@@ -1,0 +1,64 @@
+lesson_uid: L0110
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: '請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+
+    🅐 從本課語詞框框，找語詞。
+
+    🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+
+    🅒 問同學。'
+  vocabulary_bank:
+  - 直接了當
+  - 一無是處
+  - 挑剔
+  - 橫眉豎目
+  - 剽悍
+  - 風雨不透
+  - 嫌惡
+  - 薰陶
+  - 重溫舊夢
+  - 拮据
+  items:
+  - index: 1
+    word: 一無是處
+    definition: 完全沒有優點，什麼都不行。
+  - index: 2
+    word: 直接了當
+    definition: 說話做事坦率明白，不拐彎抹角，很乾脆。
+  - index: 3
+    word: 挑剔
+    definition: 過分苛求細節，常故意找缺點。
+  - index: 4
+    word: 剽悍
+    definition: 剽、悍都有強硬凶猛之意。形容人很強悍、很兇，作風很硬。
+  - index: 5
+    word: 橫眉豎目
+    definition: 眉橫、眼豎，都是生氣的樣子。怒氣沖沖、臉色很兇惡。
+  - index: 6
+    word: 嫌惡
+    definition: 覺得厭煩反感，很不喜歡。
+  - index: 7
+    word: 重溫舊夢
+    definition: 再次回到以前的情景或回憶。
+  - index: 8
+    word: 薰陶
+    definition: 在環境或人影響下，慢慢被感染、被改變。
+  - index: 9
+    word: 拮据
+    definition: 經濟困難，錢不夠用。
+  - index: 10
+    word: 風雨不透
+    definition: 包得很緊很密，一點縫都沒有。本文是指抱得很緊。
+  notes:
+    vocabulary_bank: '語詞框原文分五行印：「本課語詞：／直接了當、一無是處、／挑剔、橫眉豎目、剽悍、／
+
+      風雨不透、嫌惡、薰陶、／重溫舊夢、拮据／。」句號自成一行。
+
+      原稿夾了 8 個隱藏字元 U+E01E1/U+E01E2（Mn，在「了當／當／一／處／挑／不／重」之後），
+
+      不影響字面，已濾除。'
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
+  slug: nxwxd
+  text_ref: uw6dr

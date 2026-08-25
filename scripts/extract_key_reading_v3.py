@@ -179,18 +179,72 @@ def _version_dir(uid_dir: Path) -> Path | None:
     return vs[-1] if vs else None
 
 
-def read_lesson(uid: str) -> dict:
-    """The three things this needs, all from the uid tree."""
+def parts(uid: str) -> list[dict]:
+    """這一課的每一「篇」：(念順順檔, 它對應的課文檔)。
+
+    🔴 #2916 之後檔名是 `{模組}.{slug}.yml`，而且**一課可能有好幾篇**
+    （一份學習單裝兩三篇課文，L0029 兩篇、L0063 三篇）。配對靠 `_manifest.yml`
+    的 `text_ref` —— 念順順那一節記著它練的是哪一份課文的 slug。
+
+    ⚠️ 不要用「檔名排序後一一對應」代替 text_ref：slug 是亂數，排序後的順序
+    與版面順序無關，兩篇課的念順順會配到對方的課文上。
+
+    manifest 讀不到時退回 glob（單篇課才安全，多篇課會回報並跳過）。
+    """
+    vdir = _version_dir(LESSONS / uid)
+    if vdir is None:
+        return []
+    man = vdir / "_manifest.yml"
+    out = []
+    if man.is_file():
+        m = yaml.safe_load(man.read_text(encoding="utf-8")) or {}
+        by_slug = {s.get("slug"): s for s in (m.get("sections") or [])
+                   if s.get("module") == "full_text_annotate"}
+        for sec in (m.get("sections") or []):
+            if sec.get("module") != "key_reading":
+                continue
+            ft = by_slug.get(sec.get("text_ref"))
+            out.append({
+                "uid": uid, "vdir": vdir, "slug": sec.get("slug"),
+                "kr_path": vdir / sec["file"],
+                "ft_path": (vdir / ft["file"]) if ft else None,
+            })
+        if out:
+            return out
+    krs = sorted(vdir.glob("key_reading.*.yml")) or (
+        [vdir / "key_reading.yml"] if (vdir / "key_reading.yml").is_file() else [])
+    fts = sorted(vdir.glob("full_text_annotate.*.yml")) or (
+        [vdir / "full_text_annotate.yml"]
+        if (vdir / "full_text_annotate.yml").is_file() else [])
+    if len(krs) > 1 or len(fts) > 1:
+        # 多篇課沒有 manifest 就配不出來 —— 不猜。
+        return [{"uid": uid, "vdir": vdir, "slug": None,
+                 "kr_path": k, "ft_path": None} for k in krs]
+    return [{"uid": uid, "vdir": vdir, "slug": None,
+             "kr_path": krs[0] if krs else None,
+             "ft_path": fts[0] if fts else None}] if krs else []
+
+
+def read_lesson(uid: str, part: dict | None = None) -> dict:
+    """一篇的三樣東西。`part` 省略時取第一篇（單篇課的情境）。"""
     vdir = _version_dir(LESSONS / uid)
     out: dict = {"uid": uid, "vdir": vdir}
     if vdir is None:
         return out
-    kf, ff, lf = vdir / "key_reading.yml", vdir / "full_text_annotate.yml", vdir / "lesson.yml"
-    if kf.exists():
+    if part is None:
+        ps = parts(uid)
+        if not ps:
+            return out
+        part = ps[0]
+    out["slug"] = part.get("slug")
+    kf = part.get("kr_path")
+    ff = part.get("ft_path")
+    lf = vdir / "lesson.yml"
+    if kf and kf.exists():
         doc = yaml.safe_load(kf.read_text(encoding="utf-8")) or {}
         out["kr_file"] = doc
         out["kr"] = doc.get("key_reading") or {}
-    if ff.exists():
+    if ff and ff.exists():
         d = yaml.safe_load(ff.read_text(encoding="utf-8")) or {}
         ft = d.get("full_text_annotate") or d
         paras = [p for p in (ft.get("paragraphs") or []) if isinstance(p, dict)]
@@ -306,9 +360,11 @@ def corroborate(passage: str, by_idx: dict) -> bool | None:
     return _norm(hits[0]) == mine
 
 
-def extract(uid: str) -> dict:
-    l = read_lesson(uid)
+def extract(uid: str, part: dict | None = None) -> dict:
+    """一「篇」的抽取。多篇課（L0029 兩篇、L0063 三篇）要逐篇跑，見 `parts()`。"""
+    l = read_lesson(uid, part)
     out: dict = {"uid": uid, "title": l.get("title", uid), "slot": l.get("slot", ""),
+                 "slug": l.get("slug"), "part": part,
                  "verdict": "empty", "passage": None, "anchor": None,
                  "corroborated_by_first_edition": None}
     if l.get("vdir") is None:
@@ -397,8 +453,12 @@ def apply(uid: str, r: dict) -> None:
     `test_lesson_uid_loader.py::test_key_reading_disagreements_are_flagged_not_silently_preferred`
     all already look. A check that describes the extraction is not a field of the passage.
     """
-    vdir = _version_dir(LESSONS / uid)
-    f = vdir / "key_reading.yml"
+    f = (r.get("part") or {}).get("kr_path")
+    if f is None:                       # 單篇課、又沒帶 part 進來時的退路
+        ps = parts(uid)
+        f = ps[0]["kr_path"] if ps else None
+    if f is None or not f.is_file():
+        raise FileNotFoundError(f"{uid}: 找不到要寫回的 key_reading 檔")
     doc = yaml.safe_load(f.read_text(encoding="utf-8")) or {}
     kr = doc.get("key_reading")
     if kr is None:
@@ -459,19 +519,29 @@ def main() -> int:
     uids = a.uids or sorted(os.path.basename(d) for d in glob.glob(str(LESSONS / "L*")))
     counts: dict[str, int] = {}
     written = 0
+    seen_parts = 0
     for uid in uids:
-        r = extract(uid)
-        counts[r["verdict"]] = counts.get(r["verdict"], 0) + 1
-        if r["verdict"] in WRITEABLE:
-            if a.apply:
-                apply(uid, r)
-            written += 1
-            if not a.quiet:
-                print(f"✅ {uid} 第{r['anchor']}段 {r['chars']}字 [{r['verdict']}] {r['title']}")
-        elif not a.quiet and r["verdict"] != "no_anchor":
-            print(f"—  {uid} {r['verdict']} {r['title']}")
+        ps = parts(uid)
+        if not ps:
+            counts["no_key_reading"] = counts.get("no_key_reading", 0) + 1
+            continue
+        for part in ps:
+            seen_parts += 1
+            r = extract(uid, part)
+            counts[r["verdict"]] = counts.get(r["verdict"], 0) + 1
+            tag = uid if len(ps) == 1 else f"{uid}#{part.get('slug')}"
+            if r["verdict"] in WRITEABLE:
+                if a.apply:
+                    apply(uid, r)
+                written += 1
+                if not a.quiet:
+                    print(f"✅ {tag} 第{r['anchor']}段 {r['chars']}字 "
+                          f"[{r['verdict']}] {r['title']}")
+            elif not a.quiet and r["verdict"] != "no_anchor":
+                print(f"—  {tag} {r['verdict']} {r['title']}")
 
-    print(f"\n可寫入 {written} 課" + ("（已寫入）" if a.apply else "（未寫入，加 --apply）"))
+    print(f"\n可寫入 {written} 篇 / 共 {seen_parts} 篇"
+          + ("（已寫入）" if a.apply else "（未寫入，加 --apply）"))
     for v, n in sorted(counts.items(), key=lambda kv: -kv[1]):
         print(f"    {v:32s} {n}")
     return 0

@@ -5,12 +5,17 @@ sections:
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
+  slug: j4dyf
+  file: full_text_annotate.j4dyf.yml
   pages:
   - 1
   - 2
 - 'no': 二
   name: 念順順
   module: key_reading
+  text_ref: j4dyf
+  slug: tpxtj
+  file: key_reading.tpxtj.yml
   pages:
   - 2
   - 3
@@ -18,17 +23,26 @@ sections:
 - 'no': 三
   name: 語詞我最棒
   module: vocab_definitions
+  text_ref: j4dyf
+  slug: 6mnax
+  file: vocab_definitions.6mnax.yml
   pages:
   - 4
 - 'no': 四
   name: 語詞應用
   module: vocab_application
+  text_ref: j4dyf
+  slug: r6eny
+  file: vocab_application.r6eny.yml
   pages:
   - 4
   - 5
 - 'no': 五
   name: 文章重點表
   module: keypoints
+  text_ref: j4dyf
+  slug: fpwnq
+  file: keypoints.fpwnq.yml
   pages:
   - 5
   - 6
@@ -36,23 +50,35 @@ sections:
   name: 閱讀聚光燈
   module: spotlight
   subtitle: 遞進複句
+  text_ref: j4dyf
+  slug: 4qk73
+  file: spotlight.4qk73.yml
   pages:
   - 6
   - 7
 - 'no': 七
   name: 閱讀理解
   module: comprehension
+  text_ref: j4dyf
+  slug: yfqcd
+  file: comprehension.yfqcd.yml
   pages:
   - 7
   - 8
 - 'no': 八
   name: 詞語複習
   module: vocab_review
+  text_ref: j4dyf
+  slug: 3ucmw
+  file: vocab_review.3ucmw.yml
   pages:
   - 8
 - 'no': 九
   name: 知識補給站
   module: resources
+  text_ref: j4dyf
+  slug: t4jqe
+  file: resources.t4jqe.yml
   pages:
   - 8
 dispatch:

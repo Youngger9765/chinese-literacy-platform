@@ -5,6 +5,8 @@ sections:
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
+  slug: 43ftn
+  file: full_text_annotate.43ftn.yml
   pages:
   - 1
   - 2
@@ -12,11 +14,17 @@ sections:
 - 'no': 二
   name: 念順順
   module: key_reading
+  text_ref: 43ftn
+  slug: tfepx
+  file: key_reading.tfepx.yml
   pages:
   - 3
 - 'no': 三
   name: 語詞我最棒
   module: vocab_definitions
+  text_ref: 43ftn
+  slug: 3wetu
+  file: vocab_definitions.3wetu.yml
   pages:
   - 3
   - 4
@@ -24,12 +32,18 @@ sections:
 - 'no': 四
   name: 語詞應用
   module: vocab_application
+  text_ref: 43ftn
+  slug: qnwhh
+  file: vocab_application.qnwhh.yml
   pages:
   - 5
 - 'no': 五
   name: 閱讀聚光燈
   module: spotlight
   subtitle: 寫作手法──用故事帶出觀點
+  text_ref: 43ftn
+  slug: kmjyn
+  file: spotlight.kmjyn.yml
   pages:
   - 5
   - 6
@@ -38,17 +52,26 @@ sections:
 - 'no': 六
   name: 閱讀理解
   module: comprehension
+  text_ref: 43ftn
+  slug: ekyhh
+  file: comprehension.ekyhh.yml
   pages:
   - 8
   - 9
 - 'no': 七
   name: 詞語複習
   module: vocab_review
+  text_ref: 43ftn
+  slug: ehvn9
+  file: vocab_review.ehvn9.yml
   pages:
   - 9
 - 'no': 八
   name: 知識補給站
   module: resources
+  text_ref: 43ftn
+  slug: heexq
+  file: resources.heexq.yml
   pages:
   - 9
   - 10

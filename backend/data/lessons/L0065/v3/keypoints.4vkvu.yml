@@ -1,0 +1,39 @@
+lesson_uid: L0065
+version_id: v3
+section_no: 五
+keypoints:
+  title: 運動傷害，怎麼辦？
+  layout: list
+  answer_carrier: 橘色手寫字（PDF p4~p5）與紅色 ☑（w:sym Wingdings F0FE）；文字層的【　】內已填有同樣的答案
+  rows:
+  - label: 如何預防
+    items:
+    - value: 1.不管是哪一種運動，都要先做好【　】運動。
+      blanks:
+      - answer: 暖身
+    - value: 2.暖身的目的是什麼？（多選）
+      options:
+        1: 讓心跳和呼吸慢慢加快
+        2: 提高肌肉溫度
+        3: 讓關節活動更靈活
+      answers:
+      - 1
+      - 2
+      - 3
+  - label: 受傷時的處理
+    items:
+    - value: 1.受傷初期可以參考 PEACE 原則：【　】、【　】、【　】、【　】、【　】。
+      blanks:
+      - answer: 保護
+      - answer: 抬高
+      - answer: 避免
+      - answer: 壓迫
+      - answer: 教育
+    - value: '2.若不幸自己或他人意外受傷，可以先怎麼做？
+
+        停止運動、【　】、找大人或【　】幫忙。'
+      blanks:
+      - answer: 保護傷處
+      - answer: 專業人員
+  slug: 4vkvu
+  text_ref: 7qpra

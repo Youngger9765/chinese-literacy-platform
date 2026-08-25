@@ -1,0 +1,134 @@
+lesson_uid: L0175
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 義無反顧
+  - 喃喃自語
+  - 氣餒
+  - 躺平
+  - 截然不同
+  - 思維
+  - 停損點
+  - 懊惱
+  - 良機
+  - 羅盤
+  - 一步到位
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 斯義無反顧一邏成思型
+  - 維外行人南南步盤維義
+  - 走氣艱停默良機天長一
+  - 節餒困損想不固定天步
+  - 然種訊點契機作截惟到
+  - 酸懊差尚氣妥然聲各位
+  - 該閱惱一平不羅停員點
+  - 艮奧讀無同庸人自擾屋
+  - 幾事羅反棒球喃喃自語
+  - 我盤有顧躺平事不過三
+  answers_are_graphical: true
+  answer_paths:
+  - word: 義無反顧
+    cells:
+    - - 1
+      - 2
+    - - 1
+      - 3
+    - - 1
+      - 4
+    - - 1
+      - 5
+    direction: horizontal
+  - word: 思維
+    cells:
+    - - 1
+      - 9
+    - - 2
+      - 9
+    direction: vertical
+  - word: 氣餒
+    cells:
+    - - 3
+      - 2
+    - - 4
+      - 2
+    direction: vertical
+  - word: 停損點
+    cells:
+    - - 3
+      - 4
+    - - 4
+      - 4
+    - - 5
+      - 4
+    direction: vertical
+  - word: 良機
+    cells:
+    - - 3
+      - 6
+    - - 3
+      - 7
+    direction: horizontal
+  - word: 一步到位
+    cells:
+    - - 3
+      - 10
+    - - 4
+      - 10
+    - - 5
+      - 10
+    - - 6
+      - 10
+    direction: vertical
+  - word: 截然不同
+    cells:
+    - - 5
+      - 8
+    - - 6
+      - 7
+    - - 7
+      - 6
+    - - 8
+      - 5
+    direction: diagonal_down_left
+  - word: 懊惱
+    cells:
+    - - 6
+      - 2
+    - - 7
+      - 3
+    direction: diagonal_down_right
+  - word: 羅盤
+    cells:
+    - - 9
+      - 3
+    - - 10
+      - 2
+    direction: diagonal_down_left
+  - word: 喃喃自語
+    cells:
+    - - 9
+      - 7
+    - - 9
+      - 8
+    - - 9
+      - 9
+    - - 9
+      - 10
+    direction: horizontal
+  - word: 躺平
+    cells:
+    - - 10
+      - 5
+    - - 10
+      - 6
+    direction: horizontal
+  notes:
+    圈選: 11 個目標語詞全部圈到，圈是 11 個 roundRect 圖形（全在同一個群組內，anchor 只有 1 個）。 以群組框（4.344×3.930
+      in）換算格距後，每個圈的中心都落在對應語詞的中點， 並經 PDF 第 10 頁像素比對逐一確認。
+  slug: k3thh
+  text_ref: 66nax

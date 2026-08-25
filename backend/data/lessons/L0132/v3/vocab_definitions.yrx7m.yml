@@ -1,0 +1,51 @@
+lesson_uid: L0132
+version_id: v3
+section_no: 三
+vocab_definitions:
+  vocabulary_bank:
+  - 望塵莫及
+  - 罹患
+  - 鳳毛麟角
+  - 多巴胺
+  - 咎責
+  - 刻板印象
+  - 流行疫病
+  - 不言而喻
+  vocabulary_bank_label: 本課語詞
+  instruction: '請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+
+    🅐 從本課語詞框框，找語詞。
+
+    🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+
+    🅒 問同學。'
+  items:
+  - index: 1
+    word: 流行疫病
+    definition: 指在一定時期和一定地區內，大量感染的傳染病。
+  - index: 2
+    word: 刻板印象
+    definition: 指因為固有的觀念或經驗，而對人或事物形成的片面固執的印象。例如：男主內女主外。
+  - index: 3
+    word: 望塵莫及
+    definition: 比喻遠遠追不上。
+  - index: 4
+    word: 咎責
+    definition: 責罰、怪罪。
+  - index: 5
+    word: 罹患
+    definition: 染病。
+  - index: 6
+    word: 鳳毛麟角
+    definition: 形容極為少見的珍貴事物。
+  - index: 7
+    word: 不言而喻
+    definition: 指明顯到不需要說明的道理或情況。
+  - index: 8
+    word: 多巴胺
+    definition: 一種神經傳遞物質，對大腦的情感和動機起著重要作用。
+    example: 例句：運動可以促使大腦釋放多巴胺，讓人感到快樂和興奮。
+  notes:
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
+  slug: yrx7m
+  text_ref: ue3q9

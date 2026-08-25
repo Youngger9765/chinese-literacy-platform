@@ -1,0 +1,55 @@
+lesson_uid: L0148
+version_id: v3
+section_no: 三
+vocab_definitions:
+  vocabulary_bank:
+  - 首屈一指
+  - 花團錦簇
+  - 奼紫嫣紅
+  - 大放異彩
+  - 入不敷出
+  - 匠心獨具
+  - 別出心裁
+  - 暑氣蒸人
+  - 動輒
+  vocabulary_bank_label: 本課語詞
+  instruction: '請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+
+    🅐 從本課語詞框框，找語詞。
+
+    🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+
+    🅒 問同學。'
+  items:
+  - index: 1
+    word: 首屈一指
+    definition: 非常突出，名列前茅。
+  - index: 2
+    word: 奼紫嫣紅
+    definition: 色彩鮮豔繽紛，多形容花或景色很美。
+  - index: 3
+    word: 花團錦簇
+    definition: 花朵盛開，色彩繽紛、熱鬧華麗的樣子。
+  - index: 4
+    word: 動輒
+    definition: 動不動就發生。
+  - index: 5
+    word: 入不敷出
+    definition: 入：收入；出：支出。收入不夠支出，錢不夠用。
+  - index: 6
+    word: 暑氣蒸人
+    definition: 暑氣，指夏天的熱氣。形容天氣又悶又熱，讓人難受。
+  - index: 7
+    word: 匠心獨具
+    definition: 形容很用心、有巧思，做法精巧又有特色。
+  - index: 8
+    word: 別出心裁
+    definition: 想法特別、有創意。
+  - index: 9
+    word: 大放異彩
+    definition: 有突出、與眾不同的表現。
+  notes:
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
+    note: 第 9 題的題號在原稿印成全形「（９）」，其餘 (1)~(8) 是半形。
+  slug: pw3uu
+  text_ref: nnmyv

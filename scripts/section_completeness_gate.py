@@ -53,6 +53,9 @@ def main() -> int:
     doc = yaml.safe_load(MAP.read_text(encoding="utf-8"))
     matches = doc["matches"]
     inside = {x["needle"] for x in doc.get("lives_inside", [])}
+    # 印在紙上、線上還沒做的大題（見對照表 not_built_yet）。
+    # ⛔ 不是豁免 —— 照樣列出來，只是跟「沒注意到的漏洞」分開報。
+    deferred = {x["needle"]: x.get("why", "") for x in doc.get("not_built_yet", [])}
 
     def to_mod(name: str):
         for m in matches:
@@ -61,6 +64,7 @@ def main() -> int:
         return None
 
     unmapped: dict[str, list[str]] = {}
+    known: dict[str, list[str]] = {}
     missing: list[str] = []
     total = 0
     lessons = 0
@@ -86,12 +90,26 @@ def main() -> int:
                 continue
             mod = to_mod(name)
             if not mod:
-                unmapped.setdefault(name, []).append(uid)
-            elif not (ly.parent / f"{mod}.yml").is_file():
-                missing.append(f"{uid}/{name} → {mod}.yml 不存在")
+                hit = next((k for k in deferred if k in name), None)
+                if hit:
+                    known.setdefault(hit, []).append(uid)
+                else:
+                    unmapped.setdefault(name, []).append(uid)
+            # 檔名帶各自的 slug（`{模組}.{slug}.yml`，#2916），一課可能有好幾份。
+            # ⛔ 別寫死 `{mod}.yml` —— 改名之後 1474 個大題會全數被判成
+            #    「檔案不存在」，而檔案全都在。這道門會變成整片紅，
+            #    紅到沒有人看，然後真的缺檔那天也不會有人發現。
+            elif not any(ly.parent.glob(f"{mod}.*.yml")):
+                missing.append(f"{uid}/{name} → {mod}.*.yml 一份都沒有")
 
     print(f"  {lessons} 課 · 學習單宣告的大題 {total} 個")
     bad = False
+    if known:
+        n = sum(len(v) for v in known.values())
+        print(f"  🟡 {n} 個大題是**已知還沒做**的（不是漏抽，有具名理由）：")
+        for k, us in sorted(known.items(), key=lambda x: -len(x[1])):
+            print(f"      「{k}」 {len(us)} 課   例 {us[:3]}")
+            print(f"         理由：{deferred[k].strip().splitlines()[0]}")
     if unmapped:
         print(f"  🔴 {sum(len(v) for v in unmapped.values())} 個大題對不到模組：")
         for n, us in sorted(unmapped.items(), key=lambda x: -len(x[1])):

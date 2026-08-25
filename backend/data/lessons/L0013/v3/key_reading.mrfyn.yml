@@ -1,0 +1,32 @@
+lesson_uid: L0013
+version_id: v3
+section_no: 二
+key_reading:
+  instruction: 請用計時器，從指定段落（七☞）開始朗讀，計時1分鐘讀的字數，並記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！
+  timing_table:
+    columns:
+    - 第1次計時
+    - 第2次計時
+    - 第3次計時
+    - 裁判計時
+    unit: 字
+    judge_signature: true
+  benchmark:
+  - threshold: ＜190字
+    feedback: 還要多加練習。
+  - threshold: 190~220字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞221字
+    feedback: 哇嗚，超級厲害！
+  passage: 經過了萬紫千紅的春天，暑氣蒸人的夏天，金風送爽的秋天，寒氣逼人的冬天。正太每天抱著豬上上下下，一天又一天，一年又一年，小豬慢慢長大，小豬變中豬，中豬變大豬了。
+  start_text: 經過了萬紫千紅的春天，暑氣蒸人的夏天，金風送爽的
+  extent_chars: 79
+  source: extract_key_reading_v3
+  start_paragraph: 7
+  end_paragraph: 7
+  slug: mrfyn
+  text_ref: 7fy99
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  absorbed_tail: 0

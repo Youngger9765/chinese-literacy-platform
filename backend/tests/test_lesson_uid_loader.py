@@ -888,7 +888,10 @@ def test_key_reading_disagreements_are_flagged_not_silently_preferred():
 
     flagged = 0
     for uid in L.available_uids():
-        for f in (L.LESSONS_ROOT / uid).glob("v*/key_reading.yml"):
+        # ⚠️ #2916 之後檔名帶 slug、一課可能有好幾篇。舊的 `v*/key_reading.yml`
+        # 一個檔都對不到 —— 這支因為有 `flagged >= 1` 所以大聲失敗，但同樣形狀的
+        # 掃描若只斷言「違規清單為空」就會靜靜地全綠（見 `_module_files.py`）。
+        for f in sorted((L.LESSONS_ROOT / uid).glob("v*/key_reading.*.yml")):
             doc = yaml.safe_load(f.read_text(encoding="utf-8")) or {}
             if not doc.get("needs_human_review"):
                 continue

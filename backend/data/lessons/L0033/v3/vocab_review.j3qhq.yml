@@ -1,0 +1,141 @@
+lesson_uid: L0033
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 色彩繽紛
+  - 濃郁
+  - 大快朵頤
+  - 焦頭爛額
+  - 愁眉不展
+  - 垂涎欲滴
+  - 膳食纖維
+  - 釋放
+  - 戰友
+  - 損友
+  - 無傷大雅
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 膳食纖維奔應無傷大雅
+  - 善憂解釋放肆援神快量
+  - 愁意貫注色奮單隊朵焦
+  - 苦眉開眼笑彩戰友頤點
+  - 缺一不伸睡亂繽舒適圈
+  - 損人明展開垂燒紛濃郁
+  - 循序漸進涎躺焦色烈有
+  - 束結實欲延頭黑朋分量
+  - 倘若滴長爛毀損友維解
+  - 攝氏線額害傷失壞持脫
+  answers_are_graphical: true
+  answer_paths:
+  - word: 膳食纖維
+    cells:
+    - - 1
+      - 1
+    - - 1
+      - 2
+    - - 1
+      - 3
+    - - 1
+      - 4
+    direction: horizontal
+  - word: 無傷大雅
+    cells:
+    - - 1
+      - 7
+    - - 1
+      - 8
+    - - 1
+      - 9
+    - - 1
+      - 10
+    direction: horizontal
+  - word: 大快朵頤
+    cells:
+    - - 1
+      - 9
+    - - 2
+      - 9
+    - - 3
+      - 9
+    - - 4
+      - 9
+    direction: vertical
+  - word: 釋放
+    cells:
+    - - 2
+      - 4
+    - - 2
+      - 5
+    direction: horizontal
+  - word: 愁眉不展
+    cells:
+    - - 3
+      - 1
+    - - 4
+      - 2
+    - - 5
+      - 3
+    - - 6
+      - 4
+    direction: diagonal_down_right
+  - word: 色彩繽紛
+    cells:
+    - - 3
+      - 5
+    - - 4
+      - 6
+    - - 5
+      - 7
+    - - 6
+      - 8
+    direction: diagonal_down_right
+  - word: 戰友
+    cells:
+    - - 4
+      - 7
+    - - 4
+      - 8
+    direction: horizontal
+  - word: 垂涎欲滴
+    cells:
+    - - 6
+      - 6
+    - - 7
+      - 5
+    - - 8
+      - 4
+    - - 9
+      - 3
+    direction: diagonal_down_left
+  - word: 濃郁
+    cells:
+    - - 6
+      - 9
+    - - 6
+      - 10
+    direction: horizontal
+  - word: 焦頭爛額
+    cells:
+    - - 7
+      - 7
+    - - 8
+      - 6
+    - - 9
+      - 5
+    - - 10
+      - 4
+    direction: diagonal_down_left
+  - word: 損友
+    cells:
+    - - 9
+      - 7
+    - - 9
+      - 8
+    direction: horizontal
+  slug: j3qhq
+  text_ref: p7q67

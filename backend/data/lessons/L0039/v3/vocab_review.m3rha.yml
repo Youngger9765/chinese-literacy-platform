@@ -1,0 +1,103 @@
+lesson_uid: L0039
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 汗流浹背
+  - 精湛
+  - 不外乎
+  - 達標
+  - 僧多粥少
+  - 合作無間
+  - 想方設法
+  - 朝思暮想
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 朝夕暮想曾經精神流汗
+  - 想思方法精人外有人流
+  - 粥精慕絕倫僧多粥少夾
+  - 少汗夢想方設法寶背背
+  - 血顏流合作團結不外包
+  - 汗清粥浹無間外合達客
+  - 工精小合背乎方作標脫
+  - 廠湛菜作叛想法無修離
+  - 外套脫調湛設人間仙險
+  - 套離浹克藍計備隔人境
+  answers_are_graphical: true
+  answers_printed: partial
+  answer_paths:
+  - word: 僧多粥少
+    cells:
+    - - 3
+      - 6
+    - - 3
+      - 7
+    - - 3
+      - 8
+    - - 3
+      - 9
+    direction: horizontal
+  - word: 想方設法
+    cells:
+    - - 4
+      - 4
+    - - 4
+      - 5
+    - - 4
+      - 6
+    - - 4
+      - 7
+    direction: horizontal
+  - word: 汗流浹背
+    cells:
+    - - 4
+      - 2
+    - - 5
+      - 3
+    - - 6
+      - 4
+    - - 7
+      - 5
+    direction: diagonal_down_right
+  - word: 不外乎
+    cells:
+    - - 5
+      - 8
+    - - 6
+      - 7
+    - - 7
+      - 6
+    direction: diagonal_down_left
+  - word: 合作無間
+    cells:
+    - - 6
+      - 8
+    - - 7
+      - 8
+    - - 8
+      - 8
+    - - 9
+      - 8
+    direction: vertical
+  - word: 達標
+    cells:
+    - - 6
+      - 9
+    - - 7
+      - 9
+    direction: vertical
+  - word: 精湛
+    cells:
+    - - 7
+      - 2
+    - - 8
+      - 2
+    direction: vertical
+  notes:
+    answer: 8 個目標語詞都圈了，但「朝思暮想」那一條因格子錯字拼不回來，故不列進 answer_paths（見 E1）。
+  slug: m3rha
+  text_ref: phhwe

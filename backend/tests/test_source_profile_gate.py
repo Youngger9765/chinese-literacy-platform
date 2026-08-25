@@ -31,14 +31,36 @@ import yaml
 LESSONS = pathlib.Path(__file__).resolve().parents[1] / "data" / "lessons"
 
 KNOWN_CLASSES = {
-    "standard", "no_section", "no_body", "no_anchor", "multi_anchor", "renumbered",
+    "standard", "no_section", "multi_text", "no_body", "no_anchor",
+    "multi_anchor", "renumbered",
     "no_counter",
 }
 
 # 2026-08-24 的分布。變動要**刻意**改這裡，順便回答「為什麼變了」。
 BASELINE = {
-    "standard": 129, "no_section": 22, "no_anchor": 7,
-    "multi_anchor": 7, "no_body": 6, "renumbered": 4,
+    # 2026-08-24 調整：multi_text 的判斷提到 no_section **前面**。
+    # L0111 L0137 L0144 是「一份多篇」但沒有念順順那一節，原本被 no_section 吃掉，
+    # 導致建 parts 時漏了三課。「有沒有念順順」與「是不是一份多篇」是兩個獨立事實，
+    # 不該互相遮蔽 —— 所以 no_section 19（原 22）、multi_text 7（原 4）。
+    "standard": 128,
+    "no_section": 19,
+    "multi_anchor": 7,
+    "no_anchor": 7,
+    #
+    # 2026-08-25（#2916）：multi_text 7 → 5、renumbered 1 → 3。
+    # L0010 與 L0012 從 multi_text 移到 renumbered。
+    #
+    # ⚠️ 這**不是**分類器改了判準，是 owner 看過兩份原稿之後的認定：
+    # 那兩課印的是一來一往的兩封信，「兩封信就是一篇課文」（2026-08-25 原話），
+    # 所以它們不是一份學習單包多篇文章。書信體的段落 idx 會重編，
+    # 那正是 renumbered 的定義 —— 分類跟著事實走，事實被人看過了。
+    # 兩課的 multi_text 登記已從 metadata 清掉。
+    #
+    # ⛔ 下一個人看到這條紅不要直接改數字：先確認是**原稿事實變了**
+    # （教材方重發、或有人重新認定）還是**分類器判錯了**。前者改基準，後者修分類器。
+    "multi_text": 5,
+    "no_body": 6,
+    "renumbered": 3,
 }
 
 

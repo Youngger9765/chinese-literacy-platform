@@ -1,0 +1,37 @@
+lesson_uid: L0029
+version_id: v3
+section_no: 二
+key_reading:
+  instruction: 請用計時器，從指定段落（七☞）開始朗讀，計時1分鐘讀的字數，並記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！
+  printed_char_count: 331
+  timing_table:
+    columns:
+    - 第1次計時
+    - 第2次計時
+    - 第3次計時
+    - 裁判計時
+    unit: 字
+    judge_signature: true
+  benchmark:
+  - threshold: ＜200字
+    feedback: 還要多加練習。
+  - threshold: 201~230字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞231字
+    feedback: 哇嗚，超級厲害！
+  passage: 接下來發生的事，就是千古流傳的傳奇了。
+  start_text: 接下來發生的事，就是千古流傳的傳奇了。
+  extent_chars: 19
+  source: extract_key_reading_v3
+  start_idx: 7
+  end_idx: 9
+  printed_counter_last: 331
+  part: 1
+  slug: tfewt
+  text_ref: fqwda
+  start_paragraph: 7
+  end_paragraph: 7
+extraction_check:
+  verdict: confirmed
+  corroborated_by_first_edition: true
+  absorbed_tail: 0

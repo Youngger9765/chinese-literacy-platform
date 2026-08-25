@@ -1,0 +1,27 @@
+lesson_uid: L0163
+version_id: v3
+key_reading:
+  label: 朗讀計時
+  instruction: '1. 請用計時器，朗讀原文，並將讀完的時間記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！
+
+    2. 文章中的「.」是表示斷詞的地方，朗讀時，不要把「同組的詞」分開。'
+  timing_table:
+    columns:
+    - 第1次計時
+    - 第2次計時
+    - 第3次計時
+    - 裁判計時
+    unit: 秒
+    judge_signature: true
+  benchmark_note: ◎ 我的表現：請確認讀完全文的時間。不要太快也不要太慢，不漏字或加字，斷詞的位置也要正確哦！
+  benchmark:
+  - threshold: 20秒以下
+    feedback: 速度有點快，要讀清楚哦！
+  - threshold: 20~30秒
+    feedback: 強者就是你啦！
+  - threshold: 30秒以上
+    feedback: 速度再快一點！
+  benchmark_threshold_note: '本課的門檻是 20／20~30／30 秒（原文較短）；同批 L0160 是 45／45~55／55 秒、
+
+    L0162 是 45／45~50／50 秒。三課各不相同，照各自原稿抄。'
+  slug: mxj46

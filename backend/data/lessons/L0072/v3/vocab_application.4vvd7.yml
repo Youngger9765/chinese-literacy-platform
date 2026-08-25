@@ -1,0 +1,46 @@
+lesson_uid: L0072
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_banks:
+  - A: 負擔
+    B: 負荷
+    C: 負責
+  - D: 遷移
+    E: 質疑
+    F: 懷疑
+    G: 遷徙
+  items:
+  - index: 1
+    stem: 他做事認真又（　），是個值得託付的人。
+    answer: C
+  - index: 2
+    stem: 他一個人要（　）全家人的生活費，真的很辛苦。
+    answer: A
+  - index: 3
+    stem: 張老師的工作太多了，已經超過他的（　），他快要承受不住了。
+    answer: B
+  - index: 4
+    stem: 打電動練出來的技能，將來可能（　）到無人機的操作上。
+    answer: D
+  - index: 5
+    stem: 面對各種聳動的新聞，要抱持（　）的態度，轉發前更是要先求證。
+    answer:
+    - F
+    - E
+    multi: true
+  - index: 6
+    stem: 紫斑蝶是極少數會遠距離搬遷過冬的蝴蝶，臺灣每年可觀察到紫斑蝶三次大規模的（　）。
+    answer: G
+  - index: 7
+    stem: 他鬼鬼祟祟的躲在角落，讓人很（　）他是不是想做壞事。
+    answer: F
+  - index: 8
+    stem: 人們開始（　）「AI可以完全取代人類工作」的說法。
+    answer: E
+  - index: 9
+    stem: 騎腳踏車學會的平衡技巧，也能用在學騎機車上，這就是學習（　）。
+    answer: D
+  slug: 4vvd7
+  text_ref: yk4tc

@@ -1,0 +1,39 @@
+lesson_uid: L0103
+version_id: v3
+section_no: 二
+key_reading:
+  instruction: 請用計時器，從指定段落（一　）開始朗讀，在表格中記錄1分鐘朗讀的字數。如果你計時3次後，對自己還不滿意，可以多練幾次。最後一次，找一位同學請他計時、記錄並簽名！
+  instruction_note: 括號內原稿另有一個 ☞ 圖形物件（不在文字流）。
+  printed_paragraph_in_instruction: 一
+  start_paragraph_note: '三個訊號一致，起點沒有歧義：指示語印「（一　）」、☞ 圖形印在第 1 段句首、
+
+    字數欄第一個 `w:p` 就是「26」（前面沒有空段落）。'
+  timing_table:
+    columns:
+    - 第1次計時
+    - 第2次計時
+    - 第3次計時
+    - 裁判計時
+    unit: 字
+    judge_signature: true
+    judge_signature_label: 裁判簽名：
+  benchmark_label: ◎ 我的表現
+  benchmark:
+  - threshold: ＜220字
+    feedback: 還要多加練習。
+  - threshold: 221~250字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞251字
+    feedback: 哇嗚，超級厲害！
+  passage: 2023年3月，最具聲望的世界柑橘類果醬大賽在英國的一個小城市舉行，來自世界各國的參賽選手雲集。經過重重考驗，一位出身臺南 柳營山村的年輕人林韡勳脫穎而出，虜獲評審的味蕾，最終拿下了一金二銅的成績。
+  start_text: 2023年3月，最具聲望的世界柑橘類果醬大賽在英
+  extent_chars: 98
+  source: extract_key_reading_v3
+  start_paragraph: 1
+  end_paragraph: 1
+  slug: dxjyx
+  text_ref: uwr7r
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  absorbed_tail: 0

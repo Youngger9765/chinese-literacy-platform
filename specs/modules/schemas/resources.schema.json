@@ -36,17 +36,33 @@
       "type": "string",
       "x-seen-in": "10/148"
     },
+    "slug": {
+      "type": "string",
+      "x-seen-in": "148/148"
+    },
+    "text_ref": {
+      "type": [
+        "array",
+        "string"
+      ],
+      "x-seen-in": "148/148"
+    },
     "videos": {
       "type": "array",
       "x-seen-in": "139/148"
     }
   },
-  "required": [],
+  "required": [
+    "slug",
+    "text_ref"
+  ],
   "title": "resources module payload",
   "type": "object",
   "x-core-90pct": [
     "label",
     "section_name",
+    "slug",
+    "text_ref",
     "videos"
   ],
   "x-enforcement": "error",

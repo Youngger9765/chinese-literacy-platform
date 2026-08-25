@@ -1,0 +1,152 @@
+lesson_uid: L0054
+version_id: v3
+section_no: 七
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 青睞
+  - 爭強鬥勝
+  - 粉墨登場
+  - 嬌客
+  - 耳目一新
+  - 真摯
+  - 雄赳赳，氣昂昂
+  - 脫穎而出
+  - 丰采
+  - 千里迢迢
+  gray_box_printed: 青睞、爭強鬥勝、粉墨登場、嬌客、耳目一新、真摯、雄赳赳、氣昂昂、脫穎而出、丰采、千里迢迢
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 青睛青池畔紛粉海五爭
+  - 睞來招潮蟹墨馬色干強
+  - 耳日一薪登登鳥大里鬥
+  - 曼歌喉場芳場展千召勝
+  - 妙春傳承蹤身執里召喚
+  - 耳暖脫聰手真摯迢風丰
+  - 目花拖穎機擊遼迢采彩
+  - 一開大螯而闊共鑲成舉
+  - 新談情說愛出繁衍嬌橋
+  - 攻擊雄赳赳，氣昂昂客
+  answers_are_graphical: true
+  answer_paths:
+  - word: 青睞
+    cells:
+    - - 1
+      - 1
+    - - 2
+      - 1
+    direction: vertical
+  - word: 爭強鬥勝
+    cells:
+    - - 1
+      - 10
+    - - 2
+      - 10
+    - - 3
+      - 10
+    - - 4
+      - 10
+    direction: vertical
+  - word: 粉墨登場
+    cells:
+    - - 1
+      - 7
+    - - 2
+      - 6
+    - - 3
+      - 5
+    - - 4
+      - 4
+    direction: diagonal_down_left
+  - word: 千里迢迢
+    cells:
+    - - 4
+      - 8
+    - - 5
+      - 8
+    - - 6
+      - 8
+    - - 7
+      - 8
+    direction: vertical
+  - word: 真摯
+    cells:
+    - - 6
+      - 6
+    - - 6
+      - 7
+    direction: horizontal
+  - word: 丰采
+    cells:
+    - - 6
+      - 10
+    - - 7
+      - 9
+    direction: diagonal_down_left
+  - word: 耳目一新
+    cells:
+    - - 6
+      - 1
+    - - 7
+      - 1
+    - - 8
+      - 1
+    - - 9
+      - 1
+    direction: vertical
+  - word: 脫穎而出
+    cells:
+    - - 6
+      - 3
+    - - 7
+      - 4
+    - - 8
+      - 5
+    - - 9
+      - 6
+    direction: diagonal_down_right
+  - word: 嬌客
+    cells:
+    - - 9
+      - 9
+    - - 10
+      - 10
+    direction: diagonal_down_right
+  - word: 雄赳赳，氣昂昂
+    cells:
+    - - 10
+      - 3
+    - - 10
+      - 4
+    - - 10
+      - 5
+    - - 10
+      - 6
+    - - 10
+      - 7
+    - - 10
+      - 8
+    - - 10
+      - 9
+    direction: horizontal
+  notes:
+    gray_box: "⚠️ 灰框清單與「本課語詞」**不同**，兩個差異都是原稿如此：\n① 灰框有「脫穎而出」「千里迢迢」（不在本課語詞），沒有「招親」「尾隨而至」（在本課語詞）。\n\
+      ② 灰框把「雄赳赳，氣昂昂」用頓號拆成「雄赳赳、氣昂昂」兩項，看起來像 11 個語詞；\n   但格子裡它是一個連續的 7 格（含逗號）並被同一個圈框住，所以是\
+      \ **10** 個目標語詞。\ntarget_words 以格子與圈為準（10 個）。"
+    answer_path: '10 條路徑對上 document.xml 的 10 個 roundRect（全部 accent2／#E97132 橘色，無灰框
+      roundRect），
+
+      每一條套回 grid 都拼得出目標語詞，**格子裡沒有錯字**。
+
+      ⚠️ 格子跨頁（第 1~8 列在 p9、第 9~10 列在 p10），但**所有圈都畫在 p9**——
+
+      「雄赳赳，氣昂昂」與「嬌客」的圈在 p9 底部看起來像兩個空框。只看 p10 會判成「後兩列沒有答案」。
+
+      ⚠️ 第 3 列第 1~4 格是「耳日一薪」，那是「耳目一新」的近音誘答，不是錯字 ——
+
+      正確拼法在第 1 欄第 6~9 列，而且被圈起來。'
+  slug: 6dw9u
+  text_ref: a3pdu

@@ -402,6 +402,9 @@ app.add_middleware(GlobalRateLimitMiddleware)
 # Logging middleware wraps everything (added after CORS so it runs outermost)
 app.add_middleware(RequestLoggingMiddleware)
 
+# QR 短網址：掛根路徑，因為 `/q/9a7x4` 是要印在紙上給人掃的（#2916）
+from .routes import slug_redirect as _slug_redirect
+app.include_router(_slug_redirect.router)
 app.include_router(stories.router, prefix="/api")
 app.include_router(testset.router, prefix="/api")
 app.include_router(spotlight_qa.router, prefix="/api")

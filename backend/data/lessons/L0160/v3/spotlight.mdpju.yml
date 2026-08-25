@@ -1,0 +1,137 @@
+lesson_uid: L0160
+version_id: v3
+section_no: 四
+spotlight:
+  label: 四、文言文聚光燈
+  strategy_name: 認識文言文代詞—人稱代詞
+  strategy_type: classical_chinese
+  answer_carrier: 橘色手寫與 V／X 判斷（都在文字層），PDF p6~p7 可見
+  blocks:
+  - type: concept_box
+    text: '之前的課文我們了解到文言文為了簡潔的緣故，常有許多省略的現象，比如省略主語；假如兩句(或兩句以上)的主語相同，第一句出現主語後，後面的句子主語就省略，或是以代詞來代替主語。
+
+      那麼問題來了：什麼是代詞呢？'
+  - type: concept_box
+    text: 代詞：具有代替或指示作用的語詞
+  - type: guide
+    text: '用現代的白話來說明
+
+      代替作用：❶人稱代詞（你、我、他）；
+
+      指示作用：❷指示代詞（這個、那個）、
+
+      ❸疑問代詞（誰、什麼、多少）。
+
+      由上面的說明可知，代詞分三類，這一課，我們先來認識文言文中的人稱代詞。'
+  - type: guide
+    text: '一、常見的文言文人稱代詞
+
+      ( 淺灰 ) 語詞出現頻率較不高，可依需要自行記憶，增加詞彙量哦！'
+  - type: table
+    label: 第一人稱代詞
+    rows:
+    - - 我
+      - 我、吾、余、予、某
+    - - 我們
+      - 我等、我輩、吾等、吾輩、某等
+    - - 謙稱
+      - 私、僕、愚、在下、（敝人、不才、鄙人、臣、妾）
+    - - 君王專用
+      - 朕、孤、寡人、本王
+  - type: table
+    label: 第二人稱代詞
+    rows:
+    - - 你 / 你的
+      - 爾、汝、    、(若、乃、而)
+    - - 「你」的敬稱
+      - 君、子、公、卿、足下、閣下
+    - - 你們 / 你們的
+      - 爾等、爾曹、汝等、汝曹
+    - - 帝王專用
+      - 陛下
+    image_note: '第 1 列第 2 欄「爾、汝、    、(若、乃、而)」中間那四個空格處插了**一張圖**
+
+      （w:drawing，Word 自動產生的 alt 沒有內容），PDF p6 印出一個帶注音的字形。
+
+      ⚠️ **不轉錄那個字形**：render 上形近字分不出來，而它在文字層沒有任何字可交叉驗證。
+
+      整格照文字層抄；未標 `text_carrier: image`，因為同格其餘的字確實在文字層，
+
+      標了會讓它們一起逃過逐字門。'
+  - type: table
+    label: 第三人稱代詞
+    rows:
+    - - 他 / 他們
+      - 彼、其、之
+  - type: guide
+    text: 二、人稱代詞—基礎題練習
+  - type: exercise
+    label: 練習一
+    instruction: 在(   )中寫出標示灰底的人稱代詞現代的用詞，如，你、我、他等。
+    items:
+    - type: free_text
+      prompt: 荀巨伯遠看友人疾，值胡賊攻郡。
+      no_correct_answer: true
+      answer_carrier: 這一句沒有灰底代詞，原稿無答案
+    - type: free_text
+      prompt: 友人語巨伯曰：「吾(　)今死矣，子(　)可去！」
+      blanks:
+      - answer: 我
+      - answer: 你
+    - type: free_text
+      prompt: 巨伯曰：「遠來相視，子(　)令吾(　)去；敗義以求生，豈荀巨伯所行邪？」
+      blanks:
+      - answer: 你
+      - answer: 我
+    - type: free_text
+      prompt: 賊既至，謂巨伯曰：「大軍至，一郡盡空，汝(　)何男子，而敢獨止？」
+      blanks:
+      - answer: 你
+    - type: free_text
+      prompt: 巨伯曰：「友人有疾，不忍委之(　)，寧以我(　)身代友人命。」賊相謂曰：「我輩(　)無義之人，而入有義之國！」
+      blanks:
+      - answer: 他
+      - answer: 我
+      - answer: 我們
+  - type: exercise
+    label: 練習二
+    instruction: 下面各題皆有文言、白話的對讀，請判斷白話的理解是否正確；正確的✓，錯誤的畫╳。
+    answer_carrier: 橘色手寫的 V／X（在文字層）；原稿指示語寫「✓／╳」但答案實際印成「V／X」
+    items:
+    - type: free_text
+      prompt: '1. 文言：予獨愛蓮之出淤泥而不染。
+
+        白話：他只愛蓮花生長在淤泥中卻不受汙染。'
+      answer: X
+      explanation: 第1題解析：「予」是指「我」。
+    - type: free_text
+      prompt: '2. 文言：余憶童稚時能張目對日，明察秋毫。
+
+        白話：我回憶小時候能張著眼睛看太陽，仔細觀察秋天鳥獸新生的細毛。'
+      answer: V
+    - type: free_text
+      prompt: '3. 文言：爾安敢輕吾射？汝亦知射乎？
+
+        白話：他怎麼敢輕視我的射箭技術？你也懂射箭嗎？'
+      answer: X
+      explanation: 第3題解析：「爾」是指「你」。
+    - type: free_text
+      prompt: '4. 文言：宋有富人，天雨牆壞。其子曰：「不築，必將有盜。」
+
+        白話：宋國有位富人，他的房子因為下雨，牆坍塌了。他的兒子說：「不修築的話，必定有盜賊會來。」'
+      answer: V
+    - type: free_text
+      prompt: '5. 文言：鬼言：「卿太重，將非鬼也？」定伯言：「我新鬼，故身重耳。」
+
+        白話：鬼說：「你太重了，莫非不是鬼？」定伯說：「我是新鬼，所以身體才比較重而已。」'
+      answer: V
+    - type: free_text
+      prompt: '6. 文言：眾皆驚服曰：「丞相玄機，神鬼莫測。若某等之見，必棄城而走矣。」
+
+        白話：眾人都驚訝又佩服，說：「丞相的機智，神鬼都無法預測。如果是他們的見識，必定放棄守城而逃。」'
+      answer: X
+      explanation: 第6題解析：「某等」是指「我們」。
+    explanation_placement_note: '第 1、3、6 題的解析印在題目旁的橘色文字方塊裡，但**第 3 題的解析方塊排在第 2 題後面**
+
+      （PDF p7 可見），是版面位置，不是對錯 —— 解析內容明確寫「第3題解析」。'
+  slug: mdpju

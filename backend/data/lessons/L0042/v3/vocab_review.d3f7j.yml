@@ -1,0 +1,141 @@
+lesson_uid: L0042
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 羨慕
+  - 獨當一面
+  - 扳回一城
+  - 沉著
+  - 雕琢
+  - 防禦
+  - 如魚得水
+  - 監測
+  - 傾訴
+  - 橫逆
+  - 心力交瘁
+  - 質疑
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 彩色暮氣沉沉入大海中
+  - 虹彩扳手不著火枯木人
+  - 雕刻家回住氣石像對質
+  - 琢磨石洞一爛心句問疑
+  - 玉石防空洞城獨力題目
+  - 成禦波浪雨當友朋交心
+  - 器情橫大一容監查字瘁
+  - 羨心逆面心易視測典禮
+  - 慕傾倒水一如魚得水力
+  - 預告訴苦意反掌握比賽
+  answers_are_graphical: true
+  answers_printed: true
+  answer_paths:
+  - word: 沉著
+    cells:
+    - - 1
+      - 6
+    - - 2
+      - 6
+    direction: vertical
+  - word: 扳回一城
+    cells:
+    - - 2
+      - 3
+    - - 3
+      - 4
+    - - 4
+      - 5
+    - - 5
+      - 6
+    direction: diagonal_down_right
+  - word: 雕琢
+    cells:
+    - - 3
+      - 1
+    - - 4
+      - 1
+    direction: vertical
+  - word: 質疑
+    cells:
+    - - 3
+      - 10
+    - - 4
+      - 10
+    direction: vertical
+  - word: 心力交瘁
+    cells:
+    - - 4
+      - 7
+    - - 5
+      - 8
+    - - 6
+      - 9
+    - - 7
+      - 10
+    direction: diagonal_down_right
+  - word: 防禦
+    cells:
+    - - 5
+      - 3
+    - - 6
+      - 2
+    direction: diagonal_down_left
+  - word: 獨當一面
+    cells:
+    - - 5
+      - 7
+    - - 6
+      - 6
+    - - 7
+      - 5
+    - - 8
+      - 4
+    direction: diagonal_down_left
+  - word: 橫逆
+    cells:
+    - - 7
+      - 3
+    - - 8
+      - 3
+    direction: vertical
+  - word: 監測
+    cells:
+    - - 7
+      - 7
+    - - 8
+      - 8
+    direction: diagonal_down_right
+  - word: 羨慕
+    cells:
+    - - 8
+      - 1
+    - - 9
+      - 1
+    direction: vertical
+  - word: 如魚得水
+    cells:
+    - - 9
+      - 6
+    - - 9
+      - 7
+    - - 9
+      - 8
+    - - 9
+      - 9
+    direction: horizontal
+  - word: 傾訴
+    cells:
+    - - 9
+      - 2
+    - - 10
+      - 3
+    direction: diagonal_down_right
+  notes:
+    bank: 語詞框 12 個，比第三大題的 11 個多一個「羨慕」；「羨慕」不在本課語詞，但確實排在格子裡（第 8~9 列第 1 格）也被圈起來
+    answer_paths: 12 個目標語詞全部圈到。
+  slug: d3f7j
+  text_ref: tvt77

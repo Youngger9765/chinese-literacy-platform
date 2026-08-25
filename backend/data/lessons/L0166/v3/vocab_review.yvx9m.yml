@@ -1,0 +1,153 @@
+lesson_uid: L0166
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞劃掉。
+  target_words:
+  - 一手包辦
+  - 滿腹委屈
+  - 頻頻
+  - 口令
+  - 備受矚目
+  - 外界
+  - 出局數
+  - 一己之力
+  - 推進
+  - 出色
+  - 不見蹤影
+  - 釐清
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 不頻棒一意孤行口仰不
+  - 外頻奪推　滿一另賴見
+  - 元冠配進奮出腹已頻蹤
+  - 釐清反球我不侷委之影
+  - 局趕備受矚目顧數屈力
+  - 俐一手包辨出澀身滿理
+  - 一落世出孤外界包出清
+  - 己心界局軍不見縱影色
+  - 之口結數奮一手包辦推
+  - 力風令走戰倍受注目近
+  answers_are_graphical: true
+  answer_paths:
+  - word: 不見蹤影
+    cells:
+    - - 1
+      - 10
+    - - 2
+      - 10
+    - - 3
+      - 10
+    - - 4
+      - 10
+    direction: vertical
+  - word: 頻頻
+    cells:
+    - - 1
+      - 2
+    - - 2
+      - 2
+    direction: vertical
+  - word: 推進
+    cells:
+    - - 2
+      - 4
+    - - 3
+      - 4
+    direction: vertical
+  - word: 滿腹委屈
+    cells:
+    - - 2
+      - 6
+    - - 3
+      - 7
+    - - 4
+      - 8
+    - - 5
+      - 9
+    direction: diagonal_down_right
+  - word: 釐清
+    cells:
+    - - 4
+      - 1
+    - - 4
+      - 2
+    direction: horizontal
+  - word: 備受矚目
+    cells:
+    - - 5
+      - 3
+    - - 5
+      - 4
+    - - 5
+      - 5
+    - - 5
+      - 6
+    direction: horizontal
+  - word: 一己之力
+    cells:
+    - - 7
+      - 1
+    - - 8
+      - 1
+    - - 9
+      - 1
+    - - 10
+      - 1
+    direction: vertical
+  - word: 出局數
+    cells:
+    - - 7
+      - 4
+    - - 8
+      - 4
+    - - 9
+      - 4
+    direction: vertical
+  - word: 外界
+    cells:
+    - - 7
+      - 6
+    - - 7
+      - 7
+    direction: horizontal
+  - word: 出色
+    cells:
+    - - 7
+      - 9
+    - - 8
+      - 10
+    direction: diagonal_down_right
+  - word: 一手包辦
+    cells:
+    - - 9
+      - 6
+    - - 9
+      - 7
+    - - 9
+      - 8
+    - - 9
+      - 9
+    direction: horizontal
+  - word: 口令
+    cells:
+    - - 9
+      - 2
+    - - 10
+      - 3
+    direction: diagonal_down_right
+  notes:
+    target_words: 灰框 12 個 ＝ 第三大題語詞框 10 個 ＋ 第四大題選項庫多出的「一手包辦」「外界」。
+    grid: '⚠️ 第 2 列第 5 欄在原稿是**空白儲存格**（見 source_errata E1），此處以全形空格佔位，
+
+      以維持每列 10 格、座標對得上。它不在任何一條圈選路徑上。'
+    decoy: '格子裡有兩組**刻意寫錯字的干擾**：第 6 列「一手包**辨**」（辨≠辦）、
+
+      第 8 列「不見**縱**影」（縱≠蹤）—— 兩組都沒有被圈，正確的那兩條在第 9 列與第 1~4 列的 c10。
+
+      這與其他課「格子印錯字」不同：本課錯的那組不在答案路徑上，屬設計好的干擾項，不是勘誤。'
+  slug: yvx9m
+  text_ref: pvqer

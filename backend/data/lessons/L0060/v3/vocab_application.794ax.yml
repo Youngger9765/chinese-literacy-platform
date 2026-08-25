@@ -1,0 +1,44 @@
+lesson_uid: L0060
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 一蹶不振
+    B: 三頭六臂
+    C: 茶飯不思
+    D: 無妄之災
+    E: 潸然淚下
+    F: 反芻
+    G: 鴉雀無聲
+    H: 萬丈深淵
+  items:
+  - index: 1
+    stem: 我只是走在路上，沒想到卻被飛來的磚頭砸到進醫院，簡直是（　）。
+    answer: D
+  - index: 2
+    stem: 自從他上次比賽慘敗，從此就（　），連平日的練習都不參加了。
+    answer: A
+  - index: 3
+    stem: 每次比賽過後，他總會不斷（　）跑步中的每個動作，期待下次能有更好的表現。
+    answer: F
+  - index: 4
+    stem: 這個廚師彷彿有（　），居然能一手炒菜，一手煮湯，還能同時完成擺盤，真是太厲害了！
+    answer: B
+  - index: 5
+    stem: 他不僅被騙光積蓄，還被裁員，情緒一下子跌入（　）。
+    answer: H
+  - index: 6
+    stem: 他想到因腳傷，運動生涯就此結束，不禁（　）。
+    answer: E
+  - index: 7
+    stem: 原本吵鬧的教室，在老師進門後，瞬間變得（　）。
+    answer: G
+  - index: 8
+    stem: 自從心愛的寵物走丟後，他每天（　），不斷尋找丟失的寵物。
+    answer: C
+  notes:
+    option_bank: 12 個本課語詞只有 8 個進代號表（倒楣、輾轉反側、豁達、半身不遂 未列），8 個代號對應 8 道小題、全部用到
+    answer_carrier: 橘色手寫代號（PDF p5）；文字層的（　）內已填有同樣的代號
+  slug: 794ax
+  text_ref: tw9hj

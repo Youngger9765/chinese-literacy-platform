@@ -131,7 +131,11 @@ class TestTheLookupSiteActuallyNormalises:
         by_uid = {x.get("lesson_uid"): x for x in get_all_lessons()}
         missing = [
             u for u in sorted(em_uids)
-            if "full-text-annotate" not in ((by_uid.get(u) or {}).get("step_sequence") or [])
+            # `step_sequence` 的元素帶輪次後綴（`full-text-annotate#p3kud`，#2916）——
+            # 用裸字串 `in` 比會全部對不上，量出「36/36 課都沒有」，
+            # 而那 36 課的畫面上明明有那一步。
+            if not any(k.split("#", 1)[0] == "full-text-annotate"
+                       for k in ((by_uid.get(u) or {}).get("step_sequence") or []))
         ]
         assert not missing, (
             f"{len(missing)} / {len(em_uids)} 課的 step_sequence 仍然沒有 full-text-annotate —— "
@@ -154,6 +158,7 @@ class TestTheLookupSiteActuallyNormalises:
         by_uid = {x.get("lesson_uid"): x for x in get_all_lessons()}
         missing = [
             u for u in sorted(plain)
-            if u in by_uid and "full-text-annotate" not in (by_uid[u].get("step_sequence") or [])
+            if u in by_uid and not any(k.split("#", 1)[0] == "full-text-annotate"
+                                       for k in (by_uid[u].get("step_sequence") or []))
         ]
         assert not missing, f"原本正常的課掉了步驟：{missing[:6]}"

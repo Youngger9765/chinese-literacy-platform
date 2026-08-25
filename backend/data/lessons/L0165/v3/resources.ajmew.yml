@@ -1,0 +1,20 @@
+lesson_uid: L0165
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: The Power Of Teamwork - Funny Animation
+    duration: '1:22'
+    duration_seconds: 82
+    source: Tibi Tibi
+    url: http://youtu.be/4duPBWzf46E
+  - index: 2
+    title: 分組報告怎麼做才避免出問題？ ColleGo! 教你三個關鍵！｜高中生活
+    duration: '6:12'
+    duration_seconds: 372
+    source: ColleGo!大學選才與高中育才輔助系統
+    url: http://youtu.be/u4d-WxHTacc
+  slug: ajmew
+  text_ref: p9d6j

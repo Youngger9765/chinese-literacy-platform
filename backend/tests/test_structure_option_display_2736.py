@@ -31,6 +31,7 @@ from __future__ import annotations
 
 import json
 import pathlib
+from _module_files import module_file, module_files
 import re
 import sys
 
@@ -70,8 +71,8 @@ def _walk(rows):
 def _served():
     scanned = 0
     for d in sorted(LESSONS.iterdir()):
-        f = d / "v3" / "keypoints.yml"
-        if not (d.is_dir() and d.name.startswith("L") and f.exists()):
+        f = module_file(d / "v3", "keypoints")
+        if not (d.is_dir() and d.name.startswith("L") and f):
             continue
         doc = yaml.safe_load(f.read_text(encoding="utf-8")) or {}
         try:

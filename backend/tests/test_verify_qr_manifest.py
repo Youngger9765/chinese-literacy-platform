@@ -4,7 +4,7 @@ Why this file exists
 --------------------
 There are two QR generators that must never disagree:
 
-  * backend  build_demo_reading.plan_demo_audio  — the authoritative plan of
+  * backend  reading_delivery_rules  — 年級交付規則的唯一一份，來源是
     which audio objects get generated (and therefore which QR codes are real).
   * frontend LessonAudioTable.buildQrManifestRows — the xlsx the 教材端 prints.
 
@@ -29,7 +29,10 @@ from __future__ import annotations
 import importlib
 
 qa = importlib.import_module("scripts.verify_qr_manifest")
-gen = importlib.import_module("scripts.build_demo_reading")
+# 年級規則的唯一一份（#2916 清理）：批次產生器 build_demo_reading 已無消費端而刪除，
+# 規則搬到 reading_delivery_rules。這裡仍然是 import 而不是複製字面值，
+# 所以 QA 跟規則不會分岔。
+gen = importlib.import_module("scripts.reading_delivery_rules")
 
 
 def _lesson(id, grade, code, has_kr):
@@ -47,9 +50,9 @@ class TestExpectedQr:
         # if the audio policy ever produces full for grade 8 the QA follows
         # without a separate edit (and this test would then need updating —
         # which is the signal that the policy changed).
-        for g in gen._FULL_AND_PASSAGE_GRADES:
+        for g in gen.FULL_AND_PASSAGE_GRADES:
             assert qa.expected_qr(_lesson(1, g, f"G{g}-L01", False), set())["full"] is True
-        for g in gen._PASSAGE_ONLY_GRADES:
+        for g in gen.PASSAGE_ONLY_GRADES:
             assert qa.expected_qr(_lesson(1, g, f"G{g}-L01", True), {f"G{g}-L01"})["full"] is False
 
     def test_passage_gated_on_actual_passage_presence(self):

@@ -1,0 +1,40 @@
+lesson_uid: L0100
+version_id: v3
+section_no: 六
+keypoints:
+  title: 你以為的浪漫可能是跟騷
+  layout: list
+  instruction: 請根據課文內容，整理浪漫與跟騷的判斷方式，以及遇到跟騷時可以採取的行動。
+  answer_carrier: 橘色手寫字（PDF p7）；文字層的【　】內已填有同樣的答案
+  rows:
+  - label: 主題
+    value: 你以為的浪漫可能是跟騷
+    value_note: 原稿最上面這一列的左欄印「主題」、右欄印課名，是表格的第一列不是表頭。
+  - label: 情境案例
+    value: 阿哲反覆追求小芳，小芳【　】很大，甚至失眠。
+    blanks:
+    - answer: 壓力
+  - label: 迷思來源
+    value: 愛情電影常把糾纏行為美化為浪漫，容易誤導觀眾產生錯誤認識。
+  - label: 法律標準
+    value: 《跟蹤騷擾防治法》：若反覆或持續對特定人做出違反其意願、且與【　】有關的行為，造成對方【　】，並影響【　】，就可能構成「跟蹤騷擾」。
+    blanks:
+    - answer: 性或性別
+    - answer: 恐懼或焦慮
+    - answer: 學習、工作或日常生活
+  - label: 判斷關鍵
+    value: 如何區別浪漫和跟騷，關鍵在是否【　】對方的意願，及是否取得【　】。
+    blanks:
+    - answer: 尊重
+    - answer: 同意
+  - label: 行動建議
+    value: 遭遇跟騷時，可以明確表達【　】，向可信任的【　】求助；情況嚴重時，可【　】或依法申請【　】。
+    blanks:
+    - answer: 拒絕
+    - answer: 大人
+    - answer: 報警
+    - answer: 保護令
+  - label: 結語
+    value: 真正的喜歡要從尊重他人開始。
+  slug: drn94
+  text_ref: rcmdx

@@ -5,23 +5,31 @@ sections:
 - 'no': ''
   name: 古文今譯
   module: modern_translation
+  slug: phkkj
+  file: modern_translation.phkkj.yml
   pages:
   - 1
   - 2
 - 'no': ''
   name: 原文
   module: classical_text
+  slug: 7qj99
+  file: classical_text.7qj99.yml
   pages:
   - 2
   - 3
 - 'no': 一
   name: 文白句子比對
   module: sentence_matching
+  slug: u4kx3
+  file: sentence_matching.u4kx3.yml
   pages:
   - 3
 - 'no': 二
   name: 文白詞語比對
   module: word_matching
+  slug: d7hde
+  file: word_matching.d7hde.yml
   pages:
   - 3
   - 4
@@ -29,6 +37,8 @@ sections:
 - 'no': 三
   name: 文章重點表
   module: keypoints
+  slug: 4h6mk
+  file: keypoints.4h6mk.yml
   pages:
   - 5
   - 6
@@ -36,6 +46,8 @@ sections:
   name: 文言文聚光燈
   module: spotlight
   subtitle: 疑問標籤：疑問助詞
+  slug: nv9cd
+  file: spotlight.nv9cd.yml
   pages:
   - 6
   - 7
@@ -44,6 +56,8 @@ sections:
 - 'no': 五
   name: 閱讀理解
   module: comprehension
+  slug: fa79k
+  file: comprehension.fa79k.yml
   pages:
   - 9
   - 10
@@ -51,6 +65,8 @@ sections:
 - 'no': 六
   name: 自我挑戰
   module: self_challenge
+  slug: ftffm
+  file: self_challenge.ftffm.yml
   pages:
   - 11
 dispatch:

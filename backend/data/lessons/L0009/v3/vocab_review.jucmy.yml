@@ -1,0 +1,159 @@
+lesson_uid: L0009
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 忠心耿耿
+  - 威風凜凜
+  - 不寒而慄
+  - 凜冽
+  - 輾轉難眠
+  - 淚水奪眶而出
+  - 忐忑不安
+  - 毫髮無傷
+  - 凌亂
+  - 蹭
+  - 遍體鱗傷
+  - 奄奄一息
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 淚水奪眶而出稟崩潰凜
+  - 明毫豪氣遍生淹告奄冽
+  - 迎察髮氛體入沒奄寒流
+  - 忠刃增無鱗死一醃漬污
+  - 心摩而加傷息凝聚凌亂
+  - 耿憎蹭解勢焦不抱輾輕
+  - 耿威恨忐均躁寒頭轉而
+  - 耽風贈忑力不而鼠難易
+  - 誤凜送不敵安慄竄眠舉
+  - 傷凜別安寒氣逼人歉疚
+  answers_are_graphical: true
+  answer_paths:
+  - word: 淚水奪眶而出
+    cells:
+    - - 1
+      - 1
+    - - 1
+      - 2
+    - - 1
+      - 3
+    - - 1
+      - 4
+    - - 1
+      - 5
+    - - 1
+      - 6
+    direction: horizontal
+  - word: 凜冽
+    cells:
+    - - 1
+      - 10
+    - - 2
+      - 10
+    direction: vertical
+  - word: 毫髮無傷
+    cells:
+    - - 2
+      - 2
+    - - 3
+      - 3
+    - - 4
+      - 4
+    - - 5
+      - 5
+    direction: diagonal_down_right
+  - word: 遍體鱗傷
+    cells:
+    - - 2
+      - 5
+    - - 3
+      - 5
+    - - 4
+      - 5
+    - - 5
+      - 5
+    direction: vertical
+  - word: 奄奄一息
+    cells:
+    - - 2
+      - 9
+    - - 3
+      - 8
+    - - 4
+      - 7
+    - - 5
+      - 6
+    direction: diagonal_down_left
+  - word: 忠心耿耿
+    cells:
+    - - 4
+      - 1
+    - - 5
+      - 1
+    - - 6
+      - 1
+    - - 7
+      - 1
+    direction: vertical
+  - word: 凌亂
+    cells:
+    - - 5
+      - 9
+    - - 5
+      - 10
+    direction: horizontal
+  - word: 蹭
+    cells:
+    - - 6
+      - 3
+    direction: horizontal
+  - word: 不寒而慄
+    cells:
+    - - 6
+      - 7
+    - - 7
+      - 7
+    - - 8
+      - 7
+    - - 9
+      - 7
+    direction: vertical
+  - word: 輾轉難眠
+    cells:
+    - - 6
+      - 9
+    - - 7
+      - 9
+    - - 8
+      - 9
+    - - 9
+      - 9
+    direction: vertical
+  - word: 威風凜凜
+    cells:
+    - - 7
+      - 2
+    - - 8
+      - 2
+    - - 9
+      - 2
+    - - 10
+      - 2
+    direction: vertical
+  - word: 忐忑不安
+    cells:
+    - - 7
+      - 4
+    - - 8
+      - 4
+    - - 9
+      - 4
+    - - 10
+      - 4
+    direction: vertical
+  slug: jucmy
+  text_ref: xxwkf

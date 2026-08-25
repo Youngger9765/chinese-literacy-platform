@@ -55,9 +55,6 @@ from app.services.lesson_layer_loaders import (
     build_intro as _build_intro,
     GENRE_TO_CATEGORY as _GENRE_TO_CATEGORY,
     LAYER2_ID_OFFSET as _LAYER2_ID_OFFSET,
-    load_curriculum_manifest as _load_curriculum_manifest,
-    load_layer1_lessons as _load_layer1_lessons,
-    load_layer2_lessons as _load_layer2_lessons,
 )
 
 from app.services.lesson_indexes import (

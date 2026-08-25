@@ -1,0 +1,24 @@
+lesson_uid: L0144
+version_id: v3
+keypoints_followup_questions:
+  part_note: 篇1（第23課）
+  section_name_printed: 閱讀接力
+  subtitle: 從一位選手，到各項運動紀錄
+  items:
+  - type: single
+    label: ❶先整理這一篇
+    prompt: 讀完〈馬拉松王者──基普喬吉〉，哪一項最完整地整理了本文內容？（單選）
+    options:
+      1: 作者從個人鍛鍊、環境、團隊與科技等面向，說明基普喬吉如何創造紀錄。
+      2: 作者聚焦跑鞋與配速科技，說明基普喬吉如何依靠設備突破馬拉松紀錄。
+    answer: 1
+  - type: guide
+    label: ❷帶著問題讀下一篇
+    text: '第一篇讓我們看見一位選手創造紀錄的多種條件。下一篇把範圍擴大到不同年代、不同運動。閱讀時，請帶著這個問題：
+
+      →「近百年來，各項運動紀錄為什麼不斷進步？」'
+  slug: h7eea
+  text_ref:
+  - wdnd7
+  - dvxj6
+  - 4ymn7

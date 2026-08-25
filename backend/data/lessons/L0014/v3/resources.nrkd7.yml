@@ -1,0 +1,26 @@
+lesson_uid: L0014
+version_id: v3
+section_no: 九
+resources:
+  items:
+  - index: 1
+    title: 9大讀書的好處！看完你還有什麼藉口不讀書
+    duration: '8:24'
+    duration_seconds: 504
+    source: 老鷹思維
+  - index: 2
+    title: 長期滑手機?小心變爆米花腦!
+    duration: '4:11'
+    duration_seconds: 251
+    source: Wisdom Bread 智慧麵包
+  section_name: 知識補給站
+  label: 影片連結
+  videos:
+  - index: 1
+    url: http://youtu.be/qMwm7zXChlo
+    url_source: 總表0816「4.影片連結」年級4課次3
+  - index: 2
+    url: http://youtu.be/ih7f3K3LJXk
+    url_source: 總表0816「4.影片連結」年級4課次3
+  slug: nrkd7
+  text_ref: uc7mr

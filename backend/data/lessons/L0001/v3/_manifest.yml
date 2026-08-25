@@ -5,28 +5,42 @@ sections:
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
+  slug: mcyjp
+  file: full_text_annotate.mcyjp.yml
   pages:
   - 1
   - 2
 - 'no': 二
   name: 念順順
   module: key_reading
+  text_ref: mcyjp
+  slug: mpjwh
+  file: key_reading.mpjwh.yml
   pages:
   - 2
 - 'no': 三
   name: 語詞我最棒
   module: vocab_definitions
+  text_ref: mcyjp
+  slug: athdw
+  file: vocab_definitions.athdw.yml
   pages:
   - 2
   - 3
 - 'no': 四
   name: 語詞應用
   module: vocab_application
+  text_ref: mcyjp
+  slug: m94d7
+  file: vocab_application.m94d7.yml
   pages:
   - 3
 - 'no': 五
   name: 文章重點表
   module: keypoints
+  text_ref: mcyjp
+  slug: 3vhut
+  file: keypoints.3vhut.yml
   pages:
   - 3
   - 4
@@ -34,6 +48,9 @@ sections:
   name: 閱讀聚光燈
   module: spotlight
   subtitle: 寫作手法──順敘──從時間詞判斷事件順序
+  text_ref: mcyjp
+  slug: fyq9q
+  file: spotlight.fyq9q.yml
   pages:
   - 4
   - 5
@@ -41,17 +58,26 @@ sections:
 - 'no': 七
   name: 閱讀理解
   module: comprehension
+  text_ref: mcyjp
+  slug: 9u9ny
+  file: comprehension.9u9ny.yml
   pages:
   - 6
   - 7
 - 'no': 八
   name: 詞語複習
   module: vocab_review
+  text_ref: mcyjp
+  slug: q6nak
+  file: vocab_review.q6nak.yml
   pages:
   - 7
 - 'no': 九
   name: 知識補給站
   module: resources
+  text_ref: mcyjp
+  slug: cutwp
+  file: resources.cutwp.yml
   pages:
   - 7
   - 8

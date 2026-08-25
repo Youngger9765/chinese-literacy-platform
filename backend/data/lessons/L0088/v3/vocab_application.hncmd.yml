@@ -1,0 +1,46 @@
+lesson_uid: L0088
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格中填入正確的語詞代號
+  option_bank:
+    A: 杯水車薪
+    B: 功敗垂成
+    C: 塑膠微粒
+    D: 闕如
+    E: 簽署
+    F: 自行其是
+    G: 無遠弗屆
+    H: 倡議者
+    I: 有增無減
+  unused_options:
+  - I
+  items:
+  - index: 1
+    stem: 我決定少用一次性餐具，因為它們最後可能變成（　）進入海洋。
+    answer: C
+  - index: 2
+    stem: 代表隊一路打進決賽，卻在關鍵時刻失手，眼看勝利就在眼前，最後仍（　）。
+    answer: B
+  - index: 3
+    stem: 海灘垃圾太多，靠一兩個人撿拾只是（　），要見到成效，必須由社區長期動員清理。
+    answer: A
+  - index: 4
+    stem: 反霸凌的（　）設計了匿名投訴信箱，讓同學更願意求助。
+    answer: H
+  - index: 5
+    stem: 參加校外教學前，家長要先（　）同意書。
+    answer: E
+  - index: 6
+    stem: 網路的影響（　），一個影片能在幾小時內傳到全世界。
+    answer: G
+  - index: 7
+    stem: 教練要求全隊遵守比賽戰術安排，不能（　），破壞整個比賽的默契。
+    answer: F
+  - index: 8
+    stem: 這份報告的參考資料仍（　），需要再補上出處。
+    answer: D
+  notes:
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
+  slug: hncmd
+  text_ref: y4x3j

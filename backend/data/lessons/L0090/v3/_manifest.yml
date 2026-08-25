@@ -5,6 +5,8 @@ sections:
 - 'no': 一
   name: 讀全文—做記號
   module: full_text_annotate
+  slug: 4x996
+  file: full_text_annotate.4x996.yml
   pages:
   - 1
   - 2
@@ -12,17 +14,26 @@ sections:
 - 'no': 二
   name: 念順順
   module: key_reading
+  text_ref: 4x996
+  slug: 6pvew
+  file: key_reading.6pvew.yml
   pages:
   - 3
 - 'no': 三
   name: 語詞我最棒
   module: vocab_definitions
+  text_ref: 4x996
+  slug: cfu9e
+  file: vocab_definitions.cfu9e.yml
   pages:
   - 3
   - 4
 - 'no': 四
   name: 語詞應用
   module: vocab_application
+  text_ref: 4x996
+  slug: thkh9
+  file: vocab_application.thkh9.yml
   pages:
   - 4
   - 5
@@ -30,6 +41,9 @@ sections:
   name: 閱讀聚光燈
   module: spotlight
   subtitle: 用表格整理訊息──從數據歸納趨勢
+  text_ref: 4x996
+  slug: w7mdd
+  file: spotlight.w7mdd.yml
   pages:
   - 5
   - 6
@@ -38,23 +52,35 @@ sections:
 - 'no': 六
   name: 文章重點表
   module: keypoints
+  text_ref: 4x996
+  slug: a374n
+  file: keypoints.a374n.yml
   pages:
   - 8
   - 9
 - 'no': 七
   name: 閱讀理解
   module: comprehension
+  text_ref: 4x996
+  slug: f6khx
+  file: comprehension.f6khx.yml
   pages:
   - 9
   - 10
 - 'no': 八
   name: 詞語複習
   module: vocab_review
+  text_ref: 4x996
+  slug: y7ycx
+  file: vocab_review.y7ycx.yml
   pages:
   - 10
 - 'no': 九
   name: 知識補給站
   module: resources
+  text_ref: 4x996
+  slug: ppcmr
+  file: resources.ppcmr.yml
   pages:
   - 10
   - 11

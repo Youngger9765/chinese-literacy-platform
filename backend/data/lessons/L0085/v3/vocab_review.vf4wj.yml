@@ -1,0 +1,150 @@
+lesson_uid: L0085
+version_id: v3
+section_no: 七
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 纖細
+  - 即將
+  - 明察秋毫
+  - 頻率
+  - 坐立難安
+  - 徵兆
+  - 前兆
+  - 歷歷在目
+  - 彷彿
+  - 遠山如洗
+  - 焦躁不安
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 憑速識見看見義勇為人
+  - 頻率微微纖系節明焦頭
+  - 接頭笑知細項焦察慮即
+  - 坐遠容著玉目躁秋日將
+  - 車立山名手體不毫曆歷
+  - 站站難如掌會安全歷遠
+  - 徵立過安洗頻佛在前山
+  - 明天警察案繁目像徵兆
+  - 前面彷彿體育組長如果
+  - 照元歷史遺跡洗車長者
+  answers_are_graphical: true
+  answers_printed: true
+  answer_paths:
+  - word: 頻率
+    cells:
+    - - 2
+      - 1
+    - - 2
+      - 2
+    direction: horizontal
+  - word: 纖細
+    cells:
+    - - 2
+      - 5
+    - - 3
+      - 5
+    direction: vertical
+  - word: 明察秋毫
+    cells:
+    - - 2
+      - 8
+    - - 3
+      - 8
+    - - 4
+      - 8
+    - - 5
+      - 8
+    direction: vertical
+  - word: 焦躁不安
+    cells:
+    - - 3
+      - 7
+    - - 4
+      - 7
+    - - 5
+      - 7
+    - - 6
+      - 7
+    direction: vertical
+  - word: 即將
+    cells:
+    - - 3
+      - 10
+    - - 4
+      - 10
+    direction: vertical
+  - word: 坐立難安
+    cells:
+    - - 4
+      - 1
+    - - 5
+      - 2
+    - - 6
+      - 3
+    - - 7
+      - 4
+    direction: diagonal_down_right
+  - word: 遠山如洗
+    cells:
+    - - 4
+      - 2
+    - - 5
+      - 3
+    - - 6
+      - 4
+    - - 7
+      - 5
+    direction: diagonal_down_right
+  - word: 歷歷在目
+    cells:
+    - - 5
+      - 10
+    - - 6
+      - 9
+    - - 7
+      - 8
+    - - 8
+      - 7
+    direction: diagonal_down_left
+  - word: 前兆
+    cells:
+    - - 7
+      - 9
+    - - 8
+      - 10
+    direction: diagonal_down_right
+  - word: 徵兆
+    cells:
+    - - 8
+      - 9
+    - - 8
+      - 10
+    direction: horizontal
+  - word: 彷彿
+    cells:
+    - - 9
+      - 3
+    - - 9
+      - 4
+    direction: horizontal
+  notes:
+    answer_paths: '11 個目標語詞全部圈到，逐格取字皆能拼回，格子沒有錯字。
+
+      ✅ 幾何交叉驗證乾淨：`roundRect` 共 11 個，**全部在紙面上**（無離頁殘留），
+
+      圈也是 11 個，數量相符。
+
+      ⚠️ 「徵兆」與「前兆」**共用第 8 列第 10 欄的「兆」**（一橫一斜落在同一格），
+
+      不是重複圈選；格子裡沒有第二個「兆」可以讓兩條路徑分開走，逐格取字已確認。
+
+      （同型：L0071 的「差異／差距」共用「差」。）
+
+      ⚠️ 格子裡有兩個「焦」（第2列第9欄、第3列第7欄），被圈的是第 3 列那個，
+
+      因為只有它底下接得出「躁不安」。'
+  slug: vf4wj
+  text_ref: ttk9y

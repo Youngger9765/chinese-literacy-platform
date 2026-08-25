@@ -1,0 +1,35 @@
+lesson_uid: L0078
+version_id: v3
+section_no: 二
+key_reading:
+  instruction: 請用計時器，從指定段落（一    )開始朗讀，在表格中記錄1分鐘朗讀的字數。如果你計時3次後，對自己還不滿意，可以多練幾次。最後一次，找一位同學請他計時、記錄並簽名！
+  instruction_note: 括號內的 ☞ 是圖形物件，文字流只有「（一    )」的空白；右括號原稿是半形。
+  timing_table:
+    columns:
+    - 第1次計時
+    - 第2次計時
+    - 第3次計時
+    - 裁判計時
+    unit: 字
+    judge_signature: true
+  benchmark_label: ◎ 我的表現
+  benchmark_note: PDF p3 上這張表被第三大題的內容疊印壓住，幾乎看不見；文字層完整。
+  benchmark:
+  - threshold: ＜220字
+    feedback: 還要多加練習。
+  - threshold: 221~250字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞251字
+    feedback: 哇嗚，超級厲害！
+  passage: 寫作文時，文章必須緊扣題目，是每個人都懂的道理。如果文不對題，一定會被老師扣很重的分數。但在日常生活中卻常常看到「題不對文」的現象，尤其是新聞報導——記者完成文章後，下標題時故意添加一些「調味料」，讓標題變得辛辣、浮誇，也就是閩南語所說的「重鹹」、「重口味」，目的是為了吸引閱聽大眾點擊閱讀或收看，我們稱這種標題為「誘餌式標題」或「釣魚式標題」。
+  start_text: 寫作文時，文章必須緊扣題目，是每個人都懂的道理。
+  extent_chars: 173
+  source: extract_key_reading_v3
+  start_paragraph: 1
+  end_paragraph: 1
+  slug: hqnw3
+  text_ref: 3ynpe
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  absorbed_tail: 0

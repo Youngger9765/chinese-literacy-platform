@@ -5,23 +5,31 @@ sections:
 - 'no': ''
   name: 古文今譯
   module: modern_translation
+  slug: w4ftv
+  file: modern_translation.w4ftv.yml
   pages:
   - 1
   - 2
 - 'no': ''
   name: 原文
   module: classical_text
+  slug: 34ehy
+  file: classical_text.34ehy.yml
   pages:
   - 2
 - 'no': ''
   name: 朗讀計時
   module: key_reading
+  slug: t7efe
+  file: key_reading.t7efe.yml
   pages:
   - 2
   pages_source: bracketed
 - 'no': 一
   name: 文白句子比對
   module: sentence_matching
+  slug: 7kd4e
+  file: sentence_matching.7kd4e.yml
   pages:
   - 2
   - 3
@@ -29,12 +37,16 @@ sections:
 - 'no': 二
   name: 文白詞語比對
   module: word_matching
+  slug: 4cway
+  file: word_matching.4cway.yml
   pages:
   - 4
   - 5
 - 'no': 三
   name: 文章重點表
   module: keypoints
+  slug: vyt3c
+  file: keypoints.vyt3c.yml
   pages:
   - 5
   - 6
@@ -42,6 +54,8 @@ sections:
   name: 文言文聚光燈
   module: spotlight
   subtitle: 判讀主語
+  slug: cwrdn
+  file: spotlight.cwrdn.yml
   pages:
   - 6
   - 7
@@ -50,6 +64,8 @@ sections:
 - 'no': 五
   name: 閱讀理解
   module: comprehension
+  slug: f7nh7
+  file: comprehension.f7nh7.yml
   pages:
   - 9
   - 10

@@ -5,6 +5,8 @@ sections:
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
+  slug: fv7cm
+  file: full_text_annotate.fv7cm.yml
   pages:
   - 1
   - 2
@@ -12,17 +14,26 @@ sections:
 - 'no': 二
   name: 念順順
   module: key_reading
+  text_ref: fv7cm
+  slug: 6ynfe
+  file: key_reading.6ynfe.yml
   pages:
   - 3
 - 'no': 三
   name: 語詞我最棒
   module: vocab_definitions
+  text_ref: fv7cm
+  slug: arm7k
+  file: vocab_definitions.arm7k.yml
   pages:
   - 3
   - 4
 - 'no': 四
   name: 語詞應用
   module: vocab_application
+  text_ref: fv7cm
+  slug: udv6d
+  file: vocab_application.udv6d.yml
   pages:
   - 4
   - 5
@@ -30,6 +41,9 @@ sections:
   name: 閱讀聚光燈
   module: spotlight
   subtitle: 摘要策略──問題、解決、結果找重點
+  text_ref: fv7cm
+  slug: at3r4
+  file: spotlight.at3r4.yml
   pages:
   - 5
   - 6
@@ -37,24 +51,36 @@ sections:
 - 'no': 六
   name: 文章重點表
   module: keypoints
+  text_ref: fv7cm
+  slug: j6v9q
+  file: keypoints.j6v9q.yml
   pages:
   - 7
   - 8
 - 'no': 七
   name: 閱讀理解
   module: comprehension
+  text_ref: fv7cm
+  slug: v7kn7
+  file: comprehension.v7kn7.yml
   pages:
   - 8
   - 9
 - 'no': 八
   name: 詞語複習
   module: vocab_review
+  text_ref: fv7cm
+  slug: 9qnmy
+  file: vocab_review.9qnmy.yml
   pages:
   - 9
   - 10
 - 'no': 九
   name: 知識補給站
   module: resources
+  text_ref: fv7cm
+  slug: muhf3
+  file: resources.muhf3.yml
   pages:
   - 10
 dispatch:

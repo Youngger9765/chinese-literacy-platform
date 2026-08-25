@@ -8,9 +8,17 @@
       "type": "string",
       "x-seen-in": "175/175"
     },
+    "parts": {
+      "type": "array",
+      "x-seen-in": "5/175"
+    },
     "sections_present": {
       "type": "array",
       "x-seen-in": "175/175"
+    },
+    "sections_present_note": {
+      "type": "string",
+      "x-seen-in": "1/175"
     },
     "source": {
       "type": "object",

@@ -1,0 +1,143 @@
+lesson_uid: L0035
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 國際特赦組織
+  - 壓迫
+  - 求助無門
+  - 乾著急
+  - 癲癇
+  - 極權
+  - 聲援
+  - 充耳不聞
+  - 素未謀面
+  - 緣起
+  - 突發奇想
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 電風扇下雨天乾著急忙
+  - 充電器雨寫信國幫忙碌
+  - 耳緣起天氣晴際瘋癲預
+  - 不由突發奇想特聲練癇
+  - 聞求緣分天人赦援武雨
+  - 風助人民極權組助功過
+  - 不無民突緣素織拉筋天
+  - 動門口述發現未松鼠青
+  - 做自己的主其來謀反木
+  - 被受壓迫切尋想見面瓜
+  answers_are_graphical: true
+  answer_paths:
+  - word: 乾著急
+    cells:
+    - - 1
+      - 7
+    - - 1
+      - 8
+    - - 1
+      - 9
+    direction: horizontal
+  - word: 充耳不聞
+    cells:
+    - - 2
+      - 1
+    - - 3
+      - 1
+    - - 4
+      - 1
+    - - 5
+      - 1
+    direction: vertical
+  - word: 國際特赦組織
+    cells:
+    - - 2
+      - 7
+    - - 3
+      - 7
+    - - 4
+      - 7
+    - - 5
+      - 7
+    - - 6
+      - 7
+    - - 7
+      - 7
+    direction: vertical
+  - word: 緣起
+    cells:
+    - - 3
+      - 2
+    - - 3
+      - 3
+    direction: horizontal
+  - word: 癲癇
+    cells:
+    - - 3
+      - 9
+    - - 4
+      - 10
+    direction: diagonal_down_right
+  - word: 突發奇想
+    cells:
+    - - 4
+      - 3
+    - - 4
+      - 4
+    - - 4
+      - 5
+    - - 4
+      - 6
+    direction: horizontal
+  - word: 聲援
+    cells:
+    - - 4
+      - 8
+    - - 5
+      - 8
+    direction: vertical
+  - word: 求助無門
+    cells:
+    - - 5
+      - 2
+    - - 6
+      - 2
+    - - 7
+      - 2
+    - - 8
+      - 2
+    direction: vertical
+  - word: 極權
+    cells:
+    - - 6
+      - 5
+    - - 6
+      - 6
+    direction: horizontal
+  - word: 素未謀面
+    cells:
+    - - 7
+      - 6
+    - - 8
+      - 7
+    - - 9
+      - 8
+    - - 10
+      - 9
+    direction: diagonal_down_right
+  - word: 壓迫
+    cells:
+    - - 10
+      - 3
+    - - 10
+      - 4
+    direction: horizontal
+  notes:
+    extra_circle: 第 12 個圈是一條 4 格斜線，從第 7 列第 4 欄往右下到第 10 列第 7 欄， 取字為「突發[其]想」—— 格子第 9
+      列第 6 欄該是「奇」卻放成「其」， 所以拼不回任何目標語詞。這是教材的格子錯字（source_errata E1）， 不是漏抽；「突發奇想」正確的那一次是第
+      4 列橫向那條，已列在 answer_paths。
+  slug: 99vhy
+  text_ref: vc3at

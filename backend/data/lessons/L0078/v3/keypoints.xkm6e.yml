@@ -1,0 +1,51 @@
+lesson_uid: L0078
+version_id: v3
+section_no: 五
+keypoints:
+  title: 別上「誘餌式標題」的鉤
+  layout: list
+  answer_carrier: 橘色手寫字（PDF p4~p5）；文字層的【　】內已填有同樣的答案
+  rows:
+  - label: 什麼是誘餌式標題
+    value: 為吸引閱聽大眾點擊收看，新聞標題經常變得【　】、【　】，卻沒有完整、準確呈現文章內容，這就是【　】。
+    blanks:
+    - answer: 辛辣
+    - answer: 浮誇
+    - answer: 誘餌式標題
+  - label: 誘餌式標題的目的
+    items:
+    - label: '1'
+      value: 下標者想讓文章在眾多訊息中【　】。
+      blanks:
+      - answer: 被看見
+    - label: '2'
+      value: 讓報導增加【　】，獲得較多的廣告收益。
+      blanks:
+      - answer: 點閱率
+    - label: '3'
+      value: 為了能【　】，影響大眾的認知。
+      blanks:
+      - answer: 帶風向
+  - label: 面對方法
+    label_note: 原稿左欄分兩行排「面對」／「方法」，本檔記為連續字串。
+    items:
+    - label: '1'
+      value: 看到誇張、模糊或引發強烈情緒的標題時，先【　】。
+      blanks:
+      - answer: 警覺
+    - label: '2'
+      value: 【　】標題與內容的一致性。
+      blanks:
+      - answer: 核對
+    - label: '3'
+      value: 【　】不同報導，培養【　】能力。
+      blanks:
+      - answer: 比較
+      - answer: 獨立思考
+  - label: 結論
+    value: 上網時要隨時提醒自己：不上【　】的鉤，不再讓劣質新聞騙取你的【　】。
+    blanks:
+    - answer: 誘餌式標題
+    - answer: 點擊
+  slug: xkm6e
+  text_ref: 3ynpe

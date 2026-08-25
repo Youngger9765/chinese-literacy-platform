@@ -1,0 +1,70 @@
+lesson_uid: L0152
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: '請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+
+    🅐 從本課語詞框框，找語詞。
+
+    🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+
+    🅒 問同學。'
+  vocabulary_bank:
+  - 竹簡
+  - 安然
+  - 贍養
+  - 有幸窺見
+  - 拋頭顱灑熱血
+  - 書吏
+  - 搏命
+  - 兵餉
+  - 轉嫁
+  - 英姿颯爽
+  - 絕筆
+  - 嚴峻
+  - 生死未卜
+  items:
+  - index: 1
+    word: 拋頭顱灑熱血
+    definition: 拋棄頭顱，灑出熱血。比喻願意為理想犧牲自己的生命，在所不惜。
+  - index: 2
+    word: 搏命
+    definition: 以性命相爭。形容不顧生命，全力以赴。搏，搏鬥、拚鬥。
+  - index: 3
+    word: 英姿颯爽
+    definition: 形容威武豪邁，意氣風發的樣子。
+  - index: 4
+    word: 轉嫁
+    definition: 將應該承受的負擔轉移到他人身上。嫁，轉移。
+  - index: 5
+    word: 嚴峻
+    definition: 形容情勢嚴重困難。本文指兄弟倆借錢過活，再不還錢就可能喪命，情況非常嚴重。
+  - index: 6
+    word: 兵餉
+    definition: 士兵的薪水。
+  - index: 7
+    word: 絕筆
+    definition: 臨死前最後的文字。
+  - index: 8
+    word: 書吏
+    definition: 古代專門替人記錄事情或抄寫文本的人。吏，是職位較低的政府官員。
+  - index: 9
+    word: 安然
+    definition: 平安無事的樣子。然，意思是「…的樣子」。
+  - index: 10
+    word: 竹簡
+    definition: 古代刻寫文字用的竹片。
+  - index: 11
+    word: 生死未卜
+    definition: 不知道是死還是活。
+  - index: 12
+    word: 贍養
+    definition: 提供生活所需的物品、金錢。本文是指照顧年邁的父母。
+  - index: 13
+    word: 有幸窺見
+    definition: 很幸運的看見一部分不容易看見的事情。
+  notes:
+    vocabulary_bank: 語詞框共 13 個，比總表少「文房四寶」。原稿「嚴峻、」與「生死未卜」之間有一段多餘空白，照原樣不補不刪。
+    answer_carrier: 橘色（字元樣式 rStyle=af，run 層無 w:color），PDF p4 可見
+  slug: kjar3
+  text_ref: 6e7r9

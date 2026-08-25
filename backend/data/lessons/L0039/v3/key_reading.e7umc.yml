@@ -1,0 +1,32 @@
+lesson_uid: L0039
+version_id: v3
+section_no: 二
+key_reading:
+  instruction: 請用計時器，從指定段落（五☞）開始朗讀，計時1分鐘讀的字數，並記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！
+  timing_table:
+    columns:
+    - 第1次計時
+    - 第2次計時
+    - 第3次計時
+    - 裁判計時
+    unit: 字
+    judge_signature: true
+  benchmark:
+  - threshold: ＜200字
+    feedback: 還要多加練習。
+  - threshold: 201~230字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞231字
+    feedback: 哇嗚，超級厲害！
+  passage: 許多學生球員仔細思考過夢想和事實之間可能的差距，他們也想兼顧學業和運動訓練，想讓自己未來有更寬廣的職涯選擇，但這不是學生自己就能辦到的。還好，現在全臺灣有許多愛棒球的校長及教練，運用各種方法幫助學生球員在教室和球場間取得平衡。例如，花蓮縣三民國中的林國源校長、張志強教練和老師們合作無間，改善了球員的學習、訓練及生活。他們增加了宿舍的淋浴間及洗衣機，減少等待洗澡、洗衣服的時間，讓球員在繁重嚴格的訓練中，還能擠出讀書的時間。學校還訂定了出賽辦法，要求學業成績達標才能出去比賽。再例如，新竹縣中山國小郭碧玄校長認為，為了確保孩子未來的人生能走得更寬廣，維持基本學力和發展運動技能同樣重要，他們加入中信基金會支持的「愛接棒計畫」，為棒球選手提供額外的夜間課輔，以確保學生的基本學力。
+  start_text: 許多學生球員仔細思考過夢想和事實之間可能的差距，
+  extent_chars: 339
+  source: extract_key_reading_v3
+  start_paragraph: 5
+  end_paragraph: 5
+  slug: e7umc
+  text_ref: phhwe
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  absorbed_tail: 0

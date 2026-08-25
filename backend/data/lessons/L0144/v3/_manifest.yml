@@ -5,6 +5,9 @@ sections:
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
+  part: 篇次 1/3
+  slug: wdnd7
+  file: full_text_annotate.wdnd7.yml
   pages:
   - 1
   - 2
@@ -12,18 +15,30 @@ sections:
 - 'no': 二
   name: 語詞我最棒
   module: vocab_definitions
+  part: 篇次 1/3
+  text_ref: wdnd7
+  slug: 3rp4q
+  file: vocab_definitions.3rp4q.yml
   pages:
   - 3
   - 4
 - 'no': 三
   name: 文章重點整理
   module: keypoints
+  part: 篇次 1/3
+  text_ref: wdnd7
+  slug: 337rq
+  file: keypoints.337rq.yml
   pages:
   - 4
   - 5
 - 'no': 四
   name: 閱讀理解
   module: comprehension
+  part: 篇次 1/3
+  text_ref: wdnd7
+  slug: 3dufp
+  file: comprehension.3dufp.yml
   pages:
   - 5
   - 6
@@ -31,12 +46,16 @@ sections:
   name: 閱讀接力
   module: null
   subtitle: 從一位選手，到各項運動紀錄
+  part: 篇次 1/3
   module_unresolved: true
   pages:
   - 6
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
+  part: 篇次2/3
+  slug: dvxj6
+  file: full_text_annotate.dvxj6.yml
   pages:
   - 6
   - 7
@@ -44,18 +63,30 @@ sections:
 - 'no': 二
   name: 語詞我最棒
   module: vocab_definitions
+  part: 篇次2/3
+  text_ref: dvxj6
+  slug: wpr7x
+  file: vocab_definitions.wpr7x.yml
   pages:
   - 8
   - 9
 - 'no': 三
   name: 文章重點整理
   module: keypoints
+  part: 篇次2/3
+  text_ref: dvxj6
+  slug: hdp9w
+  file: keypoints.hdp9w.yml
   pages:
   - 9
   - 10
 - 'no': 四
   name: 閱讀理解
   module: comprehension
+  part: 篇次2/3
+  text_ref: dvxj6
+  slug: mpwdc
+  file: comprehension.mpwdc.yml
   pages:
   - 10
   - 11
@@ -63,6 +94,7 @@ sections:
   name: 閱讀接力
   module: null
   subtitle: 從科技影響成績，到科技使用的公平問題
+  part: 篇次2/3
   module_unresolved: true
   pages:
   - 11
@@ -70,23 +102,38 @@ sections:
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
+  part: 篇次3/3-(新聞短文)
+  slug: 4ymn7
+  file: full_text_annotate.4ymn7.yml
   pages:
   - 12
   - 13
 - 'no': 二
   name: 語詞我最棒
   module: vocab_definitions
+  part: 篇次3/3-(新聞短文)
+  text_ref: 4ymn7
+  slug: y4xxx
+  file: vocab_definitions.y4xxx.yml
   pages:
   - 13
   - 14
 - 'no': 三
   name: 文章重點表
   module: keypoints
+  part: 篇次3/3-(新聞短文)
+  text_ref: 4ymn7
+  slug: vvk4v
+  file: keypoints.vvk4v.yml
   pages:
   - 14
 - 'no': 四
   name: 閱讀理解
   module: comprehension
+  part: 篇次3/3-(新聞短文)
+  text_ref: 4ymn7
+  slug: 9w4yp
+  file: comprehension.9w4yp.yml
   pages:
   - 14
   - 15
@@ -94,6 +141,7 @@ sections:
   name: 閱讀接力
   module: null
   subtitle: 從突破紀錄到公平界線
+  part: 篇次3/3-(新聞短文)
   module_unresolved: true
   pages:
   - 15
@@ -102,6 +150,13 @@ sections:
   name: 閱讀聚光燈
   module: spotlight
   subtitle: 從多文本閱讀──看文章之間的關係
+  part: 三篇合讀
+  text_ref:
+  - wdnd7
+  - dvxj6
+  - 4ymn7
+  slug: 7xwy3
+  file: spotlight.7xwy3.yml
   pages:
   - 16
   - 17
@@ -109,11 +164,25 @@ sections:
 - 'no': 七
   name: 詞語複習
   module: vocab_review
+  part: 三篇合讀
+  text_ref:
+  - wdnd7
+  - dvxj6
+  - 4ymn7
+  slug: cmp6q
+  file: vocab_review.cmp6q.yml
   pages:
   - 18
 - 'no': 八
   name: 知識補給站
   module: resources
+  part: 三篇合讀
+  text_ref:
+  - wdnd7
+  - dvxj6
+  - 4ymn7
+  slug: 7ccvr
+  file: resources.7ccvr.yml
   pages:
   - 18
   - 19

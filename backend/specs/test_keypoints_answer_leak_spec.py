@@ -86,9 +86,23 @@ def _strings(node, out: list[str]) -> list[str]:
     return out
 
 
+def _keypoints_files(uid: str) -> list[pathlib.Path]:
+    """這一課的所有重點表 —— 多篇課一篇一份（#2916）。"""
+    return sorted((LESSONS / uid / "v3").glob("keypoints.*.yml"))
+
+
+def _one_keypoints_doc(uid: str):
+    """單篇課的那一份。這幾條鎖的對象都是單篇課，多份時就不是它們要驗的形狀。"""
+    files = _keypoints_files(uid)
+    assert files, f"{uid} 一份重點表都找不到 —— 是檔名規則變了還是課不見了？"
+    return yaml.safe_load(files[0].read_text(encoding="utf-8"))
+
+
 def _all_student_strings():
     """(uid, 字串) —— 全庫，學生看得到的每一段文字。"""
-    for p in sorted(LESSONS.glob("*/v3/keypoints.yml")):
+    # 檔名是 `keypoints.{自己的 slug}.yml`（#2916）。多篇課一課好幾份，
+    # 每一份都要掃 —— 只掃第一份的話，第 2、3 篇的洩答案永遠看不到。
+    for p in sorted(LESSONS.glob("*/v3/keypoints.*.yml")):
         view = _student_view(yaml.safe_load(p.read_text(encoding="utf-8")))
         if view is None:
             continue
@@ -144,7 +158,7 @@ def test_choice_cells_render_as_options_not_as_a_dict(uid: str, column: str):
     L0004 = mapping 整個塞進儲存格；L0017 = `{欄名}_options` 被 `_sidecar` 包成 list。
     兩個不同成因，都會印出 dict，所以各鎖一課。
     """
-    doc = yaml.safe_load((LESSONS / uid / "v3/keypoints.yml").read_text(encoding="utf-8"))
+    doc = _one_keypoints_doc(uid)
     table = keypoints_to_structure_table(doc)
     assert table, f"{uid} 橋接不回來"
     cells = [str(c) for row in table for c in row]
@@ -176,7 +190,7 @@ def _marked_as_answer(cell: str) -> set[str]:
 
 
 def _cell_containing(uid: str, needle: str) -> str:
-    doc = yaml.safe_load((LESSONS / uid / "v3/keypoints.yml").read_text(encoding="utf-8"))
+    doc = _one_keypoints_doc(uid)
     for row in keypoints_to_structure_table(doc) or []:
         for cell in row:
             if needle in str(cell):

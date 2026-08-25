@@ -3,71 +3,71 @@
   "gate_version": 2,
   "docx_sha256": "184c-c767-3bc2-87d1",
   "modules": {
-    "classical_text": {
-      "yaml_sha256": "ef5e-65ba-bd22-cc8d",
+    "classical_text.xahdd": {
+      "yaml_sha256": "0dae-a636-8443-0fff",
       "checked": 8,
       "status": "pass",
       "passed": true,
       "exit": 0
     },
-    "comprehension": {
-      "yaml_sha256": "d818-c51d-0a05-9757",
+    "comprehension.dj4uv": {
+      "yaml_sha256": "4784-ed07-3218-831d",
       "checked": 31,
       "status": "pass",
       "passed": true,
       "exit": 0
     },
-    "intro_guide": {
-      "yaml_sha256": "24b7-bf0a-70e1-793d",
+    "intro_guide.jkkup": {
+      "yaml_sha256": "3c8c-4f08-5b19-a4ac",
       "checked": 2,
       "status": "pass",
       "passed": true,
       "exit": 0
     },
-    "key_reading": {
-      "yaml_sha256": "dd0c-3c83-a893-99db",
+    "key_reading.y76jd": {
+      "yaml_sha256": "543f-aadc-3588-863d",
       "checked": 7,
       "status": "pass",
       "passed": true,
       "exit": 0
     },
-    "keypoints": {
-      "yaml_sha256": "a0a8-3b6d-4182-bd03",
+    "keypoints.d9m7p": {
+      "yaml_sha256": "f93a-71db-a50f-5f16",
       "checked": 12,
       "status": "pass",
       "passed": true,
       "exit": 0
     },
-    "modern_translation": {
-      "yaml_sha256": "fe55-1047-db7b-190b",
+    "modern_translation.3h7ad": {
+      "yaml_sha256": "4db5-26ea-fb35-71bf",
       "checked": 4,
       "status": "pass",
       "passed": true,
       "exit": 0
     },
-    "self_challenge": {
-      "yaml_sha256": "4688-955e-d485-83d4",
+    "self_challenge.7aemk": {
+      "yaml_sha256": "c56f-e2ce-c49e-bd38",
       "checked": 22,
       "status": "pass",
       "passed": true,
       "exit": 0
     },
-    "sentence_matching": {
-      "yaml_sha256": "9345-eb2a-c2e6-f243",
+    "sentence_matching.vrrma": {
+      "yaml_sha256": "e55c-c4c3-cc29-8936",
       "checked": 31,
       "status": "pass",
       "passed": true,
       "exit": 0
     },
-    "spotlight": {
-      "yaml_sha256": "45a3-ccfe-e6a4-9be3",
+    "spotlight.deqve": {
+      "yaml_sha256": "22b6-102a-488b-fad6",
       "checked": 50,
       "status": "pass",
       "passed": true,
       "exit": 0
     },
-    "word_matching": {
-      "yaml_sha256": "32ee-de85-a194-65aa",
+    "word_matching.w4r3j": {
+      "yaml_sha256": "0fc3-f8d5-f50b-59e6",
       "checked": 15,
       "status": "pass",
       "passed": true,

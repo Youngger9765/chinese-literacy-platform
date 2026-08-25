@@ -1,0 +1,212 @@
+lesson_uid: L0071
+version_id: v3
+section_no: 六
+spotlight:
+  strategy_name: 用表格整理訊息──比較異同
+  strategy_type: compare_contrast
+  section_title_printed: 閱讀聚光燈
+  answer_carrier: 紅色 ☑（w:sym Wingdings F0FE，13 個）與橘色手寫字
+  structure_note: '⛔ 三張比較表刻意留在 blocks 最上層、沒有塞進 sub_block ——
+
+    `BlockSequenceRenderer` 的 `renderSubBlock` 不依 type 分派，巢狀的 fill_table
+
+    只會畫出 instruction，`columns`/`rows` 整片消失而且不報錯。'
+  blank_marker_note: '本節學生要填的空格，原稿印的是**全形括號**（　），不是重點表那種【　】，
+
+    照原稿保留（全庫兩種都在用：（　）642 處、【　】919 處）。'
+  blocks:
+  - type: concept_box
+    text: '這篇說明文介紹兩個數字記憶實驗，包含不同受試者的記憶表現和數字發音長度。當文章的訊息較多，又需要互相比較時，可以用表格整理，幫助我們清楚看出相同點和不同點。
+
+      ※比較異同：把兩個或多個對象放在一起，比較它們相同和不同的地方。'
+  - type: guide
+    text: ◎小試身手：實驗一
+  - type: guide
+    text: 1.用表格整理訊息：
+  - type: guide
+    text: 這張表要比較中國大學生和美國大學生的兩項資料。請回到課文找答案，在（　）裡填寫答案。
+  - type: fill_table
+    prompt: 實驗一：老中和老美「數字記憶廣度」與「數字發音長度」的比較
+    columns:
+    - 比較項目
+    - 中國大學生
+    - 美國大學生
+    answer_carrier: 橘色手寫字，PDF p6 可見
+    rows:
+    - 比較項目: '數字記憶廣度得分
+
+        （填入高、低）'
+      中國大學生: （　）
+      中國大學生_blanks:
+      - answer: 高
+      美國大學生: （　）
+      美國大學生_blanks:
+      - answer: 低
+    - 比較項目: '數字發音長度
+
+        （填入長、短）'
+      中國大學生: （　）
+      中國大學生_blanks:
+      - answer: 短
+      美國大學生: （　）
+      美國大學生_blanks:
+      - answer: 長
+  - type: guide
+    text: 2.從表格歸納訊息：實驗一告訴我們什麼訊息(單選)
+  - type: single
+    prompt: (1)中國大學生的數字記憶得分比美國大學生（　）。
+    options:
+      1: 高
+      2: 低
+    answer: 1
+  - type: single
+    prompt: (2)漢語的數字發音長度比英語（　）。
+    options:
+      1: 長
+      2: 短
+    answer: 2
+  - type: free_text
+    prompt: (3)大學生數字記憶廣度可能和什麼有關？
+    blanks:
+    - answer: 數字發音長度
+  - type: guide
+    text: ◎小試身手：實驗二
+  - type: guide
+    text: 1.用表格整理訊息：
+  - type: guide
+    text: 實驗二也比較相同的兩項資料，只是受試者換成年紀較小的幼童。請回到課文找答案，在（　）裡填寫答案。
+  - type: fill_table
+    prompt: 實驗二：小老中和小老美「數字記憶廣度」與「數字發音長度」的比較
+    columns:
+    - 比較項目
+    - 中國幼童
+    - 美國幼童
+    answer_carrier: 橘色手寫字，PDF p7 可見
+    rows:
+    - 比較項目: '數字記憶廣度得分
+
+        （填入高、低）'
+      中國幼童: （　）
+      中國幼童_blanks:
+      - answer: 高
+      美國幼童: （　）
+      美國幼童_blanks:
+      - answer: 低
+    - 比較項目: '數字發音長度
+
+        （填入長、短）'
+      中國幼童: （　）
+      中國幼童_blanks:
+      - answer: 短
+      美國幼童: （　）
+      美國幼童_blanks:
+      - answer: 長
+  - type: guide
+    text: 2.從表格歸納訊息：實驗二告訴我們什麼訊息(單選)
+  - type: single
+    prompt: (1)中國幼童的數字記憶得分比美國幼童（　）。
+    options:
+      1: 高
+      2: 低
+    answer: 1
+  - type: single
+    prompt: (2)漢語幼童的數字發音長度比英語幼童（　）。
+    options:
+      1: 長
+      2: 短
+    answer: 2
+  - type: single
+    prompt: (3)把表格中的兩項資料合起來看：幼兒「數字記憶廣度」和「數字發音長度」有什麼關係？
+    options:
+      1: 數字發音越短，數字記憶廣度越高
+      2: 數字發音越短，數字記憶廣度越低
+    answer: 1
+  - type: guide
+    text: ◎小試身手：比較實驗一與二
+  - type: guide
+    text: 1.用表格整理訊息：
+  - type: guide
+    text: 接下來，把兩個實驗放在一起比較，請根據前面兩張表，在（　）裡填寫答案及完成勾選。
+  - type: fill_table
+    prompt: 表：「實驗一」與「實驗二」的比較
+    columns:
+    - 比較項目
+    - 實驗一
+    - 實驗二
+    answer_carrier: 橘色手寫字＋紅色 ☑（w:sym），PDF p7 可見；本表 4 個 ☑
+    rows:
+    - 比較項目: （　）
+      比較項目_blanks:
+      - answer: 受試者年齡
+      實驗一: 大學生
+      實驗二: 4～6 歲幼童
+    - 比較項目: '哪一種語言的
+
+        數字發音長度較短'
+      實驗一: '①漢語
+
+        ②英語'
+      實驗一_options:
+        1: 漢語
+        2: 英語
+      實驗一_answer: 1
+      實驗二: '①漢語
+
+        ②英語'
+      實驗二_options:
+        1: 漢語
+        2: 英語
+      實驗二_answer: 1
+    - 比較項目: '哪一組
+
+        能記住的數字比較多'
+      實驗一: '①漢語
+
+        ②英語'
+      實驗一_options:
+        1: 漢語
+        2: 英語
+      實驗一_answer: 1
+      實驗二: '①漢語
+
+        ②英語'
+      實驗二_options:
+        1: 漢語
+        2: 英語
+      實驗二_answer: 1
+    rows_note: '後兩列的選項在原稿是「①漢語 ②英語」，兩欄各自勾選，四格答案都是①漢語。
+
+      ⚠️ 這一列問的是「哪一組能記住的數字比較多」，選項卻寫語言名（漢語／英語），
+
+      原稿如此，未改寫成「漢語組／英語組」。'
+  - type: guide
+    text: 2.從表格歸納訊息：上表告訴我們什麼訊息(單選)
+  - type: single
+    prompt: (1)這兩個實驗的受試者年齡相同嗎？
+    options:
+      1: 相同
+      2: 不同
+    answer: 2
+  - type: single
+    prompt: (2)實驗二改用年紀較小的幼童，主要是想減少哪一項因素對實驗結果的影響？（單選）
+    options:
+      1: 幼童記憶數字的能力
+      2: 長期補習或數字訓練的影響
+    answer: 2
+  - type: single
+    prompt: (3)兩個實驗都出現哪一種結果？(單選)
+    options:
+      1: 漢語組的數字發音較長，數字記憶廣度較低
+      2: 漢語組的數字發音較短，數字記憶廣度較高
+      3: 英語組的數字發音較短，數字記憶廣度較高
+    answer: 2
+  - type: single
+    prompt: (4)這兩個實驗都支持了數字記憶廣度和哪一項因素有關？
+    options:
+      1: 數字發音長度
+      2: 受試者的年齡
+      3: 補習訓練的時間
+    answer: 1
+  self_check_absent_note: 本課聚光燈**沒有**「◎自我檢核」那一節（原稿到第 (4) 題為止就接第七大題），不是漏抽。
+  slug: thktn
+  text_ref: mkn9y

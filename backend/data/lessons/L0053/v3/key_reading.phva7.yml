@@ -1,0 +1,35 @@
+lesson_uid: L0053
+version_id: v3
+section_no: 二
+key_reading:
+  instruction: 請用計時器，從指定段落（六☞）開始朗讀，計時1分鐘讀的字數，並記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！
+  instruction_note: 文字流實際是「（六    )」（前全形後半形、中間空白），☞ 是圖形物件不在文字流。
+  timing_table:
+    columns:
+    - 第1次計時
+    - 第2次計時
+    - 第3次計時
+    - 裁判計時
+    unit: 字
+    judge_signature: true
+  benchmark_label: ◎ 我的表現
+  benchmark_note: ⚠️ 這張表在 PDF 上完全沒畫出來（只印了標題），內容取自 document.xml。
+  benchmark:
+  - threshold: ＜210字
+    feedback: 還要多加練習。
+  - threshold: 211~240字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞241字
+    feedback: 哇嗚，超級厲害！
+  passage: 「噗噗！噗噗！」黃面蜂（狩獵蜂的一種）正在野地裡飛來飛去，尋找獵物，為孵化後的幼蟲準備食物。黃面蜂發現一個葉苞裡藏著一隻捲葉蛾幼蟲，便飛過去停在捲起的葉子上。牢固的葉苞把牠擋在外面，牠便用觸鬚碰碰葉苞的底部，彷彿在告訴獵物：「殺手來啦！」
+  start_text: 「噗噗！噗噗！」黃面蜂（狩獵蜂的一種）正在野地裡
+  extent_chars: 119
+  source: extract_key_reading_v3
+  start_paragraph: 6
+  end_paragraph: 6
+  slug: phva7
+  text_ref: 3np3k
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  absorbed_tail: 0

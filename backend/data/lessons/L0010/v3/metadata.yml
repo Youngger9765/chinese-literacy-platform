@@ -18,6 +18,9 @@ source_profile:
   class: renumbered
   note: 段落 idx 有重複（書信體）—— 用列表位置定址，不能用 idx
   has_key_reading_section: true
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: true
   has_body_paragraphs: true
   paragraph_idx_unique: false
   anchor_hits: 1
@@ -25,3 +28,5 @@ source_profile:
   body_in_tables: true
   invisible_chars_docx_only: true
   profiled: '2026-08-24'
+  reclassified_2026_08_24: 2026-08-24 owner 判定：兩封信是同一篇課文 —— 紙上只印一組計時表、一個念順順，且該念順順的起訖與字數都對得上原稿（L0010
+    二~八/326、L0012 六~七/334）。偵測器把「段號重數」當成換篇而誤發 part id，已退役。

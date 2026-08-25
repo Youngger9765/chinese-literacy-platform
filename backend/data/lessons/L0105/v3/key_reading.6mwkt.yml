@@ -1,0 +1,32 @@
+lesson_uid: L0105
+version_id: v3
+section_no: 二
+key_reading:
+  instruction: 請用計時器，從指定段落（四☞）開始朗讀，計時1分鐘讀的字數，並記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！
+  timing_table:
+    columns:
+    - 第1次計時
+    - 第2次計時
+    - 第3次計時
+    - 裁判計時
+    unit: 字
+    judge_signature: true
+  benchmark:
+  - threshold: ＜200字
+    feedback: 還要多加練習。
+  - threshold: 201~230字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞231字
+    feedback: 哇嗚，超級厲害！
+  passage: 珍古德母女搭船進入保護區，映入眼簾的是險峻的山壁，層層交疊的樹冠，深不可測的密林。叢林中偶爾有黑猩猩的黑影快速飛奔閃過，珍古德又是歡喜又是焦慮：歡喜的是，終於可以展開期盼已久的黑猩猩研究；焦慮的是，如何在長年籠罩迷霧的森林中，追蹤迅疾如風的黑猩猩呢？
+  start_text: 珍古德母女搭船進入保護區，映入眼簾的是險峻的山壁
+  extent_chars: 125
+  source: extract_key_reading_v3
+  start_paragraph: 4
+  end_paragraph: 4
+  slug: 6mwkt
+  text_ref: qqppu
+extraction_check:
+  verdict: confirmed
+  corroborated_by_first_edition: true
+  absorbed_tail: 0

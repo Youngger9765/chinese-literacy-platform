@@ -1,0 +1,26 @@
+lesson_uid: L0068
+version_id: v3
+section_no: 七
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 洪信介：植物獵人
+    duration: (5:53)
+    source: 一条Yit
+    has_qr: true
+  - index: 2
+    title: 辜嚴倬雲植物保種中心-永續生命，永續地球
+    duration: (8:29)
+    source: 台泥企業集團
+    has_qr: true
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/ExxrWek4tC4
+    url_source: 總表0816「4.影片連結」年級6課次29
+  - index: 2
+    url: http://youtu.be/kfEw_fv1m_4
+    url_source: 總表0816「4.影片連結」年級6課次29
+  slug: 7u7q7
+  text_ref: yehu3

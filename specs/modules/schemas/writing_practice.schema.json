@@ -24,6 +24,14 @@
       "type": "object",
       "x-seen-in": "1/4"
     },
+    "slug": {
+      "type": "string",
+      "x-seen-in": "4/4"
+    },
+    "text_ref": {
+      "type": "string",
+      "x-seen-in": "4/4"
+    },
     "words": {
       "type": "array",
       "x-seen-in": "4/4"
@@ -32,6 +40,8 @@
   "required": [
     "columns",
     "instruction",
+    "slug",
+    "text_ref",
     "words"
   ],
   "title": "writing_practice module payload",
@@ -39,6 +49,8 @@
   "x-core-90pct": [
     "columns",
     "instruction",
+    "slug",
+    "text_ref",
     "words"
   ],
   "x-enforcement": "error",

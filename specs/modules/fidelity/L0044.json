@@ -3,15 +3,15 @@
   "gate_version": 2,
   "docx_sha256": "6f4c-81c3-4257-f8fe",
   "modules": {
-    "full_text_annotate": {
-      "yaml_sha256": "eefc-af26-0937-5726",
+    "full_text_annotate.yqxqv": {
+      "yaml_sha256": "7c75-3f14-c8df-8aa4",
       "checked": 9,
       "status": "pass",
       "passed": true,
       "exit": 0
     },
-    "spotlight": {
-      "yaml_sha256": "7664-591d-6974-13b1",
+    "spotlight.t9rat": {
+      "yaml_sha256": "c436-d384-80dd-408d",
       "checked": 180,
       "status": "pass",
       "passed": true,

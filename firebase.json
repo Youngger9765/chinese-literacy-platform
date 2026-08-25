@@ -3,7 +3,11 @@
     {
       "target": "prod",
       "public": "frontend/dist",
-      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
       "rewrites": [
         {
           "source": "/api/**",
@@ -14,6 +18,13 @@
         },
         {
           "source": "/assets/**",
+          "run": {
+            "serviceId": "lingoleap-backend",
+            "region": "asia-east1"
+          }
+        },
+        {
+          "source": "/q/**",
           "run": {
             "serviceId": "lingoleap-backend",
             "region": "asia-east1"
@@ -28,7 +39,11 @@
     {
       "target": "staging",
       "public": "frontend/dist",
-      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
       "rewrites": [
         {
           "source": "/api/**",
@@ -39,6 +54,13 @@
         },
         {
           "source": "/assets/**",
+          "run": {
+            "serviceId": "lingoleap-backend-staging",
+            "region": "asia-east1"
+          }
+        },
+        {
+          "source": "/q/**",
           "run": {
             "serviceId": "lingoleap-backend-staging",
             "region": "asia-east1"
@@ -53,7 +75,11 @@
     {
       "target": "dev",
       "public": "frontend/dist",
-      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
       "rewrites": [
         {
           "source": "/api/**",
@@ -64,6 +90,13 @@
         },
         {
           "source": "/assets/**",
+          "run": {
+            "serviceId": "lingoleap-backend-staging",
+            "region": "asia-east1"
+          }
+        },
+        {
+          "source": "/q/**",
           "run": {
             "serviceId": "lingoleap-backend-staging",
             "region": "asia-east1"

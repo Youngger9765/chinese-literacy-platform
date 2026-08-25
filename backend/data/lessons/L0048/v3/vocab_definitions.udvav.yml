@@ -1,0 +1,46 @@
+lesson_uid: L0048
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+  - 從本課語詞框框，找語詞。
+  - 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+  - 問同學。
+  vocabulary_bank:
+  - 雷同
+  - 預言
+  - 應驗
+  - 倖存者
+  - 風險意識
+  - 偏誤
+  - 含糊其辭
+  items:
+  - index: 1
+    word: 預言
+    definition: 預測未來可能發生的事情。
+  - index: 2
+    word: 風險意識
+    definition: 能察覺可能發生的危險，並事先防範的意識。
+  - index: 3
+    word: 雷同
+    definition: 事物非常相似。
+  - index: 4
+    word: 應驗
+    definition: 預言或推測後來真的發生了。
+  - index: 5
+    word: 倖存者
+    definition: 在災難、事故或危險中存活下來的人。
+  - index: 6
+    word: 偏誤
+    definition: 思考或判斷時產生的偏差與錯誤。
+  - index: 7
+    word: 含糊其辭
+    definition: 說話或表達得不清楚，讓人難以知道真正的意思。
+  notes:
+    vocabulary_bank: '只有 7 個（本課四份清單中最短的一份），照「本課語詞」框原樣、依印出的順序記錄。
+
+      「含糊其辭」只在這一份出現，不在總表、也不在第五大題代號表。'
+    answer_carrier: 橘色手寫字；文字流已含答案
+  slug: udvav
+  text_ref: jehhy

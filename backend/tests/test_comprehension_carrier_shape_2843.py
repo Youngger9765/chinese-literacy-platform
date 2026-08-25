@@ -30,7 +30,7 @@ LESSONS = REPO_ROOT / "backend" / "data" / "lessons"
 @pytest.fixture(scope="module")
 def bodies() -> list[tuple[str, dict]]:
     out = []
-    for path in sorted(LESSONS.glob("L*/v3/comprehension.yml")):
+    for path in sorted(LESSONS.glob("L*/v3/comprehension.*.yml")):
         try:
             data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
         except Exception:

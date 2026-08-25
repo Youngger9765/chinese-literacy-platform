@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import collections
 import pathlib
+from _module_files import module_file, module_files
 import sys
 
 import pytest
@@ -41,8 +42,8 @@ MIN_SCANNED = 100
 def _exercises():
     scanned = 0
     for d in sorted(LESSONS.iterdir()):
-        f = d / "v3" / "vocab_application.yml"
-        if not (d.is_dir() and d.name.startswith("L") and f.exists()):
+        f = module_file(d / "v3", "vocab_application")
+        if not (d.is_dir() and d.name.startswith("L") and f):
             continue
         va = (yaml.safe_load(f.read_text(encoding="utf-8")) or {}).get("vocab_application") or {}
         items, bank = va.get("items") or [], va.get("option_bank") or {}

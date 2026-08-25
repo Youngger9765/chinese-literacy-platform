@@ -31,7 +31,9 @@ import { camelizeKeys } from '../schema/camelize';
 import { LessonSchema } from '../schema/lessonContent';
 import { API_BASE } from './apiConfig';
 import { ASSET_BASE } from '../config/assetBase';
-import { stepSequenceFromWorksheet } from '../config/stepConfig';
+import { stepSequenceFromManifest } from '../config/stepConfig';
+import type { ManifestSection } from '../config/stepConfig';
+import { scopeDetailToRound } from '../config/roundScope';
 
 const inFlightStoryById = new Map<string, Promise<Story>>();
 
@@ -122,7 +124,9 @@ interface ApiStoryDetail extends ApiStoryListItem {
   reading_strategy_type?: string;
   images?: Array<{ filename: string; size_bytes: number; image_hash: string; content_type: string; caption?: string; figure_label?: string }>;
   // 學習單 section order + intro metadata (#1434)
-  worksheet_section_order?: Array<{ number: string; name: string; type: string }> | null;
+  manifest_sections?: ManifestSection[] | null;
+  /** 一課多篇時，各篇（以課文 slug 為 key）各模組的內容（#2916）。 */
+  repeat_rounds?: Record<string, Record<string, unknown>> | null;
   worksheet_intro?: {
     step_label?: string;
     target_strategy?: string;
@@ -198,6 +202,28 @@ function apiListItemToStory(item: ApiStoryListItem): Story {
   };
 }
 
+/**
+ * 這一步該看到的 story（#2916）。
+ *
+ * 一課印了好幾篇課文時，`key-passage-reading#9a7x4` 是第 2 篇的念順順。
+ * 不換的話三篇都會渲染頂層的 `key_reading`（＝第 1 篇）——
+ * **有段落、會唸、不報錯，只是唸錯篇**，畫面上看不出來。
+ *
+ * 單篇課、跨篇的節、以及沒有 `#slug` 的步驟一律原封不動回傳同一個物件。
+ */
+export function storyForStep(story: Story | null, stepKey: string): Story | null {
+  if (!story) return story;
+  const detail = (story as Story & { __detail?: ApiStoryDetail }).__detail;
+  if (!detail) return story;
+  const scoped = scopeDetailToRound(
+    detail as unknown as Record<string, unknown>,
+    story.manifestSections,
+    stepKey,
+  );
+  if (scoped === (detail as unknown as Record<string, unknown>)) return story;
+  return apiDetailToStory(scoped as unknown as ApiStoryDetail);
+}
+
 function apiDetailToStory(detail: ApiStoryDetail): Story {
   return {
     id: String(detail.lesson_number),
@@ -253,9 +279,12 @@ function apiDetailToStory(detail: ApiStoryDetail): Story {
     // flow matches each lesson's actual 學習單 (5/1「學習步驟動態對應學習單」).
     stepSequence:
       detail.step_sequence
-      ?? stepSequenceFromWorksheet(detail.worksheet_section_order)
+      ?? stepSequenceFromManifest(detail.manifest_sections)
       ?? undefined,
-    worksheetSectionOrder: detail.worksheet_section_order ?? undefined,
+    manifestSections: detail.manifest_sections ?? undefined,
+    // 原始 detail 留著：切到別篇的步驟時要用它重新對應一次（見 storyForStep）。
+    // 存原始的、不存已對應的，是為了讓對應邏輯只有一份。
+    __detail: detail,
     worksheetIntro: detail.worksheet_intro ?? undefined,
     lessonIntro: detail.lesson_intro ?? undefined,
     worksheetPdfUrl: resolveAssetUrl(detail.worksheet_pdf_url),

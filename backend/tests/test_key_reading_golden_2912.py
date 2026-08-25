@@ -13,6 +13,7 @@
 """
 
 import pathlib
+from _module_files import module_file, module_files
 
 import yaml
 
@@ -25,8 +26,8 @@ def _golden() -> dict:
 
 
 def _key_reading(uid: str) -> dict:
-    f = LESSONS / uid / "v3" / "key_reading.yml"
-    if not f.is_file():
+    f = module_file(LESSONS / uid / "v3", "key_reading")
+    if not f:
         return {}
     d = yaml.safe_load(f.read_text(encoding="utf-8")) or {}
     return d.get("key_reading") or d
@@ -35,6 +36,34 @@ def _key_reading(uid: str) -> dict:
 def _norm(text: str) -> str:
     import re
     return re.sub(r"[\s　]", "", text or "")
+
+
+def _all_key_reading_files() -> list[pathlib.Path]:
+    """全庫每一篇的念順順檔。
+
+    ⚠️ #2916 之後檔名帶 slug（`key_reading.mpjwh.yml`），而且**一課可能有好幾篇**。
+    寫死 `key_reading.yml` 的 glob 會一個都比對不到，於是整條測試掃 0 課**照樣全綠**
+    —— `backend/tests/_module_files.py` 的 docstring 就是在講這個死法。
+    """
+    out = []
+    for vdir in sorted(LESSONS.glob("L*/v3")):
+        out.extend(module_files(vdir, "key_reading"))
+    return out
+
+
+def _key_reading_of(f: pathlib.Path) -> dict:
+    d = yaml.safe_load(f.read_text(encoding="utf-8")) or {}
+    return d.get("key_reading") or d
+
+
+def test_the_sweep_actually_finds_files():
+    """上面那個走訪不可以掃到 0 檔。
+
+    **為什麼要單獨一條**：底下三條都是「找出違規的，斷言清單為空」。掃 0 檔時
+    清單天然為空 → 全部綠燈，而且沒有任何訊號說覆蓋範圍歸零了。
+    """
+    n = len(_all_key_reading_files())
+    assert n >= 150, f"只掃到 {n} 個念順順檔 —— 檔名規則又變了？（#2916 加了 slug）"
 
 
 def test_golden_lessons_carry_the_range_the_worksheet_marks():
@@ -59,13 +88,13 @@ def test_the_marked_paragraph_is_the_whole_passage():
     改一次、147 課同時變），只鎖 12 課會讓其餘 135 課靜默跨段。這條是那個廣度。
     """
     spans = []
-    for f in sorted(LESSONS.glob("L*/v3/key_reading.yml")):
-        kr = _key_reading(f.parts[-3])
+    for f in _all_key_reading_files():
+        kr = _key_reading_of(f)
         if not kr.get("passage"):
             continue
         s, e = kr.get("start_paragraph"), kr.get("end_paragraph")
         if s != e:
-            spans.append(f"  {f.parts[-3]} start={s} end={e}")
+            spans.append(f"  {f.parts[-3]}/{f.name} start={s} end={e}")
     assert spans == [], (
         "念順順只取學習單指定的那一段，end_paragraph 必須等於 start_paragraph。"
         "跨段的課：\n" + "\n".join(spans)
@@ -100,10 +129,10 @@ def test_no_lesson_reintroduces_the_range_era_fields():
     數字本身，`instruction_note` 講的是指示句）。刪那些是湮滅證據，不是消除矛盾。
     """
     dirty = []
-    for f in sorted(LESSONS.glob("L*/v3/key_reading.yml")):
-        bad = [k for k in _RANGE_ERA_FIELDS if k in _key_reading(f.parts[-3])]
+    for f in _all_key_reading_files():
+        bad = [k for k in _RANGE_ERA_FIELDS if k in _key_reading_of(f)]
         if bad:
-            dirty.append(f"  {f.parts[-3]}: {bad}")
+            dirty.append(f"  {f.parts[-3]}/{f.name}: {bad}")
     assert dirty == [], "宣稱範圍的欄位又出現了：\n" + "\n".join(dirty)
 
 
@@ -114,8 +143,8 @@ def test_the_transcribed_worksheet_numbers_are_not_swept_away():
     但 `printed_char_marks` 是**紙上真的印著的數字**。它不能決定朗讀範圍，
     卻是這一課的原稿證據 —— 刪掉之後就再也回答不了「那一欄到底印了什麼」。
     """
-    kept = sum(1 for f in LESSONS.glob("L*/v3/key_reading.yml")
-               if "printed_char_marks" in _key_reading(f.parts[-3]))
+    kept = sum(1 for f in _all_key_reading_files()
+               if "printed_char_marks" in _key_reading_of(f))
     assert kept >= 25, (
         f"只剩 {kept} 課有 printed_char_marks —— 清理範圍規則欄位時把原稿轉錄也刪了？"
     )

@@ -5,12 +5,17 @@ sections:
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
+  slug: n3tjn
+  file: full_text_annotate.n3tjn.yml
   pages:
   - 1
   - 2
 - 'no': 二
   name: 念順順
   module: key_reading
+  text_ref: n3tjn
+  slug: 4uj4q
+  file: key_reading.4uj4q.yml
   pages:
   - 2
   - 3
@@ -18,17 +23,26 @@ sections:
 - 'no': 三
   name: 語詞我最棒
   module: vocab_definitions
+  text_ref: n3tjn
+  slug: kax3d
+  file: vocab_definitions.kax3d.yml
   pages:
   - 4
 - 'no': 四
   name: 語詞應用
   module: vocab_application
+  text_ref: n3tjn
+  slug: fkwue
+  file: vocab_application.fkwue.yml
   pages:
   - 4
   - 5
 - 'no': 五
   name: 文章重點表
   module: keypoints
+  text_ref: n3tjn
+  slug: c69qn
+  file: keypoints.c69qn.yml
   pages:
   - 5
   - 6
@@ -36,6 +50,9 @@ sections:
   name: 閱讀聚光燈
   module: spotlight
   subtitle: 推論代名詞
+  text_ref: n3tjn
+  slug: ytnak
+  file: spotlight.ytnak.yml
   pages:
   - 6
   - 7
@@ -43,17 +60,26 @@ sections:
 - 'no': 七
   name: 閱讀理解
   module: comprehension
+  text_ref: n3tjn
+  slug: 4jmfr
+  file: comprehension.4jmfr.yml
   pages:
   - 8
 - 'no': 八
   name: 詞語複習
   module: vocab_review
+  text_ref: n3tjn
+  slug: qtedc
+  file: vocab_review.qtedc.yml
   pages:
   - 8
   - 9
 - 'no': 九
   name: 知識補給站
   module: resources
+  text_ref: n3tjn
+  slug: x79cn
+  file: resources.x79cn.yml
   pages:
   - 9
 dispatch:
