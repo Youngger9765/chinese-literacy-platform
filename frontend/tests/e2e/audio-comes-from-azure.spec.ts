@@ -16,7 +16,9 @@ import { test, expect } from '@playwright/test';
  * 而播出來的是機器人音（我就是這樣連報了三次「聲音對了」）。
  */
 
-const BASE = process.env.E2E_BASE_URL || 'https://lingoleap-staging.web.app';
+// CI 用 PLAYWRIGHT_BASE_URL 指到該 PR 的 preview（見 playwright.config.ts）。
+// 讀錯變數名的話，PR 上跑的是 staging —— 綠燈驗的不是這次的改動。
+const BASE = process.env.PLAYWRIGHT_BASE_URL || 'https://lingoleap-staging.web.app';
 const MIN_MP3_BYTES = 20_000;   // 一句話的 Azure mp3 都遠大於此；降級路徑則是 0 個請求
 
 type Probe = { audio: Array<{ status: number; type: string; bytes: number }>; spoke: string[] };
@@ -28,8 +30,14 @@ async function playAndProbe(page: import('@playwright/test').Page, path: string)
     if (!s?.speak) return;
     const orig = s.speak.bind(s);
     s.speak = (u: SpeechSynthesisUtterance) => {
-      (window as unknown as { __spoke: string[] }).__spoke ??= [];
-      (window as unknown as { __spoke: string[] }).__spoke.push(String(u.text).slice(0, 20));
+      // 只記真的有字的。`useTtsPlayback` 會先送一個**空字串** utterance 暖機
+      // （為了在 async fetch 之前保住使用者手勢），那不是機器音 ——
+      // 把它算進來會讓每一次正常播放都被判成降級（我第一版就是這樣誤報的）。
+      const t = String(u.text ?? '');
+      if (t.trim()) {
+        (window as unknown as { __spoke: string[] }).__spoke ??= [];
+        (window as unknown as { __spoke: string[] }).__spoke.push(t.slice(0, 20));
+      }
       return orig(u);
     };
   });
@@ -79,8 +87,14 @@ test('把後端打掉時，使用者一定會知道 —— 不可以安靜地換
     if (!sy?.speak) return;
     const orig = sy.speak.bind(sy);
     sy.speak = (u: SpeechSynthesisUtterance) => {
-      (window as unknown as { __spoke: string[] }).__spoke ??= [];
-      (window as unknown as { __spoke: string[] }).__spoke.push(String(u.text).slice(0, 20));
+      // 只記真的有字的。`useTtsPlayback` 會先送一個**空字串** utterance 暖機
+      // （為了在 async fetch 之前保住使用者手勢），那不是機器音 ——
+      // 把它算進來會讓每一次正常播放都被判成降級（我第一版就是這樣誤報的）。
+      const t = String(u.text ?? '');
+      if (t.trim()) {
+        (window as unknown as { __spoke: string[] }).__spoke ??= [];
+        (window as unknown as { __spoke: string[] }).__spoke.push(t.slice(0, 20));
+      }
       return orig(u);
     };
   });

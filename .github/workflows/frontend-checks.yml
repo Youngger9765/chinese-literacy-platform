@@ -166,6 +166,15 @@ jobs:
           src/components/layout/__tests__/toolboxUnreachable.test.tsx \
           src/components/reading-steps/__tests__/introStepCount.test.ts \
           src/context/__tests__/zhuyinSpaceShortcut.test.tsx \
+          src/config/__tests__/roundAwareStepNeighbours.test.ts \
+          src/config/__tests__/activeStepHighlight.test.ts \
+          src/config/__tests__/realPayloadRoundScope.test.ts \
+          src/config/__tests__/stepPath.test.ts \
+          src/config/__tests__/stepPathIsTheOnlyBuilder.test.ts \
+          src/services/__tests__/ttsRoundScoped.test.ts \
+          src/services/__tests__/everyLessonAddressedCallCarriesRound.test.ts \
+          src/components/reading-steps/__tests__/degradedNoticeEverywhere.test.ts \
+          src/components/reading-steps/__tests__/roundAudioAndLog.test.tsx \
           src/components/learning/__tests__/QuizCompletionScreen.test.tsx \
           src/components/learning/__tests__/quizCompletionScreenUsage.test.ts \
           src/pages/learning/__tests__/comprehensionReview.test.ts \
