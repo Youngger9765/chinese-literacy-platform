@@ -5,6 +5,7 @@ import { useFontSize } from '../../ui/FontSizeControl';
 import { cancelTts } from '../../../services/ttsApi';
 import { scopedStepStorageKey, isToolboxMode } from '../../../services/learningStorageScope';
 import { useParagraphReadingSpeech } from '../../../hooks/useParagraphReadingSpeech';
+import { useCurrentSectionSlug } from '../../../hooks/useCurrentStepId';
 import { useTtsPlayback } from '../../../hooks/useTtsPlayback';
 import { useAudioRecorder, PARAGRAPH_MAX_SECONDS } from '../../../hooks/useAudioRecorder';
 import { transcribeReading, saveReadingAudio } from '../../../services/learning/session';
@@ -98,6 +99,8 @@ const ParagraphReading: React.FC<ParagraphReadingProps> = ({
   onResetTutor,
   dbSessionId,
 }) => {
+  // 一課多篇時，句子對照表要跟著篇次走，否則會唸到第 1 篇（#2930）。
+  const roundSlug = useCurrentSectionSlug();
   const { px: fontSizePx } = useFontSize();
   const { isZhuyinAny, processLinesSelective } = useZhuyin();
   const { token } = useAuth();
@@ -188,7 +191,7 @@ const ParagraphReading: React.FC<ParagraphReadingProps> = ({
   const speakCurrentParagraph = useCallback(() => {
     const text = story.content[currentLineIndex];
     if (!text) return;
-    speakText(text, Number(story.id), currentLineIndex);
+    speakText(text, Number(story.id), currentLineIndex, roundSlug ?? undefined);
   }, [story.content, story.id, currentLineIndex, speakText]);
 
   // ── Retry sentence ref (needed by STT hook before useSentenceRetry called) ──
