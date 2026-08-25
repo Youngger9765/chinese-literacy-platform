@@ -631,3 +631,18 @@ export const PATH_TO_VIEW: Record<string, AppView> = Object.fromEntries(
  * stored as that integer, never as the id string, so no row had to move.
  */
 
+/**
+ * step id → 帳本裡的模組名（`key-passage-reading` → `key_reading`）。
+ *
+ * WORKSHEET_TYPE_ALIASES 的反向查表。QR 要印「這一節自己的代號」時，
+ * 得先知道這個 step 對應帳本哪一個模組，才找得到那一列。
+ */
+export function moduleForStep(stepId: string): string | undefined {
+  const base = stepId.split('#', 1)[0];
+  for (const [mod, step] of Object.entries(WORKSHEET_TYPE_ALIASES)) {
+    if (step === base) return mod;
+  }
+  // 別名表沒收的：`vocab_application` → `vocab-application` 這種只差破折號的
+  const guess = base.replace(/-/g, '_');
+  return guess === base ? undefined : guess;
+}

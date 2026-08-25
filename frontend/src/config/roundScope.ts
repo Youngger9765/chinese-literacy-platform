@@ -90,3 +90,30 @@ export function scopeDetailToRound<T extends Record<string, unknown>>(
   //    **不要在這裡再寫第二套。**
   return out as T;
 }
+
+/**
+ * 這一步該印哪一個代號到 QR 上（#2916）。
+ *
+ * 跟 `articleSlugForStep` 相反：那支回「這一步要用**誰的課文**」，
+ * 這支回「**這一節自己**的代號」。QR 印的是後者。
+ *
+ * ⚠️ 不從網址拿。單篇課的網址沒有 `?p=`（只有多篇課才需要圈輪次），
+ * 所以靠 `?p=` 取代號的話 170 課的 QR 會全部退回長網址 ——
+ * 掃得開、頁面對，只是把課號跟路由名印在紙上了。代號在帳本裡，就從帳本拿。
+ *
+ * @param stepId 基礎 step id（`key-passage-reading`）或帶輪次的 key（`…#9a7x4`）
+ */
+export function sectionSlugForStep(
+  manifest: ManifestSection[] | null | undefined,
+  stepId: string,
+  moduleOf: (step: string) => string | undefined,
+): string | null {
+  const hash = stepId.indexOf('#');
+  // 帶輪次的直接用它 —— 那本來就是這一節自己的代號
+  if (hash >= 0) return stepId.slice(hash + 1) || null;
+  const mod = moduleOf(stepId);
+  if (!mod) return null;
+  const rows = (manifest ?? []).filter((s) => s?.module === mod && s?.slug);
+  // 多份而網址沒說是哪一份 → 不猜。猜錯會讓紙上印到別篇的碼。
+  return rows.length === 1 ? (rows[0].slug ?? null) : null;
+}

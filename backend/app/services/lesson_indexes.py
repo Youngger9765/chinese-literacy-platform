@@ -124,7 +124,12 @@ def _parts_summary(l: dict) -> list[dict]:
         return [{
             "slug": art,
             "part": None,
-            "has_full": bool(l.get("paragraphs")),
+            # ⚠️ 判準要跟 row 的 `paragraphs` **同源**（`_flat_paragraphs(_body(l))`）。
+            #    這裡本來讀 `l["paragraphs"]`，而 loader 那一層是 None ——
+            #    段落是 row 攤出來的。結果 4–7 年級 106 課裡 104 課的
+            #    `has_full` 是 False，全文 QR 整批消失，後台那一欄變空字串。
+            #    沒有錯誤、清單照樣產出，只是少了 104 個碼。
+            "has_full": bool(_flat_paragraphs(_body(l))),
             "has_key": bool((kr or {}).get("passage")),
             "full_slug": mods.get("full_text_annotate") or mods.get("classical_text") or art,
             "key_slug": mods.get("key_reading"),

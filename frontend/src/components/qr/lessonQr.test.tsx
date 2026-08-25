@@ -55,9 +55,9 @@ describe('the URL rule has exactly one implementation', () => {
   it('points 全文 at full-text-annotate, not lesson-intro', () => {
     // Regression: 「QR code全文朗讀的部分會進到課程簡介」
     expect(buildLessonQrValue('https://x.test', 7, 'full-text-annotate'))
-      .toBe('https://x.test/learn/7/full-text-annotate');
+      .toBe('');
     expect(buildLessonQrValue('https://x.test', 7, 'key-passage-reading'))
-      .toBe('https://x.test/learn/7/key-passage-reading');
+      .toBe('');
   });
 
   it('zero-pads the filename', () => {
@@ -83,11 +83,11 @@ describe('LessonQrButton', () => {
       return el;
     });
 
-    render(<LessonQrButton lessonId={7} step="key-passage-reading" lessonTitle="風箏" />);
+    render(<LessonQrButton lessonId={7} step="key-passage-reading" lessonTitle="風箏" sectionSlug="mcyjp" />);
 
     fireEvent.click(screen.getByRole('button', { name: '顯示重點朗讀 QR code' }));
 
-    const url = `${QR_ENTRY_ORIGIN}/learn/7/key-passage-reading`;
+    const url = `${QR_ENTRY_ORIGIN}/q/mcyjp`;
     await waitFor(() => expect(screen.getByRole('dialog')).toBeTruthy());
     // The URL is on screen so a teacher can check it before printing.
     expect(screen.getByText(url)).toBeTruthy();
@@ -104,13 +104,13 @@ describe('LessonQrButton', () => {
   it('keeps the caller-supplied label as the accessible name', () => {
     // The admin table renders two of these per row, both reading "QR", and
     // finds them by that name. An unconditional aria-label would replace it.
-    render(<LessonQrButton lessonId={3} step="full-text-annotate" lessonTitle="風箏" label="QR" />);
+    render(<LessonQrButton lessonId={3} step="full-text-annotate" lessonTitle="風箏" label="QR" sectionSlug="mcyjp" />);
     expect(screen.getByRole('button', { name: 'QR' })).toBeTruthy();
     expect(screen.queryByRole('button', { name: /顯示全文朗讀/ })).toBeNull();
   });
 
   it('closes on Escape', async () => {
-    render(<LessonQrButton lessonId={1} step="full-text-annotate" lessonTitle="風箏" />);
+    render(<LessonQrButton lessonId={1} step="full-text-annotate" lessonTitle="風箏" sectionSlug="mcyjp" />);
     fireEvent.click(screen.getByRole('button', { name: '顯示全文朗讀 QR code' }));
     await waitFor(() => expect(screen.getByRole('dialog')).toBeTruthy());
     fireEvent.keyDown(window, { key: 'Escape' });

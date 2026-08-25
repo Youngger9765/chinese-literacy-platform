@@ -239,13 +239,18 @@ export function buildQrManifestCsv(rows: QrManifestRow[]): string {
   return `\uFEFF${lines.join('\r\n')}\r\n`;
 }
 
-const QrDownloadButton: React.FC<QrButtonProps> = ({ lessonId, step, label, filePrefix, lessonTitle }) => (
+const QrDownloadButton: React.FC<QrButtonProps & { sectionSlug?: string | null }> = ({
+  lessonId, step, label, filePrefix, lessonTitle, sectionSlug,
+}) => (
   <LessonQrButton
     lessonId={lessonId}
     step={step}
     lessonTitle={lessonTitle}
     label={label}
     filePrefix={filePrefix}
+    // 這一節自己的代號（#2916）。沒有它按鈕不會出現 ——
+    // 這一列本來就漏傳，所以後台每一列的 QR 鈕也在印長網址。
+    sectionSlug={sectionSlug}
     variant="admin"
   />
 );
@@ -724,9 +729,11 @@ const LessonAudioTable: React.FC = () => {
               </div>
 
               {deliversFullText(story.grade)
-                ? <QrDownloadButton lessonId={story.id} step="full-text-annotate" label="QR" filePrefix="intro-qr" lessonTitle={story.title} />
+                ? <QrDownloadButton lessonId={story.id} step="full-text-annotate" label="QR" filePrefix="intro-qr" lessonTitle={story.title}
+                    sectionSlug={(story.part_rounds ?? [])[0]?.full_slug ?? (story.part_rounds ?? [])[0]?.slug} />
                 : <span className="text-xs text-gray-400" title="8-9 年級依規格只交付重點朗讀">—</span>}
-              <QrDownloadButton lessonId={story.id} step="key-passage-reading" label="QR" filePrefix="full-reading-qr" lessonTitle={story.title} />
+              <QrDownloadButton lessonId={story.id} step="key-passage-reading" label="QR" filePrefix="full-reading-qr" lessonTitle={story.title}
+                sectionSlug={(story.part_rounds ?? [])[0]?.key_slug} />
             </div>
           );
         })}

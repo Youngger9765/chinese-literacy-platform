@@ -148,6 +148,10 @@ const LessonQrButton: React.FC<LessonQrButtonProps> = ({
     }
   }, [lessonId, step, sectionSlug]);
 
+  // 沒有代號就不出這顆按鈕 —— 印不出 slug 短網址就不該給 QR（#2916）。
+  // 顯示一顆按不出東西的按鈕，比不顯示更糟。
+  if (!sectionSlug) return null;
+
   const kind = STEP_LABEL[step];
   const text = label ?? `QR ${kind}`;
   const stem = filePrefix ?? (step === 'full-text-annotate' ? 'qr-full' : 'qr-key-reading');

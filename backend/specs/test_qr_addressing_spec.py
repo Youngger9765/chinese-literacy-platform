@@ -218,3 +218,55 @@ def test_classical_lessons_print_no_codes_yet(rows):
     for uid in classical:
         p = (rows[uid].get("part_rounds") or [{}])[0]
         assert not p.get("has_key"), f"{uid} 開始印重點碼了 —— 訪客頁支援文言文了嗎？"
+
+
+def test_grades_four_to_seven_keep_their_full_text_code(rows):
+    """4–7 年級有課文的課，全文 QR 不可以消失（#2916 回歸）。
+
+    `_parts_summary` 判 `has_full` 時讀的是 loader 層的 `l["paragraphs"]`，
+    而那一層是 None —— 段落是 row 用 `_flat_paragraphs(_body(l))` 攤出來的。
+    於是 106 課裡有 104 課的 `has_full` 是 False，全文 QR 整批不見，
+    後台清單那一欄變成空字串。**沒有錯誤、清單照樣產出、少了 104 個碼。**
+
+    判準用 row 自己的 `paragraphs` —— 那是真正會送到學生面前的那一份。
+    """
+    def grade_num(r):
+        try:
+            return int(str(r.get("grade")))
+        except (TypeError, ValueError):
+            return None
+
+    g47 = [r for r in rows.values() if (n := grade_num(r)) and 4 <= n <= 7]
+    assert len(g47) > 90, f"只找到 {len(g47)} 課 4–7 年級 —— 這條測不到東西"
+    # ⚠️ 判準是「**帳本印了讀全文這一節**」，不是「row 有段落」。
+    #    L0044/L0068/L0070/L0106 的抽取檔在硬碟上，但學習單根本沒印那一節
+    #    （sections_present 只有閱讀聚光燈）—— 紙上沒有的東西不該有 QR。
+    #    用「有段落」當判準會把這 4 課判成缺陷，那是問錯問題。
+    with_text = [r for r in g47
+                 if any(s.get("module") in ARTICLE_MODULES and s.get("slug")
+                        for s in (r.get("manifest_sections") or []))]
+    assert len(with_text) > 90, f"只有 {len(with_text)} 課帳本印了讀全文 —— 這條測不到東西"
+    missing = [r["lesson_uid"] for r in with_text
+               if not any(p.get("has_full") for p in (r.get("part_rounds") or []))]
+    assert not missing, (
+        f"{len(missing)} 課有課文卻沒有全文碼: {missing[:8]}\n"
+        "has_full 判準要跟 row 的 paragraphs 同源")
+
+
+def test_every_delivered_code_is_a_slug_not_a_path(rows):
+    """會印出去的每一個碼，都要有 slug 可用 —— 沒有 slug 就沒有短網址。
+
+    owner 2026-08-25：「我希望每一個 QR code 都是一組 QR slug url」。
+    退回長網址是無聲的：QR 掃得開、頁面對，只是把課號跟路由名印在紙上了。
+    """
+    bad = []
+    for uid, r in rows.items():
+        for p in (r.get("part_rounds") or []):
+            if p.get("has_full") and not p.get("full_slug"):
+                bad.append((uid, "全文"))
+            if p.get("has_key") and not p.get("key_slug"):
+                bad.append((uid, "重點"))
+    total = sum(1 for r in rows.values() for p in (r.get("part_rounds") or [])
+                if p.get("has_full") or p.get("has_key"))
+    assert total > 140, f"只有 {total} 個可交付的節 —— 這條測不到東西"
+    assert not bad, f"這些節要印碼卻沒有 slug: {bad[:8]}"

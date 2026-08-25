@@ -13,11 +13,13 @@ describe('QR 印的是短網址', () => {
     expect(new Set(v).size).toBe(3);
   });
 
-  it('沒有代號（舊資料）退回長網址，而且看得出來是長的', () => {
-    // 退回本身是對的（能掃的 QR 勝過沒有 QR），但不可以無聲 ——
-    // 後台清單有網址欄，長網址在那裡一眼認得出來。
-    expect(buildLessonQrValue('https://x.test', 7, 'full-text-annotate'))
-      .toBe('https://x.test/learn/7/full-text-annotate');
+  it('沒有代號就不出網址 —— 回空字串，不是悄悄印長網址', () => {
+    // owner 2026-08-25：「每一個 QR code 都是一組 QR slug url」。
+    // 舊版在這裡退回 `/learn/{id}/{step}`，而退回是無聲的：
+    // QR 掃得開、頁面也對，只是把課號跟路由名印在紙上 ——
+    // 那正是這一層要消除的東西。空字串讓呼叫端看得見缺代號。
+    expect(buildLessonQrValue('https://x.test', 7, 'full-text-annotate')).toBe('');
+    expect(buildLessonQrValue('https://x.test', 7, 'key-passage-reading', null)).toBe('');
   });
 
   it('入口網域預設是正式站，不是「按下載時剛好在哪」', () => {

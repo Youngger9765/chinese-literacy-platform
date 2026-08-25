@@ -60,6 +60,10 @@ const STORIES_RESPONSE = {
       reading_strategy: null,
       intro: { author: '', background: '' },
       has_key_reading: true,
+      // 每一節自己的代號（#2916）—— QR 印的是它。沒有代號就不出按鈕，
+      // 所以 fixture 少了這一段的話這些測試會全部找不到 QR 鈕。
+      part_rounds: [{ slug: 'mcyjp', part: null, has_full: true, has_key: true,
+                      full_slug: 'mcyjp', key_slug: 'mpjwh' }],
     },
     {
       id: 89,
@@ -74,6 +78,8 @@ const STORIES_RESPONSE = {
       reading_strategy: null,
       intro: { author: '', background: '' },
       has_key_reading: false,
+      part_rounds: [{ slug: 'wfrxc', part: null, has_full: true, has_key: false,
+                      full_slug: 'wfrxc', key_slug: null }],
     },
   ],
 };
@@ -186,9 +192,12 @@ describe('LessonAudioTable', () => {
   it('builds QR values for intro and full-reading lesson routes', () => {
     const origin = 'https://staging.example.test';
 
-    expect(buildLessonQrValue(origin, 1, 'full-text-annotate')).toBe('https://staging.example.test/learn/1/full-text-annotate');
-    expect(buildLessonQrValue(origin, 1, 'key-passage-reading')).toBe(
-      'https://staging.example.test/learn/1/key-passage-reading',
+    // 代號是第 4 個參數；沒有代號就沒有網址（#2916）。
+    expect(buildLessonQrValue(origin, 1, 'full-text-annotate', 'mcyjp'))
+      .toBe('https://staging.example.test/q/mcyjp');
+    expect(buildLessonQrValue(origin, 1, 'full-text-annotate')).toBe('');
+    expect(buildLessonQrValue(origin, 1, 'key-passage-reading', 'mpjwh')).toBe(
+      'https://staging.example.test/q/mpjwh',
     );
   });
 
@@ -426,10 +435,10 @@ describe('#2622 stop must actually silence the audio, not just the UI', () => {
 
 describe('#2622 QR 交付表', () => {
   const stories = [
-    { id: 1, lesson_number: 1, title: '贏得喝采的輸家', grade: 4, grade_code: 'G4-L01', char_count: 100, has_key_reading: true },
+    { id: 1, lesson_number: 1, title: '贏得喝采的輸家', grade: 4, grade_code: 'G4-L01', char_count: 100, has_key_reading: true, part_rounds: [{ slug: 'x1aaa', part: null, has_full: true, has_key: true, full_slug: 'x1aaa', key_slug: 'y1bbb' }] },
     // A title with both a comma and a quote — editorial content will eventually
     // have them, and unquoted CSV silently shifts every later column.
-    { id: 2, lesson_number: 2, title: '他說「快,再快」', grade: 8, grade_code: 'G8-L02', char_count: 90, has_key_reading: false },
+    { id: 2, lesson_number: 2, title: '他說「快,再快」', grade: 8, grade_code: 'G8-L02', char_count: 90, has_key_reading: false, part_rounds: [{ slug: 'x2aaa', part: null, has_full: true, has_key: false, full_slug: 'x2aaa', key_slug: null }] },
   ];
 
   it('emits one row per lesson, with 全文 and 段落 side by side', () => {
@@ -441,8 +450,8 @@ describe('#2622 QR 交付表', () => {
     // 課程欄印課碼（`G4-L01`）而不是 `L01`：後台一張表混著六個年級，
     // 光看 L01 分不出是四年級還是九年級的第一課。
     expect(rows[0].lesson_no).toBe('G4-L01');
-    expect(rows[0].full_url).toBe('https://x.test/learn/1/full-text-annotate');
-    expect(rows[0].passage_url).toBe('https://x.test/learn/1/key-passage-reading');
+    expect(rows[0].full_url).toBe('https://x.test/q/x1aaa');
+    expect(rows[0].passage_url).toBe('https://x.test/q/y1bbb');
     // Lesson 2 is grade 8 (全文 blank per the grade rule) AND has no 念順順段
     // (has_key_reading=false), so the batch produces no passage clip for it.
     // Both columns are therefore blank — a 段落 code here would point at a
@@ -518,16 +527,16 @@ describe('#2626 只有 4-7 年級交付全文', () => {
 
   it('leaves the 全文 URL blank for 8-9 so no code points at silence', () => {
     const rows = buildQrManifestRows([
-      { id: 1, lesson_number: 1, title: 'G7 課', grade: 7, grade_code: 'G7-L01', char_count: 10, has_key_reading: true },
-      { id: 2, lesson_number: 2, title: 'G8 課', grade: 8, grade_code: 'G8-L02', char_count: 10, has_key_reading: true },
+      { id: 1, lesson_number: 1, title: 'G7 課', grade: 7, grade_code: 'G7-L01', char_count: 10, has_key_reading: true, part_rounds: [{ slug: 'x1aaa', part: null, has_full: true, has_key: true, full_slug: 'x1aaa', key_slug: 'y1bbb' }] },
+      { id: 2, lesson_number: 2, title: 'G8 課', grade: 8, grade_code: 'G8-L02', char_count: 10, has_key_reading: true, part_rounds: [{ slug: 'x2aaa', part: null, has_full: true, has_key: true, full_slug: 'x2aaa', key_slug: 'y2bbb' }] },
     ] as never, 'https://x.test');
 
-    expect(rows[0].full_url).toBe('https://x.test/learn/1/full-text-annotate');
+    expect(rows[0].full_url).toBe('https://x.test/q/x1aaa');
     expect(rows[1].full_url).toBe('');
     // Positive control: this G8 lesson DOES have a 念順順段
     // (has_key_reading=true), so its 段落 code must survive even though 全文
     // is blank. Passage now gates on has_key_reading, not on grade.
-    expect(rows[1].passage_url).toBe('https://x.test/learn/2/key-passage-reading');
+    expect(rows[1].passage_url).toBe('https://x.test/q/y2bbb');
   });
 });
 
@@ -546,22 +555,22 @@ describe('#2622 段落 QR 只發給真的有段落的課（no 空砲）', () => 
    */
   it('omits the 段落 URL when the lesson has no 念順順段', () => {
     const rows = buildQrManifestRows([
-      { id: 10, lesson_number: 10, title: '有段落', grade: 5, grade_code: 'G5-L10', char_count: 50, has_key_reading: true },
-      { id: 11, lesson_number: 11, title: '無段落', grade: 5, grade_code: 'G5-L11', char_count: 50, has_key_reading: false },
+      { id: 10, lesson_number: 10, title: '有段落', grade: 5, grade_code: 'G5-L10', char_count: 50, has_key_reading: true, part_rounds: [{ slug: 'x10aaa', part: null, has_full: true, has_key: true, full_slug: 'x10aaa', key_slug: 'y10bbb' }] },
+      { id: 11, lesson_number: 11, title: '無段落', grade: 5, grade_code: 'G5-L11', char_count: 50, has_key_reading: false, part_rounds: [{ slug: 'x11aaa', part: null, has_full: true, has_key: false, full_slug: 'x11aaa', key_slug: null }] },
     ] as never, 'https://x.test');
 
     // Positive control — a lesson with a passage still gets its 段落 code.
-    expect(rows[0].passage_url).toBe('https://x.test/learn/10/key-passage-reading');
+    expect(rows[0].passage_url).toBe('https://x.test/q/y10bbb');
     // The fix — a lesson without one does not.
     expect(rows[1].passage_url).toBe('');
   });
 
   it('never emits a 段落 URL that outnumbers the lessons that have a passage', () => {
     const stories = [
-      { id: 1, lesson_number: 1, title: 'a', grade: 4, grade_code: 'G4-L01', char_count: 10, has_key_reading: true },
-      { id: 2, lesson_number: 2, title: 'b', grade: 8, grade_code: 'G8-L02', char_count: 10, has_key_reading: false },
-      { id: 3, lesson_number: 3, title: 'c', grade: 9, grade_code: 'G9-L03', char_count: 10, has_key_reading: false },
-      { id: 4, lesson_number: 4, title: 'd', grade: 6, grade_code: 'G6-L04', char_count: 10, has_key_reading: true },
+      { id: 1, lesson_number: 1, title: 'a', grade: 4, grade_code: 'G4-L01', char_count: 10, has_key_reading: true, part_rounds: [{ slug: 'x1aaa', part: null, has_full: true, has_key: true, full_slug: 'x1aaa', key_slug: 'y1bbb' }] },
+      { id: 2, lesson_number: 2, title: 'b', grade: 8, grade_code: 'G8-L02', char_count: 10, has_key_reading: false, part_rounds: [{ slug: 'x2aaa', part: null, has_full: true, has_key: false, full_slug: 'x2aaa', key_slug: null }] },
+      { id: 3, lesson_number: 3, title: 'c', grade: 9, grade_code: 'G9-L03', char_count: 10, has_key_reading: false, part_rounds: [{ slug: 'x3aaa', part: null, has_full: true, has_key: false, full_slug: 'x3aaa', key_slug: null }] },
+      { id: 4, lesson_number: 4, title: 'd', grade: 6, grade_code: 'G6-L04', char_count: 10, has_key_reading: true, part_rounds: [{ slug: 'x4aaa', part: null, has_full: true, has_key: true, full_slug: 'x4aaa', key_slug: 'y4bbb' }] },
     ];
     const rows = buildQrManifestRows(stories as never, 'https://x.test');
 
@@ -659,9 +668,13 @@ describe('#2622 全文 QR 必須指向真正讀全文的那一步', () => {
    */
   it('encodes full-text-annotate, not lesson-intro', () => {
     const origin = 'https://x.test';
-    expect(buildLessonQrValue(origin, 7, 'full-text-annotate')).toBe(
-      'https://x.test/learn/7/full-text-annotate',
+    // 代號在第 4 個參數。這條鎖的是「指到讀全文那一步、不是課程簡介」——
+    // 短網址之後這件事由轉址表決定，所以同時鎖 `/q/` 形狀。
+    expect(buildLessonQrValue(origin, 7, 'full-text-annotate', 'x7aaa')).toBe(
+      'https://x.test/q/x7aaa',
     );
+    expect(buildLessonQrValue(origin, 7, 'full-text-annotate', 'x7aaa'))
+      .not.toContain('lesson-intro');
   });
 
   it('the 全文 column renders a QR for the whole-text step', async () => {
@@ -677,8 +690,15 @@ describe('#2622 全文 QR 必須指向真正讀全文的那一步', () => {
       .getAllByRole('button', { name: 'QR' })
       .map((b) => b.getAttribute('title'));
 
-    expect(titles.some((t) => t?.endsWith('/full-text-annotate'))).toBe(true);
-    expect(titles.some((t) => t?.endsWith('/lesson-intro'))).toBe(false);
+    // 短網址之後「指到哪一步」由轉址表決定，網址上看不到 step 名（#2916）。
+    // 這條原本的用意仍然成立，只是換個問法：
+    //   ① 兩顆 QR 印的是**不同**代號（全文 vs 重點分得開）
+    //   ② 全文那顆印的是帳本裡讀全文那一節的代號 `mcyjp`
+    expect(titles).toHaveLength(2);
+    expect(new Set(titles).size).toBe(2);
+    expect(titles.some((t) => t?.endsWith('/q/mcyjp'))).toBe(true);
+    expect(titles.some((t) => t?.endsWith('/q/mpjwh'))).toBe(true);
+    expect(titles.every((t) => t?.includes('/q/'))).toBe(true);
   });
 });
 
@@ -706,10 +726,16 @@ describe('#2622 QR popup 標題要分得出全文與重點', () => {
     await waitFor(() => screen.getByText('贏得喝采的輸家'));
 
     const row = screen.getByText('贏得喝采的輸家').closest('[role="row"]') as HTMLElement;
+    // 短網址之後 title 是 `/q/{代號}`，不再帶 step 名（#2916）——
+    // 用帳本裡那一節的代號來認：讀全文 = mcyjp、念順順 = mpjwh。
+    const CODE: Record<string, string> = {
+      'full-text-annotate': 'mcyjp',
+      'key-passage-reading': 'mpjwh',
+    };
     const btn = within(row)
       .getAllByRole('button', { name: 'QR' })
-      .find((b) => b.getAttribute('title')?.endsWith(`/${step}`));
-    expect(btn, `no QR button targeting ${step}`).toBeDefined();
+      .find((b) => b.getAttribute('title')?.endsWith(`/q/${CODE[step]}`));
+    expect(btn, `no QR button targeting ${step} (/q/${CODE[step]})`).toBeDefined();
 
     fireEvent.click(btn!);
     const dialog = await screen.findByRole('dialog');

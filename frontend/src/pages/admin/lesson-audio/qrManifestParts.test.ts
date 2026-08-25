@@ -15,13 +15,24 @@ const base = {
 } as never;
 
 describe('buildQrManifestRows — 一課多篇', () => {
-  it('單篇課維持一列，網址不帶 ?p=', () => {
+  it('單篇課也是一列、也是短網址（後端對單篇課同樣回一筆 part_rounds）', () => {
+    // ⚠️ 單篇課的 `part_rounds` 不再是 null：後端對它也回一筆（#2916），
+    //    否則 170 課的 QR 會退回長網址。fixture 用真實形狀。
+    const rows = buildQrManifestRows(
+      [{ ...(base as object), id: 20011, grade: 4, grade_code: 'G4-L1',
+         part_rounds: [{ slug: 'mcyjp', part: null, has_full: true, has_key: true,
+                         full_slug: 'mcyjp', key_slug: 'mpjwh' }] }] as never, 'https://x');
+    expect(rows).toHaveLength(1);
+    expect(rows[0].full_url).toBe('https://x/q/mcyjp');
+    expect(rows[0].passage_url).toBe('https://x/q/mpjwh');
+    expect(rows[0].lesson_no).toBe('G4-L1');
+  });
+
+  it('沒有代號的課不出網址 —— 不可以悄悄退回長網址', () => {
     const rows = buildQrManifestRows(
       [{ ...(base as object), id: 20011, grade: 4, grade_code: 'G4-L1', part_rounds: null }] as never, 'https://x');
-    expect(rows).toHaveLength(1);
-    expect(rows[0].full_url).toBe('https://x/learn/20011/full-text-annotate');
-    expect(rows[0].passage_url).toBe('https://x/learn/20011/key-passage-reading');
-    expect(rows[0].lesson_no).toBe('G4-L1');
+    expect(rows[0].full_url).toBe('');
+    expect(rows[0].passage_url).toBe('');
   });
 
   it('三篇課展開成三列，六個 QR 各自是自己那一節的代號', () => {

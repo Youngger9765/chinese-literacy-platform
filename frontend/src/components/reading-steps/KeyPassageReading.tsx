@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { formatTime } from '../../utils/formatTime';
+import { sectionSlugForStep } from '../../config/roundScope';
+import { moduleForStep } from '../../config/stepConfig';
 import { Story, KeyPassageReadingResult } from '../../types';
 import { parseReadingBenchmark, getAiFluencyInsight, type ParsedBenchmark } from '../../utils/fluencyAnalyzer';
 import { useZhuyin } from '../../context/ZhuyinContext';
@@ -65,6 +67,11 @@ const KeyPassageReading: React.FC<KeyPassageReadingProps> = ({
   onProgressChange,
   dbSessionId,
 }) => {
+  // 這一節自己的代號：單篇課從帳本推導（網址沒有 `?p=`），
+  // 多篇課帳本有好幾列 → 推不出來，改用頁面從 `?p=` 傳進來的那個（#2916）。
+  const qrCode =
+    sectionSlugForStep(story.manifestSections, 'key-passage-reading', moduleForStep)
+    ?? qrSectionSlug ?? null;
   const { token, user } = useAuth();
   const storageKey = scopedStepStorageKey('fullReading_progress_', story.id);
   // #1462: in toolbox mode, completion screen shows 重做/回工具箱 instead of 下一關.
@@ -454,7 +461,7 @@ const KeyPassageReading: React.FC<KeyPassageReadingProps> = ({
                       lessonId={story.id}
                       step="key-passage-reading"
                       lessonTitle={story.title}
-                    sectionSlug={qrSectionSlug}
+                    sectionSlug={qrCode}
               />
                   </div>
                 )}

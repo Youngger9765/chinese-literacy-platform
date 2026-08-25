@@ -28,9 +28,10 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useLocation, Link } from 'react-router-dom';
 
 import ReadingAnnotation from '../components/reading-steps/FullTextAnnotate';
-import { resolveStepId } from '../config/stepConfig';
+import { resolveStepId, moduleForStep } from '../config/stepConfig';
 import { deliversFullText } from '../components/qr/lessonQr';
 import { fetchStory, storyForStep } from '../services/api';
+import { sectionSlugForStep } from '../config/roundScope';
 import type { Story } from '../types';
 
 const GuestReadingPage: React.FC = () => {
@@ -90,6 +91,12 @@ const GuestReadingPage: React.FC = () => {
   // 段落 shows only the 念順順 passage; 全文 shows the lesson. When a lesson has
   // no passage recorded, the passage code falls back to the whole text rather
   // than showing an empty page.
+  // QR 要印**這一節自己的**代號。多篇課從 `?p=` 拿；單篇課網址沒有 `?p=`，
+  // 從帳本拿（`manifestSections`）—— 不然 170 課的 QR 全部退回長網址。
+  const qrSectionSlug = sectionSlugForStep(
+    story.manifestSections, roundSlug ? `${resolveStepId(step)}#${roundSlug}` : resolveStepId(step),
+    moduleForStep,
+  );
   const wantsPassage = resolveStepId(step) === 'key-passage-reading';
   // 先換成這一節所屬的那一篇，再決定要顯示全文還是重點段 ——
   // 順序不能反：反過來的話重點段仍然取自第 1 篇。
@@ -130,6 +137,11 @@ const GuestReadingPage: React.FC = () => {
           重點 page. Same rules as the signed-in pages: 全文 only for the grades
           the spec gives one to, 重點 only where a 念順順段 exists. */}
       <ReadingAnnotation
+        // 掃 QR 進來的人走這一頁 —— 頁面上那顆 QR 按鈕也要印短網址（#2916）。
+        // ⚠️ 這個 prop 漏了三次都是同一個原因：訪客路徑不經過 LearningLayout，
+        //    所以每次「登入端修好了」都不等於這裡修好了。
+        //    單篇課的網址沒有 `?p=`，所以退回用 story 帶的代號。
+        sectionSlug={qrSectionSlug}
         story={shown}
         onFinish={() => {}}
         hideAnnotation
