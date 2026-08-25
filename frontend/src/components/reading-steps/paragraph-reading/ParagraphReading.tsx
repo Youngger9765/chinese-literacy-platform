@@ -25,6 +25,7 @@ import {
 } from './hooks/useParagraphEvaluation';
 import { useSentenceRetry } from './hooks/useSentenceRetry';
 import ParagraphReadingControls from './ParagraphReadingControls';
+import TtsDegradedNotice from '../TtsDegradedNotice';
 import type { LocalEvalResult } from '../../../utils/localEval';
 import type { RetrySentenceInfo } from './hooks/useSentenceRetry';
 import type { TutorStepData } from '../../../types/stepProgress';
@@ -175,6 +176,7 @@ const ParagraphReading: React.FC<ParagraphReadingProps> = ({
     isTtsPaused,
     isTtsLoading,
     ttsError,
+    isTtsDegraded,
     setIsTtsSpeaking,
     setIsTtsPaused,
     utteranceRef,
@@ -868,6 +870,8 @@ const ParagraphReading: React.FC<ParagraphReadingProps> = ({
       )}
 
       {/* ── Fixed bottom controls ─────────────────────────────────────── */}
+      {/* 降級成機器音時要說出來（#2930）。 */}
+      {isTtsDegraded && <TtsDegradedNotice className="mb-3" />}
       <ParagraphReadingControls
         isSessionActive={stt.isSessionActive}
         isPreparing={stt.isPreparing}

@@ -8,6 +8,7 @@ import React, {
 } from 'react';
 import { Story } from '../../types';
 import { sectionSlugForStep } from '../../config/roundScope';
+import TtsDegradedNotice from './TtsDegradedNotice';
 import { moduleForStep } from '../../config/stepConfig';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import { scopedStepStorageKey } from '../../services/learningStorageScope';
@@ -919,6 +920,8 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
               to the strip/table block below the article. */}
           <div className={story.layout_mode === 'graphic-text' && fallbackImages.length > 0 ? 'flex flex-col lg:flex-row items-start' : undefined}>
             <article className={story.layout_mode === 'graphic-text' && fallbackImages.length > 0 ? 'flex-1 min-w-0 px-6 md:px-12 space-y-10' : 'max-w-4xl mx-auto px-6 md:px-16 space-y-10'}>
+            {/* 降級成機器音時要說出來 —— 少了它，聽到的人不知道那不是 AI（#2930）。 */}
+            {reader.isTtsDegraded && <TtsDegradedNotice className="mb-4" />}
             {story.content.map((rawPara, paraIdx) => {
               const displayText = zhuyinParagraphs?.[paraIdx] ?? rawPara;
               const inlineImgIdx = inlineImageIdxByPara.get(paraIdx);
