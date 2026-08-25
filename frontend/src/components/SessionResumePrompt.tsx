@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { stepPath as buildStepPath } from '../config/stepPath';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import {
@@ -87,7 +88,7 @@ const SessionResumePrompt: React.FC<SessionResumePromptProps> = ({ onDismiss }) 
     const stepPath = STEP_NUMBER_TO_PATH[record.currentStep] ?? 'lesson-intro';
     setVisible(false);
     onDismiss?.();
-    navigate(`/learn/${record.storyId}/${stepPath}`);
+    navigate(buildStepPath(record.storyId, stepPath));
   };
 
   const handleRestart = () => {

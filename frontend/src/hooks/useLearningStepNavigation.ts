@@ -11,6 +11,7 @@
  */
 
 import { useCallback, useEffect, useRef } from 'react';
+import { stepPath } from '../config/stepPath';
 import type { Dispatch, SetStateAction } from 'react';
 import type { NavigateFunction } from 'react-router-dom';
 import type { AuthUser } from '../services/authApi';
@@ -143,7 +144,7 @@ export function useLearningStepNavigation({
     );
     persistStep(STEP_PATH_TO_NUMBER[firstReadingStep]);
     ensureDbSession();
-    navigate(isToolboxMode() ? '/tools' : `/learn/${storyId}/${firstReadingStep}`);
+    navigate(isToolboxMode() ? '/tools' : stepPath(storyId, firstReadingStep));
   }, [storyId, selectedStory, navigate, persistStep, ensureDbSession, setSession]);
 
   // ─── Navigation helpers ───────────────────────────────────────────────────
@@ -154,7 +155,7 @@ export function useLearningStepNavigation({
         navigate('/tools');
         return;
       }
-      navigate(`/learn/${storyId}/${nextStep}`);
+      navigate(stepPath(storyId, nextStep));
     },
     [navigate, storyId],
   );
@@ -408,7 +409,7 @@ export function useLearningStepNavigation({
     (step: { id: string }) => {
       if (!storyId) return;
       persistStep(STEP_PATH_TO_NUMBER[step.id]);
-      navigate(`/learn/${storyId}/${step.id}`);
+      navigate(stepPath(storyId, step.id));
     },
     [navigate, persistStep, storyId],
   );

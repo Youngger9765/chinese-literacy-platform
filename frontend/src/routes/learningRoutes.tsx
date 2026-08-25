@@ -30,6 +30,7 @@
  *   Consume via: `<Route path="/learn/:storyId" element={...}>{learningRoutes}</Route>`
  */
 import React, { lazy } from 'react';
+import { stepPath } from '../config/stepPath';
 import { Route, Navigate, useNavigate, useParams } from 'react-router-dom';
 
 import StepErrorBoundary from '../components/StepErrorBoundary';
@@ -132,7 +133,7 @@ const StepEnabledGuard: React.FC<StepEnabledGuardProps> = ({ stepId, children })
 
   if (step && !step.enabled) {
     const fallbackId = resolveActiveSteps()[0]?.id ?? 'full-text-annotate';
-    return <Navigate to={`/learn/${storyId ?? ''}/${fallbackId}`} replace />;
+    return <Navigate to={stepPath(storyId ?? '', fallbackId)} replace />;
   }
 
   return <>{children}</>;
@@ -155,7 +156,7 @@ const StepEnabledGuard: React.FC<StepEnabledGuardProps> = ({ stepId, children })
 /** Replaces the legacy segment in place, preserving the storyId and the rest of the URL. */
 const LegacyStepRedirect: React.FC<{ to: string }> = ({ to }) => {
   const { storyId } = useParams<{ storyId: string }>();
-  return <Navigate to={`/learn/${storyId}/${to}`} replace />;
+  return <Navigate to={stepPath(storyId ?? '', to)} replace />;
 };
 
 function buildLearningRoutes(): React.ReactElement[] {

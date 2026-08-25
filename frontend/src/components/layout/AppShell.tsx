@@ -10,6 +10,7 @@
  * notification bell, zhuyin toggle, logout) is now integrated into Sidebar.
  */
 import React, { useState, useEffect, useCallback, useMemo, useRef, Suspense } from 'react';
+import { stepPath } from '../../config/stepPath';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useWorkspace } from '../../contexts/WorkspaceContext';
@@ -282,7 +283,7 @@ const ImmersiveTopBar: React.FC = () => {
 
   const handleStepClick = (step: ReturnType<typeof useStepSequence>[number]) => {
     if (!selectedStory) return;
-    navigate(`/learn/${selectedStory.id}/${step.id}`);
+    navigate(stepPath(selectedStory.id, step.id));
   };
 
   const { prev: prevStep, next: nextStep } = nav;
