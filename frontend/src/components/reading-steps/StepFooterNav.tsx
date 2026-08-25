@@ -12,6 +12,7 @@
  * Issue #2082 (A9 — in-place next nav, professor demo feedback 2026-06-04).
  */
 import React, { useMemo } from 'react';
+import { useCurrentStepId } from '../../hooks/useCurrentStepId';
 import { stepPath } from '../../config/stepPath';
 import { useNavigate } from 'react-router-dom';
 import { useLearningNav } from '../../contexts/LearningNavContext';
@@ -25,11 +26,16 @@ const StepFooterNav: React.FC = () => {
   const navigate = useNavigate();
   const { selectedStory, session } = useLearningNav();
   const currentView = useAppView();
+  // ⚠️ 比對步驟一律用**帶輪次**的 key（`full-text-annotate#7wavn`）。
+  //    `currentView` 只反映路徑段，多文本課三個輪次的路徑段一樣，
+  //    於是 `stepNeighbours` 永遠命中第一個同名步驟 ——
+  //    active 圓圈與上一步／下一步三輪共用一顆（2026-08-25 staging 實測）。
+  const currentStepKey = useCurrentStepId(String(currentView));
   const inToolbox = isToolboxMode();
 
   const activeSteps = useStepSequence(selectedStory ?? null);
   // #2905 — see config/stepNeighbours.ts. -1 no longer means "nowhere".
-  const nav = useMemo(() => stepNeighbours(activeSteps, currentView), [activeSteps, currentView]);
+  const nav = useMemo(() => stepNeighbours(activeSteps, currentStepKey), [activeSteps, currentStepKey]);
   const currentStepIndex = nav.index;
   const totalSteps = activeSteps.length;
   const { current: currentStep, prev: prevStep, next: nextStep } = nav;

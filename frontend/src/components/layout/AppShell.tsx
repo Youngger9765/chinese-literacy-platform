@@ -10,6 +10,7 @@
  * notification bell, zhuyin toggle, logout) is now integrated into Sidebar.
  */
 import React, { useState, useEffect, useCallback, useMemo, useRef, Suspense } from 'react';
+import { useCurrentStepId } from '../../hooks/useCurrentStepId';
 import { stepPath } from '../../config/stepPath';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -242,6 +243,11 @@ const StepDots: React.FC<StepDotsProps> = ({
 const ImmersiveTopBar: React.FC = () => {
   const navigate = useNavigate();
   const currentView = useAppView();
+  // ⚠️ 比對步驟一律用**帶輪次**的 key（`full-text-annotate#7wavn`）。
+  //    `currentView` 只反映路徑段，多文本課三個輪次的路徑段一樣，
+  //    於是 `stepNeighbours` 永遠命中第一個同名步驟 ——
+  //    active 圓圈與上一步／下一步三輪共用一顆（2026-08-25 staging 實測）。
+  const currentStepKey = useCurrentStepId(String(currentView));
   const { selectedStory, session } = useLearningNav();
   const { zhuyinMode, zhuyinReady, setZhuyinMode } = useZhuyin();
 
@@ -258,8 +264,8 @@ const ImmersiveTopBar: React.FC = () => {
   // Both this file and StepFooterNav used to do `findIndex(...)` and treat -1 as
   // "nowhere", which disabled every chevron on e.g. /learn/20011/spotlight.
   const nav = useMemo(
-    () => stepNeighbours(activeSteps, currentView),
-    [activeSteps, currentView],
+    () => stepNeighbours(activeSteps, currentStepKey),
+    [activeSteps, currentStepKey],
   );
   const currentStepIndex = nav.index;
   const currentStep = nav.current;
