@@ -1,22 +1,52 @@
 name: Schema Drift Check
 
+# ⚠️ 觸發不用 `paths:`（#2916 收尾查到）。
+#
+# GitHub 的 `paths:` 過濾只看**前 300 個變更檔**。PR #2920 改了 3691 個檔，
+# 前 300 個全被批次改名的 yml 佔滿 —— 這支整個 PR 一次都沒跑，
+# 而檢查清單上不會出現這一列，看起來就是全綠。
+#
+# 改用 repo 既有的 `dorny/paths-filter`（staging-deploy.yml 一直這樣做），
+# 它算完整 diff，沒有 300 上限。意圖不變：沒動到 model / migration 就跳過。
+#
+# ⚠️ push 到 staging/main 時**一律跑**，不再過濾 ——
+# merge commit 的 diff 同樣可能超過 300 檔，而那一刻正是最不該漏掉它的時候。
+
 on:
   pull_request:
-    paths:
-      - 'backend/app/models/**'
-      - 'backend/alembic/versions/**'
-      - 'backend/scripts/check_model_coverage.py'
   push:
     branches:
       - staging
       - main
-    paths:
-      - 'backend/app/models/**'
-      - 'backend/alembic/versions/**'
 
 jobs:
+  detect-changes:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    outputs:
+      relevant: ${{ steps.filter.outputs.relevant }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          filters: |
+            relevant:
+              - 'backend/app/models/**'
+              - 'backend/alembic/versions/**'
+              - 'backend/scripts/check_model_coverage.py'
+              - '.github/workflows/schema-check.yml'
+
   schema-drift:
     name: Detect Model / Migration Drift
+    needs: detect-changes
+    # push 到 staging/main 時 detect-changes 被跳過 → needs 的結果是 skipped，
+    # 所以要明寫「push 一律跑」，否則整支會跟著被跳掉。
+    if: |
+      always() && (github.event_name == 'push'
+        || needs.detect-changes.outputs.relevant == 'true')
     runs-on: ubuntu-latest
 
     steps:
