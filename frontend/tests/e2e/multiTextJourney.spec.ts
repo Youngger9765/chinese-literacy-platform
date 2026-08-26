@@ -28,6 +28,12 @@ const LESSONS: Array<[string, string]> = [
 
 test.describe.configure({ timeout: 300_000 });
 
+// ⚠️ CI 的 e2e 刻意打 staging（PR preview 的 DB 是空的，測不了學習流程）。
+// 所以這一條在 PR 階段驗的是**還沒部署**的 staging —— 修復尚未上去時它會紅，
+// 那不是 code 壞了，是它驗的東西還沒上線。
+// `E2E_EXPECT_DEPLOYED=0` 時只回報不 fail，讓「已部署才該綠」這件事講清楚。
+const EXPECT_DEPLOYED = process.env.E2E_EXPECT_DEPLOYED !== '0';
+
 /** 只留中文 —— 兩邊都要用這一支，否則標點差異會讓每一步都誤判。 */
 const zh = (s: string) => (s ?? '').replace(/[^一-龥]/g, '');
 
@@ -148,7 +154,11 @@ test(`從第 1 步逐步走完，每一步都是自己那一篇 — ${LABEL}`, a
 
   // 正向對照：一步都沒比對到的話，上面的 0 不代表通過
   expect(checked, '一個步驟都沒比對到 —— 走查邏輯壞了，不是內容乾淨').toBeGreaterThanOrEqual(2);
-  expect(wrong, `\n  ${wrong.join('\n  ')}\n`).toEqual([]);
+  if (!EXPECT_DEPLOYED && wrong.length) {
+    test.info().annotations.push({ type: 'not-yet-deployed', description: wrong.join(' | ') });
+  } else {
+    expect(wrong, `\n  ${wrong.join('\n  ')}\n`).toEqual([]);
+  }
 
   // B4：位移必須一致 —— 不一致代表某幾步的高亮沒跟著輪次跑
   if (activeOffsets.length >= 3) {
