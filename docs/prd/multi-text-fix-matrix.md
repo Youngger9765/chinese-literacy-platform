@@ -32,7 +32,7 @@
 | 2 | slug | ✅ 每一節一個，網址 `?p=` 各不相同（實測 20 個入口） | ✅ 由帳本推導 | `test_qr_addressing_spec.py` |
 | 3 | 內容 | ✅ 三輪課文與後端真值逐一相符、別篇未混入（真瀏覽器實測） | ✅ | `realPayloadRoundScope.test.ts`（**真 API payload**） |
 | 4 | 元件 active | ✅ **已修**：三輪的 `aria-current` 落在第 2/7/12 顆（間隔 5 ＝ 每輪五個模組） | ✅ 不適用 | `activeStepHighlight.test.ts` + `roundAwareStepNeighbours.test.ts` |
-| 5 | HTML | 未驗 | 未驗 | 無 |
+| 5 | HTML | ✅ 三篇截圖逐張看過：0 破圖、0 橫向溢出、0 pageerror。⚠️ 三篇**標題相同**（資料裡每篇沒有自己的 title，前台沿用課名；後台有標「（篇1/2/3）」）——現況不是缺陷 | ✅ | 截圖 + DOM 量測 |
 | 6 | QR code | ✅ 六個代號六個不同頁面 | ✅ 170 課都有代號 | `test_slug_redirect_spec.py` |
 | 7 | URL | ✅ `?p=` 由 `stepPath` 統一產生 | ✅ | `stepPathIsTheOnlyBuilder.test.ts` |
 | 8 | Audio | ✅ **已修並在 staging 驗過**：前台三篇送出各自的首段（3/3）、後台三列各送自己那一篇（3/3） | ✅ 不帶篇次時行為不變 | `test_tts_mapping_round_spec.py`＋`ttsRoundScoped.test.ts`＋`everyLessonAddressedCallCarriesRound.test.ts` |
@@ -54,7 +54,8 @@
 | 項目 | 狀態 | 說明 |
 |---|---|---|
 | HTML（維度 5） | 未驗 | 還沒定義要驗什麼 |
-| 訪客（掃 QR）那條路的朗讀 | 未驗 | 元件裡兩份註解互相矛盾（一份說走預生成 mp3、一份說走同一條走訪），還沒在真環境聽過 |
+| ~~訪客那條路的朗讀~~ | ✅ 已驗 | staging 3/3、prod 3/3：內容對、送字對、Azure 音檔、機器音 0 |
+| prod 後台 | ⛔ 驗不了 | 需要真帳號，prod 沒有一鍵登入 → 交辦 Hans |
 | 不經過統一 scope 的其他路徑 | 未逐一驗 | 見下 |
 
 **同族風險點**（吃 `lesson_id` 取內容、不經過前端統一 scope 的路徑）：
@@ -75,6 +76,21 @@
 
 **每一個量測都先讓它抓一個已知存在的東西**（總列數 > 0、G6-L22 找得到三列）。
 今晚三次是靠這個正向對照才發現量錯的，不是靠更小心。
+
+## 4.8 Production 驗證（2026-08-26，走真入口）
+
+`https://lingoleap-prod.web.app`，全新 context（＝真的沒登入，就是掃 QR 的人看到的）：
+
+| 項目 | 結果 |
+|---|---|
+| 掃 QR 的三篇 | 3/3 內容對、朗讀送字對、Azure 音檔、機器音 0、pageerror 0 |
+| 短代號轉址 | 307 到前端網域的正確頁面；`/q/zzzzz` 與 `/q/nope` 都 404（負向對照） |
+| **QR 印出來的值** | `https://lingoleap-prod.web.app/q/7wavn` —— 正式站，不是測試站 |
+| 五個重複模組 × 三篇 | 在 staging 驗過 5/5；prod 只驗得到訪客可讀的兩步（無一鍵登入） |
+
+⛔ **未驗**：prod 後台 `/admin/lesson-audio` —— 需要真帳號，prod 沒有一鍵登入。
+後台的 QR 與前台共用同一支產生器（前台已證實產出 prod 網域），但沒實測過，不替它背書。
+交辦單：`docs/qa/2026-08-26-multi-text-manual-qa.md`。
 
 ## 5. 怎麼驗（給下一個人）
 
