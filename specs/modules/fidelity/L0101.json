@@ -1,6 +1,6 @@
 {
   "uid": "L0101",
-  "gate_version": 1,
+  "gate_version": 2,
   "docx_sha256": "459e-e905-1933-ac3d",
   "modules": {
     "comprehension.cjdtp": {
@@ -18,7 +18,7 @@
       "exit": 0
     },
     "key_reading.cw744": {
-      "yaml_sha256": "c368-2801-54a4-4264",
+      "yaml_sha256": "2d8b-9f98-4dd6-681a",
       "checked": 11,
       "status": "pass",
       "passed": true,

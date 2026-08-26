@@ -1,6 +1,6 @@
 {
   "uid": "L0109",
-  "gate_version": 1,
+  "gate_version": 2,
   "docx_sha256": "0e6e-c3fc-468c-53c5",
   "modules": {
     "comprehension.9mxte": {
@@ -25,7 +25,7 @@
       "exit": 0
     },
     "key_reading.jfpu3": {
-      "yaml_sha256": "1165-a78b-d358-a6ce",
+      "yaml_sha256": "89ac-5a6c-c952-52d9",
       "checked": 10,
       "status": "pass",
       "passed": true,

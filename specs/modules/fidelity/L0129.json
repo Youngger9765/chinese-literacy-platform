@@ -1,6 +1,6 @@
 {
   "uid": "L0129",
-  "gate_version": 1,
+  "gate_version": 2,
   "docx_sha256": "b678-9ab6-d493-aec1",
   "modules": {
     "comprehension.ufwra": {
@@ -25,7 +25,7 @@
       "exit": 0
     },
     "key_reading.knxr3": {
-      "yaml_sha256": "2631-6ff8-e0ab-9847",
+      "yaml_sha256": "19d8-8e9c-d4c6-783e",
       "checked": 10,
       "status": "pass",
       "passed": true,

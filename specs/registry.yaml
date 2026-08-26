@@ -635,7 +635,7 @@ modules:
   - scripts/spotlight_fingerprints.py
   - frontend/src/components/reading-spotlight/
   owns_data:
-  - backend/data/lessons/*/v*/spotlight.yml
+  - backend/data/lessons/*/v3/spotlight.*.yml
   - backend/data/spotlight_fingerprints.json
   - backend/data/curriculum_qa/spotlight_manifest.json
   - backend/data/curriculum_qa/content_known_gaps.yaml

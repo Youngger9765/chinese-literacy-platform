@@ -1,6 +1,6 @@
 {
   "uid": "L0050",
-  "gate_version": 1,
+  "gate_version": 2,
   "docx_sha256": "1f26-a870-fe4d-dc55",
   "modules": {
     "comprehension.kvuvw": {
@@ -25,7 +25,7 @@
       "exit": 0
     },
     "key_reading.teqca": {
-      "yaml_sha256": "6854-8eb1-b97b-b79d",
+      "yaml_sha256": "ea41-a202-626d-2c26",
       "checked": 10,
       "status": "pass",
       "passed": true,

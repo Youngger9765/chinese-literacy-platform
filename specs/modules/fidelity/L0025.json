@@ -1,6 +1,6 @@
 {
   "uid": "L0025",
-  "gate_version": 1,
+  "gate_version": 2,
   "docx_sha256": "7443-0647-737a-6649",
   "modules": {
     "comprehension.kehf6": {
@@ -25,7 +25,7 @@
       "exit": 0
     },
     "key_reading.jppcc": {
-      "yaml_sha256": "fc1e-1c7c-13fb-3f1f",
+      "yaml_sha256": "f3f7-ed8f-b528-73f6",
       "checked": 10,
       "status": "pass",
       "passed": true,

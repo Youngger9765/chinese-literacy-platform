@@ -1,6 +1,6 @@
 {
   "uid": "L0095",
-  "gate_version": 1,
+  "gate_version": 2,
   "docx_sha256": "568c-f377-3a48-8e87",
   "modules": {
     "comprehension.cdpnx": {
@@ -18,7 +18,7 @@
       "exit": 0
     },
     "key_reading.yqvaj": {
-      "yaml_sha256": "dced-06d2-9553-39bf",
+      "yaml_sha256": "ccff-471b-7e26-bca5",
       "checked": 11,
       "status": "pass",
       "passed": true,

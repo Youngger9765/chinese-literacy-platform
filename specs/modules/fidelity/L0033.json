@@ -1,6 +1,6 @@
 {
   "uid": "L0033",
-  "gate_version": 1,
+  "gate_version": 2,
   "docx_sha256": "b282-1d93-aac0-85e5",
   "modules": {
     "comprehension.jfyjf": {
@@ -18,7 +18,7 @@
       "exit": 0
     },
     "key_reading.phwnx": {
-      "yaml_sha256": "da6b-f7b7-10c2-76e8",
+      "yaml_sha256": "ad38-c26c-4071-8e2f",
       "checked": 9,
       "status": "pass",
       "passed": true,

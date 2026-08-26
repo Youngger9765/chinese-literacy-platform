@@ -4,12 +4,7 @@ section_no: 3
 key_reading:
   instruction: 請用計時器，從指定段落（八    )開始朗讀，計時1分鐘讀的字數，並記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！
   start_paragraph: 8
-  end_paragraph: 9
-  spans_paragraphs:
-  - 8
-  - 9
-  approx_chars_from_start: 271
-  span_confidence: high
+  end_paragraph: 8
   timing_table:
     columns:
     - 第1次計時
@@ -26,10 +21,14 @@ key_reading:
     feedback: 嗯，還不錯喲！
   - threshold: ＞221字
     feedback: 哇嗚，超級厲害！
-  passage: 同樣的道理，如果一個人能在崗位上兢兢業業、精益求精，把專業技能磨鍊到同業中無人能及的高度，這樣就能為自己爭取到更高的收入。例如，吳寶春17歲就去麵包店當學徒，每天從凌晨三點半開始工作，一直做到晚上七、八點才能休息，每個月只休兩天假，一個月薪水只有6000元。但他和別的麵包師傅不同，他不斷的努力學習新的技能，到處參加比賽。23年後，他40歲時，在法國拿下世界麵包大師賽冠軍。全臺灣麵包師傅有幾千個人，但這樣厲害的，只有吳寶春一個，他的薪水自然水漲船高了。想要在職場上拿高薪嗎？記得物以稀為貴的道理，下定決心終身學習，做一個人力市場上人人想要的稀缺人才吧！
-  extent_chars: 277
+  passage: 同樣的道理，如果一個人能在崗位上兢兢業業、精益求精，把專業技能磨鍊到同業中無人能及的高度，這樣就能為自己爭取到更高的收入。例如，吳寶春17歲就去麵包店當學徒，每天從凌晨三點半開始工作，一直做到晚上七、八點才能休息，每個月只休兩天假，一個月薪水只有6000元。但他和別的麵包師傅不同，他不斷的努力學習新的技能，到處參加比賽。23年後，他40歲時，在法國拿下世界麵包大師賽冠軍。全臺灣麵包師傅有幾千個人，但這樣厲害的，只有吳寶春一個，他的薪水自然水漲船高了。
+  extent_chars: 227
   start_text: 同樣的道理，如果一個人能在崗位上兢兢業業、精益求
-  source: part-scoped-anchor-and-count
+  source: extract_key_reading_v3
   part: 3
   slug: ajy9w
   text_ref: 7wavn
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  absorbed_tail: 0

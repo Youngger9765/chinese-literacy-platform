@@ -1,6 +1,6 @@
 {
   "uid": "L0007",
-  "gate_version": 1,
+  "gate_version": 2,
   "docx_sha256": "bdfd-75b4-6218-60b3",
   "modules": {
     "comprehension.nxt4d": {
@@ -18,7 +18,7 @@
       "exit": 0
     },
     "key_reading.cwcnf": {
-      "yaml_sha256": "5294-27c3-7d27-67b4",
+      "yaml_sha256": "de84-37ac-7b05-609d",
       "checked": 10,
       "status": "pass",
       "passed": true,

@@ -1,6 +1,6 @@
 {
   "uid": "L0029",
-  "gate_version": 1,
+  "gate_version": 2,
   "docx_sha256": "5ee8-e431-4c1f-575e",
   "modules": {
     "comprehension.6je7j": {
@@ -46,14 +46,14 @@
       "exit": 0
     },
     "key_reading.d9d7p": {
-      "yaml_sha256": "2a49-497d-67f1-0fdf",
+      "yaml_sha256": "6a9f-4042-239b-1901",
       "checked": 9,
       "status": "pass",
       "passed": true,
       "exit": 0
     },
     "key_reading.tfewt": {
-      "yaml_sha256": "beb4-3885-bc6b-a576",
+      "yaml_sha256": "bab2-b174-e4af-159c",
       "checked": 9,
       "status": "pass",
       "passed": true,

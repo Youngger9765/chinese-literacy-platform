@@ -1,6 +1,6 @@
 {
   "uid": "L0035",
-  "gate_version": 1,
+  "gate_version": 2,
   "docx_sha256": "1c0d-0793-2139-30ae",
   "modules": {
     "comprehension.tdet9": {
@@ -25,7 +25,7 @@
       "exit": 0
     },
     "key_reading.apnaa": {
-      "yaml_sha256": "4968-75e7-fa51-c7a7",
+      "yaml_sha256": "f9f9-5d87-3ff8-b721",
       "checked": 9,
       "status": "pass",
       "passed": true,

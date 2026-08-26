@@ -3,7 +3,6 @@ version_id: v3
 section_no: 二
 key_reading:
   instruction: 請用計時器，從指定段落（四☞）開始朗讀，計時1分鐘讀的字數，並記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！
-  span_confidence: medium
   timing_table:
     columns:
     - 第1次計時
@@ -20,11 +19,15 @@ key_reading:
     feedback: 嗯，還不錯喲！
   - threshold: ＞231字
     feedback: 哇嗚，超級厲害！
-  passage: 在陳念琴以為往後的拳擊生涯會如魚得水時，她卻再次遭遇橫逆。準備2020年東京奧運時，她發現脖子上有一個小小的硬塊，醫生告訴她，她罹患淋巴癌。她和教練討論後，決定暫時不公開病情，一邊備戰，一邊接受化學治療。化療的副作用讓她無力、想吐、掉髮；因為病情尚未公開，治療過程中的辛苦也很難向人傾訴。更難受的是，她還要面對媒體的質疑：「你不是奧運選手嗎？怎麼奧運前的比賽表現這麼差？」她有苦難言，心中的委屈也難以被理解。可是，她仍堅持在拳擊擂台上飛舞，因為她的信念是：「為了夢想我願意忍耐，在追求成功的過程中，再苦再累我都要咬牙撐過。」她的抗癌經歷也鼓舞了許多癌症病友。
+  passage: 在陳念琴以為往後的拳擊生涯會如魚得水時，她卻再次遭遇橫逆。準備2020年東京奧運時，她發現脖子上有一個小小的硬塊，醫生告訴她，她罹患淋巴癌。她和教練討論後，決定暫時不公開病情，一邊備戰，一邊接受化學治療。化療的副作用讓她無力、想吐、掉髮；因為病情尚未公開，治療過程中的辛苦也很難向人傾訴。
   start_text: 在陳念琴以為往後的拳擊生涯會如魚得水時，她卻再次
-  extent_chars: 279
-  source: docx-anchor-and-count
+  extent_chars: 144
+  source: extract_key_reading_v3
   start_paragraph: 4
-  end_paragraph: 5
+  end_paragraph: 4
   slug: mdjjy
   text_ref: tvt77
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  absorbed_tail: 0

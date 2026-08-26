@@ -14,7 +14,11 @@ owns_code:
   - scripts/spotlight_fingerprints.py
   - frontend/src/components/reading-spotlight/
 owns_data:
-  - backend/data/lessons/*/v*/spotlight.yml
+  # #2916 之後檔名帶 slug，且一課可能有好幾篇 → `v3/spotlight.*.yml`
+  # （`story-structure` 的 `v3/keypoints.*.yml` 是同一個形狀）。
+  # ⚠️ 舊值 `*/v*/spotlight.yml` 在 v2 還在時**只靠 v2 對得到**；#2720 移除 v2 之後
+  # 它變成 0 檔，被 registry 的 pointer-rot 檢查擋下 —— 那道 gate 起作用了。
+  - backend/data/lessons/*/v3/spotlight.*.yml
   - backend/data/spotlight_fingerprints.json
   - backend/data/curriculum_qa/spotlight_manifest.json
   - backend/data/curriculum_qa/content_known_gaps.yaml

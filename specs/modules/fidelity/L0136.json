@@ -1,6 +1,6 @@
 {
   "uid": "L0136",
-  "gate_version": 1,
+  "gate_version": 2,
   "docx_sha256": "8f9d-eec1-abf9-b4fb",
   "modules": {
     "comprehension.ncvcp": {

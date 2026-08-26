@@ -21,11 +21,15 @@ key_reading:
     feedback: 嗯，還不錯喲！
   - threshold: ＞231字
     feedback: 哇嗚，超級厲害！
-  passage: 沙馬雷和一般的無人機不一樣，它只有一片翅膀，因此構造簡單，體積更小，更省電，而且沒電時，它會盤旋而下，比較不會摔壞！它和一般無人機一樣，可以垂直起降，在狹窄的空間靈活飛行。內建攝影機時，可以幫助人類進行搜救、環境監測，甚至探索危機四伏、險象環生的災難現場。還沒開花的向日葵花苞，早晨朝向東方，到了下午則轉向西方，整天彷彿在追逐太陽！這種「向陽性」讓科學家發明了一種能自動調整角度的仿生太陽能板，讓太陽能發電變得更有效率！一般的太陽能板角度是固定的，當太陽移動後，吸收陽光的效率就會降低。但這種仿生設計模仿向日葵的特性，讓太陽能板可以「跟著太陽轉」，整天都能吸收到最多陽光，發電量大幅提升。這項技術已經在多個國家被應用，為地球提供更多乾淨能源！
+  passage: 沙馬雷和一般的無人機不一樣，它只有一片翅膀，因此構造簡單，體積更小，更省電，而且沒電時，它會盤旋而下，比較不會摔壞！它和一般無人機一樣，可以垂直起降，在狹窄的空間靈活飛行。內建攝影機時，可以幫助人類進行搜救、環境監測，甚至探索危機四伏、險象環生的災難現場。
   start_text: 沙馬雷和一般的無人機不一樣，它只有一片翅膀，因此
-  extent_chars: 321
-  source: docx-anchor-and-count
+  extent_chars: 128
+  source: extract_key_reading_v3
   start_paragraph: 3
-  end_paragraph: 5
+  end_paragraph: 3
   slug: ny7wv
   text_ref: vcn7j
+extraction_check:
+  verdict: confirmed
+  corroborated_by_first_edition: true
+  absorbed_tail: 0

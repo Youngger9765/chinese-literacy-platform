@@ -1,6 +1,6 @@
 {
   "uid": "L0032",
-  "gate_version": 1,
+  "gate_version": 2,
   "docx_sha256": "1165-ecf5-6e33-8c5f",
   "modules": {
     "comprehension.udrax": {
@@ -18,7 +18,7 @@
       "exit": 0
     },
     "key_reading.pucxn": {
-      "yaml_sha256": "3085-fcd8-6092-57c8",
+      "yaml_sha256": "ea54-bd45-4d0d-0365",
       "checked": 9,
       "status": "pass",
       "passed": true,

@@ -1,6 +1,6 @@
 {
   "uid": "L0167",
-  "gate_version": 1,
+  "gate_version": 2,
   "docx_sha256": "96c9-cd9a-acb2-e86b",
   "modules": {
     "comprehension.rarna": {
@@ -32,7 +32,7 @@
       "exit": 0
     },
     "key_reading.dkhf7": {
-      "yaml_sha256": "eddd-0ac7-29a2-6cf2",
+      "yaml_sha256": "5342-ef24-136e-f341",
       "checked": 10,
       "status": "pass",
       "passed": true,

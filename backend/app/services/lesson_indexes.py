@@ -608,12 +608,13 @@ def _thumbnail_name(uid: str, version_id: str | None) -> str | None:
         return None
     # 封面是**課**的一部分，不是版本的一部分。
     #
-    # 二修建了 v3 但沒把封面搬過去 —— 175 張全部留在 `v2/assets/`。
-    # 這裡原本只看 `version_id`（＝ v3），於是每一課都回 None，圖書館整片空白。
+    # 二修建了 v3 但沒把封面搬過去，175 張一度全留在 `v2/assets/`。這裡原本只看
+    # `version_id`（＝ v3），於是每一課都回 None，圖書館整片空白。
     # Young：圖呢？？？之前有圖啊
     #
-    # 從最新版本往回找，第一個有封面的就用它。v3 之後補了自己的封面時會優先，
-    # 沒補就沿用課本來就有的那張 —— 而不是假裝這課沒有封面。
+    # v2 移除時 1990 個 asset 已 `git mv` 進 `v3/assets/`（#2720 的 v3 移植），
+    # 所以現在最新版本就有封面。**往回找的迴圈保留** —— 它不是為 v2 寫的，而是為
+    # 「下一個版本忘記搬封面」寫的，而那件事已經發生過一次。
     versions = sorted(
         (c for c in root.iterdir() if c.is_dir() and c.name.startswith("v")),
         key=lambda c: c.name,

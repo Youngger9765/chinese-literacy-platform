@@ -1,6 +1,6 @@
 {
   "uid": "L0041",
-  "gate_version": 1,
+  "gate_version": 2,
   "docx_sha256": "0431-43f4-82b0-b8de",
   "modules": {
     "comprehension.remjm": {
@@ -18,7 +18,7 @@
       "exit": 0
     },
     "key_reading.ujtjf": {
-      "yaml_sha256": "63cb-feb7-e7f0-41ee",
+      "yaml_sha256": "4df5-1963-27e3-defc",
       "checked": 9,
       "status": "pass",
       "passed": true,

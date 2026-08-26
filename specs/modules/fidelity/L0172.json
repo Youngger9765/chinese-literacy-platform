@@ -1,6 +1,6 @@
 {
   "uid": "L0172",
-  "gate_version": 1,
+  "gate_version": 2,
   "docx_sha256": "c7e9-56ab-bdbf-93e6",
   "modules": {
     "comprehension.krvkp": {
@@ -32,7 +32,7 @@
       "exit": 0
     },
     "key_reading.pfqpp": {
-      "yaml_sha256": "b711-05d7-76ad-9318",
+      "yaml_sha256": "45b9-4988-df89-f6d0",
       "checked": 11,
       "status": "pass",
       "passed": true,

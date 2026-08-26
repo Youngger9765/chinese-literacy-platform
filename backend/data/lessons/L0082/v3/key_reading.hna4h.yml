@@ -4,8 +4,6 @@ section_no: 二
 key_reading:
   instruction: 請用計時器，從指定段落（二    ）開始朗讀，在表格中記錄計時1分鐘朗讀的字數。如果計時3次後還不滿意，可以再多練幾次。最後一次，找一位同學，請他計時、記錄並簽名！
   instruction_note: 括號內的 ☞ 是圖形物件，文字流只有「（二    ）」的空白
-  span_confidence: high
-  span_evidence_note: 字數欄末筆 344 == 第 2~5 段字數和（扣 U+2014 後 110+40+84+110），四個檢查點全中
   timing_table:
     columns:
     - 第1次計時
@@ -23,11 +21,15 @@ key_reading:
   - threshold: ≧251字
     feedback: 哇嗚，超級厲害！
   benchmark_note: 本課門檻用 ≦／≧（其他課多為 ＜／＞），照原稿記錄
-  passage: 螞蟻雖然身軀小，卻有驚人的力氣，能夠扛起自己重量數十倍的食物。牠們是社會性昆蟲，分工嚴密。整個蟻群的核心是蟻后，所有的螞蟻都為了一個共同的目標——協助蟻后繁衍後代。工蟻日夜奔波，冒著生命危險外出覓食，都是為了延續蟻群的生命。從生物行為的角度來看，螞蟻的合作延續蟻群的生存，而蟋蟀則透過競爭爭取繁衍的機會。夏秋時節最容易發現蟋蟀的蹤影，草叢與灌木間常傳來一聲聲「唧唧」的蟲鳴，此起彼落、忽遠忽近，正是蟋蟀在大自然的舞台上放聲高歌。但你知道嗎？這些會發出鳴叫聲的都是雄蟋蟀呢！原來，蟋蟀高歌是為了求偶，雄蟋蟀會摩擦前翅，發出清脆的鳴聲，就像在演奏情歌，吸引女朋友的注意；有時也用鳴聲警告其他雄蟋蟀不要靠近地盤、不要來爭奪女朋友。雌蟋蟀最終會選擇鳴聲最吸引她的雄蟋蟀作為伴侶，進而交配，繁殖下一代。
+  passage: 螞蟻雖然身軀小，卻有驚人的力氣，能夠扛起自己重量數十倍的食物。牠們是社會性昆蟲，分工嚴密。整個蟻群的核心是蟻后，所有的螞蟻都為了一個共同的目標——協助蟻后繁衍後代。工蟻日夜奔波，冒著生命危險外出覓食，都是為了延續蟻群的生命。
   start_text: 螞蟻雖然身軀小，卻有驚人的力氣，能夠扛起自己重量
-  extent_chars: 346
-  source: docx-anchor-and-count
+  extent_chars: 112
+  source: extract_key_reading_v3
   start_paragraph: 2
-  end_paragraph: 5
+  end_paragraph: 2
   slug: hna4h
   text_ref: 67fkn
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  absorbed_tail: 0

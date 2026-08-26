@@ -1,6 +1,6 @@
 {
   "uid": "L0162",
-  "gate_version": 1,
+  "gate_version": 2,
   "docx_sha256": "7574-4171-5bb8-0304",
   "modules": {
     "classical_text.cwuhm": {

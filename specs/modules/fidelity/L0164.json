@@ -1,6 +1,6 @@
 {
   "uid": "L0164",
-  "gate_version": 1,
+  "gate_version": 2,
   "docx_sha256": "b174-60bf-da37-70d7",
   "modules": {
     "classical_text.ntp7h": {

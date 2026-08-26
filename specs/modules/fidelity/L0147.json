@@ -1,6 +1,6 @@
 {
   "uid": "L0147",
-  "gate_version": 1,
+  "gate_version": 2,
   "docx_sha256": "25b0-b989-5fe3-78a4",
   "modules": {
     "comprehension.huqmq": {
@@ -32,7 +32,7 @@
       "exit": 0
     },
     "key_reading.tnt4y": {
-      "yaml_sha256": "d2b1-ab65-67f8-d030",
+      "yaml_sha256": "1bf6-6dc2-4444-578b",
       "checked": 10,
       "status": "pass",
       "passed": true,

@@ -1,6 +1,6 @@
 {
   "uid": "L0144",
-  "gate_version": 1,
+  "gate_version": 2,
   "docx_sha256": "713c-b121-1531-e35a",
   "modules": {
     "comprehension.3dufp": {

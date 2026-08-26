@@ -1,6 +1,6 @@
 {
   "uid": "L0143",
-  "gate_version": 1,
+  "gate_version": 2,
   "docx_sha256": "c5f4-78cc-86bb-eabe",
   "modules": {
     "comprehension.mjvdr": {
@@ -32,7 +32,7 @@
       "exit": 0
     },
     "key_reading.96jnp": {
-      "yaml_sha256": "dd57-4d75-959f-dd9e",
+      "yaml_sha256": "7c43-c086-d06f-9e2f",
       "checked": 10,
       "status": "pass",
       "passed": true,

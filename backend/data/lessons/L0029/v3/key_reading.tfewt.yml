@@ -4,24 +4,6 @@ section_no: 二
 key_reading:
   instruction: 請用計時器，從指定段落（七☞）開始朗讀，計時1分鐘讀的字數，並記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！
   printed_char_count: 331
-  parts:
-  - part: 1
-    section_no_printed: 二
-    start_paragraph_printed: 7
-    spans_seq:
-    - 7
-    - 8
-    - 9
-    printed_char_count: 331
-  - part: 2
-    section_no_printed: 三
-    start_paragraph_printed: 7
-    spans_seq:
-    - 16
-    - 17
-    - 18
-    - 19
-    printed_char_count: 333
   timing_table:
     columns:
     - 第1次計時
@@ -37,13 +19,19 @@ key_reading:
     feedback: 嗯，還不錯喲！
   - threshold: ＞231字
     feedback: 哇嗚，超級厲害！
-  passage: 接下來發生的事，就是千古流傳的傳奇了。大衛從袋中掏出一塊石子，把它裝入投石器的皮囊裡，石子甩射出去，準確擊中巨人銅盔未能防護到的額頭，歌利亞面朝下仆倒在地。大衛沒有帶刀，他跑過去，將巨人的刀拔出來，殺死他，並割下他的頭。預期中毫無勝算的少年，竟然只用一塊不值錢的小石子，就以迅雷不及掩耳的速度結束了這場戰鬥。看到自己的英雄倒下，非利士人大驚失色，四散逃跑。以色列軍隊大聲歡呼，追擊敵人，贏得了戰爭的勝利！在一對一的肉搏戰裡，少年絕對不可能擊敗巨人。但只要有勇氣，用了正確的方法，巨人並沒有想像中的那樣堅不可摧。我們的生活中，難免遇上像巨人般可怕的挑戰與困難，這時，不妨想起那個勇敢牧羊少年，勇敢面對，發揮自己的長處，就會有機會戰勝困難，把危機變成轉機！
+  passage: 接下來發生的事，就是千古流傳的傳奇了。
   start_text: 接下來發生的事，就是千古流傳的傳奇了。
-  extent_chars: 326
-  source: docx-anchor-and-count
+  extent_chars: 19
+  source: extract_key_reading_v3
   start_idx: 7
   end_idx: 9
   printed_counter_last: 331
   part: 1
   slug: tfewt
   text_ref: fqwda
+  start_paragraph: 7
+  end_paragraph: 7
+extraction_check:
+  verdict: confirmed
+  corroborated_by_first_edition: true
+  absorbed_tail: 0

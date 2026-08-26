@@ -1,6 +1,6 @@
 {
   "uid": "L0134",
-  "gate_version": 1,
+  "gate_version": 2,
   "docx_sha256": "374b-1416-c016-db24",
   "modules": {
     "comprehension.nrfew": {

@@ -1,6 +1,6 @@
 {
   "uid": "L0169",
-  "gate_version": 1,
+  "gate_version": 2,
   "docx_sha256": "a2e1-0087-81a6-49cb",
   "modules": {
     "comprehension.7q93j": {
@@ -32,7 +32,7 @@
       "exit": 0
     },
     "key_reading.wyvrp": {
-      "yaml_sha256": "8ba4-404e-b9c7-1c86",
+      "yaml_sha256": "6761-5fc1-4696-de8e",
       "checked": 10,
       "status": "pass",
       "passed": true,

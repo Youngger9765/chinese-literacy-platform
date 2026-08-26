@@ -1,6 +1,6 @@
 {
   "uid": "L0011",
-  "gate_version": 1,
+  "gate_version": 2,
   "docx_sha256": "2ee0-362d-9dc4-d279",
   "modules": {
     "comprehension.4axkq": {
@@ -18,7 +18,7 @@
       "exit": 0
     },
     "key_reading.arfe7": {
-      "yaml_sha256": "0ce2-d2e8-9b32-5f91",
+      "yaml_sha256": "1847-5e93-ea80-8da2",
       "checked": 9,
       "status": "pass",
       "passed": true,

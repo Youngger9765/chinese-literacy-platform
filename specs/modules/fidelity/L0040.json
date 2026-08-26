@@ -1,6 +1,6 @@
 {
   "uid": "L0040",
-  "gate_version": 1,
+  "gate_version": 2,
   "docx_sha256": "937a-b1cb-3a18-5ed0",
   "modules": {
     "comprehension.edf97": {
@@ -25,7 +25,7 @@
       "exit": 0
     },
     "key_reading.3ma4h": {
-      "yaml_sha256": "9bd5-e89d-00c3-c39a",
+      "yaml_sha256": "417d-c3e6-26bd-c0cf",
       "checked": 9,
       "status": "pass",
       "passed": true,

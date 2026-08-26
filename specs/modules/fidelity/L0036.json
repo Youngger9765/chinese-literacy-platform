@@ -1,6 +1,6 @@
 {
   "uid": "L0036",
-  "gate_version": 1,
+  "gate_version": 2,
   "docx_sha256": "6f97-7533-a599-6d8c",
   "modules": {
     "comprehension.nmmjf": {
@@ -18,7 +18,7 @@
       "exit": 0
     },
     "key_reading.cua4c": {
-      "yaml_sha256": "5948-f142-0023-9c7c",
+      "yaml_sha256": "3d00-f2b3-4e6c-c51d",
       "checked": 10,
       "status": "pass",
       "passed": true,

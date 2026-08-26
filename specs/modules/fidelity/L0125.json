@@ -1,6 +1,6 @@
 {
   "uid": "L0125",
-  "gate_version": 1,
+  "gate_version": 2,
   "docx_sha256": "820a-32ee-4292-3388",
   "modules": {
     "comprehension.vvnak": {
@@ -25,7 +25,7 @@
       "exit": 0
     },
     "key_reading.rxqnp": {
-      "yaml_sha256": "ba7c-780d-8c7c-f3ce",
+      "yaml_sha256": "3deb-e391-b9fc-80b3",
       "checked": 10,
       "status": "pass",
       "passed": true,

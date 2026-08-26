@@ -1,6 +1,6 @@
 {
   "uid": "L0018",
-  "gate_version": 1,
+  "gate_version": 2,
   "docx_sha256": "4bbb-86ab-4913-f59f",
   "modules": {
     "comprehension.yfqcd": {
@@ -25,7 +25,7 @@
       "exit": 0
     },
     "key_reading.tpxtj": {
-      "yaml_sha256": "b701-14c1-3289-5f69",
+      "yaml_sha256": "e12f-d3f9-d8da-6873",
       "checked": 10,
       "status": "pass",
       "passed": true,

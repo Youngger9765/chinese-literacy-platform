@@ -1,6 +1,6 @@
 {
   "uid": "L0149",
-  "gate_version": 1,
+  "gate_version": 2,
   "docx_sha256": "4f5b-53ac-76cd-c51a",
   "modules": {
     "comprehension.x6uwx": {
@@ -32,7 +32,7 @@
       "exit": 0
     },
     "key_reading.ufavh": {
-      "yaml_sha256": "3903-5b7a-d650-048d",
+      "yaml_sha256": "f678-fede-cdea-b56d",
       "checked": 10,
       "status": "pass",
       "passed": true,

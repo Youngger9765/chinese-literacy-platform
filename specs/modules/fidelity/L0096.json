@@ -1,6 +1,6 @@
 {
   "uid": "L0096",
-  "gate_version": 1,
+  "gate_version": 2,
   "docx_sha256": "1aff-c839-8c8d-63a8",
   "modules": {
     "comprehension.ekfaj": {
@@ -25,7 +25,7 @@
       "exit": 0
     },
     "key_reading.unxym": {
-      "yaml_sha256": "35e3-6a3a-22ef-f9d3",
+      "yaml_sha256": "3655-344c-4a2c-4451",
       "checked": 11,
       "status": "pass",
       "passed": true,

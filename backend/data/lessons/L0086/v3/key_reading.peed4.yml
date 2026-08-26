@@ -5,16 +5,7 @@ key_reading:
   instruction: 請用計時器，從指定段落（七　)開始朗讀，計時1分鐘讀的字數，並記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！
   instruction_note: 括號內的 ☞ 是圖形物件，文字流只有「（七　)」的空白；右括號在原稿是半形。
   start_paragraph: 7
-  end_paragraph: 11
-  spans_paragraphs:
-  - 7
-  - 8
-  - 9
-  - 10
-  - 11
-  approx_chars_from_start: 336
-  span_confidence: high
-  span_confidence_note: 五個段界（79／105／156／170／336）與印出的數字全部精準吻合，見 body.char_count_note。
+  end_paragraph: 7
   timing_table:
     columns:
     - 第1次計時
@@ -32,9 +23,13 @@ key_reading:
   - threshold: ＞221字
     feedback: 哇嗚，超級厲害！
   benchmark_note: 中間那格印「190~220字」（不是多數課的 191~220），與第一格的「＜190字」重疊到 190 這個值；照原稿保留。
-  passage: 經過了萬紫千紅的春天，暑氣蒸人的夏天，金風送爽的秋天，寒氣逼人的冬天。正太每天抱著豬上上下下，一天又一天，一年又一年，小豬慢慢長大，小豬變中豬，中豬變大豬了。三年以後，這頭豬已經80公斤了，正太還抱得動這隻豬嗎？這時正太也長大了，他變得非常強壯，每天抱著這80公斤的大豬，上下200級階梯，來回20道門檻，一點都不成問題。這麼重的豬，他怎麼抱得動呢？原來啊，豬本來小小的，很輕，但牠每天都長大一點點，這一點點的變化，抱的時候根本感覺不出來。每天加重一點點，加重一點點，根本感覺不出來有多難。在滴水穿石、循序漸進的努力之後，正太的筋骨肌肉慢慢適應這漸進的挑戰，過了一千多天，男孩變成身材魁梧、帥氣挺拔的男人，他跑得快、跳得高，能舉起寺裡最重的石臼，一般的匪徒強盜再也不是正太的對手了。
+  passage: 經過了萬紫千紅的春天，暑氣蒸人的夏天，金風送爽的秋天，寒氣逼人的冬天。正太每天抱著豬上上下下，一天又一天，一年又一年，小豬慢慢長大，小豬變中豬，中豬變大豬了。
   start_text: 經過了萬紫千紅的春天，暑氣蒸人的夏天，金風送爽的
-  extent_chars: 341
-  source: derived-from-body
+  extent_chars: 79
+  source: extract_key_reading_v3
   slug: peed4
   text_ref: rdyd6
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  absorbed_tail: 0

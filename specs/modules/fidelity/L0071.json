@@ -1,6 +1,6 @@
 {
   "uid": "L0071",
-  "gate_version": 1,
+  "gate_version": 2,
   "docx_sha256": "3919-3bac-af07-3a42",
   "modules": {
     "comprehension.dvfyt": {
@@ -18,7 +18,7 @@
       "exit": 0
     },
     "key_reading.9rncr": {
-      "yaml_sha256": "f6b8-18ee-852b-7bd6",
+      "yaml_sha256": "9485-dd7c-5c40-ac00",
       "checked": 10,
       "status": "pass",
       "passed": true,

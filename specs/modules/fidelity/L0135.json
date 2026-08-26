@@ -1,6 +1,6 @@
 {
   "uid": "L0135",
-  "gate_version": 1,
+  "gate_version": 2,
   "docx_sha256": "a067-5a2c-4e67-226e",
   "modules": {
     "comprehension.4fajv": {
