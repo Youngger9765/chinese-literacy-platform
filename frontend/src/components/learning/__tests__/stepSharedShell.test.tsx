@@ -57,10 +57,13 @@ describe('StepActionBar', () => {
     expect(inner().className).toContain('flex flex-col gap-2');
     rerender(<StepActionBar layout="stack-center">x</StepActionBar>);
     expect(inner().className).toContain('flex flex-col items-center gap-3');
-    // row：水平並排（讀全文-做記號的「播放全文 + 完成標記」，#2941）
+    // row：水平並排置中（讀全文-做記號的「播放全文 + 完成標記」，#2941）
     rerender(<StepActionBar layout="row">x</StepActionBar>);
-    expect(inner().className).toContain('flex items-center justify-center gap-3');
+    expect(inner().className).toContain('flex flex-wrap items-center justify-center gap-3');
     expect(inner().className).not.toContain('flex-col');
+    // flex-wrap 不能被拿掉：播放中那三顆在 360px 手機上塞不進一行，
+    // 不換行就直接視覺溢出（review #2942）。
+    expect(inner().className).toContain('flex-wrap');
     rerender(<StepActionBar>x</StepActionBar>);
     expect(inner().className).not.toContain('flex flex-col');
     // 四種都必須帶上共用的寬度限制，否則同一顆按鈕在不同步驟會是不同寬度

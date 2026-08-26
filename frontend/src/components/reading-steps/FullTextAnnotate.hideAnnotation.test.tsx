@@ -120,4 +120,20 @@ describe('FullTextAnnotate — normal mode (signed-in student)', () => {
     // 只有一顆，沒有連舊位置一起留下來
     expect(screen.getAllByTestId('reading-player')).toHaveLength(1);
   });
+
+  it('播放全文與完成標記等大（#2941 owner：兩個按鈕的大小要一樣）', () => {
+    // 播放鍵原本是 h-11 的次要尺寸，搬到主 CTA 旁邊就變成一大一小。
+    // 這裡鎖尺寸 class：兩顆都 w-44 h-14，任一邊改動就會紅。
+    renderStep(false);
+    const play = screen.getByText('播放全文').closest('button')!;
+    const finish = screen.getByText('完成標記').closest('button')!;
+    for (const btn of [play, finish]) {
+      expect(btn.className).toContain('w-44');
+      expect(btn.className).toContain('h-14');
+      expect(btn.className).toContain('text-xl');
+    }
+    // 置中：動作列內容用 justify-center 而不是撐滿
+    expect(screen.getByTestId('step-action-bar').firstElementChild!.className)
+      .toContain('justify-center');
+  });
 });

@@ -1056,7 +1056,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
               動作，而底部這條是唯一永遠在畫面上的地方。 */}
       <StepActionBar layout="row">
           <ReadingPlayer
-            className="shrink-0"
+            size="lg"
             isPlaying={reader.isPlaying}
             isPaused={reader.isPaused}
             onPlay={reader.play}
@@ -1067,7 +1067,9 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
           <button
             type="button"
             onClick={() => onFinish(summary)}
-            className="flex-1 min-w-0 flex items-center justify-center gap-2 h-14 rounded-full font-headline font-bold text-xl text-white whitespace-nowrap shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all"
+            /* w-44 / h-14 跟播放全文那顆一模一樣（`ReadingPlayer` size="lg"）——
+               owner 2026-08-26：「兩個按鈕的大小要一樣並且置中」。 */
+            className="w-44 h-14 flex items-center justify-center gap-2 rounded-full font-headline font-bold text-xl text-white whitespace-nowrap shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all"
             style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
           >
             <span>完成標記</span>
