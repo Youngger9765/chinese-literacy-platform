@@ -347,6 +347,12 @@ def _rounds_with_flat_paragraphs(l: dict) -> dict:
         paras = _flat_paragraphs(m.get("full_text_annotate"))
         if paras:
             m["paragraphs"] = paras
+        # 前端讀的是 `fill_in_blank` / `vocab_bank`，不是 `vocab_application`。
+        # 只覆蓋同名欄位的話這一格永遠退回頂層 —— 三篇共用一份題目（#2930）。
+        va = m.get("vocab_application")
+        if va:
+            m["fill_in_blank"] = _cloze_from(l, va) or None
+            m["vocab_bank"] = _vocab_bank_from(l, va) or None
         out[slug] = m
     return out
 
@@ -381,7 +387,7 @@ def _vocabulary_from(l: dict) -> list[dict]:
     return [{"word": i["word"], "definition": i["definition"]} for i in items if i.get("word")]
 
 
-def _cloze_from(l: dict) -> list[dict]:
+def _cloze_from(l: dict, section: dict | None = None) -> list[dict]:
     """四 語詞應用 → the LEGACY fill-in-blank shape the frontend requires.
 
     `frontend/src/services/api.ts` keeps only items matching `{sentence, answer}`
@@ -390,10 +396,16 @@ def _cloze_from(l: dict) -> list[dict]:
     shape that reads naturally from the worksheet — meant the step either showed
     nothing or crashed on `.sentence`.
     """
-    sec = _unwrap(_sections(l).get("vocab_application"), "vocab_application")
+    # `section` 有值時就用那一輪的（#2930）。一課多篇時模組在帳本裡叫
+    # `vocab_application`、送到前端卻叫 `fill_in_blank` —— 名字對不上，
+    # 覆蓋那層就漏掉它，三篇的語詞應用於是長得一模一樣。
+    sec = _unwrap(
+        section if section is not None else _sections(l).get("vocab_application"),
+        "vocab_application",
+    )
     # v2 寫 `questions[{text,answer}]`；v3 照學習單寫 `items[{stem,answer}]`。
     rows = sec.get("items") or sec.get("questions") or []
-    bank = _vocab_bank_from(l)
+    bank = _vocab_bank_from(l, section)
     out = []
     for q in rows:
         sentence = q.get("stem") or q.get("text") or ""
@@ -528,10 +540,16 @@ def _normalise_answer_code(answer: str, bank: dict) -> tuple[str, list[str]]:
     return known[0], known[1:]
 
 
-def _vocab_bank_from(l: dict) -> dict:
+def _vocab_bank_from(l: dict, section: dict | None = None) -> dict:
     """四 語詞應用's options, as the letter → word map the cloze exercise resolves
     its answers against. Without it every answer letter matches nothing."""
-    sec = _unwrap(_sections(l).get("vocab_application"), "vocab_application")
+    # `section` 有值時就用那一輪的（#2930）。一課多篇時模組在帳本裡叫
+    # `vocab_application`、送到前端卻叫 `fill_in_blank` —— 名字對不上，
+    # 覆蓋那層就漏掉它，三篇的語詞應用於是長得一模一樣。
+    sec = _unwrap(
+        section if section is not None else _sections(l).get("vocab_application"),
+        "vocab_application",
+    )
     # 一課可能有多個代號表（L0072 的語詞應用分成 A-C 與 D-G 兩組），全部合起來 ——
     # 只取第一組會讓後半題的答案代號查無對應。
     banks = sec.get("option_banks")

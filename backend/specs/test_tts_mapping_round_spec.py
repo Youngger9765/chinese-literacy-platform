@@ -69,3 +69,29 @@ def test_any_section_slug_resolves_to_its_article():
         if not (got and want.startswith(got[:8])):
             bad.append(f"{sec['slug']}（{sec.get('name')}）→{sec['text_ref']}: 得到 {got[:14]!r} 該是 {want[:14]!r}")
     assert not bad, f"{len(bad)}/{len(refs)} 個節解不開自己的課文：\n  " + "\n  ".join(bad[:6])
+
+
+def test_each_round_carries_its_own_cloze_and_bank():
+    """語詞應用也要跟著篇次走（#2930 續）。
+
+    模組在帳本裡叫 `vocab_application`，送到前端的欄位卻叫 `fill_in_blank`
+    ——名字對不上，覆蓋那一層就漏掉它，於是三篇的語詞應用長得一模一樣。
+    後端三篇的題目本來就不同（題數 9/8/8），是這一步把它們抹平的。
+    """
+    import json as _json
+    from app.services.lesson_indexes import _rounds_with_flat_paragraphs
+
+    lesson = get_lesson_by_id(LESSON)
+    rounds = _rounds_with_flat_paragraphs(lesson)
+    assert len(rounds) == 3, f"預期三輪，實際 {list(rounds)}"  # 正向對照
+
+    # 來源本來就不同 —— 若這裡就相同，那是資料問題不是這一步的問題
+    src = {k: _json.dumps(v.get("vocab_application"), ensure_ascii=False, sort_keys=True)
+           for k, v in rounds.items()}
+    assert len(set(src.values())) == 3, "來源的三輪語詞應用就已經一樣了"
+
+    got = {k: _json.dumps(v.get("fill_in_blank"), ensure_ascii=False, sort_keys=True)
+           for k, v in rounds.items()}
+    missing = [k for k, v in got.items() if v in ("null", "[]")]
+    assert not missing, f"這幾輪沒有 fill_in_blank，前端會退回頂層（三篇共用）：{missing}"
+    assert len(set(got.values())) == 3, f"三輪的語詞應用被抹成同一份：{[v[:40] for v in got.values()]}"
