@@ -26,12 +26,18 @@ export type StepActionBarLayout =
   /** 垂直堆疊、左右撐滿（例：再做一次 + 下一關）。 */
   | 'stack'
   /** 垂直堆疊並置中（例：錄音控制列，按鈕寬度各自不同）。 */
-  | 'stack-center';
+  | 'stack-center'
+  /**
+   * 水平並排（例：讀全文-做記號的「播放全文 + 完成標記」，#2941）。
+   * 主動作用 `flex-1` 吃掉剩下的寬度，旁邊那顆副控制自己 `shrink-0`。
+   */
+  | 'row';
 
 const LAYOUT_CLASS: Record<StepActionBarLayout, string> = {
   plain: '',
   stack: 'flex flex-col gap-2',
   'stack-center': 'flex flex-col items-center gap-3',
+  row: 'flex items-center justify-center gap-3',
 };
 
 interface Props {

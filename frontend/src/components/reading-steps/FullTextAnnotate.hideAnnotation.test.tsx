@@ -82,6 +82,15 @@ describe('FullTextAnnotate — read-only (anonymous QR visitor)', () => {
     renderStep(true);
     expect(screen.getByTestId('reading-player')).toBeInTheDocument();
   });
+
+  it('keeps the player out of the bottom action bar', () => {
+    // #2941 搬的是登入學生那顆。訪客頁（GuestReadingPage）沒有底部
+    // StepFooterNav，固定動作列會浮在半空中，而且訪客沒有「完成標記」
+    // 可以並排 —— 所以訪客的播放控制留在文章上方。
+    renderStep(true);
+    expect(screen.queryByTestId('step-action-bar')).not.toBeInTheDocument();
+    expect(screen.getByTestId('reading-player')).toBeInTheDocument();
+  });
 });
 
 describe('FullTextAnnotate — normal mode (signed-in student)', () => {
@@ -98,5 +107,17 @@ describe('FullTextAnnotate — normal mode (signed-in student)', () => {
   it('mounts the whole-lesson player', () => {
     renderStep(false);
     expect(screen.getByTestId('reading-player')).toBeInTheDocument();
+  });
+
+  it('puts 播放全文 next to 完成標記 in the bottom action bar (#2941)', () => {
+    // 放在文章上方時，學生一往下讀就把播放鍵捲出畫面；「完成標記」在底部那條
+    // 固定列上永遠看得到，所以兩顆並排在那裡。斷言「同一條列裡」而不是
+    // 「頁面上有」—— 後者原本就成立，改壞了也不會紅。
+    renderStep(false);
+    const bar = screen.getByTestId('step-action-bar');
+    expect(bar).toContainElement(screen.getByTestId('reading-player'));
+    expect(bar).toContainElement(screen.getByText('完成標記'));
+    // 只有一顆，沒有連舊位置一起留下來
+    expect(screen.getAllByTestId('reading-player')).toHaveLength(1);
   });
 });
