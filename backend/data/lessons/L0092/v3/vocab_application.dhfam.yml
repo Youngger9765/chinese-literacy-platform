@@ -1,0 +1,46 @@
+lesson_uid: L0092
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 廝殺
+    B: 衝鋒陷陣
+    C: 傾家蕩產
+    D: 罪孽
+    E: 益發
+    F: 自圓其說
+    G: 匪夷所思
+    H: 南轅北轍
+    I: 前仆後繼
+    J: 救贖
+  items:
+  - index: 1
+    stem: 如果騙人的話說太多，最後將難以(　)。
+    answer: F
+  - index: 2
+    stem: 將軍率領著千軍萬馬(　)，一舉將敵人徹底殲滅。
+    answer: B
+  - index: 3
+    stem: 這場冠軍爭霸戰，兩隊在場上奮力(　)，直到最後一刻才分勝負。
+    answer: A
+  - index: 4
+    stem: 自從經過老師的指點和鼓勵後，他學習的態度（　）積極。
+    answer: E
+  - index: 5
+    stem: 他明明做錯事，卻得到大家的讚賞，真是令人(　)。
+    answer: G
+  - index: 6
+    stem: 他沉迷賭博，不但欠下大筆債務，最後還差點(　)，眾叛親離。
+    answer: C
+  - index: 7
+    stem: 他年輕時做過許多壞事，晚年常想彌補自己曾犯下的(　)。
+    answer: D
+  - index: 8
+    stem: 他常說健康第一，卻天天熬夜、亂吃零食，做法和目標根本 (　)。
+    answer: H
+  notes:
+    option_bank: 10 個代號對應 8 道小題；I.前仆後繼、J.救贖 未被任何一題用到
+    answer_carrier: 橘色手寫代號（PDF p4~p5）；文字層的(　)內已填有同樣的代號
+  slug: dhfam
+  text_ref: ymrp3

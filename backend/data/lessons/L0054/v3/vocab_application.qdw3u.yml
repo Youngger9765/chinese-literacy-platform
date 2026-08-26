@@ -1,0 +1,44 @@
+lesson_uid: L0054
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 爭強鬥勝
+    B: 招親
+    C: 耳目一新
+    D: 粉墨登場
+    E: 尾隨而至
+    F: 青睞
+    G: 雄赳赳，氣昂昂
+    H: 丰采
+  items:
+  - index: 1
+    stem: 今年校慶我們班要表演舞臺劇，到時全班都會(　)。
+    answer: D
+  - index: 2
+    stem: 颱風來襲，狂風呼嘯而過，暴雨(　)，街道很快就積水了。
+    answer: E
+  - index: 3
+    stem: 學校旁荒廢許久的公園整修後，令人(　)。
+    answer: C
+  - index: 4
+    stem: 這款新零食，不僅好吃而且好玩，受到消費者的(　)。
+    answer: F
+  - index: 5
+    stem: 運動會上，參賽選手(　)、互不相讓，努力爭取最好的成績。
+    answer: A
+  - index: 6
+    stem: 士兵(　) 的列隊前進，圍觀的人都感受到威武的氣勢。
+    answer: G
+  - index: 7
+    stem: 故事中的國王張貼公告(　)招親，希望替女兒找到合適的結婚對象。
+    answer: B
+  - index: 8
+    stem: 畢業典禮上，每位學生都展現了屬於自己的 (　)。
+    answer: H
+  notes:
+    option_bank: 8 個代號對應 8 道小題（本課 10 個語詞中「真摯」「嬌客」未入選項）。
+    answer_carrier: 橘色手寫字（圖形），文字流的（　）內已填有代號
+  slug: qdw3u
+  text_ref: a3pdu

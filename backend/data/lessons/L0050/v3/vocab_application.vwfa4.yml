@@ -1,0 +1,44 @@
+lesson_uid: L0050
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 揚帆啟航
+    B: 股票
+    C: 節衣縮食
+    D: 滿手老繭
+    E: 集資
+    F: 獲利
+    G: 股東
+    H: 大手一揮
+    I: 派遣
+  items:
+  - index: 1
+    stem: 公司今年（　）大增，決定發放員工獎金。
+    answer: F
+  - index: 2
+    stem: 大學畢業後，他準備（　），展開新的生活。
+    answer: A
+  - index: 3
+    stem: 農夫長年在田裡工作，雙手早已（　）。
+    answer: D
+  - index: 4
+    stem: 我們想（　）開一家飲料店，大家各出一點錢吧。
+    answer: E
+  - index: 5
+    stem: 公司（　）他到海外受訓。
+    answer: I
+  - index: 6
+    stem: 雖然家裡經濟不寬裕，爸媽仍靠著（　），努力供我念書。
+    answer: C
+  - index: 7
+    stem: 富有的企業家（　），當場答應贊助全校一年的午餐費用。
+    answer: H
+  - index: 8
+    stem: 他每天關注（　）市場的變化，希望找到投資機會。
+    answer: B
+  notes:
+    option_bank: 9 個代號對 8 道小題，G.股東 未被任何一題用到（原稿如此）。
+  slug: vwfa4
+  text_ref: cwrfr

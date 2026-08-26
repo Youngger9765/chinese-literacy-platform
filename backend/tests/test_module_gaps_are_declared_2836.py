@@ -45,7 +45,10 @@ def _actual_gaps() -> dict[str, set[str]]:
         v3 = lesson_dir / "v3"
         if not (v3 / "lesson.yml").is_file():
             continue
-        absent = {m for m in MODULES if not (v3 / f"{m}.yml").is_file()}
+        # 檔名是 `{模組}.{slug}.yml`（#2916），一課可能有好幾份。
+        # 寫死 `{m}.yml` 的話**每一課的每一個模組都算成缺** ——
+        # 175 課全數「缺模組」，而檔案全都在。
+        absent = {m for m in MODULES if not any(v3.glob(f"{m}.*.yml"))}
         if absent:
             out[lesson_dir.name] = absent
     return out

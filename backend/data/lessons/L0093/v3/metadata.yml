@@ -45,6 +45,9 @@ source_profile:
   class: no_anchor
   note: ☞ 錨點對不到任何課文段落 —— XML 沒訊號，只能靠 vision
   has_key_reading_section: true
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: null
   has_body_paragraphs: true
   paragraph_idx_unique: true
   anchor_hits: 0

@@ -2,7 +2,7 @@
   "$id": "lingoleap/module/metadata",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
-  "description": "從 175 份實測 yml 長出來，不是手寫的。required = 每一課都有的欄位（少了就是回歸）；properties 列出所有已觀測欄位，配合 additionalProperties: false —— 現況全過，任何新發明的欄位名會紅。 ⚠️ `strategy_explained` / `strategy_sources` 是批次生成的，不是從原稿抽的，重產 schema 不會有它們 —— 重產後記得補回來。",
+  "description": "從 175 份實測 yml 長出來，不是手寫的。required = 每一課都有的欄位（少了就是回歸）；properties 列出所有已觀測欄位，配合 additionalProperties: false —— 現況全過，任何新發明的欄位名會紅。",
   "properties": {
     "_header_box": {
       "type": "object",
@@ -88,13 +88,25 @@
       "type": "string",
       "x-seen-in": "175/175"
     },
+    "source_profile": {
+      "type": "object",
+      "x-seen-in": "175/175"
+    },
     "strategy": {
       "type": "string",
-      "x-seen-in": "171/175"
+      "x-seen-in": "173/175"
+    },
+    "strategy_explained": {
+      "type": "string",
+      "x-seen-in": "160/175"
     },
     "strategy_label_printed": {
       "type": "string",
       "x-seen-in": "1/175"
+    },
+    "strategy_sources": {
+      "type": "object",
+      "x-seen-in": "173/175"
     },
     "text_count": {
       "type": "integer",
@@ -179,29 +191,13 @@
     "閱讀聚光燈_前半": {
       "type": "string",
       "x-seen-in": "2/175"
-    },
-    "strategy_explained": {
-      "type": "string",
-      "description": "策略名稱的白話說明，2–3 句，給學生自己讀。批次預生成（scripts/build_lesson_strategy.py），不是抽取器從原稿抽的 —— 重跑 build_module_schemas.py 不會產生它。`strategy` 只是一個 13 字的標籤，學生看不出要練什麼；#2898。",
-      "x-seen-in": "160/175",
-      "x-generated": true
-    },
-    "strategy_sources": {
-      "type": "object",
-      "description": "strategy 的三份原始紀錄：worksheet（學習單第一頁）/ master_sheet（總表）/ previous（更早的 pipeline）。三份都留著，是因為它們互有詳略，而 strategy 只能存一個值 —— 將來有人問「這句依據什麼」，答案要在檔案裡。",
-      "x-seen-in": "160/175",
-      "x-generated": true
-    },
-    "source_profile": {
-      "type": "object",
-      "x-seen-in": "175/175",
-      "description": "原稿分類（#2912）。抽取前的普查把每課歸成六類之一，抽取器讀它決定走哪條路徑，不是每次重新試錯。由 scripts/corpus_profile.py --write 產生，backend/tests/test_source_profile_gate.py 守著它不漂移。"
     }
   },
   "required": [
     "lesson_no",
     "lesson_seq",
-    "series"
+    "series",
+    "source_profile"
   ],
   "title": "metadata module payload",
   "type": "object",
@@ -212,7 +208,10 @@
     "lesson_seq",
     "level",
     "series",
-    "strategy"
+    "source_profile",
+    "strategy",
+    "strategy_explained",
+    "strategy_sources"
   ],
   "x-enforcement": "error",
   "x-lessons-observed": 175

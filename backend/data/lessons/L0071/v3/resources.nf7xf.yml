@@ -1,0 +1,39 @@
+lesson_uid: L0071
+version_id: v3
+section_no: 九
+resources:
+  row_label: 影片連結
+  items:
+  - index: 1
+    title: 一小時記下1200數字！靠自創"獨門記憶法"刺激大腦 中國重慶16歲少年獲封"最新世界記憶大師"｜記者 任以芳｜【國際大現場】20181227
+    duration: '1:45'
+    duration_seconds: 105
+    source: 三立新聞台
+    qr_code: true
+  - index: 2
+    title: 神奇數字7：提升記憶力的祕訣大公開！
+    duration: '5:55'
+    duration_seconds: 355
+    source: ec 性格記憶學
+    qr_code: true
+  section_name: 知識補給站
+  label: 影片連結
+  videos:
+  - index: 1
+    url: https://youtu.be/ncrFLRcWZmE
+    url_source: 總表0816「4.影片連結」年級6課次4
+  - index: 2
+    url: https://youtu.be/zjA5Hr9sx7A
+    url_source: 總表0816「4.影片連結」年級6課次4
+  notes:
+    items: '原稿的片長印成「・片長：(1:45)」（含括號），本欄照 L0072 的既有形狀去掉括號存成
+
+      `duration` ＋ `duration_seconds`。
+
+      兩支影片各附一個 QR code（圖形），本檔未解碼、也沒有可用的 URL 文字 ——
+
+      原稿的文字層只有標題、片長、來源三項。
+
+      影片標題裡的引號在原稿是**半形雙引號** "獨門記憶法"、"最新世界記憶大師"，照原稿保留。'
+  slug: nf7xf
+  text_ref: mkn9y

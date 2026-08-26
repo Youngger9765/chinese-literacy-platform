@@ -1,0 +1,139 @@
+lesson_uid: L0001
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 喝采
+  - 擊垮
+  - 事與願違
+  - 孤寂感
+  - 迎刃而解
+  - 沮喪
+  - 天壤之別
+  - 血脈賁張
+  - 睽違
+  - 轉瞬即逝
+  - 經年累月
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 熬過沮疑難雜症再度喝
+  - 擊關喪問經年累月登采
+  - 垮物理治療師見血上負
+  - 撫迎刃而解藥脈目勢擔
+  - 摸不著頭緒賁復不均事
+  - 上緊差距張下健轉力與
+  - 天張轉掉落定龍睛敵願
+  - 壤刺眼瞬寞決爭搶睽違
+  - 之激勝負即心虎凝聚力
+  - 別捶胸頓足逝鬥孤寂感
+  answers_are_graphical: true
+  answer_paths:
+  - word: 沮喪
+    cells:
+    - - 1
+      - 3
+    - - 2
+      - 3
+    direction: vertical
+  - word: 喝采
+    cells:
+    - - 1
+      - 10
+    - - 2
+      - 10
+    direction: vertical
+  - word: 經年累月
+    cells:
+    - - 2
+      - 5
+    - - 2
+      - 6
+    - - 2
+      - 7
+    - - 2
+      - 8
+    direction: horizontal
+  - word: 擊垮
+    cells:
+    - - 2
+      - 1
+    - - 3
+      - 1
+    direction: vertical
+  - word: 血脈賁張
+    cells:
+    - - 3
+      - 8
+    - - 4
+      - 7
+    - - 5
+      - 6
+    - - 6
+      - 5
+    direction: diagonal_down_left
+  - word: 迎刃而解
+    cells:
+    - - 4
+      - 2
+    - - 4
+      - 3
+    - - 4
+      - 4
+    - - 4
+      - 5
+    direction: horizontal
+  - word: 事與願違
+    cells:
+    - - 5
+      - 10
+    - - 6
+      - 10
+    - - 7
+      - 10
+    - - 8
+      - 10
+    direction: vertical
+  - word: 天壤之別
+    cells:
+    - - 7
+      - 1
+    - - 8
+      - 1
+    - - 9
+      - 1
+    - - 10
+      - 1
+    direction: vertical
+  - word: 轉瞬即逝
+    cells:
+    - - 7
+      - 3
+    - - 8
+      - 4
+    - - 9
+      - 5
+    - - 10
+      - 6
+    direction: diagonal_down_right
+  - word: 睽違
+    cells:
+    - - 8
+      - 9
+    - - 8
+      - 10
+    direction: horizontal
+  - word: 孤寂感
+    cells:
+    - - 10
+      - 8
+    - - 10
+      - 9
+    - - 10
+      - 10
+    direction: horizontal
+  slug: q6nak
+  text_ref: mcyjp

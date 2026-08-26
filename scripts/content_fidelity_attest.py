@@ -59,7 +59,9 @@ ATTEST_DIR = REPO / "specs" / "modules" / "fidelity"
 
 #: 逐字門的判準版本。⚠️ 改 verbatim_gate 的判準時**必須**加這個數字 ——
 #: 否則舊證明會被當成「用新判準驗過」，而它其實不是。
-GATE_VERSION = 1
+#: v2（#2720）：`review_reason` 加進 ANNOTATION_KEYS —— 那是我方寫的說明，
+#:              不是原稿字串。判準變了，175 課全部重產。
+GATE_VERSION = 2
 
 
 #: 雜湊只留前 16 個十六進位字元。

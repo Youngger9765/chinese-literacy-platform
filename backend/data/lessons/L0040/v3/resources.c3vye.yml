@@ -1,0 +1,26 @@
+lesson_uid: L0040
+version_id: v3
+section_no: 九
+resources:
+  items:
+  - index: 1
+    title: 電競專班-追逐選手夢
+    duration: '11:34'
+    duration_seconds: 694
+    source: 新聞思想啟
+  - index: 2
+    title: 殘酷的夢幻職業?!電競選手生活是怎樣
+    duration: '9:36'
+    duration_seconds: 576
+    source: 金金長知識_小冷知識科普
+  section_name: 知識補給站
+  label: 影片連結
+  videos:
+  - index: 1
+    url: https://youtu.be/ABlD5EY1vlk
+    url_source: 總表0816「4.影片連結」年級5課次28
+  - index: 2
+    url: https://youtu.be/v3vT9xRJOGo
+    url_source: 總表0816「4.影片連結」年級5課次28
+  slug: c3vye
+  text_ref: h6kd6

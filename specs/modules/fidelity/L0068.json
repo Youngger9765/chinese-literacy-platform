@@ -1,10 +1,10 @@
 {
   "uid": "L0068",
-  "gate_version": 1,
+  "gate_version": 2,
   "docx_sha256": "5cd5-2def-2215-fd8e",
   "modules": {
-    "comprehension": {
-      "yaml_sha256": "6116-d8a3-fcbf-d4df",
+    "comprehension.ejdkk": {
+      "yaml_sha256": "5df5-026d-d0ee-c1b4",
       "checked": 31,
       "status": "pass",
       "passed": true,
@@ -17,50 +17,50 @@
       "passed": true,
       "exit": 0
     },
-    "full_text_annotate": {
-      "yaml_sha256": "8506-c053-d13b-27b5",
+    "full_text_annotate.yehu3": {
+      "yaml_sha256": "71e1-f2fa-7a31-8ed1",
       "checked": 17,
       "status": "pass",
       "passed": true,
       "exit": 0
     },
-    "keypoints": {
-      "yaml_sha256": "c16c-9b3a-590a-ae34",
+    "keypoints.xa37k": {
+      "yaml_sha256": "467a-ca0e-934f-55b5",
       "checked": 11,
       "status": "pass",
       "passed": true,
       "exit": 0
     },
-    "resources": {
-      "yaml_sha256": "8184-3442-4d48-223e",
+    "resources.7u7q7": {
+      "yaml_sha256": "235f-eaa6-af29-64ad",
       "checked": 3,
       "status": "pass",
       "passed": true,
       "exit": 0
     },
-    "spotlight": {
-      "yaml_sha256": "a1ab-7169-de48-70a8",
+    "spotlight.u4whf": {
+      "yaml_sha256": "b29f-a001-dfc4-f8de",
       "checked": 52,
       "status": "pass",
       "passed": true,
       "exit": 0
     },
-    "vocab_application": {
-      "yaml_sha256": "c451-894e-e32a-806b",
+    "vocab_application.wf7we": {
+      "yaml_sha256": "bd8d-bdc5-695c-a323",
       "checked": 10,
       "status": "pass",
       "passed": true,
       "exit": 0
     },
-    "vocab_definitions": {
-      "yaml_sha256": "cdbd-1574-50d9-aed3",
+    "vocab_definitions.nfq49": {
+      "yaml_sha256": "85df-089e-d906-400f",
       "checked": 17,
       "status": "pass",
       "passed": true,
       "exit": 0
     },
-    "vocab_review": {
-      "yaml_sha256": "58f0-7a18-b6f2-ebb0",
+    "vocab_review.adc93": {
+      "yaml_sha256": "9405-e6c7-e801-ef58",
       "checked": 13,
       "status": "pass",
       "passed": true,

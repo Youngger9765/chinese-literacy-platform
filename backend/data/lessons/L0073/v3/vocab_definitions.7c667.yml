@@ -1,0 +1,57 @@
+lesson_uid: L0073
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: '請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+
+    🅐從本課語詞框框，找語詞。
+
+    🅑再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+
+    🅒問同學。'
+  vocabulary_bank:
+  - 雀躍
+  - 格格不入
+  - 唾手可得
+  - 嶄新
+  - 如影隨形
+  - 恍然大悟
+  - 眷戀
+  - 韶光
+  - 枯燥乏味
+  - 翻天覆地
+  items:
+  - index: 1
+    word: 韶光
+    definition: 時間，常指美好的時光。
+  - index: 2
+    word: 唾手可得
+    definition: 往手上吐口水，比喻非常容易得到。同「易如反掌」。
+  - index: 3
+    word: 枯燥乏味
+    definition: 單調、無趣。
+  - index: 4
+    word: 眷戀
+    definition: 懷念、不捨。
+  - index: 5
+    word: 如影隨形
+    definition: 像影子一直跟著人，比喻緊緊跟隨、難以擺脫。
+  - index: 6
+    word: 格格不入
+    definition: 不適合、難以融入。
+  - index: 7
+    word: 恍然大悟
+    definition: 突然醒悟、明白。
+  - index: 8
+    word: 雀躍
+    definition: 像雀鳥一樣跳躍，比喻非常開心、興奮。
+  - index: 9
+    word: 翻天覆地
+    definition: 形容變化非常大。同「天翻地覆」。
+  - index: 10
+    word: 嶄新
+    definition: 全新。
+  notes:
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
+  slug: 7c667
+  text_ref: 4ye9x

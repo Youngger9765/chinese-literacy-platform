@@ -23,10 +23,23 @@
     "notes": {
       "type": "object",
       "x-seen-in": "56/58"
+    },
+    "slug": {
+      "type": "string",
+      "x-seen-in": "58/58"
+    },
+    "text_ref": {
+      "type": [
+        "array",
+        "string"
+      ],
+      "x-seen-in": "58/58"
     }
   },
   "required": [
-    "items"
+    "items",
+    "slug",
+    "text_ref"
   ],
   "title": "self_check_before_reading module payload",
   "type": "object",
@@ -34,7 +47,9 @@
     "instruction",
     "items",
     "no_correct_answer",
-    "notes"
+    "notes",
+    "slug",
+    "text_ref"
   ],
   "x-enforcement": "error",
   "x-lessons-observed": 58

@@ -66,9 +66,18 @@ def _measure() -> dict[str, int]:
                 continue
             if not isinstance(data, dict):
                 continue
-            body = _payload(data, path.stem)
+            # 帶 slug 的重複大題（#2916）要跟本體算同一個模組，
+            # 否則每個 slug 都變成一個「只有 1 種形狀」的假模組，形狀棘輪就形同虛設
+            module_name = path.stem.partition(".")[0]
+            body = _payload(data, module_name)
             if isinstance(body, dict):
-                shapes.setdefault(path.stem, set()).add(frozenset(body.keys()))
+                # ⛔ 定址欄位不進形狀簽章（#2916）。`slug` 每份都有，`text_ref`
+                #    只有引用型的節有（課文自己沒有、跨篇的是清單）——
+                #    於是同一個模組多出「有/沒有 text_ref」兩種變體，
+                #    棘輪讀成「抽取器又發明了新欄位名」，而那不是它在盯的東西。
+                #    排除之後數字必須回到基準；沒回到就是真的有形狀漂移。
+                shapes.setdefault(module_name, set()).add(
+                    frozenset(body.keys() - {"slug", "text_ref"}))
     return {k: len(v) for k, v in shapes.items()}
 
 
@@ -123,6 +132,12 @@ def test_notes_are_not_scattered_back_to_top_level(measured):
     import re
 
     noteish = re.compile(r"(note|說明|備註)$|^_|_ref$|errata|carrier|scope", re.IGNORECASE)
+    # ⛔ `slug` / `text_ref` 是**定址**不是註解，不算「散在 top-level 的說明文字」。
+    #    `_ref$` 這條原本是抓 `xxx_ref` 那種夾帶的參照說明，但 #2916 之後
+    #    每一份 yml 都有 `text_ref` —— 1611 個檔全部命中，計數從 ~900 跳到 2153。
+    #    ⚠️ 正確的處理是把它們排除，不是把上限調高：調高上限會讓這個棘輪
+    #    對「真的又散出 1200 個註解欄位」也保持沉默。
+    ADDRESSING = {"slug", "text_ref"}
     scattered = 0
     for version_dir in sorted(LESSONS.glob("L*/v3")):
         for path in sorted(version_dir.glob("*.yml")):
@@ -132,11 +147,13 @@ def test_notes_are_not_scattered_back_to_top_level(measured):
                 continue
             if not isinstance(data, dict):
                 continue
-            body = _payload(data, path.stem)
+            # 檔名是 `{模組}.{slug}.yml`（#2916）—— 取模組名，
+            # 用整個 stem 的話 `_payload` 找不到 body，整支測試靜靜地數 0。
+            body = _payload(data, path.stem.partition(".")[0])
             if not isinstance(body, dict):
                 continue
             for key, value in body.items():
-                if key == "notes" or isinstance(value, dict):
+                if key == "notes" or key in ADDRESSING or isinstance(value, dict):
                     continue
                 if noteish.search(str(key)):
                     scattered += 1

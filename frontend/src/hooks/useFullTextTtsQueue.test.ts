@@ -291,7 +291,7 @@ describe('useFullTextTtsQueue — paragraph-boundary prefetch', () => {
     act(() => result.current.play());
 
     await waitFor(() =>
-      expect(prefetchSpy).toHaveBeenCalledWith(PARAGRAPHS[1], LESSON_ID, 1)
+      expect(prefetchSpy).toHaveBeenCalledWith(PARAGRAPHS[1], LESSON_ID, 1, undefined)
     );
   });
 
@@ -305,6 +305,6 @@ describe('useFullTextTtsQueue — paragraph-boundary prefetch', () => {
     await waitFor(() => expect(prefetchSpy).toHaveBeenCalled());
     // undefined is what a walker passes at the end; prefetchText ignores it,
     // but asserting here keeps the walker from inventing a paragraph.
-    expect(prefetchSpy).toHaveBeenCalledWith(undefined, LESSON_ID, 1);
+    expect(prefetchSpy).toHaveBeenCalledWith(undefined, LESSON_ID, 1, undefined);
   });
 });

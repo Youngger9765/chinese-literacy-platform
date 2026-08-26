@@ -48,12 +48,20 @@ def _errata(uid: str) -> list[dict]:
 
 
 def _grid(uid: str) -> list[str] | None:
-    f = LESSONS / uid / "v3" / "vocab_review.yml"
-    if not f.is_file():
-        return None
-    b = (yaml.safe_load(f.read_text(encoding="utf-8")) or {}).get("vocab_review") or {}
-    g = b.get("grid")
-    return g if isinstance(g, list) else None
+    """找字格子。檔名帶各自的 slug（`vocab_review.{slug}.yml`，#2916）。
+
+    ⚠️ 這裡本來寫死 `vocab_review.yml`。改名之後它一律讀不到檔，於是回 None，
+    而呼叫端把 None 講成「這課沒有找字格子」—— **格子明明在**。
+    9 課的勘誤因此從「驗過」掉成「驗不到」，而訊息長得像是資料的問題。
+    「我找錯地方」跟「它不存在」在輸出上一模一樣，這是同一輪裡反覆出現的形狀。
+    """
+    files = sorted((LESSONS / uid / "v3").glob("vocab_review.*.yml"))
+    for f in files:
+        b = (yaml.safe_load(f.read_text(encoding="utf-8")) or {}).get("vocab_review") or {}
+        g = b.get("grid")
+        if isinstance(g, list):
+            return g
+    return None
 
 
 def _source_paras(uid: str) -> list[str] | None:

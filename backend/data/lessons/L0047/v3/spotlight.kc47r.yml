@@ -1,0 +1,138 @@
+lesson_uid: L0047
+version_id: v3
+section_no: 三
+spotlight:
+  strategy_name: 詞彙推測策略──從上下文推測詞義
+  strategy_type: vocabulary
+  section_title_printed: 閱讀聚光燈
+  blocks:
+  - type: concept_box
+    text: '閱讀時遇到不懂的詞，該怎麼辦？前兩課，我們學過用「拆詞釋義」推測詞義。這一課，我們要學另一種方法──「從上下文推測詞義」。有些難詞的意思，就藏在前後的文字裡。仔細讀一讀難詞的上下文，找出相關線索，就有機會推測出它的意思。現在，讓我們一起學習這個策略的步驟吧！
+
+      ❶圈難詞：把不懂的語詞圈起來。
+
+      ❷讀上下文，找線索：讀一讀難詞前後的文字，把能幫助理解詞義的線索畫線。
+
+      ❸推測詞義：根據找到的線索，推測難詞的意思。
+
+      ❹放回句子檢查：把推測的意思放回原句，讀一讀，看看是否合理。'
+  - type: sub_block
+    label: 例如：第八段
+    instruction: 例如：第八段──在工地有人吵起架來，調停的常常是她們。
+    answer_carrier: 紅色 ☑ 與橘框圈選、畫線（皆為圖形，文字流無此資訊）；❸的手寫答案在文字流內
+    items:
+    - type: guide
+      text: ❶圈難詞：把「調停」圈起來。
+    - type: guide
+      text: ❷讀上下文，找線索：把「有人吵起架來」畫線。
+    - type: free_text
+      prompt: '❸推測詞義：
+
+        前面說「有人吵起架來」，表示出現了爭執，需要有人出面勸架。因此可以推測：
+
+        「調停」的意思是：【　】。'
+      blanks:
+      - answer: 出面勸架、調解爭執
+    - type: single
+      prompt: '❹放回句子檢查：把推測的意思放回原句
+
+        在工地有人吵起架來，出面勸架、調解爭執 的常常是她們。'
+      options:
+        1: 合理
+        2: 不合理
+      answer: 1
+  - type: guide
+    text: 你發現了嗎？難詞前後的文字，常藏著詞義線索。現在，來試試看吧。
+  - type: exercise
+    label: ◎小試身手：
+    prompt: ◎小試身手：
+    items:
+    - type: sub_block
+      label: 1.第七段
+      instruction: 1.第七段──往往我們叫不到的人，都要靠這些嫂子的關係拜請而來。
+      items:
+      - type: guide
+        text: ❶圈難詞：把「拜請」圈起來。
+      - type: guide
+        text: ❷讀上下文，找線索：把「叫不到的人」、「靠這些嫂子的關係」、「而來」畫線。
+      - type: single
+        prompt: '❸推測詞義：「叫不到的人」表示自己無法把人請來，要靠大嫂的關係，才能把人請來。
+
+          因此可以推測，「拜請」的意思是：（單選）'
+        options:
+          1: 邀請
+          2: 祭拜
+        answer: 1
+      - type: single
+        prompt: '❹放回句子檢查：把推測的意思放回原句。
+
+          往往我們叫不到的人，都要靠這些嫂子的關係　邀請　而來。'
+        options:
+          1: 合理
+          2: 不合理
+        answer: 1
+        prompt_note: '原稿的 ❹ 只有「把答案填進句子」＋「①合理／□②不合理」兩件事，沒有另一句題幹。
+
+          填進去的「邀請」就是 ❸ 的答案，故直接寫進句子，不另開一個 blanks（避免重複記同一個答案）。'
+    - type: sub_block
+      label: 2.第八段
+      instruction: 2.第八段──工程不順，要去哪裡拜什麼、下一步該怎麼做，都是她們在指點迷津。
+      items:
+      - type: guide
+        text: ❶圈難詞：把「指點迷津」圈起來。
+      - type: guide
+        text: ❷讀上下文，找線索：請把能幫助你推測「指點迷津」意思的文字畫線。
+      - type: single
+        prompt: ❸推測詞義：根據你畫出的線索，推測「指點迷津」的意思是：
+        options:
+          1: 批評別人的做法
+          2: 提供方向和建議
+        answer: 2
+      - type: single
+        prompt: '❹放回句子檢查
+
+          工程不順，要去哪裡拜什麼、下一步該怎麼做，都是她們在   提供方向和建議 　     　 。'
+        options:
+          1: 合理
+          2: 不合理
+        answer: 1
+    - type: sub_block
+      label: 3.換你試試看：
+      instruction: 3.換你試試看：
+      quote: 新聞報導一架小型飛機失事，機身嚴重受損，多名乘客緊急送醫。
+      items:
+      - type: guide
+        text: ❶圈難詞：把「失事」圈起來。
+      - type: guide
+        text: ❷讀上下文，找線索：把能幫助你推測「失事」意思的文字畫線。
+      - type: free_text
+        prompt: '❸推測詞義：根據你畫出的線索，推測「失事」的意思。
+
+          「失事」的意思是：【　】。'
+        blanks:
+        - answer: 發生事故
+      - type: single
+        prompt: '❹放回句子檢查：
+
+          →新聞報導一架小型飛機【　】，機身嚴重受損，多名乘客緊急送醫。'
+        options:
+          1: 合理
+          2: 不合理
+        answer: 1
+        blanks_printed: false
+        answer_note: '句中那一格在教師版是**空白底線**，沒有填字（前兩題同位置都有填），故不代填。
+
+          但「①合理」上有紅色 ☑，所以選擇題本身是有答案的 —— 兩件事分開記。'
+  - type: guide
+    text: '＊你學會了嗎？遇到難詞，先讀一讀上下文、找找線索，也許就能推測出詞義。
+
+      ＊小提醒：前後文有足夠線索時，才適合使用這個策略；如果線索不足，就改用拆詞釋義或查字典。'
+  - type: self_check
+    label: ◎自我檢核
+    instruction: 如果你做得到，請在□內打勾。
+    items:
+    - 1.我能讀上下文、找出線索，推測難詞的意思。
+    - 2.我會把推測的意思放回句子，檢查是否合理。
+    - 3.下次遇到難詞，我會先看看上下文有沒有足夠線索，再試著推測詞義。
+  slug: kc47r
+  text_ref: 4mq6a

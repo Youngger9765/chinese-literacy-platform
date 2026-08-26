@@ -1,0 +1,58 @@
+lesson_uid: L0127
+version_id: v3
+section_no: 三
+vocab_definitions:
+  vocabulary_bank:
+  - 水洩不通
+  - 在劫難逃
+  - 如影隨形
+  - 煎熬
+  - 孱弱
+  - 屈從
+  - 跋涉
+  - 踉蹌
+  - 蹣跚
+  - 吞沒
+  vocabulary_bank_label: 本課語詞
+  instruction: '請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+
+    🅐 從本課語詞框框，找語詞。
+
+    🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+
+    🅒 問同學。'
+  items:
+  - index: 1
+    word: 水洩不通
+    definition: 形容擁擠、包圍或堵塞得非常嚴密，連水都流不出去。
+  - index: 2
+    word: 孱弱
+    definition: 身體或力量很弱，站不穩、撐不久。
+  - index: 3
+    word: 煎熬
+    definition: 身體或心裡被痛苦折磨，很難受，撐得很辛苦。像被火慢慢烤一樣的折磨感。
+  - index: 4
+    word: 踉蹌
+    definition: 突然失去平衡，像快要跌倒的樣子。
+  - index: 5
+    word: 屈從
+    definition: 在壓力或威脅下被迫順從，不是出於自願。
+  - index: 6
+    word: 如影隨形
+    definition: 像影子跟著身體一樣，緊緊跟著；形容壓力、恐懼或困擾一直擺脫不了。
+  - index: 7
+    word: 在劫難逃
+    definition: 劫：災禍。指即將遭遇災禍或懲罰，難以逃避。
+  - index: 8
+    word: 跋涉
+    definition: 走很遠、很辛苦的路，形容旅途艱難。
+  - index: 9
+    word: 吞沒
+    definition: 將人或事物完全淹沒，使它消失不見；也可形容情緒完全控制一個人。
+  - index: 10
+    word: 蹣跚
+    definition: 走路不穩、搖搖晃晃的樣子，常見於受傷、年老、疲憊或身體虛弱時的步伐。
+  notes:
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
+  slug: uvvdq
+  text_ref: xead6

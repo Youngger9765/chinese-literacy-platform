@@ -5,23 +5,34 @@ sections:
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
+  slug: dkkew
+  file: full_text_annotate.dkkew.yml
   pages:
   - 1
   - 2
 - 'no': 二
   name: 念順順
   module: key_reading
+  text_ref: dkkew
+  slug: yy4tx
+  file: key_reading.yy4tx.yml
   pages:
   - 2
 - 'no': 三
   name: 語詞我最棒
   module: vocab_definitions
+  text_ref: dkkew
+  slug: mam36
+  file: vocab_definitions.mam36.yml
   pages:
   - 2
   - 3
 - 'no': 四
   name: 語詞應用
   module: vocab_application
+  text_ref: dkkew
+  slug: awd7j
+  file: vocab_application.awd7j.yml
   pages:
   - 3
   - 4
@@ -29,12 +40,18 @@ sections:
 - 'no': 五
   name: 文章重點表
   module: keypoints
+  text_ref: dkkew
+  slug: papux
+  file: keypoints.papux.yml
   pages:
   - 5
 - 'no': 六
   name: 閱讀聚光燈
   module: spotlight
   subtitle: 用表格整理訊息──比較兩個對象
+  text_ref: dkkew
+  slug: jvwar
+  file: spotlight.jvwar.yml
   pages:
   - 5
   - 6
@@ -43,17 +60,26 @@ sections:
 - 'no': 七
   name: 閱讀理解
   module: comprehension
+  text_ref: dkkew
+  slug: yyvve
+  file: comprehension.yyvve.yml
   pages:
   - 8
 - 'no': 八
   name: 詞語複習
   module: vocab_review
+  text_ref: dkkew
+  slug: drk4r
+  file: vocab_review.drk4r.yml
   pages:
   - 8
   - 9
 - 'no': 九
   name: 知識補給站
   module: resources
+  text_ref: dkkew
+  slug: p7cvk
+  file: resources.p7cvk.yml
   pages:
   - 9
 dispatch:

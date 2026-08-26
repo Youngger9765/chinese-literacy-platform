@@ -219,7 +219,7 @@ async def synthesize_sentence_endpoint(
 
 
 @router.get("/mapping/{lesson_id}")
-def get_tts_mapping(lesson_id: int) -> dict:
+def get_tts_mapping(lesson_id: int, p: str | None = None) -> dict:
     """Return sentence-level TTS mapping for a lesson (Issue #667).
 
     The mapping contains each paragraph split into sentences, with text,
@@ -249,7 +249,9 @@ def get_tts_mapping(lesson_id: int) -> dict:
     if lesson is None:
         raise HTTPException(status_code=404, detail=f"Lesson {lesson_id} not found")
 
-    return build_lesson_tts_mapping(lesson)
+    # `p` 是這一節自己的代號（#2930）。一課印好幾篇時不帶它，
+    # 回的永遠是第 1 篇 —— 前端拿去對照就會唸錯篇，而且不會報錯。
+    return build_lesson_tts_mapping(lesson, round_slug=p)
 
 
 @router.post(

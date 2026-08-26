@@ -5,47 +5,63 @@ sections:
 - 'no': null
   name: 古文今譯
   module: modern_translation
+  slug: hpd4n
+  file: modern_translation.hpd4n.yml
   pages:
   - 1
 - 'no': null
   name: 原文（含斷詞點）＋注釋
   module: classical_text
+  slug: qu6uh
+  file: classical_text.qu6uh.yml
   pages:
   - 1
   pages_source: bracketed
 - 'no': null
   name: 朗讀計時
   module: key_reading
+  slug: mxj46
+  file: key_reading.mxj46.yml
   pages:
   - 1
   pages_source: bracketed
 - 'no': 一
   name: 文白句子比對
   module: sentence_matching
+  slug: nt97y
+  file: sentence_matching.nt97y.yml
   pages:
   - 1
   - 2
 - 'no': 二
   name: 文白詞語比對
   module: word_matching
+  slug: ewea6
+  file: word_matching.ewea6.yml
   pages:
   - 2
   - 3
 - 'no': 三
   name: 文章重點表
   module: keypoints
+  slug: r4dqk
+  file: keypoints.r4dqk.yml
   pages:
   - 3
 - 'no': 四
   name: 文言文聚光燈
   module: spotlight
   subtitle: 認識文言文—一字多義：少
+  slug: we9tn
+  file: spotlight.we9tn.yml
   pages:
   - 3
   - 4
 - 'no': 五
   name: 閱讀理解
   module: comprehension
+  slug: jd3fw
+  file: comprehension.jd3fw.yml
   pages:
   - 4
   - 5

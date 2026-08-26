@@ -40,6 +40,10 @@
       "type": "string",
       "x-seen-in": "1/2"
     },
+    "slug": {
+      "type": "string",
+      "x-seen-in": "2/2"
+    },
     "subtitle": {
       "type": "string",
       "x-seen-in": "1/2"
@@ -47,12 +51,22 @@
     "tail_note": {
       "type": "string",
       "x-seen-in": "1/2"
+    },
+    "text_ref": {
+      "type": "array",
+      "x-seen-in": "2/2"
     }
   },
-  "required": [],
+  "required": [
+    "slug",
+    "text_ref"
+  ],
   "title": "keypoints_followup_questions module payload",
   "type": "object",
-  "x-core-90pct": [],
+  "x-core-90pct": [
+    "slug",
+    "text_ref"
+  ],
   "x-enforcement": "error",
   "x-lessons-observed": 2
 }

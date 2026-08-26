@@ -45,9 +45,40 @@ export function deliversFullText(grade: string | number | undefined | null): boo
   return Number.isInteger(n) && n >= 4 && n <= 7;
 }
 
-export function buildLessonQrValue(origin: string, lessonId: number | string, step: LessonQrStep): string {
-  return `${origin}/learn/${lessonId}/${step}`;
+export function buildLessonQrValue(
+  origin: string,
+  lessonId: number | string,
+  step: LessonQrStep,
+  /** 這一節**自己的**代號（不是它引用的課文）。有就印短網址。 */
+  sectionSlug?: string | null,
+): string {
+  // 紙上只印一個不帶語意的代號：`/q/9a7x4`（#2916）。
+  //
+  // 長網址 `/learn/{id}/{step}?p={slug}` 把四樣東西焊死在紙上 ——
+  // 網域、路由名、課的流水號、篇次 —— 而這四樣 2026-08 全都動過。
+  // QR 印進學習單、貼在教室，那張紙收不回來，所以紙上不可以有
+  // 任何我們還會改的東西。代號永不變，目的地是我們這邊的設定。
+  if (sectionSlug) return `${origin}/q/${sectionSlug}`;
+  // ⛔ **沒有代號就不出 QR**（owner 2026-08-25：「每一個 QR code 都是一組 QR slug url」）。
+  //
+  // 這裡本來退回長網址。退回是無聲的：QR 掃得開、頁面也對，
+  // 只是把課號跟路由名印在紙上 —— 而那正是這整層要消除的東西。
+  // 2026-08-25 實測：訪客頁沒把代號傳下來，四個情境全部靜靜地印了長網址。
+  // 回空字串讓呼叫端看得見「這一節沒有代號」，而不是拿到一個看似正常的網址。
+  return '';
 }
+
+/**
+ * QR 要印的入口網域。
+ *
+ * ⛔ **不要傳 `window.location.origin`。** 那會讓「在哪個站按下載」決定紙上印什麼 ——
+ * 2026-08-25 查出 PM 在 staging 產的那批 QR **每一張都指向測試站**，
+ * 學生掃進去用測試站登入、學習歷程留在測試站。那不是設定失誤，
+ * 是「用當下網址當印刷內容」這個設計保證會發生的事。
+ */
+export const QR_ENTRY_ORIGIN =
+  (import.meta.env.VITE_QR_ENTRY_ORIGIN as string | undefined)?.replace(/\/$/, '')
+  || 'https://lingoleap-prod.web.app';
 
 export function qrFileName(filePrefix: string, lessonId: number | string): string {
   return `${filePrefix}-L${String(lessonId).padStart(2, '0')}.png`;

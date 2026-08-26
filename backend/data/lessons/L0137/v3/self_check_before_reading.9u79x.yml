@@ -1,0 +1,17 @@
+lesson_uid: L0137
+version_id: v3
+self_check_before_reading:
+  instruction: ※ 如果你有做到下列事項，請在□內打勾。
+  items:
+  - 請在不太了解的字、詞或句做記號
+  - 重要的地方、喜歡的語詞、句子或段落做上記
+  no_correct_answer: true
+  notes:
+    answer_carrier: 學生自填，原稿兩個□都沒有勾選
+    note: '兩篇各印一份，內容相同。第二條在原稿就印成「…做上記」（沒有「號」字也沒有句號），
+
+      PDF 與 document.xml 一致 —— 疑似被右邊的目標策略框裁掉，但文字層本身就缺，照原樣抄。'
+  slug: 9u79x
+  text_ref:
+  - ut67x
+  - ppwdu

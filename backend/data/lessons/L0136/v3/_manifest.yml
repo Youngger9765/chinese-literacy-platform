@@ -5,6 +5,8 @@ sections:
 - 'no': 一
   name: 會考圖文題實戰
   module: comprehension
+  slug: ncvcp
+  file: comprehension.ncvcp.yml
   pages:
   - 1
   - 2

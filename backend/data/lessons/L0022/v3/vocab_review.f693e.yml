@@ -1,0 +1,100 @@
+lesson_uid: L0022
+version_id: v3
+section_no: 八
+vocab_review:
+  section_no_printed: 七
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 靦腆
+  - 計較
+  - 邁開
+  - 思緒
+  - 一如往常
+  - 異樣
+  - 莫名
+  - 漣漪
+  - 愣
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 邁漣漪往如莫面談落寞
+  - 一廂情願果讚嘆不已連
+  - 崩潰迷無的計不莫有結
+  - 邁開關思事較蓮計名往
+  - 插否異樣倚醋思念其樣
+  - 沮曲計執見面萬不頑數
+  - 喪典異生愣好一是強靦
+  - 如藏思常優漣如滋想腆
+  - 何緒椅有碘可往味煩而
+  - 漠不關心辦知常之怎樣
+  answers_are_graphical: true
+  answer_paths:
+  - word: 漣漪
+    cells:
+    - - 1
+      - 2
+    - - 1
+      - 3
+    direction: horizontal
+  - word: 計較
+    cells:
+    - - 3
+      - 6
+    - - 4
+      - 6
+    direction: vertical
+  - word: 莫名
+    cells:
+    - - 3
+      - 8
+    - - 4
+      - 9
+    direction: diagonal_down_right
+  - word: 邁開
+    cells:
+    - - 4
+      - 1
+    - - 4
+      - 2
+    direction: horizontal
+  - word: 異樣
+    cells:
+    - - 5
+      - 3
+    - - 5
+      - 4
+    direction: horizontal
+  - word: 愣
+    cells:
+    - - 7
+      - 5
+    direction: horizontal
+  - word: 一如往常
+    cells:
+    - - 7
+      - 7
+    - - 8
+      - 7
+    - - 9
+      - 7
+    - - 10
+      - 7
+    direction: vertical
+  - word: 靦腆
+    cells:
+    - - 7
+      - 10
+    - - 8
+      - 10
+    direction: vertical
+  - word: 思緒
+    cells:
+    - - 8
+      - 3
+    - - 9
+      - 2
+    direction: diagonal_down_left
+  slug: f693e
+  text_ref: 7m4my

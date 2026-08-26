@@ -5,11 +5,17 @@ sections:
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
+  part: 1/2
+  slug: ut67x
+  file: full_text_annotate.ut67x.yml
   pages:
   - 1
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
+  part: 2/2
+  slug: ppwdu
+  file: full_text_annotate.ppwdu.yml
   pages:
   - 1
   - 2
@@ -21,17 +27,32 @@ sections:
 - 'no': 二
   name: 語詞我最棒
   module: vocab_definitions
+  text_ref:
+  - ut67x
+  - ppwdu
+  slug: afkuc
+  file: vocab_definitions.afkuc.yml
   pages:
   - 7
   - 8
 - 'no': 三
   name: 語詞應用
   module: vocab_application
+  text_ref:
+  - ut67x
+  - ppwdu
+  slug: v7xu3
+  file: vocab_application.v7xu3.yml
   pages:
   - 8
 - 'no': 四
   name: 文章重點整理
   module: keypoints
+  text_ref:
+  - ut67x
+  - ppwdu
+  slug: 66etm
+  file: keypoints.66etm.yml
   pages:
   - 8
   - 9
@@ -39,17 +60,32 @@ sections:
 - 'no': 五
   name: 閱讀理解
   module: comprehension
+  text_ref:
+  - ut67x
+  - ppwdu
+  slug: m7fne
+  file: comprehension.m7fne.yml
   pages:
   - 10
   - 11
 - 'no': 六
   name: 詞語複習
   module: vocab_review
+  text_ref:
+  - ut67x
+  - ppwdu
+  slug: fu7fr
+  file: vocab_review.fu7fr.yml
   pages:
   - 11
 - 'no': 七
   name: 知識補給站
   module: resources
+  text_ref:
+  - ut67x
+  - ppwdu
+  slug: 6333n
+  file: resources.6333n.yml
   pages:
   - 11
   - 12

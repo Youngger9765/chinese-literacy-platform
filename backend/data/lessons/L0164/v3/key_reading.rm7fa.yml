@@ -1,0 +1,29 @@
+lesson_uid: L0164
+version_id: v3
+key_reading:
+  instruction: '1. 請用計時器，朗讀原文，並將讀完的時間記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！
+
+    2. 文章中的「.」是表示斷詞的地方，朗讀時，不要把「同組的詞」分開。'
+  target_note: 原文全文
+  timing_table:
+    columns:
+    - 第1次計時
+    - 第2次計時
+    - 第3次計時
+    - 裁判計時
+    unit: 秒
+    judge_signature: true
+  benchmark_note: 我的表現：請確認讀完全文的時間。不要太快也不要太慢，不漏字或加字，斷詞的位置也要正確哦！
+  benchmark:
+  - threshold: 55秒以下
+    feedback: 速度有點快，要讀清楚哦！
+  - threshold: 55~65秒
+    feedback: 強者就是你啦！
+  - threshold: 65秒以上
+    feedback: 速度再快一點！
+  benchmark_threshold_note: '門檻 55／55~65／65（L0153 是 45／45~55／55，L0161 是 90／90~100／100）——各課依原文長度不同。
+
+    三句回饋與門檻的對應在原稿上一律是這個順序（讀最快的配「速度有點快」、最慢的配「速度再快一點」），
+
+    語意看起來是反的但三課皆同，照原樣不改。'
+  slug: rm7fa

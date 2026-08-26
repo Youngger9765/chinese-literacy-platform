@@ -1,0 +1,35 @@
+lesson_uid: L0029
+version_id: v3
+section_no: 二
+resources:
+  section_no_printed: 二
+  section_part: 2
+  label: 影片連結
+  items:
+  - index: 1
+    title: 影片MV【大衛打敗歌利亞 David vs Goliath】
+    duration: 03:58
+    duration_seconds: 238
+    source: 耶穌是主Jesus is Lord
+  - index: 2
+    title: 《雜草的夢想》-迪士尼勵志動畫小短片
+    duration: 02:47
+    duration_seconds: 167
+    source: 馬來觀雲
+  - index: 3
+    title: 如何把自己變強？聽聽教授怎麼說
+    duration: '3:35'
+    duration_seconds: 215
+    source: 智慧麵包
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/gGvWsLdZ0EM
+    url_source: 總表0816「4.影片連結」年級5課次17
+  - index: 2
+    url: http://youtu.be/0R51Ee5SGv0
+    url_source: 總表0816「4.影片連結」年級5課次17
+  slug: 9npfp
+  text_ref:
+  - fqwda
+  - n3qxn

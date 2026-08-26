@@ -59,6 +59,10 @@
       "type": "string",
       "x-seen-in": "2/150"
     },
+    "slug": {
+      "type": "string",
+      "x-seen-in": "150/150"
+    },
     "target_words": {
       "type": "array",
       "x-seen-in": "150/150"
@@ -66,6 +70,13 @@
     "target_words_source_text": {
       "type": "string",
       "x-seen-in": "1/150"
+    },
+    "text_ref": {
+      "type": [
+        "array",
+        "string"
+      ],
+      "x-seen-in": "150/150"
     },
     "type": {
       "type": "string",
@@ -80,7 +91,9 @@
     "answers_are_graphical",
     "grid_size",
     "instruction",
+    "slug",
     "target_words",
+    "text_ref",
     "type"
   ],
   "title": "vocab_review module payload",
@@ -91,7 +104,9 @@
     "grid",
     "grid_size",
     "instruction",
+    "slug",
     "target_words",
+    "text_ref",
     "type"
   ],
   "x-enforcement": "error",

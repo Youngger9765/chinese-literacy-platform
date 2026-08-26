@@ -1,0 +1,33 @@
+lesson_uid: L0083
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 台客劇場》當我身體90歲
+    duration: (7:33)
+    source: 台客劇場
+  - index: 2
+    title: 【真人真事改編】 阿嬤的衛生紙
+    duration: (3:17)
+    source: 春風衛生紙
+  - index: 3
+    title: 【阿公的電視機】 全國電子2017
+    duration: (6:33)
+    source: 全國電子
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/TOjeL24CEDw
+    url_source: 總表0816「4.影片連結」年級7課次15
+  - index: 2
+    url: http://youtu.be/T_uFMQGCZYg
+    url_source: 總表0816「4.影片連結」年級7課次15
+  - index: 3
+    url: http://youtu.be/oADIpGnUjfY
+    url_source: 總表0816「4.影片連結」年級7課次15
+  notes:
+    qr: 三則各附一個 QR code（圖形，網址不在文字層）
+  slug: jv9tj
+  text_ref: xmaax

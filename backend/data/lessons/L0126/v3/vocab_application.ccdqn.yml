@@ -1,0 +1,46 @@
+lesson_uid: L0126
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號。
+  option_bank:
+    A: 蜂擁而至
+    B: 崛起
+    C: 妄想
+    D: 倉皇
+    E: 狼狽
+    F: 突如其來
+    G: 驚心動魄
+    H: 喧嘩
+    I: 驚駭不已
+    J: 蕭條
+  items:
+  - index: 1
+    stem: 他整天(  )能中大樂透，卻不願認真工作。
+    answer: C
+  - index: 2
+    stem: 她在路上目睹嚴重車禍，(  )，好一會兒才回過神來。
+    answer: I
+  - index: 3
+    stem: 火警警報一響，大家(  )離開大樓，有人連包包都沒拿。
+    answer: D
+  - index: 4
+    stem: 一場午後雷陣雨讓他全身濕透，樣子非常(  )。
+    answer: E
+  - index: 5
+    stem: 只要聽聞偶像出現在車站，粉絲們必定(  )，場面非常熱鬧。
+    answer: A
+  - index: 6
+    stem: 近年來，這個新品牌快速(  )，備受市場關注。
+    answer: B
+  - index: 7
+    stem: 這場電影的爆破場面實在是(  )，非常刺激。
+    answer: G
+  - index: 8
+    stem: 圖書館內應保持安靜，不可大聲(  )。
+    answer: H
+  notes:
+    option_bank: 代號表印成 2 列 5 欄（A~E／F~J）；F 突如其來 未被任何一題使用（原稿如此）
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
+  slug: ccdqn
+  text_ref: hxeve

@@ -10,6 +10,7 @@
  * Issue #1165 (replaces #1153 card-grid design)
  */
 import React, { useEffect, useState } from 'react';
+import { stepPath as buildStepPath } from '../../config/stepPath';
 import { useNavigate } from 'react-router-dom';
 import { Story } from '../../types';
 import LessonPicker from '../../components/tools/LessonPicker';
@@ -38,7 +39,7 @@ const PracticeToolbox: React.FC = () => {
     // Activate toolbox-mode before navigation so the tool component reads
     // localStorage under the isolated "__t" scope from first render.
     setToolboxMode(true);
-    navigate(`/learn/${selectedStory.id}/${selectedTool.stepPath}`, {
+    navigate(buildStepPath(selectedStory.id, selectedTool.stepPath), {
       state: { returnTo: '/tools' },
     });
   };

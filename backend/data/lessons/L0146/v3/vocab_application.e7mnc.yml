@@ -1,0 +1,49 @@
+lesson_uid: L0146
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 耐人尋味
+    B: 言歸正傳
+    C: 遷徙
+    D: 司空見慣
+    E: 溯源
+    F: 如出一轍
+    G: 接踵而來
+    H: 天馬行空
+    I: 開枝散葉
+    J: 浩瀚無垠
+  answers_printed: true
+  items:
+  - index: 1
+    stem: 大家把握時間，不要把話題扯得太遠，趕緊（　）吧！
+    answer: B
+  - index: 2
+    stem: 如果想了解這項傳統文化，就要(　)它最早的發展背景。
+    answer: E
+  - index: 3
+    stem: 老師鼓勵我們先(　)地提出想法，再一起討論哪些點子可行。
+    answer: H
+  - index: 4
+    stem: 期末考快到了，作業和考試(　)，大家都很忙碌。
+    answer: G
+  - index: 5
+    stem: 老師講的那句話看似輕鬆，其實(　)，讓我想了很久。
+    answer: A
+  - index: 6
+    stem: 每到冬天，候鳥會隨著氣候變化進行(　)，飛往較溫暖的地區。
+    answer: C
+  - index: 7
+    stem: 這部電影的劇情和上一部(　)，觀眾一開始就猜到結局。
+    answer: F
+  - index: 8
+    stem: 這家店總是大排長龍，對附近的居民來說早已(　)。
+    answer: D
+  notes:
+    option_bank: '十個代號取自十四個語詞，未列入的是 匯流／典故／歲月淘洗／引人入勝。
+
+      I（開枝散葉）與 J（浩瀚無垠）在八題裡都沒有被用到，是誘答項。'
+    answer_carrier: 橘色字母填在（　）內；**顏色來自字元樣式 af，run 層沒有 w:color**
+  slug: e7mnc
+  text_ref: 9h66d

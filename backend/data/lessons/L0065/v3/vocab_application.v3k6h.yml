@@ -1,0 +1,44 @@
+lesson_uid: L0065
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 滑稽
+    B: 充斥
+    C: 處置
+    D: 僵硬
+    E: 評估
+    F: 此起彼落
+    G: 抑制
+    H: 全神貫注
+  items:
+  - index: 1
+    stem: 他終究（　）不住心中的悲傷，流下了眼淚。
+    answer: G
+  - index: 2
+    stem: 這件事經過適當的（　）後，終於平安解決了。
+    answer: C
+  - index: 3
+    stem: 過年時鞭炮聲（　），真是熱鬧。
+    answer: F
+  - index: 4
+    stem: 疫情期間，網路（　）著許多不實的消息，一定要小心查證。
+    answer: B
+  - index: 5
+    stem: 他（　）的表情和動作，惹得眾人哄堂大笑。
+    answer: A
+  - index: 6
+    stem: 天氣寒冷，沒有先做暖身就開始運動，容易讓肌肉變得（　）。
+    answer: D
+  - index: 7
+    stem: 上實驗課時，同學們都（　），仔細觀察實驗變化，不敢分心。
+    answer: H
+  - index: 8
+    stem: 出發登山前，我們先（　）天氣和路況，確認安全後才啟程。
+    answer: E
+  notes:
+    option_bank: 8 個代號對應 8 道小題，一一對應無剩餘。
+    answer_carrier: 橘色手寫代號（PDF p4）；文字層的括號內已填有同樣的代號
+  slug: v3k6h
+  text_ref: 7qpra

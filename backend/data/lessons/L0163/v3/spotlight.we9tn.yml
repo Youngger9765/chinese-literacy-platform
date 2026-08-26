@@ -1,0 +1,62 @@
+lesson_uid: L0163
+version_id: v3
+section_no: 四
+spotlight:
+  label: 四、文言文聚光燈
+  strategy_name: 認識文言文—一字多義：少
+  strategy_type: classical_chinese
+  answer_carrier: 橘色代號（在文字層，顏色只有解 rStyle 才看得到），PDF p4 可見
+  blocks:
+  - type: concept_box
+    text: '讀完了這一課，你是否發現到文言文經常有「一字多義」的特性，意思是「一個字，有多種解釋」。例如課文中的「少」字就是這樣。
+
+      以下是「少」字的多義整理：'
+  - type: table
+    columns:
+    - 多義字
+    - 讀 音
+    - 意 思
+    - 例 句
+    - 例句解釋
+    rows:
+    - - 少
+      - ㄕㄠˇ
+      - Ａ稍微
+      - 旅店少休
+      - 到旅店稍微休息後
+    - - 少
+      - ㄕㄠˇ
+      - Ｂ缺少或很少
+      - 但少閑人如吾兩人耳
+      - 只是缺少有閒情的人像我們兩人罷了
+    - - 少
+      - ㄕㄠˋ
+      - Ｃ小或年幼、年輕的
+      - 少負絕異之資
+      - 年少時就擁有超越一般人的資質
+    rows_note: '原稿的「多義字」欄只在第 1 列印「少」、「讀 音」欄 ㄕㄠˇ 跨前兩列合併，
+
+      本檔為了讓每一列自成一筆而把合併欄的值補齊；欄名照原稿（含中間的全形空格）。'
+  - type: exercise
+    instruction: 換你試試看！下面的每個句子都有「少」，請利用上表查找合適的意思，再將代號填入(  )中。
+    items:
+    - type: free_text
+      prompt: 1.「少」不更事。
+      answer: Ｃ
+    - type: free_text
+      prompt: 2.陳涉「少」時，嘗(曾經)與人傭耕(替人種田)。
+      answer: Ｃ
+    - type: free_text
+      prompt: 3.聽僕(我)之所為，「少」安勿躁(不要急)。
+      answer: A
+    - type: free_text
+      prompt: 4.兒(小時候)能騎羊，引(拉)弓射鳥鼠；「少」長(長大)則射狐兔。
+      answer: Ａ
+    - type: free_text
+      prompt: 5.遙知兄弟登高處，遍插茱萸「少」一人。
+      answer: B
+    - type: free_text
+      prompt: 6.濟從騎(隨從)有一馬，絕(非常)難乘，「少」能騎者。
+      answer: Ｂ
+    answer_note: 六題的答案代號原稿全形半形混用（Ｃ／Ｃ／A／Ａ／B／Ｂ），照原樣抄，不統一。
+  slug: we9tn

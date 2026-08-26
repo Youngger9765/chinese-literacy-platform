@@ -9,14 +9,14 @@ What "correct" means (one invariant, gated on data — never on a stale
 assumption about a grade):
 
   * A lesson gets a 全文 QR  iff  the batch generates a whole-text clip for it
-    — i.e. its grade is in build_demo_reading._FULL_AND_PASSAGE_GRADES. This is
-    imported, not re-declared, so the QA tracks the generator automatically.
+    — i.e. its grade is in reading_delivery_rules.FULL_AND_PASSAGE_GRADES. This is
+    imported, not re-declared, so the QA and the producers cannot drift apart.
   * A lesson gets a 段落 QR  iff  a 念順順段 exists for it: its grade_code is a
     key with non-empty text in key_reading_passages.yml (the SOT), which MUST
     equal the DB's has_key_reading flag.
 
 The two QR producers this keeps honest:
-  * backend  scripts/build_demo_reading.plan_demo_audio  (authoritative plan)
+  * backend  scripts/reading_delivery_rules            (年級規則的唯一一份)
   * frontend LessonAudioTable.buildQrManifestRows         (the printed xlsx)
 
 They drifted once (#2622): the frontend emitted a 段落 QR for all 165 lessons
@@ -39,9 +39,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "backend"))
 
-from scripts.build_demo_reading import (  # noqa: E402
-    _FULL_AND_PASSAGE_GRADES,
-    _PASSAGE_ONLY_GRADES,
+from scripts.reading_delivery_rules import (  # noqa: E402
+    FULL_AND_PASSAGE_GRADES as _FULL_AND_PASSAGE_GRADES,
+    PASSAGE_ONLY_GRADES as _PASSAGE_ONLY_GRADES,
+    grade_num as _grade_num,
 )
 
 STAGING_API = "https://lingoleap-backend-staging-958347263320.asia-east1.run.app"
@@ -72,7 +73,9 @@ def expected_qr(lesson: dict, passage_codes: set[str]) -> dict:
     `passage_codes` is the set from `yml_with_passage`.
     """
     return {
-        "full": lesson["grade"] in _FULL_AND_PASSAGE_GRADES,
+        # ⚠️ 一定要先過 `_grade_num` —— API 的 grade 是字串，
+        #    `'4' in {4,5,6,7}` 永遠是 False（2026-08-25 實測）。
+        "full": _grade_num(lesson["grade"]) in _FULL_AND_PASSAGE_GRADES,
         "passage": lesson["grade_code"] in passage_codes,
     }
 

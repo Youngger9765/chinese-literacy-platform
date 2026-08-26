@@ -1,7 +1,21 @@
 #!/usr/bin/env python3
 """念順順起訖 —— 從原稿的兩個標記算出 start_paragraph / end_paragraph
 
-規則（Young 2026-08-24 看原稿定案）：
+⛔⛔ 這支實作的規則已於 2026-08-24 稍晚被否決，**不要再跑它去產資料**。⛔⛔
+
+    靖杭比對紙本學習單後推翻：「從教授指定的段落，v3 會直接提取到結束，並沒有
+    提取出該段落，而是將該段落以下的內容全部提取了」。念順順只練學習單指定的
+    那一段（2026-07-20 專家審查定案），`end_paragraph == start_paragraph`。
+
+    對一版人工掃描的 38 課黃金集：這支 2/38，只取那一段 36/38。
+
+    現行實作：`scripts/extract_key_reading_v3.py`（不需要 DOCX/PDF/LibreOffice）。
+
+    保留本檔的理由是下面那兩個坑的量測還有用（多錨點投票、以及「不要加比率門檻」
+    那組 70–100% vs 0–87% 的分布數字）—— 當知識讀，不要當跑法。
+    它還 hardcode 了 Young 本機的 SOT 路徑，在別人機器上本來就跑不起來。
+
+規則（Young 2026-08-24 看原稿定案，**已否決**）：
   start = ☞ 錨點所在的那一段
   end   = 右緣累計字數欄「最後一個數字」落在的那一段
   passage = start 段到 end 段，整段包含（不切半句）
@@ -269,7 +283,7 @@ def main() -> int:
     ap.add_argument("--apply", action="store_true")
     a = ap.parse_args()
     uids = a.uids or sorted(d.parent.parent.name
-                            for d in LESSONS.glob("L*/v3/key_reading.yml"))
+                            for d in LESSONS.glob("L*/v3/key_reading.*.yml"))
     for uid in uids:
         try:
             r = run(uid)

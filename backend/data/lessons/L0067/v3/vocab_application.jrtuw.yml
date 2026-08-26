@@ -1,0 +1,46 @@
+lesson_uid: L0067
+version_id: v3
+section_no: 五
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 拋家棄子
+    B: 籌措
+    C: 震懾
+    D: 畏懼
+    E: 仰望
+    F: 有生之年
+    G: 諮詢
+    H: 精神抖擻
+    I: 殆盡
+    J: 沁涼
+  items:
+  - index: 1
+    stem: 我們站在山腳下(　)高聳的山峰，感受到大自然的壯麗。
+    answer: E
+  - index: 2
+    stem: 面對強大的對手，他心中雖有些(　)，仍然勇敢上場。
+    answer: D
+  - index: 3
+    stem: 他多年不回家，也不照顧孩子，親友都批評他 (　)。
+    answer: A
+  - index: 4
+    stem: 在這個偏遠山村裡，村民遇到問題時，常向村長(　)。
+    answer: G
+  - index: 5
+    stem: 當山崩發生時，所有人看到土石滑落的景象，都被(　)住了。
+    answer: C
+  - index: 6
+    stem: 為了完成這個工程，我們需要(　)大量資金。
+    answer: B
+  - index: 7
+    stem: 爺爺都已經80歲了，看起來仍然（　），元氣十足。
+    answer: H
+  - index: 8
+    stem: 因為一再失敗，我們原來的雄心壯志已經消磨（　）。
+    answer: I
+  notes:
+    option_bank: 10 個代號對應 8 道小題；F.有生之年、J.沁涼 未被任何一題用到
+    answer_carrier: 橘色手寫代號（PDF p10）；文字層的(　)內已填有同樣的代號
+  slug: jrtuw
+  text_ref: dhqrv

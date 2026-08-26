@@ -1,0 +1,61 @@
+lesson_uid: L0147
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: '請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+
+    🅐 從本課語詞框框，找語詞。
+
+    🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+
+    🅒 問同學。'
+  word_bank_line: '本課語詞：
+
+    廣闊無垠、天各一方、
+
+    精湛、綿延、星羅棋布、舉足輕重、掛一漏萬、
+
+    支離破碎、一目了然。'
+  word_bank:
+  - 廣闊無垠
+  - 天各一方
+  - 精湛
+  - 綿延
+  - 星羅棋布
+  - 舉足輕重
+  - 掛一漏萬
+  - 支離破碎
+  - 一目了然
+  answers_printed: true
+  items:
+  - index: 1
+    definition: 範圍非常大，廣大到沒有邊界。
+    answer: 廣闊無垠
+  - index: 2
+    definition: 形容彼此距離非常遙遠，各自在不同地方，很難相見。
+    answer: 天各一方
+  - index: 3
+    definition: 形容技術或能力非常高明，做得又好又準。
+    answer: 精湛
+  - index: 4
+    definition: 形容事物連續不斷的延伸，很長、很久都沒有中斷；常用來描述長度或時間。
+    answer: 綿延
+  - index: 5
+    definition: 形容事物分散在各處，數量很多，到處都有。
+    answer: 星羅棋布
+  - index: 6
+    definition: 形容某件事或某個角色非常重要，會影響整個情況。
+    answer: 舉足輕重
+  - index: 7
+    definition: 漏：遺漏。形容只提到一小部分，卻遺漏了非常多重要內容。
+    answer: 掛一漏萬
+  - index: 8
+    definition: 零散又破裂。形容內容零散、不完整，前後連不起來。
+    answer: 支離破碎
+  - index: 9
+    definition: 目：眼睛；了然：清楚明白。形容事情或結果非常清楚，看一眼就懂，不需要再解釋。
+    answer: 一目了然
+  notes:
+    answer_carrier: 橘色（E97132）填在橫線上
+  slug: rv3rx
+  text_ref: ptm4r

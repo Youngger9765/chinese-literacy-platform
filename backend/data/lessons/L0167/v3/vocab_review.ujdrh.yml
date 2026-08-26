@@ -1,0 +1,125 @@
+lesson_uid: L0167
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  word_bank_line: '不是滋味、不動聲色、害群之馬、似曾相識、
+
+    小劇場、左右、較勁、平分秋色'
+  target_words:
+  - 不是滋味
+  - 不動聲色
+  - 害群之馬
+  - 似曾相識
+  - 小劇場
+  - 左右
+  - 較勁
+  - 平分秋色
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 使豁小不比似不平劇場
+  - 勁群是劇較曾知等似心
+  - 春滋素是楊相所聲理乎
+  - 味色養左要識措素色較
+  - 相味動練右不質滋勁相
+  - 見覺曾害心分小養知試
+  - 恨小經群此上不動聲色
+  - 晚劇心之起下之球不打
+  - 夏場理馬彼平分秋色擊
+  - 緊張萬分落芝麻綠豆區
+  answers_are_graphical: true
+  answer_paths:
+  - word: 不是滋味
+    cells:
+    - - 1
+      - 4
+    - - 2
+      - 3
+    - - 3
+      - 2
+    - - 4
+      - 1
+    direction: diagonal_down_left
+  - word: 似曾相識
+    cells:
+    - - 1
+      - 6
+    - - 2
+      - 6
+    - - 3
+      - 6
+    - - 4
+      - 6
+    direction: vertical
+  - word: 左右
+    cells:
+    - - 4
+      - 4
+    - - 5
+      - 5
+    direction: diagonal_down_right
+  - word: 較勁
+    cells:
+    - - 4
+      - 10
+    - - 5
+      - 9
+    direction: diagonal_down_left
+  - word: 害群之馬
+    cells:
+    - - 6
+      - 4
+    - - 7
+      - 4
+    - - 8
+      - 4
+    - - 9
+      - 4
+    direction: vertical
+  - word: 不動聲色
+    cells:
+    - - 7
+      - 7
+    - - 7
+      - 8
+    - - 7
+      - 9
+    - - 7
+      - 10
+    direction: horizontal
+  - word: 小劇場
+    cells:
+    - - 7
+      - 2
+    - - 8
+      - 2
+    - - 9
+      - 2
+    direction: vertical
+  - word: 平分秋色
+    cells:
+    - - 9
+      - 6
+    - - 9
+      - 7
+    - - 9
+      - 8
+    - - 9
+      - 9
+    direction: horizontal
+  notes:
+    target_words: 只有 8 個（語詞我最棒的九個裡，「心理素質」沒有進找字框）
+    answer_carrier: '找字那一頁（PDF p9）實際印出 **8 個橘圈**，等於 8 條路徑、8 個目標語詞。
+
+      ⚠️ 全檔 roundRect 有 **9 個**（都錨在紙內、都用佈景色 accent2），比路徑數多 1 ——
+
+      照 SKILL 這是「單向警報」要查。查法是**把範圍限在找字那一頁**：p9 逐個數只有 8 個橘圈，
+
+      第 9 個 roundRect 屬於別頁的版面元件（品格聚光燈的情境標籤框），不是圈選。
+
+      → 無漏抓。'
+  slug: ujdrh
+  text_ref: 9jcxw

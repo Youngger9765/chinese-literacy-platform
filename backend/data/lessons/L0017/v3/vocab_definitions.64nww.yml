@@ -1,0 +1,49 @@
+lesson_uid: L0017
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+  - 從本課語詞框框，找語詞。
+  - 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+  - 問同學。
+  vocabulary_bank:
+  - 腦海
+  - 茫然
+  - 結結巴巴
+  - 心跳漏了一拍
+  - 片段
+  - 不經意
+  - 不自覺
+  - 目光
+  - 瞬間
+  items:
+  - index: 1
+    word: 心跳漏了一拍
+    definition: 形容緊張、驚訝或激動時，心臟突然一震的感覺。
+  - index: 2
+    word: 結結巴巴
+    definition: 說話不順暢，時常中斷停頓。
+  - index: 3
+    word: 不經意
+    definition: 不是故意的、沒有特別留意。
+  - index: 4
+    word: 茫然
+    definition: 不知所措的樣子。
+  - index: 5
+    word: 目光
+    definition: 眼神。
+  - index: 6
+    word: 腦海
+    definition: 腦中。
+  - index: 7
+    word: 片段
+    definition: 不完整的一小段內容或記憶。
+  - index: 8
+    word: 不自覺
+    definition: 自己沒發現、不是刻意的。
+  - index: 9
+    word: 瞬間
+    definition: 很短的時間、一眨眼的時間。
+  slug: 64nww
+  text_ref: qeqwt

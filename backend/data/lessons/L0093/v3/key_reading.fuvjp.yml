@@ -1,0 +1,35 @@
+lesson_uid: L0093
+version_id: v3
+section_no: 二
+key_reading:
+  instruction: 請用計時器，從指定段落（二    )開始朗讀，計時1分鐘讀的字數，並記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！
+  instruction_note: 括號內的 ☞ 是圖形物件，文字流只有「（二    )」的空白
+  start_paragraph: 2
+  end_paragraph: 2
+  start_paragraph_note: ☞ 印在第 2 段句首（PDF p1 可見），與指示語印的「二」一致；字數六個端點也全數吻合
+  timing_table:
+    columns:
+    - 第1次計時
+    - 第2次計時
+    - 第3次計時
+    - 裁判計時
+    unit: 字
+    judge_signature: true
+  benchmark_label: ◎ 我的表現
+  benchmark:
+  - threshold: ＜220字
+    feedback: 還要多加練習。
+  - threshold: 221~250字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞251字
+    feedback: 哇嗚，超級厲害！
+  passage: 有位72歲的老太太獨居在美國康乃狄克州的一個城市裡。這天是感恩節，外面大雪紛飛。中午，一位鄰居烘了一個餅，請小孩送到老太太家，希望她在團圓的節日裡，不致於太孤苦伶仃。
+  start_text: 有位72歲的老太太獨居在美國康乃狄克州的一個城市
+  extent_chars: 83
+  source: extract_key_reading_v3
+  slug: fuvjp
+  text_ref: ch7x6
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  absorbed_tail: 0

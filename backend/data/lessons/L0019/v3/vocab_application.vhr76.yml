@@ -1,0 +1,43 @@
+lesson_uid: L0019
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 沮喪
+    B: 數據
+    C: 成效斐然
+    D: 抵消
+    E: 大同小異
+    F: 徒手訓練
+    G: 失之毫釐，差之千里
+    H: 負擔
+  items:
+  - index: 1
+    stem: 收到這次測驗的結果，他的心情（　）到極點，完全提不起勁了。
+    answer: A
+  - index: 2
+    stem: 這兩種藥不能同時服用，否則藥效會互相（　）。
+    answer: D
+  - index: 3
+    stem: 「（　）」，做事只要有一點小錯，結果可能會有大大不同。
+    answer: G
+  - index: 4
+    stem: 根據調查（　），青少年的犯罪年齡呈現逐年下降的趨勢。
+    answer: B
+  - index: 5
+    stem: 這兩本書的題材和內容（　），只是文字風格較為不同罷了。
+    answer: E
+  - index: 6
+    stem: 經過一學期的努力練習，班上的閱讀能力提升許多，可說是（　）。
+    answer: C
+  - index: 7
+    stem: 父母努力工作，希望減輕家裡的經濟（　）。
+    answer: H
+  - index: 8
+    stem: 因為沒有健身器材，他每天在家做（　），培養運動習慣。
+    answer: F
+  notes:
+    option_bank: 只列 8 個代號（本課 10 個語詞中的「精準」「加持」未入選項），對應 8 道小題
+  slug: vhr76
+  text_ref: 3hhtn

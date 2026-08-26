@@ -1,0 +1,52 @@
+lesson_uid: L0163
+version_id: v3
+section_no: 三
+keypoints:
+  label: 三、文章重點表
+  intro: '<愛讀書的顧寧人>的課文內容寫的是一位愛讀書的人，「他的背景」、「他是怎麼樣的人」、「他做了什麼」的文章。這跟白話文的寫法是一樣的。
+
+    讀文言文時，我們可以善用文章的結構來幫助我們讀文言文喔。我們一起根據寫人的結構，來整理文章重點。'
+  layout: list
+  answer_carrier: 橘色手寫（在文字層，顏色只有解 rStyle 才看得到），PDF p3 可見
+  rows:
+  - label: 主角
+    value: 【　】
+    blanks:
+    - answer: 顧寧人
+  - label: 背景
+    items:
+    - label: 居住地
+      value: 【　】
+      blanks:
+      - answer: 崑山
+    - label: 家世背景
+      value: 【　】
+      blanks:
+      - answer: 世族/世代做官的家族
+  - label: 特質
+    value: 【　】，而且精力【　】。
+    blanks:
+    - answer: 絕異之資/超越其他人的資質
+    - answer: 絕人/超越一般人
+  - label: 專長
+    value: 【　】，九經諸史，都能背誦。
+    blanks:
+    - answer: 古學/古代的學問
+  - label: 嗜好：【　】
+    value: 支持的證據有：
+    blanks:
+    - answer: 讀書
+    items:
+    - label: '1'
+      value: 自少至老，未嘗【　】。
+      blanks:
+      - answer: 一日廢書/從來沒有一天不讀書
+    - label: '2'
+      value: 出必【　】數簏自隨，旅店少休，披尋搜討，曾無【　】。
+      blanks:
+      - answer: 載書/帶上書
+      - answer: 倦色/疲倦的樣子
+  rows_note: '「嗜好」那一列的標籤本身就含一個填空（【 讀書 】），跟其他列不同 —— 原稿如此。
+
+    表格欄名是「元素／內容摘要」。'
+  slug: r4dqk

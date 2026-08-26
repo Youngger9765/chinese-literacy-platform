@@ -5,6 +5,8 @@ sections:
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
+  slug: nvrme
+  file: full_text_annotate.nvrme.yml
   pages:
   - 1
   - 2
@@ -13,12 +15,18 @@ sections:
 - 'no': 二
   name: 古今對照表
   module: word_matching
+  text_ref: nvrme
+  slug: 3wvtc
+  file: word_matching.3wvtc.yml
   pages:
   - 4
 - 'no': 三
   name: 文言文聚光燈
   module: spotlight
   subtitle: 如何讀懂文言文
+  text_ref: nvrme
+  slug: na3kk
+  file: spotlight.na3kk.yml
   pages:
   - 4
   - 5
@@ -27,6 +35,9 @@ sections:
 - 'no': 四
   name: 閱讀理解
   module: comprehension
+  text_ref: nvrme
+  slug: vxhd9
+  file: comprehension.vxhd9.yml
   pages:
   - 7
   - 8

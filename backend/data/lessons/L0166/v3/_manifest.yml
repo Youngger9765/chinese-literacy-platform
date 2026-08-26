@@ -5,6 +5,8 @@ sections:
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
+  slug: pvqer
+  file: full_text_annotate.pvqer.yml
   pages:
   - 1
   - 2
@@ -13,23 +15,35 @@ sections:
 - 'no': 二
   name: 念順順
   module: key_reading
+  text_ref: pvqer
+  slug: p7nhm
+  file: key_reading.p7nhm.yml
   pages:
   - 4
 - 'no': 三
   name: 語詞我最棒
   module: vocab_definitions
+  text_ref: pvqer
+  slug: xu67m
+  file: vocab_definitions.xu67m.yml
   pages:
   - 4
   - 5
 - 'no': 四
   name: 語詞應用
   module: vocab_application
+  text_ref: pvqer
+  slug: dyvrx
+  file: vocab_application.dyvrx.yml
   pages:
   - 5
   - 6
 - 'no': 五
   name: 文章重點表
   module: keypoints
+  text_ref: pvqer
+  slug: hdu4j
+  file: keypoints.hdu4j.yml
   pages:
   - 6
   - 7
@@ -37,6 +51,9 @@ sections:
   name: 品格聚光燈
   module: spotlight
   subtitle: 成為值得信任的夥伴
+  text_ref: pvqer
+  slug: ymyec
+  file: spotlight.ymyec.yml
   pages:
   - 7
   - 8
@@ -45,17 +62,26 @@ sections:
 - 'no': 七
   name: 閱讀理解
   module: comprehension
+  text_ref: pvqer
+  slug: 6aaq3
+  file: comprehension.6aaq3.yml
   pages:
   - 10
 - 'no': 八
   name: 詞語複習
   module: vocab_review
+  text_ref: pvqer
+  slug: yvx9m
+  file: vocab_review.yvx9m.yml
   pages:
   - 10
   - 11
 - 'no': 九
   name: 知識補給站
   module: resources
+  text_ref: pvqer
+  slug: ht6rv
+  file: resources.ht6rv.yml
   pages:
   - 11
 dispatch:

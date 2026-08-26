@@ -1,5 +1,6 @@
 import type { TeacherWordSearchSource } from './components/reading-steps/wordSearchGrid';
 import type { Lesson } from './schema/lessonContent';
+import type { ManifestSection } from './config/stepConfig';
 
 export enum AppView {
   HOME = 'HOME',
@@ -341,7 +342,9 @@ export interface Story {
   /** Paragraphs array (Layer-2 lessons use this instead of content). */
   paragraphs?: string[];
   /** 學習單 section ordering (#1434). e.g. [{number: '二', name: '念順順', type: 'reading_timer'}, ...] */
-  worksheetSectionOrder?: Array<{ number: string; name: string; type: string }>;
+  manifestSections?: ManifestSection[];
+  /** API 原始回應。切到別篇的步驟時用它重新對應（見 `storyForStep`）。 */
+  __detail?: unknown;
   /** 學習單 intro metadata (#1434). Present only for Layer-2 lessons parsed from docx. */
   worksheetIntro?: {
     step_label?: string;

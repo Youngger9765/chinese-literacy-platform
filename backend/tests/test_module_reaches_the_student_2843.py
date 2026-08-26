@@ -38,11 +38,16 @@ NOT_RENDERED = {"lesson", "metadata", "errata", "goal_box", "notes"}
 
 #: 🔴 已知斷掉的。修好一個就從這裡拿掉（並更新上面的說明）。
 #: ⛔ 不要為了讓測試變綠而往這裡加東西 —— 加之前先確認它真的該斷。
-KNOWN_UNREACHED = {
+KNOWN_UNREACHED: dict[str, str] = {
     # vocab_review 於 #2860 接通：API 送出 143 課的教師版格子，
     # VocabWordSearch 用它而不是自己生。移除這一項是這條反向鎖要求的
     # —— 它就是為了不讓豁免清單爛在這裡。
-    "resources": "API 已送出 148 課（#2860），但前端還沒有任何畫面在讀它",
+    #
+    # resources 於 #2916 接通，這條反向鎖自己抓到的：前台的步驟順序改成
+    # 照帳本（`manifest_sections`）走之後，147 課裡有 147 課的
+    # `step_sequence` 帶著 `knowledge-station`，而 KnowledgeStationPage
+    # 一直都在。它以前走不到不是因為沒有畫面，是因為沒有人把它排進序列。
+    # 實測（2026-08-25）：147/147。
 }
 
 

@@ -1,0 +1,45 @@
+lesson_uid: L0097
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 大放異彩
+    B: 憂心忡忡
+    C: 諷刺
+    D: 氣候變遷
+    E: 環境永續
+    F: 亂竄
+    G: 提案
+    H: 象徵
+    I: 禦寒
+  items:
+  - index: 1
+    stem: 許多人對地球暖化及氣候異常的情況感到（　）。
+    answer: B
+  - index: 2
+    stem: 為了實現（　）的目標，我們需要共同努力，力行節能減碳。
+    answer: E
+  - index: 3
+    stem: 這位網紅以（　）的言論批評了社會上的不公平現象。
+    answer: C
+  - index: 4
+    stem: 這部精采的國片在世界各地的影展中（　），獲得不少殊榮。
+    answer: A
+  - index: 5
+    stem: 倉庫裡傳來聲響，燈一打開，幾隻老鼠立刻四處（　）。
+    answer: F
+  - index: 6
+    stem: 這份（　）不只寫出活動內容，也列出經費和人力安排，所以得到同學的支持。
+    answer: G
+  - index: 7
+    stem: 寒流來襲時，出門要穿厚外套（　），避免著涼感冒。
+    answer: I
+  - index: 8
+    stem: （　）不只是氣溫升高，也可能造成乾旱、海平面上升和生態改變。
+    answer: D
+  notes:
+    option_bank: 9 個代號對應 8 道小題；H.象徵 未被任何一題用到。語詞框有 13 個語詞，碳排放／碳足跡／因應而生／地球公民 沒有進第四大題。
+    answer_carrier: 橘色手寫代號（PDF p4）；文字層的（　）內已填有同樣的代號
+  slug: wn7nn
+  text_ref: pa39q

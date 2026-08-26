@@ -82,7 +82,8 @@ def _rendered_sublabels(table: list[list]) -> list[str]:
 
 
 def _lessons_with_sublabels():
-    for path in sorted(LESSONS.glob("*/v3/keypoints.yml")):
+    # 檔名帶自己的 slug（#2916）；多篇課一篇一份，每一份都要驗。
+    for path in sorted(LESSONS.glob("*/v3/keypoints.*.yml")):
         kp = (yaml.safe_load(path.read_text(encoding="utf-8")) or {}).get("keypoints") or {}
         rows = kp.get("rows")
         if not isinstance(rows, list) or not rows:

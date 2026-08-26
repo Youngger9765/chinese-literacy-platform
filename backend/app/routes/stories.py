@@ -550,6 +550,9 @@ def list_stories(
                 # first-edition data keyed by catalogue position, so after the
                 # renumber it matched the wrong lesson. See the detail route.
                 has_key_reading=bool(s.get("key_reading")),
+                # 一課多篇的篇次摘要（#2916）—— 後台的 QR 清單靠它一次展開，
+                # 不必為 175 課各打一次詳情。
+                part_rounds=s.get("part_rounds"),
                 intro=(StoryIntroSchema(**s["intro"]) if s.get("intro") else None),
             )
             for s in page_results
@@ -632,7 +635,13 @@ def get_story(story_id: str):
         # Image gallery for graphic-text layout (#1341)
         images=story.get("images") or [],
         # Worksheet metadata (#1434) — surface to API
-        worksheet_section_order=story.get("worksheet_section_order"),
+        manifest_sections=story.get("manifest_sections"),
+        # ⚠️ 這裡是**逐欄列舉**建 StoryDetail —— 沒有寫在這裡的欄位，
+        #    後端算得再對也送不出去，而且不會有任何錯誤或紅燈。
+        #    2026-08-25 實測：L0063 三輪的資料在 loader 裡都在，
+        #    但 API 回應的 repeat_rounds 是空的，就是漏了這兩行。
+        repeat_rounds=story.get("repeat_rounds"),
+        key_readings=story.get("key_readings"),
         worksheet_intro=story.get("worksheet_intro"),
         # Lesson intro (#1443) — docx 說明/導讀 or excel fallback
         lesson_intro=story.get("lesson_intro"),

@@ -1,0 +1,63 @@
+lesson_uid: L0076
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+  - 從本課語詞框框，找語詞。
+  - 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+  - 問同學。
+  vocabulary_bank:
+  - 觸怒
+  - 不假思索
+  - 攙扶
+  - 不情之請
+  - 刻板印象
+  - 預後
+  - 納悶
+  - 喬裝
+  - 會診
+  - 退駕
+  - 由衷
+  - 稱職
+  items:
+  - index: 1
+    word: 稱職
+    definition: 把分內的工作做得很好。
+  - index: 2
+    word: 會診
+    definition: 一位醫師邀請其他醫師一起討論、判斷病情。
+  - index: 3
+    word: 喬裝
+    definition: 改變穿著或外表，假裝成另一種身分。
+  - index: 4
+    word: 不情之請
+    definition: 自己知道可能會讓別人為難，還是提出的請求。
+  - index: 5
+    word: 退駕
+    definition: 民間信仰中，指神明離開乩童的身體，附身的狀態結束。
+  - index: 6
+    word: 觸怒
+    definition: 惹人生氣。
+  - index: 7
+    word: 納悶
+    definition: 心裡有疑問。
+  - index: 8
+    word: 不假思索
+    definition: 沒有仔細想，就立刻回答或行動。
+  - index: 9
+    word: 預後
+    definition: 病人之後可能的病情發展或結果。
+  - index: 10
+    word: 刻板印象
+    definition: 還沒有真正了解，就先認定某一類人、事物或做法都是某個樣子。
+  - index: 11
+    word: 攙扶
+    definition: 用手扶著他人。
+  - index: 12
+    word: 由衷
+    definition: 真心的、發自內心的。
+  notes:
+    answer_carrier: 橘色手寫字（PDF p4）；文字層的空格內已填有同樣的答案
+  slug: dkwyh
+  text_ref: qw9tk

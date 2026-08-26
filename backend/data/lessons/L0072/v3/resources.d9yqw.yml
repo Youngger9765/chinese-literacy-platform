@@ -1,0 +1,26 @@
+lesson_uid: L0072
+version_id: v3
+section_no: 九
+resources:
+  items:
+  - index: 1
+    title: 區分專家和菜鳥的思考方式：解讀工作記憶空間！！｜框架思維｜思維能力｜ 金手指
+    duration: '8:13'
+    duration_seconds: 493
+    source: 思考者的金手指
+  - index: 2
+    title: 鼎泰豐｜口語表達大調查－朗讀的重要
+    duration: '2:23'
+    duration_seconds: 143
+    source: 鼎泰豐
+  section_name: 知識補給站
+  label: 影片連結
+  videos:
+  - index: 1
+    url: http://youtu.be/33SzICsCWew
+    url_source: 總表0816「4.影片連結」年級6課次5
+  - index: 2
+    url: http://youtu.be/CW3Wxb0TlUI
+    url_source: 總表0816「4.影片連結」年級6課次5
+  slug: d9yqw
+  text_ref: yk4tc

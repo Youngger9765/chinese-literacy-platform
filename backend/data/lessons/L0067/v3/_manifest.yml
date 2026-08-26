@@ -5,6 +5,9 @@ sections:
 - 'no': 一
   name: 閱讀聚光燈-自我提問策略1──跟著人物故事線問問題
   module: spotlight
+  text_ref: dhqrv
+  slug: pqrwq
+  file: spotlight.pqrwq.yml
   pages:
   - 1
   - 2
@@ -17,6 +20,8 @@ sections:
 - 'no': 二
   name: 讀全文
   module: full_text_annotate
+  slug: dhqrv
+  file: full_text_annotate.dhqrv.yml
   pages:
   - 7
   - 8
@@ -24,39 +29,60 @@ sections:
 - 'no': 三
   name: 念順順
   module: key_reading
+  text_ref: dhqrv
+  slug: 3nau9
+  file: key_reading.3nau9.yml
   pages:
   - 9
 - 'no': 四
   name: 語詞我最棒
   module: vocab_definitions
+  text_ref: dhqrv
+  slug: umjej
+  file: vocab_definitions.umjej.yml
   pages:
   - 9
   - 10
 - 'no': 五
   name: 語詞應用
   module: vocab_application
+  text_ref: dhqrv
+  slug: jrtuw
+  file: vocab_application.jrtuw.yml
   pages:
   - 10
 - 'no': 六
   name: 文章重點表
   module: keypoints
+  text_ref: dhqrv
+  slug: t4qhk
+  file: keypoints.t4qhk.yml
   pages:
   - 10
   - 11
 - 'no': 七
   name: 閱讀理解
   module: comprehension
+  text_ref: dhqrv
+  slug: eyxrw
+  file: comprehension.eyxrw.yml
   pages:
   - 11
   - 12
 - 'no': 八
   name: 詞語複習
   module: vocab_review
+  text_ref: dhqrv
+  slug: uq6nw
+  file: vocab_review.uq6nw.yml
   pages:
   - 12
 - 'no': 九
   name: 知識補給站
   module: resources
+  text_ref: dhqrv
+  slug: tn7fe
+  file: resources.tn7fe.yml
   pages:
   - 12
   - 13

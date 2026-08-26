@@ -1,0 +1,45 @@
+lesson_uid: L0172
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 五體投地
+    B: 精神抖擻
+    C: 氣急敗壞
+    D: 不可置信
+    E: 悠悠
+    F: 荒謬
+    G: 刁鑽
+    H: 靦腆
+  unused_options: []
+  items:
+  - index: 1
+    stem: 他平常溫文有禮，竟會在街上破口大罵，真令人(    )。
+    answer: D
+  - index: 2
+    stem: 網路上充滿(    )的假訊息與詐騙，大家都要養成查證的習慣。
+    answer: F
+  - index: 3
+    stem: 她發現自己的模型被弟弟弄壞後，(    )的去找奶奶告狀。
+    answer: C
+  - index: 4
+    stem: 教練示範投球時，展現出高超的控球能力，令大家 (    )。
+    answer: A
+  - index: 5
+    stem: 聽完朋友激動的抱怨，她只是(    )的說：「不要理他就好了。」
+    answer: E
+  - index: 6
+    stem: 啦啦隊(    )的動作與整齊的口號，瞬間吸引了觀眾的目光。
+    answer: B
+  - index: 7
+    stem: 面對大家的讚美，她總是謙虛又(    )，將功勞歸給背後的團隊。
+    answer: H
+  - index: 8
+    stem: 面對顧客 (    )的提問與要求，他仍然耐著性子，一一回應。
+    answer: G
+  notes:
+    option_bank: 原稿是 2 列 × 5 欄的表，第 5 欄兩格都是空的（只有 8 個代號）。
+    answer_carrier: 橘色手寫代號（run 層 w:color E97132），文字流有此資訊
+  slug: mfdv3
+  text_ref: ampvv

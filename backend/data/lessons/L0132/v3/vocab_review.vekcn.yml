@@ -1,0 +1,116 @@
+lesson_uid: L0132
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 望塵莫及
+  - 鳳毛麟角
+  - 流行疫病
+  - 刻板印象
+  - 咎責
+  - 罹患
+  - 多巴胺
+  - 不言而喻
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 雕地影形流落花多責罰
+  - 刻板印象花下巴多事錢
+  - 鳳毛不流不胺不引內罹
+  - 凰探水可行望得咎責負
+  - 于望穿秋水疫患辭備鳳
+  - 飛灰塵埃及並病職毛甲
+  - 喻罹難莫言不行麟天不
+  - 病患病過及可角人花言
+  - 鳳麒麟行為理言可板而
+  - 飛塵來多巴喻及印象喻
+  answers_are_graphical: true
+  answer_paths:
+  - word: 多巴胺
+    cells:
+    - - 1
+      - 8
+    - - 2
+      - 7
+    - - 3
+      - 6
+    direction: diagonal_down_left
+  - word: 刻板印象
+    cells:
+    - - 2
+      - 1
+    - - 2
+      - 2
+    - - 2
+      - 3
+    - - 2
+      - 4
+    direction: horizontal
+  - word: 流行疫病
+    cells:
+    - - 3
+      - 4
+    - - 4
+      - 5
+    - - 5
+      - 6
+    - - 6
+      - 7
+    direction: diagonal_down_right
+  - word: 咎責
+    cells:
+    - - 4
+      - 8
+    - - 4
+      - 9
+    direction: horizontal
+  - word: 望塵莫及
+    cells:
+    - - 5
+      - 2
+    - - 6
+      - 3
+    - - 7
+      - 4
+    - - 8
+      - 5
+    direction: diagonal_down_right
+  - word: 鳳毛麟角
+    cells:
+    - - 5
+      - 10
+    - - 6
+      - 9
+    - - 7
+      - 8
+    - - 8
+      - 7
+    direction: diagonal_down_left
+  - word: 罹患
+    cells:
+    - - 7
+      - 2
+    - - 8
+      - 2
+    direction: vertical
+  - word: 不言而喻
+    cells:
+    - - 7
+      - 10
+    - - 8
+      - 10
+    - - 9
+      - 10
+    - - 10
+      - 10
+    direction: vertical
+  geometry_check: '紙上 roundRect 錨點 8 個（全檔即 8 個，posOffset 皆在紙內），與 8 條 answer_paths
+
+    相同，無警報。8 個框的線色 4 個 srgb E97132、4 個佈景色 accent2 —— PDF p11 上
+
+    八個都是橘框、都圈住一個目標語詞，顏色不一致不影響判讀。'
+  slug: vekcn
+  text_ref: ue3q9

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { stepPath as buildStepPath } from '../../config/stepPath';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import {
@@ -135,7 +136,7 @@ const MyAssignments: React.FC = () => {
         },
         sessionId: result.session_id,
       });
-      navigate(`/learn/${textKey}/${defaultStepPath}`);
+      navigate(buildStepPath(textKey, defaultStepPath));
     } catch (err) {
       if (err instanceof AssignmentApiError) {
         setError(err.message);
@@ -173,7 +174,7 @@ const MyAssignments: React.FC = () => {
       sessionId,
     });
     const resumeStepPath = getResumeStepPath(a);
-    navigate(`/learn/${textKey}/${resumeStepPath}`);
+    navigate(buildStepPath(textKey, resumeStepPath));
   };
 
   const handleViewReport = (a: StudentAssignmentResponse) => {

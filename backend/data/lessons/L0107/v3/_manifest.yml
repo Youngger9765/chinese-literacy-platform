@@ -5,12 +5,17 @@ sections:
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
+  slug: 6ra7e
+  file: full_text_annotate.6ra7e.yml
   pages:
   - 1
   - 2
 - 'no': 二
   name: 閱讀理解
   module: comprehension
+  text_ref: 6ra7e
+  slug: j63x3
+  file: comprehension.j63x3.yml
   pages:
   - 2
   - 3

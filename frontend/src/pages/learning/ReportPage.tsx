@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { stepPath } from '../../config/stepPath';
 import { useNavigate, useParams } from 'react-router-dom';
 import AssessmentReport from '../../components/reading-steps/AssessmentReport';
 import XPAwardToast, { type XPAwardResult } from '../../components/gamification/XPAwardToast';
@@ -169,7 +170,7 @@ const ReportPage: React.FC = () => {
           <div className="flex gap-3">
             <button
               type="button"
-              onClick={() => navigate(`/learn/${storyId}/${firstIncompleteStepPath}`)}
+              onClick={() => navigate(stepPath(storyId!, firstIncompleteStepPath))}
               className="px-6 py-2.5 rounded-full bg-accent hover:bg-accent-hover text-white text-sm font-bold"
             >
               繼續未完成關卡

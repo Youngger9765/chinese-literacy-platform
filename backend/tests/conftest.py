@@ -1,3 +1,9 @@
+import os as _os
+import sys as _sys
+# 讓 `from _module_files import ...` 在任何 rootdir 下都找得到（#2916）。
+# tests/ 不是 package，pytest 的 rootdir 會變，靠相對 import 不穩。
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+
 """
 Shared test configuration.
 

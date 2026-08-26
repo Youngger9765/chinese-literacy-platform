@@ -66,9 +66,9 @@ def _find_story_id_by_grade_code(grade_code: str):
 
 # xfail 拿掉了（2026-08-24，#2912）。它的理由是「重點朗讀未接上：來源是一修的課號
 # 綁定資料」—— 對這一條已經不成立：v3 的 passage 收成學習單指定的那一段之後，服務端
-# 對 G4-L1 回的是第 3–4 段（到「…尊敬及喝采。」），與原稿的 ☞ 與計數欄一致。
-# strict=True 會把 xpass 判成 failed，留著它 CI 就是紅的；而這是一條真的在驗服務層的
-# 鎖，該讓它跑。上面那條仍 xfail：它讀的是 key_reading_passages.yml（死檔，不復活）。
+# 對 G4-L1 真的回得出 key_reading。strict=True 會把 xpass 判成 failed，留著它 CI 就是
+# 紅的；而這是一條真的在驗服務層的鎖，該讓它跑。
+# 上面那條仍 xfail：它讀的是 key_reading_passages.yml（死檔，不復活）。
 def test_detail_endpoint_serves_mapped_key_reading():
     """真 API 回應要帶 key_reading.passage，而且是正確的範圍。
 
@@ -78,9 +78,13 @@ def test_detail_endpoint_serves_mapped_key_reading():
     **為什麼斷言結尾字串**：passage 長度對不代表範圍對（取到隔壁段也可能一樣長）。
     盯住結尾那幾個字，取錯段就會立刻紅。
 
-    ⚠️ 期望值 2026-08-24 改過一次：原本斷言「向心力！」（只到第 3 段），
-    那是「只取 ☞ 那一段」的舊規則。owner 逐行看原稿推翻 —— ☞ 在第三段段首、
-    右緣計數欄最後一格 376 落在第四段，所以是第 3–4 段。
+    ⚠️ 期望值翻過兩次，寫清楚免得再翻第三次：
+      · 原本斷言「向心力！」= 只取 ☞ 那一段（第 3 段）
+      · 2026-08-24 改成「尊敬及喝采。」= 第 3–4 段，理由是右緣累計字數欄最後一格
+        376 落在第四段
+      · 2026-08-24 改回「向心力！」—— 靖杭比對紙本學習單後推翻上一次：計數欄是
+        「一分鐘能讀到哪」的量尺，不是教授畫的範圍，念順順只練指定的那一段
+        （2026-07-20 專家審查定案）。要再改請先讀 fixtures/key_reading_golden.yml。
     """
     sid = _find_story_id_by_grade_code("G4-L1")
     assert sid is not None, "找不到 G4-L1"
@@ -89,7 +93,17 @@ def test_detail_endpoint_serves_mapped_key_reading():
     kr = resp.json().get("key_reading")
     assert kr is not None, "G4-L1 詳情未回傳 key_reading（合併 no-op？）"
     assert kr["passage"].startswith("2021年8月1日")
-    assert kr["passage"].rstrip().endswith("尊敬及喝采。")
+    assert kr["passage"].rstrip().endswith("向心力！")
+    # start_paragraph / end_paragraph 不在 API 回應裡（只有 passage / start_text /
+    # extent_chars / source），跨段與否在服務層看不到。看得到的是 extent_chars ——
+    # 它必須是 passage 自己的長度，不是右緣累計字數欄那個「一分鐘能讀到哪」的數字。
+    # 兩者一旦脫鉤，就是計數欄又被當成範圍在用（#2712）。整庫的 start==end 由
+    # test_key_reading_golden_2912.py 在資料層鎖。
+    import re
+    assert kr["extent_chars"] == len(re.sub(r"[\s　]", "", kr["passage"])), (
+        f'extent_chars={kr["extent_chars"]} 與 passage 實際長度不符 —— '
+        "字數欄的數字漏進來了？"
+    )
 
 
 def test_no_text_lesson_has_no_key_reading():

@@ -6,6 +6,9 @@ sections:
   name: 閱讀聚光燈
   module: spotlight
   subtitle: 解題策略—帶著問題閱讀
+  text_ref: p9whw
+  slug: twdxu
+  file: spotlight.twdxu.yml
   pages:
   - 1
   - 2

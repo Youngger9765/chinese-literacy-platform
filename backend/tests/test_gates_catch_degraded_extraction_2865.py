@@ -68,7 +68,7 @@ def test_a_real_lesson_still_validates():
 
     抽 5 課而不是 1 課 —— 「有一課過」不代表 schema 沒把好課判死。
     """
-    files = sorted(LESSONS.glob("L*/v3/vocab_definitions.yml"))[:5]
+    files = sorted(LESSONS.glob("L*/v3/vocab_definitions.*.yml"))[:5]
     assert len(files) == 5, f"只找到 {len(files)} 份，掃描前提不成立"
     v = _validator("vocab_definitions")
     for f in files:

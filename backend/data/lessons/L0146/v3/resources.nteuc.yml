@@ -1,0 +1,27 @@
+lesson_uid: L0146
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 台灣歷史不只400年？我們會是南島語系的原鄉嗎？看見台灣連接世界的道路｜Taiwan Keywords EP3
+    duration: (11:40)
+    source: PanSci 泛科學
+    has_qr: true
+    note: 這一則的「片長」「來源」前面沒有「・」符號，第 2 則有，照原稿抄
+  - index: 2
+    title: 排灣族語和印尼語超像？南島語族發源自台灣？台灣原住民真的征服了太平洋？ft. 台灣小姐 Joyce【敢按呢】EP4
+    duration: (10:17)
+    source: 科科抱抱
+    has_qr: true
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/21GVrel_1TO2Extb&t=270
+    url_source: 總表0816「4.影片連結」年級9課次3
+  - index: 2
+    url: http://youtu.be/PZfAZYQnSyY
+    url_source: 總表0816「4.影片連結」年級9課次3
+  slug: nteuc
+  text_ref: 9h66d

@@ -1,21 +1,49 @@
 name: Frontend Checks (lint + vitest)
 
+# ⚠️ 觸發不用 `on.pull_request.paths`（#2916 收尾查到）。
+#
+# GitHub 的 `paths:` 過濾只看**前 300 個變更檔**。PR #2920 改了 3691 個檔，
+# 前 300 個全是 `backend/data/lessons/**`（批次改名 1611 個 yml），
+# `frontend/**` 一個都排不進去 —— 於是這支**整個 PR 一次都沒跑**，
+# 而檢查清單上不會出現這一列，看起來就是全綠。
+#
+# 改用 repo 既有的 `dorny/paths-filter` 判斷（staging-deploy.yml 一直是這樣做的）：
+# 它算的是完整 diff，沒有 300 的上限。意圖不變 —— 純後端的 PR 仍然跳過。
+#
+# ⛔ 不要為了「保險」把過濾整個拿掉：那會讓每個 PR 都跑一次 e2e，
+#    而這支存在的理由是**該跑的時候真的跑**，不是每次都跑。
+
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-    paths:
-      - 'frontend/src/**'
-      - 'frontend/eslint.config.js'
-      - 'frontend/package.json'
-      - 'frontend/vite.config.ts'
-      - '.github/workflows/frontend-checks.yml'
 
 concurrency:
   group: frontend-checks-${{ github.event.pull_request.head.ref }}
   cancel-in-progress: true
 
 jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      relevant: ${{ steps.filter.outputs.relevant }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # paths-filter 要完整歷史才能算 diff
+      - uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          filters: |
+            relevant:
+              - 'frontend/src/**'
+              - 'frontend/eslint.config.js'
+              - 'frontend/package.json'
+              - 'frontend/vite.config.ts'
+              - '.github/workflows/frontend-checks.yml'
+
   frontend-checks:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.relevant == 'true'
     name: Frontend Lint + Vitest
     runs-on: ubuntu-latest
 
@@ -127,6 +155,9 @@ jobs:
           src/pages/admin/lesson-audio/paragraphGap.test.ts \
           src/pages/GuestReadingPage.passage.test.tsx \
           src/components/auth/publicSteps.test.ts \
+          src/config/__tests__/repeatedModulesSplit.test.ts \
+          src/pages/admin/lesson-audio/multiPartRows.test.tsx \
+          src/components/reading-steps/__tests__/splitPartsNotDuplicated.test.tsx \
           src/services/ttsApi.paragraph.test.ts \
           src/components/reading-spotlight/__tests__/BlockSequenceRenderer.newblocks.test.tsx \
           src/components/learning/__tests__/nextStepFooter.test.tsx \
@@ -135,6 +166,15 @@ jobs:
           src/components/layout/__tests__/toolboxUnreachable.test.tsx \
           src/components/reading-steps/__tests__/introStepCount.test.ts \
           src/context/__tests__/zhuyinSpaceShortcut.test.tsx \
+          src/config/__tests__/roundAwareStepNeighbours.test.ts \
+          src/config/__tests__/activeStepHighlight.test.ts \
+          src/config/__tests__/realPayloadRoundScope.test.ts \
+          src/config/__tests__/stepPath.test.ts \
+          src/config/__tests__/stepPathIsTheOnlyBuilder.test.ts \
+          src/services/__tests__/ttsRoundScoped.test.ts \
+          src/services/__tests__/everyLessonAddressedCallCarriesRound.test.ts \
+          src/components/reading-steps/__tests__/degradedNoticeEverywhere.test.ts \
+          src/components/reading-steps/__tests__/roundAudioAndLog.test.tsx \
           src/components/learning/__tests__/QuizCompletionScreen.test.tsx \
           src/components/learning/__tests__/quizCompletionScreenUsage.test.ts \
           src/pages/learning/__tests__/comprehensionReview.test.ts \

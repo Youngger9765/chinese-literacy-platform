@@ -1,0 +1,129 @@
+lesson_uid: L0007
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 嘲弄
+  - 調侃
+  - 歉疚
+  - 靦腆
+  - 飛馳而過
+  - 哽咽
+  - 小心翼翼
+  - 輕蔑
+  - 譏諷
+  - 刮目相看
+  - 忐忑不安
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 瓦礫小心翼翼翻騰本顫
+  - 敢怒力不從心稻收顫忐
+  - 糾結顫抖歉而契巍限忑
+  - 火嘲弄唱疚易巍金局不
+  - 藥滴落行舉調侃風滯安
+  - 味水靦腆無譏諷一靈敏
+  - 寒氣逼人大圍剿溜無飛
+  - 刮目相看局猶啄煙動馳
+  - 遣輕停滯面豫撐待於而
+  - 蔑循序漸進暑哽咽衷過
+  answers_are_graphical: true
+  answer_paths:
+  - word: 小心翼翼
+    cells:
+    - - 1
+      - 3
+    - - 1
+      - 4
+    - - 1
+      - 5
+    - - 1
+      - 6
+    direction: horizontal
+  - word: 忐忑不安
+    cells:
+    - - 2
+      - 10
+    - - 3
+      - 10
+    - - 4
+      - 10
+    - - 5
+      - 10
+    direction: vertical
+  - word: 歉疚
+    cells:
+    - - 3
+      - 5
+    - - 4
+      - 5
+    direction: vertical
+  - word: 嘲弄
+    cells:
+    - - 4
+      - 2
+    - - 4
+      - 3
+    direction: horizontal
+  - word: 調侃
+    cells:
+    - - 5
+      - 6
+    - - 5
+      - 7
+    direction: horizontal
+  - word: 靦腆
+    cells:
+    - - 6
+      - 3
+    - - 6
+      - 4
+    direction: horizontal
+  - word: 譏諷
+    cells:
+    - - 6
+      - 6
+    - - 6
+      - 7
+    direction: horizontal
+  - word: 飛馳而過
+    cells:
+    - - 7
+      - 10
+    - - 8
+      - 10
+    - - 9
+      - 10
+    - - 10
+      - 10
+    direction: vertical
+  - word: 刮目相看
+    cells:
+    - - 8
+      - 1
+    - - 8
+      - 2
+    - - 8
+      - 3
+    - - 8
+      - 4
+    direction: horizontal
+  - word: 輕蔑
+    cells:
+    - - 9
+      - 2
+    - - 10
+      - 1
+    direction: diagonal_down_left
+  - word: 哽咽
+    cells:
+    - - 10
+      - 7
+    - - 10
+      - 8
+    direction: horizontal
+  slug: ajkap
+  text_ref: c9h66

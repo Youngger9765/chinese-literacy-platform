@@ -70,7 +70,12 @@ def violations(schemas):
     for version_dir in sorted(LESSONS.glob("L*/v3")):
         uid = version_dir.parent.name
         for path in sorted(version_dir.glob("*.yml")):
-            schema = schemas.get(path.stem)
+            # 重複出現的大題（#2916）：第二輪以後的檔名帶 slug，例如
+            # `key_reading.m7qxv.yml`。stem 會是 `key_reading.m7qxv`，
+            # 直接查 schema 會查不到 → **靜默跳過**，那些檔案就永遠不受 schema 管
+            # （2026-08-24 dry run 實測）。所以查之前先把 slug 剝掉。
+            module_name = path.stem.partition(".")[0]
+            schema = schemas.get(module_name)
             if schema is None:
                 continue
             try:
@@ -79,17 +84,20 @@ def violations(schemas):
                 continue
             if not isinstance(data, dict):
                 continue
-            body = _payload(data, path.stem)
+            body = _payload(data, module_name)
             if not isinstance(body, dict):
                 continue
             scanned += 1
             allowed = set(schema.get("properties", {}))
             extra = sorted(set(body) - allowed)
             if extra:
-                unknown[path.stem].append((uid, extra))
+                # ⚠️ key 要用 module_name 不是 path.stem —— 下面的 `_enforced` 比對的是
+                #    模組名，用 `key_reading.m7qxv` 當 key 會被濾掉而靜默放行
+                #    （2026-08-24：我第一版只修了查 schema 那一半，mutation 才抓到）
+                unknown[module_name].append((f"{uid}:{path.name}", extra))
             absent = sorted(set(schema.get("required", [])) - set(body))
             if absent:
-                missing[path.stem].append((uid, absent))
+                missing[module_name].append((f"{uid}:{path.name}", absent))
     return {"unknown": unknown, "missing": missing, "scanned": scanned}
 
 

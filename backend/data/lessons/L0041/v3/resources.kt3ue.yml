@@ -1,0 +1,26 @@
+lesson_uid: L0041
+version_id: v3
+section_no: 九
+resources:
+  items:
+  - index: 1
+    title: 頂尖運動選手的一天
+    duration: '10:03'
+    duration_seconds: 603
+    source: 台客劇場 TKstory
+  - index: 2
+    title: 羽球一哥周天成 訓練內容大公開
+    duration: '2:30'
+    duration_seconds: 150
+    source: 愛爾達體育家族
+  section_name: 知識補給站
+  label: 影片連結
+  videos:
+  - index: 1
+    url: http://youtu.be/GEUGHJZSP7c
+    url_source: 總表0816「4.影片連結」年級5課次2
+  - index: 2
+    url: http://youtu.be/h1qcBXSU4cA
+    url_source: 總表0816「4.影片連結」年級5課次2
+  slug: kt3ue
+  text_ref: wjtnp

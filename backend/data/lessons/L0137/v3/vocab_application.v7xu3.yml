@@ -1,0 +1,50 @@
+lesson_uid: L0137
+version_id: v3
+section_no: 三
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 肅然起敬
+    B: 爭論不休
+    C: 星光滿布
+    D: 崎嶇
+    E: 人煙稀少
+    F: 矗立
+    G: 千里迢迢
+    H: 感同身受
+    I: 眾說紛紜
+  answers_printed: true
+  items:
+  - index: 1
+    stem: 太魯閣名聞遐邇，許多遊客(　)而來只為了一睹這裡的美景。
+    answer: G
+  - index: 2
+    stem: 一個人走路時，最好不要走(　)的巷子，因為很危險。
+    answer: E
+  - index: 3
+    stem: 這條路(　)難行，經過的人都叫苦連天。
+    answer: D
+  - index: 4
+    stem: 萬里長城及金字塔的浩大工程，現代人看了無不(　)。
+    answer: A
+  - index: 5
+    stem: 廣場正中央(　)著一棟高達四十層的大樓，格外引人注目。
+    answer: F
+  - index: 6
+    stem: 同學們為了要去哪裡畢業旅行而 (　)。
+    answer: B
+  - index: 7
+    stem: 露營時，望著(　)的夜空，心情慢慢平靜下來。
+    answer: C
+  - index: 8
+    stem: 聽完他不幸遭遇後，我對他的痛苦(　)，十分遺憾。
+    answer: H
+  notes:
+    option_bank: '九個代號裡 H「感同身受」不在本課十一個語詞內，是刻意的誘答項（第 (8) 題答案就是它）；
+
+      反過來，語詞表裡的「複製」「無獨有偶」沒有出現在選項欄。見 E1。'
+    answer_carrier: 橘色手寫體填在（　）內（教師版答案），文字流有此資訊
+  slug: v7xu3
+  text_ref:
+  - ut67x
+  - ppwdu

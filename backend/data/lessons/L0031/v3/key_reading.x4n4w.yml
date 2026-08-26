@@ -1,0 +1,34 @@
+lesson_uid: L0031
+version_id: v3
+section_no: 二
+key_reading:
+  instruction: 請用計時器，從指定段落（四☞）開始朗讀，計時1分鐘讀的字數，並記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！
+  printed_char_count: 412
+  printed_char_count_note: 「字數」欄共 15 個累計數，最後一個是 412；其中第 11 個印成 376，順序上是錯的（見 source_errata E1）
+  timing_table:
+    columns:
+    - 第1次計時
+    - 第2次計時
+    - 第3次計時
+    - 裁判計時
+    unit: 字
+    judge_signature: true
+  benchmark:
+  - threshold: ＜200字
+    feedback: 還要多加練習。
+  - threshold: 201~230字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞231字
+    feedback: 哇嗚，超級厲害！
+  passage: 心、體、技，缺一不可。競技場上，除了體能和技術，心理素質更是成敗關鍵。楊勇緯說：「賽前，我學會把注意力全部放在比賽上，讓身邊的干擾降到最低，專注在當下。先深呼吸冷靜，再調整好心情重新開始，然後思考應該再做些什麼，好讓自己多一點機會。」
+  start_text: 心、體、技，缺一不可。競技場上，除了體能和技術，
+  extent_chars: 117
+  source: extract_key_reading_v3
+  start_paragraph: 4
+  end_paragraph: 4
+  slug: x4n4w
+  text_ref: 3khu6
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  absorbed_tail: 0

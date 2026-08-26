@@ -1,0 +1,37 @@
+lesson_uid: L0101
+version_id: v3
+section_no: 二
+key_reading:
+  instruction: 請用計時器，從指定段落（三　)開始朗讀，在表格中記錄1分鐘朗讀的字數。如果你計時3次後，對自己還不滿意，可以多練幾次。最後一次，找一位同學請他計時、記錄並簽名！
+  instruction_note: 括號內原稿另有一個 ☞ 圖形物件（不在文字流）；右括號在原稿是**半形** `)`。
+  printed_paragraph_in_instruction: 三
+  start_paragraph_note: "\U0001F534 **原稿自相矛盾，這裡需要人看一眼。** 三個訊號兩比一：\n  ・指示語文字印「從指定段落（**三**　)開始朗讀」            → 第 3 段\n  ・☞ 圖形掛在**第 2 段**那個 `w:p` 上（H relativeFrom=margin，\n    posOffset −35729 EMU ＝ 貼在段號欄位置；PDF p1 也印在「二」旁邊）→ 第 2 段\n  ・字數欄從**第 2 段第一個字**開始累計（前 4 個空段落只空掉第 1 段的 4 行；\n    且 207／230／461 三個數字精準等於第 2／2+3／2+3+4 段的字數）→ 第 2 段\n→ 取 **2**：☞ 與字數欄是兩個各自獨立、且可機器驗證的結構訊號，\n  指示語的「三」只是一個字元，且若採信它，字數欄每一格都會多算 207 字（等於整套計時失效）。\n⛔ 沒有把指示語的「三」改掉（那會改動原稿印出來的字），只在此標明衝突。"
+  timing_table:
+    columns:
+    - 第1次計時
+    - 第2次計時
+    - 第3次計時
+    - 裁判計時
+    unit: 字
+    judge_signature: true
+    judge_signature_label: '裁判簽名:'
+  benchmark_label: ◎ 我的表現
+  benchmark:
+  - threshold: ＜220字
+    feedback: 還要多加練習。
+  - threshold: 221~250字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞251字
+    feedback: 哇嗚，超級厲害！
+  passage: 小米酒的意義，在一次次被舉起的場合中展現無遺。
+  start_text: 小米酒的意義，在一次次被舉起的場合中展現無遺。
+  extent_chars: 23
+  source: extract_key_reading_v3
+  start_paragraph: 3
+  end_paragraph: 3
+  slug: cw744
+  text_ref: ffk64
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  absorbed_tail: 0

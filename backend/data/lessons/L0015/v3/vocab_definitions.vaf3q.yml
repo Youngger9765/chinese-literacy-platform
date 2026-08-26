@@ -1,0 +1,53 @@
+lesson_uid: L0015
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+    A: 從本課語詞框框，找語詞。
+    B: 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+    C: 問同學。
+  vocabulary_bank:
+  - 殊榮
+  - 歷屆
+  - 無可言喻
+  - 插曲
+  - 崩潰
+  - 家常便飯
+  - 執著
+  - 頑強
+  - 痛快淋漓
+  - 罹癌
+  items:
+  - index: 1
+    word: 家常便飯
+    definition: 比喻很常見或很普通的事情。
+  - index: 2
+    word: 罹癌
+    definition: 罹患癌症。
+  - index: 3
+    word: 殊榮
+    definition: 特殊的榮耀。
+  - index: 4
+    word: 頑強
+    definition: 堅強，不容易被打敗或放棄。
+  - index: 5
+    word: 痛快淋漓
+    definition: 心情非常暢快。
+  - index: 6
+    word: 歷屆
+    definition: 以往各屆。
+  - index: 7
+    word: 執著
+    definition: 對某件事、目標或想法非常堅持，不容易放下。
+  - index: 8
+    word: 崩潰
+    definition: 精神潰散，情緒相當難過。
+  - index: 9
+    word: 無可言喻
+    definition: 無法用話說明白。
+  - index: 10
+    word: 插曲
+    definition: 進行的事情過程中，意外發生的故事。
+  slug: vaf3q
+  text_ref: kfjyw

@@ -1,31 +1,31 @@
 {
   "uid": "L0130",
-  "gate_version": 1,
+  "gate_version": 2,
   "docx_sha256": "bd4c-66f4-ebce-b86f",
   "modules": {
-    "comprehension": {
-      "yaml_sha256": "2f43-eb72-4a30-7473",
+    "comprehension.vfkqr": {
+      "yaml_sha256": "2f67-70d3-69d9-3299",
       "checked": 17,
       "status": "pass",
       "passed": true,
       "exit": 0
     },
-    "full_text_annotate": {
-      "yaml_sha256": "83de-2f69-29c1-699a",
+    "full_text_annotate.9n3wf": {
+      "yaml_sha256": "4168-a217-8d89-3926",
       "checked": 13,
       "status": "pass",
       "passed": true,
       "exit": 0
     },
-    "goal_box": {
-      "yaml_sha256": "06c1-d3c7-84e5-c83f",
+    "goal_box.3nfde": {
+      "yaml_sha256": "6aa6-8123-6952-3d5e",
       "checked": 2,
       "status": "pass",
       "passed": true,
       "exit": 0
     },
-    "self_check_before_reading": {
-      "yaml_sha256": "d6cc-40d1-44fd-6728",
+    "self_check_before_reading.qf66k": {
+      "yaml_sha256": "2563-7209-dd59-81b8",
       "checked": 1,
       "status": "pass",
       "passed": true,

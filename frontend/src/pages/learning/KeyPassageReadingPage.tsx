@@ -1,7 +1,9 @@
 import React, { useCallback } from 'react';
+import { sectionSlugForStep } from '../../config/roundScope';
+import { moduleForStep } from '../../config/stepConfig';
 import { useNavigate, useParams } from 'react-router-dom';
 import KeyPassageReading from '../../components/reading-steps/KeyPassageReading';
-import { useCurrentStepId } from '../../hooks/useCurrentStepId';
+import { useCurrentStepId, useCurrentSectionSlug } from '../../hooks/useCurrentStepId';
 import { useLearningContext } from '../../layouts/LearningLayout';
 import type { KeyPassageReadingStepData } from '../../types/stepProgress';
 
@@ -18,6 +20,11 @@ const KeyPassageReadingPage: React.FC = () => {
     saveStepProgressPatch,
     dbSessionId,
   } = useLearningContext();
+  // QR 要印這一節自己的代號（#2916）—— 頁面在 Router 裡，葉元件不是
+  // 多篇課從網址的 `?p=` 拿；單篇課網址沒有 `?p=`，改從帳本拿 ——
+  // 只靠網址的話 170 課的 QR 會退回長網址（#2916）。
+  const sectionSlug = useCurrentSectionSlug()
+    ?? sectionSlugForStep(selectedStory?.manifestSections, 'key-passage-reading', moduleForStep);
   const navigate = useNavigate();
 
   // #2588: read/write progress under the step id this page is actually mounted at
@@ -41,6 +48,7 @@ const KeyPassageReadingPage: React.FC = () => {
 
   return (
     <KeyPassageReading
+      sectionSlug={sectionSlug}
       story={selectedStory}
       onFinish={handleFinishKeyPassageReading}
       onBack={() => navigate(`/learn/${storyId}/paragraph-reading`)}

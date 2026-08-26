@@ -118,6 +118,12 @@ LIST_MARKER_RE = re.compile(
 # 這些 key 的值是抽取者自己寫的，不是原稿字串
 ANNOTATION_KEYS = frozenset({
     "note", "notes", "verdict", "method", "answer_carrier", "extraction_check",
+    # `review_reason` 是「為什麼這課要人看」的說明，與 `verdict` 同一類：我方寫的。
+    # `build_lesson_body.py` 早就在 body.yml 寫它，`extract_key_reading_v3.py`
+    # 也在 key_reading.yml 寫 —— 沒排除的話，**標記待審這個動作本身**會讓該課
+    # 逐字門變紅（實測 L0072 / L0110 / L0140 三課，紅的全是我自己那段中文）。
+    # 誠實標記不應該讓門變紅，否則下一個人的修法就是不要標。
+    "review_reason",
     "lesson_uid", "version_id", "catalog_slot", "structure", "strategy_type",
     "type", "index", "idx", "grid_size", "bind", "id", "recommend_range",
     "kind", "why", "confidence", "evidence", "corrected", "errata_ref",

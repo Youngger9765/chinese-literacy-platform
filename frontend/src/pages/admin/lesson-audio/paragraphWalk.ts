@@ -14,6 +14,8 @@
 
 export interface ParagraphWalk {
   storyId: number;
+  /** 這一篇的課文代號。少了它，句子對照表會回第 1 篇（#2930）。 */
+  roundSlug?: string;
   /** Index of the paragraph to play next. */
   next: number;
   total: number;
@@ -25,6 +27,8 @@ export interface ParagraphWalk {
 
 export function planParagraphWalk(init: {
   storyId: number;
+  /** 這一篇的課文代號。少了它，句子對照表會回第 1 篇（#2930）。 */
+  roundSlug?: string;
   paragraphs: string[];
   requestId: number;
   /** Where to resume; defaults to 1 because paragraph 0 starts immediately. */
@@ -33,6 +37,7 @@ export function planParagraphWalk(init: {
   const paragraphs = [...init.paragraphs];
   return {
     storyId: init.storyId,
+    roundSlug: init.roundSlug,
     next: init.next ?? 1,
     total: paragraphs.length,
     requestId: init.requestId,
