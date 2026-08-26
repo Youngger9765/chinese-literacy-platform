@@ -123,7 +123,10 @@ describe('KeyPassageReadingPage — assignment-safety (progress key must stay fu
 describe('KeyPassageReadingPage — step-aware (no hardcoded id drift)', () => {
   it('follows the route when mounted under another registered step id', () => {
     (useLearningContext as ReturnType<typeof vi.fn>).mockReturnValue(
-      makeContext({ 'key-passage-reading': { cpm: 99 }, tutor: { cpm: 42 } }),
+      // 這一步的進度 key 已從舊別名 `tutor` 改成正式 id `paragraph-reading`。
+      // 這條要鎖的是「寫入與讀取用同一個 key」，所以 fixture 也用正式 id ——
+      // 留著舊別名的話，讀不到會被誤讀成 key 分岔。
+      makeContext({ 'key-passage-reading': { cpm: 99 }, 'paragraph-reading': { cpm: 42 } }),
     );
     renderAt('/learn/1/paragraph-reading');
     fireEvent.click(screen.getByTestId('emit-progress'));

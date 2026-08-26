@@ -214,7 +214,8 @@ describe('CrossTextAnalytics — student detail panel', () => {
 
     await waitFor(() => expect(screen.getByText('已嘗試課文')).toBeInTheDocument());
     expect(screen.getByText('學習次數')).toBeInTheDocument();
-    expect(screen.getByText('平均分')).toBeInTheDocument();
+    // 「平均分」現在同時出現在總覽與明細面板，getByText 會因為多筆而丟例外
+    expect(screen.getAllByText('平均分').length, '看不到平均分卡片').toBeGreaterThan(0);
     expect(screen.getByText('強項課文')).toBeInTheDocument();
   });
 
