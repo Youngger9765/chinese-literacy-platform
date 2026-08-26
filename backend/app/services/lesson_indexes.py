@@ -355,6 +355,9 @@ def _rounds_with_flat_paragraphs(l: dict) -> dict:
             m["vocab_bank"] = _vocab_bank_from(l, va) or None
         # 重點表那一步讀 `story_structure_table`（由 keypoints 轉成），
         # 不是 `keypoints` 本身 —— 又是模組名與欄位名對不上（#2930）。
+        vd = m.get("vocab_definitions")
+        if vd:
+            m["vocabulary"] = _vocabulary_from(l, vd) or None
         kp = m.get("keypoints")
         if kp:
             from app.services.keypoints_to_structure import (  # noqa: PLC0415
@@ -389,9 +392,16 @@ def _body(l: dict) -> dict:
     )
 
 
-def _vocabulary_from(l: dict) -> list[dict]:
-    """三 語詞我最棒 → the shape StoryDetail's vocabulary field expects."""
-    items = _unwrap(_sections(l).get("vocab_definitions"), "vocab_definitions").get("items") or []
+def _vocabulary_from(l: dict, section: dict | None = None) -> list[dict]:
+    """三 語詞我最棒 → the shape StoryDetail's vocabulary field expects.
+
+    `section` 有值時用那一輪的（#2930）——模組叫 `vocab_definitions`，
+    前端讀的欄位卻叫 `vocabulary`，名字對不上就會三篇共用同一份詞語。
+    """
+    items = _unwrap(
+        section if section is not None else _sections(l).get("vocab_definitions"),
+        "vocab_definitions",
+    ).get("items") or []
     return [{"word": i["word"], "definition": i["definition"]} for i in items if i.get("word")]
 
 

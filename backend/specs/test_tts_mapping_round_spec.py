@@ -121,3 +121,26 @@ def test_each_round_carries_its_own_structure_table():
     missing = [k for k, v in got.items() if v in ("null", "[]", "{}")]
     assert not missing, f"這幾輪沒有重點表，前端會退回頂層（三篇共用）：{missing}"
     assert len(set(got.values())) == 3, f"三輪的重點表被抹成同一份：{[v[:40] for v in got.values()]}"
+
+
+def test_each_round_carries_its_own_vocabulary():
+    """詞語理解也要跟著篇次走（#2930 續）。
+
+    模組叫 `vocab_definitions`，前端讀的欄位叫 `vocabulary` ——
+    名字對不上，覆蓋那層漏掉它，三篇共用同一份詞語。
+    這是同一個形狀第三次（前兩次是 fill_in_blank 與 story_structure_table）。
+    """
+    import json as _json
+    from app.services.lesson_indexes import _rounds_with_flat_paragraphs
+
+    lesson = get_lesson_by_id(LESSON)
+    rounds = _rounds_with_flat_paragraphs(lesson)
+    src = {k: _json.dumps(v.get("vocab_definitions"), ensure_ascii=False, sort_keys=True)
+           for k, v in rounds.items()}
+    assert len(set(src.values())) == 3, "來源的三輪詞語就已經一樣了"  # 正向對照
+
+    got = {k: _json.dumps(v.get("vocabulary"), ensure_ascii=False, sort_keys=True)
+           for k, v in rounds.items()}
+    missing = [k for k, v in got.items() if v in ("null", "[]")]
+    assert not missing, f"這幾輪沒有 vocabulary，前端會退回頂層：{missing}"
+    assert len(set(got.values())) == 3, f"三輪的詞語被抹成同一份：{[v[:36] for v in got.values()]}"
