@@ -96,6 +96,10 @@ jobs:
         working-directory: frontend
         env:
           PLAYWRIGHT_BASE_URL: ${{ steps.wait.outputs.effective_url }}
+          # 這支打的是 staging，而 PR 的 code 還沒部署上去。
+          # journey 那條驗的是「已部署的行為」，PR 階段落後一輪是正常的 ——
+          # 讓它回報而不是把整個 gate 弄紅（merge 後的 staging 跑才是判準）。
+          E2E_EXPECT_DEPLOYED: ${{ github.ref == 'refs/heads/staging' && '1' || '0' }}
           CI: 'true'
         run: |
           # Run all specs in testDir (tests/e2e). The old hardcoded list named 6

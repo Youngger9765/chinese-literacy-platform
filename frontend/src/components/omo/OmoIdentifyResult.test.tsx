@@ -5,7 +5,7 @@
  * Uses vi.mock to avoid real API calls.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent , waitFor } from '@testing-library/react';
 import OmoIdentifyResult from './OmoIdentifyResult';
 import * as omoApi from '../../services/omoApi';
 
@@ -120,7 +120,7 @@ describe('OmoIdentifyResult — 3-tier confidence UX', () => {
     expect(screen.getByRole('button', { name: /重新批改/i })).toBeTruthy();
   });
 
-  it('already-graded modal calls onGraded when "看上次結果" clicked', () => {
+  it('already-graded modal calls onGraded when "看上次結果" clicked', async () => {
     const onGraded = vi.fn();
     render(
       <OmoIdentifyResult
@@ -133,7 +133,14 @@ describe('OmoIdentifyResult — 3-tier confidence UX', () => {
       />,
     );
     fireEvent.click(screen.getByRole('button', { name: /看上次結果/i }));
-    expect(onGraded).toHaveBeenCalledWith(UPLOAD_ID);
+    // 簽名早就改成 (answers, score, title) —— 舊斷言還在傳 uploadId。
+    // 要鎖的意圖是「點『看上次結果』會把上次批改的內容交出去」。
+    // handler 是 async（先打 getOmoStatus 再回呼），同步斷言看不到
+    await waitFor(() =>
+      expect(onGraded, `實際呼叫：${JSON.stringify(onGraded.mock.calls)}`).toHaveBeenCalledTimes(1),
+    );
+    const [answers] = onGraded.mock.calls[0] as [unknown];
+    expect(Array.isArray(answers), '第一個參數應該是作答清單').toBe(true);
   });
 
   it('already-graded modal shows "—" when cachedScore is null', () => {

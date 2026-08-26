@@ -215,7 +215,11 @@ describe('step_complete_handler_advances_through_active_step_config', () => {
     const activeIds = activeSteps.map((s) => s.id);
     const next = getNextEnabledStep('full-text-annotate', activeIds);
     // Tutor follows reading-annotation in the default 12-step sequence
-    expect(next).toBe('paragraph-reading');
+    // 逐段朗讀 2026-07-20 起 enabled:false（主流程改成重點朗讀），
+    // 所以預設序列裡「讀全文」的下一步是 key-passage-reading。
+    // 第 230 行那組是**自訂序列**，明確把 paragraph-reading 放進去，仍該跳到它 ——
+    // 兩者不衝突：一個測預設、一個測自訂。
+    expect(next).toBe('key-passage-reading');
   });
 
   it('knowledge-station → report (terminal step)', () => {

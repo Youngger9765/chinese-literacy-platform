@@ -26,12 +26,20 @@ export type StepActionBarLayout =
   /** 垂直堆疊、左右撐滿（例：再做一次 + 下一關）。 */
   | 'stack'
   /** 垂直堆疊並置中（例：錄音控制列，按鈕寬度各自不同）。 */
-  | 'stack-center';
+  | 'stack-center'
+  /**
+   * 水平並排置中（例：讀全文-做記號的「播放全文 + 完成標記」，#2941）。
+   * `flex-wrap` 是必要的：`max-w-md` 扣掉 `px-6` 之後，360px 的手機只剩約
+   * 320px，播放中那三顆（暫停/停止/完成標記）擠不進一行。不換行就會直接
+   * 視覺溢出（review #2942 抓到的）—— 換行是退成兩行、仍然置中。
+   */
+  | 'row';
 
 const LAYOUT_CLASS: Record<StepActionBarLayout, string> = {
   plain: '',
   stack: 'flex flex-col gap-2',
   'stack-center': 'flex flex-col items-center gap-3',
+  row: 'flex flex-wrap items-center justify-center gap-3',
 };
 
 interface Props {
