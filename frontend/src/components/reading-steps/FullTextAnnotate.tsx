@@ -85,6 +85,10 @@ interface ReadingAnnotationProps {
    *    沒傳就退回長網址：能掃的 QR 勝過沒有 QR。
    */
   sectionSlug?: string | null;
+  /** 這一頁顯示的不是課文本身（例：訪客的重點段朗讀）。
+   *  設為 true 就不拿課號＋段落序號去對照句子 —— 那對定址到的是整課課文的那一段，
+   *  重點段根本不在那個索引裡，結果會唸出課文開頭（#2930）。 */
+  disableCanonicalMapping?: boolean;
   story: Story;
   /**
    * Which QR code this page should offer, when the caller knows better than
@@ -410,6 +414,7 @@ function ReadingRelaySection({ items, title }: { items: NonNullable<Story['keypo
 
 const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
   sectionSlug: qrSectionSlug,
+  disableCanonicalMapping,
   story,
   onFinish,
   fontSizePx = 22,
@@ -440,7 +445,10 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
   // reader there. A QR-code visitor never reaches this hook — GuestReadingPage
   // drives its own player off the pre-generated mp3, because the synthesis
   // endpoint this one calls answers 401 without a session.
-  const numericLessonId = Number.isFinite(Number(story.id)) ? Number(story.id) : undefined;
+  const numericLessonId =
+    disableCanonicalMapping || !Number.isFinite(Number(story.id))
+      ? undefined
+      : Number(story.id);
   const reader = useFullTextTtsQueue({
     paragraphs: story.content,
     lessonId: numericLessonId,

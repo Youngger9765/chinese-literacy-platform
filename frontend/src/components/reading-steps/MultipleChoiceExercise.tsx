@@ -209,7 +209,12 @@ const MultipleChoiceExercise: React.FC<Props> = ({
         )}
 
         {/* 問 AI 助教 — only on wrong answers after reveal, opt-in (Issue #1507) */}
-        {revealed && !isCorrect && !rescueOpen && (
+        {/* 答錯時要能問 AI 助教（#1507）。
+            ⚠️ 原本的條件是 `revealed && !isCorrect` —— #2199 把「答錯」改成
+            不揭露答案、讓學生再選一次之後，`revealed` 只在**答對**時才為 true，
+            於是這個條件恆為 false，這顆按鈕從此再也沒出現過（死碼）。
+            改看 `wrongFeedback`：那才是「這次選錯了」的訊號。 */}
+        {(wrongFeedback || (revealed && !isCorrect)) && !rescueOpen && (
           <button
             onClick={openRescue}
             className="mt-3 w-full flex items-center justify-center gap-2 rounded-lg border-2 border-amber-300 bg-amber-50 px-4 py-2.5 text-sm font-medium text-amber-800 hover:bg-amber-100 hover:border-amber-400 transition-colors"

@@ -105,6 +105,8 @@ type AnswerMap = Record<string, string | number[] | number>;
 
 interface Props {
   storyId: string;
+  /** 這一節自己的代號。一課多篇時少了它，三篇會拿到同一份表（#2930）。 */
+  roundSlug?: string;
   structure?: StructureData | null;
   previewMode?: boolean;
   showCoach?: boolean;
@@ -1007,6 +1009,7 @@ const WorksheetTable: React.FC<WorksheetTableProps> = ({
 
 const StoryStructureTable: React.FC<Props> = ({
   storyId,
+  roundSlug,
   structure: structureProp,
   previewMode = false,
   showCoach: showCoachProp,
@@ -1080,7 +1083,7 @@ const StoryStructureTable: React.FC<Props> = ({
     }
     const headers: Record<string, string> = {};
     if (token) headers['Authorization'] = `Bearer ${token}`;
-    fetch(`${API_BASE}/api/stories/${storyId}/structure`, { headers })
+    fetch(`${API_BASE}/api/stories/${storyId}/structure${roundSlug ? `?p=${encodeURIComponent(roundSlug)}` : ''}`, { headers })
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
@@ -1280,7 +1283,7 @@ const StoryStructureTable: React.FC<Props> = ({
     try {
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
-      const res = await fetch(`${API_BASE}/api/stories/${storyId}/structure/grade`, {
+      const res = await fetch(`${API_BASE}/api/stories/${storyId}/structure/grade${roundSlug ? `?p=${encodeURIComponent(roundSlug)}` : ''}`, {
         method: 'POST',
         headers,
         body: JSON.stringify({ answers: buildAnswerPayload() }),

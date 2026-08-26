@@ -11,9 +11,12 @@ import ComprehensionLayout from '../../components/reading-steps/ComprehensionLay
 import StoryStructureTable from '../../components/reading-steps/StoryStructureTable';
 import KeypointsFollowupQuestions from '../../components/reading-steps/KeypointsFollowupQuestions';
 import { useLearningContext } from '../../layouts/LearningLayout';
+import { useCurrentSectionSlug } from '../../hooks/useCurrentStepId';
 import NextStepFooter from '../../components/learning/NextStepFooter';
 
 const KeypointsTablePage: React.FC = () => {
+  // 這一步屬於哪一篇（多篇課才有）——重點表要跟著篇次走（#2930）。
+  const roundSlug = useCurrentSectionSlug();
   const { storyId } = useParams<{ storyId: string }>();
   const {
     selectedStory,
@@ -60,6 +63,7 @@ const KeypointsTablePage: React.FC = () => {
     >
       <StoryStructureTable
         storyId={selectedStory.id}
+        roundSlug={roundSlug ?? undefined}
         initialProgress={initialProgress}
         onProgressChange={handleProgressChange}
       />

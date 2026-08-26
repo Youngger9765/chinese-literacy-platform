@@ -95,3 +95,29 @@ def test_each_round_carries_its_own_cloze_and_bank():
     missing = [k for k, v in got.items() if v in ("null", "[]")]
     assert not missing, f"這幾輪沒有 fill_in_blank，前端會退回頂層（三篇共用）：{missing}"
     assert len(set(got.values())) == 3, f"三輪的語詞應用被抹成同一份：{[v[:40] for v in got.values()]}"
+
+
+def test_each_round_carries_its_own_structure_table():
+    """文章重點表也要跟著篇次走（#2930 續）。
+
+    重點表那一步打 `/api/stories/{id}/structure`，只帶課號 ——
+    三篇必然拿到同一份（而且共用同一個快取）。
+    擁有者 2026-08-26 實測：「第11步和第16步的文章重點表都出現和第6步一樣的表格」。
+
+    修法跟語詞應用同型：每一輪先備好自己的 `story_structure_table`。
+    """
+    import json as _json
+    from app.services.lesson_indexes import _rounds_with_flat_paragraphs
+
+    lesson = get_lesson_by_id(LESSON)
+    rounds = _rounds_with_flat_paragraphs(lesson)
+    assert len(rounds) == 3, f"預期三輪，實際 {list(rounds)}"
+
+    src = {k: _json.dumps(v.get("keypoints"), ensure_ascii=False, sort_keys=True) for k, v in rounds.items()}
+    assert len(set(src.values())) == 3, "來源的三輪重點表就已經一樣了"  # 正向對照
+
+    got = {k: _json.dumps(v.get("story_structure_table"), ensure_ascii=False, sort_keys=True)
+           for k, v in rounds.items()}
+    missing = [k for k, v in got.items() if v in ("null", "[]", "{}")]
+    assert not missing, f"這幾輪沒有重點表，前端會退回頂層（三篇共用）：{missing}"
+    assert len(set(got.values())) == 3, f"三輪的重點表被抹成同一份：{[v[:40] for v in got.values()]}"

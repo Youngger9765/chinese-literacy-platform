@@ -353,6 +353,14 @@ def _rounds_with_flat_paragraphs(l: dict) -> dict:
         if va:
             m["fill_in_blank"] = _cloze_from(l, va) or None
             m["vocab_bank"] = _vocab_bank_from(l, va) or None
+        # 重點表那一步讀 `story_structure_table`（由 keypoints 轉成），
+        # 不是 `keypoints` 本身 —— 又是模組名與欄位名對不上（#2930）。
+        kp = m.get("keypoints")
+        if kp:
+            from app.services.keypoints_to_structure import (  # noqa: PLC0415
+                keypoints_to_structure_table,
+            )
+            m["story_structure_table"] = keypoints_to_structure_table(kp) or None
         out[slug] = m
     return out
 
