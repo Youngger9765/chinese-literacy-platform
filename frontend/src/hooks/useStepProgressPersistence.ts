@@ -30,6 +30,9 @@ interface PersistStepProgressOptions {
 }
 
 interface SaveStepProgressPatchOptions {
+  /** 目前這一步的完整 key（多篇課帶 `#slug`）。由 LearningLayout 補上，
+   *  各步驟頁只要照舊傳 base id 就好（#2930）。 */
+  currentStepKey?: string;
   stepId: string;
   stepData: Record<string, unknown>;
   currentStep?: string | null;
@@ -277,14 +280,20 @@ export function useStepProgressPersistence({
     [flushProgress, syncProgress, setSession],
   );
 
+
   const saveStepProgressPatch = useCallback(
     (opts: SaveStepProgressPatchOptions) => {
+      // 一課多篇時，每個步驟頁傳的都是寫死的 base id（`keypoints-table`）——
+      // 三篇會寫進同一個 key，做完第 2 篇第 1 篇也變完成，而且完全沒有徵兆。
+      // 這裡補上網址帶的輪次；單篇課沒有 `#`，keyed === stepId，行為不變（#2930）。
+      const k = opts.currentStepKey ?? '';
+      const keyed = k.startsWith(`${opts.stepId}#`) ? k : opts.stepId;
       persistStepProgressState(
         {
           currentStep: opts.currentStep,
-          completeStep: opts.markCompleted ? opts.stepId : undefined,
+          completeStep: opts.markCompleted ? keyed : undefined,
           stepDataPatch: {
-            [opts.stepId]: {
+            [keyed]: {
               ...opts.stepData,
             },
           },
