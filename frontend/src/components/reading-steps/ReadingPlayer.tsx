@@ -29,11 +29,29 @@ export interface ReadingPlayerProps {
   /** True while the first audio bytes are still on their way. */
   isLoading?: boolean;
   className?: string;
+  /**
+   * 按鈕尺寸。`lg` 是給底部那條動作列用的（#2941）——
+   * 它跟主 CTA「完成標記」並排，同高同字級才不會看起來一大一小。
+   */
+  size?: 'md' | 'lg';
 }
 
-const BTN =
-  'flex items-center justify-center gap-1.5 h-11 px-5 rounded-full font-headline font-bold ' +
-  'text-base transition-all active:scale-[0.97] disabled:opacity-50';
+const BTN_BASE =
+  'flex items-center justify-center gap-1.5 rounded-full font-headline font-bold ' +
+  'transition-all active:scale-[0.97] disabled:opacity-50 whitespace-nowrap';
+
+const BTN_SIZE: Record<'md' | 'lg', string> = {
+  md: 'h-11 px-5 text-base',
+  // h-14 / text-xl = 「完成標記」那顆的尺寸，兩顆並排才等高
+  lg: 'h-14 px-6 text-xl',
+};
+
+/**
+ * 待機那顆（播放全文）要跟主 CTA **等寬**，owner 2026-08-26:「兩個按鈕的大小要
+ * 一樣並且置中」。播放中的暫停/停止是次要動作，維持自身寬度 —— 三顆都撐成
+ * `w-44` 會塞不進 `max-w-md` 那條列，反而被迫換行。
+ */
+const IDLE_WIDTH: Record<'md' | 'lg', string> = { md: '', lg: 'w-44' };
 
 const ReadingPlayer: React.FC<ReadingPlayerProps> = ({
   isPlaying,
@@ -45,7 +63,9 @@ const ReadingPlayer: React.FC<ReadingPlayerProps> = ({
   idleLabel = '播放全文',
   isLoading = false,
   className = '',
+  size = 'md',
 }) => {
+  const BTN = `${BTN_BASE} ${BTN_SIZE[size]}`;
   // Paused counts as active: the audio is still loaded and stop must stay
   // reachable, otherwise a paused reading can only be ended by leaving the page.
   const isActive = isPlaying || isPaused;
@@ -62,7 +82,7 @@ const ReadingPlayer: React.FC<ReadingPlayerProps> = ({
           type="button"
           onClick={onPlay}
           disabled={isLoading}
-          className={`${BTN} text-white shadow-[0_6px_24px_rgba(86,74,191,0.28)] hover:brightness-110`}
+          className={`${BTN} ${IDLE_WIDTH[size]} text-white shadow-[0_6px_24px_rgba(86,74,191,0.28)] hover:brightness-110`}
           style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
         >
           <span className="material-symbols-outlined text-xl" aria-hidden="true">

@@ -854,9 +854,13 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
             />
           )}
 
-          {/* Whole-lesson player. Sits above the legend so it's the first control
-              on the page — listening is what a lot of students come here to do. */}
-          {(
+          {/* Whole-lesson player — 訪客（掃 QR 進來的）專用位置。
+              #2941 把登入學生的播放鍵搬到底部動作列，跟「完成標記」並排：
+              放在文章上方的話，學生一往下讀就把它捲出畫面，讀到第二段想聽
+              就得先捲回頂端。訪客頁留在這裡，因為 `GuestReadingPage` 沒有
+              底部 `StepFooterNav`，那條固定動作列會浮在半空中；訪客也沒有
+              「完成標記」可並排（#2649：不能標記，但要能聽）。 */}
+          {hideAnnotation && (
             <div className="flex justify-center pt-4">
               <ReadingPlayer
                 isPlaying={reader.isPlaying}
@@ -1056,11 +1060,24 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
       {!hideAnnotation && (
         <>
           {/* ── Fixed bottom CTA — gradient fade ─────────────────────────── */}
-      <StepActionBar>
+          {/* #2941: 播放全文跟完成標記並排在這裡。兩顆都是這一步隨時要按得到的
+              動作，而底部這條是唯一永遠在畫面上的地方。 */}
+      <StepActionBar layout="row">
+          <ReadingPlayer
+            size="lg"
+            isPlaying={reader.isPlaying}
+            isPaused={reader.isPaused}
+            onPlay={reader.play}
+            onPause={reader.pause}
+            onResume={reader.resume}
+            onStop={reader.stop}
+          />
           <button
             type="button"
             onClick={() => onFinish(summary)}
-            className="w-full flex items-center justify-center gap-2 h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all"
+            /* w-44 / h-14 跟播放全文那顆一模一樣（`ReadingPlayer` size="lg"）——
+               owner 2026-08-26：「兩個按鈕的大小要一樣並且置中」。 */
+            className="w-44 h-14 flex items-center justify-center gap-2 rounded-full font-headline font-bold text-xl text-white whitespace-nowrap shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all"
             style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
           >
             <span>完成標記</span>
