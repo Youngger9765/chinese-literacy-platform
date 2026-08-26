@@ -143,6 +143,8 @@ const GuestReadingPage: React.FC = () => {
         //    單篇課的網址沒有 `?p=`，所以退回用 story 帶的代號。
         sectionSlug={qrSectionSlug}
         story={shown}
+        // 這一頁顯示的是重點段，不是課文 —— 用課號定址會唸出課文第一段（#2930）
+        disableCanonicalMapping={Boolean(wantsPassage && passage)}
         onFinish={() => {}}
         hideAnnotation
         qrStep={
