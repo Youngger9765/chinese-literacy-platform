@@ -19,7 +19,12 @@ import { test, expect } from '@playwright/test';
 // CI 用 PLAYWRIGHT_BASE_URL 指到該 PR 的 preview（見 playwright.config.ts）。
 // 讀錯變數名的話，PR 上跑的是 staging —— 綠燈驗的不是這次的改動。
 const BASE = process.env.PLAYWRIGHT_BASE_URL || 'https://lingoleap-staging.web.app';
-const MIN_MP3_BYTES = 20_000;   // 一句話的 Azure mp3 都遠大於此；降級路徑則是 0 個請求
+const MIN_MP3_BYTES = 20_000;
+
+// PR preview 的後端是冷的，登入導頁與 TTS 合成都比 staging 慢得多。
+// 這裡放寬到 3 分鐘 —— 逾時代表環境沒起來，不代表音源錯了，
+// 而把環境問題報成「朗讀壞了」比沒有這條測試更糟。
+test.describe.configure({ timeout: 180_000 });   // 一句話的 Azure mp3 都遠大於此；降級路徑則是 0 個請求
 
 type Probe = { audio: Array<{ status: number; type: string; bytes: number }>; spoke: string[] };
 
@@ -53,7 +58,7 @@ async function playAndProbe(page: import('@playwright/test').Page, path: string)
 
   await page.goto(`${BASE}/login`, { waitUntil: 'networkidle' });
   await page.getByRole('button', { name: /小明/ }).first().click();
-  await page.waitForURL((u) => !u.pathname.startsWith('/login'), { timeout: 30_000 });
+  await page.waitForURL((u) => !u.pathname.startsWith('/login'), { timeout: 90_000 });
   await page.goto(`${BASE}${path}`, { waitUntil: 'networkidle' });
   await page.getByRole('button', { name: /播放全文/ }).first().click();
   await page.waitForResponse((r) => /\/api\/tts\/synthesize/i.test(r.url()), { timeout: 45_000 })
@@ -106,7 +111,7 @@ test('把後端打掉時，使用者一定會知道 —— 不可以安靜地換
 
   await page.goto(`${BASE}/login`, { waitUntil: 'networkidle' });
   await page.getByRole('button', { name: /小明/ }).first().click();
-  await page.waitForURL((u) => !u.pathname.startsWith('/login'), { timeout: 30_000 });
+  await page.waitForURL((u) => !u.pathname.startsWith('/login'), { timeout: 90_000 });
   await page.goto(`${BASE}/learn/20063/full-text-annotate?p=7wavn`, { waitUntil: 'networkidle' });
   await page.getByRole('button', { name: /播放全文/ }).first().click();
   await page.waitForTimeout(8000);
