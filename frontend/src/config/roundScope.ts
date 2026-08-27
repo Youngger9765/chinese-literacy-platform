@@ -1,4 +1,4 @@
-import type { ManifestSection } from './stepConfig';
+import type { ManifestSection, StepConfig } from './stepConfig';
 
 /**
  * 一課多篇課文時，「這一步該用哪一篇的資料」（#2916）。
@@ -116,4 +116,68 @@ export function sectionSlugForStep(
   const rows = (manifest ?? []).filter((s) => s?.module === mod && s?.slug);
   // 多份而網址沒說是哪一份 → 不猜。猜錯會讓紙上印到別篇的碼。
   return rows.length === 1 ? (rows[0].slug ?? null) : null;
+}
+
+/**
+ * 一顆 stepper 圈圈連同它屬於哪一篇。
+ *
+ * 單篇課 `partNo` / `partTotal` 都是 undefined，`a11yLabel` 跟以前一模一樣。
+ */
+export interface AnnotatedStep {
+  step: StepConfig;
+  /** 1-based 篇次；共用步（課程簡介／聚光燈／報告…）與跨篇的節沒有 */
+  partNo?: number;
+  /** 這一課共幾篇；單篇課 undefined */
+  partTotal?: number;
+  /** 該篇的第一步 —— stepper 用它畫分隔 */
+  isPartStart: boolean;
+  /** 螢幕閱讀器與 tooltip 用的標籤；多篇課帶「第 N 篇」讓它在整列裡唯一 */
+  a11yLabel: string;
+}
+
+/**
+ * 給每一步標上篇次（#2916 階段 6）。
+ *
+ * 為什麼要有這個：2026-08-27 prod 實測 L0063（3 篇）的 stepper 是攤平 21 顆，
+ * 五個標籤原樣重複三次 —— 每顆點下去 `?p=` 與內容都正確，但**學生看不出
+ * 哪一組是哪一篇**，只能靠位置猜。
+ *
+ * ⛔ **篇次一定要跟內容用同一個來源** —— 走 `articleSlugForStep()`
+ * （帳本的 `text_ref`），不是自己數第幾組五步，也不是讀 `manifest_sections`
+ * 的 `part` 欄位：
+ *   - 按組距切 → 每篇步驟數可以不一樣（有的篇沒有念順順），會切錯
+ *   - 讀 `part` 欄位 → 它跟挑內容的機制不同源，一旦不一致就會出現
+ *     「標籤寫第 2 篇、畫面是第 3 篇的內容」，比沒有標籤更糟
+ *     （實測單篇課 L0011 的 `part` 8 列全是 null）
+ */
+export function annotateStepParts(
+  steps: StepConfig[],
+  manifestSections?: ManifestSection[] | null,
+): AnnotatedStep[] {
+  const articleOf = (step: StepConfig): string | null =>
+    step.roundSlug ? articleSlugForStep(manifestSections, step.id) : null;
+
+  const order: string[] = [];
+  for (const s of steps) {
+    const a = articleOf(s);
+    if (a && !order.includes(a)) order.push(a);
+  }
+  // 單篇課（0 或 1 篇）完全不標，行為與以前一致
+  const multi = order.length > 1;
+  const seen = new Set<string>();
+
+  return steps.map((step, i) => {
+    const article = multi ? articleOf(step) : null;
+    const partNo = article ? order.indexOf(article) + 1 : undefined;
+    const isPartStart = !!(partNo && article && !seen.has(article));
+    if (article) seen.add(article);
+    const base = `${i + 1}. ${step.label}`;
+    return {
+      step,
+      partNo,
+      partTotal: partNo ? order.length : undefined,
+      isPartStart,
+      a11yLabel: partNo ? `${base}（第 ${partNo} 篇）` : base,
+    };
+  });
 }
