@@ -1,8 +1,8 @@
 {
   "interaction_profile": {
-    "checkbox_count": 2,
+    "checkbox_count": 3,
     "fill_blank_count": 1,
-    "inline_choice_count": 1,
+    "inline_choice_count": 0,
     "layout": "worksheet_table",
     "mode": "mixed",
     "primary_labels": [
@@ -68,35 +68,19 @@
           "value": "6-8"
         },
         {
-          "blanks": [
-            {
-              "options": [
-                "孤軍奮戰",
-                "自責失誤"
-              ]
-            },
-            {
-              "options": [
-                "害怕",
-                "在乎"
-              ]
-            },
-            {
-              "options": [
-                "成功",
-                "失敗"
-              ]
-            },
-            {
-              "options": [
-                "拿下一分",
-                "丟了一分"
-              ]
-            }
-          ],
-          "interactive_type": "inline_choice",
+          "interactive_type": "checkbox",
           "label": "情節摘要",
-          "value": "1.【　　　】告訴阿澤不必\n【　　　】\n2.小宇向阿澤道歉，阿澤才知道原來小宇也很\n【　　　】\n3.小宇在下一局時，雖然上壘【　　　】，但也讓隊上【　　　】。"
+          "options": [
+            "孤軍奮戰",
+            "自責失誤",
+            "害怕",
+            "在乎",
+            "成功",
+            "失敗",
+            "拿下一分",
+            "丟了一分"
+          ],
+          "value": "教練告訴阿澤不必 ①孤軍奮戰 ②自責失誤\n原來小宇也很 ①害怕 ②在乎\n小宇上壘 ①成功 ②失敗\n讓隊上 ①拿下一分 ②丟了一分"
         }
       ],
       "value": ""
@@ -161,7 +145,7 @@
         },
         {
           "label": "情節摘要",
-          "value": "1.【　　　】告訴阿澤不必\n（①孤軍奮戰　②自責失誤）\n2.小宇向阿澤道歉，阿澤才知道原來小宇也很\n（①害怕　②在乎）\n3.小宇在下一局時，雖然上壘（①成功　②失敗 ），但也讓隊上（①拿下一分　②丟了一分）。"
+          "value": "教練告訴阿澤不必 ①孤軍奮戰 ②自責失誤\n原來小宇也很 ①害怕 ②在乎\n小宇上壘 ①成功 ②失敗\n讓隊上 ①拿下一分 ②丟了一分"
         }
       ],
       "kind": "section_block",

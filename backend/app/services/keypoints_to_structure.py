@@ -479,6 +479,26 @@ def _columns_to_structure_table(kp: dict) -> Optional[list[list[str]]]:
             if text is None:
                 continue
             cells.append(str(shown))
+            # 一格內含多個獨立小題：`_choices`（10 處）／`_sub_items`（1 處）。
+            # 不認的話整格退成 display —— 答案印在畫面上、學生不能作答（codex 複審指出）。
+            multi = (
+                _sidecar(row, key, "_choices", is_last=(i == len(rest) - 1))
+                or _sidecar(row, key, "_sub_items", is_last=(i == len(rest) - 1))
+                or _sidecar(row, key, "_items", is_last=(i == len(rest) - 1))
+            )
+            if isinstance(multi, list) and multi:
+                parts = []
+                for sub in multi:
+                    if not isinstance(sub, Mapping):
+                        continue
+                    cell = _render_choice_cell({"options": sub.get("options"),
+                                                "answers": sub.get("answer", sub.get("answers"))})
+                    label = str(sub.get("label") or "").strip()
+                    parts.append(f"{label} {cell}".strip() if label else cell)
+                if parts:
+                    cells.append("\n".join(parts))
+                    continue
+
             opts = _sidecar(row, key, "_options", is_last=(i == len(rest) - 1))
             if opts:
                 # 規格（skill §⑥.55b）寫的是 `{欄名}_answer` / `{欄名}_answers`；

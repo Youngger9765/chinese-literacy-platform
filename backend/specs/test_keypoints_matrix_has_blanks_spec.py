@@ -67,3 +67,51 @@ def test_list_layout_still_works():
     }
     table = keypoints_to_structure_table(list_kp)
     assert table and _fillable(table) > 0, "list 佈局的挖空壞了"
+
+
+# ── codex 複審指出的缺口（2026-08-27）─────────────────────────────────────
+# matrix 路徑原本只認 flat cell / `_answer` / `_options` / `_blanks` / `option_bank`。
+# 全庫實際還有 `_choices`（10 處，一格內多個獨立選擇題）與
+# `_sub_items`（1 處，帶 label 的多個小題）—— 這兩種會靜默退成 display，
+# 學生看到答案卻不能作答。
+
+L0137 = json.loads((pathlib.Path(__file__).parent / "fixtures" / "keypoints_matrix_L0137.json").read_text(encoding="utf-8"))
+L0063 = json.loads((pathlib.Path(__file__).parent / "fixtures" / "keypoints_matrix_L0063.json").read_text(encoding="utf-8"))
+
+
+def _bare_answers(kp) -> list[str]:
+    """該作答卻裸著印出來的答案文字。"""
+    table = keypoints_to_structure_table(kp)
+    j = json.dumps(table, ensure_ascii=False)
+    bare = []
+    for row in kp.get("rows", []):
+        if not isinstance(row, dict):
+            continue
+        for k, v in row.items():
+            if not (isinstance(k, str) and k.endswith(("_choices", "_sub_items", "_items"))):
+                continue
+            for sub in (v if isinstance(v, list) else [v]):
+                if not isinstance(sub, dict):
+                    continue
+                opts = sub.get("options")
+                vals = list(opts.values()) if isinstance(opts, dict) else (opts or [])
+                for t in vals:
+                    t = str(t).strip()
+                    # 選項本身要出現，而且要帶作答記號（□）才算可作答
+                    if t and t in j and "□" not in j:
+                        bare.append(f"{k}:{t}"[:24])
+    return bare
+
+
+def test_choices_sidecar_is_answerable():
+    """`_choices`（一格多個獨立選擇題）要渲染成可勾選，不能只印文字。"""
+    assert not _bare_answers(L0137), (
+        f"L0137 的 _choices 沒有變成可作答的題目：{_bare_answers(L0137)[:4]}"
+    )
+
+
+def test_sub_items_sidecar_is_answerable():
+    """`_sub_items`（帶 label 的多個小題）同理。"""
+    assert not _bare_answers(L0063), (
+        f"L0063 的 _sub_items 沒有變成可作答的題目：{_bare_answers(L0063)[:4]}"
+    )

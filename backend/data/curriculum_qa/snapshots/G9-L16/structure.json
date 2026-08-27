@@ -1,10 +1,10 @@
 {
   "interaction_profile": {
-    "checkbox_count": 0,
-    "fill_blank_count": 6,
+    "checkbox_count": 4,
+    "fill_blank_count": 4,
     "inline_choice_count": 0,
     "layout": "worksheet_table",
-    "mode": "fill_blank",
+    "mode": "mixed",
     "primary_labels": [
       "巨石陣",
       "摩艾走路",
@@ -59,9 +59,13 @@
       "label": "相同處",
       "sub_rows": [
         {
-          "interactive_type": "fill_blank",
+          "interactive_type": "checkbox",
           "label": "巨石陣",
-          "value": "1.介紹的主題都和【　　　】有關。\n2.對於人們好奇的疑問，均提出【　　　】個假設。\n3.謎團是否被解開"
+          "options": [
+            "是",
+            "否"
+          ],
+          "value": "①是 ②否"
         }
       ],
       "value": ""
@@ -76,9 +80,15 @@
           "value": "石頭排列成【　　　】"
         },
         {
-          "interactive_type": "fill_blank",
+          "interactive_type": "checkbox",
           "label": "摩艾走路",
-          "value": "石像背向【　　　】\n面向【　　　】"
+          "options": [
+            "海洋",
+            "島內",
+            "海洋",
+            "島內"
+          ],
+          "value": "①海洋 ②島內\n①海洋 ②島內"
         }
       ],
       "value": ""
@@ -88,14 +98,22 @@
       "label": "",
       "sub_rows": [
         {
-          "interactive_type": "display",
+          "interactive_type": "checkbox",
           "label": "巨石陣",
-          "value": "最上方巨石的方向為"
+          "options": [
+            "橫向",
+            "直向"
+          ],
+          "value": "①橫向 ②直向"
         },
         {
-          "interactive_type": "display",
+          "interactive_type": "checkbox",
           "label": "摩艾走路",
-          "value": "部分石像頭上最上方會加一塊"
+          "options": [
+            "帕洛",
+            "帽子"
+          ],
+          "value": "①帕洛 ②帽子"
         }
       ],
       "value": ""
@@ -135,7 +153,7 @@
       "items": [
         {
           "label": "巨石陣",
-          "value": "1.介紹的主題都和【　　　】有關。\n2.對於人們好奇的疑問，均提出【　　　】個假設。\n3.謎團是否被解開"
+          "value": "①是 ②否"
         }
       ],
       "kind": "section_block",
@@ -149,7 +167,7 @@
         },
         {
           "label": "摩艾走路",
-          "value": "石像背向（　）\n面向（　）"
+          "value": "①海洋 ②島內\n①海洋 ②島內"
         }
       ],
       "kind": "section_block",
@@ -159,11 +177,11 @@
       "items": [
         {
           "label": "巨石陣",
-          "value": "最上方巨石的方向為"
+          "value": "①橫向 ②直向"
         },
         {
           "label": "摩艾走路",
-          "value": "部分石像頭上最上方會加一塊"
+          "value": "①帕洛 ②帽子"
         }
       ],
       "kind": "section_block",
