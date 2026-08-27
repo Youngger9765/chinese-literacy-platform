@@ -28,6 +28,9 @@ MODULE_TO_FIELD = {
     "keypoints": "story_structure_table",
     "vocab_definitions": "vocabulary",
     "vocab_application": "fill_in_blank",
+    # 前端讀的欄位跟模組同名（#2930）—— 它是第一篇專屬的加碼題，
+    # 靠 `part_no` 決定歸屬，只會出現在自己那一篇的 round。
+    "keypoints_followup_questions": "keypoints_followup_questions",
 }
 
 # 還沒接線的模組：具名登記，不靜默略過。接線時把它從這裡移走。
