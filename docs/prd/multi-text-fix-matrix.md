@@ -41,8 +41,8 @@ G5-L3 `mdjjy`／G6-L5 `vfmem`／G6-L4 `9rncr`／G7-L16 `fff44`／G7-L20 `uf6ny`
 | B1 | yml / 後端資料 | ✅ | ✅ | D5：prod 五課每輪內容各自不同（md5 逐欄位比對） |
 | B2 | slug | ✅ | ✅ | `test_qr_addressing_spec.py`；D4 九張代號實掃 |
 | B3 | 內容 | ✅ | ✅ | **D6：prod 訪客實際渲染 17 對 / 0 錯**（五課讀全文＋念順順逐篇比對真值） |
-| B4 | 元件 active | ✅ staging | ☐ | journey e2e 斷言高亮位移一致 |
-| B5 | HTML 顯示 | ⚠️ 部分 | ☐ | 只在 staging 截圖看過三篇；prod 未截圖 |
+| B4 | 元件 active | ✅ staging | ⛔ 需學生帳號 | journey e2e 斷言高亮位移一致（訪客頁沒有步驟列，無登入看不到） |
+| B5 | HTML 顯示 | ✅ | ✅ | **D7：prod 三篇截圖逐張看過** —— 0 破圖、0 橫向溢出、0 pageerror，各篇顯示自己的內容（717/787/894 字） |
 | B6 | QR code | ✅ | ✅ | D4：prod 九張 9/9，轉址 307＋負向對照 404 |
 | B7 | URL | ✅ | ✅ | `stepPathIsTheOnlyBuilder.test.ts`；D4 轉址目標逐一比對 |
 | B8 | Audio | ✅ | ✅ | D4 攔 `/api/tts` 比對送出文字；`audio-comes-from-azure.spec.ts` |
@@ -59,6 +59,19 @@ G5-L3 `mdjjy`／G6-L5 `vfmem`／G6-L4 `9rncr`／G7-L16 `fff44`／G7-L20 `uf6ny`
 | `src/pages/__tests__/guestKeyPassageAudio.test.tsx` | 訪客重點朗讀不用課號定址 | ✅ 已 pin 進具名清單 |
 | `src/hooks/__tests__/finishAdvancesWithinRound.test.ts` | 完成標記走到同輪下一步 | ✅ 已 pin 進具名清單 |
 
+## C2. prod 建學生帳號：四條路都試過，都不通
+
+| 嘗試 | 結果 |
+|---|---|
+| `POST /api/auth/register` 帶 `role: student` | 403 —— 後端明擋（`block_student_self_registration`，#457：學生由老師建立） |
+| 帶 `role: admin` / `org_admin` | 201 但角色被強制成 teacher，打 admin 端點仍 403 |
+| 教師帳號建學校 | 403 —— 建校要 `system_admin` / `org_admin` |
+| `POST /api/admin/seed/demo-students` | 需 `system_admin` |
+| 教師帳號建班級 | 422 —— 必填 `school_id`，而 prod 目前 **0 所學校** |
+
+→ 剩下的 4 格（A1-3／A2-3／B4／B9）**需要一組既有的 prod 學生帳號**才驗得到。
+這四格在 staging 都已驗過，但那是 staging 不是 prod，不併進綠燈。
+
 ## D. 驗證紀錄
 
 | 編號 | 日期 | 項次 | 環境 | 方法 | 結果 |
@@ -69,3 +82,4 @@ G5-L3 `mdjjy`／G6-L5 `vfmem`／G6-L4 `9rncr`／G7-L16 `fff44`／G7-L20 `uf6ny`
 | D4 | 2026-08-27 | A3-1、B6、B7、B8 | **prod** | 真瀏覽器掃 9 張 QR → 攔 `/api/tts` → 跟該課 `key_reading.passage` 比對 | **9/9** |
 | D5 | 2026-08-27 | B1 | **prod** | 同 D3 | 五課全對 |
 | D6 | 2026-08-27 | B3 | **prod** | 真瀏覽器訪客路徑，五課的每一篇「讀全文」與「念順順」逐篇比對後端真值，並檢查有無混入別篇 | **17 對 / 0 錯** |
+| D7 | 2026-08-27 | B5 | **prod** | 三篇截圖 + DOM 量測（破圖／橫向溢出／pageerror／本篇內容），並逐張看過 | **3/3** |
