@@ -78,8 +78,28 @@ test(`從第 1 步逐步走完，每一步都是自己那一篇 — ${LABEL}`, a
   }
 
   await page.goto(`${FE}/login`, { waitUntil: 'networkidle' });
-  await page.getByRole('button', { name: /小明/ }).first().click();
+  // staging 有一鍵登入；prod 刻意關掉，那就用帳密 ——
+  // 沒有一鍵登入不是「測不了」，是自己開一個帳號。
+  const demo = page.getByRole('button', { name: /小明/ }).first();
+  if (await demo.count()) {
+    await demo.click();
+  } else {
+    const email = process.env.E2E_EMAIL;
+    const password = process.env.E2E_PASSWORD;
+    expect(Boolean(email && password), 'prod 沒有一鍵登入，請給 E2E_EMAIL / E2E_PASSWORD').toBe(true);
+    // prod 的帳號欄是 type=text（可填 email 或學號），不是 type=email
+    await page.locator('input[type="text"], input[type="email"]').first().fill(email!);
+    await page.locator('input[type="password"]').first().fill(password!);
+    await page.getByRole('button', { name: /登入|登錄|sign in/i }).first().click();
+  }
   await page.waitForURL((u) => !u.pathname.startsWith('/login'), { timeout: 60_000 });
+
+  // 新帳號第一次登入會被導到使用條款頁，要先同意才進得去
+  const agree = page.getByRole('button', { name: /同意並繼續/ }).first();
+  if (await agree.count()) {
+    await agree.click();
+    await page.waitForTimeout(3000);
+  }
   await page.goto(`${FE}/learn/${LESSON}/lesson-intro`, { waitUntil: 'networkidle' });
   await page.getByRole('button', { name: /開始學習/ }).first().click();
   await page.waitForTimeout(3000);
