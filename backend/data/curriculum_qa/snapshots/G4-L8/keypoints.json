@@ -40,6 +40,7 @@
     }
   ],
   "section_no": "五",
+  "slug": "tdp9c",
   "tail_question": {
     "answer": 2,
     "answer_carrier": "紅色 ☑（圖形），文字流無此資訊",
@@ -51,6 +52,7 @@
     "star": false,
     "stem": "如果想避免長跑影響肌力訓練，下列哪一種安排較適合？（單選）"
   },
+  "text_ref": "3hhtn",
   "theme": "文章主題：運動科學",
   "title": "運動科學"
 }

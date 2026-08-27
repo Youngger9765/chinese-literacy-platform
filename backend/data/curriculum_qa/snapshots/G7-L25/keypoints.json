@@ -85,6 +85,8 @@
     }
   ],
   "section_no": "五",
+  "slug": "kpkaq",
   "structure_note": "原稿三欄：左欄是直排的人物名（人物一【福爾摩斯】／人物二【王戎】，各自縱向合併儲存格）、\n中欄是項目名（特質與支持理由／成功推理要素）、右欄是內容。\n用 list 佈局：人物當 row 的 label，中欄項目當 items 的 label。\n⛔ 未寫成 matrix ——「結論」那一列沒有中欄，欄名對不齊。",
+  "text_ref": "qxvp9",
   "title": "看到了嗎？然後呢？"
 }

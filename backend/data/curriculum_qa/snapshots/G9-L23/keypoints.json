@@ -2,6 +2,7 @@
   "answer_carrier": "橘色手寫 + 紅色 ☑（w:sym Wingdings F0FE，在文字層），PDF p4 可見",
   "instruction": "請根據課文的內容，把表格中正確的描述打Ｖ，或填上正確的答案。",
   "layout": "list",
+  "part": 1,
   "part_note": "篇1（第23課）",
   "rows": [
     {
@@ -90,5 +91,7 @@
   ],
   "section_name_printed": "文章重點整理",
   "section_no": "三",
+  "slug": "337rq",
+  "text_ref": "wdnd7",
   "title": "馬拉松王者──基普喬吉"
 }
