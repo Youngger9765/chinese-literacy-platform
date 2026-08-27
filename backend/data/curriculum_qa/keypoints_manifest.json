@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-08-20T06:07:38.320983+00:00",
+  "generated_at": "2026-08-27T13:54:50.862307+00:00",
   "generated_by": "scripts/build_keypoints_qa_manifest.py",
   "source": "served corpus — backend/data/lessons/<uid>/<version>/keypoints.yml (#2749)",
   "smoke_only": false,
@@ -3358,10 +3358,10 @@
       "title": "未解之謎──石頭的祕密",
       "tier": "keypoints_yml",
       "layout": {
-        "mode": "fill_blank",
+        "mode": "mixed",
         "layout": "worksheet_table",
-        "fill_blank_count": 6,
-        "checkbox_count": 0,
+        "fill_blank_count": 4,
+        "checkbox_count": 4,
         "row_count": 6
       },
       "gates": {
@@ -4007,10 +4007,10 @@
       "title": "心，也要一起練",
       "tier": "keypoints_yml",
       "layout": {
-        "mode": "fill_blank",
+        "mode": "mixed",
         "layout": "worksheet_table",
-        "fill_blank_count": 4,
-        "checkbox_count": 0,
+        "fill_blank_count": 3,
+        "checkbox_count": 1,
         "row_count": 5
       },
       "gates": {
@@ -4037,7 +4037,7 @@
         "mode": "mixed",
         "layout": "worksheet_table",
         "fill_blank_count": 1,
-        "checkbox_count": 2,
+        "checkbox_count": 3,
         "row_count": 5
       },
       "gates": {
@@ -4088,10 +4088,10 @@
       "title": "成為身體的最佳夥伴",
       "tier": "keypoints_yml",
       "layout": {
-        "mode": "fill_blank",
+        "mode": "mixed",
         "layout": "worksheet_table",
-        "fill_blank_count": 4,
-        "checkbox_count": 0,
+        "fill_blank_count": 1,
+        "checkbox_count": 3,
         "row_count": 5
       },
       "gates": {
@@ -4115,10 +4115,10 @@
       "title": "身體，謝謝你",
       "tier": "keypoints_yml",
       "layout": {
-        "mode": "fill_blank",
+        "mode": "mixed",
         "layout": "worksheet_table",
-        "fill_blank_count": 4,
-        "checkbox_count": 0,
+        "fill_blank_count": 3,
+        "checkbox_count": 1,
         "row_count": 5
       },
       "gates": {
@@ -4199,7 +4199,7 @@
         "mode": "mixed",
         "layout": "worksheet_table",
         "fill_blank_count": 2,
-        "checkbox_count": 6,
+        "checkbox_count": 13,
         "row_count": 9
       },
       "gates": {
@@ -4253,7 +4253,7 @@
         "mode": "mixed",
         "layout": "worksheet_table",
         "fill_blank_count": 4,
-        "checkbox_count": 0,
+        "checkbox_count": 3,
         "row_count": 5
       },
       "gates": {
@@ -4280,8 +4280,8 @@
         "mode": "mixed",
         "layout": "worksheet_table",
         "fill_blank_count": 4,
-        "checkbox_count": 3,
-        "row_count": 6
+        "checkbox_count": 9,
+        "row_count": 9
       },
       "gates": {
         "L3": {

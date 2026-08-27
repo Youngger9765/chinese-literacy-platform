@@ -332,6 +332,15 @@ def _unwrap(mod: Any, key: str) -> dict:
     return inner if isinstance(inner, dict) else mod
 
 
+def _article_order(l: dict) -> dict:
+    """課文 slug → 它是第幾篇（1-based）。加碼題用 `part_no` 指定歸屬（#2930）。"""
+    order, n = {}, 0
+    for sec in l.get("manifest_sections") or []:
+        if sec.get("module") == "full_text_annotate" and sec.get("slug"):
+            n += 1
+            order[sec["slug"]] = n
+    return order
+
 def _rounds_with_flat_paragraphs(l: dict) -> dict:
     """`repeat_rounds`，每一輪多一個攤平好的 `paragraphs`（#2916）。
 
@@ -355,6 +364,13 @@ def _rounds_with_flat_paragraphs(l: dict) -> dict:
             m["vocab_bank"] = _vocab_bank_from(l, va) or None
         # 重點表那一步讀 `story_structure_table`（由 keypoints 轉成），
         # 不是 `keypoints` 本身 —— 又是模組名與欄位名對不上（#2930）。
+        # 第一篇專屬的加碼題（`part_no: 1`、instruction 寫「依據第一篇文章」）。
+        # 它只掛在頂層的話，沒覆蓋到的篇次會退回去讀到它 ——
+        # 學生在第 2、3 篇的重點表底下也看到「請依據第一篇文章的內容」（#2930）。
+        fq = l.get("keypoints_followup_questions")
+        if fq and _article_order(l).get(slug) == (fq.get("part_no") if isinstance(fq, dict) else None):
+            m["keypoints_followup_questions"] = fq
+
         vd = m.get("vocab_definitions")
         if vd:
             m["vocabulary"] = _vocabulary_from(l, vd) or None
@@ -897,7 +913,12 @@ def _uid_tree_lessons() -> list[dict]:
             # works correctly on an empty/absent list.
             "multi_text_parts": l.get("multi_text_parts") or None,
             "cross_text_banner": l.get("cross_text_banner") or None,
-            "keypoints_followup_questions": l.get("keypoints_followup_questions") or None,
+            # 多篇課不掛頂層 —— 它已經放進自己那一篇的 round 了；
+            # 留在頂層會讓別篇退回去讀到它。單篇課沒有 round，照舊掛頂層。
+            "keypoints_followup_questions": (
+                None if (l.get("repeat_rounds") or {})
+                else (l.get("keypoints_followup_questions") or None)
+            ),
             "writing_practice": l.get("writing_practice") or None,
             # Per-lesson step order (#1374 mechanism, unused by the uid tree until now —
             # every one of the 175 second-edition lessons fell back to
@@ -917,9 +938,14 @@ def _uid_tree_lessons() -> list[dict]:
         #      `manifest_sections`（形狀不同的兩份互蓋 → type/number 全變 None）
         #    加新的計算欄位時，**如果 lesson.yml 也有同名欄位就要加進這裡**。
         #    `test_computed_fields_survive_the_overlay` 會盯著這件事。
+        # ⚠️ 這個名單擋的是「row 上算好的值，不可以被原始 lesson 的同名欄位蓋回去」。
+        #    已經踩四次：parts / repeat_rounds / manifest_sections /
+        #    keypoints_followup_questions —— 每次都是算對了卻被 overlay 蓋掉，
+        #    沒有錯誤、型別也對，只有把畫面並排看才發現。
         _IDENTITY = {"id", "lesson_uid", "version_id", "grade", "assets", "source",
                      "spotlight_v2", "keypoints", "story_structure_table",
-                     "repeat_rounds", "manifest_sections"}
+                     "repeat_rounds", "manifest_sections",
+                     "keypoints_followup_questions"}
         for k, v in l.items():
             if k in _IDENTITY or v in (None, "", [], {}):
                 continue
