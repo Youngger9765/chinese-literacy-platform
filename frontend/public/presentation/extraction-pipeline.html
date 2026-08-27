@@ -613,11 +613,37 @@ full_text_annotate  漏 inline_marked_terms</pre>
 </tbody></table></div>
 <p>全庫 <b>1696 個模組實例 PASS</b>（不誤報）；拿抽薄的那份餵進去會紅。</p>`},
 
-  {k:"8", num:"⑧", ttl:"學生畫面", kind:"machine", badge:["ok","—"],
+  {k:"8", num:"⑧", ttl:"yml → 學生畫面", kind:"machine", badge:["ok","—"],
    src:"frontend",
-   fact:"終點",
+   fact:"8/26 回報的四個 bug 全在這裡",
    body:`<p>前面所有的門加起來，保證的是「形狀對、沒有整題被靜默丟掉」。</p>
-<div class="m"><b>不保證抄的字是對的</b> —— 那是 ⑦b 的事，它現在 174 課全有證明、已經進 CI 具名清單。</div>`},
+<div class="m"><b>不保證抄的字是對的</b> —— 那是 ⑦b 的事，它現在 174 課全有證明、已經進 CI 具名清單。</div>
+<p><b>這一關以前在圖上是個空盒子</b>，而 2026-08-26 回報的四個 bug 全發生在裡面。展開如下：</p>
+<pre style="font-size:12px;line-height:1.5;overflow-x:auto">yml 檔
+ │  lesson_indexes.py 組 detail
+ ▼
+detail（頂層） + repeat_rounds{課文slug: {模組: 內容}}
+ │  🔴 名字要對得上，否則<b>靜默退回頂層 = 第 1 篇</b>
+ ▼
+API /api/stories/{id}
+ │  ⚠️ 有些步驟另外打自己的端點，那條<b>只帶課號</b>
+ ▼
+storyForStep(story, "步驟#篇次")   ← LearningLayout 一處統一換篇
+ │  ⛔ 訪客(掃 QR)走 GuestReadingPage，<b>不經過這裡</b>
+ ▼
+步驟頁 → 元件 → HTML（進度寫回也要帶篇次）</pre>
+<table class="t"><thead><tr><th>模組名</th><th>前端讀的欄位</th><th></th></tr></thead><tbody>
+<tr><td>full_text_annotate</td><td><code>paragraphs</code></td><td></td></tr>
+<tr><td>key_reading</td><td><code>key_reading</code></td><td></td></tr>
+<tr><td>keypoints</td><td><code>story_structure_table</code></td><td>犯過</td></tr>
+<tr><td>vocab_definitions</td><td><code>vocabulary</code></td><td>犯過</td></tr>
+<tr><td>vocab_application</td><td><code>fill_in_blank</code> / <code>vocab_bank</code></td><td>犯過</td></tr>
+</tbody></table>
+<div class="m"><b>失敗形狀只有一種：用課號定址，多篇課取不到自己那一份。</b>
+沒有錯誤、型別正確、頁面正常 —— 只有把三篇並排看才發現一模一樣。<br>
+判準：看到 <code>lesson_id</code> 跟內容欄位出現在同一個取值式裡，就問「多篇課會拿到哪一篇？」</div>
+<p>門：<code>multiTextJourney.spec.ts</code> —— 登入後從第 1 步逐步按完成走完，
+每步比對該篇真值、斷言高亮跟著篇次、進度 key 帶篇次。五課全跑。</p>`},
 ];
 
 const PLANES = ["一 讀全文-做記號","二 念順順","三 語詞我最棒","四 語詞應用",
