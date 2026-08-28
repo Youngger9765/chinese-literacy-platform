@@ -165,10 +165,20 @@ prod **561 課完成只有 9 筆有分數**、第一個徽章**永遠發不出�
 
 ### 🟢 P3 L0：門本身的品質
 
-- `#2925` 已修：門不准用 `on.paths`（會被 300 檔上限靜靜跳過）
-- 還缺：**具名清單漂移偵測** —— 清單裡列了不存在的檔，
-  `vitest` 是**靜默跳過**、`pytest` 會報錯。前端那邊尤其危險
+- ✅ `#2925`：門不准用 `on.paths`（會被 300 檔上限靜靜跳過）
+- ✅ **具名清單漂移偵測** —— `specs/test_ci_gates_are_runnable_spec.py` 兩條
+  （`test_every_backend_test_named_in_ci_exists` /
+  `test_every_frontend_test_named_in_ci_exists`），跑在 Spec Check 裡。
+  前端那條更重要：**vitest 對不存在的路徑是靜默跳過**，pytest 至少會爆。
+  現況：具名 140 支，每一支都在磁碟上
+- ✅ **三支被隔離的鎖已修好插電**（2026-08-28）—— 原因不是 regression 而是
+  「測試自己的環境假設」，見 `backend/tests/_route_walk.py`。
+  ⚠️ 復現要另建 python3.11 + 未釘版 fastapi 的 venv（實測 0.141.1）；
+  本機 3.10 + 0.115.6 永遠重現不到
 - 還缺：**「鎖有沒有紅過」的紀錄** —— 沒看過紅的鎖是劇場
+- 還缺：**批次順序的污染偵測** —— 這輪抓到一支測試把另一支的登入弄成 500
+  （`dependency_overrides.clear()` 掃全域）。單跑永遠看不到，
+  只有**照 workflow 的順序整批跑**才會出現
 
 ---
 
