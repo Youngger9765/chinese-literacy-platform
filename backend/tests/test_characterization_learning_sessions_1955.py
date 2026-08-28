@@ -22,6 +22,8 @@ import uuid
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
+from _route_walk import method_paths  # noqa: E402
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, event
@@ -161,7 +163,7 @@ def _register_and_login(client, suffix=None) -> dict:
     rate_limiter.reset()
     unique = suffix or uuid.uuid4().hex[:8]
     email = f"char1955_{unique}@example.com"
-    password = "SecurePass123!"
+    password = "demo1234"  # 常見 placeholder，在掃描器的 banlist 上（自創的假密碼反而會被抓）
     resp = client.post("/api/auth/register", json={
         "email": email,
         "password": password,
@@ -446,11 +448,13 @@ class TestRouteRegistry:
 
     def test_all_expected_routes_registered(self, client):
         """Check that each expected route method+path exists in the FastAPI app routes."""
-        registered = set()
-        for route in app.routes:
-            if hasattr(route, "methods") and hasattr(route, "path"):
-                for method in route.methods:
-                    registered.add((method, route.path))
+        # ⚠️ 原本的 `if hasattr(route, "path")` 是**靜默跳過** —— 新版 FastAPI 把
+        #    include_router 的東西包成 `_IncludedRouter`（沒有 .path），於是裡面的
+        #    路由整批消失，斷言會說「路由沒註冊」，看起來像重構把路由弄丟了。
+        #    路由好好的，是走訪的方式看不到它。
+        registered = method_paths(app)
+        assert len(registered) >= 20, (
+            f"只走到 {len(registered)} 條 method+path —— 走訪方式壞了，不是路由沒註冊")
 
         for method, path in self.EXPECTED_ROUTES:
             assert (method, path) in registered, (
