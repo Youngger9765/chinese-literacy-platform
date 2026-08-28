@@ -50,11 +50,32 @@ def test_no_spotlight_serves_a_figure_that_points_at_a_table_with_no_asset():
     assert bad == [], f"assetless table-figures still produced: {[b[0] for b in bad][:5]}"
 
 
+#: 聚光燈裡「表格」有兩種 block 型別。
+#: ⚠️ 二修多了 `fill_table`（要學生填的表，116 個 block／69 課），
+#:    而這條原本只認 `table` —— 於是只數到 40 課，看起來像掉了一半。
+#:    實際兩種加起來 96 課，內容一直都在。
+#: ⛔ 這不是把門檻調低讓它過：是把詞彙補齊。單一型別的檢查會漏掉另一種，
+#:    而漏掉的那種**沒有任何症狀**。
+TABLE_BLOCK_TYPES = ("table", "fill_table")
+
+
+def test_the_scan_knows_both_table_vocabularies():
+    """正向對照 —— 兩種型別都要真的存在，否則下面那條可能靠其中一種撐著。"""
+    import collections
+    seen = collections.Counter()
+    for l in _lessons():
+        for b in _blocks(l):
+            if b.get("type") in TABLE_BLOCK_TYPES:
+                seen[b["type"]] += 1
+    for t in TABLE_BLOCK_TYPES:
+        assert seen[t] > 0, f"語料庫裡一個 {t} block 都沒有 —— 詞彙又變了，重新盤點"
+
+
 def test_the_table_exercises_reach_the_lesson():
     """88 lessons had tables in their spotlight range. They must arrive as content."""
     with_tables = [
         l["lesson_uid"] for l in _lessons()
-        if any(b.get("type") == "table" and b.get("rows") for b in _blocks(l))
+        if any(b.get("type") in TABLE_BLOCK_TYPES and b.get("rows") for b in _blocks(l))
     ]
     assert len(with_tables) >= 70, (
         f"only {len(with_tables)} lessons carry spotlight tables — 88 have them in the "
