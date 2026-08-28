@@ -351,13 +351,21 @@ def process_session_completion(
             total_weight = sum(weights)
             overall = sum(s * w for s, w in zip(scores, weights)) / total_weight
             learning_session.overall_score = round(overall, 1)
-            if learning_session.status != "completed":
-                learning_session.status = "completed"
-                learning_session.completed_at = datetime.now(timezone.utc)
             logger.info(
                 "Set overall_score=%.1f for session %d (sources=%d)",
                 learning_session.overall_score, session_id, len(scores),
             )
+
+        # ⛔ 標記完成**不可以**綁在「有沒有算出分數」上（#2904 的第二層）。
+        # 原本這三行縮在 `if scores and weights:` 裡面，於是三個來源都空的 session
+        # 連 status 都不會變成 completed —— 接著 _get_stories_completed() 回 0，
+        # first_session / first_story 徽章就永遠發不出來（test_gamification.py
+        # 那四條紅了很久，而它不在 CI 具名清單裡所以沒人發現）。
+        #
+        # 完成是**事實**（學生走完了），分數是可有可無的**量測**。兩件事不同層。
+        if learning_session.status != "completed":
+            learning_session.status = "completed"
+            learning_session.completed_at = datetime.now(timezone.utc)
 
     # --- Check badges ---
     newly_unlocked = check_and_award_badges(

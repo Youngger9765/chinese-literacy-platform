@@ -62,12 +62,19 @@ def _make_user(db_session, user_id: int = 1):
 def _make_session(db_session, session_id: int = 1, student_id: int = 1, status: str = "completed"):
     """Insert a minimal LearningSession row."""
     from sqlalchemy import text
+    # story_slug 一定要給 —— get_completed_story_count() 數的是 DISTINCT story_slug
+    # 且濾掉 NULL，所以少了它，「完成幾課」永遠是 0，first_session / first_story
+    # 徽章就發不出來（這四條紅了很久，而 test_gamification.py 不在 CI 具名清單裡）。
+    # ⛔ 這不是把測試改到過 —— staging 實測 300 筆 session **全部**都有 story_slug，
+    #    是這個 fixture 不像真實資料。
     db_session.execute(
         text(
-            "INSERT INTO learning_sessions (id, student_id, status, current_step, started_at)"
-            " VALUES (:id, :student_id, :status, 1, CURRENT_TIMESTAMP)"
+            "INSERT INTO learning_sessions"
+            " (id, student_id, status, current_step, started_at, story_slug)"
+            " VALUES (:id, :student_id, :status, 1, CURRENT_TIMESTAMP, :slug)"
         ),
-        {"id": session_id, "student_id": student_id, "status": status},
+        {"id": session_id, "student_id": student_id, "status": status,
+         "slug": f"story-{session_id}"},
     )
     db_session.commit()
 

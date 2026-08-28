@@ -112,3 +112,28 @@ def test_nothing_at_all_still_writes_nothing(db_session):
     _seed(db_session)
     process_session_completion(db_session, student_id=1, session_id=1)
     assert _score(db_session) is None
+
+
+def test_finishing_is_recorded_even_without_a_score(db_session):
+    """⭐ 完成是事實，分數是量測 —— 兩件事不可以綁在一起。
+
+    原本 `learning_session.status = "completed"` 那三行縮在
+    `if scores and weights:` 裡面，於是三個來源都空的 session 連「完成」
+    都不會被記錄。接著 get_completed_story_count() 回 0，
+    first_session / first_story 徽章就永遠發不出來。
+
+    ⛔ 這條跟上面那條「三個來源皆空時不准憑空生分數」不衝突：
+       分數仍然是 None，但 status 要變成 completed。
+    """
+    from app.services.gamification_service import process_session_completion
+    _seed(db_session)
+    process_session_completion(db_session, student_id=1, session_id=1)
+
+    from sqlalchemy import text as _t
+    row = db_session.execute(
+        _t("SELECT status, overall_score FROM learning_sessions WHERE id=1")).fetchone()
+    assert row[0] == "completed", (
+        f"沒有分數的 session 沒有被標成 completed（實得 {row[0]}）—— "
+        "標記完成被關在 `if scores` 裡面了")
+    assert row[1] is None, "分數仍然應該是 None —— 不可以為了標完成就編一個分數"
+
