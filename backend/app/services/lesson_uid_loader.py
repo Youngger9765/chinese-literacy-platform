@@ -36,6 +36,10 @@ LESSONS_ROOT = _BACKEND_ROOT / "data" / "lessons"
 # 文言文的大題集合跟白話課完全不同（文白句子比對／文白詞語比對／自我挑戰，
 # 且導讀・古文今譯・原文沒有大題編號），所以那幾個模組也列在這裡；
 # 缺檔的課直接跳過，不會因為多列而報錯。
+#: 課級模組 —— 一課一份，檔名**沒有 slug**（`metadata.yml`，不是 `metadata.xxxxx.yml`）。
+#: 大題模組一課可以有好幾份（一課多篇），所以帶 slug；課級的不會。
+COURSE_LEVEL_MODULES = ("metadata", "errata")
+
 MODULES = (
     # 課級
     "metadata",
@@ -174,6 +178,20 @@ def load_lesson(uid: str, version: Optional[str] = None) -> Optional[dict]:
     for f in sorted(vdir.glob("*.*.yml")):
         m = f.stem.partition(".")[0]
         if m in MODULES:
+            by_mod.setdefault(m, []).append(f)
+
+    # ⛔ 上面那個 glob 要兩個點（`{模組}.{slug}.yml`），而**課級的檔沒有 slug**
+    #    —— `metadata.yml` / `errata.yml` 只有一個點，從此配不到。
+    #
+    #    後果不是「少一個欄位」：_meta(l) 回空 dict，於是 intro 永遠 None，
+    #    **175 課的課程簡介整頁空白**，而 174 份 metadata.yml 一直好好躺在磁碟上。
+    #    那正是 #2736 修過一次的症狀，換一個機制回來（#2964 抓到）。
+    #
+    #    只對課級模組補回無 slug 的檔名 —— 不對大題模組開，
+    #    否則會把二修前遺留的 `{模組}.yml` 復活成頂層預設。
+    for m in COURSE_LEVEL_MODULES:
+        f = vdir / f"{m}.yml"
+        if m in MODULES and f.exists():
             by_mod.setdefault(m, []).append(f)
 
     # 帳本決定「哪一份是頂層的預設」——⛔ 不要用檔名排序，slug 是不透明亂碼。
