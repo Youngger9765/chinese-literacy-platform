@@ -33,6 +33,9 @@ jobs:
               - '.github/workflows/**'
               - 'specs/**'
               - 'backend/specs/**'
+              # 回歸鎖的「紅過」帳本是 test_locks_have_red_evidence_spec.py 的輸入。
+              # 不盯它的話，只把帳本裡的條目刪掉不會觸發這支 —— 門還在，但那條路沒插電。
+              - 'docs/qa/lock-red-evidence.md'
               - 'backend/app/services/**'
               - 'backend/app/routes/auth.py'
               - 'backend/app/routes/semesters.py'

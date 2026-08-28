@@ -201,7 +201,10 @@ PR 只跑一課（五課走完整條路慢到會讓人想關掉這道門），st
   「測試自己的環境假設」，見 `backend/tests/_route_walk.py`。
   ⚠️ 復現要另建 python3.11 + 未釘版 fastapi 的 venv（實測 0.141.1）；
   本機 3.10 + 0.115.6 永遠重現不到
-- 還缺：**「鎖有沒有紅過」的紀錄** —— 沒看過紅的鎖是劇場
+- ✅ **「鎖有沒有紅過」的紀錄** —— `docs/qa/lock-red-evidence.md`
+  ＋ `backend/specs/test_locks_have_red_evidence_spec.py`（3 條，兩個 mutation 驗過會咬）。
+  新加進具名清單的鎖沒有證據就紅；`grandfathered` 那節是**看得見的債**
+  （2026-08-28：104 支裡 95 支沒有逐支驗過會咬），只准變少
 - 還缺：**批次順序的污染偵測** —— 這輪抓到一支測試把另一支的登入弄成 500
   （`dependency_overrides.clear()` 掃全域）。單跑永遠看不到，
   只有**照 workflow 的順序整批跑**才會出現
