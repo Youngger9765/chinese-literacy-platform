@@ -152,16 +152,42 @@ prod **561 課完成只有 9 筆有分數**、第一個徽章**永遠發不出�
 把另一支的登入弄成 500**（單跑 13 綠 / 批次 12 紅）。所以插電前一定要
 **照 workflow 裡的順序**跑整個 step，不能只確認每支自己是綠的。
 
-### 🟡 P1 補 L3：PR 階段要有一道「學生走得完」
+### ✅ P1 補 L3：PR 階段的「學生走得完」—— 已完成（2026-08-28）
 
-現況 e2e 只能打 staging。做法二選一：
-- preview 部署時 seed 一組固定測試帳號 → e2e 就能打 preview
-- 或把 `multiTextJourney` 那種不依賴 seed 帳號的 spec 獨立出來，在 PR 跑
+`preview-deploy.yml` 的「學生走得完嗎（multi-text journey on preview）」
+（`E2E_ONLY_LESSONS: 20063` = G6-L22，三篇，Hans 回報的那一課）。
 
-### 🟡 P2 補 L4：歷程的門
+⚠️ **原本 `e2e-tests.yml` 的註解說「per-PR preview 的 DB 是空的、demo 帳號不存在」
+—— 那句已經過時**：preview 後端吃的是共用的 `PREVIEW_DATABASE_URL`，
+前端 build 時帶 `VITE_SHOW_DEMO_LOGIN=true`。實測一鍵登入可用。
 
-每一種「學生做完之後應該留下的東西」各要一條：
-分數 ✅（今天補）· 徽章 ✅（今天補）· 進度 key · 作業提交 · 學習紀錄可讀回
+⚠️ 還有一件事要記住：**`e2e-tests.yml` 那四支 spec 雖然在 `pull_request` 上跑，
+但它們打的是 staging** —— 門在跑，跑的是**別的 build**。
+PR 弄壞了流程它照樣綠。真正問「這個 PR 的學生走不走得完」的只有上面那一道。
+
+PR 只跑一課（五課走完整條路慢到會讓人想關掉這道門），staging 維持五課全跑 ——
+兩個環境跑不同的量，不是抽樣代替全檢。
+
+### 🟡 P2 補 L4：歷程的門 —— 大部分已完成（2026-08-28）
+
+⚠️ **原本這裡寫「L4 幾乎沒有門」，那是錯的。門是有的（7 支），只是沒接進 CI**
+—— 跟 P0-a 同一個病，不是缺門是缺接線。
+
+| 學生做完之後該留下的東西 | 狀態 |
+|---|---|
+| 分數 | ✅ `test_session_scoring_below_threshold_2904` / `_write_1063` |
+| 徽章 | ✅ `test_gamification`（49 條） |
+| 進度 key | ✅ `test_step_progress_api` · `test_step_progress_parse` · `test_student_progress` · `test_progress_carry_forward_2889` · `test_round_progress_2916` |
+| 作業提交 | ✅ `test_assignments`（102 條）· `test_assignment_1762` · `test_dashboard_assignment_completion` · `test_submission_counts_not_inflated_1764` |
+| 學習紀錄可讀回 | ✅ `test_dialogue_history` · `test_reading_attempt_history` · `test_omo_history_1975` |
+
+插電那 7 支的時候挖到 **2 支是真的紅**：
+
+- `test_student_progress`：**學生的完成課在歷程頁顯示 17%**。
+  `_compute_step_completion` 的 fallback 分支少了「completed 就是全完成」那條規則，
+  於是同一個語意兩種答案（有 `step_progress` 的 100%、沒有的 17%）
+- `test_dialogue_history`：#1135 的 `story_slug` gate 上線之後就一直 422，
+  12 條紅了很久，而它不在 CI 清單裡所以沒有人看到
 
 ### 🟢 P3 L0：門本身的品質
 
