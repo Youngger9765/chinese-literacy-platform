@@ -162,11 +162,13 @@ class TestClassroomsEndpointFiltersDevForTeachers:
         debugging, etc). Don't filter on admin path."""
         _seed_classrooms(db, teacher_id=_FakeTeacher().id)
 
-        # Insert an admin user_role so is_admin returns True
-        # Bypass: monkeypatch is_admin to return True for our fake admin
+        # ⚠️ 原本 monkeypatch 的是 `is_admin` —— #2470 把它拆掉了。
+        #    那是**安全修復**：`is_admin` 當全域 bypass 會讓任何 org_admin
+        #    看到整個平台的班級（跨組織洩漏）。現在全域只認 `is_system_admin`。
+        #    所以這裡改打新的那個，測的意圖不變：系統管理員仍要看得到 dev 班級。
         from app.routes.classrooms import classroom_crud as _crud_mod
-        orig_is_admin = _crud_mod.is_admin
-        _crud_mod.is_admin = lambda user_id, db: True
+        orig_is_admin = _crud_mod.is_system_admin
+        _crud_mod.is_system_admin = lambda user_id, db: True
 
         app.dependency_overrides[get_db] = _override_get_db
         app.dependency_overrides[get_current_user] = lambda: _FakeAdmin()
@@ -185,7 +187,7 @@ class TestClassroomsEndpointFiltersDevForTeachers:
             assert "五年乙班" in names
             assert data["total"] == 5
         finally:
-            _crud_mod.is_admin = orig_is_admin
+            _crud_mod.is_system_admin = orig_is_admin
             app.dependency_overrides.clear()
 
     def test_only_dev_classrooms_returns_empty_for_teacher(self, db):
