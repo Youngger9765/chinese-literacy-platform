@@ -38,7 +38,7 @@ LESSONS_ROOT = _BACKEND_ROOT / "data" / "lessons"
 # 缺檔的課直接跳過，不會因為多列而報錯。
 #: 課級模組 —— 一課一份，檔名**沒有 slug**（`metadata.yml`，不是 `metadata.xxxxx.yml`）。
 #: 大題模組一課可以有好幾份（一課多篇），所以帶 slug；課級的不會。
-COURSE_LEVEL_MODULES = ("metadata", "errata")
+COURSE_LEVEL_MODULES = ("metadata", "errata", "multi_text_parts")
 
 MODULES = (
     # 課級

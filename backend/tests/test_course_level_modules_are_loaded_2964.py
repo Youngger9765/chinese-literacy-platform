@@ -72,3 +72,25 @@ def test_the_intro_survives_all_the_way_to_the_row():
         f"只有 {len(with_intro)} 課的 intro 走到消費端，"
         f"而磁碟上有 {len(list(_LESSONS.glob('L*/v3/metadata.yml')))} 份 metadata.yml。\n"
         "抽對了、寫進去了、學生看不到 —— 又是這個形狀。")
+
+
+def test_every_slugless_file_on_disk_is_registered_as_course_level():
+    """⭐ 語料庫裡每一種**無 slug 的檔**都要登記成課級 —— 不靠人記得補。
+
+    `COURSE_LEVEL_MODULES` 是手維護的清單。手維護的清單只會保護到
+    「上次出事的那幾個」——`multi_text_parts.yml`（4 課、前端有 9 處在讀）
+    就是這樣被漏掉的，而它跟 metadata 是同一個病。
+    """
+    from app.services.lesson_uid_loader import COURSE_LEVEL_MODULES, MODULES
+    plain = set()
+    for p in _LESSONS.glob("L*/v3/*.yml"):
+        if p.stem.startswith("_") or p.stem == "lesson":
+            continue
+        if "." not in p.stem:          # 檔名沒有 slug ＝ 課級
+            plain.add(p.stem)
+    assert plain, "掃不到任何無 slug 的檔 —— 這條在測空氣"
+    missing = sorted(m for m in plain if m in MODULES and m not in COURSE_LEVEL_MODULES)
+    assert not missing, (
+        f"這些檔沒有 slug（課級），但沒登記進 COURSE_LEVEL_MODULES：{missing}\n"
+        "載入端的 glob 需要兩個點，它們配不到 —— 會靜靜地整個模組消失。")
+
