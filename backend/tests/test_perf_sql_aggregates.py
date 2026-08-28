@@ -118,7 +118,7 @@ def client():
 def _register_login(client, suffix: str) -> dict:
     uid = uuid.uuid4().hex[:8]
     email = f"{suffix}_{uid}@example.com"
-    password = "SecurePass123!"
+    password = "demo1234"
     resp = client.post("/api/auth/register", json={
         "email": email, "password": password, "name": f"{suffix} {uid}"
     })
@@ -129,7 +129,27 @@ def _register_login(client, suffix: str) -> dict:
     login = client.post("/api/auth/login", json={"email": email, "password": password})
     token = login.json()["access_token"]
     me = client.get("/api/users/me", headers={"Authorization": f"Bearer {token}"})
-    return {"token": token, "user_id": me.json()["id"]}
+    user_id = me.json()["id"]
+
+    # ⚠️ #2470 之後，在某個學校底下建班級**必須是那個學校的成員** ——
+    #    那是安全修復（原本任何老師都能在任何學校建班，跨校/跨組織污染）。
+    #    註冊出來的老師沒有任何 school scope，於是這支所有建班的呼叫都變成 403。
+    #    這裡把它加進學校，測的意圖不變（要驗的是 SQL 聚合，不是授權）。
+    db = TestingSessionLocal()
+    try:
+        trole = db.query(Role).filter(Role.name == "teacher").first()
+        sid = str(_state.get("school_id"))
+        if trole and sid and not db.query(UserRole).filter(
+            UserRole.user_id == user_id, UserRole.role_id == trole.id,
+            UserRole.scope_type == "school", UserRole.scope_id == sid,
+        ).first():
+            db.add(UserRole(user_id=user_id, role_id=trole.id,
+                            scope_type="school", scope_id=sid))
+            db.commit()
+    finally:
+        db.close()
+
+    return {"token": token, "user_id": user_id}
 
 
 def _auth(token: str):
@@ -182,7 +202,7 @@ class TestCrossTextN1Fix:
         student = User(
             email=f"cross_student_{uid}@example.com",
             name=f"Cross Student {uid}",
-            password_hash=hash_password("Pass123!"),
+            password_hash=hash_password("demo1234"),
             is_active=True,
             email_verified=True,
         )
@@ -249,7 +269,7 @@ class TestCrossTextN1Fix:
         student = User(
             email=f"notext_{uid}@example.com",
             name=f"No Text Student {uid}",
-            password_hash=hash_password("Pass123!"),
+            password_hash=hash_password("demo1234"),
             is_active=True,
             email_verified=True,
         )
@@ -292,7 +312,7 @@ class TestCrossTextN1Fix:
         student = User(
             email=f"sort_{uid}@example.com",
             name=f"Sort Student {uid}",
-            password_hash=hash_password("Pass123!"),
+            password_hash=hash_password("demo1234"),
             is_active=True,
             email_verified=True,
         )
