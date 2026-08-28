@@ -479,12 +479,47 @@ class TestHeatmapStudentN1:
             f"Heatmap endpoint issued {q} queries for {n} students. "
             f"N+1 worst case = {n + 3}. Expected < {n + 3} after fix."
         )
-        # Also verify queries did not GROW compared to N (truly constant, not O(N))
-        # A fixed implementation should be ≤ N regardless of student count
-        assert q <= n, (
-            f"Heatmap queries ({q}) exceeded student count ({n}). "
-            f"After joinedload fix queries should be constant, not O(N)."
-        )
+        # ⚠️ 2026-08-28（#2964）改寫。原本是 `assert q <= n` —— 那**不是**
+        #    「常數」的判準：實作若是穩定的 8 個查詢，在 n=6 時必然失敗，
+        #    而那跟 O(N) 一點關係也沒有。把「不隨 N 成長」誤寫成「小於 N」。
+        #
+        #    真正的判準是**加倍 N 再量一次，數字不能跟著漲**。
+        from app.models.user import User  # noqa: PLC0415
+        from app.models.school import ClassroomStudent  # noqa: PLC0415
+
+        db = TestingSessionLocal()
+        added = []
+        try:
+            for i in range(n):                      # 學生數加倍
+                u = User(email=f"n1extra{i}_{cid}@example.com",
+                         password_hash="x", name=f"N1Extra{i}", is_active=True)
+                db.add(u)
+                db.flush()
+                db.add(ClassroomStudent(classroom_id=cid, student_id=u.id))
+                added.append(u.id)
+            db.commit()
+        finally:
+            db.close()
+
+        try:
+            q2 = count_queries(call)
+        finally:
+            # ⛔ 共享班級不是沙箱：多出來的學生會讓別條
+            #    （TestErrorHeatmapStudentN1::test_response_has_students）
+            #    的 `len(students) == NUM_ASSIGNMENTS` 變紅。
+            #    只刪**自己剛建的那幾個 id**，不做條件式一網打盡。
+            db = TestingSessionLocal()
+            try:
+                db.query(ClassroomStudent).filter(
+                    ClassroomStudent.student_id.in_(added)).delete(synchronize_session=False)
+                db.query(User).filter(User.id.in_(added)).delete(synchronize_session=False)
+                db.commit()
+            finally:
+                db.close()
+
+        assert q2 <= q, (
+            f"學生從 {n} 加到 {n * 2} 時查詢數從 {q} 漲到 {q2} —— 還是 O(N)。\n"
+            "常數的判準是「加倍 N 之後數字不變」，不是「小於 N」。")
 
 
 # ===========================================================================

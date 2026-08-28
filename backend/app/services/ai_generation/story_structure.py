@@ -370,7 +370,13 @@ async def grade_story_structure(
             if blank_hints and blank_idx is not None and 0 <= blank_idx < len(blank_hints):
                 correct_answer = blank_hints[blank_idx]
             else:
-                correct_answer = target.get("hint") or correct_answer
+                # ⚠️ `hint` 只在 `value` 為空時才當正解。
+                #    原本是 `hint or value` —— 兩個都有的時候拿 hint，
+                #    而 hint 是**給學生的提示問句**（「課文主角是誰？」），
+                #    於是答錯的回饋變成「參考答案：課文主角是誰？」。
+                #    保留 hint 這條舊路徑（有些資料只有 hint 沒有 value），
+                #    但 value 有值時以 value 為準。
+                correct_answer = correct_answer or target.get("hint") or ""
             is_correct = _fuzzy_match_chinese(student_value, correct_answer, story_text)
             result_entry["correct"] = is_correct
             result_entry["correct_answer"] = correct_answer

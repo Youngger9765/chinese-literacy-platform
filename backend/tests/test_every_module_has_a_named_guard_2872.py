@@ -38,8 +38,31 @@ def _wg():
 
 
 def _corpus_modules() -> set[str]:
-    return {p.stem for p in LESSONS.glob("L*/v3/*.yml")
-            if p.stem != "lesson" and not p.stem.startswith("_")}
+    """檔名裡的**模組類型**，不含 slug。
+
+    ⚠️ #2916 之後檔名是 `{模組}.{slug}.yml`，`p.stem` 會回 `comprehension.34pme`。
+       登記表登記的是**類型**（一種模組一道門），不是每一份檔 ——
+       不切掉 slug 的話這條會報「1623 種模組沒登記」，
+       而真正的類型數量只有二十幾種。
+    """
+    out = set()
+    for p in LESSONS.glob("L*/v3/*.yml"):
+        mod = p.stem.partition(".")[0]
+        if mod != "lesson" and not mod.startswith("_"):
+            out.add(mod)
+    return out
+
+
+def test_the_scan_returns_types_not_files():
+    """正向對照 + 防呆 —— 掃出來的必須是類型，不是一課一個。
+
+    少了這條，slug 又混進來時上面那條會報幾百種「沒登記」，
+    而真正的原因是掃描壞了，不是登記漏了。
+    """
+    mods = _corpus_modules()
+    assert 5 <= len(mods) <= 60, f"掃出 {len(mods)} 種模組 —— 這個數字不像類型數"
+    dotted = sorted(m for m in mods if "." in m)
+    assert not dotted, f"這些還帶著 slug，切割壞了：{dotted[:5]}"
 
 
 def test_every_module_is_registered():

@@ -332,6 +332,59 @@ def _unwrap(mod: Any, key: str) -> dict:
     return inner if isinstance(inner, dict) else mod
 
 
+def _followup_belongs_to(l: dict, fq: dict, slug: str) -> bool:
+    """這一篇是不是加碼題的歸屬篇。
+
+    兩種形狀都要認：
+      · `part_no: 1`          第一篇專屬的加碼題（L0063）
+      · `text_ref: <課文slug>` 閱讀接力（L0144）—— 它沒有 part_no
+    兩種都給不出答案時回 False，由頂層兜底 —— ⛔ 不可以兩邊都不放。
+    """
+    part_no = fq.get("part_no")
+    if part_no is not None:
+        return _article_order(l).get(slug) == part_no
+    ref = fq.get("text_ref")
+    if isinstance(ref, str) and ref:
+        return ref == slug
+    return False
+
+
+def _followup_was_placed_in_a_round(l: dict) -> bool:
+    """加碼題有沒有真的被放進某一篇 —— 有才可以把頂層清掉。"""
+    fq = l.get("keypoints_followup_questions")
+    if not isinstance(fq, dict):
+        return False
+    return any(_followup_belongs_to(l, fq, slug)
+               for slug in (l.get("repeat_rounds") or {}))
+
+
+def _reading_benchmark(l: dict) -> dict | None:
+    """每一課自己的流暢率門檻表，包成 API schema 要的 `{levels: [...]}`。
+
+    ⚠️ 二修的 key_reading yml 裡欄位叫 **`benchmark`**，是一個裸 list：
+        benchmark: [{threshold: '＜220字', feedback: '...'}, ...]
+    而 row 原本只讀 `reading_benchmark` —— 名字對不上，175 課全部 None，
+    於是 getThresholdsFromBenchmark() 每一課都退回年級預設，
+    而每份學習單上都印著它自己的那張表（#2722 regress）。
+
+    ⛔ 不可以直接把裸 list 放上去：`ReadingBenchmarkSchema` 要的是
+       `{levels: [...]}`。傳 list 會讓 141/175 課的 detail 驗證失敗
+       ——**學生打開就是 500**（我第一版就是這樣，被 2725 那條鎖擋下來）。
+    """
+    kr = l.get("key_reading")
+    if not isinstance(kr, dict):
+        return None
+    raw = kr.get("benchmark") or kr.get("reading_benchmark")
+    if not raw:
+        return None
+    if isinstance(raw, dict):          # 已經是 {levels: [...]} 的舊資料
+        return raw if raw.get("levels") else None
+    if isinstance(raw, list):
+        levels = [x for x in raw if isinstance(x, dict) and x.get("threshold")]
+        return {"levels": levels} if levels else None
+    return None
+
+
 def _article_order(l: dict) -> dict:
     """課文 slug → 它是第幾篇（1-based）。加碼題用 `part_no` 指定歸屬（#2930）。"""
     order, n = {}, 0
@@ -368,7 +421,7 @@ def _rounds_with_flat_paragraphs(l: dict) -> dict:
         # 它只掛在頂層的話，沒覆蓋到的篇次會退回去讀到它 ——
         # 學生在第 2、3 篇的重點表底下也看到「請依據第一篇文章的內容」（#2930）。
         fq = l.get("keypoints_followup_questions")
-        if fq and _article_order(l).get(slug) == (fq.get("part_no") if isinstance(fq, dict) else None):
+        if isinstance(fq, dict) and _followup_belongs_to(l, fq, slug):
             m["keypoints_followup_questions"] = fq
 
         vd = m.get("vocab_definitions")
@@ -853,8 +906,11 @@ def _uid_tree_lessons() -> list[dict]:
             # read from 念順順 and stored beside the passage it belongs to. Hard-coded
             # None until #2722, which meant `getThresholdsFromBenchmark` fell through to
             # a grade-wide default on every lesson while each worksheet carried its own.
-            "reading_benchmark": ((l.get("key_reading") or {}).get("reading_benchmark")
-                                  if isinstance(l.get("key_reading"), dict) else None),
+            # ⚠️ 二修的 key_reading yml 裡欄位叫 `benchmark`，不是 `reading_benchmark`
+            #    —— 只讀後者的話 175 課全部是 None，於是每一課的門檻都退回年級預設，
+            #    而每份學習單上都印著它自己的那張表（#2722 regress，#2964 抓到）。
+            #    形狀不用轉：前端 parseCpmBenchmark() 收的就是 {threshold, feedback}[]。
+            "reading_benchmark": _reading_benchmark(l),
             # 重點朗讀 (念順順). Absent means the step reads the whole text, which is
             # what the 2026-07-20 review ruled against but is at least this lesson's
             # own text — the first-edition table, keyed by code, was serving another
@@ -915,8 +971,13 @@ def _uid_tree_lessons() -> list[dict]:
             "cross_text_banner": l.get("cross_text_banner") or None,
             # 多篇課不掛頂層 —— 它已經放進自己那一篇的 round 了；
             # 留在頂層會讓別篇退回去讀到它。單篇課沒有 round，照舊掛頂層。
+            # 多篇課：**已經放進某一篇的**才清掉頂層（留著會讓別篇退回去讀到它）。
+            # ⛔ 原本是「只要是多篇課就一律清掉」—— 那是 fail-open：
+            #    L0144 的加碼題沒有 part_no（閱讀接力形狀只有 text_ref），
+            #    每一篇都對不上、頂層又被清掉，於是**整個大題消失**，
+            #    而檔案一直在磁碟上（#2964 抓到）。
             "keypoints_followup_questions": (
-                None if (l.get("repeat_rounds") or {})
+                None if _followup_was_placed_in_a_round(l)
                 else (l.get("keypoints_followup_questions") or None)
             ),
             "writing_practice": l.get("writing_practice") or None,
@@ -978,17 +1039,57 @@ def normalise_section_label(name: str) -> str:
 
 _SECTION_TO_STEP = {
     "讀全文-做記號": "full-text-annotate",
+    # 6 課的學習單只印「讀全文」—— 比完整名字**短**，所以最長前綴比對不到它
+    # （startswith 的方向是反的）。要獨立列一條。
+    "讀全文": "full-text-annotate",
     "念順順": "key-passage-reading",
     "重點朗讀": "key-passage-reading",
     "語詞我最棒": "vocab-definition",
     "語詞應用": "vocab-application",
     "文章重點表": "keypoints-table",
     "閱讀聚光燈": "spotlight",
+    # 聚光燈在三種教材上印不同的名字（#2964 全庫盤點）：
+    #   閱讀聚光燈    主教材
+    #   品格聚光燈    體育品格  33 課   ← 原本不在表裡
+    #   文言文聚光燈  文言文    11 課   ← 原本不在表裡
+    # 這條 fallback 路徑目前很少走到（有帳本的課走模組名），但**沒有帳本的課
+    # 會整個掉掉那一關**，而掉掉不會報錯。
+    "品格聚光燈": "spotlight",
+    "文言文聚光燈": "spotlight",
     "閱讀理解": "comprehension",
+    "綜合閱讀理解": "comprehension",
+    # 學習單上「文章重點表」也印成「文章重點整理」（8 課）
+    "文章重點整理": "keypoints-table",
+    # 文言文的朗讀那一關印「朗讀計時」（8 課）
+    "朗讀計時": "key-passage-reading",
     "詞語複習": "vocab-review",
     "語詞複習": "vocab-review",
     "知識補給站": "knowledge-station",
 }
+
+
+def resolve_section_step(name: str) -> str | None:
+    """學習單章節名 → step id，先精確再最長前綴。
+
+    ⚠️ 學習單上的名字常帶副標：
+        閱讀聚光燈-自我提問策略1-讀出段落重點   ← 11 課，精確比對對不上
+        讀全文                                  ← 6 課，比「讀全文-做記號」短
+    純字面比對會把這些課的那一關整個漏掉，**而漏掉不報錯**
+    （#2964：11 課的聚光燈是第一關，卻沒出現在期望順序裡）。
+
+    最長前綴：先試「這個名字是不是以某個已知章節開頭」，取最長的那個，
+    避免「讀全文」誤吃掉「讀全文-做記號」。
+    """
+    n = normalise_section_label((name or "").strip())
+    if not n:
+        return None
+    if n in _SECTION_TO_STEP:
+        return _SECTION_TO_STEP[n]
+    best = None
+    for known, step in _SECTION_TO_STEP.items():
+        if n.startswith(known) and (best is None or len(known) > len(best[0])):
+            best = (known, step)
+    return best[1] if best else None
 
 
 #: 模組名 → step id。跟 `scripts/module_entry_gate.py` 的 ENTRY 同一份對照，
@@ -1053,9 +1154,7 @@ def _step_sequence_for(l: dict) -> list[str] | None:
                 seen.append(key)
     else:
         for sec in l.get("sections_present") or []:
-            step = _SECTION_TO_STEP.get(
-                normalise_section_label(str((sec or {}).get("name") or "").strip())
-            )
+            step = resolve_section_step(str((sec or {}).get("name") or ""))
             if step and step not in seen:
                 seen.append(step)
     if not seen:

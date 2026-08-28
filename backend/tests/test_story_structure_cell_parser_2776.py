@@ -172,9 +172,14 @@ class TestCorpusWideRegressionCounts:
             value = str(row.get("value") or "")
             if row.get("interactive_type") == "checkbox" and "個空格" in value:
                 lessons_with_leftover_marker.add(uid)
-        assert lessons_with_leftover_marker == {"L0102"}, (
-            f"預期只剩 L0102 這個已知缺口，實際：{sorted(lessons_with_leftover_marker)}"
-        )
+        # ⚠️ 2026-08-28（#2964）：這裡原本是 `== {"L0102"}` —— 一個**只能剛好等於**
+        #    的斷言。缺口修好之後（實際變成空集合）它反而變紅，於是這條會被人
+        #    誤讀成「壞掉了」。棘輪只能往一個方向收：允許變少，不允許變多。
+        assert lessons_with_leftover_marker <= {"L0102"}, (
+            f"又有課出現「第N個空格」的殘留字樣：{sorted(lessons_with_leftover_marker)}\n"
+            "已知缺口只有 L0102（那一列混了一個沒有標準答案的自由文字空格）。")
+        # 正向對照：真的掃到列了，否則上面在空集合上永遠成立
+        assert len(list(self._rows())) > 50, "掃不到幾列 —— 這條在測空氣"
 
     def test_single_select_instruction_always_carries_select_mode_single(self):
         """指示語寫「單選」的 checkbox 列，一律要標 select_mode=single——
