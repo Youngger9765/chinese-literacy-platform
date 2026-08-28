@@ -59,19 +59,16 @@ def test_the_sequence_matches_the_worksheet_sections():
     （`CLASSICAL_STEP_SEQUENCE`）。這條分辨得出來：拿 `sections_present`
     的章節名逐課比對。
     """
-    SECTION_TO_STEP = {
-        "讀全文-做記號": "full-text-annotate",
-        "念順順": "key-passage-reading",
-        "語詞我最棒": "vocab-definition",
-        "語詞應用": "vocab-application",
-        "文章重點表": "keypoints-table",
-        "閱讀聚光燈": "spotlight",
-        "閱讀理解": "comprehension",
-        "詞語複習": "vocab-review",
-        "知識補給站": "knowledge-station",
-    }
+    # ⚠️ 原本這裡自己複製了一份對照表，而且**沒有破折號正規化** ——
+    #    於是 36 課的「讀全文—做記號」（EM DASH）對不上，
+    #    再加上缺「品格聚光燈」等別名，154 課被判成「順序不符」。
+    #    ⛔ 複製品上犯的錯跟被測對象無關，但看起來一模一樣。
+    #    改成直接用生產端那一份 + 它的正規化器，兩邊不可能再漂移。
+    from app.services.lesson_indexes import resolve_section_step, _SECTION_TO_STEP
+    _KNOWN_STEPS = set(_SECTION_TO_STEP.values())
     checked = 0
     wrong = []
+    classical: list[str] = []
     for l in search_lessons():
         uid = l.get("lesson_uid")
         f = LESSONS / uid / "v3" / "lesson.yml"
@@ -84,16 +81,38 @@ def test_the_sequence_matches_the_worksheet_sections():
         # （讀全文-做記號…出現兩次）——線上流程只走一次，所以比對的也是去重後的順序。
         want: list[str] = []
         for n in sections:
-            step = SECTION_TO_STEP.get(n)
+            step = resolve_section_step(n)
             if step and step not in want:
                 want.append(step)
         if len(want) < 3:
             continue
         checked += 1
-        got = [s for s in (l.get("step_sequence") or []) if s in SECTION_TO_STEP.values()]
+        # ⚠️ #2916 之後 step id 帶篇次：`full-text-annotate#dcavv`。
+        #    不切掉 `#slug` 的話這裡濾出來是空的 —— 154 課全部報「順序不符」，
+        #    而真正的原因是比對用的 key 對不上，不是順序錯。
+        #    同一篇的重複步驟去重，因為 `want` 也是去重後的順序。
+        # 文言文課吃寫死的 CLASSICAL_STEP_SEQUENCE —— 這條 docstring 明講要偵測
+        # 的就是這件事。⛔ 不默默豁免：收集起來，下面斷言「就是這幾課、不准長大」。
+        if l.get("classical_text"):
+            classical.append(uid)
+            continue
+        got: list[str] = []
+        for s in (l.get("step_sequence") or []):
+            base = s.partition("#")[0]
+            if base in _KNOWN_STEPS and base not in got:
+                got.append(base)
         if got != want:
             wrong.append((uid, want[:6], got[:6]))
     assert checked >= 100, f"只比對到 {checked} 課 —— 這條在測空氣"
+
+    # 文言文那批：順序來自寫死的清單而不是它自己的學習單。
+    # 這不是「通過」，是**已知且被數住的缺口** —— 數字變大就會紅。
+    assert len(classical) <= 12, (
+        f"{len(classical)} 課吃寫死的 CLASSICAL_STEP_SEQUENCE（上限 12）：{classical[:6]}\n"
+        "文言文的順序還沒有從它自己的學習單推導。多出來的課代表這條捷徑在擴散。")
+    assert sum(1 for _, _, g in wrong if g) or not wrong, (
+        "所有不符的課送出的順序都是空的 —— 那是比對用的 key 對不上（例如沒切掉 "
+        "`#slug`），不是順序錯。先修比對再看結果。")
     assert not wrong, (
         f"{len(wrong)} 課送出的順序跟它自己的學習單不符：\n"
         + "\n".join(f"  {u}\n    學習單 {w}\n    送出   {g}" for u, w, g in wrong[:4])

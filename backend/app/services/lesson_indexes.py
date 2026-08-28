@@ -1039,17 +1039,57 @@ def normalise_section_label(name: str) -> str:
 
 _SECTION_TO_STEP = {
     "讀全文-做記號": "full-text-annotate",
+    # 6 課的學習單只印「讀全文」—— 比完整名字**短**，所以最長前綴比對不到它
+    # （startswith 的方向是反的）。要獨立列一條。
+    "讀全文": "full-text-annotate",
     "念順順": "key-passage-reading",
     "重點朗讀": "key-passage-reading",
     "語詞我最棒": "vocab-definition",
     "語詞應用": "vocab-application",
     "文章重點表": "keypoints-table",
     "閱讀聚光燈": "spotlight",
+    # 聚光燈在三種教材上印不同的名字（#2964 全庫盤點）：
+    #   閱讀聚光燈    主教材
+    #   品格聚光燈    體育品格  33 課   ← 原本不在表裡
+    #   文言文聚光燈  文言文    11 課   ← 原本不在表裡
+    # 這條 fallback 路徑目前很少走到（有帳本的課走模組名），但**沒有帳本的課
+    # 會整個掉掉那一關**，而掉掉不會報錯。
+    "品格聚光燈": "spotlight",
+    "文言文聚光燈": "spotlight",
     "閱讀理解": "comprehension",
+    "綜合閱讀理解": "comprehension",
+    # 學習單上「文章重點表」也印成「文章重點整理」（8 課）
+    "文章重點整理": "keypoints-table",
+    # 文言文的朗讀那一關印「朗讀計時」（8 課）
+    "朗讀計時": "key-passage-reading",
     "詞語複習": "vocab-review",
     "語詞複習": "vocab-review",
     "知識補給站": "knowledge-station",
 }
+
+
+def resolve_section_step(name: str) -> str | None:
+    """學習單章節名 → step id，先精確再最長前綴。
+
+    ⚠️ 學習單上的名字常帶副標：
+        閱讀聚光燈-自我提問策略1-讀出段落重點   ← 11 課，精確比對對不上
+        讀全文                                  ← 6 課，比「讀全文-做記號」短
+    純字面比對會把這些課的那一關整個漏掉，**而漏掉不報錯**
+    （#2964：11 課的聚光燈是第一關，卻沒出現在期望順序裡）。
+
+    最長前綴：先試「這個名字是不是以某個已知章節開頭」，取最長的那個，
+    避免「讀全文」誤吃掉「讀全文-做記號」。
+    """
+    n = normalise_section_label((name or "").strip())
+    if not n:
+        return None
+    if n in _SECTION_TO_STEP:
+        return _SECTION_TO_STEP[n]
+    best = None
+    for known, step in _SECTION_TO_STEP.items():
+        if n.startswith(known) and (best is None or len(known) > len(best[0])):
+            best = (known, step)
+    return best[1] if best else None
 
 
 #: 模組名 → step id。跟 `scripts/module_entry_gate.py` 的 ENTRY 同一份對照，
@@ -1114,9 +1154,7 @@ def _step_sequence_for(l: dict) -> list[str] | None:
                 seen.append(key)
     else:
         for sec in l.get("sections_present") or []:
-            step = _SECTION_TO_STEP.get(
-                normalise_section_label(str((sec or {}).get("name") or "").strip())
-            )
+            step = resolve_section_step(str((sec or {}).get("name") or ""))
             if step and step not in seen:
                 seen.append(step)
     if not seen:
