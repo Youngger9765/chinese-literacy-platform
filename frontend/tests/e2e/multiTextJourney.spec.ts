@@ -18,13 +18,23 @@ const FE = process.env.PLAYWRIGHT_BASE_URL || 'https://lingoleap-staging.web.app
 const BE = process.env.E2E_BACKEND_URL
   || 'https://lingoleap-backend-staging-958347263320.asia-east1.run.app';
 // 五課多篇全跑（擁有者回報涵蓋 G6-L22 與 G5-L17，其餘一併鎖住）
-const LESSONS: Array<[string, string]> = [
+const ALL_LESSONS: Array<[string, string]> = [
   ['20029', 'G5-L17（兩篇）'],
   ['20063', 'G6-L22（三篇）'],
   ['20111', 'G8-L13（兩篇）'],
   ['20137', 'G9-L16（兩篇）'],
   ['20144', 'G9-L23（三篇）'],
 ];
+
+// PR preview 上只跑一課（五課走完整條路太慢，會讓人想關掉這道門）；
+// staging 維持五課全跑。⛔ 不是抽樣代替全檢 —— 是**兩個環境跑不同的量**，
+// PR 擋「有沒有整個壞掉」，staging 擋「哪一課壞掉」。
+const ONLY = (process.env.E2E_ONLY_LESSONS || '').split(',').map((s) => s.trim()).filter(Boolean);
+const LESSONS = ONLY.length ? ALL_LESSONS.filter(([id]) => ONLY.includes(id)) : ALL_LESSONS;
+if (ONLY.length && LESSONS.length !== ONLY.length) {
+  // 給錯 id 會靜靜少跑幾課而測試照樣綠 —— 那正是這一輪一直在修的病
+  throw new Error(`E2E_ONLY_LESSONS 有對不到的 id: 要 ${ONLY} 實得 ${LESSONS.map(([i]) => i)}`);
+}
 
 test.describe.configure({ timeout: 300_000 });
 

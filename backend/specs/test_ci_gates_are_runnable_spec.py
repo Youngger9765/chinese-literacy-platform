@@ -93,3 +93,41 @@ def test_no_workflow_skips_itself_into_a_green_tick():
         if any(needle in text for needle in ABSENT_IN_RUNNER):
             offenders.append(path.name)
     assert offenders == [], f"workflows that skip on an absent precondition and pass: {offenders}"
+
+
+# ── 具名清單漂移（#2925 收尾補）──────────────────────────────────────────
+#
+# 另一種「門在但沒跑」：具名清單裡列了一個**不存在的檔**。
+#
+#   pytest  → 報錯，會被看到
+#   vitest  → **靜默跳過**，只印它有對到的檔然後 exit 0
+#
+# frontend-checks.yml 自己的註解就寫著這件事。所以清單裡一旦打錯路徑
+# （改名、搬檔、手滑），那條鎖就從此不跑，而檢查是綠的。
+
+def _named_paths(text, prefix):
+    return sorted({m for m in re.findall(prefix + r'[A-Za-z0-9_@./-]+\.(?:py|tsx?|ts)', text)})
+
+
+def test_every_backend_test_named_in_ci_exists():
+    wf = (_REPO / ".github" / "workflows" / "pytest.yml").read_text(encoding="utf-8")
+    named = [p for p in _named_paths(wf, r"tests/") if "*" not in p]
+    missing = [p for p in named if not (_REPO / "backend" / p).exists()]
+    assert named, "pytest.yml 裡一個具名測試都沒抓到 —— 解析壞了"
+    assert len(named) >= 40, f"只抓到 {len(named)} 支，解析可能壞了"
+    assert not missing, (
+        f"pytest.yml 具名清單列了不存在的檔: {missing}\n"
+        "pytest 會報錯所以看得到，但清單本身應該保持乾淨。")
+
+
+def test_every_frontend_test_named_in_ci_exists():
+    """⭐ 這條比上面那條重要 —— vitest 對不存在的路徑是**靜默跳過**。"""
+    wf = (_REPO / ".github" / "workflows" / "frontend-checks.yml").read_text(encoding="utf-8")
+    named = [p for p in _named_paths(wf, r"src/") if "*" not in p]
+    missing = [p for p in named if not (_REPO / "frontend" / p).exists()]
+    assert len(named) >= 40, f"只抓到 {len(named)} 支，解析可能壞了"
+    assert not missing, (
+        f"frontend-checks.yml 具名清單列了不存在的檔: {missing}\n"
+        "vitest 不會報錯，它只會跑它對得到的、然後 exit 0 —— "
+        "那條鎖從此不跑，而檢查是綠的。")
+
