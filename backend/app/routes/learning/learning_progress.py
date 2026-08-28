@@ -100,13 +100,19 @@ def _compute_step_completion(session: LearningSession) -> dict[str, str]:
                 statuses[key] = "completed"
             else:
                 statuses[key] = "not_started"
+    elif session.status == "completed":
+        # ⛔ 上面那條分支（step_progress 有值）寫著「completed 的 session 全部算完成」，
+        #    這條 fallback 原本**沒有**同一條規則 —— 於是同一個語意有兩種答案：
+        #    有 step_progress 的完成課顯示 100%，沒有的顯示 17%（只算到第 1 步）。
+        #    學生自己的學習歷程頁看到的就是那個 17%。(#2964)
+        for _step_num, key in STEP_NAMES.items():
+            statuses[key] = "completed"
     else:
         # Fallback: step_progress absent (legacy sessions or fresh session).
         # Use current_step_derived (which itself falls back to 1 when no data). (#1182)
         derived = session.current_step_derived
-        completed_step = derived if session.status == "completed" else derived - 1
         for step_num, key in STEP_NAMES.items():
-            if step_num <= completed_step:
+            if step_num < derived:
                 statuses[key] = "completed"
             elif step_num == derived and session.status == "in_progress":
                 statuses[key] = "in_progress"

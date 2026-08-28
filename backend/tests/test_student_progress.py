@@ -157,11 +157,16 @@ class TestStudentProgressWithSessions:
         """One in-progress session at step 2 → 1 text, 0 completed, 1 step done."""
         student = _register_user(client, "inprog")
         db = TestingSessionLocal()
+        # ⚠️ 原本只寫 `current_step=2`。那個整數欄位在 #1182 就被明文廢棄了
+        #    （`current_step_derived` 的 docstring：do NOT read the deprecated
+        #    integer current_step column），真相是 `step_progress.steps_completed`。
+        #    只寫廢棄欄位 = 在測一條沒有人在走的路。
         session = LearningSession(
             student_id=student["id"],
             story_slug="lesson-01",
             status="in_progress",
             current_step=2,
+            step_progress={"steps_completed": ["intro"], "current_step": "live_tutor"},
         )
         db.add(session)
         db.commit()

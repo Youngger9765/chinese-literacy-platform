@@ -95,6 +95,7 @@ jobs:
             tests/test_ai_generation_split_1888.py \
             tests/test_asset_proxy_on_served_path_2748.py \
             tests/test_assignment_1762.py \
+            tests/test_assignments.py \
             tests/test_auth_route_split_1844.py \
             tests/test_auth_token_gate.py \
             tests/test_blank_marker_regex_2878.py \
@@ -108,6 +109,8 @@ jobs:
             tests/test_classrooms_dev_filter_1999.py \
             tests/test_course_intro_present_2736.py \
             tests/test_course_level_modules_are_loaded_2964.py \
+            tests/test_dashboard_assignment_completion.py \
+            tests/test_dialogue_history.py \
             tests/test_docx_named_styles_2715.py \
             tests/test_docx_second_opinion_2868.py \
             tests/test_every_lesson_detail_validates_2725.py \
@@ -146,6 +149,7 @@ jobs:
             tests/test_perf_sql_aggregates.py \
             tests/test_progress_carry_forward_2889.py \
             tests/test_raw_table_not_public_2769.py \
+            tests/test_reading_attempt_history.py \
             tests/test_reading_benchmark_2722.py \
             tests/test_reading_benchmark_reaches_the_row_2964.py \
             tests/test_regression_2_5_flash_lite_default_1744.py \
@@ -176,8 +180,11 @@ jobs:
             tests/test_spotlight_ordering_items_2683.py \
             tests/test_spotlight_table_content_2683.py \
             tests/test_spotlight_textbox_heading_2714.py \
+            tests/test_step_progress_api.py \
+            tests/test_step_progress_parse.py \
             tests/test_step_sequence_from_worksheet_2736.py \
             tests/test_story_structure_cell_parser_2776.py \
+            tests/test_student_progress.py \
             tests/test_sub_exercise_reaches_students_2865.py \
             tests/test_submission_counts_not_inflated_1764.py \
             tests/test_teacher_dev_classroom_filter_1985.py \
