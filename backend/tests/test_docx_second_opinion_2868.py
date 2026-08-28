@@ -137,7 +137,14 @@ def test_xml_and_yml_agree_on_the_lessons_pdf_could_not_read():
             r = dw.count(sot / rel, target, nxt)
             if r.get("status") != "ok":
                 continue
-            f = REPO / "backend" / "data" / "lessons" / uid / "v3" / f"{mod}.yml"
+            # ⚠️ #2916 之後模組檔名是 `{mod}.{slug}.yml`（一課多篇會有好幾份）。
+            #    寫死 `{mod}.yml` 會直接 FileNotFoundError —— 整支測試掛掉。
+            #    課級模組（metadata/errata）仍是無 slug，兩種都試。
+            d = REPO / "backend" / "data" / "lessons" / uid / "v3"
+            cands = [d / f"{mod}.yml", *sorted(d.glob(f"{mod}.*.yml"))]
+            f = next((c for c in cands if c.is_file()), None)
+            if f is None:
+                continue
             y = (yaml.safe_load(f.read_text(encoding="utf-8")) or {}).get(mod) or {}
             items = next((y[c] for c in carriers if isinstance(y.get(c), list)), [])
             idx = sorted({it.get("index") for it in items
