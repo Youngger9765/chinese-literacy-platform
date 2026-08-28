@@ -62,6 +62,9 @@ def _override_get_db():
         db.close()
 
 
+# ⚠️ import 時登記的 override 撐不過別的測試模組的 `dependency_overrides.clear()`
+#    —— collection 期間就設好，等真的跑到這支時早被掃掉了，於是登入回 500。
+#    下面 module-scope fixture 會在跑之前重掛一次，不靠 import 順序。
 app.dependency_overrides[get_db] = _override_get_db
 
 
@@ -102,6 +105,7 @@ _SEED_ROLES = [
 @pytest.fixture(scope="module", autouse=True)
 def setup_db():
     """Create tables and seed data for all tests in this module."""
+    app.dependency_overrides[get_db] = _override_get_db
     Base.metadata.create_all(bind=engine)
     db = TestingSessionLocal()
 
