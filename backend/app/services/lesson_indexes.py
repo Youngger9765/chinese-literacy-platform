@@ -332,6 +332,32 @@ def _unwrap(mod: Any, key: str) -> dict:
     return inner if isinstance(inner, dict) else mod
 
 
+def _followup_belongs_to(l: dict, fq: dict, slug: str) -> bool:
+    """這一篇是不是加碼題的歸屬篇。
+
+    兩種形狀都要認：
+      · `part_no: 1`          第一篇專屬的加碼題（L0063）
+      · `text_ref: <課文slug>` 閱讀接力（L0144）—— 它沒有 part_no
+    兩種都給不出答案時回 False，由頂層兜底 —— ⛔ 不可以兩邊都不放。
+    """
+    part_no = fq.get("part_no")
+    if part_no is not None:
+        return _article_order(l).get(slug) == part_no
+    ref = fq.get("text_ref")
+    if isinstance(ref, str) and ref:
+        return ref == slug
+    return False
+
+
+def _followup_was_placed_in_a_round(l: dict) -> bool:
+    """加碼題有沒有真的被放進某一篇 —— 有才可以把頂層清掉。"""
+    fq = l.get("keypoints_followup_questions")
+    if not isinstance(fq, dict):
+        return False
+    return any(_followup_belongs_to(l, fq, slug)
+               for slug in (l.get("repeat_rounds") or {}))
+
+
 def _article_order(l: dict) -> dict:
     """課文 slug → 它是第幾篇（1-based）。加碼題用 `part_no` 指定歸屬（#2930）。"""
     order, n = {}, 0
@@ -368,7 +394,7 @@ def _rounds_with_flat_paragraphs(l: dict) -> dict:
         # 它只掛在頂層的話，沒覆蓋到的篇次會退回去讀到它 ——
         # 學生在第 2、3 篇的重點表底下也看到「請依據第一篇文章的內容」（#2930）。
         fq = l.get("keypoints_followup_questions")
-        if fq and _article_order(l).get(slug) == (fq.get("part_no") if isinstance(fq, dict) else None):
+        if isinstance(fq, dict) and _followup_belongs_to(l, fq, slug):
             m["keypoints_followup_questions"] = fq
 
         vd = m.get("vocab_definitions")
@@ -915,8 +941,13 @@ def _uid_tree_lessons() -> list[dict]:
             "cross_text_banner": l.get("cross_text_banner") or None,
             # 多篇課不掛頂層 —— 它已經放進自己那一篇的 round 了；
             # 留在頂層會讓別篇退回去讀到它。單篇課沒有 round，照舊掛頂層。
+            # 多篇課：**已經放進某一篇的**才清掉頂層（留著會讓別篇退回去讀到它）。
+            # ⛔ 原本是「只要是多篇課就一律清掉」—— 那是 fail-open：
+            #    L0144 的加碼題沒有 part_no（閱讀接力形狀只有 text_ref），
+            #    每一篇都對不上、頂層又被清掉，於是**整個大題消失**，
+            #    而檔案一直在磁碟上（#2964 抓到）。
             "keypoints_followup_questions": (
-                None if (l.get("repeat_rounds") or {})
+                None if _followup_was_placed_in_a_round(l)
                 else (l.get("keypoints_followup_questions") or None)
             ),
             "writing_practice": l.get("writing_practice") or None,
