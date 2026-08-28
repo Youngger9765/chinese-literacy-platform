@@ -219,6 +219,7 @@ def process_session_completion(
     session_id: int,
     reading_accuracy: float | None = None,
     comprehension_passed: bool = False,
+    comprehension_score: float | None = None,
     activity_date: date | None = None,
 ) -> dict:
     """Main entry point: called when a learning session is fully completed.
@@ -318,10 +319,25 @@ def process_session_completion(
             scores.append(reading_accuracy)
             weights.append(0.4)
         # Comprehension score (weight: 40%)
+        #
+        # ⛔ 順序有意義，不要調換（#2904）：
+        #   ① DB 上已經算好的分數
+        #   ② 這次呼叫帶上來的真實百分比 ← 新增
+        #   ③ 只知道「有沒有達標」的舊 client，才退回固定 80
+        #
+        # 原本只有 ①③。`comprehension_passed` 是個 bool，False 什麼都不加，
+        # 於是**沒達標的學生不是拿低分，是整段 `if scores` 不成立、完全沒有分數**
+        # —— 不報錯、不寫、沒有痕跡。prod 561 課完成只有 9 筆有分數就是這個形狀。
+        # 前端在 ReportPage 早就算出真實百分比了，只是被壓成布林送上來。
         if learning_session.comprehension_score is not None:
             scores.append(learning_session.comprehension_score)
             weights.append(0.4)
+        elif comprehension_score is not None:
+            scores.append(comprehension_score)
+            weights.append(0.4)
         elif comprehension_passed:
+            # 舊 client 只送得出 bool，這裡沒有真實分數可用。
+            # ⛔ 不從 bool 反推分數 —— 那是編一個數字出來。
             scores.append(80.0)  # default pass score
             weights.append(0.4)
         # Vocab result (weight: 20%) — extract from vocab_result JSONB if available

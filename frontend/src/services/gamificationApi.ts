@@ -201,7 +201,12 @@ export async function reportSessionComplete(
   studentId: number,
   sessionId: number,
   token: string,
-  opts: { readingAccuracy?: number; comprehensionPassed?: boolean } = {},
+  opts: {
+    readingAccuracy?: number;
+    comprehensionPassed?: boolean;
+    /** 真實百分比。只送 passed 的話，沒達標的學生會完全沒有分數（#2904）。*/
+    comprehensionScore?: number;
+  } = {},
 ): Promise<{
   xp_earned: number;
   new_total_xp: number;
@@ -220,6 +225,7 @@ export async function reportSessionComplete(
       session_id: sessionId,
       reading_accuracy: opts.readingAccuracy ?? null,
       comprehension_passed: opts.comprehensionPassed ?? false,
+      comprehension_score: opts.comprehensionScore ?? null,
     }),
   });
   if (!res.ok) throw new Error(`reportSessionComplete failed: ${res.status}`);

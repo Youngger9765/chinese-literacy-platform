@@ -170,6 +170,7 @@ jobs:
           src/config/__tests__/activeStepHighlight.test.ts \
           src/config/__tests__/stepPartLabels.test.ts \
           src/components/layout/__tests__/stepperPartsAreWired.test.ts \
+          src/pages/learning/__tests__/reportSendsRealScore.test.ts \
           src/config/__tests__/realPayloadRoundScope.test.ts \
           src/config/__tests__/stepPath.test.ts \
           src/config/__tests__/stepPathIsTheOnlyBuilder.test.ts \
