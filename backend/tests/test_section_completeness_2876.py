@@ -61,7 +61,19 @@ def test_the_three_late_additions_are_still_mapped():
     doc = yaml.safe_load(MAP.read_text(encoding="utf-8"))
     needles = {m["needle"]: m["module"] for m in doc["matches"]}
     assert needles.get("文章重點整理") == "keypoints", "「文章重點整理」的對應不見了"
-    assert needles.get("綜合練習") == "spotlight", "「綜合練習」的對應不見了"
+    # ⚠️ 2026-08-28（#2964）改寫。原本斷言「綜合練習 → spotlight」——
+    #    那條對應**是刻意刪掉的，因為它是錯的**：L0029 的 spotlight.yml
+    #    `section_no_printed` 是「八」（品格聚光燈），綜合練習是「七」。
+    #    接回去會讓同一份 spotlight 被兩列指到，看起來像「重複模組沒拆」，
+    #    實際上是兩個不同大題被塞進同一個模組（對照表裡有完整說明）。
+    #    改成鎖住「刻意不接」這個狀態，不准有人把它接回任何既有模組。
+    assert "綜合練習" not in needles, (
+        f"「綜合練習」又被接到 {needles.get('綜合練習')} 了 —— "
+        "它的形狀跟現有 24 個模組都不一樣（連連看＋兩題單選＋一題跨篇單選），"
+        "接回任何既有模組都會製造重複指向。見 section-to-module.yml 的說明。")
+    unmapped = {x["needle"] for x in doc.get("no_match", []) or doc.get("unmapped", []) or []}
+    if unmapped:
+        assert "綜合練習" in unmapped, "「綜合練習」應該登記在「刻意無對應」那一區"
     inside = {x["needle"]: x for x in doc.get("lives_inside", [])}
     assert "閱讀接力" in inside, "「閱讀接力」的 lives_inside 登記不見了"
     assert "multi_text_parts" in inside["閱讀接力"]["inside"]
