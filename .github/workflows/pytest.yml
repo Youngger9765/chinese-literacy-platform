@@ -65,7 +65,8 @@ jobs:
             tests/test_characterization_tts_cache.py \
             tests/test_rate_limiting.py \
             tests/test_session_scoring_write_1063.py \
-            tests/test_session_scoring_below_threshold_2904.py
+            tests/test_session_scoring_below_threshold_2904.py \
+            tests/test_gamification.py
         env:
           DATABASE_URL: sqlite://
           TTS_PROVIDER: google
