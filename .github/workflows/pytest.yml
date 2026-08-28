@@ -2,16 +2,34 @@ name: Pytest
 
 on:
   pull_request:
-    paths:
-      - 'backend/**'
-      # 產生器也要觸發 —— 只改它的 PR 若不跑鎖，「下次會再錯一次」的鎖就沒插電
-      # 抽取器與普查也要觸發 —— 改它們的 PR 若不跑 gate，等於鎖建了沒插電
-      - 'scripts/split_lesson_modules.py'
-      - 'scripts/key_reading_xml_rule.py'
-      - 'scripts/corpus_profile.py'
+    types: [opened, synchronize, reopened]
 
 jobs:
+  # 路徑判斷改在 job 裡做 —— `on.paths` 只看前 300 個變更檔，批次改名的 PR
+  # 會讓整支被靜靜跳過，而且檢查清單上不會出現那一列（#2925）。
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      relevant: ${{ steps.filter.outputs.relevant }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # paths-filter 要完整歷史才能算 diff
+      - uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          filters: |
+            relevant:
+              - 'backend/**'
+              # 產生器也要觸發 —— 只改它的 PR 若不跑鎖，「下次會再錯一次」的鎖就沒插電
+              # 抽取器與普查也要觸發 —— 改它們的 PR 若不跑 gate，等於鎖建了沒插電
+              - 'scripts/split_lesson_modules.py'
+              - 'scripts/key_reading_xml_rule.py'
+              - 'scripts/corpus_profile.py'
+
   pytest:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.relevant == 'true'
     name: Backend Tests
     runs-on: ubuntu-latest
 
