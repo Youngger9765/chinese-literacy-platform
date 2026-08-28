@@ -68,11 +68,15 @@ print(len(covered), len(disk), len(disk-covered))
 PY
 ```
 
-| | |
-|---|---|
-| `pytest.yml` 展開 glob 後涵蓋 | **50** 支 |
-| 磁碟上的 `backend/tests` | **279** 支 |
-| **從來不會被 CI 跑到** | **229** 支 |
+| | 2026-08-28 早上 | **同日收尾後** |
+|---|---|---|
+| `pytest.yml` 展開 glob 後涵蓋 | 50 支 | **156 支** |
+| 磁碟上的 `backend/tests` | 279 支 | 282 支 |
+| **從來不會被 CI 跑到** | **229 支** | **127 支** |
+| 其中「回歸鎖」沒插電的 | 20 支紅 + 73 支綠 | **0 支** |
+
+剩下那 127 支不是鎖（一般 unit / 探索性 / 需要外部服務的），
+沒有插電的義務 —— 判準見 §3。
 
 把那 229 支全部跑一次（10 分 28 秒）：
 
@@ -111,7 +115,7 @@ test_perf_sql_aggregates            test_perf_1243_remaining_optimizations
 **為某個 bug 寫的鎖，紅著、而且沒有人會看到。** 這正是今天 #2962 的形狀
 （`test_gamification.py` 四條紅了很久，不在清單裡）。
 
-### 1.3 L3（真 user 走得完）只有 4 支 e2e
+### 1.3 L3（真 user 走得完）只有 4 支 e2e ⚠️ 已補一道打 preview 的（見 §2 P1）
 
 ```
 frontend/tests/e2e/  audio-comes-from-azure · demo-path · full-qa · multiTextJourney
@@ -121,7 +125,7 @@ frontend/tests/e2e/  audio-comes-from-azure · demo-path · full-qa · multiText
 （preview 的 DB 是空的、沒有 seed 帳號）—— e2e workflow 自己的註解就寫著這件事。
 換句話說：**PR 階段沒有任何一道門問「學生走得完嗎」。**
 
-### 1.4 L4（歷程）幾乎沒有門
+### 1.4 L4（歷程）幾乎沒有門 ⚠️ 這個判斷後來證明是錯的（見 §2 P2）
 
 今天才補上的兩條是這一層目前**僅有**的：
 
@@ -135,9 +139,16 @@ prod **561 課完成只有 9 筆有分數**、第一個徽章**永遠發不出�
 
 ## 2. 要做的事（依價值排序）
 
-### 🔴 P0-a 把 73 支綠的回歸鎖插電
+### ✅ P0-a 把綠的回歸鎖插電 —— 已完成
 
-它們現在就是綠的，插電零風險，而缺席的代價已經證實過兩次。
+2026-08-28 實測：**磁碟上 129 支回歸鎖（檔名帶 issue 號 / gate / guard / regression），
+0 支沒插電**。workflow 具名 147 支（多出來的是非鎖的測試）。
+
+```bash
+DISK=$(ls backend/tests/test_*.py | grep -E '_[0-9]{3,4}\.py$|gate|guard|regression' | sed 's|backend/||' | sort -u)
+NAMED=$(grep -oE 'tests/test_[a-z0-9_]+\.py' .github/workflows/pytest.yml | sort -u)
+comm -23 <(echo "$DISK") <(echo "$NAMED")     # 空的 = 全部插電
+```
 
 ### ✅ P0-b 那 20 支紅的鎖 —— 已完成（2026-08-28）
 
@@ -168,7 +179,7 @@ PR 弄壞了流程它照樣綠。真正問「這個 PR 的學生走不走得完�
 PR 只跑一課（五課走完整條路慢到會讓人想關掉這道門），staging 維持五課全跑 ——
 兩個環境跑不同的量，不是抽樣代替全檢。
 
-### 🟡 P2 補 L4：歷程的門 —— 大部分已完成（2026-08-28）
+### ✅ P2 補 L4：歷程的門 —— 已完成（2026-08-28）
 
 ⚠️ **原本這裡寫「L4 幾乎沒有門」，那是錯的。門是有的（7 支），只是沒接進 CI**
 —— 跟 P0-a 同一個病，不是缺門是缺接線。
@@ -189,7 +200,7 @@ PR 只跑一課（五課走完整條路慢到會讓人想關掉這道門），st
 - `test_dialogue_history`：#1135 的 `story_slug` gate 上線之後就一直 422，
   12 條紅了很久，而它不在 CI 清單裡所以沒有人看到
 
-### 🟢 P3 L0：門本身的品質
+### ✅ P3 L0：門本身的品質 —— 已完成（2026-08-28）
 
 - ✅ `#2925`：門不准用 `on.paths`（會被 300 檔上限靜靜跳過）
 - ✅ **具名清單漂移偵測** —— `specs/test_ci_gates_are_runnable_spec.py` 兩條
@@ -205,9 +216,12 @@ PR 只跑一課（五課走完整條路慢到會讓人想關掉這道門），st
   ＋ `backend/specs/test_locks_have_red_evidence_spec.py`（3 條，兩個 mutation 驗過會咬）。
   新加進具名清單的鎖沒有證據就紅；`grandfathered` 那節是**看得見的債**
   （2026-08-28：104 支裡 95 支沒有逐支驗過會咬），只准變少
-- 還缺：**批次順序的污染偵測** —— 這輪抓到一支測試把另一支的登入弄成 500
-  （`dependency_overrides.clear()` 掃全域）。單跑永遠看不到，
-  只有**照 workflow 的順序整批跑**才會出現
+- ✅ **批次順序的污染偵測** —— 不需要另建門：那個 step 是**單一 pytest 呼叫**，
+  104 支照清單順序一次跑完，所以跨檔污染本來就會在 CI 現形。
+  這輪抓到的那一支（`dependency_overrides.clear()` 掃全域，把另一支的登入弄成 500）
+  正是因為它們兩支都被插電才浮出來。
+  ⚠️ 要記住的是**人這一側**：改完不要只跑自己那一支就宣稱好了 ——
+  單跑綠、批次紅是這個 repo 真實發生過的事
 
 ---
 
