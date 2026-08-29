@@ -179,7 +179,11 @@ const GuidedStepsInput: React.FC<Props> = ({
         studentAnswer: text,
         strategyName,
         storyTitle,
-        passage,
+        // A worked-example step (子流程) carries its OWN story in `context` (e.g. 例一:烏鴉喝水).
+        // Grade it against that, NOT the whole-lesson passage — otherwise the AI checks the
+        // answer against the main story (小兵立大功/孟嘗君) and wrongly accepts 孟嘗君 for
+        // 烏鴉喝水's 主角. Fall back to the lesson passage for steps without their own context. (#2553)
+        passage: step.context ?? passage,
       });
       setGrades((prev) => ({ ...prev, [i]: grade }));
       setFeedback((prev) => ({ ...prev, [i]: true }));
