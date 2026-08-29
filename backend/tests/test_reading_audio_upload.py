@@ -32,6 +32,9 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 import threading
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]  # backend/
 import pytest
 from unittest.mock import MagicMock, patch, call
 
@@ -338,166 +341,80 @@ def _build_app():
     return app
 
 
-class TestTranscribeRouteGcsPatch:
-    """Route-level: BackgroundTasks executes synchronously in TestClient.
+class TestUploadIsWiredToTheLiveRoute:
+    """上傳這條路在某次重構搬家了，而守它的測試沒跟著搬。
 
-    CRITICAL: upload_reading_audio_to_gcs must be patched at the ROUTE MODULE
-    import site, not the service module.  The route did:
+    ⚠️ 原本這裡是 `TestTranscribeRouteGcsPatch`，5 條全紅，錯誤是
 
-        from ...services.audio_upload_service import upload_reading_audio_to_gcs
+        AttributeError: module 'app.routes.learning.learning_reading'
+                        does not have the attribute 'upload_reading_audio_to_gcs'
 
-    so the reference lives at:
+    因為 `learning_reading` 早就不 import 它了 —— 背景上傳（BackgroundTasks）
+    被換成「學生按下接受分數之後，前端明確呼叫 POST /reading/save-audio」，
+    由 `learning_save_audio.py` 走 `upload_reading_audio_to_gcs_sync`。
 
-        app.routes.learning.learning_reading.upload_reading_audio_to_gcs
+    而這支檔案**不在 CI 具名清單裡**，所以那 5 條紅了很久沒有人看到。
 
-    Patching at the service module path would NOT intercept calls from the route.
+    這一版改成守**活的那條路**。用靜態層驗就夠了 —— 要抓的是「接線有沒有斷」，
+    那是靜態事實，不需要起整個 app（qa-layering：用能忠實抓到它的最低層）。
+
+    2026-08-29 同一輪查到的相關事實：`lingoleap-reading-audio-prod` 與
+    `-staging` 兩顆桶**都沒有任何 `reading-audio/` 物件**。這裡的鎖只能保證
+    接線在，不能保證真的有人錄過 —— 那件事另外追。
     """
 
-    def test_happy_path_upload_called_with_correct_args(self):
-        """Route happy path: upload background task is scheduled, NOT real GCS."""
-        from fastapi.testclient import TestClient
-        from unittest.mock import AsyncMock
+    LIVE_ROUTE = ROOT / "app" / "routes" / "learning" / "learning_save_audio.py"
+    OLD_ROUTE = ROOT / "app" / "routes" / "learning" / "learning_reading.py"
 
-        app = _build_app()
-        client = TestClient(app)
+    def test_the_files_are_where_we_think(self):
+        """正向對照。少了這條，下面每一條都會在空字串上通過。"""
+        assert self.LIVE_ROUTE.is_file(), f"找不到 {self.LIVE_ROUTE}"
+        assert self.OLD_ROUTE.is_file(), f"找不到 {self.OLD_ROUTE}"
+        assert len(self.LIVE_ROUTE.read_text(encoding="utf-8")) > 500, "檔案短得不像真的"
 
-        mock_transcribe_result = {
-            "transcript": "孟嘗君養了很多門客。",
-            "method": "gemini",
-            "reasoning": "正確。",
-        }
+    def test_the_live_route_actually_calls_the_upload(self):
+        src = self.LIVE_ROUTE.read_text(encoding="utf-8")
+        assert "upload_reading_audio_to_gcs_sync" in src, (
+            "活的那條路沒有在呼叫上傳 —— 學生的朗讀錄音不會落地，"
+            "而且失敗是被吞掉的（route 回 {ok:false}，不會 raise）"
+        )
+        assert "import" in src.split("upload_reading_audio_to_gcs_sync")[0][-400:], (
+            "只在字串裡出現不算 —— 要真的 import 進來"
+        )
 
-        with (
-            patch(
-                "app.routes.learning.learning_reading.transcribe_reading_audio",
-                new=AsyncMock(return_value=mock_transcribe_result),
-            ),
-            # Pit #1 fix: patch at ROUTE module, not service module
-            patch(
-                "app.routes.learning.learning_reading.upload_reading_audio_to_gcs",
-            ) as mock_upload,
-        ):
-            resp = client.post(
-                "/api/reading/transcribe",
-                files={"audio": ("rec.webm", b"fake_audio", "audio/webm")},
-                data={"target_text": "孟嘗君養了很多門客。", "duration_ms": "5000"},
-            )
+    def test_the_blob_path_shape_is_locked(self):
+        src = self.LIVE_ROUTE.read_text(encoding="utf-8")
+        assert 'f"reading-audio/attempts/' in src, (
+            "物件路徑的前綴變了。桶裡是用這個前綴在找東西的（老師端回放、稽核），"
+            "改前綴等於把既有錄音變成孤兒"
+        )
 
-        assert resp.status_code == 200
-        body = resp.json()
-        assert body["transcript"] == "孟嘗君養了很多門客。"
+    def test_the_old_route_no_longer_owns_the_upload(self):
+        """記錄搬家這件事本身 —— 有人搬回去的話這條會紅，逼他一起更新鎖。"""
+        src = self.OLD_ROUTE.read_text(encoding="utf-8")
+        assert "upload_reading_audio_to_gcs" not in src, (
+            "上傳又出現在 learning_reading 裡了。那不一定是錯的，"
+            "但這支測試的 patch 目標要跟著改，否則又會變成一堆紅著沒人看的斷言"
+        )
 
-        # Background task was scheduled and executed by TestClient (synchronous)
-        mock_upload.assert_called_once()
-        call_kwargs = mock_upload.call_args.kwargs
-        assert call_kwargs["audio_bytes"] == b"fake_audio"
-        assert call_kwargs["user_id"] == 42
-        assert call_kwargs["mime_type"] == "audio/webm"
+    def test_the_background_variant_has_no_production_caller(self):
+        """背景版目前是死 code（0 個正式呼叫者）。有人接回去要知道。"""
+        import subprocess
 
-    def test_upload_not_called_when_mime_rejected(self):
-        """MIME gate returns 415 before background task is queued."""
-        from fastapi.testclient import TestClient
-
-        app = _build_app()
-        client = TestClient(app)
-
-        with patch(
-            "app.routes.learning.learning_reading.upload_reading_audio_to_gcs",
-        ) as mock_upload:
-            resp = client.post(
-                "/api/reading/transcribe",
-                files={"audio": ("rec.mp3", b"fake", "audio/mpeg_bad_type")},
-                data={"target_text": "測試"},
-            )
-
-        assert resp.status_code == 415
-        mock_upload.assert_not_called()
-
-    def test_upload_not_called_when_audio_empty(self):
-        """400 on empty audio → background task is never queued."""
-        from fastapi.testclient import TestClient
-
-        app = _build_app()
-        client = TestClient(app)
-
-        with patch(
-            "app.routes.learning.learning_reading.upload_reading_audio_to_gcs",
-        ) as mock_upload:
-            resp = client.post(
-                "/api/reading/transcribe",
-                files={"audio": ("rec.webm", b"", "audio/webm")},
-                data={"target_text": "測試"},
-            )
-
-        assert resp.status_code == 400
-        mock_upload.assert_not_called()
-
-    def test_fallback_result_still_schedules_upload(self):
-        """Even when Gemini falls back, the audio is uploaded (for debug)."""
-        from fastapi.testclient import TestClient
-        from unittest.mock import AsyncMock
-
-        app = _build_app()
-        client = TestClient(app)
-
-        fallback_result = {"transcript": None, "method": "fallback", "reason": "timeout"}
-
-        with (
-            patch(
-                "app.routes.learning.learning_reading.transcribe_reading_audio",
-                new=AsyncMock(return_value=fallback_result),
-            ),
-            patch(
-                "app.routes.learning.learning_reading.upload_reading_audio_to_gcs",
-            ) as mock_upload,
-        ):
-            resp = client.post(
-                "/api/reading/transcribe",
-                files={"audio": ("rec.webm", b"fake_audio", "audio/webm")},
-                data={"target_text": "測試文字"},
-            )
-
-        assert resp.status_code == 200
-        body = resp.json()
-        assert body["method"] == "fallback"
-
-        # Upload is still called even on Gemini fallback — debug value remains
-        mock_upload.assert_called_once()
-
-    def test_no_real_gcs_client_instantiated_during_route_test(self):
-        """Prove TestClient never reaches google.cloud.storage.Client."""
-        from fastapi.testclient import TestClient
-        from unittest.mock import AsyncMock
-
-        app = _build_app()
-        client = TestClient(app)
-
-        mock_result = {
-            "transcript": "春風吹過田野。",
-            "method": "gemini",
-            "reasoning": "OK",
-        }
-
-        with (
-            patch(
-                "app.routes.learning.learning_reading.transcribe_reading_audio",
-                new=AsyncMock(return_value=mock_result),
-            ),
-            patch(
-                "app.routes.learning.learning_reading.upload_reading_audio_to_gcs",
-            ) as mock_upload,
-            # Extra guard: if google.cloud.storage.Client is called it fails the test
-            patch(
-                "google.cloud.storage.Client",
-                side_effect=AssertionError("Real GCS Client was instantiated in test!"),
-            ),
-        ):
-            resp = client.post(
-                "/api/reading/transcribe",
-                files={"audio": ("rec.webm", b"x", "audio/webm")},
-                data={"target_text": "春風吹過田野。"},
-            )
-
-        # If we reach here without AssertionError, no real GCS call happened
-        assert resp.status_code == 200
-        mock_upload.assert_called_once()
+        out = subprocess.run(
+            # ⛔ 不限定 `.py` 的話會掃到 `__pycache__` 的 .pyc（第一版就中了），
+            #    那會讓這條永遠紅 —— 一條永遠紅的鎖跟沒有一樣，會被關掉。
+            ["grep", "-rn", "--include=*.py", "--exclude-dir=__pycache__",
+             "upload_reading_audio_to_gcs", str(ROOT / "app")],
+            capture_output=True, text=True,
+        ).stdout
+        lines = [l for l in out.split("\n") if l.strip()]
+        assert lines, "grep 一行都沒抓到 —— 查法壞了，不是沒有呼叫者"
+        callers = [
+            l for l in lines
+            if "_sync" not in l and "def upload_reading_audio_to_gcs(" not in l
+        ]
+        assert not callers, (
+            "背景版又被接回去了：\n  " + "\n  ".join(callers)
+            + "\n（不一定是錯的，但要一起更新這支的斷言與 blob path 的鎖）"
+        )

@@ -18,6 +18,8 @@
 - `test_reading_benchmark_reaches_the_row_2964.py` — 復現：175 課的門檻整批 None
 - `test_session_scoring_below_threshold_2904.py` — 復現：prod 561 課完成只有 9 筆有分數
 - `test_student_progress.py` — mutation：把 fallback 的 completed 分支改成 False → 1 條紅
+- `test_reading_audio_upload.py` — mutation：拿掉活路的上傳呼叫 → 1 failed；改掉 blob path 前綴 → 1 failed；還原 → 15 passed
+- `test_reading_audio_replay_student.py` — mutation：拿掉 IDOR 的 owner 過濾 → 1 failed；還原 → 9 passed（那條 IDOR 斷言在此之前從沒執行過）
 
 ## grandfathered（既有債，未逐支驗過）
 
