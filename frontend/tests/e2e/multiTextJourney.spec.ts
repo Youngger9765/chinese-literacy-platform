@@ -114,6 +114,42 @@ test(`從第 1 步逐步走完，每一步都是自己那一篇 — ${LABEL}`, a
   await page.getByRole('button', { name: /開始學習/ }).first().click();
   await page.waitForTimeout(3000);
 
+  // ⛔ 不可以靠「開始學習」把我們放到第 1 步 —— 那顆是**接續**。
+  //    demo 帳號小明的進度留在共用的 preview DB，所以這道門第一次跑會過，
+  //    第二次就被自己上一輪的進度接到報告頁，一步都走不到，
+  //    而下面那條正向對照會說「走查邏輯壞了」，把真正的原因蓋掉。
+  //    2026-08-29 在 PR #2911 的 preview 上復現：頁面停在「報告 2/2」、checked=0。
+  //    所以明確走到序列的第一步，讓這條走查不依賴帳號當下的進度。
+  const [firstSeg, firstSlug] = (seq[0] ?? '').split('#');
+  if (firstSeg) {
+    await page.goto(
+      `${FE}/learn/${LESSON}/${firstSeg}${firstSlug ? `?p=${firstSlug}` : ''}`,
+      { waitUntil: 'networkidle' },
+    );
+    await page.waitForTimeout(2000);
+  }
+
+  // ── 環境合格檢查（preflight）────────────────────────────────────
+  // 這道門要問的是「這個 PR 的學生走不走得完」。如果環境本身就沒把這一課
+  // 的步驟給出來，那走不完跟 PR 無關 —— 那是 INVALID，不是 FAIL。
+  // ⛔ 把環境缺陷報成 FAIL 會把好 code 判死。
+  //
+  // 2026-08-29 實測（同一份 code、同一課、同一個帳號）：
+  //   staging               畫面「讀全文-做記號 2/21」，按完成 → 第 3 步 ✅
+  //   preview(issue-2712)   畫面只有「簡介／報告」，按完成 → 直接 /report ❌
+  // 差別在環境的資料，不在這個 PR。
+  const stepButtons = await page
+    .locator('[aria-label="學習步驟導航"] button, nav[aria-label*="步驟"] button')
+    .count();
+  if (stepButtons > 0 && stepButtons < 5) {
+    test.skip(
+      true,
+      `環境不合格（INVALID，不是 FAIL）：這一課 API 給了 ${seq.length} 步，` +
+        `但畫面只渲染出 ${stepButtons} 個步驟鈕 —— 這個環境的資料不完整，` +
+        `走不完跟這個 PR 無關。先修 setup 再重跑。停在 ${page.url()}`,
+    );
+  }
+
   const wrong: string[] = [];
   let checked = 0;
 
@@ -183,7 +219,16 @@ test(`從第 1 步逐步走完，每一步都是自己那一篇 — ${LABEL}`, a
   }
 
   // 正向對照：一步都沒比對到的話，上面的 0 不代表通過
-  expect(checked, '一個步驟都沒比對到 —— 走查邏輯壞了，不是內容乾淨').toBeGreaterThanOrEqual(2);
+  // ⛔ 順序要緊：走查如果**已經抓到東西**（wrong 非空），先報那個。
+  //    原本正向對照放前面，於是「第 1 步就跳報告」這種真發現會被說成
+  //    「走查邏輯壞了」—— 把答案蓋掉。2026-08-29 就是這樣誤導了一輪。
+  if (wrong.length) {
+    expect(wrong, `\n  ${wrong.join('\n  ')}\n`).toEqual([]);
+  }
+  expect(
+    checked,
+    `一個步驟都沒比對到 —— 走查邏輯壞了，不是內容乾淨（停在 ${page.url()}）`,
+  ).toBeGreaterThanOrEqual(2);
   if (!EXPECT_DEPLOYED && wrong.length) {
     test.info().annotations.push({ type: 'not-yet-deployed', description: wrong.join(' | ') });
   } else {
