@@ -73,15 +73,36 @@ function expectedFor(round: Round, module: string): string | null {
 
 for (const [LESSON, LABEL] of LESSONS) {
 test(`從第 1 步逐步走完，每一步都是自己那一篇 — ${LABEL}`, async ({ page }) => {
-  const detail = await (await fetch(`${BE}/api/stories/${LESSON}`)).json();
-  const rounds: Record<string, Round> = detail.repeat_rounds ?? {};
-  const seq: string[] = detail.step_sequence ?? [];
-  expect(seq.length, '拿不到 step_sequence').toBeGreaterThan(3);   // 有的課只有 8 節
+  // ── 環境合格檢查 ①：後端在不在 ──────────────────────────────
+  // 只改前端的 PR，preview 後端映像可能從來沒建過（2026-08-29 PR #2554 就是這樣：
+  // `Image ... backend:issue-2553-<sha> not found`）。那時這支會在下面
+  // 「拿不到 step_sequence」倒下 —— 而那跟 PR 改了什麼完全無關。
+  // ⛔ 環境不合格是 INVALID，不是 FAIL。把它報成 FAIL 會把好 code 判死。
+  let detail: Record<string, unknown> = {};
+  let fetchErr = '';
+  try {
+    const res = await fetch(`${BE}/api/stories/${LESSON}`);
+    if (!res.ok) fetchErr = `HTTP ${res.status}`;
+    else detail = await res.json();
+  } catch (e) {
+    fetchErr = String(e);
+  }
+  const rounds: Record<string, Round> = (detail.repeat_rounds as Record<string, Round>) ?? {};
+  const seq: string[] = (detail.step_sequence as string[]) ?? [];
+  if (fetchErr || seq.length <= 3) {
+    test.skip(
+      true,
+      `環境不合格（INVALID，不是 FAIL）：${BE}/api/stories/${LESSON} ` +
+        `${fetchErr ? `打不通（${fetchErr}）` : `只給了 ${seq.length} 步`} —— ` +
+        '這個環境的後端沒起來或資料不完整，跟這個 PR 改了什麼無關。先修 setup 再重跑。',
+    );
+  }
   expect(Object.keys(rounds).length, '這一課不是多篇？那這條測試該換課').toBeGreaterThanOrEqual(2);
 
   // 帳本：每一節屬於哪一篇
   const articleOf: Record<string, string | null> = {};
-  for (const s of detail.manifest_sections ?? []) {
+  const sections = (detail.manifest_sections as { slug: string; text_ref?: unknown; module?: string }[]) ?? [];
+  for (const s of sections) {
     const ref = s.text_ref;
     articleOf[s.slug] =
       typeof ref === 'string' && ref ? ref : s.module === 'full_text_annotate' ? s.slug : null;

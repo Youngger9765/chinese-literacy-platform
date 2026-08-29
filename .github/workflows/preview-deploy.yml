@@ -202,10 +202,29 @@ jobs:
           FIREBASE_URL="https://lingoleap-dev.web.app"
           # Cloud Run has two URL formats per service - add both to CORS
           ALT_URL="https://${{ env.FRONTEND_SERVICE }}-958347263320.asia-east1.run.app"
-          gcloud run services update ${{ env.BACKEND_SERVICE }} \
+          # ⚠️ service 還在、但它指向的映像已被刪掉，是很常見的一種狀態：
+          #    PR 關閉時 Layer 4 會刪 `issue-N-*` 映像，service 本身留著。
+          #    之後任何 env 更新都會強制建新 revision，於是 `Image ... not found`。
+          #    這種情況這一步什麼也做不了 —— 記一行然後放行，讓下游的
+          #    preflight 去把環境標成 INVALID（而不是把整個 PR 判成 FAIL）。
+          #    ⛔ 只對這一種錯誤放行；其他錯誤照舊讓它炸。
+          #    2026-08-29 PR #2554（只改前端）就是被這個擋住的。
+          set +e
+          OUT=$(gcloud run services update ${{ env.BACKEND_SERVICE }} \
             --region ${{ env.REGION }} \
             --project ${{ env.PROJECT_ID }} \
-            --update-env-vars "^::^ALLOWED_ORIGINS=${FRONTEND_URL},${ALT_URL},${STAGING_URL},${FIREBASE_URL}::DATABASE_URL=${DATABASE_URL_SECRET}"
+            --update-env-vars "^::^ALLOWED_ORIGINS=${FRONTEND_URL},${ALT_URL},${STAGING_URL},${FIREBASE_URL}::DATABASE_URL=${DATABASE_URL_SECRET}" 2>&1)
+          RC=$?
+          set -e
+          echo "$OUT"
+          if [ "$RC" -ne 0 ]; then
+            if printf '%s' "$OUT" | grep -q "Image '.*' not found"; then
+              echo "::warning::preview 後端 service 指向的映像已被清掉（PR 關閉時的映像清理），"\
+                   "這一步無事可做。下游的 preflight 會把環境標成 INVALID。"
+              exit 0
+            fi
+            exit "$RC"
+          fi
 
       - name: Warm backend to avoid cold-start CORS errors
         if: always() && steps.preview-urls.outputs.backend_url != 'N/A'
