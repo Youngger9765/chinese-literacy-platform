@@ -118,7 +118,11 @@ def recommend_next_stories(
                 (s.accuracy for s in slug_sess if s.accuracy is not None), default=None
             )
             if best_acc is not None and best_acc >= 60.0:
-                completed_grades.append(lesson["grade"])
+                    # `grade` is a classification string: "4".."9", 文言文, 品格教育.
+                    # Only the year-based ones say anything about the student's
+                    # level, so the named collections are skipped here.
+                    if str(lesson.get("grade", "")).isdigit():
+                        completed_grades.append(int(lesson["grade"]))
 
     if completed_grades:
         # Use the most common grade the student works at
@@ -172,29 +176,33 @@ def recommend_next_stories(
         score = 0
         reason_parts: list[str] = []
 
-        # Difficulty match
-        grade_diff = abs(lesson["grade"] - student_grade)
-        if grade_diff == 0:
-            score += DIFFICULTY_EXACT
-            reason_parts.append(f"難度符合你目前的程度（{lesson['grade']} 年級）")
-        elif grade_diff == 1:
-            score += DIFFICULTY_NEAR
-            if lesson["grade"] > student_grade:
-                reason_parts.append("難度略高，適合挑戰")
-            else:
-                reason_parts.append("難度稍低，適合鞏固基礎")
-        elif grade_diff == 2:
+        # Difficulty match.
+        # `grade` is a classification string: "4".."9", 文言文, 品格教育.
+        # The named collections have no school year, so there is no distance to
+        # compute — they score neutrally instead of being ranked against a year
+        # they do not belong to.
+        _lg = str(lesson.get("grade", ""))
+        if not _lg.isdigit():
             score += DIFFICULTY_FAR
-            if lesson["grade"] > student_grade:
-                reason_parts.append("難度有所提升，可嘗試挑戰")
-            else:
-                reason_parts.append("可以複習鞏固")
+            reason_parts.append("專題課程" + (f"（{_lg}）" if _lg else ""))
         else:
-            # Too far from student level — still include but low score
-            if lesson["grade"] > student_grade:
-                reason_parts.append("難度較高，建議打好基礎再嘗試")
+            _ly = int(_lg)
+            grade_diff = abs(_ly - student_grade)
+            if grade_diff == 0:
+                score += DIFFICULTY_EXACT
+                reason_parts.append(f"難度符合你目前的程度（{_lg} 年級）")
+            elif grade_diff == 1:
+                score += DIFFICULTY_NEAR
+                reason_parts.append("難度略高，適合挑戰" if _ly > student_grade
+                                    else "難度稍低，適合鞏固基礎")
+            elif grade_diff == 2:
+                score += DIFFICULTY_FAR
+                reason_parts.append("難度有所提升，可嘗試挑戰" if _ly > student_grade
+                                    else "可以複習鞏固")
             else:
-                reason_parts.append("可做複習練習")
+                # Too far from student level — still included, but low score
+                reason_parts.append("難度較高，建議打好基礎再嘗試" if _ly > student_grade
+                                    else "可做複習練習")
 
         # Weak character coverage
         vocab = lesson.get("vocabulary") or []

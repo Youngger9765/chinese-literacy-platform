@@ -1,66 +1,77 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 5,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "事件起點",
+      "衝突引爆",
+      "衝突擴大",
+      "關鍵轉折"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "白牙的最後一戰",
-      "value": "",
-      "interactive_type": "display"
+      "interactive_type": "display",
+      "label": "美好的一天",
+      "value": ""
     },
     {
-      "label": "背景",
-      "value": "1.獵人住在森林邊，有一條忠心的狗白牙。白牙有【　　　】的血統，看起來兇猛，鎮上的人都很怕牠，但獵人很信任牠。\n2.獵人結婚後有了孩子──小寶。妻子過世後，獵人擔心外出打獵時，小寶一個人在家會有【　　　】，請白牙負責照顧小寶。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "事件起點",
+      "value": "一位女生上了公車，臉色慘白，司機請她去【　　　】"
     },
     {
-      "label": "起因",
-      "value": "冬天獵人上山查看陷阱，遇【　　　】無法回家，只能在山上過夜。他很擔心家裡的孩子和白牙。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "衝突引爆",
+      "value": "1.一位【　　　】上車後看到女生坐在博愛座，大聲指責。\n2.【　　　】解釋，但大媽繼續罵。"
     },
     {
-      "label": "經過",
-      "value": "獵人回家後發現屋內一片混亂，滿地血跡，小寶不見，白牙滿身是血。\n他懷疑白牙【　　　】，一氣之下砍了白牙。這時從床底傳來小寶的哭聲。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "衝突擴大",
+      "value": "1.女生勉強要站起來，一位阿姨阻止女生讓座，認為博愛座是給需要的人坐的。大媽提高音量罵人\n2.其他乘客也開始議論怎麼這樣講話大媽回應，說話不行嗎？\n3.司機廣播請大家控制音量，不要干擾其他乘客\n大媽要【　　　】"
     },
     {
-      "label": "結果",
-      "value": "小寶毫髮無傷，牆角卻有一頭死去的大灰狼。獵人明白是白牙\n【　　　】了孩子。他後悔自己誤會了白牙，抱著小寶向白牙\n【　　　】，但白牙已奄奄一息，最後搖幾下尾巴就斷氣了。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "關鍵轉折",
+      "value": "老奶奶出面支持女生，願意【　　　】。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "結局",
+      "value": "大媽【　　　】，全車掌聲，司機以「美好的一天」作結尾"
     }
   ],
-  "layout": "worksheet_table",
-  "title": "白牙的最後一戰",
+  "title": "美好的一天",
   "worksheet_rows": [
     {
       "kind": "pair",
-      "label": "背景",
-      "value": "1.獵人住在森林邊，有一條忠心的狗白牙。白牙有【　　　】的血統，看起來兇猛，鎮上的人都很怕牠，但獵人很信任牠。\n2.獵人結婚後有了孩子──小寶。妻子過世後，獵人擔心外出打獵時，小寶一個人在家會有【　　　】，請白牙負責照顧小寶。"
+      "label": "事件起點",
+      "value": "一位女生上了公車，臉色慘白，司機請她去【　　　】"
     },
     {
       "kind": "pair",
-      "label": "起因",
-      "value": "冬天獵人上山查看陷阱，遇【　　　】無法回家，只能在山上過夜。他很擔心家裡的孩子和白牙。"
+      "label": "衝突引爆",
+      "value": "1.一位【　　　】上車後看到女生坐在博愛座，大聲指責。\n2.【　　　】解釋，但大媽繼續罵。"
     },
     {
       "kind": "pair",
-      "label": "經過",
-      "value": "獵人回家後發現屋內一片混亂，滿地血跡，小寶不見，白牙滿身是血。\n他懷疑白牙【　　　】，一氣之下砍了白牙。這時從床底傳來小寶的哭聲。"
+      "label": "衝突擴大",
+      "value": "1.女生勉強要站起來，一位阿姨阻止女生讓座，認為博愛座是給需要的人坐的。大媽提高音量罵人\n2.其他乘客也開始議論怎麼這樣講話大媽回應，說話不行嗎？\n3.司機廣播請大家控制音量，不要干擾其他乘客\n大媽要【　　　】"
     },
     {
       "kind": "pair",
-      "label": "結果",
-      "value": "小寶毫髮無傷，牆角卻有一頭死去的大灰狼。獵人明白是白牙\n【　　　】了孩子。他後悔自己誤會了白牙，抱著小寶向白牙\n【　　　】，但白牙已奄奄一息，最後搖幾下尾巴就斷氣了。"
+      "label": "關鍵轉折",
+      "value": "老奶奶出面支持女生，願意【　　　】。"
+    },
+    {
+      "kind": "pair",
+      "label": "結局",
+      "value": "大媽【　　　】，全車掌聲，司機以「美好的一天」作結尾"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "generic",
-    "fill_blank_count": 4,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "背景",
-      "起因",
-      "經過",
-      "結果"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

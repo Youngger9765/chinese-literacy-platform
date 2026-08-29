@@ -1,0 +1,72 @@
+lesson_uid: L0157
+version_id: v3
+section_no: 二
+word_matching:
+  instruction: 請依照文意，勾選出原文「 」中的白話文意思。
+  items:
+  - index: 1
+    classical: 「俄而」腥風驟起
+    boxed_term: 俄而
+    options:
+      1: 經常
+      2: 突然
+    answer: 2
+  - index: 2
+    classical: 有道士謂之「曰」
+    boxed_term: 曰
+    options:
+      1: 說
+      2: 太陽很大
+    answer: 1
+  - index: 3
+    classical: 於是。醫數十日漸平，「乃」偕歸
+    boxed_term: 乃
+    options:
+      1: 於是
+      2: 可是
+    answer: 1
+  - index: 4
+    classical: 含光「竭力」以口遍吮之
+    boxed_term: 竭力
+    options:
+      1: 用力
+      2: 盡力
+    answer: 2
+  - index: 5
+    classical: 虎怒，力不得「肆」
+    boxed_term: 肆
+    options:
+      1: 施展
+      2: 放肆
+    answer: 1
+  - index: 6
+    classical: 含光負其弟「疾」奔下嶺
+    boxed_term: 疾
+    options:
+      1: 快速
+      2: 疾病
+    answer: 1
+  - index: 7
+    classical: 其弟尚「一息未殊」
+    boxed_term: 一息未殊
+    options:
+      1: 還有一口氣沒
+      2: 一口氣還沒有斷絕
+    answer: 2
+  - index: 8
+    classical: 「既」息肩
+    boxed_term: 既
+    options:
+      1: 已經
+      2: 既然
+    answer: 1
+  notes:
+    answer_carrier: 紅色 ☑（w:sym Wingdings F0FE，在文字層），8 題各 1 個
+    shape: 每題一列：文言原句（要解釋的字用「」框住）＋ 兩個白話選項二選一
+    items: '第 (3) 題的文言句在原稿印成「於是。醫數十日漸平，「乃」偕歸」——句首多了「於是。」
+
+      而課文原句是「醫數十日漸平，乃偕歸」。這是題目自己的寫法（把答案先寫在前面當提示），
+
+      照原樣抄、不修。'
+  slug: 3wvtc
+  text_ref: nvrme

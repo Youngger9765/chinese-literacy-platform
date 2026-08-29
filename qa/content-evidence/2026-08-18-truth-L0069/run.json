@@ -1,0 +1,18 @@
+{
+  "lesson_uid": "L0069",
+  "catalog_slot": "G6-L2",
+  "pdf_pages": 10,
+  "pages_read": 10,
+  "wall_clock_seconds": null,
+  "read_calls": 1,
+  "gate_failures": {
+    "verbatim": 0,
+    "coverage": 0,
+    "block_type": 0,
+    "word_search": 0,
+    "traditional_only": 0,
+    "keypoints_shape": 0
+  },
+  "retries": 0,
+  "notes": "念順順「六☞」= 第 6 段。累計字數兩端全中且不需任何 Word 特殊口徑：第 6 段 226 字 = 印出的第 8 個數字，＋第 7 段 165 = 391 = 最後一個數字，故 span = 第 6~7 段（第 6、7 段沒有阿拉伯數字串、沒有註腳、沒有分節小標）。全課 15 個 w:sym F0FE 與逐頁讀 PDF 看到的 15 個紅 ☑ 位置逐一相符（聚光燈 1+8+1+4+1）。找字格 roundRect 共 10 個但只有 9 個是答案圈 —— 第 10 個錨在紙張外面（positionH relativeFrom=rightMargin posOffset=5264785 ≈5.76in，落在距頁左約 13.0in，紙寬只有 8.27in），且框線是寫死的 E97132 而非其餘九個的佈景色 accent2，所以永遠不會印出來。灰框只有 9 個詞，格子沒有錯字，9 條路徑逐格取字全部拼得回目標語詞。🔴 總表第 53 列的 11 個語詞與學習單的 9 個完全不重疊（同 L0061 的形狀），判為總表沒跟上改稿，未以學習單覆蓋總表。"
+}

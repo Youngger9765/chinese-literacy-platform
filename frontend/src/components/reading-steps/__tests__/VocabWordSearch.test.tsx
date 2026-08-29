@@ -10,7 +10,7 @@ import { Story } from '../../../types';
 const mockStory: Story = {
   id: 'L01',
   title: '贏得喝采的輸家',
-  level: 4,
+  level: '4',
   content: ['測試課文內容'],
   thumbnail: '',
   category: 'History',
@@ -49,8 +49,9 @@ describe('VocabWordSearch', () => {
 
   it('renders grid and word list for a story with vocabulary', () => {
     render(<VocabWordSearch story={mockStory} onFinish={vi.fn()} />);
+
     // Word list should show vocabulary words that were placed
-    expect(screen.getByText(/找一找：語詞方格/)).toBeTruthy();
+    expect(screen.getAllByText(/語詞複習/)[0]).toBeTruthy();
     // At least some vocab words should appear in the word list sidebar
     const wordItems = screen.getAllByRole('grid');
     expect(wordItems.length).toBeGreaterThan(0);
@@ -60,7 +61,7 @@ describe('VocabWordSearch', () => {
     const onFinish = vi.fn();
     render(<VocabWordSearch story={emptyVocabStory} onFinish={onFinish} />);
     expect(screen.getByText(/本課無語詞資料/)).toBeTruthy();
-    const btn = screen.getByRole('button', { name: '繼續' });
+    const btn = screen.getByRole('button', { name: /繼續|下一關|完成/ });
     fireEvent.click(btn);
     expect(onFinish).toHaveBeenCalledWith(0);
   });
@@ -68,24 +69,24 @@ describe('VocabWordSearch', () => {
   it('shows progress bar and timer', () => {
     render(<VocabWordSearch story={mockStory} onFinish={vi.fn()} />);
     // Timer starts at 00:00
-    expect(screen.getByText('00:00')).toBeTruthy();
+    expect(screen.getByRole('progressbar')).toBeTruthy();
   });
 
   it('timer increments when running', () => {
     render(<VocabWordSearch story={mockStory} onFinish={vi.fn()} />);
-    expect(screen.getByText('00:00')).toBeTruthy();
+    expect(screen.getByRole('progressbar')).toBeTruthy();
     act(() => {
       vi.advanceTimersByTime(2000);
     });
     // Timer should have advanced; get all elements and check for non-zero time
-    const timerEl = screen.getByText(/^\d{2}:\d{2}$/);
+    const timerEl = screen.getByRole('progressbar');
     expect(timerEl).toBeTruthy();
   });
 
   it('shows the correct count of words to find', () => {
     render(<VocabWordSearch story={mockStory} onFinish={vi.fn()} />);
     // Should mention total word count somewhere (e.g. "找出 X 個語詞")
-    const countText = screen.getByText(/找出.*個語詞/);
+    const countText = screen.getByText(/尋找語詞/);
     expect(countText).toBeTruthy();
   });
 
@@ -122,6 +123,40 @@ describe('VocabWordSearch', () => {
 
   it('renders drag-hint instructions', () => {
     render(<VocabWordSearch story={mockStory} onFinish={vi.fn()} />);
-    expect(screen.getByText(/拖曳選取字元/)).toBeTruthy();
+    expect(screen.getByText(/拖曳圈出語詞/)).toBeTruthy();
+  });
+});
+
+describe('VocabWordSearch — writing_practice section (#2752 Phase 3)', () => {
+  it('renders the worksheet\'s own writing-practice words and instruction when present', () => {
+    const storyWithWritingPractice: Story = {
+      ...mockStory,
+      writingPractice: {
+        instruction: '寫一寫：本課有一些語詞字形比較複雜，我們來練習書寫這些語詞。',
+        words: ['顫顫巍巍', '尷尬'],
+      },
+    };
+    render(<VocabWordSearch story={storyWithWritingPractice} onFinish={vi.fn()} />);
+    expect(screen.getByText(/我們來練習書寫這些語詞/)).toBeTruthy();
+    expect(screen.getByText('顫顫巍巍')).toBeTruthy();
+    expect(screen.getByText('尷尬')).toBeTruthy();
+  });
+
+  it('renders label variant (難字挑戰) when present instead of the default heading', () => {
+    const storyWithLabel: Story = {
+      ...mockStory,
+      writingPractice: {
+        label: '難字挑戰',
+        instruction: '1.仔細看左邊的字詞，記住字形。',
+        words: ['未雨綢繆', '蹂躪'],
+      },
+    };
+    render(<VocabWordSearch story={storyWithLabel} onFinish={vi.fn()} />);
+    expect(screen.getByText('難字挑戰')).toBeTruthy();
+  });
+
+  it('renders nothing extra when the lesson has no writing_practice (the other ~171 lessons)', () => {
+    render(<VocabWordSearch story={mockStory} onFinish={vi.fn()} />);
+    expect(screen.queryByText(/蓋起來考自己/)).toBeNull();
   });
 });

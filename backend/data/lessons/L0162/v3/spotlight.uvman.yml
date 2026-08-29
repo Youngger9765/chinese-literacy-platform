@@ -1,0 +1,148 @@
+lesson_uid: L0162
+version_id: v3
+section_no: 四
+spotlight:
+  label: 四、文言文聚光燈
+  strategy_name: 判斷句
+  strategy_type: classical_chinese
+  answer_carrier: '三種載體混用：紅色 ☑（w:sym Wingdings F0FE）2 個、
+
+    橘色手寫（解 rStyle 才看得到顏色）、以及文字層的字母 V（是／不是表格 7 格）。PDF p6~p8 可見。'
+  blocks:
+  - type: guide
+    text: 課文開頭介紹故事的主人翁出場時說「范式字巨卿，山陽金鄉人也」，這是一種很典型的文言文句子，像這樣的句型，我們稱它為判斷句。
+  - type: concept_box
+    text: 判斷句：用來判斷人、事、物是什麼或不是什麼的句子。
+  - type: multi
+    label: 輕練習
+    prompt: 以白話文舉例，底下三個句子裡有兩個是判斷句，請你勾選出來。
+    options:
+      1: 這個圖書館是一幢美麗的建築物
+      2: 那個長髮的孩子不是女生
+      3: 猛虎突然竄出把他弟弟攫走了
+    answers:
+    - 1
+    - 2
+  - type: guide
+    text: '發現了嗎？判斷句裡都會有「是」或「不是」來「判斷」事物的屬性或內涵。
+
+      那麼文言文要怎麼表示「是或不是」呢？'
+  - type: guide
+    text: '一、「者也」組合變化
+
+      1.「……者，……也。」這一種最常見。
+
+      例如：廉頗者，趙之良將也。(史記)
+
+      白話：廉頗是趙國的良將。
+
+      2.「……者，……。」只用「者」，不用「也」。
+
+      例如：佳兵者，不祥之器。（天工開物）
+
+      白話：精良的武器，是不祥的東西。
+
+      3.「……，……也。」不用「者」，只用「也」。
+
+      例如：儉，美德也。(儉訓)
+
+      白話：節儉是美德。
+
+      4.「……，……。」「者」、「也」都不用。
+
+      例如：劉備，天下梟雄。(三國志)
+
+      白話：劉備是天下的梟雄。'
+  - type: exercise
+    label: 輕練習
+    instruction: 依原文的意思，在白話的空格處填入適當的語詞，完成句子。
+    items:
+    - type: free_text
+      prompt: 原文：孝，德之本也。➡白話：孝順（　）道德的根本。
+      blanks:
+      - answer: 是
+    - type: free_text
+      prompt: 原文：信，國之寶也。➡白話：誠信（　）國家的珍寶。
+      blanks:
+      - answer: 是
+    prompt_note: 這兩題的「➡」是文字層真的字元（全檔 w:sym 沒有箭號符號），照字面抄。
+  - type: guide
+    text: '二、用「乃、為、即、蓋、非」表示
+
+      「乃、為、即、蓋」相當於白話的「是」；「非」相當於白話的「不是」。
+
+      例如：司馬懿乃魏之名將。(空城計)
+
+      白話：司馬懿是魏國的名將。
+
+      例如：非禮勿聽，非禮勿視。(論語)
+
+      白話：不是合禮的事不要聽，不是合禮的事不要看。'
+  - type: exercise
+    label: 輕練習
+    instruction: 請猜一猜：下面有幾個句子，句中加框的字是什麼意思，請在正確的欄位打勾。
+    note: 表格三欄（欄名照原稿）：是／不是／句子。答案是在「是」或「不是」欄印一個字母 V。
+    answer_carrier: 文字層的字母「V」（不是 ☑ 也不是橘字）；前兩列黑色、後五列橘色
+    items:
+    - type: free_text
+      prompt: 例1：司馬懿乃魏之名將
+      answer: 是
+    - type: free_text
+      prompt: 例2：無是非之心，非人也。
+      answer: 不是
+    - type: free_text
+      prompt: 人為刀俎，我為魚肉
+      answer: 是
+    - type: free_text
+      prompt: 人非聖賢，孰能無過
+      answer: 不是
+    - type: free_text
+      prompt: 少府徐仁，即丞相車千秋女婿也。
+      answer: 是
+    - type: free_text
+      prompt: 勝敗乃兵家常事。
+      answer: 是
+    - type: free_text
+      prompt: 庭下如積水空明，水中藻荇交橫──蓋竹柏影也。
+      answer: 是
+  - type: exercise
+    label: 統整練習
+    instruction: 下列有5個判斷句，各題的題幹都是文言文的白話翻譯，請依文意選出原來的文言文句子。
+    items:
+    - type: single
+      prompt: 1.結成三尺厚的冰層，不是一天的寒冷所能造成的。
+      options:
+        A: 冰凍三尺，非一日之寒
+        B: 冰凍三尺，一日之寒也
+      answer: A
+    - type: single
+      prompt: 2.我如果是司馬懿，一定不會退兵。
+      options:
+        A: 吾若為司馬懿，必不便退也
+        B: 吾若司馬懿為，必不便退也
+      answer: A
+    - type: single
+      prompt: 3.法律是天子要跟天下人民共同遵守的。
+      options:
+        A: 法者，天子所與天下公共也
+        B: 法與天子，所與天下公共也
+      answer: A
+      explanation: '第3題解析：
+
+        本題的主語是「法律」，不是「法律與天子」。'
+    - type: single
+      prompt: 4.只有來而沒有往，這不是符合禮節的行為。
+      options:
+        A: 來而不往，蓋禮也
+        B: 來而不往，非禮也
+      answer: B
+    - type: single
+      prompt: 5.弈秋是全國最擅長下棋的人。
+      options:
+        A: 弈秋通國者，善弈也
+        B: 弈秋，通國之善弈者也
+      answer: B
+      explanation: '第5題解析：
+
+        判斷句是說明「主語是什麼或不是什麼」的句子，因此「是/不是」之前就是主語的位置。本題的主語是「弈秋」，不是「弈秋通國」。'
+  slug: uvman

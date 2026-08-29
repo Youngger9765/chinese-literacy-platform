@@ -1,0 +1,112 @@
+lesson_uid: L0068
+generated_by: scripts/build_lesson_manifest.py
+note: 衍生檔，不是真相來源。sections 來自 lesson.yml 的 sections_present，module 歸屬來自 specs/modules/section-to-module.yml。改了那兩者要重產。
+sections:
+- 'no': 一
+  name: 閱讀聚光燈-自我提問策略2──跟著人物故事線問問題
+  module: spotlight
+  text_ref: yehu3
+  slug: u4whf
+  file: spotlight.u4whf.yml
+  pages:
+  - 1
+  - 2
+  - 3
+  - 4
+  pages_source: bracketed
+- 'no': 二
+  name: 文章重點表
+  module: keypoints
+  text_ref: yehu3
+  slug: xa37k
+  file: keypoints.xa37k.yml
+  pages:
+  - 4
+  - 5
+- 'no': 三
+  name: 語詞我最棒
+  module: vocab_definitions
+  text_ref: yehu3
+  slug: nfq49
+  file: vocab_definitions.nfq49.yml
+  pages:
+  - 5
+  - 6
+- 'no': 四
+  name: 語詞應用
+  module: vocab_application
+  text_ref: yehu3
+  slug: wf7we
+  file: vocab_application.wf7we.yml
+  pages:
+  - 6
+  - 7
+- 'no': 五
+  name: 閱讀理解
+  module: comprehension
+  text_ref: yehu3
+  slug: ejdkk
+  file: comprehension.ejdkk.yml
+  pages:
+  - 7
+  - 8
+- 'no': 六
+  name: 詞語複習
+  module: vocab_review
+  text_ref: yehu3
+  slug: adc93
+  file: vocab_review.adc93.yml
+  pages:
+  - 8
+- 'no': 七
+  name: 知識補給站
+  module: resources
+  text_ref: yehu3
+  slug: 7u7q7
+  file: resources.7u7q7.yml
+  pages:
+  - 8
+dispatch:
+- comprehension
+- keypoints
+- resources
+- spotlight
+- vocab_application
+- vocab_definitions
+- vocab_review
+produced:
+- comprehension
+- full_text_annotate
+- keypoints
+- resources
+- spotlight
+- vocab_application
+- vocab_definitions
+- vocab_review
+absent_from_source:
+- key_reading
+pdf_pages: 8
+dispatch_pages:
+  comprehension:
+  - 7
+  - 8
+  keypoints:
+  - 4
+  - 5
+  resources:
+  - 8
+  spotlight:
+  - 1
+  - 2
+  - 3
+  - 4
+  vocab_application:
+  - 6
+  - 7
+  vocab_definitions:
+  - 5
+  - 6
+  vocab_review:
+  - 8
+low_confidence_pages:
+- spotlight

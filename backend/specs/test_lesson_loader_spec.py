@@ -17,6 +17,7 @@ the known behavior.
 """
 
 import re
+import pytest
 import sys
 from pathlib import Path
 
@@ -49,10 +50,13 @@ class TestLessonCount:
             f"Check for unexpected L*.yml files."
         )
 
-    def test_layer2_lessons_present(self):
+    def test_every_lesson_comes_from_the_uid_tree(self):
+        """The two historical layers were merged on TITLE and are gone (#2683).
+        This pinned "Layer-2 is loaded"; the equivalent invariant now is that there
+        is exactly ONE source, so no lesson can be assembled from two of them."""
         lessons = build_all_lessons()
-        layer2 = [l for l in lessons if l.get("_layer") == 2]
-        assert len(layer2) >= 1, "No Layer-2 lessons loaded — _parsed_2026-05-01/ may be missing"
+        sources = {l.get("source") for l in lessons}
+        assert sources == {"uid_tree"}, f"unexpected lesson sources: {sources}"
 
 
 # ---------------------------------------------------------------------------
@@ -65,6 +69,14 @@ class TestRequiredFields:
         missing = [l.get("lesson_code") or l.get("id") for l in lessons if not l.get("title")]
         assert not missing, f"Lessons missing 'title': {missing[:5]}"
 
+    def test_all_lessons_have_a_uid(self):
+        """Replaces the `_layer` marker check: identity is the uid now, and the
+        layer a lesson came from is no longer a thing that exists."""
+        lessons = build_all_lessons()
+        missing = [l.get("id") for l in lessons if not l.get("lesson_uid")]
+        assert not missing, f"Lessons missing 'lesson_uid': {missing[:5]}"
+
+    @pytest.mark.skip(reason="`_layer` was a dual-layer merge artefact, removed in #2683")
     def test_all_lessons_have_layer_marker(self):
         lessons = build_all_lessons()
         missing = [l.get("title", "?")[:30] for l in lessons if "_layer" not in l]
@@ -113,9 +125,12 @@ class TestStrategyExercisePluralFallback:
         This test pins that most lessons (>= 100) DO have a truthy strategy_exercise.
         """
         lessons = build_all_lessons()
-        truthy_lessons = [l for l in lessons if l.get("strategy_exercise")]
-        assert len(truthy_lessons) >= 100, (
-            f"Expected >= 100 lessons with truthy strategy_exercise, got {len(truthy_lessons)}"
+        # The second-edition extraction produces the spotlight itself rather than a
+        # separate `strategy_exercise` field, so what this was protecting — "most
+        # lessons carry their strategy exercise" — is now measured on the spotlight.
+        with_spotlight = [l for l in lessons if (l.get("spotlight_v2") or {}).get("blocks")]
+        assert len(with_spotlight) >= 100, (
+            f"Expected >= 100 lessons with spotlight blocks, got {len(with_spotlight)}"
         )
 
 
@@ -235,6 +250,8 @@ class TestLessonCodeFormat:
     def test_available_grades_are_positive_integers(self):
         lessons = build_all_lessons()
         _, _, _, grades = build_indexes(lessons)
-        assert all(isinstance(g, int) and g > 0 for g in grades), (
-            f"available_grades must be positive ints, got: {grades}"
+        # Strings, not ints: the axis carries 文言文 and 品格教育 alongside the years.
+        assert all(isinstance(g, str) and g for g in grades), (
+            f"available_grades must be non-empty strings, got: {grades}"
         )
+        assert {"4", "文言文"} <= set(grades), grades

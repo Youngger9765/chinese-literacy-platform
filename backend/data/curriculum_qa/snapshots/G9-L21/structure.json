@@ -1,0 +1,234 @@
+{
+  "interaction_profile": {
+    "checkbox_count": 2,
+    "fill_blank_count": 9,
+    "inline_choice_count": 1,
+    "layout": "worksheet_table",
+    "mode": "mixed",
+    "primary_labels": [
+      "1",
+      "2",
+      "3",
+      "3"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
+  "rows": [
+    {
+      "interactive_type": "display",
+      "label": "焚而不毀的倫敦",
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "倫敦大轟炸(段1~3)",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "1",
+          "value": "1940年秋天，倫敦遭遇【　　　】轟炸機空襲，持續了許多個月。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "2",
+          "value": "轟炸後倫敦【　　　】、焦土遍野，滿是殘垣敗瓦。"
+        },
+        {
+          "blanks": [
+            {
+              "options": [
+                "眾多",
+                "稀少"
+              ]
+            }
+          ],
+          "interactive_type": "inline_choice",
+          "label": "3",
+          "value": "死亡人數【　　　】，可見轟炸造成嚴重傷亡。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "倫敦市民的反應(段4~9)",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "1",
+          "value": "轟炸期間，許多民眾盡自己所能幫助受難的人員。"
+        },
+        {
+          "interactive_type": "display",
+          "label": "2",
+          "value": "警報解除後，大家儘速清理修復，讓城市恢復運轉。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "3",
+          "value": "民眾以幽默的態度面對這場災難，英國人用【　　　】來形容這種面不改色的心理韌性。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "心理學家的發現(段10)",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "1",
+          "value": "大轟炸後，幸運存活者非但沒有嚇壞，反而產生了強烈的自信與平靜，這現象被稱為【　　　】。"
+        },
+        {
+          "interactive_type": "display",
+          "label": "2",
+          "value": "心理學家將大轟炸後的倫敦人民分成三類，分析大轟炸對他們的影響。"
+        },
+        {
+          "interactive_type": "checkbox",
+          "label": "2-(1)",
+          "options": [
+            "直接受害者",
+            "間接受害者",
+            "未受波及者"
+          ],
+          "select_mode": "multi",
+          "value": "哪幾類人較容易產生強烈的自信與平靜？【 請打勾，複選 】\n①直接受害者 ②間接受害者 ③未受波及者"
+        },
+        {
+          "interactive_type": "checkbox",
+          "label": "2-(2)",
+          "options": [
+            "直接受害者",
+            "間接受害者",
+            "未受波及者"
+          ],
+          "select_mode": "single",
+          "value": "哪一類人最為恐懼？【 請打勾，單選 】\n①直接受害者 ②間接受害者 ③未受波及者"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "2-(3)",
+          "value": "重災區的人們能「親身體驗」，能「參與救災」，因此獲得【　　　】，就能讓自己找回秩序與平衡。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "作者結論(段11~13)",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "1",
+          "value": "人類的恐懼，常不只來自危險本身，也來自對【　　　】的想像。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "2",
+          "value": "當人們真正【　　　】恐懼，恐懼就沒那麼可怕。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "3",
+          "value": "當危險變成日常，人們反而會見怪不怪，【　　　】。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "4",
+          "value": "大轟炸讓人看見了一種名為【　　　】的力量。"
+        }
+      ],
+      "value": ""
+    }
+  ],
+  "title": "焚而不毀的倫敦",
+  "worksheet_rows": [
+    {
+      "items": [
+        {
+          "label": "1",
+          "value": "1940年秋天，倫敦遭遇【　　　】轟炸機空襲，持續了許多個月。"
+        },
+        {
+          "label": "2",
+          "value": "轟炸後倫敦【　　　】、焦土遍野，滿是殘垣敗瓦。"
+        },
+        {
+          "label": "3",
+          "value": "死亡人數【　　　】，可見轟炸造成嚴重傷亡。\n①眾多 ②稀少"
+        }
+      ],
+      "kind": "section_block",
+      "section": "倫敦大轟炸(段1~3)"
+    },
+    {
+      "items": [
+        {
+          "label": "1",
+          "value": "轟炸期間，許多民眾盡自己所能幫助受難的人員。"
+        },
+        {
+          "label": "2",
+          "value": "警報解除後，大家儘速清理修復，讓城市恢復運轉。"
+        },
+        {
+          "label": "3",
+          "value": "民眾以幽默的態度面對這場災難，英國人用【　　　】來形容這種面不改色的心理韌性。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "倫敦市民的反應(段4~9)"
+    },
+    {
+      "items": [
+        {
+          "label": "1",
+          "value": "大轟炸後，幸運存活者非但沒有嚇壞，反而產生了強烈的自信與平靜，這現象被稱為【　　　】。"
+        },
+        {
+          "label": "2",
+          "value": "心理學家將大轟炸後的倫敦人民分成三類，分析大轟炸對他們的影響。"
+        },
+        {
+          "label": "2-(1)",
+          "value": "哪幾類人較容易產生強烈的自信與平靜？(請打勾，複選)\n①直接受害者 ②間接受害者 ③未受波及者"
+        },
+        {
+          "label": "2-(2)",
+          "value": "哪一類人最為恐懼？(請打勾，單選)\n①直接受害者 ②間接受害者 ③未受波及者"
+        },
+        {
+          "label": "2-(3)",
+          "value": "重災區的人們能「親身體驗」，能「參與救災」，因此獲得【　　　】，就能讓自己找回秩序與平衡。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "心理學家的發現(段10)"
+    },
+    {
+      "items": [
+        {
+          "label": "1",
+          "value": "人類的恐懼，常不只來自危險本身，也來自對【　　　】的想像。"
+        },
+        {
+          "label": "2",
+          "value": "當人們真正【　　　】恐懼，恐懼就沒那麼可怕。"
+        },
+        {
+          "label": "3",
+          "value": "當危險變成日常，人們反而會見怪不怪，【　　　】。"
+        },
+        {
+          "label": "4",
+          "value": "大轟炸讓人看見了一種名為【　　　】的力量。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "作者結論(段11~13)"
+    }
+  ]
+}

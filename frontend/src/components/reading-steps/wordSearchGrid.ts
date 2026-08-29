@@ -16,6 +16,12 @@ export interface PlacedWord {
   row: number;
   col: number;
   direction: Direction;
+  /**
+   * 教師版找字表的實際路徑（#2860）。自動生成的表只走水平/垂直，用 row+col+direction
+   * 就推得出格子；老師出的表有 30% 是斜線（實測全庫 445 條），推不出來，所以直接帶座標。
+   * 有 cells 時它是權威，row/col/direction 只留給既有消費端當起點用。
+   */
+  cells?: CellPos[];
 }
 
 export interface CellPos {
@@ -175,6 +181,11 @@ export function generateGrid(words: string[]): GeneratedGrid {
 
 export function wordCellKeys(placed: PlacedWord): Set<string> {
   const keys = new Set<string>();
+  if (placed.cells?.length) {
+    // 教師版路徑（#2860）—— 斜線只有這條路推得出來
+    for (const c of placed.cells) keys.add(c.row + ',' + c.col);
+    return keys;
+  }
   const chars = [...placed.word];
   for (let i = 0; i < chars.length; i++) {
     const r = placed.direction === 'vertical' ? placed.row + i : placed.row;
@@ -209,9 +220,205 @@ export function getCellsBetween(start: CellPos, end: CellPos): CellPos[] {
     for (let r = start.row; r !== end.row + step; r += step) {
       cells.push({ row: r, col: start.col });
     }
+  } else if (Math.abs(dr) === Math.abs(dc)) {
+    // 45° 斜線（#2860）。教師版的表 30% 是斜的，不支援等於那些詞選不起來。
+    // ⛔ 只認 |dr| === |dc| —— 放寬成任意兩點會讓學生亂拖也能中。
+    const sr = dr > 0 ? 1 : -1;
+    const sc = dc > 0 ? 1 : -1;
+    for (let i = 0; i <= Math.abs(dr); i++) {
+      cells.push({ row: start.row + i * sr, col: start.col + i * sc });
+    }
   } else {
-    // Diagonal not supported -- return just start
+    // 不成直線也不成 45° —— 不是合法選取
     cells.push(start);
   }
   return cells;
+}
+
+// ---------------------------------------------------------------------------
+// 教師版找字表（#2860）
+// ---------------------------------------------------------------------------
+
+/** 後端 `story.vocab_review` 的形狀。yml 的 grid 是一列一個字串、座標 1-based。 */
+export interface TeacherWordSearchSource {
+  /** 一列是字串或字元陣列，兩種都在服務中（實測 142 / 1） */
+  grid?: (string | string[])[] | null;
+  answer_paths?: { word?: string; cells?: number[][] }[] | null;
+  target_words?: string[] | null;
+}
+
+const SEARCH_DIRS: [number, number][] = [
+  [0, 1], [0, -1], [1, 0], [-1, 0], [1, 1], [1, -1], [-1, 1], [-1, -1],
+];
+
+/** 在格子裡找一個詞，回它的路徑；找不到回 null。 */
+function searchWord(grid: string[][], word: string): CellPos[] | null {
+  const chars = [...word];
+  if (chars.length === 0) return null;
+  for (let r = 0; r < grid.length; r++) {
+    for (let c = 0; c < grid[r].length; c++) {
+      if (grid[r][c] !== chars[0]) continue;
+      for (const [dr, dc] of SEARCH_DIRS) {
+        const path: CellPos[] = [];
+        let ok = true;
+        for (let i = 0; i < chars.length; i++) {
+          const rr = r + i * dr;
+          const cc = c + i * dc;
+          if (grid[rr]?.[cc] !== chars[i]) { ok = false; break; }
+          path.push({ row: rr, col: cc });
+        }
+        if (ok) return path;
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * 把老師出的那張表轉成畫面用的格子。
+ *
+ * 回 `null` 代表「這課沒有教師版的表」，呼叫端退回 generateGrid ——
+ * ⛔ 但退回時必須讓畫面標記出來（`grid_source`），不要靜默降級。
+ * `useTtsPlayback` 就是靜默降級成瀏覽器機器音，QA 聽到有聲音就當 AI 朗讀成功。
+ */
+export function buildTeacherGrid(
+  src: TeacherWordSearchSource | null | undefined
+): GeneratedGrid | null {
+  const rows = src?.grid;
+  if (!Array.isArray(rows) || rows.length === 0) return null;
+
+  // 一列可能是字串 '熬過沮疑…'（142 課）也可能是 ['憑','速',…]（1 課，L0003）。
+  // 只處理字串那種的話，list 那課會被 String() 變成 "['憑', '速'…" —— 畫面照樣畫得出來，
+  // 只是每一格都是引號跟逗號。這種錯不會有錯誤訊息。
+  const grid = rows.map((row) =>
+    Array.isArray(row) ? row.map((ch) => String(ch)) : [...String(row ?? '')]
+  );
+  const size = Math.max(grid.length, ...grid.map((r) => r.length));
+
+  const placedWords: PlacedWord[] = [];
+  const seen = new Set<string>();
+
+  const push = (word: string, cells: CellPos[]) => {
+    if (!word || seen.has(word) || cells.length === 0) return;
+    seen.add(word);
+    placedWords.push({
+      word,
+      row: cells[0].row,
+      col: cells[0].col,
+      direction: cells.length > 1 && cells[0].row === cells[1].row ? 'horizontal' : 'vertical',
+      cells,
+    });
+  };
+
+  for (const p of src?.answer_paths ?? []) {
+    const word = String(p?.word ?? '');
+    const cells = (p?.cells ?? [])
+      // yml 是 1-based
+      .map(([r, c]) => ({ row: Number(r) - 1, col: Number(c) - 1 }))
+      .filter(({ row, col }) => grid[row]?.[col] !== undefined);
+    // 座標對不上格子內容就不要用 —— 寧可讓它落到下面的搜尋，也不要放一條讀出來不是那個詞的路徑
+    if (cells.length === [...word].length &&
+        cells.map(({ row, col }) => grid[row][col]).join('') === word) {
+      push(word, cells);
+    }
+  }
+
+  // target_words 有、answer_paths 沒有的，用搜尋補（實測全庫可救 45 個）。
+  // 搜不到 = 格子裡真的沒有（實測 10 個，源頭 target_words 打錯字），
+  // ⛔ 那些不放進來 —— 放了學生會找到天荒地老。
+  for (const raw of src?.target_words ?? []) {
+    const word = String(raw ?? '').replace(/[，,\s]/g, '');
+    if (!word || seen.has(word)) continue;
+    const found = searchWord(grid, word);
+    if (found) push(word, found);
+  }
+
+  if (placedWords.length === 0) return null;
+  return { grid, placedWords, size };
+}
+
+// ---------------------------------------------------------------------------
+// 找到之後畫在哪（#2860）
+// ---------------------------------------------------------------------------
+
+export interface OverlayRect {
+  key: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+/**
+ * 「找到了」的紅框。回一到多塊矩形。
+ *
+ * 自動生成的格子只有水平／垂直，一整條矩形就夠。教師版的表有 30% 是斜線
+ * （實測 445/1490，139/143 課至少各有一條），而矩形畫不出斜線 ——
+ * 靠 `direction` 推的話會畫成一根從第一格往下的直條，蓋到不相干的格子、
+ * 也搆不到真正的最後一個字。學生會看到「紅框跟我剛剛拖的不一樣」。
+ *
+ * ⛔ 不要為了斜線把水平／垂直也拆成逐格 —— 那會在每個字之間留下邊框接縫。
+ */
+export function overlayRects(placed: PlacedWord, cellSizePx: number): OverlayRect[] {
+  const cells = placed.cells;
+  const straight =
+    !cells?.length ||
+    cells.every((c) => c.row === cells[0].row) ||
+    cells.every((c) => c.col === cells[0].col);
+
+  if (straight) {
+    const len = [...placed.word].length;
+    const first = cells?.length ? cells[0] : { row: placed.row, col: placed.col };
+    const horizontal = cells?.length
+      ? cells.length > 1 && cells.every((c) => c.row === cells[0].row)
+      : placed.direction === 'horizontal';
+    return [{
+      key: placed.word,
+      x: first.col * cellSizePx,
+      y: first.row * cellSizePx,
+      w: horizontal ? len * cellSizePx : cellSizePx,
+      h: horizontal ? cellSizePx : len * cellSizePx,
+    }];
+  }
+
+  return cells.map((c) => ({
+    key: `${placed.word}-${c.row},${c.col}`,
+    x: c.col * cellSizePx,
+    y: c.row * cellSizePx,
+    w: cellSizePx,
+    h: cellSizePx,
+  }));
+}
+
+/**
+ * 前 `upToIndex + 1` 個字所在的格子（教學動畫逐字點亮用）。
+ *
+ * 跟 `overlayRects` 同一個病根：靠 `direction` 推，斜線就點錯格子。
+ */
+export function cellsAlongWord(placed: PlacedWord, upToIndex: number): Set<string> {
+  const keys = new Set<string>();
+  if (placed.cells?.length) {
+    for (let i = 0; i <= upToIndex && i < placed.cells.length; i++) {
+      keys.add(`${placed.cells[i].row},${placed.cells[i].col}`);
+    }
+    return keys;
+  }
+  const chars = [...placed.word];
+  for (let i = 0; i <= upToIndex && i < chars.length; i++) {
+    const r = placed.direction === 'vertical' ? placed.row + i : placed.row;
+    const c = placed.direction === 'horizontal' ? placed.col + i : placed.col;
+    keys.add(`${r},${c}`);
+  }
+  return keys;
+}
+
+/** 路徑上的第 `index` 格。有 `cells` 就照它走，否則沿 direction 推。 */
+export function cellAt(placed: PlacedWord, index: number): CellPos {
+  if (placed.cells?.length) {
+    return placed.cells[Math.min(index, placed.cells.length - 1)];
+  }
+  return {
+    row: placed.direction === 'vertical' ? placed.row + index : placed.row,
+    col: placed.direction === 'horizontal' ? placed.col + index : placed.col,
+  };
 }

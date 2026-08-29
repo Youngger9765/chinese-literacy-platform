@@ -1,0 +1,13 @@
+{
+  "lesson_uid": "L0125",
+  "pdf_pages": 9,
+  "pages_read": 9,
+  "wall_clock_seconds": null,
+  "read_calls": 2,
+  "gate_failures": {
+    "schema": 0,
+    "contract": 0,
+    "verbatim": 0
+  },
+  "retries": 0
+}

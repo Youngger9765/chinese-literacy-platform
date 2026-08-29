@@ -1,0 +1,32 @@
+lesson_uid: L0118
+version_id: v3
+level: 8
+genre: 記敘說理文
+strategy: 寫作手法──用故事說道理
+課文作者: 曾世杰
+學習單: 陳淑麗
+lesson_no: 20
+series: 一般
+lesson_seq: 8200
+intro: 這篇文章講述一位罹患重病的林奶奶，在病痛與憂鬱中感到絕望，甚至萌生放棄生命的念頭。家人們雖然關心，卻不知如何是好。一位法師來到病床邊，為林奶奶講述了一個關於樵夫在懸崖邊的奇特故事。故事中，樵夫面臨生死危機，卻意外發現了一顆懸崖邊的草莓。法師藉由這個故事，引導林奶奶思考生命中的苦難與美好，以及在無力改變的困境中，如何去感受和珍惜當下仍然存在的溫暖與希望。
+notes:
+  總表_議題: ''
+strategy_explained: 這一課我們要練習的是，用一個好聽的故事來告訴大家一個道理，你看林奶奶因為生病很痛苦，法師就講了一個樵夫在懸崖邊發現草莓的故事，用這個故事讓林奶奶知道，就算遇到困難，也要試著在裡面找到小小的美好和希望，讀的時候，你也可以想想故事裡有哪些細節讓你印象深刻，以及這些細節是如何幫助法師講出道理的
+strategy_sources:
+  worksheet: 寫作手法──用故事說道理
+  master_sheet: null
+  previous: 寫作手法──用故事說道理
+source_profile:
+  class: standard
+  note: 單一錨點 + 有計數欄 + idx 唯一 —— 走主路徑
+  has_key_reading_section: true
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: null
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 1
+  has_counter_column: true
+  body_in_tables: true
+  invisible_chars_docx_only: false
+  profiled: '2026-08-24'

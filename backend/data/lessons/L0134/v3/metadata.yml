@@ -1,0 +1,40 @@
+lesson_uid: L0134
+version_id: v3
+level: 9
+genre: 說明文
+strategy: 圖文整合閱讀策略——先讀文、再看圖、整合文圖
+課文作者: 曾世杰
+學習單: 陳淑麗
+lesson_no: 13
+series: 一般
+lesson_seq: 9130
+intro: 這篇文章透過四張圖，帶領大家一起探討近年來備受關注的「地球暖化」現象。文章首先呈現了地球平均氣溫長期的變化趨勢，並說明了「溫室效應假說」如何解釋氣溫升高的原因，也就是人類活動排放過多二氧化碳，如同給地球穿上厚外套。接著，文章進一步連結了二氧化碳排放量與全球氣溫上升的關係。然而，文章也提出了另一種觀點，從更長遠的時間尺度來看地球的自然溫度變化，引導讀者思考目前的暖化現象是否全然是人類活動所造成。透過這些圖表和不同的觀點，引導我們一同思考地球暖化的原因。
+notes:
+  總表_課名: 從四張圖，看地球暖化的現象
+  總表_文體: 說明文
+  總表_類型: 科學
+  總表_議題: null
+  總表_聚光燈策略: 圖文整合閱讀策略
+  總表_第六大題標題: 圖文整合閱讀策略
+  總表_文本類型: 單
+  總表_語詞_原樣:
+  - 無
+strategy_explained: 這篇說明文用四張圖帶你練習「看懂圖和文字的關係」，因為它把地球暖化的趨勢圖、溫室效應的比喻，還有二氧化碳排放量跟氣溫的關聯都跟文字結合在一起，所以讀的時候，你可以試著邊看圖邊想文字說了什麼，然後想想圖和文字的說明是不是讓你更清楚「地球暖化」這件事呢
+strategy_sources:
+  worksheet: 圖文整合閱讀策略
+  master_sheet: null
+  previous: 圖文整合閱讀策略——先讀文、再看圖、整合文圖
+source_profile:
+  class: no_section
+  note: 學習單根本沒有「念順順」這一節 —— 不是抽不到，是本來就沒有
+  has_key_reading_section: false
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: null
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 4
+  has_counter_column: false
+  body_in_tables: true
+  invisible_chars_docx_only: false
+  profiled: '2026-08-24'

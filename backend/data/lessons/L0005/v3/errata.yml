@@ -1,0 +1,22 @@
+lesson_uid: L0005
+version_id: v3
+notes:
+  errata:
+  - id: E1
+    section: 一 讀全文-做記號
+    locator: 勾選清單第 1 項句末
+    source: □ 請在不太了解的字、詞或句做記號
+    corrected: □ 請在不太了解的字、詞或句做記號。
+    kind: 漏標點
+    why: 同組第 2 項與其他課（L0001／L0004）此句皆以句號結尾，本課第 1 項漏了句號
+    confidence: high
+    evidence: document.xml 與 PDF p1 一致
+  - id: E2
+    section: 五 閱讀聚光燈．二、從故事發展（表格第 4 列）
+    locator: 「關鍵線索」欄
+    source: 更大聲回嗆：「….，我說個話也不行了嗎？」
+    corrected: 更大聲回嗆：「……我說個話也不行了嗎？」
+    kind: 標點誤用
+    why: 省略號誤打成三個半形句點加一個頓逗；同表其他列用的是「...」
+    confidence: medium
+    evidence: document.xml 與 PDF p6 一致

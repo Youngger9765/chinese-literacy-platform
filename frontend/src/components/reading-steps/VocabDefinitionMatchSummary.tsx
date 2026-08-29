@@ -2,13 +2,30 @@
  * SummaryScreen — Score + per-question results for VocabDefinitionMatch (#1846)
  *
  * Extracted from VocabDefinitionMatch.tsx. Stateless UI component.
+ *
+ * #2773: classification switched from `correct` (the LATEST attempt —
+ * overwritten every time a student retries a wrong pick) to `firstTryCorrect`
+ * (write-once, set on the item's first answer and never touched again). Under
+ * the old `correct`-based logic, this screen could NEVER show a wrong item or
+ * the 重做錯題 button — a student always retries until right, so `correct` is
+ * always eventually true for everything, meaning "全部答對！" was shown
+ * unconditionally regardless of how many first-try mistakes were made.
+ * Verified live on staging before this fix: 2 deliberate first-try misses out
+ * of 11 questions still rendered "答對 11 / 11 題" with zero ✗ cards.
+ *
+ * Per-item wording now goes through the shared `WrongAnswerReviewList`
+ * (also #2773) so it matches vocab-application's FillInBlankExercise summary
+ * ("你選了 X → 正確：Y") instead of this screen's previous, differently-worded
+ * "正確答案：X | 你的答案：Y" layout.
  */
 import React from 'react';
 import { VocabItem } from '../../types';
 import ToolboxCompletionActions from '../tools/ToolboxCompletionActions';
+import { WrongAnswerReviewList, type WrongAnswerReviewItem } from '../learning/WrongAnswerReviewList';
+import NextStepFooter from '../learning/NextStepFooter';
+import StepActionBar from '../learning/StepActionBar';
 import {
   getDragDropAttemptFeedback,
-  getDragDropAttemptTone,
   AnswerRecord,
   InteractionMode,
 } from './vocabDefinitionMatchLogic';
@@ -23,6 +40,12 @@ export interface SummaryScreenProps {
   onFinish: () => void;
 }
 
+/** firstTryCorrect is the authority; fall back to `correct` for records that
+ * predate the field (persisted progress saved before this fix landed). */
+function firstTryOf(a: AnswerRecord): boolean {
+  return (a.firstTryCorrect ?? a.correct) === true;
+}
+
 export function SummaryScreen({
   inToolbox,
   vocab,
@@ -32,74 +55,50 @@ export function SummaryScreen({
   onRetryAll,
   onFinish,
 }: SummaryScreenProps) {
-  const mcCorrect = mcAnswers.filter((a) => a.correct).length;
+  const mcCorrect = mcAnswers.filter(firstTryOf).length;
   const mcTotal = mcAnswers.length;
-  const dragDropCorrect = dragDropAnswers.filter((a) => a.correct).length;
+  const dragDropCorrect = dragDropAnswers.filter(firstTryOf).length;
   const dragDropTotal = dragDropAnswers.length;
   const correctCount = mcCorrect + dragDropCorrect;
   const total = mcTotal + dragDropTotal;
-  const allCorrect = correctCount === total;
+  const allCorrect = total > 0 && correctCount === total;
   const pct = total > 0 ? Math.round((correctCount / total) * 100) : 0;
   void pct; // used by parent for scoring, kept for clarity
-  const mcWrongAnswers = mcAnswers.filter((a) => !a.correct);
-  const dragDropWrongAnswers = dragDropAnswers.filter((a) => !a.correct);
+  const mcWrongAnswers = mcAnswers.filter((a) => !firstTryOf(a));
+  const dragDropWrongAnswers = dragDropAnswers.filter((a) => !firstTryOf(a));
 
-  const renderResultSection = (title: string, answers: AnswerRecord[], mode: InteractionMode) => (
-    <div className="flex flex-col gap-3 mb-6">
-      <h4 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-1">
-        {title}
-      </h4>
-      {answers.map((ans, idx) => {
-        const item = vocab[ans.defIndex];
-        const isCorrect = ans.correct;
-        const studentWord =
-          ans.answeredWordIdx !== null ? vocab[ans.answeredWordIdx]?.word : '—';
-        const wrongAttempts = ans.wrongAttempts ?? 0;
-        const feedback = mode === 'drag-drop'
-          ? getDragDropAttemptFeedback(wrongAttempts)
-          : null;
-        const dragDropTone = getDragDropAttemptTone(wrongAttempts);
-        const cardClass = mode === 'drag-drop'
-          ? dragDropTone.cardClass
-          : (isCorrect ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-200');
-        const badgeClass = mode === 'drag-drop'
-          ? dragDropTone.badgeClass
-          : (isCorrect ? 'bg-emerald-500' : 'bg-red-500');
+  const renderResultSection = (title: string, answers: AnswerRecord[], mode: InteractionMode) => {
+    const items: WrongAnswerReviewItem[] = answers.map((ans) => {
+      const item = vocab[ans.defIndex];
+      const isFirstTryCorrect = firstTryOf(ans);
+      // firstTryAnsweredWordIdx (not answeredWordIdx, which is the LATEST
+      // attempt) — using answeredWordIdx here showed the CORRECT word on
+      // both sides of "你選了 X → 正確：Y" once a wrong-then-correct retry
+      // finished. Falls back to answeredWordIdx for records that predate
+      // the field (persisted progress saved before this fix).
+      const wrongWordIdx = ans.firstTryAnsweredWordIdx ?? ans.answeredWordIdx;
+      const studentWord = !isFirstTryCorrect && wrongWordIdx !== null ? vocab[wrongWordIdx]?.word ?? null : null;
+      const wrongAttempts = ans.wrongAttempts ?? 0;
+      const extraNote = mode === 'drag-drop' ? getDragDropAttemptFeedback(wrongAttempts) : null;
+      return {
+        id: ans.defIndex,
+        promptText: item?.definition,
+        correct: isFirstTryCorrect,
+        correctAnswerText: item?.word ?? '',
+        studentAnswerText: studentWord,
+        extraNote: extraNote ?? undefined,
+      };
+    });
 
-        return (
-          <div
-            key={`${title}-${idx}`}
-            className={`rounded-xl border-2 px-4 py-3 flex items-start gap-3 ${cardClass}`}
-          >
-            <span
-              className={`mt-0.5 flex-shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold text-white ${badgeClass}`}
-            >
-              {isCorrect ? '✓' : '✗'}
-            </span>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm text-gray-500 leading-snug mb-1">
-                {item?.definition}
-              </p>
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-                <span className="text-gray-500">正確答案：</span>
-                <span className="font-bold text-gray-800">{item?.word}</span>
-                {!isCorrect && (
-                  <>
-                    <span className="text-gray-400">|</span>
-                    <span className="text-gray-500">你的答案：</span>
-                    <span className="font-bold text-red-600">{studentWord}</span>
-                  </>
-                )}
-              </div>
-              {feedback && (
-                <p className="mt-1 text-xs font-semibold text-amber-700">{feedback}</p>
-              )}
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
+    return (
+      <div className="flex flex-col gap-3 mb-6">
+        <h4 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-1">
+          {title}
+        </h4>
+        <WrongAnswerReviewList items={items} revealed />
+      </div>
+    );
+  };
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 pb-48 animate-fade-in">
@@ -122,9 +121,7 @@ export function SummaryScreen({
       {renderResultSection('第二關：拖拉配對', dragDropAnswers, 'drag-drop')}
 
       {/* Fixed bottom CTA */}
-      <div className="fixed bottom-16 left-0 w-full px-6 pb-8 pt-6 pointer-events-none z-20"
-           style={{ background: 'linear-gradient(to top, #FBF6EE 60%, transparent)' }}>
-        <div className="max-w-md mx-auto pointer-events-auto flex flex-col gap-2">
+      <StepActionBar layout="stack">
           {inToolbox ? (
             <ToolboxCompletionActions onRetry={onRetryAll} className="w-full" />
           ) : (
@@ -140,16 +137,10 @@ export function SummaryScreen({
                 className="w-full h-12 rounded-full font-headline font-bold text-base text-on-surface-variant bg-surface-container-high hover:bg-surface-container-highest active:scale-[0.98] transition-all">
                 全部重做
               </button>
-              <button onClick={onFinish}
-                className="w-full h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-                style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}>
-                繼續下一步
-                <span className="material-symbols-outlined text-xl">arrow_forward</span>
-              </button>
+              <NextStepFooter onNext={onFinish} />
             </>
           )}
-        </div>
-      </div>
+      </StepActionBar>
     </div>
   );
 }

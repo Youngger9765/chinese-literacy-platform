@@ -1,0 +1,19 @@
+{
+  "lesson_uid": "L0098",
+  "catalog_slot": "G7-L29",
+  "pdf_pages": 9,
+  "pages_read": 9,
+  "wall_clock_seconds": null,
+  "read_calls": 1,
+  "gate_failures": {
+    "verbatim": 0,
+    "coverage": 0,
+    "block_type": 0,
+    "word_search": 0,
+    "traditional_only": 0,
+    "keypoints_shape": 0,
+    "orphan_key": 0
+  },
+  "retries": 0,
+  "notes": "三載體全查：☑ 11 個（重點表 4＋聚光燈 7）；roundRect 全文 11、找字表格內 11 = 11 條路徑；w:bdr 非 auto 0 個；w:vanish 0 個。另有一個 w:sym 『Wingdings 2』F045（☛ 手指），用在「小叮嚀」開頭，不是勾選 —— 別把它算進答案。🔴 課文最前面有**三段未編號的開場情境**（三個微歧視場景），段號欄的「一」從第四段才開始。收在 body.preface；若當成編號段落會變 10 段，念順順的 ☞（第 6 段）就會指錯。字數兩端精準：第 6 段 195 = 印出的第 7 個數字，＋第 7 段 211 = 406 = 最後一個。span=第6~7段。🔴 三份語詞清單三種內容（原稿本身不一致，非抽錯）：總表 10 個有「滴水穿石」無「偏見」；學習單語詞框 10 個相反；第八大題找字灰框 11 個是兩者聯集。第三、四大題都跟語詞框一致。errata E1：語詞框字串結尾是「…日積月累、」——末尾多一個懸空頓號沒有接詞，研判漏列「滴水穿石」；只把頓號改成句號，**未自行補那個語詞**（補進去等於替作者決定內容）。"
+}

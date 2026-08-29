@@ -1,0 +1,153 @@
+lesson_uid: L0103
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 雲集
+  - 脫穎而出
+  - 虜獲
+  - 坐困愁城
+  - 靈機一動
+  - 兩全其美
+  - 口碑
+  - 籌措
+  - 桂冠
+  - 大為嘆服
+  - 層出不窮
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 雲集當旅夢極口品嚐起
+  - 隻合紅柚子碑德卑費心
+  - 季茶脱果醬幽靈機一動
+  - 兩撫拖穎反城兩車威念
+  - 壽全桑循而全部大士層
+  - 錯疲其惡期出因為忌出
+  - 符憊醬美盒環坐嘆氣不
+  - 廚的桂冠甜蜜困服籌窮
+  - 餘心讚不絕口愁裝措錯
+  - 桶虜獲得蕾味城飾詞誤
+  answers_are_graphical: true
+  answers_printed: true
+  answer_paths:
+  - word: 雲集
+    cells:
+    - - 1
+      - 1
+    - - 1
+      - 2
+    direction: horizontal
+  - word: 口碑
+    cells:
+    - - 1
+      - 7
+    - - 2
+      - 6
+    direction: diagonal_down_left
+  - word: 靈機一動
+    cells:
+    - - 3
+      - 7
+    - - 3
+      - 8
+    - - 3
+      - 9
+    - - 3
+      - 10
+    direction: horizontal
+  - word: 脱穎而出
+    cells:
+    - - 3
+      - 3
+    - - 4
+      - 4
+    - - 5
+      - 5
+    - - 6
+      - 6
+    direction: diagonal_down_right
+  - word: 兩全其美
+    cells:
+    - - 4
+      - 1
+    - - 5
+      - 2
+    - - 6
+      - 3
+    - - 7
+      - 4
+    direction: diagonal_down_right
+  - word: 大為嘆服
+    cells:
+    - - 5
+      - 8
+    - - 6
+      - 8
+    - - 7
+      - 8
+    - - 8
+      - 8
+    direction: vertical
+  - word: 層出不窮
+    cells:
+    - - 5
+      - 10
+    - - 6
+      - 10
+    - - 7
+      - 10
+    - - 8
+      - 10
+    direction: vertical
+  - word: 桂冠
+    cells:
+    - - 8
+      - 3
+    - - 8
+      - 4
+    direction: horizontal
+  - word: 籌措
+    cells:
+    - - 8
+      - 9
+    - - 9
+      - 9
+    direction: vertical
+  - word: 坐困愁城
+    cells:
+    - - 7
+      - 7
+    - - 8
+      - 7
+    - - 9
+      - 7
+    - - 10
+      - 7
+    direction: vertical
+  - word: 虜獲
+    cells:
+    - - 10
+      - 2
+    - - 10
+      - 3
+    direction: horizontal
+  notes:
+    grid: 第 3 列第 3 欄印的是異體字「脱」（U+8131），見 source_errata E1。
+    intended_word: 「脱穎而出」那一條的目標語詞是「脫穎而出」，格子第 3 列第 3 欄印成異體字「脱」（見 source_errata E1）。word
+      必須跟格子拼得出來的字一致，否則座標門會判 FAIL。
+    answer_paths: '11 條路徑對 11 個目標語詞，逐格取字皆能拼回。
+
+      ✅ 幾何交叉驗證：全檔 `roundRect` 20 個，但**先把範圍限在找字那一頁**（skill 的要求）——
+
+      另外 9 個分別是五 聚光燈流程圖的 7 個方塊、泰國故事的外框、七 閱讀理解第 4 題的甲~戊框。
+
+      落在找字格子上的正好 **11** 個，等於路徑數，紙外殘留 0 個。
+
+      ⚠️ 干擾字：第 4 列第 7 欄與第 5 列第 6 欄各有一個「兩」「全」、第 6 列第 6 欄的「出」、
+
+      第 9 列第 6 欄的「口」，都接不出完整語詞。'
+  slug: t6j9k
+  text_ref: uwr7r

@@ -1,0 +1,218 @@
+{
+  "$id": "lingoleap/module/metadata",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "從 175 份實測 yml 長出來，不是手寫的。required = 每一課都有的欄位（少了就是回歸）；properties 列出所有已觀測欄位，配合 additionalProperties: false —— 現況全過，任何新發明的欄位名會紅。",
+  "properties": {
+    "_header_box": {
+      "type": "object",
+      "x-seen-in": "1/175"
+    },
+    "_第一頁右上標題": {
+      "type": "object",
+      "x-seen-in": "1/175"
+    },
+    "genre": {
+      "type": "string",
+      "x-seen-in": "170/175"
+    },
+    "genre_detail": {
+      "type": "string",
+      "x-seen-in": "1/175"
+    },
+    "genre_printed": {
+      "type": "string",
+      "x-seen-in": "3/175"
+    },
+    "header_badge": {
+      "type": "string",
+      "x-seen-in": "1/175"
+    },
+    "header_target": {
+      "type": "string",
+      "x-seen-in": "7/175"
+    },
+    "intro": {
+      "type": "string",
+      "x-seen-in": "174/175"
+    },
+    "lesson_no": {
+      "type": "integer",
+      "x-seen-in": "175/175"
+    },
+    "lesson_number": {
+      "type": "string",
+      "x-seen-in": "1/175"
+    },
+    "lesson_seq": {
+      "type": "integer",
+      "x-seen-in": "175/175"
+    },
+    "level": {
+      "type": "integer",
+      "x-seen-in": "169/175"
+    },
+    "master_sheet_vocabulary": {
+      "type": "array",
+      "x-seen-in": "1/175"
+    },
+    "material_form": {
+      "type": "string",
+      "x-seen-in": "2/175"
+    },
+    "note_layout": {
+      "type": "string",
+      "x-seen-in": "2/175"
+    },
+    "note_議題_總表": {
+      "type": "string",
+      "x-seen-in": "1/175"
+    },
+    "notes": {
+      "type": "object",
+      "x-seen-in": "143/175"
+    },
+    "pages_from_docprops": {
+      "type": "integer",
+      "x-seen-in": "1/175"
+    },
+    "pages_read": {
+      "type": "integer",
+      "x-seen-in": "28/175"
+    },
+    "parts": {
+      "type": "array",
+      "x-seen-in": "2/175"
+    },
+    "series": {
+      "type": "string",
+      "x-seen-in": "175/175"
+    },
+    "source_profile": {
+      "type": "object",
+      "x-seen-in": "175/175"
+    },
+    "strategy": {
+      "type": "string",
+      "x-seen-in": "173/175"
+    },
+    "strategy_explained": {
+      "type": "string",
+      "x-seen-in": "160/175"
+    },
+    "strategy_label_printed": {
+      "type": "string",
+      "x-seen-in": "1/175"
+    },
+    "strategy_sources": {
+      "type": "object",
+      "x-seen-in": "173/175"
+    },
+    "text_count": {
+      "type": "integer",
+      "x-seen-in": "1/175"
+    },
+    "text_type": {
+      "type": "string",
+      "x-seen-in": "2/175"
+    },
+    "title_printed": {
+      "type": "string",
+      "x-seen-in": "1/175"
+    },
+    "title_printed_on_worksheet": {
+      "type": "string",
+      "x-seen-in": "2/175"
+    },
+    "topic_line": {
+      "type": "string",
+      "x-seen-in": "2/175"
+    },
+    "作者欄原樣": {
+      "type": "string",
+      "x-seen-in": "2/175"
+    },
+    "出處": {
+      "type": "string",
+      "x-seen-in": "5/175"
+    },
+    "原文作者": {
+      "type": "string",
+      "x-seen-in": "2/175"
+    },
+    "學習單": {
+      "type": "string",
+      "x-seen-in": "151/175"
+    },
+    "學習單_前半": {
+      "type": "string",
+      "x-seen-in": "1/175"
+    },
+    "學習單_後半": {
+      "type": "string",
+      "x-seen-in": "3/175"
+    },
+    "文言文類型": {
+      "type": "string",
+      "x-seen-in": "3/175"
+    },
+    "課文": {
+      "type": "string",
+      "x-seen-in": "4/175"
+    },
+    "課文作者": {
+      "type": "string",
+      "x-seen-in": "137/175"
+    },
+    "課文出處": {
+      "type": "string",
+      "x-seen-in": "3/175"
+    },
+    "課文學習單": {
+      "type": "string",
+      "x-seen-in": "18/175"
+    },
+    "課文學習單合署": {
+      "type": "boolean",
+      "x-seen-in": "1/175"
+    },
+    "課文學習單同一人": {
+      "type": "boolean",
+      "x-seen-in": "2/175"
+    },
+    "課文與學習單": {
+      "type": "string",
+      "x-seen-in": "1/175"
+    },
+    "議題": {
+      "type": "null",
+      "x-seen-in": "1/175"
+    },
+    "閱讀聚光燈_前半": {
+      "type": "string",
+      "x-seen-in": "2/175"
+    }
+  },
+  "required": [
+    "lesson_no",
+    "lesson_seq",
+    "series",
+    "source_profile"
+  ],
+  "title": "metadata module payload",
+  "type": "object",
+  "x-core-90pct": [
+    "genre",
+    "intro",
+    "lesson_no",
+    "lesson_seq",
+    "level",
+    "series",
+    "source_profile",
+    "strategy",
+    "strategy_explained",
+    "strategy_sources"
+  ],
+  "x-enforcement": "error",
+  "x-lessons-observed": 175
+}

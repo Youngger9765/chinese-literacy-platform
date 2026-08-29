@@ -10,8 +10,8 @@ rewrite in prod/staging, or the backend's own Cloud Run URL directly in
 preview/local dev), never to storage.googleapis.com.
 
 Security posture:
-- Only 3 allow-listed top-level prefixes are servable (lessons-images/, stories/,
-  worksheets/) — these are exactly the prefixes referenced by frontend consts and
+- Only allow-listed top-level prefixes are servable (lessons-images/, stories/,
+  worksheets/, demo-reading/) — these are exactly the prefixes referenced by frontend consts and
   backend-generated URLs. Legacy prefixes not consumed by the app (pr-screenshots/,
   qa/) are NOT proxied — no general-purpose GCS object reader.
 - Strict allow-list regex on the full decoded path before it ever reaches GCS,
@@ -23,6 +23,7 @@ Security posture:
 """
 import logging
 import re
+from pathlib import Path
 from functools import lru_cache
 
 from fastapi import APIRouter, HTTPException
@@ -37,7 +38,7 @@ router = APIRouter(prefix="/assets", tags=["assets"])
 # Keep in sync with frontend `ASSET_BASE` consumers (assetBase.ts) and the
 # backend URL builders in lesson_layer_loaders.py — this list IS the public
 # content surface of the bucket.
-_ALLOWED_PREFIXES = ("lessons-images/", "stories/", "worksheets/")
+_ALLOWED_PREFIXES = ("lessons-images/", "stories/", "worksheets/", "demo-reading/")
 
 # Allow-list charset for the decoded object path. FastAPI's `{path:path}`
 # converter URL-decodes the raw request path once before this ever runs, so a
@@ -59,6 +60,7 @@ _CONTENT_TYPES = {
     ".jpg": "image/jpeg",
     ".jpeg": "image/jpeg",
     ".png": "image/png",
+    ".mp3": "audio/mpeg",
     ".pdf": "application/pdf",
     ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 }
@@ -105,6 +107,56 @@ def _content_type_for(object_path: str) -> str:
         return _DEFAULT_CONTENT_TYPE
     ext = "." + object_path.rsplit(".", 1)[-1].lower()
     return _CONTENT_TYPES.get(ext, _DEFAULT_CONTENT_TYPE)
+
+
+_LESSONS_ROOT = Path(__file__).resolve().parent.parent.parent / "data" / "lessons"
+_UID_RE = re.compile(r"^L\d{4}$")
+
+
+@router.get("/lesson/{lesson_uid}/{filename}")
+def get_lesson_asset(lesson_uid: str, filename: str) -> Response:
+    """Serve a file from the uid tree: cover images, figures, anything shipped with
+    the lesson.
+
+    These live in the repo rather than in GCS because they are part of the lesson —
+    the first edition kept covers in a bucket keyed by lesson code, and when the
+    codes were renumbered every image pointed at a different story. Filing them under
+    the uid removes that class of mistake entirely.
+
+    Registered ABOVE the catch-all GCS proxy so `/assets/lesson/...` resolves here;
+    everything else still goes to the bucket.
+    """
+    if not _UID_RE.match(lesson_uid) or "/" in filename or ".." in filename:
+        raise HTTPException(status_code=404, detail="Not found")
+
+    uid_dir = _LESSONS_ROOT / lesson_uid
+    if not uid_dir.is_dir():
+        raise HTTPException(status_code=404, detail="Not found")
+    versions = sorted(
+        (c for c in uid_dir.iterdir() if c.is_dir() and c.name.startswith("v")),
+        key=lambda c: c.name,
+    )
+    if not versions:
+        raise HTTPException(status_code=404, detail="Not found")
+
+    # 從最新版本往回找第一個有這個檔的版本。只看 `versions[-1]` 的話，
+    # 二修沒搬過去的資產（175 張封面全在 v2/assets/）一律 404 ——
+    # 而它們是課的一部分，不是版本的一部分。
+    path = next(
+        (v / "assets" / filename for v in reversed(versions)
+         if (v / "assets" / filename).is_file()),
+        versions[-1] / "assets" / filename,   # 都沒有時維持原本的 404 路徑
+    )
+    # resolve() before the containment check: a symlink inside assets/ would
+    # otherwise pass the string checks above and read outside the tree.
+    if not path.resolve().is_file() or _LESSONS_ROOT.resolve() not in path.resolve().parents:
+        raise HTTPException(status_code=404, detail="Not found")
+
+    return Response(
+        content=path.read_bytes(),
+        media_type=_content_type_for(filename),
+        headers={"Cache-Control": _CACHE_CONTROL},
+    )
 
 
 @router.get("/{object_path:path}")

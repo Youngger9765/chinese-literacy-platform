@@ -11,6 +11,8 @@
  */
 
 import { useCallback, useEffect, useRef } from 'react';
+import { stepPath } from '../config/stepPath';
+import useCurrentStepId from './useCurrentStepId';
 import type { Dispatch, SetStateAction } from 'react';
 import type { NavigateFunction } from 'react-router-dom';
 import type { AuthUser } from '../services/authApi';
@@ -19,19 +21,20 @@ import { submitAssignment } from '../services/assignmentApi';
 import { STEP_PATH_TO_NUMBER } from '../config/stepConfig';
 import { isToolboxMode } from '../services/learningStorageScope';
 import type { ListeningResult } from '../components/reading-steps/ListeningPractice';
-import type { AnnotationSummary } from '../components/reading-steps/ReadingAnnotation';
+import type { AnnotationSummary } from '../components/reading-steps/FullTextAnnotate';
 import type { VocabApplicationResult } from '../components/reading-steps/VocabApplication';
 import type { VocabDefinitionMatchResult } from '../components/reading-steps/VocabDefinitionMatch';
 import type {
   ComprehensionResult,
   DictationResult,
-  FullReadingResult,
+  KeyPassageReadingResult,
   LearningSession,
   ReadingAttempt,
   Story,
   VocabResult,
 } from '../types';
 import { buildStepFinishPayload } from './stepHandlerUtils';
+import { lessonAwareNextStep } from './lessonAwareStepTransition';
 
 const ACTIVE_ASSIGNMENT_CONTEXT_KEY = 'activeAssignmentContext';
 const SELF_PRACTICE_COMPLETED_KEY_PREFIX = 'self-practice-completed-';
@@ -68,7 +71,7 @@ interface UseLearningStepNavigationReturn {
   handleFinishReadingStrategy: () => void;
   handleFinishVocab: (result: VocabResult) => void;
   handleFinishDictation: (result: DictationResult) => void;
-  handleFinishFullReading: (result: FullReadingResult) => void;
+  handleFinishKeyPassageReading: (result: KeyPassageReadingResult) => void;
   handleFinishListening: (result: ListeningResult) => void;
   handleFinishReadingAnnotation: (summary: AnnotationSummary) => void;
   handleFinishVocabDefinitionMatch: (result: VocabDefinitionMatchResult) => void;
@@ -76,6 +79,10 @@ interface UseLearningStepNavigationReturn {
   handleFinishSentencePractice: () => void;
   handleFinishVocabWordSearch: (elapsedSeconds: number) => void;
   handleFinishKnowledgeStation: () => void;
+  handleFinishClassicalText: () => void;
+  handleFinishClassicalSentenceMatching: () => void;
+  handleFinishClassicalWordMatching: () => void;
+  handleFinishClassicalSelfChallenge: () => void;
   handleRetry: () => void;
   handleSessionComplete: () => void;
   handleNextStep: () => void;
@@ -126,12 +133,25 @@ export function useLearningStepNavigation({
       }
       return null;
     });
-    persistStep(STEP_PATH_TO_NUMBER['reading-annotation']);
+    // Lesson-aware first reading step (#2752): a 文言文 lesson's own step_sequence
+    // starts at 'classical-text' (原文), not the hardcoded 'full-text-annotate' —
+    // that step has no data for this genre (讀全文-做記號 module never extracted
+    // for these 10 lessons). A regular lesson has no step_sequence, so this
+    // resolves to the same 'full-text-annotate' it always has.
+    const firstReadingStep = lessonAwareNextStep(
+      'lesson-intro',
+      selectedStory?.stepSequence,
+      'full-text-annotate',
+    );
+    persistStep(STEP_PATH_TO_NUMBER[firstReadingStep]);
     ensureDbSession();
-    navigate(isToolboxMode() ? '/tools' : `/learn/${storyId}/reading-annotation`);
+    navigate(isToolboxMode() ? '/tools' : stepPath(storyId, firstReadingStep));
   }, [storyId, selectedStory, navigate, persistStep, ensureDbSession, setSession]);
 
   // ─── Navigation helpers ───────────────────────────────────────────────────
+
+  // 目前這一步的 key，含輪次（多篇課才有 `#slug`）。
+  const currentStepKey = useCurrentStepId('');
 
   const navigateAfterFinish = useCallback(
     (nextStep: string) => {
@@ -139,7 +159,7 @@ export function useLearningStepNavigation({
         navigate('/tools');
         return;
       }
-      navigate(`/learn/${storyId}/${nextStep}`);
+      navigate(stepPath(storyId, nextStep));
     },
     [navigate, storyId],
   );
@@ -153,24 +173,36 @@ export function useLearningStepNavigation({
    */
   const dispatchStepFinish = useCallback(
     (stepId: string, stepData: Record<string, unknown>, sessionPatch?: Partial<LearningSession>) => {
-      const payload = buildStepFinishPayload(stepId, stepData);
+      // 一課多篇時，序列裡是 `full-text-annotate#p3kud`，而呼叫端傳的是寫死的
+      // base id。`lessonAwareNextStep` 找不到就 `return 'report'` ——
+      // 學生在第 2 步按「完成標記」會直接被丟到第 21 步的報告頁（#2930）。
+      // 補上目前網址帶的輪次；單篇課沒有 `#`，keyed === stepId，行為不變。
+      const keyed = currentStepKey.startsWith(`${stepId}#`) ? currentStepKey : stepId;
+      const payload = buildStepFinishPayload(keyed, stepData);
+      // Lesson-aware override (#2752): STEP_FINISH_TRANSITIONS is one static table
+      // keyed by step id, so it cannot express "key-passage-reading is followed by
+      // X for 白話 lessons but Y for 文言文 lessons" — both genres route through
+      // that SAME step id. A lesson carrying its own step_sequence must advance
+      // within THAT sequence; a lesson without one gets payload.nextStep back
+      // unchanged (see lessonAwareStepTransition.ts).
+      const nextStep = lessonAwareNextStep(keyed, selectedStory?.stepSequence, payload.nextStep);
       if (sessionPatch) {
         setSession((prev) => (prev ? { ...prev, ...sessionPatch } : null));
       }
       persistStepProgressState(
         {
           completeStep: payload.completeStep,
-          currentStep: payload.currentStep,
+          currentStep: nextStep,
           stepDataPatch: payload.stepDataPatch,
         },
         true,
       );
-      if (STEP_PATH_TO_NUMBER[payload.nextStep] !== undefined) {
-        persistStep(STEP_PATH_TO_NUMBER[payload.nextStep]);
+      if (STEP_PATH_TO_NUMBER[nextStep] !== undefined) {
+        persistStep(STEP_PATH_TO_NUMBER[nextStep]);
       }
-      navigateAfterFinish(payload.nextStep);
+      navigateAfterFinish(nextStep);
     },
-    [navigateAfterFinish, persistStep, persistStepProgressState, setSession],
+    [navigateAfterFinish, persistStep, persistStepProgressState, setSession, selectedStory, currentStepKey],
   );
 
   // ─── Step finish handlers ─────────────────────────────────────────────────
@@ -178,8 +210,8 @@ export function useLearningStepNavigation({
   const handleFinishReading = useCallback(
     (attempt: ReadingAttempt) => {
       setLastAttempt(attempt);
-      // handleFinishReading completes the 'tutor' step (live tutor readout)
-      dispatchStepFinish('tutor', { readingAttempt: attempt }, { readingAttempt: attempt });
+      // handleFinishReading completes the 'paragraph-reading' step (live tutor readout)
+      dispatchStepFinish('paragraph-reading', { readingAttempt: attempt }, { readingAttempt: attempt });
     },
     [dispatchStepFinish, setLastAttempt],
   );
@@ -193,7 +225,7 @@ export function useLearningStepNavigation({
 
   const handleFinishVocab = useCallback(
     (result: VocabResult) => {
-      dispatchStepFinish('vocab', { result }, { vocabResult: result });
+      dispatchStepFinish('character-practice', { result }, { vocabResult: result });
     },
     [dispatchStepFinish],
   );
@@ -202,15 +234,15 @@ export function useLearningStepNavigation({
     (result: DictationResult) => {
       // Dictation has no persistStepProgressState call in the original — just navigate
       setSession((prev) => (prev ? { ...prev, dictationResult: result } : null));
-      persistStep(STEP_PATH_TO_NUMBER['vocab-word-search']);
-      navigateAfterFinish('vocab-word-search');
+      persistStep(STEP_PATH_TO_NUMBER['vocab-review']);
+      navigateAfterFinish('vocab-review');
     },
     [navigateAfterFinish, persistStep, setSession],
   );
 
-  const handleFinishFullReading = useCallback(
-    (result: FullReadingResult) => {
-      dispatchStepFinish('full-reading', { result }, { fullReadingResult: result });
+  const handleFinishKeyPassageReading = useCallback(
+    (result: KeyPassageReadingResult) => {
+      dispatchStepFinish('key-passage-reading', { result }, { fullReadingResult: result });
     },
     [dispatchStepFinish],
   );
@@ -224,7 +256,7 @@ export function useLearningStepNavigation({
 
   const handleFinishReadingAnnotation = useCallback(
     (_summary: AnnotationSummary) => {
-      dispatchStepFinish('reading-annotation', { completed: true }, { readingAnnotationCompleted: true });
+      dispatchStepFinish('full-text-annotate', { completed: true }, { readingAnnotationCompleted: true });
     },
     [dispatchStepFinish],
   );
@@ -245,14 +277,14 @@ export function useLearningStepNavigation({
 
   const handleFinishStoryStructure = useCallback(
     () => {
-      dispatchStepFinish('story-structure', { completed: true });
+      dispatchStepFinish('keypoints-table', { completed: true });
     },
     [dispatchStepFinish],
   );
 
   const handleFinishReadingStrategy = useCallback(
     () => {
-      dispatchStepFinish('reading-strategy', { completed: true });
+      dispatchStepFinish('spotlight', { completed: true });
     },
     [dispatchStepFinish],
   );
@@ -266,7 +298,7 @@ export function useLearningStepNavigation({
 
   const handleFinishVocabWordSearch = useCallback(
     (_elapsedSeconds: number) => {
-      dispatchStepFinish('vocab-word-search', { completed: true }, { vocabWordSearchCompleted: true });
+      dispatchStepFinish('vocab-review', { completed: true }, { vocabWordSearchCompleted: true });
     },
     [dispatchStepFinish],
   );
@@ -277,6 +309,26 @@ export function useLearningStepNavigation({
     },
     [dispatchStepFinish],
   );
+
+  // ── 文言文專屬 steps (#2752) — same no-arg "read it, mark done, advance"
+  // shape as handleFinishStoryStructure/handleFinishReadingStrategy above.
+  // dispatchStepFinish's lesson-aware override (see above) sends these to the
+  // right next classical step, not the static table's 'report' fallback.
+  const handleFinishClassicalText = useCallback(() => {
+    dispatchStepFinish('classical-text', { completed: true });
+  }, [dispatchStepFinish]);
+
+  const handleFinishClassicalSentenceMatching = useCallback(() => {
+    dispatchStepFinish('classical-sentence-matching', { completed: true });
+  }, [dispatchStepFinish]);
+
+  const handleFinishClassicalWordMatching = useCallback(() => {
+    dispatchStepFinish('classical-word-matching', { completed: true });
+  }, [dispatchStepFinish]);
+
+  const handleFinishClassicalSelfChallenge = useCallback(() => {
+    dispatchStepFinish('classical-self-challenge', { completed: true });
+  }, [dispatchStepFinish]);
 
   const handleRetry = useCallback(() => {
     clearPersistedSession();
@@ -366,7 +418,7 @@ export function useLearningStepNavigation({
     (step: { id: string }) => {
       if (!storyId) return;
       persistStep(STEP_PATH_TO_NUMBER[step.id]);
-      navigate(`/learn/${storyId}/${step.id}`);
+      navigate(stepPath(storyId, step.id));
     },
     [navigate, persistStep, storyId],
   );
@@ -399,7 +451,7 @@ export function useLearningStepNavigation({
     handleFinishReadingStrategy,
     handleFinishVocab,
     handleFinishDictation,
-    handleFinishFullReading,
+    handleFinishKeyPassageReading,
     handleFinishListening,
     handleFinishReadingAnnotation,
     handleFinishVocabDefinitionMatch,
@@ -407,6 +459,10 @@ export function useLearningStepNavigation({
     handleFinishSentencePractice,
     handleFinishVocabWordSearch,
     handleFinishKnowledgeStation,
+    handleFinishClassicalText,
+    handleFinishClassicalSentenceMatching,
+    handleFinishClassicalWordMatching,
+    handleFinishClassicalSelfChallenge,
     handleRetry,
     handleSessionComplete,
     handleNextStep,

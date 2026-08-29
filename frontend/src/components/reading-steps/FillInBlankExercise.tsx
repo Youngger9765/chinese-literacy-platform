@@ -16,8 +16,9 @@ import { FillInBlankItem } from '../../types';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import { fontForZhuyin } from '../../constants/fonts';
 import { scopedStepStorageKey, isToolboxMode } from '../../services/learningStorageScope';
-import ToolboxCompletionActions from '../tools/ToolboxCompletionActions';
 import { FILLBLANK_SHOW_ABCD, FILLBLANK_OPTION_MODE } from '../../config/featureFlags';
+import QuizCompletionScreen from '../learning/QuizCompletionScreen';
+import StepCoachCard, { StepCoachHelpButton } from '../learning/StepCoachCard';
 
 // A8: Detect touch (coarse pointer) vs mouse at mount time.
 const IS_TOUCH_DEVICE =
@@ -60,43 +61,51 @@ interface OnboardingCoachProps {
 
 function OnboardingCoach({ onDismiss, onDemo }: OnboardingCoachProps) {
   return (
-    <div className="mb-5 rounded-2xl border-2 border-amber-400/60 bg-amber-50 px-5 py-4 flex flex-col gap-3">
-      <div className="flex items-start gap-3">
-        <span className="material-symbols-outlined text-amber-500 text-2xl flex-shrink-0 mt-0.5">
-          lightbulb
-        </span>
-        <div className="flex-1">
-          <p className="font-bold text-on-surface text-base mb-1">語詞應用怎麼玩？</p>
-          <p className="text-sm text-on-surface-variant leading-relaxed">
-            讀句子，從下面選出最適合填進空格的語詞。
-          </p>
-        </div>
-      </div>
-      <div className="flex items-center gap-2 self-end">
-        <button
-          type="button"
-          onClick={onDemo}
-          className="px-4 py-2 rounded-full text-sm font-bold border-2 border-accent text-accent hover:bg-accent/10 active:scale-[0.98] transition-all"
-        >
-          示範
-        </button>
-        <button
-          type="button"
-          onClick={onDismiss}
-          className="px-5 py-2 rounded-full text-sm font-bold text-white bg-accent hover:brightness-110 active:scale-[0.98] transition-all"
-        >
-          我知道了
-        </button>
-      </div>
-    </div>
+    <StepCoachCard title="語詞應用怎麼玩？" onDemo={onDemo} onDismiss={onDismiss}>
+      讀句子，從下面選出最適合填進空格的語詞。
+    </StepCoachCard>
   );
 }
+
+/**
+ * 句子裡的那個空格。結果頁靠它把正確答案填回句子裡給學生看。
+ *
+ * 🔴 原本寫死成 `/[（(]　　[）)]/` —— **要求兩個全形空格**，
+ * 而全庫 1198 題裡符合的有 **0 題**。實際存在的寫法有六種：
+ *
+ *     791  （\u3000）      全形括號 + 一個全形空格
+ *     223  (\u3000)        半形括號 + 一個全形空格
+ *     137  (  )            半形括號 + 兩個半形空格
+ *      17  (   )    15  (    )    8  (  \u3000 )
+ *
+ * 所以那個 replace 對每一題都是空轉 —— 學生做完看到的還是空格，
+ * 不是「【喝采】」。⛔ 沒有任何症狀：畫面照樣渲染、測試照樣綠。
+ *
+ * 改成容忍任意數量的空白（含全形），括號全形半形都認。
+ * 2026-08-23 拿真資料跑 L0011 逐欄比對時撞出來的。
+ */
+const BLANK_RE = /[（(][\s\u3000]*[）)]/;
 
 interface Props {
   sentences: FillInBlankItem[];
   vocabBank: Record<string, string>;
   onComplete: (score: number, total: number, firstTryResults?: QuestionResult[]) => void;
   storyId?: string | number;
+  /**
+   * #2848 — 先前存下的作答快照（DB 優先於 localStorage）。
+   * 沒給就退回 localStorage，跟這個元件原本的行為一樣。
+   */
+  initialProgress?: SavedProgress | null;
+  /**
+   * #2848 — 每答一題回報一次。
+   *
+   * 這個 callback 之前不存在，是這一關進度存不進 DB 的根因：逐題作答只寫進
+   * localStorage（`vocab_app_progress_<story>`），parent 完全不知情，所以
+   * `VocabApplication` 送進 DB 的 patch 只有 `phase === 'done'` 的最終成績，
+   * 以及 beforeunload 那個「一題答案都沒有」的 `{phase, partialAt}` 心跳。
+   * 學生換一台裝置或清快取，整關從第 1 題重來。
+   */
+  onProgressChange?: (progress: SavedProgress) => void;
 }
 
 export interface QuestionResult {
@@ -112,7 +121,7 @@ function storageKey(storyId: string | number | undefined): string | null {
   return storyId != null ? scopedStepStorageKey('vocab_app_progress_', storyId) : null;
 }
 
-interface SavedProgress {
+export interface SavedProgress {
   currentIdx: number;
   usedCodes: string[];
   score: number;
@@ -156,10 +165,17 @@ function nextPraise(): string {
   return msg;
 }
 
-const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete, storyId }) => {
-  const bankEntries = Object.entries(vocabBank).sort(([a], [b]) => a.localeCompare(b));
+const FillInBlankExercise: React.FC<Props> = ({
+  sentences,
+  vocabBank,
+  onComplete,
+  storyId,
+  initialProgress,
+  onProgressChange,
+}) => {
   const { zhuyinActive, processZhuyin } = useZhuyin();
-  const savedProgress = loadProgress(storyId);
+  // #2848: DB 快照優先，localStorage 只是離線 / 尚未載入時的 L1 快取。
+  const savedProgress = initialProgress ?? loadProgress(storyId);
 
   // Onboarding state — gated by localStorage
   const [showCoach, setShowCoach] = useState<boolean>(() => {
@@ -221,18 +237,31 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
   const done = currentIdx >= total;
 
   useEffect(() => {
-    if (storyId == null) return;
-    saveProgress(storyId, {
+    const progress: SavedProgress = {
       currentIdx, usedCodes: Array.from(usedCodes), score, firstTryResults,
       pendingRetryIndices: retryIndices, retryMode,
-    });
-  }, [currentIdx, usedCodes, score, firstTryResults, retryIndices, retryMode, storyId]);
+    };
+    if (storyId != null) saveProgress(storyId, progress);
+    // #2848 — 同一份快照也往上送，讓它進得了 DB。跟 localStorage 綁在同一個
+    // effect 是刻意的：兩邊存的是同一個東西，一起壞一起好，不會出現
+    //「localStorage 有、DB 沒有」那種換裝置才發現的落差。
+    onProgressChange?.(progress);
+  }, [currentIdx, usedCodes, score, firstTryResults, retryIndices, retryMode, storyId, onProgressChange]);
 
   useEffect(() => {
     if (done && phase === 'exercise') setPhase('summary');
   }, [done, phase]);
 
   const currentSentence = !done ? activeSentences[currentIdx] : null;
+
+  // 這一題用哪一組選項：子練習自帶 `options`，其餘沿用整課的 vocabBank。
+  // ⛔ 不可以只改 bankEntries —— 判分後的講解也要用同一組去查語詞，
+  //    混用會讓「正確：X」印出另一組的詞。
+  // ⚠️ 必須宣告在 `currentSentence` **之後**。第一版放在檔案上方，
+  //    那正是 #2279 的 TDZ 形狀（mount 就 ReferenceError、白屏，
+  //    而 tsc 與 vite build 都抓不到）。eslint `no-use-before-define` 會擋。
+  const activeBank: Record<string, string> = currentSentence?.options ?? vocabBank;
+  const bankEntries = Object.entries(activeBank).sort(([a], [b]) => a.localeCompare(b));
   const currentOriginalIdx = retryMode ? retryIndices[currentIdx] : currentIdx;
 
   // #7 教授「選項呈現兩案」(featureFlag FILLBLANK_OPTION_MODE):
@@ -240,8 +269,18 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
   //   'disappear'→ 全部選項，用過直接移除 = 案 (b)
   //   'random4'  → 每題只 4 個（正解 + 3 確定性 decoy）= 案 (a) 降難度
   // random4 用 currentOriginalIdx 當 seed → 同題重選不會洗牌。
+  // 🔴 子練習不參與「用過就消失」。兩個理由，任一個都足以壞掉：
+  //   ① 代號會撞：子練習自己的 A（肆虐）跟主題目的 A 是不同的詞，
+  //      但 usedCodes 是一份扁平的代號集合 —— 主題目用掉 A 之後，
+  //      子練習的正確答案就變成 disabled，**學生答不了**。
+  //      （L0122 第 9 題實測：選項只剩肆虐/蔓延是對的，但肆虐是 disabled）
+  //   ② 語意本來就不同：主題目是一對一配對（每個詞用一次），
+  //      子練習會**重複用同一個詞**（L0122 的答案是 肆虐/蔓延/肆虐/蔓延）。
+  //      就算沒有 ①，消失機制也會讓後兩題無解。
+  const isSubExercise = Boolean(currentSentence?.options);
+
   const availableEntries = useMemo(() => {
-    if (FILLBLANK_OPTION_MODE === 'disappear') {
+    if (FILLBLANK_OPTION_MODE === 'disappear' && !isSubExercise) {
       return bankEntries.filter(([code]) => !usedCodes.has(code));
     }
     if (FILLBLANK_OPTION_MODE === 'random4' && currentSentence) {
@@ -257,7 +296,7 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
       return out;
     }
     return bankEntries; // 'all'
-  }, [bankEntries, usedCodes, currentSentence, currentOriginalIdx]);
+  }, [bankEntries, usedCodes, currentSentence, currentOriginalIdx, isSubExercise]);
 
   /**
    * Guided demo on the real UI — tooltips + animated tap on the correct option.
@@ -290,9 +329,13 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
     setSelectedCode(code);
 
     if (code === currentSentence.answer) {
-      const newUsed = new Set(usedCodes);
-      newUsed.add(code);
-      setUsedCodes(newUsed);
+      // ⛔ 子練習答對不記進 usedCodes —— 那份集合是給主題目的一對一配對用的，
+      //    記進去會把後面某一題的正確答案關掉（見 isSubExercise 那段）。
+      if (!isSubExercise) {
+        const newUsed = new Set(usedCodes);
+        newUsed.add(code);
+        setUsedCodes(newUsed);
+      }
 
       const alreadyRecorded = firstTryResults.some((r) => r.sentenceIdx === currentOriginalIdx);
       if (!alreadyRecorded) {
@@ -389,7 +432,7 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
             ? 'bg-amber-50 border-amber-400 text-amber-800'
             : 'bg-accent/10 border-accent/40 text-accent'
         }`}>
-          {zh(vocabBank[selectedCode])}
+          {zh(activeBank[selectedCode] ?? vocabBank[selectedCode])}
         </span>
       )
       : (
@@ -406,6 +449,10 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
   }
 
   // ── Summary screen ──────────────────────────────────────────────
+  // #2834：header card + CTA row 抽到 `QuizCompletionScreen`（跟 ComprehensionMcqPage
+  // 共用）。逐題清單留在這裡自己畫——這裡把正解嵌進句子裡的括號（`【word】`），跟
+  // comprehension 用「正確：」另起一行不是同一種形狀，勉強共用會犧牲這個既有的
+  // bracket-fill 呈現方式，見 QuizCompletionScreen.tsx 檔頭說明。
   if (phase === 'summary') {
     const firstTryScore = firstTryResults.filter((r) => r.firstTryCorrect).length;
     const firstTryTotal = sentences.length;
@@ -413,85 +460,51 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
     const wrongCount = firstTryResults.filter((r) => !r.firstTryCorrect).length;
 
     return (
-      <div className="flex-1 flex flex-col bg-surface overflow-y-auto pb-48" style={{ fontFamily: zhuyinFont }}>
-        <div className="max-w-2xl mx-auto px-6 pt-8 w-full space-y-6">
-          {/* Score */}
-          <div className={`rounded-3xl p-8 text-center ${allCorrect ? 'bg-emerald-50' : 'bg-surface-container-lowest shadow-editorial'}`}>
-            <div className={`w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center ${allCorrect ? 'bg-emerald-100' : 'bg-tertiary-container/20'}`}>
-              <span className={`material-symbols-outlined text-4xl ${allCorrect ? 'text-emerald-600' : 'text-tertiary'}`}>
-                {allCorrect ? 'emoji_events' : 'school'}
-              </span>
-            </div>
-            <p className="text-2xl font-headline font-black text-on-surface mb-1">
-              {allCorrect ? '全部答對！' : '你完成了！'}
-            </p>
-            <p className="text-sm text-on-surface-variant">
-              {allCorrect ? '每一題都一次答對，表現優異！' : '以下是各題的作答結果'}
-            </p>
-          </div>
+      <QuizCompletionScreen
+        allCorrect={allCorrect}
+        wrongCount={wrongCount}
+        onRetryWrong={handleRetryWrong}
+        onRetryAll={handleRetryAll}
+        onNext={() => onComplete(firstTryScore, firstTryTotal, firstTryResults)}
+        style={{ fontFamily: zhuyinFont }}
+        toolboxMode={isToolboxMode()}
+      >
+        {/* Per-question breakdown — summary is the ONLY place correct answers are shown (A12) */}
+        <div className="space-y-3">
+          {sentences.map((s, idx) => {
+            const qResult = firstTryResults.find((r) => r.sentenceIdx === idx);
+            const correct = qResult?.firstTryCorrect ?? false;
+            const correctCode = qResult?.correctAnswer ?? '';
+            const wrongCode = qResult?.studentFirstAnswer ?? null;
+            // ⚠️ 這裡是逐題 map，不能用「當前那一題」的 activeBank ——
+            //    子練習跟主題目的代號會撞（兩邊都有 A），拿錯組會在
+            //    結果頁印出另一組的語詞，而畫面看起來完全正常。
+            const rowBank = s.options ?? vocabBank;
 
-          {/* Per-question breakdown — summary is the ONLY place correct answers are shown (A12) */}
-          <div className="space-y-3">
-            {sentences.map((s, idx) => {
-              const qResult = firstTryResults.find((r) => r.sentenceIdx === idx);
-              const correct = qResult?.firstTryCorrect ?? false;
-              const correctCode = qResult?.correctAnswer ?? '';
-              const wrongCode = qResult?.studentFirstAnswer ?? null;
-
-              return (
-                <div key={idx} className={`rounded-2xl p-5 ${correct ? 'bg-emerald-50' : 'bg-amber-50'}`}>
-                  <div className="flex items-start gap-3">
-                    <span className={`material-symbols-outlined text-xl mt-0.5 ${correct ? 'text-emerald-600' : 'text-amber-600'}`}>
-                      {correct ? 'check_circle' : 'cancel'}
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-base text-on-surface leading-relaxed mb-1">
-                        {zh(s.sentence.replace(/[（(]　　[）)]/, `【${vocabBank[correctCode] ?? correctCode}】`))}
+            return (
+              <div key={idx} className={`rounded-2xl p-5 ${correct ? 'bg-emerald-50' : 'bg-amber-50'}`}>
+                <div className="flex items-start gap-3">
+                  <span className={`material-symbols-outlined text-xl mt-0.5 ${correct ? 'text-emerald-600' : 'text-amber-600'}`}>
+                    {correct ? 'check_circle' : 'cancel'}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-base text-on-surface leading-relaxed mb-1">
+                      {zh(s.sentence.replace(BLANK_RE, `【${rowBank[correctCode] ?? correctCode}】`))}
+                    </p>
+                    {!correct && wrongCode && (
+                      <p className="text-sm text-amber-700">
+                        你選了 <span className="font-bold">{zh(rowBank[wrongCode] ?? wrongCode)}</span>
+                        <span className="text-on-surface-variant mx-1">→</span>
+                        正確：<span className="font-bold text-emerald-700">{zh(rowBank[correctCode] ?? correctCode)}</span>
                       </p>
-                      {!correct && wrongCode && (
-                        <p className="text-sm text-amber-700">
-                          你選了 <span className="font-bold">{zh(vocabBank[wrongCode] ?? wrongCode)}</span>
-                          <span className="text-on-surface-variant mx-1">→</span>
-                          正確：<span className="font-bold text-emerald-700">{zh(vocabBank[correctCode] ?? correctCode)}</span>
-                        </p>
-                      )}
-                    </div>
+                    )}
                   </div>
                 </div>
-              );
-            })}
-          </div>
+              </div>
+            );
+          })}
         </div>
-
-        {/* Fixed bottom CTA */}
-        <div className="fixed bottom-16 left-0 w-full px-6 pb-8 pt-6 pointer-events-none z-20"
-             style={{ background: 'linear-gradient(to top, #FBF6EE 60%, transparent)' }}>
-          <div className="max-w-md mx-auto pointer-events-auto flex flex-col gap-2">
-            {isToolboxMode() ? (
-              <ToolboxCompletionActions onRetry={handleRetryAll} className="w-full" />
-            ) : (
-              <>
-                {wrongCount > 0 && (
-                  <button onClick={handleRetryWrong}
-                    className="w-full h-12 rounded-full font-headline font-bold text-base text-on-surface bg-surface-container-lowest shadow-editorial hover:bg-surface-container-low active:scale-[0.98] transition-all">
-                    重做錯題（{wrongCount} 題）
-                  </button>
-                )}
-                <button onClick={handleRetryAll}
-                  className="w-full h-12 rounded-full font-headline font-bold text-base text-on-surface-variant bg-surface-container-high hover:bg-surface-container-highest active:scale-[0.98] transition-all">
-                  全部重做
-                </button>
-                <button onClick={() => onComplete(firstTryScore, firstTryTotal, firstTryResults)}
-                  className="w-full h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-                  style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}>
-                  繼續下一步
-                  <span className="material-symbols-outlined text-xl">arrow_forward</span>
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
+      </QuizCompletionScreen>
     );
   }
 
@@ -587,7 +600,7 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
               demo?.step === 'pick' ? 'ring-4 ring-amber-300/40 rounded-2xl p-1' : ''
             }`}>
               {availableEntries.map(([code, word]) => {
-                const isUsedDecoy = usedCodes.has(code);
+                const isUsedDecoy = !isSubExercise && usedCodes.has(code);
                 const isDemoTarget = demo?.targetCode === code;
                 const isWrongSelected =
                   feedback === 'wrong' &&
@@ -667,14 +680,7 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
         {/* Show help button after onboarding is dismissed */}
         {!showCoach && (
           <div className="flex justify-end">
-            <button
-              type="button"
-              onClick={() => setShowCoach(true)}
-              className="text-xs text-on-surface-variant/60 hover:text-on-surface-variant transition-colors flex items-center gap-1"
-            >
-              <span className="material-symbols-outlined text-sm">help_outline</span>
-              怎麼玩？
-            </button>
+            <StepCoachHelpButton onClick={() => setShowCoach(true)} />
           </div>
         )}
 

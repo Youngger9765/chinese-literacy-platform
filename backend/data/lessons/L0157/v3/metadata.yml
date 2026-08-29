@@ -1,0 +1,34 @@
+lesson_uid: L0157
+version_id: v3
+genre: 文言文
+strategy: 文言文閱讀策略──如何讀懂文言文
+課文作者: 曾世杰
+學習單: 張明珠
+pages_read: 8
+lesson_no: 2
+series: 文言文
+lesson_seq: 90020
+intro: 這篇文章要帶大家一起認識文言文。為什麼古人要用文言文寫作，而不是我們現在常用的白話文呢？文章會從書寫、記錄和印刷的便利性來解釋文言文的由來。接著，文章會探討文言文閱讀起來比較困難的原因，像是用字精簡需要讀者「腦補」推敲，以及古人的用詞和現代的差異。透過《鞭虎救弟記》這個例子，你會更了解文言文的特色和閱讀方法。
+strategy_explained: '這一課我們要學會「讀懂古早的中文」，也就是文言文
+
+  文章一開始會告訴你文言文為什麼會出現，接著用《鞭虎救弟記》這個故事，讓你看看古人怎麼寫文章，還有為什麼讀起來會有點卡住
+
+  所以讀的時候，你可以試著想想文字背後的意思，還有現在的說法有什麼不一樣，就能慢慢讀通囉'
+strategy_sources:
+  worksheet: 文言文閱讀策略──如何讀懂文言文
+  master_sheet: null
+  previous: 文言文閱讀策略──如何讀懂文言文
+source_profile:
+  class: no_section
+  note: 學習單根本沒有「念順順」這一節 —— 不是抽不到，是本來就沒有
+  has_key_reading_section: false
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: null
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 0
+  has_counter_column: false
+  body_in_tables: true
+  invisible_chars_docx_only: true
+  profiled: '2026-08-24'

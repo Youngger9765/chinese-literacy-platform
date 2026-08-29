@@ -1,0 +1,39 @@
+lesson_uid: L0102
+version_id: v3
+level: 7
+genre: 說明文
+strategy: 媒體素養與識讀──辨別網路訊息真偽
+課文作者: 林玫伶
+學習單: 巫怡蓉
+lesson_no: 5
+series: 一般
+lesson_seq: 7050
+intro: 這篇文章介紹了兩種常見的網紅電子煙實驗影片。影片中，網紅透過模擬實驗和親身示範，試圖證明電子煙的安全性。然而，作者指出這些實驗方法存在許多問題，例如實驗條件不嚴謹、混淆不同物質的危害，以及將食用與吸入對身體的影響混為一談。文章進一步分析了電子煙業者如何利用行銷手法吸引年輕族群，並提醒讀者要仔細辨識網路資訊，了解電子煙的真實危害，才能避免落入偽科學和菸害的陷阱。
+notes:
+  總表_對照: '⚠️ 本檔的 `_總表_*` 欄位留空未填 —— 抽取當下沒有逐欄比對總表這一列，
+
+    不寫等於沒查，比填一個沒驗過的值誠實。要補的話回頭讀 `1.總表` 第 7 年級第 5 課那一列。'
+  節次順序: 本課 **五＝閱讀聚光燈、六＝文章重點表**（與 L0071 同、與 L0061/L0069 相反）。
+strategy_explained: '這一課要練的是，在網路上海量的資訊裡，學會分辨什麼是真的、什麼是假的，才不會被網紅或業者騙了
+
+  這篇文章就講到網紅用不專業的方式做實驗，來證明電子煙很安全，但其實這些影片裡藏著很多誤導人的地方，像是實驗條件很隨便，或是把不同的危害混在一起講，非常適合我們練習找出這些「偽科學」的破綻
+
+  所以讀的時候，你可以問問自己，影片裡的做法有沒有道理，會不會有人故意用奇怪的方法誤導你，還有電子煙到底會不會危害健康，去想一想作者為什麼要寫這篇文章給我們看'
+strategy_sources:
+  worksheet: 媒體素養與識讀
+  master_sheet: 媒體素養與識讀──辨別網路訊息真偽
+  previous: 媒體素養與識讀──辨別網路訊息真偽
+source_profile:
+  class: standard
+  note: 單一錨點 + 有計數欄 + idx 唯一 —— 走主路徑
+  has_key_reading_section: true
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: null
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 1
+  has_counter_column: true
+  body_in_tables: true
+  invisible_chars_docx_only: false
+  profiled: '2026-08-24'

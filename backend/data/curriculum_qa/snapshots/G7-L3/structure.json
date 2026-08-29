@@ -1,130 +1,97 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 4,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "情境案例",
+      "法律標準",
+      "判斷關鍵",
+      "行動建議"
+    ],
+    "template_kind": "theme_facts"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "項目對象",
-      "value": "",
       "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "__",
-          "value": "阿提米絲【　　　】",
-          "interactive_type": "fill_blank"
-        }
-      ]
+      "label": "你以為的浪漫可能是跟騷",
+      "value": ""
     },
     {
-      "label": "古希臘神話代表",
-      "value": "",
       "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "太陽神",
-          "value": "【　　　】",
-          "interactive_type": "fill_blank"
-        }
-      ]
+      "label": "主題",
+      "value": "你以為的浪漫可能是跟騷"
     },
     {
-      "label": "【年代】",
-      "value": "",
-      "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "1969年~1972年",
-          "value": "【　　　】",
-          "interactive_type": "fill_blank"
-        }
-      ]
+      "interactive_type": "fill_blank",
+      "label": "情境案例",
+      "value": "阿哲反覆追求小芳，小芳【　　　】很大，甚至失眠。"
     },
     {
-      "label": "【代表性別】",
-      "value": "",
       "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "男性",
-          "value": "【　　　】",
-          "interactive_type": "fill_blank"
-        }
-      ]
+      "label": "迷思來源",
+      "value": "愛情電影常把糾纏行為美化為浪漫，容易誤導觀眾產生錯誤認識。"
     },
     {
-      "label": "【太空人的優勢】",
-      "value": "",
+      "interactive_type": "fill_blank",
+      "label": "法律標準",
+      "value": "《跟蹤騷擾防治法》：若反覆或持續對特定人做出違反其意願、且與【　　　】有關的行為，造成對方【　　　】，並影響【　　　】，就可能構成「跟蹤騷擾」。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "判斷關鍵",
+      "value": "如何區別浪漫和跟騷，關鍵在是否【　　　】對方的意願，及是否取得【　　　】。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "行動建議",
+      "value": "遭遇跟騷時，可以明確表達【　　　】，向可信任的【　　　】求助；情況嚴重時，可【　　　】或依法申請【　　　】。"
+    },
+    {
       "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "高大強壯",
-          "value": "1.消耗的飲食與氧氣【　　　】\n2.【　　　】環境中情緒與精神表現也比較【　　　】。",
-          "interactive_type": "fill_blank"
-        }
-      ]
+      "label": "結語",
+      "value": "真正的喜歡要從尊重他人開始。"
     }
   ],
-  "layout": "worksheet_table",
+  "title": "你以為的浪漫可能是跟騷",
   "worksheet_rows": [
     {
-      "kind": "section_block",
-      "section": "項目對象",
-      "items": [
-        {
-          "label": "__",
-          "value": "阿提米絲【　　　】"
-        }
-      ]
+      "kind": "pair",
+      "label": "主題",
+      "value": "你以為的浪漫可能是跟騷"
     },
     {
-      "kind": "section_block",
-      "section": "古希臘神話代表",
-      "items": [
-        {
-          "label": "太陽神",
-          "value": "【　　　】"
-        }
-      ]
+      "kind": "pair",
+      "label": "情境案例",
+      "value": "阿哲反覆追求小芳，小芳【　　　】很大，甚至失眠。"
     },
     {
-      "kind": "section_block",
-      "section": "【年代】",
-      "items": [
-        {
-          "label": "1969年~1972年",
-          "value": "【　　　】"
-        }
-      ]
+      "kind": "pair",
+      "label": "迷思來源",
+      "value": "愛情電影常把糾纏行為美化為浪漫，容易誤導觀眾產生錯誤認識。"
     },
     {
-      "kind": "section_block",
-      "section": "【代表性別】",
-      "items": [
-        {
-          "label": "男性",
-          "value": "【　　　】"
-        }
-      ]
+      "kind": "pair",
+      "label": "法律標準",
+      "value": "《跟蹤騷擾防治法》：若反覆或持續對特定人做出違反其意願、且與【　　　】有關的行為，造成對方【　　　】，並影響【　　　】，就可能構成「跟蹤騷擾」。"
     },
     {
-      "kind": "section_block",
-      "section": "【太空人的優勢】",
-      "items": [
-        {
-          "label": "高大強壯",
-          "value": "1.消耗的飲食與氧氣【　　　】\n2.【　　　】環境中情緒與精神表現也比較【　　　】。"
-        }
-      ]
+      "kind": "pair",
+      "label": "判斷關鍵",
+      "value": "如何區別浪漫和跟騷，關鍵在是否【　　　】對方的意願，及是否取得【　　　】。"
+    },
+    {
+      "kind": "pair",
+      "label": "行動建議",
+      "value": "遭遇跟騷時，可以明確表達【　　　】，向可信任的【　　　】求助；情況嚴重時，可【　　　】或依法申請【　　　】。"
+    },
+    {
+      "kind": "pair",
+      "label": "結語",
+      "value": "真正的喜歡要從尊重他人開始。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "generic",
-    "fill_blank_count": 5,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "__",
-      "太陽神",
-      "1969年~1972年",
-      "男性"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

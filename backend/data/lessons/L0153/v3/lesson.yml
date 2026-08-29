@@ -1,0 +1,29 @@
+lesson_uid: L0153
+version_id: v3
+title: 荒野救亡記
+catalog_slot: 文-L10
+sections_present:
+- 'no': null
+  name: 古文今譯
+- 'no': null
+  name: 原文（含斷詞點）＋注釋
+- 'no': null
+  name: 朗讀計時
+- 'no': 一
+  name: 文白句子比對
+- 'no': 二
+  name: 文白詞語比對
+- 'no': 三
+  name: 文章重點表
+- 'no': 四
+  name: 文言文聚光燈
+  subtitle: 固定句式：以……為……
+- 'no': 五
+  name: 閱讀理解
+- 'no': 六
+  name: 自我挑戰
+source:
+  extracted_by: extract-lesson-multimodal
+  pdf_pages: 10
+  drive_path: 文言文/文-L10荒野救亡記（固定句式：以--為.）.docx
+  docx_md5: md5-12:c555b7883a75

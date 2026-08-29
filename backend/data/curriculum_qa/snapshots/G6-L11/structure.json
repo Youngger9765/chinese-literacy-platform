@@ -1,77 +1,87 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 6,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "飛機失事\n【　　　】",
+      "搜救困難\n【　　　】",
+      "搜救行動\n【　　　】",
+      "出現希望\n【　　　】"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "古代畫家心中的仙境",
-      "value": "",
-      "interactive_type": "display"
+      "interactive_type": "display",
+      "label": "奇蹟行動",
+      "value": ""
     },
     {
-      "label": "中國文化的神仙想像",
-      "value": "中國古人相信神仙遠離【　　　】，住在【　　　】的深山中，並流傳許多仙境故事。",
-      "interactive_type": "fill_blank"
-    },
-    {
-      "label": "著名仙境：【　　　】",
-      "value": "張公洞是中國著名仙境之一，洞內如藝術品般美麗，畫家將其描繪成通往仙境的入口，增添了神祕色彩。",
       "interactive_type": "fill_blank",
-      "blank_in_label": true
+      "label": "飛機失事\n【　　　】",
+      "value": "2023年5月1日，小飛機在飛越亞馬遜雨林上空時，意外【　　　】。三名成人罹難，四名孩子受困雨林。"
     },
     {
-      "label": "仙境畫的元素與意義",
-      "value": "仙境畫常見【　　　】、【　　　】、【　　　】三個元素，分別象徵通往仙境的門戶、跨越世界的通道與交通工具，表達進入仙境的奇妙轉變。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "搜救困難\n【　　　】",
+      "value": "搜尋範圍十分【　　　】，雨林植被茂密，加上雷雨不斷、能見度低，還有蚊蟲、毒蛇和野獸出沒。"
     },
     {
-      "label": "仙境畫的特點",
-      "value": "畫中人物【　　　】而風景【　　　】，表現人類在浩瀚大自然中的【　　　】，傳達敬畏自然的情感。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "搜救行動\n【　　　】",
+      "value": "1.軍人帶著【　　　】進入雨林搜索，超過200名原住民志工也加入。\n2.搜救隊空投傳單和【　　　】，並播放孩子祖母的錄音。"
     },
     {
-      "label": "古、今對仙境的嚮往",
-      "value": "1.元明時期庶民畫家喜用「山人」、「道人」等稱號，反映對自然和心靈提升的【　　　】。\n2.儘管現代人不再相信神仙，但在欣賞仙境畫時，仍能喚起遠離【　　　】、回歸自然的渴望。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "出現希望\n【　　　】",
+      "value": "搜救隊發現孩子的足印、被啃過的野果、奶瓶和遮蔽棚，相信孩子們很可能【　　　】。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "孩子求生\n【　　　】",
+      "value": "1.萊絲莉運用族人教導的【　　　】知識，分辨可食用與有毒的植物。\n2.她採集種子、野果和根莖類植物充飢，收集【　　　】，並和索來尼在樹上搭建小屋。\n3.她還照顧年幼的弟妹和【　　　】。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "結果\n【　　　】",
+      "value": "墜機【　　　】後，搜救隊找到四名孩子。他們雖然體力虛弱，但仍然意識清楚。"
     }
   ],
-  "layout": "worksheet_table",
-  "title": "古代畫家心中的仙境",
+  "title": "奇蹟行動",
   "worksheet_rows": [
     {
       "kind": "pair",
-      "label": "中國文化的神仙想像",
-      "value": "中國古人相信神仙遠離【　　　】，住在【　　　】的深山中，並流傳許多仙境故事。"
+      "label": "飛機失事\n（段2）",
+      "value": "2023年5月1日，小飛機在飛越亞馬遜雨林上空時，意外【　　　】。三名成人罹難，四名孩子受困雨林。"
     },
     {
       "kind": "pair",
-      "label": "著名仙境：【　　　】",
-      "value": "張公洞是中國著名仙境之一，洞內如藝術品般美麗，畫家將其描繪成通往仙境的入口，增添了神祕色彩。"
+      "label": "搜救困難\n（段4-5）",
+      "value": "搜尋範圍十分【　　　】，雨林植被茂密，加上雷雨不斷、能見度低，還有蚊蟲、毒蛇和野獸出沒。"
     },
     {
       "kind": "pair",
-      "label": "仙境畫的元素與意義",
-      "value": "仙境畫常見【　　　】、【　　　】、【　　　】三個元素，分別象徵通往仙境的門戶、跨越世界的通道與交通工具，表達進入仙境的奇妙轉變。"
+      "label": "搜救行動\n（段4-5）",
+      "value": "1.軍人帶著【　　　】進入雨林搜索，超過200名原住民志工也加入。\n2.搜救隊空投傳單和【　　　】，並播放孩子祖母的錄音。"
     },
     {
       "kind": "pair",
-      "label": "仙境畫的特點",
-      "value": "畫中人物【　　　】而風景【　　　】，表現人類在浩瀚大自然中的【　　　】，傳達敬畏自然的情感。"
+      "label": "出現希望\n（段6）",
+      "value": "搜救隊發現孩子的足印、被啃過的野果、奶瓶和遮蔽棚，相信孩子們很可能【　　　】。"
     },
     {
       "kind": "pair",
-      "label": "古、今對仙境的嚮往",
-      "value": "1.元明時期庶民畫家喜用「山人」、「道人」等稱號，反映對自然和心靈提升的【　　　】。\n2.儘管現代人不再相信神仙，但在欣賞仙境畫時，仍能喚起遠離【　　　】、回歸自然的渴望。"
+      "label": "孩子求生\n（段8）",
+      "value": "1.萊絲莉運用族人教導的【　　　】知識，分辨可食用與有毒的植物。\n2.她採集種子、野果和根莖類植物充飢，收集【　　　】，並和索來尼在樹上搭建小屋。\n3.她還照顧年幼的弟妹和【　　　】。"
+    },
+    {
+      "kind": "pair",
+      "label": "結果\n（段7）",
+      "value": "墜機【　　　】後，搜救隊找到四名孩子。他們雖然體力虛弱，但仍然意識清楚。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "generic",
-    "fill_blank_count": 5,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "中國文化的神仙想像",
-      "著名仙境：【　　　】",
-      "仙境畫的元素與意義",
-      "仙境畫的特點"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

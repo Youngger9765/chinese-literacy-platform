@@ -27,7 +27,7 @@ export const FILLBLANK_SHOW_ABCD: boolean =
   _lsAbcd != null ? _lsAbcd === 'true' : _rawAbcd === 'true';
 
 // LESSON_RENDERER_V1: Phase-2 unified block-based lesson renderer (閱讀聚光燈 refactor).
-// Default ON (go-live). StrategyExercisePage / ComprehensionMcqPage render the new
+// Default ON (go-live). SpotlightPage / ComprehensionMcqPage render the new
 // LessonRenderer (via storyToLesson) and fall back to the legacy path
 // (ComprehensionLayout / BlockSequenceRenderer / StrategyExercise) whenever the adapter
 // can't produce a valid Lesson — so a bad lesson degrades to legacy, never white-screens.

@@ -1,0 +1,114 @@
+{
+  "$id": "lingoleap/module/vocab_review",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "從 150 份實測 yml 長出來，不是手寫的。required = 每一課都有的欄位（少了就是回歸）；properties 列出所有已觀測欄位，配合 additionalProperties: false —— 現況全過，任何新發明的欄位名會紅。",
+  "properties": {
+    "answer_paths": {
+      "type": "array",
+      "x-seen-in": "141/150"
+    },
+    "answers_are_graphical": {
+      "type": "boolean",
+      "x-seen-in": "150/150"
+    },
+    "answers_printed": {
+      "type": [
+        "boolean",
+        "string"
+      ],
+      "x-seen-in": "62/150"
+    },
+    "answers_printed_partial": {
+      "type": "boolean",
+      "x-seen-in": "1/150"
+    },
+    "geometry_check": {
+      "type": "string",
+      "x-seen-in": "22/150"
+    },
+    "gray_box_printed": {
+      "type": "string",
+      "x-seen-in": "1/150"
+    },
+    "grid": {
+      "type": "array",
+      "x-seen-in": "143/150"
+    },
+    "grid_size": {
+      "type": "array",
+      "x-seen-in": "150/150"
+    },
+    "instruction": {
+      "type": "string",
+      "x-seen-in": "150/150"
+    },
+    "instruction_source_text": {
+      "type": "string",
+      "x-seen-in": "1/150"
+    },
+    "note_partial": {
+      "type": "string",
+      "x-seen-in": "1/150"
+    },
+    "notes": {
+      "type": "object",
+      "x-seen-in": "106/150"
+    },
+    "section_no_printed": {
+      "type": "string",
+      "x-seen-in": "2/150"
+    },
+    "slug": {
+      "type": "string",
+      "x-seen-in": "150/150"
+    },
+    "target_words": {
+      "type": "array",
+      "x-seen-in": "150/150"
+    },
+    "target_words_source_text": {
+      "type": "string",
+      "x-seen-in": "1/150"
+    },
+    "text_ref": {
+      "type": [
+        "array",
+        "string"
+      ],
+      "x-seen-in": "150/150"
+    },
+    "type": {
+      "type": "string",
+      "x-seen-in": "150/150"
+    },
+    "word_bank_line": {
+      "type": "string",
+      "x-seen-in": "7/150"
+    }
+  },
+  "required": [
+    "answers_are_graphical",
+    "grid_size",
+    "instruction",
+    "slug",
+    "target_words",
+    "text_ref",
+    "type"
+  ],
+  "title": "vocab_review module payload",
+  "type": "object",
+  "x-core-90pct": [
+    "answer_paths",
+    "answers_are_graphical",
+    "grid",
+    "grid_size",
+    "instruction",
+    "slug",
+    "target_words",
+    "text_ref",
+    "type"
+  ],
+  "x-enforcement": "error",
+  "x-lessons-observed": 150
+}

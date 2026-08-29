@@ -1,0 +1,11 @@
+{
+  "lesson_uid": "L0117",
+  "catalog_slot": "G8-L1",
+  "pdf_pages": 13,
+  "pages_read": 13,
+  "wall_clock_seconds": null,
+  "read_calls": 2,
+  "gate_failures": {"verbatim": 0, "coverage": 0, "block_type": 0, "word_search": 0, "traditional": 0, "keypoints_shape": 0, "render_coverage": 0, "orphan_key": 0},
+  "retries": 1,
+  "notes": "逐字門第一次 FAIL 3 筆，全是我方寫法問題不是抄錯：(a) 描述性的 figure referent 會被逐字門檢查，改成 referent: diagram + note；(b) 步驟❷ 的「原因→結果」箭頭是 w:sym Wingdings F0E0，不在文字流，改用 source_text 記文字流原樣。找字 12 條路徑全部由 grid 反查驗證；13 個 roundRect = 12 個格子圈 + 1 個步驟❹ 示意圖的外框，無紙外殘留。"
+}

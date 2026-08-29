@@ -1,0 +1,27 @@
+lesson_uid: L0061
+version_id: v3
+title: 因人而異，才有真正的公平
+catalog_slot: G6-L20
+sections_present:
+- 'no': 一
+  name: 讀全文-做記號
+- 'no': 二
+  name: 念順順
+- 'no': 三
+  name: 語詞我最棒
+- 'no': 四
+  name: 語詞應用
+- 'no': 五
+  name: 閱讀聚光燈
+  subtitle: 寫作手法——用例子說明觀點
+- 'no': 六
+  name: 文章重點表
+- 'no': 七
+  name: 閱讀理解
+- 'no': 八
+  name: 詞語複習
+source:
+  extracted_by: extract-lesson-multimodal
+  pdf_pages: 10
+  drive_path: 6年級/G6-L20因人而異，才有真正的公平（寫作手法-用例子說明觀點）.docx
+  docx_md5: md5-12:0c3c8b79914d

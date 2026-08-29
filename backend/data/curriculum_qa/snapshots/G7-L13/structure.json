@@ -1,55 +1,56 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 2,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "阿波羅",
+      "阿提米絲"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "綠色賽事",
-      "value": "",
-      "interactive_type": "display"
+      "interactive_type": "display",
+      "label": "女性太空人登月",
+      "value": ""
     },
     {
-      "label": "覺察問題",
-      "value": "【　　　】阿國路跑結束後，看到有許多人為製造的垃圾，阿國期待一個沒有【　　　】的運動賽事。\n【　　　】賽事規模越大，造成環境負擔也越大，許多人\n  【　　　】忡忡。",
-      "interactive_type": "fill_blank"
-    },
-    {
-      "label": "具體做法",
-      "value": "1.Reduce【　　　】：避免無所謂的浪費。例如，不再印製秩序冊。\n2.Reuse【　　　】：重複使用器材與裝備。\n  例如：【　　　】。\n3.Recycle【　　　】：使用再生能源與材料。例如，【　　　】。",
-      "interactive_type": "fill_blank"
-    },
-    {
-      "label": "結論",
-      "value": "阿國決定邀請更多的人一起努力，將永續的理念融入運動賽事中。不要把【　　　】帶走，卻把悲傷留給【　　　】！",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "登月計畫",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "阿波羅",
+          "value": "1.實現了人類登月夢想。\n2.第一位登陸月球的太空人【　　　】說：\n「這是個人的一小步，卻是【　　　】。」\n3.共有12位【　　　】太空人成功登陸月球。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "阿提米絲",
+          "value": "1.目標：希望送第一位【　　　】和第一位【　　　】太空人登上月球。\n2.傳統偏見：認為男性較適合艱鉅的太空任務。\n3.現今研究：女性可能更適合長途的太空任務\n因為(1)消耗的【　　　】與【　　　】較少。\n(2)在幽閉環境中情緒和精神較為穩定。\n4.計畫特色：\n(1)強調【　　　】的太空人背景。\n(2)看重性別與族群的【　　　】。\n5.未來目標：\n在月球建立研究基地，並為登陸【　　　】做準備。"
+        }
+      ],
+      "value": ""
     }
   ],
-  "layout": "worksheet_table",
-  "title": "綠色賽事",
+  "title": "女性太空人登月",
   "worksheet_rows": [
     {
-      "kind": "pair",
-      "label": "覺察問題",
-      "value": "(1)阿國路跑結束後，看到有許多人為製造的垃圾，阿國期待一個沒有【　　　】的運動賽事。\n(2)賽事規模越大，造成環境負擔也越大，許多人\n  【　　　】忡忡。"
-    },
-    {
-      "kind": "pair",
-      "label": "具體做法",
-      "value": "1.Reduce【　　　】：避免無所謂的浪費。例如，不再印製秩序冊。\n2.Reuse【　　　】：重複使用器材與裝備。\n  例如：【　　　】。\n3.Recycle【　　　】：使用再生能源與材料。例如，【　　　】。"
-    },
-    {
-      "kind": "pair",
-      "label": "結論",
-      "value": "阿國決定邀請更多的人一起努力，將永續的理念融入運動賽事中。不要把【　　　】帶走，卻把悲傷留給【　　　】！"
+      "items": [
+        {
+          "label": "阿波羅",
+          "value": "1.實現了人類登月夢想。\n2.第一位登陸月球的太空人【　　　】說：\n「這是個人的一小步，卻是【　　　】。」\n3.共有12位【　　　】太空人成功登陸月球。"
+        },
+        {
+          "label": "阿提米絲",
+          "value": "1.目標：希望送第一位【　　　】和第一位【　　　】太空人登上月球。\n2.傳統偏見：認為男性較適合艱鉅的太空任務。\n3.現今研究：女性可能更適合長途的太空任務\n因為(1)消耗的【　　　】與【　　　】較少。\n(2)在幽閉環境中情緒和精神較為穩定。\n4.計畫特色：\n(1)強調【　　　】的太空人背景。\n(2)看重性別與族群的【　　　】。\n5.未來目標：\n在月球建立研究基地，並為登陸【　　　】做準備。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "登月計畫"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "generic",
-    "fill_blank_count": 3,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "覺察問題",
-      "具體做法",
-      "結論"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

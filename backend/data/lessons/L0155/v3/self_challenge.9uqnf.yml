@@ -1,0 +1,62 @@
+lesson_uid: L0155
+version_id: v3
+section_no: 六
+self_challenge:
+  instruction: 請閱讀以下文章，完成問題。提醒：記得運用文言文的閱讀策略哦！
+  strategy_banner: ❶斷句 ⭢❷找動詞/形容詞 ⭢❸找/補主語 ⭢❹用自己的話說一說
+  passage: 弈秋，通國之善弈1者也。使弈秋誨二人弈，其一人專心致志，惟弈秋之爲聽；一人雖聽之，一心以爲有鴻鵠將至，思援弓繳2而射之。雖與之俱學，弗若3之矣。爲是其智弗若與？曰：非然也。(91基二)
+  annotations:
+  - index: 1
+    term: 弈
+    text: 下(圍)棋。
+  - index: 2
+    term: 繳
+    text: ㄓㄨㄛˊ，繫在箭尾的絲繩，便於尋找射中的獵物或回收箭枝。
+  - index: 3
+    term: 弗若
+    text: 不如。
+  translation: 弈秋是全國最會下棋的人。讓弈秋教兩個人下棋，其中一人專心學習，只聽弈秋的教導；另一人雖然也聽課，卻一心以為有大鳥要飛來，總想著要拉弓射鳥。雖然他跟那個專心學棋的人一起學習，棋力卻不如人。是因為他的智力不如人家嗎?(我)說：不是這樣的。
+  part_one:
+    label: （一）請依照故事脈絡，回答下列問題。
+    answer_carrier: 橘色手寫（字元樣式 aff6）；第 3、4 題是**橘色圈選**（roundRect FF9900）
+    items:
+    - index: 1
+      stem: 斷句後的第一個分句，主語是誰？
+      answer: 弈秋
+    - index: 2
+      stem: 承上題，這個主語怎麼樣或做什麼？
+      answer: 善弈/很會下棋
+    - index: 3
+      stem: 弈秋的兩名學生，一人「專心致志」，從何可知？
+      options:
+        1: 惟弈秋之為聽
+        2: 一心以為有鴻鵠將至
+      answer: 1
+      instruction: (圈出適當答案)
+      answer_carrier: 橘色圈選（roundRect FF9900，1.27×0.33in，尺寸吻合 6 字）圈住「惟弈秋之為聽」
+    - index: 4
+      stem: 「雖與之俱學，弗若之矣」是省略主語的句子。請問：主語是誰？
+      options:
+        1: 惟弈秋之為聽者
+        2: 一心以為有鴻鵠將至者
+      answer: 2
+      instruction: (圈出適當答案)
+      answer_carrier: 橘色圈選（roundRect FF9900，2.07×0.26in，尺寸吻合 10 字）圈住「一心以為有鴻鵠將至者」
+  part_two:
+    label: （二）閱讀理解測驗
+    answer_carrier: 橘色手寫代號（字元樣式 aff6）
+    items:
+    - index: 1
+      answer: C
+      stem: 關於文本內容，下列何者較符合文章主旨?
+      options:
+        A: 說明學習需依靠名師指導
+        B: 強調天資將決定學習成敗
+        C: 指出專心致志的重要性
+        D: 說明下棋比射箭更難學
+  notes:
+    optional: （老師可視同學情況決定是否做此大題）
+    strategy_banner: 箭號是**字面字元「⭢」（U+2B62）**，不是 `→` 也不是 `w:sym`；依規則保留原樣、不斷行
+    annotations_marker: 注釋清單前印一個 `w:sym Wingdings F026` 的書本圖示，不是文字
+    translation_carrier: 深藍色（C:156082）文字方塊，印在文章右側
+  slug: 9uqnf

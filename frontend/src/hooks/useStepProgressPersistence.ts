@@ -7,7 +7,7 @@ import { useProgressSync } from './useProgressSync';
 import type { StepProgressData } from '../services/learningApi';
 import type {
   ComprehensionResult,
-  FullReadingResult,
+  KeyPassageReadingResult,
   LearningSession,
   ReadingAttempt,
   Story,
@@ -30,6 +30,9 @@ interface PersistStepProgressOptions {
 }
 
 interface SaveStepProgressPatchOptions {
+  /** 目前這一步的完整 key（多篇課帶 `#slug`）。由 LearningLayout 補上，
+   *  各步驟頁只要照舊傳 base id 就好（#2930）。 */
+  currentStepKey?: string;
   stepId: string;
   stepData: Record<string, unknown>;
   currentStep?: string | null;
@@ -106,7 +109,7 @@ export function useStepProgressPersistence({
 
   const [completedParagraphsSet, setCompletedParagraphsSet] = useState<Set<number>>(() => {
     const scopedTutorKey = storyId ? scopedStepStorageKey('tutor_completed_', storyId) : null;
-    const scopedLiveTutorKey = storyId ? scopedStepStorageKey('liveTutor_progress_', storyId) : null;
+    const scopedParagraphReadingKey = storyId ? scopedStepStorageKey('liveTutor_progress_', storyId) : null;
     try {
       const raw = scopedTutorKey ? localStorage.getItem(scopedTutorKey) : null;
       if (raw) {
@@ -119,7 +122,7 @@ export function useStepProgressPersistence({
       // Non-fatal — continue to fallback
     }
     try {
-      const liveTutorRaw = scopedLiveTutorKey ? localStorage.getItem(scopedLiveTutorKey) : null;
+      const liveTutorRaw = scopedParagraphReadingKey ? localStorage.getItem(scopedParagraphReadingKey) : null;
       if (liveTutorRaw) {
         const liveTutorParsed = JSON.parse(liveTutorRaw) as {
           completedParagraphs?: unknown;
@@ -161,7 +164,7 @@ export function useStepProgressPersistence({
     [requiredAssignmentSteps, completedStepsSet],
   );
   const isAssignmentReadyForSubmit = missingAssignmentSteps.length === 0;
-  const firstIncompleteStepPath = missingAssignmentSteps[0]?.id ?? 'reading-annotation';
+  const firstIncompleteStepPath = missingAssignmentSteps[0]?.id ?? 'full-text-annotate';
   const hasActiveAssignment = useMemo(() => {
     try {
       return isAssignmentFlow;
@@ -194,30 +197,30 @@ export function useStepProgressPersistence({
       setSession((prev) => {
         if (!prev) return prev;
         const tutorData = (loadedStepData.tutor ?? {}) as Record<string, unknown>;
-        const fullReadingData = (loadedStepData['full-reading'] ?? {}) as Record<string, unknown>;
+        const fullReadingData = (loadedStepData['key-passage-reading'] ?? {}) as Record<string, unknown>;
         const vocabData = (loadedStepData.vocab ?? {}) as Record<string, unknown>;
         const comprehensionData = (loadedStepData.comprehension ?? {}) as Record<string, unknown>;
-        const readingAnnotationData = (loadedStepData['reading-annotation'] ?? {}) as Record<string, unknown>;
+        const readingAnnotationData = (loadedStepData['full-text-annotate'] ?? {}) as Record<string, unknown>;
         const vocabDefinitionData = (loadedStepData['vocab-definition'] ?? {}) as Record<string, unknown>;
         const vocabApplicationData = (loadedStepData['vocab-application'] ?? {}) as Record<string, unknown>;
-        const vocabWordSearchData = (loadedStepData['vocab-word-search'] ?? {}) as Record<string, unknown>;
+        const vocabWordSearchData = (loadedStepData['vocab-review'] ?? {}) as Record<string, unknown>;
         const knowledgeStationData = (loadedStepData['knowledge-station'] ?? {}) as Record<string, unknown>;
 
         return {
           ...prev,
           completedSteps: loadedCompleted,
           readingAttempt: (tutorData.readingAttempt as ReadingAttempt | undefined) ?? prev.readingAttempt,
-          fullReadingResult: (fullReadingData.result as FullReadingResult | undefined) ?? prev.fullReadingResult,
+          fullReadingResult: (fullReadingData.result as KeyPassageReadingResult | undefined) ?? prev.fullReadingResult,
           vocabResult: (vocabData.result as VocabResult | undefined) ?? prev.vocabResult,
           comprehensionResult: (comprehensionData.result as ComprehensionResult | undefined) ?? prev.comprehensionResult,
           readingAnnotationCompleted:
-            (readingAnnotationData.completed as boolean | undefined) ?? loadedCompleted.includes('reading-annotation') ?? prev.readingAnnotationCompleted,
+            (readingAnnotationData.completed as boolean | undefined) ?? loadedCompleted.includes('full-text-annotate') ?? prev.readingAnnotationCompleted,
           vocabDefinitionMatchCompleted:
             (vocabDefinitionData.completed as boolean | undefined) ?? loadedCompleted.includes('vocab-definition') ?? prev.vocabDefinitionMatchCompleted,
           vocabApplicationCompleted:
             (vocabApplicationData.completed as boolean | undefined) ?? loadedCompleted.includes('vocab-application') ?? prev.vocabApplicationCompleted,
           vocabWordSearchCompleted:
-            (vocabWordSearchData.completed as boolean | undefined) ?? loadedCompleted.includes('vocab-word-search') ?? prev.vocabWordSearchCompleted,
+            (vocabWordSearchData.completed as boolean | undefined) ?? loadedCompleted.includes('vocab-review') ?? prev.vocabWordSearchCompleted,
           knowledgeStationCompleted:
             (knowledgeStationData.completed as boolean | undefined) ?? loadedCompleted.includes('knowledge-station') ?? prev.knowledgeStationCompleted,
         };
@@ -234,7 +237,7 @@ export function useStepProgressPersistence({
         // Issue #2530: merge each step's patch ONE LEVEL deep instead of replacing the
         // whole step entry. A partial finish patch (e.g. tutor's { readingAttempt }) must
         // not wipe detailed data another writer already put under the same step key
-        // (e.g. LiveTutor's line_results / paragraph_summaries_data). Also fixes the
+        // (e.g. ParagraphReading's line_results / paragraph_summaries_data). Also fixes the
         // latent same issue for full-reading (#2503). Non-object values still replace.
         const mergedStepData: Record<string, unknown> = { ...prev.step_data };
         const isPlainObject = (v: unknown): v is Record<string, unknown> =>
@@ -277,14 +280,20 @@ export function useStepProgressPersistence({
     [flushProgress, syncProgress, setSession],
   );
 
+
   const saveStepProgressPatch = useCallback(
     (opts: SaveStepProgressPatchOptions) => {
+      // 一課多篇時，每個步驟頁傳的都是寫死的 base id（`keypoints-table`）——
+      // 三篇會寫進同一個 key，做完第 2 篇第 1 篇也變完成，而且完全沒有徵兆。
+      // 這裡補上網址帶的輪次；單篇課沒有 `#`，keyed === stepId，行為不變（#2930）。
+      const k = opts.currentStepKey ?? '';
+      const keyed = k.startsWith(`${opts.stepId}#`) ? k : opts.stepId;
       persistStepProgressState(
         {
           currentStep: opts.currentStep,
-          completeStep: opts.markCompleted ? opts.stepId : undefined,
+          completeStep: opts.markCompleted ? keyed : undefined,
           stepDataPatch: {
-            [opts.stepId]: {
+            [keyed]: {
               ...opts.stepData,
             },
           },
@@ -360,12 +369,12 @@ export function useStepProgressPersistence({
 
   /**
    * Issue #2532 (review): full tutor reset for「再讀一次」. `resetForRetry()` in
-   * useLiveTutorProgress only clears React state + liveTutor_progress_ localStorage —
+   * useParagraphReadingProgress only clears React state + liveTutor_progress_ localStorage —
    * that's a "half reset". Completion/成績 actually live in FOUR places; this clears
    * ALL of them so navigating away+back or a full reload can't resurrect old data:
    *   1. step_data.tutor — fully replaced with an empty entry (also drops readingAttempt)
-   *   2. steps_completed — 'tutor' removed (so the stepper doesn't stay ticked)
-   *   3. session.readingAttempt / completedParagraphs / completedSteps('tutor')
+   *   2. steps_completed — 'paragraph-reading' removed (so the stepper doesn't stay ticked)
+   *   3. session.readingAttempt / completedParagraphs / completedSteps('paragraph-reading')
    *      (ReportPage reads session.readingAttempt; reload rehydrates it from step_data)
    *   4. completedParagraphsSet (in-memory) + tutor_completed_ / liveTutor_progress_ localStorage
    */
@@ -380,7 +389,7 @@ export function useStepProgressPersistence({
 
     setStepProgressState((prev) => {
       const completed = new Set(prev.steps_completed);
-      completed.delete('tutor');
+      completed.delete('paragraph-reading');
       const next: StepProgressData = {
         current_step: prev.current_step,
         steps_completed: Array.from(completed),
@@ -406,7 +415,7 @@ export function useStepProgressPersistence({
         ...prev,
         readingAttempt: null,
         completedParagraphs: [],
-        completedSteps: (prev.completedSteps ?? []).filter((s) => s !== 'tutor'),
+        completedSteps: (prev.completedSteps ?? []).filter((s) => s !== 'paragraph-reading'),
       };
     });
   }, [

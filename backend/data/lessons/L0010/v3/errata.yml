@@ -1,0 +1,13 @@
+lesson_uid: L0010
+version_id: v3
+notes:
+  errata:
+  - id: E1
+    section: 三 語詞我最棒
+    locator: 「本課語詞」框
+    source: 揮之不去、有朝一日、勸誡、累癱、雀屏中選、疲憊、豐厚、報酬、擦身而過、
+    corrected: 揮之不去、有朝一日、勸誡、累癱、雀屏中選、疲憊、豐厚、報酬、擦身而過、孤注一擲
+    kind: 漏列
+    why: 框內只列 9 個語詞且以頓號結尾，但第 (3) 小題的答案就是「孤注一擲」， 第四大題選項 B 也是它，總表語詞10 同樣列它 —— 學生在框裡找不到要填的字
+    confidence: high
+    evidence: PDF p3 與 document.xml 一致（框內末字為「擦身而過、」）

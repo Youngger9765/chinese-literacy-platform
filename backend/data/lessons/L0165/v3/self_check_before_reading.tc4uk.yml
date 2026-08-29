@@ -1,0 +1,15 @@
+lesson_uid: L0165
+version_id: v3
+self_check_before_reading:
+  instruction: ※ 如果你有做到下列事項，請在□內打勾。
+  items:
+  - 請在不太了解的字、詞或句做記號。
+  - 請在重要的地方、喜歡的語詞、句子或段落做記號
+  no_correct_answer: true
+  notes:
+    items: '第 2 項與其他課型不同：本課寫「請在重要的地方…做記號」（句首多「請在」、句末無句號），
+
+      白話課寫「重要的地方…做上記號。」。原稿如此。'
+    answer_carrier: 學生自填，原稿無勾選
+  slug: tc4uk
+  text_ref: p9d6j

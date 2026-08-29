@@ -1,0 +1,16 @@
+lesson_uid: L0094
+version_id: v3
+notes:
+  errata:
+  - id: E1
+    section: 五 文章重點表
+    locator: 人物一・支持理由 ❷ 的答案
+    source: 已步中年
+    corrected: 已步入中年
+    kind: 漏字
+    why: 課文第 2 段原文是「讓我推測帽主已步入中年」，重點表的答案漏了「入」
+    confidence: medium
+    evidence: document.xml 該儲存格為「推測帽主可能【   已步中年   　】」；課文段 2 為「已步入中年」
+    note: '⛔ **未自動改掉 blanks 的 answer** —— 那是教師版答案鍵，改它等於改答案而不是修抄寫。
+
+      本檔的 answer 保留原稿印的「已步中年」，這條只做登錄。'

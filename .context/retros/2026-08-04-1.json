@@ -1,0 +1,79 @@
+{
+  "date": "2026-08-04",
+  "window": "14d",
+  "window_note": "7d window had ZERO commits on origin/main (main last moved 2026-07-26). Widened to 14d to cover real activity. Step 0.5 staleness guard fired and was resolved with evidence, not overridden.",
+  "metrics": {
+    "commits": 30,
+    "commits_non_merge": 19,
+    "contributors": 1,
+    "prs_merged": 11,
+    "insertions": 3141,
+    "deletions": 258,
+    "net_loc": 2883,
+    "test_loc": 49,
+    "test_ratio": 0.016,
+    "active_days": 3,
+    "sessions": 5,
+    "deep_sessions": 1,
+    "avg_session_minutes": 44,
+    "loc_per_session_hour": 850,
+    "docs_pct": 0.30,
+    "fix_pct": 0.27,
+    "feat_pct": 0.23,
+    "style_pct": 0.13,
+    "copy_pct": 0.07,
+    "peak_hour": 3,
+    "test_files_total": 145
+  },
+  "authors": {
+    "Young": {
+      "commits": 30,
+      "insertions": 3141,
+      "deletions": 258,
+      "test_ratio": 0.016,
+      "top_area": "frontend/public/competitor-research-4b9e2a/"
+    }
+  },
+  "unmerged_work_today": {
+    "date": "2026-08-04",
+    "commits": 7,
+    "insertions": 1711,
+    "branches": [
+      "chore/issue-2590-pages-scope",
+      "docs/issue-2591-reading-demo-audio-qr",
+      "chore/issue-2595-move-converter-skill",
+      "gh-pages"
+    ],
+    "open_prs": [2594, 2596, 2597],
+    "note": "None merged to main. This is why the main streak reads as broken."
+  },
+  "streak_days": 0,
+  "streak_note": "main last committed 2026-07-26 — 9 days without a merge to main. Work exists but sits on branches.",
+  "hotspots": [
+    { "file": "frontend/public/competitor-research-4b9e2a/index.html", "changes": 17 },
+    { "file": "frontend/public/competitor-research-4b9e2a/amira-video.html", "changes": 7 },
+    { "file": "docs/research/2026-07-26-ichinesereader-feature-map.md", "changes": 4 }
+  ],
+  "ship_of_the_period": {
+    "pr": 2574,
+    "title": "競品研究：iChineseReader × Amira 三方對照報告（含 evidence-graded spec）",
+    "commits": 19,
+    "note": "All 19 landed 01:45–04:30 in a single 2h45m session"
+  },
+  "skill_usage": { "codex": 1, "qa": 1, "hook_fires": 0 },
+  "quality_signal_not_in_git": {
+    "overclaims_this_session": 3,
+    "root_cause": "no positive control on empty results",
+    "instances": [
+      "grep | head -3 truncation reported 3 reference points when there were 21",
+      "dead fallback (cmd | grep X || echo 'not set') swallowed a gcloud auth error and reversed the TTS provider conclusion",
+      "claimed 17 files leaked when roughly half were public-source compilations"
+    ]
+  },
+  "prior_retro_compared": {
+    "date": "2026-03-29",
+    "window": "7d",
+    "note": "Different window length — compared on per-day basis only"
+  },
+  "tweetable": "2 weeks to Aug 4: 30 commits, 11 PRs, +3.1k LOC, 1 contributor | biggest ship: competitor research (19 commits in one 2h45m 2am session) | main streak: broken 9d, 3 PRs waiting"
+}

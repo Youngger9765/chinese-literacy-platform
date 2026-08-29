@@ -1,0 +1,82 @@
+lesson_uid: L0028
+generated_by: scripts/build_lesson_manifest.py
+note: 衍生檔，不是真相來源。sections 來自 lesson.yml 的 sections_present，module 歸屬來自 specs/modules/section-to-module.yml。改了那兩者要重產。
+sections:
+- 'no': 一
+  name: 讀全文-做記號
+  module: full_text_annotate
+  slug: 977nw
+  file: full_text_annotate.977nw.yml
+- 'no': 二
+  name: 念順順
+  module: key_reading
+  text_ref: 977nw
+  slug: pckcm
+  file: key_reading.pckcm.yml
+- 'no': 三
+  name: 語詞我最棒
+  module: vocab_definitions
+  text_ref: 977nw
+  slug: x97ak
+  file: vocab_definitions.x97ak.yml
+- 'no': 四
+  name: 語詞應用
+  module: vocab_application
+  text_ref: 977nw
+  slug: hmcf6
+  file: vocab_application.hmcf6.yml
+- 'no': 五
+  name: 文章重點表
+  module: keypoints
+  text_ref: 977nw
+  slug: hj9xc
+  file: keypoints.hj9xc.yml
+- 'no': 六
+  name: 閱讀聚光燈
+  module: spotlight
+  subtitle: 閱讀表格策略
+  text_ref: 977nw
+  slug: rjyaa
+  file: spotlight.rjyaa.yml
+- 'no': 七
+  name: 閱讀理解
+  module: comprehension
+  text_ref: 977nw
+  slug: rnxx6
+  file: comprehension.rnxx6.yml
+- 'no': 八
+  name: 詞語複習
+  module: vocab_review
+  text_ref: 977nw
+  slug: qxx9u
+  file: vocab_review.qxx9u.yml
+- 'no': 九
+  name: 知識補給站
+  module: resources
+  text_ref: 977nw
+  slug: qhv7a
+  file: resources.qhv7a.yml
+dispatch:
+- comprehension
+- full_text_annotate
+- key_reading
+- keypoints
+- resources
+- spotlight
+- vocab_application
+- vocab_definitions
+- vocab_review
+produced:
+- comprehension
+- full_text_annotate
+- key_reading
+- keypoints
+- resources
+- spotlight
+- vocab_application
+- vocab_definitions
+- vocab_review
+absent_from_source: []
+pdf_pages: null
+dispatch_pages: {}
+pages_unavailable: LibreOffice 整份轉檔無窮迴圈（300s 逾時）。解法是拆 subset 再轉，見 extract-lesson-multimodal ②③

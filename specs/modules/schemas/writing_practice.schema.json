@@ -1,0 +1,58 @@
+{
+  "$id": "lingoleap/module/writing_practice",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "從 4 份實測 yml 長出來，不是手寫的。required = 每一課都有的欄位（少了就是回歸）；properties 列出所有已觀測欄位，配合 additionalProperties: false —— 現況全過，任何新發明的欄位名會紅。",
+  "properties": {
+    "boxed_chars": {
+      "type": "array",
+      "x-seen-in": "1/4"
+    },
+    "columns": {
+      "type": "array",
+      "x-seen-in": "4/4"
+    },
+    "instruction": {
+      "type": "string",
+      "x-seen-in": "4/4"
+    },
+    "label": {
+      "type": "string",
+      "x-seen-in": "1/4"
+    },
+    "notes": {
+      "type": "object",
+      "x-seen-in": "1/4"
+    },
+    "slug": {
+      "type": "string",
+      "x-seen-in": "4/4"
+    },
+    "text_ref": {
+      "type": "string",
+      "x-seen-in": "4/4"
+    },
+    "words": {
+      "type": "array",
+      "x-seen-in": "4/4"
+    }
+  },
+  "required": [
+    "columns",
+    "instruction",
+    "slug",
+    "text_ref",
+    "words"
+  ],
+  "title": "writing_practice module payload",
+  "type": "object",
+  "x-core-90pct": [
+    "columns",
+    "instruction",
+    "slug",
+    "text_ref",
+    "words"
+  ],
+  "x-enforcement": "error",
+  "x-lessons-observed": 4
+}

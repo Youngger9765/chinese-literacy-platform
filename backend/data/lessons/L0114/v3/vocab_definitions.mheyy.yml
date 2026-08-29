@@ -1,0 +1,67 @@
+lesson_uid: L0114
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: '請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+
+    🅐 從本課語詞框框，找語詞。
+
+    🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+
+    🅒 問同學。'
+  vocabulary_bank:
+  - 瀕危
+  - 坎坷
+  - 絕種
+  - 棲地
+  - 植被
+  - 疾駛
+  - 緩不濟急
+  - 路殺
+  - 補償機制
+  - 干預
+  - 破碎化
+  - 掠食者
+  vocabulary_bank_label: 本課語詞
+  items:
+  - index: 1
+    word: 絕種
+    definition: 指一個物種在地球上完全不存在了。
+  - index: 2
+    word: 棲地
+    definition: 動物生活、覓食、繁殖的地方。
+  - index: 3
+    word: 坎坷
+    definition: 原指道路不平；也比喻人生經歷不順、處境艱難。
+  - index: 4
+    word: 植被
+    definition: 植：植物；被：覆蓋指。指地表面被植物覆蓋的情況，如草、灌木和樹木等。
+  - index: 5
+    word: 瀕危
+    definition: 瀕：靠近、快要到；危：危險。物種族群數量很少，面臨消失或絕種的危險。
+  - index: 6
+    word: 破碎化
+    definition: 原本完整的一大片環境被切割成很多小塊，變得零散。
+  - index: 7
+    word: 路殺
+    definition: 路：道路；殺：造成死亡。動物在道路上被車輛撞死。
+  - index: 8
+    word: 掠食者
+    definition: 掠：奪取、搶走。以捕食其他動物為生的動物。
+  - index: 9
+    word: 干預
+    definition: 以外力介入，改變原本的進行方式或結果。
+  - index: 10
+    word: 緩不濟急
+    definition: 方法太慢，來不及解決眼前的急迫問題。
+  - index: 11
+    word: 補償機制
+    definition: 因損失而提供補貼或賠償的一套做法。
+  - index: 12
+    word: 疾駛
+    definition: 疾：快；駛：車子行駛。車子開得很快。
+  notes:
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
+    items: 第 4 題的定義原稿印「被：覆蓋指。」——「指」字疑為贅字，但兩處（PDF 與文字層）一致，照原樣抄、不列勘誤
+  slug: mheyy
+  text_ref: 69exm

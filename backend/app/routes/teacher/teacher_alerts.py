@@ -14,6 +14,12 @@ from ...models.user import User
 from ...services.prediction_service import predict_learning_difficulty
 from .teacher_schemas import AtRiskStudentResponse, StudentAlertResponse
 
+
+#: PRD 兩處都寫「超過 7 天沒進展」（docs/PRD.md:71、652）。
+#: 實作原本是 14 天，程式裡沒有寫任何理由 —— 沒註解、沒 issue 連結。
+#: 既然沒有依據就照 PRD；而且 14 天是半個月，對「早期介入」來說太晚（#2787）。
+INACTIVE_DAYS = 7
+
 router = APIRouter(tags=["teacher"])
 logger = logging.getLogger(__name__)
 
@@ -30,7 +36,7 @@ def get_classroom_alerts(
     """Detect at-risk students in a classroom.
 
     Alert types:
-    - inactive: no sessions in last 14 days
+    - inactive: no sessions in last INACTIVE_DAYS days
     - low_performance: average score below 50
     - declining: score declining trend (last 3 sessions decreasing)
     """
@@ -48,7 +54,7 @@ def get_classroom_alerts(
 
     student_ids = [e.student_id for e in enrollments]
     now = datetime.now(timezone.utc)
-    fourteen_days_ago = now - timedelta(days=14)
+    inactive_cutoff = now - timedelta(days=INACTIVE_DAYS)
 
     # Batch-load all scored sessions for alert analysis (single query instead of N)
     all_scored_sessions = (
@@ -85,7 +91,7 @@ def get_classroom_alerts(
         latest = latest_by_student.get(student.id)
         last_date = latest.started_at if latest else None
 
-        is_inactive = last_date is None or _make_aware(last_date) < fourteen_days_ago
+        is_inactive = last_date is None or _make_aware(last_date) < inactive_cutoff
         if is_inactive:
             days_since = (
                 int((now - _make_aware(last_date)).days) if last_date else None

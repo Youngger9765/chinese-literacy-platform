@@ -54,11 +54,31 @@ export interface LessonRendererProps {
   onExerciseChange?: (state: LessonExerciseState) => void;
   onComplete?: () => void;
   initialState?: Record<string, unknown>;
+  /** 呼叫端說自己是哪一步（`閱讀理解` / `閱讀聚光燈`）。省略時沿用舊行為。 */
+  sectionLabel?: string;
+  /**
+   * 是否顯示「閱讀學習 ＋ 課名」那條頁首。預設 **不顯示**。
+   *
+   * #2897：學習流程的頂欄已經寫著《課名》· 步驟名 ＋ 一行提示，這條頁首讓
+   * `閱讀理解` 與 `閱讀聚光燈` 兩步的畫面上出現第三次課名，還多一個對學生
+   * 沒有意義的 eyebrow「閱讀學習」——其餘九步都沒有。它原本是給 `DevLessonPage`
+   * 那種沒有頂欄的獨立頁用的，所以預設改成關閉、由那個頁自己打開：新的學習
+   * 步驟接上來時不會再默默多一份課名。
+   */
+  showLessonHeader?: boolean;
 }
 
 interface ExerciseMeta {
   gradable: boolean; // participates in allDone gating (custom/needsReview excluded)
 }
+
+/**
+ * Exercise kinds paginated one-at-a-time in the answer column (see the long comment at
+ * the `singleQuestionBlocks` useMemo below for why fill_in_blank joined multiple_choice
+ * here). Module-level so its identity is stable across renders — declaring it inside the
+ * component would need to be a useMemo dependency for no benefit.
+ */
+export const PAGINATED_QUESTION_KINDS = new Set(['multiple_choice', 'fill_in_blank']);
 
 /** Pre-compute per-block render metadata (paragraph numbers, figure indices, exercise
  *  gradability) in one pass so the render path is pure. */
@@ -98,6 +118,8 @@ const LessonRenderer: React.FC<LessonRendererProps> = ({
   onExerciseChange,
   onComplete,
   initialState,
+  sectionLabel,
+  showLessonHeader = false,
 }) => {
   const resolvedLessonCode =
     lessonCode || story?.lessonCode || story?.lesson_code || lesson.lessonCode;
@@ -222,11 +244,66 @@ const LessonRenderer: React.FC<LessonRendererProps> = ({
   }, [lesson.blocks]);
   const useSplit = readingBlocks.length > 0 && exerciseBlocks.length > 0;
 
+  // 目前顯示第幾題。
+  const [exerciseIdx, setExerciseIdx] = React.useState(0);
+
+  // ⚠️ **分頁對象是「一串同型小題」，不是「整份都是選擇題」。** Young 要的是
+  // 「閱讀理解這邊都是選擇題，可以一題一題出嗎」——那是針對一連串各自獨立、
+  // 一題一答的小題。重點表、造句(guided_steps/graphic_text_integration/
+  // keypoints_table/custom)這類**結構化的整份工作單**才不分頁：分頁之後
+  // 學生第一頁看到的可能是半張表，其餘藏起來；第一版就是這樣，弄紅了
+  // 「這一課有可作答的輸入」的既有測試（見下方 `混著非選擇題時` 那組）。
+  //
+  // ⚠️ 「小題」不只 multiple_choice。第一版判準只認 `kind === 'multiple_choice'`，
+  // 而 20011（以及全庫 175 課裡 126 課、72%）同時有 5 題 MCQ **和** 8 題
+  // fill_in_blank（語詞應用：一句話 + 詞庫按鈕，結構跟 MCQ 一模一樣，
+  // 一句就是一題）。分頁分母對了（`1/5`），可是 8 個 fill_in_blank 區塊
+  // 全部不算「選擇題」，被「非選擇題照舊全顯示」那條規則整批放行 ——
+  // 部署了、chunk 裡有那段 code、測試也綠，畫面還是一次列出 9 題
+  // （1 MCQ 分頁正確 + 8 fill_in_blank 照舊全開）。是線上真資料才看得出來：
+  // 本機 fixture 從沒餵過 fill_in_blank。
+  const singleQuestionBlocks = React.useMemo(
+    () => exerciseBlocks.filter(
+      (b) => PAGINATED_QUESTION_KINDS.has(
+        (b as { question?: { kind?: string } }).question?.kind ?? '',
+      ),
+    ),
+    [exerciseBlocks],
+  );
+  const paginateExercises = singleQuestionBlocks.length > 1;
+  // 單欄分支畫的是 `lesson.blocks`（課文與練習混在一起）。只換掉練習那幾個，
+  // 課文區塊照舊全部顯示 —— 學生要邊看課文邊作答。
+  const singleVisibleBlocks = React.useMemo(() => {
+    if (!paginateExercises) return lesson.blocks;
+    const shown = singleQuestionBlocks[exerciseIdx];
+    return lesson.blocks.filter((b) => !singleQuestionBlocks.includes(b) || b === shown);
+  }, [lesson.blocks, singleQuestionBlocks, exerciseIdx, paginateExercises]);
+
+  const visibleExercises = React.useMemo(
+    () => {
+      if (!paginateExercises) return exerciseBlocks;
+      // 只換掉小題那幾個；重點表、造句這類結構化工作單照舊全部顯示 ——
+      // 把它們藏到第二頁會讓學生第一頁看到半張表（第一版就是這樣，
+      // 弄紅兩條「這一課有可作答的輸入」的既有測試）。
+      const shown = singleQuestionBlocks[exerciseIdx];
+      return exerciseBlocks.filter((b) => !singleQuestionBlocks.includes(b) || b === shown);
+    },
+    [exerciseBlocks, singleQuestionBlocks, exerciseIdx, paginateExercises],
+  );
+
   // Single-column card header: 聚光燈作答 when the flow carries exercises, otherwise
   // it is pure reference reading (mirrors the split view's two card titles).
+  // `sectionLabel` 是呼叫端說「我是哪一步」。沒給就沿用舊行為。
+  //
+  // 這個 renderer 同時服務聚光燈與閱讀理解，而原本的判準是
+  //「有練習題 ⇒ 我是閱讀聚光燈」—— 閱讀理解也有練習題，於是那一頁掛上了
+  // 別人的名字（Young 2026-08-19：「閱讀理解，為什麼標題是 閱讀聚光燈？」）。
+  //
+  // 只有呼叫端知道自己是誰，所以由它說，不在這裡推論。
   const singleHeader =
     exerciseBlocks.length > 0
-      ? { icon: 'highlight', label: '閱讀聚光燈' }
+      ? { icon: sectionLabel === '閱讀聚光燈' || !sectionLabel ? 'highlight' : 'quiz',
+          label: sectionLabel ?? '閱讀聚光燈' }
       : { icon: 'menu_book', label: '參考課文' };
 
   const notices = (
@@ -248,14 +325,16 @@ const LessonRenderer: React.FC<LessonRendererProps> = ({
       data-layout={useSplit ? 'reading-split' : layout}
       className="flex flex-col flex-1 min-h-0 overflow-hidden"
     >
-      <header className="border-b border-surface-container-high pb-4 mb-4 shrink-0">
-        <div className="font-headline font-bold text-accent text-sm uppercase tracking-wider">
-          閱讀學習
-        </div>
-        {(lesson.title ?? null) && (
-          <h2 className="font-headline text-xl font-bold text-on-surface mt-1">{lesson.title}</h2>
-        )}
-      </header>
+      {showLessonHeader && (
+        <header className="border-b border-surface-container-high pb-4 mb-4 shrink-0">
+          <div className="font-headline font-bold text-accent text-sm uppercase tracking-wider">
+            閱讀學習
+          </div>
+          {(lesson.title ?? null) && (
+            <h2 className="font-headline text-xl font-bold text-on-surface mt-1">{lesson.title}</h2>
+          )}
+        </header>
+      )}
 
       {useSplit ? (
         // Two-pane: LEFT 課文(+其圖表)可捲動對照;RIGHT 聚光燈答題區可捲動。
@@ -294,15 +373,32 @@ const LessonRenderer: React.FC<LessonRendererProps> = ({
             </section>
           )}
           <section
-            aria-label="閱讀聚光燈作答區"
+            aria-label={`${singleHeader.label}作答區`}
             className={`${readingOpen ? 'lg:col-span-5' : 'lg:col-span-12'} lg:min-h-0 lg:overflow-y-auto custom-scrollbar lg:pr-1`}
           >
-            <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8">
+            {/* #2832 — the single-column path below (line ~437) already got the
+                max-w-3xl treatment for "字太小，右邊留一堆空白" (2026-08-19). This
+                is the sibling: same full-bleed card, reached whenever a lesson has
+                BOTH reference text and exercises but the reading panel starts
+                collapsed (`readingOpen` defaults false) — i.e. every 閱讀理解 page
+                with 參考課文 on first load. Only constrain width in the collapsed
+                (12-col) state; the 5-col split state is already narrow. */}
+            <div
+              className={`bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8 ${
+                readingOpen ? '' : 'mx-auto w-full max-w-3xl'
+              }`}
+            >
               <div className="flex items-center justify-between gap-2 mb-4">
                 <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-accent text-xl">highlight</span>
+                  {/* ⚠️ 雙欄分支原本也寫死「閱讀聚光燈」。上一個 commit 只改了單欄那條，
+                      **線上 QA 才抓到閱讀理解頁的標題還是錯的** —— 那頁有課文所以走雙欄，
+                      而本機測試資料沒有課文區塊、走單欄，於是測試是綠的。
+                      同一個缺口的兩個位置，2026-08-19 第六次。 */}
+                  <span className="material-symbols-outlined text-accent text-xl">
+                    {singleHeader.icon}
+                  </span>
                   <span className="font-headline font-bold text-on-surface text-sm uppercase tracking-wider">
-                    閱讀聚光燈
+                    {singleHeader.label}
                   </span>
                 </div>
                 {readingBlocks.length > 0 && (
@@ -319,9 +415,37 @@ const LessonRenderer: React.FC<LessonRendererProps> = ({
                 )}
               </div>
               <div className="space-y-6">
-                {exerciseBlocks.map((block) => (
+                {/* 一次一題（Young 2026-08-19：「閱讀理解這邊都是選擇題，可以一題一題出嗎？」）。
+                    整份一次列出來，學生要自己找現在做到哪 —— 而旁邊那條路
+                    （MultipleChoiceExercise）本來就是一次一題，兩條路行為不一致。 */}
+                {visibleExercises.map((block) => (
                   <div key={block.id}>{renderBlock(block)}</div>
                 ))}
+                {paginateExercises ? (
+                  <div className="flex items-center justify-between gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setExerciseIdx((i) => Math.max(0, i - 1))}
+                      disabled={exerciseIdx === 0}
+                      className="px-4 h-9 rounded-full text-sm font-medium border border-outline-variant text-on-surface-variant disabled:opacity-40 disabled:cursor-not-allowed hover:bg-surface-container-high transition-colors"
+                    >
+                      上一題
+                    </button>
+                    <span className="text-sm text-on-surface-variant tabular-nums">
+                      {exerciseIdx + 1} / {singleQuestionBlocks.length}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setExerciseIdx((i) => Math.min(singleQuestionBlocks.length - 1, i + 1))
+                      }
+                      disabled={exerciseIdx >= singleQuestionBlocks.length - 1}
+                      className="px-4 h-9 rounded-full text-sm font-medium border border-outline-variant text-on-surface-variant disabled:opacity-40 disabled:cursor-not-allowed hover:bg-surface-container-high transition-colors"
+                    >
+                      下一題
+                    </button>
+                  </div>
+                ) : null}
                 {notices}
               </div>
             </div>
@@ -329,7 +453,12 @@ const LessonRenderer: React.FC<LessonRendererProps> = ({
         </div>
       ) : (
         <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar pr-1">
-          <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8">
+          {/* 內容寬度收到可讀範圍並置中（`~/.claude/rules/frontend-design.md`：
+              max-width 720–820px 置中、body ≥18px）。
+              原本卡片撐滿 1408px：一題四個短選項橫跨 1400px，右邊當然一片空 ——
+              Young 2026-08-19：「字太小，右邊留一堆空白做什麼？」
+              留白不是靠加東西填滿，是把行長收到讀得順的寬度。 */}
+          <div className="mx-auto w-full max-w-3xl bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8">
             <div className="flex items-center gap-2 mb-4">
               <span className="material-symbols-outlined text-accent text-xl">
                 {singleHeader.icon}
@@ -339,9 +468,35 @@ const LessonRenderer: React.FC<LessonRendererProps> = ({
               </span>
             </div>
             <div className="space-y-6">
-              {lesson.blocks.map((block) => (
+              {/* 單欄也一次一題。這條路是「沒有課文區塊」時走的 ——
+                  Young 看到的閱讀理解頁就在這裡。第一版我只改了雙欄那條，
+                  測試照樣紅，因為測試資料沒有課文區塊。 */}
+              {singleVisibleBlocks.map((block) => (
                 <div key={block.id}>{renderBlock(block)}</div>
               ))}
+              {paginateExercises ? (
+                <div className="flex items-center justify-between gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setExerciseIdx((i) => Math.max(0, i - 1))}
+                    disabled={exerciseIdx === 0}
+                    className="px-4 h-9 rounded-full text-sm font-medium border border-outline-variant text-on-surface-variant disabled:opacity-40 disabled:cursor-not-allowed hover:bg-surface-container-high transition-colors"
+                  >
+                    上一題
+                  </button>
+                  <span className="text-sm text-on-surface-variant tabular-nums">
+                    {exerciseIdx + 1} / {singleQuestionBlocks.length}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setExerciseIdx((i) => Math.min(singleQuestionBlocks.length - 1, i + 1))}
+                    disabled={exerciseIdx >= singleQuestionBlocks.length - 1}
+                    className="px-4 h-9 rounded-full text-sm font-medium border border-outline-variant text-on-surface-variant disabled:opacity-40 disabled:cursor-not-allowed hover:bg-surface-container-high transition-colors"
+                  >
+                    下一題
+                  </button>
+                </div>
+              ) : null}
             </div>
             {notices}
           </div>

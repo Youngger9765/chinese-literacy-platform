@@ -1,7 +1,7 @@
 /**
  * render-smoke.test.tsx — Gate ① of the frontend render-safety net (#2289)
  *
- * Purpose: mount each of the 12 main step components + LiveTutorControls and
+ * Purpose: mount each of the 12 main step components + ParagraphReadingControls and
  * assert they do NOT throw a TDZ ReferenceError at mount.
  *
  * Scope: this is NOT a functional test. It only guards against mount-time
@@ -10,7 +10,7 @@
  * values are intentionally swallowed — they are a different risk profile from a
  * TDZ that white-screens the whole page.
  *
- * #2279 postmortem: LiveTutorControls declared `const stopPlaybackSync =
+ * #2279 postmortem: ParagraphReadingControls declared `const stopPlaybackSync =
  * useCallback(...)` AFTER the useEffect that listed it in deps → TDZ on mount →
  * 逐段朗讀 白屏. tsc + vite build did NOT catch it. This suite would have.
  *
@@ -93,10 +93,10 @@ vi.mock('react-router-dom', () => ({
 
 // ── Component imports (all default exports) ──────────────────────────────────
 import Intro from '../components/reading-steps/Intro';
-import ReadingAnnotation from '../components/reading-steps/ReadingAnnotation';
-import LiveTutor from '../components/reading-steps/live-tutor/LiveTutor';
-import LiveTutorControls from '../components/reading-steps/live-tutor/LiveTutorControls';
-import FullReading from '../components/reading-steps/FullReading';
+import ReadingAnnotation from '../components/reading-steps/FullTextAnnotate';
+import ParagraphReading from '../components/reading-steps/paragraph-reading/ParagraphReading';
+import ParagraphReadingControls from '../components/reading-steps/paragraph-reading/ParagraphReadingControls';
+import KeyPassageReading from '../components/reading-steps/KeyPassageReading';
 import VocabDefinitionMatch from '../components/reading-steps/VocabDefinitionMatch';
 import VocabApplication from '../components/reading-steps/VocabApplication';
 import StrategyExercise from '../components/reading-steps/StrategyExercise';
@@ -106,21 +106,30 @@ import VocabWordSearch from '../components/reading-steps/VocabWordSearch';
 import KnowledgeStation from '../components/reading-steps/KnowledgeStation';
 import AssessmentReport from '../components/reading-steps/AssessmentReport';
 import LessonRenderer from '../components/lesson-content/LessonRenderer';
+import StepActionBar from '../components/learning/StepActionBar';
+import StepCoachCard, { StepCoachHelpButton } from '../components/learning/StepCoachCard';
 import { LessonSchema } from '../schema/lessonContent';
 import LoginPage from '../pages/LoginPage';
+import GuestReadingPage from '../pages/GuestReadingPage';
+import LessonAudioTable from '../pages/admin/lesson-audio/LessonAudioTable';
+import KeypointsFollowupQuestions from '../components/reading-steps/KeypointsFollowupQuestions';
+import ClassicalText from '../components/reading-steps/ClassicalText';
+import ClassicalWordMatching from '../components/reading-steps/ClassicalWordMatching';
+import ClassicalSentenceMatching from '../components/reading-steps/ClassicalSentenceMatching';
+import ClassicalSelfChallenge from '../components/reading-steps/ClassicalSelfChallenge';
 
 // ── Minimal fixtures ─────────────────────────────────────────────────────────
 
 const MINIMAL_STORY: Story = {
   id: '1',
   title: '測試課文',
-  level: 1,
+  level: '1',
   content: ['這是第一段。', '這是第二段。'],
   paragraphs: ['這是第一段。', '這是第二段。'],
   thumbnail: '',
   category: 'Fable',
   filename: 'smoke-test.yml',
-  grade: 4,
+  grade: '4',
   charCount: 10,
   vocabulary: [{ word: '測試', definition: '試驗' }],
 };
@@ -316,14 +325,55 @@ describe('render-smoke: 12 step components mount without TDZ ReferenceError (#22
     mountGuard('Intro', <Intro story={MINIMAL_STORY} onStartReading={vi.fn()} onBack={vi.fn()} />);
   });
 
+  // #2752 Phase 2: goal_box feeds the 本課學習策略 box, 70/175 lessons.
+  it('Intro (with goal_box)', () => {
+    mountGuard(
+      'Intro-goalBox',
+      <Intro
+        story={{ ...MINIMAL_STORY, goalBox: { title: '閱讀之旅的起點', strategy_line: '目標策略：讀出故事道理' } }}
+        onStartReading={vi.fn()}
+        onBack={vi.fn()}
+      />,
+    );
+  });
+
   it('ReadingAnnotation', () => {
     mountGuard('ReadingAnnotation', <ReadingAnnotation story={MINIMAL_STORY} onFinish={vi.fn()} />);
   });
 
-  it('LiveTutor', () => {
+  // #2752 Phase 2: a distinct render path (selfCheckBeforeReading banner), 58/175 lessons.
+  it('ReadingAnnotation (with self_check_before_reading)', () => {
     mountGuard(
-      'LiveTutor',
-      <LiveTutor
+      'ReadingAnnotation-selfCheck',
+      <ReadingAnnotation
+        story={{ ...MINIMAL_STORY, selfCheckBeforeReading: { items: ['請在不太了解的字、詞或句做記號。'] } }}
+        onFinish={vi.fn()}
+      />,
+    );
+  });
+
+  // #2752 Phase 3: multi_text_parts + cross_text_banner + 閱讀接力, 4/175 lessons.
+  it('ReadingAnnotation (with multi_text_parts, cross_text_banner, 閱讀接力)', () => {
+    mountGuard(
+      'ReadingAnnotation-multiText',
+      <ReadingAnnotation
+        story={{
+          ...MINIMAL_STORY,
+          multiTextParts: [{ lesson_heading: '第23課', body: { paragraphs: [{ idx: 1, text: '段落一' }] } }],
+          crossTextBanner: { title_block: { title: '跨課文習作' } },
+          keypointsFollowupQuestions: {
+            items: [{ type: 'single', label: '❶', prompt: '哪一項最完整？', options: { '1': 'a' }, answer: 1 }],
+          },
+        }}
+        onFinish={vi.fn()}
+      />,
+    );
+  });
+
+  it('ParagraphReading', () => {
+    mountGuard(
+      'ParagraphReading',
+      <ParagraphReading
         story={MINIMAL_STORY}
         rightPanelWidth={400}
         onPanelWidthChange={vi.fn()}
@@ -333,8 +383,21 @@ describe('render-smoke: 12 step components mount without TDZ ReferenceError (#22
     );
   });
 
-  it('FullReading', () => {
-    mountGuard('FullReading', <FullReading story={MINIMAL_STORY} onFinish={vi.fn()} onBack={vi.fn()} />);
+  it('KeyPassageReading', () => {
+    mountGuard('KeyPassageReading', <KeyPassageReading story={MINIMAL_STORY} onFinish={vi.fn()} onBack={vi.fn()} />);
+  });
+
+  // #2559: 重點朗讀 — exercise the keyReading.passage branch (readingContent = [passage]),
+  // not just the full-text fallback, so the pilot code path is smoke-covered.
+  it('KeyPassageReading (重點朗讀 keyReading passage)', () => {
+    const storyWithKeyReading: Story = {
+      ...MINIMAL_STORY,
+      keyReading: { passage: '這是老師指定的重點段落，只練這一段。', extentChars: 18, source: 'docx-extract' },
+    };
+    mountGuard(
+      'KeyPassageReading-keyReading',
+      <KeyPassageReading story={storyWithKeyReading} onFinish={vi.fn()} onBack={vi.fn()} />,
+    );
   });
 
   it('VocabDefinitionMatch', () => {
@@ -353,6 +416,14 @@ describe('render-smoke: 12 step components mount without TDZ ReferenceError (#22
     mountGuard('StoryStructureTable', <StoryStructureTable storyId="1" />);
   });
 
+  // #2752 Phase 3: L0063-shape keypointsFollowupQuestions, 2/175 lessons.
+  it('KeypointsFollowupQuestions', () => {
+    mountGuard(
+      'KeypointsFollowupQuestions',
+      <KeypointsFollowupQuestions questions={[{ answer: 'A', stem: '題目一', options: { A: '選項一' } }]} />,
+    );
+  });
+
   it('ComprehensionChat', () => {
     mountGuard(
       'ComprehensionChat',
@@ -364,6 +435,17 @@ describe('render-smoke: 12 step components mount without TDZ ReferenceError (#22
     mountGuard('VocabWordSearch', <VocabWordSearch story={MINIMAL_STORY} onFinish={vi.fn()} />);
   });
 
+  // #2752 Phase 3: writing_practice appended section, 4/175 lessons.
+  it('VocabWordSearch (with writing_practice)', () => {
+    mountGuard(
+      'VocabWordSearch-writingPractice',
+      <VocabWordSearch
+        story={{ ...MINIMAL_STORY, writingPractice: { words: ['顫顫巍巍', '尷尬'] } }}
+        onFinish={vi.fn()}
+      />,
+    );
+  });
+
   it('KnowledgeStation', () => {
     mountGuard('KnowledgeStation', <KnowledgeStation story={MINIMAL_STORY} onFinish={vi.fn()} />);
   });
@@ -371,11 +453,35 @@ describe('render-smoke: 12 step components mount without TDZ ReferenceError (#22
   it('AssessmentReport', () => {
     mountGuard('AssessmentReport', <AssessmentReport session={MINIMAL_SESSION} onRetry={vi.fn()} />);
   });
+
+  // 文言文專屬 steps (#2752). Mounted both with and without their data present —
+  // the empty-state branch is a distinct render path from the content branch.
+  it('ClassicalText (empty state)', () => {
+    mountGuard('ClassicalText-empty', <ClassicalText story={MINIMAL_STORY} onFinish={vi.fn()} />);
+  });
+  it('ClassicalText (with content)', () => {
+    mountGuard(
+      'ClassicalText-content',
+      <ClassicalText
+        story={{ ...MINIMAL_STORY, classicalText: { paragraphs: ['桓公曰'] } }}
+        onFinish={vi.fn()}
+      />,
+    );
+  });
+  it('ClassicalWordMatching', () => {
+    mountGuard('ClassicalWordMatching', <ClassicalWordMatching story={MINIMAL_STORY} onFinish={vi.fn()} />);
+  });
+  it('ClassicalSentenceMatching', () => {
+    mountGuard('ClassicalSentenceMatching', <ClassicalSentenceMatching story={MINIMAL_STORY} onFinish={vi.fn()} />);
+  });
+  it('ClassicalSelfChallenge', () => {
+    mountGuard('ClassicalSelfChallenge', <ClassicalSelfChallenge story={MINIMAL_STORY} onFinish={vi.fn()} />);
+  });
 });
 
-describe('render-smoke: LiveTutorControls — TDZ guard for stopPlaybackSync (#2279)', () => {
-  it('LiveTutorControls', () => {
-    mountGuard('LiveTutorControls', <LiveTutorControls {...LIVE_TUTOR_CONTROLS_PROPS} />);
+describe('render-smoke: ParagraphReadingControls — TDZ guard for stopPlaybackSync (#2279)', () => {
+  it('ParagraphReadingControls', () => {
+    mountGuard('ParagraphReadingControls', <ParagraphReadingControls {...LIVE_TUTOR_CONTROLS_PROPS} />);
   });
 });
 
@@ -392,5 +498,42 @@ describe('render-smoke: LessonRenderer — Phase-2 unified block renderer (#2289
 describe('render-smoke: LoginPage — quick-login handler mounts without TDZ (#2410)', () => {
   it('LoginPage', () => {
     mountGuard('LoginPage', <LoginPage onSwitchToRegister={vi.fn()} />);
+  });
+});
+
+describe('render-smoke: 自學模式共用外框（#2897）', () => {
+  it('StepActionBar', () => {
+    mountGuard(
+      'StepActionBar',
+      <StepActionBar layout="stack">
+        <button type="button">下一關</button>
+      </StepActionBar>,
+    );
+  });
+
+  it('StepCoachCard', () => {
+    mountGuard(
+      'StepCoachCard',
+      <StepCoachCard title="語詞應用怎麼玩？" onDemo={vi.fn()} onDismiss={vi.fn()}>
+        讀句子，從下面選出最適合填進空格的語詞。
+      </StepCoachCard>,
+    );
+  });
+
+  it('StepCoachHelpButton', () => {
+    mountGuard('StepCoachHelpButton', <StepCoachHelpButton onClick={vi.fn()} />);
+  });
+});
+
+describe('render-smoke: LessonAudioTable — admin audio table mounts without TDZ (#2622)', () => {
+  it('LessonAudioTable', () => {
+    mountGuard('LessonAudioTable', <LessonAudioTable />);
+  });
+
+  it('GuestReadingPage', () => {
+    // Replaces the DemoReadingPage case: that page was the second audio source
+    // for 讀全文-做記號 and is gone. This is the page an anonymous QR visitor
+    // now lands on.
+    mountGuard('GuestReadingPage', <GuestReadingPage />);
   });
 });

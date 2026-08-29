@@ -1,0 +1,37 @@
+lesson_uid: L0022
+version_id: v3
+level: 5
+genre: 抒情文
+strategy: 品格力──自我覺察─當我「吃醋」時
+header_target: 目標議題：品格力──情緒覺察與調節
+課文學習單: 張筱晴
+lesson_no: 10
+series: 一般
+lesson_seq: 5100
+intro: 這篇文章記錄了作者在學校裡一段複雜的心情轉折。當作者原本想找朋友阿葉一起去福利社時，卻發現阿葉正和另一位同學聊得十分開心。作者因此感到有些不是滋味，內心出現了許多矛盾的想法，像是失落、生氣，卻又覺得這可能只是小事。作者試圖忽略這種感受，但思緒卻不斷被牽引。後來阿葉回到教室，作者因為內心的糾結而選擇沉默回應。文章描寫了作者面對這種難以言喻的情緒時的困惑與掙扎，並試圖理解這種「吃醋」的滋味。
+notes:
+  intro_topic: 品格力：SEL自我覺察
+  master_sheet_vocabulary: 總表語詞5「思緒一如往常」實為「思緒」與「一如往常」兩詞，且語詞6 欄空白
+strategy_explained: '這一課要一起練習的是，當你覺得心裡怪怪、有點不開心，但又說不太清楚是什麼感覺的時候，**學會發現和認識自己的情緒**
+
+  這篇文章裡，作者本來想找阿葉，結果阿葉跟別人玩得很開心，作者心裡就好像有東西卡住一樣，不知道為什麼難過、有點生氣，又覺得好像沒什麼大不了的，這些複雜的感覺，就是我們這課要認識的「吃醋」滋味
+
+  讀的時候，你可以試著想想，當你讀到作者發現阿葉跟別人玩時，你的心裡有沒有出現類似的感覺，試著說說看那種「怪怪的」感覺是什麼'
+strategy_sources:
+  worksheet: null
+  master_sheet: 品格力──自我覺察─當我「吃醋」時
+  previous: 品格力──情緒覺察與調節
+source_profile:
+  class: standard
+  note: 單一錨點 + 有計數欄 + idx 唯一 —— 走主路徑
+  has_key_reading_section: true
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: null
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 1
+  has_counter_column: true
+  body_in_tables: true
+  invisible_chars_docx_only: true
+  profiled: '2026-08-24'

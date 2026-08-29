@@ -1,0 +1,28 @@
+lesson_uid: L0145
+version_id: v3
+notes:
+  errata:
+  - id: E1
+    section: 一 讀全文-做記號
+    locator: 第 1 段的段號
+    source: ㄧ
+    corrected: 一
+    kind: 字元誤用
+    why: '段號欄八個號碼中，第一個在 document.xml 裡是 **U+3127 BOPOMOFO LETTER I（注音符號ㄧ）**，
+
+      不是 U+4E00「一」。其餘七個（二三四五六七八）都是正常的國字數字。
+
+      兩者在多數字型下幾乎一模一樣，PDF 上看不出來。
+
+      ⚠️ 這跟同批 L0135 第 1 段段號被打成 EM DASH 是同一族的毛病（第一個號碼特別容易打錯）。'
+    confidence: high
+    evidence: document.xml 該儲存格單一字元 U+3127；PDF p1 左緣同位置
+  - id: E2
+    section: 二 念順順
+    locator: 指示語的括號
+    source: 從指定段落（二    )開始朗讀
+    corrected: 從指定段落（二    ）開始朗讀
+    kind: 全半形括號不成對
+    why: 開括號是全形「（」，閉括號是半形「)」。同批其他課兩邊都是全形。
+    confidence: high
+    evidence: document.xml 念順順文字方塊；PDF p3 一致

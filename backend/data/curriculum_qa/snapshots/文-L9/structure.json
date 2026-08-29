@@ -1,81 +1,86 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 6,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "主角",
+      "居住地",
+      "家世",
+      "天\n才\n時\n期"
+    ],
+    "template_kind": "theme_facts"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
+      "interactive_type": "fill_blank",
       "label": "主角",
-      "value": "",
-      "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "",
-          "value": "【　　　】",
-          "interactive_type": "fill_blank"
-        }
-      ]
+      "value": "【　　　】"
     },
     {
+      "interactive_type": "display",
       "label": "背景",
-      "value": "",
-      "interactive_type": "display",
       "sub_rows": [
         {
-          "label": "",
-          "value": "居住地：【　　　】",
-          "interactive_type": "fill_blank"
-        },
-        {
-          "label": "",
-          "value": "家  世：【　　　】",
-          "interactive_type": "fill_blank"
-        }
-      ]
-    },
-    {
-      "label": "發展或變化",
-      "value": "",
-      "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "天\n才\n時\n期",
-          "value": "【　　　】歲開始展現天才。\n1.不曾見過【　　　】，沒有人教，卻會寫詩，還能簽名。\n2.指定任何事物叫他作詩，都能立刻做出來。\n3.寫出來的詩有【　　　】 】也有【　　　】理 】。\n4.他的父親帶他【　　　】鄉人作詩，沒有讓他學習。",
-          "interactive_type": "fill_blank"
-        },
-        {
-          "label": "變成凡人過程",
-          "value": "1.【　　　】歲時，寫的詩已不如傳聞中的好。\n2.【　　　】歲，天資消失，變成普通人。",
-          "interactive_type": "fill_blank"
-        }
-      ]
-    }
-  ],
-  "layout": "worksheet_table",
-  "worksheet_rows": [
-    {
-      "kind": "section_block",
-      "section": "主角",
-      "items": [
-        {
-          "label": "",
-          "value": "【　　　】"
-        }
-      ]
-    },
-    {
-      "kind": "section_block",
-      "section": "背景",
-      "items": [
-        {
-          "label": "",
+          "interactive_type": "fill_blank",
+          "label": "居住地",
           "value": "居住地：【　　　】"
         },
         {
-          "label": "",
-          "value": "家  世：【　　　】"
+          "interactive_type": "fill_blank",
+          "label": "家世",
+          "value": "家　世：【　　　】"
         }
-      ]
+      ],
+      "value": ""
     },
     {
+      "interactive_type": "display",
+      "label": "發展或\n變化",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "天\n才\n時\n期",
+          "value": "【　　　】歲開始展現天才。\n1.不曾見過【　　　】，沒有人教，卻會寫詩，還能簽名。\n2.指定任何事物叫他作詩，都能立刻做出來。\n3.寫出來的詩有【　　　】】也有【　　　】理】。\n4.他的父親帶他【　　　】鄉人作詩，沒有讓他學習。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "變成凡人過程",
+          "value": "1.【　　　】歲時，寫的詩已不如傳聞中的好。\n2.【　　　】歲，天資消失，變成普通人。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "想一想，寫一寫：關於這篇課文的內容，你覺得是否合理？請打勾表示並說明理由。",
+      "value": "我覺得□合理    □不合理，因為：【　　　】。"
+    }
+  ],
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "主角",
+      "value": "【　　　】"
+    },
+    {
+      "items": [
+        {
+          "label": "居住地",
+          "value": "居住地：【　　　】"
+        },
+        {
+          "label": "家世",
+          "value": "家　世：【　　　】"
+        }
+      ],
       "kind": "section_block",
-      "section": "發展或變化",
+      "section": "背景"
+    },
+    {
       "items": [
         {
           "label": "天\n才\n時\n期",
@@ -85,18 +90,14 @@
           "label": "變成凡人過程",
           "value": "1.【　　　】歲時，寫的詩已不如傳聞中的好。\n2.【　　　】歲，天資消失，變成普通人。"
         }
-      ]
+      ],
+      "kind": "section_block",
+      "section": "發展或\n變化"
+    },
+    {
+      "kind": "pair",
+      "label": "想一想，寫一寫：關於這篇課文的內容，你覺得是否合理？請打勾表示並說明理由。",
+      "value": "我覺得□合理    □不合理，因為：（　）。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "theme_facts",
-    "fill_blank_count": 5,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "天\n才\n時\n期",
-      "變成凡人過程"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

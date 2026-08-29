@@ -1,0 +1,82 @@
+lesson_uid: L0172
+generated_by: scripts/build_lesson_manifest.py
+note: 衍生檔，不是真相來源。sections 來自 lesson.yml 的 sections_present，module 歸屬來自 specs/modules/section-to-module.yml。改了那兩者要重產。
+sections:
+- 'no': 一
+  name: 讀全文-做記號
+  module: full_text_annotate
+  slug: ampvv
+  file: full_text_annotate.ampvv.yml
+- 'no': 二
+  name: 念順順
+  module: key_reading
+  text_ref: ampvv
+  slug: pfqpp
+  file: key_reading.pfqpp.yml
+- 'no': 三
+  name: 語詞我最棒
+  module: vocab_definitions
+  text_ref: ampvv
+  slug: tfnme
+  file: vocab_definitions.tfnme.yml
+- 'no': 四
+  name: 語詞應用
+  module: vocab_application
+  text_ref: ampvv
+  slug: mfdv3
+  file: vocab_application.mfdv3.yml
+- 'no': 五
+  name: 文章重點表
+  module: keypoints
+  text_ref: ampvv
+  slug: jq6vt
+  file: keypoints.jq6vt.yml
+- 'no': 六
+  name: 品格聚光燈
+  module: spotlight
+  subtitle: 特質的多元樣貌
+  text_ref: ampvv
+  slug: jk9f3
+  file: spotlight.jk9f3.yml
+- 'no': 七
+  name: 閱讀理解
+  module: comprehension
+  text_ref: ampvv
+  slug: krvkp
+  file: comprehension.krvkp.yml
+- 'no': 八
+  name: 詞語複習
+  module: vocab_review
+  text_ref: ampvv
+  slug: xdmkq
+  file: vocab_review.xdmkq.yml
+- 'no': 九
+  name: 知識補給站
+  module: resources
+  text_ref: ampvv
+  slug: 7euxw
+  file: resources.7euxw.yml
+dispatch:
+- comprehension
+- full_text_annotate
+- key_reading
+- keypoints
+- resources
+- spotlight
+- vocab_application
+- vocab_definitions
+- vocab_review
+produced:
+- comprehension
+- full_text_annotate
+- key_reading
+- keypoints
+- resources
+- spotlight
+- vocab_application
+- vocab_definitions
+- vocab_review
+absent_from_source: []
+pdf_pages: null
+dispatch_pages: {}
+pages_unavailable: 同上，實測 900s 仍逾時；需切成 7 份 subset

@@ -1,0 +1,48 @@
+lesson_uid: L0021
+version_id: v3
+level: 5
+genre: 記敘文
+strategy: 推論策略──找出故事道理
+header_badge: 閱讀之旅的起點
+課文學習單: 曾世杰
+master_sheet_vocabulary:
+- 敢怒不敢言
+- 剃度
+- 惡言相向
+- 抱頭鼠竄
+- 囑咐
+- 萬紫千紅
+- 暑氣蒸人
+- 金風送爽
+- 寒氣逼人
+- 滴水穿石
+- 循序漸進
+- 身材魁梧
+- 帥氣挺拔
+lesson_no: 0
+series: 一般
+lesson_seq: 5000
+intro: 這篇文章講述了正太從小立志成為武僧的歷程。故事發生在日本奈良，正太目睹了武僧懲奸除惡的英姿，心中燃起了學習武術的願望。然而，進入興福寺後，他並沒有立刻學習武功，而是被師父指派了一項看似簡單卻充滿挑戰的任務：餵養一頭小豬。這項任務需要他日復一日地抱著逐漸長大的豬，攀爬階梯、跨越門檻。在看似枯燥的重複勞動中，正太的身體和意志都得到了鍛鍊，也體會到了循序漸進的努力所能帶來的巨大改變。
+notes:
+  intro_topic: 品格力──堅毅、水滴石穿
+strategy_explained: '這一課我們要一起練習「從故事裡找出做人做事的道理」，因為這篇故事透過正太餵豬、爬樓梯的過程，讓我們看到即使是很重複、看似沒什麼的努力，只要有毅力，最後也能練成很厲害的武僧，就像水滴可以穿石一樣
+
+  所以，讀的時候，你可以想想看，正太為什麼能練成武僧，他在做什麼事情的時候，展現了不放棄的精神'
+strategy_sources:
+  worksheet: 讀出故事道理
+  master_sheet: 推論策略──找出故事道理
+  previous: 讀出故事道理
+source_profile:
+  class: no_section
+  note: 學習單根本沒有「念順順」這一節 —— 不是抽不到，是本來就沒有
+  has_key_reading_section: false
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: null
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 0
+  has_counter_column: false
+  body_in_tables: true
+  invisible_chars_docx_only: true
+  profiled: '2026-08-24'

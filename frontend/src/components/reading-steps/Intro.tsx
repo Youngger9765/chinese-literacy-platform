@@ -1,5 +1,6 @@
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { stepPath } from '../../config/stepPath';
 import { useNavigate } from 'react-router-dom';
 import { Story } from '../../types';
 import { useZhuyin } from '../../context/ZhuyinContext';
@@ -10,6 +11,49 @@ import { useAuth } from '../../contexts/AuthContext';
 import { getOmoImageSignedUrl, getPriorOmoUploadByLesson } from '../../services/omoApi';
 import type { OmoPriorUploadResponse } from '../../services/omoApi';
 import { downloadRemoteFile } from '../../utils/downloadRemoteFile';
+import { gradeLabel } from '../../utils/gradeLabel';
+
+/**
+ * 「💡 本課學習策略」要顯示的字串，找不到就回空字串。
+ *
+ * ⚠️ 抽成獨立函式是為了測得到 —— 原本這段內聯在 JSX 的 IIFE 裡，
+ * 測試只能在自己那邊重排一次同樣的判斷，那是打在複製品上：
+ * 改壞這裡不會讓測試變紅。
+ *
+ * 鏈的順序有意義，不是隨手排的：
+ *   1. `worksheetIntro.target_strategy` — Layer-1/2 欄位
+ *   2. `intro.author` 的 " · " 後半      — 同上
+ *   3. `goal_box.strategy_line`          — 學習單原文（**最權威**，逐字印在紙上）
+ *   4. `readingStrategy`                 — 總表的策略名
+ *
+ * 前兩個是二修的 uid tree **從來不寫**的欄位。第三個只有 52 課有。
+ * 所以在接上第四個之前，這個框對 175 課裡的 123 課是空的 ——
+ * 而 `readingStrategy` 171 課都有值，`types.ts` 甚至標著
+ * `// for future Intro enhancement`：欄位是為了這個框加的，加了之後沒接上。
+ *
+ * 3 排在 4 前面因為它是學習單上逐字印的那句；兩者內容其實一樣，只差前綴：
+ *     readingStrategy        '讀出故事道理'
+ *     goal_box.strategy_line '目標策略：讀出故事道理'
+ */
+export function resolveRawStrategy(story: {
+  worksheetIntro?: { target_strategy?: string };
+  intro?: { author?: string };
+  goalBox?: { strategy_line?: string };
+  readingStrategy?: string;
+}): string {
+  const goalBoxStrategy = story.goalBox?.strategy_line
+    ? story.goalBox.strategy_line.replace(/^目標策略[:：]\s*/, '').replace(/\n/g, '，')
+    : '';
+  return (
+    story.worksheetIntro?.target_strategy ||
+    (story.intro?.author?.includes(' · ')
+      ? story.intro.author.split(' · ').slice(1).join(' · ')
+      : '') ||
+    goalBoxStrategy ||
+    story.readingStrategy ||
+    ''
+  );
+}
 
 const CATEGORY_LABEL: Record<string, string> = {
   Fable: '寓言故事',
@@ -25,7 +69,6 @@ interface IntroProps {
 }
 
 const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
-  const [isSpeaking, setIsSpeaking] = useState(false);
   const [showWorksheetModal, setShowWorksheetModal] = useState(false);
   const [showUploadedModal, setShowUploadedModal] = useState(false);
   const [priorUpload, setPriorUpload] = useState<OmoPriorUploadResponse | null>(null);
@@ -129,51 +172,19 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
     });
   }, [priorUpload, token]);
 
-  const speakIntro = useCallback(() => {
-    if (!window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
-
-    // #1598: 課文簡介 only — never fall back to strategy/target text (which would
-    // read aloud "圖文題就是..." instead of the actual lesson topic).
-    // #2082 A1: start at story content directly — do NOT prepend title or metadata header.
-    const introText = story.lessonIntro?.course_intro || story.intro?.background || '';
-    if (!introText) return;
-
-    const text = introText;
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'zh-TW';
-    // #2082 A1: brisker pace ~260-270 字/分 (product-tunable)
-    utterance.rate = 1.05;
-
-    const doSpeak = () => {
-      const voices = window.speechSynthesis.getVoices();
-      const preferred =
-        voices.find(v => v.name.includes('Google') && v.name.includes('Taiwan')) ||
-        voices.find(v => v.name.includes('Google') && v.lang === 'zh-TW') ||
-        voices.find(v => v.lang === 'zh-TW') ||
-        voices.find(v => v.lang.startsWith('zh'));
-      if (preferred) utterance.voice = preferred;
-
-      utterance.onstart = () => setIsSpeaking(true);
-      utterance.onend = () => setIsSpeaking(false);
-      utterance.onerror = () => setIsSpeaking(false);
-      window.speechSynthesis.speak(utterance);
-    };
-
-    if (window.speechSynthesis.getVoices().length === 0) {
-      window.speechSynthesis.onvoiceschanged = () => {
-        window.speechSynthesis.onvoiceschanged = null;
-        doSpeak();
-      };
-    } else {
-      doSpeak();
-    }
-  }, [story]);
-
-  const stopSpeaking = () => {
-    window.speechSynthesis?.cancel();
-    setIsSpeaking(false);
-  };
+  // #1598: 課文簡介 teaser. Never falls back to strategy/target text (which
+  // would show "圖文題就是..." instead of the actual lesson topic).
+  //
+  // #2719: the #2607 "AI 朗讀全文 / 展開看全文" controls that used to sit under
+  // this teaser were removed — reading and listening to the full lesson body
+  // belongs to step 2「讀全文－做記號」(FullReading), and having it here too
+  // duplicated that step and blurred what the intro page is for. The intro page
+  // is now teaser + strategy + worksheet + step chips only; do NOT re-add a
+  // full-text player here. (The pre-#2607 speechSynthesis button that narrated
+  // this teaser is deliberately not restored either: PR #2608 verified 8/8
+  // sampled lessons have no real course_intro, so the teaser is a hard-truncated
+  // ~103-char slice of the lesson body that cuts off mid-word.)
+  const introText = story.lessonIntro?.course_intro || story.intro?.background || '';
 
   return (
     <div
@@ -182,25 +193,6 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
         fontFamily: fontForZhuyin(zhuyinActive),
       }}
     >
-      {/* Top bar */}
-      <nav aria-label="麵包屑導覽" className="h-9 bg-surface-container-lowest border-b border-gray-200 flex items-center px-4 gap-3">
-        <button
-          type="button"
-          onClick={onBack}
-          aria-label="返回圖書館"
-          className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 rounded"
-        >
-          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
-          </svg>
-          圖書館
-        </button>
-        <span className="text-gray-300 text-xs" aria-hidden="true">›</span>
-        <span className="text-xs text-gray-600">{story.title}</span>
-        <span className="text-gray-300 text-xs" aria-hidden="true">›</span>
-        <span className="text-xs text-accent-light font-bold" aria-current="page">簡介</span>
-        <div className="flex-1" />
-      </nav>
 
       {/* Main content */}
       <div className="flex-1 overflow-y-auto">
@@ -208,11 +200,18 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
 
           {/* Hero: thumbnail + title */}
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start">
-            <img
-              src={story.thumbnail}
-              alt={`《${story.title}》課文封面圖`}
-              className="w-32 h-24 object-cover rounded-xl border border-gray-200 flex-shrink-0"
-            />
+            {/* 二修的 175 課一張封面都沒有，`story.thumbnail` 是空字串 ——
+                `<img src="">` 在瀏覽器裡就是一個破圖 icon，看起來像壞掉，
+                而不是像「這課還沒有封面」。缺資料的狀態不要畫成錯誤狀態。
+                上午修過圖書館列表（StoryCard），課內這個是第二處。 */}
+            {story.thumbnail ? (
+              <img
+                src={story.thumbnail}
+                alt={`《${story.title}》課文封面圖`}
+                className="w-32 h-24 object-cover rounded-xl border border-gray-200 flex-shrink-0"
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+              />
+            ) : null}
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-accent-bg-subtle text-accent-hover border border-accent-bg-subtle uppercase tracking-widest">
@@ -222,7 +221,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                     discouraging for older students. Mapping: story.level is
                     already a numeric level (e.g. 4), shown as 「第 N 級」.
                     Product-tunable: owner may prefer pure number or different label. */}
-                <span className="text-[10px] text-gray-400">第 {story.level} 級</span>
+                <span className="text-[10px] text-gray-400">{gradeLabel(String(story.level))}</span>
               </div>
               <h1 className={`text-2xl font-normal text-on-surface ${zhuyinActive ? 'leading-[2.4rem] tracking-[0.15em]' : 'leading-[1.5]'}`}>
                 {processZhuyin(story.title)}
@@ -241,12 +240,14 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
             // the strategy portion of story.intro.author, which holds e.g.
             // "說明文 · 摘要策略-問題.解決.結果結構". Take the part after the last " · " separator
             // (drops the genre prefix like 說明文) so the box highlights the strategy itself.
-            const rawStrategy =
-              story.worksheetIntro?.target_strategy ||
-              (story.intro?.author?.includes(' · ')
-                ? story.intro.author.split(' · ').slice(1).join(' · ')
-                : '') ||
-              '';
+            //
+            // #2752 Phase 2: neither of the two sources above is ever populated for the
+            // uid-tree (v3) lessons — worksheetIntro/intro.author are Layer-1/2 fields
+            // this pipeline never writes. `goal_box.strategy_line` is the actual worksheet
+            // text this box was designed to show, printed verbatim as "目標策略：<text>"
+            // (sometimes with an embedded `\n` mid-phrase, e.g. "寫作手法──\n排比─..." —
+            // normalized to a comma so it reads as one line instead of a raw newline).
+            const rawStrategy = resolveRawStrategy(story);
             // For structure-type strategies, wrap the three stage words in corner quotes and
             // keep 結構 outside, e.g. 〈「問題、解決、結果」結構〉. Matches ASCII '.', middot, hyphen,
             // and CJK separators (the demo data uses ASCII '.').
@@ -265,12 +266,32 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                 <span className="text-xs font-bold text-amber-800 uppercase tracking-widest">本課學習策略</span>
               </div>
 
+              {/* goal_box.title (#2752 Phase 2) — a decorative unit tagline some
+                  lessons print near the title (e.g. "閱讀之旅的起點"). Deliberately
+                  NOT rendering goal_box.level_badge here — that's a "Level N・文體"
+                  format already shown by the category/grade badges above the title,
+                  so showing it again would just repeat the same information. */}
+              {story.goalBox?.title && (
+                <p className="text-sm text-amber-700 italic">{processZhuyin(story.goalBox.title)}</p>
+              )}
+
               {strategyName && (
                 // #2082 A2: prominent highlight box for strategy name
                 <div className="bg-amber-200/70 border-2 border-amber-400 rounded-xl px-4 py-3">
                   <p className={`text-amber-900 text-xl font-bold ${zhuyinActive ? 'leading-[2.8rem] tracking-[0.25em]' : 'leading-[1.4]'}`}>
                     {processZhuyin(strategyName)}
                   </p>
+                  {/* #2898 — the name alone is a 13-character label. Owner, seeing
+                      「推論策略──推論代名詞」 and nothing else: 「就這麼短嗎？」
+                      This is 2-3 sentences generated once per lesson and stored in
+                      metadata.strategy_explained, grounded in this article rather
+                      than in the strategy in the abstract. 160 of 175 lessons have
+                      one; the rest keep the bare name, which is what the source has. */}
+                  {story.readingStrategyExplained && (
+                    <p className={`mt-2 text-amber-900/80 text-sm whitespace-pre-line ${zhuyinActive ? 'leading-[2.4rem] tracking-[0.15em]' : 'leading-[1.8]'}`}>
+                      {processZhuyin(story.readingStrategyExplained)}
+                    </p>
+                  )}
                 </div>
               )}
 
@@ -280,7 +301,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                 </p>
               )}
               {/* #2082 A2: instructions (▷ triangle items) removed from intro page —
-                  they belong to the read-text phase (LiveTutor / annotations), not intro. */}
+                  they belong to the read-text phase (ParagraphReading / annotations), not intro. */}
             </div>
             );
           })()}
@@ -344,43 +365,6 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                 </button>
               ) : null}
 
-              {/* Upload button — #1637: available for any lesson with a lesson_code */}
-              {story.lesson_code && (
-                priorUpload?.has_prior_upload ? (
-                  <>
-                    <button
-                      type="button"
-                      onClick={handleOpenUploadedModal}
-                      className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border border-sky-300 bg-sky-50 hover:bg-sky-100 text-sky-700 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-1"
-                      aria-label="檢視已上傳學習單"
-                    >
-                      <span aria-hidden="true">📷</span>
-                      檢視已上傳
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleUploadWorksheet}
-                      className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border border-green-300 bg-green-50 hover:bg-green-100 text-green-700 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:ring-offset-1"
-                      aria-label="重新上傳學習單"
-                    >
-                      <span aria-hidden="true">📤</span>
-                      重新上傳
-                    </button>
-                  </>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={handleUploadWorksheet}
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border border-green-300 bg-green-50 hover:bg-green-100 text-green-700 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:ring-offset-1"
-                    aria-label="上傳學習單"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                    </svg>
-                    上傳學習單
-                  </button>
-                )
-              )}
             </div>
           )}
 
@@ -388,7 +372,6 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
               or intro.background fallback. No longer falls back to strategy
               content (which used to leak into 課文簡介 and confuse students). */}
           {(() => {
-            const introText = story.lessonIntro?.course_intro || story.intro?.background;
             if (!introText) {
               return (
                 <div className="bg-surface-container-low border border-gray-200 rounded-2xl p-6 text-gray-500 text-sm">
@@ -416,40 +399,29 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                 {sourceLabel && (
                   <p className="text-xs text-on-surface-variant">{sourceLabel}</p>
                 )}
-
-                <div className="pt-2">
-                  {isSpeaking ? (
-                    <button
-                      type="button"
-                      onClick={stopSpeaking}
-                      aria-label="停止朗讀課文簡介"
-                      aria-pressed={true}
-                      className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold bg-amber-800/50 text-amber-800 border border-amber-300 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-1"
-                    >
-                      <svg className="w-4 h-4 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 10h6v4H9z" />
-                      </svg>
-                      停止朗讀
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={speakIntro}
-                      aria-label="朗讀課文簡介"
-                      aria-pressed={false}
-                      className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border border-gray-300 bg-transparent hover:bg-gray-50 text-gray-800 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072" />
-                      </svg>
-                      朗讀
-                    </button>
-                  )}
-                </div>
               </div>
             );
           })()}
+
+          {/* 導讀 (#2752) — 文言文 lessons carry their own worksheet 導讀 paragraph
+              (`intro_guide.yml`, no big-question number, printed under the title).
+              This is DIFFERENT content from 課文簡介 above (that's an AI/PDF teaser
+              of the lesson body; 導讀 is the worksheet author's own framing of the
+              story) — shown as its own box, and only for the 4 lessons that have
+              one (`story.introGuide` is undefined for every other lesson). */}
+          {story.introGuide?.text && (
+            <div className="bg-surface-container-low border border-gray-200 rounded-2xl p-6 space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-lg text-accent-light" aria-hidden="true">auto_stories</span>
+                <span className="text-xs font-bold text-accent-light uppercase tracking-widest">
+                  {story.introGuide.section_name || '導讀'}
+                </span>
+              </div>
+              <p className={`text-on-surface text-base ${zhuyinActive ? 'leading-[2.2rem] tracking-[0.15em]' : 'leading-[1.7]'}`}>
+                {processZhuyin(story.introGuide.text)}
+              </p>
+            </div>
+          )}
 
           {/* #2139: 本課學習策略 yellow box relocated above (directly below title). */}
 
@@ -457,19 +429,22 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
               #2082 A4 removed the non-clickable ol — do NOT restore a static ol.
               This uses chip badges so each step is directly accessible. */}
           {(() => {
-            const digitalSteps = resolveActiveSteps(story.stepSequence).filter(s => s.id !== 'intro');
+            const digitalSteps = resolveActiveSteps(story.stepSequence).filter(s => s.id !== 'lesson-intro');
             if (digitalSteps.length === 0) return null;
             return (
               <div className="space-y-2 pb-2">
                 <p className="text-xs text-gray-400 text-center">
-                  本課共 {digitalSteps.length} 個步驟，點擊可快速跳轉
+                  {/* 這份清單**不含**課程簡介本身（人就在這頁，連過去沒意義），所以它不是
+                      「本課的步驟總數」—— 底部進度條數的是含簡介的 N+1。原本寫「本課共 N 個步驟」，
+                      學生會看到「共 10 個步驟」配上「第 11 步」，兩個數字互相打架。 */}
+                  接下來還有 {digitalSteps.length} 個步驟，點擊可快速跳轉
                 </p>
                 <div className="flex flex-wrap gap-2 justify-center">
                   {digitalSteps.map((step, idx) => (
                     <button
                       key={step.id}
                       type="button"
-                      onClick={() => navigate(`/learn/${story.id}/${step.id}`)}
+                      onClick={() => navigate(stepPath(story.id, step.id))}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white hover:border-accent hover:text-accent hover:bg-accent/5 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
                       aria-label={`跳轉到第 ${idx + 1} 步：${step.label}`}
                     >
@@ -493,10 +468,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
         {/* Primary CTA — full-width on mobile, min-height ~56px */}
         <button
           type="button"
-          onClick={() => {
-            stopSpeaking();
-            onStartReading();
-          }}
+          onClick={onStartReading}
           className="w-full sm:flex-1 min-h-[56px] rounded-2xl font-bold text-lg bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
         >
           開始學習

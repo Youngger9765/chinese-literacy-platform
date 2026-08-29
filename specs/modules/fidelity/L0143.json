@@ -1,0 +1,91 @@
+{
+  "uid": "L0143",
+  "gate_version": 2,
+  "docx_sha256": "c5f4-78cc-86bb-eabe",
+  "modules": {
+    "comprehension.mjvdr": {
+      "yaml_sha256": "57c1-aa9e-b133-d2b3",
+      "checked": 30,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "errata": {
+      "yaml_sha256": "e62e-3557-64ae-7db3",
+      "checked": 1,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "full_text_annotate.6mpre": {
+      "yaml_sha256": "841d-791c-0c1d-0b13",
+      "checked": 15,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "goal_box.ap9w3": {
+      "yaml_sha256": "6792-3e59-fdb0-99f2",
+      "checked": 2,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "key_reading.96jnp": {
+      "yaml_sha256": "7c43-c086-d06f-9e2f",
+      "checked": 10,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "keypoints.yvp6r": {
+      "yaml_sha256": "ad38-3570-791d-e69b",
+      "checked": 10,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "resources.49cux": {
+      "yaml_sha256": "3ff4-0eb6-0dcc-18c7",
+      "checked": 3,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "self_check_before_reading.pupn9": {
+      "yaml_sha256": "de66-5235-a24a-0ba5",
+      "checked": 3,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "spotlight.p4kj9": {
+      "yaml_sha256": "a4e8-2ca9-cc45-167e",
+      "checked": 34,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "vocab_application.upfj7": {
+      "yaml_sha256": "36e9-9e74-78ea-52a7",
+      "checked": 12,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "vocab_definitions.6hx3d": {
+      "yaml_sha256": "cc04-831f-d0d5-3b83",
+      "checked": 15,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "vocab_review.3q43q": {
+      "yaml_sha256": "4e4d-bf07-23c4-10d9",
+      "checked": 14,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    }
+  }
+}

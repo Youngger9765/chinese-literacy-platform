@@ -206,17 +206,32 @@ def _patch_regenerate():
 
 class TestSynthesizeAuth:
 
-    def test_unauthenticated_returns_401(self, client):
-        """Anonymous request must be rejected with 401."""
-        resp = client.post("/api/tts/synthesize", json={"text": "你好"})
-        assert resp.status_code == 401, f"Expected 401, got {resp.status_code}: {resp.text}"
+    def test_anonymous_gets_the_same_audio_as_a_signed_in_user(self, client):
+        """A QR-code visitor has no account and must still hear the reading.
+
+        This used to be 401. Giving anonymous listeners a *different* audio
+        source instead is what made 讀全文-做記號 sound different before and
+        after logging in — the two sources drifted within days. Owner: 「你登錄
+        的時候就可以用你為什麼未登錄的時候不能用啊」.
+
+        Abuse is bounded by the per-IP bucket in _rate_limit_key plus the global
+        /api/* limiter, not by an auth wall.
+
+        Synthesis is patched here on purpose: without it this test performs a
+        real Azure call (app.config reads backend/.env regardless of the shell)
+        and caches real audio, which then leaks into the next test.
+        """
+        with _patch_tts():
+            resp = client.post("/api/tts/synthesize", json={"text": "匿名測試句"})
+        assert resp.status_code == 200, f"Expected 200, got {resp.status_code}: {resp.text}"
+        assert resp.content == FAKE_AUDIO
 
     def test_authenticated_returns_200(self, client, regular_user):
         """Authenticated user receives audio bytes."""
         with _patch_tts():
             resp = client.post(
                 "/api/tts/synthesize",
-                json={"text": "你好"},
+                json={"text": "登入測試句"},
                 headers={"Authorization": f"Bearer {regular_user['token']}"},
             )
         assert resp.status_code == 200, f"Expected 200, got {resp.status_code}: {resp.text}"
@@ -229,17 +244,19 @@ class TestSynthesizeAuth:
 
 class TestSynthesizeSentenceAuth:
 
-    def test_unauthenticated_returns_401(self, client):
-        """Anonymous request must be rejected with 401."""
-        resp = client.post("/api/tts/synthesize-sentence", json={"text": "你好"})
-        assert resp.status_code == 401, f"Expected 401, got {resp.status_code}: {resp.text}"
+    def test_anonymous_gets_the_same_audio_as_a_signed_in_user(self, client):
+        """Same rule as /synthesize — see the note there."""
+        with _patch_tts():
+            resp = client.post("/api/tts/synthesize-sentence", json={"text": "匿名測試句"})
+        assert resp.status_code == 200, f"Expected 200, got {resp.status_code}: {resp.text}"
+        assert resp.content == FAKE_AUDIO
 
     def test_authenticated_returns_200(self, client, regular_user):
         """Authenticated user receives audio bytes."""
         with _patch_tts():
             resp = client.post(
                 "/api/tts/synthesize-sentence",
-                json={"text": "你好"},
+                json={"text": "登入測試句"},
                 headers={"Authorization": f"Bearer {regular_user['token']}"},
             )
         assert resp.status_code == 200, f"Expected 200, got {resp.status_code}: {resp.text}"

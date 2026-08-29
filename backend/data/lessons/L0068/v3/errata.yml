@@ -1,0 +1,17 @@
+lesson_uid: L0068
+version_id: v3
+notes:
+  errata:
+  - id: E1
+    section: 一 閱讀聚光燈（課文段號）
+    locator: 【停點D】之後的第一段
+    source: （段10）二十五年來，阿介一次次走進山林
+    corrected: （段11）二十五年來，阿介一次次走進山林
+    kind: 段號重複
+    why: 「（段10）」用了兩次（「有人問阿介…」與「二十五年來…」），其後的（段11）（段12）跟著少一號
+    confidence: high
+    evidence: 'document.xml 依序出現 段1…段9、段10、段10、段11、段12，共 13 個段落標記但只到 12 號。
+
+      本檔 body.paragraphs 用連續 idx 1～13，並在每段記 `printed_idx` 保留原稿印的號碼。
+
+      本課沒有念順順（無 ☞ 索引），所以這個重複不會造成朗讀指到錯段。'

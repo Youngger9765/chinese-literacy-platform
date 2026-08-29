@@ -12,7 +12,7 @@ This file is the MACHINE side of the step-sequence spec.
 Contracts:
   1. VALID_STEP_IDS constant matches the set in test_content_schema_spec.py
      (both must be updated together when STEP_REGISTRY changes).
-  2. ACTIVE_STEPS (enabled=true subset) has exactly 12 members with the
+  2. ACTIVE_STEPS (enabled=true subset) has exactly 11 members with the
      currently-known composition.
   3. Every step_sequence value in every lesson YAML is a valid step id.
      (Duplicates the content-schema Contract 3 by design — two modules own this
@@ -42,7 +42,7 @@ VALID_STEP_IDS: frozenset[str] = frozenset({
     "intro",
     "reading-annotation",
     "tutor",
-    "full-reading",
+    "full-reading",    # 2026-07-20 教授審查：label 改造成「重點朗讀」（保留 id，只練指定段落）
     "listening",
     "vocab",
     "vocab-definition",
@@ -57,13 +57,14 @@ VALID_STEP_IDS: frozenset[str] = frozenset({
     "report",
 })
 
-# Steps known to be disabled (enabled: false) per stepConfig.ts 2026-06-02.
+# Steps known to be disabled (enabled: false) per stepConfig.ts.
 # Update when product decisions change the disabled set.
 DISABLED_STEP_IDS: frozenset[str] = frozenset({
     "listening",       # 2026-05-01 expert review → ToolPicker
     "vocab",           # 2026-05-01 expert review → ToolPicker
     "sentence-practice",  # 2026-05-01 optional post-7/1
     "dictation",       # 2026-03-27 product decision
+    "tutor",           # 2026-07-20 教授審查：朗讀簡化 → 逐段從 nav 隱藏（ToolPicker 仍可進）
 })
 
 ENABLED_STEP_IDS: frozenset[str] = VALID_STEP_IDS - DISABLED_STEP_IDS
@@ -93,6 +94,12 @@ DEFAULT_STEP_SEQUENCE: list[str] = [
 # Infrastructure
 # ---------------------------------------------------------------------------
 
+@pytest.mark.skip(
+
+    reason="來源 backend/data/lessons/_parsed_2026-05-01/ 隨一修刪除（#2683）；此契約待二修抽取器補上對應欄位後，改對 uid tree 重建 —— 登記在 data/curriculum_qa/content_known_gaps.yaml#locks_removed_with_the_first_edition"
+
+)
+
 def test_lesson_dir_exists():
     assert LESSON_DIR.is_dir(), f"lesson dir missing: {LESSON_DIR}"
 
@@ -102,8 +109,9 @@ def test_lesson_dir_exists():
 # ---------------------------------------------------------------------------
 
 def test_valid_step_ids_count():
-    """STEP_REGISTRY defines exactly 16 step IDs as of 2026-06-02.
+    """STEP_REGISTRY defines exactly 16 step IDs.
 
+    2026-07-20: full-reading repurposed to 重點朗讀 (no new id added).
     Fails if someone adds/removes a step without updating this spec.
     """
     assert len(VALID_STEP_IDS) == 16, (
@@ -116,14 +124,15 @@ def test_valid_step_ids_count():
 # Contract 2: enabled step count = 12 (total 16 minus 4 disabled)
 # ---------------------------------------------------------------------------
 
-def test_enabled_step_count_is_twelve():
-    """12 of the 16 steps are enabled; 4 are disabled per product decisions.
+def test_enabled_step_count_is_eleven():
+    """11 of the 16 steps are enabled; 5 are disabled per product decisions.
 
-    Disabled: listening, vocab, sentence-practice, dictation.
+    Disabled: listening, vocab, sentence-practice, dictation, tutor.
+    (2026-07-20: tutor hidden; full-reading kept enabled but repurposed to 重點朗讀 → 12-1 = 11.)
     If a step is re-enabled or a new step is added, update DISABLED_STEP_IDS.
     """
-    assert len(ENABLED_STEP_IDS) == 12, (
-        f"Expected 12 enabled steps, got {len(ENABLED_STEP_IDS)}. "
+    assert len(ENABLED_STEP_IDS) == 11, (
+        f"Expected 11 enabled steps, got {len(ENABLED_STEP_IDS)}. "
         "Update DISABLED_STEP_IDS in this spec to match stepConfig.ts."
     )
 
@@ -199,6 +208,15 @@ def test_step_sequence_values_reference_valid_ids():
         if invalid:
             failures.append(f"{path.stem}: unknown step ID(s): {invalid}")
     assert not failures, "\n".join(failures)
+
+
+@pytest.mark.skip(
+
+
+    reason="來源 backend/data/lessons/_parsed_2026-05-01/ 隨一修刪除（#2683）；此契約待二修抽取器補上對應欄位後，改對 uid tree 重建 —— 登記在 data/curriculum_qa/content_known_gaps.yaml#locks_removed_with_the_first_edition"
+
+
+)
 
 
 def test_some_lessons_have_step_sequence():

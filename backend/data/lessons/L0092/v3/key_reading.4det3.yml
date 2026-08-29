@@ -1,0 +1,43 @@
+lesson_uid: L0092
+version_id: v3
+section_no: 二
+key_reading:
+  instruction: 請用計時器，從指定段落（五    )開始朗讀，在表格中記錄1分鐘朗讀的字數。如果你計時3次後，對自己還不滿意，可以多練幾次。最後一次，找一位同學請他計時、記錄並簽名！
+  instruction_note: 括號內的 ☞ 是圖形物件，文字流只有「（五    )」的空白
+  start_paragraph: 5
+  end_paragraph: 5
+  start_paragraph_note: '☞ drawing 錨在第 5 段（教主終於決定回她的房間…）的 w:p，與指示語印的「五」一致。
+
+    段號歸屬用段號欄的 w:p 位置驗過：ㄧ/二/三/四/五/六/七/八/九/十/十一 分別落在
+
+    第 1/13/20/23/28/31/43/44/45/49/53 個位置，兩兩間距與各段的行數逐一吻合
+
+    （例：五→六 間隔 3 行 ＝ 第 5 段 80 字約 3 行；六→七 間隔 12 行 ＝ 第 6 段 1 行＋兩個浮動方框約 11 行）。
+
+    ⛔ 不要照 PDF 上「號碼旁邊那一行」對位 —— 段號欄用空段落當墊片，會整體漂移。'
+  timing_table:
+    columns:
+    - 第1次計時
+    - 第2次計時
+    - 第3次計時
+    - 裁判計時
+    unit: 字
+    judge_signature: true
+  benchmark_label: ◎ 我的表現
+  benchmark:
+  - threshold: ＜220字
+    feedback: 還要多加練習。
+  - threshold: 221~250字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞251字
+    feedback: 哇嗚，超級厲害！
+  passage: 教主終於決定回她的房間去接收外星人的啟示。出來後，她告訴信眾：「你們的虔誠，外星人接收到了，外星人很感動，決定寬恕世人的罪孽，不再毀滅地球了，你們拯救了世界。」
+  start_text: 教主終於決定回她的房間去接收外星人的啟示。出來後
+  extent_chars: 80
+  source: extract_key_reading_v3
+  slug: 4det3
+  text_ref: ymrp3
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  absorbed_tail: 0

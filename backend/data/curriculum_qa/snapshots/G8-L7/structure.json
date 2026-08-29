@@ -1,76 +1,166 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 11,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "問題【　　　】",
+      "1",
+      "2",
+      "3"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "讓你口中的甜蜜，成為遠方農民的希望",
-      "value": "",
-      "interactive_type": "display"
+      "interactive_type": "display",
+      "label": "當壞事已不可逆轉：集中營裡的一門課",
+      "value": ""
     },
     {
-      "label": "問題1：勞動剝削",
-      "value": "1.種植與採收可可豆【　　　】，但農民的收入很低，難以養家活口\n2.為節省成本，不少農場雇用【　　　】。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "問題【　　　】",
+      "value": "遇上【　　　】的壞事，人還可能過著【　　　】嗎？"
     },
     {
-      "label": "問題2：利潤分配不均與世代貧窮",
-      "value": "1.全球巧克力產業【　　　】，大量利潤被製造商與經銷商取得，底層農民收益不到總額5%。\n2.扭曲的分配制度導致農民無法改善生計，被迫讓子女從事童工，一代代【　　　】。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "背景（段2-4）",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "1",
+          "value": "二戰期間，德國的種族迫害使猶太人被送往【　　　】；法蘭柯全家被捕並在月台面臨【　　　】。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "2",
+          "value": "青壯年被挑選進營區成為【　　　】；老人、小孩與病人往往【　　　】，被屠殺。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "3",
+          "value": "在生不如死的煎熬裡，法蘭柯卻親眼看見人的【　　　】。"
+        }
+      ],
+      "value": ""
     },
     {
-      "label": "問題3：環境惡化",
-      "value": "1.【　　　】使病蟲害加劇，農民無力改善問題，只好【　　　】開墾新地。\n2.砍伐森林又【　　　】，惡化病蟲害與土壤流失，導致【　　　】。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "例子與道理（段5-9)",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "1",
+          "value": "仍分享最後一口麵包：情況壞到極點，人仍能決定自己【　　　】的高度。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "2",
+          "value": "獄卒辱罵羞辱：我們不能阻止別人說什麼，但可以選擇不讓【　　　】定義自己。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "3",
+          "value": "女子將死仍感恩：在死亡前一刻，有人能靠智慧、想像而感受到【　　　】。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "4",
+          "value": "寒夜長途跋涉：靠著愛與期待，受苦的人仍能得到【　　　】，保有【　　　】。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "5",
+          "value": "仍看見黎明之美：人仍保有對【　　　】的感受力，並因此並獲得片刻的【　　　】。"
+        }
+      ],
+      "value": ""
     },
     {
-      "label": "解決方案：公平交易模式",
-      "value": "1.採【　　　】模式，直接與農民合作社簽約，減少中間商【　　　】，保證合理的價格，並禁用童工。\n2.「東尼公平巧克力」為典範，無奴工、不規則巧克力造型提醒【　　　】、並投資農村建設。",
-      "interactive_type": "fill_blank"
-    },
-    {
-      "label": "結語",
-      "value": "提醒讀者選購有【　　　】標章的巧克力，以實際支持農民。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "總結主旨(段10)",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "1",
+          "value": "外在一切可能被奪走，但仍能決定用什麼【　　　】回應遭遇。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "2",
+          "value": "提出意義治療法，幫助人找到【　　　】，踏出可以前進的下一步。"
+        }
+      ],
+      "value": ""
     }
   ],
-  "layout": "worksheet_table",
-  "title": "讓你口中的甜蜜，成為遠方農民的希望",
+  "title": "當壞事已不可逆轉：集中營裡的一門課",
   "worksheet_rows": [
     {
       "kind": "pair",
-      "label": "問題1：勞動剝削",
-      "value": "1.種植與採收可可豆【　　　】，但農民的收入很低，難以養家活口\n2.為節省成本，不少農場雇用【　　　】。"
+      "label": "問題（段1）",
+      "value": "遇上【　　　】的壞事，人還可能過著【　　　】嗎？"
     },
     {
-      "kind": "pair",
-      "label": "問題2：利潤分配不均與世代貧窮",
-      "value": "1.全球巧克力產業【　　　】，大量利潤被製造商與經銷商取得，底層農民收益不到總額5%。\n2.扭曲的分配制度導致農民無法改善生計，被迫讓子女從事童工，一代代【　　　】。"
+      "items": [
+        {
+          "label": "1",
+          "value": "二戰期間，德國的種族迫害使猶太人被送往【　　　】；法蘭柯全家被捕並在月台面臨【　　　】。"
+        },
+        {
+          "label": "2",
+          "value": "青壯年被挑選進營區成為【　　　】；老人、小孩與病人往往【　　　】，被屠殺。"
+        },
+        {
+          "label": "3",
+          "value": "在生不如死的煎熬裡，法蘭柯卻親眼看見人的【　　　】。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "背景（段2-4）"
     },
     {
-      "kind": "pair",
-      "label": "問題3：環境惡化",
-      "value": "1.【　　　】使病蟲害加劇，農民無力改善問題，只好【　　　】開墾新地。\n2.砍伐森林又【　　　】，惡化病蟲害與土壤流失，導致【　　　】。"
+      "items": [
+        {
+          "label": "1",
+          "value": "仍分享最後一口麵包：情況壞到極點，人仍能決定自己【　　　】的高度。"
+        },
+        {
+          "label": "2",
+          "value": "獄卒辱罵羞辱：我們不能阻止別人說什麼，但可以選擇不讓【　　　】定義自己。"
+        },
+        {
+          "label": "3",
+          "value": "女子將死仍感恩：在死亡前一刻，有人能靠智慧、想像而感受到【　　　】。"
+        },
+        {
+          "label": "4",
+          "value": "寒夜長途跋涉：靠著愛與期待，受苦的人仍能得到【　　　】，保有【　　　】。"
+        },
+        {
+          "label": "5",
+          "value": "仍看見黎明之美：人仍保有對【　　　】的感受力，並因此並獲得片刻的【　　　】。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "例子與道理（段5-9)"
     },
     {
-      "kind": "pair",
-      "label": "解決方案：公平交易模式",
-      "value": "1.採【　　　】模式，直接與農民合作社簽約，減少中間商【　　　】，保證合理的價格，並禁用童工。\n2.「東尼公平巧克力」為典範，無奴工、不規則巧克力造型提醒【　　　】、並投資農村建設。"
-    },
-    {
-      "kind": "pair",
-      "label": "結語",
-      "value": "提醒讀者選購有【　　　】標章的巧克力，以實際支持農民。"
+      "items": [
+        {
+          "label": "1",
+          "value": "外在一切可能被奪走，但仍能決定用什麼【　　　】回應遭遇。"
+        },
+        {
+          "label": "2",
+          "value": "提出意義治療法，幫助人找到【　　　】，踏出可以前進的下一步。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "總結主旨(段10)"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "psr",
-    "fill_blank_count": 5,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "問題1：勞動剝削",
-      "問題2：利潤分配不均與世代貧窮",
-      "問題3：環境惡化",
-      "解決方案：公平交易模式"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

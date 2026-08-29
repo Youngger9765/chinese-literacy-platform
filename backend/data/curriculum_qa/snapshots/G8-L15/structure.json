@@ -1,115 +1,87 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 6,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "志向與進入場域【　　　】",
+      "農場外觀【　　　】",
+      "農場運作方式【　　　】",
+      "工作內容【　　　】"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "球場上的另類指揮家",
-      "value": "",
-      "interactive_type": "display"
-    },
-    {
-      "label": "情境【 段1 】",
-      "value": "球場氣氛沸騰，帶動氣勢的推手是【　　　】",
-      "interactive_type": "fill_blank"
-    },
-    {
-      "label": "觀點/主張【 段2 】",
-      "value": "1.啦啦隊已蛻變成一種有價值與需要高度【　　　】的職業",
-      "interactive_type": "fill_blank"
-    },
-    {
-      "label": "支持理由",
-      "value": "",
       "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "有功能\n【 段2 】",
-          "value": "啦啦隊能把球迷零散聲音整合成整齊有力的音浪，讓球隊氣勢如虹，也為運動員注入【　　　】。",
-          "interactive_type": "fill_blank"
-        },
-        {
-          "label": "有能力\n【 段3 】",
-          "value": "1.許多人以為啦啦隊只需【　　　】就能勝任。\n2.啦啦隊要付出很多的訓練。需要驚人的【　　　】與【　　　】。",
-          "interactive_type": "fill_blank"
-        },
-        {
-          "label": "需體能\n【 段4 】",
-          "value": "工作消耗體力，長時間跳躍揮手、需要【　　　】；訓練含重訓、核心訓練、拉筋。",
-          "interactive_type": "fill_blank"
-        },
-        {
-          "label": "心理韌性【 段4 】",
-          "value": "需【　　　】，落後仍保持活力，絕對不是【　　　】。",
-          "interactive_type": "fill_blank"
-        }
-      ]
+      "label": "未來的農夫",
+      "value": ""
     },
     {
-      "label": "反思【 段5 】",
-      "value": "1.啦啦隊的服裝常成為與論靶心。\n2.服裝爭議表面在「穿什麼/辣不辣」，但深層涉及觀看的立場是【　　　】或【　　　】。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "志向與進入場域【　　　】",
+      "value": "1.宇晴的志向是當【　　　】。\n2.宇晴到桃園【　　　】實習，農場沒有泥土味，反而有消毒酒精味，農場像【　　　】。"
     },
     {
-      "label": "呼籲/結語【 段5.6 】",
-      "value": "呼籲讀者【　　　】看啦啦隊，把焦點放回【　　　】，看見笑容背後的訓練與心意。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "農場外觀【　　　】",
+      "value": "農場一層層栽培架和LED燈光，像【　　　】，每層水耕槽的葉片【　　　】。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "農場運作方式【　　　】",
+      "value": "1.水耕蔬菜不是用土種出來的，而是用【　　　】。\n2.透過【　　　】監測並調整各項條件，讓農場的環境維持在最適合蔬菜生長的範圍。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "工作內容【　　　】",
+      "value": "1.宇晴每天【　　　】，找出【　　　】的地方，能處理就處理，必要時回報。\n2.她的領悟：讀圖表、看趨勢、抓異常也是在【　　　】。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "農場優勢【　　　】",
+      "value": "1.垂直農場一開始【　　　】，宇晴擔心不賺錢。\n2.無毒、蔬菜長得又快又漂亮，因此可賣【　　　】。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "傳統與未來【　　　】",
+      "value": "1.宇晴回憶【　　　】【　　　】，因此起雞皮疙瘩。\n2.未來農夫不再是戴斗笠拿鋤頭，而更像【　　　】"
     }
   ],
-  "layout": "worksheet_table",
-  "title": "球場上的另類指揮家",
+  "title": "未來的農夫",
   "worksheet_rows": [
     {
       "kind": "pair",
-      "label": "情境（段1）",
-      "value": "球場氣氛沸騰，帶動氣勢的推手是【　　　】"
+      "label": "志向與進入場域(段1-2)",
+      "value": "1.宇晴的志向是當【　　　】。\n2.宇晴到桃園【　　　】實習，農場沒有泥土味，反而有消毒酒精味，農場像【　　　】。"
     },
     {
       "kind": "pair",
-      "label": "觀點/主張（段2）",
-      "value": "1.啦啦隊已蛻變成一種有價值與需要高度【　　　】的職業"
-    },
-    {
-      "kind": "section_block",
-      "section": "支持理由",
-      "items": [
-        {
-          "label": "有功能\n（段2）",
-          "value": "啦啦隊能把球迷零散聲音整合成整齊有力的音浪，讓球隊氣勢如虹，也為運動員注入【　　　】。"
-        },
-        {
-          "label": "有能力\n(段3)",
-          "value": "1.許多人以為啦啦隊只需【　　　】就能勝任。\n2.啦啦隊要付出很多的訓練。需要驚人的【　　　】與【　　　】。"
-        },
-        {
-          "label": "需體能\n(段4)",
-          "value": "工作消耗體力，長時間跳躍揮手、需要【　　　】；訓練含重訓、核心訓練、拉筋。"
-        },
-        {
-          "label": "心理韌性(段4)",
-          "value": "需【　　　】，落後仍保持活力，絕對不是【　　　】。"
-        }
-      ]
+      "label": "農場外觀（段3）",
+      "value": "農場一層層栽培架和LED燈光，像【　　　】，每層水耕槽的葉片【　　　】。"
     },
     {
       "kind": "pair",
-      "label": "反思(段5)",
-      "value": "1.啦啦隊的服裝常成為與論靶心。\n2.服裝爭議表面在「穿什麼/辣不辣」，但深層涉及觀看的立場是【　　　】或【　　　】。"
+      "label": "農場運作方式(段4)",
+      "value": "1.水耕蔬菜不是用土種出來的，而是用【　　　】。\n2.透過【　　　】監測並調整各項條件，讓農場的環境維持在最適合蔬菜生長的範圍。"
     },
     {
       "kind": "pair",
-      "label": "呼籲/結語(段5.6)",
-      "value": "呼籲讀者【　　　】看啦啦隊，把焦點放回【　　　】，看見笑容背後的訓練與心意。"
+      "label": "工作內容(段5)",
+      "value": "1.宇晴每天【　　　】，找出【　　　】的地方，能處理就處理，必要時回報。\n2.她的領悟：讀圖表、看趨勢、抓異常也是在【　　　】。"
+    },
+    {
+      "kind": "pair",
+      "label": "農場優勢(段6)",
+      "value": "1.垂直農場一開始【　　　】，宇晴擔心不賺錢。\n2.無毒、蔬菜長得又快又漂亮，因此可賣【　　　】。"
+    },
+    {
+      "kind": "pair",
+      "label": "傳統與未來(段7-8)",
+      "value": "1.宇晴回憶【　　　】（徒手、糞肥等），因此起雞皮疙瘩。\n2.未來農夫不再是戴斗笠拿鋤頭，而更像【　　　】"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "generic",
-    "fill_blank_count": 8,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "情境【 段1 】",
-      "觀點/主張【 段2 】",
-      "有功能\n【 段2 】",
-      "有能力\n【 段3 】"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

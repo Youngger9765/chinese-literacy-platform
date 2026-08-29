@@ -32,7 +32,7 @@ const DictationPage: React.FC = () => {
     <DictationPractice
       story={selectedStory}
       onFinish={handleFinishDictation}
-      onBack={() => navigate(`/learn/${storyId}/vocab`)}
+      onBack={() => navigate(`/learn/${storyId}/character-practice`)}
       initialProgress={stepProgressData.step_data?.dictation as DictationStepData | undefined}
       onProgressChange={handleProgressChange}
     />

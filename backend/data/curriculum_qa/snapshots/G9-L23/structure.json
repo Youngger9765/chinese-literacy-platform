@@ -1,0 +1,113 @@
+{
+  "interaction_profile": {
+    "checkbox_count": 1,
+    "fill_blank_count": 5,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "mixed",
+    "primary_labels": [
+      "1",
+      "高地環境【　　　】",
+      "團隊合作【　　　】",
+      "科技協助【　　　】"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
+  "rows": [
+    {
+      "interactive_type": "display",
+      "label": "馬拉松王者──基普喬吉",
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "成就(段1、5)",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "1",
+          "value": "2019年，基普喬吉在「1小時59分挑戰計畫」中突破【　　　】大關，但因不是正式比賽，成績不列入【　　　】。"
+        },
+        {
+          "interactive_type": "display",
+          "label": "2",
+          "value": "2022年，他在柏林馬拉松刷新正式世界紀錄。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "高地環境【　　　】",
+      "value": "南迪郡的【　　　】、稀薄空氣、溫和氣候與鄉村小路，為長跑訓練提供有利條件，幫助他練出強大的【　　　】功能"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "團隊合作【　　　】",
+      "value": "陪跑員【　　　】上場，並排成倒V字隊形，以降低【　　　】，幫助基普喬吉維持團隊設定的速度。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "科技協助【　　　】",
+      "value": "教練團用雷射光點協助控制【　　　】；NIKE宣稱，高科技跑鞋可以提升【　　　】的跑步效率。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "自我鍛鍊【　　　】",
+      "value": "基普喬吉生活簡樸、日復一日苦練，重視【　　　】與內省，也寫【　　　】調整自己；閱讀則幫助他保持【　　　】、增廣見聞。"
+    },
+    {
+      "interactive_type": "checkbox",
+      "label": "結尾【　　　】",
+      "options": [
+        "基普喬吉的紀錄主要來自高地環境帶來的體能優勢。",
+        "基普喬吉的紀錄主要來自跑鞋與雷射帶來的科技協助。",
+        "基普喬吉長期鍛鍊自己，也受到環境、團隊與科技支持。"
+      ],
+      "value": "哪一項最能說明本文重點？\n①基普喬吉的紀錄主要來自高地環境帶來的體能優勢。 ②基普喬吉的紀錄主要來自跑鞋與雷射帶來的科技協助。 ③基普喬吉長期鍛鍊自己，也受到環境、團隊與科技支持。"
+    }
+  ],
+  "title": "馬拉松王者──基普喬吉",
+  "worksheet_rows": [
+    {
+      "items": [
+        {
+          "label": "1",
+          "value": "2019年，基普喬吉在「1小時59分挑戰計畫」中突破【　　　】大關，但因不是正式比賽，成績不列入【　　　】。"
+        },
+        {
+          "label": "2",
+          "value": "2022年，他在柏林馬拉松刷新正式世界紀錄。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "成就(段1、5)"
+    },
+    {
+      "kind": "pair",
+      "label": "高地環境(段2)",
+      "value": "南迪郡的【　　　】、稀薄空氣、溫和氣候與鄉村小路，為長跑訓練提供有利條件，幫助他練出強大的【　　　】功能"
+    },
+    {
+      "kind": "pair",
+      "label": "團隊合作(段3～5)",
+      "value": "陪跑員【　　　】上場，並排成倒V字隊形，以降低【　　　】，幫助基普喬吉維持團隊設定的速度。"
+    },
+    {
+      "kind": "pair",
+      "label": "科技協助(段4～5)",
+      "value": "教練團用雷射光點協助控制【　　　】；NIKE宣稱，高科技跑鞋可以提升【　　　】的跑步效率。"
+    },
+    {
+      "kind": "pair",
+      "label": "自我鍛鍊(段6～8)",
+      "value": "基普喬吉生活簡樸、日復一日苦練，重視【　　　】與內省，也寫【　　　】調整自己；閱讀則幫助他保持【　　　】、增廣見聞。"
+    },
+    {
+      "kind": "pair",
+      "label": "結尾(段9）",
+      "value": "哪一項最能說明本文重點？\n①基普喬吉的紀錄主要來自高地環境帶來的體能優勢。 ②基普喬吉的紀錄主要來自跑鞋與雷射帶來的科技協助。 ③基普喬吉長期鍛鍊自己，也受到環境、團隊與科技支持。"
+    }
+  ]
+}

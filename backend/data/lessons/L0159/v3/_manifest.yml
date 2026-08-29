@@ -1,0 +1,137 @@
+lesson_uid: L0159
+generated_by: scripts/build_lesson_manifest.py
+note: 衍生檔，不是真相來源。sections 來自 lesson.yml 的 sections_present，module 歸屬來自 specs/modules/section-to-module.yml。改了那兩者要重產。
+sections:
+- 'no': ''
+  name: 古文今譯
+  module: modern_translation
+  slug: 46nj6
+  file: modern_translation.46nj6.yml
+  pages:
+  - 1
+  - 2
+- 'no': ''
+  name: 故事賞析
+  module: intro_guide
+  slug: m7q3x
+  file: intro_guide.m7q3x.yml
+  pages:
+  - 1
+  - 2
+  pages_source: bracketed
+- 'no': ''
+  name: 原文
+  module: classical_text
+  slug: mqqqq
+  file: classical_text.mqqqq.yml
+  pages:
+  - 2
+- 'no': ''
+  name: 朗讀計時
+  module: key_reading
+  slug: pajcu
+  file: key_reading.pajcu.yml
+  pages:
+  - 2
+  pages_source: bracketed
+- 'no': 一
+  name: 文白句子比對
+  module: sentence_matching
+  slug: krf7k
+  file: sentence_matching.krf7k.yml
+  pages:
+  - 2
+  - 3
+  - 4
+- 'no': 二
+  name: 文白詞語比對
+  module: word_matching
+  slug: u7xrq
+  file: word_matching.u7xrq.yml
+  pages:
+  - 4
+  - 5
+- 'no': 三
+  name: 文章重點表
+  module: keypoints
+  slug: pjwwr
+  file: keypoints.pjwwr.yml
+  pages:
+  - 5
+  - 6
+- 'no': 四
+  name: 文言文聚光燈
+  module: spotlight
+  subtitle: 斷句及判讀主語II
+  slug: dppq4
+  file: spotlight.dppq4.yml
+  pages:
+  - 6
+  - 7
+  - 8
+- 'no': 五
+  name: 閱讀理解
+  module: comprehension
+  slug: k4mrx
+  file: comprehension.k4mrx.yml
+  pages:
+  - 8
+  - 9
+dispatch:
+- classical_text
+- comprehension
+- intro_guide
+- key_reading
+- keypoints
+- modern_translation
+- sentence_matching
+- spotlight
+- word_matching
+produced:
+- classical_text
+- comprehension
+- intro_guide
+- key_reading
+- keypoints
+- modern_translation
+- sentence_matching
+- spotlight
+- word_matching
+absent_from_source:
+- full_text_annotate
+- resources
+- vocab_application
+- vocab_definitions
+- vocab_review
+pdf_pages: 9
+dispatch_pages:
+  classical_text:
+  - 2
+  comprehension:
+  - 8
+  - 9
+  intro_guide:
+  - 1
+  - 2
+  key_reading:
+  - 2
+  keypoints:
+  - 5
+  - 6
+  modern_translation:
+  - 1
+  - 2
+  sentence_matching:
+  - 2
+  - 3
+  - 4
+  spotlight:
+  - 6
+  - 7
+  - 8
+  word_matching:
+  - 4
+  - 5
+low_confidence_pages:
+- intro_guide
+- key_reading

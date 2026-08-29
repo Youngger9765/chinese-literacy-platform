@@ -1,0 +1,52 @@
+lesson_uid: L0001
+version_id: v3
+level: 4
+genre: 記敘文
+strategy: 寫作手法──順敘──從時間詞判斷事件順序
+課文作者: 吳漢庭
+學習單: 巫怡蓉
+lesson_no: 10
+series: 一般
+lesson_seq: 4100
+intro: 十秒鐘，看似短暫，卻能決定一場比賽的勝負，也能承載運動員多年的努力與夢想。這篇文章以「臺灣最速男」楊俊瀚為例，帶我們看見他如何在短跑賽場上，經歷光榮的時刻，也曾遭遇受傷的低潮。文章將引導我們思考，在看似孤獨的運動生涯中，運動員如何面對一次次的挑戰，以及他們如何在壓力與挫折中，找到堅持下去的力量。透過楊俊瀚的故事，我們將一同體會，每一次的起跑，都蘊藏著不為人知的汗水與決心。
+notes:
+  總表_文體: 記敘文
+  總表_類型: 記(人)
+  總表_議題: 運動+克服挫折
+  總表_聚光燈策略: 寫作手法──順敘──從時間詞判斷事件順序
+  總表_第六大題標題: 寫作手法──順敘
+  總表_語詞:
+  - 擊垮
+  - 沮喪
+  - 睽違
+  - 孤寂感
+  - 天壤之別
+  - 事與願違
+  - 迎刃而解
+  - 血脈賁張
+  - 轉瞬而逝
+  - 經年累月
+  總表_對照: 總表語詞9 寫「轉瞬而逝」，學習單與課文皆印「轉瞬即逝」——差異在總表側，非 DOCX 勘誤。
+strategy_explained: '這一次，我們要學會怎麼找出故事裡事情發生的順序，就像偵探一樣，從時間的線索中找到答案
+
+  透過「臺灣最速男」楊俊瀚的故事，你會發現文章裡有很多「時間詞」，像是「那一年」、「後來」，它們就像路標，告訴我們什麼事先發生，什麼事在後頭
+
+  所以，讀的時候，記得眼睛要仔細看，找找看有沒有這些「時間的線索」，它們會帶你更清楚地了解楊俊瀚怎麼克服受傷的挑戰，一步步走向夢想'
+strategy_sources:
+  worksheet: 寫作手法──順敘－從時間詞判斷事件順序
+  master_sheet: 寫作手法──順敘──從時間詞判斷事件順序
+  previous: 寫作手法──順敘－從時間詞判斷事件順序
+source_profile:
+  class: multi_anchor
+  note: ☞ 錨點命中多段 —— 用計數欄段界投票，平手就判不動
+  has_key_reading_section: true
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: null
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 2
+  has_counter_column: true
+  body_in_tables: true
+  invisible_chars_docx_only: true
+  profiled: '2026-08-24'

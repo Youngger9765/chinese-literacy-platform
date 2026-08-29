@@ -1,0 +1,134 @@
+lesson_uid: L0057
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 睡眼惺忪
+  - 流連忘返
+  - 代謝
+  - 小酌
+  - 去蕪存菁
+  - 懸梁刺股
+  - 生理時鐘
+  - 惡性循環
+  - 得不償失
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 凝視哈欠連連一尚得保
+  - 鐵鏈手無寸鐵息存不持
+  - 去結甦小酌然譁片償沉
+  - 喝蕪醒譁冒惡性腫失默
+  - 哈難存然犯性睡眼惺忪
+  - 餘欠以菁流循眠睛新懸
+  - 飯係連舉連環叫陳世梁
+  - 後關果連忘狀代開代刺
+  - 走出陰霾返謝顧門黃股
+  - 生理時鐘有所忌憚色腔
+  answers_are_graphical: true
+  answers_printed: true
+  answer_paths:
+  - word: 得不償失
+    cells:
+    - - 1
+      - 9
+    - - 2
+      - 9
+    - - 3
+      - 9
+    - - 4
+      - 9
+    direction: vertical
+  - word: 小酌
+    cells:
+    - - 3
+      - 4
+    - - 3
+      - 5
+    direction: horizontal
+  - word: 去蕪存菁
+    cells:
+    - - 3
+      - 1
+    - - 4
+      - 2
+    - - 5
+      - 3
+    - - 6
+      - 4
+    direction: diagonal_down_right
+  - word: 惡性循環
+    cells:
+    - - 4
+      - 6
+    - - 5
+      - 6
+    - - 6
+      - 6
+    - - 7
+      - 6
+    direction: vertical
+  - word: 睡眼惺忪
+    cells:
+    - - 5
+      - 7
+    - - 5
+      - 8
+    - - 5
+      - 9
+    - - 5
+      - 10
+    direction: horizontal
+  - word: 流連忘返
+    cells:
+    - - 6
+      - 5
+    - - 7
+      - 5
+    - - 8
+      - 5
+    - - 9
+      - 5
+    direction: vertical
+  - word: 懸梁刺股
+    cells:
+    - - 6
+      - 10
+    - - 7
+      - 10
+    - - 8
+      - 10
+    - - 9
+      - 10
+    direction: vertical
+  - word: 代謝
+    cells:
+    - - 8
+      - 7
+    - - 9
+      - 6
+    direction: diagonal_down_left
+  - word: 生理時鐘
+    cells:
+    - - 10
+      - 1
+    - - 10
+      - 2
+    - - 10
+      - 3
+    - - 10
+      - 4
+    direction: horizontal
+  notes:
+    answer_paths: '9 個目標語詞全部圈到，逐格取字皆能拼回，格子沒有印錯字。
+
+      **PDF 只印得出 2 條**（流連忘返 p9、代謝 p10）—— 另外 7 個 roundRect 在一個
+
+      垂直被拉伸 4.07 倍的 wpg 群組裡，LibreOffice 整組沒輸出。9 個圈的中心座標
+
+      換算回格子後與 9 個語詞一一對應、無剩無缺（換算過程見檔頭）。'
+  slug: rw7dy
+  text_ref: tvrxr

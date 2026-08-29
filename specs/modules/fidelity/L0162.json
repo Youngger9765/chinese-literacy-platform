@@ -1,0 +1,91 @@
+{
+  "uid": "L0162",
+  "gate_version": 2,
+  "docx_sha256": "7574-4171-5bb8-0304",
+  "modules": {
+    "classical_text.cwuhm": {
+      "yaml_sha256": "0ef6-5f77-ce21-adef",
+      "checked": 7,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "comprehension.up6km": {
+      "yaml_sha256": "067c-59cd-a04d-cb94",
+      "checked": 29,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "errata": {
+      "yaml_sha256": "c0f8-17b7-8d6f-e7b2",
+      "checked": 1,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "goal_box.67hkw": {
+      "yaml_sha256": "fbc5-0938-7a63-8cb6",
+      "checked": 2,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "intro_guide.6tcj9": {
+      "yaml_sha256": "85ec-d3b2-ab70-c411",
+      "checked": 1,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "key_reading.36w47": {
+      "yaml_sha256": "a25a-2e5f-88fe-edad",
+      "checked": 7,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "keypoints.kjpr4": {
+      "yaml_sha256": "d2f2-8835-c7c3-9950",
+      "checked": 14,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "modern_translation.3apnt": {
+      "yaml_sha256": "42d8-58b3-58f7-2d50",
+      "checked": 2,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "self_challenge.h7w9e": {
+      "yaml_sha256": "6c00-31ee-da77-ca35",
+      "checked": 20,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "sentence_matching.audxx": {
+      "yaml_sha256": "0c5c-83fc-81d2-214e",
+      "checked": 25,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "spotlight.uvman": {
+      "yaml_sha256": "b459-b556-807b-4c16",
+      "checked": 38,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "word_matching.cpxjv": {
+      "yaml_sha256": "8092-974e-ace9-2b42",
+      "checked": 17,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    }
+  }
+}

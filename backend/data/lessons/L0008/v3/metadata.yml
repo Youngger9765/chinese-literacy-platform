@@ -1,0 +1,34 @@
+lesson_uid: L0008
+version_id: v3
+level: 4
+genre: 記敘文
+strategy: 品格力──想法感受的換位思考
+課文與學習單: 唐儀庭
+note_議題_總表: 品格──行善、仁慈
+lesson_no: 17
+series: 一般
+lesson_seq: 4170
+intro: 這篇文章講述一個寒冷夜晚，一位資源回收的阿公帶著孫子到麵攤吃麵的故事。阿公為了讓孫子能吃到熱騰騰的麵，自己只喝水，並巧妙地向孫子表達自己已經吃飽。麵攤老闆看見了這祖孫倆的互動，決定請客。後來，在寒流來襲的日子裡，孫子為了報答阿公的善意，也努力想讓阿公成為麵攤第一百位客人，而這份心意也讓阿公和孫子之間有了更深的理解。文章描寫了在物資匱乏的環境中，親情的可貴與人與人之間溫暖的互助。
+strategy_explained: '這一課我們要練習的是**站在別人角度想一想，感受他的心情**
+
+  這篇文章裡的阿公把麵讓給孫子吃，孫子想幫阿公的忙，都是因為他們懂得替對方著想，感受對方的需要
+
+  讀的時候，你可以想想看，如果自己是阿公或孫子，會是什麼感覺，或是麵攤老闆看到了，心裡也會有什麼暖暖的感覺'
+strategy_sources:
+  worksheet: null
+  master_sheet: 品格力──想法感受的換位思考
+  previous: 品格力──想法感受的換位思考
+source_profile:
+  class: standard
+  note: 單一錨點 + 有計數欄 + idx 唯一 —— 走主路徑
+  has_key_reading_section: true
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: null
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 1
+  has_counter_column: true
+  body_in_tables: true
+  invisible_chars_docx_only: true
+  profiled: '2026-08-24'

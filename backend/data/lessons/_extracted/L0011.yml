@@ -1,0 +1,265 @@
+# L0011 / G4-L1《贏得喝采的輸家》— LLM 多模態抽取
+# 方法：SOT DOCX → PDF → 逐頁讀 8/8 頁（非抽樣）
+# 來源：private/curriculum-source/_SOT/4年級/G4-L1贏得喝采的輸家.docx
+# 產生：2026-08-18　skill: extract-lesson-multimodal
+
+meta:
+  lesson_uid: L0011
+  catalog_slot: G4-L1
+  title: 贏得喝采的輸家
+  level: 4
+  genre: 記敘文
+  課文學習單: 張明珠          # 原稿印「課文/學習單：張明珠」，兩者同一人
+  pdf_pages: 8
+  # ⚠️ 本課**沒有聚光燈大題**：學習單第六大題直接是「閱讀理解」，第一頁右上角也沒有
+  #    「目標策略」框（放的是一段閱讀提示）。總表的「閱讀聚光燈策略」與「第六大題標題」
+  #    兩欄同樣是空的 —— 兩邊一致，所以這是教材本來就沒有，不是抽取漏掉。
+
+sections_present:
+  - {"no": 一, name: 讀全文-做記號}
+  - {"no": 二, name: 念順順}
+  - {"no": 三, name: 語詞我最棒}
+  - {"no": 四, name: 語詞應用}
+  - {"no": 五, name: 文章重點表}
+  - {"no": 六, name: 閱讀理解}
+  - {"no": 七, name: 詞語複習}
+  - {"no": 八, name: 知識補給站}
+
+# ── 一 讀全文-做記號 ──
+body:
+  # ⚠️ marking_instruction 放在 body 底下：split_lesson_modules.py 只搬對照表上的頂層
+  #    key，放頂層會被靜默丟掉。
+  marking_instruction:
+    header: ※ 如果你有做到下列事項，請在□內打勾。
+    items:
+      - 請在不太了解的字、詞或句做記號。
+      - 重要的地方、喜歡的語詞、句子或段落做上記號
+  reading_tip: 讀文章時，隨時留意自己的理解和感受，並且用筆做記號，可以讓你和文章更有連結喔！
+  paragraph_count: 5
+  # 段號欄印 ㄧ二三四五（首字是注音符號 ㄧ，不是漢字 一）。
+  # ⚠️ 第 5 個號碼「五」印在第 2 頁「的尊敬及喝采。」那一行旁邊，但那行是第 4 段的句尾
+  #    （「贏得全國人民」＋「的尊敬及喝采。」是同一句）。跨頁後號碼欄的行距失去同步，
+  #    真正的第 5 段是縮排起首的「其實比賽就像是一場模擬的人生」。
+  paragraphs:
+    - idx: 1
+      text: 「戴資穎戴資穎第一名，戴資穎戴資穎我愛妳~~~」這一句洗腦的廣告臺詞，是否也在你的周遭出現？她就是臺灣第一人，累計214周排名世界第一的球后──戴資穎。
+    - idx: 2
+      text: 小戴即使在強大的壓力下，仍然堅持維持自己的風格。小戴相信攻擊是最好的防禦，總是主動出擊，她追求完美的邊角球和難以預測的穿越角度，她的攻擊千變萬化，讓對手摸不著頭緒。雖然這樣的進攻方式會提高失誤率，但如果要她打穩定的安全球風，小戴就不是小戴了。這就是她獨特的地方，也是她迷人之處。
+    - idx: 3
+      text: 2021年8月1日，小戴在東京奧運金牌賽的轉播收視率創下新高，這場小戴與陳雨菲的龍爭虎鬥，戰況勢均力敵，全臺觀眾守在電視前，目不轉睛。小戴一得分，大家歡天喜地、讚嘆不已；不幸鷹眼判定小戴的殺球出界，大家不免唉聲嘆氣、捶胸頓足。一場比賽帶出全國人民不可思議的凝聚力和向心力！
+    - idx: 4
+      text: 小戴在最後一局落後七分時，依然面不改色的一分一分追回來，她的每一下揮拍、每一次扣殺，都是在和自己比賽，她沒有因為想贏得比賽而選擇保守，她選擇的是做自己、用自己擅長的方式戰鬥，她要掌握比賽的節奏，她拚盡全力攻擊。雖然球評都指出小戴打得太精采了，但她最終還是以三分之差不敵對手的嚴密防守，只能奪得銀牌。下場時，小戴落寞的神情，讓全國粉絲們的心都揪了起來。受訪時，她卻不改大俠的性子，說：「盡力了，不後悔。」球迷們留言鼓勵。她，打得漂亮，雖然輸了比賽，卻贏得了人心，贏得全國人民的尊敬及喝采。
+    - idx: 5
+      text: 其實比賽就像是一場模擬的人生，有一些障礙你可以克服，也有一些不可控制的疑難雜症，「贏了值得開心，輸了也不必難過」，小戴面對挫折的坦然與勇氣、永不放棄的精神，值得我們學習，因為只要你沒有輸了自己，比賽就會一直持續下去。
+  inline_marked_terms: [防禦, 摸不著頭緒, 龍爭虎鬥, 勢均力敵, 目不轉睛, 讚嘆不已, 鷹眼, 唉聲嘆氣, 捶胸頓足, 凝聚力, 拚, 落寞, 揪, 喝采, 疑難雜症]
+
+# ── 二 念順順 ──
+key_reading:
+  instruction: 請用計時器，從指定段落（三☞）開始朗讀，計時1分鐘讀的字數，並記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！
+  start_paragraph: 3          # ☞ 印在「2021年8月1日，小戴在東京奧運金牌賽…」該行
+  end: 課文結束
+  spans_paragraphs: [3, 4, 5]
+  approx_chars_from_start: 376
+  approx_chars_note: 右緣累計字數只印到 376（落在第 4 段「贏得全國人民」那一行），
+    之後的「的尊敬及喝采。」與第 5 段沒有再印數字 —— 是數字欄印完了，不是課文到此為止。
+  timing_table:
+    columns: [第1次計時, 第2次計時, 第3次計時, 裁判計時]
+    unit: 字
+    judge_signature: true
+  benchmark:
+    - {threshold: ＜190字, feedback: 還要多加練習。}
+    - {threshold: 191~220字, feedback: 嗯，還不錯喲！}
+    - {threshold: ＞221字, feedback: 哇嗚，超級厲害！}
+
+# ── 三 語詞我最棒 ──
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+    A: 從本課語詞框框，找語詞。
+    B: 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+    C: 問同學。
+  vocabulary_bank: [喝采, 龍爭虎鬥, 讚嘆不已, 摸不著頭緒, 勢均力敵, 目不轉睛, 鷹眼, 凝聚力, 捶胸頓足, 疑難雜症, 落寞]
+  vocabulary_bank_note: 學習單框內列 11 個，總表語詞欄只列 10 個（少「鷹眼」）。
+    以學習單為準 —— 第 (10) 小題的答案就是鷹眼，第七大題找字遊戲也要圈它。
+  items:
+    - {index: 1, word: 龍爭虎鬥, definition: 形容像巨龍和猛虎般地相互爭鬥，難分高低。}
+    - {index: 2, word: 捶胸頓足, definition: 捶打胸膛，以腳跺地。形容極為悲憤或悔恨。}
+    - {index: 3, word: 摸不著頭緒, definition: 搞不清楚狀況的樣子。}
+    - {index: 4, word: 目不轉睛, definition: 形容眼睛盯著、非常專心的樣子。}
+    - {index: 5, word: 凝聚力, definition: 讓一群人非常團結的力量。}
+    - {index: 6, word: 勢均力敵, definition: 雙方實力很接近，不知道誰會贏。}
+    - {index: 7, word: 喝采, definition: 大聲叫好。}
+    - {index: 8, word: 讚嘆不已, definition: 不停地讚美、驚嘆。}
+    - {index: 9, word: 落寞, definition: 失望而且孤單寂寞的樣子。}
+    - {index: 10, word: 鷹眼, definition: 在網球、羽球等球類運動中，用以追蹤記錄球的路徑的電腦輔助系統。}
+    - {index: 11, word: 疑難雜症, definition: 難以解決的困難或問題。}
+  supplement:
+    text: '*「鷹眼」常用的意思是銳利的眼光。'
+
+# ── 四 語詞應用 ──
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank: {A: 疑難雜症, B: 龍爭虎鬥, C: 目不轉睛, D: 喝采, E: 讚嘆不已, F: 凝聚力, G: 勢均力敵, H: 捶胸頓足, I: 摸不著頭緒}
+  example:
+    label: 例
+    stem: 他上知天文，下知地理，假使有任何【　】都可以向他請教
+    answer: A
+  items:
+    - {index: 1, stem: 這個問題很複雜，一時之間讓人（　），無法解決。, answer: I}
+    - {index: 2, stem: 他精湛的演出，贏得全場觀眾的（　）。, answer: D}
+    - {index: 3, stem: 班上同學經過幾年相處下來，彼此的（　）很強。, answer: F}
+    - {index: 4, stem: 奧運會上各國選手（　），競爭非常激烈。, answer: B}
+    - {index: 5, stem: 上國文課時，同學們都（　）的盯著臺上新來的老師。, answer: C}
+    - {index: 6, stem: 這兩位棋手下棋時互不相讓，整盤對局（　），最後才分出勝負。, answer: G}
+    - {index: 7, stem: 比賽最後一球沒有投進，全隊與冠軍擦身而過，隊長難過得（　）。, answer: H}
+    - {index: 8, stem: 美術館裡展出的作品十分精緻，大家看完都（　）。, answer: E}
+
+# ── 五 文章重點表 ──
+# ⚠️ 表格跨頁：p4 印到「主題」列，p5 接「球風」與「事例」列。
+#    p5 版面上「六 閱讀理解」標題印在這幾列**上方**，但那是轉檔的浮動排版 ——
+#    document.xml 的實際順序是 文章重點表 → 主角 → 主題 → 球風 → 事例(背景/經過/結果)
+#    → 閱讀理解說明 → 閱讀理解標題。所以這幾列屬第五大題，不是第六大題。
+keypoints:
+  title: 贏得喝采的輸家
+  structure: nested
+  rows:
+    - label: 主角
+      value: 【　】
+      blanks: [{answer: 戴資穎}]
+    - label: 主題
+      value: 小戴即使在強大的壓力下，仍然堅持維持自己的風格。
+    - label: 球風
+      value: 主動出擊，追求完美的【　】和【　】的穿越角度。
+      blanks: [{answer: 邊角球}, {answer: 難以預測}]
+    - label: 事例
+      sub_rows:
+        - label: 背景
+          prompt: 這個故事發生的情境？(多選，請打勾)
+          multi: true
+          options: {1: 奧運金牌賽, 2: 世界大學運動會, 3: 全國關注的比賽}
+          answer: [1, 3]
+          answer_carrier: 紅色 ☑（圖形）
+        - label: 經過
+          prompt: 在重要比賽，輸球的狀況下，仍然選擇：(單選，請打勾)
+          options: {1: 忠於自己的球風, 2: 保守地打安全球}
+          answer: 1
+          answer_carrier: 紅色 ☑（圖形）
+        - label: 結果
+          prompt: (單選，請打勾)
+          value: |-
+            結果，小戴（　）球賽，
+            卻（　）全國人民的尊敬。
+          sub_items:
+            - {index: 1, options: {1: 贏了, 2: 輸了}, answer: 2}
+            - {index: 2, options: {1: 贏得, 2: 失去}, answer: 1}
+          answer_carrier: 紅色 ☑（圖形）
+
+# ── 六 閱讀理解 ──
+comprehension:
+  instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
+  questions:
+    - index: 1
+      answer: C
+      stem: 請問「勢均力敵」，可以用哪個詞語替換？
+      options:
+        A: 天差地遠
+        B: 揚眉吐氣
+        C: 不分上下
+        D: 寡不敵眾
+      teacher_note: （勢均力敵表示兩方對手實力相近）
+    - index: 2
+      answer: B
+      stem: 請問文中第三段「捶胸頓足」最可能的情緒是哪個？
+      options:
+        A: 開心
+        B: 懊惱
+        C: 欣喜
+        D: 寂寞
+      teacher_note: （由前後文「唉聲嘆氣」，後句「滿臉失落」可推論是懊惱的情緒）
+    - index: 3
+      answer: B
+      stem: 「贏了值得開心，輸了不必難過」，和下列哪一句話的意思最接近？
+      options:
+        A: 天生我材必有用
+        B: 勝不驕，敗不餒。
+        C: 天塌下來有高個子擋著
+        D: 失敗是成功的必要條件
+      teacher_note: （輸了不必難過代表失敗了不用氣餒）
+    - index: 4
+      answer: A
+      stem: 為什麼戴資穎在落後的時候，沒有改為穩定的打法？
+      options:
+        A: 她要用自己的方式戰鬥
+        B: 高風險才有高得分
+        C: 她認為自己打不出穩定的球路
+        D: 對手太強了，讓她無法獲勝
+      teacher_note: （第三段）
+    - index: 5
+      answer: D
+      stem: 根據本文，戴資穎在這場比賽中最重視的是什麼？
+      options:
+        A: 賺進大量廣告代言費
+        B: 希望贏得比賽的勝利
+        C: 希望獲得人民的喝采
+        D: 做自己、為自己比賽
+      teacher_note: （第三、四段）
+
+# ── 七 詞語複習 ──
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words: [鷹眼, 喝采, 龍爭虎鬥, 讚嘆不已, 摸不著頭緒, 勢均力敵, 目不轉睛, 凝聚力, 捶胸頓足, 疑難雜症, 落寞]
+  grid_size: [10, 10]
+  grid:
+    - 偉大飛餓丞讚嘆不已日
+    - 作喝龍虎相爭氣行經光
+    - 文采在爭老摸不著頭緒
+    - 章花天羊虎頭勢平手皇
+    - 捶天疑問話鬥不均大帝
+    - 胸酒難題撒寂兩一力情
+    - 頓地雜墜落寞立平士敵
+    - 足少症狀下默正鷹眼隊
+    - 球人稀少數目不轉睛手
+    - 員凝聚力以萬計謀畫冊
+  answers_are_graphical: true
+  answer_paths_note: 11 個目標語詞全部都有圈記，其中「鷹眼」的框是**灰色**、其餘 10 個是橘色。
+  answer_paths:
+    - word: 讚嘆不已
+      cells: [[1, 6], [1, 7], [1, 8], [1, 9]]
+      direction: horizontal
+    - word: 喝采
+      cells: [[2, 2], [3, 2]]
+      direction: vertical
+    - word: 龍爭虎鬥
+      cells: [[2, 3], [3, 4], [4, 5], [5, 6]]
+      direction: diagonal_down_right
+    - word: 摸不著頭緒
+      cells: [[3, 6], [3, 7], [3, 8], [3, 9], [3, 10]]
+      direction: horizontal
+    - word: 勢均力敵
+      cells: [[4, 7], [5, 8], [6, 9], [7, 10]]
+      direction: diagonal_down_right
+    - word: 捶胸頓足
+      cells: [[5, 1], [6, 1], [7, 1], [8, 1]]
+      direction: vertical
+    - word: 疑難雜症
+      cells: [[5, 3], [6, 3], [7, 3], [8, 3]]
+      direction: vertical
+    - word: 落寞
+      cells: [[7, 5], [7, 6]]
+      direction: horizontal
+    - word: 鷹眼
+      cells: [[8, 8], [8, 9]]
+      direction: horizontal
+    - word: 目不轉睛
+      cells: [[9, 6], [9, 7], [9, 8], [9, 9]]
+      direction: horizontal
+    - word: 凝聚力
+      cells: [[10, 2], [10, 3], [10, 4]]
+      direction: horizontal
+
+# ── 八 知識補給站 ──
+resources:
+  items:
+    - {index: 1, title: 戴資穎力戰三局落敗-東京奧運獲銀牌, duration: '1:50', duration_seconds: 110, source: 爾達體育家族}
+    - {index: 2, title: 判定麟洋配決勝關鍵！一探「鷹眼系統」如何運作, duration: '01:52', duration_seconds: 112, source: 財經向前看}

@@ -1,0 +1,33 @@
+lesson_uid: L0037
+version_id: v3
+section_no: 二
+key_reading:
+  instruction: 請用計時器，從指定段落（四☞）開始朗讀，計時1分鐘讀的字數，並記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！
+  timing_table:
+    columns:
+    - 第1次計時
+    - 第2次計時
+    - 第3次計時
+    - 裁判計時
+    unit: 字
+    judge_signature: true
+  benchmark_label: ◎ 我的表現
+  benchmark:
+  - threshold: ＜200字
+    feedback: 還要多加練習。
+  - threshold: 201~230字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞231字
+    feedback: 哇嗚，超級厲害！
+  passage: 這下孟嘗君頭大了，大衣只有一件，已經送給秦昭王，現在幸姬又想要一件，如果不給，自己就凶多吉少。他立刻召集手下的食客開緊急會議，看怎麼解決問題。食客們面面相覷，會議現場鴉雀無聲。終於，一位坐在最後面、總是悶不吭聲的食客說話了：「我能得到那件皮大衣。」這位矮小瘦削的食客，在投奔孟嘗君時就說過自己的特長是「狗盜」──模仿狗的樣子和動作潛入別人家裡偷東西，他說他能潛入秦王收藏寶物的庫房盜取白狐裘，這事聽來匪夷所思，但事已至此，只能試試了。
+  start_text: 這下孟嘗君頭大了，大衣只有一件，已經送給秦昭王，
+  extent_chars: 217
+  source: extract_key_reading_v3
+  start_paragraph: 4
+  end_paragraph: 4
+  slug: 6ynfe
+  text_ref: fv7cm
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  absorbed_tail: 0

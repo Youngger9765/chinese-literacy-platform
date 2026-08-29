@@ -1,0 +1,56 @@
+{
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 3,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "想做什麼",
+      "怎麼繼續做",
+      "帶來什麼改變"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
+  "rows": [
+    {
+      "interactive_type": "display",
+      "label": "森林大軍的守護者-賴倍元",
+      "value": ""
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "想做什麼",
+      "value": "1.賴桑童年時期整天與【　　　】為伍。\n2.他上山看神木，感受到自己生命的短暫與大自然的永恆，決定開始【　　　】。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "怎麼繼續做",
+      "value": "1.困難：買下的山布滿【　　　】，長期使用除草劑破壞了【　　　】，也使土壤失去涵養水分的功能。\n2.做法：清運垃圾、人工【　　　】、鋪設水管，持續種樹。\n3.家人支持：賴太太扛起家庭與公司，並為種樹【　　　】；兒子種植咖啡，將販售所得投入種樹志業。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "帶來什麼改變",
+      "value": "1.三十年來，賴桑在大雪山種下三十多萬棵珍貴樹木。\n2.大雪山林場的【　　　】豐富而多元。\n3.愈來愈多的人認同賴桑的理念，並【　　　】。"
+    }
+  ],
+  "title": "森林大軍的守護者-賴倍元",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "想做什麼",
+      "value": "1.賴桑童年時期整天與【　　　】為伍。\n2.他上山看神木，感受到自己生命的短暫與大自然的永恆，決定開始【　　　】。"
+    },
+    {
+      "kind": "pair",
+      "label": "怎麼繼續做",
+      "value": "1.困難：買下的山布滿【　　　】，長期使用除草劑破壞了【　　　】，也使土壤失去涵養水分的功能。\n2.做法：清運垃圾、人工【　　　】、鋪設水管，持續種樹。\n3.家人支持：賴太太扛起家庭與公司，並為種樹【　　　】；兒子種植咖啡，將販售所得投入種樹志業。"
+    },
+    {
+      "kind": "pair",
+      "label": "帶來什麼改變",
+      "value": "1.三十年來，賴桑在大雪山種下三十多萬棵珍貴樹木。\n2.大雪山林場的【　　　】豐富而多元。\n3.愈來愈多的人認同賴桑的理念，並【　　　】。"
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+lesson_uid: L0074
+version_id: v3
+section_no: 二
+key_reading:
+  instruction: 請用計時器，從指定段落（二☞)開始朗讀，計時1分鐘讀的字數，並記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！
+  start_paragraph: 2
+  char_count_note: "右緣「字數」欄從第 2 段（☞ 指定的起點）開始累計，末筆 392 落在第 4 段結束，\n第 5~7 段沒有標 —— 屬「字數欄提早停」的形狀，392 不是全文長度。\n三個段界值都對得上（Word 口徑：連續阿拉伯數字算 1 個字）：\n  第 2 段 108 == 印的 108；第 2+3 段 223 == 印的 223；第 2+3+4 段 392 == 印的 392。\n⚠️ 中間的行號在 PDF 上整體上移，「四」與「鳥。」看起來跟 249 同一列，\n但 249 其實是第 4 段的第一行 —— 是版面漂移，不是抓錯段落。"
+  timing_table:
+    columns:
+    - 第1次計時
+    - 第2次計時
+    - 第3次計時
+    - 裁判計時
+    unit: 字
+    judge_signature: true
+  benchmark:
+  - threshold: ＜210字
+    feedback: 還要多加練習。
+  - threshold: 211~240字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞241字
+    feedback: 哇嗚，超級厲害！
+  passage: 研究人員追根究柢後才知道，當地的稻子收割後，農民會利用空檔時間改種紅豆，紅豆播種時遭到大量野鳥啄食。農民為了減少農業損失，便使用農藥製作毒餌，造成小型鳥類的大量死亡。而猛禽如老鷹、紅隼撿食小鳥的屍體，也因而間接受害。
+  start_text: 研究人員追根究柢後才知道，當地的稻子收割後，農民
+  extent_chars: 108
+  source: extract_key_reading_v3
+  slug: fedv9
+  text_ref: a4qjf
+  end_paragraph: 2
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  absorbed_tail: 0

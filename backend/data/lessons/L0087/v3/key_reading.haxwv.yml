@@ -1,0 +1,35 @@
+lesson_uid: L0087
+version_id: v3
+section_no: 二
+key_reading:
+  instruction: 請用計時器，從指定段落（三　)開始朗讀，計時1分鐘讀的字數，並記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！
+  instruction_note: 括號內的 ☞ 是圖形物件，文字流只有「（三　)」的空白；右括號在原稿是半形。
+  timing_table:
+    columns:
+    - 第1次計時
+    - 第2次計時
+    - 第3次計時
+    - 裁判計時
+    unit: 字
+    judge_signature: true
+  benchmark_label: ◎ 我的表現
+  benchmark:
+  - threshold: ＜210字
+    feedback: 還要多加練習。
+  - threshold: 211~240字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞241字
+    feedback: 哇嗚，超級厲害！
+  benchmark_note: 本課門檻比 L0085／L0086 高一級（210/211~240/241），對應課文較長。
+  passage: 看在眼裡，我突然覺得自己「受騙」了，一定是她拿到比較大的那一半。年紀小嘛，撒賴一下，就可以把餅換回來。真的換回來後，我就開始吃了。我狼吞虎嚥，兩三下就把餅吃光，再看姊姊，她還在慢條斯理細細品嚐，又甜又香的樣子。我的嫉妒、懷疑一起發作，心裡想：「一定是我原來的那一半比較大。」我百思不解的是，為什麼每次分餅，用盡所有策略，到頭來還是覺得姊姊的餅比我的大？
+  start_text: 看在眼裡，我突然覺得自己「受騙」了，一定是她拿到
+  extent_chars: 176
+  source: extract_key_reading_v3
+  start_paragraph: 3
+  end_paragraph: 3
+  slug: haxwv
+  text_ref: rpcyh
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  absorbed_tail: 0

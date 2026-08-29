@@ -1,0 +1,157 @@
+{
+  "interaction_profile": {
+    "checkbox_count": 1,
+    "fill_blank_count": 3,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "mixed",
+    "primary_labels": [
+      "內容",
+      "內容",
+      "內容",
+      "內容"
+    ],
+    "template_kind": "theme_facts"
+  },
+  "layout": "worksheet_table",
+  "rows": [
+    {
+      "interactive_type": "display",
+      "label": "身體，謝謝你",
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "引言",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "段落",
+          "value": "一"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容",
+          "value": "人體是一座精密的【　　　】，無論簡單或困難的動作，都是這支團隊的傑出【　　　】。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "論點",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "段落",
+          "value": "二"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容",
+          "value": "每個人都是自己工廠的【　　　】。\n優秀的【　　　】會是好老闆，知道【　　　】、水分、【　　　】都很重要。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "舉例說明",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "段落",
+          "value": "三~四"
+        },
+        {
+          "interactive_type": "checkbox",
+          "label": "內容",
+          "options": [
+            "口渴前",
+            "口渴後",
+            "相同",
+            "不同"
+          ],
+          "value": "①口渴前 ②口渴後\n①相同 ②不同"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "結語",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "段落",
+          "value": "五"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容",
+          "value": "身體支持我們完成各種事情，我們可以練習對身體說聲【　　　】。"
+        }
+      ],
+      "value": ""
+    }
+  ],
+  "title": "身體，謝謝你",
+  "worksheet_rows": [
+    {
+      "items": [
+        {
+          "label": "段落",
+          "value": "一"
+        },
+        {
+          "label": "內容",
+          "value": "人體是一座精密的【　　　】，無論簡單或困難的動作，都是這支團隊的傑出【　　　】。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "引言"
+    },
+    {
+      "items": [
+        {
+          "label": "段落",
+          "value": "二"
+        },
+        {
+          "label": "內容",
+          "value": "每個人都是自己工廠的【　　　】。\n優秀的【　　　】會是好老闆，知道【　　　】、水分、【　　　】都很重要。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "論點"
+    },
+    {
+      "items": [
+        {
+          "label": "段落",
+          "value": "三~四"
+        },
+        {
+          "label": "內容",
+          "value": "①口渴前 ②口渴後\n①相同 ②不同"
+        }
+      ],
+      "kind": "section_block",
+      "section": "舉例說明"
+    },
+    {
+      "items": [
+        {
+          "label": "段落",
+          "value": "五"
+        },
+        {
+          "label": "內容",
+          "value": "身體支持我們完成各種事情，我們可以練習對身體說聲【　　　】。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "結語"
+    }
+  ]
+}

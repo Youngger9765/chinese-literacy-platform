@@ -1,0 +1,169 @@
+{
+  "interaction_profile": {
+    "checkbox_count": 3,
+    "fill_blank_count": 1,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "mixed",
+    "primary_labels": [
+      "情節摘要",
+      "情節摘要",
+      "情節摘要",
+      "情節摘要"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
+  "rows": [
+    {
+      "interactive_type": "display",
+      "label": "下一球，我相信你",
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "起因",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "段落",
+          "value": "1-2"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "情節摘要",
+          "value": "1.游擊手【　　　】漏接了一顆滾地球\n2.投手【　　　】改變投球方式──他想靠【　　　】三振打者。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "發展",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "段落",
+          "value": "3-5"
+        },
+        {
+          "interactive_type": "checkbox",
+          "label": "情節摘要",
+          "options": [
+            "一意孤行",
+            "接受建議"
+          ],
+          "value": "①一意孤行 ②接受建議"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "轉折",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "段落",
+          "value": "6-8"
+        },
+        {
+          "interactive_type": "checkbox",
+          "label": "情節摘要",
+          "options": [
+            "孤軍奮戰",
+            "自責失誤",
+            "害怕",
+            "在乎",
+            "成功",
+            "失敗",
+            "拿下一分",
+            "丟了一分"
+          ],
+          "value": "教練告訴阿澤不必 ①孤軍奮戰 ②自責失誤\n原來小宇也很 ①害怕 ②在乎\n小宇上壘 ①成功 ②失敗\n讓隊上 ①拿下一分 ②丟了一分"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "結果",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "段落",
+          "value": "9-10"
+        },
+        {
+          "interactive_type": "checkbox",
+          "label": "情節摘要",
+          "options": [
+            "接受",
+            "拒絕"
+          ],
+          "value": "①接受 ②拒絕"
+        }
+      ],
+      "value": ""
+    }
+  ],
+  "title": "下一球，我相信你",
+  "worksheet_rows": [
+    {
+      "items": [
+        {
+          "label": "段落",
+          "value": "1-2"
+        },
+        {
+          "label": "情節摘要",
+          "value": "1.游擊手【　　　】漏接了一顆滾地球\n2.投手【　　　】改變投球方式──他想靠【　　　】三振打者。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "起因"
+    },
+    {
+      "items": [
+        {
+          "label": "段落",
+          "value": "3-5"
+        },
+        {
+          "label": "情節摘要",
+          "value": "①一意孤行 ②接受建議"
+        }
+      ],
+      "kind": "section_block",
+      "section": "發展"
+    },
+    {
+      "items": [
+        {
+          "label": "段落",
+          "value": "6-8"
+        },
+        {
+          "label": "情節摘要",
+          "value": "教練告訴阿澤不必 ①孤軍奮戰 ②自責失誤\n原來小宇也很 ①害怕 ②在乎\n小宇上壘 ①成功 ②失敗\n讓隊上 ①拿下一分 ②丟了一分"
+        }
+      ],
+      "kind": "section_block",
+      "section": "轉折"
+    },
+    {
+      "items": [
+        {
+          "label": "段落",
+          "value": "9-10"
+        },
+        {
+          "label": "情節摘要",
+          "value": "①接受 ②拒絕"
+        }
+      ],
+      "kind": "section_block",
+      "section": "結果"
+    }
+  ]
+}

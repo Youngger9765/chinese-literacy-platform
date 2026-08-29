@@ -1,0 +1,13 @@
+lesson_uid: L0022
+version_id: v3
+notes:
+  errata:
+  - id: E1
+    section: 六 品格聚光燈
+    locator: 大題標題的序號
+    source: 五
+    corrected: 六
+    kind: 大題序號印錯
+    why: 第五大題「文章重點表」已經是「五」，聚光燈又印一次「五」；其後的閱讀理解印「六」、詞語複習印「七」、知識補給站印「九」——整條尾巴少一號，而且「八」沒有被用到
+    confidence: high
+    evidence: PDF p4 與 document.xml 一致（「五 品格聚光燈」「五 文章重點表」兩處都是「五」）

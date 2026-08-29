@@ -1,0 +1,70 @@
+{
+  "$id": "lingoleap/module/resources",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "從 148 份實測 yml 長出來，不是手寫的。required = 每一課都有的欄位（少了就是回歸）；properties 列出所有已觀測欄位，配合 additionalProperties: false —— 現況全過，任何新發明的欄位名會紅。",
+  "properties": {
+    "items": {
+      "type": "array",
+      "x-seen-in": "129/148"
+    },
+    "label": {
+      "type": "string",
+      "x-seen-in": "145/148"
+    },
+    "notes": {
+      "type": "object",
+      "x-seen-in": "50/148"
+    },
+    "row_label": {
+      "type": "string",
+      "x-seen-in": "8/148"
+    },
+    "section_name": {
+      "type": "string",
+      "x-seen-in": "139/148"
+    },
+    "section_no_printed": {
+      "type": "string",
+      "x-seen-in": "2/148"
+    },
+    "section_part": {
+      "type": "integer",
+      "x-seen-in": "1/148"
+    },
+    "section_title_printed": {
+      "type": "string",
+      "x-seen-in": "10/148"
+    },
+    "slug": {
+      "type": "string",
+      "x-seen-in": "148/148"
+    },
+    "text_ref": {
+      "type": [
+        "array",
+        "string"
+      ],
+      "x-seen-in": "148/148"
+    },
+    "videos": {
+      "type": "array",
+      "x-seen-in": "139/148"
+    }
+  },
+  "required": [
+    "slug",
+    "text_ref"
+  ],
+  "title": "resources module payload",
+  "type": "object",
+  "x-core-90pct": [
+    "label",
+    "section_name",
+    "slug",
+    "text_ref",
+    "videos"
+  ],
+  "x-enforcement": "error",
+  "x-lessons-observed": 148
+}

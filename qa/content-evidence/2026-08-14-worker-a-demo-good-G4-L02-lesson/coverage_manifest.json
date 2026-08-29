@@ -1,0 +1,59 @@
+{
+  "schema_version": "content-evidence.v1",
+  "run_id": "2026-08-14-worker-a-demo-good-G4-L02-lesson",
+  "generated_at": "2026-08-13T17:30:29Z",
+  "git": {
+    "branch": "ao/chinese-literacy-platform-5/content-evidence-per-lesson-gate",
+    "commit_sha": "14ab3b73ab3432a2a6a6ac217488411d94aad7c7"
+  },
+  "smoke": false,
+  "partial": true,
+  "scope": {
+    "expected_lessons": 1,
+    "expected_steps": [
+      "reading-strategy",
+      "story-structure"
+    ],
+    "expected_total_cells": 2,
+    "requested_story_ids": null,
+    "requested_lesson_codes": [
+      "G4-L02"
+    ]
+  },
+  "observed": {
+    "l1_rows": 2,
+    "l3_rows": 2,
+    "figure_rows": 2,
+    "l2_rows": 0,
+    "cells": 2
+  },
+  "summary_counts": {
+    "pass_cells": 0,
+    "fail_cells": 0,
+    "unknown_cells": 2,
+    "known_gap_cells": 0,
+    "missing_screenshot_cells": 2,
+    "console_error_cells": 0,
+    "figure_blacklist_hits": 0
+  },
+  "files": {
+    "l1_results_jsonl": "l1_results.jsonl",
+    "l3_render_results_jsonl": "l3_render_results.jsonl",
+    "figure_asset_audit_jsonl": "figure_asset_audit.jsonl",
+    "review_queue_jsonl": "review_queue.jsonl",
+    "human_review_md": "human_review.md",
+    "l2_eval_jsonl": null
+  },
+  "checksums_sha256": {
+    "l1_results.jsonl": "3c4572aebed7e24e8c13cb7b542fbbc79cf908b685b0cd5e3d219c18aa8b75e0",
+    "l3_render_results.jsonl": "1e980dacd137f84eb9ddb0ca81bdbb64b7f9cbe60a8198988a9a1aa4d1792114",
+    "figure_asset_audit.jsonl": "6f1686f8fd090179124dcaa500ea77067be462a82c9a1f84d7089587f775f6c5",
+    "review_queue.jsonl": "b0dc04929e826c68de3429f7030b39b9390adf0d72b1c56c55e1674fce39840d",
+    "human_review.md": "574a42b57e5ea0c8a232a9967ac49955057e6a0524d4d0bee92a2a41e57b78e8"
+  },
+  "overall_status": "fail",
+  "fail_reasons": [
+    "unknown_cells=2",
+    "missing_screenshot_cells=2"
+  ]
+}

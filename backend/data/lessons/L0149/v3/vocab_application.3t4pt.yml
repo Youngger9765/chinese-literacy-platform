@@ -1,0 +1,53 @@
+lesson_uid: L0149
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 職涯
+    B: 效率
+    C: 代謝
+    D: 水滴石穿
+    E: 事半功倍
+    F: 得天獨厚
+    G: 因材施教
+  items:
+  - index: 1
+    stem: 每天堅持十分鐘的練習，日積月累，(  )，讓他獲得好成果。
+    answer: D
+  - index: 2
+    stem: 我們得先思考問題在哪兒，才能讓事情處理得更有(  )。
+    answer: B
+  - index: 3
+    stem: (  )規畫要先掌握自己的興趣、能力、價值觀，再看看有什麼樣的機會適合自己。
+    answer: A
+  - index: 4
+    stem: 教練不會要求每位選手用同一種訓練方式，而是根據個別差異(  )。
+    answer: G
+  - index: 5
+    stem: 他天生嗓音清亮，再加上勤奮練習，在歌唱比賽中展現出(  )的優勢。
+    answer: F
+  - index: 6
+    stem: 熬夜會影響身體的(  )，也可能讓人白天更容易疲倦。
+    answer: C
+  word_sense_discrimination:
+    title: ◎詞義辨識
+    instruction: ◎詞義辨識：「事半功倍」和「事倍功半」都是在講工作的效能，但這兩個詞的詞義正好相反，請你默讀它們的解釋之後，在(7)、(8)題填入適當的詞語。
+    glossary:
+    - word: 事半功倍
+      definition: 花較少力氣，得到較大成效。
+    - word: 事倍功半
+      definition: 花很多力氣，效果卻不大。
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊；這兩題填的是**語詞本身**不是代號
+    items:
+    - index: 7
+      stem: 團隊工作若有良好的分工及默契，才會有(  )的效果。
+      answer: 事半功倍
+    - index: 8
+      stem: 新手不會操作機器，做起事來又錯又慢，總是(  )。
+      answer: 事倍功半
+  notes:
+    option_bank: 代號表印成 2 列 5 欄，第 2 列後 3 格是空的（只到 G）
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
+  slug: 3t4pt
+  text_ref: c9fmq

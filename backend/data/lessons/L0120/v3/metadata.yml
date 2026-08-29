@@ -1,0 +1,52 @@
+lesson_uid: L0120
+version_id: v3
+level: 8
+genre: 說明文
+strategy: 科學探究策略——假設與假設檢驗
+課文作者: 吳漢庭
+學習單: 巫怡蓉/曾世杰
+lesson_no: 22
+series: 一般
+lesson_seq: 8220
+intro: 這篇文章探討了人們普遍感到害怕的「鬼火」和「鬼壓床」這兩種現象。作者首先點出，無論古今中外，人們都對鬼魂和死後世界感到恐懼，這些也常成為故事的題材。接著，文章分別介紹了科學家如何從理性的角度解釋鬼火的成因，以及「鬼壓床」這種在睡眠中動彈不得的感覺，其實是睡眠週期中的一種正常生理現象。透過這些科學的解釋，讓我們對這些看似神祕的現象有更客觀的認識，也引發我們思考，科學的發展如何改變了我們對世界的看法。
+notes:
+  總表_文體: 說明文
+  總表_類型: 科學
+  總表_議題: 科學知識
+  總表_聚光燈策略: 科學探究策略──假設與假設檢驗
+  總表_第六大題標題: 科學探究策略──假設與假設檢驗
+  總表_文本類型: 單
+  總表_語詞_原樣:
+  - 閃爍
+  - 乍見
+  - 週期
+  - 癱瘓
+  - 引人入勝
+  - 毛骨悚然
+  - 啟人疑竇
+  - 睡眼惺忪
+  - 窮凶極惡
+  - 喑啞無聲
+strategy_explained: '這一課我們練習用科學的方法來找出事物的真相
+
+  因為這篇文章用科學解釋了鬼火和鬼壓床這些過去被認為是靈異的現象
+
+  所以讀的時候，你可以試著像作者一樣，看看能不能從現象背後找到合理的解釋'
+strategy_sources:
+  worksheet: 科學探究策略
+  master_sheet: 解決問題──科學探究法
+  previous: 科學探究策略——假設與假設檢驗
+source_profile:
+  class: standard
+  note: 單一錨點 + 有計數欄 + idx 唯一 —— 走主路徑
+  has_key_reading_section: true
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: null
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 1
+  has_counter_column: true
+  body_in_tables: true
+  invisible_chars_docx_only: false
+  profiled: '2026-08-24'

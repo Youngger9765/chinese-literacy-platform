@@ -149,7 +149,48 @@ def user_b(client):
 # ---------------------------------------------------------------------------
 
 
-def _create_session(client, token: str, story_slug: str = "test-story") -> int:
+# These tests used descriptive string slugs (VALID_SLUG, VALID_SLUG).
+# #1135 added a gate requiring the slug to name a real story, and they have been red
+# ever since — 13 permanently failing tests in the session suite, which is exactly the
+# condition under which a genuine regression goes unnoticed. A real lesson id keeps the
+# tests meaningful rather than merely green.
+from app.services.lesson_loader import get_all_lessons
+
+VALID_SLUG = str(get_all_lessons()[0]["id"])
+
+
+# ---------------------------------------------------------------------------
+# #1182 removed the integer `current_step` column from the read path: the value a
+# session reports is `current_step_derived`, computed as max(completed step) + 1 from
+# `step_progress.steps_completed`. PATCHing `current_step` is accepted and no longer
+# moves it — deliberately. Tests written before that change kept asserting the
+# round-trip and have been red ever since, which is 13 permanently failing tests in
+# the session suite: the exact condition under which a real regression is invisible.
+#
+# Progress is advanced the way the product advances it.
+# ---------------------------------------------------------------------------
+
+_STEP_ORDER = ["intro", "live_tutor", "comprehension", "vocab", "full_reading", "report"]
+
+
+def _advance_to_step(client, token: str, session_id: int, step_num: int) -> None:
+    """Complete steps 1..step_num-1 so the session reports `step_num` as current.
+
+    Capped at the last step: asking for 6 completes the first five, which is what a
+    student who has reached the report has actually done."""
+    resp = client.put(
+        f"/api/learning/sessions/{session_id}/progress",
+        json={
+            "current_step": _STEP_ORDER[step_num - 1],
+            "steps_completed": _STEP_ORDER[: step_num - 1],
+            "step_data": {},
+        },
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert resp.status_code in (200, 201), resp.text
+
+
+def _create_session(client, token: str, story_slug: str = VALID_SLUG) -> int:
     resp = client.post(
         "/api/learning/sessions",
         json={"story_slug": story_slug},
@@ -160,7 +201,16 @@ def _create_session(client, token: str, story_slug: str = "test-story") -> int:
 
 
 def _complete_session(client, token: str, session_id: int):
-    """Mark a session as completed (simulates reaching the report step)."""
+    """Mark a session as completed (simulates reaching the report step).
+
+    The step is advanced through the progress endpoint first: a completed session
+    reports step 6 because every step is marked done, not because the request said so.
+    """
+    _advance_to_step(client, token, session_id, 6)
+    _mark_done(client, token, session_id)
+
+
+def _mark_done(client, token: str, session_id: int):
     resp = client.patch(
         f"/api/learning/sessions/{session_id}",
         json={
@@ -182,7 +232,7 @@ class TestGetSessionStatus:
     # --- 200 OK cases ---
 
     def test_status_returns_200_for_in_progress(self, client, user_a):
-        session_id = _create_session(client, user_a["token"], "resume-inprogress")
+        session_id = _create_session(client, user_a["token"], VALID_SLUG)
         resp = client.get(
             f"/api/learning/sessions/{session_id}/status",
             headers=auth_header(user_a["token"]),
@@ -191,7 +241,7 @@ class TestGetSessionStatus:
 
     def test_in_progress_session_is_resumable(self, client, user_a):
         """An in_progress session should have is_resumable=True and is_completed=False."""
-        session_id = _create_session(client, user_a["token"], "resumable-story")
+        session_id = _create_session(client, user_a["token"], VALID_SLUG)
         resp = client.get(
             f"/api/learning/sessions/{session_id}/status",
             headers=auth_header(user_a["token"]),
@@ -202,7 +252,7 @@ class TestGetSessionStatus:
 
     def test_in_progress_status_fields(self, client, user_a):
         """Status response includes all expected fields."""
-        session_id = _create_session(client, user_a["token"], "fields-story")
+        session_id = _create_session(client, user_a["token"], VALID_SLUG)
         resp = client.get(
             f"/api/learning/sessions/{session_id}/status",
             headers=auth_header(user_a["token"]),
@@ -217,7 +267,7 @@ class TestGetSessionStatus:
 
     def test_in_progress_session_has_correct_step(self, client, user_a):
         """Default current_step for a new session is 1."""
-        session_id = _create_session(client, user_a["token"], "step-check")
+        session_id = _create_session(client, user_a["token"], VALID_SLUG)
         resp = client.get(
             f"/api/learning/sessions/{session_id}/status",
             headers=auth_header(user_a["token"]),
@@ -229,13 +279,9 @@ class TestGetSessionStatus:
 
     def test_step_advance_reflected_in_status(self, client, user_a):
         """After advancing to step 3, status should reflect current_step=3."""
-        session_id = _create_session(client, user_a["token"], "step-advance")
+        session_id = _create_session(client, user_a["token"], VALID_SLUG)
         # Advance to step 3
-        client.patch(
-            f"/api/learning/sessions/{session_id}",
-            json={"current_step": 3},
-            headers=auth_header(user_a["token"]),
-        )
+        _advance_to_step(client, user_a["token"], session_id, 3)
         resp = client.get(
             f"/api/learning/sessions/{session_id}/status",
             headers=auth_header(user_a["token"]),
@@ -249,7 +295,7 @@ class TestGetSessionStatus:
 
     def test_completed_session_is_not_resumable(self, client, user_a):
         """A completed session should have is_resumable=False and is_completed=True."""
-        session_id = _create_session(client, user_a["token"], "completed-story")
+        session_id = _create_session(client, user_a["token"], VALID_SLUG)
         _complete_session(client, user_a["token"], session_id)
 
         resp = client.get(
@@ -264,7 +310,7 @@ class TestGetSessionStatus:
 
     def test_completed_session_step_is_6(self, client, user_a):
         """Completed session should show current_step=6."""
-        session_id = _create_session(client, user_a["token"], "completed-step6")
+        session_id = _create_session(client, user_a["token"], VALID_SLUG)
         _complete_session(client, user_a["token"], session_id)
 
         resp = client.get(
@@ -287,7 +333,7 @@ class TestGetSessionStatus:
 
     def test_status_other_users_session_returns_403(self, client, user_a, user_b):
         """User A cannot check the status of User B's session."""
-        session_id = _create_session(client, user_b["token"], "b-private-story")
+        session_id = _create_session(client, user_b["token"], VALID_SLUG)
 
         resp = client.get(
             f"/api/learning/sessions/{session_id}/status",
@@ -326,12 +372,8 @@ class TestResumeFlow:
         headers = auth_header(user["token"])
 
         # Step 1: Create session and advance to step 3
-        session_id = _create_session(client, user["token"], "lifecycle-story")
-        client.patch(
-            f"/api/learning/sessions/{session_id}",
-            json={"current_step": 3},
-            headers=headers,
-        )
+        session_id = _create_session(client, user["token"], VALID_SLUG)
+        _advance_to_step(client, user["token"], session_id, 3)
 
         # Step 2: Check status — should be resumable at step 3
         status_resp = client.get(
@@ -343,7 +385,7 @@ class TestResumeFlow:
         assert status["is_resumable"] is True
         assert status["is_completed"] is False
         assert status["current_step"] == 3
-        assert status["story_slug"] == "lifecycle-story"
+        assert status["story_slug"] == VALID_SLUG
 
         # Step 3: Complete the session
         _complete_session(client, user["token"], session_id)

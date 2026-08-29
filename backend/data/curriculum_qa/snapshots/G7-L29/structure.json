@@ -1,158 +1,152 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 2,
+    "inline_choice_count": 4,
+    "layout": "worksheet_table",
+    "mode": "mixed",
+    "primary_labels": [
+      "定義",
+      "1",
+      "2",
+      "1"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "從四張圖，看地球暖化的現象",
-      "value": "",
-      "interactive_type": "display"
+      "interactive_type": "display",
+      "label": "隱藏在日常對話中的「微歧視」",
+      "value": ""
     },
     {
-      "label": "主題",
-      "value": "",
-      "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "文章探討的核心問題是什麼？",
-          "value": "地球是不是【　　　】了？",
-          "interactive_type": "fill_blank"
-        }
-      ]
+      "interactive_type": "fill_blank",
+      "label": "定義",
+      "value": "微歧視：在互動中出現看似微小、隱蔽、無意的\n【　　　】或偏見。"
     },
     {
-      "label": "觀察 段1．圖一",
-      "value": "",
       "interactive_type": "display",
+      "label": "例子分析",
       "sub_rows": [
         {
-          "label": "圖一呈現了什麼資料？",
-          "value": "1850 年以來地球的平均氣溫【　　　】，1975 年後上升速度【　　　】，2024 年是有記錄以來的【　　　】年。",
-          "interactive_type": "fill_blank"
+          "blanks": [
+            {
+              "options": [
+                "憐憫",
+                "尊重",
+                "偏見"
+              ]
+            }
+          ],
+          "interactive_type": "inline_choice",
+          "label": "1",
+          "value": "對原住民的刻板印象：與原住民互動時，強調酒量與膚色，加深對原住民族群的【　　　】。"
+        },
+        {
+          "blanks": [
+            {
+              "options": [
+                "低期望",
+                "尊重",
+                "平等"
+              ]
+            }
+          ],
+          "interactive_type": "inline_choice",
+          "label": "2",
+          "value": "對身障者的過度保護：以體諒為出發點，但話語中隱含對身障者的【　　　】與過度保護。"
+        },
+        {
+          "interactive_type": "display",
+          "label": "3",
+          "value": "對體育班的單一印象：總是讓體育班學生做勞動性工作，對他們不公平，也忽視了他們在其他領域的潛力。"
         }
-      ]
+      ],
+      "value": ""
     },
     {
-      "label": "推論 段2．圖二",
-      "value": "",
       "interactive_type": "display",
+      "label": "影響與特點",
       "sub_rows": [
         {
-          "label": "為什麼地球氣溫會逐漸升高？",
-          "value": "工業革命以來人類大量燃燒【　　　】，釋放大量【　　　】，就像給地球穿上厚外套，熱量散不出去。",
-          "interactive_type": "fill_blank"
+          "blanks": [
+            {
+              "options": [
+                "外化",
+                "內化"
+              ]
+            }
+          ],
+          "interactive_type": "inline_choice",
+          "label": "1",
+          "value": "微歧視似無傷大雅，但長期累積會導致偏見被\n【　　　】，滲透到人們的【　　　】中。"
+        },
+        {
+          "blanks": [
+            {
+              "options": [
+                "明顯",
+                "隱蔽"
+              ]
+            }
+          ],
+          "interactive_type": "inline_choice",
+          "label": "2",
+          "value": "微歧視的特點在於它【　　　】，因此難以被發現和改正。"
         }
-      ]
+      ],
+      "value": ""
     },
     {
-      "label": "趨勢 段3．圖三",
-      "value": "",
-      "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "圖三比較了哪兩個資料的變化？",
-          "value": "一百多年來【　　　】和【　　　】兩條曲線都往上升，後半段上升速度【　　　】。",
-          "interactive_type": "fill_blank"
-        }
-      ]
-    },
-    {
-      "label": "反論 段4．圖四",
-      "value": "",
-      "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "圖四引出了什麼疑問？",
-          "value": "把時間拉長到 40 萬年看，地球本來就有【　　　】和【　　　】反覆出現，所以暖化【　　　】是人類造成的。",
-          "interactive_type": "fill_blank"
-        }
-      ]
-    },
-    {
-      "label": "結論 段5",
-      "value": "",
-      "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "作者最後的提醒是什麼？",
-          "value": "推論地球暖化的原因時要特別【　　　】，因為地球本來就會自己變冷或變熱。",
-          "interactive_type": "fill_blank"
-        }
-      ]
+      "interactive_type": "fill_blank",
+      "label": "破除微歧視",
+      "value": "破除微歧視的關鍵是【　　　】，並避免用刻板印象來判斷某個群體。【　　　】\nA.經常反思自己的思維模式和語言。\nB.對每個人保持低期望；\nＣ.被微歧視時，可溫和表達自己的感受與期望"
     }
   ],
-  "layout": "worksheet_table",
-  "title": "從四張圖，看地球暖化的現象",
+  "title": "隱藏在日常對話中的「微歧視」",
   "worksheet_rows": [
     {
-      "kind": "section_block",
-      "section": "主題",
-      "items": [
-        {
-          "label": "文章探討的核心問題是什麼？",
-          "value": "地球是不是【　　　】了？"
-        }
-      ]
+      "kind": "pair",
+      "label": "定義",
+      "value": "微歧視：在互動中出現看似微小、隱蔽、無意的\n【　　　】或偏見。"
     },
     {
-      "kind": "section_block",
-      "section": "觀察 段1．圖一",
       "items": [
         {
-          "label": "圖一呈現了什麼資料？",
-          "value": "1850 年以來地球的平均氣溫【　　　】，1975 年後上升速度【　　　】，2024 年是有記錄以來的【　　　】年。"
+          "label": "1",
+          "value": "對原住民的刻板印象：與原住民互動時，強調酒量與膚色，加深對原住民族群的【　　　】。\n①憐憫 ②尊重 ③偏見"
+        },
+        {
+          "label": "2",
+          "value": "對身障者的過度保護：以體諒為出發點，但話語中隱含對身障者的【　　　】與過度保護。\n①低期望 ②尊重 ③平等"
+        },
+        {
+          "label": "3",
+          "value": "對體育班的單一印象：總是讓體育班學生做勞動性工作，對他們不公平，也忽視了他們在其他領域的潛力。"
         }
-      ]
+      ],
+      "kind": "section_block",
+      "section": "例子分析"
     },
     {
-      "kind": "section_block",
-      "section": "推論 段2．圖二",
       "items": [
         {
-          "label": "為什麼地球氣溫會逐漸升高？",
-          "value": "工業革命以來人類大量燃燒【　　　】，釋放大量【　　　】，就像給地球穿上厚外套，熱量散不出去。"
+          "label": "1",
+          "value": "微歧視似無傷大雅，但長期累積會導致偏見被\n【　　　】，滲透到人們的【　　　】中。\n①外化 ②內化"
+        },
+        {
+          "label": "2",
+          "value": "微歧視的特點在於它【　　　】，因此難以被發現和改正。\n①明顯 ②隱蔽"
         }
-      ]
+      ],
+      "kind": "section_block",
+      "section": "影響與特點"
     },
     {
-      "kind": "section_block",
-      "section": "趨勢 段3．圖三",
-      "items": [
-        {
-          "label": "圖三比較了哪兩個資料的變化？",
-          "value": "一百多年來【　　　】和【　　　】兩條曲線都往上升，後半段上升速度【　　　】。"
-        }
-      ]
-    },
-    {
-      "kind": "section_block",
-      "section": "反論 段4．圖四",
-      "items": [
-        {
-          "label": "圖四引出了什麼疑問？",
-          "value": "把時間拉長到 40 萬年看，地球本來就有【　　　】和【　　　】反覆出現，所以暖化【　　　】是人類造成的。"
-        }
-      ]
-    },
-    {
-      "kind": "section_block",
-      "section": "結論 段5",
-      "items": [
-        {
-          "label": "作者最後的提醒是什麼？",
-          "value": "推論地球暖化的原因時要特別【　　　】，因為地球本來就會自己變冷或變熱。"
-        }
-      ]
+      "kind": "pair",
+      "label": "破除微歧視",
+      "value": "破除微歧視的關鍵是【　　　】，並避免用刻板印象來判斷某個群體。( 填入代號 )\nA.經常反思自己的思維模式和語言。\nB.對每個人保持低期望；\nＣ.被微歧視時，可溫和表達自己的感受與期望"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "theme_facts",
-    "fill_blank_count": 6,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "文章探討的核心問題是什麼？",
-      "圖一呈現了什麼資料？",
-      "為什麼地球氣溫會逐漸升高？",
-      "圖三比較了哪兩個資料的變化？"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

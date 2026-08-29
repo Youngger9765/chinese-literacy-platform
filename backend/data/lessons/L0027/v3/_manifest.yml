@@ -1,0 +1,133 @@
+lesson_uid: L0027
+generated_by: scripts/build_lesson_manifest.py
+note: 衍生檔，不是真相來源。sections 來自 lesson.yml 的 sections_present，module 歸屬來自 specs/modules/section-to-module.yml。改了那兩者要重產。
+sections:
+- 'no': 一
+  name: 讀全文-做記號
+  module: full_text_annotate
+  slug: dkkew
+  file: full_text_annotate.dkkew.yml
+  pages:
+  - 1
+  - 2
+- 'no': 二
+  name: 念順順
+  module: key_reading
+  text_ref: dkkew
+  slug: yy4tx
+  file: key_reading.yy4tx.yml
+  pages:
+  - 2
+- 'no': 三
+  name: 語詞我最棒
+  module: vocab_definitions
+  text_ref: dkkew
+  slug: mam36
+  file: vocab_definitions.mam36.yml
+  pages:
+  - 2
+  - 3
+- 'no': 四
+  name: 語詞應用
+  module: vocab_application
+  text_ref: dkkew
+  slug: awd7j
+  file: vocab_application.awd7j.yml
+  pages:
+  - 3
+  - 4
+  - 5
+- 'no': 五
+  name: 文章重點表
+  module: keypoints
+  text_ref: dkkew
+  slug: papux
+  file: keypoints.papux.yml
+  pages:
+  - 5
+- 'no': 六
+  name: 閱讀聚光燈
+  module: spotlight
+  subtitle: 用表格整理訊息──比較兩個對象
+  text_ref: dkkew
+  slug: jvwar
+  file: spotlight.jvwar.yml
+  pages:
+  - 5
+  - 6
+  - 7
+  - 8
+- 'no': 七
+  name: 閱讀理解
+  module: comprehension
+  text_ref: dkkew
+  slug: yyvve
+  file: comprehension.yyvve.yml
+  pages:
+  - 8
+- 'no': 八
+  name: 詞語複習
+  module: vocab_review
+  text_ref: dkkew
+  slug: drk4r
+  file: vocab_review.drk4r.yml
+  pages:
+  - 8
+  - 9
+- 'no': 九
+  name: 知識補給站
+  module: resources
+  text_ref: dkkew
+  slug: p7cvk
+  file: resources.p7cvk.yml
+  pages:
+  - 9
+dispatch:
+- comprehension
+- full_text_annotate
+- key_reading
+- keypoints
+- resources
+- spotlight
+- vocab_application
+- vocab_definitions
+- vocab_review
+produced:
+- comprehension
+- full_text_annotate
+- key_reading
+- keypoints
+- resources
+- spotlight
+- vocab_application
+- vocab_definitions
+- vocab_review
+absent_from_source: []
+pdf_pages: 9
+dispatch_pages:
+  comprehension:
+  - 8
+  full_text_annotate:
+  - 1
+  - 2
+  key_reading:
+  - 2
+  keypoints:
+  - 5
+  resources:
+  - 9
+  spotlight:
+  - 5
+  - 6
+  - 7
+  - 8
+  vocab_application:
+  - 3
+  - 4
+  - 5
+  vocab_definitions:
+  - 2
+  - 3
+  vocab_review:
+  - 8
+  - 9

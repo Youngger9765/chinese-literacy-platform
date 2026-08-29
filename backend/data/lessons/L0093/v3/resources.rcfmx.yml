@@ -1,0 +1,26 @@
+lesson_uid: L0093
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 【漫畫實驗室】EP.2 兇案現場的血跡怎麼鑑定的?就靠魯米諾!
+    duration: (2:13)
+    source: 佚名驚人
+    has_qr: true
+  - index: 2
+    title: 水平思考 vs 垂直思考 | 找出問題原因的思考技巧
+    duration: (05:57)
+    source: 均一教育平台
+    has_qr: true
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: https://www.youtu.be/ghvb612GFyA
+    url_source: 總表0816「4.影片連結」年級7課次24
+  - index: 2
+    url: http://youtu.be/6RtmRAYY74M
+    url_source: 總表0816「4.影片連結」年級7課次24
+  slug: rcfmx
+  text_ref: ch7x6

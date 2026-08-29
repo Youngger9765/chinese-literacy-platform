@@ -1,0 +1,48 @@
+lesson_uid: L0112
+version_id: v3
+section_no: 五
+vocab_application:
+  instruction: 在空格中填入正確的語詞代號
+  option_bank:
+    A: 始終如一
+    B: 冷冽
+    C: 鬱鬱蔥蔥
+    D: 生機勃勃
+    E: 校正
+    F: 所費不貲
+    G: 狐疑
+    H: 模擬
+    I: 徒手
+    J: 雞皮疙瘩
+  unused_options:
+  - C
+  - J
+  items:
+  - index: 1
+    stem: 儘管環境困難，他追求夢想的態度（　），令人敬佩。
+    answer: A
+  - index: 2
+    stem: 在使用儀器前，必須先進行（　），以確保精準。
+    answer: E
+  - index: 3
+    stem: 古蹟的修復（　），還要投入大量的人力，只為喚回歷史的光彩。
+    answer: F
+  - index: 4
+    stem: 這公司在創新策略的推動下，展現出（　）的成長動能，前景看好。
+    answer: D
+  - index: 5
+    stem: 他（　）攀爬台北101大樓，展現出驚人的體能與技術。
+    answer: I
+  - index: 6
+    stem: 面對這項提議，他露出（　）的神情，心想：「這有可能嗎？」
+    answer: G
+  - index: 7
+    stem: 上台前，我先在家（　）正式報告的情境，練習說話的速度和抑揚頓挫。
+    answer: H
+  - index: 8
+    stem: 山難發生時，雖然北風（　），消防隊員們仍冒著嚴寒上山搜救。
+    answer: B
+  notes:
+    answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
+  slug: parcv
+  text_ref: heaup

@@ -1,19 +1,46 @@
 name: E2E Tests (Playwright)
 
+# ⚠️ 觸發不用 `on.pull_request.paths`（#2916 收尾查到）。
+#
+# GitHub 的 `paths:` 過濾只看**前 300 個變更檔**。PR #2920 改了 3691 個檔，
+# 前 300 個全是 `backend/data/lessons/**`（批次改名 1611 個 yml），
+# `frontend/**` 一個都排不進去 —— 於是這支**整個 PR 一次都沒跑**，
+# 而檢查清單上不會出現這一列，看起來就是全綠。
+#
+# 改用 repo 既有的 `dorny/paths-filter` 判斷（staging-deploy.yml 一直是這樣做的）：
+# 它算的是完整 diff，沒有 300 的上限。意圖不變 —— 純後端的 PR 仍然跳過。
+#
+# ⛔ 不要為了「保險」把過濾整個拿掉：那會讓每個 PR 都跑一次 e2e，
+#    而這支存在的理由是**該跑的時候真的跑**，不是每次都跑。
+
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-    paths:
-      - 'frontend/**'
-      - '.github/workflows/e2e-tests.yml'
 
-# Only run one E2E job per PR branch — cancel in-progress runs on new push
 concurrency:
   group: e2e-${{ github.event.pull_request.head.ref }}
   cancel-in-progress: true
 
 jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      relevant: ${{ steps.filter.outputs.relevant }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # paths-filter 要完整歷史才能算 diff
+      - uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          filters: |
+            relevant:
+              - 'frontend/**'
+              - '.github/workflows/e2e-tests.yml'
+
   e2e:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.relevant == 'true'
     name: Playwright E2E Tests
     runs-on: ubuntu-latest
 
@@ -69,6 +96,10 @@ jobs:
         working-directory: frontend
         env:
           PLAYWRIGHT_BASE_URL: ${{ steps.wait.outputs.effective_url }}
+          # 這支打的是 staging，而 PR 的 code 還沒部署上去。
+          # journey 那條驗的是「已部署的行為」，PR 階段落後一輪是正常的 ——
+          # 讓它回報而不是把整個 gate 弄紅（merge 後的 staging 跑才是判準）。
+          E2E_EXPECT_DEPLOYED: ${{ github.ref == 'refs/heads/staging' && '1' || '0' }}
           CI: 'true'
         run: |
           # Run all specs in testDir (tests/e2e). The old hardcoded list named 6

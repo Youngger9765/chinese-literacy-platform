@@ -1,0 +1,11 @@
+{
+  "lesson_uid": "L0119",
+  "catalog_slot": "G8-L21",
+  "pdf_pages": 10,
+  "pages_read": 10,
+  "wall_clock_seconds": null,
+  "read_calls": 2,
+  "gate_failures": {"verbatim": 0, "coverage": 0, "block_type": 0, "word_search": 0, "traditional": 0, "keypoints_shape": 0, "render_coverage": 0, "orphan_key": 0},
+  "retries": 1,
+  "notes": "逐字門第一次 FAIL 1 筆：總表的「議題」欄寫成一般欄位會被逐字門判成抄錯（那三個字不在學習單上），改用既有慣例的 _總表_議題 前綴。找字 12 條路徑全部由 grid 反查驗證；roundRect 只有 5 個（少於路徑數，依規則不算缺陷——這課的圈多半用別種圖形畫）。兩段引用的新詩各佔一個段號，由字數欄四個段界 77/143/273/417 精準吻合第 4/5/6/7 段結尾反證。"
+}

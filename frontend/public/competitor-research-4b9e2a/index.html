@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow, noarchive" />
+<meta name="referrer" content="no-referrer" />
+<meta name="description" content="內部競品研究，未對外公開" />
+<title>競品研究：iChineseReader × Amira × LingoLeap（內部）</title>
+<style>
+  :root {
+    --paper:#FBFAF7; --ink:#1C1B18; --ink-soft:#5A574E; --ink-faint:#6F6A5F;
+    --rule:#E3DFD5; --accent:#1F5C4A; --accent-wash:#EDF2EF;
+    --flag:#A6421F; --flag-wash:#F8EFEA;
+    --serif:"Iowan Old Style","Songti TC","Source Han Serif TC",Georgia,serif;
+    --sans:"PingFang TC","Helvetica Neue","Noto Sans TC",system-ui,sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,monospace;
+  }
+  @media (prefers-color-scheme: dark){:root{
+    --paper:#16150F; --ink:#EDEAE0; --ink-soft:#A9A499; --ink-faint:#A09B8F;
+    --rule:#322F27; --accent:#7FB8A2; --accent-wash:#1C241F;
+    --flag:#DE9070; --flag-wash:#251A15;}}
+  :root[data-theme="dark"]{
+    --paper:#16150F; --ink:#EDEAE0; --ink-soft:#A9A499; --ink-faint:#A09B8F;
+    --rule:#322F27; --accent:#7FB8A2; --accent-wash:#1C241F;
+    --flag:#DE9070; --flag-wash:#251A15;}
+  :root[data-theme="light"]{
+    --paper:#FBFAF7; --ink:#1C1B18; --ink-soft:#5A574E; --ink-faint:#6F6A5F;
+    --rule:#E3DFD5; --accent:#1F5C4A; --accent-wash:#EDF2EF;
+    --flag:#A6421F; --flag-wash:#F8EFEA;}
+
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+       font-size:21px;line-height:1.8;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:880px;margin:0 auto;padding:clamp(2rem,6vw,5rem) clamp(1.1rem,5vw,2.5rem) 6rem;
+        display:flex;flex-direction:column;gap:3.5rem}
+  .eyebrow{font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;
+           color:var(--ink-faint);margin:0 0 1rem}
+  h1{font-family:var(--serif);font-size:clamp(2rem,5.5vw,2.85rem);line-height:1.17;font-weight:600;
+     margin:0;text-wrap:balance;letter-spacing:-.01em}
+  h2{font-family:var(--serif);font-size:1.55rem;font-weight:600;margin:0 0 .5rem;letter-spacing:-.005em;
+     padding-bottom:.45rem;border-bottom:1px solid var(--rule)}
+  h3{font-size:1.06rem;font-weight:600;margin:0 0 .3rem;line-height:1.45}
+  p{margin:0}
+  .standfirst{font-size:1.15rem;color:var(--ink-soft);margin-top:1.3rem;max-width:36em}
+  .meta{font-family:var(--mono);font-size:.76rem;color:var(--ink-faint);margin-top:1.7rem;
+        padding-top:1rem;border-top:1px solid var(--rule);line-height:1.95}
+  a{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--rule)}
+  a:hover,a:focus-visible{border-bottom-color:var(--accent)}
+  a:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+  a.cardlink{border-bottom:none;color:inherit}
+  section{display:flex;flex-direction:column;gap:1.4rem}
+  .note{color:var(--ink-soft);font-size:1rem;max-width:38em;line-height:1.75}
+  .tablewrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:.5rem 0;
+             border:1px solid var(--rule);border-radius:8px;background:var(--paper)}
+  table{border-collapse:separate;border-spacing:0;width:100%;font-size:.95rem;line-height:1.6;min-width:520px}
+  th,td{text-align:left;vertical-align:top;padding:.65rem .9rem;border-bottom:1px solid var(--rule)}
+  th{font-family:var(--mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;
+     color:var(--ink-faint);font-weight:600;white-space:nowrap;background:color-mix(in srgb, var(--rule) 40%, var(--paper));
+     position:sticky;top:0;border-bottom:2px solid color-mix(in srgb, var(--rule) 80%, var(--ink))}
+  td{font-variant-numeric:tabular-nums}
+  tbody tr:nth-child(even){background:color-mix(in srgb, var(--rule) 35%, transparent)}
+  tbody tr:hover{background:color-mix(in srgb, var(--accent) 8%, transparent)}
+  tbody tr:last-child td{border-bottom:none}
+  /* First column (label) wider and bolder */
+  table td:first-child{font-weight:600;white-space:nowrap;min-width:5em}
+  table.hyp td:nth-child(1){min-width:3em;font-weight:700}
+  table.hyp td:nth-child(3){min-width:7em}
+  table.hyp td:nth-child(4){min-width:5.5em;font-family:var(--mono);font-size:.8rem}
+  table.hyp td:nth-child(5){line-height:1.55;font-size:.84rem;color:var(--ink-soft);min-width:14em}
+  table.hyp{min-width:740px}
+  table.dec td:nth-child(1){min-width:3em;font-weight:700}
+  table.dec td:nth-child(4){font-size:.84rem;color:var(--ink-soft);line-height:1.55}
+  /* "Us" column: strong green highlight */
+  thead th.us,tbody td.us{background:color-mix(in srgb, var(--accent) 12%, var(--paper));
+     border-left:2.5px solid var(--accent);border-right:2.5px solid var(--accent)}
+  thead th.us{color:var(--accent);font-weight:700;background:color-mix(in srgb, var(--accent) 18%, var(--paper))}
+  tbody tr:nth-child(even) td.us{background:color-mix(in srgb, var(--accent) 16%, var(--paper))}
+  table.mx td:nth-child(1){min-width:10em;font-weight:600;white-space:normal}
+  table.mx td:nth-child(2),table.mx td:nth-child(3),table.mx td:nth-child(4){min-width:9em;white-space:normal}
+  table.mx{min-width:680px}
+  /* Colored markers for feature matrix */
+  table.mx td:nth-child(n+2){font-size:.9rem}
+  .mk-y{color:#1a7a52;font-weight:700} /* ◎ strong = green */
+  .mk-w{color:#8b6e00;font-weight:600} /* △ weak = amber */
+  .mk-n{color:#a04030;font-weight:600} /* ✕ none = red */
+  .mk-na{color:var(--ink-faint)} /* — not applicable */
+  .callout{background:var(--accent-wash);border-left:3px solid var(--accent);padding:1.3rem 1.5rem;
+           border-radius:0 6px 6px 0;display:flex;flex-direction:column;gap:.55rem}
+  .warn{background:var(--flag-wash);border-left:3px solid var(--flag);padding:1.3rem 1.5rem;
+        border-radius:0 6px 6px 0;display:flex;flex-direction:column;gap:.55rem}
+  .warn .tag,.callout .tag{font-family:var(--mono);font-size:.67rem;letter-spacing:.12em;
+        text-transform:uppercase;font-weight:600}
+  .warn .tag{color:var(--flag)} .callout .tag{color:var(--accent)}
+  figure{margin:0;display:flex;flex-direction:column;gap:.8rem}
+  figure img{width:100%;height:auto;display:block;border:1px solid var(--rule);border-radius:4px;
+             box-shadow:0 2px 8px rgba(0,0,0,.04)}
+  figcaption{font-size:.88rem;color:var(--ink-faint);line-height:1.7}
+  ul{margin:0;padding-left:1.4rem;display:flex;flex-direction:column;gap:.6rem}
+  li{padding-left:.2rem;line-height:1.7}
+  .cardlink{display:flex;flex-direction:column;gap:.4rem;background:var(--accent-wash);
+            border-left:3px solid var(--accent);padding:1.3rem 1.5rem;border-radius:0 6px 6px 0;
+            border-bottom:none;cursor:pointer;transition:background .15s,box-shadow .15s;
+            position:relative;text-decoration:none}
+  .cardlink:hover{background:color-mix(in srgb, var(--accent) 10%, var(--accent-wash));
+                  box-shadow:0 2px 8px rgba(0,0,0,.06)}
+  .cardlink::after{content:"→";position:absolute;right:1.3rem;top:50%;transform:translateY(-50%);
+                   font-size:1.3rem;color:var(--accent);font-weight:600;transition:transform .15s}
+  .cardlink:hover::after{transform:translateY(-50%) translateX(3px)}
+  .cardlink strong{color:var(--accent);border-bottom:1px solid var(--accent);display:inline;
+                   padding-bottom:1px}
+  .cardlink .sub{font-size:.94rem;color:var(--ink-soft)}
+  ol.findings{margin:0;padding-left:1.4rem;display:flex;flex-direction:column;gap:1.4rem;
+              counter-reset:finding}
+  ol.findings li{padding-left:.3rem;list-style:none;counter-increment:finding}
+  ol.findings li::before{content:counter(finding);font-family:var(--mono);font-size:.75rem;
+              font-weight:600;color:var(--accent);margin-right:.5rem}
+  ol.findings h3{display:inline}
+  .at{display:block;font-family:var(--mono);font-size:.72rem;color:var(--ink-faint);margin-top:.5rem}
+  footer{font-size:.9rem;color:var(--ink-faint);border-top:2px solid var(--rule);
+         padding-top:1.5rem;line-height:1.75;margin-top:1rem}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">內部資料 · 競品研究 · 2026-07-26</p>
+    <h1>iChineseReader × Amira × LingoLeap 三方比較</h1>
+    <p class="standfirst">「這個 project 就是在做中文的 Amira」—— 這句話方向對，但 Amira 真正在賣的不是 AI 家教，是<strong>州法規定要做的法定評測</strong> 而中文根本沒有 WCPM 這個量尺，那是我們得自己定義的空白</p>
+    <p class="meta">
+      內部研究文件，未對外公開，不從任何頁面連入<br />
+      方法：官方使用手冊全 61 頁 + 實機瀏覽標準頁 + 官方影片逐字稿
+    </p>
+  </header>
+
+  <div style="background:linear-gradient(135deg, var(--accent-wash) 0%, color-mix(in srgb, var(--accent) 10%, var(--paper)) 40%, color-mix(in srgb, var(--flag) 5%, var(--paper)) 100%);border-radius:10px;padding:2.5rem 2rem;display:flex;align-items:center;justify-content:center;gap:1.5rem;border:1px solid var(--rule)">
+    <span style="font-size:2.5rem">📊</span>
+    <span style="font-family:var(--serif);font-size:1.2rem;font-weight:500;color:var(--ink-soft)">三方競品比較研究</span>
+  </div>
+
+  <section>
+    <h2>一、三方對照：三家在做完全不同的生意</h2>
+    <p class="note">把它們並列比較會誤導 —— 一家是出版社做的內容平台，一家是研究機構孵出來的評測公司，我們是第三種：綁單一國家課綱的母語教學工具</p>
+    <div class="tablewrap"><table>
+      <thead><tr><th></th><th>iChineseReader（爱读）</th><th>Amira Learning</th><th class="us">LingoLeap</th></tr></thead>
+      <tbody><tr><td>本質</td><td>內容庫 + 班級管理 + 老師人工評分</td><td>法定評測 + AI 家教</td><td class="us">台灣國教課本 + 自動朗讀評測 + OMO 學習單</td></tr>
+<tr><td>母體</td><td>Nan Hai (USA)，出版社的美國分支</td><td>CMU Project LISTEN，1990 年起 25 年研究</td><td class="us">曾世杰／陳淑麗教授的教學設計</td></tr>
+<tr><td>規模</td><td>1,000–3,000 本讀本 / 20 級</td><td>5.5M 學生、4,000+ 學區、約 15% K-12 市佔</td><td class="us">158 課（目標 180）、單一學校試用階段</td></tr>
+<tr><td>賣給誰</td><td>美國 K-12 中文學校（immersion／heritage／CSL）</td><td>美國學區、各國教育部</td><td class="us">台灣國中小（非營利）</td></tr>
+<tr><td>錢從哪來</td><td>學校或個人訂閱，按人數報價</td><td>學區 outcomes-based 合約</td><td class="us">開源非營利</td></tr>
+<tr><td>AI 的位置</td><td>加值配件（自動出教案）</td><td>產品本體（自研兒童語音辨識 + Claude 理解對話）</td><td class="us">產品本體（朗讀評分 + 蘇格拉底對話 + 內容抽取）</td></tr>
+<tr><td>護城河</td><td>內容產能 + ACTFL 展會與學區通路</td><td>110 億字兒童朗讀語料 + 州級法定 screener 認證</td><td class="us">繁中注音朗讀評測 + 台灣課綱深度 + 已在教室裡的老師關係</td></tr>
+<tr><td>最大弱點</td><td>口說只有錄音沒自動評分；App Store 3.2★</td><td>只做英文與西文，不碰漢字</td><td class="us">內容量小、無跨課掌握度、無能力分級、尚無商業模式</td></tr></tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <h2>二、功能優劣矩陣</h2>
+    <p class="note">◎ 有且是強項｜△ 有但弱｜✕ 沒有｜— 不適用 <strong>最右欄是我們</strong></p>
+    <div class="tablewrap"><table class="mx">
+      <thead><tr><th>能力</th><th>iChineseReader</th><th>Amira</th><th class="us">LingoLeap</th></tr></thead>
+      <tbody><tr><td>自動語音評分（朗讀流暢度）</td><td><span class="mk-n">✕</span> 無</td><td><span class="mk-y">◎</span> 強 — 音素層級</td><td class='us'><span class="mk-y">◎</span> 有 — 字級正確率 + 每分鐘字數</td></tr>
+<tr><td>中文特有教學（注音／筆順／聽寫／破音）</td><td><span class="mk-n">✕</span> 無</td><td><span class="mk-na">—</span> 不適用</td><td class='us'><span class="mk-y">◎</span> 強</td></tr>
+<tr><td>紙本學習單 ↔ 線上（OMO）</td><td><span class="mk-n">✕</span> 無</td><td><span class="mk-n">✕</span> 無</td><td class='us'><span class="mk-y">◎</span> 強</td></tr>
+<tr><td>台灣課綱對齊</td><td><span class="mk-n">✕</span> 對美國 CCSS／ACTFL</td><td><span class="mk-n">✕</span> 對美國各州標準</td><td class='us'><span class="mk-y">◎</span> 強</td></tr>
+<tr><td>AI 對話式理解教學</td><td><span class="mk-n">✕</span> 只有選擇題 eQuiz</td><td><span class="mk-y">◎</span> 有 — Claude 離線預生成</td><td class='us'><span class="mk-y">◎</span> 有 — 蘇格拉底即時對話</td></tr>
+<tr><td>跨課技能掌握度追蹤</td><td><span class="mk-y">◎</span> 有 — CCRA 矩陣（實機確認在線）</td><td><span class="mk-y">◎</span> 強 — 每日 Estimated Mastery</td><td class='us'><span class="mk-n">✕</span> 無</td></tr>
+<tr><td>能力分級 / 入班定位測驗</td><td><span class="mk-y">◎</span> 有 — 20 級 ACTFL／HSK／YCT + CAT</td><td><span class="mk-y">◎</span> 強 — ISIP 電腦適性</td><td class='us'><span class="mk-n">✕</span> 無 — 按年級排</td></tr>
+<tr><td>內容量</td><td><span class="mk-y">◎</span> 1,000–3,000 本</td><td><span class="mk-na">—</span> 用學區既有教材</td><td class='us'><span class="mk-w">△</span> 158 課</td></tr>
+<tr><td>法定評測地位</td><td><span class="mk-n">✕</span> 無</td><td><span class="mk-y">◎</span> 強 — 州法 K-3 篩檢核准</td><td class='us'><span class="mk-n">✕</span> 無</td></tr>
+<tr><td>老師端「該做什麼」提示</td><td><span class="mk-n">✕</span> 只有報表</td><td><span class="mk-y">◎</span> 有 — 差異化教學建議</td><td class='us'><span class="mk-n">✕</span> 無 — 只有 dashboard</td></tr>
+<tr><td>自由閱讀書櫃 / 興趣分級</td><td><span class="mk-y">◎</span> 有 — Interest Level 與難度分開</td><td><span class="mk-na">—</span> 不適用</td><td class='us'><span class="mk-n">✕</span> 無</td></tr>
+<tr><td>語言覆蓋</td><td>簡體 + 繁體 + <strong>粵語</strong></td><td>英文 + 西班牙文</td><td class='us'>繁體 + 注音</td></tr></tbody>
+    </table></div>
+    <div class="callout">
+      <span class="tag">我們獨佔（沒人競爭）</span>
+      <ul>
+<li><strong>自動語音評分（朗讀流暢度）</strong> — <strong>中文的自動朗讀評分只有我們在做</strong> Amira 的音素層級中文沒有等價物</li>
+<li><strong>中文特有教學（注音／筆順／聽寫／破音）</strong> — 無人競爭 這是母語教學的剛需，二語平台不做</li>
+<li><strong>紙本學習單 ↔ 線上（OMO）</strong> — 無人競爭 而且是老師眼中「省工」最直接的一塊</li>
+<li><strong>台灣課綱對齊</strong> — 無人競爭 但反面是無法輸出到美國市場</li>
+      </ul>
+    </div>
+    <div class="warn">
+      <span class="tag">我們落後（兩家都有，我們沒有）</span>
+      <ul>
+<li><strong>跨課技能掌握度追蹤</strong> — <strong>我們唯一明確落後的一項，而且兩家都有</strong> 目前是一堂課一份報告，課與課之間沒接起來</li>
+<li><strong>能力分級 / 入班定位測驗</strong> — 落後 學生一進來就從該年級第一課開始，不管實際程度</li>
+<li><strong>老師端「該做什麼」提示</strong> — 落後 有圖表但沒有行動建議</li>
+      </ul>
+      <p>這三項<strong>不是這次的新發現</strong> —— 2026-03 的國際平台分析就已標為我們的缺口</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>三、假設判定</h2>
+    <div class="tablewrap"><table class="hyp">
+      <thead><tr><th>#</th><th>假設</th><th>判定</th><th>證據</th><th>關鍵證據 / 為什麼不能更強</th></tr></thead>
+      <tbody><tr><td><strong>H1</strong></td><td>iChineseReader 沒有自動語音評分</td><td>證實</td><td>E4 + E3</td><td>實機登入教師端後確認兩件事：① 批改收件匣 Basket 的欄位只有 Student／Task／Book Title／Status／Type／<strong>Score</strong>／Submit Date —— 單一 Score 欄，沒有正確率、每分鐘字數或錯誤類型欄，而自動語音評分需要那些欄位 ② 教師端 13 個 section 與全部子 tab 都沒有「IB Speaking」，那原本是唯一可能讓結論翻案的未知 仍未看到的是「完成的錄音被評分」那一刻的畫面 —— 該示範帳號沒有任何 submission</td></tr>
+<tr><td><strong>H2</strong></td><td>它的分級軸是語言難度、不是閱讀策略</td><td>推翻，而且比我原本以為的更徹底</td><td>E4</td><td>20 級確實對照 ACTFL／HSK／YCT 語言能力，但那只是一條軸 實機登入後看到：教師 dashboard 的 Standards Overview 是<strong>每個學生 × CCRA.R.1–R.8 的即時掌握度矩陣</strong>（0-49％／50-79％／80-100％ 三色帶），而且每本書都掛 CCRA 技能標籤 也就是說那套閱讀技能框架不是靜態對齊頁，是<strong>上線運轉中的跨課技能追蹤</strong></td></tr>
+<tr><td><strong>H3</strong></td><td>AI 只在教師端，學生端無 AI</td><td>證實</td><td>E4</td><td>實機進到學生端閱讀器：控制項是簡體／繁體／無字、<strong>國語／粵語</strong>／無音訊、自動播放、拼音、音檔播放器、書本背景、寫字板（存檔／送給老師與家長）、加入書櫃 —— 沒有任何 AI 回饋或評分控制項</td></tr>
+<tr><td><strong>H6</strong></td><td>「評測 &gt; 練習」在台灣也成立</td><td>未完全證實</td><td>E3</td><td>有證據的是：老師不想學新工具、代跑服務有價值、三版本自動化確實省工 但這是交付形態偏好，不等於採購理由 —— 採購錨點要靠訪談或真實報價驗</td></tr>
+<tr><td><strong>H7</strong></td><td>Amira 短期不會進繁體中文</td><td>拆三段</td><td>E3 / 待核 / 推論</td><td>E3 證實：教學語言只有英文與西文（官方產品頁 + 官方影片旁白） 待核：「20 國 18 語言」出自二手摘要，且「20 國」是市場足跡與教學語言是兩件事 推論非證據：「12 個月內不會進」是預測</td></tr></tbody>
+    </table></div>
+    <p class="note">證據分級：<strong>E1</strong> 官網文案｜<strong>E2</strong> 第三方報導或二手摘要｜<strong>E3</strong> 官方技術文件、使用手冊、官方影片逐字稿｜<strong>E4</strong> 自己實機操作加截圖｜<strong>E5</strong> 可重現量測</p>
+  </section>
+
+  <section>
+    <h2>四、我原本低估的東西</h2>
+    <p class="note">一開始判斷「他們只有內容廣度，閱讀策略的深度是我們獨有」—— 實機看了他們的標準頁之後，這句話不準確</p>
+    <figure>
+      <img src="h2-ccra-matrix.jpg" alt="iChineseReader 的 CCRA 對齊矩陣頁面" loading="lazy" />
+      <figcaption>實機截圖（E4）：5 個領域 15 個閱讀子技能，逐條對齊 Common Core 錨標準 —— 主旨（主題摘要／作者目的／語氣）、關鍵細節（找細節／支持證據／論證邏輯）、詞彙與語法、寫作手法與結構（因果／比較對照／問題解決／事件順序）、統整與批判思考（結論／推論／評價／視覺元素）</figcaption>
+    </figure>
+    <figure>
+      <img src="h2-level-mapping.jpg" alt="iChineseReader 的分級對照頁面" loading="lazy" />
+      <figcaption>實機截圖（E4）：20 級對照 ACTFL / HSK / YCT，三套都是語言能力框架 —— 所以他們的難度軸是語言，技能軸是另一條正交的 CCRA</figcaption>
+    </figure>
+    <div class="callout">
+      <span class="tag">所以差異不是深淺，是內容</span>
+      <p>他們的 15 個子技能是<strong>國際通用的閱讀理解技能套用到中文文本</strong>；我們的策略主軸是<strong>中文語言特有的結構</strong>（句型、寫作手法、文言），綁台灣課綱 兩邊都是策略軸，內容不同 而且他們的 Skill Point 報表是逐個學生累積的 —— <strong>跨課掌握度我們完全沒有</strong></p>
+    </div>
+  </section>
+
+  <section>
+    <h2>五、中文的量尺是一片空白</h2>
+    <p class="note">Amira 整套建立在兩個英文特有的地基上：<strong>WCPM</strong>（每分鐘正確字數）和<strong>音素解碼</strong> 它自己的影片說得很明白 —— 「I can uniquely analyze their speech down to the phone level」，畫面上是學生把 h / i / p 三塊字母磚重組</p>
+    <ul>
+      <li>中文沒有音素解碼這一層，hip 可以拆三塊磚，中文沒有這個拆法 —— <strong>它最深的護城河剛好是中文最沒有的維度</strong></li>
+      <li>要做「中文的 Amira」不是移植，是<strong>定義中文的等價量尺</strong>：每分鐘正確字數（已有）、破音字錯 vs 不認識字、注音↔字雙向診斷、<strong>斷句／詞界切分</strong></li>
+      <li>斷句是最有原創性的一項：英文有空格所以評測不需要這個維度，中文唸得快不代表懂，<strong>斷句錯就是句法沒解析對</strong> 加上我們有 10 課文言文（斷句幾乎是唯一指標），零競爭者</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>六、決策建議</h2>
+    <p class="note">只有 D2 的「他們有策略框架」這半句站在 E4 上，其餘皆為 E3 或推論 —— 下注前先看「還缺什麼」</p>
+    <div class="tablewrap"><table class="dec">
+      <thead><tr><th>#</th><th>要決定的事</th><th>建議</th><th>還缺什麼才敢下注</th></tr></thead>
+      <tbody><tr><td><strong>D1</strong></td><td>理解對話要不要改 closed-loop 預生成</td><td>值得做 spike，但先量涵蓋率再決定</td><td>涵蓋率 / 人審工時 / 單次成本三個數字</td></tr>
+<tr><td><strong>D2</strong></td><td>iChineseReader 是競品還是不同物種</td><td>不同物種，但<strong>不是「他們比較淺」</strong> —— 他們是國際閱讀技能框架 × 中文素材 × 老師人工評分；我們是台灣國教課本 × 中文特有語言結構 × 自動語音評分 <strong>語音評測確實是真空</strong>（實機確認）</td><td>只差最後一哩：沒看到「完成的錄音被評分」的畫面（示範帳號無 submission） 但翻案風險已消除 —— 全站沒有 IB Speaking，Basket 也沒有語音指標欄</td></tr>
+<tr><td><strong>D3</strong></td><td>對外敘事要不要改成「AI 幫老師省」</td><td>方向對，而且要決定服務 → 工具的切換條件，不只換文案</td><td>採購錨點未驗，要一次老師或學校端訪談問「你會為什麼付錢」</td></tr>
+<tr><td><strong>D4</strong></td><td>中文朗讀量尺下一個維度做哪個</td><td>斷句仍是最有原創性的候選 —— 英文有空格所以評測沒有這個維度，中文斷句錯就是句法沒解析對</td><td>斷句訊號能否從既有錄音抽出，以及與理解分數的相關性</td></tr>
+<tr><td><strong>D5</strong></td><td>Amira 進中文的時間窗有多急</td><td>教學語言只有英/西文，跨到漢字距離遠；近程壓力更可能來自 iChineseReader 加語音（它已有中文內容與 CCRA 框架，只缺語音）</td><td>「12 個月內不會進」是推論不是證據；「20 國 18 語言」原始來源仍待核</td></tr></tbody>
+    </table></div>
+    <div class="callout">
+      <span class="tag">風險最集中的一點</span>
+      <p>D2 整段懸在 <strong>IB Speaking</strong> 上 —— 只能證明 Running Record 那條流程的手冊沒寫自動評分，證不了整個平台沒有 如果 IB Speaking 有自動語音評分，「語音評分是我們的真空」這個結論直接翻案</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>七、實機走查：登入後看到的東西</h2>
+    <p class="note">用公開分享的老師帳號登入 <code>/icr5/teacher</code>，走過 13 個 section 與全部子 tab 三件只有登入才看得到的事</p>
+    <ol class="findings">
+      <li>
+        <h3>Standards Overview 是上線中的跨課掌握度矩陣</h3>
+        <p>每個學生 × CCRA.R.1 Detail／R.2 Main Idea／R.3 Chronology／R.4 Vocab／R.5 Text Structure／R.6 Point of View·Purpose／R.7 Media Integration…，三色帶 0-49％／50-79％／80-100％ 我原本判斷這只是靜態對齊頁，錯了 —— <strong>這正是我們沒有的東西，而它在線上跑著</strong></p>
+        <figure><img src="icr-dashboard.png" alt="iChineseReader 教師端 Dashboard — Standards Overview" loading="lazy" /></figure>
+        <span class="at">/icr5/teacher · Standards Overview</span>
+      </li>
+      <li>
+        <h3>批改收件匣只有一個 Score 欄</h3>
+        <p>Basket 的欄位是 Student Name／Task／Book Title／Status／Type／Score／Submit Date <strong>沒有正確率、每分鐘字數、錯誤類型</strong> —— 做自動語音評分的產品需要那些欄位（Amira 的 running record 就是給錯誤類型的）</p>
+        <figure><img src="icr-basket.png" alt="iChineseReader Basket 批改收件匣" loading="lazy" /></figure>
+        <span class="at">/icr5/teacher/basket</span>
+      </li>
+      <li>
+        <h3>全站沒有「IB Speaking」，但有粵語</h3>
+        <p>行銷頁提過的 IB Speaking 在產品裡不存在（13 section 全掃過）—— 這消除了唯一可能讓結論翻案的未知 反而看到學生端閱讀器支援 <strong>國語／粵語</strong>，服務對象包含粵語背景華裔，跟我們市場不重疊</p>
+        <figure><img src="icr-sidebar.png" alt="iChineseReader 教師端 sidebar — 13 個 section 全列，無 IB Speaking" loading="lazy" /><figcaption>教師端 Library 頁，左側 sidebar 列出全部 13 個 section —— 沒有 IB Speaking</figcaption></figure>
+        <span class="at">/icr5/teacher/* · /book/</span>
+      </li>
+    </ol>
+    <p class="note">技術路徑：app 在 <code>/icr5/</code>（與行銷站分離）Flutter canvas 在無 GPU 的 headless 環境登入視窗打不開 —— 這是第一輪驗不到教師端的真正原因，換成 headed + GPU 才進得去</p>
+  </section>
+
+  <section>
+    <h2>八、延伸閱讀</h2>
+    <a class="cardlink" href="amira-video.html" aria-label="Amira 介紹影片逐格解析">
+      <strong>Amira 介紹影片逐格解析</strong>
+      <span class="sub">一支 2 分 48 秒的影片把產品拍給你看了 —— 沒有帳號看不到 Amira 的介面，但產品影片會實拍 含真實學生端 UI、三合一迴圈圖、以及同一支影片裡旁白 68% 對畫面 63% 的矛盾</span>
+    </a>
+  </section>
+
+  <footer>
+    <p><strong>驗證邊界</strong>：教師端與學生端<strong>已登入實機走查</strong>（headed 瀏覽器，2026-07-26 晚），H1／H2／H3 因此升到 E4 仍未看到的：完成的錄音被評分那一刻的畫面（示範帳號沒有任何 submission，要看到必須建作業並以學生身分完成，屬寫入動作故未做）其他未知項：CAT 是真 IRT 還是分支腳本、AI Lesson Plan 實際輸出品質、兩家真實定價（皆不公開，不猜）</p>
+    <p style="margin-top:.9rem"><strong>已知的重複</strong>：跨課掌握度、教師 alert、能力分級三項，2026-03 國際平台分析已標為我們的缺口</p>
+  </footer>
+
+</div>
+</body>
+</html>

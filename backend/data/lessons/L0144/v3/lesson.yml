@@ -1,0 +1,75 @@
+lesson_uid: L0144
+version_id: v3
+title: 馬拉松王者──基普喬吉
+catalog_slot: G9-L23
+sections_present:
+- part: 篇次 1/3
+  'no': 一
+  name: 讀全文-做記號
+- part: 篇次 1/3
+  'no': 二
+  name: 語詞我最棒
+- part: 篇次 1/3
+  'no': 三
+  name: 文章重點整理
+- part: 篇次 1/3
+  'no': 四
+  name: 閱讀理解
+- part: 篇次 1/3
+  'no': 五
+  name: 閱讀接力
+  subtitle: 從一位選手，到各項運動紀錄
+- part: 篇次2/3
+  'no': 一
+  name: 讀全文-做記號
+- part: 篇次2/3
+  'no': 二
+  name: 語詞我最棒
+- part: 篇次2/3
+  'no': 三
+  name: 文章重點整理
+- part: 篇次2/3
+  'no': 四
+  name: 閱讀理解
+- part: 篇次2/3
+  'no': 五
+  name: 閱讀接力
+  subtitle: 從科技影響成績，到科技使用的公平問題
+- part: 篇次3/3-(新聞短文)
+  'no': 一
+  name: 讀全文-做記號
+- part: 篇次3/3-(新聞短文)
+  'no': 二
+  name: 語詞我最棒
+- part: 篇次3/3-(新聞短文)
+  'no': 三
+  name: 文章重點表
+- part: 篇次3/3-(新聞短文)
+  'no': 四
+  name: 閱讀理解
+- part: 篇次3/3-(新聞短文)
+  'no': 五
+  name: 閱讀接力
+  subtitle: 從突破紀錄到公平界線
+- part: 三篇合讀
+  'no': 六
+  name: 閱讀聚光燈
+  subtitle: 從多文本閱讀──看文章之間的關係
+- part: 三篇合讀
+  'no': 七
+  name: 詞語複習
+- part: 三篇合讀
+  'no': 八
+  name: 知識補給站
+source:
+  extracted_by: extract-lesson-multimodal
+  pdf_pages: 19
+  drive_path: 9年級/G9-L23~25運動記錄的突破與公平（多文本閱讀-看文章之間的關係）.docx
+  docx_md5: md5-12:a6101c6decec
+parts:
+- id: wdnd7
+  label: 「你覺得100公尺跑17秒，這樣
+- id: dvxj6
+  label: 1936年美國選手歐文斯（J.O
+- id: 4ymn7
+  label: 當代馬拉松名將基普喬吉，2019

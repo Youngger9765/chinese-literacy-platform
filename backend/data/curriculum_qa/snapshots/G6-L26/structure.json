@@ -1,0 +1,84 @@
+{
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 4,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
+  "rows": [
+    {
+      "interactive_type": "display",
+      "label": "運動傷害，怎麼辦？",
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "如何預防",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "",
+          "value": "1.不管是哪一種運動，都要先做好【　　　】運動。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "",
+          "value": "2.暖身的目的是什麼？【 多選 】\n①讓心跳和呼吸慢慢加快 ②提高肌肉溫度 ③讓關節活動更靈活"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "受傷時的處理",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "",
+          "value": "1.受傷初期可以參考 PEACE 原則：【　　　】、【　　　】、【　　　】、【　　　】、【　　　】。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "",
+          "value": "2.若不幸自己或他人意外受傷，可以先怎麼做？\n停止運動、【　　　】、找大人或【　　　】幫忙。"
+        }
+      ],
+      "value": ""
+    }
+  ],
+  "title": "運動傷害，怎麼辦？",
+  "worksheet_rows": [
+    {
+      "items": [
+        {
+          "label": "",
+          "value": "1.不管是哪一種運動，都要先做好【　　　】運動。"
+        },
+        {
+          "label": "",
+          "value": "2.暖身的目的是什麼？（多選）\n①讓心跳和呼吸慢慢加快 ②提高肌肉溫度 ③讓關節活動更靈活"
+        }
+      ],
+      "kind": "section_block",
+      "section": "如何預防"
+    },
+    {
+      "items": [
+        {
+          "label": "",
+          "value": "1.受傷初期可以參考 PEACE 原則：【　　　】、【　　　】、【　　　】、【　　　】、【　　　】。"
+        },
+        {
+          "label": "",
+          "value": "2.若不幸自己或他人意外受傷，可以先怎麼做？\n停止運動、【　　　】、找大人或【　　　】幫忙。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "受傷時的處理"
+    }
+  ]
+}

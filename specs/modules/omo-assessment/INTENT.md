@@ -6,8 +6,9 @@ stability: active
 canonical_source: vocab_bank
 owns_code:
   - backend/app/services/omo_question_schema.py
-owns_data:
-  - backend/data/lessons/_parsed_2026-05-01/**/*.yml
+owns_data: []  # 一修的 _parsed_2026-05-01/ 已封存（#2683）。二修抽取器補齊對應欄位前，
+               # 這個 module 不擁有任何資料檔 —— 跟它的 spec 契約現況一致，
+               # 登記在 data/curriculum_qa/content_known_gaps.yaml#locks_removed_with_the_first_edition
 spec_tests:
   - backend/specs/test_omo_assessment_spec.py
   - backend/specs/test_omo_grading_corpus.py

@@ -1,0 +1,29 @@
+lesson_uid: L0111
+version_id: v3
+section_no: 五
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 如果亞馬遜雨林消失了？大膽科學
+    duration: '5:28'
+    duration_seconds: 328
+    source: 大膽科學What If Chinese
+    url: http://youtu.be/rDRqgcJNC4M
+  - index: 2
+    title: 【動物瀕友會】EP12名偵探鴿南之滅絕事件旅鴿篇
+    duration: '6:08'
+    duration_seconds: 368
+    source: 故事劇樂部
+    url: http://youtu.be/nnvYNY7kLEo
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/rDRqgcJNC4M
+    url_source: 總表0816「4.影片連結」年級8課次13
+  notes:
+    note: 學習單上每支影片旁各有一個 QR code 圖檔，網址不在文字流裡，故由總表補上
+  slug: amhwp
+  text_ref:
+  - 33uhx
+  - r4d9j

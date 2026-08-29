@@ -82,10 +82,11 @@ describe('StudentSidebar — role=student nav items', () => {
     expect(typeof StudentSidebar).toBe('function');
   });
 
-  it('renders student nav items: 主頁/圖書館/班級作業/加入班級/學習紀錄/練習工具箱', () => {
+  it('renders student nav items: 主頁/圖書館/班級作業/加入班級/學習紀錄', () => {
     renderWithRouter(<StudentSidebar pendingAssignmentCount={0} collapsed={false} onNavigate={vi.fn()} />);
 
-    const labels = ['主頁', '圖書館', '班級作業', '加入班級', '學習紀錄', '練習工具箱'];
+    // 練習工具箱已於 #2801 從學生導覽移除（Young 2026-08-20 指示）
+    const labels = ['主頁', '圖書館', '班級作業', '加入班級', '學習紀錄'];
     for (const label of labels) {
       expect(screen.getByRole('button', { name: new RegExp(label) })).toBeTruthy();
     }

@@ -1,0 +1,42 @@
+lesson_uid: L0084
+version_id: v3
+level: 7
+genre: 抒情文
+strategy: 寫作手法──排比─從排比歸納文意重點
+課文作者: 張筱晴
+學習單: 張筱晴
+課文學習單同一人: true
+pages_read: 0
+lesson_no: 16
+series: 一般
+lesson_seq: 7160
+intro: 這篇文章回顧了作者年少時對楊喚的童詩〈夏夜〉的初次接觸與理解。作者分享了當時年紀小，對詩中「來了！來了！」的運用，以及「擬人化」的寫法感到困惑，並對詩中描繪的快樂童年感到羨慕。然而，隨著年齡增長，作者透過更深入的了解，才逐漸明白詩句背後的意涵，以及楊喚創作這首詩時的心境。文章探討了成長過程中，我們對文學作品的理解如何隨著生命經驗而產生不同的體悟。
+notes:
+  pages_read: '⚠️ 本課**刻意沒有轉 PDF、沒有讀任何頁面圖**（先前兩個 worker 都死在讀圖階段）。
+
+    所有內容來自 `document.xml` + `styles.xml`；唯一拿不到的是找字遊戲的圈選路徑，
+
+    已如實標成未轉錄（見 vocab_review），不臆測、不硬塞座標。'
+strategy_explained: '這一課我們要練習的是，透過作者不斷重複說的那些句子，去抓住文章最想告訴你的重點
+
+  這篇文章裡，作者用「來了！來了！」這樣重複的說法，來寫出詩中那種歡樂的感覺，很適合我們練習怎麼從重複的句子裡，找到文章的核心意思
+
+  讀的時候，你可以注意作者用了哪些重複的詞句，然後想想這些重複是不是在強調某種情感或情境，進而了解作者想表達的意涵'
+strategy_sources:
+  worksheet: 寫作手法──排比─從排比歸納重點
+  master_sheet: 寫作手法──排比─從排比歸納文意重點
+  previous: 寫作手法──排比─從排比歸納重點
+source_profile:
+  class: standard
+  note: 單一錨點 + 有計數欄 + idx 唯一 —— 走主路徑
+  has_key_reading_section: true
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: null
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 1
+  has_counter_column: true
+  body_in_tables: true
+  invisible_chars_docx_only: false
+  profiled: '2026-08-24'

@@ -1,0 +1,2868 @@
+{
+ "A 答案鑰匙 correct_options 直接進學生的 API 回應": {
+  "L0001": [
+   [
+    "rows[2].sub_rows[0]",
+    "[1]"
+   ],
+   [
+    "rows[2].sub_rows[1]",
+    "[0]"
+   ]
+  ],
+  "L0011": [
+   [
+    "rows[4].sub_rows[0]",
+    "[]"
+   ],
+   [
+    "rows[4].sub_rows[1]",
+    "[0]"
+   ]
+  ],
+  "L0014": [
+   [
+    "rows[1].sub_rows[1]",
+    "[2]"
+   ],
+   [
+    "rows[1].sub_rows[4]",
+    "[0, 2]"
+   ]
+  ],
+  "L0015": [
+   [
+    "rows[3].sub_rows[0]",
+    "[1]"
+   ]
+  ],
+  "L0017": [
+   [
+    "rows[1].sub_rows[1]",
+    "[]"
+   ],
+   [
+    "rows[4].sub_rows[1]",
+    "[]"
+   ],
+   [
+    "rows[5].sub_rows[0]",
+    "[]"
+   ]
+  ],
+  "L0019": [
+   [
+    "rows[4]",
+    "[1]"
+   ]
+  ],
+  "L0020": [
+   [
+    "rows[1].sub_rows[1]",
+    "[1]"
+   ],
+   [
+    "rows[3].sub_rows[2]",
+    "[0]"
+   ],
+   [
+    "rows[5].sub_rows[0]",
+    "[1]"
+   ]
+  ],
+  "L0022": [
+   [
+    "rows[5].sub_rows[0]",
+    "[]"
+   ]
+  ],
+  "L0024": [
+   [
+    "rows[2].sub_rows[1]",
+    "[]"
+   ]
+  ],
+  "L0026": [
+   [
+    "rows[1].sub_rows[2]",
+    "[]"
+   ],
+   [
+    "rows[2].sub_rows[1]",
+    "[]"
+   ],
+   [
+    "rows[2].sub_rows[2]",
+    "[]"
+   ],
+   [
+    "rows[3].sub_rows[2]",
+    "[]"
+   ],
+   [
+    "rows[5].sub_rows[2]",
+    "[]"
+   ],
+   [
+    "rows[6].sub_rows[0]",
+    "[]"
+   ],
+   [
+    "rows[6].sub_rows[1]",
+    "[]"
+   ],
+   [
+    "rows[6].sub_rows[2]",
+    "[]"
+   ]
+  ],
+  "L0028": [
+   [
+    "rows[3].sub_rows[3]",
+    "[0]"
+   ],
+   [
+    "rows[3].sub_rows[4]",
+    "[1]"
+   ]
+  ],
+  "L0032": [
+   [
+    "rows[3].sub_rows[0]",
+    "[1, 2]"
+   ]
+  ],
+  "L0034": [
+   [
+    "rows[4]",
+    "[1, 2, 4, 5]"
+   ]
+  ],
+  "L0040": [
+   [
+    "rows[1].sub_rows[0]",
+    "[1]"
+   ],
+   [
+    "rows[3].sub_rows[0]",
+    "[0, 1, 2]"
+   ],
+   [
+    "rows[3].sub_rows[1]",
+    "[0, 1]"
+   ]
+  ],
+  "L0041": [
+   [
+    "rows[2].sub_rows[2]",
+    "[0, 1]"
+   ],
+   [
+    "rows[2].sub_rows[3]",
+    "[2]"
+   ],
+   [
+    "rows[2].sub_rows[4]",
+    "[1]"
+   ]
+  ],
+  "L0042": [
+   [
+    "rows[2].sub_rows[0]",
+    "[0, 1, 2]"
+   ],
+   [
+    "rows[2].sub_rows[1]",
+    "[0]"
+   ],
+   [
+    "rows[2].sub_rows[2]",
+    "[1]"
+   ]
+  ],
+  "L0064": [
+   [
+    "rows[2].sub_rows[0]",
+    "[0]"
+   ],
+   [
+    "rows[2].sub_rows[1]",
+    "[0]"
+   ],
+   [
+    "rows[2].sub_rows[2]",
+    "[0, 1, 2, 5]"
+   ],
+   [
+    "rows[3].sub_rows[0]",
+    "[0]"
+   ],
+   [
+    "rows[3].sub_rows[1]",
+    "[1]"
+   ]
+  ],
+  "L0072": [
+   [
+    "rows[2]",
+    "[1, 2, 4, 6, 7, 8]"
+   ]
+  ],
+  "L0073": [
+   [
+    "rows[1].sub_rows[1]",
+    "[]"
+   ],
+   [
+    "rows[2].sub_rows[1]",
+    "[]"
+   ],
+   [
+    "rows[3].sub_rows[1]",
+    "[]"
+   ],
+   [
+    "rows[3].sub_rows[2]",
+    "[]"
+   ]
+  ],
+  "L0080": [
+   [
+    "rows[1].sub_rows[2]",
+    "[0, 2]"
+   ]
+  ],
+  "L0082": [
+   [
+    "rows[2].sub_rows[0]",
+    "[0]"
+   ],
+   [
+    "rows[2].sub_rows[2]",
+    "[1]"
+   ]
+  ],
+  "L0083": [
+   [
+    "rows[1].sub_rows[0]",
+    "[1]"
+   ],
+   [
+    "rows[1].sub_rows[1]",
+    "[0, 1, 2]"
+   ]
+  ],
+  "L0084": [
+   [
+    "rows[2].sub_rows[1]",
+    "[]"
+   ],
+   [
+    "rows[3].sub_rows[1]",
+    "[]"
+   ],
+   [
+    "rows[5].sub_rows[1]",
+    "[]"
+   ],
+   [
+    "rows[8].sub_rows[1]",
+    "[]"
+   ],
+   [
+    "rows[9].sub_rows[0]",
+    "[]"
+   ],
+   [
+    "rows[9].sub_rows[1]",
+    "[]"
+   ]
+  ],
+  "L0092": [
+   [
+    "rows[5]",
+    "[0]"
+   ]
+  ],
+  "L0093": [
+   [
+    "rows[4]",
+    "[0]"
+   ]
+  ],
+  "L0095": [
+   [
+    "rows[3].sub_rows[2]",
+    "[1]"
+   ]
+  ],
+  "L0098": [
+   [
+    "rows[2].sub_rows[0]",
+    "[2, 5]"
+   ],
+   [
+    "rows[2].sub_rows[1]",
+    "[0, 3]"
+   ],
+   [
+    "rows[3].sub_rows[0]",
+    "[1, 3]"
+   ],
+   [
+    "rows[3].sub_rows[1]",
+    "[1, 3]"
+   ]
+  ],
+  "L0124": [
+   [
+    "rows[5]",
+    "[]"
+   ]
+  ],
+  "L0125": [
+   [
+    "rows[3].sub_rows[0]",
+    "[0]"
+   ],
+   [
+    "rows[3].sub_rows[1]",
+    "[1]"
+   ],
+   [
+    "rows[3].sub_rows[2]",
+    "[0]"
+   ],
+   [
+    "rows[3].sub_rows[3]",
+    "[0]"
+   ],
+   [
+    "rows[3].sub_rows[4]",
+    "[1]"
+   ],
+   [
+    "rows[3].sub_rows[5]",
+    "[1]"
+   ]
+  ],
+  "L0126": [
+   [
+    "rows[1].sub_rows[2]",
+    "[1]"
+   ]
+  ],
+  "L0132": [
+   [
+    "rows[3].sub_rows[1]",
+    "[3, 4]"
+   ]
+  ],
+  "L0138": [
+   [
+    "rows[3].sub_rows[2]",
+    "[0]"
+   ],
+   [
+    "rows[3].sub_rows[3]",
+    "[1]"
+   ]
+  ],
+  "L0142": [
+   [
+    "rows[1].sub_rows[2]",
+    "[0]"
+   ],
+   [
+    "rows[3].sub_rows[2]",
+    "[0, 1]"
+   ],
+   [
+    "rows[3].sub_rows[3]",
+    "[2]"
+   ]
+  ],
+  "L0156": [
+   [
+    "rows[4].sub_rows[0]",
+    "[0]"
+   ],
+   [
+    "rows[4].sub_rows[1]",
+    "[0]"
+   ],
+   [
+    "rows[4].sub_rows[2]",
+    "[0]"
+   ],
+   [
+    "rows[4].sub_rows[3]",
+    "[1]"
+   ]
+  ],
+  "L0165": [
+   [
+    "rows[2].sub_rows[1]",
+    "[]"
+   ],
+   [
+    "rows[3].sub_rows[1]",
+    "[0, 3, 5, 6]"
+   ],
+   [
+    "rows[4].sub_rows[1]",
+    "[]"
+   ]
+  ],
+  "L0166": [
+   [
+    "rows[1].sub_rows[1]",
+    "[]"
+   ]
+  ],
+  "L0170": [
+   [
+    "rows[2].sub_rows[0]",
+    "[0]"
+   ],
+   [
+    "rows[2].sub_rows[2]",
+    "[0]"
+   ],
+   [
+    "rows[4].sub_rows[0]",
+    "[0]"
+   ]
+  ],
+  "L0172": [
+   [
+    "rows[1].sub_rows[0]",
+    "[]"
+   ],
+   [
+    "rows[2].sub_rows[0]",
+    "[]"
+   ],
+   [
+    "rows[3].sub_rows[0]",
+    "[]"
+   ],
+   [
+    "rows[4].sub_rows[0]",
+    "[]"
+   ],
+   [
+    "rows[5].sub_rows[0]",
+    "[]"
+   ],
+   [
+    "rows[6].sub_rows[0]",
+    "[]"
+   ],
+   [
+    "rows[7].sub_rows[0]",
+    "[]"
+   ]
+  ],
+  "L0174": [
+   [
+    "rows[1].sub_rows[0]",
+    "[0, 3]"
+   ],
+   [
+    "rows[3].sub_rows[1]",
+    "[0]"
+   ],
+   [
+    "rows[4].sub_rows[0]",
+    "[0, 3, 5]"
+   ]
+  ],
+  "L0175": [
+   [
+    "rows[1].sub_rows[0]",
+    "[]"
+   ],
+   [
+    "rows[1].sub_rows[1]",
+    "[]"
+   ],
+   [
+    "rows[4].sub_rows[0]",
+    "[]"
+   ]
+  ]
+ },
+ "D 子項標題渲染成空字串": {
+  "L0001": [
+   [
+    "rows[2].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[1].label",
+    ""
+   ]
+  ],
+  "L0011": [
+   [
+    "rows[4].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[2].label",
+    ""
+   ]
+  ],
+  "L0012": [
+   [
+    "rows[3].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[2].label",
+    ""
+   ]
+  ],
+  "L0014": [
+   [
+    "rows[1].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[1].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[1].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[1].sub_rows[3].label",
+    ""
+   ],
+   [
+    "rows[1].sub_rows[4].label",
+    ""
+   ]
+  ],
+  "L0015": [
+   [
+    "rows[3].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[2].label",
+    ""
+   ]
+  ],
+  "L0020": [
+   [
+    "rows[1].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[1].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[5].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[5].sub_rows[1].label",
+    ""
+   ]
+  ],
+  "L0023": [
+   [
+    "rows[1].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[1].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[1].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[1].label",
+    ""
+   ]
+  ],
+  "L0027": [
+   [
+    "rows[2].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[2].label",
+    ""
+   ]
+  ],
+  "L0028": [
+   [
+    "rows[3].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[3].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[4].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[2].label",
+    ""
+   ]
+  ],
+  "L0030": [
+   [
+    "rows[2].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[2].label",
+    ""
+   ]
+  ],
+  "L0032": [
+   [
+    "rows[3].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[2].label",
+    ""
+   ]
+  ],
+  "L0035": [
+   [
+    "rows[1].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[1].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[1].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[1].label",
+    ""
+   ]
+  ],
+  "L0037": [
+   [
+    "rows[2].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[2].label",
+    ""
+   ]
+  ],
+  "L0040": [
+   [
+    "rows[1].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[1].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[2].label",
+    ""
+   ]
+  ],
+  "L0041": [
+   [
+    "rows[2].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[3].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[4].label",
+    ""
+   ]
+  ],
+  "L0042": [
+   [
+    "rows[2].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[2].label",
+    ""
+   ]
+  ],
+  "L0045": [
+   [
+    "rows[2].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[5].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[5].sub_rows[1].label",
+    ""
+   ]
+  ],
+  "L0047": [
+   [
+    "rows[2].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[3].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[4].label",
+    ""
+   ]
+  ],
+  "L0048": [
+   [
+    "rows[1].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[1].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[1].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[1].label",
+    ""
+   ]
+  ],
+  "L0055": [
+   [
+    "rows[2].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[1].label",
+    ""
+   ]
+  ],
+  "L0056": [
+   [
+    "rows[1].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[1].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[1].label",
+    ""
+   ]
+  ],
+  "L0058": [
+   [
+    "rows[2].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[1].label",
+    ""
+   ]
+  ],
+  "L0059": [
+   [
+    "rows[4].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[3].label",
+    ""
+   ],
+   [
+    "rows[5].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[5].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[5].sub_rows[2].label",
+    ""
+   ]
+  ],
+  "L0060": [
+   [
+    "rows[2].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[3].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[4].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[5].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[3].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[4].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[5].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[2].label",
+    ""
+   ]
+  ],
+  "L0064": [
+   [
+    "rows[2].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[3].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[4].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[5].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[1].label",
+    ""
+   ]
+  ],
+  "L0065": [
+   [
+    "rows[1].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[1].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[1].label",
+    ""
+   ]
+  ],
+  "L0071": [
+   [
+    "rows[1].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[1].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[1].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[1].label",
+    ""
+   ]
+  ],
+  "L0076": [
+   [
+    "rows[2].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[3].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[4].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[5].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[1].label",
+    ""
+   ]
+  ],
+  "L0078": [
+   [
+    "rows[2].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[2].label",
+    ""
+   ]
+  ],
+  "L0079": [
+   [
+    "rows[1].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[1].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[3].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[4].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[5].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[6].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[7].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[8].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[1].label",
+    ""
+   ]
+  ],
+  "L0080": [
+   [
+    "rows[1].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[1].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[1].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[1].sub_rows[3].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[1].label",
+    ""
+   ]
+  ],
+  "L0081": [
+   [
+    "rows[1].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[1].sub_rows[1].label",
+    ""
+   ]
+  ],
+  "L0082": [
+   [
+    "rows[1].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[1].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[1].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[1].label",
+    ""
+   ]
+  ],
+  "L0083": [
+   [
+    "rows[1].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[1].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[3].label",
+    ""
+   ]
+  ],
+  "L0090": [
+   [
+    "rows[2].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[2].label",
+    ""
+   ]
+  ],
+  "L0094": [
+   [
+    "rows[1].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[1].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[0].label",
+    ""
+   ]
+  ],
+  "L0095": [
+   [
+    "rows[2].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[3].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[4].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[5].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[6].label",
+    ""
+   ]
+  ],
+  "L0097": [
+   [
+    "rows[3].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[2].label",
+    ""
+   ]
+  ],
+  "L0098": [
+   [
+    "rows[2].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[1].label",
+    ""
+   ]
+  ],
+  "L0102": [
+   [
+    "rows[3].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[1].label",
+    ""
+   ]
+  ],
+  "L0103": [
+   [
+    "rows[3].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[3].label",
+    ""
+   ],
+   [
+    "rows[5].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[5].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[5].sub_rows[2].label",
+    ""
+   ]
+  ],
+  "L0109": [
+   [
+    "rows[3].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[3].label",
+    ""
+   ]
+  ],
+  "L0121": [
+   [
+    "rows[2].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[1].label",
+    ""
+   ]
+  ],
+  "L0122": [
+   [
+    "rows[3].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[1].label",
+    ""
+   ]
+  ],
+  "L0125": [
+   [
+    "rows[3].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[3].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[4].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[5].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[6].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[5].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[5].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[5].sub_rows[2].label",
+    ""
+   ]
+  ],
+  "L0126": [
+   [
+    "rows[1].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[1].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[1].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[2].label",
+    ""
+   ]
+  ],
+  "L0127": [
+   [
+    "rows[2].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[3].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[4].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[1].label",
+    ""
+   ]
+  ],
+  "L0128": [
+   [
+    "rows[1].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[1].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[3].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[1].label",
+    ""
+   ]
+  ],
+  "L0132": [
+   [
+    "rows[1].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[1].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[3].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[4].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[5].label",
+    ""
+   ]
+  ],
+  "L0142": [
+   [
+    "rows[1].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[1].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[1].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[3].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[4].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[3].label",
+    ""
+   ]
+  ],
+  "L0143": [
+   [
+    "rows[3].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[2].label",
+    ""
+   ]
+  ],
+  "L0144": [
+   [
+    "rows[1].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[1].sub_rows[1].label",
+    ""
+   ]
+  ],
+  "L0145": [
+   [
+    "rows[1].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[1].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[3].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[1].label",
+    ""
+   ]
+  ],
+  "L0146": [
+   [
+    "rows[3].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[1].label",
+    ""
+   ]
+  ],
+  "L0149": [
+   [
+    "rows[2].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[2].label",
+    ""
+   ]
+  ],
+  "L0151": [
+   [
+    "rows[1].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[1].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[1].sub_rows[2].label",
+    ""
+   ]
+  ],
+  "L0152": [
+   [
+    "rows[2].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[1].label",
+    ""
+   ]
+  ],
+  "L0156": [
+   [
+    "rows[2].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[3].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[3].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[3].label",
+    ""
+   ]
+  ],
+  "L0160": [
+   [
+    "rows[1].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[1].sub_rows[1].label",
+    ""
+   ]
+  ],
+  "L0162": [
+   [
+    "rows[1].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[1].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[1].sub_rows[2].label",
+    ""
+   ]
+  ],
+  "L0163": [
+   [
+    "rows[1].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[1].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[1].label",
+    ""
+   ]
+  ],
+  "L0164": [
+   [
+    "rows[1].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[1].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[1].label",
+    ""
+   ]
+  ],
+  "L0170": [
+   [
+    "rows[2].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[4].sub_rows[2].label",
+    ""
+   ]
+  ],
+  "L0171": [
+   [
+    "rows[2].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[1].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[2].label",
+    ""
+   ],
+   [
+    "rows[2].sub_rows[3].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[0].label",
+    ""
+   ],
+   [
+    "rows[3].sub_rows[1].label",
+    ""
+   ]
+  ]
+ },
+ "B checkbox 格含【】→ 前端誤判成填空，選項變純文字＋沒有勾選 UI": {
+  "L0001": [
+   [
+    "rows[2].sub_rows[1]",
+    "比賽時受傷了，他選擇【 單選 】\n①積極的面對與復健 □②放棄跑步、不願治療"
+   ]
+  ],
+  "L0014": [
+   [
+    "rows[1].sub_rows[4]",
+    "發現讀書的畫面給人【　】的感覺。\n①正向 □②用功 ③愉悅"
+   ]
+  ],
+  "L0015": [
+   [
+    "rows[3].sub_rows[0]",
+    "他【　】年罹患了\n□①骨癌 ②咽喉癌"
+   ]
+  ],
+  "L0020": [
+   [
+    "rows[1].sub_rows[1]",
+    "「但是」之後【  】都接壞消息。\n□①一定 ②不一定"
+   ],
+   [
+    "rows[3].sub_rows[2]",
+    "結果：小恩最後【  】了作者的邀約。\n①答應 □②婉拒"
+   ],
+   [
+    "rows[5].sub_rows[0]",
+    "轉折詞後面出現的狀況，常常和一般預期的【  】，也是整句話的重點所在。\n□①相同 ②不同"
+   ]
+  ],
+  "L0028": [
+   [
+    "rows[3].sub_rows[3]",
+    "效率【  】\n①高 □②低"
+   ],
+   [
+    "rows[3].sub_rows[4]",
+    "訓練成本【  】\n□①高 ②低"
+   ]
+  ],
+  "L0032": [
+   [
+    "rows[3].sub_rows[0]",
+    "常見方式：【 複選 】\n□①精密的手術 ②搞笑表演 ③變魔術 □④提供治療藥物"
+   ]
+  ],
+  "L0034": [
+   [
+    "rows[4]",
+    "小睿使用手機的時間□①上升 ②下降，\n他的生活品質與成績①上升 □②下降，\n最後頂住指尖的誘惑，成為「手機的主人」。【②下降】【①上升】"
+   ]
+  ],
+  "L0040": [
+   [
+    "rows[1].sub_rows[0]",
+    "1.主角最初迷上《聯盟戰記》的原因是什麼？【 單選 】\n□①想要成為職業電競選手。 ②電玩遊戲能讓他忘卻現實中的學習煩惱。"
+   ],
+   [
+    "rows[3].sub_rows[0]",
+    "1.主角把哪些活動排進作息時間表：【 多選 】\n①晨讀與上課 ②複習、作業與預習 ③電競訓練 □④晚餐與睡眠 □⑤熬夜加強訓練"
+   ],
+   [
+    "rows[3].sub_rows[1]",
+    "2.學習與遊戲的相輔相成：主角在課堂上是如何將遊戲中的經驗應用於學習的？【 多選 】\n①在數學課運用機率計算遊戲命中率 ②在物理課運用遊戲角色的移動軌跡解釋拋物線原理 □③他把遊戲戰術策略應用於班級的討論活動中"
+   ]
+  ],
+  "L0041": [
+   [
+    "rows[2].sub_rows[2]",
+    "2.飲食控制：為了減少熱量的攝取，保持輕盈的身軀，他的飲食有哪些特點？【 多選 】\n①吃原型食物 ②依照順序吃各類食物 □③快速吃完食物"
+   ],
+   [
+    "rows[2].sub_rows[3]",
+    "3.安全意識：為了降低受傷風險，周天成晚上外出時會選擇哪種方式？【 單選 】\n□①騎腳踏車 □②自己開車 ③搭乘大眾運輸工具"
+   ],
+   [
+    "rows[2].sub_rows[4]",
+    "4.自我反省與調整：周天成持續尋找進步的方法，是為了什麼？【 單選 】\n□①提高成績領比賽獎金。 ②提高成績，讓自己有能力回饋並影響更多人。 □③提高成績爭取更多企業贊助。"
+   ]
+  ],
+  "L0042": [
+   [
+    "rows[2].sub_rows[0]",
+    "1.陳念琴剛加入拳擊隊時受到排擠和遇到打不贏男生的困境，她做了什麼來改變現況？【 多選 】\n2.陳念琴如何看待挫折？【 單選 】「既然無路可退，就\n3.後來的發展：在67公斤級女子拳擊賽中獲得冠軍。\n①用不服輸的態度撐下來 ②練習防禦、躲閃，再尋找出拳機會 ③接受高強度的訓練 □④增重到67公斤"
+   ],
+   [
+    "rows[2].sub_rows[1]",
+    "1.高中：\n【 1 】健康情況：【 單選 】\n【 2 】過程：一邊訓練、一邊監測身體狀況，讓她心力交瘁。\n①罹患缺鐵性貧血 □②罹患淋巴癌。"
+   ],
+   [
+    "rows[2].sub_rows[2]",
+    "2.備戰東京奧運：\n【 1 】健康情況：【 單選 】\n【 2 】過程：忍受痛苦的【　】和承受媒體的質疑。\n【 3 】抱持信念：為了【　】我願意忍耐，再苦再累我都要咬牙撐過。\n□①罹患缺鐵性貧血 ②罹患淋巴癌。"
+   ]
+  ],
+  "L0064": [
+   [
+    "rows[2].sub_rows[0]",
+    "聽到同學說喜歡的人【  】，\n①有交往對象了 □②也喜歡自己"
+   ],
+   [
+    "rows[2].sub_rows[1]",
+    "而感到【  】\n①出乎意料 □②理所當然"
+   ],
+   [
+    "rows[2].sub_rows[2]",
+    "1.當下感受：【 勾選，可複選 】\n①震驚 ②失落 ③混亂 □④悸動 □⑤勇敢 ⑥不甘心 □⑦快樂"
+   ],
+   [
+    "rows[3].sub_rows[0]",
+    "比起聽到消息的當下，心情【  】許多，\n①緩和 □②激動"
+   ],
+   [
+    "rows[3].sub_rows[1]",
+    "覺得真心喜歡一個人是【  】的。\n□①浪費 ②值得"
+   ]
+  ],
+  "L0072": [
+   [
+    "rows[2]",
+    "1.東西越大【 文旦 】，工作記憶能記得的越【□①多 ②少】；\n  東西越小【 柳丁 】，工作記憶能記得的越【①多 □②少】。\n2.讀得快的人，工作記憶能記住更多內容。\n3.讀得快的人，閱讀理解能力比讀得慢的人來得【①好 □②不好】。【②少】【①多】【①好】"
+   ]
+  ],
+  "L0080": [
+   [
+    "rows[1].sub_rows[2]",
+    "1.學生有【☑①充足 □②少量】的課後時間進行體育活動\n2.經常舉辦校內、校際的體育競賽。\n①充足 □②少量"
+   ]
+  ],
+  "L0082": [
+   [
+    "rows[2].sub_rows[0]",
+    "會發出鳴叫聲的都是【　】。【 單選 】\n①雄蟋蟀 □②雌蟋蟀"
+   ],
+   [
+    "rows[2].sub_rows[2]",
+    "雄蟋蟀為了爭取交配機會，牠們之間的關係是【　】的。【 單選 】\n□①合作 ②競爭"
+   ]
+  ],
+  "L0083": [
+   [
+    "rows[1].sub_rows[0]",
+    "家裡氣氛變得【　】【 單選 】\n□①吵鬧 ②熱鬧 □③擁擠"
+   ],
+   [
+    "rows[1].sub_rows[1]",
+    "第3～6段寫到哪些爺爺奶奶同住後的生活改變？【 多選 】\n①高齡友善空間的改造 ②餐桌上菜色的變化 ③生活作息的調整 □④音樂喜好的改變"
+   ]
+  ],
+  "L0092": [
+   [
+    "rows[5]",
+    "①什麼都沒有發生　　□②外星人出現。【 單選 】"
+   ]
+  ],
+  "L0093": [
+   [
+    "rows[4]",
+    "假設一：血跡\n【已被清理】\n假設二、廚房不是\n【第一現場】\n噴化學藥劑，觀察地板是否出現\n【血跡反應】\n地板確有血跡反應，支持了：\n①假設一\n□②假設二"
+   ]
+  ],
+  "L0095": [
+   [
+    "rows[3].sub_rows[2]",
+    "小說的怪物其實【　】名字，可以解讀為他從未得到他人的認同與祝福。【 單選 】\n□①有 ②沒有"
+   ]
+  ],
+  "L0098": [
+   [
+    "rows[2].sub_rows[0]",
+    "對原住民的刻板印象：與原住民互動時，強調酒量與膚色，加深對原住民族群的【 □①憐憫　□②尊重　☑③偏見 】。\n□①憐憫 □②尊重 ③偏見"
+   ],
+   [
+    "rows[2].sub_rows[1]",
+    "對身障者的過度保護：以體諒為出發點，但話語中隱含對身障者的【 ☑①低期望　□②尊重　□③平等 】與過度保護。\n①低期望 □②尊重 □③平等"
+   ],
+   [
+    "rows[3].sub_rows[0]",
+    "微歧視似無傷大雅，但長期累積會導致偏見被\n【 □①外化　☑②內化 】，滲透到人們的【　】中。\n□①外化 ②內化"
+   ],
+   [
+    "rows[3].sub_rows[1]",
+    "微歧視的特點在於它【 □①明顯　☑②隱蔽 】，因此難以被發現和改正。\n□①明顯 ②隱蔽"
+   ]
+  ],
+  "L0126": [
+   [
+    "rows[1].sub_rows[2]",
+    "作者從小在家幫忙，曾遇過有人強闖戲院、遭鹹豬手騷擾、打掃時發現吸食強力膠後留下的垃圾。作者的家就是戲院，而戲院令人感到【　】。\n□①安全 ②不安"
+   ]
+  ],
+  "L0132": [
+   [
+    "rows[3].sub_rows[1]",
+    "【 1 】2007年美國研究者研究514位小學生，發現\n□①戶外活動時間 □②家長近視情況 □③做功課時間【 複選 】\n可有效預測學生是否會罹患近視。\n①戶外活動時間 ②家長近視情況 □③做功課時間"
+   ]
+  ],
+  "L0138": [
+   [
+    "rows[3].sub_rows[2]",
+    "【 單選 】\n①越打越好 □②連敗不止"
+   ],
+   [
+    "rows[3].sub_rows[3]",
+    "【 單選 】\n□①越打越好 ②連續低潮"
+   ]
+  ],
+  "L0142": [
+   [
+    "rows[1].sub_rows[2]",
+    "死亡人數【　】，可見轟炸造成嚴重傷亡。\n①眾多 □②稀少"
+   ],
+   [
+    "rows[3].sub_rows[2]",
+    "哪幾類人較容易產生強烈的自信與平靜？【 請打勾，複選 】\n①直接受害者 ②間接受害者 □③未受波及者"
+   ],
+   [
+    "rows[3].sub_rows[3]",
+    "哪一類人最為恐懼？【 請打勾，單選 】\n□①直接受害者 □②間接受害者 ③未受波及者"
+   ]
+  ],
+  "L0165": [
+   [
+    "rows[3].sub_rows[1]",
+    "1.【教練】告訴阿澤不必\n【 ①孤軍奮戰　□②自責失誤 】\n2.小宇向阿澤道歉，阿澤才知道原來小宇也很\n【 □①害怕　②在乎 】\n3.小宇在下一局時，雖然上壘【 □①成功　②失敗 】，但也讓隊上【 ①拿下一分　□②丟了一分 】。"
+   ]
+  ],
+  "L0172": [
+   [
+    "rows[1].sub_rows[0]",
+    "□①固執倔強  □②認真細心【專心投入】"
+   ],
+   [
+    "rows[3].sub_rows[0]",
+    "□①有禮貌  □②有想法【抖擻】"
+   ],
+   [
+    "rows[5].sub_rows[0]",
+    "□①沒信心  □②沒毅力【臉色】【悶悶不樂】"
+   ],
+   [
+    "rows[6].sub_rows[0]",
+    "□①容易後悔  □②容易擔心【拖累】"
+   ]
+  ],
+  "L0174": [
+   [
+    "rows[1].sub_rows[0]",
+    "1.九局下，兩出局，落後一分，輪到小齊站上【打擊區】。\n2.小齊【 ①被投手三振 □②擊出安打 】，比賽結束。\n3.球隊【 □①贏球 ②輸球 】"
+   ],
+   [
+    "rows[3].sub_rows[1]",
+    "雖然成績不亮眼，但對她來說這是她走過【受傷】和【低潮】的【 ①勝利 □②失敗 】"
+   ],
+   [
+    "rows[4].sub_rows[0]",
+    "1.失敗可以讓人看見該【補強】的地方──對應的是【 ①楊勇緯 □②郭婞淳 】的故事\n2.有時候看似是失敗，但其實已經是重要的突破──對應的是【 □①楊勇緯 ②郭婞淳 】的故事\n3.我們【 □①只有一種 ②有不只一種 】的角度來面對失敗。"
+   ]
+  ]
+ },
+ "C options 陣列殘留 □／①標記（切分沒切乾淨）": {
+  "L0001": [
+   [
+    "rows[2].sub_rows[1].options[0]",
+    "積極的面對與復健 □"
+   ]
+  ],
+  "L0011": [
+   [
+    "rows[4].sub_rows[0].options[0]",
+    "奧運金牌賽 □"
+   ],
+   [
+    "rows[4].sub_rows[0].options[1]",
+    "世界大學運動會 □"
+   ],
+   [
+    "rows[4].sub_rows[1].options[0]",
+    "忠於自己的球風 □"
+   ]
+  ],
+  "L0014": [
+   [
+    "rows[1].sub_rows[1].options[0]",
+    "閱讀 □"
+   ],
+   [
+    "rows[1].sub_rows[4].options[0]",
+    "正向 □"
+   ]
+  ],
+  "L0020": [
+   [
+    "rows[3].sub_rows[2].options[0]",
+    "答應 □"
+   ]
+  ],
+  "L0028": [
+   [
+    "rows[3].sub_rows[3].options[0]",
+    "高 □"
+   ]
+  ],
+  "L0032": [
+   [
+    "rows[3].sub_rows[0].options[2]",
+    "變魔術 □"
+   ]
+  ],
+  "L0034": [
+   [
+    "rows[4].options[2]",
+    "上升 □"
+   ]
+  ],
+  "L0040": [
+   [
+    "rows[3].sub_rows[0].options[2]",
+    "電競訓練 □"
+   ],
+   [
+    "rows[3].sub_rows[0].options[3]",
+    "晚餐與睡眠 □"
+   ],
+   [
+    "rows[3].sub_rows[1].options[1]",
+    "在物理課運用遊戲角色的移動軌跡解釋拋物線原理 □"
+   ]
+  ],
+  "L0041": [
+   [
+    "rows[2].sub_rows[2].options[1]",
+    "依照順序吃各類食物 □"
+   ],
+   [
+    "rows[2].sub_rows[3].options[0]",
+    "騎腳踏車 □"
+   ],
+   [
+    "rows[2].sub_rows[4].options[1]",
+    "提高成績，讓自己有能力回饋並影響更多人。 □"
+   ]
+  ],
+  "L0042": [
+   [
+    "rows[2].sub_rows[0].options[2]",
+    "接受高強度的訓練 □"
+   ],
+   [
+    "rows[2].sub_rows[1].options[0]",
+    "罹患缺鐵性貧血 □"
+   ]
+  ],
+  "L0064": [
+   [
+    "rows[2].sub_rows[0].options[0]",
+    "有交往對象了 □"
+   ],
+   [
+    "rows[2].sub_rows[1].options[0]",
+    "出乎意料 □"
+   ],
+   [
+    "rows[2].sub_rows[2].options[2]",
+    "混亂 □"
+   ],
+   [
+    "rows[2].sub_rows[2].options[3]",
+    "悸動 □"
+   ],
+   [
+    "rows[2].sub_rows[2].options[5]",
+    "不甘心 □"
+   ],
+   [
+    "rows[3].sub_rows[0].options[0]",
+    "緩和 □"
+   ]
+  ],
+  "L0072": [
+   [
+    "rows[2].options[2]",
+    "多 □"
+   ],
+   [
+    "rows[2].options[4]",
+    "好 □"
+   ]
+  ],
+  "L0080": [
+   [
+    "rows[1].sub_rows[2].options[0]",
+    "充足 □"
+   ],
+   [
+    "rows[1].sub_rows[2].options[2]",
+    "充足 □"
+   ]
+  ],
+  "L0082": [
+   [
+    "rows[2].sub_rows[0].options[0]",
+    "雄蟋蟀 □"
+   ]
+  ],
+  "L0083": [
+   [
+    "rows[1].sub_rows[0].options[1]",
+    "熱鬧 □"
+   ],
+   [
+    "rows[1].sub_rows[1].options[2]",
+    "生活作息的調整 □"
+   ]
+  ],
+  "L0092": [
+   [
+    "rows[5].options[0]",
+    "什麼都沒有發生　　□"
+   ]
+  ],
+  "L0093": [
+   [
+    "rows[4].options[0]",
+    "假設一\n□"
+   ]
+  ],
+  "L0098": [
+   [
+    "rows[2].sub_rows[0].options[0]",
+    "憐憫　□"
+   ],
+   [
+    "rows[2].sub_rows[0].options[1]",
+    "尊重　☑"
+   ],
+   [
+    "rows[2].sub_rows[0].options[2]",
+    "偏見 】。\n□"
+   ],
+   [
+    "rows[2].sub_rows[0].options[3]",
+    "憐憫 □"
+   ],
+   [
+    "rows[2].sub_rows[1].options[0]",
+    "低期望　□"
+   ],
+   [
+    "rows[2].sub_rows[1].options[1]",
+    "尊重　□"
+   ],
+   [
+    "rows[2].sub_rows[1].options[3]",
+    "低期望 □"
+   ],
+   [
+    "rows[2].sub_rows[1].options[4]",
+    "尊重 □"
+   ],
+   [
+    "rows[3].sub_rows[0].options[0]",
+    "外化　☑"
+   ],
+   [
+    "rows[3].sub_rows[0].options[1]",
+    "內化 】，滲透到人們的【　】中。\n□"
+   ],
+   [
+    "rows[3].sub_rows[1].options[0]",
+    "明顯　☑"
+   ],
+   [
+    "rows[3].sub_rows[1].options[1]",
+    "隱蔽 】，因此難以被發現和改正。\n□"
+   ]
+  ],
+  "L0124": [
+   [
+    "rows[5].options[0]",
+    "讓讀者認識植物肉 □"
+   ],
+   [
+    "rows[5].options[1]",
+    "推廣植物肉的食用 □"
+   ],
+   [
+    "rows[5].options[2]",
+    "質疑植物肉的安全性 □"
+   ],
+   [
+    "rows[5].options[3]",
+    "期待植物肉帶來的正向影響 □"
+   ],
+   [
+    "rows[5].options[4]",
+    "期待這一波的飲食革命 □"
+   ]
+  ],
+  "L0125": [
+   [
+    "rows[3].sub_rows[0].options[0]",
+    "不用賠償 □"
+   ],
+   [
+    "rows[3].sub_rows[2].options[0]",
+    "不用賠償 □"
+   ],
+   [
+    "rows[3].sub_rows[3].options[0]",
+    "不用賠償 □"
+   ]
+  ],
+  "L0132": [
+   [
+    "rows[3].sub_rows[1].options[0]",
+    "戶外活動時間 □"
+   ],
+   [
+    "rows[3].sub_rows[1].options[1]",
+    "家長近視情況 □"
+   ],
+   [
+    "rows[3].sub_rows[1].options[4]",
+    "家長近視情況 □"
+   ]
+  ],
+  "L0138": [
+   [
+    "rows[3].sub_rows[2].options[0]",
+    "越打越好 □"
+   ]
+  ],
+  "L0142": [
+   [
+    "rows[1].sub_rows[2].options[0]",
+    "眾多 □"
+   ],
+   [
+    "rows[3].sub_rows[2].options[1]",
+    "間接受害者 □"
+   ],
+   [
+    "rows[3].sub_rows[3].options[0]",
+    "直接受害者 □"
+   ]
+  ],
+  "L0156": [
+   [
+    "rows[4].sub_rows[0].options[0]",
+    "真實事件 □"
+   ],
+   [
+    "rows[4].sub_rows[1].options[0]",
+    "有可能 □"
+   ],
+   [
+    "rows[4].sub_rows[2].options[0]",
+    "有可能 □"
+   ]
+  ],
+  "L0165": [
+   [
+    "rows[3].sub_rows[1].options[0]",
+    "孤軍奮戰　□"
+   ],
+   [
+    "rows[3].sub_rows[1].options[1]",
+    "自責失誤 】\n2.小宇向阿澤道歉，阿澤才知道原來小宇也很\n【 □"
+   ],
+   [
+    "rows[3].sub_rows[1].options[3]",
+    "在乎 】\n3.小宇在下一局時，雖然上壘【 □"
+   ],
+   [
+    "rows[3].sub_rows[1].options[6]",
+    "拿下一分　□"
+   ]
+  ],
+  "L0170": [
+   [
+    "rows[2].sub_rows[0].options[0]",
+    "漏接 □"
+   ],
+   [
+    "rows[2].sub_rows[2].options[0]",
+    "自責 □"
+   ],
+   [
+    "rows[4].sub_rows[0].options[0]",
+    "三振 □"
+   ]
+  ],
+  "L0172": [
+   [
+    "rows[1].sub_rows[0].options[0]",
+    "固執倔強  □"
+   ],
+   [
+    "rows[2].sub_rows[0].options[0]",
+    "謙虛  □"
+   ],
+   [
+    "rows[3].sub_rows[0].options[0]",
+    "有禮貌  □"
+   ],
+   [
+    "rows[4].sub_rows[0].options[0]",
+    "容易焦慮  □"
+   ],
+   [
+    "rows[5].sub_rows[0].options[0]",
+    "沒信心  □"
+   ],
+   [
+    "rows[6].sub_rows[0].options[0]",
+    "容易後悔  □"
+   ],
+   [
+    "rows[7].sub_rows[0].options[0]",
+    "懂得感恩  □"
+   ]
+  ],
+  "L0174": [
+   [
+    "rows[1].sub_rows[0].options[0]",
+    "被投手三振 □"
+   ],
+   [
+    "rows[1].sub_rows[0].options[1]",
+    "擊出安打 】，比賽結束。\n3.球隊【 □"
+   ],
+   [
+    "rows[3].sub_rows[1].options[0]",
+    "勝利 □"
+   ],
+   [
+    "rows[4].sub_rows[0].options[0]",
+    "楊勇緯 □"
+   ],
+   [
+    "rows[4].sub_rows[0].options[1]",
+    "郭婞淳 】的故事\n2.有時候看似是失敗，但其實已經是重要的突破──對應的是【 □"
+   ],
+   [
+    "rows[4].sub_rows[0].options[3]",
+    "郭婞淳 】的故事\n3.我們【 □"
+   ]
+  ]
+ },
+ "E python dict/list repr 印在螢幕上": {
+  "L0004": [
+   [
+    "rows[1].sub_rows[1]",
+    "{'instruction': '▢', 'select': 'multi', 'options': {1: '尷尬', 2: '生氣', 3: '感到丟臉'}, 'answer': [1, 3], 'answer_carrier': '紅色 ☑▢，文字流無此資訊'}"
+   ],
+   [
+    "rows[2].sub_rows[0]",
+    "{'value': '常常和他做▢的選擇', 'select': 'single', 'options': {1: '相同', 2: '不同'}, 'answer': 1, 'answer_carrier': '紅色 ☑▢，文字流無此資訊'}"
+   ],
+   [
+    "rows[3].sub_rows[1]",
+    "{'instruction': '▢', 'select': 'multi', 'options': {1: '不是滋味', 2: '難過', 3: '害羞'}, 'answer': [1, 2], 'answer_carrier': '紅色 ☑▢，文字流無此資訊'}"
+   ],
+   [
+    "rows[4].sub_rows[1]",
+    "{'value': '感到▢', 'blanks': [{'answer': '失落'}]}"
+   ],
+   [
+    "rows[5].sub_rows[1]",
+    "{'value': '內心▢', 'blanks': [{'answer': '雀躍'}]}"
+   ],
+   [
+    "rows[6].sub_rows[1]",
+    "{'instruction': '▢', 'select': 'multi', 'options': {1: '平靜', 2: '疲累', 3: '困惑'}, 'answer': [2, 3], 'answer_carrier': '紅色 ☑▢，文字流無此資訊'}"
+   ]
+  ],
+  "L0167": [
+   [
+    "rows[1].sub_rows[1]",
+    "['1.小美看見隊友的表現亮眼而感到▢', '2.阿哲練習後對自己的表現感到▢', '3.小宇站在罰球線，心裡十分▢', '4.佳恩準備上場，腦中都是他人▢的聲音']▢▢"
+   ],
+   [
+    "rows[2].sub_rows[1]",
+    "['1.運動不只需要體力、技術，還需要可以和▢好好合作。', '2.▢會影響你面對壓力和挫折，以及看待自己與隊友。']▢▢"
+   ],
+   [
+    "rows[3].sub_rows[1]",
+    "['1.證據：研究顯示，在實力相當的情況下，▢往往是勝負的關鍵。', '2.建議：把握每一次訓練和比賽的機會，隨時▢、調整自己的情緒與想法。']▢▢"
+   ],
+   [
+    "rows[4].sub_rows[1]",
+    "['比賽帶來的不只是輸贏，更是對自己和他人的▢。']▢"
+   ]
+  ],
+  "L0168": [
+   [
+    "rows[2].sub_rows[1]",
+    "['阿哲收到學長的打氣，並關心學長▢的原因：學長▢', '學長說，教練認為求表現之前，要先▢，成為▢。', '阿哲說出自己腦中的▢，學長邀請他一起去找教練。', '阿哲內心反省自己時常▢教練的叮嚀，也許無形中影響身體。']▢▢▢▢"
+   ]
+  ],
+  "L0169": [
+   [
+    "rows[2].sub_rows[1]",
+    "['每個人都是自己工廠的▢。', '優秀的▢會是好老闆，知道▢、水分、▢都很重要。']▢▢▢▢"
+   ],
+   [
+    "rows[3].sub_rows[1]",
+    "['1.營養的重要：運動員會適時補充碳水化合物與▢，幫助肌肉▢。', '2.▢的重要：應該在▢補充水分。', '3.休息的重要：「休息」、「放鬆」與「耍廢」▢，充足的▢及運動後的▢都能降低運動傷害的風險。']▢▢▢▢▢"
+   ]
+  ]
+ }
+}

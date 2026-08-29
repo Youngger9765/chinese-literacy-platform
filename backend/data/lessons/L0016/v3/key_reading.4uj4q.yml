@@ -1,0 +1,33 @@
+lesson_uid: L0016
+version_id: v3
+section_no: 二
+key_reading:
+  instruction: 請用計時器，從指定段落（一☞）開始朗讀，計時1分鐘讀的字數，並記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！
+  chars_column_stops_at_seq: 5
+  timing_table:
+    columns:
+    - 第1次計時
+    - 第2次計時
+    - 第3次計時
+    - 裁判計時
+    unit: 字
+    judge_signature: true
+  benchmark:
+  - threshold: ＜190字
+    feedback: 還要多加練習。
+  - threshold: 191~220字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞221字
+    feedback: 哇嗚，超級厲害！
+  passage: 有一次，我走路不小心撞到隔壁班的同學，連忙說：「不好意思！」他不但沒生氣，還笑著說：「沒關係！」沒想到旁邊的朋友小聲的說：「我覺得他可能對你有意思喔。」我心想這人的確蠻不錯，聽說還常常幫忙同學，講話又幽默，或許是個很有意思的人。但我最愛的笑話類型是諧音冷笑話，不知道他會不會覺得跟這種人相處起來很沒意思呢？
+  start_text: 有一次，我走路不小心撞到隔壁班的同學，連忙說：「
+  extent_chars: 153
+  source: extract_key_reading_v3
+  start_paragraph: 1
+  end_paragraph: 1
+  slug: 4uj4q
+  text_ref: n3tjn
+extraction_check:
+  verdict: confirmed
+  corroborated_by_first_edition: true
+  absorbed_tail: 0

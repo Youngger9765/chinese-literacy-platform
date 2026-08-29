@@ -1,0 +1,11 @@
+{
+  "lesson_uid": "L0128",
+  "catalog_slot": "G8-L8",
+  "pdf_pages": 13,
+  "pages_read": 13,
+  "wall_clock_seconds": null,
+  "read_calls": 2,
+  "gate_failures": {"verbatim": 0, "coverage": 0, "block_type": 0, "word_search": 0, "traditional": 0, "keypoints_shape": 0, "render_coverage": 0, "orphan_key": 0},
+  "retries": 1,
+  "notes": "四個分節小標不佔段號，編號段落 9 段；第 8 段在 DOCX 被版面拆成兩個 <w:p>（切在「吸引更多年輕／人投入環境保育行動」中間），PDF 上段號「九」也印在後半那一行 —— 用重點表自己的段號交叉驗證（從理解到行動(段８) 提到成立研究院與根與芽計畫、總結信念（段9）對應「唯有了解」引言）確認併回一段。roundRect 11 個扣掉 1 個紙外殘留 = 10 條路徑 = 10 個目標語詞；第 4 列第 5 欄的「以」被三條路徑共用（原稿三個圈確實交叉）。念順順末筆 315 = 第 4 段長度精準吻合，四條口徑一條都不必套。retry 1 次是 YAML 語法：影片標題含「珍古德: 點燃希望」的冒號加空格被 YAML 當成 mapping，加引號解決。"
+}

@@ -1,0 +1,46 @@
+lesson_uid: L0160
+version_id: v3
+level: 8
+genre: 文言文
+strategy: 文言文閱讀策略──認識文言文代詞—人稱代詞
+課文出處: 南朝宋・劉義慶(編)
+學習單: 王淑瑱
+lesson_no: 5
+series: 文言文
+lesson_seq: 90050
+intro: 這篇文章講述了東漢時期一位名叫荀巨伯的人，在動盪不安的年代，面對友人重病，以及戰亂逼近的危險情況。儘管身處險境，荀巨伯卻選擇堅守情義，不願獨自逃離。面對來襲的盜賊，他更是展現了非凡的勇氣和擔當，以自己的生命來保護生病的友人。故事透過荀巨伯的行為，呈現了在艱難時刻，一個人如何選擇面對困境，以及「義」在人們心中的重要價值。
+notes:
+  strategy: 學習單第四大題副標印單線「—」；總表印「文言文閱讀策略──認識文言文代詞—人稱代詞」，見 _總表_聚光燈策略
+  總表_新課次: 文-5
+  總表_適用年級: '8'
+  總表_課名: 重義的荀巨伯
+  總表_文體: 文言文
+  總表_類型: 名人軼事
+  總表_單元議題: 類型-記敘人物
+  總表_聚光燈策略: 文言文閱讀策略──認識文言文代詞—人稱代詞
+  總表_第六大題標題: 認識文言文代詞—人稱代詞
+  總表_文本類型: 單
+  總表_語詞: 無
+strategy_explained: '這一課我們要練習的是，怎麼看懂古時候的中文，特別是辨識裡面用來指人的詞，這樣你就能更清楚誰在跟誰說話
+
+  這篇故事裡，荀巨伯為了救朋友，不惜冒著生命危險，這樣的行為很感人，而我們要練習的，就是透過辨識裡面的代詞，更能體會他為何這麼做
+
+  讀的時候，你可以試著把文言文裡的「彼」「之」等字，先換成你比較熟悉的「他」「她的」或「他的」，看看句子意思是不是更清楚了'
+strategy_sources:
+  worksheet: null
+  master_sheet: 文言文閱讀策略──認識文言文代詞—人稱代詞
+  previous: 認識文言文代詞—人稱代詞
+source_profile:
+  class: no_body
+  note: 課文沒有段落 —— 上游課文抽取的缺口，這一層修不了
+  has_key_reading_section: true
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: null
+  has_body_paragraphs: false
+  paragraph_idx_unique: true
+  anchor_hits: 0
+  has_counter_column: false
+  body_in_tables: false
+  invisible_chars_docx_only: false
+  profiled: '2026-08-24'

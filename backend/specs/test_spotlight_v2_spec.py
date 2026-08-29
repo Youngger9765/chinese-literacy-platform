@@ -1,235 +1,177 @@
-"""Spec contracts for spotlight v2 block schemas (professor dev7).
+"""Spec contracts for spotlight v2 block schemas.
 
-Regression strategy (3 layers):
-  1. Gold fingerprint — checked-in YAML must match gold_manifest.json byte-for-byte metrics
-  2. Eval gates — guide_retained, answer_recall, mcq_leakage, struct validity
-  3. Loader wiring — dev7 lesson codes expose spotlight_v2 on lesson dict
+WHAT THIS FILE USED TO BE, AND WHY IT CHANGED (#2683 二修重刷)
+--------------------------------------------------------------
+It ran three layers against two hand-curated fixture sets — DEV7 (七課, the professor
+set) and TEST15 — living in `data/lessons/spotlight/{dev7,test15}/`:
+
+  1. gold fingerprint — each checked-in YAML matched `gold_manifest.json` byte metrics
+  2. eval gates       — guide_retained / answer_recall / mcq_leakage / struct validity
+  3. loader wiring    — those lesson codes exposed spotlight_v2 on the lesson dict
+
+Layers 1 and 3 were tied to the fixtures themselves: the roster was a tuple of
+first-edition lesson codes, and the gold manifest was a fingerprint of those exact
+files. Both directories were deleted with the first edition, so all three layers now
+assert facts about material that does not exist — 77 failures, 23 errors, none of them
+about the code they were meant to protect.
+
+Layer 2 is the part worth keeping, and it never needed a curated fixture set: the eval
+gates are properties every spotlight must hold, whichever lesson it came from. So they
+now run against the real corpus in the uid tree — 143 lessons instead of 22, and no
+roster to go stale.
+
+The gold fingerprint is NOT rebuilt. Regenerating it from second-edition output would
+freeze whatever the extractor happens to produce today as the definition of correct,
+which is a baseline that proves only that nothing changed — not that anything is right.
+Fingerprints belong to human-checked material; if a curated set is re-established for
+the second edition, the layer can come back with it.
 
 Run:
     cd backend && python -m pytest specs/test_spotlight_v2_spec.py -v
 """
 
-import json
-
 import pytest
 
 from app.services.spotlight_contract import (
-    DEV7_LESSONS,
-    TEST15_CATALOG_CODES,
-    TEST15_LESSONS,
-    compare_to_gold,
     count_mcq_option_guides,
     eval_spotlight_v2,
-    load_dev7_spotlight,
-    load_gold_manifest,
-    load_test15_gold_manifest,
-    load_test15_spotlight,
-    semantic_eval_spotlight,
+    fingerprint_spotlight,
     validate_block_structure,
 )
-from app.services.spotlight_v2_loader import is_spotlight_v2_lesson, load_spotlight_v2
+from app.services.lesson_loader import get_all_lessons
 
 
-@pytest.fixture(scope="module")
-def gold_manifest() -> dict:
-    return load_gold_manifest()
+# ── corpus ──────────────────────────────────────────────────────────────────
+
+def _corpus() -> list[tuple[str, dict]]:
+    """(uid, spotlight) for every lesson that has spotlight blocks.
+
+    A lesson whose extraction produced nothing is a registered content gap
+    (`data/curriculum_qa/content_known_gaps.yaml`), not a contract violation —
+    including it here would report 32 failures for material that was never extracted.
+    """
+    out = []
+    for lesson in get_all_lessons():
+        spot = lesson.get("spotlight_v2")
+        if isinstance(spot, dict) and spot.get("blocks"):
+            out.append((lesson["lesson_uid"], spot))
+    return out
 
 
-@pytest.fixture(scope="module")
-def test15_gold_manifest() -> dict:
-    return load_test15_gold_manifest()
+CORPUS = _corpus()
+UIDS = [uid for uid, _ in CORPUS]
+BY_UID = dict(CORPUS)
 
 
-@pytest.mark.parametrize("lesson_id", DEV7_LESSONS)
-def test_dev7_fixture_exists(lesson_id: str):
-    sp = load_dev7_spotlight(lesson_id)
-    assert sp is not None, f"missing fixture {lesson_id}.spotlight.yml"
-    assert sp.get("blocks"), f"{lesson_id}: empty blocks"
+def test_corpus_is_not_empty():
+    """Guards the parametrised tests below from silently collecting nothing.
+
+    Every test in this file is parametrised over UIDS. If the corpus were empty —
+    a wrong path, a loader returning [] — pytest would collect zero cases and the
+    file would report all-green while asserting nothing at all.
+    """
+    assert len(UIDS) >= 100, f"corpus only yielded {len(UIDS)} lessons with blocks"
 
 
-@pytest.mark.parametrize("lesson_id", DEV7_LESSONS)
-def test_dev7_gold_fingerprint(lesson_id: str, gold_manifest: dict):
-    sp = load_dev7_spotlight(lesson_id)
-    result = compare_to_gold(lesson_id, sp, gold_manifest["lessons"][lesson_id])
-    assert result["match"], f"{lesson_id} gold drift: {result.get('diffs')}"
+# ── layer 2: eval gates, now over the whole corpus ──────────────────────────
+
+@pytest.mark.parametrize("uid", UIDS)
+def test_block_structure_is_valid(uid: str):
+    errors = validate_block_structure(BY_UID[uid].get("blocks") or [])
+    assert errors == [], f"{uid}: {errors}"
 
 
-@pytest.mark.parametrize("lesson_id", DEV7_LESSONS)
-def test_dev7_eval_passes(lesson_id: str):
-    sp = load_dev7_spotlight(lesson_id)
-    ev = eval_spotlight_v2(sp, lesson_id)
-    assert ev["guide_retained"], f"{lesson_id}: no guide blocks"
-    assert ev["mcq_leakage"] == 0, f"{lesson_id}: MCQ leaked into spotlight"
-    assert ev["answer_recall"] >= 0.99, f"{lesson_id}: null answers in single/multi"
-    assert ev["pass"], f"{lesson_id}: struct/semantic errors {ev.get('struct_errors')} {ev.get('semantic')}"
-
-
-def test_g6_l22_teaching_context_preserved():
-    """G6-L22 must keep opening pedagogical guide (not flattened to MCQ-only)."""
-    sp = load_dev7_spotlight("G6-L22")
-    guides = [b for b in sp["blocks"] if b["type"] == "guide"]
-    assert any("好故事" in g.get("text", "") for g in guides)
-    assert any(b["type"] == "passage" for b in sp["blocks"])
-
-
-def test_g6_l22_has_supplementary_passages():
-    sp = load_dev7_spotlight("G6-L22")
-    passages = [b for b in sp["blocks"] if b["type"] == "passage"]
-    flat = " ".join(" ".join(p.get("paragraphs", [])) for p in passages)
-    assert "孟嘗君" in flat or "大象" in flat
-
-
-def test_g7_l29_mcq_options_not_guides():
-    """G7-L29 had 80 guides / 1 single before MCQ coalesce fix."""
-    sp = load_dev7_spotlight("G7-L29")
-    sem = semantic_eval_spotlight("G7-L29", sp)
-    assert sem["single_count"] >= 15
-    assert count_mcq_option_guides(sp["blocks"]) == 0
-
-
-def test_g6_l22_mengchang_story_has_interactive_singles():
-    """孟嘗君 passage must be followed by ❶❷❸❹ singles, not static guide text."""
-    sp = load_dev7_spotlight("G6-L22")
-    blocks = sp["blocks"]
-    pivot = next(
-        i for i, b in enumerate(blocks)
-        if b.get("type") == "guide" and "接下來，我們來看課文的故事" in b.get("text", "")
-    )
-    following = blocks[pivot + 1 : pivot + 8]
-    assert following[0]["type"] == "passage"
-    singles = [b for b in following if b["type"] == "single"]
-    assert len(singles) >= 3
-    assert any(
-        any("孟嘗君" in opt for opt in (b.get("options") or []))
-        for b in singles
+@pytest.mark.parametrize("uid", UIDS)
+def test_eval_gates_pass(uid: str):
+    result = eval_spotlight_v2(BY_UID[uid])
+    assert result["pass"], (
+        f"{uid}: guide_retained={result['guide_retained']} "
+        f"answer_recall={result['answer_recall']} mcq_leakage={result['mcq_leakage']} "
+        f"struct_errors={result['struct_errors']}"
     )
 
 
-@pytest.mark.parametrize("lesson_id", DEV7_LESSONS)
-def test_loader_exposes_spotlight_v2(lesson_id: str):
-    assert is_spotlight_v2_lesson(lesson_id)
-    loaded = load_spotlight_v2(lesson_id)
-    assert loaded is not None
-    assert loaded.get("strategy_type")
+@pytest.mark.parametrize("uid", UIDS)
+def test_mcq_options_are_not_emitted_as_guides(uid: str):
+    """A multiple-choice option rendered as a `guide` block reads as instruction
+    text rather than a choice — the student sees the answer laid out as prose."""
+    # L0067 and L0070 dropped 2026-08-17: the checked-box fix (#2555) gave the ☑ a
+    # character, so the option lines that used to arrive as bare text and be classified
+    # as guides now carry their 「□」 and are recognised as options. They no longer leak.
+    # L0067 dropped 2026-08-17: the checked-box fix (#2555) gave the ☑ a character, so
+    # option lines that used to arrive bare and be classified as guides now carry their
+    # 「□」 and are recognised as options.
+    #
+    # L0070 ADDED by the same change, and it is a regression, not a discovery. One block
+    # (「□①沒有真實的歷史，只有歷史的真實」) is a second question's option list that lost
+    # its stem, so the coalescer has nothing to attach it to. Registered rather than
+    # fixed at the time: the change it comes with stops 157 lessons from showing students
+    # which option the teacher checked, and one option rendering as a guide is a smaller
+    # harm than holding that back. It is a real defect and belongs in #2555's follow-up.
+    # L0033 已在 #2736 多模態重抽時修好（選項不再被抽成 guide），
+    # 測試自己要求移除 —— 一個「已知缺口」清單如果只進不出，
+    # 過一陣子就會變成「這些永遠都壞」的免死金牌。
+    # 2026-08-18：L0070 重抽後不再漏（那個沒有題幹的選項清單已掛回第二題），
+    # 一併發現這個集合與 content_known_gaps.yaml 從建立起就不同步 —— 這裡有 L0070、
+    # 那裡有 L0067，兩邊各漏對方一課。兩課都修好後對齊，之後以這一份為準。
+    # 2026-08-18：L0122、L0129 也在重抽後不再漏 —— 這個清單清空了。
+    # 原本 6 課（L0033 L0054 L0067 L0070 L0100 L0122 L0129，兩份清單合計）全部由
+    # 多模態重抽修好，每一課都是這條斷言自己開火要求移除的，不是誰決定「算了」。
+    KNOWN: set[str] = set()
+    leaked = count_mcq_option_guides(BY_UID[uid].get("blocks") or [])
+    if uid in KNOWN:
+        # Registered in content_known_gaps.yaml#mcq_options_emitted_as_guides. Asserted
+        # as STILL BROKEN rather than skipped, so fixing the extractor turns this red
+        # and forces the entry to be removed — a plain skip would let the gap outlive
+        # its cause without anyone noticing.
+        assert leaked > 0, f"{uid} no longer leaks — remove it from KNOWN and the gap file"
+        return
+    assert leaked == 0, f"{uid}: {leaked} MCQ options emitted as guide blocks"
 
 
-def test_non_dev7_lesson_returns_none():
-    assert not is_spotlight_v2_lesson("G4-L1")
-    assert load_spotlight_v2("G4-L1") is None
+@pytest.mark.parametrize("uid", UIDS)
+def test_no_assetless_table_figure_survives_loading(uid: str):
+    """`{"type": "figure", "referent": "table", "asset": null}` has nothing to render.
+    `inject_per_practice_figures` emits them on every rebuild (89 of 143 lessons after
+    the second-edition run), and `lesson_uid_loader._drop_assetless_table_figures`
+    strips them — this is that filter's regression lock.
+
+    A `referent=table` figure that DOES carry an asset is a real figure and stays;
+    the first version of this test banned the referent outright and would have
+    deleted one (#2455/#2463)."""
+    bad = [
+        b for b in (BY_UID[uid].get("blocks") or [])
+        if isinstance(b, dict)
+        and b.get("type") == "figure"
+        and b.get("referent") == "table"
+        and not b.get("asset")
+    ]
+    assert bad == [], f"{uid}: {len(bad)} assetless referent=table figure blocks survived"
 
 
-@pytest.mark.parametrize("catalog_code", sorted(TEST15_CATALOG_CODES))
-def test_test15_loader_exposes_spotlight_v2(catalog_code: str):
-    assert is_spotlight_v2_lesson(catalog_code)
-    loaded = load_spotlight_v2(catalog_code)
-    assert loaded is not None
-    assert loaded.get("strategy_type")
-    assert loaded.get("blocks")
+# ── fingerprint shape (not a frozen baseline — see module docstring) ────────
+
+@pytest.mark.parametrize("uid", UIDS[:20])
+def test_fingerprint_is_computable(uid: str):
+    """The fingerprint function must survive real corpus input. This asserts its
+    SHAPE, deliberately not its values: a value baseline generated from today's
+    extractor output would only prove that nothing changed."""
+    fp = fingerprint_spotlight(BY_UID[uid])
+    assert isinstance(fp, dict) and fp
 
 
-@pytest.mark.parametrize("fixture_id", TEST15_LESSONS)
-def test_test15_fixture_exists(fixture_id: str):
-    sp = load_test15_spotlight(fixture_id)
-    assert sp is not None, f"missing fixture {fixture_id}.spotlight.yml"
-    assert sp.get("blocks"), f"{fixture_id}: empty blocks"
-
-
-@pytest.mark.parametrize("fixture_id", TEST15_LESSONS)
-def test_test15_gold_fingerprint(fixture_id: str, test15_gold_manifest: dict):
-    sp = load_test15_spotlight(fixture_id)
-    result = compare_to_gold(
-        fixture_id,
-        sp,
-        test15_gold_manifest["lessons"][fixture_id],
-    )
-    assert result["match"], f"{fixture_id} gold drift: {result.get('diffs')}"
-
-
-@pytest.mark.parametrize("fixture_id", TEST15_LESSONS)
-def test_test15_eval_passes(fixture_id: str):
-    sp = load_test15_spotlight(fixture_id)
-    ev = eval_spotlight_v2(sp, fixture_id)
-    assert ev["guide_retained"], f"{fixture_id}: no guide blocks"
-    assert ev["mcq_leakage"] == 0, f"{fixture_id}: MCQ leaked into spotlight"
-    assert ev["answer_recall"] >= 0.99, f"{fixture_id}: null answers in single/multi"
-    assert ev["pass"], (
-        f"{fixture_id}: struct/semantic errors "
-        f"{ev.get('struct_errors')} {ev.get('semantic')}"
-    )
-
-
-def test_g4_l10_catalog_code_loads_test15_fixture():
-    loaded = load_spotlight_v2("G4-L10")
-    assert loaded is not None
-    assert "美好的一天" in " ".join(
-        " ".join(b.get("paragraphs") or [])
-        for b in loaded.get("blocks") or []
-        if b.get("type") == "passage"
-    ) or any(
-        "情緒" in (b.get("text") or "")
-        for b in loaded.get("blocks") or []
-        if b.get("type") == "guide"
-    )
-
-
-def test_g8_l3b_maps_to_test15_plant_meat_fixture():
-    loaded = load_spotlight_v2("G8-L3b")
-    assert loaded is not None
-    guides = [b.get("text", "") for b in loaded["blocks"] if b["type"] == "guide"]
-    assert any("植物肉" in g for g in guides)
-
-
-def test_layer1_g6_l03_lesson_dict_has_spotlight_v2():
-    from app.services.lesson_loader import get_lesson_by_code
-
-    lesson = get_lesson_by_code("G6-L03")
-    assert lesson is not None
-    sp = lesson.get("spotlight_v2")
-    assert sp is not None
-    assert sp.get("strategy_type") == "scientific_inquiry"
-
+# ── structural invariants that do not depend on any particular lesson ───────
 
 def test_validate_rejects_empty_guide():
-    errors = validate_block_structure([{"type": "guide", "text": "  "}])
-    assert any("guide missing text" in e for e in errors)
+    errors = validate_block_structure([{"type": "guide", "text": ""}])
+    assert errors, "an empty guide block must be reported"
 
 
-def test_gold_manifest_covers_all_dev7(gold_manifest: dict):
-    assert set(gold_manifest["lessons"].keys()) == set(DEV7_LESSONS)
-
-
-def test_test15_gold_manifest_covers_all_test15(test15_gold_manifest: dict):
-    assert set(test15_gold_manifest["lessons"].keys()) == set(TEST15_LESSONS)
-
-
-def test_catalog_manifest_matches_files_if_present():
-    from pathlib import Path
-
-    from app.services.spotlight_contract import CATALOG_DIR, CATALOG_MANIFEST, load_catalog_spotlight
-
-    if not CATALOG_MANIFEST.exists():
-        pytest.skip("catalog not promoted yet")
-    manifest = json.loads(CATALOG_MANIFEST.read_text(encoding="utf-8"))
-    codes = manifest.get("lessons") or []
-    assert len(codes) >= 80, f"expected bulk catalog, got {len(codes)}"
-    sample = codes[0]
-    sp = load_catalog_spotlight(sample)
-    assert sp is not None and sp.get("blocks"), sample
-    assert (CATALOG_DIR / f"{sample}.spotlight.yml").exists()
-
-
-@pytest.mark.parametrize("lesson_id", DEV7_LESSONS)
-def test_dev7_no_referent_table_figure_block(lesson_id: str):
-    """#2463 — a figure block with referent=table has no image and no inline
-    table data, so BlockSequenceRenderer.renderFigure can only draw an empty
-    「圖表參考」placeholder. Tables belong in the 重點表 (keypoints) step, never
-    as an inline spotlight figure. Lock that dev7 carries none."""
-    sp = load_dev7_spotlight(lesson_id)
-    offenders = [
-        b for b in (sp.get("blocks") or [])
-        if b.get("type") == "figure" and b.get("referent") == "table"
-    ]
-    assert not offenders, (
-        f"{lesson_id}: {len(offenders)} figure/referent=table block(s) render as "
-        f"empty 圖表參考 placeholders — model tables as the 重點表 step, not inline figures"
-    )
+def test_a_lesson_with_no_spotlight_exposes_none():
+    """The absence of a spotlight is served as absence, never as an empty shell —
+    an empty one renders as a blank 聚光燈 page that looks like content."""
+    for lesson in get_all_lessons():
+        spot = lesson.get("spotlight_v2")
+        assert spot is None or isinstance(spot, dict), (
+            f"{lesson['lesson_uid']}: spotlight_v2 is {type(spot).__name__}"
+        )

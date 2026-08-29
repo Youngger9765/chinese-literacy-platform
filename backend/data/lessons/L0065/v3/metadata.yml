@@ -1,0 +1,57 @@
+lesson_uid: L0065
+version_id: v3
+level: 6
+genre: 說明文
+strategy: 寫作手法──倒反：讀懂反話
+課文作者: 吳漢庭
+學習單: 巫怡蓉/陳淑麗
+lesson_no: 26
+series: 一般
+lesson_seq: 6260
+intro: 這篇文章透過籃球比賽中發生的運動傷害事件，引導我們認識運動時可能遇到的傷害。文章描述了主角在比賽關鍵時刻受傷的情況，並藉由運動防護員的專業說明，解釋了肌肉抽筋和腳踝扭傷的原因。此外，文章也提供了預防運動傷害的方法，例如運動前的暖身，以及受傷後可以參考的處理原則。透過這些內容，讓讀者了解如何保護自己，以及在不幸受傷時該如何應對。
+notes:
+  總表_課名: 運動傷害，怎麼辦?
+  總表_文體: 說明文
+  總表_類型: 運動
+  總表_議題: 運動知識
+  總表_聚光燈策略: 寫作手法──倒反：讀懂反話
+  總表_第六大題標題: 寫作手法──倒反：讀懂反話
+  總表_文本類型: 單
+  總表_語詞_原樣:
+  - 充斥
+  - 評估
+  - 僵硬
+  - 處置
+  - 壓迫
+  - 抑制
+  - 滑稽
+  - 此起彼落
+  - 全神貫注
+  - 哄堂大笑
+  總表_對照: '總表 10 個語詞與學習單語詞框的 10 個**完全一致**（只有排列順序不同），無漂移。
+
+    總表課名結尾是半形「?」，學習單印全形「？」——不列勘誤，只是全半形差異。'
+  節次順序: 本課 **五＝文章重點表、六＝閱讀聚光燈**，依 sections_present 為準。
+strategy_explained: '這一課要學會怎麼聽出「話中有話」，也就是作者雖然沒直接講，但其實想表達另一件事，像是說「還好」但其實很擔心
+
+  文章講到受傷的過程，但又說到「保護自己」和「怎麼應對」，這樣的對比方式，就是用這種「話中有話」來提醒我們運動時要小心
+
+  所以，讀的時候可以注意看看，作者有沒有哪些地方說話的「意思」跟「說出來的字」不太一樣，特別是提到受傷和保護之間'
+strategy_sources:
+  worksheet: 寫作手法──倒反：讀懂反話
+  master_sheet: null
+  previous: 寫作手法──倒反：讀懂反話
+source_profile:
+  class: standard
+  note: 單一錨點 + 有計數欄 + idx 唯一 —— 走主路徑
+  has_key_reading_section: true
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: null
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 1
+  has_counter_column: true
+  body_in_tables: true
+  invisible_chars_docx_only: false
+  profiled: '2026-08-24'

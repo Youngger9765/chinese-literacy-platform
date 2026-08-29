@@ -1,0 +1,30 @@
+lesson_uid: L0015
+version_id: v3
+level: 4
+genre: 記敘文
+strategy: 推論策略──推論代名詞
+課文作者: 吳漢庭
+學習單: 巫怡蓉
+lesson_no: 4
+series: 一般
+lesson_seq: 4040
+intro: 這篇文章介紹了臺灣極地超級馬拉松選手陳彥博的故事。他是一位勇於挑戰極限的運動員，曾經跑過沙漠、高山和冰原，並且是第一位獲得四大極地超級馬拉松巡迴賽總冠軍的亞洲人。文章描述了他如何從年輕時就立下遠大夢想，並在追逐夢想的過程中，面臨了意想不到的健康挑戰。即使在得知罹患重病後，他依然展現出堅韌的意志，努力克服身體的不適，重新站上跑道，繼續挑戰自我，完成他對超級馬拉松的熱愛與承諾。
+strategy_explained: 這篇文章要練習的是，當作者寫「他」或是「她」的時候，我們要仔細想想，這些字指的是誰，因為陳彥博在追逐夢想的路上，遇到很多困難，有時候會用代名詞來指代他自己或遇到的挑戰，讀的時候，可以一邊讀一邊在心裡想，這些「他」、「她」或是「它們」到底是指文章裡的哪個人、事、物，這樣就能更清楚故事的發展和陳彥博的堅持
+strategy_sources:
+  worksheet: 推論策略──推論代名詞
+  master_sheet: 推論策略──推論代名詞
+  previous: 推論策略──推論代名詞
+source_profile:
+  class: standard
+  note: 單一錨點 + 有計數欄 + idx 唯一 —— 走主路徑
+  has_key_reading_section: true
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: null
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 1
+  has_counter_column: true
+  body_in_tables: true
+  invisible_chars_docx_only: true
+  profiled: '2026-08-24'

@@ -1,0 +1,59 @@
+lesson_uid: L0063
+version_id: v3
+section_no: 五
+keypoints:
+  part_no: 1
+  title: 物以稀為貴：從「供給」和「需求」談物價波動
+  layout: list
+  instruction: 1.請根據第一篇文章的內容，完成下方表格。
+  answer_carrier: 紅色 ☑（w:sym Wingdings F0FE，2 個）與橘色手寫字；PDF p4 可見
+  structure_note: '⚠️ 原稿**不是表格**，是一張流程圖（圓角方塊 ＋ 箭頭）：
+
+    最上面「問題／答案」框 ← 由下方「例一」「例二」兩組（原因 → 後果）往上匯聚，
+
+    最下面是「文章結論」框。用 list 佈局把四塊依版面順序攤平，層級關係寫進 label。
+
+    ⛔ 未寫成 matrix —— 流程圖沒有一致的欄名。
+
+    「例一」的原因框裡有兩點（1./2.），「1.」是 Word 自動編號不在文字流。'
+  rows:
+  - label: 問題／答案
+    value: '本文想回答的問題：什麼因素決定市場商品價格？
+
+      作者的答案：【　】'
+    blanks:
+    - answer: 市場的供給和需求
+    label_printed: 問題  /答 案
+  - label: 例一・原因
+    value: '1.颱風後，蔬菜受損，市場【　】減少。
+
+      2.颱風前，人們預期青菜上漲，搶買青菜，市場需求增加。'
+    blanks:
+    - answer: 供給
+  - label: 例一・後果（單選）
+    value: 所以青菜價格【　】。
+    options:
+      1: 需求＞供給
+      2: 需求＜供給
+    answer: 1
+    blanks:
+    - answer: 上漲
+  - label: 例二・原因
+    value: 看到高麗菜好賺，農民搶種；收成時，市場湧入大量高麗菜。
+  - label: 例二・後果（單選）
+    value: 所以高麗菜價格【　】。
+    options:
+      1: 需求＞供給
+      2: 需求＜供給
+    answer: 2
+    blanks:
+    - answer: 下跌
+  - label: 文章結論
+    value: 商品價格的波動，是由市場【　】和【　】決定的。
+    blanks:
+    - answer: 供給
+    - answer: 需求
+    hint: (可從最後一段找結論)
+  part: 1
+  slug: dydnq
+  text_ref: p3kud

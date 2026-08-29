@@ -1,0 +1,89 @@
+lesson_uid: L0012
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 興味盎然
+  - 欲罷不能
+  - 滴水穿石
+  - 廢寢忘食
+  - 解剖學
+  - 久病而成良醫
+  - 胃口大開
+  - 愛不釋手
+  - 不相上下
+  - 受挫
+  - 兼顧
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 不高興味盎然食欲霸道
+  - 解相美味道後受傷主滴
+  - 開同上相久大解剖學水
+  - 自然學下病胃病患良穿
+  - 欲罷不能而王廢石心石
+  - 望兼相穿成愛不釋手兼
+  - 學校信衣良綠意盎然廢
+  - 胃口大開醫院挫上而寢
+  - 顧受人口霸王折下醫忘
+  - 挫不能笑水滴兼顧家食
+  answers_are_graphical: true
+  answer_paths:
+  - word: 滴水穿石
+    cells:
+    - - 2
+      - 10
+    - - 3
+      - 10
+    - - 4
+      - 10
+    - - 5
+      - 10
+    direction: vertical
+  - word: 愛不釋手
+    cells:
+    - - 6
+      - 6
+    - - 6
+      - 7
+    - - 6
+      - 8
+    - - 6
+      - 9
+    direction: horizontal
+  - word: 廢寢忘食
+    cells:
+    - - 7
+      - 10
+    - - 8
+      - 10
+    - - 9
+      - 10
+    - - 10
+      - 10
+    direction: vertical
+  - word: 胃口大開
+    cells:
+    - - 8
+      - 1
+    - - 8
+      - 2
+    - - 8
+      - 3
+    - - 8
+      - 4
+    direction: horizontal
+  - word: 兼顧
+    cells:
+    - - 10
+      - 7
+    - - 10
+      - 8
+    direction: horizontal
+  notes:
+    answer_paths: 原稿只圈出 11 個目標語詞中的 5 個；其餘 6 個未畫圈，故不列。
+  slug: jkf4j
+  text_ref: rxfxx

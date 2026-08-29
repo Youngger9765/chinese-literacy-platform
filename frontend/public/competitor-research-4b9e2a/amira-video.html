@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow, noarchive" />
+<meta name="referrer" content="no-referrer" />
+<meta name="description" content="內部競品研究，未對外公開" />
+<title>Amira 介紹影片逐格解析（內部）</title>
+<style>
+  :root {
+    --paper:#FBFAF7; --ink:#1C1B18; --ink-soft:#5A574E; --ink-faint:#6F6A5F;
+    --rule:#E3DFD5; --accent:#1F5C4A; --accent-wash:#EDF2EF;
+    --flag:#A6421F; --flag-wash:#F8EFEA;
+    --serif:"Iowan Old Style","Songti TC","Source Han Serif TC",Georgia,serif;
+    --sans:"PingFang TC","Helvetica Neue","Noto Sans TC",system-ui,sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,monospace;
+  }
+  @media (prefers-color-scheme: dark){:root{
+    --paper:#16150F; --ink:#EDEAE0; --ink-soft:#A9A499; --ink-faint:#A09B8F;
+    --rule:#322F27; --accent:#7FB8A2; --accent-wash:#1C241F;
+    --flag:#DE9070; --flag-wash:#251A15;}}
+  :root[data-theme="dark"]{
+    --paper:#16150F; --ink:#EDEAE0; --ink-soft:#A9A499; --ink-faint:#A09B8F;
+    --rule:#322F27; --accent:#7FB8A2; --accent-wash:#1C241F;
+    --flag:#DE9070; --flag-wash:#251A15;}
+  :root[data-theme="light"]{
+    --paper:#FBFAF7; --ink:#1C1B18; --ink-soft:#5A574E; --ink-faint:#6F6A5F;
+    --rule:#E3DFD5; --accent:#1F5C4A; --accent-wash:#EDF2EF;
+    --flag:#A6421F; --flag-wash:#F8EFEA;}
+
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+       font-size:21px;line-height:1.8;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:880px;margin:0 auto;padding:clamp(2rem,6vw,5rem) clamp(1.1rem,5vw,2.5rem) 6rem;
+        display:flex;flex-direction:column;gap:3.5rem}
+  .eyebrow{font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;
+           color:var(--ink-faint);margin:0 0 1rem}
+  h1{font-family:var(--serif);font-size:clamp(2rem,5.5vw,2.85rem);line-height:1.17;font-weight:600;
+     margin:0;text-wrap:balance;letter-spacing:-.01em}
+  h2{font-family:var(--serif);font-size:1.55rem;font-weight:600;margin:0 0 .5rem;letter-spacing:-.005em;
+     padding-bottom:.45rem;border-bottom:1px solid var(--rule)}
+  h3{font-size:1.06rem;font-weight:600;margin:0 0 .3rem;line-height:1.45}
+  p{margin:0}
+  .standfirst{font-size:1.15rem;color:var(--ink-soft);margin-top:1.3rem;max-width:36em}
+  .meta{font-family:var(--mono);font-size:.76rem;color:var(--ink-faint);margin-top:1.7rem;
+        padding-top:1rem;border-top:1px solid var(--rule);line-height:1.95}
+  a{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--rule)}
+  a:hover,a:focus-visible{border-bottom-color:var(--accent)}
+  a:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+  section{display:flex;flex-direction:column;gap:1.4rem}
+  .note,.section-note{color:var(--ink-soft);font-size:1rem;max-width:38em;line-height:1.75}
+  .callout{background:var(--accent-wash);border-left:3px solid var(--accent);padding:1.3rem 1.5rem;
+           border-radius:0 6px 6px 0;display:flex;flex-direction:column;gap:.55rem}
+  .warn{background:var(--flag-wash);border-left:3px solid var(--flag);padding:1.3rem 1.5rem;
+        border-radius:0 6px 6px 0;display:flex;flex-direction:column;gap:.55rem}
+  .warn .tag,.callout .tag{font-family:var(--mono);font-size:.67rem;letter-spacing:.12em;
+        text-transform:uppercase;font-weight:600}
+  .warn .tag{color:var(--flag)} .callout .tag{color:var(--accent)}
+  figure{margin:0;display:flex;flex-direction:column;gap:.8rem}
+  figure img{width:100%;height:auto;display:block;border:1px solid var(--rule);border-radius:4px;
+             box-shadow:0 2px 8px rgba(0,0,0,.04)}
+  figcaption{font-size:.88rem;color:var(--ink-faint);line-height:1.7}
+  ul,ol{margin:0;padding-left:1.4rem;display:flex;flex-direction:column;gap:.6rem}
+  li{padding-left:.2rem;line-height:1.7}
+  ol.findings{counter-reset:finding;gap:1.4rem}
+  ol.findings li{padding-left:.3rem;list-style:none;counter-increment:finding}
+  ol.findings li::before{content:counter(finding);font-family:var(--mono);font-size:.75rem;
+              font-weight:600;color:var(--accent);margin-right:.5rem}
+  ol.findings h3{display:inline}
+  .at{display:block;font-family:var(--mono);font-size:.72rem;color:var(--ink-faint);margin-top:.5rem}
+  /* Timeline / moment styles */
+  .timeline{display:flex;flex-direction:column;gap:2.5rem}
+  .moment{display:flex;flex-direction:column;gap:.8rem;padding-left:1rem;border-left:2px solid var(--rule)}
+  .moment-head{display:flex;align-items:center;gap:.6rem}
+  .tc{font-family:var(--mono);font-size:.78rem;font-weight:600;color:var(--accent);
+      background:var(--accent-wash);padding:.15rem .5rem;border-radius:3px;border-bottom:none}
+  blockquote.said{margin:0;padding:.6rem 1rem;background:color-mix(in srgb, var(--rule) 20%, transparent);
+                  border-radius:4px;font-style:italic;font-size:.95rem;line-height:1.65;
+                  border-left:3px solid var(--ink-faint)}
+  .seen{font-size:.92rem;color:var(--ink-soft);line-height:1.7}
+  .means{font-size:.95rem;line-height:1.7}
+  footer{font-size:.9rem;color:var(--ink-faint);border-top:2px solid var(--rule);
+         padding-top:1.5rem;line-height:1.75;margin-top:1rem}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<p class="eyebrow" style="margin-bottom:0"><a href="index.html" style="border-bottom-color:transparent">&larr; 回競品研究總覽</a></p>
+
+  <div class="banner" style="background:linear-gradient(135deg, var(--accent-wash) 0%, color-mix(in srgb, var(--accent) 8%, var(--paper)) 50%, var(--flag-wash) 100%);border-radius:10px;padding:2.5rem 2rem;display:flex;align-items:center;justify-content:center;gap:1.5rem;border:1px solid var(--rule)">
+    <span style="font-size:2.5rem">🎬</span>
+    <span style="font-family:var(--serif);font-size:1.3rem;font-weight:600;color:var(--ink)">Amira 介紹影片逐格解析</span>
+  </div>
+
+  <header>
+    <p class="eyebrow">競品研究 · 影片逐格</p>
+    <h1>Amira 用一支 2 分 48 秒的影片，把自己的產品拍給我看了</h1>
+    <p class="standfirst">我們沒有 Amira 的帳號，所以整份研究對它的介面本來是零視覺證據但產品介紹影片會實拍真實畫面——把逐字稿的時間碼對上影格，等於拿到它的產品截圖</p>
+    <p class="meta">
+      來源：<a href="https://youtu.be/5pGJXsavwL0" target="_blank" rel="noopener">Introducing Amira · YouTube</a>（2:48）
+    </p>
+  </header>
+
+  <section>
+    <a href="https://youtu.be/5pGJXsavwL0" target="_blank" rel="noopener" style="display:block;position:relative;border-radius:8px;overflow:hidden;border:1px solid var(--rule);box-shadow:0 2px 8px rgba(0,0,0,.04);border-bottom:none">
+      <img src="https://img.youtube.com/vi/5pGJXsavwL0/maxresdefault.jpg" alt="Introducing Amira — YouTube" style="width:100%;display:block" />
+      <span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:68px;height:48px;background:rgba(0,0,0,.75);border-radius:12px;display:flex;align-items:center;justify-content:center">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><polygon points="8,5 20,12 8,19"/></svg>
+      </span>
+    </a>
+  </section>
+
+  <section>
+    <h2>先看四個結論</h2>
+    <p class="section-note">其中兩個修正了我前一版研究寫錯的地方</p>
+    <ol class="findings">
+  <li>
+    <h3>學生端介面是「角色 + 拼讀磚」</h3>
+    <p>沒帳號看不到 Amira 的 UI，但它自己的影片拍了兩次 解碼優先、音素層級——而這一層中文沒有等價物</p>
+    <span class="at">0:50 · 1:04</span>
+  </li>
+  <li>
+    <h3>closed loop 是隱私賣點，不是工程妥協</h3>
+    <p>預生成回應池那句話，配的畫面是 FERPA / SOC 2 / COPPA 徽章 它對學區講的是「可控、資料不外流」</p>
+    <span class="at">2:08</span>
+  </li>
+  <li>
+    <h3>它自己說只有英文和西文</h3>
+    <p>我上一版寫的「20 國 18 語言」是二手摘要，被官方產品頁和這支影片同時否證</p>
+    <span class="at">1:19</span>
+  </li>
+  <li>
+    <h3>效果數字四個版本</h3>
+    <p>旁白 68%、畫面圖表 63%、官網 68%、Anthropic 案例 70% 字數也是影片 100 億 vs 官網 110 億</p>
+    <span class="at">0:43 · 2:23</span>
+  </li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>逐格</h2>
+    <p class="section-note">每一格：它說了什麼（旁白原話）、畫面上是什麼、以及這對我們的意思</p>
+    <div class="timeline">
+<section class="moment">
+  <header class="moment-head">
+    <a class="tc" href="https://youtu.be/5pGJXsavwL0?t=20" target="_blank" rel="noopener">0:20</a>
+  </header>
+  <blockquote class="said">Hi, I&#x27;m Amira, your learning agent for reading growth.</blockquote>
+  <figure class="frame">
+  <img src="frame-01.jpg" alt="影片 0:20 的畫格" loading="lazy" />
+  <figcaption>動畫角色現身：戴眼鏡、綠圍巾、側背包的年輕女性，標題「The Learning Agent for Reading Growth」</figcaption>
+</figure>
+  <div class="read"><p>第一個決定就很重了：Amira 不是一個工具的名字，是一個<strong>角色</strong> 整支影片用第一人稱「我」講話——「我聽過 110 億個字」「我是雙語的」 把 AI 擬人化成一個學生會認的角色，這是產品設計選擇，不是行銷包裝 我們的平台目前沒有這一層</p></div>
+  
+</section>
+<section class="moment">
+  <header class="moment-head">
+    <a class="tc" href="https://youtu.be/5pGJXsavwL0?t=27" target="_blank" rel="noopener">0:27</a>
+  </header>
+  <blockquote class="said">My story began at Carnegie Mellon University, where leading AI and reading scientists spent decades advancing research that became my foundation.</blockquote>
+  <figure class="frame">
+  <img src="frame-02.jpg" alt="影片 0:27 的畫格" loading="lazy" />
+  <figcaption>半透明的大腦點陣圖</figcaption>
+</figure>
+  <div class="read"><p>第二張畫面就搬出 CMU 和「數十年研究」 順序有意思——先角色、再血統、才講功能 它賣的第一件事是可信度不是功能</p></div>
+  
+</section>
+<section class="moment">
+  <header class="moment-head">
+    <a class="tc" href="https://youtu.be/5pGJXsavwL0?t=43" target="_blank" rel="noopener">0:43</a>
+  </header>
+  <blockquote class="said">I&#x27;ve listened to over 11 billion words read aloud.</blockquote>
+  <figure class="frame">
+  <img src="frame-03.jpg" alt="影片 0:43 的畫格" loading="lazy" />
+  <figcaption>螢幕大字：10,000,000,000 words</figcaption>
+</figure>
+  <div class="read"><p>旁白說 11 billion，畫面寫 10,000,000,000（100 億） 這是這支影片裡第一個自己對不上的數字</p></div>
+  <p class="flag"><span class="flag-label">數字對不上</span>旁白 110 億 vs 畫面 100 億</p>
+</section>
+<section class="moment">
+  <header class="moment-head">
+    <a class="tc" href="https://youtu.be/5pGJXsavwL0?t=50" target="_blank" rel="noopener">0:50</a>
+  </header>
+  <blockquote class="said">I can uniquely analyze their speech down to the phone level.</blockquote>
+  <figure class="frame">
+  <img src="frame-04.jpg" alt="影片 0:50 的畫格" loading="lazy" />
+  <figcaption>教室實拍：Dell 筆電螢幕上是 Amira 角色 + 三塊黃色字母磚「h i p」+ 語音氣泡圖示</figcaption>
+</figure>
+  <div class="read"><p><strong>這格最有價值</strong> —— 沒有帳號的話我看不到 Amira 的真實介面，而它自己的影片拍出來了 學生端長這樣：左邊角色、中間拼讀磚 這是徹底的解碼優先（decoding-first）介面，配合旁白的「down to the phone level」（音素層級分析）完全一致</p>
+<p>而這正是<strong>中文搬不過來的那一層</strong>：英文可以把 hip 拆成 /h/ /ɪ/ /p/ 三塊磚讓學生重組，中文沒有這個拆法 它最深的護城河剛好是中文最沒有的維度</p></div>
+  
+</section>
+<section class="moment">
+  <header class="moment-head">
+    <a class="tc" href="https://youtu.be/5pGJXsavwL0?t=57" target="_blank" rel="noopener">0:57</a>
+  </header>
+  <blockquote class="said">Universities, state agencies, ministries of education, and prominent research firms are continuously testing and validating my efficacy.</blockquote>
+  <figure class="frame">
+  <img src="frame-05.jpg" alt="影片 0:57 的畫格" loading="lazy" />
+  <figcaption>研究夥伴 logo：SRI、Digital Promise、UT Health Houston、Carnegie Mellon University、IES（美國教育科學研究院）</figcaption>
+</figure>
+  <div class="read"><p>IES 是美國聯邦教育部底下的研究機構 這排 logo 的作用不是學術背書，是<strong>採購背書</strong>——學區要用聯邦經費買，就需要看到這些名字</p></div>
+  
+</section>
+<section class="moment">
+  <header class="moment-head">
+    <a class="tc" href="https://youtu.be/5pGJXsavwL0?t=64" target="_blank" rel="noopener">1:04</a>
+  </header>
+  <blockquote class="said">As a learning agent, my superpower is being able to listen, assess, and tutor in real time.</blockquote>
+  <figure class="frame">
+  <img src="frame-06.jpg" alt="影片 1:04 的畫格" loading="lazy" />
+  <figcaption>另一台 Dell 筆電，同樣的角色 + 字母磚介面</figcaption>
+</figure>
+  <div class="read"><p>第二次拍到同一種介面，佐證前一格不是特例 注意這裡說 real time（即時），但 128 秒處又說 closed loop（預先生成）——兩者並不矛盾：<strong>聽是即時的，回應是從審過的池子裡即時挑的</strong></p></div>
+  
+</section>
+<section class="moment">
+  <header class="moment-head">
+    <a class="tc" href="https://youtu.be/5pGJXsavwL0?t=72" target="_blank" rel="noopener">1:12</a>
+  </header>
+  <blockquote class="said">I help both teachers and students in the classroom by connecting assessment, instruction, and tutoring into one coherent instructional experience.</blockquote>
+  <figure class="frame">
+  <img src="frame-07.jpg" alt="影片 1:12 的畫格" loading="lazy" />
+  <figcaption>迴圈圖正在畫出：AMIRA ISIP ASSESS ↔ 角色 ↔ AMIRA INSTRUCT</figcaption>
+</figure>
+  <div class="read"><p>這張圖就是它的商業模型 三個產品（評測 / 教學 / 家教）被畫成一個閉環，賣的是「連起來」而不是三個工具</p>
+<p>對我們最刺的一點：這個閉環的中間值是<strong>跨課掌握度</strong>——它知道每個學生現在的技能狀態，所以評測能餵教學 我們是一堂課一份報告，課跟課之間沒有接起來</p></div>
+  
+</section>
+<section class="moment">
+  <header class="moment-head">
+    <a class="tc" href="https://youtu.be/5pGJXsavwL0?t=79" target="_blank" rel="noopener">1:19</a>
+  </header>
+  <blockquote class="said">I&#x27;m also bilingual. I speak fluently in English and Spanish. I love being in dual language classrooms.</blockquote>
+  <p class="no-frame">（這段是課堂 b-roll，沒有產品畫面）</p>
+  <div class="read"><p>沒有畫面但這句話很關鍵：<strong>它自己說只有英文和西文</strong> 我先前一版研究寫「已在 20 國 18 語言」，來源是一則二手摘要——被它自己的影片和官方產品頁同時否證 它連第三個拼音語言都還沒做，跨到漢字的距離比我原本判斷的遠得多</p></div>
+  
+</section>
+<section class="moment">
+  <header class="moment-head">
+    <a class="tc" href="https://youtu.be/5pGJXsavwL0?t=89" target="_blank" rel="noopener">1:29</a>
+  </header>
+  <blockquote class="said">I&#x27;m so proud to be trusted by thousands of partner districts.</blockquote>
+  <figure class="frame">
+  <img src="frame-08.jpg" alt="影片 1:29 的畫格" loading="lazy" />
+  <figcaption>學區 logo 牆：LAUSD、Chicago Public Schools、Detroit Public Schools、SFUSD、Tulsa、Long Beach、Duval County、Oklahoma City、Hillsborough County、Providence…</figcaption>
+</figure>
+  <div class="read"><p>LAUSD 和芝加哥都在上面——這是美國第二、第四大學區 這面牆的意義是：它已經過了「找早期客戶」階段，在打規模化採購</p></div>
+  
+</section>
+<section class="moment">
+  <header class="moment-head">
+    <a class="tc" href="https://youtu.be/5pGJXsavwL0?t=105" target="_blank" rel="noopener">1:45</a>
+  </header>
+  <blockquote class="said">Amira steps in and does a phenomenal job with lifting that load and helping our teachers get scholars to where they need to be. […] the time that it could save in the classroom.</blockquote>
+  <figure class="frame">
+  <img src="frame-09.jpg" alt="影片 1:45 的畫格" loading="lazy" />
+  <figcaption>喬治亞州 Clayton County 的老師受訪</figcaption>
+</figure>
+  <div class="read"><p>整支影片唯一的真人證言，講的不是「學生變厲害」，是「<strong>幫老師卸掉負擔、省下時間</strong>」 這是它敘事的軸心，也是我們該學的地方——不過我們的形態不一樣（見文末）</p></div>
+  
+</section>
+<section class="moment">
+  <header class="moment-head">
+    <a class="tc" href="https://youtu.be/5pGJXsavwL0?t=128" target="_blank" rel="noopener">2:08</a>
+  </header>
+  <blockquote class="said">I&#x27;m also approved by state agencies nationwide and I represent the highest standards of privacy, security, and responsible AI. Districts trust my closed loop system.</blockquote>
+  <figure class="frame">
+  <img src="frame-10.jpg" alt="影片 2:08 的畫格" loading="lazy" />
+  <figcaption>合規徽章：iKeepSafe FERPA、AICPA SOC 2、COPPA Compliant</figcaption>
+</figure>
+  <div class="read"><p><strong>這格解掉了我一個誤解 </strong> 我原本把 closed loop（Claude 離線預生成回應、人工審過、runtime 只從池中挑）當成一個工程妥協 但它在影片裡出現的位置是<strong>緊貼著 FERPA / SOC 2 / COPPA 徽章</strong>，句子是「Districts trust my closed loop system」</p>
+<p>也就是說：預生成不是為了省成本，是<strong>當隱私與可控性的賣點在賣給學區</strong> 這改變了我們要不要跟進的算法——它不只降 QA 成本，還是一個可以對外講的合規論述</p></div>
+  
+</section>
+<section class="moment">
+  <header class="moment-head">
+    <a class="tc" href="https://youtu.be/5pGJXsavwL0?t=143" target="_blank" rel="noopener">2:23</a>
+  </header>
+  <blockquote class="said">Independent published research shows that students who work with Amira at the recommended dosage of 30 minutes per week grow about 68% faster than peers using other reading technologies.</blockquote>
+  <figure class="frame">
+  <img src="frame-11.jpg" alt="影片 2:23 的畫格" loading="lazy" />
+  <figcaption>成長曲線圖，左上角大字：63% Faster growth</figcaption>
+</figure>
+  <div class="read"><p>兩件事</p>
+<p>一、<strong>劑量</strong>：每週 30 分鐘 它把使用量寫成處方，效果宣稱綁在這個劑量上 我們從來沒定義過「一週該練多久」</p>
+<p>二、旁白說 68%，同一格畫面的圖表寫 63% 加上官網的 68% 和 Anthropic 案例的 70%——同一個成效指標,四個地方四個數字</p></div>
+  <p class="flag"><span class="flag-label">數字對不上</span>旁白 68% vs 畫面 63% vs 官網 68% vs Anthropic 案例 70%</p>
+</section>
+    </div>
+  </section>
+
+  <section class="closing">
+    <h2>所以呢</h2>
+    <p>它整支影片的敘事軸是<strong>幫老師卸負擔</strong>，唯一的真人證言講的是省時間，不是學生變厲害這個錨點我們該學</p>
+    <p>但形態不一樣Amira 給老師的是<strong>工具</strong>——老師自己 20 分鐘掃全班，可以規模化我們現在給老師的是<strong>服務</strong>——老師交檔、我們代跑，因為教授明確要求不學新工具服務換到的是信任和內容，工具換到的是規模<strong>什麼時候、用什麼條件從服務切到工具</strong>，這才是真正要決定的事</p>
+    <p class="caveat">驗證邊界：本頁所有畫面來自 Amira 官方介紹影片，屬廠商自製素材（不是我實機操作 Amira 產品）字幕是 YouTube 自動生成，人名與專有名詞可能有辨識誤差（影片把 Amira 念成 "Amamira"、"Mirror" 等）；引用的句子我已對照畫面確認語意畫格僅為研究評述用途</p>
+  </section>
+
+
+</div>
+</body>
+</html>

@@ -1,0 +1,120 @@
+{
+  "$id": "lingoleap/module/multi_text_parts",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "從 4 份實測 yml 長出來，不是手寫的。required = 每一課都有的欄位（少了就是回歸）；properties 列出所有已觀測欄位，配合 additionalProperties: false —— 現況全過，任何新發明的欄位名會紅。",
+  "properties": {
+    "_sections": {
+      "type": "string",
+      "x-seen-in": "1/4"
+    },
+    "body": {
+      "type": "object",
+      "x-seen-in": "4/4"
+    },
+    "comprehension": {
+      "type": "object",
+      "x-seen-in": "1/4"
+    },
+    "header_level": {
+      "type": "string",
+      "x-seen-in": "2/4"
+    },
+    "header_material_form": {
+      "type": "string",
+      "x-seen-in": "1/4"
+    },
+    "header_part": {
+      "type": "string",
+      "x-seen-in": "2/4"
+    },
+    "header_strategy": {
+      "type": "string",
+      "x-seen-in": "2/4"
+    },
+    "key_reading": {
+      "type": "object",
+      "x-seen-in": "1/4"
+    },
+    "keypoints": {
+      "type": "object",
+      "x-seen-in": "2/4"
+    },
+    "keypoints_followup_questions": {
+      "type": "object",
+      "x-seen-in": "1/4"
+    },
+    "lesson_heading": {
+      "type": "string",
+      "x-seen-in": "3/4"
+    },
+    "part_badge": {
+      "type": "string",
+      "x-seen-in": "1/4"
+    },
+    "part_no": {
+      "type": [
+        "integer",
+        "string"
+      ],
+      "x-seen-in": "3/4"
+    },
+    "part_note": {
+      "type": "string",
+      "x-seen-in": "1/4"
+    },
+    "part_of": {
+      "type": [
+        "integer",
+        "string"
+      ],
+      "x-seen-in": "3/4"
+    },
+    "reading_prompt": {
+      "type": "string",
+      "x-seen-in": "1/4"
+    },
+    "reading_relay": {
+      "type": "object",
+      "x-seen-in": "1/4"
+    },
+    "spotlight": {
+      "type": "object",
+      "x-seen-in": "1/4"
+    },
+    "title_line": {
+      "type": "string",
+      "x-seen-in": "1/4"
+    },
+    "vocab_application": {
+      "type": "object",
+      "x-seen-in": "1/4"
+    },
+    "vocab_definitions": {
+      "type": "object",
+      "x-seen-in": "2/4"
+    },
+    "學習單": {
+      "type": "string",
+      "x-seen-in": "4/4"
+    },
+    "課文作者": {
+      "type": "string",
+      "x-seen-in": "4/4"
+    }
+  },
+  "required": [
+    "body",
+    "學習單",
+    "課文作者"
+  ],
+  "title": "multi_text_parts module payload",
+  "type": "object",
+  "x-core-90pct": [
+    "body",
+    "學習單",
+    "課文作者"
+  ],
+  "x-enforcement": "error",
+  "x-lessons-observed": 4
+}

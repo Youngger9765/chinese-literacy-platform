@@ -1,0 +1,37 @@
+lesson_uid: L0085
+version_id: v3
+title: 大自然的氣象小幫手
+catalog_slot: G7-L17
+sections_present:
+- 'no': 一
+  name: 閱讀聚光燈-自我提問策略1-讀出段落重點
+  part: 前半
+- 'no': 一
+  name: 讀全文-做記號
+  part: 後半
+- 'no': 二
+  name: 念順順
+  part: 後半
+- 'no': 三
+  name: 語詞我最棒
+  part: 後半
+- 'no': 四
+  name: 語詞應用
+  part: 後半
+- 'no': 五
+  name: 文章重點表
+  part: 後半
+- 'no': 六
+  name: 閱讀理解
+  part: 後半
+- 'no': 七
+  name: 詞語複習
+  part: 後半
+- 'no': 八
+  name: 知識補給站
+  part: 後半
+source:
+  extracted_by: extract-lesson-multimodal
+  pdf_pages: 12
+  drive_path: 7年級/G7-L17大自然的氣象小幫手（自我提問策略1-讀出重點）.docx
+  docx_md5: md5-12:6dcf18447640

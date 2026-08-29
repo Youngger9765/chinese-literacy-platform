@@ -1,0 +1,22 @@
+lesson_uid: L0082
+version_id: v3
+notes:
+  errata:
+  - id: E1
+    section: 六 閱讀聚光燈
+    locator: 第六大題標題（第 5 頁）
+    source: 用表格整理訊息——依比較項目找看出異同
+    corrected: 用表格整理訊息——依比較項目看出異同
+    kind: 贅字
+    why: 「依比較項目」後多一個「找」字；同一份學習單第 1 頁的目標策略寫「依比較項目看出異同」，總表兩個欄位也都沒有「找」
+    confidence: high
+    evidence: document.xml 中「看出異同」出現 4 次、「找看出異同」2 次（皆為第六大題標題與其 Fallback 複本）
+  - id: E2
+    section: 一 讀全文—做記號
+    locator: 打勾說明句末
+    source: ※ 如果你有做到下列事項，請在□內打
+    corrected: ※ 如果你有做到下列事項，請在□內打勾。
+    kind: 漏字
+    why: 句子斷在「打」，缺「勾。」；其餘各課此句皆為「請在□內打勾。」
+    confidence: high
+    evidence: document.xml 文字流本身就沒有「勾。」，不是 PDF 版面裁切

@@ -61,25 +61,34 @@ jobs:
 
       - name: Extract issue number from branch
         id: issue
+        # branch 名走 env 不直接內插 —— 它是 PR 作者可控的字串，
+        # 直接塞進 shell 等於讓外人往這支 workflow 注入指令
+        env:
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          BRANCH="${{ github.event.pull_request.head.ref }}"
+          BRANCH="$HEAD_REF"
           # Extract issue number from branch name: feature/issue-{N}-* or fix/issue-{N}-*
           ISSUE_NUM=$(echo "$BRANCH" | grep -oE 'issue-[0-9]+' | grep -oE '[0-9]+' || echo "")
           if [ -z "$ISSUE_NUM" ]; then
             # Fallback to PR number if branch doesn't follow convention
-            ISSUE_NUM=${{ github.event.pull_request.number }}
+            ISSUE_NUM="$PR_NUMBER"
             echo "⚠️ Could not extract issue number from branch '$BRANCH', using PR number: $ISSUE_NUM"
           else
             echo "✅ Extracted issue number: $ISSUE_NUM from branch: $BRANCH"
           fi
-          echo "num=${ISSUE_NUM}" >> $GITHUB_OUTPUT
+          echo "num=${ISSUE_NUM}" >> "$GITHUB_OUTPUT"
 
       - name: Set service names
+        env:
+          ISSUE_NUM_IN: ${{ steps.issue.outputs.num }}
         run: |
-          ISSUE_NUM=${{ steps.issue.outputs.num }}
-          echo "BACKEND_SERVICE=lingoleap-backend-issue-${ISSUE_NUM}" >> $GITHUB_ENV
-          echo "FRONTEND_SERVICE=lingoleap-frontend-issue-${ISSUE_NUM}" >> $GITHUB_ENV
-          echo "ISSUE_NUM=${ISSUE_NUM}" >> $GITHUB_ENV
+          ISSUE_NUM="$ISSUE_NUM_IN"
+          {
+            echo "BACKEND_SERVICE=lingoleap-backend-issue-${ISSUE_NUM}"
+            echo "FRONTEND_SERVICE=lingoleap-frontend-issue-${ISSUE_NUM}"
+            echo "ISSUE_NUM=${ISSUE_NUM}"
+          } >> "$GITHUB_ENV"
 
       # --- Backend ---
       - name: Build & push backend preview image
@@ -105,7 +114,7 @@ jobs:
             --max-instances=1 \
             --timeout=300s \
             --add-cloudsql-instances=lingoleap-dev:asia-east1:lingoleap-preview-db \
-            --set-env-vars="^::^ALLOWED_ORIGINS=https://placeholder.run.app::DATABASE_URL=${{ secrets.PREVIEW_DATABASE_URL }}::RUN_MIGRATIONS=true::ENVIRONMENT=preview::JWT_SECRET_KEY=${{ secrets.PREVIEW_JWT_SECRET_KEY }}::GCS_OMO_BUCKET=lingoleap-omo-uploads-preview::AZURE_SPEECH_KEY=${{ secrets.AZURE_SPEECH_KEY }}::AZURE_SPEECH_REGION=eastus::TTS_PROVIDER=gemini31"
+            --set-env-vars="^::^ALLOWED_ORIGINS=https://placeholder.run.app::DATABASE_URL=${{ secrets.PREVIEW_DATABASE_URL }}::RUN_MIGRATIONS=true::ENVIRONMENT=preview::JWT_SECRET_KEY=${{ secrets.PREVIEW_JWT_SECRET_KEY }}::GCS_OMO_BUCKET=lingoleap-omo-uploads-preview::AZURE_SPEECH_KEY=${{ secrets.AZURE_SPEECH_KEY }}::AZURE_SPEECH_REGION=eastus::TTS_PROVIDER=azure"
 
       - name: Get backend preview URL
         id: backend-url
@@ -121,7 +130,7 @@ jobs:
           if [ -z "$URL" ]; then
             URL="https://lingoleap-backend-958347263320.asia-east1.run.app"
           fi
-          echo "url=${URL}" >> $GITHUB_OUTPUT
+          echo "url=${URL}" >> "$GITHUB_OUTPUT"
           echo "Preview frontend will use backend: ${URL}"
 
       # --- Frontend ---
@@ -175,8 +184,8 @@ jobs:
             --region ${{ env.REGION }} \
             --project ${{ env.PROJECT_ID }} \
             --format='value(status.url)' 2>/dev/null || echo "N/A")
-          echo "frontend_url=${FRONTEND_URL}" >> $GITHUB_OUTPUT
-          echo "backend_url=${BACKEND_URL}" >> $GITHUB_OUTPUT
+          echo "frontend_url=${FRONTEND_URL}" >> "$GITHUB_OUTPUT"
+          echo "backend_url=${BACKEND_URL}" >> "$GITHUB_OUTPUT"
 
       - name: Update backend CORS + refresh DATABASE_URL from GH secret
         # Skip when backend preview service doesn't exist (frontend-only PR after
@@ -227,6 +236,34 @@ jobs:
               "${BACKEND_URL}${path}" || echo timeout)
             echo "Preflight $path: HTTP $code"
           done
+
+      # ── PR 階段的「學生走得完」門（#2964 L3）────────────────────────────
+      #
+      # 在這之前，PR 階段**沒有任何一道門問「學生走得完嗎」**：
+      # 十道 content gate 有九道在問「抽對了沒」，而 e2e 只打 staging。
+      # Hans 回報的那幾類 bug（按完成標記跳到最後一步、三篇共用進度）
+      # 只有真的一步一步走完才會遇到。
+      #
+      # ⚠️ e2e-tests.yml 裡寫著「per-PR preview 的 DB 是空的、demo 帳號不存在」——
+      #    那句已經過時。preview 後端吃的是共用的 secrets.PREVIEW_DATABASE_URL，
+      #    而 preview 前端 build 時帶了 VITE_SHOW_DEMO_LOGIN=true 與三個帳號。
+      #    2026-08-28 在 PR #2965 的 preview 上實測：一鍵登入 → /library，pageerror 0。
+      #
+      # PR 只跑一課（五課走完整條路太慢，慢到會讓人想關掉這道門），
+      # staging 維持五課全跑 —— 兩個環境跑不同的量，不是抽樣代替全檢。
+      - name: 學生走得完嗎（multi-text journey on preview）
+        if: always() && steps.preview-urls.outputs.frontend_url != 'N/A' && steps.preview-urls.outputs.backend_url != 'N/A'
+        working-directory: frontend
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ steps.preview-urls.outputs.frontend_url }}
+          E2E_BACKEND_URL: ${{ steps.preview-urls.outputs.backend_url }}
+          E2E_ONLY_LESSONS: "20063"      # G6-L22，三篇，Hans 回報的那一課
+          E2E_EXPECT_DEPLOYED: "1"
+        run: |
+          npm ci
+          npx playwright install chromium --with-deps
+          npx playwright test tests/e2e/multiTextJourney.spec.ts \
+            --reporter=github --timeout=300000
 
       - name: Comment PR with preview URLs
         uses: actions/github-script@v8
@@ -291,19 +328,28 @@ jobs:
 
       - name: Extract issue number from branch
         id: issue
+        # branch 名走 env 不直接內插 —— 它是 PR 作者可控的字串，
+        # 直接塞進 shell 等於讓外人往這支 workflow 注入指令
+        env:
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          BRANCH="${{ github.event.pull_request.head.ref }}"
+          BRANCH="$HEAD_REF"
           ISSUE_NUM=$(echo "$BRANCH" | grep -oE 'issue-[0-9]+' | grep -oE '[0-9]+' || echo "")
           if [ -z "$ISSUE_NUM" ]; then
-            ISSUE_NUM=${{ github.event.pull_request.number }}
+            ISSUE_NUM="$PR_NUMBER"
           fi
-          echo "num=${ISSUE_NUM}" >> $GITHUB_OUTPUT
+          echo "num=${ISSUE_NUM}" >> "$GITHUB_OUTPUT"
 
       - name: Set service names
+        env:
+          ISSUE_NUM_IN: ${{ steps.issue.outputs.num }}
         run: |
-          ISSUE_NUM=${{ steps.issue.outputs.num }}
-          echo "BACKEND_SERVICE=lingoleap-backend-issue-${ISSUE_NUM}" >> $GITHUB_ENV
-          echo "FRONTEND_SERVICE=lingoleap-frontend-issue-${ISSUE_NUM}" >> $GITHUB_ENV
+          ISSUE_NUM="$ISSUE_NUM_IN"
+          {
+            echo "BACKEND_SERVICE=lingoleap-backend-issue-${ISSUE_NUM}"
+            echo "FRONTEND_SERVICE=lingoleap-frontend-issue-${ISSUE_NUM}"
+          } >> "$GITHUB_ENV"
 
       - name: Delete preview backend
         run: |

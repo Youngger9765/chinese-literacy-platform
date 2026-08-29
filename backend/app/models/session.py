@@ -150,8 +150,14 @@ class LearningSession(Base):
     # full_reading_result above is kept as backward-compat scalar (= latest attempt).
     # Each element: { attempt_index, timestamp, cpm, accuracy, match_rate,
     #                 duration_ms, audio_url }
+    # server_default takes a SQL EXPRESSION. Given the plain string "'[]'::jsonb",
+    # SQLAlchemy quotes it a second time and emits DEFAULT '\'\'[]\'\'::jsonb', which
+    # Postgres rejects — invalid input syntax for type json — so create_all cannot build
+    # this table at all. Production never noticed: its schema comes from Alembic. Any
+    # fresh Postgres built from the models simply does not come up, which is why every
+    # test runs on SQLite and why a Postgres-only defect can sit here unseen.
     full_reading_attempts: Mapped[list] = mapped_column(
-        JSONB, nullable=False, server_default="'[]'::jsonb"
+        JSONB, nullable=False, server_default=text("'[]'::jsonb")
     )
     # General step progress store for all learning steps (Issue #660)
     # Stores current_step, steps_completed[], and per-step step_data

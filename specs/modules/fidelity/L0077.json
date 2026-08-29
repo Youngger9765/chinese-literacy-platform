@@ -1,0 +1,21 @@
+{
+  "uid": "L0077",
+  "gate_version": 2,
+  "docx_sha256": "bd4c-66f4-ebce-b86f",
+  "modules": {
+    "comprehension.jrwp4": {
+      "yaml_sha256": "6d7f-438a-ee52-3879",
+      "checked": 17,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "full_text_annotate.6cp4h": {
+      "yaml_sha256": "490c-ac29-6628-5c2d",
+      "checked": 13,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    }
+  }
+}

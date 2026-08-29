@@ -1,0 +1,58 @@
+lesson_uid: L0110
+version_id: v3
+level: 8
+genre: 記敘抒情文
+strategy: 推論策略──推論角色關係與觀點
+課文作者: 曾世杰
+學習單: 陳淑麗
+lesson_no: 12
+series: 一般
+lesson_seq: 8120
+intro: 這篇文章描寫作者與阿嬤之間獨特的互動關係。作者從小由阿嬤帶大，阿嬤的管教方式嚴厲且直接，充滿責罵與體罰，讓作者年幼時感到又怨又怕。然而，隨著年齡增長，作者逐漸體會到阿嬤看似嚴苛的教養背後，其實蘊含著一種深沉的愛，並且對自己日後面對挑戰時的心理韌性有著深遠的影響。文章也透過作者自身經歷與觀察，探討了童年經驗、成長歷程以及人如何詮釋過去的經歷，進而影響對親情的理解。
+notes:
+  總表_文體: 記敘抒情文
+  總表_類型: 記(人)
+  總表_議題: null
+  總表_聚光燈策略: 推論策略──推論角色關係與觀點
+  總表_第六大題標題: 推論策略──推論讀出關係變化與觀點轉變
+  總表_文本類型: 單
+  總表_語詞_原樣:
+  - 直接了當
+  - 一無是處
+  - 挑剔
+  - 橫眉豎目
+  - 剽悍
+  - 風雨不透
+  - 嫌惡
+  - 重溫舊夢
+  - 薰陶
+  - 拮据
+  總表_影片連結:
+  - http://youtu.be/m8ApjhtgVFs
+  - http://youtu.be/5pzcRH665Lw
+  總表_對照: "・語詞：總表 10 個與第三大題語詞框、第四大題選項庫、第八大題灰框**四處成員完全一致**\n  （順序略有差異）。\n・「第六大題標題」欄寫「推論策略──推論讀出關係變化與觀點轉變」，但學習單第六大題\n\
+    \  標題只印「推論策略──推論角色關係與觀點」（與第一頁目標框相同）。兩者都照原樣留。\n・本課聚光燈確實是**第六**大題（文章重點表在第五），與 L0109\
+    \ 的順序相反 ——\n  見 sections_present。"
+strategy_explained: '這一課我們要練習「從文字裡去猜測」，像是猜阿嬤跟作者的關係，還有他們看事情的角度有什麼不一樣
+
+  這篇文章裡，作者從一開始覺得阿嬤很兇很可怕，到後來發現那是因為愛，這種感覺的轉變，非常適合我們練習去讀懂作者心裡的想法和阿嬤背後的用意
+
+  讀的時候，可以試著想想，作者為什麼會這樣想，阿嬤又為什麼會那樣做，把這些線索找出來，就能更了解他們了'
+strategy_sources:
+  worksheet: 推論策略──推論角色關係與觀點
+  master_sheet: 推論策略──推論角色關係與觀點
+  previous: 推論策略──推論角色關係與觀點
+source_profile:
+  class: standard
+  note: 單一錨點 + 有計數欄 + idx 唯一 —— 走主路徑
+  has_key_reading_section: true
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: null
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 1
+  has_counter_column: true
+  body_in_tables: true
+  invisible_chars_docx_only: true
+  profiled: '2026-08-24'

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { stepPath as buildStepPath } from '../config/stepPath';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import {
@@ -12,11 +13,11 @@ import {
  * Step index to URL path segment mapping.
  */
 const STEP_NUMBER_TO_PATH: Record<number, string> = {
-  1: 'intro',
-  2: 'tutor',
+  1: 'lesson-intro',
+  2: 'paragraph-reading',
   3: 'comprehension',
-  4: 'vocab',
-  5: 'full-reading',
+  4: 'character-practice',
+  5: 'key-passage-reading',
   6: 'report',
 };
 
@@ -84,10 +85,10 @@ const SessionResumePrompt: React.FC<SessionResumePromptProps> = ({ onDismiss }) 
 
   const handleResume = () => {
     if (!record) return;
-    const stepPath = STEP_NUMBER_TO_PATH[record.currentStep] ?? 'intro';
+    const stepPath = STEP_NUMBER_TO_PATH[record.currentStep] ?? 'lesson-intro';
     setVisible(false);
     onDismiss?.();
-    navigate(`/learn/${record.storyId}/${stepPath}`);
+    navigate(buildStepPath(record.storyId, stepPath));
   };
 
   const handleRestart = () => {
@@ -96,7 +97,7 @@ const SessionResumePrompt: React.FC<SessionResumePromptProps> = ({ onDismiss }) 
     setVisible(false);
     onDismiss?.();
     if (record) {
-      navigate(`/learn/${record.storyId}/intro`);
+      navigate(`/learn/${record.storyId}/lesson-intro`);
     }
   };
 

@@ -1,0 +1,28 @@
+lesson_uid: L0112
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 如果我們建造垂直農場？| 大膽科學
+    duration: '5:54'
+    duration_seconds: 354
+    source: 大膽科學What If Chinese
+    url: http://youtu.be/54c3328Fyvk
+  - index: 2
+    title: 光電科技農夫 LED燈照出生菜商機 part4
+    duration: '7:59'
+    duration_seconds: 479
+    source: 台灣的1001個故事
+    url: http://youtu.be/45Pthxd4alc
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/54c3328Fyvk
+    url_source: 總表0816「4.影片連結」年級8課次15
+  - index: 2
+    url: http://youtu.be/45Pthxd4alc
+    url_source: 總表0816「4.影片連結」年級8課次15
+  slug: xt3vv
+  text_ref: heaup

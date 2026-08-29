@@ -1,0 +1,43 @@
+lesson_uid: L0133
+version_id: v3
+level: 9
+genre: 說明文
+strategy: 圖文整合閱讀策略——看圖、找對應、整合文圖
+課文作者: 曾世杰
+學習單: 陳淑麗
+lesson_no: 12
+series: 一般
+lesson_seq: 9120
+intro: 這篇文章介紹了法國科學家巴斯德如何透過一個巧妙的實驗，破解了肉湯腐敗的原因。在過去，人們普遍認為無生命的物質在適當條件下可以自行產生生命，進而導致食物腐敗。然而，巴斯德提出了不同的看法，他認為是肉眼看不見的微生物造成了肉湯的腐敗。文章描述了巴斯德如何設計「鵝頸瓶」實驗，並比較了不同情境下的肉湯變化，藉此探討空氣中的微生物是否是導致肉湯腐敗的關鍵。透過這個實驗，巴斯德的發現不僅回答了關於生命起源的疑問，也對後來的醫學、生物學和公共衛生產生了深遠的影響。
+notes:
+  總表_文體: 說明文
+  總表_類型: 科學
+  總表_議題: null
+  總表_聚光燈策略: 圖文整合閱讀策略
+  總表_第六大題標題: 圖文整合閱讀策略
+  總表_文本類型: 單
+  總表_語詞_原樣:
+  - 無
+strategy_explained: '這一課我們要練習的是看懂圖文怎麼告訴你一件事
+
+  因為這篇文章用實驗的過程和結果來解釋肉湯為什麼會壞掉，就像在看圖說故事一樣，結合文字和實驗的想像，你就能更清楚巴斯德怎麼找到「看不見的兇手」
+
+  讀的時候，可以一邊看文字描述，一邊想像實驗的樣子，想一想為什麼鵝頸瓶裡的肉湯沒壞，外面敞開的卻會壞呢'
+strategy_sources:
+  worksheet: 圖文整合閱讀策略
+  master_sheet: null
+  previous: 圖文整合閱讀策略——看圖、找對應、整合文圖
+source_profile:
+  class: no_section
+  note: 學習單根本沒有「念順順」這一節 —— 不是抽不到，是本來就沒有
+  has_key_reading_section: false
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: null
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 1
+  has_counter_column: false
+  body_in_tables: true
+  invisible_chars_docx_only: false
+  profiled: '2026-08-24'

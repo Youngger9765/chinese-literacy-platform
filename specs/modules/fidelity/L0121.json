@@ -1,0 +1,91 @@
+{
+  "uid": "L0121",
+  "gate_version": 2,
+  "docx_sha256": "f231-95c4-862d-04e9",
+  "modules": {
+    "comprehension.mmnuv": {
+      "yaml_sha256": "8254-e901-7b8f-99b0",
+      "checked": 26,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "errata": {
+      "yaml_sha256": "75ce-def7-597d-282e",
+      "checked": 0,
+      "status": "unverifiable",
+      "passed": false,
+      "exit": 1
+    },
+    "full_text_annotate.a6hyh": {
+      "yaml_sha256": "04ae-d4fb-c43a-76bc",
+      "checked": 24,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "goal_box.adn3d": {
+      "yaml_sha256": "781d-432c-26c1-8e21",
+      "checked": 2,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "key_reading.tt49h": {
+      "yaml_sha256": "1c10-0c41-55a3-5ad6",
+      "checked": 10,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "keypoints.yu4nw": {
+      "yaml_sha256": "c343-fed7-a8e5-37f4",
+      "checked": 11,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "resources.4pj3t": {
+      "yaml_sha256": "44dc-4b65-c416-fa6e",
+      "checked": 4,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "self_check_before_reading.94397": {
+      "yaml_sha256": "0b16-c987-d8b8-ce4f",
+      "checked": 3,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "spotlight.xja77": {
+      "yaml_sha256": "6f72-0247-9df8-29f6",
+      "checked": 66,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "vocab_application.pxtem": {
+      "yaml_sha256": "9548-a883-6e31-cd49",
+      "checked": 12,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "vocab_definitions.49yt6": {
+      "yaml_sha256": "d84f-6e56-c486-3066",
+      "checked": 18,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "vocab_review.wpjhn": {
+      "yaml_sha256": "c688-213b-5faa-cee1",
+      "checked": 14,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    }
+  }
+}

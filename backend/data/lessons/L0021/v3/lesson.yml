@@ -1,0 +1,14 @@
+lesson_uid: L0021
+version_id: v3
+title: 正太與小豬：武僧的養成之路
+catalog_slot: G5-L0
+sections_present:
+- 'no': 一
+  name: 讀全文-做記號
+- 'no': 二
+  name: 閱讀理解
+source:
+  extracted_by: extract-lesson-multimodal
+  pdf_pages: 3
+  drive_path: 5年級/G5-L0正太與小豬：武僧的養成之路.docx
+  docx_md5: md5-12:122123fc7cdb

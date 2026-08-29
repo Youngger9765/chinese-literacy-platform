@@ -1,55 +1,177 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 1,
+    "fill_blank_count": 5,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "mixed",
+    "primary_labels": [
+      "事件",
+      "矛盾的想法與反應",
+      "矛盾的想法與反應",
+      "矛盾的想法與反應"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "從童工到大學教授之路",
-      "value": "",
-      "interactive_type": "display"
+      "interactive_type": "display",
+      "label": "感情小日記3──吃醋的滋味",
+      "value": ""
     },
     {
-      "label": "家庭背景",
-      "value": "1.小花小時候家裡很窮困\n【　　　】父親早逝，母親沒有【　　　】，到處打零工。\n【　　　】家裡沒有課外讀物，吃得不好。\n【　　　】大姊二姊【　　　】學業，小學畢業就到工廠工作。\n【　　　】孩子們放學後、寒暑假都要到工廠做【　　　】貼補家用。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "二、三",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "事件",
+          "value": "看見自己的【　　　】和喜歡的人聊得很開心"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "矛盾的想法與反應",
+          "value": "A.覺得很正常、不值得【　　　】\nB.覺得胸口【　　　】、不是滋味"
+        }
+      ],
+      "value": ""
     },
     {
-      "label": "翻身之路",
-      "value": "【　　　】起因：\n大學聯考落榜，向媽媽爭取【　　　】的機會，希望能靠【　　　】翻身。\n【　　　】問題：\n必須靠自己的力量支付補習費和生活費。\n【　　　】解決：\n到補習班【　　　】，短時間賺到補習費。\n【　　　】伸出援手，願意支付重考一年的生活費。\n【　　　】結果：\n小花考上【　　　】的師範學院，並在大學期間繼續打工和接家教，堅持完成學業。\n畢業後成為學校助教，並在職念碩士和博士，最終成為國立大學的【　　　】。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "四",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "事件",
+          "value": "轉身離開現場，回到教室座位"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "矛盾的想法與反應",
+          "value": "A.不想再看下去\nB.【　　　】卻無法停止"
+        }
+      ],
+      "value": ""
     },
     {
-      "label": "體會與心得",
-      "value": "小花感激姊姊們為家庭所做的犧牲，並意識到【　　　】對人生進路的影響。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "五",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "事件",
+          "value": "朋友阿葉來關心"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "矛盾的想法與反應",
+          "value": "A.認為自己沒有回應阿葉，太【　　　】\nB.認為阿葉忽略自己的心情，所以不想【　　　】"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "六",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "事件",
+          "value": "獨自反思"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "矛盾的想法與反應",
+          "value": "A.心情亂成一團，心裡莫名【　　　】\nB.不想對朋友【　　　】、不想承認因為阿葉【　　　】"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "統整",
+      "sub_rows": [
+        {
+          "interactive_type": "checkbox",
+          "label": "事件",
+          "options": [
+            "煩躁混亂",
+            "寂寞無奈"
+          ],
+          "value": "①煩躁混亂 ②寂寞無奈"
+        }
+      ],
+      "value": ""
     }
   ],
-  "layout": "worksheet_table",
-  "title": "從童工到大學教授之路",
+  "title": "感情小日記3──吃醋的滋味",
   "worksheet_rows": [
     {
-      "kind": "pair",
-      "label": "家庭背景",
-      "value": "1.小花小時候家裡很窮困\n(1)父親早逝，母親沒有【　　　】，到處打零工。\n(2)家裡沒有課外讀物，吃得不好。\n(3)大姊二姊【　　　】學業，小學畢業就到工廠工作。\n(4)孩子們放學後、寒暑假都要到工廠做【　　　】貼補家用。"
+      "items": [
+        {
+          "label": "事件",
+          "value": "看見自己的【　　　】和喜歡的人聊得很開心"
+        },
+        {
+          "label": "矛盾的想法與反應",
+          "value": "A.覺得很正常、不值得【　　　】\nB.覺得胸口【　　　】、不是滋味"
+        }
+      ],
+      "kind": "section_block",
+      "section": "二、三"
     },
     {
-      "kind": "pair",
-      "label": "翻身之路",
-      "value": "(1)起因：\n大學聯考落榜，向媽媽爭取【　　　】的機會，希望能靠【　　　】翻身。\n(2)問題：\n必須靠自己的力量支付補習費和生活費。\n(3)解決：\n到補習班【　　　】，短時間賺到補習費。\n【　　　】伸出援手，願意支付重考一年的生活費。\n(4)結果：\n小花考上【　　　】的師範學院，並在大學期間繼續打工和接家教，堅持完成學業。\n畢業後成為學校助教，並在職念碩士和博士，最終成為國立大學的【　　　】。"
+      "items": [
+        {
+          "label": "事件",
+          "value": "轉身離開現場，回到教室座位"
+        },
+        {
+          "label": "矛盾的想法與反應",
+          "value": "A.不想再看下去\nB.【　　　】卻無法停止"
+        }
+      ],
+      "kind": "section_block",
+      "section": "四"
     },
     {
-      "kind": "pair",
-      "label": "體會與心得",
-      "value": "小花感激姊姊們為家庭所做的犧牲，並意識到【　　　】對人生進路的影響。"
+      "items": [
+        {
+          "label": "事件",
+          "value": "朋友阿葉來關心"
+        },
+        {
+          "label": "矛盾的想法與反應",
+          "value": "A.認為自己沒有回應阿葉，太【　　　】\nB.認為阿葉忽略自己的心情，所以不想【　　　】"
+        }
+      ],
+      "kind": "section_block",
+      "section": "五"
+    },
+    {
+      "items": [
+        {
+          "label": "事件",
+          "value": "獨自反思"
+        },
+        {
+          "label": "矛盾的想法與反應",
+          "value": "A.心情亂成一團，心裡莫名【　　　】\nB.不想對朋友【　　　】、不想承認因為阿葉【　　　】"
+        }
+      ],
+      "kind": "section_block",
+      "section": "六"
+    },
+    {
+      "items": [
+        {
+          "label": "事件",
+          "value": "①煩躁混亂 ②寂寞無奈"
+        }
+      ],
+      "kind": "section_block",
+      "section": "統整"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "generic",
-    "fill_blank_count": 3,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "家庭背景",
-      "翻身之路",
-      "體會與心得"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

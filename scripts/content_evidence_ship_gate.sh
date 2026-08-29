@@ -6,7 +6,12 @@
 #
 #   bash scripts/content_evidence_ship_gate.sh --run-id <run_id>
 #   bash scripts/content_evidence_ship_gate.sh --run-id <run_id> --evidence-root qa/content-evidence
-#   bash scripts/content_evidence_ship_gate.sh --run-id <run_id> --smoke   # allow <304 cells (smoke set)
+#   bash scripts/content_evidence_ship_gate.sh --run-id <run_id> --smoke    # allow <304 cells (smoke set)
+#   bash scripts/content_evidence_ship_gate.sh --run-id <run_id> --lesson   # allow <304 cells (per-lesson pilot run)
+#
+# --smoke and --lesson both relax the "expected_total_cells == 304" assertion
+# (full-sweep-only invariant); everything else (unknown/fail/checksum/human
+# sign-off gates) still applies at full strength to a partial run.
 #
 # Exit 0 + "CONTENT_EVIDENCE_GATE=PASS run_id=<run_id>" on success.
 # Exit 1 + specific fail codes otherwise.
@@ -20,13 +25,14 @@ PYBIN="$REPO_ROOT/backend/.venv/bin/python"
 
 RUN_ID=""
 EVIDENCE_ROOT="qa/content-evidence"
-SMOKE="false"
+PARTIAL="false"
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --run-id) RUN_ID="$2"; shift 2 ;;
     --evidence-root) EVIDENCE_ROOT="$2"; shift 2 ;;
-    --smoke) SMOKE="true"; shift ;;
+    --smoke) PARTIAL="true"; shift ;;
+    --lesson) PARTIAL="true"; shift ;;
     *) echo "unknown arg: $1" >&2; exit 2 ;;
   esac
 done
@@ -43,14 +49,17 @@ if [ ! -d "$RUN_DIR" ]; then
 fi
 
 # All validation logic in Python (schema + checksum recompute + counters).
-"$PYBIN" - "$RUN_DIR" "$SMOKE" <<'PY'
+"$PYBIN" - "$RUN_DIR" "$PARTIAL" <<'PY'
 import hashlib
 import json
 import sys
 from pathlib import Path
 
 run_dir = Path(sys.argv[1])
-smoke = sys.argv[2] == "true"
+# "partial" covers BOTH --smoke (fixed 10-lesson regression set) and --lesson
+# (arbitrary pilot lesson selection) — either way this is not a full 152-lesson
+# sweep, so the ==304 cell-count assertion below does not apply.
+partial = sys.argv[2] == "true"
 
 fails: list[str] = []
 
@@ -107,10 +116,11 @@ observed = manifest.get("observed", {})
 counts = manifest.get("summary_counts", {})
 
 # 2. expected_total_cells == 304 (full = 152 deduped lessons x 2 steps) ;
-#    for smoke = expected_lessons * 2. 304 (not 330): the raw /api/stories
-#    list has 13 padded/unpadded duplicate rows the gate now collapses.
+#    for a partial (--smoke or --lesson) run = expected_lessons * 2. 304 (not
+#    330): the raw /api/stories list has 13 padded/unpadded duplicate rows the
+#    gate now collapses.
 expected_total = scope.get("expected_total_cells")
-if not smoke and expected_total != 304:
+if not partial and expected_total != 304:
     fails.append(f"EXPECTED_TOTAL_NOT_304:{expected_total}")
 
 # 3. observed three layers all == expected_total

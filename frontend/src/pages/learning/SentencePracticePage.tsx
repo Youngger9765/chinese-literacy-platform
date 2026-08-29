@@ -32,7 +32,7 @@ const SentencePracticePage: React.FC = () => {
       storyId={selectedStory.id}
       saveStepProgressPatch={saveStepProgressPatch}
       onFinish={handleFinishSentencePractice}
-      onBack={() => navigate(`/learn/${storyId}/vocab`)}
+      onBack={() => navigate(`/learn/${storyId}/character-practice`)}
     />
   );
 };

@@ -1,0 +1,22 @@
+lesson_uid: L0026
+version_id: v3
+notes:
+  errata:
+  - id: E1
+    section: 三 語詞我最棒
+    locator: 「本課語詞」框第 1～2 行交界
+    source: 映入眼簾、忽視、坦然惱怒、尷尬、悸動、苦惱、猶豫、卸下、
+    corrected: 映入眼簾、忽視、坦然、惱怒、尷尬、悸動、苦惱、猶豫、卸下
+    kind: 漏字（頓號）＋末尾贅頓號
+    why: 「坦然」與「惱怒」之間漏了頓號（版面剛好在此換行，看起來像兩個詞，實際文字流是黏在一起的「坦然惱怒」）；另外「卸下」後面多一個頓號但沒有下一個詞
+    confidence: high
+    evidence: PDF p3 與 document.xml 一致（該框整段是同一個 run）
+  - id: E2
+    section: 八 詞語複習
+    locator: 找字格子第 6 列第 9 欄
+    source: 腦
+    corrected: 惱
+    kind: 錯字
+    why: 目標語詞是「苦惱」，格子裡「苦」（第5列第9欄）下方卻印成「腦」，橘色圈選也把「苦」「腦」兩格圈了起來 —— 格子拼出來是「苦腦」
+    confidence: high
+    evidence: PDF p9 與 document.xml 一致；全格子只有這一處「苦」，其相鄰格沒有任何「惱」

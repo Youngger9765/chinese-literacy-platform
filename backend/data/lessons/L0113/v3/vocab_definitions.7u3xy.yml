@@ -1,0 +1,71 @@
+lesson_uid: L0113
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: '請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+
+    🅐 從本課語詞框框，找語詞。
+
+    🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+
+    🅒 問同學。'
+  vocabulary_bank:
+  - 叱吒風雲
+  - 臨終
+  - 家喻戶曉
+  - 瘦骨嶙峋
+  - 形容枯槁
+  - 不言而喻
+  - 設身處地
+  - 非黑即白
+  - 覆水難收
+  - 迫在眉睫
+  - 眾說紛紜
+  - 莫衷一是
+  vocabulary_bank_label: 本課語詞
+  items:
+  - index: 1
+    word: 家喻戶曉
+    definition: 幾乎每家每戶都知道，形容非常有名。
+  - index: 2
+    word: 瘦骨嶙峋
+    definition: 形容人很瘦，骨頭都凸出來，多指生病或受苦。
+  - index: 3
+    word: 叱吒風雲
+    definition: 形容一個人氣勢很強、影響力很大。
+  - index: 4
+    word: 形容枯槁
+    definition: 枯槁：乾枯、沒有生氣。形容人很憔悴、消瘦，精神很差。
+  - index: 5
+    word: 不言而喻
+    definition: 不用特別解釋，就能明白。
+  - index: 6
+    word: 設身處地
+    definition: 把自己放到別人的立場想，理解對方的處境與感受。
+  - index: 7
+    word: 臨終
+    definition: 臨：接近；終：結束。生命快要結束、接近死亡的時候。
+  - index: 8
+    word: 迫在眉睫
+    definition: 事情非常緊急，立刻就要處理。
+  - index: 9
+    word: 非黑即白
+    definition: 把事情看成只有兩種結果：不是對就是錯、不是好就是壞，忽略中間的灰色地帶。
+  - index: 10
+    word: 覆水難收
+    definition: 事情一旦發生就很難挽回，像潑出去的水收不回來。
+  - index: 11
+    word: 莫衷一是
+    definition: 意見分歧，無法判定哪一個最恰當，也無法形成一致結論。
+  - index: 12
+    word: 眾說紛紜
+    definition: 大家提出許多不同的說法或意見。
+  notes:
+    vocabulary_bank: '語詞框裡的「莫衷一是」在文字層寫成 `莫衷一` + `U+E01E1`（變體選擇符）+ `是`，
+
+      其餘三處（定義列、代號表、找字灰框）都是乾淨的四個字。本檔一律寫乾淨版；
+
+      記在這裡是因為 naive `len()` 會多算 1 個字。'
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
+  slug: 7u3xy
+  text_ref: 3mx6k

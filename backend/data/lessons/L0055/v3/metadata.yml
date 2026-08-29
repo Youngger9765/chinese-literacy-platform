@@ -1,0 +1,54 @@
+lesson_uid: L0055
+version_id: v3
+level: 6
+genre: 說明文
+strategy: 摘要策略──從段落找主題句
+課文作者: 曾世杰
+學習單: 張明珠
+lesson_no: 15
+series: 一般
+lesson_seq: 6150
+intro: 這篇文章探討為什麼男性比女性更容易發生意外傷害。文中提到，科學研究發現男性可能因為天性喜歡冒險，以及在他人面前逞強的行為，而增加了意外發生的機率。文章透過跑酷運動員、日本短尾猴的行為觀察，以及一項心理學實驗，來說明男性在面對危險情境時，可能展現出與女性不同的反應模式。此外，也連結到流行文化中的一些例子，引導讀者思考這些行為背後的原因。
+notes:
+  總表_文體: 說明文
+  總表_類型: 科學
+  總表_議題: 擴展視野──性別教育
+  總表_聚光燈策略: 摘要策略──從段落找主題句
+  總表_第六大題標題: 摘要策略──從段落找主題句
+  總表_文本類型: 單
+  總表_語詞_原樣:
+  - 逞強
+  - 清一色
+  - 飛簷走壁
+  - 英姿煥發
+  - 驟降
+  - 自命不凡
+  - 審時度勢
+  - 有過之而無不及
+  - 相去無幾
+  總表_對照: '總表列 9 個語詞，學習單只有 8 個 —— 多出來的是「驟降」。
+
+    「驟降」在學習單的三處（第三大題語詞框、第四大題選項 A~H、第八大題找字框與灰框）
+
+    **都沒有出現**，課文本身也沒有這個詞（課文寫的是「比例便下降到1：5」）。
+
+    學習單自己的三處內容一致（同樣 8 個語詞、同樣的順序群組），所以判定是總表多列。'
+strategy_explained: 這一課我們要練習的，是從每一段話裡找出最重要的「一句話」，也就是這段話想告訴你的重點是什麼，這篇文章特別適合練習，因為它用跑酷、猴子和實驗來說明男性愛冒險的原因，每個例子都像在告訴你一個小故事，你可以試著讀一段，然後問自己：「這段話最想告訴我什麼」，把那個重點找出來
+strategy_sources:
+  worksheet: 摘要策略──從段落找主題句
+  master_sheet: 摘要策略──從段落找主題句
+  previous: 摘要策略──從段落找主題句
+source_profile:
+  class: standard
+  note: 單一錨點 + 有計數欄 + idx 唯一 —— 走主路徑
+  has_key_reading_section: true
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: null
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 1
+  has_counter_column: true
+  body_in_tables: true
+  invisible_chars_docx_only: true
+  profiled: '2026-08-24'

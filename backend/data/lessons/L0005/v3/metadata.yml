@@ -1,0 +1,49 @@
+lesson_uid: L0005
+version_id: v3
+level: 4
+genre: 記敘文
+strategy: 推論策略──推論情緒和感受
+課文作者: 曾世杰
+學習單: 陳淑麗
+lesson_no: 14
+series: 一般
+lesson_seq: 4140
+intro: 這篇文章描述了一段在公車上發生的故事。一位身體不適的國中女生在博愛座上休息，卻被一位大媽誤解並責備。在爭執中，有其他乘客和司機介入，試圖化解僵局。故事探討了在公共場合，人們如何看待和對待「需要幫助」的他人，以及在面對誤解與衝突時，不同的反應會帶來什麼樣的結果。
+notes:
+  總表_文體: 記敘文
+  總表_類型: 記(事)
+  總表_議題: ''
+  總表_聚光燈策略: 推論策略──推論情緒和感受
+  總表_第六大題標題: 推論策略──推論情緒和感受
+  總表_語詞:
+  - 示意
+  - 局面
+  - 側目
+  - 火藥味
+  - 側目
+  - 不可收拾
+  - 尷尬
+  - 顫顫巍巍
+  - 一溜煙
+  - 路見不平
+  總表_對照: 總表語詞3 與語詞5 皆為「側目」（重複），去重後 9 個，與學習單語詞框一致。差異在總表側。
+  總表_標題對照: 總表第六大題標題填「推論策略──推論情緒和感受」，但本課第六大題實為「文章重點表」，聚光燈在第五大題。
+strategy_explained: 這一課我們要練習的是「當別人說話或做事時，想想他心裡在想什麼、有什麼感覺」，就像這篇文章裡，那位身體不舒服的女生，還有生氣的大媽，你都可以試著想想他們為什麼會那樣做，還有當時心裡有多難過或生氣，讀的時候，可以把他們說的話和做的事，跟他們身體的狀況或當時的氣氛連在一起想，就能更了解他們囉
+strategy_sources:
+  worksheet: 推論策略──推論情緒和感受
+  master_sheet: 推論策略──推論情緒和感受
+  previous: 推論策略──推論情緒和感受
+source_profile:
+  class: standard
+  note: 單一錨點 + 有計數欄 + idx 唯一 —— 走主路徑
+  has_key_reading_section: true
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: null
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 1
+  has_counter_column: true
+  body_in_tables: true
+  invisible_chars_docx_only: false
+  profiled: '2026-08-24'

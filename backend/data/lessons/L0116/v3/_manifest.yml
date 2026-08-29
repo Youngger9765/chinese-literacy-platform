@@ -1,0 +1,139 @@
+lesson_uid: L0116
+generated_by: scripts/build_lesson_manifest.py
+note: 衍生檔，不是真相來源。sections 來自 lesson.yml 的 sections_present，module 歸屬來自 specs/modules/section-to-module.yml。改了那兩者要重產。
+sections:
+- 'no': 一
+  name: 讀全文—做記號
+  module: full_text_annotate
+  slug: dcjhu
+  file: full_text_annotate.dcjhu.yml
+  pages:
+  - 1
+  - 2
+  - 3
+- 'no': 二
+  name: 念順順
+  module: key_reading
+  text_ref: dcjhu
+  slug: 3uy4q
+  file: key_reading.3uy4q.yml
+  pages:
+  - 3
+- 'no': 三
+  name: 語詞我最棒
+  module: vocab_definitions
+  text_ref: dcjhu
+  slug: qn6wc
+  file: vocab_definitions.qn6wc.yml
+  pages:
+  - 3
+  - 4
+- 'no': 四
+  name: 語詞應用
+  module: vocab_application
+  text_ref: dcjhu
+  slug: kmre4
+  file: vocab_application.kmre4.yml
+  pages:
+  - 4
+  - 5
+  - 6
+- 'no': 五
+  name: 文章重點表
+  module: keypoints
+  text_ref: dcjhu
+  slug: qwa93
+  file: keypoints.qwa93.yml
+  pages:
+  - 6
+  - 7
+- 'no': 六
+  name: 閱讀聚光燈
+  module: spotlight
+  subtitle: 寫作手法——用故事和例子支持觀點
+  text_ref: dcjhu
+  slug: mpyx9
+  file: spotlight.mpyx9.yml
+  pages:
+  - 7
+  - 8
+  - 9
+  - 10
+  - 11
+- 'no': 七
+  name: 閱讀理解
+  module: comprehension
+  text_ref: dcjhu
+  slug: 3fyuy
+  file: comprehension.3fyuy.yml
+  pages:
+  - 11
+  - 12
+- 'no': 八
+  name: 詞語複習
+  module: vocab_review
+  text_ref: dcjhu
+  slug: knur3
+  file: vocab_review.knur3.yml
+  pages:
+  - 12
+- 'no': 九
+  name: 知識補給站
+  module: resources
+  text_ref: dcjhu
+  slug: ynemd
+  file: resources.ynemd.yml
+  pages:
+  - 12
+dispatch:
+- comprehension
+- full_text_annotate
+- key_reading
+- keypoints
+- resources
+- spotlight
+- vocab_application
+- vocab_definitions
+- vocab_review
+produced:
+- comprehension
+- full_text_annotate
+- key_reading
+- keypoints
+- resources
+- spotlight
+- vocab_application
+- vocab_definitions
+- vocab_review
+absent_from_source: []
+pdf_pages: 12
+dispatch_pages:
+  comprehension:
+  - 11
+  - 12
+  full_text_annotate:
+  - 1
+  - 2
+  - 3
+  key_reading:
+  - 3
+  keypoints:
+  - 6
+  - 7
+  resources:
+  - 12
+  spotlight:
+  - 7
+  - 8
+  - 9
+  - 10
+  - 11
+  vocab_application:
+  - 4
+  - 5
+  - 6
+  vocab_definitions:
+  - 3
+  - 4
+  vocab_review:
+  - 12

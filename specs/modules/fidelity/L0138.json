@@ -1,0 +1,84 @@
+{
+  "uid": "L0138",
+  "gate_version": 2,
+  "docx_sha256": "2581-7cc4-312a-52b5",
+  "modules": {
+    "comprehension.jxj76": {
+      "yaml_sha256": "9827-04b2-c724-7b7d",
+      "checked": 30,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "full_text_annotate.v77k6": {
+      "yaml_sha256": "7317-391d-9dfe-2d26",
+      "checked": 27,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "goal_box.xpmjh": {
+      "yaml_sha256": "1699-6ed5-cd12-1ec1",
+      "checked": 2,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "key_reading.c3rt9": {
+      "yaml_sha256": "c956-5fbe-77af-ebc7",
+      "checked": 10,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "keypoints.nxc6k": {
+      "yaml_sha256": "5b8b-2032-44cf-ef8b",
+      "checked": 27,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "resources.fdaan": {
+      "yaml_sha256": "1e26-da22-c512-4a3d",
+      "checked": 3,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "self_check_before_reading.wpxcu": {
+      "yaml_sha256": "454c-af1d-994f-ea3e",
+      "checked": 3,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "spotlight.up7cx": {
+      "yaml_sha256": "bdea-2847-396b-de94",
+      "checked": 50,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "vocab_application.dj7wr": {
+      "yaml_sha256": "698b-888a-c5b9-dc17",
+      "checked": 16,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "vocab_definitions.4xrk4": {
+      "yaml_sha256": "0a9d-b5f7-71b2-9ba8",
+      "checked": 25,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "vocab_review.mc33e": {
+      "yaml_sha256": "cb12-42d3-e656-17b2",
+      "checked": 18,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    }
+  }
+}

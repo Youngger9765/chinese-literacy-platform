@@ -1,0 +1,17 @@
+lesson_uid: L0143
+version_id: v3
+notes:
+  errata:
+  - id: E1
+    section: 第一頁右上目標框
+    locator: 目標策略那一行的句末
+    source: 目標策略：說明文結構──用研究證據回答問題無
+    corrected: 目標策略：說明文結構──用研究證據回答問題
+    kind: 贅字
+    why: '句末多一個「無」字。它是獨立的 <w:r>，字型／顏色與前文相同，不是控制字元。
+
+      因為方框高度固定，「無」被擠到框外，所以 PDF 上印不出來 —— 兩份 mc 副本（wps 與 v:textbox）都有它。
+
+      本檔 goal_box.strategy_line 取印得出來的版本，原樣留在 strategy_line_source_text。'
+    confidence: high
+    evidence: document.xml 兩處皆有；PDF p1 的方框只印到「回答問題」

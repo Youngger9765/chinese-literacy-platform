@@ -1,0 +1,141 @@
+{
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 3,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "鬼壓床",
+      "鬼火",
+      "鬼壓床"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
+  "rows": [
+    {
+      "interactive_type": "display",
+      "label": "靈異與科學",
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "現象",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "鬼火",
+          "value": "黑暗中閃爍飄動的藍綠色火焰。"
+        },
+        {
+          "interactive_type": "display",
+          "label": "鬼壓床",
+          "value": "入睡或剛醒來時，感覺自己被一股力量壓著，動彈不得。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "靈異的解釋",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "鬼火",
+          "value": "鬼火代表死者的鬼魂。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "鬼壓床",
+          "value": "鬼魂壓制了睡眠者，想要傳達【　　　】的訊息。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "科學界的解釋",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "鬼火",
+          "value": "(1)人類及動物的遺骸腐化後，產生磷化氫氣體，在常溫下【　　　】。\n(2)磷化氫和沼氣、空氣混合，形成燃點很低的可燃氣體，30度便可自燃，要在非常暗的地方才可以看得到，顏色為藍色或淡紫色，稱為【　　　】。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "鬼壓床",
+          "value": "(1)人類每晚有四到六次的睡眠週期，每次約90分鐘。\n(2)大腦在【　　　】最為活躍，正在作夢的睡眠者此時無法控制自己的肌肉，癱軟無力。\n(3)鬼壓床又稱【　　　】，是因為身體有自我保護機制，避免作夢時讓身體受傷。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "結論",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "鬼火",
+          "value": "用科學方法，讓我們對未知的現象有了合理的解釋，因此把鬼魅的說法從我們的世界裡驅除了。"
+        }
+      ],
+      "value": ""
+    }
+  ],
+  "title": "靈異與科學",
+  "worksheet_rows": [
+    {
+      "items": [
+        {
+          "label": "鬼火",
+          "value": "黑暗中閃爍飄動的藍綠色火焰。"
+        },
+        {
+          "label": "鬼壓床",
+          "value": "入睡或剛醒來時，感覺自己被一股力量壓著，動彈不得。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "現象"
+    },
+    {
+      "items": [
+        {
+          "label": "鬼火",
+          "value": "鬼火代表死者的鬼魂。"
+        },
+        {
+          "label": "鬼壓床",
+          "value": "鬼魂壓制了睡眠者，想要傳達【　　　】的訊息。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "靈異的解釋"
+    },
+    {
+      "items": [
+        {
+          "label": "鬼火",
+          "value": "(1)人類及動物的遺骸腐化後，產生磷化氫氣體，在常溫下【　　　】。\n(2)磷化氫和沼氣、空氣混合，形成燃點很低的可燃氣體，30度便可自燃，要在非常暗的地方才可以看得到，顏色為藍色或淡紫色，稱為【　　　】。"
+        },
+        {
+          "label": "鬼壓床",
+          "value": "(1)人類每晚有四到六次的睡眠週期，每次約90分鐘。\n(2)大腦在【　　　】最為活躍，正在作夢的睡眠者此時無法控制自己的肌肉，癱軟無力。\n(3)鬼壓床又稱【　　　】，是因為身體有自我保護機制，避免作夢時讓身體受傷。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "科學界的解釋"
+    },
+    {
+      "items": [
+        {
+          "label": "鬼火",
+          "value": "用科學方法，讓我們對未知的現象有了合理的解釋，因此把鬼魅的說法從我們的世界裡驅除了。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "結論"
+    }
+  ]
+}

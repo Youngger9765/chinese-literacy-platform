@@ -1,0 +1,17 @@
+lesson_uid: L0166
+version_id: v3
+notes:
+  errata:
+  - id: E1
+    section: 八 詞語複習
+    locator: 找字格子第 2 列第 5 欄
+    source: null
+    corrected: null
+    kind: 格子缺字
+    why: '10×10 的找字格子中，第 2 列第 5 欄是**空的**（其餘 99 格都有字）。
+
+      PDF p11 上該位置也是空白。不在任何一條圈選路徑上，不影響作答，但格子並不完整。
+
+      無法推定原本該放哪個字，故不臆測、只登錄。'
+    confidence: high
+    evidence: document.xml 該儲存格無任何 w:t；PDF p11 第 2 列可見缺一格

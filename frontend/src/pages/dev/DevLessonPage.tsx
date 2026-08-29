@@ -131,7 +131,8 @@ const DevLessonPage: React.FC = () => {
           {lesson.title ? `　${lesson.title}` : ''}
         </span>
       </div>
-      <LessonRenderer lesson={lesson} lessonCode={lesson.lessonCode} />
+      {/* 這頁沒有學習流程的頂欄，所以要 LessonRenderer 自己印課名（#2897 之後預設關閉）。 */}
+      <LessonRenderer lesson={lesson} lessonCode={lesson.lessonCode} showLessonHeader />
     </Frame>
   );
 };

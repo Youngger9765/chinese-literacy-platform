@@ -1,0 +1,58 @@
+lesson_uid: L0129
+version_id: v3
+section_no: 七
+comprehension:
+  instruction: 請根據文章內容，讀完每一個選項後，選出最適合的答案。
+  questions:
+  - index: 1
+    answer: C
+    stem: 文中「按讚…正悄悄左右我們的心緒」的「左右」最接近何意？
+    options:
+      A: 來回擺動
+      B: 左右兩邊
+      C: 暗中影響著
+      D: 分成兩部分
+    explanation: （此處「左右」是動詞，指「影響、牽動」）
+    explanation_placement_note: 印在選項 D 後面同一行（橘色斜體），不是選項的一部分
+  - index: 2
+    answer: A
+    stem: 作者舉「網紅艾絲娜」與「11歲瑟琳娜」的例子，最主要要說明什麼？
+    options:
+      A: 讚數會傷心理健康
+      B: 網紅都愛演戲賣慘
+      C: 年紀小就不該上網
+      D: 向平台提告效果好
+  - index: 3
+    answer: C
+    stem: 綜合全文，作者對「按讚」的立場最接近下列何者？
+    options:
+      A: 按讚應被禁止，因為危害太大
+      B: 按讚越多越好，能證明個人價值
+      C: 按讚是工具，重點在有意識使用
+      D: 按讚是騙局，平台只想操控人心
+    explanation: C作者明說「按讚本身沒有錯」，但提醒別被讚數左右情緒與自我價值，也要留意推播與過濾泡泡，強調「平衡使用」。這是「工具中立、使用需自覺」立場
+    explanation_placement_note: 印在題目右側的獨立文字方塊（藍框），是教師版解析
+  - index: 4
+    answer: B
+    stem: 作者大量使用「真實案例」（網紅、同學、莫莉），最主要目的為何？
+    options:
+      A: 製造八卦話題
+      B: 讓論點更可信
+      C: 證明人人受害
+      D: 比較各國文化
+    explanation: B案例的功能是當「論據」，讓抽象影響（心理、推播）具體可感、提高說服力
+    explanation_placement_note: 印在題目右側的獨立文字方塊（藍框），是教師版解析
+  - index: 5
+    answer: D
+    stem: 依作者整體提醒，下列哪個做法最能同時照顧「情緒/自我價值」與「資訊/視野」兩個面向？
+    options:
+      A: 頻繁發文並反覆修圖求按讚
+      B: 追逐讚數並只看同類內容
+      C: 關掉通知並只看熟人貼文
+      D: 隱藏讚數並刻意看不同內容
+    explanation: 作者建議別讓讚數左右情緒與自我價值（可用隱藏讚數減壓），也要留意自己滑動內容、避免過濾泡泡限制視野；D同時符合兩面向。
+    explanation_placement_note: 印在題目右側的獨立文字方塊（藍框），是教師版解析
+  notes:
+    answer_carrier: 橘色手寫代號（教師版答案），文字流有此資訊
+  slug: ufwra
+  text_ref: uc6qm

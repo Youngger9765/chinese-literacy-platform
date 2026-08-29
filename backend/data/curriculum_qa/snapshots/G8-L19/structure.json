@@ -1,108 +1,67 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 4,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "問題引入【　　　】",
+      "塞翁故事與道理【　　　】",
+      "舉例【　　　】",
+      "結論【　　　】"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "引出議題",
-      "value": "",
       "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "【   1   】",
-          "value": "本文從生活與產業都需要【　　　】切入，提出台灣【　　　】的爭議。",
-          "interactive_type": "fill_blank"
-        }
-      ]
+      "label": "塞翁失馬，焉知非福",
+      "value": ""
     },
     {
-      "label": "反方論述",
-      "value": "",
-      "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "【2～4   】",
-          "value": "反對方強調萬一出事【　　　】，並指出台灣疏散困難與核廢選址的困境。",
-          "interactive_type": "fill_blank"
-        }
-      ]
+      "interactive_type": "fill_blank",
+      "label": "問題引入【　　　】",
+      "value": "1.小宇小考只拿52分，覺得自己不是【　　　】，因此越想越沮喪。\n2.引出問題：眼前的挫敗，會不會藏著【　　　】？"
     },
     {
-      "label": "正方論述",
-      "value": "",
-      "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "【 5～7  】",
-          "value": "支持方強調「不用核能也有風險」，包括能源【　　　】、減碳壓力與【　　　】。",
-          "interactive_type": "fill_blank"
-        }
-      ]
+      "interactive_type": "fill_blank",
+      "label": "塞翁故事與道理【　　　】",
+      "value": "1.塞翁的馬跑走、馬回來、兒子摔斷腿、兒子未被徵兵，形成福禍轉折，讓人明白：眼前的【　　　】不一定是最後的【　　　】。\n2.這個故事表現了【　　　】的智慧，提醒我們【　　　】，得失難料，不必太早下定論。\n3.塞翁的反應也可以用認知心理學來理解：不同的【　　　】會影響情緒與行動。"
     },
     {
-      "label": "結尾",
-      "value": "",
-      "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "【  8    】",
-          "value": "作者提醒要用【　　　】來做出民主決策。",
-          "interactive_type": "fill_blank"
-        }
-      ]
+      "interactive_type": "fill_blank",
+      "label": "舉例【　　　】",
+      "value": "新冠肺炎讓全台遠距上學上班，市井間的商店【　　　】；但遠距設備需求增加，也讓臺灣電子產業迎來爆發性成長。\n羅伯茲提出【　　　】，不幸不一定只有傷害，也可能帶來【　　　】。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "結論【　　　】",
+      "value": "挫敗不必看成失敗的【　　　】，可以看成照出問題的【　　　】。只要先【　　　】，再調整方法，就可能成為【　　　】的起點。"
     }
   ],
-  "layout": "worksheet_table",
+  "title": "塞翁失馬，焉知非福",
   "worksheet_rows": [
     {
-      "kind": "section_block",
-      "section": "引出議題",
-      "items": [
-        {
-          "label": "【　　　】",
-          "value": "本文從生活與產業都需要【　　　】切入，提出台灣【　　　】的爭議。"
-        }
-      ]
+      "kind": "pair",
+      "label": "問題引入（段1）",
+      "value": "1.小宇小考只拿52分，覺得自己不是【　　　】，因此越想越沮喪。\n2.引出問題：眼前的挫敗，會不會藏著【　　　】？"
     },
     {
-      "kind": "section_block",
-      "section": "反方論述",
-      "items": [
-        {
-          "label": "【　　　】",
-          "value": "反對方強調萬一出事【　　　】，並指出台灣疏散困難與核廢選址的困境。"
-        }
-      ]
+      "kind": "pair",
+      "label": "塞翁故事與道理（段2～4）",
+      "value": "1.塞翁的馬跑走、馬回來、兒子摔斷腿、兒子未被徵兵，形成福禍轉折，讓人明白：眼前的【　　　】不一定是最後的【　　　】。\n2.這個故事表現了【　　　】的智慧，提醒我們【　　　】，得失難料，不必太早下定論。\n3.塞翁的反應也可以用認知心理學來理解：不同的【　　　】會影響情緒與行動。"
     },
     {
-      "kind": "section_block",
-      "section": "正方論述",
-      "items": [
-        {
-          "label": "【　　　】",
-          "value": "支持方強調「不用核能也有風險」，包括能源【　　　】、減碳壓力與【　　　】。"
-        }
-      ]
+      "kind": "pair",
+      "label": "舉例(段5～6)",
+      "value": "新冠肺炎讓全台遠距上學上班，市井間的商店【　　　】；但遠距設備需求增加，也讓臺灣電子產業迎來爆發性成長。\n羅伯茲提出【　　　】，不幸不一定只有傷害，也可能帶來【　　　】。"
     },
     {
-      "kind": "section_block",
-      "section": "結尾",
-      "items": [
-        {
-          "label": "【　　　】",
-          "value": "作者提醒要用【　　　】來做出民主決策。"
-        }
-      ]
+      "kind": "pair",
+      "label": "結論(段7)",
+      "value": "挫敗不必看成失敗的【　　　】，可以看成照出問題的【　　　】。只要先【　　　】，再調整方法，就可能成為【　　　】的起點。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "generic",
-    "fill_blank_count": 4,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "【   1   】",
-      "【2～4   】",
-      "【 5～7  】",
-      "【  8    】"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

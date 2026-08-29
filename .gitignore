@@ -60,3 +60,9 @@ qa/content-evidence/*/artifacts/
 backend/data/lessons/_lesson_content_dryrun/
 # graphify architecture map — local knowledge-graph cache (18M), rebuilt on demand, not committed
 graphify-out/
+.playwright-mcp/
+backend/demo-reading-output/
+
+# QA manifest smoke 產物（只跑 5 課，不是正式輸出，見 #2795）
+backend/data/curriculum_qa/keypoints_manifest.smoke.json
+backend/data/curriculum_qa/snapshots.smoke/

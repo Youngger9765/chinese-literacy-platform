@@ -1,0 +1,46 @@
+lesson_uid: L0087
+version_id: v3
+section_no: 八
+resources:
+  row_label: 影片連結
+  items:
+  - index: 1
+    title: 湯姆歷險記（舊版配音）第二集 快樂的油漆匠(看9:45－20:45)
+    duration: '22:55'
+    duration_seconds: 1375
+    source: Wesley Timo
+    qr_code: true
+    title_note: 標題內的「(看9:45－20:45)」是原稿標註的建議觀看區間，不是片長。
+  - index: 2
+    title: 當你面對逆境時，這段話能幫到你 簡單三個字，就能改變一切... - Hal Elrod 哈爾.埃爾羅德（中英字幕
+    duration: '4:26'
+    duration_seconds: 266
+    source: Wisdom Bread 智慧麵包
+    qr_code: true
+    title_note: 標題結尾的全形左括號「（中英字幕」在原稿就**沒有右括號**，照原稿保留。
+  - index: 3
+    title: 德育故事——孔融讓梨
+    duration: '7:15'
+    duration_seconds: 435
+    source: 普通話教室/故事廊
+    qr_code: true
+  section_name: 知識補給站
+  label: 影片連結
+  videos:
+  - index: 1
+    url: http://youtu.be/QV4MadU3s8U
+    url_source: 總表0816「4.影片連結」年級7課次19（⚠️課名與課程不符，仍依課次採用）
+  - index: 2
+    url: http://youtu.be/u_t4eYiPZEg
+    url_source: 總表0816「4.影片連結」年級7課次19（⚠️課名與課程不符，仍依課次採用）
+  - index: 3
+    url: http://youtu.be/iCxh-0P2Db4
+    url_source: 總表0816「4.影片連結」年級7課次19（⚠️課名與課程不符，仍依課次採用）
+  notes:
+    items: '原稿的片長印成「・片長：(22:55)」（含括號），本欄照既有形狀去掉括號存成
+
+      `duration` ＋ `duration_seconds`。三支影片各附一個 QR code（圖形），未解碼；
+
+      文字層只有標題、片長、來源三項，沒有 URL。'
+  slug: wq7tw
+  text_ref: rpcyh

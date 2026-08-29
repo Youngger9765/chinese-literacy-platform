@@ -1,94 +1,127 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 8,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "什麼是誘餌式標題",
+      "1",
+      "2",
+      "3"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "主題",
-      "value": "塑膠污染 【　　　】",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "別上「誘餌式標題」的鉤",
+      "value": ""
     },
     {
-      "label": "重要事實 1",
-      "value": "□①塑膠很容易在自然界分解。 ②塑膠一旦進入環境，就很難消失。 □③塑膠只會存在於陸地環境。",
-      "interactive_type": "checkbox",
-      "options": [
-        "塑膠很容易在自然界分解。",
-        "塑膠一旦進入環境，就很難消失。 □",
-        "塑膠只會存在於陸地環境。"
+      "interactive_type": "fill_blank",
+      "label": "什麼是誘餌式標題",
+      "value": "為吸引閱聽大眾點擊收看，新聞標題經常變得【　　　】、【　　　】，卻沒有完整、準確呈現文章內容，這就是【　　　】。"
+    },
+    {
+      "interactive_type": "display",
+      "label": "誘餌式標題的目的",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "1",
+          "value": "下標者想讓文章在眾多訊息中【　　　】。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "2",
+          "value": "讓報導增加【　　　】，獲得較多的廣告收益。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "3",
+          "value": "為了能【　　　】，影響大眾的認知。"
+        }
       ],
-      "correct_options": [
-        1
-      ]
+      "value": ""
     },
     {
-      "label": "重要事實 2",
-      "value": "□①塑膠微粒對人體健康沒有影響。 ②塑膠微粒會透過食物鏈進入人體。 □③塑膠微粒只存在於海洋生物體內。",
-      "interactive_type": "checkbox",
-      "options": [
-        "塑膠微粒對人體健康沒有影響。",
-        "塑膠微粒會透過食物鏈進入人體。 □",
-        "塑膠微粒只存在於海洋生物體內。"
+      "interactive_type": "display",
+      "label": "面對方法",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "1",
+          "value": "看到誇張、模糊或引發強烈情緒的標題時，先【　　　】。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "2",
+          "value": "【　　　】標題與內容的一致性。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "3",
+          "value": "【　　　】不同報導，培養【　　　】能力。"
+        }
       ],
-      "correct_options": [
-        1
-      ]
+      "value": ""
     },
     {
-      "label": "重要事實 3",
-      "value": "□①塑膠回收率高且減產容易。 ②回收率低且減產困難是塑膠問題的挑戰。 □③塑膠回收成本比製作新塑膠便宜。",
-      "interactive_type": "checkbox",
-      "options": [
-        "塑膠回收率高且減產容易。",
-        "回收率低且減產困難是塑膠問題的挑戰。 □",
-        "塑膠回收成本比製作新塑膠便宜。"
-      ],
-      "correct_options": [
-        1
-      ]
-    },
-    {
+      "interactive_type": "fill_blank",
       "label": "結論",
-      "value": "個人減塑行動能影響供應，成為環保倡議者。 【　　　】",
-      "interactive_type": "fill_blank"
+      "value": "上網時要隨時提醒自己：不上【　　　】的鉤，不再讓劣質新聞騙取你的【　　　】。"
     }
   ],
-  "layout": "worksheet_table",
+  "title": "別上「誘餌式標題」的鉤",
   "worksheet_rows": [
     {
       "kind": "pair",
-      "label": "主題",
-      "value": "塑膠污染 【　　　】"
+      "label": "什麼是誘餌式標題",
+      "value": "為吸引閱聽大眾點擊收看，新聞標題經常變得【　　　】、【　　　】，卻沒有完整、準確呈現文章內容，這就是【　　　】。"
     },
     {
-      "kind": "pair",
-      "label": "重要事實 1",
-      "value": "□①塑膠很容易在自然界分解。 ②塑膠一旦進入環境，就很難消失。 □③塑膠只會存在於陸地環境。"
+      "items": [
+        {
+          "label": "1",
+          "value": "下標者想讓文章在眾多訊息中【　　　】。"
+        },
+        {
+          "label": "2",
+          "value": "讓報導增加【　　　】，獲得較多的廣告收益。"
+        },
+        {
+          "label": "3",
+          "value": "為了能【　　　】，影響大眾的認知。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "誘餌式標題的目的"
     },
     {
-      "kind": "pair",
-      "label": "重要事實 2",
-      "value": "□①塑膠微粒對人體健康沒有影響。 ②塑膠微粒會透過食物鏈進入人體。 □③塑膠微粒只存在於海洋生物體內。"
-    },
-    {
-      "kind": "pair",
-      "label": "重要事實 3",
-      "value": "□①塑膠回收率高且減產容易。 ②回收率低且減產困難是塑膠問題的挑戰。 □③塑膠回收成本比製作新塑膠便宜。"
+      "items": [
+        {
+          "label": "1",
+          "value": "看到誇張、模糊或引發強烈情緒的標題時，先【　　　】。"
+        },
+        {
+          "label": "2",
+          "value": "【　　　】標題與內容的一致性。"
+        },
+        {
+          "label": "3",
+          "value": "【　　　】不同報導，培養【　　　】能力。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "面對方法"
     },
     {
       "kind": "pair",
       "label": "結論",
-      "value": "個人減塑行動能影響供應，成為環保倡議者。 【　　　】"
+      "value": "上網時要隨時提醒自己：不上【　　　】的鉤，不再讓劣質新聞騙取你的【　　　】。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "mixed",
-    "template_kind": "theme_facts",
-    "fill_blank_count": 2,
-    "checkbox_count": 3,
-    "primary_labels": [
-      "主題",
-      "重要事實 1",
-      "重要事實 2",
-      "重要事實 3"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

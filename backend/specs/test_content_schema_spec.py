@@ -44,7 +44,7 @@ VALID_STEP_IDS = frozenset({
     "intro",
     "reading-annotation",
     "tutor",
-    "full-reading",
+    "full-reading",    # 2026-07-20 教授審查：label 改造成「重點朗讀」（keep id）
     "listening",
     "vocab",
     "vocab-definition",
@@ -113,9 +113,24 @@ def _lessons_with_lesson_intro() -> list[tuple[Path, dict]]:
 # Infrastructure tests
 # ---------------------------------------------------------------------------
 
+@pytest.mark.skip(
+
+    reason="來源 backend/data/lessons/_parsed_2026-05-01/ 隨一修刪除（#2683）；此契約待二修抽取器補上對應欄位後，改對 uid tree 重建 —— 登記在 data/curriculum_qa/content_known_gaps.yaml#locks_removed_with_the_first_edition"
+
+)
+
 def test_lesson_dir_exists() -> None:
     """The parsed YAML corpus directory must exist (gate for all downstream tests)."""
     assert LESSON_DIR.is_dir(), f"Lesson dir not found: {LESSON_DIR}"
+
+
+@pytest.mark.skip(
+
+
+    reason="來源 backend/data/lessons/_parsed_2026-05-01/ 隨一修刪除（#2683）；此契約待二修抽取器補上對應欄位後，改對 uid tree 重建 —— 登記在 data/curriculum_qa/content_known_gaps.yaml#locks_removed_with_the_first_edition"
+
+
+)
 
 
 def test_demo_lesson_files_exist() -> None:
@@ -127,6 +142,12 @@ def test_demo_lesson_files_exist() -> None:
 # ---------------------------------------------------------------------------
 # Contract: 7 demo lessons have lesson_intro
 # ---------------------------------------------------------------------------
+
+@pytest.mark.skip(
+
+    reason="來源 backend/data/lessons/_parsed_2026-05-01/ 隨一修刪除（#2683）；此契約待二修抽取器補上對應欄位後，改對 uid tree 重建 —— 登記在 data/curriculum_qa/content_known_gaps.yaml#locks_removed_with_the_first_edition"
+
+)
 
 def test_demo_lessons_all_have_lesson_intro() -> None:
     """The 7 demo lessons (G6-L22~25, G7-L28~30) must each have lesson_intro.

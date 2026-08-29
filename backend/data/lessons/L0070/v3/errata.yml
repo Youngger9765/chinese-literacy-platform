@@ -1,0 +1,23 @@
+lesson_uid: L0070
+version_id: v3
+notes:
+  errata:
+  - id: E1
+    section: 一 閱讀聚光燈 ／ 挑戰題1 標題
+    locator: 「◎挑戰題1：用策略試試會考題」下一行
+    source: 屆試題-1.108會考國文科第31題：
+    corrected: 歷屆試題-1.108會考國文科第31題：
+    kind: 漏字
+    why: 開頭漏了「歷」字；同一份學習單的挑戰題3 印的是完整的「歷屆試題-３.110會考國文科第38題：」
+    confidence: high
+    evidence: document.xml 全文只出現 1 次「歷屆」（挑戰題3），「屆試題」出現 2 次；PDF p5 也印成「屆試題-1.」
+  - id: E2
+    section: 一 閱讀聚光燈 ／ 課文
+    locator: 段號欄第 1 個號碼
+    source: ㄧ
+    corrected: 一
+    kind: 錯字（注音符號誤植）
+    why: 段號欄第一格打成注音「ㄧ」(U+3127)，其餘 8 個都是漢字數字
+    confidence: high
+    evidence: document.xml 段號儲存格首字碼位 U+3127
+    note: 本檔的段落用數字 idx，不受此字影響；記錄供修稿參考。

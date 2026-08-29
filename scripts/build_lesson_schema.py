@@ -97,6 +97,27 @@ def parse_option_line(text: str) -> tuple[str, bool]:
     return t.strip(), is_dist
 
 
+def _ground_truth_answer(items: list[tuple[str, bool]], checked_positions: list[int]) -> str | None:
+    """Which of `items` (option_text, is_distractor) the teacher actually ticked (#2735).
+
+    `items` must be in the same left-to-right order as the □ glyphs in the paragraph's
+    rendered text — the same order `checked_box_positions()` counted them in — so index
+    `k` in `checked_positions` points at `items[k]`.
+
+    #2555 made every option carry a box, so `is_distractor` is True for all of them and
+    can no longer point at the answer by itself (the "which one has no box" leak it
+    used to read is gone, on purpose). This is the replacement: read the tick directly
+    instead of inferring it from an absent box. Returns None when the source DOCX
+    carries no tick data for these positions — the caller falls back to the old
+    is_distractor guess, unchanged, for lessons this pipeline never got a teacher
+    version of.
+    """
+    for idx in checked_positions:
+        if 0 <= idx < len(items):
+            return items[idx][0]
+    return None
+
+
 def split_inline_box_options(text: str) -> list[tuple[str, bool]] | None:
     """
     Parse a single guide line with multiple □-separated options.
@@ -193,31 +214,45 @@ def _append_options_from_block(
     block: dict,
     options: list[str],
     answer: str | None,
-) -> str | None:
-    """Extract MCQ options from guide / _option_line block into running lists."""
+    ground_truth: str | None = None,
+) -> tuple[str | None, str | None]:
+    """Extract MCQ options from guide / _option_line block into running lists.
+
+    Returns `(answer, ground_truth)`. `ground_truth` — resolved from the box the
+    teacher actually ticked via `block["checked"]` (#2735) — wins over `answer` (the
+    pre-#2735 "no box = answer" guess, which #2555 turned into dead weight since every
+    option now has a box). The first block in the run that carries tick data decides
+    it; later blocks in the same run cannot override it.
+    """
     if block.get("type") not in ("guide", "_option_line"):
-        return answer
+        return answer, ground_truth
     gtext = block.get("text", "")
+    checked = block.get("checked") or []
     inline = split_inline_box_options(gtext)
     if inline:
+        if ground_truth is None:
+            ground_truth = _ground_truth_answer(inline, checked)
         for opt_text, is_dist in inline:
             if opt_text:
                 options.append(opt_text)
                 if not is_dist and answer is None:
                     answer = opt_text
-        return answer
+        return answer, ground_truth
     if is_option_line(gtext):
         opt_text, is_dist = parse_option_line(gtext)
         if opt_text:
             options.append(opt_text)
+            if ground_truth is None:
+                ground_truth = _ground_truth_answer([(opt_text, is_dist)], checked)
             if not is_dist and answer is None:
                 answer = opt_text
-    return answer
+    return answer, ground_truth
 
 
 def _collect_option_run(blocks: list, start: int) -> tuple[list[str], str | None, int]:
     options: list[str] = []
     answer: str | None = None
+    ground_truth: str | None = None
     j = start
     while j < len(blocks):
         nxt = blocks[j]
@@ -230,9 +265,12 @@ def _collect_option_run(blocks: list, start: int) -> tuple[list[str], str | None
                 break
         else:
             break
-        answer = _append_options_from_block(nxt, options, answer)
+        answer, ground_truth = _append_options_from_block(nxt, options, answer, ground_truth)
         j += 1
-    return options, answer, j
+    # Ground truth (#2735) wins whenever the source DOCX carried it; otherwise fall
+    # back to the pre-#2735 guess unchanged (dead-weight `is_dist` check, options[0]
+    # default lives in the caller).
+    return options, (ground_truth if ground_truth is not None else answer), j
 
 
 def coalesce_mcq_option_blocks(blocks: list) -> list:
@@ -314,18 +352,22 @@ def coalesce_mcq_option_blocks(blocks: list) -> list:
                     options.append(opt_text)
                     if not is_dist and answer is None:
                         answer = opt_text
+                # #2735: the box the teacher actually ticked wins over the guess above.
+                ground_truth = _ground_truth_answer(inline, b.get("checked") or [])
                 out.append({
                     "type": "single",
                     "prompt": prev.get("prompt", ""),
                     "options": options,
-                    "answer": answer or options[0],
+                    "answer": ground_truth or answer or options[0],
                 })
                 i += 1
                 continue
 
         if b.get("type") == "_option_line":
-            # Orphan option line — keep as guide fallback
-            out.append({"type": "guide", "text": b.get("text", "")})
+            # Orphan option line — keep as guide fallback. `checked` (#2735) has to
+            # survive this downgrade or convert_checkbox_guide_blocks, which reads
+            # this same "guide" block next, loses the tick for no reason.
+            out.append({"type": "guide", "text": b.get("text", ""), "checked": b.get("checked") or []})
         else:
             out.append(b)
         i += 1
@@ -333,8 +375,16 @@ def coalesce_mcq_option_blocks(blocks: list) -> list:
     return out
 
 
-def split_question_inline_options(text: str) -> dict | None:
-    """Guide line with question + inline □ options → single block dict."""
+def split_question_inline_options(text: str, checked: list[int] | None = None) -> dict | None:
+    """Guide line with question + inline □ options → single block dict.
+
+    `checked` is `checked_box_positions()` for the *whole paragraph* `text` came from
+    (#2735) — same left-to-right □ order the caller counted. Only trusted when we can
+    prove the indices still line up: `opt_part` already starting with □ (no synthetic
+    box inserted below) and the prompt itself holding none. Either branch that
+    reshapes the □ layout before parsing keeps the pre-#2735 guess unchanged rather
+    than risk pointing ground truth at the wrong option.
+    """
     t = (text or "").strip()
     if "□" not in t or GUIDE_HEADER_RE.match(t):
         return None
@@ -343,16 +393,19 @@ def split_question_inline_options(text: str) -> dict | None:
         return None
     prompt = m.group(1).strip()
     opt_part = m.group(2).strip()
+    indices_line_up = opt_part.startswith("□") and "□" not in prompt
     inline = split_inline_box_options("□" + opt_part if not opt_part.startswith("□") else opt_part)
     if not inline and "□" in opt_part:
         inline = split_inline_box_options(opt_part)
     if not inline:
         parts = re.findall(r"□\s*([^□　]+)", opt_part)
         inline = [(p.strip(), True) for p in parts if p.strip()]
+        indices_line_up = False
     if not inline or len(inline) < 2:
         return None
     options = [o for o, _ in inline]
-    answer = next((o for o, d in inline if not d), None) or options[0]
+    ground_truth = _ground_truth_answer(inline, checked or []) if indices_line_up else None
+    answer = ground_truth or next((o for o, d in inline if not d), None) or options[0]
     return {
         "type": "single",
         "prompt": prompt,
@@ -370,18 +423,29 @@ def _is_checkbox_guide_text(text: str) -> bool:
     return bool(re.search(r"□\s*[①②③④⑤]", t))
 
 
-def _options_from_checkbox_guide(text: str) -> list[str]:
+def _options_from_checkbox_guide(text: str, checked: list[int] | None = None) -> tuple[list[str], str | None]:
+    """Returns (option_texts, ground_truth). `checked` is `checked_box_positions()`
+    for this same guide paragraph (#2735) — resolves which returned option, if any,
+    the teacher ticked. This used to call `split_inline_box_options`/`parse_option_line`
+    for their `is_distractor` flag and then discard it, same leak as the four sites
+    fixed earlier in #2735 (found by code review, not by the original issue text)."""
+    checked = checked or []
     if INSTRUCTIONAL_CHECKBOX_RE.search((text or "").strip()):
-        return []
+        return [], None
     inline = split_inline_box_options(text)
     if inline:
-        return [o for o, _ in inline if o]
+        return [o for o, _ in inline if o], _ground_truth_answer(inline, checked)
     if text.strip().startswith("□"):
         m = re.match(r"^□(.+?)[\s　]{2,}(.+)$", text.strip())
         if m:
-            return [m.group(1).strip(), m.group(2).strip()]
-    opt, _ = parse_option_line(text)
-    return [opt] if opt else []
+            # "□A  B" — only A carries a box (index 0); B is the pre-#2735 leak shape
+            # (no box = answer). `checked` can only ever confirm A here.
+            items = [(m.group(1).strip(), True), (m.group(2).strip(), False)]
+            return [o for o, _ in items], _ground_truth_answer(items, checked)
+    opt, is_dist = parse_option_line(text)
+    if not opt:
+        return [], None
+    return [opt], _ground_truth_answer([(opt, is_dist)], checked)
 
 
 def convert_checkbox_guide_blocks(blocks: list) -> list:
@@ -398,7 +462,7 @@ def convert_checkbox_guide_blocks(blocks: list) -> list:
             continue
 
         text = b.get("text", "").strip()
-        expanded = split_question_inline_options(text)
+        expanded = split_question_inline_options(text, b.get("checked") or [])
         if expanded:
             out.append(expanded)
             i += 1
@@ -430,6 +494,7 @@ def convert_checkbox_guide_blocks(blocks: list) -> list:
                 prompt = out.pop().get("prompt", "")
                 is_multi = bool(re.search(r"複選|多選|可複選", prompt))
             options: list[str] = []
+            ground_truth: str | None = None
             j = i
             while j < len(blocks) and blocks[j].get("type") == "guide":
                 gtext = blocks[j].get("text", "").strip()
@@ -437,7 +502,10 @@ def convert_checkbox_guide_blocks(blocks: list) -> list:
                     break
                 if not _is_checkbox_guide_text(gtext):
                     break
-                options.extend(_options_from_checkbox_guide(gtext))
+                opts, gt = _options_from_checkbox_guide(gtext, blocks[j].get("checked") or [])
+                options.extend(opts)
+                if ground_truth is None:
+                    ground_truth = gt
                 if re.search(r"複選|多選|可複選", gtext):
                     is_multi = True
                 j += 1
@@ -450,7 +518,8 @@ def convert_checkbox_guide_blocks(blocks: list) -> list:
                     "options": options,
                 }
                 if block_type == "single":
-                    block["answer"] = options[0]
+                    # #2735: the box the teacher actually ticked wins over options[0].
+                    block["answer"] = ground_truth or options[0]
                 else:
                     block["answer"] = options
                 out.append(block)
@@ -532,6 +601,13 @@ def cell_grid(tc):
     return span, vmerge
 
 
+def _cell_text(cell) -> str:
+    """Cell text WITH the checked box. `Cell.text` drops `w:sym` the same way
+    `Paragraph.text` does, and the keypoints table is built entirely from cells — which
+    is why fixing only the paragraph readers left 68 lessons still leaking (#2555)."""
+    return _para_text(cell, cell._tc).strip()
+
+
 def table_cells(tbl):
     rows = []
     for ri, row in enumerate(tbl.rows):
@@ -540,13 +616,21 @@ def table_cells(tbl):
         for ci, cell in enumerate(row.cells):
             tc = cell._tc
             if id(tc) in seen:
-                cells.append({"col": ci, "text": cell.text.strip(), "dup": True})
+                cells.append({
+                    "col": ci,
+                    "text": _cell_text(cell),
+                    "checked": checked_box_positions(tc),
+                    "dup": True,
+                })
                 continue
             seen.add(id(tc))
             span, vmerge = cell_grid(tc)
             cells.append({
                 "col": ci,
-                "text": cell.text.strip(),
+                "text": _cell_text(cell),
+                # 重點表那類題目的答案住在表格裡。段落層讀了勾、表格層沒讀，
+                # 全庫真值只讀得到 31%（19 課實測 57/183）——#2735 只修好三分之一。
+                "checked": checked_box_positions(tc),
                 "gridspan": span,
                 "vmerge": vmerge,
                 "has_blank": bool(BLANK_RE.search(cell.text)),
@@ -561,6 +645,68 @@ def img_count(el_or_doc):
     return len(blips)
 
 
+_W_NS = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
+# Every glyph #2555 folds into a plain □ (⃞ 37 occurrences, ▢ 16, plus ☐ ◻ — see the
+# #2555 commit message). `checked_box_positions` below must count every one of these,
+# not just literal □, or its position index desyncs from `_para_text`'s output the
+# moment an un-ticked distractor uses one of the alt glyphs ahead of a real tick
+# (#2735 round-3 review: reproduced pointing ground truth at the wrong option).
+_BOX_GLYPH_ALTS = "⃞▢☐◻"
+_BOX_GLYPHS = str.maketrans({c: "□" for c in _BOX_GLYPH_ALTS})
+_BOX_GLYPH_CHARS = "\u25a1" + _BOX_GLYPH_ALTS
+
+
+def checked_box_positions(child) -> list[int]:
+    """這一段裡「第幾個框」被老師打了勾，0-based，對齊 `_para_text` 的輸出。
+
+    #2555 讓 `_para_text` 把 `<w:sym w:char="F0FE"/>` 吐成一般的 `□`，
+    每個選項長得一樣、學生猜不到答案 —— **那是對的，不要動它**。
+    但抽取器原本就靠那個洩漏判答案，抹掉之後 312 題的答案跟著變（#2735）。
+
+    這裡走旁路：**文字流一個字元都不改**，另外回報「第幾個框是勾的」。
+    理由是這個 repo 有 209 行、20 個檔硬寫 `□`（inline 選項的正則、
+    各種 QA lib、spotlight 解析器…）。在文字裡換一個字元 = 要人工列全
+    209 個消費端，漏一個就是靜默 bug。旁路的話，那 209 處一行都不用動。
+
+    index 的定義刻意跟 `_para_text` 綁在一起：兩者走同一個 `child.iter()`
+    順序，所以第 n 個框在文字裡就是第 n 個 `□`——**但這只在數框的時候數了
+    同一組字元才成立**。`_para_text` 會把 `_BOX_GLYPH_CHARS` 那幾個異體字全
+    正規化成 `□`，所以這裡也要數同一組，不能只數 `\u25a1`（第三輪 review 抓到：
+    一個未勾的 distractor 用異體字、排在真的勾之前，會讓 index 少算 1，
+    指到錯的選項——比完全沒有這個機制還糟）。
+    """
+    out: list[int] = []
+    box = 0
+    for node in child.iter():
+        tag = node.tag
+        if tag == _W_NS + "t":
+            text = node.text or ""
+            box += sum(text.count(c) for c in _BOX_GLYPH_CHARS)
+        elif tag == _W_NS + "sym" and node.get(_W_NS + "char", "").upper() == "F0FE":
+            out.append(box)
+            box += 1
+    return out
+
+
+def _para_text(para, child) -> str:
+    """Paragraph text WITH the checked-box glyph, which `Paragraph.text` drops.
+
+    `Paragraph.text` concatenates `w:t` only. A checked box is `<w:sym w:font="Wingdings"
+    w:char="F0FE"/>` and produces nothing, so the option the teacher checked arrives with
+    no box while its siblings keep theirs — and the odd one out is the answer (#2555).
+    Emitted as an ordinary 「□」 so every option looks the same. The same substitution is
+    in `extract_lesson_body._paragraphs`; both readers exist and both were leaking.
+    """
+    parts = []
+    for node in child.iter():
+        tag = node.tag
+        if tag == _W_NS + "t":
+            parts.append(node.text or "")
+        elif tag == _W_NS + "sym" and node.get(_W_NS + "char", "").upper() == "F0FE":
+            parts.append("□")
+    return "".join(parts).translate(_BOX_GLYPHS) if parts else para.text
+
+
 def extract_raw(path):
     d = docx.Document(path)
     out = []
@@ -568,10 +714,13 @@ def extract_raw(path):
     for child in d.element.body.iterchildren():
         if isinstance(child, CT_P):
             p = Paragraph(child, d)
-            t = p.text.strip()
+            t = _para_text(p, child).strip()
             if not t:
                 continue
-            out.append({"kind": "p", "style": p.style.name, "text": t})
+            out.append({
+                "kind": "p", "style": p.style.name, "text": t,
+                "checked": checked_box_positions(child),
+            })
         elif isinstance(child, CT_Tbl):
             tbl = Table(child, d)
             flat = " ".join(c.text for r in tbl.rows for c in r.cells)
@@ -1120,7 +1269,107 @@ def clean_label(text):
 
 # ── SPOTLIGHT extraction ───────────────────────────────────────────────────
 
-def find_spotlight_range(blocks):
+#: The section heading — 閱讀聚光燈 / 品格聚光燈 / 文言聚光燈 — is drawn in a TEXT BOX,
+#: not in the paragraph flow. python-docx's `Paragraph.text` concatenates `w:r/w:t`
+#: children only, and a text box's runs sit under `mc:AlternateContent/w:drawing/…/
+#: w:txbxContent`, so the paragraph arrives with empty text and `extract_raw` drops it
+#: at `if not t: continue`.
+#:
+#: Measured over the first 40 lessons: the heading is in the document in 38 and reaches
+#: the block stream in 8. The most reliable marker in the worksheet never arrives, which
+#: is why everything downstream compensates with phrase heuristics — and why 29 lessons
+#: with a perfectly ordinary 「閱讀聚光燈」 heading extract nothing at all.
+_SPOTLIGHT_HEADING = re.compile(r"(閱讀|品格|文言)?聚光燈")
+
+
+def textbox_heading_anchor(path) -> int | None:
+    """Block index of the 聚光燈 heading that lives in a text box, or None.
+
+    Returns an index into the SAME list `extract_raw` produces, by walking the body in
+    the same order and counting what that function would have emitted. Used only as a
+    fallback: a lesson whose start is already found keeps it, so this cannot move any of
+    the 143 lessons that extract today.
+    """
+    try:
+        d = docx.Document(path)
+    except Exception:                                   # pragma: no cover
+        return None
+    emitted = 0
+    last: int | None = None
+    for child in d.element.body.iterchildren():
+        if isinstance(child, CT_P):
+            para = Paragraph(child, d)
+            if para.text.strip():
+                emitted += 1
+                continue
+            # Empty in the paragraph flow — look inside any text box it carries.
+            boxed = "".join(
+                node.text or ""
+                for node in child.iter(
+                    "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}t"
+                )
+            ).strip()
+            if boxed and _SPOTLIGHT_HEADING.search(boxed):
+                # The heading itself is not emitted, so the section starts at whatever
+                # `extract_raw` emits next.
+                #
+                # LAST occurrence, not first — defensive, and load-bearing for nothing
+                # in the current corpus. Stated plainly because the version of this
+                # comment that shipped claimed it FIXED the seven 文言文 lessons that
+                # anchored at block 0, and it did not: taking the last match still left
+                # all seven moved. What fixed them is the call site, which passes None
+                # for classical_grammar because those lessons already build a schema
+                # through the no-start branch.
+                #
+                # Measured: first and last differ in 6 of 175 lessons. Five are the
+                # 文言文 ones the call site excludes. The sixth, L0111, never reaches
+                # this function — its phrase rules return a start of their own.
+                #
+                # Kept because 文言文 worksheets do print 文言聚光燈：固定句式 in the
+                # masthead, the same note `extract_lesson_body` records for its own
+                # boundary search, and a lesson that starts using this path while
+                # carrying a masthead hit would anchor at the top of the document.
+                last = emitted
+        elif isinstance(child, CT_Tbl):
+            emitted += 1
+    return last
+
+
+#: A 【 】 in a table cell is where the student writes. This is the TEACHER's copy, so it
+#: arrives filled in:
+#:
+#:      把頭和四肢【    縮進龜殼     】
+#:      身體顏色【   接近四周環境  】，不容易被【   發現  】
+#:
+#: Serving the rows as extracted hands the student every answer. 438 filled brackets
+#: across the 109 lessons that have a table block; 8 are already empty.
+#:
+#: Checked against the marker's own named style (教材：教師解答) rather than assumed: 405
+#: of the 438 carry it. The 33 that do not are answers too — 「著涼/感冒/生病」,
+#: 「學習/練習」, 「①擔心 ②希望」 — the style is simply applied inconsistently, which is
+#: why the emptiness of the bracket is the rule here rather than the style.
+#:
+#: The answers are kept beside the rows and never rendered, the same arrangement
+#: `ordering` uses for `correct_order`.
+_MARKER_BLANK = re.compile(r"【([^】]*)】")
+
+
+def _blank_marker_answers(rows):
+    """Empty every filled 【 】 and return (rows, answers) in reading order."""
+    answers = []
+
+    def blank(cell):
+        def repl(m):
+            v = m.group(1).strip()
+            if v:
+                answers.append(v)
+            return "【】"
+        return _MARKER_BLANK.sub(repl, cell)
+
+    return [[blank(c) for c in row] for row in rows], answers
+
+
+def find_spotlight_range(blocks, docx_path=None):
     """
     Return (start_idx, end_idx) of spotlight section in blocks list.
     Spotlight = after vocab-application table (T#3/T#4 typically),
@@ -1152,6 +1401,28 @@ def find_spotlight_range(blocks):
                 if re.search(r"步驟|主角|問題|故事|聚光燈|圖文|閱讀|大主題|小主題|說明文|主旨", flat):
                     spotlight_start = i
                     break
+
+    # Fallback only. The phrase rules above look for 「◎ 小試身手」 and friends; the second
+    # edition writes the same sub-heading as 「一、先複習：…」 with no ◎ at all, so they
+    # find nothing in 29 lessons that plainly have the section. The heading itself is the
+    # reliable marker and it is sitting in a text box the block stream never received.
+    #
+    # Applied ONLY when the existing rules came up empty, so a lesson that extracts today
+    # keeps exactly the start it had.
+    # Fallback only, and only for lessons the caller says have no other path. The phrase
+    # rules above look for 「◎ 小試身手」 and friends; the second edition writes the same
+    # sub-heading as 「一、先複習：…」 with no ◎ at all, so they find nothing in 29 lessons
+    # that plainly have the section. The heading itself is the reliable marker and it is
+    # sitting in a text box the block stream never received.
+    #
+    # 文言文 is excluded at the CALL SITE rather than guarded for here: those lessons
+    # already build a 文言聚光燈 schema through the `spotlight_start is None` branch, so
+    # finding a start for them REPLACES something that works. Two structural guards were
+    # tried here first — take the last heading, require it after the title table — and
+    # both cost recovered lessons without fixing the seven, because the information that
+    # settles it (which strategy this lesson is) does not exist in this function.
+    if spotlight_start is None and docx_path is not None:
+        spotlight_start = textbox_heading_anchor(docx_path)
 
     end_idx = mcq_start if mcq_start is not None else len(blocks)
     return spotlight_start, end_idx
@@ -1219,7 +1490,7 @@ def classify_block(b, idx, all_blocks, strategy_type):
         ]
         for pat in guide_markers:
             if re.search(pat, txt):
-                return {"type": "guide", "text": txt}
+                return {"type": "guide", "text": txt, "checked": b.get("checked") or []}
 
         # Self-check checkbox items — skip
         if re.match(r"^□\s*\d+\.", txt) or re.match(r"^□\s*[我]", txt):
@@ -1232,7 +1503,7 @@ def classify_block(b, idx, all_blocks, strategy_type):
         # Detect questions with option markers
         exercise_q_re = re.compile(r"^[❶❷❸❹]\s*|^\d+[\.\、]\s*[^（\(]|^\(\d+\)")
         if exercise_q_re.match(txt):
-            return _classify_question_para(txt, strategy_type)
+            return _classify_question_para(txt, strategy_type, b.get("checked") or [])
 
         # List Paragraph style = passage line (G6 lessons)
         if b.get("style") == "List Paragraph":
@@ -1246,8 +1517,8 @@ def classify_block(b, idx, all_blocks, strategy_type):
 
         # Default: guide text — but MCQ option lines are not guides
         if is_option_line(txt):
-            return {"type": "_option_line", "text": txt}
-        return {"type": "guide", "text": txt}
+            return {"type": "_option_line", "text": txt, "checked": b.get("checked") or []}
+        return {"type": "guide", "text": txt, "checked": b.get("checked") or []}
 
     elif b["kind"] == "table" and not b.get("scaffold"):
         flat = " ".join(
@@ -1300,28 +1571,109 @@ def classify_block(b, idx, all_blocks, strategy_type):
                                     if not row["cells"][0].get("dup")
                                 ]}
 
-        # Data table (表一/表二) — figure with table referent
-        if b["n_cols"] >= 2 and b["n_rows"] >= 3:
-            return {"type": "figure", "referent": "table",
-                    "asset": None, "bind_paragraph": None, "_needs_asset_bind": True}
+        # Ordering exercise: a 2-column table of （N）| sentence.
+        #
+        # 《十秒的背後》 asks the student to number four events by time, and the four
+        # events live in a table like this. It matched none of the branches above, fell
+        # through to 「data table → figure with a table referent」, and figures with no
+        # asset are dropped by the uid loader — so the prompt was served with nothing
+        # under it and the step read as 「3.〈𪹚龍慶元宵〉　彭仁星」 and then nothing.
+        #
+        # The numbers in the brackets are the ANSWER, so they become `correct_order`
+        # and never reach the option text. Blank brackets (a student copy) yield an
+        # item with no order, which is still worth showing.
+        ordered = _ordering_rows(b)
+        if ordered:
+            return {"type": "ordering", "items": ordered}
+
+        # Data table — carry the CELLS, not a pointer to a picture that does not exist.
+        #
+        # This returned {figure, referent: table} for any unrecognised multi-column
+        # table, and `lesson_uid_loader._drop_assetless_table_figures` removes those
+        # because a figure with no asset renders as an empty box. The content went with
+        # it: 172 tables across 88 of 175 lessons, and they are exercise material —
+        #
+        #     動物例子 | 重要細節      柴棺龜、食蛇龜 | 把頭和四肢【 縮進龜殼 】
+        #     事件 | 想法（單選）| 情緒  1.上課舉手發言… □①天啊… ②幸好…
+        #
+        # Dropping was right while the alternative was an empty box. Carrying the rows
+        # is better than either. A table that DOES have an image stays a figure.
+        if b["n_cols"] >= 2 and b["n_rows"] >= 2:
+            rows = [
+                [c["text"].strip() for c in row["cells"] if not c.get("dup")]
+                for row in b["rows"]
+            ]
+            rows = [r for r in rows if any(r)]
+            if rows:
+                rows, answers = _blank_marker_answers(rows)
+                out = {"type": "table", "rows": rows}
+                if answers:
+                    out["answers"] = answers
+                return out
 
         return None
 
     return None
 
 
-def _classify_question_para(txt, strategy_type):
+#: 「（ 4 ）」 / 「（　）」 — an answer slot, optionally already filled in by the marker.
+_ORDER_SLOT_RE = re.compile(r"^[（(]\s*(\d+)?\s*[）)]$")
+
+
+def _ordering_rows(b):
+    """Rows of a 2-column ordering table, or None when the table is something else.
+
+    One column holds answer slots and the other holds the sentences. Which side is
+    which varies between worksheets, so it is decided by looking at the cells rather
+    than assumed. Requires at least two slot rows: a single bracketed cell in an
+    otherwise ordinary table is not an ordering exercise.
+    """
+    if b.get("n_cols") != 2 or b.get("n_rows", 0) < 2:
+        return None
+
+    pairs = []
+    for row in b.get("rows") or []:
+        cells = [c for c in row.get("cells", []) if not c.get("dup")]
+        if len(cells) < 2:
+            continue
+        left, right = cells[0]["text"].strip(), cells[1]["text"].strip()
+        for slot_text, sentence in ((left, right), (right, left)):
+            m = _ORDER_SLOT_RE.match(slot_text)
+            if m and len(sentence) >= 6:
+                pairs.append({
+                    "text": sentence,
+                    "correct_order": int(m.group(1)) if m.group(1) else None,
+                })
+                break
+
+    if len(pairs) < 2:
+        return None
+    return pairs
+
+
+def _classify_question_para(txt, strategy_type, checked=None):
     """
     Classify a paragraph that looks like a question.
     If the paragraph contains inline options (□-separated), extract answer immediately.
     Format: "❶question？ □distractor1　answer　□distractor2"
+
+    `checked` is `checked_box_positions()` for this paragraph (#2735). This function
+    never called `parse_option_line`/`split_inline_box_options` — it re.splits on □
+    itself — so it wasn't caught by the literal-string search that found the first
+    five #2735 call sites. Measured against the real 175-lesson corpus: this
+    "same-paragraph, multiple □" shape fires 74 times, and 62 of those return
+    answer=None today (not a wrong guess — the answer disappears entirely, with no
+    `_needs_answer_extraction` fallback to recover it later). Ground truth wins
+    whenever `checked` resolves it; falls back to the existing guess otherwise.
     """
+    checked = checked or []
     has_inline_options = bool(re.search(r"□", txt))
 
     if has_inline_options:
         # Try to extract answer inline (same paragraph contains all options)
         options = []
         answer = None
+        ground_truth = None
 
         if not txt.startswith("□"):
             parts = re.split(r"\s*□\s*", txt)
@@ -1339,12 +1691,18 @@ def _classify_question_para(txt, strategy_type):
                         options.append(clean)
                     # else: pure question, no inline answer
                 else:
+                    # parts[k] is the text right after the (k-1)'th □ in checked_box_positions'
+                    # 0-based, left-to-right count — same order this split walks them in.
+                    box_index = k - 1
                     # After □: may have multiple tokens (first=distractor, rest=answer)
                     sub_tokens = re.split(r"[　\s]+", part_stripped)
                     sub_tokens = [t.strip() for t in sub_tokens if t.strip()]
                     if sub_tokens:
                         dist = re.sub(r"^[①②③④⑤\d]+[\.\、]?\s*", "", sub_tokens[0])
-                        options.append(dist or sub_tokens[0])
+                        dist = dist or sub_tokens[0]
+                        options.append(dist)
+                        if ground_truth is None and box_index in checked:
+                            ground_truth = dist
                         for tok in sub_tokens[1:]:
                             clean_tok = re.sub(r"^[①②③④⑤\d]+[\.\、]?\s*", "", tok).strip()
                             if clean_tok and "□" not in tok:
@@ -1352,6 +1710,7 @@ def _classify_question_para(txt, strategy_type):
                                     answer = clean_tok
                                 options.append(clean_tok)
 
+        answer = ground_truth or answer
         if options or answer:
             return {"type": "single", "prompt": txt,
                     "options": options or None, "answer": answer}
@@ -1736,6 +2095,15 @@ def extract_single_options(blocks, raw_blocks, spotlight_start, spotlight_end):
     3. Multi-line: lines after prompt; lines NOT starting with □ are answer candidates,
        lines starting with □ are distractors. Handles "1.text" vs "□2.text" pattern.
     4. Circled-number lines: ① = answer, □② = distractor
+
+    #2735 note: every pattern above has the same "no box = answer" assumption that
+    #2555 broke for the six call sites fixed in that issue — but this function only
+    ever runs on blocks with `_needs_answer_extraction=True`, and that flag is set in
+    exactly one place (`_classify_question_para`'s final fallback). Measured against
+    the real 175-lesson corpus after fixing `_classify_question_para`: 0 blocks reach
+    here with that flag set. Left unfixed on purpose — tracked in #2823, not silently
+    dropped — because there is no live example to verify a fix against, and each of
+    #2735's other six fixes was verified against real corpus behavior, not guessed.
     """
     raw_paras = [b["text"] for b in raw_blocks[spotlight_start:spotlight_end]
                  if b["kind"] == "p"]
@@ -2010,9 +2378,13 @@ def extract_self_check(raw_blocks, spotlight_start, spotlight_end):
     return items
 
 
-def build_spotlight_schema(lesson_id, blocks, raw_blocks, strategy_type, strategy_name, assets=None):
+def build_spotlight_schema(lesson_id, blocks, raw_blocks, strategy_type, strategy_name, assets=None, docx_path=None):
     """Build the full spotlight schema dict."""
-    spotlight_start, spotlight_end = find_spotlight_range(blocks)
+    # 文言文 has its own path below when no start is found; handing it the text-box
+    # fallback would replace a working schema. Everything else gets the fallback.
+    spotlight_start, spotlight_end = find_spotlight_range(
+        blocks, None if strategy_type == "classical_grammar" else docx_path
+    )
 
     if spotlight_start is None:
         if strategy_type == "classical_grammar":
@@ -2331,7 +2703,7 @@ def process_lesson(lesson_id, docx_path, output_dir):
     # 2. Build spotlight schema (with assets for figure binding)
     sp_schema = build_spotlight_schema(
         resolved_lesson_id, raw_blocks, raw_blocks, strategy_type, strategy_name,
-        assets=assets
+        assets=assets, docx_path=docx_path
     )
     sp_path = Path(output_dir) / f"{resolved_lesson_id}.spotlight.yml"
     with open(sp_path, "w", encoding="utf-8") as f:

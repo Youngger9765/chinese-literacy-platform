@@ -1,0 +1,64 @@
+lesson_uid: L0076
+version_id: v3
+level: 6
+genre: 記敘文
+strategy: 品格力──跨文化接納理解
+課文作者: 陳志金
+學習單: 張明珠/陳淑麗
+lesson_no: 9
+series: 一般
+lesson_seq: 6090
+intro: 這篇文章記錄了一位醫師在面對病危病患時，如何以開放的心態與家屬的信仰互動。當家屬提出想請乩童協助時，醫師並沒有排斥，反而將其視為家屬表達心意、尋求慰藉的方式。文章描述了醫師如何放下對乩童的刻板印象，主動與乩童溝通病情，並將其視為醫療團隊的「夥伴」。透過醫師的視角，我們看到了一種跨越專業界線的理解與合作，以及對家屬情感支持的重視。
+notes:
+  總表_文體: 記敘文
+  總表_類型: 記(事)
+  總表_議題: 品格──同理心
+  總表_聚光燈策略: 品格力──跨文化理解與接納
+  總表_第六大題標題: 跨文化理解與接納
+  總表_文本類型: 單
+  總表_語詞_原樣:
+  - 由衷
+  - 觸怒
+  - 預後
+  - 納悶
+  - 喬裝
+  - 會診
+  - 退駕
+  - 攙扶
+  - 稱職
+  - 不假思索
+  - 不情之請
+  - 惡版印象
+  總表_對照: '總表 12 個語詞與學習單 12 個一一對應，唯一差異是總表「語詞12」印成「惡版印象」，
+
+    學習單四處（語詞框／第三大題(10)／第四大題代號 F／第八大題灰框與格子）都寫「刻板印象」。
+
+    課文本身也寫「這完全顛覆了我對乩童的刻板印象！」→ 研判是**總表那格的錯字**，不是抽取錯。
+
+    ⛔ 未自行以學習單覆蓋總表 —— 那要改的是 xlsx，不是這份抽取。'
+  節次順序: '本課 **五＝文章重點表、六＝品格聚光燈**（與 L0061 那種聚光燈在前的課相反），依 sections_present 為準。
+
+    ⚠️ 第六大題標題印的是「品格聚光燈」而不是「閱讀聚光燈」，照原稿記錄。'
+strategy_explained: '這一課我們要練習的是，當別人跟你的想法不一樣時，要試著理解他們為什麼會這樣想
+
+  就像故事裡，醫師沒有因為覺得乩童奇怪，就不理會病人家屬的心情
+
+  你可以試著想想，如果換成你，你會怎麼做，或是想想家屬的感受，他們才會覺得有人懂他們'
+strategy_sources:
+  worksheet: null
+  master_sheet: 品格力──跨文化接納理解
+  previous: 跨文化理解與接納
+source_profile:
+  class: standard
+  note: 單一錨點 + 有計數欄 + idx 唯一 —— 走主路徑
+  has_key_reading_section: true
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: null
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 1
+  has_counter_column: true
+  body_in_tables: true
+  invisible_chars_docx_only: true
+  profiled: '2026-08-24'

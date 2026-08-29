@@ -1,0 +1,22 @@
+lesson_uid: L0158
+version_id: v3
+notes:
+  errata:
+  - id: E1
+    section: ㄧ 文白句子比對／第二題
+    locator: 第二題原文的第二個括號段
+    source: 每春間民就貸
+    corrected: 每春間貧民就貸
+    kind: 漏字
+    why: 少一個「貧」字
+    confidence: high
+    evidence: '同一份學習單「每春間」共出現 5 次，其餘 4 次都是「每春間貧民就貸」
+
+      （原文、文白詞語比對第 5 題文言欄、聚光燈四之 2 的題幹、聚光燈四之 2 的補主語答案），
+
+      只有第二題這一處寫「每春間民就貸」。而且本題對應的參考句［5］是
+
+      「每到春天，**窮人**就來找他借貸穀物」，也指向「貧民」。PDF 與 document.xml 一致。'
+    handling_note: '照 SKILL 的做法：`text` 用修正後的版本（線上用這個），
+
+      `source_text` 保留原稿原樣（逐字門比對這個），並在該段標 errata_ref。'

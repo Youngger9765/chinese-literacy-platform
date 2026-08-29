@@ -1,0 +1,511 @@
+# L0027 / G5-L15《救援大隊的好幫手》— LLM 多模態抽取
+# 方法：SOT DOCX → PDF → 逐頁讀 9/9 頁（非抽樣）
+# 來源：private/curriculum-source/_SOT/5年級/G5-L15救援大隊的好幫手（用表格整理訊息-比較兩個對象）.docx
+# 產生：2026-08-18　skill: extract-lesson-multimodal
+#
+# 🔴 讀這一課的 PDF 時務必知道：**版面上看到的簡體字是轉檔造成的，不是教材印錯。**
+#    PDF 裡「读全文-做记号」「语词我最棒」「瓦砾」「胜任」「灵敏」「幸存」「缝隙」
+#    「训练有素」「会计」等等看起來都是簡體，但 document.xml 的文字流**全部是繁體**。
+#    原因：這份 DOCX 有多處字元帶 Unicode variation selector（如 `勝\U000E01E1任`），
+#    LibreOffice 找不到對應字型就代換成一套簡體字型，於是整片字被畫成簡體。
+#    所有文字一律以 document.xml 為準，不要照 PDF 的字形抄，也不要當成勘誤。
+
+meta:
+  lesson_uid: L0027
+  catalog_slot: G5-L15
+  title: 救援大隊的好幫手
+  level: 5
+  genre: 說明文
+  text_type: 科學
+  strategy: 用表格整理訊息──比較兩個對象
+  header_target: 目標策略：用表格整理訊息──比較兩個對象
+  課文: 曾世杰
+  學習單: 張明珠/陳淑麗
+  pdf_pages: 9
+  # 總表「議題」欄的值是「擴展視野： 有趣的」——後面像是被截掉了，總表就是這樣寫的，不補。
+  intro_topic_note: 擴展視野： 有趣的（總表原值，看起來未寫完）
+  render_artifact_note: PDF 有大量簡體字形，是 LibreOffice 對 variation selector 的字型代換，document.xml 全為繁體
+
+source_errata:
+  - id: E1
+    section: 九 知識補給站
+    locator: 第 2 支影片標題開頭
+    source: 搜救巨鼠」亮相 嬌小敏捷 搭配科技背包 找到受難者即刻通報｜
+    corrected: 「搜救巨鼠」亮相 嬌小敏捷 搭配科技背包 找到受難者即刻通報｜
+    kind: 漏字（前引號）
+    why: 有下引號「」」卻沒有對應的上引號，標題開頭少了「
+    confidence: high
+    evidence: PDF p9 與 document.xml 一致
+
+sections_present:
+  - {"no": 一, name: 讀全文-做記號}
+  - {"no": 二, name: 念順順}
+  - {"no": 三, name: 語詞我最棒}
+  - {"no": 四, name: 語詞應用}
+  - {"no": 五, name: 文章重點表}
+  - {"no": 六, name: 閱讀聚光燈, subtitle: 用表格整理訊息──比較兩個對象}
+  - {"no": 七, name: 閱讀理解}
+  - {"no": 八, name: 詞語複習}
+  - {"no": 九, name: 知識補給站}
+
+# ── 一 讀全文-做記號 ──
+body:
+  marking_instruction:
+    header: ※ 如果你有做到下列事項，請在□內打勾。
+    items:
+      - 請在不太了解的字、詞或句做記號。
+      - 重要的地方、喜歡的語詞、句子或段落做上記號。
+  # 段號欄印 一二三四 共 4 個。段號欄行距比課文欄窄會往下漂
+  #（「二」印在第 1 段末行旁、「三」印在第 2 段末行旁），對位靠語意起頭。
+  paragraph_count: 4
+  paragraphs:
+    - idx: 1
+      text: 當人們談到「救援動物」時，最有可能浮現在腦海中的形象是一隻在瓦礫中到處聞嗅的狗。然而，你可能從未想到的是，老鼠也可以勝任救援的工作。有一種原產於非洲的巨鼠，像小貓那麼大，聽力和嗅覺特別靈敏，現在，科學家正在訓練非洲巨鼠來拯救生命。
+    - idx: 2
+      text: 當強烈地震把大型建築物震垮，有人被困在像山一般高的瓦礫廢墟時，就是非洲巨鼠出任務的時機。受過專門訓練的巨鼠，配備著微型背包，背包裡有麥克風、攝影機和定位追蹤器。當巨鼠被帶到廢墟，牠們可以靠著靈敏的聽覺、嗅覺，以及鑽進狹小縫隙的能力尋找倖存者。當牠們來到倖存者身邊，就會扯一扯繫在背包上的警報器，讓它嗶嗶響，救援人員就可以根據這個信號來找到受困者。
+      note: 念順順的 ☞ 錨點印在本段首行
+    - idx: 3
+      text: 科學家表示，在救援行動中使用巨鼠好處多多。它們的嗅覺能力與狗相當，而且訓練起來同樣容易。訓練有素的巨鼠可以跟多位訓練員合作，但狗通常只接受一位訓練員的指導。此外，巨鼠體型小，狗無法通過的瓦礫縫隙，巨鼠卻可以輕而易舉的鑽過。最後，飼養和訓練巨鼠的成本比較低，不必花很多錢，只要有老鼠飼料和香蕉作為獎勵就可以了。
+    - idx: 4
+      text: 比較麻煩的是，巨鼠可能會嚇壞陷在瓦礫裡的倖存者。為了預防這種情況發生，研究人員開始在媒體大力宣傳巨鼠救難的本領，讓更多人知道，會去災難現場救人的動物，不一定是狗，也可能是大老鼠；此外，研究人員也在巨鼠的背包內安裝了揚聲器，能夠持續播放音訊，讓人們知道這些看來噁心的大老鼠並不是陰溝裡冒出來的，而是救援大隊的好幫手呢！
+  inline_marked_terms: [救援, 瓦礫, 勝任, 靈敏, 拯救, 廢墟, 倖存, 縫隙, 輕而易舉, 成本, 本領, 訓練有素]
+  inline_underlined_terms: [非洲]
+
+# ── 二 念順順 ──
+key_reading:
+  instruction: 請用計時器，從指定段落（二☞）開始朗讀，計時1分鐘讀的字數，並記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！
+  start_paragraph: 2
+  end: 課文結束
+  spans_paragraphs: [2, 3, 4]
+  printed_char_count: 327
+  # ⚠️ 跟 L0022／L0026 同一個樣態：右緣「字數」欄只標到第 3 段（327），**第 4 段整段沒標**。
+  #    教材沒印結束記號，指示語也只寫「從指定段落開始朗讀」，所以朗讀範圍取到課文結束。
+  timing_table:
+    columns: [第1次計時, 第2次計時, 第3次計時, 裁判計時]
+    unit: 字
+    judge_signature: true
+  benchmark:
+    - {threshold: ＜200字, feedback: 還要多加練習。}
+    - {threshold: 201~230字, feedback: 嗯，還不錯喲！}
+    - {threshold: ＞231字, feedback: 哇嗚，超級厲害！}
+
+# ── 三 語詞我最棒 ──
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+    A: 從本課語詞框框，找語詞。
+    B: 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+    C: 問同學。
+  vocabulary_bank: [救援, 瓦礫, 勝任, 靈敏, 拯救, 廢墟, 倖存, 縫隙, 輕而易舉, 成本, 本領, 訓練有素]
+  items:
+    - {index: 1, word: 瓦礫, definition: 建築物倒塌後留下的碎石或磚塊。}
+    - {index: 2, word: 倖存, definition: 在災難或危險中活下來。}
+    - {index: 3, word: 輕而易舉, definition: 形容做事情非常容易。}
+    - {index: 4, word: 訓練有素, definition: 經過充分的訓練，表現出高水準的能力。}
+    - {index: 5, word: 靈敏, definition: 感覺或反應迅速敏銳，能察覺細微的變化。}
+    - {index: 6, word: 勝任, definition: 有能力完成工作或任務。}
+    - {index: 7, word: 本領, definition: 技術或能力。}
+    - {index: 8, word: 拯救, definition: 將人或動物從危險或困境中救出來。}
+    - {index: 9, word: 廢墟, definition: 無人居住、廢棄不用的建築物。}
+    - {index: 10, word: 救援, definition: 採取行動，幫助災難受困者，讓他們脫離危險。}
+    - {index: 11, word: 縫隙, definition: 物體之間的細小空間或裂縫。}
+    - {index: 12, word: 成本, definition: 為了完成某件事所需要付出的代價。例如：開飲料店需要材料費、店租、水電費和店員薪水，這些都是開店的「成本」。}
+  answer_carrier: 橘色手寫字（圖形層），文字流有字但無顏色資訊
+
+# ── 四 語詞應用 ──
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  # ⚠️ 選項只有 9 個（A~I）；本課 12 個語詞裡的「救援」與「成本」沒有進選項框。
+  option_bank: {A: 本領, B: 靈敏, C: 輕而易舉, D: 倖存, E: 拯救, F: 廢墟, G: 勝任, H: 訓練有素, I: 縫隙}
+  items:
+    - {index: 1, stem: 這道數學題對他來說（　），他只花幾秒鐘就算出答案。, answer: C}
+    - {index: 2, stem: 她精通三種語言，這項（　）讓她在職場上十分吃香。, answer: A}
+    - {index: 3, stem: 在這場飛機空難中，只有少數乘客（　）。, answer: D}
+    - {index: 4, stem: 消防員奮不顧身的衝進火場，成功（　）受困的居民。, answer: E}
+    - {index: 5, stem: 這款新手機的觸控螢幕非常（　），輕輕一碰就能迅速反應。, answer: B}
+    - {index: 6, stem: 她的數理能力很好，絕對能（　）這份會計工作。, answer: G}
+    - {index: 7, stem: 這支救援隊（　），即使在危急的災難現場，仍能冷靜的做出正確的判斷。, answer: H}
+    - {index: 8, stem: 春雨降臨後萬物滋長，連水泥地的（　）裡也長出青綠的小草。, answer: I}
+  practice:
+    title: ◎小試身手：
+    items:
+      - index: 1
+        stem: 深夜，一場猛烈的火災吞噬整棟大樓，濃煙不斷從建築物內竄出，驚慌的居民受困其中。消防員立刻趕到現場，全力（　）受困者。
+        answers: [E]
+      - index: 2
+        stem: 要（　）艱難的救援任務，消防員必須具備專業的（　），並熟練操作各種滅火與救援設備。即使濃煙遮住視線，他們仍要保持感官（　），迅速察覺求救信號，確認是否仍有居民（　）。
+        answers: [G, A, B, D]
+    answer_carrier: 橘色手寫字（圖形層）
+
+# ── 五 文章重點表 ──
+keypoints:
+  title: 救援大隊的好幫手
+  layout: list
+  rows:
+    - label: 介紹對象
+      value: 【　】
+      blanks: [{answer: 非洲巨鼠}]
+    - label: 特徵
+      items:
+        - label: '1'
+          value: 體型如小貓。
+        - label: '2'
+          value: 嗅覺與聽力【　】及能鑽進狹小縫隙。
+          blanks: [{answer: 靈敏}]
+    - label: 救援任務
+      items:
+        - label: '1'
+          value: 巨鼠要在地震廢墟中尋找【　】。
+          blanks: [{answer: 倖存者}]
+        - label: '2'
+          value: 巨鼠身上裝備有麥克風、攝影機、定位追蹤器。
+        - label: '3'
+          value: 巨鼠發現倖存者後，拉扯警報器發出【　】。
+          blanks: [{answer: 信號}]
+    - label: 優勢
+      value: 相較於狗，非洲巨鼠有哪些優勢？（多選）
+      options:
+        1: 能與多位訓練員合作
+        2: 體型小，可以進入狗無法進入的地方
+        3: 比狗的嗅覺更靈敏
+        4: 訓練與飼養成本較低
+        5: 比狗更容易訓練
+      answers: [1, 2, 4]
+      answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+    - label: 潛在問題
+      value: 巨鼠可能會嚇壞瓦礫中的倖存者。
+    - label: 科學家的對策
+      value: 為了解決人們對巨鼠的恐懼，科學家採取了哪些方法？（多選）
+      options:
+        1: 透過媒體宣傳巨鼠的救援能力。
+        2: 平常舉辦與巨鼠相處的活動，讓人們更認識巨鼠。
+        3: 在巨鼠的背包內裝設揚聲器播放音訊，讓受困者明白巨鼠是救援動物。
+        4: 在巨鼠的背包外印上醒目的救援標語。
+      answers: [1, 3]
+      answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+    - label: 結論
+      value: 巨鼠是【　】的重要夥伴。
+      blanks: [{answer: 救援大隊}]
+
+# ── 六 閱讀聚光燈 ──
+spotlight:
+  strategy_name: 用表格整理訊息──比較兩個對象
+  strategy_type: comprehension_strategy
+  blocks:
+    - type: concept_box
+      text: 文章同時介紹兩個對象，細節又很多時，可以用表格來整理。怎麼做呢？先找出文章在比較哪兩個對象，再看看比較哪些項目，最後把兩個對象的訊息填進表格。完成後，就能清楚看出它們哪裡相同、哪裡不同，也比較容易說出結論。
+    - type: guide
+      text: 本課提到，救援行動中使用巨鼠好處多多，這時，我們就可以把狗與巨鼠放在一起進行比較，做成表格，就可以讓人一目了然兩者的差異囉。
+
+    # ⚠️ 下面的 (1)/(2) 與 A./B./C. 是 Word 自動編號，不在文字流裡，
+    #    所以編號只寫進 label，text 一律不帶前綴（帶了逐字門會判 FAIL）。
+    - type: guide
+      label: (1)
+      text: 整理表格步驟：
+    - type: sub_block
+      label: A. 找對象
+      items:
+        - type: guide
+          text: 找對象：文章在比較誰和誰。
+        - type: guide
+          text: 先把比較的對象寫在表格「第一列」：巨鼠與狗
+    - type: sub_block
+      label: B. 找項目
+      items:
+        - type: guide
+          text: 找項目：文章從哪些方面比較兩個對象？
+        - type: guide
+          text: 把文章比較的項目寫在表格「第一欄」
+        - type: guide
+          text: 祕訣：文章中出現「但是」、「不同」、「比較」等語詞時，可能表示作者正在比較兩個對象喔！
+        - type: passage
+          label: 範例
+          paragraphs:
+            - 範例：訓練有素的巨鼠可以跟多位訓練員合作，但狗通常只接受一位訓練員的指導。
+        - type: sub_block
+          label: ❶
+          instruction: 讀一讀，找出巨鼠與狗不同的地方。（單選）
+          items:
+            - type: single
+              prompt: 巨鼠可以跟（　）訓練員合作，
+              options: {1: 多位, 2: 一位}
+              answer: 1
+              answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+            - type: single
+              prompt: 狗只接受（　）訓練員指導。
+              options: {1: 多位, 2: 一位}
+              answer: 2
+              answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+        - type: single
+          label: ❷
+          prompt: 這句話比較的項目是什麼？
+          options: {1: 可合作的訓練員人數, 2: 嗅覺能力}
+          answer: 1
+          answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+        - type: guide
+          label: ❸
+          text: 把比較項目「可合作的訓練員人數」填入「第一欄」
+    - type: sub_block
+      label: C. 填細節
+      items:
+        - type: guide
+          text: 填細節：兩個對象在這個項目上有什麼不同？
+        - type: guide
+          text: 把巨鼠和狗的相關細節，分別填入對應的格子
+        - type: guide
+          text: 巨鼠可合作訓練員數量多位，狗可合作訓練員數量只有一位。
+        - type: fill_table
+          # 第一欄的表頭在教材上是空白格；此處補「項目」以便對位。
+          # 表格外圍另有兩個指示文字方塊「第一欄」「第一列」用虛線箭頭指向表格。
+          columns: [項目, 對象1：巨鼠, 對象2：狗]
+          rows:
+            - 項目: 項目1：可合作的訓練員人數
+              對象1：巨鼠: 【　】
+              對象1：巨鼠_blanks: [{answer: 多位}]
+              對象2：狗: 【　】
+              對象2：狗_blanks: [{answer: 一位}]
+              answer_carrier: 橘色手寫字（圖形層）
+            - 項目: 項目2：
+              note: 教材此列留白，供學生自己填第二個比較項目
+    - type: guide
+      label: (2)
+      text: 看表格：比較兩個對象，找出相同和不同，再說出重點。
+
+    # ── 小試身手 ──
+    - type: guide
+      text: ◎小試身手
+    - type: sub_block
+      label: 1.
+      instruction: 現在讓我們從文章找出比較的內容與項目
+      items:
+        - type: passage
+          label: (1)
+          paragraphs:
+            - 此外，巨鼠體型小，狗無法通過的瓦礫縫隙，巨鼠卻可以輕而易舉的鑽過。
+        - type: sub_block
+          label: (1)❶
+          instruction: 現在我們來看這句話，請你找出巨鼠與狗不同的地方。（單選）
+          items:
+            - type: single
+              prompt: 巨鼠的體型比狗（　）
+              options: {1: 大, 2: 小}
+              answer: 2
+              answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+            - type: single
+              prompt: 可以（　）鑽過瓦礫縫。
+              options: {1: 輕易, 2: 無法}
+              answer: 1
+              answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+        - type: single
+          label: (1)❷
+          prompt: 這句話比較的項目是什麼？
+          options: {1: 訓練員數量, 2: 體型, 3: 成本}
+          answer: 2
+          answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+        - type: passage
+          label: (2)
+          paragraphs:
+            - 飼養和訓練巨鼠的成本比較低，不必花很多錢，只要有老鼠飼料和香蕉作為獎勵就可以了。
+        - type: sub_block
+          label: (2)❶
+          instruction: 現在我們來看這句話，請你找出巨鼠與狗不同的地方。（單選）
+          items:
+            - type: single
+              prompt: 巨鼠訓練時需要的食物獎勵是（　）
+              options: {1: 昂貴的專業食品, 2: 簡單的飼料和香蕉}
+              answer: 2
+              answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+            - type: single
+              prompt: 所以巨鼠的訓練成本比狗（　）。
+              options: {1: 高, 2: 低}
+              answer: 2
+              answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+        - type: free_text
+          label: (2)❷
+          prompt: 這句話比較的項目是什麼？
+          answer: 訓練成本
+          answer_carrier: 橘色手寫字（圖形層）
+
+    - type: fill_table
+      label: 2.
+      instruction: 請將比較項目與細節填入表格內(請打勾，單選)
+      columns: [比較項目, 巨鼠, 狗]
+      columns_note: 第一欄表頭在教材上印的是「比較項目          對象」（同一格內左下右上兩個詞）
+      rows:
+        - 比較項目: 1.可合作的訓練員人數
+          巨鼠_options: {1: 多位, 2: 一位}
+          巨鼠_answer: 1
+          狗_options: {1: 多位, 2: 一位}
+          狗_answer: 2
+        - 比較項目: 2.【　】
+          比較項目_blanks: [{answer: 體型}]
+          巨鼠_options: {1: 大, 2: 小}
+          巨鼠_answer: 2
+          狗_options: {1: 大, 2: 小}
+          狗_answer: 1
+        - 比較項目: 3.【　】
+          比較項目_blanks: [{answer: 訓練成本}]
+          巨鼠_options: {1: 高, 2: 低}
+          巨鼠_answer: 2
+          狗_options: {1: 高, 2: 低}
+          狗_answer: 1
+      answer_carrier: 紅色 ☑（圖形）＋橘色手寫字，文字流無此資訊
+
+    - type: sub_block
+      label: 3.
+      instruction: 想一想表格內容告訴我們什麼？
+      items:
+        - type: single
+          label: ❶
+          prompt: 誰可以跟多位訓練員合作？
+          options: {1: 巨鼠, 2: 狗}
+          answer: 1
+          answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+        - type: single
+          label: ❷
+          prompt: 誰可以鑽過瓦礫縫隙？
+          options: {1: 巨鼠, 2: 狗}
+          answer: 1
+          answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+        - type: single
+          label: ❸
+          prompt: 誰的訓練成本比較低？
+          options: {1: 巨鼠, 2: 狗}
+          answer: 1
+          answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+    - type: single
+      label: 4.
+      prompt: 總結：根據上表，下列哪一句最能說明巨鼠和狗的比較結果？
+      options:
+        1: 非洲巨鼠和搜救犬的各項能力都完全不同。
+        2: 在可合作訓練員人數、體型和訓練成本方面，巨鼠較有優勢。
+      answer: 2
+      answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+
+    - type: guide
+      text: ★策略帶著走
+    - type: guide
+      text: 文章比較兩個對象時，可以用「找對象—找項目—填細節—看表格」整理訊息。
+    - type: self_check
+      prompt: ◎我會了嗎？
+      items:
+        - 我能用表格整理兩個對象的相同與不同。
+      no_correct_answer: true
+      answer_carrier: 學生自我檢核，原稿的 □ 未勾選
+
+# ── 七 閱讀理解 ──
+comprehension:
+  instruction: 請根據文章內容，選出最適合的答案，要讀完每一個選項再作答。
+  questions:
+    - index: 1
+      answer: C
+      stem: 下列語詞何者使用不正確？
+      options:
+        A: 地震後，建築物倒塌，滿地都是「瓦礫」
+        B: 這隻警犬的嗅覺十分「靈敏」，能迅速偵測危險物品
+        C: 她很節省，把所有打工賺的錢都「倖存」在郵局裡
+        D: 她經過多年努力，終於能「勝任」老師的工作
+      teacher_note: （C.「倖存」通常指生物從危險中存活）
+    - index: 2
+      answer: B
+      stem: 為什麼科學家認為使用非洲巨鼠進行救援更有優勢？
+      options:
+        A: 它們能夠幫助人類在廢墟中挖掘瓦礫
+        B: 它們訓練成本低、體型小、能與不同訓練員合作
+        C: 它們在野外比一般動物更容易生存
+        D: 它們可以配備麥克風、攝影機和定位追蹤器
+    - index: 3
+      answer: A
+      stem: 請問本課文章的主旨是什麼？
+      options:
+        A: 受過訓練的非洲巨鼠有望成為救援隊的好幫手
+        B: 地震發生時，狗可以幫助救援隊找到倖存者
+        C: 強調動物與科技結合的重要性
+        D: 地震發生時，所有動物都能成為救援隊的一員
+      teacher_note: （文中提到非洲巨鼠當救援動物好處多多，人類無須太過懼怕，所以答案為A。）
+    - index: 4
+      answer: B
+      stem: 為什麼科學家需要透過媒體宣傳非洲巨鼠的救援能力？
+      options:
+        A: 讓更多人知道非洲巨鼠的救援能力，牠們應該受到保護
+        B: 希望減少大家對巨鼠的排斥，看到巨鼠來救援時不要害怕
+        C: 希望大眾捐款，讓科學家可以做更多的巨鼠訓練
+        D: 希望說服更多的團體使用非洲巨鼠來取代搜救犬
+    - index: 5
+      answer: D
+      stem: 末段提到要用巨鼠背上的揚聲器持續播放音訊。以下選項中，哪一項最可能是揚聲器播放的內容？
+      options:
+        A: 讓受難者可以感到安全、放鬆的古典或流行音樂
+        B: 請受難者家屬錄下來的呼喊聲「ＯＯＯ，你在哪裡？」
+        C: 廣播電台或電視台新聞報導節目的當天新聞
+        D: 語音：「別害怕，這隻巨鼠是來協助救援的。」
+      teacher_note: 揚聲器是為了減低人們對老鼠的恐懼，讓他們安心等候不害怕，D最符合。
+
+# ── 八 詞語複習 ──
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words: [救援, 瓦礫, 勝任, 靈敏, 拯救, 廢墟, 訓練有素, 倖存, 縫隙, 輕而易舉, 成本, 本領]
+  grid_size: [10, 10]
+  grid:
+    - 淑全神貫注瓦礫石滿貫
+    - 媛輕而易舉捶胸頓足衝
+    - 堵住摸倖僥倖拯救責任
+    - 幸福存蝠輻縫崎援手何
+    - 沮悻圓園隙逢嶇生強陣
+    - 闊悻成功敏天壤之別靈
+    - 崩然本領訓井過費虛敏
+    - 勝潰陪秀勝練井廢墟掘
+    - 任堤玲龍利遲有有迢審
+    - 回饋雞腿事與願素條視
+  answers_are_graphical: true
+  # ⚠️ 12 個目標語詞裡，原稿只圈了 9 個：**靈敏（第6列第10欄→第7列第10欄）、
+  #    廢墟（第8列第8~9欄）、本領（第7列第3~4欄）三個格子裡有、但沒有畫圈**。
+  #    已逐一確認頁面上除了下列 9 條橘線之外沒有其他筆跡，所以是原稿答案未圈完，
+  #    不是抽取漏掉。不臆測補齊。
+  answer_paths_note: 原稿只圈出 12 個目標語詞中的 9 個；靈敏、廢墟、本領未畫圈，故不列
+  answer_paths:
+    - word: 瓦礫
+      cells: [[1, 6], [1, 7]]
+      direction: horizontal
+    - word: 輕而易舉
+      cells: [[2, 2], [2, 3], [2, 4], [2, 5]]
+      direction: horizontal
+    - word: 倖存
+      cells: [[3, 4], [4, 3]]
+      direction: diagonal_down_left
+    - word: 拯救
+      cells: [[3, 7], [3, 8]]
+      direction: horizontal
+    - word: 救援
+      cells: [[3, 8], [4, 8]]
+      direction: vertical
+    - word: 縫隙
+      cells: [[4, 6], [5, 5]]
+      direction: diagonal_down_left
+    - word: 成本
+      cells: [[6, 3], [7, 3]]
+      direction: vertical
+    - word: 勝任
+      cells: [[8, 1], [9, 1]]
+      direction: vertical
+    - word: 訓練有素
+      cells: [[7, 5], [8, 6], [9, 7], [10, 8]]
+      direction: diagonal_down_right
+
+# ── 九 知識補給站 ──
+resources:
+  label: 影片連結
+  items:
+    - index: 1
+      title: 非洲巨鼠不只掃雷 震災救援也行
+      duration: '0:58'
+      duration_seconds: 58
+      source: DaAi News Storage
+    - index: 2
+      title: 「搜救巨鼠」亮相 嬌小敏捷 搭配科技背包 找到受難者即刻通報｜
+      title_source_text: 搜救巨鼠」亮相 嬌小敏捷 搭配科技背包 找到受難者即刻通報｜
+      errata_ref: E1
+      duration: '01:50'
+      duration_seconds: 110
+      source: 雅虎香港

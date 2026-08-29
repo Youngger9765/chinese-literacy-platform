@@ -1,0 +1,22 @@
+{
+  "lesson_uid": "L0066",
+  "catalog_slot": "G6-L27",
+  "pdf_pages": 9,
+  "pages_read": 9,
+  "wall_clock_seconds": null,
+  "read_calls": 1,
+  "gate_failures": {
+    "verbatim": 0,
+    "coverage": 0,
+    "block_type": 0,
+    "word_search": 0,
+    "traditional_only": 0,
+    "keypoints_shape": 0,
+    "render_coverage": 0,
+    "sot_drift": 0,
+    "orphan_key": 0,
+    "pytest_specs": 0
+  },
+  "retries": 0,
+  "notes": "🔴 念順順段號印錯，已列 source_errata E1：指示語印「（五 ☞）」，但 ☞ drawing 錨在「不只如此…」那個 w:p ＝第六段，且右緣累計字數 165／253／394 精確等於第六段、六+七、六+七+八 的長度（若從第五段起算首段應為 115 字，印出的數字裡沒有 115）。三項證據一致，故 start_paragraph=6，instruction 採 corrected（六），原樣留在 instruction_source_text。⛔ 不要因為指示語印「五」就把 span 往前挪。 版面：段號欄與字數欄在 PDF p2 整體上移約一行（「六」印在「變。」旁），是欄位行距差造成的漂移，p1 的一～五都與段首對齊 —— 段落切分以內容為準，不要照「號碼旁邊那一行」對位。 全課 11 個 w:sym F0FE 全在第五大題聚光燈，與 PDF p5~p6 的紅 ☑ 逐一相符，無疊印遺漏。 找字：11 個 roundRect ＝ 11 個目標語詞 ＝ 11 條路徑，數量吻合；逐格取字全部拼得回，格子沒有錯字。 總表 10 個語詞全在學習單語詞框內，學習單多「凡塵俗世」一個（框內與第八大題灰框都是 11 個），屬總表少收。  【2026-08-18 新規則回測】① 找字圈選個數（先扣紙外殘留）：roundRect 11 個、紙外殘留 0（像素掃描：橘色 x 範圍 372~1291，無任何觸及紙右緣者）→ 紙上 11 ＝ 路徑 11，不觸發「紙上>路徑」警報。② 第三種答案載體 w:bdr 非 auto 顏色字元框線：本課 0 個（25 個 w:bdr 全是 color=auto 的黑框，即課文語詞標示，已收在 inline_marked_terms）。正向對照：同一支偵測器對 L0070 回 3 個 E97132/accent2（得意／思念／後悔），證明偵測器有效，本課的 0 是真負而非查法壞掉。  【2026-08-18】第八道門 orphan_key_gate：知識補給站原本寫成 top-level key `supplement`，MODULES 表只認 `resources`，整節會被靜默丟掉而八道門全綠 —— 已改名為 `resources`（內層 `items` 不變）。"
+}

@@ -1,0 +1,97 @@
+{
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 4,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "研究一",
+      "研究二",
+      "研究三",
+      "研究結論"
+    ],
+    "template_kind": "scientific"
+  },
+  "layout": "worksheet_table",
+  "rows": [
+    {
+      "interactive_type": "display",
+      "label": "高地訓練有助於運動表現嗎？",
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "探究問題",
+      "value": "高地訓練有助於運動表現嗎？"
+    },
+    {
+      "interactive_type": "display",
+      "label": "答案",
+      "value": "不一定，因人而異。"
+    },
+    {
+      "interactive_type": "display",
+      "label": "支持證據",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "研究一",
+          "value": "在高地，紅血球生成素的濃度變化【　　　】。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "研究二",
+          "value": "(1)重複研究一的結論，高地訓練對紅血球增生效果因人而異\n(2)高地訓練後，紅血球增加者5000公尺成績【　　　】；紅血球未增加者成績反而略為【　　　】。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "研究三",
+          "value": "玻利維亞人也居住在高地，但他們體內紅血球太多，血液變得濃稠，反而容易發生【　　　】，對運動員來說【　　　】是好事。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "研究結論",
+      "value": "高地訓練需要考量【　　　】，才可能得到最好成效。"
+    }
+  ],
+  "title": "高地訓練有助於運動表現嗎？",
+  "worksheet_rows": [
+    {
+      "kind": "pair",
+      "label": "探究問題",
+      "value": "高地訓練有助於運動表現嗎？"
+    },
+    {
+      "kind": "pair",
+      "label": "答案",
+      "value": "不一定，因人而異。"
+    },
+    {
+      "items": [
+        {
+          "label": "研究一",
+          "value": "在高地，紅血球生成素的濃度變化【　　　】。"
+        },
+        {
+          "label": "研究二",
+          "value": "(1)重複研究一的結論，高地訓練對紅血球增生效果因人而異\n(2)高地訓練後，紅血球增加者5000公尺成績【　　　】；紅血球未增加者成績反而略為【　　　】。"
+        },
+        {
+          "label": "研究三",
+          "value": "玻利維亞人也居住在高地，但他們體內紅血球太多，血液變得濃稠，反而容易發生【　　　】，對運動員來說【　　　】是好事。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "支持證據"
+    },
+    {
+      "kind": "pair",
+      "label": "研究結論",
+      "value": "高地訓練需要考量【　　　】，才可能得到最好成效。"
+    }
+  ]
+}

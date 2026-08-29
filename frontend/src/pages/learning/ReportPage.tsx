@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { stepPath } from '../../config/stepPath';
 import { useNavigate, useParams } from 'react-router-dom';
 import AssessmentReport from '../../components/reading-steps/AssessmentReport';
 import XPAwardToast, { type XPAwardResult } from '../../components/gamification/XPAwardToast';
@@ -25,6 +26,7 @@ const ReportPage: React.FC = () => {
     firstIncompleteStepPath,
     hasActiveAssignment,
     saveStepProgressPatch,
+    stepProgressData,
   } = useLearningContext();
   const { user, token } = useAuth();
   const navigate = useNavigate();
@@ -85,9 +87,13 @@ const ReportPage: React.FC = () => {
       : undefined;
     const comprehensionPassed = comprehensionPct !== undefined && comprehensionPct >= 60;
 
+    // comprehensionPct 這裡本來就算好了，原本卻只把 `>= 60` 的布林送上去 ——
+    // 於是沒達標的學生在後端整段 `if scores` 不成立，**完全沒有分數**（#2904）。
+    // 真實百分比一起送，後端有值就用它；舊 build 沒送時才退回 passed。
     reportSessionComplete(Number(user.id), dbSessionId, token, {
       readingAccuracy,
       comprehensionPassed,
+      comprehensionScore: comprehensionPct,
     })
       .then((result) => {
         if (result.xp_earned > 0) {
@@ -168,7 +174,7 @@ const ReportPage: React.FC = () => {
           <div className="flex gap-3">
             <button
               type="button"
-              onClick={() => navigate(`/learn/${storyId}/${firstIncompleteStepPath}`)}
+              onClick={() => navigate(stepPath(storyId!, firstIncompleteStepPath))}
               className="px-6 py-2.5 rounded-full bg-accent hover:bg-accent-hover text-white text-sm font-bold"
             >
               繼續未完成關卡
@@ -198,11 +204,12 @@ const ReportPage: React.FC = () => {
         session={session}
         story={selectedStory}
         onRetry={handleRetry}
-        onGoToVocab={() => navigate(`/learn/${storyId}/vocab`)}
+        onGoToVocab={() => navigate(`/learn/${storyId}/character-practice`)}
         dbSessionId={dbSessionId}
         token={token}
         comprehensionScores={comprehensionScores}
         comprehensionScoresLoading={comprehensionScoresLoading}
+        stepProgressData={stepProgressData}
         readingGoals={
           assignmentReadingGoals
             ? {

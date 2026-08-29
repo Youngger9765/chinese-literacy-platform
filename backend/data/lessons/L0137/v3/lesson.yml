@@ -1,0 +1,41 @@
+lesson_uid: L0137
+version_id: v3
+title: 未解之謎──石頭的祕密
+catalog_slot: G9-L16
+sections_present:
+- 'no': 一
+  name: 讀全文-做記號
+  part: 1/2
+  part_title: 第16課 未解之謎──石頭的祕密（一）：巨石陣
+- 'no': 一
+  name: 讀全文-做記號
+  part: 2/2
+  part_title: 第17課 未解之謎──石頭的祕密（二）：摩艾走路
+- 'no': 二
+  name: 語詞我最棒
+  _scope: 跨課文習作
+- 'no': 三
+  name: 語詞應用
+  _scope: 跨課文習作
+- 'no': 四
+  name: 文章重點整理
+  _scope: 跨課文習作
+- 'no': 五
+  name: 閱讀理解
+  _scope: 跨課文習作
+- 'no': 六
+  name: 詞語複習
+  _scope: 跨課文習作
+- 'no': 七
+  name: 知識補給站
+  _scope: 跨課文習作
+source:
+  extracted_by: extract-lesson-multimodal
+  pdf_pages: 12
+  drive_path: 9年級/G9-L16~17多文本-未解之謎-巨石陣+摩艾石像（多文本閱讀-比較異同＋科學步驟-假設驗證歷程）.docx
+  docx_md5: md5-12:44874a447f96
+parts:
+- id: ut67x
+  label: 西元1130年前後，一位英格蘭史
+- id: ppwdu
+  label: 第17課  未解之謎──石頭的祕密（二）：摩艾走路

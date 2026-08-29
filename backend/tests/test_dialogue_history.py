@@ -24,6 +24,21 @@ from unittest.mock import patch, AsyncMock
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
+# #1135 加了一道 gate：story_slug 必須指到真的一課（課號數字，且 DB 的 Text 或課程
+# 語料裡找得到）。這支測試從那時起就一直是 422，而它不在 CI 具名清單裡，所以沒人看到。
+# 修法照 test_step_progress_api.py 既有的做法：拿真的課號，不要自己編 slug。
+# 名字保留原本的語意（哪個測試用哪一課），只是值換成真的課號 —— 每個名字拿不同的一課，
+# 因為 sessions 是 get-or-create per (student, slug)。
+from app.services.lesson_loader import get_all_lessons  # noqa: E402
+
+_LESSON_IDS = [str(_l["id"]) for _l in get_all_lessons()]
+assert len(_LESSON_IDS) >= 14, f"課程語料只有 {len(_LESSON_IDS)} 課，不夠給每個測試一課"
+_SLUGS = {_n: _LESSON_IDS[_i] for _i, _n in enumerate(
+    ['test-slug', 'empty-story', 'ordered-story', 'protected-story', 'shape-test', 'session-a', 'session-b', 'persist-story', 'persist-answer-story', 'e2e-story', 'teacher-dialogue-story', 'forbidden-story', 'mismatch-story', 'no-dialogue-story']
+)}
+
+
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, event
@@ -196,7 +211,7 @@ def user_b(client):
     return _register_user(client, "da_user_b")
 
 
-def _create_session(client, token: str, story_slug: str = "test-slug") -> int:
+def _create_session(client, token: str, story_slug: str = _SLUGS["test-slug"]) -> int:
     resp = client.post(
         "/api/learning/sessions",
         json={"story_slug": story_slug},
@@ -214,7 +229,7 @@ def _create_session(client, token: str, story_slug: str = "test-slug") -> int:
 class TestDialogueHistoryEndpoint:
     def test_returns_empty_list_for_new_session(self, client, user_a):
         """A brand-new session with no dialogue turns returns empty turns list."""
-        session_id = _create_session(client, user_a["token"], "empty-story")
+        session_id = _create_session(client, user_a["token"], _SLUGS["empty-story"])
 
         resp = client.get(
             f"/api/learning/sessions/{session_id}/dialogue",
@@ -223,13 +238,13 @@ class TestDialogueHistoryEndpoint:
         assert resp.status_code == 200
         data = resp.json()
         assert data["session_id"] == session_id
-        assert data["story_slug"] == "empty-story"
+        assert data["story_slug"] == _SLUGS["empty-story"]
         assert data["turns"] == []
         assert data["total"] == 0
 
     def test_returns_stored_turns_in_order(self, client, user_a):
         """Dialogue turns stored directly in DB are returned in turn_order order."""
-        session_id = _create_session(client, user_a["token"], "ordered-story")
+        session_id = _create_session(client, user_a["token"], _SLUGS["ordered-story"])
 
         # Seed dialogue turns directly in DB
         db = TestingSessionLocal()
@@ -293,7 +308,7 @@ class TestDialogueHistoryEndpoint:
 
     def test_returns_403_for_other_users_session(self, client, user_a, user_b):
         """User B cannot access User A's session dialogue."""
-        session_id = _create_session(client, user_a["token"], "protected-story")
+        session_id = _create_session(client, user_a["token"], _SLUGS["protected-story"])
 
         resp = client.get(
             f"/api/learning/sessions/{session_id}/dialogue",
@@ -308,7 +323,7 @@ class TestDialogueHistoryEndpoint:
 
     def test_response_shape_has_all_fields(self, client, user_a):
         """DialogueTurnResponse must include all required fields."""
-        session_id = _create_session(client, user_a["token"], "shape-test")
+        session_id = _create_session(client, user_a["token"], _SLUGS["shape-test"])
 
         db = TestingSessionLocal()
         try:
@@ -340,8 +355,8 @@ class TestDialogueHistoryEndpoint:
 
     def test_only_returns_turns_for_requested_session(self, client, user_a):
         """Turns from another session of the same user are not included."""
-        session_a = _create_session(client, user_a["token"], "session-a")
-        session_b = _create_session(client, user_a["token"], "session-b")
+        session_a = _create_session(client, user_a["token"], _SLUGS["session-a"])
+        session_b = _create_session(client, user_a["token"], _SLUGS["session-b"])
 
         db = TestingSessionLocal()
         try:
@@ -460,7 +475,7 @@ class TestDialoguePersistence:
 
     def test_persists_opening_question_when_db_session_id_provided(self, client, user_a):
         """When student_answer=null + db_session_id, the AI opening question is stored."""
-        session_id = _create_session(client, user_a["token"], "persist-story")
+        session_id = _create_session(client, user_a["token"], _SLUGS["persist-story"])
         socratic_id = str(uuid.uuid4())
         mock_result = self._mock_agent_start()
 
@@ -499,7 +514,7 @@ class TestDialoguePersistence:
 
     def test_persists_student_feedback_and_next_question(self, client, user_a):
         """When student_answer is provided + db_session_id, three turns are stored."""
-        session_id = _create_session(client, user_a["token"], "persist-answer-story")
+        session_id = _create_session(client, user_a["token"], _SLUGS["persist-answer-story"])
         socratic_id = str(uuid.uuid4())
 
         # First: start session (opening question)
@@ -561,7 +576,7 @@ class TestDialoguePersistence:
 
     def test_dialogue_history_returns_persisted_turns(self, client, user_a):
         """Turns persisted via comprehension/chat are retrievable via dialogue endpoint."""
-        session_id = _create_session(client, user_a["token"], "e2e-story")
+        session_id = _create_session(client, user_a["token"], _SLUGS["e2e-story"])
         socratic_id = str(uuid.uuid4())
 
         start_result = self._mock_agent_start()
@@ -649,9 +664,11 @@ class TestTeacherDialogueHistory:
         # Create a learning session for the student
         session_resp = client.post(
             "/api/learning/sessions",
-            json={"story_slug": "teacher-dialogue-story"},
+            json={"story_slug": _SLUGS["teacher-dialogue-story"]},
             headers=auth_header(student_token),
         )
+        assert session_resp.status_code == 201, session_resp.text
+        # ⛔ 沒有這一行的話，422 會變成 `KeyError: 'id'` —— 看不出是 slug 被擋
         assert session_resp.status_code == 201, session_resp.text
         session_id = session_resp.json()["id"]
 
@@ -698,7 +715,7 @@ class TestTeacherDialogueHistory:
         data = resp.json()
         assert data["session_id"] == session_id
         assert data["student_id"] == student_id
-        assert data["story_slug"] == "teacher-dialogue-story"
+        assert data["story_slug"] == _SLUGS["teacher-dialogue-story"]
         assert data["total"] == 3
         turns = data["turns"]
         assert [t["turn_order"] for t in turns] == [0, 1, 2]
@@ -713,9 +730,11 @@ class TestTeacherDialogueHistory:
 
         session_resp = client.post(
             "/api/learning/sessions",
-            json={"story_slug": "no-dialogue-story"},
+            json={"story_slug": _SLUGS["no-dialogue-story"]},
             headers=auth_header(student_token),
         )
+        # ⛔ 沒有這一行的話，422 會變成 `KeyError: 'id'` —— 看不出是 slug 被擋
+        assert session_resp.status_code == 201, session_resp.text
         session_id = session_resp.json()["id"]
 
         resp = client.get(
@@ -734,9 +753,11 @@ class TestTeacherDialogueHistory:
         # Create session for student
         session_resp = client.post(
             "/api/learning/sessions",
-            json={"story_slug": "mismatch-story"},
+            json={"story_slug": _SLUGS["mismatch-story"]},
             headers=auth_header(student_token),
         )
+        # ⛔ 沒有這一行的話，422 會變成 `KeyError: 'id'` —— 看不出是 slug 被擋
+        assert session_resp.status_code == 201, session_resp.text
         session_id = session_resp.json()["id"]
 
         # Use a different (non-existent) student_id
@@ -756,9 +777,11 @@ class TestTeacherDialogueHistory:
 
         session_resp = client.post(
             "/api/learning/sessions",
-            json={"story_slug": "forbidden-story"},
+            json={"story_slug": _SLUGS["forbidden-story"]},
             headers=auth_header(student_token),
         )
+        # ⛔ 沒有這一行的話，422 會變成 `KeyError: 'id'` —— 看不出是 slug 被擋
+        assert session_resp.status_code == 201, session_resp.text
         session_id = session_resp.json()["id"]
 
         resp = client.get(

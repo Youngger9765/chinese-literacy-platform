@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { stepPath as buildStepPath } from '../../config/stepPath';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import {
@@ -31,7 +32,7 @@ const MyAssignments: React.FC = () => {
   const [classroomFilter, setClassroomFilter] = useState<string>('all');
 
   const assignmentSteps = useMemo(() => ACTIVE_STEPS, []);
-  const defaultStepPath = assignmentSteps[0]?.id ?? 'reading-annotation';
+  const defaultStepPath = assignmentSteps[0]?.id ?? 'full-text-annotate';
   const stepIdSet = useMemo(() => new Set(assignmentSteps.map((s) => s.id)), [assignmentSteps]);
 
   // Build classroom name -> teacher name lookup
@@ -135,7 +136,7 @@ const MyAssignments: React.FC = () => {
         },
         sessionId: result.session_id,
       });
-      navigate(`/learn/${textKey}/${defaultStepPath}`);
+      navigate(buildStepPath(textKey, defaultStepPath));
     } catch (err) {
       if (err instanceof AssignmentApiError) {
         setError(err.message);
@@ -173,7 +174,7 @@ const MyAssignments: React.FC = () => {
       sessionId,
     });
     const resumeStepPath = getResumeStepPath(a);
-    navigate(`/learn/${textKey}/${resumeStepPath}`);
+    navigate(buildStepPath(textKey, resumeStepPath));
   };
 
   const handleViewReport = (a: StudentAssignmentResponse) => {

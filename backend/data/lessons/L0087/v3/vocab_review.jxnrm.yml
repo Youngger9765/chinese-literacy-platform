@@ -1,0 +1,172 @@
+lesson_uid: L0087
+version_id: v3
+section_no: 七
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 百思不解
+  - 嘴饞
+  - 撒賴
+  - 慢條斯理
+  - 層出不窮
+  - 難如登天
+  - 自怨自艾
+  - 醍醐灌頂
+  - 嘀咕
+  - 怨懟
+  - 儼然
+  - 故技重施
+  - 犯小人
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 醍醐灌頂藝壇大師鬱嘴
+  - 開心百食故技重施卒饞
+  - 儼滿思物質慢狼吞虎嚥
+  - 然意不麥香雞條刷籬笆
+  - 不足解捨不得層斯耍撒
+  - 難如登天得出門賴理賴
+  - 脆皮炸雞不白自目嚴孔
+  - 怨對年窮品思怨怨然融
+  - 滴嘀紀嫉嚐不自目策怨
+  - 咕沽犯小人解艾艾略懟
+  answers_are_graphical: true
+  answers_printed: true
+  answer_paths:
+  - word: 醍醐灌頂
+    cells:
+    - - 1
+      - 1
+    - - 1
+      - 2
+    - - 1
+      - 3
+    - - 1
+      - 4
+    direction: horizontal
+  - word: 嘴饞
+    cells:
+    - - 1
+      - 10
+    - - 2
+      - 10
+    direction: vertical
+  - word: 故技重施
+    cells:
+    - - 2
+      - 5
+    - - 2
+      - 6
+    - - 2
+      - 7
+    - - 2
+      - 8
+    direction: horizontal
+  - word: 百思不解
+    cells:
+    - - 2
+      - 3
+    - - 3
+      - 3
+    - - 4
+      - 3
+    - - 5
+      - 3
+    direction: vertical
+  - word: 儼然
+    cells:
+    - - 3
+      - 1
+    - - 4
+      - 1
+    direction: vertical
+  - word: 慢條斯理
+    cells:
+    - - 3
+      - 6
+    - - 4
+      - 7
+    - - 5
+      - 8
+    - - 6
+      - 9
+    direction: diagonal_down_right
+  - word: 層出不窮
+    cells:
+    - - 5
+      - 7
+    - - 6
+      - 6
+    - - 7
+      - 5
+    - - 8
+      - 4
+    direction: diagonal_down_left
+  - word: 撒賴
+    cells:
+    - - 5
+      - 10
+    - - 6
+      - 10
+    direction: vertical
+  - word: 難如登天
+    cells:
+    - - 6
+      - 1
+    - - 6
+      - 2
+    - - 6
+      - 3
+    - - 6
+      - 4
+    direction: horizontal
+  - word: 自怨自艾
+    cells:
+    - - 7
+      - 7
+    - - 8
+      - 7
+    - - 9
+      - 7
+    - - 10
+      - 7
+    direction: vertical
+  - word: 嘀咕
+    cells:
+    - - 9
+      - 2
+    - - 10
+      - 1
+    direction: diagonal_down_left
+  - word: 怨懟
+    cells:
+    - - 9
+      - 10
+    - - 10
+      - 10
+    direction: vertical
+  - word: 犯小人
+    cells:
+    - - 10
+      - 3
+    - - 10
+      - 4
+    - - 10
+      - 5
+    direction: horizontal
+  notes:
+    answer_paths: '13 個目標語詞全部圈到，逐格取字皆能拼回，格子沒有錯字。
+
+      ✅ 幾何交叉驗證乾淨：`roundRect` 共 13 個，**全部在紙面上**（無離頁殘留），
+
+      圈也是 13 個，數量相符。
+
+      ⚠️ 這張格子放了不少誘餌：兩個「怨」在第 8 列（第 1、7、8 欄共三個）、
+
+      第 7 與第 9 列各有一個「自」、第 10 列有兩個「艾」。被圈的都是能接出完整語詞的那一條
+
+      （自怨自艾走第 7 欄直下），逐格取字已確認。'
+  slug: jxnrm
+  text_ref: rpcyh

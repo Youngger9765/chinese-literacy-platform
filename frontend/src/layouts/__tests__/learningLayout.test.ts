@@ -63,10 +63,10 @@ describe('learning_step_transitions_follow_active_step_config', () => {
   it('every step in the default active sequence (except report and intro) has a STEP_TRANSITIONS entry', () => {
     const activeSteps = resolveActiveSteps(); // default sequence, enabled only
     // 'report' is the terminal step — no outgoing transition needed.
-    // 'intro' completion is handled by handleStartReading (not a handleFinish*),
+    // 'lesson-intro' completion is handled by handleStartReading (not a handleFinish*),
     // so it does not need a STEP_TRANSITIONS entry.
     const stepsNeedingTransition = activeSteps
-      .filter((s) => s.id !== 'report' && s.id !== 'intro')
+      .filter((s) => s.id !== 'report' && s.id !== 'lesson-intro')
       .map((s) => s.id);
 
     for (const stepId of stepsNeedingTransition) {
@@ -90,11 +90,11 @@ describe('learning_step_transitions_follow_active_step_config', () => {
   });
 
   it('getNextEnabledStep falls back to STEP_TRANSITIONS when step not in custom sequence', () => {
-    // 'tutor' is not in this custom list
-    const customSequence = ['reading-annotation', 'full-reading', 'report'];
-    const result = getNextEnabledStep('tutor', customSequence);
-    // Falls back to STEP_TRANSITIONS['tutor'].nextStep = 'full-reading'
-    expect(result).toBe(STEP_TRANSITIONS['tutor'].nextStep);
+    // 'paragraph-reading' is not in this custom list
+    const customSequence = ['full-text-annotate', 'key-passage-reading', 'report'];
+    const result = getNextEnabledStep('paragraph-reading', customSequence);
+    // Falls back to STEP_TRANSITIONS['paragraph-reading'].nextStep = 'key-passage-reading'
+    expect(result).toBe(STEP_TRANSITIONS['paragraph-reading'].nextStep);
   });
 
   it('each STEP_TRANSITIONS entry has consistent completeStep == key', () => {
@@ -115,10 +115,10 @@ describe('learning_step_transitions_follow_active_step_config', () => {
 
   it('a custom lesson step_sequence that disables some steps still gets correct next', () => {
     // Simulate a lesson that skips vocab steps — goes directly annotation → tutor → full-reading → report
-    const customIds = ['reading-annotation', 'tutor', 'full-reading', 'report'];
-    expect(getNextEnabledStep('reading-annotation', customIds)).toBe('tutor');
-    expect(getNextEnabledStep('tutor', customIds)).toBe('full-reading');
-    expect(getNextEnabledStep('full-reading', customIds)).toBe('report');
+    const customIds = ['full-text-annotate', 'paragraph-reading', 'key-passage-reading', 'report'];
+    expect(getNextEnabledStep('full-text-annotate', customIds)).toBe('paragraph-reading');
+    expect(getNextEnabledStep('paragraph-reading', customIds)).toBe('key-passage-reading');
+    expect(getNextEnabledStep('key-passage-reading', customIds)).toBe('report');
   });
 });
 
@@ -152,7 +152,7 @@ describe('assignment_completion_does_not_submit_until_required_steps_done', () =
 
   it('returns not-ready when only some steps are completed', () => {
     // Partially complete — only the first 3 steps done
-    const partial = ['reading-annotation', 'tutor', 'full-reading'];
+    const partial = ['full-text-annotate', 'paragraph-reading', 'key-passage-reading'];
     const { isReady } = computeIsReady(partial);
     expect(isReady).toBe(false);
   });

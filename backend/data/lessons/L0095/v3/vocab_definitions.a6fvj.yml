@@ -1,0 +1,61 @@
+lesson_uid: L0095
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+  - 從本課語詞框中找語詞。
+  - 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+  - 問同學。
+  vocabulary_bank:
+  - 魁梧
+  - 離群索居
+  - 遲滯
+  - 奪門而出
+  - 神祇
+  - 禁忌
+  - 隻手遮天
+  - 倫理
+  - 抽搐
+  - 轉瞬即逝
+  - 哀鳴
+  items:
+  - index: 1
+    word: 抽搐
+    definition: 肌肉不受控制的收縮、抖動。
+  - index: 2
+    word: 遲滯
+    definition: 緩慢、停止不動。
+  - index: 3
+    word: 神祇
+    definition: 指神明。
+  - index: 4
+    word: 離群索居
+    definition: 離開人群，自己生活。
+  - index: 5
+    word: 魁梧
+    definition: 體格高大強壯。
+  - index: 6
+    word: 奪門而出
+    definition: 迅速衝出大門。「奪」是指衝出去的意思。
+  - index: 7
+    word: 禁忌
+    definition: 因為風俗習慣或想法，而被禁止說的話或做的事。
+  - index: 8
+    word: 轉瞬即逝
+    definition: 一眨眼間就消失不見。
+  - index: 9
+    word: 隻手遮天
+    definition: 想用一隻手遮住天，比喻隱瞞事實的真相。
+  - index: 10
+    word: 倫理
+    definition: 判斷一件事應不應該做、做法是否合宜的
+  - index: 11
+    word: 哀鳴
+    definition: 因痛苦或悲傷而發出的叫聲。
+  notes:
+    vocabulary_bank: 語詞框原文為「本課語詞：魁梧、離群索居、遲滯、奪門而出、神祇、禁忌、隻手遮天、倫理、抽搐、轉瞬即逝、哀鳴」（11 個，句末無句號）。
+    answer_carrier: 橘色手寫字（PDF p4）；文字層的空格內已填有同樣的答案
+    items: 第 10 題的解釋句末**沒有句號**（原稿如此，未補）。
+  slug: a6fvj
+  text_ref: 9yvqf

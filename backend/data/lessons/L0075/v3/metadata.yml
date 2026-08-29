@@ -1,0 +1,54 @@
+lesson_uid: L0075
+version_id: v3
+level: 6
+genre: 說明文
+strategy: 摘要策略──問題—解決—結果找重點
+課文作者: 曾世杰
+學習單: 陳淑麗
+lesson_no: 8
+series: 一般
+lesson_seq: 6080
+intro: 這篇文章講述了一場發生在北極海的驚險救援行動。數千頭白鯨因氣候驟變，被困在結冰的海峽中，面臨窒息的危機。從當地村民的初步援助，到政府派出破冰船的浩大工程，救援過程充滿挑戰。更令人意想不到的是，當白鯨因害怕破冰船的噪音而不敢前進時，一場結合音樂的奇特救援方式就此展開。文章描寫了人與動物之間如何透過理解與創意，共同克服困境，展現了生命的可貴與希望。
+notes:
+  title: 學習單與總表都印全名；`backend/data/lessons/L0075/v2/lesson.yml` 的 title 是簡稱「白鯨救援」
+  總表_文體: 說明文
+  總表_類型: 科學
+  總表_議題: null
+  總表_聚光燈策略: 摘要策略──問題—解決—結果找重點
+  總表_第六大題標題: 摘要策略──問題—解決—結果找重點
+  總表_文本類型: 單
+  總表_語詞_原樣:
+  - 翻騰
+  - 凜冽
+  - 窒息
+  - 緩不濟急
+  - 僧多粥少
+  - 徒勞無功
+  - 筋疲力竭
+  - 束手無策
+  - 屏氣凝神
+  總表_對照: "・語詞：總表 9 個與學習單語詞框 9 個**完全一致**（含順序）。\n・破折號：總表策略欄用「──」（兩個 U+2500），學習單標題印的是「—」（U+2014），\n\
+    \  本檔 meta.strategy 採學習單印的形式。\n・總表「第六大題標題」欄名對本課成立（本課聚光燈確實是第六大題）。"
+strategy_explained: '這一課，我們要練習從故事裡找出「遇到的困難」、「大家怎麼想辦法解決」以及「最後的結果」
+
+  這篇文章裡，白鯨被冰困住、又害怕船的聲音，這些都是很清楚的問題，而村民和科學家運用創意想辦法，最後成功救了白鯨，正好可以練習找出這些部分
+
+  所以你讀的時候，可以一邊想「發生了什麼問題」、「有哪些人做了什麼事來幫忙」、「最後怎麼樣了」，這樣就能把文章重點抓得好好的'
+strategy_sources:
+  worksheet: 摘要策略──問題—解決—結果找重點
+  master_sheet: 摘要策略──問題.解決結構找重點
+  previous: 摘要策略—問題—解決—結果找重點
+source_profile:
+  class: standard
+  note: 單一錨點 + 有計數欄 + idx 唯一 —— 走主路徑
+  has_key_reading_section: true
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: null
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 1
+  has_counter_column: true
+  body_in_tables: true
+  invisible_chars_docx_only: true
+  profiled: '2026-08-24'

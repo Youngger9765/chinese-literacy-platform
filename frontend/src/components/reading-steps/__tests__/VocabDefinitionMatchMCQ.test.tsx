@@ -42,11 +42,9 @@ describe('MultipleChoiceMode — #1912 wrong-answer feedback', () => {
 
     // The first definition shown is for defIndex 0 → correct answer is '勤奮' (idx 0)
     // Pick any button that is NOT the correct word (i.e., a wrong one)
-    const allButtons = screen.getAllByRole('button');
-    const wrongButton = allButtons.find(
-      (btn) => btn.textContent?.trim() !== '' && btn.textContent?.trim() !== '勤奮'
-    );
-    expect(wrongButton).toBeTruthy();
+    // ⚠️ 舊寫法用 find 挑「第一個非空且不是正解」的按鈕 —— 那會挑到「示範」，
+    //    根本沒點到選項，於是測出「沒有錯誤標記」的假結果（#2933）。
+    const wrongButton = screen.getByRole('button', { name: '謙虛' });
 
     fireEvent.click(wrongButton!);
 
@@ -97,11 +95,8 @@ describe('MultipleChoiceMode — #1912 wrong-answer feedback', () => {
       />
     );
 
-    const allButtons = screen.getAllByRole('button');
-    const wrongButton = allButtons.find(
-      (btn) => btn.textContent?.trim() !== '' && btn.textContent?.trim() !== '勤奮'
-    );
-    fireEvent.click(wrongButton!);
+    // 同一個壞掉的 find（會挑到「示範」），改成明確點一個錯誤選項
+    fireEvent.click(screen.getByRole('button', { name: '謙虛' }));
 
     // After wrong answer, the feedback panel must mention the correct answer
     // Use getAllByText (no throw on multiple) and confirm at least one element has '勤奮'
@@ -122,17 +117,19 @@ describe('MultipleChoiceMode — #1912 wrong-answer feedback', () => {
       />
     );
 
-    const allButtons = screen.getAllByRole('button');
-    const wrongButton = allButtons.find(
-      (btn) => btn.textContent?.trim() !== '' && btn.textContent?.trim() !== '勤奮'
-    );
-    fireEvent.click(wrongButton!);
+    // 同一個壞掉的 find（會挑到「示範」），改成明確點一個錯誤選項
+    fireEvent.click(screen.getByRole('button', { name: '謙虛' }));
 
-    // After wrong answer, there must be an explicit "next" or "繼續" button
-    const nextBtn =
-      screen.queryByRole('button', { name: /繼續|下一題|next/i }) ||
-      screen.queryByRole('button', { name: /再試一次|try again/i });
-    expect(nextBtn).toBeTruthy();
+    // #2159 之後不再顯示「下一題」按鈕，改成把錯的選項標 ✗、讓學生直接重選。
+    // 這條要鎖的意圖沒變：不可靜默接受、不可自動前進。
+    const labels = screen.getAllByRole('button').map((b) => b.textContent?.trim() ?? '');
+    expect(labels.some((t) => t.includes('✗')), `錯的選項沒有標記：${labels}`).toBe(true);
+    expect(
+      screen.queryByRole('button', { name: /繼續|下一題/ }),
+      '不該自動放行到下一題',
+    ).toBeNull();
+    // 仍要能繼續作答
+    expect(screen.getByRole('button', { name: '勤奮' })).not.toBeDisabled();
   });
 });
 
@@ -207,5 +204,159 @@ describe('MultipleChoiceMode — correct answer behavior (must stay green)', () 
     });
 
     expect(screen.getByText('2 / 3')).toBeTruthy();
+  });
+});
+
+/* ------------------------------------------------------------------ */
+/*  #2773: firstTryCorrect must survive a retry-into-correct            */
+/*                                                                       */
+/*  Root cause this locks: handleChoice records `correct` from the      */
+/*  LATEST attempt on purpose (so live in-round checkmarks reflect      */
+/*  current state) — but that means a student who picked wrong once     */
+/*  then retried into the right answer ends up with correct: true and   */
+/*  is invisible to any "what did I get wrong" summary. Verified live   */
+/*  on staging (/learn/20011/vocab-definition): answering 2 of 11       */
+/*  questions wrong on the first try still showed "答對 11 / 11 題"     */
+/*  with zero items flagged wrong.                                      */
+/* ------------------------------------------------------------------ */
+
+describe('MultipleChoiceMode — #2773 firstTryCorrect (immutable first-try verdict)', () => {
+  it('records firstTryCorrect: false for an item answered wrong first, even after a correct retry', async () => {
+    const onAllDone = vi.fn();
+    render(
+      <MultipleChoiceMode
+        vocab={VOCAB}
+        activeDefIndices={[0]}
+        onAllDone={onAllDone}
+      />
+    );
+
+    // Wrong pick first
+    const wrongButton = screen.getAllByRole('button').find(
+      (btn) => btn.textContent?.trim() !== '' && btn.textContent?.trim() !== '勤奮'
+    );
+    fireEvent.click(wrongButton!);
+
+    // Then the correct pick — this is what advances/completes the round
+    fireEvent.click(screen.getByRole('button', { name: '勤奮' }));
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 1400));
+    });
+
+    expect(onAllDone).toHaveBeenCalledOnce();
+    expect(onAllDone).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        // correct reflects the final (retried) attempt — stays true —
+        // but firstTryCorrect must remain false, permanently.
+        expect.objectContaining({ defIndex: 0, correct: true, firstTryCorrect: false }),
+      ])
+    );
+  });
+
+  // Caught live on the PR preview for #2773's own fix (docs/evidence/qa-2026-08-20/
+  // vocab-definition-firsttrycorrect-fixed-but-wrong-word-bug.png): the summary
+  // correctly showed "答對 10 / 11 題", but the wrong item's "你選了 X" line showed
+  // the CORRECT word on both sides ("你選了 龍爭虎鬥 → 正確：龍爭虎鬥") — because
+  // `answeredWordIdx` reflects the LATEST attempt (the retry that got it right),
+  // same overwrite-on-retry behavior `firstTryCorrect` was added to work around.
+  // `firstTryAnsweredWordIdx` must capture the FIRST (wrong) pick specifically,
+  // immutably, the same way `firstTryCorrect` does.
+  it('records firstTryAnsweredWordIdx as the FIRST wrong pick, not the later correct retry', async () => {
+    const onAllDone = vi.fn();
+    render(
+      <MultipleChoiceMode
+        vocab={VOCAB}
+        activeDefIndices={[0]}
+        onAllDone={onAllDone}
+      />
+    );
+
+    const wrongButton = screen.getAllByRole('button').find(
+      (btn) => btn.textContent?.trim() !== '' && btn.textContent?.trim() !== '勤奮'
+    )!;
+    const wrongVocabIdx = VOCAB.findIndex((v) => v.word === wrongButton.textContent?.trim());
+    fireEvent.click(wrongButton);
+    fireEvent.click(screen.getByRole('button', { name: '勤奮' }));
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 1400));
+    });
+
+    expect(onAllDone).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({ defIndex: 0, firstTryAnsweredWordIdx: wrongVocabIdx }),
+      ])
+    );
+  });
+
+  it('leaves firstTryAnsweredWordIdx null for an item correct on the first try (nothing wrong to show)', async () => {
+    const onAllDone = vi.fn();
+    render(
+      <MultipleChoiceMode
+        vocab={VOCAB}
+        activeDefIndices={[0]}
+        onAllDone={onAllDone}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: '勤奮' }));
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 1400));
+    });
+
+    expect(onAllDone).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({ defIndex: 0, firstTryAnsweredWordIdx: null }),
+      ])
+    );
+  });
+
+  it('records firstTryCorrect: true for an item answered correctly on the first try', async () => {
+    const onAllDone = vi.fn();
+    render(
+      <MultipleChoiceMode
+        vocab={VOCAB}
+        activeDefIndices={[0]}
+        onAllDone={onAllDone}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: '勤奮' }));
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 1400));
+    });
+
+    expect(onAllDone).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({ defIndex: 0, correct: true, firstTryCorrect: true }),
+      ])
+    );
+  });
+
+  it('does not flip firstTryCorrect back to true on a SECOND wrong retry attempt', async () => {
+    const onAllDone = vi.fn();
+    render(
+      <MultipleChoiceMode
+        vocab={VOCAB}
+        activeDefIndices={[0]}
+        onAllDone={onAllDone}
+      />
+    );
+
+    const wrongButtons = screen.getAllByRole('button').filter(
+      (btn) => btn.textContent?.trim() !== '' && btn.textContent?.trim() !== '勤奮'
+    );
+    // Two different wrong picks in a row before finally getting it right.
+    fireEvent.click(wrongButtons[0]);
+    fireEvent.click(wrongButtons[wrongButtons.length - 1]);
+    fireEvent.click(screen.getByRole('button', { name: '勤奮' }));
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 1400));
+    });
+
+    expect(onAllDone).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({ defIndex: 0, firstTryCorrect: false }),
+      ])
+    );
   });
 });

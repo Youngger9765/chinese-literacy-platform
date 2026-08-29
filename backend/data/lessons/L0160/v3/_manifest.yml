@@ -1,0 +1,139 @@
+lesson_uid: L0160
+generated_by: scripts/build_lesson_manifest.py
+note: 衍生檔，不是真相來源。sections 來自 lesson.yml 的 sections_present，module 歸屬來自 specs/modules/section-to-module.yml。改了那兩者要重產。
+sections:
+- 'no': null
+  name: 古文今譯
+  module: modern_translation
+  slug: tdefy
+  file: modern_translation.tdefy.yml
+  pages:
+  - 1
+  - 2
+- 'no': null
+  name: 原文（含斷詞點）＋注釋
+  module: classical_text
+  slug: wf4ue
+  file: classical_text.wf4ue.yml
+  pages:
+  - 1
+  - 2
+  pages_source: bracketed
+- 'no': null
+  name: 朗讀計時
+  module: key_reading
+  slug: kahpr
+  file: key_reading.kahpr.yml
+  pages:
+  - 1
+  - 2
+  pages_source: bracketed
+- 'no': 一
+  name: 文白句子比對
+  module: sentence_matching
+  slug: a7rd7
+  file: sentence_matching.a7rd7.yml
+  pages:
+  - 2
+  - 3
+- 'no': 二
+  name: 文白詞語比對
+  module: word_matching
+  slug: 9cukd
+  file: word_matching.9cukd.yml
+  pages:
+  - 3
+  - 4
+- 'no': 三
+  name: 文章重點表
+  module: keypoints
+  slug: qpu9w
+  file: keypoints.qpu9w.yml
+  pages:
+  - 4
+  - 5
+- 'no': 四
+  name: 文言文聚光燈
+  module: spotlight
+  subtitle: 認識文言文代詞—人稱代詞
+  slug: mdpju
+  file: spotlight.mdpju.yml
+  pages:
+  - 5
+  - 6
+  - 7
+- 'no': 五
+  name: 閱讀理解
+  module: comprehension
+  slug: ddjt7
+  file: comprehension.ddjt7.yml
+  pages:
+  - 7
+  - 8
+- 'no': 六
+  name: 自我挑戰
+  module: self_challenge
+  slug: hkkxa
+  file: self_challenge.hkkxa.yml
+  pages:
+  - 8
+  - 9
+dispatch:
+- classical_text
+- comprehension
+- key_reading
+- keypoints
+- modern_translation
+- self_challenge
+- sentence_matching
+- spotlight
+- word_matching
+produced:
+- classical_text
+- comprehension
+- key_reading
+- keypoints
+- modern_translation
+- self_challenge
+- sentence_matching
+- spotlight
+- word_matching
+absent_from_source:
+- full_text_annotate
+- resources
+- vocab_application
+- vocab_definitions
+- vocab_review
+pdf_pages: 9
+dispatch_pages:
+  classical_text:
+  - 1
+  - 2
+  comprehension:
+  - 7
+  - 8
+  key_reading:
+  - 1
+  - 2
+  keypoints:
+  - 4
+  - 5
+  modern_translation:
+  - 1
+  - 2
+  self_challenge:
+  - 8
+  - 9
+  sentence_matching:
+  - 2
+  - 3
+  spotlight:
+  - 5
+  - 6
+  - 7
+  word_matching:
+  - 3
+  - 4
+low_confidence_pages:
+- classical_text
+- key_reading

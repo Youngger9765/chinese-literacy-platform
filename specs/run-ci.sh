@@ -11,6 +11,9 @@
 #   Gate 2: spec contracts   (pytest specs/)
 #   Gate 3: legacy_tests     (union of all legacy_tests: paths from the registry)
 #           Skip if no module has legacy_tests entries.
+#   Gate 4: QR-manifest reconciliation
+#   Gate 5: spotlight structural ratchet
+#   Gate 6: 原稿過期偵測 (sot_drift_check --offline)
 #
 # Usage:
 #   bash specs/run-ci.sh          # run all gates, exit non-zero on any failure
@@ -23,16 +26,44 @@ REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
 
 # Prefer the backend venv (has google.genai etc.); fall back to python3.
+#
+# 這個 fallback 原本是靜默的，而系統 python3 沒有 google-genai —— 於是在任何沒有
+# .venv 的 worktree 裡會冒出 8 個 collection error，看起來跟「你的改動弄壞了 spec」
+# 一模一樣。已經騙過兩次（2026-08-14、2026-08-21），所以改成會叫。
 PYBIN="$REPO_ROOT/backend/.venv/bin/python"
-[ -x "$PYBIN" ] || PYBIN="$(command -v python3)"
+
+# worktree 裡沒有 .venv（它不進版控），但主 checkout 有 —— 走回去用它，
+# 而不是掉到系統 python3 然後噴 8 個 collection error 嚇人。
+# ⚠️ 這條 2026-08-14 跟 08-21 各騙過我一次，08-22 第三次 —— 所以修掉，
+#    不是再加一段警語。
+if [ ! -x "$PYBIN" ]; then
+  _COMMON_DIR="$(git rev-parse --git-common-dir 2>/dev/null || true)"
+  if [ -n "$_COMMON_DIR" ]; then
+    _MAIN_ROOT="$(cd "$(dirname "$_COMMON_DIR")" && pwd)"
+    if [ -x "$_MAIN_ROOT/backend/.venv/bin/python" ]; then
+      PYBIN="$_MAIN_ROOT/backend/.venv/bin/python"
+      echo "ℹ️  這個 worktree 沒有 .venv，改用主 checkout 的：$PYBIN"
+      echo ""
+    fi
+  fi
+fi
+
+if [ ! -x "$PYBIN" ]; then
+  PYBIN="$(command -v python3)"
+  echo "⚠️  找不到 $REPO_ROOT/backend/.venv —— 退回系統 python3。"
+  echo "   系統 python3 沒有 google-genai，collection error 很可能是這個造成的，"
+  echo "   不是你的改動。要真的驗，用主 checkout 的 venv："
+  echo "     \$(git rev-parse --show-toplevel 2>/dev/null)/backend/.venv/bin/python -m pytest backend/specs -q"
+  echo ""
+fi
 
 echo "== Local Spec CI =="
 echo "   python: $PYBIN"
 echo "   modules: $(ls -d specs/modules/*/ 2>/dev/null | wc -l | tr -d ' ')"
 echo ""
 
-# ── Gate 1/3: registry freshness + legacy_tests pointer-rot ──────────────────
-echo "-- Gate 1/3: registry freshness + pointer-rot check (build_registry.py --check) --"
+# ── Gate 1/10: registry freshness + legacy_tests pointer-rot ──────────────────
+echo "-- Gate 1/10: registry freshness + pointer-rot check (build_registry.py --check) --"
 "$PYBIN" specs/build_registry.py --check
 echo "   OK"
 echo ""
@@ -42,8 +73,8 @@ if [ "${1:-}" = "--quick" ]; then
   exit 0
 fi
 
-# ── Gate 2/3: spec contracts ──────────────────────────────────────────────────
-echo "-- Gate 2/3: spec contracts (pytest specs/) --"
+# ── Gate 2/10: spec contracts ──────────────────────────────────────────────────
+echo "-- Gate 2/10: spec contracts (pytest specs/) --"
 ( cd backend && "$PYBIN" -m pytest specs/ -q )
 echo ""
 
@@ -81,5 +112,87 @@ else
   ( cd backend && "$PYBIN" -m pytest "${PYTEST_ARGS[@]}" -q )
   echo ""
 fi
+
+# ── Gate 4/10: QR-manifest reconciliation (no 空砲, no missing QR) ─────────────
+# Reusable: validates against current data, not hard-coded lesson numbers.
+# After importing new courses, re-run this same gate.
+echo "-- Gate 4/10: QR-manifest reconciliation (verify_qr_manifest) --"
+( cd backend && "$PYBIN" -m pytest tests/test_verify_qr_manifest.py -q )
+echo ""
+
+# ── Gate 5/10: spotlight structural ratchet ───────────────────────────────────
+# The spotlight gate existed and nothing ran it. `run_spotlight_dev_gate.sh` and
+# `content_evidence_gate.py` appear in no workflow and were not here either, while
+# CLAUDE.md said a spotlight PR must print CONTENT_EVIDENCE_GATE=PASS. The gate had
+# been exiting 1 on a deleted first-edition fixture for the whole re-ink.
+#
+# This is the cheap half — structure only, deterministic, all 175 lessons — and it is
+# the half that matters before a full rebuild: #2713 and #2714 both end by rebuilding
+# every lesson's spotlight, and without this nothing says what else moved.
+echo "-- Gate 5/10: spotlight structural ratchet (spotlight_fingerprints) --"
+"$PYBIN" scripts/spotlight_fingerprints.py --check
+echo ""
+
+# ── Gate 6/10: 原稿有沒有悄悄過期（SOT_STALE，離線半） ────────────────────────
+# 2026-08-17：案主 20:28 更新 6/7/8 年級 12 個檔，本機快照停在那之前，其中 G8-L4
+# 已經抽完 —— 抽出來的 yml 忠實反映一份**作廢的教材**，而**所有門都是綠的**，
+# 因為每一道門比對的都是本機那份過期原稿。這種過期沒有任何徵兆。
+#
+# `sot_drift_check.py` 早就會用 MD5 抓它，但**只有人想到才會被跑** —— 跟 Gate 5
+# 那個「門存在、沒人跑」是同一種病。
+#
+# 只跑 `--offline` 那半：完整版要 rclone 打 Google Drive（要網路、要憑證、逾時
+# 上限 600 秒），那不能當 push 前的門。離線半問的是「這份**已經 commit** 的抽取
+# 結果，還對得上它宣稱的來源嗎」，答案完全在 repo 與本機快照裡。
+#
+# 沒有本機原稿快照時（例：CI runner，private/ 是 gitignored 的 symlink）它會**明講**
+# 只驗得到「有沒有指紋」、驗不到「指紋對不對」—— 不會假裝全驗過了。
+# 看得見 Drive 那一側要另外跑：`python3 scripts/sot_drift_check.py`
+echo "-- Gate 6/10: 原稿過期偵測（sot_drift_check --offline） --"
+"$PYBIN" scripts/sot_drift_check.py --offline
+echo ""
+
+echo "-- Gate 7/10: 抽出來的模組，學生走不走得到（module_entry_gate） --"
+"$PYBIN" scripts/module_entry_gate.py
+echo ""
+
+# ── Gate 8/10: 內容忠實度證明（content_fidelity_attest --verify-all） ─────────
+# ⑦b。這道門在 2026-08-22 之前只有**一課**有證明、而且沒有任何流程跑它 ——
+# 「門建了沒插電」跟沒有門的差別是：大家會以為它在看。
+#
+# 兩個信任區：
+#   本機（讀得到 private/ 原稿）→ `--uid <L> --docx <原稿>` 產證明，
+#                                 證明綁三個雜湊：原稿、yml、判準版本
+#   CI（讀不到原稿）           → 這裡，只驗證明還對不對得上，不重跑比對
+#
+# 棘輪守的是「驗不到」的數量（原文只有一個字、或錯字印在圖上，共 25 個）——
+# ⛔ 那個數字只准往下。無聲增加 = 覆蓋率在漏，而每一次都是綠的。
+echo "-- Gate 8/10: 內容忠實度證明（content_fidelity_attest --verify-all） --"
+"$PYBIN" scripts/content_fidelity_attest.py --verify-all
+echo ""
+
+# ── Gate 9/10: 學習單印的大題有沒有著落（section_completeness_gate） ─────────
+# 前面每一道門問的都是「抽出來的東西對不對」（形狀 / 逐字 / 題號），
+# 沒有一道問「該有的東西在不在」—— 一整個大題被漏抽，前面全綠。
+#
+# ⚠️ 最容易被忽略的失敗形狀不是「內容不見了」，是**對照表少一個字**：
+#    「文章重點表」vs「文章重點整理」差一個字，6 課的那一節就在完整性
+#    檢查眼裡消失，而內容其實好端端在 keypoints.yml 裡。沒有症狀。
+echo "-- Gate 9/10: 大題有沒有著落（section_completeness_gate） --"
+"$PYBIN" scripts/section_completeness_gate.py
+echo ""
+
+# ── Gate 10/10: 原稿有多少沒被任何 yml 收走（source_coverage_gate） ─────────
+# 第九道問「大題有沒有著落」，這一道問「那個大題**裡面的東西**抽全了嗎」。
+# 見證對帳只覆蓋 6 種題號型模組（490/1844 份），其餘 1354 份沒有任何門在問。
+#
+# ⛔ 不用絕對門檻 —— 剩下的未涵蓋字裡混著真缺口與量法雜訊（語詞框存成 list，
+#    而原稿那行是頓號串起來的），訂 90% 會對一半的課誤報。用**棘輪**：
+#    現況存基準，只准往下。它擋的是「某個改動讓抽取收得更少」。
+#
+# ⚠️ CI 沒有 private/ 原稿 → 這道門會明講「沒驗到」並放行，不假裝驗過了。
+echo "-- Gate 10/10: 原稿涵蓋率棘輪（source_coverage_gate） --"
+"$PYBIN" scripts/source_coverage_gate.py
+echo ""
 
 echo "== Local Spec CI: PASS =="

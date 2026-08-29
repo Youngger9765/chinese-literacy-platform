@@ -1,0 +1,13 @@
+lesson_uid: L0037
+version_id: v3
+notes:
+  errata:
+  - id: E1
+    section: 六 文章重點表
+    locator: 最上方「問題」列
+    source: 秦昭王軟禁了孟嘗君，還想想殺掉他；孟嘗君想要逃離秦國。
+    corrected: 秦昭王軟禁了孟嘗君，還想殺掉他；孟嘗君想要逃離秦國。
+    kind: 重複字
+    why: 「還想想殺掉他」的「想」連印兩次；課文第二段對應敘述是「還動了殺心」，此處應為「還想殺掉他」
+    confidence: high
+    evidence: document.xml 與 PDF p7 一致，兩處都看得到重複

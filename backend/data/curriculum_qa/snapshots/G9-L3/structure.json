@@ -1,232 +1,119 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 6,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "萬華地名典故",
+      "擴大觀察",
+      "1",
+      "2"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "國高中數學當然可以使用計算機",
-      "value": "",
-      "interactive_type": "display"
-    },
-    {
-      "label": "作者論點",
-      "value": "作者主張國高中生學數學時，可以把複雜的計算「外化」給計算機，以提升學習效率。",
-      "interactive_type": "display"
-    },
-    {
-      "label": "外化的好處",
-      "value": "解決學習時大腦負荷超載的問題。",
-      "interactive_type": "display"
-    },
-    {
-      "label": "外化工具",
-      "value": "",
       "interactive_type": "display",
+      "label": "語言的足跡：從臺北 萬華到南太平洋的航海之路",
+      "value": ""
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "萬華地名典故",
+      "value": "「萬華」這個地名，來自原住民語 manga，原本是指【　　　】"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "擴大觀察",
+      "value": "不只臺北，【　　　】　與 【　　　】等地，也以manga【　　　】指稱小船或獨木舟。人類學家把這些使用相似語言的族群稱為【　　　】。"
+    },
+    {
+      "interactive_type": "display",
+      "label": "更多例子",
       "sub_rows": [
         {
-          "label": "外化歷程",
-          "value": "外化目的",
-          "interactive_type": "display"
+          "interactive_type": "fill_blank",
+          "label": "1",
+          "value": "南島語族共享許多相似語彙，例如眼睛稱 mata，母親稱 ina【　　　】，數字「５」稱 lima【　　　】"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "2",
+          "value": "語言在傳遞過程中會產生【　　　】，這是一種自然現象。"
         }
-      ]
+      ],
+      "value": ""
     },
     {
-      "label": "紙筆",
-      "value": "",
       "interactive_type": "display",
+      "label": "疑問與解釋",
       "sub_rows": [
         {
-          "label": "將腦袋中的__外化到紙筆。",
-          "value": "減輕大腦負荷，每一個人都能輕易解題。【　　　】",
-          "interactive_type": "fill_blank"
-        }
-      ]
-    },
-    {
-      "label": "【計算機】",
-      "value": "",
-      "interactive_type": "display",
-      "sub_rows": [
+          "interactive_type": "display",
+          "label": "1",
+          "value": "1.南島語族彼此相隔很遠，怎麼可能使用相似語言？"
+        },
         {
-          "label": "將複雜的計算外化到計算機。",
-          "value": "可以節省【　　　】，大腦騰出空間來做更重要的理解、推理和問題解決。",
-          "interactive_type": "fill_blank"
+          "interactive_type": "fill_blank",
+          "label": "2",
+          "value": "2.科學界的解釋：他們曾有【　　　】，並透過航海逐步【　　　】、拓展至各島嶼。"
         }
-      ]
+      ],
+      "value": ""
     },
     {
-      "label": "長竿",
-      "value": "",
-      "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "將身體力量外化到長竿。",
-          "value": "幫人類獲取遠處或高處的東西。",
-          "interactive_type": "display"
-        }
-      ]
-    },
-    {
-      "label": "【語言】",
-      "value": "",
-      "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "將__外化到語言。",
-          "value": "將重要訊息分享給同伴。【　　　】",
-          "interactive_type": "fill_blank"
-        }
-      ]
-    },
-    {
-      "label": "文字",
-      "value": "",
-      "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "將語言外化到文字，讓知識能夠被保存與傳承。",
-          "value": "保存與傳遞智慧，促進文明持續發展。",
-          "interactive_type": "display"
-        }
-      ]
-    },
-    {
-      "label": "圖書館",
-      "value": "",
-      "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "將數千年來累積的知識，從__外化到圖書館儲存。",
-          "value": "保存與傳遞智慧，促進文明持續發展。【　　　】",
-          "interactive_type": "fill_blank"
-        }
-      ]
-    },
-    {
-      "label": "網路",
-      "value": "",
-      "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "電腦、網路的興起，將圖書館外化到網路上。",
-          "value": "保存與傳遞智慧，促進文明持續發展。",
-          "interactive_type": "display"
-        }
-      ]
-    },
-    {
-      "label": "結論",
-      "value": "1.將複雜的知識及計算外化，是世界趨勢。\n2.教育應有前瞻性，讓國高中生學習時部分的心智歷程外化，允許數學課使用計算機，以提升學習效能。",
-      "interactive_type": "display"
+      "interactive_type": "fill_blank",
+      "label": "結尾",
+      "value": "語言是一條【　　　】，語言能保存族群【　　　】與【　　　】 的歷史。"
     }
   ],
-  "layout": "worksheet_table",
-  "title": "國高中數學當然可以使用計算機",
+  "title": "語言的足跡：從臺北 萬華到南太平洋的航海之路",
   "worksheet_rows": [
     {
       "kind": "pair",
-      "label": "作者論點",
-      "value": "作者主張國高中生學數學時，可以把複雜的計算「外化」給計算機，以提升學習效率。"
+      "label": "萬華地名典故",
+      "value": "「萬華」這個地名，來自原住民語 manga，原本是指【　　　】"
     },
     {
       "kind": "pair",
-      "label": "外化的好處",
-      "value": "解決學習時大腦負荷超載的問題。"
+      "label": "擴大觀察",
+      "value": "不只臺北，【　　　】　與 【　　　】等地，也以manga（或vanga）指稱小船或獨木舟。人類學家把這些使用相似語言的族群稱為【　　　】。"
     },
     {
-      "kind": "section_block",
-      "section": "外化工具",
       "items": [
         {
-          "label": "外化歷程",
-          "value": "外化目的"
+          "label": "1",
+          "value": "南島語族共享許多相似語彙，例如眼睛稱 mata，母親稱 ina（或 tina），數字「５」稱 lima（或 nima／rima）"
+        },
+        {
+          "label": "2",
+          "value": "語言在傳遞過程中會產生【　　　】，這是一種自然現象。"
         }
-      ]
+      ],
+      "kind": "section_block",
+      "section": "更多例子"
     },
     {
-      "kind": "section_block",
-      "section": "紙筆",
       "items": [
         {
-          "label": "將腦袋中的__外化到紙筆。",
-          "value": "減輕大腦負荷，每一個人都能輕易解題。【　　　】"
-        }
-      ]
-    },
-    {
-      "kind": "section_block",
-      "section": "【計算機】",
-      "items": [
+          "label": "1",
+          "value": "1.南島語族彼此相隔很遠，怎麼可能使用相似語言？"
+        },
         {
-          "label": "將複雜的計算外化到計算機。",
-          "value": "可以節省【　　　】，大腦騰出空間來做更重要的理解、推理和問題解決。"
+          "label": "2",
+          "value": "2.科學界的解釋：他們曾有【　　　】，並透過航海逐步【　　　】、拓展至各島嶼。"
         }
-      ]
-    },
-    {
+      ],
       "kind": "section_block",
-      "section": "長竿",
-      "items": [
-        {
-          "label": "將身體力量外化到長竿。",
-          "value": "幫人類獲取遠處或高處的東西。"
-        }
-      ]
-    },
-    {
-      "kind": "section_block",
-      "section": "【語言】",
-      "items": [
-        {
-          "label": "將__外化到語言。",
-          "value": "將重要訊息分享給同伴。【　　　】"
-        }
-      ]
-    },
-    {
-      "kind": "section_block",
-      "section": "文字",
-      "items": [
-        {
-          "label": "將語言外化到文字，讓知識能夠被保存與傳承。",
-          "value": "保存與傳遞智慧，促進文明持續發展。"
-        }
-      ]
-    },
-    {
-      "kind": "section_block",
-      "section": "圖書館",
-      "items": [
-        {
-          "label": "將數千年來累積的知識，從__外化到圖書館儲存。",
-          "value": "保存與傳遞智慧，促進文明持續發展。【　　　】"
-        }
-      ]
-    },
-    {
-      "kind": "section_block",
-      "section": "網路",
-      "items": [
-        {
-          "label": "電腦、網路的興起，將圖書館外化到網路上。",
-          "value": "保存與傳遞智慧，促進文明持續發展。"
-        }
-      ]
+      "section": "疑問與解釋"
     },
     {
       "kind": "pair",
-      "label": "結論",
-      "value": "1.將複雜的知識及計算外化，是世界趨勢。\n2.教育應有前瞻性，讓國高中生學習時部分的心智歷程外化，允許數學課使用計算機，以提升學習效能。"
+      "label": "結尾",
+      "value": "語言是一條【　　　】，語言能保存族群【　　　】與【　　　】 的歷史。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "theme_facts",
-    "fill_blank_count": 4,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "將腦袋中的__外化到紙筆。",
-      "將複雜的計算外化到計算機。",
-      "將__外化到語言。",
-      "將數千年來累積的知識，從__外化到圖書館儲存。"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

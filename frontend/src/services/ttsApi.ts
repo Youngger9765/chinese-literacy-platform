@@ -129,11 +129,57 @@ export async function speakText(
   text: string,
   lessonId?: number,
   paragraphIdx?: number,
+  /** 這一節自己的代號。一課多篇時少了它會唸到第 1 篇（#2930）。 */
+  roundSlug?: string,
 ): Promise<void> {
   if (!text.trim()) return;
   cancelTts();
   _cancelRequested = false;
-  await _speakViaBackend(text, lessonId, paragraphIdx);
+  await _speakViaBackend(text, lessonId, paragraphIdx, roundSlug);
+}
+
+/**
+ * Warm the cache for text that will be spoken soon, without playing it.
+ *
+ * The in-loop prefetch only reaches the next sentence of the *current*
+ * paragraph, so every paragraph boundary still fetched cold — which is where
+ * a whole-lesson walk audibly stalls. A walker calls this with the next
+ * paragraph while the current one is still being read.
+ *
+ * Never throws and never interrupts playback: a failed warm-up simply means
+ * the real request pays for it later.
+ */
+export function prefetchText(
+  text: string | undefined,
+  lessonId?: number,
+  paragraphIdx?: number,
+  /** 這一節自己的代號（#2930）—— 少了它會預熱到第 1 篇。 */
+  roundSlug?: string,
+): void {
+  if (!text || !text.trim()) return;
+  void (async () => {
+    try {
+      let sentences: string[] | null = null;
+      if (lessonId !== undefined && paragraphIdx !== undefined) {
+        sentences = await _fetchLessonSentences(lessonId, paragraphIdx, roundSlug);
+      }
+      // Warm exactly what playback will ask for, or the warm-up is wasted and
+      // pays for a second synthesis on top. When there is lesson context that
+      // is the whole paragraph — reassembled the same way _speakViaBackend
+      // reassembles it — not its first sentence. Getting this wrong was
+      // measurable on staging: 8 synthesis requests for a 5-paragraph lesson,
+      // alternating one long (the paragraph) and one short (a first sentence
+      // nothing would ever play), and 13% of playback silent because every
+      // paragraph still started cold.
+      const unit =
+        sentences !== null && sentences !== undefined
+          ? sentences.join('').trim()
+          : _splitSentences(_cleanForTts(text)).find((x) => x.trim());
+      if (unit) await _fetchAudioUrl(unit);
+    } catch {
+      // deliberately silent — see doc comment
+    }
+  })();
 }
 
 /**
@@ -163,11 +209,13 @@ export async function speakTextWithProgress(
   onProgress: (info: TtsProgressInfo) => void,
   lessonId?: number,
   paragraphIdx?: number,
+  /** 這一節自己的代號（#2930）。 */
+  roundSlug?: string,
 ): Promise<void> {
   if (!text.trim()) return;
   cancelTts();
   _cancelRequested = false;
-  await _speakViaBackendWithProgress(text, onProgress, lessonId, paragraphIdx);
+  await _speakViaBackendWithProgress(text, onProgress, lessonId, paragraphIdx, roundSlug);
 }
 
 /**
@@ -262,21 +310,26 @@ function _splitSentences(text: string): string[] {
 async function _fetchLessonSentences(
   lessonId: number,
   paragraphIdx: number,
+  roundSlug?: string,
 ): Promise<string[] | null> {
-  const cacheKey = `${lessonId}-${paragraphIdx}`;
+  // 一課印好幾篇時，`lessonId + 段落序號` 定址的是**整課頂層**（＝第 1 篇），
+  // 所以快取 key 也要分篇 —— 少了它，第 1 篇先到就把後兩篇釘死，
+  // 而且畫面正常、音檔正常播出，只是唸錯篇（#2930）。
+  const cacheKey = `${lessonId}-${roundSlug ?? ''}-${paragraphIdx}`;
   if (_mappingCache.has(cacheKey)) {
     return _mappingCache.get(cacheKey)!;
   }
 
   try {
-    const response = await fetch(`${API_BASE}/api/tts/mapping/${lessonId}`);
+    const qs = roundSlug ? `?p=${encodeURIComponent(roundSlug)}` : '';
+    const response = await fetch(`${API_BASE}/api/tts/mapping/${lessonId}${qs}`);
     if (!response.ok) return null;
     const data = await response.json() as {
       paragraphs: Array<{ index: number; sentences: Array<{ text: string }> }>;
     };
     // Populate all paragraphs from this lesson into the cache at once.
     for (const para of data.paragraphs) {
-      const key = `${lessonId}-${para.index}`;
+      const key = `${lessonId}-${roundSlug ?? ''}-${para.index}`;
       _mappingCache.set(key, para.sentences.map((s) => s.text));
     }
     return _mappingCache.get(cacheKey) ?? null;
@@ -301,7 +354,34 @@ async function _fetchLessonSentences(
  * On any other error: throws (existing behaviour, caught by outer try/catch in
  * speakText callers or surfaced to the user as a silent skip).
  */
+/**
+ * Requests in flight, so two callers asking for the same sentence at the same
+ * time produce one synthesis rather than two.
+ *
+ * Needed once prefetch exists: the prefetch for sentence N+1 is still on the
+ * wire when the loop arrives at N+1, and the plain `_urlCache` check misses it
+ * because nothing has been cached *yet*. Without this we paid for every
+ * prefetched sentence twice.
+ */
+const _inFlight = new Map<string, Promise<string | null>>();
+
 async function _fetchAudioUrl(sentence: string): Promise<string | null> {
+  const cached = _urlCache.get(sentence);
+  if (cached) return cached;
+
+  const pending = _inFlight.get(sentence);
+  if (pending) return pending;
+
+  const request = _fetchAudioUrlUncached(sentence);
+  _inFlight.set(sentence, request);
+  try {
+    return await request;
+  } finally {
+    _inFlight.delete(sentence);
+  }
+}
+
+async function _fetchAudioUrlUncached(sentence: string): Promise<string | null> {
   let audioUrl = _urlCache.get(sentence);
   if (!audioUrl) {
     // If still within a rate-limit window, skip this sentence silently.
@@ -345,13 +425,26 @@ async function _speakViaBackend(
   text: string,
   lessonId?: number,
   paragraphIdx?: number,
+  roundSlug?: string,
 ): Promise<void> {
   let sentences: string[];
 
-  // Prefer canonical v2 sentences to guarantee GCS cache hits (Issue #1208).
+  // A paragraph is one synthesis unit, not a list of sentences.
+  //
+  // Splitting it costs almost nothing in timing — measured, three sentences as
+  // one request run 5.33 s against 5.50 s concatenated, and the resulting pause
+  // (763 ms) is shorter than the one Azure renders itself between sentences in
+  // a single request (873–883 ms). What splitting loses is prosody: each clip
+  // is generated in isolation, so the pitch contour resets at every sentence
+  // and the reading sounds like a list rather than someone reading aloud.
+  //
+  // The canonical sentence list is still fetched, but only to reconstruct the
+  // paragraph exactly as the backend split it, so the text sent matches the
+  // text the mapping describes.
   if (lessonId !== undefined && paragraphIdx !== undefined) {
-    const canonical = await _fetchLessonSentences(lessonId, paragraphIdx);
-    sentences = canonical ?? _splitSentences(_cleanForTts(text));
+    const canonical = await _fetchLessonSentences(lessonId, paragraphIdx, roundSlug);
+    const paragraph = (canonical?.join('') || _cleanForTts(text)).trim();
+    sentences = paragraph ? [paragraph] : [];
   } else {
     const cleaned = _cleanForTts(text);
     if (!cleaned) return;
@@ -360,7 +453,8 @@ async function _speakViaBackend(
 
   if (sentences.length === 0) return;
 
-  for (const sentence of sentences) {
+  for (let i = 0; i < sentences.length; i += 1) {
+    const sentence = sentences[i];
     if (_cancelRequested) break;
     if (!sentence.trim()) continue;
 
@@ -368,8 +462,33 @@ async function _speakViaBackend(
     // null = 429 rate-limited — skip this sentence (toast already fired)
     if (audioUrl === null) continue;
     if (_cancelRequested) break;
+
+    // Fetch the next sentence while this one is being said (#2627).
+    //
+    // Playback used to be strictly serial, so every uncached sentence inserted
+    // its whole synthesis time as silence — 4.5s on a cold key passage. A
+    // sentence takes seconds to say and well under a second to fetch, so the
+    // next fetch fits inside the current playback and the gap disappears.
+    //
+    // Deliberately not awaited, and deliberately before the play: the point is
+    // that it overlaps. _fetchAudioUrl caches by sentence text, so when the
+    // loop arrives at i+1 it is a local hit rather than a second request.
+    _prefetchSentence(sentences[i + 1]);
+
     await _playSingleAudio(audioUrl);
   }
+}
+
+/**
+ * Warm the cache for a sentence without playing it. Errors are swallowed —
+ * a failed prefetch must never break playback; the real request will retry
+ * and surface the failure then.
+ */
+function _prefetchSentence(sentence: string | undefined): void {
+  if (!sentence || !sentence.trim()) return;
+  if (_cancelRequested) return;
+  if (_urlCache.has(sentence)) return;
+  void _fetchAudioUrl(sentence).catch(() => undefined);
 }
 
 async function _speakViaBackendWithProgress(
@@ -377,13 +496,26 @@ async function _speakViaBackendWithProgress(
   onProgress: (info: TtsProgressInfo) => void,
   lessonId?: number,
   paragraphIdx?: number,
+  roundSlug?: string,
 ): Promise<void> {
   let sentences: string[];
 
-  // Prefer canonical v2 sentences to guarantee GCS cache hits (Issue #1208).
+  // A paragraph is one synthesis unit, not a list of sentences.
+  //
+  // Splitting it costs almost nothing in timing — measured, three sentences as
+  // one request run 5.33 s against 5.50 s concatenated, and the resulting pause
+  // (763 ms) is shorter than the one Azure renders itself between sentences in
+  // a single request (873–883 ms). What splitting loses is prosody: each clip
+  // is generated in isolation, so the pitch contour resets at every sentence
+  // and the reading sounds like a list rather than someone reading aloud.
+  //
+  // The canonical sentence list is still fetched, but only to reconstruct the
+  // paragraph exactly as the backend split it, so the text sent matches the
+  // text the mapping describes.
   if (lessonId !== undefined && paragraphIdx !== undefined) {
-    const canonical = await _fetchLessonSentences(lessonId, paragraphIdx);
-    sentences = canonical ?? _splitSentences(_cleanForTts(text));
+    const canonical = await _fetchLessonSentences(lessonId, paragraphIdx, roundSlug);
+    const paragraph = (canonical?.join('') || _cleanForTts(text)).trim();
+    sentences = paragraph ? [paragraph] : [];
   } else {
     const cleaned = _cleanForTts(text);
     if (!cleaned) return;

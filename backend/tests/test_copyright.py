@@ -171,7 +171,8 @@ def _create_classroom(client, token: str, school_id: int) -> int:
 
 
 # Use story id "1" which is known to exist in the fixture YAML data
-TEXT_ID = "1"
+# 二修 uid tree 的 id 從 20001 起（#2683）
+TEXT_ID = "20001"
 
 
 # ---------------------------------------------------------------------------

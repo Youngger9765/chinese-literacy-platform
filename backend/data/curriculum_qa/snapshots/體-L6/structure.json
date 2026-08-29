@@ -1,0 +1,318 @@
+{
+  "interaction_profile": {
+    "checkbox_count": 13,
+    "fill_blank_count": 2,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "mixed",
+    "primary_labels": [
+      "阿翔行動／反應",
+      "阿翔特質",
+      "阿翔行動／反應",
+      "阿翔特質"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
+  "rows": [
+    {
+      "interactive_type": "display",
+      "label": "不是想太多，只是好在乎",
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "寫訓練日誌",
+      "sub_rows": [
+        {
+          "interactive_type": "checkbox",
+          "label": "阿翔行動／反應",
+          "options": [
+            "紮實",
+            "馬虎"
+          ],
+          "value": "①紮實 ②馬虎"
+        },
+        {
+          "interactive_type": "checkbox",
+          "label": "阿翔特質",
+          "options": [
+            "固執倔強",
+            "認真細心"
+          ],
+          "value": "①固執倔強 ②認真細心"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "訓練日誌被誇獎",
+      "sub_rows": [
+        {
+          "interactive_type": "checkbox",
+          "label": "阿翔行動／反應",
+          "options": [
+            "洋洋得意",
+            "不好意思"
+          ],
+          "value": "①洋洋得意 ②不好意思"
+        },
+        {
+          "interactive_type": "checkbox",
+          "label": "阿翔特質",
+          "options": [
+            "謙虛",
+            "冷漠"
+          ],
+          "value": "①謙虛 ②冷漠"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "遇到學長、教練",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "阿翔行動／反應",
+          "value": "精神【　　　】的問好，並微微鞠躬"
+        },
+        {
+          "interactive_type": "checkbox",
+          "label": "阿翔特質",
+          "options": [
+            "有禮貌",
+            "有想法"
+          ],
+          "value": "①有禮貌 ②有想法"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "聽到教練對大家訓話",
+      "sub_rows": [
+        {
+          "interactive_type": "checkbox",
+          "label": "阿翔行動／反應",
+          "options": [
+            "充滿自信",
+            "自我懷疑"
+          ],
+          "value": "①充滿自信 ②自我懷疑"
+        },
+        {
+          "interactive_type": "checkbox",
+          "label": "阿翔特質",
+          "options": [
+            "容易焦慮",
+            "容易放棄"
+          ],
+          "value": "①容易焦慮 ②容易放棄"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "傳球被教練糾正",
+      "sub_rows": [
+        {
+          "interactive_type": "checkbox",
+          "label": "阿翔行動／反應",
+          "options": [
+            "很在意",
+            "不在乎"
+          ],
+          "value": "①很在意 ②不在乎"
+        },
+        {
+          "interactive_type": "checkbox",
+          "label": "阿翔特質",
+          "options": [
+            "沒信心",
+            "沒毅力"
+          ],
+          "value": "①沒信心 ②沒毅力"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "練習失誤，卻又被選上先發",
+      "sub_rows": [
+        {
+          "interactive_type": "checkbox",
+          "label": "阿翔行動／反應",
+          "options": [
+            "不夠資格",
+            "備受肯定"
+          ],
+          "value": "①不夠資格 ②備受肯定"
+        },
+        {
+          "interactive_type": "checkbox",
+          "label": "阿翔特質",
+          "options": [
+            "容易後悔",
+            "容易擔心"
+          ],
+          "value": "①容易後悔 ②容易擔心"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "收到教練和隊友的提醒和鼓勵",
+      "sub_rows": [
+        {
+          "interactive_type": "checkbox",
+          "label": "阿翔行動／反應",
+          "options": [
+            "自責",
+            "感謝"
+          ],
+          "value": "①自責 ②感謝"
+        },
+        {
+          "interactive_type": "checkbox",
+          "label": "阿翔特質",
+          "options": [
+            "懂得感恩",
+            "樂於分享"
+          ],
+          "value": "①懂得感恩 ②樂於分享"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "隊友省思",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "阿翔行動／反應",
+          "value": "面對想很多的隊友，可以陪他一起看見「想很多」也是很棒的特質，也可以很有【　　　】，提醒他多相信【　　　】、相信自己，讓「想很多」成為【　　　】。"
+        }
+      ],
+      "value": ""
+    }
+  ],
+  "title": "不是想太多，只是好在乎",
+  "worksheet_rows": [
+    {
+      "items": [
+        {
+          "label": "阿翔行動／反應",
+          "value": "①紮實 ②馬虎"
+        },
+        {
+          "label": "阿翔特質",
+          "value": "①固執倔強 ②認真細心"
+        }
+      ],
+      "kind": "section_block",
+      "section": "寫訓練日誌"
+    },
+    {
+      "items": [
+        {
+          "label": "阿翔行動／反應",
+          "value": "①洋洋得意 ②不好意思"
+        },
+        {
+          "label": "阿翔特質",
+          "value": "①謙虛 ②冷漠"
+        }
+      ],
+      "kind": "section_block",
+      "section": "訓練日誌被誇獎"
+    },
+    {
+      "items": [
+        {
+          "label": "阿翔行動／反應",
+          "value": "精神【　　　】的問好，並微微鞠躬"
+        },
+        {
+          "label": "阿翔特質",
+          "value": "①有禮貌 ②有想法"
+        }
+      ],
+      "kind": "section_block",
+      "section": "遇到學長、教練"
+    },
+    {
+      "items": [
+        {
+          "label": "阿翔行動／反應",
+          "value": "①充滿自信 ②自我懷疑"
+        },
+        {
+          "label": "阿翔特質",
+          "value": "①容易焦慮 ②容易放棄"
+        }
+      ],
+      "kind": "section_block",
+      "section": "聽到教練對大家訓話"
+    },
+    {
+      "items": [
+        {
+          "label": "阿翔行動／反應",
+          "value": "①很在意 ②不在乎"
+        },
+        {
+          "label": "阿翔特質",
+          "value": "①沒信心 ②沒毅力"
+        }
+      ],
+      "kind": "section_block",
+      "section": "傳球被教練糾正"
+    },
+    {
+      "items": [
+        {
+          "label": "阿翔行動／反應",
+          "value": "①不夠資格 ②備受肯定"
+        },
+        {
+          "label": "阿翔特質",
+          "value": "①容易後悔 ②容易擔心"
+        }
+      ],
+      "kind": "section_block",
+      "section": "練習失誤，卻又被選上先發"
+    },
+    {
+      "items": [
+        {
+          "label": "阿翔行動／反應",
+          "value": "①自責 ②感謝"
+        },
+        {
+          "label": "阿翔特質",
+          "value": "①懂得感恩 ②樂於分享"
+        }
+      ],
+      "kind": "section_block",
+      "section": "收到教練和隊友的提醒和鼓勵"
+    },
+    {
+      "items": [
+        {
+          "label": "阿翔行動／反應",
+          "value": "面對想很多的隊友，可以陪他一起看見「想很多」也是很棒的特質，也可以很有【　　　】，提醒他多相信【　　　】、相信自己，讓「想很多」成為【　　　】。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "隊友省思"
+    }
+  ]
+}

@@ -1,0 +1,133 @@
+lesson_uid: L0065
+generated_by: scripts/build_lesson_manifest.py
+note: 衍生檔，不是真相來源。sections 來自 lesson.yml 的 sections_present，module 歸屬來自 specs/modules/section-to-module.yml。改了那兩者要重產。
+sections:
+- 'no': 一
+  name: 讀全文-做記號
+  module: full_text_annotate
+  slug: 7qpra
+  file: full_text_annotate.7qpra.yml
+  pages:
+  - 1
+  - 2
+  - 3
+- 'no': 二
+  name: 念順順
+  module: key_reading
+  text_ref: 7qpra
+  slug: mqxtx
+  file: key_reading.mqxtx.yml
+  pages:
+  - 3
+- 'no': 三
+  name: 語詞我最棒
+  module: vocab_definitions
+  text_ref: 7qpra
+  slug: peejk
+  file: vocab_definitions.peejk.yml
+  pages:
+  - 3
+  - 4
+- 'no': 四
+  name: 語詞應用
+  module: vocab_application
+  text_ref: 7qpra
+  slug: v3k6h
+  file: vocab_application.v3k6h.yml
+  pages:
+  - 4
+- 'no': 五
+  name: 文章重點表
+  module: keypoints
+  text_ref: 7qpra
+  slug: 4vkvu
+  file: keypoints.4vkvu.yml
+  pages:
+  - 4
+  - 5
+- 'no': 六
+  name: 閱讀聚光燈
+  module: spotlight
+  subtitle: 寫作手法—倒反：讀懂反話
+  text_ref: 7qpra
+  slug: d7dec
+  file: spotlight.d7dec.yml
+  pages:
+  - 5
+  - 6
+  - 7
+- 'no': 七
+  name: 閱讀理解
+  module: comprehension
+  text_ref: 7qpra
+  slug: cwthx
+  file: comprehension.cwthx.yml
+  pages:
+  - 7
+  - 8
+- 'no': 八
+  name: 詞語複習
+  module: vocab_review
+  text_ref: 7qpra
+  slug: cnhuv
+  file: vocab_review.cnhuv.yml
+  pages:
+  - 8
+- 'no': 九
+  name: 知識補給站
+  module: resources
+  text_ref: 7qpra
+  slug: 6xphw
+  file: resources.6xphw.yml
+  pages:
+  - 8
+  - 9
+dispatch:
+- comprehension
+- full_text_annotate
+- key_reading
+- keypoints
+- resources
+- spotlight
+- vocab_application
+- vocab_definitions
+- vocab_review
+produced:
+- comprehension
+- full_text_annotate
+- key_reading
+- keypoints
+- resources
+- spotlight
+- vocab_application
+- vocab_definitions
+- vocab_review
+absent_from_source: []
+pdf_pages: 9
+dispatch_pages:
+  comprehension:
+  - 7
+  - 8
+  full_text_annotate:
+  - 1
+  - 2
+  - 3
+  key_reading:
+  - 3
+  keypoints:
+  - 4
+  - 5
+  resources:
+  - 8
+  - 9
+  spotlight:
+  - 5
+  - 6
+  - 7
+  vocab_application:
+  - 4
+  vocab_definitions:
+  - 3
+  - 4
+  vocab_review:
+  - 8

@@ -1,170 +1,95 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 1,
+    "fill_blank_count": 5,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "mixed",
+    "primary_labels": [
+      "人物背景",
+      "人物特質",
+      "日常鍛鍊",
+      "挫折"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "兵來將擋，水來土掩",
-      "value": "",
-      "interactive_type": "display"
-    },
-    {
-      "label": "問題",
-      "value": "【　　　】入侵臺灣，農民深受其害，昆蟲學家嘗試許多方法解決問題。",
-      "interactive_type": "fill_blank"
-    },
-    {
-      "label": "人工噴農藥",
-      "value": "",
       "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "執行方式",
-          "value": "每週噴藥【　　　】次，持續【　　　】週。",
-          "interactive_type": "fill_blank"
-        },
-        {
-          "label": "產生問題",
-          "value": "種植面積很大時，人工噴農藥太【　　　】、【　　　】、【　　　】。",
-          "interactive_type": "fill_blank"
-        }
-      ]
+      "label": "奧運銀牌背後的自我鍛鍊",
+      "value": ""
     },
     {
-      "label": "無人機噴農藥",
-      "value": "",
-      "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "執行方式",
-          "value": "大型無人機，噴一公頃的農藥只要【　　　】分鐘，一天可以噴【　　　】公頃。",
-          "interactive_type": "fill_blank"
-        },
-        {
-          "label": "產生問題",
-          "value": "倖存的秋行軍蟲繁殖下一代，新生代的幼蟲會產生【　　　】。",
-          "interactive_type": "fill_blank"
-        }
-      ]
+      "interactive_type": "fill_blank",
+      "label": "人物背景",
+      "value": "主角是【　　　】，他從國小三年級開始練習柔道，後來成為國手。"
     },
     {
-      "label": "寄生蜂卵片",
-      "value": "",
-      "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "執行方式",
-          "value": "讓寄生蜂在小紙卡上產卵，再請農民把這個卵片釘在【　　　】的背面，一公頃放【　　　】片就可以防治蟲害。",
-          "interactive_type": "fill_blank"
-        },
-        {
-          "label": "產生問題",
-          "value": "釘卵片的工作耗時【　　　】個鐘頭，對年紀【　　　】的農民仍然辛苦。",
-          "interactive_type": "fill_blank"
-        }
-      ]
+      "interactive_type": "fill_blank",
+      "label": "人物特質",
+      "value": "楊勇緯從小就很【　　　】，也有【　　　】。"
     },
     {
-      "label": "寄生蜂扭蛋",
-      "value": "",
-      "interactive_type": "display",
-      "sub_rows": [
-        {
-          "label": "執行方式",
-          "value": "1.把【　　　】放進紙做的扭蛋，小蜂能從扭蛋出來，但雨水淋不進去。\n2.把扭蛋丟進玉米田裡，就可以產生防治蟲害的效果。\n3.扭蛋可以用【　　　】施作，一公頃只要20到30分鐘就可以灑完了。",
-          "interactive_type": "fill_blank"
-        },
-        {
-          "label": "延伸效果",
-          "value": "寄生蜂不但殺死秋行軍蟲，也消滅了其他【　　　】。",
-          "interactive_type": "fill_blank"
-        }
-      ]
+      "interactive_type": "checkbox",
+      "label": "日常鍛鍊",
+      "options": [
+        "每天提早三、四十分鐘到校練習。",
+        "按照老師給的課表，一步一步完成訓練。",
+        "控制飲食和作息，讓身體保持最佳狀態。",
+        "隨時記下所學和需要注意的事情。",
+        "只在比賽前加強練習，平時很少主動練習。"
+      ],
+      "select_mode": "multi",
+      "value": "楊勇緯平時怎麼要求自己？【 多選 】\n①每天提早三、四十分鐘到校練習。 ②按照老師給的課表，一步一步完成訓練。 ③控制飲食和作息，讓身體保持最佳狀態。 ④隨時記下所學和需要注意的事情。 ⑤只在比賽前加強練習，平時很少主動練習。"
     },
     {
-      "label": "總結",
-      "value": "昆蟲學家以科技幫農民解決問題，並不斷解決層出不窮的問題，可說是「【　　　】」。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "挫折",
+      "value": "2021年東京奧運金牌戰中，他未能達成奪金目標，最後獲得【　　　】。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "面對方式",
+      "value": "他認為失敗能讓人【　　　】，也能幫助自己找出【　　　】，在下一個階段繼續進步。"
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "結果",
+      "value": "東奧之後，他持續調整改進，在2021年及2022年的柔道【　　　】中，共奪下兩面金牌。"
     }
   ],
-  "layout": "worksheet_table",
-  "title": "兵來將擋，水來土掩",
+  "title": "奧運銀牌背後的自我鍛鍊",
   "worksheet_rows": [
     {
       "kind": "pair",
-      "label": "問題",
-      "value": "【　　　】入侵臺灣，農民深受其害，昆蟲學家嘗試許多方法解決問題。"
-    },
-    {
-      "kind": "section_block",
-      "section": "人工噴農藥",
-      "items": [
-        {
-          "label": "執行方式",
-          "value": "每週噴藥【　　　】次，持續【　　　】週。"
-        },
-        {
-          "label": "產生問題",
-          "value": "種植面積很大時，人工噴農藥太【　　　】、【　　　】、【　　　】。"
-        }
-      ]
-    },
-    {
-      "kind": "section_block",
-      "section": "無人機噴農藥",
-      "items": [
-        {
-          "label": "執行方式",
-          "value": "大型無人機，噴一公頃的農藥只要【　　　】分鐘，一天可以噴【　　　】公頃。"
-        },
-        {
-          "label": "產生問題",
-          "value": "倖存的秋行軍蟲繁殖下一代，新生代的幼蟲會產生【　　　】。"
-        }
-      ]
-    },
-    {
-      "kind": "section_block",
-      "section": "寄生蜂卵片",
-      "items": [
-        {
-          "label": "執行方式",
-          "value": "讓寄生蜂在小紙卡上產卵，再請農民把這個卵片釘在【　　　】的背面，一公頃放【　　　】片就可以防治蟲害。"
-        },
-        {
-          "label": "產生問題",
-          "value": "釘卵片的工作耗時【　　　】個鐘頭，對年紀【　　　】的農民仍然辛苦。"
-        }
-      ]
-    },
-    {
-      "kind": "section_block",
-      "section": "寄生蜂扭蛋",
-      "items": [
-        {
-          "label": "執行方式",
-          "value": "1.把【　　　】放進紙做的扭蛋，小蜂能從扭蛋出來，但雨水淋不進去。\n2.把扭蛋丟進玉米田裡，就可以產生防治蟲害的效果。\n3.扭蛋可以用【　　　】施作，一公頃只要20到30分鐘就可以灑完了。"
-        },
-        {
-          "label": "延伸效果",
-          "value": "寄生蜂不但殺死秋行軍蟲，也消滅了其他【　　　】。"
-        }
-      ]
+      "label": "人物背景",
+      "value": "主角是【　　　】，他從國小三年級開始練習柔道，後來成為國手。"
     },
     {
       "kind": "pair",
-      "label": "總結",
-      "value": "昆蟲學家以科技幫農民解決問題，並不斷解決層出不窮的問題，可說是「【　　　】」。"
+      "label": "人物特質",
+      "value": "楊勇緯從小就很【　　　】，也有【　　　】。"
+    },
+    {
+      "kind": "pair",
+      "label": "日常鍛鍊",
+      "value": "楊勇緯平時怎麼要求自己？（多選）\n①每天提早三、四十分鐘到校練習。 ②按照老師給的課表，一步一步完成訓練。 ③控制飲食和作息，讓身體保持最佳狀態。 ④隨時記下所學和需要注意的事情。 ⑤只在比賽前加強練習，平時很少主動練習。"
+    },
+    {
+      "kind": "pair",
+      "label": "挫折",
+      "value": "2021年東京奧運金牌戰中，他未能達成奪金目標，最後獲得【　　　】。"
+    },
+    {
+      "kind": "pair",
+      "label": "面對方式",
+      "value": "他認為失敗能讓人【　　　】，也能幫助自己找出【　　　】，在下一個階段繼續進步。"
+    },
+    {
+      "kind": "pair",
+      "label": "結果",
+      "value": "東奧之後，他持續調整改進，在2021年及2022年的柔道【　　　】中，共奪下兩面金牌。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "generic",
-    "fill_blank_count": 10,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "問題",
-      "執行方式",
-      "產生問題",
-      "執行方式"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

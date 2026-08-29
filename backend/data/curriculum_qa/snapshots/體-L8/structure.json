@@ -1,0 +1,160 @@
+{
+  "interaction_profile": {
+    "checkbox_count": 3,
+    "fill_blank_count": 4,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "mixed",
+    "primary_labels": [
+      "事件",
+      "面對失敗的想法",
+      "事件",
+      "面對失敗的想法"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
+  "rows": [
+    {
+      "interactive_type": "display",
+      "label": "文章重點表",
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "小齊（1～3段）",
+      "sub_rows": [
+        {
+          "interactive_type": "checkbox",
+          "label": "事件",
+          "options": [
+            "被投手三振",
+            "擊出安打",
+            "贏球",
+            "輸球"
+          ],
+          "value": "①被投手三振 ②擊出安打\n①贏球 ②輸球"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "面對失敗的想法",
+          "value": "作者認為有的人──【 複選 】\n①自責沒好好把握機會\n②認為努力都白費了\n③覺得自己不適合打棒球"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "楊勇緯（第4段）",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "事件",
+          "value": "1.在雅加達亞運的【　　　】賽落敗，要面對曾經兩度【　　　】的勁敵。\n2.將過去比賽的【　　　】化為教訓，反覆演練，最後拿下勝利。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "面對失敗的想法",
+          "value": "1.失敗讓他【　　　】，也讓他發現自己的【　　　】\n2.從失敗中看見【　　　】的機會與【　　　】的可能。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "郭婞淳（第5段）",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "事件",
+          "value": "1.在仁川亞運比賽前被140多公斤的【　　　】壓傷\n2.仁川亞運時抓舉95公斤、挺舉124公斤，拿下第【　　　】名，沒有奪牌。"
+        },
+        {
+          "interactive_type": "checkbox",
+          "label": "面對失敗的想法",
+          "options": [
+            "勝利",
+            "失敗"
+          ],
+          "value": "①勝利 ②失敗"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "總結",
+      "sub_rows": [
+        {
+          "interactive_type": "checkbox",
+          "label": "事件",
+          "options": [
+            "楊勇緯",
+            "郭婞淳",
+            "楊勇緯",
+            "郭婞淳",
+            "只有一種",
+            "有不只一種"
+          ],
+          "value": "①楊勇緯 ②郭婞淳\n①楊勇緯 ②郭婞淳\n①只有一種 ②有不只一種"
+        }
+      ],
+      "value": ""
+    }
+  ],
+  "title": "文章重點表",
+  "worksheet_rows": [
+    {
+      "items": [
+        {
+          "label": "事件",
+          "value": "①被投手三振 ②擊出安打\n①贏球 ②輸球"
+        },
+        {
+          "label": "面對失敗的想法",
+          "value": "作者認為有的人──(複選)\n①自責沒好好把握機會\n②認為努力都白費了\n③覺得自己不適合打棒球"
+        }
+      ],
+      "kind": "section_block",
+      "section": "小齊（1～3段）"
+    },
+    {
+      "items": [
+        {
+          "label": "事件",
+          "value": "1.在雅加達亞運的【　　　】賽落敗，要面對曾經兩度【　　　】的勁敵。\n2.將過去比賽的【　　　】化為教訓，反覆演練，最後拿下勝利。"
+        },
+        {
+          "label": "面對失敗的想法",
+          "value": "1.失敗讓他【　　　】，也讓他發現自己的【　　　】\n2.從失敗中看見【　　　】的機會與【　　　】的可能。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "楊勇緯（第4段）"
+    },
+    {
+      "items": [
+        {
+          "label": "事件",
+          "value": "1.在仁川亞運比賽前被140多公斤的【　　　】壓傷\n2.仁川亞運時抓舉95公斤、挺舉124公斤，拿下第【　　　】名，沒有奪牌。"
+        },
+        {
+          "label": "面對失敗的想法",
+          "value": "①勝利 ②失敗"
+        }
+      ],
+      "kind": "section_block",
+      "section": "郭婞淳（第5段）"
+    },
+    {
+      "items": [
+        {
+          "label": "事件",
+          "value": "①楊勇緯 ②郭婞淳\n①楊勇緯 ②郭婞淳\n①只有一種 ②有不只一種"
+        }
+      ],
+      "kind": "section_block",
+      "section": "總結"
+    }
+  ]
+}

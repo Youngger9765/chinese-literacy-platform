@@ -1,0 +1,29 @@
+lesson_uid: L0142
+version_id: v3
+title: 焚而不毀的倫敦
+catalog_slot: G9-L21
+sections_present:
+- 'no': 一
+  name: 讀全文-做記號
+- 'no': 二
+  name: 念順順
+- 'no': 三
+  name: 語詞我最棒
+- 'no': 四
+  name: 語詞應用
+- 'no': 五
+  name: 文章重點表
+- 'no': 六
+  name: 品格聚光燈
+  subtitle: 正向思考──用三種方法培養心理韌性
+- 'no': 七
+  name: 閱讀理解
+- 'no': 八
+  name: 詞語複習
+- 'no': 九
+  name: 知識補給站
+source:
+  extracted_by: extract-lesson-multimodal
+  pdf_pages: 14
+  drive_path: 9年級/G9-L21焚而不毀的倫敦（品格力-正向思考-培養心理韌性）.docx
+  docx_md5: md5-12:8ac799ccbb36

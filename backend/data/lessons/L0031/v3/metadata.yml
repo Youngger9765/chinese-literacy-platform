@@ -1,0 +1,35 @@
+lesson_uid: L0031
+version_id: v3
+level: 5
+genre: 記敘文
+strategy: 推論策略──找言行，認識人物特質
+header_target: 目標策略：推論策略──找言行，認識人物特質
+課文: 吳漢庭
+學習單: 張明珠/陳淑麗
+lesson_no: 1
+series: 一般
+lesson_seq: 5010
+intro: 這篇文章介紹了柔道選手楊勇緯的成長歷程。文章描述了他如何透過嚴格的自我要求，包括勤奮的練習、飲食控制、細心記錄學習心得，以及在比賽中培養專注力與心理素質，來不斷精進自己。即使在東京奧運中未能達成金牌的目標，他也從中學習，並持續努力，最終在其他賽事中獲得佳績。透過楊勇緯的故事，我們可以看見一位運動員如何在挑戰中成長，並展現出堅韌的毅力與不斷追求卓越的精神。
+strategy_explained: '這一課我們要練習「從楊勇緯的說話和做事，看出他有多厲害」
+
+  因為這篇文章告訴我們，楊勇緯為了變強，不只練習，還會控制飲食、寫心得，比賽時也很專心，這些都是他很棒的特質
+
+  讀的時候，你可以找找看，他做了哪些事，說了哪些話，來展現他有多認真，多麼想變更好'
+strategy_sources:
+  worksheet: 推論策略──找言行，認識人物特質
+  master_sheet: null
+  previous: 推論策略──找言行，認識人物特質
+source_profile:
+  class: standard
+  note: 單一錨點 + 有計數欄 + idx 唯一 —— 走主路徑
+  has_key_reading_section: true
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: null
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 1
+  has_counter_column: true
+  body_in_tables: true
+  invisible_chars_docx_only: true
+  profiled: '2026-08-24'

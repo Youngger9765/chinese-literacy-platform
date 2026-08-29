@@ -2,11 +2,11 @@
  * recordingValidation.ts — Issue #2362
  *
  * Shared "①.5 Recording Validation" layer that sits between ① Recording and
- * ② STT Transcription for BOTH LiveTutor (per-paragraph) and FullReading
+ * ② STT Transcription for BOTH ParagraphReading (per-paragraph) and KeyPassageReading
  * (full text).
  *
- * Previously the silence gate existed only in useFullReadingSession.ts (#2321).
- * LiveTutor had no front-end guard and sent silent audio straight to Gemini,
+ * Previously the silence gate existed only in useKeyPassageReadingSession.ts (#2321).
+ * ParagraphReading had no front-end guard and sent silent audio straight to Gemini,
  * allowing hallucinations to pass the hallucination-prefix backend gate
  * (which only fires when transcript ≥ 35% length of target).
  *

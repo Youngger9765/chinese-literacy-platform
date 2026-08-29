@@ -1,87 +1,118 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 5,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "故事大綱",
+      "讀者自問自答",
+      "勤奮不懈",
+      "自立自強"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "「拳」力出擊──陳念琴",
-      "value": "",
-      "interactive_type": "display"
-    },
-    {
-      "label": "主角",
-      "value": "【　　　】",
-      "interactive_type": "fill_blank"
-    },
-    {
-      "label": "主題",
-      "value": "陳念琴靠著堅韌的心志，擊破種種挑戰和困難，成為臺灣第一個拿到奧運拳擊項目資格的女拳手。",
-      "interactive_type": "display"
-    },
-    {
-      "label": "發展歷程",
-      "value": "",
       "interactive_type": "display",
+      "label": "比運氣更重要的事：《長腿叔叔》的啟發",
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "故事介紹",
       "sub_rows": [
         {
-          "label": "國中時期",
-          "value": "1.陳念琴剛加入拳擊隊時受到排擠和遇到打不贏男生的困境，她做了什麼來改變現況？【　　　】\n用一顆不服輸的心撐下來   思考打到對方的策略\n接受高強度的訓練    　　 □增重到67公斤\n2.陳念琴的正向思考：【　　　】\n「既然無路可退，就  正面迎擊  □沮喪逃避，用成績證明自己。」\n3.越級打怪成功，贏得勝利。",
-          "interactive_type": "fill_blank"
+          "interactive_type": "display",
+          "label": "書名",
+          "value": "長腿叔叔"
         },
         {
-          "label": "國中以後",
-          "value": "1.高中：\n【　　　】健康情況：【　　　】\n罹患先天缺血性貧血\n□罹患淋巴癌。\n【　　　】過程：一邊訓練、一邊監測身體狀況，讓她心力交瘁。 2.東京奧運：\n【　　　】健康情況：【　　　】\n□罹患先天缺血性貧血 \n罹患淋巴癌。\n【　　　】過程：忍受痛苦的【　　　】和承受媒體的質疑。\n【　　　】抱持信念：\n為了【　　　】我願意忍耐，再苦再累我都要咬牙撐過。",
-          "interactive_type": "fill_blank"
+          "interactive_type": "display",
+          "label": "作者",
+          "value": "珍‧韋伯斯特"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "故事大綱",
+          "value": "描述孤兒朱蒂在「長腿叔叔」的【　　　】下進入大學，克服因【　　　】而導致的種種【　　　】困難，成為【　　　】的女性。"
         }
-      ]
+      ],
+      "value": ""
     },
     {
-      "label": "成就",
-      "value": "1.她成為第一個拿到奧運【　　　】項目資格的女拳手，並進入前八強。\n2.她的抗癌經歷，也鼓舞了許多癌症病友。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "讀者自問自答",
+      "value": "自問：朱蒂成功，只是得到貴人相助的好運嗎？\n自答：除了貴人相助，朱蒂【　　　】、自立自強的特質，也是她【　　　】的關鍵"
+    },
+    {
+      "interactive_type": "display",
+      "label": "從故事內容找支持「自答」的證據",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "勤奮不懈",
+          "value": "1.在學業上，朱蒂有什麼困難？【 請打勾，多選 】\n2.朱蒂如何克服困難：制定有條不紊的【　　　】，持續閱讀與學習。\n3.結果：朱蒂學業短時間內脫穎而出，成績名列前茅。\n①在孤兒院沒有受到完整教育 ②文化常識薄弱，也不認識名人 ③大一時，數學及拉丁文成績不及格"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "自立自強",
+          "value": "1.生活儉樸，不【　　　】資助的學費與生活費。\n2.靠自己能力賺錢、得獎學金時，想償還資助款。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "fill_blank",
+      "label": "讀者結論",
+      "value": "除了貴人相助，朱蒂也把握機會、愈挫愈勇，不斷付出【　　　】，最後成為獨立自主的女性。"
     }
   ],
-  "layout": "worksheet_table",
-  "title": "「拳」力出擊──陳念琴",
+  "title": "比運氣更重要的事：《長腿叔叔》的啟發",
   "worksheet_rows": [
     {
-      "kind": "pair",
-      "label": "主角",
-      "value": "【　　　】"
-    },
-    {
-      "kind": "pair",
-      "label": "主題",
-      "value": "陳念琴靠著堅韌的心志，擊破種種挑戰和困難，成為臺灣第一個拿到奧運拳擊項目資格的女拳手。"
-    },
-    {
-      "kind": "section_block",
-      "section": "發展歷程",
       "items": [
         {
-          "label": "國中時期",
-          "value": "1.陳念琴剛加入拳擊隊時受到排擠和遇到打不贏男生的困境，她做了什麼來改變現況？(多選)\n用一顆不服輸的心撐下來   思考打到對方的策略\n接受高強度的訓練    　　 □增重到67公斤\n2.陳念琴的正向思考：(單選)\n「既然無路可退，就  正面迎擊  □沮喪逃避，用成績證明自己。」\n3.越級打怪成功，贏得勝利。"
+          "label": "書名",
+          "value": "長腿叔叔"
         },
         {
-          "label": "國中以後",
-          "value": "1.高中：\n(1)健康情況：(單選)\n罹患先天缺血性貧血\n□罹患淋巴癌。\n(2)過程：一邊訓練、一邊監測身體狀況，讓她心力交瘁。 2.東京奧運：\n(1)健康情況：(單選)\n□罹患先天缺血性貧血 \n罹患淋巴癌。\n(2)過程：忍受痛苦的【　　　】和承受媒體的質疑。\n(3)抱持信念：\n為了【　　　】我願意忍耐，再苦再累我都要咬牙撐過。"
+          "label": "作者",
+          "value": "珍‧韋伯斯特"
+        },
+        {
+          "label": "故事大綱",
+          "value": "描述孤兒朱蒂在「長腿叔叔」的【　　　】下進入大學，克服因【　　　】而導致的種種【　　　】困難，成為【　　　】的女性。"
         }
-      ]
+      ],
+      "kind": "section_block",
+      "section": "故事介紹"
     },
     {
       "kind": "pair",
-      "label": "成就",
-      "value": "1.她成為第一個拿到奧運【　　　】項目資格的女拳手，並進入前八強。\n2.她的抗癌經歷，也鼓舞了許多癌症病友。"
+      "label": "讀者自問自答",
+      "value": "自問：朱蒂成功，只是得到貴人相助的好運嗎？\n自答：除了貴人相助，朱蒂【　　　】、自立自強的特質，也是她【　　　】的關鍵"
+    },
+    {
+      "items": [
+        {
+          "label": "勤奮不懈",
+          "value": "1.在學業上，朱蒂有什麼困難？（請打勾，多選）\n2.朱蒂如何克服困難：制定有條不紊的【　　　】，持續閱讀與學習。\n3.結果：朱蒂學業短時間內脫穎而出，成績名列前茅。\n①在孤兒院沒有受到完整教育 ②文化常識薄弱，也不認識名人 ③大一時，數學及拉丁文成績不及格"
+        },
+        {
+          "label": "自立自強",
+          "value": "1.生活儉樸，不【　　　】資助的學費與生活費。\n2.靠自己能力賺錢、得獎學金時，想償還資助款。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "從故事內容找支持「自答」的證據"
+    },
+    {
+      "kind": "pair",
+      "label": "讀者結論",
+      "value": "除了貴人相助，朱蒂也把握機會、愈挫愈勇，不斷付出【　　　】，最後成為獨立自主的女性。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "theme_facts",
-    "fill_blank_count": 4,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "主角",
-      "國中時期",
-      "國中以後",
-      "成就"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

@@ -1,0 +1,58 @@
+lesson_uid: L0099
+version_id: v3
+level: 7
+genre: 議論文
+strategy: 推論策略──找觀點與理由，推論隱含意義
+課文作者: 林玫伶
+學習單: 巫怡蓉
+lesson_no: 2
+series: 一般
+lesson_seq: 7020
+intro: 這篇文章探討在人工智慧（AI）日益強大的時代，我們學習的意義與方向。文章指出，AI能快速提供資訊、完成許多任務，但這並不代表人類就不再需要學習。相反地，我們更需要培養獨立思考、提出有意義問題的能力，並重視親身體驗與情感連結。文章也說明，AI是個有用的工具，能協助我們節省時間，但真正的學習是將AI的幫助融入自身經驗，透過思考、判斷與創造，展現屬於人類獨特的價值。
+notes:
+  總表_文體: 議論文
+  總表_類型: 時事
+  總表_議題: null
+  _總表_議題note: 總表這一列的「議題」欄是**空白**。空白就是空白，未自行編一個。
+  總表_聚光燈策略: 推論策略──找觀點與理由，推論隱含意義
+  總表_第六大題標題: 推論策略──找觀點與理由，推論隱含意義
+  _總表_第六大題標題note: 總表欄名叫「第六大題標題」，但本課聚光燈是**第五**大題（本課沒有重點表）。
+  總表_文本類型: 單
+  總表_語詞_原樣:
+  - 汙名化
+  - 轉瞬之間
+  - 情感共鳴
+  - 詞藻優美
+  - 磨合
+  - 破關攻略
+  - 牽著鼻子走
+  - 駕馭
+  - 構思
+  - 磨難
+  總表_對照: 總表 10 個語詞與學習單語詞框 10 個**完全一致**，只有排列順序不同。第八（找字）灰框也是同樣 10 個。
+  節次順序: '🔴 本課 **五＝閱讀聚光燈**（不是六），因為**沒有文章重點表**。
+
+    依 sections_present 為準；用常數表推序號會把聚光燈標成六。'
+strategy_explained: '這一課我們要練習的是，找出作者認為「在AI這麼厲害的時代，我們人類還有什麼價值，為什麼還要學習」的關鍵想法，以及他提出哪些理由來支持這個想法
+
+  這篇文章正是在討論AI的進步，但作者告訴我們，人類的獨立思考、提問和情感連結才是AI做不到的，所以非常適合練習去找出作者的看法和他的證據
+
+  讀的時候，你可以試著想想，作者認為AI和我們人哪裡不一樣，然後他說了哪些例子或原因來證明他的想法'
+strategy_sources:
+  worksheet: null
+  master_sheet: 推論策略──找作者觀點和支持理由
+  previous: 推論策略──找觀點與理由，推論隱含意義
+source_profile:
+  class: standard
+  note: 單一錨點 + 有計數欄 + idx 唯一 —— 走主路徑
+  has_key_reading_section: true
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: null
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 1
+  has_counter_column: true
+  body_in_tables: true
+  invisible_chars_docx_only: true
+  profiled: '2026-08-24'

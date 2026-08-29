@@ -1,0 +1,29 @@
+lesson_uid: L0091
+version_id: v3
+title: 你看見時代的灰犀牛了嗎？談人口負成長
+catalog_slot: G7-L22
+sections_present:
+- 'no': 一
+  name: 讀全文—做記號
+- 'no': 二
+  name: 念順順
+- 'no': 三
+  name: 語詞我最棒
+- 'no': 四
+  name: 語詞應用
+- 'no': 五
+  name: 文章重點表
+- 'no': 六
+  name: 閱讀聚光燈
+  subtitle: 圖表繪製與判讀─折線圖
+- 'no': 七
+  name: 閱讀理解
+- 'no': 八
+  name: 詞語複習
+- 'no': 九
+  name: 知識補給站
+source:
+  extracted_by: extract-lesson-multimodal
+  pdf_pages: 12
+  drive_path: 7年級/G7-L22你看見時代的灰犀牛了嗎談人口負成長（圖表繪製與判讀-折線圖）.docx
+  docx_md5: md5-12:f5dade54520a

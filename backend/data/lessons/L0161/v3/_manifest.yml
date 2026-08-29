@@ -1,0 +1,166 @@
+lesson_uid: L0161
+generated_by: scripts/build_lesson_manifest.py
+note: 衍生檔，不是真相來源。sections 來自 lesson.yml 的 sections_present，module 歸屬來自 specs/modules/section-to-module.yml。改了那兩者要重產。
+sections:
+- 'no': null
+  name: 導讀
+  module: intro_guide
+  slug: jkkup
+  file: intro_guide.jkkup.yml
+  pages:
+  - 1
+- 'no': null
+  name: 古文今譯
+  module: modern_translation
+  slug: 3h7ad
+  file: modern_translation.3h7ad.yml
+  pages:
+  - 1
+  - 2
+  - 3
+  - 4
+- 'no': null
+  name: 原文（含斷詞點）＋注釋
+  module: classical_text
+  slug: xahdd
+  file: classical_text.xahdd.yml
+  pages:
+  - 1
+  - 2
+  - 3
+  - 4
+  pages_source: bracketed
+- 'no': null
+  name: 朗讀計時
+  module: key_reading
+  slug: y76jd
+  file: key_reading.y76jd.yml
+  pages:
+  - 1
+  - 2
+  - 3
+  - 4
+  pages_source: bracketed
+- 'no': 一
+  name: 文白句子比對
+  module: sentence_matching
+  slug: vrrma
+  file: sentence_matching.vrrma.yml
+  pages:
+  - 4
+  - 5
+- 'no': 二
+  name: 文白詞語比對
+  module: word_matching
+  slug: w4r3j
+  file: word_matching.w4r3j.yml
+  pages:
+  - 5
+  - 6
+  - 7
+- 'no': 三
+  name: 文章重點表
+  module: keypoints
+  slug: d9m7p
+  file: keypoints.d9m7p.yml
+  pages:
+  - 7
+  - 8
+  - 9
+- 'no': 四
+  name: 文言文聚光燈
+  module: spotlight
+  subtitle: 指示代詞、疑問代詞
+  slug: deqve
+  file: spotlight.deqve.yml
+  pages:
+  - 9
+  - 10
+  - 11
+  - 12
+- 'no': 五
+  name: 閱讀理解
+  module: comprehension
+  slug: dj4uv
+  file: comprehension.dj4uv.yml
+  pages:
+  - 12
+  - 13
+- 'no': 六
+  name: 自我挑戰
+  module: self_challenge
+  slug: 7aemk
+  file: self_challenge.7aemk.yml
+  pages:
+  - 13
+dispatch:
+- classical_text
+- comprehension
+- intro_guide
+- key_reading
+- keypoints
+- modern_translation
+- self_challenge
+- sentence_matching
+- spotlight
+- word_matching
+produced:
+- classical_text
+- comprehension
+- intro_guide
+- key_reading
+- keypoints
+- modern_translation
+- self_challenge
+- sentence_matching
+- spotlight
+- word_matching
+absent_from_source:
+- full_text_annotate
+- resources
+- vocab_application
+- vocab_definitions
+- vocab_review
+pdf_pages: 13
+dispatch_pages:
+  classical_text:
+  - 1
+  - 2
+  - 3
+  - 4
+  comprehension:
+  - 12
+  - 13
+  intro_guide:
+  - 1
+  key_reading:
+  - 1
+  - 2
+  - 3
+  - 4
+  keypoints:
+  - 7
+  - 8
+  - 9
+  modern_translation:
+  - 1
+  - 2
+  - 3
+  - 4
+  self_challenge:
+  - 13
+  sentence_matching:
+  - 4
+  - 5
+  spotlight:
+  - 9
+  - 10
+  - 11
+  - 12
+  word_matching:
+  - 5
+  - 6
+  - 7
+low_confidence_pages:
+- classical_text
+- key_reading

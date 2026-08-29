@@ -1,0 +1,131 @@
+lesson_uid: L0017
+generated_by: scripts/build_lesson_manifest.py
+note: 衍生檔，不是真相來源。sections 來自 lesson.yml 的 sections_present，module 歸屬來自 specs/modules/section-to-module.yml。改了那兩者要重產。
+sections:
+- 'no': 一
+  name: 讀全文-做記號
+  module: full_text_annotate
+  slug: qeqwt
+  file: full_text_annotate.qeqwt.yml
+  pages:
+  - 1
+  - 2
+- 'no': 二
+  name: 念順順
+  module: key_reading
+  text_ref: qeqwt
+  slug: h6xnk
+  file: key_reading.h6xnk.yml
+  pages:
+  - 2
+  - 3
+- 'no': 三
+  name: 語詞我最棒
+  module: vocab_definitions
+  text_ref: qeqwt
+  slug: 64nww
+  file: vocab_definitions.64nww.yml
+  pages:
+  - 3
+- 'no': 四
+  name: 語詞應用
+  module: vocab_application
+  text_ref: qeqwt
+  slug: 6pkat
+  file: vocab_application.6pkat.yml
+  pages:
+  - 3
+  - 4
+- 'no': 五
+  name: 文章重點表
+  module: keypoints
+  text_ref: qeqwt
+  slug: vhkqd
+  file: keypoints.vhkqd.yml
+  pages:
+  - 4
+  - 5
+- 'no': 六
+  name: 品格聚光燈
+  module: spotlight
+  subtitle: 自我覺察──是友情還是愛情？
+  text_ref: qeqwt
+  slug: yqcxe
+  file: spotlight.yqcxe.yml
+  pages:
+  - 5
+  - 6
+- 'no': 七
+  name: 閱讀理解
+  module: comprehension
+  text_ref: qeqwt
+  slug: pjhxh
+  file: comprehension.pjhxh.yml
+  pages:
+  - 6
+  - 7
+  - 8
+- 'no': 八
+  name: 詞語複習
+  module: vocab_review
+  text_ref: qeqwt
+  slug: 99vy3
+  file: vocab_review.99vy3.yml
+  pages:
+  - 8
+- 'no': 九
+  name: 知識補給站
+  module: resources
+  text_ref: qeqwt
+  slug: yxcht
+  file: resources.yxcht.yml
+  pages:
+  - 8
+dispatch:
+- comprehension
+- full_text_annotate
+- key_reading
+- keypoints
+- resources
+- spotlight
+- vocab_application
+- vocab_definitions
+- vocab_review
+produced:
+- comprehension
+- full_text_annotate
+- key_reading
+- keypoints
+- resources
+- spotlight
+- vocab_application
+- vocab_definitions
+- vocab_review
+absent_from_source: []
+pdf_pages: 8
+dispatch_pages:
+  comprehension:
+  - 6
+  - 7
+  - 8
+  full_text_annotate:
+  - 1
+  - 2
+  key_reading:
+  - 2
+  - 3
+  keypoints:
+  - 4
+  - 5
+  resources:
+  - 8
+  spotlight:
+  - 5
+  - 6
+  vocab_application:
+  - 3
+  - 4
+  vocab_definitions:
+  - 3
+  vocab_review:
+  - 8

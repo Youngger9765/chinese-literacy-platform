@@ -11,7 +11,15 @@ pypinyin>=0.51
 jieba>=0.42
 pytest>=8.0
 pytest-asyncio>=0.23
+# schema 驗證（#2865 的門與測試都用它）。原本靠別的套件間接帶進來，
+# 本機有、CI 沒有 —— 那種相依不宣告就會在 CI 才炸。
+jsonschema>=4.0
 httpx>=0.27
+# Azure TTS is called through requests, not urllib: urllib fails ~12% of the
+# time on Azure's chunked responses (IncompleteRead), and each failure used to
+# become mainland-accent audio via the Google fallback. Listed explicitly
+# because it arrives here only as a transitive dependency today.
+requests>=2.31
 google-genai>=1.0
 alembic>=1.13
 google-cloud-storage>=2.14
@@ -26,3 +34,4 @@ sentry-sdk[fastapi]>=2.0
 google-cloud-texttospeech>=2.14
 pypdfium2>=4.30
 Pillow>=10.0
+qrcode[pil]==8.2

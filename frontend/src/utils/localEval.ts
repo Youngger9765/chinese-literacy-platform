@@ -1,5 +1,5 @@
 /**
- * Local (offline) evaluation utilities for LiveTutor hybrid STT architecture.
+ * Local (offline) evaluation utilities for ParagraphReading hybrid STT architecture.
  *
  * Used in the hybrid eval flow:
  *   - Phase 1 (instant): localEvaluateParagraph → tier 1/2/3 with diffTokens (<1ms)
@@ -97,8 +97,8 @@ export function splitIntoSentences(text: string): string[] {
  * @param transcript  Raw STT transcript for this segment
  * @param targetText  The target text (paragraph or sentence)
  * @param durationMs  Elapsed recording time in ms (used for CPM calc; pass/fail unaffected since cpmPass=0)
- * @param pools       Feedback pools from LiveTutor (TIER1_POOL, etc.)
- * @param streak      Current streak value from LiveTutor state
+ * @param pools       Feedback pools from ParagraphReading (TIER1_POOL, etc.)
+ * @param streak      Current streak value from ParagraphReading state
  */
 export function localEvaluateParagraph(
   transcript: string,

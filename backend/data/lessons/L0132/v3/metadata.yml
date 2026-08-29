@@ -1,0 +1,50 @@
+lesson_uid: L0132
+version_id: v3
+level: 9
+genre: 說明文
+strategy: 科學推理策略——整合多項研究證據
+課文作者: 曾世杰
+學習單: 張明珠/陳淑麗
+lesson_no: 11
+series: 一般
+lesson_seq: 9110
+intro: 這篇文章探討了現代人近視率不斷攀升的現象，並分析了造成近視的可能原因。文中首先指出，雖然許多人認為近距離用眼是導致近視的主因，但近年的研究發現，眼球缺乏足夠的陽光照射，也就是戶外活動時間不足，可能是另一個重要的因素。文章接著透過多項研究和實驗，說明了戶外活動對預防近視的潛在益處，並提出「光線-多巴胺假說」來解釋其作用機制。最後，文章強調了增加戶外活動的重要性，並提及陽光對身心健康的額外益處。
+notes:
+  總表_文體: 說明文
+  總表_類型: 科學
+  總表_議題: 科學知識
+  總表_聚光燈策略: 科學推理策略──整合多項研究證據
+  總表_第六大題標題: 科學推理策略──整合多項研究證據
+  總表_文本類型: 單
+  總表_語詞_原樣:
+  - 咎責
+  - 罹患
+  - 多巴胺
+  - 望塵莫及
+  - 鳳毛麟角
+  - 流行疫病
+  - 刻板印象
+  - 不言而喻
+strategy_explained: '這一課我們要練習的是，怎麼看懂科學研究的證據，然後用這些證據去說服別人
+
+  這篇文章就帶你分析，為什麼長時間待在室內、陽光照不夠，會讓近視越來越嚴重，裡面有很多研究和實驗可以讓你練習判斷
+
+  讀的時候，可以試著想想，作者是怎麼一步一步證明「多去戶外」對眼睛好的，也可以想想，自己是不是也曾經有類似的經驗呢'
+strategy_sources:
+  worksheet: 科學推理策略
+  master_sheet: 表達看法──以科學證據說服人
+  previous: 科學推理策略——整合多項研究證據
+source_profile:
+  class: standard
+  note: 單一錨點 + 有計數欄 + idx 唯一 —— 走主路徑
+  has_key_reading_section: true
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: null
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 1
+  has_counter_column: true
+  body_in_tables: true
+  invisible_chars_docx_only: false
+  profiled: '2026-08-24'

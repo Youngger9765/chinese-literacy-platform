@@ -17,6 +17,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { VocabItem } from '../../types';
 import { buildMCQOptions, AnswerRecord } from './vocabDefinitionMatchLogic';
 import { getVocabDefinitionEncouragementMessage } from '../../utils/encouragement';
+import StepCoachCard, { StepCoachHelpButton } from '../learning/StepCoachCard';
 
 // ── localStorage key for first-use onboarding gate ────────────────────────
 const VOCAB_MCQ_ONBOARDED_KEY = 'vocab_mcq_onboarded';
@@ -38,6 +39,43 @@ export interface MultipleChoiceProps {
   vocab: VocabItem[];
   activeDefIndices: number[];
   onAllDone: (answers: AnswerRecord[]) => void;
+  /**
+   * #2839 — 已作答的快照，用來「接著答」而不是從第 1 題重來。
+   */
+  initialAnswers?: AnswerRecord[];
+  /**
+   * #2839 — 每答一題回報一次。
+   *
+   * 這個 callback 之前不存在，是這一關進度存不進 DB 的根因：每一題的作答只寫進
+   * `answersRef`（useRef，不觸發 render、不通知 parent），parent 要等到 11 題全部
+   * 答完的 `onAllDone` 才知道任何事。作答中 parent 的 `mcAnswers` 恆為 `[]`，
+   * 進度 payload 每次算出來都一模一樣，dedup 正確地判定沒變化 → 一次 PUT 都不發。
+   */
+  onAnswersChange?: (answers: AnswerRecord[]) => void;
+}
+
+/**
+ * 把還原回來的作答對回目前這一輪的題目集合。用 `defIndex` 對，不是用陣列位置 ——
+ * 「重做錯題」會讓 `activeDefIndices` 只剩一部分，位置對不起來。
+ */
+function seedAnswers(activeDefIndices: number[], restored?: AnswerRecord[]): AnswerRecord[] {
+  const byDefIndex = new Map((restored ?? []).map((a) => [a.defIndex, a]));
+  return activeDefIndices.map(
+    (defIdx) =>
+      byDefIndex.get(defIdx) ?? {
+        defIndex: defIdx,
+        answeredWordIdx: null,
+        correct: null,
+        firstTryCorrect: null,
+      },
+  );
+}
+
+/** 還原後該從第幾題接著答 —— 第一個還沒作答的。全部答完就停在最後一題。 */
+function resumeQueueIdx(answers: AnswerRecord[]): number {
+  const idx = answers.findIndex((a) => a.answeredWordIdx === null);
+  if (idx !== -1) return idx;
+  return Math.max(0, answers.length - 1);
 }
 
 // AnswerState now tracks all wrong choices for the current question so
@@ -81,43 +119,21 @@ interface OnboardingCoachProps {
 
 function OnboardingCoach({ onDismiss, onDemo }: OnboardingCoachProps) {
   return (
-    <div className="mb-5 rounded-2xl border-2 border-amber-400/60 bg-amber-50 px-5 py-4 flex flex-col gap-3">
-      <div className="flex items-start gap-3">
-        <span className="material-symbols-outlined text-amber-500 text-2xl flex-shrink-0 mt-0.5">
-          lightbulb
-        </span>
-        <div className="flex-1">
-          <p className="font-bold text-on-surface text-base mb-1">詞語理解怎麼玩？</p>
-          <p className="text-sm text-on-surface-variant leading-relaxed">
-            讀上方的解釋，從下面的選項中選出對應的語詞。
-          </p>
-        </div>
-      </div>
-      <div className="flex items-center gap-2 self-end">
-        <button
-          type="button"
-          onClick={onDemo}
-          className="px-4 py-2 rounded-full text-sm font-bold border-2 border-accent text-accent hover:bg-accent/10 active:scale-[0.98] transition-all"
-        >
-          示範
-        </button>
-        <button
-          type="button"
-          onClick={onDismiss}
-          className="px-5 py-2 rounded-full text-sm font-bold text-white bg-accent hover:brightness-110 active:scale-[0.98] transition-all"
-        >
-          我知道了
-        </button>
-      </div>
-    </div>
+    <StepCoachCard title="詞語理解怎麼玩？" onDemo={onDemo} onDismiss={onDismiss}>
+      讀上方的解釋，從下面的選項中選出對應的語詞。
+    </StepCoachCard>
   );
 }
 
-export function MultipleChoiceMode({ vocab, activeDefIndices, onAllDone }: MultipleChoiceProps) {
-  const [queueIdx, setQueueIdx] = useState(0);
-  const answersRef = useRef<AnswerRecord[]>(
-    activeDefIndices.map((defIdx) => ({ defIndex: defIdx, answeredWordIdx: null, correct: null })),
-  );
+export function MultipleChoiceMode({
+  vocab,
+  activeDefIndices,
+  onAllDone,
+  initialAnswers,
+  onAnswersChange,
+}: MultipleChoiceProps) {
+  const answersRef = useRef<AnswerRecord[]>(seedAnswers(activeDefIndices, initialAnswers));
+  const [queueIdx, setQueueIdx] = useState(() => resumeQueueIdx(answersRef.current));
   const [answerState, setAnswerState] = useState<AnswerState>({ status: 'idle' });
   const [correctPraise, setCorrectPraise] = useState('答對了！');
   const [wrongEncouragement, setWrongEncouragement] = useState('加油！再想想看');
@@ -137,16 +153,22 @@ export function MultipleChoiceMode({ vocab, activeDefIndices, onAllDone }: Multi
   const demoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const demoTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
+  // 題目集合換了（重做錯題 / 全部重做 / 切換模式）→ 從頭開始。
+  //
+  // #2839：這個 effect 在 mount 時也會跑一次，會把上面剛從 `initialAnswers` 種好的
+  // 快照整個抹掉 —— 還原就永遠不會生效，而且不會有任何錯誤，看起來就只是「沒還原」。
+  // 所以第一次跑要跳過：mount 當下的種子已經是對的了。
+  const didResetOnceRef = useRef(false);
   useEffect(() => {
+    if (!didResetOnceRef.current) {
+      didResetOnceRef.current = true;
+      return;
+    }
     setQueueIdx(0);
     setAnswerState({ status: 'idle' });
     setCorrectPraise('答對了！');
     setWrongEncouragement('加油！再想想看');
-    answersRef.current = activeDefIndices.map((defIdx) => ({
-      defIndex: defIdx,
-      answeredWordIdx: null,
-      correct: null,
-    }));
+    answersRef.current = seedAnswers(activeDefIndices);
   }, [activeDefIndices]);
 
   const clearDemoTimers = () => {
@@ -217,12 +239,29 @@ export function MultipleChoiceMode({ vocab, activeDefIndices, onAllDone }: Multi
 
     const isCorrect = vocabIdx === currentDefIdx;
 
-    // Update the answers record — on retry, overwrite with the latest attempt
-    answersRef.current = answersRef.current.map((a) =>
-      a.defIndex === currentDefIdx
-        ? { ...a, answeredWordIdx: vocabIdx, correct: isCorrect }
-        : a,
-    );
+    // Update the answers record — `correct`/`answeredWordIdx` reflect the
+    // LATEST attempt on purpose (on retry, overwrite). `firstTryCorrect` and
+    // `firstTryAnsweredWordIdx` are write-once (#2773): captured only on the
+    // item's first attempt (while `firstTryCorrect` is still null), then never
+    // touched again — a retry-into-correct can't erase the original miss, and
+    // "你選了 X" can't end up showing the later CORRECT pick on both sides.
+    answersRef.current = answersRef.current.map((a) => {
+      if (a.defIndex !== currentDefIdx) return a;
+      const isFirstAttempt = a.firstTryCorrect == null;
+      return {
+        ...a,
+        answeredWordIdx: vocabIdx,
+        correct: isCorrect,
+        firstTryCorrect: isFirstAttempt ? isCorrect : a.firstTryCorrect,
+        firstTryAnsweredWordIdx: isFirstAttempt
+          ? (isCorrect ? null : vocabIdx)
+          : a.firstTryAnsweredWordIdx ?? null,
+      };
+    });
+
+    // #2839 — 每一題都回報，答對答錯都要。少了這行，作答中的答案只活在 ref 裡，
+    // parent 的進度 payload 從頭到尾不會變，PUT 一次都不會送出去。
+    onAnswersChange?.(answersRef.current);
 
     if (isCorrect) {
       if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
@@ -401,14 +440,7 @@ export function MultipleChoiceMode({ vocab, activeDefIndices, onAllDone }: Multi
       {/* Show help button after onboarding is dismissed */}
       {!showCoach && (
         <div className="mt-4 flex justify-end">
-          <button
-            type="button"
-            onClick={() => setShowCoach(true)}
-            className="text-xs text-on-surface-variant/60 hover:text-on-surface-variant transition-colors flex items-center gap-1"
-          >
-            <span className="material-symbols-outlined text-sm">help_outline</span>
-            怎麼玩？
-          </button>
+          <StepCoachHelpButton onClick={() => setShowCoach(true)} />
         </div>
       )}
     </div>

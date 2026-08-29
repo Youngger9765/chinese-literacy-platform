@@ -1,0 +1,28 @@
+lesson_uid: L0154
+version_id: v3
+section_no: 二
+key_reading:
+  unit: 秒
+  unit_note: '🔴 文言文的計時跟白話課**不同**：白話課是「1 分鐘讀幾字」，這裡是「讀完全文要幾秒」。
+
+    表格的欄位單位是「秒」，對照表的門檻也是秒數，沒有累計字數欄、也沒有 ☞ 起讀點。'
+  instructions:
+  - 請用計時器，朗讀原文，並將讀完的時間記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！
+  - 文章中的「.」是表示斷詞的地方，朗讀時，不要把「同組的詞」分開。
+  timing_table:
+    columns:
+    - 第1次計時
+    - 第2次計時
+    - 第3次計時
+    - 裁判計時
+    unit: 秒
+    judge_signature: true
+  benchmark_instruction: ◎ 我的表現：請確認讀完全文的時間。不要太快也不要太慢，不漏字或加字，斷詞的位置也要正確哦！
+  benchmark:
+  - threshold: 42秒以下
+    feedback: 速度有點快，要讀清楚哦！
+  - threshold: 42~55秒
+    feedback: 強者就是你啦！
+  - threshold: 55秒以上
+    feedback: 速度再快一點！
+  slug: 3jdew

@@ -1,0 +1,34 @@
+lesson_uid: L0050
+version_id: v3
+section_no: 二
+key_reading:
+  instruction: 請用計時器，從指定段落（三　）開始朗讀，計時1分鐘讀的字數，並記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！
+  instruction_note: 括號內原稿印的是「三」加一個 ☞ 圖形；☞ 不在文字流。
+  timing_table:
+    columns:
+    - 第1次計時
+    - 第2次計時
+    - 第3次計時
+    - 裁判計時
+    unit: 字
+    judge_signature: true
+  benchmark_label: ◎ 我的表現
+  benchmark:
+  - threshold: ＜210字
+    feedback: 還要多加練習。
+  - threshold: 211~240字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞241字
+    feedback: 哇嗚，超級厲害！
+  passage: 這時，荷蘭人有了一個巧妙的構想——大家一起出錢，讓一家公司主導遠洋行動。於是，荷蘭東印度公司（Dutch East India Company）成立了，它是全世界第一家發行「股票」的公司。它把經營公司所需的資金分成許多小份，每一小份就是一張股票。如果人們認為這家公司會賺錢，就可以出錢認購股票，投資這家公司。只要有許多人投資，公司就能集到足夠的經費，組成船隊，揚帆啟航。
+  start_text: 這時，荷蘭人有了一個巧妙的構想——大家一起出錢，
+  extent_chars: 182
+  source: extract_key_reading_v3
+  start_paragraph: 3
+  end_paragraph: 3
+  slug: teqca
+  text_ref: cwrfr
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  absorbed_tail: 0

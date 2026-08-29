@@ -1,3 +1,4 @@
+import type { TeacherWordSearchSource } from '../components/reading-steps/wordSearchGrid';
 /**
  * api.ts — Core session utilities and story fetch APIs.
  *
@@ -11,12 +12,28 @@
  * fetchStories, fetchStory.
  */
 
-import type { Story } from '../types';
+import type {
+  Story,
+  ClassicalTextContent,
+  ModernTranslationContent,
+  ClassicalWordMatchingContent,
+  ClassicalSentenceMatchingContent,
+  ClassicalSelfChallengeContent,
+  IntroGuideContent,
+  GoalBoxContent,
+  SelfCheckBeforeReadingContent,
+  WritingPracticeContent,
+  MultiTextPart,
+  CrossTextBannerContent,
+  KeypointsFollowupQuestionsContent,
+} from '../types';
 import { camelizeKeys } from '../schema/camelize';
 import { LessonSchema } from '../schema/lessonContent';
 import { API_BASE } from './apiConfig';
 import { ASSET_BASE } from '../config/assetBase';
-import { stepSequenceFromWorksheet } from '../config/stepConfig';
+import { stepSequenceFromManifest } from '../config/stepConfig';
+import type { ManifestSection } from '../config/stepConfig';
+import { scopeDetailToRound } from '../config/roundScope';
 
 const inFlightStoryById = new Map<string, Promise<Story>>();
 
@@ -68,13 +85,14 @@ interface ApiStoryListItem {
   id: number;
   lesson_number: number;
   title: string;
-  grade: number;
+  grade: string;   // "4".."9" / 文言文 / 品格教育
   grade_code: string;
   genre: string;
   category: string;
   char_count: number;
   thumbnail_url: string;
   reading_strategy: string | null;
+  reading_strategy_explained?: string | null;
   intro: ApiStoryIntro;
 }
 
@@ -91,6 +109,8 @@ interface ApiStoryDetail extends ApiStoryListItem {
   // Full video list (#1683). null for legacy lessons without video_links field.
   video_links: { title: string; url: string }[] | null;
   reading_benchmark: { levels: { threshold: string; feedback: string }[] } | null;
+  // 重點朗讀指定段 (#2559)。null → 前端唸全文 fallback。
+  key_reading: { passage: string; start_text: string | null; extent_chars: number | null; source: string | null } | null;
   text_type: string;
   source_file: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -104,7 +124,9 @@ interface ApiStoryDetail extends ApiStoryListItem {
   reading_strategy_type?: string;
   images?: Array<{ filename: string; size_bytes: number; image_hash: string; content_type: string; caption?: string; figure_label?: string }>;
   // 學習單 section order + intro metadata (#1434)
-  worksheet_section_order?: Array<{ number: string; name: string; type: string }> | null;
+  manifest_sections?: ManifestSection[] | null;
+  /** 一課多篇時，各篇（以課文 slug 為 key）各模組的內容（#2916）。 */
+  repeat_rounds?: Record<string, Record<string, unknown>> | null;
   worksheet_intro?: {
     step_label?: string;
     target_strategy?: string;
@@ -139,12 +161,27 @@ interface ApiStoryDetail extends ApiStoryListItem {
   // straight from pydantic model_dump; null when the backend flag is OFF or no source.
   // Parsed in apiDetailToStory via camelizeKeys + LessonSchema.safeParse (fail-safe).
   lesson_content?: Record<string, unknown> | null;
+  // 文言文專屬模組 (#2752) — null for every non-文言文 lesson.
+  vocab_review?: TeacherWordSearchSource | null;
+  classical_text?: ClassicalTextContent | null;
+  modern_translation?: ModernTranslationContent | null;
+  word_matching?: ClassicalWordMatchingContent | null;
+  sentence_matching?: ClassicalSentenceMatchingContent | null;
+  self_challenge?: ClassicalSelfChallengeContent | null;
+  intro_guide?: IntroGuideContent | null;
+  // 一般課也有的無編號元素 (#2752 Phase 2) — null for lessons without one.
+  goal_box?: GoalBoxContent | null;
+  self_check_before_reading?: SelfCheckBeforeReadingContent | null;
+  writing_practice?: WritingPracticeContent | null;
+  multi_text_parts?: MultiTextPart[] | null;
+  cross_text_banner?: CrossTextBannerContent | null;
+  keypoints_followup_questions?: KeypointsFollowupQuestionsContent | null;
 }
 
 interface ApiStoryListResponse {
   stories: ApiStoryListItem[];
   total: number;
-  grades: number[];
+  grades: string[];
 }
 
 function apiListItemToStory(item: ApiStoryListItem): Story {
@@ -160,8 +197,31 @@ function apiListItemToStory(item: ApiStoryListItem): Story {
     grade: item.grade,
     genre: item.genre,
     readingStrategy: item.reading_strategy ?? undefined,
+    readingStrategyExplained: item.reading_strategy_explained ?? undefined,
     charCount: item.char_count,
   };
+}
+
+/**
+ * 這一步該看到的 story（#2916）。
+ *
+ * 一課印了好幾篇課文時，`key-passage-reading#9a7x4` 是第 2 篇的念順順。
+ * 不換的話三篇都會渲染頂層的 `key_reading`（＝第 1 篇）——
+ * **有段落、會唸、不報錯，只是唸錯篇**，畫面上看不出來。
+ *
+ * 單篇課、跨篇的節、以及沒有 `#slug` 的步驟一律原封不動回傳同一個物件。
+ */
+export function storyForStep(story: Story | null, stepKey: string): Story | null {
+  if (!story) return story;
+  const detail = (story as Story & { __detail?: ApiStoryDetail }).__detail;
+  if (!detail) return story;
+  const scoped = scopeDetailToRound(
+    detail as unknown as Record<string, unknown>,
+    story.manifestSections,
+    stepKey,
+  );
+  if (scoped === (detail as unknown as Record<string, unknown>)) return story;
+  return apiDetailToStory(scoped as unknown as ApiStoryDetail);
 }
 
 function apiDetailToStory(detail: ApiStoryDetail): Story {
@@ -177,9 +237,18 @@ function apiDetailToStory(detail: ApiStoryDetail): Story {
     grade: detail.grade,
     genre: detail.genre,
     readingStrategy: detail.reading_strategy ?? undefined,
+    readingStrategyExplained: detail.reading_strategy_explained ?? undefined,
     vocabulary: detail.vocabulary ?? undefined,
     charCount: detail.char_count,
     readingBenchmark: detail.reading_benchmark ?? undefined,
+    keyReading: detail.key_reading
+      ? {
+          passage: detail.key_reading.passage,
+          startText: detail.key_reading.start_text ?? undefined,
+          extentChars: detail.key_reading.extent_chars ?? undefined,
+          source: detail.key_reading.source ?? undefined,
+        }
+      : undefined,
     // Filter to legacy-format items only.
     // Two fill_in_blank schemas coexist (#1559, #1563):
     //   Legacy: { sentence, answer: "A" } — answer is a vocab_bank letter code.
@@ -197,7 +266,7 @@ function apiDetailToStory(detail: ApiStoryDetail): Story {
     fillInBlank: detail.fill_in_blank
       ? detail.fill_in_blank.filter((item) =>
           item['_schema'] === 'legacy' || typeof item['sentence'] === 'string' && !('context_before' in item)
-        ) as Array<{ sentence: string; answer: string }>
+        ) as Array<{ sentence: string; answer: string; options?: Record<string, string> }>
       : undefined,
     multipleChoice: detail.multiple_choice ?? undefined,
     vocabBank: detail.vocab_bank ?? undefined,
@@ -210,9 +279,12 @@ function apiDetailToStory(detail: ApiStoryDetail): Story {
     // flow matches each lesson's actual 學習單 (5/1「學習步驟動態對應學習單」).
     stepSequence:
       detail.step_sequence
-      ?? stepSequenceFromWorksheet(detail.worksheet_section_order)
+      ?? stepSequenceFromManifest(detail.manifest_sections)
       ?? undefined,
-    worksheetSectionOrder: detail.worksheet_section_order ?? undefined,
+    manifestSections: detail.manifest_sections ?? undefined,
+    // 原始 detail 留著：切到別篇的步驟時要用它重新對應一次（見 storyForStep）。
+    // 存原始的、不存已對應的，是為了讓對應邏輯只有一份。
+    __detail: detail,
     worksheetIntro: detail.worksheet_intro ?? undefined,
     lessonIntro: detail.lesson_intro ?? undefined,
     worksheetPdfUrl: resolveAssetUrl(detail.worksheet_pdf_url),
@@ -239,10 +311,25 @@ function apiDetailToStory(detail: ApiStoryDetail): Story {
       }
       return parsed.data;
     })(),
+    // 文言文專屬模組 (#2752) — undefined for every non-文言文 lesson (matches
+    // the `undefined`-means-absent convention every other optional field here uses).
+    vocabReview: detail.vocab_review ?? undefined,
+    classicalText: detail.classical_text ?? undefined,
+    modernTranslation: detail.modern_translation ?? undefined,
+    wordMatching: detail.word_matching ?? undefined,
+    sentenceMatching: detail.sentence_matching ?? undefined,
+    selfChallenge: detail.self_challenge ?? undefined,
+    introGuide: detail.intro_guide ?? undefined,
+    goalBox: detail.goal_box ?? undefined,
+    selfCheckBeforeReading: detail.self_check_before_reading ?? undefined,
+    writingPractice: detail.writing_practice ?? undefined,
+    multiTextParts: detail.multi_text_parts ?? undefined,
+    crossTextBanner: detail.cross_text_banner ?? undefined,
+    keypointsFollowupQuestions: detail.keypoints_followup_questions ?? undefined,
   };
 }
 
-export async function fetchStories(token?: string): Promise<{ stories: Story[]; total: number; grades: number[] }> {
+export async function fetchStories(token?: string): Promise<{ stories: Story[]; total: number; grades: string[] }> {
   const headers: Record<string, string> = {};
   if (token) headers['Authorization'] = `Bearer ${token}`;
   // Bounded content (~270 lessons): fetch all in one request so client-side

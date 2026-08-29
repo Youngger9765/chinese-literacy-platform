@@ -47,8 +47,9 @@ gcloud config configurations activate lingoleap
 
 | 元件 | URL |
 |------|-----|
-| Frontend (Cloud Run) | `https://lingoleap-frontend-958347263320.asia-east1.run.app` |
-| Frontend (Firebase) | `https://lingoleap-dev.web.app` |
+| Frontend (Cloud Run, **prod**) | `https://lingoleap-frontend-958347263320.asia-east1.run.app` |
+| Frontend (Firebase, **prod**) | `https://lingoleap-prod.web.app` |
+| Frontend (Firebase, **dev/staging**) | `https://lingoleap-dev.web.app` |
 | Backend API | `https://lingoleap-backend-958347263320.asia-east1.run.app` |
 | Cloud SQL | `lingoleap-db` (PostgreSQL 15, asia-east1, db-f1-micro) |
 | Artifact Registry | `asia-east1-docker.pkg.dev/lingoleap-dev/lingoleap/` |
@@ -97,7 +98,9 @@ PR Preview          Staging         Production
 
 - `backend/**` 變更 → rebuild + deploy backend
 - `frontend/**` 變更 → rebuild + deploy frontend
-- Secret: `GCP_SA_KEY` (service account for CI/CD)
+- CI/CD 用的 service account 憑證存在 GitHub secret，名稱 `GCP_SA_KEY`
+  <!-- 不寫成 `Secret: <名稱>` —— 那個形狀會被 pre-commit 的 generic_secret 偵測器
+       當成「secret 後面跟著一個值」而擋下 commit。這裡只有名稱，沒有值。 -->
 
 ### Artifact Registry Image Cleanup（4 層防護）
 
@@ -163,6 +166,25 @@ cd backend && pip install -r requirements.txt && uvicorn app.main:app --reload  
 | 改**聚光燈 / 重點表內容或抽取器**（`catalog/*` / `_online-schema/*` / `_parsed*/*` / `build_lesson_schema.py` / `keypoints_manifest.json` / spotlight / story_structure）| **PR 前必跑 content evidence gate + ship-gate（fail-closed）**：`python scripts/content_evidence_gate.py --run-id <id>` → `bash scripts/content_evidence_ship_gate.sh --run-id <id>`，必須印 `CONTENT_EVIDENCE_GATE=PASS`。⛔ 禁用「API 回 200 / render 看一下 / 我覺得對了」當完成依據——口頭宣稱過不了 gate，只認 evidence 檔（fail_cells=0 + unknown_cells=0）。真內容缺口登錄 `backend/data/curriculum_qa/content_known_gaps.yaml`（known_gap，誠實標、非造假），**禁把缺口 fake 成 pass**。| `.claude/skills/build-keypoints/` `.claude/skills/build-spotlight/` + `docs/qa/layer-verification-framework.md` |
 
 > 相關 PostToolUse hooks 已在 `~/.claude/settings.json` 全域註冊（#1273）。
+
+## 會議議程 / 會議記錄 → 一律進 repo，不開 issue（Young 2026-08-21 明令）
+
+要開會 → **議程必須在 GitHub 上有一個穩定的檔案 URL**，發給與會者的就是那個連結。
+
+| 做 | 不做 |
+|---|---|
+| 寫進 `docs/meetings/YYYY-MM-DD-agenda.md`（會後紀錄用 `-record.md`） | ⛔ 開成 GitHub issue |
+| commit + push，把 GitHub 上的檔案連結發給與會者 | ⛔ 只寫在對話裡、只留本機不推 |
+
+**為什麼不用 issue**：議程開成票會混進待辦票流，跟真正的工作票搶注意力；
+而開會當下需要一個穩定可讀的 URL，票裡的內容會被留言洗掉。
+
+**物理擋**：`~/.claude/hooks/pre-bash-meeting-agenda-to-repo-guard.sh`
+（PreToolUse/Bash；只認命令位置、會先剝掉 heredoc 內文，所以「寫文件說明這條規則」不會被誤擋）
+golden set：`~/.claude/hooks/tests/meeting-agenda-to-repo-guard.eval.sh`（12 case，兩種 mutation 都驗過會紅）
+
+> 起因：2026-08-21 我把當晚議程開成票 #2827 → 「誰叫你開 issue?????? meeting呢？？？」，
+> 同日再一次「會議就要開 agenda to github 知道嗎？？？」。規則層講兩次還犯，所以上 hook。
 
 ## Modular Spec System (`specs/`) — #2029
 
@@ -256,21 +278,68 @@ private/omo-real-samples/2026-05-18-batch-results/
 - ❌ 用「貴 = 好」邏輯（3.5 Flash $9 完敗 2.5-flash-lite $0.30）
 - ❌ Skip 便宜的 model（之前漏測 2.5-flash-lite 差點省不到 78%）
 
-## 學習流程（7 步驟，StepperNav 定義）
+## 學習流程
 
-1. **簡介** — 課文背景介紹（Intro）
-2. **逐段朗讀** — AI 即時朗讀指導（LiveTutor）
-3. **課文理解** — 蘇格拉底式 AI 對話（ComprehensionChat）
-4. **生字練習** — 筆順練習 + 注音（VocabPractice + WriteCharacter）
-5. **聽寫練習** — AI 唸字學生打字（DictationPractice）
-6. **全文朗讀** — 完整朗讀評估（FullReading）
-7. **報告** — 朗朗上口六環節診斷報告（AssessmentReport）
+> ⛔ **這裡的步驟名稱只是導覽用。真相 SOT 是 `frontend/src/config/stepConfig.ts`**——
+> 每個 step 上方都有決策註解寫明「為什麼、何時改的」，**那些註解才是答案，不是 label 字串**。
+> 想知道某個 step 現在是什麼、還在不在用，讀那個檔並**讀完該段註解**。
+
+### 朗讀相關的三個名稱（最容易搞混，2026-08-08 我就搞混過）
+
+| step id | 現在的 label | 狀態 | 是什麼 |
+|---|---|---|---|
+| `lesson-intro` | 課程簡介 | ✅ 啟用 | AI 唸**全文**（#2607 從瀏覽器機器音改成 Gemini/Azure 人聲）|
+| `key-passage-reading` | **重點朗讀** | ✅ 啟用 | 唸老師 ☞ 標的**重點段**（念順順），資料在 `key_reading.passage`；無資料時 fallback 唸全文 |
+| `paragraph-reading` | 逐段朗讀 | ⛔ **`enabled: false`** | 2026-07-20 專家審查後從 StepperNav 隱藏（ToolPicker 仍可進）。**新功能不要連到它** |
+
+⚠️ **這張表以前寫的是 `intro` / `full-reading` / `tutor`** —— 那三個是
+`LEGACY_STEP_ID_ALIASES`（stepConfig.ts:462）裡的**舊別名**，`resolveStepId()` 仍然解得開，
+所以照著寫「會動」，只是寫的人建在別名上而不是正式 id。新東西一律用左欄那三個。
+完整別名對照在那個 map 裡（另有 `reading-annotation`→`full-text-annotate`、
+`story-structure`→`keypoints-table`、`vocab`→`character-practice` 等）。
+
+2026-07-20 專家審查定調：朗讀**只練老師指定的那一段**，**不練全文**，
+範圍 = **☞ 落在的那一段 → 右緣最後一個累計數字落在的那一段，兩端之間全包**（常常剛好一段）。
+⚠️ 這裡以前寫「約 300–400 字」——那個數字是**右緣累計字數欄**的量級，那一欄量的是「一分鐘能讀到哪」，不是範圍長度。「從 ☞ 累積到字數欄 max」這條規則已經被否決四次，每次都是有人拿那個數字當範圍。
+主指標是流暢率（每分鐘字數）而非逐字正確率。做法是把既有 `full-reading` step **改造**成重點朗讀
+並**保留 step id**（新增 step 會讓完成記錄寫錯 step → 作業無法提交）。
 
 ### 其他練習元件（未在主流程 stepper 中）
 - **SentencePractice** — AI 引導造句
 - **ListeningPractice** — 聽力理解（TTS + AI 評估）
 - **PronunciationPractice** — 發音練習
 - **ExitTicket** — 學習出場券
+
+## TTS（2026-08-08 全面切到 Azure）
+
+| 項目 | 現值 | 備註 |
+|---|---|---|
+| provider | **`azure`** | prod / staging / preview 三個環境一致 |
+| voice | `zh-TW-HsiaoChenNeural` | 192kbps 48kHz |
+| fallback | Google `cmn-CN-Chirp3-HD-Sulafat` | ⚠️ **中國腔**，2026-04 盲聽已否決 |
+| GCS bucket | `lingoleap-tts-cache` | prefix：`azure/sentences/` 6356 · `gemini31-prompt-only-v2/sentences/` 1418 · `tts-cache/` 10 |
+| 快取 key | `sha256(raw_text.strip())` | **不含 provider 或 voice**，prefix 是唯一區隔 |
+
+⚠️ **判斷現在跑哪個 provider 一律查 serving revision 的 env**，不要讀文件——
+2026-08-08 之前所有文件都寫「Gemini 是 primary」，切換後那些全錯。
+
+```bash
+gcloud run services describe lingoleap-backend --region asia-east1 --project lingoleap-dev \
+  --format='value(status.traffic)'          # 找 percent 100 那筆的 revisionName
+gcloud run revisions describe <該 revision> --region asia-east1 --project lingoleap-dev \
+  --format='json(spec.containers[0].env)'   # 看它的 TTS_PROVIDER
+```
+
+### 三個 TTS 地雷
+
+1. **有聲音 ≠ AI 朗讀成功**。`frontend/src/hooks/useTtsPlayback.ts` 約 201 行在後端失敗時
+   **靜默降級成瀏覽器機器音**，聽起來「有聲音」但不是 AI。驗證要看 network 回應大小
+   （Azure 約 177–197KB，瀏覽器語音沒有網路請求）。
+2. **Azure 拒收 `<phoneme>`**。四種 alphabet（zhuyin/sapi/ipa/ups）全部 HTTP 400。
+   多音字校正要用 `<sub alias="X">Y</sub>`。
+3. **fallback 會把中國腔永久寫進快取**。azure prefix miss 時讀取路徑會回讀 `tts-cache/`
+   （`tts/__init__.py` 約 281–285 行），所以一次短暫失敗就把該句永久釘在中國腔，
+   Azure 恢復也救不回。詳見 `specs/modules/tts/INTENT.md`。
 
 ## 關鍵檔案
 
@@ -295,8 +364,32 @@ private/omo-real-samples/2026-05-18-batch-results/
 | `backend/app/services/dictionary_service.py` | 字典查詢服務 |
 | `backend/app/services/input_sanitizer.py` | 輸入消毒 |
 | `backend/app/routes/` | API 路由（140+ endpoints：auth, classrooms, assignments, learning, teacher, gamification, parents, dictionary, feedback, jobs, privacy） |
-| `backend/data/curriculum/` | 現行課程 SOT（**158 課** + `manifest.yml` 158 entries，verified 2026-07-02） |
-| `backend/data/lessons/` | legacy 課文 YAML 來源檔（57 篇，舊；現行看 `data/curriculum/`） |
+| `backend/data/curriculum/` | 課程來源檔（`manifest.yml` 158 entries）⚠️ **不是服務端真相**，見下方 |
+| `backend/data/lessons/` | legacy 課文 YAML 來源檔（57 篇，舊） |
+| `backend/data/key_reading_passages.yml` | 重點朗讀（念順順）段落 SOT，by lesson code（`G4-L01`）；134 條有 passage，其中 32 條對不到 DB 任一課（孤兒，待清） |
+
+### ⚠️ 課程清單的真相是 uid tree 檔案，不是 DB、也不是 manifest（2026-08-18 verified）
+
+⚠️ **這一段 2026-08-08 寫的是「真相在 DB」，二修 re-ink（#2683/#2736）之後已不成立。**
+`/api/stories` 的 handler（`backend/app/routes/stories.py:382 list_stories`）**沒有 DB
+session**，它呼叫 `search_lessons()`，而那支的註解就寫著 `All in-memory, no DB` ——
+資料來自 `build_all_lessons()` → `backend/data/lessons/<lesson_uid>/<version_id>/`。
+
+```
+backend/data/lessons/L*/v3/                  175 課     ← 服務端真相
+backend/data/curriculum/manifest.yml         158 筆     ← 一修遺留，已不是服務來源
+```
+
+要「所有課程」仍然一律走 API（別 grep `manifest.yml`，它少 17 課）：
+
+```bash
+curl -s "$BACKEND/api/stories?page_size=300" | python3 -c "import json,sys; d=json.load(sys.stdin); print(len(d['stories']), d['total'])"
+```
+
+⚠️ 分頁參數是 **`page_size`**（預設 60，上限 300），**不是 `limit`**。傳 `limit=500` 會被
+**靜默忽略**只回 60 筆，看起來像全部。**斷言拿到的筆數等於回應的 `total`**，否則就是沒拿全。
+
+（2026-08-08 我因此把「60 課 / 47 有重點段」當成全體回報，實際是全體 175 課。）
 
 ## 簡報資料（公開，不需登入）
 
@@ -305,6 +398,42 @@ private/omo-real-samples/2026-05-18-batch-results/
 | 教授簡介（3 分鐘版） | https://lingoleap-frontend-staging-958347263320.asia-east1.run.app/presentation/short.html |
 | 完整平台說明書 | https://lingoleap-frontend-staging-958347263320.asia-east1.run.app/presentation/full.html |
 | 閱讀理解技能樹研究 | https://lingoleap-frontend-staging-958347263320.asia-east1.run.app/presentation/research.html |
+
+### ⚠️ GitHub Pages 只發佈 Brand Book，不發佈 docs/（2026-08-04 收斂）
+
+**這個 repo 是 PUBLIC，而 GitHub Pages 曾設成 `main` branch 的 `/docs`** → 整個 `docs/` 目錄（含內部會議記錄、合作方顧問姓名、實習生就讀學校、product owner 個人背景）都被一個對外網站服務中，任何人與 Google 爬蟲可直接讀 `.md`（實測 `https://youngger9765.github.io/chinese-literacy-platform/meetings/*.md` 回 200 `text/markdown`）。
+
+**現行設定**：Pages source = **`gh-pages` branch / root**，該 branch 是 orphan、只有兩個檔（`index.html` = Brand Book、`.nojekyll`）。`docs/` 已不再對外發佈（實測敏感路徑回 404、Brand Book 仍 200、negative control 404）。
+
+| 情況 | 做法 |
+|------|------|
+| 改了 `docs/index.html`（Brand Book） | **線上不會自動更新** → 要手動把它推成 `gh-pages` 的 root（見下方指令），否則 github.io 上還是舊版 |
+| 想把 Pages source 改回 `main:/docs` | ⛔ **禁止** — 那會立刻重新對外發佈整個 `docs/`，包含內部會議記錄與個資 |
+| 新增任何含顧問姓名／客戶內容／實習生個資的文件 | 進 **L2 PRIVATE** `kist-curriculum`，不進這個 PUBLIC repo 的 `docs/`（完整原始版備份在 `kist-curriculum/l3-docs-originals/`） |
+
+同步 Brand Book 到線上（不動工作樹的 plumbing 做法）：
+
+```bash
+BLOB=$(git hash-object -w docs/index.html)
+NOJ=$(printf '' | git hash-object -w --stdin)
+TREE=$(printf '100644 blob %s\t.nojekyll\n100644 blob %s\tindex.html\n' "$NOJ" "$BLOB" | git mktree)
+PARENT=$(git ls-remote origin refs/heads/gh-pages | cut -f1)
+
+# fail-closed：branch 被誤刪時 PARENT 會是空字串，git commit-tree -p "" 會直接失敗
+if [ -n "$PARENT" ]; then
+  COMMIT=$(git commit-tree "$TREE" -p "$PARENT" -m "chore: sync Brand Book")
+else
+  echo "⚠️ gh-pages 不存在，改建 root commit（等於重建該 branch）"
+  COMMIT=$(git commit-tree "$TREE" -m "chore: republish Brand Book (gh-pages was missing)")
+fi
+
+git push origin "${COMMIT}:refs/heads/gh-pages"   # ⚠️ 大括號必要，zsh 會把 $COMMIT:r 當 modifier 吃掉
+```
+
+**build 觸發**：改「Pages source 設定」**不會**自動 rebuild —— 2026-08-04 實測改完 120 秒後舊 build 仍在服務敏感路徑，要 `gh api -X POST repos/Youngger9765/chinese-literacy-platform/pages/builds` 手動觸發。
+至於「push 到 `gh-pages` 會不會自動觸發 build」**尚未實測**（一般 Pages 對 source branch push 會觸發）→ 保險起見同步完就跑一次上面那個 POST，並用下面的方法驗證線上真的變了。
+
+> 驗證一定要帶 **positive + negative control**：Brand Book 回 200 **且內容含 "Brand Book"**、敏感路徑回 404、不存在的路徑也回 404。少了 positive control，整站掛掉也會看起來像「敏感檔下架成功」。
 
 ## 參考專案
 

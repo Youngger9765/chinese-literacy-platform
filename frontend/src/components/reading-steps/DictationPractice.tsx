@@ -4,6 +4,7 @@ import { speakText as cloudSpeakText, cancelTts } from '../../services/ttsApi';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import { fontForZhuyin } from '../../constants/fonts';
 import type { DictationStepData } from '../../types/stepProgress';
+import NextStepFooter from '../learning/NextStepFooter';
 
 export interface DictationResult {
   totalWords: number;
@@ -31,7 +32,7 @@ interface DictationPracticeProps {
   onProgressChange?: (stepData: DictationStepData, immediate?: boolean) => void;
 }
 
-type Phase = 'intro' | 'practice' | 'results';
+type Phase = 'lesson-intro' | 'practice' | 'results';
 
 /**
  * Extract vocabulary words from a story.
@@ -149,7 +150,7 @@ const DictationPractice: React.FC<DictationPracticeProps> = ({
     : [];
 
   const [phase, setPhase] = useState<Phase>(
-    canShowResults ? 'results' : canResume ? 'practice' : 'intro',
+    canShowResults ? 'results' : canResume ? 'practice' : 'lesson-intro',
   );
   const [currentIndex, setCurrentIndex] = useState(
     canResume ? Math.min(initialProgress!.current_index ?? 0, words.length - 1) : 0,
@@ -294,7 +295,7 @@ const DictationPractice: React.FC<DictationPracticeProps> = ({
   }, [submitAnswer]);
 
   // ---- Phase: intro ----
-  if (phase === 'intro') {
+  if (phase === 'lesson-intro') {
     return (
       <div className="flex-1 flex flex-col bg-amber-50 overflow-hidden">
         {/* Content */}
@@ -465,7 +466,7 @@ const DictationPractice: React.FC<DictationPracticeProps> = ({
   const skippedCount = wordResults.filter((r) => r.skipped).length;
   const incorrectCount = wordResults.length - correctCount - skippedCount;
   const handleRedo = () => {
-    setPhase('intro');
+    setPhase('lesson-intro');
     setCurrentIndex(0);
     setAnswer('');
     setWordResults([]);
@@ -525,12 +526,7 @@ const DictationPractice: React.FC<DictationPracticeProps> = ({
         </div>
 
         <div className="w-full flex flex-col gap-2 mt-2">
-          <button
-            onClick={handleContinue}
-            className="w-full py-3 rounded-2xl bg-accent text-white font-semibold hover:bg-accent-hover transition-colors"
-          >
-            繼續下一關
-          </button>
+          <NextStepFooter onNext={handleContinue} />
           <button
             onClick={handleRedo}
             className="w-full py-3 rounded-2xl bg-white text-gray-700 border border-gray-300 font-semibold hover:bg-gray-50 transition-colors"

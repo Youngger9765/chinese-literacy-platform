@@ -17,10 +17,19 @@ import {
   resolveDemoTargetElement,
   type StructureInteractionProfile,
 } from './storyStructureProfile';
+import StepCoachCard, { StepCoachHelpButton } from '../learning/StepCoachCard';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
-type InteractiveType = 'fill_blank' | 'checkbox' | 'display';
+type InteractiveType = 'fill_blank' | 'checkbox' | 'display' | 'inline_choice';
+
+// 一句話裡好幾個空格、各自配一組小選項時用的形狀（#2776）。`options` 是這個
+// 空格自己的選項清單（跟句子裡的第 N 個真空格按順序對應），沒有 `correct_option`
+// —— 那是判分用的，伺服器端消毒時就拿掉了，作答後才由 `/structure/grade` 帶回。
+interface InlineChoiceBlank {
+  /** 沒有 options = 這一格是填空（同一格可以混合填空與選擇題，#2785）。 */
+  options?: string[];
+}
 
 interface StructureSubRow {
   label: string;
@@ -31,6 +40,8 @@ interface StructureSubRow {
   blank_in_label?: boolean;
   options?: string[];
   correct_options?: number[];
+  select_mode?: 'single' | 'multi';
+  blanks?: InlineChoiceBlank[];
 }
 
 interface StructureRow {
@@ -42,8 +53,9 @@ interface StructureRow {
   blank_in_label?: boolean;
   options?: string[];
   correct_options?: number[];
+  select_mode?: 'single' | 'multi';
+  blanks?: InlineChoiceBlank[];
   sub_rows?: StructureSubRow[];
-  blank_in_label?: boolean;
 }
 
 interface WorksheetPairRow {
@@ -75,6 +87,11 @@ interface GradeResultItem {
   correct: boolean;
   feedback: string;
   correct_answer: string;
+  // 勾選題的正解索引。#2736 之前它跟著題目一起從 /structure 送過來 ——
+  // 也就是作答前就在瀏覽器裡。現在改由判分結果帶回，作答後才拿得到。
+  correct_options?: number[];
+  // inline_choice 單一空格的正解索引，同上，作答後才回。
+  correct_option?: number;
 }
 
 interface GradeResult {
@@ -82,13 +99,31 @@ interface GradeResult {
   score: number;
 }
 
-type AnswerMap = Record<string, string | number[]>;
+// inline_choice 一格存一個選項索引（number），fill_blank 存文字，
+// checkbox 存複選索引陣列。
+type AnswerMap = Record<string, string | number[] | number>;
 
 interface Props {
   storyId: string;
+  /** 這一節自己的代號。一課多篇時少了它，三篇會拿到同一份表（#2930）。 */
+  roundSlug?: string;
   structure?: StructureData | null;
   previewMode?: boolean;
   showCoach?: boolean;
+  /**
+   * #2833 — previously-persisted `{ answers, gradeResult }` for this step, read
+   * once on mount to restore in-progress work after a reload or step revisit.
+   * Only the initial value is used (see the lazy useState initializers below) —
+   * this component owns `answers`/`gradeResult` afterwards and reports changes
+   * back out via `onProgressChange`, it does not keep re-syncing from this prop.
+   */
+  initialProgress?: Record<string, unknown>;
+  /**
+   * #2833 — called with `{ answers, gradeResult }` whenever either changes, so
+   * the caller can persist it (debounced) the same way every other step
+   * component (VocabDefinitionMatch, KeyPassageReading, ...) already does.
+   */
+  onProgressChange?: (stepData: Record<string, unknown>, immediate?: boolean) => void;
 }
 
 const INLINE_BLANK_RE = /【([^】]*)】/g;
@@ -186,33 +221,15 @@ interface OnboardingCoachProps {
 
 function OnboardingCoach({ introText, onDismiss, onDemo }: OnboardingCoachProps) {
   return (
-    <div className="mb-4 rounded-2xl border-2 border-amber-400/60 bg-amber-50 px-5 py-4 flex flex-col gap-3">
-      <div className="flex items-start gap-3">
-        <span className="material-symbols-outlined text-amber-500 text-2xl flex-shrink-0 mt-0.5">
-          account_tree
-        </span>
-        <div className="flex-1">
-          <p className="font-bold text-on-surface text-base mb-1">文章重點表怎麼玩？</p>
-          <p className="text-sm text-on-surface-variant leading-relaxed">{introText}</p>
-        </div>
-      </div>
-      <div className="flex items-center gap-2 self-end">
-        <button
-          type="button"
-          onClick={onDemo}
-          className="px-4 py-2 rounded-full text-sm font-bold border-2 border-accent text-accent hover:bg-accent/10 active:scale-[0.98] transition-all"
-        >
-          示範
-        </button>
-        <button
-          type="button"
-          onClick={onDismiss}
-          className="px-5 py-2 rounded-full text-sm font-bold text-white bg-accent hover:brightness-110 active:scale-[0.98] transition-all"
-        >
-          我知道了
-        </button>
-      </div>
-    </div>
+    <StepCoachCard
+      title="文章重點表怎麼玩？"
+      icon="account_tree"
+      className="mb-4"
+      onDemo={onDemo}
+      onDismiss={onDismiss}
+    >
+      {introText}
+    </StepCoachCard>
   );
 }
 
@@ -229,20 +246,70 @@ function answerKey(rowIdx: number, subIdx?: number, blankIdx?: number): string {
   return `${rowIdx}`;
 }
 
+// #2833 — the restored value comes off the wire as `unknown` JSON; validate
+// its shape matches AnswerMap before trusting it as initial React state.
+// A malformed/legacy payload falls back to `{}` instead of crashing render.
+function isValidAnswerMap(value: unknown): value is AnswerMap {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  return Object.values(value as Record<string, unknown>).every((v) => {
+    if (typeof v === 'string' || typeof v === 'number') return true;
+    return Array.isArray(v) && v.every((n) => typeof n === 'number');
+  });
+}
+
+// #2833 code-review — checking only `Array.isArray(results)` let a malformed
+// element (e.g. `null`, or an object missing `row_index`) through: the first
+// `submitted` render then calls `findGradeItem()`, which does `r.row_index` on
+// every element with no null-guard, and crashes the whole step instead of
+// falling back safely the way the sibling isValidAnswerMap check does.
+function isValidGradeResultItem(item: unknown): item is GradeResultItem {
+  if (!item || typeof item !== 'object') return false;
+  const r = item as Partial<GradeResultItem>;
+  return (
+    typeof r.row_index === 'number' &&
+    typeof r.correct === 'boolean' &&
+    typeof r.feedback === 'string' &&
+    typeof r.correct_answer === 'string'
+  );
+}
+
+function isValidGradeResult(value: unknown): value is GradeResult {
+  if (!value || typeof value !== 'object') return false;
+  const results = (value as GradeResult).results;
+  return Array.isArray(results) && results.every(isValidGradeResultItem);
+}
+
 
 function cellInteractiveText(cell: StructureRow | StructureSubRow): string {
   if ('blank_in_label' in cell && cell.blank_in_label) return cell.label;
   return cell.value;
 }
 
+/** 學習單把作答指示寫在跟空格同一種括號裡：`【單選】`、`【勾選，可複選】`。 */
+const INSTRUCTION_WORDS = ['單選', '多選', '複選', '勾選', '打勾'];
+
+/**
+ * `【…】` 裡面裝的是作答指示，不是要學生填的空格。
+ *
+ * 兩者共用同一種括號，所以任何「數 `【】`」的地方都必須先問這一句，
+ * 否則指示語會被算成一題 —— 而它渲染成標籤、學生填不了，分母就永遠到不了。
+ * 那正是 2026-08-19「已填 5 / 7 題」提交鈕永遠是灰的原因。
+ */
+export function isInstructionBlank(inner: string): boolean {
+  return INSTRUCTION_WORDS.some((w) => inner.includes(w));
+}
+
 function countBlanks(text: string): number {
   // 每次呼叫都用新鮮的 /g literal，避免共用單例 INLINE_BLANK_RE 的 lastIndex 殘留跨 cell 污染
-  return text.match(/【[^】]*】/g)?.length ?? 0;
+  const all = text.match(/【[^】]*】/g) ?? [];
+  return all.filter((m) => !isInstructionBlank(m.slice(1, -1))).length;
 }
 
 function classifyInteractive(value: string): InteractiveType {
   // 用不帶 /g 的 literal，.test() 不會推進 lastIndex（共用單例會有殘留狀態）
-  return /【[^】]*】/.test(value) ? 'fill_blank' : 'display';
+  // 只有指示語、沒有真空格的 cell 是純文字 —— 判成 fill_blank 會畫出一個
+  // 填不了的輸入框，把「單選」兩個字吃掉，學生連要勾幾個都看不到。
+  return countBlanks(value) > 0 ? 'fill_blank' : 'display';
 }
 
 function resolveGradeIndex(
@@ -373,7 +440,7 @@ interface InlineWorksheetContentProps {
   rowIdx: number;
   subIdx?: number;
   answers: AnswerMap;
-  setAnswer: (key: string, value: string | number[]) => void;
+  setAnswer: (key: string, value: string | number[] | number) => void;
   submitted: boolean;
   gradeResults: GradeResultItem[];
 }
@@ -396,6 +463,20 @@ const InlineWorksheetContent: React.FC<InlineWorksheetContentProps> = ({
     while ((match = re.exec(text)) !== null) {
       if (match.index > last) {
         nodes.push(<span key={`t-${last}`}>{text.slice(last, match.index)}</span>);
+      }
+      // 作答指示（`【單選】`）不是空格 —— 畫成輸入框會把「單選」兩個字吃掉，
+      // 學生連要勾幾個都看不到，而且那個框他永遠填不了。當標籤顯示。
+      if (isInstructionBlank(match[1])) {
+        nodes.push(
+          <span
+            key={`i-${match.index}`}
+            className="inline-flex items-baseline px-1.5 py-0.5 mx-0.5 rounded text-xs font-semibold bg-amber-100 text-amber-800 align-middle"
+          >
+            {match[1].trim()}
+          </span>,
+        );
+        last = match.index + match[0].length;
+        continue;
       }
       const key = answerKey(rowIdx, subIdx, blankIdx);
       nodes.push(
@@ -424,6 +505,7 @@ const InlineWorksheetContent: React.FC<InlineWorksheetContentProps> = ({
 
   return <span className="text-sm leading-relaxed whitespace-pre-line">{parts}</span>;
 };
+
 
 // ── FillBlankCell (card layout) ─────────────────────────────────────────────
 
@@ -487,6 +569,9 @@ interface CheckboxCellProps {
   submitted: boolean;
   gradeItem?: GradeResultItem;
   correctOptions?: number[];
+  // 指示語寫「單選」時只准選一個（#2776）。未知（舊 AI 產生的題目沒帶這個
+  // 欄位）一律當 'multi' —— 維持既有行為，不因為新增這個 prop 而變嚴格。
+  selectMode?: 'single' | 'multi';
 }
 
 const CheckboxCell: React.FC<CheckboxCellProps> = ({
@@ -496,9 +581,18 @@ const CheckboxCell: React.FC<CheckboxCellProps> = ({
   submitted,
   gradeItem,
   correctOptions,
+  selectMode,
 }) => {
+  const isSingle = selectMode === 'single';
+
   const toggle = (idx: number) => {
     if (submitted) return;
+    if (isSingle) {
+      // 單選：點下去就換人，不支援點兩下取消——跟原生 radio 一樣的行為，
+      // 也讓「已作答」的判定單純（有值就是有值，不會回到「沒選」狀態）。
+      onChange([idx]);
+      return;
+    }
     if (selected.includes(idx)) {
       onChange(selected.filter((i) => i !== idx));
     } else {
@@ -507,7 +601,11 @@ const CheckboxCell: React.FC<CheckboxCellProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-2" {...{ [STORY_STRUCTURE_INTERACTIVE_ATTR]: 'checkbox' }}>
+    <div
+      className="flex flex-col gap-2"
+      {...{ [STORY_STRUCTURE_INTERACTIVE_ATTR]: 'checkbox' }}
+      data-select-mode={selectMode ?? 'multi'}
+    >
       {options.map((opt, idx) => {
         const isSelected = selected.includes(idx);
         const isCorrectOption = (correctOptions ?? []).includes(idx);
@@ -539,12 +637,25 @@ const CheckboxCell: React.FC<CheckboxCellProps> = ({
             }`}
           >
             <span
-              className={`w-4 h-4 shrink-0 rounded border-2 flex items-center justify-center text-xs ${boxStyle}`}
+              className={`w-4 h-4 shrink-0 flex items-center justify-center text-xs border-2 ${
+                isSingle ? 'rounded-full' : 'rounded'
+              } ${boxStyle}`}
             >
-              {(submitted && isCorrectOption) || (!submitted && isSelected) ? '✓' : ''}
+              {/* #2832 — the U+25CF '●' glyph used to mark a selected radio option
+                  renders far larger than its 12px font-size in this font stack
+                  (verified on staging: a ~12px-diameter white disc filling almost
+                  the entire 16px box, leaving only the 2px border ring visibly
+                  amber). The result looked *hollow*, the opposite of "selected".
+                  A checkbox's '✓' doesn't have this problem (thin stroke, not a
+                  filled disc) so it keeps the glyph. Radio gets a fixed-size CSS
+                  dot instead — its size can't drift with font/platform. */}
+              {!isSingle && ((submitted && isCorrectOption) || (!submitted && isSelected)) && '✓'}
+              {isSingle && ((submitted && isCorrectOption) || (!submitted && isSelected)) && (
+                <span className="w-1.5 h-1.5 rounded-full bg-white" />
+              )}
             </span>
             <input
-              type="checkbox"
+              type={isSingle ? 'radio' : 'checkbox'}
               className="sr-only"
               checked={isSelected}
               onChange={() => toggle(idx)}
@@ -564,12 +675,178 @@ const CheckboxCell: React.FC<CheckboxCellProps> = ({
   );
 };
 
+// ── InlineChoicePicker ───────────────────────────────────────────────────────
+// 一句話裡的一個空格，配一組小選項（單選）。跟 CheckboxCell 不同的地方：
+// 這是「句子裡的一個空格」不是「獨立一題」——所以用緊湊的按鈕列，不是整欄
+// 卡片，讓它塞得進 InlineWorksheetContent 那種行內排版（#2776）。
+
+interface InlineChoicePickerProps {
+  options: string[];
+  selected?: number;
+  onChange: (idx: number) => void;
+  submitted: boolean;
+  gradeItem?: GradeResultItem;
+  compact?: boolean;
+}
+
+const InlineChoicePicker: React.FC<InlineChoicePickerProps> = ({
+  options,
+  selected,
+  onChange,
+  submitted,
+  gradeItem,
+  compact,
+}) => {
+  if (submitted && gradeItem) {
+    const isCorrect = gradeItem.correct;
+    const shown =
+      selected !== undefined && selected >= 0 && selected < options.length
+        ? options[selected]
+        : '（未選）';
+    return (
+      <span
+        className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 mx-0.5 text-sm border-b-2 ${
+          isCorrect ? 'border-emerald-500 text-emerald-800' : 'border-red-500 text-red-800'
+        }`}
+        title={!isCorrect ? gradeItem.feedback : undefined}
+      >
+        {shown}
+      </span>
+    );
+  }
+
+  return (
+    <span
+      className={`inline-flex flex-wrap items-center gap-1 mx-0.5 align-middle ${compact ? '' : 'py-0.5'}`}
+      {...{ [STORY_STRUCTURE_INTERACTIVE_ATTR]: 'inline_choice' }}
+    >
+      {options.map((opt, idx) => (
+        <button
+          key={idx}
+          type="button"
+          onClick={() => onChange(idx)}
+          disabled={submitted}
+          className={`px-2 py-0.5 rounded-full border text-xs font-medium transition-colors ${
+            selected === idx
+              ? 'border-amber-500 bg-amber-100 text-amber-900'
+              : 'border-gray-300 bg-white text-gray-600 hover:border-amber-400 hover:bg-amber-50'
+          }`}
+        >
+          {opt}
+        </button>
+      ))}
+    </span>
+  );
+};
+
+// ── Inline choice sentence (worksheet table cells) ──────────────────────────
+// 跟 InlineWorksheetContent 是同一套「找 【…】 位置插元件」的邏輯，差別只在
+// 插的是選項按鈕不是文字輸入框。兩者分開寫是因為判分方式完全不同（索引比對
+// vs 模糊文字比對）——硬併成一個元件反而讓兩種資料形狀互相打架。
+
+interface InlineChoiceContentProps {
+  text: string;
+  blanks: InlineChoiceBlank[];
+  rowIdx: number;
+  subIdx?: number;
+  answers: AnswerMap;
+  setAnswer: (key: string, value: string | number[] | number) => void;
+  submitted: boolean;
+  gradeResults: GradeResultItem[];
+}
+
+const InlineChoiceContent: React.FC<InlineChoiceContentProps> = ({
+  text,
+  blanks,
+  rowIdx,
+  subIdx,
+  answers,
+  setAnswer,
+  submitted,
+  gradeResults,
+}) => {
+  const parts = useMemo(() => {
+    const nodes: React.ReactNode[] = [];
+    let last = 0;
+    let blankIdx = 0;
+    const re = new RegExp(INLINE_BLANK_RE.source, 'g');
+    let match: RegExpExecArray | null;
+    while ((match = re.exec(text)) !== null) {
+      if (match.index > last) {
+        nodes.push(<span key={`t-${last}`}>{text.slice(last, match.index)}</span>);
+      }
+      if (isInstructionBlank(match[1])) {
+        nodes.push(
+          <span
+            key={`i-${match.index}`}
+            className="inline-flex items-baseline px-1.5 py-0.5 mx-0.5 rounded text-xs font-semibold bg-amber-100 text-amber-800 align-middle"
+          >
+            {match[1].trim()}
+          </span>,
+        );
+        last = match.index + match[0].length;
+        continue;
+      }
+      // 這個空格沒有對應的選項組 —— 資料跟句子對不上，寧可留原樣的空格記號
+      // 也不要憑空造一組選項出來騙學生。
+      const blank = blanks[blankIdx];
+      if (!blank) {
+        nodes.push(<span key={`b-${blankIdx}`}>【　　　】</span>);
+        blankIdx += 1;
+        last = match.index + match[0].length;
+        continue;
+      }
+      // 有這一格、但沒有 options —— 那是**填空**。一格裡同時有填空與選擇題
+      // 是真實形狀（L0102「1 個填空 + 2 個選擇」，#2785），要給輸入框，
+      // 不然學生看得到卻填不了。
+      // ⚠️ 上面只判 `!blank`，而 `{}` 是 truthy —— options 是 undefined 就這樣
+      // 傳進 `InlineChoicePicker`，那一格會直接拋錯、整列不見。
+      if (!blank.options || blank.options.length === 0) {
+        const textKey = answerKey(rowIdx, subIdx, blankIdx);
+        nodes.push(
+          <InlineBlankInput
+            key={`b-${blankIdx}`}
+            value={typeof answers[textKey] === 'string' ? (answers[textKey] as string) : ''}
+            onChange={(v) => setAnswer(textKey, v)}
+            submitted={submitted}
+            gradeItem={submitted ? findGradeItem(gradeResults, rowIdx, subIdx, blankIdx) : undefined}
+            compact
+          />,
+        );
+        blankIdx += 1;
+        last = match.index + match[0].length;
+        continue;
+      }
+      const key = answerKey(rowIdx, subIdx, blankIdx);
+      nodes.push(
+        <InlineChoicePicker
+          key={`b-${blankIdx}`}
+          options={blank.options}
+          selected={typeof answers[key] === 'number' ? (answers[key] as number) : undefined}
+          onChange={(idx) => setAnswer(key, idx)}
+          submitted={submitted}
+          gradeItem={submitted ? findGradeItem(gradeResults, rowIdx, subIdx, blankIdx) : undefined}
+          compact
+        />,
+      );
+      blankIdx += 1;
+      last = match.index + match[0].length;
+    }
+    if (last < text.length) {
+      nodes.push(<span key={`t-${last}`}>{text.slice(last)}</span>);
+    }
+    return nodes;
+  }, [text, blanks, rowIdx, subIdx, answers, setAnswer, submitted, gradeResults]);
+
+  return <span className="text-sm leading-relaxed whitespace-pre-line">{parts}</span>;
+};
+
 // ── Worksheet HTML table ─────────────────────────────────────────────────────
 
 interface WorksheetTableProps {
   structure: StructureData;
   answers: AnswerMap;
-  setAnswer: (key: string, value: string | number[]) => void;
+  setAnswer: (key: string, value: string | number[] | number) => void;
   submitted: boolean;
   gradeResults: GradeResultItem[];
   renderCellContent: (
@@ -595,6 +872,32 @@ const WorksheetTable: React.FC<WorksheetTableProps> = ({
     rowIdx: number,
     subIdx?: number,
   ) => {
+    // ⚠️ #2776 — must check the cell's real `interactive_type` BEFORE the
+    // local bracket-based heuristic below. `classifyInteractive` only knows
+    // 'fill_blank' vs 'display'; it would see the 【　　　】 blanks in an
+    // inline_choice sentence and route them into InlineWorksheetContent as
+    // free-text inputs, discarding each blank's option list entirely.
+    const cell =
+      rowIdx >= 0 ? (subIdx !== undefined ? rows[rowIdx]?.sub_rows?.[subIdx] : rows[rowIdx]) : undefined;
+    if (cell?.interactive_type === 'inline_choice') {
+      // ⚠️ NOT `value` (the param) — that's the `worksheet_rows` copy of this
+      // cell, built straight from the RAW list-of-lists text and never run
+      // through `cell_to_structure_fields`'s parsing. It still carries the
+      // "第N個空格：…" caption lines and paren-style blanks that `rows[].value`
+      // (i.e. `cell.value`) has already had stripped/normalized.
+      return (
+        <InlineChoiceContent
+          text={cell.value}
+          blanks={cell.blanks ?? []}
+          rowIdx={rowIdx}
+          subIdx={subIdx}
+          answers={answers}
+          setAnswer={setAnswer}
+          submitted={submitted}
+          gradeResults={gradeResults}
+        />
+      );
+    }
     const itype = classifyInteractive(value);
     if (itype === 'fill_blank' && countBlanks(value) > 0) {
       return (
@@ -609,10 +912,7 @@ const WorksheetTable: React.FC<WorksheetTableProps> = ({
         />
       );
     }
-    if (rowIdx >= 0) {
-      const cell = subIdx !== undefined ? rows[rowIdx]?.sub_rows?.[subIdx] : rows[rowIdx];
-      if (cell) return renderCellContent(cell, rowIdx, subIdx);
-    }
+    if (cell) return renderCellContent(cell, rowIdx, subIdx);
     return <span className="text-sm leading-relaxed whitespace-pre-line">{value}</span>;
   };
 
@@ -709,19 +1009,30 @@ const WorksheetTable: React.FC<WorksheetTableProps> = ({
 
 const StoryStructureTable: React.FC<Props> = ({
   storyId,
+  roundSlug,
   structure: structureProp,
   previewMode = false,
   showCoach: showCoachProp,
+  initialProgress,
+  onProgressChange,
 }) => {
   const { token } = useAuth();
   const [structure, setStructure] = useState<StructureData | null>(structureProp ?? null);
   const [loading, setLoading] = useState(structureProp === undefined);
   const [fetchError, setFetchError] = useState(false);
 
-  const [answers, setAnswers] = useState<AnswerMap>({});
+  // #2833 — restore in-progress answers/grade once on mount. Lazy initializer
+  // so this only runs on the very first render, not every re-render caused by
+  // the parent passing a fresh `initialProgress` object reference.
+  const [answers, setAnswers] = useState<AnswerMap>(() => {
+    const restored = initialProgress?.answers;
+    return isValidAnswerMap(restored) ? restored : {};
+  });
   const [submitting, setSubmitting] = useState(false);
-  const [gradeResult, setGradeResult] = useState<GradeResult | null>(null);
-  const [copyDone, setCopyDone] = useState(false);
+  const [gradeResult, setGradeResult] = useState<GradeResult | null>(() => {
+    const restored = initialProgress?.gradeResult;
+    return isValidGradeResult(restored) ? restored : null;
+  });
   const [showCoach, setShowCoach] = useState<boolean>(() => {
     if (showCoachProp !== undefined) return showCoachProp;
     if (previewMode) return false;
@@ -739,22 +1050,40 @@ const StoryStructureTable: React.FC<Props> = ({
 
   const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
+  // #2833 — tracks which storyId the in-memory `answers`/`gradeResult` belong
+  // to, so this effect can tell "first mount of this story (keep the restored
+  // initial state)" apart from "storyId actually changed under us (must wipe
+  // stale answers from the previous story)". Before this fix the effect wiped
+  // `answers`/`gradeResult` unconditionally on every run — including the very
+  // first run right after the lazy useState initializers above restored them
+  // from `initialProgress`, which is exactly why reload always came back blank.
+  const loadedStoryIdRef = useRef<string | undefined>(storyId);
+  const isInitialAnswersMountRef = useRef(true);
+
   useEffect(() => {
+    const isStoryChange = !isInitialAnswersMountRef.current && loadedStoryIdRef.current !== storyId;
+    isInitialAnswersMountRef.current = false;
+    loadedStoryIdRef.current = storyId;
+
     if (structureProp !== undefined) {
       setStructure(structureProp);
       setLoading(false);
       setFetchError(false);
-      setAnswers({});
-      setGradeResult(null);
+      if (isStoryChange) {
+        setAnswers({});
+        setGradeResult(null);
+      }
       return;
     }
     setLoading(true);
     setFetchError(false);
-    setAnswers({});
-    setGradeResult(null);
+    if (isStoryChange) {
+      setAnswers({});
+      setGradeResult(null);
+    }
     const headers: Record<string, string> = {};
     if (token) headers['Authorization'] = `Bearer ${token}`;
-    fetch(`${API_BASE}/api/stories/${storyId}/structure`, { headers })
+    fetch(`${API_BASE}/api/stories/${storyId}/structure${roundSlug ? `?p=${encodeURIComponent(roundSlug)}` : ''}`, { headers })
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
@@ -763,6 +1092,16 @@ const StoryStructureTable: React.FC<Props> = ({
       .catch(() => setFetchError(true))
       .finally(() => setLoading(false));
   }, [storyId, token, API_BASE, structureProp]);
+
+  // #2833 — report the live answer/grade state so the caller can persist it
+  // (debounced, same mechanism every other step component already uses via
+  // useProgressSync). Fires on mount too so a first-ever visit seeds step_data
+  // with `{}` rather than leaving it undefined; persistStepProgressState
+  // no-ops when the payload is unchanged, so this costs nothing when restored.
+  useEffect(() => {
+    if (!onProgressChange) return;
+    onProgressChange({ answers, gradeResult }, false);
+  }, [answers, gradeResult, onProgressChange]);
 
 
   const clearDemoTimers = useCallback(() => {
@@ -848,10 +1187,15 @@ const StoryStructureTable: React.FC<Props> = ({
   ]);
 
 
-  const setAnswer = useCallback((key: string, value: string | number[]) => {
+  const setAnswer = useCallback((key: string, value: string | number[] | number) => {
     setAnswers((prev) => ({ ...prev, [key]: value }));
   }, []);
 
+  // ⚠️ #2776 — key 慣例必須跟 `InlineWorksheetContent` 的寫入端一致:
+  // 那個元件**一律**用 `answerKey(rowIdx, subIdx, blankIdx)`，`blankIdx` 從 0
+  // 起算，即使這格只有一個空格。這裡以前在 `blankCount<=1` 時改用不帶 blank
+  // 後綴的 key —— 兩邊對不起來，唯一空格的欄位讀到的永遠是 `undefined`，
+  // 送出去的一律是空字串。128 課 / 400 處欄位曾經因此永遠被判空白。
   const pushFillBlankAnswers = useCallback(
     (
       payload: object[],
@@ -861,16 +1205,7 @@ const StoryStructureTable: React.FC<Props> = ({
     ) => {
       const blankCount =
         cell.blank_hints?.length ||
-        (cell.interactive_type === 'fill_blank' ? Math.max(countBlanks(cellInteractiveText(cell)), 1) : 0);
-      if (blankCount <= 1) {
-        const key = answerKey(rowIdx, subIdx);
-        payload.push({
-          row_index: rowIdx,
-          ...(subIdx !== undefined ? { sub_row_index: subIdx } : {}),
-          value: typeof answers[key] === 'string' ? answers[key] : '',
-        });
-        return;
-      }
+        (cell.interactive_type === 'fill_blank' ? Math.max(countBlanks(cellInteractiveText(cell)), 1) : 1);
       for (let b = 0; b < blankCount; b += 1) {
         const key = answerKey(rowIdx, subIdx, b);
         payload.push({
@@ -884,91 +1219,63 @@ const StoryStructureTable: React.FC<Props> = ({
     [answers],
   );
 
+  const pushInlineChoiceAnswers = useCallback(
+    (
+      payload: object[],
+      rowIdx: number,
+      subIdx: number | undefined,
+      cell: StructureRow | StructureSubRow,
+    ) => {
+      const blanks = cell.blanks ?? [];
+      for (let b = 0; b < blanks.length; b += 1) {
+        const key = answerKey(rowIdx, subIdx, b);
+        const val = answers[key];
+        payload.push({
+          row_index: rowIdx,
+          ...(subIdx !== undefined ? { sub_row_index: subIdx } : {}),
+          blank_index: b,
+          selected_option: typeof val === 'number' ? val : null,
+        });
+      }
+    },
+    [answers],
+  );
+
   const buildAnswerPayload = useCallback((): object[] => {
     if (!structure) return [];
     const payload: object[] = [];
 
+    const pushCell = (
+      cell: StructureRow | StructureSubRow,
+      rowIdx: number,
+      subIdx: number | undefined,
+    ) => {
+      if (cell.interactive_type === 'display') return;
+      if (cell.interactive_type === 'checkbox') {
+        const key = answerKey(rowIdx, subIdx);
+        payload.push({
+          row_index: rowIdx,
+          ...(subIdx !== undefined ? { sub_row_index: subIdx } : {}),
+          selected_options: Array.isArray(answers[key]) ? answers[key] : [],
+        });
+      } else if (cell.interactive_type === 'inline_choice') {
+        pushInlineChoiceAnswers(payload, rowIdx, subIdx, cell);
+      } else {
+        pushFillBlankAnswers(payload, rowIdx, subIdx, cell);
+      }
+    };
+
     structure.rows.forEach((row, rowIdx) => {
       if (row.sub_rows && row.sub_rows.length > 0) {
-        row.sub_rows.forEach((sub, subIdx) => {
-          if (sub.interactive_type === 'display') return;
-          if (sub.interactive_type === 'checkbox') {
-            const key = answerKey(rowIdx, subIdx);
-            payload.push({
-              row_index: rowIdx,
-              sub_row_index: subIdx,
-              selected_options: Array.isArray(answers[key]) ? answers[key] : [],
-            });
-          } else {
-            pushFillBlankAnswers(payload, rowIdx, subIdx, sub);
-          }
-        });
+        row.sub_rows.forEach((sub, subIdx) => pushCell(sub, rowIdx, subIdx));
       } else {
-        if (row.interactive_type === 'display') return;
-        if (row.interactive_type === 'checkbox') {
-          const key = answerKey(rowIdx);
-          payload.push({
-            row_index: rowIdx,
-            selected_options: Array.isArray(answers[key]) ? answers[key] : [],
-          });
-        } else {
-          pushFillBlankAnswers(payload, rowIdx, undefined, row);
-        }
+        pushCell(row, rowIdx, undefined);
       }
     });
 
     return payload;
-  }, [structure, answers, pushFillBlankAnswers]);
+  }, [structure, answers, pushFillBlankAnswers, pushInlineChoiceAnswers]);
 
-  const handleCopyTemplate = useCallback(() => {
-    if (!structure) return;
-    const lines: string[] = ['【文章重點表模板】', ''];
-    if (structure.title) lines.push(structure.title, '');
-
-    if (structure.layout === 'worksheet_table' && structure.worksheet_rows) {
-      structure.worksheet_rows.forEach((wsRow) => {
-        if (wsRow.kind === 'pair') {
-          lines.push(`${wsRow.label}：${wsRow.value.replace(INLINE_BLANK_RE, '【　　　】')}`);
-        } else {
-          lines.push(`【${wsRow.section}】`);
-          wsRow.items.forEach((item) => {
-            lines.push(
-              `  ${item.label}：${item.value.replace(INLINE_BLANK_RE, '【　　　】')}`,
-            );
-          });
-        }
-        lines.push('');
-      });
-    } else {
-      structure.rows.forEach((row) => {
-        if (row.sub_rows && row.sub_rows.length > 0) {
-          lines.push(`【${row.label}】`);
-          row.sub_rows.forEach((sub) => {
-            lines.push(`  上位概念：${sub.label}`);
-            lines.push(
-              sub.interactive_type === 'display' && sub.value?.trim()
-                ? `  重點：${sub.value}`
-                : '  重點：________________',
-            );
-            lines.push('');
-          });
-        } else {
-          lines.push(`上位概念：${row.label}`);
-          lines.push(
-            row.interactive_type === 'display' && row.value?.trim()
-              ? `重點：${row.value}`
-              : '重點：________________',
-          );
-          lines.push('');
-        }
-      });
-    }
-
-    navigator.clipboard.writeText(lines.join('\n')).then(() => {
-      setCopyDone(true);
-      setTimeout(() => setCopyDone(false), 1500);
-    }).catch(() => {});
-  }, [structure]);
 
   const handleSubmit = useCallback(async () => {
     if (!structure || submitting || gradeResult !== null) return;
@@ -976,7 +1283,7 @@ const StoryStructureTable: React.FC<Props> = ({
     try {
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
-      const res = await fetch(`${API_BASE}/api/stories/${storyId}/structure/grade`, {
+      const res = await fetch(`${API_BASE}/api/stories/${storyId}/structure/grade${roundSlug ? `?p=${encodeURIComponent(roundSlug)}` : ''}`, {
         method: 'POST',
         headers,
         body: JSON.stringify({ answers: buildAnswerPayload() }),
@@ -995,6 +1302,7 @@ const StoryStructureTable: React.FC<Props> = ({
     (cell: StructureRow | StructureSubRow): number => {
       if (cell.interactive_type === 'display') return 0;
       if (cell.interactive_type === 'checkbox') return 1;
+      if (cell.interactive_type === 'inline_choice') return cell.blanks?.length || 1;
       const blanks = cell.blank_hints?.length || countBlanks(cellInteractiveText(cell));
       return blanks > 0 ? blanks : 1;
     },
@@ -1022,12 +1330,25 @@ const StoryStructureTable: React.FC<Props> = ({
         return;
       }
 
+      if (cell.interactive_type === 'inline_choice') {
+        const blankCount = cell.blanks?.length || 1;
+        total += blankCount;
+        for (let b = 0; b < blankCount; b += 1) {
+          const key = answerKey(rowIdx, subIdx, b);
+          if (typeof answers[key] === 'number') answered += 1;
+        }
+        return;
+      }
+
+      // ⚠️ #2776 — 這裡以前在只有 1 個空格時故意省略 blank 後綴
+      // （`blankCount > 1 ? b : undefined`），但寫入端 `InlineWorksheetContent`
+      // 從來不省略。單一空格欄位因此永遠讀不到剛填進去的值，計數器卡住不動。
       const blankCount =
         cell.blank_hints?.length ||
         (cell.interactive_type === 'fill_blank' ? Math.max(countBlanks(cellInteractiveText(cell)), 1) : 1);
       total += blankCount;
       for (let b = 0; b < blankCount; b += 1) {
-        const key = answerKey(rowIdx, subIdx, blankCount > 1 ? b : undefined);
+        const key = answerKey(rowIdx, subIdx, b);
         const val = answers[key];
         if (typeof val === 'string' && val.trim().length > 0) answered += 1;
       }
@@ -1062,9 +1383,9 @@ const StoryStructureTable: React.FC<Props> = ({
           </span>
         );
       }
-      const key = answerKey(rowIdx, subIdx);
-      const gradeItem = submitted ? findGradeItem(gradeResults, rowIdx, subIdx) : undefined;
       if (cell.interactive_type === 'checkbox') {
+        const key = answerKey(rowIdx, subIdx);
+        const gradeItem = submitted ? findGradeItem(gradeResults, rowIdx, subIdx) : undefined;
         return (
           <CheckboxCell
             options={cell.options ?? []}
@@ -1072,10 +1393,53 @@ const StoryStructureTable: React.FC<Props> = ({
             onChange={(v) => setAnswer(key, v)}
             submitted={submitted}
             gradeItem={gradeItem}
-            correctOptions={cell.correct_options}
+            correctOptions={gradeItem?.correct_options ?? cell.correct_options}
+            selectMode={cell.select_mode}
           />
         );
       }
+      if (cell.interactive_type === 'inline_choice') {
+        const blanks = cell.blanks ?? [];
+        return (
+          <div className="flex flex-col gap-2">
+            {blanks.map((blank, b) => {
+              const key = answerKey(rowIdx, subIdx, b);
+              const gradeItem = submitted ? findGradeItem(gradeResults, rowIdx, subIdx, b) : undefined;
+              // 沒有 options = 這一格是填空（同一格可混合填空與選擇題，#2785）。
+              // ⚠️ 這裡以前無條件開 picker，而 picker 內部是 `options.map(...)` ——
+              // options 是 undefined 就 TypeError，整列消失。
+              if (!blank.options || blank.options.length === 0) {
+                return (
+                  <InlineBlankInput
+                    key={b}
+                    value={typeof answers[key] === 'string' ? (answers[key] as string) : ''}
+                    onChange={(v) => setAnswer(key, v)}
+                    submitted={submitted}
+                    gradeItem={gradeItem}
+                  />
+                );
+              }
+              return (
+                <InlineChoicePicker
+                  key={b}
+                  options={blank.options}
+                  selected={typeof answers[key] === 'number' ? (answers[key] as number) : undefined}
+                  onChange={(idx) => setAnswer(key, idx)}
+                  submitted={submitted}
+                  gradeItem={gradeItem}
+                />
+              );
+            })}
+          </div>
+        );
+      }
+      // fill_blank fallback (card layout, or worksheet cells the local
+      // bracket-style heuristic didn't route through InlineWorksheetContent).
+      // ⚠️ #2776 — always keyed with blank index 0, matching the unified
+      // convention `tallyCell`/`pushFillBlankAnswers` now use for every
+      // fill_blank field, single-blank or not.
+      const key = answerKey(rowIdx, subIdx, 0);
+      const gradeItem = submitted ? findGradeItem(gradeResults, rowIdx, subIdx, 0) : undefined;
       return (
         <FillBlankCell
           value={typeof answers[key] === 'string' ? (answers[key] as string) : ''}
@@ -1124,14 +1488,7 @@ const StoryStructureTable: React.FC<Props> = ({
       )}
       {!showCoach && (
         <div className="flex justify-end mb-2">
-          <button
-            type="button"
-            onClick={() => setShowCoach(true)}
-            className="text-xs text-gray-500 hover:text-gray-700 transition-colors flex items-center gap-1"
-          >
-            <span className="material-symbols-outlined text-sm">help_outline</span>
-            怎麼玩？
-          </button>
+          <StepCoachHelpButton onClick={() => setShowCoach(true)} />
         </div>
       )}
       {demo && demoTargetRect && activeDemoStep && (
@@ -1150,16 +1507,6 @@ const StoryStructureTable: React.FC<Props> = ({
       <div className="bg-amber-50 border-b-2 border-amber-400 px-5 py-3 flex items-center justify-between gap-2">
         <span className="text-amber-800 font-bold text-base">📋 文章重點表</span>
         <div className="flex items-center gap-2">
-          <button
-            onClick={handleCopyTemplate}
-            className="flex items-center gap-1.5 px-3 py-1 rounded-lg border border-amber-300 bg-white text-amber-700 text-xs font-semibold hover:bg-amber-100 active:scale-95 transition-all select-none"
-            title="複製模板到剪貼板"
-          >
-            <span className="material-symbols-outlined text-sm" style={{ fontSize: '14px' }}>
-              {copyDone ? 'check_circle' : 'content_copy'}
-            </span>
-            {copyDone ? '已複製 ✓' : '複製模板'}
-          </button>
           {submitted && score >= 0 && (
             <span
               className={`text-sm font-bold px-3 py-1 rounded-full ${

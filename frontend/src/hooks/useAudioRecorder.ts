@@ -50,7 +50,7 @@ const MAX_DURATION_SECONDS = 120; // default 2-minute limit (short clips)
  * Issue #2497 — per-flow recording caps.
  *
  * The old shared 120 s cap silently truncated long readings: a whole-article
- * FullReading (and the longest paragraphs) routinely runs 2–4 min, so the mic
+ * KeyPassageReading (and the longest paragraphs) routinely runs 2–4 min, so the mic
  * auto-stopped mid-reading, Gemini only transcribed the captured head, and the
  * scorer marked every un-transcribed tail character as 漏念 → 27–40% false scores.
  *

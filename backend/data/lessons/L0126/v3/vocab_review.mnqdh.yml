@@ -1,0 +1,147 @@
+lesson_uid: L0126
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞劃掉。
+  target_words:
+  - 集資
+  - 蜂擁而至
+  - 崛起
+  - 妄想
+  - 倉皇
+  - 狼狽
+  - 突如其來
+  - 驚心動魄
+  - 喧嘩
+  - 驚駭不已
+  - 蕭條
+  - 訣竅
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 米蒼皇帝王驚駭不已驚
+  - 倉白族集滿蜂窩宣祕喜
+  - 突然金資料蜜擁告訣竅
+  - 發如庫集崛起至而　祕
+  - 狀此其合強制親人至密
+  - 況這實來誕妄條件狼喧
+  - 驚般倉促思想膽狽嚎賓
+  - 訝已庫皇竹蕭大妄為奪
+  - 鬼迷心竅驚心動魄蕭主
+  - 狼喧嘩孔動心不已條來
+  answers_are_graphical: true
+  answer_paths:
+  - word: 驚駭不已
+    cells:
+    - - 1
+      - 6
+    - - 1
+      - 7
+    - - 1
+      - 8
+    - - 1
+      - 9
+    direction: horizontal
+  - word: 集資
+    cells:
+    - - 2
+      - 4
+    - - 3
+      - 4
+    direction: vertical
+  - word: 蜂擁而至
+    cells:
+    - - 2
+      - 6
+    - - 3
+      - 7
+    - - 4
+      - 8
+    - - 5
+      - 9
+    direction: diagonal_down_right
+  - word: 訣竅
+    cells:
+    - - 3
+      - 9
+    - - 3
+      - 10
+    direction: horizontal
+  - word: 突如其來
+    cells:
+    - - 3
+      - 1
+    - - 4
+      - 2
+    - - 5
+      - 3
+    - - 6
+      - 4
+    direction: diagonal_down_right
+  - word: 崛起
+    cells:
+    - - 4
+      - 5
+    - - 4
+      - 6
+    direction: horizontal
+  - word: 狼狽
+    cells:
+    - - 6
+      - 9
+    - - 7
+      - 8
+    direction: diagonal_down_left
+  - word: 妄想
+    cells:
+    - - 6
+      - 6
+    - - 7
+      - 6
+    direction: vertical
+  - word: 倉皇
+    cells:
+    - - 7
+      - 3
+    - - 8
+      - 4
+    direction: diagonal_down_right
+  - word: 驚心動魄
+    cells:
+    - - 9
+      - 5
+    - - 9
+      - 6
+    - - 9
+      - 7
+    - - 9
+      - 8
+    direction: horizontal
+  - word: 蕭條
+    cells:
+    - - 9
+      - 9
+    - - 10
+      - 9
+    direction: vertical
+  - word: 喧嘩
+    cells:
+    - - 10
+      - 2
+    - - 10
+      - 3
+    direction: horizontal
+  notes:
+    instruction: '文字層另有一份同位置的重複文字方塊，句末寫「刪除」而不是「劃掉」（各 2 份，是 mc:Choice/Fallback 的兩份）。
+
+      PDF p10 上印出來的是「劃掉」那一份，本檔照印出來的取。'
+    grid: '第 4 列第 9 欄是**空格**（文字層該儲存格無字，PDF p10 上也印成空白）。
+
+      本檔用全形空格「　」佔位，讓每列都是 10 欄、座標對得上；沒有任何一條圈選路徑用到這一格。'
+    answer_paths: '12 條路徑 ＝ 12 個目標語詞 ＝ 紙上 12 個 roundRect anchor，三者相符，無警報。
+
+      格子沒有印錯字：12 條路徑套回 grid 全部拼得回目標語詞。'
+  slug: mnqdh
+  text_ref: hxeve

@@ -1,0 +1,36 @@
+lesson_uid: L0012
+version_id: v3
+level: 4
+genre: 應用文
+strategy: 生涯探索──轉個彎，熱愛還在前方
+課文作者: 許元耕
+學習單: 巫怡蓉
+lesson_no: 20
+series: 一般
+lesson_seq: 4200
+intro: 這篇文章透過一封信和回信，探討學生運動員在課業與訓練之間面臨的挑戰。當課業落後、感到挫折時，該如何重新找回學習的動力與方向？作者分享了三位朋友的故事，他們都曾遇到類似的困境，但都從自己熱愛的運動領域出發，找到了獨特的學習方法，並在各自的道路上有所成就。文章藉由這些真實的經驗，鼓勵讀者思考，即使遇到困難，也能從感興趣的事物中找到學習的樂趣與契機。
+strategy_explained: '這一課我們要學的是「從興趣裡找到學習的方法」
+
+  這篇文章裡，阿耀和健豪學長都在運動和讀書之間遇到困難，但他們都從自己喜歡的運動裡找到了學習的線索，這很像我們在文章裡看到其他朋友的故事
+
+  所以，讀的時候可以想想看，你喜歡做什麼呢，又可以怎麼從喜歡的事情裡，找到讀書的靈感和樂趣呢'
+strategy_sources:
+  worksheet: 生涯探索──轉個彎，熱愛還在前方
+  master_sheet: null
+  previous: 生涯探索──轉個彎，熱愛還在前方
+source_profile:
+  class: renumbered
+  note: 段落 idx 有重複（書信體）—— 用列表位置定址，不能用 idx
+  has_key_reading_section: true
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: true
+  has_body_paragraphs: true
+  paragraph_idx_unique: false
+  anchor_hits: 1
+  has_counter_column: true
+  body_in_tables: true
+  invisible_chars_docx_only: true
+  profiled: '2026-08-24'
+  reclassified_2026_08_24: 2026-08-24 owner 判定：兩封信是同一篇課文 —— 紙上只印一組計時表、一個念順順，且該念順順的起訖與字數都對得上原稿（L0010
+    二~八/326、L0012 六~七/334）。偵測器把「段號重數」當成換篇而誤發 part id，已退役。

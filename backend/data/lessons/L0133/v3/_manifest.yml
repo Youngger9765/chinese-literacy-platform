@@ -1,0 +1,85 @@
+lesson_uid: L0133
+generated_by: scripts/build_lesson_manifest.py
+note: 衍生檔，不是真相來源。sections 來自 lesson.yml 的 sections_present，module 歸屬來自 specs/modules/section-to-module.yml。改了那兩者要重產。
+sections:
+- 'no': 一
+  name: 讀全文
+  module: full_text_annotate
+  slug: 99uef
+  file: full_text_annotate.99uef.yml
+  pages:
+  - 1
+  - 2
+  - 3
+- 'no': 二
+  name: 知識補給站
+  module: resources
+  text_ref: 99uef
+  slug: cumxd
+  file: resources.cumxd.yml
+  pages:
+  - 3
+- 'no': 三
+  name: 閱讀聚光燈
+  module: spotlight
+  subtitle: 圖文整合閱讀策略──看圖、找對應、整合文圖
+  text_ref: 99uef
+  slug: n3mex
+  file: spotlight.n3mex.yml
+  pages:
+  - 3
+  - 4
+  - 5
+- 'no': 四
+  name: 文章重點表
+  module: keypoints
+  text_ref: 99uef
+  slug: jxh3p
+  file: keypoints.jxh3p.yml
+  pages:
+  - 5
+  - 6
+- 'no': 五
+  name: 閱讀理解
+  module: comprehension
+  text_ref: 99uef
+  slug: hcmkh
+  file: comprehension.hcmkh.yml
+  pages:
+  - 6
+  - 7
+dispatch:
+- comprehension
+- full_text_annotate
+- keypoints
+- resources
+- spotlight
+produced:
+- comprehension
+- full_text_annotate
+- keypoints
+- resources
+- spotlight
+absent_from_source:
+- key_reading
+- vocab_application
+- vocab_definitions
+- vocab_review
+pdf_pages: 7
+dispatch_pages:
+  comprehension:
+  - 6
+  - 7
+  full_text_annotate:
+  - 1
+  - 2
+  - 3
+  keypoints:
+  - 5
+  - 6
+  resources:
+  - 3
+  spotlight:
+  - 3
+  - 4
+  - 5

@@ -37,7 +37,57 @@ _GENRE_TO_CATEGORY = {
 
 
 def _lesson_path(lesson_number: int) -> Path:
-    return _LESSONS_DIR / f"L{lesson_number}.yml"
+    """On-disk file for a lesson, inside the uid tree.
+
+    This wrote `data/lessons/L{n}.yml` — the first edition's flat layout, which
+    `build_all_lessons()` no longer reads. The admin panel kept returning 201 and
+    the story never appeared anywhere, which is the exact silent-success failure
+    the re-ink set out to remove, reintroduced from the write side.
+
+    `lesson_number` stays the external handle (it is what the admin URLs carry) and
+    maps onto the uid the tree is keyed by. Lessons created here get `v1`: the
+    extraction pipeline owns `v2`, and a hand-authored lesson must not look like
+    one that came out of a second-edition worksheet.
+    """
+    uid = _uid_for(lesson_number)
+    return _LESSONS_DIR / uid / "v1" / "lesson.yml"
+
+
+def _tree_id(lesson_number: int) -> int:
+    """lesson_number → the id the tree assigns (`20000 + n`), idempotent."""
+    return lesson_number if lesson_number > 20000 else 20000 + lesson_number
+
+
+#: A uid is `L` + exactly four digits — `lesson_uid_loader._is_uid_dir` checks the
+#: name length, so `L19999` is not a uid, it is an unrecognised directory. That caps
+#: the lesson_number this route can address.
+MAX_LESSON_NUMBER = 9999
+
+
+def _uid_for(lesson_number: int) -> str:
+    """lesson_number → lesson_uid. The tree's ids are `20000 + int(uid[1:])`."""
+    n = lesson_number - 20000 if lesson_number > 20000 else lesson_number
+    return f"L{n:04d}"
+
+
+def _require_addressable(lesson_number: int) -> None:
+    """Reject a lesson_number the uid tree cannot represent.
+
+    `f"L{n:04d}"` pads to four digits but does not truncate, so n=19999 produced
+    `L19999` — five digits, which the loader's `len(name) == 5` check rejects as
+    not-a-uid. The story was written to disk, the route returned 201, and it never
+    appeared anywhere. Fail loudly at the boundary instead.
+    """
+    n = lesson_number - 20000 if lesson_number > 20000 else lesson_number
+    if not (1 <= n <= MAX_LESSON_NUMBER):
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                f"lesson_number {lesson_number} maps to L{n:04d}, which is outside the "
+                f"uid format (L0001–L{MAX_LESSON_NUMBER:04d}); the lesson would be "
+                "written but never loaded"
+            ),
+        )
 
 
 def _build_yaml_dict(data: StoryCreateRequest, user_id: str | None = None) -> dict:
@@ -48,7 +98,13 @@ def _build_yaml_dict(data: StoryCreateRequest, user_id: str | None = None) -> di
     full_text = "\n".join(safe_paragraphs)
     char_count = len(full_text.replace("\n", "").replace(" ", ""))
 
+    # `lesson_uid` / `version_id` are what the tree loader keys on; without them it
+    # treats the directory as half-written and skips it (fail-closed), so a created
+    # story would be on disk and invisible — the failure this route just stopped having.
     doc: dict = {
+        "lesson_uid": _uid_for(data.lesson_number),
+        "version_id": "v1",
+        "catalog_slot": data.grade_code,
         "lesson_number": data.lesson_number,
         "grade": data.grade,
         "grade_code": data.grade_code,
@@ -78,10 +134,24 @@ def _build_yaml_dict(data: StoryCreateRequest, user_id: str | None = None) -> di
 
 
 def _reload_lessons() -> None:
-    """Reload in-memory lesson cache after a write operation."""
+    """Reload in-memory lesson caches after a write operation.
+
+    Two caches, not one. `lesson_loader` holds the built lesson list, but the uid
+    loader underneath it memoises the directory scan and each parsed lesson with
+    `lru_cache` — rebuilding the list without clearing those just re-reads the same
+    memoised answer, so a newly written lesson stayed invisible until the process
+    restarted.
+    """
+    from app.services import lesson_uid_loader
+
+    lesson_uid_loader.reset_cache()
     lesson_loader._ALL_LESSONS = lesson_loader._load_lessons()
     lesson_loader._LESSONS_BY_ID = {l["id"]: l for l in lesson_loader._ALL_LESSONS}
-    lesson_loader._AVAILABLE_GRADES = sorted({l["grade"] for l in lesson_loader._ALL_LESSONS})
+    _g = {l["grade"] for l in lesson_loader._ALL_LESSONS if l.get("grade")}
+    lesson_loader._AVAILABLE_GRADES = (
+        sorted((x for x in _g if str(x).isdigit()), key=int)
+        + sorted(x for x in _g if not str(x).isdigit())
+    )
 
 
 def _lesson_to_admin_item(lesson: dict) -> StoryAdminListItem:
@@ -142,12 +212,17 @@ def _lesson_to_story_detail(lesson: dict) -> StoryDetail:
 )
 def list_admin_stories(
     search: str | None = None,
-    grade: int | None = None,
+    grade: str | None = None,
 ):
-    """List all stories with admin metadata. Supports search and grade filter."""
+    """List all stories with admin metadata. Supports search and grade filter.
+
+    `grade` is a string: "4".."9" plus 文言文 and 品格教育. It was typed `int`, so
+    the comparison against a string grade never matched — the filter returned an
+    empty list for every year, and the two collections could not be filtered at all.
+    """
     lessons = lesson_loader.get_all_lessons()
     if grade is not None:
-        lessons = [l for l in lessons if l["grade"] == grade]
+        lessons = [l for l in lessons if str(l["grade"]) == str(grade)]
     if search:
         q = search.lower()
         lessons = [l for l in lessons if q in l["title"].lower()]
@@ -166,7 +241,7 @@ def list_admin_stories(
 )
 def get_admin_story(lesson_number: int):
     """Get full story detail by lesson_number."""
-    lesson = lesson_loader.get_lesson_by_id(lesson_number)
+    lesson = lesson_loader.get_lesson_by_id(_tree_id(lesson_number))
     if not lesson:
         raise HTTPException(status_code=404, detail="Story not found")
     return _lesson_to_story_detail(lesson)
@@ -188,8 +263,9 @@ def create_story(body: StoryCreateRequest):
     - title required (enforced by Pydantic min_length=1)
     - paragraphs must have at least 1 item (enforced by Pydantic min_length=1)
     """
-    _LESSONS_DIR.mkdir(parents=True, exist_ok=True)
+    _require_addressable(body.lesson_number)
     yaml_path = _lesson_path(body.lesson_number)
+    yaml_path.parent.mkdir(parents=True, exist_ok=True)
     if yaml_path.exists():
         raise HTTPException(
             status_code=409,
@@ -202,7 +278,13 @@ def create_story(body: StoryCreateRequest):
 
     _reload_lessons()
 
-    lesson = lesson_loader.get_lesson_by_id(body.lesson_number)
+    lesson = lesson_loader.get_lesson_by_id(_tree_id(body.lesson_number))
+    if lesson is None:
+        # Written but not loadable — surface it instead of 500ing on the None below.
+        raise HTTPException(
+            status_code=500,
+            detail=f"Story written to {yaml_path} but the loader did not pick it up",
+        )
     return _lesson_to_admin_item(lesson)
 
 
@@ -261,7 +343,7 @@ def update_story(lesson_number: int, body: StoryUpdateRequest):
 
     _reload_lessons()
 
-    lesson = lesson_loader.get_lesson_by_id(lesson_number)
+    lesson = lesson_loader.get_lesson_by_id(_tree_id(lesson_number))
     return _lesson_to_admin_item(lesson)
 
 
@@ -282,9 +364,21 @@ def delete_story(lesson_number: int):
     if not yaml_path.exists():
         raise HTTPException(status_code=404, detail="Story not found")
 
+    # Archive the whole uid directory, not the single YAML inside it. Under the flat
+    # layout every lesson had a distinct filename (`L12.yml`); in the tree they are
+    # all `<uid>/<version>/lesson.yml`, so moving the file alone put every deleted
+    # lesson at `archive/lesson.yml` — the second delete would silently overwrite the
+    # first one's only copy, and its spotlight/keypoints/assets would be left behind.
+    uid_dir = _LESSONS_DIR / _uid_for(lesson_number)
     archive_dir = _LESSONS_DIR / "archive"
     archive_dir.mkdir(exist_ok=True)
-    archive_path = archive_dir / yaml_path.name
-    yaml_path.rename(archive_path)
+    archive_path = archive_dir / uid_dir.name
+    if archive_path.exists():
+        raise HTTPException(
+            status_code=409,
+            detail=f"An archived copy of {uid_dir.name} already exists; "
+                   "remove or rename it before archiving again",
+        )
+    uid_dir.rename(archive_path)
 
     _reload_lessons()

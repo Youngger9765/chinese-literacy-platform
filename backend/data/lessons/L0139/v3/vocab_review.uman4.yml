@@ -1,0 +1,151 @@
+lesson_uid: L0139
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 引人矚目
+  - 難以置信
+  - 繁衍
+  - 懸而未決
+  - 荒唐
+  - 白駒過隙
+  - 洞察
+  - 膾炙人口
+  - 機制
+  - 眼見為憑
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 多流行疫病咎責青睞不
+  - 巴荒毛麟角膾稻繁衍言
+  - 胺唐劇毒老人炙侷限眼
+  - 化外引人矚目作人局見
+  - 推難前瞻性負荷量口為
+  - 廣層以不窮鷹機猛學憑
+  - 追懸層置氣紅制禽證人
+  - 根而出把信白駒過隙口
+  - 知未究持望塵莫及罹患
+  - 底決刻板印象光陰洞察
+  answers_are_graphical: true
+  answer_paths:
+  - word: 荒唐
+    cells:
+    - - 2
+      - 2
+    - - 3
+      - 2
+    direction: vertical
+  - word: 繁衍
+    cells:
+    - - 2
+      - 8
+    - - 2
+      - 9
+    direction: horizontal
+  - word: 膾炙人口
+    cells:
+    - - 2
+      - 6
+    - - 3
+      - 7
+    - - 4
+      - 8
+    - - 5
+      - 9
+    direction: diagonal_down_right
+  - word: 引人矚目
+    cells:
+    - - 4
+      - 3
+    - - 4
+      - 4
+    - - 4
+      - 5
+    - - 4
+      - 6
+    direction: horizontal
+  - word: 眼見為憑
+    cells:
+    - - 3
+      - 10
+    - - 4
+      - 10
+    - - 5
+      - 10
+    - - 6
+      - 10
+    direction: vertical
+  - word: 難以置信
+    cells:
+    - - 5
+      - 2
+    - - 6
+      - 3
+    - - 7
+      - 4
+    - - 8
+      - 5
+    direction: diagonal_down_right
+  - word: 機制
+    cells:
+    - - 6
+      - 7
+    - - 7
+      - 7
+    direction: vertical
+  - word: 懸而未決
+    cells:
+    - - 7
+      - 2
+    - - 8
+      - 2
+    - - 9
+      - 2
+    - - 10
+      - 2
+    direction: vertical
+  - word: 白駒過隙
+    cells:
+    - - 8
+      - 6
+    - - 8
+      - 7
+    - - 8
+      - 8
+    - - 8
+      - 9
+    direction: horizontal
+  - word: 洞察
+    cells:
+    - - 10
+      - 9
+    - - 10
+      - 10
+    direction: horizontal
+  geometry_check: "全檔 `a:prstGeom prst=\"roundRect\"` **10 個**（扣掉 mc:Fallback 的重複），\n\
+    等於 10 條 answer_paths、10 個目標語詞，三者一致，「>」方向無警報。\n⚠️ 只數 `<wp:anchor>` 會得到 3 個 —— 圈大多包在群組裡（同\
+    \ L0131 的形狀）。判準用形狀。\n逐一對得上（尺寸／旋轉角）：\n  斜式 4 格 1.56in(rot 312.1°)／1.53in(rot 308.8°)\
+    \ ×2 → 膾炙人口／難以置信\n  直式 4 格 1.48／1.52in ×2 → 眼見為憑／懸而未決\n  直式 2 格 0.78／0.74in ×2\
+    \ → 荒唐／機制\n  橫式 4 格 1.75in(rot 270°)／1.23in(rot 270°) ×2 → 引人矚目／白駒過隙\n  橫式 2 格\
+    \ 0.78in(無旋轉)／0.81in(rot 90°) ×2 → 繁衍／洞察\n十個圈的框線**全部**寫死 srgb E97132（沒有一個用佈景色）——\
+    \ 同 L0122，\n所以「寫死 E97132 = 紙外殘留」在本課同樣不成立，不能單獨當判準。\nposOffset 全部在頁內，無紙外殘留。格子沒有跨頁（10\
+    \ 列都在 p11）。\n每一條都套回 grid 拼得回目標語詞（`normalize_word_search.py --check` 綠），\n本課**沒有**格子錯字。"
+  notes:
+    instruction: '⚠️ 這句指示語在原稿是**兩個一模一樣、互相重疊的文字方塊**（w:t 出現兩次），
+
+      PDF 上看起來只有一句。屬複製殘留，本檔只記一次。'
+    target_words: '灰框列了 10 個詞，但**本課語詞只有 8 個** —— 多出來的「荒唐」與「眼見為憑」
+
+      不在語詞框裡，兩個都出現在課文（第 5 段「太荒唐」、第 9 段「眼見為憑」）。
+
+      這是原稿如此，不是我多抄。'
+    grid: '誘答字：兩個「人」（3,6 是「膾炙人口」的第 3 字在 4,8；4,4 是「引人矚目」的第 2 字）、
+
+      兩個「口」（5,9 是答案的末字、8,10 是誘答）、兩個「不」（1,10／6,4，6,4 是誘答）。
+
+      取字一律以路徑座標為準。'
+  slug: uman4
+  text_ref: 4dcq9

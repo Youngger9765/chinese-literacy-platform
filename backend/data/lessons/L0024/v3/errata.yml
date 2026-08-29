@@ -1,0 +1,24 @@
+lesson_uid: L0024
+version_id: v3
+notes:
+  errata:
+  - id: E1
+    section: 六 閱讀聚光燈．《當觀點的重點不只一個…》說明框
+    locator: 「觀點有多個重點時」該項
+    source: '觀點有多個重點時：每個重點都要有相對應的支持理由。
+
+      每個重點都要有相對應的支持理由。'
+    corrected: 觀點有多個重點時：每個重點都要有相對應的支持理由。
+    kind: 整句重複
+    why: 「每個重點都要有相對應的支持理由。」連續印了兩次，第二次是獨立的一行，語意完全重複
+    confidence: high
+    evidence: document.xml 為兩個相鄰的 <w:p>，內容逐字相同；PDF p6 亦可見重複
+  - id: E2
+    section: 八 詞語複習
+    locator: 灰框語詞清單句末
+    source: 盛夏、引退、寄予厚望、力邀、菜單、自立自強、直言、鴻溝、技不如人、懈怠、激勵、晉升、
+    corrected: 盛夏、引退、寄予厚望、力邀、菜單、自立自強、直言、鴻溝、技不如人、懈怠、激勵、晉升。
+    kind: 標點誤用
+    why: 清單最後一個語詞後面接的是頓號而非句號；同一課第三大題的語詞框結尾就是「晉升。」，可直接對照
+    confidence: high
+    evidence: document.xml 與 PDF p9 一致；同課第三大題語詞框可作對照

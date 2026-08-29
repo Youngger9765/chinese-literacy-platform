@@ -28,11 +28,16 @@ if not r['pass']:
     sys.exit(1)
 "
 
-echo "=== [2/6] Gold contract (dev7 checked-in fixtures) ==="
-python3 scripts/spotlight_contract.py --dev7
-
-echo "=== [2b/6] Gold contract (test15 checked-in fixtures) ==="
-python3 scripts/spotlight_contract.py --test15
+# The dev7 / test15 steps compared seven and fifteen CHECKED-IN first-edition lessons
+# against gold manifests under backend/data/lessons/spotlight/. The re-ink deleted that
+# directory on purpose — those fixtures are keyed by first-edition lesson codes, the
+# identity it removed — so both steps had been exiting 1 on a FileNotFoundError, and
+# nothing was running this gate to notice.
+#
+# Replaced by a structural ratchet over ALL 175 lessons, keyed by lesson_uid. Same idea,
+# same fingerprint function, no sample.
+echo "=== [2/6] Spotlight structural ratchet (all lessons) ==="
+python3 scripts/spotlight_fingerprints.py --check
 
 echo "=== [3/6] Backend pytest (spotlight block model TDD) ==="
 cd backend && python -m pytest specs/test_spotlight_block_model_spec.py -q --tb=short

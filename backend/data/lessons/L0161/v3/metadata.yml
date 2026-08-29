@@ -1,0 +1,35 @@
+lesson_uid: L0161
+version_id: v3
+level: 8
+genre: 文言文
+文言文類型: 記敘人物
+strategy: 文言文閱讀策略──指示與疑問代詞
+出處: 西漢・劉向
+學習單: 王淑瑱
+lesson_no: 6
+series: 文言文
+lesson_seq: 90060
+intro: 這篇文章講述了江乙的母親為了替兒子洗刷冤屈，勇敢地向楚王上訴的故事。當時江乙因為宮中失竊而被牽連，母親為了證明兒子的清白，巧妙地運用了比喻和歷史典故，向楚王說明了身為上位者應有的責任。她透過對比過去清明的政治，以及現今令尹的失職，來點出問題的癥結所在。這篇文章讓我們看到一位母親的智慧與勇氣，以及她對公平正義的堅持。
+strategy_explained: '我們要練習的是，弄清楚文言文裡面的「指示代詞」（像「這」、「那」）和「疑問代詞」（像「什麼」、「為什麼」）指的到底是什麼，這樣才能更精準地理解故事；
+
+  這篇文章裡，江乙媽媽就是很巧妙地運用了「此」跟「彼」來對比，點出問題在哪裡，這剛好可以讓我們練習分辨這些詞在課文裡實際指涉的對象；
+
+  讀的時候，不妨停下來問問自己，這些「這」、「那」、「什麼」指的究竟是哪個人、哪件事，幫助你抓住作者想表達的重點'
+strategy_sources:
+  worksheet: null
+  master_sheet: 文言文閱讀策略──指示與疑問代詞
+  previous: 文言聚光燈：指示與疑問代詞
+source_profile:
+  class: no_body
+  note: 課文沒有段落 —— 上游課文抽取的缺口，這一層修不了
+  has_key_reading_section: true
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: null
+  has_body_paragraphs: false
+  paragraph_idx_unique: true
+  anchor_hits: 0
+  has_counter_column: false
+  body_in_tables: false
+  invisible_chars_docx_only: false
+  profiled: '2026-08-24'

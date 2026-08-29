@@ -1,0 +1,15 @@
+lesson_uid: L0136
+version_id: v3
+notes:
+  errata:
+  - id: E1
+    section: 頁首 Level 標籤
+    locator: 右上角級別框第 1 行
+    source: Leve9・會考圖文題
+    corrected: Level 9・會考圖文題
+    kind: 缺字
+    why: '「Level」少了字尾的 l，且數字前少一個空格。同批教材其餘課印的都是
+
+      「Level 9・說明文」這個格式（例：L0135 同為 G9，印「Level 9・說明文」）。'
+    confidence: high
+    evidence: document.xml 該文字方塊字串為「Leve9・會考圖文題」；PDF p1 右上角一致

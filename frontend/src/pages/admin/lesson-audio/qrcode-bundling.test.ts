@@ -1,0 +1,83 @@
+/**
+ * Regression lock for #2622 — the QR library must really be bundled.
+ *
+ * What broke: `qrCodeToDataUrl` used
+ *
+ *     const moduleName = 'qrcode';
+ *     await import(/* @vite-ignore *\/ moduleName)
+ *
+ * A non-literal specifier plus `@vite-ignore` tells Vite not to analyse or
+ * bundle the module. The consequences were invisible to every gate we run:
+ *
+ *   vite build   passed — Vite was explicitly told to skip it
+ *   npm run lint passed — nothing is wrong with the syntax
+ *   vitest       passed — LessonAudioTable.test.tsx does vi.mock('qrcode')
+ *
+ * ...while in a browser the bare specifier cannot be resolved, so every QR
+ * download threw. Confirmed by grepping the build output for the library's own
+ * strings: zero hits before the fix, present after.
+ *
+ * These two tests deliberately do NOT mock 'qrcode'.
+ */
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+import { describe, expect, it } from 'vitest';
+
+describe('#2622 qrcode bundling', () => {
+  it('resolves and runs the real qrcode library, unmocked', async () => {
+    const QRCode = (await import('qrcode')).default;
+
+    const dataUrl = await QRCode.toDataURL('https://example.test/demo-reading/1/full', {
+      errorCorrectionLevel: 'M',
+      margin: 2,
+      width: 512,
+    });
+
+    // A real PNG data URL, not an empty string or a stub's echo.
+    expect(dataUrl.startsWith('data:image/png;base64,')).toBe(true);
+    expect(dataUrl.length).toBeGreaterThan(500);
+  });
+
+  // The static import moved to components/qr/lessonQr.ts when the learning
+  // pages became a second caller (#2886). The invariant did not move: whichever
+  // file holds `QRCode.toDataURL` must name 'qrcode' as a literal specifier.
+  // Both files are checked so this cannot pass by looking at the wrong one.
+  const QR_HOME = join(__dirname, '..', '..', '..', 'components', 'qr', 'lessonQr.ts');
+
+  it('imports qrcode statically so the bundler can see it', () => {
+    const raw = readFileSync(QR_HOME, 'utf-8');
+    // Positive control: the file really is the one that calls the library.
+    expect(raw).toContain('QRCode.toDataURL');
+
+    // Strip comments first. The explanation of this very bug mentions the
+    // dangerous construct by name, and an assertion that matched anywhere in
+    // the file would fail on its own documentation.
+    const code = raw
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .replace(/^\s*\/\/.*$/gm, '');
+
+    // The bug was a dynamic import whose specifier the bundler cannot follow —
+    // a variable, not a string literal. `await import('exceljs')` is fine and is
+    // used deliberately to keep a 100KB library out of the initial chunk, so
+    // this asserts on the dangerous shape rather than banning dynamic import
+    // outright.
+    const dynamicImports = [...code.matchAll(/\bimport\s*\(\s*([^)]*)\)/g)];
+    for (const [, specifier] of dynamicImports) {
+      expect(specifier.trim()).toMatch(/^['"][^'"]+['"]$/);
+    }
+    // A literal top-level specifier is what makes Vite include the library.
+    expect(code).toMatch(/^import QRCode from 'qrcode';$/m);
+  });
+
+  it('no other file re-implements the call with a dynamic specifier', () => {
+    // The admin table used to own this. If someone puts it back there (or
+    // anywhere else) with the unbundlable shape, this catches it.
+    const admin = readFileSync(join(__dirname, 'LessonAudioTable.tsx'), 'utf-8')
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .replace(/^\s*\/\/.*$/gm, '');
+    for (const [, specifier] of admin.matchAll(/\bimport\s*\(\s*([^)]*)\)/g)) {
+      expect(specifier.trim()).toMatch(/^['"][^'"]+['"]$/);
+    }
+  });
+});

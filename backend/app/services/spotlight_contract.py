@@ -90,6 +90,20 @@ KNOWN_BLOCK_TYPES = frozenset({
     "highlight",
     "self_check",
     "match",
+    # 排序題：（N）| 句子 的兩欄表格。原本落到「無圖 figure」而被 loader 丟棄，
+    # 學生只看到題目提示、底下什麼都沒有（#2683）。
+    "ordering",
+    # 表格練習的內容本身。同上，172 個表格、88 課因為被歸成無圖 figure 而消失。
+    "table",
+    # 多模態抽取（#2736）才抽得出來的四種。舊的 regex 管線看不到它們：
+    #   concept_box — 每課聚光燈的開場說明框，以前被壓成 guide 文字流
+    #   sub_block   — 巢狀小題（一、→（一）→ 1.2.3.），以前被壓平、層級消失
+    #   exercise    — 小試身手（打勾表格＋填代號）
+    #   matching    — 連連看，答案是紅色連線，文字流裡根本沒有
+    "concept_box",
+    "sub_block",
+    "exercise",
+    "matching",
     "unknown",
 })
 
@@ -195,10 +209,21 @@ def test15_fixture_for_catalog(catalog_code: str) -> str | None:
 def fingerprint_spotlight(spotlight: dict[str, Any]) -> dict[str, Any]:
     blocks = spotlight.get("blocks") or []
     hist = dict(sorted(Counter(b.get("type", "?") for b in blocks).items()))
-    qa = [b for b in blocks if b.get("type") in ("single", "multi")]
+    qa = _all_questions(blocks)
     guides = [b for b in blocks if b.get("type") == "guide"]
     passages = [b for b in blocks if b.get("type") == "passage"]
-    nulls = sum(1 for b in qa if b.get("answer") is None)
+    # ⚠️ 複選題的答案在 `answers`（複數）。只看 `answer` 的話，答案抓齊的複選題
+    #    會被算成「沒答案」—— L0013 明明有 `answers: [2, 3]`，contract 卻判
+    #    answer_recall=0.5 而擋下整課。是計數器看漏，不是抽取漏抓。
+    #
+    #    另外：**沒有標準答案的題目本來就不該有答案**（「哪些是你認同的？」這種
+    #    自我覺察題，學習單上不會有 ☑）。硬要求它有答案，等於逼抽取者編一個。
+    #    這種題目標 `no_correct_answer: true`，不計入分母。
+    scored = [b for b in qa if not b.get("no_correct_answer")]
+    nulls = sum(
+        1 for b in scored
+        if b.get("answer") is None and not b.get("answers")
+    )
     mcq_leakage = sum(
         1 for b in qa if MCQ_LEAK_RE.match(b.get("prompt", "") or "")
     )
@@ -209,11 +234,52 @@ def fingerprint_spotlight(spotlight: dict[str, Any]) -> dict[str, Any]:
         "type_sequence": [b.get("type") for b in blocks],
         "guide_count": len(guides),
         "passage_count": len(passages),
-        "qa_total": len(qa),
+        "qa_total": len(scored),
         "null_answers": nulls,
         "first_guide_prefix": (guides[0].get("text", "")[:60] if guides else ""),
         "mcq_leakage": mcq_leakage,
     }
+
+
+def _all_questions(blocks: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """所有選擇題，**含巢在 sub_block / exercise 底下的**。
+
+    ⚠️ 原本只數 top-level 的 single/multi。教材本身有標題分組時，抽取者照結構
+    把題目放進 `sub_block.items[]` —— 於是 `qa_total` 變成 0，而
+    `answer_recall = 1.0 if qa_total == 0` 讓那一課直接拿滿分。
+    **那個 1.000 什麼都沒驗到**：L0017／L0018／L0019／L0023 全是這樣過的。
+
+    假綠比沒有檢查更糟 —— 它讓人以為驗過了。修在計數器，不是叫抽取者為了
+    讓 gate 有數字而把結構攤平（那是為了指標改資料，本末倒置）。
+    """
+    out: list[dict[str, Any]] = []
+
+    def walk(items):
+        for b in items or []:
+            if not isinstance(b, dict):
+                continue
+            # 判準：**有選項才算可評分的題目**。
+            # 沒有 options 的 single 是自我評估表的一列（「被他叫到名字時感到心裡發熱」
+            # 這種），學生自己勾，談不上答案對不對 —— 把它算進分母，等於要求
+            # 抽取者替一列自述編一個答案。
+            # 兩種狀態都不計入 answer_recall 的分母，但**意思不同、不可合併**：
+            #   no_correct_answer  = 本來就沒有標準答案（自我覺察題）
+            #   answers_printed:false = 有標準答案，但教師版沒印出來
+            # 合併會讓之後的人分不出「開放題」與「教材缺印」。
+            #
+            # 為什麼兩者都要排除：算進分母就等於**逼抽取者補一個推論出來的答案**，
+            # 而推論出來的答案跟真答案在檔案裡長得一模一樣，之後沒人分得出來。
+            if (b.get("options")
+                    and not b.get("no_correct_answer")
+                    and b.get("answers_printed") is not False):
+                out.append(b)
+            for key in ("items", "sub_blocks", "blocks", "rows"):
+                v = b.get(key)
+                if isinstance(v, list):
+                    walk(v)
+
+    walk(blocks)
+    return out
 
 
 def validate_block_structure(blocks: list[dict[str, Any]]) -> list[str]:
@@ -253,7 +319,14 @@ def eval_spotlight_v2(
     fp = fingerprint_spotlight(spotlight)
     struct_errors = validate_block_structure(blocks)
 
-    guide_retained = fp["guide_count"] > 0
+    # 這條檢查存在的理由是「教學引導語不可以被丟掉」，不是「一定要有 guide 這個型別」。
+    # 多模態抽取（#2736）把引導語放進 `concept_box`（策略說明框），因為它在學習單上
+    # 本來就是一個獨立的框，壓成 guide 文字流才是失真。L0105 / L0140 兩課的引導語
+    # 全在 concept_box 裡，用舊寫法會判成「引導語不見了」—— 假紅。
+    guide_retained = fp["guide_count"] > 0 or any(
+        isinstance(b, dict) and b.get("type") == "concept_box" and (b.get("text") or "").strip()
+        for b in blocks
+    )
     answer_recall = (
         1.0
         if fp["qa_total"] == 0

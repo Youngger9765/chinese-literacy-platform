@@ -15,7 +15,7 @@
 import React, { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 
-import { PublicOnlyRoute, ProtectedRoute, StudentClassroomGuard } from '../components/auth/RouteGuards';
+import { PublicOnlyRoute, ProtectedRoute, StudentClassroomGuard, LearningRouteGate } from '../components/auth/RouteGuards';
 import NoTeacherPage from '../pages/app/NoTeacherPage';
 import { AppShell, LearningAppShell } from '../components/layout/AppShell';
 import {
@@ -83,6 +83,7 @@ const TermsOfService = lazy(() => import('../pages/app/TermsOfService'));
 
 // Dev-only local demo harness for AI-extracted lesson_content (public, no API/DB).
 const DevLessonPage = lazy(() => import('../pages/dev/DevLessonPage'));
+
 
 // ---------------------------------------------------------------------------
 
@@ -251,7 +252,7 @@ const AppRoutes: React.FC = () => (
         }
       />
       <Route
-        path="/admin"
+        path="/admin/*"
         element={
           <ProtectedRoute>
             <AppShell>
@@ -425,18 +426,22 @@ const AppRoutes: React.FC = () => (
       <Route
         path="/learn/:storyId"
         element={
-          <ProtectedRoute>
+          /* Not ProtectedRoute: 讀全文-做記號 is reachable from a QR code on
+             paper, so an anonymous visitor gets a read-and-listen page there
+             instead of a login box (#2649). Every other step still redirects. */
+          <LearningRouteGate>
             <LearningAppShell />
-          </ProtectedRoute>
+          </LearningRouteGate>
         }
       >
         {learningRoutes}
         {/* Default: redirect to reading-annotation (new first step) */}
-        <Route index element={<Navigate to="reading-annotation" replace />} />
+        <Route index element={<Navigate to="full-text-annotate" replace />} />
       </Route>
 
       {/* Privacy policy — public, no auth required */}
       <Route path="/privacy" element={<PrivacyPolicy />} />
+
 
       {/* Local demo harness for AI-extracted lesson_content — DEV builds only.
           #2505 review #7: don't ship an unauthenticated dev route in the production

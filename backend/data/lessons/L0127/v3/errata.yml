@@ -1,0 +1,22 @@
+lesson_uid: L0127
+version_id: v3
+notes:
+  errata:
+  - id: E1
+    section: 二 念順順
+    locator: instruction 的指定段落號
+    source: 請用計時器，從指定段落（五     ）開始朗讀
+    corrected: 請用計時器，從指定段落（六     ）開始朗讀
+    kind: 段號印錯
+    why: "兩個獨立訊號都指向第 6 段，而不是印出來的「五」：\n① ☞ 圖形錨在第 6 段「難友每天最重要的餐」開頭（PDF p2 可見，document.xml 的第 6 個 <w:p> 帶 drawing）。\n② 字數欄兩個段界精準吻合：150 ＝ 第 6 段 150 字；341 ＝ 150＋第 7 段 191 字。\n   若從第 5 段起算，第 5 段 113 字不在字數欄的任何一個數字上。\n本檔 key_reading.start_paragraph 取 6（依 ☞ 與字數），instruction 照原稿留「五」。"
+    confidence: high
+    evidence: PDF p2/p3 與 document.xml 一致（不是轉檔造成的）
+  - id: E2
+    section: 五 文章重點表
+    locator: 例子與道理 第 5 點
+    source: 5.仍看見黎明之美：人仍保有對【　美　】的感受力，並因此並獲得片刻的【　心靈自由　】。
+    corrected: null
+    kind: 贅字
+    why: 「並因此並獲得」多一個「並」字；不擅自改（本檔 value 照原稿留，只登錄）
+    confidence: high
+    evidence: PDF p6 與 document.xml 一致

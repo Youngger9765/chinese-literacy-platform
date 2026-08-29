@@ -20,6 +20,7 @@ Strategy:
 """
 
 import asyncio
+import re
 import json
 import sys
 import types
@@ -79,74 +80,63 @@ def _run(coro):
 # ---------------------------------------------------------------------------
 
 class TestBuildGradingPrompt:
-    """Verify the new prompt design does not leak expected answers inline."""
+    """防 #1614/#1616 的核心：**prompt 不可以透露哪個答案是對的**。
+
+    ## 2026-08-28 重寫了這個 class，原本六條刪掉五條
+
+    Prompt 在 #1712（#1614/#1616 第三輪）整個重寫過。原本那六條裡：
+
+    - `test_reference_block_present` 斷言 prompt 要有「標準答案參考」區 ——
+      **跟現在的設計正好相反**。新設計連正確答案都不送了
+      （`_build_grading_prompt` docstring：Reference answers stay HIDDEN per #1616）。
+      這條留著等於在要求把答案送回去。
+    - 另外四條是「斷言 prompt 裡有某個中文字串」（`紅筆`／`圈選`／`空白`／
+      `只報告手寫`）。Prompt 一改寫就紅，**而紅了不代表品質變差、綠了也不代表
+      評分是對的** —— 那是 owner 說的「綠燈也是假的」那種。
+    - `test_expected_answers_not_inline` 的**意圖**（答案不可洩漏）比以前更重要，
+      但它的做法綁死舊格式：靠「待批改題目」「標準答案參考」兩個標頭切區段。
+      標頭沒了之後它掛在自己的 `len(question_lines) > 0` 上 ——
+      **那個防呆救了它**，否則洩漏斷言會在掃到空集合的情況下無聲通過。
+
+    改成直接問「有沒有標出哪個是對的」，不綁任何格式。
+    """
 
     def setup_method(self):
         from app.services.omo_grader import _build_question_schema, _build_grading_prompt
         self.questions = _build_question_schema(SAMPLE_LESSON)
         self.prompt = _build_grading_prompt(self.questions)
 
-    def test_prompt_contains_handwriting_only_instruction(self):
-        assert "禁止把標準答案複製到 student_answer" in self.prompt, (
-            "Prompt must explicitly forbid copying expected answer into student_answer"
-        )
+    def test_the_prompt_was_actually_built(self):
+        """正向對照 —— 少了它，下面每一條都可能在對空字串斷言。"""
+        assert len(self.questions) >= 3, f"只抽出 {len(self.questions)} 題"
+        assert len(self.prompt) > 500, f"prompt 只有 {len(self.prompt)} 字"
+        assert "合法答案" in self.prompt, "prompt 沒有列出合法值清單，格式可能又變了"
 
-    def test_expected_answers_not_inline(self):
-        """Each QUESTION line must NOT contain the correct_answer inline.
+    def test_no_question_is_told_which_value_is_correct(self):
+        """⭐ #1614/#1616 的核心。不綁格式 —— 只問有沒有「標出正確」這件事。"""
+        seg = self.prompt.split("== 題目清單")[-1]
+        offenders = [
+            line for line in seg.split("\n")
+            if re.search(r"(正確答案|答案是|correct[_ ]answer|Expected answer)", line)
+        ]
+        assert not offenders, (
+            "題目區出現了指出正確答案的字樣，#1614 的洩漏又回來了：\n"
+            + "\n".join(offenders[:5]))
 
-        Old pattern:  '| Expected answer: 覓食'
-        New pattern:  correct answers only appear in the reference block at the bottom.
+    def test_the_value_space_is_a_space_not_a_giveaway(self):
+        """合法值清單至少要有兩個真實選項 —— 只列一個就等於直接把答案給它。
 
-        We identify question lines as those between the "待批改題目" header and the
-        "標準答案參考" header — the reference block is a separate section.
+        ⚠️ 原本我寫的是「同 mode 的題目要看到同一組值」，那個假設站不住腳：
+        選擇題每題本來就有自己的選項，而那些選項**印在學習單上**、學生看得到，
+        不是洩漏。真正該守的是「清單不能窄到只剩答案」。
         """
-        lines = self.prompt.split("\n")
-        # Find the section boundaries
-        in_questions_section = False
-        question_lines = []
-        for line in lines:
-            if "待批改題目" in line:
-                in_questions_section = True
-                continue
-            if "標準答案參考" in line:
-                in_questions_section = False
-                continue
-            if in_questions_section and line.strip():
-                question_lines.append(line)
-
-        assert len(question_lines) > 0, "Should find question lines in 待批改題目 section"
-        for line in question_lines:
-            assert "Expected answer:" not in line, (
-                f"Question line still contains 'Expected answer:': {line!r}"
-            )
-            assert "標準答案：" not in line, (
-                f"Question line still contains inline correct answer: {line!r}"
-            )
-
-    def test_reference_block_present(self):
-        assert "標準答案參考" in self.prompt, (
-            "Prompt must have a separate reference block for correct answers"
-        )
-
-    def test_red_pen_instruction_present(self):
-        assert "紅筆" in self.prompt, (
-            "Prompt must instruct Gemini how to handle red-pen correction marks"
-        )
-
-    def test_mc_instruction_present(self):
-        assert "圈選" in self.prompt or "選項字母" in self.prompt, (
-            "Prompt must tell Gemini to report which letter the student CIRCLED"
-        )
-
-    def test_blank_answer_instruction(self):
-        assert "空白" in self.prompt, (
-            "Prompt must handle blank answer slots (student_answer='', score=0.0)"
-        )
-
-
-# ---------------------------------------------------------------------------
-# Unit tests — parsing logic with mock Gemini responses
-# ---------------------------------------------------------------------------
+        thin = []
+        for q in self.questions:
+            vals = [v for v in (q.get("allowed_values") or []) if v != ""]
+            if len(vals) < 2:
+                thin.append((q["id"], vals))
+        assert not thin, (
+            f"這幾題的合法值清單窄到只剩一個，等於把答案交出去：{thin}")
 
 class TestParsingWithMockResponses:
     """Verify that the grader correctly parses Gemini responses representing

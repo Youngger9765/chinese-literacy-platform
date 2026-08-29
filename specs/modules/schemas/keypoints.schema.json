@@ -1,0 +1,278 @@
+{
+  "$id": "lingoleap/module/keypoints",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "從 155 份實測 yml 長出來，不是手寫的。required = 每一課都有的欄位（少了就是回歸）；properties 列出所有已觀測欄位，配合 additionalProperties: false —— 現況全過，任何新發明的欄位名會紅。",
+  "properties": {
+    "answer_carrier": {
+      "type": "string",
+      "x-seen-in": "126/155"
+    },
+    "arrow_note": {
+      "type": "string",
+      "x-seen-in": "1/155"
+    },
+    "blank_marker_note": {
+      "type": "string",
+      "x-seen-in": "1/155"
+    },
+    "blanks_note": {
+      "type": "string",
+      "x-seen-in": "1/155"
+    },
+    "checkbox_note": {
+      "type": "string",
+      "x-seen-in": "1/155"
+    },
+    "column_headers": {
+      "type": "array",
+      "x-seen-in": "1/155"
+    },
+    "column_headers_note": {
+      "type": "string",
+      "x-seen-in": "2/155"
+    },
+    "column_note": {
+      "type": "string",
+      "x-seen-in": "8/155"
+    },
+    "columns": {
+      "type": "array",
+      "x-seen-in": "33/155"
+    },
+    "columns_note": {
+      "type": "string",
+      "x-seen-in": "3/155"
+    },
+    "columns_printed": {
+      "type": "array",
+      "x-seen-in": "3/155"
+    },
+    "columns_printed_note": {
+      "type": "string",
+      "x-seen-in": "1/155"
+    },
+    "exercise": {
+      "type": "object",
+      "x-seen-in": "1/155"
+    },
+    "footnotes": {
+      "type": "array",
+      "x-seen-in": "1/155"
+    },
+    "header_labels": {
+      "type": "array",
+      "x-seen-in": "1/155"
+    },
+    "header_note": {
+      "type": "string",
+      "x-seen-in": "1/155"
+    },
+    "header_row": {
+      "type": "object",
+      "x-seen-in": "1/155"
+    },
+    "instruction": {
+      "type": "string",
+      "x-seen-in": "26/155"
+    },
+    "instruction_note": {
+      "type": "string",
+      "x-seen-in": "2/155"
+    },
+    "intro": {
+      "type": "string",
+      "x-seen-in": "32/155"
+    },
+    "intro_source_text": {
+      "type": "string",
+      "x-seen-in": "1/155"
+    },
+    "label": {
+      "type": "string",
+      "x-seen-in": "6/155"
+    },
+    "layout": {
+      "type": "string",
+      "x-seen-in": "138/155"
+    },
+    "layout_note": {
+      "type": "string",
+      "x-seen-in": "10/155"
+    },
+    "left_header": {
+      "type": "string",
+      "x-seen-in": "2/155"
+    },
+    "main_topic": {
+      "type": "string",
+      "x-seen-in": "1/155"
+    },
+    "main_topic_label": {
+      "type": "string",
+      "x-seen-in": "1/155"
+    },
+    "matching": {
+      "type": "object",
+      "x-seen-in": "1/155"
+    },
+    "merged_cell_note": {
+      "type": "string",
+      "x-seen-in": "1/155"
+    },
+    "note": {
+      "type": "string",
+      "x-seen-in": "3/155"
+    },
+    "option_bank": {
+      "type": "object",
+      "x-seen-in": "1/155"
+    },
+    "part": {
+      "type": "integer",
+      "x-seen-in": "8/155"
+    },
+    "part_no": {
+      "type": "integer",
+      "x-seen-in": "1/155"
+    },
+    "part_note": {
+      "type": "string",
+      "x-seen-in": "1/155"
+    },
+    "right_header": {
+      "type": "string",
+      "x-seen-in": "2/155"
+    },
+    "rows": {
+      "type": "array",
+      "x-seen-in": "155/155"
+    },
+    "rows_note": {
+      "type": "string",
+      "x-seen-in": "19/155"
+    },
+    "section_name_note": {
+      "type": "string",
+      "x-seen-in": "1/155"
+    },
+    "section_name_printed": {
+      "type": "string",
+      "x-seen-in": "3/155"
+    },
+    "section_no_printed": {
+      "type": "string",
+      "x-seen-in": "2/155"
+    },
+    "slug": {
+      "type": "string",
+      "x-seen-in": "155/155"
+    },
+    "spanning_rows_note": {
+      "type": "string",
+      "x-seen-in": "1/155"
+    },
+    "structure": {
+      "type": "string",
+      "x-seen-in": "16/155"
+    },
+    "structure_note": {
+      "type": "string",
+      "x-seen-in": "9/155"
+    },
+    "sub_topic_label": {
+      "type": "string",
+      "x-seen-in": "1/155"
+    },
+    "subtitle": {
+      "type": "string",
+      "x-seen-in": "3/155"
+    },
+    "subtitle_note": {
+      "type": "string",
+      "x-seen-in": "1/155"
+    },
+    "summary": {
+      "type": "string",
+      "x-seen-in": "1/155"
+    },
+    "summary_blanks": {
+      "type": "array",
+      "x-seen-in": "1/155"
+    },
+    "summary_label": {
+      "type": "string",
+      "x-seen-in": "1/155"
+    },
+    "tail": {
+      "type": [
+        "object",
+        "string"
+      ],
+      "x-seen-in": "2/155"
+    },
+    "tail_question": {
+      "type": "object",
+      "x-seen-in": "3/155"
+    },
+    "tail_questions": {
+      "type": "array",
+      "x-seen-in": "1/155"
+    },
+    "text_ref": {
+      "type": [
+        "array",
+        "string"
+      ],
+      "x-seen-in": "145/155"
+    },
+    "theme": {
+      "type": "string",
+      "x-seen-in": "2/155"
+    },
+    "theme_blanks": {
+      "type": "array",
+      "x-seen-in": "1/155"
+    },
+    "theme_errata_ref": {
+      "type": "string",
+      "x-seen-in": "1/155"
+    },
+    "theme_source_text": {
+      "type": "string",
+      "x-seen-in": "1/155"
+    },
+    "title": {
+      "type": "string",
+      "x-seen-in": "148/155"
+    },
+    "title_note": {
+      "type": "string",
+      "x-seen-in": "4/155"
+    },
+    "topic_blanks": {
+      "type": "array",
+      "x-seen-in": "1/155"
+    },
+    "topic_cell": {
+      "type": "string",
+      "x-seen-in": "1/155"
+    }
+  },
+  "required": [
+    "rows",
+    "slug"
+  ],
+  "title": "keypoints module payload",
+  "type": "object",
+  "x-core-90pct": [
+    "rows",
+    "slug",
+    "text_ref",
+    "title"
+  ],
+  "x-enforcement": "warn",
+  "x-lessons-observed": 155,
+  "x-owner": "@stgst",
+  "x-why-warn": "@stgst 正在改這個模組，現在硬擋等於在他的工作區丟紅燈。等他收完再由他自己改成 error。"
+}

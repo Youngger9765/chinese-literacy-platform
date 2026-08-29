@@ -1,75 +1,306 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 8,
+    "fill_blank_count": 5,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "mixed",
+    "primary_labels": [
+      "想法",
+      "感受",
+      "想法",
+      "感受"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "垃圾食物的誘惑與代價",
-      "value": "",
-      "interactive_type": "display"
+      "interactive_type": "display",
+      "label": "感情小日記4──我被告白了",
+      "value": ""
     },
     {
-      "label": "主題",
-      "value": "垃圾食物",
-      "interactive_type": "display"
+      "interactive_type": "display",
+      "label": "一、二",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "經歷",
+          "value": "收到同學的告白訊息"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "想法",
+          "value": "1.不知該【　　　】\n2.擔心相處會變得【　　　】"
+        },
+        {
+          "interactive_type": "checkbox",
+          "label": "感受",
+          "options": [
+            "驚訝",
+            "驚喜",
+            "惱怒",
+            "煩躁"
+          ],
+          "value": "①驚訝 ②驚喜 ③惱怒 ④煩躁"
+        }
+      ],
+      "value": ""
     },
     {
-      "label": "定義",
-      "value": "垃圾食物就是含有【　　　】、【　　　】、【　　　】的食物，例如洋芋片、餅乾、巧克力……等。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "三",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "經歷",
+          "value": "猶豫是否該答應"
+        },
+        {
+          "interactive_type": "checkbox",
+          "label": "想法",
+          "options": [
+            "自己喜歡的人",
+            "喜歡自己的人"
+          ],
+          "value": "①自己喜歡的人 ②喜歡自己的人"
+        },
+        {
+          "interactive_type": "checkbox",
+          "label": "感受",
+          "options": [
+            "混亂",
+            "輕鬆",
+            "悸動",
+            "矛盾"
+          ],
+          "value": "①混亂 ②輕鬆 ③悸動 ④矛盾"
+        }
+      ],
+      "value": ""
     },
     {
-      "label": "讓人上癮的原因",
-      "value": "為什麼我們會忍不住想吃垃圾食物？【　　　】\n味道經過精心調配，口感令人難以抗拒\n促進大腦分泌多巴胺，給人快樂的感受\n□吃垃圾食物能讓人變得更聰明\n與快樂時光聯結，容易形成習慣",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "四",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "經歷",
+          "value": "思考如何拒絕"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "想法",
+          "value": "想要【　　　】拒絕，又不希望讓他覺得自己【　　　】"
+        },
+        {
+          "interactive_type": "checkbox",
+          "label": "感受",
+          "options": [
+            "苦惱",
+            "猶豫",
+            "憤怒",
+            "無奈"
+          ],
+          "value": "①苦惱 ②猶豫 ③憤怒 ④無奈"
+        }
+      ],
+      "value": ""
     },
     {
-      "label": "健康危害",
-      "value": "長期吃垃圾食物可能造成哪些影響？【　　　】\n增加體重，可能導致肥胖\n□增強免疫力，讓身體更健康\n影響血糖穩定，容易感到飢餓，導致過量飲食\n可能引發高血壓、糖尿病、心血管疾病等健康問題",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "五",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "經歷",
+          "value": "傳訊息表達拒絕"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "想法",
+          "value": "盡可能給出最【　　　】的回應"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "感受",
+          "value": "感到【　　　】"
+        }
+      ],
+      "value": ""
     },
     {
-      "label": "給青少年的建議",
-      "value": "在飲食方面，我們應該怎麼做？\n□絕對不能吃垃圾食物，以免付出代價。\n偶爾吃無傷大雅，但不要讓垃圾食物主導飲食習慣。",
-      "interactive_type": "display"
+      "interactive_type": "display",
+      "label": "六",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "經歷",
+          "value": "收到對方回覆"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "想法",
+          "value": "1.能同理對方的感受\n2.真誠面對【　　　】很重要\n3.感謝對方的【　　　】"
+        },
+        {
+          "interactive_type": "checkbox",
+          "label": "感受",
+          "options": [
+            "如釋重負",
+            "坦然",
+            "難過"
+          ],
+          "value": "①如釋重負 ②坦然 ③難過"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "統整",
+      "sub_rows": [
+        {
+          "interactive_type": "checkbox",
+          "label": "經歷",
+          "options": [
+            "混亂",
+            "平靜"
+          ],
+          "value": "①混亂 ②平靜"
+        },
+        {
+          "interactive_type": "checkbox",
+          "label": "想法",
+          "options": [
+            "答應",
+            "拒絕"
+          ],
+          "value": "①答應 ②拒絕"
+        },
+        {
+          "interactive_type": "checkbox",
+          "label": "感受",
+          "options": [
+            "踏實坦然",
+            "沮喪難過"
+          ],
+          "value": "①踏實坦然 ②沮喪難過"
+        }
+      ],
+      "value": ""
     }
   ],
-  "layout": "worksheet_table",
-  "title": "垃圾食物的誘惑與代價",
+  "title": "感情小日記4──我被告白了",
   "worksheet_rows": [
     {
-      "kind": "pair",
-      "label": "主題",
-      "value": "垃圾食物"
+      "items": [
+        {
+          "label": "經歷",
+          "value": "收到同學的告白訊息"
+        },
+        {
+          "label": "想法",
+          "value": "1.不知該【　　　】\n2.擔心相處會變得【　　　】"
+        },
+        {
+          "label": "感受",
+          "value": "①驚訝 ②驚喜 ③惱怒 ④煩躁"
+        }
+      ],
+      "kind": "section_block",
+      "section": "一、二"
     },
     {
-      "kind": "pair",
-      "label": "定義",
-      "value": "垃圾食物就是含有【　　　】、【　　　】、【　　　】的食物，例如洋芋片、餅乾、巧克力……等。"
+      "items": [
+        {
+          "label": "經歷",
+          "value": "猶豫是否該答應"
+        },
+        {
+          "label": "想法",
+          "value": "①自己喜歡的人 ②喜歡自己的人"
+        },
+        {
+          "label": "感受",
+          "value": "①混亂 ②輕鬆 ③悸動 ④矛盾"
+        }
+      ],
+      "kind": "section_block",
+      "section": "三"
     },
     {
-      "kind": "pair",
-      "label": "讓人上癮的原因",
-      "value": "為什麼我們會忍不住想吃垃圾食物？（請打勾，多選）\n味道經過精心調配，口感令人難以抗拒\n促進大腦分泌多巴胺，給人快樂的感受\n□吃垃圾食物能讓人變得更聰明\n與快樂時光聯結，容易形成習慣"
+      "items": [
+        {
+          "label": "經歷",
+          "value": "思考如何拒絕"
+        },
+        {
+          "label": "想法",
+          "value": "想要【　　　】拒絕，又不希望讓他覺得自己【　　　】"
+        },
+        {
+          "label": "感受",
+          "value": "①苦惱 ②猶豫 ③憤怒 ④無奈"
+        }
+      ],
+      "kind": "section_block",
+      "section": "四"
     },
     {
-      "kind": "pair",
-      "label": "健康危害",
-      "value": "長期吃垃圾食物可能造成哪些影響？（請打勾，多選）\n增加體重，可能導致肥胖\n□增強免疫力，讓身體更健康\n影響血糖穩定，容易感到飢餓，導致過量飲食\n可能引發高血壓、糖尿病、心血管疾病等健康問題"
+      "items": [
+        {
+          "label": "經歷",
+          "value": "傳訊息表達拒絕"
+        },
+        {
+          "label": "想法",
+          "value": "盡可能給出最【　　　】的回應"
+        },
+        {
+          "label": "感受",
+          "value": "感到【　　　】"
+        }
+      ],
+      "kind": "section_block",
+      "section": "五"
     },
     {
-      "kind": "pair",
-      "label": "給青少年的建議",
-      "value": "在飲食方面，我們應該怎麼做？\n□絕對不能吃垃圾食物，以免付出代價。\n偶爾吃無傷大雅，但不要讓垃圾食物主導飲食習慣。"
+      "items": [
+        {
+          "label": "經歷",
+          "value": "收到對方回覆"
+        },
+        {
+          "label": "想法",
+          "value": "1.能同理對方的感受\n2.真誠面對【　　　】很重要\n3.感謝對方的【　　　】"
+        },
+        {
+          "label": "感受",
+          "value": "①如釋重負 ②坦然 ③難過"
+        }
+      ],
+      "kind": "section_block",
+      "section": "六"
+    },
+    {
+      "items": [
+        {
+          "label": "經歷",
+          "value": "①混亂 ②平靜"
+        },
+        {
+          "label": "想法",
+          "value": "①答應 ②拒絕"
+        },
+        {
+          "label": "感受",
+          "value": "①踏實坦然 ②沮喪難過"
+        }
+      ],
+      "kind": "section_block",
+      "section": "統整"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "theme_facts",
-    "fill_blank_count": 3,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "定義",
-      "讓人上癮的原因",
-      "健康危害"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

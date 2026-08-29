@@ -1,0 +1,48 @@
+lesson_uid: L0004
+version_id: v3
+level: 4
+genre: 抒情文
+strategy: 品格力──自我覺察─想法與情緒的關係
+strategy_label_printed: 目標議題
+課文學習單: 張筱晴
+lesson_no: 13
+series: 一般
+lesson_seq: 4130
+intro: 這篇文章記錄了作者最近心情上的劇烈變化，她發現自己對某位同學產生了特別的關注，上課時會不自覺地觀察對方，下課時也希望能有更多相處的機會。然而，當看到對方和其他人互動愉快時，作者又會感到失落和不安，腦中充滿了各種猜測和擔憂。這種忽喜忽憂的情緒起伏，讓作者感到困惑和疲憊，她開始思考「喜歡」究竟是什麼樣的感覺，以及為什麼喜歡一個人反而會帶來這麼多複雜的情緒。
+notes:
+  總表_文體: 抒情文
+  總表_類型: ''
+  總表_議題: 品格力：SEL自我覺察
+  總表_聚光燈策略: 品格力──自我覺察─想法與情緒的關係
+  總表_第六大題標題: 自我覺察──想法與情緒的關係
+  總表_語詞:
+  - 亂竄
+  - 動向
+  - 揮之不去
+  - 起伏
+  - 深淵
+  - 煙消雲散
+  - 偵測
+  - 不是滋味
+  - 心花怒放
+  - 一言一行
+  總表_對照: 總表只列 10 個語詞，缺「雀躍」；學習單語詞框、三、四、八大題皆為 11 個（含雀躍）。差異在總表側。
+strategy_explained: 這篇文章帶你練習「認識自己的感覺」，就像偵探一樣，仔細看看心裡有什麼想法和情緒在跑跳，因為文章裡作者常常忽喜忽憂，讓你感覺自己也跟著心情七上八下，讀的時候不妨想像自己是作者，問問自己「為什麼我會有這種感覺呢」
+strategy_sources:
+  worksheet: null
+  master_sheet: 品格力──自我覺察─想法與情緒的關係
+  previous: 品格力──自我覺察－想法與情緒的關係
+source_profile:
+  class: standard
+  note: 單一錨點 + 有計數欄 + idx 唯一 —— 走主路徑
+  has_key_reading_section: true
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: null
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 1
+  has_counter_column: true
+  body_in_tables: true
+  invisible_chars_docx_only: true
+  profiled: '2026-08-24'

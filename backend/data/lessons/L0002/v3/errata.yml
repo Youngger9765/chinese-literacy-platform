@@ -1,0 +1,22 @@
+lesson_uid: L0002
+version_id: v3
+notes:
+  errata:
+  - id: E1
+    section: 一 讀全文-做記號
+    locator: 第 1 段句末
+    source: 許多動物發展出各種讓人驚嘆竹的各種生存妙招。
+    corrected: 許多動物發展出各種讓人驚嘆的生存妙招。
+    kind: 贅字＋語詞重複
+    why: 「驚嘆」後多一個「竹」字；且「各種」在同一句出現兩次
+    confidence: high
+    evidence: PDF p1 與 document.xml 一致
+  - id: E2
+    section: 四 語詞應用
+    locator: 標題右側指示語
+    source: 在空格中入正確的語詞代號
+    corrected: 在空格中填入正確的語詞代號
+    kind: 漏字
+    why: 缺「填」字；同一份教材其他課皆作「填入」
+    confidence: high
+    evidence: PDF p3 與 document.xml 一致

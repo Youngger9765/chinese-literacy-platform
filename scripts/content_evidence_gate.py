@@ -26,10 +26,17 @@ Outputs to qa/content-evidence/<run_id>/:
   artifacts/{screenshots,api-payloads,logs}/...
 
 Run:
-  python scripts/content_evidence_gate.py --smoke     # 10-lesson smoke
-  python scripts/content_evidence_gate.py             # full 304 cells
+  python scripts/content_evidence_gate.py --smoke                     # 10-lesson smoke
+  python scripts/content_evidence_gate.py                             # full 304 cells
+  python scripts/content_evidence_gate.py --lesson G4-L02,G4-L12      # per-lesson (pilot)
+  python scripts/content_evidence_gate.py --story-ids 2,1009          # per-lesson by story_id
 
-Status values are pass / fail / unknown. unknown == fail at gate time.
+Status values are pass / fail / unknown / known_gap. unknown == fail at gate
+time; known_gap (documented, reason-tagged content gap) is NON-BLOCKING as
+long as every known_gap row carries a KNOWN_CONTENT_GAP_* failure code — see
+content_evidence_ship_gate.sh KNOWN_GAP_NO_REASON check, which is the other
+half of this contract. A real fail/unknown on the SAME cell always dominates
+a known_gap (a documented gap that also renders broken still fails).
 """
 
 from __future__ import annotations
@@ -79,6 +86,28 @@ SCHEMA_VERSION = "content-evidence.v1"
 # See dedupe_stories_by_canonical_code(). 152 x 2 steps = 304 cells.
 EXPECTED_LESSONS = 152
 STEPS = ("reading-strategy", "story-structure")
+
+# ⚠️ 上面兩個是這道門**內部**的識別名（`STEP_SOURCE_FIELD`、known_gaps 的 key
+# 都用它們），但**它們已經不是 app 服務的路徑**。
+# `frontend/src/config/stepConfig.ts` 的 `LEGACY_STEP_ID_ALIASES` 記著改名：
+#
+#     reading-strategy → spotlight
+#     story-structure  → keypoints-table
+#
+# app 收到舊名會轉址到新名，而 L3 的判準是
+# `href.endswith(f"/learn/{id}/{step}")` —— 轉址之後永遠對不上，
+# 於是 350/350 全 fail，而每一格的內容其實都是好的（#2730）。
+#
+# 內部識別名保持不動（改了會連帶弄壞 known_gaps 的查詢），只在組網址時換成現行 id。
+_STEP_URL_ID = {
+    "reading-strategy": "spotlight",
+    "story-structure": "keypoints-table",
+}
+
+
+def step_url_id(step: str) -> str:
+    """這個 step 在 app 上真正的路徑片段。"""
+    return _STEP_URL_ID.get(step, step)
 STEP_SOURCE_FIELD = {
     "reading-strategy": "spotlight_v2.blocks",
     "story-structure": "story_structure_table",
@@ -1009,7 +1038,7 @@ def l3_render_cell(
 ) -> dict[str, Any]:
     story_id = story["id"]
     lesson_code = story.get("grade_code", "")
-    url = f"{STAGING_FRONTEND}/learn/{story_id}/{step}"
+    url = f"{STAGING_FRONTEND}/learn/{story_id}/{step_url_id(step)}"
     cell_shot_dir = shots_dir / str(story_id)
     cell_shot_dir.mkdir(parents=True, exist_ok=True)
     shot_path = cell_shot_dir / f"{step}.png"
@@ -1020,7 +1049,7 @@ def l3_render_cell(
         time.sleep(4)
         href = browse.js("location.href")
         on_login = "/login" in href
-        loaded = href.endswith(f"/learn/{story_id}/{step}")
+        loaded = href.endswith(f"/learn/{story_id}/{step_url_id(step)}")
         errors = browse.console_errors()
         browse.screenshot(str(shot_path))
         return {
@@ -1168,6 +1197,109 @@ HUMAN_REVIEW_TEMPLATE = """# Human Review - {run_id}
 # ---------------------------------------------------------------------------
 # main pipeline
 # ---------------------------------------------------------------------------
+def summarize_cells(
+    l1_rows: list[dict[str, Any]],
+    l3_rows: list[dict[str, Any]],
+    fig_rows: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Per-cell final status + aggregate counters (single-pass).
+
+    Any layer fail/unknown dominates: a cell is only "pass" when L1, L3, and
+    figure all agree, and only "known_gap" when the WORST status across all
+    three is known_gap (an honest, reason-tagged, non-blocking content gap).
+    A cell that is both known_gap and genuinely broken (fail/unknown on
+    another layer) still surfaces as fail/unknown, never known_gap.
+
+    Extracted from main() so the known_gap-vs-fail precedence (the #2561
+    ship-gate contradiction fix) is unit-testable without a live staging
+    server or the browse binary.
+    """
+
+    def cell_index(rows: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+        return {r["cell_id"]: r for r in rows}
+
+    l1_idx, l3_idx, fig_idx = (
+        cell_index(l1_rows),
+        cell_index(l3_rows),
+        cell_index(fig_rows),
+    )
+    all_cells = sorted(set(l1_idx) | set(l3_idx) | set(fig_idx))
+
+    pass_cells = fail_cells = unknown_cells = known_gap_cells = 0
+    missing_screenshot_cells = console_error_cells = 0
+    figure_blacklist_hits = 0
+    for cid in all_cells:
+        statuses = [
+            l1_idx.get(cid, {}).get("status", "unknown"),
+            l3_idx.get(cid, {}).get("status", "unknown"),
+            fig_idx.get(cid, {}).get("status", "unknown"),
+        ]
+        if "fail" in statuses:
+            fail_cells += 1
+        elif "unknown" in statuses:
+            unknown_cells += 1
+        elif "known_gap" in statuses:
+            known_gap_cells += 1
+        else:
+            pass_cells += 1
+        l3 = l3_idx.get(cid, {})
+        if l3.get("screenshot", {}).get("bytes", 0) == 0:
+            missing_screenshot_cells += 1
+        if l3.get("render", {}).get("console_error_count", 0) > 0:
+            console_error_cells += 1
+        figure_blacklist_hits += len(
+            fig_idx.get(cid, {}).get("blacklist_md5_hits", [])
+        )
+
+    return {
+        "all_cells": all_cells,
+        "pass_cells": pass_cells,
+        "fail_cells": fail_cells,
+        "unknown_cells": unknown_cells,
+        "known_gap_cells": known_gap_cells,
+        "missing_screenshot_cells": missing_screenshot_cells,
+        "console_error_cells": console_error_cells,
+        "figure_blacklist_hits": figure_blacklist_hits,
+    }
+
+
+def compute_fail_reasons(summary: dict[str, Any], expected_cells: int) -> list[str]:
+    """Gate-level pass/fail decision from summarize_cells() counters.
+
+    known_gap is intentionally NON-BLOCKING here (honest, reason-tagged content
+    gap — no deployable source exists). This mirrors content_evidence_ship_gate.sh
+    §7b, which only requires every known_gap row to carry a KNOWN_CONTENT_GAP_*
+    failure code (checked at row build time via _known_gap_reason) and never
+    fails on known_gap_cells>0. Before this fix the two scripts contradicted
+    each other: this gate failed on any known_gap while the ship gate declared
+    known_gap non-blocking, making PASS mathematically unreachable once any
+    lesson had a documented gap (#2561 blocker). A cell that is BOTH known_gap
+    and genuinely broken still surfaces as fail/unknown (see summarize_cells'
+    "fail" > "unknown" > "known_gap" precedence), so this does NOT relax
+    detection of real defects.
+    """
+    fail_reasons: list[str] = []
+    if expected_cells != len(summary["all_cells"]):
+        fail_reasons.append(
+            f"cell_count {len(summary['all_cells'])} != expected {expected_cells}"
+        )
+    if summary["unknown_cells"]:
+        fail_reasons.append(f"unknown_cells={summary['unknown_cells']}")
+    if summary["fail_cells"]:
+        fail_reasons.append(f"fail_cells={summary['fail_cells']}")
+    if summary["missing_screenshot_cells"]:
+        fail_reasons.append(
+            f"missing_screenshot_cells={summary['missing_screenshot_cells']}"
+        )
+    if summary["console_error_cells"]:
+        fail_reasons.append(f"console_error_cells={summary['console_error_cells']}")
+    if summary["figure_blacklist_hits"]:
+        fail_reasons.append(
+            f"figure_blacklist_hits={summary['figure_blacklist_hits']}"
+        )
+    return fail_reasons
+
+
 def write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
     with path.open("w", encoding="utf-8") as fh:
         for row in rows:
@@ -1178,11 +1310,23 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Content Evidence Gate (MVP)")
     parser.add_argument("--smoke", action="store_true",
                         help="run only the 10-lesson smoke set")
+    parser.add_argument("--lesson", action="append", default=None,
+                        help="comma-separated grade_code(s) to run "
+                             "(e.g. G4-L02,G4-L12); repeatable")
+    parser.add_argument("--story-ids", default=None,
+                        help="comma-separated story id(s) to run (e.g. 2,1009)")
     parser.add_argument("--no-l3", action="store_true",
                         help="skip browse render (L1+figure only; for debugging)")
     parser.add_argument("--run-id", default=None)
     parser.add_argument("--evidence-root", default="qa/content-evidence")
     args = parser.parse_args()
+
+    if sum(bool(x) for x in (args.smoke, args.lesson, args.story_ids)) > 1:
+        print(
+            "ERROR: --smoke / --lesson / --story-ids are mutually exclusive",
+            file=sys.stderr,
+        )
+        return 2
 
     git = git_info()
     short_sha = (git["commit_sha"] or "nogit")[:7]
@@ -1192,6 +1336,8 @@ def main() -> int:
     )
     if args.smoke:
         run_id += "-smoke"
+    elif args.lesson or args.story_ids:
+        run_id += "-lesson"
 
     evidence_root = REPO_ROOT / args.evidence_root
     run_dir = evidence_root / run_id
@@ -1207,7 +1353,37 @@ def main() -> int:
     stories = fetch_story_list()
     stories = dedupe_stories_by_canonical_code(stories)
     by_id = {s["id"]: s for s in stories}
-    if args.smoke:
+    if args.story_ids:
+        requested_ids = [
+            int(x.strip()) for x in args.story_ids.split(",") if x.strip()
+        ]
+        target_ids = [sid for sid in requested_ids if sid in by_id]
+        missing = [sid for sid in requested_ids if sid not in by_id]
+        if missing:
+            print(f"   WARNING: story_ids not found: {missing}", file=sys.stderr)
+        expected_lessons = len(target_ids)
+    elif args.lesson:
+        requested_codes = {
+            c.strip()
+            for group in args.lesson
+            for c in group.split(",")
+            if c.strip()
+        }
+        requested_norm = {normalize_manifest_code(c) for c in requested_codes}
+        target_ids = [
+            s["id"]
+            for s in stories
+            if normalize_manifest_code(s.get("grade_code", "")) in requested_norm
+        ]
+        found_norm = {
+            normalize_manifest_code(by_id[sid].get("grade_code", ""))
+            for sid in target_ids
+        }
+        missing = requested_norm - found_norm
+        if missing:
+            print(f"   WARNING: lesson codes not found: {sorted(missing)}", file=sys.stderr)
+        expected_lessons = len(target_ids)
+    elif args.smoke:
         target_ids = [sid for sid in SMOKE_STORY_IDS if sid in by_id]
         expected_lessons = len(target_ids)
     else:
@@ -1215,6 +1391,7 @@ def main() -> int:
         expected_lessons = len(target_ids)
     expected_cells = expected_lessons * len(STEPS)
     print(f"   lessons={len(target_ids)} expected_cells={expected_cells}")
+    partial_run = bool(args.smoke or args.lesson or args.story_ids)
 
     browse = None
     if not args.no_l3:
@@ -1266,7 +1443,7 @@ def main() -> int:
                         "story_id": sid,
                         "lesson_code": lesson_code,
                         "step": step,
-                        "url": f"{STAGING_FRONTEND}/learn/{sid}/{step}",
+                        "url": f"{STAGING_FRONTEND}/learn/{sid}/{step_url_id(step)}",
                         "render": {
                             "loaded": False,
                             "on_login_page": False,
@@ -1298,68 +1475,22 @@ def main() -> int:
         encoding="utf-8",
     )
 
-    # per-cell final status (single-pass: any layer fail/unknown => fail/unknown)
-    def cell_index(rows: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
-        return {r["cell_id"]: r for r in rows}
-
-    l1_idx, l3_idx, fig_idx = (
-        cell_index(l1_rows),
-        cell_index(l3_rows),
-        cell_index(fig_rows),
-    )
-    all_cells = sorted(set(l1_idx) | set(l3_idx) | set(fig_idx))
-
-    pass_cells = fail_cells = unknown_cells = known_gap_cells = 0
-    missing_screenshot_cells = console_error_cells = 0
-    figure_blacklist_hits = 0
-    for cid in all_cells:
-        statuses = [
-            l1_idx.get(cid, {}).get("status", "unknown"),
-            l3_idx.get(cid, {}).get("status", "unknown"),
-            fig_idx.get(cid, {}).get("status", "unknown"),
-        ]
-        # Precedence: a real fail/unknown always dominates an honest known_gap,
-        # so a known_gap cell that ALSO renders broken still surfaces as fail.
-        if "fail" in statuses:
-            fail_cells += 1
-        elif "unknown" in statuses:
-            unknown_cells += 1
-        elif "known_gap" in statuses:
-            known_gap_cells += 1
-        else:
-            pass_cells += 1
-        l3 = l3_idx.get(cid, {})
-        if l3.get("screenshot", {}).get("bytes", 0) == 0:
-            missing_screenshot_cells += 1
-        if l3.get("render", {}).get("console_error_count", 0) > 0:
-            console_error_cells += 1
-        figure_blacklist_hits += len(
-            fig_idx.get(cid, {}).get("blacklist_md5_hits", [])
-        )
+    summary = summarize_cells(l1_rows, l3_rows, fig_rows)
+    all_cells = summary["all_cells"]
+    pass_cells = summary["pass_cells"]
+    fail_cells = summary["fail_cells"]
+    unknown_cells = summary["unknown_cells"]
+    known_gap_cells = summary["known_gap_cells"]
+    missing_screenshot_cells = summary["missing_screenshot_cells"]
+    console_error_cells = summary["console_error_cells"]
+    figure_blacklist_hits = summary["figure_blacklist_hits"]
 
     checksums = {
         p.name: sha256_file(p)
         for p in (l1_path, l3_path, fig_path, rq_path, hr_path)
     }
 
-    fail_reasons: list[str] = []
-    if expected_cells != len(all_cells):
-        fail_reasons.append(
-            f"cell_count {len(all_cells)} != expected {expected_cells}"
-        )
-    if unknown_cells:
-        fail_reasons.append(f"unknown_cells={unknown_cells}")
-    if known_gap_cells:
-        fail_reasons.append(f"known_gap_cells={known_gap_cells}")
-    if fail_cells:
-        fail_reasons.append(f"fail_cells={fail_cells}")
-    if missing_screenshot_cells:
-        fail_reasons.append(f"missing_screenshot_cells={missing_screenshot_cells}")
-    if console_error_cells:
-        fail_reasons.append(f"console_error_cells={console_error_cells}")
-    if figure_blacklist_hits:
-        fail_reasons.append(f"figure_blacklist_hits={figure_blacklist_hits}")
-
+    fail_reasons = compute_fail_reasons(summary, expected_cells)
     overall_status = "pass" if not fail_reasons else "fail"
 
     manifest = {
@@ -1368,10 +1499,13 @@ def main() -> int:
         "generated_at": utcnow(),
         "git": git,
         "smoke": args.smoke,
+        "partial": partial_run,
         "scope": {
             "expected_lessons": expected_lessons,
             "expected_steps": list(STEPS),
             "expected_total_cells": expected_cells,
+            "requested_story_ids": args.story_ids,
+            "requested_lesson_codes": args.lesson,
         },
         "observed": {
             "l1_rows": len(l1_rows),

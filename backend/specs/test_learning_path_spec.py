@@ -65,11 +65,17 @@ def test_catalog_lesson_numbers_are_numeric(all_lessons: list[dict]) -> None:
     )
 
 
-def test_catalog_grades_in_valid_range(all_lessons: list[dict]) -> None:
-    out_of_range = [l["lesson_number"] for l in all_lessons if l["grade"] not in range(4, 10)]
-    assert not out_of_range, (
-        f"lessons with grade outside [4, 9]: {out_of_range[:10]}"
-    )
+VALID_GRADES = {"4", "5", "6", "7", "8", "9", "文言文", "品格教育"}
+
+
+def test_catalog_grades_are_known_values(all_lessons: list[dict]) -> None:
+    """The axis is a set of strings, not an int range: 文言文 and 品格教育 are
+    collections, not year groups (#2683). `grade not in range(4, 10)` was true for
+    every lesson once the values became strings."""
+    unknown = [
+        l["lesson_number"] for l in all_lessons if str(l["grade"]) not in VALID_GRADES
+    ]
+    assert not unknown, f"lessons with an unknown grade: {unknown[:10]}"
 
 
 def test_catalog_titles_are_nonempty_strings(all_lessons: list[dict]) -> None:
@@ -161,11 +167,11 @@ def test_recommended_slugs_exist_in_catalog(
 # CONTRACT 4 — grade in [4, 9] for all recommendations
 # =========================================================================
 
-def test_recommended_grades_in_valid_range(cold_start_recs: list) -> None:
+def test_recommended_grades_are_known_values(cold_start_recs: list) -> None:
     out_of_range = [
         (r["story_slug"], r["grade"])
         for r in cold_start_recs
-        if r["grade"] not in range(4, 10)
+        if str(r["grade"]) not in VALID_GRADES
     ]
     assert not out_of_range, (
         f"recommendations with grade outside [4, 9]: {out_of_range}"

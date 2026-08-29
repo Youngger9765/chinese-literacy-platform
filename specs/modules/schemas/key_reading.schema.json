@@ -1,0 +1,274 @@
+{
+  "$id": "lingoleap/module/key_reading",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "從 160 份實測 yml 長出來，不是手寫的。required = 每一課都有的欄位（少了就是回歸）；properties 列出所有已觀測欄位，配合 additionalProperties: false —— 現況全過，任何新發明的欄位名會紅。",
+  "properties": {
+    "approx_chars_from_start": {
+      "type": "integer",
+      "x-seen-in": "13/160"
+    },
+    "benchmark": {
+      "type": "array",
+      "x-seen-in": "154/160"
+    },
+    "benchmark_instruction": {
+      "type": "string",
+      "x-seen-in": "28/160"
+    },
+    "benchmark_label": {
+      "type": "string",
+      "x-seen-in": "78/160"
+    },
+    "benchmark_note": {
+      "type": "string",
+      "x-seen-in": "20/160"
+    },
+    "benchmark_threshold_note": {
+      "type": "string",
+      "x-seen-in": "5/160"
+    },
+    "char_count_note": {
+      "type": "string",
+      "x-seen-in": "10/160"
+    },
+    "char_marks_cover_note": {
+      "type": "string",
+      "x-seen-in": "1/160"
+    },
+    "char_marks_cover_paragraphs": {
+      "type": "array",
+      "x-seen-in": "30/160"
+    },
+    "char_marks_note": {
+      "type": "string",
+      "x-seen-in": "30/160"
+    },
+    "chars_column_stops_at_paragraph": {
+      "type": "integer",
+      "x-seen-in": "1/160"
+    },
+    "chars_column_stops_at_seq": {
+      "type": "integer",
+      "x-seen-in": "1/160"
+    },
+    "end": {
+      "type": "string",
+      "x-seen-in": "10/160"
+    },
+    "end_idx": {
+      "type": "integer",
+      "x-seen-in": "2/160"
+    },
+    "end_paragraph": {
+      "type": "integer",
+      "x-seen-in": "138/160"
+    },
+    "errata_ref": {
+      "type": "string",
+      "x-seen-in": "3/160"
+    },
+    "extent_chars": {
+      "type": "integer",
+      "x-seen-in": "149/160"
+    },
+    "includes_section_heading": {
+      "type": "string",
+      "x-seen-in": "2/160"
+    },
+    "includes_section_headings": {
+      "type": "array",
+      "x-seen-in": "1/160"
+    },
+    "instruction": {
+      "type": "string",
+      "x-seen-in": "156/160"
+    },
+    "instruction_errata_ref": {
+      "type": "string",
+      "x-seen-in": "6/160"
+    },
+    "instruction_note": {
+      "type": "string",
+      "x-seen-in": "56/160"
+    },
+    "instruction_source_text": {
+      "type": "string",
+      "x-seen-in": "2/160"
+    },
+    "instructions": {
+      "type": "array",
+      "x-seen-in": "4/160"
+    },
+    "instructions_note": {
+      "type": "string",
+      "x-seen-in": "1/160"
+    },
+    "label": {
+      "type": "string",
+      "x-seen-in": "3/160"
+    },
+    "layout_note": {
+      "type": "string",
+      "x-seen-in": "1/160"
+    },
+    "needs_human_review": {
+      "type": "boolean",
+      "x-seen-in": "1/160"
+    },
+    "part": {
+      "type": "integer",
+      "x-seen-in": "5/160"
+    },
+    "part_no": {
+      "type": "integer",
+      "x-seen-in": "1/160"
+    },
+    "parts": {
+      "type": "array",
+      "x-seen-in": "2/160"
+    },
+    "passage": {
+      "type": "string",
+      "x-seen-in": "150/160"
+    },
+    "passage_note": {
+      "type": "string",
+      "x-seen-in": "1/160"
+    },
+    "performance_tiers": {
+      "type": "object",
+      "x-seen-in": "6/160"
+    },
+    "printed_char_count": {
+      "type": "integer",
+      "x-seen-in": "9/160"
+    },
+    "printed_char_count_note": {
+      "type": "string",
+      "x-seen-in": "1/160"
+    },
+    "printed_char_marks": {
+      "type": "array",
+      "x-seen-in": "30/160"
+    },
+    "printed_counter_last": {
+      "type": "integer",
+      "x-seen-in": "1/160"
+    },
+    "printed_cumulative_chars": {
+      "type": "array",
+      "x-seen-in": "3/160"
+    },
+    "printed_paragraph_in_instruction": {
+      "type": "string",
+      "x-seen-in": "3/160"
+    },
+    "review_reason_note": {
+      "type": "string",
+      "x-seen-in": "1/160"
+    },
+    "slug": {
+      "type": "string",
+      "x-seen-in": "160/160"
+    },
+    "source": {
+      "type": "string",
+      "x-seen-in": "149/160"
+    },
+    "span_confidence": {
+      "type": "string",
+      "x-seen-in": "39/160"
+    },
+    "span_confidence_note": {
+      "type": "string",
+      "x-seen-in": "6/160"
+    },
+    "span_evidence_note": {
+      "type": "string",
+      "x-seen-in": "6/160"
+    },
+    "span_note": {
+      "type": "string",
+      "x-seen-in": "2/160"
+    },
+    "spans_paragraphs": {
+      "type": "array",
+      "x-seen-in": "16/160"
+    },
+    "start_idx": {
+      "type": "integer",
+      "x-seen-in": "2/160"
+    },
+    "start_letter": {
+      "type": "integer",
+      "x-seen-in": "2/160"
+    },
+    "start_marker_note": {
+      "type": "string",
+      "x-seen-in": "6/160"
+    },
+    "start_paragraph": {
+      "type": "integer",
+      "x-seen-in": "148/160"
+    },
+    "start_paragraph_conflict_note": {
+      "type": "string",
+      "x-seen-in": "1/160"
+    },
+    "start_paragraph_note": {
+      "type": "string",
+      "x-seen-in": "12/160"
+    },
+    "start_seq": {
+      "type": "integer",
+      "x-seen-in": "2/160"
+    },
+    "start_text": {
+      "type": "string",
+      "x-seen-in": "149/160"
+    },
+    "target_note": {
+      "type": "string",
+      "x-seen-in": "3/160"
+    },
+    "text_ref": {
+      "type": "string",
+      "x-seen-in": "150/160"
+    },
+    "timing_table": {
+      "type": "object",
+      "x-seen-in": "160/160"
+    },
+    "unit": {
+      "type": "string",
+      "x-seen-in": "4/160"
+    },
+    "unit_note": {
+      "type": "string",
+      "x-seen-in": "4/160"
+    }
+  },
+  "required": [
+    "slug",
+    "timing_table"
+  ],
+  "title": "key_reading module payload",
+  "type": "object",
+  "x-core-90pct": [
+    "benchmark",
+    "extent_chars",
+    "instruction",
+    "passage",
+    "slug",
+    "source",
+    "start_paragraph",
+    "start_text",
+    "text_ref",
+    "timing_table"
+  ],
+  "x-enforcement": "warn",
+  "x-lessons-observed": 160,
+  "x-owner": "@if-else-master",
+  "x-why-warn": "@if-else-master 正在改這個模組，現在硬擋等於在他的工作區丟紅燈。等他收完再由他自己改成 error。"
+}

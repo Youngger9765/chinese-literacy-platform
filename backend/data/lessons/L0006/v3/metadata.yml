@@ -1,0 +1,34 @@
+lesson_uid: L0006
+version_id: v3
+level: 4
+genre: 記敘文
+strategy: 推論策略──推論情緒和感受
+課文作者: 曾世杰
+學習單: 陳淑麗
+lesson_no: 15
+series: 一般
+lesson_seq: 4150
+intro: 這篇文章描述了作者在公車上看到一位老爺爺站著，而身旁的年輕人卻專心看書，沒有讓位的景象。作者一時心急，便大聲指責了那位年輕人。然而，接下來發生的事情，卻讓作者發現自己犯了一個嚴重的錯誤。這篇文章探討了我們在未了解真相前，容易因為片面的觀察而產生誤會，並藉此反思了同理心與判斷力的重要性。
+strategy_explained: '這一課要練習的是「猜猜看別人心裡在想什麼」，也就是推測別人為什麼會那樣做，還有他們心裡是什麼感覺
+
+  因為故事裡，作者看到爺爺站著，年輕人看書，就覺得年輕人不讓位，但其實年輕人有他的原因，這篇故事正好讓我們練習，在不清楚事情真相前，不要隨便亂下判斷，要試著去了解別人
+
+  所以讀的時候，除了看故事發生了什麼事，也要想想看：作者為什麼會這麼生氣，那個年輕人為什麼會這樣做，還有他們心裡到底在想什麼'
+strategy_sources:
+  worksheet: 推論策略──推論情緒和感受
+  master_sheet: 推論策略──推論情緒和感受
+  previous: 推論策略──推論情緒和感受
+source_profile:
+  class: standard
+  note: 單一錨點 + 有計數欄 + idx 唯一 —— 走主路徑
+  has_key_reading_section: true
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: null
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 1
+  has_counter_column: true
+  body_in_tables: true
+  invisible_chars_docx_only: false
+  profiled: '2026-08-24'

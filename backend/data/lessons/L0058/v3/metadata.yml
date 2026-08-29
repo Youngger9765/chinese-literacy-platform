@@ -1,0 +1,54 @@
+lesson_uid: L0058
+version_id: v3
+level: 6
+genre: 說明文
+strategy: 摘要策略──從關鍵句找小主題與細節
+課文作者: 林玫伶
+學習單: 陳允捷/陳淑麗
+lesson_no: 18
+series: 一般
+lesson_seq: 6180
+intro: 你知道嗎？世界上有一種特別的銀行，它不存錢，而是珍藏著來自世界各地的農作物種子。這就是「斯瓦爾巴全球種子庫」，又被稱為「末日種子庫」。為什麼會有這樣的種子銀行呢？原來，面對日益嚴峻的氣候變遷，許多農作物可能面臨滅絕的危機。為了保存珍貴的農作物基因多樣性，這座種子庫被建造在挪威北極圈內的永久凍土區，利用極低的溫度進行長期保存。文章將帶你認識這個獨特的種子庫，了解它的重要性，以及臺灣如何參與其中，共同為人類的糧食安全盡一份心力。
+notes:
+  總表_文體: 說明文
+  總表_類型: 科學
+  總表_議題: 擴展視野：農業永續
+  總表_聚光燈策略: 摘要策略──找小主題與細節
+  總表_第六大題標題: 摘要策略──找小主題與細節
+  總表_文本類型: 單
+  總表_語詞_原樣:
+  - 出資
+  - 倖免
+  - 活性
+  - 戒備
+  - 森嚴
+  - 極端
+  - 甦醒
+  - 多樣性
+  - 烽火漫天
+  - 未雨綢繆
+  - 殃及池魚
+  總表_對照: '總表 11 個語詞與學習單三處（語詞框／第三大題／第八大題灰框）**完全一致**，
+
+    僅排列順序不同，無增減。'
+strategy_explained: '這一課我們要練習找出文章裡的小主題和重要細節，就像在「末日種子庫」裡，我們要找出它為什麼存在、藏了什麼種子，以及它有多重要這些重點，這樣才能了解為什麼我們要保護這些種子，還有臺灣在裡面扮演的角色
+
+  讀的時候，你可以試著在心裡問問自己：「這一小段在講什麼？」「它說的『末日種子庫』最重要的是什麼？」這樣做，你就能抓到文章的重點囉'
+strategy_sources:
+  worksheet: 摘要策略──找小主題與細節
+  master_sheet: 摘要策略──從關鍵句找小主題與細節
+  previous: 摘要策略──找小主題與細節
+source_profile:
+  class: standard
+  note: 單一錨點 + 有計數欄 + idx 唯一 —— 走主路徑
+  has_key_reading_section: true
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: null
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 1
+  has_counter_column: true
+  body_in_tables: true
+  invisible_chars_docx_only: true
+  profiled: '2026-08-24'

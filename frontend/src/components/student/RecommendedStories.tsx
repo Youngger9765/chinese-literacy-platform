@@ -17,12 +17,8 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getStoryRecommendations, type StoryRecommendationItem } from '../../services/progressApi';
 import { useAuth } from '../../contexts/AuthContext';
+import { gradeLabel } from '../../utils/gradeLabel';
 
-// ── Grade display helper ─────────────────────────────────────────────────────
-
-function gradeLabel(grade: number): string {
-  return `第 ${grade} 級`;
-}
 
 // ── Tooltip component ────────────────────────────────────────────────────────
 
@@ -68,7 +64,7 @@ const StoryRecommendationCard: React.FC<StoryCardProps> = ({ rec, onStart }) => 
     {/* Header: grade + genre badges */}
     <div className="flex items-center gap-2 flex-wrap">
       <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-accent text-white">
-        {gradeLabel(rec.grade)}
+        {gradeLabel(String(rec.grade))}
       </span>
       <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
         {rec.genre}
@@ -135,7 +131,7 @@ const RecommendedStories: React.FC = () => {
   }, [fetchRecs]);
 
   const handleStart = (storySlug: string) => {
-    navigate(`/learn/${storySlug}/intro`);
+    navigate(`/learn/${storySlug}/lesson-intro`);
   };
 
   // ── Loading ──────────────────────────────────────────────────────────────

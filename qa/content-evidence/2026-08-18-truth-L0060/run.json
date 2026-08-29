@@ -1,0 +1,23 @@
+{
+  "lesson_uid": "L0060",
+  "date": "2026-08-18",
+  "skill": "extract-lesson-multimodal",
+  "wall_clock_seconds": null,
+  "wall_clock_note": "未量測",
+  "pdf_pages": 11,
+  "pages_read": 11,
+  "read_calls": 1,
+  "extra_image_reads": 0,
+  "gate_failures": {
+    "schema": 0,
+    "contract": 0,
+    "verbatim": 6,
+    "coverage": 0,
+    "block_types": 0,
+    "word_search": 0,
+    "traditional": 0,
+    "keypoints_shape": 0
+  },
+  "retries": 1,
+  "notes": "verbatim 首跑 6 筆，全是我自己寫的註解欄位被當成原稿字串（span_evidence 未加 _note、兩處自造的『／』串接欄名、三處自造的圖說 instruction）—— 0 筆是抄錯。改成註解鍵後全綠。"
+}

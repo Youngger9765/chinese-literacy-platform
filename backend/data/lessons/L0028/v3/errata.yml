@@ -1,0 +1,22 @@
+lesson_uid: L0028
+version_id: v3
+notes:
+  errata:
+  - id: E1
+    section: 五 文章重點表
+    locator: 「巨鼠掃雷」列第 2 小項
+    source: 2安全：不會引爆地雷。
+    corrected: 2.安全：不會引爆地雷。
+    kind: 漏字（序號後的點）
+    why: 同一格的第 1、3 小項都寫「1.」「3.」，只有第 2 項的序號後面少了點
+    confidence: high
+    evidence: document.xml 該儲存格原文
+  - id: E2
+    section: 六 閱讀聚光燈 步驟五
+    locator: 引用課文第五段的那一段引文
+    source: 簡單的說，以巨鼠掃雷相對安全、有效能、便宜而且方便。
+    corrected: 簡單來說，以巨鼠掃雷相對安全、有效能、便宜而且方便。
+    kind: 引文與課文不一致
+    why: 課文第五段印的是「簡單來說」，聚光燈引用同一句時寫成「簡單的說」。無法判定哪一邊才是作者本意，所以**兩處都照原樣保留、未更正**，只登錄這個落差
+    confidence: high
+    evidence: document.xml 內兩處並存（課文段落 vs 步驟五引文）

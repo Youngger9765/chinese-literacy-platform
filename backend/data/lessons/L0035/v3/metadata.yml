@@ -1,0 +1,33 @@
+lesson_uid: L0035
+version_id: v3
+level: 5
+genre: 說明文
+strategy: 提取上位概念──從具體描述提取上位概念
+課文學習單: 張筱晴
+lesson_no: 23
+series: 一般
+lesson_seq: 5230
+intro: 這篇文章介紹了「寫信馬拉松」這項特別的活動。它說明了這個活動如何透過寫信的方式，為世界上遭受不公平對待、人權受到侵害的人們發聲，並給予他們支持與鼓勵。文章中也分享了幾個具體的案例，讓我們了解即使在現代社會，仍有許多人面臨困境，而一封封信件如何成為他們黑暗中的一道光。透過了解「寫信馬拉松」，我們能知道即使是小小的力量，也能匯聚成巨大的影響，展現出信件所蘊含的溫暖與改變的力量。
+strategy_explained: '這一次我們要練習的是，從文章裡具體的例子，去想一想它們代表了什麼更大的意思
+
+  這篇「寫信馬拉松」的文章，用了很多關於大家如何寫信、信件如何幫助人的故事，正好可以讓我們練習找出這些例子背後，信件傳遞溫暖和改變的力量這個重要的概念
+
+  所以讀的時候，你可以試著想想，為什麼這些信件能帶來幫助，它們共同展現了什麼樣的「力量」'
+strategy_sources:
+  worksheet: 提取上位概念──從具體描述提取上位概念
+  master_sheet: 提取上位概念──從具體描述提取上位概念
+  previous: 提取上位概念──從具體描述提取上位概念
+source_profile:
+  class: standard
+  note: 單一錨點 + 有計數欄 + idx 唯一 —— 走主路徑
+  has_key_reading_section: true
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: null
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 1
+  has_counter_column: true
+  body_in_tables: true
+  invisible_chars_docx_only: true
+  profiled: '2026-08-24'

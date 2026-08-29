@@ -1,0 +1,36 @@
+lesson_uid: L0117
+version_id: v3
+level: 8
+genre: 說明文
+strategy: 推論策略──找出一連串因果
+課文作者: 林玫伶
+學習單: 陳淑麗
+lesson_no: 1
+series: 一般
+lesson_seq: 8010
+intro: 你喜歡吃巧克力嗎？這份全球流行的美味，背後卻藏著許多不為人知的辛酸。這篇文章將帶你認識生產巧克力最重要的原料——可可豆，以及種植和採收可可豆的農民。你會發現，許多西非的可可農民，即使終年辛勞，收入卻十分微薄，甚至面臨童工、氣候變遷等嚴峻挑戰。文章也會探討「公平交易」這種新的商業模式，如何試圖改善農民的處境，並鼓勵我們在消費時做出更有意義的選擇，讓手中的甜蜜，也能成為遠方農民的希望。
+notes:
+  總表_議題: ''
+strategy_explained: '這一課我們要練習的是，看懂文章裡「因為這樣，所以那樣」的道理，就像是找出事情發生先後順序和關聯
+
+  因為這篇講了巧克力背後，農民辛勞卻收入低，以及公平交易如何幫助他們，有很多「原因」和「結果」可以讓我們練習
+
+  閱讀時，可以試著想一想，像是「可可豆種植困難」是「什麼原因」，那「農民收入微薄」又是「什麼結果」呢'
+strategy_sources:
+  worksheet: 推論策略──找出一連串因果
+  master_sheet: 推論策略──找出一連串因果
+  previous: 推論策略──找出一連串因果
+source_profile:
+  class: standard
+  note: 單一錨點 + 有計數欄 + idx 唯一 —— 走主路徑
+  has_key_reading_section: true
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: null
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 1
+  has_counter_column: true
+  body_in_tables: true
+  invisible_chars_docx_only: true
+  profiled: '2026-08-24'

@@ -1,0 +1,18 @@
+{
+  "lesson_uid": "L0079",
+  "catalog_slot": "G7-L11",
+  "pdf_pages": 12,
+  "pages_read": 12,
+  "wall_clock_seconds": null,
+  "read_calls": 1,
+  "gate_failures": {
+    "verbatim": 0,
+    "coverage": 0,
+    "block_type": 0,
+    "word_search": 0,
+    "traditional_only": 0,
+    "keypoints_shape": 0
+  },
+  "retries": 1,
+  "notes": "三載體全查：☑(w:sym F0FE) 7 個全在聚光燈；roundRect 全文 10、找字表格內紙上 10、紙外 0 = 10 條路徑；w:bdr 非 auto 0 個（13 個全是 color=auto 的課文生難詞黑框，已記進 inline_marked_terms）。🔴 本課有 2 個 w:vanish 隱藏文字 run（'(3(' 與 '('），夾在重點表「經濟與照顧的負擔」那格：文字流有、印不出來，所以 PDF 顯示乾淨的 (3)(4)，而純 w:t 抽取會讀成「(3((3)擔心阿嬤…」。本檔採印出來的樣子。⚠️ 逐字門讀全部 <w:t>（含隱藏 run），對這種錯分辨不出來——兩種寫法都會 PASS，只能靠讀 PDF 對照。不是原稿錯字，未列 errata。🔴 字數欄是逐行不是逐段：第 2 段 268 字不在印出的數字裡（最近的是 258/286）；415=第3段前半、427=第3段結束，而印出的最後一個數字 417 落在兩者之間。⛔ 不能拿這欄反推段界，段界依據是段號欄的 7 個號碼。span=第2~3段。段落結構：段號 7 個 vs 課文儲存格 14 個 w:p —— [0]salutation、[3]+[4] 合為第3段、[7]+[8]+[9] 合為第6段、[11][12][13] closing。逐字門第一次 FAIL 3 條全是我自己的問題：(a) meta.strategy 我填總表的「從事實歸納概念」，但 DOCX 右上框印的是「從事實提取概念」——門抓到的是真差異，已改採 DOCX 用字，總表版本留在 _總表_ 欄位；(b)(c) span_evidence/layout_warning 兩個自訂鍵不符合門的註解鍵命名規則（要 _note 結尾或 _ 開頭），改名為 span_note/layout_note。errata E1：段號欄第 1 個號碼是注音「ㄧ」(U+3127)，其餘六個是漢字（同 L0061 的形狀）。找字格子跨頁：第 1~2 列在 p11、第 3~10 列在 p12，p11 只看得到「哄騙」一個圈。總表第 92 列影片1 的 YouTube ID 有 16 碼（正常 11 碼），疑似總表側貼錯，未自行修正。"
+}

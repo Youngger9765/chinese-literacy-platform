@@ -1,0 +1,201 @@
+{
+  "$id": "lingoleap/module/spotlight",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "從 169 份實測 yml 長出來，不是手寫的。required = 每一課都有的欄位（少了就是回歸）；properties 列出所有已觀測欄位，配合 additionalProperties: false —— 現況全過，任何新發明的欄位名會紅。",
+  "properties": {
+    "_practises": {
+      "type": "string",
+      "x-seen-in": "2/169"
+    },
+    "_scope": {
+      "type": "string",
+      "x-seen-in": "1/169"
+    },
+    "_scope_printed": {
+      "type": "string",
+      "x-seen-in": "1/169"
+    },
+    "_總表_note": {
+      "type": "string",
+      "x-seen-in": "1/169"
+    },
+    "_總表_第六大題標題": {
+      "type": "string",
+      "x-seen-in": "1/169"
+    },
+    "absent_note": {
+      "type": "string",
+      "x-seen-in": "1/169"
+    },
+    "answer_carrier": {
+      "type": "string",
+      "x-seen-in": "94/169"
+    },
+    "answer_carrier_bdr_note": {
+      "type": "string",
+      "x-seen-in": "3/169"
+    },
+    "arrow_note": {
+      "type": "string",
+      "x-seen-in": "1/169"
+    },
+    "blank_marker_note": {
+      "type": "string",
+      "x-seen-in": "1/169"
+    },
+    "blocks": {
+      "type": "array",
+      "x-seen-in": "169/169"
+    },
+    "connect_the_dots_geometry_note": {
+      "type": "string",
+      "x-seen-in": "1/169"
+    },
+    "label": {
+      "type": "string",
+      "x-seen-in": "4/169"
+    },
+    "layout_note": {
+      "type": "string",
+      "x-seen-in": "1/169"
+    },
+    "no_answer_note": {
+      "type": "string",
+      "x-seen-in": "1/169"
+    },
+    "note": {
+      "type": "string",
+      "x-seen-in": "5/169"
+    },
+    "options_key_note": {
+      "type": "string",
+      "x-seen-in": "1/169"
+    },
+    "overlap_note": {
+      "type": "string",
+      "x-seen-in": "1/169"
+    },
+    "part": {
+      "type": "integer",
+      "x-seen-in": "2/169"
+    },
+    "part_note": {
+      "type": "string",
+      "x-seen-in": "1/169"
+    },
+    "practises": {
+      "type": "string",
+      "x-seen-in": "2/169"
+    },
+    "section_label": {
+      "type": "string",
+      "x-seen-in": "2/169"
+    },
+    "section_label_note": {
+      "type": "string",
+      "x-seen-in": "1/169"
+    },
+    "section_no_note": {
+      "type": "string",
+      "x-seen-in": "4/169"
+    },
+    "section_no_printed": {
+      "type": "string",
+      "x-seen-in": "6/169"
+    },
+    "section_number_printed": {
+      "type": "string",
+      "x-seen-in": "1/169"
+    },
+    "section_subtitle_printed": {
+      "type": "string",
+      "x-seen-in": "4/169"
+    },
+    "section_title_note": {
+      "type": "string",
+      "x-seen-in": "4/169"
+    },
+    "section_title_printed": {
+      "type": "string",
+      "x-seen-in": "96/169"
+    },
+    "self_check_absent_note": {
+      "type": "string",
+      "x-seen-in": "1/169"
+    },
+    "shape_note": {
+      "type": "string",
+      "x-seen-in": "2/169"
+    },
+    "single_vs_multi_note": {
+      "type": "string",
+      "x-seen-in": "1/169"
+    },
+    "slug": {
+      "type": "string",
+      "x-seen-in": "169/169"
+    },
+    "source_images": {
+      "type": "array",
+      "x-seen-in": "1/169"
+    },
+    "strategy_name": {
+      "type": "string",
+      "x-seen-in": "169/169"
+    },
+    "strategy_name_errata_ref": {
+      "type": "string",
+      "x-seen-in": "1/169"
+    },
+    "strategy_type": {
+      "type": "string",
+      "x-seen-in": "156/169"
+    },
+    "structure_note": {
+      "type": "string",
+      "x-seen-in": "25/169"
+    },
+    "table_header_note": {
+      "type": "string",
+      "x-seen-in": "1/169"
+    },
+    "table_layout_note": {
+      "type": "string",
+      "x-seen-in": "1/169"
+    },
+    "text_ref": {
+      "type": [
+        "array",
+        "string"
+      ],
+      "x-seen-in": "158/169"
+    },
+    "title_line": {
+      "type": "string",
+      "x-seen-in": "1/169"
+    },
+    "title_note": {
+      "type": "string",
+      "x-seen-in": "1/169"
+    }
+  },
+  "required": [
+    "blocks",
+    "slug",
+    "strategy_name"
+  ],
+  "title": "spotlight module payload",
+  "type": "object",
+  "x-core-90pct": [
+    "blocks",
+    "slug",
+    "strategy_name",
+    "strategy_type",
+    "text_ref"
+  ],
+  "x-enforcement": "warn",
+  "x-lessons-observed": 169,
+  "x-owner": "@stgst",
+  "x-why-warn": "@stgst 正在改這個模組，現在硬擋等於在他的工作區丟紅燈。等他收完再由他自己改成 error。"
+}

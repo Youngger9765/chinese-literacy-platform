@@ -145,7 +145,7 @@ export const LibraryPage: React.FC = () => {
   const handleSelectStory = (story: { id: string }) => {
     clearAssignmentContext(story.id);
     cleanupAssignmentScopedProgressKeys(story.id);
-    navigate(`/learn/${story.id}/intro`);
+    navigate(`/learn/${story.id}/lesson-intro`);
   };
 
   const handleClearProgress = (storyId: string) => {

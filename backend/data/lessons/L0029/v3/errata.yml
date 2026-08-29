@@ -1,0 +1,13 @@
+lesson_uid: L0029
+version_id: v3
+notes:
+  errata:
+  - id: E1
+    section: 十 詞語複習
+    locator: 找字格子第 8 列第 5 欄
+    source: 催
+    corrected: 摧
+    kind: 錯字
+    why: 目標語詞是「堅不可摧」，格子從「堅」(第5列第8欄) 往左下斜排是 堅→不→可→催，最後一格印成「催」，拼出來是「堅不可催」；橘圈確實把這四格圈了起來
+    confidence: high
+    evidence: PDF p20 與 document.xml 一致；全格子只有這一條斜線經過「堅」

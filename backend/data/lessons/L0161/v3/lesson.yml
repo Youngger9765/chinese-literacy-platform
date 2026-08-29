@@ -1,0 +1,31 @@
+lesson_uid: L0161
+version_id: v3
+title: 江乙媽媽告御狀
+catalog_slot: 文-L6
+sections_present:
+- 'no': null
+  name: 導讀
+- 'no': null
+  name: 古文今譯
+- 'no': null
+  name: 原文（含斷詞點）＋注釋
+- 'no': null
+  name: 朗讀計時
+- 'no': 一
+  name: 文白句子比對
+- 'no': 二
+  name: 文白詞語比對
+- 'no': 三
+  name: 文章重點表
+- 'no': 四
+  name: 文言文聚光燈
+  subtitle: 指示代詞、疑問代詞
+- 'no': 五
+  name: 閱讀理解
+- 'no': 六
+  name: 自我挑戰
+source:
+  extracted_by: extract-lesson-multimodal
+  pdf_pages: 13
+  drive_path: 文言文/文-L6江乙媽媽告御狀（指示與疑問代詞）.docx
+  docx_md5: md5-12:116a381e7ee5

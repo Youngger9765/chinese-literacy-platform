@@ -1,0 +1,42 @@
+lesson_uid: L0131
+version_id: v3
+section_no: 九
+resources:
+  section_name: 知識補給站
+  label: 影片連結
+  items:
+  - index: 1
+    title: 計算機是如何被發明出來的
+    duration: (6:16)
+    source: 科普創世紀
+    has_qr: true
+  - index: 2
+    title: 解密圖書DNA：漢字的演進
+    duration: (2:10)
+    source: theNLPI
+    has_qr: true
+  - index: 3
+    title: 解密圖書DNA：圖書館的演進
+    duration: (2:48)
+    source: theNLPI
+    has_qr: true
+  videos:
+  - index: 1
+    url: http://youtu.be/DOnaWWW7kBY
+    url_source: 總表0816「4.影片連結」年級9課次10（⚠️課名與課程不符，仍依課次採用）
+  - index: 2
+    url: http://youtu.be/LFJjOSNgfxA
+    url_source: 總表0816「4.影片連結」年級9課次10（⚠️課名與課程不符，仍依課次採用）
+  - index: 3
+    url: http://youtu.be/Ex_Oy3vhuC8
+    url_source: 總表0816「4.影片連結」年級9課次10（⚠️課名與課程不符，仍依課次採用）
+  notes:
+    items: '三支影片的「1.」「2.」「3.」在原稿是印出來的字元（不是 Word 自動編號）。
+
+      總表 4.影片連結 分頁對應網址為 http://youtu.be/DOnaWWW7kBY ／
+
+      http://youtu.be/LFJjOSNgfxA ／ http://youtu.be/Ex_Oy3vhuC8 —— 學習單上只印 QR code，
+
+      網址不在 DOCX 文字層。'
+  slug: ep69r
+  text_ref: 9kedu

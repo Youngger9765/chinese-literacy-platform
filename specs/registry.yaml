@@ -126,8 +126,7 @@ modules:
   - backend/app/schemas/story.py
   - frontend/src/components/reading-steps/Intro.tsx
   - frontend/src/config/stepConfig.ts
-  owns_data:
-  - backend/data/lessons/_parsed_2026-05-01/**/*.yml
+  owns_data: []
   spec_tests:
   - backend/specs/test_content_schema_spec.py
   related_issues:
@@ -330,8 +329,7 @@ modules:
   canonical_source: vocab_bank
   owns_code:
   - backend/app/services/omo_question_schema.py
-  owns_data:
-  - backend/data/lessons/_parsed_2026-05-01/**/*.yml
+  owns_data: []
   spec_tests:
   - backend/specs/test_omo_assessment_spec.py
   - backend/specs/test_omo_grading_corpus.py
@@ -438,8 +436,7 @@ modules:
   - frontend/src/components/omo/OmoIdentifyResult.tsx
   - frontend/src/components/omo/OmoResultPage.tsx
   - frontend/src/services/omoApi.ts
-  owns_data:
-  - backend/data/lessons/_parsed_2026-05-01/**/*.yml
+  owns_data: []
   spec_tests: []
   related_issues: []
   source_meetings:
@@ -551,9 +548,9 @@ modules:
   - backend/app/services/assignment_lifecycle_service.py
   - scripts/reconcile_reading_audio_orphans.py
   - frontend/src/hooks/useAudioRecorder.ts
-  - frontend/src/hooks/useFullReadingSession.ts
-  - frontend/src/components/reading-steps/FullReading.tsx
-  - frontend/src/components/reading-steps/live-tutor/LiveTutor.tsx
+  - frontend/src/hooks/useKeyPassageReadingSession.ts
+  - frontend/src/components/reading-steps/KeyPassageReading.tsx
+  - frontend/src/components/reading-steps/paragraph-reading/ParagraphReading.tsx
   - frontend/src/services/learning/session.ts
   owns_data: []
   spec_tests:
@@ -625,7 +622,7 @@ modules:
   intent: specs/modules/socratic-dialogue/INTENT.md
 - spec_id: learning.spotlight_v2
   module: spotlight-v2
-  title: 聚光燈 v2 — block 序列契約 + G6-L22 驗收
+  title: 聚光燈 v2 — block 序列契約 + QA manifest 對齊服務端
   stability: active
   canonical_source: backend/app/services/spotlight_block_model.py
   owns_code:
@@ -633,14 +630,27 @@ modules:
   - backend/app/services/spotlight_contract.py
   - backend/app/services/spotlight_v2_loader.py
   - backend/app/services/spotlight_pse_parser.py
+  - backend/app/services/curriculum_qa_spotlight.py
   - scripts/build_lesson_schema.py
+  - scripts/spotlight_fingerprints.py
   - frontend/src/components/reading-spotlight/
+  owns_data:
+  - backend/data/lessons/*/v3/spotlight.*.yml
+  - backend/data/spotlight_fingerprints.json
+  - backend/data/curriculum_qa/spotlight_manifest.json
+  - backend/data/curriculum_qa/content_known_gaps.yaml
   spec_tests:
   - backend/specs/test_spotlight_block_model_spec.py
   - backend/specs/test_spotlight_v2_spec.py
   - backend/specs/test_pse_mcq_parser_spec.py
+  - backend/specs/test_spotlight_manifest_spec.py
+  legacy_tests:
+  - backend/tests/test_spotlight_known_gaps_ledger_2772.py
   related_issues:
   - 2205
+  - 2727
+  - 2747
+  - 2772
   source_meetings:
   - docs/professor-7-lessons-block-decomposition.md
   last_reviewed: 2026-06-20
@@ -653,8 +663,7 @@ modules:
   canonical_source: frontend/src/config/stepConfig.ts
   owns_code:
   - frontend/src/config/stepConfig.ts
-  owns_data:
-  - backend/data/lessons/_parsed_2026-05-01/**/*.yml
+  owns_data: []
   spec_tests:
   - backend/specs/test_step_sequence_spec.py
   related_issues:
@@ -678,8 +687,9 @@ modules:
   - scripts/story_structure_qa.py
   - scripts/build_keypoints_qa_manifest.py
   - scripts/keypoints_manifest_verify.py
+  - backend/app/services/keypoints_to_structure.py
   owns_data:
-  - backend/data/lessons/_parsed_2026-05-01/**/*.yml
+  - backend/data/lessons/*/v3/keypoints.*.yml
   - backend/data/curriculum_qa/keypoints_manifest.json
   - backend/data/curriculum_qa/snapshots/**/*
   spec_tests:
@@ -687,10 +697,17 @@ modules:
   - backend/specs/test_keypoints_manifest_spec.py
   - backend/tests/test_yaml_first_structure.py
   - backend/tests/test_story_structure_qa_contract.py
+  legacy_tests:
+  - backend/tests/test_yaml_first_structure.py
+  - backend/tests/test_story_structure_qa_contract.py
+  - backend/tests/test_keypoints_to_structure.py
+  - backend/tests/test_keypoints_subitem_label_2736.py
+  - backend/tests/test_keypoints_prompt_stem_2736.py
   related_issues:
   - 2205
   - 2261
   - 2273
+  - 2736
   last_reviewed: 2026-06-19
   owner: young
   intent: specs/modules/story-structure/INTENT.md
@@ -712,11 +729,12 @@ modules:
   intent: specs/modules/stuck-detection/INTENT.md
 - spec_id: tts.synthesis.provider_chain
   module: tts
-  title: TTS 合成服務 — 提供者鏈（Chirp3-HD → Azure fallback）+ synthesize_speech 入口
+  title: TTS 合成服務 — 提供者鏈（Azure → Chirp3-HD fallback）+ synthesize_speech 入口
   stability: active
   canonical_source: backend/app/services/tts/__init__.py
   owns_code:
   - backend/app/services/tts/__init__.py
+  - backend/app/services/tts/cache.py
   - backend/app/services/tts/providers/azure.py
   - backend/app/services/tts/providers/gemini.py
   - backend/app/services/tts/providers/google.py
@@ -724,9 +742,11 @@ modules:
   owns_data: []
   spec_tests:
   - backend/specs/test_tts_spec.py
+  - backend/tests/test_characterization_tts_cache.py
+  - backend/tests/test_no_duplicate_azure_impl.py
   related_issues: []
   source_meetings:
   - docs/meetings/2026-05-01-experts-review.md
-  last_reviewed: 2026-06-02
+  last_reviewed: 2026-08-11
   owner: young
   intent: specs/modules/tts/INTENT.md

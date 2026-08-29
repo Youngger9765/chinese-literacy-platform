@@ -1,0 +1,116 @@
+{
+  "$id": "lingoleap/module/vocab_application",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "從 152 份實測 yml 長出來，不是手寫的。required = 每一課都有的欄位（少了就是回歸）；properties 列出所有已觀測欄位，配合 additionalProperties: false —— 現況全過，任何新發明的欄位名會紅。",
+  "properties": {
+    "answer_carrier": {
+      "type": "string",
+      "x-seen-in": "2/152"
+    },
+    "answers_printed": {
+      "type": "boolean",
+      "x-seen-in": "7/152"
+    },
+    "cloze": {
+      "type": "object",
+      "x-seen-in": "1/152"
+    },
+    "example": {
+      "type": "object",
+      "x-seen-in": "1/152"
+    },
+    "exercise": {
+      "type": "object",
+      "x-seen-in": "1/152"
+    },
+    "instruction": {
+      "type": "string",
+      "x-seen-in": "152/152"
+    },
+    "instruction_source_text": {
+      "type": "string",
+      "x-seen-in": "1/152"
+    },
+    "items": {
+      "type": "array",
+      "x-seen-in": "152/152"
+    },
+    "notes": {
+      "type": "object",
+      "x-seen-in": "114/152"
+    },
+    "option_bank": {
+      "type": "object",
+      "x-seen-in": "151/152"
+    },
+    "option_bank_note": {
+      "type": "string",
+      "x-seen-in": "2/152"
+    },
+    "option_banks": {
+      "type": "array",
+      "x-seen-in": "1/152"
+    },
+    "part": {
+      "type": "integer",
+      "x-seen-in": "5/152"
+    },
+    "part_no": {
+      "type": "integer",
+      "x-seen-in": "1/152"
+    },
+    "practice": {
+      "type": "object",
+      "x-seen-in": "1/152"
+    },
+    "slug": {
+      "type": "string",
+      "x-seen-in": "152/152"
+    },
+    "synonym_application": {
+      "type": "object",
+      "x-seen-in": "1/152"
+    },
+    "synonym_compound": {
+      "type": "object",
+      "x-seen-in": "1/152"
+    },
+    "text_ref": {
+      "type": [
+        "array",
+        "string"
+      ],
+      "x-seen-in": "152/152"
+    },
+    "unused_options": {
+      "type": "array",
+      "x-seen-in": "28/152"
+    },
+    "word_discrimination": {
+      "type": "object",
+      "x-seen-in": "1/152"
+    },
+    "word_sense_discrimination": {
+      "type": "object",
+      "x-seen-in": "1/152"
+    }
+  },
+  "required": [
+    "instruction",
+    "items",
+    "slug",
+    "text_ref"
+  ],
+  "title": "vocab_application module payload",
+  "type": "object",
+  "x-core-90pct": [
+    "instruction",
+    "items",
+    "option_bank",
+    "slug",
+    "text_ref"
+  ],
+  "x-enforcement": "error",
+  "x-lessons-observed": 152
+}

@@ -1,0 +1,157 @@
+{
+  "interaction_profile": {
+    "checkbox_count": 1,
+    "fill_blank_count": 3,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "mixed",
+    "primary_labels": [
+      "內容",
+      "內容",
+      "內容",
+      "內容"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
+  "rows": [
+    {
+      "interactive_type": "display",
+      "label": "心，也要一起練",
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "舉例",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "段落",
+          "value": "二~五"
+        },
+        {
+          "interactive_type": "checkbox",
+          "label": "內容",
+          "options": [
+            "緊張",
+            "雀躍",
+            "肯定",
+            "批評"
+          ],
+          "value": "①緊張 ②雀躍\n①肯定 ②批評"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "提出主旨",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "段落",
+          "value": "六"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容",
+          "value": "1.運動不只需要體力、技術，還需要可以和【　　　】好好合作。\n2.【　　　】會影響你面對壓力和挫折，以及看待自己與隊友。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "提出證據  與建議",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "段落",
+          "value": "七"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容",
+          "value": "1.證據：研究顯示，在實力相當的情況下，【　　　】往往是勝負的關鍵。\n2.建議：把握每一次訓練和比賽的機會，隨時【　　　】、調整自己的情緒與想法。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "結論",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "段落",
+          "value": "八"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容",
+          "value": "比賽帶來的不只是輸贏，更是對自己和他人的【　　　】。"
+        }
+      ],
+      "value": ""
+    }
+  ],
+  "title": "心，也要一起練",
+  "worksheet_rows": [
+    {
+      "items": [
+        {
+          "label": "段落",
+          "value": "二~五"
+        },
+        {
+          "label": "內容",
+          "value": "①緊張 ②雀躍\n①肯定 ②批評"
+        }
+      ],
+      "kind": "section_block",
+      "section": "舉例"
+    },
+    {
+      "items": [
+        {
+          "label": "段落",
+          "value": "六"
+        },
+        {
+          "label": "內容",
+          "value": "1.運動不只需要體力、技術，還需要可以和【　　　】好好合作。\n2.【　　　】會影響你面對壓力和挫折，以及看待自己與隊友。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "提出主旨"
+    },
+    {
+      "items": [
+        {
+          "label": "段落",
+          "value": "七"
+        },
+        {
+          "label": "內容",
+          "value": "1.證據：研究顯示，在實力相當的情況下，【　　　】往往是勝負的關鍵。\n2.建議：把握每一次訓練和比賽的機會，隨時【　　　】、調整自己的情緒與想法。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "提出證據  與建議"
+    },
+    {
+      "items": [
+        {
+          "label": "段落",
+          "value": "八"
+        },
+        {
+          "label": "內容",
+          "value": "比賽帶來的不只是輸贏，更是對自己和他人的【　　　】。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "結論"
+    }
+  ]
+}

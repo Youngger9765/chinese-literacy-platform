@@ -1,76 +1,97 @@
 {
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 6,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "運動賽事環境問題",
+      "綠色賽事目的",
+      "1",
+      "2"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
   "rows": [
     {
-      "label": "以實驗破解肉湯腐敗之謎",
-      "value": "",
-      "interactive_type": "display"
+      "interactive_type": "display",
+      "label": "綠色賽事",
+      "value": ""
     },
     {
-      "label": "研究問題/解釋【 段1 】",
-      "value": "問題為什麼煮好的肉湯，過幾天會【　　　】？\n當年的解釋：【　　　】：因為湯裡含有某種特殊條件，讓無生命的物質變成生命。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "運動賽事環境問題",
+      "value": "運動賽事雖然帶來健康和快樂，也會消耗【　　　】，增加碳排放和產生【　　　】，造成環境負擔。"
     },
     {
-      "label": "新說法/假說【 段2 】",
-      "value": "新說法：巴斯德認為，肉湯腐敗可能和空氣中的【　　　】有關。\n假說：只要把肉湯【　　　】，並且阻止微生物落入湯裡，肉湯即使【　　　】，也不會腐敗。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "綠色賽事目的",
+      "value": "把【　　　】理念融入體育賽事，減少自然資源的消耗與碳排放，降低環境負擔，也提升大眾的【　　　】。"
     },
     {
-      "label": "實驗/檢驗【 段3 】",
-      "value": "情境①：瓶頸【　　　】，空氣可進入，但微生物被攔住；結果肉湯【　　　】。\n情境②：把瓶頸【　　　】，微生物可直接進入；結果肉湯【　　　】。\n情境③：把瓶身【　　　】，讓肉湯流到瓶口、接觸微生物；結果肉湯【　　　】。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "display",
+      "label": "保護環境怎麼做？",
+      "sub_rows": [
+        {
+          "interactive_type": "fill_blank",
+          "label": "1",
+          "value": "Reduce【　　　】：減少不必要的物品與資源使用。例如，不再印製賽事手冊。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "2",
+          "value": "Reuse【　　　】：讓器材、裝備或容器多次使用。例如：布置改用【　　　】下次可再使用；提供可重複使用的【　　　】。"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "3",
+          "value": "Recycle【　　　】：將使用過的材料回收處理，再製成新的材料或產品。例如：用回收玻璃製作【　　　】；用回收寶特瓶製作【　　　】。"
+        }
+      ],
+      "value": ""
     },
     {
-      "label": "結論【 段4 】",
-      "value": "生物不能【　　　】，腐敗與【　　　】有關。",
-      "interactive_type": "fill_blank"
-    },
-    {
-      "label": "研究影響【 段5 】",
-      "value": "改變了醫學、生物學與【　　　】的發展方向，例如：消毒、洗手、戴口罩。",
-      "interactive_type": "fill_blank"
+      "interactive_type": "fill_blank",
+      "label": "從想法到行動",
+      "value": "阿國把綠色賽事的想法分享給同學，邀請大家向學校提案，從每年的【　　　】做起，落實環保【　　　】。"
     }
   ],
-  "layout": "worksheet_table",
-  "title": "以實驗破解肉湯腐敗之謎",
+  "title": "綠色賽事",
   "worksheet_rows": [
     {
       "kind": "pair",
-      "label": "研究問題/解釋（段1）",
-      "value": "問題為什麼煮好的肉湯，過幾天會【　　　】？\n當年的解釋：【　　　】：因為湯裡含有某種特殊條件，讓無生命的物質變成生命。"
+      "label": "運動賽事環境問題",
+      "value": "運動賽事雖然帶來健康和快樂，也會消耗【　　　】，增加碳排放和產生【　　　】，造成環境負擔。"
     },
     {
       "kind": "pair",
-      "label": "新說法/假說（段2）",
-      "value": "新說法：巴斯德認為，肉湯腐敗可能和空氣中的【　　　】有關。\n假說：只要把肉湯【　　　】，並且阻止微生物落入湯裡，肉湯即使【　　　】，也不會腐敗。"
+      "label": "綠色賽事目的",
+      "value": "把【　　　】理念融入體育賽事，減少自然資源的消耗與碳排放，降低環境負擔，也提升大眾的【　　　】。"
+    },
+    {
+      "items": [
+        {
+          "label": "1",
+          "value": "Reduce【　　　】：減少不必要的物品與資源使用。例如，不再印製賽事手冊。"
+        },
+        {
+          "label": "2",
+          "value": "Reuse【　　　】：讓器材、裝備或容器多次使用。例如：布置改用【　　　】下次可再使用；提供可重複使用的【　　　】。"
+        },
+        {
+          "label": "3",
+          "value": "Recycle【　　　】：將使用過的材料回收處理，再製成新的材料或產品。例如：用回收玻璃製作【　　　】；用回收寶特瓶製作【　　　】。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "保護環境怎麼做？"
     },
     {
       "kind": "pair",
-      "label": "實驗/檢驗（段3)",
-      "value": "情境①：瓶頸【　　　】，空氣可進入，但微生物被攔住；結果肉湯【　　　】。\n情境②：把瓶頸【　　　】，微生物可直接進入；結果肉湯【　　　】。\n情境③：把瓶身【　　　】，讓肉湯流到瓶口、接觸微生物；結果肉湯【　　　】。"
-    },
-    {
-      "kind": "pair",
-      "label": "結論(段4)",
-      "value": "生物不能【　　　】，腐敗與【　　　】有關。"
-    },
-    {
-      "kind": "pair",
-      "label": "研究影響(段5)",
-      "value": "改變了醫學、生物學與【　　　】的發展方向，例如：消毒、洗手、戴口罩。"
+      "label": "從想法到行動",
+      "value": "阿國把綠色賽事的想法分享給同學，邀請大家向學校提案，從每年的【　　　】做起，落實環保【　　　】。"
     }
-  ],
-  "interaction_profile": {
-    "mode": "fill_blank",
-    "template_kind": "scientific",
-    "fill_blank_count": 5,
-    "checkbox_count": 0,
-    "primary_labels": [
-      "研究問題/解釋【 段1 】",
-      "新說法/假說【 段2 】",
-      "實驗/檢驗【 段3 】",
-      "結論【 段4 】"
-    ],
-    "layout": "worksheet_table"
-  }
+  ]
 }

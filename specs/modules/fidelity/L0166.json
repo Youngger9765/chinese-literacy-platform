@@ -1,0 +1,91 @@
+{
+  "uid": "L0166",
+  "gate_version": 2,
+  "docx_sha256": "b242-da09-5b50-662a",
+  "modules": {
+    "comprehension.6aaq3": {
+      "yaml_sha256": "6346-ea05-f640-283e",
+      "checked": 29,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "errata": {
+      "yaml_sha256": "bd9a-734a-2d7b-b345",
+      "checked": 0,
+      "status": "unverifiable",
+      "passed": false,
+      "exit": 1
+    },
+    "full_text_annotate.pvqer": {
+      "yaml_sha256": "28e4-2443-35a6-ec2b",
+      "checked": 13,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "goal_box.aye7q": {
+      "yaml_sha256": "972c-9e18-83f5-62cc",
+      "checked": 3,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "key_reading.p7nhm": {
+      "yaml_sha256": "9734-fe76-06f2-e3be",
+      "checked": 10,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "keypoints.hdu4j": {
+      "yaml_sha256": "43ba-7be2-7c95-daeb",
+      "checked": 18,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "resources.ht6rv": {
+      "yaml_sha256": "85ae-1992-6542-da41",
+      "checked": 2,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "self_check_before_reading.9tyf7": {
+      "yaml_sha256": "6897-62ad-e198-31aa",
+      "checked": 3,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "spotlight.ymyec": {
+      "yaml_sha256": "00dc-4f77-c3c1-6f8e",
+      "checked": 56,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "vocab_application.dyvrx": {
+      "yaml_sha256": "38f0-cfbd-931b-a79d",
+      "checked": 14,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "vocab_definitions.xu67m": {
+      "yaml_sha256": "c510-90f2-287f-71cd",
+      "checked": 19,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "vocab_review.yvx9m": {
+      "yaml_sha256": "c24a-f7d3-fb0b-519e",
+      "checked": 16,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    }
+  }
+}

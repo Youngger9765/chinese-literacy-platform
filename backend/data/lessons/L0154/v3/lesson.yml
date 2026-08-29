@@ -1,0 +1,31 @@
+lesson_uid: L0154
+version_id: v3
+title: 祁黃羊的思路解密
+catalog_slot: 文-L11
+sections_present:
+- 'no': ''
+  name: 古文今譯
+  note: 無大題編號，印在第 1 頁
+- 'no': ''
+  name: 原文
+  note: 無大題編號，印在第 2 頁，含注釋與朗讀計時
+- 'no': 一
+  name: 文白句子比對
+  note: 原稿印注音符號「ㄧ」不是漢字「一」
+- 'no': 二
+  name: 文白詞語比對
+- 'no': 三
+  name: 文章重點表
+- 'no': 四
+  name: 文言文聚光燈
+  subtitle: 疑問標籤：疑問助詞
+- 'no': 五
+  name: 閱讀理解
+- 'no': 六
+  name: 自我挑戰
+  note: 印「（老師可視同學情況決定是否做此大題）」
+source:
+  extracted_by: extract-lesson-multimodal
+  pdf_pages: 11
+  drive_path: 文言文/文-L11祁黃羊的思路解密(疑問助詞).docx
+  docx_md5: md5-12:a57e36371742

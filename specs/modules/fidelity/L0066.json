@@ -1,0 +1,77 @@
+{
+  "uid": "L0066",
+  "gate_version": 2,
+  "docx_sha256": "00ff-670d-d43b-eef9",
+  "modules": {
+    "comprehension.hxktk": {
+      "yaml_sha256": "3ac8-3429-cda1-9989",
+      "checked": 30,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "errata": {
+      "yaml_sha256": "f183-eae7-01e5-2efc",
+      "checked": 1,
+      "status": "pass",
+      "passed": true,
+      "exit": 1
+    },
+    "full_text_annotate.my7tn": {
+      "yaml_sha256": "7b56-c2bc-ed2f-e0f9",
+      "checked": 25,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "key_reading.vye47": {
+      "yaml_sha256": "6ba3-0d83-72b9-c543",
+      "checked": 10,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "keypoints.jtywk": {
+      "yaml_sha256": "3b55-a96e-9c74-9152",
+      "checked": 9,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "resources.7yah9": {
+      "yaml_sha256": "a165-d2a9-942f-231a",
+      "checked": 3,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "spotlight.tfey4": {
+      "yaml_sha256": "743f-ad1c-0cf1-f8c0",
+      "checked": 45,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "vocab_application.umc94": {
+      "yaml_sha256": "c9a1-830b-9aba-0ec5",
+      "checked": 19,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "vocab_definitions.r3t9q": {
+      "yaml_sha256": "2188-6861-806a-bfe4",
+      "checked": 41,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "vocab_review.e9vaq": {
+      "yaml_sha256": "e979-dcd4-3de4-b8eb",
+      "checked": 20,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    }
+  }
+}

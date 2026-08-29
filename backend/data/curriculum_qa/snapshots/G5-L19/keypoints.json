@@ -1,103 +1,61 @@
 {
-  "keypoints": {
-    "lesson": "G5-L19",
-    "structure": "nested",
-    "columns": [
-      "label",
-      "value"
-    ],
-    "rows": [
-      {
-        "label": "二、三",
-        "sub_rows": [
-          {
-            "sub_label": "看見自己的__和喜歡的人聊得很開心",
-            "template": "A.覺得很正常、不值得__\nB.覺得胸口__、不是滋味",
-            "blanks": [
-              {
-                "answer": "朋友",
-                "hint": ""
-              },
-              {
-                "answer": "放在心上",
-                "hint": ""
-              },
-              {
-                "answer": "悶悶",
-                "hint": ""
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "label": "四",
-        "sub_rows": [
-          {
-            "sub_label": "轉身離開現場，回到教室座位",
-            "template": "Ａ.不想再看下去\nB.__卻無法停止",
-            "blanks": [
-              {
-                "answer": "思緒",
-                "hint": ""
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "label": "五",
-        "sub_rows": [
-          {
-            "sub_label": "朋友阿葉來關心",
-            "template": "Ａ.認為自己沒有回應他，太__\nB.認為阿葉忽略自己的心情，所以不想__",
-            "blanks": [
-              {
-                "answer": "小氣",
-                "hint": ""
-              },
-              {
-                "answer": "開口回應",
-                "hint": ""
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "label": "六",
-        "sub_rows": [
-          {
-            "sub_label": "獨自反思",
-            "template": "Ａ.心情亂成一團，心裡莫名__\nB.不想對朋友__、不想承認因為阿葉__",
-            "blanks": [
-              {
-                "answer": "煩燥",
-                "hint": ""
-              },
-              {
-                "answer": "擺臭臉",
-                "hint": ""
-              },
-              {
-                "answer": "吃醋",
-                "hint": ""
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "label": "統整",
-        "value": "因為看見__和喜歡的人聊天而感到不是滋味，卻又不想面對這份吃醋的心情，作者寫下這篇小日記，是想抒發心情（煩燥混亂  □寂寞無奈）的感受。",
-        "blanks": [
-          {
-            "answer": "朋友/阿葉",
-            "hint": ""
-          }
-        ]
-      }
-    ],
-    "title": "感情小日記3──吃醋的滋味"
-  }
+  "answer_carrier": "橘色手寫字（圖形層）",
+  "layout": "list",
+  "rows": [
+    {
+      "blanks": [
+        {
+          "answer": "減脂"
+        },
+        {
+          "answer": "增肌"
+        }
+      ],
+      "label": "關鍵",
+      "value": "想要有結實的肌肉，要先【　】再【　】。"
+    },
+    {
+      "items": [
+        {
+          "blanks": [
+            {
+              "answer": "油炸"
+            }
+          ],
+          "label": "A",
+          "value": "均衡的飲食控制：要減少【　】類和甜食的攝取。"
+        },
+        {
+          "blanks": [
+            {
+              "answer": "睡眠"
+            }
+          ],
+          "label": "B",
+          "value": "保持良好的【　】：可以幫助分泌生長激素促進生長。"
+        },
+        {
+          "blanks": [
+            {
+              "answer": "舒適"
+            }
+          ],
+          "label": "C",
+          "value": "專業且規律的訓練：不同肌肉部位會有不同的訓練方式，每次練習都要離開【　】區，練習的分量要比自己承受的最大量再高一些才行。"
+        }
+      ],
+      "label": "訓練要點",
+      "value": "要有結實的肌肉，訓練要循序漸進，本文提出以下三個要點："
+    }
+  ],
+  "section_no": "五",
+  "slug": "xk6rk",
+  "text_ref": "eqqyy",
+  "title": "六塊肌、六塊雞",
+  "topic_blanks": [
+    {
+      "answer": "肌肉"
+    }
+  ],
+  "topic_cell": "主題：【　】的鍛鍊"
 }

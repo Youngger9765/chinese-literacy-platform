@@ -1,0 +1,48 @@
+lesson_uid: L0171
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 酸言酸語
+    B: 惱人
+    C: 邋遢
+    D: 大肆
+    E: 充斥
+    F: 退縮
+    G: 唱衰
+    H: 起步
+    I: 效應
+    J: 俯仰
+  unused_options:
+  - I
+  - J
+  items:
+  - index: 1
+    stem: 這台冷氣機因過於老舊，不斷發出(  )的聲音，讓人難以入眠。
+    answer: B
+  - index: 2
+    stem: 為了賺流量，他在社群網站上(  )散播假消息，造成許多誤解。
+    answer: D
+  - index: 3
+    stem: 有些人總喜歡(  )別人的努力，卻不曾付出行動。
+    answer: G
+  - index: 4
+    stem: 真正的勇敢並不是沒有恐懼，而是在害怕時不輕易(  )。
+    answer: F
+  - index: 5
+    stem: 儘管他衣著(  )，但談吐卻非常有深度，讓人另眼相看。
+    answer: C
+  - index: 6
+    stem: 有些人的(  )其實是種偽裝，用來掩飾自己的不安與嫉妒。
+    answer: A
+  - index: 7
+    stem: 校園限制手機使用的新政策才剛(  )，還需要時間觀察成效。
+    answer: H
+  - index: 8
+    stem: 現在的社群媒體上(  )著謠言與偏見，需要仔細分辨真假。
+    answer: E
+  notes:
+    answer_carrier: 橘色手寫代號（字元樣式 af0），文字流有此資訊
+  slug: 7ahj9
+  text_ref: envdq

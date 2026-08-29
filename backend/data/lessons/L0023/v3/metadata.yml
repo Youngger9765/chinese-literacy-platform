@@ -1,0 +1,55 @@
+lesson_uid: L0023
+version_id: v3
+level: 5
+genre: 應用文
+strategy: 推論策略──觀點找支持理由
+課文作者: 林玫伶
+學習單: 巫怡蓉
+lesson_no: 11
+series: 一般
+lesson_seq: 5110
+intro: 這篇文章介紹了經典小說《長腿叔叔》的故事，主角朱蒂在一位神祕資助人的幫助下獲得就學機會，並努力克服學業上的困難。作者透過朱蒂的經歷，引導讀者思考，除了幸運的際遇，還有哪些更重要的特質讓朱蒂得以成長和成功。文章將探討朱蒂如何展現她的幽默、坦率、樂觀、勤奮以及獨立思考的能力，這些面向如何幫助她從一名教育背景不足的孤兒，蛻變為一位獨立自主的女性，並與資助人建立起更深厚的關係。
+notes:
+  總表_文體: 應用文
+  總表_類型: 記(事)
+  總表_議題: 品格力： 感恩
+  總表_聚光燈策略: 推論策略──觀點找支持理由
+  總表_第六大題標題: 觀點找支持理由
+  總表_文本類型: 單
+  總表_語詞:
+  - 資助
+  - 貴人相助
+  - 瞥見
+  - 詼諧
+  - 傾注
+  - 歸咎
+  - 低微
+  - 有條不紊
+  - 脫穎而出
+  - 蛻變
+  - 前衛
+  - 名列前茅
+  總表_對照: 總表 12 個語詞與學習單語詞框、第三大題 12 題、第八大題找字語詞框三者完全一致（本批少見的全對齊）。
+strategy_explained: '這一課我們要練習的，是從文章裡找出作者認為比運氣更重要的特質，並且說出為什麼你會這樣想
+
+  因為《長腿叔叔》的故事裡，朱蒂雖然得到資助，但她靠著自己的幽默、坦率、樂觀和勤奮，才能克服困難、越來越好，這些都是文章裡會提到、可以用來支持我們想法的具體例子
+
+  讀的時候，你可以一邊讀一邊想：朱蒂做了什麼、說了什麼，讓你知道她不是只靠運氣，而是有哪些「品格」讓她成長，然後把這些找出來告訴大家'
+strategy_sources:
+  worksheet: 推論策略──觀點找支持理由
+  master_sheet: 推論策略──觀點找支持理由
+  previous: 推論策略──觀點找支持理由
+source_profile:
+  class: standard
+  note: 單一錨點 + 有計數欄 + idx 唯一 —— 走主路徑
+  has_key_reading_section: true
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: null
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 1
+  has_counter_column: true
+  body_in_tables: true
+  invisible_chars_docx_only: true
+  profiled: '2026-08-24'

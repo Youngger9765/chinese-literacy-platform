@@ -168,10 +168,20 @@ def _resolve_family(lesson_id: str, log_entry: dict, schema_dir: Path) -> str:
         return family
 
     # 5. Keypoints row-label structure inference (D-bucket — #2146)
-    #    Applied only when spotlight.yml confirms "spotlight range not found" — i.e.
-    #    this lesson has NO spotlight section in the source document (not a pipeline
-    #    failure, but a structural absence). Returns 'keypoints_only' when a
-    #    keypoints table exists; 'unknown' otherwise. No lesson ids are hardcoded.
+    #    Applied when spotlight.yml says "spotlight range not found".
+    #
+    #    ⚠️ This comment used to read "not a pipeline failure, but a structural
+    #    absence". That is wrong, and being written down is why nobody looked: of the
+    #    30 lessons carrying the error, 27 have 閱讀聚光燈 in their DOCX. It IS a
+    #    pipeline failure — `find_spotlight_range` in build_lesson_schema.py opens the
+    #    section on a narrow marker list (◎/※ + a fixed set of phrases, or 步驟❶), and
+    #    these worksheets print their 閱讀聚光燈 heading in the MASTHEAD with the
+    #    exercises introduced by 「示範１：」/「練習1：」 instead. Only 3 of the 30 genuinely
+    #    have no such section.
+    #
+    #    Recorded in content_known_gaps.yaml#spotlight_range_not_found. The fallback
+    #    below is still useful — it recovers a family for lessons the extractor missed —
+    #    but it is compensating for a defect, not describing the source.
     sp_data = _load_yaml_safe(sp_path) if sp_path.exists() else None
     sp_error = ((sp_data.get("spotlight") if sp_data else None) or {}).get("error", "")
     if "spotlight range not found" in sp_error:

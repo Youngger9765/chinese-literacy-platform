@@ -1,0 +1,109 @@
+lesson_uid: L0006
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 力不從心
+  - 左顧右盼
+  - 無動於衷
+  - 糾結
+  - 猶豫
+  - 仆倒
+  - 圍剿
+  - 停滯
+  - 反芻
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 路見不為所動翻騰本顫
+  - 不平力不從心稻收顫左
+  - 糾結遙遙領先契巍限顧
+  - 無拯救唱咐目巍金局右
+  - 話禾落行舉示意風滯盼
+  - 不老神在在反芻區間車
+  - 說氣逼人大圍剿溜無與
+  - 抱頭鼠竄優猶啄煙動眾
+  - 遣仆停滯雅豫撐待於不
+  - 倒左故右判暑廢墟衷同
+  answers_are_graphical: true
+  answer_paths:
+  - word: 力不從心
+    cells:
+    - - 2
+      - 3
+    - - 2
+      - 4
+    - - 2
+      - 5
+    - - 2
+      - 6
+    direction: horizontal
+  - word: 左顧右盼
+    cells:
+    - - 2
+      - 10
+    - - 3
+      - 10
+    - - 4
+      - 10
+    - - 5
+      - 10
+    direction: vertical
+  - word: 糾結
+    cells:
+    - - 3
+      - 1
+    - - 3
+      - 2
+    direction: horizontal
+  - word: 反芻
+    cells:
+    - - 6
+      - 6
+    - - 6
+      - 7
+    direction: horizontal
+  - word: 圍剿
+    cells:
+    - - 7
+      - 6
+    - - 7
+      - 7
+    direction: horizontal
+  - word: 無動於衷
+    cells:
+    - - 7
+      - 9
+    - - 8
+      - 9
+    - - 9
+      - 9
+    - - 10
+      - 9
+    direction: vertical
+  - word: 猶豫
+    cells:
+    - - 8
+      - 6
+    - - 9
+      - 6
+    direction: vertical
+  - word: 停滯
+    cells:
+    - - 9
+      - 3
+    - - 9
+      - 4
+    direction: horizontal
+  - word: 仆倒
+    cells:
+    - - 9
+      - 2
+    - - 10
+      - 1
+    direction: diagonal_down_left
+  slug: r4797
+  text_ref: 3ttr7

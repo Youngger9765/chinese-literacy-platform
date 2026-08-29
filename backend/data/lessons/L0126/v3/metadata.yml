@@ -1,0 +1,56 @@
+lesson_uid: L0126
+version_id: v3
+level: 8
+genre: 記敘文
+strategy: 推論策略──推論人物的動機、情緒與想法
+課文作者: 林玫伶
+學習單: 張明珠
+lesson_no: 6
+series: 一般
+lesson_seq: 8060
+intro: 這篇文章記錄了作者在戲院、賭場、檳榔攤交織的特殊環境中成長的童年與少年時期。作者的家庭經營著一間戲院，然而隨著時代變遷，戲院生意日漸蕭條。為了生計，家人也投入了賭場與檳榔攤的經營。在這樣動盪不安的家庭背景下，作者經歷了許多令人難忘的事件，也從中摸索出屬於自己的讀書方法，努力在夾縫中尋找前進的力量。文章描寫了作者在特殊環境下的生活點滴，以及他如何面對挑戰、尋求成長的歷程。
+notes:
+  總表_文體: 記敘文
+  總表_類型: 記(人)
+  總表_議題: ''
+  _總表_議題note: 總表「議題」欄**空白**——空白就是空白，不是抽取 bug
+  總表_聚光燈策略: 推論策略──推論人物的動機、情緒與想法
+  總表_第六大題標題: 推論人物的動機、情緒與想法
+  總表_文本類型: 單
+  總表_語詞_原樣:
+  - 集資
+  - 蜂擁而至
+  - 崛起
+  - 妄想
+  - 倉皇
+  - 狼狽
+  - 突如其來
+  - 驚心動魄
+  - 喧嘩
+  - 驚駭不已
+  - 蕭條
+  - 訣竅
+  總表_語詞_對照: 總表 12 個語詞與學習單第三大題印的 12 個完全一致
+strategy_explained: '這一課要練習的是，像偵探一樣，從文章裡的小線索去猜測故事裡的人為什麼會這樣做、心裡在想什麼，還有當時的感受是什麼
+
+  這篇文章裡，作者的家開戲院、也做賭場和檳榔攤的生意，生活環境很不尋常，有很多讓你意想不到的事情，所以很適合你練習從這些細節裡，去推敲人物內心的世界
+
+  讀的時候，你可以試著想想，在那個特別的環境裡，作者的家人心裡在想什麼，他自己又是怎麼感受的，然後才能更了解他怎麼在夾縫中長大喔'
+strategy_sources:
+  worksheet: 推論策略──推論人物的動機、情緒與想法
+  master_sheet: 推論策略──推論人物的動機、情緒與想法
+  previous: 推論策略──推論人物的動機、情緒與想法
+source_profile:
+  class: standard
+  note: 單一錨點 + 有計數欄 + idx 唯一 —— 走主路徑
+  has_key_reading_section: true
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: null
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 1
+  has_counter_column: true
+  body_in_tables: true
+  invisible_chars_docx_only: false
+  profiled: '2026-08-24'

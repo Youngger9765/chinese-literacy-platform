@@ -1,21 +1,49 @@
 name: Frontend Checks (lint + vitest)
 
+# ⚠️ 觸發不用 `on.pull_request.paths`（#2916 收尾查到）。
+#
+# GitHub 的 `paths:` 過濾只看**前 300 個變更檔**。PR #2920 改了 3691 個檔，
+# 前 300 個全是 `backend/data/lessons/**`（批次改名 1611 個 yml），
+# `frontend/**` 一個都排不進去 —— 於是這支**整個 PR 一次都沒跑**，
+# 而檢查清單上不會出現這一列，看起來就是全綠。
+#
+# 改用 repo 既有的 `dorny/paths-filter` 判斷（staging-deploy.yml 一直是這樣做的）：
+# 它算的是完整 diff，沒有 300 的上限。意圖不變 —— 純後端的 PR 仍然跳過。
+#
+# ⛔ 不要為了「保險」把過濾整個拿掉：那會讓每個 PR 都跑一次 e2e，
+#    而這支存在的理由是**該跑的時候真的跑**，不是每次都跑。
+
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-    paths:
-      - 'frontend/src/**'
-      - 'frontend/eslint.config.js'
-      - 'frontend/package.json'
-      - 'frontend/vite.config.ts'
-      - '.github/workflows/frontend-checks.yml'
 
 concurrency:
   group: frontend-checks-${{ github.event.pull_request.head.ref }}
   cancel-in-progress: true
 
 jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      relevant: ${{ steps.filter.outputs.relevant }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # paths-filter 要完整歷史才能算 diff
+      - uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          filters: |
+            relevant:
+              - 'frontend/src/**'
+              - 'frontend/eslint.config.js'
+              - 'frontend/package.json'
+              - 'frontend/vite.config.ts'
+              - '.github/workflows/frontend-checks.yml'
+
   frontend-checks:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.relevant == 'true'
     name: Frontend Lint + Vitest
     runs-on: ubuntu-latest
 
@@ -43,8 +71,141 @@ jobs:
       # workflow red on day one. Pin a file here whenever a fix ships a regression
       # test that must stay enforced — an un-run lock is theatre (testing-strategy 鐵律).
       #   - render-smoke: mount-crash guard (#2279/#2289)
-      #   - resetTutorStep / LiveTutor.readAgain: 「再讀一次」reset must clear every
+      #   - resetTutorStep / ParagraphReading.readAgain: 「再讀一次」reset must clear every
       #     completion/成績 source + the single-paragraph residual diff (#2532)
+      #   - useTtsPlayback: Web Speech API fallback must set isTtsDegraded (visible
+      #     banner) instead of silently playing a machine voice with no signal (#2609)
+      #   - stepNaming / componentNaming: every step id and every component name
+      #     must say what its Chinese label says. Two were inverted before #2641 —
+      #     `full-reading` read one passage, `reading-annotation` read the whole
+      #     text — which is how a feature got wired to a step disabled since
+      #     2026-07-20 (#2641, #2643)
+      #   - qrcode-bundling: the QR library must be imported with a literal
+      #     specifier so Vite bundles it. A dynamic import with the name in a
+      #     variable passed build, lint and vitest while the feature was broken
+      #     in every browser (#2622)
+      #   - BlockSequenceRenderer.newblocks: every spotlight block type must have a
+      #     case in the renderer. `multi` sat in types.ts with no branch, so 68
+      #     blocks across 37 lessons fell through to default — the question printed,
+      #     the options never did, and nothing errored. Assertions check that the
+      #     options/sub-items/right-column entries actually reach the DOM, because
+      #     "renders without throwing" cannot tell those two states apart.
+      #   - LessonAudioTable: admin audio panel must (a) stop the previous
+      #     clip before starting a new one — the hook's single-shot playback
+      #     path does not auto-cancel a prior <audio> on its own — and (b)
+      #     return a row to idle the instant it (or the header button) is
+      #     stopped. Regression of either reintroduces #2622's "不能停止 /
+      #     同時播其他的就會一堆聲音" follow-up bug.
+      #   - VocabDefinitionMatch/ComprehensionMcqPage progressPersistence: 作答「中」
+      #     的答案必須進得了進度 payload。詞語理解的答案只活在子元件的 `answersRef`
+      #     裡、閱讀理解的 onExerciseChange 只接到計分 —— 兩邊 payload 在作答中都
+      #     從沒變過，dedup 正確地判定「沒變化」→ 一次 PUT 都沒發出去，學生換裝置
+      #     或清快取就整步重來。斷言用「答 N 題要存回 N 筆」的數量形式，因為
+      #     「有一筆就算過」連「只回報第一題」都能矇混過去（#2839）。
+      #   - VocabApplication/VocabWordSearch progressPersistence + DragDrop restore +
+      #     retryWrong: #2839 盤點剩下的關卡（#2848/#2849/#2850）。語詞應用的逐題作答
+      #     只寫 localStorage、語詞複習整個 hook 沒有任何 API import —— 兩關作答中對 DB
+      #     完全不存在，換裝置就整關重來。拖拉配對是「存得進去、讀不回來」（存了讀不回來
+      #     等於沒存）。詞語理解的「重做錯題」則因為 render gate 用 `mcAnswers.length > 0`
+      #     判完成，按下去只會停在「選擇題 已完成」的 placeholder。斷言一律用
+      #     「做了 N 個就要讀回 N 個」的數量形式 ——「有一筆就算過」連「只回報第一題」
+      #     都能矇混過去。
+      #   - stepSharedShell / rendererHeader: 自學模式每一步的外框只能有一份實作。
+      #     底部固定動作列曾有 12 份逐字相同的 copy（連 `#FBF6EE` 都硬寫 12 次），
+      #     「怎麼玩？」教學卡有 6 份而且已經漂成兩種底色兩種字級。抽成
+      #     `StepActionBar` / `StepCoachCard` 之後，掃描鎖擋的是「再複製一份」；
+      #     每條掃描都配正向對照，因為 class 字串一改名，掃描器就會什麼都找不到
+      #     而恆綠。`rendererHeader` 另外鎖住「閱讀學習 ＋ 課名」頁首預設關閉 ——
+      #     那條頁首在學習流程裡是第三次出現的課名（#2897）。
+      #   - nextStepFooter: no `.tsx` may draw its own "下一關" / "繼續下一步"
+      #     button — every step's forward CTA must be the shared
+      #     `NextStepFooter`. This test file existed before #2771 but was
+      #     never pinned here, so its scan lock never actually ran in CI —
+      #     which is exactly how 23 custom buttons across 14 files shipped
+      #     past a lock whose test file was green (#2771).
+      # ⚠️ `run: |` (block literal) is load-bearing — do NOT collapse it back to a
+      # plain `run:` scalar. YAML folds a plain scalar's newlines into spaces, which
+      # leaves the `\` as LITERAL characters; the shell then reads `\ ` as an escaped
+      # space, so every file after the first line arrives as an argument with a leading
+      # space, matches nothing, and vitest silently drops it. That is not an error —
+      # vitest just reports the files it did match and exits 0. This step ran
+      # "8 passed (8)" while listing 37 files, i.e. 29 pinned locks (including the two
+      # #2839 ones added in the same commit) had never executed in CI while the step
+      # showed green. Verify after editing this list with:
+      #   files=$(python3 -c "import yaml;d=yaml.safe_load(open('.github/workflows/frontend-checks.yml'));\
+      #     print([s['run'] for s in d['jobs']['frontend-checks']['steps'] if 'vitest' in str(s.get('run',''))][0])")
+      # then confirm the run's "Test Files N passed (N)" equals the number of files listed.
+      # Production build. vitest and eslint both passed while `vite build` was
+      # broken — a rename left two files under their old names while every
+      # import already used the new ones, and nothing in this workflow resolved
+      # the module graph the way rollup does. Staging deployed red as a result
+      # (#2643). Build is the only gate that catches a filename/import mismatch.
+      - name: Build (production)
+        working-directory: frontend
+        run: npx vite build
+
       - name: Render-smoke + pinned regression tests (vitest)
         working-directory: frontend
-        run: npx vitest run src/__smoke__/render-smoke.test.tsx src/hooks/useStepProgressPersistence.resetTutorStep.test.ts src/components/reading-steps/live-tutor/LiveTutor.readAgain.test.tsx
+        run: |
+          npx vitest run src/__smoke__/render-smoke.test.tsx src/hooks/useStepProgressPersistence.resetTutorStep.test.ts src/components/reading-steps/paragraph-reading/ParagraphReading.readAgain.test.tsx src/hooks/useTtsPlayback.test.ts src/pages/admin/lesson-audio/qrcode-bundling.test.ts src/pages/admin/lesson-audio/LessonAudioTable.test.tsx src/config/stepNaming.test.ts src/routes/componentNaming.test.ts \
+          src/components/auth/LearningRouteGate.test.tsx \
+          src/components/reading-steps/FullTextAnnotate.hideAnnotation.test.tsx \
+          src/hooks/useFullTextTtsQueue.test.ts \
+          src/services/ttsApi.prefetch.test.ts \
+          src/pages/admin/lesson-audio/paragraphGap.test.ts \
+          src/pages/GuestReadingPage.passage.test.tsx \
+          src/components/auth/publicSteps.test.ts \
+          src/config/__tests__/repeatedModulesSplit.test.ts \
+          src/pages/admin/lesson-audio/multiPartRows.test.tsx \
+          src/components/reading-steps/__tests__/splitPartsNotDuplicated.test.tsx \
+          src/services/ttsApi.paragraph.test.ts \
+          src/components/reading-spotlight/__tests__/BlockSequenceRenderer.newblocks.test.tsx \
+          src/components/learning/__tests__/nextStepFooter.test.tsx \
+          src/components/layout/__tests__/studentSidebar.noToolbox.test.tsx \
+          src/components/layout/__tests__/Sidebar.role-split.test.tsx \
+          src/components/layout/__tests__/toolboxUnreachable.test.tsx \
+          src/components/reading-steps/__tests__/introStepCount.test.ts \
+          src/context/__tests__/zhuyinSpaceShortcut.test.tsx \
+          src/config/__tests__/roundAwareStepNeighbours.test.ts \
+          src/config/__tests__/activeStepHighlight.test.ts \
+          src/config/__tests__/stepPartLabels.test.ts \
+          src/components/layout/__tests__/stepperPartsAreWired.test.ts \
+          src/pages/learning/__tests__/reportSendsRealScore.test.ts \
+          src/config/__tests__/realPayloadRoundScope.test.ts \
+          src/config/__tests__/stepPath.test.ts \
+          src/config/__tests__/stepPathIsTheOnlyBuilder.test.ts \
+          src/services/__tests__/ttsRoundScoped.test.ts \
+          src/services/__tests__/everyLessonAddressedCallCarriesRound.test.ts \
+          src/components/reading-steps/__tests__/degradedNoticeEverywhere.test.ts \
+          src/pages/__tests__/guestKeyPassageAudio.test.tsx \
+          src/hooks/__tests__/finishAdvancesWithinRound.test.ts \
+          src/components/reading-steps/__tests__/FillInBlankExercise.test.tsx \
+          src/components/reading-steps/__tests__/MultipleChoiceExercise.test.tsx \
+          src/components/reading-steps/__tests__/ReadingTrendChart.test.tsx \
+          src/components/reading-steps/__tests__/VocabApplication.test.tsx \
+          src/components/reading-steps/__tests__/VocabDefinitionMatchMCQ.test.tsx \
+          src/components/reading-steps/__tests__/VocabWordSearch.test.tsx \
+          src/components/reading-steps/__tests__/roundAudioAndLog.test.tsx \
+          src/components/learning/__tests__/QuizCompletionScreen.test.tsx \
+          src/components/learning/__tests__/quizCompletionScreenUsage.test.ts \
+          src/pages/learning/__tests__/comprehensionReview.test.ts \
+          src/pages/learning/__tests__/ComprehensionMcqPage.test.tsx \
+          src/components/reading-steps/__tests__/StoryStructureTable.radioFill.test.tsx \
+          src/components/lesson-content/__tests__/LessonRenderer.comprehensionWidth.test.tsx \
+          src/components/reading-steps/__tests__/StoryStructureTable.progressPersistence.test.tsx \
+          src/components/reading-steps/__tests__/assessmentReportMetrics.test.ts \
+          src/components/reading-steps/__tests__/practiceStepsSummary.test.ts \
+          src/components/reading-steps/__tests__/PracticeStepsSummarySection.test.tsx \
+          src/components/reading-steps/__tests__/AssessmentComprehensionSectionMcqFallback.test.tsx \
+          src/components/reading-steps/__tests__/AssessmentReportIntegration.test.tsx \
+          src/components/reading-steps/__tests__/VocabDefinitionMatch.progressPersistence.test.tsx \
+          src/pages/learning/__tests__/ComprehensionMcqPage.progressPersistence.test.tsx \
+          src/components/reading-steps/__tests__/VocabApplication.progressPersistence.test.tsx \
+          src/components/reading-steps/__tests__/VocabWordSearch.progressPersistence.test.tsx \
+          src/components/reading-steps/__tests__/VocabDefinitionMatch.retryWrong.test.tsx \
+          src/components/reading-steps/__tests__/VocabDefinitionMatchDragDrop.restore.test.tsx \
+          src/components/reading-steps/__tests__/teacherWordSearch2860.test.ts \
+          src/components/reading-steps/__tests__/teacherGridStability2860.test.tsx \
+          src/components/reading-steps/__tests__/wordSearchGrid.test.ts \
+          src/components/learning/__tests__/stepSharedShell.test.tsx \
+          src/components/lesson-content/__tests__/rendererHeader.test.tsx

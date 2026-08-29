@@ -19,7 +19,7 @@ def _base_detail(**overrides) -> dict:
     base = {
         "id": 1,
         "title": "Test Story",
-        "grade": 7,
+        "grade": "7",   # 分級軸是字串（文言文／品格教育不是年級）
         "grade_code": "G7",
         "genre": "說明文",
         "category": "圖文整合",

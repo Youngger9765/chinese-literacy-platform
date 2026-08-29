@@ -1,0 +1,46 @@
+lesson_uid: L0075
+version_id: v3
+section_no: 五
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 翻騰
+    B: 凜冽
+    C: 窒息
+    D: 徒勞無功
+    E: 筋疲力竭
+    F: 束手無策
+    G: 屏氣凝神
+    H: 緩不濟急
+    I: 僧多粥少
+  unused_options:
+  - G
+  items:
+  - index: 1
+    stem: 教師職缺只有十個，報名者卻有百人，（　），因此錄取不易。
+    answer: I
+  - index: 2
+    stem: 颱風即將到來，岸邊巨浪（　），聲勢真是嚇人。
+    answer: A
+  - index: 3
+    stem: 北風（　），即使裹緊大衣，還是覺得很冷。
+    answer: B
+  - index: 4
+    stem: 學校為了推動週三第八節的「興趣探索課」花了許多心力，但因家長反對，最後（　），令人遺憾。
+    answer: D
+  - index: 5
+    stem: 面對突如其來的危機，大家一時（　），不知道該怎麼辦。
+    answer: F
+  - index: 6
+    stem: 忙完畢業展的布置後，大家都（　），希望好好休息。
+    answer: E
+  - index: 7
+    stem: 災後援助若拖延太久，恐怕（　），災民的食物與醫療需求將受影響。
+    answer: H
+  - index: 8
+    stem: 他白天忙著工作、晚上又得照顧生病的母親，雙重壓力讓他覺得快要（　）了，感到十分辛苦。
+    answer: C
+  notes:
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
+  slug: kqu6u
+  text_ref: tvf6u

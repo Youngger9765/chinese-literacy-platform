@@ -1,0 +1,45 @@
+lesson_uid: L0081
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 模擬
+    B: 偏見
+    C: 消耗
+    D: 重啟
+    E: 族裔
+    F: 幽閉
+    G: 輻射
+    H: 承載
+    I: 意味深長
+  items:
+  - index: 1
+    stem: 一個人若無法克服（　），就難以真正理解不同文化的價值觀。
+    answer: B
+  - index: 2
+    stem: 環保意識的提升有助於減少能源（　），讓地球可以永續發展。
+    answer: C
+  - index: 3
+    stem: 畢業典禮前一天的彩排，（　）了當天可能遇到的情況。
+    answer: A
+  - index: 4
+    stem: 在核能發電廠附近，我們必須密切監測（　）是否對周邊環境造成潛在威脅。
+    answer: G
+  - index: 5
+    stem: 他患有（　）恐懼症，所以無法長時間待在狹窄的房間。
+    answer: F
+  - index: 6
+    stem: 電腦當機後，老師請他先（　）系統，再看看檔案能不能打開。
+    answer: D
+  - index: 7
+    stem: 一首民謠常常（　）著某個地方的歷史與情感。
+    answer: H
+  - index: 8
+    stem: 他沒有給一個明確的答覆，只留下一個（　）的微笑。
+    answer: I
+  notes:
+    option_bank: 9 個代號對應 8 道小題；E.族裔 未被任何一題用到。語詞框有 12 個語詞，天體／月相變化／世紀 沒有進第四大題。
+    answer_carrier: 橘色手寫代號（PDF p4）；文字層的（　）內已填有同樣的代號
+  slug: j9trt
+  text_ref: v3nth

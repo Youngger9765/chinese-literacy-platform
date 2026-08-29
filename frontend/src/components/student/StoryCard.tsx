@@ -5,6 +5,7 @@
 import React from 'react';
 import { Story } from '../../types';
 import type { LibraryStoryStatus } from '../../services/progressApi';
+import { gradeLabel } from '../../utils/gradeLabel';
 
 export type Difficulty = 'easy' | 'medium' | 'hard';
 
@@ -13,11 +14,14 @@ export function getDifficulty(story: Story): Difficulty {
   if (story.difficultyLevel === 'easy' || story.difficultyLevel === 'medium' || story.difficultyLevel === 'hard') {
     return story.difficultyLevel;
   }
-  const grade = story.grade;
-  if (grade == null) return 'medium';
-  if (grade <= 5) return 'easy';   // 4-5年級
-  if (grade <= 7) return 'medium'; // 6-7年級
-  return 'hard';                   // 8-9年級
+  // grade is a classification string: "4".."9", 文言文, 品格教育.
+  // The named collections are not a year, so no automatic difficulty applies —
+  // for those a teacher override (difficultyLevel) is the only signal.
+  const year = Number(story.grade);
+  if (!Number.isFinite(year) || !story.grade) return 'medium';
+  if (year <= 5) return 'easy';   // 4-5年級
+  if (year <= 7) return 'medium'; // 6-7年級
+  return 'hard';                  // 8-9年級
 }
 
 export const DIFFICULTY_CONFIG: Record<Difficulty, { label: string; className: string }> = {
@@ -66,16 +70,35 @@ const StoryCard: React.FC<StoryCardProps> = ({ story, isLoading, isCompleted, on
       onClick={onClick}
     >
       <div className="h-40 overflow-hidden relative">
-        <img
-          src={story.thumbnail}
-          alt={story.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-        />
+        {/* 二修的課目前沒有封面檔（`backend/data/lessons/` 底下 0 個圖），所以
+            `thumbnail_url` 是 null。無條件 render <img> 會讓圖書館 175 張卡片
+            全部變破圖 —— 破圖看起來像壞掉，而不是像「這課還沒有封面」。
+            有圖就照常顯示；載入失敗也退回同一個佔位，兩種情況長得一樣。 */}
+        {story.thumbnail ? (
+          <img
+            src={story.thumbnail}
+            alt={story.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            onError={(e) => {
+              e.currentTarget.style.display = 'none';
+              const ph = e.currentTarget.nextElementSibling as HTMLElement | null;
+              if (ph) ph.style.display = 'flex';
+            }}
+          />
+        ) : null}
+        <div
+          data-testid="story-cover-placeholder"
+          className="w-full h-full items-center justify-center bg-gray-100 text-gray-400"
+          style={{ display: story.thumbnail ? 'none' : 'flex' }}
+          aria-hidden="true"
+        >
+          <span className="material-symbols-outlined text-4xl">menu_book</span>
+        </div>
         {/* Top-right badges */}
         <div className="absolute top-2 right-2 flex flex-col items-end gap-1">
           {story.grade && (
             <div className="bg-accent text-white text-xs font-bold px-2 py-0.5 rounded">
-              第 {story.grade} 級
+              {gradeLabel(String(story.grade))}
             </div>
           )}
           <div className={`text-xs font-medium px-2 py-0.5 rounded ${diffConfig.className}`}>

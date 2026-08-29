@@ -1,0 +1,27 @@
+lesson_uid: L0164
+version_id: v3
+title: 從天才跌為凡人的神童
+catalog_slot: 文-L9
+sections_present:
+- 'no': null
+  name: 古文今譯
+- 'no': null
+  name: 原文（含斷詞點）＋注釋
+- 'no': null
+  name: 朗讀計時
+- 'no': 一
+  name: 文白句子比對
+- 'no': 二
+  name: 文白詞語比對
+- 'no': 三
+  name: 文章重點表
+- 'no': 四
+  name: 文言文聚光燈
+  subtitle: 認識文言文—一字多義：聞
+- 'no': 五
+  name: 閱讀理解
+source:
+  extracted_by: extract-lesson-multimodal
+  pdf_pages: 9
+  drive_path: 文言文/文-L9從天才跌為凡人的神童（一字多義「聞」）.docx
+  docx_md5: md5-12:a20ec337790c

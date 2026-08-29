@@ -1,0 +1,35 @@
+lesson_uid: L0067
+version_id: v3
+section_no: 三
+key_reading:
+  instruction: 請用計時器，從指定段落（一    )開始朗讀，計時1分鐘讀的字數，並記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！
+  instruction_note: 括號內的 ☞ 是圖形物件，文字流只有「（一    )」的空白
+  start_paragraph_note: ☞ drawing 錨在第 1 段；累計字數 244/259/384 = 第 1/1+2/1+2+3 段長度，與印出的「一」一致
+  timing_table:
+    columns:
+    - 第1次計時
+    - 第2次計時
+    - 第3次計時
+    - 裁判計時
+    unit: 字
+    judge_signature: true
+  benchmark_label: ◎ 我的表現
+  benchmark:
+  - threshold: ＜210字
+    feedback: 還要多加練習。
+  - threshold: 211~240字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞241字
+    feedback: 哇嗚，超級厲害！
+  passage: 臺灣有個種樹達人，名叫賴倍元，大家都稱他為賴桑。童年時期的賴桑，喜歡到溪邊抓泥鰍、到樹上摘果實，整天與大自然為伍。十四歲開始，他跟著父親經營家族的運輸事業，工作之餘，就會騎著機車上山看神木。他常仰望著三千多歲的神木，呼吸著森林裡獨特的沁涼空氣，感受到自己生命的短暫與大自然的永恆，所有的煩惱也消失殆盡。他開始思考自己生命的意義，心中有一個願望慢慢成形：我要經營一個事業，一個不會被時間淘汰的事業。這個事業的「員工」，不會鬧脾氣、不會罷工、不會請假、免勞保，而且不用退休金。他決定開始種樹。
+  start_text: 臺灣有個種樹達人，名叫賴倍元，大家都稱他為賴桑。
+  extent_chars: 244
+  source: extract_key_reading_v3
+  start_paragraph: 1
+  end_paragraph: 1
+  slug: 3nau9
+  text_ref: dhqrv
+extraction_check:
+  verdict: confirmed
+  corroborated_by_first_edition: true
+  absorbed_tail: 0

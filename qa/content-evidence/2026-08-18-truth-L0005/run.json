@@ -1,0 +1,11 @@
+{
+  "lesson_uid": "L0005",
+  "catalog_slot": "G4-L14",
+  "pdf_pages": 10,
+  "pages_read": 10,
+  "wall_clock_seconds": null,
+  "read_calls": 3,
+  "gate_failures": {"verbatim": 2, "coverage": 0, "block_type": 0, "word_search": 0},
+  "retries": 1,
+  "notes": "逐字門抓到 2 處：勘誤欄位名寫成 checklist_source（正確是 checklist_source_text，門因此比對修正版而非原稿）；重點表把版面上的 → 箭頭寫進 value，但箭頭是圖形物件不在文字流。修正後全綠。字陣無任何圈選，依 skill 省略 answer_paths。"
+}

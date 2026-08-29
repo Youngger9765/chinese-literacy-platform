@@ -1,5 +1,6 @@
 /* eslint-disable no-use-before-define -- pre-existing pattern, not TDZ risk (#2289) */
 import React, { useState, useEffect, useCallback } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import AdminTreeSidebar, { TreeNodeSelection } from './AdminTreeSidebar';
 import OrgDetailPanel from './OrgDetailPanel';
 import OrgDashboardPanel from './OrgDashboardPanel';
@@ -9,6 +10,7 @@ import ClassroomDetailPanel from './ClassroomDetailPanel';
 import UsersPanel from './UsersPanel';
 import StoryManagementPanel from './StoryManagementPanel';
 import TtsSentenceTable from './tts-audit/TtsSentenceTable';
+import LessonAudioTable from './lesson-audio/LessonAudioTable';
 import StoryStructureLabPage from './story-structure-lab/StoryStructureLabPage';
 import KeypointsQADashboard from './KeypointsQADashboard';
 import { BuildingIcon, ShieldIcon } from '../../components/icons';
@@ -21,12 +23,56 @@ import { useAuth } from '../../contexts/AuthContext';
 
 type OrgTab = 'detail' | 'dashboard';
 
+// ── Slug ↔ TreeNodeSelection mapping ────────────────────────────────────────
+
+const PANEL_SLUGS: Record<string, TreeNodeSelection> = {
+  'stories': { type: 'stories', id: 'stories' },
+  'tts-audit': { type: 'tts_audit', id: 'tts_audit' },
+  'lesson-audio': { type: 'lesson_audio', id: 'lesson_audio' },
+  'story-structure-lab': { type: 'story_structure_lab', id: 'story_structure_lab' },
+  'keypoints-qa': { type: 'keypoints_qa', id: 'keypoints_qa' },
+  'roles': { type: 'roles', id: 'roles' },
+  'users': { type: 'users', id: 'users' },
+  'create-org': { type: 'create_org', id: 'create_org' },
+};
+
+function nodeToSlug(node: TreeNodeSelection | null): string {
+  if (!node) return '';
+  for (const [slug, n] of Object.entries(PANEL_SLUGS)) {
+    if (n.type === node.type && n.id === node.id) return slug;
+  }
+  // Dynamic nodes (org/school/classroom) use type/id
+  if (node.type === 'org') return `org/${node.id}`;
+  if (node.type === 'school') return `school/${node.id}`;
+  if (node.type === 'classroom') return `classroom/${node.id}`;
+  return '';
+}
+
+function slugToNode(path: string): TreeNodeSelection | null {
+  // Remove /admin prefix
+  const sub = path.replace(/^\/admin\/?/, '');
+  if (!sub) return null;
+  if (PANEL_SLUGS[sub]) return PANEL_SLUGS[sub];
+  // Dynamic: org/xxx, school/123, classroom/123
+  const orgMatch = sub.match(/^org\/(.+)$/);
+  if (orgMatch) return { type: 'org', id: orgMatch[1] };
+  const schoolMatch = sub.match(/^school\/(\d+)$/);
+  if (schoolMatch) return { type: 'school', id: parseInt(schoolMatch[1]) };
+  const classroomMatch = sub.match(/^classroom\/(\d+)$/);
+  if (classroomMatch) return { type: 'classroom', id: parseInt(classroomMatch[1]) };
+  return null;
+}
+
 // ── Main AdminDashboard ─────────────────────────────────────────────────────
 
 const AdminDashboard: React.FC = () => {
-  const [selectedNode, setSelectedNode] = useState<TreeNodeSelection | null>(null);
+  const location = useLocation();
+  const navigate = useNavigate();
   const [sidebarRefreshKey, setSidebarRefreshKey] = useState(0);
   const [orgTab, setOrgTab] = useState<OrgTab>('detail');
+
+  // Derive selectedNode from URL
+  const selectedNode = slugToNode(location.pathname);
 
   const refreshSidebar = useCallback(() => {
     setSidebarRefreshKey((prev) => prev + 1);
@@ -34,20 +80,21 @@ const AdminDashboard: React.FC = () => {
 
   const handleOrgCreated = useCallback((orgId: string) => {
     refreshSidebar();
-    setSelectedNode({ type: 'org', id: orgId });
+    navigate(`/admin/org/${orgId}`);
     setOrgTab('detail');
-  }, [refreshSidebar]);
+  }, [refreshSidebar, navigate]);
 
   const handleSelectClassroom = useCallback((classroomId: number) => {
-    setSelectedNode({ type: 'classroom', id: classroomId });
-  }, []);
+    navigate(`/admin/classroom/${classroomId}`);
+  }, [navigate]);
 
-  // Reset tab when switching org
+  // When sidebar selects a node, navigate to its URL
   const handleSelectNode = useCallback((node: TreeNodeSelection | null) => {
-    setSelectedNode(node);
+    const slug = nodeToSlug(node);
+    navigate(slug ? `/admin/${slug}` : '/admin');
     if (node?.type !== 'org') return;
     setOrgTab('detail');
-  }, []);
+  }, [navigate]);
 
   return (
     <div className="flex flex-1 overflow-hidden">
@@ -124,6 +171,7 @@ const AdminDashboard: React.FC = () => {
         {selectedNode?.type === 'users' && <UsersPanel />}
         {selectedNode?.type === 'stories' && <StoryManagementPanel />}
         {selectedNode?.type === 'tts_audit' && <TtsSentenceTable />}
+        {selectedNode?.type === 'lesson_audio' && <LessonAudioTable />}
         {selectedNode?.type === 'story_structure_lab' && <StoryStructureLabPage />}
         {selectedNode?.type === 'keypoints_qa' && <KeypointsQADashboard />}
       </div>

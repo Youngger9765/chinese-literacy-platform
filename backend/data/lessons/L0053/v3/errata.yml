@@ -1,0 +1,21 @@
+lesson_uid: L0053
+version_id: v3
+notes:
+  errata:
+  - id: E1
+    section: 八 詞語複習
+    locator: 找字格子第 4 列第 10 欄
+    source: 便
+    corrected: 變
+    kind: 格子錯字
+    why: '第 10 欄由上而下圈起的四格是「臨（r1c10）機（r2c10）應（r3c10）便（r4c10）」，
+
+      拼出來是「臨機應便」，目標語詞是「臨機應變」。「便」與「變」同音（biàn）。
+
+      整個格子裡沒有第二個「變」字，所以這個語詞在格子中**沒有正確拼法**。'
+    confidence: high
+    evidence: 'document.xml 巢狀表格 r4c10 的文字就是「便」（不是 PDF 字型代換）；
+
+      該框為 roundRect（rot 90°、長 1.45 in ≈ 4 格），中心落在第 10 欄、第 1~4 列，
+
+      幾何與逐頁讀圖一致。'
