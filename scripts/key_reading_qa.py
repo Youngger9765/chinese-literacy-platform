@@ -51,18 +51,23 @@ _spec = importlib.util.spec_from_file_location("dw", REPO / "scripts" / "docx_wi
 dw = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(dw)
 
-# ⚠️ 對帳判準待確認（2026-08-28）
+# ✅ 判準已確認（2026-08-29）
 #
-# 這裡把 `target` 定義成「累計字數欄的最後一個數字」＝整篇文章的總字數，
-# 依據是 Owner 2026-08-24 說的「☞ 是 start，最後的數字是 end」。
-# 但實測對不上：157 課裡 145 課判「抽太少」，而換成「☞ 之後到文末」當基準
-# 也只有 22/147 落在 ±60 字內。**兩種讀法都對不起來。**
+# Owner 2026-08-24：「☞ 是 start，最後的數字是 end」。
+# 一度以為對不上（157 課裡 145 課判「抽太少」），但那是**資料錯，不是判準錯** ——
+# 我當時拿「存的」去比「整篇總字數」，少扣了 ☞ 之前的部分。
 #
-# 所以「貼合率 1%」這個數字**不要拿去下內容品質的結論** —— 它可能在說
-# 抽取太短，也可能在說這個判準問錯了問題。要 Owner 指一課實體學習單確認
-# 「最後的數字」指的是哪一段的結尾，才算驗過。
+# 扣掉之後兩個獨立的尺互相印證：
 #
-# 相對地，`in_spec`（300–400 字）不需要任何假設，可以直接引用。
+#   【☞→文末】  中位數 303   落在 300–400 的 67/147   250–450 的 108/147
+#   【現在存的】中位數 148   落在 300–400 的  4/147   250–450 的  16/147
+#
+# 303 正好落在 2026-07-20 專家審查定的 300–400 中間。所以 target =
+# 「累計字數欄最後一個數字」減掉「☞ 之前那幾段的字數」。
+#
+# 真正的 bug 在抽取端：`end_paragraph == start_paragraph` 有 150/160 ——
+# 只抽了 ☞ 那一段就停，而學習單寫的是「從指定段落（四☞）**開始**朗讀」。
+# 修抽取是 #2712（intern-first），不在這支腳本的範圍。
 #
 # 差多少才算沒貼合。一行約 30 字，抓半行。
 TOLERANCE = 15
@@ -70,6 +75,29 @@ TOLERANCE = 15
 MIN_RUN = 4
 # 2026-07-20 專家審查：念順順只練老師指定的重點段，約 300–400 字。
 SPEC_MIN, SPEC_MAX = 300, 400
+
+
+_CN_DIGITS = "一二三四五六七八九十"
+
+
+def _ordinal_to_int(s):
+    """「四」「十二」「3」→ int。認不出來回 None（寧可回「無法判斷」也不要硬猜）。"""
+    s = (s or "").strip()
+    if not s:
+        return None
+    if s.isdigit():
+        return int(s)
+    if s == "十":
+        return 10
+    if len(s) == 1:
+        return _CN_DIGITS.index(s) + 1 if s in _CN_DIGITS else None
+    if s.startswith("十"):
+        return 10 + (_CN_DIGITS.index(s[1]) + 1 if len(s) > 1 and s[1] in _CN_DIGITS else 0)
+    if "十" in s:
+        a, b = s.split("十", 1)
+        if a in _CN_DIGITS and (not b or b in _CN_DIGITS):
+            return (_CN_DIGITS.index(a) + 1) * 10 + ((_CN_DIGITS.index(b) + 1) if b else 0)
+    return None
 
 
 def _key_reading_file(vdir):
@@ -142,7 +170,15 @@ def audit(uid: str) -> dict:
         return out
 
     steps = [b - a for a, b in zip(seq, seq[1:])]
-    out["target"] = seq[-1]
+    # target = ☞ 那一段到文末的字數 = 總字數 - ☞ 之前那幾段
+    start_no = _ordinal_to_int(out.get("start_ordinal_printed"))
+    before = 0
+    if start_no and 2 <= start_no <= len(seq):
+        before = seq[start_no - 2]
+    out["start_no"] = start_no
+    out["chars_before_start"] = before
+    out["target"] = seq[-1] - before
+    out["article_total"] = seq[-1]
     out["counter_len"] = len(seq)
     out["last_step"] = steps[-1]
     out["typical_step"] = int(statistics.median(steps[:-1])) if len(steps) > 1 else 0

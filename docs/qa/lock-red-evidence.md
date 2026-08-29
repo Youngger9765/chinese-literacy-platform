@@ -20,6 +20,7 @@
 - `test_student_progress.py` — mutation：把 fallback 的 completed 分支改成 False → 1 條紅
 - `test_reading_audio_upload.py` — mutation：拿掉活路的上傳呼叫 → 1 failed；改掉 blob path 前綴 → 1 failed；還原 → 15 passed
 - `test_reading_audio_replay_student.py` — mutation：拿掉 IDOR 的 owner 過濾 → 1 failed；還原 → 9 passed（那條 IDOR 斷言在此之前從沒執行過）
+- `test_key_reading_qa_2712.py` — mutation：把 target 改回「整篇總字數」→ 1 failed；還原 → 14 passed
 
 ## grandfathered（既有債，未逐支驗過）
 
