@@ -150,6 +150,8 @@ jobs:
             tests/test_progress_carry_forward_2889.py \
             tests/test_raw_table_not_public_2769.py \
             tests/test_reading_attempt_history.py \
+            tests/test_reading_audio_replay_student.py \
+            tests/test_reading_audio_upload.py \
             tests/test_reading_benchmark_2722.py \
             tests/test_reading_benchmark_reaches_the_row_2964.py \
             tests/test_regression_2_5_flash_lite_default_1744.py \
