@@ -51,10 +51,40 @@ _spec = importlib.util.spec_from_file_location("dw", REPO / "scripts" / "docx_wi
 dw = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(dw)
 
+# ⚠️ 對帳判準待確認（2026-08-28）
+#
+# 這裡把 `target` 定義成「累計字數欄的最後一個數字」＝整篇文章的總字數，
+# 依據是 Owner 2026-08-24 說的「☞ 是 start，最後的數字是 end」。
+# 但實測對不上：157 課裡 145 課判「抽太少」，而換成「☞ 之後到文末」當基準
+# 也只有 22/147 落在 ±60 字內。**兩種讀法都對不起來。**
+#
+# 所以「貼合率 1%」這個數字**不要拿去下內容品質的結論** —— 它可能在說
+# 抽取太短，也可能在說這個判準問錯了問題。要 Owner 指一課實體學習單確認
+# 「最後的數字」指的是哪一段的結尾，才算驗過。
+#
+# 相對地，`in_spec`（300–400 字）不需要任何假設，可以直接引用。
+#
 # 差多少才算沒貼合。一行約 30 字，抓半行。
 TOLERANCE = 15
 # 少於這麼多個數字就不像累計字數欄，寧可回「無法判斷」也不要硬算。
 MIN_RUN = 4
+# 2026-07-20 專家審查：念順順只練老師指定的重點段，約 300–400 字。
+SPEC_MIN, SPEC_MAX = 300, 400
+
+
+def _key_reading_file(vdir):
+    """那一課的 key_reading yml —— 無 slug 的舊檔名優先，其次帶 slug 的第一份。"""
+    cand = vdir / "key_reading.yml"
+    if cand.is_file():
+        return cand
+    rest = sorted(vdir.glob("key_reading.*.yml"))
+    return rest[0] if rest else cand
+
+
+def _key_reading_files(lessons_root):
+    """全語料的 key_reading yml（兩種檔名都算）。"""
+    return sorted(lessons_root.glob("L*/v3/key_reading.yml")) + \
+           sorted(lessons_root.glob("L*/v3/key_reading.*.yml"))
 
 
 def cumulative_counter(paragraphs: list[str]) -> list[int]:
@@ -84,10 +114,12 @@ def start_ordinal(instruction: str) -> str | None:
 
 def audit(uid: str) -> dict:
     out: dict = {"uid": uid, "verdict": "無法判斷", "why": ""}
-    kp = LESSONS / uid / "v3" / "key_reading.yml"
+    # ⚠️ #2916 之後檔名是 `key_reading.{slug}.yml`（一課多篇會有好幾份）。
+    #    寫死無 slug 的名字 = 一課都掃不到，而且不會有錯誤 —— 只會回「沒有資料」。
+    kp = _key_reading_file(LESSONS / uid / "v3")
     lp = LESSONS / uid / "v3" / "lesson.yml"
     if not kp.is_file():
-        out["why"] = "沒有 key_reading.yml"
+        out["why"] = "沒有 key_reading yml"
         return out
     kr = yaml.safe_load(kp.read_text(encoding="utf-8")) or {}
     kr = kr.get("key_reading", kr) or {}
@@ -121,6 +153,10 @@ def audit(uid: str) -> dict:
         out["verdict"] = "空"
         out["why"] = "passage 是空的"
         return out
+    # 不需要任何判斷的一個量：2026-07-20 專家審查定的規格是 300–400 字。
+    # 下面那個「對帳」要先假設『最後的數字』是什麼意思，這個不用。
+    out["in_spec"] = SPEC_MIN <= out["stored"] <= SPEC_MAX
+
     delta = out["stored"] - out["target"]
     out["delta"] = delta
     if abs(delta) <= TOLERANCE:
@@ -139,7 +175,7 @@ def main() -> int:
     ap.add_argument("--uid", action="append")
     ap.add_argument("--json", action="store_true")
     a = ap.parse_args()
-    uids = a.uid or sorted(p.parts[-3] for p in LESSONS.glob("L*/v3/key_reading.yml"))
+    uids = a.uid or sorted({p.parts[-3] for p in _key_reading_files(LESSONS)})
     rows = [audit(u) for u in uids]
 
     if a.json:
@@ -162,6 +198,9 @@ def main() -> int:
         print("  抽太多最嚴重：")
         for r in worst:
             print(f"     {r['uid']}  學習單 {r['target']} → 存 {r['stored']}（多 {r['delta']}）")
+    in_spec = [r for r in rows if r.get("in_spec")]
+    print(f"    落在 300–400 字規格的：{len(in_spec)}/{len(rows)}")
+
     # 「無法判斷」要看得見，不可以被當成通過
     unknown = [r for r in rows if r["verdict"] == "無法判斷"]
     if unknown:

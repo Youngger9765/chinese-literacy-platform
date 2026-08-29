@@ -78,8 +78,13 @@ def test_the_real_corpus_still_answers():
 
     少了這條，上面那條（判不動要說判不動）可以靠「永遠判不動」滿足。
     """
-    uids = sorted(p.parts[-3] for p in (REPO / "backend" / "data" / "lessons").glob("L*/v3/key_reading.yml"))
-    assert len(uids) > 100, f"只找到 {len(uids)} 課 key_reading.yml，掃描壞了"
+    # ⚠️ #2916 之後檔名是 `key_reading.{slug}.yml`；兩種都要算。
+    #    這條下限斷言就是為了抓「掃描壞了」跟「真的沒有」長得一樣的情況 ——
+    #    2026-08-28 它真的抓到了（只寫無 slug 的名字 → 0 課）。
+    root = REPO / "backend" / "data" / "lessons"
+    uids = sorted({p.parts[-3] for p in
+                   list(root.glob("L*/v3/key_reading.yml")) + list(root.glob("L*/v3/key_reading.*.yml"))})
+    assert len(uids) > 100, f"只找到 {len(uids)} 課 key_reading yml，掃描壞了"
     sample = [krqa.audit(u) for u in uids[:12]]
     judged = [r for r in sample if r["verdict"] in ("貼合", "抽太多", "抽太少")]
     if not any(r.get("why", "").startswith("原稿不在") for r in sample):
