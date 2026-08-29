@@ -31,3 +31,17 @@ strategy_sources:
   worksheet: null
   master_sheet: 認識文言文──一字多義：少
   previous: 認識文言文—一字多義：少
+source_profile:
+  class: no_body
+  note: 課文沒有段落 —— 上游課文抽取的缺口，這一層修不了
+  has_key_reading_section: true
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: null
+  has_body_paragraphs: false
+  paragraph_idx_unique: true
+  anchor_hits: 0
+  has_counter_column: false
+  body_in_tables: false
+  invisible_chars_docx_only: false
+  profiled: '2026-08-24'

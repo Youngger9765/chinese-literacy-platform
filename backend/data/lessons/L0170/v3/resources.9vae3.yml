@@ -1,0 +1,19 @@
+lesson_uid: L0170
+version_id: v3
+section_no: 九
+resources:
+  section_name: 知識補給站
+  label: 影片連結
+  videos:
+  - index: 1
+    title: 艾菲爾與影子 關於自我批判的動畫
+    duration: (5:26)
+    source: HY K
+    has_qr: true
+  - index: 2
+    title: 非黑即白的思考模式 ｜ 打破極端的二元思考
+    duration: (4:11)
+    source: 均一教育平台
+    has_qr: true
+  slug: 9vae3
+  text_ref: 3vey6

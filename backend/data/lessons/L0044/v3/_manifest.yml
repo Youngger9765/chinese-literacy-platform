@@ -6,6 +6,9 @@ sections:
   name: 閱讀聚光燈
   module: spotlight
   subtitle: 解題策略──看特殊標點找線索
+  text_ref: yqxqv
+  slug: t9rat
+  file: spotlight.t9rat.yml
   pages:
   - 1
   - 2

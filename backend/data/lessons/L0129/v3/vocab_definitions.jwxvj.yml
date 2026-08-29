@@ -1,0 +1,62 @@
+lesson_uid: L0129
+version_id: v3
+section_no: 三
+vocab_definitions:
+  vocabulary_bank:
+  - 備受矚目
+  - 心緒
+  - 演算法
+  - 自我價值
+  - 欲罷不能
+  - 推播
+  - 悵然若失
+  - 起伏不定
+  - 過濾泡泡
+  - 左右
+  - 席捲
+  vocabulary_bank_label: 本課語詞
+  instruction: '請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+
+    🅐 從本課語詞框框，找語詞。
+
+    🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+
+    🅒 問同學。'
+  items:
+  - index: 1
+    word: 備受矚目
+    definition: 矚目：被看見。指受到很多人的注意，成為大家關注的焦點。
+  - index: 2
+    word: 欲罷不能
+    definition: 想要停下來，卻停不住，形容對某件事非常著迷，忍不住一直做下去。
+  - index: 3
+    word: 自我價值
+    definition: 一個人對自身價值、能力與是否值得被肯定的整體看法。
+  - index: 4
+    word: 心緒
+    definition: 一個人內心的情緒狀態，如平靜、焦慮、失落或愉快。
+  - index: 5
+    word: 悵然若失
+    definition: 若失：好像失去了什麼。指心裡感到失落、空虛，好像少了什麼重要的東西。
+  - index: 6
+    word: 起伏不定
+    definition: 形容情緒或狀態時好時壞，變化很大，沒有穩定下來。
+  - index: 7
+    word: 席捲
+    definition: 形容事物迅速擴散，並產生廣泛影響。
+  - index: 8
+    word: 推播
+    definition: 推：主動送出；播：傳送、播放。指平台主動把資訊、影片或廣告送到使用者眼前，而不是等使用者自己去找。
+  - index: 9
+    word: 左右
+    definition: 原本指左邊和右邊；本文作動詞，指影響或牽動人的想法、情緒或行為。
+  - index: 10
+    word: 演算法
+    definition: 按照一定步驟計算或處理資料的方法。本文指平台用來分析使用紀錄、決定推薦內容的方法。
+  - index: 11
+    word: 過濾泡泡
+    definition: 過濾：把某些東西篩選掉，只留下特定的內容。本文指網路平台持續推薦符合使用者偏好的資訊，使相似內容較常出現，其他觀點較少被看見，像被泡泡包住一樣。
+  notes:
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
+  slug: jwxvj
+  text_ref: uc6qm

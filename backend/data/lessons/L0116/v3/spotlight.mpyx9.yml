@@ -1,0 +1,248 @@
+lesson_uid: L0116
+version_id: v3
+section_no: 六
+spotlight:
+  strategy_name: 寫作手法——用故事和例子支持觀點
+  strategy_type: writing_craft
+  section_title_printed: 閱讀聚光燈
+  answer_carrier: 紅色 ☑（w:sym Wingdings F0FE，在文字層，22 個全為紅色）；歸納格的填空是橘色手寫
+  shape_note: '原稿的一、三、四大題各有一張表格，表格裡**每一格都是一組單選**（□①…／□②…）。
+
+    表格型別（fill_table/table）在前端只會把儲存格當純文字畫出來，選項不能作答；
+
+    所以這裡把每一列拆成一個 sub_block（label ＝ 該列的事件／人物／例子），
+
+    底下掛該列的 single。表頭字（一開始看起來／後來怎麼變化？…）當成 single 的 prompt，照原稿。'
+  blocks:
+  - type: concept_box
+    text: '本文透過故事和例子提醒我們：遇到挫敗時，不要太快認定事情只有壞的一面；先穩住心，換個角度看，可能會發現轉機或成長。
+
+      讀這類文章時，不能只看故事或例子，還可學到：作者如何使用故事和例子，讓文章的觀點更清楚、更有說服力？'
+  - type: guide
+    text: 一、看故事轉折，讀出道理
+  - type: guide
+    text: 1.從塞翁故事看福禍轉折，請先根據課文完成表格
+  - type: sub_block
+    label: ⑴馬忽然跑走了
+    items:
+    - type: single
+      prompt: 一開始看起來
+      options:
+        1: 福
+        2: 禍
+      answer: 2
+    - type: single
+      prompt: 後來怎麼變化？
+      options:
+        1: 馬回來了，還帶回幾匹漂亮的野馬。
+        2: 馬再也沒有回來。
+      answer: 1
+  - type: sub_block
+    label: ⑵馬回來，還帶回野馬
+    items:
+    - type: single
+      prompt: 一開始看起來
+      options:
+        1: 福
+        2: 禍
+      answer: 1
+    - type: single
+      prompt: 後來怎麼變化？
+      options:
+        1: 野馬讓一家人從此過得很富有。
+        2: 兒子騎野馬，結果摔斷了腿。
+      answer: 2
+  - type: sub_block
+    label: ⑶兒子摔斷了腿
+    items:
+    - type: single
+      prompt: 一開始看起來
+      options:
+        1: 福
+        2: 禍
+      answer: 2
+    - type: single
+      prompt: 後來怎麼變化？
+      options:
+        1: 兒子因為跛足，沒有被徵兵。
+        2: 兒子因此被派去打仗。
+      answer: 1
+  - type: sub_block
+    label: ⑷兒子沒有被徵兵
+    items:
+    - type: single
+      prompt: 一開始看起來
+      options:
+        1: 福
+        2: 禍
+      answer: 1
+    - type: single
+      prompt: 後來怎麼變化？
+      options:
+        1: 他因此逃過戰爭，保住性命。
+        2: 他因此失去所有生活希望。
+      answer: 1
+  - type: single
+    prompt: 2.看完上表，這個故事讓我們明白什麼？
+    options:
+      1: 眼前看似幸運的事，通常會一直帶來好結果。
+      2: 遇到不幸時，只要耐心等待，事情自然會好轉。
+      3: 眼前看似福或禍，都不一定是最後定局。
+    answer: 3
+  - type: guide
+    text: 二、看人物對照：理解想法（詮釋）怎麼影響情緒和行動
+  - type: guide
+    text: '1.小宇和塞翁怎麼看待不順利的事
+
+      一件事發生後，我們會對它產生想法。這個想法，就是「詮釋」。
+
+      不同的詮釋，可能帶來不同的情緒和行動。請根據課文勾選答案。'
+  - type: sub_block
+    label: 小宇
+    intro: 遇到的事
+    instruction: 小考52分
+    items:
+    - type: single
+      prompt: 詮釋：怎麼解釋這件事？
+      options:
+        1: 我不是讀書的料。
+        2: 是福是禍？還不知道。
+      answer: 1
+    - type: single
+      prompt: 情緒／行動
+      options:
+        1: 沮喪、心不在焉。
+        2: 不過度悲傷，保持清醒。
+      answer: 1
+  - type: sub_block
+    label: 塞翁
+    intro: 遇到的事
+    instruction: 馬跑走
+    items:
+    - type: single
+      prompt: 詮釋：怎麼解釋這件事？
+      options:
+        1: 我不是養馬的料。
+        2: 是福是禍？還不知道。
+      answer: 2
+    - type: single
+      prompt: 情緒／行動
+      options:
+        1: 沮喪、心不在焉。
+        2: 不過度悲傷，保持清醒。
+      answer: 2
+  - type: single
+    prompt: 2.從小宇和塞翁的比較，可以看出作者想提醒我們什麼？
+    options:
+      1: 遇到不順利的事，情緒主要由事情本身決定。
+      2: 同樣遇到不順利的事，不同的詮釋，會帶來不同的情緒和行動。
+    answer: 2
+  - type: guide
+    text: 三、看例子：找共同點
+  - type: guide
+    text: '1.看例子的一開始和後來變化
+
+      作者把這個道理放到不同情境中說明。
+
+      請完成表格，看看這些情境前後有什麼共同變化。'
+  - type: sub_block
+    label: ⑴小宇小考52分
+    intro: 一開始看起來
+    instruction: 考差了，好像自己很失敗
+    items:
+    - type: single
+      prompt: 後來或換個角度詮釋之後
+      options:
+        1: 可以發現哪些地方還要加強。
+        2: 代表自己真的不是讀書的料。
+      answer: 1
+  - type: sub_block
+    label: ⑵新冠肺炎
+    intro: 一開始看起來
+    instruction: 遠距上學上班，商店受影響，看起來是危機
+    items:
+    - type: single
+      prompt: 後來或換個角度詮釋之後
+      options:
+        1: 遠距設備需求增加，臺灣電子產業出現成長的轉機。
+        2: 所有事情都變壞，沒有任何轉機
+      answer: 1
+  - type: sub_block
+    label: ⑶羅伯茲的反向祝福
+    intro: 一開始看起來
+    instruction: 不公平、孤單、失敗，聽起來都不好
+    items:
+    - type: single
+      prompt: 後來或換個角度詮釋之後
+      options:
+        1: 只要經歷不公平、孤單或失敗，人自然就會成長。
+        2: 可能讓人懂得正義、珍惜朋友、學會謙遜。
+      answer: 2
+  - type: sub_block
+    label: 歸納例子的共同點
+    value: '一開始都看起來是【　】
+
+      後來或換個角度詮釋，都可能出現【　】'
+    blanks:
+    - answer: 不順利/不好的事
+    - answer: 轉機/ 成長
+    answer_carrier: 橘色手寫（C:E97132），文字流有此資訊；這一列是三.1 表格的最後一列
+  - type: single
+    prompt: 2.共同變化：上表中的例子，共同想說明什麼？
+    options:
+      1: 眼前的不順利不一定是最後結果，換個角度看，可能發現轉機或成長
+      2: 遇到不順利時，先等待事情自行改變，比採取行動更重要。
+      3: 只要保持樂觀，就可以忽略挫敗帶來的問題和影響。
+    answer: 1
+  - type: guide
+    text: 四、連回觀點：判斷故事和例子的作用
+  - type: guide
+    text: '本文透過故事和例子支持的主要觀點是：遇到挫敗時，不必太快認定事情只有壞的一面；先穩住心，換個角度看，可能會發現轉機或成長。
+
+      作者最後再進一步提出行動建議：看見問題後，還可調整方法。'
+  - type: guide
+    text: 1. 請判斷前面的故事和例子，分別支持主要觀點的哪一個面向。
+  - type: sub_block
+    label: ⑴塞翁故事
+    items:
+    - type: single
+      prompt: 它怎麼支持主要觀點？
+      options:
+        1: 說明眼前福禍不一定是最後定局，不要太快判定好壞。
+        2: 說明壞事最後一定會自然變好，只要等待好運就可以。
+      answer: 1
+  - type: sub_block
+    label: ⑵小宇和塞翁
+    items:
+    - type: single
+      prompt: 它怎麼支持主要觀點？
+      options:
+        1: 說明同樣遇到不順利的事，怎麼詮釋會影響情緒和行動。
+        2: 說明只要保持正面的想法，不順利的事就會自然消失。
+      answer: 1
+  - type: sub_block
+    label: ⑶羅伯茲反向祝福、新冠肺炎
+    items:
+    - type: single
+      prompt: 它怎麼支持主要觀點？
+      options:
+        1: 說明遭遇的不順利越多，後來得到的成長就越大。
+        2: 說明不順利的事，換個角度看，可能有轉機或成長。
+      answer: 2
+  - type: single
+    prompt: 2.這些故事和例子合起來，有什麼作用？
+    options:
+      1: 它們分別從「事情未定、想法影響、換角度有轉機」三個面向，支持主要觀點。
+      2: 它們主要用來增加故事與背景資料，即使刪除，也不影響作者觀點的說服力。
+    answer: 1
+  - type: self_check
+    label: ◎自我檢核
+    instruction: 如果你有做到，請在□中打勾。
+    items:
+    - 1.我能判斷故事和例子，是如何支持作者的觀點。
+    - 2.我能把多個例子合起來看，找出它們共同支持的意思。
+    - 3.下次讀到「用故事或例子說明觀點」的文章時，我會問自己：這些故事和例子怎麼讓作者的觀點更清楚、更有說服力？
+    no_correct_answer: true
+    answer_carrier: 學生自填，原稿無勾選
+  slug: mpyx9
+  text_ref: dcjhu

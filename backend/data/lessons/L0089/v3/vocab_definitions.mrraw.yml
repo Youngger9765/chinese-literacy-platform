@@ -1,0 +1,65 @@
+lesson_uid: L0089
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: '請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+
+    🅐 從本課語詞框中找語詞。
+
+    🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+
+    🅒 問同學。'
+  vocabulary_bank:
+  - 經典之作
+  - 囑託
+  - 定格
+  - 鉅細靡遺
+  - 老邁
+  - 不置可否
+  - 獨白
+  - 凝住
+  - 敏捷
+  - 輕蔑
+  - 笨拙
+  - 迂
+  items:
+  - index: 1
+    word: 囑託
+    definition: 吩咐並託付對方辦理某件事。
+  - index: 2
+    word: 鉅細靡遺
+    definition: 大小事都沒有遺漏，形容內容完整或做事仔細。
+  - index: 3
+    word: 笨拙
+    definition: 動作或做事不靈活、不靈巧。
+  - index: 4
+    word: 定格
+    definition: 讓原本連續的動作或畫面停住，呈現靜止的一刻。本文指演員暫停動作和表情。
+  - index: 5
+    word: 獨白
+    definition: 戲劇、電影或小說中，角色獨自說出內心的感受或想法的一段話。
+  - index: 6
+    word: 不置可否
+    definition: 不說贊成，也不說反對。
+  - index: 7
+    word: 老邁
+    definition: 年紀大，體力和行動逐漸衰弱。
+  - index: 8
+    word: 經典之作
+    definition: 經過長時間仍受到肯定，並能成為同類作品典範的作品。
+  - index: 9
+    word: 敏捷
+    definition: 反應快，動作靈活。
+  - index: 10
+    word: 迂
+    definition: 言行守舊、不懂變通，讓人覺得不合時宜。
+  - index: 11
+    word: 輕蔑
+    definition: 看不起或輕視。
+  - index: 12
+    word: 凝住
+    definition: 形容像水凝固成冰一樣，表示停頓或靜止。
+  notes:
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
+  slug: mrraw
+  text_ref: f7mav

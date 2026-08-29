@@ -1,0 +1,174 @@
+lesson_uid: L0102
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 黏稠
+  - 信以為真
+  - 迷魂陣
+  - 尼古丁
+  - 相提並論
+  - 似是而非
+  - 混淆
+  - 長期提款機
+  - 行銷手法
+  - 查緝
+  - 指鹿為馬
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 指說訴告勸毒查緝詢問
+  - 鹿陷說戒世信以為真任
+  - 為阱長人黏性器神靈迷
+  - 馬行道路土黏長人魂尼
+  - 訪為短相同期稠陣魄古
+  - 查偽古老提行銷手法丁
+  - 偽鈔裝款真並雞丁似混
+  - 證科機靈偽行論是陷水
+  - 並排學混淆李而提入摸
+  - 排列魂魄常非是醒手魚
+  answers_are_graphical: true
+  answers_printed: true
+  answer_paths:
+  - word: 指鹿為馬
+    cells:
+    - - 1
+      - 1
+    - - 2
+      - 1
+    - - 3
+      - 1
+    - - 4
+      - 1
+    direction: vertical
+  - word: 查緝
+    cells:
+    - - 1
+      - 7
+    - - 1
+      - 8
+    direction: horizontal
+  - word: 信以為真
+    cells:
+    - - 2
+      - 6
+    - - 2
+      - 7
+    - - 2
+      - 8
+    - - 2
+      - 9
+    direction: horizontal
+  - word: 迷魂陣
+    cells:
+    - - 3
+      - 10
+    - - 4
+      - 9
+    - - 5
+      - 8
+    direction: diagonal_down_left
+  - word: 黏稠
+    cells:
+    - - 4
+      - 6
+    - - 5
+      - 7
+    direction: diagonal_down_right
+  - word: 長期提款機
+    cells:
+    - - 4
+      - 7
+    - - 5
+      - 6
+    - - 6
+      - 5
+    - - 7
+      - 4
+    - - 8
+      - 3
+    direction: diagonal_down_left
+  - word: 尼古丁
+    cells:
+    - - 4
+      - 10
+    - - 5
+      - 10
+    - - 6
+      - 10
+    direction: vertical
+  - word: 相提並論
+    cells:
+    - - 5
+      - 4
+    - - 6
+      - 5
+    - - 7
+      - 6
+    - - 8
+      - 7
+    direction: diagonal_down_right
+  - word: 行銷手法
+    cells:
+    - - 6
+      - 6
+    - - 6
+      - 7
+    - - 6
+      - 8
+    - - 6
+      - 9
+    direction: horizontal
+  - word: 偽科學
+    cells:
+    - - 7
+      - 1
+    - - 8
+      - 2
+    - - 9
+      - 3
+    direction: diagonal_down_right
+  - word: 似是而非
+    cells:
+    - - 7
+      - 9
+    - - 8
+      - 8
+    - - 9
+      - 7
+    - - 10
+      - 6
+    direction: diagonal_down_left
+  - word: 混淆
+    cells:
+    - - 9
+      - 4
+    - - 9
+      - 5
+    direction: horizontal
+  notes:
+    target_words: '⚠️ 灰框列的 11 個語詞與三大題「本課語詞」框的 11 個**不完全相同**：
+
+      灰框多了「行銷手法」、少了「偽科學」。而格子裡**兩個都被圈起來**，
+
+      所以答案路徑有 12 條、比灰框的 11 個多一條（多的是「偽科學」）。照原稿記錄。'
+    answer_paths: '12 條路徑，逐格取字皆能拼回，格子沒有錯字。
+
+      ✅ 幾何交叉驗證：`roundRect` 紙上 13 個、紙外 0 個，而路徑 12 條 ——
+
+      **多出來的那一個不是漏抓的答案，是「灰框」本身**：它 6.48×1.30 in、
+
+      `fill=bg1` `line=bg1`（灰底灰框），就是框住語詞清單的那個外框，
+
+      其餘 12 個都是 accent2／E97132 的細長框。
+
+      （同型：L0053 的第 11 個 roundRect 也是灰框。）
+
+      ⚠️ 「相提並論」與「長期提款機」**共用第 6 列第 5 欄的「提」**（兩條斜線交叉），
+
+      不是重複圈選；格子裡另有一個「提」在第 9 列第 8 欄，但接不出完整語詞。'
+  slug: 46t3h
+  text_ref: eujnf

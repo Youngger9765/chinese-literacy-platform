@@ -42,11 +42,9 @@ describe('MultipleChoiceMode — #1912 wrong-answer feedback', () => {
 
     // The first definition shown is for defIndex 0 → correct answer is '勤奮' (idx 0)
     // Pick any button that is NOT the correct word (i.e., a wrong one)
-    const allButtons = screen.getAllByRole('button');
-    const wrongButton = allButtons.find(
-      (btn) => btn.textContent?.trim() !== '' && btn.textContent?.trim() !== '勤奮'
-    );
-    expect(wrongButton).toBeTruthy();
+    // ⚠️ 舊寫法用 find 挑「第一個非空且不是正解」的按鈕 —— 那會挑到「示範」，
+    //    根本沒點到選項，於是測出「沒有錯誤標記」的假結果（#2933）。
+    const wrongButton = screen.getByRole('button', { name: '謙虛' });
 
     fireEvent.click(wrongButton!);
 
@@ -97,11 +95,8 @@ describe('MultipleChoiceMode — #1912 wrong-answer feedback', () => {
       />
     );
 
-    const allButtons = screen.getAllByRole('button');
-    const wrongButton = allButtons.find(
-      (btn) => btn.textContent?.trim() !== '' && btn.textContent?.trim() !== '勤奮'
-    );
-    fireEvent.click(wrongButton!);
+    // 同一個壞掉的 find（會挑到「示範」），改成明確點一個錯誤選項
+    fireEvent.click(screen.getByRole('button', { name: '謙虛' }));
 
     // After wrong answer, the feedback panel must mention the correct answer
     // Use getAllByText (no throw on multiple) and confirm at least one element has '勤奮'
@@ -122,17 +117,19 @@ describe('MultipleChoiceMode — #1912 wrong-answer feedback', () => {
       />
     );
 
-    const allButtons = screen.getAllByRole('button');
-    const wrongButton = allButtons.find(
-      (btn) => btn.textContent?.trim() !== '' && btn.textContent?.trim() !== '勤奮'
-    );
-    fireEvent.click(wrongButton!);
+    // 同一個壞掉的 find（會挑到「示範」），改成明確點一個錯誤選項
+    fireEvent.click(screen.getByRole('button', { name: '謙虛' }));
 
-    // After wrong answer, there must be an explicit "next" or "繼續" button
-    const nextBtn =
-      screen.queryByRole('button', { name: /繼續|下一題|next/i }) ||
-      screen.queryByRole('button', { name: /再試一次|try again/i });
-    expect(nextBtn).toBeTruthy();
+    // #2159 之後不再顯示「下一題」按鈕，改成把錯的選項標 ✗、讓學生直接重選。
+    // 這條要鎖的意圖沒變：不可靜默接受、不可自動前進。
+    const labels = screen.getAllByRole('button').map((b) => b.textContent?.trim() ?? '');
+    expect(labels.some((t) => t.includes('✗')), `錯的選項沒有標記：${labels}`).toBe(true);
+    expect(
+      screen.queryByRole('button', { name: /繼續|下一題/ }),
+      '不該自動放行到下一題',
+    ).toBeNull();
+    // 仍要能繼續作答
+    expect(screen.getByRole('button', { name: '勤奮' })).not.toBeDisabled();
   });
 });
 

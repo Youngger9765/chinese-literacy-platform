@@ -5,29 +5,43 @@ sections:
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
+  slug: pa39q
+  file: full_text_annotate.pa39q.yml
   pages:
   - 1
   - 2
 - 'no': 二
   name: 念順順
   module: key_reading
+  text_ref: pa39q
+  slug: jj9ka
+  file: key_reading.jj9ka.yml
   pages:
   - 2
   - 3
 - 'no': 三
   name: 語詞我最棒
   module: vocab_definitions
+  text_ref: pa39q
+  slug: rjjke
+  file: vocab_definitions.rjjke.yml
   pages:
   - 3
   - 4
 - 'no': 四
   name: 語詞應用
   module: vocab_application
+  text_ref: pa39q
+  slug: wn7nn
+  file: vocab_application.wn7nn.yml
   pages:
   - 4
 - 'no': 五
   name: 文章重點表
   module: keypoints
+  text_ref: pa39q
+  slug: uqpay
+  file: keypoints.uqpay.yml
   pages:
   - 4
   - 5
@@ -35,6 +49,9 @@ sections:
   name: 品格聚光燈
   module: spotlight
   subtitle: 落實環保3R─從問題到行動
+  text_ref: pa39q
+  slug: e64w9
+  file: spotlight.e64w9.yml
   pages:
   - 5
   - 6
@@ -42,18 +59,27 @@ sections:
 - 'no': 七
   name: 閱讀理解
   module: comprehension
+  text_ref: pa39q
+  slug: yfrcj
+  file: comprehension.yfrcj.yml
   pages:
   - 7
   - 8
 - 'no': 八
   name: 詞語複習
   module: vocab_review
+  text_ref: pa39q
+  slug: pu66w
+  file: vocab_review.pu66w.yml
   pages:
   - 8
   - 9
 - 'no': 九
   name: 知識補給站
   module: resources
+  text_ref: pa39q
+  slug: th3pt
+  file: resources.th3pt.yml
   pages:
   - 9
 dispatch:

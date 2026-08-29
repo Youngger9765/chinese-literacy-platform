@@ -1,4 +1,6 @@
 import React, { useEffect, useRef, useMemo } from 'react';
+import { useCurrentStepId } from '../hooks/useCurrentStepId';
+import { storyForStep } from '../services/api';
 import { Outlet, useParams, useNavigate, useOutletContext, useLocation } from 'react-router-dom';
 import type {
   Story,
@@ -283,9 +285,30 @@ const LearningLayout: React.FC = () => {
   // minted a fresh object; child useEffect hooks that depend on context
   // identity (rather than individual fields) would needlessly re-run.
   // NOTE: must be before early returns to satisfy Rules of Hooks.
+  // 這一步該看到哪一篇（#2916）。一課印了好幾篇課文時，
+  // `key-passage-reading#9a7x4` 是第 2 篇的念順順 —— 不換的話三篇都會渲染
+  // 頂層的 `key_reading`（＝第 1 篇）。有段落、會唸、不報錯，只是唸錯篇。
+  //
+  // 換在這裡而不是各步驟頁裡：所有步驟頁都吃 `selectedStory`，
+  // 一處換完全部正確；散在各頁換就會有人漏掉，而漏掉是看不出來的。
+  const stepKey = useCurrentStepId('');
+  // 各步驟頁寫進度時傳的是寫死的 base id（`keypoints-table`）。
+  // 一課多篇時三篇會寫進同一個 key，做完第 2 篇第 1 篇也變完成，而且沒有徵兆。
+  // 在這裡補上輪次，10 個步驟頁都不用改（#2930）。
+  const saveStepProgressPatchKeyed = React.useCallback(
+    (opts: Parameters<typeof saveStepProgressPatch>[0]) =>
+      saveStepProgressPatch({ ...opts, currentStepKey: stepKey }),
+    [saveStepProgressPatch, stepKey],
+  );
+
+  const storyForThisStep = useMemo(
+    () => storyForStep(selectedStory, stepKey),
+    [selectedStory, stepKey],
+  );
+
   const ctx: LearningContext = useMemo(
     () => ({
-      selectedStory,
+      selectedStory: storyForThisStep,
       session,
       lastAttempt,
       rightPanelWidth,
@@ -320,14 +343,14 @@ const LearningLayout: React.FC = () => {
       syncProgress,
       flushProgress,
       stepProgressData: stepProgressState,
-      saveStepProgressPatch,
+      saveStepProgressPatch: saveStepProgressPatchKeyed,
       isAssignmentReadyForSubmit,
       missingAssignmentSteps,
       firstIncompleteStepPath,
       hasActiveAssignment,
     }),
     [
-      selectedStory,
+      storyForThisStep,
       session,
       lastAttempt,
       rightPanelWidth,

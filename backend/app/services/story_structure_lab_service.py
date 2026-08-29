@@ -144,8 +144,16 @@ def _keypoints_path(parsed_code: str | None, lesson_uid: str | None = None) -> P
         # uid 給了就只認這條。**不回退到 legacy** —— legacy 以 parsed_code 為 key，
         # 回退等於「這一課沒有，那就拿對得上 parsed_code 的那份」，可能是別課的檔；
         # 而且它同時把「二修沒產出這一課」這個真缺口掩蓋成看起來有資料。
-        path = _LESSONS_DIR / lesson_uid / "v3" / "keypoints.yml"
-        return path if path.exists() else None
+        # 檔名是 `keypoints.{自己的 slug}.yml`（#2916），多篇課一篇一份。
+        #
+        # ⚠️ 這裡本來寫死 `keypoints.yml`，改名後**永遠讀不到** ——
+        #    而讀不到是靜默回 None，於是後台重點表儀表板顯示「0 課有重點表」，
+        #    磁碟上其實有 155 課。沒有錯誤、頁面正常，只是全空。
+        #
+        # 多份時取帳本的第一份：這個儀表板是一課一列，
+        # 逐篇檢視要另外做（記在 docs/prd/multi-text-open-issues.md）。
+        found = sorted((_LESSONS_DIR / lesson_uid / "v3").glob("keypoints.*.yml"))
+        return found[0] if found else None
     if not parsed_code:
         return None
     path = _SCHEMA_DIR / f"{parsed_code}.keypoints.yml"

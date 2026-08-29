@@ -1,0 +1,52 @@
+lesson_uid: L0105
+version_id: v3
+section_no: 三
+vocab_definitions:
+  vocabulary_bank:
+  - 夢寐以求
+  - 行囊
+  - 深不可測
+  - 迷霧
+  - 迅疾如風
+  - 崎嶇
+  - 掛慮
+  - 拒人於千里之外
+  - 卸下心防
+  - 舉世聞名
+  - 馬不停蹄
+  items:
+  - index: 1
+    word: 迷霧
+    definition: 形容霧濃到分不清方向。
+  - index: 2
+    word: 卸下心防
+    definition: 不再防備某個人或某件事。
+  - index: 3
+    word: 崎嶇
+    definition: 山路或地面高低不平，有時候也比喻人生艱難。
+  - index: 4
+    word: 舉世聞名
+    definition: 形容名氣很大，全世界都知道。舉世，全世界。
+  - index: 5
+    word: 夢寐以求
+    definition: 睡夢中都在尋找、追求，形容願望很強烈。寐，睡著。
+  - index: 6
+    word: 馬不停蹄
+    definition: 馬不停的往前走，形容到處奔走，非常忙碌。
+  - index: 7
+    word: 行囊
+    definition: 旅行時攜帶的行李或包袱。
+  - index: 8
+    word: 掛慮
+    definition: 心裡掛念、不放心。
+  - index: 9
+    word: 深不可測
+    definition: 深到無法測量，也可形容情況或想法很難了解。
+  - index: 10
+    word: 迅疾如風
+    definition: 行動迅速像風一樣快速。
+  - index: 11
+    word: 拒人於千里之外
+    definition: 千里以外就將人擋住，形容堅決拒絕別人。也可以形容人態度傲慢或沒有商量的餘地。
+  slug: v4uqj
+  text_ref: qqppu

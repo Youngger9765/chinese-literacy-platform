@@ -1,0 +1,19 @@
+lesson_uid: L0175
+version_id: v3
+section_no: 九
+resources:
+  items:
+  - index: 1
+    title: 成長心態vs.定型心態
+    duration: '5:03'
+    duration_seconds: 303
+    source: Sprouts
+  - index: 2
+    title: 成功的要訣是什麽？是意志力
+    duration: '6:12'
+    duration_seconds: 372
+    source: 李彥甫
+  notes:
+    _note: 兩則皆附 QR code 圖片；連結網址不在文字流裡
+  slug: xquyk
+  text_ref: 66nax

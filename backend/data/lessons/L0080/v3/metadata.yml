@@ -41,3 +41,17 @@ strategy_sources:
   worksheet: 用表格整理訊息
   master_sheet: 用表格整理訊息──從細節解讀主要資訊
   previous: 用表格整理訊息──比較兩者異同
+source_profile:
+  class: multi_anchor
+  note: ☞ 錨點命中多段 —— 用計數欄段界投票，平手就判不動
+  has_key_reading_section: true
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: null
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 2
+  has_counter_column: true
+  body_in_tables: true
+  invisible_chars_docx_only: false
+  profiled: '2026-08-24'

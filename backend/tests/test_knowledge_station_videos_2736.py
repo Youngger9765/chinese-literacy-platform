@@ -26,6 +26,7 @@ URL 是 2026-08-19 從一修搬過來的（`scripts/migrate_legacy_video_urls.py
 from __future__ import annotations
 
 import pathlib
+from _module_files import module_file, module_files
 import sys
 
 import yaml
@@ -41,8 +42,8 @@ LESSONS = pathlib.Path(__file__).resolve().parent.parent / "data" / "lessons"
 def _with_videos() -> list[tuple[str, list[dict]]]:
     out = []
     for d in sorted(LESSONS.iterdir()):
-        f = d / "v3" / "resources.yml"
-        if not (d.is_dir() and d.name.startswith("L") and f.exists()):
+        f = module_file(d / "v3", "resources")
+        if not (d.is_dir() and d.name.startswith("L") and f):
             continue
         doc = yaml.safe_load(f.read_text(encoding="utf-8")) or {}
         vids = ((doc.get("resources") or {}).get("videos")) or []

@@ -47,6 +47,8 @@ class SessionCompleteRequest(BaseModel):
     session_id: int
     reading_accuracy: float | None = None
     comprehension_passed: bool = False
+    #: 真實百分比。舊 client 不會送，那時才退回 comprehension_passed（#2904）
+    comprehension_score: float | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -230,5 +232,6 @@ def on_session_complete(
         session_id=body.session_id,
         reading_accuracy=body.reading_accuracy,
         comprehension_passed=body.comprehension_passed,
+        comprehension_score=body.comprehension_score,
     )
     return result

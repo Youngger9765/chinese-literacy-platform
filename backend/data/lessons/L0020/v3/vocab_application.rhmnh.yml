@@ -1,0 +1,41 @@
+lesson_uid: L0020
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 讀心術
+    B: 工整
+    C: 路標
+    D: 婉拒
+    E: 常理
+    F: 預期
+    G: 出乎意料
+    H: 顧慮
+  items:
+  - index: 1
+    stem: 面對銷售員熱情的招呼，她微笑著（　）了對方的推銷。
+    answer: D
+  - index: 2
+    stem: 外面下著大雨，他卻沒有帶傘就出門，實在不合（　）。
+    answer: E
+  - index: 3
+    stem: 好朋友相處久了，好像都會有（　），一個眼神就知道彼此的想法。
+    answer: A
+  - index: 4
+    stem: 這次跨年級英語競賽的結果（　），經驗最少的新生隊竟然獲勝了。
+    answer: G
+  - index: 5
+    stem: 經過朋友的鼓勵，他才終於放下心中的（　），決定嘗試看看。
+    answer: H
+  - index: 6
+    stem: 他的字寫得非常（　），老師常常拿來當作範本提供大家參考。
+    answer: B
+  - index: 7
+    stem: 因為下雨，這週末老街的遊客比（　）的少很多。
+    answer: F
+  - index: 8
+    stem: 這裡有許多岔路，如果沒有（　），遊客很容易迷路。
+    answer: C
+  slug: rhmnh
+  text_ref: 6xkpp

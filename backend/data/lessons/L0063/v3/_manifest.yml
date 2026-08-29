@@ -5,47 +5,160 @@ sections:
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
+  part: 1
+  slug: p3kud
+  file: full_text_annotate.p3kud.yml
   pages:
   - 1
   - 2
 - 'no': 二
   name: 念順順
   module: key_reading
+  part: 1
+  text_ref: p3kud
+  slug: yprak
+  file: key_reading.yprak.yml
   pages:
   - 2
   - 3
 - 'no': 三
   name: 語詞我最棒
   module: vocab_definitions
+  part: 1
+  text_ref: p3kud
+  slug: mc9mf
+  file: vocab_definitions.mc9mf.yml
   pages:
   - 3
   - 4
 - 'no': 四
   name: 語詞應用
   module: vocab_application
+  part: 1
+  text_ref: p3kud
+  slug: 4fq9w
+  file: vocab_application.4fq9w.yml
   pages:
   - 4
 - 'no': 五
   name: 文章重點整理
   module: keypoints
+  part: 1
+  text_ref: p3kud
+  slug: dydnq
+  file: keypoints.dydnq.yml
   pages:
   - 4
   - 5
   - 6
+- 'no': 一
+  name: 讀全文-做記號
+  module: full_text_annotate
+  part: 2
+  slug: 4uee3
+  file: full_text_annotate.4uee3.yml
+  pages:
+  - 6
   - 7
   - 8
+- 'no': 二
+  name: 念順順
+  module: key_reading
+  part: 2
+  text_ref: 4uee3
+  slug: 9a7x4
+  file: key_reading.9a7x4.yml
+  pages:
+  - 8
   - 9
+- 'no': 三
+  name: 語詞我最棒
+  module: vocab_definitions
+  part: 2
+  text_ref: 4uee3
+  slug: 3944x
+  file: vocab_definitions.3944x.yml
+  pages:
+  - 9
+- 'no': 四
+  name: 語詞應用
+  module: vocab_application
+  part: 2
+  text_ref: 4uee3
+  slug: 3q3cd
+  file: vocab_application.3q3cd.yml
+  pages:
+  - 9
+  - 10
+- 'no': 五
+  name: 文章重點整理
+  module: keypoints
+  part: 2
+  text_ref: 4uee3
+  slug: 6xvh6
+  file: keypoints.6xvh6.yml
+  pages:
   - 10
   - 11
   - 12
+- 'no': 一
+  name: 讀全文-做記號
+  module: full_text_annotate
+  part: 3
+  slug: 7wavn
+  file: full_text_annotate.7wavn.yml
+  pages:
+  - 12
   - 13
   - 14
+- 'no': 二
+  name: 念順順
+  module: key_reading
+  part: 3
+  text_ref: 7wavn
+  slug: ajy9w
+  file: key_reading.ajy9w.yml
+  pages:
+  - 14
+- 'no': 三
+  name: 語詞我最棒
+  module: vocab_definitions
+  part: 3
+  text_ref: 7wavn
+  slug: arpnw
+  file: vocab_definitions.arpnw.yml
+  pages:
+  - 14
+  - 15
+- 'no': 四
+  name: 語詞應用
+  module: vocab_application
+  part: 3
+  text_ref: 7wavn
+  slug: 6x4t9
+  file: vocab_application.6x4t9.yml
+  pages:
+  - 15
+- 'no': 五
+  name: 文章重點整理
+  module: keypoints
+  part: 3
+  text_ref: 7wavn
+  slug: 6pyvc
+  file: keypoints.6pyvc.yml
+  pages:
   - 15
   - 16
 - 'no': 六
   name: 閱讀聚光燈
   module: spotlight
-  subtitle: 寫作手法──用不同角度的例子說明概念
+  part: 4
+  text_ref:
+  - p3kud
+  - 4uee3
+  - 7wavn
+  slug: fpctd
+  file: spotlight.fpctd.yml
   pages:
   - 16
   - 17
@@ -56,17 +169,38 @@ sections:
 - 'no': 七
   name: 綜合閱讀理解
   module: comprehension
+  part: 4
+  text_ref:
+  - p3kud
+  - 4uee3
+  - 7wavn
+  slug: 9a3ve
+  file: comprehension.9a3ve.yml
   pages:
   - 21
   - 22
 - 'no': 八
   name: 詞語複習
   module: vocab_review
+  part: 4
+  text_ref:
+  - p3kud
+  - 4uee3
+  - 7wavn
+  slug: 9ahm4
+  file: vocab_review.9ahm4.yml
   pages:
   - 22
 - 'no': 九
   name: 知識補給站
   module: resources
+  part: 4
+  text_ref:
+  - p3kud
+  - 4uee3
+  - 7wavn
+  slug: xf7e3
+  file: resources.xf7e3.yml
   pages:
   - 22
 dispatch:
@@ -98,21 +232,25 @@ dispatch_pages:
   full_text_annotate:
   - 1
   - 2
+  - 6
+  - 7
+  - 8
+  - 12
+  - 13
+  - 14
   key_reading:
   - 2
   - 3
+  - 8
+  - 9
+  - 14
   keypoints:
   - 4
   - 5
   - 6
-  - 7
-  - 8
-  - 9
   - 10
   - 11
   - 12
-  - 13
-  - 14
   - 15
   - 16
   resources:
@@ -126,8 +264,14 @@ dispatch_pages:
   - 21
   vocab_application:
   - 4
+  - 9
+  - 10
+  - 15
   vocab_definitions:
   - 3
   - 4
+  - 9
+  - 14
+  - 15
   vocab_review:
   - 22

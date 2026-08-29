@@ -1,0 +1,18 @@
+lesson_uid: L0168
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: win身體保養手冊日常如何觀察身體的健康
+    duration: (2:24)
+    source: win身體保養手冊
+    has_qr: true
+  - index: 2
+    title: 【每天一分鐘練習呼吸！紓壓、解鬱還能促進健康遠離焦慮】
+    duration: (4:40)
+    source: World Gym Taiwan
+    has_qr: true
+  slug: uuvee
+  text_ref: pmxkq

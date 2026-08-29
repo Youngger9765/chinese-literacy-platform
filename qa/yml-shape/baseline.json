@@ -24,24 +24,31 @@
       "core": [
         "instruction"
       ],
-      "inner_shapes": 10,
-      "lessons": 172,
+      "inner_shapes": 14,
+      "lessons": 176,
       "mid": [
         "items",
         "notes",
         "questions"
       ],
       "rare": [
+        "answer_carrier",
         "answer_line",
         "answers_printed",
         "floating_annotations",
         "groups",
+        "instruction_note",
         "label",
+        "part",
         "section_no_printed",
         "source_exam"
       ],
-      "rare_noteish": [],
-      "top_level_shapes": 1
+      "rare_noteish": [
+        "answer_carrier",
+        "instruction_note"
+      ],
+      "top_level_shapes": 1,
+      "why_raised_2026_08_25": "10 → 14（#2916）。L0029/L0063/L0111/L0137/L0144 拆成一篇一份模組檔，每篇的那一份各自是一種形狀變體 —— 拆分本來就會這樣。\n⚠️ **這不是憑感覺調高**：拿同一支 yml_shape_report.py 跑分支前的語料當基準，再跑「現在但移掉那 5 課」的語料，結果是**沒有任何模組變差**。也就是說增量 100% 來自那 5 課，其餘 170 課的形狀一格都沒動。\n⚠️ 同時修了兩個量測缺陷（不是資料變好）：`_manifest.yml` 是衍生檔卻被算成第 25 個模組；`slug`/`text_ref` 是我們加的定址欄位，`text_ref` 有些節有有些沒有，**讓每個既有形狀一分為二**，11 個模組一起虛增。兩者都排除之後才有這份基準。\n⛔ 下一個人看到這條紅：先跑 `--compare` 對分支前的語料，再跑一次「移掉可疑那幾課」的版本 —— 兩份都要用**同一個版本的工具**（我第一次忘了帶工具過去，量出完全不同的答案）。"
     },
     "cross_text_banner": {
       "core": [],
@@ -80,8 +87,8 @@
         "paragraph_count",
         "paragraphs"
       ],
-      "inner_shapes": 93,
-      "lessons": 164,
+      "inner_shapes": 98,
+      "lessons": 171,
       "mid": [
         "checklist",
         "checklist_instruction",
@@ -103,6 +110,7 @@
         "checklist_source_text",
         "closing",
         "comparison_table",
+        "duplicate_copy_note",
         "explanation_box",
         "figures",
         "footnote",
@@ -114,8 +122,7 @@
         "hypothesis_blocks",
         "inline_boxed_terms",
         "inline_headings",
-        "inline_marked_terms_part1",
-        "inline_marked_terms_part2",
+        "inline_marked_terms_note",
         "inline_table",
         "inline_tables",
         "inline_underlined_terms",
@@ -130,6 +137,8 @@
         "note_paragraph_count",
         "paragraph_numbering",
         "paragraph_numbers_printed",
+        "paragraphs_note",
+        "part",
         "part_no",
         "part_of",
         "parts",
@@ -141,6 +150,8 @@
         "reading_tip",
         "salutation",
         "section_headings",
+        "section_name",
+        "section_printed_no",
         "section_subheads",
         "sidebar",
         "sidebars",
@@ -159,9 +170,13 @@
         "課文作者"
       ],
       "rare_noteish": [
-        "footnote"
+        "duplicate_copy_note",
+        "footnote",
+        "inline_marked_terms_note",
+        "paragraphs_note"
       ],
-      "top_level_shapes": 1
+      "top_level_shapes": 1,
+      "why_raised_2026_08_25": "93 → 98（#2916）。L0029/L0063/L0111/L0137/L0144 拆成一篇一份模組檔，每篇的那一份各自是一種形狀變體 —— 拆分本來就會這樣。\n⚠️ **這不是憑感覺調高**：拿同一支 yml_shape_report.py 跑分支前的語料當基準，再跑「現在但移掉那 5 課」的語料，結果是**沒有任何模組變差**。也就是說增量 100% 來自那 5 課，其餘 170 課的形狀一格都沒動。\n⚠️ 同時修了兩個量測缺陷（不是資料變好）：`_manifest.yml` 是衍生檔卻被算成第 25 個模組；`slug`/`text_ref` 是我們加的定址欄位，`text_ref` 有些節有有些沒有，**讓每個既有形狀一分為二**，11 個模組一起虛增。兩者都排除之後才有這份基準。\n⛔ 下一個人看到這條紅：先跑 `--compare` 對分支前的語料，再跑一次「移掉可疑那幾課」的版本 —— 兩份都要用**同一個版本的工具**（我第一次忘了帶工具過去，量出完全不同的答案）。"
     },
     "goal_box": {
       "core": [],
@@ -222,16 +237,14 @@
         "start_text",
         "timing_table"
       ],
-      "inner_shapes": 53,
-      "lessons": 157,
+      "inner_shapes": 59,
+      "lessons": 160,
       "mid": [
-        "approx_chars_from_start",
         "benchmark_instruction",
         "benchmark_label",
         "benchmark_note",
         "char_marks_cover_paragraphs",
         "char_marks_note",
-        "end",
         "end_paragraph",
         "instruction_note",
         "printed_char_marks",
@@ -239,13 +252,14 @@
         "spans_paragraphs"
       ],
       "rare": [
-        "approx_chars_note",
+        "approx_chars_from_start",
         "benchmark_threshold_note",
         "char_count_note",
         "char_marks_cover_note",
         "chars_column_stops_at_paragraph",
         "chars_column_stops_at_seq",
-        "end_paragraph_note",
+        "end",
+        "end_idx",
         "errata_ref",
         "includes_section_heading",
         "includes_section_headings",
@@ -256,19 +270,21 @@
         "label",
         "layout_note",
         "needs_human_review",
+        "part",
         "part_no",
         "parts",
         "passage_note",
         "performance_tiers",
         "printed_char_count",
         "printed_char_count_note",
+        "printed_counter_last",
         "printed_cumulative_chars",
         "printed_paragraph_in_instruction",
         "review_reason_note",
         "span_confidence_note",
         "span_evidence_note",
         "span_note",
-        "spans_note",
+        "start_idx",
         "start_letter",
         "start_marker_note",
         "start_paragraph_conflict_note",
@@ -279,11 +295,9 @@
         "unit_note"
       ],
       "rare_noteish": [
-        "approx_chars_note",
         "benchmark_threshold_note",
         "char_count_note",
         "char_marks_cover_note",
-        "end_paragraph_note",
         "errata_ref",
         "instruction_errata_ref",
         "instructions_note",
@@ -294,22 +308,24 @@
         "span_confidence_note",
         "span_evidence_note",
         "span_note",
-        "spans_note",
         "start_marker_note",
         "start_paragraph_conflict_note",
         "start_paragraph_note",
         "target_note",
         "unit_note"
       ],
-      "top_level_shapes": 2
+      "top_level_shapes": 2,
+      "why_raised_2026_08_24": "53 → 57（#2912）。129 課新增 end_paragraph（範圍終點段），但另外 28 課的範圍還判不動、沒有這個欄位 —— 於是每個既有形狀一分為二，組合數暫時上升。⚠️ 這是**有意識**的調升，不是為了讓測試變綠：那 28 課補齊後這個數字會回落，回落時應該把基準降回去。⛔ 下一個人看到這條紅不要直接再調高 —— 先問「是哪些課多出新組合、為什麼」。",
+      "why_raised_2026_08_24b": "57 → 58（#2916）。L0063 的第 2、3 輪念順順拆成 key_reading.4uee3.yml / key_reading.7wavn.yml，兩份共用同一種形狀。⚠️ 這一種形狀**沒有任何新欄位名** —— 它是既有形狀（L0083 那種）的嚴格子集，只少了 instruction_note 與 span_evidence_note 兩個註記欄（part 級的來源本來就沒有）。棘輪量的是「欄位組合數」，比它訊息寫的「發明新欄位名」寬，所以子集也會讓數字上升。⛔ 下一個人看到這條紅不要直接調高 —— 先跑 scripts/yml_shape_report.py 比對，確認多出來的是「子集」還是「真的有新欄位名」；後者要退回去修抽取器，不是改基準。\n⚠️ 只動了 key_reading 這一筆。重產整份會順手吸收兩筆**既有**漂移（_manifest 這個衍生檔被當成模組計入、lesson.top_level_shapes 1→2），那兩筆不是本次改動造成的，留著待查。",
+      "why_raised_2026_08_25": "58 → 59（#2916）。L0029/L0063/L0111/L0137/L0144 拆成一篇一份模組檔，每篇的那一份各自是一種形狀變體 —— 拆分本來就會這樣。\n⚠️ **這不是憑感覺調高**：拿同一支 yml_shape_report.py 跑分支前的語料當基準，再跑「現在但移掉那 5 課」的語料，結果是**沒有任何模組變差**。也就是說增量 100% 來自那 5 課，其餘 170 課的形狀一格都沒動。\n⚠️ 同時修了兩個量測缺陷（不是資料變好）：`_manifest.yml` 是衍生檔卻被算成第 25 個模組；`slug`/`text_ref` 是我們加的定址欄位，`text_ref` 有些節有有些沒有，**讓每個既有形狀一分為二**，11 個模組一起虛增。兩者都排除之後才有這份基準。\n⛔ 下一個人看到這條紅：先跑 `--compare` 對分支前的語料，再跑一次「移掉可疑那幾課」的版本 —— 兩份都要用**同一個版本的工具**（我第一次忘了帶工具過去，量出完全不同的答案）。"
     },
     "keypoints": {
       "core": [
         "rows",
         "title"
       ],
-      "inner_shapes": 56,
-      "lessons": 150,
+      "inner_shapes": 61,
+      "lessons": 155,
       "mid": [
         "answer_carrier",
         "columns",
@@ -346,10 +362,11 @@
         "merged_cell_note",
         "note",
         "option_bank",
-        "part2_table",
+        "part",
         "part_no",
         "part_note",
         "right_header",
+        "section_name_note",
         "section_name_printed",
         "section_no_printed",
         "spanning_rows_note",
@@ -360,7 +377,9 @@
         "summary",
         "summary_blanks",
         "summary_label",
+        "tail",
         "tail_question",
+        "tail_questions",
         "theme",
         "theme_blanks",
         "theme_errata_ref",
@@ -384,13 +403,15 @@
         "merged_cell_note",
         "note",
         "part_note",
+        "section_name_note",
         "spanning_rows_note",
         "structure_note",
         "subtitle_note",
         "theme_errata_ref",
         "title_note"
       ],
-      "top_level_shapes": 1
+      "top_level_shapes": 1,
+      "why_raised_2026_08_25": "56 → 61（#2916）。L0029/L0063/L0111/L0137/L0144 拆成一篇一份模組檔，每篇的那一份各自是一種形狀變體 —— 拆分本來就會這樣。\n⚠️ **這不是憑感覺調高**：拿同一支 yml_shape_report.py 跑分支前的語料當基準，再跑「現在但移掉那 5 課」的語料，結果是**沒有任何模組變差**。也就是說增量 100% 來自那 5 課，其餘 170 課的形狀一格都沒動。\n⚠️ 同時修了兩個量測缺陷（不是資料變好）：`_manifest.yml` 是衍生檔卻被算成第 25 個模組；`slug`/`text_ref` 是我們加的定址欄位，`text_ref` 有些節有有些沒有，**讓每個既有形狀一分為二**，11 個模組一起虛增。兩者都排除之後才有這份基準。\n⛔ 下一個人看到這條紅：先跑 `--compare` 對分支前的語料，再跑一次「移掉可疑那幾課」的版本 —— 兩份都要用**同一個版本的工具**（我第一次忘了帶工具過去，量出完全不同的答案）。"
     },
     "keypoints_followup_questions": {
       "core": [],
@@ -420,12 +441,19 @@
         "source",
         "title"
       ],
-      "inner_shapes": 1,
+      "inner_shapes": 3,
       "lessons": 175,
       "mid": [],
-      "rare": [],
-      "rare_noteish": [],
-      "top_level_shapes": 1
+      "rare": [
+        "parts",
+        "sections_present_note"
+      ],
+      "rare_noteish": [
+        "sections_present_note"
+      ],
+      "top_level_shapes": 3,
+      "why_raised_2026_08_24_parts": "1 → 2（#2916）。7 課的 lesson.yml 新增 parts（一份學習單多篇文章時，每篇的身分），其餘 168 課刻意**不加** —— 加了等於動到全部已上架的課文檔。所以形狀本來就會是兩種：有 parts 與沒有。沒有 parts 的課由 loader 正規化成「單篇」。⛔ 這個數字不會再回到 1，別等它回落。",
+      "why_raised_2026_08_25": "2 → 3（#2916）。L0029/L0063/L0111/L0137/L0144 拆成一篇一份模組檔，每篇的那一份各自是一種形狀變體 —— 拆分本來就會這樣。\n⚠️ **這不是憑感覺調高**：拿同一支 yml_shape_report.py 跑分支前的語料當基準，再跑「現在但移掉那 5 課」的語料，結果是**沒有任何模組變差**。也就是說增量 100% 來自那 5 課，其餘 170 課的形狀一格都沒動。\n⚠️ 同時修了兩個量測缺陷（不是資料變好）：`_manifest.yml` 是衍生檔卻被算成第 25 個模組；`slug`/`text_ref` 是我們加的定址欄位，`text_ref` 有些節有有些沒有，**讓每個既有形狀一分為二**，11 個模組一起虛增。兩者都排除之後才有這份基準。\n⛔ 下一個人看到這條紅：先跑 `--compare` 對分支前的語料，再跑一次「移掉可疑那幾課」的版本 —— 兩份都要用**同一個版本的工具**（我第一次忘了帶工具過去，量出完全不同的答案）。"
     },
     "metadata": {
       "core": [
@@ -435,6 +463,7 @@
         "lesson_seq",
         "level",
         "series",
+        "source_profile",
         "strategy",
         "strategy_explained",
         "strategy_sources"
@@ -627,7 +656,7 @@
         "strategy_type"
       ],
       "inner_shapes": 40,
-      "lessons": 168,
+      "lessons": 169,
       "mid": [
         "answer_carrier",
         "section_title_printed",
@@ -650,6 +679,7 @@
         "note",
         "options_key_note",
         "overlap_note",
+        "part",
         "part_note",
         "practises",
         "section_label",
@@ -705,20 +735,22 @@
         "items",
         "option_bank"
       ],
-      "inner_shapes": 17,
-      "lessons": 149,
+      "inner_shapes": 18,
+      "lessons": 152,
       "mid": [
         "notes",
         "unused_options"
       ],
       "rare": [
+        "answer_carrier",
         "answers_printed",
         "cloze",
         "example",
         "exercise",
         "instruction_source_text",
-        "option_bank_part2",
+        "option_bank_note",
         "option_banks",
+        "part",
         "part_no",
         "practice",
         "synonym_application",
@@ -726,8 +758,12 @@
         "word_discrimination",
         "word_sense_discrimination"
       ],
-      "rare_noteish": [],
-      "top_level_shapes": 1
+      "rare_noteish": [
+        "answer_carrier",
+        "option_bank_note"
+      ],
+      "top_level_shapes": 1,
+      "why_raised_2026_08_25": "17 → 18（#2916）。L0029/L0063/L0111/L0137/L0144 拆成一篇一份模組檔，每篇的那一份各自是一種形狀變體 —— 拆分本來就會這樣。\n⚠️ **這不是憑感覺調高**：拿同一支 yml_shape_report.py 跑分支前的語料當基準，再跑「現在但移掉那 5 課」的語料，結果是**沒有任何模組變差**。也就是說增量 100% 來自那 5 課，其餘 170 課的形狀一格都沒動。\n⚠️ 同時修了兩個量測缺陷（不是資料變好）：`_manifest.yml` 是衍生檔卻被算成第 25 個模組；`slug`/`text_ref` 是我們加的定址欄位，`text_ref` 有些節有有些沒有，**讓每個既有形狀一分為二**，11 個模組一起虛增。兩者都排除之後才有這份基準。\n⛔ 下一個人看到這條紅：先跑 `--compare` 對分支前的語料，再跑一次「移掉可疑那幾課」的版本 —— 兩份都要用**同一個版本的工具**（我第一次忘了帶工具過去，量出完全不同的答案）。"
     },
     "vocab_definitions": {
       "core": [
@@ -735,26 +771,35 @@
         "items",
         "vocabulary_bank"
       ],
-      "inner_shapes": 13,
-      "lessons": 150,
+      "inner_shapes": 19,
+      "lessons": 155,
       "mid": [
         "methods",
         "notes",
         "vocabulary_bank_label"
       ],
       "rare": [
+        "answer_carrier",
         "answers_printed",
         "hints",
+        "instruction_note",
         "label",
+        "part",
         "part_no",
         "supplement",
         "synonym_analysis",
         "synonym_bank",
+        "vocabulary_bank_note",
         "word_bank",
         "word_bank_line"
       ],
-      "rare_noteish": [],
-      "top_level_shapes": 1
+      "rare_noteish": [
+        "answer_carrier",
+        "instruction_note",
+        "vocabulary_bank_note"
+      ],
+      "top_level_shapes": 1,
+      "why_raised_2026_08_25": "13 → 19（#2916）。L0029/L0063/L0111/L0137/L0144 拆成一篇一份模組檔，每篇的那一份各自是一種形狀變體 —— 拆分本來就會這樣。\n⚠️ **這不是憑感覺調高**：拿同一支 yml_shape_report.py 跑分支前的語料當基準，再跑「現在但移掉那 5 課」的語料，結果是**沒有任何模組變差**。也就是說增量 100% 來自那 5 課，其餘 170 課的形狀一格都沒動。\n⚠️ 同時修了兩個量測缺陷（不是資料變好）：`_manifest.yml` 是衍生檔卻被算成第 25 個模組；`slug`/`text_ref` 是我們加的定址欄位，`text_ref` 有些節有有些沒有，**讓每個既有形狀一分為二**，11 個模組一起虛增。兩者都排除之後才有這份基準。\n⛔ 下一個人看到這條紅：先跑 `--compare` 對分支前的語料，再跑一次「移掉可疑那幾課」的版本 —— 兩份都要用**同一個版本的工具**（我第一次忘了帶工具過去，量出完全不同的答案）。"
     },
     "vocab_review": {
       "core": [

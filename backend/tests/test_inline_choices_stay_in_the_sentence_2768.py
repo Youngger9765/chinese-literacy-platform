@@ -23,6 +23,7 @@ schema 用 `blank_choices`（與既有的 `blank_hints` 同位置、同順序）
 from __future__ import annotations
 
 import pathlib
+from _module_files import module_file, module_files
 import sys
 
 import yaml
@@ -39,7 +40,7 @@ LESSONS = pathlib.Path(__file__).resolve().parent.parent / "data" / "lessons"
 
 
 def _served(uid: str):
-    kp = (yaml.safe_load((LESSONS / uid / "v3" / "keypoints.yml").read_text(encoding="utf-8"))
+    kp = (yaml.safe_load(module_file(LESSONS / uid / "v3", "keypoints").read_text(encoding="utf-8"))
           or {}).get("keypoints") or {}
     return _sanitize_structure_for_client(_format_yaml_structure_table(
         keypoints_to_structure_table(kp)))
@@ -53,7 +54,7 @@ def _walk(rows):
 
 def test_the_source_is_still_the_shape_this_is_about():
     """前置：L0011 那一列還是「一句兩空格 + sub_items」。"""
-    kp = (yaml.safe_load((LESSONS / "L0011" / "v3" / "keypoints.yml").read_text(encoding="utf-8"))
+    kp = (yaml.safe_load(module_file(LESSONS / "L0011" / "v3", "keypoints").read_text(encoding="utf-8"))
           or {}).get("keypoints") or {}
     row = kp["rows"][3]["sub_rows"][2]
     assert row["label"] == "結果"
@@ -91,12 +92,25 @@ def test_the_sentence_keeps_its_choices():
     assert "小戴" in value and "尊敬" in value, f"句子不完整：{value!r}"
     assert value.count("【") >= 2, f"兩個空格不見了：{value!r}"
 
-    # 兩組選項各自標明對應第幾個空格
-    assert "第一個空格" in value and "第二個空格" in value, (
-        f"沒有標明哪組對應哪個空格：{value!r}"
-    )
+    # ⚠️ 2026-08-28（#2964）改寫。原本斷言 value 裡要有「第一個空格」「第二個空格」
+    #    這兩個散文標記。現在的結構**更精確**：`interactive_type: inline_choice`
+    #    + `blanks: [{options:[…]}, {options:[…]}]` —— 每個空格自己帶選項，
+    #    位置對位置，前端不必去解析句子裡的中文序數。
+    #    ⛔ 不是把斷言放寬：是改成驗「對應關係存在且對得起來」這件事本身，
+    #       而且比原本更嚴（原本只要句子裡有那四個字就算過）。
+    assert row.get("interactive_type") == "inline_choice", (
+        f"這一列不是 inline_choice：{row.get('interactive_type')!r}")
+    blanks = row.get("blanks") or []
+    assert len(blanks) == value.count("【") - 1 or len(blanks) == value.count("【"), (
+        f"空格數 {value.count('【')} 跟 blanks 數 {len(blanks)} 對不起來：{blanks!r}")
+    assert len(blanks) >= 2, f"兩組選項不見了：{blanks!r}"
+    for i, b in enumerate(blanks):
+        assert (b or {}).get("options"), f"第 {i+1} 個空格沒有自己的選項：{b!r}"
 
-    opts = row.get("options") or []
+    # 頂層 `options` 也一起搬進 blanks 了 —— 攤平回來比，**順序要對**，
+    # 這樣「兩組選項互換」（贏得/失去 跑到第一個空格）也擋得住。
+    opts = ([o for b in blanks for o in (b.get("options") or [])]
+            or (row.get("options") or []))
     assert opts == ["贏了", "輸了", "贏得", "失去"], (
         f"選項不對（跨行切壞會出現「輸了\\n第二個空格：」這種）：{opts}"
     )

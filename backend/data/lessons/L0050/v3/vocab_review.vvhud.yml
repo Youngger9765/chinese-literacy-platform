@@ -1,0 +1,137 @@
+lesson_uid: L0050
+version_id: v3
+section_no: 七
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 揚帆啟航
+  - 股票
+  - 股東
+  - 獲利
+  - 利潤
+  - 大手一揮
+  - 派遣
+  - 節衣縮食
+  - 集資
+  - 滿手老繭
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 陽飛揚風利對派遺憾如
+  - 凡楊帆屁益遣人贓俱獲
+  - 一柳啟程股票鐘鼓勵珍
+  - 股密航漂大據滿集體寶
+  - 作集空郵蹟手無寸鐵儲
+  - 氣合資票老潮一指派蓄
+  - 積蓄獲繭滋溼豆揮股東
+  - 溫蟲福利潤滑乳別資金
+  - 潤繭力用集滿手投資便
+  - 喉節衣縮食訓地盡其利
+  answers_are_graphical: true
+  answers_printed: true
+  answer_paths:
+  - word: 揚帆啟航
+    cells:
+    - - 1
+      - 3
+    - - 2
+      - 3
+    - - 3
+      - 3
+    - - 4
+      - 3
+    direction: vertical
+  - word: 派遣
+    cells:
+    - - 1
+      - 7
+    - - 2
+      - 6
+    direction: diagonal_down_left
+  - word: 股票
+    cells:
+    - - 3
+      - 5
+    - - 3
+      - 6
+    direction: horizontal
+  - word: 大手一揮
+    cells:
+    - - 4
+      - 5
+    - - 5
+      - 6
+    - - 6
+      - 7
+    - - 7
+      - 8
+    direction: diagonal_down_right
+  - word: 滿手老繭
+    cells:
+    - - 4
+      - 7
+    - - 5
+      - 6
+    - - 6
+      - 5
+    - - 7
+      - 4
+    direction: diagonal_down_left
+  - word: 集資
+    cells:
+    - - 5
+      - 2
+    - - 6
+      - 3
+    direction: diagonal_down_right
+  - word: 獲利
+    cells:
+    - - 7
+      - 3
+    - - 8
+      - 4
+    direction: diagonal_down_right
+  - word: 股東
+    cells:
+    - - 7
+      - 9
+    - - 7
+      - 10
+    direction: horizontal
+  - word: 利潤
+    cells:
+    - - 8
+      - 4
+    - - 8
+      - 5
+    direction: horizontal
+  - word: 節衣縮食
+    cells:
+    - - 10
+      - 2
+    - - 10
+      - 3
+    - - 10
+      - 4
+    - - 10
+      - 5
+    direction: horizontal
+  notes:
+    answer_paths: '10 個目標語詞全部圈到，roundRect 圖形也正好 10 個（數量相符，不需回頭補格）。
+
+      幾何逐一對得上：4 格垂直（w0.320×h1.527）＝揚帆啟航；rot 51.5°（向左下）4 格對角
+
+      ＝滿手老繭；rot 309.6°（向右下）4 格對角＝大手一揮，兩者在第 5 列第 6 格的「手」交叉，
+
+      是這一課唯一共用格子的一對。「獲利」與「利潤」共用第 8 列第 4 格的「利」。'
+    distractor: '格子裡另有同音／形近誘答：第 1 列「陽」對「揚」、第 2 列「楊」對「揚」、
+
+      第 1 列第 8 格「遺」對「遣」、第 7 列第 1~2 格「積蓄」與第 5~6 列第 10 格「儲蓄」
+
+      （總表有「積蓄」但學習單三處都沒列，見 meta._總表_對照note）。逐格取字確認過，
+
+      格子本身**沒有印錯字**。'
+  slug: vvhud
+  text_ref: cwrfr

@@ -1,0 +1,58 @@
+lesson_uid: L0125
+version_id: v3
+section_no: 三
+vocab_definitions:
+  vocabulary_bank:
+  - 好心沒好報
+  - 不堪設想
+  - 悲痛欲絕
+  - 自告奮勇
+  - 事在人為
+  - 情有可原
+  - 因噎廢食
+  - 提告
+  - 苛責
+  - 感同身受
+  vocabulary_bank_label: 本課語詞
+  instruction: '請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+
+    🅐 從本課語詞框框，找語詞。
+
+    🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+
+    🅒 問同學。'
+  items:
+  - index: 1
+    word: 自告奮勇
+    definition: 自己主動要求承擔某項任務或工作。
+  - index: 2
+    word: 好心沒好報
+    definition: 形容做好事卻沒有得到應有的回報，甚至受到誤解或損害。
+  - index: 3
+    word: 事在人為
+    definition: 表示事情能否成功取決於人的努力。
+  - index: 4
+    word: 不堪設想
+    definition: 形容事情發展到很糟糕的地步，令人不敢想像後果。
+  - index: 5
+    word: 悲痛欲絕
+    definition: 形容極度悲傷，傷心到無法承受的地步。
+  - index: 6
+    word: 苛責
+    definition: 嚴厲的責備或要求。
+  - index: 7
+    word: 提告
+    definition: 向法院提出訴訟，或向司法機關提出控告，請求依法處理。
+  - index: 8
+    word: 情有可原
+    definition: 指某人的過錯從情理上來衡量，是可以被理解或原諒的。
+  - index: 9
+    word: 因噎廢食
+    definition: 因為怕噎著，而不吃東西。比喻因過去的挫折或失敗而放棄所有有關的事情。
+  - index: 10
+    word: 感同身受
+    definition: 心裡的感覺好像親身經歷一般。
+  notes:
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
+  slug: vx94u
+  text_ref: 4etxq

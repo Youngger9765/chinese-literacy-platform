@@ -1,0 +1,138 @@
+lesson_uid: L0092
+version_id: v3
+section_no: 七
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 益發
+  - 前仆後繼
+  - 南轅北轍
+  - 傾家蕩產
+  - 救贖
+  - 罪孽
+  - 匪夷所思
+  - 自圓其說
+  - 衝鋒陷陣
+  - 廝殺
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 扳回一城堡自圓其說話
+  - 傾家蕩產壘脫口而出衝
+  - 情常之人益處救贖尖鋒
+  - 抵便宜發廁心矗立淪陷
+  - 消飯匪夷所思想翻車陣
+  - 過前途千里迢迢窺視迎
+  - 關仆街得介紹天廝剎刃
+  - 展後輩罪孽緣南造殺而
+  - 將繼續犯障軒地心地解
+  - 全神貫注南轅北轍位設
+  answers_are_graphical: true
+  answers_printed: true
+  answer_paths:
+  - word: 自圓其說
+    cells:
+    - - 1
+      - 6
+    - - 1
+      - 7
+    - - 1
+      - 8
+    - - 1
+      - 9
+    direction: horizontal
+  - word: 傾家蕩產
+    cells:
+    - - 2
+      - 1
+    - - 2
+      - 2
+    - - 2
+      - 3
+    - - 2
+      - 4
+    direction: horizontal
+  - word: 衝鋒陷陣
+    cells:
+    - - 2
+      - 10
+    - - 3
+      - 10
+    - - 4
+      - 10
+    - - 5
+      - 10
+    direction: vertical
+  - word: 救贖
+    cells:
+    - - 3
+      - 7
+    - - 3
+      - 8
+    direction: horizontal
+  - word: 益發
+    cells:
+    - - 3
+      - 5
+    - - 4
+      - 4
+    direction: diagonal_down_left
+  - word: 匪夷所思
+    cells:
+    - - 5
+      - 3
+    - - 5
+      - 4
+    - - 5
+      - 5
+    - - 5
+      - 6
+    direction: horizontal
+  - word: 前仆後繼
+    cells:
+    - - 6
+      - 2
+    - - 7
+      - 2
+    - - 8
+      - 2
+    - - 9
+      - 2
+    direction: vertical
+  - word: 廝殺
+    cells:
+    - - 7
+      - 8
+    - - 8
+      - 9
+    direction: diagonal_down_right
+  - word: 罪孽
+    cells:
+    - - 8
+      - 4
+    - - 8
+      - 5
+    direction: horizontal
+  - word: 南轅北轍
+    cells:
+    - - 10
+      - 5
+    - - 10
+      - 6
+    - - 10
+      - 7
+    - - 10
+      - 8
+    direction: horizontal
+  notes:
+    answer_paths: '10 個目標語詞全部圈到，逐格取字皆能拼回，格子無錯字。
+
+      幾何交叉驗證吻合：roundRect 10 個、紙外殘留 0 → 紙上 10 ＝ 路徑 10，無警報。
+
+      🔵 「南轅北轍」那一條**跨頁**：第 10 列的字印在 p8 頂端，橘圈整組留在 p7 底部
+
+      （p7 最下方只看得到一個空的橘框）。只讀 p8 會判成這一條沒被圈到。'
+  slug: qu643
+  text_ref: ymrp3

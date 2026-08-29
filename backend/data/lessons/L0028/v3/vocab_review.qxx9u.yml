@@ -1,0 +1,137 @@
+lesson_uid: L0028
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 表彰
+  - 刻不容緩
+  - 成效斐然
+  - 繁殖
+  - 救苦救難
+  - 層出不窮
+  - 晝伏夜出
+  - 肉眼
+  - 刨地
+  - 雜草叢生
+  - 效能
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 如魚得水包嗷成嗚彌累
+  - 效能識丁庇熱嗷效能積
+  - 不彌晝伏夜出待待斐丘
+  - 轉撒貼蔭果貼補成哺然
+  - 睛刻心救苦救難效撰餘
+  - 店木不按件計酬覓層鋪
+  - 雜肉食容按鍵食出天剪
+  - 草眼指莽緩庇不蓋體貼
+  - 叢不浩給撞窮地表樹繁
+  - 生案繁刨地便飯護彰殖
+  answers_are_graphical: true
+  answer_paths:
+  - word: 成效斐然
+    cells:
+    - - 1
+      - 7
+    - - 2
+      - 8
+    - - 3
+      - 9
+    - - 4
+      - 10
+    direction: diagonal_down_right
+  - word: 效能
+    cells:
+    - - 2
+      - 1
+    - - 2
+      - 2
+    direction: horizontal
+  - word: 晝伏夜出
+    cells:
+    - - 3
+      - 3
+    - - 3
+      - 4
+    - - 3
+      - 5
+    - - 3
+      - 6
+    direction: horizontal
+  - word: 刻不容緩
+    cells:
+    - - 5
+      - 2
+    - - 6
+      - 3
+    - - 7
+      - 4
+    - - 8
+      - 5
+    direction: diagonal_down_right
+  - word: 救苦救難
+    cells:
+    - - 5
+      - 4
+    - - 5
+      - 5
+    - - 5
+      - 6
+    - - 5
+      - 7
+    direction: horizontal
+  - word: 層出不窮
+    cells:
+    - - 6
+      - 9
+    - - 7
+      - 8
+    - - 8
+      - 7
+    - - 9
+      - 6
+    direction: diagonal_down_left
+  - word: 雜草叢生
+    cells:
+    - - 7
+      - 1
+    - - 8
+      - 1
+    - - 9
+      - 1
+    - - 10
+      - 1
+    direction: vertical
+  - word: 肉眼
+    cells:
+    - - 7
+      - 2
+    - - 8
+      - 2
+    direction: vertical
+  - word: 表彰
+    cells:
+    - - 9
+      - 8
+    - - 10
+      - 9
+    direction: diagonal_down_right
+  - word: 繁殖
+    cells:
+    - - 9
+      - 10
+    - - 10
+      - 10
+    direction: vertical
+  - word: 刨地
+    cells:
+    - - 10
+      - 4
+    - - 10
+      - 5
+    direction: horizontal
+  slug: qxx9u
+  text_ref: 977nw

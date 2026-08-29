@@ -22,9 +22,18 @@ vi.mock('../../../services/learningApi', () => ({ validateStrategyAnswer: vi.fn(
 
 const LESSONS = resolve(__dirname, '../../../../../backend/data/lessons');
 
+// #2916 之後每份模組 yml 的檔名帶自己的 slug（`spotlight.jj4jh.yml`），
+// 不再是固定的 `spotlight.yml`。寫死舊檔名會掃到 0 課 —— 那看起來像資料被刪。
+const spotlightFile = (uid: string): string | null => {
+  const dir = resolve(LESSONS, uid, 'v3');
+  if (!existsSync(dir)) return null;
+  const hit = readdirSync(dir).find((n) => /^spotlight(\.[^.]+)?\.yml$/.test(n));
+  return hit ? resolve(dir, hit) : null;
+};
+
 const load = (uid: string) => {
-  const p = resolve(LESSONS, uid, 'v3/spotlight.yml');
-  if (!existsSync(p)) return null;
+  const p = spotlightFile(uid);
+  if (!p) return null;
   const doc = parse(readFileSync(p, 'utf-8')) as { spotlight?: SpotlightV2 };
   return doc?.spotlight ?? null;
 };
@@ -32,9 +41,8 @@ const load = (uid: string) => {
 // 自動掃出所有翻新到 v3 的課。
 // 原本寫死清單，用意是「新增課要有人來加一行、順手看一眼」；到了 175 課的規模，
 // 那個儀式只會變成漏加。改成自動掃 + 下限斷言：課數只會增加，掉下去就是有東西被刪了。
-const V3_DIR = (uid: string) => resolve(LESSONS, uid, 'v3/spotlight.yml');
 const UIDS = readdirSync(LESSONS)
-  .filter(n => /^L\d{4}$/.test(n) && existsSync(V3_DIR(n)))
+  .filter((n) => /^L\d{4}$/.test(n) && spotlightFile(n) !== null)
   .sort();
 
 // 掃到 0 課 = 路徑錯了或資料沒了，別讓空跑看起來像全過

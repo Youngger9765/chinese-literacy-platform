@@ -5,12 +5,17 @@ sections:
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
+  slug: h9yhy
+  file: full_text_annotate.h9yhy.yml
   pages:
   - 1
   - 2
 - 'no': 二
   name: 念順順
   module: key_reading
+  text_ref: h9yhy
+  slug: 3adk9
+  file: key_reading.3adk9.yml
   pages:
   - 2
   - 3
@@ -18,17 +23,26 @@ sections:
 - 'no': 三
   name: 語詞我最棒
   module: vocab_definitions
+  text_ref: h9yhy
+  slug: 9ud9u
+  file: vocab_definitions.9ud9u.yml
   pages:
   - 4
 - 'no': 四
   name: 語詞應用
   module: vocab_application
+  text_ref: h9yhy
+  slug: xnkx7
+  file: vocab_application.xnkx7.yml
   pages:
   - 4
   - 5
 - 'no': 五
   name: 文章重點表
   module: keypoints
+  text_ref: h9yhy
+  slug: t3jvd
+  file: keypoints.t3jvd.yml
   pages:
   - 5
   - 6
@@ -36,6 +50,9 @@ sections:
   name: 品格聚光燈
   module: spotlight
   subtitle: 想法感受的換位思考
+  text_ref: h9yhy
+  slug: jmw99
+  file: spotlight.jmw99.yml
   pages:
   - 6
   - 7
@@ -43,17 +60,26 @@ sections:
 - 'no': 七
   name: 閱讀理解
   module: comprehension
+  text_ref: h9yhy
+  slug: 7j6y3
+  file: comprehension.7j6y3.yml
   pages:
   - 8
   - 9
 - 'no': 八
   name: 詞語複習
   module: vocab_review
+  text_ref: h9yhy
+  slug: twecn
+  file: vocab_review.twecn.yml
   pages:
   - 9
 - 'no': 九
   name: 知識補給站
   module: resources
+  text_ref: h9yhy
+  slug: 7xuqm
+  file: resources.7xuqm.yml
   pages:
   - 9
   - 10

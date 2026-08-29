@@ -42,3 +42,17 @@ strategy_sources:
   worksheet: 媒體素養與識讀
   master_sheet: 媒體素養與識讀──辨識不合理的詐騙訊息
   previous: 媒體素養與識讀──檢查誠信，辨識詐騙
+source_profile:
+  class: standard
+  note: 單一錨點 + 有計數欄 + idx 唯一 —— 走主路徑
+  has_key_reading_section: true
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: null
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 1
+  has_counter_column: true
+  body_in_tables: true
+  invisible_chars_docx_only: false
+  profiled: '2026-08-24'

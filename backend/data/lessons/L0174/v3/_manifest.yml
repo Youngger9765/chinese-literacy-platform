@@ -5,6 +5,8 @@ sections:
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
+  slug: vw6jj
+  file: full_text_annotate.vw6jj.yml
   pages:
   - 1
   - 2
@@ -12,11 +14,17 @@ sections:
 - 'no': 二
   name: 念順順
   module: key_reading
+  text_ref: vw6jj
+  slug: uvmjm
+  file: key_reading.uvmjm.yml
   pages:
   - 3
 - 'no': 三
   name: 語詞我最棒
   module: vocab_definitions
+  text_ref: vw6jj
+  slug: fchhd
+  file: vocab_definitions.fchhd.yml
   pages:
   - 3
   - 4
@@ -24,18 +32,27 @@ sections:
 - 'no': 四
   name: 語詞應用
   module: vocab_application
+  text_ref: vw6jj
+  slug: m3f4y
+  file: vocab_application.m3f4y.yml
   pages:
   - 5
   - 6
 - 'no': 五
   name: 文章重點表
   module: keypoints
+  text_ref: vw6jj
+  slug: 3uahj
+  file: keypoints.3uahj.yml
   pages:
   - 6
 - 'no': 六
   name: 品格聚光燈
   module: spotlight
   subtitle: 面對失敗，你的想法是……
+  text_ref: vw6jj
+  slug: 6pr3w
+  file: spotlight.6pr3w.yml
   pages:
   - 6
   - 7
@@ -44,17 +61,26 @@ sections:
 - 'no': 七
   name: 閱讀理解
   module: comprehension
+  text_ref: vw6jj
+  slug: 7xekn
+  file: comprehension.7xekn.yml
   pages:
   - 9
   - 10
 - 'no': 八
   name: 詞語複習
   module: vocab_review
+  text_ref: vw6jj
+  slug: 66rq7
+  file: vocab_review.66rq7.yml
   pages:
   - 10
 - 'no': 九
   name: 知識補給站
   module: resources
+  text_ref: vw6jj
+  slug: 6p6kx
+  file: resources.6p6kx.yml
   pages:
   - 10
 dispatch:

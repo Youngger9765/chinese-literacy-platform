@@ -1,0 +1,64 @@
+lesson_uid: L0024
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+  - 從本課語詞框框，找語詞。
+  - 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+  - 問同學。
+  vocabulary_bank:
+  - 盛夏
+  - 引退
+  - 寄予厚望
+  - 力邀
+  - 菜單
+  - 自立自強
+  - 直言
+  - 鴻溝
+  - 技不如人
+  - 懈怠
+  - 激勵
+  - 晉升
+  items:
+  - index: 1
+    word: 直言
+    definition: 直接說出自己的想法或意見。
+  - index: 2
+    word: 激勵
+    definition: 激發、鼓勵。
+  - index: 3
+    word: 盛夏
+    definition: 一年中最熱的時候。
+  - index: 4
+    word: 鴻溝
+    definition: 比喻差距很大。
+  - index: 5
+    word: 寄予厚望
+    definition: 對某人有很大的期待，希望他能成功或表現很好。
+  - index: 6
+    word: 力邀
+    definition: 大力邀請。
+  - index: 7
+    word: 菜單
+    definition: 本文指訓練計畫的內容安排。
+  - index: 8
+    word: 技不如人
+    definition: 自己的能力或技術比不上別人。
+  - index: 9
+    word: 引退
+    definition: 離開原來的職業或舞臺；本文指職業球員退休。
+  - index: 10
+    word: 晉升
+    definition: 升到更高的職位或等級。
+  - index: 11
+    word: 懈怠
+    definition: 不努力、不積極，變得懶散。
+  - index: 12
+    word: 自立自強
+    definition: 靠自己努力，不依靠別人。
+  notes:
+    foot: '*千安、百轟、百盜：指打出一千支安打、一百支全壘打及一百次盜壘成功。'
+    footnote: 星號註解印在第 12 題右側，不是編號語詞（總表卻把它當第 13 個語詞欄位）
+  slug: qecvu
+  text_ref: eak94

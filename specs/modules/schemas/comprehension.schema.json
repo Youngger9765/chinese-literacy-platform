@@ -2,61 +2,87 @@
   "$id": "lingoleap/module/comprehension",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
-  "description": "從 172 份實測 yml 長出來，不是手寫的。required = 每一課都有的欄位（少了就是回歸）；properties 列出所有已觀測欄位，配合 additionalProperties: false —— 現況全過，任何新發明的欄位名會紅。",
+  "description": "從 176 份實測 yml 長出來，不是手寫的。required = 每一課都有的欄位（少了就是回歸）；properties 列出所有已觀測欄位，配合 additionalProperties: false —— 現況全過，任何新發明的欄位名會紅。",
   "properties": {
+    "answer_carrier": {
+      "type": "string",
+      "x-seen-in": "2/176"
+    },
     "answer_line": {
       "type": "string",
-      "x-seen-in": "1/172"
+      "x-seen-in": "1/176"
     },
     "answers_printed": {
       "type": "boolean",
-      "x-seen-in": "9/172"
+      "x-seen-in": "9/176"
     },
     "floating_annotations": {
       "type": "array",
-      "x-seen-in": "1/172"
+      "x-seen-in": "1/176"
     },
     "groups": {
       "type": "array",
-      "x-seen-in": "1/172"
+      "x-seen-in": "1/176"
     },
     "instruction": {
       "type": "string",
-      "x-seen-in": "172/172"
+      "x-seen-in": "176/176"
+    },
+    "instruction_note": {
+      "type": "string",
+      "x-seen-in": "1/176"
     },
     "items": {
       "type": "array",
-      "x-seen-in": "27/172"
+      "x-seen-in": "29/176"
     },
     "label": {
       "type": "string",
-      "x-seen-in": "4/172"
+      "x-seen-in": "4/176"
     },
     "notes": {
       "type": "object",
-      "x-seen-in": "119/172"
+      "x-seen-in": "121/176"
+    },
+    "part": {
+      "type": "integer",
+      "x-seen-in": "5/176"
     },
     "questions": {
       "type": "array",
-      "x-seen-in": "145/172"
+      "x-seen-in": "147/176"
     },
     "section_no_printed": {
       "type": "string",
-      "x-seen-in": "2/172"
+      "x-seen-in": "2/176"
+    },
+    "slug": {
+      "type": "string",
+      "x-seen-in": "176/176"
     },
     "source_exam": {
       "type": "string",
-      "x-seen-in": "1/172"
+      "x-seen-in": "1/176"
+    },
+    "text_ref": {
+      "type": [
+        "array",
+        "string"
+      ],
+      "x-seen-in": "165/176"
     }
   },
   "required": [
-    "instruction"
+    "instruction",
+    "slug"
   ],
   "title": "comprehension module payload",
   "type": "object",
   "x-core-90pct": [
-    "instruction"
+    "instruction",
+    "slug",
+    "text_ref"
   ],
   "x-enforcement": "error",
-  "x-lessons-observed": 172
+  "x-lessons-observed": 176
 }

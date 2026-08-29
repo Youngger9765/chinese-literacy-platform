@@ -1,0 +1,62 @@
+lesson_uid: L0109
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: '請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+
+    🅐 從本課語詞框框，找語詞。
+
+    🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+
+    🅒 問同學。'
+  vocabulary_bank:
+  - 交織
+  - 群情激昂
+  - 蛻變
+  - 花瓶
+  - 氣勢如虹
+  - 物化
+  - 訕笑
+  - 無遠弗屆
+  - 排山倒海
+  - 低迷不振
+  items:
+  - index: 1
+    word: 群情激昂
+    definition: 許多人情緒高漲、興奮。
+  - index: 2
+    word: 交織
+    definition: 不同的事物混合在一起、互相穿插形成一個整體。
+  - index: 3
+    word: 排山倒海
+    definition: 力量或聲勢大到像推倒大山、翻起大海，形容非常強烈。
+  - index: 4
+    word: 氣勢如虹
+    definition: 士氣很強、很有衝勁。
+  - index: 5
+    word: 花瓶
+    definition: 外表好看但沒有實力的人。
+  - index: 6
+    word: 訕笑
+    definition: 譏笑、嘲弄。
+  - index: 7
+    word: 低迷不振
+    definition: 精神不好、情緒不佳或市場清淡，無法振作。
+  - index: 8
+    word: 蛻變
+    definition: 蛻：動物脫皮。像脫皮一樣，從舊狀態轉變成新狀態，多指成長、變得更成熟。
+  - index: 9
+    word: 無遠弗屆
+    definition: 沒有到不了的地方，形容影響的範圍又大又廣。
+  - index: 10
+    word: 物化
+    definition: 把人當成「物品」來看，只看外表或價值，忽略人的感受與尊嚴。
+  notes:
+    vocabulary_bank: '語詞框原文印「本課語詞：交織、群情激昂、蛻變、花瓶、氣勢如虹、物化、訕笑、無遠弗屆、
+
+      排山倒海、低迷不振。」共 10 個，**沒有**總表與第八大題都有的「震耳欲聾」。
+
+      原稿在「排山倒」「低迷不」後各夾一個隱藏字元 U+E01E1（Mn），不影響字面，已濾除。'
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
+  slug: kqdhf
+  text_ref: ptwcu

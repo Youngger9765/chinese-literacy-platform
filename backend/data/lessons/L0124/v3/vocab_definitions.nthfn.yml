@@ -1,0 +1,51 @@
+lesson_uid: L0124
+version_id: v3
+section_no: 三
+vocab_definitions:
+  vocabulary_bank:
+  - 悄然興起
+  - 追溯
+  - 質地
+  - 不分軒輊
+  - 媲美
+  - 屠宰
+  - 膳食纖維
+  - 蓬勃
+  - 刮目相看
+  - 應運而生
+  items:
+  - index: 1
+    word: 質地
+    definition: 物品表面的觸感、組織或口感。本文指植物肉吃起來的口感與組織。
+  - index: 2
+    word: 媲美
+    definition: 媲：比得上。通常用於稱讚對方的能力比得上厲害的人。例如：媽媽的廚藝媲美五星級大廚。
+  - index: 3
+    word: 悄然興起
+    definition: 某一事物或現象在大家未察覺的情況下，慢慢興起或發展起來。
+  - index: 4
+    word: 刮目相看
+    definition: 另眼看待，用新的眼光來看待。
+  - index: 5
+    word: 應運而生
+    definition: 順應時勢需求而產生。
+  - index: 6
+    word: 膳食纖維
+    definition: 植物性食物中人體不易消化吸收的成分，可以增加飽足感，幫助腸道蠕動與排便。
+  - index: 7
+    word: 追溯
+    definition: 回想、探究事物發生的原因。溯：逆著、往前或往回。
+  - index: 8
+    word: 蓬勃
+    definition: 茂盛繁榮的樣子。
+  - index: 9
+    word: 屠宰
+    definition: 宰殺牲畜。
+  - index: 10
+    word: 不分軒輊
+    definition: 比喻分不出高下，實力相當。軒，車前高起的部分。輊，車後低下的部分。
+  supplement:
+    label: 補充
+    text: '*○○革命：人類發展過程中所發生的劇烈變化，可形容任何方面。如：環保馬拉松的綠色革命。'
+  slug: nthfn
+  text_ref: u7rhq

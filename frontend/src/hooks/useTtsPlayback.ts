@@ -88,7 +88,13 @@ export function useTtsPlayback(
    * @param lessonId - Optional lesson ID for canonical v2 sentence lookup.
    * @param paragraphIdx - Optional paragraph index (0-based) within the lesson.
    */
-  const speakText = useCallback((text: string, lessonId?: number, paragraphIdx?: number) => {
+  const speakText = useCallback((
+    text: string,
+    lessonId?: number,
+    paragraphIdx?: number,
+    /** 這一節自己的代號。一課多篇時少了它會唸到第 1 篇（#2930）。 */
+    roundSlug?: string,
+  ) => {
     if (!text) return;
     cancelTts();
     setIsTtsPaused(false);
@@ -124,6 +130,7 @@ export function useTtsPlayback(
         },
         lessonId,
         paragraphIdx,
+        roundSlug,
       ).catch(() => {
         setTtsError('音檔載入失敗，請重試');
       }).finally(() => {

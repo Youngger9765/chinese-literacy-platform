@@ -5,6 +5,8 @@ sections:
 - 'no': 一
   name: 讀全文—做記號
   module: full_text_annotate
+  slug: rnuuy
+  file: full_text_annotate.rnuuy.yml
   pages:
   - 1
   - 2
@@ -12,22 +14,34 @@ sections:
 - 'no': 二
   name: 念順順
   module: key_reading
+  text_ref: rnuuy
+  slug: unxym
+  file: key_reading.unxym.yml
   pages:
   - 3
 - 'no': 三
   name: 語詞我最棒
   module: vocab_definitions
+  text_ref: rnuuy
+  slug: makmd
+  file: vocab_definitions.makmd.yml
   pages:
   - 3
   - 4
 - 'no': 四
   name: 語詞應用
   module: vocab_application
+  text_ref: rnuuy
+  slug: ecmq3
+  file: vocab_application.ecmq3.yml
   pages:
   - 4
 - 'no': 五
   name: 文章重點表
   module: keypoints
+  text_ref: rnuuy
+  slug: qmetw
+  file: keypoints.qmetw.yml
   pages:
   - 4
   - 5
@@ -35,6 +49,9 @@ sections:
   name: 閱讀聚光燈
   module: spotlight
   subtitle: 反思策略——4F反思法
+  text_ref: rnuuy
+  slug: vemm6
+  file: spotlight.vemm6.yml
   pages:
   - 5
   - 6
@@ -42,18 +59,27 @@ sections:
 - 'no': 七
   name: 閱讀理解
   module: comprehension
+  text_ref: rnuuy
+  slug: ekfaj
+  file: comprehension.ekfaj.yml
   pages:
   - 7
   - 8
 - 'no': 八
   name: 詞語複習
   module: vocab_review
+  text_ref: rnuuy
+  slug: fuccv
+  file: vocab_review.fuccv.yml
   pages:
   - 8
   - 9
 - 'no': 九
   name: 知識補給站
   module: resources
+  text_ref: rnuuy
+  slug: twp9v
+  file: resources.twp9v.yml
   pages:
   - 9
   - 10

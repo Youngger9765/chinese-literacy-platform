@@ -1,0 +1,28 @@
+lesson_uid: L0053
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 「《昆蟲捉迷藏》巧奪天工的偉大母親【 摺紙藝術師：捲葉象鼻蟲 】
+    duration: (5:01)
+    source: 客家電視 HakkaTV
+  - index: 2
+    title: 【See Yellow-Face bee (Hylaeus communis) making its cellophane-like nest】
+    duration: (4:25)
+    source: George Pilkington
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/x4DdIctCESI
+    url_source: 總表0816「4.影片連結」年級6課次13
+  - index: 2
+    url: http://youtu.be/2R4UwzvlbR4
+    url_source: 總表0816「4.影片連結」年級6課次13
+  notes:
+    note: '本課只有 2 則影片（L0052 有 3 則），非漏抄。各附一個 QR code（圖形），連結網址不在文字層。
+
+      第 1 則標題開頭的「 沒有配對的結束引號，原稿如此。'
+  slug: ah47p
+  text_ref: 3np3k

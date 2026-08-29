@@ -45,11 +45,28 @@ def test_cross_text_banner_reaches_get_lesson_by_id():
     assert banner, "cross_text_banner missing from get_lesson_by_id"
 
 
+def _followup_anywhere(story: dict) -> dict | None:
+    """加碼題可能在頂層，也可能在它所屬的那一篇。
+
+    ⚠️ #2930 之後「第一篇專屬」的加碼題移進那一篇了 —— 留在頂層的話，
+       第 2、3 篇的重點表底下也會出現「請依據第一篇文章的內容」。
+       所以這裡兩個地方都找；**這條鎖的是「形狀沒掉」，不是「在哪一層」**
+       （在哪一層由 test_followup_never_vanishes_2964.py 管）。
+    """
+    top = story.get("keypoints_followup_questions")
+    if top:
+        return top
+    for v in (story.get("repeat_rounds") or {}).values():
+        if isinstance(v, dict) and v.get("keypoints_followup_questions"):
+            return v["keypoints_followup_questions"]
+    return None
+
+
 def test_keypoints_followup_questions_reaches_get_lesson_by_id_both_shapes():
-    q_shape = _get(MULTI_TEXT_QUESTIONS_SHAPE_ID).get("keypoints_followup_questions")
+    q_shape = _followup_anywhere(_get(MULTI_TEXT_QUESTIONS_SHAPE_ID))
     assert q_shape and q_shape.get("questions"), "L0063's questions[] shape lost"
 
-    relay_shape = _get(MULTI_TEXT_RELAY_SHAPE_ID).get("keypoints_followup_questions")
+    relay_shape = _followup_anywhere(_get(MULTI_TEXT_RELAY_SHAPE_ID))
     assert relay_shape and relay_shape.get("items"), "L0144's items[] (閱讀接力) shape lost"
 
 

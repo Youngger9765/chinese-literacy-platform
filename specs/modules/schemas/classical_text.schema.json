@@ -32,6 +32,10 @@
       "type": "array",
       "x-seen-in": "10/10"
     },
+    "slug": {
+      "type": "string",
+      "x-seen-in": "10/10"
+    },
     "source": {
       "type": "string",
       "x-seen-in": "6/10"
@@ -43,13 +47,15 @@
   },
   "required": [
     "annotations",
-    "paragraphs"
+    "paragraphs",
+    "slug"
   ],
   "title": "classical_text module payload",
   "type": "object",
   "x-core-90pct": [
     "annotations",
-    "paragraphs"
+    "paragraphs",
+    "slug"
   ],
   "x-enforcement": "error",
   "x-lessons-observed": 10

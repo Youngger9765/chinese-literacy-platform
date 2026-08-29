@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { formatTime } from '../../utils/formatTime';
+import { sectionSlugForStep } from '../../config/roundScope';
+import { moduleForStep } from '../../config/stepConfig';
 import { Story, KeyPassageReadingResult } from '../../types';
 import { parseReadingBenchmark, getAiFluencyInsight, type ParsedBenchmark } from '../../utils/fluencyAnalyzer';
 import { useZhuyin } from '../../context/ZhuyinContext';
@@ -30,6 +32,15 @@ import { hasKeyPassage } from '../qr/lessonQr';
 /* ------------------------------------------------------------------ */
 
 interface KeyPassageReadingProps {
+  /**
+   * 這一節**自己的**代號，QR 印它（#2916）。
+   *
+   * ⛔ 由頁面傳進來，不在這裡呼叫 `useLocation` —— 葉元件不該知道路由。
+   *    一度改成在這裡叫 hook，結果 31 條既有測試（直接 render 不包 Router）
+   *    全數炸掉，而那不是測試的問題，是把 routing 依賴放錯了層。
+   *    沒傳就退回長網址：能掃的 QR 勝過沒有 QR。
+   */
+  sectionSlug?: string | null;
   story: Story;
   onFinish: (result: KeyPassageReadingResult) => void;
   onBack: () => void;
@@ -46,6 +57,7 @@ interface KeyPassageReadingProps {
 }
 
 const KeyPassageReading: React.FC<KeyPassageReadingProps> = ({
+  sectionSlug: qrSectionSlug,
   story,
   onFinish,
   onBack,
@@ -55,6 +67,11 @@ const KeyPassageReading: React.FC<KeyPassageReadingProps> = ({
   onProgressChange,
   dbSessionId,
 }) => {
+  // 這一節自己的代號：單篇課從帳本推導（網址沒有 `?p=`），
+  // 多篇課帳本有好幾列 → 推不出來，改用頁面從 `?p=` 傳進來的那個（#2916）。
+  const qrCode =
+    sectionSlugForStep(story.manifestSections, 'key-passage-reading', moduleForStep)
+    ?? qrSectionSlug ?? null;
   const { token, user } = useAuth();
   const storageKey = scopedStepStorageKey('fullReading_progress_', story.id);
   // #1462: in toolbox mode, completion screen shows 重做/回工具箱 instead of 下一關.
@@ -444,7 +461,8 @@ const KeyPassageReading: React.FC<KeyPassageReadingProps> = ({
                       lessonId={story.id}
                       step="key-passage-reading"
                       lessonTitle={story.title}
-                    />
+                    sectionSlug={qrCode}
+              />
                   </div>
                 )}
               </div>

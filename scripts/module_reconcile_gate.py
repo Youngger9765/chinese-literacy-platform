@@ -103,7 +103,8 @@ def reconcile(uid_filter: str | None = None) -> dict:
             else:
                 unknown_section[name] += 1
 
-        produced = {p.stem for p in version_dir.glob("*.yml")} - not_sections
+        # 同 build_lesson_manifest：`{module}.{slug}.yml` 要收斂回模組名（#2916）
+        produced = {p.stem.partition(".")[0] for p in version_dir.glob("*.yml")} - not_sections
         gaps = known_gaps.get(uid, set())
 
         for module in sorted(declared - produced - gaps):

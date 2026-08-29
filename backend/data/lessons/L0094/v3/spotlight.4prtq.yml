@@ -1,0 +1,114 @@
+lesson_uid: L0094
+version_id: v3
+section_no: 六
+spotlight:
+  strategy_name: 科學推理策略──用線索和知識推論
+  strategy_type: science_reasoning
+  section_title_printed: 閱讀聚光燈
+  answer_carrier: 紅色 ☑（w:sym Wingdings F0FE，全課 3 個都在本大題）與橘色手寫字
+  blocks:
+  - type: concept_box
+    text: 簡單推理常用到三個要素：❶觀察線索；❷背景知識；❸進行推論。我們可以用下圖來表示：
+  - type: figure
+    referent: 推理三要素流程圖
+    label: 推理三要素
+    text_carrier: image
+    description: '方塊流程圖：左側上下兩個框「觀察線索」與「背景知識」，中間以 ✚ 相連，
+
+      往右一個箭頭指向「進行推論」（上方黑底標籤「思考」），
+
+      再以 ＝ 指向「推理結果」（上方黑底標籤「產出」）。'
+    figure_note: '六個字串（觀察線索／背景知識／進行推論／推理結果／思考／產出）在文字層是文字方塊，
+
+      ✚ ➡ ＝ 三個連接符號是圖形，文字層沒有。'
+  - type: guide
+    text: 一、看福爾摩斯如何推理
+  - type: guide
+    text: 推理能力可以透過訓練提升，我們先用福爾摩斯的帽子推理，看看三個要素運作的細節。
+  - type: free_text
+    prompt: '❶細心觀察線索：關於帽主的訊息，福爾摩斯觀察到：
+
+      1.固定鬆緊帶的小圓環是請【　】製作的、襯裡用料【　】，還帶有一條【　】的絲綢箍帶。
+
+      2.鬆緊帶壞了卻沒有換，帽子的補丁處用墨水【　】。'
+    blanks:
+    - answer: 專人
+    - answer: 高級
+    - answer: 精緻
+    - answer: 染黑
+  - type: guide
+    text: ❷連結背景知識 ❸進行推論
+    text_note: 兩段之間原稿印一個 → 箭頭，它是 `w:sym Wingdings F0E0` 符號物件、不在文字流，故未寫進 text。
+  - type: free_text
+    prompt: '對以上的線索，福爾摩斯連結到許多背景知識，並進行推論：
+
+      先備知識：帽子是【　】款式；專人製作、用料高級，價格通常【　】'
+    blanks:
+    - answer: 三年前
+    - answer: 不便宜
+  - type: guide
+    text: 推論：帽主三年前是有錢人。
+    text_note: 句首原稿印一個 → 箭頭（`w:sym Wingdings F0E0`，不在文字流），未寫進 text。
+  - type: guide
+    text: 二、小試身手：你來試試看
+  - type: guide
+    text: 接下來有兩個情境，都有點挑戰，請你利用觀察力與背景知識，試著推論看看！
+  - type: guide
+    text: （一）推論人的個性：福爾摩斯能推測出帽主「家道中落」，是比較容易理解的。但是為什麼福爾摩斯還可以進一步推論帽主的個性，說帽主「不想讓人看出來（家道中落）」、「力圖保持體面」呢？他觀察到什麼線索？連結了什麼背景知識？請推論出最可能的選項。
+  - type: single
+    prompt: 觀察線索（選１項）：
+    options:
+      1: 鬆緊帶壞了，也沒有換新
+      2: 補丁的地方，用墨水塗黑
+    answer: 2
+  - type: single
+    prompt: 背景知識（選１項）：
+    options:
+      1: 鬆緊帶壞了反而比較好用舒服
+      2: 用墨水塗黑就比較看不出補丁
+    answer: 2
+  - type: free_text
+    prompt: 福爾摩斯的推論：他買不起新帽子，把舊帽破損處補丁，不想讓人看見，所以塗上墨水，以保持自己的【　】。
+    prompt_note: 句首原稿印一個 → 箭頭（`w:sym Wingdings F0E0`，不在文字流），未寫進 prompt。
+    blanks:
+    - answer: 體面
+  - type: guide
+    text: （二）停電夜的真相
+  - type: passage
+    paragraphs:
+    - 不久前，伊藤的管家頭部受到重擊而亡，中村警官找伊藤問話。燭光中，伊藤顫抖著從冰箱取了些冰塊，並往威士忌加冰塊。
+    - 「我以為他是強盜。」伊藤喝著威士忌說：「三天前這裡開始停電，我就暫時搬去城裡住。大概兩小時前，我回來拿一些資料，就在我開抽屜時，他跳到我的身後。我現在猜想可能他以為我是小偷，而我在黑暗中，則以為是一個歹徒在攻擊我，當時我只想到自保，就拿起木棍全力反擊，擊中了他，他倒退幾步後就倒下了，然後我就報警了。」
+    - 中村警官：「老實交代吧！我不想聽你編故事。」
+    underlined_terms:
+    - 伊藤
+    - 中村
+    paragraphs_note: 這一段情境是文字方塊，在文字層裡重複出現兩次（原稿疊了兩份），內容相同。
+  - type: guide
+    text: （在【 】中填入適當推理步驟：觀察線索、背景知識、進行推論。）
+  - type: fill_table
+    prompt: 問題：中村警官判斷伊藤沒有說實話的理由是什麼？
+    columns:
+    - 推理步驟
+    - 內容
+    rows:
+    - 推理步驟: 【　】
+      推理步驟_blanks:
+      - answer: 觀察線索
+      內容: 伊藤從冰箱拿冰塊。
+    - 推理步驟: 【　】
+      推理步驟_blanks:
+      - answer: 背景知識
+      內容: 冰箱的冰塊停電８小時左右就會融化。
+    - 推理步驟: 【　】
+      推理步驟_blanks:
+      - answer: 進行推論
+      內容: 三天前開始停電，本案發生時，冰塊早該融光了，但伊藤喝酒卻能加冰塊？
+  - type: single
+    prompt: 最後推論
+    prompt_note: 句末原稿印一個 → 箭頭（`w:sym Wingdings F0E0`，不在文字流），未寫進 prompt。
+    options:
+      1: 伊藤很愛喝酒
+      2: 伊藤沒有說實話
+    answer: 2
+  slug: 4prtq
+  text_ref: qxvp9

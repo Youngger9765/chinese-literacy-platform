@@ -39,12 +39,19 @@ describe('ReadingTrendChart', () => {
     expect(screen.queryByText(/再多練幾次/)).toBeNull();
   });
 
-  it('caps at 20 points and shows "最近 20 次" label when exceeded', () => {
+  it('超過上限時：標出總次數與 20 筆上限，並提供載入更多', () => {
     const history = Array.from({ length: 25 }, (_, i) =>
       makeItem(i + 1, 60 + i, 100 + i * 2, 25 - i),
     );
     render(<ReadingTrendChart history={history} />);
-    expect(screen.getByText('最近 20 次')).toBeTruthy();
+    // 元件把字切成多個節點（「顯示最近 {N} 次」＋超過上限時的補述），
+    // 所以比對整段 textContent。斷言的是意圖：有告訴使用者「只畫最近 20 次、總共 25 次」。
+    // 元件現在預設只畫最近 4 次，要按「載入更多」才展開，上限仍是 20（#2933）。
+    // 舊斷言停在「給 25 筆就直接畫 20 筆」的行為，早就不成立了。
+    const txt = document.body.textContent?.replace(/\s+/g, '') ?? '';
+    expect(txt, '沒有告訴使用者總共幾次').toContain('共25次');
+    expect(txt, '沒有標出 20 筆的上限').toContain('最多顯示20次');
+    expect(screen.getByText(/載入更多/), '超過預設筆數時要能展開').toBeTruthy();
   });
 
   it('does NOT show "最近 20 次" label when within the cap', () => {

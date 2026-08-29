@@ -15,3 +15,17 @@ notes:
     教材目標策略／第六大題標題皆為「品格力──成長型思維」，語詞欄有 11 個（與學習單相同）。
 strategy_sources:
   previous: 品格力──成長型思維
+source_profile:
+  class: standard
+  note: 單一錨點 + 有計數欄 + idx 唯一 —— 走主路徑
+  has_key_reading_section: true
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: null
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 1
+  has_counter_column: true
+  body_in_tables: true
+  invisible_chars_docx_only: true
+  profiled: '2026-08-24'

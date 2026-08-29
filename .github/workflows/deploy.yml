@@ -148,12 +148,14 @@ jobs:
       - name: Show deployment summary
         if: always()
         run: |
-          echo "## Production Deployment Complete" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Frontend (Cloud Run):** https://lingoleap-frontend-958347263320.asia-east1.run.app" >> $GITHUB_STEP_SUMMARY
-          echo "**Frontend (Firebase):** https://lingoleap-prod.web.app" >> $GITHUB_STEP_SUMMARY
-          echo "**Backend:** https://lingoleap-backend-958347263320.asia-east1.run.app" >> $GITHUB_STEP_SUMMARY
-          echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "## Production Deployment Complete"
+            echo ""
+            echo "**Frontend (Cloud Run):** https://lingoleap-frontend-958347263320.asia-east1.run.app"
+            echo "**Frontend (Firebase):** https://lingoleap-prod.web.app"
+            echo "**Backend:** https://lingoleap-backend-958347263320.asia-east1.run.app"
+            echo "**Commit:** \`${{ github.sha }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
 
   deploy-frontend-firebase:
     name: Deploy frontend to Firebase Hosting (prod)
@@ -297,12 +299,30 @@ jobs:
             // ("ai-qa-passed", "deployed-to-prod") but must leave issues OPEN so Young
             // can verify with human eyes before closing.
 
-            const compare = await github.rest.repos.compareCommits({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              base: context.payload.before,
-              head: context.payload.after,
-            });
+            // ⚠️ `payload.before/after` 只有 push 事件才有。
+            // 手動觸發（workflow_dispatch）時它們是 undefined，
+            // compareCommits 會回 404 —— 整個 job 紅掉，而部署其實是成功的。
+            // 2026-08-27 連兩次都掛在這裡。手動觸發時改看最近一次 push 的範圍。
+            const before = context.payload.before;
+            const after = context.payload.after || context.sha;
+            if (!before || !after || /^0+$/.test(before)) {
+              console.log(`No push range (event=${context.eventName}) — skipping issue notification`);
+              return;
+            }
+
+            let compare;
+            try {
+              compare = await github.rest.repos.compareCommits({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                base: before,
+                head: after,
+              });
+            } catch (e) {
+              // 找不到範圍不該讓部署 job 變紅 —— 它只是「沒能貼標籤」。
+              console.log(`compareCommits failed (${e.status}): ${e.message} — skipping`);
+              return;
+            }
 
             const issueNumbers = new Set();
             const patterns = [

@@ -1,0 +1,34 @@
+lesson_uid: L0048
+version_id: v3
+section_no: 九
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 現代心理學分析災難預言 小心陷入"巴南效應" 應保持理性.清醒
+    duration: (2:53)
+    source: 東森美洲電視
+    qr_code: true
+  - index: 2
+    title: 我們其實都被倖存者偏差給騙了！【鄒大瑞】
+    duration: (1:09)
+    source: 鄒大瑞的冷水財經
+    qr_code: true
+  - index: 3
+    title: 確認偏誤
+    duration: (1:00)
+    source: '@awinders426'
+    qr_code: true
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/5_ik04y7YSc
+    url_source: 總表0816「4.影片連結」年級5課次9
+  - index: 2
+    url: http://youtu.be/KIP6w4v7im0
+    url_source: 總表0816「4.影片連結」年級5課次9
+  - index: 3
+    url: http://youtu.be/EX1a76aBuPc
+    url_source: 總表0816「4.影片連結」年級5課次9
+  slug: tj6dq
+  text_ref: jehhy

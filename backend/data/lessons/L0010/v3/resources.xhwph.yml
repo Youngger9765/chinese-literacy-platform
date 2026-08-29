@@ -1,0 +1,26 @@
+lesson_uid: L0010
+version_id: v3
+section_no: 九
+resources:
+  items:
+  - index: 1
+    title: 蔡康永｜如何讓自己更進步
+    duration: '2:30'
+    duration_seconds: 150
+    source: EC couple x 安麗小夫妻
+  - index: 2
+    title: 【 心靈七湯 】讀書不是為了考試，而是為了認識厲害的人。《 心靈七湯 》EP 004
+    duration: '3:29'
+    duration_seconds: 209
+    source: 志祺七七
+  section_name: 知識補給站
+  label: 影片連結
+  videos:
+  - index: 1
+    url: http://youtu.be/xJ33aSqrTPY
+    url_source: 總表0816「4.影片連結」年級4課次19（⚠️課名與課程不符，仍依課次採用）
+  - index: 2
+    url: http://youtu.be/KhRNQFPE6W0
+    url_source: 總表0816「4.影片連結」年級4課次19（⚠️課名與課程不符，仍依課次採用）
+  slug: xhwph
+  text_ref: ajk7q

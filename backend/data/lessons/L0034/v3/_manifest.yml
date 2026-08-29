@@ -5,6 +5,8 @@ sections:
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
+  slug: 6t6cy
+  file: full_text_annotate.6t6cy.yml
   pages:
   - 1
   - 2
@@ -12,23 +14,35 @@ sections:
 - 'no': 二
   name: 念順順
   module: key_reading
+  text_ref: 6t6cy
+  slug: j7xqu
+  file: key_reading.j7xqu.yml
   pages:
   - 3
 - 'no': 三
   name: 語詞我最棒
   module: vocab_definitions
+  text_ref: 6t6cy
+  slug: yhwrq
+  file: vocab_definitions.yhwrq.yml
   pages:
   - 3
   - 4
 - 'no': 四
   name: 語詞應用
   module: vocab_application
+  text_ref: 6t6cy
+  slug: 77y3q
+  file: vocab_application.77y3q.yml
   pages:
   - 4
   - 5
 - 'no': 五
   name: 文章重點表
   module: keypoints
+  text_ref: 6t6cy
+  slug: ppqcq
+  file: keypoints.ppqcq.yml
   pages:
   - 5
   - 6
@@ -36,6 +50,9 @@ sections:
   name: 品格聚光燈
   module: spotlight
   subtitle: 建立好習慣
+  text_ref: 6t6cy
+  slug: fy63a
+  file: spotlight.fy63a.yml
   pages:
   - 6
   - 7
@@ -44,18 +61,27 @@ sections:
 - 'no': 七
   name: 閱讀理解
   module: comprehension
+  text_ref: 6t6cy
+  slug: uc6ud
+  file: comprehension.uc6ud.yml
   pages:
   - 9
   - 10
 - 'no': 八
   name: 詞語複習
   module: vocab_review
+  text_ref: 6t6cy
+  slug: nftaj
+  file: vocab_review.nftaj.yml
   pages:
   - 10
   - 11
 - 'no': 九
   name: 知識補給站
   module: resources
+  text_ref: 6t6cy
+  slug: 66dwt
+  file: resources.66dwt.yml
   pages:
   - 11
 dispatch:

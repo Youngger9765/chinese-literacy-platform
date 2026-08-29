@@ -11,6 +11,8 @@
  */
 
 import { useCallback, useEffect, useRef } from 'react';
+import { stepPath } from '../config/stepPath';
+import useCurrentStepId from './useCurrentStepId';
 import type { Dispatch, SetStateAction } from 'react';
 import type { NavigateFunction } from 'react-router-dom';
 import type { AuthUser } from '../services/authApi';
@@ -143,10 +145,13 @@ export function useLearningStepNavigation({
     );
     persistStep(STEP_PATH_TO_NUMBER[firstReadingStep]);
     ensureDbSession();
-    navigate(isToolboxMode() ? '/tools' : `/learn/${storyId}/${firstReadingStep}`);
+    navigate(isToolboxMode() ? '/tools' : stepPath(storyId, firstReadingStep));
   }, [storyId, selectedStory, navigate, persistStep, ensureDbSession, setSession]);
 
   // ─── Navigation helpers ───────────────────────────────────────────────────
+
+  // 目前這一步的 key，含輪次（多篇課才有 `#slug`）。
+  const currentStepKey = useCurrentStepId('');
 
   const navigateAfterFinish = useCallback(
     (nextStep: string) => {
@@ -154,7 +159,7 @@ export function useLearningStepNavigation({
         navigate('/tools');
         return;
       }
-      navigate(`/learn/${storyId}/${nextStep}`);
+      navigate(stepPath(storyId, nextStep));
     },
     [navigate, storyId],
   );
@@ -168,14 +173,19 @@ export function useLearningStepNavigation({
    */
   const dispatchStepFinish = useCallback(
     (stepId: string, stepData: Record<string, unknown>, sessionPatch?: Partial<LearningSession>) => {
-      const payload = buildStepFinishPayload(stepId, stepData);
+      // 一課多篇時，序列裡是 `full-text-annotate#p3kud`，而呼叫端傳的是寫死的
+      // base id。`lessonAwareNextStep` 找不到就 `return 'report'` ——
+      // 學生在第 2 步按「完成標記」會直接被丟到第 21 步的報告頁（#2930）。
+      // 補上目前網址帶的輪次；單篇課沒有 `#`，keyed === stepId，行為不變。
+      const keyed = currentStepKey.startsWith(`${stepId}#`) ? currentStepKey : stepId;
+      const payload = buildStepFinishPayload(keyed, stepData);
       // Lesson-aware override (#2752): STEP_FINISH_TRANSITIONS is one static table
       // keyed by step id, so it cannot express "key-passage-reading is followed by
       // X for 白話 lessons but Y for 文言文 lessons" — both genres route through
       // that SAME step id. A lesson carrying its own step_sequence must advance
       // within THAT sequence; a lesson without one gets payload.nextStep back
       // unchanged (see lessonAwareStepTransition.ts).
-      const nextStep = lessonAwareNextStep(stepId, selectedStory?.stepSequence, payload.nextStep);
+      const nextStep = lessonAwareNextStep(keyed, selectedStory?.stepSequence, payload.nextStep);
       if (sessionPatch) {
         setSession((prev) => (prev ? { ...prev, ...sessionPatch } : null));
       }
@@ -192,7 +202,7 @@ export function useLearningStepNavigation({
       }
       navigateAfterFinish(nextStep);
     },
-    [navigateAfterFinish, persistStep, persistStepProgressState, setSession, selectedStory],
+    [navigateAfterFinish, persistStep, persistStepProgressState, setSession, selectedStory, currentStepKey],
   );
 
   // ─── Step finish handlers ─────────────────────────────────────────────────
@@ -408,7 +418,7 @@ export function useLearningStepNavigation({
     (step: { id: string }) => {
       if (!storyId) return;
       persistStep(STEP_PATH_TO_NUMBER[step.id]);
-      navigate(`/learn/${storyId}/${step.id}`);
+      navigate(stepPath(storyId, step.id));
     },
     [navigate, persistStep, storyId],
   );

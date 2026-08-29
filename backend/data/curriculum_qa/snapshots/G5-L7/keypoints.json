@@ -76,6 +76,7 @@
     }
   ],
   "section_no": "六",
+  "slug": "apuhm",
   "spanning_rows_note": "「大主題」與「總結」是橫跨全部三個小主題欄的整列合併儲存格，塞不進 matrix 的\nrow×column 網格，故照 L0030 的 `topic_cell` 前例另存成純量欄位。\n⚠️ 已知落差：消費端 keypoints_to_structure._columns_to_structure_table 只吃\n`columns`＋`rows`，這兩列**目前不會被畫出來**。資料在檔案裡沒有遺失，\n但要讓它上畫面得改消費端，不在本次抽取範圍。",
   "sub_topic_label": "小主題",
   "summary": "植物有許多聰明的生存技巧，為人類帶來【　】。",
@@ -85,5 +86,6 @@
     }
   ],
   "summary_label": "總結",
+  "text_ref": "vcn7j",
   "title": "文章重點表"
 }

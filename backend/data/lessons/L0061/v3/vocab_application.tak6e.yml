@@ -1,0 +1,45 @@
+lesson_uid: L0061
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格中填入正確的語詞代號
+  option_bank:
+    A: 經典
+    B: 一視同仁
+    C: 目睹
+    D: 怯生生
+    E: 劍及履及
+    F: 不偏不倚
+    G: 韁繩
+    H: 木訥
+    I: 因材施教
+    J: 對症下藥
+  items:
+  - index: 1
+    stem: 教練瞭解每位選手的體能與專長後，以（　）的方式設計不同的訓練。
+    answer: I
+  - index: 2
+    stem: 救援隊接到求救消息後立即出發，展現（　）的行動力。
+    answer: E
+  - index: 3
+    stem: 那場比賽在最後一局逆轉勝，被球迷稱為（　）之戰。
+    answer: A
+  - index: 4
+    stem: 小杰（　）車禍發生，立刻打電話報警。
+    answer: C
+  - index: 5
+    stem: 爸爸個性（　），不太會說甜言蜜語，總是用行動照顧家人。
+    answer: H
+  - index: 6
+    stem: 馬兒突然偏離道路，教練趕緊拉緊（　），控制方向。
+    answer: G
+  - index: 7
+    stem: 醫生先找出頭痛的原因，再（　），效果很好。
+    answer: J
+  - index: 8
+    stem: 教練不因球員是主力或替補而偏心，對每個人都（　）。
+    answer: B
+  notes:
+    option_bank: 10 個代號對應 8 道小題；D.怯生生、F.不偏不倚 未被任何一題用到
+  slug: tak6e
+  text_ref: k3ckp

@@ -39,3 +39,17 @@ notes:
   總表_語詞_對照: 總表 12 個語詞與學習單第三大題印的 12 個完全一致
 strategy_sources:
   previous: 品格力──正向思考──培養心理韌性
+source_profile:
+  class: no_anchor
+  note: ☞ 錨點對不到任何課文段落 —— XML 沒訊號，只能靠 vision
+  has_key_reading_section: true
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: null
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 0
+  has_counter_column: true
+  body_in_tables: true
+  invisible_chars_docx_only: false
+  profiled: '2026-08-24'

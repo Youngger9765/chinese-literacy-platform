@@ -1,0 +1,39 @@
+lesson_uid: L0081
+version_id: v3
+section_no: 九
+resources:
+  section_title_printed: 知識補給站
+  label: 影片連結
+  items:
+  - index: 1
+    title: 女太空人登月 生理結構暗藏使命
+    duration: 02:32
+    source: 大愛新聞
+    _總表_url: http://youtu.be/lPmpV3Sk__g
+  - index: 2
+    title: 太空人在太空的生活
+    duration: 01:46
+    source: 南門書局
+    _總表_url: http://youtu.be/hQ-YhtWbUeQ
+  - index: 3
+    title: 她3歲 立志當太空人】
+    duration: 07:47
+    source: 雲端世界
+    _總表_url: http://youtu.be/9lKhIV6ojFI
+    title_note: 標題末尾的「】」原稿如此（沒有對應的左括號），照原樣記錄。
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: http://youtu.be/lPmpV3Sk__g
+    url_source: 總表0816「4.影片連結」年級7課次13
+  - index: 2
+    url: http://youtu.be/hQ-YhtWbUeQ
+    url_source: 總表0816「4.影片連結」年級7課次13
+  - index: 3
+    url: http://youtu.be/9lKhIV6ojFI
+    url_source: 總表0816「4.影片連結」年級7課次13
+  notes:
+    items: 本課是**三支**影片（多數課是兩支）。
+    url: 學習單上只印 QR code（圖形，文字層無網址）；URL 取自總表「4.影片連結」第 94 列，故加 `_` 前綴標示非 DOCX 內容。
+  slug: dvqkn
+  text_ref: v3nth

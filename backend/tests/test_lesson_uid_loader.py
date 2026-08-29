@@ -876,21 +876,32 @@ def test_key_reading_disagreements_are_flagged_not_silently_preferred():
     marking another. The DOCX wins — it is this edition's own instruction, and the
     passage is still this lesson's — but the file has to say a human should look, and
     say why. Setting the verdict before the length check and falling through
-    overwrote it with 'ok': the flag survived, the reason did not."""
+    overwrote it with 'ok': the flag survived, the reason did not.
+
+    ⚠️ 白名單 2026-08-24 加了第二個 verdict：`short_marked_paragraph`（L0140 指定的
+    第十三段只有 11 字）。它與這條原本擋的是同一件事 —— 出貨、但檔案自己說要人看。
+    保持白名單而不是「有 verdict 就算數」：任何 verdict 都能配旗子的話，
+    'ok' 也能被標成待審，這條就退化成沒驗。"""
     import yaml
 
     from app.services import lesson_uid_loader as L
 
     flagged = 0
     for uid in L.available_uids():
-        for f in (L.LESSONS_ROOT / uid).glob("v*/key_reading.yml"):
+        # ⚠️ #2916 之後檔名帶 slug、一課可能有好幾篇。舊的 `v*/key_reading.yml`
+        # 一個檔都對不到 —— 這支因為有 `flagged >= 1` 所以大聲失敗，但同樣形狀的
+        # 掃描若只斷言「違規清單為空」就會靜靜地全綠（見 `_module_files.py`）。
+        for f in sorted((L.LESSONS_ROOT / uid).glob("v*/key_reading.*.yml")):
             doc = yaml.safe_load(f.read_text(encoding="utf-8")) or {}
             if not doc.get("needs_human_review"):
                 continue
             flagged += 1
             assert doc.get("review_reason"), f"{uid}: flagged with no reason"
             verdict = (doc.get("extraction_check") or {}).get("verdict")
-            assert verdict == "disagrees_with_first_edition", f"{uid}: verdict {verdict!r}"
+            assert verdict in ("disagrees_with_first_edition", "short_marked_paragraph",
+                               "unnumbered_tail_disputed"), (
+                f"{uid}: verdict {verdict!r}"
+            )
     assert flagged >= 1, "no lesson carries the flag — has the disagreement been hidden?"
 
 

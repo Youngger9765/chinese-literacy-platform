@@ -1,0 +1,32 @@
+lesson_uid: L0137
+version_id: v3
+section_no: 七
+resources:
+  label: 影片連結
+  items:
+  - index: 1
+    title: 史前失落文明：巨石陣之謎(備註：請從第６分鐘開始觀看)
+    duration: (09:00)
+    source: 小宇宙傳說
+    has_qr: true
+  - index: 2
+    title: 古建築奧祕：復活節島摩艾石像
+    duration: (05:18)
+    source: 國家地理
+    has_qr: true
+  - index: 3
+    title: Easter Island moai 'walked'摩艾走路實驗
+    duration: (01:46)
+    source: Nature Newsteam
+    has_qr: true
+  section_name: 知識補給站
+  videos:
+  - index: 1
+    url: https://www.epochtimes.com/b5/21/4/30/n12917210.htm (文章)
+    url_source: 總表0816「4.影片連結」年級9課次16（⚠️課名與課程不符，仍依課次採用）
+  notes:
+    note: 三則各附一個 QR code 圖片；QR 圖上沒有可讀文字
+  slug: 6333n
+  text_ref:
+  - ut67x
+  - ppwdu

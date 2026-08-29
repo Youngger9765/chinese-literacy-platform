@@ -1,0 +1,62 @@
+lesson_uid: L0045
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+  - 從本課語詞框框，找語詞。
+  - 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+  - 問同學。
+  vocabulary_bank:
+  - 翼展
+  - 水來土掩
+  - 蔓延
+  - 想方設法
+  - 兵來將擋
+  - 抗藥性
+  - 剋星
+  - 施作
+  - 防治
+  - 日新月異
+  - 一勞永逸
+  items:
+  - index: 1
+    word: 抗藥性
+    definition: 生物對藥的抵抗能力，使藥效變差。
+  - index: 2
+    word: 防治
+    definition: 預防並治理疾病、蟲害等問題。
+  - index: 3
+    word: 日新月異
+    definition: 每天更新，每月不同；形容進步或變化很快。
+  - index: 4
+    word: 翼展
+    definition: 兩邊翅膀完全展開時，左右翼尖之間的長度。
+  - index: 5
+    word: 蔓延
+    definition: 像藤蔓一樣延伸。形容向四周不斷擴展。
+  - index: 6
+    word: 施作
+    definition: 依照計畫或方法進行工作。
+  - index: 7
+    word: 兵來將擋，水來土掩
+    definition: 敵兵來了，就派將士抵擋；水來了，就用土築堤阻擋。比喻針對不同情況，採取適合的應對方法。
+  - index: 8
+    word: 想方設法
+    definition: 想出各種辦法，設法達成目的。
+  - index: 9
+    word: 一勞永逸
+    definition: 辛苦一次，以後就不用再費力。
+  - index: 10
+    word: 剋星
+    definition: 能克制對方的人或物。
+  notes:
+    bank_split: '⚠️ 照原樣記錄：語詞框把成語「兵來將擋，水來土掩」拆成兩半且順序顛倒
+
+      （「水來土掩」排第 2、「兵來將擋」排第 5，中間隔著「蔓延」「想方設法」）。
+
+      第三大題第 7 題與第八大題找字框都把它當**一個**語詞，故判定是語詞框編排錯。
+
+      合併後應是 10 個語詞，不是 11 個 —— 但那要重排清單、改數量，不是照字改，故不逕自修。'
+  slug: rhc73
+  text_ref: urk49

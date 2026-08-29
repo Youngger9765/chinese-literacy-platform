@@ -1,0 +1,24 @@
+lesson_uid: L0124
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞劃掉。
+  target_words:
+  - 悄然興起
+  - 革命
+  - 追溯
+  - 不分軒輊
+  - 質地
+  - 媲美
+  - 膳食纖維
+  - 屠宰
+  - 蓬勃
+  - 刮目相看
+  - 應運而生
+  grid_size:
+  - 10
+  - 10
+  answers_are_graphical: true
+  slug: jk99m
+  text_ref: u7rhq

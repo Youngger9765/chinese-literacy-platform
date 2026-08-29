@@ -5,6 +5,8 @@ sections:
 - 'no': 一
   name: 讀全文
   module: full_text_annotate
+  slug: 76aw6
+  file: full_text_annotate.76aw6.yml
   pages:
   - 1
   - 2
@@ -15,6 +17,9 @@ sections:
   name: 閱讀聚光燈
   module: spotlight
   subtitle: 圖文整合閱讀策略——先文後圖，再整合
+  text_ref: 76aw6
+  slug: 7rrtx
+  file: spotlight.7rrtx.yml
   pages:
   - 5
   - 6
@@ -25,11 +30,17 @@ sections:
 - 'no': 三
   name: 知識補給站
   module: resources
+  text_ref: 76aw6
+  slug: ecdhf
+  file: resources.ecdhf.yml
   pages:
   - 10
 - 'no': 四
   name: 閱讀理解
   module: comprehension
+  text_ref: 76aw6
+  slug: nrfew
+  file: comprehension.nrfew.yml
   pages:
   - 10
   - 11

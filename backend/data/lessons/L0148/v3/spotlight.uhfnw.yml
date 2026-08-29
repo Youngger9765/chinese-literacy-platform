@@ -1,0 +1,157 @@
+lesson_uid: L0148
+version_id: v3
+section_no: 五
+spotlight:
+  strategy_name: 科學推理策略——用科學步驟解決問題
+  strategy_type: comprehension_strategy
+  section_title_printed: 閱讀聚光燈
+  answer_carrier: '三種載體混用——(a) 紅色手繪連線（連連看，4 條 srgbClr FF0000 的 line 圖形）；
+
+    (b) 紅色 ☑（w:sym Wingdings F0FE，3 個，在❸驗證的是/否/部分支持）；
+
+    (c) 橘色手寫填空（❶問題、❷假說、❸驗證的結果欄、❹結論、二、應用），文字流有此資訊。'
+  blocks:
+  - type: concept_box
+    text: '這又是一篇「用科學步驟解決問題」的說明文，讀起來就像科學偵探故事。作者先找「問題」，再提出「假設」，接著做實驗，用證據「驗證假設」，最後下「結論」，再把結論應用出來。
+
+      這樣的文章，閱讀時要先注意「證據是否能支持（或推翻）假設」。
+
+      我們要先用4個步驟把「解決科學問題的過程」整理清楚。請根據你過去所學，把底下「四個科學步驟」和「ＡＢＣＤ的說明」連連看：'
+  - type: matching
+    left:
+      ❶: 找問題
+      ❷: 提假說
+      ❸: 找驗證
+      ❹: 下結論
+    right:
+      A: 推測原因可能是…；或暫時性的答案常出現「可能」、「推測」等關鍵詞。
+      B: 文章主要想解決（或追問）什麼問題？
+      C: 證據最後支持哪個假說？
+      D: 用什麼方法、看到什麼結果？結果符不符合推測？
+    left_header: 步驟
+    right_header: 關鍵概念或說明
+    answer:
+      ❶: B
+      ❷: A
+      ❸: D
+      ❹: C
+    answer_carrier: '紅色手繪連線。`document.xml` 有 4 條 srgbClr FF0000 的 line 圖形
+
+      （2 條無 flip＝右下斜、2 條 flipV=1＝右上斜），與四組配對的方向完全相同。'
+    answers_partially_missing_in_pdf_note: '🔴 **PDF 只畫得出 3 條**（❶–B／❸–D／❹–C），❷–A 那條在
+      XML 裡但完全沒被畫出來
+
+      （它是獨立 anchor：0.948×0.442in、flipV=1、anchorH=column@0.13、anchorV=paragraph@0.206；
+
+      另外 3 條同屬一個 anchor 群組 0.977×1.867in）。只看 PDF 會判成「這題只連了 3 條」。
+
+      端點還原（200dpi）：圓點在 x=514（左欄）與 x=728（右欄），y=968/1104/1251/1381；
+
+      三條可見紅線各自有一致的上移量（−22/−32、−60/−57、−73/−71），校正後接上的就是
+
+      ❶–B、❸–D、❹–C。剩下的 ❷–A 同時被「XML 有第 4 條上斜線」與「語意」兩邊支持。'
+  - type: guide
+    text: 一、找問題→提假說→看驗證→下結論
+  - type: guide
+    text: 表：本課的科學解決四步驟：找問題→提假說→看驗證→下結論
+  - type: guide
+    text: 根據課文內容，請勾選或填寫答案（答案合理即可）
+  - type: free_text
+    label: ❶問題
+    prompt: '1.花期落差
+
+      蝴蝶蘭自然盛開於（　）月；市場需求卻在（　）月'
+    answers:
+    - 3-4
+    - 1-2
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
+  - type: free_text
+    label: ❶問題
+    prompt: 2.文章要解決什麼問題？
+    answers:
+    - 如何讓蝴蝶蘭提早開花，以配合市場需求？
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
+  - type: fill_table
+    label: ❷假說⭣❸驗證
+    columns:
+    - 影響因素可能是
+    - 用什麼方法
+    - 結果/是否支持假說？
+    rows:
+    - - 1.肥料
+      - 1.施用高磷、鉀肥
+      - '1.花更大更美，但沒提早開花
+
+        ➜□①是 □②否 □③部分支持'
+    - - 2 白晝長度
+      - 2.用黑塑膠網遮光    ，讓蝴蝶蘭以為白天變短
+      - '2.遮光可催花但僅提早5–7天
+
+        ➜□①是 □②否 □③部分支持'
+    - - 3.低溫
+      - 3.實驗組放冷氣房、對照組留原來花房
+      - '3.實驗組一個多月後，抽出花梗       ；對照組則無。
+
+        ➜□①是 □②否 □③部分支持'
+    row_answers:
+    - row: 1
+      options:
+        1: 是
+        2: 否
+        3: 部分支持
+      answer: 2
+    - row: 2
+      options:
+        1: 是
+        2: 否
+        3: 部分支持
+      answer: 3
+    - row: 3
+      options:
+        1: 是
+        2: 否
+        3: 部分支持
+      answer: 1
+    answer_carrier: '☑ 是紅色 `w:sym Wingdings F0FE`（3 個）；每一列的「用什麼方法／結果」欄裡
+
+      底線處的字（用黑塑膠網遮光／僅提早5–7天／一個多月後、抽出花梗）是橘色手寫，
+
+      兩種都在文字流裡。'
+  - type: free_text
+    label: ❹結論
+    prompt: ❹結論
+    answers:
+    - 低溫，溫度26度以下，持續30-40天，就能成功催花
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
+  - type: guide
+    text: 二、應用（把結論帶回現場：問題→解決→結果）
+  - type: guide
+    text: 前面我們用科學步驟找出「低溫能催花」。再來是把結論應用到現場。但農民遇到了新的問題，請根據課文寫出他們如何解決問題。
+  - type: free_text
+    prompt: 1.問題：【　】
+    answers:
+    - 花房面積大，冷氣電費成本太高
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
+  - type: free_text
+    prompt: '2.解決：
+
+      ①把平地蘭花送到高海拔蘭園降溫
+
+      ②
+
+      ③'
+    answers:
+    - 在高海拔地方設置蘭園
+    - 用深層海水降溫
+    answer_carrier: 橘色手寫；①是原稿印好的示例（黑字），②③才是要學生填的，教師版填了答案
+  - type: guide
+    text: 3.結果：用大自然降溫，降低電費負擔，也能順利催花。
+  - type: self_check
+    title: ◎自我檢核（請打勾）
+    items:
+    - 1.我能用四步驟整理文章：找問題→提假說→看驗證→下結論
+    - 2.我能看懂作者如何用證據進行驗證，並判斷結果是否支持原本的假說。
+    no_correct_answer: true
+    answer_carrier: 學生自填，原稿無勾選
+  slug: uhfnw
+  text_ref: nnmyv

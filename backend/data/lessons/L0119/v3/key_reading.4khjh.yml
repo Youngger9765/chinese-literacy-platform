@@ -1,0 +1,50 @@
+lesson_uid: L0119
+version_id: v3
+section_no: 二
+key_reading:
+  instruction: 請用計時器，從指定段落（四☞）開始朗讀，在表格中記錄1分鐘朗讀的字數。如果你計時3次後，對自己還不滿意，可以多練幾次。最後一次，找位同學，請他計時、記錄並簽名！
+  printed_cumulative_chars:
+  - 27
+  - 56
+  - 77
+  - 94
+  - 111
+  - 128
+  - 143
+  - 170
+  - 200
+  - 229
+  - 259
+  - 273
+  - 301
+  - 331
+  - 361
+  - 390
+  - 417
+  timing_table:
+    columns:
+    - 第1次計時
+    - 第2次計時
+    - 第3次計時
+    - 裁判計時
+    unit: 字
+    judge_signature: true
+  benchmark:
+  - threshold: ＜220字
+    feedback: 還要多加練習。
+  - threshold: 221~250字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞251字
+    feedback: 哇嗚，超級厲害！
+  passage: 下了車，站前廣場依舊熱鬧，麻糬果然已經售完，在陣陣阿粨的月桃葉香中，看見青草茶店的客人仍絡繹不絕。再往前走，是你一貫的熱情閃耀，以湛藍無邊的天際擁我入懷。
+  start_text: 下了車，站前廣場依舊熱鬧，麻糬果然已經售完，在陣
+  extent_chars: 77
+  source: extract_key_reading_v3
+  start_paragraph: 4
+  end_paragraph: 4
+  slug: 4khjh
+  text_ref: d4jfj
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  absorbed_tail: 0

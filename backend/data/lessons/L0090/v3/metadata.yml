@@ -43,3 +43,17 @@ strategy_sources:
   worksheet: 用表格整理訊息
   master_sheet: 用表格整理訊息──從數據資料歸納趨勢
   previous: 用表格整理訊息──從數據歸納趨勢
+source_profile:
+  class: standard
+  note: 單一錨點 + 有計數欄 + idx 唯一 —— 走主路徑
+  has_key_reading_section: true
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: null
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 1
+  has_counter_column: true
+  body_in_tables: true
+  invisible_chars_docx_only: false
+  profiled: '2026-08-24'

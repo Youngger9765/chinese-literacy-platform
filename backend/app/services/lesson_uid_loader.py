@@ -36,6 +36,10 @@ LESSONS_ROOT = _BACKEND_ROOT / "data" / "lessons"
 # 文言文的大題集合跟白話課完全不同（文白句子比對／文白詞語比對／自我挑戰，
 # 且導讀・古文今譯・原文沒有大題編號），所以那幾個模組也列在這裡；
 # 缺檔的課直接跳過，不會因為多列而報錯。
+#: 課級模組 —— 一課一份，檔名**沒有 slug**（`metadata.yml`，不是 `metadata.xxxxx.yml`）。
+#: 大題模組一課可以有好幾份（一課多篇），所以帶 slug；課級的不會。
+COURSE_LEVEL_MODULES = ("metadata", "errata", "multi_text_parts")
+
 MODULES = (
     # 課級
     "metadata",
@@ -167,8 +171,40 @@ def load_lesson(uid: str, version: Optional[str] = None) -> Optional[dict]:
 
     lesson: dict[str, Any] = dict(meta)
     lesson["version_id"] = vdir.name
+    # 每一份模組檔都有自己的 slug，檔名一律 `{模組}.{slug}.yml`（#2916）——
+    # 沒有「有 slug／沒 slug」兩種分支了。同一個模組出現多次（一課多篇）時，
+    # 就是多個檔，順序由帳本決定，這裡只負責把第一個放到頂層當預設。
+    by_mod: dict[str, list[pathlib.Path]] = {}
+    for f in sorted(vdir.glob("*.*.yml")):
+        m = f.stem.partition(".")[0]
+        if m in MODULES:
+            by_mod.setdefault(m, []).append(f)
+
+    # ⛔ 上面那個 glob 要兩個點（`{模組}.{slug}.yml`），而**課級的檔沒有 slug**
+    #    —— `metadata.yml` / `errata.yml` 只有一個點，從此配不到。
+    #
+    #    後果不是「少一個欄位」：_meta(l) 回空 dict，於是 intro 永遠 None，
+    #    **175 課的課程簡介整頁空白**，而 174 份 metadata.yml 一直好好躺在磁碟上。
+    #    那正是 #2736 修過一次的症狀，換一個機制回來（#2964 抓到）。
+    #
+    #    只對課級模組補回無 slug 的檔名 —— 不對大題模組開，
+    #    否則會把二修前遺留的 `{模組}.yml` 復活成頂層預設。
+    for m in COURSE_LEVEL_MODULES:
+        f = vdir / f"{m}.yml"
+        if m in MODULES and f.exists():
+            by_mod.setdefault(m, []).append(f)
+
+    # 帳本決定「哪一份是頂層的預設」——⛔ 不要用檔名排序，slug 是不透明亂碼。
+    man_pre = _read_yaml(vdir / "_manifest.yml")
+    ledger_files = [s.get("file") for s in ((man_pre or {}).get("sections") or []) if s.get("file")]
+    for m, fs in by_mod.items():
+        fs.sort(key=lambda f: ledger_files.index(f.name) if f.name in ledger_files else 10**6)
+
     for mod in MODULES:
-        data = _read_yaml(vdir / f"{mod}.yml")
+        files = by_mod.get(mod) or []
+        if not files:
+            continue
+        data = _read_yaml(files[0])
         if not data:
             continue
         if mod == "spotlight":
@@ -202,6 +238,129 @@ def load_lesson(uid: str, version: Optional[str] = None) -> Optional[dict]:
             lesson["reading_benchmark"] = kr["reading_benchmark"]
         if not kr.get("passage"):
             lesson.pop("key_reading")
+
+    # 重複出現的大題（#2916）。有些學習單把同一個大題印好幾次 —— 一份多篇文章的課，
+    # 每一輪都有自己的讀全文、念順順、語詞…。沿用「一個模組一份 yml」的慣例，
+    # 第二輪以後的檔名帶 slug：`key_reading.m7qxv.yml`。同一個 slug ＝ 同一輪。
+    #
+    # ⚠️ 沒有這一段的話，那些檔案**在硬碟上但沒有人看得到** —— 上面的 MODULES 迴圈
+    #    只讀 `{mod}.yml`，多出來的檔會被靜默忽略（2026-08-24 dry run 實測）。
+    #    單篇課的檔名沒有 slug，所以完全不受影響。
+    # 總帳（#2843/#2916）—— 這一課有哪些大題、照學習單的順序、各自要載哪一份檔。
+    # 一課多篇時，同一個大題會出現多次，每一列的 `file` 直接寫明是哪一份
+    # （`key_reading.fqwda.yml` / `key_reading.n3qxn.yml`），消費端不必懂 slug 規則。
+    man = _read_yaml(vdir / "_manifest.yml")
+    if isinstance(man, dict) and man.get("sections"):
+        lesson["manifest_sections"] = man["sections"]
+
+    # 「一輪」＝ text_ref 指向同一篇課文的那些大題（#2916）。
+    # slug 現在是**每個大題自己的身分**，所以不能再拿它當分組的 key ——
+    # 分組要看它指向誰（text_ref），課文自己則用自己的 slug 當這一輪的 key。
+    repeats: dict[str, dict[str, Any]] = {}
+    for path in sorted(vdir.glob("*.*.yml")):
+        mod, _, own = path.stem.partition(".")
+        if mod not in MODULES or not own:
+            continue
+        _probe = _read_yaml(path) or {}
+        _body = _probe.get(mod) if isinstance(_probe.get(mod), dict) else _probe
+        _ref = (_body or {}).get("text_ref")
+        if mod == "full_text_annotate":
+            slug = own
+        elif isinstance(_ref, str):
+            slug = _ref
+        else:
+            continue          # 跨篇的（text_ref 是清單）不屬於任何單一輪
+        data = _read_yaml(path)
+        if not data:
+            continue
+        if mod == "spotlight":
+            _drop_assetless_table_figures(data)
+        if isinstance(data, dict) and mod in data:
+            inner = data[mod]
+            if isinstance(inner, dict):
+                inner = {
+                    **{k: v for k, v in data.items() if k in ("section_no",)},
+                    **inner,
+                }
+            data = inner
+        repeats.setdefault(slug, {})[mod] = data
+    # 只有**真的多輪**才給 repeat_rounds。單篇課只有一輪，給了會讓 175 課
+    # 的下游行為全部改變（念順順會變成兩筆、清單會多一個欄位）。
+    if len(repeats) > 1:
+        # 形狀：{slug: {module: payload}}。消費端拿 `?p=<slug>` 就取那一輪的全部模組。
+        lesson["repeat_rounds"] = repeats
+
+        # 某個模組**只**存在於帶 slug 的檔裡時（例如 L0010 的兩封信各自成檔、
+        # 沒有合併版的 full_text_annotate.yml），要在這裡合成一份頂層的。
+        #
+        # ⚠️ 少了這一段的後果實測過：L0010 的 `paragraphs` 變成 0 段 —— 學生看到
+        #    空白課文，而且**朗讀一句都對不到**。音檔本身是用 sha256(句子) 定址的、
+        #    不會失效，但 `/api/tts/mapping/{id}` 是從 `lesson["paragraphs"]` 建的，
+        #    那個陣列空了就沒有任何句子可以對。
+        #
+        # 順序用段落自己的 `seq`（整課連續段號）決定，**不是**檔名排序 ——
+        # slug 是不透明亂碼，字母序跟課文順序沒有任何關係。
+        # 🔴 順序的唯一真相是**總帳**（`_manifest.yml`），不是這裡自己排。
+        #
+        # 之前這裡按 `seq`／檔名排，結果 L0063 的段落只有 `idx` 沒有 `seq`，
+        # 三輪拿到同一個排序值 → 退回檔名字母序（4uee3, 7wavn, p3kud）
+        # ＝ 篇2、篇3、篇1。學生打開課文第一段看到的是第23課不是第22課，
+        # 而且沒有任何錯誤或紅燈（2026-08-25 真瀏覽器實測抓到）。
+        #
+        # 帳本已經照學習單的順序列好每一列要載哪一份檔，照它走就不會有第二套順序。
+        order: dict[str, list[str]] = {}
+        for sec in lesson.get("manifest_sections") or []:
+            f = sec.get("file")
+            if not f:
+                continue
+            mod_name, _, rest = f.partition(".")
+            slug_name = rest[:-4] if rest.endswith(".yml") else rest
+            if slug_name and slug_name != "yml":
+                order.setdefault(mod_name, [])
+                if slug_name not in order[mod_name]:
+                    order[mod_name].append(slug_name)
+
+        for mod in MODULES:
+            # ⚠️ 條件是「這個模組有多份檔」，不是「頂層還沒有」——
+            #    頂層現在一定有（照帳本挑第一份），所以用舊條件會整段跳過，
+            #    L0063 的課文就只剩篇1 的 7 段（實測）。
+            if len(by_mod.get(mod) or []) < 2:
+                continue
+            seq = order.get(mod) or sorted(repeats)
+            rounds = [(sl, repeats[sl][mod]) for sl in seq
+                      if sl in repeats and isinstance(repeats[sl].get(mod), dict)]
+            if len(rounds) < 2:
+                continue
+            merged = dict(rounds[0][1])
+            paras: list = []
+            for _slug, payload in rounds:
+                paras.extend(payload.get("paragraphs")
+                             or (payload.get("body") or {}).get("paragraphs") or [])
+            if not paras:
+                # 沒有段落的模組（文章重點整理／聚光燈／語詞…）沒有東西可以串接，
+                # 但**頂層還是要有一份**，否則那一課在服務端等於少了一整個大題。
+                #
+                # 🔴 2026-08-25 實測：少了這一段，L0029 / L0063 / L0144 的
+                #    keypoints 與 L0111 的 spotlight 全部消失，
+                #    `test_keypoints_manifest_spec` 直接報「in manifest but no
+                #    served lesson has that code」。
+                #
+                # 取帳本的第一輪當頂層（既有消費端看到的跟拆之前一樣），
+                # 每一輪各自的內容仍然在 `repeat_rounds` 裡，
+                # 前台照帶篇次的步驟去拿自己那一輪。
+                lesson[mod] = dict(rounds[0][1])
+                lesson[mod]["from_round"] = rounds[0][0]
+                continue
+            merged["paragraphs"] = paras
+            merged["paragraph_count"] = len(paras)
+            merged["assembled_from_rounds"] = [sl for sl, _ in rounds]
+            for k in ("letters", "inline_marked_terms"):
+                if any(k in payload for _s, payload in rounds):
+                    out: list = []
+                    for _s, payload in rounds:
+                        out.extend(payload.get(k) or [])
+                    merged[k] = out
+            lesson[mod] = merged
 
     assets = vdir / "assets"
     lesson["assets"] = (

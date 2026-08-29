@@ -18,3 +18,17 @@ strategy_sources:
   worksheet: 推論策略──推論文章主旨
   master_sheet: 推論策略──找出文章主旨
   previous: 推論策略──推論文章主旨
+source_profile:
+  class: multi_anchor
+  note: ☞ 錨點命中多段 —— 用計數欄段界投票，平手就判不動
+  has_key_reading_section: true
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: null
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 2
+  has_counter_column: true
+  body_in_tables: true
+  invisible_chars_docx_only: false
+  profiled: '2026-08-24'

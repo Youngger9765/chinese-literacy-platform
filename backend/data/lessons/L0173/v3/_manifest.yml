@@ -5,6 +5,8 @@ sections:
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
+  slug: wwejy
+  file: full_text_annotate.wwejy.yml
   pages:
   - 1
   - 2
@@ -13,11 +15,17 @@ sections:
 - 'no': 二
   name: 念順順
   module: key_reading
+  text_ref: wwejy
+  slug: nva4u
+  file: key_reading.nva4u.yml
   pages:
   - 4
 - 'no': 三
   name: 語詞我最棒
   module: vocab_definitions
+  text_ref: wwejy
+  slug: 6r3x7
+  file: vocab_definitions.6r3x7.yml
   pages:
   - 4
   - 5
@@ -25,12 +33,18 @@ sections:
 - 'no': 四
   name: 語詞應用
   module: vocab_application
+  text_ref: wwejy
+  slug: xywhm
+  file: vocab_application.xywhm.yml
   pages:
   - 6
   - 7
 - 'no': 五
   name: 文章重點表
   module: keypoints
+  text_ref: wwejy
+  slug: 9tu7e
+  file: keypoints.9tu7e.yml
   pages:
   - 7
   - 8
@@ -38,6 +52,9 @@ sections:
   name: 品格聚光燈
   module: spotlight
   subtitle: 把焦慮化為助力
+  text_ref: wwejy
+  slug: 7pyaf
+  file: spotlight.7pyaf.yml
   pages:
   - 8
   - 9
@@ -46,17 +63,26 @@ sections:
 - 'no': 七
   name: 閱讀理解
   module: comprehension
+  text_ref: wwejy
+  slug: 34pme
+  file: comprehension.34pme.yml
   pages:
   - 11
 - 'no': 八
   name: 詞語複習
   module: vocab_review
+  text_ref: wwejy
+  slug: 3cxtf
+  file: vocab_review.3cxtf.yml
   pages:
   - 11
   - 12
 - 'no': 九
   name: 知識補給站
   module: resources
+  text_ref: wwejy
+  slug: cn7f3
+  file: resources.cn7f3.yml
   pages:
   - 12
 dispatch:

@@ -1,0 +1,42 @@
+lesson_uid: L0006
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 反芻
+    B: 猶豫
+    C: 力不從心
+    D: 停滯
+    E: 仆倒
+    F: 圍剿
+    G: 無動於衷
+    H: 左顧右盼
+    I: 糾結
+  items:
+  - index: 1
+    stem: 功課一下子變多，我覺得有點（　），怎麼努力都做不完。
+    answer: C
+  - index: 2
+    stem: 媽媽一直沒出現，小安站在校門口（　），焦急地等媽媽來接他。
+    answer: H
+  - index: 3
+    stem: 他對同學的苦苦拜託（　），讓人覺得很冷漠。
+    answer: G
+  - index: 4
+    stem: 小芳又想參加演講比賽，又怕表現不好，心裡已經（　）好幾天了。
+    answer: I
+  - index: 5
+    stem: 老師邀她代表班級參加演講比賽，她（　）了很久，才鼓起勇氣說「好」。
+    answer: B
+  - index: 6
+    stem: 他被石頭絆到，整個人（　）在地。
+    answer: E
+  - index: 7
+    stem: 明星一不小心說錯話，網友就開始在網路上（　）他。
+    answer: F
+  - index: 8
+    stem: 他對文言文一直抓不到方法，學習進度（　），讓他很擔心。
+    answer: D
+  slug: 4fwf4
+  text_ref: 3ttr7

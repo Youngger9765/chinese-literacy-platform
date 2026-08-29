@@ -7,6 +7,9 @@ import React, {
   useReducer,
 } from 'react';
 import { Story } from '../../types';
+import { sectionSlugForStep } from '../../config/roundScope';
+import TtsDegradedNotice from './TtsDegradedNotice';
+import { moduleForStep } from '../../config/stepConfig';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import { scopedStepStorageKey } from '../../services/learningStorageScope';
 import { loadAnnotations, saveAnnotations } from '../../services/learning/annotationApi';
@@ -73,6 +76,19 @@ function genId(): string {
 // ── Props ──────────────────────────────────────────────────────────────────
 
 interface ReadingAnnotationProps {
+  /**
+   * 這一節**自己的**代號，QR 印它（#2916）。
+   *
+   * ⛔ 由頁面傳進來，不在這裡呼叫 `useLocation` —— 葉元件不該知道路由。
+   *    一度改成在這裡叫 hook，結果 31 條既有測試（直接 render 不包 Router）
+   *    全數炸掉，而那不是測試的問題，是把 routing 依賴放錯了層。
+   *    沒傳就退回長網址：能掃的 QR 勝過沒有 QR。
+   */
+  sectionSlug?: string | null;
+  /** 這一頁顯示的不是課文本身（例：訪客的重點段朗讀）。
+   *  設為 true 就不拿課號＋段落序號去對照句子 —— 那對定址到的是整課課文的那一段，
+   *  重點段根本不在那個索引裡，結果會唸出課文開頭（#2930）。 */
+  disableCanonicalMapping?: boolean;
   story: Story;
   /**
    * Which QR code this page should offer, when the caller knows better than
@@ -397,6 +413,8 @@ function ReadingRelaySection({ items, title }: { items: NonNullable<Story['keypo
 // ── Main Component ─────────────────────────────────────────────────────────
 
 const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
+  sectionSlug: qrSectionSlug,
+  disableCanonicalMapping,
   story,
   onFinish,
   fontSizePx = 22,
@@ -404,6 +422,21 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
   hideAnnotation = false,
   qrStep,
 }) => {
+  // QR 實際要指的那一步（訪客頁可以用 `qrStep` 覆寫），再回帳本查它自己的代號。
+  //
+  // ⚠️ 不能只用「當前步驟」的代號：訪客頁可能停在讀全文卻要給重點的碼。
+  // 單篇課帳本只有一列 → 推導得到；多篇課有好幾列 → `sectionSlugForStep` 回 null，
+  // 這時才用 `?p=` 從網址傳進來的那個（它才知道是哪一篇）。
+  // 這一課有沒有被拆成各篇的步驟：帳本裡讀全文出現兩列以上就是。
+  const isSplitIntoParts =
+    (story.manifestSections ?? []).filter((x) => x?.module === 'full_text_annotate').length > 1;
+
+  const qrEffectiveStep =
+    qrStep === undefined ? (deliversFullText(story.grade) ? 'full-text-annotate' : null) : qrStep;
+  const qrCode =
+    (qrEffectiveStep
+      ? sectionSlugForStep(story.manifestSections, qrEffectiveStep, moduleForStep)
+      : null) ?? qrSectionSlug ?? null;
   // Zhuyin state from global context
   const { isZhuyinAny, processLinesSelective } = useZhuyin();
 
@@ -412,8 +445,16 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
   // reader there. A QR-code visitor never reaches this hook — GuestReadingPage
   // drives its own player off the pre-generated mp3, because the synthesis
   // endpoint this one calls answers 401 without a session.
-  const numericLessonId = Number.isFinite(Number(story.id)) ? Number(story.id) : undefined;
-  const reader = useFullTextTtsQueue({ paragraphs: story.content, lessonId: numericLessonId });
+  const numericLessonId =
+    disableCanonicalMapping || !Number.isFinite(Number(story.id))
+      ? undefined
+      : Number(story.id);
+  const reader = useFullTextTtsQueue({
+    paragraphs: story.content,
+    lessonId: numericLessonId,
+    // 一課印好幾篇時，句子對照表要跟著篇次走（#2930）。
+    roundSlug: qrSectionSlug ?? undefined,
+  });
   const paragraphRefs = useRef<Record<number, HTMLElement | null>>({});
 
   // Scroll the paragraph being read into view. `nearest` rather than `center`
@@ -813,9 +854,13 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
             />
           )}
 
-          {/* Whole-lesson player. Sits above the legend so it's the first control
-              on the page — listening is what a lot of students come here to do. */}
-          {(
+          {/* Whole-lesson player — 訪客（掃 QR 進來的）專用位置。
+              #2941 把登入學生的播放鍵搬到底部動作列，跟「完成標記」並排：
+              放在文章上方的話，學生一往下讀就把它捲出畫面，讀到第二段想聽
+              就得先捲回頂端。訪客頁留在這裡，因為 `GuestReadingPage` 沒有
+              底部 `StepFooterNav`，那條固定動作列會浮在半空中；訪客也沒有
+              「完成標記」可並排（#2649：不能標記，但要能聽）。 */}
+          {hideAnnotation && (
             <div className="flex justify-center pt-4">
               <ReadingPlayer
                 isPlaying={reader.isPlaying}
@@ -869,6 +914,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
                 lessonId={story.id}
                 step={(qrStep ?? 'full-text-annotate') as LessonQrStep}
                 lessonTitle={story.title}
+              sectionSlug={qrCode}
               />
             )}
           </div>
@@ -886,6 +932,8 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
               to the strip/table block below the article. */}
           <div className={story.layout_mode === 'graphic-text' && fallbackImages.length > 0 ? 'flex flex-col lg:flex-row items-start' : undefined}>
             <article className={story.layout_mode === 'graphic-text' && fallbackImages.length > 0 ? 'flex-1 min-w-0 px-6 md:px-12 space-y-10' : 'max-w-4xl mx-auto px-6 md:px-16 space-y-10'}>
+            {/* 降級成機器音時要說出來 —— 少了它，聽到的人不知道那不是 AI（#2930）。 */}
+            {reader.isTtsDegraded && <TtsDegradedNotice className="mb-4" />}
             {story.content.map((rawPara, paraIdx) => {
               const displayText = zhuyinParagraphs?.[paraIdx] ?? rawPara;
               const inlineImgIdx = inlineImageIdxByPara.get(paraIdx);
@@ -971,7 +1019,12 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
 
           {/* A7: 多文本合讀課的第 2/3 篇 + 過場字 + 閱讀接力 (#2752 Phase 3).
               Read-only — see the comment on MultiTextPartSection above for why. */}
-          {story.multiTextParts?.map((part, i) => (
+          {/* ⛔ 已經拆成各篇步驟的課**不要**再整份重畫（#2916）。
+              帳本有兩列以上讀全文 = 這一課的每一篇各自是一個步驟，
+              學生停在第 1 篇時再把第 2、3 篇貼在下面，就是同一份內容出現兩次。
+              2026-08-25 owner 截圖：第 1 篇的讀全文往下捲出現「第 2 篇 第23課」。
+              沒拆的舊課維持原本行為（一頁到底）—— 那是 #2752 的設計。 */}
+          {!isSplitIntoParts && story.multiTextParts?.map((part, i) => (
             <MultiTextPartSection key={i} part={part} index={i} />
           ))}
           {story.keypointsFollowupQuestions?.items && (
@@ -1007,11 +1060,24 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
       {!hideAnnotation && (
         <>
           {/* ── Fixed bottom CTA — gradient fade ─────────────────────────── */}
-      <StepActionBar>
+          {/* #2941: 播放全文跟完成標記並排在這裡。兩顆都是這一步隨時要按得到的
+              動作，而底部這條是唯一永遠在畫面上的地方。 */}
+      <StepActionBar layout="row">
+          <ReadingPlayer
+            size="lg"
+            isPlaying={reader.isPlaying}
+            isPaused={reader.isPaused}
+            onPlay={reader.play}
+            onPause={reader.pause}
+            onResume={reader.resume}
+            onStop={reader.stop}
+          />
           <button
             type="button"
             onClick={() => onFinish(summary)}
-            className="w-full flex items-center justify-center gap-2 h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all"
+            /* w-44 / h-14 跟播放全文那顆一模一樣（`ReadingPlayer` size="lg"）——
+               owner 2026-08-26：「兩個按鈕的大小要一樣並且置中」。 */
+            className="w-44 h-14 flex items-center justify-center gap-2 rounded-full font-headline font-bold text-xl text-white whitespace-nowrap shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all"
             style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
           >
             <span>完成標記</span>

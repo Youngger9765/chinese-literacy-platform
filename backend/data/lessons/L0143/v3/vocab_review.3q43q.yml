@@ -1,0 +1,106 @@
+lesson_uid: L0143
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 囊括
+  - 稀薄
+  - 功不可沒
+  - 因人而異
+  - 濃稠
+  - 凝血現象
+  - 血栓
+  - 堵住
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 美濃淡皆可疑人不用因
+  - 稠厚重是課問因素人為
+  - 皮稀薄效功勞基而不所
+  - 香探錦用能不異臉疑以
+  - 酒囊飯袋異同可紅吸住
+  - 毛取括弧常人以沒血凝
+  - 賭物凝血流如柱有鬼血
+  - 注體固型血囊體堵皮現
+  - 意外面紅男栓住家球象
+  - 大人素面朝天塞眼盲婚
+  answers_are_graphical: true
+  answer_paths:
+  - word: 濃稠
+    cells:
+    - - 1
+      - 2
+    - - 2
+      - 1
+    direction: diagonal_down_left
+  - word: 因人而異
+    cells:
+    - - 1
+      - 10
+    - - 2
+      - 9
+    - - 3
+      - 8
+    - - 4
+      - 7
+    direction: diagonal_down_left
+  - word: 稀薄
+    cells:
+    - - 3
+      - 2
+    - - 3
+      - 3
+    direction: horizontal
+  - word: 功不可沒
+    cells:
+    - - 3
+      - 5
+    - - 4
+      - 6
+    - - 5
+      - 7
+    - - 6
+      - 8
+    direction: diagonal_down_right
+  - word: 囊括
+    cells:
+    - - 5
+      - 2
+    - - 6
+      - 3
+    direction: diagonal_down_right
+  - word: 凝血現象
+    cells:
+    - - 6
+      - 10
+    - - 7
+      - 10
+    - - 8
+      - 10
+    - - 9
+      - 10
+    direction: vertical
+  - word: 血栓
+    cells:
+    - - 8
+      - 5
+    - - 9
+      - 6
+    direction: diagonal_down_right
+  - word: 堵住
+    cells:
+    - - 8
+      - 8
+    - - 9
+      - 7
+    direction: diagonal_down_left
+  notes:
+    instruction: 本課句末寫「刪除」（多數課寫「劃掉」），PDF p10 印的也是「刪除」，照原稿抄
+    answer_paths: '8 條路徑 ＝ 8 個目標語詞 ＝ 紙上 8 個 roundRect anchor，三者相符，無警報。
+
+      格子沒有印錯字：8 條路徑套回 grid 全部拼得回目標語詞。'
+  slug: 3q43q
+  text_ref: 6mpre

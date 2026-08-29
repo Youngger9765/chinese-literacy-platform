@@ -1,0 +1,136 @@
+lesson_uid: L0081
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞劃掉。
+  target_words:
+  - 天體
+  - 月相變化
+  - 意味深長
+  - 世紀
+  - 重啟
+  - 偏見
+  - 消耗
+  - 幽閉
+  - 輻射
+  - 族裔
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 藥寶體玉天體啟消兔玉
+  - 度長偏變相寶偏門耗道
+  - 量見聞月消玉兔搗藥味
+  - 重折新族裔記世日思意
+  - 化變相日中意門輻射核
+  - 三世童啟味射偏粥相消
+  - 清紀相深幅月方清幽關
+  - 老兔長藥門色相搗門閉
+  - 族王裔重啟不同變世記
+  - 長見天開動耗子味化緣
+  answers_are_graphical: true
+  answers_printed: true
+  answer_paths:
+  - word: 天體
+    cells:
+    - - 1
+      - 5
+    - - 1
+      - 6
+    direction: horizontal
+  - word: 消耗
+    cells:
+    - - 1
+      - 8
+    - - 2
+      - 9
+    direction: diagonal_down_right
+  - word: 偏見
+    cells:
+    - - 2
+      - 3
+    - - 3
+      - 2
+    direction: diagonal_down_left
+  - word: 族裔
+    cells:
+    - - 4
+      - 4
+    - - 4
+      - 5
+    direction: horizontal
+  - word: 輻射
+    cells:
+    - - 5
+      - 8
+    - - 5
+      - 9
+    direction: horizontal
+  - word: 意味深長
+    cells:
+    - - 5
+      - 6
+    - - 6
+      - 5
+    - - 7
+      - 4
+    - - 8
+      - 3
+    direction: diagonal_down_left
+  - word: 世紀
+    cells:
+    - - 6
+      - 2
+    - - 7
+      - 2
+    direction: vertical
+  - word: 月相變化
+    cells:
+    - - 7
+      - 6
+    - - 8
+      - 7
+    - - 9
+      - 8
+    - - 10
+      - 9
+    direction: diagonal_down_right
+  - word: 幽閉
+    cells:
+    - - 7
+      - 9
+    - - 8
+      - 10
+    direction: diagonal_down_right
+  - word: 重啟
+    cells:
+    - - 9
+      - 4
+    - - 9
+      - 5
+    direction: horizontal
+  notes:
+    instruction: 原稿同時存在「劃掉」版與「刪除」版兩句（兩個重疊的文字方塊），表格正上方印的是「劃掉」版。
+    target_words: 灰框 10 個詞，比本課語詞（12 個）少「承載」「模擬」—— 那兩個沒進找字遊戲，不是抽漏。
+    answer_paths: '10 個目標語詞全部圈到，逐格取字皆能拼回，格子沒有印錯字。
+
+      幾何交叉驗證（單向警報）：以找字表格元素當邊界，表格內、扣掉紙外殘留後的 roundRect
+
+      = **10 個**，路徑 10 條 → 沒有「紙上 > 路徑」的缺條警報。
+
+      ⚠️ **紙外殘留：未驗**（判準只認錨點型溢出，對排版推出型零命中，2026-08-18 更正）；
+
+      扣掉未偵測的殘留只會讓紙上數更少，不會讓警報成立。正確性證據是拼字 10/10。
+
+      全文 11 個，多的 1 個在表格外，不是漏抽的答案。
+
+      ⚠️ **格子跨頁**：第 1~4 列印在 PDF p7、第 5~10 列印在 p8。
+
+      p7 上除了前四列的圈之外，格子下方還畫了幾個看似空白的橘框 —— 那是終點落在
+
+      p8 的路徑（意味深長／月相變化／幽閉／世紀／輻射）的圈線整組留在 p7 的結果。
+
+      只讀 p8 會判成「這課只圈了重啟一個」。兩頁都要讀。'
+  slug: 6ctfq
+  text_ref: v3nth

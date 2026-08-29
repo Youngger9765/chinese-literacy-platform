@@ -1,0 +1,44 @@
+lesson_uid: L0012
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 興味盎然
+    B: 欲罷不能
+    C: 滴水穿石
+    D: 廢寢忘食
+    E: 兼顧
+    F: 久病而成良醫
+    G: 胃口大開
+    H: 愛不釋手
+    I: 不相上下
+    J: 受挫
+  items:
+  - index: 1
+    stem: 在決賽中，兩隊實力（　），比分一度僵持，現場氣氛十分緊張。
+    answer: I
+  - index: 2
+    stem: 他長年受氣喘困擾，後來勤讀醫書、調整生活，減少氣喘發作的頻率，真是（　）。
+    answer: F
+  - index: 3
+    stem: 老師生動的講述古代的歷史故事，讓全班同學都聽得（　）。
+    answer: A/B
+    answer_note: 原稿手寫「A/B」，兩個答案都算對
+  - index: 4
+    stem: 弟弟看到滿桌的美食，立刻（　），吃了好幾碗飯。
+    answer: G
+  - index: 5
+    stem: 老師教我們要（　）玩樂和學習，不能只玩不讀書。
+    answer: E
+  - index: 6
+    stem: 為了完成科展作品，他連續幾天（　）的研究程式設計，直到成功才露出笑容。
+    answer: D
+  - index: 7
+    stem: 妹妹收到那隻手工縫製的小熊娃娃後，整天抱在懷裡，（　），連睡覺都不放開。
+    answer: H
+  - index: 8
+    stem: 他雖然數學基礎薄弱，但每天堅持練習題目，終於以（　）的毅力取得好成績。
+    answer: C
+  slug: xwtec
+  text_ref: rxfxx

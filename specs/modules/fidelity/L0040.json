@@ -1,10 +1,10 @@
 {
   "uid": "L0040",
-  "gate_version": 1,
+  "gate_version": 2,
   "docx_sha256": "937a-b1cb-3a18-5ed0",
   "modules": {
-    "comprehension": {
-      "yaml_sha256": "a8aa-9b8a-25f5-cac6",
+    "comprehension.edf97": {
+      "yaml_sha256": "c24d-a027-83fb-0343",
       "checked": 26,
       "status": "pass",
       "passed": true,
@@ -17,57 +17,57 @@
       "passed": true,
       "exit": 1
     },
-    "full_text_annotate": {
-      "yaml_sha256": "fc58-c641-e309-0e47",
+    "full_text_annotate.h6kd6": {
+      "yaml_sha256": "f875-ab9d-d7d9-48bb",
       "checked": 22,
       "status": "pass",
       "passed": true,
       "exit": 0
     },
-    "key_reading": {
-      "yaml_sha256": "c074-729c-1ec4-e07b",
+    "key_reading.3ma4h": {
+      "yaml_sha256": "417d-c3e6-26bd-c0cf",
       "checked": 9,
       "status": "pass",
       "passed": true,
       "exit": 0
     },
-    "keypoints": {
-      "yaml_sha256": "595e-f14d-226e-a588",
+    "keypoints.j6n4a": {
+      "yaml_sha256": "21ab-ea14-d6af-6d6e",
       "checked": 29,
       "status": "pass",
       "passed": true,
       "exit": 0
     },
-    "resources": {
-      "yaml_sha256": "3a47-3c23-bf16-41dc",
+    "resources.c3vye": {
+      "yaml_sha256": "65fb-95d8-9acf-ea00",
       "checked": 3,
       "status": "pass",
       "passed": true,
       "exit": 0
     },
-    "spotlight": {
-      "yaml_sha256": "f256-a31b-42ef-312d",
+    "spotlight.pxhn3": {
+      "yaml_sha256": "9911-5c8b-48c2-f661",
       "checked": 52,
       "status": "pass",
       "passed": true,
       "exit": 0
     },
-    "vocab_application": {
-      "yaml_sha256": "46a4-2cb8-fbf1-3a94",
+    "vocab_application.ujkda": {
+      "yaml_sha256": "adf1-2116-367e-c1d4",
       "checked": 14,
       "status": "pass",
       "passed": true,
       "exit": 0
     },
-    "vocab_definitions": {
-      "yaml_sha256": "f65a-bbc7-f786-f288",
+    "vocab_definitions.j4ndx": {
+      "yaml_sha256": "b8c7-762b-43cf-328f",
       "checked": 31,
       "status": "pass",
       "passed": true,
       "exit": 0
     },
-    "vocab_review": {
-      "yaml_sha256": "098d-9dd3-66c0-79b4",
+    "vocab_review.cercr": {
+      "yaml_sha256": "b415-974b-9a8c-b699",
       "checked": 18,
       "status": "pass",
       "passed": true,

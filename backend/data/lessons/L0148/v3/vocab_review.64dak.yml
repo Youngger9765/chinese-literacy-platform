@@ -1,0 +1,134 @@
+lesson_uid: L0148
+version_id: v3
+section_no: 七
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 首屈一指
+  - 花團錦簇
+  - 奼紫嫣紅
+  - 動輒
+  - 入不敷出
+  - 匠心獨具
+  - 別出心裁
+  - 暑氣蒸人
+  - 大放異彩
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 動不實破蘭鯨大放異彩
+  - 聲輒畜首藻別構廣闊掛
+  - 色究屈碎樹出別有闔一
+  - 方一天各匠心獨具萬漏
+  - 指綿目較摀裁支離馨漬
+  - 延花團錦簇瘡花暑持有
+  - 奼梅照入熱溫望氣試巡
+  - 紫夏燈控不度假蒸尋律
+  - 嫣星羅棋布敷設人覓渴
+  - 紅蘭高實山痍出演算法
+  answers_are_graphical: true
+  answer_paths:
+  - word: 大放異彩
+    cells:
+    - - 1
+      - 7
+    - - 1
+      - 8
+    - - 1
+      - 9
+    - - 1
+      - 10
+    direction: horizontal
+  - word: 動輒
+    cells:
+    - - 1
+      - 1
+    - - 2
+      - 2
+    direction: diagonal_down_right
+  - word: 首屈一指
+    cells:
+    - - 2
+      - 4
+    - - 3
+      - 3
+    - - 4
+      - 2
+    - - 5
+      - 1
+    direction: diagonal_down_left
+  - word: 別出心裁
+    cells:
+    - - 2
+      - 6
+    - - 3
+      - 6
+    - - 4
+      - 6
+    - - 5
+      - 6
+    direction: vertical
+  - word: 匠心獨具
+    cells:
+    - - 4
+      - 5
+    - - 4
+      - 6
+    - - 4
+      - 7
+    - - 4
+      - 8
+    direction: horizontal
+  - word: 花團錦簇
+    cells:
+    - - 6
+      - 2
+    - - 6
+      - 3
+    - - 6
+      - 4
+    - - 6
+      - 5
+    direction: horizontal
+  - word: 暑氣蒸人
+    cells:
+    - - 6
+      - 8
+    - - 7
+      - 8
+    - - 8
+      - 8
+    - - 9
+      - 8
+    direction: vertical
+  - word: 奼紫嫣紅
+    cells:
+    - - 7
+      - 1
+    - - 8
+      - 1
+    - - 9
+      - 1
+    - - 10
+      - 1
+    direction: vertical
+  - word: 入不敷出
+    cells:
+    - - 7
+      - 4
+    - - 8
+      - 5
+    - - 9
+      - 6
+    - - 10
+      - 7
+    direction: diagonal_down_right
+  geometry_check: '紙上 roundRect 錨點 9 個（全檔即 9 個，posOffset 皆在紙內，線色全部 srgb E97132），
+
+    等於 9 條 answer_paths、也等於 9 個目標語詞，無警報。
+
+    「別出心裁」的直向圈與「匠心獨具」的橫向圈在 (4,6)「心」交叉 —— PDF p8 兩個框確實相交。'
+  slug: 64dak
+  text_ref: nnmyv

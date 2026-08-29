@@ -125,9 +125,55 @@ python3 scripts/run_extraction_pipeline.py verify --uid L0072 --out <產出目�
 │  ❌ 內容忠實度           **整層是空的**（Layer ⑥）          │
 └──────────────────────────────────────────────────────────┘
                           │
-┌─ ⑧  學生畫面 ────────────────────────────────────────────┐
+┌─ ⑧  yml → 學生畫面（2026-08-27 展開）────────────────────┐
+│  ⚠️ 這個盒子以前是空的，而 8/26 回報的四個 bug **全在裡面**│
+│                                                          │
+│  yml 檔                                                  │
+│   │  lesson_indexes.py 組 detail                         │
+│   ▼                                                      │
+│  detail（頂層）＋ repeat_rounds{課文slug: {模組: 內容}}   │
+│   │                                                      │
+│   │  🔴 名字要對得上，否則**靜默退回頂層＝第 1 篇**        │
+│   │     模組名          →  前端讀的欄位                   │
+│   │     full_text_annotate → paragraphs                  │
+│   │     key_reading       → key_reading                  │
+│   │     keypoints         → story_structure_table  ←犯過  │
+│   │     vocab_definitions → vocabulary          ←犯過     │
+│   │     vocab_application → fill_in_blank/vocab_bank ←犯過│
+│   ▼                                                      │
+│  API /api/stories/{id}                                   │
+│   │  ⚠️ 有些步驟另外打自己的端點，那條**只帶課號**：       │
+│   │     /stories/{id}/structure   ← 重點表（犯過，快取也是）│
+│   │     /tts/mapping/{id}         ← 朗讀句子（犯過）       │
+│   ▼                                                      │
+│  前端 storyForStep(story, "步驟#篇次")                    │
+│   │  LearningLayout 一處統一換篇 → 各步驟頁吃 selectedStory│
+│   │  ⛔ 訪客(掃 QR)走 GuestReadingPage，**不經過這裡**     │
+│   ▼                                                      │
+│  步驟頁 → 元件 → HTML                                     │
+│   │  進度寫回：saveStepProgressPatch(步驟id)              │
+│   │  ⚠️ 步驟頁傳的是寫死的 base id，要在 Layout 補篇次     │
+│   ▼                                                      │
+│  🔧 門：multiTextJourney.spec.ts（真 journey 走完 20 步） │
+│     每步比對該篇真值 + 高亮位移 + 進度 key 帶篇次          │
 └──────────────────────────────────────────────────────────┘
 ```
+
+### ⑧ 的失敗形狀只有一種
+
+**用課號定址，多篇課取不到自己那一份。**
+沒有錯誤、型別正確、頁面正常 —— 只有把三篇並排看才發現一模一樣。
+
+判準：看到 `lesson_id`（或 `story.id`）跟內容欄位出現在同一個取值式裡，
+就問一句「多篇課會拿到哪一篇？」
+
+| 犯過的四次 | 在圖上的位置 |
+|---|---|
+| 語詞應用三篇同題 | 模組名 ≠ 欄位名（`vocab_application`→`fill_in_blank`） |
+| 重點表三篇同一份 | `/structure` 只帶課號，連快取 key 也是 |
+| 朗讀唸錯篇／唸課文第一段 | `/tts/mapping/{id}` 用「課號＋段落序號」定址 |
+| 按完成標記跳到最後一步 | 完成時傳的步驟 id 不含篇次，序列裡找不到 |
+| （自己抓到）三篇進度互相覆蓋 | 進度 key 不含篇次 |
 
 ### 每一塊現在的狀態（要修就對著這張表挑）
 

@@ -1,0 +1,33 @@
+lesson_uid: L0004
+version_id: v3
+section_no: 二
+key_reading:
+  instruction: 請用計時器，從指定段落（三☞）開始朗讀，計時1分鐘讀的字數，並記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！
+  timing_table:
+    columns:
+    - 第1次計時
+    - 第2次計時
+    - 第3次計時
+    - 裁判計時
+    unit: 字
+    judge_signature: true
+  benchmark_label: ◎ 我的表現
+  benchmark:
+  - threshold: ＜190字
+    feedback: 還要多加練習。
+  - threshold: 191~220字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞221字
+    feedback: 哇嗚，超級厲害！
+  passage: 然而最近我更發現當他和其他同學聊天聊得很開心，我的胸口就會被抓緊，心裡很不是滋味，也開始胡思亂想：他是不是喜歡那個很幽默的同學？他們會不會常常傳訊息？他跟我聊天有這麼開心嗎？還是我根本不特別？這些念頭在我腦中亂竄，有時候一閃而過，但有時候卻揮之不去，像是一群停不下來的蜜蜂，在腦袋裡嗡嗡作響，也讓我越想越難過。
+  start_text: 然而最近我更發現當他和其他同學聊天聊得很開心，我
+  extent_chars: 155
+  source: extract_key_reading_v3
+  start_paragraph: 3
+  end_paragraph: 3
+  slug: 6yxve
+  text_ref: dmhc3
+extraction_check:
+  verdict: confirmed
+  corroborated_by_first_edition: true
+  absorbed_tail: 0

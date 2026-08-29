@@ -1,0 +1,110 @@
+lesson_uid: L0027
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 救援
+  - 瓦礫
+  - 勝任
+  - 靈敏
+  - 拯救
+  - 廢墟
+  - 訓練有素
+  - 倖存
+  - 縫隙
+  - 輕而易舉
+  - 成本
+  - 本領
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 淑全神貫注瓦礫石滿貫
+  - 媛輕而易舉捶胸頓足衝
+  - 堵住摸倖僥倖拯救責任
+  - 幸福存蝠輻縫崎援手何
+  - 沮悻圓園隙逢嶇生強陣
+  - 闊悻成功敏天壤之別靈
+  - 崩然本領訓井過費虛敏
+  - 勝潰陪秀勝練井廢墟掘
+  - 任堤玲龍利遲有有迢審
+  - 回饋雞腿事與願素條視
+  answers_are_graphical: true
+  answer_paths:
+  - word: 瓦礫
+    cells:
+    - - 1
+      - 6
+    - - 1
+      - 7
+    direction: horizontal
+  - word: 輕而易舉
+    cells:
+    - - 2
+      - 2
+    - - 2
+      - 3
+    - - 2
+      - 4
+    - - 2
+      - 5
+    direction: horizontal
+  - word: 倖存
+    cells:
+    - - 3
+      - 4
+    - - 4
+      - 3
+    direction: diagonal_down_left
+  - word: 拯救
+    cells:
+    - - 3
+      - 7
+    - - 3
+      - 8
+    direction: horizontal
+  - word: 救援
+    cells:
+    - - 3
+      - 8
+    - - 4
+      - 8
+    direction: vertical
+  - word: 縫隙
+    cells:
+    - - 4
+      - 6
+    - - 5
+      - 5
+    direction: diagonal_down_left
+  - word: 成本
+    cells:
+    - - 6
+      - 3
+    - - 7
+      - 3
+    direction: vertical
+  - word: 勝任
+    cells:
+    - - 8
+      - 1
+    - - 9
+      - 1
+    direction: vertical
+  - word: 訓練有素
+    cells:
+    - - 7
+      - 5
+    - - 8
+      - 6
+    - - 9
+      - 7
+    - - 10
+      - 8
+    direction: diagonal_down_right
+  notes:
+    answer_paths: 原稿只圈出 12 個目標語詞中的 9 個；靈敏、廢墟、本領未畫圈，故不列
+  slug: drk4r
+  text_ref: dkkew

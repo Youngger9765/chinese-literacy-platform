@@ -10,6 +10,8 @@
  * notification bell, zhuyin toggle, logout) is now integrated into Sidebar.
  */
 import React, { useState, useEffect, useCallback, useMemo, useRef, Suspense } from 'react';
+import { useCurrentStepId } from '../../hooks/useCurrentStepId';
+import { stepPath } from '../../config/stepPath';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useWorkspace } from '../../contexts/WorkspaceContext';
@@ -19,6 +21,7 @@ import { getMyAssignments } from '../../services/assignmentApi';
 import { AppView } from '../../types';
 import { ACTIVE_STEPS } from '../../config/stepConfig';
 import { useStepSequence } from '../../hooks/useStepSequence';
+import { annotateStepParts } from '../../config/roundScope';
 import { useAppView } from '../../hooks/useAppView';
 import Sidebar from './Sidebar';
 import LearningLayout from '../../layouts/LearningLayout';
@@ -92,6 +95,8 @@ type Step = ReturnType<typeof useStepSequence>[number];
 
 interface StepDotsProps {
   steps: ReturnType<typeof useStepSequence>;
+  /** 每一步屬於哪一篇（多篇課才有）；單篇課全部沒有篇次 */
+  annotations?: ReturnType<typeof annotateStepParts>;
   currentStepIndex: number;
   completedSet: Set<string>;
   onStepClick: (step: Step) => void;
@@ -141,6 +146,7 @@ const NavArrow: React.FC<{
 
 const StepDots: React.FC<StepDotsProps> = ({
   steps,
+  annotations,
   currentStepIndex,
   completedSet,
   onStepClick,
@@ -172,6 +178,13 @@ const StepDots: React.FC<StepDotsProps> = ({
       <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 flex-nowrap justify-center min-w-max px-0.5">
       <NavArrow dir="prev" step={prevStep} disabled={navDisabled} onClick={onStepClick} />
       {steps.map((step, i) => {
+        // 多篇課的圈圈原樣重複好幾組，學生只能靠位置猜是哪一篇（#2916 階段 6）。
+        // 篇次走 annotateStepParts（帳本 text_ref），跟挑內容同一個來源。
+        // 靠 index 對齊 —— 兩個陣列都由 activeSteps 推導，長度必然相同，
+        // 但萬一將來有人傳了別的陣列，錯位會是「標籤指到別篇」這種無聲的錯。
+        // 比對 id 之後不一致就當作沒有篇次，寧可不標也不要標錯。
+        const annAt = annotations?.[i];
+        const ann = annAt?.step.id === step.id ? annAt : undefined;
         const isCompleted = completedSet.has(step.id);
         const isActive = i === currentStepIndex;
 
@@ -186,14 +199,25 @@ const StepDots: React.FC<StepDotsProps> = ({
           : 'w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9';
 
         return (
-          <span key={step.id} className="group relative flex flex-col items-center justify-center shrink-0">
+          <React.Fragment key={step.id}>
+          {ann?.isPartStart && (
+            // 篇的起點插一個小標，否則三組一樣的圈圈連在一起分不出邊界。
+            // aria-hidden：篇次已經在每一顆的 aria-label 裡，這裡只是視覺。
+            <span
+              aria-hidden="true"
+              className="shrink-0 select-none px-1 text-[10px] sm:text-xs font-bold text-accent/70 border-l border-on-surface-variant/25 pl-1.5 ml-0.5"
+            >
+              {ann.partNo}
+            </span>
+          )}
+          <span className="group relative flex flex-col items-center justify-center shrink-0">
             <button
               type="button"
               onClick={() => onStepClick(step)}
               className={`${sizeClass} rounded-full text-xs sm:text-sm md:text-base font-bold flex items-center justify-center transition-all hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${dotClass}`}
-              aria-label={`${i + 1}. ${step.label}`}
+              aria-label={ann?.a11yLabel ?? `${i + 1}. ${step.label}`}
               aria-current={isActive ? 'step' : undefined}
-              title={step.label}
+              title={ann?.partNo ? `${step.label}（第 ${ann.partNo} 篇）` : step.label}
             >
               {isCompleted ? (
                 <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3">
@@ -217,7 +241,7 @@ const StepDots: React.FC<StepDotsProps> = ({
               className="hidden md:block absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 pointer-events-none opacity-0 translate-y-1 transition-all duration-150 group-hover:opacity-100 group-hover:translate-y-0 group-focus-within:opacity-100 group-focus-within:translate-y-0"
             >
               <span className="block bg-gray-900 text-white text-sm font-medium px-2.5 py-1 rounded-lg shadow-lg whitespace-nowrap leading-tight">
-                {step.label}
+                {ann?.partNo ? `${step.label}（第 ${ann.partNo} 篇）` : step.label}
               </span>
               <span
                 className="block w-0 h-0 mx-auto border-x-4 border-x-transparent border-t-4 border-t-gray-900"
@@ -225,6 +249,7 @@ const StepDots: React.FC<StepDotsProps> = ({
               />
             </span>
           </span>
+          </React.Fragment>
         );
       })}
       <NavArrow dir="next" step={nextStep} disabled={navDisabled} onClick={onStepClick} />
@@ -241,6 +266,11 @@ const StepDots: React.FC<StepDotsProps> = ({
 const ImmersiveTopBar: React.FC = () => {
   const navigate = useNavigate();
   const currentView = useAppView();
+  // ⚠️ 比對步驟一律用**帶輪次**的 key（`full-text-annotate#7wavn`）。
+  //    `currentView` 只反映路徑段，多文本課三個輪次的路徑段一樣，
+  //    於是 `stepNeighbours` 永遠命中第一個同名步驟 ——
+  //    active 圓圈與上一步／下一步三輪共用一顆（2026-08-25 staging 實測）。
+  const currentStepKey = useCurrentStepId(String(currentView));
   const { selectedStory, session } = useLearningNav();
   const { zhuyinMode, zhuyinReady, setZhuyinMode } = useZhuyin();
 
@@ -257,11 +287,16 @@ const ImmersiveTopBar: React.FC = () => {
   // Both this file and StepFooterNav used to do `findIndex(...)` and treat -1 as
   // "nowhere", which disabled every chevron on e.g. /learn/20011/spotlight.
   const nav = useMemo(
-    () => stepNeighbours(activeSteps, currentView),
-    [activeSteps, currentView],
+    () => stepNeighbours(activeSteps, currentStepKey),
+    [activeSteps, currentStepKey],
   );
   const currentStepIndex = nav.index;
   const currentStep = nav.current;
+  // 多篇課才有東西；單篇課回傳的每一項 partNo 都是 undefined（行為與以前一致）
+  const stepAnnotations = React.useMemo(
+    () => annotateStepParts(activeSteps, selectedStory?.manifestSections),
+    [activeSteps, selectedStory?.manifestSections],
+  );
   const totalSteps = activeSteps.length;
 
   // Determine completed steps
@@ -282,7 +317,7 @@ const ImmersiveTopBar: React.FC = () => {
 
   const handleStepClick = (step: ReturnType<typeof useStepSequence>[number]) => {
     if (!selectedStory) return;
-    navigate(`/learn/${selectedStory.id}/${step.id}`);
+    navigate(stepPath(selectedStory.id, step.id));
   };
 
   const { prev: prevStep, next: nextStep } = nav;
@@ -338,6 +373,7 @@ const ImmersiveTopBar: React.FC = () => {
           <div className="flex items-center justify-center w-full max-w-full min-w-0 h-8 md:h-10" role="navigation" aria-label="學習步驟導航">
             <StepDots
               steps={activeSteps}
+              annotations={stepAnnotations}
               currentStepIndex={currentStepIndex}
               completedSet={completedSet}
               onStepClick={handleStepClick}

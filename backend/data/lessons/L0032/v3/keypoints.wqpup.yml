@@ -1,0 +1,43 @@
+lesson_uid: L0032
+version_id: v3
+section_no: 六
+keypoints:
+  title: 小丑醫生
+  intro: 上面的閱讀聚光燈幫助我們了解文章的大主題、小主題和細節之間的關係。接下來，我們要完成「文章重點表」，把重點更清楚地整理出來。
+  layout: list
+  rows:
+  - label: 起源
+    value: 1980年代，美國醫生亞當斯認為病人不只需要藥物和手術，也需要歡樂來幫助康復。
+  - label: 主要服務對象
+    value: 面臨【　】、手術或治療的孩子。
+    blanks:
+    - answer: 長期住院
+  - label: 主要工作內容
+    items:
+    - label: 緩解醫院緊張的氛圍
+      value: 常見方式：(複選)
+      options:
+        1: 精密的手術
+        2: 搞笑表演
+        3: 變魔術
+        4: 提供治療藥物
+      answers:
+      - 2
+      - 3
+      answer_carrier: 紅色 ☑（圖形），文字流無此資訊
+  - label: 所需專業
+    items:
+    - label: 表演
+      value: 以多元的表演方式，讓孩子們感受到放鬆。
+    - label: 專業知識
+      value: 了解醫院的規範和病人的需求。
+    - label: 【　】學
+      value: 應對病人和家屬的負面情緒。
+      blanks:
+      - answer: 心理
+  - label: 貢獻
+    value: 讓病房多了笑聲，幫助病童降低【　】，也舒緩了壓力鍋下家長緊繃的心情。
+    blanks:
+    - answer: 治療的焦慮
+  slug: wqpup
+  text_ref: qjn4x

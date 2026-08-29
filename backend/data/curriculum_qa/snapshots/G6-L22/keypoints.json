@@ -2,6 +2,7 @@
   "answer_carrier": "紅色 ☑（w:sym Wingdings F0FE，2 個）與橘色手寫字；PDF p4 可見",
   "instruction": "1.請根據第一篇文章的內容，完成下方表格。",
   "layout": "list",
+  "part": 1,
   "part_no": 1,
   "rows": [
     {
@@ -70,6 +71,8 @@
     }
   ],
   "section_no": "五",
+  "slug": "dydnq",
   "structure_note": "⚠️ 原稿**不是表格**，是一張流程圖（圓角方塊 ＋ 箭頭）：\n最上面「問題／答案」框 ← 由下方「例一」「例二」兩組（原因 → 後果）往上匯聚，\n最下面是「文章結論」框。用 list 佈局把四塊依版面順序攤平，層級關係寫進 label。\n⛔ 未寫成 matrix —— 流程圖沒有一致的欄名。\n「例一」的原因框裡有兩點（1./2.），「1.」是 Word 自動編號不在文字流。",
+  "text_ref": "p3kud",
   "title": "物以稀為貴：從「供給」和「需求」談物價波動"
 }

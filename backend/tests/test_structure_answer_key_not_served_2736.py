@@ -21,6 +21,7 @@
 from __future__ import annotations
 
 import pathlib
+from _module_files import module_file, module_files
 import sys
 
 import pytest
@@ -62,8 +63,8 @@ def _served_rows():
     """走完整條學生路徑：橋 → formatter → 消毒器。"""
     scanned = 0
     for d in sorted(LESSONS.iterdir()):
-        f = d / "v3" / "keypoints.yml"
-        if not (d.is_dir() and d.name.startswith("L") and f.exists()):
+        f = module_file(d / "v3", "keypoints")
+        if not (d.is_dir() and d.name.startswith("L") and f):
             continue
         doc = yaml.safe_load(f.read_text(encoding="utf-8")) or {}
         try:
@@ -126,8 +127,8 @@ def test_grading_still_has_the_answers_it_needs():
     """
     sample = None
     for d in sorted(LESSONS.iterdir()):
-        f = d / "v3" / "keypoints.yml"
-        if not (d.is_dir() and d.name.startswith("L") and f.exists()):
+        f = module_file(d / "v3", "keypoints")
+        if not (d.is_dir() and d.name.startswith("L") and f):
             continue
         doc = yaml.safe_load(f.read_text(encoding="utf-8")) or {}
         try:

@@ -1,0 +1,53 @@
+lesson_uid: L0029
+version_id: v3
+section_no: 五
+keypoints:
+  title: 牧羊少年的逆轉勝
+  layout: list
+  section_no_printed: 五
+  instruction: 牧羊少年的逆轉勝是一個精彩的故事，故事通常有「背景」、「起因」、「經過」、「結果」，請把這四個名稱填入表格左欄。
+  rows:
+  - label: （左欄第1格）
+    row_label_blank: 【　】
+    row_label_blanks:
+    - answer: 背景
+    value: 西元前 1100 年左右，以色列與非利士兩軍隔著【　】對峙，僵持數月。
+    blanks:
+    - answer: 山谷
+  - label: （左欄第2格）
+    row_label_blank: 【　】
+    row_label_blanks:
+    - answer: 起因
+    value: 非利士巨人【　】連日出來叫陣單挑，要求以單挑決定雙方勝負，以色列軍隊【　】，士氣低落。
+    blanks:
+    - answer: 歌利亞
+    - answer: 無人敢應戰
+  - label: （左欄第3格）
+    row_label_blank: 【　】
+    row_label_blanks:
+    - answer: 經過
+    value: '15歲牧羊少年【　】送飯到陣地，自告奮勇請戰。
+
+      →國王一開始拒絕，後來被大衛的決心說服，讓大衛應戰。
+
+      →大衛拿了牧羊的杖，以及在溪邊挑選【　】，帶著甩石的機弦迎向巨人。
+
+      →大衛將石頭甩射出去，一石擊中歌利亞未防護的【　】，大衛拔出巨人的【　】將其斬首。'
+    blanks:
+    - answer: 大衛
+    - answer: 五塊石子
+    - answer: 額頭
+    - answer: 大刀
+  - label: （左欄第4格）
+    row_label_blank: 【　】
+    row_label_blanks:
+    - answer: 結果
+    value: 巨人倒地身亡，非利士軍【　】，以色列人大獲全勝。
+    blanks:
+    - answer: 四散逃跑
+  - label: 作者結語
+    value: 面對可怕的挑戰及困難，勇敢面對，發揮自己的長處，就有機會將危機變成轉機。
+  answer_carrier: 橘色手寫字（圖形層）
+  part: 1
+  slug: n3q4d
+  text_ref: fqwda

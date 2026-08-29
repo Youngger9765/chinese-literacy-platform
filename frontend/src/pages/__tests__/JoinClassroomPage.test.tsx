@@ -64,7 +64,7 @@ describe('JoinClassroomPage — success message (Issue #1646)', () => {
     fillAndSubmit('ABC123');
 
     await waitFor(() => {
-      expect(screen.getByText(/成功加入「測試班級 5A」！/)).toBeInTheDocument();
+      expect(screen.getAllByText(/成功加入「測試班級 5A」！/)[0]).toBeInTheDocument();
     });
 
     // Must NOT show "undefined"
@@ -93,7 +93,7 @@ describe('JoinClassroomPage — success message (Issue #1646)', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText(/成功加入「Bulk驗證 2026-05-16」！/)).toBeInTheDocument();
+      expect(screen.getAllByText(/成功加入「Bulk驗證 2026-05-16」！/)[0]).toBeInTheDocument();
     });
   });
 

@@ -1,0 +1,43 @@
+lesson_uid: L0037
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞刪除。
+  target_words:
+  - 爭強鬥勝
+  - 互比苗頭
+  - 津津樂道
+  - 開門見山
+  - 凶多吉少
+  - 面面相覷
+  - 鴉雀無聲
+  - 悶不吭聲
+  - 匪夷所思
+  - 唯妙唯肖
+  - 快馬加鞭
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 爭奇鬥艷福氣面面相覷
+  - 鬥怪爭強鬥勝面露凶相
+  - 凶多吉少面匪夷所思考
+  - 狠搶匪烏面徒悶悶不樂
+  - 悶互別鴉俱津馬不停開
+  - 稻不爭雀到津蹄匪門唯
+  - 苗思吭無快樂所見思快
+  - 頭進氣聲妙道山互比馬
+  - 不取唯有唯妙唯肖鞭加
+  - 對互比苗頭雀舌面子鞭
+  answers_are_graphical: true
+  answers_printed: false
+  notes:
+    bank: 語詞框只列 11 個（第三大題的 14 個中少了「投奔」「讒言」「軟禁」），是題目自己縮小範圍
+    answers_printed: '⛔ 這一課的教師版**一個圈都沒有** —— 格子跨 p9／p10 兩頁，兩頁都逐頁放大看過，
+
+      沒有任何橘框或圈線。依 skill：沒圈到就整個省略 answer_paths，不寫空 list，
+
+      更不可自己算路徑填進去。這是教材缺口，不是沒轉錄到。'
+  slug: 9qnmy
+  text_ref: fv7cm

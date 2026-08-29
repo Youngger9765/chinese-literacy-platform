@@ -460,9 +460,45 @@ def _columns_to_structure_table(kp: dict) -> Optional[list[list[str]]]:
         for i, entry in enumerate(rest):
             key, shown = entry if isinstance(entry, tuple) else (entry, entry)
             text = row.get(key)
+            # 欄名本身拿不到值時，答案多半掛在 `{欄名}_answer`（matrix 佈局的形狀）。
+            # 取到就**包成 `【答案】`** —— 下游 `_format_yaml_structure_table`
+            # 認得這個標記才會挖成空格。不包的話答案原封不動印在學生畫面上，
+            # 畫面顯示「已填 0 / 0 題」，學生沒得做也直接看光（#2930；全庫 28 課是 matrix）。
+            answer_here = None
+            if text is None and isinstance(key, str):
+                answer_here = row.get(f"{key}_answer", row.get(f"{key}_answers"))
+            if text is None and answer_here is not None:
+                cells.append(str(shown))
+                opts_here = row.get(f"{key}_options")
+                if opts_here:
+                    cells.append(_render_choice_cell({"options": opts_here, "answers": answer_here}))
+                else:
+                    t = _text_only(answer_here)
+                    cells.append(f"【{t}】" if t else "【　】")
+                continue
             if text is None:
                 continue
             cells.append(str(shown))
+            # 一格內含多個獨立小題：`_choices`（10 處）／`_sub_items`（1 處）。
+            # 不認的話整格退成 display —— 答案印在畫面上、學生不能作答（codex 複審指出）。
+            multi = (
+                _sidecar(row, key, "_choices", is_last=(i == len(rest) - 1))
+                or _sidecar(row, key, "_sub_items", is_last=(i == len(rest) - 1))
+                or _sidecar(row, key, "_items", is_last=(i == len(rest) - 1))
+            )
+            if isinstance(multi, list) and multi:
+                parts = []
+                for sub in multi:
+                    if not isinstance(sub, Mapping):
+                        continue
+                    cell = _render_choice_cell({"options": sub.get("options"),
+                                                "answers": sub.get("answer", sub.get("answers"))})
+                    label = str(sub.get("label") or "").strip()
+                    parts.append(f"{label} {cell}".strip() if label else cell)
+                if parts:
+                    cells.append("\n".join(parts))
+                    continue
+
             opts = _sidecar(row, key, "_options", is_last=(i == len(rest) - 1))
             if opts:
                 # 規格（skill §⑥.55b）寫的是 `{欄名}_answer` / `{欄名}_answers`；
@@ -485,6 +521,19 @@ def _columns_to_structure_table(kp: dict) -> Optional[list[list[str]]]:
             bank = kp.get("option_bank")
             if isinstance(bank, dict) and str(text).strip() in bank:
                 cells.append(_render_choice_cell({"options": bank, "answers": str(text).strip()}))
+                continue
+            # 這一格是「答案欄」（`{欄名}_answer`）而不是印在紙上的內容時，
+            # 要包成 `【答案】` —— 下游 `_format_yaml_structure_table` 認得這個
+            # 標記才會挖成空格。不包的話答案原封不動印在學生畫面上，
+            # 而且畫面顯示「已填 0 / 0 題」，學生沒得做（#2930，全庫 28 課是 matrix）。
+            # 這一欄本身就是答案欄（fallback 用 row 自己的 key，而它排除了
+            # `_options` 卻沒排除 `_answer`）——要包成 `【答案】`，
+            # 下游 `_format_yaml_structure_table` 認得這個標記才挖成空格。
+            # 不包的話答案原封不動印在學生畫面上，而且顯示「已填 0 / 0 題」，
+            # 學生沒得做也直接看光（#2930；全庫 28 課是 matrix 佈局）。
+            if isinstance(key, str) and key.endswith(("_answer", "_answers")):
+                txt = _text_only(text)
+                cells.append(f"【{txt}】" if txt else "【　】")
                 continue
             blanks = _sidecar(row, key, "_blanks", is_last=(i == len(rest) - 1))
             cells.append(_render_cell(text, blanks))

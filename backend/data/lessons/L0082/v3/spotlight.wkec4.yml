@@ -1,0 +1,117 @@
+lesson_uid: L0082
+version_id: v3
+section_no: 六
+spotlight:
+  strategy_name: 用表格整理訊息——依比較項目找看出異同
+  strategy_name_errata_ref: E1
+  strategy_type: table_organize
+  section_title_printed: 閱讀聚光燈
+  answer_carrier: 紅色 ☑（w:sym Wingdings F0FE，在文字層但非 ☑ 字元）與橘色手寫字
+  blocks:
+  - type: concept_box
+    text: '上一課〈女性太空人登月〉中，我們學會把兩個對象的細節放進表格，並從細節歸納出「比較項目」。這一課要再往前一步：把同一個比較項目的內容放在同一列，一列一列比較，找出相同與不同。
+
+      祕訣：同一列，才可以比。
+
+      在「女性太空人登月」，我們已經學過整理表格的步驟：
+
+      ❶找比較對象：這張表要比較哪兩個對象？把它們寫在表格對象列。
+
+      ❷找同列細節：找出同一列中比較對象可以互相比較的各個細節。
+
+      ❸問比較項目：把各細節放一起，問：「它們都在說哪一個項目？」
+
+      ❹填入並檢查：把比較項目和文章細節填進同一列，確認兩格都在回答同一個項目。'
+  - type: table
+    note: 說明框裡的空白範例表（示範表格長什麼樣，沒有本課內容）
+    columns:
+    - 項目           　　 對象
+    - 對象１
+    - 對象２
+    rows:
+    - - 比較項目１
+      - 文章細節
+      - 文章細節
+    - - 比較項目２
+      - 文章細節
+      - 文章細節
+  - type: guide
+    text: 現在就讓我們利用本課文章來練習看看吧！
+  - type: guide
+    text: ◎小試身手：
+  - type: fill_table
+    prompt: '1.請依照上面的步驟，完成以下的表格。
+
+      （項目主題參考：行為模式、行為背後的共同目的、生存目標）'
+    columns:
+    - 項目
+    - 螞 蟻
+    - 蟋蟀
+    - 異同比較
+    header_note: '原稿表頭第一格是斜分格「對象／項目」，第三格是要學生填的【　】（答案：蟋蟀），
+
+      本檔把欄名寫成 columns，蟋蟀那格的答案記在 header_blanks。'
+    header_blanks:
+    - column: 蟋蟀
+      answer: 蟋蟀
+    rows:
+    - 項目: 行為模式
+      螞 蟻: ''
+      螞 蟻_options:
+        1: 合作
+        2: 競爭
+      螞 蟻_answer: 1
+      蟋蟀: ''
+      蟋蟀_options:
+        1: 合作
+        2: 競爭
+      蟋蟀_answer: 2
+      異同比較: ''
+      異同比較_options:
+        1: 相同
+        2: 不同
+      異同比較_answer: 2
+    - 項目: ''
+      項目_options:
+        1: 延續生命的方式
+        2: 同類競爭的方式
+      項目_answer: 1
+      螞 蟻: 合作協力幫助蟻后繁衍後代
+      蟋蟀: 雄蟋蟀彼此競爭，爭取交配機會
+      異同比較: ''
+      異同比較_options:
+        1: 相同
+        2: 不同
+      異同比較_answer: 2
+    - 項目: 行為背後的【　】
+      項目_blanks:
+      - answer: 目標/目的
+      螞 蟻: ''
+      螞 蟻_options:
+        1: 延續生命
+        2: 爭取最多資源
+      螞 蟻_answer: 1
+      蟋蟀: ''
+      蟋蟀_options:
+        1: 延續生命
+        2: 爭取最多資源
+      蟋蟀_answer: 1
+      異同比較: ''
+      異同比較_options:
+        1: 相同
+        2: 不同
+      異同比較_answer: 1
+    - 項目: 人類強加的【　】
+      項目_blanks:
+      - answer: 道德標準
+      螞 蟻: 【　】
+      螞 蟻_blanks:
+      - answer: 勤勞節儉
+      蟋蟀: 懶惰、沒骨氣、天兵
+      異同比較: ''
+      異同比較_options:
+        1: 相同
+        2: 不同
+      異同比較_answer: 2
+  slug: wkec4
+  text_ref: 67fkn

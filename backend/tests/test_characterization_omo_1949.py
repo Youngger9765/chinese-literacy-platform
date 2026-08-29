@@ -31,6 +31,8 @@ import os
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
+from _route_walk import route_paths  # noqa: E402
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, event
@@ -629,7 +631,10 @@ class TestRouteRegistration:
     """All OMO URL patterns must be present in the FastAPI app after split."""
 
     def test_all_omo_routes_registered(self):
-        registered_paths = {route.path for route in app.routes}
+        # ⚠️ 新版 FastAPI 把 include_router 的東西包成 `_IncludedRouter`，它沒有
+        #    `.path` —— 直接取會 AttributeError。本機舊版重現不到，只有 CI 會紅。
+        registered_paths = route_paths(app)
+        assert registered_paths, "一條路由都沒走到 —— 走訪方式壞了，不是路由沒註冊"
         expected = {
             "/api/omo/lessons",
             "/api/omo/upload",

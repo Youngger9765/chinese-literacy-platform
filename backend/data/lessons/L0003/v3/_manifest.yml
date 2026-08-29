@@ -5,23 +5,34 @@ sections:
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
+  slug: mcda3
+  file: full_text_annotate.mcda3.yml
   pages:
   - 1
   - 2
 - 'no': 二
   name: 念順順
   module: key_reading
+  text_ref: mcda3
+  slug: fxqh6
+  file: key_reading.fxqh6.yml
   pages:
   - 2
   - 3
 - 'no': 三
   name: 語詞我最棒
   module: vocab_definitions
+  text_ref: mcda3
+  slug: 7uv7y
+  file: vocab_definitions.7uv7y.yml
   pages:
   - 3
 - 'no': 四
   name: 語詞應用
   module: vocab_application
+  text_ref: mcda3
+  slug: a6tya
+  file: vocab_application.a6tya.yml
   pages:
   - 3
   - 4
@@ -29,6 +40,9 @@ sections:
   name: 閱讀聚光燈
   module: spotlight
   subtitle: 摘要策略──找小主題與重要細節
+  text_ref: mcda3
+  slug: n3pj7
+  file: spotlight.n3pj7.yml
   pages:
   - 4
   - 5
@@ -36,23 +50,35 @@ sections:
 - 'no': 六
   name: 文章重點表
   module: keypoints
+  text_ref: mcda3
+  slug: 4pxwq
+  file: keypoints.4pxwq.yml
   pages:
   - 6
   - 7
 - 'no': 七
   name: 閱讀理解
   module: comprehension
+  text_ref: mcda3
+  slug: y9n4q
+  file: comprehension.y9n4q.yml
   pages:
   - 7
   - 8
 - 'no': 八
   name: 詞語複習
   module: vocab_review
+  text_ref: mcda3
+  slug: pqm6e
+  file: vocab_review.pqm6e.yml
   pages:
   - 8
 - 'no': 九
   name: 知識補給站
   module: resources
+  text_ref: mcda3
+  slug: pvuvp
+  file: resources.pvuvp.yml
   pages:
   - 8
   - 9

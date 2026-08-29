@@ -1,0 +1,41 @@
+lesson_uid: L0114
+version_id: v3
+section_no: 二
+key_reading:
+  instruction: 請用計時器，從指定段落（三    ）開始朗讀，在表格中記錄1分鐘朗讀的字數。如果你計時3次後，對自己還不滿意，可以多練幾次，最後一次，找一位同學，請他計時、記錄並簽名！
+  start_paragraph_note: '指示語印「（三 ☞）」、☞ 圖檔錨在第 3 段段首、字數欄第一個數字 27 == 第 3 段第一行字數、
+
+    第 3 個數字 **72 == 第 3 段的完整字數**（72 字，無數字無外文，不必套任何 Word 口徑）——
+
+    四條證據都指向第 3 段，沒有 L0112 那種衝突。
+
+    ⚠️ 前提是第 4 段要照段號欄合成一段（見 body.paragraphs[3].split_note）。'
+  char_count_note: "末筆 415 不是全文長度：字數欄只標到第 4 段結束，第 5、6 段沒有標\n（「字數欄提早停」的形狀，已見 5 課）。\n・起點檢查點精準：第 3 段 72 字 == 印出來的第 3 個數字 72。\n・\U0001F534 **終點對不上，差 5，我沒有找到解釋**：第 3+4 段合計 410 字（兩段都沒有阿拉伯數字、\n  沒有外文、沒有隱藏字元，所以四條 Word 口徑一條都用不上），但印的是 415。\n  最後一個間距 395→415 只跳 20，是段界的短行 signature，位置沒錯。\n  這一段唯一特別的東西是第 4 段的頁尾註腳（76 字），但整段算進去會多 51 而不是 5，\n  所以「註腳算進字數」這條解釋不成立。⛔ 不編一條規則去湊，如實記錄差異。\n  起點不受影響（四條證據獨立確認），所以念順順的段落範圍照樣可用。"
+  timing_table:
+    columns:
+    - 第1次計時
+    - 第2次計時
+    - 第3次計時
+    - 裁判計時
+    unit: 字
+    judge_signature: true
+  benchmark_label: ◎ 我的表現
+  benchmark:
+  - threshold: ＜220字
+    feedback: 還要多加練習。
+  - threshold: 221~250字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞251字
+    feedback: 哇嗚，超級厲害！
+  passage: 於是，一個爭議的問題浮上檯面：如果石虎在原棲息地裡越來越難存活，我們該不該「幫牠換個地方」呢？保育界對這個「物種遷移」的議題有非常不一樣的想法。
+  start_text: 於是，一個爭議的問題浮上檯面：如果石虎在原棲息地
+  extent_chars: 72
+  source: extract_key_reading_v3
+  start_paragraph: 3
+  end_paragraph: 3
+  slug: vrpan
+  text_ref: 69exm
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  absorbed_tail: 0

@@ -1,0 +1,52 @@
+lesson_uid: L0058
+version_id: v3
+section_no: 六
+keypoints:
+  title: 大主題：末日種子庫
+  layout: list
+  intro: 複習完小主題及細節，接下來就請你完成文章重點表吧！
+  column_headers:
+  - 小主題
+  - 重要細節
+  column_headers_note: '原稿表頭是「小主題｜重要細節」兩欄，但「種子銀行的建置」「參與種子銀行的例子」
+
+    兩列的小主題欄再切成子欄（縱向合併儲存格），所以用 list＋items 表達，
+
+    label＝小主題、value＝重要細節。'
+  answer_carrier: 橘色手寫字（圖形），文字流的【】內已填有答案
+  rows:
+  - label: 種子庫是什麼（第1～2段）
+    value: 斯瓦爾巴全球種子庫是挪威政府出資興建的【　】，用來保存【　】。
+    blanks:
+    - answer: 非營利儲藏庫
+    - answer: 全世界的農作物種子
+  - label: 種子銀行的建置
+    items:
+    - label: 目的（第3段）
+      value: 如聚光燈－（第三段）所寫。
+    - label: 【　】
+      label_blanks:
+      - answer: 保存環境與方式
+      value: 如聚光燈－（第四段）所寫。
+    - label: 安全設計（第5段）
+      value: 種子庫設計具備高度的安全性，可以防範【　】帶來的威脅。
+      blanks:
+      - answer: 地震、核武與海平面上升
+  - label: 參與種子銀行的例子
+    items:
+    - label: 【　】
+      label_blanks:
+      - answer: 臺灣參與種子保存計畫
+      value: 為保存臺灣原生小米的【　】，臺灣把小米種子存入斯瓦爾巴全球種子庫。
+      blanks:
+      - answer: 基因多樣性
+    - label: 敘利亞取出保存種子
+      value: 2015年，因阿勒坡種子庫遭到內戰波及，中東研究人員首次【　】。
+      blanks:
+      - answer: 取出130箱種子
+  - label: 作者提醒（第8段）
+    value: 科學家未雨綢繆建設種子庫，我們應該保護【　】，希望永遠不會用到種子庫。
+    blanks:
+    - answer: 生態環境
+  slug: 7nc34
+  text_ref: wmhmv

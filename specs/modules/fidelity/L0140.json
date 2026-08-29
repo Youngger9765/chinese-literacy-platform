@@ -1,59 +1,59 @@
 {
   "uid": "L0140",
-  "gate_version": 1,
+  "gate_version": 2,
   "docx_sha256": "7260-e341-3a86-4ac0",
   "modules": {
-    "comprehension": {
-      "yaml_sha256": "36b0-19e1-e572-941e",
+    "comprehension.ekyhh": {
+      "yaml_sha256": "c1dc-6421-3adb-a085",
       "checked": 26,
       "status": "pass",
       "passed": true,
       "exit": 0
     },
-    "full_text_annotate": {
-      "yaml_sha256": "fb26-bed6-2d2a-b7ba",
+    "full_text_annotate.43ftn": {
+      "yaml_sha256": "9873-66e1-8565-ce8a",
       "checked": 26,
       "status": "pass",
       "passed": true,
       "exit": 0
     },
-    "key_reading": {
-      "yaml_sha256": "88d9-e28d-f4c0-ff2a",
+    "key_reading.tfepx": {
+      "yaml_sha256": "2ded-6f7c-fad3-838d",
       "checked": 9,
       "status": "pass",
       "passed": true,
       "exit": 0
     },
-    "resources": {
-      "yaml_sha256": "868a-e814-8a8e-478a",
+    "resources.heexq": {
+      "yaml_sha256": "6654-cbee-6048-8510",
       "checked": 3,
       "status": "pass",
       "passed": true,
       "exit": 0
     },
-    "spotlight": {
-      "yaml_sha256": "7ce3-f5ec-a572-249e",
-      "checked": 40,
+    "spotlight.kmjyn": {
+      "yaml_sha256": "7360-5b02-946f-8efd",
+      "checked": 39,
       "status": "pass",
       "passed": true,
       "exit": 0
     },
-    "vocab_application": {
-      "yaml_sha256": "d3e7-51d4-4eec-8c5b",
+    "vocab_application.qnwhh": {
+      "yaml_sha256": "6e7b-eb2d-3d63-eb05",
       "checked": 14,
       "status": "pass",
       "passed": true,
       "exit": 0
     },
-    "vocab_definitions": {
-      "yaml_sha256": "aabc-658a-0247-ef13",
+    "vocab_definitions.3wetu": {
+      "yaml_sha256": "6efe-0595-680d-b69c",
       "checked": 19,
       "status": "pass",
       "passed": true,
       "exit": 0
     },
-    "vocab_review": {
-      "yaml_sha256": "3299-727e-4c6a-fd3b",
+    "vocab_review.ehvn9": {
+      "yaml_sha256": "ecd7-94b3-b1b2-73b6",
       "checked": 6,
       "status": "pass",
       "passed": true,

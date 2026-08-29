@@ -1,0 +1,45 @@
+lesson_uid: L0069
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 摩拳擦掌
+    B: 迫不及待
+    C: 凝聚力
+    D: 激昂
+    E: 盲點
+    F: 共識
+    G: 折衷
+    H: 妥協
+    I: 衡量得失
+  items:
+  - index: 1
+    stem: 選擇參加比賽前，他先（　），再決定是否報名。
+    answer: I
+  - index: 2
+    stem: 討論時多聽不同意見，才能看見原本沒有注意到的（　）。
+    answer: E
+  - index: 3
+    stem: 經過多次討論，全班終於對校外教學地點達成（　）。
+    answer: F
+  - index: 4
+    stem: 球隊一起接受訓練，彼此支持的過程提升了團隊（　）。
+    answer: C
+  - index: 5
+    stem: 決賽即將開始，選手們早已（　），準備上場。
+    answer: A
+  - index: 6
+    stem: 爸爸想爬山，媽媽想泡湯，最後選擇有步道的溫泉區，作為（　）方案。
+    answer: G
+  - index: 7
+    stem: 演講者談到守護海洋時，語氣十分（　），感動了在場聽眾。
+    answer: D
+  - index: 8
+    stem: 蛋糕才剛端上桌，弟弟就（　）地想吃第一口。
+    answer: B
+  notes:
+    option_bank: 9 個代號對應 8 道小題；H.妥協 未被任何一題用到
+    answer_carrier: 橘色手寫代號（PDF p4）；文字層的括號內已填有同樣的代號
+  slug: 4ekaa
+  text_ref: v9cjw

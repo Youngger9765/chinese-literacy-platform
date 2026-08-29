@@ -1,0 +1,57 @@
+lesson_uid: L0038
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+  - 從本課語詞框框，找語詞。
+  - 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+  - 問同學。
+  vocabulary_bank:
+  - 命脈
+  - 承載
+  - 閘門
+  - 洄游
+  - 與生俱來
+  - 本能
+  - 棲息地
+  - 暢行無阻
+  - 萬頭鑽動
+  - 滯留
+  - 契機
+  items:
+  - index: 1
+    word: 洄游
+    definition: 魚類為了繁殖或生存，在不同水域之間移動的行為。
+  - index: 2
+    word: 命脈
+    definition: 維持生存與發展最重要的事物。
+  - index: 3
+    word: 萬頭鑽動
+    definition: 形容很多人或動物擠在一起移動的樣子。
+  - index: 4
+    word: 本能
+    definition: 不用學就會的反應或行為。
+  - index: 5
+    word: 承載
+    definition: 承受或運送人、物，也可指包含情感、責任等抽象事物。
+  - index: 6
+    word: 暢行無阻
+    definition: 順利通行，沒有阻礙。
+  - index: 7
+    word: 與生俱來
+    definition: 出生時就已具備的，天生的。
+  - index: 8
+    word: 契機
+    definition: 讓事情開始、改變或發展的關鍵機會。
+  - index: 9
+    word: 棲息地
+    definition: 動植物生長、生活的自然環境。
+  - index: 10
+    word: 閘門
+    definition: 設在水道中，可以升降或開合，用來控制水流的裝置。
+  - index: 11
+    word: 滯留
+    definition: 停留在某處，無法離開或繼續前進。
+  slug: tuytm
+  text_ref: jmh6a

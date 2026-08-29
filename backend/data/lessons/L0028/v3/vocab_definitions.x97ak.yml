@@ -1,0 +1,57 @@
+lesson_uid: L0028
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+    A: 從本課語詞框框，找語詞。
+    B: 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+    C: 問同學。
+  vocabulary_bank:
+  - 表彰
+  - 刻不容緩
+  - 成效斐然
+  - 救苦救難
+  - 肉眼
+  - 層出不窮
+  - 刨地
+  - 效能
+  - 雜草叢生
+  - 晝伏夜出
+  - 繁殖
+  items:
+  - index: 1
+    word: 晝伏夜出
+    definition: 白天藏起來，夜晚才出現；「晝」是白天，「伏」是潛伏；描述夜行性動物的習性。
+  - index: 2
+    word: 成效斐然
+    definition: 成果非常好。
+  - index: 3
+    word: 刻不容緩
+    definition: 形容情況十分緊急，一刻也不容耽擱。
+  - index: 4
+    word: 表彰
+    definition: 公開表揚傑出的表現或貢獻。
+  - index: 5
+    word: 肉眼
+    definition: 人的眼睛，指不倚賴眼鏡或光學設備的視力。
+  - index: 6
+    word: 刨地
+    definition: 用爪子或工具挖地。
+  - index: 7
+    word: 雜草叢生
+    definition: 到處長滿雜草。
+  - index: 8
+    word: 層出不窮
+    definition: 接連不斷地出現。（注意：這個詞常用來形容壞事）。
+  - index: 9
+    word: 繁殖
+    definition: 生出新的生命，讓物種的數量增加。例如，老鼠生出小老鼠、植物的種子變成小苗，都是繁殖。
+  - index: 10
+    word: 救苦救難
+    definition: 提供救助，使人脫離痛苦與災難。
+  - index: 11
+    word: 效能
+    definition: 做事的效率和效果。「工作效能很好」指的是工作做得又快、又好。
+  slug: x97ak
+  text_ref: 977nw

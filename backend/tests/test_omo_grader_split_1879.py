@@ -236,7 +236,14 @@ def _make_mock_response(items: list[dict]) -> MagicMock:
 
 
 def _run(coro):
-    return asyncio.get_event_loop().run_until_complete(coro)
+    # ⚠️ `asyncio.get_event_loop()` 在沒有現成 loop 的同步情境下，新版 Python
+    #    直接 RuntimeError（3.10 只是 DeprecationWarning）。本機重現不到。
+    #    自己開一個、用完關掉，不依賴「當前有沒有 loop」這個環境假設。
+    loop = asyncio.new_event_loop()
+    try:
+        return loop.run_until_complete(coro)
+    finally:
+        loop.close()
 
 
 def _patch_and_grade(lesson: dict, mock_items: list[dict]) -> list:

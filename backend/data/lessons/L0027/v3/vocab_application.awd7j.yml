@@ -1,0 +1,57 @@
+lesson_uid: L0027
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 本領
+    B: 靈敏
+    C: 輕而易舉
+    D: 倖存
+    E: 拯救
+    F: 廢墟
+    G: 勝任
+    H: 訓練有素
+    I: 縫隙
+  items:
+  - index: 1
+    stem: 這道數學題對他來說（　），他只花幾秒鐘就算出答案。
+    answer: C
+  - index: 2
+    stem: 她精通三種語言，這項（　）讓她在職場上十分吃香。
+    answer: A
+  - index: 3
+    stem: 在這場飛機空難中，只有少數乘客（　）。
+    answer: D
+  - index: 4
+    stem: 消防員奮不顧身的衝進火場，成功（　）受困的居民。
+    answer: E
+  - index: 5
+    stem: 這款新手機的觸控螢幕非常（　），輕輕一碰就能迅速反應。
+    answer: B
+  - index: 6
+    stem: 她的數理能力很好，絕對能（　）這份會計工作。
+    answer: G
+  - index: 7
+    stem: 這支救援隊（　），即使在危急的災難現場，仍能冷靜的做出正確的判斷。
+    answer: H
+  - index: 8
+    stem: 春雨降臨後萬物滋長，連水泥地的（　）裡也長出青綠的小草。
+    answer: I
+  practice:
+    title: ◎小試身手：
+    items:
+    - index: 1
+      stem: 深夜，一場猛烈的火災吞噬整棟大樓，濃煙不斷從建築物內竄出，驚慌的居民受困其中。消防員立刻趕到現場，全力（　）受困者。
+      answers:
+      - E
+    - index: 2
+      stem: 要（　）艱難的救援任務，消防員必須具備專業的（　），並熟練操作各種滅火與救援設備。即使濃煙遮住視線，他們仍要保持感官（　），迅速察覺求救信號，確認是否仍有居民（　）。
+      answers:
+      - G
+      - A
+      - B
+      - D
+    answer_carrier: 橘色手寫字（圖形層）
+  slug: awd7j
+  text_ref: dkkew

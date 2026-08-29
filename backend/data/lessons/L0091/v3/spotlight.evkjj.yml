@@ -1,0 +1,173 @@
+lesson_uid: L0091
+version_id: v3
+section_no: 六
+spotlight:
+  strategy_name: 圖表繪製與判讀─折線圖
+  strategy_type: chart_reading
+  section_title_printed: 閱讀聚光燈
+  answer_carrier: 紅色 ☑（w:sym Wingdings F0FE，5 個）與橘色手寫字
+  structure_note: '⛔ 教學步驟 ❶~❺ 與「◎考考你」原稿在同一個大外框裡，本檔攤平成線性 blocks，
+
+    不塞進 sub_block —— `BlockSequenceRenderer` 的 `renderSubBlock` 不依 type 分派，
+
+    巢狀的選項會整片消失而且不報錯。
+
+    圖一／圖二／繪圖區用 `figure` 型別佔位，圖內的座標軸與資料點在圖片上（見各自 note）。'
+  blocks:
+  - type: concept_box
+    text: 你聽過資料視覺化嗎？它是將複雜的資訊以圖表的方式呈現，讓讀者更容易理解訊息。折線圖特別適合呈現資料隨著時間產生的變化。現在就讓我們把表格中的資訊畫成折線圖：
+  - type: guide
+    text: '例:  臺北市113年1~7月平均氣溫變化統計表'
+  - type: table
+    columns:
+    - 月份(月)
+    - '1'
+    - '2'
+    - '3'
+    - '4'
+    - '5'
+    - '6'
+    - '7'
+    rows:
+    - - 氣溫(℃)
+      - '16.9'
+      - '18.0'
+      - '19.3'
+      - '24.9'
+      - '25.4'
+      - '28.5'
+      - '30.0'
+  - type: guide
+    text: 數據資料來源：CODiS氣候觀測資料查詢服務站(年報表-逐月資料)
+  - type: single
+    prompt: ❶寫標題：選出折線圖的標題：(請打勾，單選)
+    options:
+      1: 臺北市113年1~7月平均氣溫變化統計表
+      2: 臺北市113年1~7月平均氣溫變化折線圖
+    answer: 2
+  - type: single
+    prompt: ❷畫橫軸:選出橫軸表示的統計項目及單位：
+    options:
+      1: 氣溫(℃)
+      2: 月份(月)
+    answer: 2
+  - type: single
+    prompt: ❸畫縱軸:選出縱軸表示的統計項目及單位：
+    options:
+      1: 氣溫(℃)
+      2: 月份(月)
+    answer: 1
+  - type: figure
+    referent: 臺北市113年1~7月平均氣溫變化折線圖
+    chart_data_carrier: image
+    note: '⚠️ 不標 `text_carrier: image` —— caption 與 referent 都在文字層、必須受逐字門檢查；
+
+      只有圖內的座標刻度與資料點在圖片上，那部分本檔沒有轉錄。
+
+      示範用的折線圖；referent 直接用圖上印的標題（在文字層，可受檢）。圖上已寫好標題與縱軸起點 0，
+
+      座標刻度在圖片上；PDF 轉檔後只剩虛線箭頭與波浪線，圖形本體沒畫出來。'
+  - type: guide
+    text: ❹省略符號：省略用不到的刻度（上圖15℃以下的刻度都省略了）。
+  - type: guide
+    text: ❺逐筆標點、連線：用黑點來表示橫軸和縱軸上的兩組數字，依時間序用直線把這些點連起來。
+  - type: guide
+    text: ◎考考你：
+  - type: free_text
+    prompt: (1)從折線圖來看，最高溫會落在【　】月，平均氣溫是【　】度。
+    blanks:
+    - answer: '7'
+    - answer: '30'
+  - type: single
+    prompt: (2)從折線圖可看出：從1月到７月的氣溫變化是如何？(請打勾，單選)
+    options:
+      1: 越來越高
+      2: 越來越低
+    answer: 1
+  - type: single
+    prompt: (3)承上題，你是怎麼判斷的？因為我看到折線圖的趨勢是
+    options:
+      1: 上升
+      2: 下降
+    answer: 1
+  - type: guide
+    text: ◎小試身手：看圖回答問題：
+  - type: guide
+    text: '1.圖一是某天上午九點到下午五點的溫度折線圖:'
+  - type: figure
+    referent: 圖一
+    caption: ▲圖一：某天上午9時到下午5時的溫度折線圖
+    axis_label: 時間(幾點)
+    chart_data_carrier: image
+    note: 折線圖本體與座標刻度都在圖片上；下面兩題的答案是從這張圖讀出來的
+  - type: free_text
+    prompt: (1)最高溫是（　）度，出現在（　）點，最低溫為（　）度，出現在（　）點。
+    blanks:
+    - answer: '22'
+    - answer: '13'
+    - answer: '12'
+    - answer: '17'
+  - type: free_text
+    prompt: (2)從（　）點開始，溫度越來越低。
+    blanks:
+    - answer: '15'
+  - type: guide
+    text: 2.圖二是Ａ牌奶粉近幾年來市場占有率的折線圖，請問：
+  - type: figure
+    referent: 圖二
+    caption: Ａ牌奶粉近幾年來市場占有率的折線圖
+    chart_data_carrier: image
+    note: '橫軸 2014~2021（西元(年)）、縱軸 市場占有率(%)。PDF 上這張畫得出來，
+
+      圖上標了 9(2016)、11(2017)、20(2020) 三個資料點；2018 與 2019 的值要從線上讀。'
+  - type: free_text
+    prompt: '(1)2018年的市場占有率是（　）%。
+
+      (2)2020年的市場占有率是（　）%。
+
+      (3)2019~2020年的市場占有率成長了（　）%。'
+    blanks:
+    - answer: '12'
+    - answer: '20'
+    - answer: '6'
+  - type: free_text
+    prompt: (4)圖二告訴我們「Ａ牌奶粉在市場的佔有率」和「年份」有什麼關係？
+    answer: Ａ牌奶粉在市場的佔有率呈現逐年成長的趨勢
+  - type: guide
+    text: 3.下面是小倫4-10歲的體重紀錄表
+  - type: table
+    columns:
+    - 年齡(y)
+    - '4'
+    - '5'
+    - '6'
+    - '7'
+    - '8'
+    - '9'
+    - '10'
+    rows:
+    - - 體重(kg)
+      - '14'
+      - '16'
+      - '19'
+      - '23'
+      - '21'
+      - '26'
+      - '30'
+  - type: figure
+    referent: 標題：小倫4-10歲的體重紀錄
+    chart_data_carrier: image
+    note: 空白繪圖區，學生依左表資料自己畫折線圖並寫標題；教師版已把標題寫上（referent 即該標題，在文字層）
+  - type: free_text
+    prompt: '(1)根據資料繪製右方折線圖和寫標題。
+
+      (2)請問幾歲到幾歲小倫的體重有下降（　）歲～（　）歲，下降了幾公斤？（　）公斤。
+
+      (3)小倫體重最重和最輕相差多少公斤？（　）公斤。'
+    blanks:
+    - answer: '7'
+    - answer: '8'
+    - answer: '2'
+    - answer: '16'
+  slug: evkjj
+  text_ref: yvw4a

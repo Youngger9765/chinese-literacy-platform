@@ -35,3 +35,18 @@ strategy_sources:
   worksheet: null
   master_sheet: 品格力──認識自我
   previous: 品格力──認識自我─看見長處與限制
+source_profile:
+  class: multi_text
+  note: 一份學習單包多篇文章（多文本閱讀）—— 整課音檔會把幾篇混在一起念
+  has_key_reading_section: true
+  multi_text: true
+  repeated_modules:
+  - key_reading
+  text_boundary_known: true
+  has_body_paragraphs: true
+  paragraph_idx_unique: false
+  anchor_hits: 1
+  has_counter_column: true
+  body_in_tables: true
+  invisible_chars_docx_only: true
+  profiled: '2026-08-24'

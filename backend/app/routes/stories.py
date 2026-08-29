@@ -550,6 +550,9 @@ def list_stories(
                 # first-edition data keyed by catalogue position, so after the
                 # renumber it matched the wrong lesson. See the detail route.
                 has_key_reading=bool(s.get("key_reading")),
+                # 一課多篇的篇次摘要（#2916）—— 後台的 QR 清單靠它一次展開，
+                # 不必為 175 課各打一次詳情。
+                part_rounds=s.get("part_rounds"),
                 intro=(StoryIntroSchema(**s["intro"]) if s.get("intro") else None),
             )
             for s in page_results
@@ -632,7 +635,13 @@ def get_story(story_id: str):
         # Image gallery for graphic-text layout (#1341)
         images=story.get("images") or [],
         # Worksheet metadata (#1434) — surface to API
-        worksheet_section_order=story.get("worksheet_section_order"),
+        manifest_sections=story.get("manifest_sections"),
+        # ⚠️ 這裡是**逐欄列舉**建 StoryDetail —— 沒有寫在這裡的欄位，
+        #    後端算得再對也送不出去，而且不會有任何錯誤或紅燈。
+        #    2026-08-25 實測：L0063 三輪的資料在 loader 裡都在，
+        #    但 API 回應的 repeat_rounds 是空的，就是漏了這兩行。
+        repeat_rounds=story.get("repeat_rounds"),
+        key_readings=story.get("key_readings"),
         worksheet_intro=story.get("worksheet_intro"),
         # Lesson intro (#1443) — docx 說明/導讀 or excel fallback
         lesson_intro=story.get("lesson_intro"),
@@ -693,6 +702,7 @@ def get_story(story_id: str):
 async def get_story_structure(
     request: Request,
     story_id: str,
+    p: str | None = None,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -712,13 +722,25 @@ async def get_story_structure(
     if not story:
         raise HTTPException(status_code=404, detail="Story not found")
 
+    # `p` = 這一節自己的代號（#2930）。一課印好幾篇時不帶它，
+    # 三篇會拿到同一份表 —— 而且共用同一個快取。
+    from app.services.tts.lesson_mapping import _article_slug  # noqa: PLC0415
+
+    round_table = None
+    if p:
+        article = _article_slug(story, p)
+        round_table = ((story.get("repeat_rounds") or {}).get(article) or {}).get(
+            "story_structure_table"
+        )
+    cache_key = f"{story_id}:{p}" if p else story_id
+
     # ── YAML-first: use pre-stored structure data if available (#1377, #1398, #2205) ──
     # Priority 1: story_structure_table — DOCX/keypoints ground truth (preserves layout)
-    yaml_table = story.get("story_structure_table")
+    yaml_table = round_table or story.get("story_structure_table")
     if yaml_table:
         result = _format_yaml_structure_table(yaml_table)
         # Store full structure (with answers) in cache for grading
-        _set_cached_structure(story_id, result)
+        _set_cached_structure(cache_key, result)
         log_ai_usage(
             db,
             endpoint=f"/stories/{story_id}/structure",
@@ -744,7 +766,7 @@ async def get_story_structure(
     yaml_rows = story.get("story_structure_rows")
     if yaml_rows and isinstance(yaml_rows, list):
         result = {"rows": yaml_rows}
-        _set_cached_structure(story_id, result)
+        _set_cached_structure(cache_key, result)
         log_ai_usage(
             db,
             endpoint=f"/stories/{story_id}/structure",
@@ -767,7 +789,7 @@ async def get_story_structure(
         return _sanitize_structure_for_client(result)
 
     # ── In-memory cache hit — return immediately without rate-limit quota ───
-    cached = _get_cached_structure(story_id)
+    cached = _get_cached_structure(cache_key)
     if cached is not None:
         return _sanitize_structure_for_client(cached)
 
@@ -783,7 +805,7 @@ async def get_story_structure(
         story_text=story_text,
         genre=story.get("genre"),
     )
-    _set_cached_structure(story_id, result)
+    _set_cached_structure(cache_key, result)
     latency_ms = int((time.monotonic() - start_time) * 1000)
 
     # Track AI usage (Issue #874)
@@ -817,6 +839,7 @@ async def grade_story_structure_endpoint(
     request: Request,
     story_id: str,
     body: GradeStructureRequest,
+    p: str | None = None,
     current_user: User = Depends(get_current_user),
 ):
     """Grade student answers for the interactive story structure table (#1082).
@@ -836,7 +859,9 @@ async def grade_story_structure_endpoint(
     if not story:
         raise HTTPException(status_code=404, detail="Story not found")
 
-    cached = _get_cached_structure(story_id)
+    # 批改要對**這一篇**的答案（#2930）；快取 key 與 GET 那支一致。
+    cache_key = f"{story_id}:{p}" if p else story_id
+    cached = _get_cached_structure(cache_key)
     if cached is None:
         raise HTTPException(
             status_code=400,

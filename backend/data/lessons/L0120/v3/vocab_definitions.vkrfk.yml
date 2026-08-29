@@ -1,0 +1,58 @@
+lesson_uid: L0120
+version_id: v3
+section_no: 三
+vocab_definitions:
+  vocabulary_bank:
+  - 引人入勝
+  - 閃爍
+  - 乍見
+  - 毛骨悚然
+  - 啟人疑竇
+  - 週期
+  - 癱瘓
+  - 睡眼惺忪
+  - 窮凶極惡
+  - 喑啞無聲
+  vocabulary_bank_label: 本課語詞
+  instruction: '請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+
+    🅐 從本課語詞框框，找語詞。
+
+    🅑 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+
+    🅒 問同學。'
+  items:
+  - index: 1
+    word: 毛骨悚然
+    definition: 讓人感到毛髮直立、背脊發涼，形容極度害怕。
+  - index: 2
+    word: 週期
+    definition: 指的是一定的時間間隔，定期的重複發生。
+  - index: 3
+    word: 喑啞無聲
+    definition: 發不出聲音。
+  - index: 4
+    word: 癱瘓
+    definition: 失去行走的能力。
+  - index: 5
+    word: 窮凶極惡
+    definition: 形容人十分凶惡。
+  - index: 6
+    word: 乍見
+    definition: 忽然看見。
+  - index: 7
+    word: 引人入勝
+    definition: 故事或景物很吸引人，引起人們極大的興趣。
+  - index: 8
+    word: 睡眼惺忪
+    definition: 剛睡醒，眼神模糊，神智不清醒的樣子。
+  - index: 9
+    word: 啟人疑竇
+    definition: 讓人開始懷疑事情的合理性。
+  - index: 10
+    word: 閃爍
+    definition: 光線快速閃動的樣子。
+  notes:
+    answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
+  slug: vkrfk
+  text_ref: 7c3ah

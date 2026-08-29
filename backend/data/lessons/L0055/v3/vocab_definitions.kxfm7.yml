@@ -1,0 +1,47 @@
+lesson_uid: L0055
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+  - 從本課語詞框框，找語詞。
+  - 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+  - 問同學。
+  vocabulary_bank:
+  - 有過之而無不及
+  - 飛簷走壁
+  - 英姿煥發
+  - 逞強
+  - 清一色
+  - 自命不凡
+  - 審時度勢
+  - 相去無幾
+  items:
+  - index: 1
+    word: 英姿煥發
+    definition: 形容人外表有精神、神采飛揚的樣子。
+  - index: 2
+    word: 清一色
+    definition: 形容全部都是同一種類或同一樣式。例如：參賽者清一色是男生。
+  - index: 3
+    word: 相去無幾
+    definition: 事物之間的差距不大，幾乎相同。
+  - index: 4
+    word: 飛簷走壁
+    definition: 形容人在屋簷、牆壁間敏捷移動，身手十分輕快。
+  - index: 5
+    word: 有過之而無不及
+    definition: 指互相比較後，不但沒有落後，反而超越對方。
+  - index: 6
+    word: 逞強
+    definition: 為了顯示自己厲害而勉強做一些超過能力的事。
+  - index: 7
+    word: 審時度勢
+    definition: 先看清當時的情況和變化，再做合適的決定。
+  - index: 8
+    word: 自命不凡
+    definition: 自以為聰明、不平凡，常表現出高傲自負的態度。
+  notes:
+    answer_carrier: 橘色手寫字（圖形字型），文字流的空格內已填有答案
+  slug: kxfm7
+  text_ref: 9pfan

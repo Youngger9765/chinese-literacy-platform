@@ -1,0 +1,33 @@
+lesson_uid: L0041
+version_id: v3
+section_no: 二
+key_reading:
+  instruction: 請用計時器，從指定段落（五☞）開始朗讀，計時1分鐘讀的字數，並記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！
+  chars_column_stops_at_paragraph: 6
+  timing_table:
+    columns:
+    - 第1次計時
+    - 第2次計時
+    - 第3次計時
+    - 裁判計時
+    unit: 字
+    judge_signature: true
+  benchmark:
+  - threshold: ＜200字
+    feedback: 還要多加練習。
+  - threshold: 201~230字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞231字
+    feedback: 哇嗚，超級厲害！
+  passage: 到了晚上，周天成有時要出席公開活動，或拜會企業與政府機構。身為經常參加國際賽事的選手，除了比賽和訓練，他也有推廣羽球、回饋社會的責任，而這些工作往往也需要企業贊助或政府支持。此外，為了減少受傷的風險，他不騎機車，也不自行開車，盡量搭乘捷運或公車。保護自己，也是運動員對職業生涯負責的表現。
+  start_text: 到了晚上，周天成有時要出席公開活動，或拜會企業與
+  extent_chars: 144
+  source: extract_key_reading_v3
+  start_paragraph: 5
+  end_paragraph: 5
+  slug: ujtjf
+  text_ref: wjtnp
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  absorbed_tail: 0

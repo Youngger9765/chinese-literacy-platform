@@ -64,15 +64,21 @@ describe('MultipleChoiceExercise', () => {
     expect(screen.getByRole('button', { name: /下一題/ })).toBeTruthy();
   });
 
-  it('selecting wrong answer shows explanation and next button', () => {
+  it('答錯不揭露答案，請學生再選一次（#2199）', () => {
     render(<MultipleChoiceExercise questions={questions} onComplete={() => {}} />);
 
-    const optionA = screen.getByText('自然環境').closest('button');
-    fireEvent.click(optionA!);
+    fireEvent.click(screen.getByText('自然環境').closest('button')!);
 
-    // Explanation still appears
-    expect(screen.getByText(/文章主要討論科技對社會的影響/)).toBeTruthy();
-    expect(screen.getByRole('button', { name: /下一題/ })).toBeTruthy();
+    const txt = document.body.textContent ?? '';
+    // 現在的教學設計：答錯不給答案、也不放行到下一題，讓學生自己再想
+    expect(screen.getByText(/再選一次/), '答錯應該請學生再選一次').toBeTruthy();
+    expect(txt, '答錯時洩漏了解說').not.toMatch(/文章主要討論科技對社會的影響/);
+    expect(
+      screen.queryByRole('button', { name: /下一題/ }),
+      '答錯不該能直接跳下一題',
+    ).toBeNull();
+    // 還要能繼續作答 —— 鎖住選項等於卡死學生
+    expect(screen.getByText('科技發展').closest('button')).not.toBeDisabled();
   });
 
   it('clicking next moves to the next question', () => {
@@ -105,17 +111,21 @@ describe('MultipleChoiceExercise', () => {
     expect(onComplete).toHaveBeenCalledWith(expect.any(Number), 2);
   });
 
-  it('options are disabled after selection', () => {
+  it('答對才鎖選項；答錯要能再選（#2199）', () => {
+    const opts = () =>
+      screen
+        .getAllByRole('button')
+        .filter((b) => ['自然環境', '科技發展', '人際關係', '歷史文化'].some((t) => b.textContent?.includes(t)));
+
     render(<MultipleChoiceExercise questions={questions} onComplete={() => {}} />);
 
-    const optionA = screen.getByText('自然環境').closest('button');
-    fireEvent.click(optionA!);
+    // 答錯 → 不鎖，否則學生卡死
+    fireEvent.click(screen.getByText('自然環境').closest('button')!);
+    opts().forEach((b) => expect(b, '答錯後選項被鎖住了').not.toBeDisabled());
 
-    // All option buttons should now be disabled
-    const allOptionButtons = screen
-      .getAllByRole('button')
-      .filter((btn) => ['自然環境', '科技發展', '人際關係', '歷史文化'].some((t) => btn.textContent?.includes(t)));
-    allOptionButtons.forEach((btn) => expect(btn).toBeDisabled());
+    // 答對 → 鎖住，避免改答案
+    fireEvent.click(screen.getByText('科技發展').closest('button')!);
+    opts().forEach((b) => expect(b, '答對後選項應該鎖住').toBeDisabled());
   });
 
   // ── Issue #1507 — opt-in rescue + telemetry ──────────────────────────
@@ -149,7 +159,16 @@ describe('MultipleChoiceExercise', () => {
       is_correct: false,
     });
 
-    // Next question, then correct pick
+    // #2199 之後答錯不放行，要先答對這一題才進得了下一題 ——
+    // 每一次作答（含答錯的那次）都要記錄，這才是老師看得到的訊號。
+    fireEvent.click(screen.getByText('科技發展').closest('button')!);
+    expect(recordMcqAttempt).toHaveBeenCalledWith('test-token', {
+      lesson_id: 'g7-l29',
+      question_id: 'g7-l29-q0',
+      choice: 'B',
+      is_correct: true,
+    });
+
     fireEvent.click(screen.getByRole('button', { name: /下一題/ }));
     fireEvent.click(screen.getByText('樂觀').closest('button')!);
     expect(recordMcqAttempt).toHaveBeenCalledWith('test-token', {
@@ -159,6 +178,6 @@ describe('MultipleChoiceExercise', () => {
       is_correct: true,
     });
 
-    expect(recordMcqAttempt).toHaveBeenCalledTimes(2);
+    expect(recordMcqAttempt, '三次作答就要三筆紀錄').toHaveBeenCalledTimes(3);
   });
 });

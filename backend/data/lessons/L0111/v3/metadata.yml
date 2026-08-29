@@ -57,3 +57,17 @@ strategy_sources:
   worksheet: 閱讀策略──跳過卡關，先瀏覽全文
   master_sheet: 閱讀策略─跳過卡關，瀏覽全文
   previous: 閱讀策略─跳過卡關，先瀏覽全文
+source_profile:
+  class: multi_text
+  note: 一份學習單包多篇文章（多文本閱讀）—— 整課音檔會把幾篇混在一起念
+  has_key_reading_section: false
+  multi_text: true
+  repeated_modules: []
+  text_boundary_known: false
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 0
+  has_counter_column: false
+  body_in_tables: true
+  invisible_chars_docx_only: false
+  profiled: '2026-08-24'

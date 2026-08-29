@@ -24,6 +24,7 @@ import sys
 from pathlib import Path
 
 import yaml
+from _module_files import module_file, module_files
 
 ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
@@ -41,7 +42,7 @@ def _content_rows(table):
 
 
 def _bridge(uid: str):
-    src = ROOT / "backend/data/lessons" / uid / "v3/keypoints.yml"
+    src = module_file(ROOT / "backend/data/lessons" / uid / "v3", "keypoints")
     return keypoints_to_structure_table(yaml.safe_load(src.read_text(encoding="utf-8")))
 
 
@@ -136,10 +137,17 @@ def test_L0017_is_the_positive_control_for_L0004():
 
     兩課都畫得出內容 ⇒ 那個維度不能預測「表會不會空」。
     """
-    a = yaml.safe_load((ROOT / "backend/data/lessons/L0017/v3/keypoints.yml")
-                       .read_text(encoding="utf-8"))["keypoints"]
-    b = yaml.safe_load((ROOT / "backend/data/lessons/L0004/v3/keypoints.yml")
-                       .read_text(encoding="utf-8"))["keypoints"]
+    # ⚠️ #2916 之後檔名是 `keypoints.{slug}.yml`（一課多篇會有好幾份）。
+    #    寫死 `keypoints.yml` 直接 FileNotFoundError。
+    def _kp(uid: str) -> dict:
+        d = ROOT / "backend/data/lessons" / uid / "v3"
+        f = next((c for c in [d / "keypoints.yml", *sorted(d.glob("keypoints.*.yml"))]
+                  if c.is_file()), None)
+        assert f is not None, f"{uid} 沒有任何 keypoints yml —— 對照組前提變了"
+        return yaml.safe_load(f.read_text(encoding="utf-8"))["keypoints"]
+
+    a = _kp("L0017")
+    b = _kp("L0004")
     assert a["columns"] == b["columns"] == ["段落", "事件", "感受"], "對照組前提變了"
 
     assert _empty_claims("L0017") == [], "正向對照本身就被門判死，對照不成立"
@@ -178,10 +186,35 @@ def test_default_mode_is_green_on_the_real_corpus():
 
 
 def test_strict_mode_still_shows_the_legacy_backlog():
-    """特赦不是遺忘：`--strict` 要看得到那 19 課還欠 layout。"""
+    """特赦不是遺忘：`--strict` 要看得到還欠 layout 的課。
+
+    ⚠️ 2026-08-28（#2964）改寫。原本斷言 `returncode == 1`（strict 必須紅）——
+    那是把「欠款還在」寫死成通過條件。**欠款還完之後這條反而變紅**，
+    而它的紅讀起來像「機制壞了」，實際上是好消息。
+
+    棘輪只能往一個方向收：欠款可以清零，但不准長回來。
+      · strict 綠 → 欠款清完了（現在就是這樣）
+      · strict 紅 → 還有欠，那就必須把它列出來（不可以紅得不說原因）
+    """
     r = _cli("--all", "--strict")
-    assert r.returncode == 1, "strict 也綠 = 那批欠的東西從此沒人看得到"
-    assert "缺 layout" in r.stdout
+    if r.returncode == 0:
+        assert "KEYPOINTS_SHAPE_GATE=PASS" in r.stdout, (
+            f"strict 回 0 卻沒有印 PASS —— 是不是根本沒跑\n{r.stdout}{r.stderr}")
+        return
+    assert "缺 layout" in r.stdout, (
+        "strict 紅了卻沒有說哪一課缺 layout —— "
+        f"紅得不說原因的門會被關掉\n{r.stdout}{r.stderr}")
+
+
+def test_strict_mode_is_actually_stricter():
+    """正向對照：`--strict` 不可以只是 `--all` 的別名。
+
+    少了這條，把 strict 改成什麼都不檢查也會讓上面那條綠。
+    """
+    import inspect
+    src = GATE.read_text(encoding="utf-8")
+    assert "--strict" in src, "gate 根本沒有 --strict 這個旗標"
+    assert "缺 layout" in src, "gate 裡找不到 strict 要報的那個訊息"
 
 
 def test_legacy_ok_stays_accepted():

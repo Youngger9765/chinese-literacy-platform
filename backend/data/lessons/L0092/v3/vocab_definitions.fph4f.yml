@@ -1,0 +1,60 @@
+lesson_uid: L0092
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  methods:
+  - 從本課語詞框中找語詞。
+  - 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+  - 問同學。
+  vocabulary_bank:
+  - 益發
+  - 前仆後繼
+  - 南轅北轍
+  - 傾家蕩產
+  - 匪夷所思
+  - 自圓其說
+  - 衝鋒陷陣
+  - 罪孽
+  - 廝殺
+  - 救贖
+  items:
+  - index: 1
+    word: 廝殺
+    definition: 互相打殺，有競爭、比賽之意。
+  - index: 2
+    word: 自圓其說
+    definition: 設法解釋自己前後矛盾的說法。
+  - index: 3
+    word: 益發
+    definition: 更加、越發
+  - index: 4
+    word: 南轅北轍
+    definition: 行動方向和原來的目的完全相反；字面意思是原本想去南方卻駕車向北行駛。
+  - index: 5
+    word: 前仆後繼
+    definition: 作戰時前面的人倒下，後面的繼續往前衝。比喻人們接連投入不怕犧牲。
+  - index: 6
+    word: 匪夷所思
+    definition: 不是一般人根據常理所能想像出來的。
+  - index: 7
+    word: 衝鋒陷陣
+    definition: 勇猛奮進，不怕困難。形容面對困難時，所表現出的勇氣和毅力。
+  - index: 8
+    word: 罪孽
+    definition: 罪惡、過失。
+  - index: 9
+    word: 傾家蕩產
+    definition: 為了做某件事，用光了家中全部的財產。
+  - index: 10
+    word: 救贖
+    definition: 使人從罪惡、災難或痛苦中得到拯救。
+  notes:
+    vocabulary_bank: '同一頁印了兩個語詞框：右上角 9 個（益發、前仆後繼、南轅北轍、傾家蕩產、匪夷所思、
+
+      自圓其說、衝鋒陷陣、罪孽、廝殺），左下角 10 個（多「救贖」）。
+
+      本欄採 10 個那一份 —— 第三大題有 10 題、第四大題代號表與第七大題灰框也都是 10 個含救贖。'
+    answer_carrier: 橘色手寫字（PDF p4）；文字層的空格內已填有同樣的答案
+  slug: fph4f
+  text_ref: ymrp3

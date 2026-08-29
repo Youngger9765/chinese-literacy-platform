@@ -917,8 +917,13 @@ def sample_uids(limit: int = 0) -> list[str]:
         # FileNotFoundError，而這支函式在測試模組的 module 層被呼叫，
         # 於是 3529 個測試在 collection 階段一起死（#2751）。
         # L0011 就是這樣：它是 #2781 盤出「真的沒有聚光燈」的 7 課之一。
-        spot_path = vdirs[-1] / "spotlight.yml"
-        if not spot_path.is_file():
+        # ⚠️ #2916 之後模組檔名是 `spotlight.{slug}.yml` —— 只找 `spotlight.yml`
+        #    的話**真實語料一課都取不到**（回空陣列，而空陣列不會拋，
+        #    所以看起來像「沒有課有聚光燈」而不是「我找錯檔名」，#2964 抓到）。
+        #    兩種都認：舊的無 slug、新的帶 slug。
+        cands = [vdirs[-1] / "spotlight.yml", *sorted(vdirs[-1].glob("spotlight.*.yml"))]
+        spot_path = next((p for p in cands if p.is_file()), None)
+        if spot_path is None:
             continue
         spot = load_spotlight(spot_path)
         if spot.get("blocks"):

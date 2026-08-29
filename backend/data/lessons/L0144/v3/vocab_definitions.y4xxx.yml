@@ -1,0 +1,25 @@
+lesson_uid: L0144
+version_id: v3
+section_no: 二
+vocab_definitions:
+  vocabulary_bank:
+  - 屢屢
+  - 界線
+  - 左右勝負
+  vocabulary_bank_label: 本課語詞
+  instruction: 請在空格內填入本課語詞，若有困難，你可以試試回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+  instruction_note: 篇3 的指示語比前兩篇短（沒有 🅐🅑🅒 三個方法），原稿如此
+  answer_carrier: 橘色手寫（教師版答案），文字流有此資訊
+  items:
+  - index: 1
+    word: 屢屢
+    definition: 一次又一次，表示同樣的事情多次發生。
+  - index: 2
+    word: 左右勝負
+    definition: 影響甚至決定比賽的結果。「左右」在這裡不是方向，而是「影響」的意思。
+  - index: 3
+    word: 界線
+    definition: 用來分清楚哪些可以、哪些不可以的範圍或標準。
+  part: 3
+  slug: y4xxx
+  text_ref: 4ymn7

@@ -5,6 +5,8 @@ sections:
 - 'no': 一
   name: 讀全文-做記號
   module: full_text_annotate
+  slug: 9kedu
+  file: full_text_annotate.9kedu.yml
   pages:
   - 1
   - 2
@@ -12,23 +14,35 @@ sections:
 - 'no': 二
   name: 念順順
   module: key_reading
+  text_ref: 9kedu
+  slug: uk6wd
+  file: key_reading.uk6wd.yml
   pages:
   - 3
 - 'no': 三
   name: 語詞我最棒
   module: vocab_definitions
+  text_ref: 9kedu
+  slug: chjku
+  file: vocab_definitions.chjku.yml
   pages:
   - 3
   - 4
 - 'no': 四
   name: 語詞應用
   module: vocab_application
+  text_ref: 9kedu
+  slug: nkv4w
+  file: vocab_application.nkv4w.yml
   pages:
   - 4
   - 5
 - 'no': 五
   name: 文章重點表
   module: keypoints
+  text_ref: 9kedu
+  slug: dnwud
+  file: keypoints.dnwud.yml
   pages:
   - 5
   - 6
@@ -36,6 +50,9 @@ sections:
   name: 閱讀聚光燈
   module: spotlight
   subtitle: 議論文結構──用論據支持論點
+  text_ref: 9kedu
+  slug: vnyte
+  file: spotlight.vnyte.yml
   pages:
   - 6
   - 7
@@ -43,17 +60,26 @@ sections:
 - 'no': 七
   name: 閱讀理解
   module: comprehension
+  text_ref: 9kedu
+  slug: fdmnp
+  file: comprehension.fdmnp.yml
   pages:
   - 8
   - 9
 - 'no': 八
   name: 詞語複習
   module: vocab_review
+  text_ref: 9kedu
+  slug: v6hak
+  file: vocab_review.v6hak.yml
   pages:
   - 9
 - 'no': 九
   name: 知識補給站
   module: resources
+  text_ref: 9kedu
+  slug: ep69r
+  file: resources.ep69r.yml
   pages:
   - 9
   - 10

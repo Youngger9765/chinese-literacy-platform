@@ -47,3 +47,17 @@ strategy_sources:
   worksheet: null
   master_sheet: 品格力──正向思考──學習樂觀思考
   previous: 正向思考──用樂觀詮釋面對失敗
+source_profile:
+  class: standard
+  note: 單一錨點 + 有計數欄 + idx 唯一 —— 走主路徑
+  has_key_reading_section: true
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: null
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 1
+  has_counter_column: true
+  body_in_tables: true
+  invisible_chars_docx_only: true
+  profiled: '2026-08-24'
