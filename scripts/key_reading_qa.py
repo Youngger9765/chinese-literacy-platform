@@ -51,22 +51,21 @@ _spec = importlib.util.spec_from_file_location("dw", REPO / "scripts" / "docx_wi
 dw = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(dw)
 
-# ✅ 判準已確認（2026-08-29）
+# ✅ 判準（2026-08-29 由 Owner 提供的學習單照片確認）
 #
-# Owner 2026-08-24：「☞ 是 start，最後的數字是 end」。
-# 一度以為對不上（157 課裡 145 課判「抽太少」），但那是**資料錯，不是判準錯** ——
-# 我當時拿「存的」去比「整篇總字數」，少扣了 ☞ 之前的部分。
+# Owner 2026-08-24：「☞ 是 start，最後的數字是 end」。就是字面意思 ——
+# 累計字數欄**從 ☞ 開始算**，所以最後一個數字直接就是該唸的字數。
 #
-# 扣掉之後兩個獨立的尺互相印證：
+# 《大自然的氣象小幫手》那張照片是決定性的：
+#   ☞ 在第七段，第七段第一行的數字就是 28（不是接續前面六段的大數）
+#   第七段結束在 259，我們存的 passage 正好 259 字
+#   第八段結束在 392  ← 學生該唸到這裡
 #
-#   【☞→文末】  中位數 303   落在 300–400 的 67/147   250–450 的 108/147
-#   【現在存的】中位數 148   落在 300–400 的  4/147   250–450 的  16/147
-#
-# 303 正好落在 2026-07-20 專家審查定的 300–400 中間。所以 target =
-# 「累計字數欄最後一個數字」減掉「☞ 之前那幾段的字數」。
+# ⛔ 我一度以為累計欄從文章開頭算，把 target 改成「總字數 - ☞ 之前那幾段」，
+#    那是錯的（PR #2976），已退回。
 #
 # 真正的 bug 在抽取端：`end_paragraph == start_paragraph` 有 150/160 ——
-# 只抽了 ☞ 那一段就停，而學習單寫的是「從指定段落（四☞）**開始**朗讀」。
+# 只抽了 ☞ 那一段就停，而學習單要的是 ☞ 到最後一個數字。
 # 修抽取是 #2712（intern-first），不在這支腳本的範圍。
 #
 # 差多少才算沒貼合。一行約 30 字，抓半行。
@@ -170,15 +169,18 @@ def audit(uid: str) -> dict:
         return out
 
     steps = [b - a for a, b in zip(seq, seq[1:])]
-    # target = ☞ 那一段到文末的字數 = 總字數 - ☞ 之前那幾段
+    # target = 累計字數欄的**最後一個數字**。
+    #
+    # ⛔ 2026-08-29 我一度改成「總字數 - ☞ 之前那幾段」，那是錯的，已退回。
+    #    錯誤假設：以為累計欄是從**文章開頭**算的。實際是**從 ☞ 開始算**。
+    #    決定性證據（Owner 提供的《大自然的氣象小幫手》學習單照片）：
+    #      ☞ 在第七段，第七段**第一行**的數字就是 28（不是接續前面六段的大數）
+    #      第七段結束在 259，而我們存的 passage 正好 259 字 —— 完全吻合
+    #      第八段結束在 392  ← 這才是學生要唸的量
+    #    所以「最後一個數字」直接就是該唸的字數，不必扣任何東西。
     start_no = _ordinal_to_int(out.get("start_ordinal_printed"))
-    before = 0
-    if start_no and 2 <= start_no <= len(seq):
-        before = seq[start_no - 2]
     out["start_no"] = start_no
-    out["chars_before_start"] = before
-    out["target"] = seq[-1] - before
-    out["article_total"] = seq[-1]
+    out["target"] = seq[-1]
     out["counter_len"] = len(seq)
     out["last_step"] = steps[-1]
     out["typical_step"] = int(statistics.median(steps[:-1])) if len(steps) > 1 else 0
