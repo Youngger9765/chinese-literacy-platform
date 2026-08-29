@@ -89,3 +89,27 @@ def test_the_real_corpus_still_answers():
     judged = [r for r in sample if r["verdict"] in ("貼合", "抽太多", "抽太少")]
     if not any(r.get("why", "").startswith("原稿不在") for r in sample):
         assert judged, "12 課全部判不動 —— 對帳邏輯壞了，不是語料的問題"
+
+def test_target_is_start_to_end_not_whole_article():
+    """判準鎖：target 必須扣掉 ☞ 之前的字數。
+
+    2026-08-29：一度把 target 定成「累計字數欄最後一個數字」＝整篇總字數，
+    於是 157 課裡 145 課判「抽太少」，看起來像判準錯了。實際是少扣了 ☞ 之前那幾段。
+
+    扣掉之後兩把獨立的尺互相印證：
+      【☞→文末】  中位數 303（2026-07-20 專家審查定的規格是 300–400）
+      【現在存的】中位數 148
+    所以判準是對的，錯的是資料（`end_paragraph == start_paragraph` 150/160）。
+
+    ⛔ 這條防的是「有人把 target 改回 seq[-1]」—— 那會讓對帳整批失真，
+       而且失真的方向是「全部都抽太少」，看起來像內容出事，其實是尺出事。
+    """
+    src = (REPO / "scripts" / "key_reading_qa.py").read_text(encoding="utf-8")
+    assert 'out["target"] = seq[-1] - before' in src, (
+        "target 不再是「☞ 到文末」了。改判準要連同這條鎖與腳本檔頭的說明一起更新"
+    )
+    assert 'out["article_total"] = seq[-1]' in src, (
+        "整篇總字數要另外留一欄 —— 它有用，只是不能拿來當 target"
+    )
+    # 正向對照：檔案真的讀到了
+    assert len(src) > 2000, "腳本短得不像真的 —— 上面兩條會在空字串上通過"
