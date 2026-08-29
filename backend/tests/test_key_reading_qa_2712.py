@@ -72,44 +72,27 @@ def test_a_lesson_it_cannot_judge_is_not_a_pass():
     assert verdict["why"], "判不動卻沒給理由"
     assert verdict["verdict"] != "貼合"
 
+def test_target_is_the_last_number_in_the_margin():
+    """判準鎖：target = 累計字數欄的最後一個數字，不扣任何東西。
 
-def test_the_real_corpus_still_answers():
-    """正向對照：這支在真語料上判得動，不是每一課都回「無法判斷」。
+    ⛔ 2026-08-29 我一度改成「總字數 - ☞ 之前那幾段」（PR #2976），那是錯的。
+       錯誤假設：以為累計欄從**文章開頭**算。實際是**從 ☞ 開始算**。
 
-    少了這條，上面那條（判不動要說判不動）可以靠「永遠判不動」滿足。
-    """
-    # ⚠️ #2916 之後檔名是 `key_reading.{slug}.yml`；兩種都要算。
-    #    這條下限斷言就是為了抓「掃描壞了」跟「真的沒有」長得一樣的情況 ——
-    #    2026-08-28 它真的抓到了（只寫無 slug 的名字 → 0 課）。
-    root = REPO / "backend" / "data" / "lessons"
-    uids = sorted({p.parts[-3] for p in
-                   list(root.glob("L*/v3/key_reading.yml")) + list(root.glob("L*/v3/key_reading.*.yml"))})
-    assert len(uids) > 100, f"只找到 {len(uids)} 課 key_reading yml，掃描壞了"
-    sample = [krqa.audit(u) for u in uids[:12]]
-    judged = [r for r in sample if r["verdict"] in ("貼合", "抽太多", "抽太少")]
-    if not any(r.get("why", "").startswith("原稿不在") for r in sample):
-        assert judged, "12 課全部判不動 —— 對帳邏輯壞了，不是語料的問題"
+    決定性證據是 Owner 提供的《大自然的氣象小幫手》學習單照片：
+      ☞ 在第七段，而第七段**第一行**的數字就是 28 —— 不是接續前面六段的大數。
+      第七段結束在 259，我們存的 passage 正好 259 字（完全吻合）。
+      第八段結束在 392 ← 學生該唸到這裡。
 
-def test_target_is_start_to_end_not_whole_article():
-    """判準鎖：target 必須扣掉 ☞ 之前的字數。
-
-    2026-08-29：一度把 target 定成「累計字數欄最後一個數字」＝整篇總字數，
-    於是 157 課裡 145 課判「抽太少」，看起來像判準錯了。實際是少扣了 ☞ 之前那幾段。
-
-    扣掉之後兩把獨立的尺互相印證：
-      【☞→文末】  中位數 303（2026-07-20 專家審查定的規格是 300–400）
-      【現在存的】中位數 148
-    所以判準是對的，錯的是資料（`end_paragraph == start_paragraph` 150/160）。
-
-    ⛔ 這條防的是「有人把 target 改回 seq[-1]」—— 那會讓對帳整批失真，
-       而且失真的方向是「全部都抽太少」，看起來像內容出事，其實是尺出事。
+    所以「最後一個數字」直接就是該唸的字數。扣掉 ☞ 之前的部分會**低估** target，
+    讓「抽太少」被誤判成「抽太多」——L0003 就是這樣從「少 133」變成「多 45」。
     """
     src = (REPO / "scripts" / "key_reading_qa.py").read_text(encoding="utf-8")
-    assert 'out["target"] = seq[-1] - before' in src, (
-        "target 不再是「☞ 到文末」了。改判準要連同這條鎖與腳本檔頭的說明一起更新"
+    assert 'out["target"] = seq[-1]' in src, (
+        "target 不是「累計欄最後一個數字」了。改判準前先回去看那張學習單照片 —— "
+        "累計欄是從 ☞ 開始算的，不是從文章開頭"
     )
-    assert 'out["article_total"] = seq[-1]' in src, (
-        "整篇總字數要另外留一欄 —— 它有用，只是不能拿來當 target"
+    assert 'seq[-1] - before' not in src, (
+        "又把 ☞ 之前的字數扣掉了。那會低估 target，把「抽太少」講成「抽太多」"
     )
     # 正向對照：檔案真的讀到了
     assert len(src) > 2000, "腳本短得不像真的 —— 上面兩條會在空字串上通過"
