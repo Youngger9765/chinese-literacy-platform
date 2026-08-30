@@ -36,6 +36,7 @@
 - `test_worksheet_url_is_not_silently_dead_2845.py` — mutation：拿掉 docstring 的 `#2845` → 1 failed；把 `_derive_docx_url` 接進 `routes/stories.py` → 1 failed（提醒接之前先確認檔案拿得到）；把 manifest 砍到 3 行 → 前提對照 1 failed；還原 → 3 passed
 - `test_progress_table_is_fresh_spec.py` — mutation：把進度表回退成 staging 上那份（51 課）→ 2 failed；只改「現況」那格的數字讓它跟表身漂移 → 1 failed；還原 → 3 passed。⭐ 這張表自己的檔頭就寫著「不要手改」，但**沒有東西擋它過期** —— 它就這樣停在 51 課，而實際是 175/175
 - `scripts/space_drift_scan.py`（#2864）— mutation：把 L0034 的修正退回 → 抓到 2 處、SPACE_DRIFT=FAIL；**把誤報濾網關掉 → 4 處**（抽取器自組的 `年級5課次17` 那類回來了，證明濾網是有作用的不是裝飾）；還原 → 0 處 PASS。⭐ 逐字門結構上抓不到這一類：它第 77 行 `re.sub(r'\s+','',s)` 比對前把空白全拿掉 —— 那是刻意且正確的（DOCX 的 run 會亂切），代價是這一類看不到，所以另走一條
+- `test_evals_are_wired_or_explained_spec.py`（#2854）— mutation：把接上的 eval 從 run-ci.sh 拿掉 → 1 failed；**把壞掉那支（`eval_keypoints_text_fidelity`）接進 CI → 1 failed**（正向對照擋假綠燈）；讓能跑的那支不再印 PASS → 1 failed（exit 0 不算過）；還原 → 8 passed。⭐ 盤點發現六支裡有兩支是 **exit 0 但零輸出**：`eval_keypoints_text_fidelity` 根本沒有 `main()`、`eval_lesson_schema --all` 的 schema-dir 指向已刪的 `_online-schema` 回 0/0 —— 照 exit code 收會多兩盞假綠燈
 
 ## grandfathered（既有債，未逐支驗過）
 

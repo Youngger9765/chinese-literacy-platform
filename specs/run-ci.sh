@@ -122,6 +122,12 @@ echo "-- Gate 4/10: QR-manifest reconciliation (verify_qr_manifest) --"
 ( cd backend && "$PYBIN" -m pytest specs/test_dead_source_paths_only_shrink_spec.py -q )   # 指向已刪目錄的引用只能變少（#2751）
 ( cd backend && "$PYBIN" -m pytest specs/test_progress_table_is_fresh_spec.py -q )   # 生成的進度表不准過期（#2736）
 "$PYBIN" scripts/space_drift_scan.py   # 原稿有空格而 yml 吃掉（#2864；沒有原稿時自己 SKIPPED）
+# ── ⑥ 內容忠實度：兩支今天就能跑的 eval（#2854 盤點結果）─────────────
+# ⛔ 另外四支刻意沒接：eval_lesson_schema/eval_keypoints_text_fidelity 的輸入
+#    指向已刪的 `_online-schema`（0 案例、exit 0 = 假綠），
+#    eval_extract_repeatability/eval_overview_repeatability 需要多次 LLM 抽取結果。
+"$PYBIN" scripts/eval_strategy_validate.py
+"$PYBIN" scripts/eval_lesson_content.py --fixtures
 echo ""
 
 # ── Gate 5/10: spotlight structural ratchet ───────────────────────────────────
