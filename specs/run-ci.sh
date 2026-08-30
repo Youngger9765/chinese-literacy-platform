@@ -119,6 +119,7 @@ fi
 echo "-- Gate 4/10: QR-manifest reconciliation (verify_qr_manifest) --"
 ( cd backend && "$PYBIN" -m pytest tests/test_verify_qr_manifest.py -q )
 ( cd backend && "$PYBIN" -m pytest specs/test_claudemd_only_names_live_gates_spec.py -q )   # CLAUDE.md 不准點名跑不起來的門（#2730）
+( cd backend && "$PYBIN" -m pytest specs/test_dead_source_paths_only_shrink_spec.py -q )   # 指向已刪目錄的引用只能變少（#2751）
 echo ""
 
 # ── Gate 5/10: spotlight structural ratchet ───────────────────────────────────
