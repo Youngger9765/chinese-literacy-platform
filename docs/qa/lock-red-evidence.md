@@ -32,6 +32,8 @@
 - `test_claudemd_only_names_live_gates_spec.py` — mutation：把 CLAUDE.md 的必跑門改回 `content_evidence_gate.py`（沒有任何 runner 叫它）→ 2 failed；改成指向不存在的 `specs/run-ci-deleted.sh` → 3 failed；還原 → 4 passed。⚠️ 它的正向對照第一版是壞的：regex 只找 `scripts/`，而真正在跑的門住在 `specs/` —— 改完 CLAUDE.md 之後那條立刻紅，才發現只找一個目錄會讓整支靜靜地變恆真
 - `frontend/tests/e2e/classicalTrackReachable.spec.ts` — 真瀏覽器（headless，打 staging）：把「來源沒這大題的課側欄不該有那一步」反過來斷言 → 1 failed（證明它分得出兩種課，不是所有課都長一樣）；把正向對照改成期待文言文那句 → 1 failed（證明正常課沒被降級成唸全文）；還原 → 4 passed。⭐ 這支存在的理由是**我自己的錯**：我從資料層看到 `has_key_reading=false` 就在總帳本寫「🔴 真缺口，學生看不到」，真的走一次才發現學生看得到，而且看到的正是學習單要的原文
 - `test_dead_source_paths_only_shrink_spec.py` — mutation：新增一支含死引用的檔 → 1 failed；把一個**存在**的路徑加進 DEAD 清單 → 1 failed（證明存在性判斷分得出來）；還原 → 3 passed。⚠️ 第一版沒咬：上限設 12 而實際是 10，**留了兩格 slack 的棘輪不會叫** —— 上限要等於當下實測值
+- `frontend/.../worksheetButton2845.test.ts` — mutation：把那顆的 aria-label 改回帶 PDF → 1 failed；多加一個下載呼叫點 → 1 failed；**把整區刪光 → 3 failed**（少了這條，一堆「不准有」在整區被刪時會全綠）；還原 → 6 passed。⚠️ 第一版用「數所有含『學習單』的 label」判，把**上傳學習單（#1637）**那套也算進來，一開始就紅在錯的地方 —— 改成鎖「什麼不准出現」
+- `test_worksheet_url_is_not_silently_dead_2845.py` — mutation：拿掉 docstring 的 `#2845` → 1 failed；把 `_derive_docx_url` 接進 `routes/stories.py` → 1 failed（提醒接之前先確認檔案拿得到）；把 manifest 砍到 3 行 → 前提對照 1 failed；還原 → 3 passed
 
 ## grandfathered（既有債，未逐支驗過）
 
