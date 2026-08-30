@@ -1,4 +1,11 @@
 {
+  "_provenance": {
+    "derived_from": "pipeline output（不是原稿）—— pipeline 自己的產物當對照組",
+    "frozen_at": "2026-06-24",
+    "edition": "一版（first edition）",
+    "warning": "🔴 二修（#2683，2026-08）之後這份比的是**不同版本的內容**。scripts/spotlight_regression_check.py 目前對 61 課報「spotlight 整個 load 不出」，但實查 L0157 有 spotlight.na3kk.yml、API 也服務得出來 —— 那是因為它 import 舊的 lesson_loader（57 課 Layer 1）。要重新啟用必須：改讀 lesson_uid_loader + 對二修重立這份 baseline。見 #2729 / #2751。",
+    "issue": 2729
+  },
   "G4-L10": {
     "tier": "test15",
     "n_blocks": 37,

@@ -150,7 +150,10 @@ def check() -> int:
     regressions = []
     improvements = []
     drifts = []  # 放錯課防線:內容/結構指紋變了(改過要 rebaseline 鎖;沒 rebaseline 卻變=ripple/放錯課→FAIL)
+    # 底線開頭的是這份檔自己的 metadata（`_provenance`），不是課號 —— 見 #2729
     for code, base in baseline.items():
+        if code.startswith("_"):
+            continue
         cur = snapshot_one(code)
         if cur is None:
             regressions.append((code, "spotlight 整個 load 不出（曾有 {} blocks）".format(base["n_blocks"])))
