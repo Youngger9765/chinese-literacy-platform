@@ -128,8 +128,10 @@ jobs:
             tests/test_health_alias_2737.py \
             tests/test_inline_choice_grading_2776.py \
             tests/test_inline_choices_stay_in_the_sentence_2768.py \
+            tests/test_key_reading_data_matches_extractor_2912.py \
             tests/test_key_reading_qa_2712.py \
             tests/test_key_reading_range_restored_2912.py \
+            tests/test_key_reading_reaches_the_student_2912.py \
             tests/test_key_reading_rule_is_stated_once_2912.py \
             tests/test_keypoints_columns_bridge_2736.py \
             tests/test_keypoints_shape_gate_empty_claim_2736.py \
