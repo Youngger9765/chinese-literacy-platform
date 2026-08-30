@@ -120,8 +120,8 @@ interface OnboardingCoachProps {
 
 function OnboardingCoach({ onDismiss, onDemo }: OnboardingCoachProps) {
   const instruction = IS_TOUCH_DEVICE
-    ? '用手指在方格上滑過，水平或垂直圈出語詞'
-    : '用滑鼠在方格上拖曳，水平或垂直圈出語詞';
+    ? '用手指在方格上滑過，橫的、直的、斜的都可以圈'
+    : '用滑鼠在方格上拖曳，橫的、直的、斜的都可以圈';
   return (
     <StepCoachCard title="語詞複習怎麼玩？" onDemo={onDemo} onDismiss={onDismiss}>
       {instruction}。右邊列出要找的語詞，全部找到就完成
@@ -435,13 +435,13 @@ export default function VocabWordSearch({
         {!showCoach ? (
           <div className="flex items-center justify-center gap-3 mt-0.5">
             <p className="text-sm text-on-surface-variant">
-              {IS_TOUCH_DEVICE ? '水平或垂直滑過圈出語詞' : '水平或垂直拖曳圈出語詞'}
+              {IS_TOUCH_DEVICE ? '橫、直、斜滑過圈出語詞' : '橫、直、斜拖曳圈出語詞'}
             </p>
             <StepCoachHelpButton onClick={() => setShowCoach(true)} />
           </div>
         ) : (
           <p className="text-sm text-on-surface-variant mt-0.5">
-            水平或垂直拖曳圈出語詞
+            橫、直、斜拖曳圈出語詞
           </p>
         )}
       </div>
@@ -485,7 +485,7 @@ export default function VocabWordSearch({
         )}
         {demo?.step === 'dragging' && (
           <DemoBubble>
-            {IS_TOUCH_DEVICE ? '③ 手指滑過，水平或垂直圈出語詞' : '③ 拖曳圈出整個語詞'}
+            {IS_TOUCH_DEVICE ? '③ 手指滑過，橫直斜圈出語詞' : '③ 拖曳圈出整個語詞（橫、直、斜）'}
           </DemoBubble>
         )}
         {demo?.step === 'success' && (
