@@ -114,14 +114,19 @@ key_reading_passages:
 key_reading_withheld:
   count: 28
   of: 175
-  status: ⚠️ 兩種完全不同的狀況，不可以合起來說『不是缺口』
-  corrected: 2026-08-31（#2912）
+  status: 兩種不同的狀況，兩種都不是缺口 —— 但理由不一樣，不可以合起來說
+  corrected: 2026-08-31（#2912 改一次、#2752 又改一次，見下）
   classified_by: '**原稿 DOCX 全文**（不是 manifest）—— manifest 自己也會漏，見 section_captured_in_manifest'
-  what_was_wrong: 這一節原本寫『逐份檢查過 DOCX，那 28 份完全沒有「念順順」或「重點朗讀」字樣』。重新逐份掃原稿：18 份確實沒有，但 10 份**有** —— 文言文那一軌把這個大題印成「請用計時器，朗讀原文」，只找「念順順／重點朗讀」會整批漏掉。跟
-    spotlight 那次「品格聚光燈／文言文聚光燈」漏抓是同一個形狀。
+  what_was_wrong: '① 原本寫『逐份檢查過 DOCX，那 28 份完全沒有「念順順」或「重點朗讀」字樣』——重新逐份掃原稿：18 份確實沒有，10 份**有**（文言文那一軌印成「請用計時器，朗讀原文」，只找那兩個詞會整批漏掉，跟
+    spotlight 那次「品格聚光燈」漏抓同形狀）。
+
+    ② 2026-08-31 我發現①之後，又把那 10 課寫成『🔴 真缺口 —— 學生在平台上看不到』。**那也是錯的。** 我只看了資料層的 has_key_reading=false 就下判斷；真的用學生帳號走一次才看到：那一步在側欄裡，畫面上寫「從頭到尾讀完整篇文章」，下面就是文言文原文
+    —— 而學習單要的正是「朗讀原文」。
+
+    ⭐ 教訓：`has_key_reading` 回答的是「有沒有**指定重點段**」，不是「學生有沒有東西可練」。兩者差一個 fallback，而那個 fallback 正是這一軌的正解。'
   breakdown:
     not_on_the_worksheet: 18
-    on_the_worksheet_but_not_served: 10
+    served_as_whole_text_reading: 10
   not_on_the_worksheet:
     count: 18
     status: 不是缺口 —— 那個課型本身沒有這個練習
@@ -182,14 +187,14 @@ key_reading_withheld:
     - lesson_uid: L0157
       catalog_slot: 文-L2
       title: 文言文怎麼讀？以鞭虎救弟記為例
-  on_the_worksheet_but_not_served:
+  served_as_whole_text_reading:
     count: 10
-    status: 🔴 **真缺口** —— 學習單上有這個大題，學生在平台上看不到
-    what: 文言文那一軌的念順順練的是「原文」整篇（`classical_text`），而抽取器只讀 `full_text_annotate` → passage 空 → 服務端 has_key_reading=false → 學生沒有這個練習可做。
-    second_defect: 其中 2 課（L0154、L0155）連 **manifest 都沒有這一節** —— 原稿有「朗讀原文」，但切大題的時候整節掉了。這是比上面更早一層的漏抓。
-    why_not_fixed_yet: 不是抽不到，是**量的東西不一樣**：這一軌計時以「秒」為單位、唸整篇原文，一般課的規格是 300–400 字重點段、看每分鐘字數。要不要服務、用什麼基準，是內容規格的決定。
-    how_to_close: 決定基準之後，讓抽取器對 verdict=whole_text_reading 的課改讀 `classical_text`，passage = 整篇原文；並補回那 2 課掉掉的大題。⛔ 不要去發明一個學習單沒標的段落。
-    how_verified: 逐份掃原稿 DOCX 全文抓到字樣（見每課的 worksheet_wording）。
+    status: ✅ 不是缺口 —— 學生看得到，而且看到的正是學習單要的
+    what: 文言文那一軌的念順順印的是「請用計時器，**朗讀原文**」，整篇、計時以秒為單位，沒有 ☞ 指定的重點段。平台走全文朗讀那條路：那一步在側欄裡，畫面寫「從頭到尾讀完整篇文章，不要中斷！標準比逐段朗讀寬鬆」，下面是原文全文。
+    why_has_key_reading_is_false: 那個旗標的意思是「沒有**指定重點段**」，不是「沒有這個練習」。⛔ 不要再拿它推論學生看不到 —— 2026-08-31 我就是這樣推錯的。
+    how_verified: 用學生帳號在 staging 真的走一次（headless）：L0155 側欄 簡/文/朗/句/詞/重/光/解/戰/報，點「原文」→ /learn/20155/classical-text；念順順那一步畫面上有「從頭到尾讀完整篇文章」＋桓公曰…原文三段，0
+      console error。對照組 L0021（來源沒這大題）側欄只有 簡/記/解/報，沒有那一步；L0003（正常課）仍是「朗讀老師指定的重點段落」。
+    locked_by: frontend/tests/e2e/classicalTrackReachable.spec.ts（4 條，含兩組對照）
     lessons:
     - lesson_uid: L0153
       catalog_slot: 文-L10
