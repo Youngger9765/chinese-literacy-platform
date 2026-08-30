@@ -18,12 +18,12 @@ key_reading:
     feedback: 嗯，還不錯喲！
   - threshold: ＞251字
     feedback: 哇嗚，超級厲害！
-  passage: 這個故事有三個大轉折。
-  start_text: 這個故事有三個大轉折。
-  extent_chars: 11
+  passage: 這個故事有三個大轉折。第一次轉折是，聽眾被引導去猜想那個感人的一幕──硬脾氣的老人終於要向付出最多的女兒說謝謝了。第二次轉折是，原來老人根本沒要說謝謝，只是要一根吸管。第三次轉折是，女兒在期待的大和解落空後，居然大笑起來。第三次轉折是最值得探究的。張曼娟對老爸抱著這麼高的期待，而幾乎不可能的父女和解似乎出現，這時她應該會感動到泫然欲泣吧。但幾秒之內，她的感動變成幻影，現實中的老爸才不來這一套。最耐人玩味的是，女兒從天堂跌落谷底了，她此時如果淚眼模糊、捏緊拳頭、心存怨懟，長年身心的辛苦折磨和委屈一一從心底浮現，是完全可以理解的。但她沒有，她哈哈大笑，笑到站不穩。作為聽故事的人，我一邊聽，一邊為父女間的愛怨糾葛感到提心吊膽，聽到張曼娟大笑後，我提的心吊的膽一下全放鬆下來，為她歡喜寬心。我覺得，對她來說，這可能是當下最好的選擇：不必在這無解的議題上再多耗心力了。但，到底張曼娟是怎麼做到的呢？我想到「認命」這個概念。
+  start_text: 這個故事有三個大轉折。第一次轉折是，聽眾被引導去
+  extent_chars: 410
   source: extract_key_reading_v3
   start_paragraph: 13
-  end_paragraph: 13
+  end_paragraph: 19
   slug: tfepx
   text_ref: 43ftn
   printed_char_marks:
@@ -45,8 +45,6 @@ key_reading:
   - 408
   printed_counter_last: 408
 extraction_check:
-  verdict: short_marked_paragraph
+  verdict: ok
   corroborated_by_first_edition: null
   absorbed_tail: 0
-needs_human_review: true
-review_reason: 學習單指定的那一段只有 11 字（第13段）。規則是只取指定的那一段，所以照寫；但這長度不像一分鐘的朗讀量，要人看紙本確認段號沒讀錯。

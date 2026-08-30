@@ -123,6 +123,7 @@ jobs:
             tests/test_inline_choice_grading_2776.py \
             tests/test_inline_choices_stay_in_the_sentence_2768.py \
             tests/test_key_reading_qa_2712.py \
+            tests/test_key_reading_range_restored_2912.py \
             tests/test_keypoints_columns_bridge_2736.py \
             tests/test_keypoints_shape_gate_empty_claim_2736.py \
             tests/test_knowledge_station_videos_2736.py \
@@ -148,7 +149,6 @@ jobs:
             tests/test_organizations_split_1890.py \
             tests/test_perf_1243_remaining_optimizations.py \
             tests/test_perf_sql_aggregates.py \
-            tests/test_printed_char_marks_recorded_2912.py \
             tests/test_progress_carry_forward_2889.py \
             tests/test_raw_table_not_public_2769.py \
             tests/test_reading_attempt_history.py \

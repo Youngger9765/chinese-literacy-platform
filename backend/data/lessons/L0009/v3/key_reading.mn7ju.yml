@@ -19,12 +19,12 @@ key_reading:
     feedback: 嗯，還不錯喲！
   - threshold: ＞221字
     feedback: 哇嗚，超級厲害！
-  passage: 獵人背起獵槍，走向白茫茫的山林。他巡視了之前設下的陷阱，處理了皮毛和獸肉，沒想到暴風雪來襲，氣溫驟降，寒風像刀子般凜冽。他伸手不見五指，只能找了個樹洞躲了一晚。但他心裡忐忑不安，輾轉難眠，想著的都是：「小寶會不會餓了？白牙會照顧他吧？」
+  passage: 獵人背起獵槍，走向白茫茫的山林。他巡視了之前設下的陷阱，處理了皮毛和獸肉，沒想到暴風雪來襲，氣溫驟降，寒風像刀子般凜冽。他伸手不見五指，只能找了個樹洞躲了一晚。但他心裡忐忑不安，輾轉難眠，想著的都是：「小寶會不會餓了？白牙會照顧他吧？」天一亮，風雪稍歇。獵人立刻踩著積雪趕路。他的腳凍得幾乎失去知覺，卻顧不得疲累，只想快點回家。終於，他看見小木屋。門開著。他一推門，愣住了——地上都是凌亂的腳印、翻倒的桌椅，還有暗紅的血跡。搖籃是空的，小寶不見了。獵人站在原地，渾身發抖。這時，一個黑影從角落跳出來，是白牙！牠帶著笑容，吐著舌頭，尾巴搖得飛快。牠用後腳站立，往獵人身上撲。但獵人卻呆住了——白牙的嘴邊、脖子、前腳，全是血！「牠……是不是餓壞了？把小寶吃了？」獵人的腦中浮現朋友們的警告——「牠是狼，不要被牠吃了。」但獵人搖頭：「不可能，絕對不可能！」可他從地上撿起小寶的被巾和衣服，上頭全沾滿了鮮血。他淚水奪眶而出，懷疑與怨恨終於爆發：「竟然被他們說中了！」
   start_text: 獵人背起獵槍，走向白茫茫的山林。他巡視了之前設下
-  extent_chars: 118
+  extent_chars: 433
   source: extract_key_reading_v3
   start_paragraph: 4
-  end_paragraph: 4
+  end_paragraph: 6
   slug: mn7ju
   text_ref: xxwkf
   printed_char_marks:
@@ -47,6 +47,8 @@ key_reading:
   - 422
   printed_counter_last: 422
 extraction_check:
-  verdict: confirmed
-  corroborated_by_first_edition: true
+  verdict: disagrees_with_first_edition
+  corroborated_by_first_edition: false
   absorbed_tail: 0
+needs_human_review: true
+review_reason: 二修學習單指定第4段，一版人工掃描標的是同一課的另一段，且那段文字在本課仍逐字存在。二修為主所以照寫，但兩版之一標錯了，要人看紙本確認。

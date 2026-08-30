@@ -18,12 +18,12 @@ key_reading:
     feedback: 嗯，還不錯喲！
   - threshold: ＞231字
     feedback: 哇嗚，超級厲害！
-  passage: 如今，小丑醫生的工作已經在世界各地普及，在臺灣，小丑醫生的計畫由一些非營利組織推動，許多志工投入其中，為孩子們帶來希望和勇氣。
+  passage: 如今，小丑醫生的工作已經在世界各地普及，在臺灣，小丑醫生的計畫由一些非營利組織推動，許多志工投入其中，為孩子們帶來希望和勇氣。新冠肺炎疫情期間，許多醫院限制訪客，小丑醫生改用線上表演的方式，透過螢幕繼續為病人帶來歡樂。烏俄戰爭爆發以後，醫療設施面臨被攻擊、被摧毀的壓力，住在醫院的兒童除了身體病痛，還必須面對兵荒馬亂中的忐忑不安。一批小丑醫生悄悄進入烏克蘭的醫院，安撫並陪伴病童，提供歡樂，讓他們笑逐顏開，暫時忘卻不安。小丑醫生的到來，讓冰冷的病房多了笑聲，這份歡樂不僅幫助病童降低治療的焦慮，也舒緩了壓力鍋下家長緊繃的心情，他們讓我們知道：笑，本身就是最好的良藥！
   start_text: 如今，小丑醫生的工作已經在世界各地普及，在臺灣，
-  extent_chars: 63
+  extent_chars: 283
   source: extract_key_reading_v3
   start_paragraph: 6
-  end_paragraph: 6
+  end_paragraph: 8
   slug: pucxn
   text_ref: qjn4x
   printed_char_marks:
@@ -41,6 +41,8 @@ key_reading:
   - 283
   printed_counter_last: 283
 extraction_check:
-  verdict: confirmed
-  corroborated_by_first_edition: true
+  verdict: disagrees_with_first_edition
+  corroborated_by_first_edition: false
   absorbed_tail: 0
+needs_human_review: true
+review_reason: 二修學習單指定第6段，一版人工掃描標的是同一課的另一段，且那段文字在本課仍逐字存在。二修為主所以照寫，但兩版之一標錯了，要人看紙本確認。

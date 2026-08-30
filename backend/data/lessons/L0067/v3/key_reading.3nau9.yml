@@ -21,12 +21,12 @@ key_reading:
     feedback: 嗯，還不錯喲！
   - threshold: ＞241字
     feedback: 哇嗚，超級厲害！
-  passage: 臺灣有個種樹達人，名叫賴倍元，大家都稱他為賴桑。童年時期的賴桑，喜歡到溪邊抓泥鰍、到樹上摘果實，整天與大自然為伍。十四歲開始，他跟著父親經營家族的運輸事業，工作之餘，就會騎著機車上山看神木。他常仰望著三千多歲的神木，呼吸著森林裡獨特的沁涼空氣，感受到自己生命的短暫與大自然的永恆，所有的煩惱也消失殆盡。他開始思考自己生命的意義，心中有一個願望慢慢成形：我要經營一個事業，一個不會被時間淘汰的事業。這個事業的「員工」，不會鬧脾氣、不會罷工、不會請假、免勞保，而且不用退休金。他決定開始種樹。
+  passage: 臺灣有個種樹達人，名叫賴倍元，大家都稱他為賴桑。童年時期的賴桑，喜歡到溪邊抓泥鰍、到樹上摘果實，整天與大自然為伍。十四歲開始，他跟著父親經營家族的運輸事業，工作之餘，就會騎著機車上山看神木。他常仰望著三千多歲的神木，呼吸著森林裡獨特的沁涼空氣，感受到自己生命的短暫與大自然的永恆，所有的煩惱也消失殆盡。他開始思考自己生命的意義，心中有一個願望慢慢成形：我要經營一個事業，一個不會被時間淘汰的事業。這個事業的「員工」，不會鬧脾氣、不會罷工、不會請假、免勞保，而且不用退休金。他決定開始種樹。心志定了，接下來就是實際行動。二十九歲那年，他花了三千萬元買下第一座山，卻發現整座山布滿垃圾和廢棄物，蒼蠅嗡嗡嗡的飛來飛去，根本沒什麼價值。原來，這裡曾是果園，因為長年無人管理，遭人偷偷倒了大量垃圾。他被眼前的景象震懾住了，但隨即轉變念頭，告訴自己：「沒關係！最壞的都留給我吧！」
   start_text: 臺灣有個種樹達人，名叫賴倍元，大家都稱他為賴桑。
-  extent_chars: 244
+  extent_chars: 384
   source: extract_key_reading_v3
   start_paragraph: 1
-  end_paragraph: 1
+  end_paragraph: 3
   slug: 3nau9
   text_ref: dhqrv
   printed_char_marks:
@@ -47,6 +47,8 @@ key_reading:
   - 384
   printed_counter_last: 384
 extraction_check:
-  verdict: confirmed
-  corroborated_by_first_edition: true
+  verdict: disagrees_with_first_edition
+  corroborated_by_first_edition: false
   absorbed_tail: 0
+needs_human_review: true
+review_reason: 二修學習單指定第1段，一版人工掃描標的是同一課的另一段，且那段文字在本課仍逐字存在。二修為主所以照寫，但兩版之一標錯了，要人看紙本確認。
