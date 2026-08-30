@@ -28,6 +28,7 @@
 - `test_key_reading_span_gap_is_flagged_2912.py` — mutation：拿掉一課的 `needs_human_review` → 1 failed；把理由裡的數字抹掉 → 1 failed；給對得上的課亂標（正向對照）→ 1 failed；拿掉一課的 `printed_counter_last` → 1 failed；還原 → 5 passed
 - `test_key_reading_anchor_matches_counter_2912.py` — mutation：把段號校正整段關掉（`if False`）→ 3 failed；還原 → 9 passed。⚠️ **保守閘門③（換過去要真的對得上）全庫沒有課走得到**，整批 mutation 咬不到它 —— 所以把判斷抽成純函式 `realign_anchor()`，用合成輸入單獨鎖：拿掉 ③ → `test_gate_3_refuses_a_neighbour_that_hits_more_marks_but_still_misses` 紅
 - `test_key_reading_ledger_matches_reality_2912.py` — mutation：從帳本刪掉一課 → 1 failed；把兩桶合併回「不是缺口」（就是原本那句錯話的形狀）→ 1 failed；帳本記一課其實有念順順的 → 1 failed；抽掉 `how_to_close` → 1 failed；還原 → 5 passed
+- `test_deferred_answer_extraction_stays_unreachable_2823.py` — mutation：把 `if options or answer:` 改成 `if False:`（讓真語料形狀落進 fallback）→ 3 failed；把 docstring 裡的 `#2823` 改掉 → 1 failed；還原 → 5 passed。另附正向對照 `test_the_tripwire_can_actually_fire`，證明真的有輸入會設那個旗標 —— 否則那三條「不該落到 fallback」是恆真的
 
 ## grandfathered（既有債，未逐支驗過）
 
