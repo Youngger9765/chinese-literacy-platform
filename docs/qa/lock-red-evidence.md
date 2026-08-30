@@ -30,6 +30,7 @@
 - `test_key_reading_ledger_matches_reality_2912.py` — mutation：從帳本刪掉一課 → 1 failed；把兩桶合併回「不是缺口」（就是原本那句錯話的形狀）→ 1 failed；帳本記一課其實有念順順的 → 1 failed；抽掉 `how_to_close` → 1 failed；還原 → 5 passed
 - `test_deferred_answer_extraction_stays_unreachable_2823.py` — mutation：把 `if options or answer:` 改成 `if False:`（讓真語料形狀落進 fallback）→ 3 failed；把 docstring 裡的 `#2823` 改掉 → 1 failed；還原 → 5 passed。另附正向對照 `test_the_tripwire_can_actually_fire`，證明真的有輸入會設那個旗標 —— 否則那三條「不該落到 fallback」是恆真的
 - `test_claudemd_only_names_live_gates_spec.py` — mutation：把 CLAUDE.md 的必跑門改回 `content_evidence_gate.py`（沒有任何 runner 叫它）→ 2 failed；改成指向不存在的 `specs/run-ci-deleted.sh` → 3 failed；還原 → 4 passed。⚠️ 它的正向對照第一版是壞的：regex 只找 `scripts/`，而真正在跑的門住在 `specs/` —— 改完 CLAUDE.md 之後那條立刻紅，才發現只找一個目錄會讓整支靜靜地變恆真
+- `frontend/tests/e2e/classicalTrackReachable.spec.ts` — 真瀏覽器（headless，打 staging）：把「來源沒這大題的課側欄不該有那一步」反過來斷言 → 1 failed（證明它分得出兩種課，不是所有課都長一樣）；把正向對照改成期待文言文那句 → 1 failed（證明正常課沒被降級成唸全文）；還原 → 4 passed。⭐ 這支存在的理由是**我自己的錯**：我從資料層看到 `has_key_reading=false` 就在總帳本寫「🔴 真缺口，學生看不到」，真的走一次才發現學生看得到，而且看到的正是學習單要的原文
 
 ## grandfathered（既有債，未逐支驗過）
 

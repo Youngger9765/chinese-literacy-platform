@@ -42,7 +42,7 @@ def _ledger_buckets() -> dict:
     led = yaml.safe_load(LEDGER.read_text(encoding="utf-8")) or {}
     w = led.get("key_reading_withheld") or {}
     return {k: {r["lesson_uid"] for r in (w.get(k) or {}).get("lessons") or []}
-            for k in ("not_on_the_worksheet", "on_the_worksheet_but_not_served")}
+            for k in ("not_on_the_worksheet", "served_as_whole_text_reading")}
 
 
 def test_every_lesson_without_a_passage_is_named_in_the_ledger():
@@ -61,24 +61,38 @@ def test_the_ledger_does_not_claim_a_lesson_is_missing_when_it_is_not():
 
 
 def test_the_two_causes_are_kept_apart():
-    """⭐ 這條就是原本那句錯話的形狀：把「來源沒有」跟「有但沒服務」合起來說。
+    """⭐ 兩桶都不是缺口，但**理由不一樣**，合起來說就會漏掉其中一種。
 
-    第二桶是真缺口（學生看不到學習單上有的東西），不可以被算成「不是缺口」。
+    第一桶：學習單沒有這個大題 → 側欄也沒有那一步。
+    第二桶：學習單印「請用計時器，朗讀原文」→ 走全文朗讀，學生看得到原文。
+
+    2026-08-31 這裡先後錯過兩次：先是把兩桶合起來說「28 份完全沒有」，
+    再是把第二桶寫成「🔴 真缺口，學生看不到」—— 後者只看了資料層旗標，
+    沒有走過真的路。
     """
     b = _ledger_buckets()
-    overlap = b["not_on_the_worksheet"] & b["on_the_worksheet_but_not_served"]
+    overlap = b["not_on_the_worksheet"] & b["served_as_whole_text_reading"]
     assert not overlap, f"同一課同時記在兩桶：{sorted(overlap)}"
-    assert b["on_the_worksheet_but_not_served"], (
-        "第二桶是空的 —— 要嘛真的補好了（那要一起更新這條），"
-        "要嘛又被合併回『不是缺口』了")
+    assert b["served_as_whole_text_reading"], (
+        "第二桶是空的 —— 要嘛那一軌真的改版了（那要一起更新這條），"
+        "要嘛又被合併回同一桶了")
 
 
-def test_the_real_gap_says_how_to_close_it():
-    """真缺口要寫得出「怎麼補」，否則它只是被記下來然後被忘掉。"""
+def test_the_whole_text_bucket_says_it_was_walked_not_inferred():
+    """⛔ 第二桶的結論只能來自「真的走過」，不能來自資料層旗標。
+
+    這條擋的是我 2026-08-31 犯的錯：看到 `has_key_reading=false` 就寫
+    「學生看不到」，而學生其實看得到。
+    """
     led = yaml.safe_load(LEDGER.read_text(encoding="utf-8")) or {}
-    b = (led.get("key_reading_withheld") or {}).get("on_the_worksheet_but_not_served") or {}
-    for field in ("status", "what", "why_not_fixed_yet", "how_to_close", "how_verified"):
-        assert str(b.get(field) or "").strip(), f"真缺口那一節少了 {field}"
+    b = (led.get("key_reading_withheld") or {}).get("served_as_whole_text_reading") or {}
+    for field in ("status", "what", "why_has_key_reading_is_false",
+                  "how_verified", "locked_by"):
+        assert str(b.get(field) or "").strip(), f"全文朗讀那一節少了 {field}"
+    hv = str(b["how_verified"])
+    assert "走" in hv and "側欄" in hv, (
+        "how_verified 沒有提到真的走過側欄 —— 只憑資料層旗標下的結論不算數")
+    assert "對照" in hv, "沒有對照組：少了它，「學生看得到」可能只是所有課都長那樣"
 
 
 def test_the_gate_is_measuring_something():
