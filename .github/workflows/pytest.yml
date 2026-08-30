@@ -129,6 +129,9 @@ jobs:
             tests/test_inline_choice_grading_2776.py \
             tests/test_inline_choices_stay_in_the_sentence_2768.py \
             tests/test_key_reading_data_matches_extractor_2912.py \
+            tests/test_key_reading_anchor_matches_counter_2912.py \
+            tests/test_key_reading_ledger_matches_reality_2912.py \
+            tests/test_key_reading_span_gap_is_flagged_2912.py \
             tests/test_key_reading_qa_2712.py \
             tests/test_key_reading_range_restored_2912.py \
             tests/test_key_reading_reaches_the_student_2912.py \

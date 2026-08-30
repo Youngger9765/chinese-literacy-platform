@@ -107,20 +107,160 @@ key_reading_passages:
   status: 已按 right_fix 接上（140/175）；本條保留為紀錄，剩餘 35 課見 key_reading_withheld
   resolved_2026_08_16: 段落改由二修 DOCX 第二節按 lesson_uid 抽取，一修那張表不再被讀取
   what: '`backend/data/key_reading_passages.yml` 有 134 段重點朗讀文字，但它是一修資料、以課號（補零寫法 G4-L01）為鍵。'
-  why_not_just_join: 課號是課文在課表上的位置，而二修把位置全部重編 —— 同一個 G4-L1 在兩版可能是不同課。而且條目只有 `passage` / `tou_paragraph` / `needs_review`
-    三個欄位，沒有標題或任何身分資訊，所以**無法驗證某段文字屬於哪一課**。
+  why_not_just_join: 課號是課文在課表上的位置，而二修把位置全部重編 —— 同一個 G4-L1 在兩版可能是不同課。而且條目只有 `passage` / `tou_paragraph` / `needs_review` 三個欄位，沒有標題或任何身分資訊，所以**無法驗證某段文字屬於哪一課**。
   what_i_checked: 正規化課號後 115/134 對得上，但那個數字不代表對得『正確』；我一度拿標題比對想確認，實際上條目根本沒有標題欄位 —— 那個比對恆為真，什麼都沒驗到。課文本體也是空的（0/175），所以連『這段文字在不在該課課文裡』都比不了。
   current_behaviour: has_key_reading 全 175 課為 false，所以沒有接錯課，只是沒有這個功能
   right_fix: 重點朗讀段落在二修 DOCX 的第二節（念順順）裡，應該跟聚光燈/重點表一樣按 lesson_uid 抽取進 uid tree，而不是拿一修檔案按課號硬接。
 key_reading_withheld:
   count: 28
   of: 175
-  status: 不是缺口 —— 那個課型本身沒有這個練習
+  status: ⚠️ 兩種完全不同的狀況，不可以合起來說『不是缺口』
+  corrected: 2026-08-31（#2912）
+  classified_by: '**原稿 DOCX 全文**（不是 manifest）—— manifest 自己也會漏，見 section_captured_in_manifest'
+  what_was_wrong: 這一節原本寫『逐份檢查過 DOCX，那 28 份完全沒有「念順順」或「重點朗讀」字樣』。重新逐份掃原稿：18 份確實沒有，但 10 份**有** —— 文言文那一軌把這個大題印成「請用計時器，朗讀原文」，只找「念順順／重點朗讀」會整批漏掉。跟
+    spotlight 那次「品格聚光燈／文言文聚光燈」漏抓是同一個形狀。
   breakdown:
-    no_section: 28
-  what: 這些課的朗讀步驟會唸全文 —— 是降級，不是錯課（唸的仍是自己的課文）。
-  why_28_is_not_a_gap: 逐份檢查過 DOCX，那 28 份完全沒有「念順順」或「重點朗讀」字樣。沒有老師標的重點段可抽，跟某課沒有影片一樣是正常狀態。
-  how_to_close: 無 —— 這 28 份學習單沒有這一節。若日後改版加入，重跑 build_key_reading.py 即可。
+    not_on_the_worksheet: 18
+    on_the_worksheet_but_not_served: 10
+  not_on_the_worksheet:
+    count: 18
+    status: 不是缺口 —— 那個課型本身沒有這個練習
+    what: 這些課的朗讀步驟會唸全文 —— 是降級，不是錯課（唸的仍是自己的課文）。
+    how_verified: 逐份讀 DOCX 全文，「念順順／重點朗讀／朗讀原文／計時器」四個字樣一個都沒有。
+    lessons:
+    - lesson_uid: L0021
+      catalog_slot: G5-L0
+      title: 正太與小豬：武僧的養成之路
+    - lesson_uid: L0044
+      catalog_slot: G5-L5
+      title: 文字路上的閱讀號誌
+    - lesson_uid: L0049
+      catalog_slot: G6-L0
+      title: 正太與小豬：武僧的養成之路
+    - lesson_uid: L0068
+      catalog_slot: G6-L29
+      title: 植物獵人
+    - lesson_uid: L0070
+      catalog_slot: G6-L3
+      title: 文章中的「關鍵少數」
+    - lesson_uid: L0077
+      catalog_slot: G7-L0
+      title: 正太與小豬：武僧的養成之路
+    - lesson_uid: L0106
+      catalog_slot: G7-L9
+      title: 帶著「血拼清單」閱讀
+    - lesson_uid: L0107
+      catalog_slot: G8-L0
+      title: 正太與小豬：武僧的養成之路
+    - lesson_uid: L0111
+      catalog_slot: G8-L13
+      title: 雨林裡的奇蹟藥物
+    - lesson_uid: L0130
+      catalog_slot: G9-L0
+      title: 正太與小豬：武僧的養成之路
+    - lesson_uid: L0133
+      catalog_slot: G9-L12
+      title: 看不見的兇手：以實驗破解肉湯腐敗之謎
+    - lesson_uid: L0134
+      catalog_slot: G9-L13
+      title: 從四張圖看地球暖化
+    - lesson_uid: L0135
+      catalog_slot: G9-L14
+      title: 都是八哥，為什麼命運不一樣？
+    - lesson_uid: L0136
+      catalog_slot: G9-L15
+      title: 會考圖文題實戰
+    - lesson_uid: L0137
+      catalog_slot: G9-L16
+      title: 未解之謎──石頭的祕密
+    - lesson_uid: L0144
+      catalog_slot: G9-L23
+      title: 馬拉松王者──基普喬吉
+    - lesson_uid: L0150
+      catalog_slot: G9-L7
+      title: 臺灣學生的閱讀力：美麗與哀愁
+    - lesson_uid: L0157
+      catalog_slot: 文-L2
+      title: 文言文怎麼讀？以鞭虎救弟記為例
+  on_the_worksheet_but_not_served:
+    count: 10
+    status: 🔴 **真缺口** —— 學習單上有這個大題，學生在平台上看不到
+    what: 文言文那一軌的念順順練的是「原文」整篇（`classical_text`），而抽取器只讀 `full_text_annotate` → passage 空 → 服務端 has_key_reading=false → 學生沒有這個練習可做。
+    second_defect: 其中 2 課（L0154、L0155）連 **manifest 都沒有這一節** —— 原稿有「朗讀原文」，但切大題的時候整節掉了。這是比上面更早一層的漏抓。
+    why_not_fixed_yet: 不是抽不到，是**量的東西不一樣**：這一軌計時以「秒」為單位、唸整篇原文，一般課的規格是 300–400 字重點段、看每分鐘字數。要不要服務、用什麼基準，是內容規格的決定。
+    how_to_close: 決定基準之後，讓抽取器對 verdict=whole_text_reading 的課改讀 `classical_text`，passage = 整篇原文；並補回那 2 課掉掉的大題。⛔ 不要去發明一個學習單沒標的段落。
+    how_verified: 逐份掃原稿 DOCX 全文抓到字樣（見每課的 worksheet_wording）。
+    lessons:
+    - lesson_uid: L0153
+      catalog_slot: 文-L10
+      title: 荒野救亡記
+      worksheet_wording:
+      - 朗讀原文
+      - 計時器
+      section_captured_in_manifest: true
+    - lesson_uid: L0154
+      catalog_slot: 文-L11
+      title: 祁黃羊的思路解密
+      worksheet_wording:
+      - 朗讀原文
+      - 計時器
+      section_captured_in_manifest: false
+    - lesson_uid: L0155
+      catalog_slot: 文-L12
+      title: 不流血的戰爭
+      worksheet_wording:
+      - 朗讀原文
+      - 計時器
+      section_captured_in_manifest: false
+    - lesson_uid: L0158
+      catalog_slot: 文-L3
+      title: 不量田
+      worksheet_wording:
+      - 朗讀原文
+      - 計時器
+      section_captured_in_manifest: true
+    - lesson_uid: L0159
+      catalog_slot: 文-L4
+      title: 陸公買硯
+      worksheet_wording:
+      - 朗讀原文
+      - 計時器
+      section_captured_in_manifest: true
+    - lesson_uid: L0160
+      catalog_slot: 文-L5
+      title: 重義的荀巨伯
+      worksheet_wording:
+      - 朗讀原文
+      - 計時器
+      section_captured_in_manifest: true
+    - lesson_uid: L0161
+      catalog_slot: 文-L6
+      title: 江乙媽媽告御狀
+      worksheet_wording:
+      - 朗讀原文
+      - 計時器
+      section_captured_in_manifest: true
+    - lesson_uid: L0162
+      catalog_slot: 文-L7
+      title: 相隔千里的約定
+      worksheet_wording:
+      - 朗讀原文
+      - 計時器
+      section_captured_in_manifest: true
+    - lesson_uid: L0163
+      catalog_slot: 文-L8
+      title: 愛讀書的顧寧人
+      worksheet_wording:
+      - 朗讀原文
+      - 計時器
+      section_captured_in_manifest: true
+    - lesson_uid: L0164
+      catalog_slot: 文-L9
+      title: 從天才跌為凡人的神童
+      worksheet_wording:
+      - 朗讀原文
+      - 計時器
+      section_captured_in_manifest: true
 key_reading_flagged:
   count: 2
   lessons:
@@ -142,14 +282,14 @@ resolved:
   lesson_body_text:
     was: 0 / 175
     now: 174 / 175
-    how: scripts/extract_lesson_body.py 從 DOCX 第一節抽出，驗證用「本課語詞是否出現在抽出的課文裡」（語詞由學習單另一節獨立寫成）。另外兩種驗證試過但不成立：段落編號不是 1:1（96
-      份誤報 14 份）、朗讀累計字數涵蓋的是印刷行不是段落範圍（69 份只中 3 份）。
+    how: scripts/extract_lesson_body.py 從 DOCX 第一節抽出，驗證用「本課語詞是否出現在抽出的課文裡」（語詞由學習單另一節獨立寫成）。另外兩種驗證試過但不成立：段落編號不是 1:1（96 份誤報 14
+      份）、朗讀累計字數涵蓋的是印刷行不是段落範圍（69 份只中 3 份）。
     remaining: 1 課（G9-L15 會考圖文題實戰）整份是考題，本來就沒有課文
   thumbnail_url:
     was: 0 / 175
     now: 174 / 175
-    how: 105 課沿用一修 2026-05 生的封面（用課名比對，不是課號 —— 課號重編後照課號接會拿到別課的圖，實測 G4-L10 的公車圖會配到楊俊瀚短跑那課）；69 課新生成。Imagen 3/4 全系列在本專案已
-      404（連 5/2 成功那個 model 也是），改用 gemini-2.5-flash-image。
+    how: 105 課沿用一修 2026-05 生的封面（用課名比對，不是課號 —— 課號重編後照課號接會拿到別課的圖，實測 G4-L10 的公車圖會配到楊俊瀚短跑那課）；69 課新生成。Imagen 3/4 全系列在本專案已 404（連
+      5/2 成功那個 model 也是），改用 gemini-2.5-flash-image。
     spec: 400×300 WebP，中位數 19 KB，最大 42 KB —— 與一修同規格
     remaining: 同上那 1 課（沒有課文就沒有場景可畫）
   worksheet_sections:
@@ -160,8 +300,8 @@ resolved:
       生字（語詞我最棒）: 116 / 175
       語詞應用: 129 / 175
       閱讀理解: 140 / 175
-    how_verified: 每節都有自己的對照，等級 A（跟文件另一節交叉比對）優先。生字：定義的詞 vs 本課語詞清單。語詞應用：選項必屬本課語詞、答案代號必在選項內。閱讀理解：答案必在選項內、題幹必接地到課文。沒通過的不寫入
-      —— 抽錯比沒抽更糟。
+    how_verified: 每節都有自己的對照，等級 A（跟文件另一節交叉比對）優先。生字：定義的詞 vs 本課語詞清單。語詞應用：選項必屬本課語詞、答案代號必在選項內。閱讀理解：答案必在選項內、題幹必接地到課文。沒通過的不寫入 ——
+      抽錯比沒抽更糟。
     two_source_shapes_that_looked_like_bugs:
     - 教師版把正確選項換成答案解析（有時加括號有時不加）→ 138 課曾被誤判為抽錯
     - 本課語詞跨行時會黏在一起（揮之不去起伏）→ 42 課曾被誤判為對不上
@@ -177,8 +317,8 @@ resolved:
     how_verified: 讀 backend/data/lessons/L*/v3/spotlight.yml 本身（不是重跑抽取器），逐課列出 block type 分佈人工抽查過樣本
     note: 本次只更新這份人讀的 ledger。machine-checked 的 content_known_gaps.adapter.yaml（spotlight_to_lesson_content.py 讀的那份）是另一個檔，本次未動——那份要不要跟進改，需要先確認
       adapter gate 現在怎麼用這 43 課的 enum，不在這次盤點範圍內。
-    caveat: 「spotlight.yml 有可渲染 block」只證明檔案本身有內容，不代表學生一定看得到——serving 層另外有兩個已知獨立問題會讓有內容的課仍然渲染失敗或量測失敗：#2730（content
-      evidence gate 的量測本身壞掉）、#2752（部分模組完全沒有 UI 入口）。這次只回答『抽了沒』，不是『學生看不看得到』。
+    caveat: 「spotlight.yml 有可渲染 block」只證明檔案本身有內容，不代表學生一定看得到——serving 層另外有兩個已知獨立問題會讓有內容的課仍然渲染失敗或量測失敗：#2730（content evidence
+      gate 的量測本身壞掉）、#2752（部分模組完全沒有 UI 入口）。這次只回答『抽了沒』，不是『學生看不看得到』。
 bodies_without_a_cross_check:
   count: 29
   of: 175
@@ -233,11 +373,9 @@ spotlight_range_not_found:
 
     '
   current_behaviour: loader 已改成把 error 視為「沒有」，所以計數誠實、步驟顯示乾淨的空狀態
-  how_to_close: 擴充 find_spotlight_range 認得刊頭版型（示範／練習 子標題）。⚠️ 改聚光燈抽取器依 CLAUDE.md 必須跑 content evidence gate + ship
-    gate
-  likely_stale_2772: 2026-08-19（#2772）重驗閱讀聚光燈缺口只剩 2 課（見 resolved.spotlight_render_null_2683），跟這裡的『現在 143/175』（缺
-    32）數字對不上——175-143=32，剛好等於本檔案舊版『完全沒有 block』的課數，兩者極可能是同一批課、只是這裡沒有逐課 uid 清單可以直接核對。find_spotlight_range() 這支窄 marker
-    的抽取器很可能已被多模態抽取取代，但沒有清單就不能保證每一課都重驗過，本次不動這段敘述本身，留給下一手核對。
+  how_to_close: 擴充 find_spotlight_range 認得刊頭版型（示範／練習 子標題）。⚠️ 改聚光燈抽取器依 CLAUDE.md 必須跑 content evidence gate + ship gate
+  likely_stale_2772: 2026-08-19（#2772）重驗閱讀聚光燈缺口只剩 2 課（見 resolved.spotlight_render_null_2683），跟這裡的『現在 143/175』（缺 32）數字對不上——175-143=32，剛好等於本檔案舊版『完全沒有
+    block』的課數，兩者極可能是同一批課、只是這裡沒有逐課 uid 清單可以直接核對。find_spotlight_range() 這支窄 marker 的抽取器很可能已被多模態抽取取代，但沒有清單就不能保證每一課都重驗過，本次不動這段敘述本身，留給下一手核對。
 choice_rows_without_options:
   generated: '2026-08-19'
   issue: 2736
@@ -255,11 +393,10 @@ choice_rows_without_options:
 comprehension_no_mcq_uses_vocab_fill_in_blank:
   generated: '2026-08-20'
   issue: 2779
-  what_this_is: '175 課全掃：23 課（13%）的 multiple_choice 是 0 題，但 fill_in_blank（語詞應用）有 8 題。這 23 課的 lesson_content 也全部不存在（不是
-    #2779 修的 G0 adapter 缺口，是題目本身從沒被抽取器抽出來過），是真的內容缺口，不是程式邏輯問題。'
-  not_a_bug: '#2779 把「閱讀理解」步驟過濾成只顯示 multiple_choice（語詞應用的 fill_in_blank 不該在這裡重複出現，理由見 issue #2779）。過濾後這 23 課的閱讀理解會落在既有的
-    hasMcq=false 分支，渲染既有的「此課文尚未有選擇題」空狀態 + 手動「跳過，下一關」按鈕 （ComprehensionMcqPage.tsx，非本次新增邏輯），不會自動判定完成、不是空白頁。已用其中一課（20055）的真實
-    payload 寫回歸鎖驗證這個行為。'
+  what_this_is: '175 課全掃：23 課（13%）的 multiple_choice 是 0 題，但 fill_in_blank（語詞應用）有 8 題。這 23 課的 lesson_content 也全部不存在（不是 #2779
+    修的 G0 adapter 缺口，是題目本身從沒被抽取器抽出來過），是真的內容缺口，不是程式邏輯問題。'
+  not_a_bug: '#2779 把「閱讀理解」步驟過濾成只顯示 multiple_choice（語詞應用的 fill_in_blank 不該在這裡重複出現，理由見 issue #2779）。過濾後這 23 課的閱讀理解會落在既有的 hasMcq=false
+    分支，渲染既有的「此課文尚未有選擇題」空狀態 + 手動「跳過，下一關」按鈕 （ComprehensionMcqPage.tsx，非本次新增邏輯），不會自動判定完成、不是空白頁。已用其中一課（20055）的真實 payload 寫回歸鎖驗證這個行為。'
   how_to_close: 請教材端為這 23 課補閱讀理解選擇題（回原始 DOCX 或請補印）。
   count: 23
   of: 175
@@ -338,8 +475,8 @@ modules_absent_from_source:
     就翻過一次）。
   evidence: 開 private/curriculum-source/ 的 175 份教師版 docx 數關鍵字，每組都帶正向對照：keypoints 抽樣 12 課「重點表」0 次，對照組 5/5 課各 4 次；resources
     6 課「知識補給站」0 次，對照組 2/2 課各 2 次；key_reading 4 課「念順順」0 次，對照組 2/2 課各 2 次。三組對照都命中，所以那些 0 是真的 0，不是查法壞掉。
-  how_to_reverify: python3 - <<PY / 開 lesson.yml 取 source.drive_path → 到 private/curriculum-source/ 找同名 docx → unzip
-    -p word/document.xml 去標籤數關鍵字。⚠️ 一定要同時跑一個「已知有該模組」的課當正向對照，否則 0 可能是查法壞掉。
+  how_to_reverify: python3 - <<PY / 開 lesson.yml 取 source.drive_path → 到 private/curriculum-source/ 找同名 docx → unzip -p word/document.xml
+    去標籤數關鍵字。⚠️ 一定要同時跑一個「已知有該模組」的課當正向對照，否則 0 可能是查法壞掉。
   groups:
     classical_course: 文言文課型：有 classical_text / sentence_matching 等專屬大題，本來就沒有語詞應用那套
     orientation_course: 每個年級開學的同一份「正太與小豬」定向課：sections_present 只有兩節
