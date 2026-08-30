@@ -13,6 +13,8 @@ staging 課(`story_id` → title,如 story 2 = 十秒的背後)與 catalog 聚�
 - 部分課(如「十秒的背後」)catalog **根本沒有自己的 spotlight 檔** → 被綁到鄰號別課的檔
 - 結果:story_id N 拿到別課的聚光燈/重點表內容 = 內容放錯課
 
+⚠️ **2026-08-31（#2730）：`content_evidence_gate.py` 目前不是可過的門** —— 它的 golden 凍結在 2026-07-03，早於 #2736 的多模態重抽，`golden_match` 對現行內容恆紅；而且它不在任何 workflow 裡。真正在跑、而且會擋的是 `bash specs/run-ci.sh` 的十道門（內容相關：Gate 5 結構棘輪 175 課、Gate 8 對**原稿 DOCX** 的忠實度證明）。要重立基準還是移除，見 #2730。
+
 ## 鐵律(看到「內容放錯課」先做這個)
 1. **先疑 mapping,不是內容**:某課顯示別課內容 → 先查 `story_id → lesson_code → catalog 檔 → title` 這條鏈哪裡對不上,**不要急著改那課的內容檔**
 2. **修 mapping = 修全部**:這是一個系統根因,改對應/正規化/序號分配一次,所有受害課一起好。**禁止逐課手改輸出**(那是症狀治療,會一直冒)
