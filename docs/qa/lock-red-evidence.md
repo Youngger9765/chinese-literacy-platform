@@ -34,6 +34,7 @@
 - `test_dead_source_paths_only_shrink_spec.py` — mutation：新增一支含死引用的檔 → 1 failed；把一個**存在**的路徑加進 DEAD 清單 → 1 failed（證明存在性判斷分得出來）；還原 → 3 passed。⚠️ 第一版沒咬：上限設 12 而實際是 10，**留了兩格 slack 的棘輪不會叫** —— 上限要等於當下實測值
 - `frontend/.../worksheetButton2845.test.ts` — mutation：把那顆的 aria-label 改回帶 PDF → 1 failed；多加一個下載呼叫點 → 1 failed；**把整區刪光 → 3 failed**（少了這條，一堆「不准有」在整區被刪時會全綠）；還原 → 6 passed。⚠️ 第一版用「數所有含『學習單』的 label」判，把**上傳學習單（#1637）**那套也算進來，一開始就紅在錯的地方 —— 改成鎖「什麼不准出現」
 - `test_worksheet_url_is_not_silently_dead_2845.py` — mutation：拿掉 docstring 的 `#2845` → 1 failed；把 `_derive_docx_url` 接進 `routes/stories.py` → 1 failed（提醒接之前先確認檔案拿得到）；把 manifest 砍到 3 行 → 前提對照 1 failed；還原 → 3 passed
+- `test_progress_table_is_fresh_spec.py` — mutation：把進度表回退成 staging 上那份（51 課）→ 2 failed；只改「現況」那格的數字讓它跟表身漂移 → 1 failed；還原 → 3 passed。⭐ 這張表自己的檔頭就寫著「不要手改」，但**沒有東西擋它過期** —— 它就這樣停在 51 課，而實際是 175/175
 
 ## grandfathered（既有債，未逐支驗過）
 
