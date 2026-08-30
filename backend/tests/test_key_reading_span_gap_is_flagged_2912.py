@@ -60,3 +60,24 @@ def test_the_gate_is_actually_measuring_something():
     """正向對照：真的有課被量到（全都跳過的話上面三條恆真）。"""
     measured = list(_shipped())
     assert len(measured) >= 140, f"只量到 {len(measured)} 課，量具本身可能壞了"
+
+def test_a_lesson_with_no_counter_at_all_is_not_shipped_silently():
+    """沒有累計欄的課會退回單段 —— 那正是 Hans 報的形狀，不能無聲出貨。
+
+    ⚠️ 上面三條只看「有累計欄」的課，所以一課如果連累計欄都沒有，它會從那三條的
+    視野裡整個消失。今天 150/150 都有，這條是把那個縫先補起來。
+    """
+    import glob as _g
+    blind = []
+    for f in _g.glob(str(REPO / "backend/data/lessons/L*/v3/*key_reading*.yml")):
+        doc = yaml.safe_load(pathlib.Path(f).read_text(encoding="utf-8")) or {}
+        kr = doc.get("key_reading") or {}
+        if not (kr.get("passage") or ""):
+            continue
+        if isinstance(kr.get("printed_counter_last"), int):
+            continue
+        if not doc.get("needs_human_review"):
+            blind.append(pathlib.Path(f).parts[-3])
+    assert not blind, (
+        f"{len(blind)} 課沒有學習單累計欄可對，也沒有標記 —— "
+        f"它們會以單段長度出貨而沒有人知道：{sorted(blind)[:8]}")

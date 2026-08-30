@@ -129,6 +129,12 @@ MAX_SPAN_PARAGRAPHS = 12
 #: 累加結果與累計欄末筆差多少還算對得上。實測差值多為個位數（標點/空白算法差異），
 #: L0001 差 5、L0132 差 2。超過就標記讓人看，⛔ 不要自動吸收。
 SPAN_TOLERANCE = 20
+#: 段界要落在累計欄數字的多近才算命中（學習單常差 1 個標點）
+MARK_MATCH_SLACK = 2
+#: 數列太短時段界對齊沒有鑑別力，不做校正
+MIN_MARKS_TO_REALIGN = 4
+#: 鄰居要贏多少個命中才敢動指令寫的段號
+MIN_MARK_HIT_GAIN = 2
 
 RANGE_ERA_FIELDS = (
     "spans_paragraphs",            # 「跨哪幾段」
@@ -298,6 +304,52 @@ def _unfinished(passage: str) -> bool:
     return not passage.rstrip().endswith(tuple(_SENTENCE_END))
 
 
+
+def realign_anchor(anchor: int, by_idx: dict, marks) -> int | None:
+    """指令寫的段號與我們的 idx 錯位時，回傳該改用的段號；不該改就回 None。
+
+    累計欄是**第二個獨立見證人**：☞ 說起點在哪，段界對齊說那個段號有沒有錯位。
+    兩個都印在同一張學習單上，而數列已轉錄進 yml，所以這支仍然不需要 DOCX。
+
+    ⛔ 三條閘門缺一不可：
+      ① 現在對不上          —— 對得上的課一律不碰（L0101 命中數更高，但它是對的）
+      ② 鄰居多命中 ≥2 個段界 —— 差一兩個是雜訊
+      ③ 換過去之後真的對得上 —— 少了這條會把「命中多但一樣錯」的鄰居當答案
+
+    ③ 目前全庫沒有課走得到（②③ 在真資料上同進退），所以它只有 unit test 守得住 ——
+    這不是死碼，是先擋住那個形狀。
+    """
+    if not isinstance(marks, list) or len(marks) < MIN_MARKS_TO_REALIGN:
+        return None
+    target = marks[-1]
+
+    def walk(start: int) -> tuple[int, int]:
+        """(段界落在累計欄數字上的個數, 離末筆最近的累計字數)"""
+        acc, hits, best = 0, 0, 0
+        for i in range(start, start + MAX_SPAN_PARAGRAPHS):
+            if i not in by_idx:
+                break
+            acc += len(_norm(by_idx[i]))
+            if any(abs(acc - mk) <= MARK_MATCH_SLACK for mk in marks):
+                hits += 1
+            if abs(acc - target) < abs(best - target):
+                best = acc
+            if acc >= target:
+                break
+        return hits, best
+
+    here_hits, here_best = walk(anchor)
+    if abs(here_best - target) <= SPAN_TOLERANCE:      # ①
+        return None
+    for alt in (anchor - 1, anchor + 1):
+        if alt not in by_idx:
+            continue
+        alt_hits, alt_best = walk(alt)
+        if (alt_hits - here_hits >= MIN_MARK_HIT_GAIN          # ②
+                and abs(alt_best - target) <= SPAN_TOLERANCE):  # ③
+            return alt
+    return None
+
 def absorb_split_tail(texts: list, order: list, idx, pos_of: dict,
                       unnumbered_after: dict | None = None) -> tuple[str, int]:
     """指定段的文字，加上「把句子講完」所需的後續文字。
@@ -403,6 +455,28 @@ def extract(uid: str, part: dict | None = None) -> dict:
         out["verdict"] = "anchor_out_of_range"
         out["body_paragraphs"] = len(l["by_idx"])
         return out
+
+    # ── 段號校正：指令寫的段號不一定等於我們的 idx ──────────────────────
+    #
+    # L0007 的指令寫「從指定段落（五☞）開始朗讀」，照 5 取得到 367 字，
+    # 而學習單累計欄末筆是 399。把累計欄的**整串數字**拿來跟段界比對就清楚了：
+    #
+    #   學習單  27 45 61 77 104 130 157 172 189 218 248 271 298 327 356 385 399
+    #   從第4段  33 78 131 173 190 272 400      ← 6 個段界落在數字上
+    #   從第5段  45 98 140 157 239 367 480      ← 只有 2 個
+    #
+    # 累計欄是**第二個獨立見證人**：☞ 說起點在哪，段界對齊說那個段號有沒有錯位。
+    # 兩個都印在同一張學習單上，而數列已經轉錄進 yml，所以這支仍然不需要 DOCX。
+    #
+    # ⛔ 保守閘門三條缺一不可：① 現在對不上 ② 鄰居的段界命中多至少 2 個
+    #    ③ 換過去之後真的對得上。少了 ③ 會把本來正確的課改壞
+    #    （L0101 的鄰居命中數更高，但它現在已經對得上 —— 不准碰）。
+    anchor_corrected_from = realign_anchor(
+        anchor, l["by_idx"], (l.get("kr") or {}).get("printed_char_marks"))
+    if anchor_corrected_from is not None:
+        anchor_corrected_from, anchor = anchor, anchor_corrected_from
+        out["anchor"] = anchor
+    out["anchor_corrected_from"] = anchor_corrected_from
 
     passage, absorbed = absorb_split_tail(l["texts"], l["order"], anchor, l["pos_of"],
                                           l.get("unnumbered_after"))
@@ -544,6 +618,11 @@ def apply(uid: str, r: dict) -> None:
     kr["end_paragraph"] = r.get("end_anchor") or r["anchor"]
     if r.get("counter_last") is not None:
         kr["printed_counter_last"] = r["counter_last"]
+    #: 校正過就要留痕 —— 否則下一個人會以為指令寫的段號本來就是這個
+    if r.get("anchor_corrected_from") is not None:
+        kr["anchor_corrected_from"] = r["anchor_corrected_from"]
+    else:
+        kr.pop("anchor_corrected_from", None)
     for stale in RANGE_ERA_FIELDS:   # ⚠️ 不要叫 f —— 外面的 f 是要寫回的 Path
         kr.pop(stale, None)
     kr.pop("extraction_check", None)  # earlier runs of this script nested it here
