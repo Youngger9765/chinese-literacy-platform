@@ -18,13 +18,23 @@ const FE = process.env.PLAYWRIGHT_BASE_URL || 'https://lingoleap-staging.web.app
 const BE = process.env.E2E_BACKEND_URL
   || 'https://lingoleap-backend-staging-958347263320.asia-east1.run.app';
 // 五課多篇全跑（擁有者回報涵蓋 G6-L22 與 G5-L17，其餘一併鎖住）
-const LESSONS: Array<[string, string]> = [
+const ALL_LESSONS: Array<[string, string]> = [
   ['20029', 'G5-L17（兩篇）'],
   ['20063', 'G6-L22（三篇）'],
   ['20111', 'G8-L13（兩篇）'],
   ['20137', 'G9-L16（兩篇）'],
   ['20144', 'G9-L23（三篇）'],
 ];
+
+// PR preview 上只跑一課（五課走完整條路太慢，會讓人想關掉這道門）；
+// staging 維持五課全跑。⛔ 不是抽樣代替全檢 —— 是**兩個環境跑不同的量**，
+// PR 擋「有沒有整個壞掉」，staging 擋「哪一課壞掉」。
+const ONLY = (process.env.E2E_ONLY_LESSONS || '').split(',').map((s) => s.trim()).filter(Boolean);
+const LESSONS = ONLY.length ? ALL_LESSONS.filter(([id]) => ONLY.includes(id)) : ALL_LESSONS;
+if (ONLY.length && LESSONS.length !== ONLY.length) {
+  // 給錯 id 會靜靜少跑幾課而測試照樣綠 —— 那正是這一輪一直在修的病
+  throw new Error(`E2E_ONLY_LESSONS 有對不到的 id: 要 ${ONLY} 實得 ${LESSONS.map(([i]) => i)}`);
+}
 
 test.describe.configure({ timeout: 300_000 });
 
@@ -63,15 +73,36 @@ function expectedFor(round: Round, module: string): string | null {
 
 for (const [LESSON, LABEL] of LESSONS) {
 test(`從第 1 步逐步走完，每一步都是自己那一篇 — ${LABEL}`, async ({ page }) => {
-  const detail = await (await fetch(`${BE}/api/stories/${LESSON}`)).json();
-  const rounds: Record<string, Round> = detail.repeat_rounds ?? {};
-  const seq: string[] = detail.step_sequence ?? [];
-  expect(seq.length, '拿不到 step_sequence').toBeGreaterThan(3);   // 有的課只有 8 節
+  // ── 環境合格檢查 ①：後端在不在 ──────────────────────────────
+  // 只改前端的 PR，preview 後端映像可能從來沒建過（2026-08-29 PR #2554 就是這樣：
+  // `Image ... backend:issue-2553-<sha> not found`）。那時這支會在下面
+  // 「拿不到 step_sequence」倒下 —— 而那跟 PR 改了什麼完全無關。
+  // ⛔ 環境不合格是 INVALID，不是 FAIL。把它報成 FAIL 會把好 code 判死。
+  let detail: Record<string, unknown> = {};
+  let fetchErr = '';
+  try {
+    const res = await fetch(`${BE}/api/stories/${LESSON}`);
+    if (!res.ok) fetchErr = `HTTP ${res.status}`;
+    else detail = await res.json();
+  } catch (e) {
+    fetchErr = String(e);
+  }
+  const rounds: Record<string, Round> = (detail.repeat_rounds as Record<string, Round>) ?? {};
+  const seq: string[] = (detail.step_sequence as string[]) ?? [];
+  if (fetchErr || seq.length <= 3) {
+    test.skip(
+      true,
+      `環境不合格（INVALID，不是 FAIL）：${BE}/api/stories/${LESSON} ` +
+        `${fetchErr ? `打不通（${fetchErr}）` : `只給了 ${seq.length} 步`} —— ` +
+        '這個環境的後端沒起來或資料不完整，跟這個 PR 改了什麼無關。先修 setup 再重跑。',
+    );
+  }
   expect(Object.keys(rounds).length, '這一課不是多篇？那這條測試該換課').toBeGreaterThanOrEqual(2);
 
   // 帳本：每一節屬於哪一篇
   const articleOf: Record<string, string | null> = {};
-  for (const s of detail.manifest_sections ?? []) {
+  const sections = (detail.manifest_sections as { slug: string; text_ref?: unknown; module?: string }[]) ?? [];
+  for (const s of sections) {
     const ref = s.text_ref;
     articleOf[s.slug] =
       typeof ref === 'string' && ref ? ref : s.module === 'full_text_annotate' ? s.slug : null;
@@ -103,6 +134,42 @@ test(`從第 1 步逐步走完，每一步都是自己那一篇 — ${LABEL}`, a
   await page.goto(`${FE}/learn/${LESSON}/lesson-intro`, { waitUntil: 'networkidle' });
   await page.getByRole('button', { name: /開始學習/ }).first().click();
   await page.waitForTimeout(3000);
+
+  // ⛔ 不可以靠「開始學習」把我們放到第 1 步 —— 那顆是**接續**。
+  //    demo 帳號小明的進度留在共用的 preview DB，所以這道門第一次跑會過，
+  //    第二次就被自己上一輪的進度接到報告頁，一步都走不到，
+  //    而下面那條正向對照會說「走查邏輯壞了」，把真正的原因蓋掉。
+  //    2026-08-29 在 PR #2911 的 preview 上復現：頁面停在「報告 2/2」、checked=0。
+  //    所以明確走到序列的第一步，讓這條走查不依賴帳號當下的進度。
+  const [firstSeg, firstSlug] = (seq[0] ?? '').split('#');
+  if (firstSeg) {
+    await page.goto(
+      `${FE}/learn/${LESSON}/${firstSeg}${firstSlug ? `?p=${firstSlug}` : ''}`,
+      { waitUntil: 'networkidle' },
+    );
+    await page.waitForTimeout(2000);
+  }
+
+  // ── 環境合格檢查（preflight）────────────────────────────────────
+  // 這道門要問的是「這個 PR 的學生走不走得完」。如果環境本身就沒把這一課
+  // 的步驟給出來，那走不完跟 PR 無關 —— 那是 INVALID，不是 FAIL。
+  // ⛔ 把環境缺陷報成 FAIL 會把好 code 判死。
+  //
+  // 2026-08-29 實測（同一份 code、同一課、同一個帳號）：
+  //   staging               畫面「讀全文-做記號 2/21」，按完成 → 第 3 步 ✅
+  //   preview(issue-2712)   畫面只有「簡介／報告」，按完成 → 直接 /report ❌
+  // 差別在環境的資料，不在這個 PR。
+  const stepButtons = await page
+    .locator('[aria-label="學習步驟導航"] button, nav[aria-label*="步驟"] button')
+    .count();
+  if (stepButtons > 0 && stepButtons < 5) {
+    test.skip(
+      true,
+      `環境不合格（INVALID，不是 FAIL）：這一課 API 給了 ${seq.length} 步，` +
+        `但畫面只渲染出 ${stepButtons} 個步驟鈕 —— 這個環境的資料不完整，` +
+        `走不完跟這個 PR 無關。先修 setup 再重跑。停在 ${page.url()}`,
+    );
+  }
 
   const wrong: string[] = [];
   let checked = 0;
@@ -173,7 +240,16 @@ test(`從第 1 步逐步走完，每一步都是自己那一篇 — ${LABEL}`, a
   }
 
   // 正向對照：一步都沒比對到的話，上面的 0 不代表通過
-  expect(checked, '一個步驟都沒比對到 —— 走查邏輯壞了，不是內容乾淨').toBeGreaterThanOrEqual(2);
+  // ⛔ 順序要緊：走查如果**已經抓到東西**（wrong 非空），先報那個。
+  //    原本正向對照放前面，於是「第 1 步就跳報告」這種真發現會被說成
+  //    「走查邏輯壞了」—— 把答案蓋掉。2026-08-29 就是這樣誤導了一輪。
+  if (wrong.length) {
+    expect(wrong, `\n  ${wrong.join('\n  ')}\n`).toEqual([]);
+  }
+  expect(
+    checked,
+    `一個步驟都沒比對到 —— 走查邏輯壞了，不是內容乾淨（停在 ${page.url()}）`,
+  ).toBeGreaterThanOrEqual(2);
   if (!EXPECT_DEPLOYED && wrong.length) {
     test.info().annotations.push({ type: 'not-yet-deployed', description: wrong.join(' | ') });
   } else {

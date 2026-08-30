@@ -81,60 +81,110 @@ def test_golden_lessons_carry_the_range_the_worksheet_marks():
     assert wrong == [], "golden set 對不上：\n" + "\n".join(wrong)
 
 
-def test_the_marked_paragraph_is_the_whole_passage():
-    """全庫 end_paragraph 恆等於 start_paragraph。
+def test_the_passage_spans_to_where_the_counter_stops():
+    """全庫大多數課 end_paragraph > start_paragraph。
 
-    **為什麼要有這條**：上面那條只盯 12 課。範圍規則是**整庫一起**回來的（一支抽取器
-    改一次、147 課同時變），只鎖 12 課會讓其餘 135 課靜默跨段。這條是那個廣度。
+    ⚠️ **2026-08-30 這條整個反過來了。** 原本斷言 `end == start`（只取 ☞ 那一段）。
+
+    起因：明珠老師 2026-08-29 透過 Hans 回報，測段落閱讀流暢度需要**至少 300 字**，
+    學習單上「☞ 是開始，但學生要讀的是講義右方有標字數的**全部段落**」。
+    當時服務端 passage 中位數只有 **144 字**、只有 4/160 達 300 字 —— 老師測不了。
+
+    ## 為什麼推翻 2026-08-24 那次改寫
+
+    當時的依據有兩條，兩條現在都站不住：
+
+    ① **「規則是 2026-07-20 專家審查定的只取指定的那一段」** ——
+       那次審查（曾世傑教授）自己定的是「重點段落，**約 300–400 字**」
+       （`docs/PRD.md:1602`、`docs/reading-key-passage-TODO.md:3`）。
+       「只取一段」的中位數是 144 字，**跟它自己引用的專家決策互相矛盾** ——
+       保留了句子，把數字丟了。
+
+    ② **靖杭比對紙本後的觀察**：「v3 會直接提取到**結束**…將該段落**以下的內容全部**
+       提取了」。那個觀察是對的，但它描述的是**另一種**抽法（☞ → 文末）。
+       實測還原後的資料：**115 課提早停、只有 23 課抽到文末**
+       （例：L0005 是 1→7 而課文有 14 段）。所以他否決的是「抽到文末」，
+       而這裡要的是「抽到**累計字數欄末筆落在的那一段**」—— 兩件事被混在一起了。
+       yml 裡的手寫筆記本來就記著這個形狀：
+       「末筆 392 落在第 4 段結束，第 5~7 段沒有標 —— 屬『字數欄提早停』的形狀」。
+
+    ## 決定性證據
+
+    Owner 拍的《大自然的氣象小幫手》(L0003) 實體學習單：
+    ☞ 在第七段，而第七段**第一行**的數字就是 28（若從文章開頭算不可能是 28），
+    第七段結束在 259（＝當時服務的字數），第八段結束在 392。
+
+    ## 這條為什麼用全庫的量
+
+    範圍規則是**整庫一起**變的（一支抽取器改一次、147 課同時變）。
+    2026-08-26 那次 regression 的樣態是**全庫 0 課跨段**，不是某幾課壞掉。
+    所以廣度要鎖在「大多數課跨段」，只鎖 12 課會讓其餘 135 課靜默塌回一段。
     """
-    spans = []
+    blocks = []
     for f in _all_key_reading_files():
         kr = _key_reading_of(f)
         if not kr.get("passage"):
             continue
         s, e = kr.get("start_paragraph"), kr.get("end_paragraph")
-        if s != e:
-            spans.append(f"  {f.parts[-3]}/{f.name} start={s} end={e}")
-    assert spans == [], (
-        "念順順只取學習單指定的那一段，end_paragraph 必須等於 start_paragraph。"
-        "跨段的課：\n" + "\n".join(spans)
+        if s is not None and e is not None:
+            blocks.append((f, s, e))
+    assert len(blocks) >= 100, f"只掃到 {len(blocks)} 份有段號 —— 掃描壞了"
+    multi = [b for b in blocks if b[2] > b[1]]
+    assert len(multi) >= 100, (
+        f"只有 {len(multi)}/{len(blocks)} 課跨段。念順順要的是「☞ → 累計字數欄末筆落在的"
+        "那一段」，不是只有 ☞ 那一段。end_paragraph 是不是又被寫死等於 start 了？\n"
+        "（2026-08-26 那次 regression 的樣態就是全庫 0 課跨段，老師因此測不了流暢度。）"
     )
 
 
-#: 宣稱「passage 到哪結束 / 跨幾段」的欄位。與 `scripts/extract_key_reading_v3.py`
-#: 的 `RANGE_ERA_FIELDS` 是同一份清單，這裡重寫一次是為了讓測試不依賴被測的那支
-#: —— 抽取器把某個欄位從清單拿掉時，這條才會紅。
+#: 宣稱「範圍」但**內容會跟 passage 矛盾**的欄位。
+#: ⚠️ 2026-08-30：`approx_chars_from_start` 從這裡移除 —— 它是累計字數欄的末筆，
+#:    而那正是判斷範圍的依據（不是「一分鐘能讀到哪」的量尺）。刪它才是湮滅證據。
+#:    現在它以 `printed_counter_last` 的名字被正式記錄，另有鎖在守。
 _RANGE_ERA_FIELDS = (
-    "spans_paragraphs", "approx_chars_from_start", "end", "passage_note",
+    "spans_paragraphs", "passage_note",
     "char_marks_cover_note", "char_marks_cover_paragraphs", "span_confidence",
     "span_confidence_note", "span_evidence_note", "span_note", "parts",
 )
 
 
-def test_no_lesson_reintroduces_the_range_era_fields():
-    """宣稱範圍的欄位不可以回來。
+def test_range_fields_never_contradict_the_passage():
+    """宣稱範圍的欄位，內容必須跟 start/end 一致。
 
-    **為什麼**：`approx_chars_from_start` 是右緣累計字數欄的最大值 —— 那是「一分鐘能讀
-    到哪」，不是段落長度。把它留在單段 passage 旁邊，下一個人就會拿它重建範圍規則
-    （#2712 已經這樣復發過四次）。欄位不存在，就沒得重建。
+    ⚠️ **2026-08-30 從「欄位不准存在」改成「不准矛盾」。**
 
-    ⚠️ 清單是 2026-08-24 三審擴充的：原本只擋兩個欄位，但實際上還有 `span_confidence`
-    37 課、`char_marks_cover_paragraphs` 30 課、`end` 10 課在講範圍，而且**內容與
-    passage 直接矛盾**（L0050 的 `span_evidence_note` 講第 4、5 段，passage 卻是第 3 段；
+    原本的理由是對的 —— 那些欄位曾經與 passage **直接矛盾**
+    （L0050 的 `span_evidence_note` 講第 4、5 段，passage 卻是第 3 段；
     L0084 的 `passage_note` 寫「兩段合計 304 字」，passage 卻是 179 字）。
-    reviewer 自己就說「我上一輪是被 `passage_note` 引導做出『被截斷』的判斷」——
-    矛盾的敘述會讓下一個讀資料的人得到錯的結論。
+    reviewer 自己說「我上一輪是被 `passage_note` 引導做出『被截斷』的判斷」。
 
-    ⛔ 這條**不擋**忠實轉錄紙上內容的欄位（`printed_char_marks` 等是字數欄印出來的
-    數字本身，`instruction_note` 講的是指示句）。刪那些是湮滅證據，不是消除矛盾。
+    但當時的解法是**把欄位刪掉**，而那在 2026-08-30 變成問題：
+    passage 改回範圍之後，那些欄位**不再矛盾了**（實測 33 課一致、
+    12 課是 `end_paragraph` 缺值而範圍只記在 `spans_paragraphs` 裡 ——
+    刪掉那欄等於毀掉唯一的紀錄，`end_paragraph` 已從它補出）。
+
+    ⛔ 真正要防的是**矛盾**，不是欄位存在。刪證據跟消除矛盾是兩回事 ——
+       同一份檔案的 `test_the_transcribed_worksheet_numbers_are_not_swept_away`
+       就是在講這件事。所以這條改成驗一致性。
     """
-    dirty = []
+    wrong = []
     for f in _all_key_reading_files():
-        bad = [k for k in _RANGE_ERA_FIELDS if k in _key_reading_of(f)]
-        if bad:
-            dirty.append(f"  {f.parts[-3]}/{f.name}: {bad}")
-    assert dirty == [], "宣稱範圍的欄位又出現了：\n" + "\n".join(dirty)
-
+        kr = _key_reading_of(f)
+        s, e = kr.get("start_paragraph"), kr.get("end_paragraph")
+        if s is None or e is None:
+            continue
+        for key in ("spans_paragraphs", "char_marks_cover_paragraphs"):
+            v = kr.get(key)
+            if isinstance(v, list) and v and all(isinstance(x, int) for x in v):
+                if (min(v), max(v)) != (s, e):
+                    wrong.append(
+                        f"  {f.parts[-3]}/{f.name}: {key}={v} 但 start={s} end={e}"
+                    )
+    assert wrong == [], (
+        "宣稱範圍的欄位跟 passage 的起訖矛盾 —— 矛盾的敘述會讓下一個讀資料的人"
+        "得到錯的結論（要嘛修欄位、要嘛修 start/end，不要用刪欄位解決）：\n"
+        + "\n".join(wrong)
+    )
 
 def test_the_transcribed_worksheet_numbers_are_not_swept_away():
     """反過來鎖：清理不可以順手刪掉原稿的事實轉錄。
@@ -201,20 +251,33 @@ def test_an_unnumbered_block_is_absorbed_only_when_the_sentence_is_unfinished():
     )
 
 
-def test_the_lesson_with_an_unnumbered_block_still_ships_the_marked_paragraph():
+def test_the_unnumbered_closing_block_is_part_of_the_range():
     """L0084 的實資料：段號欄 6 個號、課文欄 7 段，第 7 段沒號。
 
-    第六段以「。」收尾，所以出貨的是第六段本身（179 字），不含後面 125 字的結語。
-    ⚠️ 這條鎖的是**結果**，上面那條鎖的是**判準** —— 少了判準那條，有人把規則改成
-    「總是吃」時這條仍會綠（L0084 剛好不受影響），反之亦然。
+    ⚠️ **2026-08-30 反過來了。** 原本斷言出貨的是第六段本身（179 字）、不含後面
+    125 字的結語 —— 那是「只取指定的那一段」規則下的結果。
+
+    這一課自己的 `passage_note` 就寫著答案：
+
+        朗讀範圍是第 6 段 ＋ 最後那段沒有段號的結語（兩段合計 304 字，
+        **與字數欄末筆吻合**）
+
+    字數欄末筆是紙上印的、可獨立驗證的事實，而「沒有段號」只是排版 ——
+    不是「不用唸」。所以結語**在範圍內**。
+
+    ⚠️ 這條鎖的是**結果**，`test_the_passage_spans_to_where_the_counter_stops`
+    鎖的是**判準** —— 少了判準那條，有人把規則改回「只取一段」時
+    這條仍可能綠（L0084 剛好只有一個段號），反之亦然。
     """
     kr = _key_reading("L0084")
-    assert kr.get("start_paragraph") == kr.get("end_paragraph") == 6
-    assert kr["passage"].rstrip().endswith("直到現在我才讀懂。")
-    assert "阿德勒" not in kr["passage"], (
-        "沒編號的結語被吃進來了 —— 檢查是不是又拿字數欄當終點依據"
+    passage = kr["passage"]
+    assert "阿德勒" in passage, (
+        "沒編號的結語被排除了 —— 那段在字數欄的計數範圍內（末筆 304 == 第 6 段 ＋ 結語），"
+        "『沒有段號』是排版，不是『不用唸』"
     )
-
+    assert len(passage) >= 300, (
+        f"只有 {len(passage)} 字。字數欄末筆是 304，少於它代表結語又被切掉了"
+    )
 
 def test_a_repeated_paragraph_number_resolves_to_the_last_run():
     """段號重編時取**最後**一次出現，而且吸收尾巴要接對位置。

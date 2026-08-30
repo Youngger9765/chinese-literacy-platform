@@ -49,10 +49,22 @@ def test_the_lesson_young_asked_about_shows_its_ordering_items():
     lesson = next((l for l in _spotlight_lessons() if l["id"] == 20001), None)
     assert lesson, "20001 《十秒的背後》 has no spotlight"
 
-    joined = " ".join(
-        str(b.get("prompt") or b.get("text") or "") + " ".join(b.get("paragraphs") or [])
-        for b in _blocks(lesson)
-    )
+    # ⚠️ 原本只讀頂層 block 的 prompt/text/paragraphs。二修之後 `ordering` block
+    #    把項目放在巢狀結構裡（`items` 之類），於是這條報「item 3's title is gone」
+    #    ——而字串一直都在 spotlight_v2 裡，只是換了位置。
+    #    這條要問的是「內容有沒有送到學生面前」，不是「放在哪個欄位」，
+    #    所以改成遞迴收所有字串，不綁形狀。
+    def _all_text(o) -> str:
+        if isinstance(o, str):
+            return o
+        if isinstance(o, dict):
+            return " ".join(_all_text(v) for v in o.values())
+        if isinstance(o, list):
+            return " ".join(_all_text(v) for v in o)
+        return ""
+
+    joined = _all_text(_blocks(lesson))
+    assert len(joined) > 100, f"攤平後只有 {len(joined)} 字 —— 攤平器壞了，不是內容不見"
     assert "𪹚龍慶元宵" in joined, "item 3's title is gone"
     for sentence in ("化龍返天", "回到苗栗的阿公家", "𪹚龍之夜", "家家戶戶歡喜的「迎龍」"):
         assert sentence in joined, (

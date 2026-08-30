@@ -2,16 +2,40 @@ name: Pytest
 
 on:
   pull_request:
-    paths:
-      - 'backend/**'
-      # 產生器也要觸發 —— 只改它的 PR 若不跑鎖，「下次會再錯一次」的鎖就沒插電
-      # 抽取器與普查也要觸發 —— 改它們的 PR 若不跑 gate，等於鎖建了沒插電
-      - 'scripts/split_lesson_modules.py'
-      - 'scripts/key_reading_xml_rule.py'
-      - 'scripts/corpus_profile.py'
+    types: [opened, synchronize, reopened]
 
 jobs:
+  # 路徑判斷改在 job 裡做 —— `on.paths` 只看前 300 個變更檔，批次改名的 PR
+  # 會讓整支被靜靜跳過，而且檢查清單上不會出現那一列（#2925）。
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      relevant: ${{ steps.filter.outputs.relevant }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # paths-filter 要完整歷史才能算 diff
+      - uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          filters: |
+            relevant:
+              - 'backend/**'
+              # 產生器也要觸發 —— 只改它的 PR 若不跑鎖，「下次會再錯一次」的鎖就沒插電
+              # 抽取器與普查也要觸發 —— 改它們的 PR 若不跑 gate，等於鎖建了沒插電
+              - 'scripts/split_lesson_modules.py'
+              - 'scripts/key_reading_xml_rule.py'
+              - 'scripts/corpus_profile.py'
+              # 念順順的抽取器 —— 規則就寫在裡面（2026-08-30 那次 regression 的來源）
+              - 'scripts/extract_key_reading_v3.py'
+              # ⭐ skill 是「下一個人拿來當規格讀」的東西。2026-08-30 就是 code 改了、
+              #    skill 沒改 —— 分家的後果不是報錯，是下一個人照文件把 code 改回去。
+              #    不盯這個路徑，「只改 skill」的 PR 不會跑那道鎖 ＝ 鎖建了沒插電。
+              - '.claude/skills/**'
+
   pytest:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.relevant == 'true'
     name: Backend Tests
     runs-on: ubuntu-latest
 
@@ -45,7 +69,144 @@ jobs:
             tests/test_characterization_socratic_state_machine.py \
             tests/test_characterization_tts_normalization.py \
             tests/test_characterization_tts_cache.py \
-            tests/test_rate_limiting.py
+            tests/test_rate_limiting.py \
+            tests/test_session_scoring_write_1063.py \
+            tests/test_session_scoring_below_threshold_2904.py \
+            tests/test_gamification.py
+        env:
+          DATABASE_URL: sqlite://
+          TTS_PROVIDER: google
+          AZURE_SPEECH_KEY: ""
+          AZURE_SPEECH_REGION: eastus
+          JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"
+
+      # ── 回歸鎖（檔名帶 issue 號的那些）────────────────────────────────
+      # 2026-08-28 量到：backend/tests 279 支裡有 229 支從來不會被 CI 跑到，
+      # 其中 93 支是為特定 bug 寫的回歸鎖。鎖建了沒插電 = 劇場 ——
+      # #2962 就是這樣（test_gamification 四條紅了很久，沒有人會看到）。
+      # 這一步把當時全綠的 73 支插上（575 條，本機 2m06s）。
+      # 另外 20 支當時是紅的，逐支判「真 regression / 期望過時 / 沒價值」，
+      # 見 docs/qa/guardrail-plan.md §2 P0-b。
+      # 2026-08-28：上面那三支（omo_grader_split_1879 / characterization_omo_1949 /
+      # characterization_learning_sessions_1955）原本因「本機綠、CI 紅」被排除在外。
+      # 修的是**測試自己的環境假設**，不是把斷言放寬 —— 已插電，見 tests/_route_walk.py。
+      # 復現方式：另建 python3.11 + 未釘版 fastapi 的 venv（實測 0.141.1）跑一次；
+      # 用本機的 3.10 + 0.115.6 永遠重現不到。
+      - name: Run regression locks (issue-numbered)
+        run: |
+          cd backend
+          python -m pytest --tb=short -q \
+            tests/test_ai_analysis_deprecation_1648.py \
+            tests/test_ai_base_split_1953.py \
+            tests/test_ai_generation_split_1888.py \
+            tests/test_asset_proxy_on_served_path_2748.py \
+            tests/test_assignment_1762.py \
+            tests/test_assignments.py \
+            tests/test_auth_route_split_1844.py \
+            tests/test_auth_token_gate.py \
+            tests/test_blank_marker_regex_2878.py \
+            tests/test_bracket_inline_choice_2786.py \
+            tests/test_characterization_learning_sessions_1955.py \
+            tests/test_characterization_omo_1857.py \
+            tests/test_characterization_omo_1949.py \
+            tests/test_checked_box_answer_leak_2555.py \
+            tests/test_choice_rows_carry_options_2736.py \
+            tests/test_classical_modules_entry_2752.py \
+            tests/test_classrooms_dev_filter_1999.py \
+            tests/test_course_intro_present_2736.py \
+            tests/test_course_level_modules_are_loaded_2964.py \
+            tests/test_dashboard_assignment_completion.py \
+            tests/test_dialogue_history.py \
+            tests/test_docx_named_styles_2715.py \
+            tests/test_docx_second_opinion_2868.py \
+            tests/test_every_lesson_detail_validates_2725.py \
+            tests/test_every_module_has_a_named_guard_2872.py \
+            tests/test_every_module_has_a_skill_2843.py \
+            tests/test_followup_never_vanishes_2964.py \
+            tests/test_gate_uses_current_step_ids_2730.py \
+            tests/test_goal_box_self_check_entry_2752.py \
+            tests/test_health_alias_2737.py \
+            tests/test_inline_choice_grading_2776.py \
+            tests/test_inline_choices_stay_in_the_sentence_2768.py \
+            tests/test_key_reading_data_matches_extractor_2912.py \
+            tests/test_key_reading_qa_2712.py \
+            tests/test_key_reading_range_restored_2912.py \
+            tests/test_key_reading_reaches_the_student_2912.py \
+            tests/test_key_reading_rule_is_stated_once_2912.py \
+            tests/test_keypoints_columns_bridge_2736.py \
+            tests/test_keypoints_shape_gate_empty_claim_2736.py \
+            tests/test_knowledge_station_videos_2736.py \
+            tests/test_lesson_cover_served_2767.py \
+            tests/test_lesson_ordering_2736.py \
+            tests/test_lesson_row_keypoints_2749.py \
+            tests/test_lesson_strategy_join_2898.py \
+            tests/test_manifest_builder_does_not_destroy_2795.py \
+            tests/test_matrix_option_bank_2749.py \
+            tests/test_mcq_rescue_split_1887.py \
+            tests/test_migration_pii_repair_1931.py \
+            tests/test_mixed_blank_shapes_2785.py \
+            tests/test_module_entry_gate_parser_2752.py \
+            tests/test_multi_text_and_followups_entry_2752.py \
+            tests/test_n1_queries_fix_1217.py \
+            tests/test_n1_queries_fix_1301.py \
+            tests/test_omo_grader_split_1879.py \
+            tests/test_omo_hint_1637.py \
+            tests/test_omo_history_1975.py \
+            tests/test_omo_identifier_split_1886.py \
+            tests/test_omo_pdf_split_1976.py \
+            tests/test_omo_session_sync_2027.py \
+            tests/test_organizations_split_1890.py \
+            tests/test_perf_1243_remaining_optimizations.py \
+            tests/test_perf_sql_aggregates.py \
+            tests/test_progress_carry_forward_2889.py \
+            tests/test_raw_table_not_public_2769.py \
+            tests/test_reading_attempt_history.py \
+            tests/test_reading_audio_replay_student.py \
+            tests/test_reading_audio_upload.py \
+            tests/test_reading_benchmark_2722.py \
+            tests/test_reading_benchmark_reaches_the_row_2964.py \
+            tests/test_regression_2_5_flash_lite_default_1744.py \
+            tests/test_regression_fill_in_blank_127_lessons_1753.py \
+            tests/test_regression_llm_models_per_task_1734.py \
+            tests/test_regression_omo_grader_circuit_breaker.py \
+            tests/test_regression_omo_grader_locked_1730.py \
+            tests/test_regression_omo_grader_question_order_1973.py \
+            tests/test_regression_omo_identifier_swap_1729.py \
+            tests/test_regression_omo_job_hardening_1772.py \
+            tests/test_regression_reading_transcription_truncation.py \
+            tests/test_regression_text_title_n_plus_1_1810.py \
+            tests/test_regression_thinking_budget_1738.py \
+            tests/test_regression_tts_rate_limit_1808.py \
+            tests/test_restart_does_not_skip_own_prior_attempt_1764.py \
+            tests/test_round_progress_2916.py \
+            tests/test_sample_uids_survives_missing_spotlight_2751.py \
+            tests/test_schema_drift_guard_2683.py \
+            tests/test_second_edition_session_start_2683.py \
+            tests/test_section_completeness_2876.py \
+            tests/test_seed_data_pii_1920.py \
+            tests/test_single_blank_inline_choice_2750.py \
+            tests/test_single_spotlight_producer_2683.py \
+            tests/test_skip_policy_snapshot_1764.py \
+            tests/test_sot_stale_offline_gate_2736.py \
+            tests/test_source_coverage_2877.py \
+            tests/test_spotlight_known_gaps_ledger_2772.py \
+            tests/test_spotlight_ordering_items_2683.py \
+            tests/test_spotlight_table_content_2683.py \
+            tests/test_spotlight_textbox_heading_2714.py \
+            tests/test_step_progress_api.py \
+            tests/test_step_progress_parse.py \
+            tests/test_step_sequence_from_worksheet_2736.py \
+            tests/test_story_structure_cell_parser_2776.py \
+            tests/test_student_progress.py \
+            tests/test_sub_exercise_reaches_students_2865.py \
+            tests/test_submission_counts_not_inflated_1764.py \
+            tests/test_teacher_dev_classroom_filter_1985.py \
+            tests/test_teacher_report_completion_1911.py \
+            tests/test_teacher_sees_grouped_attempts_1764.py \
+            tests/test_teacher_students_1882.py \
+            tests/test_tts_cache_fail_closed_2765.py \
+            tests/test_uid_tree_module_isolation_2683.py \
+            tests/test_vocab_application_option_bank_2736.py
         env:
           DATABASE_URL: sqlite://
           TTS_PROVIDER: google

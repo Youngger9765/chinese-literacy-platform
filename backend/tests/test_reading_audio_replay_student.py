@@ -296,6 +296,38 @@ class TestStudentAudioReplaySignedUrl:
 # ─────────────────────────────────────────────────────────────────────────────
 
 
+def _build_save_audio_app(db_session, current_user_id: int = _STUDENT_ID) -> FastAPI:
+    """Minimal app for POST /reading/save-audio —— 上傳現在住這裡。
+
+    ⚠️ 上傳在某次重構從「轉寫時順便做（BackgroundTasks）」改成
+       「學生按下接受分數之後，前端明確呼叫 POST /reading/save-audio」。
+       原本這裡的兩條測試還在 patch `learning_reading.upload_reading_audio_to_gcs_sync`，
+       而那個模組沒有這個名字 → AttributeError，兩條都是紅的，
+       **其中一條是 IDOR 安全斷言，等於從來沒有執行過**。
+       而這支檔案不在 CI 具名清單裡，所以沒有人看到。
+    """
+    from app.routes.learning.learning_save_audio import router
+    from app.auth.dependencies import get_current_user
+    from app.auth.rate_limiter import ai_limit_10_per_min
+    from app.database import get_db
+
+    app = FastAPI()
+
+    def _mock_user():
+        user = MagicMock()
+        user.id = current_user_id
+        return user
+
+    def _override_db():
+        yield db_session
+
+    app.dependency_overrides[get_current_user] = _mock_user
+    app.dependency_overrides[ai_limit_10_per_min] = lambda: None
+    app.dependency_overrides[get_db] = _override_db
+    app.include_router(router, prefix="/api")
+    return app
+
+
 def _build_transcribe_app(db_session, current_user_id: int = _STUDENT_ID) -> FastAPI:
     """Minimal app for /reading/transcribe with all heavy deps mocked."""
     from app.routes.learning.learning_reading import router
@@ -322,115 +354,57 @@ def _build_transcribe_app(db_session, current_user_id: int = _STUDENT_ID) -> Fas
 
 class TestTranscribeWithSessionIdPersistsPath:
 
-    def test_transcribe_with_session_id_writes_audio_gcs_path(self, db):
-        """When session_id is supplied and a sync upload succeeds, audio_gcs_path is persisted."""
-        from unittest.mock import AsyncMock
-
+    def test_save_audio_persists_the_path_on_the_attempt(self, db):
+        """活的那條路：POST /reading/save-audio 上傳成功後把路徑寫回 attempt。"""
         learning_sess = _create_session(db, student_id=_STUDENT_ID)
         attempt = _create_attempt(db, session_id=learning_sess.id, audio_gcs_path=None)
-
-        # Verify path is None before the call
-        assert attempt.audio_gcs_path is None
-
-        app = _build_transcribe_app(db, current_user_id=_STUDENT_ID)
-        client = TestClient(app)
+        assert attempt.audio_gcs_path is None, "前置不成立：這筆一開始就有路徑了"
 
         expected_path = f"reading-audio/attempts/{attempt.id}.webm"
-
-        with (
-            patch(
-                "app.routes.learning.learning_reading.transcribe_reading_audio",
-                new=AsyncMock(return_value={
-                    "transcript": "春風吹過田野",
-                    "method": "gemini",
-                    "reasoning": "正確",
-                }),
-            ),
-            patch(
-                "app.routes.learning.learning_reading.upload_reading_audio_to_gcs_sync",
-                return_value=expected_path,
-            ) as mock_sync,
-            patch(
-                "app.routes.learning.learning_reading.upload_reading_audio_to_gcs",
-            ),
-            patch(
-                "app.routes.learning.learning_reading.log_ai_usage",
-            ),
-        ):
-            resp = client.post(
-                "/api/reading/transcribe",
-                files={"audio": ("rec.webm", b"fake_audio_bytes", "audio/webm")},
-                data={
-                    "target_text": "春風吹過田野",
-                    "session_id": str(learning_sess.id),
-                },
-            )
-
-        assert resp.status_code == 200
-        body = resp.json()
-        assert body["transcript"] == "春風吹過田野"
-
-        # Sync upload should have been called with the pre-computed blob_path
-        mock_sync.assert_called_once()
-        call_kwargs = mock_sync.call_args.kwargs
-        assert call_kwargs["blob_path"] == expected_path
-        assert call_kwargs["audio_bytes"] == b"fake_audio_bytes"
-
-        # The attempt row in DB should now have the path written
-        db.refresh(attempt)
-        assert attempt.audio_gcs_path == expected_path
-
-    def test_transcribe_idor_rejected_when_session_belongs_to_other_user(self, db):
-        """SECURITY: supplying another student's session_id must NOT write to their attempts.
-
-        This test covers the IDOR fix: the transcribe endpoint must verify
-        LearningSession.student_id == current_user.id before writing audio_gcs_path.
-        """
-        from unittest.mock import AsyncMock
-
-        # Create a session owned by _OTHER_STUDENT_ID
-        other_sess = _create_session(db, student_id=_OTHER_STUDENT_ID)
-        other_attempt = _create_attempt(db, session_id=other_sess.id, audio_gcs_path=None)
-
-        # Log in as _STUDENT_ID but pass the other student's session_id
-        app = _build_transcribe_app(db, current_user_id=_STUDENT_ID)
+        app = _build_save_audio_app(db, current_user_id=_STUDENT_ID)
         client = TestClient(app)
 
-        with (
-            patch(
-                "app.routes.learning.learning_reading.transcribe_reading_audio",
-                new=AsyncMock(return_value={
-                    "transcript": "攻擊者",
-                    "method": "gemini",
-                    "reasoning": "ok",
-                }),
-            ),
-            patch(
-                "app.routes.learning.learning_reading.upload_reading_audio_to_gcs_sync",
-                return_value="reading-audio/attempts/EVIL.webm",
-            ) as mock_sync,
-            patch("app.routes.learning.learning_reading.upload_reading_audio_to_gcs"),
-            patch("app.routes.learning.learning_reading.log_ai_usage"),
-        ):
+        with patch(
+            "app.routes.learning.learning_save_audio.upload_reading_audio_to_gcs_sync",
+            return_value=expected_path,
+        ) as mock_sync:
             resp = client.post(
-                "/api/reading/transcribe",
-                files={"audio": ("rec.webm", b"attacker_audio", "audio/webm")},
-                data={
-                    "target_text": "攻擊者",
-                    "session_id": str(other_sess.id),  # Attacker passes victim's session_id
-                },
+                "/api/reading/save-audio",
+                data={"session_id": str(learning_sess.id)},
+                files={"audio": ("take.webm", b"fake-audio-bytes", "audio/webm")},
             )
 
-        # Scoring must succeed — IDOR block must NOT break the response
-        assert resp.status_code == 200
-        body = resp.json()
-        assert body["transcript"] == "攻擊者"
+        assert resp.status_code == 200, resp.text
+        assert resp.json().get("ok") is True, resp.text
+        assert mock_sync.called, "上傳根本沒被呼叫 —— 錄音不會落地"
+        db.refresh(attempt)
+        assert attempt.audio_gcs_path == expected_path, (
+            f"路徑沒寫回 attempt（老師端回放靠它找檔）：{attempt.audio_gcs_path!r}"
+        )
 
-        # The sync upload must NOT have been called — ownership check blocked it
-        mock_sync.assert_not_called()
+    def test_save_audio_rejects_another_users_session(self, db):
+        """IDOR。⚠️ 這條在 2026-08-29 之前**從來沒有執行過** ——
+        它 patch 的模組沒有那個名字，setup 就 AttributeError 了，
+        而這支檔案不在 CI 清單裡，所以那個紅沒有人看到。"""
+        other_sess = _create_session(db, student_id=_OTHER_STUDENT_ID)
+        _create_attempt(db, session_id=other_sess.id, audio_gcs_path=None)
 
-        # The other student's attempt row must still have audio_gcs_path=None
-        db.refresh(other_attempt)
-        assert other_attempt.audio_gcs_path is None, (
-            "IDOR exploit succeeded: attacker wrote to another student's attempt row"
+        app = _build_save_audio_app(db, current_user_id=_STUDENT_ID)  # 不是 owner
+        client = TestClient(app)
+
+        with patch(
+            "app.routes.learning.learning_save_audio.upload_reading_audio_to_gcs_sync",
+            return_value="reading-audio/attempts/999.webm",
+        ) as mock_sync:
+            resp = client.post(
+                "/api/reading/save-audio",
+                data={"session_id": str(other_sess.id)},
+                files={"audio": ("take.webm", b"fake-audio-bytes", "audio/webm")},
+            )
+
+        assert not mock_sync.called, (
+            "別人的 session 也上傳了 —— 這是 IDOR：任何人都能往別人的 attempt 塞音檔"
+        )
+        assert resp.status_code in (403, 404) or resp.json().get("ok") is False, (
+            f"越權沒被擋：{resp.status_code} {resp.text}"
         )

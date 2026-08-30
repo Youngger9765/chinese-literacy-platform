@@ -90,9 +90,19 @@ def test_regular_lesson_is_unaffected():
     story = _get(REGULAR_ID)
     for mod in ("classical_text", "modern_translation", "word_matching", "sentence_matching", "self_challenge", "intro_guide"):
         assert not story.get(mod), f"{mod} leaked onto a regular (non-classical) lesson"
-    # A regular lesson keeps falling back to DEFAULT_STEP_SEQUENCE (frontend behavior
-    # unchanged) — backend must not invent a step_sequence for it.
-    assert not story.get("step_sequence"), "regular lesson should not get an invented step_sequence"
+    # ⚠️ 2026-08-28（#2964）改寫。原本斷言「一般課不可以有 step_sequence」——
+    #    #2736 之後那已經不成立而且是**刻意的**：每一課的順序要來自它自己的學習單，
+    #    否則側欄照學習單畫、而「下一關」查另一張靜態表，兩個來源會不一致
+    #    （Young 2026-08-19：「下一關按鈕為什麼不是按照側欄順序？？？？」）。
+    #
+    #    這條真正要守的是「文言文的那套不可以漏到一般課上」，所以改成：
+    #    一般課可以有自己的順序，但不可以是文言文那組步驟。
+    seq = story.get("step_sequence") or []
+    classical_only = {"classical-text", "classical-self-challenge",
+                      "sentence-matching", "word-matching", "modern-translation"}
+    leaked = [s for s in seq if s.partition("#")[0] in classical_only]
+    assert not leaked, f"文言文的步驟漏到一般課上了：{leaked}"
+    assert seq, "一般課現在也應該有自己的 step_sequence（#2736）"
 
 
 def test_story_detail_schema_accepts_the_new_fields():

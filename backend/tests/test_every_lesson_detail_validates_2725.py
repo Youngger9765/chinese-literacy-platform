@@ -94,13 +94,46 @@ def test_a_lesson_with_a_target_but_no_passage_still_serves_the_target():
     """
     from app.services.lesson_loader import get_all_lessons
 
+    from app.services.lesson_uid_loader import load_lesson
+
     lessons = get_all_lessons()
-    no_passage_with_target = [
-        l for l in lessons
-        if not (l.get("key_reading") or {}).get("passage") and l.get("reading_benchmark")
-    ]
-    assert len(no_passage_with_target) >= 8, (
-        f"only {len(no_passage_with_target)} lessons keep a fluency target without a "
-        f"passage — the 文言文 lessons time in seconds and mostly have no anchor, so "
-        f"dropping their target is how #2722 regresses"
-    )
+
+    # ⚠️ 2026-08-28（#2964）改寫。原本斷言「至少 8 課有目標但沒 passage」——
+    #    二修之後**來源資料裡這種課是 0 課**（文言文那批連秒數型目標一起沒了），
+    #    所以那個數字現在無法成立。
+    #
+    #    ⛔ 不把門檻調低讓它過 —— 那是為了讓門變綠而改斷言。
+    #    改成鎖**機制**：只要來源有「benchmark 但沒 passage」的課，
+    #    row 就必須把目標留下來（丟掉 key_reading 是對的，連目標一起丟才是 #2722）。
+    #    來源目前是 0 課，這條就等於在等資料回來時自動生效。
+    #
+    #    內容缺口另記：文言文的秒數型流暢率目標在二修時遺失（#2964 記錄）。
+    by_uid = {l.get("lesson_uid"): l for l in lessons}
+    should_keep = []
+    for uid in by_uid:
+        raw = load_lesson(uid) or {}
+        kr = raw.get("key_reading")
+        if isinstance(kr, dict) and kr.get("benchmark") and not kr.get("passage"):
+            should_keep.append(uid)
+
+    lost = [u for u in should_keep if not by_uid[u].get("reading_benchmark")]
+    assert not lost, (
+        f"這幾課的來源有 benchmark 但沒 passage，而 row 把目標一起丟了：{lost}\n"
+        "丟掉 key_reading 是對的（沒有段落可念），連目標一起丟就是 #2722 regress。")
+
+
+def test_the_benchmark_survives_for_the_lessons_that_do_have_one():
+    """正向對照 —— 上面那條在 should_keep 是空集合時會空過。
+
+    這條確保「目標會被送出去」這件事本身是活的：
+    來源有 benchmark 的課，row 就要有。
+    """
+    from app.services.lesson_uid_loader import load_lesson
+    from app.services.lesson_loader import get_all_lessons
+
+    lessons = get_all_lessons()
+    by_uid = {l.get("lesson_uid"): l for l in lessons}
+    served = [u for u, row in by_uid.items() if row.get("reading_benchmark")]
+    assert len(served) >= 100, (
+        f"只有 {len(served)} 課的 reading_benchmark 有值 —— "
+        "門檻整批沒送出去，每一課都會退回年級預設（#2722 regress）")

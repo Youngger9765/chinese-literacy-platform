@@ -42,14 +42,15 @@ key_reading:
     feedback: 嗯，還不錯喲！
   - threshold: ＞251字
     feedback: 哇嗚，超級厲害！
-  passage: 集中營裡食物匱乏，一口麵包都可能關乎生死，但仍有些瘦弱得像骷髏的難友，走過一間間囚房，向更孱弱的難友問好、為他們禱告，甚至把最後一口麵包分享出去。這讓法蘭柯深受感動，也領悟到：即使情況壞到極點，人仍能決定自己道德與品格的高度。
+  passage: 集中營裡食物匱乏，一口麵包都可能關乎生死，但仍有些瘦弱得像骷髏的難友，走過一間間囚房，向更孱弱的難友問好、為他們禱告，甚至把最後一口麵包分享出去。這讓法蘭柯深受感動，也領悟到：即使情況壞到極點，人仍能決定自己道德與品格的高度。難友每天最重要的餐，是一碗內容貧乏的湯。領湯時囚犯必須照規定「脫帽」領湯，用屈從的姿態領取施捨，獄卒還常辱罵：「你們根本不配喝這碗湯。」但法蘭柯發現，有些難友的情緒並不受影響，只說：「他們罵的不是事實，只是想羞辱我們，我為什麼要受假話影響？」原來，我們不能阻止別人說什麼，但可以選擇不讓謊言定義自己。
   start_text: 集中營裡食物匱乏，一口麵包都可能關乎生死，但仍有
-  extent_chars: 113
+  extent_chars: 263
   source: extract_key_reading_v3
   start_paragraph: 5
-  end_paragraph: 5
+  end_paragraph: 6
   slug: 7k3hv
   text_ref: xead6
+  printed_counter_last: 341
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

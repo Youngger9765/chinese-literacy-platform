@@ -20,15 +20,34 @@ key_reading:
     feedback: 嗯，還不錯喲！
   - threshold: ＞241字
     feedback: 哇嗚，超級厲害！
-  passage: 鄧小姐憂鬱起來，她日間茶飯不思，夜裡輾轉反側，心裡不斷反芻：「為什麼是我？我那麼年輕，看重飲食和運動，又沒有過重，無妄之災啊，我為什麼那麼倒楣？」
+  passage: 鄧小姐憂鬱起來，她日間茶飯不思，夜裡輾轉反側，心裡不斷反芻：「為什麼是我？我那麼年輕，看重飲食和運動，又沒有過重，無妄之災啊，我為什麼那麼倒楣？」她四處求醫，但各家醫院的診斷都差不多，只要她聽到要一輩子吃藥，立刻潸然淚下。這天，她到臺大醫院，這位最有名的心臟血管科醫師宣判：「先天性的高血壓！一輩子服藥。」鄧小姐立刻眼前模糊一片，啜泣著說：「為什麼是我？我那麼年輕……我為什麼那麼倒楣？」名醫皺著眉說話了：「你怎麼會倒楣？你運氣太好了。」鄧小姐愣了愣。醫師繼續說：「高血壓是沒有症狀的，年輕人尤其不會注意到自己血壓過高，許多人因此腦血管破裂，送醫時已經死亡或半身不遂了。你在完全沒症狀時就發現高血壓，每天只要一小顆藥就沒問題了。」他又說了一次：「你怎麼會倒楣？你運氣太好了。」鄧小姐眼睛睜大，心想：「對耶，我運氣還真不錯。」從此，她乖乖吃藥，快樂起來，又能吃能睡了。
   start_text: 鄧小姐憂鬱起來，她日間茶飯不思，夜裡輾轉反側，心
-  extent_chars: 73
+  extent_chars: 387
   source: extract_key_reading_v3
   start_paragraph: 8
-  end_paragraph: 8
+  end_paragraph: 11
   slug: 6reqf
   text_ref: tw9hj
+  printed_char_marks:
+  - 27
+  - 57
+  - 73
+  - 101
+  - 130
+  - 160
+  - 190
+  - 194
+  - 222
+  - 252
+  - 281
+  - 310
+  - 338
+  - 366
+  - 383
+  printed_counter_last: 383
 extraction_check:
-  verdict: confirmed
-  corroborated_by_first_edition: true
+  verdict: disagrees_with_first_edition
+  corroborated_by_first_edition: false
   absorbed_tail: 0
+needs_human_review: true
+review_reason: 二修學習單指定第8段，一版人工掃描標的是同一課的另一段，且那段文字在本課仍逐字存在。二修為主所以照寫，但兩版之一標錯了，要人看紙本確認。

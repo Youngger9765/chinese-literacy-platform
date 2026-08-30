@@ -45,13 +45,32 @@ NOT_A_MODULE = {"module", "lesson_multimodal"}
 
 
 def _corpus_modules() -> set[str]:
+    """檔名裡的**模組類型**，不含 slug。
+
+    ⚠️ #2916 之後檔名是 `{模組}.{slug}.yml`，`p.stem` 會回 `comprehension.34pme`。
+       一個 skill 對應一種模組，不是對應每一份檔 ——
+       不切掉 slug 的話這條會報「1623 種模組沒有 skill」，
+       而真正的類型只有二十幾種。
+    """
     out = set()
     for p in LESSONS.glob("L*/v3/*.yml"):
-        stem = p.stem
+        stem = p.stem.partition(".")[0]
         if stem == "lesson" or stem.startswith("_"):
             continue
         out.add(stem)
     return out
+
+
+def test_the_scan_returns_types_not_files():
+    """正向對照 + 防呆 —— 掃出來的必須是類型。
+
+    少了這條，slug 又混進來時上面會報幾百種「沒有 skill」，
+    而真正的原因是掃描壞了，不是 skill 漏了。
+    """
+    mods = _corpus_modules()
+    assert 5 <= len(mods) <= 60, f"掃出 {len(mods)} 種模組 —— 這個數字不像類型數"
+    dotted = sorted(m for m in mods if "." in m)
+    assert not dotted, f"這些還帶著 slug，切割壞了：{dotted[:5]}"
 
 
 def _skills() -> set[str]:

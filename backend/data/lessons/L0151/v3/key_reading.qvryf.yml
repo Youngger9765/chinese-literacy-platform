@@ -22,15 +22,32 @@ key_reading:
     feedback: 嗯，還不錯喲！
   - threshold: ＞251字
     feedback: 哇嗚，超級厲害！
-  passage: 心理學家因此提出了「旁觀者效應」的理論，來解釋這個現象。
+  passage: 心理學家因此提出了「旁觀者效應」的理論，來解釋這個現象。「旁觀者效應」指的是，若發生緊急情況，旁觀者數量越多，他們當中任何一人出手進行援助之機會越低。例如，老太太騎著車，在你眼前摔倒了，如果附近只有你一個人，你很可能會衝上前幫忙。但是，如果同時有二十個人看見這個意外，你就會有很高的可能袖手旁觀，而不去幫忙。一九七○年之後，旁觀者效應變成社會心理學界最負盛名的議題，而凱蒂謀殺案和那38位冷漠目擊者的故事，就出現在每一本普通心理學的大學教科書上。教科書總是先頗為詳盡的介紹凱蒂案，再以匪夷所思的形容詞去描繪那38位目擊者的冷漠行徑，最後再以旁觀者效應的理論說明人性的脆弱。四十年如一日，沒有例外。我教普通心理學數十年，每次都要和學生一再討論凱蒂案帶來的啟示，和旁觀者效應的意義。
   start_text: 心理學家因此提出了「旁觀者效應」的理論，來解釋這
-  extent_chars: 28
+  extent_chars: 339
   source: extract_key_reading_v3
   start_paragraph: 3
-  end_paragraph: 3
+  end_paragraph: 5
   slug: qvryf
   text_ref: n3hxj
+  printed_char_marks:
+  - 28
+  - 56
+  - 86
+  - 116
+  - 146
+  - 154
+  - 181
+  - 210
+  - 240
+  - 269
+  - 299
+  - 329
+  - 337
+  printed_counter_last: 337
 extraction_check:
-  verdict: confirmed
-  corroborated_by_first_edition: true
+  verdict: disagrees_with_first_edition
+  corroborated_by_first_edition: false
   absorbed_tail: 0
+needs_human_review: true
+review_reason: 二修學習單指定第3段，一版人工掃描標的是同一課的另一段，且那段文字在本課仍逐字存在。二修為主所以照寫，但兩版之一標錯了，要人看紙本確認。
