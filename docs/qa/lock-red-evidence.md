@@ -22,6 +22,9 @@
 - `test_reading_audio_replay_student.py` — mutation：拿掉 IDOR 的 owner 過濾 → 1 failed；還原 → 9 passed（那條 IDOR 斷言在此之前從沒執行過）
 - `test_key_reading_qa_2712.py` — mutation：把 target 改回「整篇總字數」→ 1 failed；還原 → 14 passed
 - `test_key_reading_range_restored_2912.py` — mutation：把 L0003 改回「只有第七段」（end=start、passage 截到 259）→ 1 failed；還原 → 4 passed
+- `test_key_reading_rule_is_stated_once_2912.py` — mutation：把 end 寫死回 start → 2 failed；把 skill 的規則改回舊的 → 1 failed；還原 → 5 passed
+- `test_key_reading_data_matches_extractor_2912.py` — mutation：手改一課的資料 → 1 failed（指名哪一課）；改抽取器不重生 → 1 failed；還原 → 2 passed
+- `test_key_reading_reaches_the_student_2912.py` — mutation（打**真正的服務路徑** `lesson_uid_loader`，先驗證服務端輸出真的變了才算數）：截斷成 150 字 → 2 failed；整個不給 key_reading → 3 failed；還原 → 4 passed
 
 ## grandfathered（既有債，未逐支驗過）
 
