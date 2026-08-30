@@ -128,6 +128,8 @@ echo "-- Gate 4/10: QR-manifest reconciliation (verify_qr_manifest) --"
 #    eval_extract_repeatability/eval_overview_repeatability 需要多次 LLM 抽取結果。
 "$PYBIN" scripts/eval_strategy_validate.py
 "$PYBIN" scripts/eval_lesson_content.py --fixtures
+# 每個模組該有的欄位都在（#2729 普查撈出來的孤兒門 —— 它讀 L*/v3，是新世界）
+"$PYBIN" scripts/essential_fields_check.py
 echo ""
 
 # ── Gate 5/10: spotlight structural ratchet ───────────────────────────────────

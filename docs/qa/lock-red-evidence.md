@@ -37,6 +37,7 @@
 - `test_progress_table_is_fresh_spec.py` — mutation：把進度表回退成 staging 上那份（51 課）→ 2 failed；只改「現況」那格的數字讓它跟表身漂移 → 1 failed；還原 → 3 passed。⭐ 這張表自己的檔頭就寫著「不要手改」，但**沒有東西擋它過期** —— 它就這樣停在 51 課，而實際是 175/175
 - `scripts/space_drift_scan.py`（#2864）— mutation：把 L0034 的修正退回 → 抓到 2 處、SPACE_DRIFT=FAIL；**把誤報濾網關掉 → 4 處**（抽取器自組的 `年級5課次17` 那類回來了，證明濾網是有作用的不是裝飾）；還原 → 0 處 PASS。⭐ 逐字門結構上抓不到這一類：它第 77 行 `re.sub(r'\s+','',s)` 比對前把空白全拿掉 —— 那是刻意且正確的（DOCX 的 run 會亂切），代價是這一類看不到，所以另走一條
 - `test_evals_are_wired_or_explained_spec.py`（#2854）— mutation：把接上的 eval 從 run-ci.sh 拿掉 → 1 failed；**把壞掉那支（`eval_keypoints_text_fidelity`）接進 CI → 1 failed**（正向對照擋假綠燈）；讓能跑的那支不再印 PASS → 1 failed（exit 0 不算過）；還原 → 8 passed。⭐ 盤點發現六支裡有兩支是 **exit 0 但零輸出**：`eval_keypoints_text_fidelity` 根本沒有 `main()`、`eval_lesson_schema --all` 的 schema-dir 指向已刪的 `_online-schema` 回 0/0 —— 照 exit code 收會多兩盞假綠燈
+- `test_gate_scripts_are_classified_spec.py`（#2729）— mutation：新增一支沒登記的門 → 1 failed（這就是票要的『擋』）；把某支的理由寫成一個字 → 1 failed；把已接上的留在 NOT_WIRED → 1 failed；還原 → 5 passed。⚠️ 第一版**紅在自我參照**：NOT_WIRED 的名字寫在這支 spec 裡，而它自己也在被掃的目錄下 —— 不排除自己的話每一支都會被算成「有人叫」，整支恆綠
 
 ## grandfathered（既有債，未逐支驗過）
 
