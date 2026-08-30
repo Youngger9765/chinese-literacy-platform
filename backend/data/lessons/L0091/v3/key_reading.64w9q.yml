@@ -50,3 +50,5 @@ extraction_check:
   verdict: ok
   corroborated_by_first_edition: null
   absorbed_tail: 0
+needs_human_review: true
+review_reason: 本課念順順 489 字，與學習單右緣累計欄末筆 406 差 83 字，請人對一次實體學習單（第 1–4 段）

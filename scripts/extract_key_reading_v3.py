@@ -468,6 +468,7 @@ def extract(uid: str, part: dict | None = None) -> dict:
 
     out.update(passage=passage, absorbed_tail=absorbed, end_anchor=end,
                counter_last=counter_last, span_note=span_note,
+               gap_unresolved=gap_unresolved,
                start_text=passage[:24], chars=len(_norm(passage)))
 
     if len(_norm(passage)) > MAX_CHARS:
@@ -553,10 +554,28 @@ def apply(uid: str, r: dict) -> None:
         "absorbed_tail": r.get("absorbed_tail") or 0,
     }
     reason = REVIEW_REASONS.get(r["verdict"])
-    if reason:
+    #: 🔴 #2912：`extract()` 一直算得出 `span_note`，但這裡從來沒讀過它 ——
+    #: 19 課的字數與學習單累計欄對不上，卻只有 1 課帶標記，其餘 18 課看起來
+    #: 跟完全正確的課一模一樣。門算出了答案卻沒有人接。
+    #: 理由用**出貨後的實際字數**重算，不沿用 span_note 的字面 —— 那段文字是
+    #: 吸收無段號結語**之前**的數字，接完之後就對不上了。
+    span_reason = None
+    if r.get("gap_unresolved") and isinstance(r.get("counter_last"), int):
+        shipped = len(r["passage"] or "")
+        span_reason = (f"本課念順順 {shipped} 字，與學習單右緣累計欄末筆 "
+                       f"{r['counter_last']} 差 {abs(shipped - r['counter_last'])} 字，"
+                       f"請人對一次實體學習單（第 {r['anchor']}–{r.get('end_anchor')} 段）")
+    if reason or span_reason:
         # 誠實標，不是造假成 pass：出貨了，但檔案自己說要人看，並說為什麼。
+        parts = []
+        if reason:
+            parts.append(reason.format(chars=r["chars"], anchor=r["anchor"]))
+        #: ⛔ 兩個理由要**都寫出來**，不是二選一。L0142 兩者皆中：只寫 verdict 那條的話，
+        #: 看的人會照它去比一版掃描，而完全不知道範圍還差 50 字（而且一版正是錯的裁判）。
+        if span_reason:
+            parts.append(span_reason)
         doc["needs_human_review"] = True
-        doc["review_reason"] = reason.format(chars=r["chars"], anchor=r["anchor"])
+        doc["review_reason"] = "；另外，".join(parts)
     else:
         doc.pop("needs_human_review", None)
         doc.pop("review_reason", None)
