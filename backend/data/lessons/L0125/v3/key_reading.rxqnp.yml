@@ -4,6 +4,7 @@ section_no: 二
 key_reading:
   instruction: 請用計時器，從指定段落（八　　）開始朗讀，計時1分鐘讀的字數，並記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！
   start_paragraph: 8
+  end: 第 11 段結束（＝課文結束）
   printed_char_marks:
   - 27
   - 55
@@ -21,7 +22,17 @@ key_reading:
   - 373
   - 401
   - 414
-  char_marks_note: "\U0001F7E2 這一課**四條口徑一條都不用套**，四個段界用最單純的字元數（只濾掉 Cf/Mn 隱藏字元）\n就全部精準吻合 —— 正是 SKILL ⑥.7 說的「也可能一條都不用套，先直接算，對不上再逐條試」：\n  段8  → 111（＝ 裸算 111）\n  段9  → 167－111 ＝ 56 （＝ 裸算 56）\n  段10 → 290－167 ＝ 123（＝ 裸算 123）\n  段11 → 414－290 ＝ 124（＝ 裸算 124，也是最後一個數字）\n第 1 條（數字算 1）不必套：段 8~11 這四段裡沒有阿拉伯數字。\n第 2 條（註腳）不必套：footnotes.xml 是空的。\n第 3 條（分節小標）不必套：本課課文沒有加框小標。\n第 4 條（variation selector）不必套：這四段裡沒有。\n本課字數欄**數到最後一段**，沒有提早停止。"
+  char_marks_cover_paragraphs:
+  - 8
+  - 9
+  - 10
+  - 11
+  span_confidence: high
+  char_marks_note: "\U0001F7E2 這一課**四條口徑一條都不用套**，四個段界用最單純的字元數（只濾掉 Cf/Mn 隱藏字元）\n就全部精準吻合\
+    \ —— 正是 SKILL ⑥.7 說的「也可能一條都不用套，先直接算，對不上再逐條試」：\n  段8  → 111（＝ 裸算 111）\n  段9  →\
+    \ 167－111 ＝ 56 （＝ 裸算 56）\n  段10 → 290－167 ＝ 123（＝ 裸算 123）\n  段11 → 414－290 ＝ 124（＝\
+    \ 裸算 124，也是最後一個數字）\n第 1 條（數字算 1）不必套：段 8~11 這四段裡沒有阿拉伯數字。\n第 2 條（註腳）不必套：footnotes.xml\
+    \ 是空的。\n第 3 條（分節小標）不必套：本課課文沒有加框小標。\n第 4 條（variation selector）不必套：這四段裡沒有。\n本課字數欄**數到最後一段**，沒有提早停止。"
   timing_table:
     columns:
     - 第1次計時
@@ -44,11 +55,6 @@ key_reading:
   passage: 一時之間，同學們的回應此起彼落。雅柔說：「我對顏家的悲傷痛苦可以感同身受，自己的孩子早上好好的去上學，上個體育課就天人永隔了。而一審法官的意思是，這沒辦法，大家都不是故意的，沒有人需要負責。如果是我，我會先哭死，再氣死。」
   start_text: 一時之間，同學們的回應此起彼落。雅柔說：「我對顏
   extent_chars: 111
-  source: extract_key_reading_v3
+  source: derived-from-body
   slug: rxqnp
   text_ref: 4etxq
-  end_paragraph: 8
-extraction_check:
-  verdict: confirmed
-  corroborated_by_first_edition: true
-  absorbed_tail: 0

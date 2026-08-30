@@ -20,15 +20,11 @@ key_reading:
     feedback: 嗯，還不錯喲！
   - threshold: ＞221字
     feedback: 哇嗚，超級厲害！
-  passage: 說實話，我以前也覺得只要球打得好，就能進職棒、獲得豐厚報酬。但等我真的進了職棒，我才發現：成功，不只要努力，還要「運氣站在你這邊」。
+  passage: 說實話，我以前也覺得只要球打得好，就能進職棒、獲得豐厚報酬。但等我真的進了職棒，我才發現：成功，不只要努力，還要「運氣站在你這邊」。怎麼說呢？就算你再怎麼拚，還是可能遇到以下這些情況：同年選秀剛好出現一堆「怪物級」選手，你就算很強，也未必雀屏中選。長時間比賽、過度疲憊，身體很容易受傷，萬一需要休息，就可能和機會擦身而過。守備的位置有太多人爭取，即使你實力不錯，也可能沒機會上場。這些都不是你能控制的。所以我想跟你說：「打球很重要，但如果你孤注一擲，只有這一條路可走，真的太冒險了。」讀書，不是要你考高分，而是讓你多一條路。當棒球這條路卡住的時候，你還有別的方向可以走。就像比賽不能只練一招，人生也不能只靠一種能力。你準備得越多，選擇就越多喔！祝福你。
   start_text: 說實話，我以前也覺得只要球打得好，就能進職棒、獲
-  extent_chars: 66
-  source: extract_key_reading_v3
-  start_paragraph: 2
-  end_paragraph: 2
+  extent_chars: 326
+  source: docx-anchor-and-count
+  start_paragraph: 6
+  end_paragraph: 12
   slug: wkmdr
   text_ref: ajk7q
-extraction_check:
-  verdict: confirmed
-  corroborated_by_first_edition: true
-  absorbed_tail: 0
