@@ -121,6 +121,7 @@ echo "-- Gate 4/10: QR-manifest reconciliation (verify_qr_manifest) --"
 ( cd backend && "$PYBIN" -m pytest specs/test_claudemd_only_names_live_gates_spec.py -q )   # CLAUDE.md 不准點名跑不起來的門（#2730）
 ( cd backend && "$PYBIN" -m pytest specs/test_dead_source_paths_only_shrink_spec.py -q )   # 指向已刪目錄的引用只能變少（#2751）
 ( cd backend && "$PYBIN" -m pytest specs/test_progress_table_is_fresh_spec.py -q )   # 生成的進度表不准過期（#2736）
+"$PYBIN" scripts/space_drift_scan.py   # 原稿有空格而 yml 吃掉（#2864；沒有原稿時自己 SKIPPED）
 echo ""
 
 # ── Gate 5/10: spotlight structural ratchet ───────────────────────────────────
