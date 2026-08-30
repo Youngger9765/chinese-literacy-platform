@@ -27,6 +27,23 @@ key_reading:
   slug: jr6ja
   text_ref: eqqyy
   end_paragraph: 3
+  printed_char_marks:
+  - 28
+  - 58
+  - 87
+  - 118
+  - 148
+  - 178
+  - 208
+  - 238
+  - 268
+  - 287
+  - 315
+  - 345
+  - 375
+  - 404
+  - 418
+  printed_counter_last: 418
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

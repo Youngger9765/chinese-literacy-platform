@@ -29,6 +29,22 @@ key_reading:
   end_paragraph: 5
   slug: nkj9j
   text_ref: cmwwv
+  printed_char_marks:
+  - 28
+  - 58
+  - 87
+  - 116
+  - 144
+  - 147
+  - 175
+  - 204
+  - 234
+  - 264
+  - 295
+  - 324
+  - 354
+  - 374
+  printed_counter_last: 374
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

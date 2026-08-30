@@ -28,6 +28,21 @@ key_reading:
   end_paragraph: 2
   slug: 634yc
   text_ref: mr3he
+  printed_char_marks:
+  - 27
+  - 55
+  - 83
+  - 111
+  - 140
+  - 157
+  - 184
+  - 211
+  - 240
+  - 269
+  - 298
+  - 327
+  - 333
+  printed_counter_last: 333
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

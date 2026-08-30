@@ -28,6 +28,22 @@ key_reading:
   end_paragraph: 4
   slug: 7rxjq
   text_ref: tvrxr
+  printed_char_marks:
+  - 28
+  - 58
+  - 88
+  - 118
+  - 124
+  - 152
+  - 181
+  - 212
+  - 241
+  - 271
+  - 284
+  - 311
+  - 341
+  - 371
+  printed_counter_last: 371
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

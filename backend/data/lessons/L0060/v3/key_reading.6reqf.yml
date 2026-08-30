@@ -28,6 +28,23 @@ key_reading:
   end_paragraph: 8
   slug: 6reqf
   text_ref: tw9hj
+  printed_char_marks:
+  - 27
+  - 57
+  - 73
+  - 101
+  - 130
+  - 160
+  - 190
+  - 194
+  - 222
+  - 252
+  - 281
+  - 310
+  - 338
+  - 366
+  - 383
+  printed_counter_last: 383
 extraction_check:
   verdict: confirmed
   corroborated_by_first_edition: true

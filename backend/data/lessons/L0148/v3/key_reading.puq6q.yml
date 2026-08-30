@@ -19,7 +19,9 @@ key_reading:
   - 349
   - 379
   - 395
-  char_marks_note: "三個端點全部精準吻合（不需要猜）：\n  62  = 段落三 62 字\n  173 = 62 + 段落四 111 字\n  395 = 173 + 段落五 222 字（套 SKILL ⑥.7 第 1 條：12／40／4／5／7 五串數字各算 1 字，224→222）\n段落六之後那一欄是空的 —— 原稿如此，不是漏抽。\nPDF 上數字欄整體上移一行，不能照「號碼旁邊那一行」對位。"
+  char_marks_note: "三個端點全部精準吻合（不需要猜）：\n  62  = 段落三 62 字\n  173 = 62 + 段落四 111 字\n\
+    \  395 = 173 + 段落五 222 字（套 SKILL ⑥.7 第 1 條：12／40／4／5／7 五串數字各算 1 字，224→222）\n段落六之後那一欄是空的\
+    \ —— 原稿如此，不是漏抽。\nPDF 上數字欄整體上移一行，不能照「號碼旁邊那一行」對位。"
   timing_table:
     columns:
     - 第1次計時
@@ -44,6 +46,7 @@ key_reading:
   end_paragraph: 3
   slug: puq6q
   text_ref: nnmyv
+  printed_counter_last: 395
 extraction_check:
   verdict: confirmed
   corroborated_by_first_edition: true

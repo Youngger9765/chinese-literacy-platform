@@ -71,6 +71,7 @@ key_reading:
   end_paragraph: 3
   slug: knxr3
   text_ref: uc6qm
+  printed_counter_last: 617
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

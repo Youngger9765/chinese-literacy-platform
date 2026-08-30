@@ -26,6 +26,24 @@ key_reading:
   end_paragraph: 6
   slug: j7xqu
   text_ref: 6t6cy
+  printed_char_marks:
+  - 28
+  - 58
+  - 88
+  - 116
+  - 146
+  - 176
+  - 206
+  - 237
+  - 266
+  - 296
+  - 319
+  - 347
+  - 377
+  - 406
+  - 437
+  - 462
+  printed_counter_last: 462
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

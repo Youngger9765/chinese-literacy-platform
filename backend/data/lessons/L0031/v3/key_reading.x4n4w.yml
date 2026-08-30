@@ -4,7 +4,8 @@ section_no: 二
 key_reading:
   instruction: 請用計時器，從指定段落（四☞）開始朗讀，計時1分鐘讀的字數，並記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！
   printed_char_count: 412
-  printed_char_count_note: 「字數」欄共 15 個累計數，最後一個是 412；其中第 11 個印成 376，順序上是錯的（見 source_errata E1）
+  printed_char_count_note: 「字數」欄共 15 個累計數，最後一個是 412；其中第 11 個印成 376，順序上是錯的（見 source_errata
+    E1）
   timing_table:
     columns:
     - 第1次計時
@@ -28,6 +29,19 @@ key_reading:
   end_paragraph: 4
   slug: x4n4w
   text_ref: 3khu6
+  printed_char_marks:
+  - 27
+  - 57
+  - 86
+  - 117
+  - 142
+  - 172
+  - 201
+  - 231
+  - 257
+  - 265
+  - 376
+  printed_counter_last: 376
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

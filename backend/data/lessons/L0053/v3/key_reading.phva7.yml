@@ -29,6 +29,21 @@ key_reading:
   end_paragraph: 6
   slug: phva7
   text_ref: 3np3k
+  printed_char_marks:
+  - 29
+  - 59
+  - 89
+  - 119
+  - 146
+  - 175
+  - 205
+  - 219
+  - 246
+  - 276
+  - 306
+  - 335
+  - 362
+  printed_counter_last: 362
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

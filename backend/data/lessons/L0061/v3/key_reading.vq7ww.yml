@@ -28,6 +28,25 @@ key_reading:
   end_paragraph: 2
   slug: vq7ww
   text_ref: k3ckp
+  printed_char_marks:
+  - 28
+  - 57
+  - 87
+  - 117
+  - 147
+  - 176
+  - 205
+  - 211
+  - 238
+  - 267
+  - 297
+  - 326
+  - 328
+  - 355
+  - 384
+  - 413
+  - 437
+  printed_counter_last: 437
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

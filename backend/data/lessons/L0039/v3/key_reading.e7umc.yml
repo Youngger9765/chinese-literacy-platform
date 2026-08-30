@@ -26,6 +26,20 @@ key_reading:
   end_paragraph: 5
   slug: e7umc
   text_ref: phhwe
+  printed_char_marks:
+  - 27
+  - 57
+  - 87
+  - 117
+  - 146
+  - 176
+  - 206
+  - 235
+  - 265
+  - 295
+  - 325
+  - 339
+  printed_counter_last: 339
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

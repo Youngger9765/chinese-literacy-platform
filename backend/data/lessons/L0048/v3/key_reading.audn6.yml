@@ -28,6 +28,23 @@ key_reading:
   end_paragraph: 5
   slug: audn6
   text_ref: jehhy
+  printed_char_marks:
+  - 27
+  - 57
+  - 87
+  - 117
+  - 147
+  - 177
+  - 207
+  - 237
+  - 267
+  - 283
+  - 311
+  - 340
+  - 367
+  - 397
+  - 419
+  printed_counter_last: 419
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

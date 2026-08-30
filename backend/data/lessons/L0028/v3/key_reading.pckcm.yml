@@ -27,6 +27,25 @@ key_reading:
   slug: pckcm
   text_ref: 977nw
   end_paragraph: 2
+  printed_char_marks:
+  - 28
+  - 58
+  - 88
+  - 117
+  - 147
+  - 175
+  - 202
+  - 232
+  - 260
+  - 273
+  - 301
+  - 331
+  - 361
+  - 389
+  - 418
+  - 448
+  - 456
+  printed_counter_last: 456
 extraction_check:
   verdict: confirmed
   corroborated_by_first_edition: true

@@ -28,6 +28,25 @@ key_reading:
   end_paragraph: 3
   slug: kjcx3
   text_ref: jhjte
+  printed_char_marks:
+  - 27
+  - 56
+  - 86
+  - 115
+  - 144
+  - 174
+  - 204
+  - 234
+  - 239
+  - 266
+  - 295
+  - 324
+  - 354
+  - 382
+  - 412
+  - 442
+  - 449
+  printed_counter_last: 449
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

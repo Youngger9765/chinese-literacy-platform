@@ -26,6 +26,22 @@ key_reading:
   end_paragraph: 4
   slug: apnaa
   text_ref: vc3at
+  printed_char_marks:
+  - 27
+  - 55
+  - 84
+  - 113
+  - 140
+  - 170
+  - 199
+  - 216
+  - 244
+  - 273
+  - 303
+  - 333
+  - 363
+  - 370
+  printed_counter_last: 370
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

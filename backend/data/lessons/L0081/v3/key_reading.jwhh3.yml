@@ -30,6 +30,20 @@ key_reading:
   end_paragraph: 4
   slug: jwhh3
   text_ref: v3nth
+  printed_char_marks:
+  - 25
+  - 55
+  - 85
+  - 115
+  - 145
+  - 174
+  - 201
+  - 227
+  - 257
+  - 287
+  - 316
+  - 338
+  printed_counter_last: 338
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

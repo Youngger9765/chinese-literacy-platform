@@ -26,6 +26,25 @@ key_reading:
   end_paragraph: 6
   slug: nva4u
   text_ref: wwejy
+  printed_char_marks:
+  - 28
+  - 57
+  - 87
+  - 118
+  - 148
+  - 177
+  - 186
+  - 214
+  - 243
+  - 274
+  - 296
+  - 324
+  - 353
+  - 383
+  - 413
+  - 443
+  - 453
+  printed_counter_last: 453
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

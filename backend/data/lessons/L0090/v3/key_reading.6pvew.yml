@@ -37,6 +37,21 @@ key_reading:
   slug: 6pvew
   text_ref: 4x996
   end_paragraph: 6
+  printed_char_marks:
+  - 20
+  - 48
+  - 76
+  - 105
+  - 113
+  - 139
+  - 151
+  - 179
+  - 209
+  - 238
+  - 267
+  - 294
+  - 322
+  printed_counter_last: 322
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

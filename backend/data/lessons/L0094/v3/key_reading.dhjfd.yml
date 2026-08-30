@@ -29,6 +29,25 @@ key_reading:
   source: extract_key_reading_v3
   slug: dhjfd
   text_ref: qxvp9
+  printed_char_marks:
+  - 27
+  - 44
+  - 72
+  - 92
+  - 120
+  - 123
+  - 151
+  - 153
+  - 181
+  - 210
+  - 239
+  - 268
+  - 294
+  - 311
+  - 336
+  - 363
+  - 392
+  printed_counter_last: 392
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

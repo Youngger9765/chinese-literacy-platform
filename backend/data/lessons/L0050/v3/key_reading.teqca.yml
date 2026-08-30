@@ -28,6 +28,22 @@ key_reading:
   end_paragraph: 3
   slug: teqca
   text_ref: cwrfr
+  printed_char_marks:
+  - 26
+  - 50
+  - 80
+  - 109
+  - 139
+  - 163
+  - 187
+  - 215
+  - 243
+  - 270
+  - 297
+  - 323
+  - 352
+  - 357
+  printed_counter_last: 357
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

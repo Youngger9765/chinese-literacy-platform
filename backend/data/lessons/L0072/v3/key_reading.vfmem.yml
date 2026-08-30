@@ -26,6 +26,23 @@ key_reading:
   end_paragraph: 6
   slug: vfmem
   text_ref: yk4tc
+  printed_char_marks:
+  - 29
+  - 57
+  - 78
+  - 106
+  - 136
+  - 166
+  - 173
+  - 201
+  - 230
+  - 260
+  - 290
+  - 303
+  - 331
+  - 360
+  - 364
+  printed_counter_last: 364
 extraction_check:
   verdict: disagrees_with_first_edition
   corroborated_by_first_edition: false

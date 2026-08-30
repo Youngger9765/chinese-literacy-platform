@@ -29,6 +29,21 @@ key_reading:
   end_paragraph: 2
   slug: hna4h
   text_ref: 67fkn
+  printed_char_marks:
+  - 28
+  - 58
+  - 85
+  - 110
+  - 138
+  - 150
+  - 177
+  - 207
+  - 234
+  - 262
+  - 292
+  - 322
+  - 344
+  printed_counter_last: 344
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

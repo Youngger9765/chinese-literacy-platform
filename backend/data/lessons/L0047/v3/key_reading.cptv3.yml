@@ -28,6 +28,24 @@ key_reading:
   end_paragraph: 7
   slug: cptv3
   text_ref: 4mq6a
+  printed_char_marks:
+  - 28
+  - 58
+  - 88
+  - 118
+  - 123
+  - 151
+  - 181
+  - 211
+  - 241
+  - 271
+  - 302
+  - 314
+  - 343
+  - 373
+  - 392
+  - 410
+  printed_counter_last: 410
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

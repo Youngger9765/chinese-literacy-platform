@@ -28,6 +28,26 @@ key_reading:
   end_paragraph: 3
   slug: 3yw7u
   text_ref: 4fwdm
+  printed_char_marks:
+  - 28
+  - 56
+  - 86
+  - 116
+  - 146
+  - 151
+  - 179
+  - 209
+  - 238
+  - 267
+  - 294
+  - 322
+  - 352
+  - 382
+  - 412
+  - 442
+  - 472
+  - 492
+  printed_counter_last: 492
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

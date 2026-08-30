@@ -28,6 +28,23 @@ key_reading:
   end_paragraph: 6
   slug: 7nadf
   text_ref: eujnf
+  printed_char_marks:
+  - 28
+  - 59
+  - 89
+  - 117
+  - 147
+  - 176
+  - 206
+  - 236
+  - 249
+  - 277
+  - 308
+  - 338
+  - 368
+  - 398
+  - 409
+  printed_counter_last: 409
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

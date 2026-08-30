@@ -28,6 +28,24 @@ key_reading:
   end_paragraph: 2
   slug: wkmdr
   text_ref: ajk7q
+  printed_char_marks:
+  - 27
+  - 56
+  - 66
+  - 92
+  - 119
+  - 124
+  - 151
+  - 161
+  - 188
+  - 190
+  - 218
+  - 242
+  - 269
+  - 298
+  - 326
+  - 330
+  printed_counter_last: 330
 extraction_check:
   verdict: confirmed
   corroborated_by_first_edition: true

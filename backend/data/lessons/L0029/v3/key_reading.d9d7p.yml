@@ -30,6 +30,21 @@ key_reading:
   text_ref: n3qxn
   start_paragraph: 7
   end_paragraph: 7
+  printed_char_marks:
+  - 19
+  - 47
+  - 76
+  - 106
+  - 135
+  - 164
+  - 194
+  - 207
+  - 234
+  - 264
+  - 294
+  - 324
+  - 331
+  printed_counter_last: 331
 extraction_check:
   verdict: confirmed
   corroborated_by_first_edition: true

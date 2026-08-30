@@ -3,7 +3,9 @@ version_id: v3
 section_no: 三
 key_reading:
   instruction: 請用計時器，從指定段落（三☞)開始朗讀，計時1分鐘讀的字數，並記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！
-  char_count_note: "右緣「字數」欄從第 3 段（☞ 指定的起點）開始累計，末筆 324 落在第 4 段結束，\n第 5~7 段沒有標 —— 屬「字數欄提早停」的形狀，324 不是全文長度。\n兩個段界值都對得上（Word 口徑：連續阿拉伯數字算 1 個字）：\n  第 3 段 124 == 印的 124；第 3+4 段 324 == 印的 324。"
+  char_count_note: "右緣「字數」欄從第 3 段（☞ 指定的起點）開始累計，末筆 324 落在第 4 段結束，\n第 5~7 段沒有標 —— 屬「字數欄提早停」的形狀，324\
+    \ 不是全文長度。\n兩個段界值都對得上（Word 口徑：連續阿拉伯數字算 1 個字）：\n  第 3 段 124 == 印的 124；第 3+4 段 324\
+    \ == 印的 324。"
   timing_table:
     columns:
     - 第1次計時
@@ -27,6 +29,20 @@ key_reading:
   end_paragraph: 3
   slug: 4jkpq
   text_ref: tvf6u
+  printed_char_marks:
+  - 27
+  - 56
+  - 86
+  - 115
+  - 124
+  - 151
+  - 181
+  - 211
+  - 241
+  - 270
+  - 300
+  - 324
+  printed_counter_last: 324
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

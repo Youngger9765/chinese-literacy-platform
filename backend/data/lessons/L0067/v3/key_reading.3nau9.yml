@@ -29,6 +29,23 @@ key_reading:
   end_paragraph: 1
   slug: 3nau9
   text_ref: dhqrv
+  printed_char_marks:
+  - 28
+  - 58
+  - 88
+  - 117
+  - 146
+  - 176
+  - 205
+  - 236
+  - 244
+  - 259
+  - 286
+  - 317
+  - 347
+  - 377
+  - 384
+  printed_counter_last: 384
 extraction_check:
   verdict: confirmed
   corroborated_by_first_edition: true

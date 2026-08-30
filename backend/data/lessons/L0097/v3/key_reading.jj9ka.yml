@@ -37,6 +37,23 @@ key_reading:
   source: extract_key_reading_v3
   slug: jj9ka
   text_ref: pa39q
+  printed_char_marks:
+  - 22
+  - 49
+  - 53
+  - 75
+  - 102
+  - 107
+  - 135
+  - 165
+  - 192
+  - 222
+  - 253
+  - 281
+  - 310
+  - 340
+  - 368
+  printed_counter_last: 368
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

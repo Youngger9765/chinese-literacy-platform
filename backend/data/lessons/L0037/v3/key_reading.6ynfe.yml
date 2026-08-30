@@ -27,6 +27,22 @@ key_reading:
   end_paragraph: 4
   slug: 6ynfe
   text_ref: fv7cm
+  printed_char_marks:
+  - 28
+  - 58
+  - 88
+  - 118
+  - 147
+  - 177
+  - 206
+  - 217
+  - 245
+  - 274
+  - 303
+  - 330
+  - 359
+  - 368
+  printed_counter_last: 368
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null
