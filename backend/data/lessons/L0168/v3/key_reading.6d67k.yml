@@ -51,16 +51,18 @@ key_reading:
       comment: 哇嗚，超級厲害！
     no_correct_answer: true
     answer_carrier: 學生自填，原稿三個□都沒有勾選
-  passage: 「哦！阿哲也來啦！」教練一邊準備貼紮的用具，一邊熱絡的打招呼。
+  passage: 「哦！阿哲也來啦！」教練一邊準備貼紮的用具，一邊熱絡的打招呼。「教練，我們的小學弟有煩惱想要請教您。」隊長先替我開了口。「什麼煩惱？最近都表現不好嗎？」教練一針見血的說，「你有好好放鬆、好好睡覺嗎？」我像瞬間被戳破的氣球，洩氣的搖搖頭。「可是他自主菜單都有認真練哦！」隊長急忙幫我緩頰。「我知道他很努力，」教練轉過身來說，「但放鬆跟休息也是訓練的一環。就像你，受傷還硬要上場，只會讓恢復時間拉長，反而影響到更重要的比賽。」教練說，「你們都很認真，也都會照顧隊友，但別忘了，你們還有一個最重要的夥伴──自己的身體。身為運動員，更要懂得照顧他，感謝他。如果只是一直使喚他、抱怨他，有一天他也會不理你喔！」
   start_text: 「哦！阿哲也來啦！」教練一邊準備貼紮的用具，一邊
-  extent_chars: 31
+  extent_chars: 300
   source: extract_key_reading_v3
   start_paragraph: 11
-  end_paragraph: 11
+  end_paragraph: 15
   slug: 6d67k
   text_ref: pmxkq
   printed_counter_last: 300
 extraction_check:
-  verdict: confirmed
-  corroborated_by_first_edition: true
+  verdict: disagrees_with_first_edition
+  corroborated_by_first_edition: false
   absorbed_tail: 0
+needs_human_review: true
+review_reason: 二修學習單指定第11段，一版人工掃描標的是同一課的另一段，且那段文字在本課仍逐字存在。二修為主所以照寫，但兩版之一標錯了，要人看紙本確認。

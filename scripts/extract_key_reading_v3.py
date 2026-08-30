@@ -123,6 +123,13 @@ MIN_CHARS, MAX_CHARS = 12, 900
 #: 印出來的數字本身，`instruction_note` / `start_marker_note` /
 #: `start_paragraph_conflict_note` 講的是錨點與指示句）—— 那些是原稿的事實，
 #: 與 passage 取到哪裡無關，刪掉是湮滅證據而不是消除矛盾。
+#: 從 ☞ 往後最多累加幾段。學習單標的範圍實測最長 8 段；
+#: 給到 12 是為了不誤擋，超過就是累計欄或段界讀錯了，不是真的要唸 12 段。
+MAX_SPAN_PARAGRAPHS = 12
+#: 累加結果與累計欄末筆差多少還算對得上。實測差值多為個位數（標點/空白算法差異），
+#: L0001 差 5、L0132 差 2。超過就標記讓人看，⛔ 不要自動吸收。
+SPAN_TOLERANCE = 20
+
 RANGE_ERA_FIELDS = (
     "spans_paragraphs",            # 「跨哪幾段」
     "approx_chars_from_start",     # ＝字數欄 max
@@ -400,7 +407,67 @@ def extract(uid: str, part: dict | None = None) -> dict:
     passage, absorbed = absorb_split_tail(l["texts"], l["order"], anchor, l["pos_of"],
                                           l.get("unnumbered_after"))
     passage = passage.strip()
-    out.update(passage=passage, absorbed_tail=absorbed,
+
+    # ── 範圍：☞ 那一段 → 累計字數欄末筆落在的那一段 ────────────────────────
+    #
+    # ⚠️ 2026-08-30 加。在此之前 `end_paragraph` 寫死等於 `start_paragraph`，
+    #    於是全庫 passage 中位數只有 144 字、只有 4/160 達 300 字 ——
+    #    明珠老師 2026-08-29 回報「測流暢度需要至少 300 字」，測不了。
+    #
+    # 依據（三個互相獨立的來源）：
+    #   ① 現場：學習單上「☞ 是開始，學生要讀的是右方有標字數的**全部段落**」
+    #   ② 實體學習單照片（L0003）：☞ 在第七段，而第七段**第一行**的數字就是 28
+    #      → 累計欄**從 ☞ 開始算**，末筆直接就是該唸的字數
+    #   ③ 2026-07-20 專家審查定的是「約 300–400 字」（docs/PRD.md:1602）
+    #
+    # ⚠️ 這**不是**「一路抽到文末」（那個 2026-08-24 被否決，理由成立）——
+    #    累計欄常常提早停（實測 115/138 課），停在哪就到哪。
+    #
+    # 末筆從 yml 的 `printed_counter_last` 讀（#2912 已轉錄 150 課），
+    # 所以這支仍然**不需要 DOCX**。讀不到就退回單段並標記，⛔ 不猜。
+    end = anchor
+    counter_last = (l.get("kr") or {}).get("printed_counter_last")
+    span_note = None
+    if isinstance(counter_last, int) and counter_last > 0:
+        # ⛔ 不是「累加到 >= max 才停」——那會多吃一段（實測 32 課差在這裡）。
+        #    取**離 max 最近**的那個停點：一路累加，記下每一步的差距，挑最小的。
+        acc, idx, hops = 0, anchor, 0
+        best = (abs(0 - counter_last), anchor, 0)      # (差距, 停在哪一段, 到那裡的字數)
+        while idx in l["by_idx"] and hops < MAX_SPAN_PARAGRAPHS:
+            acc += len(_norm(l["by_idx"][idx]))
+            cand = (abs(acc - counter_last), idx, acc)
+            if cand[0] < best[0]:
+                best = cand
+            if acc >= counter_last:
+                break
+            idx += 1
+            hops += 1
+        gap, end, acc = best
+        if gap > SPAN_TOLERANCE:
+            # 對不上就不要假裝算對了 —— 出貨但標記，讓它被看見。
+            span_note = (f"從第 {anchor} 段累加到第 {end} 段共 {acc} 字，"
+                         f"但學習單累計欄末筆是 {counter_last}（差 {gap}）")
+        if end > anchor:
+            passage = "".join(l["by_idx"][i] for i in range(anchor, end + 1)).strip()
+        # 沒編號的收尾區塊不在 `by_idx` 裡，上面的迴圈拿不到它。
+        # L0084 就是這樣：counter_last=304，第 6 段只有 179，差的 125 字是那段
+        # 沒有段號的結語（它自己的 passage_note 寫著「合計 304 字，與字數欄末筆吻合」）。
+        # ⛔「沒有段號」是排版，不是「不用唸」—— 差距還大就把它接上，接完更接近才收。
+        if gap > SPAN_TOLERANCE:
+            for tail in (l.get("unnumbered_after") or {}).get(end, []):
+                cand = (passage + tail).strip()
+                if abs(len(_norm(cand)) - counter_last) < gap:
+                    passage = cand
+                    gap = abs(len(_norm(cand)) - counter_last)
+                    span_note = None if gap <= SPAN_TOLERANCE else span_note
+    else:
+        span_note = "沒有 printed_counter_last，退回單段（不猜範圍）"
+
+    #: 累計欄有沒有把這一課的範圍講清楚（沒講清楚才需要人裁決）
+    gap_unresolved = span_note is not None
+
+    out.update(passage=passage, absorbed_tail=absorbed, end_anchor=end,
+               counter_last=counter_last, span_note=span_note,
                start_text=passage[:24], chars=len(_norm(passage)))
 
     if len(_norm(passage)) > MAX_CHARS:
@@ -414,7 +481,13 @@ def extract(uid: str, part: dict | None = None) -> dict:
     # 抽這一課全文時，讀圖的人對「那個沒段號的收尾段算不算在朗讀範圍內」留了判斷。
     # 我們的句尾規則說不算（指定段自己把句子講完了）。兩個訊號相反、又沒有教授的
     # 掃描可以仲裁時，**照規則出貨並標記**，不是默默選一個。
+    # 讀圖的人對「那個沒段號的收尾段算不算在朗讀範圍內」留了相反的判斷。
+    # ⚠️ 2026-08-30：**累計字數欄可以仲裁這件事**。L0084 的 counter_last=304，
+    #    而「第 6 段 ＋ 結語」正好 304 字（第 6 段自己只有 179）——
+    #    紙上印的數字說了算，不需要再標成爭議。
+    #    只有在累計欄也對不上時才標記交給人。
     if (not out.get("absorbed_tail")
+            and gap_unresolved
             and any("朗讀範圍" in (n or "")
                     for n in (l.get("unnumbered_notes") or {}).get(anchor, []))):
         out["verdict"] = "unnumbered_tail_disputed"
@@ -467,7 +540,9 @@ def apply(uid: str, r: dict) -> None:
     kr["start_text"] = r["start_text"]
     kr["extent_chars"] = r["chars"]
     kr["start_paragraph"] = r["anchor"]
-    kr["end_paragraph"] = r["anchor"]
+    kr["end_paragraph"] = r.get("end_anchor") or r["anchor"]
+    if r.get("counter_last") is not None:
+        kr["printed_counter_last"] = r["counter_last"]
     for stale in RANGE_ERA_FIELDS:   # ⚠️ 不要叫 f —— 外面的 f 是要寫回的 Path
         kr.pop(stale, None)
     kr.pop("extraction_check", None)  # earlier runs of this script nested it here

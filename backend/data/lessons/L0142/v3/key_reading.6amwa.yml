@@ -48,16 +48,17 @@ key_reading:
     feedback: 嗯，還不錯喲！
   - threshold: ＞251字
     feedback: 哇嗚，超級厲害！
-  passage: 一名女子從倫敦地鐵避難所回家，裙腳還沾著灰塵。她家那條街已成廢墟，但她受訪時並未呼天搶地，只平靜幽默的說：「炸得還可以，沒打破我的茶壺。」當時英國人用「克制的上唇（stiff
-    upper lip）」來形容這種面不改色的心理韌性。隨著大眾媒體的報導，「克制的上唇」成了英國的文化象徵，成了對恐懼集體免疫的預防針，更成了「我們撐得下去」的證據。
+  passage: 一名女子從倫敦地鐵避難所回家，裙腳還沾著灰塵。她家那條街已成廢墟，但她受訪時並未呼天搶地，只平靜幽默的說：「炸得還可以，沒打破我的茶壺。」當時英國人用「克制的上唇（stiff upper lip）」來形容這種面不改色的心理韌性。隨著大眾媒體的報導，「克制的上唇」成了英國的文化象徵，成了對恐懼集體免疫的預防針，更成了「我們撐得下去」的證據。英國首相丘吉爾多次巡視災區，和居民握手、為他們掉淚，也再三承諾，他一定會對德國「加倍奉還」。他發現，人們看見的不是百廢待舉的城市，反而是一種同舟共濟、生死與共的樣貌。丘吉爾在對全國廣播時，說出他所看見的：「斷水斷電……但我們的人民從一開始就展現出無比的勇氣、堅韌與耐力。」「轟炸點燃了英國人心中的火焰。」
   start_text: 一名女子從倫敦地鐵避難所回家，裙腳還沾著灰塵。她
-  extent_chars: 168
+  extent_chars: 324
   source: extract_key_reading_v3
   slug: 6amwa
   text_ref: v7krr
-  end_paragraph: 8
+  end_paragraph: 9
   printed_counter_last: 372
 extraction_check:
-  verdict: confirmed
-  corroborated_by_first_edition: true
+  verdict: disagrees_with_first_edition
+  corroborated_by_first_edition: false
   absorbed_tail: 0
+needs_human_review: true
+review_reason: 二修學習單指定第8段，一版人工掃描標的是同一課的另一段，且那段文字在本課仍逐字存在。二修為主所以照寫，但兩版之一標錯了，要人看紙本確認。
