@@ -35,6 +35,23 @@ key_reading:
   end_paragraph: 8
   slug: m47w4
   text_ref: 6xkpp
+  printed_char_marks:
+  - 27
+  - 51
+  - 77
+  - 100
+  - 125
+  - 147
+  - 174
+  - 203
+  - 232
+  - 261
+  - 267
+  - 295
+  - 327
+  - 354
+  - 361
+  printed_counter_last: 361
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

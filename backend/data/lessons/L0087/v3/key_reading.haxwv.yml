@@ -29,6 +29,21 @@ key_reading:
   end_paragraph: 3
   slug: haxwv
   text_ref: rpcyh
+  printed_char_marks:
+  - 10
+  - 28
+  - 58
+  - 88
+  - 118
+  - 148
+  - 176
+  - 204
+  - 234
+  - 264
+  - 293
+  - 323
+  - 337
+  printed_counter_last: 337
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

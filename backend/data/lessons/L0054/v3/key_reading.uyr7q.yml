@@ -31,6 +31,28 @@ key_reading:
   end_paragraph: 5
   slug: uyr7q
   text_ref: a3pdu
+  printed_char_marks:
+  - 27
+  - 57
+  - 87
+  - 102
+  - 107
+  - 135
+  - 165
+  - 193
+  - 195
+  - 200
+  - 228
+  - 257
+  - 285
+  - 315
+  - 332
+  - 360
+  - 391
+  - 420
+  - 450
+  - 478
+  printed_counter_last: 478
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

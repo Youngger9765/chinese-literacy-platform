@@ -148,6 +148,7 @@ jobs:
             tests/test_organizations_split_1890.py \
             tests/test_perf_1243_remaining_optimizations.py \
             tests/test_perf_sql_aggregates.py \
+            tests/test_printed_char_marks_recorded_2912.py \
             tests/test_progress_carry_forward_2889.py \
             tests/test_raw_table_not_public_2769.py \
             tests/test_reading_attempt_history.py \

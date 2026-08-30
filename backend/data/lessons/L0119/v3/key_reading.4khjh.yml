@@ -44,6 +44,25 @@ key_reading:
   end_paragraph: 4
   slug: 4khjh
   text_ref: d4jfj
+  printed_char_marks:
+  - 27
+  - 56
+  - 77
+  - 94
+  - 111
+  - 128
+  - 143
+  - 170
+  - 200
+  - 229
+  - 259
+  - 273
+  - 301
+  - 331
+  - 361
+  - 390
+  - 417
+  printed_counter_last: 417
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

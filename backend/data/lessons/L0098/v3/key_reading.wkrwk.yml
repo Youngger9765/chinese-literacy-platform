@@ -28,6 +28,23 @@ key_reading:
   source: extract_key_reading_v3
   slug: wkrwk
   text_ref: phue3
+  printed_char_marks:
+  - 28
+  - 57
+  - 87
+  - 117
+  - 145
+  - 175
+  - 195
+  - 223
+  - 252
+  - 282
+  - 312
+  - 342
+  - 372
+  - 402
+  - 406
+  printed_counter_last: 406
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

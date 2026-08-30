@@ -20,7 +20,8 @@ key_reading:
     feedback: 嗯，還不錯喲！
   - threshold: ＞231字
     feedback: 哇嗚，超級厲害！
-  benchmark_threshold_note: 本課門檻是 200／201~230／231（白話課多為 220／221~250／251）——Level 5 較低。
+  benchmark_threshold_note: 本課門檻是 200／201~230／231（白話課多為 220／221~250／251）——Level 5
+    較低。
   layout_note: '⚠️ PDF p3 上「二 念順順」的標題與指示語**疊印在課文最後兩行上面**，三者互相遮蓋。
 
     那是 LibreOffice 把浮動框排在文字上造成的，不是缺頁；文字流裡都是齊全的。'
@@ -32,6 +33,24 @@ key_reading:
   end_paragraph: 5
   slug: cuq4n
   text_ref: p9d6j
+  printed_char_marks:
+  - 28
+  - 57
+  - 86
+  - 116
+  - 133
+  - 161
+  - 193
+  - 223
+  - 252
+  - 282
+  - 289
+  - 317
+  - 347
+  - 377
+  - 407
+  - 412
+  printed_counter_last: 412
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

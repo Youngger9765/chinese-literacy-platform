@@ -49,6 +49,7 @@ key_reading:
   end_paragraph: 2
   slug: rqjxq
   text_ref: 7c3ah
+  printed_counter_last: 400
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

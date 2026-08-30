@@ -27,6 +27,24 @@ key_reading:
   end_paragraph: 3
   slug: 6yxve
   text_ref: dmhc3
+  printed_char_marks:
+  - 27
+  - 57
+  - 85
+  - 115
+  - 144
+  - 155
+  - 183
+  - 212
+  - 242
+  - 269
+  - 297
+  - 326
+  - 355
+  - 385
+  - 414
+  - 422
+  printed_counter_last: 422
 extraction_check:
   verdict: confirmed
   corroborated_by_first_edition: true

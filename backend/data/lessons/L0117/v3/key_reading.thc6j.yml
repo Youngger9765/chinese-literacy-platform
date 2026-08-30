@@ -38,6 +38,19 @@ key_reading:
   end_paragraph: 2
   slug: thc6j
   text_ref: ueunt
+  printed_char_marks:
+  - 28
+  - 56
+  - 86
+  - 116
+  - 141
+  - 169
+  - 199
+  - 229
+  - 259
+  - 289
+  - 316
+  printed_counter_last: 316
 extraction_check:
   verdict: confirmed
   corroborated_by_first_edition: true

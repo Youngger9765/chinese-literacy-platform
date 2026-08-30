@@ -28,6 +28,25 @@ key_reading:
   end_paragraph: 3
   slug: 9rncr
   text_ref: mkn9y
+  printed_char_marks:
+  - 26
+  - 57
+  - 88
+  - 106
+  - 133
+  - 163
+  - 192
+  - 222
+  - 252
+  - 271
+  - 274
+  - 302
+  - 331
+  - 361
+  - 391
+  - 420
+  - 439
+  printed_counter_last: 439
 extraction_check:
   verdict: confirmed
   corroborated_by_first_edition: true

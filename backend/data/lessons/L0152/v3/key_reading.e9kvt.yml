@@ -28,6 +28,22 @@ key_reading:
   end_paragraph: 2
   slug: e9kvt
   text_ref: 6e7r9
+  printed_char_marks:
+  - 24
+  - 51
+  - 80
+  - 84
+  - 110
+  - 138
+  - 167
+  - 185
+  - 212
+  - 241
+  - 270
+  - 297
+  - 326
+  - 340
+  printed_counter_last: 340
 extraction_check:
   verdict: confirmed
   corroborated_by_first_edition: true

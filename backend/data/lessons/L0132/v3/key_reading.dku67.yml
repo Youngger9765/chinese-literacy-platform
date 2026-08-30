@@ -49,6 +49,7 @@ key_reading:
   end_paragraph: 3
   slug: dku67
   text_ref: ue3q9
+  printed_counter_last: 353
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

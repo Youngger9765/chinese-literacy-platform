@@ -26,6 +26,24 @@ key_reading:
   end_paragraph: 6
   slug: 3ma4h
   text_ref: h6kd6
+  printed_char_marks:
+  - 26
+  - 54
+  - 82
+  - 110
+  - 138
+  - 166
+  - 181
+  - 207
+  - 236
+  - 264
+  - 292
+  - 320
+  - 350
+  - 378
+  - 407
+  - 434
+  printed_counter_last: 434
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

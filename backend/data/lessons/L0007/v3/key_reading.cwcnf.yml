@@ -27,6 +27,25 @@ key_reading:
   end_paragraph: 5
   slug: cwcnf
   text_ref: c9h66
+  printed_char_marks:
+  - 27
+  - 45
+  - 61
+  - 77
+  - 104
+  - 130
+  - 157
+  - 172
+  - 189
+  - 218
+  - 248
+  - 271
+  - 298
+  - 327
+  - 356
+  - 385
+  - 399
+  printed_counter_last: 399
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

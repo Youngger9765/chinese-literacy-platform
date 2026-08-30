@@ -33,6 +33,21 @@ key_reading:
   end_paragraph: 1
   slug: dxjyx
   text_ref: uwr7r
+  printed_char_marks:
+  - 26
+  - 56
+  - 85
+  - 95
+  - 112
+  - 139
+  - 168
+  - 198
+  - 227
+  - 255
+  - 282
+  - 312
+  - 340
+  printed_counter_last: 340
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

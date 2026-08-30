@@ -28,6 +28,26 @@ key_reading:
   end_paragraph: 4
   slug: n3jva
   text_ref: tqvdk
+  printed_char_marks:
+  - 27
+  - 57
+  - 87
+  - 117
+  - 146
+  - 161
+  - 187
+  - 217
+  - 247
+  - 277
+  - 306
+  - 311
+  - 339
+  - 369
+  - 396
+  - 426
+  - 456
+  - 471
+  printed_counter_last: 471
 extraction_check:
   verdict: confirmed
   corroborated_by_first_edition: true

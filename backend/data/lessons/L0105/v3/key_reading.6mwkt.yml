@@ -26,6 +26,23 @@ key_reading:
   end_paragraph: 4
   slug: 6mwkt
   text_ref: qqppu
+  printed_char_marks:
+  - 27
+  - 56
+  - 86
+  - 115
+  - 125
+  - 151
+  - 180
+  - 210
+  - 240
+  - 269
+  - 298
+  - 328
+  - 357
+  - 387
+  - 409
+  printed_counter_last: 409
 extraction_check:
   verdict: confirmed
   corroborated_by_first_edition: true

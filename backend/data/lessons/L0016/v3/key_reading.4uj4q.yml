@@ -27,6 +27,24 @@ key_reading:
   end_paragraph: 1
   slug: 4uj4q
   text_ref: n3tjn
+  printed_char_marks:
+  - 27
+  - 57
+  - 87
+  - 117
+  - 146
+  - 153
+  - 179
+  - 207
+  - 234
+  - 248
+  - 276
+  - 305
+  - 335
+  - 365
+  - 395
+  - 407
+  printed_counter_last: 407
 extraction_check:
   verdict: confirmed
   corroborated_by_first_edition: true

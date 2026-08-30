@@ -29,6 +29,23 @@ key_reading:
   end_paragraph: 1
   slug: hqnw3
   text_ref: 3ynpe
+  printed_char_marks:
+  - 28
+  - 57
+  - 85
+  - 115
+  - 146
+  - 172
+  - 190
+  - 208
+  - 236
+  - 266
+  - 297
+  - 327
+  - 357
+  - 387
+  - 409
+  printed_counter_last: 409
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

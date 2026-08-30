@@ -30,6 +30,21 @@ key_reading:
   part: 1
   slug: yprak
   text_ref: p3kud
+  printed_char_marks:
+  - 28
+  - 57
+  - 86
+  - 116
+  - 145
+  - 171
+  - 197
+  - 227
+  - 255
+  - 284
+  - 313
+  - 343
+  - 365
+  printed_counter_last: 365
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

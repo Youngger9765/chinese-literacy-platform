@@ -27,6 +27,21 @@ key_reading:
   end_paragraph: 1
   slug: aqhhj
   text_ref: nraty
+  printed_char_marks:
+  - 28
+  - 58
+  - 88
+  - 118
+  - 148
+  - 204
+  - 234
+  - 264
+  - 294
+  - 324
+  - 354
+  - 384
+  - 389
+  printed_counter_last: 389
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

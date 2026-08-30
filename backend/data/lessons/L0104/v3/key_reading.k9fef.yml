@@ -33,6 +33,24 @@ key_reading:
   end_paragraph: 6
   slug: k9fef
   text_ref: nperf
+  printed_char_marks:
+  - 28
+  - 58
+  - 87
+  - 114
+  - 141
+  - 168
+  - 197
+  - 226
+  - 256
+  - 285
+  - 312
+  - 339
+  - 368
+  - 397
+  - 427
+  - 456
+  printed_counter_last: 456
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

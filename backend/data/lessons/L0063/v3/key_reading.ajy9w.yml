@@ -28,6 +28,21 @@ key_reading:
   part: 3
   slug: ajy9w
   text_ref: 7wavn
+  printed_char_marks:
+  - 28
+  - 57
+  - 86
+  - 116
+  - 145
+  - 171
+  - 197
+  - 227
+  - 255
+  - 284
+  - 313
+  - 343
+  - 365
+  printed_counter_last: 365
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null

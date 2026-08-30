@@ -31,6 +31,21 @@ key_reading:
   end_paragraph: 2
   slug: jfpu3
   text_ref: ptwcu
+  printed_char_marks:
+  - 29
+  - 60
+  - 90
+  - 121
+  - 151
+  - 181
+  - 204
+  - 232
+  - 263
+  - 294
+  - 324
+  - 355
+  - 384
+  printed_counter_last: 384
 extraction_check:
   verdict: ok
   corroborated_by_first_edition: null
