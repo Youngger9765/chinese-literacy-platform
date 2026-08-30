@@ -116,6 +116,7 @@ jobs:
             tests/test_course_intro_present_2736.py \
             tests/test_course_level_modules_are_loaded_2964.py \
             tests/test_dashboard_assignment_completion.py \
+            tests/test_deferred_answer_extraction_stays_unreachable_2823.py \
             tests/test_dialogue_history.py \
             tests/test_docx_named_styles_2715.py \
             tests/test_docx_second_opinion_2868.py \
