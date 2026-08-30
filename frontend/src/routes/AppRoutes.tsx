@@ -37,6 +37,7 @@ import RegisterPage from '../pages/RegisterPage';
 import ChangePasswordPage from '../pages/ChangePasswordPage';
 import ForgotPassword from '../pages/ForgotPassword';
 import JunyiCallbackPage from '../pages/JunyiCallbackPage';
+import JunyiStartPage from '../pages/JunyiStartPage';
 
 // ---------------------------------------------------------------------------
 // Route-level code splitting (lazy loading)
@@ -127,7 +128,8 @@ const AppRoutes: React.FC = () => (
         }
       />
 
-      {/* Junyi SSO callback — public route, handles the one-time code exchange (issue #1198) */}
+      {/* Junyi SSO public start + callback routes (issue #1198) */}
+      <Route path="/auth/junyi/start" element={<JunyiStartPage />} />
       <Route path="/junyi-callback" element={<JunyiCallbackPage />} />
 
       {/* Change password (after first login) */}

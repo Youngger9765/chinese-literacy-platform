@@ -1,5 +1,5 @@
 /**
- * JunyiCallbackPage — handles the OAuth-like callback from Junyi SSO (issue #1198).
+ * JunyiCallbackPage — handles the callback from Junyi custom SSO (issue #1198).
  *
  * Flow:
  * 1. Junyi redirects back to /junyi-callback?code=<one-time-code>(&state=<csrf-token>)
@@ -8,7 +8,7 @@
  * 4. On failure → show a clear error with a "retry" button that re-initiates SSO.
  *
  * Security:
- * - CSRF state is validated against sessionStorage before exchanging the code.
+ * - CSRF state and the local post-login path are bound in sessionStorage.
  * - The code is consumed and removed from the URL immediately to prevent re-use via back/reload.
  * - We call replaceState() before the exchange so the code never lingers in browser history.
  */
@@ -16,8 +16,16 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { trackEvent } from '../utils/analytics';
+import { readJSON, safeStorage, writeJSON } from '../utils/storage';
 
-const JUNYI_STATE_KEY = 'junyi_sso_state';
+const JUNYI_PENDING_KEY = 'junyi_sso_pending';
+const JUNYI_PENDING_TTL_MS = 600_000;
+
+interface JunyiPendingLogin {
+  state: string;
+  postLoginPath: string;
+  expiresAt: number;
+}
 
 // Hosts registered in Junyi SSO whitelist. Callback origin MUST be one of these
 // or Junyi silently refuses to redirect the ?code= back.
@@ -32,8 +40,16 @@ export function isSsoSupported(): boolean {
   return WHITELISTED_CALLBACK_ORIGINS.includes(window.location.origin);
 }
 
+function safePostLoginPath(value: string): string {
+  if (!value.startsWith('/') || value.startsWith('//')) return '/';
+
+  const url = new URL(value, window.location.origin);
+  if (url.origin !== window.location.origin) return '/';
+  return `${url.pathname}${url.search}${url.hash}`;
+}
+
 /** Build the Junyi login URL pointing at a whitelisted callback origin. */
-export function buildJunyiLoginUrl(returnTo: string = '/'): string {
+export function buildJunyiLoginUrl(postLoginPath: string = '/'): string {
   // Use current origin only if it is whitelisted; otherwise fall back to staging
   // (covers PR previews / Cloud Run direct URLs / localhost — SSO won't actually
   // complete there due to cross-origin sessionStorage, but at least the redirect
@@ -41,15 +57,48 @@ export function buildJunyiLoginUrl(returnTo: string = '/'): string {
   const callbackOrigin = isSsoSupported()
     ? window.location.origin
     : WHITELISTED_CALLBACK_ORIGINS[1]; // staging
-  const callbackUrl = `${callbackOrigin}/junyi-callback?returnTo=${encodeURIComponent(returnTo)}`;
-
-  const state = Array.from(crypto.getRandomValues(new Uint8Array(16)))
+  const state = Array.from(crypto.getRandomValues(new Uint8Array(32)))
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('');
-  sessionStorage.setItem(JUNYI_STATE_KEY, state);
+  const pending: JunyiPendingLogin = {
+    state,
+    postLoginPath: safePostLoginPath(postLoginPath),
+    expiresAt: Date.now() + JUNYI_PENDING_TTL_MS,
+  };
+  if (!writeJSON('session', JUNYI_PENDING_KEY, pending)) {
+    throw new Error('無法儲存均一登入驗證資訊');
+  }
 
-  const continueUrl = `${callbackUrl}&state=${state}`;
-  return `https://www.junyiacademy.org/login?continue=${encodeURIComponent(continueUrl)}`;
+  const callbackUrl = new URL('/junyi-callback', callbackOrigin);
+  callbackUrl.searchParams.set('state', state);
+
+  return `https://www.junyiacademy.org/login?continue=${encodeURIComponent(callbackUrl.toString())}`;
+}
+
+/** Consume a matching, unexpired pending login and return its bound local path. */
+export function consumeJunyiPendingLogin(stateParam: string | null): string | null {
+  const pending = readJSON<Partial<JunyiPendingLogin>>('session', JUNYI_PENDING_KEY);
+  if (
+    !pending
+    || typeof pending.state !== 'string'
+    || typeof pending.postLoginPath !== 'string'
+    || typeof pending.expiresAt !== 'number'
+  ) {
+    safeStorage.session.remove(JUNYI_PENDING_KEY);
+    return null;
+  }
+
+  if (pending.expiresAt <= Date.now()) {
+    safeStorage.session.remove(JUNYI_PENDING_KEY);
+    return null;
+  }
+
+  // Preserve a still-valid pending login on mismatch, as required by the
+  // Junyi SSO contract. Only the exact matching callback may consume it.
+  if (!stateParam || stateParam !== pending.state) return null;
+
+  safeStorage.session.remove(JUNYI_PENDING_KEY);
+  return safePostLoginPath(pending.postLoginPath);
 }
 
 const JunyiCallbackPage: React.FC = () => {
@@ -65,16 +114,11 @@ const JunyiCallbackPage: React.FC = () => {
 
     const code = searchParams.get('code');
     const stateParam = searchParams.get('state');
-    const returnTo = searchParams.get('returnTo') || '/';
 
-    // --- CSRF state validation ---
-    const storedState = sessionStorage.getItem(JUNYI_STATE_KEY);
-    sessionStorage.removeItem(JUNYI_STATE_KEY);
-
-    if (stateParam && storedState && stateParam !== storedState) {
-      setError('登入驗證失敗（CSRF state 不符），請重新嘗試。');
-      trackEvent('auth', 'junyi_login_csrf_mismatch');
-      return;
+    if (code) {
+      // Strip the one-time code before any validation or network work so it
+      // never remains visible in browser history, including error paths.
+      window.history.replaceState({}, '', '/junyi-callback');
     }
 
     if (!code) {
@@ -83,13 +127,17 @@ const JunyiCallbackPage: React.FC = () => {
       return;
     }
 
-    // Remove the code from the URL immediately so it never stays in browser history.
-    window.history.replaceState({}, '', '/junyi-callback');
+    const postLoginPath = consumeJunyiPendingLogin(stateParam);
+    if (!postLoginPath) {
+      setError('登入驗證失敗（state 缺少、不符或已過期），請重新嘗試。');
+      trackEvent('auth', 'junyi_login_csrf_mismatch');
+      return;
+    }
 
     loginWithJunyi(code)
       .then(({ isNewUser }) => {
         trackEvent('auth', isNewUser ? 'junyi_login_new_user' : 'junyi_login_success');
-        navigate(returnTo, { replace: true });
+        navigate(postLoginPath, { replace: true });
       })
       .catch((err: unknown) => {
         const message =
