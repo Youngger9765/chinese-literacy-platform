@@ -118,6 +118,7 @@ fi
 # After importing new courses, re-run this same gate.
 echo "-- Gate 4/10: QR-manifest reconciliation (verify_qr_manifest) --"
 ( cd backend && "$PYBIN" -m pytest tests/test_verify_qr_manifest.py -q )
+( cd backend && "$PYBIN" -m pytest specs/test_claudemd_only_names_live_gates_spec.py -q )   # CLAUDE.md 不准點名跑不起來的門（#2730）
 echo ""
 
 # ── Gate 5/10: spotlight structural ratchet ───────────────────────────────────
