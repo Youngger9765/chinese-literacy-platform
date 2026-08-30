@@ -26,6 +26,12 @@ jobs:
               - 'scripts/split_lesson_modules.py'
               - 'scripts/key_reading_xml_rule.py'
               - 'scripts/corpus_profile.py'
+              # 念順順的抽取器 —— 規則就寫在裡面（2026-08-30 那次 regression 的來源）
+              - 'scripts/extract_key_reading_v3.py'
+              # ⭐ skill 是「下一個人拿來當規格讀」的東西。2026-08-30 就是 code 改了、
+              #    skill 沒改 —— 分家的後果不是報錯，是下一個人照文件把 code 改回去。
+              #    不盯這個路徑，「只改 skill」的 PR 不會跑那道鎖 ＝ 鎖建了沒插電。
+              - '.claude/skills/**'
 
   pytest:
     needs: detect-changes
@@ -124,6 +130,7 @@ jobs:
             tests/test_inline_choices_stay_in_the_sentence_2768.py \
             tests/test_key_reading_qa_2712.py \
             tests/test_key_reading_range_restored_2912.py \
+            tests/test_key_reading_rule_is_stated_once_2912.py \
             tests/test_keypoints_columns_bridge_2736.py \
             tests/test_keypoints_shape_gate_empty_claim_2736.py \
             tests/test_knowledge_station_videos_2736.py \
