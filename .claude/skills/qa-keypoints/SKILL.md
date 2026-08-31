@@ -138,6 +138,8 @@ Known-gap 課次（不需修 — filename 無括號無法偵測 strategy）：`G
 
 per-lesson eval + 人眼抽審是課級檢查。要宣稱「重點表這批 ship 得了」**還要過全平台 content evidence gate（fail-closed）**：
 
+⚠️ **2026-08-31（#2730）：`content_evidence_gate.py` 目前不是可過的門** —— 它的 golden 凍結在 2026-07-03，早於 #2736 的多模態重抽，`golden_match` 對現行內容恆紅；而且它不在任何 workflow 裡。真正在跑、而且會擋的是 `bash specs/run-ci.sh` 的十道門（內容相關：Gate 5 結構棘輪 175 課、Gate 8 對**原稿 DOCX** 的忠實度證明）。要重立基準還是移除，見 #2730。
+
 ```bash
 python scripts/content_evidence_gate.py --run-id <id>
 bash   scripts/content_evidence_ship_gate.sh --run-id <id>   # 須印 CONTENT_EVIDENCE_GATE=PASS

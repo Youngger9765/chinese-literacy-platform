@@ -129,6 +129,10 @@ jobs:
             tests/test_inline_choice_grading_2776.py \
             tests/test_inline_choices_stay_in_the_sentence_2768.py \
             tests/test_key_reading_data_matches_extractor_2912.py \
+            tests/test_worksheet_url_is_not_silently_dead_2845.py \
+            tests/test_key_reading_anchor_matches_counter_2912.py \
+            tests/test_key_reading_ledger_matches_reality_2912.py \
+            tests/test_key_reading_span_gap_is_flagged_2912.py \
             tests/test_key_reading_qa_2712.py \
             tests/test_key_reading_range_restored_2912.py \
             tests/test_key_reading_reaches_the_student_2912.py \
@@ -360,4 +364,7 @@ jobs:
           # requirements.txt, so the deployed Cloud Run image doesn't carry a
           # dependency it never uses at runtime.
           pip install python-docx==1.2.0 lxml==6.1.0
-          python -m pytest --tb=short -q tests/test_checked_option_is_the_answer_2735.py
+          # #2823 的絆線測同一個模組（同樣要 python-docx），所以掛在這裡 ——
+          # 放進上面的 regression-lock 清單會 ModuleNotFoundError（2026-08-31 實際發生過）。
+          python -m pytest --tb=short -q tests/test_checked_option_is_the_answer_2735.py \
+            tests/test_deferred_answer_extraction_stays_unreachable_2823.py

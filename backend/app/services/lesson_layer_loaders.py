@@ -130,6 +130,17 @@ def _derive_docx_url(grade_code: str | None) -> str | None:
 
     YAML-explicit worksheet_docx_url always takes priority over this derived value
     (callers use ``_to_asset_proxy_url(data.get("worksheet_docx_url")) or _derive_docx_url(grade_code)``).
+
+    🔴 #2845（2026-08-31 實測）：**上面那句話目前不成立 —— 沒有人呼叫這支。**
+    `routes/stories.py` 只讀 yml 的 `worksheet_docx_url`，所以 `/api/stories` 的
+    175 課 `worksheet_docx_url` 全是 None，即使 manifest 有 139 個 code 對得上。
+
+    ⛔ 現在**刻意不接**：`/assets/worksheets/*.docx` 在 staging 一律 404
+    （正向對照：同一個 proxy 拿 `/assets/lesson/L0011/thumbnail.webp` 回 200 / 17KB，
+    所以 proxy 是好的，是**檔案沒上傳**）。接上去只會讓 139 課長出按下去就失敗的按鈕。
+
+    檔案上傳之後要一起做兩件事：接上這支 + 更新
+    `backend/tests/test_worksheet_url_is_not_silently_dead_2845.py`。
     """
     if not grade_code or grade_code not in _DOCX_CODES:
         return None

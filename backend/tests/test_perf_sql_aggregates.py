@@ -541,13 +541,27 @@ class TestTimeStatsSQLAggregate:
         assert resp.json()["study_days"] >= 1
 
     def test_sessions_this_week(self, client, setup):
+        """⚠️ `started_at` 不可以往前推 —— 週一凌晨會掉進上週。
+
+        端點的 this_monday 是 `(now - weekday 天).replace(hour=0)`（UTC）。
+        週一時它就是今天 00:00 UTC，所以 `now - 1 小時` 在
+        **每週一 00:00~01:00 UTC 這一小時**會落在週日 = 上週 →
+        sessions_this_week == 0 → 這一條紅。
+
+        2026-08-31（週一）01:00:06Z 的 CI 真的踩到了：`assert 0 >= 1`。
+        本機跑是綠的，因為本機那時不在那個窗口裡。
+
+        改成 started_at = now：一個「現在開始」的 session 依定義必在本週
+        （this_monday 就是從 now 截出來的），跟時鐘走到哪都無關。
+        時長改用 completed_at 往後給，不動 started_at。
+        """
         now = datetime.now(timezone.utc)
         db = TestingSessionLocal()
         db.add(LearningSession(
             student_id=setup["student"]["user_id"],
             story_slug="ts_week", status="completed",
-            started_at=now - timedelta(hours=1),
-            completed_at=now,
+            started_at=now,
+            completed_at=now + timedelta(hours=1),
         ))
         db.commit()
         db.close()

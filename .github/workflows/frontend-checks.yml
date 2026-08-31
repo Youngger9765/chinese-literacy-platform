@@ -208,4 +208,6 @@ jobs:
           src/components/reading-steps/__tests__/teacherGridStability2860.test.tsx \
           src/components/reading-steps/__tests__/wordSearchGrid.test.ts \
           src/components/learning/__tests__/stepSharedShell.test.tsx \
-          src/components/lesson-content/__tests__/rendererHeader.test.tsx
+          src/components/lesson-content/__tests__/rendererHeader.test.tsx \
+          src/components/reading-steps/__tests__/wordSearchWording2863.test.ts \
+          src/components/reading-steps/__tests__/worksheetButton2845.test.ts
