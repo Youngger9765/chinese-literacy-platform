@@ -1,0 +1,110 @@
+# 抽取品質的 eval case —— 每一條都來自**真的壞過**的東西（#2856）
+#
+# ⛔ 不是 eval-first：這裡沒有任何憑空設計的 case。
+#    每一條都附 `provenance`（哪一次真實失敗、怎麼被發現的），
+#    以及 `negative_control`（一課正常的，必須通過）——
+#    少了負向對照，「全部判紅」也會看起來像通過。
+#
+# 欄位：
+#   id                 穩定識別碼
+#   provenance.issue   哪一張票
+#   provenance.found   怎麼被發現的（人回報／走查／對帳／mutation）
+#   provenance.symptom 學生或老師實際看到什麼
+#   subject            出事的那一課
+#   assertion          要驗什麼（一句話，能對到一支鎖）
+#   negative_control   必須通過的對照課 + 理由
+#   locked_by          現在守住它的鎖
+
+schema_version: 1
+generated: 2026-08-31
+
+cases:
+  - id: key_reading_range_collapsed
+    provenance:
+      issue: 2912
+      found: 現場老師透過合作方回報（2026-08-29），不是我們自己的門抓到的
+      symptom: >-
+        測段落閱讀流暢度需要至少 300 字，但服務端 passage 中位數只有 144 字。
+        L0003 服務 259 字（第七段結束），學習單累計欄末筆是 392（第八段結束）。
+    subject: L0003
+    assertion: passage 的字數要落在學習單右緣累計欄末筆的容差內（20 字）
+    negative_control:
+      lesson: L0011
+      why: 一課本來就對得上的，改判準時它不可以跟著紅
+    locked_by: backend/tests/test_key_reading_golden_2912.py
+
+  - id: mismatch_shipped_without_a_flag
+    provenance:
+      issue: 2912
+      found: 對帳（不是門）—— 門算得出 span_note，但 apply() 從來沒讀過它
+      symptom: >-
+        19 課的字數與學習單對不上，其中只有 1 課帶 needs_human_review。
+        其餘 18 課在檔案裡看起來跟完全正確的課一模一樣。
+    subject: L0108
+    assertion: 字數與累計欄差超過容差的課，檔案自己要說「要人看」並說出是哪兩個數字
+    negative_control:
+      lesson: L0003
+      why: 對得上的課不可以被標記汙染，否則標記會變雜訊沒人看
+    locked_by: backend/tests/test_key_reading_span_gap_is_flagged_2912.py
+
+  - id: instruction_paragraph_number_off_by_one
+    provenance:
+      issue: 2912
+      found: 累計欄的**段界對齊**（第二個獨立見證人），不是靠人看
+      symptom: >-
+        指令寫「從指定段落（五☞）開始朗讀」，照 5 取得 367 字，
+        學習單累計欄末筆是 399。從第 4 段起算有 6 個段界落在數字上，從第 5 段起只有 2 個。
+    subject: L0007
+    assertion: 指令段號與我們的 idx 錯位時，用段界對齊校正（三道保守閘門）
+    negative_control:
+      lesson: L0101
+      why: >-
+        它的鄰居段命中數更高，但它現在已經對得上 —— 校正它等於把好的改壞。
+        少了這條，閘門①（現在對不上）會被拿掉而沒有人發現。
+    locked_by: backend/tests/test_key_reading_anchor_matches_counter_2912.py
+
+  - id: whitespace_eaten_from_source
+    provenance:
+      issue: 2864
+      found: skill 端到端實跑（#2857）比對現有資料時撞到
+      symptom: >-
+        原稿「短影音自 2018年開始」「每天限用 30 分鐘」，yml 把空格吃掉。
+        逐字門結構上看不到這一類 —— 它比對前 re.sub(r"\s+","",s)。
+    subject: L0034
+    assertion: 原稿有空格而 yml 沒有的地方要抓出來（濾掉抽取器自組的字串）
+    negative_control:
+      lesson: L0003
+      why: >-
+        全庫 5068 處「中文緊貼數字」多數是原稿本來就緊貼的（第3課、日期、編號）。
+        濾網關掉的話那 4 個抽取器自組字串會回來 —— 那就是這條的對照。
+    locked_by: scripts/space_drift_scan.py
+
+  - id: multi_text_serving_only_the_first_part
+    provenance:
+      issue: 2916
+      found: 教材端回報 + 真瀏覽器 dry run
+      symptom: >-
+        L0063 API 只回第一篇（7 段 800 字），另外兩篇沒有音檔。
+        「聽起來正常」，少念兩篇沒有人聽得出來。
+    subject: L0063
+    assertion: 多篇課的每一步都要是**那一篇**的內容，且側欄有篇次標記
+    negative_control:
+      lesson: L0003
+      why: 單篇課不可以長出篇次標記，否則學生會以為漏做了什麼
+    locked_by: frontend/tests/e2e/multiTextJourney.spec.ts
+
+  - id: gate_looks_for_the_pre_slug_filename
+    provenance:
+      issue: 2729
+      found: 孤兒門普查（#2729）逐支實跑
+      symptom: >-
+        keypoints_shape_gate 印 KEYPOINTS_SHAPE_GATE=PASS 但檢查 0 課 ——
+        它找寫死的 v3/keypoints.yml，而 #2916 之後 155 個檔全部有 slug。
+    subject: 全庫
+    assertion: 讀模組檔案一律用 glob `{module}.*.yml`，不可以寫死無 slug 的檔名
+    negative_control:
+      lesson: 全庫
+      why: >-
+        判準要是「掃到的課數 > 0」而不是「exit 0」——
+        後者在掃到 0 課時也成立，那正是這個 case 的形狀。
+    locked_by: backend/specs/test_gate_scripts_are_classified_spec.py
