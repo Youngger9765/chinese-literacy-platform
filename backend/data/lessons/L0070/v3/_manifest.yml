@@ -20,7 +20,14 @@ sections:
   - 8
   - 9
   - 10
+- 'no': null
+  name: null
+  module: full_text_annotate
+  printed: false
+  slug: cdhdt
+  file: full_text_annotate.cdhdt.yml
 dispatch:
+- full_text_annotate
 - spotlight
 produced:
 - full_text_annotate

@@ -69,9 +69,16 @@ sections:
   file: self_challenge.ftffm.yml
   pages:
   - 11
+- 'no': null
+  name: null
+  module: key_reading
+  printed: false
+  slug: 3jdew
+  file: key_reading.3jdew.yml
 dispatch:
 - classical_text
 - comprehension
+- key_reading
 - keypoints
 - modern_translation
 - self_challenge

@@ -44,7 +44,6 @@ NOT_WIRED = {
         "要接必須先改成 glob `keypoints.*.yml`。",
     "check_curriculum_drift.py": "需要 --source 或 MANIFEST.source_dir（原稿），裸跑 exit 2",
     "merge_reparsed_to_prod.py": "舊 regex 管線的合併工具（#2751），且需要 --demo/--all 參數",
-    "build_lesson_manifest.py": "建置期產 _manifest.yml（跑一次產 174 份），不是門",
     "extract_source_witnesses.py": "#2865 裁判鏈的一半，需要 --uid 等參數，由 witness_reconcile_gate 那條路帶",
     "eval_overview_repeatability.py": "需要多次 LLM 掃描結果當輸入（見 #2854 盤點）",
     "skill_dryrun_diff.py": "需要參數（比對 skill 乾跑輸出），由人在改 skill 時手動叫",

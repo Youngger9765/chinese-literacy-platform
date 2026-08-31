@@ -158,13 +158,19 @@ def build_one(version_dir: pathlib.Path, table: dict, gaps: dict, pages_db: dict
             # 用「它的 text_ref 指向第幾篇」把檔案排序，再依帳本順序配過去。
             # ⛔ 不能用檔名字母序 —— slug 是不透明亂碼，跟課本順序無關。
             cand = _module_files.get(module) or []
-            k = _module_seen[module]
+            # ⚠️ `.get(module, 0)` 不是防禦性寫法，是**新教材本來的狀態**（#3011）：
+            #    `sections_present` 是學習單印的目錄（九個大題），而模組檔是一節一節
+            #    慢慢抽的。學習單有、硬碟還沒有的那幾節根本不在 `_module_seen` 裡。
+            #    這裡原本是 `_module_seen[module]` 直接 KeyError，而 main() 是
+            #    先全部算完再寫 —— 所以**一課炸掉 = 175 課的派工單全部沒產出**。
+            #    2026-08-31 加 體-L12~L15 時撞到（課文與念順順抽好，其餘七節還沒）。
+            k = _module_seen.get(module, 0)
             if k < len(cand):
                 sl, tr = cand[k]
                 slug = sl
                 if tr is not None:
                     entry["text_ref"] = tr
-            _module_seen[module] += 1
+            _module_seen[module] = k + 1
             # `part` 是原稿怎麼印就怎麼記，五種寫法都出現過：
             #   1 / 2 / 3          （L0029、L0063、L0111）
             #   '1/2' '2/2'        （L0137）
@@ -196,6 +202,26 @@ def build_one(version_dir: pathlib.Path, table: dict, gaps: dict, pages_db: dict
                     # 標題沒印出來、範圍是靠前後鄰居夾的 —— 消費端該知道信心比較低
                     entry["pages_source"] = stored["pages_source"]
         sections.append(entry)
+
+    # 硬碟上有、但學習單目錄沒點到的那幾節（#3011）。
+    #
+    # 帳本同時是兩件事：**學習單印的大題目錄**，以及**代號目錄**（`slug` 只住這裡）。
+    # 這兩件事在 8 課上分岔了 —— 例如 L0044/L0068/L0070/L0106 的學習單沒有
+    # 「讀全文」這個大題，可是 `full_text_annotate.<slug>.yml` 在硬碟上、課文也真的
+    # 服務得出來（577–1650 字，學生讀得到）。目錄不列它，`_section_slugs_by_article`
+    # 就拿不到課文的代號，那四課的全文 QR 因此一直是空的 —— 沒有錯誤、清單照樣產出。
+    #
+    # 所以把它們補在**尾端**（不影響前面按位置對 section-pages.yml 的頁碼），
+    # 並標 `printed: false` 說清楚「這一節存在，但不是學習單印出來的大題」。
+    for module in sorted(_module_files):
+        for slug, tref in _module_files[module][_module_seen.get(module, 0):]:
+            entry = {"no": None, "name": None, "module": module,
+                     "printed": False, "slug": slug,
+                     "file": f"{module}.{slug}.yml"}
+            if tref is not None:
+                entry["text_ref"] = tref
+            sections.append(entry)
+        _module_seen[module] = len(_module_files[module])
 
     # 重複模組的檔名是 `{module}.{slug}.yml`（#2916），拿整個 stem 會冒出
     # `key_reading.m7qxv` 這種不存在的模組名，跟 dispatch 永遠對不上

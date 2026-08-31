@@ -77,10 +77,17 @@ sections:
   file: self_challenge.9uqnf.yml
   pages:
   - 12
+- 'no': null
+  name: null
+  module: key_reading
+  printed: false
+  slug: dc77j
+  file: key_reading.dc77j.yml
 dispatch:
 - classical_text
 - comprehension
 - intro_guide
+- key_reading
 - keypoints
 - modern_translation
 - self_challenge

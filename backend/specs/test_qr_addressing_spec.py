@@ -104,16 +104,28 @@ def test_every_lesson_that_has_an_article_can_print_a_short_code(rows):
     assert not missing, f"有課文卻印不出代號: {missing}"
 
 
+#: 帳本裡沒有課文那一節的課 —— 它們印不出全文 QR。⛔ 只能變少（棘輪）。
+#:
+#: 2026-08-25 寫下來時有 6 課，當時用 `==` 寫死。#3011 修好其中 5 課之後
+#: （L0044/L0068/L0070/L0106 的課文檔一直在硬碟上、課文也真的服務得出來
+#: 577–1650 字，只是學習單目錄沒印「讀全文」那個大題所以帳本沒收；L0124 是
+#: 整份目錄沒抽出來）這條就**因為情況變好而變紅**——那是判準的形狀錯了，
+#: 不是有人弄壞東西。改成棘輪：缺陷回來一樣會叫，修好了不會被當成壞事。
+ARTICLELESS_CEILING = {"L0044", "L0068", "L0070", "L0106", "L0124", "L0136"}
+
+
 def test_lessons_without_an_article_are_named_not_silently_skipped(rows):
     """沒有課文的課印不出 QR —— 那是對的，但要**點名**。
 
     無聲跳過的話，某一課哪天掉了課文模組會看起來跟這幾課一樣正常。
-    2026-08-25 實測這 6 課：學習單上就沒有讀全文那一節。
     """
-    without = sorted(uid for uid, r in rows.items()
-                     if not any(s.get("module") in ARTICLE_MODULES
-                                for s in (r.get("manifest_sections") or [])))
-    assert without == ["L0044", "L0068", "L0070", "L0106", "L0124", "L0136"], without
+    without = {uid for uid, r in rows.items()
+               if not any(s.get("module") in ARTICLE_MODULES
+                          for s in (r.get("manifest_sections") or []))}
+    #: 正向對照：這個掃描要真的看得到課（不然空集合什麼都不證明）
+    assert len(rows) >= 150, f"只掃到 {len(rows)} 課，掃描本身壞了"
+    extra = without - ARTICLELESS_CEILING
+    assert not extra, f"這幾課的帳本沒有課文那一節，全文 QR 會靜靜地不出：{sorted(extra)}"
 
 
 def test_classical_lessons_get_their_passage_code_too(rows):

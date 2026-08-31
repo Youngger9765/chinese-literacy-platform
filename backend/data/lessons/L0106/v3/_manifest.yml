@@ -19,7 +19,14 @@ sections:
   - 7
   - 8
   - 9
+- 'no': null
+  name: null
+  module: full_text_annotate
+  printed: false
+  slug: p9whw
+  file: full_text_annotate.p9whw.yml
 dispatch:
+- full_text_annotate
 - spotlight
 produced:
 - full_text_annotate

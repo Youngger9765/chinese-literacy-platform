@@ -66,8 +66,15 @@ sections:
   file: resources.7u7q7.yml
   pages:
   - 8
+- 'no': null
+  name: null
+  module: full_text_annotate
+  printed: false
+  slug: yehu3
+  file: full_text_annotate.yehu3.yml
 dispatch:
 - comprehension
+- full_text_annotate
 - keypoints
 - resources
 - spotlight

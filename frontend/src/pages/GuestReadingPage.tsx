@@ -29,7 +29,7 @@ import { useParams, useLocation, Link } from 'react-router-dom';
 
 import ReadingAnnotation from '../components/reading-steps/FullTextAnnotate';
 import { resolveStepId, moduleForStep } from '../config/stepConfig';
-import { deliversFullText } from '../components/qr/lessonQr';
+import { hasWholeTextToRead } from '../components/qr/lessonQr';
 import { fetchStory, storyForStep } from '../services/api';
 import { sectionSlugForStep } from '../config/roundScope';
 import type { Story } from '../types';
@@ -150,7 +150,7 @@ const GuestReadingPage: React.FC = () => {
         qrStep={
           wantsPassage
             ? (passage ? 'key-passage-reading' : null)
-            : (deliversFullText(story.grade) ? 'full-text-annotate' : null)
+            : (hasWholeTextToRead(story.content) ? 'full-text-annotate' : null)
         }
       />
     </div>

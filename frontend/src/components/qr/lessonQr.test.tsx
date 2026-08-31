@@ -2,7 +2,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 
 import LessonQrButton from './LessonQrButton';
-import { buildLessonQrValue, deliversFullText, qrFileName, QR_ENTRY_ORIGIN } from './lessonQr';
+import { buildLessonQrValue, hasWholeTextToRead, qrFileName, QR_ENTRY_ORIGIN } from './lessonQr';
 import * as adminTable from '../../pages/admin/lesson-audio/LessonAudioTable';
 
 vi.mock('qrcode', () => ({
@@ -11,34 +11,40 @@ vi.mock('qrcode', () => ({
 
 afterEach(() => { vi.restoreAllMocks(); });
 
-describe('deliversFullText — 4-7 全文+段落, 8-9 段落 only', () => {
+describe('hasWholeTextToRead — 全文碼看資料不看年級（#3011）', () => {
   /**
-   * The whole grade set as staging actually serves it (175 lessons, stories
-   * === total, measured 2026-08-23). A table of two or three hand-picked cases
-   * would pass with the rule half-written; this one names every value the
-   * corpus contains, so a rule that forgets the non-numeric grades fails here
-   * rather than in front of a teacher.
+   * 這一組原本列的是「整個年級集合」（4–7 true、8–9/文言文/品格教育 false），
+   * 因為當時的規則就是由年級定義的。#3011 之後判準換成「這一節有沒有課文」，
+   * 所以這裡列的是**輸入形狀的全集** —— 呼叫端手上真的會拿到的每一種值。
+   *
+   * ⛔ 這不是把斷言放寬：沒有課文仍然 false（後四列），而且新增了
+   *    「空陣列」「非陣列」這兩種舊規則根本問不到的假資料形狀。
    */
-  const CORPUS_GRADES: Array<[string, boolean]> = [
-    ['4', true], ['5', true], ['6', true], ['7', true],
-    ['8', false], ['9', false],
-    ['文言文', false], ['品格教育', false],
+  const CORPUS_SHAPES: Array<[string, boolean | readonly unknown[] | null | undefined, boolean]> = [
+    ['has_full=true（清單端點算好的）', true, true],
+    ['段落陣列有內容', ['第一段', '第二段'], true],
+    ['單段也算', ['只有一段'], true],
+    ['has_full=false', false, false],
+    ['空陣列（抽取失敗留下的形狀）', [], false],
+    ['null（欄位不存在）', null, false],
+    ['undefined（欄位沒送）', undefined, false],
   ];
 
-  it.each(CORPUS_GRADES)('grade %s -> %s', (grade, expected) => {
-    expect(deliversFullText(grade)).toBe(expected);
+  it.each(CORPUS_SHAPES)('%s -> %s', (_label, input, expected) => {
+    expect(hasWholeTextToRead(input)).toBe(expected);
   });
 
-  it('covers every grade the corpus has, and the split is 4 yes / 4 no', () => {
-    // Guards the table above against being quietly trimmed to the easy cases.
-    expect(CORPUS_GRADES).toHaveLength(8);
-    expect(CORPUS_GRADES.filter(([, yes]) => yes)).toHaveLength(4);
-    expect(CORPUS_GRADES.filter(([, yes]) => !yes)).toHaveLength(4);
+  it('涵蓋每一種真的會進來的形狀，3 通過 / 4 擋掉', () => {
+    // 擋住這張表被悄悄修剪成好過的那幾列。
+    expect(CORPUS_SHAPES).toHaveLength(7);
+    expect(CORPUS_SHAPES.filter(([, , yes]) => yes)).toHaveLength(3);
+    expect(CORPUS_SHAPES.filter(([, , yes]) => !yes)).toHaveLength(4);
   });
 
-  it('accepts numbers too (the admin list types grade as number)', () => {
-    expect(deliversFullText(7)).toBe(true);
-    expect(deliversFullText(8)).toBe(false);
+  it('年級不再是判準 —— 非數字年級的課有課文一樣拿得到碼', () => {
+    // 明珠老師 2026-08-31 回報的那 11 課，grade 是字串 `品格教育`。
+    // 舊規則 `Number.parseInt('品格教育')` = NaN → 整批擋掉。
+    expect(hasWholeTextToRead(['體育不只是身體的事'])).toBe(true);
   });
 });
 
@@ -48,7 +54,7 @@ describe('the URL rule has exactly one implementation', () => {
     // the shape that drifted last time. Identity is the only assertion that
     // stays true only while there is genuinely one of them.
     expect(adminTable.buildLessonQrValue).toBe(buildLessonQrValue);
-    expect(adminTable.deliversFullText).toBe(deliversFullText);
+    expect(adminTable.hasWholeTextToRead).toBe(hasWholeTextToRead);
     expect(adminTable.qrFileName).toBe(qrFileName);
   });
 
