@@ -8,7 +8,14 @@ WHY THIS EXISTS
     source_of_truth: Google Drive 二修教材資料夾
     lessons:
       - lesson_uid: L0004
-        drive_file_id: 1BVgWA0gzKu39tR63bfI1_aJq9ahMbsaK
+        drive_path: 4年級/G4-L4….docx
+
+⛔ **file id 不在那份登記簿裡，也不可以放回去。** 它們住在
+`private/curriculum-source/_drive-ids.json`（`private/` 已在 .gitignore）。
+
+原因：這個 repo 是 **public**，而那些 id 未認證就下載得到完整 .docx
+（2026-08-31 實測：真檔 HTTP 200 / 479,710 bytes，亂編的 id 回 404）。
+175 個 id 寫在公開登記簿裡 = 附上一份可直接下載全部原稿的索引。
 
 Every downstream script then reads `/tmp/docx-src/L0004.docx`, and nothing in the repo
 turned the first into the second. Re-running the extraction meant asking whoever had done
@@ -35,6 +42,7 @@ below instead of being counted as a missing file.
 from __future__ import annotations
 
 import argparse
+import json
 import subprocess
 import sys
 import urllib.error
@@ -88,6 +96,18 @@ def main() -> int:
     lessons = reg.get("lessons") or []
     wanted = set(a.only.split(",")) if a.only else None
 
+    # file id 住在 gitignored 的側檔，不在公開登記簿裡（見檔頭）。
+    # ⛔ 缺了要**大聲失敗**：靜默跳過會讓「抓不到原稿」看起來像「這課本來就沒有」。
+    ids_path = REPO / "private" / "curriculum-source" / "_drive-ids.json"
+    if not ids_path.is_file():
+        raise SystemExit(
+            f"⛔ 找不到 {ids_path}\n"
+            "   Drive file id 刻意不放進這個 public repo（見本檔檔頭）。\n"
+            "   跟其他 private/ 內容一樣，從我方的來源同步取得後再跑。")
+    DRIVE_IDS = json.loads(ids_path.read_text(encoding="utf-8")).get("ids") or {}
+    if not DRIVE_IDS:
+        raise SystemExit(f"⛔ {ids_path} 的 ids 是空的 —— 那不是「沒有課」，是側檔壞了。")
+
     out_dir = Path(a.out)
     out_dir.mkdir(parents=True, exist_ok=True)
     token = access_token()
@@ -96,11 +116,11 @@ def main() -> int:
     problems: list[tuple[str, str]] = []
     for entry in lessons:
         uid = entry.get("lesson_uid")
-        fid = entry.get("drive_file_id")
+        fid = DRIVE_IDS.get(uid)
         if not uid or (wanted and uid not in wanted):
             continue
         if not fid:
-            problems.append((uid, "registry 沒有 drive_file_id"))
+            problems.append((uid, "private/curriculum-source/_drive-ids.json 裡沒有這一課"))
             continue
         dest = out_dir / f"{uid}.docx"
         if dest.exists() and not a.force:
