@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, within, fireEvent } from '@testing-library/react';
-import LessonAudioTable, { buildLessonQrValue, buildQrManifestCsv, buildQrManifestRows, deliversFullText, derivePlaybackState } from './LessonAudioTable';
+import LessonAudioTable, { buildLessonQrValue, buildQrManifestCsv, buildQrManifestRows, hasWholeTextToRead, derivePlaybackState } from './LessonAudioTable';
 import { useTtsPlayback } from '../../../hooks/useTtsPlayback';
 
 // Assembled rather than spelled out. The repo's pre-commit secret scanner
@@ -452,11 +452,10 @@ describe('#2622 QR 交付表', () => {
     expect(rows[0].lesson_no).toBe('G4-L01');
     expect(rows[0].full_url).toBe('https://x.test/q/x1aaa');
     expect(rows[0].passage_url).toBe('https://x.test/q/y1bbb');
-    // Lesson 2 is grade 8 (全文 blank per the grade rule) AND has no 念順順段
-    // (has_key_reading=false), so the batch produces no passage clip for it.
-    // Both columns are therefore blank — a 段落 code here would point at a
-    // demo-reading/2/passage.mp3 that never gets generated (the "空砲" bug).
-    expect(rows[1].full_url).toBe('');
+    // Lesson 2 有課文（has_full=true）所以全文碼照出 —— #3011 之後判準是資料
+    // 不是年級。它沒有念順順段（has_key=false），所以段落欄是空的：一個
+    // 指向沒有內容的段落頁的碼就是廢紙（#2622 的「空砲」）。
+    expect(rows[1].full_url).toBe('https://x.test/q/x2aaa');
     expect(rows[1].passage_url).toBe('');
   });
 
@@ -518,25 +517,40 @@ describe('#2626 只有 4-7 年級交付全文', () => {
    * rule is defined *by* which grade you are in, and the boundary between 7 and
    * 8 is the whole point.
    */
-  it.each([[4, true], [5, true], [6, true], [7, true], [8, false], [9, false]])(
-    'grade %i delivers full text: %s',
-    (grade, expected) => {
-      expect(deliversFullText(grade as number)).toBe(expected);
+  it.each([[true, true], [false, false]])(
+    'has_full %s delivers full text: %s',
+    (hasFull, expected) => {
+      expect(hasWholeTextToRead(hasFull as boolean)).toBe(expected);
     },
   );
 
-  it('leaves the 全文 URL blank for 8-9 so no code points at silence', () => {
+  /**
+   * #3011：判準從年級換成資料。這一條原本叫「leaves the 全文 URL blank for 8-9」，
+   * 斷言 G8 的全文欄必須是空的 —— 那是在守 2026-08 的產品規則，而那條規則
+   * 2026-08-31 被 owner 改掉了（「只要有課文就可以生成」），理由見 lessonQr.ts。
+   *
+   * ⛔ 換過來的斷言不比原本鬆：空欄的情況仍然要空（下面 has_full=false 那一列），
+   *    只是「該空」的定義從年級變成資料。而且多守了一件原本沒守的事 ——
+   *    非數字年級（品格教育／文言文，175 課裡佔 23 課）有課文時必須拿得到碼。
+   */
+  it('全文欄跟著資料走：有課文就有碼，沒課文才是空的', () => {
     const rows = buildQrManifestRows([
       { id: 1, lesson_number: 1, title: 'G7 課', grade: 7, grade_code: 'G7-L01', char_count: 10, has_key_reading: true, part_rounds: [{ slug: 'x1aaa', part: null, has_full: true, has_key: true, full_slug: 'x1aaa', key_slug: 'y1bbb' }] },
       { id: 2, lesson_number: 2, title: 'G8 課', grade: 8, grade_code: 'G8-L02', char_count: 10, has_key_reading: true, part_rounds: [{ slug: 'x2aaa', part: null, has_full: true, has_key: true, full_slug: 'x2aaa', key_slug: 'y2bbb' }] },
+      { id: 3, lesson_number: 3, title: '體育生品格', grade: '品格教育' as never, grade_code: '體-L1', char_count: 10, has_key_reading: true, part_rounds: [{ slug: 'x3aaa', part: null, has_full: true, has_key: true, full_slug: 'x3aaa', key_slug: 'y3bbb' }] },
+      { id: 4, lesson_number: 4, title: '沒有課文', grade: 5, grade_code: 'G5-L99', char_count: 10, has_key_reading: true, part_rounds: [{ slug: 'x4aaa', part: null, has_full: false, has_key: true, full_slug: 'x4aaa', key_slug: 'y4bbb' }] },
     ] as never, 'https://x.test');
 
     expect(rows[0].full_url).toBe('https://x.test/q/x1aaa');
-    expect(rows[1].full_url).toBe('');
-    // Positive control: this G8 lesson DOES have a 念順順段
-    // (has_key_reading=true), so its 段落 code must survive even though 全文
-    // is blank. Passage now gates on has_key_reading, not on grade.
-    expect(rows[1].passage_url).toBe('https://x.test/q/y2bbb');
+    expect(rows[1].full_url).toBe('https://x.test/q/x2aaa');
+    expect(rows[2].full_url).toBe('https://x.test/q/x3aaa');
+    // 負向對照：沒有課文的一節仍然不出碼 —— 閘門還在，只是問的東西換了。
+    expect(rows[3].full_url).toBe('');
+    // 段落側不受這次改動影響，四課都該有。
+    expect(rows.map((r) => r.passage_url)).toEqual([
+      'https://x.test/q/y1bbb', 'https://x.test/q/y2bbb',
+      'https://x.test/q/y3bbb', 'https://x.test/q/y4bbb',
+    ]);
   });
 });
 

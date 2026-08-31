@@ -65,13 +65,23 @@ describe('buildQrManifestRows — 一課多篇', () => {
     expect(rows.every(r => r.passage_url === '')).toBe(true);
   });
 
-  it('8–9 年級依規格不交付全文碼', () => {
+  /**
+   * #3011：這條原本斷言「9 年級的全文欄必須是空的」。判準已從年級換成資料
+   * （owner 2026-08-31：「只要有課文就可以生成」），所以現在斷言的是
+   * **這一篇有沒有課文**。沒有課文的那一篇仍然要空 —— 沒有放寬。
+   */
+  it('全文碼跟著這一篇有沒有課文走，不看年級', () => {
     const rows = buildQrManifestRows([{ ...(base as object), id: 20144, grade_code: 'G9-L23',
       grade: 9, part_rounds: [
         { slug: 'wdnd7', part: 1, has_full: true, has_key: true,
           full_slug: 'wdnd7', key_slug: 'mca6h' },
+        { slug: 'zz1qq', part: 2, has_full: false, has_key: true,
+          full_slug: 'zz1qq', key_slug: 'kk2ww' },
       ] }] as never, 'https://x');
-    expect(rows[0].full_url).toBe('');
+    expect(rows[0].full_url).toBe('https://x/q/wdnd7');
     expect(rows[0].passage_url).toBe('https://x/q/mca6h');
+    // 負向對照：同一課的第 2 篇沒有課文 → 全文欄空，段落欄照常。
+    expect(rows[1].full_url).toBe('');
+    expect(rows[1].passage_url).toBe('https://x/q/kk2ww');
   });
 });

@@ -42,7 +42,7 @@ import ReadingPlayer from './ReadingPlayer';
 import { useFullTextTtsQueue } from '../../hooks/useFullTextTtsQueue';
 import AnnotatedParagraph from './AnnotatedParagraph';
 import LessonQrButton from '../qr/LessonQrButton';
-import { deliversFullText, type LessonQrStep } from '../qr/lessonQr';
+import { hasWholeTextToRead, type LessonQrStep } from '../qr/lessonQr';
 import StepCoachCard from '../learning/StepCoachCard';
 import StepActionBar from '../learning/StepActionBar';
 
@@ -432,7 +432,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
     (story.manifestSections ?? []).filter((x) => x?.module === 'full_text_annotate').length > 1;
 
   const qrEffectiveStep =
-    qrStep === undefined ? (deliversFullText(story.grade) ? 'full-text-annotate' : null) : qrStep;
+    qrStep === undefined ? (hasWholeTextToRead(story.content) ? 'full-text-annotate' : null) : qrStep;
   const qrCode =
     (qrEffectiveStep
       ? sectionSlugForStep(story.manifestSections, qrEffectiveStep, moduleForStep)
@@ -907,9 +907,9 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
               清除全部
             </button>
             {/* #2886: the QR for THIS page, so a teacher can hand it out in
-                class without opening the admin panel. 8-9 年級 deliberately get
-                no 全文 code — see docs/requirements/reading-demo-audio-qr.md R1. */}
-            {(qrStep === undefined ? (deliversFullText(story.grade) ? 'full-text-annotate' : null) : qrStep) && (
+                class without opening the admin panel. 有課文就有碼 —— 判準是
+                資料不是年級（#3011），見 docs/requirements/reading-demo-audio-qr.md R1。*/}
+            {(qrStep === undefined ? (hasWholeTextToRead(story.content) ? 'full-text-annotate' : null) : qrStep) && (
               <LessonQrButton
                 lessonId={story.id}
                 step={(qrStep ?? 'full-text-annotate') as LessonQrStep}

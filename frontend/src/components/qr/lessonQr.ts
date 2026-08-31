@@ -30,19 +30,33 @@ import QRCode from 'qrcode';
 export type LessonQrStep = 'full-text-annotate' | 'key-passage-reading';
 
 /**
- * Grades 4-7 get 全文 + 段落; grades 8-9 get 段落 only.
- * Source: docs/requirements/reading-demo-audio-qr.md §R1.
+ * 全文 QR 的條件：**這一節有沒有課文可唸**（#3011）。
  *
- * ⚠️ `grade` arrives from the API as a **string**, and 23 of the 175 lessons
- * carry a non-numeric one (`文言文` 12, `品格教育` 11 — measured against
- * staging 2026-08-23, stories === total). The original signature said `number`
- * and leaned on JS coercion, which happened to give the right answer for the
- * numeric cases and `false` for the other two. This spells that out instead of
- * inheriting it: anything that is not a number in 4..7 gets no 全文 code.
+ * 這裡原本問的是年級 —— `4 <= grade <= 7` 才給全文碼，8/9 年級只給段落碼，
+ * 依據 `docs/requirements/reading-demo-audio-qr.md` §R1。那條規則的理由是
+ * 技術性的：`build_demo_reading.plan_demo_audio` 只替 4–7 年級批次產
+ * `demo-reading/{id}/whole.mp3`，替其他年級印碼會指向一個永遠不存在的檔。
+ *
+ * ⚠️ 那個限制已經不存在了。`build_demo_reading.py` 在 6894dda73 隨 #2916
+ * 一起刪除，前端也沒有任何地方抓預產 mp3 —— QR 指向 `/learn/{id}/{step}`，
+ * 訪客頁與登入頁走**同一條**即時 TTS。所以「產不出音檔」的年級不再存在。
+ *
+ * 而年級這個判準有它自己的破法：`grade` 從 API 來是**字串**，175 課裡有 23 課
+ * 的值不是數字（`品格教育` 11、`文言文` 12），`Number.parseInt` 回 NaN → false。
+ * 2026-08-31 明珠老師回報體育生品格 11 課掃不到全文 QR，就是這個。
+ * Owner 當場定調：「只要有課文就可以生成」。
+ *
+ * 所以判準換成資料本身。傳 `has_full`（清單端點算好的布林）或直接傳段落陣列，
+ * 兩種都行 —— 呼叫端手上有哪一種就傳哪一種，不必先轉換。
+ *
+ * ⛔ 這不是取消閘門。沒有課文的一節仍然不出碼，只是問的是「有沒有東西可唸」
+ *    而不是「幾年級」。空碼的紙一樣是廢紙。
  */
-export function deliversFullText(grade: string | number | undefined | null): boolean {
-  const n = typeof grade === 'number' ? grade : Number.parseInt(grade ?? '', 10);
-  return Number.isInteger(n) && n >= 4 && n <= 7;
+export function hasWholeTextToRead(
+  source: boolean | readonly unknown[] | null | undefined,
+): boolean {
+  if (typeof source === 'boolean') return source;
+  return Array.isArray(source) && source.length > 0;
 }
 
 export function buildLessonQrValue(

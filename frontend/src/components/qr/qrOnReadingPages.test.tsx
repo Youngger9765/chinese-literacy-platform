@@ -84,13 +84,27 @@ describe('#2886 讀全文-做記號：全文 QR', () => {
     expect(btn!.getAttribute('title')).toBe(`${QR_ENTRY_ORIGIN}/q/mcyjp`);
   });
 
+  /**
+   * ⭐ 這一組原本斷言「這四種年級**不可以**有全文 QR」—— 而 `品格教育`
+   * 那一列，正是明珠老師 2026-08-31 回報「體育生品格 11 課掃不到全文碼」
+   * 的那個行為。規則層的鎖忠實地守住了一條後來被推翻的規則。
+   *
+   * #3011 之後判準是資料：有課文就有碼（owner：「只要有課文就可以生成」）。
+   * 換過來的斷言不比原本鬆 —— 沒有課文的課仍然沒有碼（下面那一條）。
+   */
   it.each(['8', '9', '文言文', '品格教育'])(
-    'is absent for grade %s (spec R1: 8-9 段落 only)',
+    'grade %s 有課文一樣拿得到全文碼（#3011）',
     (grade) => {
       render(<FullTextAnnotate story={{ ...STORY, grade }} onFinish={vi.fn()} sectionSlug="mcyjp" />);
-      expect(qrButton()).toBeNull();
+      expect(qrButton()).not.toBeNull();
+      expect(qrButton()!.getAttribute('title')).toBe(`${QR_ENTRY_ORIGIN}/q/mcyjp`);
     },
   );
+
+  it('沒有課文的課仍然沒有全文碼', () => {
+    render(<FullTextAnnotate story={{ ...STORY, content: [] }} onFinish={vi.fn()} sectionSlug="mcyjp" />);
+    expect(qrButton()).toBeNull();
+  });
 });
 
 describe('#2886 重點朗讀：重點 QR', () => {

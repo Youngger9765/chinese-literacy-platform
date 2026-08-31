@@ -12,7 +12,7 @@ import LessonQrButton from '../../../components/qr/LessonQrButton';
 import {
   buildLessonQrValue,
   QR_ENTRY_ORIGIN,
-  deliversFullText,
+  hasWholeTextToRead,
   qrCodeToDataUrl,
   qrFileName,
   triggerDownload,
@@ -22,7 +22,7 @@ import {
 // Re-exported so this file's existing tests keep addressing them here. The
 // implementations moved to components/qr/lessonQr.ts when the learning pages
 // became a second caller — one rule, two surfaces (see that file's header).
-export { buildLessonQrValue, deliversFullText, qrFileName };
+export { buildLessonQrValue, hasWholeTextToRead, qrFileName };
 export type { LessonQrStep };
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
@@ -205,9 +205,11 @@ export function buildQrManifestRows(stories: StoryListItem[], origin: string): Q
     lesson_no: lessonTitle(s) + (r?.part ? `（篇${r.part}）` : ''),
     title: s.title,
     grade: s.grade,
-    // Blank rather than a URL: the batch produces no whole-text clip for
-    // grades 8-9, so handing the 教材端 a code for it would point at silence.
-    full_url: deliversFullText(s.grade) && (r ? r.has_full : true)
+    // 空字串而不是網址：這一節沒有課文可唸的話，碼掃開會是一頁沒有東西唸的紙。
+    // ⚠️ 判準是**資料**不是年級（#3011）。原本這裡問 `deliversFullText(s.grade)`，
+    //    而 `品格教育` / `文言文` 這種非數字年級一律回 false —— 體育生品格
+    //    11 課的全文碼因此整批消失，沒有錯誤、清單照樣產出。
+    full_url: hasWholeTextToRead(r ? r.has_full : true)
       // 印**讀全文那一節自己的**代號。用 `r.slug`（課文的）的話，
       // 三篇的念順順會跟讀全文共用同一個碼 —— 掃得開、頁面打得開、指錯地方。
       ? buildLessonQrValue(origin, s.id, 'full-text-annotate', r?.full_slug ?? r?.slug) : '',
@@ -747,10 +749,10 @@ const LessonAudioTable: React.FC = () => {
                 )}
               </div>
 
-              {deliversFullText(story.grade)
+              {hasWholeTextToRead(part ? part.has_full : true)
                 ? <QrDownloadButton lessonId={story.id} step="full-text-annotate" label="QR" filePrefix="intro-qr" lessonTitle={story.title}
                     sectionSlug={part?.full_slug ?? part?.slug} />
-                : <span className="text-xs text-gray-400" title="8-9 年級依規格只交付重點朗讀">—</span>}
+                : <span className="text-xs text-gray-400" title="這一節沒有課文可唸，印碼會指向空頁面">—</span>}
               <QrDownloadButton lessonId={story.id} step="key-passage-reading" label="QR" filePrefix="full-reading-qr" lessonTitle={story.title}
                 sectionSlug={part?.key_slug} />
             </div>
