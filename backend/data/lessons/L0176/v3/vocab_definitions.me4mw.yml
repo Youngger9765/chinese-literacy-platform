@@ -1,0 +1,61 @@
+lesson_uid: L0176
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  hints:
+  - 從本課語詞框中，找語詞。
+  - 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+  - 問同學。
+  vocabulary_bank:
+  - 忐忑
+  - 顧忌
+  - 先發
+  - 垂頭喪氣
+  - 難保
+  - 後盾
+  - 拍檔
+  - 訣竅
+  - 暗自較勁
+  - 懊惱
+  - 頓時
+  - 隱隱作痛
+  items:
+  - index: 1
+    word: 忐忑
+    definition: 心裡不安、緊張，不能平靜。
+  - index: 2
+    word: 顧忌
+    definition: 因為有所擔心顧慮，而不敢放心去做。
+  - index: 3
+    word: 先發
+    definition: 比賽一開始就上場的球員。
+  - index: 4
+    word: 垂頭喪氣
+    definition: 因為失敗或不順利而很失望、沒精神。
+  - index: 5
+    word: 難保
+    definition: 難以保留。
+  - index: 6
+    word: 後盾
+    definition: 在背後支持、幫助自己的人或力量。
+  - index: 7
+    word: 拍檔
+    definition: 經常一起合作的夥伴。
+  - index: 8
+    word: 訣竅
+    definition: 做好一件事的重要方法。
+  - index: 9
+    word: 暗自較勁
+    definition: 心裡偷偷和別人比較。
+  - index: 10
+    word: 懊惱
+    definition: 因為事情沒做好而生氣、後悔。
+  - index: 11
+    word: 頓時
+    definition: 一下子；立刻。
+  - index: 12
+    word: 隱隱作痛
+    definition: 身體有輕微、不太明顯的疼痛。
+  slug: me4mw
+  text_ref: 9qjnx

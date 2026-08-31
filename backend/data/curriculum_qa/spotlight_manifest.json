@@ -4,11 +4,11 @@
   "source": "served corpus — get_all_lessons()['spotlight_v2'], keyed by lesson_uid (#2747)",
   "gold_source": "backend/data/spotlight_fingerprints.json (#2727 ratchet)",
   "summary": {
-    "total": 168,
-    "pass": 168,
-    "fail": 0,
+    "total": 172,
+    "pass": 171,
+    "fail": 1,
     "lessons_without_spotlight": 7,
-    "corpus_total": 175
+    "corpus_total": 179
   },
   "lessons_without_spotlight": [
     "L0011",
@@ -7084,7 +7084,7 @@
       "title": "雨林裡的奇蹟藥物",
       "strategy_type": "reading_strategy",
       "block_count": 19,
-      "overall_pass": true,
+      "overall_pass": false,
       "eval": {
         "pass": true,
         "guide_retained": true,
@@ -7099,8 +7099,105 @@
         }
       },
       "gold": {
-        "match": true,
-        "diffs": {}
+        "match": false,
+        "diffs": {
+          "block_count": {
+            "actual": 19,
+            "expected": 38
+          },
+          "type_histogram": {
+            "actual": {
+              "concept_box": 1,
+              "free_text": 2,
+              "guide": 7,
+              "passage": 1,
+              "single": 8
+            },
+            "expected": {
+              "concept_box": 1,
+              "free_text": 4,
+              "guide": 15,
+              "multi": 1,
+              "passage": 2,
+              "single": 15
+            }
+          },
+          "type_sequence": {
+            "actual": [
+              "concept_box",
+              "passage",
+              "guide",
+              "free_text",
+              "guide",
+              "single",
+              "guide",
+              "guide",
+              "single",
+              "guide",
+              "single",
+              "single",
+              "guide",
+              "single",
+              "single",
+              "guide",
+              "single",
+              "single",
+              "free_text"
+            ],
+            "expected": [
+              "concept_box",
+              "passage",
+              "guide",
+              "free_text",
+              "guide",
+              "single",
+              "guide",
+              "guide",
+              "single",
+              "guide",
+              "single",
+              "single",
+              "guide",
+              "single",
+              "single",
+              "guide",
+              "single",
+              "single",
+              "free_text",
+              "guide",
+              "passage",
+              "guide",
+              "free_text",
+              "guide",
+              "free_text",
+              "single",
+              "guide",
+              "guide",
+              "single",
+              "guide",
+              "single",
+              "single",
+              "guide",
+              "single",
+              "guide",
+              "single",
+              "single",
+              "multi"
+            ]
+          },
+          "guide_count": {
+            "actual": 7,
+            "expected": 15
+          },
+          "passage_count": {
+            "actual": 1,
+            "expected": 2
+          },
+          "qa_total": {
+            "actual": 7,
+            "expected": 14
+          }
+        }
       },
       "type_histogram": {
         "concept_box": 1,
@@ -11384,6 +11481,299 @@
         "qa_total": 10,
         "null_answers": 0,
         "first_guide_prefix": "→你觀察到了嗎？固定型思維通常讓我們停下來、躲起來；成長型思維通常讓我們調整、求助、再試一次。而怎麼看待思考會影響我們的",
+        "mcq_leakage": 0
+      }
+    },
+    {
+      "lesson_id": "L0176",
+      "lesson_uid": "L0176",
+      "grade_code": "體-L12",
+      "title": "一起變強，會更好",
+      "strategy_type": null,
+      "block_count": 20,
+      "overall_pass": true,
+      "eval": {
+        "pass": true,
+        "guide_retained": true,
+        "answer_recall": 1.0,
+        "mcq_leakage": 0,
+        "struct_errors": [],
+        "semantic": {
+          "single_count": 5,
+          "mcq_option_guides": 0,
+          "semantic_pass": true,
+          "semantic_errors": []
+        }
+      },
+      "gold": {
+        "match": null,
+        "reason": "no fingerprint baseline for this lesson"
+      },
+      "type_histogram": {
+        "concept_box": 1,
+        "guide": 9,
+        "self_check": 1,
+        "single": 5,
+        "sub_block": 3,
+        "table": 1
+      },
+      "fingerprint": {
+        "strategy_type": null,
+        "block_count": 20,
+        "type_histogram": {
+          "concept_box": 1,
+          "guide": 9,
+          "self_check": 1,
+          "single": 5,
+          "sub_block": 3,
+          "table": 1
+        },
+        "type_sequence": [
+          "concept_box",
+          "guide",
+          "single",
+          "guide",
+          "guide",
+          "table",
+          "guide",
+          "guide",
+          "sub_block",
+          "sub_block",
+          "sub_block",
+          "guide",
+          "guide",
+          "single",
+          "single",
+          "single",
+          "guide",
+          "single",
+          "guide",
+          "self_check"
+        ],
+        "guide_count": 9,
+        "passage_count": 0,
+        "qa_total": 14,
+        "null_answers": 0,
+        "first_guide_prefix": "◎情境回顧：先從佳恩的故事來看看：子皓來請教接球的方法時，佳恩心裡想：「如果全部教給子皓，子皓變得比自己更強，自己的先發",
+        "mcq_leakage": 0
+      }
+    },
+    {
+      "lesson_id": "L0177",
+      "lesson_uid": "L0177",
+      "grade_code": "體-L13",
+      "title": "別讓一句話決定你是誰",
+      "strategy_type": null,
+      "block_count": 17,
+      "overall_pass": true,
+      "eval": {
+        "pass": true,
+        "guide_retained": true,
+        "answer_recall": 1.0,
+        "mcq_leakage": 0,
+        "struct_errors": [],
+        "semantic": {
+          "single_count": 6,
+          "mcq_option_guides": 0,
+          "semantic_pass": true,
+          "semantic_errors": []
+        }
+      },
+      "gold": {
+        "match": null,
+        "reason": "no fingerprint baseline for this lesson"
+      },
+      "type_histogram": {
+        "concept_box": 1,
+        "exercise": 1,
+        "guide": 6,
+        "self_check": 1,
+        "single": 6,
+        "table": 2
+      },
+      "fingerprint": {
+        "strategy_type": null,
+        "block_count": 17,
+        "type_histogram": {
+          "concept_box": 1,
+          "exercise": 1,
+          "guide": 6,
+          "self_check": 1,
+          "single": 6,
+          "table": 2
+        },
+        "type_sequence": [
+          "concept_box",
+          "guide",
+          "table",
+          "single",
+          "single",
+          "single",
+          "guide",
+          "table",
+          "guide",
+          "exercise",
+          "guide",
+          "guide",
+          "single",
+          "single",
+          "single",
+          "guide",
+          "self_check"
+        ],
+        "guide_count": 6,
+        "passage_count": 0,
+        "qa_total": 6,
+        "null_answers": 0,
+        "first_guide_prefix": "◎情境舉例：小晴拍了一張照片，傳給三位朋友看。",
+        "mcq_leakage": 0
+      }
+    },
+    {
+      "lesson_id": "L0178",
+      "lesson_uid": "L0178",
+      "grade_code": "體-L14",
+      "title": "在看不見成長的日子中",
+      "strategy_type": null,
+      "block_count": 15,
+      "overall_pass": true,
+      "eval": {
+        "pass": true,
+        "guide_retained": true,
+        "answer_recall": 1.0,
+        "mcq_leakage": 0,
+        "struct_errors": [],
+        "semantic": {
+          "single_count": 4,
+          "mcq_option_guides": 0,
+          "semantic_pass": true,
+          "semantic_errors": []
+        }
+      },
+      "gold": {
+        "match": null,
+        "reason": "no fingerprint baseline for this lesson"
+      },
+      "type_histogram": {
+        "concept_box": 1,
+        "exercise": 1,
+        "free_text": 1,
+        "guide": 4,
+        "self_check": 3,
+        "single": 4,
+        "table": 1
+      },
+      "fingerprint": {
+        "strategy_type": null,
+        "block_count": 15,
+        "type_histogram": {
+          "concept_box": 1,
+          "exercise": 1,
+          "free_text": 1,
+          "guide": 4,
+          "self_check": 3,
+          "single": 4,
+          "table": 1
+        },
+        "type_sequence": [
+          "concept_box",
+          "guide",
+          "table",
+          "exercise",
+          "guide",
+          "single",
+          "single",
+          "guide",
+          "single",
+          "single",
+          "guide",
+          "free_text",
+          "self_check",
+          "self_check",
+          "self_check"
+        ],
+        "guide_count": 4,
+        "passage_count": 0,
+        "qa_total": 4,
+        "null_answers": 0,
+        "first_guide_prefix": "◎重拾動力的開關：當事情越做越感到無力時，你可能會出現下表左欄的念頭，讓你的動力流失；而中欄列出A, B, C, D四個",
+        "mcq_leakage": 0
+      }
+    },
+    {
+      "lesson_id": "L0179",
+      "lesson_uid": "L0179",
+      "grade_code": "體-L15",
+      "title": "練過的心，陪你走更遠",
+      "strategy_type": null,
+      "block_count": 17,
+      "overall_pass": true,
+      "eval": {
+        "pass": true,
+        "guide_retained": true,
+        "answer_recall": 1.0,
+        "mcq_leakage": 0,
+        "struct_errors": [],
+        "semantic": {
+          "single_count": 1,
+          "mcq_option_guides": 0,
+          "semantic_pass": true,
+          "semantic_errors": []
+        }
+      },
+      "gold": {
+        "match": null,
+        "reason": "no fingerprint baseline for this lesson"
+      },
+      "type_histogram": {
+        "concept_box": 1,
+        "fill_table": 1,
+        "free_text": 1,
+        "guide": 4,
+        "multi": 5,
+        "passage": 2,
+        "self_check": 1,
+        "single": 1,
+        "sub_block": 1
+      },
+      "fingerprint": {
+        "strategy_type": null,
+        "block_count": 17,
+        "type_histogram": {
+          "concept_box": 1,
+          "fill_table": 1,
+          "free_text": 1,
+          "guide": 4,
+          "multi": 5,
+          "passage": 2,
+          "self_check": 1,
+          "single": 1,
+          "sub_block": 1
+        },
+        "type_sequence": [
+          "concept_box",
+          "guide",
+          "passage",
+          "fill_table",
+          "single",
+          "multi",
+          "free_text",
+          "guide",
+          "guide",
+          "passage",
+          "multi",
+          "sub_block",
+          "multi",
+          "multi",
+          "multi",
+          "self_check",
+          "guide"
+        ],
+        "guide_count": 4,
+        "passage_count": 2,
+        "qa_total": 10,
+        "null_answers": 0,
+        "first_guide_prefix": "◎遇到困難，先問自己四個問題\n來看看小安遇到困難時，可以怎麼一步一步想。",
         "mcq_leakage": 0
       }
     }

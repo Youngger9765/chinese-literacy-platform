@@ -1,0 +1,46 @@
+lesson_uid: L0176
+version_id: v3
+section_no: 二
+key_reading:
+  instruction: 請用計時器，從指定段落（八☞）開始朗讀，在表格中記錄1分鐘朗讀的字數。如果計時3次後，你對自己還不滿意，可以多練幾次。最後一次，找一位同學，請他計時、記錄並簽名！
+  timing_table:
+    columns:
+    - 第1次計時
+    - 第2次計時
+    - 第3次計時
+    - 裁判計時
+    unit: 字
+    judge_signature: true
+  benchmark:
+  - threshold: ＜200字
+    feedback: 還要多加練習。
+  - threshold: 201~230字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞231字
+    feedback: 哇嗚，超級厲害！
+  slug: ww3ve
+  text_ref: 9qjnx
+  printed_char_marks:
+  - 28
+  - 57
+  - 87
+  - 117
+  - 138
+  - 166
+  - 196
+  - 215
+  - 243
+  - 273
+  - 304
+  - 321
+  printed_counter_last: 321
+  passage: 教練接著說：「今天這場比賽讓我們看見一件事：如果先發捕手突然不能上場，另一個捕手也要能立刻接上。這不是你一個人的責任，也不是子皓一個人的責任，是整支球隊都要準備好的事。你們爭取先發沒有錯，但同一個位置的隊友，不只是競爭者，也是彼此的後盾，是最能互相提醒、互相補位的最佳拍檔。」佳恩想起幾天前，子皓來請教時，自己明明知道方法，卻只說了一句：「多練習就會了。」再想到那顆從子皓身旁滾過去的球，他的心裡一沉，曬的黑亮的臉龐頓時微微發燙。從那天起，佳恩主動分享接球的訣竅，子皓也會把自己觀察打者的方法告訴佳恩。他們仍然會比較，也都希望自己能先發上場。不同的是，他們不再只想：「我一定要贏過他」，也會問自己：「他哪裡做得比我好？我能從他身上學到什麼？」
+  start_text: 教練接著說：「今天這場比賽讓我們看見一件事：如果
+  extent_chars: 321
+  start_paragraph: 8
+  end_paragraph: 10
+  source: extract_key_reading_v3
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  absorbed_tail: 0

@@ -1,0 +1,57 @@
+lesson_uid: L0178
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  hints:
+  - 從本課語詞框中，找語詞。
+  - 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+  - 問同學。
+  vocabulary_bank:
+  - 濛濛亮
+  - 遲遲
+  - 突出
+  - 鮮少
+  - 成效
+  - 高峰
+  - 疲憊
+  - 復健
+  - 韌性
+  - 一味
+  - 逐步
+  items:
+  - index: 1
+    word: 復健
+    definition: 受傷或生病後，透過運動、治療或訓練，慢慢恢復身體的功能。
+  - index: 2
+    word: 韌性
+    definition: 比喻遇到困難或挫折時，能調整自己、重新找到方法繼續往前的能力。
+  - index: 3
+    word: 遲遲
+    definition: 經過很長一段時間，事情仍沒有發生或完成。
+  - index: 4
+    word: 成效
+    definition: 指做一件事之後得到的效果或成果。
+  - index: 5
+    word: 一味
+    definition: 只照著同一種想法或方式去做，不考慮其他情況。
+  - index: 6
+    word: 濛濛亮
+    definition: 天剛開始亮，光線還不十分明亮。
+  - index: 7
+    word: 鮮少
+    definition: 指很少、不常有。
+  - index: 8
+    word: 高峰
+    definition: 原指山最高的地方；也比喻發展、表現或成就達到最好的階段。
+  - index: 9
+    word: 突出
+    definition: 超出一般的程度，特別明顯或優秀。
+  - index: 10
+    word: 疲憊
+    definition: 身體或精神非常疲累，感到沒有力氣。
+  - index: 11
+    word: 逐步
+    definition: 一步一步、慢慢進行或改變。
+  slug: q793t
+  text_ref: h4jud

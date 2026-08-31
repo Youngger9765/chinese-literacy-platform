@@ -1,0 +1,135 @@
+lesson_uid: L0176
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞劃掉。
+  target_words:
+  - 先發
+  - 暗自較勁
+  - 顧忌
+  - 難保
+  - 隱隱作痛
+  - 忐忑
+  - 懊惱
+  - 垂頭喪氣
+  - 後盾
+  - 頓時
+  - 訣竅
+  - 拍檔
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 後頓仙較決拍暗自較勁
+  - 先難保引後竅穩穩作痛
+  - 垂案痛盾難奧備訣顧時
+  - 頻頭頓竅寶腦拍受忌仙
+  - 頻口喪滿腹委屈檔矚發
+  - 拍擋令氣盾先發忐竟目
+  - 忐忑後隱拍時棒委頓時
+  - 出我暗自委屈懊雇發跑
+  - 色隱隱作痛僱惱記忑訣
+  - 捶頭喪棄一手包辦竅自
+  answers_are_graphical: true
+  answer_paths:
+  - word: 先發
+    cells:
+    - - 6
+      - 6
+    - - 6
+      - 7
+    direction: horizontal
+  - word: 暗自較勁
+    cells:
+    - - 1
+      - 7
+    - - 1
+      - 8
+    - - 1
+      - 9
+    - - 1
+      - 10
+    direction: horizontal
+  - word: 顧忌
+    cells:
+    - - 3
+      - 9
+    - - 4
+      - 9
+    direction: vertical
+  - word: 難保
+    cells:
+    - - 2
+      - 2
+    - - 2
+      - 3
+    direction: horizontal
+  - word: 隱隱作痛
+    cells:
+    - - 9
+      - 2
+    - - 9
+      - 3
+    - - 9
+      - 4
+    - - 9
+      - 5
+    direction: horizontal
+  - word: 忐忑
+    cells:
+    - - 7
+      - 1
+    - - 7
+      - 2
+    direction: horizontal
+  - word: 懊惱
+    cells:
+    - - 8
+      - 7
+    - - 9
+      - 7
+    direction: vertical
+  - word: 垂頭喪氣
+    cells:
+    - - 3
+      - 1
+    - - 4
+      - 2
+    - - 5
+      - 3
+    - - 6
+      - 4
+    direction: diagonal_down_right
+  - word: 後盾
+    cells:
+    - - 2
+      - 5
+    - - 3
+      - 4
+    direction: diagonal_down_left
+  - word: 頓時
+    cells:
+    - - 7
+      - 9
+    - - 7
+      - 10
+    direction: horizontal
+  - word: 訣竅
+    cells:
+    - - 9
+      - 10
+    - - 10
+      - 9
+    direction: diagonal_down_left
+  - word: 拍檔
+    cells:
+    - - 4
+      - 7
+    - - 5
+      - 8
+    direction: diagonal_down_right
+  notes:
+    answer_paths: 圈選是橘色圖形（文字層沒有），所以路徑是**在格子裡搜尋算出來的**：12 個詞在 8 個方向上各只命中一條路徑，零歧義；結果與原稿圈選一致。
+  slug: durwa
+  text_ref: 9qjnx

@@ -1,5 +1,3 @@
-# part id 登記簿 —— ⛔ 退役的 id 永不重用（舊紙本的 QR 會指到別篇）
-# 產生：scripts/build_lesson_parts.py --apply
 337rq:
   label_snapshot: L0144 keypoints
   lesson_uid: L0144
@@ -364,6 +362,11 @@
   label_snapshot: L0102 vocab_review
   lesson_uid: L0102
   module: vocab_review
+  status: active
+477kn:
+  label_snapshot: L0176 vocab_application
+  lesson_uid: L0176
+  module: vocab_application
   status: active
 47nhx:
   label_snapshot: L0002 vocab_application
@@ -1225,6 +1228,11 @@
   lesson_uid: L0105
   module: vocab_application
   status: active
+7fv3n:
+  label_snapshot: L0176 comprehension
+  lesson_uid: L0176
+  module: comprehension
+  status: active
 7fy99:
   label_snapshot: L0013 full_text_annotate
   lesson_uid: L0013
@@ -1319,6 +1327,11 @@
   label_snapshot: L0013 vocab_review
   lesson_uid: L0013
   module: vocab_review
+  status: active
+7q3wr:
+  label_snapshot: L0177 spotlight
+  lesson_uid: L0177
+  module: spotlight
   status: active
 7q6vq:
   label_snapshot: L0114 self_check_before_reading
@@ -1675,6 +1688,11 @@
   lesson_uid: L0109
   module: vocab_application
   status: active
+9qjnx:
+  label_snapshot: L0176 full_text_annotate
+  lesson_uid: L0176
+  module: full_text_annotate
+  status: active
 9qnmy:
   label_snapshot: L0037 vocab_review
   lesson_uid: L0037
@@ -1900,6 +1918,11 @@ adc93:
   lesson_uid: L0068
   module: vocab_review
   status: active
+adhep:
+  label_snapshot: L0178 comprehension
+  lesson_uid: L0178
+  module: comprehension
+  status: active
 adn3d:
   label_snapshot: L0121 goal_box
   lesson_uid: L0121
@@ -2041,6 +2064,11 @@ ap9w3:
   lesson_uid: L0143
   module: goal_box
   status: active
+apkxt:
+  label_snapshot: L0179 full_text_annotate
+  lesson_uid: L0179
+  module: full_text_annotate
+  status: active
 apnaa:
   label_snapshot: L0035 key_reading
   lesson_uid: L0035
@@ -2115,6 +2143,11 @@ audxx:
   label_snapshot: L0162 sentence_matching
   lesson_uid: L0162
   module: sentence_matching
+  status: active
+autqw:
+  label_snapshot: L0179 resources
+  lesson_uid: L0179
+  module: resources
   status: active
 avcvy:
   label_snapshot: L0047 resources
@@ -2346,6 +2379,11 @@ cjdtp:
   lesson_uid: L0101
   module: comprehension
   status: active
+cjj6d:
+  label_snapshot: L0178 vocab_application
+  lesson_uid: L0178
+  module: vocab_application
+  status: active
 cjtmj:
   label_snapshot: L0118 resources
   lesson_uid: L0118
@@ -2420,6 +2458,11 @@ cq9aa:
   label_snapshot: L0116 goal_box
   lesson_uid: L0116
   module: goal_box
+  status: active
+cqhpp:
+  label_snapshot: L0178 key_reading
+  lesson_uid: L0178
+  module: key_reading
   status: active
 cr9we:
   label_snapshot: L0120 self_check_before_reading
@@ -2676,6 +2719,16 @@ de7fd:
   lesson_uid: L0060
   module: keypoints
   status: active
+decex:
+  label_snapshot: L0178 vocab_review
+  lesson_uid: L0178
+  module: vocab_review
+  status: active
+den3v:
+  label_snapshot: L0176 keypoints
+  lesson_uid: L0176
+  module: keypoints
+  status: active
 deqve:
   label_snapshot: L0161 spotlight
   lesson_uid: L0161
@@ -2851,6 +2904,11 @@ duhpt:
   lesson_uid: L0082
   module: keypoints
   status: active
+durwa:
+  label_snapshot: L0176 vocab_review
+  lesson_uid: L0176
+  module: vocab_review
+  status: active
 dv47v:
   label_snapshot: L0117 resources
   lesson_uid: L0117
@@ -2886,6 +2944,11 @@ dvxj6:
   lesson_uid: L0144
   module: full_text_annotate
   status: active
+dx76p:
+  label_snapshot: L0177 vocab_definitions
+  lesson_uid: L0177
+  module: vocab_definitions
+  status: active
 dxjyx:
   label_snapshot: L0103 key_reading
   lesson_uid: L0103
@@ -2900,6 +2963,11 @@ dxx43:
   label_snapshot: L0048 spotlight
   lesson_uid: L0048
   module: spotlight
+  status: active
+dxxwe:
+  label_snapshot: L0179 key_reading
+  lesson_uid: L0179
+  module: key_reading
   status: active
 dydnq:
   label_snapshot: L0063 keypoints
@@ -3386,6 +3454,11 @@ fpwnq:
   lesson_uid: L0018
   module: keypoints
   status: active
+fq3vr:
+  label_snapshot: L0177 keypoints
+  lesson_uid: L0177
+  module: keypoints
+  status: active
 fqahx:
   label_snapshot: L0055 vocab_review
   lesson_uid: L0055
@@ -3430,6 +3503,11 @@ fuema:
   label_snapshot: L0151 vocab_definitions
   lesson_uid: L0151
   module: vocab_definitions
+  status: active
+fufx6:
+  label_snapshot: L0178 spotlight
+  lesson_uid: L0178
+  module: spotlight
   status: active
 fuhne:
   label_snapshot: L0148 vocab_application
@@ -3515,6 +3593,11 @@ h4997:
   label_snapshot: L0156 vocab_review
   lesson_uid: L0156
   module: vocab_review
+  status: active
+h4jud:
+  label_snapshot: L0178 full_text_annotate
+  lesson_uid: L0178
+  module: full_text_annotate
   status: active
 h6kd6:
   label_snapshot: L0040 full_text_annotate
@@ -3845,6 +3928,11 @@ ja36v:
   label_snapshot: L0051 resources
   lesson_uid: L0051
   module: resources
+  status: active
+jac7c:
+  label_snapshot: L0176 spotlight
+  lesson_uid: L0176
+  module: spotlight
   status: active
 jak3k:
   label_snapshot: L0062 key_reading
@@ -4271,6 +4359,11 @@ kjvmn:
   lesson_uid: L0118
   module: vocab_application
   status: active
+km664:
+  label_snapshot: L0178 keypoints
+  lesson_uid: L0178
+  module: keypoints
+  status: active
 kmjyn:
   label_snapshot: L0140 spotlight
   lesson_uid: L0140
@@ -4551,6 +4644,11 @@ mdpju:
   lesson_uid: L0160
   module: spotlight
   status: active
+me4mw:
+  label_snapshot: L0176 vocab_definitions
+  lesson_uid: L0176
+  module: vocab_definitions
+  status: active
 me9ct:
   label_snapshot: L0056 resources
   lesson_uid: L0056
@@ -4714,6 +4812,11 @@ mtdue:
 muhf3:
   label_snapshot: L0037 resources
   lesson_uid: L0037
+  module: resources
+  status: active
+mumpn:
+  label_snapshot: L0177 resources
+  lesson_uid: L0177
   module: resources
   status: active
 muna7:
@@ -4922,6 +5025,11 @@ nftaj:
   lesson_uid: L0034
   module: vocab_review
   status: active
+nh639:
+  label_snapshot: L0179 vocab_application
+  lesson_uid: L0179
+  module: vocab_application
+  status: active
 nhuxq:
   label_snapshot: L0052 spotlight
   lesson_uid: L0052
@@ -4976,6 +5084,11 @@ nnyhm:
   label_snapshot: L0038 comprehension
   lesson_uid: L0038
   module: comprehension
+  status: active
+np49y:
+  label_snapshot: L0177 full_text_annotate
+  lesson_uid: L0177
+  module: full_text_annotate
   status: active
 nperf:
   label_snapshot: L0104 full_text_annotate
@@ -5492,6 +5605,11 @@ q767k:
   lesson_uid: L0075
   module: vocab_review
   status: active
+q793t:
+  label_snapshot: L0178 vocab_definitions
+  lesson_uid: L0178
+  module: vocab_definitions
+  status: active
 q7qn3:
   label_snapshot: L0059 vocab_review
   lesson_uid: L0059
@@ -5591,6 +5709,11 @@ qj3wq:
   label_snapshot: L0127 keypoints
   lesson_uid: L0127
   module: keypoints
+  status: active
+qj9j4:
+  label_snapshot: L0177 key_reading
+  lesson_uid: L0177
+  module: key_reading
   status: active
 qjn4x:
   label_snapshot: L0032 full_text_annotate
@@ -5952,6 +6075,11 @@ rqdqc:
   lesson_uid: L0051
   module: vocab_definitions
   status: active
+rqheq:
+  label_snapshot: L0177 vocab_application
+  lesson_uid: L0177
+  module: vocab_application
+  status: active
 rqjxq:
   label_snapshot: L0120 key_reading
   lesson_uid: L0120
@@ -6011,6 +6139,11 @@ rwwrh:
   label_snapshot: L0053 comprehension
   lesson_uid: L0053
   module: comprehension
+  status: active
+rx7uu:
+  label_snapshot: L0179 keypoints
+  lesson_uid: L0179
+  module: keypoints
   status: active
 rxfxx:
   label_snapshot: L0012 full_text_annotate
@@ -6223,6 +6356,11 @@ th3pt:
   lesson_uid: L0097
   module: resources
   status: active
+th6tk:
+  label_snapshot: L0178 resources
+  lesson_uid: L0178
+  module: resources
+  status: active
 thc6j:
   label_snapshot: L0117 key_reading
   lesson_uid: L0117
@@ -6282,6 +6420,11 @@ tn94k:
   label_snapshot: L0148 resources
   lesson_uid: L0148
   module: resources
+  status: active
+tnm6d:
+  label_snapshot: L0177 vocab_review
+  lesson_uid: L0177
+  module: vocab_review
   status: active
 tnt4y:
   label_snapshot: L0147 key_reading
@@ -6563,6 +6706,11 @@ ufh6f:
   lesson_uid: L0168
   module: self_check_before_reading
   status: active
+ufjck:
+  label_snapshot: L0179 spotlight
+  lesson_uid: L0179
+  module: spotlight
+  status: active
 ufnre:
   label_snapshot: L0095 spotlight
   lesson_uid: L0095
@@ -6647,6 +6795,11 @@ ump7k:
   label_snapshot: L0058 vocab_application
   lesson_uid: L0058
   module: vocab_application
+  status: active
+unpja:
+  label_snapshot: L0179 vocab_review
+  lesson_uid: L0179
+  module: vocab_review
   status: active
 unvfu:
   label_snapshot: L0004 comprehension
@@ -7028,6 +7181,16 @@ vm6me:
   lesson_uid: L0043
   module: resources
   status: active
+vmcyw:
+  label_snapshot: L0176 resources
+  lesson_uid: L0176
+  module: resources
+  status: active
+vmk3a:
+  label_snapshot: L0179 comprehension
+  lesson_uid: L0179
+  module: comprehension
+  status: active
 vn3f6:
   label_snapshot: L0030 vocab_definitions
   lesson_uid: L0030
@@ -7313,6 +7476,11 @@ whhad:
   lesson_uid: L0045
   module: vocab_application
   status: active
+wjc9c:
+  label_snapshot: L0179 vocab_definitions
+  lesson_uid: L0179
+  module: vocab_definitions
+  status: active
 wjetk:
   label_snapshot: L0071 vocab_review
   lesson_uid: L0071
@@ -7427,6 +7595,11 @@ wvqw9:
   label_snapshot: L0171 spotlight
   lesson_uid: L0171
   module: spotlight
+  status: active
+ww3ve:
+  label_snapshot: L0176 key_reading
+  lesson_uid: L0176
+  module: key_reading
   status: active
 ww4d9:
   label_snapshot: L0062 full_text_annotate
@@ -7873,6 +8046,11 @@ y7uew:
   label_snapshot: L0145 vocab_definitions
   lesson_uid: L0145
   module: vocab_definitions
+  status: active
+y7vfp:
+  label_snapshot: L0177 comprehension
+  lesson_uid: L0177
+  module: comprehension
   status: active
 y7ycx:
   label_snapshot: L0090 vocab_review

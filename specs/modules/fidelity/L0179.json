@@ -1,0 +1,70 @@
+{
+  "uid": "L0179",
+  "gate_version": 2,
+  "docx_sha256": "2a6a-313e-b313-c4f9",
+  "modules": {
+    "comprehension.vmk3a": {
+      "yaml_sha256": "e389-ec4a-e31f-27d1",
+      "checked": 26,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "full_text_annotate.apkxt": {
+      "yaml_sha256": "dcf9-2022-ffe9-9b66",
+      "checked": 9,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "key_reading.dxxwe": {
+      "yaml_sha256": "3cc7-b411-7bb2-bb9a",
+      "checked": 9,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "keypoints.rx7uu": {
+      "yaml_sha256": "1f01-f84f-6b94-ef2c",
+      "checked": 33,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "resources.autqw": {
+      "yaml_sha256": "6da4-ed4a-a170-6c25",
+      "checked": 2,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "spotlight.ufjck": {
+      "yaml_sha256": "b626-0bbb-5bbd-302b",
+      "checked": 62,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "vocab_application.nh639": {
+      "yaml_sha256": "9625-b1a9-27f7-8db7",
+      "checked": 10,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "vocab_definitions.wjc9c": {
+      "yaml_sha256": "97fa-60f5-1306-c6e2",
+      "checked": 16,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    },
+    "vocab_review.unpja": {
+      "yaml_sha256": "b865-56aa-df34-7109",
+      "checked": 12,
+      "status": "pass",
+      "passed": true,
+      "exit": 0
+    }
+  }
+}

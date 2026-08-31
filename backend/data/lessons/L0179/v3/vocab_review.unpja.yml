@@ -1,0 +1,111 @@
+lesson_uid: L0179
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞劃掉。
+  target_words:
+  - 終場
+  - 歷經
+  - 強韌
+  - 局勢
+  - 刻薄
+  - 刺耳
+  - 覺察
+  - 生涯
+  - 發揮所長
+  - 失利
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 生崖疲心理發生涯高峰
+  - 突出終憊次耳鮮緊張強
+  - 一味歷場揮中少場覺任
+  - 強韌刻耳勢場發薄察好
+  - 發遲利生所可揮濛濛亮
+  - 遲揮歷經失強所施局勢
+  - 局可所逐力博長成呼吸
+  - 事刻韌常步長覺刺效失
+  - 終薄復健刺耳局查利惜
+  - 經涯厲經無體刻簿韌性
+  answers_are_graphical: true
+  answer_paths:
+  - word: 終場
+    cells:
+    - - 2
+      - 3
+    - - 3
+      - 4
+    direction: diagonal_down_right
+  - word: 歷經
+    cells:
+    - - 6
+      - 3
+    - - 6
+      - 4
+    direction: horizontal
+  - word: 強韌
+    cells:
+    - - 4
+      - 1
+    - - 4
+      - 2
+    direction: horizontal
+  - word: 局勢
+    cells:
+    - - 6
+      - 9
+    - - 6
+      - 10
+    direction: horizontal
+  - word: 刻薄
+    cells:
+    - - 8
+      - 2
+    - - 9
+      - 2
+    direction: vertical
+  - word: 刺耳
+    cells:
+    - - 9
+      - 5
+    - - 9
+      - 6
+    direction: horizontal
+  - word: 覺察
+    cells:
+    - - 3
+      - 9
+    - - 4
+      - 9
+    direction: vertical
+  - word: 生涯
+    cells:
+    - - 1
+      - 7
+    - - 1
+      - 8
+    direction: horizontal
+  - word: 發揮所長
+    cells:
+    - - 4
+      - 7
+    - - 5
+      - 7
+    - - 6
+      - 7
+    - - 7
+      - 7
+    direction: vertical
+  - word: 失利
+    cells:
+    - - 8
+      - 10
+    - - 9
+      - 9
+    direction: diagonal_down_left
+  notes:
+    answer_paths: 圈選是橘色圖形（文字層沒有），路徑是在格子裡搜尋算出來的，10 個詞零歧義。
+  slug: unpja
+  text_ref: apkxt
