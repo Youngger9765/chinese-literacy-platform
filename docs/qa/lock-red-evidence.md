@@ -41,6 +41,7 @@
   ⚠️ **偵測器改嚴之後又多找到 9 支**：原本用「整份檔案含這個檔名」判，別的 spec 只是在 docstring 裡**提到**它就被算成「有人叫」。改成行層級（只收含 `subprocess`/`python `/`import`/`SCRIPTS /` 的行）之後才撈出來 —— 其中 `keypoints_shape_gate.py` 印 `KEYPOINTS_SHAPE_GATE=PASS` 卻**檢查 0 課**（找寫死的 `v3/keypoints.yml`，而 #2916 之後 155 個檔全有 slug），`lint_prompt_overfit.py` 的預設輸入目錄根本不存在
 - `test_golden_files_declare_provenance_spec.py`（#2729 機制 4）— mutation：新增一個沒 provenance 的 golden → 2 failed；把一版警語從 baseline 拿掉 → 1 failed；把檢查器的「跳過 metadata key」拿掉 → 1 failed；還原 → 6 passed。⚠️ 我加 `_provenance` 之後**當場把那兩支檢查器弄壞**（它們把它當成一課 → `KeyError: 'row_count'`）——所以鎖裡多一條盯著那個跳過還在。另：我兩次量測不一致（10 vs 95），因為第一版 regex 把裸字 `source` 也算成 provenance
 - `test_eval_cases_come_from_real_failures_spec.py`（#2856）— mutation：加一條沒有 provenance 的 case（＝憑空設計的）→ 2 failed；把一條的負向對照拿掉 → 1 failed；`locked_by` 指到不存在的檔 → 1 failed；**把六條的發現方式全改成同一種 → 1 failed**（只看得到一種失敗就會漏掉別種）；還原 → 21 passed
+- `test_skill_docs_do_not_contradict_themselves_spec.py`（#2858）— mutation：把矛盾那句放回 `lesson-overview-scan/SKILL.md` → 1 failed；把偵測器的主題清單清空 → 正向對照 1 failed；還原 → 41 passed。⭐ 起因：那份 skill 有**九天**同時寫著「還沒驗的：跑兩次的一致率」與「重跑一致率已量（L0072×3）」，相隔幾行 —— 讀的人拿到哪一句全看他從哪裡開始讀。另配一條反向對照：單純的「還沒驗」不可以被誤判成矛盾（否則會逼人刪掉誠實的話）
 
 ## grandfathered（既有債，未逐支驗過）
 
