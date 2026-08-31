@@ -1,0 +1,53 @@
+lesson_uid: L0179
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  hints:
+  - 從本課語詞框中找語詞。
+  - 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+  - 問同學。
+  vocabulary_bank:
+  - 終場
+  - 歷經
+  - 強韌
+  - 局勢
+  - 刻薄
+  - 刺耳
+  - 覺察
+  - 生涯
+  - 發揮所長
+  - 失利
+  items:
+  - index: 1
+    word: 覺察
+    definition: 指注意到自己或周遭正在發生的情況。
+  - index: 2
+    word: 刻薄
+    definition: 說話或待人尖酸、不留情，容易讓別人感到受傷。
+  - index: 3
+    word: 失利
+    definition: 指在比賽、競爭或選拔中沒有成功或落敗。
+  - index: 4
+    word: 歷經
+    definition: 指親身經過一段時間或許多事情。
+  - index: 5
+    word: 生涯
+    definition: 指一個人在某個領域中，長時間發展和經歷的過程。
+  - index: 6
+    word: 強韌
+    definition: 能承受壓力或挫折，並在調整後繼續前進。
+  - index: 7
+    word: 發揮所長
+    definition: 指把自己的長處充分表現、運用出來。
+  - index: 8
+    word: 終場
+    definition: 指比賽或表演結束的時候。
+  - index: 9
+    word: 刺耳
+    definition: 原指聲音尖銳難聽；也形容話語讓人聽了不舒服或難以接受。
+  - index: 10
+    word: 局勢
+    definition: 事情在某個時候呈現的整體情況和發展。
+  slug: wjc9c
+  text_ref: apkxt

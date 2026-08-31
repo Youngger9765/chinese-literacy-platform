@@ -1,0 +1,30 @@
+lesson_uid: L0176
+version_id: v3
+level: 5
+genre: 議論文
+strategy: 品格力──我好，你也好
+課文作者: 張筱晴
+學習單: 張筱晴
+pages_read: 10
+lesson_no: 12
+series: 體育生
+lesson_seq: 91120
+intro: 這篇文章從球隊裡兩位捕手的故事出發，談面對能力相近的隊友時，那種既想進步又怕被超越的心情。佳恩因為擔心先發位置不保，把接球的方法留了下來；一場比賽的失誤與教練的提醒，讓他重新看見同位置的隊友「不只是競爭者，也是最佳拍檔」。文章接著介紹「我好，你也好」「我好，你不好」「我不好，你好」「我不好，你也不好」四種心理地位，並用辨別練習與情境題，帶讀者練習從話語中認出彼此的互動位置，再有意識地把自己調整回「肯定自己也肯定他人」的位置。
+notes:
+  總表_對照: 總表「2.體育生的品格教材」列 體-12：適用年級 5、文體 議論文，教材目標策略與第六大題標題皆為「品格力──我好，你也好」。⚠️ 這四課（體-12~15）是 2026-08-17 之後才加進來源 Drive 的，抽取管線先前沒跟上（#3011）。
+strategy_sources:
+  previous: 品格力──我好，你也好
+source_profile:
+  class: standard
+  note: 單一錨點 + 有計數欄 + idx 唯一 —— 走主路徑
+  has_key_reading_section: true
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: null
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 1
+  has_counter_column: true
+  body_in_tables: true
+  invisible_chars_docx_only: true
+  profiled: '2026-08-31'

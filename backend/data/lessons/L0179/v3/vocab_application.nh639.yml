@@ -1,0 +1,43 @@
+lesson_uid: L0179
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格中填入正確的語詞代號
+  option_bank:
+    A: 刻薄
+    B: 失利
+    C: 歷經
+    D: 強韌
+    E: 覺察
+    F: 刺耳
+    G: 終場
+    H: 局勢
+    I: 發揮所長
+    J: 生涯
+  items:
+  - index: 1
+    stem: 即使不同意別人的做法，也不必用（　）的語氣批評對方。
+    answer: A
+  - index: 2
+    stem: 這座老校舍（　）數十年的風吹雨打，牆面已經出現許多裂痕。
+    answer: C
+  - index: 3
+    stem: 如果能（　）自己的情緒變化，會比較容易找到適合的調整方法。
+    answer: E
+  - index: 4
+    stem: 雖然那句批評十分（　），其中仍有一些值得思考的地方。
+    answer: F
+  - index: 5
+    stem: 教練依照球員不同的能力安排位置，希望每個人都能（　）。
+    answer: I
+  - index: 6
+    stem: 老師帶我們閱讀世界新聞，了解最近國際（　）的變化與影響。
+    answer: H
+  - index: 7
+    stem: 這位候選人在選舉中（　）後，十分大方的向支持者表達感謝。
+    answer: B
+  - index: 8
+    stem: 經過一次次失敗，他的心變得更加（　），不再因小挫折就放棄。
+    answer: D
+  slug: nh639
+  text_ref: apkxt

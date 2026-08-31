@@ -1,0 +1,61 @@
+lesson_uid: L0177
+version_id: v3
+section_no: 三
+vocab_definitions:
+  instruction: 請在空格內填入本課語詞，遇到困難時，你可以試試以下方法：
+  hints:
+  - 從本課語詞框中，找語詞。
+  - 再回到課文讀讀看，這個解釋可能是哪個語詞的意思。
+  - 問同學。
+  vocabulary_bank:
+  - 全貌
+  - 隨口
+  - 採納
+  - 概括
+  - 一文不值
+  - 黯淡
+  - 人身攻擊
+  - 失常
+  - 混為一談
+  - 迎合
+  - 揮之不去
+  - 照單全收
+  items:
+  - index: 1
+    word: 全貌
+    definition: 一件事情完整的情況或樣子。
+  - index: 2
+    word: 隨口
+    definition: 沒有仔細思考，就順口說出來。
+  - index: 3
+    word: 採納
+    definition: 接受別人的意見、方法或建議，並決定使用。
+  - index: 4
+    word: 概括
+    definition: 把許多內容整理後，用較簡要的方式說出整體情況或重點。
+  - index: 5
+    word: 一文不值
+    definition: 比喻把人或事物說得毫無價值。
+  - index: 6
+    word: 黯淡
+    definition: 指光線不明亮，也可形容未來不看好或表現不突出。
+  - index: 7
+    word: 人身攻擊
+    definition: 不針對事情本身，而是攻擊一個人的外表、能力、身分或人格。
+  - index: 8
+    word: 失常
+    definition: 表現失去平常的水準，沒有發揮平常的實力。
+  - index: 9
+    word: 混為一談
+    definition: 把原本不同的事情當成同一件事來看或討論。
+  - index: 10
+    word: 迎合
+    definition: 刻意配合對方的喜好或想法。
+  - index: 11
+    word: 揮之不去
+    definition: 怎麼趕都趕不走，常形容記憶、情緒或念頭一直留在心中。
+  - index: 12
+    word: 照單全收
+    definition: 比喻不加判斷，全盤接受別人的意見。
+  slug: dx76p
+  text_ref: np49y

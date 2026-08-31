@@ -1,0 +1,43 @@
+lesson_uid: L0177
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格中填入正確的語詞代號
+  option_bank:
+    A: 揮之不去
+    B: 照單全收
+    C: 一文不值
+    D: 混為一談
+    E: 採納
+    F: 黯淡
+    G: 迎合
+    H: 失常
+    I: 概括
+    J: 隨口
+  items:
+  - index: 1
+    stem: 嚴格的老師不一定就是不關心學生，不要把嚴格和冷漠（　）。
+    answer: D
+  - index: 2
+    stem: 球隊主力接連受傷，外界一度認為今年的奪冠希望十分（　）。
+    answer: F
+  - index: 3
+    stem: 雖然事情已經過了很久，那句傷人的話仍在她心中（　）。
+    answer: A
+  - index: 4
+    stem: 別人的建議可以參考，但不能不加思考就（　）。
+    answer: B
+  - index: 5
+    stem: 經過熱烈的討論後，大家投票決定（　）第二組提出的方案。
+    answer: E
+  - index: 6
+    stem: 為了（　）大家的喜好，她勉強答應參加自己不感興趣的活動。
+    answer: G
+  - index: 7
+    stem: 老師請我們用一句話（　）這一段文章的重點。
+    answer: I
+  - index: 8
+    stem: 一次比賽失敗，不代表之前所有的努力都變得（　）。
+    answer: C
+  slug: rqheq
+  text_ref: np49y

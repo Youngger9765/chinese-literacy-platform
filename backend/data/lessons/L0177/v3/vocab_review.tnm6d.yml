@@ -1,0 +1,144 @@
+lesson_uid: L0177
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞劃掉。
+  target_words:
+  - 混為一談
+  - 隨口
+  - 揮之不去
+  - 全貌
+  - 黯淡
+  - 失常
+  - 概括
+  - 採納
+  - 迎合
+  - 人身攻擊
+  - 一文不值
+  - 照單全收
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 採黯淡失概一聞不直隨
+  - 內顧忌長括頓照踩口可
+  - 混為一談　時單瑩納暗
+  - 垂案合惰口輝全全冒淡
+  - 揮頭採難保之收我人盈
+  - 人之喪納昆不較身合一
+  - 忐生不氣為去攻勁後文
+  - 忑混攻去一擊評迎盾不
+  - 失常訣擊潭拍價合棒值
+  - 既炎竅全貌檔全常概刮
+  answers_are_graphical: true
+  answer_paths:
+  - word: 混為一談
+    cells:
+    - - 3
+      - 1
+    - - 3
+      - 2
+    - - 3
+      - 3
+    - - 3
+      - 4
+    direction: horizontal
+  - word: 隨口
+    cells:
+    - - 1
+      - 10
+    - - 2
+      - 9
+    direction: diagonal_down_left
+  - word: 揮之不去
+    cells:
+    - - 5
+      - 1
+    - - 6
+      - 2
+    - - 7
+      - 3
+    - - 8
+      - 4
+    direction: diagonal_down_right
+  - word: 全貌
+    cells:
+    - - 10
+      - 4
+    - - 10
+      - 5
+    direction: horizontal
+  - word: 黯淡
+    cells:
+    - - 1
+      - 2
+    - - 1
+      - 3
+    direction: horizontal
+  - word: 失常
+    cells:
+    - - 9
+      - 1
+    - - 9
+      - 2
+    direction: horizontal
+  - word: 概括
+    cells:
+    - - 1
+      - 5
+    - - 2
+      - 5
+    direction: vertical
+  - word: 採納
+    cells:
+    - - 5
+      - 3
+    - - 6
+      - 4
+    direction: diagonal_down_right
+  - word: 迎合
+    cells:
+    - - 8
+      - 8
+    - - 9
+      - 8
+    direction: vertical
+  - word: 人身攻擊
+    cells:
+    - - 5
+      - 9
+    - - 6
+      - 8
+    - - 7
+      - 7
+    - - 8
+      - 6
+    direction: diagonal_down_left
+  - word: 一文不值
+    cells:
+    - - 6
+      - 10
+    - - 7
+      - 10
+    - - 8
+      - 10
+    - - 9
+      - 10
+    direction: vertical
+  - word: 照單全收
+    cells:
+    - - 2
+      - 7
+    - - 3
+      - 7
+    - - 4
+      - 7
+    - - 5
+      - 7
+    direction: vertical
+  notes:
+    grid: ⚠️ 原稿第 3 列第 5 格是**空的**（10x10 只印了 99 個字），這裡用全形空白如實保留、不補字。缺格的位置不是靠肉眼判讀：補在 (3,5) 之後 12 個詞才各自只有一條路徑，補在別處「照單全收」無解。
+    answer_paths: 圈選是橘色圖形（文字層沒有），路徑是在格子裡搜尋算出來的，12 個詞零歧義。
+  slug: tnm6d
+  text_ref: np49y
