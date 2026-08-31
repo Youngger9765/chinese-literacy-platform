@@ -1,21 +1,31 @@
-"""
-Lesson layer loaders: I/O for Layer-1 (L*.yml) and Layer-2 (_parsed_2026-05-01/*.yml).
+"""Lesson layer loaders：課文 yml 的 I/O 與欄位正規化。
 
 Extracted from lesson_loader.py (Issue #1889).
 
-Public API:
-    GENRE_TO_CATEGORY    — static genre→display category map
-    ENRICHMENT_FIELDS    — tuple of field names merged from Layer-2 into Layer-1
-    build_intro()        — construct intro dict from raw lesson data
-    normalize_fill_in_blank_item()  — tag and normalize fill_in_blank items
-    load_curriculum_manifest()      — load manifest.yml → code→meta index
-    load_layer1_lessons()           — load production L*.yml lessons
+Public API（2026-08-31 對著模組實跑核對過，⛔ 不要憑印象加）:
+    build_intro()                   — 從 raw lesson data 組 intro dict
+    normalize_fill_in_blank_item()  — 標記並正規化 fill_in_blank 題目
+    get_key_reading_passages()      — 念順順段落
+    GENRE_TO_CATEGORY               — genre → 顯示分類的靜態對照
+    MULTI_LESSON_PRIMARY / MULTI_LESSON_MAP / AB_SECONDARY_MAP
+    CATALOG_TO_PARSED_OVERRIDE / LAYER2_ID_OFFSET
 
-⛔ 這裡曾經列著 `load_layer2_lessons()` 與 `build_layer2_enrichment_index()`，
-   但一修（#2683）封存 Layer-2 來源目錄之後那兩支就被移掉了 —— docstring 卻留著，
-   宣傳了兩支不存在的 API。2026-08-31 清 worktree 時發現（有一支測試 import 它們，
-   在新 base 上直接 AttributeError）。
-   同族還有 `lesson_code_normalization.py:151` 的註解也還指著 `load_layer2_lessons`。
+🔴 這份清單原本列著 **五支根本不存在的函式**：
+   `load_layer1_lessons()` · `load_layer2_lessons()` ·
+   `build_layer2_enrichment_index()` · `load_curriculum_manifest()` ·
+   還有一個不存在的常數 `ENRICHMENT_FIELDS`。
+   Layer-2 的來源目錄在一修（#2683）被封存刪除，那批函式跟著被移掉，
+   docstring 卻原封不動留著 —— 宣傳了一整組不存在的 API。
+
+   2026-08-31 清 worktree 時才發現：有一支 parked 的測試 import
+   `LAYER2_SOURCE_AVAILABLE`，在新 base 上直接 AttributeError。
+
+   ⚠️ 我第一次只拿掉那兩支 layer2 的，以為其餘還在 —— 用
+   `grep "^def load_layer1_lessons"` 驗，回 0，但**正向對照也回 0**，
+   所以那個 0 什麼都不證明。改用 `hasattr(module, name)` 直接問模組，
+   才知道五支全都不在。
+
+   同族：`lesson_code_normalization.py:151` 的註解也還指著 `load_layer2_lessons`。
 """
 
 import logging

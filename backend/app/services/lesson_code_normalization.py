@@ -148,7 +148,11 @@ _AB_SECONDARY_MAP = AB_SECONDARY_MAP
 def catalog_to_parsed_code(catalog_code: str) -> str:
     """Map curriculum catalog code → parsed YAML ``lesson_code`` / filename stem.
 
-    Mirrors ``load_layer2_lessons`` resolution (#1669).
+    原本寫著「Mirrors ``load_layer2_lessons`` resolution (#1669)」——
+    ⛔ 那支函式在一修（#2683）封存 Layer-2 來源之後就被移掉了，
+    這行從此指著一個不存在的東西（2026-08-31 清理時發現）。
+    現在的行為就寫在下面幾行：先正規化課號，再依序查
+    MULTI_LESSON_PRIMARY → CATALOG_TO_PARSED_OVERRIDE。
     """
     norm = normalize_manifest_code(catalog_code)
     if norm in MULTI_LESSON_PRIMARY:
