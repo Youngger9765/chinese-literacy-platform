@@ -38,6 +38,8 @@
 - `scripts/space_drift_scan.py`（#2864）— mutation：把 L0034 的修正退回 → 抓到 2 處、SPACE_DRIFT=FAIL；**把誤報濾網關掉 → 4 處**（抽取器自組的 `年級5課次17` 那類回來了，證明濾網是有作用的不是裝飾）；還原 → 0 處 PASS。⭐ 逐字門結構上抓不到這一類：它第 77 行 `re.sub(r'\s+','',s)` 比對前把空白全拿掉 —— 那是刻意且正確的（DOCX 的 run 會亂切），代價是這一類看不到，所以另走一條
 - `test_evals_are_wired_or_explained_spec.py`（#2854）— mutation：把接上的 eval 從 run-ci.sh 拿掉 → 1 failed；**把壞掉那支（`eval_keypoints_text_fidelity`）接進 CI → 1 failed**（正向對照擋假綠燈）；讓能跑的那支不再印 PASS → 1 failed（exit 0 不算過）；還原 → 8 passed。⭐ 盤點發現六支裡有兩支是 **exit 0 但零輸出**：`eval_keypoints_text_fidelity` 根本沒有 `main()`、`eval_lesson_schema --all` 的 schema-dir 指向已刪的 `_online-schema` 回 0/0 —— 照 exit code 收會多兩盞假綠燈
 - `test_gate_scripts_are_classified_spec.py`（#2729）— mutation：新增一支沒登記的門 → 1 failed（這就是票要的『擋』）；把某支的理由寫成一個字 → 1 failed；把已接上的留在 NOT_WIRED → 1 failed；還原 → 5 passed。⚠️ 第一版**紅在自我參照**：NOT_WIRED 的名字寫在這支 spec 裡，而它自己也在被掃的目錄下 —— 不排除自己的話每一支都會被算成「有人叫」，整支恆綠
+  ⚠️ **偵測器改嚴之後又多找到 9 支**：原本用「整份檔案含這個檔名」判，別的 spec 只是在 docstring 裡**提到**它就被算成「有人叫」。改成行層級（只收含 `subprocess`/`python `/`import`/`SCRIPTS /` 的行）之後才撈出來 —— 其中 `keypoints_shape_gate.py` 印 `KEYPOINTS_SHAPE_GATE=PASS` 卻**檢查 0 課**（找寫死的 `v3/keypoints.yml`，而 #2916 之後 155 個檔全有 slug），`lint_prompt_overfit.py` 的預設輸入目錄根本不存在
+- `test_golden_files_declare_provenance_spec.py`（#2729 機制 4）— mutation：新增一個沒 provenance 的 golden → 2 failed；把一版警語從 baseline 拿掉 → 1 failed；把檢查器的「跳過 metadata key」拿掉 → 1 failed；還原 → 6 passed。⚠️ 我加 `_provenance` 之後**當場把那兩支檢查器弄壞**（它們把它當成一課 → `KeyError: 'row_count'`）——所以鎖裡多一條盯著那個跳過還在。另：我兩次量測不一致（10 vs 95），因為第一版 regex 把裸字 `source` 也算成 provenance
 
 ## grandfathered（既有債，未逐支驗過）
 

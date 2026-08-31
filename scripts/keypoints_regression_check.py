@@ -96,7 +96,11 @@ def check() -> int:
     regressions = []
     drifts = []
     improvements = []
+    # 底線開頭的是這份檔自己的 metadata（`_provenance`：它從哪來、哪一版），
+    # 不是課號。⛔ 不跳過的話會被當成一課，然後 KeyError: 'row_count'（#2729 實際踩過）。
     for code, base in baseline.items():
+        if code.startswith("_"):
+            continue
         cur = snapshot_one(code)
         if cur is None:
             regressions.append((code, "重點表整個 load 不出（曾有 {} 列）".format(base["row_count"])))

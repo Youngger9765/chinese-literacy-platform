@@ -33,6 +33,21 @@ _GATEISH = re.compile(r"(GATE=|_GATE\b|return 1\b|sys\.exit\(1|SystemExit\(1|=PA
 
 #: 刻意不接，理由逐支寫死。⛔ 加新的一定要寫理由，不可以只是加名字。
 NOT_WIRED = {
+    "lint_prompt_overfit.py":
+        "🔴 它的預設輸入目錄 `backend/data/lessons/_ai_lessons` **不存在** —— "
+        "裸跑印 ADAPTER_OVERFIT_PASS 但沒有東西可掃。接了就是一盞假燈。"
+        "要接必須先給它一個真的存在的 --lessons-dir。",
+    # ③ 建在舊世界上（續）—— 這批是更嚴的偵測（行層級判「真的在叫」）才撈出來的
+    "keypoints_shape_gate.py":
+        "🔴 建在舊世界：找 `v3/keypoints.yml`（寫死無 slug），而 #2916 之後 155 個檔全有 slug "
+        "→ 它檢查 **0 課**卻印 KEYPOINTS_SHAPE_GATE=PASS。接了就是一盞永遠綠的假燈。"
+        "要接必須先改成 glob `keypoints.*.yml`。",
+    "check_curriculum_drift.py": "需要 --source 或 MANIFEST.source_dir（原稿），裸跑 exit 2",
+    "merge_reparsed_to_prod.py": "舊 regex 管線的合併工具（#2751），且需要 --demo/--all 參數",
+    "build_lesson_manifest.py": "建置期產 _manifest.yml（跑一次產 174 份），不是門",
+    "extract_source_witnesses.py": "#2865 裁判鏈的一半，需要 --uid 等參數，由 witness_reconcile_gate 那條路帶",
+    "eval_overview_repeatability.py": "需要多次 LLM 掃描結果當輸入（見 #2854 盤點）",
+    "skill_dryrun_diff.py": "需要參數（比對 skill 乾跑輸出），由人在改 skill 時手動叫",
     # ① 一次性 / 建置期工具
     "batch_all_lessons.py": "一次性批次建置，不是門",
     "build_lesson_registry.py": "建置期產 registry",
@@ -74,24 +89,41 @@ def _gate_scripts() -> list[str]:
     return out
 
 
-def _callers() -> str:
-    parts = [REPO / "specs" / "run-ci.sh"]
-    parts += sorted((REPO / ".github" / "workflows").glob("*.yml"))
-    parts += list((REPO / "backend" / "tests").rglob("*.py"))
-    parts += list((REPO / "backend" / "specs").rglob("*.py"))
-    parts += list((REPO / ".claude" / "skills").rglob("SKILL.md"))
-    # ⛔ 排除這支自己 —— NOT_WIRED 的名字寫在這裡面，不排除的話每一支都會被
-    #    算成「有人叫」，於是整支恆綠。第一版就是這樣紅在自我參照上。
+def _invocation_lines() -> list[str]:
+    """只收「看起來像在叫它」的那些行。
+
+    ⛔ 不可以用「整份檔案含這個檔名」判 —— 別的 spec 只是在 docstring 裡**提到**
+       它（例如解釋為什麼不接），就會被算成「有人叫」，於是整支恆綠。
+       2026-08-31 實際踩到：我在 provenance 那支的 docstring 寫了兩支 checker 的名字，
+       這條當場紅了。
+    """
+    lines: list[str] = []
+    for p in [REPO / "specs" / "run-ci.sh"] + sorted((REPO / ".github" / "workflows").glob("*.yml")):
+        if p.is_file():
+            lines += p.read_text(encoding="utf-8", errors="ignore").split("\n")
     me = pathlib.Path(__file__).resolve()
-    return "\n".join(p.read_text(encoding="utf-8", errors="ignore")
-                     for p in parts if p.is_file() and p.resolve() != me)
+    code_dirs = [REPO / "backend" / "tests", REPO / "backend" / "specs",
+                 REPO / ".claude" / "skills"]
+    for d in code_dirs:
+        for f in list(d.rglob("*.py")) + list(d.rglob("SKILL.md")):
+            if not f.is_file() or f.resolve() == me:
+                continue
+            for ln in f.read_text(encoding="utf-8", errors="ignore").split("\n"):
+                # 像呼叫：subprocess / python 指令 / import / 組路徑
+                if any(k in ln for k in ("subprocess", "sys.executable", "python ",
+                                         "python3 ", "import ", "SCRIPTS /", 'scripts/"')):
+                    lines.append(ln)
+    return lines
+
+
+def _is_called(name: str) -> bool:
+    return any(name in ln for ln in _invocation_lines())
 
 
 def test_every_gate_script_is_either_wired_or_explained():
     """⛔ 這條就是 #2729 要的擋：新加一支門而沒接、也沒說為什麼，就紅。"""
-    callers = _callers()
     unclassified = sorted(n for n in _gate_scripts()
-                          if n not in callers and n not in NOT_WIRED)
+                          if not _is_called(n) and n not in NOT_WIRED)
     assert not unclassified, (
         f"{len(unclassified)} 支像門的腳本沒有人叫、也沒寫為什麼不接：\n  "
         + "\n  ".join(unclassified)
@@ -107,8 +139,7 @@ def test_the_not_wired_list_has_no_dead_entries():
 
 def test_the_not_wired_list_is_not_hiding_wired_ones():
     """反向之二：已經接上的不該還掛在「不接」的名單裡（讀的人會被誤導）。"""
-    callers = _callers()
-    both = sorted(n for n in NOT_WIRED if n in callers)
+    both = sorted(n for n in NOT_WIRED if _is_called(n))
     assert not both, f"這幾支其實已經被叫了，從 NOT_WIRED 移除：{both}"
 
 
