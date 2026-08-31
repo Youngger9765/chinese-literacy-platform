@@ -1,0 +1,30 @@
+lesson_uid: L0179
+version_id: v3
+level: 5
+genre: 議論文
+strategy: 品格力──心理韌性
+課文作者: 張筱晴
+學習單: 張筱晴
+pages_read: 11
+lesson_no: 15
+series: 體育生
+lesson_seq: 91150
+intro: 這是體育生品格教材的最後一課，把前面各課學過的方法統整起來。文章指出心理韌性不是不會緊張、也不是遇到困難就硬撐，而是在壓力、挫折或改變面前，能看見自己的狀態、分辨念頭與事實、找到現在可以做的一步，並懂得運用身邊的支持。文章以跆拳道選手陳怡安受傷後轉行創業為例，說明運動場上磨練出的能力會跟著人走進另一條路；最後用「遇到困難先問自己四個問題」的架構，帶讀者在真實情境中演練一次。
+notes:
+  總表_對照: 總表「2.體育生的品格教材」列 體-15：適用年級 5、文體 議論文，教材目標策略與第六大題標題皆為「品格力──心理韌性」。⚠️ 這四課（體-12~15）是 2026-08-17 之後才加進來源 Drive 的，抽取管線先前沒跟上（#3011）。
+strategy_sources:
+  previous: 品格力──心理韌性
+source_profile:
+  class: standard
+  note: 單一錨點 + 有計數欄 + idx 唯一 —— 走主路徑
+  has_key_reading_section: true
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: null
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 1
+  has_counter_column: true
+  body_in_tables: true
+  invisible_chars_docx_only: true
+  profiled: '2026-08-31'

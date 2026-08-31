@@ -1,0 +1,117 @@
+lesson_uid: L0178
+version_id: v3
+section_no: 八
+vocab_review:
+  type: word_search
+  instruction: 找一找：請圈出格子內的語詞，圈出後，把灰框內的語詞劃掉。
+  target_words:
+  - 濛濛亮
+  - 遲遲
+  - 突出
+  - 鮮少
+  - 成效
+  - 高峰
+  - 疲憊
+  - 復健
+  - 韌性
+  - 一味
+  - 逐步
+  grid_size:
+  - 10
+  - 10
+  grid:
+  - 蒙犀無任暗淡高遂在皮
+  - 蒙犀疲法性峰穌步成憊
+  - 亮步一憊承低少隨口效
+  - 混動機文一攻濛濛亮喂
+  - 為遲突好不昧看不建復
+  - 一遲想逐步值味韌人建
+  - 談揮之不去疲備性身內
+  - 鮮是突日子值葉中攻一
+  - 少迎合出韌復健承擊味
+  - 高鋒全冒姓逐峰我效亮
+  answers_are_graphical: true
+  answer_paths:
+  - word: 濛濛亮
+    cells:
+    - - 4
+      - 7
+    - - 4
+      - 8
+    - - 4
+      - 9
+    direction: horizontal
+  - word: 遲遲
+    cells:
+    - - 5
+      - 2
+    - - 6
+      - 2
+    direction: vertical
+  - word: 突出
+    cells:
+    - - 8
+      - 3
+    - - 9
+      - 4
+    direction: diagonal_down_right
+  - word: 鮮少
+    cells:
+    - - 8
+      - 1
+    - - 9
+      - 1
+    direction: vertical
+  - word: 成效
+    cells:
+    - - 2
+      - 9
+    - - 3
+      - 10
+    direction: diagonal_down_right
+  - word: 高峰
+    cells:
+    - - 1
+      - 7
+    - - 2
+      - 6
+    direction: diagonal_down_left
+  - word: 疲憊
+    cells:
+    - - 2
+      - 3
+    - - 3
+      - 4
+    direction: diagonal_down_right
+  - word: 復健
+    cells:
+    - - 9
+      - 6
+    - - 9
+      - 7
+    direction: horizontal
+  - word: 韌性
+    cells:
+    - - 6
+      - 8
+    - - 7
+      - 8
+    direction: vertical
+  - word: 一味
+    cells:
+    - - 8
+      - 10
+    - - 9
+      - 10
+    direction: vertical
+  - word: 逐步
+    cells:
+    - - 6
+      - 4
+    - - 6
+      - 5
+    direction: horizontal
+  notes:
+    answer_paths: 圈選是橘色圖形（文字層沒有），路徑是在格子裡搜尋算出來的，11 個詞零歧義。
+  slug: decex
+  text_ref: h4jud

@@ -1,0 +1,30 @@
+lesson_uid: L0178
+version_id: v3
+level: 5
+genre: 議論文
+strategy: 品格力──找回內在動力
+課文作者: 張筱晴
+學習單: 張筱晴
+pages_read: 11
+lesson_no: 14
+series: 體育生
+lesson_seq: 91140
+intro: 這篇文章寫的是努力很久卻遲遲看不見成果的那段日子。職棒投手林詩翔身材不突出、球速不快，長期待在二軍，直到一次比賽的挫折讓他清楚看見差距，才積極請教前輩、重新調整投球動作，幾年後才看見成效；林智勝則是曾站上生涯高峰，車禍受傷後從復健一點一點練回來，最後明白比別人不看好自己更可怕的，是自己先失去信心。文章歸納出「堅持不只有一種樣子」，並提供換個方式、找到理由、縮小目標、留下紀錄四個重拾動力的開關。
+notes:
+  總表_對照: 總表「2.體育生的品格教材」列 體-14：適用年級 5、文體 議論文，教材目標策略與第六大題標題皆為「品格力──找回內在動力」。⚠️ 這四課（體-12~15）是 2026-08-17 之後才加進來源 Drive 的，抽取管線先前沒跟上（#3011）。
+strategy_sources:
+  previous: 品格力──找回內在動力
+source_profile:
+  class: standard
+  note: 單一錨點 + 有計數欄 + idx 唯一 —— 走主路徑
+  has_key_reading_section: true
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: null
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 1
+  has_counter_column: true
+  body_in_tables: true
+  invisible_chars_docx_only: true
+  profiled: '2026-08-31'

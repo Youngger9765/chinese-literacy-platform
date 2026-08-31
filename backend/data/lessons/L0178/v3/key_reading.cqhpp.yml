@@ -1,0 +1,48 @@
+lesson_uid: L0178
+version_id: v3
+section_no: 二
+key_reading:
+  instruction: 請用計時器，從指定段落（七☞）開始朗讀，在表格中記錄1分鐘朗讀的字數。如果計時3次後，你對自己還不滿意，可以多練幾次。最後一次，找一位同學，請他計時、記錄並簽名！
+  timing_table:
+    columns:
+    - 第1次計時
+    - 第2次計時
+    - 第3次計時
+    - 裁判計時
+    unit: 字
+    judge_signature: true
+  benchmark:
+  - threshold: ＜200字
+    feedback: 還要多加練習。
+  - threshold: 201~230字
+    feedback: 嗯，還不錯喲！
+  - threshold: ＞231字
+    feedback: 哇嗚，超級厲害！
+  slug: cqhpp
+  text_ref: h4jud
+  printed_char_marks:
+  - 28
+  - 58
+  - 87
+  - 101
+  - 129
+  - 159
+  - 188
+  - 218
+  - 247
+  - 263
+  - 291
+  - 321
+  - 351
+  - 362
+  printed_counter_last: 362
+  passage: 後來，他慢慢明白，比別人不看好自己，更可怕的是自己先失去信心。他開始正視自己的不足，不再只盯著成績，而是從每一場比賽中找出自己還能改進的地方。棒球不再只剩下一串數字，也重新成為一件他願意繼續做下去的事。這條路上，或許有些人繼續練，後來等到了上場的機會；有些人改變位置，找到更適合自己的方向；也有人最後沒有成為職業選手，卻把訓練中學會的自律、合作，以及面對挫折的韌性，帶到球場外的學習、工作與生活。堅持並不只有一種樣子。它不只是沿著同一條路一味苦撐；有時是調整方法、改變位置，也有時是在評估後重新選擇更適合自己的方向，繼續往前。看不見成長的日子，不一定都是白費。有時候，能力正在逐步累積；有時候，方法確實需要改變；也有時候，方向可以重新選擇。下一場比賽會不會更好，沒有人能保證。但你仍可以想一想：現在的自己，下一步可以怎麼走？
+  start_text: 後來，他慢慢明白，比別人不看好自己，更可怕的是自
+  extent_chars: 362
+  start_paragraph: 7
+  end_paragraph: 9
+  source: extract_key_reading_v3
+extraction_check:
+  verdict: ok
+  corroborated_by_first_edition: null
+  absorbed_tail: 0

@@ -1,0 +1,43 @@
+lesson_uid: L0176
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格填入正確的語詞代號
+  option_bank:
+    A: 垂頭喪氣
+    B: 隱隱作痛
+    C: 暗自較勁
+    D: 忐忑
+    E: 後盾
+    F: 難保
+    G: 訣竅
+    H: 頓時
+    I: 顧忌
+    J: 懊惱
+  items:
+  - index: 1
+    stem: 籃球比賽最後一秒被對手逆轉，大家都（　）的走回休息區。
+    answer: A
+  - index: 2
+    stem: 每當她遇到挫折，家人總是給她鼓勵，成為她最可靠的（　）。
+    answer: E
+  - index: 3
+    stem: 他知道自己闖禍後，（　）地走進辦公室，不知如何向老師說明。
+    answer: D
+  - index: 4
+    stem: 他們兩個在球隊上稱兄道弟，但也常（　），希望得到教練賞識。
+    answer: C
+  - index: 5
+    stem: 昨天跑完八百公尺後，他的腳踝到今天還有些（　）。
+    answer: B
+  - index: 6
+    stem: 哥哥告訴我，背英文單字的（　）不是重複抄寫，而是常常複習。
+    answer: G
+  - index: 7
+    stem: 他想在小組討論時提出不同意見，卻（　）同學的感受，沒有開口。
+    answer: I
+  - index: 8
+    stem: 老師宣布明天的考試延期，全班同學（　）鬆了一口氣。
+    answer: H
+  slug: 477kn
+  text_ref: 9qjnx

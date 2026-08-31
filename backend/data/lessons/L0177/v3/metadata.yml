@@ -1,0 +1,30 @@
+lesson_uid: L0177
+version_id: v3
+level: 5
+genre: 議論文
+strategy: 品格力──面對評價的方法
+課文作者: 張筱晴
+學習單: 張筱晴
+pages_read: 12
+lesson_no: 13
+series: 體育生
+lesson_seq: 91130
+intro: 這篇文章從一段被大量轉傳的失誤影片談起，說明一句評價為什麼會讓人開始懷疑自己。作者提出三個可以先問自己的問題——對方說的是具體問題還是個人感覺、他掌握的是全貌還是片段、這個評價能不能幫助我做得更好——並以2024年世界棒球12強賽潘傑楷受質疑的例子，說明不該因幾次失常就否定原來擁有的能力。文章把評價分成具體回饋、個人喜好與無效批評三類，分別給出處理方式，最後提醒讀者：成為給意見的人時，也要「用愛心說真話」。
+notes:
+  總表_對照: 總表「2.體育生的品格教材」列 體-13：適用年級 5、文體 議論文，教材目標策略與第六大題標題皆為「品格力──面對評價的方法」。⚠️ 這四課（體-12~15）是 2026-08-17 之後才加進來源 Drive 的，抽取管線先前沒跟上（#3011）。
+strategy_sources:
+  previous: 品格力──面對評價的方法
+source_profile:
+  class: standard
+  note: 單一錨點 + 有計數欄 + idx 唯一 —— 走主路徑
+  has_key_reading_section: true
+  multi_text: false
+  repeated_modules: []
+  text_boundary_known: null
+  has_body_paragraphs: true
+  paragraph_idx_unique: true
+  anchor_hits: 1
+  has_counter_column: true
+  body_in_tables: true
+  invisible_chars_docx_only: true
+  profiled: '2026-08-31'

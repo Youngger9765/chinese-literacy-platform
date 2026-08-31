@@ -1,0 +1,29 @@
+lesson_uid: L0176
+version_id: v3
+title: 一起變強，會更好
+catalog_slot: 體-L12
+sections_present:
+- 'no': 一
+  name: 讀全文-做記號
+- 'no': 二
+  name: 念順順
+- 'no': 三
+  name: 語詞我最棒
+- 'no': 四
+  name: 語詞應用
+- 'no': 五
+  name: 文章重點表
+- 'no': 六
+  name: 品格聚光燈
+  subtitle: 我好，你也好
+- 'no': 七
+  name: 閱讀理解
+- 'no': 八
+  name: 詞語複習
+- 'no': 九
+  name: 知識補給站
+source:
+  extracted_by: extract-lesson-multimodal
+  pdf_pages: 10
+  drive_path: 體育生品格教育/體L12-團隊_一起變強會更好(品格─我好，你也好).docx
+  docx_md5: md5-12:d5a9335311de

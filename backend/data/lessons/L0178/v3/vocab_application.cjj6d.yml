@@ -1,0 +1,44 @@
+lesson_uid: L0178
+version_id: v3
+section_no: 四
+vocab_application:
+  instruction: 在空格中填入正確的語詞代號
+  option_bank:
+    A: 鮮少
+    B: 成效
+    C: 高峰
+    D: 復健
+    E: 疲憊
+    F: 逐步
+    G: 一味
+    H: 韌性
+    I: 突出
+  items:
+  - index: 1
+    stem: 一整天的校外教學結束後，同學們雖然（　），心情卻很愉快。
+    answer: E
+  - index: 2
+    stem: 這個山區冬天天氣寒冷，十分荒涼，（　）有遊客前來。
+    answer: A
+  - index: 3
+    stem: 身體已經受傷，就不能（　）忍痛練習，應該先接受檢查。
+    answer: G
+  - index: 4
+    stem: 這位歌手正值事業（　）時，檢查出罹患了癌症，令人震驚。
+    answer: C
+  - index: 5
+    stem: 小恩在繪畫方面表現（　），作品多次代表學校參賽。
+    answer: I
+  - index: 6
+    stem: 老師先教基本操作，再一個個增加新功能，讓大家（　）學會使用新的軟體。
+    answer: F
+  - index: 7
+    stem: 她轉學後花了一段時間適應新環境，也在過程中培養出面對改變的（　）。
+    answer: H
+  - index: 8
+    stem: 她每天固定複習英文單字，幾個月後終於看見努力的（　）。
+    answer: B
+  slug: cjj6d
+  notes:
+    option_bank: ⚠️ 原稿把代號 H 印了兩次：「Ｈ.韌性」與「H.遲遲」。第 7 題答案 H 依語意（面對改變的韌性）指的是韌性，所以這裡的 H 記為韌性；「遲遲」在本大題沒有可用代號，也沒有任何一題用到它。⛔ 不改原稿、也不替它補一個代號。
+  text_ref: h4jud
