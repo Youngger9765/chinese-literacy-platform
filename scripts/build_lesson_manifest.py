@@ -158,13 +158,19 @@ def build_one(version_dir: pathlib.Path, table: dict, gaps: dict, pages_db: dict
             # 用「它的 text_ref 指向第幾篇」把檔案排序，再依帳本順序配過去。
             # ⛔ 不能用檔名字母序 —— slug 是不透明亂碼，跟課本順序無關。
             cand = _module_files.get(module) or []
-            k = _module_seen[module]
+            # ⚠️ `.get(module, 0)` 不是防禦性寫法，是**新教材本來的狀態**（#3011）：
+            #    `sections_present` 是學習單印的目錄（九個大題），而模組檔是一節一節
+            #    慢慢抽的。學習單有、硬碟還沒有的那幾節根本不在 `_module_seen` 裡。
+            #    這裡原本是 `_module_seen[module]` 直接 KeyError，而 main() 是
+            #    先全部算完再寫 —— 所以**一課炸掉 = 175 課的派工單全部沒產出**。
+            #    2026-08-31 加 體-L12~L15 時撞到（課文與念順順抽好，其餘七節還沒）。
+            k = _module_seen.get(module, 0)
             if k < len(cand):
                 sl, tr = cand[k]
                 slug = sl
                 if tr is not None:
                     entry["text_ref"] = tr
-            _module_seen[module] += 1
+            _module_seen[module] = k + 1
             # `part` 是原稿怎麼印就怎麼記，五種寫法都出現過：
             #   1 / 2 / 3          （L0029、L0063、L0111）
             #   '1/2' '2/2'        （L0137）

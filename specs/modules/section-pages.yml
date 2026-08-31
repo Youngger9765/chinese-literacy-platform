@@ -4858,6 +4858,47 @@ lessons:
     - name: 知識補給站
       pages: [11]
       pages_source: located
+  L0124:
+    pdf_pages: 10
+    page_prints:
+    - 6f23-05d8-c2d1
+    - b06f-431d-d3a8
+    - 10e1-2d85-f6af
+    - 7dcd-a013-d97f
+    - a96a-3f67-7684
+    - 0f56-096f-0e46
+    - 9b74-569a-ccc7
+    - d138-53e6-3ac3
+    - 5db8-d67b-0dfc
+    - 007c-c245-d44f
+    sections:
+    - name: 讀全文-做記號
+      pages: [1, 2, 3]
+      pages_source: located
+    - name: 念順順
+      pages: [3]
+      pages_source: located
+    - name: 語詞我最棒
+      pages: [3, 4]
+      pages_source: located
+    - name: 語詞應用
+      pages: [4, 5]
+      pages_source: located
+    - name: 文章重點表
+      pages: [5, 6]
+      pages_source: located
+    - name: 閱讀聚光燈
+      pages: [6, 7, 8]
+      pages_source: located
+    - name: 閱讀理解
+      pages: [8, 9]
+      pages_source: located
+    - name: 詞語複習
+      pages: [9, 10]
+      pages_source: located
+    - name: 知識補給站
+      pages: [10]
+      pages_source: located
   L0125:
     pdf_pages: 9
     page_prints:
