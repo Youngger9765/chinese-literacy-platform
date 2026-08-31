@@ -10,8 +10,12 @@ Public API:
     normalize_fill_in_blank_item()  — tag and normalize fill_in_blank items
     load_curriculum_manifest()      — load manifest.yml → code→meta index
     load_layer1_lessons()           — load production L*.yml lessons
-    load_layer2_lessons()           — load _parsed_2026-05-01/*.yml lessons
-    build_layer2_enrichment_index() — build title→Layer-2 data dict for enrichment
+
+⛔ 這裡曾經列著 `load_layer2_lessons()` 與 `build_layer2_enrichment_index()`，
+   但一修（#2683）封存 Layer-2 來源目錄之後那兩支就被移掉了 —— docstring 卻留著，
+   宣傳了兩支不存在的 API。2026-08-31 清 worktree 時發現（有一支測試 import 它們，
+   在新 base 上直接 AttributeError）。
+   同族還有 `lesson_code_normalization.py:151` 的註解也還指著 `load_layer2_lessons`。
 """
 
 import logging
