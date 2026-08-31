@@ -3,7 +3,7 @@
   "github": "stgst",
   "email": "steven19790906@gmail.com",
   "startDate": "2026-03-06",
-  "lastReview": "2026-08-07",
+  "lastReview": "2026-08-14",
   "skills": {
     "1": {
       "level": 3,
@@ -290,6 +290,11 @@
           "date": "2026-03-13",
           "level": 4,
           "reason": "獨立完成多個 feature 開發"
+        },
+        {
+          "date": "2026-08-14",
+          "level": 4,
+          "reason": "PR #2673/#2674/#2675 獨立完成 #2561 的三件前置（pilot 報告、gate 修復、課號對照表），從 issue 到 PR 全程自走，本機 spec CI 綠。維持不 bump 的原因：同期 #2551/#2552/#2554 三個 PR 自 7/19 起卡 26 天未推進，「完整流程」尚未包含把 PR 收到 merge 這一段"
         }
       ]
     },
@@ -310,7 +315,7 @@
       ]
     },
     "18": {
-      "level": 3,
+      "level": 4,
       "maxLevel": 5,
       "history": [
         {
@@ -327,6 +332,22 @@
           "date": "2026-04-23",
           "level": 3,
           "reason": "PR #1130 是架構理解的關鍵證據：診斷 PR #1087 把 data-para-idx 從 p 移到外層 section 後，selection walker 讀到段落號碼徽章字元導致 charStart 每次 +2、選取偏移的 regression bug。能從 HTML 結構變化追蹤到 JS DOM traversal 行為再到 UI 偏移現象，完整的跨層因果鏈。修復方式精準：把 attr 搬回 p，徽章保留在 [data-para-idx] 子樹外。這是從自己的 PR 造成的 regression 中正確做 root cause analysis 的能力"
+        },
+        {
+          "date": "2026-08-14",
+          "level": 4,
+          "reason": "PR #2674 診斷出 content_evidence_gate.py 與 content_evidence_ship_gate.sh 兩支腳本的 known_gap 契約互相矛盾——前者把任何 known_gap 判 fail，後者宣告 known_gap 非阻擋，導致只要有一課登錄缺口，PASS 在數學上不可達。這是跨檔案的系統層矛盾，不是單點 bug。PR #2675 又正確建模了 story_id 補零/不補零重複資料的碰撞，索引鍵用正規化 (grade, lesson_number, ab_suffix) 對齊真實 loader 的 normalize_manifest_code，並把殘留重複列進「線上多出」附原因而非隱藏。首次獨立處理跨腳本契約與資料正規化層的架構問題"
+        }
+      ]
+    },
+    "14": {
+      "level": 3,
+      "maxLevel": 5,
+      "history": [
+        {
+          "date": "2026-08-14",
+          "level": 3,
+          "reason": "PR #2674 首次評定（此前無此技能紀錄）。為 content evidence gate 的 known_gap/fail 優先序契約寫 5 條回歸鎖，並把判定邏輯從 main() 抽成 summarize_cells()/compute_fail_reasons() 純函式以便無 staging、無 browse binary 也能測。測試檔明確標示哪些列是 synthetic stub、為何必須 stub（sandbox 無 browse／GCS 403），並自行寫明「這不代表已在 staging 目視驗證」——沒有把 stub 講成真驗證。工頭複驗：三條 mutation（反轉 precedence／重新引入舊 bug／讓 fail_cells 不再阻擋）皆在預期位置變紅，還原後 5 passed，確認是真鎖非裝飾。定 3 而非更高：全為單元層，尚無 E2E"
         }
       ]
     }
