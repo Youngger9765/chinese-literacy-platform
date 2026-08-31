@@ -117,7 +117,7 @@ describe('ClassroomDetail (refactor characterization) — render with mock data'
   it('renders join code prominently', async () => {
     renderDetail();
     await waitFor(() => {
-      expect(screen.getByText('ABC123')).toBeInTheDocument();
+      expect(screen.getAllByText('ABC123')[0]).toBeInTheDocument();
     });
   });
 
@@ -197,7 +197,7 @@ describe('ClassroomDetail (refactor characterization) — join code copy', () =>
   it('clicking 複製代碼 copies join code to clipboard', async () => {
     const user = userEvent.setup();
     renderDetail();
-    await waitFor(() => screen.getByText('ABC123'));
+    await waitFor(() => screen.getAllByText('ABC123')[0]);
 
     await user.click(screen.getByRole('button', { name: /複製代碼/i }));
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith('ABC123');
@@ -206,7 +206,7 @@ describe('ClassroomDetail (refactor characterization) — join code copy', () =>
   it('shows "已複製" feedback after copy', async () => {
     const user = userEvent.setup();
     renderDetail();
-    await waitFor(() => screen.getByText('ABC123'));
+    await waitFor(() => screen.getAllByText('ABC123')[0]);
 
     await user.click(screen.getByRole('button', { name: /複製代碼/i }));
     await waitFor(() => {
@@ -217,7 +217,7 @@ describe('ClassroomDetail (refactor characterization) — join code copy', () =>
   it('shows confirm dialog before regenerating code', async () => {
     const user = userEvent.setup();
     renderDetail();
-    await waitFor(() => screen.getByText('ABC123'));
+    await waitFor(() => screen.getAllByText('ABC123')[0]);
 
     await user.click(screen.getByRole('button', { name: /重生代碼/i }));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
@@ -232,7 +232,7 @@ describe('ClassroomDetail (refactor characterization) — join code copy', () =>
 
     const user = userEvent.setup();
     renderDetail();
-    await waitFor(() => screen.getByText('ABC123'));
+    await waitFor(() => screen.getAllByText('ABC123')[0]);
 
     await user.click(screen.getByRole('button', { name: /重生代碼/i }));
     await user.click(screen.getByRole('button', { name: /確定/i }));
