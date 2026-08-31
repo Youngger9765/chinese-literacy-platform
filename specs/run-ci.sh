@@ -135,8 +135,28 @@ echo "-- Gate 6/6: 原稿過期偵測（sot_drift_check --offline） --"
 "$PYBIN" scripts/sot_drift_check.py --offline
 echo ""
 
-echo "-- Gate 7/7: 抽出來的模組，學生走不走得到（module_entry_gate） --"
+echo "-- Gate 7/9: 抽出來的模組，學生走不走得到（module_entry_gate） --"
 "$PYBIN" scripts/module_entry_gate.py
+echo ""
+
+# ── Gate 8/9: 模組輸出契約（#2843 階段 0）────────────────────────────────────
+# `module_entry_gate` 問「學生走得到嗎」，這道門問**走到了看得到東西嗎**。
+# 2019 個模組檔有 598 種 top-level key 形狀 —— 沒有 per-module 契約，抽取時每一課
+# 自己想一個欄位名，消費端 `.get()` 回 None：不報錯、上面七道門全綠、學生看不到。
+# 實例：27 課的閱讀理解寫成 `items`（`_mcq_from` 只讀 `questions`），那 27 課的
+# multiple_choice 長度是 0。
+#
+# 棘輪門：違規數只准降不准升（同 module_entry_gate 的 NO_ENTRY_LESSON_CEILING）。
+echo "-- Gate 8/9: 模組輸出契約（module_schema_gate） --"
+"$PYBIN" scripts/module_schema_gate.py
+echo ""
+
+# ── Gate 9/9: 分派對帳（#2843 階段 0）───────────────────────────────────────
+# 學習單自己印的大題目錄（`sections_present`，174/175 課有）vs 實際產出的模組檔。
+# 這份目錄一直都在，但只被拿去推 section_no 與 step_sequence —— 沒有任何東西
+# 拿它對帳。三種紅法各自指名責任方：宣告有檔案沒有／檔案有宣告沒有／認不得的大題名。
+echo "-- Gate 9/9: 分派對帳（module_reconcile_gate） --"
+"$PYBIN" scripts/module_reconcile_gate.py
 echo ""
 
 echo "== Local Spec CI: PASS =="

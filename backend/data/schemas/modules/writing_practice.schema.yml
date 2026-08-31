@@ -1,0 +1,6 @@
+# 語詞書寫練習／難字挑戰（4 課）
+module: writing_practice
+required: [words]
+consumer:
+  - "frontend/src/types.ts::WritingPracticeContent"
+forbidden_aliases: {}

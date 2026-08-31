@@ -1,0 +1,88 @@
+# 模組登記表 —— 「這個 yml 是哪一個大題、誰負責、有沒有輸出契約」
+#
+# #2843 階段 0。這裡**不重抄模組清單** —— 24 個模組的真相在
+# `scripts/module_entry_gate.py` 的 `ENTRY`，登記表只補它沒有的兩件事：
+#
+#   declarable          這個模組會不會印在學習單的大題目錄（`sections_present`）上
+#   owner               誰在動它。有人在動的，這一輪不寫 schema（見下）
+#
+# 為什麼要 `declarable`：對帳門要判「檔案有、宣告沒有」。`metadata` / `errata` /
+# `goal_box` 這些從來不是大題（goal_box 是課頭那個沒編號的框），拿它們當漏宣告
+# 會製造 175 課的假紅。
+#
+# ⚠️ `section_name_aliases` 是 `split_lesson_modules.SECTION_NAME_TO_MODULE` 的
+#    **超集**，不是另一份真相：那一份決定 `section_no`（行為），這一份只給對帳門
+#    用。`test_registry_does_not_contradict_the_splitter` 鎖住兩邊不得打架。
+#    比對方式是「包含」不是全等 —— 抽取者照教材抄名字，教材用字有好幾種寫法。
+
+modules:
+  # ── 一般課的大題（會印在目錄上）──────────────────────────────────────────
+  full_text_annotate:        {declarable: true,  owner: unassigned}
+  key_reading:               {declarable: true,  owner: "@if-else-master"}
+  vocab_definitions:         {declarable: true,  owner: unassigned}
+  vocab_application:         {declarable: true,  owner: unassigned}
+  keypoints:                 {declarable: true,  owner: "@stgst"}
+  spotlight:                 {declarable: true,  owner: "@stgst"}
+  comprehension:             {declarable: true,  owner: unassigned}
+  vocab_review:              {declarable: true,  owner: unassigned}
+  resources:                 {declarable: true,  owner: unassigned}
+  writing_practice:          {declarable: true,  owner: unassigned}
+  keypoints_followup_questions: {declarable: true, owner: "@stgst"}
+
+  # ── 文言文專屬的大題 ────────────────────────────────────────────────────
+  classical_text:            {declarable: true,  owner: unassigned}
+  modern_translation:        {declarable: true,  owner: unassigned}
+  sentence_matching:         {declarable: true,  owner: unassigned}
+  word_matching:             {declarable: true,  owner: unassigned}
+  self_challenge:            {declarable: true,  owner: unassigned}
+  intro_guide:               {declarable: true,  owner: unassigned}
+
+  # ── 不是大題：不印在目錄上，所以「沒被宣告」是正常的 ──────────────────────
+  lesson:                    {declarable: false, owner: unassigned}   # 課的身分＋大題目錄本身
+  metadata:                  {declarable: false, owner: unassigned}   # 課名／年級／策略
+  errata:                    {declarable: false, owner: unassigned}   # 教材印錯紀錄，不給學生看
+  goal_box:                  {declarable: false, owner: unassigned}   # 課頭沒編號的目標策略框
+  self_check_before_reading: {declarable: false, owner: unassigned}   # 讀前自我檢核，沒編號
+  multi_text_parts:          {declarable: false, owner: unassigned}   # 多文本課的第 2/3 篇
+  cross_text_banner:         {declarable: false, owner: unassigned}   # 篇次之間的過場字
+
+# 大題名 → 模組。前 12 條跟 splitter 那份逐字相同（那是行為來源）；
+# 其餘是這次補的，補的依據寫在各自後面。
+section_name_aliases:
+  讀全文:        full_text_annotate
+  念順順:        key_reading
+  朗讀計時:      key_reading            # 文言文的朗讀節印這個，不印「念順順」
+  語詞我最棒:    vocab_definitions
+  語詞應用:      vocab_application
+  文章重點表:    keypoints
+  重點表:        keypoints
+  聚光燈:        spotlight
+  閱讀理解:      comprehension
+  詞語複習:      vocab_review
+  知識補給站:    resources
+  語詞書寫:      writing_practice
+
+  # 補齊文言文那幾個（splitter 那份只涵蓋 10 個模組，文言文 6 個全不在表上）。
+  # 依據：這些名字出現的課，v3 目錄裡確實有對應的模組檔。
+  古文今譯:      modern_translation     # 10 課
+  文白句子比對:  sentence_matching      # 10 課
+  文白詞語比對:  word_matching          # 10 課
+  原文:          classical_text         # 4 課（另有「原文（含斷詞點）＋注釋」6 課，同一個 needle 命中）
+  自我挑戰:      self_challenge         # 6 課
+  導讀:          intro_guide            # 3 課
+  閱讀接力:      keypoints_followup_questions   # L0144；前端型別註解也是這樣寫的
+  文章重點:      keypoints              # 「文章重點整理」6 課；「文章重點表」也命中，同一個模組
+
+# 認不得的大題名。**故意不填答案** —— 每一個都只有 1 課、而且從名字看不出來
+# 是哪一個模組。順手補一個合理的答案就是把猜測洗成契約；對帳門會把它們報成
+# `unmapped_section_name`，留給看得到原稿的人回答。
+#
+#   會考圖文題實戰   L0136 第一大題。該課有 comprehension 與 spotlight，兩個都可能
+#   古今對照表       L0157 第二大題。該課有 word_matching，但名字對不上「文白詞語比對」
+#   故事賞析         L0159。該課有 intro_guide，但也可能是獨立的一節
+#   綜合練習         L0029 第七大題（該課第七大題位置通常是閱讀理解）
+unmapped_section_names_pending_review:
+  - 會考圖文題實戰
+  - 古今對照表
+  - 故事賞析
+  - 綜合練習

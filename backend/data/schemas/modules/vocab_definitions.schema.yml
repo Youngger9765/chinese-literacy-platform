@@ -1,0 +1,8 @@
+# 三 語詞我最棒
+module: vocab_definitions
+required: [items]
+consumer:
+  - "backend/app/services/lesson_indexes.py::_vocabulary_from"
+# 每一筆還要有 word/definition —— `_vocabulary_from` 會把沒有 word 的靜靜濾掉。
+# 這一輪只鎖 top-level（列內欄位是下一階段的事，見 PRD 階段 1）。
+forbidden_aliases: {}

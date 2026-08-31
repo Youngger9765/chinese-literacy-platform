@@ -1,0 +1,10 @@
+# 文言文：導讀
+module: intro_guide
+required: [text]
+consumer:
+  - "frontend/src/types.ts::IntroGuideContent"
+forbidden_aliases:
+  # L0159 用 `paragraphs`（list）裝導讀。型別要的是 `text`（string），
+  # 所以這不只是改名 —— 併成一段文字才裝得進去。列成別名是為了指出正名，
+  # 修的人要一併處理型別。
+  paragraphs: text

@@ -1,0 +1,7 @@
+# 文言文：原文（含斷詞點）＋注釋
+module: classical_text
+required: [paragraphs]
+consumer:
+  - "frontend/src/types.ts::ClassicalTextContent"
+  - "frontend/src/components/reading-steps/ClassicalText.tsx"
+forbidden_aliases: {}

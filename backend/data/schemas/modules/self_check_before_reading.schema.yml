@@ -1,0 +1,6 @@
+# 讀前自我檢核清單（58 課，沒有大題編號）
+module: self_check_before_reading
+required: [items]
+consumer:
+  - "frontend/src/types.ts::SelfCheckBeforeReadingContent"
+forbidden_aliases: {}

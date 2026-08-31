@@ -1,0 +1,6 @@
+# 文言文：自我挑戰（選做）
+module: self_challenge
+required: [passage]
+consumer:
+  - "frontend/src/types.ts::ClassicalSelfChallengeContent"
+forbidden_aliases: {}

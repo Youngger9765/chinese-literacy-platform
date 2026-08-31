@@ -162,3 +162,20 @@ jobs:
           # dependency it never uses at runtime.
           pip install python-docx==1.2.0 lxml==6.1.0
           python -m pytest --tb=short -q tests/test_checked_option_is_the_answer_2735.py
+
+      # 模組契約的兩道門 (#2843 階段 0)。2019 個模組檔、24 種模組、598 種 key 形狀，
+      # 而沒有一道門在看「欄位名對不對」——閱讀理解有 27 課寫成 `items`（消費端只讀
+      # `questions`），那 27 課的 multiple_choice 長度是 0，畫面上就是空的，其他門全綠。
+      # 兩道門都是棘輪（違規數只准降不准升），所以現在是綠的、而且擋得住新的漂移。
+      # 這個 workflow 是點名清單不是掃目錄 —— 沒點到名的鎖等於沒有（同檔案上面
+      # 兩則註解各記過一次）。測試檔自己有一條斷言在鎖這件事。
+      - name: Run module contract gates (schema + dispatch reconcile) (#2843)
+        run: |
+          cd backend
+          python -m pytest --tb=short -q tests/test_module_contract_gates_2843.py
+        env:
+          DATABASE_URL: sqlite://
+          TTS_PROVIDER: google
+          AZURE_SPEECH_KEY: ""
+          AZURE_SPEECH_REGION: eastus
+          JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"

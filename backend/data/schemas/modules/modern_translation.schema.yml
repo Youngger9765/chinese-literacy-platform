@@ -1,0 +1,7 @@
+# 文言文：古文今譯
+module: modern_translation
+required: [paragraphs]
+consumer:
+  - "frontend/src/types.ts::ModernTranslationContent"
+  - "frontend/src/components/reading-steps/ClassicalText.tsx"
+forbidden_aliases: {}

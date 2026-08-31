@@ -1,0 +1,15 @@
+{
+  "comprehension": {
+    "forbidden_alias": 27
+  },
+  "goal_box": {
+    "forbidden_alias": 19
+  },
+  "intro_guide": {
+    "forbidden_alias": 1
+  },
+  "sentence_matching": {
+    "forbidden_alias": 5,
+    "missing_required": 4
+  }
+}

@@ -1,0 +1,6 @@
+# 文言文：文白詞語比對
+module: word_matching
+required: [items]
+consumer:
+  - "frontend/src/types.ts::ClassicalWordMatchingContent"
+forbidden_aliases: {}

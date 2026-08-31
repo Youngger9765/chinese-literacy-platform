@@ -1,0 +1,16 @@
+# 課頭的目標策略框（70 課，沒有大題編號）
+module: goal_box
+required: [strategy_line]
+consumer:
+  - "frontend/src/types.ts::GoalBoxContent"
+  - "frontend/src/components/reading-steps/Intro.tsx"
+forbidden_aliases:
+  # 🔴 同一件事**五個名字**，18 課在用 —— PRD 說的「東漏西漏」的教科書案例。
+  # `GoalBoxContent.strategy_line` 是型別上唯一必填的欄位；Intro.tsx 把它當
+  # 三段 fallback 裡最權威的一段（學習單原文），缺了會退到比較不權威的來源，
+  # 不是整個空白 —— 老實標，不要誇大成「畫面壞掉」。
+  target_strategy: strategy_line      # 7 課，內容就是「目標策略：…」
+  target_issue: strategy_line         # 2 課，「目標議題：…」
+  text: strategy_line                 # 2 課，內容同樣是「目標議題：品格力──…」
+  header_right: strategy_line         # 4 課，文言文版面把它印在右上（「文言聚光燈：…」）
+  文言聚光燈: strategy_line            # 3 課，**中文欄位名**（L0160/162/163）

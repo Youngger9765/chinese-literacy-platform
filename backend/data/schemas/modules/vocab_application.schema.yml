@@ -1,0 +1,12 @@
+# 四 語詞應用
+module: vocab_application
+required: [items]
+consumer:
+  - "backend/app/services/lesson_indexes.py::_cloze_from"
+forbidden_aliases:
+  # 前瞻鎖：v3 目前 0 課違規。`_cloze_from` 現在 `items or questions` 兩個都收，
+  # 而註解自己寫著 questions 是 v2 的寫法 —— 兩個名字並存就是下一次漂移的起點。
+  questions: items
+  # 同理：`_vocab_bank_from` 收 option_banks / option_bank / options 三個名字。
+  # 正名是 option_bank（148 課用它），另外兩個各 1 課。
+  options: option_bank

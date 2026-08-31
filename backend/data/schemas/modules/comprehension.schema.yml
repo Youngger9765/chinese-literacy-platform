@@ -1,0 +1,12 @@
+# 七 閱讀理解
+module: comprehension
+required: [questions]
+consumer:
+  - "backend/app/services/lesson_indexes.py::_mcq_from"
+forbidden_aliases:
+  # 🔴 這條有 27 課在違規，而且是**已經在線上的資料流失**：
+  # `_mcq_from` 只讀 `questions`，寫 `items` 的那 27 課 `multiple_choice` 長度是 0
+  # （2026-08-21 實測，正向對照：寫 questions 的課同一支函式回 5 題）。
+  # 學生在那 27 課的閱讀理解頁看到的是空的。修法是把 `items` 改名成 `questions`，
+  # 不是在消費端加一條 `or items`（那會讓兩個名字永久並存）。細節見 issue。
+  items: questions

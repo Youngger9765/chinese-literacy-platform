@@ -1,0 +1,12 @@
+# 文言文：文白句子比對
+module: sentence_matching
+required: [reference_sentences, segments]
+consumer:
+  - "frontend/src/types.ts::ClassicalSentenceMatchingContent"
+forbidden_aliases:
+  # 5 課寫 `items`，列內欄位還是中文的 `文言`（型別要的是 `classical`）。
+  # 同一個東西換了名字，前端讀不到 → 那一節是空的。
+  items: segments
+# ⚠️ 另有 2 課（L0158/L0164）用 `parts` 把題目分組 —— 那是**結構不同**不是換名字，
+# 所以故意不列成別名（列了等於宣稱改個名就對，實際上前端型別裝不下）。
+# 它們會照實報成缺 required，計入基準值，留給後續處理。

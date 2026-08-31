@@ -1,0 +1,12 @@
+# 九 知識補給站
+module: resources
+# ⚠️ `videos` 與 `items` **不是別名，是兩個來源**：videos 帶連結（總表），
+# items 帶片名/長度（學習單）。120 課兩個都有，19 課只有 videos，9 課只有 items。
+# `_video_links` 的註解寫得很清楚，兩邊數量不一致時故意不硬配。
+# 所以規則是「任一即可」，兩個都沒有才是真的沒有影片。
+module_note: two-source
+required_any_of:
+  - [videos, items]
+consumer:
+  - "backend/app/services/lesson_indexes.py::_video_links"
+forbidden_aliases: {}

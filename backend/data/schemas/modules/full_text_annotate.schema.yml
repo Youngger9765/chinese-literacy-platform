@@ -1,0 +1,10 @@
+# 一 讀全文-做記號
+module: full_text_annotate
+required: [paragraphs]
+consumer:
+  - "backend/app/services/lesson_indexes.py::_body"
+# ⚠️ 這個模組 164 課有 115 種形狀（全庫最亂），但亂在**註記欄**
+# （`*_note` / `*_errata_ref` / 各種版面說明），核心三欄 paragraphs /
+# paragraph_count / char_count 是 164/164 都有。所以這一輪只鎖核心欄位，
+# 不做「未宣告欄位一律紅」—— 那會一次紅 100 多課，然後被無視。
+forbidden_aliases: {}
