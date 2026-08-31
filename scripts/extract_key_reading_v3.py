@@ -626,6 +626,17 @@ def apply(uid: str, r: dict) -> None:
     for stale in RANGE_ERA_FIELDS:   # ⚠️ 不要叫 f —— 外面的 f 是要寫回的 Path
         kr.pop(stale, None)
     kr.pop("extraction_check", None)  # earlier runs of this script nested it here
+    #: 🔴 #2919：`needs_human_review` / `review_reason` 的家在**文件頂層**，
+    #: 讀取契約也只看那裡。舊版曾把它們寫進 `key_reading` 裡面 —— 巢狀的那個
+    #: 誰都看不到，卻會一直留著（L0139 就是：verdict=ok、393 字對得上，
+    #: 巢狀卻寫著 needs_human_review: True）。下面 apply 頂層那份，這裡把舊家清掉。
+    #: ⛔ 只清這兩個 —— 它們在頂層有明確的家，巢狀那份是舊版殘骸、誰都看不到。
+    #:    `char_marks_note` / `review_reason_note` **不准清**：那是人手寫的分析
+    #:    （「兩個段界都精準吻合，不必套 SKILL ⑥.7 的任何一條口徑」、
+    #:     「右緣累計字數只印到 400，p2 之後那一欄是空的 —— 原稿如此，不是漏抽」），
+    #:    刪掉等於毀掉 30 課的證據。我第一版就是連它們一起 pop 的。
+    for legacy in ("needs_human_review", "review_reason"):
+        kr.pop(legacy, None)
     kr["source"] = "extract_key_reading_v3"
     doc["extraction_check"] = {
         "verdict": r["verdict"],
