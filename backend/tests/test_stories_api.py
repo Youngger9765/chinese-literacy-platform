@@ -146,18 +146,30 @@ class TestKeyReadingContract:
         assert kr["passage"].rstrip().endswith("向心力！")
 
     def test_lesson_without_key_reading_serves_null(self, client):
-        """A lesson without key_reading must serve key_reading: null (fallback path),
-        never 500 — proves the optional field degrades gracefully."""
-        # Issue #2562: 需用「對照表沒有」的課（閱讀策略類、無念順順，如 G7-L23）。
-        # 找一課 grade_code 不在對照表者，其詳情 key_reading 應為 null。
-        from app.services.lesson_layer_loaders import get_key_reading_passages
-        kr_map = get_key_reading_passages()
+        """沒有念順順的課要回 key_reading: null，不可以 500。
+
+        ⚠️ 判準在 2026-08-31 改過。原本是「grade_code 不在
+        `get_key_reading_passages()` 對照表 → 必為 null」——
+        那個對照表是**一版**的人工掃描（134 筆），二修之後 150 課的念順順
+        來自抽取器（`source: extract_key_reading_v3`），跟那張表沒有關係。
+        於是這條在 L0011 上紅了：它不在一版表裡，卻正確地回了 379 字。
+
+        現在的契約：**看服務端自己的 `has_key_reading`**，
+        它為 false 的課（來源學習單沒有這個大題）才該是 null。
+        """
         listing = client.get("/api/stories").json().get("stories", [])
-        target = next((s for s in listing if s.get("grade_code") not in kr_map), None)
-        assert target is not None, "找不到任何不在對照表的課可測 fallback"
+        target = next((s for s in listing if not s.get("has_key_reading")), None)
+        assert target is not None, "找不到任何 has_key_reading=false 的課可測 fallback"
         resp = client.get(f"/api/stories/{target['id']}")
         assert resp.status_code == 200, resp.text
         assert resp.json().get("key_reading") is None
+
+        # 正向對照：has_key_reading=true 的課要真的給得出 passage ——
+        # 少了它，「全部都回 null」也會讓上面那條綠。
+        yes = next((s for s in listing if s.get("has_key_reading")), None)
+        assert yes is not None, "一課 has_key_reading=true 的都沒有 —— 量具可能壞了"
+        got = client.get(f"/api/stories/{yes['id']}").json().get("key_reading") or {}
+        assert got.get("passage"), f"{yes['id']} 標了 has_key_reading 卻沒有 passage"
 
     def test_list_never_leaks_the_passage_and_flags_only_real_ones(self, client):
         """`has_key_reading` used to be true for most lessons — but that came from
