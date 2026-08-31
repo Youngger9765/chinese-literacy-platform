@@ -174,7 +174,8 @@ python3 scripts/locate_scanned_sections.py \
 `label` 逐字欄位保留注音（忠實原稿），`no` / `section_no` 正規化成漢字（那是給機器用的）。
 鎖：`backend/tests/test_section_no_is_hanzi_2843.py`，兩個方向都 mutation 驗過。
 
-**還沒驗的：跑兩次的一致率。** 這條最重要（LLM 會 run-to-run 飄），下次補。
+**跑兩次的一致率已補**（見下一段：L0072 × 3 次）—— 那條最重要，因為 LLM 會 run-to-run 飄。
+⚠️ 這一行原本寫著「還沒驗」，而下一段就是量出來的數字 —— 兩句在同一份檔案裡互相矛盾了九天（2026-08-22 → 08-31，#2858 盤點時發現）。
 
 ## 現況
 
