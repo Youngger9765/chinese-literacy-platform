@@ -34,13 +34,13 @@ spotlight:
     options:
     - 他一個糖果也不願意放，因此手緊緊卡住。
     - 人還是要知足，貪多可能危害自己啊。
-    answer: 他一個糖果也不願意放，因此手緊緊卡住。
-  - type: single
+    answer: 人還是要知足，貪多可能危害自己啊。
+  - type: free_text
     prompt: 2.我們可以把這句話整理成更簡短的主旨
-    options:
-    - 告訴讀者人要知足，不可貪心
-    - 告訴讀者拿糖果時要小心，不要把手卡住。
-    answer: 告訴讀者人要知足，不可貪心
+  - type: guide
+    text: □①告訴讀者人要知足，不可貪心
+  - type: guide
+    text: □②告訴讀者拿糖果時要小心，不要把手卡住。
   - type: guide
     text: 重要內容線索：從關鍵語句找主旨線索
   - type: guide
@@ -63,7 +63,7 @@ spotlight:
     - 老師說幾點要到學校集合。
     - 守時是很重要的事。不能遲到，讓大家等你一個人。
     - 你明天到學校，一定要再問老師。
-    answer: 老師說幾點要到學校集合。
+    answer: 守時是很重要的事。不能遲到，讓大家等你一個人。
   - type: free_text
     prompt: 2. 從這句重要語句，可以推論本文主旨是：　守時很重要　　 　。
   - type: guide
@@ -107,13 +107,13 @@ spotlight:
     options:
     - 因為作者也開始出門觀察別人。
     - 因為作者也開始出門帶書，有空就閱讀。
-    answer: 因為作者也開始出門觀察別人。
+    answer: 因為作者也開始出門帶書，有空就閱讀。
   - type: single
     prompt: 2.這個線索告訴我們，作者希望自己成為什麼樣的人？
     options:
     - 愛觀察的人。
     - 愛閱讀的人。
-    answer: 愛觀察的人。
+    answer: 愛閱讀的人。
   - type: guide
     text: （二）把線索連起來，推主旨
   - type: guide

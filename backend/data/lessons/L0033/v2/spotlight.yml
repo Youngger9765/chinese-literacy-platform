@@ -36,12 +36,10 @@ spotlight:
     prompt: ❷檢查刪除後的文字（打勾）
   - type: guide
     text: 垃圾食物常和快樂時光連結在一起。
-  - type: single
-    prompt: 請選擇
-    options:
-    - 句子完整、通順。
-    - 原文最重要的意思仍然保留。
-    answer: 句子完整、通順。
+  - type: guide
+    text: □①句子完整、通順。
+  - type: guide
+    text: □②原文最重要的意思仍然保留。
   - type: free_text
     prompt: 2.請把下段文字中的舉例刪除(課內練習)
   - type: free_text
@@ -54,12 +52,10 @@ spotlight:
     source: unknown
     paragraphs:
     - 垃圾食物的味道都經過精心調配，製造商會找到鹽、糖、油的完美比例，讓食物又香又酥，都讓人難以抗拒。
-  - type: single
-    prompt: 請選擇
-    options:
-    - 句子完整、通順。
-    - 原文最重要的意思仍然保留。
-    answer: 句子完整、通順。
+  - type: guide
+    text: □①句子完整、通順。
+  - type: guide
+    text: □②原文最重要的意思仍然保留。
   - type: free_text
     prompt: 3.請把下段文字中的舉例刪除(延伸文章)
   - type: free_text
@@ -70,12 +66,10 @@ spotlight:
     prompt: ❷檢查刪除後的文字
   - type: guide
     text: 讀一讀沒有劃掉的文字，再打勾。
-  - type: single
-    prompt: 請選擇
-    options:
-    - 句子完整、通順。
-    - 原文最重要的意思仍然保留。
-    answer: 句子完整、通順。
+  - type: guide
+    text: □①句子完整、通順。
+  - type: guide
+    text: □②原文最重要的意思仍然保留。
   - type: free_text
     prompt: 4.請把下段文字中的舉例刪除(延伸文章)
   - type: free_text
@@ -86,12 +80,10 @@ spotlight:
     prompt: ❷檢查刪除後的文字
   - type: guide
     text: 讀一讀沒有劃掉的文字，再打勾。
-  - type: single
-    prompt: 請選擇
-    options:
-    - 句子完整、通順。
-    - 原文最重要的意思仍然保留。
-    answer: 句子完整、通順。
+  - type: guide
+    text: □①句子完整、通順。
+  - type: guide
+    text: □②原文最重要的意思仍然保留。
   - type: guide
     text: ★策略帶著走
   - type: guide

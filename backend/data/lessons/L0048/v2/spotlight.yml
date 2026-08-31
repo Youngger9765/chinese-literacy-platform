@@ -98,7 +98,7 @@ spotlight:
     options:
     - 網路內容受到相信的程度
     - 網路內容被點開閱讀的比率
-    answer: 網路內容受到相信的程度
+    answer: 網路內容被點開閱讀的比率
   - type: single
     prompt: 4.把推測的意思放回上面的句子：意思合理嗎？
     options:
@@ -120,15 +120,15 @@ spotlight:
     options:
     - 能
     - 還不能，需要再看上下文
-    answer: 能
+    answer: 還不能，需要再看上下文
   - type: free_text
     prompt: 3.再用「從上下文推測詞義」，補充意思：把能幫助你推測詞義的文字畫線。
-  - type: single
+  - type: free_text
     prompt: 4.結合拆詞和上下文線索可以推測「繪聲繪影」的意思是：
-    options:
-    - 把事情說得生動逼真，讓人覺得像真的一樣
-    - 把事情說得詳細，讓人容易了解
-    answer: 把事情說得生動逼真，讓人覺得像真的一樣
+  - type: guide
+    text: □①把事情說得生動逼真，讓人覺得像真的一樣
+  - type: guide
+    text: □②把事情說得詳細，讓人容易了解
   - type: single
     prompt: 5.把推測的意思放回上面的句子：意思合理嗎？
     options:

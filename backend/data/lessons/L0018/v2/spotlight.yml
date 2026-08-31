@@ -14,18 +14,18 @@ spotlight:
   - type: single
     prompt: (3)誰的車子比較好？【□①小傑   □②阿光】，因為他的車子多了  【 省油       】的優點。
     options:
-    - 【
-    - 小傑
+    - 【□①小傑
     - 阿光】，因為他的車子多了
+    - 【
     - 省油
     - 】的優點。
-    answer: 【
+    answer: 【□①小傑
   - type: single
     prompt: (4)小傑的車子「不但」跑得很快，「還」很省油。「不但……還……」這類把前後意思連起來的詞語，叫做【□①關聯詞　□②形容詞】
     options:
-    - 關聯詞
-    - 形容詞】
-    answer: 關聯詞
+    - □①關聯詞
+    - ②形容詞
+    answer: □①關聯詞
   - type: free_text
     prompt: 2.請先圈出遞進關聯詞，再勾選作者最想強調的重點。
   - type: table

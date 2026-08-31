@@ -29,6 +29,23 @@ export type GuidedQuestion = Question & ({ kind: 'guided_steps' } | { kind: 'gra
 /** A/B/C/D 字母標籤 — 與 MultipleChoiceExercise / ChoiceInput 一致的選項樣式。 */
 const OPTION_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 
+/**
+ * 判分要用哪一段文本。
+ *
+ * 範例子流程（例一：烏鴉喝水）自己帶 `context`。沒有這個判斷時，送出去的一律是整課課文
+ * —— 於是「❶主角是誰？」輸入 **孟嘗君** 會被判對，因為那課的主角真的是孟嘗君。範例的題目
+ * 被拿去對主課文判分（#2553）。
+ *
+ * 抽成函式而不是寫在呼叫處，是為了讓這個決策測得到而不必 render 整個元件：這個 failure
+ * 住在「挑哪一段」，不住在畫面上。
+ */
+export function gradingPassage(
+  stepContext: string | null | undefined,
+  lessonPassage: string | null | undefined,
+): string | null | undefined {
+  return stepContext ?? lessonPassage;
+}
+
 const FALLBACK_GRADE: StrategyGradeResult = {
   is_correct: true,
   feedback: '已記錄你的答案，做得好！',
@@ -179,7 +196,7 @@ const GuidedStepsInput: React.FC<Props> = ({
         studentAnswer: text,
         strategyName,
         storyTitle,
-        passage,
+        passage: gradingPassage(step.context, passage),
       });
       setGrades((prev) => ({ ...prev, [i]: grade }));
       setFeedback((prev) => ({ ...prev, [i]: true }));

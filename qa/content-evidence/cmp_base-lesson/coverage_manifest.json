@@ -1,0 +1,58 @@
+{
+  "schema_version": "content-evidence.v1",
+  "run_id": "cmp_base-lesson",
+  "generated_at": "2026-08-16T15:38:30Z",
+  "git": {
+    "branch": "fix/issue-2727-spotlight-gate",
+    "commit_sha": "f8a2746164c8ccc35c71f3ec8eb3f5f2b936a779"
+  },
+  "smoke": false,
+  "partial": true,
+  "scope": {
+    "expected_lessons": 1,
+    "expected_steps": [
+      "reading-strategy",
+      "story-structure"
+    ],
+    "expected_total_cells": 2,
+    "requested_story_ids": "20001",
+    "requested_lesson_codes": null
+  },
+  "observed": {
+    "l1_rows": 2,
+    "l3_rows": 2,
+    "figure_rows": 2,
+    "l2_rows": 0,
+    "cells": 2
+  },
+  "summary_counts": {
+    "pass_cells": 0,
+    "fail_cells": 1,
+    "unknown_cells": 1,
+    "known_gap_cells": 0,
+    "missing_screenshot_cells": 2,
+    "console_error_cells": 0,
+    "figure_blacklist_hits": 0
+  },
+  "files": {
+    "l1_results_jsonl": "l1_results.jsonl",
+    "l3_render_results_jsonl": "l3_render_results.jsonl",
+    "figure_asset_audit_jsonl": "figure_asset_audit.jsonl",
+    "review_queue_jsonl": "review_queue.jsonl",
+    "human_review_md": "human_review.md",
+    "l2_eval_jsonl": null
+  },
+  "checksums_sha256": {
+    "l1_results.jsonl": "245b0f2e1d523d5bb8c68153f5bba9c491437a01be70306abee2ee7d6ab570fc",
+    "l3_render_results.jsonl": "1552b8e521cc43c7a7345258eeda4d1e5138c89fb547a753708f6451762a2fc6",
+    "figure_asset_audit.jsonl": "c4c2da483eec2974d177547e350376c86751ddeeddd86b66bd26d010c27f4de4",
+    "review_queue.jsonl": "c75997af2ad52c0802e02154088d69af33ec510b6f2f4a49aad164358efc1642",
+    "human_review.md": "ae8d6bf43c2d9f623ebefefe6b884a5c044212b105e37cd197ac8e45454b1f2b"
+  },
+  "overall_status": "fail",
+  "fail_reasons": [
+    "unknown_cells=1",
+    "fail_cells=1",
+    "missing_screenshot_cells=2"
+  ]
+}

@@ -37,7 +37,7 @@ spotlight:
     options:
     - 魚類
     - 哺乳類）
-    answer: 魚類
+    answer: 哺乳類）
   - type: single
     prompt: 請選擇
     options:
@@ -109,7 +109,7 @@ spotlight:
     options:
     - 相同
     - 不同）的狀況，
-    answer: 相同
+    answer: 不同）的狀況，
   - type: single
     prompt: 請選擇
     options:
@@ -196,7 +196,7 @@ spotlight:
     - 成功企業家通常具備許多過人之處。
     - 成功企業家的過人之處包括精神、思慮和眼光。
     - 成功企業家的過人之處主要是堅毅奮發的精神。
-    answer: 成功企業家通常具備許多過人之處。
+    answer: 成功企業家的過人之處包括精神、思慮和眼光。
   - type: passage
     source: unknown
     paragraphs:
@@ -302,14 +302,14 @@ spotlight:
     - 漢武帝時
     - 掌管音樂的單位
     - 搜集民間歌謠
-    answer: 漢武帝時
+    answer: 掌管音樂的單位
   - type: single
     prompt: ❹順文意：哪一句最完整地說出破折號前後的意思？
     options:
     - 樂府負責搜集民間歌謠
     - 樂府是漢武帝時掌管音樂的單位
     - 漢武帝時的民間歌謠都由樂府創作
-    answer: 樂府負責搜集民間歌謠
+    answer: 樂府是漢武帝時掌管音樂的單位
   - type: free_text
     prompt: (2)「這份報告裡面似乎還有一個小問題──算了，反正凡事很難十全十美。」
   - type: free_text
@@ -325,14 +325,14 @@ spotlight:
     options:
     - 這份報告裡面有一個小問題
     - 算了，反正凡事很難十全十美
-    answer: 這份報告裡面有一個小問題
+    answer: 算了，反正凡事很難十全十美
   - type: single
     prompt: ❹順文意：哪一句最完整地說出破折號前後的意思？
     options:
     - 作者決定繼續處理報告的問題
     - 作者沒有發現報告有問題
     - 作者決定暫時不處理問題
-    answer: 作者決定繼續處理報告的問題
+    answer: 作者決定暫時不處理問題
   - type: free_text
     prompt: 4.挑戰題：用策略試試會考題
   - type: free_text
@@ -354,16 +354,16 @@ spotlight:
   - type: single
     prompt: ❷判斷作用：破折號的作用──□①補充說明  □②語意轉折
     options:
-    - 補充說明
-    - 語意轉折
-    answer: 補充說明
+    - 判斷作用：破折號的作用──□①補充說明
+    - ②語意轉折
+    answer: 判斷作用：破折號的作用──□①補充說明
   - type: single
     prompt: ❸找重點：破折號後面的內容，補充說明前面的哪一項內容？
     options:
     - 掌權的人
     - 自己手中
     - 自己握有的權力
-    answer: 掌權的人
+    answer: 自己握有的權力
   - type: single
     prompt: ❹順文意：哪一句最完整地說出破折號前後的意思？
     options:
@@ -401,8 +401,8 @@ spotlight:
     prompt: ❷判斷作用：□①補充說明 □②語意轉折
     options:
     - 補充說明
-    - 語意轉折
-    answer: 補充說明
+    - □②語意轉折
+    answer: □②語意轉折
   - type: free_text
     prompt: ❸找重點：比較破折號前後內容，下列何者為本句重點？
   - type: passage
@@ -415,7 +415,7 @@ spotlight:
     options:
     - 小澤付出了許多努力，而最終實現了目標
     - 小澤付出了許多努力，最後卻還是期待落空
-    answer: 小澤付出了許多努力，而最終實現了目標
+    answer: 小澤付出了許多努力，最後卻還是期待落空
   - type: guide
     text: ❺選選項：依據本文，下列何者最能概括本文主旨？
   - type: guide

@@ -97,12 +97,12 @@ spotlight:
     prompt: 4.異：不同／奇怪
   - type: free_text
     prompt: ❸合詞義：
-  - type: single
+  - type: free_text
     prompt: 1.先把字義合起來
-    options:
-    - 每天更新，每月不同
-    - 每天出現新東西，每月發生奇怪的事
-    answer: 每天更新，每月不同
+  - type: guide
+    text: □①每天更新，每月不同
+  - type: guide
+    text: □②每天出現新東西，每月發生奇怪的事
   - type: free_text
     prompt: 2.再配合句子，可以推測「日新月異」的意思是：形容   進步或變化很快
   - type: free_text
