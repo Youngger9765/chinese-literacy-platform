@@ -125,7 +125,6 @@ def build(drive: list[dict], online: list[dict]) -> tuple[dict, list[dict]]:
             "lesson_uid": f"L{i:04d}",
             "title": title,
             "catalog_slot": code,
-            "drive_file_id": f.get("ID"),
             "drive_path": f["Path"],
         })
         if not code:
@@ -175,10 +174,18 @@ def gate(reg: dict, amb: list[dict], drive: list[dict], online: list[dict]) -> l
     if d:
         fails.append(f"2. drive_path 重複: {d[:3]}")
 
-    # 3 drive_file_id present
-    noid = [e["lesson_uid"] for e in lessons if not e.get("drive_file_id")]
-    if noid:
-        fails.append(f"3. 缺 drive_file_id: {len(noid)} 筆 {noid[:5]}")
+    # 3 每一課在 gitignored 的側檔裡都有 file id
+    #
+    # ⛔ id 刻意**不寫進這份公開登記簿**：這個 repo 是 public，而那些 id 未認證
+    #    就下載得到完整 .docx（2026-08-31 實測：真檔 200 / 479,710 bytes，假 id 404）。
+    #    175 個 id 寫在公開檔裡 = 附上一份可直接下載全部原稿的索引。
+    #    側檔不在時只警告不擋 —— CI checkout 沒有 private/，那不是登記簿的錯。
+    ids_path = ROOT / "private" / "curriculum-source" / "_drive-ids.json"
+    if ids_path.is_file():
+        known = set((json.loads(ids_path.read_text(encoding="utf-8")).get("ids") or {}))
+        noid = [e["lesson_uid"] for e in lessons if e["lesson_uid"] not in known]
+        if noid:
+            fails.append(f"3. 側檔缺 file id: {len(noid)} 筆 {noid[:5]}")
 
     # 4 every online lesson is accounted for — all retired, none silently dropped
     retired_ids = {r["story_id"] for r in reg["retired"]}

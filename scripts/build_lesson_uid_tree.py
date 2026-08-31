@@ -133,8 +133,9 @@ def build_one(entry: dict, docx: Path, version: str, python: str,
                     "version_id": version,
                     "title": entry["title"],
                     "catalog_slot": entry["catalog_slot"],
+                    # ⛔ 不寫 drive_file_id：這個 repo 是 public，而那個 id 未認證
+                    #    就下載得到完整原稿。id 住在 private/curriculum-source/_drive-ids.json。
                     "source": {
-                        "drive_file_id": entry["drive_file_id"],
                         "drive_path": entry["drive_path"],
                     },
                 }, allow_unicode=True, sort_keys=False),
