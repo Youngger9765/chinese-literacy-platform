@@ -141,3 +141,28 @@ jobs:
           AZURE_SPEECH_KEY: ""
           AZURE_SPEECH_REGION: eastus
           JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"
+
+      # Module-entry locks (#2752): these four files pin "every module the
+      # extraction produces has a real path to the student" at the layer(s)
+      # module_entry_gate.py cannot see on its own — payload actually reaches
+      # get_lesson_by_id() / StoryDetail / the route response, additive-only
+      # for the 165 non-文言文 lessons, and no module gets faked in for a
+      # lesson whose worksheet never had it. Same gap as the keypoints locks
+      # above: `backend/app/schemas/story.py` and `backend/app/routes/stories.py`
+      # are outside spec-check.yml's path filter, so a PR touching only those
+      # would otherwise ship with this whole suite unrun. An un-run lock is
+      # theatre — pin it.
+      - name: Run module-entry locks (#2752)
+        run: |
+          cd backend
+          python -m pytest --tb=short -q \
+            tests/test_classical_modules_entry_2752.py \
+            tests/test_goal_box_self_check_entry_2752.py \
+            tests/test_module_entry_gate_parser_2752.py \
+            tests/test_multi_text_and_followups_entry_2752.py
+        env:
+          DATABASE_URL: sqlite://
+          TTS_PROVIDER: google
+          AZURE_SPEECH_KEY: ""
+          AZURE_SPEECH_REGION: eastus
+          JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"

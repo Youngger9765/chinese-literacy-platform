@@ -555,6 +555,15 @@ def _uid_tree_lessons() -> list[dict]:
 
 
 # 學習單章節 → 線上 step。名字是抽取照著學習單印的字寫的。
+#
+# 多文本合讀課 (#2752 Phase 3) 的六~九大題是「三篇合讀共用」，印的標題跟單篇課
+# 不同字面：五 印「文章重點整理」不是「文章重點表」，七 印「綜合閱讀理解」不是
+# 「閱讀理解」——兩邊內容其實是同一個 keypoints-table / comprehension 步驟，只是
+# 抄學習單字面時沒收斂成同一個 key。exact-match 字典漏掉這兩個變體，於是 L0029/
+# L0063/L0137/L0144（4 課全部的多文本課）這兩步整個不在 step_sequence 裡——
+# `story_structure_table`／`multiple_choice`／`keypoints_followup_questions` 內容都在，
+# 但學生連 stepper 都點不到那一步（curl 全 200、component 也 render 得出來，問題
+# 出在這張表，是 module_entry_gate.py 掃檔名看不到的那層）。
 _SECTION_TO_STEP = {
     "讀全文-做記號": "full-text-annotate",
     "念順順": "key-passage-reading",
@@ -562,8 +571,10 @@ _SECTION_TO_STEP = {
     "語詞我最棒": "vocab-definition",
     "語詞應用": "vocab-application",
     "文章重點表": "keypoints-table",
+    "文章重點整理": "keypoints-table",  # 多文本合讀課的五*大題字面（L0029/L0063/L0137/L0144）
     "閱讀聚光燈": "spotlight",
     "閱讀理解": "comprehension",
+    "綜合閱讀理解": "comprehension",  # 多文本合讀課的七*大題字面（L0029/L0063）
     "詞語複習": "vocab-review",
     "語詞複習": "vocab-review",
     "知識補給站": "knowledge-station",

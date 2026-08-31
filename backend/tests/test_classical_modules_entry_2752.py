@@ -86,13 +86,33 @@ def test_classical_lesson_gets_a_step_sequence_with_the_new_steps():
 
 
 def test_regular_lesson_is_unaffected():
-    """This change must be additive-only for the 165 non-文言文 lessons."""
+    """This change must be additive-only for the 165 non-文言文 lessons.
+
+    2026-08-19 (#2720): `step_sequence` stopped being classical-only —
+    `_step_sequence_for` now derives it from any lesson's `sections_present`, so a
+    regular lesson legitimately gets one too (that is the intended fix for "下一關
+    按鈕為什麼不是按照側欄順序", not a leak). A bare `assert not
+    story.get("step_sequence")` would now fail on a real, wanted feature instead of
+    catching an actual regression. What this test needs to guard is narrower: a
+    regular lesson's step_sequence — invented or not — must never contain any of
+    the four 文言文-only step ids, which only make sense for a classical_text
+    lesson and would either 404 the route or render an empty-state step no
+    worksheet asked for.
+    """
+    from app.services.lesson_indexes import CLASSICAL_STEP_SEQUENCE
+
     story = _get(REGULAR_ID)
     for mod in ("classical_text", "modern_translation", "word_matching", "sentence_matching", "self_challenge", "intro_guide"):
         assert not story.get(mod), f"{mod} leaked onto a regular (non-classical) lesson"
-    # A regular lesson keeps falling back to DEFAULT_STEP_SEQUENCE (frontend behavior
-    # unchanged) — backend must not invent a step_sequence for it.
-    assert not story.get("step_sequence"), "regular lesson should not get an invented step_sequence"
+    # Steps CLASSICAL_STEP_SEQUENCE shares with the regular flow (lesson-intro,
+    # key-passage-reading, keypoints-table, spotlight, comprehension, report) are
+    # fine on a regular lesson — only the four 文言文-exclusive ones are the leak.
+    classical_only_steps = {
+        "classical-text", "classical-sentence-matching", "classical-word-matching", "classical-self-challenge",
+    }
+    assert classical_only_steps < set(CLASSICAL_STEP_SEQUENCE), "fixture drifted from lesson_indexes.py's actual step ids"
+    leaked = classical_only_steps & set(story.get("step_sequence") or [])
+    assert not leaked, f"classical-only step(s) {leaked} leaked into a regular lesson's step_sequence: {story.get('step_sequence')}"
 
 
 def test_story_detail_schema_accepts_the_new_fields():

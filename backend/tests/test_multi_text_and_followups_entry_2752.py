@@ -72,6 +72,40 @@ def test_regular_lesson_without_any_of_the_four_is_unaffected():
         assert not story.get(mod), f"{mod} leaked onto a lesson without that module"
 
 
+def test_multi_text_lessons_step_sequence_reaches_keypoints_table_and_comprehension():
+    """The data-layer tests above prove the content reaches get_lesson_by_id — this
+    proves the STEP that renders it is actually in step_sequence, which is a
+    different layer module_entry_gate.py cannot see (it only checks whether a
+    module's data exists somewhere, not whether the step containing it survived
+    into the per-lesson step_sequence the frontend stepper actually iterates).
+
+    All four 多文本合讀 lessons (L0029/L0063/L0137/L0144) print 大題五 as
+    「文章重點整理」 and 大題七 as 「綜合閱讀理解」 — worksheet-print variants of
+    「文章重點表」/「閱讀理解」 that `_SECTION_TO_STEP`'s exact-match dict did not
+    recognize, so `keypoints-table` and `comprehension` were silently absent from
+    every one of these lessons' step_sequence even though `story_structure_table`,
+    `multiple_choice`, and (for L0063/L0144) `keypoints_followup_questions` are all
+    populated. Confirmed via real browser: L0063's own stepper nav (before this fix)
+    jumped straight from 閱讀聚光燈 to 語詞複習 with no 文章重點表/閱讀理解 stop —
+    the content a student could reach by URL was unreachable from the UI at all.
+    """
+    from app.services.lesson_indexes import CLASSICAL_STEP_SEQUENCE
+
+    for lid in (20029, MULTI_TEXT_QUESTIONS_SHAPE_ID, 20137, MULTI_TEXT_RELAY_SHAPE_ID):
+        seq = _get(lid).get("step_sequence") or []
+        assert "keypoints-table" in seq, f"lesson {lid}: keypoints-table missing from step_sequence {seq}"
+        assert "comprehension" in seq, f"lesson {lid}: comprehension missing from step_sequence {seq}"
+        # additive-only guard, same invariant as test_classical_modules_entry_2752.py's
+        # test_regular_lesson_is_unaffected — these are 白話 multi-text lessons, not
+        # 文言文, so none of the four classical-only steps should ever appear here.
+        classical_only_steps = {
+            "classical-text", "classical-sentence-matching", "classical-word-matching", "classical-self-challenge",
+        }
+        assert classical_only_steps < set(CLASSICAL_STEP_SEQUENCE), "fixture drifted from lesson_indexes.py's actual step ids"
+        leaked = classical_only_steps & set(seq)
+        assert not leaked, f"lesson {lid}: classical-only step(s) {leaked} leaked in: {seq}"
+
+
 def test_story_detail_schema_accepts_the_new_fields():
     from app.schemas.story import StoryDetail
 
