@@ -44,9 +44,32 @@ MAP_FILE = REPO / "specs" / "modules" / "section-to-module.yml"
 _TABLE = yaml.safe_load(MAP_FILE.read_text(encoding="utf-8")) or {}
 NOT_SECTIONS = set(_TABLE.get("not_sections", []))
 
-#: 目前還沒有帳本、或帳本漏列模組的課。⛔ 只能變少。
-#: 空的就代表全庫乾淨 —— 那時 `<=` 會強制它一直乾淨。
-KNOWN: set[str] = set()
+#: 帳本漏列了硬碟上某個模組的課。⛔ 只能變少（棘輪）。
+#:
+#: 這些課的共同形狀是：**帳本同時是兩件事，而它們在這裡分岔了** ——
+#: 它既是「學習單印的大題目錄」，也是「代號目錄」（slug 只住這裡）。
+#: 例如 L0044/L0068/L0070/L0106 的學習單沒有「讀全文」這個大題，可是
+#: `full_text_annotate.<slug>.yml` 在硬碟上、課文也真的服務得出來（577–1650 字）。
+#: 目錄不列它 → 拿不到代號 → 那四課的全文 QR 一直是空的。
+#:
+#: ⚠️ #3011 一度把它們補進帳本尾端（標 `printed: false`）。那會讓
+#: `full_text_annotate` 流進 `step_sequence`，於是學生多出一個
+#: **他的學習單根本沒有**的「讀全文」步驟 ——
+#: `test_step_sequence_from_worksheet_2736` 當場抓到。所以撤回了。
+#:
+#: 正解是讓代號目錄與大題目錄分開表達（帳本補一個不進 step_sequence 的欄位，
+#: 或 `_section_slugs_by_article` 另有來源），那是比這張票大的改動。
+#: 在那之前先把債記在這裡數住：**只能變少，不准長大**。
+KNOWN: set[str] = {
+    "L0044",  # G5-L5  學習單沒印「讀全文」，但課文 9 段在硬碟上
+    "L0068",  # G6-L29 同上，13 段
+    "L0070",  # G6-L3  同上，9 段
+    "L0091",  # G7-L22 帳本漏列 writing_practice
+    "L0106",  # G7-L9  同上，8 段
+    "L0136",  # G9-L15 帳本漏列 spotlight
+    "L0154",  # 文-L11 帳本漏列 key_reading（passage 是 0 字，沒東西可唸）
+    "L0155",  # 文-L12 同上
+}
 
 
 def _on_disk(vdir: pathlib.Path) -> set[str]:

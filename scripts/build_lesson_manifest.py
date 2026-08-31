@@ -203,26 +203,6 @@ def build_one(version_dir: pathlib.Path, table: dict, gaps: dict, pages_db: dict
                     entry["pages_source"] = stored["pages_source"]
         sections.append(entry)
 
-    # 硬碟上有、但學習單目錄沒點到的那幾節（#3011）。
-    #
-    # 帳本同時是兩件事：**學習單印的大題目錄**，以及**代號目錄**（`slug` 只住這裡）。
-    # 這兩件事在 8 課上分岔了 —— 例如 L0044/L0068/L0070/L0106 的學習單沒有
-    # 「讀全文」這個大題，可是 `full_text_annotate.<slug>.yml` 在硬碟上、課文也真的
-    # 服務得出來（577–1650 字，學生讀得到）。目錄不列它，`_section_slugs_by_article`
-    # 就拿不到課文的代號，那四課的全文 QR 因此一直是空的 —— 沒有錯誤、清單照樣產出。
-    #
-    # 所以把它們補在**尾端**（不影響前面按位置對 section-pages.yml 的頁碼），
-    # 並標 `printed: false` 說清楚「這一節存在，但不是學習單印出來的大題」。
-    for module in sorted(_module_files):
-        for slug, tref in _module_files[module][_module_seen.get(module, 0):]:
-            entry = {"no": None, "name": None, "module": module,
-                     "printed": False, "slug": slug,
-                     "file": f"{module}.{slug}.yml"}
-            if tref is not None:
-                entry["text_ref"] = tref
-            sections.append(entry)
-        _module_seen[module] = len(_module_files[module])
-
     # 重複模組的檔名是 `{module}.{slug}.yml`（#2916），拿整個 stem 會冒出
     # `key_reading.m7qxv` 這種不存在的模組名，跟 dispatch 永遠對不上
     produced = sorted(

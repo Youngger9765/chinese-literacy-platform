@@ -111,7 +111,9 @@ def test_every_lesson_that_has_an_article_can_print_a_short_code(rows):
 #: 577–1650 字，只是學習單目錄沒印「讀全文」那個大題所以帳本沒收；L0124 是
 #: 整份目錄沒抽出來）這條就**因為情況變好而變紅**——那是判準的形狀錯了，
 #: 不是有人弄壞東西。改成棘輪：缺陷回來一樣會叫，修好了不會被當成壞事。
-ARTICLELESS_CEILING = {"L0044", "L0068", "L0070", "L0106", "L0124", "L0136"}
+#: L0124 已在 #3011 修好（它的 `sections_present` 本來是空的），所以從天花板移除 ——
+#: 棘輪留 slack 就不會咬。實測現值就是這 5 課。
+ARTICLELESS_CEILING = {"L0044", "L0068", "L0070", "L0106", "L0136"}
 
 
 def test_lessons_without_an_article_are_named_not_silently_skipped(rows):

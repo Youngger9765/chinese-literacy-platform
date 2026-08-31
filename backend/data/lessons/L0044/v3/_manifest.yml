@@ -22,14 +22,7 @@ sections:
   - 10
   - 11
   - 12
-- 'no': null
-  name: null
-  module: full_text_annotate
-  printed: false
-  slug: yqxqv
-  file: full_text_annotate.yqxqv.yml
 dispatch:
-- full_text_annotate
 - spotlight
 produced:
 - full_text_annotate

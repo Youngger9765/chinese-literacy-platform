@@ -11,15 +11,8 @@ sections:
   - 1
   - 2
   - 3
-- 'no': null
-  name: null
-  module: spotlight
-  printed: false
-  slug: tq79h
-  file: spotlight.tq79h.yml
 dispatch:
 - comprehension
-- spotlight
 produced:
 - comprehension
 - spotlight

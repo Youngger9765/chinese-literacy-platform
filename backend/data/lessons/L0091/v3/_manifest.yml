@@ -86,13 +86,6 @@ sections:
   pages:
   - 12
   - 13
-- 'no': null
-  name: null
-  module: writing_practice
-  printed: false
-  slug: 6dv9k
-  file: writing_practice.6dv9k.yml
-  text_ref: yvw4a
 dispatch:
 - comprehension
 - full_text_annotate
@@ -103,7 +96,6 @@ dispatch:
 - vocab_application
 - vocab_definitions
 - vocab_review
-- writing_practice
 produced:
 - comprehension
 - full_text_annotate
