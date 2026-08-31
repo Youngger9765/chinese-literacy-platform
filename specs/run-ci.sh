@@ -123,6 +123,7 @@ echo "-- Gate 4/10: QR-manifest reconciliation (verify_qr_manifest) --"
 ( cd backend && "$PYBIN" -m pytest specs/test_progress_table_is_fresh_spec.py -q )   # 生成的進度表不准過期（#2736）
 ( cd backend && "$PYBIN" -m pytest specs/test_golden_files_declare_provenance_spec.py -q )   # 對照組要說得出從哪來（#2729 機制 4）
 ( cd backend && "$PYBIN" -m pytest specs/test_eval_cases_come_from_real_failures_spec.py -q )   # eval case 要來自真的壞過的東西 + 配對照組（#2856）
+( cd backend && "$PYBIN" -m pytest specs/test_module_docstrings_name_real_things_spec.py -q )   # docstring 的 Public API 清單不准列不存在的名字（#2712）
 ( cd backend && "$PYBIN" -m pytest specs/test_skill_docs_do_not_contradict_themselves_spec.py -q )   # 同一份 skill 不可以既說「還沒驗」又說「已量到 N」（#2858）
 "$PYBIN" scripts/space_drift_scan.py   # 原稿有空格而 yml 吃掉（#2864；沒有原稿時自己 SKIPPED）
 # ── ⑥ 內容忠實度：兩支今天就能跑的 eval（#2854 盤點結果）─────────────
