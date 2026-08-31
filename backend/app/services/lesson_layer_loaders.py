@@ -42,6 +42,23 @@ logger = logging.getLogger(__name__)
 
 _LESSONS_DIR = Path(__file__).parent.parent.parent / "data" / "lessons"
 _PARSED_DIR = _LESSONS_DIR / "_parsed_2026-05-01"
+
+# Layer-2 的來源目錄在一修（#2683）就被封存刪除了，兩支載入器從此永遠回空。
+# 問題不是「回空」，是**回空跟「真的沒內容」長得一模一樣** —— #2751 記著一次
+# 誤判：某個內容儀表板顯示 0/175，看起來像整批內容不見了，實際上只是來源目錄
+# 早就不存在。一個講不出自己已經死掉的來源，會讓每一個下游數字都變成假警報。
+#
+# 這裡不刪那兩支（它們在服務 175 課的活路徑上，要拆得另外做，見 #2751），
+# 只讓它開口：模組載入時說一次，並留一個旗標給想分辨的呼叫端。
+LAYER2_SOURCE_AVAILABLE = _PARSED_DIR.exists()
+
+if not LAYER2_SOURCE_AVAILABLE:
+    logger.warning(
+        "Layer-2 來源不存在（%s）—— load_layer2_lessons() 與 "
+        "build_layer2_enrichment_index() 會永遠回空。這是一修封存的預期結果，"
+        "不是內容缺失。要分辨請讀 LAYER2_SOURCE_AVAILABLE，不要用「回空」推論。(#2751)",
+        _PARSED_DIR,
+    )
 _CURRICULUM_MANIFEST = Path(__file__).parent.parent.parent / "data" / "curriculum" / "manifest.yml"
 # Checked-in manifest listing grade_codes that have a .docx in GCS worksheets/ (#2207)
 _DOCX_MANIFEST = Path(__file__).parent.parent.parent / "data" / "worksheet_docx_codes.txt"
