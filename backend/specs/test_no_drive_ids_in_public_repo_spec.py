@@ -42,7 +42,21 @@ PATTERNS = {
     "drive_file_id 欄位": re.compile(rf"drive[_-]?file[_-]?id\s*[:=]\s*['\"]?({ID})\b"),
     "Drive 分享連結": re.compile(rf"(?:drive\.google\.com|googleapis\.com/drive)[^\s'\"]*?({ID})\b"),
     "rclone folder id": re.compile(rf"--drive-root-folder-id[=\s]+['\"]?({ID})\b"),
+    # ④ 落單的 id —— 前後被引號／空白／逗號／括號夾住，而不是黏在更長的字串裡。
+    #
+    # 為什麼要這條：#3011 第一版的鎖只認①②③，於是我自己在**這個檔案裡**
+    # 寫了一行 `real = "1cHrwbQ…"`（體-L1 的真 id）它完全沒叫 ——
+    # 一邊把 175 個 id 搬出公開 repo、一邊又 commit 一個回去。
+    #
+    # 為什麼不能只用 `\b`：`\b` 的字界是 `\w`（不含 `-`），所以 sha512 那種
+    # `…aQ/u+1GlRuz4LZBk6Mm3sg90G9hEbmEt37C1Zg==` 會從某個 `-` 後面命中。
+    # 這裡改成明確要求「落單」：兩側只能是引號、空白、`,` `(` `[` `=` `:` 或行首行尾。
+    "落單的 id": re.compile(rf"(?:^|[\s'\"(\[,=:])({ID})(?=$|[\s'\")\],])", re.M),
 }
+
+#: 這幾類檔案裡「長得像 id 的東西」是雜湊不是 id —— 不掃第 ④ 條。
+HASHY_FILES = ("package-lock.json", "yarn.lock", "poetry.lock", "uv.lock")
+HASHY_DIRS = ("qa/content-evidence/",)
 
 #: 這些副檔名之外的不掃（二進位、雜湊紀錄）
 TEXTY = (".yml", ".yaml", ".json", ".md", ".py", ".ts", ".tsx", ".sh", ".txt")
@@ -62,6 +76,11 @@ def _offenders() -> list[str]:
         except (UnicodeDecodeError, FileNotFoundError, IsADirectoryError):
             continue
         for label, rx in PATTERNS.items():
+            if label == "落單的 id" and (
+                pathlib.Path(rel).name in HASHY_FILES
+                or any(rel.startswith(d) for d in HASHY_DIRS)
+            ):
+                continue
             m = rx.search(text)
             if m:
                 line = text[: m.start()].count("\n") + 1
@@ -78,25 +97,45 @@ def test_positive_control_the_scan_reads_real_files():
 
 def test_it_recognises_every_leak_shape():
     """三種真的會洩漏的寫法都要認得。"""
-    real = "1cHrwbQGdQ9VJsup0GcwwP_oLww8PCaDN"
-    assert PATTERNS["drive_file_id 欄位"].search(f"drive_file_id: {real}")
-    assert PATTERNS["Drive 分享連結"].search(f"https://drive.google.com/file/d/{real}/view")
-    assert PATTERNS["rclone folder id"].search(f"rclone lsf gdrive: --drive-root-folder-id {real}")
+    # ⛔ **合成的**，不是真 id。第一版這裡寫了體-L1 的真 id ——
+    #    一邊把 175 個 id 搬出公開 repo、一邊又 commit 一個回去。
+    #    自家稽核抓到的；而這道鎖當時**沒**抓到，因為它只認掛在欄位名底下的。
+    #    測試用的假 id 要維持形狀（1 開頭 33 碼）但不對應任何真檔。
+    fake = "1" + "Z" * 32
+    assert PATTERNS["drive_file_id 欄位"].search(f"drive_file_id: {fake}")
+    assert PATTERNS["Drive 分享連結"].search(f"https://drive.google.com/file/d/{fake}/view")
+    assert PATTERNS["rclone folder id"].search(f"rclone lsf gdrive: --drive-root-folder-id {fake}")
+
+
+def test_a_bare_id_sitting_in_a_string_is_caught():
+    """#3011 第一版漏掉的那個形狀：裸 id 被指派給變數。
+
+    這正是我自己在這個檔案裡犯的 —— 鎖當時只認欄位名，所以沒叫。
+    """
+    fake = "1" + "Y" * 32
+    assert PATTERNS["落單的 id"].search(f'    real = "{fake}"')
+    assert PATTERNS["落單的 id"].search(f"ids = ['{fake}', 'x']")
+    assert PATTERNS["落單的 id"].search(f"- {fake}\n")
 
 
 def test_it_does_not_cry_wolf_on_things_that_merely_look_like_ids():
     """負向對照：會誤報的門最後會被關掉，所以這幾種一定不能叫。
 
-    這三個都是實測踩過的誤報來源。
+    三個都是實測踩過的誤報來源。字串一律**組出來**、不寫長字面 ——
+    寫死的話 repo 的 secret 掃描器會把它們當成 token（Azure/CircleCI/LINE 都誤報過），
+    那等於為了測誤報而製造另一種誤報。
     """
-    assert not any(rx.search(
-        '"integrity": "sha512-uOJamYALNhfJ6iolExyQM40yIQwDqYnkKtQ5VCiSe17E33H0aQ"'
-    ) for rx in PATTERNS.values())
-    assert not any(rx.search(
-        "https://renegadeeducator.com/11-alternative-schools-you-didnt-know-about1abcdefghij"
-    ) for rx in PATTERNS.values())
-    assert not any(rx.search('"sha256": "b72cacf619c8a14b1741b8d7f3d62f97b744b9735b34763b1b"')
-                   for rx in PATTERNS.values())
+    idish = "1" + "B" * 32                      # 跟 Drive id 同形狀的一段
+    # ① lock 檔的 integrity 雜湊：id 形狀黏在更長的 base64 裡，且前面是 `-`
+    #    （`\b` 的字界不含 `-`，所以只靠 `\b` 會從這裡命中）
+    integrity = '"integrity": "sha' + '512-' + "u" * 20 + "-" + idish + "A" * 6 + '=="'
+    # ② 網址 slug：id 形狀黏在路徑中間
+    url = "https://example.test/some-long-article-slug" + idish + "tail"
+    # ③ content-evidence 的 sha256
+    sha = '"sha' + '256": "' + "b" * 20 + idish + "c" * 10 + '"'
+    for sample in (integrity, url, sha):
+        hits = [label for label, rx in PATTERNS.items() if rx.search(sample)]
+        assert not hits, f"{hits} 對這段誤報了：{sample[:60]}…"
 
 
 def test_no_drive_file_ids_are_committed():
