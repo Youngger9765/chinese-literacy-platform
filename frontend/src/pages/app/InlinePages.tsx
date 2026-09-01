@@ -53,8 +53,6 @@ export const HomePage: React.FC = () => {
   const { isAuthenticated, isLoading, user } = useAuth();
 
   if (isLoading || !isAuthenticated) return null;
-  // Wait for roles to hydrate before redirecting.
-  if (!user?.roles || user.roles.length === 0) return null;
 
   // Derive redirect target directly from user.roles instead of reading
   // WorkspaceContext.activeView — that state re-syncs via useEffect, which
@@ -64,11 +62,27 @@ export const HomePage: React.FC = () => {
   const ADMIN_ROLES = new Set(['system_admin', 'org_owner', 'org_admin']);
   const TEACHER_ROLES = new Set(['teacher', 'homeroom_teacher', 'principal', 'director']);
 
+  // ⚠️ 這裡原本先擋一道 `if (roles.length === 0) return null`，本意是「等 roles 灌好
+  //    再轉，避免閃到錯的頁」。但對**真的沒有角色**的人來說它永遠不會結束 ——
+  //    使用者看到一片空白，而且沒有任何錯誤訊息。
+  //
+  //    誰會沒有角色：`sso_login_service.resolve_junyi_user` 建新 User 時不指派任何
+  //    角色，而 `/api/auth/me` 的 roles 純粹從 `user_roles` 表撈、沒有 fallback。
+  //    **第一次從均一九宮格點進來的人就是這樣**（#1198）。均一主站的按鈕一上線，
+  //    第一批點進來的全是這種人。
+  //
+  //    ⛔ 這不是「多給權限」：學生端三個主要路由檔（learning / gamification /
+  //    stories）一個 role gate 都沒有，`ProtectedRoute` 也只看有沒有登入 ——
+  //    沒有角色的人本來就用得了學生功能，缺的只是「該送他去哪一頁」。
+  //    要真的補一筆 student 角色是後端的事，那會改變權限，不在這裡做。
+  //
+  //    Owner 2026-09-01：「空白 role 就是給學生」。
+  const roles = user?.roles ?? [];
   let target = '/student';
-  if (user.roles.some((r) => ADMIN_ROLES.has(r.role_name))) target = '/admin';
-  else if (user.roles.some((r) => TEACHER_ROLES.has(r.role_name))) target = '/teacher-home';
-  else if (user.roles.some((r) => r.role_name === 'student')) target = '/student';
-  else if (PARENT_PORTAL_ENABLED && user.roles.some((r) => r.role_name === 'parent')) target = '/parent';
+  if (roles.some((r) => ADMIN_ROLES.has(r.role_name))) target = '/admin';
+  else if (roles.some((r) => TEACHER_ROLES.has(r.role_name))) target = '/teacher-home';
+  else if (roles.some((r) => r.role_name === 'student')) target = '/student';
+  else if (PARENT_PORTAL_ENABLED && roles.some((r) => r.role_name === 'parent')) target = '/parent';
 
   return <Navigate to={target} replace />;
 };
