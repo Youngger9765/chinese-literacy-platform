@@ -167,6 +167,7 @@ jobs:
           src/components/qr/qrOnReadingPages.test.tsx \
           src/pages/admin/lesson-audio/qrManifestParts.test.ts \
           src/pages/admin/lesson-audio/qrGateOnData3011.test.ts \
+          src/pages/app/__tests__/homeRedirectNoRole.test.tsx \
           src/components/layout/__tests__/toolboxUnreachable.test.tsx \
           src/components/reading-steps/__tests__/introStepCount.test.ts \
           src/context/__tests__/zhuyinSpaceShortcut.test.tsx \
