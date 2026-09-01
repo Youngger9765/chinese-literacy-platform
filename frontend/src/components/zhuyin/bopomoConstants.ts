@@ -46,6 +46,28 @@ export const SS_MAPPING: Record<string, string> = {
   ss05: 'E01E5',
 };
 
+// Sentinel markers used by processLinesSelective('difficult') to delimit which
+// character run should get the zhuyin-rendering font applied (#3022).
+//
+// Root cause of #3022: fontForZhuyin() was applied at the CONTAINER level, so
+// BpmfZihiSerif/BpmfIansui (an IVS font that renders bopomofo for *every*
+// character it draws, using the default reading absent an SS_MAPPING selector)
+// annotated the whole subtree -- interface text included -- regardless of
+// which characters processLinesSelective() actually selected. These markers
+// let the renderer wrap ONLY the selected runs in the zhuyin font, leaving
+// everything else (including plain passage text and UI chrome) in the base
+// serif font.
+//
+// Deliberately placed inside the same Variation Selectors Supplement block as
+// SS_MAPPING (U+E0100-U+E01EF) so every existing consumer that already treats
+// that whole block as zero-width/combining (stripPUASelectors, countRawChars,
+// splitZhuyinChars) absorbs them for free -- they never inflate a raw-char
+// count or become their own visual/TTS-highlight unit. Chosen far from the
+// ss01-ss05 cluster (E01E1-E01E5) to avoid any confusion with real tone
+// variants.
+export const DIFFICULT_SPAN_START = '\u{E01EA}';
+export const DIFFICULT_SPAN_END = '\u{E01EB}';
+
 /** Result of processing a single character */
 export interface ProcessedChar {
   char: string;
