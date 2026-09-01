@@ -123,6 +123,36 @@ jobs:
       #     never pinned here, so its scan lock never actually ran in CI —
       #     which is exactly how 23 custom buttons across 14 files shipped
       #     past a lock whose test file was green (#2771).
+      #   - difficultSpanRenderer / processLinesSelectiveDifficultMarkers /
+      #     FullTextAnnotate.zhuyinDifficultFontScope: 'difficult' zhuyin mode
+      #     must annotate ONLY the vocab-word character runs, never a whole
+      #     container. fontForZhuyin() used to be applied at the container
+      #     level gated on isZhuyinAny (true for 'difficult' too) —
+      #     BpmfZihiSerif/BpmfIansui renders bopomofo for every character it
+      #     draws, so the font (not processLinesSelective's text output)
+      #     annotated the whole page the instant 'difficult' mode turned it
+      #     on: interface text (❓ 不懂 / 💛 重要 / 還沒有標記 / instruction
+      #     banners) included, staging-measured at 24/78 leaf nodes, 11 of
+      #     them interface text (#3022). Locks: the marker-wrapping pure
+      #     function, ZhuyinContext emitting the markers, and the rendered
+      #     DOM never carrying the zhuyin font on interface text while still
+      #     carrying it on the actual vocab run.
+      #     ⚠️ The first pass at #3022 converted only ONE of ParagraphCard's
+      #     three text branches, and had NO lock on ParagraphCard,
+      #     KeyPassageReading or zhuyinUtils at all -- reverting each of those
+      #     files wholesale left the suite fully green. Adversarial review
+      #     caught it. The four locks below each fail on a wholesale revert of
+      #     the file they guard, verified one at a time:
+      #       paragraphCardDifficultFont3022  -- all three render branches
+      #         (plain / karaoke / blurred), plus a negative control that the
+      #         font never lands on an element holding the whole paragraph
+      #       keyPassageDifficultFont3022     -- on revert the font lands on a
+      #         406-character element of interface text + passage
+      #       splitZhuyinCharsMarkers3022     -- an opening marker on the first
+      #         character used to become its own phantom group, drifting the
+      #         karaoke cursor by one for the rest of the line
+      #       difficultFlags3022              -- carries run membership across
+      #         the PUA strip so annotated paragraphs keep their ruby
       # ⚠️ `run: |` (block literal) is load-bearing — do NOT collapse it back to a
       # plain `run:` scalar. YAML folds a plain scalar's newlines into spaces, which
       # leaves the `\` as LITERAL characters; the shell then reads `\ ` as an escaped
@@ -215,4 +245,11 @@ jobs:
           src/components/learning/__tests__/stepSharedShell.test.tsx \
           src/components/lesson-content/__tests__/rendererHeader.test.tsx \
           src/components/reading-steps/__tests__/wordSearchWording2863.test.ts \
-          src/components/reading-steps/__tests__/worksheetButton2845.test.ts
+          src/components/reading-steps/__tests__/worksheetButton2845.test.ts \
+          src/components/zhuyin/__tests__/difficultSpanRenderer.test.tsx \
+          src/context/__tests__/processLinesSelectiveDifficultMarkers.test.tsx \
+          src/components/reading-steps/__tests__/FullTextAnnotate.zhuyinDifficultFontScope.test.tsx \
+          src/components/zhuyin/__tests__/difficultFlags3022.test.tsx \
+          src/components/reading-steps/__tests__/paragraphCardDifficultFont3022.test.tsx \
+          src/components/reading-steps/__tests__/keyPassageDifficultFont3022.test.tsx \
+          src/utils/__tests__/splitZhuyinCharsMarkers3022.test.ts
