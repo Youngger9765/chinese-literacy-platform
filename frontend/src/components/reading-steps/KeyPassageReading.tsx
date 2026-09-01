@@ -16,6 +16,7 @@ import { scopedStepStorageKey, isToolboxMode } from '../../services/learningStor
 import { useAuth } from '../../contexts/AuthContext';
 import { splitZhuyinChars } from '../../utils/zhuyinUtils';
 import { fontForZhuyin } from '../../constants/fonts';
+import { renderDifficultAwareText } from '../zhuyin/difficultSpanRenderer';
 import { groupIdxForProgress } from '../../utils/ttsHighlight';
 import FluencyProgressChart, { type KeyPassageReadingAttempt } from './key-passage-reading/FluencyProgressChart';
 import SelfAssessment, { type AssessmentRating } from './key-passage-reading/SelfAssessment';
@@ -123,7 +124,7 @@ const KeyPassageReading: React.FC<KeyPassageReadingProps> = ({
 
   const aiRating = aiFluencyInsight?.rating;
 
-  const { isZhuyinAny, processLinesSelective } = useZhuyin();
+  const { isZhuyinAny, zhuyinActive, processLinesSelective } = useZhuyin();
   const { karaokeEnabled } = useKaraoke();
   const vocabWords = useMemo(
     () => (story.vocabulary ?? []).map((v) => v.word).filter(Boolean),
@@ -305,13 +306,22 @@ const KeyPassageReading: React.FC<KeyPassageReadingProps> = ({
       // and symbols stripped by _cleanForTts (#1110) don't push the split
       // past the real char boundary.
       const splitIdx = groupIdxForProgress(chars, speakingProgress);
+      // #3022: displayText may carry DIFFICULT_SPAN_START/END markers around
+      // vocab runs. Splitting it here can cut a run in half -- each resulting
+      // string then has an "orphan" marker at one end, which
+      // renderDifficultAwareText/splitDifficultSegments are built to tolerate
+      // (see difficultSpanRenderer.tsx), so the zhuyin font stays scoped to
+      // the vocab run even mid-highlight instead of leaking onto this whole
+      // paragraph via the container-level font this component used to set.
       return (
         <>
           {speakingProgress > 0 && (
-            <span className="text-accent font-bold">{chars.slice(0, splitIdx).join('')}</span>
+            <span className="text-accent font-bold">
+              {renderDifficultAwareText(chars.slice(0, splitIdx).join(''), `${idx}-read`)}
+            </span>
           )}
           <span className={speakingProgress > 0 ? 'opacity-30' : 'opacity-90'}>
-            {chars.slice(splitIdx).join('')}
+            {renderDifficultAwareText(chars.slice(splitIdx).join(''), `${idx}-unread`)}
           </span>
         </>
       );
@@ -319,10 +329,10 @@ const KeyPassageReading: React.FC<KeyPassageReadingProps> = ({
 
     // When karaoke is ON: finished TTS paragraphs stay fully colored
     if (karaokeEnabled && isTtsPlaying && currentTtsParagraph > idx) {
-      return <span className="text-accent font-bold">{zhuyinLine ?? line}</span>;
+      return <span className="text-accent font-bold">{renderDifficultAwareText(zhuyinLine ?? line, `${idx}-done`)}</span>;
     }
 
-    return <>{zhuyinLine ?? line}</>;
+    return <>{renderDifficultAwareText(zhuyinLine ?? line, `${idx}-plain`)}</>;
   };
 
   const handleCancel = useCallback(() => {
@@ -393,12 +403,18 @@ const KeyPassageReading: React.FC<KeyPassageReadingProps> = ({
   /*  JSX                                                             */
   /* ================================================================ */
 
+  // #3022: the zhuyin font used to sit on THIS wrapper, gated on isZhuyinAny
+  // (true for 'difficult' too). BpmfZihiSerif/BpmfIansui renders bopomofo for
+  // every character it draws, so that annotated the whole page -- the "朗讀
+  // 老師指定的重點段落" instructions, the "AI 朗讀中" label, even non-vocab
+  // passage characters processLinesSelective() never selected (that's what
+  // made stray dates like "2021年8月1日" show up annotated). The font now
+  // lives only on the paragraph <p> below, and only for 'all' mode
+  // (zhuyinActive); 'difficult' mode applies it per-run via
+  // renderDifficultAwareText inside renderParagraph instead.
   return (
     <div
       className="flex flex-col flex-1 h-full bg-surface overflow-hidden relative"
-      style={{
-        fontFamily: fontForZhuyin(isZhuyinAny),
-      }}
     >
       {/* ── 評估進度：共用 EvalProgress（與逐段朗讀同款 duration 動態+緩動+snap，#2396）
             取代舊版乾轉圈 spinner（#2131）；置中 overlay 保留 ── */}
@@ -483,7 +499,10 @@ const KeyPassageReading: React.FC<KeyPassageReadingProps> = ({
                   <span className="text-xs font-headline font-bold text-on-surface-variant/40 pt-2 select-none shrink-0 w-6 text-right">
                     {String(idx + 1).padStart(2, '0')}
                   </span>
-                  <p className={`text-xl md:text-2xl text-on-surface leading-[2rem] md:leading-[2.2rem] ${isZhuyinAny ? 'tracking-[0.15em]' : ''}`}>
+                  <p
+                    className={`text-xl md:text-2xl text-on-surface leading-[2rem] md:leading-[2.2rem] ${isZhuyinAny ? 'tracking-[0.15em]' : ''}`}
+                    style={{ fontFamily: fontForZhuyin(zhuyinActive) }}
+                  >
                     {renderParagraph(line, idx)}
                   </p>
                 </div>

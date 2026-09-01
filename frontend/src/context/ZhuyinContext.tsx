@@ -23,10 +23,22 @@
  *   - triState='all'       -> fully-processed ruby lines
  *   - triState='difficult' -> ruby only on individual chars from vocabulary words
  *                             (empty vocabulary -> null, graceful degrade like 'none')
+ *
+ * 'difficult' output is wrapped with DIFFICULT_SPAN_START/END sentinel markers
+ * around each selected run (#3022). The zhuyin FONT must not be applied to the
+ * whole line/container for 'difficult' mode -- it renders bopomofo for every
+ * character it draws, so the font (not this text processing) was what leaked
+ * annotation onto unselected passage text and onto unrelated interface text
+ * sharing the same container. Callers should render this output through
+ * components/zhuyin/difficultSpanRenderer.tsx, which strips the markers and
+ * applies the zhuyin font only inside them. 'all' mode's output has no
+ * markers -- callers keep applying the font at the container level there,
+ * since the whole line is meant to be annotated.
  */
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { PolyphonicProcessor, buildZhuyinString } from '../components/zhuyin/polyphonicProcessor';
+import { DIFFICULT_SPAN_START, DIFFICULT_SPAN_END } from '../components/zhuyin/bopomoConstants';
 
 export type ZhuyinMode = 'none' | 'difficult' | 'all';
 
@@ -244,12 +256,16 @@ export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ childr
               spanStart = i;
               inSpan = true;
             } else if (!isDifficult && inSpan) {
-              // Close the span and annotate it
+              // Close the span and annotate it. Wrapped in DIFFICULT_SPAN_START/END
+              // (#3022) so the renderer can apply the zhuyin FONT to exactly this
+              // run -- without the markers, every consumer applied the font at the
+              // container level, so the font (not this text processing) annotated
+              // the whole line/page regardless of which chars were selected here.
               const span = line.slice(spanStart, i);
               try {
-                result += buildZhuyinString(PolyphonicProcessor.instance.process(span));
+                result += DIFFICULT_SPAN_START + buildZhuyinString(PolyphonicProcessor.instance.process(span)) + DIFFICULT_SPAN_END;
               } catch {
-                result += span;
+                result += DIFFICULT_SPAN_START + span + DIFFICULT_SPAN_END;
               }
               plainCursor = i;
               inSpan = false;
@@ -260,9 +276,9 @@ export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           if (inSpan) {
             const span = line.slice(spanStart);
             try {
-              result += buildZhuyinString(PolyphonicProcessor.instance.process(span));
+              result += DIFFICULT_SPAN_START + buildZhuyinString(PolyphonicProcessor.instance.process(span)) + DIFFICULT_SPAN_END;
             } catch {
-              result += span;
+              result += DIFFICULT_SPAN_START + span + DIFFICULT_SPAN_END;
             }
           } else {
             result += line.slice(plainCursor);

@@ -48,9 +48,14 @@ fields_not_extracted:
       of: 175
       是什麼: 課文本體（見 lesson_body_text）
     vocabulary:
-      count: 0
-      of: 175
+      count: 147
+      of: 179
       是什麼: 生字語詞
+      # 2026-09-01 更正（#3022 調查發現此格已過期）：這裡曾寫 0/175（與上方
+      # `what` 欄「全部 0/175」的舊敘述一致，但抽取進度後續已推進，這個欄位
+      # 沒跟著更新）。實測 backend/data/lessons/ 全庫（179 課）：147 課
+      # `vocabulary` 陣列非空、32 課仍是空陣列。只更正計數，32 課是否
+      # 屬於「原稿本來就沒有語詞表」尚未逐課覆核，不代表已排查成因。
     fill_in_blank:
       count: 0
       of: 175
