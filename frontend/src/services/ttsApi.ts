@@ -1,5 +1,6 @@
 import { API_BASE } from './apiConfig';
 import { authToken } from '../utils/storage';
+import { applyDemoPlaybackRate } from '../utils/ttsRate';
 /**
  * ttsApi.ts — TTS client with sentence-level sequential playback (Issue #667)
  *
@@ -608,6 +609,8 @@ function _playSingleAudio(
     }
 
     const audio = new Audio(audioUrl);
+    // #3023: demo reading voice honours the student's speed preference.
+    applyDemoPlaybackRate(audio);
     _currentAudio = audio;
 
     if (onTimeUpdate) {

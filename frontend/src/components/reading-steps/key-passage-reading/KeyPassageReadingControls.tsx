@@ -14,6 +14,7 @@ import ToolboxCompletionActions from '../../tools/ToolboxCompletionActions';
 import { formatTime } from '../../../utils/formatTime';
 import NextStepFooter from '../../learning/NextStepFooter';
 import StepActionBar from '../../learning/StepActionBar';
+import TtsSpeedPicker from '../TtsSpeedPicker';
 
 export type ControlState = 'idle' | 'preparing' | 'recording' | 'ttsPlaying' | 'result';
 
@@ -141,7 +142,9 @@ const KeyPassageReadingControls: React.FC<KeyPassageReadingControlsProps> = ({
           </div>
         ) : (
           /* idle */
-          <div className="w-full flex gap-3">
+          <div className="w-full flex flex-wrap items-center gap-3">
+            {/* #3023: speed sits next to AI 朗讀, not in a settings page. */}
+            <TtsSpeedPicker className="h-14 shrink-0" />
             <button
               onClick={onSpeak}
               className="flex-1 h-14 rounded-full font-headline font-bold text-lg bg-surface-container-lowest shadow-editorial text-on-surface hover:bg-surface-container-low active:scale-[0.98] transition-all flex items-center justify-center gap-2"

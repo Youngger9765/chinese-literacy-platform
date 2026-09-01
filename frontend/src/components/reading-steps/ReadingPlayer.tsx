@@ -15,6 +15,7 @@
  * and one set of tests.
  */
 import React from 'react';
+import TtsSpeedPicker from './TtsSpeedPicker';
 
 export interface ReadingPlayerProps {
   isPlaying: boolean;
@@ -34,6 +35,14 @@ export interface ReadingPlayerProps {
    * 它跟主 CTA「完成標記」並排，同高同字級才不會看起來一大一小。
    */
   size?: 'md' | 'lg';
+  /**
+   * #3023: show the demo-voice speed picker while idle. On by default,
+   * because this component IS the demo-audio surface for the guest/QR path
+   * (GuestReadingPage -> FullTextAnnotate -> here) -- and that path is the
+   * 課後學習扶助 audience the too-fast report came from. Pass false only
+   * from a caller that already renders its own picker.
+   */
+  showSpeed?: boolean;
 }
 
 const BTN_BASE =
@@ -54,6 +63,7 @@ const BTN_SIZE: Record<'md' | 'lg', string> = {
 const IDLE_WIDTH: Record<'md' | 'lg', string> = { md: '', lg: 'w-44' };
 
 const ReadingPlayer: React.FC<ReadingPlayerProps> = ({
+  showSpeed = true,
   isPlaying,
   isPaused,
   onPlay,
@@ -131,6 +141,11 @@ const ReadingPlayer: React.FC<ReadingPlayerProps> = ({
           <span>停止</span>
         </button>
       )}
+
+      {/* #3023: only while idle -- changing the rate mid-utterance needs the
+          audio restarted to take effect, and restarting under the student is
+          worse than making them choose before they press play. */}
+      {showSpeed && !isActive && <TtsSpeedPicker />}
     </div>
   );
 };

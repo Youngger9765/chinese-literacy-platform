@@ -53,6 +53,10 @@ export function useTtsAudio(): UseTtsAudio {
         .then((blob) => {
           const url = URL.createObjectURL(blob);
           blobUrlRef.current = url;
+          // #3023: deliberately NOT rate-adjusted. This is the admin TTS
+          // audit tool -- its whole job is to hear what the synthesizer
+          // actually produced. Applying a listener's speed preference here
+          // would hide the very thing the auditor is checking.
           const audio = new Audio(url);
           audioRef.current = audio;
           audio.onended = () => {

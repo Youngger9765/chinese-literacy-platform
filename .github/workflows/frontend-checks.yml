@@ -153,6 +153,25 @@ jobs:
       #         karaoke cursor by one for the rest of the line
       #       difficultFlags3022              -- carries run membership across
       #         the PUA strip so annotated paragraphs keep their ruby
+      #   - ttsRate / ttsSpeedControl3023: the demo reading voice must honour
+      #     the student's speed choice, and an out-of-range stored value must
+      #     never reach an <audio> element (0 silences it). Teachers running
+      #     課後學習扶助 reported the demo reads too fast; measured on prod it
+      #     is 273 字/分 while the same worksheet's reading_benchmark puts the
+      #     top student band at ＞231 (#3023). The rate cannot be fixed in
+      #     SSML without a full re-synthesis -- the TTS cache key is
+      #     sha256(raw_text) with no rate in it.
+      #     ⚠️ The first pass put the control only in KeyPassageReadingControls,
+      #     which only the SIGNED-IN shell mounts. key-passage-reading is a
+      #     PUBLIC_LEARNING_STEP: an unauthenticated visitor is routed to
+      #     GuestReadingPage, which renders FullTextAnnotate for both 讀全文
+      #     and 重點朗讀 and plays through ReadingPlayer -- so the student
+      #     scanning the printed worksheet QR, i.e. the exact audience that
+      #     reported this, had no control at all. readingPlayerSpeed3023 locks
+      #     the control onto that shared player.
+      #     ttsRateWiring3023 locks the three production wiring points
+      #     themselves: reverting each one left the whole suite green before,
+      #     because nothing asserted the call sites actually call the helper.
       # ⚠️ `run: |` (block literal) is load-bearing — do NOT collapse it back to a
       # plain `run:` scalar. YAML folds a plain scalar's newlines into spaces, which
       # leaves the `\` as LITERAL characters; the shell then reads `\ ` as an escaped
@@ -252,4 +271,8 @@ jobs:
           src/components/zhuyin/__tests__/difficultFlags3022.test.tsx \
           src/components/reading-steps/__tests__/paragraphCardDifficultFont3022.test.tsx \
           src/components/reading-steps/__tests__/keyPassageDifficultFont3022.test.tsx \
-          src/utils/__tests__/splitZhuyinCharsMarkers3022.test.ts
+          src/utils/__tests__/splitZhuyinCharsMarkers3022.test.ts \
+          src/utils/__tests__/ttsRate.test.ts \
+          src/components/reading-steps/key-passage-reading/__tests__/ttsSpeedControl3023.test.tsx \
+          src/components/reading-steps/__tests__/readingPlayerSpeed3023.test.tsx \
+          src/hooks/__tests__/ttsRateWiring3023.test.ts
