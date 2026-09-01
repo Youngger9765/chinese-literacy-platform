@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { cancelTts, cleanForTts, pauseCurrentTts, resumeCurrentTts, speakTextWithProgress, TtsProgressInfo } from '../services/ttsApi';
 import { authToken } from '../utils/storage';
+import { applyDemoPlaybackRate, getTtsPlaybackRate } from '../utils/ttsRate';
 
 /** Read JWT token from localStorage and return Authorization header if present. */
 function _ttsAuthHeaders(): Record<string, string> {
@@ -203,6 +204,8 @@ export function useTtsPlayback(
         if (blob.size === 0) throw new Error('Empty TTS audio');
         const url = URL.createObjectURL(blob);
         const audio = new Audio(url);
+        // #3023: demo reading voice honours the student's speed preference.
+        applyDemoPlaybackRate(audio);
         utteranceRef.current = audio as unknown as SpeechSynthesisUtterance;
 
         // Use cleaned char count so cursor ceiling matches what TTS actually speaks.
@@ -232,7 +235,14 @@ export function useTtsPlayback(
       })
       .catch(() => {
         // Fallback: Web Speech API — rAF + wall-clock timing path (unchanged)
-        msPerCharRef.current = 240; // reset to default estimate for Web Speech
+        // #3023: the highlight on this path is wall-clock, not audio-position,
+        // so the per-char estimate has to be divided by the same rate we set on
+        // the utterance below -- otherwise slowing the voice down leaves the
+        // karaoke cursor running at full speed and it finishes long before the
+        // voice does. (The Cloud TTS path above is immune: it derives position
+        // from currentTime/duration, which already scales with playbackRate.)
+        const fallbackRate = getTtsPlaybackRate();
+        msPerCharRef.current = 240 / fallbackRate;
         if (!window.speechSynthesis) { onSpeechError(); return; }
         // Fix #2609: mark this playback as degraded (machine voice, not AI)
         // the moment we commit to the fallback — the UI banner must appear
@@ -242,7 +252,7 @@ export function useTtsPlayback(
         const utterance = new SpeechSynthesisUtterance(text);
         utteranceRef.current = utterance;
         utterance.lang = 'zh-TW';
-        utterance.rate = 1.0;
+        utterance.rate = fallbackRate; // #3023
         const voices = window.speechSynthesis.getVoices();
         const preferred =
           voices.find(v => v.name.includes('Google') && v.name.includes('Taiwan')) ||

@@ -123,6 +123,14 @@ jobs:
       #     never pinned here, so its scan lock never actually ran in CI —
       #     which is exactly how 23 custom buttons across 14 files shipped
       #     past a lock whose test file was green (#2771).
+      #   - ttsRate / ttsSpeedControl3023: the demo reading voice must honour
+      #     the student's speed choice, and an out-of-range stored value must
+      #     never reach an <audio> element (0 silences it). Teachers running
+      #     課後學習扶助 reported the demo reads too fast; measured on prod it
+      #     is 273 字/分 while the same worksheet's reading_benchmark puts the
+      #     top student band at ＞231 (#3023). The rate cannot be fixed in
+      #     SSML without a full re-synthesis -- the TTS cache key is
+      #     sha256(raw_text) with no rate in it.
       # ⚠️ `run: |` (block literal) is load-bearing — do NOT collapse it back to a
       # plain `run:` scalar. YAML folds a plain scalar's newlines into spaces, which
       # leaves the `\` as LITERAL characters; the shell then reads `\ ` as an escaped
@@ -215,4 +223,6 @@ jobs:
           src/components/learning/__tests__/stepSharedShell.test.tsx \
           src/components/lesson-content/__tests__/rendererHeader.test.tsx \
           src/components/reading-steps/__tests__/wordSearchWording2863.test.ts \
-          src/components/reading-steps/__tests__/worksheetButton2845.test.ts
+          src/components/reading-steps/__tests__/worksheetButton2845.test.ts \
+          src/utils/__tests__/ttsRate.test.ts \
+          src/components/reading-steps/key-passage-reading/__tests__/ttsSpeedControl3023.test.tsx
