@@ -14,6 +14,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 
 from .config import settings
+from .auth.jwt import decode_token
 from .routes import stories, learning, users, auth, classrooms, schools, organizations, roles, testset, spotlight_qa, keypoints_qa
 from .routes.classroom_texts import router as classroom_texts_router
 from .routes.teacher import router as teacher_router
@@ -351,6 +352,54 @@ class GlobalRateLimitMiddleware:
         await self.app(scope, receive, send_with_headers)
 
 
+class PreviewModeWriteGuardMiddleware(BaseHTTPMiddleware):
+    """Blocks every write when the request's JWT carries preview=true (Issue #3027).
+
+    Background: a teacher "previewing as a student" (Issue #3027, see
+    docs/prd/2026-09-hans-feedback-teacher-visibility.md) is issued a token
+    whose `sub` claim is the STUDENT's id, not the teacher's — this is what
+    lets every existing current_user.id-scoped read route (there is no
+    admin/role-based read path in this codebase; access is always resolved
+    from `sub`) keep working completely unmodified. But that also means the
+    identity can, in principle, hit any of the ~26 POST/PUT/PATCH/DELETE
+    endpoints under /api/learning/* and write into the real student's
+    records exactly as if the student had done it themselves.
+
+    Rather than teach each of those ~26 handlers to check a preview flag —
+    easy to get right today and easy to forget on the 27th endpoint someone
+    adds next month — this single middleware blocks by HTTP method for any
+    token carrying `preview: true`, before the request ever reaches a route
+    handler. New write endpoints are covered automatically.
+
+    Scoped to /api/* only (mirrors GlobalRateLimitMiddleware above): nothing
+    outside the API surface accepts a JWT anyway.
+    """
+
+    SAFE_METHODS = {"GET", "HEAD", "OPTIONS"}
+
+    async def dispatch(self, request: Request, call_next) -> Response:
+        if request.url.path.startswith("/api") and request.method not in self.SAFE_METHODS:
+            auth_header = request.headers.get("authorization", "")
+            if auth_header.startswith("Bearer "):
+                token = auth_header[len("Bearer "):]
+                try:
+                    payload = decode_token(token)
+                except Exception:
+                    # Not this middleware's job to validate the token — an
+                    # invalid/expired/garbage token falls through untouched
+                    # and gets the normal 401 from get_current_user. Only a
+                    # SUCCESSFULLY decoded preview=true token is ever blocked
+                    # here, so this can never mask a real auth failure behind
+                    # the preview-mode error message.
+                    payload = None
+                if payload and payload.get("preview") is True:
+                    return JSONResponse(
+                        status_code=403,
+                        content={"detail": "預覽模式為唯讀，不允許寫入"},
+                    )
+        return await call_next(request)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # seed_default_data() internally respects ENABLE_TEST_SEED and ENVIRONMENT:
@@ -401,6 +450,11 @@ app.add_middleware(GlobalRateLimitMiddleware)
 
 # Logging middleware wraps everything (added after CORS so it runs outermost)
 app.add_middleware(RequestLoggingMiddleware)
+
+# Issue #3027: block every write for a "preview as student" token, for every
+# /api/* route uniformly. Added after logging so a blocked attempt still gets
+# a request_id / log line like everything else.
+app.add_middleware(PreviewModeWriteGuardMiddleware)
 
 # QR 短網址：掛根路徑，因為 `/q/9a7x4` 是要印在紙上給人掃的（#2916）
 from .routes import slug_redirect as _slug_redirect

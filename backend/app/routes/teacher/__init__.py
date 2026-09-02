@@ -17,6 +17,7 @@ from .teacher_students import router as students_router
 from .teacher_texts import router as texts_router
 from .teacher_audio_replay import router as audio_replay_router
 from .teacher_reading_progress import router as reading_progress_router
+from .teacher_preview import router as preview_router
 
 router = APIRouter()
 
@@ -32,5 +33,6 @@ router.include_router(texts_router)
 router.include_router(story_tags_router)
 router.include_router(reading_progress_router)
 router.include_router(audio_replay_router)
+router.include_router(preview_router)
 
 __all__ = ["router"]

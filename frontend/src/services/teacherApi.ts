@@ -668,3 +668,29 @@ export async function getSubmissionReadingAudio(
     throw e;
   }
 }
+
+// --- "Preview as student" (Issue #3027) -------------------------------------
+
+export interface PreviewTokenResponse {
+  preview_token: string;
+  student_id: number;
+  student_name: string;
+  expires_in_minutes: number;
+}
+
+/**
+ * Mint a short-lived, read-only "preview as this student" token (Issue #3027).
+ *
+ * Uses the teacher's OWN session (the global auth token, via httpClient's
+ * default auth behaviour) to ask the backend for a token whose identity is
+ * the student — see backend/app/routes/teacher/teacher_preview.py and
+ * docs/prd/2026-09-hans-feedback-teacher-visibility.md.
+ *
+ * The returned preview_token is deliberately NOT stored anywhere here — the
+ * caller is responsible for keeping it out of the shared `authToken`
+ * storage the rest of the app reads from, so previewing a student can never
+ * clobber the teacher's own logged-in session.
+ */
+export function requestPreviewToken(studentId: number): Promise<PreviewTokenResponse> {
+  return post(`/api/teacher/students/${studentId}/preview-token`, {});
+}
