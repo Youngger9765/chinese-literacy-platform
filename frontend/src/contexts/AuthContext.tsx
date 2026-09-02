@@ -1,13 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { login as apiLogin, register as apiRegister, getMe, acceptTerms as apiAcceptTerms, googleLogin as apiGoogleLogin, junyiLogin as apiJunyiLogin, AuthUser, AuthError, RegisterResponse } from '../services/authApi';
 import { SESSION_UNAUTHORIZED_EVENT } from '../services/sessionGuard';
-import { authToken, safeStorage } from '../utils/storage';
-
-const ACTIVE_ASSIGNMENT_CONTEXT_KEY = 'activeAssignmentContext';
-// Set when user logs in via Junyi SSO (#1260). Read on logout to also clear
-// Junyi-side cookies via redirect to https://www.junyiacademy.org/logout —
-// without this, Junyi auto-logs the user back in on next "使用均一帳號登入".
-const JUNYI_SESSION_FLAG = 'lingoleap_junyi_session';
+import { authToken, safeStorage, clearAuthSession, JUNYI_SESSION_FLAG } from '../utils/storage';
 
 interface AuthContextValue {
   user: AuthUser | null;
@@ -193,29 +187,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // expired-token recovery doesn't yank the user mid-page through Junyi.
     const wasJunyiSession = safeStorage.local.get(JUNYI_SESSION_FLAG) === '1';
     const shouldRedirectToJunyi = wasJunyiSession && !options?.skipJunyiRedirect;
-    authToken.remove();
-    safeStorage.local.remove(JUNYI_SESSION_FLAG);
-    try {
-      sessionStorage.removeItem('activeAssignmentId');
-      sessionStorage.removeItem('activeAssignmentGoals');
-      sessionStorage.removeItem(ACTIVE_ASSIGNMENT_CONTEXT_KEY);
-
-      const keysToRemove: string[] = [];
-      for (let i = 0; i < sessionStorage.length; i += 1) {
-        const key = sessionStorage.key(i);
-        if (!key) continue;
-        if (
-          key.startsWith('db-session-')
-          || key.startsWith('assignment-db-session-')
-          || key.startsWith('self-db-session-')
-        ) {
-          keysToRemove.push(key);
-        }
-      }
-      keysToRemove.forEach((key) => sessionStorage.removeItem(key));
-    } catch {
-      // non-fatal
-    }
+    clearAuthSession();
     setToken(null);
     setUser(null);
     setMustChangePassword(false);
