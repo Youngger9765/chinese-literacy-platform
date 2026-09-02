@@ -229,6 +229,17 @@ jobs:
         working-directory: frontend
         run: npx vite build
 
+      #   - StudentPreviewPage / StudentProgressCard.preview (#3027): the
+      #     teacher "preview as student" entry point. Locks (a) no crash and
+      #     no network call when the page is reached with no router state
+      #     (b) the read-only banner names the student and states the
+      #     expiry (c) the recommendation fetch uses the PREVIEW token
+      #     handed to the page, never any global/teacher token (d) fetch
+      #     failure (expired token) shows an error instead of crashing (e)
+      #     結束預覽 navigates back (f) the card's 預覽 button calls
+      #     onPreview — not onExpand, which the card's whole surface is
+      #     also a click target for — and is disabled while a mint call is
+      #     in flight.
       - name: Render-smoke + pinned regression tests (vitest)
         working-directory: frontend
         run: |
@@ -314,5 +325,7 @@ jobs:
           src/hooks/__tests__/ttsRateWiring3023.test.ts \
           src/contexts/__tests__/authNetworkFailureKeepsToken.test.tsx \
           src/utils/__tests__/ttsDefaultRateBand.test.ts \
+          src/pages/teacher/__tests__/StudentPreviewPage.test.tsx \
+          src/pages/teacher/components/__tests__/StudentProgressCard.preview.test.tsx \
           src/components/reading-steps/editorPreMarks.test.ts \
           src/components/reading-steps/__tests__/FullTextAnnotate.editorPreMarks.test.tsx

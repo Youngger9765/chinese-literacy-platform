@@ -9,6 +9,9 @@ export interface StudentProgressCardProps {
   onExpand: (studentId: number) => void;
   onTagManager: (student: StudentProgress) => void;
   onInstruction: (student: StudentProgress) => void;
+  /** Issue #3027: read-only "preview as student" entry point. */
+  onPreview: (student: StudentProgress) => void;
+  isPreviewLoading: boolean;
 }
 
 export const StudentProgressCard: React.FC<StudentProgressCardProps> = ({
@@ -18,6 +21,8 @@ export const StudentProgressCard: React.FC<StudentProgressCardProps> = ({
   onExpand,
   onTagManager,
   onInstruction,
+  onPreview,
+  isPreviewLoading,
 }) => (
   <div
     className="bg-white rounded-lg border border-gray-200 p-4 cursor-pointer hover:border-gray-300 transition-colors"
@@ -56,21 +61,34 @@ export const StudentProgressCard: React.FC<StudentProgressCardProps> = ({
           </button>
         </div>
       </div>
-      <button
-        onClick={(event) => {
-          event.stopPropagation();
-          onInstruction(student);
-        }}
-        className="relative inline-flex items-center justify-center px-2.5 py-1 rounded-md text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 transition-colors shrink-0"
-        title="AI 教學指示"
-      >
-        留言
-        {instructionCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center w-3.5 h-3.5 text-[9px] font-bold text-white bg-amber-500 rounded-full">
-            {instructionCount}
-          </span>
-        )}
-      </button>
+      <div className="flex items-center gap-1.5 shrink-0">
+        <button
+          onClick={(event) => {
+            event.stopPropagation();
+            onPreview(student);
+          }}
+          disabled={isPreviewLoading}
+          className="inline-flex items-center justify-center px-2.5 py-1 rounded-md text-xs font-medium text-accent bg-accent-bg border border-accent/30 hover:bg-accent-bg/70 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          title="以學生身分預覽（唯讀）"
+        >
+          {isPreviewLoading ? '載入中…' : '預覽'}
+        </button>
+        <button
+          onClick={(event) => {
+            event.stopPropagation();
+            onInstruction(student);
+          }}
+          className="relative inline-flex items-center justify-center px-2.5 py-1 rounded-md text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 transition-colors"
+          title="AI 教學指示"
+        >
+          留言
+          {instructionCount > 0 && (
+            <span className="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center w-3.5 h-3.5 text-[9px] font-bold text-white bg-amber-500 rounded-full">
+              {instructionCount}
+            </span>
+          )}
+        </button>
+      </div>
     </div>
     <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm mt-3">
       <div>
