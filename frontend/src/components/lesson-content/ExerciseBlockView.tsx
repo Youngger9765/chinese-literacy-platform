@@ -58,7 +58,10 @@ function fillShape(exercise: ExerciseBlockT): FillShape {
   return 'set-list';
 }
 
-const ExerciseBlockView: React.FC<ExerciseBlockViewProps> = ({
+/** 本體：只負責畫題目。慶祝動畫由外層 wrapper 統一掛，見檔尾。 */
+const ExerciseBlockViewBody: React.FC<
+  ExerciseBlockViewProps & { onCorrect: () => void }
+> = ({
   exercise,
   lessonCode,
   storyTitle,
@@ -67,17 +70,12 @@ const ExerciseBlockView: React.FC<ExerciseBlockViewProps> = ({
   onValueChange,
   onGraded,
   verdict,
+  onCorrect,
 }) => {
   const { token } = useAuth();
   const [rescue, setRescue] = useState<McqRescueContext | null>(null);
   // 答錯時備好的 context —— 備好不等於打開，學生按了才變成 `rescue`。
   const [pendingRescue, setPendingRescue] = useState<McqRescueContext | null>(null);
-  // Issue 3024 — bump on every correct single-choice MCQ pick to re-trigger
-  // CorrectAnswerBurst. This is the block-based renderer's equivalent of the
-  // legacy MultipleChoiceExercise.tsx wiring: LESSON_RENDERER_V1 is ON by
-  // default, so THIS path (not the legacy one) is what most students see for
-  // 閱讀理解 on any story with real v3 lesson_content.
-  const [correctBurstKey, setCorrectBurstKey] = useState(0);
   const q = exercise.question;
   const submitted = verdict !== undefined && verdict !== null;
 
@@ -85,8 +83,15 @@ const ExerciseBlockView: React.FC<ExerciseBlockViewProps> = ({
     (studentValue: unknown) => {
       const result = grade(exercise, studentValue);
       onGraded(result);
+      // Issue 3024 —— 慶祝要在這裡觸發，不是在某個題型分支裡。
+      // 七種題型（複選／排序／trait_inference／keypoints_table／
+      // fill_in_blank 的三種形狀）全部經過這支共用的 submit，
+      // 只在單選那個分支呼叫 onCorrect 的話，它們答對什麼都不會發生。
+      if (result.verdict === true) {
+        onCorrect();
+      }
     },
-    [exercise, onGraded],
+    [exercise, onGraded, onCorrect],
   );
 
   // Retry a wrong lock-on-submit exercise (parallels guided_steps' 再試一次): clear the
@@ -147,6 +152,12 @@ const ExerciseBlockView: React.FC<ExerciseBlockViewProps> = ({
           // Reset to null when not all-correct (a wrong step, or 再試一次) so the parent never
           // latches a stale ✓ complete verdict.
           onGraded({ verdict: done ? true : null, needsReview: false });
+          // Issue 3024 —— 引導題（重點導讀）全部答對也要慶祝。
+          // `verdict !== true` 這個條件是防重複：這個 callback 每次 render 都可能
+          // 帶著 done=true 再進來一次，沒有它就會一直重放。
+          if (done && verdict !== true) {
+            onCorrect();
+          }
         }}
       />
     );
@@ -163,7 +174,7 @@ const ExerciseBlockView: React.FC<ExerciseBlockViewProps> = ({
       // semantics (that's a separate, deliberately out-of-scope ticket about
       // accuracy-based rewards).
       if (result.verdict === true) {
-        setCorrectBurstKey((k) => k + 1);
+        onCorrect();
       }
       // telemetry (choice letter truncated to VARCHAR(8)) — fire-and-forget.
       if (token) {
@@ -199,8 +210,6 @@ const ExerciseBlockView: React.FC<ExerciseBlockViewProps> = ({
     };
     return (
       <>
-        {/* Issue 3024: instant positive feedback on a correct answer */}
-        <CorrectAnswerBurst triggerKey={correctBurstKey} />
         <p className="text-lg font-medium text-on-surface mb-4 leading-relaxed whitespace-pre-wrap">{q.question}</p>
         <ChoiceInput
           options={q.options}
@@ -392,6 +401,31 @@ const ExerciseBlockView: React.FC<ExerciseBlockViewProps> = ({
 
   // Exhaustiveness guard — unreachable given the 8-kind union.
   return null;
+};
+
+/**
+ * Issue 3024 — 慶祝動畫掛在這一層，不掛在本體裡面。
+ *
+ * 為什麼：本體有 10 個 early return（custom / guided_steps / 複選 / 排序 /
+ * trait_inference / keypoints_table / vocab-choice / slots ×2 / 單選），
+ * 把 <CorrectAnswerBurst> 寫進其中一個分支，其餘九種題型答對就什麼都不會發生。
+ * 第一版就是這樣，preview 上實測「閱讀理解答對 → 沒有任何回饋」。
+ * 掛在分支之外只需要一處，而且新增題型不會漏掉。
+ *
+ * CorrectAnswerBurst 是 position:fixed + pointer-events-none，
+ * 掛在哪一層都不影響版面。
+ */
+const ExerciseBlockView: React.FC<ExerciseBlockViewProps> = (props) => {
+  const [correctBurstKey, setCorrectBurstKey] = useState(0);
+  return (
+    <>
+      <CorrectAnswerBurst triggerKey={correctBurstKey} />
+      <ExerciseBlockViewBody
+        {...props}
+        onCorrect={() => setCorrectBurstKey((k) => k + 1)}
+      />
+    </>
+  );
 };
 
 export default ExerciseBlockView;
