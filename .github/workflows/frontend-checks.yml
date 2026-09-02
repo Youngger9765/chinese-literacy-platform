@@ -172,6 +172,17 @@ jobs:
       #     ttsRateWiring3023 locks the three production wiring points
       #     themselves: reverting each one left the whole suite green before,
       #     because nothing asserted the call sites actually call the helper.
+      #   - authNetworkFailureKeepsToken: AuthContext used to delete the token
+      #     on ANY getMe() rejection. The comment said "invalid or expired",
+      #     but that catch also fires when the request never reached the server
+      #     -- so one bad request (classroom Wi-Fi, a phone changing towers, a
+      #     Cloud Run cold start) signed the student out and made them log in
+      #     again (#3037). Found via a Playwright trace of a randomly-failing
+      #     e2e run: 200 /api/auth/login then -1 /api/users/me, where -1 is a
+      #     request-level failure rather than an HTTP status.
+      #     Locks BOTH directions: a network failure keeps the token, a 401/403
+      #     clears it. Only locking the first would let "never clear anything"
+      #     pass and keep a revoked session alive.
       # ⚠️ `run: |` (block literal) is load-bearing — do NOT collapse it back to a
       # plain `run:` scalar. YAML folds a plain scalar's newlines into spaces, which
       # leaves the `\` as LITERAL characters; the shell then reads `\ ` as an escaped
@@ -275,4 +286,5 @@ jobs:
           src/utils/__tests__/ttsRate.test.ts \
           src/components/reading-steps/key-passage-reading/__tests__/ttsSpeedControl3023.test.tsx \
           src/components/reading-steps/__tests__/readingPlayerSpeed3023.test.tsx \
-          src/hooks/__tests__/ttsRateWiring3023.test.ts
+          src/hooks/__tests__/ttsRateWiring3023.test.ts \
+          src/contexts/__tests__/authNetworkFailureKeepsToken.test.tsx

@@ -83,13 +83,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setUser(userData);
         }
       })
-      .catch(() => {
-        // Token is invalid or expired — clear it
-        if (!cancelled) {
+      .catch((err: unknown) => {
+        if (cancelled) return;
+        // #3037: this catch used to fire for ANY rejection and delete the
+        // token. But getMe() rejects for two unrelated reasons:
+        //
+        //   AuthError with status 401/403 -> the token really is dead.
+        //   Anything else (fetch rejecting with TypeError on a dropped
+        //   connection, a 5xx, a timeout) -> we simply do not know, and the
+        //   token is probably fine.
+        //
+        // Treating the second as the first logs a student out on one bad
+        // request: flaky classroom Wi-Fi, a phone changing towers, a Cloud
+        // Run cold start. They then have to sign in again, because the token
+        // was removed from localStorage, not just from memory.
+        //
+        // Observed in a Playwright trace of a real failure:
+        //   200  /api/auth/login
+        //   -1   /api/users/me      <- request-level failure, not an HTTP code
+        const status = err instanceof AuthError ? err.status : undefined;
+        const tokenIsReallyDead = status === 401 || status === 403;
+
+        if (tokenIsReallyDead) {
           authToken.remove();
           setToken(null);
-          setUser(null);
         }
+        // Either way there is no user, so isAuthenticated stays false and
+        // nothing authenticated renders. Keeping the token just means the
+        // next attempt can succeed without a fresh login.
+        setUser(null);
       })
       .finally(() => {
         if (!cancelled) {
