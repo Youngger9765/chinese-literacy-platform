@@ -208,6 +208,21 @@ jobs:
       #     the step recomputes the same pre-marks from story data while a
       #     dismissal does NOT survive the remount (session-local by design,
       #     not persisted anywhere).
+      #   - LiveMonitorTab / ClassroomTabs.liveMonitor (#3025): teacher live
+      #     classroom monitor. Locks (a) a student with zero trackable
+      #     mcq_attempt rows renders an EXPLICIT 尚無資料 state -- the whole
+      #     point of this feature is that "no data" must never look the same
+      #     as "doing fine" (b) the stuck signal is always labelled 「卡在這題」
+      #     and the word "亂猜" never appears anywhere in the rendered output
+      #     (issue #3025 comment: that word assigns a motive) (c) polling
+      #     fetches again after the interval while mounted and STOPS the
+      #     instant the tab unmounts -- a leaked interval after navigating
+      #     away would keep hitting the backend forever (d) the 預覽 button
+      #     reuses the #3027 preview-token mint + navigate flow (e) the tab
+      #     is reachable from the real classroom navigation (日常管理 group,
+      #     not 進階分析 -- this is a during-class tool) and renders the
+      #     right classroomId, because an endpoint nobody can reach is a FAIL
+      #     even if the component itself renders correctly.
       # ⚠️ `run: |` (block literal) is load-bearing — do NOT collapse it back to a
       # plain `run:` scalar. YAML folds a plain scalar's newlines into spaces, which
       # leaves the `\` as LITERAL characters; the shell then reads `\ ` as an escaped
@@ -328,4 +343,6 @@ jobs:
           src/pages/teacher/__tests__/StudentPreviewPage.test.tsx \
           src/pages/teacher/components/__tests__/StudentProgressCard.preview.test.tsx \
           src/components/reading-steps/editorPreMarks.test.ts \
-          src/components/reading-steps/__tests__/FullTextAnnotate.editorPreMarks.test.tsx
+          src/components/reading-steps/__tests__/FullTextAnnotate.editorPreMarks.test.tsx \
+          src/pages/teacher/__tests__/LiveMonitorTab.test.tsx \
+          src/pages/teacher/__tests__/ClassroomTabs.liveMonitor.test.tsx
