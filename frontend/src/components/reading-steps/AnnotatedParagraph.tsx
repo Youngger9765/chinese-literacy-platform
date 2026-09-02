@@ -9,7 +9,7 @@
  */
 import React from 'react';
 import { Annotation } from './annotationReducer';
-import { TYPE_CONFIG } from './AnnotationToolbar';
+import { TYPE_CONFIG, EDITOR_PREMARK_STYLE } from './AnnotationToolbar';
 import { stripPUASelectors } from './annotationOffsets';
 import {
   renderDifficultAwareText,
@@ -121,7 +121,15 @@ const AnnotatedParagraph: React.FC<AnnotatedParagraphProps> = ({
       if (!seg.annotation) {
         return <React.Fragment key={seg.start}>{body}</React.Fragment>;
       }
-      const cfg = TYPE_CONFIG[seg.annotation.type];
+      // #3026: an 'editor'-sourced pre-mark uses its own style — never the
+      // student's own 重要/不懂 look — so the two stay visually distinguishable
+      // (BDD: 「與新套用的預標在視覺上可分辨」). Clicking it doesn't "移除"
+      // anything the student made; it hides that one pre-mark for this
+      // student, so the wording says 隱藏, not 移除 (see FullTextAnnotate.tsx's
+      // dismiss handling — a pre-mark's id is never fed to the reducer's
+      // REMOVE action).
+      const isEditorPreMark = seg.annotation.source === 'editor';
+      const cfg = isEditorPreMark ? EDITOR_PREMARK_STYLE : TYPE_CONFIG[seg.annotation.type];
       return (
         <span
           key={seg.annotation.id}
@@ -133,11 +141,12 @@ const AnnotatedParagraph: React.FC<AnnotatedParagraphProps> = ({
             }
           }}
           className={`cursor-pointer transition-all duration-300 ${cfg.className} ${focusedAnnotationId === seg.annotation.id ? 'ring-4 ring-lime-300 ring-offset-2 shadow-[0_0_0_4px_rgba(190,242,100,0.35)]' : ''}`}
-          title={`${cfg.icon} ${cfg.label} (點擊移除)`}
+          title={isEditorPreMark ? `${cfg.icon} ${cfg.label}（點擊隱藏）` : `${cfg.icon} ${cfg.label} (點擊移除)`}
           onClick={() => onRemoveAnnotation(seg.annotation!.id)}
           role="mark"
           aria-label={`${cfg.label}標記：${chars}`}
           data-annotation-id={seg.annotation.id}
+          data-annotation-source={seg.annotation.source ?? 'student'}
         >
           {body}
         </span>

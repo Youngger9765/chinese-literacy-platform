@@ -9,12 +9,32 @@
 
 export type AnnotationType = 'unknown' | 'important';
 
+/**
+ * Who put this mark here (#3026).
+ *
+ * `undefined`/absent means 'student' — every annotation persisted before this
+ * field existed (DB rows, localStorage snapshots) has no `source` key, and
+ * must keep behaving exactly like a student's own mark. Only pre-computed
+ * 編者標 (see editorPreMarks.ts) ever carry `'editor'`, and they are computed
+ * fresh on every render from `story.vocabulary` — never persisted through
+ * this reducer's ADD/REMOVE/UNDO/CLEAR/INIT actions, never saved to
+ * localStorage or the DB. That separation is deliberate: it is what keeps
+ * 清除全部 / undo / DB-save from touching marks the student never made, and
+ * keeps the DB record of "this student's marks" free of editor content.
+ *
+ * The switch is written to extend to `'teacher'` later (issue #3026's other
+ * open scenario) without another reshape of this type.
+ */
+export type AnnotationSource = 'student' | 'editor';
+
 export interface Annotation {
   id: string;
   paragraphIndex: number;
   charStart: number;
   charEnd: number;
   type: AnnotationType;
+  /** Defaults to 'student' wherever absent — see AnnotationSource above. */
+  source?: AnnotationSource;
 }
 
 export interface AnnotationSummary {
