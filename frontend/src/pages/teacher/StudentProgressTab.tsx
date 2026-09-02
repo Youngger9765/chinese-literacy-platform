@@ -1,5 +1,6 @@
 import React from 'react';
-import { StudentProgress } from '../../services/teacherApi';
+import { useNavigate } from 'react-router-dom';
+import { StudentProgress, requestPreviewToken } from '../../services/teacherApi';
 import StudentDialogueModal from './components/StudentDialogueModal';
 import StudentExpandedPanel from './components/StudentExpandedPanel';
 import StudentProgressCard from './components/StudentProgressCard';
@@ -47,6 +48,34 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
     addTag,
     removeTag,
   } = useStudentProgress(classroomId);
+
+  const navigate = useNavigate();
+  const [previewingStudentId, setPreviewingStudentId] = React.useState<number | null>(null);
+  const [previewError, setPreviewError] = React.useState<string | null>(null);
+
+  // Issue #3027: mint a read-only preview token, then hand it to
+  // StudentPreviewPage via router state (never localStorage, never the
+  // shared authToken) — see StudentPreviewPage.tsx for why.
+  const startPreview = async (student: StudentProgress) => {
+    setPreviewError(null);
+    setPreviewingStudentId(student.student_id);
+    try {
+      const { preview_token, student_id, student_name, expires_in_minutes } =
+        await requestPreviewToken(student.student_id);
+      navigate(`/teacher/preview/${student_id}`, {
+        state: {
+          previewToken: preview_token,
+          studentId: student_id,
+          studentName: student_name,
+          expiresInMinutes: expires_in_minutes,
+        },
+      });
+    } catch {
+      setPreviewError('無法開啟預覽，請稍後再試');
+    } finally {
+      setPreviewingStudentId(null);
+    }
+  };
 
   const openInstruction = (student: StudentProgress) => {
     setInstructionTarget({ id: student.student_id, name: student.student_name });
@@ -153,6 +182,12 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
         />
       )}
 
+      {previewError && (
+        <div className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
+          {previewError}
+        </div>
+      )}
+
       <div className="flex justify-end mb-3">
         <button
           onClick={exportReport}
@@ -178,6 +213,8 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
                 onExpand={handleRowClick}
                 onTagManager={setTagManagerStudent}
                 onInstruction={openInstruction}
+                onPreview={startPreview}
+                isPreviewLoading={previewingStudentId === student.student_id}
               />
               {isExpanded && renderExpandedPanel(student, 'mobile')}
             </div>
@@ -194,6 +231,7 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
               <th className="pb-2 font-medium">最近練習日期</th>
               <th className="pb-2 font-medium">最近練習課文</th>
               <th className="pb-2 font-medium text-center">練習次數</th>
+              <th className="pb-2 font-medium text-center w-14">預覽</th>
               <th className="pb-2 font-medium text-center w-10">指示</th>
             </tr>
           </thead>
@@ -252,6 +290,19 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
                       }`}>
                         {student.total_sessions}
                       </span>
+                    </td>
+                    <td className="py-2.5 text-center">
+                      <button
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          startPreview(student);
+                        }}
+                        disabled={previewingStudentId === student.student_id}
+                        className="inline-flex items-center justify-center px-2.5 py-1 rounded-md text-xs font-medium text-accent bg-accent-bg border border-accent/30 hover:bg-accent-bg/70 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="以學生身分預覽（唯讀）"
+                      >
+                        {previewingStudentId === student.student_id ? '載入中…' : '預覽'}
+                      </button>
                     </td>
                     <td className="py-2.5 text-center">
                       <button

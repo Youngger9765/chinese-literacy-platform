@@ -14,6 +14,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 
 from .config import settings
+from .auth.jwt import decode_token
 from .routes import stories, learning, users, auth, classrooms, schools, organizations, roles, testset, spotlight_qa, keypoints_qa
 from .routes.classroom_texts import router as classroom_texts_router
 from .routes.teacher import router as teacher_router
@@ -351,6 +352,63 @@ class GlobalRateLimitMiddleware:
         await self.app(scope, receive, send_with_headers)
 
 
+class PreviewModeWriteGuardMiddleware(BaseHTTPMiddleware):
+    """Blocks every write when the request's JWT carries preview=true (Issue #3027).
+
+    Background: a teacher "previewing as a student" (Issue #3027, see
+    docs/prd/2026-09-hans-feedback-teacher-visibility.md) is issued a token
+    whose `sub` claim is the STUDENT's id, not the teacher's — this is what
+    lets every existing current_user.id-scoped read route (there is no
+    admin/role-based read path in this codebase; access is always resolved
+    from `sub`) keep working completely unmodified. But that also means the
+    identity can, in principle, hit any of the ~26 POST/PUT/PATCH/DELETE
+    endpoints under /api/learning/* and write into the real student's
+    records exactly as if the student had done it themselves.
+
+    Rather than teach each of those ~26 handlers to check a preview flag —
+    easy to get right today and easy to forget on the 27th endpoint someone
+    adds next month — this single middleware blocks by HTTP method for any
+    token carrying `preview: true`, before the request ever reaches a route
+    handler. New write endpoints are covered automatically.
+
+    Deliberately NOT scoped to a path prefix. Every write endpoint in this
+    app happens to already live under /api (some via an explicit prefix=
+    argument to include_router, some via APIRouter(prefix="/api/...") on
+    the router itself — e.g. tts.py) or has no write endpoints at all (e.g.
+    assets.py is a GET-only GCS proxy registered without an /api prefix).
+    But that is a property of today's route table, not something this
+    middleware should trust: a future POST added to a router that isn't
+    under /api would silently escape a path-scoped check. Gating on HTTP
+    method alone costs nothing extra (no legitimate write anywhere in this
+    app is exempt from needing a real, non-preview identity) and closes
+    that gap by construction instead of by convention.
+    """
+
+    SAFE_METHODS = {"GET", "HEAD", "OPTIONS"}
+
+    async def dispatch(self, request: Request, call_next) -> Response:
+        if request.method not in self.SAFE_METHODS:
+            auth_header = request.headers.get("authorization", "")
+            if auth_header.startswith("Bearer "):
+                token = auth_header[len("Bearer "):]
+                try:
+                    payload = decode_token(token)
+                except Exception:
+                    # Not this middleware's job to validate the token — an
+                    # invalid/expired/garbage token falls through untouched
+                    # and gets the normal 401 from get_current_user. Only a
+                    # SUCCESSFULLY decoded preview=true token is ever blocked
+                    # here, so this can never mask a real auth failure behind
+                    # the preview-mode error message.
+                    payload = None
+                if payload and payload.get("preview") is True:
+                    return JSONResponse(
+                        status_code=403,
+                        content={"detail": "預覽模式為唯讀，不允許寫入"},
+                    )
+        return await call_next(request)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # seed_default_data() internally respects ENABLE_TEST_SEED and ENVIRONMENT:
@@ -379,6 +437,24 @@ app = FastAPI(
     docs_url="/docs" if _is_dev else None,
     redoc_url="/redoc" if _is_dev else None,
 )
+
+# Starlette's add_middleware() does user_middleware.insert(0, ...): each call
+# pushes to the FRONT of the list, which — after build_middleware_stack()
+# reverses it to compose the onion — means the middleware added LAST ends up
+# OUTERMOST (sees the request first, touches the response last on the way
+# out), and the one added FIRST ends up INNERMOST (closest to the router).
+#
+# Issue #3027: PreviewModeWriteGuardMiddleware is registered FIRST, i.e.
+# innermost of this block, on purpose. If it were outermost (as an earlier
+# version had it, added last) it would short-circuit a blocked write with a
+# bare 403 that never passes through SecurityHeaders/CORS/RateLimit/Logging
+# below — no security headers, no CORS headers on the error response, and no
+# log line, because those middlewares' dispatch() bodies never run at all
+# unless something outer actually calls into them. Being innermost means
+# every one of those still wraps its response on the way back out, blocked
+# or not — verified via adversarial review (appsec-pentest-reviewer) probing
+# the actual response headers and log output of a blocked request.
+app.add_middleware(PreviewModeWriteGuardMiddleware)
 
 # Security headers must be added before CORSMiddleware so they appear on
 # every response (including CORS preflight responses).

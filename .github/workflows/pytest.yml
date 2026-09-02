@@ -219,6 +219,24 @@ jobs:
           AZURE_SPEECH_REGION: eastus
           JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"
 
+      # 教師「以學生身分預覽」(#3027)：preview JWT 只允許唯讀。這三支涵蓋
+      # (1) token 本身帶對 claim (2) 核發端點只給該學生的授課老師 (3) 核心
+      # 安全邊界 — PreviewModeWriteGuardMiddleware 擋掉所有 /api/* 寫入，
+      # 用最低權限身分(被預覽的學生本人)測、每個 fail-closed 都配正向對照。
+      - name: Run teacher preview-mode locks (#3027)
+        run: |
+          cd backend
+          python -m pytest --tb=short -q \
+            tests/test_jwt_preview_token.py \
+            tests/test_teacher_preview_token.py \
+            tests/test_preview_mode_write_guard.py
+        env:
+          DATABASE_URL: sqlite://
+          TTS_PROVIDER: google
+          AZURE_SPEECH_KEY: ""
+          AZURE_SPEECH_REGION: eastus
+          JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"
+
       - name: Run testset tests (upload security + auth + eval)
         run: |
           cd backend

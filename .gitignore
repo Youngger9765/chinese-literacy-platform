@@ -4,6 +4,7 @@ private/
 # Environment variables (secrets)
 venv/
 .venv/
+.venv3*/
 .env
 .env.local
 .env.production

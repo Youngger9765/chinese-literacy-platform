@@ -65,6 +65,7 @@ const ParentDashboard = lazy(() => import('../pages/parent/ParentDashboard'));
 // New home pages for each role
 const StudentHome = lazy(() => import('../pages/student/StudentHome'));
 const TeacherHome = lazy(() => import('../pages/teacher/TeacherHome'));
+const StudentPreviewPage = lazy(() => import('../pages/teacher/StudentPreviewPage'));
 const TeacherMyTextsPage = lazy(() => import('../pages/teacher/TeacherMyTextsPage'));
 const TeacherAssignmentsPage = lazy(() => import('../pages/teacher/TeacherAssignmentsPage'));
 const TeacherSessionReportPage = lazy(() => import('../pages/teacher/TeacherSessionReportPage'));
@@ -179,6 +180,20 @@ const AppRoutes: React.FC = () => (
           <ProtectedRoute>
             <AppShell>
               <TeacherHome />
+            </AppShell>
+          </ProtectedRoute>
+        }
+      />
+      {/* Issue #3027: read-only "preview as student" entry point. Reached from
+          the "以學生身分預覽" button on a classroom's 學生進度 tab — see
+          StudentProgressTab.tsx. Direct navigation with no state bounces
+          back (no preview token to use). */}
+      <Route
+        path="/teacher/preview/:studentId"
+        element={
+          <ProtectedRoute>
+            <AppShell>
+              <StudentPreviewPage />
             </AppShell>
           </ProtectedRoute>
         }
