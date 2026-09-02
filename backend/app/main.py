@@ -371,14 +371,23 @@ class PreviewModeWriteGuardMiddleware(BaseHTTPMiddleware):
     token carrying `preview: true`, before the request ever reaches a route
     handler. New write endpoints are covered automatically.
 
-    Scoped to /api/* only (mirrors GlobalRateLimitMiddleware above): nothing
-    outside the API surface accepts a JWT anyway.
+    Deliberately NOT scoped to a path prefix. Every write endpoint in this
+    app happens to already live under /api (some via an explicit prefix=
+    argument to include_router, some via APIRouter(prefix="/api/...") on
+    the router itself — e.g. tts.py) or has no write endpoints at all (e.g.
+    assets.py is a GET-only GCS proxy registered without an /api prefix).
+    But that is a property of today's route table, not something this
+    middleware should trust: a future POST added to a router that isn't
+    under /api would silently escape a path-scoped check. Gating on HTTP
+    method alone costs nothing extra (no legitimate write anywhere in this
+    app is exempt from needing a real, non-preview identity) and closes
+    that gap by construction instead of by convention.
     """
 
     SAFE_METHODS = {"GET", "HEAD", "OPTIONS"}
 
     async def dispatch(self, request: Request, call_next) -> Response:
-        if request.url.path.startswith("/api") and request.method not in self.SAFE_METHODS:
+        if request.method not in self.SAFE_METHODS:
             auth_header = request.headers.get("authorization", "")
             if auth_header.startswith("Bearer "):
                 token = auth_header[len("Bearer "):]
@@ -429,6 +438,24 @@ app = FastAPI(
     redoc_url="/redoc" if _is_dev else None,
 )
 
+# Starlette's add_middleware() does user_middleware.insert(0, ...): each call
+# pushes to the FRONT of the list, which — after build_middleware_stack()
+# reverses it to compose the onion — means the middleware added LAST ends up
+# OUTERMOST (sees the request first, touches the response last on the way
+# out), and the one added FIRST ends up INNERMOST (closest to the router).
+#
+# Issue #3027: PreviewModeWriteGuardMiddleware is registered FIRST, i.e.
+# innermost of this block, on purpose. If it were outermost (as an earlier
+# version had it, added last) it would short-circuit a blocked write with a
+# bare 403 that never passes through SecurityHeaders/CORS/RateLimit/Logging
+# below — no security headers, no CORS headers on the error response, and no
+# log line, because those middlewares' dispatch() bodies never run at all
+# unless something outer actually calls into them. Being innermost means
+# every one of those still wraps its response on the way back out, blocked
+# or not — verified via adversarial review (appsec-pentest-reviewer) probing
+# the actual response headers and log output of a blocked request.
+app.add_middleware(PreviewModeWriteGuardMiddleware)
+
 # Security headers must be added before CORSMiddleware so they appear on
 # every response (including CORS preflight responses).
 app.add_middleware(SecurityHeadersMiddleware)
@@ -450,11 +477,6 @@ app.add_middleware(GlobalRateLimitMiddleware)
 
 # Logging middleware wraps everything (added after CORS so it runs outermost)
 app.add_middleware(RequestLoggingMiddleware)
-
-# Issue #3027: block every write for a "preview as student" token, for every
-# /api/* route uniformly. Added after logging so a blocked attempt still gets
-# a request_id / log line like everything else.
-app.add_middleware(PreviewModeWriteGuardMiddleware)
 
 # QR 短網址：掛根路徑，因為 `/q/9a7x4` 是要印在紙上給人掃的（#2916）
 from .routes import slug_redirect as _slug_redirect

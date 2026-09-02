@@ -293,6 +293,39 @@ class TestPreviewModeAllowsReads:
         )
 
 
+class TestBlockedResponseStillPassesThroughOtherMiddleware:
+    """Registration-order regression (adversarial review finding, #3027).
+
+    An earlier version registered PreviewModeWriteGuardMiddleware LAST,
+    which — per Starlette's insert(0, ...) semantics — made it the
+    OUTERMOST middleware. An outermost middleware that returns a response
+    directly (without calling call_next) short-circuits every middleware
+    registered before it: their dispatch() bodies never run at all. A real
+    adversarial review caught this empirically (blocked response had none
+    of SecurityHeadersMiddleware's headers). This test locks the fix: the
+    guard must be registered innermost (first), so a blocked response still
+    gets dressed by every middleware that wraps it on the way back out.
+    """
+
+    def test_blocked_write_response_still_carries_security_headers(self, client):
+        resp = client.post(
+            "/api/learning/mcq-attempt",
+            json={
+                "lesson_id": "1",
+                "question_id": "q1",
+                "choice": "A",
+                "is_correct": True,
+            },
+            headers=auth_header(_state["preview_token"]),
+        )
+        assert resp.status_code == 403
+        # These are set by SecurityHeadersMiddleware's dispatch(), which only
+        # runs if the guard actually calls call_next() into it. If the guard
+        # were outermost, these headers would be entirely absent.
+        assert resp.headers.get("x-content-type-options") == "nosniff"
+        assert resp.headers.get("x-frame-options") == "DENY"
+
+
 class TestInvalidTokenIsNotTreatedAsPreview:
     def test_garbage_token_falls_through_to_normal_401_not_preview_403(self, client):
         """A malformed/undecodable bearer must NOT be swallowed by the

@@ -73,12 +73,14 @@ Issue 主張：「依學生程度建議關聯課程」**已經完整實作、前
 
 ```
 dispatch():
-  1. 若路徑不是 /api/* 或方法是 GET/HEAD/OPTIONS → 直接放行
+  1. 方法是 GET/HEAD/OPTIONS → 直接放行
   2. 解析 Authorization header，用既有 decode_token()（backend/app/auth/jwt.py）解 JWT
   3. 解不開（過期/偽造/沒帶）→ 不介入，讓後面的 get_current_user 正常回 401
      （這一步刻意設計成「絕不能把真的認證失敗，包裝成預覽模式訊息」）
   4. 只有成功解出 payload 且 payload.preview is True → 回 403「預覽模式為唯讀，不允許寫入」
 ```
+
+**刻意不對路徑做 `/api/*` 篩選**：第一版曾加過「路徑不是 `/api/*` 就直接放行」這條，看起來像是仿照既有的 `GlobalRateLimitMiddleware` 只管 `/api` 與 `/assets`。但覆核時逐一查過 `backend/app/main.py` 裡沒有掛 `/api` 前綴的路由（`tts.py`、`tts_audit.py`、`assets.py`、`health.py`、`slug_redirect.py`）：`tts.py`/`tts_audit.py` 的 `APIRouter` 自己在 prefix 裡就寫死了 `/api/tts`、`/api/tts-audit`，`assets.py`/`health.py`/`slug_redirect.py` 則完全沒有任何 POST/PUT/PATCH/DELETE 端點——今天沒有任何寫入端點真的活在 `/api` 之外，所以那個條件當下不構成可利用的漏洞。但那是「今天路由表恰好如此」，不是「架構上保證如此」：日後若有人在 `assets.py` 加一支上傳端點卻忘記給 `/api` 前綴，就會悄悄逃過這道 middleware。既然全站沒有任何合法寫入需要被排除在這道檢查之外，拿掉路徑條件、只用 HTTP method 判斷完全零成本，卻能把這類「未來加錯路由」的漏洞從架構上排除，而不是靠「大家記得都放對地方」這種慣例撐著。
 
 **為什麼選這個設計，而不是逐一修改每個寫入端點**：後端 `/learning/*` 底下光是 POST/PUT/PATCH/DELETE 就有 **26 個端點**（見 1.3），全部靠同一個模式（`current_user.id` 決定寫入對象）。逐一在每個 handler 裡加「如果是 preview 就擋」，一來要改 26 處、容易漏改，二來**未來新增的寫入端點不會自動被涵蓋**——這正是「漏掉一個就是這個功能的全部風險」（mandate 原文）最可能發生的地方。用一個掛在最外層、對 HTTP method 做判斷的 middleware，新端點無論何時加入都自動被保護，不需要開發者記得加一行檢查。
 
