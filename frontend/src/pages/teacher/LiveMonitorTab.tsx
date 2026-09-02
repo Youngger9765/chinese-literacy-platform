@@ -5,12 +5,12 @@
  * a 「卡在這題」flag (same question answered wrong >= 3 times). Built for
  * 課後學習扶助: teacher present, students working simultaneously.
  *
- * Liveness (Young 2026-09-03 — manual refresh, no polling):
- *   Fetches ONCE on mount, then only when the teacher presses 重新整理.
- *   The first version auto-polled every 7s; Young pulled it — an open,
- *   forgotten tab would hit the backend all night for nothing, and a
- *   teacher walking a classroom refreshes on their own rhythm anyway.
- *   The 上次更新 timestamp tells them how stale the view is.
+ * Liveness (Young 2026-09-03, second decision — 60s poll + manual button):
+ *   First version polled every 7s; Young pulled that as wasteful, then
+ *   settled on this: auto-refresh once a MINUTE (an open forgotten tab
+ *   costs ~1 cheap request/min, acceptable), plus a 重新整理 button for
+ *   the teacher who wants the latest right now. 上次更新 timestamp shows
+ *   staleness. Polling stops the moment the component unmounts.
  *
  * Data honesty (issue #3025 decided design):
  *   `mcq_attempt` has no session_id and only a handful of exercise
@@ -56,6 +56,8 @@ function sortForTeacherScan(students: LiveMonitorStudentEntry[]): LiveMonitorStu
   return [...students].sort((a, b) => rank(a) - rank(b));
 }
 
+const POLL_INTERVAL_MS = 60_000;
+
 const LiveMonitorTab: React.FC<LiveMonitorTabProps> = ({ classroomId }) => {
   const { token } = useAuth();
   const navigate = useNavigate();
@@ -93,8 +95,10 @@ const LiveMonitorTab: React.FC<LiveMonitorTabProps> = ({ classroomId }) => {
   useEffect(() => {
     isMountedRef.current = true;
     fetchOnce();
+    const interval = setInterval(fetchOnce, POLL_INTERVAL_MS);
     return () => {
       isMountedRef.current = false;
+      clearInterval(interval);
     };
   }, [fetchOnce]);
 
@@ -148,7 +152,7 @@ const LiveMonitorTab: React.FC<LiveMonitorTabProps> = ({ classroomId }) => {
         <div>
           <h3 className="text-base font-semibold text-gray-900">課堂即時監控</h3>
           <p className="text-sm text-gray-500 mt-0.5">
-            顯示每位學生目前所在的大題與是否卡關。按「重新整理」取得最新狀態。
+            顯示每位學生目前所在的大題與是否卡關。每分鐘自動更新，也可隨時按「重新整理」。
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">

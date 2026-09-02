@@ -10,10 +10,11 @@
  *    word assigns a motive the data does not support).
  *  - the tracked_exercise_types disclosure is rendered, not silently
  *    dropped, so the teacher knows the scope of what this view can see.
- *  - refresh model (Young 2026-09-03): fetches ONCE on mount, never again
- *    on its own — no timers at all. 重新整理 button triggers a re-fetch.
- *    The first version auto-polled every 7s; a forgotten open tab would
- *    hit the backend all night, so polling was removed entirely
+ *  - refresh model (Young 2026-09-03, final): auto-poll once a MINUTE plus
+ *    a manual 重新整理 button. Both directions are locked: faster than 60s
+ *    violates the cost decision (v1 polled every 7s and was pulled), and
+ *    no polling at all violates the "auto update" half of the decision.
+ *    Polling must stop on unmount — a forgotten tab costs 1 req/min max
  *    that keeps running after unmount would leak requests forever.
  *  - the 預覽 button reuses the teacher preview-token mint flow and
  *    navigates to /teacher/preview/{id}, same as StudentProgressTab (#3027).
@@ -172,7 +173,7 @@ describe('LiveMonitorTab', () => {
     });
   });
 
-  describe('refresh model — no polling (Young 2026-09-03)', () => {
+  describe('refresh model — 60s poll + manual (Young 2026-09-03 final)', () => {
     beforeEach(() => {
       vi.useFakeTimers();
     });
@@ -181,19 +182,37 @@ describe('LiveMonitorTab', () => {
       vi.useRealTimers();
     });
 
-    it('fetches once on mount and NEVER again on its own — no timers', async () => {
+    it('does NOT poll faster than once a minute (v1 polled every 7s — pulled as wasteful)', async () => {
       mockGetClassroomLiveMonitor.mockResolvedValue(baseResponse);
       renderTab();
-
       await vi.waitFor(() => expect(mockGetClassroomLiveMonitor).toHaveBeenCalledTimes(1));
 
-      // 走過遠超過舊輪詢間隔的時間 —— 若有人把 setInterval 加回來，這裡會抓到。
-      // 這是本次改動的核心承諾：開著忘記關的分頁不會一直打後端。
-      await vi.advanceTimersByTimeAsync(120_000);
+      // 59 秒內不可以有第二次 —— 誰把間隔改短（例如改回 7 秒）這裡就紅
+      await vi.advanceTimersByTimeAsync(59_000);
       expect(
         mockGetClassroomLiveMonitor.mock.calls.length,
-        '兩分鐘內出現額外請求 —— 自動輪詢被加回來了？Young 明確拿掉它',
+        '59 秒內出現第二次請求 —— 輪詢間隔被改短了？Young 定的是一分鐘',
       ).toBe(1);
+    });
+
+    it('DOES auto-refresh after a minute, and stops on unmount', async () => {
+      mockGetClassroomLiveMonitor.mockResolvedValue(baseResponse);
+      const { unmount } = renderTab();
+      await vi.waitFor(() => expect(mockGetClassroomLiveMonitor).toHaveBeenCalledTimes(1));
+
+      await vi.advanceTimersByTimeAsync(61_000);
+      expect(
+        mockGetClassroomLiveMonitor.mock.calls.length,
+        '過了一分鐘沒有自動更新 —— 輪詢被整個拿掉了？決定是 60 秒自動＋手動並存',
+      ).toBeGreaterThanOrEqual(2);
+
+      const atUnmount = mockGetClassroomLiveMonitor.mock.calls.length;
+      unmount();
+      await vi.advanceTimersByTimeAsync(180_000);
+      expect(
+        mockGetClassroomLiveMonitor.mock.calls.length,
+        'unmount 之後還在打 —— 忘記關的分頁會漏水',
+      ).toBe(atUnmount);
     });
 
     it('重新整理 button triggers a re-fetch and updates the timestamp', async () => {
