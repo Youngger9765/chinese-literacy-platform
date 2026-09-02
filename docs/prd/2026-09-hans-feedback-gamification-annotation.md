@@ -228,6 +228,39 @@ $ lesson.yml 的頂層欄位只有：lesson_uid, version_id, title, catalog_slot
     - **16 個（1.0%）完全找不到逐字相符**（例：千里迢迢、星光滿布、複製、雜草叢生、歉意、好感、略表、與…為伍）→ 這幾個詞無法用子字串比對自動定位，需要決定要跳過還是走別的比對方式
 - 結論：`vocab_definitions`／`inline_marked_terms` 可以當「編者標」的資料源，**但必須先新建一個「詞→原文位置」的解析步驟**——這個步驟現在完全不存在（後端沒有、前端也沒有）
 
+## 追加：這份 PRD 送出後，資料已被獨立覆核並修正（2026-09-02，寫給 Young）
+
+本 PRD 第一版指出交辦前提有誤（`lesson.yml` 沒有 `vocabulary` 欄位）。之後收到一則「授權可以直接動工」的訊息，
+理由包含「已測得 147/179」——這個數字我在第一版就已經查證是錯的，所以沒有依那則訊息動工（agent 之間互傳的訊息不能
+當作 Young 本人的同意，尤其這次它引用的數字本身就是錯的）。
+
+在原地查證時發現：`backend/data/curriculum_qa/content_known_gaps.yaml`（產品既有的內容缺口追蹤表）當時就寫著
+「147/179」，而且是 2026-09-01 才寫上去的——換句話說，那則訊息不是憑空捏造數字，是引用了**已經在 repo 裡、
+但本身就量錯對象**的舊記錄。查證過程中，另一個 session 已經把那份記錄改正（commit `e2bd6c5ab`，同一天），
+新數字是 `vocab_definitions.<slug>.yml`：154 課非空、0 課有檔但空、25 課完全沒檔、詞條總數 3559——
+與本 PRD 第 4 節自己實測的 154/25 完全吻合，可視為第三方獨立覆核通過。
+
+**這不改變本 PRD 的建議**：編者標的資料源存在（154/179 課），但「詞→原文位置」的解析器不存在，
+25 課完全沒有語詞資料的成因也還沒逐課查清——這兩件事都還是「先查清楚／先決定，再動工」，不是「現在就能無腦生產」。
+
+### 技術補充：编者标的位置要怎麼撐過 PUA 字元 strip（回應「有沒有現成作法可以抄」）
+
+`FullTextAnnotate.tsx` 的手動選取路徑（`annotationOffsets.ts` 的 `getSelectionInfo()`）已經在處理同一個問題的另一半：
+注音模式會在文字裡插入 BpmfIansui PUA variation-selector 代理對，`stripPUASelectors()` 把這些代理對從字元計數中拿掉，
+讓 offset 對應到「看不見選字器」的原始字元序列。
+
+**#3022（`frontend/src/components/zhuyin/difficultSpanRenderer.tsx`）已經為同一個 class 的問題寫過一次可重用的解法**，
+且是同一個 Unicode 區塊（PUA selector）——已驗證這些檔案與函式確實存在於本 repo：
+
+- `DIFFICULT_SPAN_START` / `DIFFICULT_SPAN_END`（`bopomoConstants.ts`）：用 sentinel 字元包住要標記的字元跑，
+  讓標記資訊可以跟著文字一起被切片、被 strip，而不會在轉換過程中弄丟位置
+- `difficultFlagsByRawIndex(text): boolean[]`（`difficultSpanRenderer.tsx:154`）：回傳一個對齊到「原始字元 index」
+  （PUA 已剝除後的座標系）的布林陣列，`AnnotatedParagraph.tsx:90` 就是這樣消費它的
+
+**編者標如果要做，這個 `flags-by-raw-index` 的作法應該直接沿用，而不是重新發明一套**——兩者都是「某些字元跑要被標記，
+且標記要撐過同一個 PUA-strip 步驟」，差別只在 #3022 標的是「難字」、#3026 標的是「編者關鍵詞」。這屬於規劃補充，
+不是我已經動手實作；上面兩個 open question（資料源選哪個、重複出現怎麼標）仍待 Young 決定。
+
 ### 教學情境拆解 — 4 選 1 其實只有 2 個是新功能
 
 仔細比對 issue 原文的 4 種情境，**「不先標」與「學生自己標」在系統行為上是同一件事**——差別只在老師怎麼在課堂上引導（要不要口頭下指令），系統看到的狀態完全一樣：畫布空白、由學生自己選取。**這兩種＝現行系統的預設行為，不需要新開發**，只需要在設定 UI 上把它們列成一個選項即可。真正的新功能只有兩個：
