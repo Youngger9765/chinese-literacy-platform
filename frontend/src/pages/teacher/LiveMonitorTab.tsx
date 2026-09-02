@@ -5,11 +5,12 @@
  * a 「卡在這題」flag (same question answered wrong >= 3 times). Built for
  * 課後學習扶助: teacher present, students working simultaneously.
  *
- * Liveness (issue #3025 decided design — proposal A):
- *   Polls GET /teacher/classrooms/{id}/live-monitor every POLL_INTERVAL_MS
- *   while this tab is mounted. Stops the moment the component unmounts
- *   (leaving the tab / classroom). No SSE/WebSocket — 10s of latency is
- *   invisible against how long it takes a teacher to walk across a room.
+ * Liveness (Young 2026-09-03, second decision — 60s poll + manual button):
+ *   First version polled every 7s; Young pulled that as wasteful, then
+ *   settled on this: auto-refresh once a MINUTE (an open forgotten tab
+ *   costs ~1 cheap request/min, acceptable), plus a 重新整理 button for
+ *   the teacher who wants the latest right now. 上次更新 timestamp shows
+ *   staleness. Polling stops the moment the component unmounts.
  *
  * Data honesty (issue #3025 decided design):
  *   `mcq_attempt` has no session_id and only a handful of exercise
@@ -37,7 +38,6 @@ interface LiveMonitorTabProps {
   classroomId: number;
 }
 
-const POLL_INTERVAL_MS = 7_000;
 
 function formatRelativeTime(iso: string): string {
   const then = new Date(iso).getTime();
@@ -56,6 +56,8 @@ function sortForTeacherScan(students: LiveMonitorStudentEntry[]): LiveMonitorStu
   return [...students].sort((a, b) => rank(a) - rank(b));
 }
 
+const POLL_INTERVAL_MS = 60_000;
+
 const LiveMonitorTab: React.FC<LiveMonitorTabProps> = ({ classroomId }) => {
   const { token } = useAuth();
   const navigate = useNavigate();
@@ -65,6 +67,8 @@ const LiveMonitorTab: React.FC<LiveMonitorTabProps> = ({ classroomId }) => {
   const [error, setError] = useState('');
   const [previewingStudentId, setPreviewingStudentId] = useState<number | null>(null);
   const [previewError, setPreviewError] = useState('');
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   // Track mount state so an in-flight fetch from a poll tick that outlives
   // unmount never calls setState on an unmounted component.
@@ -72,15 +76,19 @@ const LiveMonitorTab: React.FC<LiveMonitorTabProps> = ({ classroomId }) => {
 
   const fetchOnce = useCallback(async () => {
     if (!token) return;
+    setRefreshing(true);
     try {
       const data = await getClassroomLiveMonitor(token, classroomId);
       if (!isMountedRef.current) return;
       setStudents(data.students);
       setTrackedTypes(data.tracked_exercise_types);
+      setLastUpdated(new Date());
       setError('');
     } catch (err) {
       if (!isMountedRef.current) return;
       setError(err instanceof Error ? err.message : '無法載入即時監控資料');
+    } finally {
+      if (isMountedRef.current) setRefreshing(false);
     }
   }, [token, classroomId]);
 
@@ -140,11 +148,28 @@ const LiveMonitorTab: React.FC<LiveMonitorTabProps> = ({ classroomId }) => {
 
   return (
     <div className="p-6 space-y-5">
-      <div>
-        <h3 className="text-base font-semibold text-gray-900">課堂即時監控</h3>
-        <p className="text-sm text-gray-500 mt-0.5">
-          每 {Math.round(POLL_INTERVAL_MS / 1000)} 秒自動更新，顯示每位學生目前所在的大題與是否卡關。
-        </p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h3 className="text-base font-semibold text-gray-900">課堂即時監控</h3>
+          <p className="text-sm text-gray-500 mt-0.5">
+            顯示每位學生目前所在的大題與是否卡關。每分鐘自動更新，也可隨時按「重新整理」。
+          </p>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          {lastUpdated && (
+            <span className="text-xs text-gray-400">
+              上次更新 {lastUpdated.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+            </span>
+          )}
+          <button
+            type="button"
+            onClick={fetchOnce}
+            disabled={refreshing}
+            className="px-3 py-1.5 rounded-lg text-sm font-medium text-white bg-violet-600 hover:bg-violet-700 disabled:opacity-50"
+          >
+            {refreshing ? '更新中…' : '重新整理'}
+          </button>
+        </div>
       </div>
 
       {/* Honesty disclosure — most exercise types produce no signal at all. */}
