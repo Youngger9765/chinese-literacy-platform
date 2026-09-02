@@ -10,8 +10,10 @@
  *    word assigns a motive the data does not support).
  *  - the tracked_exercise_types disclosure is rendered, not silently
  *    dropped, so the teacher knows the scope of what this view can see.
- *  - polling: fetches on mount, fetches again after the interval, and
- *    STOPS fetching once unmounted (leaving the tab) — a live-poll gate
+ *  - refresh model (Young 2026-09-03): fetches ONCE on mount, never again
+ *    on its own — no timers at all. 重新整理 button triggers a re-fetch.
+ *    The first version auto-polled every 7s; a forgotten open tab would
+ *    hit the backend all night, so polling was removed entirely
  *    that keeps running after unmount would leak requests forever.
  *  - the 預覽 button reuses the teacher preview-token mint flow and
  *    navigates to /teacher/preview/{id}, same as StudentProgressTab (#3027).
@@ -170,7 +172,7 @@ describe('LiveMonitorTab', () => {
     });
   });
 
-  describe('polling lifecycle', () => {
+  describe('refresh model — no polling (Young 2026-09-03)', () => {
     beforeEach(() => {
       vi.useFakeTimers();
     });
@@ -179,24 +181,32 @@ describe('LiveMonitorTab', () => {
       vi.useRealTimers();
     });
 
-    it('polls again after the interval while mounted, and stops after unmount', async () => {
+    it('fetches once on mount and NEVER again on its own — no timers', async () => {
       mockGetClassroomLiveMonitor.mockResolvedValue(baseResponse);
-      const { unmount } = renderTab();
+      renderTab();
 
-      // Initial mount fetch.
       await vi.waitFor(() => expect(mockGetClassroomLiveMonitor).toHaveBeenCalledTimes(1));
 
-      // Advance past one poll interval (5-10s decided range — use 8s).
-      await vi.advanceTimersByTimeAsync(8_000);
-      expect(mockGetClassroomLiveMonitor.mock.calls.length).toBeGreaterThanOrEqual(2);
+      // 走過遠超過舊輪詢間隔的時間 —— 若有人把 setInterval 加回來，這裡會抓到。
+      // 這是本次改動的核心承諾：開著忘記關的分頁不會一直打後端。
+      await vi.advanceTimersByTimeAsync(120_000);
+      expect(
+        mockGetClassroomLiveMonitor.mock.calls.length,
+        '兩分鐘內出現額外請求 —— 自動輪詢被加回來了？Young 明確拿掉它',
+      ).toBe(1);
+    });
 
-      const callsAtUnmount = mockGetClassroomLiveMonitor.mock.calls.length;
-      unmount();
+    it('重新整理 button triggers a re-fetch and updates the timestamp', async () => {
+      vi.useRealTimers();
+      mockGetClassroomLiveMonitor.mockResolvedValue(baseResponse);
+      renderTab();
 
-      // Advancing further after unmount must NOT trigger more fetches —
-      // otherwise this "stops when not open" requirement is theatre.
-      await vi.advanceTimersByTimeAsync(30_000);
-      expect(mockGetClassroomLiveMonitor.mock.calls.length).toBe(callsAtUnmount);
+      await screen.findByText('小安');
+      expect(mockGetClassroomLiveMonitor).toHaveBeenCalledTimes(1);
+
+      fireEvent.click(screen.getByRole('button', { name: /重新整理|更新中/ }));
+      await vi.waitFor(() => expect(mockGetClassroomLiveMonitor).toHaveBeenCalledTimes(2));
+      expect(screen.getByText(/上次更新/)).toBeTruthy();
     });
   });
 });
