@@ -471,7 +471,17 @@ def _vocabulary_from(l: dict, section: dict | None = None) -> list[dict]:
         section if section is not None else _sections(l).get("vocab_definitions"),
         "vocab_definitions",
     ).get("items") or []
-    return [{"word": i["word"], "definition": i["definition"]} for i in items if i.get("word")]
+    # #3043: 詞語庫填空型學習單(L0137/L0145-147/L0167-169 七課)把詞放在
+    # `answer` 而不是 `word` -- 學生從 word_bank 挑答案填進定義旁。只認
+    # `word` 會把整課 8-14 筆 items 靜默過濾成空: 檔案在、section 在、
+    # items 有料, 只有 API 的 vocabulary 是 [], 語詞理解與 #3026 編者標
+    # 整課消失。word 優先(混合形狀時 answer 可能另有含義)。
+    out = []
+    for i in items:
+        word = i.get("word") or i.get("answer")
+        if word and i.get("definition"):
+            out.append({"word": word, "definition": i["definition"]})
+    return out
 
 
 def _cloze_from(l: dict, section: dict | None = None) -> list[dict]:
