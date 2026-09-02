@@ -185,6 +185,37 @@ class AtRiskStudentResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
+# ── Live Classroom Monitor (Issue #3025) ───────────────────────────────────────
+
+
+class LiveMonitorStudentEntry(BaseModel):
+    student_id: int
+    student_name: str
+    #: False when this student has zero trackable mcq_attempt rows — an
+    #: explicit "no data" state. Must never be conflated with "doing fine"
+    #: (see app/services/live_monitor_service.py module docstring).
+    has_data: bool
+    lesson_id: str | None
+    question_label: str | None
+    last_activity_at: datetime | None
+    wrong_count: int
+    #: 「卡在這題」— never render this as "亂猜" (issue #3025 comment: that
+    #: word assigns a motive the data does not support).
+    is_stuck: bool
+
+    model_config = {"from_attributes": True}
+
+
+class LiveMonitorResponse(BaseModel):
+    classroom_id: int
+    generated_at: datetime
+    #: Honesty disclosure — which exercise types can even produce a signal.
+    tracked_exercise_types: list[str]
+    students: list[LiveMonitorStudentEntry]
+
+    model_config = {"from_attributes": True}
+
+
 # ── Error Heatmap ─────────────────────────────────────────────────────────────
 
 

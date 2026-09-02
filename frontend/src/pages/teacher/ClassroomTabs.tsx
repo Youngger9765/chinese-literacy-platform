@@ -17,8 +17,9 @@ import CrossTextAnalytics from './CrossTextAnalytics';
 import AtRiskStudents from '../../components/teacher/AtRiskStudents';
 import ErrorHeatmapTab from './ErrorHeatmapTab';
 import CoTeachingTab from './CoTeachingTab';
+import LiveMonitorTab from './LiveMonitorTab';
 
-type TabKey = 'progress' | 'texts' | 'students' | 'analytics' | 'cross-text' | 'at-risk' | 'error-heatmap' | 'teachers';
+type TabKey = 'progress' | 'live' | 'texts' | 'students' | 'analytics' | 'cross-text' | 'at-risk' | 'error-heatmap' | 'teachers';
 
 interface TabDef {
   key: TabKey;
@@ -27,6 +28,7 @@ interface TabDef {
 
 const CORE_TABS: TabDef[] = [
   { key: 'progress', label: '學生進度' },
+  { key: 'live', label: '課堂即時' },
   { key: 'students', label: '學生名單' },
   { key: 'texts', label: '課文管理' },
   { key: 'teachers', label: '協同教師' },
@@ -42,6 +44,7 @@ const ANALYSIS_TABS: TabDef[] = [
 // Backwards-compat export (kept for any external consumers)
 export const TABS: { key: TabKey; label: string; group?: 'core' | 'analysis' | 'other' }[] = [
   { key: 'progress', label: '學生進度', group: 'core' },
+  { key: 'live', label: '課堂即時', group: 'core' },
   { key: 'students', label: '學生名單', group: 'core' },
   { key: 'texts', label: '課文管理', group: 'core' },
   { key: 'analytics', label: '學習分析', group: 'analysis' },
@@ -140,6 +143,10 @@ const ClassroomTabs: React.FC<ClassroomTabsProps> = ({
     {/* Tab content */}
     {activeTab === 'progress' && (
       <StudentProgressTab classroomId={classroomId} />
+    )}
+
+    {activeTab === 'live' && (
+      <LiveMonitorTab classroomId={classroomId} />
     )}
 
     {activeTab === 'analytics' && (
