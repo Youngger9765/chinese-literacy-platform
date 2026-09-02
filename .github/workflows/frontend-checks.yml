@@ -235,6 +235,17 @@ jobs:
       #     ("是達成目標的當下就跑出來嗎？"): some badges can only ever be judged at
       #     full-session completion, so the report page says so instead of leaving
       #     it to guesswork.
+      #   - ExerciseBlockView.correctAnswerBurst (#3024): CorrectAnswerBurst was
+      #     first wired into MultipleChoiceExercise.tsx (the legacy
+      #     ComprehensionMcqPage fallback), but LESSON_RENDERER_V1 defaults ON in
+      #     production and ComprehensionMcqPage prefers the block-based
+      #     LessonRenderer -> ExerciseBlockView path whenever a story has real v3
+      #     lesson_content with a multiple_choice block -- the common case. Caught
+      #     live on this PR's own preview: answering a real story's 閱讀理解 MCQ
+      #     correctly never showed the burst, because the page was rendering
+      #     ExerciseBlockView, not MultipleChoiceExercise. This locks the SAME
+      #     burst wired into ExerciseBlockView's single-choice handlePick, so the
+      #     path most students actually take gets the feedback too.
       # ⚠️ `run: |` (block literal) is load-bearing — do NOT collapse it back to a
       # plain `run:` scalar. YAML folds a plain scalar's newlines into spaces, which
       # leaves the `\` as LITERAL characters; the shell then reads `\ ` as an escaped
@@ -360,4 +371,5 @@ jobs:
           src/components/gamification/BadgeUnlockToast.test.tsx \
           src/components/gamification/XPAwardToast.test.tsx \
           src/hooks/useProgressSync.xpAwarded.test.ts \
-          src/hooks/useStepProgressPersistence.badgeUnlock.test.ts
+          src/hooks/useStepProgressPersistence.badgeUnlock.test.ts \
+          src/components/lesson-content/__tests__/ExerciseBlockView.correctAnswerBurst.test.tsx

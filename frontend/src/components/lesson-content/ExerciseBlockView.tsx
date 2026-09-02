@@ -32,6 +32,7 @@ import KeypointsTableInput, { type KeypointsQuestion } from './inputs/KeypointsT
 import FillInBlankInput, { type FillShape } from './inputs/FillInBlankInput';
 import CustomExerciseView from './inputs/CustomExerciseView';
 import McqRescueDialog, { type McqRescueContext } from '../reading-spotlight/McqRescueDialog';
+import CorrectAnswerBurst from '../gamification/CorrectAnswerBurst';
 
 const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 
@@ -71,6 +72,12 @@ const ExerciseBlockView: React.FC<ExerciseBlockViewProps> = ({
   const [rescue, setRescue] = useState<McqRescueContext | null>(null);
   // 答錯時備好的 context —— 備好不等於打開，學生按了才變成 `rescue`。
   const [pendingRescue, setPendingRescue] = useState<McqRescueContext | null>(null);
+  // Issue 3024 — bump on every correct single-choice MCQ pick to re-trigger
+  // CorrectAnswerBurst. This is the block-based renderer's equivalent of the
+  // legacy MultipleChoiceExercise.tsx wiring: LESSON_RENDERER_V1 is ON by
+  // default, so THIS path (not the legacy one) is what most students see for
+  // 閱讀理解 on any story with real v3 lesson_content.
+  const [correctBurstKey, setCorrectBurstKey] = useState(0);
   const q = exercise.question;
   const submitted = verdict !== undefined && verdict !== null;
 
@@ -151,6 +158,13 @@ const ExerciseBlockView: React.FC<ExerciseBlockViewProps> = ({
       onValueChange(i);
       const result = grade(exercise, i);
       onGraded(result);
+      // Issue 3024 — brief, non-blocking positive reinforcement on a correct
+      // pick. Never fires on a wrong answer; carries no score/attempt-count
+      // semantics (that's a separate, deliberately out-of-scope ticket about
+      // accuracy-based rewards).
+      if (result.verdict === true) {
+        setCorrectBurstKey((k) => k + 1);
+      }
       // telemetry (choice letter truncated to VARCHAR(8)) — fire-and-forget.
       if (token) {
         recordMcqAttempt(token, {
@@ -185,6 +199,8 @@ const ExerciseBlockView: React.FC<ExerciseBlockViewProps> = ({
     };
     return (
       <>
+        {/* Issue 3024: instant positive feedback on a correct answer */}
+        <CorrectAnswerBurst triggerKey={correctBurstKey} />
         <p className="text-lg font-medium text-on-surface mb-4 leading-relaxed whitespace-pre-wrap">{q.question}</p>
         <ChoiceInput
           options={q.options}
