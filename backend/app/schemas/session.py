@@ -177,8 +177,16 @@ class StepProgressSaveRequest(BaseModel):
 
 
 class StepProgressResponse(BaseModel):
-    """Response for GET /api/learning/sessions/{id}/progress."""
+    """Response for GET/PUT /api/learning/sessions/{id}/progress."""
     session_id: int
     step_progress: dict[str, Any] | None
+    #: XP newly awarded by THIS save for newly-completed steps (Issue #3024).
+    #: Always 0 for GET responses and for saves that completed nothing new —
+    #: added fields default so pre-#3024 clients that don't read them see no
+    #: behavior change.
+    xp_awarded: int = 0
+    #: Badge keys newly unlocked by THIS save (Issue #3024). Empty for GET
+    #: responses and for saves that unlocked nothing.
+    badges_unlocked: list[str] = Field(default_factory=list)
 
     model_config = {"from_attributes": True}

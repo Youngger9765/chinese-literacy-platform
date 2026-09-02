@@ -69,6 +69,14 @@ interface UseStepProgressPersistenceReturn {
   hasActiveAssignment: boolean;
   syncProgress: (data: StepProgressData) => void;
   flushProgress: (data: StepProgressData) => void;
+  /**
+   * Issue #3024 — badge keys unlocked mid-session by a step-complete save,
+   * not yet acknowledged by the student. Rendered by LearningLayout as a
+   * BadgeUnlockToast. Empty array when there is nothing pending.
+   */
+  midSessionBadgeUnlocks: string[];
+  /** Dismiss the current mid-session badge unlock toast (Issue #3024). */
+  dismissMidSessionBadgeUnlocks: () => void;
 }
 
 export function useStepProgressPersistence({
@@ -173,9 +181,20 @@ export function useStepProgressPersistence({
     }
   }, [isAssignmentFlow]);
 
+  // Issue #3024 — badge keys unlocked mid-session, pending student ack.
+  const [midSessionBadgeUnlocks, setMidSessionBadgeUnlocks] = useState<string[]>([]);
+  const dismissMidSessionBadgeUnlocks = useCallback(() => {
+    setMidSessionBadgeUnlocks([]);
+  }, []);
+
   const { syncProgress, flushProgress, isProgressLoading } = useProgressSync({
     token: token ?? null,
     dbSessionId,
+    onXpAwarded: ({ badgesUnlocked }) => {
+      if (badgesUnlocked.length > 0) {
+        setMidSessionBadgeUnlocks((prev) => [...prev, ...badgesUnlocked]);
+      }
+    },
     onProgressLoaded: (data) => {
       const loadedCompleted = Array.isArray(data.steps_completed) ? data.steps_completed : [];
       const loadedStepData = (data.step_data ?? {}) as Record<string, unknown>;
@@ -445,5 +464,7 @@ export function useStepProgressPersistence({
     syncProgress,
     flushProgress,
     isProgressLoading,
+    midSessionBadgeUnlocks,
+    dismissMidSessionBadgeUnlocks,
   };
 }

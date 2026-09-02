@@ -40,7 +40,8 @@ from app.models.user import Role
 # where a genuine regression hides.
 from app.services.lesson_loader import get_all_lessons
 
-_VALID_SLUG = str(get_all_lessons()[0]["id"])
+_ALL_LESSON_SLUGS = [str(lesson["id"]) for lesson in get_all_lessons()]
+_VALID_SLUG = _ALL_LESSON_SLUGS[0]
 
 
 # ---------------------------------------------------------------------------
@@ -283,3 +284,169 @@ def test_save_progress_empty_payload(client, student, session_id):
     assert sp["current_step"] is None
     assert sp["steps_completed"] == []
     assert sp["step_data"] == {}
+
+
+# ---------------------------------------------------------------------------
+# Tests: mid-session step-complete XP + badge check (Issue #3024)
+#
+# #3024's PRD found XP_REWARDS["step_complete"] already defined but never
+# awarded anywhere in the codebase -- the data model had a place for
+# "finishing a step gives XP" but nothing was wired to it. This is the ONE
+# place every step completion already flows through: PUT .../progress with
+# the step id freshly added to steps_completed. Wiring it here (rather than
+# a brand-new endpoint) needs no new API surface and no DB migration.
+#
+# These tests use a dedicated fresh_session_id per test (not the module-scoped
+# session_id shared by the tests above) so XP side effects from one test never
+# leak into another.
+# ---------------------------------------------------------------------------
+
+
+_fresh_slug_counter = iter(range(1, len(_ALL_LESSON_SLUGS)))
+
+
+@pytest.fixture()
+def fresh_session_id(client, student):
+    """A brand-new session per test, isolated from the shared module session_id.
+
+    POST /api/learning/sessions get-or-creates: it returns the existing
+    in_progress session for the SAME (user, story_slug) pair instead of a new
+    one (#984 dedup). The shared `student` fixture is module-scoped, so
+    reusing `_VALID_SLUG` here would silently hand every test the SAME
+    session — each call uses a distinct slug to guarantee genuine isolation.
+    """
+    slug = _ALL_LESSON_SLUGS[next(_fresh_slug_counter)]
+    resp = client.post(
+        "/api/learning/sessions",
+        json={"story_slug": slug},
+        headers=auth_header(student["token"]),
+    )
+    assert resp.status_code == 201, resp.text
+    return resp.json()["id"]
+
+
+def test_first_step_completion_awards_step_complete_xp(client, student, fresh_session_id):
+    """Completing a step for the first time awards step_complete XP (3xp)."""
+    resp = client.put(
+        f"/api/learning/sessions/{fresh_session_id}/progress",
+        json={
+            "current_step": "vocab-definition",
+            "steps_completed": ["vocab-definition"],
+            "step_data": {},
+        },
+        headers=auth_header(student["token"]),
+    )
+    assert resp.status_code == 200, resp.text
+    body = resp.json()
+    assert body["xp_awarded"] == 3
+    assert body["badges_unlocked"] == []
+
+
+def test_resaving_same_completed_step_does_not_double_award(client, student, fresh_session_id):
+    """Saving the SAME steps_completed list again must not award XP twice
+    (component remounts / debounced re-saves must be idempotent per step)."""
+    payload = {
+        "current_step": "vocab-definition",
+        "steps_completed": ["vocab-definition"],
+        "step_data": {},
+    }
+    r1 = client.put(
+        f"/api/learning/sessions/{fresh_session_id}/progress",
+        json=payload,
+        headers=auth_header(student["token"]),
+    )
+    assert r1.json()["xp_awarded"] == 3
+
+    r2 = client.put(
+        f"/api/learning/sessions/{fresh_session_id}/progress",
+        json=payload,
+        headers=auth_header(student["token"]),
+    )
+    assert r2.json()["xp_awarded"] == 0
+
+
+def test_multiple_new_steps_in_one_save_each_award_xp(client, student, fresh_session_id):
+    """A single save that newly-completes 2 steps at once (a batched/debounced
+    sync catching up) must award XP for each newly-completed step, not just one."""
+    resp = client.put(
+        f"/api/learning/sessions/{fresh_session_id}/progress",
+        json={
+            "current_step": "comprehension",
+            "steps_completed": ["vocab-definition", "comprehension"],
+            "step_data": {},
+        },
+        headers=auth_header(student["token"]),
+    )
+    assert resp.status_code == 200, resp.text
+    assert resp.json()["xp_awarded"] == 6  # 2 newly-completed steps * 3xp
+
+
+def test_report_step_completion_is_excluded_from_step_complete_xp(client, student, fresh_session_id):
+    """'report' is the results page itself (marked complete by ReportPage on
+    mount for teacher-dashboard visibility), not a step the student practiced --
+    it must NOT earn step_complete XP. Awarding it would double-count against
+    the session_complete settlement that fires in the same moment."""
+    resp = client.put(
+        f"/api/learning/sessions/{fresh_session_id}/progress",
+        json={"current_step": "report", "steps_completed": ["report"], "step_data": {}},
+        headers=auth_header(student["token"]),
+    )
+    assert resp.status_code == 200, resp.text
+    assert resp.json()["xp_awarded"] == 0
+    assert resp.json()["badges_unlocked"] == []
+
+
+def test_get_progress_response_defaults_xp_fields_to_empty(client, student, fresh_session_id):
+    """GET (read-only) never awards XP -- new fields default to 0/[] so old
+    clients that don't read them see no behavior change."""
+    client.put(
+        f"/api/learning/sessions/{fresh_session_id}/progress",
+        json={
+            "current_step": "vocab-definition",
+            "steps_completed": ["vocab-definition"],
+            "step_data": {},
+        },
+        headers=auth_header(student["token"]),
+    )
+    resp = client.get(
+        f"/api/learning/sessions/{fresh_session_id}/progress",
+        headers=auth_header(student["token"]),
+    )
+    assert resp.status_code == 200, resp.text
+    assert resp.json()["xp_awarded"] == 0
+    assert resp.json()["badges_unlocked"] == []
+
+
+def test_midsession_step_complete_does_not_block_session_complete_settlement(
+    client, student, fresh_session_id,
+):
+    """End-to-end version of the #3024 root-cause fix: completing a step
+    mid-session (which now writes a StudentXPLog row for this session_id)
+    must not make POST /gamification/session-complete believe the session
+    was already settled."""
+    client.put(
+        f"/api/learning/sessions/{fresh_session_id}/progress",
+        json={
+            "current_step": "vocab-definition",
+            "steps_completed": ["vocab-definition"],
+            "step_data": {},
+        },
+        headers=auth_header(student["token"]),
+    )
+
+    me = client.get("/api/users/me", headers=auth_header(student["token"]))
+    assert me.status_code == 200, me.text
+    student_id = me.json()["id"]
+
+    resp = client.post(
+        "/api/gamification/session-complete",
+        json={"student_id": student_id, "session_id": fresh_session_id},
+        headers=auth_header(student["token"]),
+    )
+    assert resp.status_code == 200, resp.text
+    body = resp.json()
+    event_types = [e["event_type"] for e in body["xp_breakdown"]]
+    assert "session_complete" in event_types, (
+        "Mid-session step_complete XP incorrectly suppressed the "
+        f"session_complete settlement. Got breakdown: {body['xp_breakdown']!r}"
+    )
