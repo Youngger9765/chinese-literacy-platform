@@ -227,10 +227,25 @@ def process_session_completion(
     Awards XP, updates streak, checks badges, commits all changes.
     Returns a summary dict with XP earned, badges unlocked, and level info.
     """
-    # --- Idempotency check (B2): skip if this session already awarded XP ---
+    # --- Idempotency check (B2, fixed for #3024) ---
+    # Originally keyed on "does ANY StudentXPLog row exist for this session_id",
+    # which meant a single mid-session XP award (e.g. step_complete for finishing
+    # one 大題 — see learning_step_progress.py) would look identical to "this
+    # session's settlement already ran", and every subsequent real completion
+    # call would be silently skipped: no session_complete XP, no accuracy/
+    # comprehension bonuses, no streak update, no badge check. That is the exact
+    # architecture conflict #3024's PRD called out as a prerequisite before any
+    # in-progress XP could be wired up. Key on the SETTLEMENT event itself
+    # (event_type="session_complete") instead of "any XP log at all" — a
+    # mid-session award no longer masks the real completion, while a genuine
+    # duplicate POST /session-complete (session_complete already logged) still
+    # dedupes exactly as before.
     existing_logs = (
         db.query(StudentXPLog)
-        .filter(StudentXPLog.session_id == session_id)
+        .filter(
+            StudentXPLog.session_id == session_id,
+            StudentXPLog.event_type == "session_complete",
+        )
         .first()
     )
     if existing_logs is not None:

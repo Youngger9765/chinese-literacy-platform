@@ -573,6 +573,38 @@ export function getAtRiskStudents(
   return get(`/api/teacher/classrooms/${classroomId}/at-risk-students`);
 }
 
+// ── Live Classroom Monitor (Issue #3025) ───────────────────────────────────────
+
+export interface LiveMonitorStudentEntry {
+  student_id: number;
+  student_name: string;
+  /** False = this student has zero trackable mcq_attempt rows right now —
+   * an explicit "no data" state. Must never be rendered the same as a
+   * student who is doing fine (see backend live_monitor_service.py). */
+  has_data: boolean;
+  lesson_id: string | null;
+  question_label: string | null;
+  last_activity_at: string | null;
+  wrong_count: number;
+  /** 「卡在這題」— render this label only, never "亂猜" (issue #3025). */
+  is_stuck: boolean;
+}
+
+export interface LiveMonitorResponse {
+  classroom_id: number;
+  generated_at: string;
+  tracked_exercise_types: string[];
+  students: LiveMonitorStudentEntry[];
+}
+
+/** Polled every 5-10s by LiveMonitorTab while the teacher has it open. */
+export function getClassroomLiveMonitor(
+  _token: string,
+  classroomId: number,
+): Promise<LiveMonitorResponse> {
+  return get(`/api/teacher/classrooms/${classroomId}/live-monitor`);
+}
+
 // ── Story Tags ────────────────────────────────────────────────────────────────
 
 /** Get teacher's difficulty and custom tags for a story. */

@@ -9,6 +9,10 @@
  *   「問 AI 助教」button appears so the student opts in. Every click is
  *   logged to mcq_attempt for teacher visibility on students who skip
  *   the rescue.
+ * Issue #3024: a correct answer now also shows a brief, non-blocking
+ *   CorrectAnswerBurst — teacher feedback asked for "即時增強" on a correct
+ *   answer. Purely cosmetic (no score/attempt-count semantics change; see
+ *   #3028 for why that's a separate, deliberately out-of-scope concern).
  */
 import React, { useState } from 'react';
 import { MultipleChoiceItem } from '../../types';
@@ -17,6 +21,7 @@ import { fontForZhuyin } from '../../constants/fonts';
 import { useAuth } from '../../contexts/AuthContext';
 import { recordMcqAttempt } from '../../services/learningApi';
 import McqRescueDialog, { McqRescueContext } from '../reading-spotlight/McqRescueDialog';
+import CorrectAnswerBurst from '../gamification/CorrectAnswerBurst';
 
 interface Props {
   questions: MultipleChoiceItem[];
@@ -44,6 +49,8 @@ const MultipleChoiceExercise: React.FC<Props> = ({
   const [score, setScore] = useState(0);
   // #2199: show "再選一次" feedback after a wrong answer without revealing correct
   const [wrongFeedback, setWrongFeedback] = useState(false);
+  // #3024: bump on every correct answer to re-trigger CorrectAnswerBurst
+  const [correctBurstKey, setCorrectBurstKey] = useState(0);
 
   // MCQ Rescue dialog state (Issue #1387 / #1507)
   const [rescueOpen, setRescueOpen] = useState(false);
@@ -75,6 +82,8 @@ const MultipleChoiceExercise: React.FC<Props> = ({
       setRevealed(true);
       setWrongFeedback(false);
       setScore((s) => s + 1);
+      // #3024: brief positive reinforcement, never delays advancing
+      setCorrectBurstKey((k) => k + 1);
     } else {
       // #2199: wrong — show "再選一次" without locking or revealing the answer
       setSelected(label);
@@ -119,6 +128,8 @@ const MultipleChoiceExercise: React.FC<Props> = ({
 
   return (
     <>
+    {/* #3024: instant positive feedback on a correct answer */}
+    <CorrectAnswerBurst triggerKey={correctBurstKey} />
     {/* MCQ Rescue dialog — parallel feature, doesn't disrupt existing socratic chat (#1373) */}
     <McqRescueDialog
       isOpen={rescueOpen}

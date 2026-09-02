@@ -481,6 +481,10 @@ export interface StepProgressData {
 export interface StepProgressResponse {
   session_id: number;
   step_progress: StepProgressData | null;
+  /** XP newly awarded by THIS save (Issue #3024). Absent/0 = nothing new. */
+  xp_awarded?: number;
+  /** Badge keys newly unlocked by THIS save (Issue #3024). Absent/[] = none. */
+  badges_unlocked?: string[];
 }
 
 /**
