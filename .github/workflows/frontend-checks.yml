@@ -123,6 +123,66 @@ jobs:
       #     never pinned here, so its scan lock never actually ran in CI —
       #     which is exactly how 23 custom buttons across 14 files shipped
       #     past a lock whose test file was green (#2771).
+      #   - difficultSpanRenderer / processLinesSelectiveDifficultMarkers /
+      #     FullTextAnnotate.zhuyinDifficultFontScope: 'difficult' zhuyin mode
+      #     must annotate ONLY the vocab-word character runs, never a whole
+      #     container. fontForZhuyin() used to be applied at the container
+      #     level gated on isZhuyinAny (true for 'difficult' too) —
+      #     BpmfZihiSerif/BpmfIansui renders bopomofo for every character it
+      #     draws, so the font (not processLinesSelective's text output)
+      #     annotated the whole page the instant 'difficult' mode turned it
+      #     on: interface text (❓ 不懂 / 💛 重要 / 還沒有標記 / instruction
+      #     banners) included, staging-measured at 24/78 leaf nodes, 11 of
+      #     them interface text (#3022). Locks: the marker-wrapping pure
+      #     function, ZhuyinContext emitting the markers, and the rendered
+      #     DOM never carrying the zhuyin font on interface text while still
+      #     carrying it on the actual vocab run.
+      #     ⚠️ The first pass at #3022 converted only ONE of ParagraphCard's
+      #     three text branches, and had NO lock on ParagraphCard,
+      #     KeyPassageReading or zhuyinUtils at all -- reverting each of those
+      #     files wholesale left the suite fully green. Adversarial review
+      #     caught it. The four locks below each fail on a wholesale revert of
+      #     the file they guard, verified one at a time:
+      #       paragraphCardDifficultFont3022  -- all three render branches
+      #         (plain / karaoke / blurred), plus a negative control that the
+      #         font never lands on an element holding the whole paragraph
+      #       keyPassageDifficultFont3022     -- on revert the font lands on a
+      #         406-character element of interface text + passage
+      #       splitZhuyinCharsMarkers3022     -- an opening marker on the first
+      #         character used to become its own phantom group, drifting the
+      #         karaoke cursor by one for the rest of the line
+      #       difficultFlags3022              -- carries run membership across
+      #         the PUA strip so annotated paragraphs keep their ruby
+      #   - ttsRate / ttsSpeedControl3023: the demo reading voice must honour
+      #     the student's speed choice, and an out-of-range stored value must
+      #     never reach an <audio> element (0 silences it). Teachers running
+      #     課後學習扶助 reported the demo reads too fast; measured on prod it
+      #     is 273 字/分 while the same worksheet's reading_benchmark puts the
+      #     top student band at ＞231 (#3023). The rate cannot be fixed in
+      #     SSML without a full re-synthesis -- the TTS cache key is
+      #     sha256(raw_text) with no rate in it.
+      #     ⚠️ The first pass put the control only in KeyPassageReadingControls,
+      #     which only the SIGNED-IN shell mounts. key-passage-reading is a
+      #     PUBLIC_LEARNING_STEP: an unauthenticated visitor is routed to
+      #     GuestReadingPage, which renders FullTextAnnotate for both 讀全文
+      #     and 重點朗讀 and plays through ReadingPlayer -- so the student
+      #     scanning the printed worksheet QR, i.e. the exact audience that
+      #     reported this, had no control at all. readingPlayerSpeed3023 locks
+      #     the control onto that shared player.
+      #     ttsRateWiring3023 locks the three production wiring points
+      #     themselves: reverting each one left the whole suite green before,
+      #     because nothing asserted the call sites actually call the helper.
+      #   - authNetworkFailureKeepsToken: AuthContext used to delete the token
+      #     on ANY getMe() rejection. The comment said "invalid or expired",
+      #     but that catch also fires when the request never reached the server
+      #     -- so one bad request (classroom Wi-Fi, a phone changing towers, a
+      #     Cloud Run cold start) signed the student out and made them log in
+      #     again (#3037). Found via a Playwright trace of a randomly-failing
+      #     e2e run: 200 /api/auth/login then -1 /api/users/me, where -1 is a
+      #     request-level failure rather than an HTTP status.
+      #     Locks BOTH directions: a network failure keeps the token, a 401/403
+      #     clears it. Only locking the first would let "never clear anything"
+      #     pass and keep a revoked session alive.
       # ⚠️ `run: |` (block literal) is load-bearing — do NOT collapse it back to a
       # plain `run:` scalar. YAML folds a plain scalar's newlines into spaces, which
       # leaves the `\` as LITERAL characters; the shell then reads `\ ` as an escaped
@@ -215,4 +275,16 @@ jobs:
           src/components/learning/__tests__/stepSharedShell.test.tsx \
           src/components/lesson-content/__tests__/rendererHeader.test.tsx \
           src/components/reading-steps/__tests__/wordSearchWording2863.test.ts \
-          src/components/reading-steps/__tests__/worksheetButton2845.test.ts
+          src/components/reading-steps/__tests__/worksheetButton2845.test.ts \
+          src/components/zhuyin/__tests__/difficultSpanRenderer.test.tsx \
+          src/context/__tests__/processLinesSelectiveDifficultMarkers.test.tsx \
+          src/components/reading-steps/__tests__/FullTextAnnotate.zhuyinDifficultFontScope.test.tsx \
+          src/components/zhuyin/__tests__/difficultFlags3022.test.tsx \
+          src/components/reading-steps/__tests__/paragraphCardDifficultFont3022.test.tsx \
+          src/components/reading-steps/__tests__/keyPassageDifficultFont3022.test.tsx \
+          src/utils/__tests__/splitZhuyinCharsMarkers3022.test.ts \
+          src/utils/__tests__/ttsRate.test.ts \
+          src/components/reading-steps/key-passage-reading/__tests__/ttsSpeedControl3023.test.tsx \
+          src/components/reading-steps/__tests__/readingPlayerSpeed3023.test.tsx \
+          src/hooks/__tests__/ttsRateWiring3023.test.ts \
+          src/contexts/__tests__/authNetworkFailureKeepsToken.test.tsx

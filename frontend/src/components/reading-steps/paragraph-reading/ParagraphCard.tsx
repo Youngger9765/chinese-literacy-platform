@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { renderDifficultAwareText } from '../../zhuyin/difficultSpanRenderer';
 import ParagraphProgress, { ParagraphStatus } from '../ParagraphProgress';
 import { ParagraphSummaryData, LineResult, getLineResultForParagraph } from './paragraphReadingTypes';
 import { cancelTts } from '../../../services/ttsApi';
@@ -27,7 +28,15 @@ interface ParagraphCardProps {
   isAdvancing: boolean;
   fontSizePx: string | number;
   zhuyinLine: React.ReactNode | null;
-  zhuyinActive: boolean;
+  /**
+   * True in BOTH 'difficult' and 'all' -- this is isZhuyinAny, despite what
+   * the old name said. It gates letter-spacing, line-height and which string
+   * to display, all of which 'difficult' needs too.
+   * DO NOT feed it to fontForZhuyin(): that font draws bopomofo on every
+   * character it renders, so applying it on this flag is exactly bug #3022.
+   * Per-run font goes through renderDifficultAwareText instead.
+   */
+  zhuyinAny: boolean;
   // STT state
   isSessionActive: boolean;
   isPreparing: boolean;
@@ -76,7 +85,7 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
   isAdvancing,
   fontSizePx,
   zhuyinLine,
-  zhuyinActive,
+  zhuyinAny,
   isSessionActive,
   isPreparing,
   isTtsSpeaking,
@@ -209,14 +218,20 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
 
       {/* Paragraph text — with TTS character highlight */}
       <p
-        className={`text-on-surface/90 ${zhuyinActive ? 'tracking-[0.15em]' : ''}`}
+        className={`text-on-surface/90 ${zhuyinAny ? 'tracking-[0.15em]' : ''}`}
         style={{
           fontSize: fontSizePx,
-          lineHeight: zhuyinActive ? '2.4rem' : '1.6', /* ruby annotations need 2.4rem minimum to avoid clipping */
+          lineHeight: zhuyinAny ? '2.4rem' : '1.6', /* ruby annotations need 2.4rem minimum to avoid clipping */
         }}
       >
         {status === 'locked' ? (
-          <span className="blur-sm select-none">{zhuyinLine ?? line}</span>
+          <span className="blur-sm select-none">{
+            /* #3022: zhuyinLine 的型別是 ReactNode（別處可能塞 element 進來），
+               只有它是字串時才可能帶 DIFFICULT_SPAN 標記、才需要切 run。 */
+            typeof zhuyinLine === 'string'
+              ? renderDifficultAwareText(zhuyinLine, `${idx}-blur`)
+              : (zhuyinLine ?? renderDifficultAwareText(line, `${idx}-blur`))
+          }</span>
         ) : isTtsSpeaking && isCurrentIdx && karaokeEnabled ? (
           // KTV highlight: scrolls char-by-char during TTS playback.
           // Only shown when karaokeEnabled is true (toggle in ImmersiveTopBar).
@@ -224,22 +239,36 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
           // (#1112) and symbols stripped by _cleanForTts (#1110) don't push
           // the split past the real char boundary.
           (() => {
-            const displayText = (zhuyinActive && typeof zhuyinLine === 'string') ? zhuyinLine : line;
+            const displayText = (zhuyinAny && typeof zhuyinLine === 'string') ? zhuyinLine : line;
             const chars = splitZhuyinChars(displayText);
             const splitIdx = groupIdxForProgress(chars, speakingProgress);
             return (
               <>
+                {/* #3022: both halves go through renderDifficultAwareText. A
+                    karaoke split can land in the middle of a marked run, so one
+                    half carries an unclosed START and the other an orphaned END
+                    -- splitDifficultSegments handles both. Skipping this is how
+                    the first pass at this fix left 'difficult' mode with no ruby
+                    at all in the normal reading view: the container font was
+                    (correctly) narrowed to 'all', and nothing replaced it here. */}
                 {speakingProgress > 0 && (
-                  <span className="text-accent font-bold">{chars.slice(0, splitIdx).join('')}</span>
+                  <span className="text-accent font-bold">
+                    {renderDifficultAwareText(chars.slice(0, splitIdx).join(''), `${idx}-sung`)}
+                  </span>
                 )}
                 <span className={speakingProgress > 0 ? 'text-on-surface/30' : 'text-on-surface/90'}>
-                  {chars.slice(splitIdx).join('')}
+                  {renderDifficultAwareText(chars.slice(splitIdx).join(''), `${idx}-unsung`)}
                 </span>
               </>
             );
           })()
         ) : (
-          zhuyinLine ?? line
+          // #3022: the plain reading view -- where the student spends most of
+          // their time. zhuyinLine is typed ReactNode because other callers may
+          // pass an element; only a string can carry the run markers.
+          typeof zhuyinLine === 'string'
+            ? renderDifficultAwareText(zhuyinLine, `${idx}-plain`)
+            : (zhuyinLine ?? renderDifficultAwareText(line, `${idx}-plain`))
         )}
       </p>
 

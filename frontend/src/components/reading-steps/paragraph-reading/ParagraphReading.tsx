@@ -103,7 +103,7 @@ const ParagraphReading: React.FC<ParagraphReadingProps> = ({
   // 一課多篇時，句子對照表要跟著篇次走，否則會唸到第 1 篇（#2930）。
   const roundSlug = useCurrentSectionSlug();
   const { px: fontSizePx } = useFontSize();
-  const { isZhuyinAny, processLinesSelective } = useZhuyin();
+  const { isZhuyinAny, zhuyinActive, processLinesSelective } = useZhuyin();
   const { token } = useAuth();
   const storageKey = scopedStepStorageKey('liveTutor_progress_', story.id);
 
@@ -759,7 +759,12 @@ const ParagraphReading: React.FC<ParagraphReadingProps> = ({
   return (
     <div
       className="flex flex-col flex-1 h-full bg-surface overflow-hidden relative"
-      style={{ fontFamily: fontForZhuyin(isZhuyinAny) }}
+      // #3022: 這裡本來傳 isZhuyinAny（難字也是 true）。BpmfZihiSerif/BpmfIansui
+      // 會替它畫到的**每一個**字畫注音，所以字型一套在這個外層容器上，
+      // 難字模式就會把整頁標滿 —— 包含 processLinesSelective 從沒選到的課文字，
+      // 以及共用這個容器的介面文字。難字的注音改由 renderDifficultAwareText
+      // 只套在選中的 run 上（見 zhuyin/difficultSpanRenderer.tsx）。
+      style={{ fontFamily: fontForZhuyin(zhuyinActive) }}
     >
       {/* ── Single-column centered layout ──────────────────────────────── */}
       <div className="flex-1 overflow-y-auto pb-48" style={{ scrollbarWidth: 'thin' }}>
@@ -774,7 +779,7 @@ const ParagraphReading: React.FC<ParagraphReadingProps> = ({
               isAdvancing={isAdvancing}
               fontSizePx={fontSizePx}
               zhuyinLine={zhuyinLines ? zhuyinLines[currentLineIndex] : null}
-              zhuyinActive={isZhuyinAny}
+              zhuyinAny={isZhuyinAny}
               isSessionActive={stt.isSessionActive}
               isPreparing={stt.isPreparing}
               isTtsSpeaking={isTtsSpeaking}

@@ -438,7 +438,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
       ? sectionSlugForStep(story.manifestSections, qrEffectiveStep, moduleForStep)
       : null) ?? qrSectionSlug ?? null;
   // Zhuyin state from global context
-  const { isZhuyinAny, processLinesSelective } = useZhuyin();
+  const { isZhuyinAny, zhuyinActive, processLinesSelective } = useZhuyin();
 
   // Whole-lesson playback (#2649). Paragraph-by-paragraph rather than one long
   // clip, so the page knows which paragraph is being read and can carry the
@@ -818,12 +818,17 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
 
   // ── Render ─────────────────────────────────────────────────────────────
 
+  // #3022: the zhuyin font used to sit on THIS wrapper, gated on isZhuyinAny
+  // (true for 'difficult' too). BpmfZihiSerif/BpmfIansui renders bopomofo for
+  // every character it draws, so that annotated the whole page -- the legend
+  // pills, onboarding coach, undo/clear buttons, "還沒有標記" side panel --
+  // any interface text sharing this container, not just the article text.
+  // The font now lives only on <article> below (title + paragraphs), and
+  // only for 'all' mode (zhuyinActive); 'difficult' mode applies it per-run
+  // via renderDifficultAwareText inside AnnotatedParagraph instead.
   return (
     <div
       className="flex-1 flex flex-col bg-surface overflow-hidden select-none"
-      style={{
-        fontFamily: fontForZhuyin(isZhuyinAny),
-      }}
     >
       {/* ── Two-column layout: article left, panel right ──────────────── */}
       <div className="flex-1 flex overflow-hidden">
@@ -921,7 +926,15 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
 
           {/* Title */}
           <div className="text-center mb-8 px-6">
-            <h1 className="font-headline font-medium text-3xl md:text-4xl text-on-surface tracking-tight leading-tight">
+            {/* #3022: the title used to sit inside the page-wide font scope, so
+                'all' mode annotated it. Narrowing that scope to <article> below
+                dropped the title out of it -- restore it explicitly here rather
+                than let 'all' mode quietly lose the heading. Still gated on
+                zhuyinActive, so 'difficult' does NOT blanket-annotate it. */}
+            <h1
+              className="font-headline font-medium text-3xl md:text-4xl text-on-surface tracking-tight leading-tight"
+              style={{ fontFamily: fontForZhuyin(zhuyinActive) }}
+            >
               {story.title}
             </h1>
           </div>
@@ -931,7 +944,10 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
               right after the caption row (#1692). Un-referenced assets fall back
               to the strip/table block below the article. */}
           <div className={story.layout_mode === 'graphic-text' && fallbackImages.length > 0 ? 'flex flex-col lg:flex-row items-start' : undefined}>
-            <article className={story.layout_mode === 'graphic-text' && fallbackImages.length > 0 ? 'flex-1 min-w-0 px-6 md:px-12 space-y-10' : 'max-w-4xl mx-auto px-6 md:px-16 space-y-10'}>
+            <article
+              className={story.layout_mode === 'graphic-text' && fallbackImages.length > 0 ? 'flex-1 min-w-0 px-6 md:px-12 space-y-10' : 'max-w-4xl mx-auto px-6 md:px-16 space-y-10'}
+              style={{ fontFamily: fontForZhuyin(zhuyinActive) }}
+            >
             {/* 降級成機器音時要說出來 —— 少了它，聽到的人不知道那不是 AI（#2930）。 */}
             {reader.isTtsDegraded && <TtsDegradedNotice className="mb-4" />}
             {story.content.map((rawPara, paraIdx) => {

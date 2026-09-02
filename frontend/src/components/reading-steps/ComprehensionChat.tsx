@@ -16,6 +16,7 @@ import ToolboxCompletionActions from '../tools/ToolboxCompletionActions';
 import GraphicTextImageStrip from './GraphicTextImageStrip';
 import NextStepFooter from '../learning/NextStepFooter';
 import StepActionBar from '../learning/StepActionBar';
+import { renderDifficultAwareText } from '../zhuyin/difficultSpanRenderer';
 
 interface ComprehensionChatProps {
   story: Story;
@@ -305,7 +306,13 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
                       {String(idx + 1).padStart(2, '0')}
                     </span>
                     <p className={`text-lg md:text-xl text-on-surface leading-[2rem] md:leading-[2.2rem] ${isZhuyinAny ? 'tracking-[0.15em]' : ''}`}>
-                      {zhuyinLines ? zhuyinLines[idx] : line}
+                      {/* #3022: in 'difficult' mode these strings now carry
+                          DIFFICULT_SPAN markers. renderDifficultAwareText
+                          consumes them into spans (so they stop leaking into
+                          textContent and copy-paste) and applies the zhuyin
+                          font to the vocab runs -- which this panel never had.
+                          No-op when there are no markers ('none'/'all'). */}
+                      {zhuyinLines ? renderDifficultAwareText(zhuyinLines[idx], idx) : line}
                     </p>
                   </div>
                 ))}
