@@ -25,15 +25,44 @@
  * those are evidence of how someone actually spoke, and re-timing them
  * would misrepresent the recording.
  *
- * ⚠️ DEFAULT: DEFAULT_TTS_RATE stays 1.0, i.e. today's speed. Whether the
- * shipped default should be slower is a product call for the owner; this
- * module only makes the choice possible and remembers it per browser.
+ * ⚠️ DEFAULT: 0.85 as of #3023 — see DEFAULT_TTS_RATE below for why that
+ * specific number, and ttsDefaultRateBand.test.ts for the lock that keeps
+ * it inside the worksheet's own benchmark rather than merely pinning a
+ * literal.
  */
 
 export const TTS_RATE_STORAGE_KEY = 'tts_playback_rate_v1';
 
-/** Today's behaviour. Changing this changes the speed for every student. */
-export const DEFAULT_TTS_RATE = 1;
+/**
+ * Measured on prod: 21 characters of demo audio in 4.608s = 273 字/分.
+ * Everything below is expressed as a multiple of this.
+ */
+export const BASELINE_CHARS_PER_MIN = 273;
+
+/**
+ * The worksheet prints its own reading_benchmark.levels: ＜200 / 201~230 / ＞231.
+ * 231 is therefore the floor of the band it calls the best a student can do.
+ */
+export const WORKSHEET_TOP_BAND_FLOOR = 231;
+
+/**
+ * Shipped default: 0.85x = 232 字/分.
+ *
+ * WHY NOT 1.0 (the original). At 1.0 the demo reads at 273 字/分, which is
+ * 42 字/分 FASTER than 231 -- the floor of the top band the same worksheet
+ * defines. The model a student is told to imitate was faster than the best
+ * score that worksheet says exists. Teachers running 課後學習扶助 reported
+ * exactly this: "語速有點太快，希望慢一點".
+ *
+ * WHY NOT 0.7. That yields 191 字/分, below the 201~230 middle band -- the
+ * demo would then be slower than an average reader, which is not a model
+ * worth imitating either, and it undersells students who already read well.
+ *
+ * 0.85 is the only offered option that lands inside the worksheet's own top
+ * band: aspirational, and actually reachable. A student who wants the old
+ * speed can still pick 正常; the choice is remembered per browser.
+ */
+export const DEFAULT_TTS_RATE = 0.85;
 
 /**
  * Bounds for anything that reaches an <audio> element. 0 or negative
@@ -55,9 +84,9 @@ export interface TtsRateOption {
  * read it as "the slow-learner setting". 273 字/分 is the measured baseline.
  */
 export const TTS_RATE_OPTIONS: readonly TtsRateOption[] = [
-  { value: 0.7, label: '慢', approxCharsPerMin: 191 },
-  { value: 0.85, label: '稍慢', approxCharsPerMin: 232 },
-  { value: 1, label: '正常', approxCharsPerMin: 273 },
+  { value: 0.7, label: '慢', approxCharsPerMin: Math.round(273 * 0.7) },   // 191
+  { value: 0.85, label: '稍慢', approxCharsPerMin: Math.round(273 * 0.85) }, // 232 — shipped default
+  { value: 1, label: '正常', approxCharsPerMin: 273 },                      // the original speed
 ];
 
 function isUsableRate(n: number): boolean {
