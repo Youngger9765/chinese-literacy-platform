@@ -35,6 +35,7 @@ import {
   Annotation,
   AnnotationType,
 } from './annotationReducer';
+import { computeEditorPreMarks, mergeWithStudentAnnotations } from './editorPreMarks';
 import { type AnnotationWithText } from './AnnotationSidePanel';
 import AnnotationSidePanel from './AnnotationSidePanel';
 import AnnotationToolbar from './AnnotationToolbar';
@@ -477,6 +478,53 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
     undoStack: [],
   });
 
+  // ── 編者標 pre-marks (#3026) ───────────────────────────────────────────
+  //
+  // Deliberately kept OUT of the `annotations` reducer state above: they are
+  // never dispatched through ADD/REMOVE/UNDO/CLEAR/INIT, never written to
+  // localStorage, never sent to saveAnnotations(). That separation is what
+  // keeps 清除全部 / undo / the DB-persisted "this student's marks" record
+  // free of content the student never made — a student who clears everything
+  // still gets the same pre-marks back on next render, because they are
+  // recomputed fresh from `story.vocabulary` + `story.content`, not restored
+  // from any saved state. It's also what makes injecting them safe across
+  // the DB-hydration INIT above: INIT only ever touches `annotations`
+  // (student-only), so a pre-mark can never be overwritten or duplicated by
+  // that restore, and restoring on remount cannot resurrect a dismissed one
+  // as if it were a saved annotation (dismissal is local-only, see below).
+  //
+  // 25/179 lessons have no vocab_definitions data — `story.vocabulary` is
+  // null/undefined there, computeEditorPreMarks returns [], and the lesson
+  // renders exactly as it does today. Not an error, no message.
+  const editorPreMarks = useMemo(
+    () => computeEditorPreMarks(story.content, story.vocabulary),
+    [story.content, story.vocabulary],
+  );
+
+  // A student can dismiss an individual pre-mark (BDD: 「學生刪除某個編者標
+  // 記，不影響其他學生看到的版本」). Session-local only — not persisted to
+  // localStorage or the DB, on purpose: dismissing a reminder is not the
+  // same action as making (and therefore owning) a mark, and every other
+  // student's pre-marks for this lesson are computed independently from the
+  // same static vocabulary data regardless of what happens here.
+  const [dismissedPreMarkIds, setDismissedPreMarkIds] = useState<Set<string>>(() => new Set());
+
+  const visibleEditorPreMarks = useMemo(
+    () => editorPreMarks.filter((m) => !dismissedPreMarkIds.has(m.id)),
+    [editorPreMarks, dismissedPreMarkIds],
+  );
+
+  // What AnnotatedParagraph actually renders: the student's own marks plus
+  // any pre-marks that survive dismissal AND don't collide with a student
+  // mark in the same paragraph (mergeWithStudentAnnotations drops those —
+  // see its doc for why). `annotations` itself (student-only) stays the
+  // source of truth everywhere else below: summary counts, the side panel,
+  // undo, clear-all, localStorage, and the DB save.
+  const renderAnnotations = useMemo(
+    () => mergeWithStudentAnnotations(annotations, visibleEditorPreMarks),
+    [annotations, visibleEditorPreMarks],
+  );
+
   // DB-sync tracking: true once the initial DB load finishes.
   // Using useState (not ref) so the save effect re-runs when hydration completes —
   // this fixes the race where an annotation made before hydration would be silently
@@ -774,15 +822,29 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
   }, [toolbar, hideToolbar]);
 
   // ── Remove annotation on click ─────────────────────────────────────────
-
+  //
+  // #3026: a click can land on either a student's own mark or an editor
+  // pre-mark, and the two go through completely different paths — a
+  // pre-mark's id is NEVER passed to `dispatch`, because it was never added
+  // via `dispatch` in the first place (see editorPreMarks block above). Look
+  // it up against the full (not dismissal-filtered) `editorPreMarks` list —
+  // not the merged render list — so this stays correct even for a paragraph
+  // where mergeWithStudentAnnotations already dropped the pre-mark for
+  // overlapping a student mark elsewhere.
   const removeAnnotation = useCallback((id: string) => {
+    if (editorPreMarks.some((m) => m.id === id)) {
+      setDismissedPreMarkIds((prev) => (prev.has(id) ? prev : new Set(prev).add(id)));
+      annotationElementRefs.current.delete(id);
+      return;
+    }
+
     dispatch({ type: 'REMOVE', payload: { id } });
 
     if (focusedAnnotationId === id) {
       setFocusedAnnotationId(null);
     }
     annotationElementRefs.current.delete(id);
-  }, [focusedAnnotationId]);
+  }, [focusedAnnotationId, editorPreMarks]);
 
   // ── Undo ──────────────────────────────────────────────────────────────
 
@@ -975,7 +1037,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
                       rawText={rawPara}
                       displayText={displayText}
                       paraIdx={paraIdx}
-                      annotations={annotations}
+                      annotations={renderAnnotations}
                       focusedAnnotationId={focusedAnnotationId}
                       isZhuyinAny={isZhuyinAny}
                       fontSizePx={fontSizePx}

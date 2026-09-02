@@ -30,6 +30,23 @@ export const TYPE_CONFIG: Record<
   },
 };
 
+/**
+ * Style for a 編者標 pre-mark (#3026) — deliberately NOT one of TYPE_CONFIG's
+ * two entries. A pre-mark's underlying `type` is `'important'` (重點生詞 is
+ * semantically "important vocabulary"), but it must stay visually
+ * distinguishable from a mark the STUDENT chose as 💛 重要 themselves (BDD:
+ * 「與新套用的預標在視覺上可分辨」) — a sky-blue background + a pin icon,
+ * never the toolbar's own yellow. There is no toolbar button for this style:
+ * a student never chooses to create a 編者標 mark, only a teacher/editor
+ * pipeline produces one (see editorPreMarks.ts), so it is not part of
+ * `TYPE_CONFIG`'s Object.entries() iteration that builds the toolbar UI.
+ */
+export const EDITOR_PREMARK_STYLE = {
+  label: '重點生詞',
+  icon: '📌',
+  className: 'bg-sky-100 shadow-[inset_0_-2px_0_0_#0284c7]',
+};
+
 interface AnnotationToolbarProps {
   x: number;
   y: number;

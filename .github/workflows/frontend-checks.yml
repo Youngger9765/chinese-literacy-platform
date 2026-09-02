@@ -191,6 +191,23 @@ jobs:
       #     default that is still a speed a student could be asked to match, and
       #     goes red if the default drifts back above the ceiling OR below the
       #     middle band (too slow is not a model worth imitating either).
+      #   - editorPreMarks / FullTextAnnotate.editorPreMarks: 編者標 (#3026) --
+      #     a term from `story.vocabulary` gets pre-marked at EVERY occurrence
+      #     it matches verbatim in the article (not just the first), a lesson
+      #     with no vocab_definitions data (25/179) renders unmarked with no
+      #     error, and a non-matching term is skipped silently. Pre-marks are
+      #     computed fresh from story data on every render and are NEVER
+      #     dispatched through the annotation reducer's ADD/REMOVE/UNDO/CLEAR/
+      #     INIT actions, never written to localStorage, never sent to
+      #     saveAnnotations() -- locked explicitly because that separation is
+      #     what stops 清除全部 and DB persistence from touching content the
+      #     student never made. Two locks exercise the real async DB-restore
+      #     path (not just the source): a DB-restored student annotation and
+      #     the computed pre-marks render together after hydration's INIT
+      #     (proving INIT cannot wipe or duplicate a pre-mark), and remounting
+      #     the step recomputes the same pre-marks from story data while a
+      #     dismissal does NOT survive the remount (session-local by design,
+      #     not persisted anywhere).
       # ⚠️ `run: |` (block literal) is load-bearing — do NOT collapse it back to a
       # plain `run:` scalar. YAML folds a plain scalar's newlines into spaces, which
       # leaves the `\` as LITERAL characters; the shell then reads `\ ` as an escaped
@@ -296,4 +313,6 @@ jobs:
           src/components/reading-steps/__tests__/readingPlayerSpeed3023.test.tsx \
           src/hooks/__tests__/ttsRateWiring3023.test.ts \
           src/contexts/__tests__/authNetworkFailureKeepsToken.test.tsx \
-          src/utils/__tests__/ttsDefaultRateBand.test.ts
+          src/utils/__tests__/ttsDefaultRateBand.test.ts \
+          src/components/reading-steps/editorPreMarks.test.ts \
+          src/components/reading-steps/__tests__/FullTextAnnotate.editorPreMarks.test.tsx
