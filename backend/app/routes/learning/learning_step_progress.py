@@ -100,13 +100,93 @@ def save_step_progress(
     # attempt snapshot (capped at 4).  Also update full_reading_result for backward compat.
     _maybe_append_full_reading_attempt(session, payload.step_data)
 
+    # Issue #3024 — award step_complete XP (+ check badges) for any step that
+    # is newly present in steps_completed vs. what was already stored. This is
+    # the ONE place every step completion already flows through, so no new
+    # endpoint or DB migration is needed. Runs in the SAME transaction as the
+    # step_progress save (award_xp/check_and_award_badges only flush; the
+    # db.commit() below covers both).
+    previously_completed = existing_sp.steps_completed if existing_sp is not None else []
+    xp_awarded, badges_unlocked = _award_step_complete_xp(
+        db,
+        student_id=current_user.id,
+        session_id=session_id,
+        previously_completed=previously_completed,
+        newly_reported=payload.steps_completed,
+    )
+
     db.commit()
     db.refresh(session)
     logger.info(
-        "Saved step_progress for session %d (user %d): current=%s completed=%d",
+        "Saved step_progress for session %d (user %d): current=%s completed=%d xp_awarded=%d badges=%s",
         session_id, current_user.id, payload.current_step, len(payload.steps_completed),
+        xp_awarded, badges_unlocked,
     )
-    return StepProgressResponse(session_id=session.id, step_progress=session.step_progress)
+    return StepProgressResponse(
+        session_id=session.id,
+        step_progress=session.step_progress,
+        xp_awarded=xp_awarded,
+        badges_unlocked=badges_unlocked,
+    )
+
+
+# ── Mid-session step-complete XP + badge check (Issue #3024) ──────────────────
+
+#: 'report' is the results page itself (ReportPage marks it complete on mount
+#: for teacher-dashboard visibility), not a step the student practiced. It
+#: must never earn step_complete XP — that would double-count against the
+#: session_complete settlement (POST /gamification/session-complete) that
+#: fires at essentially the same moment.
+_STEP_COMPLETE_XP_EXCLUDED_STEP_IDS = frozenset({"report"})
+
+
+def _award_step_complete_xp(
+    db: Session,
+    *,
+    student_id: int,
+    session_id: int,
+    previously_completed: list[str],
+    newly_reported: list[str],
+) -> tuple[int, list[str]]:
+    """Award step_complete XP for steps newly present in `newly_reported`.
+
+    Idempotent per (session_id, step_id): a step already present in
+    `previously_completed` is skipped, so re-saving the same list (component
+    remount, debounced re-sync) never double-awards. Returns (total XP
+    awarded by this call, badge keys newly unlocked by this call) so the
+    caller can surface both to the frontend for immediate feedback.
+    """
+    from ...services.gamification_service import award_xp, check_and_award_badges
+
+    already = set(previously_completed)
+    newly_completed = [
+        step_id for step_id in newly_reported
+        if step_id not in already and step_id not in _STEP_COMPLETE_XP_EXCLUDED_STEP_IDS
+    ]
+    if not newly_completed:
+        return 0, []
+
+    xp_awarded = 0
+    for step_id in newly_completed:
+        award_xp(
+            db,
+            student_id=student_id,
+            event_type="step_complete",
+            session_id=session_id,
+            note=f"完成大題：{step_id}",
+        )
+        xp_awarded += 3  # XP_REWARDS["step_complete"]
+
+    # Badges that can genuinely be judged from data available mid-session
+    # (XP totals, level, distinct-event-type count) are checked here too —
+    # this is what makes "達成目標的當下就跑出來" (issue #3024) literally true
+    # for those badges. Badges that need full-session data (accuracy/streak/
+    # story counts) simply won't satisfy their condition yet and are left for
+    # the real session-complete settlement, which is unaffected by this call
+    # (see the (session_id, event_type="session_complete") idempotency fix in
+    # gamification_service.py).
+    newly_unlocked = check_and_award_badges(db, student_id, session_id=session_id)
+    return xp_awarded, newly_unlocked
 
 
 # ── Bug C fix helpers ─────────────────────────────────────────────────────────

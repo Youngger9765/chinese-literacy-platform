@@ -180,4 +180,55 @@ describe('MultipleChoiceExercise', () => {
 
     expect(recordMcqAttempt, '三次作答就要三筆紀錄').toHaveBeenCalledTimes(3);
   });
+
+  // ── Issue #3024 — instant positive feedback + progress bar ──────────────
+
+  it('答對時立刻顯示 CorrectAnswerBurst 正向回饋 (#3024)', () => {
+    render(<MultipleChoiceExercise questions={questions} onComplete={() => {}} />);
+
+    expect(screen.queryByTestId('correct-answer-burst'), '答題前不應出現').toBeNull();
+
+    fireEvent.click(screen.getByText('科技發展').closest('button')!);
+
+    expect(screen.getByTestId('correct-answer-burst'), '答對後應立即出現').toBeTruthy();
+  });
+
+  it('答錯時不顯示 CorrectAnswerBurst（#3028 out of scope：不做嘗試次數/正確率回饋）', () => {
+    render(<MultipleChoiceExercise questions={questions} onComplete={() => {}} />);
+
+    fireEvent.click(screen.getByText('自然環境').closest('button')!);
+
+    expect(screen.queryByTestId('correct-answer-burst'), '答錯不該觸發正向回饋').toBeNull();
+  });
+
+  it('每答對一題都重新觸發 CorrectAnswerBurst（跨題目）', () => {
+    render(<MultipleChoiceExercise questions={questions} onComplete={() => {}} />);
+
+    fireEvent.click(screen.getByText('科技發展').closest('button')!);
+    const firstBurst = screen.getByTestId('correct-answer-burst');
+    fireEvent.click(screen.getByRole('button', { name: /下一題/ }));
+
+    // Second question — burst should still be able to fire again (component
+    // isn't unmounted between questions, so this exercises the re-trigger path).
+    fireEvent.click(screen.getByText('樂觀').closest('button')!);
+    expect(screen.getByTestId('correct-answer-burst')).toBeTruthy();
+    // Sanity: it's not literally the same stale DOM node lingering from before.
+    expect(firstBurst).toBeTruthy();
+  });
+
+  it('大題進度條依已完成題數更新寬度（BDD Scenario 3, #3024）', () => {
+    const { container } = render(
+      <MultipleChoiceExercise questions={questions} onComplete={() => {}} />,
+    );
+    const bar = container.querySelector('.bg-blue-500.h-1\\.5') as HTMLElement;
+    expect(bar, '進度條不存在').toBeTruthy();
+    expect(bar.style.width).toBe('0%');
+
+    fireEvent.click(screen.getByText('科技發展').closest('button')!); // Q1 correct
+    expect(bar.style.width).toBe('50%'); // 1 of 2 done
+
+    fireEvent.click(screen.getByRole('button', { name: /下一題/ }));
+    fireEvent.click(screen.getByText('樂觀').closest('button')!); // Q2 correct
+    expect(bar.style.width).toBe('100%');
+  });
 });

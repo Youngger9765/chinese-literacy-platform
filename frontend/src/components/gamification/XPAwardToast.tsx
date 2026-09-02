@@ -4,6 +4,7 @@
  * Auto-dismisses after 4 seconds or on button click.
  */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { BADGE_ICONS, BADGE_NAMES } from './badgeMeta';
 
 /** Minimal shape needed for the toast — compatible with both gamificationApi and api.ts results. */
 export interface XPAwardResult {
@@ -31,44 +32,6 @@ interface XPAwardToastProps {
   result: XPAwardResult;
   onDismiss: () => void;
 }
-
-const BADGE_ICONS: Record<string, string> = {
-  first_story: '⭐',
-  story_5:     '📖',
-  story_10:    '📚',
-  story_25:    '🏛',
-  streak_3:    '🔥',
-  streak_7:    '🔥',
-  streak_30:   '🏆',
-  accuracy_90: '🎤',
-  accuracy_100:'🎖',
-  level_5:     '🧠',
-  level_10:    '👑',
-  xp_500:      '⚡',
-  xp_1000:     '⚡',
-  first_session:'⭐',
-  perfect_week: '📅',
-  explorer:     '🧭',
-};
-
-const BADGE_NAMES: Record<string, string> = {
-  first_story: '第一步',
-  story_5:     '勤讀者',
-  story_10:    '閱讀達人',
-  story_25:    '博覽群書',
-  streak_3:    '三日不輟',
-  streak_7:    '週週精進',
-  streak_30:   '月月堅持',
-  accuracy_90: '精準朗讀',
-  accuracy_100:'完美表現',
-  level_5:     '思考者',
-  level_10:    '國文之星',
-  xp_500:      '積分達人',
-  xp_1000:     '千分英雄',
-  first_session:'初次學習',
-  perfect_week: '完美一週',
-  explorer:     '步步探索',
-};
 
 /** XP thresholds for each level. Index = level number (level 0 starts at 0 XP). */
 const LEVEL_THRESHOLDS = [0, 100, 250, 500, 800, 1200, 1700, 2300, 3000, 4000] as const;
@@ -208,6 +171,16 @@ const XPAwardToast: React.FC<XPAwardToastProps> = ({ result, onDismiss }) => {
             )}
           </div>
         )}
+
+        {/* Issue #3024 — teachers asked "是達成目標的當下就跑出來嗎？". Some
+            badges (level/XP milestones) now DO unlock mid-lesson via
+            BadgeUnlockToast; others (accuracy/連續天數/累計課數) can only be
+            judged once the whole session's data is in, so they always show up
+            here at the end. A short, honest caption answers the question
+            directly instead of leaving it to guesswork. */}
+        <p className="mb-2 text-center text-[11px] leading-snug text-gray-400">
+          部分成就（如連續天數、累計課數）需完成整堂課才會結算；答題與升級的即時提示已在學習過程中顯示過
+        </p>
 
         <button
           onClick={() => {

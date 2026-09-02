@@ -20,6 +20,7 @@ import { useLearningNav } from '../contexts/LearningNavContext';
 import { useIdleTimer } from '../hooks/useIdleTimer';
 import type { StepProgressData } from '../services/learningApi';
 import SessionTimeoutWarning from '../components/SessionTimeoutWarning';
+import BadgeUnlockToast from '../components/gamification/BadgeUnlockToast';
 import { isToolboxMode } from '../services/learningStorageScope';
 
 // Extracted hooks (Issue #1906 — deep split of the god component)
@@ -198,6 +199,8 @@ const LearningLayout: React.FC = () => {
     syncProgress,
     flushProgress,
     isProgressLoading,
+    midSessionBadgeUnlocks,
+    dismissMidSessionBadgeUnlocks,
   } = stepPersistence;
 
   // ── Hook 3: step navigation (all handleFinish* callbacks) ────────────────
@@ -446,6 +449,13 @@ const LearningLayout: React.FC = () => {
         countdownSeconds={WARNING_COUNTDOWN_SECONDS}
         onContinue={handleContinueLearning}
         onExpired={handleSessionExpired}
+      />
+      {/* Issue #3024 — badge unlocked mid-lesson (rendered at the layout
+          level, not per-step, so it shows up regardless of which step the
+          student is currently on). */}
+      <BadgeUnlockToast
+        badgeKeys={midSessionBadgeUnlocks}
+        onDismiss={dismissMidSessionBadgeUnlocks}
       />
     </>
   );
