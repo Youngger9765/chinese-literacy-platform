@@ -95,7 +95,8 @@ jobs:
               補充或找工程師協助，然後結束。不要猜著做。
 
             ## 第 2 步 A：bug → 先重現
-            - 在 staging 環境重現（curl staging API / 讀 code 對照症狀）。
+            - 在 staging 環境重現（讀 code 對照症狀、跑對應測試；沒有網路工具，
+              打不到的外部行為就明說重現受限）。
               staging 前端 https://lingoleap-frontend-staging-958347263320.asia-east1.run.app
               後端 https://lingoleap-backend-staging-958347263320.asia-east1.run.app
             - 重現不了：回貼 comment 說明試了什麼、請發文者補充重現步驟，結束。
@@ -136,6 +137,22 @@ jobs:
             - 直接 push 到 main 或 staging
             - 跑任何 migration、動 GCP 資源、刪東西
             - 修改 .github/workflows/ 下既有的 deploy/cleanup workflow
-            - 把「還沒驗」講成「好了」—— 測試輸出、curl 回應才算證據
+            - 把「還沒驗」講成「好了」—— 測試輸出才算證據
           claude_args: |
             --allowedTools "Read,Grep,Glob,Edit,Write,Bash(git:*),Bash(gh issue:*),Bash(gh pr:*),Bash(gh api:*),Bash(npm:*),Bash(npx:*),Bash(python:*),Bash(python3:*),Bash(pytest:*),Bash(pip:*),Bash(ls:*),Bash(cat:*),Bash(mkdir:*),Bash(bash specs/run-ci.sh:*)"
+
+      # timeout 或錯誤把 job 砍掉時 agent 是斷頭的，來不及留言 ——
+      # 這個 step 補上「我被中止了」的紀錄，接手的人才有脈絡（#3055 規則）。
+      - name: Post interruption notice
+        if: ${{ !success() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue comment "${{ github.event.issue.number }}" \
+            --repo "${{ github.repository }}" \
+            --body "> 🤖 由 Claude AI 代發（非 Young 本人）
+
+          ⚠️ 這一輪自動處理**沒有正常結束**（超時 45 分鐘或執行錯誤，狀態：${{ job.status }}）。
+          可能原因：修復沒有收斂、或工作規模超出預期。
+          執行紀錄：${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          若已連續多輪失敗，建議找工程師接手，不要再 @claude 重試。"

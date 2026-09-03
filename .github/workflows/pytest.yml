@@ -32,6 +32,10 @@ jobs:
               #    skill 沒改 —— 分家的後果不是報錯，是下一個人照文件把 code 改回去。
               #    不盯這個路徑，「只改 skill」的 PR 不會跑那道鎖 ＝ 鎖建了沒插電。
               - '.claude/skills/**'
+              # ⭐ #3055 issue-agent 的安全結構鎖住在 backend/tests，但被鎖的
+              #    對象是這個 workflow 檔本身 —— 只改 yml 的 PR 不跑 pytest
+              #    ＝ 有人拆掉 gate/放回 curl 時鎖是睡著的。
+              - '.github/workflows/claude-issue-agent.yml'
 
   pytest:
     needs: detect-changes
