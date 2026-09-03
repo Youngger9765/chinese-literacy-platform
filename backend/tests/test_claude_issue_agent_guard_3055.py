@@ -257,8 +257,10 @@ def test_heavy_ci_skips_drafts_but_preview_does_not():
     from pathlib import Path as _P
 
     wf = _P(__file__).resolve().parents[2] / ".github" / "workflows"
+    # security-audit 刻意不在清單裡: 它只跑 npm/pip audit(1-2 分鐘)、屬資安
+    # 檢查, 草稿 PR 也應該跑, 沒人在等它。這裡列的是「會讓人等」的重測。
     heavy = ["e2e-tests.yml", "frontend-checks.yml", "keypoints-manifest-gate.yml",
-             "pytest.yml", "schema-check.yml", "spec-check.yml", "security-audit.yml"]
+             "pytest.yml", "schema-check.yml", "spec-check.yml"]
     unguarded = []
     for name in heavy:
         doc = _y.safe_load((wf / name).read_text(encoding="utf-8"))
@@ -286,3 +288,21 @@ def test_heavy_ci_skips_drafts_but_preview_does_not():
     assert "draft" not in preview, (
         "preview-deploy 被加了 draft 條件 —— 草稿 PR 就沒有 preview 可看了"
     )
+
+
+# ── 演練 #3065 抓到的文件錯誤宣稱 ──────────────────────────────────
+#
+# GitHub 的 `Fixes #N` 只在 merge 進**預設分支**時自動關票。我們的 PR
+# base 是 staging, 所以 merge 進 staging 那一刻票還開著 —— 但 prompt 跟
+# 兩份文件都寫成「merge 後自動關閉」。實測 #3066 merge 後 #3065 仍 OPEN。
+
+
+def test_prompt_does_not_promise_autoclose_on_staging_merge():
+    prompt = _prompt()
+    assert "預設分支" in prompt, (
+        "prompt 沒說明 Fixes #N 只對預設分支生效 —— agent 會在留言裡"
+        "承諾「merge 後這張票會自動關閉」, 而 base 是 staging 時那是錯的"
+    )
+    # 不可以出現無條件的自動關票承諾
+    bad = "Fixes #N 會自動\n              close issue"
+    assert bad.replace("\n", "\n") not in prompt
