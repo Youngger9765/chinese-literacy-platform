@@ -13,6 +13,10 @@ import * as classroomApi from '../../services/classroomApi';
 
 vi.mock('react-router-dom', () => ({
   useNavigate: () => vi.fn(),
+  // No ?code= in these tests -- manual-entry flow only. See
+  // JoinClassroomPage.qrflow.test.tsx for the ?code= (QR) flow, which
+  // overrides this per-test with a real URLSearchParams.
+  useSearchParams: () => [new URLSearchParams(), vi.fn()],
 }));
 
 vi.mock('../../contexts/AuthContext', () => ({
@@ -21,6 +25,7 @@ vi.mock('../../contexts/AuthContext', () => ({
 
 vi.mock('../../services/classroomApi', () => ({
   joinClassroomByCode: vi.fn(),
+  previewClassroomByCode: vi.fn(),
   ClassroomApiError: class ClassroomApiError extends Error {
     status: number;
     constructor(message: string, status: number) {

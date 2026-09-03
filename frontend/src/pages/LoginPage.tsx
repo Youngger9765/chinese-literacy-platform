@@ -24,7 +24,18 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
   // Prefer the sessionStorage return URL (set on mid-session 401) over the
   // router state (set by ProtectedRoute on unauthenticated access).
   const storedReturnUrl = consumeReturnUrl();
-  const from = storedReturnUrl ?? (location.state as { from?: { pathname: string } })?.from?.pathname ?? '/';
+  // ⛔ Read `.search` too, not just `.pathname` (#3081 AC3). An anonymous
+  // student who scans a classroom-join QR lands on `/join?code=XXXXXX`,
+  // ProtectedRoute bounces them to /login with the *full* location (search
+  // included) as `state.from`, but this line used to reconstruct only the
+  // pathname -- so post-login they'd land on a bare `/join` with the code
+  // silently gone, right back to typing it by hand. The Junyi SSO path
+  // (`buildJunyiLoginUrl` / `safePostLoginPath` in JunyiCallbackPage.tsx)
+  // already preserved `search`; this brings the plain email/password path
+  // in line with it.
+  const fromLocation = (location.state as { from?: { pathname: string; search?: string } })?.from;
+  const from = storedReturnUrl
+    ?? (fromLocation ? `${fromLocation.pathname}${fromLocation.search ?? ''}` : '/');
   const { login, loginWithGoogle } = useAuth();
 
   const [email, setEmail] = useState('');

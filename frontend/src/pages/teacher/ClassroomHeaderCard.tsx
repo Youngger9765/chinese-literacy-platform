@@ -5,9 +5,12 @@
  *  - Classroom name, grade badge, student count, active status (view + edit form)
  *  - Action buttons: 編輯 / 停用啟用 / 匯出CSV
  *  - Join code panel — accordion (collapsed when ≥1 student, expanded for new class)
+ *    with a QR button (#3081) for projecting the code so students scan
+ *    instead of typing
  */
 import React, { useState } from 'react';
 import { ClassroomDetailResponse } from '../../services/classroomApi';
+import ClassroomJoinQrButton from '../../components/qr/ClassroomJoinQrButton';
 
 interface ClassroomHeaderCardProps {
   classroom: ClassroomDetailResponse;
@@ -240,6 +243,7 @@ const ClassroomHeaderCard: React.FC<ClassroomHeaderCardProps> = ({
             </p>
           </div>
           <div className="flex gap-2 shrink-0">
+            <ClassroomJoinQrButton classroomName={classroom.name} joinCode={classroom.join_code} />
             <button
               onClick={onCopyJoinCode}
               disabled={!classroom.join_code}
