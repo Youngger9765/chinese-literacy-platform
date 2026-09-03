@@ -38,6 +38,7 @@ import ChangePasswordPage from '../pages/ChangePasswordPage';
 import ForgotPassword from '../pages/ForgotPassword';
 import JunyiCallbackPage from '../pages/JunyiCallbackPage';
 import JunyiStartPage from '../pages/JunyiStartPage';
+import JunyiSloLogoutPage from '../pages/JunyiSloLogoutPage';
 
 // ---------------------------------------------------------------------------
 // Route-level code splitting (lazy loading)
@@ -132,6 +133,11 @@ const AppRoutes: React.FC = () => (
       {/* Junyi SSO public start + callback routes (issue #1198) */}
       <Route path="/auth/junyi/start" element={<JunyiStartPage />} />
       <Route path="/junyi-callback" element={<JunyiCallbackPage />} />
+
+      {/* Junyi Single Logout (SLO) endpoint — public, GET, no auth guard.
+          Registered on Junyi as this RP's logout_url; clears our localStorage
+          JWT then redirects to the validated `continue` station (§6.2). */}
+      <Route path="/junyi-slo-logout" element={<JunyiSloLogoutPage />} />
 
       {/* Change password (after first login) */}
       <Route
