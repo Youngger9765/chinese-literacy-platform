@@ -269,6 +269,23 @@ jobs:
           AZURE_SPEECH_REGION: eastus
           JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"
 
+      # The 課文管理 list promises teachers that "我來試做" answers stay out of
+      # student records and class stats. The frontend test only checks the
+      # sentence is displayed; this checks it is true. Both assertions carry a
+      # positive control, and both were verified to redden under mutation
+      # (heatmap: session query scoped by classroom instead of roster;
+      # alerts: the same, plus emitting non-roster session authors).
+      - name: Run teacher try-out isolation locks (#3074)
+        run: |
+          cd backend
+          python -m pytest --tb=short -q tests/test_teacher_tryout_not_in_class_stats_3074.py
+        env:
+          DATABASE_URL: sqlite://
+          TTS_PROVIDER: google
+          AZURE_SPEECH_KEY: ""
+          AZURE_SPEECH_REGION: eastus
+          JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"
+
       - name: Run testset tests (upload security + auth + eval)
         run: |
           cd backend
