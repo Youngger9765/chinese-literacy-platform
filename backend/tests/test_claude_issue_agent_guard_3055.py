@@ -233,3 +233,56 @@ def test_cta_must_not_hand_our_own_work_back_to_the_user():
     assert "CTA 裡不可以出現" in prompt, "缺 CTA 內容邊界的禁令"
     for banned in ("請你開 PR", "空 commit"):
         assert banned in prompt, f"禁令沒點名 {banned!r} 這種回丟工作的寫法"
+
+
+# ── 草稿 PR：只跑 preview，完整 CI 留到工程師按 Ready（Young 2026-09-03）──
+
+
+def test_agent_opens_draft_prs():
+    prompt = _prompt()
+    assert "--draft" in prompt, (
+        "agent 沒被要求開 draft PR —— 非草稿 PR 會拖著 8 個完整測試 workflow "
+        "一起跑, 發文者要等很久才看得到 preview"
+    )
+
+
+def test_heavy_ci_skips_drafts_but_preview_does_not():
+    """重測 workflow 的**每一個** job 都要被 draft 擋住, preview 不可以.
+
+    數量斷言不是抽樣: 漏掉任何一個 job, 草稿 PR 就會拖著它跑。
+    always() 的 job 特別危險 —— 它會繞過 needs 的 skipped, 必須明寫排除
+    (實際踩到 3 個: schema-drift / audit-summary / 以及它們的 detect-changes)。
+    """
+    import yaml as _y
+    from pathlib import Path as _P
+
+    wf = _P(__file__).resolve().parents[2] / ".github" / "workflows"
+    heavy = ["e2e-tests.yml", "frontend-checks.yml", "keypoints-manifest-gate.yml",
+             "pytest.yml", "schema-check.yml", "spec-check.yml", "security-audit.yml"]
+    unguarded = []
+    for name in heavy:
+        doc = _y.safe_load((wf / name).read_text(encoding="utf-8"))
+        jobs = doc["jobs"]
+        for jn, jb in jobs.items():
+            cond = str(jb.get("if", ""))
+            needs = jb.get("needs") or []
+            needs = [needs] if isinstance(needs, str) else needs
+            direct = "draft" in cond
+            via = ("needs." in cond and "always()" not in cond
+                   and any("draft" in str(jobs[n].get("if", "")) for n in needs if n in jobs))
+            if not (direct or via):
+                unguarded.append(f"{name}::{jn}")
+        on = doc.get(True) or doc.get("on")
+        pr = on.get("pull_request") if isinstance(on, dict) else None
+        types = pr.get("types") if isinstance(pr, dict) else None
+        assert types and "ready_for_review" in types, (
+            f"{name} 的 pull_request types 缺 ready_for_review —— "
+            "工程師按下 Ready 時完整 CI 不會被觸發, 等於永遠沒跑過測試就 merge"
+        )
+    assert not unguarded, f"這些 job 在草稿 PR 上仍會跑: {unguarded}"
+
+    # 反向斷言: preview 不可以被一起擋掉, 否則整個設計的目的就沒了
+    preview = (wf / "preview-deploy.yml").read_text(encoding="utf-8")
+    assert "draft" not in preview, (
+        "preview-deploy 被加了 draft 條件 —— 草稿 PR 就沒有 preview 可看了"
+    )
