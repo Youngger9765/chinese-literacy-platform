@@ -35,6 +35,15 @@ const WHITELISTED_CALLBACK_ORIGINS = [
   'https://lingoleap-dev.web.app',
 ];
 
+/**
+ * Shown when buildJunyiLoginUrl() cannot start the flow. It writes the CSRF
+ * state to sessionStorage, which throws when storage is blocked (Safari private
+ * mode, locked-down school iPads). Callers must catch and surface this — an
+ * uncaught throw in a click handler leaves the button looking dead.
+ */
+export const JUNYI_START_FAILED_MESSAGE =
+  '無法啟動均一登入：瀏覽器封鎖了本機儲存空間。請關閉無痕模式或改用其他瀏覽器。';
+
 /** True when the current origin is a Junyi-whitelisted host (SSO can round-trip). */
 export function isSsoSupported(): boolean {
   return WHITELISTED_CALLBACK_ORIGINS.includes(window.location.origin);
@@ -149,7 +158,11 @@ const JunyiCallbackPage: React.FC = () => {
   }, []); // run once on mount — searchParams is stable at mount time
 
   const handleRetry = () => {
-    window.location.href = buildJunyiLoginUrl('/');
+    try {
+      window.location.href = buildJunyiLoginUrl('/');
+    } catch {
+      setError(JUNYI_START_FAILED_MESSAGE);
+    }
   };
 
   if (error) {
