@@ -280,6 +280,57 @@ class TestProcessSessionCompletion:
         r2 = process_session_completion(db_session, student_id=1, session_id=2)
         assert r2["new_total_xp"] > r1["new_total_xp"]
 
+    def test_midsession_step_xp_does_not_block_final_settlement(self, db_session):
+        """Issue #3024 root-cause fix: process_session_completion() used to key its
+        idempotency guard on "does ANY StudentXPLog row exist for this session_id".
+        That made it impossible to ever award XP mid-session (e.g. a step_complete
+        event when a student finishes one 大題) without permanently short-circuiting
+        the real session-completion settlement (session_complete XP, accuracy/
+        comprehension bonuses, streak update, badge checks) — the settlement would
+        see the mid-session log and believe it had already run.
+
+        This is the RED case that did not exist before #3024: award a mid-session
+        XP event first (as the new step-complete wiring does), THEN complete the
+        session, and require the full settlement to still happen.
+        """
+        from app.services.gamification_service import award_xp, process_session_completion
+        _make_user(db_session, 1)
+        _make_session(db_session, 1, 1)
+
+        # Simulate a mid-session award, e.g. finishing one 大題 (step_complete).
+        award_xp(db_session, student_id=1, event_type="step_complete", session_id=1, note="完成大題：vocab-definition")
+        db_session.commit()
+
+        result = process_session_completion(db_session, student_id=1, session_id=1)
+
+        event_types = [e["event_type"] for e in result["xp_breakdown"]]
+        assert "session_complete" in event_types, (
+            "Mid-session step_complete XP incorrectly suppressed the session_complete "
+            f"settlement. Got breakdown: {result['xp_breakdown']!r}"
+        )
+        # The real settlement's own event award (20xp) plus the mid-session step
+        # award (3xp) must both be reflected in the running total.
+        assert result["new_total_xp"] >= 20
+        # Badges ARE checked as part of the real settlement (not skipped).
+        assert "first_session" in result["badges_unlocked"]
+
+    def test_duplicate_session_complete_after_midsession_xp_still_dedupes(self, db_session):
+        """The other direction of the same fix: a REAL duplicate submission of
+        session_complete for a session that also has mid-session step_complete XP
+        must still be deduped (not double-award session_complete itself)."""
+        from app.services.gamification_service import award_xp, process_session_completion
+        _make_user(db_session, 1)
+        _make_session(db_session, 1, 1)
+
+        award_xp(db_session, student_id=1, event_type="step_complete", session_id=1, note="step")
+        db_session.commit()
+
+        r1 = process_session_completion(db_session, student_id=1, session_id=1)
+        r2 = process_session_completion(db_session, student_id=1, session_id=1)
+
+        assert r2["new_total_xp"] == r1["new_total_xp"]
+        assert r2["badges_unlocked"] == []
+
     def test_level_info_in_result(self, db_session):
         from app.services.gamification_service import process_session_completion
         _make_user(db_session, 1)

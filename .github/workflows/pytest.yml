@@ -1,13 +1,20 @@
+# 草稿 PR 只跑 preview，不跑完整測試（Young 2026-09-03）
+# 理由：非技術的發文者要的是「快點看到結果」，不是等 8 個 workflow。
+# agent 一律開 draft PR → 只有 preview 部署會跑；工程師 review 完按
+# 「Ready for review」→ ready_for_review 事件觸發完整 CI → 綠了才 merge。
+# merge 本身受 branch protection（需 1 個 review）保護，仍然只有工程師能做。
 name: Pytest
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, ready_for_review]
 
 jobs:
   # 路徑判斷改在 job 裡做 —— `on.paths` 只看前 300 個變更檔，批次改名的 PR
   # 會讓整支被靜靜跳過，而且檢查清單上不會出現那一列（#2925）。
   detect-changes:
+    # 草稿 PR 不跑（見檔頭）
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     outputs:
       relevant: ${{ steps.filter.outputs.relevant }}
@@ -32,6 +39,10 @@ jobs:
               #    skill 沒改 —— 分家的後果不是報錯，是下一個人照文件把 code 改回去。
               #    不盯這個路徑，「只改 skill」的 PR 不會跑那道鎖 ＝ 鎖建了沒插電。
               - '.claude/skills/**'
+              # ⭐ #3055 issue-agent 的安全結構鎖住在 backend/tests，但被鎖的
+              #    對象是這個 workflow 檔本身 —— 只改 yml 的 PR 不跑 pytest
+              #    ＝ 有人拆掉 gate/放回 curl 時鎖是睡著的。
+              - '.github/workflows/claude-issue-agent.yml'
 
   pytest:
     needs: detect-changes
@@ -230,6 +241,27 @@ jobs:
             tests/test_jwt_preview_token.py \
             tests/test_teacher_preview_token.py \
             tests/test_preview_mode_write_guard.py
+        env:
+          DATABASE_URL: sqlite://
+          TTS_PROVIDER: google
+          AZURE_SPEECH_KEY: ""
+          AZURE_SPEECH_REGION: eastus
+          JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"
+
+      # Teacher live classroom monitor (#3025): per-student "which 大題 /
+      # 卡在這題" snapshot polled during 課後學習扶助. Covers (1) the same
+      # least-privilege + positive-control access pattern as #3027 (2) the
+      # explicit has_data=False state for students with zero trackable
+      # mcq_attempt rows — this endpoint exists specifically so "no data"
+      # never silently renders as "doing fine" (3) the >=3-same-question-
+      # wrong stuck signal clearing once the student answers that exact
+      # question correctly, even though the historical wrong count stays
+      # >= 3 (4) the question_id -> teacher-readable label mapping never
+      # leaking a raw internal id.
+      - name: Run teacher live-monitor locks (#3025)
+        run: |
+          cd backend
+          python -m pytest --tb=short -q tests/test_teacher_live_monitor_3025.py
         env:
           DATABASE_URL: sqlite://
           TTS_PROVIDER: google

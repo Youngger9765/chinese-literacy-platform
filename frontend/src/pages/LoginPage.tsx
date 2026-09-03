@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { AuthError } from '../services/authApi';
 import { trackEvent } from '../utils/analytics';
 import GoogleSignInButton from '../components/GoogleSignInButton';
-import { buildJunyiLoginUrl, isSsoSupported } from './JunyiCallbackPage';
+import { buildJunyiLoginUrl, isSsoSupported, JUNYI_START_FAILED_MESSAGE } from './JunyiCallbackPage';
 import { RETURN_URL_KEY } from '../services/sessionGuard';
 
 interface LoginPageProps {
@@ -27,14 +27,21 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
   const from = storedReturnUrl ?? (location.state as { from?: { pathname: string } })?.from?.pathname ?? '/';
   const { login, loginWithGoogle } = useAuth();
 
-  const handleJunyiLogin = () => {
-    trackEvent('auth', 'junyi_login_initiated');
-    window.location.href = buildJunyiLoginUrl(from);
-  };
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Declared after setError on purpose — no-use-before-define (variables) flags
+  // the reverse order, which is the same shape that caused the #2279 TDZ crash.
+  const handleJunyiLogin = () => {
+    trackEvent('auth', 'junyi_login_initiated');
+    try {
+      window.location.href = buildJunyiLoginUrl(from);
+    } catch {
+      setError(JUNYI_START_FAILED_MESSAGE);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

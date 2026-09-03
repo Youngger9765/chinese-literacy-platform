@@ -1,3 +1,8 @@
+# 草稿 PR 只跑 preview，不跑完整測試（Young 2026-09-03）
+# 理由：非技術的發文者要的是「快點看到結果」，不是等 8 個 workflow。
+# agent 一律開 draft PR → 只有 preview 部署會跑；工程師 review 完按
+# 「Ready for review」→ ready_for_review 事件觸發完整 CI → 綠了才 merge。
+# merge 本身受 branch protection（需 1 個 review）保護，仍然只有工程師能做。
 name: E2E Tests (Playwright)
 
 # ⚠️ 觸發不用 `on.pull_request.paths`（#2916 收尾查到）。
@@ -15,7 +20,7 @@ name: E2E Tests (Playwright)
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, ready_for_review]
 
 concurrency:
   group: e2e-${{ github.event.pull_request.head.ref }}
@@ -23,6 +28,8 @@ concurrency:
 
 jobs:
   detect-changes:
+    # 草稿 PR 不跑（見檔頭）
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     outputs:
       relevant: ${{ steps.filter.outputs.relevant }}

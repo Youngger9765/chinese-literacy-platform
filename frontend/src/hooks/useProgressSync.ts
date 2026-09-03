@@ -39,6 +39,13 @@ export interface UseProgressSyncOptions {
    * Use this to hydrate in-memory state from the DB on page load / refresh.
    */
   onProgressLoaded?: (data: StepProgressData) => void;
+  /**
+   * Issue #3024 — called after a successful save when the backend awarded
+   * XP and/or unlocked badges for a newly-completed step mid-session. NOT
+   * called for saves that persisted step_data with no new completed step
+   * (the common case), nor for the initial GET load.
+   */
+  onXpAwarded?: (result: { xpAwarded: number; badgesUnlocked: string[] }) => void;
 }
 
 export interface UseProgressSyncReturn {
@@ -62,6 +69,7 @@ export function useProgressSync({
   token,
   dbSessionId,
   onProgressLoaded,
+  onXpAwarded,
 }: UseProgressSyncOptions): UseProgressSyncReturn {
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const latestDataRef = useRef<StepProgressData | null>(null);
@@ -85,6 +93,8 @@ export function useProgressSync({
   // step-data sync on every render, bursting the rate-limited PUT endpoint.
   const onProgressLoadedRef = useRef(onProgressLoaded);
   useEffect(() => { onProgressLoadedRef.current = onProgressLoaded; }, [onProgressLoaded]);
+  const onXpAwardedRef = useRef(onXpAwarded);
+  useEffect(() => { onXpAwardedRef.current = onXpAwarded; }, [onXpAwarded]);
 
   const readStoredVersion = (data: StepProgressData | null | undefined): number => {
     const v = data?.version;
@@ -128,6 +138,14 @@ export function useProgressSync({
           // Track the new server version for the next save
           if (res.step_progress) {
             lastServerVersionRef.current = readStoredVersion(res.step_progress);
+          }
+          // Issue #3024 — surface mid-session XP/badge awards for a
+          // newly-completed step. Absent on old responses / GET-shaped
+          // payloads, so this is opt-in and backward compatible.
+          const xpAwarded = res.xp_awarded ?? 0;
+          const badgesUnlocked = res.badges_unlocked ?? [];
+          if (xpAwarded > 0 || badgesUnlocked.length > 0) {
+            onXpAwardedRef.current?.({ xpAwarded, badgesUnlocked });
           }
         })
         .catch((err) => {
