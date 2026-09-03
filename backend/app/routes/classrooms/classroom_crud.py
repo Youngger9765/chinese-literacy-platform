@@ -304,6 +304,18 @@ def preview_classroom_by_code(
         .filter(Classroom.join_code == code.upper())
         .first()
     )
+
+    # Log hits and misses alike. The join endpoint leaves a ClassroomStudent
+    # row behind, so probing codes through it shows up in the data afterwards.
+    # This one writes nothing, which would make it a way to walk the code space
+    # and read back class names without leaving any trace. The rate limit caps
+    # how fast; this is what makes it visible at all. The code itself is not
+    # logged -- it is a live credential.
+    logger.info(
+        "Join-code preview by user %d: %s",
+        current_user.id,
+        "hit" if classroom is not None else "miss",
+    )
     if classroom is None or not classroom.is_active:
         raise HTTPException(status_code=404, detail="Invalid join code")
 
