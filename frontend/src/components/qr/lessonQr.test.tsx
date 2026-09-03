@@ -119,7 +119,12 @@ describe('LessonQrButton', () => {
     render(<LessonQrButton lessonId={1} step="full-text-annotate" lessonTitle="風箏" sectionSlug="mcyjp" />);
     fireEvent.click(screen.getByRole('button', { name: '顯示全文朗讀 QR code' }));
     await waitFor(() => expect(screen.getByRole('dialog')).toBeTruthy());
-    fireEvent.keyDown(window, { key: 'Escape' });
-    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    // Escape 在 waitFor 裡重送：dialog 出現在 DOM 上與它的 keydown effect
+    // 真的掛好之間有一個 tick 的縫，只送一次會落在縫裡（2026-09-03 CI flaky，
+    // 本地 1/14 重現）。重送不會弱化斷言 —— 驗的仍是「按 Escape 會關掉」。
+    await waitFor(() => {
+      fireEvent.keyDown(window, { key: 'Escape' });
+      expect(screen.queryByRole('dialog')).toBeNull();
+    });
   });
 });

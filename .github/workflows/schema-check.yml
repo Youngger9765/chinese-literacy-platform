@@ -1,3 +1,8 @@
+# 草稿 PR 只跑 preview，不跑完整測試（Young 2026-09-03）
+# 理由：非技術的發文者要的是「快點看到結果」，不是等 8 個 workflow。
+# agent 一律開 draft PR → 只有 preview 部署會跑；工程師 review 完按
+# 「Ready for review」→ ready_for_review 事件觸發完整 CI → 綠了才 merge。
+# merge 本身受 branch protection（需 1 個 review）保護，仍然只有工程師能做。
 name: Schema Drift Check
 
 # ⚠️ 觸發不用 `paths:`（#2916 收尾查到）。
@@ -14,6 +19,7 @@ name: Schema Drift Check
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
   push:
     branches:
       - staging
@@ -21,7 +27,8 @@ on:
 
 jobs:
   detect-changes:
-    if: github.event_name == 'pull_request'
+    # 草稿 PR 不跑（見檔頭）
+    if: github.event_name == 'pull_request' && github.event.pull_request.draft != true
     runs-on: ubuntu-latest
     outputs:
       relevant: ${{ steps.filter.outputs.relevant }}
@@ -44,8 +51,11 @@ jobs:
     needs: detect-changes
     # push 到 staging/main 時 detect-changes 被跳過 → needs 的結果是 skipped，
     # 所以要明寫「push 一律跑」，否則整支會跟著被跳掉。
+    # 草稿 PR 不跑（見檔頭）—— always() 會繞過 needs 的 skipped，
+    # 不明寫排除的話草稿 PR 照樣會跑這支。
     if: |
-      always() && (github.event_name == 'push'
+      always() && github.event.pull_request.draft != true
+        && (github.event_name == 'push'
         || needs.detect-changes.outputs.relevant == 'true')
     runs-on: ubuntu-latest
 

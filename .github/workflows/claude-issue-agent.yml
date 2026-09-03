@@ -91,6 +91,11 @@ jobs:
             ```
 
             要點：
+            - CTA 可以（也應該）請他**看 preview 對不對**，但不要請他按
+              「Ready for review」或 merge —— 那是工程師的動作。
+            - ⛔ **CTA 裡不可以出現「請你開 PR」「請你按 Create PR」「請你 push
+              空 commit」這類本來就是我方該做的事**。CTA 只放**只有他能做的
+              判斷**：看畫面、確認對不對、回覆通過或未通過。
             - **「驗收通過」這四個字要原樣出現在你的指示裡** —— 系統靠這個
               關鍵字判定案主已驗收；他寫「好像可以了」是關不掉票的。
             - 「要做的事」不可以寫「請驗收」這種空話。要寫成他照著就能做完的
@@ -148,7 +153,18 @@ jobs:
             - commit 訊息用 Conventional Commits，英文，包含 Fixes #N
 
             ## 第 4 步：PR + preview
-            - gh pr create --base staging，說明寫改了什麼與驗法，body 含 Fixes #N
+            🔴 **你必須自己把 PR 開出來。** 這個 action 會在留言裡附一個
+            「Create PR」連結 —— **那不算數**。對方是不會寫程式的老師，把
+            開 PR 丟回給他就等於這一輪沒做完（2026-09-03 演練實際踩到：
+            agent 推了 branch、只給連結，issue 就卡在那裡）。
+            - 用 `gh pr create --draft --base staging --head <你的 branch>` 建立。
+              **一定要 `--draft`**：草稿 PR 只跑 preview 部署，不拖著 8 個完整
+              測試 workflow —— 發文者要的是「快點看到結果」，不是等一輪全測跑完。
+              完整 CI 在工程師 review 完按「Ready for review」時才跑；merge 也
+              只有工程師能做（branch protection 需 1 個 review）。
+              說明寫改了什麼與驗法，body 含 Fixes #N
+            - 開完用 `gh pr view <N> --json number,url` 確認真的存在，
+              把**PR 連結**貼進 issue comment。沒有 PR 編號就不要說你開好了
             - PR 開了之後 preview 會自動部署（幾分鐘），網址規則：
               前端 https://lingoleap-frontend-issue-N-958347263320.asia-east1.run.app
               後端 https://lingoleap-backend-issue-N-958347263320.asia-east1.run.app

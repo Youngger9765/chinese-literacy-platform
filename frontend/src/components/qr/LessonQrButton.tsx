@@ -13,7 +13,7 @@
  * blind gives you no way to tell a correct code from a wrong one until you
  * have already printed it and scanned it with a phone.
  */
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Download, Loader2, QrCode } from 'lucide-react';
 
@@ -62,11 +62,17 @@ const QrPreviewDialog: React.FC<{
   filename: string;
   onClose: () => void;
 }> = ({ title, value, dataUrl, filename, onClose }) => {
+  // 監聽器只在掛載時裝一次。依賴 [onClose] 的話，父層每次重繪都會把它
+  // 拔掉再裝回去 —— openPreview 的 finally 會 setIsGenerating(false)，
+  // 那次重繪就落在 dialog 剛出現之後，Escape 打在縫裡就沒人接。
+  // callback 走 ref，這樣既不churn、又不會抓到過期的 onClose。
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onCloseRef.current(); };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
+  }, []);
 
   return createPortal((
     <div
@@ -148,6 +154,14 @@ const LessonQrButton: React.FC<LessonQrButtonProps> = ({
     }
   }, [lessonId, step, sectionSlug]);
 
+  // ⚠️ 一定要 useCallback。寫成 `onClose={() => setPreview(null)}` 的話每次
+  //    render 都是新的函式 identity，而 QrPreviewDialog 的 keydown effect 依賴
+  //    它 —— 於是每次父層重繪都把 Escape 監聽器拔掉再裝回去。
+  //    `openPreview` 的 finally 會 setIsGenerating(false)，那次重繪剛好落在
+  //    dialog 出現之後，Escape 打在拔掉的那一瞬間就無效（2026-09-03 CI flaky，
+  //    本地連跑兩次一綠一紅）。
+  const closePreview = useCallback(() => setPreview(null), []);
+
   // 沒有代號就不出這顆按鈕 —— 印不出 slug 短網址就不該給 QR（#2916）。
   // 顯示一顆按不出東西的按鈕，比不顯示更糟。
   if (!sectionSlug) return null;
@@ -181,7 +195,7 @@ const LessonQrButton: React.FC<LessonQrButtonProps> = ({
           value={preview.value}
           dataUrl={preview.dataUrl}
           filename={qrFileName(stem, lessonId)}
-          onClose={() => setPreview(null)}
+          onClose={closePreview}
         />
       )}
     </>

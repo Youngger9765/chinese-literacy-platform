@@ -1,5 +1,7 @@
 # 在 issue 裡 @claude：自動開工代理怎麼用
 
+> 完整流程與分工（誰在什麼時候做什麼）→ [issue-claude-agent-flow.md](issue-claude-agent-flow.md)
+
 > 給方大哥、Hans、老師們 —— 不用會寫程式。
 
 ## 怎麼用（兩步）
