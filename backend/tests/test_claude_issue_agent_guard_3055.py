@@ -148,3 +148,59 @@ def test_positive_control_prompt_still_contains_the_working_rules():
     prompt = [s for s in steps if "claude-code-action" in str(s.get("uses", ""))][0]["with"]["prompt"]
     for rule in ("PDCA", "重現", "PRD", "第 N 輪", "preview", "Fixes #N", "TDD"):
         assert rule in prompt, f"工作規則 {rule!r} 從 prompt 消失了"
+
+
+# ── CTA 鎖：使用者要知道「接下來換我做什麼」 ────────────────────────
+#
+# Young 2026-09-03: 「要給用戶明確的 call to action 讓他們知道該做什麼」。
+# 對象是不會寫程式的老師 —— 沒有明確指示他就不會動, 票就懸在那裡。
+
+
+def _prompt():
+    _, doc = _load()
+    steps = doc["jobs"]["work"]["steps"]
+    return [s for s in steps if "claude-code-action" in str(s.get("uses", ""))][0]["with"]["prompt"]
+
+
+def test_every_comment_must_end_with_a_call_to_action():
+    prompt = _prompt()
+    assert "接下來換你" in prompt, "prompt 沒有要求每則留言附 CTA 區塊"
+    for piece in ("要做的事", "看完請回覆"):
+        assert piece in prompt, f"CTA 格式缺 {piece!r}"
+    assert "請驗收" in prompt, "缺『不可以寫請驗收這種空話』的反例指示"
+
+
+def test_cta_keywords_match_the_close_gate():
+    """CTA 教使用者回的詞, 必須是 issue-close gate 認得的.
+
+    gate (~/.claude/hooks/pre-issue-close-check.sh) 用關鍵字比對判定案主
+    已驗收。2026-09-03 就踩過: Hans 寫「驗收通過」而 gate 的清單裡沒有,
+    票被擋住關不掉。CTA 若教使用者回一個 gate 不認得的詞, 同一個洞會再開一次。
+    """
+    prompt = _prompt()
+    assert "驗收通過" in prompt, (
+        "CTA 沒有教使用者回「驗收通過」—— 這是 close gate 認得的關鍵字, "
+        "使用者若回「好像可以了」票是關不掉的"
+    )
+    assert "未通過" in prompt, "CTA 缺退件用語 —— 使用者不知道不滿意時該怎麼講"
+    # ⚠️ 光斷言「CTA 區塊裡有這個詞」不夠 —— 區塊裡的說明文字本身就提到它,
+    # 所以把回覆選項改成別的詞, 這條照樣綠 (mutation 實測抓到)。要驗的是
+    # **給使用者勾選的那一行** 帶不帶關鍵字。
+    cta = prompt[prompt.index("接下來換你"):]
+    pass_line = [ln for ln in cta.splitlines() if "✅" in ln and "→" in ln]
+    fail_line = [ln for ln in cta.splitlines() if "❌" in ln and "→" in ln]
+    assert pass_line, "CTA 沒有『通過』那一行回覆選項"
+    assert fail_line, "CTA 沒有『未通過』那一行回覆選項"
+    assert "驗收通過" in pass_line[0], (
+        f"通過選項教使用者回的是 {pass_line[0].strip()!r} —— close gate 認的是"
+        "「驗收通過」, 回別的詞票關不掉"
+    )
+    assert "未通過" in fail_line[0], f"退件選項用語不對: {fail_line[0].strip()!r}"
+
+
+def test_acceptance_steps_are_actionable_not_abstract():
+    """驗收步驟要寫成可照做的動作序列（開哪個網址→什麼身分→點哪裡→看到什麼）."""
+    prompt = _prompt()
+    assert "可照做的動作序列" in prompt
+    for anchor in ("一鍵登入", "應出現"):
+        assert anchor in prompt, f"驗收步驟範例缺 {anchor!r} —— 範例不具體等於沒範例"
