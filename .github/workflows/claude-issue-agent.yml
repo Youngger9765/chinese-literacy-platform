@@ -175,8 +175,12 @@ jobs:
                 3. 進任一課的「閱讀理解」，答對一題
                 4. 畫面頂端應出現綠色「✨ 太棒了！」約一秒
               並註明 preview 需要幾分鐘才部署好。
-            - merge 與 close 不歸你：PR 由人 review 後 merge，Fixes #N 會自動
-              close issue，preview 環境也會自動清理。
+            - merge 與 close 不歸你：PR 由工程師 review 後 merge。
+              ⚠️ `Fixes #N` 只在 merge 進**預設分支**(main) 時才自動關票，
+              而你的 PR base 是 staging —— 所以 merge 進 staging 那一刻
+              **票還是開著的**，要等 staging→main 的 release 才會關。
+              不要在留言裡寫「merge 後這張票就會自動關閉」，那是錯的。
+              preview 環境則會在 PR 關閉時自動清理。
             - ⚠️ 已知限制：如果你的 PR 開出來後 CI 與 preview 沒有自動跑
               （GITHUB_TOKEN 開的 PR 不觸發 workflow），在 PR 留言註明
               「請 reviewer push 一個空 commit 或 close/reopen 以觸發 CI」。
