@@ -112,8 +112,9 @@ const JoinClassroomPage: React.FC = () => {
         if (err.status === 404) {
           setError('找不到此加入代碼，請確認代碼是否正確');
         } else if (err.status === 409) {
-          // MUTATION: regress to the old hard-error banner
-          setError('你已經加入這個班級了');
+          // Already in the class is not an error -- a student rescanning the
+          // projected QR is the expected case, not a mistake to report in red.
+          setResult({ kind: 'already', text: '你已經加入這個班級了' });
         } else if (err.status === 400) {
           setError(err.message || '加入代碼無效');
         } else {
