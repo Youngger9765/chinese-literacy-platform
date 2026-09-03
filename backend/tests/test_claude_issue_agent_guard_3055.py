@@ -204,3 +204,32 @@ def test_acceptance_steps_are_actionable_not_abstract():
     assert "可照做的動作序列" in prompt
     for anchor in ("一鍵登入", "應出現"):
         assert anchor in prompt, f"驗收步驟範例缺 {anchor!r} —— 範例不具體等於沒範例"
+
+
+# ── 演練 #3059 抓到的真缺陷 ────────────────────────────────────────
+#
+# 上線演練時 agent 推了 branch 就留言「點這裡 Create PR」, 把開 PR 丟回給
+# 一個不會寫程式的老師 —— 那一輪等於沒做完, 票就卡住。action 內建會附
+# 那個連結, 所以 prompt 必須明講「連結不算數」。
+
+
+def test_agent_must_open_the_pr_itself():
+    prompt = _prompt()
+    assert "gh pr create" in prompt, "prompt 沒有要求實際建立 PR"
+    assert "那不算數" in prompt, (
+        "prompt 沒有明講 action 內建的『Create PR』連結不算數 —— "
+        "演練時 agent 就是靠那個連結交差的"
+    )
+    assert "gh pr view" in prompt, "缺『開完要確認 PR 真的存在』的驗證步驟"
+
+
+def test_cta_must_not_hand_our_own_work_back_to_the_user():
+    """CTA 只放『只有他能做的判斷』, 不可以塞我方該做的事.
+
+    演練實例: CTA 第 1 點寫「點上面的 Create a PR 連結」——
+    那是 agent 自己該做的, 寫進 CTA 等於把工作丟回去。
+    """
+    prompt = _prompt()
+    assert "CTA 裡不可以出現" in prompt, "缺 CTA 內容邊界的禁令"
+    for banned in ("請你開 PR", "空 commit"):
+        assert banned in prompt, f"禁令沒點名 {banned!r} 這種回丟工作的寫法"
