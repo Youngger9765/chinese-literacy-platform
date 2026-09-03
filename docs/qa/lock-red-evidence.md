@@ -8,6 +8,7 @@
 
 ## 已驗過會咬
 
+- `test_join_preview_rate_limit_3081.py` — mutation：拿掉 `/classrooms/join-preview` endpoint-level limiter check → 第 11 次同 user 探 code 回到 200 而非 429，1 failed；還原 → 1 passed
 - `test_characterization_learning_sessions_1955.py` — 復現：同上，靜默跳過導致「路由沒註冊」
 - `test_characterization_omo_1949.py` — 復現：py3.11+fastapi0.141 AttributeError
 - `test_classrooms_dev_filter_1999.py` — 同上（它是污染源那一側）

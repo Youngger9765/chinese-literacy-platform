@@ -7,6 +7,7 @@ from sqlalchemy import func, or_
 from sqlalchemy.orm import Session, joinedload
 
 from ...auth.dependencies import get_current_user
+from ...auth.rate_limiter import InMemoryRateLimiter
 from ...auth.policies import is_system_admin, _is_org_admin_of_school, _org_admin_org_ids
 from ...database import get_db
 from ...models.school import Classroom, ClassroomStudent, ClassroomTeacher, School
@@ -35,6 +36,9 @@ from .helpers import (
 
 router = APIRouter(tags=["classrooms"])
 logger = logging.getLogger(__name__)
+JOIN_PREVIEW_MAX_REQUESTS = 10
+JOIN_PREVIEW_WINDOW_SECONDS = 60
+join_preview_rate_limiter = InMemoryRateLimiter()
 
 
 @router.post("/classrooms", status_code=201, response_model=ClassroomResponse)
@@ -282,6 +286,19 @@ def preview_classroom_by_code(
     the read-only half of POST /classrooms/join: same lookup, same 404
     rules, no ClassroomStudent row written.
     """
+    key = f"classroom_join_preview:user:{current_user.id}"
+    rl_info = join_preview_rate_limiter.check_with_info(
+        key,
+        JOIN_PREVIEW_MAX_REQUESTS,
+        JOIN_PREVIEW_WINDOW_SECONDS,
+    )
+    if not rl_info.allowed:
+        raise HTTPException(
+            status_code=429,
+            detail="Join preview rate limit exceeded. Please wait before retrying.",
+            headers={"Retry-After": str(rl_info.retry_after)},
+        )
+
     classroom = (
         db.query(Classroom)
         .filter(Classroom.join_code == code.upper())
