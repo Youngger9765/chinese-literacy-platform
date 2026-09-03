@@ -80,3 +80,5 @@ push 到 staging 只跑 schema-check／secret-scan／security-audit。
 1. **內文最後要打 `@claude`** —— 不打就只是普通的票，不會有人自動開工
 2. **驗收回「驗收通過」四個字** —— 回「好像可以了」系統認不得，票關不掉
 3. **同一張票修 3 輪會自己停手** —— 那不是壞掉，是設計；那時該找工程師接手
+
+<!-- 演練 2（#3065）驗證行：agent 自己開 draft PR + preview-only checks + CTA 不叫案主開 PR -->
