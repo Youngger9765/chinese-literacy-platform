@@ -125,3 +125,8 @@ def pytest_runtest_setup(item):
         general_rate_limiter.reset()
     except (ImportError, AttributeError):
         pass
+    try:
+        from app.routes.classrooms.classroom_crud import join_preview_rate_limiter
+        join_preview_rate_limiter.reset()
+    except (ImportError, AttributeError):
+        pass

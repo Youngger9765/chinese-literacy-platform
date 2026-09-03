@@ -8,6 +8,8 @@
 
 ## 已驗過會咬
 
+- `test_join_preview_rate_limit_3081.py` — mutation：拿掉 `/classrooms/join-preview` endpoint-level limiter check → 第 11 次同 user 探 code 回到 200 而非 429，1 failed；還原 → 1 passed
+- `test_classroom_join_and_batch.py` — mutation：在 `/classrooms/join-preview` 的 return 之前插入真的寫入 `ClassroomStudent` 並 commit（正是這條鎖要擋的「唯讀查詢卻偷偷入班」）→ `TestClassroomJoinPreview::test_preview_does_not_enroll` 1 failed，同 class 另外 6 條照樣綠（證明咬得精準、不是整批陪紅）；還原 → 48 passed。⚠️ 這個檔在 2026-09-04 之前從未被任何 workflow 點名執行過，7 條 preview 鎖等於寫了沒插電
 - `test_characterization_learning_sessions_1955.py` — 復現：同上，靜默跳過導致「路由沒註冊」
 - `test_characterization_omo_1949.py` — 復現：py3.11+fastapi0.141 AttributeError
 - `test_classrooms_dev_filter_1999.py` — 同上（它是污染源那一側）

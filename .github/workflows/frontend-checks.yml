@@ -399,4 +399,10 @@ jobs:
           src/pages/teacher/__tests__/ClassroomTabs.liveMonitor.test.tsx \
           src/pages/__tests__/junyiStorageBlocked.test.tsx \
           src/pages/__tests__/JunyiSloLogout.test.tsx \
-          src/pages/teacher/__tests__/TextManagementTab.teacherTryout.test.tsx
+          src/pages/teacher/__tests__/TextManagementTab.teacherTryout.test.tsx \
+          src/components/qr/classroomJoinQr.test.ts \
+          src/components/qr/ClassroomJoinQrButton.test.tsx \
+          src/pages/__tests__/JoinClassroomPage.qrflow.test.tsx \
+          src/pages/__tests__/LoginPage.redirect.test.tsx \
+          src/components/auth/__tests__/PublicOnlyRoute.redirect.test.tsx \
+          src/pages/__tests__/JoinViaLoginFlow.integration.test.tsx

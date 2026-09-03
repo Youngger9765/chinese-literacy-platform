@@ -7,6 +7,7 @@ from sqlalchemy import func, or_
 from sqlalchemy.orm import Session, joinedload
 
 from ...auth.dependencies import get_current_user
+from ...auth.rate_limiter import InMemoryRateLimiter
 from ...auth.policies import is_system_admin, _is_org_admin_of_school, _org_admin_org_ids
 from ...database import get_db
 from ...models.school import Classroom, ClassroomStudent, ClassroomTeacher, School
@@ -14,6 +15,7 @@ from ...models.user import User
 from ...schemas.classroom import (
     ClassroomCreateRequest,
     ClassroomDetailResponse,
+    ClassroomJoinPreviewResponse,
     ClassroomListResponse,
     ClassroomResponse,
     ClassroomUpdateRequest,
@@ -34,6 +36,9 @@ from .helpers import (
 
 router = APIRouter(tags=["classrooms"])
 logger = logging.getLogger(__name__)
+JOIN_PREVIEW_MAX_REQUESTS = 10
+JOIN_PREVIEW_WINDOW_SECONDS = 60
+join_preview_rate_limiter = InMemoryRateLimiter()
 
 
 @router.post("/classrooms", status_code=201, response_model=ClassroomResponse)
@@ -261,6 +266,64 @@ def list_my_enrolled_classrooms(
     ]
 
     return StudentEnrolledClassroomsResponse(classrooms=classrooms, total=len(classrooms))
+
+
+@router.get("/classrooms/join-preview", response_model=ClassroomJoinPreviewResponse)
+def preview_classroom_by_code(
+    code: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Look up a classroom by join code WITHOUT enrolling (#3081).
+
+    IMPORTANT: This route MUST appear before /classrooms/{classroom_id} so that
+    FastAPI does not try to parse 'join-preview' as an integer classroom_id.
+
+    The QR flow lands a student on the join page with the code already
+    filled in. Before that turns into an actual enrollment, the page shows
+    which classroom the code belongs to -- a projector one row over, or a
+    QR photographed weeks ago, should not silently enroll anyone. This is
+    the read-only half of POST /classrooms/join: same lookup, same 404
+    rules, no ClassroomStudent row written.
+    """
+    key = f"classroom_join_preview:user:{current_user.id}"
+    rl_info = join_preview_rate_limiter.check_with_info(
+        key,
+        JOIN_PREVIEW_MAX_REQUESTS,
+        JOIN_PREVIEW_WINDOW_SECONDS,
+    )
+    if not rl_info.allowed:
+        raise HTTPException(
+            status_code=429,
+            detail="Join preview rate limit exceeded. Please wait before retrying.",
+            headers={"Retry-After": str(rl_info.retry_after)},
+        )
+
+    classroom = (
+        db.query(Classroom)
+        .filter(Classroom.join_code == code.upper())
+        .first()
+    )
+
+    # Log hits and misses alike. The join endpoint leaves a ClassroomStudent
+    # row behind, so probing codes through it shows up in the data afterwards.
+    # This one writes nothing, which would make it a way to walk the code space
+    # and read back class names without leaving any trace. The rate limit caps
+    # how fast; this is what makes it visible at all. The code itself is not
+    # logged -- it is a live credential.
+    logger.info(
+        "Join-code preview by user %d: %s",
+        current_user.id,
+        "hit" if classroom is not None else "miss",
+    )
+    if classroom is None or not classroom.is_active:
+        raise HTTPException(status_code=404, detail="Invalid join code")
+
+    school = db.query(School).filter(School.id == classroom.school_id).first()
+    if school is None or not school.is_active:
+        raise HTTPException(status_code=404, detail="Invalid join code")
+
+    return classroom
 
 
 @router.get("/classrooms/{classroom_id}", response_model=ClassroomDetailResponse)
