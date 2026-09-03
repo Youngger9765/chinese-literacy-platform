@@ -296,6 +296,13 @@ const TextManagementTab: React.FC<TextManagementTabProps> = ({ classroomId }) =>
         </div>
       )}
 
+      {/* #3074 ③：說清楚「我來試做」是誰在做 —— 老師最怕的是動到學生的東西 */}
+      {assignedTexts.length > 0 && (
+        <p className="px-5 pt-3 text-xs text-gray-500">
+          「我來試做」會以你自己的帳號進入該課，作答不會寫進學生的學習紀錄，也不會出現在班級統計。
+        </p>
+      )}
+
       {/* Assigned text list */}
       {assignedTexts.length === 0 ? (
         <div className="p-8 text-center">
@@ -331,6 +338,17 @@ const TextManagementTab: React.FC<TextManagementTabProps> = ({ classroomId }) =>
                   </div>
                 </div>
                 <div className="flex items-center gap-1.5 shrink-0">
+                  {/* #3074 ①：老師要能實際操作看看，不是只能看學生紀錄。
+                      用老師自己的帳號進學習流程 —— 寫入落在他自己身上，
+                      不碰任何真小孩的紀錄；班級統計走 ClassroomStudent 註冊列
+                      取人，老師不在裡面，所以試做資料進不了統計。 */}
+                  <a
+                    href={`/learn/${text.text_id}/lesson-intro`}
+                    className="px-2 py-0.5 rounded text-xs font-medium text-accent hover:bg-accent-bg transition-colors cursor-pointer shrink-0"
+                    title="以你自己的帳號實際操作這一課"
+                  >
+                    我來試做
+                  </a>
                   <button
                     onClick={() => setTagEditorStory({ ref: text.text_id, title: text.title })}
                     className="px-2 py-0.5 rounded text-xs text-gray-400 hover:text-blue-600 hover:bg-blue-50 opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
