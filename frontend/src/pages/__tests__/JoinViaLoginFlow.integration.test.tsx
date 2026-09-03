@@ -161,9 +161,16 @@ describe('Full /join QR redirect chain -- unauthenticated scan through to landin
 
     // The first post-/login landing must be the exact QR target, not a
     // detour through "/" that happens to end up back here.
-    const loginIndex = navHistory.indexOf('/login');
-    expect(loginIndex).toBeGreaterThanOrEqual(0);
-    const afterLogin = navHistory.slice(loginIndex + 1);
-    expect(afterLogin[0]).toBe('/join?code=ABC123');
+    // waitFor, not a bare assertion: RecordLocation writes navHistory from a
+    // useEffect, and the probe appearing in the DOM does not guarantee that
+    // effect has committed yet. Reading navHistory synchronously here caught
+    // the array one entry short -- ending at '/login' -- and reported
+    // `undefined`, which reads exactly like "the redirect never happened".
+    await waitFor(() => {
+      const loginIndex = navHistory.indexOf('/login');
+      expect(loginIndex).toBeGreaterThanOrEqual(0);
+      const afterLogin = navHistory.slice(loginIndex + 1);
+      expect(afterLogin[0], `chain was ${JSON.stringify(navHistory)}`).toBe('/join?code=ABC123');
+    });
   });
 });
