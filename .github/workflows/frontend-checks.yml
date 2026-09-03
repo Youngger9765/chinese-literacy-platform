@@ -396,4 +396,5 @@ jobs:
           src/hooks/useStepProgressPersistence.badgeUnlock.test.ts \
           src/components/lesson-content/__tests__/ExerciseBlockView.correctAnswerBurst.test.tsx \
           src/pages/teacher/__tests__/LiveMonitorTab.test.tsx \
-          src/pages/teacher/__tests__/ClassroomTabs.liveMonitor.test.tsx
+          src/pages/teacher/__tests__/ClassroomTabs.liveMonitor.test.tsx \
+          src/pages/__tests__/junyiStorageBlocked.test.tsx
