@@ -116,3 +116,53 @@ export const authToken = {
     return token ? { Authorization: `Bearer ${token}` } : {};
   },
 };
+
+// ---------------------------------------------------------------------------
+// Session cleanup — single logout primitive
+// ---------------------------------------------------------------------------
+
+/**
+ * localStorage flag set when the session was sourced from Junyi SSO (#1260).
+ * Read on logout to decide whether to also clear Junyi-side cookies. Single
+ * source of truth — never duplicate this constant in other files.
+ */
+export const JUNYI_SESSION_FLAG = 'lingoleap_junyi_session';
+
+/** sessionStorage key holding the active assignment context (#1260). */
+export const ACTIVE_ASSIGNMENT_CONTEXT_KEY = 'activeAssignmentContext';
+
+/**
+ * Clears all LingoLeap client-side credentials and learning session state:
+ * the JWT (localStorage), the Junyi session flag, and per-session learning
+ * keys in sessionStorage.
+ *
+ * Shared by AuthContext.logout and the Junyi Single Logout route
+ * (JunyiSloLogoutPage) so both clear exactly the same state. Idempotent and
+ * never throws — storage errors degrade gracefully. Callers own any React
+ * state reset and post-cleanup navigation.
+ */
+export function clearAuthSession(): void {
+  authToken.remove();
+  safeStorage.local.remove(JUNYI_SESSION_FLAG);
+  try {
+    sessionStorage.removeItem('activeAssignmentId');
+    sessionStorage.removeItem('activeAssignmentGoals');
+    sessionStorage.removeItem(ACTIVE_ASSIGNMENT_CONTEXT_KEY);
+
+    const keysToRemove: string[] = [];
+    for (let i = 0; i < sessionStorage.length; i += 1) {
+      const key = sessionStorage.key(i);
+      if (!key) continue;
+      if (
+        key.startsWith('db-session-')
+        || key.startsWith('assignment-db-session-')
+        || key.startsWith('self-db-session-')
+      ) {
+        keysToRemove.push(key);
+      }
+    }
+    keysToRemove.forEach((key) => sessionStorage.removeItem(key));
+  } catch {
+    // non-fatal
+  }
+}
