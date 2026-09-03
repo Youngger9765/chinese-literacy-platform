@@ -1,3 +1,8 @@
+# 草稿 PR 只跑 preview，不跑完整測試（Young 2026-09-03）
+# 理由：非技術的發文者要的是「快點看到結果」，不是等 8 個 workflow。
+# agent 一律開 draft PR → 只有 preview 部署會跑；工程師 review 完按
+# 「Ready for review」→ ready_for_review 事件觸發完整 CI → 綠了才 merge。
+# merge 本身受 branch protection（需 1 個 review）保護，仍然只有工程師能做。
 name: Spec Check
 
 # Modular spec system (issues #2029 + #2058 + #2041): verify the registry is
@@ -9,12 +14,14 @@ name: Spec Check
 # legacy_tests union dynamically from specs/registry.yaml.
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, ready_for_review]
 
 jobs:
   # 路徑判斷改在 job 裡做 —— `on.paths` 只看前 300 個變更檔，批次改名的 PR
   # 會讓整支被靜靜跳過，而且檢查清單上不會出現那一列（#2925）。
   detect-changes:
+    # 草稿 PR 不跑（見檔頭）
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     outputs:
       relevant: ${{ steps.filter.outputs.relevant }}
