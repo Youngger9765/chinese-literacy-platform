@@ -212,6 +212,32 @@ export async function joinClassroomByCode(
   return handleResponse<ClassroomResponse>(res);
 }
 
+// --- Preview classroom by code, no enrollment side effect (#3081) ---
+//
+// The QR flow lands a student on /join with the code already filled in.
+// Before that turns into an actual `joinClassroomByCode` call, the page
+// shows which classroom the code belongs to -- scanning the wrong
+// projector, or an old photographed QR, should not silently enroll anyone.
+
+export interface ClassroomJoinPreview {
+  id: number;
+  name: string;
+}
+
+export async function previewClassroomByCode(
+  token: string,
+  joinCode: string,
+): Promise<ClassroomJoinPreview> {
+  const res = await fetch(
+    `${API_BASE}/api/classrooms/join-preview?code=${encodeURIComponent(joinCode)}`,
+    {
+      method: 'GET',
+      headers: authHeaders(token),
+    },
+  );
+  return handleResponse<ClassroomJoinPreview>(res);
+}
+
 // --- Batch create students ---
 
 export interface BatchStudentInput {

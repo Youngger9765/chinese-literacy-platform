@@ -24,6 +24,21 @@ class ClassroomJoinRequest(BaseModel):
     join_code: str = Field(..., min_length=1, max_length=8)
 
 
+class ClassroomJoinPreviewResponse(BaseModel):
+    """Read-only lookup by join code (#3081) -- no enrollment side effect.
+
+    Lets a student confirm *which* classroom a scanned QR points at before
+    they commit to joining it. The join endpoint itself can't serve this: it
+    enrolls on success, so calling it "just to peek" would join the wrong
+    class you were trying to rule out.
+    """
+
+    id: int
+    name: str
+
+    model_config = {"from_attributes": True}
+
+
 class StudentInClassroomResponse(BaseModel):
     id: int
     name: str

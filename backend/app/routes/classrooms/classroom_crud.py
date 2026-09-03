@@ -14,6 +14,7 @@ from ...models.user import User
 from ...schemas.classroom import (
     ClassroomCreateRequest,
     ClassroomDetailResponse,
+    ClassroomJoinPreviewResponse,
     ClassroomListResponse,
     ClassroomResponse,
     ClassroomUpdateRequest,
@@ -261,6 +262,39 @@ def list_my_enrolled_classrooms(
     ]
 
     return StudentEnrolledClassroomsResponse(classrooms=classrooms, total=len(classrooms))
+
+
+@router.get("/classrooms/join-preview", response_model=ClassroomJoinPreviewResponse)
+def preview_classroom_by_code(
+    code: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Look up a classroom by join code WITHOUT enrolling (#3081).
+
+    IMPORTANT: This route MUST appear before /classrooms/{classroom_id} so that
+    FastAPI does not try to parse 'join-preview' as an integer classroom_id.
+
+    The QR flow lands a student on the join page with the code already
+    filled in. Before that turns into an actual enrollment, the page shows
+    which classroom the code belongs to -- a projector one row over, or a
+    QR photographed weeks ago, should not silently enroll anyone. This is
+    the read-only half of POST /classrooms/join: same lookup, same 404
+    rules, no ClassroomStudent row written.
+    """
+    classroom = (
+        db.query(Classroom)
+        .filter(Classroom.join_code == code.upper())
+        .first()
+    )
+    if classroom is None or not classroom.is_active:
+        raise HTTPException(status_code=404, detail="Invalid join code")
+
+    school = db.query(School).filter(School.id == classroom.school_id).first()
+    if school is None or not school.is_active:
+        raise HTTPException(status_code=404, detail="Invalid join code")
+
+    return classroom
 
 
 @router.get("/classrooms/{classroom_id}", response_model=ClassroomDetailResponse)

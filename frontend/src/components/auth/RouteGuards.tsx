@@ -14,12 +14,38 @@ const AuthLoadingSpinner: React.FC = () => (
   </div>
 );
 
-/** Redirect authenticated users away from auth pages. */
+/**
+ * Redirect authenticated users away from auth pages.
+ *
+ * ⛔ #3081 root cause (found via real staging repro, not code-reading —
+ * see LoginPage.redirect.test.tsx's header comment for the full chain):
+ * this used to hardcode `<Navigate to="/" replace />`, unconditionally, no
+ * matter where the user was trying to go. A student who scans a
+ * classroom-join QR while logged out lands on `/login` via ProtectedRoute
+ * (which sets `state.from`); LoginPage reads that same `state.from` and
+ * calls its own `navigate(from, {replace:true})` after a successful login.
+ * Both this component and LoginPage react to the *same* `isAuthenticated`
+ * flip and race to call `history.replaceState` -- whichever's call
+ * physically executes last in that tick wins the URL bar. Verified on
+ * staging with `history.pushState/replaceState` hooked: the actual
+ * sequence was `/login -> replace:/join -> replace:/ -> replace:/student`
+ * -- this component's unconditional `/` won the race and stomped
+ * LoginPage's `/join` a moment later, on *every* protected route tested
+ * (`/join`, `/dictionary`), not just this issue's route.
+ *
+ * Reading the same `state.from` here that ProtectedRoute set makes both
+ * sides agree on the destination, so it no longer matters who wins.
+ */
 export const PublicOnlyRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
+  const location = useLocation();
 
   if (isLoading) return <AuthLoadingSpinner />;
-  if (isAuthenticated) return <Navigate to="/" replace />;
+  if (isAuthenticated) {
+    const fromLocation = (location.state as { from?: { pathname: string; search?: string } })?.from;
+    const to = fromLocation ? `${fromLocation.pathname}${fromLocation.search ?? ''}` : '/';
+    return <Navigate to={to} replace />;
+  }
 
   return <>{children}</>;
 };

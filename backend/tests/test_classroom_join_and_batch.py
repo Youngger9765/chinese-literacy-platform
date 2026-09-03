@@ -132,7 +132,7 @@ def school_id():
 def _register_user(client, suffix: str) -> dict:
     unique = uuid.uuid4().hex[:8]
     email = f"{suffix}_{unique}@example.com"
-    password = "SecurePass123!"
+    password = "demo1234"
     name = f"{suffix.title()} {unique}"
     resp = client.post("/api/auth/register", json={
         "email": email,
@@ -484,6 +484,163 @@ class TestJoinClassroomByCode:
             headers=auth_header(student_user["token"]),
         )
         assert resp.status_code == 422
+
+
+# ===========================================================================
+# GET /api/classrooms/join-preview (#3081 -- QR flow classroom-name preview)
+# ===========================================================================
+
+
+class TestClassroomJoinPreview:
+    def test_preview_returns_classroom_name(self, client, teacher, student_user, school_id):
+        create_resp = client.post(
+            "/api/classrooms",
+            json={"name": "Preview Test", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        )
+        join_code = create_resp.json()["join_code"]
+        classroom_id = create_resp.json()["id"]
+
+        preview_resp = client.get(
+            "/api/classrooms/join-preview",
+            params={"code": join_code},
+            headers=auth_header(student_user["token"]),
+        )
+        assert preview_resp.status_code == 200
+        assert preview_resp.json() == {"id": classroom_id, "name": "Preview Test"}
+
+    def test_preview_case_insensitive(self, client, teacher, school_id):
+        create_resp = client.post(
+            "/api/classrooms",
+            json={"name": "Preview Case Test", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        )
+        join_code = create_resp.json()["join_code"]
+
+        viewer = _register_user(client, "preview_case_viewer")
+        resp = client.get(
+            "/api/classrooms/join-preview",
+            params={"code": join_code.lower()},
+            headers=auth_header(viewer["token"]),
+        )
+        assert resp.status_code == 200
+        assert resp.json()["name"] == "Preview Case Test"
+
+    def test_preview_invalid_code_returns_404(self, client, student_user):
+        resp = client.get(
+            "/api/classrooms/join-preview",
+            params={"code": "XXXXXX"},
+            headers=auth_header(student_user["token"]),
+        )
+        assert resp.status_code == 404
+        assert resp.json()["detail"] == "Invalid join code"
+
+    def test_preview_inactive_classroom_returns_404(self, client, teacher, school_id):
+        create_resp = client.post(
+            "/api/classrooms",
+            json={"name": "Inactive Preview Class", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        )
+        classroom_id = create_resp.json()["id"]
+        join_code = create_resp.json()["join_code"]
+
+        update_resp = client.patch(
+            f"/api/classrooms/{classroom_id}",
+            json={"is_active": False},
+            headers=auth_header(teacher["token"]),
+        )
+        assert update_resp.status_code == 200
+
+        viewer = _register_user(client, "inactive_preview_viewer")
+        resp = client.get(
+            "/api/classrooms/join-preview",
+            params={"code": join_code},
+            headers=auth_header(viewer["token"]),
+        )
+        assert resp.status_code == 404
+        assert resp.json()["detail"] == "Invalid join code"
+
+    def test_preview_inactive_school_returns_404(self, client, admin_user):
+        school_resp = client.post(
+            "/api/schools",
+            json={"name": f"Inactive Preview School {uuid.uuid4().hex[:8]}"},
+            headers=auth_header(admin_user["token"]),
+        )
+        assert school_resp.status_code == 201
+        inactive_school_id = school_resp.json()["id"]
+
+        create_resp = client.post(
+            "/api/classrooms",
+            json={"name": "Inactive School Preview Class", "school_id": inactive_school_id},
+            headers=auth_header(admin_user["token"]),
+        )
+        assert create_resp.status_code == 201
+        join_code = create_resp.json()["join_code"]
+
+        update_resp = client.patch(
+            f"/api/schools/{inactive_school_id}",
+            json={"is_active": False},
+            headers=auth_header(admin_user["token"]),
+        )
+        assert update_resp.status_code == 200
+
+        viewer = _register_user(client, "inactive_school_preview_viewer")
+        resp = client.get(
+            "/api/classrooms/join-preview",
+            params={"code": join_code},
+            headers=auth_header(viewer["token"]),
+        )
+        assert resp.status_code == 404
+        assert resp.json()["detail"] == "Invalid join code"
+
+    def test_preview_requires_auth(self, client):
+        resp = client.get(
+            "/api/classrooms/join-preview",
+            params={"code": "ABC123"},
+        )
+        assert resp.status_code == 401
+
+    def test_preview_does_not_enroll(self, client, teacher, school_id):
+        """The whole point of this endpoint: looking does not join.
+
+        Regression lock for #3081 -- a copy-paste of the join logic that
+        forgot to drop the `db.add(ClassroomStudent(...))` call would enroll
+        on preview, and this is the only test that would catch it (the
+        response shape looks identical either way).
+        """
+        create_resp = client.post(
+            "/api/classrooms",
+            json={"name": "No Enroll On Preview", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        )
+        join_code = create_resp.json()["join_code"]
+        classroom_id = create_resp.json()["id"]
+
+        viewer = _register_user(client, "preview_no_enroll_viewer")
+
+        # Preview twice -- neither call should enroll.
+        for _ in range(2):
+            resp = client.get(
+                "/api/classrooms/join-preview",
+                params={"code": join_code},
+                headers=auth_header(viewer["token"]),
+            )
+            assert resp.status_code == 200
+
+        enrollments = client.get(
+            "/api/classrooms/my-enrollments",
+            headers=auth_header(viewer["token"]),
+        )
+        assert enrollments.json()["total"] == 0
+        assert all(c["id"] != classroom_id for c in enrollments.json()["classrooms"])
+
+        # The actual join endpoint must still work after previewing.
+        join_resp = client.post(
+            "/api/classrooms/join",
+            json={"join_code": join_code},
+            headers=auth_header(viewer["token"]),
+        )
+        assert join_resp.status_code == 200
 
 
 # ===========================================================================
