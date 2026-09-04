@@ -401,8 +401,15 @@ export async function exportClassroomReport(_token: string, classroomId: number)
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
   if (!res.ok) {
-    notifySessionUnauthorized();
-    if (res.status === 401) throw new SessionExpiredApiError();
+    // Only 401 ends the session. This used to fire for any !res.ok, so a 500
+    // while building the CSV -- a slow query, a container restart mid request
+    // -- threw the teacher back to the login screen. Their token was never
+    // the problem; they clicked Export at a bad moment. sessionGuard's
+    // onApiUnauthorized already draws this line; this call site predates it.
+    if (res.status === 401) {
+      notifySessionUnauthorized();
+      throw new SessionExpiredApiError();
+    }
     throw new ApiError('Export failed', res.status);
   }
   return res.blob();
