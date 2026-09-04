@@ -31,6 +31,10 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./src/test/setup.ts'],
-    exclude: ['e2e/**', 'node_modules/**', 'src/utils/encouragement.test.ts'],
+    // 'e2e/**' never matched: the Playwright specs live in tests/e2e/, so
+    // vitest kept collecting them and failing with "did not expect
+    // test.describe() to be called here" -- five files that looked like broken
+    // tests but were only ever in the wrong runner.
+    exclude: ['tests/e2e/**', 'e2e/**', 'node_modules/**', 'src/utils/encouragement.test.ts'],
   },
 });
