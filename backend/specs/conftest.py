@@ -31,41 +31,31 @@ from sqlalchemy import JSON
 from sqlalchemy.dialects.postgresql import JSONB
 
 from app.models import Base
+from test_support.sqlite_compat import _apply_sqlite_metadata_patches
 
 
-def _patch_jsonb_columns() -> None:
-    """Replace JSONB column types with JSON for SQLite compatibility."""
-    for table in Base.metadata.sorted_tables:
-        for column in table.columns:
-            if isinstance(column.type, JSONB):
-                column.type = JSON()
 
 
-def _patch_pg_server_defaults() -> None:
-    """Strip PostgreSQL-specific server_default values (e.g. ``'{}'::jsonb``).
 
-    SQLite cannot parse ``'{}'::jsonb``; remove any server_default whose text
-    contains ``::``, leaving Python-side defaults intact.
-    """
-    for table in Base.metadata.sorted_tables:
-        for column in table.columns:
-            sd = column.server_default
-            if sd is None:
-                continue
-            arg = getattr(sd, "arg", None)
-            if arg is None:
-                continue
-            # server_default arg may be a TextClause (.text) OR a plain string
-            # (e.g. mapped_column(JSONB, server_default="'[]'::jsonb")).
-            arg_text = getattr(arg, "text", None)
-            if arg_text is None and isinstance(arg, str):
-                arg_text = arg
-            if isinstance(arg_text, str) and "::" in arg_text:
-                column.server_default = None
+
 
 
 # Run once at import time, before any spec test creates tables.
-_patch_jsonb_columns()
-_patch_pg_server_defaults()
+# One implementation, shared with tests/conftest.py. This file used to carry
+# its own copy and the two drifted -- see test_support/sqlite_compat.py.
+_apply_sqlite_metadata_patches()
+
+# Re-apply before every create_all, not just at import: whichever conftest
+# loads second must not find the metadata already rewritten by a different
+# (or older) version of these rules.
+_original_create_all = Base.metadata.create_all
+
+
+def _create_all_with_sqlite_patches(*args, **kwargs):
+    _apply_sqlite_metadata_patches()
+    return _original_create_all(*args, **kwargs)
+
+
+Base.metadata.create_all = _create_all_with_sqlite_patches
 
 
