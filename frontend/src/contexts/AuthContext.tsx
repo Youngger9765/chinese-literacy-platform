@@ -71,7 +71,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     let cancelled = false;
 
-    getMe(token)
+    // #3085: retry before concluding the session is unusable.
+    //
+    // #3037 already stopped a transient failure from deleting the token. But
+    // the catch still ends in setUser(null), and isAuthenticated is !!user, so
+    // ProtectedRoute sends the student to /login anyway. The token survives;
+    // the student is looking at a login form in the middle of a lesson.
+    //
+    // "No verified user means not authenticated" is the right rule -- we must
+    // not render authenticated UI for someone we cannot identify. So do not
+    // weaken it; just stop reaching it over one bad request. A 401/403 is
+    // believed immediately, because a dead token stays dead and retrying only
+    // delays the login prompt.
+    //
+    // Seen in CI as full-qa A8, which walks seven lesson steps with a full
+    // page load each: one of the seven landed on /login, a different step each
+    // run -- the shape of a transient fault, not a broken step.
+    const hydrate = async (): Promise<Awaited<ReturnType<typeof getMe>>> => {
+      // Short on purpose. This runs before anything renders, so every
+      // millisecond here is a student watching a spinner. Two quick attempts
+      // absorb a blip; a server that is still failing after 600ms is not
+      // going to be rescued by waiting longer, and the login screen is the
+      // honest answer at that point.
+      const backoffMs = [200, 400];
+      for (let attempt = 0; ; attempt += 1) {
+        try {
+          return await getMe(token);
+        } catch (err: unknown) {
+          const status = err instanceof AuthError ? err.status : undefined;
+          const dead = status === 401 || status === 403;
+          if (dead || attempt >= backoffMs.length) throw err;
+          await new Promise((r) => setTimeout(r, backoffMs[attempt]));
+        }
+      }
+    };
+
+    hydrate()
       .then((userData) => {
         if (!cancelled) {
           setUser(userData);

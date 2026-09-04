@@ -8,6 +8,8 @@
 
 ## 已驗過會咬
 
+- `authTransientFailureRetries.test.tsx` — mutation：把 hydration 重試改成永遠直接 throw → 「502 後重試成功仍保持登入」與「連線失敗後重試成功仍保持登入」2 failed，「401 不重試」那條照樣綠（咬得精準）；還原 → 3 passed，既有 `authNetworkFailureKeepsToken` 6 條同時綠
+
 - `test_join_preview_rate_limit_3081.py` — mutation：拿掉 `/classrooms/join-preview` endpoint-level limiter check → 第 11 次同 user 探 code 回到 200 而非 429，1 failed；還原 → 1 passed
 - `test_classroom_join_and_batch.py` — mutation：在 `/classrooms/join-preview` 的 return 之前插入真的寫入 `ClassroomStudent` 並 commit（正是這條鎖要擋的「唯讀查詢卻偷偷入班」）→ `TestClassroomJoinPreview::test_preview_does_not_enroll` 1 failed，同 class 另外 6 條照樣綠（證明咬得精準、不是整批陪紅）；還原 → 48 passed。⚠️ 這個檔在 2026-09-04 之前從未被任何 workflow 點名執行過，7 條 preview 鎖等於寫了沒插電
 - `test_characterization_learning_sessions_1955.py` — 復現：同上，靜默跳過導致「路由沒註冊」
