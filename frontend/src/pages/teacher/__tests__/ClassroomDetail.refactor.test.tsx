@@ -116,8 +116,13 @@ describe('ClassroomDetail (refactor characterization) — render with mock data'
 
   it('renders join code prominently', async () => {
     renderDetail();
+    // getAllByText, not getByText: since #3081 the code appears twice on this
+    // page -- once in the header and once inside the QR button, which shows it
+    // in large type for students whose tablet cannot scan. Both are the code
+    // being displayed prominently, which is what this test is about. Asserting
+    // on a single match made a legitimate second display look like a failure.
     await waitFor(() => {
-      expect(screen.getByText('ABC123')).toBeInTheDocument();
+      expect(screen.getAllByText('ABC123').length).toBeGreaterThan(0);
     });
   });
 
@@ -197,16 +202,33 @@ describe('ClassroomDetail (refactor characterization) — join code copy', () =>
   it('clicking 複製代碼 copies join code to clipboard', async () => {
     const user = userEvent.setup();
     renderDetail();
-    await waitFor(() => screen.getByText('ABC123'));
+    await waitFor(() => expect(screen.getAllByText('ABC123').length).toBeGreaterThan(0));
+      // The header became an accordion (#1943 follow-up): the code panel, and
+      // with it the copy and regenerate buttons, only render once the 加入代碼
+      // toggle is opened. This characterization test was written when they were
+      // always on screen.
+      await user.click(screen.getByRole('button', { name: /加入代碼/i }));
 
     await user.click(screen.getByRole('button', { name: /複製代碼/i }));
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith('ABC123');
+    // Read the clipboard rather than spying on writeText: userEvent.setup()
+    // installs its own navigator.clipboard stub, which replaces the vi.fn()
+    // from beforeEach, so the spy is never the one the component calls. Asking
+    // what actually ended up on the clipboard is both closer to what the
+    // teacher cares about and immune to that swap.
+    await waitFor(async () => {
+      expect(await navigator.clipboard.readText()).toBe('ABC123');
+    });
   });
 
   it('shows "已複製" feedback after copy', async () => {
     const user = userEvent.setup();
     renderDetail();
-    await waitFor(() => screen.getByText('ABC123'));
+    await waitFor(() => expect(screen.getAllByText('ABC123').length).toBeGreaterThan(0));
+      // The header became an accordion (#1943 follow-up): the code panel, and
+      // with it the copy and regenerate buttons, only render once the 加入代碼
+      // toggle is opened. This characterization test was written when they were
+      // always on screen.
+      await user.click(screen.getByRole('button', { name: /加入代碼/i }));
 
     await user.click(screen.getByRole('button', { name: /複製代碼/i }));
     await waitFor(() => {
@@ -217,7 +239,12 @@ describe('ClassroomDetail (refactor characterization) — join code copy', () =>
   it('shows confirm dialog before regenerating code', async () => {
     const user = userEvent.setup();
     renderDetail();
-    await waitFor(() => screen.getByText('ABC123'));
+    await waitFor(() => expect(screen.getAllByText('ABC123').length).toBeGreaterThan(0));
+      // The header became an accordion (#1943 follow-up): the code panel, and
+      // with it the copy and regenerate buttons, only render once the 加入代碼
+      // toggle is opened. This characterization test was written when they were
+      // always on screen.
+      await user.click(screen.getByRole('button', { name: /加入代碼/i }));
 
     await user.click(screen.getByRole('button', { name: /重生代碼/i }));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
@@ -232,7 +259,12 @@ describe('ClassroomDetail (refactor characterization) — join code copy', () =>
 
     const user = userEvent.setup();
     renderDetail();
-    await waitFor(() => screen.getByText('ABC123'));
+    await waitFor(() => expect(screen.getAllByText('ABC123').length).toBeGreaterThan(0));
+      // The header became an accordion (#1943 follow-up): the code panel, and
+      // with it the copy and regenerate buttons, only render once the 加入代碼
+      // toggle is opened. This characterization test was written when they were
+      // always on screen.
+      await user.click(screen.getByRole('button', { name: /加入代碼/i }));
 
     await user.click(screen.getByRole('button', { name: /重生代碼/i }));
     await user.click(screen.getByRole('button', { name: /確定/i }));

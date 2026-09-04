@@ -120,14 +120,25 @@ def test_every_backend_test_named_in_ci_exists():
         "pytest 會報錯所以看得到，但清單本身應該保持乾淨。")
 
 
-def test_every_frontend_test_named_in_ci_exists():
-    """⭐ 這條比上面那條重要 —— vitest 對不存在的路徑是**靜默跳過**。"""
+def test_frontend_ci_runs_the_whole_vitest_suite():
+    """前端不再維護具名清單 —— 這條改成守「跑的是整包」。
+
+    原本這裡檢查清單裡的每個路徑都存在，因為 vitest 對不存在的路徑是**靜默跳過**：
+    打錯一個字，那條鎖從此不跑而檢查是綠的。
+
+    清單本身後來被證明是更大的問題：160 支有效測試在清單之外從來沒跑過，
+    其中包含當天才寫好、mutation 驗過的鎖。所以改成跑整包，
+    新測試一落地就算數 —— 但那也讓「清單裡的路徑存在嗎」這個問題失去意義。
+
+    現在要守的是它**沒有偷偷退回**成只跑一部分：整包跑用的是不帶檔案參數的
+    `vitest run`。一旦有人在後面加上路徑，涵蓋範圍就又變成人要記得維護的東西。
+    """
     wf = (_REPO / ".github" / "workflows" / "frontend-checks.yml").read_text(encoding="utf-8")
-    named = [p for p in _named_paths(wf, r"src/") if "*" not in p]
-    missing = [p for p in named if not (_REPO / "frontend" / p).exists()]
-    assert len(named) >= 40, f"只抓到 {len(named)} 支，解析可能壞了"
-    assert not missing, (
-        f"frontend-checks.yml 具名清單列了不存在的檔: {missing}\n"
-        "vitest 不會報錯，它只會跑它對得到的、然後 exit 0 —— "
-        "那條鎖從此不跑，而檢查是綠的。")
+    runs = re.findall(r"npx vitest run([^\n]*)", wf)
+    assert runs, "frontend-checks.yml 找不到 vitest 指令 —— 前端測試沒有在跑，或解析壞了"
+    narrowed = [r.strip() for r in runs if r.strip() and not r.strip().startswith("--")]
+    assert not narrowed, (
+        f"vitest 被限縮到特定檔案: {narrowed}\n"
+        "整包跑才能讓新測試自動涵蓋。要排除某些檔請用 vite.config.ts 的 exclude，"
+        "不要在指令後面列路徑 —— 那就是舊具名清單，160 支測試因此從來沒跑過。")
 
