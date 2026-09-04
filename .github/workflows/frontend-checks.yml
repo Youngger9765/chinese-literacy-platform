@@ -300,111 +300,22 @@ jobs:
       #     onPreview — not onExpand, which the card's whole surface is
       #     also a click target for — and is disabled while a mint call is
       #     in flight.
-      - name: Render-smoke + pinned regression tests (vitest)
+      # Runs the whole vitest suite. It used to run a hand-maintained list of
+      # named files, because ~38 functional tests were failing and gating on
+      # everything would have made this workflow red on day one.
+      #
+      # That debt is gone: 270 files, 0 failures. Two things were keeping it red
+      # that were never really test failures -- vitest's exclude said 'e2e/**'
+      # while the Playwright specs live in tests/e2e/, so it kept collecting five
+      # files meant for a different runner; and one characterization test from
+      # the #1943 refactor asserted a single match for the join code, which
+      # stopped being true once the code also appeared in the QR button.
+      #
+      # The list cost more than the debt it managed. 158 valid tests sat outside
+      # it and never ran, including locks written and mutation-verified the same
+      # day -- a lock nobody runs is theatre. Running everything means a new test
+      # is covered the moment it lands, with nothing to remember.
+      - name: Vitest (whole suite)
         working-directory: frontend
         run: |
-          npx vitest run src/__smoke__/render-smoke.test.tsx src/hooks/useStepProgressPersistence.resetTutorStep.test.ts src/components/reading-steps/paragraph-reading/ParagraphReading.readAgain.test.tsx src/hooks/useTtsPlayback.test.ts src/pages/admin/lesson-audio/qrcode-bundling.test.ts src/pages/admin/lesson-audio/LessonAudioTable.test.tsx src/config/stepNaming.test.ts src/routes/componentNaming.test.ts \
-          src/components/auth/LearningRouteGate.test.tsx \
-          src/components/reading-steps/FullTextAnnotate.hideAnnotation.test.tsx \
-          src/hooks/useFullTextTtsQueue.test.ts \
-          src/services/ttsApi.prefetch.test.ts \
-          src/pages/admin/lesson-audio/paragraphGap.test.ts \
-          src/pages/GuestReadingPage.passage.test.tsx \
-          src/components/auth/publicSteps.test.ts \
-          src/config/__tests__/repeatedModulesSplit.test.ts \
-          src/pages/admin/lesson-audio/multiPartRows.test.tsx \
-          src/components/reading-steps/__tests__/splitPartsNotDuplicated.test.tsx \
-          src/services/ttsApi.paragraph.test.ts \
-          src/components/reading-spotlight/__tests__/BlockSequenceRenderer.newblocks.test.tsx \
-          src/components/learning/__tests__/nextStepFooter.test.tsx \
-          src/components/layout/__tests__/studentSidebar.noToolbox.test.tsx \
-          src/components/layout/__tests__/Sidebar.role-split.test.tsx \
-          src/components/qr/lessonQr.test.tsx \
-          src/components/qr/qrOnReadingPages.test.tsx \
-          src/pages/admin/lesson-audio/qrManifestParts.test.ts \
-          src/pages/admin/lesson-audio/qrGateOnData3011.test.ts \
-          src/pages/app/__tests__/homeRedirectNoRole.test.tsx \
-          src/components/layout/__tests__/toolboxUnreachable.test.tsx \
-          src/components/reading-steps/__tests__/introStepCount.test.ts \
-          src/context/__tests__/zhuyinSpaceShortcut.test.tsx \
-          src/config/__tests__/roundAwareStepNeighbours.test.ts \
-          src/config/__tests__/activeStepHighlight.test.ts \
-          src/config/__tests__/stepPartLabels.test.ts \
-          src/components/layout/__tests__/stepperPartsAreWired.test.ts \
-          src/pages/learning/__tests__/reportSendsRealScore.test.ts \
-          src/config/__tests__/realPayloadRoundScope.test.ts \
-          src/config/__tests__/stepPath.test.ts \
-          src/config/__tests__/stepPathIsTheOnlyBuilder.test.ts \
-          src/services/__tests__/ttsRoundScoped.test.ts \
-          src/services/__tests__/everyLessonAddressedCallCarriesRound.test.ts \
-          src/components/reading-steps/__tests__/degradedNoticeEverywhere.test.ts \
-          src/pages/__tests__/guestKeyPassageAudio.test.tsx \
-          src/hooks/__tests__/finishAdvancesWithinRound.test.ts \
-          src/components/reading-steps/__tests__/FillInBlankExercise.test.tsx \
-          src/components/reading-steps/__tests__/MultipleChoiceExercise.test.tsx \
-          src/components/reading-steps/__tests__/ReadingTrendChart.test.tsx \
-          src/components/reading-steps/__tests__/VocabApplication.test.tsx \
-          src/components/reading-steps/__tests__/VocabDefinitionMatchMCQ.test.tsx \
-          src/components/reading-steps/__tests__/VocabWordSearch.test.tsx \
-          src/components/reading-steps/__tests__/roundAudioAndLog.test.tsx \
-          src/components/learning/__tests__/QuizCompletionScreen.test.tsx \
-          src/components/learning/__tests__/quizCompletionScreenUsage.test.ts \
-          src/pages/learning/__tests__/comprehensionReview.test.ts \
-          src/pages/learning/__tests__/ComprehensionMcqPage.test.tsx \
-          src/components/reading-steps/__tests__/StoryStructureTable.radioFill.test.tsx \
-          src/components/lesson-content/__tests__/LessonRenderer.comprehensionWidth.test.tsx \
-          src/components/reading-steps/__tests__/StoryStructureTable.progressPersistence.test.tsx \
-          src/components/reading-steps/__tests__/assessmentReportMetrics.test.ts \
-          src/components/reading-steps/__tests__/practiceStepsSummary.test.ts \
-          src/components/reading-steps/__tests__/PracticeStepsSummarySection.test.tsx \
-          src/components/reading-steps/__tests__/AssessmentComprehensionSectionMcqFallback.test.tsx \
-          src/components/reading-steps/__tests__/AssessmentReportIntegration.test.tsx \
-          src/components/reading-steps/__tests__/VocabDefinitionMatch.progressPersistence.test.tsx \
-          src/pages/learning/__tests__/ComprehensionMcqPage.progressPersistence.test.tsx \
-          src/components/reading-steps/__tests__/VocabApplication.progressPersistence.test.tsx \
-          src/components/reading-steps/__tests__/VocabWordSearch.progressPersistence.test.tsx \
-          src/components/reading-steps/__tests__/VocabDefinitionMatch.retryWrong.test.tsx \
-          src/components/reading-steps/__tests__/VocabDefinitionMatchDragDrop.restore.test.tsx \
-          src/components/reading-steps/__tests__/teacherWordSearch2860.test.ts \
-          src/components/reading-steps/__tests__/teacherGridStability2860.test.tsx \
-          src/components/reading-steps/__tests__/wordSearchGrid.test.ts \
-          src/components/learning/__tests__/stepSharedShell.test.tsx \
-          src/components/lesson-content/__tests__/rendererHeader.test.tsx \
-          src/components/reading-steps/__tests__/wordSearchWording2863.test.ts \
-          src/components/reading-steps/__tests__/worksheetButton2845.test.ts \
-          src/components/zhuyin/__tests__/difficultSpanRenderer.test.tsx \
-          src/context/__tests__/processLinesSelectiveDifficultMarkers.test.tsx \
-          src/components/reading-steps/__tests__/FullTextAnnotate.zhuyinDifficultFontScope.test.tsx \
-          src/components/zhuyin/__tests__/difficultFlags3022.test.tsx \
-          src/components/reading-steps/__tests__/paragraphCardDifficultFont3022.test.tsx \
-          src/components/reading-steps/__tests__/keyPassageDifficultFont3022.test.tsx \
-          src/utils/__tests__/splitZhuyinCharsMarkers3022.test.ts \
-          src/utils/__tests__/ttsRate.test.ts \
-          src/components/reading-steps/key-passage-reading/__tests__/ttsSpeedControl3023.test.tsx \
-          src/components/reading-steps/__tests__/readingPlayerSpeed3023.test.tsx \
-          src/hooks/__tests__/ttsRateWiring3023.test.ts \
-          src/contexts/__tests__/authNetworkFailureKeepsToken.test.tsx \
-          src/contexts/__tests__/authTransientFailureRetries.test.tsx \
-          src/services/__tests__/teacherExportDoesNotLogoutOn5xx.test.ts \
-          src/utils/__tests__/ttsDefaultRateBand.test.ts \
-          src/pages/teacher/__tests__/StudentPreviewPage.test.tsx \
-          src/pages/teacher/components/__tests__/StudentProgressCard.preview.test.tsx \
-          src/components/reading-steps/editorPreMarks.test.ts \
-          src/components/reading-steps/__tests__/FullTextAnnotate.editorPreMarks.test.tsx \
-          src/components/gamification/CorrectAnswerBurst.test.tsx \
-          src/components/gamification/BadgeUnlockToast.test.tsx \
-          src/components/gamification/XPAwardToast.test.tsx \
-          src/hooks/useProgressSync.xpAwarded.test.ts \
-          src/hooks/useStepProgressPersistence.badgeUnlock.test.ts \
-          src/components/lesson-content/__tests__/ExerciseBlockView.correctAnswerBurst.test.tsx \
-          src/pages/teacher/__tests__/LiveMonitorTab.test.tsx \
-          src/pages/teacher/__tests__/ClassroomTabs.liveMonitor.test.tsx \
-          src/pages/__tests__/junyiStorageBlocked.test.tsx \
-          src/pages/__tests__/JunyiSloLogout.test.tsx \
-          src/pages/teacher/__tests__/TextManagementTab.teacherTryout.test.tsx \
-          src/components/qr/classroomJoinQr.test.ts \
-          src/components/qr/ClassroomJoinQrButton.test.tsx \
-          src/pages/__tests__/JoinClassroomPage.qrflow.test.tsx \
-          src/pages/__tests__/LoginPage.redirect.test.tsx \
-          src/components/auth/__tests__/PublicOnlyRoute.redirect.test.tsx \
-          src/pages/__tests__/JoinViaLoginFlow.integration.test.tsx
+          npx vitest run
