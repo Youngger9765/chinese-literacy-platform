@@ -385,6 +385,7 @@ jobs:
           src/hooks/__tests__/ttsRateWiring3023.test.ts \
           src/contexts/__tests__/authNetworkFailureKeepsToken.test.tsx \
           src/contexts/__tests__/authTransientFailureRetries.test.tsx \
+          src/services/__tests__/teacherExportDoesNotLogoutOn5xx.test.ts \
           src/utils/__tests__/ttsDefaultRateBand.test.ts \
           src/pages/teacher/__tests__/StudentPreviewPage.test.tsx \
           src/pages/teacher/components/__tests__/StudentProgressCard.preview.test.tsx \

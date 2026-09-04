@@ -8,6 +8,8 @@
 
 ## 已驗過會咬
 
+- `teacherExportDoesNotLogoutOn5xx.test.ts` — mutation：把 `notifySessionUnauthorized()` 移回 `if (!res.ok)` 之下（任何錯誤都登出）→ 500 與 503 兩條 failed，401 那條正向對照照樣綠；還原 → 3 passed。原始缺陷是實跑復現的，不是讀 code 推論
+
 - `authTransientFailureRetries.test.tsx` — mutation：把 hydration 重試改成永遠直接 throw → 「502 後重試成功仍保持登入」與「連線失敗後重試成功仍保持登入」2 failed，「401 不重試」那條照樣綠（咬得精準）；還原 → 3 passed，既有 `authNetworkFailureKeepsToken` 6 條同時綠
 
 - `test_join_preview_rate_limit_3081.py` — mutation：拿掉 `/classrooms/join-preview` endpoint-level limiter check → 第 11 次同 user 探 code 回到 200 而非 429，1 failed；還原 → 1 passed
