@@ -107,6 +107,21 @@ def db():
         Base.metadata.drop_all(bind=_engine)
 
 
+def _add_inprogress(db, *, story_slug):
+    """An in_progress session — the only rows the partial unique index covers."""
+    db.add(
+        LearningSession(
+            student_id=_STUDENT_ID,
+            story_slug=story_slug,
+            status="in_progress",
+            current_step=1,
+            started_at=datetime.now(timezone.utc),
+            full_reading_attempts=[],
+        )
+    )
+    db.commit()
+
+
 def _add_session(db, *, story_slug=None, accuracy=None, days_ago=1):
     started = datetime.now(timezone.utc) - timedelta(days=days_ago)
     row = LearningSession(
@@ -132,17 +147,32 @@ class TestStorySlugDrift:
     This is real drift: the #91 logic predates the uniqueness constraint.
     """
 
-    def test_unique_story_slug_per_student_is_enforced(self, db):
-        from sqlalchemy.exc import IntegrityError
-        _add_session(db, story_slug="dup", accuracy=50.0)
-        with pytest.raises(IntegrityError):
-            _add_session(db, story_slug="dup", accuracy=60.0)
+    def test_uniqueness_applies_only_to_in_progress_sessions(self, db):
+        """The constraint is partial, and these tests used to miss that.
 
-    @pytest.mark.xfail(
-        reason="story_stuck needs >=3 sessions sharing story_slug, but schema "
-        "enforces UNIQUE(student_id, story_slug); detection logic (#91) is stale",
-        strict=True,
-    )
+        The real index is
+            unique(student_id, story_slug)
+            where status = 'in_progress' and story_slug is not null
+
+        SQLite has no partial indexes unless the WHERE clause is carried over,
+        and the specs' copy of the metadata patch used to drop it — so the test
+        database enforced uniqueness on every row, stricter than production.
+        These tests were written against that artefact, and one of them
+        concluded from it that story_stuck detection was dead code.
+
+        Completed sessions sharing a slug are exactly what repeated practice
+        looks like, and production has always allowed them.
+        """
+        from sqlalchemy.exc import IntegrityError
+
+        _add_session(db, story_slug="dup", accuracy=50.0)
+        _add_session(db, story_slug="dup", accuracy=60.0)  # completed: allowed
+
+        _add_inprogress(db, story_slug="live")
+        with pytest.raises(IntegrityError):
+            _add_inprogress(db, story_slug="live")
+        db.rollback()
+
     def test_story_stuck_triggers_on_repeated_attempts(self, db):
         for acc in (50.0, 51.0, 52.0):
             _add_session(db, story_slug="stuck", accuracy=acc)
