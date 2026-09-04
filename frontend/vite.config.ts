@@ -29,6 +29,17 @@ export default defineConfig({
   },
   test: {
     environment: 'jsdom',
+    // One file at a time. Which test fails used to depend on how vitest packed
+    // files onto workers, and that packing depends on the machine's core count:
+    // the suite was green here, red in CI on TextManagementTab.copyright, and
+    // red again locally on useFullTextTtsQueue once workers were capped at 2 to
+    // match the runner. Three different answers for the same code.
+    //
+    // Something in this suite leaks across files. Serial execution is not the
+    // cure for that, but it does make the gate reproducible, which is the part
+    // that decides whether a red can be acted on or only re-run. Tracked so the
+    // leak itself gets found rather than lived with.
+    fileParallelism: false,
     globals: true,
     setupFiles: ['./src/test/setup.ts'],
     // 'e2e/**' never matched: the Playwright specs live in tests/e2e/, so
