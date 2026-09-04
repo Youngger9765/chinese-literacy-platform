@@ -63,7 +63,21 @@ def test_the_primary_provider_still_writes(monkeypatch):
 
     monkeypatch.setattr(tts_cache, "_get_gcs_bucket", lambda: _Bucket())
     tts_cache._gcs_put("deadbeef", b"x" * 100, provider="azure")
-    assert len(written) == 1, f"primary 的音訊沒寫進快取：{written}"
+    assert written == ["azure/sentences/deadbeef.mp3"], (
+        f"寫進去的路徑不對：{written} —— "
+        "只驗『有沒有寫』驗不到寫錯位置（跟別的 provider 路徑混在一起）"
+    )
+
+
+def test__blob_path_routes_each_provider_to_its_own_namespace():
+    """2026-09-03 mutmut pilot 發現：_gcs_put 只驗『有沒有寫』，沒驗『寫去哪』——
+    把 azure 分支的 `==` 改成 `!=`（整條判斷反過來）在內，_blob_path 的 8 個突變
+    全部存活（見 issue #3083）。直接測 _blob_path 本身，鎖住每個 provider
+    各自的命名空間，不靠 _gcs_put 間接覆蓋。"""
+    assert tts_cache._blob_path("k", provider="azure") == "azure/sentences/k.mp3"
+    assert tts_cache._blob_path("k", provider="gemini31") == "gemini31-prompt-only-v2/sentences/k.mp3"
+    assert tts_cache._blob_path("k", provider="google") == "tts-cache/k.mp3"
+    assert tts_cache._blob_path("k", provider="unknown-future-provider") == "tts-cache/k.mp3"
 
 
 def test_the_default_matches_the_service_so_local_is_covered():
