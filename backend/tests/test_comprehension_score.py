@@ -198,13 +198,38 @@ SCORE_REQUEST_BODY = {
 }
 
 
-def _create_session(client, token: str, slug: str = "comp-test") -> int:
+# A session must name a story the catalogue actually serves. The gate added in
+# #1135 and widened in #2683 refuses a slug that names nothing, and every slug
+# in this file was a descriptive placeholder, so every POST came back 422.
+#
+# The placeholders were distinct on purpose: create_learning_session is
+# get-or-create per (student, slug), so two tests sharing a slug would share a
+# session. Keep that property by handing each label its own real lesson rather
+# than pointing them all at one.
+_LESSON_IDS: list[int] = []
+_SLUG_BY_LABEL: dict[str, str] = {}
+
+
+def _slug_for(label: str) -> str:
+    """A real, catalogue-backed slug, one distinct lesson per label."""
+    if not _LESSON_IDS:
+        from app.services.lesson_loader import get_all_lessons
+
+        _LESSON_IDS.extend(sorted(l["id"] for l in get_all_lessons()))
+    if label not in _SLUG_BY_LABEL:
+        assert len(_SLUG_BY_LABEL) < len(_LESSON_IDS), "more labels than lessons"
+        _SLUG_BY_LABEL[label] = str(_LESSON_IDS[len(_SLUG_BY_LABEL)])
+    return _SLUG_BY_LABEL[label]
+
+
+def _create_session(client, token: str, slug: str | None = None) -> int:
+    slug = slug or _slug_for("__default__")
     resp = client.post(
         "/api/learning/sessions",
         json={"story_slug": slug},
         headers=auth_header(token),
     )
-    assert resp.status_code == 201
+    assert resp.status_code == 201, f"{resp.status_code}: {resp.text}"
     return resp.json()["id"]
 
 
@@ -217,7 +242,7 @@ class TestComprehensionScore:
     @patch("app.routes.learning.learning_comprehension_score.evaluate_comprehension", new_callable=AsyncMock)
     def test_score_returns_200_with_valid_data(self, mock_eval, client, user_a):
         mock_eval.return_value = MOCK_GEMINI_SCORE
-        session_id = _create_session(client, user_a["token"], "score-200")
+        session_id = _create_session(client, user_a["token"], _slug_for("score-200"))
 
         resp = client.post(
             f"/api/learning/sessions/{session_id}/comprehension-score",
@@ -237,7 +262,7 @@ class TestComprehensionScore:
     @patch("app.routes.learning.learning_comprehension_score.evaluate_comprehension", new_callable=AsyncMock)
     def test_all_three_subscores_present(self, mock_eval, client, user_a):
         mock_eval.return_value = MOCK_GEMINI_SCORE
-        session_id = _create_session(client, user_a["token"], "subscores")
+        session_id = _create_session(client, user_a["token"], _slug_for("subscores"))
 
         resp = client.post(
             f"/api/learning/sessions/{session_id}/comprehension-score",
@@ -252,7 +277,7 @@ class TestComprehensionScore:
     @patch("app.routes.learning.learning_comprehension_score.evaluate_comprehension", new_callable=AsyncMock)
     def test_scores_in_valid_range(self, mock_eval, client, user_a):
         mock_eval.return_value = MOCK_GEMINI_SCORE
-        session_id = _create_session(client, user_a["token"], "range")
+        session_id = _create_session(client, user_a["token"], _slug_for("range"))
 
         resp = client.post(
             f"/api/learning/sessions/{session_id}/comprehension-score",
@@ -266,7 +291,7 @@ class TestComprehensionScore:
     @patch("app.routes.learning.learning_comprehension_score.evaluate_comprehension", new_callable=AsyncMock)
     def test_cached_scores_returned_without_recalling_gemini(self, mock_eval, client, user_a):
         mock_eval.return_value = MOCK_GEMINI_SCORE
-        session_id = _create_session(client, user_a["token"], "cache-test")
+        session_id = _create_session(client, user_a["token"], _slug_for("cache-test"))
 
         # First call — should call Gemini
         resp1 = client.post(
@@ -299,7 +324,7 @@ class TestComprehensionScore:
         assert resp.json()["detail"] == "Session not found"
 
     def test_other_users_session_returns_403(self, client, user_a, user_b):
-        session_id = _create_session(client, user_b["token"], "owned-by-b")
+        session_id = _create_session(client, user_b["token"], _slug_for("owned-by-b"))
 
         resp = client.post(
             f"/api/learning/sessions/{session_id}/comprehension-score",
@@ -327,7 +352,7 @@ class TestComprehensionScore:
     @patch("app.routes.learning.learning_comprehension_score.evaluate_comprehension", new_callable=AsyncMock)
     def test_gemini_failure_returns_503(self, mock_eval, client, user_a):
         mock_eval.side_effect = RuntimeError("AI service error")
-        session_id = _create_session(client, user_a["token"], "gemini-fail")
+        session_id = _create_session(client, user_a["token"], _slug_for("gemini-fail"))
 
         resp = client.post(
             f"/api/learning/sessions/{session_id}/comprehension-score",
@@ -338,7 +363,7 @@ class TestComprehensionScore:
         assert "unavailable" in resp.json()["detail"].lower()
 
     def test_empty_dialogue_returns_422(self, client, user_a):
-        session_id = _create_session(client, user_a["token"], "empty-dialogue")
+        session_id = _create_session(client, user_a["token"], _slug_for("empty-dialogue"))
         body = {
             "story_title": "Test",
             "story_text": "Test story text.",
@@ -352,7 +377,7 @@ class TestComprehensionScore:
         assert resp.status_code == 422
 
     def test_missing_story_title_returns_422(self, client, user_a):
-        session_id = _create_session(client, user_a["token"], "missing-title")
+        session_id = _create_session(client, user_a["token"], _slug_for("missing-title"))
         body = {
             "story_text": "Test story text.",
             "dialogue_turns": [{"role": "ai", "text": "Question?"}],
@@ -368,7 +393,7 @@ class TestComprehensionScore:
     def test_scores_persisted_in_session_detail(self, mock_eval, client, user_a):
         """Verify that comprehension scores appear in the session detail response."""
         mock_eval.return_value = MOCK_GEMINI_SCORE
-        session_id = _create_session(client, user_a["token"], "persist-check")
+        session_id = _create_session(client, user_a["token"], _slug_for("persist-check"))
 
         # Score the session
         client.post(
@@ -391,7 +416,7 @@ class TestComprehensionScore:
     @patch("app.routes.learning.learning_comprehension_score.evaluate_comprehension", new_callable=AsyncMock)
     def test_feedback_structure(self, mock_eval, client, user_a):
         mock_eval.return_value = MOCK_GEMINI_SCORE
-        session_id = _create_session(client, user_a["token"], "feedback-struct")
+        session_id = _create_session(client, user_a["token"], _slug_for("feedback-struct"))
 
         resp = client.post(
             f"/api/learning/sessions/{session_id}/comprehension-score",
