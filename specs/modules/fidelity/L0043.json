@@ -4,7 +4,7 @@
   "docx_sha256": "b380-9a49-6cd5-5f5e",
   "modules": {
     "comprehension.hkakq": {
-      "yaml_sha256": "85d0-bd75-2ad4-7169",
+      "yaml_sha256": "d39a-ff97-9426-9774",
       "checked": 26,
       "status": "pass",
       "passed": true,

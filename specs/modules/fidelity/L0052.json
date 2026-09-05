@@ -4,8 +4,8 @@
   "docx_sha256": "b205-12e8-d007-c4c9",
   "modules": {
     "comprehension.kc3ad": {
-      "yaml_sha256": "eca2-46e5-6bc6-f957",
-      "checked": 26,
+      "yaml_sha256": "201d-0e56-2b58-df80",
+      "checked": 25,
       "status": "pass",
       "passed": true,
       "exit": 0
