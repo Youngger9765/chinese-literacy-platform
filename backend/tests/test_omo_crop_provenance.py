@@ -3,6 +3,9 @@
 Unit tests only — no Gemini, no GCS real calls.
 Mocks GCS upload to simulate crop storage.
 """
+# The omo routes are a package now, and _upload_to_gcs lives in
+# services/omo_storage. Patch it on app.routes.omo.upload — that is the
+# module that binds the name, and patching the package would not affect it.
 import io
 import sys
 import os
@@ -197,8 +200,8 @@ class TestCropSignedUrlEndpoint:
         headers = {'Authorization': f'Bearer {token}'}
 
         # Upload a worksheet
-        with patch('app.routes.omo._upload_to_gcs', return_value='1/1/0/0.jpg'), \
-             patch('app.routes.omo._run_identification'):
+        with patch('app.routes.omo.upload._upload_to_gcs', return_value='1/1/0/0.jpg'), \
+             patch('app.routes.omo.upload._run_identification'):
             res = client.post('/api/omo/upload',
                               files=[('files', ('w.jpg', io.BytesIO(_TINY_JPEG), 'image/jpeg'))],
                               headers=headers)
@@ -225,8 +228,8 @@ class TestCropSignedUrlEndpoint:
         token = register_and_login(client, 'crop_test_user2')
         headers = {'Authorization': f'Bearer {token}'}
 
-        with patch('app.routes.omo._upload_to_gcs', return_value='1/2/0/0.jpg'), \
-             patch('app.routes.omo._run_identification'):
+        with patch('app.routes.omo.upload._upload_to_gcs', return_value='1/2/0/0.jpg'), \
+             patch('app.routes.omo.upload._run_identification'):
             res = client.post('/api/omo/upload',
                               files=[('files', ('w.jpg', io.BytesIO(_TINY_JPEG), 'image/jpeg'))],
                               headers=headers)
@@ -263,8 +266,8 @@ class TestByLessonEndpoint:
         token = register_and_login(client, 'bylessontest2')
         headers = {'Authorization': f'Bearer {token}'}
 
-        with patch('app.routes.omo._upload_to_gcs', return_value='1/3/0/0.jpg'), \
-             patch('app.routes.omo._run_identification'):
+        with patch('app.routes.omo.upload._upload_to_gcs', return_value='1/3/0/0.jpg'), \
+             patch('app.routes.omo.upload._run_identification'):
             res = client.post('/api/omo/upload',
                               files=[('files', ('w.jpg', io.BytesIO(_TINY_JPEG), 'image/jpeg'))],
                               headers=headers)
@@ -292,8 +295,8 @@ class TestByLessonEndpoint:
         token = register_and_login(client, 'bylessontest3')
         headers = {'Authorization': f'Bearer {token}'}
 
-        with patch('app.routes.omo._upload_to_gcs', return_value='1/4/0/0.jpg'), \
-             patch('app.routes.omo._run_identification'):
+        with patch('app.routes.omo.upload._upload_to_gcs', return_value='1/4/0/0.jpg'), \
+             patch('app.routes.omo.upload._run_identification'):
             res = client.post('/api/omo/upload',
                               files=[('files', ('w.jpg', io.BytesIO(_TINY_JPEG), 'image/jpeg'))],
                               headers=headers)
