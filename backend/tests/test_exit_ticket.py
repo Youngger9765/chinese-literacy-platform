@@ -8,6 +8,11 @@ Tests cover:
 - generate_exit_ticket in ai_service with AI mock (schema validation)
 """
 
+# generate_exit_ticket moved to services/ai_generation/exit_ticket.py, and
+# ai_service is a re-export shim. Patching the shim did not intercept the
+# call — these tests were reaching the live Vertex AI endpoint (12 outbound
+# HTTPS connections in one run), which is why they were slow and unstable.
+# Patch the module that binds the name.
 import sys
 import os
 import pytest
@@ -191,7 +196,7 @@ class TestAiServiceGenerateExitTicket:
             ]
         }
         with patch(
-            "app.services.ai_service.generate_structured_response",
+            "app.services.ai_generation.exit_ticket.generate_structured_response",
             new=AsyncMock(return_value=mock_response),
         ):
             from app.services.ai_service import generate_exit_ticket
@@ -212,7 +217,7 @@ class TestAiServiceGenerateExitTicket:
             ]
         }
         with patch(
-            "app.services.ai_service.generate_structured_response",
+            "app.services.ai_generation.exit_ticket.generate_structured_response",
             new=AsyncMock(return_value=mock_response),
         ):
             from app.services.ai_service import generate_exit_ticket
@@ -222,7 +227,7 @@ class TestAiServiceGenerateExitTicket:
     async def test_returns_fallback_on_ai_exception(self):
         """On any AI error, return fallback=True, NEVER raise or auto-pass."""
         with patch(
-            "app.services.ai_service.generate_structured_response",
+            "app.services.ai_generation.exit_ticket.generate_structured_response",
             new=AsyncMock(side_effect=RuntimeError("AI down")),
         ):
             from app.services.ai_service import generate_exit_ticket
@@ -232,7 +237,7 @@ class TestAiServiceGenerateExitTicket:
 
     async def test_returns_fallback_on_empty_questions(self):
         with patch(
-            "app.services.ai_service.generate_structured_response",
+            "app.services.ai_generation.exit_ticket.generate_structured_response",
             new=AsyncMock(return_value={"questions": []}),
         ):
             from app.services.ai_service import generate_exit_ticket
@@ -259,7 +264,7 @@ class TestAiServiceGenerateExitTicket:
             return mock_response
 
         with patch(
-            "app.services.ai_service.generate_structured_response",
+            "app.services.ai_generation.exit_ticket.generate_structured_response",
             new=mock_generate,
         ):
             from app.services.ai_service import generate_exit_ticket
@@ -280,7 +285,7 @@ class TestAiServiceGenerateExitTicket:
             return {"questions": []}
 
         with patch(
-            "app.services.ai_service.generate_structured_response",
+            "app.services.ai_generation.exit_ticket.generate_structured_response",
             new=mock_generate,
         ):
             from app.services.ai_service import generate_exit_ticket
