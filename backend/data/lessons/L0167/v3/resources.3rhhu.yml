@@ -9,10 +9,14 @@ resources:
     duration: (2:36)
     source: 中華民國衛生福利部
     has_qr: true
+    url: http://youtu.be/nhxFja1yPuw
+    url_source: 自學教材總表0816.xlsx 4.影片連結（課名完全相同且唯一，數量相符後位置配對）
   - index: 2
     title: 生活技能動畫-自我覺察
     duration: (1:44)
     source: 臺灣健康促進學校
     has_qr: true
+    url: http://youtu.be/MTAZrKXm1S4
+    url_source: 自學教材總表0816.xlsx 4.影片連結（課名完全相同且唯一，數量相符後位置配對）
   slug: 3rhhu
   text_ref: 9jcxw

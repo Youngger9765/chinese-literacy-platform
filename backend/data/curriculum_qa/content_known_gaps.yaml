@@ -291,60 +291,43 @@ key_reading_flagged:
 # ── 影片有標題、沒有網址 ────────────────────────────────────────────────────
 video_links_without_url:
   generated: "2026-09-05"
+  updated: "2026-09-06"
   issue: 3100
   what_this_is: >-
     學習單列了延伸影片的片名與長度，但沒有印出網址（多半是印 QR code 或只寫片名）。
     抽取器抓得到 title / source / duration，url 只能是 None。
   how_it_looks_to_a_student: >-
     看得到「簡直令人難以相信 他與獅子「零距離｣ (9:32)」這種項目，點不開。
-  scope: 28 筆 / 14 課（全庫 323 筆影片連結中）
+    ⚠️ 前端**刻意**不濾掉沒有網址的那幾支（`KnowledgeStation.tsx:51`）——
+    濾掉之後清單變空，畫面會說「這篇課文目前沒有知識補給站影片」，那是不實的：
+    影片存在，只是我們還沒有連結。
+  scope: 10 筆 / 5 課（全庫 323 筆影片連結中）
+  previously: 28 筆 / 14 課
+  what_changed_2026_09_06: >-
+    原本這一條寫著「不在我方 code 的範圍內修得掉」——**那句是錯的**。
+    網址一直都在 `自學教材總表0816.xlsx` 的「4.影片連結」分頁（154 課有網址），
+    只是沒有人把它接進二修的 resources 檔。18 支已補進來源 yml，每一支帶
+    `url_source` 可稽核。跟「課程簡介說是 DOCX 拿不到、其實試算表一直有」是同一種錯：
+    **把「我還沒去接」講成「取不到」。**
+  how_it_was_joined: >-
+    課名**完全相同**且在總表中**唯一**才配（9 課全部符合，沒有用任何模糊比對），
+    再要求兩邊影片**數量相符**才依位置配對；數量不符就整課跳過不猜。
+    容器名要同時認 `items` 與 `videos` —— 第一輪只讀 `items`，L0170/L0171 因此被漏掉。
   how_to_close: >-
-    請教材端補印網址，或把學習單上的 QR code 解出來。不在我方 code 的範圍內修得掉。
+    剩下這 5 課總表也沒有網址。請教材端補印，或把學習單上的 QR code 解出來。
   lessons:
     - lesson_uid: L0156
       links_without_url: 2
       sample_title: "簡直令人難以相信 他與獅子「零距離｣ - 李四端的雲端世界"
-    - lesson_uid: L0167
-      links_without_url: 2
-      sample_title: "走出情緒的迷宮：練習自我覺察，認識情緒宇宙(完整版)"
-    - lesson_uid: L0168
-      links_without_url: 2
-      sample_title: "win身體保養手冊日常如何觀察身體的健康"
-    - lesson_uid: L0169
-      links_without_url: 2
-      sample_title: "「我的餐盤」均衡飲食_青少年篇"
-    - lesson_uid: L0170
-      links_without_url: 2
-      sample_title: "艾菲爾與影子 關於自我批判的動畫"
-    - lesson_uid: L0171
-      links_without_url: 2
-      sample_title: "白熊效應∣越想壓抑，越難抗拒"
-    - lesson_uid: L0172
-      links_without_url: 2
-      sample_title: "1.夢想雨果｜想過你自己的特質嗎? 別輕看自己!｜動畫"
-    - lesson_uid: L0173
-      links_without_url: 2
-      sample_title: "第一次建立目標就上手！3 分鐘帶你解析曼陀羅九宮格！和大谷翔"
-    - lesson_uid: L0174
-      links_without_url: 2
-      sample_title: "讓失敗改變你的人生｜5個失敗的好處｜改變人生"
-    - lesson_uid: L0175
-      links_without_url: 2
-      sample_title: "成長心態vs.定型心態"
     - lesson_uid: L0176
       links_without_url: 2
-      sample_title: "人際關係中的4種「心理地位」"
     - lesson_uid: L0177
       links_without_url: 2
-      sample_title: "如何面對他人惡意嘲笑？那些活出自我的人都這麼做"
     - lesson_uid: L0178
       links_without_url: 2
-      sample_title: "自我決定理論：揭秘驅動行為的三大動力！"
     - lesson_uid: L0179
       links_without_url: 2
-      sample_title: "三個培養心理韌性的方法"
-  count_lessons: 14
-  count_links: 28
+  count_lessons: 5
 
 image_options_only_captions:
   generated: "2026-09-05"
@@ -373,9 +356,23 @@ image_options_only_captions:
       question: 根據第三段，哪一張圖最符合小藍鯨生前被漁具纏繞的情況
       answer: D
       empty_option: D
-  count_lessons: 2
+    - lesson_uid: L0073
+      question: 作者「升上國中的新鮮感」隨著時間有何變化？下列哪一張圖最能說明？
+      answer: C
+      empty_option: 全部四個都空
+      note: >-
+        這一課四個選項全是空的（老師一個圖說都沒寫）。原本記成 2 課是漏數 ——
+        當時的查法只列了「正解為空」的那兩課，沒有涵蓋「整題四格全空」。
+  count_lessons: 3
+  contained_since: "2026-09-06"
+  containment: >-
+    這三題現在被扣留、不再送到學生面前（`_mcq_from` 判「正解那格是空的」就不送）。
+    ⛔ 缺口本身沒有補 —— 圖仍然沒有被抽出來當選項，那三題學生就是做不到。
+    差別只在於：以前是「看得到但選什麼都錯」，現在是「不出現」。
+    判準刻意用空白正解而不是 `options_are_images` 旗標：三課裡只有 L0143 帶那個旗標。
   how_to_close: >-
-    把圖抽出來當選項（跟聚光燈的 figN.png 同一條路），或請教材端補印文字選項。
+    把圖抽出來當選項（跟聚光燈的 figN.png 同一條路，三課的 assets/ 裡都有 figN.png），
+    或請教材端補印文字選項。補上之後 `_mcq_from` 會自動放行，不需要改 code。
     不在我方 code 的範圍內修得掉。
 
 mcq_options_emitted_as_guides:

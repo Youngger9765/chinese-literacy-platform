@@ -9,10 +9,14 @@ resources:
     duration: (1:11)
     source: 衛生福利部國民健康署
     has_qr: true
+    url: http://youtu.be/jZLEeXsPreg
+    url_source: 自學教材總表0816.xlsx 4.影片連結（課名完全相同且唯一，數量相符後位置配對）
   - index: 2
     title: 84期午餐通訊-喝水的好處
     duration: (3:32)
     source: 營養探索樂園
     has_qr: true
+    url: http://youtu.be/s-R9Qo1YOlc
+    url_source: 自學教材總表0816.xlsx 4.影片連結（課名完全相同且唯一，數量相符後位置配對）
   slug: y6fww
   text_ref: 9ja7n

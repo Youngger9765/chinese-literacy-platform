@@ -8,10 +8,14 @@ resources:
     duration: '5:47'
     duration_seconds: 347
     source: Better Ways 好路
+    url: http://youtu.be/pK8OJn7xz7Q
+    url_source: 自學教材總表0816.xlsx 4.影片連結（課名完全相同且唯一，數量相符後位置配對）
   - index: 2
     title: 'JK 羅琳: 如何面對人生低谷？失敗的意義是什麼？'
     duration: '3:56'
     duration_seconds: 236
     source: 艾倫船長 Captain Aaron
+    url: http://youtu.be/NZ2Uvq1Wi5s
+    url_source: 自學教材總表0816.xlsx 4.影片連結（課名完全相同且唯一，數量相符後位置配對）
   slug: 6p6kx
   text_ref: vw6jj

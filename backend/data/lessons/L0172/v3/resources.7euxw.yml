@@ -11,14 +11,17 @@ resources:
     source: Dream Hugo 夢想雨果
     has_qr: true
     _總表_url: http://youtu.be/RKzwxDnvc8Y
+    url: http://youtu.be/RKzwxDnvc8Y
+    url_source: 自學教材總表0816.xlsx 4.影片連結（課名完全相同且唯一，數量相符後位置配對）
   - index: 2
     title: 2.【Sizz翻譯】悲觀主義者獨有的智慧
     duration: (2:30)
     source: SIZZ
     has_qr: true
     _總表_url: http://youtu.be/jW-2BepfL2Y
+    url: http://youtu.be/jW-2BepfL2Y
+    url_source: 自學教材總表0816.xlsx 4.影片連結（課名完全相同且唯一，數量相符後位置配對）
   notes:
-    url: 學習單上只印 QR code（圖形，文字層無網址）；URL 取自總表「4.影片連結」第 166 列（適用年級欄填「體育品格」、課次 6），故加 `_`
-      前綴標示非 DOCX 內容。
+    url: 學習單上只印 QR code（圖形，文字層無網址）；URL 取自總表「4.影片連結」第 166 列（適用年級欄填「體育品格」、課次 6），故加 `_` 前綴標示非 DOCX 內容。
   slug: 7euxw
   text_ref: ampvv
