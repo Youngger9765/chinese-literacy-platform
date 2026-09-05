@@ -269,10 +269,6 @@ def test_key_reading_is_not_bound_by_lesson_code():
 
 # ── 課文本體 (#2683) ────────────────────────────────────────────────────────
 
-@pytest.mark.xfail(
-    reason="內容缺口，登錄在 data/curriculum_qa/content_known_gaps.yaml#lesson_body_text（#3100）。strict=True：缺口補上時這支會 XPASS，逼人回來拿掉標記。",
-    strict=True,
-)
 def test_lessons_carry_their_body_text():
     """The body was absent for all 175 lessons: the pipeline read paragraphs back
     out of the layer the re-ink deleted, so 朗讀 / 閱讀理解 / 生字 / 造句 had no text
@@ -1550,3 +1546,56 @@ def test_the_translation_is_not_the_body():
                  ["paragraphs"] or [""])[0]
         body = "".join(served[uid].get("paragraphs") or [])
         assert first[:18] not in body, f"{uid}: 今譯被當成課文送出去了"
+
+
+def test_cross_language_paths_are_in_the_ci_filter():
+    """後端測試會讀的前端檔，必須在 pytest.yml 的 paths-filter 裡。
+
+    🔴 2026-09-06 的實際代價：#3117 是純前端 PR，改了
+    `FillInBlankExercise.tsx` 的一行判斷（加了第二個條件），而
+    `test_sub_exercise_reaches_students_2865` 用**字面字串**鎖著那一行。
+    `detect-changes` 只認 `backend/**`，判定「跟後端無關」→ **後端套件整個沒跑**
+    → 鎖紅了沒有任何人知道，一路 merge 上 prod。
+
+    那不是那支測試寫得不好（跨語言的守衛只能讀原始碼），是 CI 的觸發條件
+    漏掉了「後端依賴前端檔案」這條邊。
+
+    這一條讓清單不會再漂移：有人新增一支讀前端檔的後端測試而沒補 filter，
+    這裡就紅 —— 那比「等下一次上了 prod 才發現」便宜得多。
+    """
+    import os
+
+    root = Path(__file__).resolve().parent.parent.parent
+
+    # 後端測試實際讀到的前端路徑
+    referenced: set[str] = set()
+    for dirpath, _, filenames in os.walk(root / "backend" / "tests"):
+        for name in filenames:
+            if not name.endswith(".py"):
+                continue
+            src = (Path(dirpath) / name).read_text(encoding="utf-8", errors="ignore")
+            # REPO / "frontend" / "src" / ... 這種 Path 串接
+            for m in re.finditer(r'"frontend"((?:\s*/\s*"[^"]+")+)', src):
+                parts = re.findall(r'"([^"]+)"', m.group(1))
+                referenced.add("frontend/" + "/".join(parts))
+            # 字串裡直接寫的路徑
+            for m in re.finditer(r"frontend/([A-Za-z0-9_./-]+\.[a-z]+)", src):
+                referenced.add("frontend/" + m.group(1))
+
+    # 正向對照：抓不到任何一個 = 掃法壞了，而不是「沒有跨語言依賴」
+    assert len(referenced) >= 5, f"只掃到 {referenced} —— 掃法可能壞了"
+
+    wf = yaml.safe_load((root / ".github" / "workflows" / "pytest.yml").read_text(encoding="utf-8"))
+    filters = wf["jobs"]["detect-changes"]["steps"][1]["with"]["filters"]
+
+    missing = []
+    for path in sorted(referenced):
+        # 目錄型的引用（`frontend/src`）用 glob 涵蓋即可
+        if path.rstrip("/") == "frontend/src":
+            continue
+        if path not in filters:
+            missing.append(path)
+    assert missing == [], (
+        "這些前端檔被後端測試讀，但不在 pytest.yml 的 paths-filter 裡 —— "
+        f"改它們的 PR 不會跑後端套件：{missing}"
+    )
