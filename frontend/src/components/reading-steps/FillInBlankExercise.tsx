@@ -161,6 +161,31 @@ function clearAnswers(storyId: string | number | undefined): void {
  * 🔴 沒有這支之前，判對條件是 `code === item.answer` —— 第二個正解
  * 一路帶到 prod 卻沒人讀，學生選它畫面回「再試試看！」。
  */
+/**
+ * 這一課的「一個詞只配一題」假設成不成立。
+ *
+ * 🔴 不成立時還去鎖用過的詞，會把後面某一題的正解關掉，那一題就無解。
+ * staging 實測 L0072：第 5 題與第 7 題的正解都是「懷疑」，第 5 題用掉之後
+ * 第 7 題只剩一個錯的選項可以點。179 課裡有 7 課的答案有重複。
+ *
+ * ⛔ 判準不能寫成「題數 > 詞庫大小」—— 題數少於詞數但答案重複的課一樣會鎖死。
+ * 要問的是答案本身有沒有重複。
+ */
+export function answersAreOneToOne(
+  sentences: Pick<FillInBlankItem, 'answer' | 'accepted_answers'>[],
+): boolean {
+  const seen = new Set<string>();
+  for (const s of sentences) {
+    for (const code of (s.accepted_answers?.length ? s.accepted_answers : [s.answer])) {
+      const c = String(code || '').trim();
+      if (!c) continue;
+      if (seen.has(c)) return false;
+      seen.add(c);
+    }
+  }
+  return true;
+}
+
 export function isAcceptedCode(item: Pick<FillInBlankItem, 'answer' | 'accepted_answers'>, code: string): boolean {
   const accepted = item.accepted_answers;
   if (Array.isArray(accepted) && accepted.length > 0) return accepted.includes(code);
@@ -292,6 +317,9 @@ const FillInBlankExercise: React.FC<Props> = ({
   //      就算沒有 ①，消失機制也會讓後兩題無解。
   const isSubExercise = Boolean(currentSentence?.options);
 
+  // 這一課的答案有沒有重複 —— 有的話就不鎖用過的詞（#3117）。
+  const oneToOne = useMemo(() => answersAreOneToOne(sentences), [sentences]);
+
   const availableEntries = useMemo(() => {
     if (FILLBLANK_OPTION_MODE === 'disappear' && !isSubExercise) {
       return bankEntries.filter(([code]) => !usedCodes.has(code));
@@ -346,7 +374,8 @@ const FillInBlankExercise: React.FC<Props> = ({
     if (isAcceptedCode(currentSentence, code)) {
       // ⛔ 子練習答對不記進 usedCodes —— 那份集合是給主題目的一對一配對用的，
       //    記進去會把後面某一題的正確答案關掉（見 isSubExercise 那段）。
-      if (!isSubExercise) {
+      // 只有在「一個詞配一題」成立時才鎖 —— 否則會把後面某一題的正解關掉（#3117）。
+      if (!isSubExercise && oneToOne) {
         const newUsed = new Set(usedCodes);
         newUsed.add(code);
         setUsedCodes(newUsed);
