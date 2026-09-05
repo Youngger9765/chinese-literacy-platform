@@ -49,13 +49,26 @@ def _make_tts_test_app():
     # Strategy: also override the DB dependency so the role query returns admin.
     # Easiest: completely override require_role's inner dependency (_check_role).
     # We locate it via the route's dependencies list.
-    from fastapi import routing as fastapi_routing
-    import fastapi
-    for route in mini_app.routes:
-        if hasattr(route, "dependencies"):
-            for dep in route.dependencies:
-                if hasattr(dep, "dependency") and hasattr(dep.dependency, "__name__") and dep.dependency.__name__ == "_check_role":
-                    mini_app.dependency_overrides[dep.dependency] = lambda: stub_admin
+    # Scan the router, not mini_app.routes. This FastAPI version defers route
+    # expansion — right after include_router, mini_app.routes holds a single
+    # _IncludedRouter placeholder, so the old loop iterated nothing and silently
+    # installed no override at all. The real role check then ran and queried
+    # user_roles; it only looked fine because the in-memory test DB happened to
+    # have that table. Point it at a file-backed DB and it fails with
+    # "no such table: user_roles".
+    #
+    # A loop that finds nothing must say so, hence the count assertion.
+    overridden = 0
+    for route in router.routes:
+        for dep in getattr(route, "dependencies", []) or []:
+            fn = getattr(dep, "dependency", None)
+            if getattr(fn, "__name__", None) == "_check_role":
+                mini_app.dependency_overrides[fn] = lambda: stub_admin
+                overridden += 1
+    assert overridden, (
+        "no _check_role dependency found on the tts router — the role override "
+        "would be a no-op and /regenerate would hit the real database"
+    )
 
     return mini_app
 
@@ -206,6 +219,7 @@ class TestGCSSentinel:
         import app.services.tts_service as tts_mod
         from app.services.tts import cache as cache_mod
         from app.services.tts.providers import azure as az_mod
+        from app.services import tts as tts_pkg
 
         # Reset state
         original = cache_mod._gcs_client
@@ -238,6 +252,7 @@ class TestGCSSentinel:
         import app.services.tts_service as tts_mod
         from app.services.tts import cache as cache_mod
         from app.services.tts.providers import azure as az_mod
+        from app.services import tts as tts_pkg
 
         original = cache_mod._gcs_client
         cache_mod._gcs_client = cache_mod._GCS_UNAVAILABLE
@@ -500,6 +515,7 @@ class TestCostProtection:
         """
         import app.services.tts_service as tts_mod
         from app.services.tts.providers import azure as az_mod
+        from app.services import tts as tts_pkg
         # Clear L1 cache
         tts_mod._TTS_CACHE.clear()
 
@@ -568,6 +584,7 @@ class TestAzureTTSSynthesis:
         from unittest.mock import patch, MagicMock
         import app.services.tts_service as tts_mod
         from app.services.tts.providers import azure as az_mod
+        from app.services import tts as tts_pkg
 
         fake_response = MagicMock()
         fake_response.status_code = 200
@@ -584,6 +601,7 @@ class TestAzureTTSSynthesis:
         """_synthesize_azure must raise TTSError when AZURE_SPEECH_KEY is empty."""
         import app.services.tts_service as tts_mod
         from app.services.tts.providers import azure as az_mod
+        from app.services import tts as tts_pkg
         from app.services.tts_service import TTSError
 
         with patch.object(az_mod, "AZURE_SPEECH_KEY", ""):
@@ -595,6 +613,7 @@ class TestAzureTTSSynthesis:
         import urllib.error
         import app.services.tts_service as tts_mod
         from app.services.tts.providers import azure as az_mod
+        from app.services import tts as tts_pkg
         from app.services.tts_service import TTSError
 
         http_error = urllib.error.HTTPError(
@@ -614,13 +633,21 @@ class TestAzureTTSSynthesis:
         """Azure returning empty bytes must raise TTSError."""
         import app.services.tts_service as tts_mod
         from app.services.tts.providers import azure as az_mod
+        from app.services import tts as tts_pkg
         from app.services.tts_service import TTSError
 
         fake_response = MagicMock()
         fake_response.status_code = 200
         fake_response.content = b""
 
-        with patch.object(az_mod, "AZURE_SPEECH_KEY", "fake-key"), \
+        # Pin the provider. TTS_PROVIDER is read from the environment at import
+        # (tts/__init__.py:11); CI sets google, and with no credentials there
+        # both providers fail and the endpoint answers 503. Locally it "passed"
+        # only because the Google path succeeded against real credentials —
+        # measured: 1 outbound connection to 64.233.187.95 per run. A test that
+        # mocks the Azure request has to be on the Azure path.
+        with patch.object(tts_pkg, "TTS_PROVIDER", "azure"), \
+             patch.object(az_mod, "AZURE_SPEECH_KEY", "fake-key"), \
              patch.object(az_mod.requests, "post", return_value=fake_response):
             with pytest.raises(TTSError, match="empty"):
                 tts_mod._synthesize_azure("你好")
@@ -630,6 +657,7 @@ class TestAzureTTSSynthesis:
         import urllib.request
         import app.services.tts_service as tts_mod
         from app.services.tts.providers import azure as az_mod
+        from app.services import tts as tts_pkg
 
         captured_request = {}
 
@@ -654,13 +682,22 @@ class TestAzureTTSSynthesis:
     def test_azure_gcs_path_uses_azure_prefix(self):
         """Audio from Azure must be saved under azure/ GCS prefix."""
         import app.services.tts_service as tts_mod
+        from app.services import tts as tts_pkg
         from app.services.tts.providers import azure as az_mod
 
         fake_response = MagicMock()
         fake_response.status_code = 200
         fake_response.content = b"AZURE_AUDIO"
 
-        with patch.object(az_mod, "AZURE_SPEECH_KEY", "test-key-123"), \
+        # TTS_PROVIDER is read from the environment once at import
+        # (tts/__init__.py:11), so which provider actually ran was inherited
+        # from the ambient config. CI sets TTS_PROVIDER=google, so this
+        # asserted 'azure' and failed there while passing locally. A test named
+        # "azure ... uses azure prefix" has to pin the provider itself.
+        #
+        # AZURE_SPEECH_KEY was also patched twice with different values — the
+        # second won, the first was dead. Kept one.
+        with patch.object(tts_pkg, "TTS_PROVIDER", "azure"), \
              patch.object(az_mod, "AZURE_SPEECH_KEY", "fake-key"), \
              patch.object(az_mod.requests, "post", return_value=fake_response), \
              patch("app.services.tts_service._gcs_get", return_value=None), \
@@ -686,6 +723,7 @@ class TestAzureGoogleFallback:
         """Azure TTSError → Google client is called and returns audio."""
         import app.services.tts_service as tts_mod
         from app.services.tts.providers import azure as az_mod
+        from app.services import tts as tts_pkg
         from app.services.tts_service import synthesize_speech, TTSError
 
         mock_google_client = MagicMock()
@@ -708,6 +746,7 @@ class TestAzureGoogleFallback:
         """If both Azure and Google fail, TTSError is raised."""
         import app.services.tts_service as tts_mod
         from app.services.tts.providers import azure as az_mod
+        from app.services import tts as tts_pkg
         from app.services.tts_service import synthesize_speech, TTSError
 
         with patch.object(az_mod, "AZURE_SPEECH_KEY", "test-key-123"), \
@@ -724,6 +763,7 @@ class TestAzureGoogleFallback:
         """No AZURE_SPEECH_KEY must call Google directly without trying Azure."""
         import app.services.tts_service as tts_mod
         from app.services.tts.providers import azure as az_mod
+        from app.services import tts as tts_pkg
         from app.services.tts_service import synthesize_speech
 
         mock_google_client = MagicMock()
@@ -747,6 +787,7 @@ class TestAzureGoogleFallback:
         """Audio from Google fallback must be saved with provider='google' in GCS."""
         import app.services.tts_service as tts_mod
         from app.services.tts.providers import azure as az_mod
+        from app.services import tts as tts_pkg
         from app.services.tts_service import synthesize_speech
 
         mock_google_client = MagicMock()
@@ -841,6 +882,7 @@ class TestPhonemeCorrections:
         """Full Azure SSML output must contain <sub alias> (never <phoneme>) for 喝采."""
         import app.services.tts_service as tts_mod
         from app.services.tts.providers import azure as az_mod
+        from app.services import tts as tts_pkg
 
         captured_request = {}
 
@@ -864,6 +906,7 @@ class TestPhonemeCorrections:
         """SSML for plain text must NOT contain phoneme or sub tags."""
         import app.services.tts_service as tts_mod
         from app.services.tts.providers import azure as az_mod
+        from app.services import tts as tts_pkg
 
         captured_request = {}
 
@@ -999,6 +1042,7 @@ class TestAzureRealAPIPhonemeCorrections:
     def test_real_azure_accepts_corrected_sentence(self, sentence):
         import app.services.tts_service as tts_mod
         from app.services.tts.providers import azure as az_mod
+        from app.services import tts as tts_pkg
 
         audio = tts_mod._synthesize_azure(sentence)
         assert isinstance(audio, bytes)
@@ -1018,6 +1062,7 @@ class TestDeleteTtsCache:
         provider-scoped; delete_tts_cache must check all of them)."""
         import app.services.tts_service as tts_mod
         from app.services.tts.providers import azure as az_mod
+        from app.services import tts as tts_pkg
         from app.services.tts_service import delete_tts_cache, _cache_key
 
         text = "測試刪除L1"
@@ -1040,6 +1085,7 @@ class TestDeleteTtsCache:
         """Key absent from L1 must return l1_deleted=False without error."""
         import app.services.tts_service as tts_mod
         from app.services.tts.providers import azure as az_mod
+        from app.services import tts as tts_pkg
         from app.services.tts_service import delete_tts_cache, _cache_key
 
         text = "不在快取裡的句子"
@@ -1058,6 +1104,7 @@ class TestDeleteTtsCache:
         from app.services.tts_service import delete_tts_cache, _cache_key
         import app.services.tts_service as tts_mod
         from app.services.tts.providers import azure as az_mod
+        from app.services import tts as tts_pkg
 
         text = "測試GCS刪除"
         key = _cache_key(text)
@@ -1117,6 +1164,7 @@ class TestRegenerateEndpoint:
         """POST /api/tts/regenerate must return 200 with status=ok (uses Azure path)."""
         import app.services.tts_service as tts_mod
         from app.services.tts.providers import azure as az_mod
+        from app.services import tts as tts_pkg
         from fastapi.testclient import TestClient
         # The Azure provider moved from urllib to requests, and this fake kept the
         # urllib shape: a context manager with .read(). requests reads
@@ -1130,7 +1178,14 @@ class TestRegenerateEndpoint:
         fake_response.reason = "OK"
         fake_response.content = b"REGENERATED_AUDIO"
 
-        with patch.object(az_mod, "AZURE_SPEECH_KEY", "fake-key"), \
+        # Pin the provider. TTS_PROVIDER is read from the environment at import
+        # (tts/__init__.py:11); CI sets google, and with no credentials there
+        # both providers fail and the endpoint answers 503. Locally it "passed"
+        # only because the Google path succeeded against real credentials —
+        # measured: 1 outbound connection to 64.233.187.95 per run. A test that
+        # mocks the Azure request has to be on the Azure path.
+        with patch.object(tts_pkg, "TTS_PROVIDER", "azure"), \
+             patch.object(az_mod, "AZURE_SPEECH_KEY", "fake-key"), \
              patch.object(az_mod.requests, "post", return_value=fake_response):
             client = TestClient(self._make_app())
             response = client.post("/api/tts/regenerate", json={"text": "她贏得了喝采"})
@@ -1194,6 +1249,7 @@ class TestBuildLessonTtsMappingV2Alignment:
         """
         import app.services.tts_service as tts_mod
         from app.services.tts.providers import azure as az_mod
+        from app.services import tts as tts_pkg
         from app.services.lesson_loader import get_lesson_by_id
 
         # Reset the in-process JSONL cache so we load fresh from disk.

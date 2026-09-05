@@ -1,3 +1,4 @@
+import pytest
 import os as _os
 import sys as _sys
 # 讓 `from _module_files import ...` 在任何 rootdir 下都找得到（#2916）。
@@ -63,3 +64,63 @@ def pytest_runtest_setup(item):
         join_preview_rate_limiter.reset()
     except (ImportError, AttributeError):
         pass
+
+
+# ── 測試不准打真的 GCS ──────────────────────────────────────────────────────
+# test_omo_upload / test_omo_dedup 直接打 /api/omo/upload，而那條路會把圖片
+# 真的傳上 GCS —— socket 稽核量到 80 次對外連線（142.250.x / 173.194.x），
+# 每一次都在寫真的 bucket。這些測試在乎的是去重與狀態機，不是儲存本身。
+#
+# 三個入口都要擋：upload 綁 _upload_to_gcs、lifecycle 綁 _get_signed_url，
+# 以及 upload 之後 background_tasks 排的 _run_identification —— 那支會真的
+# 送圖去 Gemini 辨識。擋掉前兩個之後仍有 20 次外連，就是它。
+# patch 打在**綁名字的那個模組**，不是 services.omo_storage —— 打後者不會
+# 影響已經 import 進去的名字（這輪已經因為同一件事踩過三次）。
+@pytest.fixture(autouse=True)
+def _no_real_gcs():
+    from unittest.mock import patch
+
+    with patch("app.routes.omo.upload._upload_to_gcs",
+               side_effect=lambda uid, upload_id, attempt, idx, data, mime:
+                   f"{uid}/{upload_id}/{attempt}/{idx}.jpg"), \
+         patch("app.routes.omo.lifecycle._get_signed_url",
+               return_value="https://example.invalid/signed-test-url"), \
+         patch("app.routes.omo.upload._run_identification", return_value=None):
+        yield
+
+
+# ── 測試一律不准對外連線 ────────────────────────────────────────────────────
+# 稽核量到 23 支測試共發出 91 次對外連線（Gemini / GCS / Google TTS）。每一次
+# 都在花錢、都會 flaky，而且有些測試**是靠真的呼叫成功才綠的** —— CI 沒有憑證
+# 所以在那裡是紅的，那個綠是假的（實例：TTS regenerate 靠本機 ADC 打真 Google）。
+#
+# 擋板讓這件事不可能再發生：連出去就當場失敗，訊息指名是哪一支。要測外部服務
+# 的行為就 mock 它；真的需要連線的測試自己標 @pytest.mark.allow_network。
+_ALLOWED_HOST_PREFIXES = ("127.", "::1", "localhost")
+
+
+@pytest.fixture(autouse=True)
+def _no_outbound_network(request):
+    import socket
+
+    if request.node.get_closest_marker("allow_network"):
+        yield
+        return
+
+    real_connect = socket.socket.connect
+
+    def guarded(sock, address):
+        host = str(address[0]) if isinstance(address, tuple) and address else ""
+        if host and not host.startswith(_ALLOWED_HOST_PREFIXES):
+            raise AssertionError(
+                f"{request.node.nodeid} tried to reach {host} — tests must not "
+                f"call real services. Mock it, or mark the test "
+                f"@pytest.mark.allow_network if the call is the point."
+            )
+        return real_connect(sock, address)
+
+    socket.socket.connect = guarded
+    try:
+        yield
+    finally:
+        socket.socket.connect = real_connect

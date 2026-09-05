@@ -239,6 +239,51 @@ jobs:
       # (1) token 本身帶對 claim (2) 核發端點只給該學生的授課老師 (3) 核心
       # 安全邊界 — PreviewModeWriteGuardMiddleware 擋掉所有 /api/* 寫入，
       # 用最低權限身分(被預覽的學生本人)測、每個 fail-closed 都配正向對照。
+      # Eighteen files that failed when run on their own — module splits left
+      # their patches aimed at re-export shims, fixtures carried placeholder
+      # slugs a later gate started refusing, and assertions still described a
+      # response shape that had moved. None of it was caught, because none of
+      # these files was named anywhere in this workflow. That is also how the
+      # L0041 answer leak came back: 777a4a938 fixed it and shipped a lock, the
+      # lock was never wired in, and the v3 re-extraction reintroduced the leak
+      # in silence. Pinning them here is the part that makes the repair last.
+      #
+      # test_reading_transcription used to need its own step with a file-backed
+      # SQLite. It does not any more: app/database.py now sets
+      # check_same_thread=False (and StaticPool for in-memory), which is what a
+      # threaded app on SQLite needs. Fixing the engine beat working around it
+      # in CI config.
+      #
+      # test_lesson_uid_loader.py is deliberately absent — it still has 17 real
+      # content failures, tracked in #3100. Adding it would only turn CI red.
+      - name: Run repaired backend locks (#3093)
+        run: |
+          cd backend
+          python -m pytest --tb=short -q \
+            tests/test_comprehension_score.py \
+            tests/test_ai_endpoints.py \
+            tests/test_input_sanitizer.py \
+            tests/test_omo_crop_provenance.py \
+            tests/test_stories_api.py \
+            tests/test_spotlight_to_lesson_content.py \
+            tests/test_exit_ticket.py \
+            tests/test_roles_api.py \
+            tests/test_error_correction.py \
+            tests/test_reading_evaluation_service.py \
+            tests/test_reading_transcription.py \
+            tests/test_teacher_dashboard_n1.py \
+            tests/test_gemini_content_filter.py \
+            tests/test_omo_grader_real.py \
+            tests/test_omo_upload.py \
+            tests/test_tts_service.py \
+            tests/test_google_oauth.py
+        env:
+          DATABASE_URL: sqlite://
+          TTS_PROVIDER: google
+          AZURE_SPEECH_KEY: ""
+          AZURE_SPEECH_REGION: eastus
+          JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"
+
       - name: Run teacher preview-mode locks (#3027)
         run: |
           cd backend
