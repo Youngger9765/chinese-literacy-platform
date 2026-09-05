@@ -158,9 +158,17 @@ class TestGCSSentinel:
         cache_mod._gcs_client = None  # force re-init attempt
 
         try:
-            with patch.dict("sys.modules", {"google.cloud.storage": MagicMock(
-                Client=MagicMock(side_effect=Exception("no credentials"))
-            )}):
+            # Patching sys.modules does not intercept
+            # `import google.cloud.storage as storage` inside _get_gcs_bucket:
+            # once anything has imported it for real, that statement resolves
+            # through getattr(google.cloud, "storage") and gets the real module.
+            # A live client was built, the sentinel was never set, and this
+            # passed alone while failing in the full suite. Patch the attribute
+            # the call actually reaches.
+            with patch(
+                "google.cloud.storage.Client",
+                side_effect=Exception("no credentials"),
+            ):
                 result = cache_mod._get_gcs_bucket()
                 assert result is None
                 assert cache_mod._gcs_client is cache_mod._GCS_UNAVAILABLE
