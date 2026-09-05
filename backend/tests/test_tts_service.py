@@ -654,13 +654,22 @@ class TestAzureTTSSynthesis:
     def test_azure_gcs_path_uses_azure_prefix(self):
         """Audio from Azure must be saved under azure/ GCS prefix."""
         import app.services.tts_service as tts_mod
+        from app.services import tts as tts_pkg
         from app.services.tts.providers import azure as az_mod
 
         fake_response = MagicMock()
         fake_response.status_code = 200
         fake_response.content = b"AZURE_AUDIO"
 
-        with patch.object(az_mod, "AZURE_SPEECH_KEY", "test-key-123"), \
+        # TTS_PROVIDER is read from the environment once at import
+        # (tts/__init__.py:11), so which provider actually ran was inherited
+        # from the ambient config. CI sets TTS_PROVIDER=google, so this
+        # asserted 'azure' and failed there while passing locally. A test named
+        # "azure ... uses azure prefix" has to pin the provider itself.
+        #
+        # AZURE_SPEECH_KEY was also patched twice with different values — the
+        # second won, the first was dead. Kept one.
+        with patch.object(tts_pkg, "TTS_PROVIDER", "azure"), \
              patch.object(az_mod, "AZURE_SPEECH_KEY", "fake-key"), \
              patch.object(az_mod.requests, "post", return_value=fake_response), \
              patch("app.services.tts_service._gcs_get", return_value=None), \
