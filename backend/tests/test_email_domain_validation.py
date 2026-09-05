@@ -183,7 +183,53 @@ def _register_teacher(client, email_prefix: str) -> dict:
     return {"email": email, "token": token, "user_id": user_id}
 
 
-def _create_classroom(client, token: str, school_id: int) -> int:
+def _make_school_member(user_id: int, school_id: int) -> None:
+    """Give the user a school-scoped teacher role.
+
+    POST /api/classrooms requires the caller to be a member of that school, or
+    an org admin, or a system admin. That check closed a real hole — any
+    teacher could create a classroom in any school, in any org — and these
+    tests predate it: they registered a user and went straight to creating a
+    classroom, which now answers 403.
+
+    Registering does not grant school scope, so the membership has to be
+    stated. Doing it here rather than loosening the endpoint: the endpoint is
+    right, the setup was incomplete.
+    """
+    db = TestingSessionLocal()
+    try:
+        role = db.query(Role).filter(Role.name == "teacher").first()
+        # Idempotent: a test may create two classrooms in the same school, and
+        # user_roles is unique on (user, role, scope_type, scope_id).
+        existing = (
+            db.query(UserRole)
+            .filter(
+                UserRole.user_id == user_id,
+                UserRole.role_id == role.id,
+                UserRole.scope_type == "school",
+                UserRole.scope_id == str(school_id),
+            )
+            .first()
+        )
+        if existing is not None:
+            return
+        db.add(
+            UserRole(
+                user_id=user_id,
+                role_id=role.id,
+                scope_type="school",
+                scope_id=str(school_id),
+                is_active=True,
+            )
+        )
+        db.commit()
+    finally:
+        db.close()
+
+
+def _create_classroom(client, token: str, school_id: int, user_id: int | None = None) -> int:
+    if user_id is not None:
+        _make_school_member(user_id, school_id)
     resp = client.post(
         "/api/classrooms",
         json={"name": f"Class {uuid.uuid4().hex[:4]}", "school_id": school_id},
@@ -198,7 +244,7 @@ class TestBatchCreateStudentsWarnings:
 
     def test_no_warnings_when_school_has_no_domain(self, client):
         teacher = _register_teacher(client, "teacher_nodomain")
-        classroom_id = _create_classroom(client, teacher["token"], _test_school_id_no_domain)
+        classroom_id = _create_classroom(client, teacher["token"], _test_school_id_no_domain, teacher["user_id"])
 
         resp = client.post(
             f"/api/classrooms/{classroom_id}/students/batch",
@@ -212,7 +258,7 @@ class TestBatchCreateStudentsWarnings:
 
     def test_no_warnings_for_synthetic_emails_even_with_school_domain(self, client):
         teacher = _register_teacher(client, "teacher_synth")
-        classroom_id = _create_classroom(client, teacher["token"], _test_school_id_with_domain)
+        classroom_id = _create_classroom(client, teacher["token"], _test_school_id_with_domain, teacher["user_id"])
 
         # Batch create uses synthetic @student.lingoleap.local emails — no warnings
         resp = client.post(
@@ -236,7 +282,7 @@ class TestCsvUploadWarnings:
 
     def test_no_warnings_when_school_has_no_domain(self, client):
         teacher = _register_teacher(client, "csvteacher_nodomain")
-        classroom_id = _create_classroom(client, teacher["token"], _test_school_id_no_domain)
+        classroom_id = _create_classroom(client, teacher["token"], _test_school_id_no_domain, teacher["user_id"])
         csv_bytes = self._make_csv([("陳大文", "01")])
 
         resp = client.post(
@@ -251,7 +297,7 @@ class TestCsvUploadWarnings:
 
     def test_no_warnings_for_synthetic_emails(self, client):
         teacher = _register_teacher(client, "csvteacher_synth")
-        classroom_id = _create_classroom(client, teacher["token"], _test_school_id_with_domain)
+        classroom_id = _create_classroom(client, teacher["token"], _test_school_id_with_domain, teacher["user_id"])
         csv_bytes = self._make_csv([("林小花", "01")])
 
         resp = client.post(
