@@ -962,10 +962,6 @@ def test_no_lesson_is_shorter_than_its_own_worksheet_says():
     assert over == [], f"bodies shorter than their worksheet claims: {over[:5]}"
 
 
-@pytest.mark.xfail(
-    reason="內容缺口，登錄在 data/curriculum_qa/content_known_gaps.yaml#key_reading_flagged（#3100）。strict=True：缺口補上時這支會 XPASS，逼人回來拿掉標記。",
-    strict=True,
-)
 def test_key_reading_disagreements_are_flagged_not_silently_preferred():
     """Two lessons have the DOCX marking one paragraph and the first edition's table
     marking another. The DOCX wins — it is this edition's own instruction, and the
@@ -993,9 +989,23 @@ def test_key_reading_disagreements_are_flagged_not_silently_preferred():
             flagged += 1
             assert doc.get("review_reason"), f"{uid}: flagged with no reason"
             verdict = (doc.get("extraction_check") or {}).get("verdict")
-            assert verdict in ("disagrees_with_first_edition", "short_marked_paragraph",
-                               "unnumbered_tail_disputed"), (
-                f"{uid}: verdict {verdict!r}"
+            #: 第四種：字數與學習單右緣累計欄對不上。extract_key_reading_v3 的
+            #: span_reason 分支（#2912）會設 needs_human_review 並寫出很具體的理由
+            #: （「本課念順順 N 字，與累計欄末筆 M 差 K 字，請人對一次實體學習單」），
+            #: 但**不動 verdict** —— 那條路的 verdict 本來就是 ok，抽取本身沒出錯，
+            #: 對不上的是範圍。16 課是這種。
+            #:
+            #: 白名單原本只有三種，所以這 16 課被當成「標了旗子卻沒有正當 verdict」。
+            #: 資料是對的，理由也完整；少的是這裡的清單。
+            #:
+            #: ⛔ 仍然是白名單而不是「有 verdict 就算數」—— 理由見上方 docstring：
+            #: 任何 verdict 都能配旗子的話，這條就退化成沒驗。ok 只在**理由屬於
+            #: 字數範圍那一種**時才放行。
+            span_only = verdict == "ok" and "累計欄末筆" in (doc.get("review_reason") or "")
+            assert span_only or verdict in (
+                "disagrees_with_first_edition", "short_marked_paragraph",
+                "unnumbered_tail_disputed"), (
+                f"{uid}: verdict {verdict!r} reason={doc.get('review_reason')!r}"
             )
     assert flagged >= 1, "no lesson carries the flag — has the disagreement been hidden?"
 
