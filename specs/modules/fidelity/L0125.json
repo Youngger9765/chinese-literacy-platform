@@ -4,7 +4,7 @@
   "docx_sha256": "820a-32ee-4292-3388",
   "modules": {
     "comprehension.vvnak": {
-      "yaml_sha256": "85a2-4f49-01f7-8126",
+      "yaml_sha256": "24d1-c58c-3ece-6008",
       "checked": 24,
       "status": "pass",
       "passed": true,

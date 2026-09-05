@@ -4,7 +4,7 @@
   "docx_sha256": "989b-3b77-95e9-e2e1",
   "modules": {
     "comprehension.xyfrx": {
-      "yaml_sha256": "41d2-3b18-c9b5-78b4",
+      "yaml_sha256": "b17e-c1da-d6aa-d467",
       "checked": 21,
       "status": "pass",
       "passed": true,

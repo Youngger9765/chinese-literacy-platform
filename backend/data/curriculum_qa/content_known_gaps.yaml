@@ -287,6 +287,39 @@ key_reading_flagged:
   - L0139
   what: 二修 DOCX 標的段號與一修對照表差一段。已採用二修（那是二修自己的學習單指示），並在 key_reading.yml 標 needs_human_review + review_reason。
   why_not_withheld: 兩版分段一致、只有標記差一段，且段落仍是本課的。扣住等於讓學生改唸全文，那才是專家審查否決的做法。
+# ── 選項本身是圖，文字流只有圖說 ──────────────────────────────────────────
+image_options_only_captions:
+  generated: "2026-09-05"
+  issue: 3100
+  what_this_is: >-
+    「下列哪一個圖是…」這類題目，四個選項在學習單上是四張圖，文字流裡只留老師寫在
+    圖旁的圖說。抽取器讀得到圖說、讀不到圖，於是選項變成一串括號，而**正解那張圖
+    通常沒有圖說**（老師不必替答案註記），所以正解在畫面上是空的。
+  evidence: >-
+    原稿 XML 逐題查過：題幹之後 9000 字元內 drawing=3、blip=2，選項行是
+    「A.」「B. (血管暢通)」「C. (血液流動方向)」「D.(血球)」——
+    A 是正解且沒有圖說。L0052 同形狀（D 是正解且空白）。
+  how_it_looks_to_a_student: >-
+    L0143 看到四個選項：空白 / (血管暢通) / (血液流動方向) / (血球)；
+    L0052 看到：藍鯨骨骼標本 / 鯊魚 / 藍鯨 / 空白。兩題都答不了。
+  why_not_stripped: >-
+    這些括號**不能跟老師的批改註記一起剝**：整個選項就是一個括號，剝掉什麼都不剩，
+    會從「三個有字一個空」變成「四個都空」。
+    test_stripping_annotations_never_empties_an_option 就是守這件事。
+  lessons:
+    - lesson_uid: L0143
+      question: 依文中所述，下列哪一個圖是「血栓」?
+      answer: A
+      empty_option: A
+    - lesson_uid: L0052
+      question: 根據第三段，哪一張圖最符合小藍鯨生前被漁具纏繞的情況
+      answer: D
+      empty_option: D
+  count_lessons: 2
+  how_to_close: >-
+    把圖抽出來當選項（跟聚光燈的 figN.png 同一條路），或請教材端補印文字選項。
+    不在我方 code 的範圍內修得掉。
+
 mcq_options_emitted_as_guides:
   count: 0
   what: 選擇題的選項被抽取成 `guide` 區塊而不是選項。guide 是給學生看的指引文字，所以選項會以敘述形式攤在畫面上，而不是可作答的選擇。

@@ -8,6 +8,7 @@ partially.
 """
 
 from __future__ import annotations
+import re
 
 import sys
 from pathlib import Path
@@ -20,7 +21,26 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from app.services import lesson_uid_loader as L  # noqa: E402
 
 
+def _image_option_gap_uids() -> set[str]:
+    """Lessons whose options are pictures, from the ledger — not a hardcoded list.
+
+    Reading it from content_known_gaps.yaml means the exemption cannot quietly
+    grow: adding a lesson here requires writing down the evidence there.
+    """
+    import yaml
+
+    path = (
+        Path(__file__).resolve().parent.parent
+        / "data" / "curriculum_qa" / "content_known_gaps.yaml"
+    )
+    ledger = yaml.safe_load(path.read_text(encoding="utf-8"))
+    block = ledger.get("image_options_only_captions") or {}
+    return {row["lesson_uid"] for row in (block.get("lessons") or [])}
+
+
+
 @pytest.fixture
+
 def tree(tmp_path, monkeypatch):
     """A minimal uid tree, swapped in for the real LESSONS_ROOT."""
     monkeypatch.setattr(L, "LESSONS_ROOT", tmp_path)
@@ -1026,11 +1046,23 @@ def test_no_option_ends_in_the_marker_s_bracket():
     """
     from app.services.lesson_loader import get_all_lessons
 
+    # An option that is ENTIRELY a parenthesis cannot be stripped — nothing would
+    # be left. Those are the picture-option questions registered in
+    # content_known_gaps.yaml#image_options_only_captions, and the sibling test
+    # below is what guards them. Exempt exactly those lessons, from the ledger,
+    # so the exemption cannot grow without evidence being written down.
+    gap_uids = _image_option_gap_uids()
+    assert gap_uids, "ledger lost image_options_only_captions — refusing to run blind"
+
     left = [
         (l["lesson_uid"], o[:40]) for l in get_all_lessons()
         for q in (l.get("multiple_choice") or [])
         for o in (q.get("options") or [])
         if o and o.strip().endswith(("）", ")"))
+        and not (
+            l["lesson_uid"] in gap_uids
+            and re.fullmatch(r"[（(][^（）()]+[）)]", o.strip())
+        )
     ]
     assert left == [], f"marker brackets still visible: {left[:4]}"
 
@@ -1049,7 +1081,18 @@ def test_stripping_annotations_never_empties_an_option():
         if o is not None and not str(o).strip() and q.get("answer")
         and (q.get("options") or []).index(o) == ord(str(q["answer"])[0]) - 65
     ]
-    assert empty == [], f"answer option emptied by the strip: {empty[:4]}"
+    # L0143 and L0052 arrive here already empty: their options are pictures and
+    # the correct one carries no caption, so there was never any text to strip.
+    # Registered with the source evidence in
+    # content_known_gaps.yaml#image_options_only_captions. Anything outside that
+    # list means a strip really did empty an answer, which is what this guards.
+    gap_uids = _image_option_gap_uids()
+    unexpected = [e for e in empty if e[0] not in gap_uids]
+    assert unexpected == [], f"answer option emptied by the strip: {unexpected[:4]}"
+    assert len(empty) <= len(gap_uids), (
+        f"more emptied answers ({len(empty)}) than the ledger records "
+        f"({len(gap_uids)}): {empty[:4]}"
+    )
 
 
 def test_the_teacher_edition_rationale_still_fills_the_missing_option():

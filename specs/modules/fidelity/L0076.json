@@ -4,7 +4,7 @@
   "docx_sha256": "e8d7-35dd-ff1a-6d17",
   "modules": {
     "comprehension.ux3dt": {
-      "yaml_sha256": "e6b8-9325-54cd-e45d",
+      "yaml_sha256": "e724-476d-8324-0468",
       "checked": 25,
       "status": "pass",
       "passed": true,
