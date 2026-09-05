@@ -248,6 +248,12 @@ jobs:
       # lock was never wired in, and the v3 re-extraction reintroduced the leak
       # in silence. Pinning them here is the part that makes the repair last.
       #
+      # test_reading_transcription used to need its own step with a file-backed
+      # SQLite. It does not any more: app/database.py now sets
+      # check_same_thread=False (and StaticPool for in-memory), which is what a
+      # threaded app on SQLite needs. Fixing the engine beat working around it
+      # in CI config.
+      #
       # test_lesson_uid_loader.py is deliberately absent — it still has 17 real
       # content failures, tracked in #3100. Adding it would only turn CI red.
       - name: Run repaired backend locks (#3093)
@@ -264,6 +270,7 @@ jobs:
             tests/test_roles_api.py \
             tests/test_error_correction.py \
             tests/test_reading_evaluation_service.py \
+            tests/test_reading_transcription.py \
             tests/test_teacher_dashboard_n1.py \
             tests/test_gemini_content_filter.py \
             tests/test_omo_grader_real.py \
@@ -272,23 +279,6 @@ jobs:
             tests/test_google_oauth.py
         env:
           DATABASE_URL: sqlite://
-          TTS_PROVIDER: google
-          AZURE_SPEECH_KEY: ""
-          AZURE_SPEECH_REGION: eastus
-          JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"
-
-      # Split out because it needs a file-backed SQLite. transcribe_reading_audio
-      # does its work on a worker thread (asyncio.to_thread), and an in-memory
-      # SQLite connection cannot cross threads — "SQLite objects created in a
-      # thread can only be used in that same thread". Every other step here runs
-      # fine on sqlite://, so the URL is overridden for this one rather than for
-      # all of them. Measured: file-backed 14 passed, in-memory 1 failed.
-      - name: Run repaired transcription locks (#3093, needs file-backed sqlite)
-        run: |
-          cd backend
-          python -m pytest --tb=short -q tests/test_reading_transcription.py
-        env:
-          DATABASE_URL: sqlite:////tmp/ci_transcription.db
           TTS_PROVIDER: google
           AZURE_SPEECH_KEY: ""
           AZURE_SPEECH_REGION: eastus
