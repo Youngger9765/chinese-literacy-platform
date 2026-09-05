@@ -11,6 +11,11 @@ Tests cover:
 - CONTENT_FILTER_FRIENDLY_MSG is defined and non-empty
 """
 
+# These patched app.services.ai_service._get_client, which is wrong twice over:
+# ai_service is a re-export shim, and neither function under test calls
+# _get_client — both resolve their client through _get_client_for_task, which
+# respects TASK_MODELS. So the mock never intervened and every test here hit
+# the live Vertex AI endpoint (6 outbound connections in one run).
 import asyncio
 import sys
 import os
@@ -150,10 +155,11 @@ class TestGenerateStructuredResponseContentFilter:
         """When Gemini returns a SAFETY response, GeminiContentFilterError is raised."""
         mock_response = _make_response(finish_reason="FinishReason.SAFETY")
 
-        with patch("app.services.ai_service._get_client") as mock_client_factory:
+        with patch("app.services.ai.gemini_client._get_client_for_task") as mock_client_factory:
             mock_client = MagicMock()
             mock_client.models.generate_content.return_value = mock_response
-            mock_client_factory.return_value = mock_client
+            # _get_client_for_task returns (client, model_name), not a bare client.
+            mock_client_factory.return_value = (mock_client, "gemini-2.5-flash-lite")
 
             with pytest.raises(GeminiContentFilterError):
                 await generate_structured_response(
@@ -167,10 +173,11 @@ class TestGenerateStructuredResponseContentFilter:
         """Safety filter must NOT trigger retries — generate_content called exactly once."""
         mock_response = _make_response(finish_reason="FinishReason.SAFETY")
 
-        with patch("app.services.ai_service._get_client") as mock_client_factory:
+        with patch("app.services.ai.gemini_client._get_client_for_task") as mock_client_factory:
             mock_client = MagicMock()
             mock_client.models.generate_content.return_value = mock_response
-            mock_client_factory.return_value = mock_client
+            # _get_client_for_task returns (client, model_name), not a bare client.
+            mock_client_factory.return_value = (mock_client, "gemini-2.5-flash-lite")
 
             with pytest.raises(GeminiContentFilterError):
                 await generate_structured_response(
@@ -187,10 +194,11 @@ class TestGenerateStructuredResponseContentFilter:
         """Empty candidates (prompt-level block) raises GeminiContentFilterError."""
         mock_response = _make_response(candidates=False)
 
-        with patch("app.services.ai_service._get_client") as mock_client_factory:
+        with patch("app.services.ai.gemini_client._get_client_for_task") as mock_client_factory:
             mock_client = MagicMock()
             mock_client.models.generate_content.return_value = mock_response
-            mock_client_factory.return_value = mock_client
+            # _get_client_for_task returns (client, model_name), not a bare client.
+            mock_client_factory.return_value = (mock_client, "gemini-2.5-flash-lite")
 
             with pytest.raises(GeminiContentFilterError):
                 await generate_structured_response(
@@ -207,10 +215,11 @@ class TestGenerateStructuredResponseContentFilter:
             text='{"answer": "hello"}',
         )
 
-        with patch("app.services.ai_service._get_client") as mock_client_factory:
+        with patch("app.services.ai.gemini_client._get_client_for_task") as mock_client_factory:
             mock_client = MagicMock()
             mock_client.models.generate_content.return_value = mock_response
-            mock_client_factory.return_value = mock_client
+            # _get_client_for_task returns (client, model_name), not a bare client.
+            mock_client_factory.return_value = (mock_client, "gemini-2.5-flash-lite")
 
             result = await generate_structured_response(
                 system_prompt="test",
@@ -233,10 +242,11 @@ class TestGenerateSocraticQuestionContentFilter:
         """Safety block in generate_socratic_question raises GeminiContentFilterError."""
         mock_response = _make_response(finish_reason="FinishReason.SAFETY")
 
-        with patch("app.services.ai_service._get_client") as mock_client_factory:
+        with patch("app.services.ai_comprehension._get_client_for_task") as mock_client_factory:
             mock_client = MagicMock()
             mock_client.models.generate_content.return_value = mock_response
-            mock_client_factory.return_value = mock_client
+            # _get_client_for_task returns (client, model_name), not a bare client.
+            mock_client_factory.return_value = (mock_client, "gemini-2.5-flash-lite")
 
             with pytest.raises(GeminiContentFilterError):
                 await generate_socratic_question(
@@ -250,10 +260,11 @@ class TestGenerateSocraticQuestionContentFilter:
         """Empty candidates in generate_socratic_question raises GeminiContentFilterError."""
         mock_response = _make_response(candidates=False)
 
-        with patch("app.services.ai_service._get_client") as mock_client_factory:
+        with patch("app.services.ai_comprehension._get_client_for_task") as mock_client_factory:
             mock_client = MagicMock()
             mock_client.models.generate_content.return_value = mock_response
-            mock_client_factory.return_value = mock_client
+            # _get_client_for_task returns (client, model_name), not a bare client.
+            mock_client_factory.return_value = (mock_client, "gemini-2.5-flash-lite")
 
             with pytest.raises(GeminiContentFilterError):
                 await generate_socratic_question(
@@ -270,10 +281,11 @@ class TestGenerateSocraticQuestionContentFilter:
             text="課文中的主角做了什麼事？",
         )
 
-        with patch("app.services.ai_service._get_client") as mock_client_factory:
+        with patch("app.services.ai_comprehension._get_client_for_task") as mock_client_factory:
             mock_client = MagicMock()
             mock_client.models.generate_content.return_value = mock_response
-            mock_client_factory.return_value = mock_client
+            # _get_client_for_task returns (client, model_name), not a bare client.
+            mock_client_factory.return_value = (mock_client, "gemini-2.5-flash-lite")
 
             result = await generate_socratic_question(
                 story_title="測試課文",
