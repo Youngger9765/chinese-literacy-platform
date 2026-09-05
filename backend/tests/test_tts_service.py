@@ -214,9 +214,18 @@ class TestGCSSentinel:
         try:
             with patch("app.services.tts_service.storage", create=True) as mock_storage_mod:
                 # Simulate import inside _get_gcs_bucket by patching the import
-                with patch.dict("sys.modules", {"google.cloud.storage": MagicMock(
-                    Client=MagicMock(side_effect=Exception("no credentials"))
-                )}):
+                # Patching sys.modules does not intercept
+                # `import google.cloud.storage as storage`: once any earlier test
+                # has imported it, that statement resolves via
+                # getattr(google.cloud, "storage") and gets the real module, so a
+                # genuine Client was built and this asserted
+                # `<Bucket: lingoleap-tts-cache> is None`. Passed alone, failed
+                # after test_omo_upload. Patch the attribute the call actually
+                # reaches instead.
+                with patch(
+                    "google.cloud.storage.Client",
+                    side_effect=Exception("no credentials"),
+                ):
                     result = tts_mod._get_gcs_bucket()
                     assert result is None
                     assert cache_mod._gcs_client is cache_mod._GCS_UNAVAILABLE
