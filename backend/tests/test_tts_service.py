@@ -262,14 +262,20 @@ class TestTTSPydanticValidation:
         response = client.post("/api/tts/synthesize", json={"text": ""})
         assert response.status_code == 422
 
-    def test_whitespace_only_text_rejected(self):
+    def test_whitespace_only_text_passes_length_validation(self):
+        """Whitespace satisfies min_length=1, so it must not be a 422.
+
+        This asserted `status_code in (200, 422, 503)` — every outcome the
+        endpoint can produce, so it could not fail. It also left synthesis
+        unmocked, which meant a live Azure/Google call on each run. Both fixed:
+        stub the synthesis and assert the one thing this is about, which is
+        that the field validator does not reject it.
+        """
         from fastapi.testclient import TestClient
-        client = TestClient(self._make_app())
-        response = client.post("/api/tts/synthesize", json={"text": "   "})
-        # min_length=1 counts whitespace as valid chars, but the route should
-        # still accept it (Pydantic counts len, spaces count)
-        # This verifies the field is validated
-        assert response.status_code in (200, 422, 503)
+        with patch("app.routes.tts.synthesize_speech", return_value=b"AUDIO"):
+            client = TestClient(self._make_app())
+            response = client.post("/api/tts/synthesize", json={"text": "   "})
+        assert response.status_code != 422, response.text
 
     def test_over_5000_chars_rejected(self):
         from fastapi.testclient import TestClient
@@ -279,20 +285,19 @@ class TestTTSPydanticValidation:
         assert response.status_code == 422
 
     def test_exactly_5000_chars_accepted(self):
+        """5000 is the boundary: accepted here, rejected one over.
+
+        Was synthesising 5000 characters for real on every run — the boundary
+        is a Pydantic max_length, so the audio was never the point.
+        """
         from fastapi.testclient import TestClient
-        client = TestClient(self._make_app())
         text_5000 = "你" * 5000
-        # Should not be rejected by validation (may fail with 503 if TTS unavailable)
-        response = client.post("/api/tts/synthesize", json={"text": text_5000})
-        assert response.status_code != 422
-
-
-# ---------------------------------------------------------------------------
-# 5. Empty audio response from API → TTSError
-# ---------------------------------------------------------------------------
-
-class TestEmptyAudioResponse:
-    """Cloud TTS returning empty audio must raise TTSError."""
+        with patch("app.routes.tts.synthesize_speech", return_value=b"AUDIO"):
+            client = TestClient(self._make_app())
+            response = client.post("/api/tts/synthesize", json={"text": text_5000})
+        assert response.status_code != 422, (
+            f"5000 chars is at the limit and must pass validation: {response.text[:200]}"
+        )
 
     @patch("app.services.tts_service._gcs_get", return_value=None)
     @patch("app.services.tts_service._gcs_put")
@@ -1104,12 +1109,17 @@ class TestRegenerateEndpoint:
         import app.services.tts_service as tts_mod
         from app.services.tts.providers import azure as az_mod
         from fastapi.testclient import TestClient
-        import urllib.request
-
+        # The Azure provider moved from urllib to requests, and this fake kept the
+        # urllib shape: a context manager with .read(). requests reads
+        # resp.status_code (compared with >=) and resp.content, so status_code
+        # was a MagicMock, the comparison raised, Azure "failed" three times and
+        # the route fell through to the real Google Cloud TTS — three live
+        # connections per run of this file. It passed because the live call
+        # succeeded, which is the worst way for a mock to be wrong.
         fake_response = MagicMock()
-        fake_response.__enter__ = lambda s: s
-        fake_response.__exit__ = MagicMock(return_value=False)
-        fake_response.read.return_value = b"REGENERATED_AUDIO"
+        fake_response.status_code = 200
+        fake_response.reason = "OK"
+        fake_response.content = b"REGENERATED_AUDIO"
 
         with patch.object(az_mod, "AZURE_SPEECH_KEY", "fake-key"), \
              patch.object(az_mod.requests, "post", return_value=fake_response):
@@ -1164,14 +1174,9 @@ class TestBuildLessonTtsMappingV2Alignment:
                 hashes.add(h)
         return hashes
 
-    @pytest.mark.xfail(
-
-        reason="TTS 逐段映射需要課文段落，而二修課文本體 0/175（見 data/curriculum_qa/content_known_gaps.yaml#lesson_body_text）",
-
-        strict=True,
-
-    )
-
+    # The xfail said the lesson body was 0/175 and logged the gap. It is 168/179
+    # now — checked against lesson_loader directly, not inferred from this test
+    # passing — so strict xfail was turning working data into a failure.
     def test_lesson_1_mapping_hashes_all_in_v2_jsonl(self):
         """Every hash from build_lesson_tts_mapping(lesson_1) must exist in sentences.v2.jsonl.
 
