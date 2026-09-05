@@ -49,13 +49,26 @@ def _make_tts_test_app():
     # Strategy: also override the DB dependency so the role query returns admin.
     # Easiest: completely override require_role's inner dependency (_check_role).
     # We locate it via the route's dependencies list.
-    from fastapi import routing as fastapi_routing
-    import fastapi
-    for route in mini_app.routes:
-        if hasattr(route, "dependencies"):
-            for dep in route.dependencies:
-                if hasattr(dep, "dependency") and hasattr(dep.dependency, "__name__") and dep.dependency.__name__ == "_check_role":
-                    mini_app.dependency_overrides[dep.dependency] = lambda: stub_admin
+    # Scan the router, not mini_app.routes. This FastAPI version defers route
+    # expansion — right after include_router, mini_app.routes holds a single
+    # _IncludedRouter placeholder, so the old loop iterated nothing and silently
+    # installed no override at all. The real role check then ran and queried
+    # user_roles; it only looked fine because the in-memory test DB happened to
+    # have that table. Point it at a file-backed DB and it fails with
+    # "no such table: user_roles".
+    #
+    # A loop that finds nothing must say so, hence the count assertion.
+    overridden = 0
+    for route in router.routes:
+        for dep in getattr(route, "dependencies", []) or []:
+            fn = getattr(dep, "dependency", None)
+            if getattr(fn, "__name__", None) == "_check_role":
+                mini_app.dependency_overrides[fn] = lambda: stub_admin
+                overridden += 1
+    assert overridden, (
+        "no _check_role dependency found on the tts router — the role override "
+        "would be a no-op and /regenerate would hit the real database"
+    )
 
     return mini_app
 

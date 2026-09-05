@@ -72,7 +72,12 @@ def _make_mock_response(items: list[dict]) -> MagicMock:
 
 
 def _run(coro):
-    return asyncio.get_event_loop().run_until_complete(coro)
+    # asyncio.get_event_loop() reads ambient state: if an earlier test in the
+    # same process closed the loop, 3.11 raises "There is no current event loop
+    # in thread 'MainThread'". These passed alone and on 3.10, and failed in CI
+    # (3.11) once they shared a process with other files. asyncio.run() opens
+    # and closes its own loop, so nothing that ran before can reach it.
+    return asyncio.run(coro)
 
 
 # ---------------------------------------------------------------------------
