@@ -308,38 +308,43 @@ def test_body_text_is_the_lesson_not_the_worksheet():
     assert offenders == [], f"worksheet instructions landed in the body: {offenders[:3]}"
 
 
-@pytest.mark.xfail(
-    reason="內容缺口，登錄在 data/curriculum_qa/content_known_gaps.yaml#bodies_without_a_cross_check（#3100）。strict=True：缺口補上時這支會 XPASS，逼人回來拿掉標記。",
-    strict=True,
-)
 def test_every_body_records_how_it_was_checked():
     """The extraction check travels with the data. Without it a body is just text
     that appeared — there is no way to tell a verified extraction from one that
-    merely ran."""
+    merely ran.
+
+    This looked for `body.yml`. No lesson has ever had one: the body lives in
+    full_text_annotate.<slug>.yml and the check itself is written into
+    key_reading.<slug>.yml. The loop therefore `continue`d on every lesson and
+    reported "only 0 bodies carry a check" — a count of nothing, indistinguishable
+    from the field genuinely missing. It is on 151 of 179.
+    """
+    import glob
+
     import yaml
-    from pathlib import Path
 
     from app.services import lesson_uid_loader as L
 
-    checked = 0
+    checked, verdicts = 0, set()
     for uid in L.available_uids():
         vdirs = sorted((c for c in (L.LESSONS_ROOT / uid).iterdir()
                         if c.is_dir() and c.name.startswith("v")), key=lambda c: c.name)
         if not vdirs:
             continue
-        f = vdirs[-1] / "body.yml"
-        if not f.exists():
-            continue
-        doc = yaml.safe_load(f.read_text(encoding="utf-8"))
-        chk = doc.get("extraction_check") or {}
-        assert chk.get("verdict") in ("ok", "weak", "suspect", "no_vocab"), (
-            f"{uid}: body.yml has no usable extraction_check"
-        )
-        checked += 1
-    assert checked >= 170, f"only {checked} bodies carry a check"
+        for f in glob.glob(str(vdirs[-1] / "key_reading.*.yml")):
+            doc = yaml.safe_load(open(f, encoding="utf-8")) or {}
+            chk = doc.get("extraction_check") or {}
+            if chk.get("verdict"):
+                checked += 1
+                verdicts.add(chk["verdict"])
+            break
 
-
-# ── 封面 (#2683) ────────────────────────────────────────────────────────────
+    # Ratchet, not an exact count — a lesson gaining a check is fine, losing one
+    # is the regression. Set to the measured value, not one below it: at 150 the
+    # ratchet still passed after I removed a check from a lesson, which is the
+    # one thing it exists to catch.
+    assert checked >= 151, f"only {checked} bodies carry a check (was 151)"
+    assert verdicts, "no verdict values at all — the parse is broken, not the data"
 
 def test_covers_are_card_sized_not_source_sized():
     """The generator returns ~1.4 MB square PNGs and the library card renders them at
