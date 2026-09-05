@@ -235,6 +235,19 @@ _GENRE_TO_CATEGORY = {
 }
 
 
+def _served_genre(l: dict) -> str:
+    """The genre the student is shown.
+
+    Two sources, and the order matters: the worksheet's own masthead wins over the
+    planning spreadsheet where they disagree (16 lessons), because the worksheet was
+    authored with the lesson. Anything deriving from the genre must call this rather
+    than re-deriving it — that is exactly how `category` ended up computed from a
+    source no lesson populates.
+    """
+    return ((_body(l).get("level") or {}).get("genre")
+            or _meta(l).get("genre") or "")
+
+
 def _category_for(genre: str | None, meta: dict) -> str:
     g = genre or ""
     if g in _GENRE_TO_CATEGORY:
@@ -444,10 +457,54 @@ def _flat_paragraphs(fta: dict | None) -> list[str]:
     2026-08-25 我一度在前端另寫一次，形狀猜錯（以為是字串陣列），
     讀全文那一頁直接當掉。要換篇的是同一份資料，攤平也該是同一支。
     """
-    return [
+    numbered = [
         (x.get("text") if isinstance(x, dict) else x)
         for x in ((fta or {}).get("paragraphs") or ((fta or {}).get("body") or {}).get("paragraphs") or [])
     ]
+
+    # 沒有段號的段落也是課文的一部分（#3118）。
+    #
+    # 🔴 這裡本來只讀 `paragraphs`，於是 575 字的課文從沒到過學生面前：
+    #    L0084 的**最後一段**（段號欄只印到六，但字數欄末筆含它）、
+    #    L0157 Ｑ１ 底下整段「節省用字方式 一、二、三」。文章安靜地提早結束，
+    #    沒有錯誤、沒有紅燈 —— 跟 `questions` vs `items` 是同一個形狀的失敗。
+    #    L0084 還因此讓念順順引用了一段「不在自己本文裡」的文字。
+    #
+    # 每一塊都帶 `after_paragraph` 說明它接在第幾段之後，所以插得回原位，
+    # 不必猜。解析不出位置的就接在最後 —— 少一段的代價遠大於順序不完美。
+    blocks = (fta or {}).get("unnumbered_blocks") or []
+    if not blocks:
+        return numbered
+
+    # 依「接在第幾段之後」分組，再一次重組 —— 同一段之後有多塊時（L0157 的 Ｑ１
+    # 有四塊）順序就是它們在來源檔裡的順序。
+    after_map: dict[int, list[str]] = {}
+    for b in blocks:
+        if isinstance(b, dict):
+            text = (b.get("text") or "").strip()
+            raw_after = b.get("after_paragraph")
+        else:
+            text, raw_after = str(b or "").strip(), None
+        if not text:
+            continue
+        try:
+            after = int(str(raw_after).strip())
+        except (TypeError, ValueError):
+            # 位置解不出來就接在最後：少一段的代價遠大於順序不完美。
+            after = len(numbered)
+        after = max(0, min(after, len(numbered)))
+        after_map.setdefault(after, []).append(text)
+
+    out: list[str] = list(after_map.get(0, []))
+    for idx, para in enumerate(numbered, start=1):
+        out.append(para)
+        out.extend(after_map.get(idx, []))
+    # `after_paragraph` 指向比實際段數還大的段號（來源印錯）時，上面的迴圈接不到，
+    # 這裡兜底 —— 那一塊仍然要送出去。
+    for after, texts in sorted(after_map.items()):
+        if after > len(numbered):
+            out.extend(texts)
+    return out
 
 
 def _body(l: dict) -> dict:
@@ -712,6 +769,17 @@ def _mcq_from(l: dict) -> list[dict]:
         answer = q.get("answer")
         if answer and answer > last:
             continue          # answer points past every option — withhold the question
+        # 正解那一格是空的 → 這一題答不出來，不能送到學生面前。
+        #
+        # 🔴 三題這樣送出去過（L0073 / L0052 / L0143），全是「下列哪一張圖」：
+        #    四個選項是四張圖（w:drawing），文字層只有「A.」「B.」「C.」「D.」
+        #    加上教師版的橘色括號註記 —— 而註記偏偏就缺在正確的那一個。
+        #    學生看到四個選項、正確的那個是空白，選哪個都被判錯。
+        #
+        # 判準用「正解那格是空的」而不是 `options_are_images` 旗標：三課裡只有
+        # L0143 帶那個旗標，用旗標會修好一課、看起來卻像修完了。
+        if answer and not str(opts.get(answer, "")).strip():
+            continue
         out.append({
             "question": q.get("stem", ""),
             "options": [opts.get(k, "") for k in letters],
@@ -858,14 +926,17 @@ def _uid_tree_lessons() -> list[dict]:
             # unobtainable was a failure to look at how it had been obtained before.
             # The worksheet's own masthead over the planning spreadsheet: they disagree
             # on 16 lessons and the worksheet is the one authored with the lesson.
-            "genre": ((_body(l).get("level") or {}).get("genre")
-                      or _meta(l).get("genre") or ""),
+            "genre": _served_genre(l),
             # Derived from the genre actually served, not from the spreadsheet's —
             # otherwise a lesson shows 說明文 beside a category computed from 應用文.
-            "category": _category_for(
-                (_body(l).get("level") or {}).get("genre"),
-                _meta(l),
-            ),
+            #
+            # 🔴 這裡本來自己再寫一次 `(_body(l).get("level") or {}).get("genre")`，
+            #    少了 metadata 那段後援 —— 而**沒有任何一課**的 genre 來自 body，
+            #    174 課全部來自 metadata.yml。於是 `_category_for` 179 次都收到 None，
+            #    category 對全部 179 課都是空字串，而上面那行 genre 是滿的。
+            #    兩行只差三行、長得對稱，所以看起來沒問題。
+            #    抽成同一支 `_served_genre` 就不會再各寫各的。
+            "category": _category_for(_served_genre(l), _meta(l)),
             "char_count": _body(l).get("char_count") or 0,
             # Served from the uid tree, so the image is addressed by the lesson's
             # identity rather than its catalogue position. Under the first edition
