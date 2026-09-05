@@ -4,7 +4,7 @@
   "docx_sha256": "0431-43f4-82b0-b8de",
   "modules": {
     "comprehension.remjm": {
-      "yaml_sha256": "4ab2-111d-7f73-a843",
+      "yaml_sha256": "e7d7-4f50-9d4c-61b0",
       "checked": 26,
       "status": "pass",
       "passed": true,
