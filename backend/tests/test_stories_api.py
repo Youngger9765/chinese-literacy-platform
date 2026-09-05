@@ -424,14 +424,6 @@ class TestSearchLessons:
         assert len(results) > 0
         assert all(l["genre"] == "記敘文" for l in results)
 
-    @pytest.mark.xfail(
-
-        reason="二修抽取只產學習單；此欄位 0/175，登錄在 data/curriculum_qa/content_known_gaps.yaml#fields_not_extracted",
-
-        strict=True,
-
-    )
-
     def test_category_filter(self):
         results = search_lessons(category="Science")
         assert len(results) > 0
