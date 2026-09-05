@@ -1431,3 +1431,122 @@ def test_recovered_video_urls_stay_recovered():
             if isinstance(it, dict) and it.get("url") and it.get("url_source"):
                 sourced += 1
     assert sourced >= 18, f"only {sourced} recovered URLs carry provenance"
+
+
+# ---------------------------------------------------------------------------
+# 文言文的課文 (#3123)
+#
+# 十課文言文線上一個字的課文都沒有：課文住在 `classical_text` 模組，而 `_body()`
+# 只讀 `full_text_annotate`。依 lesson_indexes.py 自己的註解，那讓「朗讀 / 閱讀理解 /
+# 生字 / 造句都沒有文字可以運作」，重點表旁的「參考課文」一片空白。
+#
+# 課文是**原文**不是今譯 —— 學習單的 key_reading 指示第 1 條就寫著「請用計時器，
+# 朗讀原文」。`modern_translation`（古文今譯）是另一個大題。
+# ---------------------------------------------------------------------------
+
+CLASSICAL_UIDS = [
+    "L0153", "L0154", "L0155", "L0158", "L0159",
+    "L0160", "L0161", "L0162", "L0163", "L0164",
+]
+
+
+def test_classical_lessons_serve_their_text():
+    """文言文的課文送得到學生面前。"""
+    from app.services.lesson_loader import get_all_lessons
+
+    served = {l["lesson_uid"]: l for l in get_all_lessons()}
+    empty = [u for u in CLASSICAL_UIDS
+             if u in served and not (served[u].get("paragraphs") or [])]
+    assert empty == [], f"這些文言文課線上沒有課文：{empty}"
+
+    # 段數要跟來源檔對得上 —— 只驗「非空」的話，送一段占位字串也會綠。
+    import yaml
+    from app.services import lesson_uid_loader as L
+
+    for uid in CLASSICAL_UIDS:
+        src = next(iter((L.LESSONS_ROOT / uid).glob("v*/classical_text*.yml")), None)
+        assert src, f"{uid} 沒有 classical_text 來源檔"
+        want = yaml.safe_load(src.read_text(encoding="utf-8"))["classical_text"]["paragraphs"]
+        got = served[uid]["paragraphs"]
+        assert len(got) == len(want), f"{uid}: 送出 {len(got)} 段，來源 {len(want)} 段"
+
+
+def test_the_word_break_dots_survive():
+    """斷詞記號 `.` 是學習單印給學生看的，不可以被當成雜訊剝掉。
+
+    key_reading 指示第 2 條直接在教它：
+    「文章中的『.』是表示斷詞的地方，朗讀時，不要把『同組的詞』分開」
+    剝掉等於拿掉一半的教學內容。
+    """
+    from app.services.lesson_loader import get_all_lessons
+
+    served = {l["lesson_uid"]: l for l in get_all_lessons()}
+    without = [u for u in CLASSICAL_UIDS
+               if u in served and "." not in "".join(served[u].get("paragraphs") or [])]
+    # L0153 的原文本來就沒有斷詞點（實測 0 個），其餘九課都有
+    assert len(without) <= 1, f"斷詞記號被剝掉了：{without}"
+
+    dots = sum("".join(served[u].get("paragraphs") or []).count(".")
+               for u in CLASSICAL_UIDS if u in served)
+    assert dots >= 190, f"只剩 {dots} 個斷詞記號，來源合計應該有 238 個"
+
+
+def test_footnote_digits_do_not_reach_the_reader():
+    """注釋編號是**上標**，攤平成文字層才變成句中的阿拉伯數字。
+
+    `直隸1界` 的 `1` 在學習單上是上標的注釋號，不是課文的一部分。留著它：
+    畫面上是 `直隸1界`（學習單沒這樣印），TTS 會唸出「一」。
+
+    ⛔ 這件事**只能**在文言文這條路做，不能改全域的 `_clean_for_tts` ——
+    白話課文有 378 處「漢字+數字+漢字」是真的數字（「20道門檻」「80公斤」
+    「25公分」），一起剝掉會讓 TTS 唸成「來回道門檻」。
+    十課文言文裡的 15 個數字則**全部**是注釋編號，逐一看過。
+    """
+    import re
+
+    from app.services.lesson_loader import get_all_lessons
+
+    served = {l["lesson_uid"]: l for l in get_all_lessons()}
+    left = []
+    for uid in CLASSICAL_UIDS:
+        if uid not in served:
+            continue
+        body = "".join(served[uid].get("paragraphs") or [])
+        if re.search(r"\d", body):
+            left.append((uid, re.findall(r".\d.", body)[:3]))
+    assert left == [], f"注釋編號還在課文裡：{left}"
+
+
+def test_vernacular_lessons_keep_every_digit():
+    """負向對照：白話課文的數字一個都不能少。
+
+    沒有這一條的話，「把數字全部剝掉」也會讓上面那支變綠 —— 而那會毀掉
+    378 處真的數字。
+    """
+    import re
+
+    from app.services.lesson_loader import get_all_lessons
+
+    pat = re.compile(r"[一-鿿](\d{1,2})[一-鿿]")
+    hits = sum(len(pat.findall(p))
+               for l in get_all_lessons() if l["lesson_uid"] not in CLASSICAL_UIDS
+               for p in (l.get("paragraphs") or []))
+    assert hits >= 370, f"白話課文的內嵌數字剩 {hits} 處，基準 378 —— 被誤剝了"
+
+
+def test_the_translation_is_not_the_body():
+    """今譯是另一個大題，不可以混進課文。"""
+    import yaml
+
+    from app.services.lesson_loader import get_all_lessons
+    from app.services import lesson_uid_loader as L
+
+    served = {l["lesson_uid"]: l for l in get_all_lessons()}
+    for uid in CLASSICAL_UIDS:
+        src = next(iter((L.LESSONS_ROOT / uid).glob("v*/modern_translation*.yml")), None)
+        if not src or uid not in served:
+            continue
+        first = (yaml.safe_load(src.read_text(encoding="utf-8"))["modern_translation"]
+                 ["paragraphs"] or [""])[0]
+        body = "".join(served[uid].get("paragraphs") or [])
+        assert first[:18] not in body, f"{uid}: 今譯被當成課文送出去了"
