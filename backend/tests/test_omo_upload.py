@@ -468,13 +468,31 @@ class TestOmoUploadInputValidation:
         assert response.status_code == 400
 
     def test_too_many_files_returns_400(self, client):
-        """More than 5 files → 400."""
+        """One file over MAX_FILES_PER_UPLOAD -> 400.
+
+        This sent 6 and expected a rejection, because the cap was 5 when it was
+        written. It is 20 now. The cap itself never stopped working — the test
+        was asserting a number rather than the boundary, so raising the limit
+        turned a working guard into a failure.
+
+        Reading it from the validator keeps the guard meaningful whatever the
+        number becomes: one over is refused, and the endpoint still refuses to
+        fan an unbounded batch out to the grader.
+        """
+        from app.services.omo_upload_validator import MAX_FILES_PER_UPLOAD
+
         token = register_and_login(client, "omo_many1a")
         headers = {"Authorization": f"Bearer {token}"}
 
-        files = [("files", (f"p{i}.jpg", io.BytesIO(_TINY_JPEG), "image/jpeg")) for i in range(6)]
+        over = MAX_FILES_PER_UPLOAD + 1
+        files = [
+            ("files", (f"p{i}.jpg", io.BytesIO(_TINY_JPEG), "image/jpeg"))
+            for i in range(over)
+        ]
         response = client.post("/api/omo/upload", files=files, headers=headers)
-        assert response.status_code == 400
+        assert response.status_code == 400, (
+            f"{over} files (cap {MAX_FILES_PER_UPLOAD}) was accepted: {response.text[:200]}"
+        )
 
     def test_confirm_wrong_status_returns_409(self, client):
         """Confirm while still identifying → 409."""
