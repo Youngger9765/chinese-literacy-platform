@@ -154,6 +154,19 @@ function clearAnswers(storyId: string | number | undefined): void {
   try { localStorage.removeItem(key); } catch {}
 }
 
+/**
+ * 這個代號算不算對。學習單上標 `multi: true` 的題目有兩個正解
+ * （L0072 第 5 題 F 懷疑 / E 質疑），後端用 `accepted_answers` 送過來。
+ *
+ * 🔴 沒有這支之前，判對條件是 `code === item.answer` —— 第二個正解
+ * 一路帶到 prod 卻沒人讀，學生選它畫面回「再試試看！」。
+ */
+export function isAcceptedCode(item: Pick<FillInBlankItem, 'answer' | 'accepted_answers'>, code: string): boolean {
+  const accepted = item.accepted_answers;
+  if (Array.isArray(accepted) && accepted.length > 0) return accepted.includes(code);
+  return code === item.answer;
+}
+
 type Phase = 'exercise' | 'summary';
 
 // A6: rotating correct praise messages
@@ -286,7 +299,9 @@ const FillInBlankExercise: React.FC<Props> = ({
     if (FILLBLANK_OPTION_MODE === 'random4' && currentSentence) {
       const correct = currentSentence.answer;
       const correctEntry = bankEntries.find(([c]) => c === correct);
-      const decoys = bankEntries.filter(([c]) => c !== correct);
+      // 一題多正解時，另一個正解不可以被當成干擾項塞進來 —— 那會讓同一題
+      // 出現兩個都對的選項，學生選了「干擾項」卻是對的，畫面卻在扣他分。
+      const decoys = bankEntries.filter(([c]) => !isAcceptedCode(currentSentence, c));
       if (!correctEntry || decoys.length < 3) return bankEntries;
       const seed = (currentOriginalIdx + 1) * 7;
       // deterministic rotation → first 3 distinct decoys
@@ -328,7 +343,7 @@ const FillInBlankExercise: React.FC<Props> = ({
     // student reads the whole sentence with their pick in place.
     setSelectedCode(code);
 
-    if (code === currentSentence.answer) {
+    if (isAcceptedCode(currentSentence, code)) {
       // ⛔ 子練習答對不記進 usedCodes —— 那份集合是給主題目的一對一配對用的，
       //    記進去會把後面某一題的正確答案關掉（見 isSubExercise 那段）。
       if (!isSubExercise) {
