@@ -338,6 +338,20 @@ export function storyToLesson(story: Story | null | undefined): AdapterResult {
       gaps.push(`G3: fill-in-blank #${i + 1} not verifiable (answer=${JSON.stringify(item.answer)}, options=${options.length})`);
       return;
     }
+    // 一題多正解：後端送字母集合（`accepted_answers: ['F','E']`），這裡轉成索引。
+    // 有任何一個字母轉不出索引就整個集合作廢 —— 寧可退回單一主答案，
+    // 也不要把半套集合送進評分（那會讓某個正解無聲消失）。
+    const acceptedLetters = item.accepted_answers;
+    let acceptedAnswers: number[] | undefined;
+    if (Array.isArray(acceptedLetters) && acceptedLetters.length > 1) {
+      const mapped = acceptedLetters.map((a) => letterToIndex(String(a)));
+      if (mapped.every((m): m is number => m != null)) {
+        const uniq = Array.from(new Set(mapped));
+        if (uniq.length > 1) acceptedAnswers = uniq;
+      } else {
+        gaps.push(`G3: fill-in-blank #${i + 1} accepted_answers 有轉不出索引的代號 (${JSON.stringify(acceptedLetters)})`);
+      }
+    }
     blocks.push({
       id,
       type: 'exercise',
@@ -349,6 +363,7 @@ export function storyToLesson(story: Story | null | undefined): AdapterResult {
       answerSpace: 'choice',
       answer: idx,
       grader: 'exact',
+      ...(acceptedAnswers ? { acceptedAnswers } : {}),
       anchors: anchorsFor(item.sentence),
     });
   });

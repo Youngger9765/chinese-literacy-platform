@@ -337,6 +337,11 @@ export const ExerciseBlock = z
     answerSpace: AnswerSpace,
     answer: AnswerValue,
     grader: Grader,
+    // 一題多個正解（學習單標 `multi: true`）。有值時 `answer` 仍是主答案，
+    // 判對則看整個集合 —— 學生選其中任何一個都算對。
+    // 🔴 沒有這個欄位時，抽取器抽出的第二個正解會一路帶到 prod 卻沒人讀，
+    // 學生選它照樣被打錯（L0072 第 5 題 F/E）。
+    acceptedAnswers: z.array(z.number()).min(2).optional(),
     anchors: z.array(AnchorSchema).default([]),
     needsReview: z.boolean().default(false),
   })
