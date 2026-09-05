@@ -250,11 +250,24 @@ async def test_deterministic_path_cpm_calculated_with_duration():
     assert result["cpm"] > 0
 
 
+# Both CPM tests read "中國的戰國時期" — 7 characters that are a clean prefix of
+# the target. That is the exact signature the #2321 sanity gate looks for (a
+# short exact prefix under 35% of the target is how STT hallucinates on
+# silence), so the call routes to fallback and CPM is None by design. The gate
+# was added after these tests; the property they check is still worth checking,
+# it just needs input the gate does not claim.
+#
+# "中國的戰國時期有個人叫做孟嘗君他很喜歡" diverges from the target after a few
+# characters, so it reaches the deterministic aligner. Verified against
+# _is_hallucination_prefix directly rather than assumed.
+_PARTIAL_READ = "中國的戰國時期有個人叫做孟嘗君他很喜歡"
+
+
 @pytest.mark.asyncio
 async def test_deterministic_path_cpm_uses_correct_count_not_full_target():
     """Partial read: CPM uses chars actually matched, not full target length."""
     long_target = MENGCHANGJUN_LINE
-    spoken = "中國的戰國時期"
+    spoken = _PARTIAL_READ
     duration_ms = 60_000
     expected_cpm = round(_build_fallback_result(spoken, long_target)["stats"]["correct_count"] / 60 * 60, 1)
 
@@ -270,7 +283,7 @@ async def test_deterministic_path_cpm_uses_correct_count_not_full_target():
 @pytest.mark.asyncio
 async def test_deterministic_path_cpm_matches_fallback_helper():
     """CPM via evaluate_reading_with_ai equals CPM from _build_fallback_result directly."""
-    spoken = "中國的戰國時期"
+    spoken = _PARTIAL_READ
     target = MENGCHANGJUN_LINE
     duration_ms = 60_000
 
@@ -407,3 +420,20 @@ class TestAccentToleranceClassification:
         assert r["stats"]["wrong_count"] == 1
         assert r["stats"]["correct_count"] == 0
         assert r["stats"]["forgiven_count"] == 0
+
+
+@pytest.mark.asyncio
+async def test_hallucination_prefix_blocks_cpm():
+    """A silence-hallucinated prefix must not produce a fluency rate.
+
+    The input the two tests above used to send. Keeping it as its own case so
+    the #2321 gate has a lock of its own — without this, moving those tests off
+    the blocked input would have quietly removed the only coverage it had.
+    """
+    result = await evaluate_reading_with_ai(
+        spoken_text="中國的戰國時期",
+        target_text=MENGCHANGJUN_LINE,
+        duration_ms=60_000,
+    )
+    assert result["hallucination_blocked"] is True
+    assert result["cpm"] is None, "a blocked read must not report a reading speed"

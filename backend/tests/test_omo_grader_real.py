@@ -230,7 +230,17 @@ class TestParsingWithMockResponses:
         fb1 = next((r for r in results if r.question_id == "fb_1"), None)
         assert fb1 is not None
         assert fb1.score == 0.0, f"Red-pen corrected answer must score 0.0, got {fb1.score}"
-        assert fb1.student_answer == "寛食", f"Must capture original handwriting, got {fb1.student_answer!r}"
+        # student_answer used to hold the raw handwriting. #1712 coerces anything
+        # outside allowed_values to "" so the grader cannot invent an answer, and
+        # this worksheet is lettered (A-E), so a written word is out of vocabulary.
+        # The handwriting is not lost — it goes into reasoning, where a teacher
+        # reviewing the paper can still read it.
+        assert fb1.student_answer == "", (
+            f"an out-of-vocabulary answer must be coerced to empty (#1712), got {fb1.student_answer!r}"
+        )
+        assert "寛食" in (fb1.reasoning or ""), (
+            f"the original handwriting must survive in reasoning, got {fb1.reasoning!r}"
+        )
 
     def test_no_safety_override_inflates_score(self):
         """Verify removed Safety override: student_answer == correct_answer does NOT
@@ -297,8 +307,24 @@ class TestBuildQuestionSchema:
         from app.services.omo_grader import _build_question_schema
         questions = _build_question_schema(SAMPLE_LESSON)
         fb_questions = [q for q in questions if q["type"] == "fill_blank"]
-        assert fb_questions[0]["correct_answer"] == "覓食", (
-            f"fb_1 answer 'B' should resolve to vocabulary[1]='覓食', got {fb_questions[0]['correct_answer']!r}"
+        # This expected the letter to be replaced by the word. #1712 changed that
+        # deliberately: when every fill_in_blank answer is a single letter the
+        # worksheet has a lettered bank, so the letter IS what the student writes
+        # and what the grader must compare against — and allowed_values is what
+        # stops the model fabricating something else. 1227 of the 1228
+        # fill_in_blank answers in the corpus are single letters.
+        #
+        # The resolver still exists and still works; it is just not what scoring
+        # uses here. Assert both, so neither half can rot unnoticed.
+        from app.services.omo_question_schema import _resolve_letter_answer
+
+        assert fb_questions[0]["correct_answer"] == "B", (
+            f"lettered worksheet must score on the letter (#1712), got "
+            f"{fb_questions[0]['correct_answer']!r}"
+        )
+        assert fb_questions[0]["allowed_values"] == ["A", "B", "C", "D", "E"]
+        assert _resolve_letter_answer("B", SAMPLE_LESSON["vocabulary"], None) == "覓食", (
+            "the letter->word resolver is still the mapping used off the scoring path"
         )
 
     def test_mc_questions_extracted(self):

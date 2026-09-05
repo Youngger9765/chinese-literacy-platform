@@ -141,6 +141,9 @@ jobs:
             tests/test_inline_choices_stay_in_the_sentence_2768.py \
             tests/test_join_preview_rate_limit_3081.py \
             tests/test_classroom_join_and_batch.py \
+            tests/test_email_domain_validation.py \
+            tests/test_characterization_auth_phase2_co_teaching.py \
+            tests/test_characterization_auth_phase2_gamification.py \
             tests/test_key_reading_data_matches_extractor_2912.py \
             tests/test_review_flag_lives_at_the_top_2919.py \
             tests/test_worksheet_url_is_not_silently_dead_2845.py \

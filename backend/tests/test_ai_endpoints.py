@@ -41,6 +41,33 @@ from app.auth.dependencies import get_current_user
 from app.auth.rate_limiter import ai_rate_limiter, general_rate_limiter
 
 
+
+def _real_lesson_id() -> int:
+    """A lesson that has no stored structure, so the generate path runs.
+
+    These called /api/stories/1/structure. Lesson ids start at 20001 since the
+    re-ink, so 1 named nothing and the route correctly answered 404.
+
+    Picking any real lesson is not enough either: 154 of 179 already carry a
+    story_structure_table, and for those the route returns the stored one and
+    never calls the generator these tests mock. Pick from the 25 that do not,
+    so the branch under test is the branch that runs.
+    """
+    from app.services.lesson_loader import get_all_lessons, get_lesson_by_id
+
+    for lesson in sorted(get_all_lessons(), key=lambda l: l["id"]):
+        detail = get_lesson_by_id(lesson["id"]) or {}
+        if not detail.get("story_structure_table"):
+            return lesson["id"]
+    raise AssertionError(
+        "every lesson now ships a story_structure_table; these tests cover the "
+        "generate path and need a lesson without one"
+    )
+
+# Per-call story counter — see the note in the session helper below.
+_session_counter = {"n": 0}
+
+
 # ---------------------------------------------------------------------------
 # SQLite in-memory test DB
 # ---------------------------------------------------------------------------
@@ -145,6 +172,8 @@ def client():
 
 
 @pytest.fixture()
+
+
 def db_session():
     """Create a User + LearningSession in the DB for session-based endpoints."""
     db = TestingSessionLocal()
@@ -160,9 +189,15 @@ def db_session():
         )
         db.add(user)
         db.commit()
+    # Every call used story_slug="L1", and #1179 forbids a second in_progress
+    # session for the same (student, story) — a real production rule, enforced
+    # here by a partial unique index. So the first test to use this helper
+    # worked and every later one hit an IntegrityError. Give each call its own
+    # story instead of relaxing the constraint: the dedup is the point.
+    _session_counter["n"] += 1
     session = LearningSession(
         student_id=1,
-        story_slug="L1",
+        story_slug=f"L{_session_counter['n']}",
         status="in_progress",
     )
     db.add(session)
@@ -672,22 +707,33 @@ class TestStoryStructure:
     @patch("app.routes.stories._get_cached_structure", return_value=None)
     @patch("app.routes.stories._set_cached_structure")
     def test_happy_path(self, mock_set, mock_get, mock_log, mock_gen, client):
-        mock_gen.return_value = [
-            {"label": "人物", "value": "小王子"},
-            {"label": "時間", "value": "從前"},
-        ]
-        resp = client.get("/api/stories/1/structure")
-        assert resp.status_code == 200
+        # generate_story_structure returns {"rows": [...]}, not a bare list. The
+        # route calls .get() on it, so the old shape produced a 500 —
+        # "'list' object has no attribute 'get'" — once the request got far
+        # enough to reach the generator at all.
+        mock_gen.return_value = {
+            "rows": [
+                {"label": "人物", "value": "小王子"},
+                {"label": "時間", "value": "從前"},
+            ]
+        }
+        resp = client.get(f"/api/stories/{_real_lesson_id()}/structure")
+        assert resp.status_code == 200, resp.text
         data = resp.json()
-        assert len(data) == 2
-        assert data[0]["label"] == "人物"
+        # The response is {"rows": [...], "interaction_profile": {...}} now, not
+        # a bare list. Asserting len(data) == 2 against the dict happened to be
+        # true (two keys) while indexing data[0] raised KeyError — a shape drift
+        # that half-passed.
+        assert [r["label"] for r in data["rows"]] == ["人物", "時間"]
 
     @patch("app.routes.stories._get_cached_structure")
     def test_cache_hit(self, mock_get, client):
-        mock_get.return_value = [{"label": "cached", "value": "yes"}]
-        resp = client.get("/api/stories/1/structure")
-        assert resp.status_code == 200
-        assert resp.json()[0]["label"] == "cached"
+        # The cache holds the same dict the endpoint returns. Seeding it with a
+        # bare list made the route call .get() on a list and 500.
+        mock_get.return_value = {"rows": [{"label": "cached", "value": "yes"}]}
+        resp = client.get(f"/api/stories/{_real_lesson_id()}/structure")
+        assert resp.status_code == 200, resp.text
+        assert resp.json()["rows"][0]["label"] == "cached"
 
     def test_invalid_story_id_404(self, client):
         resp = client.get("/api/stories/999/structure")

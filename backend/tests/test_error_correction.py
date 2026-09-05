@@ -163,6 +163,26 @@ def student_b(client):
     return _register_user(client, "student_b")
 
 
+
+# POST /api/learning/sessions refuses a story_slug that names nothing (#1135,
+# widened #2683). The three tests below build their session through the API, so
+# their descriptive placeholders came back 422. Direct-DB inserts elsewhere in
+# this file bypass that gate and are left alone.
+_LESSON_IDS: list[int] = []
+_SLUG_BY_LABEL: dict[str, str] = {}
+
+
+def _slug_for(label: str) -> str:
+    """A real, catalogue-backed slug, one distinct lesson per label."""
+    if not _LESSON_IDS:
+        from app.services.lesson_loader import get_all_lessons
+
+        _LESSON_IDS.extend(sorted(l["id"] for l in get_all_lessons()))
+    if label not in _SLUG_BY_LABEL:
+        _SLUG_BY_LABEL[label] = str(_LESSON_IDS[len(_SLUG_BY_LABEL)])
+    return _SLUG_BY_LABEL[label]
+
+
 def _create_session_with_errors(db_session, student_id: int, characters: list[str], started_at=None):
     """Helper: create a learning session and add character errors."""
     session = LearningSession(
@@ -645,7 +665,7 @@ class TestAutoCharacterErrorPersist:
         # Create a session
         session_resp = client.post(
             "/api/learning/sessions",
-            json={"story_slug": "auto-persist-test"},
+            json={"story_slug": _slug_for("auto-persist-test")},
             headers=auth_header(student_a["token"]),
         )
         assert session_resp.status_code == 201, session_resp.text
@@ -667,7 +687,7 @@ class TestAutoCharacterErrorPersist:
 
         # Now the error-patterns endpoint should see these characters
         patterns_resp = client.get(
-            f"/api/learning/students/{student_a['id']}/error-patterns?story_slug=auto-persist-test",
+            f"/api/learning/students/{student_a['id']}/error-patterns?story_slug={_slug_for('auto-persist-test')}",
             headers=auth_header(student_a["token"]),
         )
         assert patterns_resp.status_code == 200, patterns_resp.text
@@ -685,7 +705,7 @@ class TestAutoCharacterErrorPersist:
 
         session_resp = client.post(
             "/api/learning/sessions",
-            json={"story_slug": "no-errors-test"},
+            json={"story_slug": _slug_for("no-errors-test")},
             headers=auth_header(student_a["token"]),
         )
         session_id = session_resp.json()["id"]
@@ -714,7 +734,7 @@ class TestAutoCharacterErrorPersist:
 
         session_resp = client.post(
             "/api/learning/sessions",
-            json={"story_slug": "no-reading-result-test"},
+            json={"story_slug": _slug_for("no-reading-result-test")},
             headers=auth_header(student_a["token"]),
         )
         session_id = session_resp.json()["id"]

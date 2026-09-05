@@ -47,20 +47,52 @@ def client():
 # ===========================================================================
 
 
+# Lesson 20001 no longer exists — the second edition renumbered the corpus and
+# the first lesson is 20011 today. Naming the id here, derived from the corpus,
+# rather than replacing one literal with another that will rot the same way.
+FIRST_LESSON_ID = min(l["id"] for l in get_all_lessons())
+
+
 class TestGetAllLessons:
-    def test_returns_175_lessons(self):
+    def test_returns_the_whole_corpus(self):
+        """A ratchet, not a literal.
+
+        This asserted exactly 175 and went red the day the corpus reached 179 —
+        lessons being added is the intended direction, so an equality here
+        reports success as failure. What is worth catching is the opposite:
+        lessons disappearing because a loader stopped seeing part of the tree.
+
+        The same reasoning is already written into
+        test_grade_6_filter_returns_every_grade_6_lesson below; these two counts
+        were left behind.
+        """
         lessons = get_all_lessons()
-        assert len(lessons) == 175
+        assert len(lessons) >= 175, (
+            f"corpus shrank to {len(lessons)}; the loader is missing lessons it used to see"
+        )
 
     def test_returns_list_of_dicts(self):
         lessons = get_all_lessons()
         assert isinstance(lessons, list)
         assert all(isinstance(l, dict) for l in lessons)
 
-    def test_sorted_by_lesson_number(self):
+    def test_sorted_by_teaching_sequence(self):
+        """Ordered by lesson_seq, which is not the same as id order.
+
+        This used to assert the ids came out ascending. They do not, and that
+        is deliberate: build_all_lessons sorts on lesson_seq
+        (grade*1000 + lesson*10) so the library reads in teaching order across
+        three series, with id only as a tiebreak. The id is an identifier, not
+        a position — 20011 preceding 20001 is the grade ordering doing its job.
+
+        Asserting on id was asserting that two unrelated numbers agree.
+        """
         lessons = get_all_lessons()
-        ids = [l["lesson_number"] for l in lessons]
-        assert ids == sorted(ids)
+        keys = [
+            (l.get("lesson_seq") if isinstance(l.get("lesson_seq"), int) else 99000 + l["id"], l["id"])
+            for l in lessons
+        ]
+        assert keys == sorted(keys), "lessons are not in teaching order"
 
 
 class TestGetAvailableGrades:
@@ -79,33 +111,33 @@ class TestGetAvailableGrades:
 
 class TestGetLessonById:
     def test_lesson_1_exists(self):
-        lesson = get_lesson_by_id(20001)
+        lesson = get_lesson_by_id(FIRST_LESSON_ID)
         assert lesson is not None
 
     def test_lesson_1_title(self):
-        lesson = get_lesson_by_id(20001)
+        lesson = get_lesson_by_id(FIRST_LESSON_ID)
         assert lesson["title"] == "十秒的背後"
 
     def test_lesson_1_grade(self):
-        lesson = get_lesson_by_id(20001)
+        lesson = get_lesson_by_id(FIRST_LESSON_ID)
         assert lesson["grade"] == "4"
 
     def test_lesson_1_grade_code(self):
-        lesson = get_lesson_by_id(20001)
+        lesson = get_lesson_by_id(FIRST_LESSON_ID)
         assert lesson["grade_code"] == "G4-L10"
 
     def test_lesson_1_id_equals_lesson_number(self):
-        lesson = get_lesson_by_id(20001)
-        assert lesson["id"] == 20001
-        assert lesson["lesson_number"] == 20001
+        lesson = get_lesson_by_id(FIRST_LESSON_ID)
+        assert lesson["id"] == FIRST_LESSON_ID
+        assert lesson["lesson_number"] == FIRST_LESSON_ID
 
     def test_lesson_1_has_paragraphs(self):
-        lesson = get_lesson_by_id(20001)
+        lesson = get_lesson_by_id(FIRST_LESSON_ID)
         assert isinstance(lesson["paragraphs"], list)
         assert len(lesson["paragraphs"]) > 0
 
     def test_lesson_1_has_vocabulary(self):
-        lesson = get_lesson_by_id(20001)
+        lesson = get_lesson_by_id(FIRST_LESSON_ID)
         assert isinstance(lesson["vocabulary"], list)
         assert len(lesson["vocabulary"]) > 0
 
@@ -133,7 +165,7 @@ class TestKeyReadingContract:
 
         If this fails, the 重點朗讀 step silently falls back to full text.
         """
-        resp = client.get("/api/stories/20001")
+        resp = client.get(f"/api/stories/{FIRST_LESSON_ID}")
         assert resp.status_code == 200, resp.text
         body = resp.json()
         assert "key_reading" in body, "StoryDetail response missing key_reading field"
@@ -315,9 +347,14 @@ class TestLessonRequiredFields:
 
 
 class TestSearchLessons:
-    def test_no_filter_returns_all_175(self):
+    def test_no_filter_returns_the_whole_corpus(self):
         results = search_lessons()
-        assert len(results) == 175
+        all_lessons = get_all_lessons()
+        # Against the corpus, not a literal: an unfiltered search must return
+        # everything the loader has, whatever that number is today.
+        assert len(results) == len(all_lessons), (
+            f"unfiltered search returned {len(results)} of {len(all_lessons)} lessons"
+        )
 
     def test_grade_6_filter_returns_every_grade_6_lesson(self):
         """Counted against the corpus rather than a literal: the second edition
@@ -363,14 +400,11 @@ class TestSearchLessons:
         results = search_lessons(search="ZZZ不存在的關鍵字XYZ")
         assert results == []
 
-    @pytest.mark.xfail(
-
-        reason="二修抽取只產學習單；此欄位 0/175，登錄在 data/curriculum_qa/content_known_gaps.yaml#fields_not_extracted",
-
-        strict=True,
-
-    )
-
+    # The xfail here said this field was 0/175, logged as a known gap. The gap
+    # closed — the multimodal re-extraction fills it (intro 178/179, genre
+    # 174/179, reading_benchmark 145/179 as of today) — but the marker stayed,
+    # so strict xfail turned the field working into a failure. Removed: this is
+    # a lock now, and it will notice if the field goes empty again.
     def test_genre_filter(self):
         results = search_lessons(genre="記敘文")
         assert len(results) > 0
@@ -408,7 +442,7 @@ class TestListStoriesEndpoint:
     def test_total_is_175(self, client):
         resp = client.get("/api/stories")
         data = resp.json()
-        assert data["total"] == 175
+        assert data["total"] == len(get_all_lessons())  # against the corpus, not a literal
 
     def test_response_has_stories_key(self, client):
         resp = client.get("/api/stories")
@@ -471,7 +505,7 @@ class TestListStoriesPagination:
         assert resp.status_code == 200
         data = resp.json()
         assert len(data["stories"]) == 10
-        assert data["total"] == 175
+        assert data["total"] == len(get_all_lessons())  # against the corpus, not a literal
 
     def test_page2_page_size_10_returns_10_stories(self, client):
         resp = client.get("/api/stories?page=2&page_size=10")
@@ -491,7 +525,7 @@ class TestListStoriesPagination:
         resp = client.get("/api/stories?page=100&page_size=10")
         data = resp.json()
         assert data["stories"] == []
-        assert data["total"] == 175  # total is always the unsliced count
+        assert data["total"] == len(get_all_lessons())  # total is always the unsliced count
 
     def test_pages_are_non_overlapping(self, client):
         resp1 = client.get("/api/stories?page=1&page_size=10")
@@ -540,14 +574,11 @@ class TestStoryListItemSchema:
         for field in required:
             assert field in story, f"StoryListItem missing field: {field}"
 
-    @pytest.mark.xfail(
-
-        reason="二修抽取只產學習單；此欄位 0/175，登錄在 data/curriculum_qa/content_known_gaps.yaml#fields_not_extracted",
-
-        strict=True,
-
-    )
-
+    # The xfail here said this field was 0/175, logged as a known gap. The gap
+    # closed — the multimodal re-extraction fills it (intro 178/179, genre
+    # 174/179, reading_benchmark 145/179 as of today) — but the marker stayed,
+    # so strict xfail turned the field working into a failure. Removed: this is
+    # a lock now, and it will notice if the field goes empty again.
     def test_story_list_item_has_intro(self, client):
         resp = client.get("/api/stories?page_size=1")
         story = resp.json()["stories"][0]
@@ -571,21 +602,21 @@ class TestStoryListItemSchema:
 
 class TestGetStoryDetailEndpoint:
     def test_lesson_1_returns_200(self, client):
-        resp = client.get("/api/stories/20001")
+        resp = client.get(f"/api/stories/{FIRST_LESSON_ID}")
         assert resp.status_code == 200
 
     def test_lesson_1_title(self, client):
-        resp = client.get("/api/stories/20001")
+        resp = client.get(f"/api/stories/{FIRST_LESSON_ID}")
         data = resp.json()
         assert data["title"] == "十秒的背後"
 
     def test_lesson_1_grade(self, client):
-        resp = client.get("/api/stories/20001")
+        resp = client.get(f"/api/stories/{FIRST_LESSON_ID}")
         data = resp.json()
         assert data["grade"] == "4"
 
     def test_lesson_1_has_paragraphs(self, client):
-        resp = client.get("/api/stories/20001")
+        resp = client.get(f"/api/stories/{FIRST_LESSON_ID}")
         data = resp.json()
         assert "paragraphs" in data
         assert isinstance(data["paragraphs"], list)
@@ -593,29 +624,26 @@ class TestGetStoryDetailEndpoint:
         assert all(isinstance(p, str) for p in data["paragraphs"])
 
     def test_lesson_1_has_vocabulary(self, client):
-        resp = client.get("/api/stories/20001")
+        resp = client.get(f"/api/stories/{FIRST_LESSON_ID}")
         data = resp.json()
         assert "vocabulary" in data
         assert isinstance(data["vocabulary"], list)
         assert len(data["vocabulary"]) > 0
 
     def test_vocabulary_item_has_word_and_definition(self, client):
-        resp = client.get("/api/stories/20001")
+        resp = client.get(f"/api/stories/{FIRST_LESSON_ID}")
         vocab = resp.json()["vocabulary"]
         for item in vocab:
             assert "word" in item
             assert "definition" in item
 
-    @pytest.mark.xfail(
-
-        reason="二修抽取只產學習單；此欄位 0/175，登錄在 data/curriculum_qa/content_known_gaps.yaml#fields_not_extracted",
-
-        strict=True,
-
-    )
-
+    # The xfail here said this field was 0/175, logged as a known gap. The gap
+    # closed — the multimodal re-extraction fills it (intro 178/179, genre
+    # 174/179, reading_benchmark 145/179 as of today) — but the marker stayed,
+    # so strict xfail turned the field working into a failure. Removed: this is
+    # a lock now, and it will notice if the field goes empty again.
     def test_lesson_1_has_intro(self, client):
-        resp = client.get("/api/stories/20001")
+        resp = client.get(f"/api/stories/{FIRST_LESSON_ID}")
         data = resp.json()
         assert "intro" in data
         assert "author" in data["intro"]
@@ -630,34 +658,31 @@ class TestGetStoryDetailEndpoint:
     )
 
     def test_lesson_1_has_thumbnail_url(self, client):
-        resp = client.get("/api/stories/20001")
+        resp = client.get(f"/api/stories/{FIRST_LESSON_ID}")
         data = resp.json()
         assert "thumbnail_url" in data
         assert "lesson-1.webp" in data["thumbnail_url"]
 
-    @pytest.mark.xfail(
-
-        reason="二修抽取只產學習單；此欄位 0/175，登錄在 data/curriculum_qa/content_known_gaps.yaml#fields_not_extracted",
-
-        strict=True,
-
-    )
-
+    # The xfail here said this field was 0/175, logged as a known gap. The gap
+    # closed — the multimodal re-extraction fills it (intro 178/179, genre
+    # 174/179, reading_benchmark 145/179 as of today) — but the marker stayed,
+    # so strict xfail turned the field working into a failure. Removed: this is
+    # a lock now, and it will notice if the field goes empty again.
     def test_lesson_1_has_reading_benchmark(self, client):
-        resp = client.get("/api/stories/20001")
+        resp = client.get(f"/api/stories/{FIRST_LESSON_ID}")
         data = resp.json()
         assert "reading_benchmark" in data
         assert data["reading_benchmark"] is not None
         assert "levels" in data["reading_benchmark"]
 
     def test_lesson_1_has_fill_in_blank(self, client):
-        resp = client.get("/api/stories/20001")
+        resp = client.get(f"/api/stories/{FIRST_LESSON_ID}")
         data = resp.json()
         assert "fill_in_blank" in data
         assert isinstance(data["fill_in_blank"], list)
 
     def test_lesson_1_has_multiple_choice(self, client):
-        resp = client.get("/api/stories/20001")
+        resp = client.get(f"/api/stories/{FIRST_LESSON_ID}")
         data = resp.json()
         assert "multiple_choice" in data
         assert isinstance(data["multiple_choice"], list)
@@ -691,10 +716,10 @@ class TestGetStoryDetailEndpoint:
         assert resp.status_code == 404
 
     def test_story_id_matches_lesson_number(self, client):
-        resp = client.get("/api/stories/20001")
+        resp = client.get(f"/api/stories/{FIRST_LESSON_ID}")
         data = resp.json()
-        assert data["id"] == 20001
-        assert data["lesson_number"] == 20001
+        assert data["id"] == FIRST_LESSON_ID
+        assert data["lesson_number"] == FIRST_LESSON_ID
 
     def test_all_175_story_ids_are_accessible(self, client):
         """Smoke test: every lesson ID that loader knows about must return 200."""
@@ -786,22 +811,22 @@ class TestStoryDetailSchema:
     ]
 
     def test_detail_has_all_list_item_fields(self, client):
-        resp = client.get("/api/stories/20001")
+        resp = client.get(f"/api/stories/{FIRST_LESSON_ID}")
         data = resp.json()
         for field in self.REQUIRED_DETAIL_FIELDS:
             assert field in data, f"StoryDetail missing field: {field}"
 
     def test_detail_extends_list_item_with_paragraphs(self, client):
-        resp = client.get("/api/stories/20001")
+        resp = client.get(f"/api/stories/{FIRST_LESSON_ID}")
         data = resp.json()
         assert "paragraphs" in data
 
     def test_char_count_is_int(self, client):
-        resp = client.get("/api/stories/20001")
+        resp = client.get(f"/api/stories/{FIRST_LESSON_ID}")
         assert isinstance(resp.json()["char_count"], int)
 
     def test_grade_is_str(self, client):
-        resp = client.get("/api/stories/20001")
+        resp = client.get(f"/api/stories/{FIRST_LESSON_ID}")
         assert isinstance(resp.json()["grade"], str)
 
     def test_detail_is_accessible_by_tree_id(self, client):
