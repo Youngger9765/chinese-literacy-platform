@@ -101,6 +101,50 @@ def _h(token):
     return {"Authorization": f"Bearer {token}"}
 
 
+def _make_school_member(user_email: str, school_id: int) -> None:
+    """Give a registered user a school-scoped teacher role.
+
+    POST /api/classrooms requires the caller to be a member of that school, an
+    org admin, or a system admin. That check closed a real hole — any teacher
+    could create a classroom in any school, in any org — and these
+    characterization tests predate it: they register a teacher and create a
+    classroom straight away, which now answers 403.
+
+    Fixed in the setup rather than by loosening the endpoint: the endpoint is
+    right, the setup was written before it existed. Idempotent because
+    user_roles is unique on (user, role, scope_type, scope_id).
+    """
+    db = TestingSessionLocal()
+    try:
+        role = db.query(Role).filter(Role.name == "teacher").first()
+        user = db.query(User).filter(User.email == user_email).first()
+        assert role and user, "role/user not found when granting school membership"
+        exists = (
+            db.query(UserRole)
+            .filter(
+                UserRole.user_id == user.id,
+                UserRole.role_id == role.id,
+                UserRole.scope_type == "school",
+                UserRole.scope_id == str(school_id),
+            )
+            .first()
+        )
+        if exists is not None:
+            return
+        db.add(
+            UserRole(
+                user_id=user.id,
+                role_id=role.id,
+                is_active=True,
+                scope_type="school",
+                scope_id=str(school_id),
+            )
+        )
+        db.commit()
+    finally:
+        db.close()
+
+
 def _grant_system_admin(user_email: str) -> None:
     """Give a registered user the system_admin role directly via DB."""
     db = TestingSessionLocal()
@@ -184,6 +228,9 @@ def setup_module():
         _state["student_id"]  = _get_user_id("gamtest_student@test.com")
         _state["stranger_id"] = _get_user_id("gamtest_stranger@test.com")
         _state["admin_id"]    = _get_user_id("gamtest_admin@test.com")
+
+        # The teacher has to belong to the school before it can create there.
+        _make_school_member("gamtest_teacher@test.com", school_id)
 
         # Create classroom as teacher
         cr = client.post(

@@ -180,13 +180,38 @@ def user_b(client):
     return _register_user(client, "ai_b")
 
 
-def _create_session(client, token: str, slug: str = "ai-test") -> int:
+# A session must name a story the catalogue actually serves. The gate added in
+# #1135 and widened in #2683 refuses a slug that names nothing, and every slug
+# in this file was a descriptive placeholder, so every POST came back 422.
+#
+# The placeholders were distinct on purpose: create_learning_session is
+# get-or-create per (student, slug), so two tests sharing a slug would share a
+# session. Keep that property by handing each label its own real lesson rather
+# than pointing them all at one.
+_LESSON_IDS: list[int] = []
+_SLUG_BY_LABEL: dict[str, str] = {}
+
+
+def _slug_for(label: str) -> str:
+    """A real, catalogue-backed slug, one distinct lesson per label."""
+    if not _LESSON_IDS:
+        from app.services.lesson_loader import get_all_lessons
+
+        _LESSON_IDS.extend(sorted(l["id"] for l in get_all_lessons()))
+    if label not in _SLUG_BY_LABEL:
+        assert len(_SLUG_BY_LABEL) < len(_LESSON_IDS), "more labels than lessons"
+        _SLUG_BY_LABEL[label] = str(_LESSON_IDS[len(_SLUG_BY_LABEL)])
+    return _SLUG_BY_LABEL[label]
+
+
+def _create_session(client, token: str, slug: str | None = None) -> int:
+    slug = slug or _slug_for("__default__")
     resp = client.post(
         "/api/learning/sessions",
         json={"story_slug": slug},
         headers=auth_header(token),
     )
-    assert resp.status_code == 201
+    assert resp.status_code == 201, f"{resp.status_code}: {resp.text}"
     return resp.json()["id"]
 
 
@@ -199,7 +224,7 @@ class TestSessionBasedAIAnalysis:
     @patch("app.routes.learning.learning_reading.generate_reading_analysis", new_callable=AsyncMock)
     def test_returns_analysis_for_valid_session(self, mock_gen, client, user_a):
         mock_gen.return_value = MOCK_ANALYSIS
-        session_id = _create_session(client, user_a["token"], "analysis-valid")
+        session_id = _create_session(client, user_a["token"], _slug_for("analysis-valid"))
 
         resp = client.post(
             f"/api/learning/sessions/{session_id}/ai-analysis",
@@ -218,7 +243,7 @@ class TestSessionBasedAIAnalysis:
     @patch("app.routes.learning.learning_reading.generate_reading_analysis", new_callable=AsyncMock)
     def test_cached_analysis_returned_without_calling_gemini(self, mock_gen, client, user_a):
         mock_gen.return_value = MOCK_ANALYSIS
-        session_id = _create_session(client, user_a["token"], "analysis-cache")
+        session_id = _create_session(client, user_a["token"], _slug_for("analysis-cache"))
 
         # First call — generates and caches
         resp1 = client.post(
@@ -250,7 +275,7 @@ class TestSessionBasedAIAnalysis:
         assert resp.json()["detail"] == "Session not found"
 
     def test_403_for_other_users_session(self, client, user_a, user_b):
-        session_id = _create_session(client, user_b["token"], "analysis-forbidden")
+        session_id = _create_session(client, user_b["token"], _slug_for("analysis-forbidden"))
 
         resp = client.post(
             f"/api/learning/sessions/{session_id}/ai-analysis",
@@ -270,7 +295,7 @@ class TestSessionBasedAIAnalysis:
     @patch("app.routes.learning.learning_reading.generate_reading_analysis", new_callable=AsyncMock)
     def test_response_schema(self, mock_gen, client, user_a):
         mock_gen.return_value = MOCK_ANALYSIS
-        session_id = _create_session(client, user_a["token"], "analysis-schema")
+        session_id = _create_session(client, user_a["token"], _slug_for("analysis-schema"))
 
         resp = client.post(
             f"/api/learning/sessions/{session_id}/ai-analysis",
@@ -290,7 +315,7 @@ class TestSessionBasedAIAnalysis:
     @patch("app.routes.learning.learning_reading.generate_reading_analysis", new_callable=AsyncMock)
     def test_503_when_gemini_fails(self, mock_gen, client, user_a):
         mock_gen.side_effect = RuntimeError("Gemini connection error")
-        session_id = _create_session(client, user_a["token"], "analysis-503")
+        session_id = _create_session(client, user_a["token"], _slug_for("analysis-503"))
 
         resp = client.post(
             f"/api/learning/sessions/{session_id}/ai-analysis",
@@ -303,7 +328,7 @@ class TestSessionBasedAIAnalysis:
     @patch("app.routes.learning.learning_reading.generate_reading_analysis", new_callable=AsyncMock)
     def test_503_on_timeout(self, mock_gen, client, user_a):
         mock_gen.side_effect = TimeoutError("AI response timeout (30s)")
-        session_id = _create_session(client, user_a["token"], "analysis-timeout")
+        session_id = _create_session(client, user_a["token"], _slug_for("analysis-timeout"))
 
         resp = client.post(
             f"/api/learning/sessions/{session_id}/ai-analysis",
@@ -322,7 +347,7 @@ class TestSessionBasedAIAnalysis:
     ):
         """#540: Flat cached analysis must not win once client sends comprehension/vocab data."""
         mock_gen.return_value = MOCK_ANALYSIS
-        session_id = _create_session(client, user_a["token"], "analysis-540-legacy")
+        session_id = _create_session(client, user_a["token"], _slug_for("analysis-540-legacy"))
 
         db = TestingSessionLocal()
         row = db.query(LearningSession).filter(LearningSession.id == session_id).one()

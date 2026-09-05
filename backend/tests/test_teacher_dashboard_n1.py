@@ -62,6 +62,7 @@ _SEED_ROLES = [
 _state: dict = {}
 
 NUM_STUDENTS = 10  # enough to detect N+1 but fast enough for unit tests
+BIG_FACTOR = 3     # the comparison roster is this many times larger
 
 
 def _override_get_db():
@@ -111,52 +112,61 @@ def setup_db():
     db.commit()
     db.refresh(teacher_user)
 
-    # Classroom
-    classroom = Classroom(
-        name="N+1 Test Class",
-        school_id=school.id,
-        teacher_id=teacher_user.id,
-        join_code="N1TEST",
-    )
-    db.add(classroom)
-    db.commit()
-    db.refresh(classroom)
-    classroom_id = classroom.id  # capture before session closes
-
-    # Students + enrollments + sessions
-    for i in range(NUM_STUDENTS):
-        student = User(
-            email=f"n1student{i}@example.com",
-            username=f"n1student{i}",
-            password_hash=hash_password("Password1!"),
-            name=f"Student {i}",
-            is_active=True,
-            email_verified=True,
+    # Two classrooms of different sizes. The whole point of this file is that
+    # query count must not grow with roster size, and that cannot be asserted
+    # from a single roster — see test_alerts_query_count_does_not_grow.
+    def _make_classroom(name: str, join_code: str, n_students: int, tag: str) -> int:
+        classroom = Classroom(
+            name=name,
+            school_id=school.id,
+            teacher_id=teacher_user.id,
+            join_code=join_code,
         )
-        db.add(student)
+        db.add(classroom)
         db.commit()
-        db.refresh(student)
+        db.refresh(classroom)
+        cid = classroom.id  # capture before session closes
 
-        # Enroll
-        db.add(ClassroomStudent(classroom_id=classroom_id, student_id=student.id))
+        for i in range(n_students):
+            student = User(
+                email=f"n1student_{tag}_{i}@example.com",
+                username=f"n1student_{tag}_{i}",
+                password_hash=hash_password("Password1!"),
+                name=f"Student {tag}{i}",
+                is_active=True,
+                email_verified=True,
+            )
+            db.add(student)
+            db.commit()
+            db.refresh(student)
 
-        # 3 sessions per student
-        for j in range(3):
-            started = datetime.now(timezone.utc) - timedelta(days=j)
-            db.add(LearningSession(
-                student_id=student.id,
-                story_slug=str(j + 1),
-                status="completed",
-                overall_score=float(70 + i + j),
-                started_at=started,
-                completed_at=started + timedelta(minutes=15),
-            ))
+            db.add(ClassroomStudent(classroom_id=cid, student_id=student.id))
 
-    db.commit()
+            # 3 sessions per student
+            for j in range(3):
+                started = datetime.now(timezone.utc) - timedelta(days=j)
+                db.add(LearningSession(
+                    student_id=student.id,
+                    story_slug=str(j + 1),
+                    status="completed",
+                    overall_score=float(70 + i + j),
+                    started_at=started,
+                    completed_at=started + timedelta(minutes=15),
+                ))
+
+        db.commit()
+        return cid
+
+    classroom_id = _make_classroom("N+1 Test Class", "N1TEST", NUM_STUDENTS, "s")
+    big_classroom_id = _make_classroom(
+        "N+1 Test Class (big)", "N1BIG", NUM_STUDENTS * BIG_FACTOR, "b"
+    )
+
     db.close()
 
     _state["teacher_email"] = "n1test_teacher@example.com"
     _state["classroom_id"] = classroom_id
+    _state["big_classroom_id"] = big_classroom_id
 
     app.dependency_overrides[get_db] = _override_get_db
 
@@ -265,23 +275,36 @@ class TestAlertsEndpointNoN1:
         )
         assert resp.status_code == 200
 
-    def test_alerts_query_count_is_bounded(self, client, teacher_token):
-        """Alerts endpoint was the worst N+1 offender: 2 queries per student."""
-        classroom_id = _state["classroom_id"]
+    def test_alerts_query_count_does_not_grow_with_roster(self, client, teacher_token):
+        """Alerts must cost the same whether the class has 10 students or 30.
 
-        def call():
-            client.get(
-                f"/api/teacher/classrooms/{classroom_id}/alerts",
-                headers=auth_header(teacher_token),
-            )
+        This asserted `n_queries < NUM_STUDENTS`, which is a proxy, and a bad
+        one: it only holds while the constant overhead happens to be smaller
+        than the roster. The endpoint issues 10 queries regardless of size —
+        measured at 5, 10 and 20 students, all 10 — so the batching is correct
+        and the test failed anyway, because 10 < 10 is false.
 
-        n_queries = count_queries_during(call)
+        A count from one roster size cannot distinguish "10 constant" from
+        "N+1 that happens to equal 10 here". Comparing two sizes can, so that
+        is what this does now. Real N+1 would be ~2N: 23 here, 63 for the big
+        class.
+        """
+        def call(cid: int):
+            def _go():
+                client.get(
+                    f"/api/teacher/classrooms/{cid}/alerts",
+                    headers=auth_header(teacher_token),
+                )
 
-        # N+1 worst case: 2N + overhead ≈ 24 queries for 10 students
-        # Batch approach: ~5-6 constant queries
-        assert n_queries < NUM_STUDENTS, (
-            f"Alerts endpoint issued {n_queries} queries for {NUM_STUDENTS} students. "
-            f"Expected < {NUM_STUDENTS} (N+1 would be ~{2 * NUM_STUDENTS + 3})."
+            return count_queries_during(_go)
+
+        small = call(_state["classroom_id"])
+        big = call(_state["big_classroom_id"])
+
+        assert big <= small, (
+            f"alerts scaled with roster size: {small} queries for {NUM_STUDENTS} "
+            f"students, {big} for {NUM_STUDENTS * BIG_FACTOR}. Query count must "
+            f"be constant."
         )
 
 

@@ -48,7 +48,20 @@ def override_get_db():
         db.close()
 
 
-app.dependency_overrides[get_db] = override_get_db
+# Installed per test, not once at import. Twenty test modules call
+# app.dependency_overrides.clear() in their teardown, and `app` is the single
+# global — so a module-level assignment here survives only until the first of
+# them runs. Every test in this file then talked to an empty database and the
+# user lookup returned None ("'NoneType' object has no attribute
+# 'email_verified'"), while the file passed perfectly on its own.
+#
+# Six unrelated modules reproduce it, so the fix belongs here rather than in
+# any one of them: reinstall before each test and the order stops mattering.
+@pytest.fixture(autouse=True)
+def _install_db_override():
+    app.dependency_overrides[get_db] = override_get_db
+    yield
+    app.dependency_overrides.pop(get_db, None)
 
 
 @pytest.fixture(autouse=True)

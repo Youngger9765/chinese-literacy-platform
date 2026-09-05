@@ -8,6 +8,8 @@
 
 ## 已驗過會咬
 
+- `test_email_domain_validation.py` / `test_characterization_auth_phase2_co_teaching.py` / `test_characterization_auth_phase2_gamification.py` — 復現：三支都因 `POST /api/classrooms` 的跨校授權收緊而 403（2/15/10 筆），實跑確認非污染（單獨跑一樣紅）；補上 school 範圍角色後 16/15/10 passed。這三支的價值是它們**擋住把該授權放寬**：拿掉 `_make_school_member` 就回到 403 紅
+
 - `teacherExportDoesNotLogoutOn5xx.test.ts` — mutation：把 `notifySessionUnauthorized()` 移回 `if (!res.ok)` 之下（任何錯誤都登出）→ 500 與 503 兩條 failed，401 那條正向對照照樣綠；還原 → 3 passed。原始缺陷是實跑復現的，不是讀 code 推論
 
 - `authTransientFailureRetries.test.tsx` — mutation：把 hydration 重試改成永遠直接 throw → 「502 後重試成功仍保持登入」與「連線失敗後重試成功仍保持登入」2 failed，「401 不重試」那條照樣綠（咬得精準）；還原 → 3 passed，既有 `authNetworkFailureKeepsToken` 6 條同時綠
