@@ -60,13 +60,34 @@ def _make_mock_gemini_call(response):
     return _fake_wait_for
 
 
+async def _fake_to_thread(fn, *args, **kwargs):
+    """Stand in for the two things to_thread is used for, by name.
+
+    This used to be a blanket AsyncMock returning b"fake-ogg-transcoded". That
+    was accurate while transcoding was the only off-thread call. The #2368
+    silence gate added a second one — _max_volume_db, whose result is compared
+    against a dB threshold — so the blanket stub handed a float comparison some
+    bytes and every test in this file raised TypeError before reaching Gemini.
+
+    Returning a loud-enough level keeps the gate open, which is what these
+    tests want. The gate itself is covered by
+    test_silent_audio_is_rejected_before_gemini below — added because it had
+    none: test_testset_upload_formats_edd checks _max_volume_db reads a real
+    level, but nothing asserted that transcribe_reading_audio acts on it.
+    """
+    name = getattr(fn, "__name__", "")
+    if name == "_max_volume_db":
+        return -10.0
+    return b"fake-ogg-transcoded"
+
+
 @contextmanager
 def _patch_webm_transcode_success(mock_resp):
     """webm inputs transcode before Gemini; skip real ffmpeg in unit tests."""
     with (
         patch(
             "app.services.reading_transcription_service.asyncio.to_thread",
-            new=AsyncMock(return_value=b"fake-ogg-transcoded"),
+            new=_fake_to_thread,
         ),
         patch(
             "app.services.reading_transcription_service.asyncio.wait_for",
@@ -338,3 +359,54 @@ class TestTranscribeRoute:
         body = resp.json()
         assert body["transcript"] is None
         assert body["method"] == "fallback"
+
+
+class TestSilenceGate:
+    """#2368: silent audio must never reach Gemini.
+
+    Gemini is handed target_text as a hint and parrots the whole passage back
+    when the audio is silent, which reads as a ~100% score. The gate rejects
+    the recording before transcode or STT, on measured volume alone.
+
+    Disabling the gate left every test in this file green, so it had no lock.
+    """
+
+    @pytest.mark.asyncio
+    async def test_silent_audio_is_rejected_before_gemini(self):
+        from app.services.reading_transcription_service import (
+            _REASON_SILENT,
+            _SILENT_MAX_VOLUME_DB,
+            transcribe_reading_audio,
+        )
+
+        async def _silent_to_thread(fn, *args, **kwargs):
+            if getattr(fn, "__name__", "") == "_max_volume_db":
+                return _SILENT_MAX_VOLUME_DB - 10.0
+            return b"fake-ogg-transcoded"
+
+        never_called = AsyncMock(side_effect=AssertionError("Gemini was called on silent audio"))
+
+        with (
+            patch(
+                "app.services.reading_transcription_service.asyncio.to_thread",
+                new=_silent_to_thread,
+            ),
+            patch(
+                "app.services.reading_transcription_service.asyncio.wait_for",
+                new=never_called,
+            ),
+        ):
+            result = await transcribe_reading_audio(
+                audio_bytes=b"silent-audio",
+                mime_type="audio/webm",
+                target_text="中國的戰國時期，有七個國家",
+            )
+
+        # Asserting method == "fallback" is not enough: a Gemini error also
+        # returns fallback, so that assertion passes whether the gate fired or
+        # not — verified by disabling the gate and watching the test stay green.
+        # The reason field is what distinguishes them.
+        assert result["transcript"] is None
+        assert result["reason"] == _REASON_SILENT, (
+            f"silent audio was not stopped by the gate: {result}"
+        )
