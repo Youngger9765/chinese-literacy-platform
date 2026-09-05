@@ -865,7 +865,9 @@ def build_lesson_dict(
     """
     gaps = gaps or GapLog()
     vdir = _uid_version_dir(lesson_code)
-    spot = load_spotlight(vdir / "spotlight.yml")
+    # Same rename as _uid_spotlight_path — glob for the slugged file.
+    _cands = [vdir / "spotlight.yml", *sorted(vdir.glob("spotlight.*.yml"))]
+    spot = load_spotlight(next((p for p in _cands if p.is_file()), vdir / "spotlight.yml"))
     # The keypoints source used to be the `_parsed` twin's raw `story_structure_table`.
     # The uid tree emits keypoints already structured, so convert back to that raw
     # shape and keep ONE keypoints parser rather than teaching the adapter a second.
@@ -893,8 +895,21 @@ def _uid_version_dir(uid: str) -> Path:
 
 
 def _uid_spotlight_path(uid: str) -> Path:
-    """Latest version's spotlight.yml for a uid."""
-    return _uid_version_dir(uid) / "spotlight.yml"
+    """Latest version's spotlight file for a uid.
+
+    #2916 renamed the module files to ``spotlight.{slug}.yml``. sample_uids()
+    below was taught both spellings and carries the warning; this one was not,
+    so the enumerator found 172 lessons and the reader then raised
+    FileNotFoundError on every one of them. Callers that swallow exceptions saw
+    "no lesson has a spotlight" rather than "I looked for the wrong filename" —
+    the same disguise #2964 describes, one function further along.
+
+    Returns the un-slugged path when nothing matches, so the caller still gets
+    a FileNotFoundError naming a real path rather than a silent None.
+    """
+    vdir = _uid_version_dir(uid)
+    cands = [vdir / "spotlight.yml", *sorted(vdir.glob("spotlight.*.yml"))]
+    return next((p for p in cands if p.is_file()), vdir / "spotlight.yml")
 
 
 def sample_uids(limit: int = 0) -> list[str]:
