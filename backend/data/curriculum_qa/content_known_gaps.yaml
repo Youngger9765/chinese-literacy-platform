@@ -288,6 +288,64 @@ key_reading_flagged:
   what: 二修 DOCX 標的段號與一修對照表差一段。已採用二修（那是二修自己的學習單指示），並在 key_reading.yml 標 needs_human_review + review_reason。
   why_not_withheld: 兩版分段一致、只有標記差一段，且段落仍是本課的。扣住等於讓學生改唸全文，那才是專家審查否決的做法。
 # ── 選項本身是圖，文字流只有圖說 ──────────────────────────────────────────
+# ── 影片有標題、沒有網址 ────────────────────────────────────────────────────
+video_links_without_url:
+  generated: "2026-09-05"
+  issue: 3100
+  what_this_is: >-
+    學習單列了延伸影片的片名與長度，但沒有印出網址（多半是印 QR code 或只寫片名）。
+    抽取器抓得到 title / source / duration，url 只能是 None。
+  how_it_looks_to_a_student: >-
+    看得到「簡直令人難以相信 他與獅子「零距離｣ (9:32)」這種項目，點不開。
+  scope: 28 筆 / 14 課（全庫 323 筆影片連結中）
+  how_to_close: >-
+    請教材端補印網址，或把學習單上的 QR code 解出來。不在我方 code 的範圍內修得掉。
+  lessons:
+    - lesson_uid: L0156
+      links_without_url: 2
+      sample_title: "簡直令人難以相信 他與獅子「零距離｣ - 李四端的雲端世界"
+    - lesson_uid: L0167
+      links_without_url: 2
+      sample_title: "走出情緒的迷宮：練習自我覺察，認識情緒宇宙(完整版)"
+    - lesson_uid: L0168
+      links_without_url: 2
+      sample_title: "win身體保養手冊日常如何觀察身體的健康"
+    - lesson_uid: L0169
+      links_without_url: 2
+      sample_title: "「我的餐盤」均衡飲食_青少年篇"
+    - lesson_uid: L0170
+      links_without_url: 2
+      sample_title: "艾菲爾與影子 關於自我批判的動畫"
+    - lesson_uid: L0171
+      links_without_url: 2
+      sample_title: "白熊效應∣越想壓抑，越難抗拒"
+    - lesson_uid: L0172
+      links_without_url: 2
+      sample_title: "1.夢想雨果｜想過你自己的特質嗎? 別輕看自己!｜動畫"
+    - lesson_uid: L0173
+      links_without_url: 2
+      sample_title: "第一次建立目標就上手！3 分鐘帶你解析曼陀羅九宮格！和大谷翔"
+    - lesson_uid: L0174
+      links_without_url: 2
+      sample_title: "讓失敗改變你的人生｜5個失敗的好處｜改變人生"
+    - lesson_uid: L0175
+      links_without_url: 2
+      sample_title: "成長心態vs.定型心態"
+    - lesson_uid: L0176
+      links_without_url: 2
+      sample_title: "人際關係中的4種「心理地位」"
+    - lesson_uid: L0177
+      links_without_url: 2
+      sample_title: "如何面對他人惡意嘲笑？那些活出自我的人都這麼做"
+    - lesson_uid: L0178
+      links_without_url: 2
+      sample_title: "自我決定理論：揭秘驅動行為的三大動力！"
+    - lesson_uid: L0179
+      links_without_url: 2
+      sample_title: "三個培養心理韌性的方法"
+  count_lessons: 14
+  count_links: 28
+
 image_options_only_captions:
   generated: "2026-09-05"
   issue: 3100

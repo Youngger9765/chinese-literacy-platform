@@ -72,18 +72,21 @@ jobs:
         # 但等於 CI 對它零覆蓋，而它是擋「版面重排」的唯一一道門。
         run: sudo apt-get update && sudo apt-get install -y ffmpeg poppler-utils
 
-      - name: Run characterization tests (refactor safety gate)
+      # ⬇︎ 這裡原本是十四個手工維護的具名清單。#3093/#2804：302 支測試檔裡有
+      #    122 支沒被任何 workflow 點名，所以從來不會跑 —— L0041 的答案洩漏
+      #    就是這樣回來的（八月修好、也寫了鎖，鎖沒進 CI，重抽時洩漏復活）。
+      #    清單會無聲腐爛，目錄不會。
+      #
+      #    十四個 step 宣告的 env 完全相同，合併不會少掉任何條件（查證過）。
+      #    真正的內容缺口用 xfail(strict) 對著 content_known_gaps.yaml 標著，
+      #    看得見，而且補好的那一刻會 XPASS 變紅逼人回來拿掉。
+      #
+      #    下面保留原本每一道鎖的說明 —— 它們記著那些鎖為什麼存在，比清單本身
+      #    值錢。鎖仍然會跑，只是不再靠人維護名字。
+      - name: Run the whole backend suite
         run: |
           cd backend
-          python -m pytest --tb=short -q \
-            tests/test_characterization_auth_policies.py \
-            tests/test_characterization_socratic_state_machine.py \
-            tests/test_characterization_tts_normalization.py \
-            tests/test_characterization_tts_cache.py \
-            tests/test_rate_limiting.py \
-            tests/test_session_scoring_write_1063.py \
-            tests/test_session_scoring_below_threshold_2904.py \
-            tests/test_gamification.py
+          python -m pytest tests --tb=short -q
         env:
           DATABASE_URL: sqlite://
           TTS_PROVIDER: google
@@ -91,10 +94,11 @@ jobs:
           AZURE_SPEECH_REGION: eastus
           JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"
 
+      # ── 以下是原本十四個 step 的說明，保留備查 ─────────────────────────
       # ── 回歸鎖（檔名帶 issue 號的那些）────────────────────────────────
       # 2026-08-28 量到：backend/tests 279 支裡有 229 支從來不會被 CI 跑到，
       # 其中 93 支是為特定 bug 寫的回歸鎖。鎖建了沒插電 = 劇場 ——
-      # #2962 就是這樣（test_gamification 四條紅了很久，沒有人會看到）。
+      # 2962 就是這樣（test_gamification 四條紅了很久，沒有人會看到）。
       # 這一步把當時全綠的 73 支插上（575 條，本機 2m06s）。
       # 另外 20 支當時是紅的，逐支判「真 regression / 期望過時 / 沒價值」，
       # 見 docs/qa/guardrail-plan.md §2 P0-b。
@@ -103,138 +107,6 @@ jobs:
       # 修的是**測試自己的環境假設**，不是把斷言放寬 —— 已插電，見 tests/_route_walk.py。
       # 復現方式：另建 python3.11 + 未釘版 fastapi 的 venv（實測 0.141.1）跑一次；
       # 用本機的 3.10 + 0.115.6 永遠重現不到。
-      - name: Run regression locks (issue-numbered)
-        run: |
-          cd backend
-          python -m pytest --tb=short -q \
-            tests/test_ai_analysis_deprecation_1648.py \
-            tests/test_ai_base_split_1953.py \
-            tests/test_ai_generation_split_1888.py \
-            tests/test_asset_proxy_on_served_path_2748.py \
-            tests/test_assignment_1762.py \
-            tests/test_assignments.py \
-            tests/test_auth_route_split_1844.py \
-            tests/test_auth_token_gate.py \
-            tests/test_blank_marker_regex_2878.py \
-            tests/test_bracket_inline_choice_2786.py \
-            tests/test_characterization_learning_sessions_1955.py \
-            tests/test_characterization_omo_1857.py \
-            tests/test_characterization_omo_1949.py \
-            tests/test_checked_box_answer_leak_2555.py \
-            tests/test_choice_rows_carry_options_2736.py \
-            tests/test_classical_modules_entry_2752.py \
-            tests/test_classrooms_dev_filter_1999.py \
-            tests/test_course_intro_present_2736.py \
-            tests/test_course_level_modules_are_loaded_2964.py \
-            tests/test_dashboard_assignment_completion.py \
-            tests/test_dialogue_history.py \
-            tests/test_docx_named_styles_2715.py \
-            tests/test_docx_second_opinion_2868.py \
-            tests/test_every_lesson_detail_validates_2725.py \
-            tests/test_every_module_has_a_named_guard_2872.py \
-            tests/test_every_module_has_a_skill_2843.py \
-            tests/test_followup_never_vanishes_2964.py \
-            tests/test_gate_uses_current_step_ids_2730.py \
-            tests/test_goal_box_self_check_entry_2752.py \
-            tests/test_health_alias_2737.py \
-            tests/test_inline_choice_grading_2776.py \
-            tests/test_inline_choices_stay_in_the_sentence_2768.py \
-            tests/test_join_preview_rate_limit_3081.py \
-            tests/test_classroom_join_and_batch.py \
-            tests/test_email_domain_validation.py \
-            tests/test_characterization_auth_phase2_co_teaching.py \
-            tests/test_characterization_auth_phase2_gamification.py \
-            tests/test_key_reading_data_matches_extractor_2912.py \
-            tests/test_review_flag_lives_at_the_top_2919.py \
-            tests/test_worksheet_url_is_not_silently_dead_2845.py \
-            tests/test_key_reading_anchor_matches_counter_2912.py \
-            tests/test_key_reading_ledger_matches_reality_2912.py \
-            tests/test_key_reading_span_gap_is_flagged_2912.py \
-            tests/test_key_reading_qa_2712.py \
-            tests/test_key_reading_range_restored_2912.py \
-            tests/test_key_reading_reaches_the_student_2912.py \
-            tests/test_key_reading_rule_is_stated_once_2912.py \
-            tests/test_keypoints_columns_bridge_2736.py \
-            tests/test_keypoints_shape_gate_empty_claim_2736.py \
-            tests/test_knowledge_station_videos_2736.py \
-            tests/test_lesson_cover_served_2767.py \
-            tests/test_lesson_ordering_2736.py \
-            tests/test_lesson_row_keypoints_2749.py \
-            tests/test_lesson_strategy_join_2898.py \
-            tests/test_manifest_builder_does_not_destroy_2795.py \
-            tests/test_matrix_option_bank_2749.py \
-            tests/test_mcq_rescue_split_1887.py \
-            tests/test_migration_pii_repair_1931.py \
-            tests/test_mixed_blank_shapes_2785.py \
-            tests/test_module_entry_gate_parser_2752.py \
-            tests/test_multi_text_and_followups_entry_2752.py \
-            tests/test_n1_queries_fix_1217.py \
-            tests/test_n1_queries_fix_1301.py \
-            tests/test_omo_grader_split_1879.py \
-            tests/test_omo_hint_1637.py \
-            tests/test_omo_history_1975.py \
-            tests/test_omo_identifier_split_1886.py \
-            tests/test_omo_pdf_split_1976.py \
-            tests/test_omo_session_sync_2027.py \
-            tests/test_organizations_split_1890.py \
-            tests/test_perf_1243_remaining_optimizations.py \
-            tests/test_perf_sql_aggregates.py \
-            tests/test_progress_carry_forward_2889.py \
-            tests/test_raw_table_not_public_2769.py \
-            tests/test_reading_attempt_history.py \
-            tests/test_reading_audio_replay_student.py \
-            tests/test_reading_audio_upload.py \
-            tests/test_reading_benchmark_2722.py \
-            tests/test_reading_benchmark_reaches_the_row_2964.py \
-            tests/test_regression_2_5_flash_lite_default_1744.py \
-            tests/test_regression_fill_in_blank_127_lessons_1753.py \
-            tests/test_regression_llm_models_per_task_1734.py \
-            tests/test_regression_omo_grader_circuit_breaker.py \
-            tests/test_regression_omo_grader_locked_1730.py \
-            tests/test_regression_omo_grader_question_order_1973.py \
-            tests/test_regression_omo_identifier_swap_1729.py \
-            tests/test_regression_omo_job_hardening_1772.py \
-            tests/test_regression_reading_transcription_truncation.py \
-            tests/test_regression_text_title_n_plus_1_1810.py \
-            tests/test_regression_thinking_budget_1738.py \
-            tests/test_regression_tts_rate_limit_1808.py \
-            tests/test_restart_does_not_skip_own_prior_attempt_1764.py \
-            tests/test_round_progress_2916.py \
-            tests/test_sample_uids_survives_missing_spotlight_2751.py \
-            tests/test_schema_drift_guard_2683.py \
-            tests/test_second_edition_session_start_2683.py \
-            tests/test_section_completeness_2876.py \
-            tests/test_seed_data_pii_1920.py \
-            tests/test_single_blank_inline_choice_2750.py \
-            tests/test_single_spotlight_producer_2683.py \
-            tests/test_skip_policy_snapshot_1764.py \
-            tests/test_sot_stale_offline_gate_2736.py \
-            tests/test_source_coverage_2877.py \
-            tests/test_spotlight_known_gaps_ledger_2772.py \
-            tests/test_spotlight_ordering_items_2683.py \
-            tests/test_spotlight_table_content_2683.py \
-            tests/test_spotlight_textbox_heading_2714.py \
-            tests/test_step_progress_api.py \
-            tests/test_step_progress_parse.py \
-            tests/test_step_sequence_from_worksheet_2736.py \
-            tests/test_story_structure_cell_parser_2776.py \
-            tests/test_student_progress.py \
-            tests/test_sub_exercise_reaches_students_2865.py \
-            tests/test_submission_counts_not_inflated_1764.py \
-            tests/test_teacher_dev_classroom_filter_1985.py \
-            tests/test_teacher_report_completion_1911.py \
-            tests/test_teacher_sees_grouped_attempts_1764.py \
-            tests/test_teacher_students_1882.py \
-            tests/test_tts_cache_fail_closed_2765.py \
-            tests/test_uid_tree_module_isolation_2683.py \
-            tests/test_vocab_application_option_bank_2736.py
-        env:
-          DATABASE_URL: sqlite://
-          TTS_PROVIDER: google
-          AZURE_SPEECH_KEY: ""
-          AZURE_SPEECH_REGION: eastus
-          JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"
-
       # 教師「以學生身分預覽」(#3027)：preview JWT 只允許唯讀。這三支涵蓋
       # (1) token 本身帶對 claim (2) 核發端點只給該學生的授課老師 (3) 核心
       # 安全邊界 — PreviewModeWriteGuardMiddleware 擋掉所有 /api/* 寫入，
@@ -247,57 +119,15 @@ jobs:
       # L0041 answer leak came back: 777a4a938 fixed it and shipped a lock, the
       # lock was never wired in, and the v3 re-extraction reintroduced the leak
       # in silence. Pinning them here is the part that makes the repair last.
-      #
+      # 
       # test_reading_transcription used to need its own step with a file-backed
       # SQLite. It does not any more: app/database.py now sets
       # check_same_thread=False (and StaticPool for in-memory), which is what a
       # threaded app on SQLite needs. Fixing the engine beat working around it
       # in CI config.
-      #
+      # 
       # test_lesson_uid_loader.py is deliberately absent — it still has 17 real
       # content failures, tracked in #3100. Adding it would only turn CI red.
-      - name: Run repaired backend locks (#3093)
-        run: |
-          cd backend
-          python -m pytest --tb=short -q \
-            tests/test_comprehension_score.py \
-            tests/test_ai_endpoints.py \
-            tests/test_input_sanitizer.py \
-            tests/test_omo_crop_provenance.py \
-            tests/test_stories_api.py \
-            tests/test_spotlight_to_lesson_content.py \
-            tests/test_exit_ticket.py \
-            tests/test_roles_api.py \
-            tests/test_error_correction.py \
-            tests/test_reading_evaluation_service.py \
-            tests/test_reading_transcription.py \
-            tests/test_teacher_dashboard_n1.py \
-            tests/test_gemini_content_filter.py \
-            tests/test_omo_grader_real.py \
-            tests/test_omo_upload.py \
-            tests/test_tts_service.py \
-            tests/test_google_oauth.py
-        env:
-          DATABASE_URL: sqlite://
-          TTS_PROVIDER: google
-          AZURE_SPEECH_KEY: ""
-          AZURE_SPEECH_REGION: eastus
-          JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"
-
-      - name: Run teacher preview-mode locks (#3027)
-        run: |
-          cd backend
-          python -m pytest --tb=short -q \
-            tests/test_jwt_preview_token.py \
-            tests/test_teacher_preview_token.py \
-            tests/test_preview_mode_write_guard.py
-        env:
-          DATABASE_URL: sqlite://
-          TTS_PROVIDER: google
-          AZURE_SPEECH_KEY: ""
-          AZURE_SPEECH_REGION: eastus
-          JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"
-
       # Teacher live classroom monitor (#3025): per-student "which 大題 /
       # 卡在這題" snapshot polled during 課後學習扶助. Covers (1) the same
       # least-privilege + positive-control access pattern as #3027 (2) the
@@ -308,102 +138,25 @@ jobs:
       # question correctly, even though the historical wrong count stays
       # >= 3 (4) the question_id -> teacher-readable label mapping never
       # leaking a raw internal id.
-      - name: Run teacher live-monitor locks (#3025)
-        run: |
-          cd backend
-          python -m pytest --tb=short -q tests/test_teacher_live_monitor_3025.py
-        env:
-          DATABASE_URL: sqlite://
-          TTS_PROVIDER: google
-          AZURE_SPEECH_KEY: ""
-          AZURE_SPEECH_REGION: eastus
-          JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"
-
       # The 課文管理 list promises teachers that "我來試做" answers stay out of
       # student records and class stats. The frontend test only checks the
       # sentence is displayed; this checks it is true. Both assertions carry a
       # positive control, and both were verified to redden under mutation
       # (heatmap: session query scoped by classroom instead of roster;
       # alerts: the same, plus emitting non-roster session authors).
-      - name: Run teacher try-out isolation locks (#3074)
-        run: |
-          cd backend
-          python -m pytest --tb=short -q tests/test_teacher_tryout_not_in_class_stats_3074.py
-        env:
-          DATABASE_URL: sqlite://
-          TTS_PROVIDER: google
-          AZURE_SPEECH_KEY: ""
-          AZURE_SPEECH_REGION: eastus
-          JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"
-
-      - name: Run testset tests (upload security + auth + eval)
-        run: |
-          cd backend
-          python -m pytest --tb=short -q tests/test_testset_*.py
-        env:
-          DATABASE_URL: sqlite://
-          TTS_PROVIDER: google
-          AZURE_SPEECH_KEY: ""
-          AZURE_SPEECH_REGION: eastus
-          JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"
-
-      - name: Run security regression tests (blackbox audit gate — WSTG-mapped)
-        run: |
-          cd backend
-          python -m pytest --tb=short -q tests/security/test_dynamic_security.py
-        env:
-          DATABASE_URL: sqlite://
-          TTS_PROVIDER: google
-          AZURE_SPEECH_KEY: ""
-          AZURE_SPEECH_REGION: eastus
-          JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"
-
       # Pronunciation fingerprint gate (#2742). Already run by spec-check.yml,
       # repeated here on purpose: spec-check is path-filtered, this workflow
       # triggers on all of backend/**, and the failure being guarded against is
       # precisely "the gate existed and nothing ran it". Cheap enough (three
       # assertions, no I/O) that redundancy costs less than another silent
       # orphaning of the whole audio cache.
-      - name: Run pronunciation fingerprint gate (#2742)
-        run: |
-          cd backend
-          python -m pytest --tb=short -q specs/test_tts_cache_fingerprint_spec.py
-        env:
-          DATABASE_URL: sqlite://
-          TTS_PROVIDER: google
-          AZURE_SPEECH_KEY: ""
-          AZURE_SPEECH_REGION: eastus
-          JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"
-
       # Wiring lock for the gate above (#2742): asserts every input the
       # fingerprint is computed from is watched by a workflow that runs it.
-      - name: Run fingerprint-gate wiring lock (#2742)
-        run: |
-          cd backend
-          python -m pytest --tb=short -q tests/test_tts_fingerprint_gate_is_wired.py
-        env:
-          DATABASE_URL: sqlite://
-          TTS_PROVIDER: google
-          AZURE_SPEECH_KEY: ""
-          AZURE_SPEECH_REGION: eastus
-          JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"
-
       # TTS coverage lock (#2619): mocked logic only (existing_keys/missing_keys/
       # expected_keys against FakeBucket doubles + the real manifest file) — no
       # GCS credentials touched here. The real-bucket class
       # (TestRealGCSCoverage) is opt-in via RUN_REAL_GCS_TESTS and self-skips
       # without it, so it never runs in CI. An un-run lock is theatre — pin it.
-      - name: Run TTS coverage lock (mocked — real-GCS class self-skips)
-        run: |
-          cd backend
-          python -m pytest --tb=short -q tests/test_audit_tts_coverage.py
-        env:
-          DATABASE_URL: sqlite://
-          TTS_PROVIDER: google
-          AZURE_SPEECH_KEY: ""
-          AZURE_SPEECH_REGION: eastus
-          JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"
-
       # 重點表 bridge lock (#2736): `app/services/keypoints_to_structure.py` 供給 150 課的
       # 重點表（`lesson_indexes.py` → `story_structure_table` → `/stories/{id}/structure`），
       # 但**沒有任何 spec module 認領它**，而這個 workflow 是點名清單不是掃目錄 ——
@@ -411,60 +164,6 @@ jobs:
       # 2026-08-18 實測，以 test_rate_limiting 與 test_verify_qr_manifest 當正向對照）。
       # 兩個靜默流失的 bug（子項標題 63 課、題幹 3 課）就是在這個空隙裡活下來的。
       # An un-run lock is theatre — pin it.
-      - name: Run keypoints bridge locks (sub-labels + prompt stems)
-        run: |
-          cd backend
-          python -m pytest --tb=short -q \
-            tests/test_keypoints_to_structure.py \
-            tests/test_keypoints_subitem_label_2736.py \
-            tests/test_keypoints_prompt_stem_2736.py \
-            tests/test_structure_answer_key_not_served_2736.py \
-            tests/test_structure_option_display_2736.py \
-            tests/test_asset_url_rewrite.py \
-            tests/test_section_label_dash_normalisation.py \
-            tests/test_table_cells_carry_the_tick_2735.py \
-            tests/test_tts_audit_empty_not_404.py \
-            tests/test_lab_keypoints_source_2751.py \
-            tests/test_tts_mapping_covers_classical_2792.py \
-            tests/test_classical_tts_normalization_2792.py \
-            tests/test_inactive_threshold_matches_prd_2787.py \
-            tests/test_yml_shape_ratchet_2843.py \
-            tests/test_module_gaps_are_declared_2836.py \
-            tests/test_module_schemas_2843.py \
-            tests/test_module_reconcile_2843.py \
-            tests/test_corpus_gates_are_wired_2843.py \
-            tests/test_section_no_is_hanzi_2843.py \
-            tests/test_comprehension_carrier_shape_2843.py \
-            tests/test_vocab_definitions_shape_2843.py \
-            tests/test_module_reaches_the_student_2843.py \
-            tests/test_part_ids_2916.py \
-            tests/test_repeat_rounds_2916.py \
-            tests/test_section_pages_2857.py \
-            tests/test_section_locator_2857.py \
-            tests/test_pdf_manifest_gate_2857.py \
-            tests/test_gates_catch_degraded_extraction_2865.py \
-            tests/test_vocab_review_reaches_student_2860.py
-        env:
-          DATABASE_URL: sqlite://
-          TTS_PROVIDER: google
-          AZURE_SPEECH_KEY: ""
-          AZURE_SPEECH_REGION: eastus
-          JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"
-
-      - name: "Run 念順順 key-reading locks (#2912 / #2712 / #2683 / #2562)"
-        run: |
-          cd backend
-          python -m pytest --tb=short -q \
-            tests/test_key_reading_passages_2562.py \
-            tests/test_key_reading_golden_2912.py \
-            tests/test_source_profile_gate.py
-        env:
-          DATABASE_URL: sqlite://
-          TTS_PROVIDER: google
-          AZURE_SPEECH_KEY: ""
-          AZURE_SPEECH_REGION: eastus
-          JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"
-
       # Ticked-answer ground-truth lock (#2735): #2555 closed the "no box = answer"
       # leak, which was the extractor's only signal — closing it silently changed
       # 312 spotlight answers. `checked_box_positions()` reads the teacher's tick
@@ -474,15 +173,3 @@ jobs:
       # box-glyph-counting bug in the primitive itself — each round's finding has its
       # own test class here). Not caught by `backend/specs` (this repo isn't on that
       # path) — pin it here or it goes unrun like the bridge lock above did.
-      - name: Run ticked-answer ground-truth lock (#2735)
-        run: |
-          cd backend
-          # scripts/build_lesson_schema.py (a DOCX->YAML build tool, not a served
-          # endpoint) needs python-docx + lxml. Installed here, not in
-          # requirements.txt, so the deployed Cloud Run image doesn't carry a
-          # dependency it never uses at runtime.
-          pip install python-docx==1.2.0 lxml==6.1.0
-          # #2823 的絆線測同一個模組（同樣要 python-docx），所以掛在這裡 ——
-          # 放進上面的 regression-lock 清單會 ModuleNotFoundError（2026-08-31 實際發生過）。
-          python -m pytest --tb=short -q tests/test_checked_option_is_the_answer_2735.py \
-            tests/test_deferred_answer_extraction_stays_unreachable_2823.py
