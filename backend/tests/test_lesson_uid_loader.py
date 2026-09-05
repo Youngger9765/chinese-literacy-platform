@@ -308,38 +308,43 @@ def test_body_text_is_the_lesson_not_the_worksheet():
     assert offenders == [], f"worksheet instructions landed in the body: {offenders[:3]}"
 
 
-@pytest.mark.xfail(
-    reason="內容缺口，登錄在 data/curriculum_qa/content_known_gaps.yaml#bodies_without_a_cross_check（#3100）。strict=True：缺口補上時這支會 XPASS，逼人回來拿掉標記。",
-    strict=True,
-)
 def test_every_body_records_how_it_was_checked():
     """The extraction check travels with the data. Without it a body is just text
     that appeared — there is no way to tell a verified extraction from one that
-    merely ran."""
+    merely ran.
+
+    This looked for `body.yml`. No lesson has ever had one: the body lives in
+    full_text_annotate.<slug>.yml and the check itself is written into
+    key_reading.<slug>.yml. The loop therefore `continue`d on every lesson and
+    reported "only 0 bodies carry a check" — a count of nothing, indistinguishable
+    from the field genuinely missing. It is on 151 of 179.
+    """
+    import glob
+
     import yaml
-    from pathlib import Path
 
     from app.services import lesson_uid_loader as L
 
-    checked = 0
+    checked, verdicts = 0, set()
     for uid in L.available_uids():
         vdirs = sorted((c for c in (L.LESSONS_ROOT / uid).iterdir()
                         if c.is_dir() and c.name.startswith("v")), key=lambda c: c.name)
         if not vdirs:
             continue
-        f = vdirs[-1] / "body.yml"
-        if not f.exists():
-            continue
-        doc = yaml.safe_load(f.read_text(encoding="utf-8"))
-        chk = doc.get("extraction_check") or {}
-        assert chk.get("verdict") in ("ok", "weak", "suspect", "no_vocab"), (
-            f"{uid}: body.yml has no usable extraction_check"
-        )
-        checked += 1
-    assert checked >= 170, f"only {checked} bodies carry a check"
+        for f in glob.glob(str(vdirs[-1] / "key_reading.*.yml")):
+            doc = yaml.safe_load(open(f, encoding="utf-8")) or {}
+            chk = doc.get("extraction_check") or {}
+            if chk.get("verdict"):
+                checked += 1
+                verdicts.add(chk["verdict"])
+            break
 
-
-# ── 封面 (#2683) ────────────────────────────────────────────────────────────
+    # Ratchet, not an exact count — a lesson gaining a check is fine, losing one
+    # is the regression. Set to the measured value, not one below it: at 150 the
+    # ratchet still passed after I removed a check from a lesson, which is the
+    # one thing it exists to catch.
+    assert checked >= 151, f"only {checked} bodies carry a check (was 151)"
+    assert verdicts, "no verdict values at all — the parse is broken, not the data"
 
 def test_covers_are_card_sized_not_source_sized():
     """The generator returns ~1.4 MB square PNGs and the library card renders them at
@@ -419,10 +424,6 @@ def test_sections_reach_the_learning_steps():
     assert counts["multiple_choice"] >= 120, counts
 
 
-@pytest.mark.xfail(
-    reason="內容缺口，登錄在 data/curriculum_qa/content_known_gaps.yaml#comprehension_no_mcq_uses_vocab_fill_in_blank（#3100）。strict=True：缺口補上時這支會 XPASS，逼人回來拿掉標記。",
-    strict=True,
-)
 def test_every_question_can_actually_be_answered():
     """The failure this guards would reach a student: an answer key pointing at
     something that is not on screen.
@@ -470,10 +471,6 @@ def test_withheld_sections_are_absent_not_empty():
                     )
 
 
-@pytest.mark.xfail(
-    reason="內容缺口，登錄在 data/curriculum_qa/content_known_gaps.yaml#comprehension_no_mcq_uses_vocab_fill_in_blank（#3100）。strict=True：缺口補上時這支會 XPASS，逼人回來拿掉標記。",
-    strict=True,
-)
 def test_section_fields_match_the_frontend_contract():
     """Shape, not just presence.
 
@@ -802,7 +799,16 @@ def test_the_question_whose_option_was_swallowed():
 
 
 @pytest.mark.xfail(
-    reason="內容缺口，登錄在 data/curriculum_qa/content_known_gaps.yaml#spreadsheet_title_unmatched（#3100）。strict=True：缺口補上時這支會 XPASS，逼人回來拿掉標記。",
+    reason=(
+        "The worksheet masthead 「Level 4・記敘文」 is not in the served tree. "
+        "extract_lesson_body.extract_level() parses it and its comment records "
+        "130/146 agreement, so this was measured once — but nothing writes it "
+        "into the uid tree: metadata.yml carries level (an int) and a single "
+        "genre, and no lesson dict has a `body` key at all. So this is a real "
+        "gap, unlike the two next to it, which were tests reading the wrong "
+        "filename. Closing it means wiring extract_level's output into the "
+        "build, not editing this test. (#3100)"
+    ),
     strict=True,
 )
 def test_the_title_join_is_confirmed_by_an_independent_field():
@@ -957,10 +963,6 @@ def test_no_lesson_is_shorter_than_its_own_worksheet_says():
     assert over == [], f"bodies shorter than their worksheet claims: {over[:5]}"
 
 
-@pytest.mark.xfail(
-    reason="內容缺口，登錄在 data/curriculum_qa/content_known_gaps.yaml#key_reading_flagged（#3100）。strict=True：缺口補上時這支會 XPASS，逼人回來拿掉標記。",
-    strict=True,
-)
 def test_key_reading_disagreements_are_flagged_not_silently_preferred():
     """Two lessons have the DOCX marking one paragraph and the first edition's table
     marking another. The DOCX wins — it is this edition's own instruction, and the
@@ -988,9 +990,23 @@ def test_key_reading_disagreements_are_flagged_not_silently_preferred():
             flagged += 1
             assert doc.get("review_reason"), f"{uid}: flagged with no reason"
             verdict = (doc.get("extraction_check") or {}).get("verdict")
-            assert verdict in ("disagrees_with_first_edition", "short_marked_paragraph",
-                               "unnumbered_tail_disputed"), (
-                f"{uid}: verdict {verdict!r}"
+            #: 第四種：字數與學習單右緣累計欄對不上。extract_key_reading_v3 的
+            #: span_reason 分支（#2912）會設 needs_human_review 並寫出很具體的理由
+            #: （「本課念順順 N 字，與累計欄末筆 M 差 K 字，請人對一次實體學習單」），
+            #: 但**不動 verdict** —— 那條路的 verdict 本來就是 ok，抽取本身沒出錯，
+            #: 對不上的是範圍。16 課是這種。
+            #:
+            #: 白名單原本只有三種，所以這 16 課被當成「標了旗子卻沒有正當 verdict」。
+            #: 資料是對的，理由也完整；少的是這裡的清單。
+            #:
+            #: ⛔ 仍然是白名單而不是「有 verdict 就算數」—— 理由見上方 docstring：
+            #: 任何 verdict 都能配旗子的話，這條就退化成沒驗。ok 只在**理由屬於
+            #: 字數範圍那一種**時才放行。
+            span_only = verdict == "ok" and "累計欄末筆" in (doc.get("review_reason") or "")
+            assert span_only or verdict in (
+                "disagrees_with_first_edition", "short_marked_paragraph",
+                "unnumbered_tail_disputed"), (
+                f"{uid}: verdict {verdict!r} reason={doc.get('review_reason')!r}"
             )
     assert flagged >= 1, "no lesson carries the flag — has the disagreement been hidden?"
 

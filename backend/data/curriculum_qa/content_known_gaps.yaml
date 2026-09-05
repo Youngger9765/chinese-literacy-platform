@@ -430,8 +430,8 @@ resolved:
     caveat: 「spotlight.yml 有可渲染 block」只證明檔案本身有內容，不代表學生一定看得到——serving 層另外有兩個已知獨立問題會讓有內容的課仍然渲染失敗或量測失敗：#2730（content evidence
       gate 的量測本身壞掉）、#2752（部分模組完全沒有 UI 入口）。這次只回答『抽了沒』，不是『學生看不看得到』。
 bodies_without_a_cross_check:
-  count: 29
-  of: 175
+  count: 28
+  of: 179
   what: 這 29 課的課文抽出來了，但**沒有任何交叉驗證** —— 學習單沒有「本課語詞」可以拿來比對邊界（其中 11 課是文言文，用「古文今譯」不是語詞框）。
   how_marked: body.yml 標 needs_review + review_reason，跟通過檢查的 111 課區分開
   why_not_withheld: 課文本身很可能是對的（suspect 那 5 課人工看過都對），扣住等於讓學生沒課文可讀。標註比隱藏誠實。

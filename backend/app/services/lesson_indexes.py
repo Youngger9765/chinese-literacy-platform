@@ -509,7 +509,23 @@ def _cloze_from(l: dict, section: dict | None = None) -> list[dict]:
         answer = q.get("answer")
         if not (sentence and answer):
             continue
-        primary, alts = _normalise_answer_code(str(answer), bank)
+        # ⛔ 不要無條件 str()。學習單上有「一格填兩個」的題目，yml 照著寫成
+        #    list（L0072 第 5 題 answer: [F, E]，同一列還標著 multi: true）。
+        #    str() 把它變成字面 "['F', 'E']"，那個字串在 A–G 的詞庫裡永遠對不到，
+        #    於是那一題**沒有任何答案是對的** —— 學生怎麼填都錯。
+        #    全庫 2102 題只有這一筆，所以它一路活到現在沒被發現。
+        if isinstance(answer, (list, tuple)):
+            codes = [str(a) for a in answer if str(a).strip()]
+            primary, alts = _normalise_answer_code(codes[0], bank) if codes else (None, [])
+            extra = []
+            for c in codes[1:]:
+                p2, a2 = _normalise_answer_code(c, bank)
+                extra.extend([p2, *a2])
+            alts = [*alts, *extra]
+        else:
+            primary, alts = _normalise_answer_code(str(answer), bank)
+        if primary is None:
+            continue
         row = {"sentence": sentence, "answer": primary, "_schema": "legacy"}
         if alts:
             row["accepted_answers"] = [primary, *alts]
