@@ -27,7 +27,7 @@ comprehension:
     stem: 根據第三段，哪一張圖最符合小藍鯨生前被漁具纏繞的情況？
     options:
       A: 藍鯨骨骼標本
-      B: 鯊魚(上端有鰭)
+      B: 鯊魚
       C: 藍鯨
       D: ''
     options_are_images: true
