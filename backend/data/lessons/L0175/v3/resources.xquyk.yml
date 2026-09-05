@@ -8,11 +8,15 @@ resources:
     duration: '5:03'
     duration_seconds: 303
     source: Sprouts
+    url: http://youtu.be/igsEb4SsQ2i1ihAV
+    url_source: 自學教材總表0816.xlsx 4.影片連結（課名完全相同且唯一，數量相符後位置配對）
   - index: 2
     title: 成功的要訣是什麽？是意志力
     duration: '6:12'
     duration_seconds: 372
     source: 李彥甫
+    url: http://youtu.be/omkV_pO94F4
+    url_source: 自學教材總表0816.xlsx 4.影片連結（課名完全相同且唯一，數量相符後位置配對）
   notes:
     _note: 兩則皆附 QR code 圖片；連結網址不在文字流裡
   slug: xquyk

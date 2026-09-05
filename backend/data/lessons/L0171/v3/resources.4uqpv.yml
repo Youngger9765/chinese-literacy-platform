@@ -10,10 +10,14 @@ resources:
     duration: (4:18)
     source: JT才知道
     has_qr: true
+    url: http://youtu.be/DcgX70eYQqA
+    url_source: 自學教材總表0816.xlsx 4.影片連結（課名完全相同且唯一，數量相符後位置配對）
   - index: 2
     title: 為什麼越不想越會想？｜怪心理 EP02｜白熊效應White Bear Effect
     duration: (4:34)
     source: ZenPhonicFlow
     has_qr: true
+    url: http://youtu.be/fEwO6SD1S8s
+    url_source: 自學教材總表0816.xlsx 4.影片連結（課名完全相同且唯一，數量相符後位置配對）
   slug: 4uqpv
   text_ref: envdq

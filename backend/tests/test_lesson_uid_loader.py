@@ -506,10 +506,6 @@ def test_section_fields_match_the_frontend_contract():
 
 # ── 試算表 metadata (#2683) ─────────────────────────────────────────────────
 
-@pytest.mark.xfail(
-    reason="內容缺口，登錄在 data/curriculum_qa/content_known_gaps.yaml#fields_not_extracted（#3100）。strict=True：缺口補上時這支會 XPASS，逼人回來拿掉標記。",
-    strict=True,
-)
 def test_spreadsheet_metadata_reaches_the_api():
     """課程簡介, 文體, 分類 and video links come from 自學教材總表.xlsx.
 
@@ -719,10 +715,6 @@ def test_vocabulary_words_are_not_welded_together():
     assert len(bad) <= 12, f"{len(bad)} lessons have vocabulary absent from their text: {bad[:4]}"
 
 
-@pytest.mark.xfail(
-    reason="內容缺口，登錄在 data/curriculum_qa/content_known_gaps.yaml#image_options_only_captions（#3100）。strict=True：缺口補上時這支會 XPASS，逼人回來拿掉標記。",
-    strict=True,
-)
 def test_every_served_choice_question_has_its_answer_among_the_options():
     """Nothing with a dangling answer reaches a student.
 
@@ -1241,3 +1233,201 @@ def test_the_lessons_without_a_spotlight_are_a_recorded_pipeline_failure():
     assert "是" in str(entry.get("is_it_a_pipeline_failure", "")), (
         "the entry no longer says this is a pipeline failure"
     )
+
+
+def test_a_question_whose_correct_option_is_blank_is_withheld():
+    """A question whose answer lands on an empty option cannot be answered.
+
+    🔴 Three of these were being served (L0073 / L0052 / L0143). All three are
+    「下列哪一張圖」 questions: the four options are four images (`w:drawing`), so
+    the text layer carries only 「A.」「B.」「C.」「D.」 plus the teacher edition's
+    orange parenthetical notes — and the note is missing on precisely the option
+    that is correct. The student saw four choices with the right one blank, and
+    was marked wrong whichever they picked.
+
+    The source yml is faithful: L0143 says `options_are_images: true` and spells
+    out in `options_note` that the brackets are annotations, not option text. The
+    break is downstream, in serving an image question as a text one.
+
+    The criterion is the blank answer cell, not the `options_are_images` flag —
+    only L0143 carries that flag, while all three have the blank. A flag-based
+    guard would have fixed one of the three and looked complete.
+    """
+    from app.services.lesson_indexes import _mcq_from
+
+    def lesson(options, answer):
+        return {"sections": {"comprehension": {"items": [
+            {"stem": "哪一張圖？", "options": options, "answer": answer}]}}}
+
+    assert _mcq_from(lesson({"A": "", "B": "乙", "C": "丙", "D": "丁"}, "A")) == [], \
+        "a blank correct option must withhold the question"
+
+    # 負向對照：空的是別的選項、正解有內容 → 照送（那題仍然答得出來）
+    kept = _mcq_from(lesson({"A": "甲", "B": "", "C": "丙", "D": "丁"}, "A"))
+    assert len(kept) == 1, "only the answer cell being blank should withhold"
+    assert kept[0]["answer"] == "A"
+
+    # 負向對照：正常題目不受影響
+    ok = _mcq_from(lesson({"A": "甲", "B": "乙", "C": "丙", "D": "丁"}, "C"))
+    assert len(ok) == 1 and ok[0]["options"] == ["甲", "乙", "丙", "丁"]
+
+    # 只有空白也算空
+    assert _mcq_from(lesson({"A": "甲", "B": "   ", "C": "丙"}, "B")) == []
+
+
+def test_category_is_derived_from_the_genre_that_is_actually_served():
+    """The taxonomy label must come from the same genre the student sees.
+
+    🔴 `category` was empty for all 179 lessons while `genre` was filled for 174.
+    Both lines sit three apart and look symmetric, but only one carries the
+    metadata fallback:
+
+        "genre":    (body_genre or meta_genre or "")
+        "category": _category_for(body_genre, meta)      # ← no fallback
+
+    Measurement: body_genre is set on **zero** lessons — every genre served comes
+    from metadata.yml — so `_category_for` was handed None 179 times out of 179.
+    The comment above it claimed it was "derived from the genre actually served";
+    it was derived from a source nothing uses.
+
+    This asserts the relationship (same input as genre), not a count, because a
+    count would still pass if the two lines drifted apart onto different sources
+    that happened to both be populated.
+    """
+    from app.services.lesson_loader import get_all_lessons
+    from app.services.lesson_indexes import _GENRE_TO_CATEGORY
+
+    lessons = get_all_lessons()
+    mismatched = []
+    for l in lessons:
+        genre = l.get("genre") or ""
+        if genre not in _GENRE_TO_CATEGORY:
+            continue          # compound labels take the prefix path, checked below
+        if l.get("category") != _GENRE_TO_CATEGORY[genre]:
+            mismatched.append((l["lesson_uid"], genre, l.get("category")))
+    assert mismatched == [], f"category does not follow its own genre: {mismatched[:4]}"
+
+    have = sum(1 for l in lessons if l.get("category"))
+    assert have >= 165, f"only {have}/{len(lessons)} lessons carry a category"
+
+
+def test_unnumbered_blocks_reach_the_student():
+    """A paragraph the worksheet did not number is still part of the article.
+
+    🔴 575 characters across two lessons were extracted, annotated with exactly
+    where they belong, and served to nobody:
+
+      L0084 — `role_note: 課文最後一段，沒有段號（段號欄只印到六），但在朗讀範圍內`
+              The article's closing paragraph. Students read the piece without
+              its ending, and 念順順 quoted a passage that was not in the body it
+              was checked against.
+      L0157 — five blocks under Ｑ１ (「節省用字方式」一、二、三 plus the Ｑ2 heading).
+              An instructional piece whose instruction was missing.
+
+    The extractor did its job: every block carries `after_paragraph` naming the
+    numbered paragraph it follows. `_flat_paragraphs` read `paragraphs` and
+    nothing else — the same shape of failure as `questions` vs `items`, and it
+    shows up as an article quietly ending early rather than as an error.
+
+    Locked on containment of the block text, not on a count, so that a future
+    extraction adding blocks to a third lesson is covered without editing a number.
+    """
+    import re
+
+    from app.services.lesson_loader import get_all_lessons
+    from app.services import lesson_uid_loader as L
+
+    norm = lambda s: re.sub(r"\s+", "", s or "")
+    served = {l["lesson_uid"]: l for l in get_all_lessons()}
+
+    checked, missing = 0, []
+    for uid in L.available_uids():
+        if uid not in served:
+            continue
+        try:
+            raw = L.load_lesson(uid)
+        except Exception:
+            continue
+        blocks = (raw.get("full_text_annotate") or {}).get("unnumbered_blocks") or []
+        if not blocks:
+            continue
+        body = norm("".join(served[uid].get("paragraphs") or []))
+        for b in blocks:
+            text = (b.get("text") or "").strip()
+            if not text:
+                continue
+            checked += 1
+            if norm(text)[:40] not in body:
+                missing.append((uid, b.get("after_paragraph"), text[:28]))
+
+    # 正向對照：沒有這一行的話，一課都沒有 unnumbered_blocks 時上面的迴圈
+    # 什麼都不檢查，而這支測試會是綠的 —— 那個綠什麼都不證明。
+    assert checked >= 6, f"only {checked} unnumbered blocks examined — the query is broken"
+    assert missing == [], f"article text never reaches the student: {missing[:4]}"
+
+
+def test_an_unnumbered_block_lands_where_the_worksheet_puts_it():
+    """Reaching the student is not enough — it has to arrive in the right place.
+
+    L0084's block is annotated `after_paragraph: 6` and the lesson has exactly six
+    numbered paragraphs, so it is the article's closing paragraph and must be last.
+    Without this, appending every block to the end passes the containment check and
+    the article ends on the wrong sentence.
+    """
+    from app.services.lesson_loader import get_all_lessons
+    from app.services import lesson_uid_loader as L
+
+    served = next(l for l in get_all_lessons() if l["lesson_uid"] == "L0084")
+    raw = L.load_lesson("L0084")
+    fta = raw["full_text_annotate"]
+    block = fta["unnumbered_blocks"][0]
+    assert str(block["after_paragraph"]) == "6", "fixture drifted: this test assumes it is last"
+
+    paras = served["paragraphs"]
+    assert len(paras) == len(fta["paragraphs"]) + 1, (
+        f"{len(paras)} served vs {len(fta['paragraphs'])} numbered + 1 block"
+    )
+    assert paras[-1].strip().startswith(block["text"].strip()[:20]), (
+        f"the closing paragraph is not last: {paras[-1][:30]!r}"
+    )
+
+    # 負向對照：L0157 的第一塊接在第 3 段之後，不是最後 —— 全部往後丟會讓這條紅
+    l157 = next(l for l in get_all_lessons() if l["lesson_uid"] == "L0157")
+    b0 = L.load_lesson("L0157")["full_text_annotate"]["unnumbered_blocks"][0]
+    assert str(b0["after_paragraph"]) == "3", "fixture drifted"
+    pos = next(i for i, x in enumerate(l157["paragraphs"])
+               if x.strip().startswith(b0["text"].strip()[:20]))
+    assert pos == 3, f"block after paragraph 3 landed at index {pos}, not 3"
+
+
+def test_recovered_video_urls_stay_recovered():
+    """A ratchet on video links that have a URL.
+
+    18 of them were recovered on 2026-09-06 by joining 自學教材總表0816.xlsx's
+    「4.影片連結」 sheet — which had them all along. The ledger had recorded the
+    gap as 「不在我方 code 的範圍內修得掉」, and that was wrong in the same way the
+    lesson intro was: 「我還沒去接」 stated as 「取不到」.
+
+    A floor rather than an exact count, so adding links is free and losing them
+    is not. 313/323 carry a URL; the remaining 10 are five lessons whose links
+    are only on paper as QR codes, and `KnowledgeStation.tsx` shows those on
+    purpose rather than claiming the lesson has no videos.
+    """
+    from app.services.lesson_loader import get_all_lessons
+
+    links = [v for l in get_all_lessons() for v in (l.get("video_links") or [])]
+    with_url = [v for v in links if (v.get("url") or "").strip()]
+    assert len(links) >= 320, f"only {len(links)} video links — extraction lost some"
+    assert len(with_url) >= 310, (
+        f"{len(with_url)}/{len(links)} links have a URL — recovered URLs went missing"
+    )
+
+    # 每一支補回來的都要說得出來源，否則將來沒人能查它是怎麼配上的。
+    import glob, yaml
+    sourced = 0
+    for f in glob.glob("data/lessons/L*/v*/resources*.yml"):
+        res = (yaml.safe_load(open(f, encoding="utf-8")) or {}).get("resources") or {}
+        for it in (res.get("items") or res.get("videos") or []):
+            if isinstance(it, dict) and it.get("url") and it.get("url_source"):
+                sourced += 1
+    assert sourced >= 18, f"only {sourced} recovered URLs carry provenance"

@@ -10,10 +10,14 @@ resources:
     duration: (5:26)
     source: HY K
     has_qr: true
+    url: http://youtu.be/kyd3b30kVds
+    url_source: 自學教材總表0816.xlsx 4.影片連結（課名完全相同且唯一，數量相符後位置配對）
   - index: 2
     title: 非黑即白的思考模式 ｜ 打破極端的二元思考
     duration: (4:11)
     source: 均一教育平台
     has_qr: true
+    url: http://youtu.be/U9zuRSWPIiw
+    url_source: 自學教材總表0816.xlsx 4.影片連結（課名完全相同且唯一，數量相符後位置配對）
   slug: 9vae3
   text_ref: 3vey6
