@@ -807,7 +807,16 @@ def test_the_question_whose_option_was_swallowed():
 
 
 @pytest.mark.xfail(
-    reason="內容缺口，登錄在 data/curriculum_qa/content_known_gaps.yaml#spreadsheet_title_unmatched（#3100）。strict=True：缺口補上時這支會 XPASS，逼人回來拿掉標記。",
+    reason=(
+        "The worksheet masthead 「Level 4・記敘文」 is not in the served tree. "
+        "extract_lesson_body.extract_level() parses it and its comment records "
+        "130/146 agreement, so this was measured once — but nothing writes it "
+        "into the uid tree: metadata.yml carries level (an int) and a single "
+        "genre, and no lesson dict has a `body` key at all. So this is a real "
+        "gap, unlike the two next to it, which were tests reading the wrong "
+        "filename. Closing it means wiring extract_level's output into the "
+        "build, not editing this test. (#3100)"
+    ),
     strict=True,
 )
 def test_the_title_join_is_confirmed_by_an_independent_field():
