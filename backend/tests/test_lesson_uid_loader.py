@@ -424,10 +424,6 @@ def test_sections_reach_the_learning_steps():
     assert counts["multiple_choice"] >= 120, counts
 
 
-@pytest.mark.xfail(
-    reason="內容缺口，登錄在 data/curriculum_qa/content_known_gaps.yaml#comprehension_no_mcq_uses_vocab_fill_in_blank（#3100）。strict=True：缺口補上時這支會 XPASS，逼人回來拿掉標記。",
-    strict=True,
-)
 def test_every_question_can_actually_be_answered():
     """The failure this guards would reach a student: an answer key pointing at
     something that is not on screen.
@@ -475,10 +471,6 @@ def test_withheld_sections_are_absent_not_empty():
                     )
 
 
-@pytest.mark.xfail(
-    reason="內容缺口，登錄在 data/curriculum_qa/content_known_gaps.yaml#comprehension_no_mcq_uses_vocab_fill_in_blank（#3100）。strict=True：缺口補上時這支會 XPASS，逼人回來拿掉標記。",
-    strict=True,
-)
 def test_section_fields_match_the_frontend_contract():
     """Shape, not just presence.
 
