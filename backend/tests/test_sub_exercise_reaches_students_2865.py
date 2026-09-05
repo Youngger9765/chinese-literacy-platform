@@ -148,7 +148,14 @@ def test_sub_exercises_are_excluded_from_the_used_code_mechanic():
     assert "const isSubExercise" in src, "沒有區分子練習"
     assert "FILLBLANK_OPTION_MODE === 'disappear' && !isSubExercise" in src, \
         "選項篩選沒排除子練習 —— 正確答案會被濾掉"
-    assert "if (!isSubExercise) {" in src, \
+    # ⚠️ 這一條原本寫死 `if (!isSubExercise) {`，而 #3117 在同一個判斷加了第二個
+    #    條件（`&& oneToOne`：答案有重複的課不鎖用過的詞）。字面比對於是紅掉，
+    #    **而那是純前端的 PR，`detect-changes` 判定不用跑後端測試 —— 破了沒人知道，
+    #    還上了 prod。** 鎖住的性質沒變（子練習答對不寫進 usedCodes），變的只是
+    #    同一個守衛多守一件事。
+    #    改成只比對前綴，讓「再加一個 && 條件」不會誤報，但把 `isSubExercise`
+    #    整個拿掉仍然會紅。
+    assert "if (!isSubExercise" in src, \
         "答對時仍會寫進 usedCodes —— 會關掉後面某一題的正確答案"
     assert "!isSubExercise && usedCodes.has(code)" in src, \
         "選項仍會被灰掉 —— 看得到但點不下去"

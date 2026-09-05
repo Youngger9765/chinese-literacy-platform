@@ -450,6 +450,49 @@ def _rounds_with_flat_paragraphs(l: dict) -> dict:
     return out
 
 
+#: 注釋編號在學習單上是**上標**，攤平成文字層才變成句中的阿拉伯數字
+#: （`直隸1界` 的 `1`）。它不是課文的一部分：留著的話畫面上會多一個數字、
+#: TTS 會把它唸成「一」。
+#:
+#: ⛔ 只能在文言文這條路剝，**不能**改全域的 `_clean_for_tts` —— 白話課文有
+#:    378 處「漢字+數字+漢字」是真的數字（「20道門檻」「80公斤」「25公分」），
+#:    一起剝會讓 TTS 唸成「來回道門檻」。十課文言文裡的 15 個數字則全部是
+#:    注釋編號，逐一看過（#3123）。
+#: 前置條件不只漢字 —— 注釋號也會接在斷詞點或書名號後面（`間.2，平`、`書》3一卷`、
+#: `賊.1攻郡`）。第一版只認漢字，四個編號因此留在課文裡。
+_FOOTNOTE_REF = re.compile(
+    r"(?<=[\u4e00-\u9fff。，、；：？！「」『』（）《》.])"
+    r"\d{1,2}"
+    r"(?=[\u4e00-\u9fff。，、；：？！「」『』（）《》.]|$)"
+)
+
+
+def _classical_paragraphs(l: dict) -> list[str]:
+    """文言文的課文。
+
+    🔴 這十課線上一個字的課文都沒有 —— 課文住在 `classical_text` 模組，而
+    `_body()` 只讀 `full_text_annotate`。跟 `questions` vs `items`、
+    `videos` vs `items` 是同一個形狀：抽取器抽對了，讀取端讀另一個鍵，
+    沒有錯誤、沒有紅燈，只是「朗讀 / 閱讀理解 / 生字 / 造句都沒有文字可以運作」。
+
+    課文是**原文**不是今譯 —— 學習單的 key_reading 指示第 1 條寫著
+    「請用計時器，**朗讀原文**」。`modern_translation`（古文今譯）是另一個大題，
+    不進這裡。
+
+    ⚠️ 斷詞記號 `.` 一定要留著。指示第 2 條直接在教它：
+    「文章中的『.』是表示斷詞的地方，朗讀時，不要把『同組的詞』分開」——
+    把它當雜訊剝掉等於拿掉一半的教學內容。
+    """
+    ct = _unwrap(l.get("classical_text"), "classical_text")
+    out = []
+    for x in (ct.get("paragraphs") or []):
+        text = x.get("text") if isinstance(x, dict) else x
+        if not text:
+            continue
+        out.append(_FOOTNOTE_REF.sub("", str(text)))
+    return out
+
+
 def _flat_paragraphs(fta: dict | None) -> list[str]:
     """課文段落攤成純字串陣列 —— API 的 `paragraphs` 是這個形狀。
 
@@ -963,7 +1006,9 @@ def _uid_tree_lessons() -> list[dict]:
             # pipeline read paragraphs back out of the layer the re-ink deleted —
             # which left 朗讀 / 閱讀理解 / 生字 / 造句 with no text to work on and
             # 「參考課文」 blank beside the keypoints table.
-            "paragraphs": _flat_paragraphs(_body(l)),
+            # 沒有 `full_text_annotate` 的課退到 `classical_text`（#3123）——
+            # 十課文言文的課文住在那裡，只讀前者的話它們線上一個字都沒有。
+            "paragraphs": _flat_paragraphs(_body(l)) or _classical_paragraphs(l),
             # StoryDetail indexes these directly. The second-edition extraction
             # produces spotlight + keypoints; the remaining practice modules are
             # not yet extracted, so they are present-but-empty rather than absent

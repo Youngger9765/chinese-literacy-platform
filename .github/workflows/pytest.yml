@@ -28,6 +28,19 @@ jobs:
           filters: |
             relevant:
               - 'backend/**'
+              # 🔴 後端測試會讀前端原始碼 —— 那些檔改了也必須跑後端套件。
+              #    2026-09-06 的代價：#3117 是純前端 PR，改了 FillInBlankExercise.tsx 的一行判斷，
+              #    而 test_sub_exercise_reaches_students_2865 用字面字串鎖著它。detect-changes 判定
+              #    「跟 backend 無關」→ 後端套件整個沒跑 → 鎖紅了沒人知道，一路上了 prod。
+              #    清單由 test_cross_language_paths_are_in_the_ci_filter 守著，新增依賴沒補這裡會紅。
+              - 'frontend/src/components/reading-steps/FillInBlankExercise.tsx'
+              - 'frontend/src/config/featureFlags.ts'
+              - 'frontend/src/config/stepConfig.ts'
+              - 'frontend/src/services/api.ts'
+              - 'frontend/src/hooks/useCurrentStepId.test.tsx'
+              - 'frontend/src/hooks/useTtsPlayback.test.ts'
+              - 'frontend/src/utils/textDiff.accentTolerance.test.ts'
+              - 'frontend/scripts/eval/tts-alignment.eval.ts'
               # 產生器也要觸發 —— 只改它的 PR 若不跑鎖，「下次會再錯一次」的鎖就沒插電
               # 抽取器與普查也要觸發 —— 改它們的 PR 若不跑 gate，等於鎖建了沒插電
               - 'scripts/split_lesson_modules.py'
