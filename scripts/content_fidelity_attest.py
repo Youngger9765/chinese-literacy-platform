@@ -261,6 +261,7 @@ def verify_all() -> int:
     uids = sorted({p.parent.parent.name for p in LESSONS.glob("L*/v3/_manifest.yml")}
                   | {p.stem for p in ATTEST_DIR.glob("L*.json")})
     missing, broken, unv_total, checked_total = [], [], 0, 0
+    per_uid_checked: dict[str, int] = {}
     for uid in uids:
         path = ATTEST_DIR / f"{uid}.json"
         if not path.is_file():
@@ -270,9 +271,12 @@ def verify_all() -> int:
         if rc:
             broken.append(uid)
         doc = json.loads(path.read_text(encoding="utf-8"))
+        n = 0
         for m in doc.get("modules", {}).values():
-            checked_total += m.get("checked", 0)
+            n += m.get("checked", 0)
             unv_total += m.get("status") == "unverifiable"
+        per_uid_checked[uid] = n
+        checked_total += n
 
     base = json.loads(RATCHET.read_text(encoding="utf-8")) if RATCHET.is_file() else {}
     cap = base.get("unverifiable_max")
@@ -294,6 +298,32 @@ def verify_all() -> int:
         bad = True
     elif unv_total < cap:
         print(f"  ✅ 驗不到的從 {cap} 降到 {unv_total} —— 記得跑 --set-ratchet 收緊")
+
+    # ── 反向棘輪：受檢字串數不准掉（#3103）────────────────────────────────
+    # 這道門本來只問「我們送出的字，原稿裡有沒有」。那是單向的：**把內容刪掉
+    # 永遠會過** —— 截短一個選項、刪掉一個選項、刪掉整題，實測三種都綠，因為
+    # 比對是「yaml 字串 ∈ DOCX」，而截短後仍然是子字串。
+    #
+    # 受檢數就是現成的反向訊號，只是沒人拿它當基準：刪掉一個非圖片題，L0122 的
+    # checked 從 21 掉到 16。（圖片題本來就進「驗不到」不進 checked，所以拿圖片題
+    # 做實驗會看到數字不動 —— 那是正確行為，不是門壞了。）
+    #
+    # 逐課鎖而不是只鎖總數：總數會被「這課掉、那課漲」互相抵消。
+    per_base = base.get("checked_per_uid") or {}
+    if not per_base:
+        print("  ⛔ 棘輪沒有 checked_per_uid —— 先跑 --set-ratchet（#3103）")
+        bad = True
+    else:
+        dropped = sorted(
+            ((u, per_base[u], per_uid_checked[u]) for u in per_uid_checked
+             if u in per_base and per_uid_checked[u] < per_base[u]),
+            key=lambda r: r[1] - r[2], reverse=True)
+        if dropped:
+            print(f"  🔴 {len(dropped)} 課的受檢字串數變少了 —— 有內容不再被送出：")
+            for u, was, now in dropped[:8]:
+                print(f"      {u}  {was} → {now}  (-{was - now})")
+            print("      內容是刻意移除的話，跑 --set-ratchet 重設並在 commit 說明移除了什麼。")
+            bad = True
     return 1 if bad else 0
 
 
@@ -303,6 +333,15 @@ def verify_quiet(uid: str) -> int:
     buf = io.StringIO()
     with contextlib.redirect_stdout(buf):
         return verify(uid)
+
+
+def _checked_per_uid() -> dict[str, int]:
+    """每一課目前的受檢字串總數 —— 反向棘輪的基準（#3103）。"""
+    out: dict[str, int] = {}
+    for path in sorted(ATTEST_DIR.glob("L*.json")):
+        doc = json.loads(path.read_text(encoding="utf-8"))
+        out[path.stem] = sum(m.get("checked", 0) for m in doc.get("modules", {}).values())
+    return out
 
 
 def set_ratchet() -> int:
@@ -317,7 +356,9 @@ def set_ratchet() -> int:
         doc = json.loads(path.read_text(encoding="utf-8"))
         n += sum(1 for m in doc.get("modules", {}).values()
                  if m.get("status") == "unverifiable")
-    RATCHET.write_text(json.dumps({"unverifiable_max": n}, indent=2) + "\n",
+    RATCHET.write_text(json.dumps({"unverifiable_max": n,
+                                   "checked_per_uid": _checked_per_uid()},
+                                  indent=2, sort_keys=True) + "\n",
                        encoding="utf-8")
     print(f"  棘輪上限設為 {n} → {RATCHET.relative_to(REPO)}")
     return 0
