@@ -58,12 +58,18 @@ def _write(root: Path, uid: str, version: str, *, meta=True, spotlight=True,
             "lesson_uid": uid, "version_id": version,
             "title": f"課文 {uid}", "catalog_slot": "G4-L1",
         }, allow_unicode=True), encoding="utf-8")
+    # Module files carry a slug: `{module}.{slug}.yml` (#2916). The loader
+    # requires the two-dot form on purpose — reviving bare `{module}.yml` would
+    # resurrect pre-二修 leftovers as the top-level default (lesson_uid_loader.py
+    # :190). This fixture still wrote the bare form, so the loader correctly
+    # ignored it and the lesson came back without spotlight or keypoints. The
+    # fixture was describing a tree shape that no longer exists.
     if spotlight:
-        (d / "spotlight.yml").write_text(yaml.dump({"spotlight": {"blocks": []}}),
-                                         encoding="utf-8")
+        (d / "spotlight.aaaaa.yml").write_text(yaml.dump({"spotlight": {"blocks": []}}),
+                                               encoding="utf-8")
     if keypoints:
-        (d / "keypoints.yml").write_text(yaml.dump({"keypoints": {"rows": []}}),
-                                         encoding="utf-8")
+        (d / "keypoints.bbbbb.yml").write_text(yaml.dump({"keypoints": {"rows": []}}),
+                                               encoding="utf-8")
     if assets:
         a = d / "assets"
         a.mkdir()
