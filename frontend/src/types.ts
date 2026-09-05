@@ -59,6 +59,14 @@ export interface FillInBlankItem {
   sentence: string;
   answer: string;  // letter code e.g. "A", "B"
   /**
+   * 這一題全部算對的代號（含主答案）。學習單上標 `multi: true` 的那種題目
+   * 有兩個正解，例如 L0072 第 5 題 F（懷疑）與 E（質疑）。
+   *
+   * 🔴 後端 `_normalise_answer_code` 早就送出它了，但一路沒有消費端：
+   * 學生選第二個正解照樣被判錯，而九道門全綠。
+   */
+  accepted_answers?: string[];
+  /**
    * 這一題自己的選項組（語詞應用底下的「子練習」用）。
    *
    * 🔴 沒有它的話，◎牛刀小試 / ◎詞義辨識 / 相似詞應用 這些子練習

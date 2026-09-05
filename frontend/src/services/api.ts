@@ -266,7 +266,13 @@ function apiDetailToStory(detail: ApiStoryDetail): Story {
     fillInBlank: detail.fill_in_blank
       ? detail.fill_in_blank.filter((item) =>
           item['_schema'] === 'legacy' || typeof item['sentence'] === 'string' && !('context_before' in item)
-        ) as Array<{ sentence: string; answer: string; options?: Record<string, string> }>
+        ) as Array<{
+            sentence: string;
+            answer: string;
+            options?: Record<string, string>;
+            /** 一題多正解時後端送的字母集合（含主答案），見 lessonContentAdapter。 */
+            accepted_answers?: string[];
+          }>
       : undefined,
     multipleChoice: detail.multiple_choice ?? undefined,
     vocabBank: detail.vocab_bank ?? undefined,

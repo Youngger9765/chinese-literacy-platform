@@ -108,6 +108,11 @@ function gradeExact(exercise: ExerciseBlockT, studentValue: unknown): GradeResul
     const expected = normalizeChoiceAnswer(exercise.answer);
     const got = normalizeChoiceAnswer(studentValue);
     if (expected == null) return MANUAL;
+    // 一題多正解：選集合裡的任何一個都對（不是要學生全選中 —— 那是 multi_choice）。
+    const accepted = exercise.acceptedAnswers;
+    if (accepted != null && accepted.length > 0) {
+      return got != null && accepted.includes(got) ? CORRECT : WRONG;
+    }
     return got === expected ? CORRECT : WRONG;
   }
 
