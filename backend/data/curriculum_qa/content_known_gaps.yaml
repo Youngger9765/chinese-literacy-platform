@@ -28,7 +28,7 @@ lessons:
   catalog_slot: G9-L0
   title: 正太與小豬：武僧的養成之路
 lesson_body_text:
-  status: 缺，全部 175 課
+  status: "11/179 課缺（原記「缺，全部 175 課」——二修重抽之後已不成立）"
   what: 二修抽取管線產出學習單（聚光燈＋重點表），但沒有課文本體。`build_lesson_schema.py` 原本是從 `lesson_loader` 讀回 paragraphs，而那是一修 `_parsed_2026-05-01`
     餵的 —— 那層刪掉後這個循環就斷了。
   impact: 朗讀、閱讀理解、生字、造句四個步驟沒有文本來源（story['paragraphs'] 為空）
@@ -39,13 +39,13 @@ lesson_body_text:
   next_step: 先取得完整 Drive 來源，再設計一個真的能判對錯的驗證（例如以字數統計欄位或人工標註的 golden set 對照），驗證成立才寫入。沒有對照就抽，可能把學習單題目當成課文，比沒有課文更糟。
 fields_not_extracted:
   what: 二修抽取管線只產出學習單的兩塊（聚光燈、重點表）。下列欄位在 175 課全部是空的 —— 全部 0/175，不是部分缺。
-  measured: 2026-08-15，對 backend/data/lessons/ 全量實測
+  measured: "2026-09-05，全量實測（2026-08-15 那批數字多半已被二修重抽推翻）"
   impact: 圖書館的文體/分類篩選會回空；課文簡介、生字、語詞應用、閱讀理解、朗讀基準這幾個步驟沒有資料來源。API 不會報錯，欄位是 null／空陣列。
   source: 多數欄位的原料在原始 DOCX 裡（語詞、閱讀理解題目都在學習單上），需要擴充抽取器
   fields:
     paragraphs:
-      count: 174
-      of: 175
+      count: 168
+      of: 179
       是什麼: 課文本體（見 lesson_body_text）
     vocabulary:
       count: 154
@@ -66,36 +66,36 @@ fields_not_extracted:
       # ⚠️ 那 25 課是「原稿本來就沒有語詞表」還是「抽取漏了」，尚未逐課覆核。
       # 這一格只保證計數正確，不代表成因已排查。
     fill_in_blank:
-      count: 0
-      of: 175
+      count: 153
+      of: 179
       是什麼: 語詞應用填空
     multiple_choice:
-      count: 0
-      of: 175
+      count: 176
+      of: 179
       是什麼: 閱讀理解選擇題
     intro:
-      count: 0
-      of: 175
+      count: 178
+      of: 179
       是什麼: 課文簡介（作者／背景）
     thumbnail_url:
-      count: 174
-      of: 175
+      count: 175
+      of: 179
       是什麼: 課文縮圖
     genre:
-      count: 0
-      of: 175
+      count: 174
+      of: 179
       是什麼: 文體（記敘文／說明文…）
     category:
       count: 0
-      of: 175
+      of: 179
       是什麼: 分類標籤
     reading_benchmark:
-      count: 0
-      of: 175
+      count: 145
+      of: 179
       是什麼: 朗讀字數基準
     has_key_reading:
-      count: 147
-      of: 175
+      count: 151
+      of: 179
       是什麼: 重點朗讀段落
 locks_removed_with_the_first_edition:
   why_this_list_exists: 刪掉的回歸鎖如果沒登記，等於把一個已知會壞的地方變回沒人看守。以下是隨一修資料一起刪掉的鎖，以及對應內容補上時要重建什麼。
