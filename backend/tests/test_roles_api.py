@@ -438,8 +438,22 @@ class TestListUserRoles:
 # ===========================================================================
 
 
-class TestNoAutoAssignOnRegister:
-    def test_new_user_has_no_roles(self, client, admin_user):
+class TestRegisterGrantsOnlyScopedTeacher:
+    """Registration grants one school-scoped teacher role and nothing wider.
+
+    These two used to assert a fresh account had zero roles. That policy is
+    gone: /auth/register is teacher self-registration (#457), and it calls
+    assign_teacher_to_school, which creates or joins the school matching the
+    email domain and grants `teacher` scoped to that school — 方大哥's spec.
+
+    The assertion worth keeping is not the count, it is the ceiling. Self
+    -registration is unauthenticated, so what matters is that it cannot hand
+    out anything beyond one school-scoped teacher role. Asserting that instead
+    keeps the guard these tests were written for and matches what the code
+    actually does.
+    """
+
+    def test_register_grants_exactly_one_school_scoped_teacher(self, client, admin_user):
         user = _register_user(client, "no_auto")
 
         resp = client.get(
@@ -447,13 +461,21 @@ class TestNoAutoAssignOnRegister:
             headers=auth_header(admin_user["token"]),
         )
         data = resp.json()
-        assert len(data) == 0
+        assert len(data) == 1, f"registration granted more than one role: {data}"
+        assert data[0]["role_name"] == "teacher"
+        assert data[0]["scope_type"] == "school"
+        assert data[0]["scope_id"], "teacher role must be scoped to a school, not global"
 
-    def test_new_user_me_endpoint_shows_empty_roles(self, client):
+    def test_register_grants_nothing_wider_than_that(self, client):
         user = _register_user(client, "me_no_role")
         resp = client.get("/api/users/me", headers=auth_header(user["token"]))
-        data = resp.json()
-        assert len(data["roles"]) == 0
+        roles = resp.json()["roles"]
+
+        assert [r["role_name"] for r in roles] == ["teacher"]
+        assert all(r["scope_type"] == "school" for r in roles), roles
+        assert not any(
+            r["role_name"] in {"admin", "system_admin", "org_admin"} for r in roles
+        ), f"self-registration escalated to an admin role: {roles}"
 
 
 # ===========================================================================
