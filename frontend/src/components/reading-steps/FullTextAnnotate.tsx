@@ -42,6 +42,10 @@ import AnnotationToolbar from './AnnotationToolbar';
 import ReadingPlayer from './ReadingPlayer';
 import { useFullTextTtsQueue } from '../../hooks/useFullTextTtsQueue';
 import AnnotatedParagraph from './AnnotatedParagraph';
+import MarkModeParagraph from './MarkModeParagraph';
+import {
+  readCellFromElement, rangeFromDrag, type MarkRange,
+} from './markModeSelection';
 import LessonQrButton from '../qr/LessonQrButton';
 import { hasWholeTextToRead, type LessonQrStep } from '../qr/lessonQr';
 import StepCoachCard from '../learning/StepCoachCard';
@@ -535,6 +539,19 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
   const dbSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Floating toolbar state
+  // ── 標記模式（#3134）──────────────────────────────────────────────
+  //
+  // 🔴 為什麼要有這個模式：做記號原本靠瀏覽器原生文字選取，而 **iOS 只要有文字
+  //    被選取就一定跳出系統編輯選單**（拷貝／查詢／翻譯），那是作業系統層級行為、
+  //    網頁擋不掉。Hans 2026-09-06 在 iPad（Safari 18.3.1）實測，選單會蓋住畫面、
+  //    跟做記號搶同一個手勢。
+  //
+  // ⛔ 刻意做成**加法**：模式關閉 = 現在的行為完全不變（桌機原生選取那條路一行沒動），
+  //    模式開啟才走逐字 span + 拖曳。兩條路都測得到，桌機使用者無感。
+  const [markMode, setMarkMode] = useState<AnnotationType | null>(null);
+  const [dragAnchor, setDragAnchor] = useState<{ paragraphIndex: number; charIndex: number } | null>(null);
+  const [pendingRange, setPendingRange] = useState<MarkRange | null>(null);
+
   const [toolbar, setToolbar] = useState<{
     visible: boolean;
     x: number;
@@ -821,6 +838,56 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
     hideToolbar();
   }, [toolbar, hideToolbar]);
 
+  // ── 標記模式的拖曳（#3134）────────────────────────────────────────────
+  //
+  // 用 `elementFromPoint` 定位，不用 `caretRangeFromPoint` —— Hans 在 iPad 實測後者
+  // 在 `user-select:none` 之下**回傳的節點不在課文裡**（起點終點都是）。逐字 span +
+  // elementFromPoint 是語詞複習找字表已經在正式站用的方式，學生用觸控操作過。
+
+  const cellFromEvent = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    const p = 'touches' in e ? (e.touches[0] ?? e.changedTouches[0]) : e;
+    if (!p) return null;
+    return readCellFromElement(document.elementFromPoint(p.clientX, p.clientY));
+  }, []);
+
+  const handleMarkDragStart = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    if (!markMode) return;
+    const cell = cellFromEvent(e);
+    if (!cell) return;
+    setDragAnchor(cell);
+    setPendingRange(rangeFromDrag(cell, cell));
+  }, [markMode, cellFromEvent]);
+
+  const handleMarkDragMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    if (!markMode || !dragAnchor) return;
+    const cell = cellFromEvent(e);
+    if (!cell) return;
+    // 跨段落回 null —— 保持上一個合法範圍，不要讓反白閃掉
+    const r = rangeFromDrag(dragAnchor, cell);
+    if (r) setPendingRange(r);
+  }, [markMode, dragAnchor, cellFromEvent]);
+
+  const handleMarkDragEnd = useCallback(() => {
+    if (!markMode || !pendingRange) {
+      setDragAnchor(null);
+      setPendingRange(null);
+      return;
+    }
+    const { paragraphIndex, charStart, charEnd } = pendingRange;
+    dispatch({
+      type: 'ADD',
+      payload: {
+        paragraphIndex,
+        charStart,
+        charEnd,
+        annotationType: markMode,
+        newAnnotation: { id: genId(), paragraphIndex, charStart, charEnd, type: markMode },
+      },
+    });
+    setDragAnchor(null);
+    setPendingRange(null);
+  }, [markMode, pendingRange]);
+
   // ── Remove annotation on click ─────────────────────────────────────────
   //
   // #3026: a click can land on either a student's own mark or an editor
@@ -899,9 +966,17 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
         <div
           ref={containerRef}
           className="flex-1 overflow-y-auto relative pb-44"
-          onMouseUp={hideAnnotation ? undefined : handleMouseUp}
-          onTouchEnd={hideAnnotation ? undefined : handleTouchEnd}
-          style={{ WebkitUserSelect: 'text', userSelect: 'text' } as React.CSSProperties}
+          onMouseDown={markMode ? handleMarkDragStart : undefined}
+          onMouseMove={markMode && dragAnchor ? handleMarkDragMove : undefined}
+          onMouseUp={hideAnnotation ? undefined : (markMode ? handleMarkDragEnd : handleMouseUp)}
+          onTouchStart={markMode ? handleMarkDragStart : undefined}
+          onTouchMove={markMode && dragAnchor ? handleMarkDragMove : undefined}
+          onTouchEnd={hideAnnotation ? undefined : (markMode ? handleMarkDragEnd : handleTouchEnd)}
+          style={{
+            // 模式關閉時原封不動 —— 桌機的原生選取那條路一行沒改（#3134 刻意做成加法）
+            WebkitUserSelect: markMode ? 'none' : 'text',
+            userSelect: markMode ? 'none' : 'text',
+          } as React.CSSProperties}
         >
           {/* A5: First-use onboarding coach (dismissable, gated by localStorage) */}
           {!hideAnnotation && (showCoach ? (
@@ -1033,6 +1108,17 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
                     >
                       {String(paraIdx + 1).padStart(2, '0')}
                     </span>
+                    {markMode ? (
+                      /* 標記模式：逐字 span、純文字（無注音）。見 MarkModeParagraph
+                         檔頭 —— 注音開啟時 displayText 帶 ruby，沒辦法逐字拆。 */
+                      <MarkModeParagraph
+                        rawText={rawPara}
+                        paraIdx={paraIdx}
+                        annotations={renderAnnotations}
+                        pending={pendingRange?.paragraphIndex === paraIdx ? pendingRange : null}
+                        fontSizePx={fontSizePx}
+                      />
+                    ) : (
                     <AnnotatedParagraph
                       rawText={rawPara}
                       displayText={displayText}
@@ -1044,6 +1130,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
                       annotationElementRefs={annotationElementRefs}
                       onRemoveAnnotation={removeAnnotation}
                     />
+                    )}
                   </section>
                   {inlineImgIdx !== undefined && story.images?.[inlineImgIdx] && (
                     <div
@@ -1141,6 +1228,29 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
           {/* #2941: 播放全文跟完成標記並排在這裡。兩顆都是這一步隨時要按得到的
               動作，而底部這條是唯一永遠在畫面上的地方。 */}
       <StepActionBar layout="row">
+          {/* ── 標記模式切換（#3134）────────────────────────────────────
+              先選模式、再拖曳。開啟時課文切成 user-select:none —— 那是讓
+              iOS 不跳系統編輯選單的唯一方法（Hans 在 iPad 實測過）。
+              關閉時完全不攔手勢，課文照常捲動、桌機原生選取照舊。 */}
+          <div className="flex items-center gap-2" data-testid="mark-mode-toggle">
+            {([['unknown', '❓', '不懂'], ['important', '💛', '重要']] as const).map(
+              ([kind, icon, label]) => (
+                <button
+                  key={kind}
+                  type="button"
+                  aria-pressed={markMode === kind}
+                  onClick={() => setMarkMode((m) => (m === kind ? null : kind))}
+                  className={`h-14 px-4 rounded-full font-headline font-bold whitespace-nowrap transition-all active:scale-[0.98] ${
+                    markMode === kind
+                      ? 'bg-primary text-white shadow-[0_8px_32px_rgba(86,74,191,0.35)]'
+                      : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high'
+                  }`}
+                >
+                  <span aria-hidden="true">{icon}</span> {label}
+                </button>
+              ),
+            )}
+          </div>
           <ReadingPlayer
             size="lg"
             isPlaying={reader.isPlaying}
