@@ -65,7 +65,7 @@ fields_not_extracted:
   source: 多數欄位的原料在原始 DOCX 裡（語詞、閱讀理解題目都在學習單上），需要擴充抽取器
   fields:
     paragraphs:
-      count: 168
+      count: 178
       of: 179
       是什麼: 課文本體（見 lesson_body_text）
     vocabulary:
@@ -107,7 +107,7 @@ fields_not_extracted:
       of: 179
       是什麼: 文體（記敘文／說明文…）
     category:
-      count: 0
+      count: 174
       of: 179
       是什麼: 分類標籤
     reading_benchmark:
