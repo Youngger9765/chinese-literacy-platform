@@ -1023,8 +1023,11 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
             </div>
           )}
 
-          {/* Legend pills + counts + undo/clear — floating centered */}
-          <div className="flex flex-wrap justify-center items-center gap-3 pt-4 pb-10 px-4">
+          {/* Legend pills + counts + undo/clear
+              #3134：這一列必須跟著捲動固定在上方。標記模式開啟後，學生往下讀就
+              再也按不到「關閉標記／復原／清除全部」—— 那是模式這個設計自己造成的
+              死角，不是既有問題。加半透明底與模糊，避免課文從下面透出來。 */}
+          <div className="sticky top-0 z-20 flex flex-wrap justify-center items-center gap-3 pt-4 pb-4 mb-6 px-4 bg-surface/85 backdrop-blur-sm border-b border-outline-variant/20">
             {/* #3134 — 原本只是顯示數量的標籤，現在同時是模式開關。
                 按下去課文進入標記模式，直接拖曳即可標記，不必長按選字
                 （長按會叫出 iOS 的編輯選單，蓋住畫面）。 */}
