@@ -1623,3 +1623,44 @@ def test_only_the_exam_practice_lesson_has_no_body():
     )
     # 正向對照：整棵樹讀得到才算數，不然空清單也會讓上面那條綠
     assert len(lessons) >= 175, f"只載到 {len(lessons)} 課 —— 載入本身壞了"
+
+
+def test_the_field_ledger_reconciles_with_what_is_served():
+    """帳本記的每個欄位覆蓋數，必須跟服務端實際送出的對得上。
+
+    🔴 為什麼要這條：`fields_not_extracted` 的十個數字裡有兩個已經過時
+    （`paragraphs` 記 168 實際 178、`category` 記 0 實際 174 —— 都是同一輪修好的），
+    而**沒有任何東西會發現**。帳本一旦開始說謊就停止值得讀，下一個人會拿它當
+    現況做決定，或是為了一個早就補好的缺口再查一輪。
+
+    兩個方向都要紅，理由不同：
+      - 實際 < 帳本 → **退步**，學生少拿到東西
+      - 實際 > 帳本 → 缺口補好了沒人更新帳本，下一個人會白追
+
+    ⚠️ 欄位住在哪個 payload 要**查**不能猜。`has_key_reading` 在清單上是 151、
+    在詳細上是另一種形狀 —— 我第一次量就從詳細數，得到 0，差點把它報成
+    「151 課的重點朗讀全沒了」的大退步。
+    """
+    from app.services.lesson_loader import get_all_lessons
+    from app.services.lesson_indexes import build_all_lessons
+
+    root = Path(__file__).resolve().parent.parent
+    ledger = yaml.safe_load(
+        (root / "data" / "curriculum_qa" / "content_known_gaps.yaml").read_text(encoding="utf-8")
+    )["fields_not_extracted"]["fields"]
+
+    served = get_all_lessons()
+    assert len(served) >= 175, f"只載到 {len(served)} 課 —— 載入本身壞了"
+
+    drift = []
+    for field, entry in ledger.items():
+        recorded = entry.get("count")
+        if recorded is None:
+            continue
+        actual = sum(1 for l in served if l.get(field))
+        if actual != recorded:
+            drift.append((field, recorded, actual,
+                          "退步" if actual < recorded else "帳本過時"))
+    assert drift == [], (
+        "帳本跟服務端對不上（欄位, 帳本記的, 實際, 哪一種）：" + repr(drift)
+    )
