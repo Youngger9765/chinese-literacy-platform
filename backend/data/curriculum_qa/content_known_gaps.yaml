@@ -28,15 +28,36 @@ lessons:
   catalog_slot: G9-L0
   title: 正太與小豬：武僧的養成之路
 lesson_body_text:
-  status: "11/179 課缺（原記「缺，全部 175 課」——二修重抽之後已不成立）"
-  what: 二修抽取管線產出學習單（聚光燈＋重點表），但沒有課文本體。`build_lesson_schema.py` 原本是從 `lesson_loader` 讀回 paragraphs，而那是一修 `_parsed_2026-05-01`
-    餵的 —— 那層刪掉後這個循環就斷了。
-  impact: 朗讀、閱讀理解、生字、造句四個步驟沒有文本來源（story['paragraphs'] 為空）
-  text_is_available: 在原始 DOCX 裡（實測 G4-L10 有 13 段 5019 字），不需要重新徵集素材
-  why_not_done_now:
-  - 本機只有 76 / 175 份 DOCX（缺 6、7 年級、文言文、品格教育），做不出全量
-  - 找不到可信的機器對照：聚光燈 passage 混了策略說明與補充短文，不是課文引用，拿它當『抽對了沒』的對照會誤判；DOCX 自帶的段落編號也不是 1:1（有不編號的前言行、有合併段），96 份裡誤報 14 份
-  next_step: 先取得完整 Drive 來源，再設計一個真的能判對錯的驗證（例如以字數統計欄位或人工標註的 golden set 對照），驗證成立才寫入。沒有對照就抽，可能把學習單題目當成課文，比沒有課文更糟。
+  status: "1/179 課沒有課文 —— 而那一課本來就沒有"
+  updated: "2026-09-06"
+  history:
+    - "原記「缺，全部 175 課」—— 二修重抽之後已不成立"
+    - "後記「11/179 課缺」—— #3123 修掉其中 10 課，剩 1"
+  what: >-
+    十課文言文的課文一直都在，住在 `classical_text` 模組，而服務層的 `_body()`
+    只讀 `full_text_annotate` —— 抽取器抽對了、讀取端讀另一個鍵。#3123 已接回並上 prod
+    （`b0abc39ed`，真環境驗過十課全有課文、238 個斷詞記號都在）。
+  the_remaining_one:
+    lesson_uid: L0136
+    title: 會考圖文題實戰
+    verdict: 不是缺口
+    why: >-
+      它的 `_manifest.yml` 只有**一個**大題：`comprehension`。內容是
+      「112年國中教育會考國文科第27～29題」的解題演練，**這份學習單本來就沒有課文** ——
+      題幹、選項、評審分數表全部畫在 `image5.jpeg` 上（來源檔的 `notes.items_carrier`
+      自己寫著「文字層完全沒有」）。
+    ⛔: >-
+      不要把它算進「課文缺口」去追。它沒有課文可抽，不是抽漏了。
+      要讓學生看到那張圖文題，是圖片資產的事（跟聚光燈的 figN.png 同一條路），
+      不是課文抽取的事。
+  impact: 已解除 —— 朗讀 / 閱讀理解 / 生字 / 造句在那十課都有文本可用了
+  locks:
+    - test_classical_lessons_serve_their_text
+    - test_the_word_break_dots_survive
+    - test_footnote_digits_do_not_reach_the_reader
+    - test_vernacular_lessons_keep_every_digit
+    - test_the_translation_is_not_the_body
+
 fields_not_extracted:
   what: 二修抽取管線只產出學習單的兩塊（聚光燈、重點表）。下列欄位在 175 課全部是空的 —— 全部 0/175，不是部分缺。
   measured: "2026-09-05，全量實測（2026-08-15 那批數字多半已被二修重抽推翻）"

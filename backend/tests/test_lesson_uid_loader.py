@@ -1599,3 +1599,27 @@ def test_cross_language_paths_are_in_the_ci_filter():
         "這些前端檔被後端測試讀，但不在 pytest.yml 的 paths-filter 裡 —— "
         f"改它們的 PR 不會跑後端套件：{missing}"
     )
+
+
+def test_only_the_exam_practice_lesson_has_no_body():
+    """課文覆蓋率的棘輪 —— 178/179，而缺的那一課本來就沒有課文。
+
+    這一條的重點不是數字，是**指名**：唯一沒有課文的必須是 L0136。
+
+    L0136《會考圖文題實戰》的 `_manifest.yml` 只有一個大題 `comprehension`，
+    內容是「112年國中教育會考國文科第27～29題」的解題演練 —— 那份學習單本來就
+    沒有課文，題幹與選項全畫在 `image5.jpeg` 上（來源檔的 `notes.items_carrier`
+    自己寫著「文字層完全沒有」）。
+
+    ⛔ 用「>= 178」而不是「== 178」會漏掉最貴的一種退步：另一課的課文消失、
+    同時 L0136 被補上，數字不變而學生少了一課。指名比計數嚴格。
+    """
+    from app.services.lesson_loader import get_all_lessons
+
+    lessons = get_all_lessons()
+    without = sorted(l["lesson_uid"] for l in lessons if not (l.get("paragraphs") or []))
+    assert without == ["L0136"], (
+        f"沒有課文的課是 {without}，預期只有 L0136（它本來就沒有課文）"
+    )
+    # 正向對照：整棵樹讀得到才算數，不然空清單也會讓上面那條綠
+    assert len(lessons) >= 175, f"只載到 {len(lessons)} 課 —— 載入本身壞了"
