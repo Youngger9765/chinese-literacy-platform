@@ -188,6 +188,25 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+
+  /*
+   * 「一個畫面高」——給那些最後一個子元素要貼在畫面底部的全螢幕外殼用
+   * （學習流程的 LearningAppShell，底下那條 StepFooterNav 是 in-flow 的）。
+   *
+   * ⛔ 不要改成 Tailwind 的 `h-screen h-dvh`。實測（2026-09-06，本機 build）
+   *    Tailwind 產出的順序是 .h-dvh(offset 15021) 在 .h-screen(offset 15129)
+   *    **之前**，所以兩個一起寫的話 100vh 反而贏，等於沒改。要 fallback 就得
+   *    像下面這樣寫在同一條規則裡，讓後者覆蓋前者。
+   *
+   * 為什麼需要 dvh：iOS Safari 的 100vh 是「工具列縮起來時」的高度，比工具列
+   * 還在時看得見的範圍大 → 外殼撐破 body → 整頁可捲 → 底部那條被推到摺線以下，
+   * 學生要先往下拖才看得到「第幾步 / 上一步 / 下一步」。桌機工具列不伸縮，
+   * 100vh 一直等於可視高度，所以桌機看不出這個問題。
+   */
+  .h-viewport {
+    height: 100vh;  /* fallback：不支援 dvh 的瀏覽器（Safari < 15.4）會停在這 */
+    height: 100dvh; /* 支援的瀏覽器覆蓋上面那行，跟著目前可視高度走 */
+  }
 }
 
 /* ── Custom animations for interactive learning components ── */

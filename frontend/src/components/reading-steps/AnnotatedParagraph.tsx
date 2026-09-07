@@ -27,6 +27,16 @@ interface AnnotatedParagraphProps {
   fontSizePx: number;
   annotationElementRefs: React.MutableRefObject<Map<string, HTMLSpanElement>>;
   onRemoveAnnotation: (id: string) => void;
+  /**
+   * #3134 — 標記模式。開啟時整段改走**逐字 span** 的獨立渲染路徑，
+   * 讓 elementFromPoint 定位得到每一個字（iPad 上 caretRangeFromPoint
+   * 在 user-select:none 下回傳課文以外的節點，不能用）。
+   *
+   * ⛔ 這條路徑刻意以**純文字**渲染，不套注音：下方主路徑的註解寫著注音的
+   *    ruby「cannot be split character-by-character」，而逐字包 span 正是在拆它。
+   *    繞開而不硬解 —— 那段還背著 PR #1155 的回歸紀錄。
+   */
+  markMode?: boolean;
 }
 
 const AnnotatedParagraph: React.FC<AnnotatedParagraphProps> = ({
@@ -39,7 +49,42 @@ const AnnotatedParagraph: React.FC<AnnotatedParagraphProps> = ({
   fontSizePx,
   annotationElementRefs,
   onRemoveAnnotation,
+  markMode = false,
 }) => {
+  /**
+   * #3134 標記模式的渲染：純文字、逐字一個 span。
+   *
+   * 位移語意跟主路徑一致 —— `stripPUASelectors` 之後 .length == 原始字元數，
+   * 所以 `data-ci` 就是 `Annotation.charStart/charEnd` 用的那個索引，
+   * 上層不需要再做任何換算。
+   */
+  function renderMarkModeContent(): React.ReactNode {
+    const text = stripPUASelectors(rawText);
+    const paraAnnotations = annotations.filter((a) => a.paragraphIndex === paraIdx);
+    // 每個字查一次「落在哪個記號裡」。一段最長 ~200 字、記號個位數，
+    // 直接線性找比建索引省事，也不會有索引沒同步的風險。
+    const typeAt = (i: number) =>
+      paraAnnotations.find((a) => i >= a.charStart && i < a.charEnd);
+
+    return [...text].map((ch, i) => {
+      const ann = typeAt(i);
+      const cfg = ann
+        ? (ann.source === 'editor' ? EDITOR_PREMARK_STYLE : TYPE_CONFIG[ann.type])
+        : null;
+      return (
+        <span
+          key={i}
+          data-ci={i}
+          data-annotated={ann ? ann.type : undefined}
+          data-annotation-source={ann ? (ann.source ?? 'student') : undefined}
+          className={cfg ? cfg.className : undefined}
+        >
+          {ch}
+        </span>
+      );
+    });
+  }
+
   /**
    * Splits a paragraph's raw text into segments:
    * plain text and annotated ranges.
@@ -160,11 +205,13 @@ const AnnotatedParagraph: React.FC<AnnotatedParagraphProps> = ({
       className="text-on-surface/90"
       style={{
         fontSize: `${fontSizePx}px`,
-        lineHeight: isZhuyinAny ? '2.4rem' : '1.6',
-        letterSpacing: isZhuyinAny ? '0.15em' : '0',
+        // 標記模式以純文字渲染，所以行高/字距也回到無注音的值 ——
+        // 否則會留下為 ruby 準備的空間，看起來像破版。
+        lineHeight: isZhuyinAny && !markMode ? '2.4rem' : '1.6',
+        letterSpacing: isZhuyinAny && !markMode ? '0.15em' : '0',
       }}
     >
-      {renderAnnotatedContent()}
+      {markMode ? renderMarkModeContent() : renderAnnotatedContent()}
     </p>
   );
 };

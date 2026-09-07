@@ -38,7 +38,7 @@ import {
 import { computeEditorPreMarks, mergeWithStudentAnnotations } from './editorPreMarks';
 import { type AnnotationWithText } from './AnnotationSidePanel';
 import AnnotationSidePanel from './AnnotationSidePanel';
-import AnnotationToolbar from './AnnotationToolbar';
+import AnnotationToolbar, { TYPE_CONFIG } from './AnnotationToolbar';
 import ReadingPlayer from './ReadingPlayer';
 import { useFullTextTtsQueue } from '../../hooks/useFullTextTtsQueue';
 import AnnotatedParagraph from './AnnotatedParagraph';
@@ -549,6 +549,18 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
   const annotationElementRefs = useRef(new Map<string, HTMLSpanElement>());
   const [focusedAnnotationId, setFocusedAnnotationId] = useState<string | null>(null);
 
+  /**
+   * #3134 — 標記模式：先選「不懂／重要」，再直接拖曳。
+   *
+   * 起因是 iPad：做記號原本依賴原生文字選取，而 iOS 只要有文字被選取就一定會跳出
+   * 系統編輯選單（拷貝／查詢／翻譯…）蓋住畫面。那是作業系統行為，網頁擋不掉，
+   * 只能不要觸發原生選取。
+   *
+   * null = 關閉，行為與改動前完全相同（桌機使用者無感）。
+   */
+  const [markMode, setMarkMode] = useState<AnnotationType | null>(null);
+  const markDragRef = useRef<{ para: number; from: number } | null>(null);
+
   // A5: First-use onboarding — gated by localStorage flag
   const [showCoach, setShowCoach] = useState<boolean>(() => {
     try {
@@ -773,6 +785,62 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
     });
   }, [hideToolbar]);
 
+  // ── #3134 標記模式的拖曳 ────────────────────────────────────────────
+  //
+  // 定位用 elementFromPoint 打逐字 span，不用 caretRangeFromPoint ——
+  // 後者在 iPad 上（user-select:none）回傳的節點不在課文裡，實測不可用。
+  // 這條路徑與「語詞複習」找字表相同，學生已在正式站用觸控操作過。
+
+  /** 螢幕座標 → 該字在哪一段的第幾個字元。命不中回 null。 */
+  const charAtPoint = useCallback((clientX: number, clientY: number) => {
+    const el = document.elementFromPoint(clientX, clientY);
+    const cell = el?.closest?.('[data-ci]') as HTMLElement | null;
+    if (!cell) return null;
+    const para = cell.closest('[data-para-idx]') as HTMLElement | null;
+    if (!para) return null;
+    return { para: Number(para.dataset.paraIdx), ci: Number(cell.dataset.ci) };
+  }, []);
+
+  const pointOf = (e: React.TouchEvent | React.MouseEvent) => {
+    if ('touches' in e) {
+      const t = e.touches[0] ?? e.changedTouches[0];
+      return t ? { x: t.clientX, y: t.clientY } : null;
+    }
+    return { x: e.clientX, y: e.clientY };
+  };
+
+  const handleMarkStart = useCallback((e: React.TouchEvent | React.MouseEvent) => {
+    if (!markMode) return;
+    const p = pointOf(e);
+    const hit = p && charAtPoint(p.x, p.y);
+    markDragRef.current = hit ? { para: hit.para, from: hit.ci } : null;
+  }, [markMode, charAtPoint]);
+
+  const handleMarkEnd = useCallback((e: React.TouchEvent | React.MouseEvent) => {
+    if (!markMode) return;
+    const start = markDragRef.current;
+    markDragRef.current = null;
+    if (!start) return;
+    const p = pointOf(e);
+    const hit = p && charAtPoint(p.x, p.y);
+    // 跨段拖曳不成立 —— 記號的資料模型是「一段一個範圍」，
+    // 硬做會產生跨段的假範圍，位移就再也對不回原文。
+    if (!hit || hit.para !== start.para) return;
+    const paragraphIndex = start.para;
+    const charStart = Math.min(start.from, hit.ci);
+    const charEnd = Math.max(start.from, hit.ci) + 1;   // 右開區間，與 getSelectionInfo 一致
+    dispatch({
+      type: 'ADD',
+      payload: {
+        paragraphIndex,
+        charStart,
+        charEnd,
+        annotationType: markMode,
+        newAnnotation: { id: genId(), paragraphIndex, charStart, charEnd, type: markMode },
+      },
+    });
+  }, [markMode, charAtPoint, dispatch]);
+
   const handleMouseUp = useCallback(() => {
     // Small delay so selection is stable
     setTimeout(showToolbarForSelection, 50);
@@ -899,9 +967,24 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
         <div
           ref={containerRef}
           className="flex-1 overflow-y-auto relative pb-44"
-          onMouseUp={hideAnnotation ? undefined : handleMouseUp}
-          onTouchEnd={hideAnnotation ? undefined : handleTouchEnd}
-          style={{ WebkitUserSelect: 'text', userSelect: 'text' } as React.CSSProperties}
+          {...(markMode ? { 'data-mark-surface': markMode } : {})}
+          onMouseUp={hideAnnotation ? undefined : (markMode ? handleMarkEnd : handleMouseUp)}
+          onTouchEnd={hideAnnotation ? undefined : (markMode ? handleMarkEnd : handleTouchEnd)}
+          onMouseDown={markMode ? handleMarkStart : undefined}
+          onTouchStart={markMode ? handleMarkStart : undefined}
+          style={
+            markMode
+              ? ({
+                  WebkitUserSelect: 'none',
+                  userSelect: 'none',
+                  WebkitTouchCallout: 'none',
+                  // ⛔ 不能用 'none' —— 那會讓學生在標記模式下捲不動長課文。
+                  // 'pan-y'：垂直滑動照常捲動，水平拖曳才交給我們，
+                  // 而標記詞語本來就是水平動作。
+                  touchAction: 'pan-y',
+                } as React.CSSProperties)
+              : ({ WebkitUserSelect: 'text', userSelect: 'text' } as React.CSSProperties)
+          }
         >
           {/* A5: First-use onboarding coach (dismissable, gated by localStorage) */}
           {!hideAnnotation && (showCoach ? (
@@ -940,20 +1023,47 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
             </div>
           )}
 
-          {/* Legend pills + counts + undo/clear — floating centered */}
-          <div className="flex flex-wrap justify-center items-center gap-3 pt-4 pb-10 px-4">
-            <div className="flex items-center gap-2 bg-surface-container-low px-4 py-2 rounded-full shadow-sm">
-              <span className="text-sm font-medium">❓ 不懂</span>
-              {summary.unknownCount > 0 && (
-                <span className="text-sm font-bold text-tertiary">{summary.unknownCount}</span>
-              )}
-            </div>
-            <div className="flex items-center gap-2 bg-surface-container-low px-4 py-2 rounded-full shadow-sm">
-              <span className="text-sm font-medium">💛 重要</span>
-              {summary.importantCount > 0 && (
-                <span className="text-sm font-bold text-yellow-800">{summary.importantCount}</span>
-              )}
-            </div>
+          {/* Legend pills + counts + undo/clear
+              #3134：這一列必須跟著捲動固定在上方。標記模式開啟後，學生往下讀就
+              再也按不到「關閉標記／復原／清除全部」—— 那是模式這個設計自己造成的
+              死角，不是既有問題。加半透明底與模糊，避免課文從下面透出來。 */}
+          <div className="sticky top-0 z-20 flex flex-wrap justify-center items-center gap-3 pt-4 pb-4 mb-6 px-4 bg-surface/85 backdrop-blur-sm border-b border-outline-variant/20">
+            {/* #3134 — 原本只是顯示數量的標籤，現在同時是模式開關。
+                按下去課文進入標記模式，直接拖曳即可標記，不必長按選字
+                （長按會叫出 iOS 的編輯選單，蓋住畫面）。 */}
+            {(['unknown', 'important'] as const).map((t) => {
+              const cfg = TYPE_CONFIG[t];
+              const count = t === 'unknown' ? summary.unknownCount : summary.importantCount;
+              const on = markMode === t;
+              return (
+                <button
+                  key={t}
+                  type="button"
+                  aria-pressed={on}
+                  aria-label={on ? `${cfg.label}：標記中，點擊結束` : `開始標記${cfg.label}的詞語`}
+                  onClick={() => setMarkMode(on ? null : t)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full shadow-sm text-sm font-medium transition-all ${
+                    on ? `${cfg.activeClass} ring-2 ring-offset-1` : 'bg-surface-container-low hover:bg-surface-container-high'
+                  }`}
+                >
+                  <span>{cfg.icon} {cfg.label}</span>
+                  {count > 0 && (
+                    <span className={`text-sm font-bold ${t === 'unknown' ? 'text-tertiary' : 'text-yellow-800'}`}>
+                      {count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+            {markMode && (
+              <button
+                type="button"
+                onClick={() => setMarkMode(null)}
+                className="px-3 py-2 rounded-full text-sm text-on-surface-variant hover:bg-surface-container-high transition-all"
+              >
+                關閉標記
+              </button>
+            )}
             {/* Undo / Clear — always rendered, disabled when no history/annotations */}
             <button
               type="button"
@@ -1043,6 +1153,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
                       fontSizePx={fontSizePx}
                       annotationElementRefs={annotationElementRefs}
                       onRemoveAnnotation={removeAnnotation}
+                      markMode={markMode !== null}
                     />
                   </section>
                   {inlineImgIdx !== undefined && story.images?.[inlineImgIdx] && (
