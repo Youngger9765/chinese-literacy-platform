@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { scopedStepStorageKey } from '../../services/learningStorageScope';
 import {
-  PlacedWord, wordCellKeys, generateGrid,
+  PlacedWord, wordCellKeys, generateGrid, getCellsBetween,
   buildTeacherGrid, TeacherWordSearchSource,
 } from './wordSearchGrid';
 
@@ -223,25 +223,11 @@ export function useWordSearchProgress(
   const handleDragMove = useCallback(
     (pos: { row: number; col: number }) => {
       if (!dragStart) return;
-      // getCellsBetween imported inline to avoid circular dependency risk
-      const dr = pos.row - dragStart.row;
-      const dc = pos.col - dragStart.col;
-      const cells: Array<{ row: number; col: number }> = [];
-      if (dr === 0 && dc === 0) {
-        cells.push(dragStart);
-      } else if (dr === 0) {
-        const step = dc > 0 ? 1 : -1;
-        for (let c = dragStart.col; c !== pos.col + step; c += step) {
-          cells.push({ row: dragStart.row, col: c });
-        }
-      } else if (dc === 0) {
-        const step = dr > 0 ? 1 : -1;
-        for (let r = dragStart.row; r !== pos.row + step; r += step) {
-          cells.push({ row: r, col: dragStart.col });
-        }
-      } else {
-        cells.push(dragStart);
-      }
+      // ⛔ 不要把這段再內聯一次（#3132）。上一版複製了 getCellsBetween 但漏掉 45° 分支，
+      // 斜的一律落到 else 只留起點 —— 教師版字表 30% 的答案是斜的，那些詞全部圈不起來。
+      // 當時的理由寫「avoid circular dependency risk」，但 wordSearchGrid.ts 沒有任何
+      // import（葉節點），而本檔本來就已經 import 它，不存在循環。
+      const cells = getCellsBetween(dragStart, pos);
       setDragCells(new Set(cells.map(c => c.row + ',' + c.col)));
     },
     [dragStart]
