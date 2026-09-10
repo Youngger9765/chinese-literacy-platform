@@ -410,7 +410,13 @@ export const LearningAppShell: React.FC = () => {
   const { zhuyinActive } = useZhuyin();
   return (
     <div
-      className="h-screen flex flex-col bg-surface text-on-surface font-sans overflow-hidden"
+      /*
+       * h-viewport（index.css）而不是 h-screen —— 兩者差在 iPad 上會不會把底部
+       * 那條 StepFooterNav 推到摺線以下。原因與實測寫在那個 class 的註解裡。
+       * ⛔ 別「順手」換回 h-screen，也別寫成 `h-screen h-dvh`（順序會反過來）。
+       * 這裡的 overflow-hidden 擋不掉那件事：捲的是 body，不是這個 div。
+       */
+      className="h-viewport flex flex-col bg-surface text-on-surface font-sans overflow-hidden"
       data-zhuyin-active={zhuyinActive ? 'true' : undefined}
     >
       {/* Skip-to-content link */}
