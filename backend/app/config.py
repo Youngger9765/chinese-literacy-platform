@@ -69,9 +69,19 @@ class Settings(BaseSettings):
     # service names are not globally unique -- without pinning our own project
     # number and URL hash, anyone could deploy `lingoleap-frontend-issue-999`
     # in their own project and be trusted with `allow_credentials=True`.
-    # Both shapes below are real and in use for the same service:
+    # Both shapes below are real and in use for the same service. The second
+    # is what `status.url` returns now; the first is what
+    # `preview-deploy.yml` builds by hand as ALT_URL, and is the one most
+    # people still have in their links:
     #   https://lingoleap-frontend-issue-3134-958347263320.asia-east1.run.app
     #   https://lingoleap-frontend-issue-3134-oja2sffiya-de.a.run.app
+    #
+    # `preview-deploy.yml` only ever emits `issue-<N>` -- when a branch has no
+    # issue number it falls back to the PR number but still names the service
+    # `lingoleap-frontend-issue-<PR number>`. There is no `pr-<N>` service
+    # today; that shape is matched only because the repo CLAUDE.md documents
+    # it, so the pattern keeps working if the workflow ever switches. Adding it
+    # costs nothing: the project pin still applies to both.
     _PREVIEW_ORIGIN_REGEX = (
         r"^https://lingoleap-frontend-(?:issue|pr)-\d+"
         r"-(?:958347263320\.asia-east1|oja2sffiya-de\.a)"
