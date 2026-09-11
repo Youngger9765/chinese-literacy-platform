@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { stepPath as buildStepPath } from '../config/stepPath';
+import { STEP_REGISTRY, resolveActiveSteps } from '../config/stepConfig';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import {
@@ -10,28 +11,27 @@ import {
 } from '../services/api';
 
 /**
- * Step index to URL path segment mapping.
+ * Resolve a stored `currentStep` (a `dbStepNumber`) to its step, or null (#3153).
+ *
+ * ⛔ Never compare `dbStepNumber` numerically. It is an identity, not an order --
+ * the numbers do not follow the sequence:
+ *
+ *   seq 1   lesson-intro          1
+ *   seq 2   full-text-annotate    8   <- what bootstrap writes on opening a lesson
+ *   seq 3   key-passage-reading   6
+ *   ...
+ *   seq 11  report                7   <- the last step is a *smaller* number
+ *
+ * The previous guard was `currentStep <= 1 || currentStep >= 6`, with a comment
+ * saying "step 6 = report = completed". But 6 is 重點朗讀 and report is 7, so a
+ * student who had merely opened a lesson (8) satisfied `8 >= 6` and had their
+ * record deleted. The prompt could never appear for anyone, and it destroyed the
+ * state on the way out -- which is why nobody reported it: a child does not say
+ * "my resume record was deleted", only that the thing does not remember them.
  */
-const STEP_NUMBER_TO_PATH: Record<number, string> = {
-  1: 'lesson-intro',
-  2: 'paragraph-reading',
-  3: 'comprehension',
-  4: 'character-practice',
-  5: 'key-passage-reading',
-  6: 'report',
-};
-
-/**
- * Step names for display.
- */
-const STEP_NAMES: Record<number, string> = {
-  1: '簡介',
-  2: '逐段朗讀',
-  3: '課文理解',
-  4: '生字練習',
-  5: '全文朗讀',
-  6: '報告',
-};
+function resolveStoredStep(currentStep: number) {
+  return Object.values(STEP_REGISTRY).find((s) => s.dbStepNumber === currentStep) ?? null;
+}
 
 /** Max age for an active session record: 7 days in ms. */
 const MAX_SESSION_AGE_MS = 7 * 24 * 60 * 60 * 1000;
@@ -67,9 +67,19 @@ const SessionResumePrompt: React.FC<SessionResumePromptProps> = ({ onDismiss }) 
       return;
     }
 
-    // Ignore sessions that are at step 1 (just started) — not worth resuming
-    // or at step 6 (report = completed) — should have been cleared already
-    if (saved.currentStep <= 1 || saved.currentStep >= 6) {
+    // Identity, not arithmetic (#3153). Clear when the stored step is:
+    //   - unknown (stale record from an older step set)
+    //   - disabled (e.g. 逐段朗讀, off since the 2026-07-20 review) -- resuming
+    //     into it drops the child on a screen the stepper cannot even show
+    //   - the first step in the sequence (only just started, nothing to resume)
+    //   - the last step in the sequence (report = finished)
+    const step = resolveStoredStep(saved.currentStep);
+    const active = resolveActiveSteps();
+    const isFirst = step != null && active.length > 0 && step.id === active[0].id;
+    const isLast = step != null && active.length > 0 && step.id === active[active.length - 1].id;
+    const isActive = step != null && active.some((s) => s.id === step.id);
+
+    if (step == null || !isActive || isFirst || isLast) {
       clearActiveSession(String(user.id));
       return;
     }
@@ -85,7 +95,7 @@ const SessionResumePrompt: React.FC<SessionResumePromptProps> = ({ onDismiss }) 
 
   const handleResume = () => {
     if (!record) return;
-    const stepPath = STEP_NUMBER_TO_PATH[record.currentStep] ?? 'lesson-intro';
+    const stepPath = resolveStoredStep(record.currentStep)?.id ?? 'lesson-intro';
     setVisible(false);
     onDismiss?.();
     navigate(buildStepPath(record.storyId, stepPath));
@@ -108,7 +118,7 @@ const SessionResumePrompt: React.FC<SessionResumePromptProps> = ({ onDismiss }) 
 
   if (!visible || !record) return null;
 
-  const stepName = STEP_NAMES[record.currentStep] ?? `步驟 ${record.currentStep}`;
+  const stepName = resolveStoredStep(record.currentStep)?.label ?? `步驟 ${record.currentStep}`;
   const title = storyTitle ?? record.storyId;
 
   return (

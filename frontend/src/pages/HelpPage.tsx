@@ -22,8 +22,10 @@ import { useNavigate } from 'react-router-dom';
 
 import {
   HELP_CONTENT,
+  HELP_DEVICES,
   HELP_ROLE_ORDER,
   entryHaystack,
+  type HelpDevice,
   type HelpEntry,
   type HelpRole,
 } from './help/helpContent';
@@ -35,7 +37,9 @@ const Entry: React.FC<{
   roleLabel?: string;
   open: boolean;
   onToggle: () => void;
-}> = ({ entry, roleLabel, open, onToggle }) => (
+  device: HelpDevice;
+  onZoom: (src: string, alt: string) => void;
+}> = ({ entry, roleLabel, open, onToggle, device, onZoom }) => (
   <div className="border-b border-slate-200 last:border-b-0">
     <button
       type="button"
@@ -70,6 +74,33 @@ const Entry: React.FC<{
             <span className="text-amber-900">{entry.gotcha}</span>
           </p>
         )}
+
+        {/* 實機截圖（#3151）。紅框是在截圖時注入 DOM 畫上去的，不是事後加的圖層。 */}
+        {(entry.shots || []).map((id) => {
+          const src = `/help-shots/${id}-${device}.png`;
+          const alt = `${entry.q}（${HELP_DEVICES[device].label}畫面，紅框標示要點）`;
+          return (
+            <figure key={id} className="mt-4">
+              <button
+                type="button"
+                onClick={() => onZoom(src, alt)}
+                className="block w-full cursor-zoom-in overflow-hidden rounded-xl border border-slate-200 bg-white"
+                aria-label={`放大檢視：${alt}`}
+              >
+                <img
+                  data-help-shot={id}
+                  src={src}
+                  alt={alt}
+                  loading="lazy"
+                  className="block w-full"
+                />
+              </button>
+              <figcaption className="mt-1.5 text-[13px] text-slate-500">
+                點圖可放大　·　{HELP_DEVICES[device].label}
+              </figcaption>
+            </figure>
+          );
+        })}
       </div>
     )}
   </div>
@@ -81,6 +112,16 @@ const HelpPage: React.FC = () => {
   const [query, setQuery] = useState('');
   const [openKeys, setOpenKeys] = useState<Set<string>>(new Set());
   const [storyTotal, setStoryTotal] = useState<number | null>(null);
+  const [device, setDevice] = useState<HelpDevice>('desktop');
+  const [zoom, setZoom] = useState<{ src: string; alt: string } | null>(null);
+
+  // Escape 關掉放大檢視。孩子會用 iPad，但老師多半用鍵盤。
+  useEffect(() => {
+    if (!zoom) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setZoom(null); };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [zoom]);
 
   // 課文總數一律問 API —— 這個數字曾經以「57 篇」的字面值躺在這頁上很久
   useEffect(() => {
@@ -179,6 +220,34 @@ const HelpPage: React.FC = () => {
           )}
         </div>
 
+        {/* 裝置切換（#3151）。只有兩種版本，理由見 helpContent.ts 的 HELP_DEVICES。 */}
+        <div
+          role="group"
+          aria-label="截圖的裝置版本"
+          className="mb-4 flex items-center gap-2 text-[15px]"
+        >
+          <span className="text-slate-500">截圖畫面</span>
+          {(Object.keys(HELP_DEVICES) as HelpDevice[]).map((d) => {
+            const active = d === device;
+            return (
+              <button
+                key={d}
+                role="radio"
+                aria-checked={active}
+                onClick={() => setDevice(d)}
+                className={
+                  'rounded-lg border px-3 py-1.5 '
+                  + (active
+                    ? 'border-slate-800 bg-slate-800 text-white'
+                    : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50')
+                }
+              >
+                {HELP_DEVICES[d].label}
+              </button>
+            );
+          })}
+        </div>
+
         {!searching && (
           <div role="tablist" aria-label="選擇對象" className="mb-4 flex gap-2">
             {HELP_ROLE_ORDER.map((r) => {
@@ -239,6 +308,8 @@ const HelpPage: React.FC = () => {
                     roleLabel={v.roleLabel}
                     open={openKeys.has(v.key)}
                     onToggle={() => toggle(v.key)}
+                    device={device}
+                    onZoom={(src, alt) => setZoom({ src, alt })}
                   />
                 ))}
               </div>
@@ -263,6 +334,33 @@ const HelpPage: React.FC = () => {
           </section>
         )}
       </div>
+
+      {/* 放大檢視。點背景或按 Escape 關掉。 */}
+      {zoom && (
+        <div
+          data-help-lightbox
+          role="dialog"
+          aria-modal="true"
+          aria-label={zoom.alt}
+          onClick={() => setZoom(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+        >
+          <img
+            src={zoom.src}
+            alt={zoom.alt}
+            onClick={(e) => e.stopPropagation()}
+            className="max-h-full max-w-full rounded-lg bg-white object-contain"
+          />
+          <button
+            type="button"
+            onClick={() => setZoom(null)}
+            aria-label="關閉放大檢視"
+            className="absolute right-5 top-4 rounded-lg bg-white/90 px-3 py-1.5 text-[15px] text-slate-800"
+          >
+            關閉
+          </button>
+        </div>
+      )}
     </div>
   );
 };

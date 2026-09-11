@@ -1,0 +1,349 @@
+{
+  "generatedAt": "2026-09-11T05:47:17.621Z",
+  "base": "https://lingoleap-frontend-staging-958347263320.asia-east1.run.app",
+  "shots": [
+    {
+      "id": "teacher-create-classroom",
+      "device": "desktop",
+      "path": "help-shots/teacher-create-classroom-desktop.png",
+      "url": "/teacher",
+      "role": "teacher",
+      "annotated": [
+        "nav[aria-label=\"教師導覽\"]",
+        "button:has-text(\"建立班級\")"
+      ],
+      "expectedAnnotations": [
+        "nav[aria-label=\"教師導覽\"]",
+        "button:has-text(\"建立班級\")"
+      ],
+      "sanitized": [
+        {
+          "sel": "div.grid h3",
+          "matched": 3,
+          "written": 3,
+          "texts": [
+            "三年甲班",
+            "五年三班",
+            "六年一班"
+          ]
+        },
+        {
+          "sel": "div.grid p:has-text(\"位學生\")",
+          "matched": 3,
+          "written": 3,
+          "texts": [
+            "28 位學生",
+            "26 位學生",
+            "30 位學生"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "teacher-assignments",
+      "device": "desktop",
+      "path": "help-shots/teacher-assignments-desktop.png",
+      "url": "/teacher/assignments",
+      "role": "teacher",
+      "annotated": [
+        "button:has-text(\"建立作業\")"
+      ],
+      "expectedAnnotations": [
+        "button:has-text(\"建立作業\")"
+      ],
+      "sanitized": [
+        {
+          "sel": "select option",
+          "matched": 3,
+          "written": 3,
+          "texts": [
+            "五年三班（5 年級）",
+            "六年一班（6 年級）",
+            "三年甲班（3 年級）"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "teacher-login",
+      "device": "desktop",
+      "path": "help-shots/teacher-login-desktop.png",
+      "url": "/login",
+      "role": "anon",
+      "annotated": [
+        "form, main"
+      ],
+      "expectedAnnotations": [
+        "form, main"
+      ],
+      "sanitized": []
+    },
+    {
+      "id": "student-join",
+      "device": "desktop",
+      "path": "help-shots/student-join-desktop.png",
+      "url": "/join",
+      "role": "student",
+      "annotated": [
+        "input",
+        "button:has-text(\"加入班級\")"
+      ],
+      "expectedAnnotations": [
+        "input",
+        "button:has-text(\"加入班級\")"
+      ],
+      "sanitized": []
+    },
+    {
+      "id": "student-assignments",
+      "device": "desktop",
+      "path": "help-shots/student-assignments-desktop.png",
+      "url": "/assignments",
+      "role": "student",
+      "annotated": [
+        "nav[aria-label=\"學生導覽\"]"
+      ],
+      "expectedAnnotations": [
+        "nav[aria-label=\"學生導覽\"]"
+      ],
+      "sanitized": [
+        {
+          "sel": "span:has-text(\"你在\")",
+          "matched": 1,
+          "written": 1,
+          "texts": [
+            "你在 2 個班級：五年三班・六年一班"
+          ]
+        },
+        {
+          "sel": "button.rounded-full",
+          "matched": 5,
+          "action": "hidden",
+          "hiddenTextCount": 4
+        },
+        {
+          "sel": "span.text-xs.text-accent.font-medium",
+          "matched": 4,
+          "action": "hidden",
+          "hiddenTextCount": 2
+        }
+      ]
+    },
+    {
+      "id": "student-library",
+      "device": "desktop",
+      "path": "help-shots/student-library-desktop.png",
+      "url": "/library",
+      "role": "student",
+      "annotated": [
+        "button:has-text(\"全部級別\")",
+        "button:has-text(\"只看未讀\")"
+      ],
+      "expectedAnnotations": [
+        "button:has-text(\"全部級別\")",
+        "button:has-text(\"只看未讀\")"
+      ],
+      "sanitized": []
+    },
+    {
+      "id": "student-home-recommend",
+      "device": "desktop",
+      "path": "help-shots/student-home-recommend-desktop.png",
+      "url": "/student",
+      "role": "student",
+      "annotated": [
+        "nav[aria-label=\"學生導覽\"]"
+      ],
+      "expectedAnnotations": [
+        "nav[aria-label=\"學生導覽\"]"
+      ],
+      "sanitized": []
+    },
+    {
+      "id": "student-help-entry",
+      "device": "desktop",
+      "path": "help-shots/student-help-entry-desktop.png",
+      "url": "/student",
+      "role": "student",
+      "annotated": [
+        "nav[aria-label=\"學生導覽\"] >> text=使用說明"
+      ],
+      "expectedAnnotations": [
+        "nav[aria-label=\"學生導覽\"] >> text=使用說明"
+      ],
+      "sanitized": []
+    },
+    {
+      "id": "teacher-create-classroom",
+      "device": "ipad",
+      "path": "help-shots/teacher-create-classroom-ipad.png",
+      "url": "/teacher",
+      "role": "teacher",
+      "annotated": [
+        "nav[aria-label=\"教師導覽\"]",
+        "button:has-text(\"建立班級\")"
+      ],
+      "expectedAnnotations": [
+        "nav[aria-label=\"教師導覽\"]",
+        "button:has-text(\"建立班級\")"
+      ],
+      "sanitized": [
+        {
+          "sel": "div.grid h3",
+          "matched": 3,
+          "written": 3,
+          "texts": [
+            "三年甲班",
+            "五年三班",
+            "六年一班"
+          ]
+        },
+        {
+          "sel": "div.grid p:has-text(\"位學生\")",
+          "matched": 3,
+          "written": 3,
+          "texts": [
+            "28 位學生",
+            "26 位學生",
+            "30 位學生"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "teacher-assignments",
+      "device": "ipad",
+      "path": "help-shots/teacher-assignments-ipad.png",
+      "url": "/teacher/assignments",
+      "role": "teacher",
+      "annotated": [
+        "button:has-text(\"建立作業\")"
+      ],
+      "expectedAnnotations": [
+        "button:has-text(\"建立作業\")"
+      ],
+      "sanitized": [
+        {
+          "sel": "select option",
+          "matched": 3,
+          "written": 3,
+          "texts": [
+            "五年三班（5 年級）",
+            "六年一班（6 年級）",
+            "三年甲班（3 年級）"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "teacher-login",
+      "device": "ipad",
+      "path": "help-shots/teacher-login-ipad.png",
+      "url": "/login",
+      "role": "anon",
+      "annotated": [
+        "form, main"
+      ],
+      "expectedAnnotations": [
+        "form, main"
+      ],
+      "sanitized": []
+    },
+    {
+      "id": "student-join",
+      "device": "ipad",
+      "path": "help-shots/student-join-ipad.png",
+      "url": "/join",
+      "role": "student",
+      "annotated": [
+        "input",
+        "button:has-text(\"加入班級\")"
+      ],
+      "expectedAnnotations": [
+        "input",
+        "button:has-text(\"加入班級\")"
+      ],
+      "sanitized": []
+    },
+    {
+      "id": "student-assignments",
+      "device": "ipad",
+      "path": "help-shots/student-assignments-ipad.png",
+      "url": "/assignments",
+      "role": "student",
+      "annotated": [
+        "nav[aria-label=\"學生導覽\"]"
+      ],
+      "expectedAnnotations": [
+        "nav[aria-label=\"學生導覽\"]"
+      ],
+      "sanitized": [
+        {
+          "sel": "span:has-text(\"你在\")",
+          "matched": 1,
+          "written": 1,
+          "texts": [
+            "你在 2 個班級：五年三班・六年一班"
+          ]
+        },
+        {
+          "sel": "button.rounded-full",
+          "matched": 5,
+          "action": "hidden",
+          "hiddenTextCount": 4
+        },
+        {
+          "sel": "span.text-xs.text-accent.font-medium",
+          "matched": 4,
+          "action": "hidden",
+          "hiddenTextCount": 2
+        }
+      ]
+    },
+    {
+      "id": "student-library",
+      "device": "ipad",
+      "path": "help-shots/student-library-ipad.png",
+      "url": "/library",
+      "role": "student",
+      "annotated": [
+        "button:has-text(\"全部級別\")",
+        "button:has-text(\"只看未讀\")"
+      ],
+      "expectedAnnotations": [
+        "button:has-text(\"全部級別\")",
+        "button:has-text(\"只看未讀\")"
+      ],
+      "sanitized": []
+    },
+    {
+      "id": "student-home-recommend",
+      "device": "ipad",
+      "path": "help-shots/student-home-recommend-ipad.png",
+      "url": "/student",
+      "role": "student",
+      "annotated": [
+        "nav[aria-label=\"學生導覽\"]"
+      ],
+      "expectedAnnotations": [
+        "nav[aria-label=\"學生導覽\"]"
+      ],
+      "sanitized": []
+    },
+    {
+      "id": "student-help-entry",
+      "device": "ipad",
+      "path": "help-shots/student-help-entry-ipad.png",
+      "url": "/student",
+      "role": "student",
+      "annotated": [
+        "nav[aria-label=\"學生導覽\"] >> text=使用說明"
+      ],
+      "expectedAnnotations": [
+        "nav[aria-label=\"學生導覽\"] >> text=使用說明"
+      ],
+      "sanitized": []
+    }
+  ],
+  "commit": "d70b8bba6"
+}
