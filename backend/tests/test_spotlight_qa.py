@@ -66,7 +66,7 @@ class TestSave:
         # ENVIRONMENT unset/blank BUT running on Cloud Run (K_SERVICE) → fail-closed as prod → 403.
         #
         # #3160 note: a shared secret is now supplied here on purpose. The token gate
-        # became fail-closed on Cloud Run, so without a secret it refuses with 503
+        # became fail-closed on Cloud Run, so without a secret it refuses with 404 (#3169)
         # before this handler's production guard is ever reached -- and this test is
         # about the production guard, not the token gate. Supplying the secret keeps
         # the subject of the test exactly what it was written to test. The
