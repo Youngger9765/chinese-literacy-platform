@@ -19,6 +19,19 @@
 
 export type HelpRole = 'teacher' | 'student';
 
+/**
+ * 截圖的兩種裝置版本（#3151）。
+ *
+ * 為什麼只有兩種：實測側邊欄在所有寬度都固定 223px 不收合，唯一的版面差異是
+ * 卡片欄數（≤834 為 2 欄、≥1024 為 3 欄），所以兩個斷點就涵蓋得到。
+ */
+export const HELP_DEVICES = {
+  desktop: { label: '電腦・iPad 橫式' },
+  ipad: { label: 'iPad 直式' },
+} as const;
+
+export type HelpDevice = keyof typeof HELP_DEVICES;
+
 export interface HelpEntry {
   /** 用使用者會問的問句，不要用名詞標題 —— 「作業管理」沒有人會這樣找 */
   q: string;
@@ -30,6 +43,16 @@ export interface HelpEntry {
   gotcha?: string;
   /** 搜尋用的額外關鍵字（同義詞、使用者可能打的錯字） */
   keywords?: string[];
+  /**
+   * 實機截圖的 id（#3151）。對應 `public/help-shots/<id>-<device>.png`。
+   *
+   * ⛔ 這裡只寫 id，不寫路徑也不寫裝置 —— 裝置由讀者在頁面上切換。
+   *    圖是用 `tools/help-screenshots/capture.mjs` 對 staging 真機產的，
+   *    內部班級名稱在截圖前就被隱藏掉（該腳本有洩漏自檢，突變驗過）。
+   * ⚠️ 加新 id 之前先跑 `node tools/help-screenshots/capture.mjs --check`，
+   *    確認選擇器還命中；UI 改版後過期的截圖比沒有截圖更糟。
+   */
+  shots?: string[];
 }
 
 export interface HelpSection {
@@ -55,6 +78,7 @@ const TEACHER: HelpRoleContent = {
       entries: [
         {
           q: '我要怎麼建立一個班級？',
+          shots: ['teacher-create-classroom'],
           steps: [
             '左側點「班級管理」',
             '點「建立班級」',
@@ -94,6 +118,7 @@ const TEACHER: HelpRoleContent = {
       entries: [
         {
           q: '「指派課文」和「出作業」有什麼不一樣？',
+          shots: ['teacher-assignments'],
           note:
             '指派課文只是把課文開放給班上練習\n'
             + '出作業才會在學生端產生「待完成」的任務，也才有繳交與批改',
@@ -121,6 +146,7 @@ const TEACHER: HelpRoleContent = {
       entries: [
         {
           q: '有哪些登入方式？',
+          shots: ['teacher-login'],
           note:
             '三種都可以：\n'
             + '輸入 Email 與密碼\n'
@@ -151,7 +177,18 @@ const STUDENT: HelpRoleContent = {
       title: '開始使用',
       entries: [
         {
+          q: '下次要怎麼再找到這一頁？',
+          steps: [
+            '登入後看左側側邊欄',
+            '最下面那個「使用說明」就是這一頁',
+          ],
+          note: '老師端也在同一個位置',
+          shots: ['student-help-entry'],
+          keywords: ['說明', '幫助', 'help', '找不到說明'],
+        },
+        {
           q: '我要怎麼加入老師的班級？',
+          shots: ['student-join'],
           steps: [
             '左側點「加入班級」',
             '輸入老師給的加入代碼，或用手機掃老師投影的 QR Code',
@@ -175,6 +212,7 @@ const STUDENT: HelpRoleContent = {
       entries: [
         {
           q: '老師出的作業在哪裡？',
+          shots: ['student-assignments'],
           steps: [
             '左側點「班級作業」',
             '選一份還沒完成的作業點進去',
@@ -184,6 +222,7 @@ const STUDENT: HelpRoleContent = {
         },
         {
           q: '我想自己找課文練習，要去哪裡？',
+          shots: ['student-library', 'student-home-recommend'],
           steps: [
             '左側點「圖書館」',
             '用年級或類別篩選，或直接搜尋課文名稱',
@@ -247,6 +286,24 @@ export function entryHaystack(e: HelpEntry): string {
  * 而停用關卡、舊課文數、工程用語全都在**別的分頁**上 —— 預設分頁看不到，
  * 於是斷言恆真、測試全綠卻什麼都沒證明。掃這裡才涵蓋每個角色。
  */
+/**
+ * 全部被引用到的 shot id（去重、保序）。
+ *
+ * 回歸鎖用它來斷言「引用的圖檔案真的存在」。刻意不做反向斷言（manifest 裡的每張都要
+ * 被引用）—— 那個方向會逼人為了讓測試綠而把圖硬塞進不相干的問答裡。
+ */
+export function allHelpShots(): string[] {
+  const out: string[] = [];
+  for (const role of HELP_ROLE_ORDER) {
+    for (const sec of HELP_CONTENT[role].sections) {
+      for (const e of sec.entries) {
+        for (const id of e.shots || []) if (!out.includes(id)) out.push(id);
+      }
+    }
+  }
+  return out;
+}
+
 export function allHelpText(): string {
   return HELP_ROLE_ORDER
     .map((role) => {
