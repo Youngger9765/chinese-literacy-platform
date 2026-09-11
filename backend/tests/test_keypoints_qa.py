@@ -11,6 +11,8 @@ from __future__ import annotations
 
 import json
 import os
+
+from app.config import settings
 import sys
 from unittest.mock import MagicMock, patch
 
@@ -62,11 +64,26 @@ class TestSave:
 
     def test_fail_closed_unset_env_on_cloud_run_403(self):
         # ENVIRONMENT unset/blank BUT running on Cloud Run (K_SERVICE) → fail-closed as prod → 403.
-        with patch.dict(os.environ, {"ENVIRONMENT": "", "K_SERVICE": "some-svc"}, clear=False), patch(
+        #
+        # #3160 note: a shared secret is now supplied here on purpose. The token gate
+        # became fail-closed on Cloud Run, so without a secret it refuses with 503
+        # before this handler's production guard is ever reached -- and this test is
+        # about the production guard, not the token gate. Supplying the secret keeps
+        # the subject of the test exactly what it was written to test. The
+        # "no secret on Cloud Run" case is covered in test_qa_token_fail_closed_3160.py.
+        with patch.dict(
+            os.environ,
+            {"ENVIRONMENT": "", "K_SERVICE": "some-svc", "QA_TOOLS_SHARED_SECRET": "demo1234"},
+            clear=False,
+        ), patch.object(
+            settings, "qa_tools_shared_secret", "demo1234"
+        ), patch(
             BUCKET, return_value=_mock_bucket()
         ):
-            r = client.post("/api/keypoints-qa/save", json=GOOD_PAYLOAD)
-        assert r.status_code == 403
+            r = client.post(
+                "/api/keypoints-qa/save", json=GOOD_PAYLOAD, headers={"x-qa-token": "demo1234"}
+            )
+        assert r.status_code == 403, r.text
 
     def test_unset_env_local_allowed(self):
         # ENVIRONMENT unset AND not on Cloud Run (no K_SERVICE) → local dev → allowed.
