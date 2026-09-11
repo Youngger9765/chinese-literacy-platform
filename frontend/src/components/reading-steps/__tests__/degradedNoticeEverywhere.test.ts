@@ -43,6 +43,11 @@ describe('降級成機器音時，畫面要說出來', () => {
    */
   const EXEMPT: Record<string, string> = {
     'ReadingPlayer.tsx': '純控制列，刻意不持有音訊（它自己的註解就這麼寫）',
+    // 跟 ReadingPlayer 同一個理由：它只是把點擊轉成 playOne/stop，音訊與狀態都在
+    // FullTextAnnotate 的 useFullTextTtsQueue，而那支畫面已經掛了 TtsDegradedNotice
+    // —— 從這顆喇叭起播的降級，使用者一樣看得到（#3141）。
+    // 會被掃到只是因為本檔的說明註解提到了 useFullTextTtsQueue 這個名字。
+    'ParagraphSpeakerButton.tsx': '純控制鍵，不持有音訊；降級通知由 FullTextAnnotate 統一顯示',
     'ParagraphCard.tsx': '純呈現，狀態在父層 ParagraphReading',
     'LessonAudioTable.tsx': '後台試聽，已顯示 ttsError；不是學生看的畫面',
   };

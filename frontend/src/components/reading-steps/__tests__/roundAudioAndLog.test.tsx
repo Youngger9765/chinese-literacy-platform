@@ -18,6 +18,9 @@ vi.mock('../../../hooks/useTtsPlayback', () => ({
   useTtsPlayback: () => ({
     speakText: (t: string) => { spoken.push(t); },
     stopTts: vi.fn(), isLoading: false, isSpeaking: false,
+    // 真的 useTtsPlayback 有 export 這顆；佇列在換段時用它把「正在發聲」歸零
+    // （#3141）。少了它這裡會丟 TypeError，而症狀是「一個字都沒唸」。
+    setIsTtsSpeaking: vi.fn(),
     prefetchParagraph: vi.fn(), registerAudio: vi.fn(),
   }),
 }));

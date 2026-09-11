@@ -308,3 +308,133 @@ describe('useFullTextTtsQueue — paragraph-boundary prefetch', () => {
     expect(prefetchSpy).toHaveBeenCalledWith(undefined, LESSON_ID, 1, undefined);
   });
 });
+
+describe('useFullTextTtsQueue — playOne (per-paragraph 喇叭, #3141)', () => {
+  it('speaks the paragraph it was asked for, addressed by THAT index (not 0)', async () => {
+    // The #2627 failure shape, re-armed for the new entry point: passing a
+    // hardcoded 0 here would read paragraph 1 aloud no matter which speaker
+    // was tapped, and nothing would error.
+    const { result } = renderHook(() => useFullTextTtsQueue({ paragraphs: PARAGRAPHS, lessonId: LESSON_ID }));
+
+    act(() => { result.current.playOne(1); });
+
+    await waitFor(() => expect(synthesizeCalls()).toEqual([CANON_P1]));
+    expect(result.current.currentParagraphIdx).toBe(1);
+  });
+
+  it('STOPS after that paragraph — does not roll on into the next one', async () => {
+    // This is the whole point of playOne vs play. Owner: 「點下去就會播放該段落
+    // 的語音」 — one paragraph, not "from here to the end".
+    const { result } = renderHook(() => useFullTextTtsQueue({ paragraphs: PARAGRAPHS, lessonId: LESSON_ID }));
+
+    act(() => { result.current.playOne(1); });
+    await waitFor(() => expect(synthesizeCalls()).toEqual([CANON_P1]));
+
+    act(() => { audioInstances[0].onended?.(); });
+
+    // waitFor, not a single tick: this asserts a CHANGE (idle), which has to
+    // travel the promise chain + `.finally()` + a React render first.
+    await waitFor(() => expect(result.current.currentParagraphIdx).toBe(-1));
+    expect(synthesizeCalls()).toEqual([CANON_P1]); // never CANON_P2
+  });
+
+  it('carries the round slug, so a 一課多篇 lesson speaks THIS article (#2930)', async () => {
+    const { result } = renderHook(() =>
+      useFullTextTtsQueue({ paragraphs: PARAGRAPHS, lessonId: LESSON_ID, roundSlug: 'p3kud' })
+    );
+
+    act(() => { result.current.playOne(2); });
+
+    await waitFor(() => expect(mappingCallCount()).toBeGreaterThan(0));
+    const [mappingUrl] = fetchMock.mock.calls.find(([u]: [string]) => String(u).includes('/api/tts/mapping/'))!;
+    // Without ?p= the backend answers with article 1's paragraphs — same shape,
+    // no error, wrong article read aloud.
+    expect(String(mappingUrl)).toContain('p=p3kud');
+  });
+
+  it('does not prefetch the next paragraph — nobody asked to hear it', async () => {
+    // play() warms N+1 to smooth the paragraph boundary; playOne has no
+    // boundary, so warming would buy a live synthesis (and a slot of the
+    // per-user TTS rate limit) for audio that may never be played.
+    const { result } = renderHook(() => useFullTextTtsQueue({ paragraphs: PARAGRAPHS, lessonId: LESSON_ID }));
+    prefetchSpy.mockClear(); // no clearMocks in vitest.config — previous tests left calls here
+
+    act(() => { result.current.playOne(0); });
+    await waitFor(() => expect(synthesizeCalls()).toEqual([CANON_P0]));
+
+    expect(prefetchSpy).not.toHaveBeenCalled();
+  });
+
+  it('tapping another paragraph supersedes the first — one audio channel, the new paragraph wins', async () => {
+    // ttsApi's _currentAudio is a module-level singleton: two live walks would
+    // fight over one audio channel, which is what #2622 saw on staging.
+    const { result } = renderHook(() => useFullTextTtsQueue({ paragraphs: PARAGRAPHS, lessonId: LESSON_ID }));
+
+    act(() => { result.current.playOne(0); });
+    await waitFor(() => expect(synthesizeCalls()).toEqual([CANON_P0]));
+    const firstPause = vi.spyOn(audioInstances[0], 'pause');
+
+    act(() => { result.current.playOne(2); });
+
+    await waitFor(() => expect(synthesizeCalls()).toEqual([CANON_P0, CANON_P2]));
+    expect(result.current.currentParagraphIdx).toBe(2);
+    expect(firstPause).toHaveBeenCalled(); // paragraph 0 silenced, not layered under
+  });
+
+  it('a paragraph ending at the instant another is tapped does not cancel the new one', async () => {
+    // The real race (a paused <audio> never fires `ended`, so the only way a
+    // superseded clip reports finishing is by genuinely reaching its end in the
+    // same instant the student taps elsewhere). Its `.finally()` clears the
+    // isTtsSpeaking/isTtsLoading that useTtsPlayback shares with every caller,
+    // producing a "playback finished" edge that belongs to the paragraph nobody
+    // is listening to any more. Believed, it retires the walk that just started:
+    // highlight gone, button back to 喇叭 — while paragraph 2 reads on.
+    const { result } = renderHook(() => useFullTextTtsQueue({ paragraphs: PARAGRAPHS, lessonId: LESSON_ID }));
+
+    act(() => { result.current.playOne(0); });
+    await waitFor(() => expect(synthesizeCalls()).toEqual([CANON_P0]));
+
+    // Same instant: paragraph 2 is issued, paragraph 0's clip reports ended
+    // before paragraph 2 has fetched a byte.
+    act(() => {
+      result.current.playOne(2);
+      audioInstances[0].onended?.();
+    });
+
+    await waitFor(() => expect(synthesizeCalls()).toEqual([CANON_P0, CANON_P2]));
+    expect(result.current.currentParagraphIdx).toBe(2);
+  });
+
+  it('an out-of-range index is ignored, not treated as "the walk ended"', async () => {
+    // speakAt reads an index past the end as "finished" and resets to idle —
+    // so an unguarded playOne(99) would silently stop whatever was playing.
+    const { result } = renderHook(() => useFullTextTtsQueue({ paragraphs: PARAGRAPHS, lessonId: LESSON_ID }));
+
+    act(() => { result.current.playOne(1); });
+    await waitFor(() => expect(result.current.currentParagraphIdx).toBe(1));
+
+    act(() => { result.current.playOne(99); });
+    act(() => { result.current.playOne(-1); });
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect(result.current.currentParagraphIdx).toBe(1);
+    expect(synthesizeCalls()).toEqual([CANON_P1]);
+  });
+
+  it('play() after playOne() still walks the WHOLE lesson (the single-shot flag is not sticky)', async () => {
+    const { result } = renderHook(() => useFullTextTtsQueue({ paragraphs: PARAGRAPHS, lessonId: LESSON_ID }));
+
+    act(() => { result.current.playOne(0); });
+    await waitFor(() => expect(synthesizeCalls()).toEqual([CANON_P0]));
+    act(() => { audioInstances[0].onended?.(); });
+    await waitFor(() => expect(result.current.currentParagraphIdx).toBe(-1));
+
+    act(() => { result.current.play(); });
+    await waitFor(() => expect(result.current.currentParagraphIdx).toBe(0));
+    act(() => { audioInstances[1].onended?.(); });
+
+    // Advancing proves play() was not left in single-shot mode by the earlier
+    // playOne — the bug a plain boolean that nobody resets would produce.
+    await waitFor(() => expect(result.current.currentParagraphIdx).toBe(1));
+  });
+});
