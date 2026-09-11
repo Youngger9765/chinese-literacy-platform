@@ -23,13 +23,7 @@ export const StudentSidebar: React.FC<StudentSidebarProps> = ({
 }) => {
   const { pathname } = useLocation();
 
-  const primaryItems: NavItem[] = [
-    { icon: '🏠', label: '主頁', path: '/student' },
-    { icon: '📚', label: '圖書館', path: '/library' },
-    { icon: '🏫', label: '班級作業', path: '/assignments', badge: pendingAssignmentCount },
-    { icon: '➕', label: '加入班級', path: '/join' },
-    { icon: '📖', label: '學習紀錄', path: '/learning-history' },
-  ];
+  const primaryItems: NavItem[] = getStudentNavItems(pendingAssignmentCount);
 
   // 練習工具箱入口已隱藏（Young 2026-08-20 指示，#2801）。
   // `/tools` 路由本身保留 —— 既有的連結／書籤不會變 404，只是導覽上到不了。
@@ -67,14 +61,23 @@ export const StudentSidebar: React.FC<StudentSidebarProps> = ({
   );
 };
 
-/** Flat list of all student nav items (used by MobileTabBar) */
-export function getStudentNavItems(pendingAssignmentCount: number): NavItem[] {
+/**
+ * Flat list of all student nav items — the single source (used by the sidebar
+ * above AND by MobileTabBar).
+ *
+ * These used to be written out twice, once here and once inline in the
+ * component. Adding an entry to one copy and not the other is invisible:
+ * the sidebar gains it, the mobile tab bar silently does not (#3142).
+ */
+export function getStudentNavItems(pendingAssignmentCount = 0): NavItem[] {
   return [
     { icon: '🏠', label: '主頁', path: '/student' },
     { icon: '📚', label: '圖書館', path: '/library' },
     { icon: '🏫', label: '班級作業', path: '/assignments', badge: pendingAssignmentCount },
     { icon: '➕', label: '加入班級', path: '/join' },
     { icon: '📖', label: '學習紀錄', path: '/learning-history' },
+    // /help had no entry anywhere in the UI until #3142.
+    { icon: '❓', label: '使用說明', path: '/help' },
   ];
 }
 

@@ -1,128 +1,76 @@
-# LingoLeap Production Deployment Guide
+# 部署與故障排除（工程用）
 
-## Overview
+從 `/help` 的「管理員」分頁搬過來（#3142）。那一頁是給老師與學生看的使用說明，
+放 `gcloud` 指令與 CI/CD workflow 名稱等於把工程 runbook 擺在錯的對象面前。
 
-LingoLeap runs on GCP Cloud Run. Production deployment goes through the
-`staging → main` PR flow, followed by the deployment script. Never push
-directly to `main`.
+> ⚠️ 這份是**搬移**而非重寫。以下內容維持 2026-03 當時的原樣，只做最小澄清，
+> 並標出已經和現況不符的地方。要當權威請以 repo 根目錄的 `CLAUDE.md` 為準 ——
+> 那裡才是持續維護的一份。
 
----
+## 系統架構
 
-## Prerequisites
+| 層 | 技術 | 部署目標 |
+|---|---|---|
+| 前端 | React 19 + TypeScript + Tailwind | Cloud Run `lingoleap-frontend` |
+| 後端 | FastAPI + SQLAlchemy | Cloud Run `lingoleap-backend` |
+| 資料庫 | PostgreSQL 15 | Cloud SQL（asia-east1） |
+| AI | Vertex AI Gemini | us-central1 |
 
-| Tool | Version | Check |
-|------|---------|-------|
-| gcloud CLI | >= 455 | `gcloud version` |
-| Docker | >= 24 | `docker version` |
-| git | any | `git version` |
+⚠️ **已過期**：原文寫「Vertex AI Gemini 2.5 Flash」，而現在是 per-task 配置，
+不是單一模型。真相在 `backend/app/services/llm_models.py` 的 `TASK_MODELS`，
+換模型的流程見 `docs/ai/llm-model-ab-2026-05.md`。
+
+## 切換 GCP 設定
 
 ```bash
-# Activate the correct gcloud configuration
 gcloud config configurations activate lingoleap
-
-# Verify
-gcloud config get-value account   # youngtsai@junyiacademy.org
-gcloud config get-value project   # lingoleap-dev
 ```
 
----
+Vertex AI 必須用 us-central1，asia-east1 不支援 Gemini 模型。
 
-## Step-by-Step Deployment
+⚠️ 跑任何 `gcloud` 之前先確認 active config 的 project 與 account 是對的 ——
+全域 active config 是單一共用的，多個終端機會互搶。
 
-### Step 1 — Merge staging to main via PR
+## 查看服務日誌
 
 ```bash
-gh pr create \
-  --base main \
-  --head staging \
-  --title "Release: <description>" \
-  --body "## Production Release
-- Fixes #N, #M
-- <summary of changes>"
-
-# After CI passes and review is approved:
-gh pr merge <PR_NUMBER> --merge
+gcloud logging read \
+  "resource.type=cloud_run_revision AND resource.labels.service_name=lingoleap-backend" \
+  --limit 100 --project lingoleap-dev
 ```
 
-### Step 2 — Run the deployment script
+只看錯誤加上 `AND severity>=ERROR`
+
+## 常見故障排除
+
+**API 503** —— 看 backend 日誌，確認 Vertex AI 連線與 Cloud SQL 狀態
+
+**AI 失效** —— 確認 AI service location 是 us-central1，且 service account 有
+`roles/aiplatform.user`
+
+**422 Session Not Found** —— Cloud Run 重啟後記憶體中的 session 被清掉，
+學生重新整理即可（前端有自動重建機制）
+
+## CI/CD Workflows
+
+| Workflow | 觸發 | 部署到 |
+|---|---|---|
+| `deploy.yml` | push `main` | Production |
+| `staging-deploy.yml` | push `staging` | Staging |
+| `preview-deploy.yml` | PR 開啟／關閉 | PR Preview（PR 關閉後自動刪除） |
 
 ```bash
-# From repository root, on main branch
-git checkout main && git pull origin main
-
-./scripts/production/deploy-production.sh
+gh run list --limit 10
 ```
 
-The script will:
-1. Verify gcloud configuration and clean git state
-2. Prompt for confirmation before deploying
-3. Build Docker images via Cloud Build
-4. Deploy backend with `--no-traffic` first, health-check the canary
-5. Route 100% traffic to the new revision
-6. Deploy frontend
-7. Run final health checks
-
-### Step 3 — Post-deployment smoke test
+⚠️ **判斷「部署好了沒」不要只看 workflow 綠**。要看正在服務 100% 流量的那個
+revision 跑的 image 是不是這次建的：
 
 ```bash
-./scripts/production/health-check.sh --env production
+gcloud run services describe <service> --region asia-east1 --project lingoleap-dev \
+  --format='value(status.traffic)'          # 找 percent: 100 那筆的 revisionName
+gcloud run revisions describe <該 revision> --region asia-east1 --project lingoleap-dev
 ```
 
-Manually verify key user flows:
-- [ ] Teacher can log in
-- [ ] Student can start a learning session
-- [ ] AI Socratic dialogue responds correctly
-- [ ] Assessment report generates
-
-### Step 4 — Tag the release
-
-```bash
-git tag prod-$(date '+%Y%m%d')-$(git rev-parse --short HEAD)
-git push --tags
-```
-
----
-
-## Environment Variables (Cloud Run)
-
-Set these via Cloud Run console or `gcloud run services update --set-env-vars`.
-Never commit them to git.
-
-| Variable | Description |
-|----------|-------------|
-| `DATABASE_URL` | Cloud SQL Unix socket connection string |
-| `JWT_SECRET_KEY` | Random 64-char hex string |
-| `ALLOWED_ORIGINS` | Comma-separated frontend origins |
-| `ENVIRONMENT` | Set to `production` |
-| `GOOGLE_CLIENT_ID` | Google OAuth client ID |
-
----
-
-## Deployment Checklist
-
-Run `docs/production/production-checklist.md` before every deploy.
-
----
-
-## Rollback
-
-If something is wrong after deploy:
-
-```bash
-./scripts/production/rollback.sh --service all
-```
-
-See `rollback.sh` for manual revision targeting.
-
----
-
-## CI/CD Automated Deploys
-
-| Branch | Workflow | Result |
-|--------|----------|--------|
-| `main` | `.github/workflows/deploy.yml` | Production deploy |
-| `staging` | `.github/workflows/staging-deploy.yml` | Staging deploy |
-| `fix/issue-*` | `.github/workflows/preview-deploy.yml` | Ephemeral PR preview |
-
-The deployment script in this guide is for **manual / emergency deploys** only.
-Normal releases go through the automated CI/CD on `main` push.
+`services describe` 的 image 欄位是「下次建 revision 要用哪個 image」的 spec 範本，
+不是現況；舊 revision 也會 health 200、也是 `Ready=True`。
