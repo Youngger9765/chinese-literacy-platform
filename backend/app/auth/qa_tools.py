@@ -8,7 +8,7 @@ dependencies harden them:
   ``settings.qa_tools_shared_secret`` is set, every request must carry a matching
   ``x-qa-token`` header or get 401. When the secret is empty/unset the gate is
   open **only off Cloud Run** (local-dev escape hatch); on a deployed service it
-  returns 503. See that function for why (#3160).
+  returns 404. See that function for why (#3160, status code revised in #3169).
 
 - ``enforce_qa_content_length`` — reject oversized uploads based on the
   ``Content-Length`` request header with 413 *before* the body is read into
@@ -44,7 +44,7 @@ def require_qa_token(x_qa_token: str | None = Header(default=None)) -> None:
     - secret set + header missing/wrong  → 401
     - secret set + header matches        → allow
     - secret unset, off Cloud Run        → allow (local-dev escape hatch)
-    - secret unset, ON Cloud Run         → 503 (#3160)
+    - secret unset, ON Cloud Run         → 404 (#3160, code revised in #3169)
 
     Why the last line exists
     ------------------------
@@ -76,36 +76,64 @@ def require_qa_token(x_qa_token: str | None = Header(default=None)) -> None:
     ENVIRONMENT would fail an existing lock that deliberately covers exactly
     that case without buying any security.
 
-    503 rather than 401 on purpose: the request is not wrong, the deployment is
-    misconfigured. 401 would send whoever hits it hunting for a credential that
-    does not exist anywhere yet.
+    Not 401 on purpose: the request is not wrong, so 401 would send whoever hits
+    it hunting for a credential that does not exist anywhere yet.
+
+    Not 5xx either, which is what this shipped as and had to be revised (#3169).
+    Cloud Run stamps every 5xx **request** log with ``severity=ERROR``, and the
+    ``LingoLeap Backend Errors`` alert policy fires on
+    ``severity>=ERROR`` for this service with no path or status exclusion. So the
+    status code *is* the alert trigger, independently of what this module logs --
+    #3166 lowered the log level here and the alert still fired, because it was
+    never the log that rang it.
+
+    404 is both quiet and accurate: this deployment does not serve the QA board.
+    The detail string has to keep naming the missing setting, because a 404 is
+    otherwise indistinguishable from a mistyped path.
     """
     secret = settings.qa_tools_shared_secret or ""
     if not secret:
         if os.environ.get("K_SERVICE"):
-            # WARNING once per process, not ERROR per request (#3166).
+            # WARNING once per process, not ERROR per request (#3166) -- and 404
+            # rather than 5xx (#3169). Those are two separate fixes to the same
+            # alert, and only the second one actually silenced it.
             #
-            # #3160 shipped this as logger.error on every refused request. That
+            # #3160 shipped this as logger.error on every refused request, which
             # fired the "LingoLeap Backend Errors" alert policy within two minutes
-            # of deploying -- triggered by my own two verification curls. An
-            # unconfigured secret is an expected, benign state on a service whose
-            # board nobody is using; it is not something to wake anyone for, and
-            # every scanner that touches these paths would ring the same bell.
+            # of deploying -- triggered by my own two verification curls. #3166
+            # lowered that to WARNING-once, and the application log did go quiet
+            # (measured: zero stderr ERROR entries afterwards). The alert fired
+            # again anyway.
             #
-            # An alert that fires on a benign condition trains people to ignore
-            # the alert, which is the same disease as a gate that false-alarms.
-            # The 503 in the response is the signal for anyone actually trying to
-            # use the board; the log only needs to explain why, once.
+            # The reason is that the ERROR feeding the alert was never ours:
+            #
+            #     logName:  .../logs/run.googleapis.com%2Frequests
+            #     severity: ERROR
+            #     httpRequest.status: 503
+            #
+            # Cloud Run marks every 5xx request log ERROR, and the policy watches
+            # severity>=ERROR with no path or status exclusion. The status code was
+            # the trigger the whole time; I had fixed the wrong layer.
+            #
+            # An unconfigured secret is an expected, benign state here -- the
+            # secret is deliberately unset since #3160 -- so reporting it as a
+            # server fault keeps an alert ringing during normal operation, which
+            # trains people to ignore it. Same disease as a gate that false-alarms.
+            #
+            # ⚠️ Scope: only this deliberate-disabled path moves off 5xx. A real
+            # storage failure in the routes still answers 503, because that one
+            # should wake someone. There is a positive control for exactly that in
+            # tests/test_qa_token_fail_closed_3160.py.
             global _warned_closed
             if not _warned_closed:
                 logger.warning(
-                    "QA board endpoints are refusing with 503: QA_TOOLS_SHARED_SECRET "
+                    "QA board endpoints are refusing with 404: QA_TOOLS_SHARED_SECRET "
                     "is not set on a deployed service. Set it in the deploy workflow "
                     "to re-enable the board."
                 )
                 _warned_closed = True
             raise HTTPException(
-                status_code=503,
+                status_code=404,
                 detail="QA board is disabled: QA_TOOLS_SHARED_SECRET is not configured",
             )
         global _warned_open

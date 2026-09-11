@@ -199,7 +199,9 @@ jobs:
             tests/test_organizations_split_1890.py \
             tests/test_perf_1243_remaining_optimizations.py \
             tests/test_perf_sql_aggregates.py \
+            tests/test_qa_token_fail_closed_3160.py \
             tests/test_progress_carry_forward_2889.py \
+            tests/test_rate_limiter_isolation_3171.py \
             tests/test_raw_table_not_public_2769.py \
             tests/test_reading_attempt_history.py \
             tests/test_reading_audio_replay_student.py \
