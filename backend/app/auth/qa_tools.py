@@ -35,6 +35,7 @@ logger = logging.getLogger(__name__)
 QA_TOOLS_MAX_BYTES = 4 * 1024 * 1024  # 4 MB
 
 _warned_open = False
+_warned_closed = False
 
 
 def require_qa_token(x_qa_token: str | None = Header(default=None)) -> None:
@@ -82,10 +83,27 @@ def require_qa_token(x_qa_token: str | None = Header(default=None)) -> None:
     secret = settings.qa_tools_shared_secret or ""
     if not secret:
         if os.environ.get("K_SERVICE"):
-            logger.error(
-                "QA board endpoint refused: QA_TOOLS_SHARED_SECRET is not set on a "
-                "deployed service. Set it in the deploy workflow to re-enable the board."
-            )
+            # WARNING once per process, not ERROR per request (#3166).
+            #
+            # #3160 shipped this as logger.error on every refused request. That
+            # fired the "LingoLeap Backend Errors" alert policy within two minutes
+            # of deploying -- triggered by my own two verification curls. An
+            # unconfigured secret is an expected, benign state on a service whose
+            # board nobody is using; it is not something to wake anyone for, and
+            # every scanner that touches these paths would ring the same bell.
+            #
+            # An alert that fires on a benign condition trains people to ignore
+            # the alert, which is the same disease as a gate that false-alarms.
+            # The 503 in the response is the signal for anyone actually trying to
+            # use the board; the log only needs to explain why, once.
+            global _warned_closed
+            if not _warned_closed:
+                logger.warning(
+                    "QA board endpoints are refusing with 503: QA_TOOLS_SHARED_SECRET "
+                    "is not set on a deployed service. Set it in the deploy workflow "
+                    "to re-enable the board."
+                )
+                _warned_closed = True
             raise HTTPException(
                 status_code=503,
                 detail="QA board is disabled: QA_TOOLS_SHARED_SECRET is not configured",

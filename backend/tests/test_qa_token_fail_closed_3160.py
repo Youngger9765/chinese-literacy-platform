@@ -138,3 +138,54 @@ def test_docstring_no_longer_lies(monkeypatch):
     assert len(doc) > 50
     with pytest.raises(HTTPException):
         qa.require_qa_token(x_qa_token=None)
+
+
+class TestRefusalIsNotAnError:
+    """拒絕要用 WARNING 記一次，不是每次請求都 ERROR（#3166）。
+
+    #3160 上線時寫成每次拒絕都 `logger.error`。結果部署後兩分鐘就觸發了
+    「LingoLeap Backend Errors」警報策略 —— 而觸發它的是我自己驗證用的兩次 curl。
+
+    「secret 沒設」在一個沒人在用看板的服務上是**預期而無害**的狀態，不需要叫醒任何人，
+    而且任何掃描器碰到那些路徑都會敲同一個鈴。**會在無害條件下響的警報，會訓練人忽略警報**
+    —— 跟誤報的門是同一種病。回應裡的 503 才是給真正想用看板的人的訊號。
+    """
+
+    def test_refusal_logs_warning_not_error(self, monkeypatch, caplog):
+        import logging
+
+        qa = _reload(monkeypatch, ENVIRONMENT="production", K_SERVICE="svc")
+        monkeypatch.setattr(qa, "_warned_closed", False, raising=False)
+        with caplog.at_level(logging.WARNING):
+            with pytest.raises(HTTPException):
+                qa.require_qa_token(x_qa_token=None)
+        levels = {r.levelno for r in caplog.records}
+        assert logging.WARNING in levels, "沒有記下任何 WARNING —— 那就完全沒有訊號了"
+        assert logging.ERROR not in levels, (
+            "用 ERROR 記錄 —— 那會觸發警報策略，而這個條件是預期的"
+        )
+
+    def test_only_logged_once_per_process(self, monkeypatch, caplog):
+        """第二次以後不再記錄。否則掃描器一掃就是一串。"""
+        import logging
+
+        qa = _reload(monkeypatch, ENVIRONMENT="production", K_SERVICE="svc")
+        monkeypatch.setattr(qa, "_warned_closed", False, raising=False)
+        with caplog.at_level(logging.WARNING):
+            for _ in range(5):
+                with pytest.raises(HTTPException):
+                    qa.require_qa_token(x_qa_token=None)
+        qa_records = [r for r in caplog.records if "QA board" in r.getMessage()]
+        assert len(qa_records) == 1, f"記了 {len(qa_records)} 次，應該只有 1 次"
+
+    def test_still_refuses_every_time(self, monkeypatch):
+        """只記一次，但**每一次**都要拒絕。
+
+        正向對照：如果為了少記 log 而改成只擋第一次，那就等於沒擋。
+        """
+        qa = _reload(monkeypatch, ENVIRONMENT="production", K_SERVICE="svc")
+        monkeypatch.setattr(qa, "_warned_closed", False, raising=False)
+        for i in range(5):
+            with pytest.raises(HTTPException) as e:
+                qa.require_qa_token(x_qa_token=None)
+            assert e.value.status_code == 503, f"第 {i+1} 次沒有拒絕"
