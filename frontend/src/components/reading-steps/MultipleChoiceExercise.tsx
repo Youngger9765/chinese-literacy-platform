@@ -49,6 +49,19 @@ const MultipleChoiceExercise: React.FC<Props> = ({
   const [score, setScore] = useState(0);
   // #2199: show "再選一次" feedback after a wrong answer without revealing correct
   const [wrongFeedback, setWrongFeedback] = useState(false);
+  /**
+   * 這一題最近一次選錯的選項，以及選錯幾次（#3158）。
+   *
+   * ⛔ 這兩個**不可以**跟 `wrongFeedback` 共用。`wrongFeedback` 是 900 毫秒的視覺閃爍，
+   * 而補救管道必須活到學生真的想用它為止。原本兩者共用一個 flag，於是「問 AI 助教」
+   * 這顆按鈕的存活時間就是那 900 毫秒 —— 五年級孩子來不及讀完按鈕上那九個字。
+   *
+   * ⚠️ 這顆按鈕已經死過兩次。第一次條件是 `revealed && !isCorrect`，而 #2199 把
+   * revealed 改成只在答對時為 true，條件恆為 false。第二次就是上面那個 900 毫秒。
+   * 所以它現在看一個**只有換題才會重置**的狀態。
+   */
+  const [lastWrongChoice, setLastWrongChoice] = useState<string | null>(null);
+  const [wrongCount, setWrongCount] = useState(0);
   // #3024: bump on every correct answer to re-trigger CorrectAnswerBurst
   const [correctBurstKey, setCorrectBurstKey] = useState(0);
 
@@ -88,6 +101,9 @@ const MultipleChoiceExercise: React.FC<Props> = ({
       // #2199: wrong — show "再選一次" without locking or revealing the answer
       setSelected(label);
       setWrongFeedback(true);
+      // #3158: these two survive the flash. The rescue path needs them.
+      setLastWrongChoice(label);
+      setWrongCount((n) => n + 1);
       // Clear selection after brief flash so student can pick again
       setTimeout(() => {
         setSelected(null);
@@ -97,13 +113,16 @@ const MultipleChoiceExercise: React.FC<Props> = ({
   }
 
   function openRescue() {
-    if (!selected) return;
-    const wrongIdx = OPTION_LABELS.indexOf(selected);
+    // #3158: was `if (!selected) return` — but the 900ms flash timer clears
+    // `selected`, so clicking the button after the flash was a silent no-op.
+    const wrong = lastWrongChoice ?? selected;
+    if (!wrong) return;
+    const wrongIdx = OPTION_LABELS.indexOf(wrong);
     const correctIdx = q.answer ? OPTION_LABELS.indexOf(q.answer) : -1;
     setRescueContext({
       questionId,
       lessonId,
-      wrongChoice: selected,
+      wrongChoice: wrong,
       wrongChoiceText: wrongIdx >= 0 ? q.options[wrongIdx] : undefined,
       questionText: q.question,
       correctAnswer: q.answer ?? '',
@@ -124,6 +143,9 @@ const MultipleChoiceExercise: React.FC<Props> = ({
     setSelected(null);
     setRevealed(false);
     setWrongFeedback(false);
+    // #3158: per-question, so they reset here and only here
+    setLastWrongChoice(null);
+    setWrongCount(0);
   }
 
   return (
@@ -212,8 +234,12 @@ const MultipleChoiceExercise: React.FC<Props> = ({
           </div>
         )}
 
-        {/* Explanation — shown only on correct answer reveal */}
-        {revealed && q.explanation && (
+        {/* Explanation — on a correct answer, or after two wrong tries (#3158).
+            原本只看 `revealed`，而 revealed 只在答對時為 true，所以答錯的孩子看不到
+            正解也看不到解說，卻能無限重選而分數照加 —— 分數對老師因此失去鑑別力。
+            Sweller 的 worked example effect：對還沒有 schema 的初學者，
+            「讓他自己想」比給完整範例差。第一次仍不揭露，那是 #2199 刻意的設計。 */}
+        {(revealed || wrongCount >= 2) && q.explanation && (
           <div className="mt-3 rounded-lg bg-amber-50 border border-amber-200 px-4 py-2 text-sm text-amber-800">
             💡 {zh(q.explanation)}
           </div>
@@ -225,7 +251,7 @@ const MultipleChoiceExercise: React.FC<Props> = ({
             不揭露答案、讓學生再選一次之後，`revealed` 只在**答對**時才為 true，
             於是這個條件恆為 false，這顆按鈕從此再也沒出現過（死碼）。
             改看 `wrongFeedback`：那才是「這次選錯了」的訊號。 */}
-        {(wrongFeedback || (revealed && !isCorrect)) && !rescueOpen && (
+        {(lastWrongChoice != null || (revealed && !isCorrect)) && !rescueOpen && (
           <button
             onClick={openRescue}
             className="mt-3 w-full flex items-center justify-center gap-2 rounded-lg border-2 border-amber-300 bg-amber-50 px-4 py-2.5 text-sm font-medium text-amber-800 hover:bg-amber-100 hover:border-amber-400 transition-colors"
