@@ -1,305 +1,268 @@
-import React, { useState } from 'react';
+/**
+ * /help 使用說明（#3142 重做）
+ *
+ * 重做前的四個問題，以及這一版怎麼處理：
+ *
+ *   1. 沒有入口 —— 全 repo 沒有任何 UI 連到 /help
+ *      → 老師與學生側邊欄都加了「使用說明」（`TeacherSidebar` / `StudentSidebar`）
+ *   2. 內容硬編且過期 —— 寫 57 篇課文、六個學習步驟、教兩個已停用的關卡
+ *      → 關卡清單改成從 `stepConfig` 推導、課文總數改成從 API 的 `total` 取
+ *   3. 底部四個「完整手冊」連結全是 404（指向不存在的 `/docs/manuals/*.md`）
+ *      → 移除
+ *   4. 對象混雜 —— 管理員分頁放 gcloud / CI-CD 工程 runbook
+ *      → 搬到 `docs/production/deployment-guide.md`，這裡只留老師與學生
+ *
+ * 版面沿用原本的優點（角色分頁 + 手風琴，收起來是一份乾淨的問題清單），
+ * 另外加了跨角色搜尋與展開／收合全部。
+ *
+ * 文案風格：網頁 UI 不加句號。
+ */
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-type ManualTab = 'teacher' | 'student' | 'parent' | 'admin';
+import {
+  HELP_CONTENT,
+  HELP_ROLE_ORDER,
+  entryHaystack,
+  type HelpEntry,
+  type HelpRole,
+} from './help/helpContent';
+import { resolveActiveSteps } from '../config/stepConfig';
 
-interface Section {
-  heading: string;
-  content: string;
-}
+/** 一則問答 */
+const Entry: React.FC<{
+  entry: HelpEntry;
+  roleLabel?: string;
+  open: boolean;
+  onToggle: () => void;
+}> = ({ entry, roleLabel, open, onToggle }) => (
+  <div className="border-b border-slate-200 last:border-b-0">
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-expanded={open}
+      className="flex w-full items-center justify-between gap-3 px-4 py-4 text-left hover:bg-slate-50"
+    >
+      <span className="text-[17px] font-medium text-slate-800">
+        {entry.q}
+        {roleLabel && (
+          <span className="ml-2 rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-500">
+            {roleLabel}
+          </span>
+        )}
+      </span>
+      <span aria-hidden className="shrink-0 text-slate-400">{open ? '−' : '+'}</span>
+    </button>
 
-interface ManualContent {
-  title: string;
-  subtitle: string;
-  icon: string;
-  color: string;
-  sections: Section[];
-}
-
-const MANUALS: Record<ManualTab, ManualContent> = {
-  student: {
-    title: '學生使用手冊',
-    subtitle: '了解如何登入、選課文、完成六個學習步驟',
-    icon: '📖',
-    color: 'text-blue-600 bg-blue-50 border-blue-200',
-    sections: [
-      {
-        heading: '什麼是 LingoLeap？',
-        content:
-          'LingoLeap 是一個幫助你學習國語文的 AI 學習平台！你可以練習朗讀課文（AI 會聽你讀並給建議）、跟 AI 做對話練習、練習生字筆順，以及查看學習成果報告。',
-      },
-      {
-        heading: '如何登入',
-        content:
-          '1. 打開 LingoLeap 網站\n2. 輸入老師給你的帳號（Email）和密碼\n3. 點選「登入」\n\n忘記密碼？點選登入頁面的「忘記密碼」，輸入 Email 後查收重設密碼信件。',
-      },
-      {
-        heading: '加入班級',
-        content:
-          '1. 登入後，點選「加入班級」\n2. 輸入老師給你的邀請碼（例如：ABC123）\n3. 點選「加入」\n4. 成功加入後，就能看到老師指派的課文',
-      },
-      {
-        heading: '六個學習步驟',
-        content:
-          '每篇課文有 6 個步驟：\n\n步驟 1：簡介 — AI 介紹課文背景\n步驟 2：逐段朗讀 — 按住錄音鍵大聲朗讀，AI 給建議\n步驟 3：生字練習 — 學習筆順與注音\n步驟 4：課文理解 — 和 AI 問答對話\n步驟 5：全文朗讀 — 完整朗讀整篇課文\n步驟 6：報告 — 查看學習成果',
-      },
-      {
-        heading: '麥克風沒有聲音怎麼辦？',
-        content:
-          '請確認瀏覽器有獲得麥克風權限。通常瀏覽器右上角會出現「允許麥克風」的請求，點選「允許」即可。也可以試試靠近麥克風說話、找安靜的地方，或用 Chrome 瀏覽器。',
-      },
-    ],
-  },
-  teacher: {
-    title: '教師使用手冊',
-    subtitle: '建立班級、指派課文、查看報告、使用通知中心',
-    icon: '👩‍🏫',
-    color: 'text-green-700 bg-green-50 border-green-200',
-    sections: [
-      {
-        heading: '快速開始',
-        content:
-          '首次使用流程：登入 → 建立班級 → 邀請學生加入 → 指派課文 → 查看報告\n\nLingoLeap 協助教師追蹤學生朗讀與理解進度、指派課文、透過 AI 蘇格拉底對話促進學生思考，並生成個人化學習報告。',
-      },
-      {
-        heading: '建立班級',
-        content:
-          '1. 登入後進入「教師儀表板」\n2. 點選「新增班級」按鈕\n3. 填寫班級名稱（如「五年三班」）和學年度\n4. 點選「建立」\n\n建立後系統會產生專屬邀請碼，分享給學生輸入加入班級。也可分享 QR Code 讓學生掃描加入。',
-      },
-      {
-        heading: '學生標籤系統',
-        content:
-          '教師可為學生新增標籤方便分組與追蹤：\n1. 在學生名單中，點選學生姓名旁的標籤圖示\n2. 選擇或新增標籤（如「需要加強」、「表現優異」）\n3. 標籤只有教師可見，學生看不到',
-      },
-      {
-        heading: '指派課文',
-        content:
-          '1. 在班級頁面點選「指派課文」\n2. 瀏覽 57 篇課文（可依年級、類型、難度篩選）\n3. 選定課文後點選「指派給班級」\n4. 設定截止日期（選填）\n5. 學生下次登入即可看到新指派的課文',
-      },
-      {
-        heading: '查看學習報告',
-        content:
-          '班級效能熱圖：一眼看出每位學生在各課文的學習狀況（深綠=完成，淺色=進行中）\n\n個人報告：點選學生姓名，查看朗讀評分、理解測驗品質、生字完成度、學習時間\n\n六環節診斷報告：完整評估每位學生的朗讀、理解、練習成果',
-      },
-      {
-        heading: '通知中心',
-        content:
-          '點選右上角鈴鐺圖示查看通知：\n• 學生完成課文\n• 學生加入班級\n• 系統公告\n\n紅點代表有未讀通知。',
-      },
-    ],
-  },
-  parent: {
-    title: '家長使用手冊',
-    subtitle: '連結孩子帳號、查看學習進度',
-    icon: '👨‍👩‍👧',
-    color: 'text-purple-700 bg-purple-50 border-purple-200',
-    sections: [
-      {
-        heading: '建立家長帳號',
-        content:
-          '1. 前往 LingoLeap 網站，點選「註冊」\n2. 選擇「我是家長」\n3. 填寫姓名、Email、密碼\n4. 閱讀並同意服務條款\n5. 查收 Email，點選驗證連結完成註冊',
-      },
-      {
-        heading: '連結孩子帳號',
-        content:
-          '首先請孩子：\n1. 孩子登入 LingoLeap\n2. 進入「個人設定」→「產生家長連結碼」\n3. 將 6 位數連結碼告知您\n\n然後您：\n1. 登入家長帳號\n2. 點選「連結孩子帳號」\n3. 輸入連結碼並確認\n\n注意：連結碼 24 小時內有效。',
-      },
-      {
-        heading: '查看學習進度',
-        content:
-          '家長儀表板顯示：\n• 本週學習時間\n• 完成課文數\n• 待完成作業\n• 最近學習課文\n\n點選課文可查看朗讀評分、理解程度、學習時間等詳細資料。',
-      },
-      {
-        heading: '隱私與安全',
-        content:
-          '孩子的學習資料僅限授權人員（孩子本人、老師、您）查看。所有資料均加密儲存，LingoLeap 不會將個人資料出售或分享給第三方。\n\n孩子可在「個人設定」中移除家長連結。',
-      },
-    ],
-  },
-  admin: {
-    title: '管理員手冊',
-    subtitle: '部署、監控、故障排除、CI/CD 流程',
-    icon: '⚙️',
-    color: 'text-gray-700 bg-gray-50 border-gray-200',
-    sections: [
-      {
-        heading: '系統架構',
-        content:
-          '前端：React 19 + TypeScript + Tailwind → Cloud Run (lingoleap-frontend)\n後端：FastAPI + SQLAlchemy → Cloud Run (lingoleap-backend)\n資料庫：PostgreSQL 15 on Cloud SQL (asia-east1)\nAI：Vertex AI Gemini 2.5 Flash (us-central1)',
-      },
-      {
-        heading: '切換 GCP 設定',
-        content:
-          'gcloud config configurations activate lingoleap\n\n注意：Vertex AI 必須使用 us-central1，asia-east1 不支援 Gemini 模型。',
-      },
-      {
-        heading: '查看服務日誌',
-        content:
-          'gcloud logging read \\\n  "resource.type=cloud_run_revision AND resource.labels.service_name=lingoleap-backend" \\\n  --limit 100 --project lingoleap-dev\n\n只看錯誤：加上 AND severity>=ERROR',
-      },
-      {
-        heading: '常見故障排除',
-        content:
-          'API 503：查看 backend 日誌，確認 Vertex AI 連線和 Cloud SQL 狀態\n\nAI 失效：確認 AI service location 為 us-central1，確認 service account 有 roles/aiplatform.user\n\n422 Session Not Found：Cloud Run 重啟後 session 被清除，學生重新整理頁面即可（前端有自動重建機制）',
-      },
-      {
-        heading: 'CI/CD Workflows',
-        content:
-          'deploy.yml → push to main → Production\nstaging-deploy.yml → push to staging → Staging\npreview-deploy.yml → PR opened/closed → PR Preview（臨時，PR 關閉後自動刪除）\n\n查看狀態：gh run list --limit 10',
-      },
-    ],
-  },
-};
+    {open && (
+      <div data-help-answer="open" className="px-4 pb-5 text-[16px] leading-8 text-slate-700">
+        {entry.steps && (
+          <ol className="ml-5 list-decimal space-y-1.5">
+            {entry.steps.map((s, i) => <li key={i}>{s}</li>)}
+          </ol>
+        )}
+        {entry.note && (
+          <p className="mt-3 whitespace-pre-line">{entry.note}</p>
+        )}
+        {entry.gotcha && (
+          <p className="mt-3 rounded-lg border-l-4 border-amber-400 bg-amber-50 px-4 py-3">
+            <span className="font-medium text-amber-900">容易踩的地方　</span>
+            <span className="text-amber-900">{entry.gotcha}</span>
+          </p>
+        )}
+      </div>
+    )}
+  </div>
+);
 
 const HelpPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<ManualTab>('student');
-  const [expandedSection, setExpandedSection] = useState<number | null>(null);
   const navigate = useNavigate();
+  const [role, setRole] = useState<HelpRole>('teacher');
+  const [query, setQuery] = useState('');
+  const [openKeys, setOpenKeys] = useState<Set<string>>(new Set());
+  const [storyTotal, setStoryTotal] = useState<number | null>(null);
 
-  const manual = MANUALS[activeTab];
+  // 課文總數一律問 API —— 這個數字曾經以「57 篇」的字面值躺在這頁上很久
+  useEffect(() => {
+    let alive = true;
+    const base = (import.meta as { env?: Record<string, string> }).env?.VITE_API_URL || '';
+    fetch(`${base}/api/stories?page_size=1`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (alive && d && typeof d.total === 'number') setStoryTotal(d.total); })
+      .catch(() => { /* 取不到就不顯示數字，不要編一個 */ });
+    return () => { alive = false; };
+  }, []);
 
-  const tabs: { key: ManualTab; label: string; icon: string }[] = [
-    { key: 'student', label: '學生', icon: '📖' },
-    { key: 'teacher', label: '教師', icon: '👩‍🏫' },
-    { key: 'parent', label: '家長', icon: '👨‍👩‍👧' },
-    { key: 'admin', label: '管理員', icon: '⚙️' },
-  ];
+  const activeSteps = useMemo(() => resolveActiveSteps(), []);
 
-  const handleTabChange = (tab: ManualTab) => {
-    setActiveTab(tab);
-    setExpandedSection(null);
-  };
+  const searching = query.trim().length > 0;
+
+  /** 搜尋時跨角色一起找；沒搜尋就只看當前分頁 */
+  const visible = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const roles = searching ? HELP_ROLE_ORDER : [role];
+    const out: Array<{ key: string; roleLabel?: string; section: string; entry: HelpEntry }> = [];
+    for (const r of roles) {
+      const c = HELP_CONTENT[r];
+      for (const sec of c.sections) {
+        for (const [i, entry] of sec.entries.entries()) {
+          if (q && !entryHaystack(entry).toLowerCase().includes(q)) continue;
+          out.push({
+            key: `${r}:${sec.title}:${i}`,
+            roleLabel: searching ? c.label : undefined,
+            section: sec.title,
+            entry,
+          });
+        }
+      }
+    }
+    return out;
+  }, [query, role, searching]);
+
+  const grouped = useMemo(() => {
+    const m = new Map<string, typeof visible>();
+    for (const v of visible) {
+      if (!m.has(v.section)) m.set(v.section, []);
+      m.get(v.section)!.push(v);
+    }
+    return Array.from(m.entries());
+  }, [visible]);
+
+  const allOpen = visible.length > 0 && visible.every((v) => openKeys.has(v.key));
+  const toggleAll = () =>
+    setOpenKeys(allOpen ? new Set() : new Set(visible.map((v) => v.key)));
+
+  const toggle = (key: string) =>
+    setOpenKeys((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key); else next.add(key);
+      return next;
+    });
 
   return (
-    <div className="min-h-screen bg-amber-50">
-      {/* Header */}
-      <header className="bg-white border-b border-amber-200 shadow-sm">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => navigate(-1)}
-              className="text-gray-500 hover:text-gray-800 transition-colors p-1 rounded-lg hover:bg-gray-100"
-              aria-label="返回"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            <div>
-              <h1 className="text-lg font-bold text-gray-900">LingoLeap 使用說明</h1>
-              <p className="text-xs text-gray-500">選擇您的角色查看對應說明</p>
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-[#fafaf8]">
+      <div className="mx-auto max-w-[820px] px-5 py-10">
+        <header className="mb-8">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="mb-4 text-[15px] text-slate-500 hover:text-slate-700"
+          >
+            ← 回上一頁
+          </button>
+          <h1 className="text-[32px] font-bold text-slate-900">使用說明</h1>
+          <p className="mt-2 text-[17px] leading-8 text-slate-600">
+            挑一個問題點開，裡面是照順序寫的步驟
+            {storyTotal !== null && (
+              <>
+                <br />
+                目前平台上有 <strong>{storyTotal}</strong> 篇課文，涵蓋第 4 到第 9 級、品格教育與文言文
+              </>
+            )}
+          </p>
+        </header>
 
-      {/* Tab navigation */}
-      <nav className="bg-white border-b border-amber-100" aria-label="使用手冊分類">
-        <div className="max-w-4xl mx-auto px-4">
-          <div className="flex gap-1 overflow-x-auto">
-            {tabs.map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => handleTabChange(tab.key)}
-                className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
-                  activeTab === tab.key
-                    ? 'border-amber-500 text-amber-700'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-                aria-current={activeTab === tab.key ? 'page' : undefined}
-              >
-                <span aria-hidden="true">{tab.icon}</span>
-                {tab.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </nav>
-
-      {/* Content */}
-      <main className="max-w-4xl mx-auto px-4 py-6">
-        {/* Manual header */}
-        <div className={`rounded-xl border p-5 mb-6 ${manual.color}`}>
-          <div className="flex items-center gap-3">
-            <span className="text-3xl" aria-hidden="true">{manual.icon}</span>
-            <div>
-              <h2 className="text-xl font-bold">{manual.title}</h2>
-              <p className="text-sm opacity-80 mt-0.5">{manual.subtitle}</p>
-            </div>
-          </div>
+        <div className="mb-5">
+          <input
+            type="search"
+            role="searchbox"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="搜尋問題，例如：麥克風、加入班級、作業"
+            aria-label="搜尋使用說明"
+            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-[16px] outline-none focus:border-slate-500"
+          />
+          {searching && (
+            <p className="mt-2 text-[14px] text-slate-500">
+              搜尋會同時找老師與學生兩邊的問題
+            </p>
+          )}
         </div>
 
-        {/* Accordion sections */}
-        <div className="space-y-3">
-          {manual.sections.map((section, idx) => (
-            <div
-              key={idx}
-              className="bg-white rounded-2xl shadow-card overflow-hidden"
-            >
-              <button
-                className="w-full text-left px-5 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
-                onClick={() =>
-                  setExpandedSection(expandedSection === idx ? null : idx)
-                }
-                aria-expanded={expandedSection === idx}
-              >
-                <h3 className="font-semibold text-gray-800 text-sm">{section.heading}</h3>
-                <svg
-                  className={`w-4 h-4 text-gray-400 transition-transform flex-shrink-0 ml-2 ${
-                    expandedSection === idx ? 'rotate-180' : ''
-                  }`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
+        {!searching && (
+          <div role="tablist" aria-label="選擇對象" className="mb-4 flex gap-2">
+            {HELP_ROLE_ORDER.map((r) => {
+              const c = HELP_CONTENT[r];
+              const active = r === role;
+              return (
+                <button
+                  key={r}
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => { setRole(r); setOpenKeys(new Set()); }}
+                  className={
+                    'rounded-xl border px-4 py-2 text-[16px] '
+                    + (active
+                      ? 'border-slate-800 bg-slate-800 text-white'
+                      : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50')
+                  }
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              {expandedSection === idx && (
-                <div className="px-5 pb-5">
-                  <div className="border-t border-gray-100 pt-4">
-                    <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
-                      {section.content}
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-
-        {/* Footer links to full docs */}
-        <div className="mt-8 bg-white rounded-2xl shadow-card p-5">
-          <h3 className="font-semibold text-gray-800 mb-3 text-sm">完整文件</h3>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {[
-              { label: '教師完整手冊', href: '/docs/manuals/teacher-guide.md' },
-              { label: '學生完整手冊', href: '/docs/manuals/student-guide.md' },
-              { label: '家長完整手冊', href: '/docs/manuals/parent-guide.md' },
-              { label: '管理員手冊', href: '/docs/manuals/admin-guide.md' },
-            ].map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-amber-700 hover:text-amber-900 hover:underline flex items-center gap-1"
-              >
-                <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                {link.label}
-              </a>
-            ))}
+                  <span aria-hidden className="mr-1.5">{c.icon}</span>
+                  {c.label}
+                </button>
+              );
+            })}
           </div>
+        )}
+
+        {!searching && (
+          <p className="mb-5 text-[15px] text-slate-500">{HELP_CONTENT[role].blurb}</p>
+        )}
+
+        <div className="mb-3 flex justify-end">
+          <button
+            type="button"
+            onClick={toggleAll}
+            className="text-[15px] text-slate-600 underline hover:text-slate-900"
+          >
+            {allOpen ? '收合全部' : '展開全部'}
+          </button>
         </div>
 
-        {/* Feedback prompt */}
-        <p className="text-center text-xs text-gray-400 mt-6">
-          找不到答案？點選右下角「回饋」按鈕告訴我們。
-        </p>
-      </main>
+        {visible.length === 0 ? (
+          <p className="rounded-xl border border-slate-200 bg-white px-4 py-8 text-center text-[16px] text-slate-500">
+            找不到符合「{query.trim()}」的問題
+            <br />
+            試試更短的字，例如「麥克風」或「班級」
+          </p>
+        ) : (
+          grouped.map(([section, items]) => (
+            <section key={section} className="mb-6">
+              <h2 className="mb-2 px-1 text-[15px] font-semibold tracking-wide text-slate-500">
+                {section}
+              </h2>
+              <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+                {items.map((v) => (
+                  <Entry
+                    key={v.key}
+                    entry={v.entry}
+                    roleLabel={v.roleLabel}
+                    open={openKeys.has(v.key)}
+                    onToggle={() => toggle(v.key)}
+                  />
+                ))}
+              </div>
+            </section>
+          ))
+        )}
+
+        {/* 關卡清單從 stepConfig 推導 —— 舊版把它寫成「六個學習步驟」並且教了兩個已停用的關卡 */}
+        {!searching && role === 'student' && (
+          <section className="mb-6">
+            <h2 className="mb-2 px-1 text-[15px] font-semibold tracking-wide text-slate-500">
+              一篇課文的關卡
+            </h2>
+            <div className="rounded-xl border border-slate-200 bg-white px-4 py-4">
+              <p className="mb-3 text-[15px] text-slate-500">
+                一般課文目前有 {activeSteps.length} 關，實際會出現哪幾關由老師的學習單決定
+              </p>
+              <ol className="ml-5 list-decimal space-y-1.5 text-[16px] leading-8 text-slate-700">
+                {activeSteps.map((s) => <li key={s.id}>{s.label}</li>)}
+              </ol>
+            </div>
+          </section>
+        )}
+      </div>
     </div>
   );
 };
