@@ -7,7 +7,8 @@ dependencies harden them:
 - ``require_qa_token`` — fail-closed shared-secret gate. When
   ``settings.qa_tools_shared_secret`` is set, every request must carry a matching
   ``x-qa-token`` header or get 401. When the secret is empty/unset the gate is
-  OPEN (local-dev escape hatch) and a single warning is logged.
+  open **only off Cloud Run** (local-dev escape hatch); on a deployed service it
+  returns 503. See that function for why (#3160).
 
 - ``enforce_qa_content_length`` — reject oversized uploads based on the
   ``Content-Length`` request header with 413 *before* the body is read into
@@ -22,6 +23,7 @@ from __future__ import annotations
 
 import hmac
 import logging
+import os
 
 from fastapi import Header, HTTPException, Request
 
@@ -38,17 +40,61 @@ _warned_open = False
 def require_qa_token(x_qa_token: str | None = Header(default=None)) -> None:
     """Fail-closed shared-secret gate for QA-board endpoints.
 
-    - secret set + header missing/wrong → 401
-    - secret set + header matches       → allow
-    - secret empty/unset                → allow (open; log once)
+    - secret set + header missing/wrong  → 401
+    - secret set + header matches        → allow
+    - secret unset, off Cloud Run        → allow (local-dev escape hatch)
+    - secret unset, ON Cloud Run         → 503 (#3160)
+
+    Why the last line exists
+    ------------------------
+    This docstring already claimed "fail-closed" while the implementation
+    returned early when the secret was empty, and ``QA_TOOLS_SHARED_SECRET`` is
+    set in none of the three deploy workflows. So the gate was open on every
+    deployed environment. Measured on 2026-09-11 with an unauthenticated GET:
+
+        /api/spotlight-qa/reviews   prod 200 (count 0)   staging 200 (count 2)
+        /api/keypoints-qa/reviews   prod 200 (count 0)   staging 200 (count 1)
+
+    A bogus ``x-qa-token`` also got 200, so the gate was open rather than
+    guessed; ``/api/classrooms`` on the same backend returned 401, so this was
+    specific to these endpoints. The staging payload carries a ``reviewer``
+    field, i.e. names of teachers and interns, readable by anyone.
+
+    The module docstring is honest that these boards were *designed*
+    unauthenticated -- static pages, human testing only. This is not someone
+    forgetting a variable; it is optional hardening that was never switched on,
+    on endpoints that later started carrying names.
+
+    ⚠️ This will stop the QA boards working on staging until
+    ``QA_TOOLS_SHARED_SECRET`` is set in the workflows. A briefly broken
+    internal tool is much cheaper than publicly readable names.
+
+    The discriminator is ``K_SERVICE`` (always set by Cloud Run) rather than
+    ``ENVIRONMENT``, for two reasons: a backend run locally with
+    ``ENVIRONMENT=staging`` is not publicly reachable, and keying on
+    ENVIRONMENT would fail an existing lock that deliberately covers exactly
+    that case without buying any security.
+
+    503 rather than 401 on purpose: the request is not wrong, the deployment is
+    misconfigured. 401 would send whoever hits it hunting for a credential that
+    does not exist anywhere yet.
     """
     secret = settings.qa_tools_shared_secret or ""
     if not secret:
+        if os.environ.get("K_SERVICE"):
+            logger.error(
+                "QA board endpoint refused: QA_TOOLS_SHARED_SECRET is not set on a "
+                "deployed service. Set it in the deploy workflow to re-enable the board."
+            )
+            raise HTTPException(
+                status_code=503,
+                detail="QA board is disabled: QA_TOOLS_SHARED_SECRET is not configured",
+            )
         global _warned_open
         if not _warned_open:
             logger.warning(
                 "QA tools shared secret is not set — QA board endpoints are OPEN. "
-                "Set QA_TOOLS_SHARED_SECRET to require an x-qa-token header."
+                "This is allowed only off Cloud Run (local development)."
             )
             _warned_open = True
         return
