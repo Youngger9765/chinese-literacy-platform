@@ -56,10 +56,7 @@ BRD ──────▶ MRD ──────▶ PRD ──────▶ TR
 
 | 文件 | 說明 |
 |------|------|
-| [manuals/teacher-guide.md](manuals/teacher-guide.md) | 教師使用手冊 |
-| [manuals/student-guide.md](manuals/student-guide.md) | 學生使用手冊 |
-| [manuals/admin-guide.md](manuals/admin-guide.md) | 管理員使用手冊 |
-| [manuals/parent-guide.md](manuals/parent-guide.md) | 家長使用手冊 |
+| [manuals/*.md](manuals/) | ⚠️ 四份使用手冊已於 #3142 停用 —— 使用說明改為線上 `/help` 單一來源（`frontend/src/pages/help/helpContent.ts`），管理員內容搬到 [production/deployment-guide.md](production/deployment-guide.md)。檔案留成指路 |
 
 ### 團隊
 

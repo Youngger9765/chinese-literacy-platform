@@ -20,10 +20,7 @@ export const TeacherSidebar: React.FC<TeacherSidebarProps> = ({
 }) => {
   const { pathname } = useLocation();
 
-  const items: NavItem[] = [
-    { icon: '🏫', label: '班級管理', path: '/teacher' },
-    { icon: '📋', label: '作業管理', path: '/teacher/assignments' },
-  ];
+  const items: NavItem[] = getTeacherNavItems();
 
   return (
     <nav aria-label="教師導覽" className="flex flex-col gap-1.5">
@@ -40,10 +37,20 @@ export const TeacherSidebar: React.FC<TeacherSidebarProps> = ({
   );
 };
 
-/** Flat list of teacher nav items (used by MobileTabBar) */
+/**
+ * Flat list of teacher nav items — the single source (used by the sidebar
+ * above AND by MobileTabBar).
+ *
+ * These used to be written out twice, once here and once inline in the
+ * component. Adding an entry to one copy and not the other is invisible:
+ * the sidebar gains it, the mobile tab bar silently does not (#3142).
+ */
 export function getTeacherNavItems(): NavItem[] {
   return [
     { icon: '🏫', label: '班級管理', path: '/teacher' },
     { icon: '📋', label: '作業管理', path: '/teacher/assignments' },
+    // /help had no entry anywhere in the UI until #3142 — it existed only in
+    // the un-authenticated route allowlist, so nobody could reach it.
+    { icon: '❓', label: '使用說明', path: '/help' },
   ];
 }
