@@ -465,6 +465,8 @@ app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.origins_list,
+    # Our own PR-preview frontends, outside production only (#3139).
+    allow_origin_regex=settings.preview_origin_regex,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

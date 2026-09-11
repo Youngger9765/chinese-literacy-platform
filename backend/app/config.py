@@ -54,6 +54,56 @@ class Settings(BaseSettings):
     def origins_list(self) -> list[str]:
         return [o.strip() for o in self.allowed_origins.split(",")]
 
+    # Preview frontends must reach the staging backend (#3139).
+    #
+    # `preview-deploy.yml` only builds a preview BACKEND when the PR touches
+    # `backend/**`. A frontend-only PR therefore points its preview frontend at
+    # the staging backend, whose ALLOWED_ORIGINS is a hardcoded list of four
+    # origins that has never contained a preview URL -- so every frontend-only
+    # PR hits CORS at the exact moment someone is asked to verify it.
+    # Adding the origin by hand does not survive either: `staging-deploy.yml`
+    # writes ALLOWED_ORIGINS with `--set-env-vars`, which replaces the whole
+    # set on the next merge.
+    #
+    # ⛔ The project pin is the security boundary, not decoration. Cloud Run
+    # service names are not globally unique -- without pinning our own project
+    # number and URL hash, anyone could deploy `lingoleap-frontend-issue-999`
+    # in their own project and be trusted with `allow_credentials=True`.
+    # Both shapes below are real and in use for the same service:
+    #   https://lingoleap-frontend-issue-3134-958347263320.asia-east1.run.app
+    #   https://lingoleap-frontend-issue-3134-oja2sffiya-de.a.run.app
+    _PREVIEW_ORIGIN_REGEX = (
+        r"^https://lingoleap-frontend-(?:issue|pr)-\d+"
+        r"-(?:958347263320\.asia-east1|oja2sffiya-de\.a)"
+        r"\.run\.app$"
+    )
+
+    @property
+    def allow_preview_origins(self) -> bool:
+        """True on staging / preview / local dev. Never on production.
+
+        Fail-closed the same way `is_dev` does: an unset ENVIRONMENT on Cloud
+        Run is treated as production, so a workflow that forgets the var does
+        not silently widen CORS on the production backend.
+        """
+        env = os.environ.get("ENVIRONMENT", "").lower()
+        if env in ("development", "preview", "staging"):
+            return True
+        if env == "production":
+            return False
+        # Unset: Cloud Run always sets K_SERVICE. If present → treat as prod.
+        if os.environ.get("K_SERVICE"):
+            return False
+        # Local dev (no K_SERVICE, no ENVIRONMENT).
+        return True
+
+    @property
+    def preview_origin_regex(self) -> str | None:
+        """Regex for CORSMiddleware, or None where previews must not be trusted."""
+        if not self.allow_preview_origins:
+            return None
+        return self._PREVIEW_ORIGIN_REGEX
+
     @property
     def is_dev(self) -> bool:
         """True when running in a non-production environment (development or preview).
