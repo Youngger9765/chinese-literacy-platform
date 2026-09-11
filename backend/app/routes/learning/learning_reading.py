@@ -333,8 +333,20 @@ async def get_ai_analysis_standalone(
 
 
 class ReadingEvaluateRequest(BaseModel):
-    spoken_text: str = Field(..., description="STT 轉錄結果")
-    target_text: str = Field(..., description="課文原文")
+    # 兩個欄位都有上限（#3162）。原本兩個都沒有，而所有兄弟端點都有：
+    # learning_comprehension.py 的 story_text 是 10000，learning_strategy.py 的
+    # 五個欄位從 128 到 4000。就這一支漏掉。
+    #
+    # 為什麼要緊：target_text 未消毒就直接進 LLM prompt（spoken_text 下游還會被
+    # input_sanitizer 砍到 2000，target_text 不會），而 main.py 沒有 body-size
+    # middleware。限流是 per-process 的記憶體字典而 prod maxScale=3，所以標
+    # 「10 次/分鐘」的實際上限是 30 —— 一個已登入帳號可以持續灌大 payload 進 Gemini，
+    # 那同時是花錢面與未消毒的注入面。
+    #
+    # 10000 對齊 comprehension 的 story_text，理由相同：那是「一篇課文的量級」。
+    # 全庫最長的重點段是 621 字，所以這個上限離真實用量很遠，不會擋到學生。
+    spoken_text: str = Field(..., max_length=10000, description="STT 轉錄結果")
+    target_text: str = Field(..., max_length=10000, description="課文原文")
     duration_ms: int | None = Field(None, description="朗讀時長（毫秒，選填）")
 
 

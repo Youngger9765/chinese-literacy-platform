@@ -75,6 +75,56 @@ jobs:
             --add-cloudsql-instances=lingoleap-dev:asia-east1:lingoleap-db \
             --set-env-vars="^::^ALLOWED_ORIGINS=https://lingoleap-frontend-958347263320.asia-east1.run.app,https://lingoleap-prod.web.app::DATABASE_URL=${{ secrets.DATABASE_URL }}::RUN_MIGRATIONS=true::AZURE_SPEECH_KEY=${{ secrets.AZURE_SPEECH_KEY }}::AZURE_SPEECH_REGION=eastus::TTS_PROVIDER=azure::ENVIRONMENT=production::ENABLE_TEST_SEED=false::JWT_SECRET_KEY=${{ secrets.PROD_JWT_SECRET_KEY }}::GCS_OMO_BUCKET=lingoleap-omo-uploads-prod::READING_AUDIO_GCS_BUCKET=lingoleap-reading-audio-prod"
 
+      # #3162: staging has had this since #1449; production never got it.
+      #
+      # Why it matters: once anyone runs `update-traffic --to-revisions` against a
+      # service (a canary, an A/B, a rollback), that service switches permanently
+      # from automatic to pinned mode. Every later `gcloud run deploy` then builds a
+      # revision and does NOT move traffic -- with no warning of any kind. The old
+      # revision still answers 200 and still reports Ready=True, so the health check
+      # below stays green while nothing ships. This repo lost five days and five
+      # all-green deploys to exactly that.
+      - name: "Promote backend traffic to latest revision (#3162, mirrors #1449 on staging)"
+        run: |
+          gcloud run services update-traffic ${{ env.BACKEND_SERVICE }} \
+            --to-latest \
+            --region ${{ env.REGION }} \
+            --project ${{ env.PROJECT_ID }}
+
+      # The only claim that means "deployed": the revision serving 100% of traffic
+      # runs the image built by THIS run. `services describe` returns the spec
+      # template (which image the NEXT revision would use), not what is live --
+      # reading that field is how the five-day gap went unnoticed.
+      - name: "Assert serving backend revision runs this build (#3162)"
+        run: |
+          set -euo pipefail
+          WANT="${{ env.REGISTRY }}/backend:prod-${{ github.sha }}"
+          REV=$(gcloud run services describe ${{ env.BACKEND_SERVICE }} \
+            --region ${{ env.REGION }} --project ${{ env.PROJECT_ID }} \
+            --format='value(status.traffic.filter("percent=100").revisionName)')
+          if [ -z "$REV" ]; then
+            echo "No revision is serving 100% of traffic — traffic may be split or pinned."
+            gcloud run services describe ${{ env.BACKEND_SERVICE }} \
+              --region ${{ env.REGION }} --project ${{ env.PROJECT_ID }} \
+              --format='value(status.traffic)'
+            exit 1
+          fi
+          GOT=$(gcloud run revisions describe "$REV" \
+            --region ${{ env.REGION }} --project ${{ env.PROJECT_ID }} \
+            --format='value(spec.containers[0].image)')
+          echo "serving revision : $REV"
+          echo "its image        : $GOT"
+          echo "built this run   : $WANT"
+          # The live image is by digest, the built tag is by tag, so compare the
+          # tag's digest rather than the strings.
+          WANT_DIGEST=$(gcloud artifacts docker images describe "$WANT" \
+            --format='value(image_summary.digest)' 2>/dev/null || echo "")
+          if [ -n "$WANT_DIGEST" ] && [ "${GOT##*@}" != "$WANT_DIGEST" ]; then
+            echo "MISMATCH: the revision serving traffic is not running this build."
+            exit 1
+          fi
+          echo "OK — traffic is on this build."
+
       - name: Verify backend health
         run: |
           URL=$(gcloud run services describe ${{ env.BACKEND_SERVICE }} \
@@ -129,6 +179,56 @@ jobs:
             --min-instances=0 \
             --max-instances=3 \
             --timeout=300s
+
+      # #3162: staging has had this since #1449; production never got it.
+      #
+      # Why it matters: once anyone runs `update-traffic --to-revisions` against a
+      # service (a canary, an A/B, a rollback), that service switches permanently
+      # from automatic to pinned mode. Every later `gcloud run deploy` then builds a
+      # revision and does NOT move traffic -- with no warning of any kind. The old
+      # revision still answers 200 and still reports Ready=True, so the health check
+      # below stays green while nothing ships. This repo lost five days and five
+      # all-green deploys to exactly that.
+      - name: "Promote frontend traffic to latest revision (#3162, mirrors #1449 on staging)"
+        run: |
+          gcloud run services update-traffic ${{ env.FRONTEND_SERVICE }} \
+            --to-latest \
+            --region ${{ env.REGION }} \
+            --project ${{ env.PROJECT_ID }}
+
+      # The only claim that means "deployed": the revision serving 100% of traffic
+      # runs the image built by THIS run. `services describe` returns the spec
+      # template (which image the NEXT revision would use), not what is live --
+      # reading that field is how the five-day gap went unnoticed.
+      - name: "Assert serving frontend revision runs this build (#3162)"
+        run: |
+          set -euo pipefail
+          WANT="${{ env.REGISTRY }}/frontend:prod-${{ github.sha }}"
+          REV=$(gcloud run services describe ${{ env.FRONTEND_SERVICE }} \
+            --region ${{ env.REGION }} --project ${{ env.PROJECT_ID }} \
+            --format='value(status.traffic.filter("percent=100").revisionName)')
+          if [ -z "$REV" ]; then
+            echo "No revision is serving 100% of traffic — traffic may be split or pinned."
+            gcloud run services describe ${{ env.FRONTEND_SERVICE }} \
+              --region ${{ env.REGION }} --project ${{ env.PROJECT_ID }} \
+              --format='value(status.traffic)'
+            exit 1
+          fi
+          GOT=$(gcloud run revisions describe "$REV" \
+            --region ${{ env.REGION }} --project ${{ env.PROJECT_ID }} \
+            --format='value(spec.containers[0].image)')
+          echo "serving revision : $REV"
+          echo "its image        : $GOT"
+          echo "built this run   : $WANT"
+          # The live image is by digest, the built tag is by tag, so compare the
+          # tag's digest rather than the strings.
+          WANT_DIGEST=$(gcloud artifacts docker images describe "$WANT" \
+            --format='value(image_summary.digest)' 2>/dev/null || echo "")
+          if [ -n "$WANT_DIGEST" ] && [ "${GOT##*@}" != "$WANT_DIGEST" ]; then
+            echo "MISMATCH: the revision serving traffic is not running this build."
+            exit 1
+          fi
+          echo "OK — traffic is on this build."
 
       - name: Verify frontend health
         run: |
