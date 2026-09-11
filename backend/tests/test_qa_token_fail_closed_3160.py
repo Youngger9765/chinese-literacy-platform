@@ -28,22 +28,43 @@ staging 的回應帶 `reviewer` 欄位，很可能是老師與實習生本名。
 
 本機開發（沒有 `K_SERVICE`）維持開著，不然沒人能在本機跑看板。
 """
-import importlib
-
 import pytest
 from fastapi import HTTPException
 
+from app.config import settings
+import app.auth.qa_tools as qa_tools
+
 
 def _reload(monkeypatch, **env):
-    for k in ("ENVIRONMENT", "K_SERVICE", "QA_TOOLS_SHARED_SECRET"):
+    """Set env + secret for one test, without reloading any module.
+
+    ⛔ The first version of this helper called `importlib.reload` on
+    `app.config` and `app.auth.qa_tools`. Do not go back to that. Reloading
+    `app.config` replaces the `settings` object, so every other test module
+    that did `from app.config import settings` at import time keeps a handle on
+    the old one and its patches stop reaching the code under test.
+
+    That is not theoretical: it passed locally (I ran a subset) and failed in
+    CI on the full suite, taking `test_spotlight_qa` and `test_keypoints_qa`
+    down with it -- 503 where they assert 403. Single-run green, batch red.
+
+    The reload was never needed anyway. `require_qa_token` reads both
+    `settings.qa_tools_shared_secret` and `os.environ["K_SERVICE"]` inside the
+    function body, so monkeypatching reaches it at call time.
+    """
+    for k in ("ENVIRONMENT", "K_SERVICE"):
         monkeypatch.delenv(k, raising=False)
+    secret = env.pop("QA_TOOLS_SHARED_SECRET", "")
     for k, v in env.items():
         monkeypatch.setenv(k, v)
-    import app.config as config_module
-    importlib.reload(config_module)
-    import app.auth.qa_tools as qa
-    importlib.reload(qa)
-    return qa
+    monkeypatch.setattr(settings, "qa_tools_shared_secret", secret)
+    # qa_tools imported `settings` by value at module import; same object, but be
+    # explicit so a future refactor of that import does not silently skip the patch.
+    monkeypatch.setattr(qa_tools.settings, "qa_tools_shared_secret", secret)
+    # The "open gate" warning is logged once per process; reset so each test is
+    # independent of ordering.
+    monkeypatch.setattr(qa_tools, "_warned_open", False, raising=False)
+    return qa_tools
 
 
 class TestSecretNotSet:
