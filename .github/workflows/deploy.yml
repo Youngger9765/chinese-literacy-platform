@@ -98,33 +98,44 @@ jobs:
       - name: "Assert serving backend revision runs this build (#3162)"
         run: |
           set -euo pipefail
-          WANT="${{ env.REGISTRY }}/backend:prod-${{ github.sha }}"
-          REV=$(gcloud run services describe ${{ env.BACKEND_SERVICE }} \
+          # Traffic must be on the revision this run created. The failure this
+          # guards is pinned mode: after anyone runs `update-traffic --to-revisions`
+          # once, every later deploy builds a revision and does not move traffic,
+          # with no warning, while the old revision keeps answering 200.
+          #
+          # Three earlier attempts here, and the first two were written without
+          # ever being run (#3166):
+          #   value(status.traffic.filter("percent=100").revisionName)
+          #        gcloud rejects it outright ("Transform function expected"), so
+          #        REV came back empty and this step failed a correct deploy.
+          #   --flatten plus --filter
+          #        `run services describe` does not accept --filter at all.
+          #   gcloud artifacts docker images describe, for a digest compare
+          #        needs artifactregistry.repositories.get, and the original
+          #        swallowed failure with `|| echo ""` -- so the comparison would
+          #        have silently vanished wherever that permission is missing.
+          # Comparing with latestReadyRevisionName needs no extra permission and
+          # targets the actual failure. Every command below was run against the
+          # live services before landing.
+          SERVING=$(gcloud run services describe ${{ env.BACKEND_SERVICE }} \
             --region ${{ env.REGION }} --project ${{ env.PROJECT_ID }} \
-            --format='value(status.traffic.filter("percent=100").revisionName)')
-          if [ -z "$REV" ]; then
-            echo "No revision is serving 100% of traffic — traffic may be split or pinned."
-            gcloud run services describe ${{ env.BACKEND_SERVICE }} \
-              --region ${{ env.REGION }} --project ${{ env.PROJECT_ID }} \
-              --format='value(status.traffic)'
+            --format='value(status.traffic)' \
+            | python3 -c 'import sys,ast; rows=[ast.literal_eval(l) for l in sys.stdin if l.strip()]; hit=[r for r in rows if r.get("percent")==100]; print(hit[0]["revisionName"] if hit else "")')
+          LATEST=$(gcloud run services describe ${{ env.BACKEND_SERVICE }} \
+            --region ${{ env.REGION }} --project ${{ env.PROJECT_ID }} \
+            --format='value(status.latestReadyRevisionName)')
+          echo "serving revision     : ${SERVING:-<none>}"
+          echo "latest ready revision: ${LATEST:-<none>}"
+          if [ -z "$SERVING" ]; then
+            echo "FAIL: no single revision serves 100% of traffic - split or pinned."
             exit 1
           fi
-          GOT=$(gcloud run revisions describe "$REV" \
-            --region ${{ env.REGION }} --project ${{ env.PROJECT_ID }} \
-            --format='value(spec.containers[0].image)')
-          echo "serving revision : $REV"
-          echo "its image        : $GOT"
-          echo "built this run   : $WANT"
-          # The live image is by digest, the built tag is by tag, so compare the
-          # tag's digest rather than the strings.
-          WANT_DIGEST=$(gcloud artifacts docker images describe "$WANT" \
-            --format='value(image_summary.digest)' 2>/dev/null || echo "")
-          if [ -n "$WANT_DIGEST" ] && [ "${GOT##*@}" != "$WANT_DIGEST" ]; then
-            echo "MISMATCH: the revision serving traffic is not running this build."
+          if [ "$SERVING" != "$LATEST" ]; then
+            echo "FAIL: traffic is on $SERVING but newest ready is $LATEST."
+            echo "Service is probably pinned. Fix: update-traffic --to-latest"
             exit 1
           fi
-          echo "OK — traffic is on this build."
-
+          echo "OK - traffic is on this build."
       - name: Verify backend health
         run: |
           URL=$(gcloud run services describe ${{ env.BACKEND_SERVICE }} \
@@ -203,33 +214,44 @@ jobs:
       - name: "Assert serving frontend revision runs this build (#3162)"
         run: |
           set -euo pipefail
-          WANT="${{ env.REGISTRY }}/frontend:prod-${{ github.sha }}"
-          REV=$(gcloud run services describe ${{ env.FRONTEND_SERVICE }} \
+          # Traffic must be on the revision this run created. The failure this
+          # guards is pinned mode: after anyone runs `update-traffic --to-revisions`
+          # once, every later deploy builds a revision and does not move traffic,
+          # with no warning, while the old revision keeps answering 200.
+          #
+          # Three earlier attempts here, and the first two were written without
+          # ever being run (#3166):
+          #   value(status.traffic.filter("percent=100").revisionName)
+          #        gcloud rejects it outright ("Transform function expected"), so
+          #        REV came back empty and this step failed a correct deploy.
+          #   --flatten plus --filter
+          #        `run services describe` does not accept --filter at all.
+          #   gcloud artifacts docker images describe, for a digest compare
+          #        needs artifactregistry.repositories.get, and the original
+          #        swallowed failure with `|| echo ""` -- so the comparison would
+          #        have silently vanished wherever that permission is missing.
+          # Comparing with latestReadyRevisionName needs no extra permission and
+          # targets the actual failure. Every command below was run against the
+          # live services before landing.
+          SERVING=$(gcloud run services describe ${{ env.FRONTEND_SERVICE }} \
             --region ${{ env.REGION }} --project ${{ env.PROJECT_ID }} \
-            --format='value(status.traffic.filter("percent=100").revisionName)')
-          if [ -z "$REV" ]; then
-            echo "No revision is serving 100% of traffic — traffic may be split or pinned."
-            gcloud run services describe ${{ env.FRONTEND_SERVICE }} \
-              --region ${{ env.REGION }} --project ${{ env.PROJECT_ID }} \
-              --format='value(status.traffic)'
+            --format='value(status.traffic)' \
+            | python3 -c 'import sys,ast; rows=[ast.literal_eval(l) for l in sys.stdin if l.strip()]; hit=[r for r in rows if r.get("percent")==100]; print(hit[0]["revisionName"] if hit else "")')
+          LATEST=$(gcloud run services describe ${{ env.FRONTEND_SERVICE }} \
+            --region ${{ env.REGION }} --project ${{ env.PROJECT_ID }} \
+            --format='value(status.latestReadyRevisionName)')
+          echo "serving revision     : ${SERVING:-<none>}"
+          echo "latest ready revision: ${LATEST:-<none>}"
+          if [ -z "$SERVING" ]; then
+            echo "FAIL: no single revision serves 100% of traffic - split or pinned."
             exit 1
           fi
-          GOT=$(gcloud run revisions describe "$REV" \
-            --region ${{ env.REGION }} --project ${{ env.PROJECT_ID }} \
-            --format='value(spec.containers[0].image)')
-          echo "serving revision : $REV"
-          echo "its image        : $GOT"
-          echo "built this run   : $WANT"
-          # The live image is by digest, the built tag is by tag, so compare the
-          # tag's digest rather than the strings.
-          WANT_DIGEST=$(gcloud artifacts docker images describe "$WANT" \
-            --format='value(image_summary.digest)' 2>/dev/null || echo "")
-          if [ -n "$WANT_DIGEST" ] && [ "${GOT##*@}" != "$WANT_DIGEST" ]; then
-            echo "MISMATCH: the revision serving traffic is not running this build."
+          if [ "$SERVING" != "$LATEST" ]; then
+            echo "FAIL: traffic is on $SERVING but newest ready is $LATEST."
+            echo "Service is probably pinned. Fix: update-traffic --to-latest"
             exit 1
           fi
-          echo "OK — traffic is on this build."
-
+          echo "OK - traffic is on this build."
       - name: Verify frontend health
         run: |
           URL=$(gcloud run services describe ${{ env.FRONTEND_SERVICE }} \
