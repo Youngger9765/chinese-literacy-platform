@@ -7,6 +7,8 @@
 >    否則 `specs/test_locks_have_red_evidence_spec.py` 會紅。
 
 ## 已驗過會咬
+- `test_rate_limiter_isolation_3171.py` — mutation：只拿掉 `ai_rate_limiter.reset()` → AI 那條隔離鎖 + 盤點鎖 2 failed，**TTS 那條照樣綠**；只拿掉 `tts_rate_limiter.reset()` → TTS 那條 + 盤點鎖 2 failed，**AI 那條照樣綠**（證明兩個是各自獨立鎖住的，不是一條鎖順便蓋到）；兩個都拿掉（回到出事前的樣子）→ 3 failed；還原 → 5 passed。原始缺陷是**實跑復現**的：PR #3170 的 CI 紅在 `test_teacher_api.py::...test_generate_ai_comment_uses_cached_comment_without_second_model_call`，`assert 429 == 200`，而同一份 code 本機全套 3981 passed。附兩條正向對照（限流器本身真的會擋第 6 次），否則「下一支拿到乾淨的」可能只是限流器整個壞掉
+- `test_qa_token_fail_closed_3160.py` — mutation（#3169 那輪，七條，兩組獨立跑出同樣結果）：閘門 404→503 → 6 failed 含兩條核心鎖；404→500 → 2 failed；**404→403（仍是 4xx）→ 只有 `disabled_returns_404` 紅，`disabled_is_not_a_5xx` 正確存活** —— 這條證明兩條新斷言不是同義重複，量的是範圍不是那個數字；detail 去掉設定名 → 可診斷性那條紅；`raise`→`return`（把 fail-closed 的門真的開掉）→ **12 failed**；route 層 503→404 → 範圍對照 + 既有未動的 `test_storage_down_503` 紅。⚠️ 這個檔在 2026-09-11 之前沒被任何 workflow 點名，它確實會被「Run the whole backend suite」跑到，但不受問責登記簿約束
 
 - `test_email_domain_validation.py` / `test_characterization_auth_phase2_co_teaching.py` / `test_characterization_auth_phase2_gamification.py` — 復現：三支都因 `POST /api/classrooms` 的跨校授權收緊而 403（2/15/10 筆），實跑確認非污染（單獨跑一樣紅）；補上 school 範圍角色後 16/15/10 passed。這三支的價值是它們**擋住把該授權放寬**：拿掉 `_make_school_member` 就回到 403 紅
 

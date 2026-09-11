@@ -64,6 +64,25 @@ def pytest_runtest_setup(item):
         join_preview_rate_limiter.reset()
     except (ImportError, AttributeError):
         pass
+    # #3171: ai_rate_limiter / tts_rate_limiter 原本漏在這裡之外。
+    #
+    # ai_rate_limiter 是模組層全域，key 是 `ai:{get_client_key(request)}`，而在
+    # TestClient 底下那個 key 對整套測試是同一個 —— 所以幾千支測試共用同一個預算。
+    # 它讓 PR #3170 的 CI 紅在一支跟那個 PR 毫無關係的測試上：老師端
+    # generate-ai-comment 掛 ai_limit_5_per_min（5 次／分鐘）而它自己要連打兩次，
+    # 於是前一分鐘內任何別的測試碰過 AI 端點就 429。同一份 code 本機全套是綠的。
+    #
+    # 不是某個 PR 弄壞的，是誰動到執行順序或耗時就會中獎 —— 而紅的地方跟改動無關，
+    # 看的人第一反應會是「CI 又壞了」。
+    #
+    # tts_rate_limiter 是同一個形狀、只是還沒中獎，所以一起補，不要只補咬到人的那個。
+    # 盤點鎖在 tests/test_rate_limiter_isolation_3171.py，新增限流器忘了補這裡會紅。
+    try:
+        from app.auth.rate_limiter import ai_rate_limiter, tts_rate_limiter
+        ai_rate_limiter.reset()
+        tts_rate_limiter.reset()
+    except (ImportError, AttributeError):
+        pass
 
 
 # ── 測試不准打真的 GCS ──────────────────────────────────────────────────────
