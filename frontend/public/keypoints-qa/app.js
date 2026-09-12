@@ -41,7 +41,11 @@
 
   // #2534: arm QA-board with the shared secret. Visit once with ?qa_token=<secret>
   // to persist it; sent as x-qa-token on save/reviews/review. No token → header
-  // omitted → backend stays open (no regression until QA_TOOLS_SHARED_SECRET is set).
+  // omitted → the request is refused. Since #3160 the backend is fail-closed when
+  // QA_TOOLS_SHARED_SECRET is unset, and since #3169 it answers 404 rather than 503
+  // (a 5xx gets stamped severity=ERROR by Cloud Run and pages someone for a week).
+  // It does NOT "stay open" — that sentence used to live here and said the opposite
+  // of what the code does, which is how the next person writes it back (#3188).
   try {
     const _qt = new URLSearchParams(location.search).get("qa_token");
     if (_qt) localStorage.setItem(NS + "qaToken", _qt);
@@ -920,7 +924,24 @@
     box.innerHTML = "<div class='cloud-row'>載入清單中…</div>";
     try {
       const res = await fetch(`${API}/api/keypoints-qa/reviews`, { headers: qaAuthHeaders() });
-      const j = await res.json();
+      // #3188: 後端拒絕時回的是「帶合法 JSON body 的非 2xx」，所以 res.json()
+      // 會成功、j.reviews 是 undefined、清單變空 —— 不看 res.ok 的話畫面就會
+      // 說「雲端沒有已存的 review」，而真相是這次根本沒讀到。
+      let j = null;
+      try {
+        j = await res.json();
+      } catch (_) {
+        /* 非 JSON 的錯誤頁 —— 下面靠狀態碼就夠了 */
+      }
+      // 共用檔萬一沒載到（快取到舊的 HTML、檔案被搬走），不可以連成功的回應
+      // 都變成錯誤 —— 退成只看狀態碼的最小判斷。
+      const why = window.qaCloud
+        ? window.qaCloud.failureMessage(res.status, j)
+        : res.ok ? null : `載入雲端 review 失敗（HTTP ${res.status}）`;
+      if (why) {
+        box.innerHTML = `<div class="cloud-row">${esc(why)}</div>`;
+        return;
+      }
       const list = (j && j.reviews) || [];
       if (!list.length) {
         box.innerHTML = "<div class='cloud-row'>雲端沒有已存的 review。</div>";
@@ -949,7 +970,21 @@
     if (!confirm("載回這筆 review?會覆寫本機對應課的標記/備註。")) return;
     try {
       const res = await fetch(`${API}/api/keypoints-qa/review?path=` + encodeURIComponent(path), { headers: qaAuthHeaders() });
-      const payload = await res.json();
+      // #3188: 少了這一段，被拒絕時 lessons 會是空陣列，然後最後那行
+      // alert 會說「已載回 0 課的 review」—— 對審查者宣告一次不存在的成功。
+      let payload = null;
+      try {
+        payload = await res.json();
+      } catch (_) {
+        /* 非 JSON 的錯誤頁 */
+      }
+      const why = window.qaCloud
+        ? window.qaCloud.failureMessage(res.status, payload)
+        : res.ok ? null : `載回失敗（HTTP ${res.status}）`;
+      if (why) {
+        alert(why);
+        return;
+      }
       const lessons = (payload && payload.lessons) || [];
       // 回填成本工具的 review 結構(findings 綁 row_key)
       lessons.forEach((L) => {

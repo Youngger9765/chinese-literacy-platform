@@ -391,6 +391,10 @@
 <script src="vendor/jszip.min.js" onerror="window.__noJSZip=true"></script>
 <script src="vendor/docx-preview.min.js" onerror="window.__noDocxPreview=true"></script>
 <script src="vendor/mammoth.browser.min.js" onerror="window.__noMammoth=true"></script>
+<!-- ⚠️ 呼叫端檢查的是 `window.qaCloud` 本身，不是這個旗標。onerror 只在**網路層**
+     失敗時發火，檔案抓到了但語法錯不會發 —— 檢查物件在不在兩種都涵蓋。
+     不要為了「跟上面三支 vendor 一致」把判斷改成 `!window.__noQaCloud`（#3188）。 -->
+<script src="../qa-shared/qaCloudResponse.js" onerror="window.__noQaCloud=true"></script>
 <script src="app.js"></script>
 </body>
 </html>
