@@ -1,5 +1,12 @@
 {
   "_comment": "#3195 型別檢查棘輪的基準。只算出貨程式碼（測試檔不算）。改這個檔要在 PR 裡說明。",
+  "_provenance": {
+    "derived_from": "npx tsc --noEmit，取 error 行、排除測試檔（*.test.* / *.spec.* / *.eval.* / __tests__ / __smoke__ / test(s) 路徑片段）",
+    "generated_by": "frontend/scripts/run-typecheck-ratchet.mjs --write-baseline",
+    "frozen_at": "2026-09-12T17:45:17.060Z",
+    "edition": "git eefb2dadd0fe",
+    "note": "⚠️ 這是產物不是真值。tsconfig、TypeScript 版本或排除規則改了，這個數字就會動 —— 重跑 --write-baseline，不要手改。"
+  },
   "schemaVersion": 2,
   "shippedErrors": 39,
   "entries": [

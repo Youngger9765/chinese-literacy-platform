@@ -49,8 +49,25 @@ if (unparsed.length > 0 && shipped.length === 0 && test.length === 0) {
 }
 
 if (process.argv.includes('--write-baseline')) {
+  // 這份基準是 pipeline 的產物，所以它必須說得出自己從哪來 ——
+  // 少了這幾行，下一個人會把 39 當成「真值」而不是「某一版某個指令的輸出」。
+  // （repo 既有的 test_golden_files_declare_provenance_spec.py 就是擋這件事的。）
+  let sha = 'unknown';
+  try {
+    // 用短 SHA：40 字元的十六進位字串會被 repo 的 secret 掃描器認成憑證
+    //（實測 40 字元 → 命中 azure_openai；12 字元 → 0 命中）。12 碼在這個 repo 足以唯一定位。
+    sha = execFileSync('git', ['rev-parse', '--short=12', 'HEAD'], { cwd: resolve(here, '..'), encoding: 'utf8' }).trim();
+  } catch { /* 不在 git 樹裡也要能產生基準，只是來源標成 unknown */ }
+
   writeFileSync(BASELINE, JSON.stringify({
     _comment: '#3195 型別檢查棘輪的基準。只算出貨程式碼（測試檔不算）。改這個檔要在 PR 裡說明。',
+    _provenance: {
+      derived_from: 'npx tsc --noEmit，取 error 行、排除測試檔（*.test.* / *.spec.* / *.eval.* / __tests__ / __smoke__ / test(s) 路徑片段）',
+      generated_by: 'frontend/scripts/run-typecheck-ratchet.mjs --write-baseline',
+      frozen_at: new Date().toISOString(),
+      edition: `git ${sha}`,
+      note: '⚠️ 這是產物不是真值。tsconfig、TypeScript 版本或排除規則改了，這個數字就會動 —— 重跑 --write-baseline，不要手改。',
+    },
     // 比對鍵的格式版本。改 keyOf 就要在 typecheckRatchet.mjs 把 CURRENT_SCHEMA_VERSION +1，
     // 這樣沒重建基準的情況會被直接認出來，而不是變成「一次多了 39 個錯」。
     schemaVersion: CURRENT_SCHEMA_VERSION,
