@@ -455,6 +455,50 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
     if (confirmed.has(vocabIdx)) return;
     setTouchSelected((prev) => (prev === vocabIdx ? null : vocabIdx));
   };
+
+  /**
+   * #3191 — iPad 上點詞語完全沒有反應：選起來又立刻被取消。
+   *
+   * 真環境量到的：同一頁同一個選擇器，滑鼠點得起來（選中 1 個）、觸控點不起來（0 個）。
+   * 根因是**一次互動發出兩個事件**，而 `onTouchStart` 與 `onClick` 都接到同一個
+   * 沒有防重入的 toggle 上：
+   *
+   *     觸控 tap : touchstart → pointerup:touch → click     ← 舊 code 收到 2 個
+   *     滑鼠 click:            pointerup:mouse → click      ← 舊 code 收到 1 個
+   *
+   * 改用 **pointerup**：上面兩種輸入各只發一次，所以沒有競爭可繞。
+   *
+   * ⛔ 試過但否決的兩條路：
+   *   - `preventDefault()` 擋掉模擬 click —— 有效，但會連帶擋掉「手指放在詞語方塊上
+   *     開始捲動」，而這個畫面的說明就寫著兩欄都可以捲動。
+   *   - 用時間戳認出模擬 click（「700 毫秒內的 click 不算」）—— 那是繞過競爭不是消掉它，
+   *     而且會**吃掉真的輸入**：iPad 配觸控板鍵盤時，觸控板點擊是真的滑鼠事件，
+   *     落在時間窗內就被靜靜丟掉。慢的裝置上模擬 click 晚於時間窗，原本的 bug 又回來。
+   *
+   * 三個實測（Chromium，觸控與滑鼠 context 各跑一次；元件同樣帶 draggable）：
+   *
+   *     單純 tap      pointerdown → touchstart → pointerup → touchend → click
+   *     拖曳          pointerdown → dragstart → drop → dragend          （沒有 pointerup）
+   *     從方塊起手捲動 pointerdown → touchstart → touchmove → pointercancel → … → touchend
+   *                                                          （沒有 pointerup，欄位捲了 495px）
+   *
+   * 所以拖曳與捲動都不會誤選 —— 瀏覽器在手勢變成捲動時送的是 pointercancel。
+   *
+   * ⚠️ 誠實說明：**只留 `onClick`（拿掉 onTouchStart）在我量過的每一種情境下行為相同**，
+   *    突變測試也證明我的鎖分不出這兩者 —— 它們鎖的是行為不是機制，這是刻意的。
+   *    選 pointerup 是判斷不是量測結果：模擬 click 是相容層產生的衍生事件，
+   *    它發不發受瀏覽器啟發式影響，而那正是這個 bug 的形狀來源；pointerup 對應的是
+   *    實際的指標放開。⛔ 我原本想寫「模擬 click 有 ~300ms 延遲」當理由，實測只有
+   *    2.4ms，那個理由不成立，已刪。
+   *
+   * ⚠️ 一個已知的取捨：`stopPropagation()` 現在掛在 pointerup 上，擋不住 2.4ms 後
+   *    才來的那個 click（不同的事件）。查過現況**沒有影響**：`DragDropMode` 沒有任何
+   *    祖先在接 onClick（`VocabDefinitionMatch.tsx` 那兩個 onClick 在別的分支的按鈕上），
+   *    全庫也沒有 document 層的 click 監聽。**沒有為此加一個只做 stopPropagation 的
+   *    onClick** —— 那是在防一個現在不存在的問題。將來若把這個元件包進「點外面關掉」
+   *    那種 click-based 的模式，要記得殘留的那個 click 不會被這裡擋下來。
+   */
+
   const handleSlotTap = (defIdx: number) => {
     if (demo !== null) return;
     if (touchSelected !== null) {
@@ -575,8 +619,16 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
               draggable={!isFlying && demo === null}
               onDragStart={() => !isFlying && handleDragStart(vocabIdx)}
               onDragEnd={handleDragEnd}
-              onTouchStart={(e) => { e.stopPropagation(); if (!isFlying) handleTouchStart(vocabIdx); }}
-              onClick={(e) => { e.stopPropagation(); if (!isFlying) handleTouchStart(vocabIdx); }}
+              onPointerUp={(e) => {
+                e.stopPropagation();
+                // pointerup 對**任何按鍵**都發，click 只對主鍵發 —— 少了這行，右鍵或中鍵
+                // 點詞語也會選起來（實測：右鍵 pointerup button=2 + auxclick、中鍵 button=1，
+                // 兩者都不發 click）。觸控的 pointerup 是 button=0，所以這條不會擋到手指。
+                // ⛔ 不可以改用 `!e.isPrimary`：實測左/右/中三種 isPrimary 都是 true
+                //    （它指的是主要指標不是主要按鍵），那樣寫等於沒擋。
+                if (e.button !== 0) return;
+                if (!isFlying) handleTouchStart(vocabIdx);
+              }}
               className={cls}
               style={{ fontFamily: zhuyinFont }}
             >
