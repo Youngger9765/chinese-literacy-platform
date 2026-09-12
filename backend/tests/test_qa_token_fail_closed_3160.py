@@ -195,7 +195,12 @@ class TestRefusalIsNotAnError:
         for i in range(5):
             with pytest.raises(HTTPException) as e:
                 qa.require_qa_token(x_qa_token=None)
-            assert e.value.status_code == 404, f"第 {i+1} 次沒有拒絕"
+            # pytest.raises 已經證明它拒絕了 —— 這條檢查的是「用哪個碼拒絕」。
+            # 訊息要講狀態碼，講「沒有拒絕」會讓看到紅燈的人去追一個不存在的問題（#3188）。
+            assert e.value.status_code == 404, (
+                f"第 {i+1} 次拒絕用的是 {e.value.status_code}，應為 404"
+                "（5xx 會被 Cloud Run 標成 severity=ERROR 觸發警報，見 #3169）"
+            )
 
 
 class TestDisabledIsNotAServerError:
