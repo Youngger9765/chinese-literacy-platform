@@ -40,6 +40,16 @@
 `poyin_db.json`，註解第 64 行寫 **「Replicates core logic of polyphonicProcessor.ts match()」**。
 — *讀檔*
 
+**B4-bis（2026-09-12 補：其實是五份）** `backend/app/services/dictionary_service.py`
+查**萌典 moedict**（`https://www.moedict.tw`，即教育部辭典），取 `h[]` 裡**第一個有真定義的
+異體字讀音**的 `b` 欄位當注音，存進 `DictionaryCache`（`source="moedict"`）。
+**對破音字不做語境判斷**（就是取第一個）。顯示在 `frontend/src/pages/student/DictionaryPage.tsx`
+—— **學生看得到**。— *實測（讀檔 ＋ 全庫掃描引用）*
+— *來源：`zhuyin-pm` agent 指出，我獨立驗證過*
+
+⭐ 它同時是個機會：**萌典已整合、已快取，而它提供的正是 pypinyin 缺的台灣讀音**。
+⚠️ 授權條款未查。
+
 **B5（B4 沒接線）** 全庫搜 `audit_polyphonic`，除了它自己與 `graphify` 的分析快取，
 只有 `docs/audit/polyphonic-audit-2026-05-01.md` 提到它。**沒有任何 workflow / skill /
 腳本叫用它。** — *實測（全庫掃描）*
@@ -157,6 +167,21 @@ BpmfIansui 字型**把 style-set 解碼成讀音。
 **而且我完全沒有過濾「這個詞有沒有落在學生真的會朗讀的重點段裡」。**
 真正到學生眼前的數量比 F1 少，少多少未知。— *自述限制*
 
+**F4（per-課 影響面 —— `zhuyin-pm` agent 量的，我沒有獨立重跑）**
+服務端 v3 樹、**依「課」去重**、179 課為分母：
+
+| | 課數 | 佔比 |
+|---|---|---|
+| 前端 `poyin_db` 會錯（了得／多難） | 11（含 L0130《正太與小豬》＝回報那課） | 6% |
+| 後端 pypinyin 會錯（災難類 12 個詞） | 32 | 18% |
+| 任一會錯 | **42** | **23%** |
+| 落在重點朗讀段（134 段，學生真的唸出聲） | 6 處 / 4 課，**全是後端那類** | |
+
+⭐ **沒人回報的後端問題，課數是被回報的前端問題的 3 倍。**
+⚠️ 這組數字**比 F1 可信**（F1 是檔案層級、灌水）。**決策請用 F4 不要用 F1。**
+⚠️ 只涵蓋 `了`／`難` 兩組詞，**不是**破音字的完整錯誤面。
+⚠️ 我沒有獨立重跑，標記為 agent 量測。
+
 **F3** `多難興邦` 在全庫 **0 處**。`難` 的 `多*` 規則（C4）要處理的情況，
 在這個語料庫裡一次都沒出現過。— *實測*
 
@@ -211,8 +236,25 @@ TTS 那一端還沒進來，**三端比對仍未做**。— *自述限制*
 **G4** **#1353 已 CLOSED**（label `ai-qa-passed`、`merged-to-staging`），
 而報告末尾的四條 Next Steps **全部未打勾**。— *實測（`gh issue view`）*
 
-**G5** 報告最後一條待辦至今未確認：「確認 `喝` 的**注音顯示**（不只 TTS）是不是也錯」。
-— *讀檔*
+**G5（2026-09-12 更正 —— 我原本寫錯了）** 報告末尾那條待辦「確認 `喝` 的注音顯示
+（不只 TTS）是不是也錯」**checkbox 未打勾是事實，但事情當晚就做完了**：
+
+```
+commit 2fd203bb2  2026-05-01 21:30
+fix(poyin): add 喝彩 polyphonic pattern to 喝 entry (Refs #1357)
+-  "*令/*采/呼*"
++  "*令/*采/*彩/呼*"
+```
+
+在 `origin/main` 與 `origin/staging` 都是祖先；線上現值 `{"s":2,"v":["","*令/*采/*彩/呼*"]}`。
+而且 `*采` 在那之前**就已經在表裡** —— 所以稽核報告自己那句
+「Still uses default font rendering … not yet overridden in poyin_db.json」當時也是錯的。
+— *實測（`git show` ＋ `merge-base --is-ancestor` ＋ 線上 JSON）*
+
+⭐ **這條更正改變診斷**：不是「這個 repo 做不完事」，是
+**「每次都把止血做完，每次都沒把結構做完」**。後者才是要防的東西。
+⚠️ 我驗的是資料表含有那個 pattern，**沒有跑 processor**，所以「畫面現在是對的」仍是推論。
+— *來源：`zhuyin-pm` agent 指出，我獨立驗證過*
 
 **G6** `tts/normalization.py:60-77` 的 docstring 記錄了一個判斷：
 手維護清單「不會收斂 —— 2026-05-01 的稽核找出 4298 項要複查、只有 22 項曾被修掉，
