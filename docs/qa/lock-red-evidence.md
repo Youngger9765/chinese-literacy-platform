@@ -55,6 +55,11 @@
 - `test_module_docstrings_name_real_things_spec.py`（#2712）— mutation：把一支不存在的 API 加回 docstring → 1 failed；把解析器的縮排條件改壞 → 正向對照 2 failed；還原 → 4 passed。⭐ 起因：`lesson_layer_loaders.py` 的 docstring 列著**五支根本不存在的函式**。⚠️ 我第一次只拿掉兩支，因為 `grep "^def load_layer1_lessons"` 回 0 看起來像「其餘還在」——**正向對照也回 0**，那個 0 什麼都不證明。這條鎖用 `hasattr` 直接問模組，不用 grep
 - `test_review_flag_lives_at_the_top_2919.py`（#2919）— mutation：把巢狀旗標放回 L0139 → 1 failed；**把 30 課人手寫的 `char_marks_note` 清掉 → 正向對照 1 failed**；還原 → 4 passed。⚠️ 我第一版的清理連 `char_marks_note` / `review_reason_note` 一起 pop，一口氣刪掉 178 行 / 30 檔的人工分析（「右緣累計字數只印到 400，p2 之後那一欄是空的 —— 原稿如此，不是漏抽」那種）—— 看 diff 才發現，正是 PDCA 裡「刪證據 ≠ 消除矛盾」那條
 
+- `test_font_readings_match_shipped_font_3177.py` ＋ `frontend/src/components/zhuyin/polyphonicReadings.test.ts` — mutation（**五條全部咬中**，baseline 94 vitest ＋ 4 pytest 全綠）：把 `d: 1` 加回「行」→ 5 vitest failed（四條行的讀音 ＋ 棘輪），**著 的七條照樣綠**；加回「著」→ 4 failed（三條著 ＋ 棘輪），**行 的照樣綠**（兩個字各自獨立鎖住，不是一條鎖順便蓋到）；改壞 fixture 裡「行」的 `ss01`（模擬讀音表跟字型漂掉）→ **pytest `test_fixture_matches_the_shipped_font` 紅** ＋ 3 vitest；從 fixture 刪掉「著」→ **pytest `test_fixture_covers_every_polyphonic_char_in_poyin_db` 紅** ＋ 7 vitest（覆蓋率破洞會讓 `readingOf()` 回 null，而 `not.toBe()` 對 null 是恆真的 —— 這條擋的就是那個）；`styleSetMapper` 的 `j > default` 分支改成 off-by-one → 16 vitest failed。還原 → 94 ＋ 4 全綠。
+  **未修的父版資料（`origin/staging` 的 `poyin_db.json`，行／著 都帶 `d: 1`）跑最終版測試 → 8 failed / 25 passed**。原始缺陷是**實跑處理器復現**的：把真的 `poyin_db.json` 餵進真的 `PolyphonicProcessor.process()`，跑遍服務端 `backend/data/lessons` 全樹（去重 76265 段文字）→ `行`／`著` 共 **6050 處，拿掉 `d` 之後 5607 處（92.7%）讀音會變**（行 2817、著 2790）。修正前「著」讀 ㄓㄨˋ（著作）2751 次而讀 ㄓㄜ˙（看著／穿著）只有 39 次 —— 那個分布本身就是倒置的證據。
+  ⭐ **這兩支存在的理由是：既有的 `polyphonicProcessor.test.ts` 44 條全綠，而它鎖住的是一個錯的信念。** 那些斷言停在 styleSet 字串（`expect(...).toBe('ss01')`），註解寫「ss01 = xíng二聲」，而出貨字型說 `行` 的 ss01 是 **hang2**；它還餵自己捏的 fixture（`d: 1` 是手寫進去的），所以連真的 `poyin_db.json` 對不對都沒在驗。新的斷言改成打在**字型會畫出來的讀音**上，真值由 `backend/scripts/extract_font_readings.py` 從 TTF 抽出來。那九條錯的已從舊檔移除。
+  ⚠️ **`frontend/public/**` 原本兩支 workflow 都沒涵蓋** —— 只改 `poyin_db.json` 的 PR **不會跑任何測試**（pytest 只認 `backend/**`，frontend-checks 只認 `frontend/src/**`）。鎖建了沒插電的老問題，本 PR 一併補上；後端那三個跨語言路徑則是被既有的 `test_cross_language_paths_are_in_the_ci_filter` 當場咬紅才補進去的
+
 ## grandfathered（既有債，未逐支驗過）
 
 2026-08-28 一次插電 104 支，其中 **95 支沒有逐支驗過它會咬**。
