@@ -4,8 +4,15 @@
 ## 為什麼需要這支
 
 `frontend/public/data/poyin_db.json` **沒有讀音**，它只有 pattern 與變體索引。
-讀音在**字型裡**：`BpmfZihiSerif-Regular.ttf` 的 cmap format 14 把「基字 + U+E01Ex」
-對到 `uniXXXX.ssNN`，而那些 glyph 是複合字元，第一個元件就叫 `z_<拼音><聲調>`。
+讀音在**字型裡**：`BpmfZihiSerif-Regular.ttf` 的 `post` 表把變體字符命名為
+`uniXXXX.ssNN`，而那些字符是**複合字符**（composite glyph），
+它的第一個元件就叫 `z_<拼音><聲調>`。走 `post` → `loca` → `glyf` 三張表就拿得到。
+
+⚠️ 讀的是 `post` 表的字符名稱，**不是** cmap format 14、**不是** GSUB。
+   （這份說明原本寫成走 cmap/GSUB，而 code 從來沒那樣做 ——
+     註解宣稱的事情 code 沒做，正是 #3177 那個 bug 的形狀，所以改掉。）
+   2026-09-12 的複審用 `fontTools` 走**真正的 GSUB stylistic-set lookup** 獨立重算過，
+   兩邊對 行／著／了／難／得 完全一致 —— 實作是對的，只有說明寫錯。
 
     難  0000→z_nan2   ss01→z_nan4   ss02→z_nuo2
     行  0000→z_xing2  ss01→z_hang2  ss02→z_xing4  ss03→z_hang4
@@ -30,7 +37,15 @@
     python3 backend/scripts/extract_font_readings.py <font.ttf> [字 字 ...]
     python3 backend/scripts/extract_font_readings.py frontend/public/fonts/BpmfZihiSerif-Regular.ttf 難 行 著
 
-不給字就輸出完整 JSON 到 stdout。
+不給字就輸出完整 JSON 到 stdout（13000+ 字）。
+
+**重生前端那份 fixture**（換字型或改了本腳本之後）：
+
+    python3 backend/scripts/extract_font_readings.py --write-fixture
+
+它只留 `poyin_db.json` 裡有變體的那 541 個字，寫進
+`frontend/src/components/zhuyin/__fixtures__/fontReadings.generated.json`。
+⛔ 那個檔不要手改 —— `test_font_readings_match_shipped_font_3177.py` 會比對。
 
 ⚠️ 唯讀：不寫任何檔、不連網、不改字型。
 
@@ -73,88 +88,6 @@ def post_names(d,off,ln):
             j=i-258
             out.append(names[j] if j<len(names) else "?%d"%i)
     return out, ver
-
-def cmap_unicode(d,off):
-    f=F(d); n=f.u16(off+2); best=None
-    for i in range(n):
-        o=off+4+8*i
-        pid=f.u16(o); eid=f.u16(o+2); so=f.u32(o+4)
-        fmt=f.u16(off+so)
-        if fmt==4 and (pid==3 and eid in (1,10)): best=(off+so,4)
-        if fmt==12 and pid==3 and eid==10: best=(off+so,12); break
-    if not best: return {}
-    o,fmt=best; m={}
-    if fmt==4:
-        segX2=f.u16(o+6); seg=segX2//2
-        ends=[f.u16(o+14+2*i) for i in range(seg)]
-        starts=[f.u16(o+16+segX2+2*i) for i in range(seg)]
-        deltas=[f.i16(o+16+2*segX2+2*i) for i in range(seg)]
-        rangeOffBase=o+16+3*segX2
-        rangeOffs=[f.u16(rangeOffBase+2*i) for i in range(seg)]
-        for i in range(seg):
-            for c in range(starts[i],min(ends[i],0xFFFF)+1):
-                if rangeOffs[i]==0: g=(c+deltas[i])&0xFFFF
-                else:
-                    gi=rangeOffBase+2*i+rangeOffs[i]+2*(c-starts[i])
-                    if gi+1>=len(d): continue
-                    g=f.u16(gi)
-                    if g: g=(g+deltas[i])&0xFFFF
-                if g: m[c]=g
-    else:
-        ng=f.u32(o+12)
-        for i in range(ng):
-            b=o+16+12*i
-            s=f.u32(b); e=f.u32(b+4); gs=f.u32(b+8)
-            if e-s>0x20000: continue
-            for c in range(s,e+1): m[c]=gs+(c-s)
-    return m
-
-def gsub_ss(d,off):
-    """return {featureTag: [lookupIndex,...]}, and lookup list offset"""
-    f=F(d)
-    scriptOff=f.u16(off+4); featOff=f.u16(off+6); lookOff=f.u16(off+8)
-    fo=off+featOff
-    nf=f.u16(fo); feats={}
-    for i in range(nf):
-        o=fo+2+6*i
-        tag=d[o:o+4].decode("latin1"); fto=f.u16(o+4)
-        ft=fo+fto
-        nl=f.u16(ft+2)
-        lks=[f.u16(ft+4+2*j) for j in range(nl)]
-        feats.setdefault(tag,[]).extend(lks)
-    return feats, off+lookOff
-
-def coverage(d,o):
-    f=F(d); fmt=f.u16(o); gl=[]
-    if fmt==1:
-        n=f.u16(o+2); gl=[f.u16(o+4+2*i) for i in range(n)]
-    else:
-        n=f.u16(o+2)
-        for i in range(n):
-            b=o+4+6*i
-            s=f.u16(b); e=f.u16(b+2); si=f.u16(b+4)
-            gl+= list(range(s,e+1))
-    return gl
-
-def single_subst(d,lookupListOff,lkIdx):
-    f=F(d); n=f.u16(lookupListOff)
-    if lkIdx>=n: return {}
-    lo=lookupListOff+f.u16(lookupListOff+2+2*lkIdx)
-    lt=f.u16(lo); nsub=f.u16(lo+4)
-    out={}
-    for i in range(nsub):
-        so=lo+f.u16(lo+6+2*i)
-        if lt!=1: continue
-        fmt=f.u16(so); cov=coverage(d,so+f.u16(so+2))
-        if fmt==1:
-            delta=f.i16(so+4)
-            for g in cov: out[g]=(g+delta)&0xFFFF
-        else:
-            cnt=f.u16(so+4)
-            for j,g in enumerate(cov):
-                if j<cnt: out[g]=f.u16(so+6+2*j)
-    return out
-
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 複合字符 → 第一個注音元件
@@ -231,10 +164,37 @@ def build_reading_table(font_path):
     return out
 
 
+#: 專案裡的預設路徑（--write-fixture 用）
+_REPO = pathlib.Path(__file__).resolve().parents[2]
+_FONT = _REPO / "frontend/public/fonts/BpmfZihiSerif-Regular.ttf"
+_POYIN = _REPO / "frontend/public/data/poyin_db.json"
+_FIXTURE = _REPO / "frontend/src/components/zhuyin/__fixtures__/fontReadings.generated.json"
+
+
+def write_fixture() -> None:
+    """只留 poyin_db 有變體的字，寫成前端斷言用的讀音表。"""
+    import json
+
+    table = build_reading_table(str(_FONT))
+    db = json.loads(_POYIN.read_text(encoding="utf-8"))["data"]
+    wanted = sorted(ch for ch, e in db.items() if isinstance(e, dict) and e.get("v"))
+    missing = [ch for ch in wanted if ch not in table]
+    if missing:
+        raise SystemExit(f"這些字有變體卻不在字型裡，先查清楚再重生：{missing[:20]}")
+    out = {ch: table[ch] for ch in wanted}
+    _FIXTURE.write_text(
+        json.dumps(out, ensure_ascii=False, indent=1, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    print(f"寫入 {_FIXTURE.relative_to(_REPO)}：{len(out)} 個字")
+
+
 if __name__ == "__main__":
     import json
     if len(sys.argv) < 2:
         raise SystemExit(__doc__)
+    if sys.argv[1] == "--write-fixture":
+        write_fixture()
+        raise SystemExit(0)
     table = build_reading_table(sys.argv[1])
     wanted = sys.argv[2:]
     if wanted:

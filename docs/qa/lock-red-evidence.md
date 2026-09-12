@@ -61,6 +61,10 @@
   ⚠️ **fail-closed 那條是 mutation 逼出來的**：第一輪它 survived —— 真實語料 25080 條字串裡 pypinyin 一次都沒對不上，**沒有輸入走得到那個分支，它等於沒被測**。補 monkeypatch 才咬得到。中文分支那條同病，由 code review 指出後補。
   ⚠️ **裁判改過兩次，兩次都是它自己太寬或太嚴**：第一版太嚴（pypinyin 的上下文輕聲變調 意思→ㄙ˙、弟弟→ㄉㄧ˙ 不在字典異讀表裡，那是對的讀音）；改成「聲韻母對得上就原諒輕聲」之後**太寬** —— code review 當場示範 `is_legal('這','ㄓㄜ˙')` 回 True，而 ㄓㄜ˙ 是「著」的讀音，常用字裡這種碰撞有 33 對，**正好是這支鎖要擋的那一類**。最終改成逐筆白名單（跑遍全語料實測出來就 5 筆）。
   ⚠️ **我自己的形狀檢查第一版是錯的**：`[ㄅ-ㄦ]` 漏掉排在 ㄦ 後面的三個介音 ㄧㄨㄩ(U+3127–3129)，「育」(ㄩˋ)、「一」(ㄧ) 當場被判成不是注音 —— **純中文正向對照立刻紅**，那正是正向對照存在的理由
+- `test_font_readings_match_shipped_font_3177.py` ＋ `frontend/src/components/zhuyin/polyphonicReadings.test.ts` — mutation（**五條全部咬中**，baseline 94 vitest ＋ 4 pytest 全綠）：把 `d: 1` 加回「行」→ 5 vitest failed（四條行的讀音 ＋ 棘輪），**著 的七條照樣綠**；加回「著」→ 4 failed（三條著 ＋ 棘輪），**行 的照樣綠**（兩個字各自獨立鎖住，不是一條鎖順便蓋到）；改壞 fixture 裡「行」的 `ss01`（模擬讀音表跟字型漂掉）→ **pytest `test_fixture_matches_the_shipped_font` 紅** ＋ 3 vitest；從 fixture 刪掉「著」→ **pytest `test_fixture_covers_every_polyphonic_char_in_poyin_db` 紅** ＋ 7 vitest（覆蓋率破洞會讓 `readingOf()` 回 null，而 `not.toBe()` 對 null 是恆真的 —— 這條擋的就是那個）；`styleSetMapper` 的 `j > default` 分支改成 off-by-one → 16 vitest failed。還原 → 94 ＋ 4 全綠。
+  **未修的父版資料（`origin/staging` 的 `poyin_db.json`，行／著 都帶 `d: 1`）跑最終版測試 → 8 failed / 25 passed**。原始缺陷是**實跑處理器復現**的：把真的 `poyin_db.json` 餵進真的 `PolyphonicProcessor.process()`，跑遍服務端 `backend/data/lessons` 全樹（去重 76265 段文字）→ `行`／`著` 共 **6050 處，拿掉 `d` 之後 5607 處（92.7%）讀音會變**（行 2817、著 2790）。修正前「著」讀 ㄓㄨˋ（著作）2751 次而讀 ㄓㄜ˙（看著／穿著）只有 39 次 —— 那個分布本身就是倒置的證據。
+  ⭐ **這兩支存在的理由是：既有的 `polyphonicProcessor.test.ts` 44 條全綠，而它鎖住的是一個錯的信念。** 那些斷言停在 styleSet 字串（`expect(...).toBe('ss01')`），註解寫「ss01 = xíng二聲」，而出貨字型說 `行` 的 ss01 是 **hang2**；它還餵自己捏的 fixture（`d: 1` 是手寫進去的），所以連真的 `poyin_db.json` 對不對都沒在驗。新的斷言改成打在**字型會畫出來的讀音**上，真值由 `backend/scripts/extract_font_readings.py` 從 TTF 抽出來。那九條錯的已從舊檔移除。
+  ⚠️ **`frontend/public/**` 原本兩支 workflow 都沒涵蓋** —— 只改 `poyin_db.json` 的 PR **不會跑任何測試**（pytest 只認 `backend/**`，frontend-checks 只認 `frontend/src/**`）。鎖建了沒插電的老問題，本 PR 一併補上；後端那三個跨語言路徑則是被既有的 `test_cross_language_paths_are_in_the_ci_filter` 當場咬紅才補進去的
 
 ## grandfathered（既有債，未逐支驗過）
 
