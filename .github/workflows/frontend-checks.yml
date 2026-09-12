@@ -60,6 +60,13 @@ jobs:
               - 'frontend/eslint.config.js'
               - 'frontend/package.json'
               - 'frontend/vite.config.ts'
+              # #3195：棘輪自己的腳本與基準檔 —— 不列進來的話，改到門本身的 PR
+              # 不會跑它，那正是「鎖建了沒插電」的老問題
+              - 'frontend/scripts/**'
+              - 'frontend/typecheck-baseline.json'
+              # tsconfig 決定 tsc 掃什麼、多嚴（含 #3195 加的 exclude）——
+              # 只改它的 PR 不跑這道門的話，等於門可以被無聲地改掉
+              - 'frontend/tsconfig.json'
               - '.github/workflows/frontend-checks.yml'
 
   frontend-checks:
@@ -84,6 +91,20 @@ jobs:
       - name: Lint (ESLint — errors block PR, warnings pass)
         working-directory: frontend
         run: npm run lint
+
+      # #3195 型別檢查棘輪：出貨程式碼的 tsc 錯誤數只准降不准升。
+      #
+      # tsc 從來沒進過 CI（build 是裸 vite build，esbuild 只轉譯不檢查型別），
+      # 而這個 repo 反覆出現的「抽對了、門全綠、學生看不到」正是前後端形狀不一致。
+      #
+      # 接線當下出貨程式碼有 39 個既有錯誤，所以門是「不准變多」而不是「歸零」——
+      # 歸零的門第一天就會被關掉。測試檔的 113 個不算（那些不會讓學生看到壞畫面，
+      # 算進來只會讓這道門變成每個 PR 都要繞過的障礙）。
+      #
+      # 基準在 frontend/typecheck-baseline.json，改它是一個看得見的 diff。
+      - name: Typecheck ratchet (#3195 — shipped-code tsc errors may not increase)
+        working-directory: frontend
+        run: npm run typecheck:ratchet
 
       # Render-smoke gate (#2289) + explicitly-pinned regression locks. Scoped to
       # named files on purpose: the wider vitest suite has ~38 pre-existing

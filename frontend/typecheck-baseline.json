@@ -1,0 +1,209 @@
+{
+  "_comment": "#3195 型別檢查棘輪的基準。只算出貨程式碼（測試檔不算）。改這個檔要在 PR 裡說明。",
+  "_provenance": {
+    "derived_from": "npx tsc --noEmit，取 error 行、排除測試檔（*.test.* / *.spec.* / *.eval.* / __tests__ / __smoke__ / test(s) 路徑片段）",
+    "generated_by": "frontend/scripts/run-typecheck-ratchet.mjs --write-baseline",
+    "frozen_at": "2026-09-12T17:45:17.060Z",
+    "edition": "git eefb2dadd0fe",
+    "note": "⚠️ 這是產物不是真值。tsconfig、TypeScript 版本或排除規則改了，這個數字就會動 —— 重跑 --write-baseline，不要手改。"
+  },
+  "schemaVersion": 2,
+  "shippedErrors": 39,
+  "entries": [
+    {
+      "file": "src/components/layout/Sidebar.tsx",
+      "code": "TS2322",
+      "text": "Type '(options?: { skipJunyiRedirect?: boolean; }) => void' is not assignable to type 'MouseEventHandler<HTMLButtonElement>'."
+    },
+    {
+      "file": "src/components/reading-spotlight/BlockSequenceRenderer.tsx",
+      "code": "TS2322",
+      "text": "Type 'unknown' is not assignable to type 'ReactNode'."
+    },
+    {
+      "file": "src/components/reading-spotlight/BlockSequenceRenderer.tsx",
+      "code": "TS2339",
+      "text": "Property 'length' does not exist on type 'unknown'."
+    },
+    {
+      "file": "src/components/reading-spotlight/BlockSequenceRenderer.tsx",
+      "code": "TS2339",
+      "text": "Property 'length' does not exist on type 'unknown'."
+    },
+    {
+      "file": "src/components/reading-spotlight/BlockSequenceRenderer.tsx",
+      "code": "TS2339",
+      "text": "Property 'map' does not exist on type 'unknown'."
+    },
+    {
+      "file": "src/components/reading-spotlight/BlockSequenceRenderer.tsx",
+      "code": "TS2339",
+      "text": "Property 'map' does not exist on type 'unknown'."
+    },
+    {
+      "file": "src/components/reading-spotlight/BlockSequenceRenderer.tsx",
+      "code": "TS2339",
+      "text": "Property 'rows' does not exist on type 'SpotlightTableBlock | SpotlightFillTableBlock | SpotlightUnknownBlock'."
+    },
+    {
+      "file": "src/components/reading-spotlight/BlockSequenceRenderer.tsx",
+      "code": "TS2345",
+      "text": "Argument of type 'SpotlightFigureBlock | SpotlightUnknownBlock' is not assignable to parameter of type '{ asset?: string; bind_paragraph?: string | number; }'."
+    },
+    {
+      "file": "src/components/reading-spotlight/BlockSequenceRenderer.tsx",
+      "code": "TS2345",
+      "text": "Argument of type 'unknown' is not assignable to parameter of type 'string | number'."
+    },
+    {
+      "file": "src/components/reading-spotlight/BlockSequenceRenderer.tsx",
+      "code": "TS2345",
+      "text": "Argument of type 'unknown' is not assignable to parameter of type 'string'."
+    },
+    {
+      "file": "src/components/reading-spotlight/BlockSequenceRenderer.tsx",
+      "code": "TS2740",
+      "text": "Type '{}' is missing the following properties from type 'OrderingBlockItem[]': length, pop, push, concat, and 29 more."
+    },
+    {
+      "file": "src/components/reading-spotlight/spotlightBlockLogic.ts",
+      "code": "TS2339",
+      "text": "Property 'length' does not exist on type 'unknown'."
+    },
+    {
+      "file": "src/components/reading-steps/ComprehensionChat.tsx",
+      "code": "TS2322",
+      "text": "Type 'StrategyExercise | StrategyExerciseItem[]' is not assignable to type 'StrategyExercise'."
+    },
+    {
+      "file": "src/components/reading-steps/FloatingAIHelper.tsx",
+      "code": "TS2339",
+      "text": "Property 'isComposing' does not exist on type 'KeyboardEvent<HTMLTextAreaElement>'."
+    },
+    {
+      "file": "src/components/reading-steps/KeyPassageReading.tsx",
+      "code": "TS2304",
+      "text": "Cannot find name 'KeyPassageReadingStepData'."
+    },
+    {
+      "file": "src/components/reading-steps/KeyPassageReading.tsx",
+      "code": "TS2304",
+      "text": "Cannot find name 'KeyPassageReadingStepData'."
+    },
+    {
+      "file": "src/components/reading-steps/KnowledgeStation.tsx",
+      "code": "TS2339",
+      "text": "Property 'duration' does not exist on type '{ title: string; url: string; }'."
+    },
+    {
+      "file": "src/components/reading-steps/KnowledgeStation.tsx",
+      "code": "TS2339",
+      "text": "Property 'source' does not exist on type '{ title: string; url: string; }'."
+    },
+    {
+      "file": "src/components/reading-steps/StoryStructureTable.tsx",
+      "code": "TS2339",
+      "text": "Property 'slice' does not exist on type 'never'."
+    },
+    {
+      "file": "src/components/stroke-order/useStrokeCanvasRenderer.ts",
+      "code": "TS2554",
+      "text": "Expected 1 arguments, but got 0."
+    },
+    {
+      "file": "src/components/stroke-order/useStrokeCanvasRenderer.ts",
+      "code": "TS2554",
+      "text": "Expected 1 arguments, but got 0."
+    },
+    {
+      "file": "src/components/stroke-order/useStrokeCanvasRenderer.ts",
+      "code": "TS2554",
+      "text": "Expected 1 arguments, but got 0."
+    },
+    {
+      "file": "src/hooks/useStepProgressPersistence.ts",
+      "code": "TS2353",
+      "text": "Object literal may only specify known properties, and 'isProgressLoading' does not exist in type 'UseStepProgressPersistenceReturn'."
+    },
+    {
+      "file": "src/layouts/LearningLayout.tsx",
+      "code": "TS2339",
+      "text": "Property 'isProgressLoading' does not exist on type 'UseStepProgressPersistenceReturn'."
+    },
+    {
+      "file": "src/pages/admin/AdminDashboard.tsx",
+      "code": "TS2304",
+      "text": "Cannot find name 'setSelectedNode'."
+    },
+    {
+      "file": "src/pages/admin/AdminDashboard.tsx",
+      "code": "TS2304",
+      "text": "Cannot find name 'setSelectedNode'."
+    },
+    {
+      "file": "src/pages/admin/AdminDashboard.tsx",
+      "code": "TS2304",
+      "text": "Cannot find name 'setSelectedNode'."
+    },
+    {
+      "file": "src/pages/admin/UsersPanel.tsx",
+      "code": "TS2345",
+      "text": "Argument of type '(p: any) => number' is not assignable to parameter of type 'number'."
+    },
+    {
+      "file": "src/pages/admin/UsersPanel.tsx",
+      "code": "TS2345",
+      "text": "Argument of type '(p: any) => number' is not assignable to parameter of type 'number'."
+    },
+    {
+      "file": "src/pages/app/NoTeacherPage.tsx",
+      "code": "TS2322",
+      "text": "Type '(options?: { skipJunyiRedirect?: boolean; }) => void' is not assignable to type 'MouseEventHandler<HTMLButtonElement>'."
+    },
+    {
+      "file": "src/pages/app/NoTeacherPage.tsx",
+      "code": "TS2339",
+      "text": "Property 'classroom_name' does not exist on type 'ClassroomResponse'."
+    },
+    {
+      "file": "src/pages/student/StudentProfile.tsx",
+      "code": "TS2339",
+      "text": "Property 'current_streak' does not exist on type 'StreakInfo'."
+    },
+    {
+      "file": "src/pages/student/StudentProfile.tsx",
+      "code": "TS2339",
+      "text": "Property 'longest_streak' does not exist on type 'StreakInfo'."
+    },
+    {
+      "file": "src/pages/teacher/ClassroomDetail.tsx",
+      "code": "TS2322",
+      "text": "Type '(student: StudentInClassroomResponse) => Promise<void>' is not assignable to type '(student: { id: number; username: string; full_name?: string; }) => void'."
+    },
+    {
+      "file": "src/pages/teacher/ClassroomTabs.tsx",
+      "code": "TS2322",
+      "text": "Type '(student: { id: number; username: string; full_name?: string; }) => void' is not assignable to type '(s: StudentInClassroomResponse) => void'."
+    },
+    {
+      "file": "src/pages/teacher/components/CrossTextChartGrid.tsx",
+      "code": "TS2322",
+      "text": "Type '(_: string, payload: Array<{ payload: { title: string | null; }; }>) => string' is not assignable to type '((label: ReactNode, payload: readonly Payload<number, string>[]) => ReactNode) & ((label: any, payload: Payload<number, string>[]) => ReactNode)'."
+    },
+    {
+      "file": "src/services/api.ts",
+      "code": "TS2322",
+      "text": "Type 'any[] | Record<string, any>' is not assignable to type 'StrategyExercise | StrategyExerciseItem[]'."
+    },
+    {
+      "file": "src/services/api.ts",
+      "code": "TS2739",
+      "text": "Type 'Record<string, any>' is missing the following properties from type 'SpotlightV2': lesson, strategy_name, strategy_type, blocks"
+    },
+    {
+      "file": "src/utils/textDiff.ts",
+      "code": "TS2440",
+      "text": "Import declaration conflicts with local declaration of 'DiffToken'."
+    }
+  ]
+}
