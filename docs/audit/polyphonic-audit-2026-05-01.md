@@ -1,5 +1,13 @@
 # 破音字標注 Audit — 2026-05-01
 
+> ⚠️ **2026-09-12 更新**：`backend/scripts/audit_polyphonic.py` 已刪除。
+> 它的註解自己寫著「Replicates core logic of polyphonicProcessor.ts match()」——
+> 量的是抄本不是本尊，而且**從來沒有被任何 workflow / skill / 腳本叫用過**
+> （2026-09-12 全庫掃描：code 引用 0，只有文件提及）。
+> 讀音的真值在出貨字型裡，抽法見 `backend/scripts/extract_font_readings.py`。
+> 本報告與 `backend/data/audit/polyphonic-audit.json` 保留為歷史紀錄，不再重新產生。
+
+
 Issue: #1353 | Phase 1 (Audit Only — no fixes applied)
 
 ## Background
