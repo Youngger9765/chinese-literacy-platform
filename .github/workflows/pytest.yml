@@ -153,6 +153,7 @@ jobs:
             tests/test_every_lesson_detail_validates_2725.py \
             tests/test_every_module_has_a_named_guard_2872.py \
             tests/test_every_module_has_a_skill_2843.py \
+            tests/test_font_is_taiwan_reading_authority_3173.py \
             tests/test_followup_never_vanishes_2964.py \
             tests/test_gate_uses_current_step_ids_2730.py \
             tests/test_goal_box_self_check_entry_2752.py \

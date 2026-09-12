@@ -7,6 +7,7 @@
 >    否則 `specs/test_locks_have_red_evidence_spec.py` 會紅。
 
 ## 已驗過會咬
+- `test_font_is_taiwan_reading_authority_3173.py` — mutation：把抽取器產出的台灣音整批換成大陸音（han4→he2、qi2→qi1、xie3→xue4…）→ **12 failed**，正好是那 12 條台灣音斷言；缺口組（液／癌）、表錯組（蛻／蠕）與 pypinyin 對照 5 條正確存活。還原 → 17 passed。⭐ 這條守的是**換字型時不可以把台灣音換掉** —— 字型是注音顯示的讀音真值，換成大陸讀音的字型會讓全站注音默默錯掉，而沒有任何其他測試看得到。附三組刻意的反向斷言：`液`／`癌` **斷言字型「沒有」台灣音**（哪天補上會紅，那是好消息不是壞消息），`蛻`／`蠕` **斷言字型對、`taiwan_pronunciation.json` 那兩列錯**（防止有人反過來去「修正」字型配合那張表 —— #3177 就是這樣把對的改成錯的）
 - `test_rate_limiter_isolation_3171.py` — mutation：只拿掉 `ai_rate_limiter.reset()` → AI 那條隔離鎖 + 盤點鎖 2 failed，**TTS 那條照樣綠**；只拿掉 `tts_rate_limiter.reset()` → TTS 那條 + 盤點鎖 2 failed，**AI 那條照樣綠**（證明兩個是各自獨立鎖住的，不是一條鎖順便蓋到）；兩個都拿掉（回到出事前的樣子）→ 3 failed；還原 → 5 passed。原始缺陷是**實跑復現**的：PR #3170 的 CI 紅在 `test_teacher_api.py::...test_generate_ai_comment_uses_cached_comment_without_second_model_call`，`assert 429 == 200`，而同一份 code 本機全套 3981 passed。附兩條正向對照（限流器本身真的會擋第 6 次），否則「下一支拿到乾淨的」可能只是限流器整個壞掉
 - `test_qa_token_fail_closed_3160.py` — mutation（#3169 那輪，七條，兩組獨立跑出同樣結果）：閘門 404→503 → 6 failed 含兩條核心鎖；404→500 → 2 failed；**404→403（仍是 4xx）→ 只有 `disabled_returns_404` 紅，`disabled_is_not_a_5xx` 正確存活** —— 這條證明兩條新斷言不是同義重複，量的是範圍不是那個數字；detail 去掉設定名 → 可診斷性那條紅；`raise`→`return`（把 fail-closed 的門真的開掉）→ **12 failed**；route 層 503→404 → 範圍對照 + 既有未動的 `test_storage_down_503` 紅。⚠️ 這個檔在 2026-09-11 之前沒被任何 workflow 點名，它確實會被「Run the whole backend suite」跑到，但不受問責登記簿約束
 
