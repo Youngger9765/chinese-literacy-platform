@@ -50,6 +50,13 @@ jobs:
               #    鎖建了沒插電的老問題，這裡補上。
               - 'frontend/public/data/**'
               - 'frontend/public/fonts/**'
+              # 同一個洞的第二次（#3188）：`qaCloudResponse3188.test.ts` 讀的是
+              # `public/qa-shared/` 與兩個看板的 `app.js`／`index.html`，用來鎖
+              # 「被拒絕時不可以講成沒有資料」以及「共用檔要在 app.js 之前載入」。
+              # 那些路徑不在這裡的話，只改看板的 PR 不會跑這支 —— 鎖就只是裝飾。
+              - 'frontend/public/qa-shared/**'
+              - 'frontend/public/keypoints-qa/**'
+              - 'frontend/public/spotlight-qa/**'
               - 'frontend/eslint.config.js'
               - 'frontend/package.json'
               - 'frontend/vite.config.ts'
