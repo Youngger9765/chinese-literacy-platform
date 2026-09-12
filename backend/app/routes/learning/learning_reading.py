@@ -350,7 +350,19 @@ class ReadingEvaluateRequest(BaseModel):
     duration_ms: int | None = Field(None, description="朗讀時長（毫秒，選填）")
 
 
-_CHINESE_CHAR_RE = re.compile(r"[一-鿿㐀-䶿]")
+# ⚠️ 這個範圍必須**涵蓋 pypinyin 認得的每一個漢字**，不然就會重演 #3175：
+# 認不得的字會走到「非中文」那條，`startswith` 對不上 → fail-closed 停住 →
+# **那個字之後整行都沒有注音**。兩個實際會踩到的：
+#   〇 U+3007（台灣寫年份就用它：二〇二六年）—— 在 U+4E00 之下，舊範圍漏掉
+#   CJK 擴充 B 之後 U+20000–U+2FA1F —— 舊範圍只到擴充 A
+_CHINESE_CHAR_RE = re.compile(r"[〇一-鿿㐀-䶿\U00020000-\U0002FA1F]")
+
+#: 注音符號本體（U+3105–U+312F）。真正的讀音一定含至少一個；數字／拉丁／標點
+#: 一個都沒有。
+#: ⚠️ 上界要到 U+312F 不是 ㄦ(U+3126) —— **ㄧㄨㄩ 三個介音排在 ㄦ 後面**
+#: （U+3127–U+3129）。寫成 `[ㄅ-ㄦ]` 會把「育」(ㄩˋ)、「一」(ㄧ) 判成不是注音，
+#: 純中文的正向對照當場就紅了。
+_BOPOMOFO_RE = re.compile(r"[\u3105-\u312F]")
 
 
 def _build_zhuyin_map(target_text: str) -> dict[int, str]:
@@ -359,14 +371,52 @@ def _build_zhuyin_map(target_text: str) -> dict[int, str]:
     Passing the full string (rather than individual chars) lets pypinyin use
     surrounding context to disambiguate polyphonic characters (破音字), e.g.
     「的」(ㄉㄜ˙ vs ㄉㄧˋ), 「樂」(ㄌㄜˋ vs ㄩㄝˋ), 「長」(ㄓㄤˇ vs ㄔㄤˊ).
+    ⛔ 不可以改成逐字呼叫 —— `lazy_pinyin("的")` 單獨呼叫回 ㄉㄜ˙，
+    「目的地」的「的」要讀 ㄉㄧˋ，那個能力會整個弄丟。
+
+    ## 為什麼不能用 zip（#3175）
+
+    這裡原本寫 `zip(target_text, bopomofo_list)`，前提是「一個字一個元素」。
+    **那個前提是錯的**：pypinyin 會把**連續的非中文**（數字、拉丁字母、連著的
+    標點）塌成**一個**元素，於是從那一點開始整串位移 ——
+
+        "民國2019年楊俊體育課"
+            年 → ㄊㄧˇ（「體」的）  楊 → ㄩˋ（「育」的）  俊 → ㄎㄜˋ（「課」的）
+            體育課 三個字完全沒有注音
+
+    而且 `bpmf != char` 那個過濾器攔不住標點：`"…我點頭。"` 裡的「頭」會拿到
+    句號當 ruby。服務端量到 **151 課有 135 課（89.4%）至少一段對不齊，
+    69.5% 的中文字落在位移點之後**，錯了多久沒查。
+
+    ## 修法：照長度消耗，不靠位置對齊
+
+    走一遍 `bopomofo_list`，非中文的「原樣回傳」元素消耗 `len(element)` 個來源
+    字元，中文字消耗 1 個。這樣**整串的上下文完全不變**（pypinyin 看到的仍是
+    整個句子），只修正索引。
+
+    fail-closed：一旦對不上就**就地停住**，後面的字寧可沒有 ruby。
+    漏標只是少一排注音，標錯是教錯讀音。
     """
-    # lazy_pinyin returns one bopomofo element per character (including punctuation).
-    # Non-CJK characters produce their raw form; we only keep CJK positions.
     bopomofo_list = lazy_pinyin(target_text, style=Style.BOPOMOFO)
     zhuyin_map: dict[int, str] = {}
-    for idx, (char, bpmf) in enumerate(zip(target_text, bopomofo_list)):
-        if _CHINESE_CHAR_RE.match(char) and bpmf and bpmf != char:
-            zhuyin_map[idx] = bpmf
+    pos = 0
+    for element in bopomofo_list:
+        if pos >= len(target_text):
+            break
+        char = target_text[pos]
+        if _CHINESE_CHAR_RE.match(char):
+            # 中文字：一個字一個音節，永遠只消耗一個字元。
+            # 只收「看起來真的是注音」的東西 —— 萬一哪天 pypinyin 對中文字也
+            # 不再 1:1，這裡會變成漏標而不是把數字／標點標成讀音。
+            if element and element != char and _BOPOMOFO_RE.search(element):
+                zhuyin_map[pos] = element
+            pos += 1
+            continue
+        # 非中文：pypinyin 原樣回傳，可能是一整串（"2019"、"Wi-Fi"、"」，"）。
+        if not target_text.startswith(element, pos):
+            # 對不上 —— 不知道後面該怎麼數了，就地停住（見上方 fail-closed）。
+            break
+        pos += len(element)
     return zhuyin_map
 
 

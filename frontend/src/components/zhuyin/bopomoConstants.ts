@@ -87,8 +87,26 @@ export interface BopomoSpelling {
 export interface PolyphonicEntry {
   s: number;        // number of variants (= len(v))
   /** Index into v[] that maps to the font's default pronunciation ('0000', no selector).
-   *  Defaults to 0 when absent.  Set to 1 for characters whose font default is v[1]
-   *  (e.g. 行 → háng, 著 → zhù). */
+   *  Defaults to 0 when absent.
+   *
+   *  ⛔ **沒有任何字需要設這個欄位，不要再加。**（#3177）
+   *
+   *  這裡原本寫「Set to 1 for characters whose font default is v[1]
+   *  (e.g. 行 → háng, 著 → zhù)」。**那句話是錯的**，而 `行`／`著` 是全庫唯二
+   *  設了 `d: 1` 的字，所以它們的前兩個讀音在正式站整整反了半年：
+   *
+   *      出貨字型說   行 0000 = xing2 / ss01 = hang2
+   *                  著 0000 = zhe5  / ss01 = zhu4
+   *      而 d: 1 把兩者對調 → 銀行讀成 ㄒㄧㄥˊ、著作讀成 ㄓㄜ˙
+   *
+   *  兩筆 `_comment`（「xing二聲、hang二聲…」「zhe5,zhu4,…」）本來就照字型的
+   *  順序寫著，`d` 跟它們自己的註解也是打架的。
+   *
+   *  真值可以機器讀出來，不必相信註解：
+   *      python3 backend/scripts/extract_font_readings.py \
+   *          frontend/public/fonts/BpmfZihiSerif-Regular.ttf 行 著
+   *
+   *  欄位本身留著（資料格式相容），但現在沒有字用它。 */
   d?: number;
   v?: string[];     // variation patterns
   f?: boolean;      // special flag

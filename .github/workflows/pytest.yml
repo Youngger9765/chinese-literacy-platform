@@ -56,6 +56,19 @@ jobs:
               #    對象是這個 workflow 檔本身 —— 只改 yml 的 PR 不跑 pytest
               #    ＝ 有人拆掉 gate/放回 curl 時鎖是睡著的。
               - '.github/workflows/claude-issue-agent.yml'
+              # ⭐ 注音的真值住在前端：出貨字型是讀音的唯一權威，
+              #    poyin_db 是規則表，fixture 是從字型抽出來的對照。
+              #    test_font_readings_match_shipped_font_3177.py 三個都讀 ——
+              #    只改它們的 PR 若不跑後端套件，那道防漂移的門就是睡著的。
+              #    test_font_is_taiwan_reading_authority_3173.py 也讀字型 ——
+              #    換成大陸讀音的字型會讓全站注音默默錯掉，那條鎖必須跑得到。
+              - 'frontend/public/data/poyin_db.json'
+              - 'frontend/public/fonts/BpmfZihiSerif-Regular.ttf'
+              - 'frontend/src/components/zhuyin/__fixtures__/fontReadings.generated.json'
+              # 給實習生的 Git 教材 —— 正文刻意含衝突標記範例，所以在
+              # test_no_stray_conflict_markers_3181 的白名單裡，而那支會讀它確認還在。
+              # 教材被刪或改名時要讓後端套件跑到，否則白名單會變成永不命中的空話。
+              - 'frontend/public/intern-training/courses/tier1-git-basics.md'
 
   pytest:
     needs: detect-changes
@@ -151,8 +164,10 @@ jobs:
             tests/test_docx_named_styles_2715.py \
             tests/test_docx_second_opinion_2868.py \
             tests/test_every_lesson_detail_validates_2725.py \
+            tests/test_font_readings_match_shipped_font_3177.py \
             tests/test_every_module_has_a_named_guard_2872.py \
             tests/test_every_module_has_a_skill_2843.py \
+            tests/test_font_is_taiwan_reading_authority_3173.py \
             tests/test_followup_never_vanishes_2964.py \
             tests/test_gate_uses_current_step_ids_2730.py \
             tests/test_goal_box_self_check_entry_2752.py \
@@ -190,6 +205,7 @@ jobs:
             tests/test_multi_text_and_followups_entry_2752.py \
             tests/test_n1_queries_fix_1217.py \
             tests/test_n1_queries_fix_1301.py \
+            tests/test_no_stray_conflict_markers_3181.py \
             tests/test_omo_grader_split_1879.py \
             tests/test_omo_hint_1637.py \
             tests/test_omo_history_1975.py \
@@ -249,6 +265,7 @@ jobs:
             tests/test_teacher_students_1882.py \
             tests/test_tts_cache_fail_closed_2765.py \
             tests/test_uid_tree_module_isolation_2683.py \
+            tests/test_zhuyin_map_alignment_3175.py \
             tests/test_vocab_application_option_bank_2736.py
         env:
           DATABASE_URL: sqlite://

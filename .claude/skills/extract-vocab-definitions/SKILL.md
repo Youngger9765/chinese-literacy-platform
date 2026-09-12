@@ -281,7 +281,6 @@ BLOCKED: manifest 說 vocab_definitions 在第 3 頁，但第 3 頁上沒有「�
 - ❌ 新開 top-level key 放旁註（進 `notes`）
 
 
-<<<<<<< Updated upstream
 ## 🔴 首次實跑紀錄（2026-08-23，L0011）
 
 在這之前這支**從來沒有真的抽過一課** —— 上面所有數字都是「對現有 150 課的統計」。
@@ -318,4 +317,3 @@ BLOCKED: manifest 說 vocab_definitions 在第 3 頁，但第 3 頁上沒有「�
 ⚠️ **跑之前要先重算頁碼**：② 的排版不穩，新轉的 PDF 常跟算頁碼那份不同，
 ⑤ 會 fail-closed 擋住（L0011 第一次就被擋，第 1、3 頁指紋對不上）。
 先跑 `python3 scripts/build_section_pages.py --uid <UID>` 再 plan。
-=======
