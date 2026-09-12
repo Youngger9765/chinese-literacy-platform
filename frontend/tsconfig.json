@@ -27,5 +27,12 @@
     },
     "allowImportingTsExtensions": true,
     "noEmit": true
-  }
+  },
+  // #3195：tsc 預設只排除 node_modules，所以 `dist/` 只要存在就會進入編譯。
+  // 實測：同一份原始碼，跑過一次 `vite build` 之後型別錯誤從 39 變成 38
+  // （dist/assets 的 ~100 支 JS 進了 module graph，擾動了 StoryStructureTable.tsx
+  //  一個不相干的推論），刪掉 dist 又回到 39。
+  // 那會讓型別檢查的答案取決於「你剛才有沒有 build」—— 對棘輪是致命的：
+  // 照工具的提示把基準降到 38，下一次乾淨的 CI 就會把 39 讀成回歸、擋住所有人。
+  "exclude": ["node_modules", "dist", "build", "coverage", "playwright-report", "test-results"]
 }
