@@ -28,7 +28,7 @@ vi.mock('../../../hooks/useFullTextTtsQueue', () => ({
     isPlaying: false,
     isPaused: false,
     isTtsDegraded: false,
-    play: vi.fn(),
+    play: vi.fn(), playOne: vi.fn(),
     pause: vi.fn(),
     resume: vi.fn(),
     stop: vi.fn(),

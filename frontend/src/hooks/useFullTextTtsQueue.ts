@@ -59,6 +59,20 @@ export interface UseFullTextTtsQueueReturn {
   isTtsDegraded: boolean;
   /** Starts a fresh walk from paragraph 0. No-op when paragraphs is empty. */
   play: () => void;
+  /**
+   * Reads ONE paragraph and stops there — the per-paragraph speaker button in
+   * the 段號 gutter (#3141). Deliberately not `playFrom`: the owner's ask is
+   * 「點下去就會播放該段落的語音」, so finishing that paragraph ends playback
+   * rather than rolling on into the next one.
+   *
+   * Supersedes whatever is playing (same walk-id mechanism as play/stop), so
+   * tapping a second paragraph's speaker switches to it instead of layering a
+   * second voice over the first — ttsApi's `_currentAudio` is a module-level
+   * singleton, so two live walks would fight over one audio channel.
+   *
+   * Out-of-range indices are ignored rather than ending the current playback.
+   */
+  playOne: (idx: number) => void;
   pause: () => void;
   resume: () => void;
   /** Stops playback, invalidates the walk, resets currentParagraphIdx to -1. */
@@ -111,6 +125,18 @@ export function useFullTextTtsQueue({
   const currentWalkIdRef = useRef(0);
   const nextWalkIdRef = useRef(1);
 
+  // Whether the walk currently authorised by currentWalkIdRef is a single
+  // paragraph (playOne) or the whole lesson (play). Kept in a ref, not state,
+  // for the same reason the walk id is: the auto-advance effect below reads it
+  // from inside a "paragraph just finished" transition, and a state value read
+  // there would be whatever it was when that render was scheduled.
+  const singleShotRef = useRef(false);
+
+  // Whether the utterance issued by the most recent speakAt has actually been
+  // heard yet (isTtsSpeaking went true for it). Guards the auto-advance effect
+  // against a superseded playback's late `.finally()` — see the long comment there.
+  const sawSpeakingRef = useRef(false);
+
   // Read on every call so a play() that races a paragraphs prop update always
   // walks the latest array, without adding paragraphs to every callback's dep list.
   const paragraphsRef = useRef(paragraphs);
@@ -119,12 +145,21 @@ export function useFullTextTtsQueue({
   const speakAt = useCallback((idx: number, walkId: number) => {
     if (walkId !== currentWalkIdRef.current) return; // superseded — stale continuation
     const list = paragraphsRef.current;
-    if (idx >= list.length) {
+    if (idx < 0 || idx >= list.length) {
       currentWalkIdRef.current = 0;
       setCurrentParagraphIdx(-1);
       return;
     }
     setCurrentParagraphIdx(idx);
+    // Nothing is sounding at this instant: speakText's first act is cancelTts(),
+    // which pauses whatever was playing, and the new clip has not been fetched
+    // yet. useTtsPlayback does not clear isTtsSpeaking on a new call — it only
+    // ever sets it true once audio starts — so without this the flag stays true
+    // across the handover and the rising edge below never happens.
+    tts.setIsTtsSpeaking(false);
+    // This utterance has not made a sound yet. See the auto-advance effect:
+    // a falling edge is only believed once we have seen THIS utterance speak.
+    sawSpeakingRef.current = false;
     // Passing the paragraph's OWN index (not a hardcoded 0) is the #2627 fix —
     // this is what lets each call hit the backend's per-paragraph cache.
     tts.speakText(list[idx], lessonId, idx, roundSlug);
@@ -132,18 +167,39 @@ export function useFullTextTtsQueue({
     // prefetch inside ttsApi only reaches the next *sentence* of the current
     // paragraph, so without this every paragraph boundary fetches cold and the
     // reading audibly stalls there (owner: 「段落之間的延遲太多了」).
-    prefetchText(list[idx + 1], lessonId, idx + 1, roundSlug);
+    //
+    // Skipped for playOne (#3141): there is no boundary to smooth over, because
+    // playback ends with this paragraph. Warming idx+1 anyway would pay a live
+    // synthesis — and spend a slot of the per-user TTS rate limit — for a
+    // paragraph nobody has asked to hear.
+    if (!singleShotRef.current) {
+      prefetchText(list[idx + 1], lessonId, idx + 1, roundSlug);
+    }
   }, [tts, lessonId, roundSlug]);
 
   const play = useCallback(() => {
     if (paragraphsRef.current.length === 0) return;
+    singleShotRef.current = false;
     const walkId = nextWalkIdRef.current++;
     currentWalkIdRef.current = walkId;
     speakAt(0, walkId);
   }, [speakAt]);
 
+  const playOne = useCallback((idx: number) => {
+    // Bounds-check BEFORE taking a walk id. speakAt treats an out-of-range
+    // index as "the walk is over" and resets to idle — which for playOne would
+    // mean a stray call silently stopped whatever was playing.
+    if (idx < 0 || idx >= paragraphsRef.current.length) return;
+    singleShotRef.current = true;
+    const walkId = nextWalkIdRef.current++;
+    currentWalkIdRef.current = walkId;
+    speakAt(idx, walkId);
+  }, [speakAt]);
+
   const stop = useCallback(() => {
     currentWalkIdRef.current = 0; // invalidate — 0 never matches a real walkId
+    singleShotRef.current = false;
+    sawSpeakingRef.current = false;
     tts.stopTts();
     // Belt and braces (see startedAudioRef comment above): pause every element
     // that has actually played while this hook was mounted, not just whatever
@@ -161,6 +217,7 @@ export function useFullTextTtsQueue({
   // useTtsPlayback.pauseTts), so this never mistakes "paused" for "finished".
   const wasBusyRef = useRef(false);
   useEffect(() => {
+    if (tts.isTtsSpeaking) sawSpeakingRef.current = true;
     const busy = tts.isTtsSpeaking || tts.isTtsLoading;
     const justFinished = wasBusyRef.current && !busy;
     wasBusyRef.current = busy;
@@ -169,6 +226,32 @@ export function useFullTextTtsQueue({
     if (tts.ttsError) return; // a failed paragraph aborts the sequence, does not advance
     const walkId = currentWalkIdRef.current;
     if (!walkId) return; // no active walk
+    // Only a falling edge belonging to THIS utterance means "finished".
+    //
+    // useTtsPlayback publishes one set of isTtsSpeaking/isTtsLoading for every
+    // caller, and a superseded speakTextWithProgress still runs its `.finally()`
+    // — which clears both — whenever its abandoned <audio> finally reports
+    // ended. Starting paragraph B while A is sounding therefore produces a
+    // busy→idle edge that belongs to A, moments after B was issued. Acting on
+    // it ends (or, for a walk, advances past) a paragraph that never played.
+    //
+    // A freshly issued utterance has not spoken yet — speakAt clears this —
+    // so requiring a rising edge first tells the two apart without reaching
+    // into the shared hook. This is also why
+    // `useFullTextTtsQueue.test.ts` 「play() after stop()…」 was flaky: it was
+    // racing the same stale `.finally()`, and only passed when the assertion
+    // happened to run first (vite.config.ts already records this suite's
+    // cross-file leak; this is the in-file half of it).
+    if (!sawSpeakingRef.current) return;
+    // playOne (#3141): this paragraph WAS the whole request. Retire the walk
+    // here instead of advancing, so the controls return to idle and the
+    // paragraph highlight clears.
+    if (singleShotRef.current) {
+      currentWalkIdRef.current = 0;
+      singleShotRef.current = false;
+      setCurrentParagraphIdx(-1);
+      return;
+    }
     speakAt(currentParagraphIdx + 1, walkId);
   }, [tts.isTtsSpeaking, tts.isTtsLoading, tts.ttsError, currentParagraphIdx, speakAt]);
 
@@ -179,6 +262,7 @@ export function useFullTextTtsQueue({
   useEffect(() => {
     if (tts.ttsError) {
       currentWalkIdRef.current = 0;
+      singleShotRef.current = false;
       setCurrentParagraphIdx(-1);
     }
   }, [tts.ttsError]);
@@ -197,6 +281,7 @@ export function useFullTextTtsQueue({
     ttsError: tts.ttsError,
     isTtsDegraded: tts.isTtsDegraded,
     play,
+    playOne,
     pause: tts.pauseTts,
     resume: tts.resumeTts,
     stop,

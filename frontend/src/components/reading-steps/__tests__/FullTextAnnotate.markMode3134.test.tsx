@@ -34,7 +34,7 @@ vi.mock('../../../context/ZhuyinContext', () => ({
 vi.mock('../../../hooks/useFullTextTtsQueue', () => ({
   useFullTextTtsQueue: () => ({
     currentParagraphIdx: null, isPlaying: false, isPaused: false,
-    play: vi.fn(), pause: vi.fn(), resume: vi.fn(), stop: vi.fn(),
+    play: vi.fn(), playOne: vi.fn(), pause: vi.fn(), resume: vi.fn(), stop: vi.fn(),
   }),
 }));
 

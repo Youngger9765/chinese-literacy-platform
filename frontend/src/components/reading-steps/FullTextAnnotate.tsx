@@ -40,6 +40,7 @@ import { type AnnotationWithText } from './AnnotationSidePanel';
 import AnnotationSidePanel from './AnnotationSidePanel';
 import AnnotationToolbar, { TYPE_CONFIG } from './AnnotationToolbar';
 import ReadingPlayer from './ReadingPlayer';
+import ParagraphSpeakerButton from './ParagraphSpeakerButton';
 import { useFullTextTtsQueue } from '../../hooks/useFullTextTtsQueue';
 import AnnotatedParagraph from './AnnotatedParagraph';
 import LessonQrButton from '../qr/LessonQrButton';
@@ -1135,14 +1136,34 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
                       reader.currentParagraphIdx === paraIdx ? 'bg-accent/[0.07]' : ''
                     }`}
                   >
-                    {/* Paragraph number — lives outside the [data-para-idx] subtree
-                        so its text doesn't inflate selection offsets. */}
-                    <span
-                      aria-hidden="true"
-                      className="absolute -left-8 md:-left-12 top-2 text-sm font-headline font-bold text-on-surface-variant/30 select-none pointer-events-none"
-                    >
-                      {String(paraIdx + 1).padStart(2, '0')}
-                    </span>
+                    {/* Paragraph number + its own 朗讀 button (#3141).
+                        BOTH live outside the [data-para-idx] subtree, and that
+                        placement is load-bearing twice over:
+                          - their text must not inflate selection offsets (the
+                            original reason the number sits here);
+                          - in 標記模式 the container's onMouseDown runs
+                            charAtPoint, which resolves a point through
+                            `closest('[data-ci]')`. Nothing out here is inside a
+                            character cell, so a tap on the speaker resolves to
+                            null and handleMarkEnd early-returns — pressing it
+                            can never leave a stray 記號 behind (#3134/#3135).
+                        Stacked rather than side by side: the gutter is 2rem on
+                        mobile, which two items do not fit across. */}
+                    <div className="absolute -left-8 md:-left-12 top-2 flex flex-col items-center gap-0.5 select-none">
+                      <span
+                        aria-hidden="true"
+                        className="text-sm font-headline font-bold text-on-surface-variant/30 pointer-events-none"
+                      >
+                        {String(paraIdx + 1).padStart(2, '0')}
+                      </span>
+                      <ParagraphSpeakerButton
+                        paraIdx={paraIdx}
+                        isActive={reader.currentParagraphIdx === paraIdx}
+                        isLoading={reader.isLoading}
+                        onPlay={reader.playOne}
+                        onStop={reader.stop}
+                      />
+                    </div>
                     <AnnotatedParagraph
                       rawText={rawPara}
                       displayText={displayText}
