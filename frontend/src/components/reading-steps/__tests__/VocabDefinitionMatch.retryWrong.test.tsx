@@ -73,7 +73,9 @@ function answerCurrentWrong() {
 
 /** 用點選路徑放一格（`handleTouchStart` → `handleSlotTap`，真實的行動版互動路徑）。 */
 async function placeSlot(word: string, definition: string) {
-  fireEvent.click(screen.getAllByText(word)[0]);
+  // #3191：選詞改由 pointerup 觸發（真瀏覽器每次互動都先發 pointerup 再發 click；
+  // 只發 click 是不會發生的序列）。格子仍然是 onClick，所以下一行不動。
+  fireEvent.pointerUp(screen.getAllByText(word)[0]);
   fireEvent.click(screen.getByText(definition));
   for (let i = 0; i < 10; i++) {
     await act(async () => {

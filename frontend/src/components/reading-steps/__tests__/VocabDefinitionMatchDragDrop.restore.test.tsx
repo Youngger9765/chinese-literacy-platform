@@ -45,7 +45,7 @@ function dismissCoachIfPresent() {
 
 /** 用點選路徑放一格（`handleTouchStart` → `handleSlotTap`，真實的行動版互動路徑）。 */
 async function placeSlot(word: string, definition: string) {
-  fireEvent.click(screen.getAllByText(word)[0]);
+  fireEvent.pointerUp(screen.getAllByText(word)[0]); // #3191：選詞改由 pointerup 觸發
   fireEvent.click(screen.getByText(definition));
   for (let i = 0; i < 10; i++) {
     await act(async () => {

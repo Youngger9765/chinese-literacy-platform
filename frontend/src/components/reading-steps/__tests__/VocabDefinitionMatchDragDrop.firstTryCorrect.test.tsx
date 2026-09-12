@@ -24,6 +24,9 @@
  * of the same assertions).
  */
 import { render, screen, fireEvent, act } from '@testing-library/react';
+// #3191：選詞改由 pointerup 觸發（真瀏覽器每次互動都先發 pointerup 再發 click；
+// 只發 click 是不會發生的序列）。格子仍然是 onClick，所以下面選格子那幾行不動。
+
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { DragDropMode } from '../VocabDefinitionMatchDragDrop';
 import type { VocabItem } from '../../../types';
@@ -54,7 +57,7 @@ describe('DragDropMode — #2773 firstTryCorrect (immutable first-try verdict)',
     );
 
     // Wrong: select 謙虛 (vocabIdx 1), drop on defIdx 0's slot (needs 勤奮).
-    fireEvent.click(screen.getAllByText('謙虛')[0]);
+    fireEvent.pointerUp(screen.getAllByText('謙虛')[0]);
     fireEvent.click(screen.getByText('努力不懈地工作或學習。'));
 
     // Past the wrong-drop bounce-back (650ms) before retrying the slot.
@@ -63,9 +66,9 @@ describe('DragDropMode — #2773 firstTryCorrect (immutable first-try verdict)',
     });
 
     // Retry defIdx 0 correctly, then answer defIdx 1 correctly on the first try.
-    fireEvent.click(screen.getAllByText('勤奮')[0]);
+    fireEvent.pointerUp(screen.getAllByText('勤奮')[0]);
     fireEvent.click(screen.getByText('努力不懈地工作或學習。'));
-    fireEvent.click(screen.getAllByText('謙虛')[0]);
+    fireEvent.pointerUp(screen.getAllByText('謙虛')[0]);
     fireEvent.click(screen.getByText('不自誇，虛心接受他人意見。'));
 
     // Each correct drop runs a ~550ms fly-away + 600ms onAllDone-check chain.
@@ -106,14 +109,14 @@ describe('DragDropMode — #2773 firstTryCorrect (immutable first-try verdict)',
       />,
     );
 
-    fireEvent.click(screen.getAllByText('謙虛')[0]);
+    fireEvent.pointerUp(screen.getAllByText('謙虛')[0]);
     fireEvent.click(screen.getByText('努力不懈地工作或學習。'));
     await act(async () => {
       await vi.advanceTimersByTimeAsync(800);
     });
-    fireEvent.click(screen.getAllByText('勤奮')[0]);
+    fireEvent.pointerUp(screen.getAllByText('勤奮')[0]);
     fireEvent.click(screen.getByText('努力不懈地工作或學習。'));
-    fireEvent.click(screen.getAllByText('謙虛')[0]);
+    fireEvent.pointerUp(screen.getAllByText('謙虛')[0]);
     fireEvent.click(screen.getByText('不自誇，虛心接受他人意見。'));
 
     for (let i = 0; i < 10; i++) {
