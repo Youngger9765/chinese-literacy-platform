@@ -1,20 +1,31 @@
 /**
- * TDD tests for Issue #219: Polyphonic character (破音字) pronunciation bug.
+ * Issue #219 的測試 —— ⚠️ **它當初的前提是錯的，見下面**。
  *
- * Bug: The style-set mapping between matched variant index (from poyin_db.json v[])
- * and the font's stylistic set code ('0000', 'ss01', ...) is incorrect for characters
- * whose font default pronunciation is NOT v[0] in the variant array.
+ * 原本的檔頭寫著：
  *
- * The BpmfIansui font has a per-character default pronunciation ('0000' = no selector).
- * For most characters this is v[0], but for some (e.g. 行, 著) it is v[1].
- * A new optional 'd' (default variant index) field in poyin_db.json encodes which
- * v[] index maps to '0000'. When absent, 'd' defaults to 0.
+ *     The BpmfIansui font has a per-character default pronunciation ('0000').
+ *     For most characters this is v[0], but for some (e.g. 行, 著) it is v[1].
  *
- * Test cases:
- *   行走 → 行 should get 'ss01' (xíng二聲)  [currently wrong: gets '0000' = háng]
- *   銀行 → 行 should get '0000' (háng二聲, font default)
- *   走著 → 著 should get 'ss01' (zhe5 輕聲)  [currently wrong: gets '0000' = zhù]
- *   著作 → 著 should get '0000' (zhù四聲, font default)
+ * **那句話沒有任何依據，而且是錯的。** 出貨字型（`BpmfZihiSerif-Regular.ttf`）說：
+ *
+ *     行  0000 = xing2   ss01 = hang2
+ *     著  0000 = zhe5    ss01 = zhu4
+ *
+ * 於是 #219 引進的 `d` 欄位把 行／著 最常用的兩個讀音**對調**了 ——
+ * 銀行讀成 ㄒㄧㄥˊ、著作讀成 ㄓㄜ˙ —— 而這個檔的九條 行／著 測試
+ * **全部綠著幫它背書**，因為斷言只停在 `'ss01'` 這種字串，
+ * 真正的對應關係只寫在註解裡，而註解沒有人去跟字型對過。
+ *
+ * `d` 已在 #3177 移除（全庫唯二用它的就是這兩個字），那九條也搬走了。
+ *
+ * ⛔ **新增注音相關的斷言不要再寫 styleSet 字串。**
+ *    讀音的真值可以機器讀出來：
+ *        python3 backend/scripts/extract_font_readings.py \
+ *            frontend/public/fonts/BpmfZihiSerif-Regular.ttf 行 著
+ *    參考 `polyphonicReadings.test.ts` 的寫法。
+ *
+ * 這個檔留下來的部分（一／不 變調、地、疊字、PUA 選擇器組字串）跟 `d` 無關，
+ * 驗的是 styleSet → PUA 的組裝機制本身，那一層用 styleSet 斷言是對的。
  */
 
 import { describe, it, expect, beforeAll } from 'vitest';
@@ -31,25 +42,23 @@ import { PolyphonicProcessor } from './polyphonicProcessor';
 function injectTestData(processor: PolyphonicProcessor) {
   const testData = {
     data: {
-      // 行: d=1 → font default is v[1]=háng.  v[0]=xíng patterns, v[1]=háng patterns.
+      // 行: 字型 0000 = xing2 = v[0]。⛔ 不要再加 d（#3177）。
       '行': {
         s: 4,
-        d: 1,
         v: [
           '流*/*頭/*動/*程/*為/人*/五*/一*人',           // v[0] xíng二聲
-          '銀*/換*/*列/*號/排*/同*/內*/*家/外*/*員',     // v[1] háng二聲 (font default)
+          '銀*/換*/*列/*號/排*/同*/內*/*家/外*/*員',     // v[1] háng二聲
           '品*/德*/*狀/操*/獸*',                          // v[2] xíng四聲
           '**如也',                                       // v[3] háng四聲
         ],
       },
 
-      // 著: d=1 → font default is v[1]=zhù.  v[0]=zhe5 patterns (large list), v[1]=zhù patterns.
+      // 著: 字型 0000 = zhe5 = v[0]。⛔ 不要再加 d（#3177）。
       '著': {
         s: 5,
-        d: 1,
         v: [
           '穿*/有*/走*/戴*/帶*/持*/過*/隨*/抱*/看*/拿*/坐*/提*/打*/放*/依*/',  // v[0] zhe5 (catch-all)
-          '*作/*述/名*/土*/顯*/巨*/鉅*/*明/譯*/拙*/昭*/*稱/*名',               // v[1] zhù四聲 (font default)
+          '*作/*述/名*/土*/顯*/巨*/鉅*/*明/譯*/拙*/昭*/*稱/*名',               // v[1] zhù四聲
           '*涼/*急/*風/*慌',                              // v[2] zhāo一聲
           '*火/睡*/*了/*店/正*/*想/*迷/點*',             // v[3] zháo二聲
           '*色/附*/衣*/*陸/一*/*落/黏*/粘*/不*痕跡',     // v[4] zhuó二聲
@@ -99,74 +108,19 @@ describe('PolyphonicProcessor — Issue #219: polyphonic character ss mapping', 
 
   // ── 行 tests ────────────────────────────────────────────────────────────
 
-  describe('行 (xíng / háng)', () => {
-    it('行走 → 行 gets ss01 (xíng二聲, first variant)', () => {
-      const result = processor.process('行走');
-      const hang = result.find(c => c.char === '行');
-      expect(hang).toBeDefined();
-      expect(hang!.styleSet).toBe('ss01');
-    });
+  // ── 行 / 著 的測試搬走了（#3177）────────────────────────────────────────
+  //
+  // 這裡原本有九條，全部綠，而**斷言的內容是錯的** —— 它們寫著
+  // 「行走 → ss01 (xíng二聲)」，但出貨字型說 `行` 的 ss01 是 **hang2**。
+  // 註解宣稱的對應關係跟字型從來沒有對過，所以 銀行/著作 在正式站反了半年，
+  // 而這支 golden set 一路綠著幫它背書。
+  //
+  // 它們還餵自己捏的 fixture（連 `d: 1` 都是手寫進去的），所以連真的
+  // `poyin_db.json` 對不對都沒在驗。
+  //
+  // 改由 `polyphonicReadings.test.ts` 接手：那支讀**真的** poyin_db，
+  // 斷言打在**字型會畫出來的讀音**上（真值從 TTF 抽出來），不是 styleSet 字串。
 
-    it('銀行 → 行 gets 0000 (háng二聲, font default)', () => {
-      const result = processor.process('銀行');
-      const hang = result.find(c => c.char === '行');
-      expect(hang).toBeDefined();
-      expect(hang!.styleSet).toBe('0000');
-    });
-
-    it('流行 → 行 gets ss01 (xíng二聲)', () => {
-      const result = processor.process('流行');
-      const hang = result.find(c => c.char === '行');
-      expect(hang).toBeDefined();
-      expect(hang!.styleSet).toBe('ss01');
-    });
-
-    it('行動 → 行 gets ss01 (xíng二聲, *動 pattern in v[0])', () => {
-      const result = processor.process('行動');
-      const hang = result.find(c => c.char === '行');
-      expect(hang).toBeDefined();
-      expect(hang!.styleSet).toBe('ss01');
-    });
-
-    it('同行 → 行 gets 0000 (háng, v[1] match)', () => {
-      const result = processor.process('同行');
-      const hang = result.find(c => c.char === '行');
-      expect(hang).toBeDefined();
-      expect(hang!.styleSet).toBe('0000');
-    });
-  });
-
-  // ── 著 tests ────────────────────────────────────────────────────────────
-
-  describe('著 (zhe5 / zhù / zhāo / zháo / zhuó)', () => {
-    it('走著 → 著 gets ss01 (zhe5輕聲)', () => {
-      const result = processor.process('走著');
-      const zhu = result.find(c => c.char === '著');
-      expect(zhu).toBeDefined();
-      expect(zhu!.styleSet).toBe('ss01');
-    });
-
-    it('著作 → 著 gets 0000 (zhù四聲, font default)', () => {
-      const result = processor.process('著作');
-      const zhu = result.find(c => c.char === '著');
-      expect(zhu).toBeDefined();
-      expect(zhu!.styleSet).toBe('0000');
-    });
-
-    it('穿著 → 著 gets ss01 (zhe5輕聲)', () => {
-      const result = processor.process('穿著');
-      const zhu = result.find(c => c.char === '著');
-      expect(zhu).toBeDefined();
-      expect(zhu!.styleSet).toBe('ss01');
-    });
-
-    it('著涼 → 著 gets ss02 (zhāo一聲, v[2] match)', () => {
-      const result = processor.process('著涼');
-      const zhu = result.find(c => c.char === '著');
-      expect(zhu).toBeDefined();
-      expect(zhu!.styleSet).toBe('ss02');
-    });
-  });
 
   // ── 的 regression tests ────────────────────────────────────────────────
 
@@ -430,7 +384,7 @@ describe('double-character special pairs (Issue #1843)', () => {
     (proc as unknown as { polyphonicData: unknown; _loaded: boolean }).polyphonicData = {
       data: {
         '重': { s: 2, v: ['', ''] },
-        '行': { s: 4, d: 1, v: ['流*', '銀*', '品*', '**如也'] },
+        '行': { s: 4, v: ['流*', '銀*', '品*', '**如也'] },   // ⛔ 不加 d（#3177）
         '好': { s: 2, v: ['', ''] },
         '數': { s: 2, v: ['', ''] },
         '晃': { s: 2, v: ['', ''] },

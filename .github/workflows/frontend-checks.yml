@@ -43,6 +43,13 @@ jobs:
           filters: |
             relevant:
               - 'frontend/src/**'
+              # 🔴 `public/` 原本完全不在這裡 —— 只改 `poyin_db.json` 的 PR
+              #    **兩支 workflow 都不會跑**（pytest 只認 backend/**，這裡只認
+              #    frontend/src/**）。而 poyin_db 正是注音規則的資料表：
+              #    #3177 那個「行／著 讀音對調」就住在它裡面。
+              #    鎖建了沒插電的老問題，這裡補上。
+              - 'frontend/public/data/**'
+              - 'frontend/public/fonts/**'
               - 'frontend/eslint.config.js'
               - 'frontend/package.json'
               - 'frontend/vite.config.ts'
