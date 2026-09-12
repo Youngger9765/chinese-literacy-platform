@@ -283,6 +283,76 @@ ND 禁的是**改作他們的資料**，不禁我們自己整理一份自己的�
 
 ---
 
+## 3.7 ⭐ 兩份來源的真實來歷（git 查證，2026-09-12）
+
+Young 問了兩個問題，答案都改變了對這件事的理解。
+
+### pypinyin 不是有人挑的，是它剛好躺在那裡
+
+```
+c17f4177c  2026-02-21  Youngger9765
+  「feat: add full-stack codebase + GCP Cloud Run deployment + CI/CD」
+  ├─ requirements.txt 第 9 行            pypinyin>=0.51
+  └─ frontend/src/components/zhuyin/     polyphonicProcessor.ts   645 行
+                                          toneData.ts            3695 行
+                                          bopomoConstants.ts / pinyin.ts
+
+2026-02-21 → 2026-06-15   pypinyin 四個月零使用，沒有任何 commit 碰它
+2026-06-15  bf6f54e19     「add bopomofo ruby annotations to per-character diff tokens」(#2227)
+                          要幫 diff 加注音 → 伸手拿了已經裝著的那個
+今天                       全庫只有一個檔 import 它：learning_reading.py:22
+```
+
+**同一顆骨架 commit 同時帶進了前端那套完整引擎與 pypinyin。**
+前端那套從第一天就是真正的系統；pypinyin 是相依套件，四個月沒人用。
+第二套引擎的出現不是一個技術決定，是**手邊剛好有**。
+
+→ 這也解釋了為什麼沒有人比對過兩者：**沒有人意識到自己引進了第二套。**
+
+### `taiwan_pronunciation.json` 確實是為了避開大陸音 —— 而且是 Hans 回報後才補的
+
+```
+2026-08-10  Young 一天三顆
+  69312eff6  fix(#2612): derive Taiwan pronunciation corrections from the MOE dictionary
+  c53c68d38  fix(#2649): cover the tone differences — the class Hans actually reported
+  ba414f59e  docs(#2649): record what was actually tested for the polyphones
+
+_method:「jieba 斷詞 → 教育部注音 vs pypinyin(大陸) 比對聲韻 → 自動生成同音單讀字 alias」
+```
+
+它**只服務 TTS**（Azure 的 `<sub alias>`），不碰畫面上的注音。
+
+### ⭐⭐ 檔案裡那句「修不掉」，其實是兩件事被混在一起
+
+```
+_not_covered:「多音字（著、和…）無法用這張表修：正確讀音要看上下文，
+              而這張表看不到上下文。Hans 2026-08-09 回報的
+              摸不著(ㄓㄠˊ) 與 和(連接詞讀ㄏㄢˋ) 屬此類。」
+```
+
+Hans 一個月前回報 **`和` 該讀 ㄏㄢˋ**，當時被記成「修不掉」。
+
+**而字型裡它一直都在：`和: 0000=he2, ss01=han4, ss02=he4, ss03=huo4, ss04=huo5, ss05=hu2`。**
+今天量到的前後端逐字不一致，`和 han4 vs he2` **168 處**排第四名。
+
+拆開來看是兩件完全不同的事：
+
+| | 狀態 | 卡在哪 |
+|---|---|---|
+| **這個字該讀什麼** | **早就知道** | 沒有卡住 —— 字型裡有 |
+| **Azure 唸不唸得出來** | 真的做不到 | `<sub alias>` 需要同音同調的**單讀音替身字**，而 `ㄓㄠˊ` 在中文裡幾乎只有「著」本身 |
+
+**渲染端的限制被記成了知識的缺口。**
+
+畫面上的注音**完全不受這個限制** —— 它只要把 `ss01` 交給字型就畫得出來。
+所以 Hans 那兩個案例裡，`和` 在課文頁上本來就該是對的（而它現在錯，是 `d` 欄位那個 bug）。
+
+→ **這是目前支持「一份 SOT ＋ 三個各自渲染」最強的證據**：
+讀音統一在一處；Azure 唸不出來就回 `KNOWN_GAP` 讓人看得見，
+而不是讓整個系統以為「這個字的讀音查不到」。
+
+---
+
 ## 4. AFTER 應該怎麼改
 
 ### 4.1 設計原則
