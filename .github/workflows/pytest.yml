@@ -190,6 +190,7 @@ jobs:
             tests/test_multi_text_and_followups_entry_2752.py \
             tests/test_n1_queries_fix_1217.py \
             tests/test_n1_queries_fix_1301.py \
+            tests/test_no_stray_conflict_markers_3181.py \
             tests/test_omo_grader_split_1879.py \
             tests/test_omo_hint_1637.py \
             tests/test_omo_history_1975.py \
