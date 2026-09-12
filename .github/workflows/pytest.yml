@@ -41,10 +41,6 @@ jobs:
               - 'frontend/src/hooks/useTtsPlayback.test.ts'
               - 'frontend/src/utils/textDiff.accentTolerance.test.ts'
               - 'frontend/scripts/eval/tts-alignment.eval.ts'
-              # ⭐ 出貨字型＝注音讀音的真值（z_<拼音><聲調> 元件名）。
-              #    test_font_is_taiwan_reading_authority_3173 讀它來確認台灣音沒被換掉。
-              #    換字型的 PR 若不跑後端套件，那條鎖就永遠不會執行 ＝ 建了沒插電。
-              - 'frontend/public/fonts/BpmfZihiSerif-Regular.ttf'
               # 產生器也要觸發 —— 只改它的 PR 若不跑鎖，「下次會再錯一次」的鎖就沒插電
               # 抽取器與普查也要觸發 —— 改它們的 PR 若不跑 gate，等於鎖建了沒插電
               - 'scripts/split_lesson_modules.py'
@@ -64,9 +60,15 @@ jobs:
               #    poyin_db 是規則表，fixture 是從字型抽出來的對照。
               #    test_font_readings_match_shipped_font_3177.py 三個都讀 ——
               #    只改它們的 PR 若不跑後端套件，那道防漂移的門就是睡著的。
+              #    test_font_is_taiwan_reading_authority_3173.py 也讀字型 ——
+              #    換成大陸讀音的字型會讓全站注音默默錯掉，那條鎖必須跑得到。
               - 'frontend/public/data/poyin_db.json'
               - 'frontend/public/fonts/BpmfZihiSerif-Regular.ttf'
               - 'frontend/src/components/zhuyin/__fixtures__/fontReadings.generated.json'
+              # 給實習生的 Git 教材 —— 正文刻意含衝突標記範例，所以在
+              # test_no_stray_conflict_markers_3181 的白名單裡，而那支會讀它確認還在。
+              # 教材被刪或改名時要讓後端套件跑到，否則白名單會變成永不命中的空話。
+              - 'frontend/public/intern-training/courses/tier1-git-basics.md'
 
   pytest:
     needs: detect-changes
