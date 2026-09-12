@@ -55,6 +55,12 @@
 - `test_module_docstrings_name_real_things_spec.py`（#2712）— mutation：把一支不存在的 API 加回 docstring → 1 failed；把解析器的縮排條件改壞 → 正向對照 2 failed；還原 → 4 passed。⭐ 起因：`lesson_layer_loaders.py` 的 docstring 列著**五支根本不存在的函式**。⚠️ 我第一次只拿掉兩支，因為 `grep "^def load_layer1_lessons"` 回 0 看起來像「其餘還在」——**正向對照也回 0**，那個 0 什麼都不證明。這條鎖用 `hasattr` 直接問模組，不用 grep
 - `test_review_flag_lives_at_the_top_2919.py`（#2919）— mutation：把巢狀旗標放回 L0139 → 1 failed；**把 30 課人手寫的 `char_marks_note` 清掉 → 正向對照 1 failed**；還原 → 4 passed。⚠️ 我第一版的清理連 `char_marks_note` / `review_reason_note` 一起 pop，一口氣刪掉 178 行 / 30 檔的人工分析（「右緣累計字數只印到 400，p2 之後那一欄是空的 —— 原稿如此，不是漏抽」那種）—— 看 diff 才發現，正是 PDCA 裡「刪證據 ≠ 消除矛盾」那條
 
+- `test_zhuyin_map_alignment_3175.py` — mutation（**六條全部咬中，而且咬得精準**）：把非中文的長度消耗改回一格（＝重新引入 `zip` 那個位移）→ 7 failed（三條對齊鎖），**純中文正向對照照樣綠**；改成逐字呼叫 `lazy_pinyin` → 2 failed，其中 `test_context_disambiguation_survives_an_embedded_number` 單獨守著「目的地」的上下文消歧義；拿掉 fail-closed 的就地停住 → **只有** `test_fail_closed_stops_instead_of_guessing` 紅；把中文字範圍縮回舊的（漏掉 `〇` 與 CJK 擴充 B）→ 2 failed；拿掉「看起來像注音才收」的形狀檢查 → **只有** `test_a_chinese_char_never_gets_a_non_bopomofo_ruby` 紅；中文分支也照長度消耗 → 13 failed 含正向對照與裁判。還原 → 15 passed。
+  **未修的父版跑最終版測試 → 9 failed / 6 passed**（綠的 6 支正是三條純中文正向對照、裁判牙齒測試，以及兩條在舊範圍下走不到的新案例）。原始缺陷是**實跑復現**的：`_build_zhuyin_map("民國2019年楊俊體育課")` → 年→ㄊㄧˇ、楊→ㄩˋ、俊→ㄎㄜˋ，體育課三個字沒有注音；`"…我點頭。"` 的「頭」拿到**句號**當 ruby。服務端量測：`data/lessons/L*/v3/key_reading.*.yml` **151 課有 135 課（89.4%）至少一段對不齊，51870 個中文字有 36026 個（69.5%）落在位移點之後**。
+  ⚠️ **fail-closed 那條是 mutation 逼出來的**：第一輪它 survived —— 真實語料 25080 條字串裡 pypinyin 一次都沒對不上，**沒有輸入走得到那個分支，它等於沒被測**。補 monkeypatch 才咬得到。中文分支那條同病，由 code review 指出後補。
+  ⚠️ **裁判改過兩次，兩次都是它自己太寬或太嚴**：第一版太嚴（pypinyin 的上下文輕聲變調 意思→ㄙ˙、弟弟→ㄉㄧ˙ 不在字典異讀表裡，那是對的讀音）；改成「聲韻母對得上就原諒輕聲」之後**太寬** —— code review 當場示範 `is_legal('這','ㄓㄜ˙')` 回 True，而 ㄓㄜ˙ 是「著」的讀音，常用字裡這種碰撞有 33 對，**正好是這支鎖要擋的那一類**。最終改成逐筆白名單（跑遍全語料實測出來就 5 筆）。
+  ⚠️ **我自己的形狀檢查第一版是錯的**：`[ㄅ-ㄦ]` 漏掉排在 ㄦ 後面的三個介音 ㄧㄨㄩ(U+3127–3129)，「育」(ㄩˋ)、「一」(ㄧ) 當場被判成不是注音 —— **純中文正向對照立刻紅**，那正是正向對照存在的理由
+
 ## grandfathered（既有債，未逐支驗過）
 
 2026-08-28 一次插電 104 支，其中 **95 支沒有逐支驗過它會咬**。

@@ -249,6 +249,7 @@ jobs:
             tests/test_teacher_students_1882.py \
             tests/test_tts_cache_fail_closed_2765.py \
             tests/test_uid_tree_module_isolation_2683.py \
+            tests/test_zhuyin_map_alignment_3175.py \
             tests/test_vocab_application_option_bank_2736.py
         env:
           DATABASE_URL: sqlite://
