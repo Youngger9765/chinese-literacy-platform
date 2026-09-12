@@ -10,11 +10,12 @@
 import React from 'react';
 import { Annotation } from './annotationReducer';
 import { TYPE_CONFIG, EDITOR_PREMARK_STYLE } from './AnnotationToolbar';
-import { stripPUASelectors } from './annotationOffsets';
+import { stripPUASelectors, toRawUnits } from './annotationOffsets';
 import {
   renderDifficultAwareText,
   difficultFlagsByRawIndex,
-  renderDifficultFlagged,
+  renderDifficultFlaggedUnits,
+  stripDifficultMarkers,
 } from '../zhuyin/difficultSpanRenderer';
 
 interface AnnotatedParagraphProps {
@@ -120,12 +121,45 @@ const AnnotatedParagraph: React.FC<AnnotatedParagraphProps> = ({
     // Fix: strip PUA selectors from the rendering string before slicing.  After stripping,
     // .length == raw char count, so raw indices and UTF-16 slice indices agree perfectly.
     //
-    // NOTE: when zhuyin is active (any mode with ruby), displayText contains BpmfZihiSerif PUA
-    // selectors AND ruby annotations that cannot be split character-by-character, so we fall
-    // back to rawText for annotation offset calculations.
-    const baseText = isZhuyinAny ? rawText : displayText;
+    // #3185: this used to fall back to `rawText` whenever zhuyin was on, which
+    // threw away every tone variant selector -- i.e. the whole polyphonic
+    // correction -- for any paragraph the student or the teacher had marked.
+    // Measured on staging L20013: 4/4 marked paragraphs had zero selectors while
+    // every unmarked paragraph had them, so 「功夫了得」read ㄌㄜ˙ instead of ㄌㄧㄠˇ.
+    //
+    // We now render from `displayText` but slice it by RAW character index via
+    // toRawUnits(), so each character keeps the selectors that belong to it and
+    // `units.slice(a, b)` still lines up with `stripped.slice(a, b)` — the two
+    // requirements (correction visible, highlight on the right characters) hold
+    // at the same time.
+    //
+    // Fail-safe #1: if the processed text does not reduce to the same raw string
+    // as rawText, something upstream changed the content and raw offsets can no
+    // longer be trusted against it — render rawText instead rather than risk
+    // putting the highlight on the wrong characters (PR #1155). Note this falls
+    // back to the old SOURCE, not the old rendering: selectors embedded directly
+    // in the lesson YAML (the 「著󠇣頭緒」 case above) still survive, which is what
+    // the annotation-free branch has always done.
+    const displayForRender = isZhuyinAny ? stripDifficultMarkers(displayText) : displayText;
+    const offsetsAgree =
+      stripPUASelectors(displayForRender) === stripPUASelectors(rawText);
+    const baseText = offsetsAgree ? displayForRender : rawText;
     // Strip PUA Variation Selectors so that .length == raw char count and slice indices match.
     const textToRender = stripPUASelectors(baseText);
+    // One entry per code unit of textToRender, each carrying its own selectors.
+    const rawUnits = toRawUnits(baseText);
+    // Fail-safe #2: the two parallel structures MUST line up index for index or
+    // every segment after the first divergence paints the wrong characters —
+    // #1155 again, by a different route. They can only diverge because
+    // stripPUASelectors absorbs a wider surrogate range (U+E0000–U+E03FF) than
+    // toRawUnits does (U+E0100–U+E01EF), so a plane-14 code point outside the
+    // variant-selector block desynchronises them. No content in this repo
+    // contains one today, which is exactly why this needs a guard rather than a
+    // comment: when one appears, drop the selectors for this paragraph and
+    // render plain text. No zhuyin is a visible, recoverable loss; a highlight
+    // on the wrong characters is silent and wrong.
+    const renderUnits =
+      rawUnits.length === textToRender.length ? rawUnits : textToRender.split('');
 
     // #3022: the strip above also removes the DIFFICULT_SPAN markers -- they
     // live in the same Variation Selectors block. Carry which characters were
@@ -158,11 +192,15 @@ const AnnotatedParagraph: React.FC<AnnotatedParagraphProps> = ({
     }
 
     return segments.map((seg) => {
+      // `chars` is the plain slice — used for anything a human or a screen
+      // reader reads. `units` is the same slice with the tone selectors still
+      // attached — that is what actually gets rendered (#3185).
       const chars = textToRender.slice(seg.start, seg.end);
+      const units = renderUnits.slice(seg.start, seg.end);
       // #3022: re-apply the per-run zhuyin font to this slice.
       const body = flagsUsable
-        ? renderDifficultFlagged(chars, difficultFlags.slice(seg.start, seg.end), seg.start)
-        : chars;
+        ? renderDifficultFlaggedUnits(units, difficultFlags.slice(seg.start, seg.end), seg.start)
+        : units.join('');
       if (!seg.annotation) {
         return <React.Fragment key={seg.start}>{body}</React.Fragment>;
       }

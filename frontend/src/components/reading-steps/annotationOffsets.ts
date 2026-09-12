@@ -61,6 +61,48 @@ export function countRawChars(text: string, upTo?: number): number {
   return rawCount;
 }
 
+/**
+ * Split `text` into one entry per UTF-16 code unit of `stripPUASelectors(text)`,
+ * each entry carrying the PUA Variation Selectors that immediately follow it.
+ *
+ * WHY this exists (#3185): the annotated-paragraph renderer has to slice by RAW
+ * character offset (that is what `Annotation.charStart/charEnd` mean), but it
+ * also has to keep the tone variant selectors -- those ARE the polyphonic
+ * correction.  Slicing the selector-bearing string directly puts the highlight
+ * on the wrong characters (PR #1155); stripping the selectors first throws the
+ * correction away.  Units give both: `units.length === stripPUASelectors(text).length`,
+ * so `units.slice(a, b)` lines up with `stripped.slice(a, b)` index for index,
+ * and `units.slice(a, b).join('')` still carries every selector in that range.
+ *
+ * A selector belongs to the character BEFORE it -- that is the order
+ * buildZhuyinString() emits.  Selectors that appear before any character
+ * (malformed input) are attached to the first unit instead of being dropped,
+ * so `toRawUnits(t).join('') === t` for every string with at least one
+ * non-selector code unit.
+ */
+export function toRawUnits(text: string): string[] {
+  const units: string[] = [];
+  let pending = '';
+  let i = 0;
+  while (i < text.length) {
+    const code = text.charCodeAt(i);
+    if (code === 0xDB40 && i + 1 < text.length) {
+      const low = text.charCodeAt(i + 1);
+      if (low >= 0xDD00 && low <= 0xDDEF) {
+        const pair = text.slice(i, i + 2);
+        if (units.length === 0) pending += pair;
+        else units[units.length - 1] += pair;
+        i += 2;
+        continue;
+      }
+    }
+    units.push(pending + text[i]);
+    pending = '';
+    i++;
+  }
+  return units;
+}
+
 export interface SelectionInfo {
   paragraphIndex: number;
   charStart: number;

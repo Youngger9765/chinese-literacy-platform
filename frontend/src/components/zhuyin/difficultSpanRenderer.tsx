@@ -183,13 +183,39 @@ export function renderDifficultFlagged(
   flags: boolean[],
   key: string | number,
 ): React.ReactNode {
+  return renderDifficultFlaggedUnits(text.split(''), flags, key);
+}
+
+/**
+ * Remove the DIFFICULT_SPAN sentinels, leaving every other Variation Selector
+ * (i.e. the tone variants that carry the polyphonic correction) in place.
+ *
+ * #3185: the annotated branch used to drop ALL selectors, correction included.
+ * It now keeps them, so the sentinels -- which are control characters, not
+ * content -- have to come off on their own or they would reach the DOM.
+ */
+export function stripDifficultMarkers(text: string): string {
+  return text.split(DIFFICULT_SPAN_START).join('').split(DIFFICULT_SPAN_END).join('');
+}
+
+/**
+ * Same as renderDifficultFlagged but takes one entry per flag instead of one
+ * code unit per flag, so a unit may carry the tone selectors that belong to
+ * its character (see toRawUnits in annotationOffsets.ts, #3185).
+ */
+export function renderDifficultFlaggedUnits(
+  units: string[],
+  flags: boolean[],
+  key: string | number,
+): React.ReactNode {
+  const text = units.join('');
   if (!flags.some(Boolean)) return text;
 
   const out: React.ReactNode[] = [];
   let runStart = 0;
   const flush = (end: number, difficult: boolean) => {
     if (end <= runStart) return;
-    const chunk = text.slice(runStart, end);
+    const chunk = units.slice(runStart, end).join('');
     out.push(
       difficult ? (
         <span key={`${key}-d${runStart}`} style={{ fontFamily: ZHUYIN_FONT_STACK }}>
@@ -202,8 +228,8 @@ export function renderDifficultFlagged(
     runStart = end;
   };
 
-  for (let i = 1; i <= text.length; i++) {
-    if (i === text.length || flags[i] !== flags[runStart]) {
+  for (let i = 1; i <= units.length; i++) {
+    if (i === units.length || flags[i] !== flags[runStart]) {
       flush(i, flags[runStart] === true);
     }
   }
