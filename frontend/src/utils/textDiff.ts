@@ -515,7 +515,3 @@ export function interleavePunctuation(
 
   return result;
 }
-
-// ⚠️ #3195 的 CI 驗證探針 —— 這一行是刻意的型別錯誤，用來證明棘輪在 CI 上真的會擋。
-// 確認 CI 紅了之後會立刻撤掉，不會留在分支上。
-export const __ratchetCiProbe: number = '這是字串不是數字';
