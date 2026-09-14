@@ -19,6 +19,7 @@ from ...services.ai_service import generate_reading_analysis, GeminiContentFilte
 from ...services.ai_usage_tracker import last_usage, log_ai_usage
 from ...services.input_sanitizer import sanitize_ai_input
 from ...services.reading_evaluation_service import evaluate_reading_with_ai
+from ...services.zhuyin_readings import font_zhuyin_table
 from pypinyin import Style, lazy_pinyin
 from ...services.reading_transcription_service import (
     ALLOWED_AUDIO_MIMES,
@@ -365,6 +366,14 @@ _CHINESE_CHAR_RE = re.compile(r"[〇一-鿿㐀-䶿\U00020000-\U0002FA1F]")
 _BOPOMOFO_RE = re.compile(r"[\u3105-\u312F]")
 
 
+#: 注音的四個聲調符號與輕聲點。去掉之後剩下的是「音節」。
+_TONE_MARKS = "ˊˇˋ˙"
+
+
+def _strip_tone(reading: str) -> str:
+    return reading.rstrip(_TONE_MARKS)
+
+
 def _build_zhuyin_map(target_text: str) -> dict[int, str]:
     """Return a position→bopomofo map for all CJK characters in target_text.
 
@@ -397,6 +406,7 @@ def _build_zhuyin_map(target_text: str) -> dict[int, str]:
     fail-closed：一旦對不上就**就地停住**，後面的字寧可沒有 ruby。
     漏標只是少一排注音，標錯是教錯讀音。
     """
+    single, poly = font_zhuyin_table()
     bopomofo_list = lazy_pinyin(target_text, style=Style.BOPOMOFO)
     zhuyin_map: dict[int, str] = {}
     pos = 0
@@ -408,8 +418,39 @@ def _build_zhuyin_map(target_text: str) -> dict[int, str]:
             # 中文字：一個字一個音節，永遠只消耗一個字元。
             # 只收「看起來真的是注音」的東西 —— 萬一哪天 pypinyin 對中文字也
             # 不再 1:1，這裡會變成漏標而不是把數字／標點標成讀音。
-            if element and element != char and _BOPOMOFO_RE.search(element):
-                zhuyin_map[pos] = element
+            reading = single.get(char)
+            if reading is None and element and element != char and _BOPOMOFO_RE.search(element):
+                entry = poly.get(char)
+                if entry is None:
+                    # 字型沒收這個字（175 課裡總共 5 字次）→ 維持 pypinyin。
+                    reading = element
+                elif element in entry["v"]:
+                    # pypinyin 依上下文挑的讀音，台灣字型有 → 直接採用
+                    reading = element
+                else:
+                    # 對不上時的分工原則：**音節聽 pypinyin，聲調聽字型**。
+                    #
+                    # pypinyin 的價值是「在這個詞裡是哪個音」（它看了整句上下文）；
+                    # 字型的價值是「台灣這個音讀第幾聲」。嚴格比對整個字串會為了一個
+                    # 聲調把對的音節整個丟掉，退回一個**完全不同的音**：
+                    #
+                    #   削  pypinyin ㄒㄩㄝ · 字型候選 [ㄒㄧㄠ, ㄒㄩㄝˋ]
+                    #       嚴格比對 → 退預設 ㄒㄧㄠ（音錯）
+                    #       同音節   → ㄒㄩㄝˋ（對）
+                    #
+                    # 全語料量過（`full_text_annotate` + `key_reading`，536 個走到這條
+                    # 分支的位置、17 個字）：同音節匹配**只改變兩個字**，其餘 15 個字的
+                    # 同音節候選本來就等於預設：
+                    #
+                    #   削 ×21  ㄒㄧㄠ → ㄒㄩㄝˋ   修好（語料全是 剝削/削弱/瘦削/削減）
+                    #   欸 ×3   ㄟˋ  → ㄞˇ      改壞（見 NEW_DISAGREEMENT_FROM_3202）
+                    #
+                    # 「唯一一個」候選才採用 —— 有兩個以上同音節候選代表聲調本身就是
+                    # 語意區別，那時沒有依據可選，退預設。
+                    same_syllable = [r for r in entry["v"] if _strip_tone(r) == _strip_tone(element)]
+                    reading = same_syllable[0] if len(same_syllable) == 1 else entry["d"]
+            if reading:
+                zhuyin_map[pos] = reading
             pos += 1
             continue
         # 非中文：pypinyin 原樣回傳，可能是一整串（"2019"、"Wi-Fi"、"」，"）。

@@ -65,6 +65,11 @@ jobs:
               - 'frontend/public/data/poyin_db.json'
               - 'frontend/public/fonts/BpmfZihiSerif-Regular.ttf'
               - 'frontend/src/components/zhuyin/__fixtures__/fontReadings.generated.json'
+              # 後端的跨畫面漂移棘輪解析這兩支前端測試自己 committed 的斷言當真值
+              #（tests/test_zhuyin_cross_surface_drift_3202.py）——
+              # 改它們必須連帶跑後端套件，否則漂移會從前端那側偷偷長出來
+              - 'frontend/src/components/zhuyin/polyphonicReadings.test.ts'
+              - 'frontend/src/components/zhuyin/reportedWords3173.test.ts'
               # 給實習生的 Git 教材 —— 正文刻意含衝突標記範例，所以在
               # test_no_stray_conflict_markers_3181 的白名單裡，而那支會讀它確認還在。
               # 教材被刪或改名時要讓後端套件跑到，否則白名單會變成永不命中的空話。
