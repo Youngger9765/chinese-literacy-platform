@@ -37,6 +37,7 @@ docstring 說整串傳是為了讓 pypinyin 用上下文消破音字，那個能
 from __future__ import annotations
 
 import functools
+import json
 import pathlib
 import re
 
@@ -75,10 +76,42 @@ NEUTRAL_TONE_SANDHI = frozenset({
 })
 
 
+@functools.lru_cache(maxsize=1)
+def _font_readings() -> dict[str, frozenset[str]]:
+    """出貨字型收的讀音，逐字一組。"""
+    raw = json.loads(
+        (pathlib.Path(__file__).resolve().parents[1] / "data" / "zhuyin" / "font_readings.json")
+        .read_text(encoding="utf-8")
+    )
+    out = {ch: frozenset({r}) for ch, r in raw["single"].items()}
+    for ch, entry in raw["poly"].items():
+        out[ch] = frozenset(entry["v"]) | {entry["d"]}
+    return out
+
+
 @functools.lru_cache(maxsize=None)
 def legal_readings(char: str) -> frozenset[str]:
-    """那個字所有合法的注音讀音 —— 跟 `_build_zhuyin_map` 的實作無關的裁判。"""
-    return frozenset(pinyin(char, style=Style.BOPOMOFO, heteronym=True)[0])
+    """那個字所有合法的注音讀音 —— 跟 `_build_zhuyin_map` 的實作無關的裁判。
+
+    ## 為什麼是「兩份字典的聯集」而不是只有 pypinyin（#3202）
+
+    這條鎖守的是**對齊**：每個字有沒有拿到自己的讀音，而不是隔壁的。
+    它原本只用 pypinyin 的異讀表當裁判，而 pypinyin 是大陸的函式庫 ——
+    於是這把尺**順便把讀音標準也釘在大陸**，儘管那從來不是它的工作。
+
+    #3202 把讀音來源換成出貨字型（本 repo 已宣告的台灣讀音權威，
+    見 test_font_is_taiwan_reading_authority_3173.py）之後，這條鎖紅了
+    104/154 段，紅的內容全是「息 拿到 ㄒㄧˊ，但合法讀音是 ㄒㄧ」——
+    **ㄒㄧˊ 正是台灣讀音**。那不是位移，是裁判用錯了標準。
+
+    ⛔ 這裡放寬**不是為了讓門變綠**。放寬之後這把尺仍然要咬得住位移，
+    而那件事由 `test_the_oracle_has_teeth` 與
+    `test_widening_the_referee_did_not_pull_its_teeth` 兩條負向對照證明：
+    實測 154 段全部位移一格，放寬前後都是 **154/154 被咬到**，零漏網。
+    """
+    return frozenset(pinyin(char, style=Style.BOPOMOFO, heteronym=True)[0]) | _font_readings().get(
+        char, frozenset()
+    )
 
 
 def is_legal(char: str, reading: str) -> bool:
@@ -155,9 +188,84 @@ def test_the_oracle_has_teeth() -> None:
     problems: list[str] = []
     for idx, char in enumerate(text):
         got = shifted.get(idx)
-        if got is None or not is_legal(char, got):
+        # ⛔ 不可以把 `got is None` 算成「裁判咬到」—— 位移建構本來就會讓最後一個
+        #    中文字沒有讀音，那是**建構的人工產物**，跟裁判嚴不嚴格完全無關。
+        #    原本寫成 `got is None or not is_legal(...)` → 對任何含中文的句子恆為 True，
+        #    把裁判換成「什麼都放行」這條照樣綠（2026-09-14 對抗式複審實測）。
+        if got is not None and not is_legal(char, got):
             problems.append(f"pos {idx}")
     assert problems, "把 map 位移一格之後裁判卻沒咬 —— 那它什麼都沒在驗"
+
+
+def test_widening_the_referee_did_not_pull_its_teeth() -> None:
+    """#3202 把裁判放寬成「兩份字典的聯集」之後，它還咬不咬得住位移。
+
+    放寬一把尺最常見的代價是它從此什麼都放行，而所有測試照樣綠。
+    這條把**服務端全部段落**各位移一格，數有幾段被咬到 —— 放寬前後都必須是全部。
+
+    實測（2026-09-14，判定式修正後）：
+        只有 pypinyin 異讀表   154 / 154
+        ∪ 出貨字型讀音          154 / 154
+        什麼都放行（對照組）      0 / 154   ← 證明這把尺分得開
+
+    ⚠️ **第一版的判定式讓這條測試整支空轉**，而且我拿它的 154/154 當結論回報過。
+    位移建構 `{i: zmap[i+1]}` 必然讓最後一個中文字沒有讀音，而
+    `shifted.get(i) is None or not is_legal(...)` 的第一個條件就先成立 ——
+    於是對任何含中文的段落恆為 True，**跟裁判是誰完全無關**。
+    對抗式複審把裁判換成「什麼都放行」，這條照樣綠。
+    修法是把 `is None` 排除掉，並把那個突變留成下面 `test_..._has_any_teeth_at_all`。
+
+    `test_the_oracle_has_teeth` 用一個句子驗同一件事；這條用全部語料驗，
+    因為放寬的影響是逐字的，單一句子看不出覆蓋率有沒有掉。
+    """
+    passages = _served_key_reading_passages()
+    assert len(passages) > 100, f"只拿到 {len(passages)} 段，語料沒載到"
+
+    missed = []
+    for name, text in passages:
+        zmap = _build_zhuyin_map(text)
+        shifted = {i: zmap[i + 1] for i in zmap if (i + 1) in zmap}
+        bitten = any(
+            # 同上：`is None` 是位移建構的產物，不算裁判咬到
+            shifted.get(i) is not None and not is_legal(char, shifted[i])
+            for i, char in enumerate(text)
+            if _CHINESE_CHAR_RE.match(char)
+        )
+        if not bitten:
+            missed.append(name)
+    assert not missed, (
+        f"{len(missed)}/{len(passages)} 段位移一格之後裁判沒咬 —— 放寬把牙齒拔掉了："
+        + ", ".join(missed[:10])
+    )
+
+
+def test_the_shift_oracle_has_any_teeth_at_all() -> None:
+    """把裁判換成「什麼都放行」，位移偵測必須完全失效（0 段被咬）。
+
+    這是上面兩條牙齒測試的**對照組**。少了它，判定式裡任何一個恆真的條件
+    都會讓那兩條變成劇場 —— 而那正是 2026-09-14 實際發生的事：
+    第一版寫 `shifted.get(i) is None or ...`，位移建構本身就保證最後一個中文字
+    沒有讀音，所以 154/154 是建構的產物不是裁判的功勞。
+
+    ⛔ 不要把這條刪掉「因為它斷言的是 0」。它斷言的是**那把尺不是萬用放行器**。
+    """
+    passages = _served_key_reading_passages()
+    assert len(passages) > 100, f"只拿到 {len(passages)} 段，語料沒載到"
+
+    bitten = []
+    for name, text in passages:
+        zmap = _build_zhuyin_map(text)
+        shifted = {i: zmap[i + 1] for i in zmap if (i + 1) in zmap}
+        if any(
+            shifted.get(i) is not None and not True  # 全放行的裁判
+            for i, char in enumerate(text)
+            if _CHINESE_CHAR_RE.match(char)
+        ):
+            bitten.append(name)
+    assert not bitten, (
+        f"{len(bitten)} 段在「裁判什麼都放行」的情況下還被判定為位移 —— "
+        "那表示判定式裡有跟裁判無關的恆真條件，上面兩條牙齒測試是空轉的"
+    )
 
 
 def test_context_disambiguation_survives_an_embedded_number() -> None:
