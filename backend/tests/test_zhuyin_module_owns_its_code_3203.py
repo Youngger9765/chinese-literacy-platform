@@ -2,8 +2,8 @@
 
 ## 為什麼需要這一道
 
-`specs/modules/zhuyin/INTENT.md` 這份文件本身防不了復發 —— 下一個人新增一支
-`frontend/src/components/zhuyin/newThing.ts` 不會有任何東西提醒他登記，
+`specs/modules/zhuyin/INTENT.md` 這份文件本身防不了復發 —— 下一個人在
+前端的 zhuyin 目錄底下再加一支新檔，不會有任何東西提醒他登記，
 而「沒有人在看這一塊的整體」正是 #3173／#3175／#3177／#3202／#3204 五張票的共同根因。
 
 這條把它變成擋：**檔名或路徑看起來跟注音有關的檔，要嘛被 zhuyin module 擁有，
