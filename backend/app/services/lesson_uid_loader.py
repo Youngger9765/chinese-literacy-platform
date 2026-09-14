@@ -24,6 +24,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 import yaml
+from functools import lru_cache
 
 # backend/app/services/ → backend/
 _BACKEND_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -101,9 +102,31 @@ def _latest_version(uid_dir: Path) -> Optional[Path]:
     return versions[-1] if versions else None
 
 
+#: libyaml 的 C 實作，比純 Python 的 SafeLoader 快一個量級。
+#:
+#: PyYAML 的官方 manylinux wheel 通常內含 libyaml，但**這裡不假設它在** ——
+#: 取不到就退回 `SafeLoader`，語意完全相同，只是慢。所以這段 code 的正確性
+#: 不依賴容器裡裝了什麼，只有「快多少」依賴。
+#:
+#: ⚠️ 兩者不是完全等價的實作（C 版對少數邊角語法比較嚴），而 `_read_yaml` 會把
+#: 任何例外吞成 `None` —— 也就是說「C 版解不出來的檔」會靜靜變成沒有內容。
+#: 所以換的時候逐檔比對過全部 2445 個 .yml，兩個 loader 結果完全相同
+#: （`tests/test_yaml_loader_equivalence_3205.py` 把那件事變成常駐的門）。
+_YAML_LOADER = getattr(yaml, "CSafeLoader", yaml.SafeLoader)
+
+
+@lru_cache(maxsize=None)
 def _read_yaml(p: Path) -> Any:
+    """讀一個 YAML 檔。**同一個 path 在同一個 process 裡只真的讀一次。**
+
+    冷啟動時 `build_all_lessons()` 對 2445 個檔發出 5605 次呼叫（每檔平均 2.3 次）——
+    課程樹的走訪會在不同階段重複碰同一個檔。
+
+    ⚠️ 這個快取**不是 test-only**：`routes/admin_stories.py` 在管理員改過課文之後
+    會呼叫 `reset_cache()`，那條路徑必須把這裡也清掉，否則管理員改了看不到。
+    """
     try:
-        return yaml.safe_load(p.read_text(encoding="utf-8"))
+        return yaml.load(p.read_text(encoding="utf-8"), Loader=_YAML_LOADER)
     except Exception:
         return None
 
@@ -380,6 +403,11 @@ def load_all() -> list[dict]:
 
 
 def reset_cache() -> None:
-    """Test-only: the caches are import-time singletons in production."""
+    """清掉這個模組的全部快取。
+
+    ⚠️ **不是 test-only** —— `routes/admin_stories.py` 在管理員改過課文之後會叫它。
+    新增快取時一定要加進來，漏掉的症狀是「管理員改了但線上沒變」，而那是靜默的。
+    """
     available_uids.cache_clear()
     load_lesson.cache_clear()
+    _read_yaml.cache_clear()
