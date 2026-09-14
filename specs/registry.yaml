@@ -750,3 +750,40 @@ modules:
   last_reviewed: 2026-08-11
   owner: young
   intent: specs/modules/tts/INTENT.md
+- spec_id: zhuyin.readings.taiwan_authority
+  module: zhuyin
+  title: 注音讀音 — 出貨字型是台灣讀音的唯一真值，三個表面各自是它的投影
+  stability: active
+  canonical_source: backend/app/services/zhuyin_readings.py
+  owns_code:
+  - backend/app/services/zhuyin_readings.py
+  - backend/app/services/he_conjunction.py
+  - backend/scripts/extract_font_readings.py
+  - backend/scripts/generate_taiwan_zhuyin_table.py
+  - frontend/src/components/zhuyin/polyphonicProcessor.ts
+  - frontend/src/components/zhuyin/polyphonicPatternMatcher.ts
+  - frontend/src/components/zhuyin/styleSetMapper.ts
+  - frontend/src/components/zhuyin/bopomoConstants.ts
+  - frontend/src/components/zhuyin/zhuyinStringBuilder.ts
+  - frontend/src/components/zhuyin/toneData.ts
+  - frontend/src/components/zhuyin/toneSandhi.ts
+  - frontend/src/utils/zhuyinUtils.ts
+  owns_data:
+  - backend/data/zhuyin/font_readings.json
+  - frontend/public/data/poyin_db.json
+  - frontend/public/fonts/BpmfZihiSerif-Regular.ttf
+  - frontend/src/components/zhuyin/__fixtures__/fontReadings.generated.json
+  spec_tests:
+  - backend/tests/test_font_is_taiwan_reading_authority_3173.py
+  - backend/tests/test_font_readings_match_shipped_font_3177.py
+  - backend/tests/test_taiwan_zhuyin_readings_3202.py
+  - backend/tests/test_zhuyin_cross_surface_drift_3202.py
+  - backend/tests/test_zhuyin_map_alignment_3175.py
+  - backend/tests/test_he_conjunction.py
+  - backend/tests/test_he_conjunction_zhuyin_3204.py
+  - backend/tests/test_zhuyin_module_owns_its_code_3203.py
+  related_issues: []
+  source_meetings: []
+  last_reviewed: 2026-09-14
+  owner: young
+  intent: specs/modules/zhuyin/INTENT.md

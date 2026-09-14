@@ -70,6 +70,15 @@ jobs:
               # 改它們必須連帶跑後端套件，否則漂移會從前端那側偷偷長出來
               - 'frontend/src/components/zhuyin/polyphonicReadings.test.ts'
               - 'frontend/src/components/zhuyin/reportedWords3173.test.ts'
+              # zhuyin module 的豁免清單（backend/tests/test_zhuyin_module_owns_its_code_3203.py）
+              # 用 git ls-files 斷言這些檔還存在 —— 刪掉或改名任何一個都會弄紅後端套件，
+              # 所以改它們的 PR 必須跑得到那條鎖，否則只會在 merge 之後才炸在 main 上。
+              - 'frontend/src/components/reading-steps/ZhuyinPhoneticGame.tsx'
+              - 'frontend/src/components/reading-steps/zhuyinGameEngine.ts'
+              - 'frontend/src/components/reading-steps/zhuyinGameLogic.ts'
+              - 'frontend/src/components/ui/ZhuyinToggle.tsx'
+              - 'frontend/src/components/zhuyin/difficultSpanRenderer.tsx'
+              - 'frontend/src/context/ZhuyinContext.tsx'
               # 給實習生的 Git 教材 —— 正文刻意含衝突標記範例，所以在
               # test_no_stray_conflict_markers_3181 的白名單裡，而那支會讀它確認還在。
               # 教材被刪或改名時要讓後端套件跑到，否則白名單會變成永不命中的空話。
