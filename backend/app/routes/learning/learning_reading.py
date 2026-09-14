@@ -19,6 +19,7 @@ from ...services.ai_service import generate_reading_analysis, GeminiContentFilte
 from ...services.ai_usage_tracker import last_usage, log_ai_usage
 from ...services.input_sanitizer import sanitize_ai_input
 from ...services.reading_evaluation_service import evaluate_reading_with_ai
+from ...services.he_conjunction import _he_conjunction_positions
 from ...services.zhuyin_readings import font_zhuyin_table
 from pypinyin import Style, lazy_pinyin
 from ...services.reading_transcription_service import (
@@ -405,8 +406,22 @@ def _build_zhuyin_map(target_text: str) -> dict[int, str]:
 
     fail-closed：一旦對不上就**就地停住**，後面的字寧可沒有 ruby。
     漏標只是少一排注音，標錯是教錯讀音。
+
+    ## 「和」（#3204）
+
+    台灣把當連接詞的「和」讀 **ㄏㄢˋ**，而它在這裡優先於其他所有判斷 ——
+    因為那是三道門的結果（`services/he_conjunction.py`：jieba 斷詞、380 筆教育部
+    例外清單、以及「和」自我指稱的檢查），比逐字查表更有把握。
+
+    ⛔ 不可以無腦替換：`和平` 是 ㄏㄜˊ、`一唱一和` 是 ㄏㄜˋ、`溫和` 是 ㄏㄜˊ ——
+    盲換是拿一個錯讀音換另一個。所以判斷是**跟語音那條路共用的**（`he_conjunction.py`
+    原本住在 `tts/normalization.py` 裡，#3204 抽出來），不是重寫一套。
+    #3202 上線時這條還沒接，語料 730 處全部標成 ㄏㄜˊ。
     """
     single, poly = font_zhuyin_table()
+    # ⚠️ fail-open：jieba 或例外清單載不到時回空集合，「和」維持字型的 ㄏㄜˊ ——
+    #    跟這次改動之前一樣。標錯讀音比漏標嚴重。
+    he_positions = _he_conjunction_positions(target_text) if "和" in target_text else frozenset()
     bopomofo_list = lazy_pinyin(target_text, style=Style.BOPOMOFO)
     zhuyin_map: dict[int, str] = {}
     pos = 0
@@ -418,7 +433,7 @@ def _build_zhuyin_map(target_text: str) -> dict[int, str]:
             # 中文字：一個字一個音節，永遠只消耗一個字元。
             # 只收「看起來真的是注音」的東西 —— 萬一哪天 pypinyin 對中文字也
             # 不再 1:1，這裡會變成漏標而不是把數字／標點標成讀音。
-            reading = single.get(char)
+            reading = "ㄏㄢˋ" if pos in he_positions else single.get(char)
             if reading is None and element and element != char and _BOPOMOFO_RE.search(element):
                 entry = poly.get(char)
                 if entry is None:
