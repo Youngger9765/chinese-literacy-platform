@@ -20,6 +20,7 @@ from ...services.ai_usage_tracker import last_usage, log_ai_usage
 from ...services.input_sanitizer import sanitize_ai_input
 from ...services.reading_evaluation_service import evaluate_reading_with_ai
 from ...services.he_conjunction import _he_conjunction_positions
+from ...services.polyphone_words import readings_in as _polyphone_word_readings
 from ...services.zhuyin_readings import font_zhuyin_table
 from pypinyin import Style, lazy_pinyin
 from ...services.reading_transcription_service import (
@@ -422,6 +423,10 @@ def _build_zhuyin_map(target_text: str) -> dict[int, str]:
     # ⚠️ fail-open：jieba 或例外清單載不到時回空集合，「和」維持字型的 ㄏㄜˊ ——
     #    跟這次改動之前一樣。標錯讀音比漏標嚴重。
     he_positions = _he_conjunction_positions(target_text) if "和" in target_text else frozenset()
+    # 詞樣式表（#3215）—— 優先於逐字判斷，因為「詞」比「字」具體：
+    # pypinyin 對「難」的每個情境都回 ㄋㄢˊ，而 poyin_db 知道 災難/難民/患難 是 ㄋㄢˋ。
+    # 讀不到表就回空 dict，維持原本的 pypinyin 判讀。
+    word_readings = _polyphone_word_readings(target_text)
     bopomofo_list = lazy_pinyin(target_text, style=Style.BOPOMOFO)
     zhuyin_map: dict[int, str] = {}
     pos = 0
@@ -433,7 +438,9 @@ def _build_zhuyin_map(target_text: str) -> dict[int, str]:
             # 中文字：一個字一個音節，永遠只消耗一個字元。
             # 只收「看起來真的是注音」的東西 —— 萬一哪天 pypinyin 對中文字也
             # 不再 1:1，這裡會變成漏標而不是把數字／標點標成讀音。
-            reading = "ㄏㄢˋ" if pos in he_positions else single.get(char)
+            reading = word_readings.get(pos)
+            if reading is None:
+                reading = "ㄏㄢˋ" if pos in he_positions else single.get(char)
             if reading is None and element and element != char and _BOPOMOFO_RE.search(element):
                 entry = poly.get(char)
                 if entry is None:
