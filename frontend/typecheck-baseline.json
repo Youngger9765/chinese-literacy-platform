@@ -3,12 +3,12 @@
   "_provenance": {
     "derived_from": "npx tsc --noEmit，取 error 行、排除測試檔（*.test.* / *.spec.* / *.eval.* / __tests__ / __smoke__ / test(s) 路徑片段）",
     "generated_by": "frontend/scripts/run-typecheck-ratchet.mjs --write-baseline",
-    "frozen_at": "2026-09-12T17:45:17.060Z",
-    "edition": "git eefb2dadd0fe",
+    "frozen_at": "2026-09-14T05:15:46.208Z",
+    "edition": "git 2cd25c11239e",
     "note": "⚠️ 這是產物不是真值。tsconfig、TypeScript 版本或排除規則改了，這個數字就會動 —— 重跑 --write-baseline，不要手改。"
   },
   "schemaVersion": 2,
-  "shippedErrors": 39,
+  "shippedErrors": 36,
   "entries": [
     {
       "file": "src/components/layout/Sidebar.tsx",
@@ -129,21 +129,6 @@
       "file": "src/layouts/LearningLayout.tsx",
       "code": "TS2339",
       "text": "Property 'isProgressLoading' does not exist on type 'UseStepProgressPersistenceReturn'."
-    },
-    {
-      "file": "src/pages/admin/AdminDashboard.tsx",
-      "code": "TS2304",
-      "text": "Cannot find name 'setSelectedNode'."
-    },
-    {
-      "file": "src/pages/admin/AdminDashboard.tsx",
-      "code": "TS2304",
-      "text": "Cannot find name 'setSelectedNode'."
-    },
-    {
-      "file": "src/pages/admin/AdminDashboard.tsx",
-      "code": "TS2304",
-      "text": "Cannot find name 'setSelectedNode'."
     },
     {
       "file": "src/pages/admin/UsersPanel.tsx",
