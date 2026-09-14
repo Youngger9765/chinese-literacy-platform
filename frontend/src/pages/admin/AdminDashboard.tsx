@@ -71,7 +71,16 @@ const AdminDashboard: React.FC = () => {
   const [sidebarRefreshKey, setSidebarRefreshKey] = useState(0);
   const [orgTab, setOrgTab] = useState<OrgTab>('detail');
 
-  // Derive selectedNode from URL
+  // Derive selectedNode from URL — there is deliberately no setter (#3198).
+  //
+  // `8ad8919e8` moved this from state to the URL so every admin section has a
+  // shareable link. Three call sites kept calling the setter that went away with
+  // the state, and since `tsc` has never run in CI (`build` is a bare
+  // `vite build`), nothing caught three `Cannot find name 'setSelectedNode'` —
+  // the buttons just threw ReferenceError and blanked the page.
+  //
+  // ⛔ To change what is shown, navigate. `handleSelectNode(node)` below does
+  //    exactly what the old setter did, via the URL.
   const selectedNode = slugToNode(location.pathname);
 
   const refreshSidebar = useCallback(() => {
@@ -109,7 +118,7 @@ const AdminDashboard: React.FC = () => {
         {selectedNode?.type === 'create_org' && (
           <CreateOrgPanel
             onCreated={handleOrgCreated}
-            onCancel={() => setSelectedNode(null)}
+            onCancel={() => handleSelectNode(null)}
           />
         )}
         {selectedNode?.type === 'org' && (
@@ -147,7 +156,7 @@ const AdminDashboard: React.FC = () => {
               <OrgDetailPanel
                 organizationId={selectedNode.id}
                 onSchoolCreated={refreshSidebar}
-                onSelectSchool={(schoolId) => setSelectedNode({ type: 'school', id: schoolId })}
+                onSelectSchool={(schoolId) => handleSelectNode({ type: 'school', id: schoolId })}
               />
             ) : (
               <OrgDashboardPanel organizationId={selectedNode.id} />
@@ -164,7 +173,7 @@ const AdminDashboard: React.FC = () => {
         {selectedNode?.type === 'classroom' && (
           <ClassroomDetailPanel
             classroomId={selectedNode.id}
-            onBackToSchool={(schoolId) => setSelectedNode({ type: 'school', id: schoolId })}
+            onBackToSchool={(schoolId) => handleSelectNode({ type: 'school', id: schoolId })}
           />
         )}
         {selectedNode?.type === 'roles' && <RolesPanel />}
