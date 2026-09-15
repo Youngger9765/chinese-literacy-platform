@@ -15,6 +15,7 @@
 
 from __future__ import annotations
 
+import json
 import pathlib
 import re
 
@@ -73,3 +74,34 @@ def test_diagnosis_matches_the_lesson_page(
     idx = sentence.index(char)
     got = _build_zhuyin_map(sentence).get(idx)
     assert got == expected, f"{sentence!r} 的「{char}」診斷頁標 {got!r}，課文頁是 {expected!r}"
+
+
+def test_the_table_really_came_from_poyin_db_and_the_font() -> None:
+    """committed 的詞表必須真的是從來源推出來的，不是有人手改的。
+
+    #3202 的 `font_readings.json` 有同款的門
+    （`test_table_really_came_from_the_shipped_font`），這張表原本沒有 ——
+    對抗式複審在 `origin/staging` 上構造了一個完全溜過去的變更來證明：
+    改 `因為` 與 `重要` 兩筆，四支注音測試 **94 passed，跟沒改一模一樣**。
+
+    ⛔ 不要把這支改成「比對一份寫死的期望值」—— 那又是一張會過期的表。
+    它每次都真的重讀 `poyin_db.json` 與 TTF 重新展開一次。
+    """
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "gpw", pathlib.Path(__file__).resolve().parents[1] / "scripts" / "generate_polyphone_words.py"
+    )
+    gen = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(gen)
+
+    fresh = gen.build()
+    have = json.loads(
+        (pathlib.Path(__file__).resolve().parents[1] / "data" / "zhuyin" / "polyphone_words.json")
+        .read_text(encoding="utf-8")
+    )
+    assert have["words"] == fresh["words"], (
+        "詞表跟 poyin_db／字型對不上 —— 有人手改了它，或來源變了沒重跑產生器：\n"
+        "  `python3 backend/scripts/generate_polyphone_words.py`"
+    )
+    assert have["_provenance"]["poyin_sha256"], "詞表要記得它從哪來"

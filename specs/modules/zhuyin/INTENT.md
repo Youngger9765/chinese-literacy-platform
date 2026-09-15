@@ -7,8 +7,11 @@ canonical_source: backend/app/services/zhuyin_readings.py
 owns_code:
   - backend/app/services/zhuyin_readings.py
   - backend/app/services/he_conjunction.py
+  - backend/app/services/polyphone_words.py
   - backend/scripts/extract_font_readings.py
   - backend/scripts/generate_taiwan_zhuyin_table.py
+  - backend/scripts/generate_polyphone_words.py
+  - backend/scripts/generate_cross_surface_baseline.py
   - frontend/src/components/zhuyin/polyphonicProcessor.ts
   - frontend/src/components/zhuyin/polyphonicPatternMatcher.ts
   - frontend/src/components/zhuyin/styleSetMapper.ts
@@ -19,6 +22,8 @@ owns_code:
   - frontend/src/utils/zhuyinUtils.ts
 owns_data:
   - backend/data/zhuyin/font_readings.json
+  - backend/data/zhuyin/polyphone_words.json
+  - backend/data/zhuyin/cross_surface_baseline.json
   - frontend/public/data/poyin_db.json
   - frontend/public/fonts/BpmfZihiSerif-Regular.ttf
   - frontend/src/components/zhuyin/__fixtures__/fontReadings.generated.json
@@ -30,6 +35,8 @@ spec_tests:
   - backend/tests/test_zhuyin_map_alignment_3175.py
   - backend/tests/test_he_conjunction.py
   - backend/tests/test_he_conjunction_zhuyin_3204.py
+  - backend/tests/test_polyphone_words_3215.py
+  - backend/tests/test_cross_surface_baseline_3215.py
   - backend/tests/test_zhuyin_module_owns_its_code_3203.py
 related_issues: []
 source_meetings: []
