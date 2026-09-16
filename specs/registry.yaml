@@ -780,6 +780,8 @@ modules:
   - frontend/public/fonts/BpmfZihiSerif-Regular.ttf
   - frontend/src/components/zhuyin/__fixtures__/fontReadings.generated.json
   spec_tests:
+  - backend/tests/test_lesson_zhuyin_3218.py
+  - backend/tests/test_lesson_zhuyin_all_lessons_3218.py
   - backend/tests/test_font_is_taiwan_reading_authority_3173.py
   - backend/tests/test_font_readings_match_shipped_font_3177.py
   - backend/tests/test_taiwan_zhuyin_readings_3202.py

@@ -52,6 +52,7 @@ import re
 import subprocess
 import sys
 import tempfile
+from collections import Counter
 from pathlib import Path
 
 BACKEND = Path(__file__).resolve().parents[1]
@@ -294,14 +295,15 @@ def _apply_corrections(uid: str, texts: list[dict], corrections: list[dict],
     """
     applied = 0
     for c in corrections:
-        target = next((t for t in texts
-                       if t["section"] == c["section"] and t["idx"] == c["idx"]), None)
-        if target is None:
-            sys.exit(f"修正過期：{uid} 找不到 {c['section']} idx={c['idx']}")
-        sha = hashlib.sha256(target["text"].encode("utf-8")).hexdigest()[:12]
-        if sha != c.get("text_sha256_prefix"):
-            sys.exit(f"修正過期：{uid} {c['section']} idx={c['idx']} 的課文變了"
-                     f"（sha {c.get('text_sha256_prefix')} → {sha}）—— 重新確認這筆修正還對不對")
+        # ⛔ 用 **sha 定位**，不用 `(section, idx)` —— 一課多篇時 idx 會重複，
+        #    `next(...)` 會挑到第一個，可能是**別一篇**的同號段落（實測 18 課會撞）。
+        want_sha = c.get("text_sha256_prefix")
+        hits = [t for t in texts
+                if hashlib.sha256(t["text"].encode("utf-8")).hexdigest()[:12] == want_sha]
+        if len(hits) != 1:
+            sys.exit(f"修正過期：{uid} 用 sha {want_sha} 找到 {len(hits)} 段"
+                     f"（要剛好 1 段）—— 課文變了或這筆修正該重新確認")
+        target = hits[0]
         i = c["i"]
         if i >= target["n"] or target["text"][i] != c["c"]:
             sys.exit(f"修正過期：{uid} i={i} 應是「{c['c']}」實際是"
@@ -424,20 +426,24 @@ def check_without_oracle(uid: str, font_slots: dict) -> list[str]:
     if prov.get("poyin_db_sha256_16") != hashlib.sha256(POYIN_DB.read_bytes()).hexdigest()[:16]:
         errs.append(f"{uid} poyin_db 變了（表是用舊樣式表產的）")
 
-    # ① 課文：段落集合與逐段內容都要對得上
-    want = {(i["section"], i["idx"]): i["text"] for i in collect_texts(uid)}
-    got = {(t["section"], t["idx"]): t["text"] for t in doc.get("texts") or []}
-    if set(want) != set(got):
-        missing = sorted(set(want) - set(got))[:3]
-        extra = sorted(set(got) - set(want))[:3]
-        errs.append(f"{uid} 段落集合不符（表缺 {missing} · 表多 {extra}）")
-    for k in set(want) & set(got):
-        if want[k] != got[k]:
-            errs.append(f"{uid} {k} 的課文變了")
+    # ① 課文：用**文字本身**當 key，跟執行期一致（`lesson_zhuyin_table` 就是 text → readings）
+    #
+    # ⛔ 不可以用 `(section, idx)` 當 key —— **一課多篇時 idx 會重複**
+    #    （同一個 `paragraphs` 陣列裡每篇各自從 1 編號）。實測 18 課有重複，
+    #    L0063 有 3 份，用 dict 當集合會把它們collapse 成一筆 →
+    #    多篇課的前幾篇過期了這道門照樣綠。
+    want = Counter(i["text"] for i in collect_texts(uid))
+    got = Counter(t["text"] for t in doc.get("texts") or [])
+    if want != got:
+        missing = [t[:20] for t in (want - got)][:3]
+        extra = [t[:20] for t in (got - want)][:3]
+        errs.append(f"{uid} 課文集合不符（表缺 {missing} · 表多 {extra}）")
 
     # ④ 表自己的內部一致性
     for t in doc.get("texts") or []:
-        if len(t.get("ss") or []) != t.get("n") != len(t.get("text") or ""):
+        # ⛔ 不可以寫成 `a != b != c` —— Python 的鏈式比較等於 `(a != b) and (b != c)`，
+        #    所以「ss 長度錯但 n == len(text)」時整句是 False，**這道門是空的**。
+        if not (len(t.get("ss") or []) == t.get("n") == len(t.get("text") or "")):
             errs.append(f"{uid} {t['section']} idx={t['idx']} 槽位/字數對不上")
         for r in t.get("poly") or []:
             i = r.get("i")

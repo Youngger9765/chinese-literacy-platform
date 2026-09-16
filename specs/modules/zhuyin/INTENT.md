@@ -29,6 +29,11 @@ owns_data:
   - frontend/public/fonts/BpmfZihiSerif-Regular.ttf
   - frontend/src/components/zhuyin/__fixtures__/fontReadings.generated.json
 spec_tests:
+  # #3218 的逐課鎖（1,093 條）。⛔ 沒掛在這裡的話 `specs/run-ci.sh` 的 Gate 2 跑不到 ——
+  # 只改產生器／processor 而沒碰 `backend/**` 的 PR 會讓這 1,093 條整組睡著
+  # （pytest.yml 是按路徑觸發的）。
+  - backend/tests/test_lesson_zhuyin_3218.py
+  - backend/tests/test_lesson_zhuyin_all_lessons_3218.py
   - backend/tests/test_font_is_taiwan_reading_authority_3173.py
   - backend/tests/test_font_readings_match_shipped_font_3177.py
   - backend/tests/test_taiwan_zhuyin_readings_3202.py
