@@ -37,7 +37,10 @@
  */
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import { PolyphonicProcessor, buildZhuyinString } from '../components/zhuyin/polyphonicProcessor';
+// ⛔ 只拿 `buildZhuyinString`（把槽位轉成 IVS 變體選擇器）。
+//    `PolyphonicProcessor`（執行期讀音選擇器）在 #3237 從執行期路徑移除 ——
+//    它現在只服務產表的 oracle `frontend/scripts/zhuyinAnswers.ts`。
+import { buildZhuyinString } from '../components/zhuyin/polyphonicProcessor';
 import type { ProcessedChar } from '../components/zhuyin/bopomoConstants';
 import { API_BASE } from '../services/apiConfig';
 import { AuthContext } from '../contexts/AuthContext';
@@ -86,6 +89,21 @@ export function buildDifficultCharSet(vocabWords: string[]): Set<string> {
 const STORAGE_KEY = 'zhuyin_mode_v2';
 const LEGACY_KEY  = 'zhuyin_enabled';
 
+/** 難字門檻的儲存 key（#3240）。跟 mode 分開存，這樣清掉一個不會連坐。 */
+const THRESHOLD_KEY = 'zhuyin_difficult_threshold_v1';
+export const THRESHOLD_MIN = 1;
+export const THRESHOLD_MAX = 5;
+
+function readStoredThreshold(): number {
+  try {
+    const n = Number(localStorage.getItem(THRESHOLD_KEY));
+    if (Number.isInteger(n) && n >= THRESHOLD_MIN && n <= THRESHOLD_MAX) return n;
+  } catch {
+    // 私密視窗／關掉 site data —— 用預設，不要炸掉整個 Provider
+  }
+  return 1;   // #3224 的預設：才剛唸完，錯一次就是真的卡點
+}
+
 const MODE_CYCLE: ZhuyinMode[] = ['none', 'difficult', 'all'];
 
 function readStoredMode(): ZhuyinMode {
@@ -104,6 +122,9 @@ function readStoredMode(): ZhuyinMode {
 }
 
 interface ZhuyinContextValue {
+  /** 難字門檻：錯幾次算「還不會」（#3240，1–5） */
+  difficultThreshold: number;
+  setDifficultThreshold: (n: number) => void;
   /** 3-state mode: 'none' | 'difficult' | 'all' */
   zhuyinMode: ZhuyinMode;
   zhuyinReady: boolean;
@@ -141,13 +162,34 @@ const ZhuyinContext = createContext<ZhuyinContextValue>({
   toggleZhuyin: () => {},
   processZhuyin: (t) => t,
   processLines: () => null,
+  difficultThreshold: 1,
+  setDifficultThreshold: () => {},
   processLinesSelective: () => null,
   loadLessonZhuyin: async () => {},
 });
 
 export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [zhuyinMode, setZhuyinModeRaw] = useState<ZhuyinMode>(readStoredMode);
-  const [zhuyinReady, setZhuyinReady] = useState(() => PolyphonicProcessor.instance.isLoaded);
+  // ── #3240 難字門檻：錯幾次算「還不會」──────────────────────────────────
+  //
+  // #3224 把難字改成「這孩子唸錯過的字」，門檻寫死 1 次。1 對「才剛開始唸」的孩子
+  // 是對的，但唸久了錯字會累積 —— 那時 2 次或 3 次才是「真的還不會」。
+  // 調它的人就是在裝置前面的人（同一個翻注音開關的人），所以跟 mode 一樣存 localStorage。
+  //
+  // ⛔ 不做成老師端的班級設定：那要 DB 欄位 + 後台介面，而這是「當下看得舒服」的
+  //    偏好，不是教學決定。做成班級設定反而讓家長在家裡調不動。
+  const [difficultThreshold, setDifficultThresholdRaw] = useState<number>(readStoredThreshold);
+
+  // #3237：執行期不再需要 `poyin_db.json`（188 KB）。
+  //
+  // 以前這個旗標等的是「破音字資料載好了嗎」—— 因為讀音是執行期算的。
+  // 現在讀音來自逐課對照表，這裡不需要等任何東西：注音的形狀由字型的 IVS 變體畫，
+  // 字型是 CSS 載的、不經過 JS。
+  //
+  // ⛔ 不可以直接拿掉這個旗標（它在 context 的型別裡、有 5 個地方在讀）——
+  //    改成恆真，語意變成「注音功能可用」。表還沒載完時 `toProcessed()` 會回
+  //    字型預設讀音（見那裡的說明），不是空白。
+  const [zhuyinReady] = useState(true);
 
   const zhuyinActive = zhuyinReady && zhuyinMode === 'all';
   const isZhuyinAny  = zhuyinReady && zhuyinMode !== 'none';
@@ -155,15 +197,14 @@ export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const isZhuyinNone = zhuyinMode === 'none';
   const zhuyinEnabled = zhuyinMode !== 'none';
 
-  // Load polyphonic data once
-  useEffect(() => {
-    if (PolyphonicProcessor.instance.isLoaded) {
-      setZhuyinReady(true);
-      return;
+  const setDifficultThreshold = useCallback((n: number) => {
+    const clamped = Math.min(THRESHOLD_MAX, Math.max(THRESHOLD_MIN, Math.round(n)));
+    setDifficultThresholdRaw(clamped);
+    try {
+      localStorage.setItem(THRESHOLD_KEY, String(clamped));
+    } catch {
+      // 存不進去就只在這個 session 有效 —— 不要因此不讓他調
     }
-    PolyphonicProcessor.instance.loadPolyphonicData()
-      .then(() => setZhuyinReady(true))
-      .catch((err) => console.error('Failed to load zhuyin data:', err));
   }, []);
 
   const setZhuyinMode = useCallback((mode: ZhuyinMode) => {
@@ -238,6 +279,7 @@ export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [errorChars, setErrorChars] = useState<Set<string>>(() => new Set());
   // 同一段只叫一次 —— alert 洗版比沒有 alert 更糟（#3166）
   const warnedMissRef = useRef<Set<string>>(new Set());
+
   const studentId = auth?.user?.id;
   const authToken = auth?.token;
   useEffect(() => {
@@ -246,7 +288,8 @@ export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     void (async () => {
       try {
         const res = await fetch(
-          `${API_BASE}/api/learning/students/${studentId}/error-patterns?min_errors=1`,
+          `${API_BASE}/api/learning/students/${studentId}/error-patterns`
+            + `?min_errors=${difficultThreshold}`,
           { headers: { Authorization: `Bearer ${authToken}` } },
         );
         if (!res.ok) return; // fail-open：拿不到就退回生詞，不要整段不標
@@ -264,7 +307,7 @@ export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       }
     })();
     return () => { alive = false; };
-  }, [authToken, studentId]);
+  }, [authToken, studentId, difficultThreshold]);
 
   // ── #3218 逐課注音對照表 ──────────────────────────────────────────────
   //
@@ -354,9 +397,28 @@ export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       if (answers.size > 0 && !warnedMissRef.current.has(key)) {
         warnedMissRef.current.add(key);
         // eslint-disable-next-line no-console
-        console.warn('[zhuyin] 表裡沒有這段字，掉回執行期選擇器：', key.slice(0, 40));
+        console.warn('[zhuyin] 表裡沒有這段字，用字型預設讀音：', key.slice(0, 40));
       }
-      return PolyphonicProcessor.instance.process(text);
+      // ⛔ 這裡**不再跑執行期選擇器**（#3237）。
+      //
+      // 以前是 `PolyphonicProcessor.instance.process(text)` —— 那是第二套讀音來源，
+      // 跟表對同一段課文會給不同答案（#3218 量到全庫 7,682 / 65,754 個破音字位置不一致）。
+      // #3230 之後服務端會交給前端的 45,606 個中文字串 100% 在表裡，所以課文永遠走上面
+      // 那條；會走到這裡的只剩「老師臨時貼的字」與表還沒載完的瞬間。
+      //
+      // 那兩種情況給**字型預設讀音**（`0000` 就是字型的預設槽）—— 這是**查表**不是選擇：
+      // 單音字（字型收了 11,050 個）本來就唯一，破音字給預設音。
+      // 破音字在老師貼的字裡可能不準，但「不準」跟「另一套引擎給出跟表不同的答案」
+      // 是兩件事 —— 後者才是 #3202/#3204/#3215 三張票疊出四層的來源。
+      //
+      // ⚠️ `polyphonicProcessor.ts` 這個檔還留著，因為 ① `buildZhuyinString`（IVS 渲染）
+      // 住在裡面 ② 產表的 oracle `frontend/scripts/zhuyinAnswers.ts` 要 import 它。
+      // 它從執行期路徑變成**產表工具**，那正是它該在的位置。
+      const out: ProcessedChar[] = [];
+      for (let i = 0; i < text.length; i++) {
+        out.push({ char: text[i], styleSet: '0000' });
+      }
+      return out;
     },
     // `answers` 必須在 deps 裡 —— 它換身分才會讓下游的 memo 重算（見上面那段註解）
     [answers],
@@ -463,6 +525,8 @@ export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     <ZhuyinContext.Provider value={{
       zhuyinMode,
       zhuyinReady,
+      difficultThreshold,
+      setDifficultThreshold,
       zhuyinActive,
       isZhuyinAny,
       isZhuyinAll,

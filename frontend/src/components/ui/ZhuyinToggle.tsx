@@ -1,9 +1,17 @@
-import { ZhuyinMode } from '../../context/ZhuyinContext';
+import { ZhuyinMode, THRESHOLD_MIN, THRESHOLD_MAX } from '../../context/ZhuyinContext';
 
 interface ZhuyinToggleProps {
   mode: ZhuyinMode;
   ready: boolean;
   onModeChange: (mode: ZhuyinMode) => void;
+  /**
+   * 難字門檻：錯幾次算「還不會」（#3240）。只在「難字」模式下顯示。
+   *
+   * ⛔ 兩個都是 optional —— `AppShell` 與 `Sidebar` 都 render 這個元件，
+   *    漏傳一邊只會少一個控制項，不會讓注音開關整個壞掉。
+   */
+  difficultThreshold?: number;
+  onThresholdChange?: (n: number) => void;
   /** @deprecated use mode + onModeChange */
   enabled?: boolean;
   /** @deprecated use onModeChange */
@@ -12,14 +20,21 @@ interface ZhuyinToggleProps {
 
 const SEGMENTS: Array<{ mode: ZhuyinMode; label: string; title: string }> = [
   { mode: 'none',      label: '無',   title: '關閉注音' },
-  { mode: 'difficult', label: '難字', title: '僅標示難字注音（詞彙表）' },
+  // ⚠️ #3224 之後這裡不再是詞彙表 —— 難字＝**這個孩子唸錯過的字**。
+  //    原本的 title 寫「（詞彙表）」，那句話在 #3224 之後就不對了。
+  { mode: 'difficult', label: '難字', title: '只標你唸錯過的字' },
   { mode: 'all',       label: '全',   title: '顯示全文注音' },
 ];
 
-export default function ZhuyinToggle({ mode, ready, onModeChange }: ZhuyinToggleProps) {
+export default function ZhuyinToggle({
+  mode, ready, onModeChange, difficultThreshold, onThresholdChange,
+}: ZhuyinToggleProps) {
   const isLoading = !ready;
+  const showThreshold =
+    mode === 'difficult' && difficultThreshold !== undefined && onThresholdChange !== undefined;
 
   return (
+    <div className="inline-flex items-center gap-1.5">
     <div
       role="group"
       aria-label="注音顯示模式"
@@ -47,6 +62,47 @@ export default function ZhuyinToggle({ mode, ready, onModeChange }: ZhuyinToggle
           </button>
         );
       })}
+    </div>
+
+    {/*
+      #3240：門檻只在「難字」模式下出現 —— 其他兩個模式下它沒有意義，
+      常駐只是讓開關變寬（這個開關在手機側欄裡，寬度是稀缺的）。
+    */}
+    {showThreshold && (
+      <div
+        role="group"
+        aria-label="難字門檻"
+        className="inline-flex items-center gap-0.5 rounded-full bg-surface-container-high p-0.5"
+      >
+        <button
+          type="button"
+          onClick={() => onThresholdChange(difficultThreshold - 1)}
+          disabled={difficultThreshold <= THRESHOLD_MIN}
+          aria-label="降低難字門檻（標更多字）"
+          title={`錯 ${difficultThreshold} 次以上才標 —— 按這裡標更多字`}
+          className="h-8 sm:h-9 w-7 rounded-full font-headline font-bold text-sm text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface disabled:opacity-30 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent active:scale-95"
+        >
+          −
+        </button>
+        <span
+          aria-live="polite"
+          aria-label={`錯 ${difficultThreshold} 次以上才標`}
+          className="min-w-[2.5rem] text-center font-headline font-bold text-xs sm:text-sm text-on-surface-variant tabular-nums"
+        >
+          {difficultThreshold}&thinsp;次
+        </span>
+        <button
+          type="button"
+          onClick={() => onThresholdChange(difficultThreshold + 1)}
+          disabled={difficultThreshold >= THRESHOLD_MAX}
+          aria-label="提高難字門檻（標更少字）"
+          title={`錯 ${difficultThreshold} 次以上才標 —— 按這裡標更少字`}
+          className="h-8 sm:h-9 w-7 rounded-full font-headline font-bold text-sm text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface disabled:opacity-30 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent active:scale-95"
+        >
+          ＋
+        </button>
+      </div>
+    )}
     </div>
   );
 }

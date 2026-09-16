@@ -353,6 +353,77 @@ _HE_CONJUNCTION_SLOT = "ss01"
 _HE_DEFAULT_SLOT = DEFAULT_SLOT
 
 
+# 教育部國語辭典（萌典 API `/uni/相`，2026-09-17 查）：
+#
+#   ㄒㄧㄤ   [副] 交互，兩方面都進行 —— 互相、守望相助、兩地相思、相得益彰
+#            [副] 彼此，強調雙方比較後的差異 —— 相異、相像、旗鼓相當
+#            [助] 由交互演變為單方面 —— 有事相煩、實不相瞞
+#   ㄒㄧㄤˋ  [動] 審視／占視／輔佐／掌管／挑選 —— 相字、相夫教子、相人
+#            [名] 容貌 —— 長相、福相、吃相；相片／相機／照相；宰相／丞相／首相
+#
+# ⭐ 關鍵結構：**ㄒㄧㄤˋ 是封閉集，ㄒㄧㄤ 是預設**。所以裁決只要列得出 ㄒㄧㄤˋ 的詞，
+# 其餘一律 ㄒㄧㄤ —— 不必窮舉交互義那條長尾（那條尾巴沒有頭：相信/相同/相處/相關/
+# 相反/相符/相向/相覷/相看/相悖/相爭/相棄/相及/相視/相謂…）。
+#
+# 出貨 processor 對這個字的錯誤是系統性的：全庫 1,301 個「相」裡有 **38 處**
+# 把交互義讀成 ㄒㄧㄤˋ（環環相扣 ×6、互不相讓 ×3、爭相報導 ×2、遠來相視 ×8、
+# 賊相謂曰 ×3、餓餒相及 ×3、於是相隨往 ×2、相違背／相傳／互相獨立／兩相宜／
+# 自相矛盾／相悖／相爭／相棄／花色相同／將相關 各 1–2 處）。
+#
+# ⛔ 為什麼是裁決層而不是 38 筆 `lesson_corrections.json`：
+#    手工修正綁在「課文 sha + 位置」上，課文一動就過期，而這 38 處分佈在 17 課、
+#    同一句還會在 spotlight／word_matching／sentence_matching／選項各出現一份。
+#    規則層會自己跟著課文走。同 `_adjudicate_he()` 的既有作法。
+#
+# ⚠️ 封閉集裡每一筆都必須是「相」在詞中位置固定、不會跨詞界誤命中的。
+#    第一版我放了 `出相`／`面相`／`福相`，結果誤命中 **37 處**本來就正確的
+#    「找出+相同」「面面+相覷」「禍福+相倚」—— 那三筆已移除。
+_XIANG4_WORDS = (
+    # 容貌
+    "長相", "吃相", "窘相", "窮酸相", "睡相", "站相", "坐相", "醜相", "怪相", "傻相",
+    # 影像
+    "相片", "相簿", "相機", "照相", "相館", "相框",
+    # 官職
+    "宰相", "丞相", "首相", "相位", "相國", "相爺", "拜相", "相夫教子", "相不賢",
+    # 其他名詞/動詞義
+    "真相", "月相", "亮相", "相人", "相字", "相馬", "相術", "相士", "相命", "相貌",
+    "相聲", "露相",
+)
+_XIANG_DEFAULT_SLOT = "ss01"   # ㄒㄧㄤ（交互／彼此／單方面動作）
+_XIANG4_SLOT = "0000"          # ㄒㄧㄤˋ（審視／容貌／宰相／照相）
+
+
+def _xiang4_at(units: list[str], i: int) -> str | None:
+    """位置 i 的「相」是不是落在 ㄒㄧㄤˋ 封閉集的某個詞裡。
+
+    ⛔ 吃的是 **UTF-16 單位的 list**，不是原字串 —— `i` 是 UTF-16 位移，
+    拿它去索引 Python 字串（碼點）在含非 BMP 字的段落會整串位移。
+    第一版就是這樣寫的，結果 L0001 的 `相傳「炸龍」`（同段有 𪹚 U+2AE5A）
+    與 L0075 的 `兩條互相獨立` 兩處**沒被裁決到** —— 比對落在錯的位置上。
+    這個索引坑在這次改動裡咬了第三次，所以這裡只收 list、不收 str。
+    """
+    for w in _XIANG4_WORDS:
+        k = w.index("相")
+        s = i - k
+        if s >= 0 and "".join(units[s:s + len(w)]) == w:
+            return w
+    return None
+
+
+def _adjudicate_xiang(text: str, ss: list) -> tuple[list, int]:
+    """「相」的讀音：ㄒㄧㄤˋ 是封閉集，其餘一律 ㄒㄧㄤ（見上方說明）。"""
+    units = u16_chars(text)
+    out, changed = list(ss), 0
+    for i, ch in enumerate(units):
+        if ch != "相":
+            continue
+        want = _XIANG4_SLOT if _xiang4_at(units, i) else _XIANG_DEFAULT_SLOT
+        if out[i] != want:
+            out[i] = want
+            changed += 1
+    return out, changed
+
+
 def _adjudicate_he(text: str, ss: list) -> tuple[list, int]:
     """「和」的讀音由 `he_conjunction`（jieba 斷詞 + 380 筆教育部例外）裁決，不由樣式表。
 
@@ -480,6 +551,7 @@ def build(uid: str, bundle: Path, font_slots: dict) -> dict:
     texts = []
     poly_n = 0
     he_total = 0
+    xiang_total = 0
     for n, it in enumerate(items):
         chars = u16_chars(it["text"])
         ss = slots[str(n)]
@@ -489,6 +561,8 @@ def build(uid: str, bundle: Path, font_slots: dict) -> dict:
             sys.exit(f"{uid} 長度不符：{it['section']} idx={it['idx']}")
         ss, he_changed = _adjudicate_he(it["text"], ss)
         he_total += he_changed
+        ss, x_changed = _adjudicate_xiang(it["text"], ss)
+        xiang_total += x_changed
         texts.append({"section": it["section"], "slug": it["slug"], "idx": it["idx"],
                       "text": it["text"], "n": len(chars), "ss": ss})
 
@@ -527,6 +601,7 @@ def build(uid: str, bundle: Path, font_slots: dict) -> dict:
             "notation": "pypinyin BopomofoConverter（與 font_readings.json 同一個轉換器）",
             "stats": {"texts": len(texts), "chars": sum(t["n"] for t in texts),
                       "poly_positions": poly_n, "he_adjudicated": he_total,
+                      "xiang_adjudicated": xiang_total,
                       "manual_corrections": n_corr},
             # ⛔ 不放 generated_at —— 重跑即使資料一字未變也會產生 diff，
             #    讓人看不出「資料到底變了沒」。provenance 由上面的 sha256 精確回答。
@@ -680,7 +755,8 @@ def main() -> int:
               f"沒有 esbuild 所以沒重跑 oracle —— 選擇邏輯本身的改動由前端 CI 擋）")
         return 0
 
-    stale, total = [], {"texts": 0, "chars": 0, "poly_positions": 0, "he_adjudicated": 0, "manual_corrections": 0}
+    stale, total = [], {"texts": 0, "chars": 0, "poly_positions": 0, "he_adjudicated": 0,
+                        "xiang_adjudicated": 0, "manual_corrections": 0}
     for uid in uids:
         doc = build(uid, bundle, font_slots)
         # ⛔ 緊湊輸出（#3230）。`indent=1` 時光是縮排就佔 24 MB / 53 MB ——
@@ -710,6 +786,7 @@ def main() -> int:
     print(f"✓ {len(uids)} 課 · {total['texts']:,} 段 · {total['chars']:,} 字 "
           f"· 破音字位置 {total['poly_positions']:,}"
           f"· 「和」裁決改掉 {total['he_adjudicated']:,} 處"
+          f"· 「相」裁決改掉 {total['xiang_adjudicated']:,} 處"
           f"· 人工修正 {total['manual_corrections']} 筆")
     return 0
 
