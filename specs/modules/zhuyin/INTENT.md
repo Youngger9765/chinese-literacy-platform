@@ -40,8 +40,6 @@ spec_tests:
   - backend/tests/test_font_is_taiwan_reading_authority_3173.py
   - backend/tests/test_font_readings_match_shipped_font_3177.py
   - backend/tests/test_taiwan_zhuyin_readings_3202.py
-  - backend/tests/test_zhuyin_cross_surface_drift_3202.py
-  - backend/tests/test_zhuyin_map_alignment_3175.py
   - backend/tests/test_he_conjunction.py
   - backend/tests/test_he_conjunction_zhuyin_3204.py
   - backend/tests/test_zhuyin_module_owns_its_code_3203.py
@@ -49,6 +47,13 @@ spec_tests:
   - backend/tests/test_served_text_all_in_table_3230.py
   # #3236 「相」全庫鎖（教育部：ㄒㄧㄤˋ 是封閉集，交互義一律 ㄒㄧㄤ）
   - backend/tests/test_xiang_reading_3236.py
+  # #3237 fallback 是查表不是選擇器（pypinyin 已移除）
+  - backend/tests/test_fallback_is_lookup_not_selector_3237.py
+  # #3237 退休紀錄（不是還在跑的鎖）—— 檔案留著，因為 CI 具名清單與
+  # `test_every_backend_test_named_in_ci_exists` 都會找這兩個路徑。
+  # 它們現在各有兩條「接手的鎖必須存在」+「舊選擇器真的沒回來」的斷言。
+  - backend/tests/test_zhuyin_map_alignment_3175.py
+  - backend/tests/test_zhuyin_cross_surface_drift_3202.py
 related_issues: []
 source_meetings: []
 last_reviewed: 2026-09-14
@@ -142,7 +147,8 @@ frontend/public/fonts/BpmfZihiSerif-Regular.ttf
 
 **要的性質（答案進 git、diff 看得懂）是對的，機制錯了。**
 正確機制是**只 commit「相異的決策」**：
-`test_zhuyin_cross_surface_drift_3202.py` 凍結的是「哪幾句兩個表面挑不同音」，
+⚠️ #3237：`test_zhuyin_cross_surface_drift_3202.py` 已退休 —— 前後端只剩一個讀音來源，
+它凍結的那個「漂移」不存在了。以下這段留作歷史紀錄。它凍結的是「哪幾句兩個表面挑不同音」，
 「這一輪 19 條變 17 條」比一萬行 lesson diff 有資訊量得多。
 repo 已有同形狀前例：`spotlight_fingerprints.py` 的結構棘輪。
 
@@ -156,7 +162,9 @@ repo 已有同形狀前例：`spotlight_fingerprints.py` 的結構棘輪。
   他跑得快      課文 ㄉㄜ˙   診斷 ㄉㄜˊ
 ```
 
-**已凍結成棘輪**（`test_zhuyin_cross_surface_drift_3202.py`）：多了紅、少了也紅。
+~~**已凍結成棘輪**（`test_zhuyin_cross_surface_drift_3202.py`）：多了紅、少了也紅。~~
+⚠️ #3237 退休（只剩一個來源，漂移不存在）。接手：`test_fallback_is_lookup_not_selector_3237.py`
+（fallback 是查表不是選擇器）＋ 前端 `noRuntimeSelector3237.test.tsx`。
 
 分兩類：**破音字選擇**（pypinyin 是大陸語料，結構上給不出「銀行 = ㄏㄤˊ」）與
 **一/不變調**（前端做、後端不做）。真正的修法是讓後端也讀 `poyin_db.json` 的詞樣式表，

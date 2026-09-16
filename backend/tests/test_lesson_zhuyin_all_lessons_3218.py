@@ -289,7 +289,11 @@ class TestHeConjunctionIsAdjudicated:
         舊引擎（`_build_zhuyin_map`）對「和」用的就是 `_he_conjunction_positions`，
         所以兩邊在「和」上必須逐字相同。改動前實測 63 處不同。
         """
-        from app.routes.learning.learning_reading import _build_zhuyin_map
+        # ⚠️ #3237：這裡原本拿 `_build_zhuyin_map()` 當 oracle —— 那是**消費端**不是權威。
+        #    #3237 把它從「pypinyin 選擇器」改成純查表之後，它對「和」只會給
+        #    ㄏㄢˋ（連接詞）或字型預設 ㄏㄜˊ，於是這條測試的尺自己變了。
+        #    改成直接問權威 `_he_conjunction_positions()`。
+        from app.services.he_conjunction import _he_conjunction_positions
 
         mismatches: list[str] = []
         total = 0
@@ -302,14 +306,20 @@ class TestHeConjunctionIsAdjudicated:
                 if "和" not in t["text"]:
                     continue
                 got = zhuyin_for_text(uid, t["text"]) or {}
-                old = _build_zhuyin_map(t["text"])
-                for i, ch in enumerate(t["text"]):
+                he_pos = _he_conjunction_positions(t["text"])
+                for i, ch in enumerate(_u16(t["text"])):
                     if ch != "和":
                         continue
                     total += 1
-                    if got.get(i) != old.get(i):
-                        ctx = t["text"][max(0, i - 5):i + 6]
-                        mismatches.append(f"{uid} …{ctx}… 表={got.get(i)} he_conjunction={old.get(i)}")
+                    # 權威只回答一件事：這個位置是不是連接詞。
+                    # 是 → 表必須是 ㄏㄢˋ。不是 → 表不可以是 ㄏㄢˋ（其他讀音由樣式表決定）。
+                    is_conj = i in he_pos
+                    tbl = got.get(i)
+                    bad = (tbl != "ㄏㄢˋ") if is_conj else (tbl == "ㄏㄢˋ")
+                    if bad:
+                        ctx = "".join(_u16(t["text"])[max(0, i - 5):i + 6])
+                        mismatches.append(
+                            f"{uid} …{ctx}… 表={tbl} he_conjunction說{'是' if is_conj else '不是'}連接詞")
         lesson_zhuyin_table.cache_clear()
         assert total > 300, f"只比到 {total} 個「和」—— 測試空轉"
         assert not mismatches, (
