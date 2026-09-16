@@ -39,9 +39,11 @@ vi.mock('../../../contexts/AuthContext', () => ({
 
 const mockGetClassroomLiveMonitor = vi.fn();
 const mockRequestPreviewToken = vi.fn();
+const mockGetStudentSessions = vi.fn();
 vi.mock('../../../services/teacherApi', () => ({
   getClassroomLiveMonitor: (...args: unknown[]) => mockGetClassroomLiveMonitor(...args),
   requestPreviewToken: (...args: unknown[]) => mockRequestPreviewToken(...args),
+  getStudentSessions: (...args: unknown[]) => mockGetStudentSessions(...args),
 }));
 
 import LiveMonitorTab from '../LiveMonitorTab';
@@ -157,7 +159,10 @@ describe('LiveMonitorTab', () => {
 
       await waitFor(() => expect(screen.getByText('小華')).toBeInTheDocument());
       const row = screen.getByText('小華').closest('div.flex.items-center.justify-between');
-      const previewBtn = row?.querySelector('button');
+      // #3220 之後一列有兩顆按鈕（看作答／推薦練習），所以用名稱選而不是位置
+      const previewBtn = Array.from(row?.querySelectorAll('button') ?? []).find(
+        (b) => b.textContent?.includes('推薦練習'),
+      );
       expect(previewBtn).toBeTruthy();
       fireEvent.click(previewBtn as HTMLButtonElement);
 
@@ -227,5 +232,50 @@ describe('LiveMonitorTab', () => {
       await vi.waitFor(() => expect(mockGetClassroomLiveMonitor).toHaveBeenCalledTimes(2));
       expect(screen.getByText(/上次更新/)).toBeTruthy();
     });
+  });
+});
+
+// ─── #3220 第三期：「看作答」入口 ────────────────────────────────────────────
+describe('LiveMonitorTab 的「看作答」(#3220)', () => {
+  /** 在指定學生那一列裡，依名稱取按鈕（列是排序過的，不能用索引）。 */
+  function buttonInRow(studentName: string, label: string) {
+    const row = screen.getByText(studentName).closest('div.flex.items-center.justify-between');
+    return Array.from(row?.querySelectorAll('button') ?? []).find((b) =>
+      b.textContent?.includes(label),
+    ) as HTMLButtonElement;
+  }
+
+  beforeEach(() => {
+    mockNavigate.mockReset();
+    mockGetClassroomLiveMonitor.mockReset();
+    mockGetStudentSessions.mockReset();
+    mockGetClassroomLiveMonitor.mockResolvedValue(baseResponse);
+  });
+
+  it('跳到該生「進行中」那一場，而不是比較新的已完成場次', async () => {
+    // 後端依 started_at desc 排序，所以已完成那筆在前 —— 老師要的是進行中那場
+    mockGetStudentSessions.mockResolvedValue([
+      { id: 91, story_title: '昨天做完的', started_at: '2026-09-16T09:00:00Z',
+        completed_at: '2026-09-16T09:30:00Z', overall_score: 88, status: 'completed' },
+      { id: 90, story_title: '現在在做的', started_at: '2026-09-16T01:00:00Z',
+        completed_at: null, overall_score: null, status: 'in_progress' },
+    ]);
+    renderTab();
+    await waitFor(() => expect(screen.getByText('小華')).toBeInTheDocument());
+    fireEvent.click(buttonInRow('小華', '看作答'));
+
+    await waitFor(() =>
+      expect(mockNavigate).toHaveBeenCalledWith('/teacher/students/2/sessions/90/report'),
+    );
+  });
+
+  it('學生完全沒有練習紀錄時給訊息，不是無聲失敗', async () => {
+    mockGetStudentSessions.mockResolvedValue([]);
+    renderTab();
+    await waitFor(() => expect(screen.getByText('小華')).toBeInTheDocument());
+    fireEvent.click(buttonInRow('小華', '看作答'));
+
+    await waitFor(() => expect(screen.getByText(/還沒有任何練習紀錄/)).toBeInTheDocument());
+    expect(mockNavigate).not.toHaveBeenCalled();
   });
 });
