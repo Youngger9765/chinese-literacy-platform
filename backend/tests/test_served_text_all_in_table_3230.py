@@ -140,3 +140,59 @@ def test_表裡的每一段都能對回自己的槽位長度(tables):
                 bad.append((d["lesson_uid"], t.get("section"), t.get("n"), len(slots)))
     assert n > 35000, f"量具壞了 —— 只掃到 {n} 段（預期 >35000）"
     assert not bad, f"這些段的槽位長度對不上課文：{bad[:10]}"
+
+
+# ===========================================================================
+# 端點本身 —— ⚠️ 這一組是因為漏測它而上線壞掉才補的
+# ===========================================================================
+
+
+class TestEndpointShape:
+    """`GET /api/lessons/{uid}/zhuyin` 回的形狀。
+
+    ⚠️ 為什麼補這一組：#3230 把表的欄位從 `ss` 換成 `ssz`，我驗了 service
+    （`lesson_zhuyin_raw()` 回的欄位是對的），**但沒驗 route** —— 而 route 自己
+    在組回應時又寫了一次 `t["ss"]`，於是 staging 一上線就 `KeyError: 'ss'` → 500。
+
+    教訓：service 綠不代表 route 綠。**只要 route 自己做了任何重新組裝，
+    就要有一條打 HTTP 的測試**，否則那段組裝程式碼沒有任何東西在看。
+    """
+
+    def test_端點回得到而且帶新欄位(self):
+        from fastapi.testclient import TestClient
+
+        from app.main import app
+
+        with TestClient(app) as c:
+            r = c.get("/api/lessons/L0013/zhuyin")
+            assert r.status_code == 200, f"端點掛了：{r.status_code} {r.text[:120]}"
+            d = r.json()
+            assert d["lesson_uid"] == "L0013"
+            assert d["texts"], "回了空的 texts"
+            t = d["texts"][0]
+            assert isinstance(t.get("ssz"), str) and t["ssz"], "沒有 ssz"
+            assert isinstance(t.get("n"), int), "沒有 n"
+            assert "ss" not in t, "還在回舊的 ss 欄位（表裡已經沒有它了）"
+
+    def test_端點的槽位長度對得上課文(self):
+        """⛔ 正向對照：不只「有欄位」，值要真的對齊。"""
+        from fastapi.testclient import TestClient
+
+        from app.main import app
+        from app.services.lesson_zhuyin import u16_chars
+
+        with TestClient(app) as c:
+            d = c.get("/api/lessons/L0013/zhuyin").json()
+        bad = [t["section"] for t in d["texts"]
+               if not (len(t["ssz"]) == t["n"] == len(u16_chars(t["text"])))]
+        assert not bad, f"這些段的 ssz 長度對不上課文：{bad[:5]}"
+
+    def test_沒有的課回404(self):
+        """⛔ 負向對照：否則上面兩條可能是在對任何輸入都回同一份東西。"""
+        from fastapi.testclient import TestClient
+
+        from app.main import app
+
+        with TestClient(app) as c:
+            assert c.get("/api/lessons/L9999/zhuyin").status_code == 404
+            assert c.get("/api/lessons/notalesson/zhuyin").status_code == 404
