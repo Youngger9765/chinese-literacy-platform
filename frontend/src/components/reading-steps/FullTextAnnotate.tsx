@@ -10,7 +10,7 @@ import { Story } from '../../types';
 import { sectionSlugForStep } from '../../config/roundScope';
 import TtsDegradedNotice from './TtsDegradedNotice';
 import { moduleForStep } from '../../config/stepConfig';
-import { useZhuyin } from '../../context/ZhuyinContext';
+import { useZhuyin} from '../../context/ZhuyinContext';
 import { scopedStepStorageKey } from '../../services/learningStorageScope';
 import { loadAnnotations, saveAnnotations } from '../../services/learning/annotationApi';
 import type { AnnotationPayload } from '../../services/learning/annotationApi';
@@ -440,7 +440,14 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
       ? sectionSlugForStep(story.manifestSections, qrEffectiveStep, moduleForStep)
       : null) ?? qrSectionSlug ?? null;
   // Zhuyin state from global context
-  const { isZhuyinAny, zhuyinActive, processLinesSelective } = useZhuyin();
+  const { isZhuyinAny, zhuyinActive, processLinesSelective, loadLessonZhuyin } = useZhuyin();
+  // #3218：注音改成讀這一課的逐字對照表；查不到的文字才回去自己算。
+  // ⛔ optional call —— 既有測試用 `vi.mock` 給的是**部分** context
+  // （只有 useZhuyin 需要的那幾個欄位），少了這個 `?.` 會讓 10 個測試檔炸。
+  useEffect(() => {
+    const uid = story?.lessonUid;
+    if (uid) void loadLessonZhuyin?.(uid);
+  }, [story?.lessonUid, loadLessonZhuyin]);
 
   // Whole-lesson playback (#2649). Paragraph-by-paragraph rather than one long
   // clip, so the page knows which paragraph is being read and can carry the

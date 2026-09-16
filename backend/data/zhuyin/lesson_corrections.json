@@ -1,0 +1,41 @@
+{
+ "_comment": "逐課注音修正表（#3218）—— 產表之後套上去的最後一層。\n\n為什麼需要它：出貨的 processor 是樣式比對，會跨詞界誤命中（「時間|接受」被當成「間接」）。那不是 processor 的 bug，是樣式表的固有限制 —— 而「逐課客製化」的意思就是這種個案直接在內容層改掉，不要回去動樣式（動樣式會弄壞別的詞，方大哥在 人*／福*／多* 上踩過四次）。\n\n⛔ 每一筆都要有 `source`（教育部辭典或其他權威），不接受「我覺得」。\n⛔ `text_sha256_prefix` 是防呆：課文一改，產生器會報這筆修正過期而不是靜靜套到錯的位置。",
+ "corrections": [
+  {
+   "lesson_uid": "L0039",
+   "section": "full_text_annotate",
+   "idx": 2,
+   "i": 77,
+   "c": "間",
+   "slot": "0000",
+   "expect_bopomofo": "ㄐㄧㄢ",
+   "text_sha256_prefix": "6b49b398c2c8",
+   "why": "時間|接受 被樣式當成「間接」（跨詞界命中）",
+   "source": "教育部辭典：時間 ㄕˊ ㄐㄧㄢ；間接 ㄐㄧㄢˋ ㄐㄧㄝ"
+  },
+  {
+   "lesson_uid": "L0043",
+   "section": "full_text_annotate",
+   "idx": 3,
+   "i": 317,
+   "c": "著",
+   "slot": "ss04",
+   "expect_bopomofo": "ㄓㄨㄛˊ",
+   "text_sha256_prefix": "3a908d956959",
+   "why": "著落 被當成動態助詞的輕聲",
+   "source": "教育部辭典：著落 ㄓㄨㄛˊ ˙ㄌㄨㄛ"
+  },
+  {
+   "lesson_uid": "L0113",
+   "section": "full_text_annotate",
+   "idx": 1,
+   "i": 133,
+   "c": "難",
+   "slot": "0000",
+   "expect_bopomofo": "ㄋㄢˊ",
+   "text_sha256_prefix": "9eef64ff38bf",
+   "why": "難當 被當成「多難興邦」那類的 ㄋㄢˋ",
+   "source": "教育部辭典：難當 ㄋㄢˊ ㄉㄤ"
+  }
+ ]
+}

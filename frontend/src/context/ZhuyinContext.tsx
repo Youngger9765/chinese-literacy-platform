@@ -38,6 +38,8 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { PolyphonicProcessor, buildZhuyinString } from '../components/zhuyin/polyphonicProcessor';
+import type { ProcessedChar } from '../components/zhuyin/bopomoConstants';
+import { API_BASE } from '../services/apiConfig';
 import { DIFFICULT_SPAN_START, DIFFICULT_SPAN_END } from '../components/zhuyin/bopomoConstants';
 
 export type ZhuyinMode = 'none' | 'difficult' | 'all';
@@ -106,6 +108,8 @@ interface ZhuyinContextValue {
   processLines: (lines: string[]) => string[] | null;
   /** 3-state selective processing: respects 'none'/'difficult'/'all' modes */
   processLinesSelective: (lines: string[], vocabWords: string[]) => string[] | null;
+  /** #3218：載入這一課的逐字注音對照表；載入後 process 都改成查表 */
+  loadLessonZhuyin: (lessonUid: string) => Promise<void>;
 }
 
 const ZhuyinContext = createContext<ZhuyinContextValue>({
@@ -122,6 +126,7 @@ const ZhuyinContext = createContext<ZhuyinContextValue>({
   processZhuyin: (t) => t,
   processLines: () => null,
   processLinesSelective: () => null,
+  loadLessonZhuyin: async () => {},
 });
 
 export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -196,32 +201,111 @@ export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     return () => document.removeEventListener('keydown', onKeyDown);
   }, [toggleZhuyin]);
 
+  // ── #3218 逐課注音對照表 ──────────────────────────────────────────────
+  //
+  // 注音是**課文的一部分**，不是執行期算出來的。離線用多來源產出（字型的合法讀音
+  // 集合 → 出貨的 processor → pypinyin 當兩岸分歧偵測器 → 教育部辭典裁決 → 人審），
+  // 固化成 `backend/data/lessons/<uid>/v3/zhuyin.json`，前後端讀同一份 ——
+  // 前後端不一致（實測 7,682 / 65,754 個破音字位置）因此**不可能存在**。
+  //
+  // ⚠️ `process()` 留著當 fallback，只服務「表裡沒有的文字」：老師臨時貼的段落、
+  //    還沒產表的課。⛔ 不要再往它身上加能力 —— 要改讀音請改表。
+  // ⛔ **必須是 state 不是 ref**。用 ref 的話「表到了」不會進到任何 dep 鏈 ——
+  //    四個消費端都是 `useMemo(..., [story.content, vocabWords, processLinesSelective])`，
+  //    而 `story.content`／`vocabWords` 每課固定、`processLinesSelective` 只在
+  //    `zhuyinReady`/`zhuyinMode` 變動時換身分。
+  //
+  //    2026-09-15 對抗式複審實測的失敗形狀：poyin_db（同源靜態檔、常被快取）先載完
+  //    → `zhuyinReady=true` → memo 用**空表**算完 → 之後 `/api/lessons/{uid}/zhuyin`
+  //    （跨網域，還要等 story detail 那趟先回）才到 → 寫進 ref → **畫面不動**。
+  //    於是第一個有注音的步驟停在 fallback，第二個步驟以後才用表 ——
+  //    同一課同一段在不同步驟顯示不同注音，**正是這個 PR 要消滅的東西**。
+  const [answers, setAnswers] = useState<Map<string, string[]>>(() => new Map());
+
+  const loadLessonZhuyin = useCallback(async (lessonUid: string) => {
+    try {
+      const res = await fetch(`${API_BASE}/api/lessons/${encodeURIComponent(lessonUid)}/zhuyin`);
+      if (!res.ok) return;   // 404 = 這課還沒產表 → 靜靜走 fallback
+      const data = await res.json();
+      const m = new Map<string, string[]>();
+      for (const t of data.texts ?? []) {
+        if (typeof t.text === 'string' && Array.isArray(t.ss)) m.set(t.text, t.ss);
+      }
+      setAnswers(m);
+    } catch {
+      // fail-open：拿不到表就走 fallback。漏標只是少一排注音，標錯是教錯讀音
+    }
+  }, []);
+
+  /**
+   * 查表優先，查不到才算。
+   *
+   * @param text   要標注音的字串（可能是整行，也可能是難字模式的 span）
+   * @param line   `text` 所屬的整行（span 的情況才給）
+   * @param offset `text` 在 `line` 裡的起始位置
+   *
+   * ⚠️ 難字模式原本把 span 當獨立字串丟給 processor，所以它看不到 span 以外的上下文。
+   *    改成切整行之後上下文變完整（跟整行模式一致）。
+   *
+   *    2026-09-15 對抗式複審實測 147 課 1,487 段：**1,296 個位置會變**，絕大多數是
+   *    改善（一/不變調、為了→ㄨㄟˋ、互相→ㄒㄧㄤ、供應→ㄧㄥˋ、成分→ㄈㄣˋ…），
+   *    **但有 4 處變差**，機制都是「整行讓樣式跨過詞界命中」：
+   *
+   *      時間|接受 → 間 ㄐㄧㄢ→ㄐㄧㄢˋ（當成「間接」）
+   *      有著落    → 著 ㄓㄨㄛˊ→ㄓㄜ˙
+   *      痛苦難當  → 難 ㄋㄢˊ→ㄋㄢˋ
+   *      得意忘形  → 得 ㄉㄜˊ→ㄉㄜ˙
+   *
+   *    ⛔ 所以不能說「不是 regression」—— 那四處在整行模式本來就錯（那條路徑沒變），
+   *    變的是難字模式原本靠「只處理選到的字」意外躲過了它們。
+   *    前三處已由 `backend/data/zhuyin/lesson_corrections.json` 在內容層修掉
+   *    （教育部辭典為據），第四處在語料裡那一處本來就對。
+   */
+  const toProcessed = useCallback(
+    (text: string, line?: string, offset = 0): ProcessedChar[] => {
+      const key = line ?? text;
+      const ss = answers.get(key);
+      // ⛔ 代理對守衛：表的槽位是按**碼點**產的，而這裡的索引是 UTF-16 單位。
+      //    課文實測 0 個非 BMP 字（2026-09-15 掃 1,667 段），但老師貼的字可能有
+      //    emoji／擴充 B 漢字 —— 兩者不等就走 fallback，不要拿位移的答案去標。
+      if (ss && ss.length === key.length && [...key].length === key.length
+          && offset + text.length <= ss.length) {
+        const out: ProcessedChar[] = [];
+        for (let i = 0; i < text.length; i++) {
+          out.push({ char: text[i], styleSet: ss[offset + i] });
+        }
+        return out;
+      }
+      return PolyphonicProcessor.instance.process(text);
+    },
+    // `answers` 必須在 deps 裡 —— 它換身分才會讓下游的 memo 重算（見上面那段註解）
+    [answers],
+  );
+
   const processZhuyin = useCallback((text: string): string => {
     if (!isZhuyinAny) return text;
     try {
-      return buildZhuyinString(PolyphonicProcessor.instance.process(text));
+      return buildZhuyinString(toProcessed(text));
     } catch {
       return text;
     }
-  }, [isZhuyinAny]);
+  }, [isZhuyinAny, toProcessed]);
 
   const processLines = useCallback((lines: string[]): string[] | null => {
     if (!isZhuyinAny) return null;
     try {
-      return lines.map((line) => buildZhuyinString(PolyphonicProcessor.instance.process(line)));
+      return lines.map((line) => buildZhuyinString(toProcessed(line)));
     } catch {
       return null;
     }
-  }, [isZhuyinAny]);
+  }, [isZhuyinAny, toProcessed]);
 
   const processLinesSelective = useCallback(
     (lines: string[], vocabWords: string[]): string[] | null => {
       if (!zhuyinReady || zhuyinMode === 'none') return null;
       if (zhuyinMode === 'all') {
         try {
-          return lines.map((line) =>
-            buildZhuyinString(PolyphonicProcessor.instance.process(line))
-          );
+          return lines.map((line) => buildZhuyinString(toProcessed(line)));
         } catch {
           return null;
         }
@@ -263,7 +347,7 @@ export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ childr
               // the whole line/page regardless of which chars were selected here.
               const span = line.slice(spanStart, i);
               try {
-                result += DIFFICULT_SPAN_START + buildZhuyinString(PolyphonicProcessor.instance.process(span)) + DIFFICULT_SPAN_END;
+                result += DIFFICULT_SPAN_START + buildZhuyinString(toProcessed(span, line, spanStart)) + DIFFICULT_SPAN_END;
               } catch {
                 result += DIFFICULT_SPAN_START + span + DIFFICULT_SPAN_END;
               }
@@ -276,7 +360,7 @@ export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           if (inSpan) {
             const span = line.slice(spanStart);
             try {
-              result += DIFFICULT_SPAN_START + buildZhuyinString(PolyphonicProcessor.instance.process(span)) + DIFFICULT_SPAN_END;
+              result += DIFFICULT_SPAN_START + buildZhuyinString(toProcessed(span, line, spanStart)) + DIFFICULT_SPAN_END;
             } catch {
               result += DIFFICULT_SPAN_START + span + DIFFICULT_SPAN_END;
             }
@@ -290,7 +374,7 @@ export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         return null;
       }
     },
-    [zhuyinReady, zhuyinMode]
+    [zhuyinReady, zhuyinMode, toProcessed]
   );
 
   return (
@@ -308,6 +392,7 @@ export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       processZhuyin,
       processLines,
       processLinesSelective,
+      loadLessonZhuyin,
     }}>
       {children}
     </ZhuyinContext.Provider>

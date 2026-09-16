@@ -280,6 +280,13 @@ export interface StrategyExerciseItem {
 
 export interface Story {
   id: string;
+  /**
+   * 課號（`L0011`）。#3218：拿它去抓這一課的逐字注音對照表。
+   *
+   * ⛔ 不要用 `Number(id) - 20000` 去推 —— 那是後端 `lesson_indexes` 的內部推導，
+   *    改了不會有人知道前端在依賴它。一修的舊列沒有這個欄位，所以是 optional。
+   */
+  lessonUid?: string;
   title: string;
   level: string;                // "4".."9" / 文言文 / 品格教育
   content: string[];
