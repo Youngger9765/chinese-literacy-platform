@@ -1,5 +1,5 @@
 {
- "_comment": "逐課注音修正表（#3218）—— 產表之後套上去的最後一層。\n\n為什麼需要它：出貨的 processor 是樣式比對，會跨詞界誤命中（「時間|接受」被當成「間接」）。那不是 processor 的 bug，是樣式表的固有限制 —— 而「逐課客製化」的意思就是這種個案直接在內容層改掉，不要回去動樣式（動樣式會弄壞別的詞，方大哥在 人*／福*／多* 上踩過四次）。\n\n⛔ 每一筆都要有 `source`（教育部辭典或其他權威），不接受「我覺得」。\n⛔ `text_sha256_prefix` 是防呆：課文一改，產生器會報這筆修正過期而不是靜靜套到錯的位置。",
+ "_comment": "逐課注音修正表（#3218）—— 產表之後套上去的最後一層。\n\n為什麼需要它：出貨的 processor 是樣式比對，會跨詞界誤命中（「時間|接受」被當成「間接」）。那不是 processor 的 bug，是樣式表的固有限制 —— 而「逐課客製化」的意思就是這種個案直接在內容層改掉，不要回去動樣式（動樣式會弄壞別的詞，方大哥在 人*／福*／多* 上踩過四次）。\n\n⛔ 每一筆都要有 `source`（教育部辭典或其他權威），不接受「我覺得」。\n⛔ `text_sha256_prefix` 是防呆：課文一改，產生器會報這筆修正過期而不是靜靜套到錯的位置。\n\n#3238：新增 7 筆「和」的個案修正。它們的成因是例外清單跨詞界誤中（和解／和服／和尾／不和），而那幾個詞在語料裡**有真用例**，所以不能像另外 9 個詞一樣整個移出清單 —— 只能逐處修。⛔ 若哪天做出真的詞界解析器，這 7 筆要一起移除，不要留著疊在新機制上。",
  "corrections": [
   {
    "lesson_uid": "L0039",
@@ -36,6 +36,90 @@
    "text_sha256_prefix": "9eef64ff38bf",
    "why": "難當 被當成「多難興邦」那類的 ㄋㄢˋ",
    "source": "教育部辭典：難當 ㄋㄢˊ ㄉㄤ"
+  },
+  {
+   "lesson_uid": "L0038",
+   "section": "served:reading_strategy_explained",
+   "idx": null,
+   "i": 15,
+   "c": "和",
+   "slot": "ss01",
+   "expect_bopomofo": "ㄏㄢˋ",
+   "text_sha256_prefix": "9a37a1de93c7",
+   "why": "問題和解決 —— 例外詞「和解」跨詞界誤中，這裡是連接詞",
+   "source": "教育部辭典（萌典 /uni/和）：ㄏㄢˋ = 連接詞的語音"
+  },
+  {
+   "lesson_uid": "L0038",
+   "section": "served:reading_strategy_explained",
+   "idx": null,
+   "i": 98,
+   "c": "和",
+   "slot": "ss01",
+   "expect_bopomofo": "ㄏㄢˋ",
+   "text_sha256_prefix": "9a37a1de93c7",
+   "why": "問題和解決 —— 例外詞「和解」跨詞界誤中，這裡是連接詞",
+   "source": "教育部辭典（萌典 /uni/和）：ㄏㄢˋ = 連接詞的語音"
+  },
+  {
+   "lesson_uid": "L0038",
+   "section": "served:reading_strategy_explained#line",
+   "idx": null,
+   "i": 15,
+   "c": "和",
+   "slot": "ss01",
+   "expect_bopomofo": "ㄏㄢˋ",
+   "text_sha256_prefix": "1aeecccdd0e2",
+   "why": "問題和解決 —— 例外詞「和解」跨詞界誤中，這裡是連接詞",
+   "source": "教育部辭典（萌典 /uni/和）：ㄏㄢˋ = 連接詞的語音"
+  },
+  {
+   "lesson_uid": "L0038",
+   "section": "served:reading_strategy_explained#line",
+   "idx": null,
+   "i": 49,
+   "c": "和",
+   "slot": "ss01",
+   "expect_bopomofo": "ㄏㄢˋ",
+   "text_sha256_prefix": "fd21db665f13",
+   "why": "問題和解決 —— 例外詞「和解」跨詞界誤中，這裡是連接詞",
+   "source": "教育部辭典（萌典 /uni/和）：ㄏㄢˋ = 連接詞的語音"
+  },
+  {
+   "lesson_uid": "L0039",
+   "section": "full_text_annotate",
+   "idx": 4,
+   "i": 67,
+   "c": "和",
+   "slot": "ss01",
+   "expect_bopomofo": "ㄏㄢˋ",
+   "text_sha256_prefix": "32378457fa41",
+   "why": "工作和服務業 —— 例外詞「和服」跨詞界誤中，這裡是連接詞",
+   "source": "教育部辭典（萌典 /uni/和）：ㄏㄢˋ = 連接詞的語音"
+  },
+  {
+   "lesson_uid": "L0135",
+   "section": "served:spotlight_v2.blocks[14].prompt",
+   "idx": null,
+   "i": 13,
+   "c": "和",
+   "slot": "ss01",
+   "expect_bopomofo": "ㄏㄢˋ",
+   "text_sha256_prefix": "3450c6a3e208",
+   "why": "嘴喙和尾羽 —— 例外詞「和尾」跨詞界誤中，這裡是連接詞",
+   "source": "教育部辭典（萌典 /uni/和）：ㄏㄢˋ = 連接詞的語音"
+  },
+  {
+   "lesson_uid": "L0179",
+   "section": "served:spotlight_v2.blocks[13].options[4]",
+   "idx": null,
+   "i": 3,
+   "c": "和",
+   "slot": "ss01",
+   "expect_bopomofo": "ㄏㄢˋ",
+   "text_sha256_prefix": "d54daa7eb89c",
+   "why": "不和隊友 —— 例外詞「不和」跨詞界誤中，這裡是連接詞",
+   "source": "教育部辭典（萌典 /uni/和）：ㄏㄢˋ = 連接詞的語音"
   }
  ]
 }

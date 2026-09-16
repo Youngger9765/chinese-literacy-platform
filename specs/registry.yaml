@@ -794,6 +794,7 @@ modules:
   - backend/tests/test_fallback_is_lookup_not_selector_3237.py
   - backend/tests/test_zhuyin_map_alignment_3175.py
   - backend/tests/test_zhuyin_cross_surface_drift_3202.py
+  - backend/tests/test_he_word_boundary_3238.py
   related_issues: []
   source_meetings: []
   last_reviewed: 2026-09-14
