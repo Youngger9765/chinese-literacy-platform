@@ -9,6 +9,7 @@ import sentry_sdk
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
@@ -505,6 +506,13 @@ app.add_middleware(
 # Global rate limiting: 300 read req/min + 90 write req/min per IP for
 # /api/* and /assets/* (#2486).
 # Placed after CORS so CORS preflight OPTIONS requests are not rate-limited.
+# gzip（#3234）。⛔ 以前一個都沒有 —— 課文 23 KB、注音表 39 KB（最大那課 109 KB）
+# 全部未壓上線，而學生多半在手機的行動網路上。
+#
+# `minimum_size=1000`：小回應壓縮的 CPU 比省下的位元組貴。
+# 只在 client 送 `Accept-Encoding` 時作用，已編碼的內容（音檔）會被跳過。
+app.add_middleware(GZipMiddleware, minimum_size=1000)
+
 app.add_middleware(GlobalRateLimitMiddleware)
 
 # Logging middleware wraps everything (added after CORS so it runs outermost)

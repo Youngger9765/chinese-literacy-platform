@@ -854,3 +854,28 @@ class TestPreflightExemptFromRateLimit:
             assert "OPTIONS" not in ln, (
                 f"OPTIONS 又被算進 read 額度了：{ln.strip()} —— 見本類 docstring"
             )
+
+
+class TestGzipIsOn:
+    """#3234：回應要壓縮。
+
+    ⛔ 上線前一個端點都沒壓：課文 23 KB、注音表 39 KB（最大那課 109 KB）全部
+    原封不動送出去，而學生多半在手機的行動網路上。#3230 把注音表放大 4 倍
+    之後這件事才浮上來（E2E 的 `waitForLoadState` 開始吃緊）。
+    """
+
+    def test_大回應在_client_要求時會壓縮(self, client):
+        general_rate_limiter.reset()
+        r = client.get("/api/stories", headers={"Accept-Encoding": "gzip"})
+        assert r.status_code == 200
+        assert len(r.content) > 1000, "這個回應太小，量不到壓縮 —— 換一個端點"
+        assert r.headers.get("content-encoding") == "gzip", (
+            "大回應沒有被壓縮 —— GZipMiddleware 沒裝或順序不對"
+        )
+
+    def test_client_沒要求就不壓(self, client):
+        """⛔ 負向對照：不是不管三七二十一都壓（否則上面那條證明不了 middleware 有在判斷）。"""
+        general_rate_limiter.reset()
+        r = client.get("/api/stories", headers={"Accept-Encoding": "identity"})
+        assert r.status_code == 200
+        assert "gzip" not in (r.headers.get("content-encoding") or "")
