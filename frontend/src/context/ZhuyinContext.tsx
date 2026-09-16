@@ -36,12 +36,27 @@
  * since the whole line is meant to be annotated.
  */
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { PolyphonicProcessor, buildZhuyinString } from '../components/zhuyin/polyphonicProcessor';
 import type { ProcessedChar } from '../components/zhuyin/bopomoConstants';
 import { API_BASE } from '../services/apiConfig';
 import { AuthContext } from '../contexts/AuthContext';
 import { DIFFICULT_SPAN_START, DIFFICULT_SPAN_END } from '../components/zhuyin/bopomoConstants';
+
+/**
+ * 解開後端表的緊湊槽位字串（#3230）。
+ *
+ * ⛔ 這個編碼有三份同語意的實作 —— 產生器 `_pack_slots`、後端 `unpack_slots`、
+ *    這裡。改編碼要三處一起改，`test_served_text_all_in_table_3230` 會抓到不一致。
+ */
+export function unpackSlots(z: string): string[] {
+  const out: string[] = [];
+  for (let i = 0; i < z.length; i++) {
+    const c = z[i];
+    out.push(c === '.' ? '0000' : `ss0${c}`);
+  }
+  return out;
+}
 
 export type ZhuyinMode = 'none' | 'difficult' | 'all';
 
@@ -221,6 +236,8 @@ export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   //    自然退回生詞清單。
   const auth = useContext(AuthContext);
   const [errorChars, setErrorChars] = useState<Set<string>>(() => new Set());
+  // 同一段只叫一次 —— alert 洗版比沒有 alert 更糟（#3166）
+  const warnedMissRef = useRef<Set<string>>(new Set());
   const studentId = auth?.user?.id;
   const authToken = auth?.token;
   useEffect(() => {
@@ -277,7 +294,12 @@ export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       const data = await res.json();
       const m = new Map<string, string[]>();
       for (const t of data.texts ?? []) {
-        if (typeof t.text === 'string' && Array.isArray(t.ss)) m.set(t.text, t.ss);
+        // `ssz` = 一槽一個字元的緊湊字串（#3230）：'.' = 預設槽、'1'..'5' = ss01..ss05。
+        // 全庫 96.9% 的槽位是預設，存成 JSON 陣列是 53 MB、壓成字串是 8.3 MB。
+        // ⛔ 位置語意不變：第 i 個字元 == 第 i 個 **UTF-16 單位**，跟下面 `text[i]` 一致。
+        if (typeof t.text === 'string' && typeof t.ssz === 'string') {
+          m.set(t.text, unpackSlots(t.ssz));
+        }
       }
       setAnswers(m);
     } catch {
@@ -313,16 +335,26 @@ export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     (text: string, line?: string, offset = 0): ProcessedChar[] => {
       const key = line ?? text;
       const ss = answers.get(key);
-      // ⛔ 代理對守衛：表的槽位是按**碼點**產的，而這裡的索引是 UTF-16 單位。
-      //    課文實測 0 個非 BMP 字（2026-09-15 掃 1,667 段），但老師貼的字可能有
-      //    emoji／擴充 B 漢字 —— 兩者不等就走 fallback，不要拿位移的答案去標。
-      if (ss && ss.length === key.length && [...key].length === key.length
-          && offset + text.length <= ss.length) {
+      // ⛔ 對齊守衛：表的槽位與這裡的索引**都是 UTF-16 單位**（#3230 起）。
+      //    以前表是按碼點產的，所以這裡還要多一條 `[...key].length === key.length`
+      //    把含非 BMP 字的字串整串排除 —— 課名〈𪹚龍慶元宵〉(U+2AE5A) 因此永遠
+      //    拿不到表、只能掉回舊選擇器。現在兩邊同一種索引，那條排除不需要了。
+      if (ss && ss.length === key.length && offset + text.length <= ss.length) {
         const out: ProcessedChar[] = [];
         for (let i = 0; i < text.length; i++) {
           out.push({ char: text[i], styleSet: ss[offset + i] });
         }
         return out;
+      }
+      // 表載入了卻對不到 —— #3230 之後這在課文內容上**不該發生**
+      // （服務端 45,606 個中文字串 100% 在表裡，`test_served_text_all_in_table_3230` 鎖住）。
+      // 會走到這裡的只有兩種：表還沒載完，或這段字不是課文（老師臨時打的）。
+      // 叫一聲是為了讓「靜默掉回另一套引擎」變得看得見 —— 那正是 #3218 之前
+      // 前後端對同一段課文給不同答案的來源。
+      if (answers.size > 0 && !warnedMissRef.current.has(key)) {
+        warnedMissRef.current.add(key);
+        // eslint-disable-next-line no-console
+        console.warn('[zhuyin] 表裡沒有這段字，掉回執行期選擇器：', key.slice(0, 40));
       }
       return PolyphonicProcessor.instance.process(text);
     },

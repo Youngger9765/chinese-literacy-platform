@@ -45,17 +45,24 @@ function main() {
   const items: Item[] = JSON.parse(fs.readFileSync(inPath, 'utf8'));
   const out: Record<string, (string | null)[]> = {};
   for (const it of items) {
-    const chars = [...it.text];
     const res = proc.process(it.text);
     // ⛔ 對齊守衛不可省：整支的價值建立在「第 i 個輸出 == 原文第 i 個字」。
     //    一旦錯位，拿到的是一整份看起來合理、實際整串位移的答案（#3175 的形狀）。
-    if (res.length !== chars.length) {
-      console.error(`長度不符 key=${it.key}: 輸出 ${res.length} vs 原文 ${chars.length}`);
+    //
+    // 索引單位 = **UTF-16 單位**，跟 `processor.process()` 與前端 `toProcessed()`
+    // 的 `text[i]` 一致（#3230）。
+    //
+    // ⚠️ 這裡原本用 `[...it.text]`（碼點）去比，純 BMP 的字兩者相同所以一直沒事；
+    //    但課名〈𪹚龍慶元宵〉（U+2AE5A）7 個碼點 = 8 個 UTF-16 單位，processor 回 8 格、
+    //    守衛期待 7 格 → `exit 3`，於是那一課的標題進不了表、只能掉回舊選擇器。
+    //    修法不是去換算兩種索引（換算就是 #3175 那個形狀），是**整條路徑只用一種**。
+    if (res.length !== it.text.length) {
+      console.error(`長度不符 key=${it.key}: 輸出 ${res.length} vs 原文 ${it.text.length}（UTF-16 單位）`);
       process.exit(3);
     }
-    for (let i = 0; i < chars.length; i++) {
-      if (res[i].char !== chars[i]) {
-        console.error(`字不符 key=${it.key} pos=${i}: 輸出「${res[i].char}」vs 原文「${chars[i]}」`);
+    for (let i = 0; i < it.text.length; i++) {
+      if (res[i].char !== it.text[i]) {
+        console.error(`字不符 key=${it.key} pos=${i}: 輸出「${res[i].char}」vs 原文「${it.text[i]}」`);
         process.exit(3);
       }
     }
