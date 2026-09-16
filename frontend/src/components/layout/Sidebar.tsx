@@ -242,7 +242,10 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const { selectedStory: navStory } = useLearningNav();
-  const { zhuyinMode, zhuyinReady, setZhuyinMode } = useZhuyin();
+  const {
+    zhuyinMode, zhuyinReady, setZhuyinMode,
+    difficultThreshold, setDifficultThreshold,   // #3240
+  } = useZhuyin();
 
   const [collapsed, setCollapsed] = useState<boolean>(() => {
     try {
@@ -474,7 +477,9 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
                 mode={zhuyinMode}
                 ready={zhuyinReady}
                 onModeChange={setZhuyinMode}
-              />
+            difficultThreshold={difficultThreshold}
+            onThresholdChange={setDifficultThreshold}
+          />
             </div>
           )}
 

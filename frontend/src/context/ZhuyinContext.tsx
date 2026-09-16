@@ -86,6 +86,21 @@ export function buildDifficultCharSet(vocabWords: string[]): Set<string> {
 const STORAGE_KEY = 'zhuyin_mode_v2';
 const LEGACY_KEY  = 'zhuyin_enabled';
 
+/** 難字門檻的儲存 key（#3240）。跟 mode 分開存，這樣清掉一個不會連坐。 */
+const THRESHOLD_KEY = 'zhuyin_difficult_threshold_v1';
+export const THRESHOLD_MIN = 1;
+export const THRESHOLD_MAX = 5;
+
+function readStoredThreshold(): number {
+  try {
+    const n = Number(localStorage.getItem(THRESHOLD_KEY));
+    if (Number.isInteger(n) && n >= THRESHOLD_MIN && n <= THRESHOLD_MAX) return n;
+  } catch {
+    // 私密視窗／關掉 site data —— 用預設，不要炸掉整個 Provider
+  }
+  return 1;   // #3224 的預設：才剛唸完，錯一次就是真的卡點
+}
+
 const MODE_CYCLE: ZhuyinMode[] = ['none', 'difficult', 'all'];
 
 function readStoredMode(): ZhuyinMode {
@@ -104,6 +119,9 @@ function readStoredMode(): ZhuyinMode {
 }
 
 interface ZhuyinContextValue {
+  /** 難字門檻：錯幾次算「還不會」（#3240，1–5） */
+  difficultThreshold: number;
+  setDifficultThreshold: (n: number) => void;
   /** 3-state mode: 'none' | 'difficult' | 'all' */
   zhuyinMode: ZhuyinMode;
   zhuyinReady: boolean;
@@ -141,12 +159,23 @@ const ZhuyinContext = createContext<ZhuyinContextValue>({
   toggleZhuyin: () => {},
   processZhuyin: (t) => t,
   processLines: () => null,
+  difficultThreshold: 1,
+  setDifficultThreshold: () => {},
   processLinesSelective: () => null,
   loadLessonZhuyin: async () => {},
 });
 
 export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [zhuyinMode, setZhuyinModeRaw] = useState<ZhuyinMode>(readStoredMode);
+  // ── #3240 難字門檻：錯幾次算「還不會」──────────────────────────────────
+  //
+  // #3224 把難字改成「這孩子唸錯過的字」，門檻寫死 1 次。1 對「才剛開始唸」的孩子
+  // 是對的，但唸久了錯字會累積 —— 那時 2 次或 3 次才是「真的還不會」。
+  // 調它的人就是在裝置前面的人（同一個翻注音開關的人），所以跟 mode 一樣存 localStorage。
+  //
+  // ⛔ 不做成老師端的班級設定：那要 DB 欄位 + 後台介面，而這是「當下看得舒服」的
+  //    偏好，不是教學決定。做成班級設定反而讓家長在家裡調不動。
+  const [difficultThreshold, setDifficultThresholdRaw] = useState<number>(readStoredThreshold);
   const [zhuyinReady, setZhuyinReady] = useState(() => PolyphonicProcessor.instance.isLoaded);
 
   const zhuyinActive = zhuyinReady && zhuyinMode === 'all';
@@ -164,6 +193,16 @@ export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     PolyphonicProcessor.instance.loadPolyphonicData()
       .then(() => setZhuyinReady(true))
       .catch((err) => console.error('Failed to load zhuyin data:', err));
+  }, []);
+
+  const setDifficultThreshold = useCallback((n: number) => {
+    const clamped = Math.min(THRESHOLD_MAX, Math.max(THRESHOLD_MIN, Math.round(n)));
+    setDifficultThresholdRaw(clamped);
+    try {
+      localStorage.setItem(THRESHOLD_KEY, String(clamped));
+    } catch {
+      // 存不進去就只在這個 session 有效 —— 不要因此不讓他調
+    }
   }, []);
 
   const setZhuyinMode = useCallback((mode: ZhuyinMode) => {
@@ -238,6 +277,7 @@ export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [errorChars, setErrorChars] = useState<Set<string>>(() => new Set());
   // 同一段只叫一次 —— alert 洗版比沒有 alert 更糟（#3166）
   const warnedMissRef = useRef<Set<string>>(new Set());
+
   const studentId = auth?.user?.id;
   const authToken = auth?.token;
   useEffect(() => {
@@ -246,7 +286,8 @@ export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     void (async () => {
       try {
         const res = await fetch(
-          `${API_BASE}/api/learning/students/${studentId}/error-patterns?min_errors=1`,
+          `${API_BASE}/api/learning/students/${studentId}/error-patterns`
+            + `?min_errors=${difficultThreshold}`,
           { headers: { Authorization: `Bearer ${authToken}` } },
         );
         if (!res.ok) return; // fail-open：拿不到就退回生詞，不要整段不標
@@ -264,7 +305,7 @@ export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       }
     })();
     return () => { alive = false; };
-  }, [authToken, studentId]);
+  }, [authToken, studentId, difficultThreshold]);
 
   // ── #3218 逐課注音對照表 ──────────────────────────────────────────────
   //
@@ -463,6 +504,8 @@ export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     <ZhuyinContext.Provider value={{
       zhuyinMode,
       zhuyinReady,
+      difficultThreshold,
+      setDifficultThreshold,
       zhuyinActive,
       isZhuyinAny,
       isZhuyinAll,
