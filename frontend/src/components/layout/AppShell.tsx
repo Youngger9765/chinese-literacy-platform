@@ -272,7 +272,10 @@ const ImmersiveTopBar: React.FC = () => {
   //    active 圓圈與上一步／下一步三輪共用一顆（2026-08-25 staging 實測）。
   const currentStepKey = useCurrentStepId(String(currentView));
   const { selectedStory, session } = useLearningNav();
-  const { zhuyinMode, zhuyinReady, setZhuyinMode } = useZhuyin();
+  const {
+    zhuyinMode, zhuyinReady, setZhuyinMode,
+    difficultThreshold, setDifficultThreshold,   // #3240
+  } = useZhuyin();
 
   // #1460 — toolbox mode: single-shot practice from /tools picker.
   // Hide multi-step navigation (dots + arrows) and route the back button
@@ -392,6 +395,8 @@ const ImmersiveTopBar: React.FC = () => {
             mode={zhuyinMode}
             ready={zhuyinReady}
             onModeChange={setZhuyinMode}
+            difficultThreshold={difficultThreshold}
+            onThresholdChange={setDifficultThreshold}
           />
         )}
       </div>
