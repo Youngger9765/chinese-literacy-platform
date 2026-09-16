@@ -62,11 +62,29 @@ export interface AuthTokenResponse {
 
 export class AuthError extends Error {
   status: number;
-  constructor(message: string, status: number) {
+  /**
+   * `Retry-After` 的秒數（#3227）—— 只有伺服器有講才有值。
+   *
+   * 429 的 `Retry-After` 是幾十秒，而 auth hydration 的快速重試預算是 200ms + 400ms，
+   * 三次全花在同一個限流窗口裡 → 學生被丟回登入頁。有了這個值，背景續試才能
+   * 等到對的時間點，而不是瞎猜。
+   */
+  retryAfterSeconds?: number;
+  constructor(message: string, status: number, retryAfterSeconds?: number) {
     super(message);
     this.name = 'AuthError';
     this.status = status;
+    this.retryAfterSeconds = retryAfterSeconds;
   }
+}
+
+/** 讀 `Retry-After`（秒數格式）。看不懂或不合理就回 undefined，不要猜。 */
+function parseRetryAfter(res: Response): number | undefined {
+  const raw = res.headers?.get?.('retry-after');
+  if (!raw) return undefined;
+  const n = Number(raw.trim());
+  if (!Number.isFinite(n) || n < 0 || n > 3600) return undefined;
+  return n;
 }
 
 async function handleAuthResponse<T>(res: Response): Promise<T> {
@@ -78,7 +96,7 @@ async function handleAuthResponse<T>(res: Response): Promise<T> {
     } catch {
       // ignore JSON parse errors
     }
-    throw new AuthError(message, res.status);
+    throw new AuthError(message, res.status, parseRetryAfter(res));
   }
   return res.json() as Promise<T>;
 }
