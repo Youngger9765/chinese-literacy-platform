@@ -150,6 +150,55 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // nothing authenticated renders. Keeping the token just means the
         // next attempt can succeed without a fresh login.
         setUser(null);
+
+        // ── #3227 後半：留著 token 不夠，要真的把他救回來 ────────────────
+        //
+        // token 留著、`user` 是 null → `isAuthenticated` false → route gate
+        // 把**手上拿著完全有效 token 的學生**導去登入頁。他得重新登入一次，
+        // 而他的 token 明明還好的。
+        //
+        // 上面那個快速重試（200ms + 400ms）是刻意的短 —— 那是**阻塞階段**，
+        // 每一毫秒都是學生在看 spinner。但一個限流（429）的 `Retry-After` 是
+        // 幾十秒，三次快速重試全花在同一個窗口裡，必然全滅。
+        //
+        // 所以改成兩段：阻塞階段照舊短，**失敗後在背景繼續試**。
+        // 學生先看到登入頁（誠實：現在真的沒登入），但只要伺服器恢復，
+        // `setUser()` 會讓畫面自己變成已登入 —— 他不必重打帳密。
+        //
+        // ⛔ 不可以把阻塞階段拉長來解決這件事：那是拿「所有人都多等幾十秒」
+        //    換「少數人不用重登」。
+        if (!tokenIsReallyDead) {
+          const retryAfter = err instanceof AuthError ? err.retryAfterSeconds : undefined;
+          // 伺服器講了就聽它的（限流時它知道窗口何時結束），沒講就用退避梯度。
+          // ⚠️ 上限 60 秒：再久的等待對「正在上課的學生」沒有意義，
+          //    而 `Retry-After` 理論上可以是任意大的數字。
+          const ladder = retryAfter !== undefined
+            ? [Math.min(retryAfter, 60) * 1000, 15000, 30000]
+            : [2000, 5000, 15000, 30000];
+          void (async () => {
+            for (const wait of ladder) {
+              await new Promise((r) => setTimeout(r, wait));
+              if (cancelled) return;
+              try {
+                const recovered = await getMe(token);
+                if (cancelled) return;
+                setUser(recovered);
+                return;                       // 救回來了
+              } catch (e: unknown) {
+                const st = e instanceof AuthError ? e.status : undefined;
+                if (st === 401 || st === 403) {
+                  // 這次是真的死了 —— 清掉 token，跟阻塞階段同一個判準
+                  if (!cancelled) {
+                    authToken.remove();
+                    setToken(null);
+                  }
+                  return;
+                }
+                // 還是不知道 —— 等下一格
+              }
+            }
+          })();
+        }
       })
       .finally(() => {
         if (!cancelled) {
