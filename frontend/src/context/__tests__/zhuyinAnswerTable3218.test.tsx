@@ -41,6 +41,9 @@ function mockFetch(lessonPayload: unknown | null) {
 const LINE = '他們相反的地方';
 /** 表故意給一組「跟 processor 算出來一定不同」的槽位，才分得出用了哪一邊 */
 const FAKE_SS = ['ss01', 'ss01', 'ss01', 'ss01', 'ss01', 'ss01', 'ss01'];
+// #3230：表的線路格式改成 `ssz` —— 一槽一個字元（'.'=0000、'1'..'5'=ss01..ss05）。
+// 全庫 96.9% 的槽位是預設，陣列版是 53 MB、字串版 8.3 MB。
+const packed = (ss: string[]) => ss.map((v) => (v === '0000' ? '.' : v[3])).join('');
 
 function wrap({ children }: { children: React.ReactNode }) {
   return <ZhuyinProvider>{children}</ZhuyinProvider>;
@@ -66,7 +69,7 @@ function withSelectors(text: string, ss: string[]) {
 
 describe('#3218 前端查表', () => {
   it('⭐ 表裡有這一段 → 用表的槽位，不是自己算的', async () => {
-    mockFetch({ lesson_uid: 'L0001', texts: [{ text: LINE, ss: FAKE_SS }] });
+    mockFetch({ lesson_uid: 'L0001', texts: [{ text: LINE, ssz: packed(FAKE_SS) }] });
     const { result } = renderHook(() => useZhuyin(), { wrapper: wrap });
     await waitFor(() => expect(result.current.zhuyinReady).toBe(true));
     await act(async () => { await result.current.loadLessonZhuyin('L0001'); });
@@ -76,7 +79,7 @@ describe('#3218 前端查表', () => {
   });
 
   it('表裡沒有這一段（老師臨時貼的字）→ 回去自己算', async () => {
-    mockFetch({ lesson_uid: 'L0001', texts: [{ text: LINE, ss: FAKE_SS }] });
+    mockFetch({ lesson_uid: 'L0001', texts: [{ text: LINE, ssz: packed(FAKE_SS) }] });
     const { result } = renderHook(() => useZhuyin(), { wrapper: wrap });
     await waitFor(() => expect(result.current.zhuyinReady).toBe(true));
     await act(async () => { await result.current.loadLessonZhuyin('L0001'); });
@@ -92,7 +95,7 @@ describe('#3218 前端查表', () => {
   it('表裡的字串含代理對 → 守衛啟動，回去自己算', async () => {
     const emoji = '他們相反🎉的地方';   // 🎉 是代理對：UTF-16 長度 != 碼點數
     mockFetch({ lesson_uid: 'L0001',
-      texts: [{ text: emoji, ss: ['ss01','ss01','ss01','ss01','ss01','ss01','ss01','ss01'] }] });
+      texts: [{ text: emoji, ssz: packed(['ss01','ss01','ss01','ss01','ss01','ss01','ss01','ss01']) }] });
     const { result } = renderHook(() => useZhuyin(), { wrapper: wrap });
     await waitFor(() => expect(result.current.zhuyinReady).toBe(true));
     await act(async () => { await result.current.loadLessonZhuyin('L0001'); });
@@ -141,7 +144,7 @@ describe('#3218 表到了畫面要重算（走 memo，不是直接呼叫）', ()
       if (u.includes('poyin_db')) return { ok: true, json: async () => poyin } as Response;
       if (u.includes('/zhuyin')) {
         await tablePromise;   // 表比 poyin_db 晚到 —— 真實時序
-        return { ok: true, json: async () => ({ texts: [{ text: LINE, ss: FAKE_SS }] }) } as Response;
+        return { ok: true, json: async () => ({ texts: [{ text: LINE, ssz: packed(FAKE_SS) }] }) } as Response;
       }
       return { ok: false, status: 404 } as Response;
     }));

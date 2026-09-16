@@ -23,6 +23,9 @@ owns_code:
   - frontend/src/utils/zhuyinUtils.ts
 owns_data:
   - backend/data/zhuyin/font_readings.json
+  # #3230：破音字的 槽位→注音。逐課表只存槽位，注音由這一份推 ——
+  # 以前每課的表把注音存 321,733 份副本（15 MB），會各自過期。
+  - backend/data/zhuyin/font_slot_readings.json
   - backend/data/lessons/*/v*/zhuyin.json
   - backend/data/zhuyin/lesson_corrections.json
   - frontend/public/data/poyin_db.json
@@ -42,6 +45,8 @@ spec_tests:
   - backend/tests/test_he_conjunction.py
   - backend/tests/test_he_conjunction_zhuyin_3204.py
   - backend/tests/test_zhuyin_module_owns_its_code_3203.py
+  # #3230 端到端窮舉鎖：服務端送出去的每一個中文字串都必須在表裡
+  - backend/tests/test_served_text_all_in_table_3230.py
 related_issues: []
 source_meetings: []
 last_reviewed: 2026-09-14

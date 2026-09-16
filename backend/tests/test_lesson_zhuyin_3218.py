@@ -40,6 +40,32 @@ def raw() -> dict:
     return json.loads(_table_path(PILOT).read_text(encoding="utf-8"))
 
 
+# ── #3230 格式轉接（同 test_lesson_zhuyin_all_lessons_3218.py 的說明）────────
+# 表改成 `ssz`（一槽一字元，53 MB → 8.3 MB）且不再存注音
+#（注音由 (字, 槽位) 經 font_slot_readings.json 推 —— 存一份就是第二個真相來源）。
+# 這裡把新格式還原成舊形狀，斷言一字不改。
+def _ss(t: dict) -> list[str]:
+    from app.services.lesson_zhuyin import unpack_slots
+    return unpack_slots(t.get("ssz") or "")
+
+
+def _u16(text: str) -> list[str]:
+    from app.services.lesson_zhuyin import u16_chars
+    return u16_chars(text)
+
+
+def _poly(t: dict) -> list[dict]:
+    from app.services.lesson_zhuyin import font_slot_readings
+    slot_map = font_slot_readings()
+    ss = _ss(t)
+    out = []
+    for i, ch in enumerate(_u16(t["text"])):
+        readings = slot_map.get(ch)
+        if readings:
+            out.append({"i": i, "c": ch, "ss": ss[i], "b": readings.get(ss[i])})
+    return out
+
+
 class TestTableIsWellFormed:
     """表本身沒壞 —— 這是下面斷言能算數的前提"""
 
@@ -50,14 +76,14 @@ class TestTableIsWellFormed:
     def test_每段的槽位陣列與字數對齊(self, raw):
         """#3175 的形狀：一旦錯位，拿到的是整串位移但看起來合理的答案"""
         for t in raw["texts"]:
-            assert len(t["ss"]) == t["n"] == len(t["text"]), (
+            assert len(_ss(t)) == t["n"] == len(_u16(t["text"])), (
                 f"{t['section']} idx={t['idx']} 槽位 {len(t['ss'])} vs 字數 {t['n']}"
             )
 
     def test_每個破音字位置都指到真的那個字(self, raw):
         for t in raw["texts"]:
-            for r in t["poly"]:
-                assert t["text"][r["i"]] == r["c"], (
+            for r in _poly(t):
+                assert _u16(t["text"])[r["i"]] == r["c"], (
                     f"{t['section']} i={r['i']} 表說是「{r['c']}」實際是「{t['text'][r['i']]}」"
                 )
                 assert r["b"], f"{r['c']} 沒有注音"
@@ -71,7 +97,7 @@ class TestBackendReadsTheTable:
         for t in raw["texts"]:
             got = zhuyin_for_text(PILOT, t["text"])
             assert got is not None, f"查不到 {t['section']} idx={t['idx']}"
-            for r in t["poly"]:
+            for r in _poly(t):
                 checked += 1
                 assert got.get(r["i"]) == r["b"], (
                     f"{t['section']} i={r['i']}「{r['c']}」表={r['b']} 後端={got.get(r['i'])}"
@@ -82,7 +108,7 @@ class TestBackendReadsTheTable:
         """表只收破音字位置；單音字由字型的 single 表補上，不能整段只剩破音字有注音"""
         t = raw["texts"][0]
         got = zhuyin_for_text(PILOT, t["text"])
-        poly_idx = {r["i"] for r in t["poly"]}
+        poly_idx = {r["i"] for r in _poly(t)}
         single_hits = [i for i in got if i not in poly_idx]
         assert len(single_hits) > len(poly_idx), (
             f"只拿到 {len(single_hits)} 個單音字注音 vs {len(poly_idx)} 個破音字 —— single 表沒接上"
@@ -101,15 +127,23 @@ class TestTheLockHasTeeth:
 
     def test_改掉表之後查表結果會跟著變(self, raw, monkeypatch):
         t = raw["texts"][0]
-        first = t["poly"][0]
+        first = _poly(t)[0]
         真 = zhuyin_for_text(PILOT, t["text"])[first["i"]]
         assert 真 == first["b"]
 
         # 把表換成一份把該位置改成別的讀音的版本
+        from app.services.lesson_zhuyin import font_slot_readings
+
+        readings = font_slot_readings()[first["c"]]
+        other = next(sl for sl in readings if sl != first["ss"])
         假 = json.loads(json.dumps(raw))
-        假["texts"][0]["poly"][0]["b"] = "ㄅㄚ˙˙"
+        z = list(假["texts"][0]["ssz"])
+        z[first["i"]] = "." if other == "0000" else other[3]
+        假["texts"][0]["ssz"] = "".join(z)
         monkeypatch.setattr("app.services.lesson_zhuyin._read_table", lambda uid: 假)
         lesson_zhuyin_table.cache_clear()
         變 = zhuyin_for_text(PILOT, t["text"])[first["i"]]
-        assert 變 == "ㄅㄚ˙˙", "改了表但查表結果沒變 —— 後端根本沒在讀表"
+        assert 變 == readings[other], (
+            f"把槽位從 {first['ss']} 改成 {other} 之後查表結果沒變 —— 後端沒在讀表"
+        )
         lesson_zhuyin_table.cache_clear()
