@@ -19,9 +19,19 @@
 
 | 原本的意圖 | 接手的鎖 |
 |---|---|
-| 前後端讀音不可分歧 | 結構上不可能（一個來源）。後端讀表由 `test_lesson_zhuyin_all_lessons_3218.py`（1,083 條）守；前端不選由 `frontend/src/context/__tests__/noRuntimeSelector3237.test.tsx` 守 |
+| 前後端讀音不可分歧 | 結構上不可能（一個來源）。後端讀表由 `test_lesson_zhuyin_all_lessons_3218.py`（1,083 條）守；前端不選由 前端 `context/__tests__/` 下的 `noRuntimeSelector3237` 那支 守 |
 | 服務端每段文字都要有答案 | `test_served_text_all_in_table_3230.py`（45,606 個字串、MISS 0） |
 | fallback 不可以變成第二套引擎 | `test_fallback_is_lookup_not_selector_3237.py`（含「不准再 import pypinyin」的結構鎖） |
+
+## ⚠️ 這個檔裡不要寫「前端檔的完整路徑」
+
+`test_cross_language_paths_are_in_the_ci_filter` 會掃**後端測試檔裡出現的前端路徑**，
+要求它們都在 `pytest.yml` 的 paths-filter 裡（否則改那些前端檔的 PR 不會跑後端套件）。
+所以在這裡寫 `frontend/...` 的完整路徑會弄紅那道門 —— 而改 workflow 需要
+`workflow` scope 的 token。要提到前端檔就用文字描述，不要寫成路徑。
+
+⭐ 同一個坑這系列踩了三次（workflow 註解、這裡 ×2）：
+**這個 repo 的門會 regex 註解，註解裡的路徑是有負載的。**
 
 ## ⚠️ 這個檔為什麼不直接刪
 
