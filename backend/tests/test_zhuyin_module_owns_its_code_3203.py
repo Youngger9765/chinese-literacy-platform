@@ -18,6 +18,8 @@ import pathlib
 import re
 import subprocess
 
+import fnmatch
+
 import yaml
 
 REPO = pathlib.Path(__file__).resolve().parents[2]
@@ -40,7 +42,8 @@ EXEMPT = {
     "frontend/src/components/reading-steps/zhuyinGameLogic.ts": "同上，遊戲邏輯",
     # ── UI／狀態，不決定讀音 ──
     "frontend/src/components/ui/ZhuyinToggle.tsx": "無／難字／全 三段開關，不決定讀音",
-    "frontend/src/context/ZhuyinContext.tsx": "注音模式的 React context，不決定讀音",
+    # ⚠️ `ZhuyinContext.tsx` 原本在這裡，理由是「不決定讀音」——
+    #    #3218 之後它**會**決定（查逐課對照表，查不到才回去算），所以移進 owns_code。
     "frontend/src/components/zhuyin/difficultSpanRenderer.tsx": "難字區間的渲染（#3022/#3185），吃已決定好的讀音",
     # ── 文件 ──
     "docs/audit/zhuyin-facts-2026-09-12.md": "稽核紀錄（⚠️ 對現在的 main 已過期，見 INTENT §1）",
@@ -51,10 +54,28 @@ EXEMPT = {
 
 
 def _tracked_files() -> list[str]:
-    out = subprocess.run(
-        ["git", "ls-files", "-z"], cwd=REPO, capture_output=True, text=True, check=True
-    ).stdout
-    return [f for f in out.split("\0") if f]
+    """已追蹤 ＋ 已 staged ＋ 未追蹤（排除 gitignore）的檔。
+
+    ⛔ 原本只有 `git ls-files` —— 那只看得到**已追蹤**的檔，所以這道門
+    **結構上擋不住引進問題的那個 commit**：新加的注音檔在該次 commit 時還沒被追蹤，
+    門是綠的；要到下一次 commit 才紅，而那時人已經走了。
+
+    #3218 實際踩到：新增 `lesson_zhuyin.py`／`generate_lesson_zhuyin.py`／
+    `zhuyinAnswers.ts` ＋ 179 個 `zhuyin.json`，這道門全綠。
+    """
+    seen: dict[str, None] = {}
+    for args in (
+        ["git", "ls-files", "-z"],                                  # 已追蹤
+        ["git", "diff", "--cached", "--name-only", "-z"],            # 已 staged（含新增）
+        ["git", "ls-files", "-z", "--others", "--exclude-standard"],  # 未追蹤、非 ignore
+    ):
+        out = subprocess.run(
+            args, cwd=REPO, capture_output=True, text=True, check=True
+        ).stdout
+        for f in out.split("\0"):
+            if f:
+                seen[f] = None
+    return list(seen)
 
 
 def _zhuyin_module_owns() -> set[str]:
@@ -66,6 +87,13 @@ def _zhuyin_module_owns() -> set[str]:
         if m.get("module") == "zhuyin":
             return set(m.get("owns_code") or []) | set(m.get("owns_data") or [])
     return set()
+
+
+def _is_owned(path: str, owned: set[str]) -> bool:
+    """owns_code/owns_data 允許 glob —— 179 個逐課注音表不可能逐筆列。"""
+    if path in owned:
+        return True
+    return any("*" in o and fnmatch.fnmatch(path, o) for o in owned)
 
 
 def test_the_zhuyin_module_is_registered() -> None:
@@ -97,7 +125,7 @@ def test_every_zhuyin_file_has_an_owner() -> None:
         for f in _tracked_files()
         if _LOOKS_LIKE_ZHUYIN.search(f)
         and not _NOT_PRODUCTION.search(f)
-        and f not in owned
+        and not _is_owned(f, owned)
         and f not in EXEMPT
     ]
     assert not orphans, (

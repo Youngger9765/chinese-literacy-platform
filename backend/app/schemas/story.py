@@ -65,6 +65,13 @@ class StoryListItem(BaseModel):
 
 class StoryDetail(StoryListItem):
     """Full schema for single story detail."""
+    # #3218：課號。前端拿它去抓這一課的逐字注音對照表
+    # （`GET /api/lessons/{lesson_uid}/zhuyin`）。
+    #
+    # ⛔ 不要讓前端用 `id - 20000` 去推 —— 那是 `lesson_indexes` 的內部推導
+    #    （`"id": 20000 + int(uid[1:])`），改了不會有人知道前端在依賴它。
+    # Optional 是因為一修的舊列沒有這個欄位。
+    lesson_uid: Optional[str] = None
     paragraphs: list[str]
     vocabulary: Optional[list[VocabItemSchema]] = None
     fill_in_blank: Optional[list[dict]] = None

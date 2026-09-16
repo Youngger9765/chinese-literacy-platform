@@ -67,6 +67,26 @@ export function useTtsPlayback(
   // must talk to ttsApi._currentAudio via pauseCurrentTts/resumeCurrentTts,
   // because the internal Audio element is not exposed on utteranceRef.
   const v2PathActiveRef = useRef<boolean>(false);
+  /**
+   * 目前這一次播放的序號。**被取代的播放不准再發佈狀態。**
+   *
+   * `isTtsSpeaking`/`isTtsLoading` 是**一個 boolean 服務所有 caller**，而一次被
+   * 取代的播放（`stop()` 之後、或下一段已經開始之後）它的 `.finally()` 照樣會在
+   * 那顆被放棄的 `<audio>` 終於回報 ended 時執行，把旗標清成 false ——
+   * 那是一個**不屬於當前播放**的 busy→idle 邊緣。
+   *
+   * 消費端無法歸屬那個邊緣（`useFullTextTtsQueue` 試過 `sawSpeakingRef`，
+   * 擋不住「新 walk 已經開始發聲」這一種），所以必須在來源端擋。
+   *
+   * 2026-09-16 實測（把順序釘成「新 walk 完全建立後才放舊 callback」）：
+   * 沒有這個守衛時 `useFullTextTtsQueue` 的 `currentParagraphIdx` 會從 0 跳到 1
+   * —— 學生按 播放→停止→播放 之後，第 0 段會被舊音檔的殘留 callback 跳掉。
+   * `useFullTextTtsQueue.test.ts`「play() after stop()…」在本機會過只是因為
+   * 斷言通常贏得那場賽跑，CI 較慢就輸。
+   *
+   * 同 `LessonAudioTable` 的 `activeRequestRef`（#2622 關掉 13s → 18s → 41s 那條 race）。
+   */
+  const speakSeqRef = useRef(0);
   // rAF loop for Web Speech API fallback cursor animation (not used for Cloud TTS path)
   const ttsRafRef = useRef<number | null>(null);
   // Used only by Web Speech API fallback path
@@ -98,6 +118,9 @@ export function useTtsPlayback(
   ) => {
     if (!text) return;
     cancelTts();
+    // ⛔ 先取序號再做任何 async —— 之後每個 callback 都要拿它跟當下的比
+    const seq = ++speakSeqRef.current;
+    const isCurrent = () => seq === speakSeqRef.current;
     setIsTtsPaused(false);
     setIsTtsLoading(true);
     setTtsError(null);
@@ -119,6 +142,7 @@ export function useTtsPlayback(
       speakTextWithProgress(
         text,
         (info: TtsProgressInfo) => {
+          if (!isCurrent()) return; // 被取代的播放不准動 highlight／旗標
           if (!v2PlaybackStarted) {
             v2PlaybackStarted = true;
             setIsTtsLoading(false);
@@ -133,8 +157,12 @@ export function useTtsPlayback(
         paragraphIdx,
         roundSlug,
       ).catch(() => {
+        if (!isCurrent()) return; // 被取代的播放不准報錯給當前的 UI
         setTtsError('音檔載入失敗，請重試');
       }).finally(() => {
+        // ⭐ 被取代的播放**不准**清旗標 —— 那會產生一個不屬於當前播放的
+        //    busy→idle 邊緣，讓 useFullTextTtsQueue 誤以為「這段唸完了」而跳段。
+        if (!isCurrent()) return;
         v2PathActiveRef.current = false;
         setIsTtsLoading(false);
         setIsTtsSpeaking(false);
@@ -165,6 +193,7 @@ export function useTtsPlayback(
     };
 
     const onSpeechEnd = () => {
+      if (!isCurrent()) return; // 同上：被取代的播放不准發佈
       stopTtsAnimation();
       setIsTtsSpeaking(false);
       setIsTtsPaused(false);
@@ -175,6 +204,7 @@ export function useTtsPlayback(
     };
 
     const onSpeechError = () => {
+      if (!isCurrent()) return;
       stopTtsAnimation();
       setIsTtsSpeaking(false);
       setIsTtsPaused(false);
@@ -352,6 +382,11 @@ export function useTtsPlayback(
   }, [onSpeakingProgress]);
 
   const stopTts = useCallback(() => {
+    // ⭐ 先讓所有在飛的 callback 失效 —— `stopTts()` 之後，任何遲到的
+    //    `.finally()`／`onended` 都不准再清旗標（見 `speakSeqRef` 的說明）。
+    //    只拆 `utteranceRef` 那一個 handle 不夠：v2 path 的狀態是由 promise 的
+    //    `.finally()` 發佈的，跟元素的 handler 是兩條路。
+    speakSeqRef.current += 1;
     if (ttsRafRef.current !== null) {
       cancelAnimationFrame(ttsRafRef.current);
       ttsRafRef.current = null;

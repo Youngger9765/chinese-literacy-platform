@@ -97,6 +97,8 @@ interface ApiStoryListItem {
 }
 
 interface ApiStoryDetail extends ApiStoryListItem {
+  /** #3218：課號。用來抓這一課的逐字注音對照表。後端 StoryDetail 才有，列表沒有 */
+  lesson_uid?: string | null;
   paragraphs: string[];
   vocabulary: ApiVocabItem[] | null;
   // New-format items (5/1 curriculum batch) use context_before/context_after instead of sentence.
@@ -227,6 +229,11 @@ export function storyForStep(story: Story | null, stepKey: string): Story | null
 function apiDetailToStory(detail: ApiStoryDetail): Story {
   return {
     id: String(detail.lesson_number),
+    // #3218：⛔ 這一行少了的話整條注音查表路徑會**靜靜死掉** ——
+    // `story.lessonUid` 永遠 undefined → `useLessonZhuyin` 不 fetch → 回去走
+    // fallback 自己算，而畫面上看不出任何異常（單元測試直接呼叫
+    // `loadLessonZhuyin('L0001')` 會綠，因為它繞過這個映射）。
+    lessonUid: detail.lesson_uid ?? undefined,
     title: detail.title,
     level: detail.grade,
     content: detail.paragraphs,

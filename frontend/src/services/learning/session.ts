@@ -203,6 +203,15 @@ export async function evaluateReading(
   durationMs?: number,
   token?: string,
   signal?: AbortSignal,
+  /**
+   * 課號（`L0011`）。#3218：後端拿它查這一課的逐字注音對照表。
+   *
+   * ⛔ 不送的話後端會回去走 `_build_zhuyin_map`（舊引擎），而診斷報告的注音就跟
+   * 課文頁**不一致** —— 2026-09-15 實測 168 課逐字對照有 **7,905 個位置不同**
+   * （212,536 中 3.72%），前幾名是 `個 ㄍㄜˋ→ㄍㄜ˙ 945`、`一 ㄧ→ㄧˋ 938`、
+   * `不 ㄅㄨˋ→ㄅㄨˊ 861`、`著 ㄓㄨˋ→ㄓㄜ˙ 771` —— 全是 pypinyin 結構上做不到的變調與輕聲。
+   */
+  lessonUid?: string,
 ): Promise<ReadingEvaluateResponse> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   if (token) headers.Authorization = `Bearer ${token}`;
@@ -215,6 +224,7 @@ export async function evaluateReading(
       spoken_text: spokenText,
       target_text: targetText,
       duration_ms: durationMs,
+      lesson_uid: lessonUid,
     }),
   });
 
