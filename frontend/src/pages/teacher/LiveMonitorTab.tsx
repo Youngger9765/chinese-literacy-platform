@@ -28,6 +28,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useStudentRecommendations } from './hooks/useStudentRecommendations';
 import {
   getClassroomLiveMonitor,
   requestPreviewToken,
@@ -65,8 +66,11 @@ const LiveMonitorTab: React.FC<LiveMonitorTabProps> = ({ classroomId }) => {
   const [students, setStudents] = useState<LiveMonitorStudentEntry[] | null>(null);
   const [trackedTypes, setTrackedTypes] = useState<string[]>([]);
   const [error, setError] = useState('');
-  const [previewingStudentId, setPreviewingStudentId] = useState<number | null>(null);
-  const [previewError, setPreviewError] = useState('');
+  const {
+    openRecommendations,
+    loadingStudentId: previewingStudentId,
+    error: previewError,
+  } = useStudentRecommendations();
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -102,26 +106,6 @@ const LiveMonitorTab: React.FC<LiveMonitorTabProps> = ({ classroomId }) => {
     };
   }, [fetchOnce]);
 
-  const startPreview = async (student: LiveMonitorStudentEntry) => {
-    setPreviewError('');
-    setPreviewingStudentId(student.student_id);
-    try {
-      const { preview_token, student_id, student_name, expires_in_minutes } =
-        await requestPreviewToken(student.student_id);
-      navigate(`/teacher/preview/${student_id}`, {
-        state: {
-          previewToken: preview_token,
-          studentId: student_id,
-          studentName: student_name,
-          expiresInMinutes: expires_in_minutes,
-        },
-      });
-    } catch {
-      setPreviewError('無法開啟預覽，請稍後再試');
-    } finally {
-      setPreviewingStudentId(null);
-    }
-  };
 
   if (students === null && !error) {
     return (
@@ -236,12 +220,12 @@ const LiveMonitorTab: React.FC<LiveMonitorTabProps> = ({ classroomId }) => {
               </div>
 
               <button
-                onClick={() => startPreview(s)}
+                onClick={() => openRecommendations(s)}
                 disabled={previewingStudentId === s.student_id}
                 className="shrink-0 inline-flex items-center justify-center px-2.5 py-1 rounded-md text-xs font-medium text-accent bg-accent-bg border border-accent/30 hover:bg-accent-bg/70 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                title="以學生身分預覽（唯讀）"
+                title="看系統建議這位學生接下來練哪幾課"
               >
-                {previewingStudentId === s.student_id ? '載入中…' : '預覽'}
+                {previewingStudentId === s.student_id ? '載入中…' : '推薦練習'}
               </button>
             </div>
           ))}

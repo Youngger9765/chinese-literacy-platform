@@ -191,7 +191,7 @@ const AppRoutes: React.FC = () => (
         }
       />
       {/* Issue #3027: read-only "preview as student" entry point. Reached from
-          the "以學生身分預覽" button on a classroom's 學生進度 tab — see
+          the "推薦練習" button on a classroom's 學生進度 tab — see
           StudentProgressTab.tsx. Direct navigation with no state bounces
           back (no preview token to use). */}
       <Route

@@ -6,7 +6,7 @@
  * what a student sees. This page is the entry point that fixes that.
  *
  * Security note: the preview token this page uses is passed via React
- * Router navigation `state` (from StudentProgressTab's "以學生身分預覽"
+ * Router navigation `state` (from StudentProgressTab's "推薦練習"
  * button), NOT stored in localStorage and NOT written into the shared
  * `authToken` used by the rest of the app (see utils/storage.ts). That is
  * what guarantees previewing a student can never clobber — or be confused
@@ -63,7 +63,7 @@ const StudentPreviewPage: React.FC = () => {
     return (
       <div className="max-w-2xl mx-auto p-6">
         <p className="text-gray-600">
-          此頁面需要從「班級學生列表」點擊「以學生身分預覽」進入，無法直接開啟。
+          此頁面需要從「學生進度」或「課堂即時」點擊「推薦練習」進入，無法直接開啟。
         </p>
         <button
           type="button"
@@ -83,8 +83,8 @@ const StudentPreviewPage: React.FC = () => {
         className="sticky top-0 z-40 mb-4 flex flex-col gap-2 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
       >
         <p className="text-sm text-amber-800">
-          <span className="font-bold">預覽模式（唯讀）</span>
-          {'　'}你正在以「{state.studentName}」的身分預覽，不會寫入這位學生的任何資料
+          <span className="font-bold">推薦練習（唯讀）</span>
+          {'　'}系統建議「{state.studentName}」接下來練這幾課。這裡看不到他當下的畫面或作答內容，也不會寫入他的任何資料
           {typeof state.expiresInMinutes === 'number' && (
             <span className="ml-1 text-amber-600">
               （{state.expiresInMinutes} 分鐘後自動失效）
@@ -96,7 +96,7 @@ const StudentPreviewPage: React.FC = () => {
           onClick={() => navigate(-1)}
           className="shrink-0 self-start rounded-full bg-amber-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-amber-700 sm:self-auto"
         >
-          結束預覽
+          返回
         </button>
       </div>
 

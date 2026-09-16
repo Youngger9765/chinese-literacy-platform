@@ -16,7 +16,7 @@
  *    no polling at all violates the "auto update" half of the decision.
  *    Polling must stop on unmount — a forgotten tab costs 1 req/min max
  *    that keeps running after unmount would leak requests forever.
- *  - the 預覽 button reuses the teacher preview-token mint flow and
+ *  - the 推薦練習 button reuses the teacher preview-token mint flow and
  *    navigates to /teacher/preview/{id}, same as StudentProgressTab (#3027).
  */
 import React from 'react';
