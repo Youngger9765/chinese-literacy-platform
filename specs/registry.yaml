@@ -774,6 +774,7 @@ modules:
   - frontend/src/utils/zhuyinUtils.ts
   owns_data:
   - backend/data/zhuyin/font_readings.json
+  - backend/data/zhuyin/font_slot_readings.json
   - backend/data/lessons/*/v*/zhuyin.json
   - backend/data/zhuyin/lesson_corrections.json
   - frontend/public/data/poyin_db.json
@@ -790,6 +791,7 @@ modules:
   - backend/tests/test_he_conjunction.py
   - backend/tests/test_he_conjunction_zhuyin_3204.py
   - backend/tests/test_zhuyin_module_owns_its_code_3203.py
+  - backend/tests/test_served_text_all_in_table_3230.py
   related_issues: []
   source_meetings: []
   last_reviewed: 2026-09-14

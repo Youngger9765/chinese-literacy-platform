@@ -30,6 +30,46 @@ from pathlib import Path
 from .lesson_uid_loader import _latest_version
 from .zhuyin_readings import font_zhuyin_table
 
+# ── 索引與編碼：三處必須同語意（產生器 / 這裡 / 前端 ZhuyinContext）──────────
+_DEFAULT_SLOT = "0000"
+
+
+def u16_chars(text: str) -> list[str]:
+    """把字串切成 **UTF-16 單位**，跟 JS 的 `text[i]` 一致。
+
+    ⛔ Python 的 `list(text)` 是碼點。純 BMP 相同，非 BMP 差一格 —— 而槽位是照
+    UTF-16 產的，混用就是整串位移（#3175 的形狀）。
+    """
+    out: list[str] = []
+    for ch in text:
+        if ord(ch) > 0xFFFF:
+            enc = ch.encode("utf-16-le")
+            out.append(enc[0:2].decode("utf-16-le", "surrogatepass"))
+            out.append(enc[2:4].decode("utf-16-le", "surrogatepass"))
+        else:
+            out.append(ch)
+    return out
+
+
+def unpack_slots(z: str) -> list[str]:
+    """`.` = 預設槽 · `1`..`5` = `ss01`..`ss05`（表裡 96.9% 是預設，所以壓成字串）。"""
+    return [_DEFAULT_SLOT if c == "." else f"ss{int(c):02d}" for c in z]
+
+
+@lru_cache(maxsize=1)
+def font_slot_readings() -> dict[str, dict[str, str]]:
+    """破音字的 槽位 → 注音（由出貨字型推出、產生器寫檔）。
+
+    讀不到就回空表 —— 注音是錦上添花，不該讓朗讀評分整個掛掉（同 `font_zhuyin_table`）。
+    """
+    path = Path(__file__).resolve().parents[2] / "data" / "zhuyin" / "font_slot_readings.json"
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))["slots"]
+    except (OSError, ValueError, KeyError) as exc:  # pragma: no cover
+        logger.warning("font_slot_readings.json unavailable (%s)", exc)
+        return {}
+
+
 logger = logging.getLogger(__name__)
 
 _BACKEND_ROOT = Path(__file__).resolve().parents[2]
@@ -94,26 +134,35 @@ def lesson_zhuyin_table(lesson_uid: str) -> dict[str, dict[int, str]] | None:
     if not raw:
         return None
     single, _ = font_zhuyin_table()
+    slot_readings = font_slot_readings()
     out: dict[str, dict[int, str]] = {}
     for t in raw.get("texts") or []:
         text = t.get("text")
         if not isinstance(text, str):
             continue
-        # 對齊守衛：表若與課文不同步就整段跳過，不要拿位移的答案去標
-        if t.get("n") != len(text):
+        units = u16_chars(text)
+        slots = unpack_slots(t.get("ssz") or "")
+        # 對齊守衛：表若與課文不同步就整段跳過，不要拿位移的答案去標。
+        # ⛔ 長度一律用 **UTF-16 單位**（#3230）—— `len(text)` 是碼點，
+        #    非 BMP 字（課名〈𪹚龍慶元宵〉的 U+2AE5A）會差一格，而槽位是
+        #    照 UTF-16 產的。兩種索引混用就是整串位移。
+        if not (len(slots) == t.get("n") == len(units)):
             logger.warning("注音表與課文字數不符 lesson_uid=%s section=%s",
                            lesson_uid, t.get("section"))
             continue
         readings: dict[int, str] = {}
-        for i, ch in enumerate(text):
+        for i, ch in enumerate(units):
+            poly = slot_readings.get(ch)
+            if poly:
+                # 破音字：注音由 (字, 槽位) 經出貨字型決定 —— 表只存槽位，
+                # 不重複存注音（#3230，以前每個位置存一份、179 個檔各一份副本）
+                r = poly.get(slots[i])
+                if r:
+                    readings[i] = r
+                continue
             r = single.get(ch)
             if r:
                 readings[i] = r
-        for entry in t.get("poly") or []:
-            i, b = entry.get("i"), entry.get("b")
-            # 位置要真的指到表說的那個字 —— 否則寧可不標
-            if isinstance(i, int) and 0 <= i < len(text) and b and text[i] == entry.get("c"):
-                readings[i] = b
         out[text] = readings
     return out or None
 

@@ -162,7 +162,154 @@ def collect_texts(uid: str) -> list[dict]:
                     if isinstance(p, dict) and isinstance(p.get("text"), str):
                         items.append({"section": f"multi_text_parts[{n}]", "slug": slug,
                                       "idx": p.get("idx"), "text": p["text"]})
+    # 補上服務端會送、但上面那趟 yml 走法漏掉的字串（見 collect_served_texts 的說明）。
+    # 保留原有 items 的順序與 section 標籤不動，只在尾端補漏 —— 這樣既有的表最小變動。
+    seen = {i["text"] for i in items}
+    for extra in collect_served_texts(uid):
+        if extra["text"] not in seen:
+            items.append(extra)
+            seen.add(extra["text"])
     return items
+
+
+def _pack_slots(ss: list) -> str:
+    """把槽位陣列壓成一個字元一格的字串（#3230）。
+
+    `.` = 預設槽（`0000`）· `1`..`5` = `ss01`..`ss05`。
+
+    全庫 1,291,315 個槽位裡 **96.9% 是預設** —— 存成 JSON 陣列是 10.3 MB，
+    壓成字串是 1.3 MB。位置語意完全不變（第 i 個字元 == 第 i 個 UTF-16 單位）。
+    """
+    out = []
+    for v in ss:
+        if not v or v == DEFAULT_SLOT:
+            out.append(".")
+        elif len(v) == 4 and v.startswith("ss") and v[2:].isdigit():
+            n = int(v[2:])
+            if not 1 <= n <= 9:
+                sys.exit(f"槽位超出可壓縮範圍：{v}")
+            out.append(str(n))
+        else:
+            sys.exit(f"沒見過的槽位格式：{v!r}")
+    return "".join(out)
+
+
+def unpack_slots(z: str) -> list[str]:
+    """`_pack_slots` 的反向。⛔ 前後端各有一份同語意的實作，改這裡要三處一起改。"""
+    return [DEFAULT_SLOT if c == "." else f"ss{int(c):02d}" for c in z]
+
+
+def u16_chars(text: str) -> list[str]:
+    """把字串切成 **UTF-16 單位**，跟 JS 的 `text[i]` 一致（#3230）。
+
+    ⛔ Python 的 `list(text)` 是**碼點**，JS 的 `text[i]` 是 **UTF-16 單位** ——
+    純 BMP 的字兩者相同，所以整條路徑一直沒事；但課名〈𪹚龍慶元宵〉（U+2AE5A）
+    是 7 個碼點 / 8 個 UTF-16 單位。兩種索引混用就是 #3175 整串位移的形狀，
+    所以產表、槽位、poly 的位置**一律**用這一種。
+
+    代理對會被切成兩半（各自不是合法字元），它們在字型表裡查不到、
+    也不可能等於任何要裁決的字，所以只是佔位，不影響選擇。
+    """
+    out: list[str] = []
+    for ch in text:
+        if ord(ch) > 0xFFFF:
+            enc = ch.encode("utf-16-le")
+            out.append(enc[0:2].decode("utf-16-le", "surrogatepass"))
+            out.append(enc[2:4].decode("utf-16-le", "surrogatepass"))
+        else:
+            out.append(ch)
+    return out
+
+
+_SERVED_CACHE: dict | None = None
+
+
+def _served_lessons() -> dict:
+    """uid -> 伺服器真的送出去的那份 lesson dict。
+
+    ⛔ 用 `build_all_lessons()`（`/api/stories/{id}` 走的同一支），**不是**再走一遍 yml。
+
+    2026-09-16 實測：產生器原本自己走 yml，跟伺服器組課文的方式不一樣 ——
+    179 課裡有 **28 處服務端送出去的文字不在表裡**（L0157 服務 10 段、表只有 5 段；
+    L0020/L0097/L0119 的 key_reading 被前端按 `\n` 切行，而表存的是整段），
+    那 28 處全部靜靜走舊選擇器。窮舉法的前提是「表的 key 就是消費端會拿的字串」，
+    所以 key 只能從服務端來。
+    """
+    global _SERVED_CACHE
+    if _SERVED_CACHE is None:
+        sys.path.insert(0, str(BACKEND))
+        from app.services.lesson_indexes import build_all_lessons  # noqa: PLC0415
+        _SERVED_CACHE = {L["lesson_uid"]: L for L in build_all_lessons() if L.get("lesson_uid")}
+    return _SERVED_CACHE
+
+
+_CJK = re.compile(r"[\u3400-\u9fff\uf900-\ufaff]")
+
+# 不收的 key：URL／檔名／代號 —— 它們不會被畫注音，收了只是讓表變大
+_SKIP_KEYS = {
+    "thumbnail_url", "knowledge_video_url", "worksheet_docx_url", "worksheet_pdf_url",
+    "source_file", "lesson_uid", "slug", "id", "grade_code", "text_ref",
+}
+
+# 內部審查用的散文（reviewer 寫給 reviewer 的）—— 學生介面不會渲染它，
+# 收進表只是讓表大 12%。⚠️ 這是**唯一**的白名單式排除；內容欄位一律遞迴全收，
+# 因為「列得出來的欄位」那條路的失敗模式就是每加一個元件就多一個漏洞。
+_INTERNAL_KEY = re.compile(
+    r"(answer_note|_note$|^notes$|^qa|review|errata|provenance|evidence|rationale"
+    r"|verdict|audit|debug|todo|comment)", re.I)
+_MAX_LEN = 1200
+
+
+def collect_served_texts(uid: str) -> list[dict]:
+    """服務端這一課**可能交給前端畫注音的每一個中文字串**。
+
+    ## 為什麼是「遞迴收整份」而不是列幾個欄位
+
+    `useZhuyin()` 有 19 個消費端，它們餵進去的不只課文段落：
+
+        CharacterPractice      processZhuyin(currentChar)        單字
+        Intro                  processZhuyin(story.title)        課名／目標框標題／策略名
+        MultipleChoiceExercise processZhuyin(text)               題幹與選項
+        FillInBlankExercise / VocabDefinitionMatch / VocabWordSearch /
+        SentencePractice / ListeningPractice                     生詞、釋義、題目、提示
+
+    2026-09-16 實測：表只涵蓋 6 種課文表面（1,861 個字串、100% 命中），
+    上面這十幾種**一個都不在表裡**，全部靜靜走舊的執行期選擇器 ——
+    也就是同一個字在課文裡跟在選項裡可能讀不一樣，而那正是 #3224 家長回報的那個症狀。
+
+    所以窮舉的單位不是「我列得出來的欄位」，是**服務端這份 dict 裡的每一個中文字串**。
+    列欄位這條路走過了，它的失敗模式是「每次有人加一個新元件就悄悄多一個漏洞」。
+
+    含整串與按 `\n` 切出的每一行（`processZhuyin` 傳整串、`processLines` 傳行）。
+    """
+    L = _served_lessons().get(uid)
+    if not L:
+        return []
+
+    found: dict[str, str] = {}   # text -> 第一次看到它的路徑（當 section 標籤用）
+
+    def walk(node, path: str, depth: int = 0) -> None:
+        if depth > 8:
+            return
+        if isinstance(node, str):
+            if node.strip() and len(node) <= _MAX_LEN and _CJK.search(node):
+                found.setdefault(node, path)
+                if "\n" in node:
+                    for line in node.split("\n"):
+                        if line.strip() and _CJK.search(line):
+                            found.setdefault(line, path + "#line")
+        elif isinstance(node, dict):
+            for k, v in node.items():
+                if k in _SKIP_KEYS or _INTERNAL_KEY.search(str(k)):
+                    continue
+                walk(v, f"{path}.{k}" if path else str(k), depth + 1)
+        elif isinstance(node, list):
+            for n, v in enumerate(node):
+                walk(v, f"{path}[{n}]", depth + 1)
+
+    walk(L, "")
+    return [{"section": f"served:{p}", "slug": None, "idx": None, "text": t}
+            for t, p in found.items()]
 
 
 def build_bundle(required: bool = True) -> Path | None:
@@ -241,7 +388,7 @@ def _adjudicate_he(text: str, ss: list) -> tuple[list, int]:
     except Exception:
         return ss, 0
     out, changed = list(ss), 0
-    for i, ch in enumerate(text):
+    for i, ch in enumerate(u16_chars(text)):
         if ch != "和":
             continue
         if i in he:
@@ -334,7 +481,7 @@ def build(uid: str, bundle: Path, font_slots: dict) -> dict:
     poly_n = 0
     he_total = 0
     for n, it in enumerate(items):
-        chars = list(it["text"])
+        chars = u16_chars(it["text"])
         ss = slots[str(n)]
         # ⛔ 對齊守衛不可省：整張表的價值建立在「第 i 個槽位 == 原文第 i 個字」。
         #    一旦錯位，拿到的是一整份看起來合理、實際整串位移的答案（#3175 的形狀）。
@@ -343,27 +490,27 @@ def build(uid: str, bundle: Path, font_slots: dict) -> dict:
         ss, he_changed = _adjudicate_he(it["text"], ss)
         he_total += he_changed
         texts.append({"section": it["section"], "slug": it["slug"], "idx": it["idx"],
-                      "text": it["text"], "n": len(chars), "ss": ss, "poly": []})
+                      "text": it["text"], "n": len(chars), "ss": ss})
 
     # ── 人工修正要在算 poly **之前**套用，否則 poly[].b 會跟 ss 不同步 ──
     corrections = _load_corrections(uid)
     n_corr = _apply_corrections(uid, texts, corrections, font_slots) if corrections else 0
 
+    # ── 只數破音字位置（統計用），不再把注音存進表 ──────────────────
+    #
+    # ⛔ 以前每個破音字位置都存一筆 `{"i","c","ss","b"}`（全庫 321,733 筆、15 MB），
+    #    而 `b` 是 **(字, 槽位) 經由出貨字型推得出來的** —— 存一份就是第二個真相來源，
+    #    而且一旦字型換版就靜靜過期。後端改成自己用 `font_slots.json` 推。
     for t in texts:
-        chars = list(t["text"])
-        ss = t["ss"]
-        review = []
-        for k, ch in enumerate(chars):
+        chars = u16_chars(t["text"])
+        for ch in chars:
             sl = font_slots.get(ch)
-            if not sl or len(sl) == 1:
-                # 字型沒收（標點／拉丁／注音符號本身）或單音字 —— 單音字由字型唯一
-                # 決定，後端已有 `font_zhuyin_table()` 的 single 表，不在這裡重複一份
-                continue
-            poly_n += 1
-            raw = sl.get(ss[k] or DEFAULT_SLOT)
-            review.append({"i": k, "c": ch, "ss": ss[k],
-                           "b": _to_bopomofo(raw) if raw else None})
-        t["poly"] = review
+            if sl and len(sl) > 1:
+                poly_n += 1
+
+    # 槽位壓成一個字元：'.'=預設、'1'..'5'=ss01..ss05（全庫 96.9% 是預設）
+    for t in texts:
+        t["ssz"] = _pack_slots(t.pop("ss"))
     return {
         "lesson_uid": uid,
         "_provenance": {
@@ -443,7 +590,9 @@ def check_without_oracle(uid: str, font_slots: dict) -> list[str]:
     for t in doc.get("texts") or []:
         # ⛔ 不可以寫成 `a != b != c` —— Python 的鏈式比較等於 `(a != b) and (b != c)`，
         #    所以「ss 長度錯但 n == len(text)」時整句是 False，**這道門是空的**。
-        if not (len(t.get("ss") or []) == t.get("n") == len(t.get("text") or "")):
+        # ⛔ 不可以寫成 `a != b != c` —— 鏈式比較等於 `(a != b) and (b != c)`
+        # ⛔ 長度一律用 UTF-16 單位（#3230）—— `len(text)` 是碼點，非 BMP 會差一格
+        if not (len(t.get("ss") or []) == t.get("n") == len(u16_chars(t.get("text") or ""))):
             errs.append(f"{uid} {t['section']} idx={t['idx']} 槽位/字數對不上")
         for r in t.get("poly") or []:
             i = r.get("i")
@@ -488,6 +637,34 @@ def main() -> int:
     bundle = build_bundle(required=not args.check)
     font_slots = _load(EXTRACTOR, "extract_font_readings").build_reading_table(str(FONT))
 
+    # ── 槽位 → 注音 的對照，寫成一份給後端用（#3230）────────────────────
+    #
+    # 以前每一課的表裡每個破音字位置都存一份注音（全庫 321,733 筆 / 15 MB），
+    # 而那個注音是 **(字, 槽位) 經由出貨字型推出來的** —— 存進 179 個檔就是
+    # 179 份會各自過期的副本。改成只存這一份（約 100 KB），後端自己查。
+    slot_map = {
+        ch: {sl: _to_bopomofo(raw) for sl, raw in (slots or {}).items() if raw}
+        for ch, slots in font_slots.items() if slots and len(slots) > 1
+    }
+    slot_path = BACKEND / "data" / "zhuyin" / "font_slot_readings.json"
+    slot_doc = {
+        "_provenance": {
+            "generator": "backend/scripts/generate_lesson_zhuyin.py",
+            "source_font": str(FONT.relative_to(REPO)),
+            "font_sha256_16": hashlib.sha256(FONT.read_bytes()).hexdigest()[:16],
+            "notation": "pypinyin BopomofoConverter（與 font_readings.json 同一個轉換器）",
+            "note": "破音字的 槽位→注音。單音字走 font_readings.json 的 single。",
+        },
+        "slots": slot_map,
+    }
+    slot_body = json.dumps(slot_doc, ensure_ascii=False, separators=(",", ":")) + "\n"
+    if args.check:
+        if not slot_path.exists() or slot_path.read_text(encoding="utf-8") != slot_body:
+            print("✗ font_slot_readings.json 與出貨字型不同步 —— 重跑產生器", file=sys.stderr)
+            return 1
+    else:
+        slot_path.write_text(slot_body, encoding="utf-8")
+
     if args.check and bundle is None:
         errs: list[str] = []
         for uid in uids:
@@ -505,7 +682,10 @@ def main() -> int:
     stale, total = [], {"texts": 0, "chars": 0, "poly_positions": 0, "he_adjudicated": 0, "manual_corrections": 0}
     for uid in uids:
         doc = build(uid, bundle, font_slots)
-        body = json.dumps(doc, ensure_ascii=False, indent=1) + "\n"
+        # ⛔ 緊湊輸出（#3230）。`indent=1` 時光是縮排就佔 24 MB / 53 MB ——
+        #    這些是**產生出來的資料檔**，沒有人手改，可讀性由 `--check` 與
+        #    逐課 TDD 負責，不靠縮排。要看內容用 `python -m json.tool`。
+        body = json.dumps(doc, ensure_ascii=False, separators=(",", ":")) + "\n"
         p = out_path(uid)
         for k, v in doc["_provenance"]["stats"].items():
             total[k] += v
