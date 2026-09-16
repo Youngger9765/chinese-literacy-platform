@@ -792,6 +792,7 @@ modules:
   - backend/tests/test_he_conjunction_zhuyin_3204.py
   - backend/tests/test_zhuyin_module_owns_its_code_3203.py
   - backend/tests/test_served_text_all_in_table_3230.py
+  - backend/tests/test_xiang_reading_3236.py
   related_issues: []
   source_meetings: []
   last_reviewed: 2026-09-14

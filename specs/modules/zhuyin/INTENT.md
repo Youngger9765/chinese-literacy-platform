@@ -47,6 +47,8 @@ spec_tests:
   - backend/tests/test_zhuyin_module_owns_its_code_3203.py
   # #3230 端到端窮舉鎖：服務端送出去的每一個中文字串都必須在表裡
   - backend/tests/test_served_text_all_in_table_3230.py
+  # #3236 「相」全庫鎖（教育部：ㄒㄧㄤˋ 是封閉集，交互義一律 ㄒㄧㄤ）
+  - backend/tests/test_xiang_reading_3236.py
 related_issues: []
 source_meetings: []
 last_reviewed: 2026-09-14
