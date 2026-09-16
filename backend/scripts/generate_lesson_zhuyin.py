@@ -164,10 +164,16 @@ def collect_texts(uid: str) -> list[dict]:
     return items
 
 
-def build_bundle() -> Path:
-    """打包出貨的 processor。⛔ 不移植邏輯 —— import 真的那個 class。"""
+def build_bundle(required: bool = True) -> Path | None:
+    """打包出貨的 processor。⛔ 不移植邏輯 —— import 真的那個 class。
+
+    `required=False` 時找不到 esbuild 回 `None`（`--check` 在 CI 沒有
+    `frontend/node_modules`，見 `main()` 裡兩段式檢查的說明）。
+    """
     esbuild = FRONTEND / "node_modules" / ".bin" / "esbuild"
     if not esbuild.exists():
+        if not required:
+            return None
         sys.exit(f"找不到 {esbuild} —— 先在 frontend/ 跑 npm ci")
     out = Path(tempfile.mkdtemp()) / "runner.cjs"
     subprocess.run([str(esbuild), str(RUNNER_TS), "--bundle", "--platform=node",
@@ -380,6 +386,85 @@ def build(uid: str, bundle: Path, font_slots: dict) -> dict:
     }
 
 
+def check_without_oracle(uid: str, font_slots: dict) -> list[str]:
+    """不跑 node 也驗得到的四種漂移。
+
+    ## 為什麼要有這條路
+
+    `--check` 原本一律重跑 oracle（需要 `frontend/node_modules/.bin/esbuild`），
+    但 spec CI 那個 job 是後端 only、沒有 `npm ci` → Gate 11 在 CI **一定紅**
+    （2026-09-16 實測：`找不到 …/esbuild`，exit 1）。
+
+    幫那個 job 裝整套 node 只為了一道門太重。改成兩段式：
+
+      有 esbuild（本機 / 前端 CI）→ 重跑 oracle 逐字比（最強）
+      沒有（後端 CI）             → 這條：驗四種漂移，**不是「沒驗到」**
+
+    驗得到的：
+      ① 課文改了     —— 表裡的段落集合 vs 現在 YAML 撈出來的（含逐段 sha）
+      ② 字型換了     —— `_provenance.font_sha256_16` vs 現在的字型
+      ③ poyin_db 改了 —— 同上
+      ④ 表自己壞了   —— 槽位長度／`ss` 與 `poly` 同步／讀音在字型合法集合／修正表仍有效
+
+    驗不到的（要 oracle）：**選擇邏輯本身變了**（processor 改了但 poyin_db 沒改）。
+    那種改動一定會動到 `frontend/src/components/zhuyin/`，而那條路徑會觸發前端 CI。
+    """
+    errs: list[str] = []
+    p = out_path(uid)
+    if not p.is_file():
+        return [f"{uid} 沒有 zhuyin.json"]
+    try:
+        doc = json.loads(p.read_text(encoding="utf-8"))
+    except Exception as e:
+        return [f"{uid} zhuyin.json 讀不起來：{e}"]
+
+    prov = doc.get("_provenance") or {}
+    if prov.get("font_sha256_16") != hashlib.sha256(FONT.read_bytes()).hexdigest()[:16]:
+        errs.append(f"{uid} 字型變了（表是用舊字型產的）")
+    if prov.get("poyin_db_sha256_16") != hashlib.sha256(POYIN_DB.read_bytes()).hexdigest()[:16]:
+        errs.append(f"{uid} poyin_db 變了（表是用舊樣式表產的）")
+
+    # ① 課文：段落集合與逐段內容都要對得上
+    want = {(i["section"], i["idx"]): i["text"] for i in collect_texts(uid)}
+    got = {(t["section"], t["idx"]): t["text"] for t in doc.get("texts") or []}
+    if set(want) != set(got):
+        missing = sorted(set(want) - set(got))[:3]
+        extra = sorted(set(got) - set(want))[:3]
+        errs.append(f"{uid} 段落集合不符（表缺 {missing} · 表多 {extra}）")
+    for k in set(want) & set(got):
+        if want[k] != got[k]:
+            errs.append(f"{uid} {k} 的課文變了")
+
+    # ④ 表自己的內部一致性
+    for t in doc.get("texts") or []:
+        if len(t.get("ss") or []) != t.get("n") != len(t.get("text") or ""):
+            errs.append(f"{uid} {t['section']} idx={t['idx']} 槽位/字數對不上")
+        for r in t.get("poly") or []:
+            i = r.get("i")
+            if not isinstance(i, int) or i >= t["n"] or t["text"][i] != r.get("c"):
+                errs.append(f"{uid} {t['section']} i={i} poly 指到錯的字")
+                continue
+            if t["ss"][i] != r.get("ss"):
+                errs.append(f"{uid} {t['section']} i={i} ss 與 poly 不同步")
+            slots = font_slots.get(r["c"]) or {}
+            raw = slots.get(r.get("ss") or DEFAULT_SLOT)
+            if raw is None or _to_bopomofo(raw) != r.get("b"):
+                errs.append(f"{uid} {t['section']} i={i}「{r['c']}」讀音 {r.get('b')} 對不上字型")
+
+    # 修正表仍有效（slot ↔ expect_bopomofo ↔ 課文位置）
+    for c in _load_corrections(uid):
+        t = next((x for x in doc.get("texts") or []
+                  if x["section"] == c["section"] and x["idx"] == c["idx"]), None)
+        if t is None:
+            errs.append(f"{uid} 修正過期：找不到 {c['section']} idx={c['idx']}")
+            continue
+        if hashlib.sha256(t["text"].encode()).hexdigest()[:12] != c.get("text_sha256_prefix"):
+            errs.append(f"{uid} 修正過期：{c['section']} idx={c['idx']} 的課文變了")
+        elif t["ss"][c["i"]] != c["slot"]:
+            errs.append(f"{uid} 修正沒被套用：i={c['i']} 表是 {t['ss'][c['i']]} 但修正說 {c['slot']}")
+    return errs
+
+
 def out_path(uid: str) -> Path:
     return _vdir(uid) / "zhuyin.json"
 
@@ -392,8 +477,24 @@ def main() -> int:
     args = ap.parse_args()
 
     uids = args.uids or lesson_uids()
-    bundle = build_bundle()
+    # `--check` 在沒有 esbuild 的環境（後端 CI）走 check_without_oracle，
+    # 不是「沒驗到」—— 見那支函式的 docstring。
+    bundle = build_bundle(required=not args.check)
     font_slots = _load(EXTRACTOR, "extract_font_readings").build_reading_table(str(FONT))
+
+    if args.check and bundle is None:
+        errs: list[str] = []
+        for uid in uids:
+            errs.extend(check_without_oracle(uid, font_slots))
+        if errs:
+            print(f"✗ {len(errs)} 個問題（前 10）：", file=sys.stderr)
+            for e in errs[:10]:
+                print(f"  {e}", file=sys.stderr)
+            print("  → python3 backend/scripts/generate_lesson_zhuyin.py", file=sys.stderr)
+            return 1
+        print(f"✓ {len(uids)} 課的表與課文/字型/poyin_db 同步（結構檢查；"
+              f"沒有 esbuild 所以沒重跑 oracle —— 選擇邏輯本身的改動由前端 CI 擋）")
+        return 0
 
     stale, total = [], {"texts": 0, "chars": 0, "poly_positions": 0, "he_adjudicated": 0, "manual_corrections": 0}
     for uid in uids:
