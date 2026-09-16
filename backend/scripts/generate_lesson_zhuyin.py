@@ -681,17 +681,35 @@ def check_without_oracle(uid: str, font_slots: dict) -> list[str]:
             if ss[i] not in slots:
                 errs.append(f"{uid} {t['section']} i={i}「{ch}」的槽位 {ss[i]} 不在字型裡")
 
+    # ⭐ 修正的**筆數**要對得上表自己記的 provenance（#3238 補的洞）。
+    #
+    # ⛔ 原本這道門只驗「還在的修正有沒有被套用」——**刪掉一筆是隱形的**：
+    #    表沒重產，被修正過的槽位還在，於是沒有任何東西發現支撐它的那筆修正不見了，
+    #    下一次重產就會靜靜把它改回錯的讀音。
+    #    （2026-09-17 實測：拿掉 7 筆「和」的修正，這條路回綠。）
+    n_now = len([c for c in _load_corrections(uid)])
+    n_recorded = ((doc.get("_provenance") or {}).get("stats") or {}).get("manual_corrections")
+    if n_recorded is not None and n_now != n_recorded:
+        errs.append(
+            f"{uid} 修正筆數不符：現在 {n_now} 筆，表記 {n_recorded} 筆 —— "
+            f"有人加了或刪了修正而沒重產表")
+
     # 修正表仍有效（slot ↔ expect_bopomofo ↔ 課文位置）
     for c in _load_corrections(uid):
-        t = next((x for x in doc.get("texts") or []
-                  if x["section"] == c["section"] and x["idx"] == c["idx"]), None)
-        if t is None:
-            errs.append(f"{uid} 修正過期：找不到 {c['section']} idx={c['idx']}")
+        # ⛔ 用 **sha 定位**，跟 `_apply_corrections()` 同一種方式（#3238）。
+        #    這裡原本用 `(section, idx)` —— 而 `served:*` 的 section 會同名
+        #    且 `idx` 是 `None`（同一段的整串與逐行版本），`next(...)` 挑到第一個，
+        #    於是 sha 對不上、報成「課文變了」。兩條路的定位方式不一致本身就是 bug：
+        #    產表那條用 sha，這條用 (section, idx)，改了一邊沒改另一邊。
+        want_sha = c.get("text_sha256_prefix")
+        hits = [x for x in doc.get("texts") or []
+                if hashlib.sha256(x["text"].encode("utf-8")).hexdigest()[:12] == want_sha]
+        if len(hits) != 1:
+            errs.append(f"{uid} 修正過期：用 sha {want_sha} 找到 {len(hits)} 段（要剛好 1 段）")
             continue
-        if hashlib.sha256(t["text"].encode()).hexdigest()[:12] != c.get("text_sha256_prefix"):
-            errs.append(f"{uid} 修正過期：{c['section']} idx={c['idx']} 的課文變了")
-        elif unpack_slots(t.get("ssz") or "")[c["i"]] != c["slot"]:
-            got = unpack_slots(t.get("ssz") or "")[c["i"]]
+        t = hits[0]
+        got = unpack_slots(t.get("ssz") or "")[c["i"]]
+        if got != c["slot"]:
             errs.append(f"{uid} 修正沒被套用：i={c['i']} 表是 {got} 但修正說 {c['slot']}")
     return errs
 

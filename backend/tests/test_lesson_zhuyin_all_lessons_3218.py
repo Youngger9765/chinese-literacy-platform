@@ -106,6 +106,17 @@ def _poly(t: dict) -> list[dict]:
     return out
 
 
+#: #3238 的個案修正（表刻意覆蓋 he_conjunction 的位置）
+def _load_corrections() -> list[dict]:
+    import json
+    from pathlib import Path
+    p = Path(__file__).resolve().parents[1] / "data/zhuyin/lesson_corrections.json"
+    return json.load(open(p, encoding="utf-8"))["corrections"]
+
+
+CORRECTIONS = _load_corrections()
+
+
 class TestEveryLessonHasATable:
     def test_有課就有表(self):
         missing = [u for u in UIDS if not (_vdir(u) / "zhuyin.json").is_file()]
@@ -307,12 +318,21 @@ class TestHeConjunctionIsAdjudicated:
                     continue
                 got = zhuyin_for_text(uid, t["text"]) or {}
                 he_pos = _he_conjunction_positions(t["text"])
+                # #3238：`lesson_corrections.json` 會**刻意覆蓋** he_conjunction ——
+                # 那 7 處的成因是例外清單跨詞界誤中（和解／和服／和尾／不和），
+                # 而那幾個詞有真用例、不能整個移出清單，所以逐處修。
+                # ⛔ 這裡要排除它們，否則這條鎖會把「修正生效」報成「不一致」。
+                fixed = {c["i"] for c in CORRECTIONS
+                         if c["lesson_uid"] == uid and c["section"] == t["section"]
+                         and c["c"] == "和"}
                 for i, ch in enumerate(_u16(t["text"])):
                     if ch != "和":
                         continue
                     total += 1
                     # 權威只回答一件事：這個位置是不是連接詞。
                     # 是 → 表必須是 ㄏㄢˋ。不是 → 表不可以是 ㄏㄢˋ（其他讀音由樣式表決定）。
+                    if i in fixed:
+                        continue
                     is_conj = i in he_pos
                     tbl = got.get(i)
                     bad = (tbl != "ㄏㄢˋ") if is_conj else (tbl == "ㄏㄢˋ")
