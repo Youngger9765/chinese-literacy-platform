@@ -792,6 +792,8 @@ modules:
   - backend/tests/test_served_text_all_in_table_3230.py
   - backend/tests/test_xiang_reading_3236.py
   - backend/tests/test_fallback_is_lookup_not_selector_3237.py
+  - backend/tests/test_zhuyin_map_alignment_3175.py
+  - backend/tests/test_zhuyin_cross_surface_drift_3202.py
   related_issues: []
   source_meetings: []
   last_reviewed: 2026-09-14
