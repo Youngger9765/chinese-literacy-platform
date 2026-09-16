@@ -125,14 +125,32 @@ def get_error_patterns(
     story_slug: str | None = Query(None, description="Filter errors by story slug"),
     limit: int = Query(50, ge=1, le=200, description="Max patterns to return"),
     offset: int = Query(0, ge=0, description="Number of patterns to skip"),
+    min_errors: int | None = Query(
+        None, ge=1, le=50,
+        description="錯幾次算「還不會」。不給就用預設：無 story_slug → 2、有 → 1",
+    ),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Get characters that the student repeatedly gets wrong (error_count >= 2).
+    """Get characters that the student repeatedly gets wrong.
 
     Returns characters sorted by error count descending.
     When story_slug is provided, only errors from sessions of that story are returned
     (minimum error threshold is lowered to 1 for per-story view).
+
+    ## `min_errors`（#3224）
+
+    注音的「難字模式」原本用**本課生詞拆成的單字**當難字 —— 那回答的是
+    「這一課要教什麼」，不是「這個孩子還不會什麼」。家長實測的症狀：
+    「人」「水」「石」（來自寒氣逼人／滴水穿石）每次出現都標，而「臼」「匪」「筋」
+    因為不在生詞清單裡就完全不標。
+
+    改成用錯字紀錄之後，**門檻直接決定第二段鷹架會留多少字** ——
+    預設的「全域錯 ≥ 2」對只唸過三次的孩子會幾乎是空的。所以門檻要能由呼叫端定，
+    不該寫死在這裡。
+
+    ⛔ 不給 `min_errors` 時行為與改動前完全一樣（學生端既有的「你常錯的字」卡片
+    依賴那個預設）。
     """
     verify_student_access(student_id, current_user, db)
 
@@ -149,14 +167,16 @@ def get_error_patterns(
 
     if story_slug:
         base_query = base_query.filter(LearningSession.story_slug == story_slug)
-        min_errors = 1
+        threshold = 1
     else:
-        min_errors = 2
+        threshold = 2
+    if min_errors is not None:
+        threshold = min_errors
 
     error_groups = (
         base_query
         .group_by(CharacterError.character)
-        .having(sa_func.count(CharacterError.id) >= min_errors)
+        .having(sa_func.count(CharacterError.id) >= threshold)
         .order_by(sa_func.count(CharacterError.id).desc())
         .limit(5000)
         .all()

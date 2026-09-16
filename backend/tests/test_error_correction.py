@@ -881,3 +881,62 @@ class TestRepeatedErrorsAlert:
         data = resp.json()
         assert data["total"] == 0
         assert data["alerts"] == []
+
+
+# ===========================================================================
+# min_errors 參數：門檻變成可調的（#3224）
+# ===========================================================================
+class TestMinErrorsParam:
+    """`min_errors` 讓呼叫端自己定「錯幾次算還不會」。
+
+    ## 為什麼需要它
+
+    注音的「難字模式」原本用**本課生詞拆成的單字**當難字，那回答的是
+    「這一課要教什麼」，不是「這個孩子還不會什麼」（#3224）。
+    家長實測的症狀：「人」「水」「石」（來自寒氣逼人／滴水穿石）每次出現都標，
+    而「臼」「匪」「筋」因為不在生詞清單裡就完全不標。
+
+    改成用她的錯字紀錄之後，**門檻直接決定第二段鷹架會留多少字**：
+    預設的「全域錯 ≥ 2 次」對只唸過三次的孩子會幾乎空的，
+    而「錯 ≥ 1 次」才抓得到剛出現的卡點。那是產品參數，不該寫死在端點裡。
+
+    ⛔ 預設值不變（無 story_slug → 2、有 story_slug → 1），這是相容性要求：
+    學生端既有的「你常錯的字」卡片依賴那個預設。
+    """
+
+    def test_min_errors_1_也抓得到只錯一次的字(self, client, student_a, seeded_errors):
+        """`中` 只錯 1 次 —— 預設看不到，min_errors=1 要看得到"""
+        base = f"/api/learning/students/{student_a['id']}/error-patterns"
+        h = auth_header(student_a["token"])
+
+        default_chars = [p["character"] for p in client.get(base, headers=h).json()["patterns"]]
+        assert "中" not in default_chars, "預設門檻變了 —— 既有的卡片會跟著變"
+
+        loose_chars = [p["character"] for p in
+                       client.get(f"{base}?min_errors=1", headers=h).json()["patterns"]]
+        assert "中" in loose_chars, "min_errors=1 沒有放寬門檻"
+        assert "大" in loose_chars and "小" in loose_chars, "放寬門檻不該漏掉本來就在的"
+
+    def test_min_errors_3_會收得更緊(self, client, student_a, seeded_errors):
+        """反方向也要成立 —— 否則「它只是忽略這個參數」也會讓上面那條綠"""
+        base = f"/api/learning/students/{student_a['id']}/error-patterns"
+        h = auth_header(student_a["token"])
+        chars = [p["character"] for p in
+                 client.get(f"{base}?min_errors=3", headers=h).json()["patterns"]]
+        assert "大" in chars, "大 錯 3 次，min_errors=3 應該還在"
+        assert "小" not in chars, "小 只錯 2 次，min_errors=3 應該被濾掉"
+        assert "中" not in chars
+
+    def test_預設值沒被改掉(self, client, student_a, seeded_errors):
+        """不帶參數時必須跟改動前完全一樣（2 次）"""
+        base = f"/api/learning/students/{student_a['id']}/error-patterns"
+        h = auth_header(student_a["token"])
+        a = [p["character"] for p in client.get(base, headers=h).json()["patterns"]]
+        b = [p["character"] for p in client.get(f"{base}?min_errors=2", headers=h).json()["patterns"]]
+        assert a == b, "不帶參數 != min_errors=2 —— 預設值漂了"
+
+    def test_越界值被擋掉(self, client, student_a, seeded_errors):
+        base = f"/api/learning/students/{student_a['id']}/error-patterns"
+        h = auth_header(student_a["token"])
+        assert client.get(f"{base}?min_errors=0", headers=h).status_code == 422
+        assert client.get(f"{base}?min_errors=-1", headers=h).status_code == 422
