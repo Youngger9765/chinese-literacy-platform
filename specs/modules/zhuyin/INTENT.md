@@ -40,8 +40,6 @@ spec_tests:
   - backend/tests/test_font_is_taiwan_reading_authority_3173.py
   - backend/tests/test_font_readings_match_shipped_font_3177.py
   - backend/tests/test_taiwan_zhuyin_readings_3202.py
-  - backend/tests/test_zhuyin_cross_surface_drift_3202.py
-  - backend/tests/test_zhuyin_map_alignment_3175.py
   - backend/tests/test_he_conjunction.py
   - backend/tests/test_he_conjunction_zhuyin_3204.py
   - backend/tests/test_zhuyin_module_owns_its_code_3203.py
@@ -49,6 +47,8 @@ spec_tests:
   - backend/tests/test_served_text_all_in_table_3230.py
   # #3236 「相」全庫鎖（教育部：ㄒㄧㄤˋ 是封閉集，交互義一律 ㄒㄧㄤ）
   - backend/tests/test_xiang_reading_3236.py
+  # #3237 fallback 是查表不是選擇器（pypinyin 已移除）
+  - backend/tests/test_fallback_is_lookup_not_selector_3237.py
 related_issues: []
 source_meetings: []
 last_reviewed: 2026-09-14

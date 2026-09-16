@@ -82,11 +82,19 @@ def test_the_mainland_reading_is_what_pypinyin_actually_gives(sentence: str, cha
 
 
 # (句子, 目標字, 該讀什麼) —— 破音字仍然要靠 pypinyin 看上下文，這個能力不可以弄丟
+# ⚠️ #3237：`_build_zhuyin_map()` 從「pypinyin 選擇器」改成純查表之後，
+#    上下文判斷沒有了 —— 破音字退回字型預設。
+#    所以只有「字型預設剛好就是對的」那兩個還成立；另兩個逐案標 xfail(strict)，
+#    **有人把它修好那天會 XPASS 而整支紅**，逼人回來把標記拿掉（同下面 KNOWN_GAPS 的作法）。
+_RETIRED_3237 = pytest.mark.xfail(
+    strict=True,
+    reason="#3237：fallback 不再用 pypinyin，破音字退回字型預設 —— 上下文判斷是刻意放棄的",
+)
 POLYPHONE_CONTEXT = [
-    ("他慢慢行走",   "行", "ㄒㄧㄥˊ"),
-    ("這是目的地",   "的", "ㄉㄧˋ"),
-    ("我的書",       "的", "ㄉㄜ˙"),
-    ("他長大了",     "長", "ㄓㄤˇ"),
+    ("他慢慢行走",   "行", "ㄒㄧㄥˊ"),          # 字型預設就是 ㄒㄧㄥˊ
+    pytest.param("這是目的地", "的", "ㄉㄧˋ", marks=_RETIRED_3237),
+    ("我的書",       "的", "ㄉㄜ˙"),            # 字型預設就是 ㄉㄜ˙
+    pytest.param("他長大了", "長", "ㄓㄤˇ", marks=_RETIRED_3237),
 ]
 
 #: pypinyin 上下文判讀本來就錯的地方 —— **跟 #3202 這次改動無關**，改動前後輸出一樣。
@@ -97,12 +105,16 @@ POLYPHONE_CONTEXT = [
 #:
 #: 「行」在正式站被回報過同一類問題（#3177，那條走的是前端資料表路徑）。
 KNOWN_POLYPHONE_GAPS = [
-    ("我去銀行辦事", "行", "ㄏㄤˊ", "pypinyin 給 ㄒㄧㄥˊ"),
-    ("這條路很長",   "長", "ㄔㄤˊ", "pypinyin 給 ㄓㄤˇ"),
+    ("我去銀行辦事", "行", "ㄏㄤˊ", "字型預設是 ㄒㄧㄥˊ；#3237 前 pypinyin 也給 ㄒㄧㄥˊ"),
+    # ⭐ #3237 之後這個**變好了**：字型預設 ㄔㄤˊ 剛好是對的（pypinyin 以前給 ㄓㄤˇ）。
+    #    所以它從「已知缺陷」升級成正常案例，搬到 POLYPHONE_CONTEXT 的行為由下面那條驗。
+]
+#: #3237 修好的：拿掉 pypinyin 之後字型預設剛好對
+FIXED_BY_3237 = [
+    ("這條路很長", "長", "ㄔㄤˊ"),
 ]
 
 
-@pytest.mark.parametrize("sentence,char,correct,note", KNOWN_POLYPHONE_GAPS)
 @pytest.mark.xfail(strict=True, reason="pypinyin 上下文判讀的既有缺陷，非本次改動造成")
 def test_known_polyphone_gaps(sentence: str, char: str, correct: str, note: str) -> None:
     idx = sentence.index(char)
@@ -164,18 +176,29 @@ def test_font_default_wins_when_pypinyin_picks_a_reading_taiwan_does_not_have() 
     )
 
 
-def test_missing_table_degrades_to_pypinyin() -> None:
-    """對照表讀不到時退回純 pypinyin，不是整支炸掉。
+def test_missing_table_degrades_to_nothing_not_to_a_crash() -> None:
+    """字型表讀不到時**漏標**，不是整支炸掉，也不是退回另一個來源。
 
-    注音是錦上添花，不該讓朗讀評分掛掉（同 TTS 的 _load_taiwan_corrections）。
+    ⚠️ #3237 改寫：這條原本叫 `test_missing_table_degrades_to_pypinyin`，
+    斷言「退回 pypinyin 的原始輸出」（`研 → ㄐㄧㄡ`，大陸讀音）。
+    那條退路已經拿掉了 —— pypinyin 是這個檔開頭 TAIWAN_NOT_MAINLAND 那串錯誤的來源。
+
+    現在的行為：字型表空的 → 沒有任何字拿得到讀音 → **漏標**。
+    漏標只是少一排注音，標錯是教錯讀音（同 TTS 的 `_load_taiwan_corrections` 的取捨）。
+    重點仍然是「不 crash」。
     """
     sentence = "科學研究"
     with pytest.MonkeyPatch.context() as mp:
         mp.setattr(mod, "font_zhuyin_table", lambda: ({}, {}))
         zmap = mod._build_zhuyin_map(sentence)
 
-    assert zmap[3] == "ㄐㄧㄡ", "退化路徑應該給 pypinyin 的原始輸出"
-    assert len(zmap) == len(sentence), "退化不等於停擺，每個字都還要有注音"
+    assert zmap == {}, f"字型表空的時候不該生出讀音：{zmap}"
+
+    # ⛔ 正向對照：沒有 monkeypatch 時同一句要有讀音 —— 否則上面那個空 dict
+    #    可能是因為 `_build_zhuyin_map` 整支壞了，而不是因為表空
+    real = mod._build_zhuyin_map(sentence)
+    assert len(real) == len(sentence), f"正常情況下每個字都要有讀音：{real}"
+    assert real[3] == "ㄐㄧㄡˋ", "台灣讀音（pypinyin 給的是 ㄐㄧㄡ）"
 
 
 def test_table_really_came_from_the_shipped_font() -> None:
@@ -313,3 +336,13 @@ def test_table_is_inside_the_backend_package_so_the_image_has_it() -> None:
     assert backend_data in TABLE_PATH.parents, (
         f"{TABLE_PATH} 不在 backend/data/ 底下 —— Dockerfile 不會把它帶進 image"
     )
+
+
+@pytest.mark.parametrize("sentence,char,expected", FIXED_BY_3237)
+def test_cases_that_3237_fixed(sentence: str, char: str, expected: str) -> None:
+    """⭐ 拿掉 pypinyin 的附帶好處 —— 這幾個以前是「已知缺陷」。
+
+    ⛔ 這條不是裝飾：它讓「#3237 換到了什麼」有量，而不是只記「失去了什麼」。
+    """
+    idx = sentence.index(char)
+    assert _build_zhuyin_map(sentence).get(idx) == expected

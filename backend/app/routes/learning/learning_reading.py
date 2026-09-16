@@ -22,7 +22,6 @@ from ...services.reading_evaluation_service import evaluate_reading_with_ai
 from ...services.he_conjunction import _he_conjunction_positions
 from ...services.zhuyin_readings import font_zhuyin_table
 from ...services.lesson_zhuyin import zhuyin_for_text
-from pypinyin import Style, lazy_pinyin
 from ...services.reading_transcription_service import (
     ALLOWED_AUDIO_MIMES,
     transcribe_reading_audio,
@@ -358,128 +357,68 @@ class ReadingEvaluateRequest(BaseModel):
     )
 
 
-# ⚠️ 這個範圍必須**涵蓋 pypinyin 認得的每一個漢字**，不然就會重演 #3175：
-# 認不得的字會走到「非中文」那條，`startswith` 對不上 → fail-closed 停住 →
-# **那個字之後整行都沒有注音**。兩個實際會踩到的：
-#   〇 U+3007（台灣寫年份就用它：二〇二六年）—— 在 U+4E00 之下，舊範圍漏掉
-#   CJK 擴充 B 之後 U+20000–U+2FA1F —— 舊範圍只到擴充 A
-_CHINESE_CHAR_RE = re.compile(r"[〇一-鿿㐀-䶿\U00020000-\U0002FA1F]")
+def _u16_units(text: str) -> list[str]:
+    """UTF-16 單位切法 —— 直接用 service 的那支，不再寫第四份實作（#3237）。"""
+    from ...services.lesson_zhuyin import u16_chars
+    return u16_chars(text)
 
-#: 注音符號本體（U+3105–U+312F）。真正的讀音一定含至少一個；數字／拉丁／標點
-#: 一個都沒有。
-#: ⚠️ 上界要到 U+312F 不是 ㄦ(U+3126) —— **ㄧㄨㄩ 三個介音排在 ㄦ 後面**
-#: （U+3127–U+3129）。寫成 `[ㄅ-ㄦ]` 會把「育」(ㄩˋ)、「一」(ㄧ) 判成不是注音，
-#: 純中文的正向對照當場就紅了。
-_BOPOMOFO_RE = re.compile(r"[\u3105-\u312F]")
 
 
 #: 注音的四個聲調符號與輕聲點。去掉之後剩下的是「音節」。
 _TONE_MARKS = "ˊˇˋ˙"
 
 
-def _strip_tone(reading: str) -> str:
-    return reading.rstrip(_TONE_MARKS)
-
-
 def _build_zhuyin_map(target_text: str) -> dict[int, str]:
-    """Return a position→bopomofo map for all CJK characters in target_text.
+    """表裡沒有這段字時的注音 —— **查表，不是選擇**（#3237）。
 
-    Passing the full string (rather than individual chars) lets pypinyin use
-    surrounding context to disambiguate polyphonic characters (破音字), e.g.
-    「的」(ㄉㄜ˙ vs ㄉㄧˋ), 「樂」(ㄌㄜˋ vs ㄩㄝˋ), 「長」(ㄓㄤˇ vs ㄔㄤˊ).
-    ⛔ 不可以改成逐字呼叫 —— `lazy_pinyin("的")` 單獨呼叫回 ㄉㄜ˙，
-    「目的地」的「的」要讀 ㄉㄧˋ，那個能力會整個弄丟。
+    ## 這裡以前是第二套讀音來源
 
-    ## 為什麼不能用 zip（#3175）
+    原本這支是一整套選擇器：pypinyin 看上下文挑音節 + 字型定聲調 + 「和」的三道門
+    + 對不上時的同音節退讓。它跟逐課對照表對同一段課文會給不同答案 ——
+    #3218 量到全庫 **7,682 / 65,754 個破音字位置（11.7%）**不一致。
 
-    這裡原本寫 `zip(target_text, bopomofo_list)`，前提是「一個字一個元素」。
-    **那個前提是錯的**：pypinyin 會把**連續的非中文**（數字、拉丁字母、連著的
-    標點）塌成**一個**元素，於是從那一點開始整串位移 ——
+    ⛔ 而 pypinyin 是**大陸來源**：#3202 就是它造成的（研究 ㄐㄧㄡ、血 ㄒㄩㄝˋ、
+    垃圾 ㄌㄚㄐㄧ）。留著它＝留著一個已知讀音不對的第二意見。
 
-        "民國2019年楊俊體育課"
-            年 → ㄊㄧˇ（「體」的）  楊 → ㄩˋ（「育」的）  俊 → ㄎㄜˋ（「課」的）
-            體育課 三個字完全沒有注音
+    ## 現在
 
-    而且 `bpmf != char` 那個過濾器攔不住標點：`"…我點頭。"` 裡的「頭」會拿到
-    句號當 ruby。服務端量到 **151 課有 135 課（89.4%）至少一段對不齊，
-    69.5% 的中文字落在位移點之後**，錯了多久沒查。
+    #3230 之後服務端會交給前端的中文字串 100% 在表裡（45,606 個），朗讀評分送來的
+    `target_text` 實測 **1,695 / 1,696 命中**（唯一沒中的是 L0140 的
+    `「ㄒㄧ…ㄒㄧ…。」`—— 純注音符號，沒有中文字要標）。所以課文那條路根本走不到這裡；
+    會走到的只剩**老師臨時貼的字**。
 
-    ## 修法：照長度消耗，不靠位置對齊
+    那種字給：
 
-    走一遍 `bopomofo_list`，非中文的「原樣回傳」元素消耗 `len(element)` 個來源
-    字元，中文字消耗 1 個。這樣**整串的上下文完全不變**（pypinyin 看到的仍是
-    整個句子），只修正索引。
+        單音字   → 字型的 `single`（11,050 個字，唯一讀音，沒有選擇問題）
+        「和」   → `he_conjunction` 的判斷（jieba + 380 筆教育部例外 + 自我指稱檢查）
+        其他破音字 → 字型的預設讀音 `d`
 
-    fail-closed：一旦對不上就**就地停住**，後面的字寧可沒有 ruby。
-    漏標只是少一排注音，標錯是教錯讀音。
+    這三者**都是表自己用的權威**，所以結果跟表一致或退讓，不會出現「兩套引擎各說一套」。
+    破音字在老師貼的字裡可能不準 —— 但「不準」跟「另一套引擎給出跟表不同的答案」
+    是兩件事，後者才是 #3202/#3204/#3215 三張票疊出四層的來源。
 
-    ## 「和」（#3204）
-
-    台灣把當連接詞的「和」讀 **ㄏㄢˋ**，而它在這裡優先於其他所有判斷 ——
-    因為那是三道門的結果（`services/he_conjunction.py`：jieba 斷詞、380 筆教育部
-    例外清單、以及「和」自我指稱的檢查），比逐字查表更有把握。
-
-    ⛔ 不可以無腦替換：`和平` 是 ㄏㄜˊ、`一唱一和` 是 ㄏㄜˋ、`溫和` 是 ㄏㄜˊ ——
-    盲換是拿一個錯讀音換另一個。所以判斷是**跟語音那條路共用的**（`he_conjunction.py`
-    原本住在 `tts/normalization.py` 裡，#3204 抽出來），不是重寫一套。
-    #3202 上線時這條還沒接，語料 730 處全部標成 ㄏㄜˊ。
+    ⚠️ 索引是 **UTF-16 單位**（跟表、跟前端一致）。以前這裡按 Python 碼點走，
+    而表是按 UTF-16 產的 —— 非 BMP 字會讓兩邊差一格（#3230 那輪咬了三次）。
     """
     single, poly = font_zhuyin_table()
-    # ⚠️ fail-open：jieba 或例外清單載不到時回空集合，「和」維持字型的 ㄏㄜˊ ——
-    #    跟這次改動之前一樣。標錯讀音比漏標嚴重。
-    he_positions = _he_conjunction_positions(target_text) if "和" in target_text else frozenset()
-    bopomofo_list = lazy_pinyin(target_text, style=Style.BOPOMOFO)
-    zhuyin_map: dict[int, str] = {}
-    pos = 0
-    for element in bopomofo_list:
-        if pos >= len(target_text):
-            break
-        char = target_text[pos]
-        if _CHINESE_CHAR_RE.match(char):
-            # 中文字：一個字一個音節，永遠只消耗一個字元。
-            # 只收「看起來真的是注音」的東西 —— 萬一哪天 pypinyin 對中文字也
-            # 不再 1:1，這裡會變成漏標而不是把數字／標點標成讀音。
-            reading = "ㄏㄢˋ" if pos in he_positions else single.get(char)
-            if reading is None and element and element != char and _BOPOMOFO_RE.search(element):
-                entry = poly.get(char)
-                if entry is None:
-                    # 字型沒收這個字（175 課裡總共 5 字次）→ 維持 pypinyin。
-                    reading = element
-                elif element in entry["v"]:
-                    # pypinyin 依上下文挑的讀音，台灣字型有 → 直接採用
-                    reading = element
-                else:
-                    # 對不上時的分工原則：**音節聽 pypinyin，聲調聽字型**。
-                    #
-                    # pypinyin 的價值是「在這個詞裡是哪個音」（它看了整句上下文）；
-                    # 字型的價值是「台灣這個音讀第幾聲」。嚴格比對整個字串會為了一個
-                    # 聲調把對的音節整個丟掉，退回一個**完全不同的音**：
-                    #
-                    #   削  pypinyin ㄒㄩㄝ · 字型候選 [ㄒㄧㄠ, ㄒㄩㄝˋ]
-                    #       嚴格比對 → 退預設 ㄒㄧㄠ（音錯）
-                    #       同音節   → ㄒㄩㄝˋ（對）
-                    #
-                    # 全語料量過（`full_text_annotate` + `key_reading`，536 個走到這條
-                    # 分支的位置、17 個字）：同音節匹配**只改變兩個字**，其餘 15 個字的
-                    # 同音節候選本來就等於預設：
-                    #
-                    #   削 ×21  ㄒㄧㄠ → ㄒㄩㄝˋ   修好（語料全是 剝削/削弱/瘦削/削減）
-                    #   欸 ×3   ㄟˋ  → ㄞˇ      改壞（見 NEW_DISAGREEMENT_FROM_3202）
-                    #
-                    # 「唯一一個」候選才採用 —— 有兩個以上同音節候選代表聲調本身就是
-                    # 語意區別，那時沒有依據可選，退預設。
-                    same_syllable = [r for r in entry["v"] if _strip_tone(r) == _strip_tone(element)]
-                    reading = same_syllable[0] if len(same_syllable) == 1 else entry["d"]
-            if reading:
-                zhuyin_map[pos] = reading
-            pos += 1
+    # fail-open：jieba 或例外清單載不到就回空集合，「和」維持字型讀音。
+    # 標錯讀音比漏標嚴重。
+    he_positions = (
+        _he_conjunction_positions(target_text) if "和" in target_text else frozenset()
+    )
+    out: dict[int, str] = {}
+    for i, ch in enumerate(_u16_units(target_text)):
+        if i in he_positions and ch == "和":
+            out[i] = "ㄏㄢˋ"
             continue
-        # 非中文：pypinyin 原樣回傳，可能是一整串（"2019"、"Wi-Fi"、"」，"）。
-        if not target_text.startswith(element, pos):
-            # 對不上 —— 不知道後面該怎麼數了，就地停住（見上方 fail-closed）。
-            break
-        pos += len(element)
-    return zhuyin_map
+        r = single.get(ch)
+        if r:
+            out[i] = r
+            continue
+        entry = poly.get(ch)
+        if entry and entry.get("d"):
+            out[i] = entry["d"]
+    return out
 
 
 class DiffToken(BaseModel):
@@ -575,19 +514,17 @@ async def evaluate_reading_endpoint(
             prompt_template_id="reading_evaluate",
         )
 
-    # Build a position→bopomofo map from target_text so pypinyin can use full-context
-    # polyphone disambiguation (破音字).  extra tokens have no position in target_text
-    # and are not displayed; skip zhuyin for them to avoid wasted lookups.
+    # 逐字注音。extra token 在 target_text 裡沒有位置、也不顯示，所以跳過。
     # #3218：注音是課文的一部分，不是執行期算出來的。
     #
     # 讀音選擇的權威是出貨的 `polyphonicProcessor.ts`（方大哥策展的樣式表 + 一/不變調
     # + skipPrev 狀態機），後端**結構上無法重現它** —— #3215 移植過一次吐出 `不 → ㄈㄨ`。
     # 所以離線逐字固化成表，兩邊讀同一份 → 前後端不一致不是「要修到 0」，是不可能存在。
     #
-    # ⚠️ 下面那條 `_build_zhuyin_map` 是 fallback，只服務「表裡沒有的文字」——
-    # 老師臨時貼的段落、還沒產表的課、以及不送 lesson_uid 的舊版前端。
-    # 它就是這次要取代的那套選擇器，**不要再往它身上加能力**（那正是 #3202/#3204/#3215
-    # 三張票疊出四層的來源）。要改讀音請改表。
+    # ⚠️ 下面那條 `_build_zhuyin_map` 只服務「表裡沒有的文字」= 老師臨時貼的段落。
+    # #3237 起它是**純查表**（字型 single + he_conjunction + 字型預設），
+    # 不再是第二套選擇器（pypinyin 已移除）。⛔ 不要再往它身上加選擇能力 ——
+    # 那正是 #3202/#3204/#3215 三張票疊出四層的來源。要改讀音請改表。
     zhuyin_map = (
         zhuyin_for_text(payload.lesson_uid, payload.target_text)
         if payload.lesson_uid
