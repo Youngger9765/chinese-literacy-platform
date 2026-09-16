@@ -1,0 +1,19 @@
+{
+ "lesson_uid": "L0136",
+ "_provenance": {
+  "generator": "backend/scripts/generate_lesson_zhuyin.py",
+  "reading_authority": "frontend/src/components/zhuyin/polyphonicProcessor.ts（跑，非移植）",
+  "source_font": "frontend/public/fonts/BpmfZihiSerif-Regular.ttf",
+  "font_sha256_16": "fc25a90d27699ec4",
+  "poyin_db_sha256_16": "882bc0ae69aeef35",
+  "notation": "pypinyin BopomofoConverter（與 font_readings.json 同一個轉換器）",
+  "stats": {
+   "texts": 0,
+   "chars": 0,
+   "poly_positions": 0,
+   "he_adjudicated": 0,
+   "manual_corrections": 0
+  }
+ },
+ "texts": []
+}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo, useReducer } from 'react';
 import { Story, ReadingAttempt } from '../../../types';
-import { useZhuyin } from '../../../context/ZhuyinContext';
+import { useZhuyin} from '../../../context/ZhuyinContext';
 import { useFontSize } from '../../ui/FontSizeControl';
 import { cancelTts } from '../../../services/ttsApi';
 import { scopedStepStorageKey, isToolboxMode } from '../../../services/learningStorageScope';
@@ -103,7 +103,14 @@ const ParagraphReading: React.FC<ParagraphReadingProps> = ({
   // 一課多篇時，句子對照表要跟著篇次走，否則會唸到第 1 篇（#2930）。
   const roundSlug = useCurrentSectionSlug();
   const { px: fontSizePx } = useFontSize();
-  const { isZhuyinAny, zhuyinActive, processLinesSelective } = useZhuyin();
+  const { isZhuyinAny, zhuyinActive, processLinesSelective, loadLessonZhuyin } = useZhuyin();
+  // #3218：注音改成讀這一課的逐字對照表；查不到的文字才回去自己算。
+  // ⛔ optional call —— 既有測試用 `vi.mock` 給的是**部分** context
+  // （只有 useZhuyin 需要的那幾個欄位），少了這個 `?.` 會讓 10 個測試檔炸。
+  useEffect(() => {
+    const uid = story?.lessonUid;
+    if (uid) void loadLessonZhuyin?.(uid);
+  }, [story?.lessonUid, loadLessonZhuyin]);
   const { token } = useAuth();
   const storageKey = scopedStepStorageKey('liveTutor_progress_', story.id);
 

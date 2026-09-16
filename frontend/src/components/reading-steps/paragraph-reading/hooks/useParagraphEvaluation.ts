@@ -360,7 +360,10 @@ export function useParagraphEvaluation({
         let localTimeout: ReturnType<typeof setTimeout> | null = null;
         try {
           const gemini = await Promise.race([
-            evaluateReading(cleaned, targetText, durationMs, token ?? undefined),
+            // #3218 最後一個參數是課號 —— 少了它後端會回去走舊引擎，
+            // 診斷報告的注音就跟課文頁不一致（實測 7,905 個位置）
+            evaluateReading(cleaned, targetText, durationMs, token ?? undefined,
+                            undefined, story.lessonUid),
             new Promise<never>((_, reject) => {
               localTimeout = setTimeout(() => reject(new Error('gemini_timeout')), 28_000);
               geminiTimeoutRef.current = localTimeout;

@@ -607,6 +607,7 @@ def get_story(story_id: str):
         title=story["title"],
         grade=story["grade"],
         grade_code=story["grade_code"],
+        lesson_uid=story.get("lesson_uid"),
         genre=story["genre"],
         category=story["category"],
         char_count=story["char_count"],
@@ -881,3 +882,36 @@ async def grade_story_structure_endpoint(
         story_text=story_text,
     )
     return result
+
+
+@router.get("/lessons/{lesson_uid}/zhuyin")
+def get_lesson_zhuyin(lesson_uid: str):
+    """這一課的逐字注音對照表（#3218）。
+
+    ## 為什麼是後端給而不是前端算
+
+    注音是**課文的一部分**，跟課文、重點表、聚光燈、生字一樣是內容。
+    離線用多來源產出（字型的合法讀音集合 → 出貨的 `polyphonicProcessor.ts` →
+    pypinyin 當兩岸分歧偵測器 → 教育部辭典裁決 → 人審），固化成表；
+    執行期兩邊讀同一份 → **前後端不一致不可能存在**。
+
+    回傳的是逐字**字型槽位**（`0000`/`ss01`…）而不是注音字串 ——
+    畫面上的注音是靠字型的 IVS 變體渲染的（`zhuyinStringBuilder` 把槽位轉成
+    U+E0100–E01EF 接在字後面），注音字串畫不出來。
+
+    公開不需要登入：這跟 `/api/stories` 一樣是課文內容，而課文本來就是公開的。
+    """
+    from ..services.lesson_zhuyin import lesson_zhuyin_raw
+
+    raw = lesson_zhuyin_raw(lesson_uid)
+    if raw is None:
+        raise HTTPException(status_code=404, detail="這一課還沒有注音對照表")
+    return {
+        "lesson_uid": raw["lesson_uid"],
+        "texts": [
+            {"section": t["section"], "slug": t["slug"], "idx": t["idx"],
+             "text": t["text"], "ss": t["ss"]}
+            for t in raw["texts"]
+        ],
+    }
+

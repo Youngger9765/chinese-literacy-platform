@@ -6,7 +6,7 @@
  */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Story, ReadingAttempt, ComprehensionResult } from '../../types';
-import { useZhuyin } from '../../context/ZhuyinContext';
+import { useZhuyin} from '../../context/ZhuyinContext';
 import StoryStructureTable from './StoryStructureTable';
 import MultipleChoiceExercise from './MultipleChoiceExercise';
 import FloatingAIHelper from './FloatingAIHelper';
@@ -87,7 +87,14 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
     persistedActiveTab ?? (hasMcq ? 'mcq' : 'structure'),
   );
 
-  const { isZhuyinAny, processLinesSelective } = useZhuyin();
+  const { isZhuyinAny, processLinesSelective, loadLessonZhuyin } = useZhuyin();
+  // #3218：注音改成讀這一課的逐字對照表；查不到的文字才回去自己算。
+  // ⛔ optional call —— 既有測試用 `vi.mock` 給的是**部分** context
+  // （只有 useZhuyin 需要的那幾個欄位），少了這個 `?.` 會讓 10 個測試檔炸。
+  useEffect(() => {
+    const uid = story?.lessonUid;
+    if (uid) void loadLessonZhuyin?.(uid);
+  }, [story?.lessonUid, loadLessonZhuyin]);
   const vocabWords = useMemo(
     () => (story.vocabulary ?? []).map((v) => v.word).filter(Boolean),
     [story.vocabulary]

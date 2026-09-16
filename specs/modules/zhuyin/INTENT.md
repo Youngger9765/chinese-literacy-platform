@@ -6,6 +6,10 @@ stability: active
 canonical_source: backend/app/services/zhuyin_readings.py
 owns_code:
   - backend/app/services/zhuyin_readings.py
+  - backend/app/services/lesson_zhuyin.py
+  - backend/scripts/generate_lesson_zhuyin.py
+  - frontend/scripts/zhuyinAnswers.ts
+  - frontend/src/context/ZhuyinContext.tsx
   - backend/app/services/he_conjunction.py
   - backend/scripts/extract_font_readings.py
   - backend/scripts/generate_taiwan_zhuyin_table.py
@@ -19,6 +23,8 @@ owns_code:
   - frontend/src/utils/zhuyinUtils.ts
 owns_data:
   - backend/data/zhuyin/font_readings.json
+  - backend/data/lessons/*/v*/zhuyin.json
+  - backend/data/zhuyin/lesson_corrections.json
   - frontend/public/data/poyin_db.json
   - frontend/public/fonts/BpmfZihiSerif-Regular.ttf
   - frontend/src/components/zhuyin/__fixtures__/fontReadings.generated.json

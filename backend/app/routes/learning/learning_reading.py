@@ -21,6 +21,7 @@ from ...services.input_sanitizer import sanitize_ai_input
 from ...services.reading_evaluation_service import evaluate_reading_with_ai
 from ...services.he_conjunction import _he_conjunction_positions
 from ...services.zhuyin_readings import font_zhuyin_table
+from ...services.lesson_zhuyin import zhuyin_for_text
 from pypinyin import Style, lazy_pinyin
 from ...services.reading_transcription_service import (
     ALLOWED_AUDIO_MIMES,
@@ -350,6 +351,11 @@ class ReadingEvaluateRequest(BaseModel):
     spoken_text: str = Field(..., max_length=10000, description="STT 轉錄結果")
     target_text: str = Field(..., max_length=10000, description="課文原文")
     duration_ms: int | None = Field(None, description="朗讀時長（毫秒，選填）")
+    # #3218：注音改成查逐課對照表。舊版前端不會送這個欄位 → 走下面的 fallback，
+    # 行為與這次改動之前完全一樣。pattern 是白名單，路徑穿越在 service 層再擋一次。
+    lesson_uid: str | None = Field(
+        None, max_length=16, pattern=r"^L\d+$", description="課號（有給就查逐課注音表）"
+    )
 
 
 # ⚠️ 這個範圍必須**涵蓋 pypinyin 認得的每一個漢字**，不然就會重演 #3175：
@@ -572,7 +578,23 @@ async def evaluate_reading_endpoint(
     # Build a position→bopomofo map from target_text so pypinyin can use full-context
     # polyphone disambiguation (破音字).  extra tokens have no position in target_text
     # and are not displayed; skip zhuyin for them to avoid wasted lookups.
-    zhuyin_map = _build_zhuyin_map(payload.target_text)
+    # #3218：注音是課文的一部分，不是執行期算出來的。
+    #
+    # 讀音選擇的權威是出貨的 `polyphonicProcessor.ts`（方大哥策展的樣式表 + 一/不變調
+    # + skipPrev 狀態機），後端**結構上無法重現它** —— #3215 移植過一次吐出 `不 → ㄈㄨ`。
+    # 所以離線逐字固化成表，兩邊讀同一份 → 前後端不一致不是「要修到 0」，是不可能存在。
+    #
+    # ⚠️ 下面那條 `_build_zhuyin_map` 是 fallback，只服務「表裡沒有的文字」——
+    # 老師臨時貼的段落、還沒產表的課、以及不送 lesson_uid 的舊版前端。
+    # 它就是這次要取代的那套選擇器，**不要再往它身上加能力**（那正是 #3202/#3204/#3215
+    # 三張票疊出四層的來源）。要改讀音請改表。
+    zhuyin_map = (
+        zhuyin_for_text(payload.lesson_uid, payload.target_text)
+        if payload.lesson_uid
+        else None
+    )
+    if zhuyin_map is None:
+        zhuyin_map = _build_zhuyin_map(payload.target_text)
     target_pos = 0  # track position through non-extra tokens
     diff_tokens: list[DiffToken] = []
     for t in result["diff_tokens"]:
