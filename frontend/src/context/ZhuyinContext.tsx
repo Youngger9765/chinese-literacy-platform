@@ -40,6 +40,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { PolyphonicProcessor, buildZhuyinString } from '../components/zhuyin/polyphonicProcessor';
 import type { ProcessedChar } from '../components/zhuyin/bopomoConstants';
 import { API_BASE } from '../services/apiConfig';
+import { AuthContext } from '../contexts/AuthContext';
 import { DIFFICULT_SPAN_START, DIFFICULT_SPAN_END } from '../components/zhuyin/bopomoConstants';
 
 export type ZhuyinMode = 'none' | 'difficult' | 'all';
@@ -201,6 +202,53 @@ export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     return () => document.removeEventListener('keydown', onKeyDown);
   }, [toggleZhuyin]);
 
+  // ── #3224 難字 = 這個孩子唸錯過的字，不是本課生詞拆成的單字 ────────────
+  //
+  // 家長實測（2026-09-16）：三段鷹架的第二段要**收斂到孩子的卡點**，而原本的難字
+  // 集合是 `buildDifficultCharSet(story.vocabulary)` —— 取本課生詞拆成單字。於是
+  //
+  //   「人」來自「寒氣逼人」·「水」「石」來自「滴水穿石」→ 早就會了卻每次都標
+  //   「臼」「匪」「筋」不在生詞清單裡              → 一個都不標
+  //
+  // 它不是判錯難度，是**沒有在判難度**：生詞是課程的屬性，難字是讀者的屬性。
+  //
+  // 平台已經在收正確的那份資料（`character_errors`，每次朗讀落地一次），所以這是
+  // 接線不是建表。門檻用 `min_errors=1` —— 她才剛唸完，錯一次就是真的卡點
+  // （端點的全域預設是 2，那對只唸過幾次的孩子會幾乎是空的）。
+  //
+  // ⚠️ 用 `useContext(AuthContext)` 而不是 `useAuth()`：後者沒有 Provider 會 throw，
+  //    而有 12 個測試檔 render 真的 ZhuyinProvider 卻沒包 auth。沒登入就是 null，
+  //    自然退回生詞清單。
+  const auth = useContext(AuthContext);
+  const [errorChars, setErrorChars] = useState<Set<string>>(() => new Set());
+  const studentId = auth?.user?.id;
+  const authToken = auth?.token;
+  useEffect(() => {
+    if (!authToken || studentId === undefined) return;
+    let alive = true;
+    void (async () => {
+      try {
+        const res = await fetch(
+          `${API_BASE}/api/learning/students/${studentId}/error-patterns?min_errors=1`,
+          { headers: { Authorization: `Bearer ${authToken}` } },
+        );
+        if (!res.ok) return; // fail-open：拿不到就退回生詞，不要整段不標
+        const data = await res.json();
+        if (!alive) return;
+        const s = new Set<string>();
+        for (const p of data.patterns ?? []) {
+          if (typeof p?.character === 'string' && p.character.trim() && !p.is_corrected) {
+            s.add(p.character);
+          }
+        }
+        setErrorChars(s);
+      } catch {
+        // fail-open，同上
+      }
+    })();
+    return () => { alive = false; };
+  }, [authToken, studentId]);
+
   // ── #3218 逐課注音對照表 ──────────────────────────────────────────────
   //
   // 注音是**課文的一部分**，不是執行期算出來的。離線用多來源產出（字型的合法讀音
@@ -321,7 +369,9 @@ export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       // polyphonic processor has full context across adjacent chars.
       //
       // Lessons with empty vocabulary fall back to null (same as 'none').
-      const difficultChars = buildDifficultCharSet(vocabWords);
+      // #3224：她唸錯過的字優先；沒有紀錄（第一次唸這課／新學生／沒登入）才退回生詞，
+      // 否則第二段鷹架會整片空白。
+      const difficultChars = errorChars.size > 0 ? errorChars : buildDifficultCharSet(vocabWords);
       if (difficultChars.size === 0) return null;
       try {
         return lines.map((line) => {
@@ -374,7 +424,7 @@ export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         return null;
       }
     },
-    [zhuyinReady, zhuyinMode, toProcessed]
+    [zhuyinReady, zhuyinMode, toProcessed, errorChars]
   );
 
   return (

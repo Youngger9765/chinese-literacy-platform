@@ -33,7 +33,16 @@ interface AuthContextValue {
   loginWithJunyi: (code: string) => Promise<{ isNewUser: boolean }>;
 }
 
-const AuthContext = createContext<AuthContextValue | null>(null);
+/**
+ * ⚠️ 直接讀這個 context 的唯一正當理由：**在沒有 `AuthProvider` 時要能安全退化**。
+ *
+ * `useAuth()` 沒有 Provider 會 throw，那對「有登入就加值、沒登入就照舊」的功能是錯的
+ * 工具 —— 例如 `ZhuyinProvider`（#3224 要拿學生的錯字當難字）：有 12 個測試檔
+ * render 真的 `ZhuyinProvider` 而沒有包 auth，用 `useAuth()` 會把它們全弄紅。
+ *
+ * 一般情況仍然用 `useAuth()`（它的 throw 是對的：那些地方沒登入就是 bug）。
+ */
+export const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function useAuth(): AuthContextValue {
   const ctx = useContext(AuthContext);
