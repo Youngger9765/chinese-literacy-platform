@@ -909,8 +909,11 @@ def get_lesson_zhuyin(lesson_uid: str):
     return {
         "lesson_uid": raw["lesson_uid"],
         "texts": [
+            # `ssz` = 一槽一個字元的緊湊字串（#3230）：'.' = 預設槽、'1'..'5' = ss01..ss05。
+            # 全庫 96.9% 的槽位是預設 —— 陣列版 53 MB，字串版 8.3 MB。
+            # 位置語意不變：第 i 個字元 == 第 i 個 **UTF-16 單位**，與前端 `text[i]` 一致。
             {"section": t["section"], "slug": t["slug"], "idx": t["idx"],
-             "text": t["text"], "ss": t["ss"]}
+             "text": t["text"], "n": t["n"], "ssz": t["ssz"]}
             for t in raw["texts"]
         ],
     }
