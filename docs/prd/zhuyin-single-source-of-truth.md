@@ -690,3 +690,137 @@ backend/data/lessons/<uid>/v*/zhuyin.json     ← 跟課文同一個資料夾，
 | `爭相報導` 仍是 ㄒㄧㄤˋ（語料 1 處） | 交叉比對抓到的，#3217 沒加 `爭*` |
 | L0001 那 44 個「要第三來源裁決」的位置 | 抽查三個（擁抱 ㄩㄥˇ、血脈賁張 ㄅㄣ、經年累月 ㄌㄟˇ）**前端全對**；其餘 41 個未逐一裁決 |
 | 全部 179 課的裁決佇列 | 只跑了 L0001 的 ①②交叉比對 |
+
+---
+
+# 7. 全鏈文字圖：原稿 DOCX → 抽取 → 服務 → 畫面（2026-09-16）
+
+> Young 2026-09-16：「你要把所有架構從抽取 pipeline 到前後端應用到架構都用文字圖畫出來」
+>
+> ⚠️ 這一節是**唯一**一份全鏈圖（§3.5 那張只畫注音的五條路，仍然有效，是這張的放大鏡）。
+> 要改就改這一節，不要在別處再畫一份。
+
+## 7.1 一張圖看完
+
+```
+  ① 原稿（private/，CI 沒有）
+     學習單 DOCX ── 一課一份，含 ☞ 標記、右緣累計字數欄、表格、插圖
+          │
+          │  backend/scripts/parse_docx_lessons_bulk.py     ← 多模態抽取（#2736 二修）
+          │  backend/scripts/pregenerate_structure_yaml.py
+          │  backend/scripts/assign_section_slugs.py        ← 給每個大題一個 slug
+          ▼
+  ② uid tree（⭐ 服務端真相，不是 manifest.yml）
+     backend/data/lessons/<uid>/v<n>/
+       ├─ lesson.yml            sections_present · catalog_slot
+       ├─ metadata.yml          級別/文體/策略
+       ├─ _manifest.yml         衍生檔：sections[] · dispatch · pdf_pages
+       ├─ full_text_annotate.<slug>.yml   ← 一 讀全文-做記號（課文段落住這）
+       ├─ key_reading.<slug>.yml          ← 二 念順順（重點朗讀段）
+       ├─ keypoints / spotlight / comprehension / vocab_* / resources …（九大題）
+       ├─ classical_text / modern_translation / self_challenge（文言文課）
+       ├─ assets/               圖
+       └─ zhuyin.json           ⭐ #3218 新增：逐字注音對照表（**不註冊成大題**）
+          │
+          │  ⛔ zhuyin.json 刻意不進 lesson_uid_loader.MODULES ——
+          │     進了會出現在 sections_present/dispatch，而內容忠實度門會拿
+          │     section 去對原稿 DOCX，**DOCX 沒有注音大題**
+          ▼
+  ③ 後端載入（全部 in-memory，無 DB）
+     lesson_uid_loader.load_all()   ← glob("*.*.yml") 要兩個點 + MODULES 白名單
+          │                            （所以看不到 zhuyin.json —— 刻意的）
+          ├→ lesson_indexes._uid_tree_lessons()   id = 20000 + int(uid[1:])
+          ├→ lesson_loader._ALL_LESSONS / _LESSONS_BY_ID / _BY_CODE / _BY_TITLE
+          └→ lesson_zhuyin.lesson_zhuyin_table(uid)   ← 懶載入，只有它讀 zhuyin.json
+          ▼
+  ④ 端點
+     GET /api/stories?page_size=300        列表（⚠️ 不是 limit，傳錯會靜默回 60）
+     GET /api/stories/{id}                 詳細（#3218 起帶 lesson_uid）
+     GET /api/lessons/{uid}/zhuyin         ⭐ 逐字槽位表（公開，不需登入）
+     POST /api/reading/evaluate            朗讀診斷（#3218 起收 lesson_uid）
+          ▼
+  ⑤ 前端
+     fetchStory(id) → apiDetailToStory()   ⚠️ **明確映射**，沒列到的欄位靜靜丟掉
+          │                                  （#3218 踩過：lesson_uid 沒映射 →
+          │                                   整條查表路徑死掉而畫面看不出異常）
+          ▼  story: Story { id, lessonUid, content[], keyReading, vocabulary … }
+     ZhuyinProvider（app root）
+          ├─ loadLessonZhuyin(uid) → GET /api/lessons/{uid}/zhuyin → setAnswers()
+          └─ toProcessed(text, line?, offset?)
+                 ├─ 表裡有 → 用存好的槽位
+                 └─ 表裡沒有 → PolyphonicProcessor.process()（fallback，只服務老師打的字）
+          ▼  ProcessedChar[] = {char, styleSet}[]   ⭐ 這是接縫
+     zhuyinStringBuilder → 把 ss01 轉成 U+E0101 接在字後面
+          ▼
+     difficultSpanRenderer → AnnotatedParagraph
+          ├─ #3022 難字範圍（DIFFICULT_SPAN_START/END，U+E01EA/EB）
+          └─ #3185 老師預標段落（PUA 選擇器剝除後才切 slice）
+          ▼
+     BpmfZihiSerif-Regular.ttf 畫出 ruby 注音
+          │
+          │  ⭐ 字型同時是**讀音真值**（z_<拼音><聲調> 元件名）與**渲染器**
+          ▼
+     學生看到的四個畫面
+       課文頁（讀全文-做記號）· 重點朗讀（念順順）· 逐段朗讀 · 閱讀理解
+```
+
+## 7.2 注音的三個消費端要的東西不一樣
+
+```
+                    ┌─ 課文頁 ruby      需要「字型槽位」（0000/ss01）→ IVS 變體渲染
+   逐字注音對照表 ──┼─ 朗讀診斷報告    需要「注音字串」（ㄒㄧㄤ）→ <rt> 純文字
+                    └─ TTS             ❌ **吃不到** —— 它要 <sub alias="賀采">喝采</sub>
+                                          （同音漢字。Azure 四種 alphabet 的
+                                           <phoneme> 全部 HTTP 400）
+```
+
+TTS 有自己的表（`backend/data/tts/taiwan_pronunciation.json` 198 筆 +
+`he_exceptions.json` 380 筆）。注音表只能**告知**它「哪些位置需要 alias」，不能共用欄位。
+
+## 7.3 產表的多來源（離線，一次性）
+
+```
+   ① 字型 BpmfZihiSerif-Regular.ttf
+        └→ extract_font_readings.build_reading_table()
+             每字 → {0000: 'xiang4', ss01: 'xiang1', …}   台灣讀音權威
+   ② 出貨的 polyphonicProcessor.ts
+        └→ frontend/scripts/zhuyinAnswers.ts（esbuild 打包，**跑它不移植**）
+             ⛔ 移植過一次（#3215）吐出 `不 → ㄈㄨ`
+   ③ _adjudicate_he()：jieba 斷詞 + 380 筆教育部例外   → 78 處
+   ④ lesson_corrections.json：人工修正，每筆附教育部來源 + sha 防呆 → 3 筆
+                    ↓ 固化
+     backend/data/lessons/<uid>/v*/zhuyin.json
+       { lesson_uid, _provenance{font_sha256_16, poyin_db_sha256_16, stats},
+         texts: [{ section, slug, idx, text, n,
+                   ss: ["0000","0000","ss02", …],          ← 逐字槽位（前端要這個）
+                   poly: [{i,c,ss,b}, …] }] }              ← 給人審（含注音）
+```
+
+## 7.4 十一道門守在哪
+
+```
+  ①→②  Gate 8  內容忠實度（對原稿 DOCX 驗，31,459 字串）
+        Gate 9  大題有沒有著落（1,523 個）
+        Gate 10 原稿涵蓋率棘輪（⚠️ CI 沒有 private/ → 只能本機跑）
+        Gate 6  原稿過期偵測
+  ②     Gate 5  聚光燈結構棘輪（179 課，none moved）
+        Gate 11 ⭐ 逐課注音表同步（#3218）——
+                有 esbuild → 重跑 oracle 逐字比
+                沒有（後端 CI）→ 驗 課文改了/字型換了/poyin_db 改了/表壞了
+  ②→③  Gate 1  registry 新鮮度 + pointer-rot
+        Gate 7  抽出來的模組學生走不走得到
+        Gate 4  QR manifest 對帳
+  ③→⑤  Gate 2  spec 契約（pytest specs/）
+        Gate 3  legacy_tests union
+  ⑤     前端 CI：eslint（no-use-before-define / rules-of-hooks）+ vitest render-smoke
+                + Playwright pageerror fixture
+```
+
+## 7.5 這條鏈上我這次踩到的四個坑（都是「看不出異常」型）
+
+| 坑 | 為什麼看不出來 |
+|---|---|
+| `apiDetailToStory` 沒映射 `lesson_uid` | 明確映射，沒列到的欄位靜靜丟掉 → 整條查表路徑死掉、畫面照樣有注音（走 fallback） |
+| `answersRef` 用 ref 不是 state | 表 fetch 回來不進 memo 的 dep 鏈 → 畫面永遠不重算，**第一個步驟停在 fallback、第二個步驟以後才用表** |
+| `ss` 欄位無人守 | `text[i]==c` 恆真（同一個 enumerate）→ 整串右移一格 729 條照樣全過，而 `ss` 正是前端渲染用的 |
+| 被取代的 TTS 播放照樣發佈狀態 | 共用的 `isTtsSpeaking` 是一個 boolean 服務所有 caller → 舊音檔遲到的 `.finally()` 讓新 walk 跳段；本機斷言通常贏得賽跑所以綠 |
