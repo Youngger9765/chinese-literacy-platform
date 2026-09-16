@@ -588,23 +588,23 @@ def check_without_oracle(uid: str, font_slots: dict) -> list[str]:
 
     # ④ 表自己的內部一致性
     for t in doc.get("texts") or []:
+        units = u16_chars(t.get("text") or "")
+        ss = unpack_slots(t.get("ssz") or "")
         # ⛔ 不可以寫成 `a != b != c` —— Python 的鏈式比較等於 `(a != b) and (b != c)`，
-        #    所以「ss 長度錯但 n == len(text)」時整句是 False，**這道門是空的**。
-        # ⛔ 不可以寫成 `a != b != c` —— 鏈式比較等於 `(a != b) and (b != c)`
+        #    所以「槽位長度錯但 n == len(text)」時整句是 False，**這道門是空的**。
         # ⛔ 長度一律用 UTF-16 單位（#3230）—— `len(text)` 是碼點，非 BMP 會差一格
-        if not (len(t.get("ss") or []) == t.get("n") == len(u16_chars(t.get("text") or ""))):
+        if not (len(ss) == t.get("n") == len(units)):
             errs.append(f"{uid} {t['section']} idx={t['idx']} 槽位/字數對不上")
-        for r in t.get("poly") or []:
-            i = r.get("i")
-            if not isinstance(i, int) or i >= t["n"] or t["text"][i] != r.get("c"):
-                errs.append(f"{uid} {t['section']} i={i} poly 指到錯的字")
+            continue
+        # 每一個破音字位置的槽位，都要是那個字在字型裡真的有的槽位
+        #（#3230 之後表不存注音了，所以這裡驗的是「槽位合法」而不是「注音對得上」——
+        #  注音由 `font_slot_readings.json` 推，那一份的同步由 main() 自己比對）
+        for i, ch in enumerate(units):
+            slots = font_slots.get(ch)
+            if not slots or len(slots) == 1:
                 continue
-            if t["ss"][i] != r.get("ss"):
-                errs.append(f"{uid} {t['section']} i={i} ss 與 poly 不同步")
-            slots = font_slots.get(r["c"]) or {}
-            raw = slots.get(r.get("ss") or DEFAULT_SLOT)
-            if raw is None or _to_bopomofo(raw) != r.get("b"):
-                errs.append(f"{uid} {t['section']} i={i}「{r['c']}」讀音 {r.get('b')} 對不上字型")
+            if ss[i] not in slots:
+                errs.append(f"{uid} {t['section']} i={i}「{ch}」的槽位 {ss[i]} 不在字型裡")
 
     # 修正表仍有效（slot ↔ expect_bopomofo ↔ 課文位置）
     for c in _load_corrections(uid):
@@ -615,8 +615,9 @@ def check_without_oracle(uid: str, font_slots: dict) -> list[str]:
             continue
         if hashlib.sha256(t["text"].encode()).hexdigest()[:12] != c.get("text_sha256_prefix"):
             errs.append(f"{uid} 修正過期：{c['section']} idx={c['idx']} 的課文變了")
-        elif t["ss"][c["i"]] != c["slot"]:
-            errs.append(f"{uid} 修正沒被套用：i={c['i']} 表是 {t['ss'][c['i']]} 但修正說 {c['slot']}")
+        elif unpack_slots(t.get("ssz") or "")[c["i"]] != c["slot"]:
+            got = unpack_slots(t.get("ssz") or "")[c["i"]]
+            errs.append(f"{uid} 修正沒被套用：i={c['i']} 表是 {got} 但修正說 {c['slot']}")
     return errs
 
 
