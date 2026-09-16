@@ -305,6 +305,35 @@ class GlobalRateLimitMiddleware:
             await self.app(scope, receive, send)
             return
 
+        # (#3227) CORS preflight never counts. The frontend and backend live on
+        # different origins in EVERY environment (two separate Cloud Run
+        # services), so the browser fires an OPTIONS preflight ahead of every
+        # request that carries an Authorization header. Counting those did two
+        # bad things and bought nothing:
+        #
+        #   1. It halved every real user's budget -- 300 reads/min became 150
+        #      actual requests, and a classroom behind one NAT shares that.
+        #   2. A 429 on the preflight carries no Access-Control-Allow-Origin
+        #      header, so the browser blocks the real request and reports it as
+        #      "blocked by CORS policy" with no status at all (-1/ERR_FAILED).
+        #      The app cannot tell it was rate-limited, so it cannot back off --
+        #      it just sees a network failure and, in our case, dumped the
+        #      student at the login screen holding a perfectly valid token.
+        #
+        # And it protects nothing: preflights are browser-generated. A script
+        # attacking us sends the real request directly and never emits one, so
+        # counting OPTIONS only ever penalised people using an actual browser.
+        # The real request is still counted, so the DoS ceiling is unchanged.
+        #
+        # Measured on staging over the 12 minutes of one E2E run (2026-09-16):
+        # peak read budget 310 > 300 -> limiter tripped; OPTIONS contributed 57
+        # of those and 4 of the 429s landed on preflights. Counting only
+        # GET/HEAD gives 253, which is UNDER the limit -- the preflights are the
+        # whole reason it tripped.
+        if scope.get("method", "").upper() == "OPTIONS":
+            await self.app(scope, receive, send)
+            return
+
         # Extract the real client IP (#2470 HIGH-1a): take the GCP-appended
         # second-from-right XFF entry, not the client-controlled leftmost one.
         headers_raw = dict(scope.get("headers", []))
@@ -312,7 +341,8 @@ class GlobalRateLimitMiddleware:
         client = scope.get("client")
         ip = real_ip_from_xff(forwarded_for, client[0] if client else None)
         method = scope.get("method", "GET").upper()
-        is_read = method in ("GET", "HEAD", "OPTIONS")
+        # OPTIONS is handled above (#3227) and never reaches here.
+        is_read = method in ("GET", "HEAD")
         limit = self.READ_LIMIT if is_read else self.WRITE_LIMIT
         key = f"global:ip:{ip}:{'read' if is_read else 'write'}"
 

@@ -736,3 +736,121 @@ class TestRealClientIpXFF:
         from app.auth.rate_limiter import real_ip_from_xff
         assert real_ip_from_xff("", "10.0.0.1") == "10.0.0.1"
         assert real_ip_from_xff("") == "unknown"
+
+
+# ===========================================================================
+# #3227 — CORS preflight must not consume the rate-limit budget
+# ===========================================================================
+
+
+class TestPreflightExemptFromRateLimit:
+    """OPTIONS preflight 不可以吃 read 額度。
+
+    前後端在每個環境都是**不同 origin**（frontend Cloud Run ↔ backend Cloud Run），
+    所以瀏覽器對每一個帶 Authorization 的請求都會先發一次 CORS preflight。
+    preflight 也算進 read 額度的話：
+
+      ① 每個真實使用者的有效額度直接砍半（300 變成 150 次真請求）
+      ② preflight 自己被 429 時，那個回應**沒有 CORS 標頭** → 瀏覽器直接把真請求
+         擋掉，並報成「blocked by CORS policy」、status 撈不到（-1 / ERR_FAILED）
+         → 前端根本看不出自己被限流了，只看到一個網路層失敗
+
+    而限流 preflight 擋不到任何攻擊者 —— preflight 是瀏覽器發的，
+    腳本攻擊直接送真請求、不會有 preflight。所以把它算進去是純粹的副作用：
+    只懲罰真的用瀏覽器的人。真請求仍然計數，防護沒有變弱。
+
+    2026-09-16 實測（staging，E2E 跑的那 12 分鐘）：
+        read 額度尖峰 310 > 300 → 觸發限流
+        其中 OPTIONS 貢獻 57 次；4 個 429 直接落在 preflight 上
+        只數 GET/HEAD 是 253，**低於額度** —— 所以少了 OPTIONS 這一項就解釋不通
+    """
+
+    def test_preflight_passes_through_when_read_budget_is_exhausted(self, client):
+        """⭐ 額度用光時，OPTIONS preflight 仍然要過（這條在修掉之前是紅的）。"""
+        from app.main import GlobalRateLimitMiddleware
+        general_rate_limiter.reset()
+
+        ip = "testclient"
+        for _ in range(GlobalRateLimitMiddleware.READ_LIMIT):
+            general_rate_limiter.check_with_info(
+                f"global:ip:{ip}:read",
+                GlobalRateLimitMiddleware.READ_LIMIT,
+                GlobalRateLimitMiddleware.WINDOW,
+            )
+
+        resp = client.options(
+            "/api/stories",
+            headers={
+                "Origin": "https://lingoleap-frontend-staging-958347263320.asia-east1.run.app",
+                "Access-Control-Request-Method": "GET",
+                "Access-Control-Request-Headers": "authorization",
+            },
+        )
+        assert resp.status_code != 429, (
+            "preflight 被限流了 → 瀏覽器會把真請求擋掉並報成 CORS error，"
+            "前端看不到 429、也無法重試"
+        )
+
+    def test_preflight_does_not_consume_budget(self, client):
+        """發一堆 preflight 不可以把後面的真 GET 擠掉。"""
+        from app.main import GlobalRateLimitMiddleware
+        general_rate_limiter.reset()
+
+        headers = {
+            "Origin": "https://lingoleap-frontend-staging-958347263320.asia-east1.run.app",
+            "Access-Control-Request-Method": "GET",
+            "Access-Control-Request-Headers": "authorization",
+        }
+        # 打滿一整個額度的 preflight
+        for _ in range(GlobalRateLimitMiddleware.READ_LIMIT + 5):
+            client.options("/api/stories", headers=headers)
+
+        # 真請求還要能過
+        resp = client.get("/api/stories")
+        assert resp.status_code != 429, "preflight 吃掉了真請求的額度"
+
+    def test_real_get_still_counted(self, client):
+        """⛔ 正向對照：真的 GET 仍然要被計數，防護沒有被這次改動關掉。"""
+        from app.main import GlobalRateLimitMiddleware
+        general_rate_limiter.reset()
+
+        ip = "testclient"
+        for _ in range(GlobalRateLimitMiddleware.READ_LIMIT):
+            general_rate_limiter.check_with_info(
+                f"global:ip:{ip}:read",
+                GlobalRateLimitMiddleware.READ_LIMIT,
+                GlobalRateLimitMiddleware.WINDOW,
+            )
+        assert client.get("/api/stories").status_code == 429
+
+    def test_write_still_counted(self, client):
+        """⛔ 正向對照：寫入額度也沒被放掉。"""
+        from app.main import GlobalRateLimitMiddleware
+        general_rate_limiter.reset()
+
+        ip = "testclient"
+        for _ in range(GlobalRateLimitMiddleware.WRITE_LIMIT):
+            general_rate_limiter.check_with_info(
+                f"global:ip:{ip}:write",
+                GlobalRateLimitMiddleware.WRITE_LIMIT,
+                GlobalRateLimitMiddleware.WINDOW,
+            )
+        resp = client.post("/api/auth/login", json={"email": "x@example.com", "password": "demo1234"})
+        assert resp.status_code == 429
+
+    def test_options_not_in_read_methods(self):
+        """OPTIONS 不該再出現在「被計數的 read method」那一行（防止有人加回去）。
+
+        ⚠️ 這條的第一版是空轉的：我寫 `src.split("is_read")[-1]`，而 `is_read`
+        在 __call__ 裡出現兩次（賦值 + 後面組 key 用），`[-1]` 拿到的是 key 那一行，
+        本來就不含 OPTIONS → 不管程式怎麼寫都會綠。改成掃「賦值那一行」本身。
+        """
+        import inspect
+        from app.main import GlobalRateLimitMiddleware
+        src = inspect.getsource(GlobalRateLimitMiddleware.__call__)
+        assign_lines = [ln for ln in src.splitlines() if "is_read" in ln and "=" in ln.split("is_read")[1][:3]]
+        assert assign_lines, "找不到 is_read 的賦值行 —— 這條測試已經量不到東西了，要修測試"
+        for ln in assign_lines:
+            assert "OPTIONS" not in ln, (
+                f"OPTIONS 又被算進 read 額度了：{ln.strip()} —— 見本類 docstring"
+            )
