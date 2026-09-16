@@ -2,6 +2,10 @@ import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests/e2e',
+  // #3242：開跑前等環境穩定、跑完再確認沒被換掉。
+  // E2E 打的是共用 staging，而部署由同一個 push 觸發 —— 兩者會賽跑。
+  globalSetup: './tests/e2e/globalSetup.ts',
+  globalTeardown: './tests/e2e/globalTeardown.ts',
   timeout: 60000,
   workers: 1,
   reporter: 'list',

@@ -54,6 +54,8 @@ spec_tests:
   # 它們現在各有兩條「接手的鎖必須存在」+「舊選擇器真的沒回來」的斷言。
   - backend/tests/test_zhuyin_map_alignment_3175.py
   - backend/tests/test_zhuyin_cross_surface_drift_3202.py
+  # #3238 「和」的詞界全庫鎖（jieba HMM 對繁體會把「和」黏進鄰詞）
+  - backend/tests/test_he_word_boundary_3238.py
 related_issues: []
 source_meetings: []
 last_reviewed: 2026-09-14

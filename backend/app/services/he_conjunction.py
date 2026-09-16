@@ -129,6 +129,44 @@ def _he_exception_spans(text: str) -> set[int]:
     return covered
 
 
+#: jieba 的字典是簡體導向的，對繁體會把「和」黏進鄰詞（#3238）。
+#: 這裡補上**左詞** —— 補左詞而不是補「和」的詞，因為問題是
+#: 「左邊那個詞被切斷，剩下的字跟『和』黏成另一個詞」：
+#:
+#:     溫暖|和|改變  →  jieba: 溫/暖和/改變   （暖和 是真詞，所以它贏）
+#:
+#: 加了 `溫暖` 之後 jieba 會切成 溫暖/和/改變，而 `天氣很暖和` 仍然切成 暖和 ——
+#: 實測兩者都對。⛔ 這張表只放**毫無爭議的常用左詞**；
+#: 它不是通解（jieba 的繁體問題是長尾），是把語料裡量到的碰撞逐一補掉。
+#:
+#: ⚠️ 加詞之前先實測「加了會不會把真詞拆壞」—— 印出加前加後的斷詞比較，
+#: 不要只看要修的那一句。
+_JIEBA_LEFT_WORDS = (
+    "溫暖",   # 溫暖|和|改變 ×6（L0035/L0059/L0083）—— jieba 原本給 溫/暖和
+)
+_jieba_primed = False
+
+
+def _prime_jieba(jieba_mod) -> None:
+    """把左詞灌進 jieba，只做一次。"""
+    global _jieba_primed
+    if _jieba_primed:
+        return
+    for w in _JIEBA_LEFT_WORDS:
+        try:
+            jieba_mod.add_word(w, freq=100000)
+        except Exception:  # pragma: no cover - 加詞失敗就維持原斷詞
+            logger.warning("jieba.add_word(%s) failed; leaving segmentation as-is", w)
+    # 「和」本身也灌一次（#3238）：它是單字功能詞，被黏進鄰詞就是 bug。
+    # 實測再修 12 處（大衛|和|歌利亞、農民|和|企業、新加坡|和|澳洲）、**0 處退步** ——
+    # 真的「和」詞靠第二道門（例外清單）擋，不靠斷詞。
+    try:
+        jieba_mod.add_word("和", freq=2_000_000)
+    except Exception:  # pragma: no cover
+        logger.warning("jieba.add_word(和) failed; leaving segmentation as-is")
+    _jieba_primed = True
+
+
 def _he_conjunction_positions(text: str) -> frozenset[int]:
     """Indices of every 和 that should be read ㄏㄢˋ.
 
@@ -161,10 +199,27 @@ def _he_conjunction_positions(text: str) -> frozenset[int]:
         logger.warning("jieba unavailable; leaving 和 uncorrected")
         return frozenset()
 
+    _prime_jieba(jieba)
     excluded = _he_exception_spans(text)
     positions = []
     cursor = 0
-    for token in jieba.cut(text):
+    # ⛔ `HMM=False`（#3238）。jieba 的 HMM 會從沒見過的字串**自己造新詞**，
+    #    而它是簡體語料訓練的 —— 對繁體課文它把「和」黏進鄰詞：
+    #
+    #        象鼻/蟲和黃面/蜂        臺/灣和/周邊        佳恩和子/皓
+    #        像/銅和鐵/做/的/牆      狗狗/和貓/咪
+    #
+    #    這裡問的只有一件很窄的事：**「和」是不是一個獨立的 token**。
+    #    對這個問題，HMM 造出來的新詞是純噪音。關掉之後上面全部切開，
+    #    而真的「和」詞仍然成立（`和尚`／`和解`／`和平`／`柔和`／`祥和`／`附和`
+    #    在字典裡，字典比對不受 HMM 影響；`隨和`／`溫和`／`和好`／`緩和`／`和諧`
+    #    會被切開，但那是第二道門（例外清單）本來就在擋的 —— 兩道門的分工沒變）。
+    #
+    #    ⚠️ `HMM=False` 會讓其他詞過度切碎（臺/灣、周/邊）。**這裡不在乎** ——
+    #    只用它回答「和是否獨立」，沒有別的地方吃這個斷詞結果。
+    #
+    #    實測（全庫 2,856 個「和」）：修正 **82 處**、**0 處退步**。
+    for token in jieba.cut(text, HMM=False):
         if (
             token == "和"
             and cursor not in excluded
