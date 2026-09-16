@@ -29,6 +29,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useStudentRecommendations } from './hooks/useStudentRecommendations';
+import { useStudentAnswers } from './hooks/useStudentAnswers';
 import {
   getClassroomLiveMonitor,
   requestPreviewToken,
@@ -71,6 +72,12 @@ const LiveMonitorTab: React.FC<LiveMonitorTabProps> = ({ classroomId }) => {
     loadingStudentId: previewingStudentId,
     error: previewError,
   } = useStudentRecommendations();
+  // #3220 第三期：上課當下最想知道的是「他寫了什麼」，不是「他接下來該練什麼」
+  const {
+    openAnswers,
+    loadingStudentId: answersLoadingId,
+    error: answersError,
+  } = useStudentAnswers(token);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -163,9 +170,9 @@ const LiveMonitorTab: React.FC<LiveMonitorTabProps> = ({ classroomId }) => {
         ，學生若正在做其他類型的練習，這裡會顯示「尚無資料」而非「正常」。
       </div>
 
-      {previewError && (
+      {(previewError || answersError) && (
         <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-3 py-2">
-          {previewError}
+          {previewError || answersError}
         </div>
       )}
 
@@ -218,6 +225,15 @@ const LiveMonitorTab: React.FC<LiveMonitorTabProps> = ({ classroomId }) => {
                   <p className="mt-1 text-xs text-gray-400">此練習類型不記錄答題資料，或尚未開始作答</p>
                 )}
               </div>
+
+              <button
+                onClick={() => openAnswers(s.student_id)}
+                disabled={answersLoadingId === s.student_id}
+                className="shrink-0 inline-flex items-center justify-center px-2.5 py-1 rounded-md text-xs font-medium text-white bg-accent hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                title="看這位學生這一場實際寫了什麼"
+              >
+                {answersLoadingId === s.student_id ? '載入中…' : '看作答'}
+              </button>
 
               <button
                 onClick={() => openRecommendations(s)}
