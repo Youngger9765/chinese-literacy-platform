@@ -220,6 +220,36 @@ describe('useFullTextTtsQueue', () => {
     expect(result.current.currentParagraphIdx).toBe(0);
   });
 
+  it('⭐ 舊 walk 的殘留 onended 在新 walk **已經開始發聲之後**才到，也不准跳段', async () => {
+    // 這條跟上面那條的差別是**順序被釘死**：上面那條在新 walk 還沒建立起自己的
+    // 音檔時就放舊 callback，所以斷言通常贏得賽跑而看起來綠；CI 較慢就輸。
+    //
+    // 2026-09-16 實測：把守衛（`useTtsPlayback` 的 `speakSeqRef`）拿掉，
+    // `currentParagraphIdx` 會從 0 跳到 **1** —— 學生按 播放→停止→播放 之後
+    // 第 0 段被舊音檔的殘留 callback 跳掉。那不是測試 flaky，是真的會發生。
+    const { result } = renderHook(() => useFullTextTtsQueue({ paragraphs: PARAGRAPHS, lessonId: LESSON_ID }));
+    act(() => { result.current.play(); });
+    await waitFor(() => expect(synthesizeCalls()).toEqual([CANON_P0]));
+    act(() => { audioInstances[0].onended?.(); });
+    await waitFor(() => expect(synthesizeCalls()).toEqual([CANON_P0, CANON_P1]));
+
+    act(() => { result.current.stop(); });
+    act(() => { result.current.play(); });
+    await waitFor(() => expect(result.current.currentParagraphIdx).toBe(0));
+
+    // ⛔ 等新 walk 真的建立起自己的音檔 —— 這一步是這條測試存在的理由，
+    //    少了它就退化成上面那條的賽跑。
+    await waitFor(() => expect(audioInstances.length).toBeGreaterThan(2));
+    const before = audioInstances.length;
+
+    act(() => { audioInstances[1].onended?.(); });
+    await new Promise((r) => setTimeout(r, 20));
+
+    expect(result.current.currentParagraphIdx).toBe(0);
+    // 也不准偷偷去合成下一段（跳段的另一個症狀）
+    expect(audioInstances.length).toBe(before);
+  });
+
   it('pause() does not advance the walk — isTtsSpeaking stays true while paused, so the finished-transition never fires', async () => {
     const { result } = renderHook(() => useFullTextTtsQueue({ paragraphs: PARAGRAPHS, lessonId: LESSON_ID }));
     act(() => { result.current.play(); });
