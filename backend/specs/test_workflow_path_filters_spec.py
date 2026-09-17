@@ -203,3 +203,40 @@ def test_the_drift_gate_really_runs_in_that_workflow():
     runci = (WF.parents[1] / "specs" / "run-ci.sh").read_text(encoding="utf-8")
     for script in ("generate_lesson_zhuyin.py --check", "generate_char_difficulty.py --check"):
         assert script in runci, f"run-ci.sh 裡沒有 {script} —— 漂移門不在了"
+
+
+#: 後端的記憶體上限不可以掉回 512Mi（2026-09-18 PM 掃描）。
+#:
+#: 在 512Mi 下**近 30 天 OOM 三次**（08-29 / 09-02 / 09-16，三個不同 revision），
+#: 每次都伴隨 `The request was aborted because there was no available instance`
+#: —— 使用者真的看到失敗：
+#:
+#:     2026-09-16T12:18  Memory limit of 512 MiB exceeded with 514 MiB used
+#:     2026-09-16T12:19  9× no available instance
+#:
+#: 514/512 = 餘裕本來就是負的。這個後端要放注音表（8.3 MB）＋ jieba 字典＋
+#: 字型讀音表＋課文 YAML 的 lru_cache。
+#:
+#: ⚠️ 為什麼要一條測試而不只是註解：這是 workflow 裡的一個數字，
+#: 「為了省錢調回去」是很自然的一個編輯，而它的後果（OOM → 拒絕服務）
+#: 要等到下一次尖峰才會出現，而且 log 裡長得像基礎設施問題不像我們改壞的。
+_BACKEND_MEMORY_WORKFLOWS = ("deploy.yml", "staging-deploy.yml")
+
+
+@pytest.mark.parametrize("name", _BACKEND_MEMORY_WORKFLOWS)
+def test_backend_memory_is_at_least_1gi(name: str):
+    raw = (WF / name).read_text(encoding="utf-8")
+    # backend 的 deploy 區塊是第一個 `gcloud run deploy`
+    blocks = raw.split("gcloud run deploy")
+    assert len(blocks) >= 3, f"{name} 找不到兩個 deploy 區塊 —— 這條在對空集合斷言"
+    backend_block = blocks[1]
+    assert "BACKEND_SERVICE" in backend_block, f"{name} 的第一個 deploy 不是 backend，這條的假設壞了"
+    import re as _re
+    m = _re.search(r"--memory=(\d+)(Mi|Gi)", backend_block)
+    assert m, f"{name} 的 backend deploy 沒有 --memory"
+    val, unit = int(m.group(1)), m.group(2)
+    mib = val * (1024 if unit == "Gi" else 1)
+    assert mib >= 1024, (
+        f"{name} 的 backend 記憶體是 {val}{unit} —— 512Mi 下近 30 天 OOM 三次，"
+        "每次都拒絕過使用者的請求。⛔ 不要為了省錢調回去（差額每月量級是美分）"
+    )
