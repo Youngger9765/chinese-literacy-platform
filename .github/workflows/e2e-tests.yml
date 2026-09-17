@@ -72,14 +72,32 @@ jobs:
         working-directory: frontend
         run: npx playwright install chromium --with-deps
 
-      # These specs are STAGING integration smoke tests, not per-PR-isolated tests:
-      # full-qa.spec.ts + demo-path.spec.ts hardcode STAGING_BACKEND for every API
-      # call and drive UI quick-login through the seeded demo accounts (王管理員 /
-      # 小明 / *@test.com). A per-PR preview has a FRESH, unseeded DB, so those
-      # quick-login accounts don't exist there → UI waitForURL times out → cascade
-      # failures (this was the #2062 revival blocker). The preview is still built by
-      # preview-deploy.yml for manual human review; this automated regression gate
-      # targets staging, the stable seeded env the specs are written against.
+      # ⚠️ 這裡原本寫著「這幾支 spec 只能打 staging」，理由有兩條，**兩條都已經不成立**
+      #    （#3242 逐條查證，別再照舊結論走）：
+      #
+      #    ① 「full-qa / demo-path 把 STAGING_BACKEND 寫死」→ 已經沒有了。
+      #       兩支都改讀 `E2E_BACKEND_URL`（預設仍是 staging，行為不變），
+      #       跟 `multiTextJourney.spec.ts` 用的是同一個變數。
+      #       `e2eBackendEnv3242.test.ts` 盯著不要退回去。
+      #
+      #    ② 「per-PR preview 的 DB 是空的、demo 帳號不存在」→ 不是這樣。
+      #       preview 後端吃的是**共用**的 `secrets.PREVIEW_DATABASE_URL`
+      #       （沒有為每個 PR 另建 DB），而 `preview-deploy.yml` 只設
+      #       `ENVIRONMENT=preview`、**沒有**設 `ENABLE_TEST_SEED=false`
+      #       （`seed.py` 預設 true，只有 production 會跳過 seeding）。
+      #       對 PR #3223 的 preview 後端實測（帶負向對照）：
+      #           POST /api/auth/login  seed 的學生帳號  → HTTP 200 + access_token
+      #           POST /api/auth/login  不存在的帳號     → HTTP 401
+      #       `preview-deploy.yml` 那側 2026-08-28 就寫過同一件事了，是這裡沒跟上。
+      #
+      # ⛔ 但**光是把網址換成 preview 並不會解掉這張票的競態**：這支 workflow 跟
+      #    `preview-deploy.yml` 是兩個獨立 workflow，由同一個 PR 事件觸發 ——
+      #    改打 preview 只是換一個環境賽跑。race-free 的作法是讓 e2e 跑在
+      #    **部署步驟之後的同一個 job 裡**（就是 preview-deploy.yml 裡
+      #    multiTextJourney 現在的位置）。那個搬遷還沒做，剩下的討論在 #3242：
+      #    要權衡的是 PR 的等待時間（那邊刻意只跑一課，理由寫在該檔）。
+      #
+      # 在搬遷之前，擋競態的是 `globalSetup.ts` 的環境穩定檢查（#3244）。
       - name: Wait for staging to be healthy
         id: wait
         run: |
