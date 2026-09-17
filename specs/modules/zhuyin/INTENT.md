@@ -16,6 +16,9 @@ owns_code:
   # #3247 難字模式在「孩子還沒有錯字紀錄」時標哪些字。它**不決定任何讀音** ——
   # 決定的是「哪些字要出現注音」，所以屬於注音這個模組的顯示面而不是讀音面。
   - backend/scripts/generate_char_difficulty.py
+  # #3257 把難字的判定法講給使用者聽。判定本身在 ZhuyinContext 的
+  # `resolveDifficultSource`（唯一實作），這支只負責描述 —— 屬於顯示面。
+  - frontend/src/components/zhuyin/DifficultRuleExplainer.tsx
   - frontend/src/components/zhuyin/polyphonicProcessor.ts
   - frontend/src/components/zhuyin/polyphonicPatternMatcher.ts
   - frontend/src/components/zhuyin/styleSetMapper.ts
