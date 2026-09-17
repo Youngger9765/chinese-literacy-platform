@@ -84,6 +84,47 @@ jobs:
               # 教材被刪或改名時要讓後端套件跑到，否則白名單會變成永不命中的空話。
               - 'frontend/public/intern-training/courses/tier1-git-basics.md'
 
+              # ─── 2026-09-18 的系統性掃描：上面那張逐檔清單本身就是病 ───
+              # 這支 workflow 跑的是**整個** `backend/tests`，而那套測試讀的
+              # 東西有整整幾個頂層目錄不在這裡。用全庫掃描（AST 取非 docstring
+              # 的字串常數）比對，46 個路徑改了不會觸發任何跑得到它的 workflow。
+              # 逐個補「上次出事的那一格」補了五輪都還在漏，所以這一輪改成
+              # 用 glob 覆蓋整個依賴面，並由
+              # `test_every_gate_input_is_in_its_filter` 守著不再漂移。
+              #
+              # `scripts/**`：25 支根目錄腳本被後端測試用
+              # `spec_from_file_location` 載進來直接執行（`build_lesson_schema.py`
+              # 就是抽取器本體）——改它們原本一道門都不會跑。
+              - 'scripts/**'
+              # `specs/**`：`specs/modules/schemas`、`section-pages.yml`、
+              # `registry.yaml`、`run-ci.sh` 都被後端測試讀。⚠️ spec-check 雖然
+              # 盯 `specs/**`，但它跑的是 `pytest specs/`（= backend/specs），
+              # **不跑 backend/tests** —— 盯得到不等於跑得到。
+              - 'specs/**'
+              # `qa/**`：棘輪基準（`qa/yml-shape/baseline.json`、
+              # `qa/reconcile/baseline.json`）。把基準調鬆是最省力的作弊法，
+              # 而它原本不觸發任何門。
+              - 'qa/**'
+              # `.github/workflows/**`：後端測試對 workflow 本身斷言 ——
+              # `test_pdf_manifest_gate_2857` 驗這支裝了 poppler-utils，
+              # `test_cross_language_paths_are_in_the_ci_filter` 驗這張 filter
+              # 本身。🔴 原本**改這張 filter 不會跑守著它的那條鎖**。
+              - '.github/workflows/**'
+              # `frontend/src/**`：`test_module_reaches_the_student_2843` 走
+              # 整個 `frontend/src` 找每個模組的 renderer（不是讀某幾個檔）。
+              # 上面那幾行逐檔列舉是這個 glob 的子集，留著是因為每一行的註解
+              # 都記著一次真實事故。
+              - 'frontend/src/**'
+              # 這四份文件在 `test_zhuyin_module_owns_its_code_3203` 的清單裡，
+              # 而那支會斷言清單上的檔還在 —— 改名或刪掉會弄紅後端套件。
+              # ⛔ 不用 `docs/**`：會議記錄一改就跑整套後端測試，太吵。
+              - 'docs/audit/zhuyin-facts-2026-09-12.md'
+              - 'docs/prd/zhuyin-single-source-of-truth.md'
+              - 'docs/qa/zhuyin-3202-changed-readings.md'
+              - 'docs/research/zhuyin-teaching-strategies-special-education.md'
+              # 教材鏡像 —— 白名單的另一半（SOT 那份已在上面）
+              - 'docs/intern-training/courses/tier1-git-basics.md'
+
   pytest:
     needs: detect-changes
     if: needs.detect-changes.outputs.relevant == 'true'

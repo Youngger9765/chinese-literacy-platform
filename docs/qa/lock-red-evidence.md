@@ -68,6 +68,12 @@
   ⭐ **這兩支存在的理由是：既有的 `polyphonicProcessor.test.ts` 44 條全綠，而它鎖住的是一個錯的信念。** 那些斷言停在 styleSet 字串（`expect(...).toBe('ss01')`），註解寫「ss01 = xíng二聲」，而出貨字型說 `行` 的 ss01 是 **hang2**；它還餵自己捏的 fixture（`d: 1` 是手寫進去的），所以連真的 `poyin_db.json` 對不對都沒在驗。新的斷言改成打在**字型會畫出來的讀音**上，真值由 `backend/scripts/extract_font_readings.py` 從 TTF 抽出來。那九條錯的已從舊檔移除。
   ⚠️ **`frontend/public/**` 原本兩支 workflow 都沒涵蓋** —— 只改 `poyin_db.json` 的 PR **不會跑任何測試**（pytest 只認 `backend/**`，frontend-checks 只認 `frontend/src/**`）。鎖建了沒插電的老問題，本 PR 一併補上；後端那三個跨語言路徑則是被既有的 `test_cross_language_paths_are_in_the_ci_filter` 當場咬紅才補進去的
 
+- `test_workflow_path_filters_spec.py::test_every_gate_input_is_in_its_filter` ＋ `frontend/src/__tests__/ciFilterCoversVitestInputs.test.ts`（2026-09-18 系統性掃描）— 這兩支守的是「門的**輸入**在不在它自己的 paths-filter 上」。
+  **紅的證據是對修之前的 filter 跑最終版測試**（`git show HEAD:.github/workflows/{pytest,frontend-checks,spec-check}.yml` 放回工作樹）→ Python 那支 `pytest.yml` 那一格點名 **45 個路徑**（`scripts/build_lesson_schema.py`、`qa/yml-shape/baseline.json`、`.github/workflows/pytest.yml`、四份注音文件…）、`spec-check.yml` 那一格點名 7 個；vitest 那支點名 `frontend/index.html` 與 `backend/data/lessons`。還原 → 37 passed ＋ 3 passed。
+  mutation：兩邊的 `covered()` / `_covered()` 各改成一律回 true（改前先 `cp` 備份、`diff` 確認**真的改到檔案**）→ **只有負向對照那一條紅**（`test_the_matcher_can_actually_say_no` / 「比對器分得開有盯跟沒盯」），主斷言照樣綠 —— 那正是負向對照存在的理由：少了它，一個什麼都不比的比對器會讓整支變成劇場。
+  ⚠️ **第一版當場被自己的正向對照咬**：vitest 那支的 `resolve(__dirname, '../../..')` 解成 repo root、`relative()` 回空字串，而 repo root 當然存在 → 門對著一個空字串叫。上一次嘗試寫通用版就是死在這種垃圾路徑上（見 `test_frontend_test_dir_is_in_the_frontend_checks_filter` 的註解：`frontend/..`、`frontend/../../../backend/...`），而會亂叫的門會被下一個人關掉。這一版改成 AST 取**非 docstring** 的字串常數 ＋ 只留真的存在於 repo 的路徑。
+  ⭐ 起因：同一個病在這個 repo 犯到第五次（#2925 / #3242 / #3251 / #3253），每次修法都是「補上次出事的那一格」。這輪改成全庫掃描，一次找出 **46 個**沒插電的路徑，其中最貴的三類是：`scripts/**`（25 支根目錄腳本被後端測試 `spec_from_file_location` 載進來直接跑，`build_lesson_schema.py` 就是抽取器本體）、`qa/**`（棘輪基準 —— 把基準調鬆是最省力的作弊法，而它不觸發任何門）、`.github/workflows/**`（🔴 **改 pytest.yml 的 filter 不會跑守著那張 filter 的鎖**）。
+
 ## grandfathered（既有債，未逐支驗過）
 
 2026-08-28 一次插電 104 支，其中 **95 支沒有逐支驗過它會咬**。

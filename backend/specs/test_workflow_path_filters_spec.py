@@ -240,3 +240,173 @@ def test_backend_memory_is_at_least_1gi(name: str):
         f"{name} 的 backend 記憶體是 {val}{unit} —— 512Mi 下近 30 天 OOM 三次，"
         "每次都拒絕過使用者的請求。⛔ 不要為了省錢調回去（差額每月量級是美分）"
     )
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 「門的輸入必須在它自己的 filter 上」—— 通用版（2026-09-18 系統性掃描）
+#
+# 上面每一組鎖都是「補上次出事的那一格」：#2925 補三支、#3242 補
+# `frontend/tests/**`、#3251/#3253 補注音門的四個輸入。補了五輪，而 2026-09-18
+# 用全庫掃描一次找出 **46 個**同型的洞 —— 包括
+#
+#   · `scripts/**`  25 支根目錄腳本被後端測試 `spec_from_file_location` 載進來
+#                   直接跑（`build_lesson_schema.py` 就是抽取器本體）
+#   · `qa/**`       棘輪基準檔。把基準調鬆是最省力的作弊法，而它不觸發任何門
+#   · `.github/workflows/**`  🔴 改 pytest.yml 的 filter **不會跑守著它的那條鎖**
+#   · `frontend/index.html`   拔掉 CSP meta tag 不會跑 `csp-meta-tag.test.ts`
+#
+# 所以這一輪不再補格子，改成讓「漏一格」這件事本身會紅。
+#
+# ⚠️ 上一次嘗試寫通用版失敗過（見 `test_frontend_test_dir_is_in_the_filter`
+# 的註解）：它吐 `frontend/..`、`frontend/../../../backend/data/lessons` 這種
+# 垃圾路徑，因為相對路徑沒解析對，而會亂叫的門會被下一個人關掉。
+# 這一版的兩個差別：
+#   ① 用 **AST** 取字串常數，並排除 docstring —— 註解與說明裡提到的路徑不算依賴
+#   ② 只留 **真的存在於 repo** 的路徑，且一律正規化成 repo 相對路徑
+# ─────────────────────────────────────────────────────────────────────────────
+
+import ast
+import fnmatch
+import re
+
+REPO = WF.parents[1]
+
+#: {workflow: 它實際跑的測試目錄} —— 只列「跑整個目錄」的門。
+#: pytest.yml 跑 `pytest tests`、spec-check.yml 跑 `pytest specs/`（在 backend 裡）。
+#: ⚠️ spec-check 盯 `specs/**` 不代表它跑 `backend/tests` —— 盯得到 ≠ 跑得到，
+#: 那正是這 46 個洞裡最多的一類。
+_GATE_TEST_DIRS = {
+    "pytest.yml": "backend/tests",
+    "spec-check.yml": "backend/specs",
+}
+
+
+def _filter_globs(workflow: str) -> list[str]:
+    doc = yaml.safe_load((WF / workflow).read_text(encoding="utf-8"))
+    dc = (doc.get("jobs") or {})["detect-changes"]
+    step = next(s for s in dc["steps"] if "paths-filter" in str(s.get("uses", "")))
+    return [l.strip()[2:].strip().strip("'\"")
+            for l in step["with"]["filters"].split("\n")
+            if l.strip().startswith("- ")]
+
+
+def _covered(path: str, globs: list[str]) -> bool:
+    """dorny/paths-filter 的比對語意（picomatch）。
+
+    被比的是**變更檔**的路徑，所以 `a/**` 命中 `a` 底下任意深度的檔案。
+    測試引用的若是一個**目錄**（例如走訪整個 `frontend/src`），那麼只要有
+    `frontend/src/**` 這種 glob 就算覆蓋 —— 目錄裡任何檔案變更都會觸發。
+    """
+    for g in globs:
+        if g == path:
+            return True
+        if g.endswith("/**"):
+            base = g[:-3]
+            if path == base or path.startswith(base + "/"):
+                return True
+        if fnmatch.fnmatch(path, g):
+            return True
+    return False
+
+
+_PATH_SHAPE = re.compile(r"^(?:[A-Za-z0-9_.\-]+/)+[A-Za-z0-9_.\-]+$")
+_PATH_CHAIN = re.compile(r'"([A-Za-z0-9_.\-]+)"((?:\s*/\s*"[A-Za-z0-9_.\-]+")+)')
+
+
+def _code_strings(path):
+    """非 docstring 的字串常數。註解天生不在 AST 裡，所以一起被排掉。"""
+    try:
+        tree = ast.parse(path.read_text(encoding="utf-8", errors="ignore"))
+    except SyntaxError:
+        return []
+    docstrings = set()
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.Module, ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            body = getattr(node, "body", None)
+            if (body and isinstance(body[0], ast.Expr)
+                    and isinstance(body[0].value, ast.Constant)
+                    and isinstance(body[0].value.value, str)):
+                docstrings.add(id(body[0].value))
+    return [n.value for n in ast.walk(tree)
+            if isinstance(n, ast.Constant) and isinstance(n.value, str)
+            and id(n) not in docstrings]
+
+
+def _referenced_repo_paths(path):
+    """這個檔案在**程式碼裡**用到、且真的存在於 repo 的路徑。"""
+    found = set()
+    for s in _code_strings(path):
+        s = s.strip()
+        if _PATH_SHAPE.match(s) and (REPO / s).exists():
+            found.add(s)
+    # `REPO / "backend" / "data" / "x.yml"` 這種 Path 串接（註解行先剔掉）
+    src = "\n".join(l for l in path.read_text(encoding="utf-8", errors="ignore").split("\n")
+                    if not l.strip().startswith("#"))
+    for m in _PATH_CHAIN.finditer(src):
+        joined = "/".join([m.group(1)] + re.findall(r'"([^"]+)"', m.group(2)))
+        if (REPO / joined).exists():
+            found.add(joined)
+    return found
+
+
+def _inputs_of(workflow: str) -> dict[str, set[str]]:
+    """{被引用的路徑: {引用它的測試檔}}"""
+    out: dict[str, set[str]] = {}
+    for f in sorted((REPO / _GATE_TEST_DIRS[workflow]).rglob("*.py")):
+        rel = str(f.relative_to(REPO))
+        for p in _referenced_repo_paths(f):
+            out.setdefault(p, set()).add(rel)
+    return out
+
+
+@pytest.mark.parametrize("workflow", sorted(_GATE_TEST_DIRS))
+def test_every_gate_input_is_in_its_filter(workflow: str):
+    """這道門跑的測試讀到的每個 repo 路徑，都必須在它自己的 paths-filter 上。
+
+    不在＝改那個檔的 PR 不會觸發這道門，而**檢查清單上不會出現那一列**，
+    看起來就是全綠。紅燈會被看到，不出現的那一列不會。
+    """
+    globs = _filter_globs(workflow)
+    inputs = _inputs_of(workflow)
+
+    # 正向對照 ①：掃不到東西＝掃法壞了，不是「沒有依賴」
+    assert len(inputs) >= 20, f"{workflow} 只掃到 {len(inputs)} 個路徑 —— 掃法壞了"
+    # 正向對照 ②：自己的測試目錄一定要在 filter 上，否則整支掃描在對空集合斷言
+    assert _covered(_GATE_TEST_DIRS[workflow] + "/x.py", globs), \
+        f"{workflow} 連自己跑的測試目錄都沒盯 —— 這條在對空集合斷言"
+
+    missing = {p: sorted(t)[:3] for p, t in sorted(inputs.items()) if not _covered(p, globs)}
+    assert not missing, (
+        f"{workflow} 跑的測試讀這些檔，但它的 paths-filter 沒盯：\n"
+        + "\n".join(f"  {p}   ← {t}" for p, t in missing.items())
+        + "\n\n改它們的 PR 不會觸發這道門 ⇒ 門在，那條路沒插電。"
+          "\n補進 filter（同類的整個目錄就用 glob，不要只補出事的那一格）。"
+    )
+
+
+def test_the_matcher_can_actually_say_no():
+    """負向對照：比對器要分得開「有盯」跟「沒盯」。
+
+    ⛔ 少了這條，把 `_covered` 寫成 `return True` 上面兩條都會綠 ——
+    而那正是「測試存在但什麼都沒測」的樣子。
+    """
+    globs = _filter_globs("pytest.yml")
+    # 這兩個真的在 filter 上
+    assert _covered("backend/app/main.py", globs)
+    assert _covered("scripts/build_lesson_schema.py", globs)
+    # 這兩個刻意不在（會議記錄與根目錄說明檔，不是任何後端測試的輸入）
+    assert not _covered("docs/meetings/2026-09-11-agenda.md", globs)
+    assert not _covered("README.md", globs)
+
+
+def test_the_workflow_that_runs_this_lock_watches_the_tests_it_reads():
+    """這條鎖住在 backend/specs，由 spec-check 跑。
+
+    它掃的是 `backend/tests` 與 `backend/specs` —— 所以 spec-check 必須盯
+    `backend/tests/**`，否則「新增一支讀新檔的後端測試」不會觸發這道門，
+    這條鎖就只在別的原因下偶然跑到。同 `test_the_workflow_that_runs_me_...`，
+    只是這次守的是**掃描的輸入**而不是被守的對象。
+    """
+    globs = _filter_globs("spec-check.yml")
+    for d in ("backend/tests/x.py", "backend/specs/x.py", ".github/workflows/pytest.yml"):
+        assert _covered(d, globs), f"spec-check.yml 沒盯 {d} —— 這條鎖會睡著"
