@@ -64,13 +64,19 @@ export type ParsedBenchmark = BenchmarkLevel | BenchmarkLevelSec;
  * Encouragement-first feedback (Issue #2131).
  * Speed (CPM) is no longer a pass/fail criterion and never appears in feedback —
  * it stays display-only on the score card. Feedback tiers are accuracy-based only:
- *   - accuracy >= 0.75: top tier, very fluent
- *   - accuracy >= 0.55: mid tier, decent
+ *   - accuracy >= 0.75: top tier
+ *   - accuracy >= 0.55: mid tier
  *   - else: encourage to keep practising
+ *
+ * ⚠️ 用詞要說出它量的是什麼（#3156）。原本最高一級寫「讀得很流暢」，
+ *    而分級依據是**逐字正確率**不是流暢度 —— 畫面上顯示的是每分鐘字數（速度），
+ *    判成敗的是正確率，回饋句卻用第三個詞（流暢）。孩子與家長會以為那句在講速度。
+ *    流暢度在閱讀研究裡是 速度 × 準確度 × 韻律（NRP 2000），平台只量前兩個，
+ *    而這條回饋只看其中一個 —— 所以不該自稱流暢。
  */
 function generateFeedback(accuracy: number): string {
   if (accuracy >= 0.75) {
-    return '讀得很流暢！繼續保持，越來越棒！';
+    return '這次唸得很準！繼續保持，越來越棒！';
   }
   if (accuracy >= 0.55) {
     return '讀得不錯！多練幾次，準確度會越來越高。';
