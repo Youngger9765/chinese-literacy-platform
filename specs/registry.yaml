@@ -765,6 +765,7 @@ modules:
   - backend/scripts/extract_font_readings.py
   - backend/scripts/generate_taiwan_zhuyin_table.py
   - backend/scripts/generate_char_difficulty.py
+  - frontend/src/components/zhuyin/DifficultRuleExplainer.tsx
   - frontend/src/components/zhuyin/polyphonicProcessor.ts
   - frontend/src/components/zhuyin/polyphonicPatternMatcher.ts
   - frontend/src/components/zhuyin/styleSetMapper.ts
