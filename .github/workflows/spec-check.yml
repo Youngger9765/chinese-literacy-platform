@@ -74,30 +74,6 @@ jobs:
               - 'backend/tests/test_full_reading_attempts.py'
               - 'backend/tests/test_auth_api.py'
               - 'backend/tests/test_auth_route_split_1844.py'
-              # ─── 2026-09-18 系統性掃描：這支跑 `pytest specs/`（backend/specs
-              # 全套）＋ run-ci.sh 的十二道門，而那些 spec 讀的東西有七類不在
-              # 這張 filter 上。 ───
-              #
-              # `backend/app/**`：`test_dead_source_paths_only_shrink_spec` 走
-              # 整個 `backend/app` 找指向已刪目錄的引用；
-              # `test_recorded_history_reaches_the_teacher_spec` 讀
-              # `routes/teacher/teacher_schemas.py`。原本只盯 services/** 與兩支 route。
-              - 'backend/app/**'
-              # `backend/tests/**`：`test_dead_source_paths_only_shrink_spec` 與
-              # `test_gate_scripts_are_classified_spec` 都走這個目錄。
-              # ⭐ 也是 `test_every_gate_input_is_in_its_filter` 的輸入 ——
-              # 少了這條，新增一支讀新檔的後端測試不會跑到那道防漂移的門。
-              - 'backend/tests/**'
-              # `.claude/skills/**`：`test_skill_docs_do_not_contradict_themselves_spec`
-              # 與 `test_gate_scripts_are_classified_spec` 讀 skill 文件。
-              # pytest.yml 盯了它，但 pytest.yml 跑的是 `tests` 不是 `specs`。
-              - '.claude/skills/**'
-              # `scripts/**`：`test_progress_table_is_fresh_spec` 用
-              # `scripts/build_progress_table.py` 重算進度表比對。
-              - 'scripts/**'
-              # 進度表與 provenance 負債帳本 —— 兩支 spec 的直接輸入
-              - 'docs/evidence/2026-08-17-multimodal-extraction/PROGRESS.md'
-              - 'docs/qa/golden-provenance-debt.txt'
 
   spec-check:
     needs: detect-changes

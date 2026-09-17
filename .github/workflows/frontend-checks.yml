@@ -76,16 +76,6 @@ jobs:
               #    而這裡的 vitest 鎖不會跑 —— 兩邊原本不對稱。
               - 'frontend/tests/**'
               - 'frontend/playwright.config.ts'
-              # 同一個洞的第五次（2026-09-18 系統性掃描）：
-              # `csp-meta-tag.test.ts` 用 readFileSync 讀 `frontend/index.html`，
-              # 斷言 CSP meta 的 img-src 含 blob:、且不含 frame-ancestors
-              #（#535 / #1932）。`index.html` 原本**完全不在這裡** —— 拔掉那個
-              # meta tag 的 PR 不會跑這道鎖，而它會部署（deploy 盯 `frontend/**`）。
-              - 'frontend/index.html'
-              # `BlockSequenceRenderer.realdata.test.tsx` 讀 `backend/data/lessons`
-              # 的真課文當輸入。改課文資料的 PR 會跑後端套件、但不會跑這支 ——
-              # 聚光燈渲染對真資料的鎖因此是睡著的。
-              - 'backend/data/lessons/**'
               - '.github/workflows/frontend-checks.yml'
 
   frontend-checks:
