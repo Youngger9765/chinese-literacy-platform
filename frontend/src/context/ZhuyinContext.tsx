@@ -86,6 +86,65 @@ export function buildDifficultCharSet(vocabWords: string[]): Set<string> {
   return chars;
 }
 
+/** 難字是從哪一層來的（#3257）。順序就是 `resolveDifficultSource` 的優先序。 */
+export type DifficultSource = 'errors' | 'grade' | 'vocab';
+
+/** 一個唸錯過的字，連同它的次數與最後一次的日期（#3257） */
+export interface DifficultErrorDetail {
+  char: string;
+  count: number;
+  /** ISO 字串；端點可能沒給 */
+  lastDate: string | null;
+}
+
+/**
+ * 難字模式要標哪些字 —— **三層優先序的唯一實作**（#3257）。
+ *
+ * ⛔ 這支之前是 `processLinesSelective` 裡的一行三元運算式。抽出來的理由不是
+ *    整潔，是**畫面要能說出現在生效的是哪一層**，而那件事若在 UI 自己再判一次，
+ *    就變成同一條規則有兩份實作 —— 這個 repo 已經因為「同語意兩份實作」付過
+ *    很貴的代價（#3218：執行期選擇器與逐課表對同一段課文給不同答案，
+ *    實測 7,682 / 65,754 個破音字位置不一致）。
+ *
+ *    所以規則住這裡，兩個消費端都叫它：
+ *      ① `processLinesSelective` —— 傳真的生詞清單，拿 `chars` 去標
+ *      ② `difficultExplain`（給說明面板）—— 傳空清單，只拿 `source`
+ *    傳空清單時 `source` 完全不變（它不看生詞多寡，只看前兩層是不是空的），
+ *    所以兩邊報的層級**不可能**分岔。
+ *
+ * 三層的意義差很多，順序不能換：
+ *   errors — 這個孩子自己唸錯過的字（#3224）。讀者的屬性，最準
+ *   grade  — 這一課對這個年級最少見的字（#3247）。教材的屬性
+ *   vocab  — 本課生詞拆成單字。**只服務還沒回 `hard` 的舊後端**（部署順序保險），
+ *            它會標出「之 加 千 同 大 失 小 手 成」那種早就會的字
+ */
+export function resolveDifficultSource(
+  errorChars: Set<string>,
+  hardChars: Set<string>,
+  vocabWords: string[],
+): { source: DifficultSource; chars: Set<string> } {
+  if (errorChars.size > 0) return { source: 'errors', chars: errorChars };
+  if (hardChars.size > 0) return { source: 'grade', chars: hardChars };
+  return { source: 'vocab', chars: buildDifficultCharSet(vocabWords) };
+}
+
+/**
+ * 說明面板要講的內容（#3257）。
+ *
+ * ⚠️ `chars` 在 `source === 'vocab'` 時是空陣列 —— 生詞清單是由消費端逐次傳進
+ *    `processLinesSelective` 的，provider 沒有它。面板在那一層改成只講規則不列字，
+ *    這是誠實的降級，不是 bug。
+ */
+export interface DifficultExplain {
+  source: DifficultSource;
+  /** 生效那一層要標的字（已排序）。`source === 'vocab'` 時為空 —— 見上面 */
+  chars: string[];
+  /** 只有 `source === 'errors'` 時有內容，按錯的次數多寡排 */
+  errors: DifficultErrorDetail[];
+  /** 這一課的表載到了沒 —— 用來分辨「舊後端沒回 hard」跟「還沒進到課文頁」 */
+  lessonLoaded: boolean;
+}
+
 /** 沒有課表時的空值 —— 用同一個實例，否則每次 render 都換身分、memo 白重算 */
 const _EMPTY_ANSWERS: Map<string, string[]> = new Map();
 const _EMPTY_HARD: Set<string> = new Set();
@@ -129,6 +188,8 @@ interface ZhuyinContextValue {
   /** 難字門檻：錯幾次算「還不會」（#3240，1–5） */
   difficultThreshold: number;
   setDifficultThreshold: (n: number) => void;
+  /** 說明面板要講的內容：現在生效哪一層、標了哪些字、錯幾次（#3257） */
+  difficultExplain: DifficultExplain;
   /** 3-state mode: 'none' | 'difficult' | 'all' */
   zhuyinMode: ZhuyinMode;
   zhuyinReady: boolean;
@@ -168,6 +229,9 @@ const ZhuyinContext = createContext<ZhuyinContextValue>({
   processLines: () => null,
   difficultThreshold: 1,
   setDifficultThreshold: () => {},
+  // 沒有 Provider 時的空說明 —— `ZhuyinToggle` 有測試不包 Provider 直接 render，
+  // 面板讀到這個就不會顯示任何一層的字（它自己會判斷空的情況）
+  difficultExplain: { source: 'vocab', chars: [], errors: [], lessonLoaded: false },
   processLinesSelective: () => null,
   loadLessonZhuyin: async () => {},
 });
@@ -280,7 +344,16 @@ export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   //    而有 12 個測試檔 render 真的 ZhuyinProvider 卻沒包 auth。沒登入就是 null，
   //    自然退回生詞清單。
   const auth = useContext(AuthContext);
-  const [errorChars, setErrorChars] = useState<Set<string>>(() => new Set());
+  // #3257：改存 Map 不是 Set —— 端點本來就回 `total_error_count` 與 `last_error_date`，
+  // 而之前只撈 `character` 就把它們丟掉了。說明面板要講「這個字你 8/24 唸錯過 2 次」，
+  // 那句話的資料一直都在，只是沒留下來。
+  const [errorDetails, setErrorDetails] = useState<Map<string, DifficultErrorDetail>>(
+    () => new Map(),
+  );
+  // ⛔ 必須 memo。`processLinesSelective` 的 dep 是這個 Set —— 每次 render 現做一個
+  //    新 Set 會讓它每次都換身分，於是四個消費端的 memo 全部每次重算（那是
+  //    整頁課文重跑一遍注音）。綁在 `errorDetails` 的身分上才穩。
+  const errorChars = React.useMemo(() => new Set(errorDetails.keys()), [errorDetails]);
   // 同一段只叫一次 —— alert 洗版比沒有 alert 更糟（#3166）
   const warnedMissRef = useRef<Set<string>>(new Set());
 
@@ -299,13 +372,20 @@ export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         if (!res.ok) return; // fail-open：拿不到就退回生詞，不要整段不標
         const data = await res.json();
         if (!alive) return;
-        const s = new Set<string>();
+        const m = new Map<string, DifficultErrorDetail>();
         for (const p of data.patterns ?? []) {
           if (typeof p?.character === 'string' && p.character.trim() && !p.is_corrected) {
-            s.add(p.character);
+            m.set(p.character, {
+              char: p.character,
+              // 端點的欄位是 `total_error_count` / `last_error_date`（#3257 開始用到）。
+              // 型別守衛是因為這是跨網域 JSON —— 舊後端沒有這兩個欄位時要降級成
+              // 「有這個字但不知道幾次」，不是整筆丟掉。
+              count: typeof p.total_error_count === 'number' ? p.total_error_count : 0,
+              lastDate: typeof p.last_error_date === 'string' ? p.last_error_date : null,
+            });
           }
         }
-        setErrorChars(s);
+        setErrorDetails(m);
       } catch {
         // fail-open，同上
       }
@@ -375,6 +455,33 @@ export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       // fail-open：拿不到表就走 fallback。漏標只是少一排注音，標錯是教錯讀音
     }
   }, []);
+
+  /**
+   * 說明面板的內容（#3257）—— 難字模式的判定法對使用者一直是隱形的。
+   *
+   * 那個資訊落差本身就是誤判的來源，而且已經害過一次：#3247 的起點是家長在四年級
+   * 課文上看到標了「之 加 千 同 大 失 小 手 成」，判定判定法壞了。實際上那是走到
+   * 第三層（生詞拆字）的正常結果 —— 規則如果講清楚，那次誤判不會發生。
+   *
+   * ⛔ `source` 由 `resolveDifficultSource` 給，不在這裡重判。傳空的生詞清單是刻意的：
+   *    provider 沒有生詞（它逐次由消費端傳進 `processLinesSelective`），而 `source`
+   *    不看生詞多寡，只看前兩層是不是空的 —— 所以空清單不影響層級判定。
+   */
+  const difficultExplain = React.useMemo<DifficultExplain>(() => {
+    const { source, chars } = resolveDifficultSource(errorChars, hardChars, []);
+    return {
+      source,
+      chars: [...chars].sort(),
+      errors:
+        source === 'errors'
+          ? [...errorDetails.values()].sort(
+              // 錯最多次的排前面；同次數按字排，否則順序會隨 Map 的插入序飄
+              (a, b) => b.count - a.count || a.char.localeCompare(b.char),
+            )
+          : [],
+      lessonLoaded: lessonTable !== null,
+    };
+  }, [errorChars, hardChars, errorDetails, lessonTable]);
 
   /**
    * 查表優先，查不到才算。
@@ -495,10 +602,9 @@ export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       //   拆成的單字。生詞是課程的屬性、難字是讀者的屬性 —— 拿生詞當難字會標出
       //   「之 加 千 同 大 失 小 手 成」（家長 2026-09-17 實測），生詞 0 的課則整個靜音。
       // ⛔ 三段的順序不能換：她的錯字 > 這課的難字 > 生詞（最後那層只服務舊後端）。
-      const difficultChars =
-        errorChars.size > 0 ? errorChars
-        : hardChars.size > 0 ? hardChars
-        : buildDifficultCharSet(vocabWords);
+      // #3257：優先序搬進 `resolveDifficultSource` —— 說明面板要報「現在是哪一層」，
+      // 而那不可以是第二份實作。這裡跟面板叫的是同一支。
+      const { chars: difficultChars } = resolveDifficultSource(errorChars, hardChars, vocabWords);
       if (difficultChars.size === 0) return null;
       try {
         return lines.map((line) => {
@@ -560,6 +666,7 @@ export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       zhuyinReady,
       difficultThreshold,
       setDifficultThreshold,
+      difficultExplain,
       zhuyinActive,
       isZhuyinAny,
       isZhuyinAll,

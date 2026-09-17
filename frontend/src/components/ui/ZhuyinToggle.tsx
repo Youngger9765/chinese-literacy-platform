@@ -1,4 +1,5 @@
 import { ZhuyinMode, THRESHOLD_MIN, THRESHOLD_MAX } from '../../context/ZhuyinContext';
+import DifficultRuleExplainer from '../zhuyin/DifficultRuleExplainer';
 
 interface ZhuyinToggleProps {
   mode: ZhuyinMode;
@@ -103,6 +104,18 @@ export default function ZhuyinToggle({
         </button>
       </div>
     )}
+
+    {/*
+      #3257：規則說明。⛔ 它的顯示條件只看 `mode`，**不跟門檻控制項綁在一起** ——
+      門檻那組要求 host 有傳 `difficultThreshold`/`onThresholdChange`（兩個都是
+      optional，因為 `AppShell` 與 `Sidebar` 各 render 一次、漏傳一邊只會少一個
+      控制項）。說明不該被那個 host 細節連坐：在難字模式下「這些字為什麼被標」
+      永遠是有意義的問題。
+
+      它自己讀 context 而不是收 props —— 要透傳的話 `AppShell` 跟 `Sidebar` 兩邊
+      都得各加一次，而「只改了其中一個 host」正是這個檔案已經有的那個風險。
+    */}
+    {mode === 'difficult' && <DifficultRuleExplainer />}
     </div>
   );
 }
