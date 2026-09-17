@@ -67,6 +67,15 @@ jobs:
               # tsconfig 決定 tsc 掃什麼、多嚴（含 #3195 加的 exclude）——
               # 只改它的 PR 不跑這道門的話，等於門可以被無聲地改掉
               - 'frontend/tsconfig.json'
+              # 同一個洞的第四次（#3242）：`e2eBackendEnv3242.test.ts` 讀的是
+              # `tests/e2e/**` 的每一支 spec 與 helper，用來鎖「環境網址一定要有
+              # env 出口」。`frontend/tests/` 原本**完全不在這裡** —— 於是下一個
+              # 只改 spec、把 `E2E_BACKEND_URL` 拔掉的 PR，這支 workflow 整個
+              # 不會被觸發，檢查清單上不會出現那一列，看起來就是全綠。
+              # ⚠️ `e2e-tests.yml` 的 filter 是 `frontend/**`，所以 Playwright 會跑、
+              #    而這裡的 vitest 鎖不會跑 —— 兩邊原本不對稱。
+              - 'frontend/tests/**'
+              - 'frontend/playwright.config.ts'
               - '.github/workflows/frontend-checks.yml'
 
   frontend-checks:
