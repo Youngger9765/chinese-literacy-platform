@@ -188,3 +188,125 @@ def lesson_zhuyin_raw(lesson_uid: str) -> dict | None:
     """
     return _read_table(lesson_uid)
 
+
+
+# ── #3247 難字 fallback：年級字頻，不是本課生詞 ──────────────────────────────
+#
+# 家長實測（2026-09-17）：難字模式標了「之 加 千 同 大 失 小 手 成」，而生詞欄位
+# 是空的那課**一個字都不標**。根因是前端 `buildDifficultCharSet(story.vocabulary)`
+# ——生詞是**課程的屬性**，難字是**讀者的屬性**。
+#
+# #3224 已經把「這孩子唸錯過的字」那條路接對了；這裡修的是**還沒有錯字紀錄**時
+# （第一次玩的孩子，也就是最需要鷹架的那一刻）走的 fallback。
+#
+# 判定與 cut 的來源寫在 `backend/scripts/generate_char_difficulty.py` 的檔頭。
+# ⛔ 難易度**不在這裡算**，這裡只查表 —— 跟注音同一條紀律。
+
+_DIFFICULTY_PATH = Path(__file__).resolve().parents[2] / "data" / "zhuyin" / "char_difficulty.json"
+
+# 難字至少給幾個 —— 短課文乘上比例會不足 1 個，而「開關沒作用」是這張票的症狀本身
+_PICK_MIN = 3
+
+
+@lru_cache(maxsize=1)
+def char_difficulty_table() -> dict:
+    """全庫逐字難易度表（懶載入，約 100 KB）。"""
+    return json.loads(_DIFFICULTY_PATH.read_text(encoding="utf-8"))
+
+
+# 課文本文住在哪個 section —— **11 課不在 `full_text_annotate` 底下**（2026-09-17
+# 複審實測）：10 課文言文的本文是 `classical_text` + `modern_translation`，
+# L0136 的本文在聚光燈的 `passage_paragraphs`。漏掉它們的後果不是「少標幾個字」，
+# 是那 11 課（含 9 課文言文，最難的內容）**一個字都不標** —— 因為它們的生詞欄位
+# 也都是 0，前端連 fallback 都沒有東西可退。這正是 #3247 要修的症狀本身。
+#
+# ⛔ 產生器（`generate_char_difficulty.py`）**必須用同一支函式**取語料。兩邊若分岔，
+#    `lesson_hard_chars` 裡「不在表裡 = 不在任何課文本文出現過」那個假設就變成假的，
+#    文言文的字會整批掉進那個縫裡而且沒有任何訊息。
+_BODY_SECTIONS = ("full_text_annotate", "classical_text", "modern_translation")
+_BODY_SECTION_RE = re.compile(r"^served:spotlight_v2\.blocks\[\d+\]\.passage_paragraphs\[\d+\]$")
+
+
+def _is_body_section(section: object) -> bool:
+    if not isinstance(section, str):
+        return False
+    return section in _BODY_SECTIONS or bool(_BODY_SECTION_RE.match(section))
+
+
+@lru_cache(maxsize=32)
+def lesson_body_text(lesson_uid: str) -> str | None:
+    """這一課的**課文本文**。沒有本文回 None。
+
+    ⛔ 不含題幹／選項／策略說明／聚光燈的解說 —— 那些是教學鷹架的文字，不是孩子
+       讀的課文。把它們算進字頻會讓「請」「選」「答」變成常用字。
+    """
+    raw = _read_table(lesson_uid)
+    if not raw:
+        return None
+    parts = [
+        t["text"]
+        for t in (raw.get("texts") or [])
+        if _is_body_section(t.get("section")) and isinstance(t.get("text"), str)
+    ]
+    return "\n".join(parts) if parts else None
+
+
+def _lesson_grade(lesson_uid: str) -> int | None:
+    p = _table_path(lesson_uid)
+    if p is None:
+        return None
+    f = p.parent / "lesson.yml"
+    if not f.is_file():
+        return None
+    m = re.search(r"^catalog_slot:\s*G(\d+)-", f.read_text(encoding="utf-8"), re.M)
+    return int(m.group(1)) if m else None
+
+
+@lru_cache(maxsize=32)
+def lesson_hard_chars(lesson_uid: str) -> frozenset[str] | None:
+    """這一課對**這個年級**的難字集合。沒有課文本文回 None。
+
+    ## 選法：逐課取最少見的一小撮，不是全域門檻
+
+    先按「這個年級才新出現的」優先、再按「在整套教材裡出現在幾篇」排序，取前
+    `pick_ratio` 比例（下限 3 個）。
+
+    ⚠️ 2026-09-17 複審擋下的上一版是**全域門檻**（出現 ≤6 篇算難）＋算不出東西時
+       的地板。它有兩個由構造而來的毛病：
+         ① 標記率隨年級崩掉 —— 九年級與無年級課程只有 ~0.3%，整篇課文標一個字，
+            對孩子來說跟開關壞掉沒有差別（實測 21 課低於 0.5%，19 課是九年級帶）
+         ② 「無年級」被當成九年級，於是年級那條篩不掉任何東西
+       逐課取比例把量**由構造保證**：實測 179 課標記率中位 1.8%、最低 1.03%、
+       最高 5.3%，而且每個年級都落在 1.6–2.0%（之前是 0.4%–17.5%）。
+       同時不再需要地板那個特例。
+
+    ⚠️ 回 `None`（這課沒有課文本文）跟回**空集合**是兩件事。現在 179 課都有本文，
+       所以空集合代表有東西壞了 —— 回歸鎖會叫。
+    """
+    body = lesson_body_text(lesson_uid)
+    if body is None:
+        return None
+    t = char_difficulty_table()
+    chars = t["chars"]
+    # 不在表裡 = 不在任何課文本文出現過（標點、數字、注音符號…）→ 一律不是難字
+    # ⛔ 排序的最後一鍵是**字本身**，不能少。`set(body)` 的迭代序跟 Python 的
+    #    字串雜湊種子有關，而 `sorted` 是穩定排序 —— 出現次數相同的字，取誰會隨
+    #    行程而變。症狀是「同一課在不同後端實例顯示不同的難字」，重啟一次就換一批，
+    #    而且**沒有任何錯誤訊息**。2026-09-17 是寫測試時撞到才發現的。
+    cand = [(ch, chars[ch]) for ch in set(body) if ch in chars]
+    if not cand:
+        return frozenset()
+    k = max(_PICK_MIN, round(t["pick_ratio"] * len(cand)))
+    grade = t.get("lesson_grade", {}).get(lesson_uid)
+    if grade is None:
+        # 無年級（文言文／品格教育／體育）—— ⛔ 不要假裝它是九年級（上一版就是這樣
+        # 才讓整批課程只剩 0.3% 的標記率）。不知道年級就只用罕見度排序。
+        ranked = sorted(cand, key=lambda kv: (kv[1][1], kv[0]))
+    else:
+        # 這個年級才新出現的排前面；不足 k 個才放寬到「更低年級出現過但仍罕見」的字。
+        # 放寬是有意的：這套教材每個年級只有 20–30 課，「首見 G4」常常只代表
+        # 「這 175 篇裡剛好有一篇四年級用過」，不等於孩子學過。
+        ranked = sorted(
+            cand, key=lambda kv: (kv[1][0] < grade, kv[1][1], kv[0])
+        )
+    return frozenset(ch for ch, _ in ranked[:k])

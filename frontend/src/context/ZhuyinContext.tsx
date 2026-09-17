@@ -86,6 +86,10 @@ export function buildDifficultCharSet(vocabWords: string[]): Set<string> {
   return chars;
 }
 
+/** 沒有課表時的空值 —— 用同一個實例，否則每次 render 都換身分、memo 白重算 */
+const _EMPTY_ANSWERS: Map<string, string[]> = new Map();
+const _EMPTY_HARD: Set<string> = new Set();
+
 const STORAGE_KEY = 'zhuyin_mode_v2';
 const LEGACY_KEY  = 'zhuyin_enabled';
 
@@ -328,9 +332,25 @@ export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   //    （跨網域，還要等 story detail 那趟先回）才到 → 寫進 ref → **畫面不動**。
   //    於是第一個有注音的步驟停在 fallback，第二個步驟以後才用表 ——
   //    同一課同一段在不同步驟顯示不同注音，**正是這個 PR 要消滅的東西**。
-  const [answers, setAnswers] = useState<Map<string, string[]>>(() => new Map());
+  // ⛔ 注音表跟難字**綁在同一個 state**，不是兩個（2026-09-17 複審擋下的上一版是
+  //    兩個）。理由是它們的失效方式不對稱：`answers` 用整行文字當 key，過期的表
+  //    對不到新課的文字 → 自然掉到 fallback，壞法是「少一排注音」；難字是**沒有 key
+  //    的裸 Set**，過期的集合會直接套到當下渲染的任何文字上 → 壞法是**標錯字**，
+  //    而這個檔自己的註解就寫著「漏標只是少一排注音，標錯是教錯讀音」。
+  //
+  //    綁成一個之後：一個身分 → 一個 dep（沒有東西可以漏掉，而遺漏 dep 這件事
+  //    只有 lint 的 warn 擋得到）；取得失敗就是「沒有表」而不是「上一課的表」。
+  const [lessonTable, setLessonTable] = useState<{
+    uid: string;
+    answers: Map<string, string[]>;
+    hard: Set<string>;
+  } | null>(null);
+  const answers = lessonTable?.answers ?? _EMPTY_ANSWERS;
+  const hardChars = lessonTable?.hard ?? _EMPTY_HARD;
 
   const loadLessonZhuyin = useCallback(async (lessonUid: string) => {
+    // 先清掉上一課 —— 任何失敗路徑都不可以留著別課的難字（見上面的註解）
+    setLessonTable((prev) => (prev && prev.uid === lessonUid ? prev : null));
     try {
       const res = await fetch(`${API_BASE}/api/lessons/${encodeURIComponent(lessonUid)}/zhuyin`);
       if (!res.ok) return;   // 404 = 這課還沒產表 → 靜靜走 fallback
@@ -344,7 +364,13 @@ export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           m.set(t.text, unpackSlots(t.ssz));
         }
       }
-      setAnswers(m);
+      // `hard` = 這一課對這個年級的難字（#3247）。舊後端沒有這個欄位 → 空集合，
+      // 讓消費端退回生詞，部署順序（前端先上、後端還沒）不會讓第二段鷹架消失。
+      setLessonTable({
+        uid: lessonUid,
+        answers: m,
+        hard: new Set(typeof data.hard === 'string' ? data.hard : ''),
+      });
     } catch {
       // fail-open：拿不到表就走 fallback。漏標只是少一排注音，標錯是教錯讀音
     }
@@ -465,7 +491,14 @@ export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       // Lessons with empty vocabulary fall back to null (same as 'none').
       // #3224：她唸錯過的字優先；沒有紀錄（第一次唸這課／新學生／沒登入）才退回生詞，
       // 否則第二段鷹架會整片空白。
-      const difficultChars = errorChars.size > 0 ? errorChars : buildDifficultCharSet(vocabWords);
+      // #3247：沒有她的錯字紀錄時，用後端按**年級字頻**算好的難字，而不是本課生詞
+      //   拆成的單字。生詞是課程的屬性、難字是讀者的屬性 —— 拿生詞當難字會標出
+      //   「之 加 千 同 大 失 小 手 成」（家長 2026-09-17 實測），生詞 0 的課則整個靜音。
+      // ⛔ 三段的順序不能換：她的錯字 > 這課的難字 > 生詞（最後那層只服務舊後端）。
+      const difficultChars =
+        errorChars.size > 0 ? errorChars
+        : hardChars.size > 0 ? hardChars
+        : buildDifficultCharSet(vocabWords);
       if (difficultChars.size === 0) return null;
       try {
         return lines.map((line) => {
@@ -518,7 +551,7 @@ export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         return null;
       }
     },
-    [zhuyinReady, zhuyinMode, toProcessed, errorChars]
+    [zhuyinReady, zhuyinMode, toProcessed, errorChars, hardChars]
   );
 
   return (

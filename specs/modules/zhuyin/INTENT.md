@@ -13,6 +13,9 @@ owns_code:
   - backend/app/services/he_conjunction.py
   - backend/scripts/extract_font_readings.py
   - backend/scripts/generate_taiwan_zhuyin_table.py
+  # #3247 難字模式在「孩子還沒有錯字紀錄」時標哪些字。它**不決定任何讀音** ——
+  # 決定的是「哪些字要出現注音」，所以屬於注音這個模組的顯示面而不是讀音面。
+  - backend/scripts/generate_char_difficulty.py
   - frontend/src/components/zhuyin/polyphonicProcessor.ts
   - frontend/src/components/zhuyin/polyphonicPatternMatcher.ts
   - frontend/src/components/zhuyin/styleSetMapper.ts
@@ -28,6 +31,8 @@ owns_data:
   - backend/data/zhuyin/font_slot_readings.json
   - backend/data/lessons/*/v*/zhuyin.json
   - backend/data/zhuyin/lesson_corrections.json
+  # #3247：字 → [首見年級, 出現在幾篇相異課文]。難字模式的 fallback 讀它。
+  - backend/data/zhuyin/char_difficulty.json
   - frontend/public/data/poyin_db.json
   - frontend/public/fonts/BpmfZihiSerif-Regular.ttf
   - frontend/src/components/zhuyin/__fixtures__/fontReadings.generated.json
@@ -36,6 +41,9 @@ spec_tests:
   # 只改產生器／processor 而沒碰 `backend/**` 的 PR 會讓這 1,093 條整組睡著
   # （pytest.yml 是按路徑觸發的）。
   - backend/tests/test_lesson_zhuyin_3218.py
+  # #3247 難字 fallback 的回歸鎖（11 條）。掛在這裡才會被 run-ci.sh 的 Gate 2 跑到。
+  - backend/tests/test_difficult_chars_by_grade_3247.py
+  - backend/tests/test_lesson_zhuyin_endpoint_hard_3247.py
   - backend/tests/test_lesson_zhuyin_all_lessons_3218.py
   - backend/tests/test_font_is_taiwan_reading_authority_3173.py
   - backend/tests/test_font_readings_match_shipped_font_3177.py

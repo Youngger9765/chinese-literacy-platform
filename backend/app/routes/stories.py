@@ -901,13 +901,18 @@ def get_lesson_zhuyin(lesson_uid: str):
 
     公開不需要登入：這跟 `/api/stories` 一樣是課文內容，而課文本來就是公開的。
     """
-    from ..services.lesson_zhuyin import lesson_zhuyin_raw
+    from ..services.lesson_zhuyin import lesson_hard_chars, lesson_zhuyin_raw
 
     raw = lesson_zhuyin_raw(lesson_uid)
     if raw is None:
         raise HTTPException(status_code=404, detail="這一課還沒有注音對照表")
+    # `hard` = 難字模式在「這個孩子還沒有錯字紀錄」時要標的字（#3247）。
+    # 判定在後端是因為它要知道**這篇課文的年級**；前端只拿結果，不重算。
+    # 有錯字紀錄時前端仍然優先用錯字（#3224），這裡是 fallback。
+    hard = lesson_hard_chars(lesson_uid)
     return {
         "lesson_uid": raw["lesson_uid"],
+        "hard": "".join(sorted(hard)) if hard is not None else "",
         "texts": [
             # `ssz` = 一槽一個字元的緊湊字串（#3230）：'.' = 預設槽、'1'..'5' = ss01..ss05。
             # 全庫 96.9% 的槽位是預設 —— 陣列版 53 MB，字串版 8.3 MB。
