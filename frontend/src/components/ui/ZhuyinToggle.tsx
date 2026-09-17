@@ -35,7 +35,16 @@ export default function ZhuyinToggle({
     mode === 'difficult' && difficultThreshold !== undefined && onThresholdChange !== undefined;
 
   return (
-    <div className="inline-flex items-center gap-1.5">
+    /*
+      #3257 `data-zhuyin-controls`：說明面板把這整群當成「自己人」，所以在面板開著的
+      時候調門檻**不會**把它關掉。
+
+      這不是順手加的體貼 —— 面板在講門檻是什麼意思，而門檻控制項就在它旁邊。原本
+      按下「＋」會被判成點到外面而關閉面板，於是使用者剛讀到那句解釋、一動手就把
+      解釋弄消失了（2026-09-18 在 preview 上實測到）。留著不關，調數字時上面那排字
+      會當場變多變少 —— 面板從「宣稱規則」變成「示範規則」，那比任何一句文案都有用。
+    */
+    <div data-zhuyin-controls className="inline-flex items-center gap-1.5">
     <div
       role="group"
       aria-label="注音顯示模式"
