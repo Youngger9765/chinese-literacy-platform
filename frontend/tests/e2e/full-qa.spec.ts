@@ -21,9 +21,14 @@
 
 import { test, expect, APIRequestContext, Page } from '@playwright/test';
 
-// Frontend navigation uses the test's baseURL (PLAYWRIGHT_BASE_URL); only API calls
-// pin to the staging backend so token issuance is deterministic regardless of origin.
-const STAGING_BACKEND = 'https://lingoleap-backend-staging-958347263320.asia-east1.run.app';
+// Frontend navigation uses the test's baseURL (PLAYWRIGHT_BASE_URL); API calls go to
+// E2E_BACKEND_URL so the spec can be pointed at whichever environment is under test.
+//
+// ⚠️ 這兩個變數要**成對**設。只設 PLAYWRIGHT_BASE_URL 的話，畫面打 preview、
+//    API 打 staging —— 綠燈驗的是兩個環境的混合，等於什麼都沒驗（#3242）。
+//    預設維持 staging，所以沒設環境變數時行為跟以前一樣。
+const BACKEND = process.env.E2E_BACKEND_URL
+  || 'https://lingoleap-backend-staging-958347263320.asia-east1.run.app';
 const TOKEN_KEY = 'lingoleap_token';
 
 const CREDS = {
@@ -37,7 +42,7 @@ const tokenCache: Record<string, string | null> = {};
 
 async function getToken(request: APIRequestContext, role: keyof typeof CREDS): Promise<string | null> {
   if (tokenCache[role] !== undefined) return tokenCache[role];
-  const res = await request.post(`${STAGING_BACKEND}/api/auth/login`, {
+  const res = await request.post(`${BACKEND}/api/auth/login`, {
     data: CREDS[role],
     failOnStatusCode: false,
   });
@@ -69,7 +74,7 @@ async function loginAs(page: Page, request: APIRequestContext, role: keyof typeo
 
 /** Stories endpoint returns `{ stories: [...] }` (object), NOT a bare array. */
 async function fetchFirstStoryId(request: APIRequestContext): Promise<number | null> {
-  const res = await request.get(`${STAGING_BACKEND}/api/stories`);
+  const res = await request.get(`${BACKEND}/api/stories`);
   if (!res.ok()) return null;
   const data = await res.json();
   const stories = Array.isArray(data) ? data : (data?.stories ?? []);
@@ -130,7 +135,7 @@ test.describe('A. Student path — 13 step walkthrough', () => {
     test.skip(!storyId, 'No stories available');
 
     // Probe listening evaluate endpoint with sentinel "123"
-    const evalRes = await request.post(`${STAGING_BACKEND}/api/listening/evaluate`, {
+    const evalRes = await request.post(`${BACKEND}/api/listening/evaluate`, {
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       data: {
         story_id: storyId,
@@ -222,7 +227,7 @@ test.describe('B. Teacher path', () => {
     const token = await getToken(request, 'teacher');
     test.skip(!token, 'Cannot login as teacher');
 
-    const classroomsRes = await request.get(`${STAGING_BACKEND}/api/classrooms`, {
+    const classroomsRes = await request.get(`${BACKEND}/api/classrooms`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     test.skip(!classroomsRes.ok(), `Cannot list classrooms: ${classroomsRes.status()}`);
@@ -242,7 +247,7 @@ test.describe('B. Teacher path', () => {
     const token = await getToken(request, 'teacher');
     test.skip(!token, 'Cannot login as teacher');
 
-    const classroomsRes = await request.get(`${STAGING_BACKEND}/api/classrooms`, {
+    const classroomsRes = await request.get(`${BACKEND}/api/classrooms`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     const cdata = classroomsRes.ok() ? await classroomsRes.json() : null;
@@ -301,7 +306,7 @@ test.describe('C. Admin path', () => {
     const token = await getToken(request, 'admin');
     test.skip(!token, 'Cannot login as admin');
 
-    const seedRes = await request.post(`${STAGING_BACKEND}/api/admin/seed/demo-students`, {
+    const seedRes = await request.post(`${BACKEND}/api/admin/seed/demo-students`, {
       headers: { Authorization: `Bearer ${token}` },
       data: { classroom_id: 1, count: 1, prefix: 'qa' + Date.now().toString().slice(-6) },
     });
