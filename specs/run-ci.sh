@@ -5,7 +5,7 @@
 # spec-module contracts are enforceable WITHOUT the GitHub Actions workflow
 # (which is blocked on a token with `workflow` scope, tracked in issue 2041).
 #
-# Gates:
+# Gates:  (12 道)
 #   Gate 1: registry freshness + legacy_tests pointer-rot check
 #           (build_registry.py --check — includes Lock 2 dangling-path guard)
 #   Gate 2: spec contracts   (pytest specs/)
@@ -224,8 +224,20 @@ echo ""
 #
 # ⚠️ 課文改一個字、字型換一版、poyin_db 動一條樣式，都會讓這道門紅 —— 那是對的：
 #    三者任一改變都會改變答案。修法是重跑產生器，不是放寬這道門。
-echo "-- Gate 11/11: 逐課注音對照表同步（generate_lesson_zhuyin --check） --"
+echo "-- Gate 11/12: 逐課注音對照表同步（generate_lesson_zhuyin --check） --"
 "$PYBIN" backend/scripts/generate_lesson_zhuyin.py --check
+echo ""
+
+# Gate 12 — 難字難易度表要跟課文同步（#3247）
+#
+# 難字模式在「孩子還沒有錯字紀錄」時用的是這張表（字頻 + 首見年級），
+# 它是從 179 課的課文本文算出來的 —— **課文改了表就過期**，而過期的症狀是
+# 「標了她早就會的字」或「這課一個字都不標」，也就是這張票原本回報的東西。
+#
+# ⚠️ 這道門跟「讀表的測試」抓的不是同一件事：測試讀的是 committed 的表，
+#    表過期它照樣綠；這道門重算一次再比對，所以抓得到。
+echo "-- Gate 12/12: 難字難易度表同步（generate_char_difficulty --check） --"
+"$PYBIN" backend/scripts/generate_char_difficulty.py --check
 echo ""
 
 echo "== Local Spec CI: PASS =="

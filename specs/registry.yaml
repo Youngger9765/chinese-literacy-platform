@@ -764,6 +764,7 @@ modules:
   - backend/app/services/he_conjunction.py
   - backend/scripts/extract_font_readings.py
   - backend/scripts/generate_taiwan_zhuyin_table.py
+  - backend/scripts/generate_char_difficulty.py
   - frontend/src/components/zhuyin/polyphonicProcessor.ts
   - frontend/src/components/zhuyin/polyphonicPatternMatcher.ts
   - frontend/src/components/zhuyin/styleSetMapper.ts
@@ -777,11 +778,14 @@ modules:
   - backend/data/zhuyin/font_slot_readings.json
   - backend/data/lessons/*/v*/zhuyin.json
   - backend/data/zhuyin/lesson_corrections.json
+  - backend/data/zhuyin/char_difficulty.json
   - frontend/public/data/poyin_db.json
   - frontend/public/fonts/BpmfZihiSerif-Regular.ttf
   - frontend/src/components/zhuyin/__fixtures__/fontReadings.generated.json
   spec_tests:
   - backend/tests/test_lesson_zhuyin_3218.py
+  - backend/tests/test_difficult_chars_by_grade_3247.py
+  - backend/tests/test_lesson_zhuyin_endpoint_hard_3247.py
   - backend/tests/test_lesson_zhuyin_all_lessons_3218.py
   - backend/tests/test_font_is_taiwan_reading_authority_3173.py
   - backend/tests/test_font_readings_match_shipped_font_3177.py
