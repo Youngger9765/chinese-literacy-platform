@@ -11,7 +11,7 @@
 - `services/zhuyin_readings.py` 的呼叫端 —— 把它標成 ㄏㄢˋ（#3204）
 
 ⚠️ **抽出來之前這整套只有語音那邊接著**，畫面上的注音（朗讀診斷報告）
-語料 730 處全部標成 ㄏㄜˊ，包括當連接詞的時候。邏輯與 489 筆例外清單早就在，
+語料 730 處全部標成 ㄏㄜˊ，包括當連接詞的時候。邏輯與 371 筆例外清單早就在，
 只是沒有第二個人來拿。
 
 ## 為什麼是「位置集合」而不是「替換字串」
@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import json
 import logging
+import threading
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -41,7 +42,7 @@ logger = logging.getLogger(__name__)
 #     is the only character in the entire MOE dictionary with that reading, so
 #     there is nothing to substitute and it stays uncorrected.)
 #   - The exceptions are enumerable. data/tts/he_exceptions.json holds every
-#     multi-character MOE entry whose 和 is read as anything but ㄏㄢˋ — 489 of
+#     multi-character MOE entry whose 和 is read as anything but ㄏㄢˋ — 371 of
 #     them, taken from the dictionary rather than guessed.
 #
 # In the lesson corpus, every standalone 和 (506 of 506, by POS tagging) is a
@@ -49,7 +50,12 @@ logger = logging.getLogger(__name__)
 
 
 def _load_he_exceptions() -> tuple[str, ...]:
-    """Words where 和 is NOT ㄏㄢˋ, longest first for greedy matching."""
+    """Words where 和 is NOT ㄏㄢˋ.
+
+    ⚠️ 排序（長的在前）現在的唯一用途是**決定性** —— `_get_tokenizer` 加詞的順序
+    會影響 jieba 算出來的頻率，而產表必須可重現。原本的用途是貪婪子字串比對，
+    那支（`_he_exception_spans`）在 #3246 刪掉了。
+    """
     # ⚠️ 這個檔在 app/services/ → backend/ 是往上 **2** 層。
     # 原本住 app/services/tts/ 是 3 層，搬家時這一格算錯**不會紅**，
     # 只會 fail-open 回空 tuple、所有「和」靜靜地不再被修正。
@@ -107,124 +113,160 @@ def _is_self_reference(text: str, i: int) -> bool:
     return False
 
 
-def _he_exception_spans(text: str) -> set[int]:
-    """Indices covered by a word whose 和 is not ㄏㄢˋ.
-
-    Greedy and left-to-right, which is what keeps 「和平和戰爭」 working: 和平
-    claims index 1 first, so 平和 cannot then claim it and the second 和 stays a
-    conjunction. Scanning for any overlapping window instead — the first version
-    — swallowed that one.
-    """
-    covered: set[int] = set()
-    i = 0
-    n = len(text)
-    while i < n:
-        for w in _HE_EXCEPTIONS:          # longest first
-            if text.startswith(w, i):
-                covered.update(range(i, i + len(w)))
-                i += len(w)
-                break
-        else:
-            i += 1
-    return covered
-
-
-#: jieba 的字典是簡體導向的，對繁體會把「和」黏進鄰詞（#3238）。
-#: 這裡補上**左詞** —— 補左詞而不是補「和」的詞，因為問題是
-#: 「左邊那個詞被切斷，剩下的字跟『和』黏成另一個詞」：
+#: jieba 缺的繁體詞 —— #3238 沒查到的第二層根因（#3246）。
 #:
-#:     溫暖|和|改變  →  jieba: 溫/暖和/改變   （暖和 是真詞，所以它贏）
+#: jieba 的字典是簡體導向的。下面這些**繁體常用詞根本不在字典裡**，
+#: 於是在它的動態規劃裡，「和」黏住鄰字的分析是**沒有對手的**：
 #:
-#: 加了 `溫暖` 之後 jieba 會切成 溫暖/和/改變，而 `天氣很暖和` 仍然切成 暖和 ——
-#: 實測兩者都對。⛔ 這張表只放**毫無爭議的常用左詞**；
-#: 它不是通解（jieba 的繁體問題是長尾），是把語料裡量到的碰撞逐一補掉。
+#:     freq(和平)   = 7998    ← 正向對照，字典確實查得到
+#:     freq(和解)   = 394
+#:     freq(和服)   = 81
+#:     freq(解釋)   = None    ← 字典裡只有簡體的「解释」
+#:     freq(解決)   = None    ← 只有「解决」
+#:     freq(服務業) = None
+#:     freq(隊友)   = None
+#:     freq(好朋友) = None
+#:     freq(面臨)   = None
 #:
-#: ⚠️ 加詞之前先實測「加了會不會把真詞拆壞」—— 印出加前加後的斷詞比較，
-#: 不要只看要修的那一句。
-_JIEBA_LEFT_WORDS = (
-    "溫暖",   # 溫暖|和|改變 ×6（L0035/L0059/L0083）—— jieba 原本給 溫/暖和
+#: 所以「理解|和解|釋」「工作|和服|務業」不是被誤判，是**贏家只有一個候選**。
+#: 補上這些詞，正確的切法才有機會競爭。
+#:
+#: ⚠️ 加詞之前先實測「加了會不會把真詞拆壞」—— 跑全語料比對加前加後的判決，
+#:    不要只看要修的那一句。這張表只放**毫無爭議的常用繁體詞**。
+#: ⛔ 也要實測「加了到底有沒有用」。`嘴喙` 一度在這張表裡，實測加與不加**判決完全相同**
+#:    （`和尾羽` 是 jieba 字典裡 freq=6 的詞，攔住它的是斷詞那道門，不是這張表），
+#:    所以移掉了 —— 惰性的條目會讓人以為某個 case 有人在顧。
+_MISSING_TRADITIONAL_WORDS = (
+    "解釋",     # 理解|和|解釋       （字典只有「解释」）
+    "解決",     # 問題|和|解決       （只有「解决」）
+    "服務業",   # 勞力工作|和|服務業 （只有「服务业」）
+    "隊友",     # 不|和|隊友         （只有「队友」）
+    "好朋友",   # 你|和|好朋友
+    "面臨",     # 世界和平|面臨考驗  ← 少了它會切成 世界/和/平面/臨，把「和平」拆散
+    "溫暖",     # 溫暖|和|改變 ×6（L0035/L0059/L0083）—— jieba 原本給 溫/暖和
 )
-_jieba_primed = False
+
+#: 例外清單裡的多字詞（單字「和」本身不算例外）
+_EXCEPTION_WORDS = frozenset(w for w in _HE_EXCEPTIONS if len(w) > 1)
+_MAX_EXCEPTION_LEN = max((len(w) for w in _EXCEPTION_WORDS), default=0)
+
+#: `None` 代表還沒建；`False` 代表建不起來（jieba 沒裝），不要每次呼叫都重試。
+_tokenizer = None
+_tokenizer_lock = threading.Lock()
 
 
-def _prime_jieba(jieba_mod) -> None:
-    """把左詞灌進 jieba，只做一次。"""
-    global _jieba_primed
-    if _jieba_primed:
-        return
-    for w in _JIEBA_LEFT_WORDS:
+def _get_tokenizer():
+    """自己的一份 jieba 字典，只建一次。
+
+    用獨立的 `Tokenizer` 而不是全域的 `jieba.dt` —— 這裡會為了判「和」而動字典
+    （加繁體鄰詞、把「和」灌成高頻），那些調整不該外溢給任何其他使用者。
+
+    ⛔ **只建一份。** 一度是兩份（一份灌「和」、一份灌例外詞），那個版本有兩個缺陷，
+    而且同一個根因：
+
+      - 兩份分兩步賦值，**晚到的執行緒會看到半建好的狀態**。而漏掉的那一份
+        是例外詞那道門，它 fail-open（回空集合）→ `溫和`／`和好`／`和諧`
+        會被讀成連接詞。TTS 走 `asyncio.to_thread`，多個學生同時按朗讀就會進來。
+      - 兩份 50 萬條的 prefix dict 多吃 **+71 MB** 穩態 RSS，而後端的上限是 512Mi。
+        更糟的是 jieba 的初始化鎖是 per-instance，N 個執行緒同時首呼叫會各建各的
+        （實測 8 執行緒 → 16 份字典）。
+
+    現在只有一份，例外詞改用「對齊詞界」判定（見 `_covered_by_exception_word`），
+    不需要第二份字典。⛔ 賦值只有一次，別再拆成多步。
+
+    ⚠️ 加詞順序會影響 `add_word(freq=None)` 算出來的頻率（它走 `suggest_freq`，
+    而那讀當下的 `self.total`）。所以一律走有序的 tuple，不要走 set ——
+    set 的走訪順序每個 process 都可能不同，而產表必須可重現。
+    """
+    global _tokenizer
+    tk = _tokenizer
+    if tk is not None:
+        return tk or None
+    with _tokenizer_lock:
+        if _tokenizer is not None:
+            return _tokenizer or None
         try:
-            jieba_mod.add_word(w, freq=100000)
-        except Exception:  # pragma: no cover - 加詞失敗就維持原斷詞
-            logger.warning("jieba.add_word(%s) failed; leaving segmentation as-is", w)
-    # 「和」本身也灌一次（#3238）：它是單字功能詞，被黏進鄰詞就是 bug。
-    # 實測再修 12 處（大衛|和|歌利亞、農民|和|企業、新加坡|和|澳洲）、**0 處退步** ——
-    # 真的「和」詞靠第二道門（例外清單）擋，不靠斷詞。
-    try:
-        jieba_mod.add_word("和", freq=2_000_000)
-    except Exception:  # pragma: no cover
-        logger.warning("jieba.add_word(和) failed; leaving segmentation as-is")
-    _jieba_primed = True
+            import jieba
+        except ImportError:  # pragma: no cover - jieba is a hard dependency
+            logger.warning("jieba unavailable; leaving 和 uncorrected")
+            _tokenizer = False
+            return None
+        built = jieba.Tokenizer()
+        built.initialize()
+        for w in _MISSING_TRADITIONAL_WORDS:
+            built.add_word(w)
+        # 「和」是單字功能詞，被黏進鄰詞就是 bug（#3238）—— `和歌`（大衛和歌利亞）、
+        # `和瑪雅`（諾查丹瑪斯和瑪雅）、`和小紅` 都是這樣來的。
+        # ⛔ 這一行是 5 個位置的唯一守衛，有測試盯著，別當成可有可無的調校。
+        built.add_word("和", freq=2_000_000)
+        _tokenizer = built          # ← 單次賦值，觀察不到中間狀態
+        return _tokenizer
+
+
+def _covered_by_exception_word(text: str, i: int, boundaries: frozenset[int]) -> bool:
+    """位置 `i` 的「和」是不是落在一個**對齊詞界**的例外詞裡。
+
+    這是這次改動的核心。舊版掃子字串，而子字串**沒有詞界概念**：
+
+        困惑和好奇   字串裡有「和好」→ 整段被當成例外詞，但那裡是連接詞
+        理解和解釋   字串裡有「和解」→ 同上
+        壞事和好事   字串裡有「和好」→ 同上
+
+    改成「例外詞的頭尾都必須落在斷詞邊界上」之後，上面三句分別切成
+    困惑/和/好奇、理解/和/解釋、壞事/和/好事 —— 例外詞的尾端切在詞中間，
+    不算覆蓋；而 朋友/和/好、與/仇人/和解 的頭尾都在邊界上，照樣被擋住。
+
+    ⚠️ 判準是「頭尾都在邊界上」，**不是**「例外詞自己剛好是一個 token」。
+    後者太嚴：jieba 常把 `和好` 切成 `和`/`好` 兩個 token（`和好` 在它的字典裡
+    freq 是 0），那時例外詞仍然完整覆蓋了兩個 token，應該算覆蓋。
+    """
+    n = len(text)
+    for length in range(2, _MAX_EXCEPTION_LEN + 1):
+        for start in range(max(0, i - length + 1), i + 1):
+            if start + length > n:
+                continue
+            if (start in boundaries and start + length in boundaries
+                    and text[start:start + length] in _EXCEPTION_WORDS):
+                return True
+    return False
 
 
 def _he_conjunction_positions(text: str) -> frozenset[int]:
     """Indices of every 和 that should be read ㄏㄢˋ.
 
-    Three gates, because neither of the first two alone is enough:
+    三道門，每一道都擋不同的東西：
 
-      - Segmentation says whether 和 stands alone. In the lesson corpus every
-        standalone 和 (506 of 506, by POS tagging) is a conjunction. But jieba
-        ships a Simplified-oriented dictionary and mis-splits some Traditional
-        words — 溫和 comes back as 很溫/和 — so it over-reports. It also
-        cannot tell a proper noun it has never seen (鄭和, 大和) from a real
-        conjunction; both come back as two single-character tokens.
-      - The MOE exception list catches those. On its own it *under*-reports,
-        because substring matching crosses word boundaries: 「白天和黑夜」
-        contains the archaic 天和. The list is therefore curated to modern
-        words, and rare two-character entries are dropped for exactly that
-        reason (recorded in the data file) — 鄭和/大和/和麵/零和 were
-        wrongly dropped as "rare" when they are a proper noun, a proper
-        noun, a verb, and a modern loanword respectively, and jieba's
-        segmentation does not catch any of them, so they are back in the list.
-      - Neither gate has any notion of a 和 that names the character rather
-        than using it — 「和」, 〈和〉, a bare UI label. That is
-        _is_self_reference's job, checked per position below.
+      - **斷詞**說「和」是不是獨立的。它會過度回報（jieba 的字典是簡體導向的，
+        `溫和` 有時被切成 `很溫/和`），但它擋住一件別人擋不住的事：
+        **例外清單漏收的真和詞**。`和煦` 不在那 371 筆裡，是斷詞讓它保持完整。
+      - **例外清單**擋斷詞漏掉的。#3246 之前它用子字串比對，會跨詞界誤中 ——
+        現在要求對齊詞界，見 `_covered_by_exception_word`。
+      - **`_is_self_reference`** 擋指稱這個字本身的「和」（「和」、〈和〉、
+        單獨一個字的 UI 標籤）—— 前兩道門都沒有這個概念。
 
-    Any gate failing leaves the 和 alone, which is the safe direction: an
-    unchanged 和 sounds like today, a wrong one sounds like a mistake.
+    任何一道門攔下來就不動它，那是安全的方向：沒改的「和」聽起來跟今天一樣，
+    改錯的「和」聽起來就是個錯。
+
+    ⛔ `HMM=False`（#3238）。jieba 的 HMM 會從沒見過的字串自己造新詞，而它是
+    簡體語料訓練的 —— 對繁體課文它把「和」黏進鄰詞（`象鼻/蟲和黃面/蜂`、
+    `臺/灣和/周邊`、`狗狗/和貓/咪`）。這裡只問「和是否獨立」，HMM 造的是純噪音。
+    ⛔ 這個參數是 82 個位置的唯一守衛，有測試盯著 —— 不要「為了斷詞更自然」打開它。
     """
-    try:
-        import jieba
-    except ImportError:  # pragma: no cover - jieba is a hard dependency
-        logger.warning("jieba unavailable; leaving 和 uncorrected")
+    tk = _get_tokenizer()
+    if tk is None:
         return frozenset()
 
-    _prime_jieba(jieba)
-    excluded = _he_exception_spans(text)
-    positions = []
+    boundaries = {0}
+    standalone = []
     cursor = 0
-    # ⛔ `HMM=False`（#3238）。jieba 的 HMM 會從沒見過的字串**自己造新詞**，
-    #    而它是簡體語料訓練的 —— 對繁體課文它把「和」黏進鄰詞：
-    #
-    #        象鼻/蟲和黃面/蜂        臺/灣和/周邊        佳恩和子/皓
-    #        像/銅和鐵/做/的/牆      狗狗/和貓/咪
-    #
-    #    這裡問的只有一件很窄的事：**「和」是不是一個獨立的 token**。
-    #    對這個問題，HMM 造出來的新詞是純噪音。關掉之後上面全部切開，
-    #    而真的「和」詞仍然成立（`和尚`／`和解`／`和平`／`柔和`／`祥和`／`附和`
-    #    在字典裡，字典比對不受 HMM 影響；`隨和`／`溫和`／`和好`／`緩和`／`和諧`
-    #    會被切開，但那是第二道門（例外清單）本來就在擋的 —— 兩道門的分工沒變）。
-    #
-    #    ⚠️ `HMM=False` 會讓其他詞過度切碎（臺/灣、周/邊）。**這裡不在乎** ——
-    #    只用它回答「和是否獨立」，沒有別的地方吃這個斷詞結果。
-    #
-    #    實測（全庫 2,856 個「和」）：修正 **82 處**、**0 處退步**。
-    for token in jieba.cut(text, HMM=False):
-        if (
-            token == "和"
-            and cursor not in excluded
-            and not _is_self_reference(text, cursor)
-        ):
-            positions.append(cursor)
+    for token in tk.cut(text, HMM=False):
+        if token == "和":
+            standalone.append(cursor)
         cursor += len(token)
-    return frozenset(positions)
+        boundaries.add(cursor)
+    frozen = frozenset(boundaries)
+    return frozenset(
+        i for i in standalone
+        if not _covered_by_exception_word(text, i, frozen)
+        and not _is_self_reference(text, i)
+    )
