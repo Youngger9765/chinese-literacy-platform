@@ -86,7 +86,20 @@ PR Preview          Staging         Production
 |-------------|----------|---------|
 | Production | `lingoleap-frontend-xxx.run.app` | `lingoleap-backend-xxx.run.app` |
 | Staging | `lingoleap-frontend-staging-xxx.run.app` | `lingoleap-backend-staging-xxx.run.app` |
-| PR Preview | `lingoleap-frontend-pr-{N}-xxx.run.app` | `lingoleap-backend-pr-{N}-xxx.run.app` |
+| PR Preview | `lingoleap-frontend-issue-{N}-xxx.run.app` | `lingoleap-backend-issue-{N}-xxx.run.app` |
+
+> ⚠️ **preview 是 `-issue-{N}` 不是 `-pr-{N}`**（2026-09-18 更正）。這一行原本寫 `-pr-{N}`，
+> 那個名字底下**沒有任何服務**，照著打會得到一個不存在的網域。實際命名取自**分支名裡的
+> issue 編號**，用 `gcloud run services list --region asia-east1 --project lingoleap-dev`
+> 就看得到（實查：`lingoleap-frontend-issue-3149` / `-3221` / `-3223` / `-3257`）。
+>
+> ⚠️ **兩個 preview 的陷阱**：
+> 1. **preview frontend 對任何路徑都回 HTTP 200**（SPA fallback）—— 包括不存在的路徑。
+>    所以「preview 起來了沒」要**打 backend** 的 `/api/health`，打 frontend 永遠是 200。
+>    （同 `rules/security.md` 那條「curl 200 不算」，這裡是它在 preview 上的具體形狀。）
+> 2. **同一張票的兩個 PR 會共用同一個 service** —— 因為名字取自 issue 編號而不是 PR 編號。
+>    #3250 與 #3251 就真的撞出 `ABORTED: Conflict for resource … version mismatch`，
+>    而那代表**人在 preview 上看到的可能是另一個 PR 的 code**，且不會紅。詳見 #3242。
 
 ### CI/CD
 

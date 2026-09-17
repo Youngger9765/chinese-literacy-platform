@@ -114,13 +114,18 @@ export default function DifficultRuleExplainer() {
     return () => document.removeEventListener('keydown', onKey);
   }, [open]);
 
-  // 點外面關閉。⛔ 條件要含 trigger 本身，否則點 trigger 會先被這裡關掉、
-  //    再被 onClick 開起來，變成永遠關不掉
+  // 點外面關閉。⛔ 兩個「不算外面」的例外：
+  //   ① trigger 本身 —— 否則點 trigger 會先被這裡關掉、再被 onClick 開起來，
+  //      變成永遠關不掉
+  //   ② 整個 `[data-zhuyin-controls]` 控制群（門檻的 −／＋）—— 面板正在解釋門檻，
+  //      按一下就把解釋關掉是反效果。留著不關，調數字時面板上那排字會當場變多變少，
+  //      規則變成看得到的東西而不只是一句話
   useEffect(() => {
     if (!open) return;
     const onDown = (e: MouseEvent) => {
       const t = e.target as Node;
       if (panelRef.current?.contains(t) || triggerRef.current?.contains(t)) return;
+      if (t instanceof Element && t.closest('[data-zhuyin-controls]')) return;
       setOpen(false);
     };
     document.addEventListener('mousedown', onDown);
