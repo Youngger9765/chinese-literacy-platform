@@ -132,3 +132,34 @@ def test_the_workflow_that_runs_me_watches_the_files_i_guard():
     # 正向對照：確認真的解析到東西，不是空清單讓上面空過
     assert len(watched) >= 5, f"只解析到 {len(watched)} 條路徑，解析壞了"
 
+
+
+def test_frontend_test_dir_is_in_the_frontend_checks_filter():
+    """`frontend/tests/**` 必須在 `frontend-checks.yml` 的 paths-filter 裡。
+
+    這是 `test_cross_language_paths_are_in_the_ci_filter`（後端測試讀前端檔）的
+    對稱情形。同一個病在這個 repo 犯過四次，前三次的補救都寫在
+    `frontend-checks.yml` 的 filter 註解裡（`public/data`、`public/qa-shared`、
+    `scripts/`），每次都是「補上出事的那一格」。
+
+    🔴 第四次（#3242）：`e2eBackendEnv3242.test.ts` 讀 `tests/e2e/**` 的每一支
+    spec 與 helper，用來鎖「環境網址一定要有 env 出口」。`frontend/tests/`
+    原本完全不在 filter 裡 → 下一個**只改 spec**、把 `E2E_BACKEND_URL` 拔掉的 PR，
+    `frontend-checks.yml` 整支不會被觸發，而**檢查清單上不會出現那一列**，
+    看起來就是全綠。紅燈會被看到，不出現的那一列不會。
+
+    ⚠️ 原本想寫成通用版（掃所有 vitest 鎖引用到的路徑，逐一比對 filter），
+    寫出來之後它吐的是 `frontend/..`、`frontend/../../../backend/data/lessons`
+    這種垃圾路徑 —— 相對路徑要正確解析才有意義，而解析錯的門會亂叫、
+    然後被下一個人關掉。所以退回這個**窄而正確**的版本：
+    只釘住已經付過代價的那一格。要做通用版的話，先把路徑解析寫對再說。
+    """
+    doc = yaml.safe_load((WF / "frontend-checks.yml").read_text(encoding="utf-8"))
+    globs = doc["jobs"]["detect-changes"]["steps"][1]["with"]["filters"]
+
+    # ⛔ 正向對照：解析拿不到東西的話，下面的 in 比對永遠是假的通過
+    assert "frontend/src/**" in globs, "filter 解析壞了 —— 連 frontend/src/** 都找不到"
+
+    assert "frontend/tests/**" in globs, (
+        "frontend-checks.yml 的 paths-filter 少了 `frontend/tests/**` —— "
+        "e2eBackendEnv3242.test.ts 讀那個目錄，只改 spec 的 PR 不會跑這道門（#3242）")

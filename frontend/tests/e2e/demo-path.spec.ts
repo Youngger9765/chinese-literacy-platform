@@ -1,6 +1,9 @@
 import { test, expect } from './fixtures/pageerror-fixture';
 
-const STAGING_BACKEND = 'https://lingoleap-backend-staging-958347263320.asia-east1.run.app';
+// API 打 E2E_BACKEND_URL，預設 staging（行為與以前相同）。
+// ⚠️ 要跟 PLAYWRIGHT_BASE_URL 成對設 —— 只設一個等於畫面與 API 在兩個環境（#3242）。
+const BACKEND = process.env.E2E_BACKEND_URL
+  || 'https://lingoleap-backend-staging-958347263320.asia-east1.run.app';
 
 test.describe('5/1 Demo path on staging', () => {
   test('admin can seed demo students via API + button is reachable', async ({ page }) => {
@@ -36,7 +39,7 @@ test.describe('5/1 Demo path on staging', () => {
 
   test('listening API rejects random input and accepts paste-full-text', async ({ request }) => {
     // Login as student via API
-    const loginRes = await request.post(`${STAGING_BACKEND}/api/auth/login`, {
+    const loginRes = await request.post(`${BACKEND}/api/auth/login`, {
       data: { email: 'student@test.com', password: 'student1234' }
     });
     if (!loginRes.ok()) test.skip(true, `Cannot login as student@test.com: ${loginRes.status()}`);
@@ -47,12 +50,12 @@ test.describe('5/1 Demo path on staging', () => {
   });
 
   test('API direct demo seeding works (covers #989)', async ({ request }) => {
-    const loginRes = await request.post(`${STAGING_BACKEND}/api/auth/login`, {
+    const loginRes = await request.post(`${BACKEND}/api/auth/login`, {
       data: { email: 'admin@test.com', password: 'admin1234' }
     });
     expect(loginRes.ok()).toBeTruthy();
     const { access_token } = await loginRes.json();
-    const seedRes = await request.post(`${STAGING_BACKEND}/api/admin/seed/demo-students`, {
+    const seedRes = await request.post(`${BACKEND}/api/admin/seed/demo-students`, {
       headers: { Authorization: `Bearer ${access_token}` },
       data: { classroom_id: 1, count: 1, prefix: 'e2e' + Date.now().toString().slice(-6) }
     });
