@@ -275,6 +275,7 @@ const ImmersiveTopBar: React.FC = () => {
   const {
     zhuyinMode, zhuyinReady, setZhuyinMode,
     difficultThreshold, setDifficultThreshold,   // #3240
+    difficultSource, difficultCount,             // 判定法要讓人看得到（2026-09-18）
   } = useZhuyin();
 
   // #1460 — toolbox mode: single-shot practice from /tools picker.
@@ -397,6 +398,8 @@ const ImmersiveTopBar: React.FC = () => {
             onModeChange={setZhuyinMode}
             difficultThreshold={difficultThreshold}
             onThresholdChange={setDifficultThreshold}
+                difficultSource={difficultSource}
+                difficultCount={difficultCount}
           />
         )}
       </div>

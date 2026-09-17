@@ -245,6 +245,7 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
   const {
     zhuyinMode, zhuyinReady, setZhuyinMode,
     difficultThreshold, setDifficultThreshold,   // #3240
+    difficultSource, difficultCount,             // 判定法要讓人看得到（2026-09-18）
   } = useZhuyin();
 
   const [collapsed, setCollapsed] = useState<boolean>(() => {
@@ -479,6 +480,8 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
                 onModeChange={setZhuyinMode}
             difficultThreshold={difficultThreshold}
             onThresholdChange={setDifficultThreshold}
+                difficultSource={difficultSource}
+                difficultCount={difficultCount}
           />
             </div>
           )}

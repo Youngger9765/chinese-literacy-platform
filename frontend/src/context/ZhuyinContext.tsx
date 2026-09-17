@@ -125,10 +125,25 @@ function readStoredMode(): ZhuyinMode {
   }
 }
 
+/**
+ * 難字模式**這一刻**是靠哪一條規則在標字。
+ *
+ * 產品端 2026-09-18 的回饋：「原來難字 = 用戶自己唸錯過的字，那或許這個判斷法可以
+ * 讓人知道，這樣產品邏輯會更容易理解。」規則有兩條而使用者不知道自己看到的是哪一條
+ * —— Young 自己 dogfood 時就因此以為判定壞了（那是走到 `vocab` 那一層，見 #3247）。
+ *
+ * 所以把「現在生效的是哪一條」變成 context 的一部分，讓開關講得出來。
+ */
+export type DifficultSource = 'errors' | 'lesson' | 'vocab' | 'none';
+
 interface ZhuyinContextValue {
   /** 難字門檻：錯幾次算「還不會」（#3240，1–5） */
   difficultThreshold: number;
   setDifficultThreshold: (n: number) => void;
+  /** 難字這一刻是哪一條規則在標（給開關解釋用） */
+  difficultSource: DifficultSource;
+  /** 那一條規則現在收斂到幾個字 */
+  difficultCount: number;
   /** 3-state mode: 'none' | 'difficult' | 'all' */
   zhuyinMode: ZhuyinMode;
   zhuyinReady: boolean;
@@ -167,6 +182,8 @@ const ZhuyinContext = createContext<ZhuyinContextValue>({
   processZhuyin: (t) => t,
   processLines: () => null,
   difficultThreshold: 1,
+  difficultSource: 'none',
+  difficultCount: 0,
   setDifficultThreshold: () => {},
   processLinesSelective: () => null,
   loadLessonZhuyin: async () => {},
@@ -347,6 +364,19 @@ export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   } | null>(null);
   const answers = lessonTable?.answers ?? _EMPTY_ANSWERS;
   const hardChars = lessonTable?.hard ?? _EMPTY_HARD;
+
+  // ⛔ 這裡的三段順序**必須跟 `processLinesSelective` 裡那條 fallback 鏈一致**
+  //    （她的錯字 > 這課的難字 > 生詞）。兩邊分岔的話，開關上寫的規則會跟畫面上
+  //    真正標的字不一樣 —— 那比不解釋更糟。回歸鎖：hardCharRuleVisible.test.tsx
+  const difficultSource: DifficultSource =
+    errorChars.size > 0 ? 'errors'
+    : hardChars.size > 0 ? 'lesson'
+    : 'vocab';
+  const difficultCount =
+    difficultSource === 'errors' ? errorChars.size
+    : difficultSource === 'lesson' ? hardChars.size
+    : 0;   // 'vocab' 的數量要看當下那一課的生詞，開關拿不到 → 不報數字
+
 
   const loadLessonZhuyin = useCallback(async (lessonUid: string) => {
     // 先清掉上一課 —— 任何失敗路徑都不可以留著別課的難字（見上面的註解）
@@ -560,6 +590,8 @@ export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       zhuyinReady,
       difficultThreshold,
       setDifficultThreshold,
+      difficultSource,
+      difficultCount,
       zhuyinActive,
       isZhuyinAny,
       isZhuyinAll,
