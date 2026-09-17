@@ -163,3 +163,43 @@ def test_frontend_test_dir_is_in_the_frontend_checks_filter():
     assert "frontend/tests/**" in globs, (
         "frontend-checks.yml 的 paths-filter 少了 `frontend/tests/**` —— "
         "e2eBackendEnv3242.test.ts 讀那個目錄，只改 spec 的 PR 不會跑這道門（#3242）")
+
+
+#: 注音漂移門（run-ci.sh 的 Gate 11/12）的輸入必須在 spec-check 的 filter 上（#3253）。
+#:
+#: ⚠️ 票原本寫「`generate_lesson_zhuyin --check` 不在任何 workflow 裡」——
+#: 那句話字面上對（workflow 裡沒有它的檔名），但**效果上錯**：`spec-check.yml`
+#: 跑的是 `bash specs/run-ci.sh`，而那支裡面就是 Gate 11/12。
+#:
+#: 真正的洞是這門的**輸入**有四類不在 filter 上：`poyin_db.json`、出貨的
+#: processor、`backend/data/zhuyin/**`、產生器本身。改那幾樣的 PR 不會觸發
+#: spec-check，所以門在、那條路沒插電。這是這個 repo 同一個病的第五次。
+_ZHUYIN_GATE_INPUTS = (
+    "backend/data/zhuyin/**",
+    "backend/scripts/generate_lesson_zhuyin.py",
+    "backend/scripts/generate_char_difficulty.py",
+    "frontend/public/data/poyin_db.json",
+    "frontend/src/components/zhuyin/**",
+    "backend/data/lessons/**",
+)
+
+
+@pytest.mark.parametrize("path", _ZHUYIN_GATE_INPUTS)
+def test_zhuyin_drift_gate_inputs_are_in_the_spec_check_filter(path: str):
+    raw = (WF / "spec-check.yml").read_text(encoding="utf-8")
+    assert f"'{path}'" in raw, (
+        f"spec-check.yml 的 filter 沒有盯 {path} —— 改它的 PR 不會觸發 spec-check，\n"
+        f"而注音漂移門（run-ci.sh 的 Gate 11/12）就住在那支裡面。門會在，但那條路沒插電。"
+    )
+
+
+def test_the_drift_gate_really_runs_in_that_workflow():
+    """正向對照：上面那組在對一個**真的會跑那道門**的 workflow 斷言。
+
+    少了這條，有人把 `bash specs/run-ci.sh` 從 spec-check.yml 拿掉，上面六條照樣綠。
+    """
+    raw = (WF / "spec-check.yml").read_text(encoding="utf-8")
+    assert "specs/run-ci.sh" in raw, "spec-check.yml 不再跑 run-ci.sh —— 上面那組在守一個空的門"
+    runci = (WF.parents[1] / "specs" / "run-ci.sh").read_text(encoding="utf-8")
+    for script in ("generate_lesson_zhuyin.py --check", "generate_char_difficulty.py --check"):
+        assert script in runci, f"run-ci.sh 裡沒有 {script} —— 漂移門不在了"

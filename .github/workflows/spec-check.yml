@@ -55,6 +55,16 @@ jobs:
               # orphans the entire TTS cache used to be the one edit this filter did not
               # watch, leaving test_tts_cache_fingerprint_spec.py unrun (#2742).
               - 'backend/data/tts/**'
+              # 注音的漂移門（run-ci.sh 的 Gate 11/12）在這支裡面跑，但它的**輸入**
+              # 原本有四個不在這張 filter 上：改 `poyin_db.json`、改出貨的 processor、
+              # 改 `backend/data/zhuyin/**`、或改產生器本身的 PR，整支 spec-check
+              # 根本不會觸發 —— 門在，而最可能弄壞它的那幾種編輯剛好那條路沒插電。
+              # 這個 repo 同一個病的第五次（#2925 / #3251 / #3253）。
+              - 'backend/data/zhuyin/**'
+              - 'backend/scripts/generate_lesson_zhuyin.py'
+              - 'backend/scripts/generate_char_difficulty.py'
+              - 'frontend/public/data/poyin_db.json'
+              - 'frontend/src/components/zhuyin/**'
               - 'backend/specs/**'
               - 'scripts/story_structure_qa.py'
               - 'scripts/build_keypoints_qa_manifest.py'

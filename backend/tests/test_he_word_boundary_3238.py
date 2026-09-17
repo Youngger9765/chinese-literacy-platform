@@ -133,7 +133,13 @@ def test_移出清單的詞都記了理由():
     d = json.load(open(p, encoding="utf-8"))
     dropped = d.get("_dropped_boundary_collision_3238") or {}
     words = {k for k in dropped if not k.startswith("_")}
-    assert len(words) >= 9, f"只記了 {len(words)} 個：{words}"
+    # ⚠️ 這裡原本是 `len(words) >= 9` —— 寫死了「當時剛好移出 9 個」。
+    #    #3252 把其中四個（求和／和善／暖和／太和）放回去之後它就紅了，而那**不是回歸**：
+    #    詞界對齊之後那四個放回來是 0 處變動（實測，含正向對照）。
+    #    所以這條改成鎖**意圖**（每個被移出的詞都要有寫下來的理由），
+    #    「現在有哪幾個詞、為什麼還留著」交給 `test_he_words_back_3252.py`
+    #    的具名斷言 —— 那條會說出理由，這條只會說出數字。
+    assert words, "移出清單被清空了 —— 那些詞的判定理由會跟著消失"
     for w in words:
         assert w not in d["words"], f"「{w}」同時在 words 與移出清單裡 —— 矛盾"
         assert len(dropped[w]) > 20, f"「{w}」的理由太短，寫清楚為什麼"
