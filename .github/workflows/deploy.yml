@@ -60,6 +60,16 @@ jobs:
           docker push "${{ env.REGISTRY }}/backend:prod-${{ github.sha }}"
           docker push "${{ env.REGISTRY }}/backend:prod-latest"
 
+      # ⚠️ 下面那個 deploy 的 --memory 是 1Gi 不是 512Mi（#3266）。
+      #    512Mi 下近 30 天 OOM 三次（2026-08-29 / 09-02 / 09-16，三個不同 revision），
+      #    每次都伴隨「The request was aborted because there was no available instance」
+      #    —— 使用者真的看到失敗：
+      #      2026-09-16T12:18  Memory limit of 512 MiB exceeded with 514 MiB used
+      #      2026-09-16T12:19  9x no available instance
+      #    這個後端常駐要放注音表（8.3 MB）＋ jieba 字典＋字型讀音表＋課文 YAML 的
+      #    lru_cache，514/512 的餘裕本來就是負的。
+      #    不要為了省錢調回 512Mi —— 差額量級是每月美分，代價是拒絕服務。
+      #    鎖：backend/specs/test_workflow_path_filters_spec.py（test_backend_memory_is_at_least_1gi）
       - name: Deploy backend to Cloud Run
         run: |
           gcloud run deploy ${{ env.BACKEND_SERVICE }} \
@@ -67,7 +77,7 @@ jobs:
             --platform managed \
             --region ${{ env.REGION }} \
             --project ${{ env.PROJECT_ID }} \
-            --memory=512Mi \
+            --memory=1Gi \
             --cpu=1 \
             --min-instances=0 \
             --max-instances=3 \
