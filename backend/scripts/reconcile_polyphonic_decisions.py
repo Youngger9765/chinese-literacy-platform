@@ -214,6 +214,11 @@ def main() -> None:
         if ch == "個" and cur == "ㄍㄜ˙" and llm == "ㄍㄜˋ":
             buckets["產品政策：量詞個輕聲"] += 1
             continue
+        # 疊字的第二個字讀輕聲：太太／奶奶／謝謝／爸爸。
+        # 模型會給完整聲調（250 處），那不是發現，是它沒套輕聲慣例。
+        if c and c["prev"] == ch and cur.endswith("˙") and not llm.endswith("˙"):
+            buckets["產品政策：疊字第二字輕聲"] += 1
+            continue
         buckets["其他 → 人判"] += 1
         key = (ch, cur, llm)
         queue[key] += 1

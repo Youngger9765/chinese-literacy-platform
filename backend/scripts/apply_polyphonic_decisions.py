@@ -1,26 +1,32 @@
 #!/usr/bin/env python3
-"""把已核可的破音字裁決寫回逐課注音表。
+"""把逐筆寫死的注音修正套回課文表。
 
-這支刻意**不會自己決定任何事**。它只做兩件機械的事：
+## 為什麼是位置清單，不是規則
 
-只有**一條寫入路徑**：套用 `polyphonic_approvals.json` 裡列名的類別。
+課文是封閉的 —— 179 課、40,529 個字串、266,351 個破音字位置都在 git 裡。
+所以「哪個位置該讀什麼」的答案是**一份清單**，不是一套推論。
 
-⛔ 曾經有第二條（`--rules`，自動套用一/不 的變調）。它被刪掉不是因為粒度不夠，
-   是因為它自己抄了一份 sandhi，而那份用「從決策檔查下一個字的讀音」的舊查法 ——
-   決策檔只有破音字，「一杯」的杯、「不夠」的夠都不在裡面。乾跑實測：3,700 個
-   規劃寫入有 **3,527 個（95.3%）** 會把本來正確的表覆寫成錯的預設值。
-   同一份邏輯散在三個檔案、修好一份另外兩份繼續帶 bug，就是這個形狀。
+先前這支腳本走過兩條規則路：
 
-為什麼要核可清單而不是「LLM 說改就改」
-──────────────────────────────────
-窮舉的 LLM 給的是**提案**。它在 L0018 抓到 25 處真錯（長高讀成 ㄔㄤˊ），
-但同一批提案裡也有它自己判錯的（因為 ㄔㄤˊ 也是「長」的合法讀音，
-所以值域約束擋不住這一類）。核可清單讓「哪一類改動被接受」進 git、
-被 review、被追溯 —— 而套用本身是零判斷的。
+  1. `--rules` 自動套用一／不 的變調。乾跑實測 3,700 個規劃寫入有 3,527 個（95.3%）
+     會把本來正確的表覆寫成錯的預設值。已刪除。
+  2. 核可清單用 `prev`/`next` 白名單當單位（例：「目的」→ ㄉㄧˋ，除了前字是
+     題／科／節／書／帳／條／數／曲／劇 的時候）。那同樣是通解 —— 我替**沒看過的詞**
+     寫了規則，而那些字有一半是我憑印象列的。已刪除。
 
-表的結構：`data/lessons/L*/v*/zhuyin.json` 的 `texts[]` 每筆有 `text` 與 `ssz`，
-`ssz` 每個 UTF-16 單位一個字元：`.` = 主讀音（slot 0000），數字 d = slot ss0d。
-所以「改讀音」就是把那個字元換成值等於目標讀音的那個 slot 代碼。
+現在只有一條路徑：讀 `data/zhuyin/polyphonic_fixes.json`，逐筆比對，逐筆替換。
+它只會動到**已經被人看過的那 434 個位置**，不可能擴散。
+
+## 鍵
+
+`(sha256(句子)[:16], UTF-16 位置)`。句子給定，位置就唯一 ——
+不需要分詞、不需要 n-gram、不需要猜詞界。「加長高度」之所以會破壞 n-gram 鍵，
+就是因為兩個字的鍵不知道詞在哪裡結束；一整句加一個位移沒有這個問題。
+
+## 用法
+
+    python3 backend/scripts/apply_polyphonic_decisions.py          # 只列計畫
+    python3 backend/scripts/apply_polyphonic_decisions.py --write  # 真的寫
 """
 from __future__ import annotations
 
@@ -33,13 +39,12 @@ from pathlib import Path
 _BACKEND = Path(__file__).resolve().parents[1]
 _LESSONS = _BACKEND / "data" / "lessons"
 _SLOTS_PATH = _BACKEND / "data" / "zhuyin" / "font_slot_readings.json"
-_DECISIONS = _BACKEND / "data" / "zhuyin" / "polyphonic_decisions.jsonl"
-_APPROVALS = _BACKEND / "data" / "zhuyin" / "polyphonic_approvals.json"
-
-NEUTRAL_TAIL = set("了的得麼著子頭們嗎呢吧啊喔呀哦")
+_FIXES = _BACKEND / "data" / "zhuyin" / "polyphonic_fixes.json"
 
 
 def u16(text: str) -> list[str | None]:
+    """UTF-16 單位序列。非 BMP 字元佔兩格，第二格填 None，
+    這樣索引才跟前端的 `str[i]` 對得上。"""
     out: list[str | None] = []
     for ch in text:
         out.append(ch)
@@ -53,50 +58,11 @@ def sentence_key(text: str) -> str:
 
 
 def code_for(slots: dict, char: str, reading: str) -> str | None:
-    """讀音 → ssz 裡該放的那個字元。畫不出來的回 None（呼叫端必須拒收）"""
+    """讀音 → ssz 裡該放的字元。字型畫不出來的回 None，呼叫端必須拒收。"""
     for slot, value in slots.get(char, {}).items():
         if value == reading:
             return "." if slot == "0000" else slot[-1]
     return None
-
-
-def load_decisions() -> list[dict]:
-    if not _DECISIONS.is_file():
-        return []
-    return [json.loads(l) for l in _DECISIONS.read_text(encoding="utf-8").splitlines() if l.strip()]
-
-
-def wanted_changes(slots: dict) -> dict:
-    """回 {(sha, u16): (char, 目標讀音)}，只含核可清單列名的類別"""
-    rows = load_decisions()
-    approvals = set()
-    if _APPROVALS.is_file():
-        for entry in json.loads(_APPROVALS.read_text(encoding="utf-8"))["approved"]:
-            approvals.add((entry["char"], entry["from"], entry["to"]))
-
-    out: dict = {}
-    for r in rows:
-        ch, cur, new = r["char"], r["current"], r["reading"]
-        if ch in "一不":
-            # ⛔ 「一」「不」永遠不走這條路。變調要看下一個字的實際聲調，
-            #    而那份資訊在 reconcile_polyphonic_decisions.py 的 load_context()，
-            #    不在決策檔裡。這支曾經自己抄過一份 sandiff，用的是「從決策檔查
-            #    下一個字」的舊查法 —— 乾跑實測 3,700 個規劃寫入有 3,527 個（95.3%）
-            #    會把本來正確的表覆寫成錯的預設值（「一杯」ㄧˋ→ㄧ、「還不夠」ㄅㄨˊ→ㄅㄨˋ）。
-            #    同一個 bug 在三個檔案各一份、只修了一份，就是這個形狀。
-            continue
-        if new == cur:
-            continue
-        # 產品政策擋掉的一律不動（#3238 的「和」、詞尾輕聲、量詞「個」）
-        if ch == "和" and cur == "ㄏㄢˋ" and new == "ㄏㄜˊ":
-            continue
-        if ch in NEUTRAL_TAIL and cur.endswith("˙") and not new.endswith("˙"):
-            continue
-        if ch == "個" and cur == "ㄍㄜ˙" and new == "ㄍㄜˋ":
-            continue
-        if (ch, cur, new) in approvals:
-            out[(r["sha"], r["u16"])] = (ch, new)
-    return out
 
 
 def main() -> int:
@@ -105,17 +71,17 @@ def main() -> int:
     a = ap.parse_args()
 
     slots = json.loads(_SLOTS_PATH.read_text(encoding="utf-8"))["slots"]
-    changes = wanted_changes(slots)
-    if not changes:
-        print("沒有要套用的改動")
-        return 0
+    fixes = json.loads(_FIXES.read_text(encoding="utf-8"))["fixes"]
+    want: dict[tuple[str, int], dict] = {(f["sha"], f["u16"]): f for f in fixes}
 
     summary: collections.Counter = collections.Counter()
-    undrawable: collections.Counter = collections.Counter()
     touched: dict[Path, int] = {}
+    problems: list[str] = []
+    seen: set[tuple[str, int]] = set()
 
     for path in sorted(_LESSONS.glob("L*/v*/zhuyin.json")):
         data = json.loads(path.read_text(encoding="utf-8"))
+        edits: list[tuple] = []
         dirty = 0
         for t in data.get("texts") or []:
             text, ssz = t.get("text"), t.get("ssz")
@@ -127,39 +93,61 @@ def main() -> int:
             sha = sentence_key(text)
             chars = list(ssz)
             for i in range(len(chars)):
-                hit = changes.get((sha, i))
-                if not hit:
+                fix = want.get((sha, i))
+                if fix is None:
                     continue
-                ch, want = hit
-                if units[i] != ch:          # 位置對不上就不動（不該發生，但不猜）
+                seen.add((sha, i))
+                if units[i] != fix["char"]:
+                    problems.append(
+                        f"{fix['lesson']} {sha}@{i}: 清單寫「{fix['char']}」"
+                        f"但課文是「{units[i]}」—— 拒絕替換")
                     continue
-                code = code_for(slots, ch, want)
+                code = code_for(slots, fix["char"], fix["to"])
                 if code is None:
-                    undrawable[(ch, want)] += 1
+                    problems.append(
+                        f"{fix['lesson']} {sha}@{i}: 字型畫不出「{fix['char']}」的"
+                        f"{fix['to']} —— 拒絕替換")
                     continue
                 if chars[i] != code:
                     chars[i] = code
                     dirty += 1
-                    summary[(ch, want)] += 1
-            if dirty:
-                t["ssz"] = "".join(chars)
-        if dirty:
+                    summary[(fix["char"], fix["from"], fix["to"])] += 1
+            new_ssz = "".join(chars)
+            if new_ssz != ssz:
+                edits.append((text, t.get("n"), ssz, new_ssz))
+        if edits:
             touched[path] = dirty
             if a.write:
-                path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n",
-                                encoding="utf-8")
+                # ⛔ 不用 json.dump 重寫整檔 —— 縮排與鍵序不同會讓幾百個位置的改動
+                #    變成十幾萬行插入，真正的改動淹沒在裡面沒人 review 得動。
+                # ⛔ 也不能只用 ssz 當定位鍵 —— 短句的 ssz 大量重複
+                #    （L0001 裡 "....." 有 19 筆共用），會改到別句。
+                raw = path.read_text(encoding="utf-8")
+                for text_v, n_v, old_ssz, new_ssz in edits:
+                    head = (f'"text":{json.dumps(text_v, ensure_ascii=False)},'
+                            f'"n":{n_v},"ssz":')
+                    needle = f'{head}"{old_ssz}"'
+                    if raw.count(needle) < 1:
+                        raise SystemExit(f"{path.name}: 定位鍵找不到 —— 拒絕替換")
+                    raw = raw.replace(needle, f'{head}"{new_ssz}"')
+                path.write_text(raw, encoding="utf-8")
 
+    missing = set(want) - seen
     verb = "已寫入" if a.write else "計畫"
-    print(f"{verb}：{sum(touched.values()):,} 個位置 · {len(touched)} 個課文檔")
-    for (ch, want), n in summary.most_common(25):
-        print(f"   {n:5,}× 「{ch}」 → {want}")
-    if undrawable:
-        print("\n🔴 字型畫不出來，拒絕套用：")
-        for (ch, want), n in undrawable.most_common():
-            print(f"   {n:,}× 「{ch}」 → {want}")
-    if not a.write:
+    print(f"清單 {len(want):,} 個位置 · {verb} {sum(touched.values()):,} 個 · "
+          f"{len(touched)} 個課文檔")
+    for (ch, frm, to), n in summary.most_common():
+        print(f"   {n:5,}× 「{ch}」 {frm} → {to}")
+    if missing:
+        print(f"\n🔴 清單裡有 {len(missing):,} 個位置在課文表裡找不到"
+              f"（句子被改過或課文被重抽？）")
+    if problems:
+        print(f"\n🔴 拒絕替換 {len(problems)} 筆:")
+        for p in problems[:10]:
+            print(f"   {p}")
+    if not a.write and (summary or missing or problems):
         print("\n（這是計畫。要真的改加 --write）")
-    return 0
+    return 1 if (missing or problems) else 0
 
 
 if __name__ == "__main__":
