@@ -19,6 +19,13 @@ const SRC = readFileSync(
   'utf8',
 );
 
+// 頂欄的《課名》是同一個病的第二個位置 —— staging 真瀏覽器實測：
+// 課文頁的 <h1> 修好之後，頂欄那一處還是 slot 0000（ㄔㄤˊ）。
+const SHELL = readFileSync(
+  join(__dirname, '..', '..', 'layout', 'AppShell.tsx'),
+  'utf8',
+);
+
 describe('#3269 標題走同一張注音表', () => {
   it('標題的 <h1> 不是裸 story.title', () => {
     // 抓 font-headline 那個 h1 到它的結束標籤
@@ -36,5 +43,23 @@ describe('#3269 標題走同一張注音表', () => {
     const memo = SRC.match(/const zhuyinTitle[\s\S]*?\);/);
     expect(memo, '找不到 zhuyinTitle 的計算').toBeTruthy();
     expect(memo![0]).toMatch(/zhuyinActive\s*\?\s*processZhuyin\(story\.title\)/);
+  });
+});
+
+describe('#3269 頂欄的《課名》也走同一張表', () => {
+  it('不是裸 selectedStory.title', () => {
+    const m = SHELL.match(/《\{[^}]+\}》/);
+    expect(m, '找不到頂欄的《課名》—— 結構變了要更新這條斷言').toBeTruthy();
+    expect(
+      m![0].includes('selectedStory.title'),
+      '頂欄直接吐 selectedStory.title → 繼承了注音字型卻用字型預設讀音',
+    ).toBe(false);
+  });
+
+  it('經過 processZhuyin，且 gate 是 zhuyinActive', () => {
+    const memo = SHELL.match(/const navTitle[\s\S]*?\);/);
+    expect(memo, '找不到 navTitle 的計算').toBeTruthy();
+    expect(memo![0]).toMatch(/zhuyinActive/);
+    expect(memo![0]).toMatch(/processZhuyin\(selectedStory\.title\)/);
   });
 });
