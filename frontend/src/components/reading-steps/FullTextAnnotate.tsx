@@ -440,7 +440,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
       ? sectionSlugForStep(story.manifestSections, qrEffectiveStep, moduleForStep)
       : null) ?? qrSectionSlug ?? null;
   // Zhuyin state from global context
-  const { isZhuyinAny, zhuyinActive, processLinesSelective, loadLessonZhuyin } = useZhuyin();
+  const { isZhuyinAny, zhuyinActive, processZhuyin, processLinesSelective, loadLessonZhuyin } = useZhuyin();
   // #3218：注音改成讀這一課的逐字對照表；查不到的文字才回去自己算。
   // ⛔ optional call —— 既有測試用 `vi.mock` 給的是**部分** context
   // （只有 useZhuyin 需要的那幾個欄位），少了這個 `?.` 會讓 10 個測試檔炸。
@@ -592,6 +592,13 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
   const zhuyinParagraphs = useMemo(
     () => processLinesSelective(story.content, vocabWords),
     [story.content, vocabWords, processLinesSelective]
+  );
+
+  // #3269：標題跟本文走同一張表。gate 用 `zhuyinActive` 而不是 `isZhuyinAny`，
+  // 因為「難字」模式不該把整個標題標滿 —— 跟上面字型的 gate 保持一致。
+  const zhuyinTitle = React.useMemo(
+    () => (zhuyinActive ? processZhuyin(story.title) : story.title),
+    [zhuyinActive, processZhuyin, story.title]
   );
 
   // ── Persist annotations (localStorage — always, for offline cache) ────────
@@ -1110,12 +1117,20 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
                 'all' mode annotated it. Narrowing that scope to <article> below
                 dropped the title out of it -- restore it explicitly here rather
                 than let 'all' mode quietly lose the heading. Still gated on
-                zhuyinActive, so 'difficult' does NOT blanket-annotate it. */}
+                zhuyinActive, so 'difficult' does NOT blanket-annotate it.
+
+                #3269: restoring the FONT was not enough. The heading was handed
+                the raw string, so every character fell through to the font's
+                DEFAULT reading -- which is how 《長高的祕密》 showed 長 as ㄔㄤˊ on
+                the most visible line of the page while the body below it, which
+                goes through processLinesSelective, read ㄓㄤˇ correctly. A parent
+                doing dogfood screenshotted exactly this heading. The title needs
+                the same table lookup as the body, not just the same font. */}
             <h1
               className="font-headline font-medium text-3xl md:text-4xl text-on-surface tracking-tight leading-tight"
               style={{ fontFamily: fontForZhuyin(zhuyinActive) }}
             >
-              {story.title}
+              {zhuyinTitle}
             </h1>
           </div>
 
