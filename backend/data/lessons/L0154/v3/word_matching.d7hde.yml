@@ -5,11 +5,11 @@ word_matching:
   instruction: 以下是原文與白話文的對照。請依照文意，寫出方框文字的白話意思。
   items:
   - index: 1
-    classical: 晉平公問於祁黃羊曰：「南陽無令，其誰可而爲之？」
+    classical: 晉平公問於祁黃羊曰：「南陽無令，其誰可而為之？」
     boxed_terms:
     - 令
     - 可
-    - 爲
+    - 為
     vernacular: 晉平公問祁黃羊說：「南陽出缺（　），誰（　）（　）這個職位？」
     blanks:
     - answer: 縣令
@@ -29,7 +29,7 @@ word_matching:
     - answer: 嗎
     - answer: 的
   - index: 3
-    classical: 居有間，平公又問祁黃羊曰：「國無尉，其誰可而爲之？」
+    classical: 居有間，平公又問祁黃羊曰：「國無尉，其誰可而為之？」
     boxed_terms:
     - 間
     - 可

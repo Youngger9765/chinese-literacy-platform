@@ -19,7 +19,7 @@ vocab_application:
     stem: 她厭倦了都市嘈雜的生活，決定隱居山林，過著（　）的生活。
     answer: G
   - index: 2
-    stem: 老人對兒孫說，歳月（　），你們一定要珍惜和家人相處的機會。
+    stem: 老人對兒孫說，歲月（　），你們一定要珍惜和家人相處的機會。
     answer: C
   - index: 3
     stem: 因為颱風，學校的校舍工程進度嚴重（　），恐怕無法及時完工。
@@ -42,6 +42,6 @@ vocab_application:
   notes:
     option_bank: 10 個代號對應 8 道小題；H.奪門而出、J.神祇未被任何一題用到。語詞框的 11 個裡「倫理」沒有進代號表。
     answer_carrier: 橘色手寫代號（PDF p4）；文字層的括號內已填有同樣的代號
-    items: 第 (2) 題原稿寫「歳月」（歳，U+6B33），不是常用的「歲」。照原樣抄。
+    items: 第 (2) 題原稿寫「歲月」（歲，U+6B33），不是常用的「歲」。照原樣抄。
   slug: tennj
   text_ref: 9yvqf

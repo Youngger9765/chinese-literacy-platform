@@ -131,3 +131,66 @@ def test_the_reported_lesson_is_covered(fixes):
         f"L0018 的「長」應該全部改成 ㄓㄤˇ，實際有 "
         f"{collections.Counter(f['to'] for f in l0018)}"
     )
+
+
+#: 字型畫不出來、而且**刻意不正規化**的字。逐課完整性只容許這 8 處。
+#: 2026-09-18：課文原本有 19 種字型沒有的字（77 處），16 種正規化成標準體
+#: （爲→為、絶→絕、脱→脫、纠→糾、説→說、没→沒、靭→韌、歳→歲、条→條、
+#:  吿→告、啓→啟、点→點、响→響、麽→麼、鈎→鉤、着→著，共 69 處）。
+#: 這三種留著，理由寫在下面 —— 它們不是錯字。
+FONT_GAP: dict[str, str] = {
+    "吔": "台灣口語語尾（「很ㄙㄨㄥˊ吔」「缺人吔」），刻意用字不是異體字",
+    "凃": "人名（凃文），不改別人的名字",
+    "軁": "台語漢字（諺語「痟貪軁雞籠」）",
+}
+FONT_GAP_TOTAL = 8
+
+
+def test_every_character_in_every_lesson_has_a_reading():
+    """逐課完整性：每一課的每一個漢字，表上指到的槽位在字型裡都畫得出來。
+
+    這就是「窮舉」的驗收條件 —— 逐課都有該上去的注音，而那張表就是該課的 SOT。
+    唯一容許的缺口是 FONT_GAP 那三種字（8 處），而且**數量寫死**：
+    多出一處就紅，不管是課文新增了字型沒有的字、或有人加了新的異體字。
+    """
+    all_readings = _BACKEND / "data" / "zhuyin" / "font_all_readings.json"
+    if not all_readings.is_file():
+        pytest.skip(f"{all_readings.name} 不在（由 extract_font_readings.py 產生）")
+    raw = json.loads(all_readings.read_text(encoding="utf-8"))
+    readings = raw.get("slots", raw)
+
+    def is_cjk(ch: str | None) -> bool:
+        return bool(ch) and (("一" <= ch <= "鿿") or ("㐀" <= ch <= "䶿"))
+
+    gaps: collections.Counter = collections.Counter()
+    misaligned: list[str] = []
+    for path in sorted(_LESSONS.glob("L*/v*/zhuyin.json")):
+        data = json.loads(path.read_text(encoding="utf-8"))
+        uid = path.parts[-3]
+        for t in data.get("texts") or []:
+            text, ssz = t.get("text"), t.get("ssz")
+            if not isinstance(text, str) or not isinstance(ssz, str):
+                continue
+            units = _u16(text)
+            if len(units) != len(ssz):
+                misaligned.append(f"{uid} {t.get('section')}")
+                continue
+            for i, ch in enumerate(units):
+                if not is_cjk(ch):
+                    continue
+                slot = "0000" if ssz[i] == "." else f"ss0{ssz[i]}"
+                if readings.get(ch, {}).get(slot) is None:
+                    gaps[ch] += 1
+
+    assert not misaligned, (
+        f"{len(misaligned)} 個字串的 ssz 長度跟文字對不上 —— 那會讓整段注音位移："
+        f"{misaligned[:5]}"
+    )
+    unexpected = {ch: n for ch, n in gaps.items() if ch not in FONT_GAP}
+    assert not unexpected, (
+        f"課文出現字型畫不出來的新字：{unexpected}。"
+        f"要嘛正規化成標準體，要嘛加進 FONT_GAP 並寫明為什麼不改"
+    )
+    assert sum(gaps.values()) == FONT_GAP_TOTAL, (
+        f"字型缺口從 {FONT_GAP_TOTAL} 處變成 {sum(gaps.values())} 處：{dict(gaps)}"
+    )
