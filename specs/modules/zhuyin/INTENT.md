@@ -36,6 +36,12 @@ owns_data:
   - backend/data/zhuyin/lesson_corrections.json
   # #3247：字 → [首見年級, 出現在幾篇相異課文]。難字模式的 fallback 讀它。
   - backend/data/zhuyin/char_difficulty.json
+  # #3269：逐筆寫死的注音修正（429 個位置 / 123 課）。
+  # 鍵是 (sha256(句子)[:16], UTF-16 位置) —— 句子給定，位置就唯一，不需要猜詞界。
+  # 這是唯一的寫入來源；規則式的核可路徑刻意刪掉了（會替沒看過的詞訂規則）。
+  - backend/data/zhuyin/polyphonic_fixes.json
+  # #3269：破音字位置的稽核輸出（哪些字是破音字、出現在哪）。唯讀，不決定讀音。
+  - backend/data/zhuyin/polyphonic_audit.json
   - frontend/public/data/poyin_db.json
   - frontend/public/fonts/BpmfZihiSerif-Regular.ttf
   - frontend/src/components/zhuyin/__fixtures__/fontReadings.generated.json
