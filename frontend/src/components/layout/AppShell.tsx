@@ -275,7 +275,19 @@ const ImmersiveTopBar: React.FC = () => {
   const {
     zhuyinMode, zhuyinReady, setZhuyinMode,
     difficultThreshold, setDifficultThreshold,   // #3240
+    zhuyinActive, processZhuyin,                 // #3269
   } = useZhuyin();
+
+  // #3269：頂欄的《課名》繼承了 <article> 外層的注音字型，但從來沒查過那張表 ——
+  // 所以每個字掉到字型的**預設讀音**（《長高的祕密》的長顯示成 ㄔㄤˊ）。
+  // 同一個病在課文頁的 <h1> 上，家長 dogfood 截到的就是那一行。
+  // 字型會不會套是別處決定的，這裡只負責「有套字型就要查表」。
+  const navTitle = React.useMemo(
+    () => (selectedStory && zhuyinActive
+      ? processZhuyin(selectedStory.title)
+      : selectedStory?.title ?? ''),
+    [selectedStory, zhuyinActive, processZhuyin],
+  );
 
   // #1460 — toolbox mode: single-shot practice from /tools picker.
   // Hide multi-step navigation (dots + arrows) and route the back button
@@ -349,7 +361,7 @@ const ImmersiveTopBar: React.FC = () => {
               className="text-on-surface-variant truncate"
               title={selectedStory.title}
             >
-              《{selectedStory.title}》
+              《{navTitle}》
             </span>
           )}
           {currentStep && (
