@@ -1,7 +1,7 @@
 {
   "uid": "L0095",
   "gate_version": 2,
-  "docx_sha256": "568c-f377-3a48-8e87",
+  "docx_sha256": "8bc2-f5ad-d0b9-04a0",
   "modules": {
     "comprehension.cdpnx": {
       "yaml_sha256": "7fde-47df-9bc0-d612",
