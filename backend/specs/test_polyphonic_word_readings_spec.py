@@ -196,3 +196,65 @@ def test_font_gap_does_not_grow():
         f"（上限 {FONT_GAP_CHARS} 種 / {FONT_GAP_TOTAL} 處）：{dict(gaps)}。"
         f"課文新增了字型畫不出來的字 → 要嘛換標準體，要嘛連同原稿重新出忠實度證明"
     )
+
+
+#: 「一」「不」變調的詞層級抽點。(詞, 目標字在詞裡第幾個, 該讀什麼, 前字排除)
+#: ⚠️ `not_prev` 是必要的，而且是實測出來的：比對字串「一個」會命中「第一個」，
+#:    而序數的「一」讀基本調 ㄧ —— 不排除的話這條鎖會把正確的讀音報成違規
+#:    （2026-09-19 實測 38 處）。這是子字串比對不等於詞，第三次咬到我。
+SANDHI_CASES: list[tuple[str, int, str, set]] = [
+    ("一個", 0, "ㄧˊ", {"第", "一"}),   # 個底層四聲；「唯一一個」的前字是一
+    ("一次", 0, "ㄧˊ", {"第"}),
+    ("一件", 0, "ㄧˊ", set()),
+    ("一半", 0, "ㄧˊ", set()),
+    ("一樣", 0, "ㄧˊ", {"第"}),
+    ("一天", 0, "ㄧˋ", {"第"}),
+    ("一般", 0, "ㄧˋ", set()),
+    ("一起", 0, "ㄧˋ", {"第"}),
+    ("第一名", 1, "ㄧ", set()),          # 序數不變調
+    ("第一個", 1, "ㄧ", set()),
+    ("一百", 0, "ㄧ", set()),            # 數字串不變調
+    ("不夠", 0, "ㄅㄨˊ", set()),          # 後字四聲
+    ("不是", 0, "ㄅㄨˊ", set()),
+    ("不能", 0, "ㄅㄨˋ", set()),          # 後字非四聲
+    ("不同", 0, "ㄅㄨˋ", set()),
+    ("不好", 0, "ㄅㄨˋ", set()),
+]
+
+
+@pytest.mark.parametrize("case", SANDHI_CASES, ids=lambda c: f"{c[0]}-{c[2]}")
+def test_yi_bu_sandhi(case):
+    """「一」「不」的變調在課文表上是對的。
+
+    變調是國語的音韻規則（看下一個字的聲調），但表上存的是結果不是規則 ——
+    所以這裡抽點驗結果。2026-09-19 修了 3,875 處，其中 2,311 處是「一」該讀 ㄧˊ
+    而表寫基本調 ㄧ。
+    """
+    word, off, want, not_prev = case
+    slots = json.loads(_SLOTS.read_text(encoding="utf-8"))["slots"]
+    counts: collections.Counter = collections.Counter()
+    for path in sorted(_LESSONS.glob("L*/v*/zhuyin.json")):
+        data = json.loads(path.read_text(encoding="utf-8"))
+        for t in data.get("texts") or []:
+            text, ssz = t.get("text"), t.get("ssz")
+            if not isinstance(text, str) or not isinstance(ssz, str):
+                continue
+            units = _u16(text)
+            if len(units) != len(ssz):
+                continue
+            j = text.find(word)
+            while j >= 0:
+                if not (j > 0 and text[j - 1] in not_prev):
+                    k = j + off
+                    ui = sum(1 + (1 if ord(c) > 0xFFFF else 0) for c in text[:k])
+                    if ui < len(units) and units[ui] == word[off]:
+                        code = ssz[ui]
+                        slot = "0000" if code == "." else f"ss0{code}"
+                        counts[slots.get(word[off], {}).get(slot)] += 1
+                j = text.find(word, j + 1)
+    assert counts, f"語料裡找不到「{word}」—— 這條斷言等於沒在測"
+    wrong = {r: n for r, n in counts.items() if r != want}
+    assert not wrong, (
+        f"「{word}」的「{word[off]}」該讀 {want}，"
+        f"但有 {sum(wrong.values())} 處讀成 {wrong}（對的 {counts.get(want, 0)} 處）"
+    )
