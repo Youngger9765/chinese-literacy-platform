@@ -11,9 +11,7 @@ function filenameFromUrl(url: string): string {
   }
 }
 
-/** Trigger a browser file download for a same-origin or cross-origin URL. */
-export async function downloadRemoteFile(url: string, filename?: string): Promise<void> {
-  const response = await fetch(url);
+async function triggerBlobDownload(response: Response, url: string, filename?: string): Promise<void> {
   if (!response.ok) {
     throw new Error(`Download failed (${response.status})`);
   }
@@ -28,4 +26,27 @@ export async function downloadRemoteFile(url: string, filename?: string): Promis
   anchor.click();
   document.body.removeChild(anchor);
   URL.revokeObjectURL(objectUrl);
+}
+
+/** Trigger a browser file download for a same-origin or cross-origin URL. */
+export async function downloadRemoteFile(url: string, filename?: string): Promise<void> {
+  const response = await fetch(url);
+  await triggerBlobDownload(response, url, filename);
+}
+
+/**
+ * Same as downloadRemoteFile, but attaches an Authorization header (#3276).
+ *
+ * Needed for role-gated endpoints (e.g. GET /api/lessons/{uid}/worksheet/teacher)
+ * that require a Bearer token — a bare `fetch(url)` like downloadRemoteFile's
+ * always sends anonymously, which is fine for the public /assets/* proxy but
+ * would just get a 401 here.
+ */
+export async function downloadAuthenticatedFile(
+  url: string,
+  token: string,
+  filename?: string,
+): Promise<void> {
+  const response = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+  await triggerBlobDownload(response, url, filename);
 }
