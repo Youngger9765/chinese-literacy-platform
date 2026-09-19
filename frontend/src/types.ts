@@ -393,6 +393,13 @@ export interface Story {
    *  of opening the broken PDF in an iframe.
    *  Hosted on GCS at gs://lingoleap-assets/worksheets/{lesson_code}.docx. */
   worksheetDocxUrl?: string;
+  /** Role-gated teacher/student worksheet download availability (#3276).
+   *  Booleans only — no URL. The actual download goes through the
+   *  authenticated `/api/lessons/{lessonUid}/worksheet/{version}` endpoint,
+   *  not a plain fetchable URL like worksheetDocxUrl above (that field has no
+   *  server-side role check, which is exactly why the teacher edition can't
+   *  reuse it — see worksheetButton2845.test.ts's leak guard). */
+  worksheetAvailable?: { student: boolean; teacher: boolean };
   /** Tables extracted from 紙本學習單 PDF (#1685).
    *  Used by 圖文表整合 lessons (G7-L28, G7-L30) where docx → yml parser dropped
    *  table row data. Frontend renders via TableDisplay with click-to-zoom.

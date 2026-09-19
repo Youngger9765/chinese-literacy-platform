@@ -150,6 +150,8 @@ interface ApiStoryDetail extends ApiStoryListItem {
   worksheet_pdf_url?: string | null;
   // Direct docx URL when soffice PDF conversion is broken (#2073)
   worksheet_docx_url?: string | null;
+  // Role-gated teacher/student worksheet download availability (#3276)
+  worksheet_available?: { student: boolean; teacher: boolean } | null;
   // 紙本表格 HTML render (#1685) — null when lesson has no extracted tables
   tables?: Array<{
     id: string;
@@ -302,6 +304,7 @@ function apiDetailToStory(detail: ApiStoryDetail): Story {
     lessonIntro: detail.lesson_intro ?? undefined,
     worksheetPdfUrl: resolveAssetUrl(detail.worksheet_pdf_url),
     worksheetDocxUrl: resolveAssetUrl(detail.worksheet_docx_url),
+    worksheetAvailable: detail.worksheet_available ?? undefined,
     tables: detail.tables ?? undefined,
     // Plugin-pattern dispatch fields (#1404 / #1341):
     layout_mode: (detail.layout_mode as Story['layout_mode']) ?? 'standard',
@@ -355,6 +358,16 @@ export async function fetchStories(token?: string): Promise<{ stories: Story[]; 
     total: data.total,
     grades: data.grades,
   };
+}
+
+/**
+ * Build the role-gated worksheet download URL (#3276). Callers must fetch
+ * this with an Authorization header (see downloadAuthenticatedFile) — unlike
+ * worksheetDocxUrl/worksheetPdfUrl above, this endpoint requires auth and
+ * will 403 a non-teacher-tier token for `version: 'teacher'`.
+ */
+export function worksheetDownloadUrl(lessonUid: string, version: 'student' | 'teacher'): string {
+  return `${API_BASE}/api/lessons/${encodeURIComponent(lessonUid)}/worksheet/${version}`;
 }
 
 export async function fetchStory(id: string): Promise<Story> {
