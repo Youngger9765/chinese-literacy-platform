@@ -123,12 +123,21 @@ def main() -> int:
                 # ⛔ 也不能只用 ssz 當定位鍵 —— 短句的 ssz 大量重複
                 #    （L0001 裡 "....." 有 19 筆共用），會改到別句。
                 raw = path.read_text(encoding="utf-8")
+                # 同一句可能在一個檔裡出現多次（重複掛載）。`str.replace` 一次就把
+                # 全部換掉，所以同一個 (text, n, ssz) 只能跑一次 —— 否則第二次找不到
+                # 定位鍵會誤判成「格式不對」。
+                seen_needles: set = set()
                 for text_v, n_v, old_ssz, new_ssz in edits:
+                    if (text_v, n_v, old_ssz) in seen_needles:
+                        continue
+                    seen_needles.add((text_v, n_v, old_ssz))
                     head = (f'"text":{json.dumps(text_v, ensure_ascii=False)},'
                             f'"n":{n_v},"ssz":')
                     needle = f'{head}"{old_ssz}"'
                     if raw.count(needle) < 1:
-                        raise SystemExit(f"{path.name}: 定位鍵找不到 —— 拒絕替換")
+                        raise SystemExit(
+                            f"{path}: 定位鍵找不到 —— 拒絕替換\n"
+                            f"  needle 前 90 字: {needle[:90]}")
                     raw = raw.replace(needle, f'{head}"{new_ssz}"')
                 path.write_text(raw, encoding="utf-8")
 
