@@ -1,7 +1,7 @@
 {
   "uid": "L0101",
   "gate_version": 2,
-  "docx_sha256": "459e-e905-1933-ac3d",
+  "docx_sha256": "59da-83ac-0f7a-843b",
   "modules": {
     "comprehension.cjdtp": {
       "yaml_sha256": "d8bc-0f77-6ebb-a2db",
