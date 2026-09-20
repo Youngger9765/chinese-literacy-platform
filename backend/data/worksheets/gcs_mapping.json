@@ -9,7 +9,7 @@
         "size_bytes": 503733,
         "sha256_16": "1ea0-81ea-4b1d-52f2",
         "gcs_path": "worksheets-gated/L0001-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G4-L10十秒的背後學生版.docx",
@@ -17,7 +17,7 @@
         "size_bytes": 500441,
         "sha256_16": "8b49-8022-1751-8cc4",
         "gcs_path": "worksheets-gated/L0001-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0002": {
@@ -28,7 +28,7 @@
         "size_bytes": 2879481,
         "sha256_16": "77fd-6a0a-5739-c075",
         "gcs_path": "worksheets-gated/L0002-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G4-L11動物的生存妙招學生版.docx",
@@ -36,7 +36,7 @@
         "size_bytes": 2878715,
         "sha256_16": "dabd-da61-807e-8be9",
         "gcs_path": "worksheets-gated/L0002-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0003": {
@@ -47,7 +47,7 @@
         "size_bytes": 490516,
         "sha256_16": "47aa-73cb-31b9-de5a",
         "gcs_path": "worksheets-gated/L0003-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G4-L12大自然的氣象小幫手學生版.docx",
@@ -55,7 +55,7 @@
         "size_bytes": 489033,
         "sha256_16": "1762-141e-3ab4-794c",
         "gcs_path": "worksheets-gated/L0003-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0004": {
@@ -66,7 +66,7 @@
         "size_bytes": 490207,
         "sha256_16": "e954-5676-0d48-6e75",
         "gcs_path": "worksheets-gated/L0004-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G4-L13感情小日記2──喜歡是什麼？學生版.docx",
@@ -74,7 +74,7 @@
         "size_bytes": 483192,
         "sha256_16": "6558-c551-e975-fdee",
         "gcs_path": "worksheets-gated/L0004-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0005": {
@@ -85,7 +85,7 @@
         "size_bytes": 442850,
         "sha256_16": "3e17-008e-875c-079f",
         "gcs_path": "worksheets-gated/L0005-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G4-L14美好的一天學生版.docx",
@@ -93,7 +93,7 @@
         "size_bytes": 436199,
         "sha256_16": "a057-7d6e-659a-901b",
         "gcs_path": "worksheets-gated/L0005-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0006": {
@@ -104,7 +104,7 @@
         "size_bytes": 450532,
         "sha256_16": "4fc0-42b0-b943-27cb",
         "gcs_path": "worksheets-gated/L0006-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G4-L15誤會學生版.docx",
@@ -112,7 +112,7 @@
         "size_bytes": 446172,
         "sha256_16": "2a1b-a07a-b288-87d2",
         "gcs_path": "worksheets-gated/L0006-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0007": {
@@ -123,7 +123,7 @@
         "size_bytes": 451183,
         "sha256_16": "721f-055a-a0b9-059e",
         "gcs_path": "worksheets-gated/L0007-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G4-L16黃絲帶學生版.docx",
@@ -131,7 +131,7 @@
         "size_bytes": 445930,
         "sha256_16": "5008-9876-76e2-c81d",
         "gcs_path": "worksheets-gated/L0007-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0008": {
@@ -142,7 +142,7 @@
         "size_bytes": 478530,
         "sha256_16": "9354-9dd0-a110-9d4c",
         "gcs_path": "worksheets-gated/L0008-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G4-L17第一百碗麵學生版.docx",
@@ -150,7 +150,7 @@
         "size_bytes": 472505,
         "sha256_16": "03b4-e8ab-557a-151e",
         "gcs_path": "worksheets-gated/L0008-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0009": {
@@ -161,7 +161,7 @@
         "size_bytes": 493796,
         "sha256_16": "cd54-a5b4-da4a-f89a",
         "gcs_path": "worksheets-gated/L0009-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G4-L18白牙的最後一戰學生版.docx",
@@ -169,7 +169,7 @@
         "size_bytes": 486826,
         "sha256_16": "fc17-05cc-7f2d-1c89",
         "gcs_path": "worksheets-gated/L0009-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0010": {
@@ -180,7 +180,7 @@
         "size_bytes": 507053,
         "sha256_16": "ede0-24e5-fcb9-18e7",
         "gcs_path": "worksheets-gated/L0010-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G4-L19把球打好，就夠了嗎？—阿耀與健豪學長的通信學生版.docx",
@@ -188,7 +188,7 @@
         "size_bytes": 499736,
         "sha256_16": "72f0-ed09-f661-8dbd",
         "gcs_path": "worksheets-gated/L0010-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0011": {
@@ -199,7 +199,7 @@
         "size_bytes": 443434,
         "sha256_16": "d74f-a29a-4960-9ff4",
         "gcs_path": "worksheets-gated/L0011-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G4-L1贏得喝采的輸家學生版.docx",
@@ -207,7 +207,7 @@
         "size_bytes": 437986,
         "sha256_16": "d35a-020f-e81e-3ec5",
         "gcs_path": "worksheets-gated/L0011-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0012": {
@@ -218,7 +218,7 @@
         "size_bytes": 477982,
         "sha256_16": "099b-aecf-9fe1-5564",
         "gcs_path": "worksheets-gated/L0012-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G4-L20想讀書，該從哪裡著手？—阿耀與健豪學長的通信(二)學生版.docx",
@@ -226,7 +226,7 @@
         "size_bytes": 471763,
         "sha256_16": "db25-1209-496a-6207",
         "gcs_path": "worksheets-gated/L0012-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0013": {
@@ -237,7 +237,7 @@
         "size_bytes": 494722,
         "sha256_16": "1023-7b7f-dc43-e49e",
         "gcs_path": "worksheets-gated/L0013-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G4-L2正太與小豬：武僧的養成之路學生版.docx",
@@ -245,7 +245,7 @@
         "size_bytes": 488221,
         "sha256_16": "1b8b-7b16-bdb6-b12d",
         "gcs_path": "worksheets-gated/L0013-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0014": {
@@ -256,7 +256,7 @@
         "size_bytes": 492358,
         "sha256_16": "1e6b-580e-8034-44ed",
         "gcs_path": "worksheets-gated/L0014-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G4-L3最美的畫面學生版.docx",
@@ -264,7 +264,7 @@
         "size_bytes": 486374,
         "sha256_16": "90c7-78eb-9d81-9f39",
         "gcs_path": "worksheets-gated/L0014-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0015": {
@@ -275,7 +275,7 @@
         "size_bytes": 500961,
         "sha256_16": "a886-0b75-1eac-4a21",
         "gcs_path": "worksheets-gated/L0015-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G4-L4穿越極限的跑者學生版.docx",
@@ -283,7 +283,7 @@
         "size_bytes": 494895,
         "sha256_16": "cbac-219b-796e-ae19",
         "gcs_path": "worksheets-gated/L0015-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0016": {
@@ -294,7 +294,7 @@
         "size_bytes": 526729,
         "sha256_16": "9cc6-2422-07fc-4329",
         "gcs_path": "worksheets-gated/L0016-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G4-L5這是什麼「意思」學生版.docx",
@@ -302,7 +302,7 @@
         "size_bytes": 512308,
         "sha256_16": "8135-70f3-051f-971b",
         "gcs_path": "worksheets-gated/L0016-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0017": {
@@ -313,7 +313,7 @@
         "size_bytes": 463343,
         "sha256_16": "a195-d1d1-2373-66a2",
         "gcs_path": "worksheets-gated/L0017-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G4-L6感情小日記1──是友情還是愛情？學生版.docx",
@@ -321,7 +321,7 @@
         "size_bytes": 476529,
         "sha256_16": "e8b1-7573-1afd-7c62",
         "gcs_path": "worksheets-gated/L0017-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0018": {
@@ -332,7 +332,7 @@
         "size_bytes": 599141,
         "sha256_16": "97a6-7554-9df7-7968",
         "gcs_path": "worksheets-gated/L0018-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G4-L7長高的祕密學生版.docx",
@@ -340,7 +340,7 @@
         "size_bytes": 579260,
         "sha256_16": "e0d4-b136-874e-d94e",
         "gcs_path": "worksheets-gated/L0018-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0019": {
@@ -351,7 +351,7 @@
         "size_bytes": 501923,
         "sha256_16": "928e-0479-a3e8-c74b",
         "gcs_path": "worksheets-gated/L0019-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G4-L8運動科學學生版.docx",
@@ -359,7 +359,7 @@
         "size_bytes": 500975,
         "sha256_16": "c462-3e12-b9df-09a8",
         "gcs_path": "worksheets-gated/L0019-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0020": {
@@ -370,7 +370,7 @@
         "size_bytes": 751822,
         "sha256_16": "efd0-2319-db96-e34f",
         "gcs_path": "worksheets-gated/L0020-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G4-L9跟著「但是」轉個彎學生版.docx",
@@ -378,7 +378,7 @@
         "size_bytes": 745720,
         "sha256_16": "6aa7-1e1f-6140-a83d",
         "gcs_path": "worksheets-gated/L0020-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0021": {
@@ -389,7 +389,7 @@
         "size_bytes": 120022,
         "sha256_16": "b291-e587-8f04-5899",
         "gcs_path": "worksheets-gated/L0021-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G5-L0正太與小豬：武僧的養成之路學生版.docx",
@@ -397,7 +397,7 @@
         "size_bytes": 116560,
         "sha256_16": "b43b-1d14-156e-466f",
         "gcs_path": "worksheets-gated/L0021-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0022": {
@@ -408,7 +408,7 @@
         "size_bytes": 487728,
         "sha256_16": "98cc-3b2c-9c95-2020",
         "gcs_path": "worksheets-gated/L0022-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G5-L10感情小日記3──吃醋的滋味學生版.docx",
@@ -416,7 +416,7 @@
         "size_bytes": 486231,
         "sha256_16": "9ee3-7267-4747-6f36",
         "gcs_path": "worksheets-gated/L0022-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0023": {
@@ -427,7 +427,7 @@
         "size_bytes": 954617,
         "sha256_16": "2dc6-cff5-203e-969b",
         "gcs_path": "worksheets-gated/L0023-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G5-L11比運氣更重要的事：《長腿叔叔》的啟發學生版.docx",
@@ -435,7 +435,7 @@
         "size_bytes": 947837,
         "sha256_16": "51a8-f624-1e94-78f7",
         "gcs_path": "worksheets-gated/L0023-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0024": {
@@ -446,7 +446,7 @@
         "size_bytes": 507383,
         "sha256_16": "4ea3-344a-e454-78bd",
         "gcs_path": "worksheets-gated/L0024-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G5-L12堅持到底的棒球人生──周思齊(前篇)學生版.docx",
@@ -454,7 +454,7 @@
         "size_bytes": 488788,
         "sha256_16": "a6d4-1c7d-7b83-8f9e",
         "gcs_path": "worksheets-gated/L0024-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0025": {
@@ -465,7 +465,7 @@
         "size_bytes": 506649,
         "sha256_16": "85a8-13a0-53a4-36f1",
         "gcs_path": "worksheets-gated/L0025-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G5-L13堅持到底的棒球人生──周思齊(後篇)學生版.docx",
@@ -473,7 +473,7 @@
         "size_bytes": 490586,
         "sha256_16": "0551-d315-4ca4-3f76",
         "gcs_path": "worksheets-gated/L0025-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0026": {
@@ -484,7 +484,7 @@
         "size_bytes": 692986,
         "sha256_16": "d844-6c6a-40b1-a22e",
         "gcs_path": "worksheets-gated/L0026-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G5-L14感情小日記4──我被告白了學生版.docx",
@@ -492,7 +492,7 @@
         "size_bytes": 689393,
         "sha256_16": "8f61-0936-d248-91a1",
         "gcs_path": "worksheets-gated/L0026-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0027": {
@@ -503,7 +503,7 @@
         "size_bytes": 513881,
         "sha256_16": "89e0-1608-55e9-a013",
         "gcs_path": "worksheets-gated/L0027-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G5-L15救援大隊的好幫手學生版.docx",
@@ -511,7 +511,7 @@
         "size_bytes": 508057,
         "sha256_16": "8917-fc82-f728-0ede",
         "gcs_path": "worksheets-gated/L0027-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0028": {
@@ -522,7 +522,7 @@
         "size_bytes": 504048,
         "sha256_16": "869f-ec47-3865-ca2b",
         "gcs_path": "worksheets-gated/L0028-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G5-L16掃雷英雄馬嘎瓦學生版.docx",
@@ -530,7 +530,7 @@
         "size_bytes": 496690,
         "sha256_16": "0b1c-3790-9642-8bbc",
         "gcs_path": "worksheets-gated/L0028-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0029": {
@@ -541,7 +541,7 @@
         "size_bytes": 15959110,
         "sha256_16": "bd09-b626-76b1-0191",
         "gcs_path": "worksheets-gated/L0029-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G5-L17-18牧羊少年的逆轉勝學生版.docx",
@@ -549,7 +549,7 @@
         "size_bytes": 15951004,
         "sha256_16": "b529-1651-88b3-22ed",
         "gcs_path": "worksheets-gated/L0029-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0030": {
@@ -560,7 +560,7 @@
         "size_bytes": 590949,
         "sha256_16": "63cc-095b-a1e5-8141",
         "gcs_path": "worksheets-gated/L0030-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G5-L19六塊肌六塊雞學生版.docx",
@@ -568,7 +568,7 @@
         "size_bytes": 585459,
         "sha256_16": "36a0-ff83-1b12-c150",
         "gcs_path": "worksheets-gated/L0030-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0031": {
@@ -579,7 +579,7 @@
         "size_bytes": 491471,
         "sha256_16": "0baa-121c-569f-179b",
         "gcs_path": "worksheets-gated/L0031-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G5-L1奧運銀牌背後的自我鍛鍊學生版.docx",
@@ -587,7 +587,7 @@
         "size_bytes": 485344,
         "sha256_16": "f5cc-eb2b-86e0-9c69",
         "gcs_path": "worksheets-gated/L0031-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0032": {
@@ -598,7 +598,7 @@
         "size_bytes": 621544,
         "sha256_16": "6c8b-7b0d-7fb3-9b03",
         "gcs_path": "worksheets-gated/L0032-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G5-L20小丑醫生學生版.docx",
@@ -606,7 +606,7 @@
         "size_bytes": 615276,
         "sha256_16": "69c3-fa27-3224-c331",
         "gcs_path": "worksheets-gated/L0032-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0033": {
@@ -617,7 +617,7 @@
         "size_bytes": 516233,
         "sha256_16": "902b-c2f4-7129-68f8",
         "gcs_path": "worksheets-gated/L0033-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G5-L21垃圾食物的誘惑與代價學生版.docx",
@@ -625,7 +625,7 @@
         "size_bytes": 519432,
         "sha256_16": "c87c-1e8b-ae7b-f528",
         "gcs_path": "worksheets-gated/L0033-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0034": {
@@ -636,7 +636,7 @@
         "size_bytes": 503030,
         "sha256_16": "6d74-22e6-022b-1e66",
         "gcs_path": "worksheets-gated/L0034-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G5-L22抗拒指尖上的誘惑學生版.docx",
@@ -644,7 +644,7 @@
         "size_bytes": 501623,
         "sha256_16": "5df5-92d1-14bd-db21",
         "gcs_path": "worksheets-gated/L0034-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0035": {
@@ -655,7 +655,7 @@
         "size_bytes": 515716,
         "sha256_16": "6618-01ed-e923-6136",
         "gcs_path": "worksheets-gated/L0035-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G5-L23信件的力量──寫信馬拉松學生版.docx",
@@ -663,7 +663,7 @@
         "size_bytes": 510089,
         "sha256_16": "a797-34b8-aab9-d443",
         "gcs_path": "worksheets-gated/L0035-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0036": {
@@ -674,7 +674,7 @@
         "size_bytes": 489237,
         "sha256_16": "6d46-5cd9-a1d3-581e",
         "gcs_path": "worksheets-gated/L0036-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G5-L24臺灣棒球先驅──來自花蓮的能高團學生版.docx",
@@ -682,7 +682,7 @@
         "size_bytes": 474488,
         "sha256_16": "454a-51d7-5840-b200",
         "gcs_path": "worksheets-gated/L0036-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0037": {
@@ -693,7 +693,7 @@
         "size_bytes": 486025,
         "sha256_16": "69f8-df2e-2095-7488",
         "gcs_path": "worksheets-gated/L0037-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G5-L25小兵立大功：雞鳴狗盜的故事學生版.docx",
@@ -701,7 +701,7 @@
         "size_bytes": 483651,
         "sha256_16": "e390-5fb4-96c1-d1de",
         "gcs_path": "worksheets-gated/L0037-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0038": {
@@ -712,7 +712,7 @@
         "size_bytes": 483989,
         "sha256_16": "d4b1-e17f-4ada-a3c9",
         "gcs_path": "worksheets-gated/L0038-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G5-L26魚來了，叮咚叮咚請開門學生版.docx",
@@ -720,7 +720,7 @@
         "size_bytes": 482874,
         "sha256_16": "0644-f079-b85f-0f92",
         "gcs_path": "worksheets-gated/L0038-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0039": {
@@ -731,7 +731,7 @@
         "size_bytes": 519014,
         "sha256_16": "39e3-ea8b-3e57-1c63",
         "gcs_path": "worksheets-gated/L0039-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G5-L27我有一個棒球夢學生版.docx",
@@ -739,7 +739,7 @@
         "size_bytes": 522542,
         "sha256_16": "bb26-c3a0-8a52-e450",
         "gcs_path": "worksheets-gated/L0039-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0040": {
@@ -750,7 +750,7 @@
         "size_bytes": 501058,
         "sha256_16": "e719-fcef-a2e3-d556",
         "gcs_path": "worksheets-gated/L0040-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G5-L28我的電競夢：從熬夜打遊戲到拿下全國冠軍學生版.docx",
@@ -758,7 +758,7 @@
         "size_bytes": 494753,
         "sha256_16": "3867-877b-d2c8-1ad6",
         "gcs_path": "worksheets-gated/L0040-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0041": {
@@ -769,7 +769,7 @@
         "size_bytes": 491410,
         "sha256_16": "9a59-1192-5e6a-fab1",
         "gcs_path": "worksheets-gated/L0041-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G5-L2周天成的一天──頂尖選手的養成學生版.docx",
@@ -777,7 +777,7 @@
         "size_bytes": 485117,
         "sha256_16": "b3ed-1245-87c8-1c7a",
         "gcs_path": "worksheets-gated/L0041-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0042": {
@@ -788,7 +788,7 @@
         "size_bytes": 495882,
         "sha256_16": "338c-ba69-4f13-8dcb",
         "gcs_path": "worksheets-gated/L0042-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G5-L3拳力出擊──陳念琴學生版.docx",
@@ -796,7 +796,7 @@
         "size_bytes": 490120,
         "sha256_16": "6303-52bc-c61c-e2b3",
         "gcs_path": "worksheets-gated/L0042-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0043": {
@@ -807,7 +807,7 @@
         "size_bytes": 496731,
         "sha256_16": "7a4b-0d64-f0da-c60d",
         "gcs_path": "worksheets-gated/L0043-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G5-L4從童工到大學教授之路學生版.docx",
@@ -815,7 +815,7 @@
         "size_bytes": 491686,
         "sha256_16": "b456-0e93-7e2d-4986",
         "gcs_path": "worksheets-gated/L0043-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0044": {
@@ -826,7 +826,7 @@
         "size_bytes": 121271,
         "sha256_16": "bb32-3fbe-5319-d64f",
         "gcs_path": "worksheets-gated/L0044-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G5-L5文字路上的閱讀號誌 學生版.docx",
@@ -834,7 +834,7 @@
         "size_bytes": 129523,
         "sha256_16": "ee86-97fb-509c-6671",
         "gcs_path": "worksheets-gated/L0044-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0045": {
@@ -845,7 +845,7 @@
         "size_bytes": 498687,
         "sha256_16": "0bc7-5127-e85d-b7e6",
         "gcs_path": "worksheets-gated/L0045-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G5-L6兵來將擋，水來土掩學生版.docx",
@@ -853,7 +853,7 @@
         "size_bytes": 498194,
         "sha256_16": "d908-c160-48ce-f529",
         "gcs_path": "worksheets-gated/L0045-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0046": {
@@ -864,7 +864,7 @@
         "size_bytes": 490484,
         "sha256_16": "c1b7-1861-ae53-a9d1",
         "gcs_path": "worksheets-gated/L0046-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G5-L7以植物為師的科學學生版.docx",
@@ -872,7 +872,7 @@
         "size_bytes": 483685,
         "sha256_16": "f0ff-3a4a-8057-82a0",
         "gcs_path": "worksheets-gated/L0046-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0047": {
@@ -883,7 +883,7 @@
         "size_bytes": 480914,
         "sha256_16": "2654-4fe7-06fb-d609",
         "gcs_path": "worksheets-gated/L0047-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G5-L8工地大嫂學生版.docx",
@@ -891,7 +891,7 @@
         "size_bytes": 474831,
         "sha256_16": "4b59-84e4-f8a1-faec",
         "gcs_path": "worksheets-gated/L0047-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0048": {
@@ -902,7 +902,7 @@
         "size_bytes": 551753,
         "sha256_16": "c735-5a69-2a38-db1d",
         "gcs_path": "worksheets-gated/L0048-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G5-L9災難預言準不準學生版.docx",
@@ -910,7 +910,7 @@
         "size_bytes": 552027,
         "sha256_16": "054b-8f35-cd7e-84f2",
         "gcs_path": "worksheets-gated/L0048-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0049": {
@@ -921,7 +921,7 @@
         "size_bytes": 119624,
         "sha256_16": "e247-7fc9-fd40-a156",
         "gcs_path": "worksheets-gated/L0049-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G6-L0正太與小豬：武僧的養成之路學生版.docx",
@@ -929,7 +929,7 @@
         "size_bytes": 116262,
         "sha256_16": "986b-d88e-0efc-9001",
         "gcs_path": "worksheets-gated/L0049-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0050": {
@@ -940,7 +940,7 @@
         "size_bytes": 447704,
         "sha256_16": "7c94-19da-77c6-8eb6",
         "gcs_path": "worksheets-gated/L0050-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G6-L10全世界第一張股票的誕生學生版.docx",
@@ -948,7 +948,7 @@
         "size_bytes": 441090,
         "sha256_16": "673e-86a1-b27b-acfa",
         "gcs_path": "worksheets-gated/L0050-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0051": {
@@ -959,7 +959,7 @@
         "size_bytes": 542421,
         "sha256_16": "e4df-f085-9cf9-db0f",
         "gcs_path": "worksheets-gated/L0051-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G6-L11奇蹟行動學生版.docx",
@@ -967,7 +967,7 @@
         "size_bytes": 536028,
         "sha256_16": "a4a0-d29d-91ea-4866",
         "gcs_path": "worksheets-gated/L0051-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0052": {
@@ -978,7 +978,7 @@
         "size_bytes": 557907,
         "sha256_16": "e90b-1c6b-a8c4-daa5",
         "gcs_path": "worksheets-gated/L0052-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G6-L12小藍鯨之死學生版.docx",
@@ -986,7 +986,7 @@
         "size_bytes": 556861,
         "sha256_16": "ed44-13f1-15c3-4b3a",
         "gcs_path": "worksheets-gated/L0052-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0053": {
@@ -997,7 +997,7 @@
         "size_bytes": 493589,
         "sha256_16": "4619-203c-ab28-6e82",
         "gcs_path": "worksheets-gated/L0053-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G6-L13昆蟲會思考嗎？學生版.docx",
@@ -1005,7 +1005,7 @@
         "size_bytes": 488271,
         "sha256_16": "4235-646a-6c96-54a9",
         "gcs_path": "worksheets-gated/L0053-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0054": {
@@ -1016,7 +1016,7 @@
         "size_bytes": 472274,
         "sha256_16": "7b10-b2f6-de66-3e22",
         "gcs_path": "worksheets-gated/L0054-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G6-L14動物談情說愛的方式學生版.docx",
@@ -1024,7 +1024,7 @@
         "size_bytes": 466278,
         "sha256_16": "8bfa-b069-b451-ade8",
         "gcs_path": "worksheets-gated/L0054-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0055": {
@@ -1035,7 +1035,7 @@
         "size_bytes": 497606,
         "sha256_16": "fafd-9c3b-9c4f-2c3d",
         "gcs_path": "worksheets-gated/L0055-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G6-L15愛冒險逞強的雄性動物學生版.docx",
@@ -1043,7 +1043,7 @@
         "size_bytes": 494875,
         "sha256_16": "1d01-2e5f-ebdc-9f81",
         "gcs_path": "worksheets-gated/L0055-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0056": {
@@ -1054,7 +1054,7 @@
         "size_bytes": 513180,
         "sha256_16": "e587-84ee-5f4d-e1ac",
         "gcs_path": "worksheets-gated/L0056-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G6-L16把手上的餅吃香一點學生版.docx",
@@ -1062,7 +1062,7 @@
         "size_bytes": 507674,
         "sha256_16": "cc08-43bc-326b-93db",
         "gcs_path": "worksheets-gated/L0056-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0057": {
@@ -1073,7 +1073,7 @@
         "size_bytes": 492269,
         "sha256_16": "a836-001b-9a18-db97",
         "gcs_path": "worksheets-gated/L0057-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G6-L17祝你好眠學生版.docx",
@@ -1081,7 +1081,7 @@
         "size_bytes": 489801,
         "sha256_16": "ae80-9be4-672d-3b4c",
         "gcs_path": "worksheets-gated/L0057-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0058": {
@@ -1092,7 +1092,7 @@
         "size_bytes": 492784,
         "sha256_16": "f694-71c8-6bdf-829b",
         "gcs_path": "worksheets-gated/L0058-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G6-L18末日種子庫學生版.docx",
@@ -1100,7 +1100,7 @@
         "size_bytes": 491639,
         "sha256_16": "8dec-d467-43ec-47f5",
         "gcs_path": "worksheets-gated/L0058-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0059": {
@@ -1111,7 +1111,7 @@
         "size_bytes": 510812,
         "sha256_16": "b3d0-9508-7867-0312",
         "gcs_path": "worksheets-gated/L0059-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G6-L19紅領帶學生版.docx",
@@ -1119,7 +1119,7 @@
         "size_bytes": 505023,
         "sha256_16": "af77-3887-7e61-009a",
         "gcs_path": "worksheets-gated/L0059-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0060": {
@@ -1130,7 +1130,7 @@
         "size_bytes": 570766,
         "sha256_16": "e41e-5449-3f0a-6fcd",
         "gcs_path": "worksheets-gated/L0060-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G6-L1心理出狀況,是壞事導致的嗎學生版.docx",
@@ -1138,7 +1138,7 @@
         "size_bytes": 563158,
         "sha256_16": "9a35-8a6c-0458-2e0d",
         "gcs_path": "worksheets-gated/L0060-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0061": {
@@ -1149,7 +1149,7 @@
         "size_bytes": 443907,
         "sha256_16": "9aff-4ae4-bfc7-9a26",
         "gcs_path": "worksheets-gated/L0061-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G6-L20因人而異，才有真正的公平學生版.docx",
@@ -1157,7 +1157,7 @@
         "size_bytes": 441727,
         "sha256_16": "614b-3b4b-d38a-adc7",
         "gcs_path": "worksheets-gated/L0061-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0062": {
@@ -1168,7 +1168,7 @@
         "size_bytes": 505407,
         "sha256_16": "96b0-a18a-64a5-0a2f",
         "gcs_path": "worksheets-gated/L0062-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G6-L21感情小日記5──我該告白嗎？學生版.docx",
@@ -1176,7 +1176,7 @@
         "size_bytes": 489434,
         "sha256_16": "8830-f4fd-854d-0b47",
         "gcs_path": "worksheets-gated/L0062-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0063": {
@@ -1187,7 +1187,7 @@
         "size_bytes": 1908509,
         "sha256_16": "39a9-1fe4-0878-4b6b",
         "gcs_path": "worksheets-gated/L0063-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G6-L22-24物以稀為貴學生版.docx",
@@ -1195,7 +1195,7 @@
         "size_bytes": 1903992,
         "sha256_16": "fb17-f4c5-c240-a734",
         "gcs_path": "worksheets-gated/L0063-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0064": {
@@ -1206,7 +1206,7 @@
         "size_bytes": 502741,
         "sha256_16": "3488-1969-673b-9c38",
         "gcs_path": "worksheets-gated/L0064-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G6-L25感情小日記6──我失戀了學生版.docx",
@@ -1214,7 +1214,7 @@
         "size_bytes": 488083,
         "sha256_16": "9b10-ab9c-b1ca-d85c",
         "gcs_path": "worksheets-gated/L0064-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0065": {
@@ -1225,7 +1225,7 @@
         "size_bytes": 490536,
         "sha256_16": "b611-b374-e10d-a1d0",
         "gcs_path": "worksheets-gated/L0065-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G6-L26運動傷害，怎麼辦學生版.docx",
@@ -1233,7 +1233,7 @@
         "size_bytes": 490222,
         "sha256_16": "faff-b8d8-ff00-e837",
         "gcs_path": "worksheets-gated/L0065-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0066": {
@@ -1244,7 +1244,7 @@
         "size_bytes": 488552,
         "sha256_16": "accf-e023-98f3-0636",
         "gcs_path": "worksheets-gated/L0066-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G6-L27古代畫家心中的仙境學生版.docx",
@@ -1252,7 +1252,7 @@
         "size_bytes": 482591,
         "sha256_16": "0010-cdf1-33d6-908b",
         "gcs_path": "worksheets-gated/L0066-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0067": {
@@ -1263,7 +1263,7 @@
         "size_bytes": 465227,
         "sha256_16": "b969-ab21-4c96-9b13",
         "gcs_path": "worksheets-gated/L0067-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G6-L28森林大軍的守護者學生版.docx",
@@ -1271,7 +1271,7 @@
         "size_bytes": 464058,
         "sha256_16": "def2-9989-ca4e-6248",
         "gcs_path": "worksheets-gated/L0067-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0068": {
@@ -1282,7 +1282,7 @@
         "size_bytes": 341405,
         "sha256_16": "aa4f-3e3b-592c-1c72",
         "gcs_path": "worksheets-gated/L0068-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G6-L29植物獵人學生版.docx",
@@ -1290,7 +1290,7 @@
         "size_bytes": 349293,
         "sha256_16": "cf62-daf1-4552-f316",
         "gcs_path": "worksheets-gated/L0068-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0069": {
@@ -1301,7 +1301,7 @@
         "size_bytes": 438585,
         "sha256_16": "6d12-36b9-592a-1d1c",
         "gcs_path": "worksheets-gated/L0069-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G6-L2一件班服，一場思辨討論學生版.docx",
@@ -1309,7 +1309,7 @@
         "size_bytes": 432256,
         "sha256_16": "d166-4009-37c4-09a9",
         "gcs_path": "worksheets-gated/L0069-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0070": {
@@ -1320,7 +1320,7 @@
         "size_bytes": 2219582,
         "sha256_16": "1141-b1ef-a2e5-0b65",
         "gcs_path": "worksheets-gated/L0070-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G6-L3文章中的「關鍵少數」 學生版.docx",
@@ -1328,7 +1328,7 @@
         "size_bytes": 2213468,
         "sha256_16": "2000-c111-1b51-d5ef",
         "gcs_path": "worksheets-gated/L0070-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0071": {
@@ -1339,7 +1339,7 @@
         "size_bytes": 487550,
         "sha256_16": "2ecc-d3e7-4232-435a",
         "gcs_path": "worksheets-gated/L0071-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G6-L4數字記憶的奧秘學生版.docx",
@@ -1347,7 +1347,7 @@
         "size_bytes": 481978,
         "sha256_16": "a1cb-8997-5e39-40e7",
         "gcs_path": "worksheets-gated/L0071-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0072": {
@@ -1358,7 +1358,7 @@
         "size_bytes": 471514,
         "sha256_16": "ecfe-fc59-eb5d-7994",
         "gcs_path": "worksheets-gated/L0072-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G6-L5重複朗讀的重要性：柳丁和文旦的比喻學生版.docx",
@@ -1366,7 +1366,7 @@
         "size_bytes": 471267,
         "sha256_16": "7a56-81ce-da9a-1163",
         "gcs_path": "worksheets-gated/L0072-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0073": {
@@ -1377,7 +1377,7 @@
         "size_bytes": 629971,
         "sha256_16": "b74e-641b-f4b9-ee50",
         "gcs_path": "worksheets-gated/L0073-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G6-L6與小學說再見學生版.docx",
@@ -1385,7 +1385,7 @@
         "size_bytes": 625077,
         "sha256_16": "56e6-9df7-2ce8-1a46",
         "gcs_path": "worksheets-gated/L0073-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0074": {
@@ -1396,7 +1396,7 @@
         "size_bytes": 486452,
         "sha256_16": "c2eb-e112-3c81-9418",
         "gcs_path": "worksheets-gated/L0074-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G6-L7老鷹紅豆的故事學生版.docx",
@@ -1404,7 +1404,7 @@
         "size_bytes": 485553,
         "sha256_16": "3205-6c15-e49a-3ab6",
         "gcs_path": "worksheets-gated/L0074-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0075": {
@@ -1415,7 +1415,7 @@
         "size_bytes": 444537,
         "sha256_16": "da7f-4dac-d55d-1dff",
         "gcs_path": "worksheets-gated/L0075-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G6-L8白鯨救援學生版.docx",
@@ -1423,7 +1423,7 @@
         "size_bytes": 437762,
         "sha256_16": "f4a1-dfb9-d5a4-f78b",
         "gcs_path": "worksheets-gated/L0075-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0076": {
@@ -1434,7 +1434,7 @@
         "size_bytes": 498428,
         "sha256_16": "f5b0-c9d6-fb2b-4bdc",
         "gcs_path": "worksheets-gated/L0076-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G6-L9給神明發會診單學生版.docx",
@@ -1442,7 +1442,7 @@
         "size_bytes": 492943,
         "sha256_16": "efac-0f8a-0602-2be0",
         "gcs_path": "worksheets-gated/L0076-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0077": {
@@ -1453,7 +1453,7 @@
         "size_bytes": 119770,
         "sha256_16": "17c5-4c07-890b-574e",
         "gcs_path": "worksheets-gated/L0077-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G7-L0正太與小豬：武僧的養成之路學生版.docx",
@@ -1461,7 +1461,7 @@
         "size_bytes": 116397,
         "sha256_16": "a2e0-bf40-4ff1-9e0f",
         "gcs_path": "worksheets-gated/L0077-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0078": {
@@ -1472,7 +1472,7 @@
         "size_bytes": 509784,
         "sha256_16": "48e6-b6b7-b45a-beeb",
         "gcs_path": "worksheets-gated/L0078-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G7-L10別上「誘餌式標題」的鉤學生版.docx",
@@ -1480,7 +1480,7 @@
         "size_bytes": 509637,
         "sha256_16": "2088-1301-fae0-7ee9",
         "gcs_path": "worksheets-gated/L0078-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0079": {
@@ -1491,7 +1491,7 @@
         "size_bytes": 480774,
         "sha256_16": "a06c-58c9-cf1d-b3fa",
         "gcs_path": "worksheets-gated/L0079-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G7-L11一封向醫師求助的信學生版.docx",
@@ -1499,7 +1499,7 @@
         "size_bytes": 479865,
         "sha256_16": "7b5e-22ad-d748-c637",
         "gcs_path": "worksheets-gated/L0079-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0080": {
@@ -1510,7 +1510,7 @@
         "size_bytes": 499133,
         "sha256_16": "2878-7b25-4b49-c8f7",
         "gcs_path": "worksheets-gated/L0080-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G7-L12澳洲奧運金牌的X機密學生版.docx",
@@ -1518,7 +1518,7 @@
         "size_bytes": 498160,
         "sha256_16": "ace8-8550-4db4-a16c",
         "gcs_path": "worksheets-gated/L0080-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0081": {
@@ -1529,7 +1529,7 @@
         "size_bytes": 496646,
         "sha256_16": "0af5-2dab-df2a-accb",
         "gcs_path": "worksheets-gated/L0081-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G7-L13女性太空人登月學生版.docx",
@@ -1537,7 +1537,7 @@
         "size_bytes": 475966,
         "sha256_16": "9e5a-85a1-b5bd-1778",
         "gcs_path": "worksheets-gated/L0081-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0082": {
@@ -1548,7 +1548,7 @@
         "size_bytes": 498209,
         "sha256_16": "5319-aa1f-d486-890f",
         "gcs_path": "worksheets-gated/L0082-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G7-L14從〈螞蟻與蟋蟀〉看生命的多樣性學生版.docx",
@@ -1556,7 +1556,7 @@
         "size_bytes": 478902,
         "sha256_16": "1992-115c-72b7-b398",
         "gcs_path": "worksheets-gated/L0082-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0083": {
@@ -1567,7 +1567,7 @@
         "size_bytes": 484540,
         "sha256_16": "126f-a03d-4781-a0aa",
         "gcs_path": "worksheets-gated/L0083-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G7-L15爺爺奶奶來了以後學生版.docx",
@@ -1575,7 +1575,7 @@
         "size_bytes": 465820,
         "sha256_16": "aa24-ee81-4834-aa4b",
         "gcs_path": "worksheets-gated/L0083-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0084": {
@@ -1586,7 +1586,7 @@
         "size_bytes": 479717,
         "sha256_16": "c4c3-3067-1307-9850",
         "gcs_path": "worksheets-gated/L0084-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G7-L16長大後，我才讀懂〈夏夜〉學生版.docx",
@@ -1594,7 +1594,7 @@
         "size_bytes": 478266,
         "sha256_16": "a5a9-a487-3e88-0564",
         "gcs_path": "worksheets-gated/L0084-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0085": {
@@ -1605,7 +1605,7 @@
         "size_bytes": 459646,
         "sha256_16": "76e0-1873-5622-31df",
         "gcs_path": "worksheets-gated/L0085-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G7-L17大自然的氣象小幫手學生版.docx",
@@ -1613,7 +1613,7 @@
         "size_bytes": 448356,
         "sha256_16": "5415-6f3c-693a-f1a0",
         "gcs_path": "worksheets-gated/L0085-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0086": {
@@ -1624,7 +1624,7 @@
         "size_bytes": 459739,
         "sha256_16": "75db-73d8-7ee5-5944",
         "gcs_path": "worksheets-gated/L0086-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G7-L18正太與小豬學生版.docx",
@@ -1632,7 +1632,7 @@
         "size_bytes": 453193,
         "sha256_16": "7442-e0cc-4cdc-37d3",
         "gcs_path": "worksheets-gated/L0086-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0087": {
@@ -1643,7 +1643,7 @@
         "size_bytes": 486390,
         "sha256_16": "bd95-d28e-17af-4877",
         "gcs_path": "worksheets-gated/L0087-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G7-L19把手上的餅吃香一點學生版.docx",
@@ -1651,7 +1651,7 @@
         "size_bytes": 476008,
         "sha256_16": "aaf5-3108-7655-2dfa",
         "gcs_path": "worksheets-gated/L0087-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0088": {
@@ -1662,7 +1662,7 @@
         "size_bytes": 487413,
         "sha256_16": "982c-60c0-9fa1-cd2d",
         "gcs_path": "worksheets-gated/L0088-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G7-L1塑膠，好用不好甩學生版.docx",
@@ -1670,7 +1670,7 @@
         "size_bytes": 481497,
         "sha256_16": "b1e9-5a15-c76d-f0fb",
         "gcs_path": "worksheets-gated/L0088-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0089": {
@@ -1681,7 +1681,7 @@
         "size_bytes": 506012,
         "sha256_16": "fe19-61fd-2fd1-01ea",
         "gcs_path": "worksheets-gated/L0089-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G7-L20「背影」讀書會學生版.docx",
@@ -1689,7 +1689,7 @@
         "size_bytes": 503010,
         "sha256_16": "d0a1-7af3-9861-45be",
         "gcs_path": "worksheets-gated/L0089-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0090": {
@@ -1700,7 +1700,7 @@
         "size_bytes": 982939,
         "sha256_16": "6c5f-eafd-7c00-3675",
         "gcs_path": "worksheets-gated/L0090-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G7-L21奧運性別平等這條路學生版.docx",
@@ -1708,7 +1708,7 @@
         "size_bytes": 981776,
         "sha256_16": "2f18-15d5-7803-4892",
         "gcs_path": "worksheets-gated/L0090-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0091": {
@@ -1719,7 +1719,7 @@
         "size_bytes": 826766,
         "sha256_16": "b9eb-d211-dda4-160f",
         "gcs_path": "worksheets-gated/L0091-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G7-L22你看見時代的灰犀牛了嗎談人口負成長學生版.docx",
@@ -1727,7 +1727,7 @@
         "size_bytes": 817496,
         "sha256_16": "90dd-6f9a-d713-6db4",
         "gcs_path": "worksheets-gated/L0091-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0092": {
@@ -1738,7 +1738,7 @@
         "size_bytes": 496343,
         "sha256_16": "2e17-1f5e-37dc-c5c7",
         "gcs_path": "worksheets-gated/L0092-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G7-L23信眾與教主學生版.docx",
@@ -1746,7 +1746,7 @@
         "size_bytes": 495495,
         "sha256_16": "2f1f-b437-1b39-e32e",
         "gcs_path": "worksheets-gated/L0092-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0093": {
@@ -1757,7 +1757,7 @@
         "size_bytes": 502256,
         "sha256_16": "7512-2036-c5ec-e3f1",
         "gcs_path": "worksheets-gated/L0093-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G7-L24用科學方法伸張正義的神探學生版.docx",
@@ -1765,7 +1765,7 @@
         "size_bytes": 496468,
         "sha256_16": "599f-4deb-ad6d-16bd",
         "gcs_path": "worksheets-gated/L0093-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0094": {
@@ -1776,7 +1776,7 @@
         "size_bytes": 490850,
         "sha256_16": "67d2-a190-7d12-6e5d",
         "gcs_path": "worksheets-gated/L0094-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G7-L25看到了嗎，然後呢學生版.docx",
@@ -1784,7 +1784,7 @@
         "size_bytes": 490864,
         "sha256_16": "568b-74bb-ffae-c2fe",
         "gcs_path": "worksheets-gated/L0094-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0095": {
@@ -1795,7 +1795,7 @@
         "size_bytes": 520052,
         "sha256_16": "8bc2-f5ad-d0b9-04a0",
         "gcs_path": "worksheets-gated/L0095-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G7-L26科學怪人學生版.docx",
@@ -1803,7 +1803,7 @@
         "size_bytes": 513848,
         "sha256_16": "2e9a-9a63-49e6-c46e",
         "gcs_path": "worksheets-gated/L0095-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0096": {
@@ -1814,7 +1814,7 @@
         "size_bytes": 529078,
         "sha256_16": "84c6-d343-c951-bf81",
         "gcs_path": "worksheets-gated/L0096-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G7-L27吐瓦魯：逐漸被淹沒的島國學生版.docx",
@@ -1822,7 +1822,7 @@
         "size_bytes": 527483,
         "sha256_16": "5cab-0e97-d6f0-d374",
         "gcs_path": "worksheets-gated/L0096-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0097": {
@@ -1833,7 +1833,7 @@
         "size_bytes": 497657,
         "sha256_16": "d5ee-f45a-3e50-1812",
         "gcs_path": "worksheets-gated/L0097-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G7-L28綠色賽事學生版.docx",
@@ -1841,7 +1841,7 @@
         "size_bytes": 479300,
         "sha256_16": "7131-5192-33e1-be9f",
         "gcs_path": "worksheets-gated/L0097-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0098": {
@@ -1852,7 +1852,7 @@
         "size_bytes": 514888,
         "sha256_16": "4f2e-60f4-937f-ca16",
         "gcs_path": "worksheets-gated/L0098-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G7-L29隱藏在日常對話中的微歧視學生版.docx",
@@ -1860,7 +1860,7 @@
         "size_bytes": 499421,
         "sha256_16": "ccbf-ef85-318e-2184",
         "gcs_path": "worksheets-gated/L0098-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0099": {
@@ -1871,7 +1871,7 @@
         "size_bytes": 479833,
         "sha256_16": "740e-a52f-b7f6-15ee",
         "gcs_path": "worksheets-gated/L0099-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G7-L2AI什麼都會，我們還要學什麼？學生版.docx",
@@ -1879,7 +1879,7 @@
         "size_bytes": 473998,
         "sha256_16": "5a97-3005-f3f4-907d",
         "gcs_path": "worksheets-gated/L0099-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0100": {
@@ -1890,7 +1890,7 @@
         "size_bytes": 492821,
         "sha256_16": "441e-c1cd-402e-da9c",
         "gcs_path": "worksheets-gated/L0100-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G7-L3你以為的浪漫，可能是跟騷學生版.docx",
@@ -1898,7 +1898,7 @@
         "size_bytes": 487123,
         "sha256_16": "b912-fd81-c7bd-8834",
         "gcs_path": "worksheets-gated/L0100-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0101": {
@@ -1909,7 +1909,7 @@
         "size_bytes": 460380,
         "sha256_16": "59da-83ac-0f7a-843b",
         "gcs_path": "worksheets-gated/L0101-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G7-L4小米酒的祝福學生版.docx",
@@ -1917,7 +1917,7 @@
         "size_bytes": 453461,
         "sha256_16": "1b7b-97bc-9fd4-cce8",
         "gcs_path": "worksheets-gated/L0101-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0102": {
@@ -1928,7 +1928,7 @@
         "size_bytes": 494405,
         "sha256_16": "d314-0b15-15f6-248d",
         "gcs_path": "worksheets-gated/L0102-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G7-L5網紅的電子煙實驗：偽科學的陷阱學生版.docx",
@@ -1936,7 +1936,7 @@
         "size_bytes": 491992,
         "sha256_16": "50ed-65d9-efed-4075",
         "gcs_path": "worksheets-gated/L0102-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0103": {
@@ -1947,7 +1947,7 @@
         "size_bytes": 570950,
         "sha256_16": "0a49-c0a4-5dcf-a32f",
         "gcs_path": "worksheets-gated/L0103-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G7-L6果醬男孩學生版.docx",
@@ -1955,7 +1955,7 @@
         "size_bytes": 563142,
         "sha256_16": "d21d-9d64-ae2d-dbae",
         "gcs_path": "worksheets-gated/L0103-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0104": {
@@ -1966,7 +1966,7 @@
         "size_bytes": 466236,
         "sha256_16": "3edb-f630-f2e5-8591",
         "gcs_path": "worksheets-gated/L0104-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G7-L7當全世界都在笑你，你可以怎麼做學生版.docx",
@@ -1974,7 +1974,7 @@
         "size_bytes": 459281,
         "sha256_16": "5518-e200-21e3-b65d",
         "gcs_path": "worksheets-gated/L0104-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0105": {
@@ -1985,7 +1985,7 @@
         "size_bytes": 459768,
         "sha256_16": "764e-2135-ca85-279e",
         "gcs_path": "worksheets-gated/L0105-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G7-L8黑猩猩的守護者學生版.docx",
@@ -1993,7 +1993,7 @@
         "size_bytes": 454442,
         "sha256_16": "4347-69dc-f2c6-10c7",
         "gcs_path": "worksheets-gated/L0105-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0106": {
@@ -2004,7 +2004,7 @@
         "size_bytes": 567623,
         "sha256_16": "942c-8fab-22a8-97c9",
         "gcs_path": "worksheets-gated/L0106-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G7-L9帶著血拼清單閱讀學生版.docx",
@@ -2012,7 +2012,7 @@
         "size_bytes": 574303,
         "sha256_16": "1c9e-5767-4354-173a",
         "gcs_path": "worksheets-gated/L0106-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0107": {
@@ -2023,7 +2023,7 @@
         "size_bytes": 106338,
         "sha256_16": "4540-a6d7-5236-632d",
         "gcs_path": "worksheets-gated/L0107-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G8-L0正太與小豬：武僧的養成之路學生版.docx",
@@ -2031,7 +2031,7 @@
         "size_bytes": 103494,
         "sha256_16": "8dfe-a75c-37a7-cadc",
         "gcs_path": "worksheets-gated/L0107-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0108": {
@@ -2042,7 +2042,7 @@
         "size_bytes": 477929,
         "sha256_16": "5eea-a3dc-b3d6-79c2",
         "gcs_path": "worksheets-gated/L0108-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G8-L10虎襲事件的真相：誰才是受害者？學生版.docx",
@@ -2050,7 +2050,7 @@
         "size_bytes": 472431,
         "sha256_16": "3266-db55-49bc-0ba9",
         "gcs_path": "worksheets-gated/L0108-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0109": {
@@ -2061,7 +2061,7 @@
         "size_bytes": 481115,
         "sha256_16": "c4cc-2bf9-e282-4564",
         "gcs_path": "worksheets-gated/L0109-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G8-L11球場上的另類指揮家學生版.docx",
@@ -2069,7 +2069,7 @@
         "size_bytes": 475131,
         "sha256_16": "8f61-a68b-e856-68b4",
         "gcs_path": "worksheets-gated/L0109-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0110": {
@@ -2080,7 +2080,7 @@
         "size_bytes": 485092,
         "sha256_16": "07ae-c70f-7417-d95e",
         "gcs_path": "worksheets-gated/L0110-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G8-L12我的阿嬤學生版.docx",
@@ -2088,7 +2088,7 @@
         "size_bytes": 479127,
         "sha256_16": "7067-ffbc-da1b-ec60",
         "gcs_path": "worksheets-gated/L0110-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0111": {
@@ -2099,7 +2099,7 @@
         "size_bytes": 271911,
         "sha256_16": "a02f-5b69-9d82-7043",
         "gcs_path": "worksheets-gated/L0111-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G8-L13-14雨林裡的奇蹟藥物和最後一隻旅人鴿學生版.docx",
@@ -2107,7 +2107,7 @@
         "size_bytes": 270771,
         "sha256_16": "6a27-36d3-59bb-237f",
         "gcs_path": "worksheets-gated/L0111-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0112": {
@@ -2118,7 +2118,7 @@
         "size_bytes": 483808,
         "sha256_16": "fa0f-e5f9-8e2d-5079",
         "gcs_path": "worksheets-gated/L0112-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G8-L15未來的農夫學生版.docx",
@@ -2126,7 +2126,7 @@
         "size_bytes": 478067,
         "sha256_16": "56fd-0044-74ae-c4b2",
         "gcs_path": "worksheets-gated/L0112-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0113": {
@@ -2137,7 +2137,7 @@
         "size_bytes": 480466,
         "sha256_16": "b8df-5d4f-47a1-cc54",
         "gcs_path": "worksheets-gated/L0113-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G8-L16我能不能選擇告別方式(比較多元觀點)學生版.docx",
@@ -2145,7 +2145,7 @@
         "size_bytes": 474703,
         "sha256_16": "fa27-c943-edd2-5804",
         "gcs_path": "worksheets-gated/L0113-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0114": {
@@ -2156,7 +2156,7 @@
         "size_bytes": 483810,
         "sha256_16": "dd96-3827-8bf8-aae8",
         "gcs_path": "worksheets-gated/L0114-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G8-L17石虎保育：遷移與否的兩難學生版.docx",
@@ -2164,7 +2164,7 @@
         "size_bytes": 477855,
         "sha256_16": "6b74-ab4d-4850-4722",
         "gcs_path": "worksheets-gated/L0114-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0115": {
@@ -2175,7 +2175,7 @@
         "size_bytes": 474992,
         "sha256_16": "1ecc-679a-7e52-3a52",
         "gcs_path": "worksheets-gated/L0115-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G8-L18核能的兩難抉擇學生版.docx",
@@ -2183,7 +2183,7 @@
         "size_bytes": 469451,
         "sha256_16": "e376-b3ab-7b55-09cc",
         "gcs_path": "worksheets-gated/L0115-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0116": {
@@ -2194,7 +2194,7 @@
         "size_bytes": 492451,
         "sha256_16": "3b89-b45e-b485-6458",
         "gcs_path": "worksheets-gated/L0116-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G8-L19塞翁失馬，焉知非福學生版.docx",
@@ -2202,7 +2202,7 @@
         "size_bytes": 491283,
         "sha256_16": "0e25-e3c8-7089-d11d",
         "gcs_path": "worksheets-gated/L0116-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0117": {
@@ -2213,7 +2213,7 @@
         "size_bytes": 601477,
         "sha256_16": "24df-8729-df02-0c06",
         "gcs_path": "worksheets-gated/L0117-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G8-L1讓你口中的甜蜜成為遠方農民的希望學生版.docx",
@@ -2221,7 +2221,7 @@
         "size_bytes": 597206,
         "sha256_16": "2fcc-41f3-f73c-64f8",
         "gcs_path": "worksheets-gated/L0117-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0118": {
@@ -2232,7 +2232,7 @@
         "size_bytes": 480810,
         "sha256_16": "a70a-36fe-7c19-bd3a",
         "gcs_path": "worksheets-gated/L0118-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G8-L20懸崖邊的那顆草莓學生版.docx",
@@ -2240,7 +2240,7 @@
         "size_bytes": 479437,
         "sha256_16": "8e7e-dbb5-32e6-61c9",
         "gcs_path": "worksheets-gated/L0118-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0119": {
@@ -2251,7 +2251,7 @@
         "size_bytes": 486526,
         "sha256_16": "2d31-682d-ddac-12b1",
         "gcs_path": "worksheets-gated/L0119-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G8-L21致台東：一封過客的情書學生版.docx",
@@ -2259,7 +2259,7 @@
         "size_bytes": 482419,
         "sha256_16": "6329-d152-3fe2-f835",
         "gcs_path": "worksheets-gated/L0119-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0120": {
@@ -2270,7 +2270,7 @@
         "size_bytes": 1232196,
         "sha256_16": "af86-c55e-8188-348b",
         "gcs_path": "worksheets-gated/L0120-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G8-L22靈異與科學學生版.docx",
@@ -2278,7 +2278,7 @@
         "size_bytes": 1229427,
         "sha256_16": "e8dd-5456-6653-10c0",
         "gcs_path": "worksheets-gated/L0120-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0121": {
@@ -2289,7 +2289,7 @@
         "size_bytes": 482180,
         "sha256_16": "d1b5-60f7-0413-a345",
         "gcs_path": "worksheets-gated/L0121-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G8-L23MeToo運動與我們的權利學生版.docx",
@@ -2297,7 +2297,7 @@
         "size_bytes": 481391,
         "sha256_16": "b4a4-f879-26af-dd7d",
         "gcs_path": "worksheets-gated/L0121-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0122": {
@@ -2308,7 +2308,7 @@
         "size_bytes": 565983,
         "sha256_16": "80c0-4a14-b91b-6c6b",
         "gcs_path": "worksheets-gated/L0122-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G8-L2隱形的征服者學生版.docx",
@@ -2316,7 +2316,7 @@
         "size_bytes": 564903,
         "sha256_16": "ffb1-eb0d-aedb-48ef",
         "gcs_path": "worksheets-gated/L0122-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0123": {
@@ -2327,7 +2327,7 @@
         "size_bytes": 484671,
         "sha256_16": "d2b6-968b-ea11-b211",
         "gcs_path": "worksheets-gated/L0123-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G8-L3爸爸的恩人們學生版.docx",
@@ -2335,7 +2335,7 @@
         "size_bytes": 479031,
         "sha256_16": "dac5-1fdc-97d9-e3d4",
         "gcs_path": "worksheets-gated/L0123-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0124": {
@@ -2346,7 +2346,7 @@
         "size_bytes": 479074,
         "sha256_16": "3aeb-92e5-d342-5189",
         "gcs_path": "worksheets-gated/L0124-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G8-L4新奇!「植物肉」你聽過嗎學生版.docx",
@@ -2354,7 +2354,7 @@
         "size_bytes": 474338,
         "sha256_16": "5175-ef04-ce7f-ab0b",
         "gcs_path": "worksheets-gated/L0124-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0125": {
@@ -2365,7 +2365,7 @@
         "size_bytes": 476826,
         "sha256_16": "71be-c2a7-74b9-9919",
         "gcs_path": "worksheets-gated/L0125-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G8-L5好心沒好報的玻璃娃娃爭議事件學生版.docx",
@@ -2373,7 +2373,7 @@
         "size_bytes": 476108,
         "sha256_16": "bb1b-ffa9-9ab8-dee2",
         "gcs_path": "worksheets-gated/L0125-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0126": {
@@ -2384,7 +2384,7 @@
         "size_bytes": 494363,
         "sha256_16": "c006-ff25-582b-bb71",
         "gcs_path": "worksheets-gated/L0126-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G8-L6戲院、賭場、檳榔攤：在時代夾縫中成長的我學生版.docx",
@@ -2392,7 +2392,7 @@
         "size_bytes": 493757,
         "sha256_16": "74d9-a749-c973-f87d",
         "gcs_path": "worksheets-gated/L0126-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0127": {
@@ -2403,7 +2403,7 @@
         "size_bytes": 481274,
         "sha256_16": "1793-71f6-7223-4f98",
         "gcs_path": "worksheets-gated/L0127-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G8-L7當壞事已不可逆轉：集中營裡的一門課學生版.docx",
@@ -2411,7 +2411,7 @@
         "size_bytes": 475326,
         "sha256_16": "c82c-217b-c0fd-8b7f",
         "gcs_path": "worksheets-gated/L0127-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0128": {
@@ -2422,7 +2422,7 @@
         "size_bytes": 484863,
         "sha256_16": "4191-751a-ba12-f7df",
         "gcs_path": "worksheets-gated/L0128-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G8-L8讓黑猩猩被看見的人學生版.docx",
@@ -2430,7 +2430,7 @@
         "size_bytes": 479189,
         "sha256_16": "8d79-a3aa-dc85-20bc",
         "gcs_path": "worksheets-gated/L0128-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0129": {
@@ -2441,7 +2441,7 @@
         "size_bytes": 478606,
         "sha256_16": "789b-09eb-bdce-7330",
         "gcs_path": "worksheets-gated/L0129-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G8-L9「按讚」背後的真相學生版.docx",
@@ -2449,7 +2449,7 @@
         "size_bytes": 473132,
         "sha256_16": "fc33-550d-9dcb-cb4d",
         "gcs_path": "worksheets-gated/L0129-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0130": {
@@ -2460,7 +2460,7 @@
         "size_bytes": 106301,
         "sha256_16": "213d-897a-aa9f-86ad",
         "gcs_path": "worksheets-gated/L0130-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G9-L0正太與小豬：武僧的養成之路學生版.docx",
@@ -2468,7 +2468,7 @@
         "size_bytes": 103458,
         "sha256_16": "ed1a-609d-25a7-f4f6",
         "gcs_path": "worksheets-gated/L0130-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0131": {
@@ -2479,7 +2479,7 @@
         "size_bytes": 478729,
         "sha256_16": "2d4c-ec99-e9db-b9e7",
         "gcs_path": "worksheets-gated/L0131-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G9-L10國高中數學當然可以使用計算機1學生版.docx",
@@ -2487,7 +2487,7 @@
         "size_bytes": 472920,
         "sha256_16": "284a-58ff-de99-3dd1",
         "gcs_path": "worksheets-gated/L0131-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0132": {
@@ -2498,7 +2498,7 @@
         "size_bytes": 465941,
         "sha256_16": "e0ca-035a-865e-38ff",
         "gcs_path": "worksheets-gated/L0132-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G9-L11預防近視？多點戶外活動就對了！學生版.docx",
@@ -2506,7 +2506,7 @@
         "size_bytes": 464827,
         "sha256_16": "dc5a-e21b-e6fd-4135",
         "gcs_path": "worksheets-gated/L0132-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0133": {
@@ -2517,7 +2517,7 @@
         "size_bytes": 326644,
         "sha256_16": "31ae-a3e5-a0e0-3fcb",
         "gcs_path": "worksheets-gated/L0133-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G9-L12看不見的兇手：以實驗破解肉湯腐敗之謎學生版.docx",
@@ -2525,7 +2525,7 @@
         "size_bytes": 322841,
         "sha256_16": "d681-f08a-a27b-f1b2",
         "gcs_path": "worksheets-gated/L0133-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0134": {
@@ -2536,7 +2536,7 @@
         "size_bytes": 1569114,
         "sha256_16": "105d-1f80-abc6-6ebf",
         "gcs_path": "worksheets-gated/L0134-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G9-L13從四張圖看地球暖化學生版.docx",
@@ -2544,7 +2544,7 @@
         "size_bytes": 1564084,
         "sha256_16": "4012-0992-4104-b389",
         "gcs_path": "worksheets-gated/L0134-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0135": {
@@ -2555,7 +2555,7 @@
         "size_bytes": 650397,
         "sha256_16": "390b-0b70-42a0-c597",
         "gcs_path": "worksheets-gated/L0135-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G9-L14都是八哥為什麼命運不一樣學生版.docx",
@@ -2563,7 +2563,7 @@
         "size_bytes": 646266,
         "sha256_16": "e0d1-7421-2bf5-4fdf",
         "gcs_path": "worksheets-gated/L0135-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0136": {
@@ -2574,7 +2574,7 @@
         "size_bytes": 903190,
         "sha256_16": "8f9d-eec1-abf9-b4fb",
         "gcs_path": "worksheets-gated/L0136-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G9-L15會考圖文題實戰學生版.docx",
@@ -2582,7 +2582,7 @@
         "size_bytes": 903458,
         "sha256_16": "ea7f-9d98-4b1d-f6ba",
         "gcs_path": "worksheets-gated/L0136-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0137": {
@@ -2593,7 +2593,7 @@
         "size_bytes": 386733,
         "sha256_16": "af49-1e02-77c1-2b6f",
         "gcs_path": "worksheets-gated/L0137-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G9-L16~17多文本-未解之謎-巨石陣+摩艾走路學生版.docx",
@@ -2601,7 +2601,7 @@
         "size_bytes": 297509,
         "sha256_16": "6ae8-0d2b-3b78-12a5",
         "gcs_path": "worksheets-gated/L0137-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0138": {
@@ -2612,7 +2612,7 @@
         "size_bytes": 475908,
         "sha256_16": "05c5-8837-7118-1171",
         "gcs_path": "worksheets-gated/L0138-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G9-L18樂觀者勝：向NBA球員學習「詮釋失敗」的智慧學生版.docx",
@@ -2620,7 +2620,7 @@
         "size_bytes": 474373,
         "sha256_16": "7e57-490a-21cd-da26",
         "gcs_path": "worksheets-gated/L0138-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0139": {
@@ -2631,7 +2631,7 @@
         "size_bytes": 470459,
         "sha256_16": "0071-29a3-af71-af70",
         "gcs_path": "worksheets-gated/L0139-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G9-L19見前人所未見--達爾文與長喙天蛾的故事學生版.docx",
@@ -2639,7 +2639,7 @@
         "size_bytes": 465793,
         "sha256_16": "2ec5-771c-c145-6f8e",
         "gcs_path": "worksheets-gated/L0139-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0140": {
@@ -2650,7 +2650,7 @@
         "size_bytes": 442954,
         "sha256_16": "8f44-9e55-2eb2-e6e5",
         "gcs_path": "worksheets-gated/L0140-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G9-L1認命是強者的選項學生版.docx",
@@ -2658,7 +2658,7 @@
         "size_bytes": 437005,
         "sha256_16": "77a7-7cfc-4225-056b",
         "gcs_path": "worksheets-gated/L0140-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0141": {
@@ -2669,7 +2669,7 @@
         "size_bytes": 484422,
         "sha256_16": "8bd4-b42f-2dd0-7e88",
         "gcs_path": "worksheets-gated/L0141-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G9-L20臺灣的太空之眼學生版.docx",
@@ -2677,7 +2677,7 @@
         "size_bytes": 478837,
         "sha256_16": "3eee-d9c3-7f71-0646",
         "gcs_path": "worksheets-gated/L0141-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0142": {
@@ -2688,7 +2688,7 @@
         "size_bytes": 478580,
         "sha256_16": "030c-a55b-a72f-a3fc",
         "gcs_path": "worksheets-gated/L0142-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G9-L21焚而不毀的倫敦學生版.docx",
@@ -2696,7 +2696,7 @@
         "size_bytes": 473459,
         "sha256_16": "567e-221e-4bc5-de80",
         "gcs_path": "worksheets-gated/L0142-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0143": {
@@ -2707,7 +2707,7 @@
         "size_bytes": 550073,
         "sha256_16": "2cc2-a33e-fd19-6c41",
         "gcs_path": "worksheets-gated/L0143-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G9-L22高地訓練有助於運動表現嗎？(說明文結構─用研究證據回答問題)學生版.docx",
@@ -2715,7 +2715,7 @@
         "size_bytes": 547766,
         "sha256_16": "08b9-5e59-8bb7-efea",
         "gcs_path": "worksheets-gated/L0143-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0144": {
@@ -2726,7 +2726,7 @@
         "size_bytes": 259526,
         "sha256_16": "9b5f-b3c5-bf51-6438",
         "gcs_path": "worksheets-gated/L0144-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G9-L23~25運動記錄的突破與公平學生版.docx",
@@ -2734,7 +2734,7 @@
         "size_bytes": 258061,
         "sha256_16": "c6e2-d18b-1314-e21d",
         "gcs_path": "worksheets-gated/L0144-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0145": {
@@ -2745,7 +2745,7 @@
         "size_bytes": 489725,
         "sha256_16": "ab93-1016-32e6-bfef",
         "gcs_path": "worksheets-gated/L0145-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G9-L2看不見的故事，推動看得見的世界學生版.docx",
@@ -2753,7 +2753,7 @@
         "size_bytes": 484160,
         "sha256_16": "cb3e-1ace-f04f-84b5",
         "gcs_path": "worksheets-gated/L0145-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0146": {
@@ -2764,7 +2764,7 @@
         "size_bytes": 474015,
         "sha256_16": "dcca-29bb-1530-10c7",
         "gcs_path": "worksheets-gated/L0146-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G9-L3語言的足跡：從臺北萬華到南太平洋的航海之路學生版.docx",
@@ -2772,7 +2772,7 @@
         "size_bytes": 473140,
         "sha256_16": "fe1e-9dc3-9803-d908",
         "gcs_path": "worksheets-gated/L0146-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0147": {
@@ -2783,7 +2783,7 @@
         "size_bytes": 608574,
         "sha256_16": "dde1-1e8d-ca7d-6029",
         "gcs_path": "worksheets-gated/L0147-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G9-L4構樹：南島祖先「出臺灣說」的植物證據學生版.docx",
@@ -2791,7 +2791,7 @@
         "size_bytes": 607677,
         "sha256_16": "467e-df39-c0ba-1d5f",
         "gcs_path": "worksheets-gated/L0147-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0148": {
@@ -2802,7 +2802,7 @@
         "size_bytes": 446912,
         "sha256_16": "3f99-df29-2edc-4831",
         "gcs_path": "worksheets-gated/L0148-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G9-L5科學辦案：破解蝴蝶蘭的花期密碼學生版.docx",
@@ -2810,7 +2810,7 @@
         "size_bytes": 445603,
         "sha256_16": "6fbe-25d2-fe67-8725",
         "gcs_path": "worksheets-gated/L0148-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0149": {
@@ -2821,7 +2821,7 @@
         "size_bytes": 1061269,
         "sha256_16": "acb4-5f0e-8a05-8583",
         "gcs_path": "worksheets-gated/L0149-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G9-L6從基因來的特別禮物學生版.docx",
@@ -2829,7 +2829,7 @@
         "size_bytes": 1048886,
         "sha256_16": "293b-4a9d-ac6f-fcb3",
         "gcs_path": "worksheets-gated/L0149-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0150": {
@@ -2840,7 +2840,7 @@
         "size_bytes": 2423304,
         "sha256_16": "34e5-90f5-d0e2-43c2",
         "gcs_path": "worksheets-gated/L0150-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G9-L7臺灣學生的閱讀力：美麗與哀愁學生版.docx",
@@ -2848,7 +2848,7 @@
         "size_bytes": 2422016,
         "sha256_16": "e9ad-7941-0d23-3892",
         "gcs_path": "worksheets-gated/L0150-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0151": {
@@ -2859,7 +2859,7 @@
         "size_bytes": 489086,
         "sha256_16": "9c6b-5219-5da8-6374",
         "gcs_path": "worksheets-gated/L0151-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G9-L8盡信書不如無書：從一件殺人案談起學生版.docx",
@@ -2867,7 +2867,7 @@
         "size_bytes": 483827,
         "sha256_16": "58d1-7d5d-fc0b-cebb",
         "gcs_path": "worksheets-gated/L0151-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0152": {
@@ -2878,7 +2878,7 @@
         "size_bytes": 500471,
         "sha256_16": "4ac2-bc37-5c5a-8b06",
         "gcs_path": "worksheets-gated/L0152-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "G9-L9帝國家書：一個普通家庭的生與死學生版.docx",
@@ -2886,7 +2886,7 @@
         "size_bytes": 497554,
         "sha256_16": "d0e6-c387-16e6-e873",
         "gcs_path": "worksheets-gated/L0152-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0153": {
@@ -2897,7 +2897,7 @@
         "size_bytes": 280449,
         "sha256_16": "6356-6788-f2e6-c131",
         "gcs_path": "worksheets-gated/L0153-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "文-L10荒野救亡記學生版.docx",
@@ -2905,7 +2905,7 @@
         "size_bytes": 276905,
         "sha256_16": "5767-e911-b271-41cd",
         "gcs_path": "worksheets-gated/L0153-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0154": {
@@ -2916,7 +2916,7 @@
         "size_bytes": 289223,
         "sha256_16": "b792-ac3c-a8fc-ffaf",
         "gcs_path": "worksheets-gated/L0154-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "文-L11祁黃羊的思路解密(疑問助詞)學生版.docx",
@@ -2924,7 +2924,7 @@
         "size_bytes": 286321,
         "sha256_16": "7799-981f-491f-b28d",
         "gcs_path": "worksheets-gated/L0154-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0155": {
@@ -2935,7 +2935,7 @@
         "size_bytes": 324762,
         "sha256_16": "0e86-6dc3-0a4c-a2fa",
         "gcs_path": "worksheets-gated/L0155-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "文-L12-不流血的戰爭學生版.docx",
@@ -2943,7 +2943,7 @@
         "size_bytes": 328149,
         "sha256_16": "cd6b-5267-500c-0701",
         "gcs_path": "worksheets-gated/L0155-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0156": {
@@ -2954,7 +2954,7 @@
         "size_bytes": 504963,
         "sha256_16": "264d-5592-8160-1116",
         "gcs_path": "worksheets-gated/L0156-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "文-L1這是假新聞嗎？──以〈鞭虎救弟記〉為例學生版.docx",
@@ -2962,7 +2962,7 @@
         "size_bytes": 510125,
         "sha256_16": "799f-d02c-10fb-2993",
         "gcs_path": "worksheets-gated/L0156-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0157": {
@@ -2973,7 +2973,7 @@
         "size_bytes": 209320,
         "sha256_16": "7e94-32ef-6cd0-ca41",
         "gcs_path": "worksheets-gated/L0157-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "文-L2文言文怎麼讀？──以〈鞭虎救弟記〉為例學生版.docx",
@@ -2981,7 +2981,7 @@
         "size_bytes": 191449,
         "sha256_16": "d1b5-85bd-b543-8d34",
         "gcs_path": "worksheets-gated/L0157-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0158": {
@@ -2992,7 +2992,7 @@
         "size_bytes": 560843,
         "sha256_16": "a7e1-98de-8866-6c76",
         "gcs_path": "worksheets-gated/L0158-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "文-L3不量田學生版.docx",
@@ -3000,7 +3000,7 @@
         "size_bytes": 308450,
         "sha256_16": "28eb-bb9c-0eb8-60f3",
         "gcs_path": "worksheets-gated/L0158-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0159": {
@@ -3011,7 +3011,7 @@
         "size_bytes": 1334680,
         "sha256_16": "f341-87b3-4ed3-e73f",
         "gcs_path": "worksheets-gated/L0159-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "文-L4陸公買硯學生版.docx",
@@ -3019,7 +3019,7 @@
         "size_bytes": 728548,
         "sha256_16": "0ca3-52ed-91e7-84f8",
         "gcs_path": "worksheets-gated/L0159-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0160": {
@@ -3030,7 +3030,7 @@
         "size_bytes": 451235,
         "sha256_16": "4db2-cdcc-961b-f8e2",
         "gcs_path": "worksheets-gated/L0160-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "文-L5重義的荀巨伯學生版.docx",
@@ -3038,7 +3038,7 @@
         "size_bytes": 520447,
         "sha256_16": "7738-94f5-22db-65a6",
         "gcs_path": "worksheets-gated/L0160-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0161": {
@@ -3049,7 +3049,7 @@
         "size_bytes": 298981,
         "sha256_16": "31e6-c228-1bf9-d103",
         "gcs_path": "worksheets-gated/L0161-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "文-L6江乙媽媽告御狀學生版.docx",
@@ -3057,7 +3057,7 @@
         "size_bytes": 301077,
         "sha256_16": "7556-dcfb-82d6-898e",
         "gcs_path": "worksheets-gated/L0161-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0162": {
@@ -3068,7 +3068,7 @@
         "size_bytes": 254215,
         "sha256_16": "0a10-5529-bf24-ae59",
         "gcs_path": "worksheets-gated/L0162-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "文-L7相隔千里的約定學生版.docx",
@@ -3076,7 +3076,7 @@
         "size_bytes": 256025,
         "sha256_16": "02f1-57ee-7c01-f43a",
         "gcs_path": "worksheets-gated/L0162-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0163": {
@@ -3087,7 +3087,7 @@
         "size_bytes": 192847,
         "sha256_16": "a217-ba57-d753-b229",
         "gcs_path": "worksheets-gated/L0163-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "文-L8愛讀書的顧寧人學生版.docx",
@@ -3095,7 +3095,7 @@
         "size_bytes": 188704,
         "sha256_16": "c202-7a0b-9970-99b9",
         "gcs_path": "worksheets-gated/L0163-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0164": {
@@ -3106,7 +3106,7 @@
         "size_bytes": 203950,
         "sha256_16": "b174-60bf-da37-70d7",
         "gcs_path": "worksheets-gated/L0164-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "文-L9從天才跌為凡人的神童學生版.docx",
@@ -3114,7 +3114,7 @@
         "size_bytes": 195377,
         "sha256_16": "1ce7-7a86-345c-dad4",
         "gcs_path": "worksheets-gated/L0164-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0165": {
@@ -3125,7 +3125,7 @@
         "size_bytes": 490678,
         "sha256_16": "587c-d0fa-76fd-7dc1",
         "gcs_path": "worksheets-gated/L0165-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "體-L10信任_下一球，我相信你學生版.docx",
@@ -3133,7 +3133,7 @@
         "size_bytes": 486516,
         "sha256_16": "d775-542f-401e-d824",
         "gcs_path": "worksheets-gated/L0165-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0166": {
@@ -3144,7 +3144,7 @@
         "size_bytes": 504203,
         "sha256_16": "40b3-ed9c-c887-e991",
         "gcs_path": "worksheets-gated/L0166-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "體-L11信任_因為相信，所以能向前學生版.docx",
@@ -3152,7 +3152,7 @@
         "size_bytes": 503441,
         "sha256_16": "3413-f57d-1f14-7df4",
         "gcs_path": "worksheets-gated/L0166-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0167": {
@@ -3163,7 +3163,7 @@
         "size_bytes": 479279,
         "sha256_16": "3447-11e8-365b-54a8",
         "gcs_path": "worksheets-gated/L0167-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "體-L1心，也要一起練學生版.docx",
@@ -3171,7 +3171,7 @@
         "size_bytes": 474226,
         "sha256_16": "316e-7d2d-91cb-d515",
         "gcs_path": "worksheets-gated/L0167-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0168": {
@@ -3182,7 +3182,7 @@
         "size_bytes": 494797,
         "sha256_16": "c600-42fe-807e-52f9",
         "gcs_path": "worksheets-gated/L0168-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "體-L2成為身體的最佳夥伴學生版.docx",
@@ -3190,7 +3190,7 @@
         "size_bytes": 496507,
         "sha256_16": "37fa-23f0-ebb9-5e33",
         "gcs_path": "worksheets-gated/L0168-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0169": {
@@ -3201,7 +3201,7 @@
         "size_bytes": 483727,
         "sha256_16": "f5ba-39a3-2a13-b8ca",
         "gcs_path": "worksheets-gated/L0169-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "體-L3身體，謝謝你學生版.docx",
@@ -3209,7 +3209,7 @@
         "size_bytes": 466719,
         "sha256_16": "808f-fc6e-3222-ec17",
         "gcs_path": "worksheets-gated/L0169-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0170": {
@@ -3220,7 +3220,7 @@
         "size_bytes": 1647475,
         "sha256_16": "4367-e312-63cc-218b",
         "gcs_path": "worksheets-gated/L0170-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "體-L4專注當下：關掉內心的批評噪音學生版.docx",
@@ -3228,7 +3228,7 @@
         "size_bytes": 1613964,
         "sha256_16": "6f67-d410-eedf-f2be",
         "gcs_path": "worksheets-gated/L0170-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0171": {
@@ -3239,7 +3239,7 @@
         "size_bytes": 1571200,
         "sha256_16": "c5a3-299d-55f0-ca36",
         "gcs_path": "worksheets-gated/L0171-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "體-L5從白熊到藍海豚：學習與念頭和平相處學生版.docx",
@@ -3247,7 +3247,7 @@
         "size_bytes": 1556445,
         "sha256_16": "b74b-c4cd-42a8-1d13",
         "gcs_path": "worksheets-gated/L0171-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0172": {
@@ -3258,7 +3258,7 @@
         "size_bytes": 495864,
         "sha256_16": "a3e7-24f1-6368-c09e",
         "gcs_path": "worksheets-gated/L0172-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "體-L6不是想太多，只是好在乎學生版.docx",
@@ -3266,7 +3266,7 @@
         "size_bytes": 478781,
         "sha256_16": "11d2-0d2a-fae0-e73f",
         "gcs_path": "worksheets-gated/L0172-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0173": {
@@ -3277,7 +3277,7 @@
         "size_bytes": 498170,
         "sha256_16": "a81c-9ed9-6f03-da16",
         "gcs_path": "worksheets-gated/L0173-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "體-L7讓「想很多」助你一臂之力學生版.docx",
@@ -3285,7 +3285,7 @@
         "size_bytes": 481112,
         "sha256_16": "2301-d0d5-a383-121e",
         "gcs_path": "worksheets-gated/L0173-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0174": {
@@ -3296,7 +3296,7 @@
         "size_bytes": 488537,
         "sha256_16": "2d55-ce4e-87a6-bdcc",
         "gcs_path": "worksheets-gated/L0174-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "體-L8面對「失敗」不只有一種可能學生版.docx",
@@ -3304,7 +3304,7 @@
         "size_bytes": 471593,
         "sha256_16": "dc96-c0bf-6c60-8d01",
         "gcs_path": "worksheets-gated/L0174-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0175": {
@@ -3315,7 +3315,7 @@
         "size_bytes": 501721,
         "sha256_16": "e83b-7fac-91de-f458",
         "gcs_path": "worksheets-gated/L0175-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "體-L9成長型思維 翻轉失敗的關鍵學生版.docx",
@@ -3323,7 +3323,7 @@
         "size_bytes": 495773,
         "sha256_16": "3d23-7c40-59e6-e694",
         "gcs_path": "worksheets-gated/L0175-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0176": {
@@ -3334,7 +3334,7 @@
         "size_bytes": 487089,
         "sha256_16": "0c07-51e7-2a69-cd94",
         "gcs_path": "worksheets-gated/L0176-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "體L12-團隊_一起變強會更好學生版.docx",
@@ -3342,7 +3342,7 @@
         "size_bytes": 486341,
         "sha256_16": "7635-ddf7-a45d-d76f",
         "gcs_path": "worksheets-gated/L0176-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0177": {
@@ -3353,7 +3353,7 @@
         "size_bytes": 496563,
         "sha256_16": "1cf2-3740-f619-0cd1",
         "gcs_path": "worksheets-gated/L0177-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "體L13-評價_別讓一句話決定你是誰學生版.docx",
@@ -3361,7 +3361,7 @@
         "size_bytes": 496625,
         "sha256_16": "98f4-3211-77e7-2c1e",
         "gcs_path": "worksheets-gated/L0177-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0178": {
@@ -3372,7 +3372,7 @@
         "size_bytes": 495860,
         "sha256_16": "8233-37a3-caf1-c7e8",
         "gcs_path": "worksheets-gated/L0178-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "體L14-職涯_在看不見成長的日子中學生版.docx",
@@ -3380,7 +3380,7 @@
         "size_bytes": 489798,
         "sha256_16": "a595-06c5-a987-48e4",
         "gcs_path": "worksheets-gated/L0178-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     },
     "L0179": {
@@ -3391,7 +3391,7 @@
         "size_bytes": 490813,
         "sha256_16": "8bb9-f612-0cc0-908d",
         "gcs_path": "worksheets-gated/L0179-teacher.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       },
       "student": {
         "original_filename": "體L15-結尾_ 練過的心，陪你走更遠學生版.docx",
@@ -3399,7 +3399,7 @@
         "size_bytes": 487515,
         "sha256_16": "43bb-ab6c-a36c-92bb",
         "gcs_path": "worksheets-gated/L0179-student.docx",
-        "gcs_uploaded": false
+        "gcs_uploaded": true
       }
     }
   },
