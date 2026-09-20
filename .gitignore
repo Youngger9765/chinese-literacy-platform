@@ -68,3 +68,10 @@ backend/demo-reading-output/
 backend/data/curriculum_qa/keypoints_manifest.smoke.json
 backend/data/curriculum_qa/snapshots.smoke/
 frontend/scripts/*.cjs
+
+# 學習單原始 docx 一律不進 git（本 repo 是 PUBLIC，內容住 GCS private bucket）
+# 見 #3276、backend/data/worksheets/GCS_MAPPING.md。
+# 既有的 backend/tests/fixtures/synthetic_worksheet.docx 是測試用合成小檔，
+# 已追蹤的檔案不受這條規則影響（gitignore 只擋新增的 untracked 檔）。
+*.docx
+!backend/tests/fixtures/synthetic_worksheet.docx

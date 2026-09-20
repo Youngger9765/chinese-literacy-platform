@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { downloadRemoteFile } from './downloadRemoteFile';
+import { downloadRemoteFile, downloadAuthenticatedFile } from './downloadRemoteFile';
 
 /**
  * Issue #2486: worksheet_pdf_url / worksheet_docx_url are now relative
@@ -60,5 +60,49 @@ describe('downloadRemoteFile', () => {
   it('throws when the response is not ok', async () => {
     global.fetch = vi.fn().mockResolvedValue({ ok: false, status: 404 });
     await expect(downloadRemoteFile('/assets/worksheets/missing.pdf')).rejects.toThrow('404');
+  });
+});
+
+/**
+ * #3276: role-gated downloads (worksheet teacher edition) need an Authorization
+ * header — plain downloadRemoteFile always fetches anonymously, which is
+ * correct for the public /assets/* proxy but would 401 against an
+ * authenticated endpoint.
+ */
+describe('downloadAuthenticatedFile', () => {
+  beforeEach(() => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      blob: vi.fn().mockResolvedValue(new Blob(['fake docx bytes'])),
+    });
+    global.URL.createObjectURL = vi.fn().mockReturnValue('blob:mock-object-url');
+    global.URL.revokeObjectURL = vi.fn();
+  });
+
+  it('sends the token as a Bearer Authorization header', async () => {
+    await downloadAuthenticatedFile('/api/lessons/L0001/worksheet/teacher', 'test-token-123');
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      '/api/lessons/L0001/worksheet/teacher',
+      { headers: { Authorization: 'Bearer test-token-123' } },
+    );
+  });
+
+  it('throws when the response is not ok (e.g. a real 403 from the role gate)', async () => {
+    global.fetch = vi.fn().mockResolvedValue({ ok: false, status: 403 });
+    await expect(
+      downloadAuthenticatedFile('/api/lessons/L0001/worksheet/teacher', 'student-token'),
+    ).rejects.toThrow('403');
+  });
+
+  it('uses the explicit filename argument when provided', async () => {
+    const anchor = document.createElement('a');
+    vi.spyOn(anchor, 'click').mockImplementation(() => {});
+    vi.spyOn(document, 'createElement').mockReturnValue(anchor);
+
+    await downloadAuthenticatedFile('/api/lessons/L0001/worksheet/teacher', 'tok', 'L0001-teacher.docx');
+
+    expect(anchor.download).toBe('L0001-teacher.docx');
   });
 });

@@ -24,6 +24,7 @@ from ..services.ai_usage_tracker import last_usage, log_ai_usage
 from ..services.story_structure_cell_parser import cell_to_structure_fields
 from ..services.lesson_content_loader import get_lesson_content
 from ..services.lesson_layer_loaders import _to_asset_proxy_url
+from ..services.worksheet_registry import get_worksheet_availability
 from ..schemas.story import StoryListItem, StoryDetail, StoryListResponse, StoryIntroSchema
 
 # ---------------------------------------------------------------------------
@@ -655,6 +656,8 @@ def get_story(story_id: str):
         worksheet_pdf_url=_to_asset_proxy_url(story.get("worksheet_pdf_url")),
         # Direct docx URL when soffice PDF conversion is broken (#2073)
         worksheet_docx_url=_to_asset_proxy_url(story.get("worksheet_docx_url")),
+        # Role-gated teacher/student worksheet download availability (#3276).
+        worksheet_available=get_worksheet_availability(story.get("lesson_uid")),
         # 紙本表格 (#1685) — extracted tables for 圖文表整合 lessons; None for others
         tables=story.get("tables"),
         # Story structure scaffold (#1683 item 4): YAML data for StoryStructure step.
