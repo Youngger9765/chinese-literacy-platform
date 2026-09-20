@@ -1,7 +1,7 @@
 {
   "uid": "L0168",
   "gate_version": 2,
-  "docx_sha256": "a1e5-60ce-b0f3-5206",
+  "docx_sha256": "c600-42fe-807e-52f9",
   "modules": {
     "comprehension.dr3uy": {
       "yaml_sha256": "e8b1-1b1d-74e5-91a6",
@@ -81,7 +81,7 @@
       "exit": 0
     },
     "vocab_review.6my44": {
-      "yaml_sha256": "ae48-4b10-caaa-8899",
+      "yaml_sha256": "f050-d55a-5265-56bc",
       "checked": 18,
       "status": "pass",
       "passed": true,

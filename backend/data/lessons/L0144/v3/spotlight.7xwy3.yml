@@ -60,19 +60,19 @@ spotlight:
     items:
     - type: free_text
       prompt: ①運動紀錄的進步，不只受到選手個人苦練影響。
-      answer: 可以支持
+      answer: 能
     - type: free_text
       prompt: ②科技是影響現代運動成績的重要因素之一。
-      answer: 可以支持
+      answer: 能
     - type: free_text
       prompt: ③既然科技能提升成績，使用高科技裝備就是不公平。
-      answer: 不能直接這樣說
+      answer: 不能
     - type: free_text
       prompt: ④只要裝備符合目前規定，就表示公平爭議已經解決。
-      answer: 不能直接這樣說
-    answer_carrier: '①②的「可以支持」前面有紅色 ☑（w:sym Wingdings F0FE）；
+      answer: 不能
+    answer_carrier: '①②的「能」前面有紅色 ☑（w:sym Wingdings F0FE）；
 
-      ③④的「不能直接這樣說」前面是空的 □ —— 教材用「哪一格被勾」表示判斷，兩種都是印出來的答案。'
+      ③④的「不能」前面是空的 □ —— 教材用「哪一格被勾」表示判斷，兩種都是印出來的答案。'
   - type: guide
     text: →說法③、④都把部分訊息推得太遠，超過三篇文章能支持的範圍。
   - type: single

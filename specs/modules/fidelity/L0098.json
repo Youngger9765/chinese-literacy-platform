@@ -1,7 +1,7 @@
 {
   "uid": "L0098",
   "gate_version": 2,
-  "docx_sha256": "6518-47d7-74a9-31d7",
+  "docx_sha256": "4f2e-60f4-937f-ca16",
   "modules": {
     "comprehension.rjenw": {
       "yaml_sha256": "872f-0a4d-3115-34a4",
@@ -46,7 +46,7 @@
       "exit": 0
     },
     "spotlight.4q7r4": {
-      "yaml_sha256": "5642-60c7-e3ce-308a",
+      "yaml_sha256": "6697-206d-4fc9-4b5e",
       "checked": 32,
       "status": "pass",
       "passed": true,

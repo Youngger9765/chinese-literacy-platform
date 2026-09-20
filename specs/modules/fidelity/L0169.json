@@ -1,10 +1,10 @@
 {
   "uid": "L0169",
   "gate_version": 2,
-  "docx_sha256": "a2e1-0087-81a6-49cb",
+  "docx_sha256": "f5ba-39a3-2a13-b8ca",
   "modules": {
     "comprehension.7q93j": {
-      "yaml_sha256": "f633-3cb9-f3f3-20e3",
+      "yaml_sha256": "e720-20ca-e01b-72a5",
       "checked": 26,
       "status": "pass",
       "passed": true,
