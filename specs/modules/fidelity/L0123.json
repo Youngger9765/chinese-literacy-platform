@@ -1,7 +1,7 @@
 {
   "uid": "L0123",
   "gate_version": 2,
-  "docx_sha256": "aea6-490f-3276-c04a",
+  "docx_sha256": "d2b6-968b-ea11-b211",
   "modules": {
     "comprehension.eph7t": {
       "yaml_sha256": "1bdc-0ef6-1602-a93f",

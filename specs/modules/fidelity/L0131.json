@@ -1,7 +1,7 @@
 {
   "uid": "L0131",
   "gate_version": 2,
-  "docx_sha256": "d416-d840-8740-1ebf",
+  "docx_sha256": "2d4c-ec99-e9db-b9e7",
   "modules": {
     "comprehension.fdmnp": {
       "yaml_sha256": "ed36-8db7-3319-043a",
