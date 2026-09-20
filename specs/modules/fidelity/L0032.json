@@ -1,7 +1,7 @@
 {
   "uid": "L0032",
   "gate_version": 2,
-  "docx_sha256": "1165-ecf5-6e33-8c5f",
+  "docx_sha256": "6c8b-7b0d-7fb3-9b03",
   "modules": {
     "comprehension.udrax": {
       "yaml_sha256": "ec6a-e94f-be5e-1e73",

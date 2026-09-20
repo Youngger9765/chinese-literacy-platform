@@ -1,7 +1,7 @@
 {
   "uid": "L0038",
   "gate_version": 2,
-  "docx_sha256": "e81f-e76d-c8f0-db9c",
+  "docx_sha256": "d4b1-e17f-4ada-a3c9",
   "modules": {
     "comprehension.nnyhm": {
       "yaml_sha256": "925c-9edb-9010-5616",
