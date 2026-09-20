@@ -128,6 +128,12 @@ class StoryDetail(StoryListItem):
     # When present, frontend shows a download link instead of the broken PDF iframe.
     # Hosted at gs://lingoleap-assets/worksheets/{lesson_code}.docx
     worksheet_docx_url: Optional[str] = None
+    # Role-gated teacher/student worksheet download availability (#3276).
+    # {"student": bool, "teacher": bool} — whether each edition is actually
+    # uploaded and downloadable via GET /api/lessons/{lesson_uid}/worksheet/{version}.
+    # Not sensitive (no URL/path, just booleans) so this endpoint stays unauthenticated;
+    # the actual role gate lives on the download endpoint itself, not here.
+    worksheet_available: Optional[dict] = None
     # Tables extracted from 紙本學習單 PDF (#1685).
     # Each item: {id, title, headers: list[str], rows: list[{cells: list[str], section?: str}],
     #             section_label_col?: str, notes?: list[str]}

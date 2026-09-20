@@ -10,8 +10,10 @@ import { resolveActiveSteps } from '../../config/stepConfig';
 import { useAuth } from '../../contexts/AuthContext';
 import { getOmoImageSignedUrl, getPriorOmoUploadByLesson } from '../../services/omoApi';
 import type { OmoPriorUploadResponse } from '../../services/omoApi';
-import { downloadRemoteFile } from '../../utils/downloadRemoteFile';
+import { downloadAuthenticatedFile } from '../../utils/downloadRemoteFile';
 import { gradeLabel } from '../../utils/gradeLabel';
+import { worksheetDownloadUrl } from '../../services/api';
+import { hasRole } from '../../services/authApi';
 
 /**
  * 「💡 本課學習策略」要顯示的字串，找不到就回空字串。
@@ -72,7 +74,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
   const [showUploadedModal, setShowUploadedModal] = useState(false);
   const [priorUpload, setPriorUpload] = useState<OmoPriorUploadResponse | null>(null);
   const { zhuyinActive, processZhuyin } = useZhuyin();
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const uploadedModalRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
@@ -83,14 +85,39 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
    * can pass it as a hint to the backend (skip Gemini fuzzy-match).
    */
 
-  const handleDownloadWorksheet = useCallback(async (url: string, ext: 'pdf' | 'docx') => {
-    const filename = story.lesson_code ? `${story.lesson_code}.${ext}` : undefined;
+  /**
+   * Role-gated worksheet download (#3276). Replaces the old #2845
+   * worksheetDocxUrl-based flow: that field was `_derive_docx_url(grade_code)`
+   * with NO server-side role check — fine for a single student-only edition,
+   * but the wrong shape once a teacher edition exists (a plain fetchable URL
+   * can't 403 a student). This calls the auth-gated
+   * `/api/lessons/{lessonUid}/worksheet/{version}` endpoint instead, which
+   * enforces the role check server-side regardless of what the client shows.
+   */
+  const handleDownloadWorksheetEdition = useCallback(async (version: 'student' | 'teacher') => {
+    if (!token || !story.lessonUid) return;
+    const url = worksheetDownloadUrl(story.lessonUid, version);
+    const filename = `${story.lesson_code ?? story.lessonUid}-${version}.docx`;
     try {
-      await downloadRemoteFile(url, filename);
+      await downloadAuthenticatedFile(url, token, filename);
     } catch {
-      window.open(url, '_blank', 'noopener,noreferrer');
+      // Auth-gated endpoint can't be opened in a new tab as a fallback (no
+      // way to attach the header) — the button stays clickable, silent no-op
+      // on failure matches this file's existing error handling posture
+      // elsewhere (fetch-and-swallow, not a blocking alert()).
     }
-  }, [story.lesson_code]);
+  }, [story.lessonUid, story.lesson_code, token]);
+
+  const isTeacherTier = hasRole(
+    user,
+    'teacher',
+    'system_admin',
+    'principal',
+    'director',
+    'org_owner',
+    'org_admin',
+    'homeroom_teacher',
+  );
 
   const handleUploadWorksheet = useCallback(() => {
     const lessonCode = story.lesson_code ?? '';
@@ -298,24 +325,43 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
 
           {/* 知識補給站 YouTube embed was removed — intro page shows course intro only */}
 
-          {/* 紙本學習單：只留學用版 Word 一顆（#2845）。
-              Young 2026-08-21：「只留下學用版的 Word 檔就好了。我不想要到時候
+          {/* 紙本學習單下載（#2845 → #3276 角色分權擴充）。
+              #2845（Young 2026-08-21）：「只留下學用版的 Word 檔就好了。我不想要到時候
               還要管 PDF 有沒有轉轉好，因為我們之前有 PDF 什麼字型的問題」
-              ⛔ 不要再把 PDF 加回來，也不要加第二顆 —— 鎖在
-                 __tests__/worksheetButton2845.test.ts */}
-          {story.worksheetDocxUrl && (
+              ⛔ PDF 仍不可加回來 —— 這條沒變，鎖在 __tests__/worksheetButton2845.test.ts。
+              #3276（本次）：加教師版，但**不是**加一個沒有伺服器端角色檢查的第二個
+              worksheetDocxUrl 分身 —— 那正是 2845 那條鎖原本要防的「靜默把解答發給學生」。
+              兩顆按鈕都呼叫 `/api/lessons/{lessonUid}/worksheet/{version}`，
+              教師版的角色檢查在後端 `require_role(...)` 做，前端這裡的 isTeacherTier
+              只決定「要不要顯示這顆按鈕」，不是唯一的防線。 */}
+          {(story.worksheetAvailable?.student || (isTeacherTier && story.worksheetAvailable?.teacher)) && (
             <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                onClick={() => { void handleDownloadWorksheet(story.worksheetDocxUrl!, 'docx'); }}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-700 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
-                aria-label="下載紙本學習單"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                下載紙本學習單
-              </button>
+              {story.worksheetAvailable?.student && (
+                <button
+                  type="button"
+                  onClick={() => { void handleDownloadWorksheetEdition('student'); }}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-700 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
+                  aria-label="下載學生版學習單"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  下載紙本學習單（學生版）
+                </button>
+              )}
+              {isTeacherTier && story.worksheetAvailable?.teacher && (
+                <button
+                  type="button"
+                  onClick={() => { void handleDownloadWorksheetEdition('teacher'); }}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border border-purple-300 bg-purple-50 hover:bg-purple-100 text-purple-700 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:ring-offset-1"
+                  aria-label="下載教師版學習單"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  下載紙本學習單（教師版）
+                </button>
+              )}
             </div>
           )}
 

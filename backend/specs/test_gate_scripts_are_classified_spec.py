@@ -49,6 +49,11 @@ NOT_WIRED = {
     "skill_dryrun_diff.py": "需要參數（比對 skill 乾跑輸出），由人在改 skill 時手動叫",
     # ① 一次性 / 建置期工具
     "batch_all_lessons.py": "一次性批次建置，不是門",
+    "upload_worksheet_docx.py":
+        "操作工具（#3276），不是內容品質門。把本機 Drive 下載的學習單 docx 傳到 GCS "
+        "並把 gcs_mapping.json 的 gcs_uploaded 標記翻 true；需要 --source-root 指向一個 "
+        "CI 裡不存在的本機目錄（原始 docx 從不進這個 PUBLIC repo），由人在有新學習單要 "
+        "上傳時手動叫，不該接進 run-ci.sh。",
     "build_lesson_registry.py": "建置期產 registry",
     "build_lesson_uid_registry.py": "建置期產 registry",
     "convert_docx_to_pdf.py": "DOCX→PDF 轉檔工具，派工單流程的前置，不是門",
