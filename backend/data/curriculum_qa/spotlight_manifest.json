@@ -3940,7 +3940,7 @@
       "grade_code": "G6-L28",
       "title": "森林大軍的守護者",
       "strategy_type": "self_questioning",
-      "block_count": 47,
+      "block_count": 48,
       "overall_pass": true,
       "eval": {
         "pass": true,
@@ -3962,7 +3962,7 @@
       "type_histogram": {
         "concept_box": 1,
         "free_text": 1,
-        "guide": 25,
+        "guide": 26,
         "multi": 5,
         "passage": 4,
         "self_check": 2,
@@ -3971,11 +3971,11 @@
       },
       "fingerprint": {
         "strategy_type": "self_questioning",
-        "block_count": 47,
+        "block_count": 48,
         "type_histogram": {
           "concept_box": 1,
           "free_text": 1,
-          "guide": 25,
+          "guide": 26,
           "multi": 5,
           "passage": 4,
           "self_check": 2,
@@ -4007,6 +4007,7 @@
           "guide",
           "single",
           "guide",
+          "guide",
           "passage",
           "guide",
           "multi",
@@ -4031,7 +4032,7 @@
           "single",
           "self_check"
         ],
-        "guide_count": 25,
+        "guide_count": 26,
         "passage_count": 4,
         "qa_total": 12,
         "null_answers": 0,
@@ -10320,7 +10321,7 @@
         "passage_count": 0,
         "qa_total": 7,
         "null_answers": 0,
-        "first_guide_prefix": "1.用故事情節來推測：\n我們來讀＜狐假虎威＞這篇文言文。這是一個故事，故事通常會有「角色」和「角色間發生的事」，只要讀懂",
+        "first_guide_prefix": "1.用故事情節來推測：\n我們來讀〈狐假虎威〉這篇文言文。這是一個故事，故事通常會有「角色」和「角色間發生的事」，只要先看",
         "mcq_leakage": 0
       }
     },
@@ -11506,8 +11507,8 @@
         }
       },
       "gold": {
-        "match": null,
-        "reason": "no fingerprint baseline for this lesson"
+        "match": true,
+        "diffs": {}
       },
       "type_histogram": {
         "concept_box": 1,
@@ -11580,8 +11581,8 @@
         }
       },
       "gold": {
-        "match": null,
-        "reason": "no fingerprint baseline for this lesson"
+        "match": true,
+        "diffs": {}
       },
       "type_histogram": {
         "concept_box": 1,
@@ -11651,8 +11652,8 @@
         }
       },
       "gold": {
-        "match": null,
-        "reason": "no fingerprint baseline for this lesson"
+        "match": true,
+        "diffs": {}
       },
       "type_histogram": {
         "concept_box": 1,
@@ -11722,8 +11723,8 @@
         }
       },
       "gold": {
-        "match": null,
-        "reason": "no fingerprint baseline for this lesson"
+        "match": true,
+        "diffs": {}
       },
       "type_histogram": {
         "concept_box": 1,

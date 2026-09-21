@@ -1,7 +1,7 @@
 {
   "uid": "L0067",
   "gate_version": 2,
-  "docx_sha256": "b4d5-980d-d530-3a67",
+  "docx_sha256": "b969-ab21-4c96-9b13",
   "modules": {
     "comprehension.eyxrw": {
       "yaml_sha256": "56e9-ad49-b2c5-6ef1",
@@ -39,8 +39,8 @@
       "exit": 0
     },
     "spotlight.pqrwq": {
-      "yaml_sha256": "3907-751d-ad75-2db2",
-      "checked": 92,
+      "yaml_sha256": "5b4b-4720-a1e5-3fb7",
+      "checked": 97,
       "status": "pass",
       "passed": true,
       "exit": 0
