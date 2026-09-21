@@ -99,7 +99,7 @@ spotlight:
     - type: sub_block
       label: 3.換你試試看：
       instruction: 3.換你試試看：
-      quote: 新聞報導一架小型飛機失事，機身嚴重受損，多名乘客緊急送醫。
+      quote: 新聞報導一架小型飛機發生事故，機身嚴重受損，多名乘客緊急送醫。
       items:
       - type: guide
         text: ❶圈難詞：把「失事」圈起來。

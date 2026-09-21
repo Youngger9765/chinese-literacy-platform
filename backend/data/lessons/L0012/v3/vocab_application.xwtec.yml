@@ -22,7 +22,7 @@ vocab_application:
     stem: 他長年受氣喘困擾，後來勤讀醫書、調整生活，減少氣喘發作的頻率，真是（　）。
     answer: F
   - index: 3
-    stem: 老師生動的講述古代的歷史故事，讓全班同學都聽得（　）。
+    stem: 老師生動的講述古代的歷史故事，讓全班同學都聽得（　）。（多選）
     answer: A/B
     answer_note: 原稿手寫「A/B」，兩個答案都算對
   - index: 4
