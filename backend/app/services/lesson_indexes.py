@@ -437,6 +437,13 @@ def _rounds_with_flat_paragraphs(l: dict) -> dict:
         if isinstance(fq, dict) and _followup_belongs_to(l, fq, slug):
             m["keypoints_followup_questions"] = fq
 
+        # 閱讀理解：模組 `comprehension` → 前端讀的 `multiple_choice`。
+        # 這一格漏掉的話三篇都退回頂層那一份，而畫面上完全看不出來 ——
+        # L0144 側欄點第 1/2/3 篇，題目一模一樣（2026-09-21 staging 實測）。
+        cm = m.get("comprehension")
+        if cm:
+            m["multiple_choice"] = _mcq_from(l, cm) or None
+
         vd = m.get("vocab_definitions")
         if vd:
             m["vocabulary"] = _vocabulary_from(l, vd) or None
@@ -775,7 +782,7 @@ def _vocab_bank_from(l: dict, section: dict | None = None) -> dict:
     return dict(sec.get("option_bank") or sec.get("options") or {})
 
 
-def _mcq_from(l: dict) -> list[dict]:
+def _mcq_from(l: dict, section: dict | None = None) -> list[dict]:
     """七 閱讀理解 → the shape declared in `api.ts`:
     `{question, options: string[], answer, explanation}`.
 
@@ -788,7 +795,12 @@ def _mcq_from(l: dict) -> list[dict]:
     explanation — the worksheet genuinely has nothing else there.
     """
     out = []
-    body = _unwrap(_sections(l).get("comprehension"), "comprehension")
+    # `section` 有值時用那一輪的（#2930 同族）—— 模組叫 `comprehension`，
+    # 前端讀的欄位卻叫 `multiple_choice`，名字對不上就三篇共用同一份題目。
+    body = _unwrap(
+        section if section is not None else _sections(l).get("comprehension"),
+        "comprehension",
+    )
     # 抽取器對同一種東西用了兩個容器名：144 課叫 `questions`、27 課叫 `items`（#2922）。
     # 每一題的結構完全一樣（index / answer / stem / options 字典），差別只在外面那層。
     #
