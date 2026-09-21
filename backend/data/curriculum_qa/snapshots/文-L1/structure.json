@@ -1,6 +1,6 @@
 {
   "interaction_profile": {
-    "checkbox_count": 5,
+    "checkbox_count": 4,
     "fill_blank_count": 6,
     "inline_choice_count": 0,
     "layout": "worksheet_table",
@@ -9,7 +9,7 @@
       "【　　　】故事概要",
       "Q1",
       "Q4",
-      "Q2"
+      "Q1"
     ],
     "template_kind": "generic"
   },
@@ -17,17 +17,17 @@
   "rows": [
     {
       "interactive_type": "display",
-      "label": "這是假新聞嗎？--以「鞭虎救弟記」為例",
+      "label": "這是假新聞嗎？--以〈鞭虎救弟記〉為例",
       "value": ""
     },
     {
       "interactive_type": "fill_blank",
       "label": "【　　　】故事概要",
-      "value": "1.時間：1675年秋天\n2.地點：地勢險峻、【　　　】的山嶺\n3.經過：含光兄弟經過山嶺時遇虎，老虎把弟弟【　　　】了，含光拿鞭子奮力追虎，經歷搏鬥，從虎口救出弟弟。弟弟一息尚存，但【　　　】過多，含光灌湯藥、吸毒血，弟弟終於得救。"
+      "value": "1.時間：1675年秋天\n2.地點：地勢險峻、【　　　】的山嶺\n3.經過：含光兄弟經過山嶺時遇虎，老虎把弟弟【　　　】了。含光拿鞭子追虎，經過搏鬥後救回弟弟。弟弟【　　　】，又依道士的說法吸吮傷口，弟弟最後得救。"
     },
     {
       "interactive_type": "display",
-      "label": "作者質疑故事不合理之處",
+      "label": "作者提出的質疑",
       "sub_rows": [
         {
           "interactive_type": "fill_blank",
@@ -54,95 +54,86 @@
     },
     {
       "interactive_type": "display",
-      "label": "作者用網路查證",
+      "label": "作者查證找到的證據",
       "sub_rows": [
         {
-          "interactive_type": "display",
+          "interactive_type": "fill_blank",
           "label": "Q1",
-          "value": "1876-1912年，印度就有33247人死於虎襲。\n康熙年間，老虎數量眾多。\n2022年印度有112人因虎襲死亡。"
+          "value": "過去和現在都有【　　　】的紀錄。"
         },
         {
           "interactive_type": "fill_blank",
           "label": "Q2",
-          "value": "華南虎體重約110-150kg，15歲的男生體重約50kg，老虎拖著體重約自己1/3體重的獵物，很可能【　　　】。"
+          "value": "華南虎體重約110-150kg；若弟弟約50公斤，老虎等於多帶自身【　　　】重的獵物。"
         },
         {
-          "interactive_type": "fill_blank",
+          "interactive_type": "display",
           "label": "Q3",
-          "value": "老虎在【　　　】時，可能會攻擊人類。\n2019年美國有一位男子被年幼公獅攻擊，最後徒手掐死公獅。"
+          "value": "2019年美國有一位男子被年幼公獅攻擊，最後徒手掐死公獅。"
         },
         {
           "interactive_type": "display",
           "label": "Q4",
-          "value": "人體失血超過1/3就會死亡，含光吮吸毒血數升，估計約2060 C.C，佔當事人血液的54%。"
+          "value": "含光吮吸毒血約有2060C.C.，約佔當事人血液的54%。"
         }
       ],
       "value": ""
     },
     {
       "interactive_type": "display",
-      "label": "結果(請打V)",
+      "label": "根據查證做判斷",
       "sub_rows": [
         {
           "interactive_type": "checkbox",
           "label": "Q1",
           "options": [
-            "真實事件",
-            "虛假事件"
+            "虎襲可能發生",
+            "虎襲不可能發生"
           ],
-          "value": "①真實事件 ②虛假事件"
+          "value": "①虎襲可能發生 ②虎襲不可能發生"
         },
         {
           "interactive_type": "checkbox",
           "label": "Q2",
           "options": [
-            "有可能",
-            "不可能"
+            "有可能追上",
+            "不可能追上"
           ],
-          "value": "①有可能 ②不可能"
+          "value": "①有可能追上 ②不可能追上"
         },
         {
           "interactive_type": "checkbox",
           "label": "Q3",
           "options": [
-            "有可能",
-            "不可能"
+            "有可能打退",
+            "不可能打退"
           ],
-          "value": "①有可能 ②不可能"
+          "value": "①有可能打退 ②不可能打退"
         },
         {
           "interactive_type": "checkbox",
           "label": "Q4",
           "options": [
-            "有可能",
-            "不可能"
+            "很可能被誇大",
+            "應該可信"
           ],
-          "value": "①有可能 ②不可能"
+          "value": "①很可能被誇大 ②應該可信"
         }
       ],
       "value": ""
     },
     {
-      "interactive_type": "checkbox",
-      "label": "得出結論",
-      "options": [
-        "真的",
-        "假的"
-      ],
-      "value": "350年前含光兄弟遇虎襲的故事很可能是\n①真的 ②假的"
-    },
-    {
       "interactive_type": "fill_blank",
-      "label": "得出結論",
-      "value": "，但失血的部分【　　　】。"
+      "label": "綜合判斷",
+      "value": "故事中的虎襲、追虎、打退老虎等情節【　　　】，但目前的資料還不能證明【　　　】；其中「吸血數升」【　　　】。"
     }
   ],
-  "title": "這是假新聞嗎？--以「鞭虎救弟記」為例",
+  "title": "這是假新聞嗎？--以〈鞭虎救弟記〉為例",
   "worksheet_rows": [
     {
       "kind": "pair",
       "label": "【　　　】故事概要",
-      "value": "1.時間：1675年秋天\n2.地點：地勢險峻、【　　　】的山嶺\n3.經過：含光兄弟經過山嶺時遇虎，老虎把弟弟【　　　】了，含光拿鞭子奮力追虎，經歷搏鬥，從虎口救出弟弟。弟弟一息尚存，但【　　　】過多，含光灌湯藥、吸毒血，弟弟終於得救。"
+      "value": "1.時間：1675年秋天\n2.地點：地勢險峻、【　　　】的山嶺\n3.經過：含光兄弟經過山嶺時遇虎，老虎把弟弟【　　　】了。含光拿鞭子追虎，經過搏鬥後救回弟弟。弟弟【　　　】，又依道士的說法吸吮傷口，弟弟最後得救。"
     },
     {
       "items": [
@@ -164,61 +155,56 @@
         }
       ],
       "kind": "section_block",
-      "section": "作者質疑故事不合理之處"
+      "section": "作者提出的質疑"
     },
     {
       "items": [
         {
           "label": "Q1",
-          "value": "1876-1912年，印度就有33247人死於虎襲。\n康熙年間，老虎數量眾多。\n2022年印度有112人因虎襲死亡。"
+          "value": "過去和現在都有【　　　】的紀錄。"
         },
         {
           "label": "Q2",
-          "value": "華南虎體重約110-150kg，15歲的男生體重約50kg，老虎拖著體重約自己1/3體重的獵物，很可能【　　　】。"
+          "value": "華南虎體重約110-150kg；若弟弟約50公斤，老虎等於多帶自身【　　　】重的獵物。"
         },
         {
           "label": "Q3",
-          "value": "老虎在【　　　】時，可能會攻擊人類。\n2019年美國有一位男子被年幼公獅攻擊，最後徒手掐死公獅。"
+          "value": "2019年美國有一位男子被年幼公獅攻擊，最後徒手掐死公獅。"
         },
         {
           "label": "Q4",
-          "value": "人體失血超過1/3就會死亡，含光吮吸毒血數升，估計約2060 C.C，佔當事人血液的54%。"
+          "value": "含光吮吸毒血約有2060C.C.，約佔當事人血液的54%。"
         }
       ],
       "kind": "section_block",
-      "section": "作者用網路查證"
+      "section": "作者查證找到的證據"
     },
     {
       "items": [
         {
           "label": "Q1",
-          "value": "①真實事件 ②虛假事件"
+          "value": "①虎襲可能發生 ②虎襲不可能發生"
         },
         {
           "label": "Q2",
-          "value": "①有可能 ②不可能"
+          "value": "①有可能追上 ②不可能追上"
         },
         {
           "label": "Q3",
-          "value": "①有可能 ②不可能"
+          "value": "①有可能打退 ②不可能打退"
         },
         {
           "label": "Q4",
-          "value": "①有可能 ②不可能"
+          "value": "①很可能被誇大 ②應該可信"
         }
       ],
       "kind": "section_block",
-      "section": "結果(請打V)"
+      "section": "根據查證做判斷"
     },
     {
       "kind": "pair",
-      "label": "得出結論",
-      "value": "350年前含光兄弟遇虎襲的故事很可能是\n①真的 ②假的"
-    },
-    {
-      "kind": "pair",
-      "label": "得出結論",
-      "value": "，但失血的部分【　　　】。"
+      "label": "綜合判斷",
+      "value": "故事中的虎襲、追虎、打退老虎等情節【　　　】，但目前的資料還不能證明【　　　】；其中「吸血數升」【　　　】。"
     }
   ]
 }

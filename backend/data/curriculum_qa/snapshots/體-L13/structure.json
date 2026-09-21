@@ -1,0 +1,182 @@
+{
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 5,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "內容",
+      "內容",
+      "內容",
+      "內容"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
+  "rows": [
+    {
+      "interactive_type": "display",
+      "label": "別讓一句話決定你是誰",
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "提出問題",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "段",
+          "value": "1-4"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容",
+          "value": "1.阿哲失誤的影片被大量轉傳，留言出現許多批評和嘲笑，讓他懷疑自己【　　　】\n2.分享喜歡的相片，而被同學【　　　】\n3.分享完成的拼圖，而被同學【　　　】"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "提出方法",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "段",
+          "value": "5"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容",
+          "value": "聽到評價會受影響，是很【　　　】的事。但不一定要立刻相信，可以問自己：\n❶對方說的是【　　　】，還是【　　　】？\n❷他掌握的是事情的【　　　】，還是只是片段？\n❸這個評價能不能幫助我【　　　】？"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "舉例說明",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "段",
+          "value": "6"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容",
+          "value": "2024年世界棒球12強賽，潘傑楷因失誤受到質疑，教練提醒，不該因幾次失常就【　　　】原來擁有的能力。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "分類處理",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "段",
+          "value": "7-8"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容",
+          "value": "1.有些評價指出具體問題，有值得【　　　】的地方。\n2.有些評價只是【　　　】，不必【　　　】別人的看法，也不一定要和對方爭論。\n3.如果遇到嘲笑、辱罵或【　　　】，可以暫時離開，也可以找【　　　】幫忙。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "總結觀點",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "段",
+          "value": "9"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容",
+          "value": "1.因別人評價而受傷是因為【　　　】\n2.對別人的評價不用【　　　】，只要把能幫助自己的部分留下來。"
+        }
+      ],
+      "value": ""
+    }
+  ],
+  "title": "別讓一句話決定你是誰",
+  "worksheet_rows": [
+    {
+      "items": [
+        {
+          "label": "段",
+          "value": "1-4"
+        },
+        {
+          "label": "內容",
+          "value": "1.阿哲失誤的影片被大量轉傳，留言出現許多批評和嘲笑，讓他懷疑自己【　　　】\n2.分享喜歡的相片，而被同學（）\n3.分享完成的拼圖，而被同學（）"
+        }
+      ],
+      "kind": "section_block",
+      "section": "提出問題"
+    },
+    {
+      "items": [
+        {
+          "label": "段",
+          "value": "5"
+        },
+        {
+          "label": "內容",
+          "value": "聽到評價會受影響，是很（）的事。但不一定要立刻相信，可以問自己：\n❶對方說的是【　　　】，還是【　　　】？\n❷他掌握的是事情的【　　　】，還是只是片段？\n❸這個評價能不能幫助我【　　　】？"
+        }
+      ],
+      "kind": "section_block",
+      "section": "提出方法"
+    },
+    {
+      "items": [
+        {
+          "label": "段",
+          "value": "6"
+        },
+        {
+          "label": "內容",
+          "value": "2024年世界棒球12強賽，潘傑楷因失誤受到質疑，教練提醒，不該因幾次失常就【　　　】原來擁有的能力。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "舉例說明"
+    },
+    {
+      "items": [
+        {
+          "label": "段",
+          "value": "7-8"
+        },
+        {
+          "label": "內容",
+          "value": "1.有些評價指出具體問題，有值得【　　　】的地方。\n2.有些評價只是【　　　】，不必【　　　】別人的看法，也不一定要和對方爭論。\n3.如果遇到嘲笑、辱罵或【　　　】，可以暫時離開，也可以找【　　　】幫忙。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "分類處理"
+    },
+    {
+      "items": [
+        {
+          "label": "段",
+          "value": "9"
+        },
+        {
+          "label": "內容",
+          "value": "1.因別人評價而受傷是因為（）\n2.對別人的評價不用【　　　】，只要把能幫助自己的部分留下來。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "總結觀點"
+    }
+  ]
+}

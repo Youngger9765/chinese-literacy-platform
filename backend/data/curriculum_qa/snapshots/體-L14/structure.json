@@ -1,0 +1,182 @@
+{
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 5,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "內容",
+      "內容",
+      "內容",
+      "內容"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
+  "rows": [
+    {
+      "interactive_type": "display",
+      "label": "在看不見成長的日子中",
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "提出困境",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "段落",
+          "value": "1"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容",
+          "value": "當自己已經努力很久，卻遲遲看不到想要的成果，「就可能開始，就可能開始【　　　】自己」：是不是沒有天分？努力真的有用嗎？"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "舉例說明",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "段落",
+          "value": "2-4"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容",
+          "value": "1.他練習總是十分【　　　】，連【　　　】時都握著棒球，但很少當上先發。\n2.在一次比賽中的挫折，使他【　　　】，追求進步。\n3.他請教【　　　】，修正自己的投球方法，幾年後終於看見成效──進入【　　　】"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "舉例說明",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "段落",
+          "value": "5-7"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容",
+          "value": "1.曾經站上生涯的【　　　】，卻因為【　　　】而受重傷，基本動作都得重新練習。\n2.好不容易重返球場，卻發現身體【　　　】\n3.他明白最可怕的是對自己【　　　】，他重新找到能改進的地方，並繼續做下去。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "歸納觀點",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "段落",
+          "value": "8"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容",
+          "value": "堅持，不只是【　　　】，有時也包括調整方法、改變位置，或【　　　】適合自己的方向。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "提出思考",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "段落",
+          "value": "9"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容",
+          "value": "看不見成長的日子【　　　】，可以想一想：現在的自己，下一步可以怎麼走？"
+        }
+      ],
+      "value": ""
+    }
+  ],
+  "title": "在看不見成長的日子中",
+  "worksheet_rows": [
+    {
+      "items": [
+        {
+          "label": "段落",
+          "value": "1"
+        },
+        {
+          "label": "內容",
+          "value": "當自己已經努力很久，卻遲遲看不到想要的成果，「就可能開始，就可能開始（）自己」：是不是沒有天分？努力真的有用嗎？"
+        }
+      ],
+      "kind": "section_block",
+      "section": "提出困境"
+    },
+    {
+      "items": [
+        {
+          "label": "段落",
+          "value": "2-4"
+        },
+        {
+          "label": "內容",
+          "value": "1.他練習總是十分（），連【　　　】時都握著棒球，但很少當上先發。\n2.在一次比賽中的挫折，使他（），追求進步。\n3.他請教【　　　】，修正自己的投球方法，幾年後終於看見成效──進入【　　　】"
+        }
+      ],
+      "kind": "section_block",
+      "section": "舉例說明"
+    },
+    {
+      "items": [
+        {
+          "label": "段落",
+          "value": "5-7"
+        },
+        {
+          "label": "內容",
+          "value": "1.曾經站上生涯的【　　　】，卻因為【　　　】而受重傷，基本動作都得重新練習。\n2.好不容易重返球場，卻發現身體（）\n3.他明白最可怕的是對自己【　　　】，他重新找到能改進的地方，並繼續做下去。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "舉例說明"
+    },
+    {
+      "items": [
+        {
+          "label": "段落",
+          "value": "8"
+        },
+        {
+          "label": "內容",
+          "value": "堅持，不只是【　　　】，有時也包括調整方法、改變位置，或【　　　】適合自己的方向。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "歸納觀點"
+    },
+    {
+      "items": [
+        {
+          "label": "段落",
+          "value": "9"
+        },
+        {
+          "label": "內容",
+          "value": "看不見成長的日子（），可以想一想：現在的自己，下一步可以怎麼走？"
+        }
+      ],
+      "kind": "section_block",
+      "section": "提出思考"
+    }
+  ]
+}
