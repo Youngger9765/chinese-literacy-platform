@@ -119,8 +119,20 @@ export function isBlockAnswered(
       const n = block.items?.length ?? 0;
       return !!checked && checked.filter(Boolean).length >= n;
     }
-    case 'fill_table':
-      return val === true;
+    case 'fill_table': {
+      // `fill_table` 有兩種，而**只有一種畫得出「我做完了」的控制項**：
+      //   沒有 rows ＝ 指路牌（「文章重點表請在…步驟填寫」），它有一顆「知道了」
+      //               會把這個 key 設成 true —— 那種要按過才算數。
+      //   有 rows   ＝ 表格就住在聚光燈裡，fall through 到 `table` 分支純繪製，
+      //               畫面上沒有輸入框、也沒有按鈕能設這個值。
+      // 以前兩種都要求 `val === true`，於是帶 rows 的那種**永遠不可能為真**，
+      // 而 `countVisibleSegments` 會在它所在的那一段停住 ——
+      // 後面每一段都永遠不顯示。L0087 的聚光燈有六節，學生只看得到三節
+      // （第四節「小試身手」、第五節、第六節自我檢核全部到不了）。
+      const hasRows = Array.isArray((block as { rows?: unknown[] }).rows)
+        && ((block as { rows?: unknown[] }).rows as unknown[]).length > 0;
+      return hasRows ? true : val === true;
+    }
     default:
       return false;
   }
