@@ -1,0 +1,182 @@
+{
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 5,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "內容",
+      "內容",
+      "內容",
+      "內容"
+    ],
+    "template_kind": "psr"
+  },
+  "layout": "worksheet_table",
+  "rows": [
+    {
+      "interactive_type": "display",
+      "label": "一起變強，會更好",
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "引出問題",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "段落",
+          "value": "1"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容",
+          "value": "遇到和自己能力【　　　】的人，看見對方進步，有的人會替他開心，但也有人會忍不住【　　　】，害怕自己的機會【　　　】。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "問題",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "段落",
+          "value": "2-4"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容",
+          "value": "1.佳恩和子皓都是隊上的【　　　】，他們的風格不同，都想成為【　　　】球員。\n2.子皓向佳恩請教，佳恩【　　　】，擔心如果子皓變強，自己先發的位置就【　　　】"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "轉折",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "段落",
+          "value": "5-7"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容",
+          "value": "1.比賽時佳恩因為【　　　】不適而改由子皓接替。\n2.子皓處理偏低的球時失誤，讓對方得分了。\n3.佳恩因此感到【　　　】，但教練說沒有人不會受傷。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "解決與改變",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "段落",
+          "value": "8-10"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容",
+          "value": "1.教練提醒：同一個位置的隊友，不只是【　　　】，也要是最佳【　　　】。\n2.佳恩想起幾天前自己對子皓【　　　】，臉紅起來。\n3.後來兩人開始分享【　　　】和對打者的觀察方法。\n4.他們【　　　】比較，但也同時思考還可以從對方身上【　　　】。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "結論",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "段落",
+          "value": "11-12"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容",
+          "value": "真能讓團隊變好的態度是：【　　　】，【　　　】。"
+        }
+      ],
+      "value": ""
+    }
+  ],
+  "title": "一起變強，會更好",
+  "worksheet_rows": [
+    {
+      "items": [
+        {
+          "label": "段落",
+          "value": "1"
+        },
+        {
+          "label": "內容",
+          "value": "遇到和自己能力【　　　】的人，看見對方進步，有的人會替他開心，但也有人會忍不住【　　　】，害怕自己的機會【　　　】。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "引出問題"
+    },
+    {
+      "items": [
+        {
+          "label": "段落",
+          "value": "2-4"
+        },
+        {
+          "label": "內容",
+          "value": "1.佳恩和子皓都是隊上的【　　　】，他們的風格不同，都想成為【　　　】球員。\n2.子皓向佳恩請教，佳恩（），擔心如果子皓變強，自己先發的位置就【　　　】"
+        }
+      ],
+      "kind": "section_block",
+      "section": "問題"
+    },
+    {
+      "items": [
+        {
+          "label": "段落",
+          "value": "5-7"
+        },
+        {
+          "label": "內容",
+          "value": "1.比賽時佳恩因為【　　　】不適而改由子皓接替。\n2.子皓處理偏低的球時失誤，讓對方得分了。\n3.佳恩因此感到【　　　】，但教練說沒有人不會受傷。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "轉折"
+    },
+    {
+      "items": [
+        {
+          "label": "段落",
+          "value": "8-10"
+        },
+        {
+          "label": "內容",
+          "value": "1.教練提醒：同一個位置的隊友，不只是【　　　】，也要是最佳【　　　】。\n2.佳恩想起幾天前自己對子皓（），臉紅起來。\n3.後來兩人開始分享【　　　】和對打者的觀察方法。\n4.他們（）比較，但也同時思考還可以從對方身上【　　　】。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "解決與改變"
+    },
+    {
+      "items": [
+        {
+          "label": "段落",
+          "value": "11-12"
+        },
+        {
+          "label": "內容",
+          "value": "真能讓團隊變好的態度是：【　　　】，【　　　】。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "結論"
+    }
+  ]
+}
