@@ -40,8 +40,9 @@ full_text_annotate:
     footnote_refs:
     - 9
     - 10
-  source_table:
-    title: 查證資料來源
+  inline_table:
+    label: 查證資料來源
+    attached_to: 課文末、念順順之前
     columns:
     - 查證問題→查什麼資料
     - 來源
@@ -75,7 +76,7 @@ full_text_annotate:
     inquiry_blocks: '第 5 段與第 6 段之間印了四組「Q + 查證說明」，**不佔段號**，也不在念順順的計數範圍內。
 
       這四組就是本課策略（善用網路資源找證據）的示範，每一段都掛著註腳連結。'
-    source_table: 現行原稿把舊版那 10 條頁尾註腳改成正文裡的「查證資料來源」四列表（Q1～Q4 各一列）。
+    inline_table: 現行原稿把舊版那 10 條頁尾註腳改成正文裡的「查證資料來源」四列表（Q1～Q4 各一列）。
       它仍是「善用網路資源找證據」這個策略的實體證據，只是從頁尾搬到正文、並按查證問題分組。
     inline_marked_terms: 課文用黑色字元框線（w:bdr color=auto）標出本課語詞；是題目標示不是答案
   slug: 4vamf
