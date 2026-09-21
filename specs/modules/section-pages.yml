@@ -6090,45 +6090,48 @@ lessons:
       pages: [12]
       pages_source: located
   L0156:
-    pdf_pages: 10
+    pdf_pages: 13
     page_prints:
-    - 5e09-c6c3-bd89
-    - 4eec-9e51-1ad3
-    - e3a4-af0b-43a4
-    - 428d-0027-5972
-    - f0ea-1b0c-4138
-    - e677-73e8-2c45
-    - ef75-8fe4-c09e
-    - 38f9-a6d6-5a7e
-    - d332-8462-9984
-    - c812-388e-8d5f
+    - b942-af1b-3919
+    - b8be-50a1-8d4e
+    - 3a73-99ef-f0dc
+    - d406-28fd-f120
+    - c8ee-8808-442c
+    - 2a92-3497-d513
+    - 4f55-76b0-3bd5
+    - b243-f91b-94fc
+    - eb2a-a504-be88
+    - 5d7e-576e-0a0c
+    - 6336-44f8-fd7f
+    - bcfc-6729-816f
+    - 1fef-431d-4930
     sections:
     - name: 讀全文-做記號
-      pages: [1, 2, 3]
+      pages: [1, 2, 3, 4]
       pages_source: located
     - name: 念順順
-      pages: [3, 4]
+      pages: [4]
       pages_source: located
     - name: 語詞我最棒
       pages: [4, 5]
       pages_source: located
     - name: 語詞應用
-      pages: [5]
-      pages_source: located
-    - name: 文章重點表
       pages: [5, 6]
       pages_source: located
+    - name: 文章重點表
+      pages: [6, 7]
+      pages_source: located
     - name: 閱讀聚光燈
-      pages: [6, 7, 8]
+      pages: [7, 8, 9, 10, 11]
       pages_source: located
     - name: 閱讀理解
-      pages: [8, 9]
+      pages: [11, 12]
       pages_source: located
     - name: 詞語複習
-      pages: [9, 10]
+      pages: [12, 13]
       pages_source: located
     - name: 知識補給站
-      pages: [10]
+      pages: [13]
       pages_source: located
   L0157:
     pdf_pages: 8

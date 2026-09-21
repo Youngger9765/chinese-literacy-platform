@@ -9,7 +9,7 @@ word_matching:
     boxed_term: 俄而
     options:
       1: 經常
-      2: 突然
+      2: 忽然
     answer: 2
   - index: 2
     classical: 有道士謂之「曰」
@@ -19,17 +19,17 @@ word_matching:
       2: 太陽很大
     answer: 1
   - index: 3
-    classical: 於是。醫數十日漸平，「乃」偕歸
+    classical: 醫數十日漸平，「乃」偕歸
     boxed_term: 乃
     options:
-      1: 於是
+      1: 才
       2: 可是
     answer: 1
   - index: 4
     classical: 含光「竭力」以口遍吮之
     boxed_term: 竭力
     options:
-      1: 用力
+      1: 省力
       2: 盡力
     answer: 2
   - index: 5
@@ -50,18 +50,11 @@ word_matching:
     classical: 其弟尚「一息未殊」
     boxed_term: 一息未殊
     options:
-      1: 還有一口氣沒
-      2: 一口氣還沒有斷絕
+      1: 呼吸還沒有恢復平穩
+      2: 氣息還沒斷絕
     answer: 2
-  - index: 8
-    classical: 「既」息肩
-    boxed_term: 既
-    options:
-      1: 已經
-      2: 既然
-    answer: 1
   notes:
-    answer_carrier: 紅色 ☑（w:sym Wingdings F0FE，在文字層），8 題各 1 個
+    answer_carrier: 紅色 ☑（w:sym Wingdings F0FE，在文字層），7 題各 1 個
     shape: 每題一列：文言原句（要解釋的字用「」框住）＋ 兩個白話選項二選一
     items: '第 (3) 題的文言句在原稿印成「於是。醫數十日漸平，「乃」偕歸」——句首多了「於是。」
 

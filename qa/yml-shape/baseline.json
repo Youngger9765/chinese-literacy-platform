@@ -86,7 +86,7 @@
         "paragraph_count",
         "paragraphs"
       ],
-      "inner_shapes": 99,
+      "inner_shapes": 101,
       "lessons": 175,
       "mid": [
         "checklist",
@@ -631,7 +631,7 @@
         "strategy_name",
         "strategy_type"
       ],
-      "inner_shapes": 40,
+      "inner_shapes": 39,
       "lessons": 173,
       "mid": [
         "answer_carrier",
@@ -670,7 +670,6 @@
         "single_vs_multi_note",
         "source_images",
         "strategy_name_errata_ref",
-        "table_header_note",
         "table_layout_note",
         "title_line",
         "title_note"
@@ -699,7 +698,6 @@
         "shape_note",
         "single_vs_multi_note",
         "strategy_name_errata_ref",
-        "table_header_note",
         "table_layout_note",
         "title_note"
       ],

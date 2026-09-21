@@ -1,0 +1,280 @@
+{
+  "interaction_profile": {
+    "checkbox_count": 0,
+    "fill_blank_count": 7,
+    "inline_choice_count": 0,
+    "layout": "worksheet_table",
+    "mode": "fill_blank",
+    "primary_labels": [
+      "內容",
+      "內容",
+      "內容",
+      "內容"
+    ],
+    "template_kind": "generic"
+  },
+  "layout": "worksheet_table",
+  "rows": [
+    {
+      "interactive_type": "display",
+      "label": "練過的心，陪你走更遠",
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "提出觀點",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "段落",
+          "value": "1"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容",
+          "value": "比賽會結束，但在比賽中歷經【　　　】，逐漸變得【　　　】的心，不會只留在球場。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "分項說明",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "段落",
+          "value": "２"
+        },
+        {
+          "interactive_type": "display",
+          "label": "子題",
+          "value": "面對緊張"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容",
+          "value": "1.緊張是因為【　　　】\n2.可以透過【　　　】、感受雙腳【　　　】，把目光放回眼前。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "分項說明",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "段落",
+          "value": "３"
+        },
+        {
+          "interactive_type": "display",
+          "label": "子題",
+          "value": "面對負面念頭和評價"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容",
+          "value": "1.分辨心中的聲音是【　　　】還是【　　　】\n2.分辨別人的評價是能幫助自己的【　　　】，還是刻薄的【　　　】。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "分項說明",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "段落",
+          "value": "４"
+        },
+        {
+          "interactive_type": "display",
+          "label": "子題",
+          "value": "面對失敗與停滯"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容",
+          "value": "1.失敗後願意找出原因，就能【　　　】。\n2.努力卻看不見成果時，也可以嘗試改變或尋求【　　　】。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "分項說明",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "段落",
+          "value": "５"
+        },
+        {
+          "interactive_type": "display",
+          "label": "子題",
+          "value": "面對合作與競爭"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容",
+          "value": "1.信任隊友，讓每個人都能【　　　】。\n2.好的競爭，可以是「我好，【　　　】」。"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "舉例印證",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "段落",
+          "value": "6"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容",
+          "value": "1.【　　　】選手陳怡安曾經奪下奧運示範賽【　　　】，後來因為受傷而轉行創業。\n2.運動沒有教她創業，卻帶給她【　　　】"
+        }
+      ],
+      "value": ""
+    },
+    {
+      "interactive_type": "display",
+      "label": "總結",
+      "sub_rows": [
+        {
+          "interactive_type": "display",
+          "label": "段落",
+          "value": "7"
+        },
+        {
+          "interactive_type": "fill_blank",
+          "label": "內容",
+          "value": "身為運動員，除了練身體，也要練【　　　】。練過的心會陪著你面對人生。"
+        }
+      ],
+      "value": ""
+    }
+  ],
+  "title": "練過的心，陪你走更遠",
+  "worksheet_rows": [
+    {
+      "items": [
+        {
+          "label": "段落",
+          "value": "1"
+        },
+        {
+          "label": "內容",
+          "value": "比賽會結束，但在比賽中歷經【　　　】，逐漸變得【　　　】的心，不會只留在球場。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "提出觀點"
+    },
+    {
+      "items": [
+        {
+          "label": "段落",
+          "value": "２"
+        },
+        {
+          "label": "子題",
+          "value": "面對緊張"
+        },
+        {
+          "label": "內容",
+          "value": "1.緊張是因為（）\n2.可以透過【　　　】、感受雙腳【　　　】，把目光放回眼前。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "分項說明"
+    },
+    {
+      "items": [
+        {
+          "label": "段落",
+          "value": "３"
+        },
+        {
+          "label": "子題",
+          "value": "面對負面念頭和評價"
+        },
+        {
+          "label": "內容",
+          "value": "1.分辨心中的聲音是【　　　】還是【　　　】\n2.分辨別人的評價是能幫助自己的【　　　】，還是刻薄的【　　　】。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "分項說明"
+    },
+    {
+      "items": [
+        {
+          "label": "段落",
+          "value": "４"
+        },
+        {
+          "label": "子題",
+          "value": "面對失敗與停滯"
+        },
+        {
+          "label": "內容",
+          "value": "1.失敗後願意找出原因，就能（）。\n2.努力卻看不見成果時，也可以嘗試改變或尋求【　　　】。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "分項說明"
+    },
+    {
+      "items": [
+        {
+          "label": "段落",
+          "value": "５"
+        },
+        {
+          "label": "子題",
+          "value": "面對合作與競爭"
+        },
+        {
+          "label": "內容",
+          "value": "1.信任隊友，讓每個人都能【　　　】。\n2.好的競爭，可以是「我好，【　　　】」。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "分項說明"
+    },
+    {
+      "items": [
+        {
+          "label": "段落",
+          "value": "6"
+        },
+        {
+          "label": "內容",
+          "value": "1.【　　　】選手陳怡安曾經奪下奧運示範賽【　　　】，後來因為受傷而轉行創業。\n2.運動沒有教她創業，卻帶給她（）"
+        }
+      ],
+      "kind": "section_block",
+      "section": "舉例印證"
+    },
+    {
+      "items": [
+        {
+          "label": "段落",
+          "value": "7"
+        },
+        {
+          "label": "內容",
+          "value": "身為運動員，除了練身體，也要練【　　　】。練過的心會陪著你面對人生。"
+        }
+      ],
+      "kind": "section_block",
+      "section": "總結"
+    }
+  ]
+}

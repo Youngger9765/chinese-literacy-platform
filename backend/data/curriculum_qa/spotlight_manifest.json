@@ -3940,7 +3940,7 @@
       "grade_code": "G6-L28",
       "title": "森林大軍的守護者",
       "strategy_type": "self_questioning",
-      "block_count": 47,
+      "block_count": 48,
       "overall_pass": true,
       "eval": {
         "pass": true,
@@ -3962,7 +3962,7 @@
       "type_histogram": {
         "concept_box": 1,
         "free_text": 1,
-        "guide": 25,
+        "guide": 26,
         "multi": 5,
         "passage": 4,
         "self_check": 2,
@@ -3971,11 +3971,11 @@
       },
       "fingerprint": {
         "strategy_type": "self_questioning",
-        "block_count": 47,
+        "block_count": 48,
         "type_histogram": {
           "concept_box": 1,
           "free_text": 1,
-          "guide": 25,
+          "guide": 26,
           "multi": 5,
           "passage": 4,
           "self_check": 2,
@@ -4007,6 +4007,7 @@
           "guide",
           "single",
           "guide",
+          "guide",
           "passage",
           "guide",
           "multi",
@@ -4031,7 +4032,7 @@
           "single",
           "self_check"
         ],
-        "guide_count": 25,
+        "guide_count": 26,
         "passage_count": 4,
         "qa_total": 12,
         "null_answers": 0,
@@ -10197,7 +10198,7 @@
       "grade_code": "文-L1",
       "title": "這是假新聞嗎？--以「鞭虎救弟記」為例",
       "strategy_type": "media_literacy",
-      "block_count": 13,
+      "block_count": 30,
       "overall_pass": true,
       "eval": {
         "pass": true,
@@ -10206,7 +10207,7 @@
         "mcq_leakage": 0,
         "struct_errors": [],
         "semantic": {
-          "single_count": 0,
+          "single_count": 9,
           "mcq_option_guides": 0,
           "semantic_pass": true,
           "semantic_errors": []
@@ -10218,41 +10219,62 @@
       },
       "type_histogram": {
         "concept_box": 1,
-        "free_text": 1,
-        "guide": 6,
-        "sub_block": 4,
-        "table": 1
+        "fill_table": 1,
+        "guide": 14,
+        "multi": 2,
+        "self_check": 1,
+        "single": 9,
+        "table": 2
       },
       "fingerprint": {
         "strategy_type": "media_literacy",
-        "block_count": 13,
+        "block_count": 30,
         "type_histogram": {
           "concept_box": 1,
-          "free_text": 1,
-          "guide": 6,
-          "sub_block": 4,
-          "table": 1
+          "fill_table": 1,
+          "guide": 14,
+          "multi": 2,
+          "self_check": 1,
+          "single": 9,
+          "table": 2
         },
         "type_sequence": [
           "concept_box",
           "guide",
+          "multi",
+          "multi",
+          "guide",
+          "guide",
+          "guide",
+          "single",
+          "guide",
+          "single",
+          "guide",
+          "guide",
           "table",
+          "single",
+          "single",
           "guide",
           "guide",
           "guide",
-          "sub_block",
-          "sub_block",
-          "sub_block",
-          "sub_block",
+          "single",
           "guide",
           "guide",
-          "free_text"
+          "table",
+          "single",
+          "single",
+          "guide",
+          "guide",
+          "fill_table",
+          "single",
+          "single",
+          "self_check"
         ],
-        "guide_count": 6,
+        "guide_count": 14,
         "passage_count": 0,
-        "qa_total": 4,
+        "qa_total": 11,
         "null_answers": 0,
-        "first_guide_prefix": "1.底下說明作者的閱讀及解決問題的歷程。最後，請你填答最右欄的是非題，只是要讓你檢查自己的閱讀習慣，沒有正確答案哦。",
+        "first_guide_prefix": "一、還有什麼值得追？",
         "mcq_leakage": 0
       }
     },
@@ -10320,7 +10342,7 @@
         "passage_count": 0,
         "qa_total": 7,
         "null_answers": 0,
-        "first_guide_prefix": "1.用故事情節來推測：\n我們來讀＜狐假虎威＞這篇文言文。這是一個故事，故事通常會有「角色」和「角色間發生的事」，只要讀懂",
+        "first_guide_prefix": "1.用故事情節來推測：\n我們來讀〈狐假虎威〉這篇文言文。這是一個故事，故事通常會有「角色」和「角色間發生的事」，只要先看",
         "mcq_leakage": 0
       }
     },
@@ -11506,8 +11528,8 @@
         }
       },
       "gold": {
-        "match": null,
-        "reason": "no fingerprint baseline for this lesson"
+        "match": true,
+        "diffs": {}
       },
       "type_histogram": {
         "concept_box": 1,
@@ -11580,8 +11602,8 @@
         }
       },
       "gold": {
-        "match": null,
-        "reason": "no fingerprint baseline for this lesson"
+        "match": true,
+        "diffs": {}
       },
       "type_histogram": {
         "concept_box": 1,
@@ -11651,8 +11673,8 @@
         }
       },
       "gold": {
-        "match": null,
-        "reason": "no fingerprint baseline for this lesson"
+        "match": true,
+        "diffs": {}
       },
       "type_histogram": {
         "concept_box": 1,
@@ -11722,8 +11744,8 @@
         }
       },
       "gold": {
-        "match": null,
-        "reason": "no fingerprint baseline for this lesson"
+        "match": true,
+        "diffs": {}
       },
       "type_histogram": {
         "concept_box": 1,

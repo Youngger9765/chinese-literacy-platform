@@ -1,16 +1,16 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-08-27T13:54:50.862307+00:00",
+  "generated_at": "2026-09-21T06:42:22.151804+00:00",
   "generated_by": "scripts/build_keypoints_qa_manifest.py",
   "source": "served corpus — backend/data/lessons/<uid>/<version>/keypoints.yml (#2749)",
   "smoke_only": false,
   "summary": {
-    "total": 150,
-    "pass": 150,
+    "total": 154,
+    "pass": 154,
     "fail": 0,
     "known_gap_count": 0,
     "failure_count": 0,
-    "unreviewed": 34,
+    "unreviewed": 38,
     "display_only": 0
   },
   "raw_failures": [],
@@ -3695,8 +3695,8 @@
         "mode": "mixed",
         "layout": "worksheet_table",
         "fill_blank_count": 6,
-        "checkbox_count": 5,
-        "row_count": 7
+        "checkbox_count": 4,
+        "row_count": 6
       },
       "gates": {
         "L3": {
@@ -4066,6 +4066,114 @@
         "fill_blank_count": 3,
         "checkbox_count": 1,
         "row_count": 5
+      },
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
+      "artifacts": {
+        "has_structure_snapshot": true,
+        "has_keypoints_snapshot": true,
+        "has_original_preview": false
+      }
+    },
+    {
+      "lesson_id": "體-L12",
+      "lesson_uid": "L0176",
+      "story_id": 20176,
+      "title": "一起變強，會更好",
+      "tier": "keypoints_yml",
+      "layout": {
+        "mode": "fill_blank",
+        "layout": "worksheet_table",
+        "fill_blank_count": 5,
+        "checkbox_count": 0,
+        "row_count": 6
+      },
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
+      "artifacts": {
+        "has_structure_snapshot": true,
+        "has_keypoints_snapshot": true,
+        "has_original_preview": false
+      }
+    },
+    {
+      "lesson_id": "體-L13",
+      "lesson_uid": "L0177",
+      "story_id": 20177,
+      "title": "別讓一句話決定你是誰",
+      "tier": "keypoints_yml",
+      "layout": {
+        "mode": "fill_blank",
+        "layout": "worksheet_table",
+        "fill_blank_count": 5,
+        "checkbox_count": 0,
+        "row_count": 6
+      },
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
+      "artifacts": {
+        "has_structure_snapshot": true,
+        "has_keypoints_snapshot": true,
+        "has_original_preview": false
+      }
+    },
+    {
+      "lesson_id": "體-L14",
+      "lesson_uid": "L0178",
+      "story_id": 20178,
+      "title": "在看不見成長的日子中",
+      "tier": "keypoints_yml",
+      "layout": {
+        "mode": "fill_blank",
+        "layout": "worksheet_table",
+        "fill_blank_count": 5,
+        "checkbox_count": 0,
+        "row_count": 6
+      },
+      "gates": {
+        "L3": {
+          "gate": "L3",
+          "pass": true,
+          "issues": []
+        }
+      },
+      "overall_status": "pass",
+      "artifacts": {
+        "has_structure_snapshot": true,
+        "has_keypoints_snapshot": true,
+        "has_original_preview": false
+      }
+    },
+    {
+      "lesson_id": "體-L15",
+      "lesson_uid": "L0179",
+      "story_id": 20179,
+      "title": "練過的心，陪你走更遠",
+      "tier": "keypoints_yml",
+      "layout": {
+        "mode": "fill_blank",
+        "layout": "worksheet_table",
+        "fill_blank_count": 7,
+        "checkbox_count": 0,
+        "row_count": 8
       },
       "gates": {
         "L3": {
