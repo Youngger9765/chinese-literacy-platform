@@ -115,13 +115,16 @@ jobs:
         with:
           node-version: '20'
 
+      # ⚠️ 裝**全域**那份，不是裝進 `frontend/node_modules`。
+      #    `frontend/package.json` 有 `overrides: {"esbuild": "^0.28.1"}`，
+      #    `npm install esbuild@X` 會撞 `npm error EOVERRIDE`（實際撞過一次）。
+      #    產生器會先找 repo 裡那份、找不到再找 PATH。
       - name: Install esbuild only (pinned to the lockfile)
         run: |
-          cd frontend
-          VER=$(node -p "require('./package-lock.json').packages['node_modules/esbuild'].version")
+          VER=$(node -p "require('./frontend/package-lock.json').packages['node_modules/esbuild'].version")
           echo "esbuild $VER（從 package-lock 讀，不寫死）"
-          npm install --no-save --no-audit --no-fund "esbuild@$VER"
-          test -x node_modules/.bin/esbuild
+          npm install -g --no-audit --no-fund "esbuild@$VER"
+          esbuild --version
 
       - name: Spec CI (registry + pointer-rot + contracts + legacy_tests union)
         run: bash specs/run-ci.sh

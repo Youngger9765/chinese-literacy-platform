@@ -63,6 +63,7 @@ import hashlib
 import importlib.util
 import json
 import os
+import shutil
 import re
 import subprocess
 import sys
@@ -338,11 +339,22 @@ def build_bundle(required: bool = True) -> Path | None:
     `required=False` 時找不到 esbuild 回 `None`（`--check` 在 CI 沒有
     `frontend/node_modules`，見 `main()` 裡兩段式檢查的說明）。
     """
-    esbuild = FRONTEND / "node_modules" / ".bin" / "esbuild"
-    if not esbuild.exists():
+    # 先找 repo 裡那份，再找 PATH 上的。
+    #
+    # ⚠️ CI 不能用 `npm install esbuild@X` 裝進 `frontend/node_modules` ——
+    #    `package.json` 有 `overrides: {"esbuild": "^0.28.1"}`，直接裝它會撞
+    #    `npm error EOVERRIDE: Override for esbuild@0.28.1 conflicts with direct
+    #    dependency`（2026-09-22 在 CI 實際撞到）。所以 CI 裝全域那份，
+    #    這裡多認一條 PATH。
+    esbuild: Path | None = FRONTEND / "node_modules" / ".bin" / "esbuild"
+    if esbuild and not esbuild.exists():
+        found = shutil.which("esbuild")
+        esbuild = Path(found) if found else None
+    if esbuild is None:
         if not required:
             return None
-        sys.exit(f"找不到 {esbuild} —— 先在 frontend/ 跑 npm ci")
+        sys.exit("找不到 esbuild（試過 frontend/node_modules/.bin/esbuild 與 PATH）"
+                 " —— 先在 frontend/ 跑 npm ci，或 npm i -g esbuild")
     out = Path(tempfile.mkdtemp()) / "runner.cjs"
     subprocess.run([str(esbuild), str(RUNNER_TS), "--bundle", "--platform=node",
                     "--format=cjs", "--loader:.json=json", f"--outfile={out}"],
