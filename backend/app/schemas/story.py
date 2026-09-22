@@ -73,6 +73,13 @@ class StoryDetail(StoryListItem):
     # Optional 是因為一修的舊列沒有這個欄位。
     lesson_uid: Optional[str] = None
     paragraphs: list[str]
+    # 印在學習單正文上的課文層內容（#3277）——出處行與正文裡的表格。
+    # 它們從 #2736 起就在 yml 裡，但沒宣告在服務端就永遠送不出去。
+    source_line: Optional[str] = None
+    inline_table: Optional[dict] = None
+    inline_tables: Optional[list] = None
+    comparison_table: Optional[dict] = None
+    summary_table: Optional[dict] = None
     vocabulary: Optional[list[VocabItemSchema]] = None
     fill_in_blank: Optional[list[dict]] = None
     multiple_choice: Optional[list[dict]] = None

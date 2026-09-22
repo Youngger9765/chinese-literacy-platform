@@ -100,5 +100,31 @@ jobs:
           cd backend
           pip install -r requirements.txt
 
+      # ⭐ Gate 11 的強路徑（oracle）需要 node —— 沒有它整道門只做結構檢查。
+      #
+      # ⛔ 不是裝整包 `npm ci`（那才是先前判斷「太重」而放棄的做法）。
+      #    產表的 runner（`frontend/scripts/zhuyinAnswers.ts`）只 import 本地模組
+      #    與 `node:fs` —— 打出來的 bundle **零外部 require**（實測），所以只要
+      #    一個 esbuild 就跑得起來。
+      #
+      # ⚠️ 沒有這一步，這道門在 CI 只驗「課文/字型/poyin_db 有沒有換」，
+      #    驗不到**選擇邏輯本身變了**（processor 改了而 poyin_db 沒改）——
+      #    而那正是只有 oracle 抓得到的那一類，也是 #3218 這整套架構的起因。
+      - name: Set up Node (for Gate 11's oracle)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # ⚠️ 裝**全域**那份，不是裝進 `frontend/node_modules`。
+      #    `frontend/package.json` 有 `overrides: {"esbuild": "^0.28.1"}`，
+      #    `npm install esbuild@X` 會撞 `npm error EOVERRIDE`（實際撞過一次）。
+      #    產生器會先找 repo 裡那份、找不到再找 PATH。
+      - name: Install esbuild only (pinned to the lockfile)
+        run: |
+          VER=$(node -p "require('./frontend/package-lock.json').packages['node_modules/esbuild'].version")
+          echo "esbuild $VER（從 package-lock 讀，不寫死）"
+          npm install -g --no-audit --no-fund "esbuild@$VER"
+          esbuild --version
+
       - name: Spec CI (registry + pointer-rot + contracts + legacy_tests union)
         run: bash specs/run-ci.sh

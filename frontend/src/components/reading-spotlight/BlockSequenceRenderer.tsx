@@ -358,6 +358,17 @@ const BlockSequenceRenderer: React.FC<Props> = ({
                 {p}
               </p>
             ))}
+            {/* 這段文章的出處（#3277）。原稿印著它，而這裡本來只畫 paragraphs。
+                ⚠️ `SpotlightBlock` 是聯集型別，索引它的欄位會退化成 `unknown`
+                （這支檔案既有的兩處型別錯就是同一個原因），所以這裡收斂成字串。 */}
+            {typeof block.source_line === 'string' && block.source_line.trim() && (
+              <p
+                className="mt-3 text-sm text-on-surface-variant"
+                data-testid="spotlight-passage-source-line"
+              >
+                {block.source_line}
+              </p>
+            )}
           </div>
         );
 
