@@ -25,6 +25,7 @@ import logging
 
 from fastapi import APIRouter, Depends, File, Form, UploadFile
 from pydantic import BaseModel
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from ...auth.dependencies import get_current_user
@@ -162,14 +163,54 @@ async def save_reading_audio(
             .first()
         )
 
-    if attempt is None:
+    if attempt is None and attempt_id is not None:
+        # 指名了一個 id 卻找不到 → 那是呼叫端給錯，不該默默改成別的 attempt
         logger.warning(
-            "save-audio: no ReadingAttemptHistory for session_id=%d attempt_id=%s user=%d",
-            session_id,
+            "save-audio: attempt_id=%s not found under session_id=%d user=%d",
             attempt_id,
+            session_id,
             current_user.id,
         )
         return SaveAudioResponse(ok=False, reason="attempt_not_found")
+
+    if attempt is None:
+        # ── #3298：沒有 attempt 列就自己建一列，不要把錄音丟掉 ──────────────
+        #
+        # ⛔ 這裡原本是 `return ok=False, reason="attempt_not_found"` ——
+        #    在上傳之前，所以學生的錄音**直接被丟棄**，而畫面上什麼都看不到
+        #    （分數照樣出現）。prod 實測近 30 天 40 次呼叫 **40 次都走這條**，
+        #    兩顆 `lingoleap-reading-audio*` 桶 0 物件、且沒有生命週期規則。
+        #
+        # 根因是兩套平行的 attempt 紀錄只搬了一半：
+        #    舊 `PATCH /sessions/{id}`（帶 reading_result）→ `snapshot_reading_result()`
+        #        → 寫 `reading_attempt_history` 資料表。prod 30 天 **2 次**。
+        #    現行 `PUT /sessions/{id}/progress` → 寫 session 上的 JSON 欄位
+        #        （`full_reading_attempts`，上限 4）。prod 30 天 **317 次**，
+        #        而它**完全不碰這張表**。
+        # 而回放功能（#2266 / #2326）讀的是這張表的 `audio_gcs_path`，
+        # 所以在這裡補建一列是「讓現行流程接回既有回放」成本最低的接法 ——
+        # 不動 schema（`audio_gcs_path` 欄位早就有）、不動前端。
+        #
+        # `reading_result` 是 NOT NULL；用 session 上已經有的結果，兩者都沒有時
+        # 存 `{}`（誠實：這一次朗讀確實發生了，分數存在別的地方）。
+        next_no = (
+            db.query(func.max(ReadingAttemptHistory.attempt_no))
+            .filter(ReadingAttemptHistory.session_id == session_id)
+            .scalar()
+            or 0
+        ) + 1
+        attempt = ReadingAttemptHistory(
+            session_id=session_id,
+            attempt_no=next_no,
+            reading_result=owned_session.full_reading_result or owned_session.reading_result or {},
+        )
+        db.add(attempt)
+        db.flush()          # 需要 attempt.id 來組 blob 路徑
+        logger.info(
+            "save-audio: created attempt row session=%d attempt_no=%d (#3298)",
+            session_id,
+            next_no,
+        )
 
     # ── 4. Upload to GCS ─────────────────────────────────────────────────────
     base_mime = _normalise_mime(raw_mime)

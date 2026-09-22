@@ -408,3 +408,92 @@ class TestTranscribeWithSessionIdPersistsPath:
         assert resp.status_code in (403, 404) or resp.json().get("ok") is False, (
             f"越權沒被擋：{resp.status_code} {resp.text}"
         )
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# #3298 — 真實流程下錄音存不下來（prod 40/40 失敗、兩個桶 0 物件）
+# ─────────────────────────────────────────────────────────────────────────────
+class TestSaveAudioWithoutPreexistingAttempt:
+    """學生第一次朗讀完，`ReadingAttemptHistory` 那一列**還不存在**。
+
+    ⛔ 這個檔案原本唯一的 save-audio 成功測試（`test_save_audio_writes_path`）
+       自己先呼叫 `_create_attempt()` 把列建好 —— 那個世界生產環境永遠不會出現，
+       所以它綠著，而 prod 100% 失敗。#2975 也是被同一個形狀騙掉的：
+       它用 curl 打 `PATCH reading_result → save-audio`，而**真實前端不走那條路**。
+
+    2026-09-22 在 staging 用真瀏覽器＋真錄音器走完學生流程，抓到的實際順序是：
+
+        POST /api/reading/transcribe   -> 200  method="gemini"
+        POST /api/reading-history      -> 200  {"id":128,...}
+        POST /api/reading/save-audio   -> 200  {"ok":false,"reason":"attempt_not_found"}
+        PUT  /api/learning/sessions/:id/progress -> 200
+
+    `PATCH /sessions/:id`（唯一會建 attempt 列的入口）**完全不在流程裡**。
+    prod 數字也自洽：44 次轉寫 − 4 次 fallback = 40 次成功 = 恰好 40 次 save-audio，
+    全部 `attempt_not_found`；兩個桶 0 物件且沒有生命週期規則。
+
+    所以這一條刻意**不建** attempt 列 —— 那才是真實狀態。
+    """
+
+    def test_audio_is_stored_even_when_no_attempt_row_exists_yet(self, db):
+        sess = _create_session(db)
+        # ⛔ 不呼叫 _create_attempt() —— 真實流程走到這裡時那一列不存在
+        assert (
+            db.query(ReadingAttemptHistory)
+            .filter(ReadingAttemptHistory.session_id == sess.id)
+            .count()
+            == 0
+        ), "前置條件：這一課還沒有任何 attempt 列"
+
+        app = _build_save_audio_app(db)
+        uploaded: dict = {}
+
+        def _fake_upload(*, audio_bytes, mime_type, blob_path):
+            uploaded["blob_path"] = blob_path
+            uploaded["bytes"] = len(audio_bytes)
+            return blob_path
+
+        with patch(
+            "app.routes.learning.learning_save_audio.upload_reading_audio_to_gcs_sync",
+            _fake_upload,
+        ):
+            r = TestClient(app).post(
+                "/api/reading/save-audio",
+                data={"session_id": str(sess.id)},
+                files={"audio": ("r.webm", b"\x1a\x45\xdf\xa3" + b"0" * 4096, "audio/webm")},
+            )
+
+        assert r.status_code == 200, r.text
+        body = r.json()
+        # ⭐ 斷言打在「錄音真的進到儲存」，不是「端點回 ok=True」——
+        #    ok=True 在不上傳的情況下也拿得到，而那正是這張票的形狀。
+        assert uploaded.get("blob_path"), (
+            f"錄音沒有進到儲存，端點回 {body} —— 學生錄的音被丟掉了"
+        )
+        assert uploaded["bytes"] > 0
+        assert body["ok"] is True, body
+        assert body["audio_gcs_path"] == uploaded["blob_path"]
+
+    def test_the_stored_path_is_readable_back_from_the_db(self, db):
+        """存完之後要查得回來 —— 否則老師端的回放還是沒有東西可播。"""
+        sess = _create_session(db)
+        app = _build_save_audio_app(db)
+
+        with patch(
+            "app.routes.learning.learning_save_audio.upload_reading_audio_to_gcs_sync",
+            lambda *, audio_bytes, mime_type, blob_path: blob_path,
+        ):
+            r = TestClient(app).post(
+                "/api/reading/save-audio",
+                data={"session_id": str(sess.id)},
+                files={"audio": ("r.webm", b"\x1a\x45\xdf\xa3" + b"0" * 4096, "audio/webm")},
+            )
+        assert r.json()["ok"] is True, r.text
+
+        rows = (
+            db.query(ReadingAttemptHistory)
+            .filter(ReadingAttemptHistory.session_id == sess.id)
+            .all()
+        )
+        assert len(rows) == 1, f"應該剛好一列，實際 {len(rows)}"
+        assert rows[0].audio_gcs_path, "列建了但沒掛上音檔路徑 —— 回放讀的就是這一欄"
