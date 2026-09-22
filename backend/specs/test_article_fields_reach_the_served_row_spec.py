@@ -12,6 +12,7 @@
 ⛔ 這裡列的是「印出來給學生看的內容」，不是註記。要新增一欄的正確做法是
    先把它接進 row，再列進來 —— 不是把它從這裡刪掉。
 """
+import json
 import sys
 from pathlib import Path
 
@@ -40,14 +41,24 @@ CONTENT_FIELDS = (
 )
 
 
-def _lessons_declaring(field: str) -> list[str]:
-    out = []
+def _declared_values(field: str) -> dict[str, list]:
+    """課號 → 這一欄在 yml 裡宣告的值（可能多篇，所以是 list）。
+
+    ⛔ 刻意**直接解析 yml**，不走 `_body()`：服務端那一列也是用 `_body()` 取值，
+       兩邊共用同一個取值函式的話，`_body()` 自己讀錯東西是看不見的（同義反覆）。
+       這裡要當的是獨立的第二個來源。
+    """
+    out: dict[str, list] = {}
     for f in sorted(LESSONS.glob("L*/v3/full_text_annotate*.yml")):
         d = yaml.safe_load(f.read_text(encoding="utf-8")) or {}
         inner = d.get("full_text_annotate") if isinstance(d.get("full_text_annotate"), dict) else d
         if isinstance(inner, dict) and inner.get(field):
-            out.append(f.parts[-3])
-    return sorted(set(out))
+            out.setdefault(f.parts[-3], []).append(inner[field])
+    return out
+
+
+def _lessons_declaring(field: str) -> list[str]:
+    return sorted(_declared_values(field))
 
 
 @pytest.mark.parametrize("field", CONTENT_FIELDS)
@@ -67,9 +78,23 @@ def test_every_declaring_lesson_serves_the_field(field):
         r = rows.get(20000 + int(uid[1:]))
         if r is None:
             continue
-        if not r.get(field):
-            want = _body(raw[uid]).get(field) if uid in raw else "?"
-            missing.append(f"{uid}（yml 有：{str(want)[:40]}…，服務端沒有）")
+        declared = _declared_values(field).get(uid) or []
+        got = r.get(field)
+        if not got:
+            missing.append(f"{uid}（yml 有：{str(declared[:1])[:40]}…，服務端沒有）")
+        elif declared and not any(
+            json.dumps(got, ensure_ascii=False, sort_keys=True)
+            == json.dumps(w, ensure_ascii=False, sort_keys=True)
+            for w in declared
+        ):
+            # ⛔ 只驗 truthy 是不夠的 —— 「有送」跟「送對」是兩件事，
+            #    而學生看到的是後者。這裡比的是**直接解析 yml** 得到的值
+            #    （多篇課有多個候選，命中任一個就算對；哪一篇該對哪一篇
+            #    由 `test_each_article_of_a_multi_text_lesson_gets_its_own_fields` 管）。
+            missing.append(
+                f"{uid} 送出去的值不在 yml 宣告的那幾份裡：\n"
+                f"      yml={str(declared[0])[:70]}\n      服務端={str(got)[:70]}"
+            )
     assert not missing, (
         f"`{field}` 在 yml 裡但沒送到服務端的那一列：\n  " + "\n  ".join(missing) +
         "\n\n→ 到 `lesson_indexes.py` 組 row 的那個字典裡加上這一欄。"
@@ -120,3 +145,38 @@ def test_the_spotlight_passage_source_line_reaches_the_student():
         "L0096 的 yml 在 passage block 裡寫了 `source_line`"
         "（〈節選自國語日報網路新聞…〉），但送出去的 block 沒帶它"
     )
+
+
+
+def test_each_article_of_a_multi_text_lesson_gets_its_own_fields():
+    """一課多篇時，每一篇要拿到**自己那一篇**的那五欄（#3277 / 同 #2930 那族）。
+
+    ⛔ 修之前：L0137 是兩篇課（巨石陣／摩艾石像），服務端那一列掛的是第一篇的
+       摘要表，而兩個 round 一張表都沒有 —— 於是前端 `scopeDetailToRound` 沒東西
+       可覆蓋，**讀第二篇的學生看到第一篇的表**。畫面上看不出異常：有表、畫得出來、
+       不報錯，只是那張表講的是別一篇。2026-09-22 由 codex 對抗式複審抓到。
+
+    這一條刻意用「兩篇的值必須不同」當判準，而不是「round 上有值」——
+    後者在「兩個 round 都被塞頂層那一份」時照樣綠。
+    """
+    rows = {l["lesson_uid"]: l for l in build_all_lessons() if l.get("lesson_uid")}
+    checked = 0
+    bad = []
+    for uid, r in rows.items():
+        rounds = r.get("repeat_rounds") or {}
+        if len(rounds) < 2:
+            continue
+        for field in CONTENT_FIELDS:
+            vals = {slug: (rd or {}).get(field) for slug, rd in rounds.items()}
+            present = {k: v for k, v in vals.items() if v}
+            if len(present) < 2:
+                continue
+            checked += 1
+            if len({json.dumps(v, ensure_ascii=False, sort_keys=True)
+                    for v in present.values()}) == 1:
+                bad.append(f"{uid} 的 `{field}`：{len(present)} 篇拿到**同一份**"
+                           f"（{str(list(present.values())[0])[:50]}）")
+    assert checked > 0, (
+        "沒有任何一課的多篇 round 帶著這幾欄 —— 這條斷言等於沒在測"
+    )
+    assert not bad, "多篇課拿到別篇的內容：\n  " + "\n  ".join(bad)
