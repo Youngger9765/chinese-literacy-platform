@@ -61,6 +61,14 @@ def actual() -> dict:
     slots = json.loads(_SLOTS.read_text(encoding="utf-8"))["slots"]
     fixes = json.loads(_FIXES.read_text(encoding="utf-8"))["fixes"]
     wanted = {(f["sha"], f["u16"]) for f in fixes}
+    # 讀音要用**畫面上那個字**去查（#3277）。清單記的是原稿的字（爲），
+    # 而字型裡只有標準體（為）—— 拿原字查一定回 None，於是這一條會把
+    # 一筆正確的修正判成「讀音不對」。第三處需要跟替換層合成的地方。
+    _vp = (_BACKEND.parent / "frontend" / "src" / "components" / "zhuyin"
+           / "fontMissingVariants.json")
+    _variants = {}
+    if _vp.is_file():
+        _variants = (json.loads(_vp.read_text(encoding="utf-8")) or {}).get("variants") or {}
     out: dict = {}
     for path in sorted(_LESSONS.glob("L*/v*/zhuyin.json")):
         data = json.loads(path.read_text(encoding="utf-8"))
@@ -77,7 +85,8 @@ def actual() -> dict:
                     continue
                 code = ssz[i]
                 slot = "0000" if code == "." else f"ss0{code}"
-                out[(sha, i)] = (ch, slots.get(ch, {}).get(slot))
+                shown = _variants.get(ch, ch)
+                out[(sha, i)] = (ch, slots.get(shown, {}).get(slot))
     return out
 
 
@@ -196,6 +205,32 @@ def test_the_reported_lesson_is_covered(fixes):
 FONT_GAP_TOTAL = 7
 FONT_GAP_CHARS = 3
 
+def _font_slot_table() -> dict:
+    """字型裡每個字有哪些槽位 —— **從版控裡的出貨字型現場推**，不讀衍生檔。
+
+    ⛔ 這裡原本讀 `backend/data/zhuyin/font_all_readings.json`，而那個檔
+       **沒進版控**（被 `.git/info/exclude` 跟 `backend/.venv`、`frontend/node_modules`
+       排在一起），repo 裡也**沒有任何東西會產生它**（兩支 spec 讀、一支腳本讀、零個寫）。
+       後果：依賴它的兩條斷言在乾淨 checkout 一律 `skip` ——
+       **只在某一台機器上跑過**（2026-09-22 codex 對抗式複審實跑乾淨 archive 抓到：
+       `32 passed, 2 skipped`，兩個 skip 正是這兩條）。這個 repo 同一個病的第六次。
+
+    現場推跟那個檔對「存在性」完全等價（實測：13,087 字，key 集合與逐字槽位集合零差異），
+    而字型與抽取器都在版控裡 —— 所以這樣門就永遠跑得到。
+    """
+    import importlib.util
+
+    font = _BACKEND.parent / "frontend" / "public" / "fonts" / "BpmfZihiSerif-Regular.ttf"
+    assert font.is_file(), f"出貨字型不在：{font} —— 這是版控裡的檔，不該缺"
+    script = _BACKEND / "scripts" / "extract_font_readings.py"
+    spec = importlib.util.spec_from_file_location("_ex_font", script)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    table = mod.build_reading_table(str(font))
+    assert len(table) > 10_000, f"只推出 {len(table)} 個字 —— 抽取器或字型有問題"
+    return table
+
+
 
 def test_font_gap_does_not_grow():
     """逐課完整性：每個漢字表上指到的槽位，字型都要畫得出來。
@@ -204,11 +239,7 @@ def test_font_gap_does_not_grow():
     877,582 個漢字位置裡目前有 36 處畫不出來（見上方說明），**數量寫死**：
     多一處就紅，不管是課文新增了字型沒有的字、或有人加了新的異體寫法。
     """
-    all_readings = _BACKEND / "data" / "zhuyin" / "font_all_readings.json"
-    if not all_readings.is_file():
-        pytest.skip(f"{all_readings.name} 不在（由 extract_font_readings.py 產生）")
-    raw = json.loads(all_readings.read_text(encoding="utf-8"))
-    readings = raw.get("slots", raw)
+    readings = _font_slot_table()
 
     # 學生看到的是換過異體字之後的那個字（見上方 2026-09-22 那段）
     variants_path = (_BACKEND.parent / "frontend" / "src" / "components" / "zhuyin"
@@ -273,11 +304,20 @@ def test_the_variant_substitution_table_is_usable():
     variants = doc.get("variants") or {}
     assert variants, "替換表是空的"
 
-    all_readings = _BACKEND / "data" / "zhuyin" / "font_all_readings.json"
-    if not all_readings.is_file():
-        pytest.skip(f"{all_readings.name} 不在")
-    raw = json.loads(all_readings.read_text(encoding="utf-8"))
-    readings = raw.get("slots", raw)
+    readings = _font_slot_table()
+
+    # ⭐ 這一條驗的是「**這是不是正確的異體字對應**」，不只是「目標字畫得出來」。
+    #
+    # ⛔ 第一版只驗了後者 —— codex 對抗式複審實跑：把表改成 `絶→狗`
+    #    （「拒絶」會顯示成「拒狗」）**所有門依然全綠**，因為「狗」確實在字型裡、
+    #    槽位也重現得出來。守衛跟 oracle 都沒有問「這兩個字是不是同一個字」。
+    #
+    # 機械化的判準：異體字跟它的標準體**必須共用讀音**。
+    #    實測 10 對全部共用；負向對照 絶→狗（jue2 vs gou3）、爲→貓、点→犬 全部被擋。
+    from pypinyin import Style, pinyin
+
+    def _readings(ch: str) -> set[str]:
+        return set(pinyin(ch, heteronym=True, style=Style.TONE3)[0])
 
     bad = []
     for src, dst in variants.items():
@@ -287,6 +327,11 @@ def test_the_variant_substitution_table_is_usable():
             bad.append(f"「{src}」本來就在字型裡，不需要替換")
         elif dst not in readings:
             bad.append(f"「{src}」→「{dst}」但「{dst}」字型也畫不出來")
+        elif not (_readings(src) & _readings(dst)):
+            bad.append(
+                f"「{src}」→「{dst}」讀音沒有交集（{sorted(_readings(src))} vs "
+                f"{sorted(_readings(dst))}）—— 這不是異體字對應，換過去學生會看到別的字"
+            )
     assert not bad, "替換表有問題：\n  " + "\n  ".join(bad)
 
 

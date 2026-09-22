@@ -40,7 +40,14 @@ MODULE_TO_FIELD = {
 NOT_WIRED_YET = {"spotlight"}
 
 # 為了給前端讀而塞進每一輪的產物 —— 它們是 MODULE_TO_FIELD 的右邊，不是模組
-DERIVED = set(MODULE_TO_FIELD.values()) | {"vocab_bank"}
+#
+# 課文層那五欄（#3277）也是這一類：它們住在 `full_text_annotate` 底下，
+# 而前端讀的欄位就叫同一個名字，所以逐篇覆蓋時直接以欄位名塞進 round。
+# 少了這一格，L0137 的第二篇會退回頂層讀到第一篇的摘要表。
+DERIVED = set(MODULE_TO_FIELD.values()) | {"vocab_bank"} | {
+    "source_line", "inline_table", "inline_tables",
+    "comparison_table", "summary_table",
+}
 
 
 @pytest.mark.parametrize("lesson_id", MULTI)
