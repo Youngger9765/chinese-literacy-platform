@@ -598,6 +598,12 @@ def _apply_polyphonic_fixes(uid: str, texts: list[dict], fixes: dict,
     """
     if not fixes:
         return 0
+    # ⚠️ 這一層必須跟「字型缺口替換」合成（2026-09-22 撞到）：清單裡記的是**原稿的字**
+    #    （爲），而槽位是**換過之後那個字**（為）在字型裡的槽位 —— 原字根本不在字型裡，
+    #    拿它去查一定查不到，於是這一層會對那些位置 exit 1。
+    #    症狀很具體：`L0155 爲是其智弗若與` 那處要從 ㄨㄟˊ 改成 ㄨㄟˋ，卻被
+    #    「出貨字型畫不出『爲』的 ㄨㄟˋ」擋住。
+    variants = _font_variants()
     applied = 0
     for t in texts:
         sha = hashlib.sha256(t["text"].encode("utf-8")).hexdigest()[:16]
@@ -606,12 +612,15 @@ def _apply_polyphonic_fixes(uid: str, texts: list[dict], fixes: dict,
             f = fixes.get((sha, i))
             if f is None:
                 continue
-            if units[i] != f["char"]:
+            here = units[i]
+            shown = variants.get(here, here)        # 畫面上真正那個字
+            # 清單可以寫原稿的字或換過的字，兩者都接受 —— 但不能兩者都不是
+            if f["char"] not in (here, shown):
                 sys.exit(f"修正過期：{uid} {sha}@{i} 清單寫「{f['char']}」"
-                         f"但課文是「{units[i]}」")
-            slot = _slot_for_reading(font_slots, f["char"], f["to"])
+                         f"但課文是「{here}」（顯示為「{shown}」）")
+            slot = _slot_for_reading(font_slots, shown, f["to"])
             if slot is None:
-                sys.exit(f"修正無效：{uid} {sha}@{i} 出貨字型畫不出「{f['char']}」"
+                sys.exit(f"修正無效：{uid} {sha}@{i} 出貨字型畫不出「{shown}」"
                          f"的 {f['to']}")
             if t["ss"][i] != slot:
                 t["ss"][i] = slot
@@ -845,15 +854,21 @@ def check_without_oracle(uid: str, font_slots: dict) -> list[str]:
     for t in doc.get("texts") or []:
         by_text.setdefault(
             hashlib.sha256(t["text"].encode("utf-8")).hexdigest()[:16], []).append(t)
+    # ⛔ 不用 `lesson` 欄位過濾（2026-09-22 codex 對抗式複審抓到）：鍵是
+    #    (sha, u16) **不含課號**，所以 4,318 筆讀進來只剩約 4,000 個鍵 ——
+    #    同一句出現在多課時只留下最後那一筆的 `lesson`。用它過濾的後果有兩個：
+    #      · 共用句子只會在「剛好留下來的那一課」被檢查，其他課放行
+    #      · 把清單裡某筆的 lesson 改成 `L9999`，這條守衛就完全看不到它
+    #    改成「這一課的表裡有這個 sha 就檢查」—— 課號不再參與判斷。
     for (sha, i), f in _polyphonic_fixes().items():
-        if f.get("lesson") != uid:
-            continue
         hits = by_text.get(sha) or []
         if not hits:
-            errs.append(f"{uid} 逐筆修正過期：sha {sha} 在表裡找不到對應的段落"
-                        f"（課文被改過而沒重產表？）")
+            # 這一課沒有這個句子 —— 不是過期，只是這筆修正不屬於這一課。
+            # 「清單裡的句子全庫都找不到」由 oracle 那條路抓（重算後逐位元比）。
             continue
-        want = _slot_for_reading(font_slots, f["char"], f["to"])
+        # 同上：槽位要用**換過字**之後那個字去查（見 `_apply_polyphonic_fixes`）
+        _v = _font_variants()
+        want = _slot_for_reading(font_slots, _v.get(f["char"], f["char"]), f["to"])
         if want is None:
             errs.append(f"{uid} 逐筆修正無效：出貨字型畫不出「{f['char']}」的 {f['to']}")
             continue
