@@ -444,6 +444,17 @@ def _rounds_with_flat_paragraphs(l: dict) -> dict:
         if cm:
             m["multiple_choice"] = _mcq_from(l, cm) or None
 
+        # 課文層印著的那幾欄也要逐篇帶（#3277）。少了這一格，第二篇會退回頂層
+        # 讀到第一篇的表 —— L0137 實測：兩篇課（巨石陣／摩艾石像），row 上掛的是
+        # 第一篇的摘要表，兩個 round 一張表都沒有 → 讀第二篇的學生看到第一篇的表。
+        # 跟上面那幾格同一個病（#2930），2026-09-22 由 codex 對抗式複審抓到。
+        fta = _unwrap(m.get("full_text_annotate"), "full_text_annotate")
+        if isinstance(fta, dict):
+            for _k in ("source_line", "inline_table", "inline_tables",
+                       "comparison_table", "summary_table"):
+                if fta.get(_k):
+                    m[_k] = fta[_k]
+
         vd = m.get("vocab_definitions")
         if vd:
             m["vocabulary"] = _vocabulary_from(l, vd) or None
