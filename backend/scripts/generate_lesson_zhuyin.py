@@ -62,6 +62,8 @@ import argparse
 import hashlib
 import importlib.util
 import json
+import os
+import shutil
 import re
 import subprocess
 import sys
@@ -77,6 +79,11 @@ POYIN_DB = FRONTEND / "public" / "data" / "poyin_db.json"
 LESSONS = BACKEND / "data" / "lessons"
 RUNNER_TS = FRONTEND / "scripts" / "zhuyinAnswers.ts"
 CORRECTIONS = BACKEND / "data" / "zhuyin" / "lesson_corrections.json"
+POLYPHONIC_FIXES = BACKEND / "data" / "zhuyin" / "polyphonic_fixes.json"
+#: 字型畫不出來的異體字 → 標準體。**這份檔前端也讀**
+#: （`frontend/src/components/zhuyin/zhuyinStringBuilder.ts`）—— 兩邊各存一份
+#: 必然會漂，而漂掉的症狀是「槽位是為算的、畫出來的字是爲」。
+FONT_VARIANTS_JSON = FRONTEND / "src" / "components" / "zhuyin" / "fontMissingVariants.json"
 EXTRACTOR = BACKEND / "scripts" / "extract_font_readings.py"
 
 DEFAULT_SLOT = "0000"
@@ -332,11 +339,22 @@ def build_bundle(required: bool = True) -> Path | None:
     `required=False` 時找不到 esbuild 回 `None`（`--check` 在 CI 沒有
     `frontend/node_modules`，見 `main()` 裡兩段式檢查的說明）。
     """
-    esbuild = FRONTEND / "node_modules" / ".bin" / "esbuild"
-    if not esbuild.exists():
+    # 先找 repo 裡那份，再找 PATH 上的。
+    #
+    # ⚠️ CI 不能用 `npm install esbuild@X` 裝進 `frontend/node_modules` ——
+    #    `package.json` 有 `overrides: {"esbuild": "^0.28.1"}`，直接裝它會撞
+    #    `npm error EOVERRIDE: Override for esbuild@0.28.1 conflicts with direct
+    #    dependency`（2026-09-22 在 CI 實際撞到）。所以 CI 裝全域那份，
+    #    這裡多認一條 PATH。
+    esbuild: Path | None = FRONTEND / "node_modules" / ".bin" / "esbuild"
+    if esbuild and not esbuild.exists():
+        found = shutil.which("esbuild")
+        esbuild = Path(found) if found else None
+    if esbuild is None:
         if not required:
             return None
-        sys.exit(f"找不到 {esbuild} —— 先在 frontend/ 跑 npm ci")
+        sys.exit("找不到 esbuild（試過 frontend/node_modules/.bin/esbuild 與 PATH）"
+                 " —— 先在 frontend/ 跑 npm ci，或 npm i -g esbuild")
     out = Path(tempfile.mkdtemp()) / "runner.cjs"
     subprocess.run([str(esbuild), str(RUNNER_TS), "--bundle", "--platform=node",
                     "--format=cjs", "--loader:.json=json", f"--outfile={out}"],
@@ -344,10 +362,36 @@ def build_bundle(required: bool = True) -> Path | None:
     return out
 
 
+def _font_variants() -> dict[str, str]:
+    """異體字 → 標準體。空 dict 代表這份檔不在（不擋，只是不換）。"""
+    if not FONT_VARIANTS_JSON.is_file():
+        return {}
+    v = (json.loads(FONT_VARIANTS_JSON.read_text(encoding="utf-8")) or {}).get("variants") or {}
+    for a, b in v.items():
+        # ⛔ 只准 1 個 UTF-16 單位換 1 個 —— 換了長度就整串位移（#3175 的形狀）
+        if len(a) != 1 or len(b) != 1 or ord(a) > 0xFFFF or ord(b) > 0xFFFF:
+            sys.exit(f"字型替換表只能一個字換一個字（BMP）：{a!r} → {b!r}")
+    return v
+
+
+def _substitute(text: str, variants: dict[str, str]) -> str:
+    return "".join(variants.get(c, c) for c in text) if variants else text
+
+
 def run_oracle(bundle: Path, items: list[dict]) -> dict[str, list]:
+    """⚠️ 餵給讀音選擇器的是**換過異體字**的文字（#3277）。
+
+    字型畫不出「爲」，所以那些位置原本沒有注音（瀏覽器用 fallback 字型畫）。
+    換成「為」之後字型畫得出來 —— 但**必須在這一層換**，不能只在渲染層換：
+    「因爲」在選擇器眼裡沒有樣式可比對 → 落到預設槽；換成「因為」才會命中
+    `ss01` = ㄨㄟˋ。只在渲染層換字＝把「沒注音」換成「錯注音」（實測）。
+
+    表上存的 `text` 仍是原文（查詢鍵是文字本身，必須跟服務端送出去的一字不差）。
+    """
     with tempfile.TemporaryDirectory() as td:
         tin, tout = Path(td) / "i.json", Path(td) / "o.json"
-        tin.write_text(json.dumps([{"key": str(n), "text": i["text"]}
+        variants = _font_variants()
+        tin.write_text(json.dumps([{"key": str(n), "text": _substitute(i["text"], variants)}
                                    for n, i in enumerate(items)]), encoding="utf-8")
         # ⛔ 不用 check=True + capture_output 直接吞掉 —— runner 的對齊守衛
         #    （非 BMP 字會讓碼點數 != UTF-16 單位數）是 `exit 3` 並把
@@ -511,6 +555,70 @@ def _load_corrections(uid: str) -> list[dict]:
     return [c for c in doc.get("corrections") or [] if c.get("lesson_uid") == uid]
 
 
+def _polyphonic_fixes() -> dict[tuple[str, int], dict]:
+    """`polyphonic_fixes.json` —— 逐筆寫死的讀音，鍵是 (句子 sha, UTF-16 位置)。
+
+    ## 為什麼這一層一定要在產生器裡
+
+    這 4,314 筆（#3269／#3270／#3274）原本是**另一支腳本事後把表改掉**
+    （`apply_polyphonic_decisions.py --write`），產生器不知道它們存在。後果：
+
+      · 重跑產生器 → 4,314 處靜靜被改回錯的預設讀音，**畫面上看不出任何異常**
+      · Gate 11 的 oracle 模式（逐字重算再比）在 `main` 上**必紅** ——
+        紅的原因不是有人弄壞了什麼，是產生器本來就重現不出磁碟上那份
+
+    第二點讓這道門在 CI 只能走弱的那條路（結構檢查），而**選擇邏輯本身變了**
+    正是只有 oracle 抓得到的那一類。所以修法不是放寬門，是讓產表可重現。
+
+    ⚠️ 2026-09-22 實測過第一點：重產 L0012／L0047 時，L0067／L0156／L0157
+    一起掉了 13 處變調，`test_yi_bu_sandhi` 才抓到。
+    """
+    if not POLYPHONIC_FIXES.is_file():
+        return {}
+    doc = json.loads(POLYPHONIC_FIXES.read_text(encoding="utf-8"))
+    return {(f["sha"], f["u16"]): f for f in (doc.get("fixes") or [])}
+
+
+def _slot_for_reading(font_slots: dict, char: str, reading: str) -> str | None:
+    """讀音 → 該字在出貨字型裡的槽位。字型畫不出來的回 None（呼叫端必須拒收）。"""
+    for slot, raw in (font_slots.get(char) or {}).items():
+        if raw and _to_bopomofo(raw) == reading:
+            return slot
+    return None
+
+
+def _apply_polyphonic_fixes(uid: str, texts: list[dict], fixes: dict,
+                            font_slots: dict) -> int:
+    """把命中這一課的修正套進 `ss`。⛔ 對不上就 `exit 1`，不靜靜跳過。
+
+    ⛔ 這裡**不把筆數寫進 `_provenance.stats`** —— `--check` 是整檔逐位元比，
+       多一個鍵會讓 179 個檔全部變成「不同步」，而它們的內容其實一個字沒變。
+       筆數印在 stdout；「有人刪了一筆修正」由 `check_without_oracle` 那條
+       逐筆比對的守衛擋（跟 `lesson_corrections.json` 同一個形狀）。
+    """
+    if not fixes:
+        return 0
+    applied = 0
+    for t in texts:
+        sha = hashlib.sha256(t["text"].encode("utf-8")).hexdigest()[:16]
+        units = u16_chars(t["text"])
+        for i in range(len(units)):
+            f = fixes.get((sha, i))
+            if f is None:
+                continue
+            if units[i] != f["char"]:
+                sys.exit(f"修正過期：{uid} {sha}@{i} 清單寫「{f['char']}」"
+                         f"但課文是「{units[i]}」")
+            slot = _slot_for_reading(font_slots, f["char"], f["to"])
+            if slot is None:
+                sys.exit(f"修正無效：{uid} {sha}@{i} 出貨字型畫不出「{f['char']}」"
+                         f"的 {f['to']}")
+            if t["ss"][i] != slot:
+                t["ss"][i] = slot
+                applied += 1
+    return applied
+
+
 def _apply_corrections(uid: str, texts: list[dict], corrections: list[dict],
                        font_slots: dict) -> int:
     """套用修正。⛔ 對不上就 `exit 1`，不靜靜跳過 —— 課文改了要有人知道。
@@ -559,6 +667,11 @@ def _apply_corrections(uid: str, texts: list[dict], corrections: list[dict],
     return applied
 
 
+#: 每一課套用了幾筆逐筆修正。⛔ 刻意放在檔案外面 —— 寫進 `_provenance` 會讓
+#: `--check`（整檔逐位元比）把 179 個內容未變的檔全判成不同步。
+doc_fixes_applied: dict[str, int] = {}
+
+
 def build(uid: str, bundle: Path, font_slots: dict) -> dict:
     items = collect_texts(uid)
     slots = run_oracle(bundle, items) if items else {}
@@ -584,6 +697,10 @@ def build(uid: str, bundle: Path, font_slots: dict) -> dict:
     corrections = _load_corrections(uid)
     n_corr = _apply_corrections(uid, texts, corrections, font_slots) if corrections else 0
 
+    # ── 逐筆寫死的讀音（#3269 那 4,314 筆）—— 見 `_polyphonic_fixes` 的 docstring。
+    #    以前這一層在另一支腳本裡，所以重跑產生器會把它們全部改回錯的。
+    n_fixed = _apply_polyphonic_fixes(uid, texts, _polyphonic_fixes(), font_slots)
+
     # ── 只數破音字位置（統計用），不再把注音存進表 ──────────────────
     #
     # ⛔ 以前每個破音字位置都存一筆 `{"i","c","ss","b"}`（全庫 321,733 筆、15 MB），
@@ -599,6 +716,7 @@ def build(uid: str, bundle: Path, font_slots: dict) -> dict:
     # 槽位壓成一個字元：'.'=預設、'1'..'5'=ss01..ss05（全庫 96.9% 是預設）
     for t in texts:
         t["ssz"] = _pack_slots(t.pop("ss"))
+    doc_fixes_applied[uid] = n_fixed
     return {
         "lesson_uid": uid,
         "_provenance": {
@@ -708,6 +826,45 @@ def check_without_oracle(uid: str, font_slots: dict) -> list[str]:
             f"{uid} 修正筆數不符：現在 {n_now} 筆，表記 {n_recorded} 筆 —— "
             f"有人加了或刪了修正而沒重產表")
 
+    # ⭐ 逐筆寫死的讀音（`polyphonic_fixes.json` 那 4,314 筆）也要逐筆驗。
+    #
+    # ⛔ 這一段本來完全不存在 —— 那批修正是**另一支腳本事後改表**的產物，
+    #    產生器與這道門都不知道它們在，所以重跑產生器會靜靜把它們改回錯的預設讀音
+    #    （2026-09-22 實測：重產 L0012／L0047 時 L0067／L0156／L0157 一起掉了
+    #     13 處變調，只有 `test_yi_bu_sandhi` 抓到）。現在產生器自己讀那份清單。
+    #
+    # ⚠️ **這一段抓得到什麼、抓不到什麼**（第一版我在這裡寫錯，mutation 才發現）：
+    #      抓得到 · 清單有這筆但表沒套用（有人改了表）
+    #             · 清單這筆的句子已經不在表裡（課文改了沒重產）
+    #             · 清單這筆要的讀音字型畫不出來
+    #      抓不到 · **有人從清單刪掉一筆** —— 迴圈跑的就是清單，刪掉就看不到。
+    #               那種要靠 oracle 那條路（重算後跟磁碟逐位元比）：實測刪掉
+    #               L0157 的 3 筆 → `--check` exit 1。所以 CI 一律跑 oracle
+    #               （見 `main()` 裡那段「CI 裡不准降級」）。
+    by_text = {}
+    for t in doc.get("texts") or []:
+        by_text.setdefault(
+            hashlib.sha256(t["text"].encode("utf-8")).hexdigest()[:16], []).append(t)
+    for (sha, i), f in _polyphonic_fixes().items():
+        if f.get("lesson") != uid:
+            continue
+        hits = by_text.get(sha) or []
+        if not hits:
+            errs.append(f"{uid} 逐筆修正過期：sha {sha} 在表裡找不到對應的段落"
+                        f"（課文被改過而沒重產表？）")
+            continue
+        want = _slot_for_reading(font_slots, f["char"], f["to"])
+        if want is None:
+            errs.append(f"{uid} 逐筆修正無效：出貨字型畫不出「{f['char']}」的 {f['to']}")
+            continue
+        for t in hits:
+            ss = unpack_slots(t.get("ssz") or "")
+            if i >= len(ss):
+                errs.append(f"{uid} 逐筆修正過期：sha {sha} 位置 {i} 超出該段長度")
+            elif ss[i] != want:
+                errs.append(f"{uid} 逐筆修正沒被套用：sha {sha}@{i}「{f['char']}」"
+                            f"表是 {ss[i]} 但清單說 {f['to']}（槽位 {want}）")
+
     # 修正表仍有效（slot ↔ expect_bopomofo ↔ 課文位置）
     for c in _load_corrections(uid):
         # ⛔ 用 **sha 定位**，跟 `_apply_corrections()` 同一種方式（#3238）。
@@ -740,9 +897,23 @@ def main() -> int:
     args = ap.parse_args()
 
     uids = args.uids or lesson_uids()
-    # `--check` 在沒有 esbuild 的環境（後端 CI）走 check_without_oracle，
+    # `--check` 在沒有 esbuild 的環境走 check_without_oracle，
     # 不是「沒驗到」—— 見那支函式的 docstring。
+    #
+    # ⭐ 但**在 CI 裡不准降級**（2026-09-22）。兩段式本來是為了讓後端 only 的
+    #    job 也有一道門，實際效果是 oracle 這條強路徑**從來沒在 CI 跑過** ——
+    #    而「選擇邏輯本身變了」只有它抓得到。`spec-check.yml` 現在會裝 esbuild
+    #    （只裝那一個，bundle 零外部 require）；有人把那一步拿掉就會撞到這裡，
+    #    不會靜靜變回弱路徑。
+    #    ⛔ 這道防線刻意放在**產生器裡**而不是只放在 workflow 的斷言上 ——
+    #       workflow 可以被改，而這裡是門自己拒絕。
     bundle = build_bundle(required=not args.check)
+    if args.check and bundle is None and os.environ.get("CI"):
+        print("✗ CI 裡找不到 frontend/node_modules/.bin/esbuild —— Gate 11 的 oracle "
+              "路徑跑不起來，而這道門的價值就在那條路。\n"
+              "  → 在 spec-check.yml 的 `Install esbuild only` 那一步（或等效步驟）"
+              "把 esbuild 裝回來；不要讓這道門降級成結構檢查。", file=sys.stderr)
+        return 1
     font_slots = _load(EXTRACTOR, "extract_font_readings").build_reading_table(str(FONT))
 
     # ── 槽位 → 注音 的對照，寫成一份給後端用（#3230）────────────────────

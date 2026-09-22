@@ -42,6 +42,12 @@ owns_data:
   - backend/data/zhuyin/polyphonic_fixes.json
   # #3269：破音字位置的稽核輸出（哪些字是破音字、出現在哪）。唯讀，不決定讀音。
   - backend/data/zhuyin/polyphonic_audit.json
+  # #3277：出貨字型畫不出來的異體字 → 標準體（爲→為 等 10 個）。
+  # **產表與渲染共讀這一份** —— 產表在餵給選擇器之前換字（所以表上記的是標準體
+  # 在那個上下文的正確槽位），渲染時換掉字符本身。兩邊各存一份必然會漂，而漂掉
+  # 的症狀是「槽位是為算的、畫出來的字是爲」。它**會影響讀音**（換字才選得到
+  # 樣式：「因爲」落到預設槽 ㄨㄟˊ，「因為」才是 ss01 ㄨㄟˋ），所以屬於讀音面。
+  - frontend/src/components/zhuyin/fontMissingVariants.json
   - frontend/public/data/poyin_db.json
   - frontend/public/fonts/BpmfZihiSerif-Regular.ttf
   - frontend/src/components/zhuyin/__fixtures__/fontReadings.generated.json

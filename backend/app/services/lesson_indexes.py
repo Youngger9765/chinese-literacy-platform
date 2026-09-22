@@ -843,6 +843,9 @@ def _mcq_from(l: dict, section: dict | None = None) -> list[dict]:
             # `items` 那批叫 `option_notes`。兩個都收，欄位名不同不代表意思不同。
             "explanation": (opts.get(answer) if q.get("is_rationale")
                             else (q.get("option_corrections") or q.get("option_notes") or {}).get(answer)),
+            # 這一題要讀的那張表（#3277）。L0150 第 4 題問的就是 PISA 那張排名表 ——
+            # 而在這之前這裡只送題幹與選項，**學生被要求讀一張看不到的表**。
+            "material_table": q.get("material_table") or None,
         })
     return out
 
@@ -993,6 +996,18 @@ def _uid_tree_lessons() -> list[dict]:
             #    抽成同一支 `_served_genre` 就不會再各寫各的。
             "category": _category_for(_served_genre(l), _meta(l)),
             "char_count": _body(l).get("char_count") or 0,
+            # 印在學習單正文上、學生該看得到的課文層內容（#3277）。
+            # ⚠️ 這一列是逐欄寫死的字典 —— 上面那段警告講的就是這幾欄：
+            #    它們從 #2736 起就在 yml 裡（L0035 的 `source_line`、L0050 與
+            #    L0125 的 `inline_table`），過了逐字門、也進了忠實度證明，
+            #    但因為沒宣告在這裡，**後端與前端各 0 處引用** —— 抽出來了，
+            #    學生看不到，而且沒有任何錯誤或紅燈。
+            #    鎖：`specs/test_article_fields_reach_the_served_row_spec.py`
+            "source_line": _body(l).get("source_line") or None,
+            "inline_table": _body(l).get("inline_table") or None,
+            "inline_tables": _body(l).get("inline_tables") or None,
+            "comparison_table": _body(l).get("comparison_table") or None,
+            "summary_table": _body(l).get("summary_table") or None,
             # Served from the uid tree, so the image is addressed by the lesson's
             # identity rather than its catalogue position. Under the first edition
             # covers were keyed by code; the renumber pointed every one of them at a

@@ -90,6 +90,13 @@ interface ApiStoryListItem {
   genre: string;
   category: string;
   char_count: number;
+  // 印在學習單正文上的課文層內容（#3277）。這幾欄從 #2736 起就在 yml 裡，
+  // 但服務端沒宣告 → 送不出去 → 前端也就沒人接。兩邊一起補。
+  source_line?: string | null;
+  inline_table?: Record<string, unknown> | null;
+  inline_tables?: unknown[] | null;
+  comparison_table?: Record<string, unknown> | null;
+  summary_table?: Record<string, unknown> | null;
   thumbnail_url: string;
   reading_strategy: string | null;
   reading_strategy_explained?: string | null;
@@ -105,7 +112,8 @@ interface ApiStoryDetail extends ApiStoryListItem {
   // Both schemas coexist; normalization in apiDetailToStory filters to legacy-format only (#1563).
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fill_in_blank: Array<Record<string, any>> | null;
-  multiple_choice: Array<{ question: string; options: string[]; answer: string | null; explanation: string | null }> | null;
+  multiple_choice: Array<{ question: string; options: string[]; answer: string | null;
+    explanation: string | null; material_table?: Record<string, unknown> | null }> | null;
   vocab_bank: Record<string, string> | null;
   knowledge_video_url: string | null;
   // Full video list (#1683). null for legacy lessons without video_links field.
@@ -249,6 +257,11 @@ function apiDetailToStory(detail: ApiStoryDetail): Story {
     readingStrategyExplained: detail.reading_strategy_explained ?? undefined,
     vocabulary: detail.vocabulary ?? undefined,
     charCount: detail.char_count,
+    sourceLine: detail.source_line ?? undefined,
+    inlineTable: detail.inline_table ?? undefined,
+    inlineTables: detail.inline_tables ?? undefined,
+    comparisonTable: detail.comparison_table ?? undefined,
+    summaryTable: detail.summary_table ?? undefined,
     readingBenchmark: detail.reading_benchmark ?? undefined,
     keyReading: detail.key_reading
       ? {

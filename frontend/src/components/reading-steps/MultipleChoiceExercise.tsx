@@ -22,6 +22,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import { recordMcqAttempt } from '../../services/learningApi';
 import McqRescueDialog, { McqRescueContext } from '../reading-spotlight/McqRescueDialog';
 import CorrectAnswerBurst from '../gamification/CorrectAnswerBurst';
+import TableDisplay from './TableDisplay';
+import { tableFrom, tableSourceLine } from './articleExtras';
 
 interface Props {
   questions: MultipleChoiceItem[];
@@ -70,6 +72,12 @@ const MultipleChoiceExercise: React.FC<Props> = ({
   const [rescueContext, setRescueContext] = useState<McqRescueContext | null>(null);
 
   const q = questions[current];
+  // 題目附的表（#3277）—— 形狀跟課文層的 inline_table 相同，走同一個轉接器。
+  const materialTable = React.useMemo(
+    () => tableFrom(q?.material_table, `mcq-${current}-table`, '表'),
+    [q?.material_table, current],
+  );
+  const materialSource = tableSourceLine(q?.material_table);
   const isCorrect = selected === q.answer;
   const isLast = current === questions.length - 1;
   const questionId = `${lessonId}-q${current}`;
@@ -178,6 +186,16 @@ const MultipleChoiceExercise: React.FC<Props> = ({
         <p className="text-base font-medium text-gray-800 leading-relaxed mb-4">
           {current + 1}. {zh(q.question)}
         </p>
+
+        {/* 這一題要讀的那張表（#3277）。少了它，L0150 第 4 題是在問一張看不到的表。 */}
+        {materialTable && (
+          <div className="mb-4" data-testid="mcq-material-table">
+            <TableDisplay tables={[materialTable]} layout="stacked" />
+            {materialSource && (
+              <p className="mt-1 text-sm text-on-surface-variant">{materialSource}</p>
+            )}
+          </div>
+        )}
 
         {/* Options */}
         <div className="flex flex-col gap-2">

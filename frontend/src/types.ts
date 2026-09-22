@@ -87,6 +87,9 @@ export interface MultipleChoiceItem {
   options: string[];
   answer: string | null;  // letter code e.g. "A", "B", or null if missing
   explanation: string | null;
+  /** 這一題要讀的那張表（#3277）。形狀跟課文層的 `inline_table` 一樣
+   *  （`{title, columns, rows, source_line}`），所以走同一個轉接器。 */
+  material_table?: Record<string, unknown> | null;
 }
 
 // 閱讀策略練習 (#943)
@@ -132,6 +135,9 @@ export interface SpotlightPassageBlock {
   type: 'passage';
   source?: string;
   paragraphs: string[];
+  /** 原稿印在這段文章末尾的出處（例：〈節選自國語日報網路新聞…〉）。
+   *  L0096 有，而在 #3277 之前渲染端只畫 `paragraphs`，所以它抽出來了沒人看到。 */
+  source_line?: string;
 }
 
 export interface SpotlightSingleBlock {
@@ -301,6 +307,12 @@ export interface Story {
   readingStrategyExplained?: string;
   vocabulary?: VocabItem[];     // for future VocabPractice enhancement
   charCount?: number;           // for reading benchmark
+  /** 印在學習單正文上的課文層內容（#3277）——出處行與正文裡的表格 */
+  sourceLine?: string;
+  inlineTable?: Record<string, unknown>;
+  inlineTables?: unknown[];
+  comparisonTable?: Record<string, unknown>;
+  summaryTable?: Record<string, unknown>;
   readingBenchmark?: { levels: { threshold: string; feedback: string }[] };
   /** 重點朗讀指定段 (#2559)：學生只朗讀老師 ☞ 標的重點段。缺→唸全文 fallback。 */
   keyReading?: { passage: string; startText?: string; extentChars?: number; source?: string };

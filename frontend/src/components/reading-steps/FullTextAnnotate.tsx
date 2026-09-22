@@ -17,6 +17,7 @@ import type { AnnotationPayload } from '../../services/learning/annotationApi';
 import { fontForZhuyin } from '../../constants/fonts';
 import GraphicTextImageStrip from './GraphicTextImageStrip';
 import TableDisplay from './TableDisplay';
+import { articleTables } from './articleExtras';
 import InlineImageCard from './InlineImageCard';
 import InlineTableCard from './InlineTableCard';
 import {
@@ -745,6 +746,11 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
     () => (story.tables ?? []).filter((_, i) => !usedTableIdx.has(i)),
     [story.tables, usedTableIdx],
   );
+  // 課文正文裡印著的表格（#3277）。跟上面那組 `tables` 是不同來源：
+  // 那組來自 PDF 擷取的整張表圖，這組來自課文模組自己的欄位
+  // （`inline_table` / `inline_tables` / `comparison_table` / `summary_table`），
+  // 先前**送不出去也沒人接**，13 份 yml 的內容學生一個字都看不到。
+  const extraTables = useMemo(() => articleTables(story), [story]);
 
   const annotationsForPanel = useMemo<AnnotationWithText[]>(() => {
     return [...annotations]
@@ -1237,6 +1243,26 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
               </aside>
             )}
           </div>
+
+          {/* 課文的出處行（#3277）—— 原稿印在課文末尾的「本課選自…」 */}
+          {story.sourceLine && (
+            <div
+              className="max-w-4xl mx-auto px-6 md:px-16 mt-6"
+              data-testid="reading-annotation-source-line"
+            >
+              <p className="text-sm text-on-surface-variant">{story.sourceLine}</p>
+            </div>
+          )}
+
+          {/* 課文正文裡印著的表格（#3277）—— 走同一個 TableDisplay，含放大檢視 */}
+          {extraTables.length > 0 && (
+            <div
+              className="max-w-4xl mx-auto px-6 md:px-16 mt-8"
+              data-testid="reading-annotation-article-tables"
+            >
+              <TableDisplay tables={extraTables} layout="stacked" />
+            </div>
+          )}
 
           {/* Fallback tables — only un-referenced tables. */}
           {fallbackTables.length > 0 && (
