@@ -177,8 +177,24 @@ def test_the_reported_lesson_is_covered(fixes):
 #:   缺口**。唯二合法的解法都不是改 yml：① 幫出貨字型補上這 12 個字符
 #:   （真正修好顯示）② 顯示時另外用一套替換表把這幾個字轉成標準體再渲染
 #:   （不動 SOT，只動呈現）——兩者都是產品/字型層的決定，留給 Young。
-FONT_GAP_TOTAL = 36
-FONT_GAP_CHARS = 12
+#:
+#: 2026-09-22（#3277）：走了②。替換表 SOT =
+#: `frontend/src/components/zhuyin/fontMissingVariants.json`，**產表與渲染共讀同一份**。
+#: 關鍵在替換發生的位置：**餵給讀音選擇器之前**就換。只在渲染層換字會拿到預設槽 ——
+#: 實測「因爲」的槽位是 `0000`（選擇器對「爲」沒有樣式可比對）＝ ㄨㄟˊ，
+#: 而換成「因為」再選才是 `ss01` ＝ ㄨㄟˋ。**只在渲染層換 = 把「沒注音」換成「錯注音」**。
+#:
+#: 10 個字換得掉（爲/絶/条/着/麽/吿/歳/鈎/点/没 → 為/絕/條/著/麼/告/歲/鉤/點/沒），
+#: 剩下 3 個沒有標準體可換，所以缺口不會歸零：
+#:   吔（×5）台語句末助詞 —— 沒有對應正字
+#:   軁（×1）台語
+#:   凃（×1）姓氏「凃文」—— **姓氏不可以替換成別的字**
+#: 這 7 處只剩解法①（幫字型補字符），那是要花錢/動字型授權的產品決定，留給 Young。
+#:
+#: ⚠️ 這條斷言現在算的是**學生實際會看到的那個字**（換過之後），不是 yml 裡的字元 ——
+#:    因為它要回答的問題是「畫面上這個字有沒有注音」。yml 一字未改。
+FONT_GAP_TOTAL = 7
+FONT_GAP_CHARS = 3
 
 
 def test_font_gap_does_not_grow():
@@ -193,6 +209,13 @@ def test_font_gap_does_not_grow():
         pytest.skip(f"{all_readings.name} 不在（由 extract_font_readings.py 產生）")
     raw = json.loads(all_readings.read_text(encoding="utf-8"))
     readings = raw.get("slots", raw)
+
+    # 學生看到的是換過異體字之後的那個字（見上方 2026-09-22 那段）
+    variants_path = (_BACKEND.parent / "frontend" / "src" / "components" / "zhuyin"
+                     / "fontMissingVariants.json")
+    variants = {}
+    if variants_path.is_file():
+        variants = (json.loads(variants_path.read_text(encoding="utf-8")) or {}).get("variants") or {}
 
     def is_cjk(ch: str | None) -> bool:
         return bool(ch) and (("一" <= ch <= "鿿") or ("㐀" <= ch <= "䶿"))
@@ -215,8 +238,9 @@ def test_font_gap_does_not_grow():
                 if not is_cjk(ch):
                     continue
                 checked += 1
+                shown = variants.get(ch, ch)      # 畫面上真正那個字
                 slot = "0000" if ssz[i] == "." else f"ss0{ssz[i]}"
-                if readings.get(ch, {}).get(slot) is None:
+                if readings.get(shown, {}).get(slot) is None:
                     gaps[ch] += 1
 
     assert checked > 800_000, (
@@ -229,8 +253,42 @@ def test_font_gap_does_not_grow():
     assert len(gaps) <= FONT_GAP_CHARS and sum(gaps.values()) <= FONT_GAP_TOTAL, (
         f"字型缺口變大：{len(gaps)} 種 / {sum(gaps.values())} 處"
         f"（上限 {FONT_GAP_CHARS} 種 / {FONT_GAP_TOTAL} 處）：{dict(gaps)}。"
-        f"課文新增了字型畫不出來的字 → 要嘛換標準體，要嘛連同原稿重新出忠實度證明"
+        f"課文新增了字型畫不出來的字 → 先看能不能加進 "
+        f"`frontend/src/components/zhuyin/fontMissingVariants.json`（顯示層換標準體，"
+        f"不動 yml）；換不掉的（台語助詞、姓氏）才是真的要補字型"
     )
+
+def test_the_variant_substitution_table_is_usable():
+    Q = None
+    # 對照組：替換表本身要有效，否則上面那個 7 只是因為表被清空了。
+    #
+    # ⛔ 少了這一條，把 `fontMissingVariants.json` 的 `variants` 清成 `{}`
+    #    會讓缺口從 7 變回 36 —— 那當然會紅。但**反過來**呢：如果有人把表填成
+    #    一堆字型也畫不出來的「標準體」，缺口一樣是 36。所以這裡驗的是
+    #    **每一筆的目標字在字型裡真的畫得出來**。
+    variants_path = (_BACKEND.parent / "frontend" / "src" / "components" / "zhuyin"
+                     / "fontMissingVariants.json")
+    assert variants_path.is_file(), f"{variants_path} 不在 —— 前端渲染也讀這一份"
+    doc = json.loads(variants_path.read_text(encoding="utf-8"))
+    variants = doc.get("variants") or {}
+    assert variants, "替換表是空的"
+
+    all_readings = _BACKEND / "data" / "zhuyin" / "font_all_readings.json"
+    if not all_readings.is_file():
+        pytest.skip(f"{all_readings.name} 不在")
+    raw = json.loads(all_readings.read_text(encoding="utf-8"))
+    readings = raw.get("slots", raw)
+
+    bad = []
+    for src, dst in variants.items():
+        if len(src) != 1 or len(dst) != 1:
+            bad.append(f"{src!r}→{dst!r} 不是一個字換一個字（會讓整串位移）")
+        elif src in readings:
+            bad.append(f"「{src}」本來就在字型裡，不需要替換")
+        elif dst not in readings:
+            bad.append(f"「{src}」→「{dst}」但「{dst}」字型也畫不出來")
+    assert not bad, "替換表有問題：\n  " + "\n  ".join(bad)
+
 
 
 #: 「一」「不」變調的詞層級抽點。(詞, 目標字在詞裡第幾個, 該讀什麼, 前字排除)

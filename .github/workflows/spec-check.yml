@@ -100,5 +100,28 @@ jobs:
           cd backend
           pip install -r requirements.txt
 
+      # ⭐ Gate 11 的強路徑（oracle）需要 node —— 沒有它整道門只做結構檢查。
+      #
+      # ⛔ 不是裝整包 `npm ci`（那才是先前判斷「太重」而放棄的做法）。
+      #    產表的 runner（`frontend/scripts/zhuyinAnswers.ts`）只 import 本地模組
+      #    與 `node:fs` —— 打出來的 bundle **零外部 require**（實測），所以只要
+      #    一個 esbuild 就跑得起來。
+      #
+      # ⚠️ 沒有這一步，這道門在 CI 只驗「課文/字型/poyin_db 有沒有換」，
+      #    驗不到**選擇邏輯本身變了**（processor 改了而 poyin_db 沒改）——
+      #    而那正是只有 oracle 抓得到的那一類，也是 #3218 這整套架構的起因。
+      - name: Set up Node (for Gate 11's oracle)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install esbuild only (pinned to the lockfile)
+        run: |
+          cd frontend
+          VER=$(node -p "require('./package-lock.json').packages['node_modules/esbuild'].version")
+          echo "esbuild $VER（從 package-lock 讀，不寫死）"
+          npm install --no-save --no-audit --no-fund "esbuild@$VER"
+          test -x node_modules/.bin/esbuild
+
       - name: Spec CI (registry + pointer-rot + contracts + legacy_tests union)
         run: bash specs/run-ci.sh

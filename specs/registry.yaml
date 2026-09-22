@@ -782,6 +782,7 @@ modules:
   - backend/data/zhuyin/char_difficulty.json
   - backend/data/zhuyin/polyphonic_fixes.json
   - backend/data/zhuyin/polyphonic_audit.json
+  - frontend/src/components/zhuyin/fontMissingVariants.json
   - frontend/public/data/poyin_db.json
   - frontend/public/fonts/BpmfZihiSerif-Regular.ttf
   - frontend/src/components/zhuyin/__fixtures__/fontReadings.generated.json
