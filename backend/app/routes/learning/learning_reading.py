@@ -581,8 +581,13 @@ class TranscribeReadingResponse(BaseModel):
     """Gemini's 1-2 sentence explanation (for teacher audit). None on fallback."""
 
     reason: str | None = None
-    """Fallback reason classification: 'timeout' | 'safety' | 'decode' | 'empty' | 'error' | 'too_short' | 'hallucination'.
-    Only present when method='fallback'. Used by frontend to show appropriate alert.
+    """Fallback reason classification: 'too_short' | 'silent' | 'empty' | 'truncated' |
+    'decode' | 'timeout' | 'safety' | 'hallucination' | 'error'.
+
+    Only present when method='fallback'.  ⛔ 前端把每一種對應到**自己的**一句話
+    （`frontend/src/hooks/transcribeFallbackMessage.ts`）—— 不要再把它們塌回同一句。
+    `empty`（Gemini 聽不出內容）是 fallback 的大宗，它需要跟 `timeout` 完全不同的
+    指示：一個要學生多唸一點，一個只要他再按一次（#3299）。
     'hallucination' (Issue #2321): Gemini echoed the lesson hint on silent/noisy audio."""
 
 
