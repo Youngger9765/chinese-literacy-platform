@@ -156,7 +156,39 @@ def make_ai_rate_limit_dependency(max_requests: int = 10, window_seconds: int = 
             ...
     """
     def _dependency(request: Request) -> None:
-        key = f"ai:{get_client_key(request)}"
+        # ── #3300：預算要**逐端點**分開 ────────────────────────────────────
+        #
+        # ⛔ key 原本是 `ai:{client}` —— 不含端點也不含層級，所以
+        #    `make_ai_rate_limit_dependency()` 產生的每一個 dependency
+        #    （不論宣告 5 還是 10）全部共用同一顆 module-level 水桶。
+        #    目前掛在上面的端點有 15 支。
+        #
+        #    真實流程「重點朗讀 → 理解題 → 生字 → 出場券」是同一個 session 內
+        #    幾十秒的連續動作，前面幾步很容易在 60 秒內把共用桶用掉，於是學生
+        #    **第一次**按出場券就被擋 —— prod 實測 53 次呼叫 5 次 429（9.4%），
+        #    而那 5 次不是重複產生出場券。
+        #
+        #    TTS 早就有自己的 store（`tts_rate_limiter`），註解寫明「不可消耗
+        #    socratic/comprehension/reading 的配額」—— 其餘 15 支從沒有這層隔離。
+        #
+        # ⚠️ 用**模板化路徑**（`/sessions/{session_id}/…`）而不是真實路徑：
+        #    真實路徑含 session id，換一個 session 就換一顆桶 = 限流形同虛設，
+        #    而且 key 會無限長大。
+        # ⚠️ 只認**字串**的 path。測試替身常是 MagicMock，`getattr(route,"path")`
+        #    會回一個每個實例都不同的物件 —— 那會讓 key 每次都不一樣，等於沒有限流
+        #    （實測弄壞了 `test_ai_limit_uses_user_id_when_available`：同一個使用者
+        #    跨 IP 本來該共用一顆桶）。拿不到字串就退回不分端點的舊行為。
+        scope_name = ""
+        scope = getattr(request, "scope", None)
+        if isinstance(scope, dict):
+            cand = getattr(scope.get("route"), "path", None)
+            if isinstance(cand, str):
+                scope_name = cand
+        if not scope_name:
+            cand = getattr(getattr(request, "url", None), "path", None)
+            if isinstance(cand, str):
+                scope_name = cand
+        key = f"ai:{scope_name}:{get_client_key(request)}" if scope_name else f"ai:{get_client_key(request)}"
         if not ai_rate_limiter.check(key, max_requests, window_seconds):
             raise HTTPException(
                 status_code=429,
