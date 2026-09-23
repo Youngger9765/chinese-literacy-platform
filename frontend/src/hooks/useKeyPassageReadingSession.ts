@@ -21,6 +21,7 @@ import { cancelTts } from '../services/ttsApi';
 import { saveReadingHistory } from '../services/readingHistoryApi';
 import { transcribeReading, saveReadingAudio } from '../services/learning/session';
 import { validateRecording } from '../utils/recordingValidation';
+import { transcribeFallbackMessage } from './transcribeFallbackMessage';
 
 // Issue #2362: SILENT_PEAK_THRESHOLD and SILENT_MIN_DURATION_MS are now the
 // single source of truth in recordingValidation.ts — imported via validateRecording().
@@ -296,12 +297,20 @@ export function useKeyPassageReadingSession({
             _evaluate(result.transcript, audioBlob);
           } else {
             // Gemini failed — cannot fall back to Web Speech (removed, Issue #2266).
-            setMicError('辨識失敗，請重錄一次');
+            //
+            // ⛔ 這裡原本不分原因，一律「辨識失敗，請重錄一次」（#3299）。
+            //    prod 的 4 次 fallback 裡 3 次是錄音太短（1.7s / 2.3s / 4.5s）、
+            //    1 次是太長轉檔失敗（103s）—— 對前三個學生來說「請重錄一次」是
+            //    **無效的指示**：照同樣長度再錄一次會同樣失敗，而他已經等了 9–20 秒
+            //    （p50 9,430ms / p95 19,810ms）。後端每一種失敗都回了 `reason`，
+            //    只是前端一直沒有用它。
+            setMicError(transcribeFallbackMessage(result.reason));
           }
         })
         .catch(() => {
           setIsTranscribing(false);
-          setMicError('辨識失敗，請重錄一次');
+          // 連線層就失敗、拿不到 reason → 重試才是有效的指示
+          setMicError(transcribeFallbackMessage('error'));
         });
     } else {
       // No token — cannot reach Gemini.
