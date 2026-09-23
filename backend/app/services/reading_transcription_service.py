@@ -6,7 +6,10 @@ transcription with punctuation using Gemini audio understanding.
 Design principles:
 - Backend is transcription-only; scoring stays in frontend analyzeFluency().
 - Fail-closed: any exception → return {transcript: null, method: "fallback", reason: <str>}
-  so the caller can show a fallback alert and use the Web Speech transcript.
+  so the caller can show a `reason`-specific message (#3299).  There is no Web Speech
+  transcript to fall back to — Web Speech was removed in #2266 and Gemini is the sole
+  speech engine.  An earlier version of this docstring promised that fallback; it does
+  not exist, and the frontend's `fallbackReason` has been a hardwired null stub since.
 - No new DB schema: result is returned synchronously, not persisted here.
   The caller (route) may log AI usage; this service is stateless.
 
@@ -314,8 +317,10 @@ async def transcribe_reading_audio(
         On success:
             {"transcript": "<text with punctuation>", "method": "gemini", "reasoning": "..."}
         On any failure (transcode failure, Gemini error, timeout, content filter):
-            {"transcript": None, "method": "fallback", "reason": "<timeout|safety|decode|empty|error>"}
-            Caller must show fallback alert and use Web Speech transcript — never auto-pass.
+            {"transcript": None, "method": "fallback",
+             "reason": "<too_short|silent|empty|truncated|decode|timeout|safety|hallucination|error>"}
+            Caller must show a `reason`-specific message (#3299) — never auto-pass.
+            There is no Web Speech transcript to fall back to (#2266).
     """
     from google import genai  # noqa: PLC0415 — lazy import; not available in test envs
     from google.genai import types as genai_types  # noqa: PLC0415
@@ -471,14 +476,22 @@ async def transcribe_reading_audio(
 
         # Empty transcript from Gemini → treat as fallback (I5: never auto-pass)
         if not transcript:
+            # ⭐ 一起記 `max_volume_db`（上面靜音門檻已經算過了）。
+            #
+            # `empty` 是 fallback 的大宗（30 天樣本裡 4 次有 3 次），而我們對「那些
+            # 錄音離靜音門檻有多近」完全沒有能見度 —— 所以也就無從判斷
+            # `_MIN_AUDIO_DURATION_MS`（現在是 1 秒，遠低於實際開始失敗的 1.7–4.5 秒）
+            # 該移到哪裡。要的不是猜一個門檻，是先把推得出門檻的那個量測補上（#3299）。
             logger.warning(
                 "Reading transcription fallback — Gemini returned empty transcript: "
-                "duration_ms=%s",
+                "duration_ms=%s max_volume_db=%s",
                 duration_ms,
+                max_db,
                 extra={
                     "event": "reading_transcribe_fallback",
                     "reason": _REASON_EMPTY,
                     "duration_ms": duration_ms,
+                    "max_volume_db": max_db,
                 },
             )
             return {"transcript": None, "method": "fallback", "reason": _REASON_EMPTY}
