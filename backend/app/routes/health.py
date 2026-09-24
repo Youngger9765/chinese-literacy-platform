@@ -26,6 +26,22 @@ _START_DATETIME = datetime.now(timezone.utc)
 # Application version — keep in sync with FastAPI app version in main.py
 APP_VERSION = "0.3.0"
 
+# The commit this container was built from, injected by the deploy workflows as
+# BUILD_SHA=${{ github.sha }} (#3310).
+#
+# Why it is here: the only valid test of "is the deploy live?" is whether the
+# revision serving 100% of traffic runs the image built from this commit.
+# Until now that took `gcloud run services describe` + `revisions describe` —
+# so the check was unavailable whenever the gcloud token had expired, which is
+# exactly when you most want it.  With this, anyone can ask:
+#
+#     test "$(curl -s $B/api/health | jq -r .sha)" = "$(git rev-parse HEAD)"
+#
+# ⚠️ None when unset — local dev and tests have no build.  A missing SHA must
+# never turn liveness into a failure; the endpoint's job is to say the process
+# is up.  Callers that need the identity must treat None as "unknown", not "ok".
+BUILD_SHA = os.getenv("BUILD_SHA") or None
+
 
 # `/health` 是監控工具的慣例路徑：uptime checker、Cloud Run、k8s probe、
 # 負載平衡器預設都打它。以前只有 `/api/health` 存在，於是每小時的巡檢 tick
@@ -38,7 +54,7 @@ APP_VERSION = "0.3.0"
 @router.get("/api/health")
 def health_liveness():
     """Basic liveness check. Returns 200 when the process is running."""
-    return {"status": "ok", "version": APP_VERSION}
+    return {"status": "ok", "version": APP_VERSION, "sha": BUILD_SHA}
 
 
 @router.get("/api/health/detailed")
