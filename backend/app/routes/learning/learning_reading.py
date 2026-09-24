@@ -24,6 +24,7 @@ from ...services.zhuyin_readings import font_zhuyin_table
 from ...services.lesson_zhuyin import zhuyin_for_text
 from ...services.reading_transcription_service import (
     ALLOWED_AUDIO_MIMES,
+    scorable_char_count,
     transcribe_reading_audio,
 )
 
@@ -691,6 +692,7 @@ async def transcribe_reading_endpoint(
                 "reason": "too_short",
                 "user_id": current_user.id,
                 "duration_ms": duration_ms,
+                "target_chars": scorable_char_count(target_text),
             },
         )
         return TranscribeReadingResponse(

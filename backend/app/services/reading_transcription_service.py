@@ -128,6 +128,26 @@ def _strip_cjk_punctuation(text: str) -> str:
     return re.sub(r'[\s　、-〿＀-￯‘-‟。，！？；：、─—…「」『』（）]', '', text)
 
 
+def scorable_char_count(text: str) -> int:
+    """Approximate the character count the frontend scorer uses for CPM.
+
+    Why this exists (#3299): to judge whether a recording is *plausibly* long
+    enough for the passage, you need the passage length in the same unit the
+    CPM norms use.  `GRADE_CPM_DEFAULTS` (frontend/src/utils/personaConfig.ts)
+    is chars/min over `diffCharacters`' scorable characters — i.e. the target
+    with punctuation and bopomofo stripped.
+
+    ⚠️ This is an approximation, not parity, and the list of differences below
+    is NOT exhaustive.  `_strip_cjk_punctuation` drops punctuation and
+    whitespace; the frontend additionally strips bopomofo and runs
+    `stripDecorativeSymbols`, `cleanChineseText`, `normalizePunctuationToChinese`
+    and number/full-width normalisation, none of which happen here.  That is
+    fine for its only purpose (logging, and later a duration gate with ~3x
+    margin); it is NOT fine as a scoring input — use the frontend scorer.
+    """
+    return len(_strip_cjk_punctuation(text))
+
+
 def _transcription_max_tokens(target_text: str) -> int:
     """Size the transcription output budget to the reading length.
 
@@ -343,6 +363,7 @@ async def transcribe_reading_audio(
             duration_ms,
             extra={
                 "event": "reading_transcribe_fallback",
+                "target_chars": scorable_char_count(target_text),
                 "reason": _REASON_SILENT,
                 "max_volume_db": max_db,
                 "duration_ms": duration_ms,
@@ -363,6 +384,7 @@ async def transcribe_reading_audio(
                 duration_ms,
                 extra={
                     "event": "reading_transcribe_fallback",
+                    "target_chars": scorable_char_count(target_text),
                     "reason": _REASON_TRANSCODE,
                     "mime_type": mime_type,
                     "duration_ms": duration_ms,
@@ -460,6 +482,7 @@ async def transcribe_reading_audio(
                 len(target_text),
                 extra={
                     "event": "reading_transcribe_fallback",
+                    "target_chars": scorable_char_count(target_text),
                     "reason": _REASON_TRUNCATED,
                     "duration_ms": duration_ms,
                     "target_len": len(target_text),
@@ -489,6 +512,7 @@ async def transcribe_reading_audio(
                 max_db,
                 extra={
                     "event": "reading_transcribe_fallback",
+                    "target_chars": scorable_char_count(target_text),
                     "reason": _REASON_EMPTY,
                     "duration_ms": duration_ms,
                     "max_volume_db": max_db,
@@ -515,6 +539,7 @@ async def transcribe_reading_audio(
                 len(target_text),
                 extra={
                     "event": "reading_transcribe_fallback",
+                    "target_chars": scorable_char_count(target_text),
                     "reason": _REASON_HALLUCINATION,
                     "duration_ms": duration_ms,
                     "transcript_len": len(transcript),
@@ -538,6 +563,7 @@ async def transcribe_reading_audio(
             duration_ms,
             extra={
                 "event": "reading_transcribe_fallback",
+                "target_chars": scorable_char_count(target_text),
                 "reason": _REASON_TIMEOUT,
                 "duration_ms": duration_ms,
             },
@@ -559,6 +585,7 @@ async def transcribe_reading_audio(
             duration_ms,
             extra={
                 "event": "reading_transcribe_fallback",
+                "target_chars": scorable_char_count(target_text),
                 "reason": reason,
                 "error": str(exc),
                 "duration_ms": duration_ms,
