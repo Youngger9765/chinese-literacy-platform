@@ -38,6 +38,7 @@ CONTENT_FIELDS = (
     "inline_tables",      # 正文裡的多個表格
     "comparison_table",   # 對照表
     "summary_table",      # 摘要表
+    "underlined_terms",   # 課文裡加底線的專有名詞（#3309）
 )
 
 
@@ -54,6 +55,22 @@ def _declared_values(field: str) -> dict[str, list]:
         inner = d.get("full_text_annotate") if isinstance(d.get("full_text_annotate"), dict) else d
         if isinstance(inner, dict) and inner.get(field):
             out.setdefault(f.parts[-3], []).append(inner[field])
+    return out
+
+
+def _primary_article_values(uid: str, field: str) -> list:
+    """主篇（服務端那一列取值的那一篇）對這一欄宣告了什麼，含明確的空值。
+
+    `_declared_values` 刻意跳過 falsy —— 它問的是「有沒有人宣告」。這裡問的是
+    另一件事：「主篇是不是**宣告了但是空的**」。兩者混用會讓「主篇真的沒有」
+    跟「根本沒送到」長得一樣，而那是兩個完全不同的狀況。
+    """
+    out = []
+    for f in sorted(LESSONS.glob(f"{uid}/v3/full_text_annotate*.yml")):
+        d = yaml.safe_load(f.read_text(encoding="utf-8")) or {}
+        inner = d.get("full_text_annotate") if isinstance(d.get("full_text_annotate"), dict) else d
+        if isinstance(inner, dict) and field in inner:
+            out.append(inner[field])
     return out
 
 
@@ -80,6 +97,18 @@ def test_every_declaring_lesson_serves_the_field(field):
             continue
         declared = _declared_values(field).get(uid) or []
         got = r.get(field)
+        # 多篇課的頂層那一列反映的是**主篇**。主篇自己沒有這一欄時，頂層是 None
+        # 才對 —— 去撈「隨便哪一篇的第一個非空」會把第二篇的東西掛到第一篇上，
+        # 那正是 #2930／L0137 那個 bug（讀第二篇的學生看到第一篇的表）。
+        # 每一篇有沒有拿到自己那一份，由
+        # `test_each_article_of_a_multi_text_lesson_gets_its_own_fields` 管。
+        # ⚠️ 只在「主篇明確宣告成空」時放行，不是「找不到就算了」。
+        primary_empty = any(
+            isinstance(v, (list, dict, str)) and not v
+            for v in _primary_article_values(uid, field)
+        )
+        if not got and primary_empty:
+            continue
         if not got:
             missing.append(f"{uid}（yml 有：{str(declared[:1])[:40]}…，服務端沒有）")
         elif declared and not any(
@@ -161,6 +190,7 @@ def test_each_article_of_a_multi_text_lesson_gets_its_own_fields():
     """
     rows = {l["lesson_uid"]: l for l in build_all_lessons() if l.get("lesson_uid")}
     checked = 0
+    per_field: dict[str, int] = {f: 0 for f in CONTENT_FIELDS}
     bad = []
     for uid, r in rows.items():
         rounds = r.get("repeat_rounds") or {}
@@ -172,11 +202,33 @@ def test_each_article_of_a_multi_text_lesson_gets_its_own_fields():
             if len(present) < 2:
                 continue
             checked += 1
+            per_field[field] += 1
             if len({json.dumps(v, ensure_ascii=False, sort_keys=True)
                     for v in present.values()}) == 1:
                 bad.append(f"{uid} 的 `{field}`：{len(present)} 篇拿到**同一份**"
                            f"（{str(list(present.values())[0])[:50]}）")
     assert checked > 0, (
         "沒有任何一課的多篇 round 帶著這幾欄 —— 這條斷言等於沒在測"
+    )
+    # ⛔ 逐欄的命中數，不是總數。總數 > 0 只要有**任何一欄**被比到就成立，
+    #    於是「某一欄根本沒被 carry 出去」會靜默跳過（`present` 是空的就 continue），
+    #    而整條測試照樣綠。2026-09-25 實測：把 `underlined_terms` 從 carry 迴圈
+    #    拿掉，15 個測試全過 —— 沒有任何東西察覺那一欄在多篇課上消失了。
+    # 哪幾欄「應該」比得到 —— 從 yml 推導，不是手寫清單：某一課有 ≥2 篇
+    # 各自宣告了非空的值，那一欄就該在上面的迴圈被比到。
+    coverable = set()
+    for uid in {p.parts[-3] for p in LESSONS.glob("L*/v3/full_text_annotate*.yml")}:
+        for field in CONTENT_FIELDS:
+            vals = [v for v in _primary_article_values(uid, field) if v]
+            if len(vals) >= 2:
+                coverable.add(field)
+    assert coverable, "沒有任何一欄是多篇課涵蓋得到的 —— 這個推導壞了"
+
+    never_checked = sorted(f for f in coverable if per_field[f] == 0)
+    assert not never_checked, (
+        f"{never_checked} 有多篇課在 yml 裡各自宣告了值，卻在任何一課的多篇 round 上"
+        f"都沒被比對到 —— `_rounds_with_flat_paragraphs` 的 carry 迴圈漏了它。\n"
+        f"後果是第二篇拿不到自己那一份，而且完全沒有紅燈。\n"
+        f"（2026-09-25 實測：把 `underlined_terms` 從 carry 拿掉，15 個測試全過。）"
     )
     assert not bad, "多篇課拿到別篇的內容：\n  " + "\n  ".join(bad)

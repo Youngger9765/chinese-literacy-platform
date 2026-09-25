@@ -451,7 +451,8 @@ def _rounds_with_flat_paragraphs(l: dict) -> dict:
         fta = _unwrap(m.get("full_text_annotate"), "full_text_annotate")
         if isinstance(fta, dict):
             for _k in ("source_line", "inline_table", "inline_tables",
-                       "comparison_table", "summary_table"):
+                       "comparison_table", "summary_table",
+                       "underlined_terms"):
                 if fta.get(_k):
                     m[_k] = fta[_k]
 
@@ -1019,6 +1020,10 @@ def _uid_tree_lessons() -> list[dict]:
             "inline_tables": _body(l).get("inline_tables") or None,
             "comparison_table": _body(l).get("comparison_table") or None,
             "summary_table": _body(l).get("summary_table") or None,
+            # 教材在課文裡替專有名詞（人名／地名／國名／機構名）加底線，
+            # 60 課共 240 個不重複詞。抽出來放了很久但**零個消費端**（#3309）——
+            # 不知道「孟嘗君」是人名的孩子會把整句讀錯，而答案一直在檔案裡。
+            "underlined_terms": _body(l).get("underlined_terms") or None,
             # Served from the uid tree, so the image is addressed by the lesson's
             # identity rather than its catalogue position. Under the first edition
             # covers were keyed by code; the renumber pointed every one of them at a
