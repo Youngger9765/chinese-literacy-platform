@@ -1,5 +1,5 @@
 /* 文章重點表 QA 工具 — docx 原文 ↔ 實際渲染(真 StoryStructureTable)對照。file:// 可用。
-   右欄上:iframe {base}/learn/{story_id}/story-structure(真 StoryStructureTable,需同源已登入)
+   右欄上:iframe {base}/learn/{20000+uid}/story-structure(真 StoryStructureTable,需同源已登入)
    右欄下:逐 row 清單(每列 🚩 標記 / 標籤 / 備註),findings 綁 row_key。 */
 (function () {
   "use strict";
@@ -22,12 +22,73 @@
   function renderBase() {
     return IS_REMOTE ? location.origin : baseUrl.replace(/\/+$/, "");
   }
-  // worksheet PDF 來源:
-  //  - 遠端部署 → WS_HOST/assets(其 CSP 允許內嵌)
-  //  - file:// 或本機靜態伺服(worksheets/ 與工具同資料夾一起被服務)→ 相對路徑 local_pdf
+  // worksheet PDF 來源(#3192):
+  //  - 本機靜態伺服(worksheets/ 與工具同資料夾一起被服務)→ 相對路徑 local_pdf
+  //  - 遠端 → **沒有**。原本指向 `WS_HOST/assets/worksheets/<code>.pdf`,那個路徑下
+  //    一個檔都沒有(實測每一課都 404,負向對照:不存在的路徑同樣 404),所以「對照原稿」
+  //    這件事在遠端等於沒有對照。
+  //    ⛔ 不要把 179 份教師版學習單放上 `lingoleap-dev.web.app` —— 那是**無需登入**
+  //    的公開 hosting,等於公開發佈案主的教材。原稿住在私有 bucket,由
+  //    `GET /api/lessons/{uid}/worksheet/teacher` 驗證後提供(見下方 docx 下載)。
+  //    PDF 版本並不存在(registry 裡只有 .docx),所以遠端不做內嵌預覽。
   function worksheetPdfSrc(L) {
-    if (IS_REMOTE) return `${WS_HOST}/assets/worksheets/${L.lesson_code}.pdf#view=FitH`;
+    if (IS_REMOTE) return "";
     return L.local_pdf ? L.local_pdf + "#view=FitH" : "";
+  }
+
+  // ⛔ 不可以用 `story_id` 推 lesson_uid。看板資料是 2026-05-01 的凍結快照,它的
+  //    `story_id`(1001…)與 `lesson_code`(G4-L1…)用的是**當時的課程編號**;二修重抽
+  //    (#2683/#2736)之後服務端 id 變成 20001–20179,而且課號整個重排過
+  //    —— 看板的 G4-L2 是「十秒的背後」,現行目錄的 G4-L2 是「正太與小豬」。
+  //    對照表由 `scripts/build_keypoints_qa_uid_map.py` 依**標題**產生(15 課改名/
+  //    同名/下架的逐一列在該支的 OVERRIDES)。查不到 = 這一課已不在現行 179 課裡。
+  function catalogEntry(L) {
+    return (window.LESSON_CATALOG_BY_CODE || {})[L.lesson_code] || null;
+  }
+  function lessonUid(L) {
+    const e = catalogEntry(L);
+    return (e && e.uid) || "";
+  }
+  // 服務端課程 id = 20000 + uid 數字(backend/app/services/lesson_indexes.py)。
+  function liveStoryId(L) {
+    const uid = lessonUid(L);
+    return uid ? (window.LESSON_STORY_ID_BASE || 20000) + Number(uid.slice(1)) : null;
+  }
+
+  // 三態,不是兩態 ——「課文不在」跟「課文在但沒有重點表」是兩件事,
+  // 混成一種的話審查者會對著空白的右欄去找登入問題。
+  const ST_OK = "ok", ST_NO_KEYPOINTS = "no_keypoints", ST_GONE = "gone", ST_NO_MAP = "no_map";
+  function lessonState(L) {
+    if (!window.LESSON_CATALOG_BY_CODE) return ST_NO_MAP;   // 對照表沒載到
+    const e = catalogEntry(L);
+    if (!e || !e.uid) return ST_GONE;
+    return e.keypoints ? ST_OK : ST_NO_KEYPOINTS;
+  }
+  const STATE_TEXT = {
+    [ST_GONE]: "這一課不在現行 179 課目錄裡(已改名或下架),沒有可對照的線上渲染與原稿",
+    [ST_NO_KEYPOINTS]: "這一課現行沒有「文章重點表」這一節 —— 課文與學習單原稿都在,但右欄沒有可對照的表",
+    // ⛔ 對照表載不到時必須這樣講。少了這一態,看板會把 152 課全部宣告成「已下架」
+    //    —— 一個語氣肯定的假結論,比改之前那個看得出壞掉的 404 更糟。
+    [ST_NO_MAP]: "⛔ 課號對照表(lesson-uid-map.js)沒有載到,這一頁現在什麼都判斷不了 —— 不是課程有問題",
+  };
+
+  // 帶 Bearer token 下載教師版原稿。看板跟 app 同源,所以讀得到 app 存的 token。
+  // ⛔ 不用看板自己的 `x-qa-token`:那是共用密鑰,拿它換教材等於擴大存取範圍。
+  async function downloadTeacherDocx(L) {
+    const uid = lessonUid(L);
+    if (!uid) return alert(STATE_TEXT[lessonState(L)] || "這一課取不到 lesson_uid");
+    const token = localStorage.getItem("lingoleap_token");
+    if (!token) return alert("請先在同一個瀏覽器登入平台(教師或以上),再回來下載原稿");
+    const r = await fetch(`${apiBase()}/api/lessons/${uid}/worksheet/teacher`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!r.ok) return alert(`下載失敗 HTTP ${r.status}${r.status === 401 ? "(登入過期?)" : ""}`);
+    const blob = await r.blob();
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `${L.lesson_code || uid}.docx`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
   }
   // 後端 API base(比照 spotlight/testset):打對應環境後端存/載 QA JSON
   function apiBase() {
@@ -263,10 +324,20 @@
     $("lessonMeta").innerHTML =
       `${esc(L.title || "")}　<strong>${L.row_count}</strong> 列` +
       ` (可審 ${L.reviewable_count} · 空格 ${L.blank_count} · 勾選 ${L.checkbox_count})`;
-    $("blocksMeta").textContent = L.story_id
-      ? `${L.reviewable_count} 列可審`
-      : "⚠ 無 story_id,右欄無法渲染";
-    $("docxLink").href = `${WS_HOST}/assets/worksheets/${L.lesson_code}.docx`;
+    const st = lessonState(L);
+    $("blocksMeta").textContent =
+      st === ST_OK ? `${L.reviewable_count} 列可審` : `⚠ ${STATE_TEXT[st]}`;
+    // #3192: 舊的 href 指向公開 hosting 上不存在的檔(每一課都 404)。
+    // 改成打驗證過的端點,原稿仍留在私有 bucket。
+    $("docxLink").removeAttribute("href");
+    // 下架的課別留一顆按下去才知道沒用的鈕(#2845 的教訓:接上線但檔案 404 的鈕比沒有更糟)
+    const hasUid = !!lessonUid(L);
+    $("docxLink").style.cursor = hasUid ? "pointer" : "not-allowed";
+    $("docxLink").style.opacity = hasUid ? "" : "0.45";
+    $("docxLink").title = hasUid
+      ? "下載教師版原稿(需已登入教師帳號)"
+      : (STATE_TEXT[lessonState(L)] || "取不到 lesson_uid");
+    $("docxLink").onclick = (e) => { e.preventDefault(); downloadTeacherDocx(L); };
     $("openLearn").href = learnUrl();
     $("prevBtn").disabled = current === 0;
     $("nextBtn").disabled = current === LESSONS.length - 1;
@@ -276,7 +347,10 @@
 
   function learnUrl() {
     const L = lesson();
-    return L.story_id ? `${renderBase()}/learn/${L.story_id}/story-structure` : "about:blank";
+    // #3192: 這裡原本用 `L.story_id`(1001…),那組 id 在現行後端一律 404
+    //        —— 右欄每一課都顯示 "fetchStory failed: 404",整個看板沒有對照對象。
+    const sid = liveStoryId(L);
+    return sid ? `${renderBase()}/learn/${sid}/story-structure` : "about:blank";
   }
   function renderFrame() {
     const L = lesson();
@@ -284,11 +358,16 @@
     $("renderFrame").src = url;
     $("openFrame").href = url;
     const hint = $("frameHint");
-    if (!L.story_id) {
-      hint.classList.add("show");
-      hint.querySelector("div").textContent = `本課解析不到 story_id,無法渲染(${L.lesson_code})。`;
-    } else {
+    // #3192: 這裡原本看的是凍結快照的 `L.story_id`,跟左欄/網址用的判準不同 ——
+    //        12 課(快照裡 story_id 為 null)明明已經對到現行課,卻被一張白底蓋住說
+    //        「解析不到 story_id」;而真正下架的那幾課反而不蓋、留一格空白 iframe。
+    //        判準只能有一個,而且要跟 `learnUrl()` 用同一個。
+    const st = lessonState(L);
+    if (st === ST_OK) {
       hint.classList.remove("show");
+    } else {
+      hint.classList.add("show");
+      hint.querySelector("div").textContent = `${STATE_TEXT[st]}(${L.lesson_code})`;
     }
     $("hintBase").textContent = renderBase();
   }
@@ -858,7 +937,8 @@
           group: L.group,
           story_id: L.story_id,
           strategy_name: L.strategy_name,
-          learn_url: L.story_id ? `/learn/${L.story_id}/story-structure` : null,
+          lesson_uid: lessonUid(L) || null,
+          learn_url: liveStoryId(L) ? `/learn/${liveStoryId(L)}/story-structure` : null,
           source_docx: L.source_file,
           worksheet_docx_url: L.worksheet_docx_url,
           lesson_status: r.status,
