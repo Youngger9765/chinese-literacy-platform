@@ -14,7 +14,7 @@ import { stripPUASelectors, toRawUnits } from './annotationOffsets';
 import {
   underlinedFlagsByRawIndex,
   UNDERLINED_TERM_CLASS,
-} from '../zhuyin/underlinedTermsRenderer';
+} from './underlinedTermsRenderer';
 import {
   renderDifficultAwareText,
   difficultFlagsByRawIndex,

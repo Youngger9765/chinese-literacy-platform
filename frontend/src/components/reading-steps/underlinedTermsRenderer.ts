@@ -5,6 +5,9 @@
  * 60 課共 240 個不重複詞，抽出來很久了但一直沒有任何消費端 —— 不知道「孟嘗君」
  * 是人名的孩子會把整句讀錯，而答案一直在檔案裡。
  *
+ * ⚠️ 刻意**不**放在 `components/zhuyin/` —— 那個目錄由注音模組擁有（#3203 有一條
+ * 測試在管），而這支跟讀音一點關係都沒有，它只是借用了同一種「逐索引旗標」的形狀。
+ *
  * ## 為什麼是「逐索引旗標」而不是塞 `<u>` 進段落
  *
  * 課文頁是學生**拖曳標記**的介面，字元位移是承重的（`annotationOffsets.ts`
@@ -12,7 +15,7 @@
  * 讓側邊面板顯示錯位兩個字）。`FullTextAnnotate.tsx` 的註解也寫著插入的東西
  * 「must not inflate selection offsets」。
  *
- * 所以做法跟難字標記（#3022 的 `difficultSpanRenderer`）一樣：課文本來就是
+ * 所以做法跟難字標記（#3022 的 `zhuyin/difficultSpanRenderer`）一樣：課文本來就是
  * **逐字元 `<span data-ci={i}>`**，只要給落在詞範圍內的那些 span 多一個 class，
  * DOM 的文字內容一個字都沒動，位移天生不受影響。
  *
@@ -20,7 +23,7 @@
  * `data-ci` 時用的 `stripPUASelectors(rawText)` 同一個基準。用沒剝的字串算會
  * 整段右移，而且畫面上看起來只是「底線畫錯字」，不會有任何錯誤。
  */
-import { stripPUASelectors } from '../reading-steps/annotationOffsets';
+import { stripPUASelectors } from './annotationOffsets';
 
 /**
  * 哪些（剝過 PUA 的）字元索引落在專有名詞裡。
