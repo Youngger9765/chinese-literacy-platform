@@ -22,12 +22,43 @@
   function renderBase() {
     return IS_REMOTE ? location.origin : baseUrl.replace(/\/+$/, "");
   }
-  // worksheet PDF 來源:
-  //  - 遠端部署 → WS_HOST/assets(其 CSP 允許內嵌)
-  //  - file:// 或本機靜態伺服(worksheets/ 與工具同資料夾一起被服務)→ 相對路徑 local_pdf
+  // worksheet PDF 來源(#3192):
+  //  - 本機靜態伺服(worksheets/ 與工具同資料夾一起被服務)→ 相對路徑 local_pdf
+  //  - 遠端 → **沒有**。原本指向 `WS_HOST/assets/worksheets/<code>.pdf`,那個路徑下
+  //    一個檔都沒有(實測每一課都 404,負向對照:不存在的路徑同樣 404),所以「對照原稿」
+  //    這件事在遠端等於沒有對照。
+  //    ⛔ 不要把 179 份教師版學習單放上 `lingoleap-dev.web.app` —— 那是**無需登入**
+  //    的公開 hosting,等於公開發佈案主的教材。原稿住在私有 bucket,由
+  //    `GET /api/lessons/{uid}/worksheet/teacher` 驗證後提供(見下方 docx 下載)。
+  //    PDF 版本並不存在(registry 裡只有 .docx),所以遠端不做內嵌預覽。
   function worksheetPdfSrc(L) {
-    if (IS_REMOTE) return `${WS_HOST}/assets/worksheets/${L.lesson_code}.pdf#view=FitH`;
+    if (IS_REMOTE) return "";
     return L.local_pdf ? L.local_pdf + "#view=FitH" : "";
+  }
+
+  // story_id ↔ lesson_uid 是固定偏移(20001 ↔ L0001),不需要另一份對照表。
+  function lessonUid(L) {
+    const n = Number(L.story_id);
+    return Number.isFinite(n) && n > 20000 ? "L" + String(n - 20000).padStart(4, "0") : "";
+  }
+
+  // 帶 Bearer token 下載教師版原稿。看板跟 app 同源,所以讀得到 app 存的 token。
+  // ⛔ 不用看板自己的 `x-qa-token`:那是共用密鑰,拿它換教材等於擴大存取範圍。
+  async function downloadTeacherDocx(L) {
+    const uid = lessonUid(L);
+    if (!uid) return alert("這一課沒有 story_id,推不出 lesson_uid");
+    const token = localStorage.getItem("lingoleap_token");
+    if (!token) return alert("請先在同一個瀏覽器登入平台(教師或以上),再回來下載原稿");
+    const r = await fetch(`${apiBase()}/api/lessons/${uid}/worksheet/teacher`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!r.ok) return alert(`下載失敗 HTTP ${r.status}${r.status === 401 ? "(登入過期?)" : ""}`);
+    const blob = await r.blob();
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `${L.lesson_code || uid}.docx`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
   }
   // 後端 API base(比照 spotlight/testset):打對應環境後端存/載 QA JSON
   function apiBase() {
@@ -266,7 +297,11 @@
     $("blocksMeta").textContent = L.story_id
       ? `${L.reviewable_count} 列可審`
       : "⚠ 無 story_id,右欄無法渲染";
-    $("docxLink").href = `${WS_HOST}/assets/worksheets/${L.lesson_code}.docx`;
+    // #3192: 舊的 href 指向公開 hosting 上不存在的檔(每一課都 404)。
+    // 改成打驗證過的端點,原稿仍留在私有 bucket。
+    $("docxLink").removeAttribute("href");
+    $("docxLink").style.cursor = "pointer";
+    $("docxLink").onclick = (e) => { e.preventDefault(); downloadTeacherDocx(L); };
     $("openLearn").href = learnUrl();
     $("prevBtn").disabled = current === 0;
     $("nextBtn").disabled = current === LESSONS.length - 1;
