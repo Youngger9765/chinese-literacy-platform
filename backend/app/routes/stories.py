@@ -617,6 +617,7 @@ def get_story(story_id: str):
         inline_tables=story.get("inline_tables"),
         comparison_table=story.get("comparison_table"),
         summary_table=story.get("summary_table"),
+        underlined_terms=story.get("underlined_terms"),
         thumbnail_url=story["thumbnail_url"],
         reading_strategy=story["reading_strategy"],
         reading_strategy_explained=story.get("reading_strategy_explained"),

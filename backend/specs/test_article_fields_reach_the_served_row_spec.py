@@ -232,3 +232,44 @@ def test_each_article_of_a_multi_text_lesson_gets_its_own_fields():
         f"（2026-09-25 實測：把 `underlined_terms` 從 carry 拿掉，15 個測試全過。）"
     )
     assert not bad, "多篇課拿到別篇的內容：\n  " + "\n  ".join(bad)
+
+@pytest.mark.parametrize("field", CONTENT_FIELDS)
+def test_the_field_survives_the_api_not_just_the_row(field):
+    """⭐ 驗 API 回應，不是只驗 `build_all_lessons()` 的那一列。
+
+    ⛔ 2026-09-25 實測：`underlined_terms` 在 row 上有值、前端也讀它，但
+    `/api/stories/{id}` 回來沒有這一欄 —— `routes/stories.py` 是**逐欄寫死**的
+    投影，沒宣告在那裡的欄位會被靜默丟掉，而上面那些只看 row 的斷言全是綠的。
+
+    這就是這張票（#3309）本身的病：抽出來了、送到列上了、學生還是看不到。
+    要驗就驗**消費端真正讀到的那一層**。
+    """
+    from fastapi.testclient import TestClient
+    from app.main import app
+
+    uids = _lessons_declaring(field)
+    assert uids, f"沒有任何一課宣告 `{field}`"
+
+    client = TestClient(app)
+    checked, missing = 0, []
+    for uid in uids:
+        lesson_id = 20000 + int(uid[1:])
+        r = client.get(f"/api/stories/{lesson_id}")
+        if r.status_code != 200:
+            continue
+        body = r.json()
+        # row 上沒有就不是 API 的問題（多篇課主篇為空，見上面那條）
+        rows = {l["id"]: l for l in build_all_lessons()}
+        if not (rows.get(lesson_id) or {}).get(field):
+            continue
+        checked += 1
+        if field not in body or body.get(field) is None:
+            missing.append(uid)
+        if checked >= 5:      # 抽 5 課就夠 —— 投影是全域的，不是逐課的
+            break
+
+    assert checked > 0, f"`{field}` 沒有任何一課同時在 row 上有值且 API 回得了 200"
+    assert not missing, (
+        f"`{field}` 在服務端那一列上有值，但 `/api/stories/{{id}}` 沒回它：{missing}\n"
+        f"→ 到 `routes/stories.py` 的逐欄投影與 `schemas/story.py` 各加一行。"
+    )
