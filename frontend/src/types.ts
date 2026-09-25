@@ -352,6 +352,9 @@ export interface Story {
   reading_strategy_type?: string;
   /** Lesson code (e.g. 'G7-L28'), used for image URL construction (#1341). */
   lesson_code?: string;
+  /** 課文裡加底線的專有名詞（人名／地名／國名／機構名）—— #3309。
+   *  60 課共 240 個不重複詞，教材自己標的，不是我們猜的詞界。 */
+  underlined_terms?: string[] | null;
   /** Images for graphic-text layout (#1341). */
   images?: {
     filename: string;
