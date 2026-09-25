@@ -108,7 +108,7 @@ jobs:
             --region ${{ env.REGION }} \
             --project ${{ env.PROJECT_ID }} \
             --allow-unauthenticated \
-            --memory=512Mi \
+            --memory=1Gi \
             --cpu=1 \
             --min-instances=0 \
             --max-instances=1 \
@@ -173,6 +173,27 @@ jobs:
             --max-instances=1 \
             --timeout=300s
 
+      # 部署失敗時 gcloud 只說「container failed to start and listen on PORT」——
+      # 真正的原因在容器自己的 log 裡，而那要有 gcloud 憑證才讀得到。
+      # 2026-09-25 為了查出 `ModuleNotFoundError: No module named 'psycopg'`
+      # 花了三十分鐘加一次重新登入，而那行字一直就在 Cloud Run 的 log 裡。
+      # 把它印進 CI 輸出，下次看 workflow 就知道。
+      - name: 部署失敗時把容器 log 倒出來
+        if: failure()
+        continue-on-error: true
+        run: |
+          echo "## ⛔ preview 後端起不來 —— 容器 log" >> "$GITHUB_STEP_SUMMARY"
+          LOGS=$(gcloud logging read \
+            "resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"${{ env.BACKEND_SERVICE }}\"" \
+            --project "${{ env.PROJECT_ID }}" --freshness=15m --limit=30 \
+            --format='value(severity,textPayload)' 2>&1 || echo "（讀不到 log）")
+          echo "$LOGS"
+          {
+            echo '```'
+            echo "$LOGS" | head -60
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Get preview URLs
         id: preview-urls
         run: |
@@ -184,8 +205,17 @@ jobs:
             --region ${{ env.REGION }} \
             --project ${{ env.PROJECT_ID }} \
             --format='value(status.url)' 2>/dev/null || echo "N/A")
+          # ⚠️ 空字串要正規化成 N/A，否則下游守衛白寫。
+          # `$(gcloud ... || echo "N/A")` 只在 gcloud **非零退出**時才回 N/A；
+          # 服務存在但 status.url 還沒填時 gcloud 是 exit 0 + 印空字串，
+          # 於是 `!= 'N/A'` 為真、E2E 照跑，拿到空 URL 後 JS 的 || 會靜默
+          # 回退去打 staging —— 那是「preview 綠了但驗的是別的環境」。
+          # 2026-09-25 PR #3316 真的撞到：backend 部署成功、URL 卻是空的。
+          [ -z "$FRONTEND_URL" ] && FRONTEND_URL="N/A"
+          [ -z "$BACKEND_URL" ] && BACKEND_URL="N/A"
           echo "frontend_url=${FRONTEND_URL}" >> "$GITHUB_OUTPUT"
           echo "backend_url=${BACKEND_URL}" >> "$GITHUB_OUTPUT"
+          echo "preview URLs → frontend=${FRONTEND_URL} backend=${BACKEND_URL}"
 
       - name: Update backend CORS + refresh DATABASE_URL from GH secret
         # Skip when backend preview service doesn't exist (frontend-only PR after
@@ -193,7 +223,7 @@ jobs:
         # DATABASE_URL is re-injected on every run so GH secret rotations propagate
         # to long-lived preview services without needing manual service rebuild
         # (Fixes #1396).
-        if: always() && steps.preview-urls.outputs.frontend_url != 'N/A' && steps.preview-urls.outputs.backend_url != 'N/A'
+        if: always() && steps.preview-urls.outputs.frontend_url != 'N/A' && steps.preview-urls.outputs.frontend_url != '' && steps.preview-urls.outputs.backend_url != 'N/A' && steps.preview-urls.outputs.backend_url != ''
         env:
           FRONTEND_URL: ${{ steps.preview-urls.outputs.frontend_url }}
           DATABASE_URL_SECRET: ${{ secrets.PREVIEW_DATABASE_URL }}
@@ -227,7 +257,7 @@ jobs:
           fi
 
       - name: Warm backend to avoid cold-start CORS errors
-        if: always() && steps.preview-urls.outputs.backend_url != 'N/A'
+        if: always() && steps.preview-urls.outputs.backend_url != 'N/A' && steps.preview-urls.outputs.backend_url != ''
         env:
           BACKEND_URL: ${{ steps.preview-urls.outputs.backend_url }}
           FRONTEND_URL: ${{ steps.preview-urls.outputs.frontend_url }}
@@ -271,7 +301,7 @@ jobs:
       # PR 只跑一課（五課走完整條路太慢，慢到會讓人想關掉這道門），
       # staging 維持五課全跑 —— 兩個環境跑不同的量，不是抽樣代替全檢。
       - name: 學生走得完嗎（multi-text journey on preview）
-        if: always() && steps.preview-urls.outputs.frontend_url != 'N/A' && steps.preview-urls.outputs.backend_url != 'N/A'
+        if: always() && steps.preview-urls.outputs.frontend_url != 'N/A' && steps.preview-urls.outputs.frontend_url != '' && steps.preview-urls.outputs.backend_url != 'N/A' && steps.preview-urls.outputs.backend_url != ''
         working-directory: frontend
         env:
           PLAYWRIGHT_BASE_URL: ${{ steps.preview-urls.outputs.frontend_url }}
