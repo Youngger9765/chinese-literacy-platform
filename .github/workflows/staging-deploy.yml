@@ -140,7 +140,7 @@ jobs:
           # Use stable Cloud Run service URL (not gcloud describe which returns
           # new-format URLs like oja2sffiya-de.a.run.app that break CORS)
           URL="https://lingoleap-backend-staging-958347263320.asia-east1.run.app"
-          echo "url=${URL}" >> $GITHUB_OUTPUT
+          echo "url=${URL}" >> "$GITHUB_OUTPUT"
           echo "Staging frontend will use backend: ${URL}"
 
       - name: Build & push frontend image
@@ -215,13 +215,15 @@ jobs:
             --region ${{ env.REGION }} \
             --project ${{ env.PROJECT_ID }} \
             --format='value(status.url)' 2>/dev/null || echo "N/A")
-          echo "## Staging Deployment Complete" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Frontend (Cloud Run):** ${FRONTEND_URL}" >> $GITHUB_STEP_SUMMARY
-          echo "**Frontend (Firebase staging):** https://lingoleap-staging.web.app" >> $GITHUB_STEP_SUMMARY
-          echo "**Frontend (Firebase dev):** https://lingoleap-dev.web.app" >> $GITHUB_STEP_SUMMARY
-          echo "**Backend:** ${BACKEND_URL}" >> $GITHUB_STEP_SUMMARY
-          echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "## Staging Deployment Complete"
+            echo ""
+            echo "**Frontend (Cloud Run):** ${FRONTEND_URL}"
+            echo "**Frontend (Firebase staging):** https://lingoleap-staging.web.app"
+            echo "**Frontend (Firebase dev):** https://lingoleap-dev.web.app"
+            echo "**Backend:** ${BACKEND_URL}"
+            echo "**Commit:** \`${{ github.sha }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
 
   deploy-frontend-firebase:
     name: Deploy frontend to Firebase Hosting (staging + dev)
@@ -336,16 +338,18 @@ jobs:
       - name: Smoke test summary
         if: always()
         run: |
-          echo "## Smoke Test Results" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Target**: ${STAGING_BACKEND}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Endpoint | Acceptable Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|----------|------------------|" >> $GITHUB_STEP_SUMMARY
-          echo "| GET /health | 200 only |" >> $GITHUB_STEP_SUMMARY
-          echo "| GET /api/teacher/story-tags | 200 or 401 (not 500) |" >> $GITHUB_STEP_SUMMARY
-          echo "| GET /api/schools | 200 or 401 (not 500) |" >> $GITHUB_STEP_SUMMARY
-          echo "| GET /api/organizations | 200 or 401 (not 500) |" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "## Smoke Test Results"
+            echo ""
+            echo "**Target**: ${STAGING_BACKEND}"
+            echo ""
+            echo "| Endpoint | Acceptable Status |"
+            echo "|----------|------------------|"
+            echo "| GET /health | 200 only |"
+            echo "| GET /api/teacher/story-tags | 200 or 401 (not 500) |"
+            echo "| GET /api/schools | 200 or 401 (not 500) |"
+            echo "| GET /api/organizations | 200 or 401 (not 500) |"
+          } >> "$GITHUB_STEP_SUMMARY"
 
   cleanup-images:
     name: Cleanup old AR images
@@ -366,7 +370,7 @@ jobs:
           KEEP=5
           DEADLINE=$(( $(date +%s) + 540 ))  # 9 min hard stop
           for PACKAGE in backend frontend; do
-            if [ $(date +%s) -ge $DEADLINE ]; then
+            if [ "$(date +%s)" -ge "$DEADLINE" ]; then
               echo "Deadline reached before ${PACKAGE}; leaving rest to GCP async policy"
               break
             fi
@@ -388,7 +392,7 @@ jobs:
 
             echo "$DIGESTS" | tail -n +$((KEEP + 1)) | while read -r DIGEST; do
               [ -z "$DIGEST" ] && continue
-              if [ $(date +%s) -ge $DEADLINE ]; then
+              if [ "$(date +%s)" -ge "$DEADLINE" ]; then
                 echo "Deadline reached; $(date +%s) >= $DEADLINE. Stopping."
                 break
               fi
