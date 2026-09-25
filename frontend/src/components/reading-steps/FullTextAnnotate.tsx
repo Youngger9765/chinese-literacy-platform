@@ -1203,6 +1203,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
                       annotationElementRefs={annotationElementRefs}
                       onRemoveAnnotation={removeAnnotation}
                       markMode={markMode !== null}
+                      underlinedTerms={story.underlinedTerms}
                     />
                   </section>
                   {inlineImgIdx !== undefined && story.images?.[inlineImgIdx] && (

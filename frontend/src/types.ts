@@ -313,6 +313,9 @@ export interface Story {
   inlineTables?: unknown[];
   comparisonTable?: Record<string, unknown>;
   summaryTable?: Record<string, unknown>;
+  /** 課文裡加底線的專有名詞（#3309）。api.ts 的映射器把 snake_case 轉過來，
+   *  ⛔ 直接讀 `underlined_terms` 永遠是 undefined —— 那一層會逐欄丟掉沒宣告的欄位。 */
+  underlinedTerms?: string[];
   readingBenchmark?: { levels: { threshold: string; feedback: string }[] };
   /** 重點朗讀指定段 (#2559)：學生只朗讀老師 ☞ 標的重點段。缺→唸全文 fallback。 */
   keyReading?: { passage: string; startText?: string; extentChars?: number; source?: string };

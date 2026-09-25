@@ -12,6 +12,10 @@ import { Annotation } from './annotationReducer';
 import { TYPE_CONFIG, EDITOR_PREMARK_STYLE } from './AnnotationToolbar';
 import { stripPUASelectors, toRawUnits } from './annotationOffsets';
 import {
+  underlinedFlagsByRawIndex,
+  UNDERLINED_TERM_CLASS,
+} from './underlinedTermsRenderer';
+import {
   renderDifficultAwareText,
   difficultFlagsByRawIndex,
   renderDifficultFlaggedUnits,
@@ -38,6 +42,14 @@ interface AnnotatedParagraphProps {
    *    繞開而不硬解 —— 那段還背著 PR #1155 的回歸紀錄。
    */
   markMode?: boolean;
+  /**
+   * 教材在課文裡替專有名詞（人名／地名／國名／機構名）加的底線（#3309）。
+   *
+   * ⛔ 不是插 `<u>` —— 課文是拖曳標記的介面，字元位移承重（#2165 錯位事故）。
+   *    這裡只給落在詞範圍內的既有 `<span data-ci>` 多一個 class，DOM 的文字
+   *    一個字都沒動。
+   */
+  underlinedTerms?: string[] | null;
 }
 
 const AnnotatedParagraph: React.FC<AnnotatedParagraphProps> = ({
@@ -51,6 +63,7 @@ const AnnotatedParagraph: React.FC<AnnotatedParagraphProps> = ({
   annotationElementRefs,
   onRemoveAnnotation,
   markMode = false,
+  underlinedTerms,
 }) => {
   /**
    * #3134 標記模式的渲染：純文字、逐字一個 span。
@@ -67,18 +80,25 @@ const AnnotatedParagraph: React.FC<AnnotatedParagraphProps> = ({
     const typeAt = (i: number) =>
       paraAnnotations.find((a) => i >= a.charStart && i < a.charEnd);
 
+    // 專有名詞底線（#3309）。索引基準跟 data-ci 一樣是剝過 PUA 的 `text`。
+    const underlined = underlinedFlagsByRawIndex(text, underlinedTerms);
+
     return [...text].map((ch, i) => {
       const ann = typeAt(i);
       const cfg = ann
         ? (ann.source === 'editor' ? EDITOR_PREMARK_STYLE : TYPE_CONFIG[ann.type])
         : null;
+      // 學生的記號用背景色、專有名詞只有底線 —— 同時出現時不會互相蓋掉。
+      const cls = [cfg?.className, underlined[i] ? UNDERLINED_TERM_CLASS : null]
+        .filter(Boolean).join(' ') || undefined;
       return (
         <span
           key={i}
           data-ci={i}
           data-annotated={ann ? ann.type : undefined}
           data-annotation-source={ann ? (ann.source ?? 'student') : undefined}
-          className={cfg ? cfg.className : undefined}
+          data-underlined-term={underlined[i] ? 'true' : undefined}
+          className={cls}
         >
           {ch}
         </span>
