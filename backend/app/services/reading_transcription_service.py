@@ -32,6 +32,8 @@ Limits enforced by route (not repeated here):
 
 from __future__ import annotations
 
+import re as _re_mod
+
 import asyncio
 import io
 import logging
@@ -126,6 +128,48 @@ def _strip_cjk_punctuation(text: str) -> str:
     """
     import re
     return re.sub(r'[\s　、-〿＀-￯‘-‟。，！？；：、─—…「」『』（）]', '', text)
+
+
+_GATE_BOPOMOFO = "\u3100-\u312f\u31a0-\u31bf\u02ca\u02c7\u02cb\u02d9"
+_GATE_PAREN = _re_mod.compile(r"[（(\[【《][^）)\]】》]*[）)\]】》]")
+_GATE_DROP = _re_mod.compile(
+    r"[" + _GATE_BOPOMOFO + r"\s「」『』，。！？：；、．…—－\-（）()\[\]{}【】《》""''"
+    r",.!?;:'\"~～·‧・°○#%/\\|*\uf410"
+    r"0-9０-９"
+    # dash 家族要列全 —— 前端 stripDecorativeSymbols 的 [──—–−] 含製表線 U+2500，
+    # 我第一版只寫了 —－- 三種，漏掉 ─ ／ – ／ − ，59 段裡有 5 段因此多算
+    r"\u2500\u2013\u2212\u2014\uff0d]"
+)
+
+
+def gate_char_count(text: str) -> int:
+    """時長門檻專用的字數 —— 必須是前端計分字數的**下界**（#3299）。
+
+    ⚠️ 不要改用 `scorable_char_count`。那支的 docstring 自己就說它不是 parity，
+    而它漏剝的東西（ASCII `.`、注音、括號內文）前端 `normalizeForComparison`
+    全部會剝 —— 於是 backend **多算**，門檻**變嚴**，砍到真的在唸的孩子：
+
+        '晉平公.問於祁黃羊曰.'   backend 11 / frontend  9
+        '日暈ㄩㄣˋ三更雨'        backend  8 / frontend  5
+        '（如慢跑、游泳）'        backend  5 / frontend  0
+
+    文言文最毒：斷詞用的 `.` 是**印在課文裡、明講不要唸出來**的記號
+    （L0163 的 instruction 就寫著「文章中的『.』是表示斷詞的地方」），
+    L0154 在 256 字裡有 48 個 —— 每一個都讓門檻多要求 100ms。
+
+    ⛔ 也不要改 `_strip_cjk_punctuation`：幻覺偵測還在用它，動它會連帶改掉那個。
+
+    設計原則：**寧可少算**。剝的是前端的超集（連括號內文一起丟），所以
+    `gate_char_count(t) <= countScorableCharacters(t)` 對每一段服務中的課文都成立
+    —— 由 `test_duration_gate_scales_with_passage_3299.py` 對全部真實課文逐一驗。
+    少算 → 門檻變寬 → 誤砍風險往下；多算才是危險的那一邊。
+
+    ⚠️ 阿拉伯數字**不剝**：前端會把它們轉成中文（2026 → 二千零二十六），
+    那只會讓前端字數**變多**，所以原樣保留仍然是下界。
+    """
+    # ⚠️ 順序：先剝「括號整段」再剝標點。反過來的話標點會先把括號本身刪掉，
+    #    括號規則就永遠對不到（我第一版就是這樣，「（如慢跑、游泳）」還是回 5）。
+    return len(_GATE_DROP.sub("", _GATE_PAREN.sub("", text or "")))
 
 
 def scorable_char_count(text: str) -> int:
