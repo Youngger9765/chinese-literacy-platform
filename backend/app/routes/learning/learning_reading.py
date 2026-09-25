@@ -23,6 +23,7 @@ from ...services.he_conjunction import _he_conjunction_positions
 from ...services.zhuyin_readings import font_zhuyin_table
 from ...services.lesson_zhuyin import zhuyin_for_text
 from ...services.reading_transcription_service import (
+    gate_char_count,
     ALLOWED_AUDIO_MIMES,
     scorable_char_count,
     transcribe_reading_audio,
@@ -566,7 +567,62 @@ _MAX_TARGET_CHARS = 3000               # ≈ longest G9 lesson
 # safety net for clients that bypass the frontend (or have no AnalyserNode).
 # 1 000 ms chosen conservatively: real speech takes ≥ 200 ms per syllable even
 # at fast pace; anything under 1 s almost certainly contains no useful audio.
-_MIN_AUDIO_DURATION_MS = 1000          # 1 second
+_MIN_AUDIO_DURATION_MS = 1000          # 1 second — absolute floor, any passage
+
+# Issue #3299 — the flat floor above is the wrong shape for the real failure.
+#
+# 平門檻問的是「這段錄音有沒有長到像人聲」，但真正的失敗形狀是
+# **「130 字的段落只錄到 2 秒」** —— 那筆錄音遠超過 1 秒，所以平門檻永遠放行，
+# 學生等 10–20 秒才拿到「請重錄一次」。門檻要跟著段落長度走：
+#
+#     min_ms = target_chars / MAX_PLAUSIBLE_CPM × 60000
+#
+# ⚠️ **一條夠高的平門檻其實也安全** —— 這點要講清楚，不要用假理由說服下一個人。
+#    我原本寫「最短的重點段只有 17 個可計分字，所以平門檻不能調高」，那個 17 來自
+#    `backend/data/key_reading_passages.yml`，而**那個檔不是服務來源**
+#    （`/api/stories` 走 `build_all_lessons()` → `data/lessons/<uid>/v3/`）。
+#    服務中的 154 個重點段最短是 **248 字**，全部 329 段 target 最短 **83 字**
+#    （文言文全文）—— 一條 8 秒的平門檻對每一課都不會誤砍。
+#
+#    比例式仍然是更好的形狀，理由是**它跟著題目變**：同一條平門檻對 83 字的段落
+#    太嚴、對 566 字的段落形同虛設；比例式讓「錄到不足以唸完」這件事在每一課都有
+#    一樣的意義。但這是設計取捨，不是「平門檻辦不到」。
+#
+# `MAX_PLAUSIBLE_CPM` = 600 的依據（2026-09-25 對 staging 人聲語料實測）：
+#   `gs://lingoleap-reading-audio-staging/test-dataset/` 338 筆真人朗讀（時長逐筆
+#   量在 `specs/fixtures/reading_corpus_durations.csv`，量法見該檔說明）。
+#
+#   ⚠️ 兩次獨立計算的**最快值不一致**，這裡採保守的那個：
+#       我的子集（190 筆對得到課號的）    最快 463 · 中位 258 · 最慢 152
+#       複審的全語料重算（172 筆 correct）最快 346 · 中位 262 · 最慢 151
+#     中位與最慢幾乎重合（同一批資料、同一種 join），最快值差在樣本切法，
+#     而我的切法重算不出來。**取較高的 463 當「實測最快」** —— 對「還有多少餘裕」
+#     這個問題，高估最快值是保守的那一邊。
+#   → 600 相對 463 有 **1.30 倍**餘裕（相對 346 是 1.73 倍）。
+#   → 偏誤在安全的一側：語料的貢獻者是成人與高中生，目標使用者是國小高年級。
+#
+# ⚠️ 名目餘裕不等於出貨餘裕：真正的上限是 `600 × (前端字數 / gate 字數)`。
+#    所以 `gate_char_count` 必須是前端計分字數的**下界** —— 由
+#    `specs/fixtures/gate_char_count.csv`（329 段全覆蓋，0 段超出）鎖住。
+#
+# ⚠️ 這條門檻只擋「快到不可能」，不負責判斷唸得對不對 —— 那是計分器的事。
+_MAX_PLAUSIBLE_CPM = 600
+
+
+def _min_duration_ms_for(target_chars: int) -> int:
+    """這段課文至少要唸多久才可能是真的唸完（毫秒）。
+
+    低於這個時間 = 隱含的朗讀速度超過 `_MAX_PLAUSIBLE_CPM`，也就是人辦不到。
+    `target_chars` 為 0 或負（拿不到課文）時自然退回平門檻 —— 底下的 `max()`
+    已經涵蓋，不需要額外的 early return。⚠️ 原本有一個 `if target_chars <= 0`
+    的分支，複審實測刪掉它**整套測試照樣全綠**，因為 `max(1000, 負數)` 本來就是
+    1000 —— 那個分支是死的，而守著它的測試是空斷言。與其留一個假的保護，
+    不如把「為什麼不需要」寫在這裡。
+    """
+    return max(
+        _MIN_AUDIO_DURATION_MS,
+        int(target_chars / _MAX_PLAUSIBLE_CPM * 60_000),
+    )
 
 
 class TranscribeReadingResponse(BaseModel):
@@ -682,25 +738,6 @@ async def transcribe_reading_endpoint(
     # protects against clients that supply duration_ms but bypass the frontend check.
     # Only applied when duration_ms is explicitly provided and below the threshold —
     # absent duration_ms means the client did not send it, not that the audio is short.
-    if duration_ms is not None and duration_ms < _MIN_AUDIO_DURATION_MS:
-        logger.warning(
-            "Reading transcribe skipped — audio too short: user=%d duration_ms=%d",
-            current_user.id,
-            duration_ms,
-            extra={
-                "event": "reading_transcribe_fallback",
-                "reason": "too_short",
-                "user_id": current_user.id,
-                "duration_ms": duration_ms,
-                "target_chars": scorable_char_count(target_text),
-            },
-        )
-        return TranscribeReadingResponse(
-            transcript=None,
-            method="fallback",
-            reason="too_short",
-        )
-
     # ── 3. Cap target_text ───────────────────────────────────────────────────
     if len(target_text) > _MAX_TARGET_CHARS:
         raise HTTPException(
@@ -709,6 +746,36 @@ async def transcribe_reading_endpoint(
         )
     if not target_text.strip():
         raise HTTPException(status_code=400, detail="target_text must not be empty.")
+
+
+    # ── 2.5 → 移到這裡（#3299 複審 M3）：門檻原本排在 `_MAX_TARGET_CHARS`
+    #    檢查**之前**，於是 5000 字的 target_text 會回「錄音太短」而不是 413，
+    #    前端把 too_short 對到「請把整段唸完」—— client 的 bug 變成叫孩子多唸。
+    _target_chars = gate_char_count(target_text)
+    _min_ms = _min_duration_ms_for(_target_chars)
+    if duration_ms is not None and duration_ms < _min_ms:
+        logger.warning(
+            "Reading transcribe skipped — audio too short for the passage: "
+            "user=%d duration_ms=%d target_chars=%d min_ms=%d",
+            current_user.id,
+            duration_ms,
+            _target_chars,
+            _min_ms,
+            extra={
+                "event": "reading_transcribe_fallback",
+                "reason": "too_short",
+                "user_id": current_user.id,
+                "duration_ms": duration_ms,
+                "target_chars": _target_chars,
+                # 記下當下用的門檻,否則事後看 log 分不出「門檻變了」還是「錄音變了」
+                "min_duration_ms": _min_ms,
+            },
+        )
+        return TranscribeReadingResponse(
+            transcript=None,
+            method="fallback",
+            reason="too_short",
+        )
 
     logger.info(
         "Reading transcribe request: user=%d audio_bytes=%d duration_ms=%s",
