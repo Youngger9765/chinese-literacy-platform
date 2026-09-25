@@ -220,7 +220,25 @@ def test_the_drift_gate_really_runs_in_that_workflow():
 #: ⚠️ 為什麼要一條測試而不只是註解：這是 workflow 裡的一個數字，
 #: 「為了省錢調回去」是很自然的一個編輯，而它的後果（OOM → 拒絕服務）
 #: 要等到下一次尖峰才會出現，而且 log 裡長得像基礎設施問題不像我們改壞的。
-_BACKEND_MEMORY_WORKFLOWS = ("deploy.yml", "staging-deploy.yml")
+#: ⚠️ 從磁碟探索，不要寫死檔名。原本這裡是 ("deploy.yml", "staging-deploy.yml")
+#: —— preview-deploy.yml 不在清單裡，所以 #3266 調 1Gi 時漏掉它，而這條鎖
+#: 綠著什麼都沒說。2026-09-25 preview 服務被 cleanup 刪光後必須全新建立，
+#: 冷啟動跑 migration + 載注音表就在 512Mi 下 OOM，所有 PR 的 preview 全紅（#3320）。
+#: 寫死清單的鎖只保護清單裡的東西；新環境加進來時沒有人會想到來改它。
+def _backend_memory_workflows() -> tuple[str, ...]:
+    found = tuple(sorted(
+        p.name for p in WF.glob("*.yml")
+        if "gcloud run deploy" in p.read_text(encoding="utf-8")
+        and "BACKEND_SERVICE" in p.read_text(encoding="utf-8")
+    ))
+    assert len(found) >= 3, (
+        f"只找到 {found} —— 應該至少有 prod/staging/preview 三個部署 backend 的 "
+        f"workflow。探索壞了的話這條鎖會對空集合斷言"
+    )
+    return found
+
+
+_BACKEND_MEMORY_WORKFLOWS = _backend_memory_workflows()
 
 
 @pytest.mark.parametrize("name", _BACKEND_MEMORY_WORKFLOWS)
