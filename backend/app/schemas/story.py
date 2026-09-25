@@ -80,6 +80,8 @@ class StoryDetail(StoryListItem):
     inline_tables: Optional[list] = None
     comparison_table: Optional[dict] = None
     summary_table: Optional[dict] = None
+    #: 課文裡加底線的專有名詞（#3309）。前端把落在詞裡的字元加底線。
+    underlined_terms: Optional[list] = None
     vocabulary: Optional[list[VocabItemSchema]] = None
     fill_in_blank: Optional[list[dict]] = None
     multiple_choice: Optional[list[dict]] = None

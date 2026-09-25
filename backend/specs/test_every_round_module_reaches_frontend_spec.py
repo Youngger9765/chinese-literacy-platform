@@ -47,6 +47,10 @@ NOT_WIRED_YET = {"spotlight"}
 DERIVED = set(MODULE_TO_FIELD.values()) | {"vocab_bank"} | {
     "source_line", "inline_table", "inline_tables",
     "comparison_table", "summary_table",
+    # 教材標的專有名詞底線（#3309）。跟上面那五欄同一族：住在
+    # `full_text_annotate` 底下、前端讀同名欄位、逐篇覆蓋時以欄位名塞進 round。
+    # 前端消費端是 `AnnotatedParagraph` 的 `underlinedTerms`。
+    "underlined_terms",
 }
 
 
