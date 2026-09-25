@@ -3,7 +3,13 @@ uvicorn[standard]>=0.30
 pydantic>=2.0
 email-validator>=2.0
 pydantic-settings>=2.0
-sqlalchemy>=2.0
+# ⛔ 上限是必要的，不是保守。SQLAlchemy 2.1.0（2026-09-24 20:36 發佈）把
+# `postgresql` scheme 的預設 DBAPI 從 psycopg2 換成 psycopg(v3)，而這個 image
+# 只裝 psycopg2-binary → 容器啟動時 alembic 就 `ModuleNotFoundError: No
+# module named 'psycopg'` 然後 exit(1)。2026-09-25 所有新建的 preview 後端
+# 全數起不來就是這個（#3320）；prod/staging 只是還沒重建 image 而已。
+# 要升 2.1 就得一起換 psycopg3 並驗過 —— 那是獨立的一件事，不是隨 build 漂移。
+sqlalchemy>=2.0,<2.1
 psycopg2-binary>=2.9
 redis>=5.0
 python-dotenv>=1.0
