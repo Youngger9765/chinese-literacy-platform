@@ -12,15 +12,18 @@ owns_code:
   - scripts/story_structure_qa_lib.py
   - scripts/story_structure_qa.py
   - scripts/build_keypoints_qa_manifest.py
+  - scripts/build_keypoints_qa_uid_map.py
   - scripts/keypoints_manifest_verify.py
   - backend/app/services/keypoints_to_structure.py
 owns_data:
   - backend/data/lessons/*/v3/keypoints.*.yml
   - backend/data/curriculum_qa/keypoints_manifest.json
+  - frontend/public/keypoints-qa/lesson-uid-map.js
   - backend/data/curriculum_qa/snapshots/**/*
 spec_tests:
   - backend/specs/test_story_structure_spec.py
   - backend/specs/test_keypoints_manifest_spec.py
+  - backend/specs/test_keypoints_qa_uid_map_3192.py
   - backend/tests/test_yaml_first_structure.py
   - backend/tests/test_story_structure_qa_contract.py
 legacy_tests:
