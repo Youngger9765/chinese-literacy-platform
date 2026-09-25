@@ -313,6 +313,9 @@ export interface Story {
   inlineTables?: unknown[];
   comparisonTable?: Record<string, unknown>;
   summaryTable?: Record<string, unknown>;
+  /** 課文裡加底線的專有名詞（#3309）。api.ts 的映射器把 snake_case 轉過來，
+   *  ⛔ 直接讀 `underlined_terms` 永遠是 undefined —— 那一層會逐欄丟掉沒宣告的欄位。 */
+  underlinedTerms?: string[];
   readingBenchmark?: { levels: { threshold: string; feedback: string }[] };
   /** 重點朗讀指定段 (#2559)：學生只朗讀老師 ☞ 標的重點段。缺→唸全文 fallback。 */
   keyReading?: { passage: string; startText?: string; extentChars?: number; source?: string };
@@ -352,9 +355,6 @@ export interface Story {
   reading_strategy_type?: string;
   /** Lesson code (e.g. 'G7-L28'), used for image URL construction (#1341). */
   lesson_code?: string;
-  /** 課文裡加底線的專有名詞（人名／地名／國名／機構名）—— #3309。
-   *  60 課共 240 個不重複詞，教材自己標的，不是我們猜的詞界。 */
-  underlined_terms?: string[] | null;
   /** Images for graphic-text layout (#1341). */
   images?: {
     filename: string;

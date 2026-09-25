@@ -97,6 +97,7 @@ interface ApiStoryListItem {
   inline_tables?: unknown[] | null;
   comparison_table?: Record<string, unknown> | null;
   summary_table?: Record<string, unknown> | null;
+  underlined_terms?: string[] | null;
   thumbnail_url: string;
   reading_strategy: string | null;
   reading_strategy_explained?: string | null;
@@ -262,6 +263,7 @@ function apiDetailToStory(detail: ApiStoryDetail): Story {
     inlineTables: detail.inline_tables ?? undefined,
     comparisonTable: detail.comparison_table ?? undefined,
     summaryTable: detail.summary_table ?? undefined,
+    underlinedTerms: detail.underlined_terms ?? undefined,
     readingBenchmark: detail.reading_benchmark ?? undefined,
     keyReading: detail.key_reading
       ? {
