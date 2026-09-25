@@ -173,6 +173,27 @@ jobs:
             --max-instances=1 \
             --timeout=300s
 
+      # 部署失敗時 gcloud 只說「container failed to start and listen on PORT」——
+      # 真正的原因在容器自己的 log 裡，而那要有 gcloud 憑證才讀得到。
+      # 2026-09-25 為了查出 `ModuleNotFoundError: No module named 'psycopg'`
+      # 花了三十分鐘加一次重新登入，而那行字一直就在 Cloud Run 的 log 裡。
+      # 把它印進 CI 輸出，下次看 workflow 就知道。
+      - name: 部署失敗時把容器 log 倒出來
+        if: failure()
+        continue-on-error: true
+        run: |
+          echo "## ⛔ preview 後端起不來 —— 容器 log" >> "$GITHUB_STEP_SUMMARY"
+          LOGS=$(gcloud logging read \
+            "resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"${{ env.BACKEND_SERVICE }}\"" \
+            --project "${{ env.PROJECT_ID }}" --freshness=15m --limit=30 \
+            --format='value(severity,textPayload)' 2>&1 || echo "（讀不到 log）")
+          echo "$LOGS"
+          {
+            echo '```'
+            echo "$LOGS" | head -60
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Get preview URLs
         id: preview-urls
         run: |
