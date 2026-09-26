@@ -1,9 +1,9 @@
 /**
- * StudentProgressCard — "以學生身分預覽" button wiring (Issue #3027).
+ * StudentProgressCard — "推薦練習" button wiring (Issue #3027，命名修正見 #3220).
  *
  * This is the mobile-card half of the reachable entry point (the desktop
  * table row has its own inline button in StudentProgressTab.tsx). Locks:
- *  - clicking 預覽 calls onPreview with the RIGHT student, not onExpand
+ *  - clicking 推薦練習 calls onPreview with the RIGHT student, not onExpand
  *    (the card's whole surface is also a click target that expands the row —
  *    a missing stopPropagation would fire both)
  *  - the loading state disables the button so a slow mint call can't be
@@ -25,7 +25,7 @@ const student: StudentProgress = {
 };
 
 describe('StudentProgressCard preview button (#3027)', () => {
-  it('calls onPreview with this student, not onExpand, when 預覽 is clicked', () => {
+  it('calls onPreview with this student, not onExpand, when 推薦練習 is clicked', () => {
     const onPreview = vi.fn();
     const onExpand = vi.fn();
 
@@ -42,7 +42,7 @@ describe('StudentProgressCard preview button (#3027)', () => {
       />
     );
 
-    fireEvent.click(screen.getByRole('button', { name: /預覽/ }));
+    fireEvent.click(screen.getByRole('button', { name: /推薦練習/ }));
 
     expect(onPreview).toHaveBeenCalledWith(student);
     expect(onExpand).not.toHaveBeenCalled();

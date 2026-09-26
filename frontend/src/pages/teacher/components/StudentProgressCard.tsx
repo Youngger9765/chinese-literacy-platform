@@ -69,9 +69,9 @@ export const StudentProgressCard: React.FC<StudentProgressCardProps> = ({
           }}
           disabled={isPreviewLoading}
           className="inline-flex items-center justify-center px-2.5 py-1 rounded-md text-xs font-medium text-accent bg-accent-bg border border-accent/30 hover:bg-accent-bg/70 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          title="以學生身分預覽（唯讀）"
+          title="看系統建議這位學生接下來練哪幾課"
         >
-          {isPreviewLoading ? '載入中…' : '預覽'}
+          {isPreviewLoading ? '載入中…' : '推薦練習'}
         </button>
         <button
           onClick={(event) => {

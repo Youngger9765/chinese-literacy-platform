@@ -9,7 +9,7 @@
  *    (not any global auth token) via the existing, already-generic
  *    getStoryRecommendations(token, studentId, limit).
  *  - Fetch failure (e.g. expired preview token) shows an error, not a crash.
- *  - "結束預覽" navigates back rather than leaving the teacher stuck on the
+ *  - "返回" navigates back rather than leaving the teacher stuck on the
  *    student's view.
  */
 import React from 'react';
@@ -48,7 +48,7 @@ describe('StudentPreviewPage (#3027)', () => {
 
   it('bounces back with a message when reached with no preview state — never crashes', () => {
     renderWithState(null);
-    expect(screen.getByText(/需要從「班級學生列表」點擊/)).toBeInTheDocument();
+    expect(screen.getByText(/需要從「學生進度」或「課堂即時」點擊/)).toBeInTheDocument();
     // No token to use — must not have attempted any network call.
     expect(mockGetStoryRecommendations).not.toHaveBeenCalled();
   });
@@ -62,7 +62,7 @@ describe('StudentPreviewPage (#3027)', () => {
       expiresInMinutes: 20,
     });
 
-    expect(screen.getByText(/預覽模式（唯讀）/)).toBeInTheDocument();
+    expect(screen.getByText(/推薦練習（唯讀）/)).toBeInTheDocument();
     expect(screen.getByText(/小美/).closest('[role="status"]')).toBeTruthy();
     expect(screen.getByText(/20 分鐘後自動失效/)).toBeInTheDocument();
 
@@ -113,7 +113,7 @@ describe('StudentPreviewPage (#3027)', () => {
     });
   });
 
-  it('"結束預覽" navigates back instead of leaving the teacher stuck in the preview', async () => {
+  it('"返回" navigates back instead of leaving the teacher stuck in the preview', async () => {
     mockGetStoryRecommendations.mockResolvedValue({ recommendations: [], total: 0 });
     renderWithState({
       previewToken: 'preview.jwt.token',
@@ -122,7 +122,7 @@ describe('StudentPreviewPage (#3027)', () => {
       expiresInMinutes: 20,
     });
 
-    fireEvent.click(screen.getByRole('button', { name: '結束預覽' }));
+    fireEvent.click(screen.getByRole('button', { name: '返回' }));
     expect(mockNavigate).toHaveBeenCalledWith(-1);
   });
 });
