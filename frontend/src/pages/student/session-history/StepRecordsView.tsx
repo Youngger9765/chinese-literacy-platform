@@ -20,6 +20,14 @@ interface StepRecordsViewProps {
   comprehensionScores: ComprehensionScoreResult | null;
   token: string;
   sessionId: number;
+  /**
+   * 對話紀錄的來源。預設打學生自己的 `/learning/sessions/{id}/dialogue`。
+   *
+   * ⛔ 教師端必須注入自己那支（`/teacher/students/{id}/sessions/{sid}/dialogue`）——
+   * 學生端那支走 `get_owned_session`，`session.student_id != current_user.id`
+   * 直接 403，老師打不到。這個 prop 存在的唯一理由就是這件事。
+   */
+  loadDialogue?: () => Promise<DialogueTurnItem[]>;
 }
 
 export const StepRecordsView: React.FC<StepRecordsViewProps> = ({
@@ -27,6 +35,7 @@ export const StepRecordsView: React.FC<StepRecordsViewProps> = ({
   comprehensionScores,
   token,
   sessionId,
+  loadDialogue,
 }) => {
   const [turns, setTurns] = useState<DialogueTurnItem[]>([]);
   const [loadingTurns, setLoadingTurns] = useState(false);
@@ -34,13 +43,14 @@ export const StepRecordsView: React.FC<StepRecordsViewProps> = ({
   useEffect(() => {
     if (!detail.comprehension_result) return;
     setLoadingTurns(true);
-    fetchDialogueHistory(token, sessionId)
-      .then((r) => setTurns(r.turns))
+    const load = loadDialogue ?? (() => fetchDialogueHistory(token, sessionId).then((r) => r.turns));
+    load()
+      .then(setTurns)
       .catch(() => {
         /* non-critical */
       })
       .finally(() => setLoadingTurns(false));
-  }, [token, sessionId, detail.comprehension_result]);
+  }, [token, sessionId, loadDialogue, detail.comprehension_result]);
 
   const hasReading = !!detail.reading_result;
   const hasKeyPassageReading = !!detail.full_reading_result;
