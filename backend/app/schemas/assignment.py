@@ -3,8 +3,27 @@ from datetime import datetime
 from pydantic import BaseModel, Field, model_validator
 
 # Default reading goals (Issue #84)
-DEFAULT_TARGET_CPM = 150        # 流暢朗讀標準：150-180 字/分
-DEFAULT_TARGET_ACCURACY = 90.0  # 正確率 > 90%
+#
+# ⚠️ #3333（2026-09-26）：這條速度線原本是 150，而我們自己學生的實際中位數是
+#    **144 字/分** —— 及格線設在中位數之上，按定義就是讓一半的孩子不及格。
+#    prod `reading_history` 全文朗讀 47 筆的真實分佈：
+#
+#        p10  82 · p25 101 · **p50 144** · p75 176 · p90 207 字/分
+#
+#        ≥100 → 38/47 過      ≥150 → 22/47 過   ← 原本的線
+#        ≥120 → 32/47 過      ≥190 →  9/47 過   ← 分年級常模落在學生 p90
+#
+#    150→120 之後，兩條線一起看的通過數從 **16/47 變成 26/47**。
+#
+# 為什麼是 120 而不是別的數字：`FULLREADING_CPM_PASS = 120`
+# （frontend/src/utils/personaConfig.ts）本來就在庫裡 —— 臺師大 Brain & Learning Lab
+# 的 G2+ 下限，有來源、不是我挑的。它落在學生中位數 144 **之下**，所以「通過」的
+# 意思是「你唸到可用的速度」而不是「你在平均之上」；同時仍有 21/47 不到，不是人人有獎。
+DEFAULT_TARGET_CPM = 120        # 臺師大 B&L Lab G2+ 下限；在我們學生中位數(144)之下（#3333）
+#
+# ⚠️ 正確率這條線**刻意不動**。它不是瓶頸：學生正確率中位數 98%，門檻設 90 或 80
+#    篩出來是同樣的 34 筆。動它等於零效果的 churn，唯一有作用的槓桿是速度那條。
+DEFAULT_TARGET_ACCURACY = 90.0  # 正確率 > 90%（#3333 查過：非瓶頸，90 與 80 同樣 34/47）
 
 
 class AssignmentCreateRequest(BaseModel):
