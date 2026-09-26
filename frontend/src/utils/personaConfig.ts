@@ -23,10 +23,28 @@ export const READING_PASS = 0.60; // ≥60%: 很好，過關
 // The floor of 120 is from 臺師大 Brain & Learning Lab (G2+ minimum).
 // Issue #2131: CPM (speed) no longer contributes to pass/fail.
 // analyzeFluency() now uses passed = accuracyPassed only.
-// FULLREADING_CPM_PASS is retained so getThresholdsFromBenchmark() can still
-// compute speedPassed for display purposes (SelfAssessment aiRating) and
-// for the learning-unit benchmark reference shown in ReadingMetricsCard.
-export const FULLREADING_CPM_PASS = 120; // display reference — NOT a pass/fail gate (Issue #2131)
+//
+// ⛔⛔ 2026-09-26（#3156 ④）—— 下面這兩個常數與 `getThresholdsFromBenchmark()`
+//     **在正式環境沒有任何消費端**。讀到這裡不要以為朗讀判定是分年級的，它不是。
+//
+//     $ grep -rn "GRADE_CPM_DEFAULTS\|getThresholdsFromBenchmark" frontend/src \
+//         --include="*.ts" --include="*.tsx" | grep -v "\.test\.\|__tests__\|personaConfig.ts"
+//       → 0 筆（正向對照：同樣查法對 cleanChineseText 有 19 筆）
+//
+//     學生實際看到的過與不過在 `components/ui/GoalAchievementCard.tsx:37-39`：
+//         cpmPassed && accPassed，對的是 **平的** DEFAULT_TARGET_CPM=150
+//         與 DEFAULT_TARGET_ACCURACY=90.0（backend/app/schemas/assignment.py:6-7）
+//     而 `analyzeFluency` 回的 `passed` **也沒有人讀**（兩個呼叫端都丟掉）。
+//
+//     ⛔ 而且不要順手把 getThresholdsFromBenchmark 接上去：它取的是三段式評量表
+//        **中間那段的下界**（191/201/221），拿中位數當及格線；prod 真實資料實測
+//        （47 筆全文朗讀 / 19 人）接上去之後通過數會從 16 掉到 6，14 筆改判
+//        **全部是「本來過、改完不過」**。原因是每個年級的常模（190~220）都比
+//        現行那條平線 150 高 —— 分年級不是把線拉得更貼身，是整條往上搬。
+//
+//     這幾個常數留著不刪，是因為將來真要做分年級時它們是起點；
+//     但在有人真的接線之前，它們是**死的**。詳見 #3156 ④。
+export const FULLREADING_CPM_PASS = 120; // 死的：沒有正式消費端（#3156 ④，2026-09-26 實查）
 export const FULLREADING_ACCURACY_PASS = 0.80;
 
 // Grade-based CPM pass defaults (fallback when no lesson YAML present)
