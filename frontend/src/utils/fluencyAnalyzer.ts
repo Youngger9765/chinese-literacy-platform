@@ -102,6 +102,17 @@ export function analyzeFluency(input: {
   const accuracyPassed = diffResult.matchRate >= thresholds.accuracyPass;
   const speedPassed = cpm >= thresholds.cpmPass;
   // Issue #2131: passed is accuracy-only; speedPassed is kept for display reference only.
+  //
+  // ⛔ 2026-09-26（#3156 ④）：**這個 `passed` 正式環境沒有任何人讀**。兩個呼叫端
+  //    都把它丟掉（`SavedResult` 根本沒有這個欄位）。要改朗讀的判定請去
+  //    `components/ui/GoalAchievementCard.tsx:37-39` —— 那裡才是學生看到的那一個，
+  //    而且它用的是**兩條平的線**（150 字/分 ＋ 90% 正確率）。
+  //    我 2026-09-26 沒查消費端就把這一行的語意改掉，做完一整輪才被複審擋下。
+  //
+  // ⚠️ 還有一個更容易誤讀的：上面那個 `cpm` **不是速度**。它是
+  //    `correctCount / 秒 × 60` ＝ **正確率 × 實際語速** —— 每一個語音辨識錯誤都
+  //    等比例壓低它。所以「速度不受辨識誤差影響」這個直覺在這裡是**反的**，
+  //    拿 `speedPassed` 當判準不等於把正確率降為參考，是把它變成沒有下限的乘數。
   const passed = accuracyPassed;
 
   const errorBreakdown: ErrorBreakdown = {
