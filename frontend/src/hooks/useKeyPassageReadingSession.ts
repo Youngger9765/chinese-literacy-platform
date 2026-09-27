@@ -218,9 +218,17 @@ export function useKeyPassageReadingSession({
     const silenceCheck = validateRecording({
       peakVolume: audioRecorder.getPeakVolume(),
       durationMs,
+      // #3299：`fullText` 是「這次要孩子唸的東西」（有重點段就只給那段），
+      // 跟後端 gate 用的 target_text 是同一份，所以兩邊算出同一個門檻。
+      targetText: fullText,
     });
     if (!silenceCheck.ok) {
-      setMicError('未偵測到語音，請重試。');
+      // #3299：分開講。錄太短 ≠ 沒聲音。
+      setMicError(
+        silenceCheck.reason === 'too_short'
+          ? '這段還沒唸完喔，請把整段唸完再按完成。'
+          : '未偵測到語音，請重試。',
+      );
       return;
     }
 

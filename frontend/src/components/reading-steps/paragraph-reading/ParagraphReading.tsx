@@ -481,9 +481,17 @@ const ParagraphReading: React.FC<ParagraphReadingProps> = ({
           const silenceCheck = validateRecording({
             peakVolume: paragraphRecorder.getPeakVolume(),
             durationMs,
+            // #3299：帶入這一段的課文，門檻才跟得上段落長度（後端早就這樣算了）
+            targetText: story.content[currentLineIndex] || '',
           });
           if (!silenceCheck.ok) {
-            setMicError('未偵測到語音，請重試。');
+            // #3299：兩種失敗不是同一件事。「沒唸完」說成「沒偵測到語音」會讓孩子
+            // 以為是麥克風壞了，去調設備而不是把整段唸完。
+            setMicError(
+              silenceCheck.reason === 'too_short'
+                ? '這段還沒唸完喔，請把整段唸完再按完成。'
+                : '未偵測到語音，請重試。',
+            );
             return;   // finally{} resets isSubmittingSentenceRef + state
           }
 
