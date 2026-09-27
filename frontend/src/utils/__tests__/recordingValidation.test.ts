@@ -16,7 +16,8 @@ import {
  * 前端 gate 只看「能量 + 時長」：
  *   - 靜音(0.0) → 擋（reason=silent）
  *   - 純音/語音/白噪音(>0.05) → 過能量關（白噪音故意過，留給後端 STT 幻覺 gate 擋）
- *   - <1500ms → 擋（reason=too_short），即使很大聲
+ *   - 低於門檻 → 擋（reason=too_short），即使很大聲。門檻自 #3299 起跟段落長度走，
+ *     沒給課文時退回平的 SILENT_MIN_DURATION_MS
  */
 describe('validateRecording — VAD 靜音 gate（合成音檔實測值）', () => {
   it('擋數位靜音 peak=0.0（silence.webm）', () => {
@@ -77,6 +78,11 @@ describe('validateRecording — VAD 靜音 gate（合成音檔實測值）', () 
 
   it('門檻常數鎖定（避免日後誤改）', () => {
     expect(SILENT_PEAK_THRESHOLD).toBe(0.05);
-    expect(SILENT_MIN_DURATION_MS).toBe(1500);
+    // #3299（2026-09-27）1500 → 1000：原本前端比後端（1000）**嚴**，
+    // 等於 client 會擋掉 server 願意收的錄音，而孩子當下沒有申訴管道。
+    // 這個下限現在只在「拿不到課文」時生效 —— 有課文就走
+    // `minDurationMsFor()`（最短的重點段 248 字就要 24.8 秒）。
+    // 前後端一致性由 __tests__/clientGateMatchesServer3299.test.ts 鎖住。
+    expect(SILENT_MIN_DURATION_MS).toBe(1000);
   });
 });
