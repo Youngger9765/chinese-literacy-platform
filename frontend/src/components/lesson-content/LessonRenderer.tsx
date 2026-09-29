@@ -233,8 +233,10 @@ const LessonRenderer: React.FC<LessonRendererProps> = ({
       // column via placement:'exercise' (a diagram/table that belongs WITH the 題目, not
       // the left-column 課文 reference). Default keeps them on the LEFT. Document order is
       // preserved within each column.
+      // `generic` is worksheet content (usually a question we cannot grade yet) → answer column.
       const toRight =
         b.type === 'exercise' ||
+        b.type === 'generic' ||
         ((b.type === 'figure' || b.type === 'table') &&
           (b as { placement?: string }).placement === 'exercise');
       if (toRight) exercises.push(b);
