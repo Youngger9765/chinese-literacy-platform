@@ -135,3 +135,56 @@ def test_no_legacy_layer_references_remain():
     src = re.sub(r'^"""".*?"""|^""".*?"""', "", src, count=1, flags=re.S)
     for banned in ("_ai_lessons", "_parsed_2026-05-01", "catalog_to_parsed_code"):
         assert banned not in src, f"{banned} 又出現在 loader 裡 — 位置不能當內容鍵"
+
+
+# ── 二修 payload shape: identity outside the payload, partial lessons withheld ─
+
+def _second_edition_story(blocks):
+    """The shape lesson_uid_loader actually hands over: the `spotlight:` wrapper is
+    stripped, only `section_no` survives, and the uid lives on the story — there is no
+    `spotlight.lesson`. Until this was fixed every one of 172 lessons raised here."""
+    return _story(
+        lesson_uid="L0042",
+        lesson_code="G5-L3",
+        spotlight_v2={"section_no": "六", "strategy_name": "找線索", "blocks": blocks},
+    )
+
+
+def test_second_edition_payload_is_served_with_uid_identity():
+    lc = L.get_lesson_content(_second_edition_story([
+        {"type": "guide", "text": "◎小試身手："},
+        {"type": "single", "prompt": "哪一個？", "options": {1: "甲", 2: "乙"}, "answer": 2},
+    ]))
+    assert lc is not None
+    assert (lc["id"], lc["lesson_code"]) == ("L0042", "G5-L3")
+    (ex,) = [b for b in lc["blocks"] if b["type"] == "exercise"]
+    step = ex["question"]["steps"][0]
+    assert (step["options"], step["answer"]) == (["甲", "乙"], 1)
+
+
+def test_no_correct_answer_question_is_served_not_withheld():
+    """沒有標準答案的題目以前會讓整課回 null；現在帶旗標供應、作答即完成。"""
+    lc = L.get_lesson_content(_second_edition_story([
+        {"type": "single", "prompt": "你自己呢？", "options": {1: "甲", 2: "乙"}, "no_correct_answer": True},
+    ]))
+    assert lc is not None
+    (ex,) = [b for b in lc["blocks"] if b["type"] == "exercise"]
+    step = ex["question"]["steps"][0]
+    assert step["no_correct_answer"] is True and "answer" not in step  # exclude_none drops the null
+
+
+def test_uncarriable_content_is_served_as_read_only_generic():
+    lc = L.get_lesson_content(_second_edition_story([
+        {"type": "single", "prompt": "選項印在圖裡", "answer": "D"},
+    ]))
+    assert lc is not None
+    assert [b["type"] for b in lc["blocks"]] == ["generic"]
+
+
+def test_a_block_that_cannot_even_be_drawn_is_withheld():
+    """No partial lessons: a source block with nothing drawable (not even a mapping) keeps the
+    whole lesson off lesson_content rather than silently missing a piece."""
+    assert L.get_lesson_content(_second_edition_story([
+        {"type": "single", "prompt": "哪一個？", "options": {1: "甲", 2: "乙"}, "answer": 2},
+        42,
+    ])) is None
