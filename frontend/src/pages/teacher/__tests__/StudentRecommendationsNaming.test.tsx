@@ -30,6 +30,7 @@ vi.mock('../../../services/progressApi', () => ({
 
 import StudentProgressCard from '../components/StudentProgressCard';
 import StudentPreviewPage from '../StudentPreviewPage';
+import { getStoryRecommendations } from '../../../services/progressApi';
 import type { StudentProgress } from '../../../services/teacherApi';
 
 /** 會讓老師以為「看得到學生當下畫面／作答」的說法，一律不准出現。 */
@@ -118,5 +119,35 @@ describe('教師端「推薦練習」的命名 (#3220)', () => {
     for (const phrase of FORBIDDEN) {
       expect(banner.innerHTML).not.toContain(phrase);
     }
+  });
+
+  // 錯誤訊息是老師唯一的下一步指引。正名後畫面上已經沒有叫「預覽」的按鈕，
+  // 若還寫「請重新進入預覽」，老師會去找一顆不存在的按鈕。
+  const renderPage = () =>
+    render(
+      <MemoryRouter
+        initialEntries={[
+          {
+            pathname: '/teacher/preview/7',
+            state: { previewToken: 't', studentId: 7, studentName: '小美', expiresInMinutes: 20 },
+          },
+        ]}
+      >
+        <StudentPreviewPage />
+      </MemoryRouter>,
+    );
+
+  it('權杖過期等載入失敗時，錯誤訊息指向實際存在的「推薦練習」按鈕，不再叫老師「進入預覽」', async () => {
+    vi.mocked(getStoryRecommendations).mockRejectedValueOnce(new Error('401'));
+    renderPage();
+    const msg = await screen.findByText(/失敗/);
+    expect(msg.textContent).toContain('推薦練習');
+    expect(msg.textContent).not.toContain('預覽');
+  });
+
+  it('正向對照：載入成功時不出現錯誤訊息', async () => {
+    renderPage();
+    await screen.findByText(/推薦的課文/);
+    expect(screen.queryByText(/失敗/)).toBeNull();
   });
 });
