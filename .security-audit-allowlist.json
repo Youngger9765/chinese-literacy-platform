@@ -1,15 +1,20 @@
 {
   "_comment": "Known-safe vulnerability exceptions for security audit CI.",
   "_instructions": [
-    "npm: add npm advisory IDs (e.g. '1234567') — matches npm audit advisory numbers",
+    "npm: add npm advisory source IDs (e.g. '1240992') or GHSA IDs — applied by scripts/npm_audit_gate.py to the `npm audit --json` report (npm itself has no --ignore flag)",
     "pip: add CVE/GHSA IDs (e.g. 'CVE-2023-12345' or 'GHSA-xxxx-yyyy-zzzz') — matches pip-audit vuln IDs",
     "Each entry MUST include a justification comment in the _justifications section"
   ],
-  "npm": [],
-  "pip": ["PYSEC-2025-183"],
+  "npm": [
+    "1240992"
+  ],
+  "pip": [
+    "PYSEC-2025-183"
+  ],
   "_justifications": {
     "_example_npm_1234567": "esbuild dev-only advisory, not exploitable in production build output",
     "_example_CVE-2023-99999": "affects feature X which we do not use; vendor patch not yet available",
-    "PYSEC-2025-183": "pyjwt 2.12.1 is latest PyPI release; no patched version available yet. Vulnerability does not affect runtime token verification path used by app. Re-evaluate when pyjwt 2.13+ ships. Filed 2026-05-21 (#1765)."
+    "PYSEC-2025-183": "pyjwt 2.12.1 is latest PyPI release; no patched version available yet. Vulnerability does not affect runtime token verification path used by app. Re-evaluate when pyjwt 2.13+ ships. Filed 2026-05-21 (#1765).",
+    "1240992": "braces GHSA-vfj7-8cjw-p6xm (stack-exhaustion DoS on deeply nested patterns): every braces release is affected (range <=3.0.3, no patched version). Only reached via tailwindcss@3.4.19 (latest v3) -> chokidar/micromatch/fast-glob, all devDependencies — `npm ls braces --omit=dev` is empty and `npm audit --omit=dev` has 0 high. Runs only at build time over the glob patterns in our own tailwind.config content[], never on user input, and is not in the shipped bundle. Only upstream fix path is the tailwindcss v4 major migration (config/CSS rewrite, out of scope for a deps chore). Re-evaluate when braces ships a fix or on the tailwind v4 migration. Filed 2026-10-08 (#3340)."
   }
 }
