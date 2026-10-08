@@ -32,15 +32,8 @@ jobs:
         working-directory: frontend
         run: npm ci
 
-      - name: Load allowlist
-        id: allowlist
-        run: |
-          if [ -f .security-audit-allowlist.json ]; then
-            NPM_IGNORE=$(jq -r '.npm // [] | map("--ignore=" + .) | join(" ")' .security-audit-allowlist.json)
-            echo "npm_ignore=$NPM_IGNORE" >> "$GITHUB_OUTPUT"
-          else
-            echo "npm_ignore=" >> "$GITHUB_OUTPUT"
-          fi
+      - name: Test npm audit gate
+        run: python3 -m unittest scripts/test_npm_audit_gate.py
 
       - name: Run npm audit (high/critical only)
         working-directory: frontend
@@ -48,29 +41,32 @@ jobs:
           echo "## npm audit results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          # Run audit and capture exit code
-          IGNORE_FLAGS="${{ steps.allowlist.outputs.npm_ignore }}"
+          # npm has no --ignore flag (it used to be passed here and was silently
+          # swallowed), so the allowlist is applied by scripts/npm_audit_gate.py.
+          # npm audit exits non-zero whenever anything is found; the gate decides.
+          npm audit --json > /tmp/npm-audit.json 2>/tmp/npm-audit.err || true
 
-          if npm audit --audit-level=high --json $IGNORE_FLAGS > /tmp/npm-audit.json 2>&1; then
-            echo "**Status**: No high/critical vulnerabilities found" >> $GITHUB_STEP_SUMMARY
-            echo "npm audit passed — no high/critical vulnerabilities"
+          CRITICAL=$(jq -r '.metadata.vulnerabilities.critical // 0' /tmp/npm-audit.json)
+          HIGH=$(jq -r '.metadata.vulnerabilities.high // 0' /tmp/npm-audit.json)
+          MODERATE=$(jq -r '.metadata.vulnerabilities.moderate // 0' /tmp/npm-audit.json)
+          echo "| Severity | Count (before allowlist) |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Critical | $CRITICAL |" >> $GITHUB_STEP_SUMMARY
+          echo "| High     | $HIGH |" >> $GITHUB_STEP_SUMMARY
+          echo "| Moderate | $MODERATE (not blocking) |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if python3 ../scripts/npm_audit_gate.py /tmp/npm-audit.json ../.security-audit-allowlist.json > /tmp/npm-audit-gate.txt; then
+            echo "**Status**: No un-allowlisted high/critical vulnerabilities" >> $GITHUB_STEP_SUMMARY
           else
             EXIT_CODE=$?
-            # Parse and display summary
-            CRITICAL=$(jq -r '.metadata.vulnerabilities.critical // 0' /tmp/npm-audit.json)
-            HIGH=$(jq -r '.metadata.vulnerabilities.high // 0' /tmp/npm-audit.json)
-            MODERATE=$(jq -r '.metadata.vulnerabilities.moderate // 0' /tmp/npm-audit.json)
-
             echo "**Status**: FAILED" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "| Severity | Count |" >> $GITHUB_STEP_SUMMARY
-            echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
-            echo "| Critical | $CRITICAL |" >> $GITHUB_STEP_SUMMARY
-            echo "| High     | $HIGH |" >> $GITHUB_STEP_SUMMARY
-            echo "| Moderate | $MODERATE (not blocking) |" >> $GITHUB_STEP_SUMMARY
-
-            echo "npm audit FAILED: Critical=$CRITICAL, High=$HIGH"
-            echo "Run 'npm audit' locally and fix or add to allowlist if known-safe"
+          fi
+          cat /tmp/npm-audit-gate.txt
+          { echo '```'; cat /tmp/npm-audit-gate.txt; echo '```'; } >> $GITHUB_STEP_SUMMARY
+          if [ -n "${EXIT_CODE:-}" ]; then
+            cat /tmp/npm-audit.err
+            echo "Run 'npm audit' locally and fix, or add to .security-audit-allowlist.json with a justification if known-safe"
             exit $EXIT_CODE
           fi
 
