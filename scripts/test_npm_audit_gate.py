@@ -314,6 +314,48 @@ class BlankIds(unittest.TestCase):
         )
 
 
+class AllowlistSchema(unittest.TestCase):
+    """#3344: the allowlist's shape was never checked, so a malformed file
+    could quietly allowlist ids (a dict `npm` iterates its keys; a null
+    justification stringifies to "None")."""
+
+    def assert_rejected(self, allowlist):
+        with self.assertRaises(gate.GateError):
+            gate.validate_allowlist(allowlist)
+
+    def test_npm_dict_is_rejected(self):
+        # The auditor's repro: the key "1" was read as an allowlist entry.
+        self.assert_rejected({"npm": {"1": False}, "_justifications": {"1": "x"}})
+
+    def test_npm_non_list_values_are_rejected(self):
+        for bad in ("1240992", 1240992, None, True):
+            with self.subTest(bad=bad):
+                self.assert_rejected({"npm": bad, "_justifications": {"1240992": "x"}})
+
+    def test_null_justification_is_rejected(self):
+        # The auditor's repro: str(None) == "None" counted as a justification.
+        self.assert_rejected({"npm": ["1"], "_justifications": {"1": None}})
+
+    def test_non_string_justifications_are_rejected(self):
+        for bad in (0, 123, False, True, [], ["why"], {"why": 1}):
+            with self.subTest(bad=bad):
+                self.assert_rejected({"npm": ["1"], "_justifications": {"1": bad}})
+
+    def test_justifications_must_be_an_object(self):
+        self.assert_rejected({"npm": ["1"], "_justifications": [["1", "why"]]})
+
+    def test_allowlist_must_be_an_object(self):
+        self.assert_rejected(["1"])
+
+    def test_empty_npm_list_is_accepted(self):
+        # Control: an explicit empty list is a valid (empty) allowlist.
+        self.assertEqual(gate.validate_allowlist({"npm": [], "_justifications": {}}), set())
+
+    def test_list_with_string_justification_is_accepted(self):
+        # Control: the well-formed shape still works.
+        self.assertEqual(gate.validate_allowlist(allow("1", "GHSA-x")), {"1", "GHSA-x"})
+
+
 class Cli(unittest.TestCase):
     def run_cli(self, report, allowlist):
         with tempfile.TemporaryDirectory() as d:
@@ -348,6 +390,26 @@ class Cli(unittest.TestCase):
         report = audit()
         report["metadata"]["vulnerabilities"].update(high=1, critical=-1)
         r = self.run_cli(report, allow())
+        self.assertEqual(r.returncode, 2, r.stdout + r.stderr)
+
+    def test_cli_exit_2_on_npm_dict_allowlist(self):
+        # #3344 repro 1. Without a justification for "1" the missing-
+        # justification check already exits 2; with one, the dict's key was
+        # read as an allowlist entry and the run exited 0 before the fix.
+        adv = advisory(1, "x", "high", "GHSA-aaaa-bbbb-cccc")
+        report = audit(("x", "high", [adv]))
+        r = self.run_cli(report, {"npm": {"1": False}, "_justifications": {"1": "x"}})
+        self.assertEqual(r.returncode, 2, r.stdout + r.stderr)
+
+    def test_cli_exit_2_on_null_justification(self):
+        # #3344 repro 2 (exit=0 before the fix).
+        adv = advisory(1, "x", "high", "GHSA-aaaa-bbbb-cccc")
+        report = audit(("x", "high", [adv]))
+        r = self.run_cli(report, {"npm": ["1"], "_justifications": {"1": None}})
+        self.assertEqual(r.returncode, 2, r.stdout + r.stderr)
+
+    def test_cli_exit_2_on_non_object_allowlist(self):
+        r = self.run_cli(TAILWIND_CHAIN, ["1240992"])
         self.assertEqual(r.returncode, 2, r.stdout + r.stderr)
 
     def test_cli_exit_2_on_bad_report(self):

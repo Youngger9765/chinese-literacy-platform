@@ -60,12 +60,26 @@ def _identity(adv):
 
 
 def validate_allowlist(allowlist):
-    entries = [str(e) for e in allowlist.get("npm", [])]
+    # Check the shape before reading it (#3344): a dict `npm` would iterate
+    # its keys as entries, and str(None) == "None" would pass as a justification.
+    if not isinstance(allowlist, dict):
+        raise GateError(f"allowlist must be a JSON object, got {type(allowlist).__name__}")
+    npm = allowlist.get("npm", [])
+    if not isinstance(npm, list):
+        raise GateError(f'allowlist "npm" must be a list, got {type(npm).__name__}')
+    entries = [str(e) for e in npm]
     blank = [e for e in entries if not e.strip()]
     if blank:
         raise GateError(f"npm allowlist has blank entries: {blank}")
     justifications = allowlist.get("_justifications", {})
-    missing = [e for e in entries if not str(justifications.get(e, "")).strip()]
+    if not isinstance(justifications, dict):
+        raise GateError(
+            f'allowlist "_justifications" must be an object, got {type(justifications).__name__}'
+        )
+    missing = [
+        e for e in entries
+        if not isinstance(justifications.get(e), str) or not justifications[e].strip()
+    ]
     if missing:
         raise GateError(f"npm allowlist entries without _justifications: {missing}")
     return set(entries)
