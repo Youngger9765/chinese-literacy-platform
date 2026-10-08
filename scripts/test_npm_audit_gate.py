@@ -201,6 +201,119 @@ class AdvisoryIdentity(unittest.TestCase):
         self.assertEqual(len(gate.blocking_advisories(report, allow())), 1)
 
 
+class SeverityCollision(unittest.TestCase):
+    """#3342 BLOCKER 1: the dedup key ignored `severity`, so a moderate copy
+    seen first swallowed the high copy with the same identity."""
+
+    def pair(self):
+        moderate = advisory(1, "same", "moderate", "GHSA-aaaa-bbbb-cccc")
+        moderate["title"] = "same advisory"
+        high = dict(moderate, severity="high")
+        return moderate, high
+
+    def test_moderate_first_does_not_hide_high(self):
+        moderate, high = self.pair()
+        report = audit(("same", "high", [moderate, high]))
+        blocking = gate.blocking_advisories(report, allow())
+        self.assertEqual([a["severity"] for a in blocking], ["high"])
+
+    def test_high_first_blocks(self):
+        # Control: the order that already failed before the fix.
+        moderate, high = self.pair()
+        report = audit(("same", "high", [high, moderate]))
+        blocking = gate.blocking_advisories(report, allow())
+        self.assertEqual([a["severity"] for a in blocking], ["high"])
+
+    def test_allowlisted_collision_still_clears(self):
+        # Control: allowlisting the id clears it whatever the order.
+        moderate, high = self.pair()
+        report = audit(("same", "high", [moderate, high]))
+        self.assertEqual(gate.blocking_advisories(report, allow("1")), [])
+
+
+class MetadataCounts(unittest.TestCase):
+    """#3342 BLOCKER 2: each blocking severity count must be present, a
+    non-negative int, and match its own package entries."""
+
+    def braces(self):
+        return audit(("braces", "high", [BRACES]))
+
+    def assert_fails_closed(self, report):
+        with self.assertRaises(gate.GateError):
+            gate.blocking_advisories(report, allow())
+
+    def test_missing_high_and_critical_counts_fail_closed(self):
+        # No entries either, so "missing = 0" would reconcile; absence alone
+        # must fail.
+        report = audit()
+        del report["metadata"]["vulnerabilities"]["high"]
+        del report["metadata"]["vulnerabilities"]["critical"]
+        self.assert_fails_closed(report)
+
+    def test_missing_critical_count_alone_fails_closed(self):
+        report = self.braces()
+        del report["metadata"]["vulnerabilities"]["critical"]
+        self.assert_fails_closed(report)
+
+    def test_negative_critical_cannot_cancel_high(self):
+        # The auditor's repro: metadata says high=1, critical=-1, no entries.
+        report = audit()
+        report["metadata"]["vulnerabilities"].update(high=1, critical=-1)
+        self.assert_fails_closed(report)
+
+    def test_high_and_critical_swapped_fail_closed(self):
+        # Sum agrees (1 == 1) but the per-severity split does not.
+        report = self.braces()
+        report["metadata"]["vulnerabilities"].update(high=0, critical=1)
+        self.assert_fails_closed(report)
+
+    def test_non_integer_counts_fail_closed(self):
+        for bad in ("1", 1.0, True, None):
+            with self.subTest(bad=bad):
+                report = self.braces()
+                report["metadata"]["vulnerabilities"]["high"] = bad
+                self.assert_fails_closed(report)
+
+    def test_well_formed_counts_pass(self):
+        # Control: a clean report with explicit zero counts is fine.
+        report = audit(("uuid", "moderate", [UUID]))
+        self.assertEqual(gate.blocking_advisories(report, allow()), [])
+
+
+class BlankIds(unittest.TestCase):
+    """#3342 MAJOR: an empty `source` is no id, and a blank allowlist entry
+    must be rejected rather than match it."""
+
+    def blank_source(self):
+        a = {"source": "", "name": "x", "severity": "high",
+             "title": "blank source and no GHSA"}
+        return audit(("x", "high", [a]))
+
+    def test_blank_source_is_not_allowlisted_by_blank_entry(self):
+        allowlist = {"npm": [""], "_justifications": {"": "blank"}}
+        with self.assertRaises(gate.GateError):
+            gate.blocking_advisories(self.blank_source(), allowlist)
+
+    def test_blank_source_has_no_ids(self):
+        self.assertEqual(gate._ids({"source": "  "}), set())
+
+    def test_whitespace_allowlist_entry_is_rejected(self):
+        with self.assertRaises(gate.GateError):
+            gate.validate_allowlist({"npm": ["  "], "_justifications": {"  ": "x"}})
+
+    def test_blank_source_blocks_without_allowlist(self):
+        # Control: with an empty allowlist it already failed.
+        self.assertEqual(len(gate.blocking_advisories(self.blank_source(), allow())), 1)
+
+    def test_blank_source_with_ghsa_still_matches_by_ghsa(self):
+        # Control: a blank source must not stop the GHSA id from working.
+        a = advisory("", "braces", "high", "GHSA-vfj7-8cjw-p6xm")
+        report = audit(("braces", "high", [a]))
+        self.assertEqual(
+            gate.blocking_advisories(report, allow("GHSA-vfj7-8cjw-p6xm")), []
+        )
+
+
 class Cli(unittest.TestCase):
     def run_cli(self, report, allowlist):
         with tempfile.TemporaryDirectory() as d:
@@ -223,6 +336,19 @@ class Cli(unittest.TestCase):
         r = self.run_cli(TAILWIND_CHAIN, allow("1240992"))
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         self.assertIn("allowlisted", r.stdout)
+
+    def test_cli_fails_on_severity_collision_moderate_first(self):
+        # #3342 BLOCKER 1 end to end (issue repro: exit=0 before the fix).
+        moderate = advisory(1, "same", "moderate", "GHSA-aaaa-bbbb-cccc")
+        report = audit(("same", "high", [moderate, dict(moderate, severity="high")]))
+        r = self.run_cli(report, allow())
+        self.assertEqual(r.returncode, 1, r.stdout + r.stderr)
+
+    def test_cli_exit_2_on_negative_count(self):
+        report = audit()
+        report["metadata"]["vulnerabilities"].update(high=1, critical=-1)
+        r = self.run_cli(report, allow())
+        self.assertEqual(r.returncode, 2, r.stdout + r.stderr)
 
     def test_cli_exit_2_on_bad_report(self):
         r = self.run_cli({"error": {"code": "ENOAUDIT"}}, allow())

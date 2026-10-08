@@ -33,8 +33,10 @@ def _ids(adv):
     """Allowlist-matchable ids. An advisory with neither a source id nor a
     GHSA id gets an empty set, so it can never be allowlisted."""
     ids = set()
-    if adv.get("source") is not None:
-        ids.add(str(adv["source"]))
+    source = adv.get("source")
+    # An empty source is no id at all (#3342), same as a missing one.
+    if source is not None and str(source).strip():
+        ids.add(str(source).strip())
     ghsa = _ghsa(adv)
     if ghsa:
         ids.add(ghsa)
@@ -44,7 +46,10 @@ def _ids(adv):
 def _identity(adv):
     # Dedup key. `source` alone is not enough: if it is missing, every
     # advisory would collapse onto None and the first one would hide the rest.
+    # `severity` is part of it too (#3342): otherwise a moderate copy seen first
+    # would hide a high copy that is otherwise identical.
     return (
+        adv.get("severity"),
         adv.get("source"),
         _ghsa(adv),
         adv.get("url"),
@@ -56,6 +61,9 @@ def _identity(adv):
 
 def validate_allowlist(allowlist):
     entries = [str(e) for e in allowlist.get("npm", [])]
+    blank = [e for e in entries if not e.strip()]
+    if blank:
+        raise GateError(f"npm allowlist has blank entries: {blank}")
     justifications = allowlist.get("_justifications", {})
     missing = [e for e in entries if not str(justifications.get(e, "")).strip()]
     if missing:
@@ -68,24 +76,32 @@ def _reconcile(report):
     by an advisory object we can actually judge.
 
     npm's metadata.vulnerabilities counts *packages* by severity (tailwindcss,
-    chokidar, ... each count), not advisories, so the check is: metadata
-    high+critical == high/critical package entries, and each of those entries
-    reaches a high/critical advisory through its `via` chain.
+    chokidar, ... each count), not advisories, so the check is: for each of
+    high and critical, the metadata count is present, a non-negative int, and
+    equals the package entries of that severity; and each of those entries
+    reaches a high/critical advisory through its `via` chain. Checking per
+    severity (not the sum) stops a negative or swapped count from cancelling
+    a real one (#3342).
     """
     vulns = report["vulnerabilities"]
     counts = (report.get("metadata") or {}).get("vulnerabilities")
     if not isinstance(counts, dict):
         raise GateError("npm audit report has no metadata.vulnerabilities counts")
-    try:
-        claimed = sum(int(counts.get(s, 0)) for s in BLOCKING_SEVERITIES)
-    except (TypeError, ValueError):
-        raise GateError(f"unreadable metadata.vulnerabilities: {counts}")
-    entries = [k for k, v in vulns.items() if v.get("severity") in BLOCKING_SEVERITIES]
-    if claimed != len(entries):
-        raise GateError(
-            f"metadata reports {claimed} high/critical but {len(entries)} "
-            f"high/critical package entries were found: {sorted(entries)}"
-        )
+    entries = []
+    for severity in sorted(BLOCKING_SEVERITIES):
+        claimed = counts.get(severity)
+        # bool is an int subclass, so exclude it explicitly.
+        if isinstance(claimed, bool) or not isinstance(claimed, int) or claimed < 0:
+            raise GateError(
+                f"metadata.vulnerabilities.{severity} must be a non-negative int, got {claimed!r}"
+            )
+        found = sorted(k for k, v in vulns.items() if v.get("severity") == severity)
+        if claimed != len(found):
+            raise GateError(
+                f"metadata reports {claimed} {severity} but {len(found)} "
+                f"{severity} package entries were found: {found}"
+            )
+        entries += found
 
     def reaches_advisory(name, seen):
         if name in seen or name not in vulns:
