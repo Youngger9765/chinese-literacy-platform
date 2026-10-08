@@ -30,11 +30,28 @@ def _ghsa(adv):
 
 
 def _ids(adv):
-    ids = {str(adv.get("source"))}
+    """Allowlist-matchable ids. An advisory with neither a source id nor a
+    GHSA id gets an empty set, so it can never be allowlisted."""
+    ids = set()
+    if adv.get("source") is not None:
+        ids.add(str(adv["source"]))
     ghsa = _ghsa(adv)
     if ghsa:
         ids.add(ghsa)
     return ids
+
+
+def _identity(adv):
+    # Dedup key. `source` alone is not enough: if it is missing, every
+    # advisory would collapse onto None and the first one would hide the rest.
+    return (
+        adv.get("source"),
+        _ghsa(adv),
+        adv.get("url"),
+        adv.get("name"),
+        adv.get("title"),
+        adv.get("range"),
+    )
 
 
 def validate_allowlist(allowlist):
@@ -46,14 +63,56 @@ def validate_allowlist(allowlist):
     return set(entries)
 
 
+def _reconcile(report):
+    """Fail closed unless every high/critical the report claims is explained
+    by an advisory object we can actually judge.
+
+    npm's metadata.vulnerabilities counts *packages* by severity (tailwindcss,
+    chokidar, ... each count), not advisories, so the check is: metadata
+    high+critical == high/critical package entries, and each of those entries
+    reaches a high/critical advisory through its `via` chain.
+    """
+    vulns = report["vulnerabilities"]
+    counts = (report.get("metadata") or {}).get("vulnerabilities")
+    if not isinstance(counts, dict):
+        raise GateError("npm audit report has no metadata.vulnerabilities counts")
+    try:
+        claimed = sum(int(counts.get(s, 0)) for s in BLOCKING_SEVERITIES)
+    except (TypeError, ValueError):
+        raise GateError(f"unreadable metadata.vulnerabilities: {counts}")
+    entries = [k for k, v in vulns.items() if v.get("severity") in BLOCKING_SEVERITIES]
+    if claimed != len(entries):
+        raise GateError(
+            f"metadata reports {claimed} high/critical but {len(entries)} "
+            f"high/critical package entries were found: {sorted(entries)}"
+        )
+
+    def reaches_advisory(name, seen):
+        if name in seen or name not in vulns:
+            return False
+        seen.add(name)
+        for via in vulns[name].get("via", []):
+            if isinstance(via, dict):
+                if via.get("severity") in BLOCKING_SEVERITIES:
+                    return True
+            elif reaches_advisory(via, seen):
+                return True
+        return False
+
+    orphans = [k for k in entries if not reaches_advisory(k, set())]
+    if orphans:
+        raise GateError(f"high/critical packages with no traceable advisory: {sorted(orphans)}")
+
+
 def _advisories(report):
     if "error" in report or not isinstance(report.get("vulnerabilities"), dict):
         raise GateError(f"not a usable npm audit report: {json.dumps(report)[:300]}")
+    _reconcile(report)
     seen = {}
     for vuln in report["vulnerabilities"].values():
         for via in vuln.get("via", []):
             if isinstance(via, dict):  # strings are transitive pointers, not advisories
-                seen.setdefault(via.get("source"), via)
+                seen.setdefault(_identity(via), via)
     return list(seen.values())
 
 

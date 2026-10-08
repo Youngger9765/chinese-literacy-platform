@@ -33,7 +33,7 @@ jobs:
         run: npm ci
 
       - name: Test npm audit gate
-        run: python3 -m unittest scripts/test_npm_audit_gate.py
+        run: python3 -m unittest scripts/test_npm_audit_gate.py scripts/test_audit_summary_check.py
 
       - name: Run npm audit (high/critical only)
         working-directory: frontend
@@ -149,18 +149,7 @@ jobs:
     runs-on: ubuntu-latest
     if: always()
     steps:
+      - uses: actions/checkout@v6
+
       - name: Check audit results
-        run: |
-          NPM_STATUS="${{ needs.npm-audit.result }}"
-          PIP_STATUS="${{ needs.pip-audit.result }}"
-
-          echo "npm-audit: $NPM_STATUS"
-          echo "pip-audit: $PIP_STATUS"
-
-          if [ "$NPM_STATUS" = "failure" ] || [ "$PIP_STATUS" = "failure" ]; then
-            echo ""
-            echo "Security audit FAILED. Fix vulnerabilities or add known-safe CVEs to .security-audit-allowlist.json"
-            exit 1
-          fi
-
-          echo "All security audits passed."
+        run: bash scripts/audit_summary_check.sh "${{ needs.npm-audit.result }}" "${{ needs.pip-audit.result }}"

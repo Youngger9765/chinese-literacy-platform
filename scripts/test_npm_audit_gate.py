@@ -34,11 +34,22 @@ def advisory(source, name, severity, ghsa):
 
 
 def audit(*vulns):
-    """Build a minimal `npm audit --json` (v7+) payload."""
+    """Build a minimal `npm audit --json` (v7+) payload.
+
+    metadata.vulnerabilities is derived the way npm does it: one count per
+    *package* entry by its severity (not per advisory).
+    """
     out = {}
+    counts = {"info": 0, "low": 0, "moderate": 0, "high": 0, "critical": 0}
     for name, severity, via in vulns:
         out[name] = {"name": name, "severity": severity, "via": via, "isDirect": False}
-    return {"auditReportVersion": 2, "vulnerabilities": out, "metadata": {}}
+        counts[severity] += 1
+    counts["total"] = sum(counts.values())
+    return {
+        "auditReportVersion": 2,
+        "vulnerabilities": out,
+        "metadata": {"vulnerabilities": counts},
+    }
 
 
 BRACES = advisory(1240992, "braces", "high", "GHSA-vfj7-8cjw-p6xm")
@@ -117,6 +128,77 @@ class MalformedReport(unittest.TestCase):
     def test_missing_vulnerabilities_key_fails_closed(self):
         with self.assertRaises(gate.GateError):
             gate.blocking_advisories({"metadata": {}}, allow())
+
+    # --- audit BLOCKER 1: metadata must reconcile with what was parsed -------
+
+    def test_metadata_high_but_no_vulnerability_entries_fails_closed(self):
+        # The auditor's repro: metadata says 1 high, vulnerabilities is empty.
+        report = audit()
+        report["metadata"]["vulnerabilities"]["high"] = 1
+        with self.assertRaises(gate.GateError):
+            gate.blocking_advisories(report, allow())
+
+    def test_metadata_count_disagreeing_with_entries_fails_closed(self):
+        report = audit(("braces", "high", [BRACES]))
+        report["metadata"]["vulnerabilities"]["critical"] = 1
+        with self.assertRaises(gate.GateError):
+            gate.blocking_advisories(report, allow("1240992"))
+
+    def test_missing_metadata_counts_fails_closed(self):
+        report = audit(("braces", "high", [BRACES]))
+        del report["metadata"]["vulnerabilities"]
+        with self.assertRaises(gate.GateError):
+            gate.blocking_advisories(report, allow("1240992"))
+
+    def test_high_package_whose_via_resolves_to_no_advisory_fails_closed(self):
+        # Counts agree, but "tailwindcss" points at a package that isn't in the
+        # report, so its high severity can't be attributed to any advisory.
+        report = audit(("tailwindcss", "high", ["ghost"]))
+        with self.assertRaises(gate.GateError):
+            gate.blocking_advisories(report, allow())
+
+    def test_real_shape_package_counts_differ_from_advisory_count_is_ok(self):
+        # Control: npm counts packages (5 high) not advisories (1). That is
+        # normal and must not trip the reconciliation.
+        self.assertEqual(TAILWIND_CHAIN["metadata"]["vulnerabilities"]["high"], 5)
+        self.assertEqual(gate.blocking_advisories(TAILWIND_CHAIN, allow("1240992")), [])
+
+
+class AdvisoryIdentity(unittest.TestCase):
+    """audit BLOCKER 2: advisories without `source` must not collapse together."""
+
+    def no_source(self, name, ghsa, title):
+        a = advisory(None, name, "high", ghsa)
+        del a["source"]
+        a["title"] = title
+        return a
+
+    def test_sourceless_advisories_are_not_deduped_into_one(self):
+        old = self.no_source("a", "GHSA-aaaa-bbbb-cccc", "old")
+        new = self.no_source("b", "GHSA-dddd-eeee-ffff", "new")
+        report = audit(("a", "high", [old]), ("b", "high", [new]))
+        blocking = gate.blocking_advisories(report, allow("GHSA-aaaa-bbbb-cccc"))
+        self.assertEqual([gate._ghsa(a) for a in blocking], ["GHSA-dddd-eeee-ffff"])
+
+    def test_sourceless_advisory_in_same_package_still_blocks(self):
+        old = self.no_source("a", "GHSA-aaaa-bbbb-cccc", "old")
+        new = self.no_source("a", "GHSA-dddd-eeee-ffff", "new")
+        report = audit(("a", "high", [old, new]))
+        self.assertEqual(
+            len(gate.blocking_advisories(report, allow("GHSA-aaaa-bbbb-cccc"))), 1
+        )
+
+    def test_advisory_without_any_id_is_never_allowlisted(self):
+        anon = {"name": "x", "severity": "high", "title": "no ids"}
+        report = audit(("x", "high", [anon]))
+        # Even an allowlist containing the stringified "None" must not match.
+        allowlist = {"npm": ["None"], "_justifications": {"None": "nope"}}
+        self.assertEqual(len(gate.blocking_advisories(report, allowlist)), 1)
+
+    def test_identical_advisory_still_deduped(self):
+        # Control: the real duplicate case (same advisory under two paths).
+        report = audit(("braces", "high", [BRACES]), ("braces2", "high", [dict(BRACES)]))
+        self.assertEqual(len(gate.blocking_advisories(report, allow())), 1)
 
 
 class Cli(unittest.TestCase):
