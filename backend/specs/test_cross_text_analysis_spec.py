@@ -46,6 +46,7 @@ def _session(
     overall_score=None,
     accuracy=None,
     completed_at=None,
+    started_at=datetime(2025, 1, 9, 12, 0, tzinfo=timezone.utc),
     story_slug="test-story",
     id_=1,
 ):
@@ -56,6 +57,7 @@ def _session(
         accuracy=accuracy,
         story_slug=story_slug,
         completed_at=completed_at,
+        started_at=started_at,
         text=None,  # helpers expect .text attribute
     )
     return s
@@ -198,8 +200,8 @@ def test_vocabulary_growth_timeline_has_required_keys():
     assert keys == set(result[0].keys())
 
 
-def test_vocabulary_growth_skips_none_completed_at():
-    """Sessions with completed_at=None are skipped (not in timeline)."""
+def test_vocabulary_growth_falls_back_to_started_at():
+    """Completed sessions without completed_at use started_at."""
     s_no_dt = _session(completed_at=None, id_=1)
     t = _text(vocabulary=[{"word": "詞"}])
     s_no_dt.text = t
@@ -207,9 +209,8 @@ def test_vocabulary_growth_skips_none_completed_at():
     t2 = _text(vocabulary=[{"word": "詞"}])
     s_ok.text = t2
     result = _build_vocabulary_growth([(s_no_dt, t), (s_ok, t2)])
-    # Only the session with completed_at appears
-    assert len(result) == 1
-    assert result[0]["session_index"] == 2
+    assert len(result) == 2
+    assert result[0]["completed_at"] == s_no_dt.started_at.isoformat()
 
 
 def test_vocabulary_growth_session_index_starts_at_1():
@@ -260,8 +261,8 @@ def test_difficulty_progression_none_score_passed_through():
     assert result[0]["score"] is None
 
 
-def test_difficulty_progression_skips_none_completed_at():
-    """Sessions with completed_at=None are excluded from progression."""
+def test_difficulty_progression_falls_back_to_started_at():
+    """Completed sessions without completed_at use started_at."""
     s1 = _session(completed_at=None, id_=1)
     t1 = _text()
     s1.text = t1
@@ -269,7 +270,8 @@ def test_difficulty_progression_skips_none_completed_at():
     t2 = _text()
     s2.text = t2
     result = _build_difficulty_progression([(s1, t1), (s2, t2)])
-    assert len(result) == 1
+    assert len(result) == 2
+    assert result[0]["completed_at"] == s1.started_at.isoformat()
 
 
 # ---------------------------------------------------------------------------

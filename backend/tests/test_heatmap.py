@@ -178,7 +178,8 @@ def _enroll_student(classroom_id: int, student_id: int):
 
 
 def _seed_session(student_id: int, classroom_id: int, story_slug: str,
-                  overall_score: float | None, status: str = "completed"):
+                  overall_score: float | None, status: str = "completed",
+                  session_mode: str = "assignment"):
     db = TestingSessionLocal()
     sess = LearningSession(
         student_id=student_id,
@@ -186,6 +187,7 @@ def _seed_session(student_id: int, classroom_id: int, story_slug: str,
         story_slug=story_slug,
         overall_score=overall_score,
         status=status,
+        session_mode=session_mode,
     )
     db.add(sess)
     db.commit()
@@ -329,7 +331,45 @@ class TestHeatmapEndpoint:
         )
         assert entry is not None
         assert entry["status"] == "in_progress"
-        assert entry["score"] == 0.0
+        assert entry["score"] is None
+
+    def test_unscored_statuses_do_not_become_zero(self, client, teacher, seeded_classroom, student_a):
+        _seed_session(student_a["user_id"], seeded_classroom, "unscored-completed", None)
+        _seed_session(student_a["user_id"], seeded_classroom, "abandoned-story", None, "abandoned")
+        resp = client.get(
+            f"/api/teacher/classrooms/{seeded_classroom}/heatmap",
+            headers=auth_header(teacher["token"]),
+        )
+        assert resp.status_code == 200
+        entries = {e["story_id"]: e for e in resp.json()["scores"]}
+        assert entries["unscored-completed"]["score"] is None
+        assert entries["unscored-completed"]["status"] == "completed"
+        assert entries["abandoned-story"]["score"] is None
+        assert entries["abandoned-story"]["status"] == "abandoned"
+
+    def test_scored_attempt_wins_over_null_for_same_story(self, client, teacher, seeded_classroom, student_a):
+        _seed_session(student_a["user_id"], seeded_classroom, "scored-story", 80.0)
+        _seed_session(student_a["user_id"], seeded_classroom, "scored-story", None)
+        resp = client.get(
+            f"/api/teacher/classrooms/{seeded_classroom}/heatmap",
+            headers=auth_header(teacher["token"]),
+        )
+        entries = [e for e in resp.json()["scores"] if e["story_id"] == "scored-story"]
+        assert len(entries) == 1
+        assert entries[0]["score"] == 80.0
+
+    def test_self_study_and_other_class_sessions_excluded(self, client, teacher, school_id, seeded_classroom, student_a):
+        _seed_session(student_a["user_id"], seeded_classroom, "self-study-only", 100.0,
+                      session_mode="self_study")
+        other_classroom = _seed_classroom(teacher["user_id"], school_id)
+        _seed_session(student_a["user_id"], other_classroom, "other-class-only", 100.0)
+        resp = client.get(
+            f"/api/teacher/classrooms/{seeded_classroom}/heatmap",
+            headers=auth_header(teacher["token"]),
+        )
+        story_ids = {story["id"] for story in resp.json()["stories"]}
+        assert "self-study-only" not in story_ids
+        assert "other-class-only" not in story_ids
 
     def test_student_b_scores(self, client, teacher, seeded_classroom, student_b):
         """student_b scores: story '1' = 55, story '2' = 65."""
@@ -451,6 +491,7 @@ class TestHeatmapSessionLimit:
                 story_slug=f"limit-story-{i}",
                 overall_score=80.0,
                 status="completed",
+                session_mode="assignment",
             )
             for i in range(5001)
         ]
@@ -477,6 +518,7 @@ class TestHeatmapSessionLimit:
                 story_slug=f"small-story-{i}",
                 overall_score=80.0,
                 status="completed",
+                session_mode="assignment",
             )
             for i in range(10)
         ]

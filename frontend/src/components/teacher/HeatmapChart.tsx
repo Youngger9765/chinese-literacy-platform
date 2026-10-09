@@ -13,15 +13,17 @@ interface HeatmapChartProps {
   data: ClassroomHeatmap;
 }
 
-function getScoreColor(score: number | null, status: string | null): string {
-  if (score === null || status === null) return 'bg-gray-100 text-gray-400';
+function getScoreColor(score: number | null, status: string): string {
+  if (status === 'in_progress') return 'border border-dashed border-gray-400 text-gray-600';
+  if (status !== 'completed' || score === null) return 'bg-gray-100 text-gray-500';
   if (score >= 80) return 'bg-green-400 text-white';
   if (score >= 60) return 'bg-yellow-400 text-white';
   return 'bg-red-400 text-white';
 }
 
-function getScoreLabel(score: number | null): string {
-  if (score === null) return '-';
+function getScoreLabel(score: number | null, status: string): string {
+  if (status === 'in_progress') return '進行中';
+  if (status !== 'completed' || score === null) return '未完成';
   return String(Math.round(score));
 }
 
@@ -37,7 +39,7 @@ const HeatmapChart: React.FC<HeatmapChartProps> = ({ data }) => {
   }
 
   // Build lookup: "student_id:story_id" -> score entry
-  const scoreMap = new Map<string, { score: number; status: string }>();
+  const scoreMap = new Map<string, { score: number | null; status: string }>();
   for (const entry of scores) {
     scoreMap.set(`${entry.student_id}:${entry.story_id}`, {
       score: entry.score,
@@ -79,12 +81,12 @@ const HeatmapChart: React.FC<HeatmapChartProps> = ({ data }) => {
                 const key = `${student.id}:${story.id}`;
                 const entry = scoreMap.get(key) ?? null;
                 const score = entry ? entry.score : null;
-                const status = entry ? entry.status : null;
+                const status = entry ? entry.status : 'not_started';
                 const colorClass = getScoreColor(score, status);
-                const label = getScoreLabel(score);
+                const label = getScoreLabel(score, status);
                 const tooltip = entry
-                  ? `${student.name} / ${story.title}: ${score} 分 (${status})`
-                  : `${student.name} / ${story.title}: 尚未練習`;
+                  ? `${student.name} / ${story.title}: ${score !== null && status === 'completed' ? `${score} 分` : label}`
+                  : `${student.name} / ${story.title}: 未開始`;
 
                 return (
                   <td
@@ -93,7 +95,7 @@ const HeatmapChart: React.FC<HeatmapChartProps> = ({ data }) => {
                     title={tooltip}
                   >
                     <span
-                      className={`inline-flex items-center justify-center w-9 h-7 rounded text-xs font-semibold ${colorClass}`}
+                      className={`inline-flex items-center justify-center min-w-9 px-1 h-7 rounded text-xs font-semibold ${colorClass}`}
                     >
                       {label}
                     </span>
@@ -111,7 +113,8 @@ const HeatmapChart: React.FC<HeatmapChartProps> = ({ data }) => {
         <LegendItem color="bg-green-400" label="優秀 (≥80)" />
         <LegendItem color="bg-yellow-400" label="良好 (60-79)" />
         <LegendItem color="bg-red-400" label="需加強 (<60)" />
-        <LegendItem color="bg-gray-100 border border-gray-300 text-gray-400" label="尚未練習" />
+        <LegendItem color="border border-dashed border-gray-400" label="進行中" />
+        <LegendItem color="bg-gray-100 border border-gray-300 text-gray-500" label="未完成" />
       </div>
     </div>
   );

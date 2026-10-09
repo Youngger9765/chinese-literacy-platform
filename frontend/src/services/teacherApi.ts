@@ -116,7 +116,7 @@ export interface HeatmapStory {
 export interface HeatmapScore {
   student_id: number;
   story_id: string;
-  score: number;
+  score: number | null;
   status: string;
 }
 
@@ -221,6 +221,8 @@ export interface StudentCrossTextPattern {
   student_name: string;
   total_texts_attempted: number;
   total_sessions: number;
+  sample_count: number;
+  completed_without_score: number;
   overall_avg_score: number | null;
   score_trend: Array<{
     date: string;
@@ -239,6 +241,8 @@ export interface ClassroomCrossTextPattern {
   classroom_name: string;
   total_students: number;
   total_sessions: number;
+  sample_count: number;
+  completed_without_score: number;
   text_difficulty_ranking: Array<{
     story_slug: string;
     title: string | null;
@@ -255,7 +259,7 @@ export interface ClassroomCrossTextPattern {
 export interface AtRiskStudent {
   student_id: number;
   student_name: string;
-  risk_level: 'low' | 'medium' | 'high';
+  risk_level: 'low' | 'medium' | 'high' | 'insufficient_data';
   risk_factors: string[];
   recommended_actions: string[];
   confidence_score: number;
@@ -732,4 +736,52 @@ export interface PreviewTokenResponse {
  */
 export function requestPreviewToken(studentId: number): Promise<PreviewTokenResponse> {
   return post(`/api/teacher/students/${studentId}/preview-token`, {});
+}
+
+// ── Assignment matrix + per-item class stats (#3367) ─────────────────────────
+
+/** completed | in_progress | not_started | not_assigned — never coerce to a score. */
+export type MatrixCellState = 'completed' | 'in_progress' | 'not_started' | 'not_assigned';
+
+export interface AssignmentMatrixResponse {
+  students: Array<{ id: number; name: string }>;
+  assignments: Array<{ id: number; title: string; due_date: string | null }>;
+  cells: Array<{
+    student_id: number;
+    assignment_id: number;
+    state: MatrixCellState;
+    score: number | null;
+    current_step: string | null;
+  }>;
+}
+
+export function getAssignmentMatrix(
+  _token: string,
+  classroomId: number,
+): Promise<AssignmentMatrixResponse> {
+  return get(`/api/teacher/classrooms/${classroomId}/assignment-matrix`);
+}
+
+export interface AssignmentItemStat {
+  key: string;
+  label: string;
+  completed: number;
+  total: number;
+  completion_rate: number | null;
+  correct_rate: number | null;
+  error_rate: number | null;
+}
+
+export interface AssignmentItemStatsResponse {
+  assignment_id: number;
+  submitted_count: number;
+  /** Sorted weakest first by the backend. */
+  items: AssignmentItemStat[];
+}
+
+export function getAssignmentItemStats(
+  _token: string,
+  assignmentId: number,
+): Promise<AssignmentItemStatsResponse> {
+  return get(`/api/teacher/assignments/${assignmentId}/item-stats`);
 }

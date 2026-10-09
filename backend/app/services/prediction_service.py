@@ -11,7 +11,7 @@ Signals analysed:
   4. Low engagement — long gaps between sessions (> 14 days)
   5. Multiple stuck-points detected
 
-Returns: risk_level (low/medium/high), risk_factors[], recommended_actions[],
+Returns: risk_level (insufficient_data/low/medium/high), risk_factors[], recommended_actions[],
          confidence_score (0-1), and supporting data.
 """
 
@@ -48,7 +48,7 @@ def predict_learning_difficulty(student_id: int, db: "DbSession") -> dict:
 
     Returns:
       {
-        risk_level: "low" | "medium" | "high",
+        risk_level: "insufficient_data" | "low" | "medium" | "high",
         risk_factors: list[str],
         recommended_actions: list[str],
         confidence_score: float,   # 0-1
@@ -68,7 +68,15 @@ def predict_learning_difficulty(student_id: int, db: "DbSession") -> dict:
     )
 
     if not sessions:
-        return _empty_prediction()
+        latest_session = (
+            db.query(LearningSession)
+            .filter(LearningSession.student_id == student_id)
+            .order_by(LearningSession.started_at.desc())
+            .first()
+        )
+        if latest_session is None:
+            return _empty_prediction()
+        sessions = [latest_session]
 
     risk_factors: list[str] = []
     recommended_actions: list[str] = []
@@ -99,7 +107,7 @@ def predict_learning_difficulty(student_id: int, db: "DbSession") -> dict:
     # Signal 4 — low engagement (inactivity)
     gap_days = _check_engagement_gap(sessions)
     supporting["max_inactivity_days"] = gap_days
-    if gap_days is not None and gap_days > INACTIVITY_DAYS:
+    if gap_days is not None and gap_days >= INACTIVITY_DAYS:
         risk_factors.append(f"練習頻率偏低（最長間隔 {gap_days} 天未練習）")
         recommended_actions.append("設定固定練習提醒，建議每周至少練習 3 次")
 
@@ -134,7 +142,7 @@ def predict_learning_difficulty(student_id: int, db: "DbSession") -> dict:
 
 def _empty_prediction() -> dict:
     return {
-        "risk_level": "low",
+        "risk_level": "insufficient_data",
         "risk_factors": [],
         "recommended_actions": [],
         "confidence_score": 0.0,
@@ -216,12 +224,14 @@ def _check_declining_trend(sessions: list[LearningSession]) -> dict:
 
 
 def _check_engagement_gap(sessions: list[LearningSession]) -> int | None:
-    """Largest gap in days between consecutive sessions."""
-    if len(sessions) < 2:
+    """Largest session gap, including days since the latest practice."""
+    if not sessions or sessions[-1].started_at is None:
         return None
-    dates = [s.started_at for s in sessions]
+    dates = [s.started_at for s in sessions if s.started_at is not None]
     gaps = [(dates[i + 1] - dates[i]).days for i in range(len(dates) - 1)]
-    return max(gaps) if gaps else None
+    last = dates[-1]
+    now = datetime.now(last.tzinfo) if last.tzinfo else datetime.now()
+    return max([0, (now - last).days, *gaps])
 
 
 def _check_stuck_count(sessions: list[LearningSession]) -> int:
@@ -253,10 +263,15 @@ def _compute_risk_level(
     # Confidence grows with session count (more data = more reliable)
     data_confidence = min(session_count / 5.0, 1.0)  # saturates at 5 sessions
 
+    if factor_count == 0 and not any(
+        s.accuracy is not None or s.started_at is not None for s in sessions
+    ):
+        return "insufficient_data", 0.0
+
     if factor_count == 0:
         return "low", round(0.3 * data_confidence, 2)
     elif factor_count == 1:
-        return "low", round(0.5 * data_confidence, 2)
+        return "medium", round(0.5 * data_confidence, 2)
     elif factor_count == 2:
         return "medium", round(0.65 * data_confidence, 2)
     elif factor_count == 3:

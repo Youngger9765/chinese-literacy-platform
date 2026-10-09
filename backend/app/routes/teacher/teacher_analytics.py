@@ -187,13 +187,15 @@ def get_classroom_heatmap(
     student_ids = [e.student_id for e in enrollments]
     students_map = {e.student_id: e.student for e in enrollments}
 
-    # Query sessions for classroom students that have a story_slug.
+    # Query assigned sessions for this classroom that have a story_slug.
     # Fetch one extra row to detect overflow — if we get more than the limit,
     # raise 400 so the caller knows data would be silently truncated.
     sessions_raw = (
         db.query(LearningSession)
         .filter(
             LearningSession.student_id.in_(student_ids),
+            LearningSession.classroom_id == classroom_id,
+            LearningSession.session_mode == "assignment",
             LearningSession.story_slug.isnot(None),
         )
         .limit(_HEATMAP_SESSION_LIMIT + 1)
@@ -217,12 +219,16 @@ def get_classroom_heatmap(
         if existing is None:
             best_score_map[key] = sess
         else:
-            # Prefer completed sessions; among same status, prefer higher score
-            existing_score = existing.overall_score or 0.0
-            new_score = sess.overall_score or 0.0
-            if sess.status == "completed" and existing.status != "completed":
+            # A real score takes precedence over an unscored attempt.
+            if sess.overall_score is not None and existing.overall_score is None:
                 best_score_map[key] = sess
-            elif sess.status == existing.status and new_score > existing_score:
+            elif sess.overall_score is None and existing.overall_score is not None:
+                continue
+            elif sess.status == "completed" and existing.status != "completed":
+                best_score_map[key] = sess
+            elif (sess.status == existing.status and sess.overall_score is not None
+                  and existing.overall_score is not None
+                  and sess.overall_score > existing.overall_score):
                 best_score_map[key] = sess
 
     # Collect unique story slugs and resolve titles
@@ -250,7 +256,7 @@ def get_classroom_heatmap(
     # Build score entries
     score_entries: list[HeatmapScoreEntry] = []
     for (s_id, slug), sess in best_score_map.items():
-        score = round(sess.overall_score, 1) if sess.overall_score is not None else 0.0
+        score = round(sess.overall_score, 1) if sess.overall_score is not None else None
         score_entries.append(
             HeatmapScoreEntry(
                 student_id=s_id,

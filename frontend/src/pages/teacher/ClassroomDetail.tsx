@@ -1,12 +1,17 @@
 /**
- * ClassroomDetail — Issue #1943
+ * ClassroomDetail — Issue #1943, re-laid out for #3367
  *
  * Orchestrator: owns all state + data-fetching.
  * Renders via:
+ *   - ClassSwitcher        (切換班級，停在同一個分頁)
  *   - ClassroomHeaderCard  (班級資訊 + 加入代碼 panel)
+ *   - 學生名單              (原本是獨立分頁，依現場回饋放進班級頁首，可收合)
  *   - ClassroomTabs        (tab bar + tab content delegation)
+ *
+ * 目前分頁與點開的作業記在網址（?tab= / ?assignment=），切班、重新整理、分享連結都不會跑掉。
  */
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   getClassroomDetail,
@@ -20,7 +25,9 @@ import {
   ClassroomApiError,
 } from '../../services/classroomApi';
 import ClassroomHeaderCard from './ClassroomHeaderCard';
-import ClassroomTabs, { TabKey } from './ClassroomTabs';
+import ClassroomTabs, { TabKey, resolveTabKey } from './ClassroomTabs';
+import StudentListTab from './StudentListTab';
+import ClassSwitcher from './panel/ClassSwitcher';
 
 interface ClassroomDetailProps {
   classroomId: number;
@@ -32,7 +39,26 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
   const [classroom, setClassroom] = useState<ClassroomDetailResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState<TabKey>('progress');
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = resolveTabKey(searchParams.get('tab'));
+  const assignmentParam = searchParams.get('assignment');
+  const selectedAssignmentId = assignmentParam ? Number(assignmentParam) || null : null;
+  const [isRosterOpen, setIsRosterOpen] = useState(true);
+
+  const updateParams = (patch: Record<string, string | null>) => {
+    const next = new URLSearchParams(searchParams);
+    for (const [k, v] of Object.entries(patch)) {
+      if (v === null) next.delete(k);
+      else next.set(k, v);
+    }
+    setSearchParams(next, { replace: true });
+  };
+  const setActiveTab = (tab: TabKey) =>
+    updateParams({ tab, assignment: tab === 'assignments' ? searchParams.get('assignment') : null });
+  const setSelectedAssignment = (id: number | null) =>
+    updateParams({ tab: 'assignments', assignment: id === null ? null : String(id) });
+  const switchClassroom = (id: number) => navigate(`/teacher/classroom/${id}?tab=${activeTab}`);
 
   // Edit state
   const [isEditing, setIsEditing] = useState(false);
@@ -271,7 +297,10 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
   return (
     <div className="flex-1 overflow-y-auto p-6 sm:p-8">
       <div className="max-w-4xl mx-auto space-y-6">
-        <BackButton />
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <BackButton />
+          <ClassSwitcher currentId={classroomId} onSwitch={switchClassroom} />
+        </div>
 
         {/* Inline error */}
         {error && (
@@ -307,25 +336,46 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
           formatDate={formatDate}
         />
 
+        <section className="bg-white rounded-2xl shadow-card" aria-label="學生名單">
+          <button
+            type="button"
+            onClick={() => setIsRosterOpen((v) => !v)}
+            aria-expanded={isRosterOpen}
+            className="w-full flex items-center justify-between px-6 py-4 text-left cursor-pointer"
+          >
+            <span className="text-lg font-semibold text-gray-900">
+              學生名單（{classroom.students.length} 人）
+            </span>
+            <span className="text-sm text-gray-500">{isRosterOpen ? '收合 ▲' : '展開 ▼'}</span>
+          </button>
+          {isRosterOpen && (
+            <div className="border-t border-gray-100">
+              <StudentListTab
+                classroom={classroom}
+                token={token}
+                studentIdInput={studentIdInput}
+                setStudentIdInput={setStudentIdInput}
+                isAddingStudent={isAddingStudent}
+                addStudentError={addStudentError}
+                setAddStudentError={setAddStudentError}
+                onAddStudent={handleAddStudent}
+                removingStudentId={removingStudentId}
+                onRemoveStudent={handleRemoveStudent}
+                setRemovingStudentId={setRemovingStudentId}
+                formatDate={formatDate}
+                onStudentsImported={loadClassroom}
+              />
+            </div>
+          )}
+        </section>
+
         <ClassroomTabs
           activeTab={activeTab}
           onTabChange={setActiveTab}
           classroomId={classroomId}
-          classroom={classroom}
-          studentListProps={{
-            token,
-            studentIdInput,
-            setStudentIdInput,
-            isAddingStudent,
-            addStudentError,
-            setAddStudentError,
-            onAddStudent: handleAddStudent,
-            removingStudentId,
-            onRemoveStudent: handleRemoveStudent,
-            setRemovingStudentId,
-            formatDate,
-            onStudentsImported: loadClassroom,
-          }}
+          ownerId={classroom.teacher_id}
+          selectedAssignmentId={selectedAssignmentId}
+          onSelectAssignment={setSelectedAssignment}
         />
       </div>
     </div>

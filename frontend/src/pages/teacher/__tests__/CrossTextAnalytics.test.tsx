@@ -48,6 +48,8 @@ const mockStudentPattern: teacherApi.StudentCrossTextPattern = {
   student_name: '王小明',
   total_texts_attempted: 3,
   total_sessions: 5,
+  sample_count: 2,
+  completed_without_score: 3,
   overall_avg_score: 78,
   score_trend: [
     { date: '2026-04-01', score: 70, story_slug: 'L1', title: '課文一' },
@@ -73,6 +75,8 @@ const mockClassData: teacherApi.ClassroomCrossTextPattern = {
   classroom_name: '三年甲班',
   total_students: 2,
   total_sessions: 10,
+  sample_count: 2,
+  completed_without_score: 8,
   text_difficulty_ranking: [
     { story_slug: 'L1', title: '課文一', avg_score: 65, attempt_count: 5 },
   ],
@@ -145,6 +149,12 @@ describe('CrossTextAnalytics — class overview (default view)', () => {
   it('renders 班級整體分數趨勢 section when trend has data', async () => {
     renderComponent();
     await waitFor(() => expect(screen.getByText('班級整體分數趨勢')).toBeInTheDocument());
+  });
+
+  it('discloses scored and unscored attempts when fewer than three scores exist', async () => {
+    renderComponent();
+    await waitFor(() => expect(screen.getByText('樣本數：2')).toBeInTheDocument());
+    expect(screen.getByText('共 10 筆練習，2 筆有分數，8 筆完成但無分數')).toBeInTheDocument();
   });
 
   it('renders 課文難易排行 section', async () => {

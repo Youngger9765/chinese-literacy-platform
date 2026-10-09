@@ -117,6 +117,11 @@ import ClassicalText from '../components/reading-steps/ClassicalText';
 import ClassicalWordMatching from '../components/reading-steps/ClassicalWordMatching';
 import ClassicalSentenceMatching from '../components/reading-steps/ClassicalSentenceMatching';
 import ClassicalSelfChallenge from '../components/reading-steps/ClassicalSelfChallenge';
+import TodayOverviewTab from '../pages/teacher/panel/TodayOverviewTab';
+import AssignmentsPanel from '../pages/teacher/panel/AssignmentsPanel';
+import AssignmentMatrixGrid from '../pages/teacher/panel/AssignmentMatrixGrid';
+import AssignmentItemStats from '../pages/teacher/panel/AssignmentItemStats';
+import ClassSwitcher from '../pages/teacher/panel/ClassSwitcher';
 
 // ── Minimal fixtures ─────────────────────────────────────────────────────────
 
@@ -535,5 +540,23 @@ describe('render-smoke: LessonAudioTable — admin audio table mounts without TD
     // for 讀全文-做記號 and is gone. This is the page an anonymous QR visitor
     // now lands on.
     mountGuard('GuestReadingPage', <GuestReadingPage />);
+  });
+});
+
+describe('render-smoke: teacher panel (#3367) mounts without TDZ', () => {
+  it('TodayOverviewTab', () => {
+    mountGuard('TodayOverviewTab', <TodayOverviewTab classroomId={1} onOpenAssignment={() => {}} onOpenAtRisk={() => {}} />);
+  });
+  it('AssignmentsPanel', () => {
+    mountGuard('AssignmentsPanel', <AssignmentsPanel classroomId={1} selectedAssignmentId={null} onSelectAssignment={() => {}} />);
+  });
+  it('AssignmentMatrixGrid', () => {
+    mountGuard('AssignmentMatrixGrid', <AssignmentMatrixGrid data={{ students: [], assignments: [], cells: [] }} onOpenAssignment={() => {}} />);
+  });
+  it('AssignmentItemStats', () => {
+    mountGuard('AssignmentItemStats', <AssignmentItemStats data={{ assignment_id: 1, submitted_count: 0, items: [] }} />);
+  });
+  it('ClassSwitcher', () => {
+    mountGuard('ClassSwitcher', <ClassSwitcher currentId={1} onSwitch={() => {}} />);
   });
 });
