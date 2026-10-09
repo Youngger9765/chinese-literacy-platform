@@ -213,6 +213,28 @@ def check_and_award_badges(
     return newly_unlocked
 
 
+def _backfill_submission_scores(db: Session, session_id: int, score: float) -> None:
+    """Give already-submitted assignments the score that was just computed (#3373).
+
+    ReportPage fires "submit assignment" and "session complete" at the same
+    time. Submit copies ``overall_score`` into ``submission.score`` at that
+    instant, so when it wins the race it copies None and the score computed a
+    moment later never reached the teacher. Only empty scores are filled — a
+    teacher's grade or an earlier value is never overwritten.
+    """
+    from ..models.assignment import AssignmentSubmission
+
+    (
+        db.query(AssignmentSubmission)
+        .filter(
+            AssignmentSubmission.session_id == session_id,
+            AssignmentSubmission.status.in_(("submitted", "graded")),
+            AssignmentSubmission.score.is_(None),
+        )
+        .update({AssignmentSubmission.score: score}, synchronize_session=False)
+    )
+
+
 def process_session_completion(
     db: Session,
     student_id: int,
@@ -370,6 +392,7 @@ def process_session_completion(
                 "Set overall_score=%.1f for session %d (sources=%d)",
                 learning_session.overall_score, session_id, len(scores),
             )
+            _backfill_submission_scores(db, session_id, learning_session.overall_score)
 
         # ⛔ 標記完成**不可以**綁在「有沒有算出分數」上（#2904 的第二層）。
         # 原本這三行縮在 `if scores and weights:` 裡面，於是三個來源都空的 session
