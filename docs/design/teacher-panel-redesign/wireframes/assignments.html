@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tab 2 作業（合併「課文管理」）</title>
+<style>
+  :root {
+    --surface: #FBF6EE; --surface-0: #FFFFFF; --surface-low: #F5F0E8;
+    --surface-container: #ECE8DF; --surface-high: #E7E2D8;
+    --on-surface: #302F2A; --on-surface-variant: #5E5B55; --on-surface-faint: #8A8678;
+    --accent: #564ABF; --accent-hover: #4A3CB2; --accent-bg: #EDEBF9; --accent-bg-subtle: #E0DCF5;
+    --success: #006947; --success-bg: #E3F2EC;
+    --warning: #D97706; --warning-bg: #FEF3E2;
+    --error: #DC2626; --error-bg: #FDECEC;
+    --shadow-card: 0 0 32px rgba(136, 152, 170, 0.12);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Noto Sans TC","PingFang TC","Microsoft JhengHei",ui-sans-serif,system-ui,sans-serif; background: var(--surface); color: var(--on-surface); font-size: 16px; line-height: 1.6; }
+  .wf-banner { background:#1A1740; color:#E0DCF5; font-size:13px; padding:7px 16px; text-align:center; }
+  .wf-shell { display:flex; min-height:100vh; }
+  .wf-sidebar { width:216px; flex-shrink:0; background:var(--surface-0); border-right:1px solid var(--surface-high); padding:20px 12px; }
+  .wf-logo { font-weight:700; font-size:17px; padding:0 8px 22px; color:var(--accent); }
+  .wf-nav-item { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:10px; font-size:15px; font-weight:600; color:var(--on-surface-variant); margin-bottom:2px; }
+  .wf-nav-item.active { background:var(--accent-bg); color:var(--accent); }
+  .wf-main { flex:1; padding:28px 36px 64px; max-width:1180px; }
+  .wf-tag { display:inline-block; font-size:11px; font-weight:700; letter-spacing:.02em; padding:3px 9px; border-radius:999px; background:var(--accent-bg); color:var(--accent); margin-bottom:14px; }
+  h1 { font-size:22px; font-weight:700; margin:0 0 4px; }
+  p.lead { color:var(--on-surface-variant); font-size:14px; margin:0 0 18px; }
+  .tabs { display:flex; gap:2px; border-bottom:1px solid var(--surface-high); margin:0 0 22px; flex-wrap:wrap; }
+  .tab { padding:11px 15px; font-size:14px; font-weight:700; color:var(--on-surface-variant); border-bottom:2.5px solid transparent; }
+  .tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+  .row-between { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+  .pillbar { display:inline-flex; background:var(--surface-container); border-radius:10px; padding:3px; gap:2px; }
+  .pill { padding:7px 14px; font-size:13.5px; font-weight:700; border-radius:8px; color:var(--on-surface-variant); cursor:default; }
+  .pill.active { background:var(--surface-0); color:var(--accent); box-shadow:0 1px 3px rgba(0,0,0,0.08); }
+  .btn { display:inline-flex; align-items:center; gap:6px; padding:9px 16px; border-radius:9px; font-size:14px; font-weight:700; background:var(--accent); color:#fff; }
+  .btn-ghost { font-size:13px; font-weight:700; color:var(--on-surface-variant); border:1px solid var(--surface-high); padding:7px 13px; border-radius:9px; white-space:nowrap; }
+  .wf-card { background:var(--surface-0); border:1px solid var(--surface-high); border-radius:16px; padding:0; box-shadow:var(--shadow-card); overflow:hidden; margin-top:18px; }
+  table { width:100%; border-collapse:collapse; font-size:14px; }
+  th { text-align:left; font-size:12px; color:var(--on-surface-variant); font-weight:700; padding:12px 16px; border-bottom:1px solid var(--surface-high); background:var(--surface-low); }
+  td { padding:14px 16px; border-bottom:1px solid var(--surface-low); vertical-align:middle; }
+  tr:last-child td { border-bottom:none; }
+  tr.row-link:hover { background: var(--surface-low); cursor: pointer; }
+  .mono { font-variant-numeric:tabular-nums; font-family:"SF Mono","Menlo",monospace; }
+  .link { color:var(--accent); font-size:13px; font-weight:700; }
+  .cell-score { display:inline-flex; align-items:center; justify-content:center; min-width:40px; height:26px; border-radius:7px; font-weight:800; font-size:13px; padding:0 6px; }
+  .score-high { background:var(--success-bg); color:var(--success); }
+  .score-mid { background:var(--warning-bg); color:var(--warning); }
+  .score-low { background:var(--error-bg); color:var(--error); }
+  .status-chip { font-size:12px; font-weight:700; padding:3px 9px; border-radius:999px; white-space:nowrap; }
+  .status-overdue { background:var(--error-bg); color:var(--error); }
+  .status-today { background:var(--warning-bg); color:var(--warning); }
+  .status-upcoming { background:var(--surface-container); color:var(--on-surface-variant); }
+  .status-complete { background:var(--success-bg); color:var(--success); }
+  .status-library { background:var(--accent-bg); color:var(--accent); }
+  .annotation { font-size:12.5px; color:var(--on-surface-variant); border-left:3px solid var(--accent-bg-subtle); padding:10px 14px; margin:16px 0; background:var(--surface-low); border-radius:0 8px 8px 0; line-height:1.65; }
+  .annotation b { color:var(--on-surface); }
+  .section-title { font-size:15px; font-weight:700; margin:28px 0 4px; }
+  .library-badge { font-size:11px; font-weight:700; color:var(--accent); }
+  .wizard-note { font-size:12.5px; color:var(--on-surface-variant); }
+</style>
+</head>
+<body>
+<div class="wf-banner">WIREFRAME — issue #3357 教師面板重設計 · 對應 README §3 / §4.3 · 非真實資料</div>
+<div class="wf-shell">
+  <div class="wf-sidebar">
+    <div class="wf-logo">LingoLeap</div>
+    <div class="wf-nav-item active">🏫 班級</div>
+    <div class="wf-nav-item">❓ 使用說明</div>
+  </div>
+  <div class="wf-main">
+    <span class="wf-tag">四年甲班 · Tab 2 作業</span>
+    <div class="row-between">
+      <div>
+        <h1>作業</h1>
+        <p class="lead" style="margin-bottom:0;">合併了原本分開的「作業管理」與「課文管理（指派課文）」—— 見 README §3</p>
+      </div>
+      <span class="btn">＋ 建立作業</span>
+    </div>
+
+    <div class="tabs">
+      <span class="tab">今日總覽</span>
+      <span class="tab active">作業</span>
+      <span class="tab">學生自學總覽</span>
+      <span class="tab">早期介入</span>
+      <span class="tab">錯字總表</span>
+      <span class="tab">協同教師</span>
+    </div>
+
+    <div class="row-between">
+      <div class="pillbar">
+        <span class="pill active">全部（8）</span>
+        <span class="pill">正式作業（6）</span>
+        <span class="pill">自學課文庫（2）</span>
+      </div>
+      <span class="btn-ghost">跨作業趨勢 →</span>
+    </div>
+
+    <div class="wf-card">
+      <table>
+        <thead><tr><th>作業 / 課文</th><th>類型</th><th>到期日</th><th>已交 / 總數</th><th>班平均</th><th></th></tr></thead>
+        <tbody>
+          <tr class="row-link" style="background:var(--error-bg);">
+            <td><b>贏得喝采的輸家</b></td>
+            <td><span class="status-chip status-overdue">正式作業</span></td>
+            <td>09/28（逾期 11 天）</td>
+            <td class="mono">19 / 28</td>
+            <td><span class="cell-score score-mid">61</span></td>
+            <td><span class="link">查看矩陣 →</span></td>
+          </tr>
+          <tr class="row-link" style="background:var(--warning-bg);">
+            <td><b>古詩兩首（朗讀＋理解）</b></td>
+            <td><span class="status-chip status-today">正式作業</span></td>
+            <td>10/09（今天到期）</td>
+            <td class="mono">22 / 28</td>
+            <td><span class="cell-score score-mid">76</span></td>
+            <td><span class="link">查看矩陣 →</span></td>
+          </tr>
+          <tr class="row-link">
+            <td>小木偶奇遇記（理解）</td>
+            <td><span class="status-chip status-complete">正式作業</span></td>
+            <td>10/05（已過期）</td>
+            <td class="mono">28 / 28</td>
+            <td><span class="cell-score score-high">88</span></td>
+            <td><span class="link">查看矩陣 →</span></td>
+          </tr>
+          <tr class="row-link">
+            <td>月亮的秘密</td>
+            <td><span class="status-chip status-upcoming">正式作業</span></td>
+            <td>10/16</td>
+            <td class="mono">4 / 28</td>
+            <td class="mono" style="color:var(--on-surface-faint);">—</td>
+            <td><span class="link">查看矩陣 →</span></td>
+          </tr>
+          <tr class="row-link">
+            <td>阿嬤的菜園</td>
+            <td><span class="status-chip status-upcoming">正式作業</span></td>
+            <td>10/23</td>
+            <td class="mono">0 / 28</td>
+            <td class="mono" style="color:var(--on-surface-faint);">—</td>
+            <td><span class="link">查看矩陣 →</span></td>
+          </tr>
+          <tr class="row-link">
+            <td>科學小偵探</td>
+            <td><span class="status-chip status-upcoming">正式作業（草稿）</span></td>
+            <td>10/30</td>
+            <td class="mono">— / 28</td>
+            <td class="mono" style="color:var(--on-surface-faint);">—</td>
+            <td><span class="link">編輯草稿 →</span></td>
+          </tr>
+          <tr class="row-link">
+            <td>十二生肖的故事<br><span class="library-badge">● 已在自學圖書館上架</span></td>
+            <td><span class="status-chip status-library">自學課文庫</span></td>
+            <td>—</td>
+            <td class="mono" style="color:var(--on-surface-faint);">12 人讀過</td>
+            <td class="mono" style="color:var(--on-surface-faint);">—</td>
+            <td><span class="link">查看自學總覽 →</span></td>
+          </tr>
+          <tr class="row-link">
+            <td>勇敢的小錫兵<br><span class="library-badge">● 已在自學圖書館上架</span></td>
+            <td><span class="status-chip status-library">自學課文庫</span></td>
+            <td>—</td>
+            <td class="mono" style="color:var(--on-surface-faint);">5 人讀過</td>
+            <td class="mono" style="color:var(--on-surface-faint);">—</td>
+            <td><span class="link">查看自學總覽 →</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="annotation">設計依據：README §3 —— 讀 code 發現 <b>建立正式作業時系統已經自動把課文同步進自學課文庫（#997）</b>，所以「自學課文庫」欄不是全新功能，是把老師原本看不到的既有同步行為攤開顯示。「已在自學圖書館上架」這行字直接回應現場回饋「指派完只出現在這一頁」——根因不是資料真的消失，是教師端從來沒有顯示「這份課文現在在自學圖書館裡」這件事，讓老師誤以為石沉大海。</p>
+
+    <div class="section-title">＋ 建立作業（精簡示意，非完整表單）</div>
+    <div class="wf-card" style="padding:18px 20px;">
+      <p class="wizard-note">課文挑選器優先顯示「已在自學課文庫」的課文（體感更快），但仍可搜尋全部 175 篇平台課文或自建教材。設定到期日、目標 CPM／正確率後建立 —— 若此時選的課文還不在課文庫，建立時會自動同步加入（沿用既有 #997 行為，不是新機制）。</p>
+    </div>
+  </div>
+</div>
+</body>
+</html>

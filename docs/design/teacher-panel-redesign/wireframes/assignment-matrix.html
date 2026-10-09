@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>作業矩陣 + 跨作業趨勢（點進單一作業）</title>
+<style>
+  :root {
+    --surface: #FBF6EE; --surface-0: #FFFFFF; --surface-low: #F5F0E8;
+    --surface-container: #ECE8DF; --surface-high: #E7E2D8;
+    --on-surface: #302F2A; --on-surface-variant: #5E5B55; --on-surface-faint: #8A8678;
+    --accent: #564ABF; --accent-hover: #4A3CB2; --accent-bg: #EDEBF9; --accent-bg-subtle: #E0DCF5;
+    --success: #006947; --success-bg: #E3F2EC;
+    --warning: #D97706; --warning-bg: #FEF3E2;
+    --error: #DC2626; --error-bg: #FDECEC;
+    --grey-bg: #ECE8DF; --grey-text: #8A8678;
+    --shadow-card: 0 0 32px rgba(136, 152, 170, 0.12);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Noto Sans TC","PingFang TC","Microsoft JhengHei",ui-sans-serif,system-ui,sans-serif; background: var(--surface); color: var(--on-surface); font-size: 16px; line-height: 1.6; }
+  .wf-banner { background:#1A1740; color:#E0DCF5; font-size:13px; padding:7px 16px; text-align:center; }
+  .wf-shell { display:flex; min-height:100vh; }
+  .wf-sidebar { width:216px; flex-shrink:0; background:var(--surface-0); border-right:1px solid var(--surface-high); padding:20px 12px; }
+  .wf-logo { font-weight:700; font-size:17px; padding:0 8px 22px; color:var(--accent); }
+  .wf-nav-item { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:10px; font-size:15px; font-weight:600; color:var(--on-surface-variant); margin-bottom:2px; }
+  .wf-nav-item.active { background:var(--accent-bg); color:var(--accent); }
+  .wf-main { flex:1; padding:28px 36px 64px; max-width:1240px; }
+  .wf-tag { display:inline-block; font-size:11px; font-weight:700; letter-spacing:.02em; padding:3px 9px; border-radius:999px; background:var(--accent-bg); color:var(--accent); margin-bottom:14px; }
+  .breadcrumb { font-size:13px; color:var(--on-surface-variant); margin-bottom:6px; }
+  .breadcrumb b { color:var(--on-surface); }
+  h1 { font-size:22px; font-weight:700; margin:0 0 4px; }
+  p.lead { color:var(--on-surface-variant); font-size:14px; margin:0 0 18px; }
+  .viewtabs { display:flex; gap:2px; border-bottom:1px solid var(--surface-high); margin:0 0 20px; }
+  .viewtab { padding:10px 16px; font-size:14px; font-weight:700; color:var(--on-surface-variant); border-bottom:2.5px solid transparent; }
+  .viewtab.active { color:var(--accent); border-bottom-color:var(--accent); }
+
+  .wf-card { background:var(--surface-0); border:1px solid var(--surface-high); border-radius:16px; padding:0; box-shadow:var(--shadow-card); overflow:hidden; margin-bottom:28px; }
+  table { width:100%; border-collapse:collapse; font-size:13.5px; }
+  th { text-align:left; font-size:11.5px; color:var(--on-surface-variant); font-weight:700; padding:11px 14px; border-bottom:1px solid var(--surface-high); background:var(--surface-low); white-space:nowrap; }
+  td { padding:12px 14px; border-bottom:1px solid var(--surface-low); vertical-align:middle; }
+  tr:last-child td { border-bottom:none; }
+  tr.avg-row td { background:var(--accent-bg-subtle); font-weight:700; border-top:2px solid var(--accent); }
+  .mono { font-variant-numeric:tabular-nums; font-family:"SF Mono","Menlo",monospace; }
+
+  .state-pill { font-size:11.5px; font-weight:700; padding:3px 9px; border-radius:999px; white-space:nowrap; display:inline-block; }
+  .state-notstarted { background:var(--grey-bg); color:var(--grey-text); }
+  .state-inprogress { background:var(--warning-bg); color:var(--warning); border:1px dashed var(--warning); }
+  .state-done-high { background:var(--success-bg); color:var(--success); }
+  .state-done-mid { background:var(--warning-bg); color:var(--warning); }
+  .state-done-low { background:var(--error-bg); color:var(--error); }
+
+  .expand-toggle { color:var(--accent); font-size:12.5px; font-weight:700; cursor:default; }
+  .expanded-row td { background:var(--surface-low); padding:0; }
+  .expand-panel { padding:14px 14px 18px 40px; display:grid; grid-template-columns:repeat(5,1fr); gap:10px; }
+  .sub-card { background:var(--surface-0); border:1px solid var(--surface-high); border-radius:10px; padding:10px 12px; }
+  .sub-card .t { font-size:11.5px; font-weight:700; color:var(--on-surface-variant); margin-bottom:4px; }
+  .sub-card .v { font-size:16px; font-weight:800; }
+  .sub-card .sub { font-size:11px; color:var(--on-surface-faint); margin-top:2px; }
+  .expand-panel .link-full { grid-column: 1 / -1; font-size:12.5px; color:var(--accent); font-weight:700; margin-top:4px; }
+
+  .annotation { font-size:12.5px; color:var(--on-surface-variant); border-left:3px solid var(--accent-bg-subtle); padding:10px 14px; margin:14px 0 24px; background:var(--surface-low); border-radius:0 8px 8px 0; line-height:1.65; }
+  .annotation b { color:var(--on-surface); }
+
+  .small-multiples { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .sm-card { background:var(--surface-0); border:1px solid var(--surface-high); border-radius:14px; padding:16px; box-shadow:var(--shadow-card); }
+  .sm-title { font-size:13px; font-weight:700; margin-bottom:2px; }
+  .sm-sub { font-size:11.5px; color:var(--on-surface-faint); margin-bottom:10px; }
+  .sm-chart { height:64px; display:flex; align-items:flex-end; gap:4px; border-bottom:1px solid var(--surface-high); position:relative; }
+  .sm-bar { flex:1; background:var(--accent-bg-subtle); border-radius:3px 3px 0 0; position:relative; }
+  .sm-bar.hi { background:var(--accent); }
+  .sm-avgline { position:absolute; left:0; right:0; border-top:2px dashed var(--on-surface-faint); }
+  .sm-avgline::after { content:"班平均"; position:absolute; right:0; top:-14px; font-size:9.5px; color:var(--on-surface-faint); background:var(--surface-0); padding:0 3px; }
+  .sm-footer { display:flex; justify-content:space-between; font-size:11px; color:var(--on-surface-faint); margin-top:6px; }
+  .sparse-tag { color:var(--warning); font-weight:700; }
+</style>
+</head>
+<body>
+<div class="wf-banner">WIREFRAME — issue #3357 教師面板重設計 · 對應 README §4.2 / §4.3 · 非真實資料</div>
+<div class="wf-shell">
+  <div class="wf-sidebar">
+    <div class="wf-logo">LingoLeap</div>
+    <div class="wf-nav-item active">🏫 班級</div>
+    <div class="wf-nav-item">❓ 使用說明</div>
+  </div>
+  <div class="wf-main">
+    <span class="wf-tag">四年甲班 · Tab 2 作業 · 作業詳情</span>
+    <div class="breadcrumb">作業 &gt; <b>贏得喝采的輸家</b>（09/28 到期，已逾期 11 天）</div>
+    <h1>贏得喝采的輸家 — 矩陣</h1>
+    <p class="lead">19 / 28 人已交　班平均 61 分</p>
+
+    <div class="viewtabs">
+      <span class="viewtab active">單一作業矩陣</span>
+      <span class="viewtab">跨作業趨勢</span>
+    </div>
+
+    <!-- ========== VIEW 1：單一作業矩陣 ========== -->
+    <div class="wf-card">
+      <table>
+        <thead><tr><th>學生</th><th>狀態</th><th>分數</th><th>正確率</th><th>完成時間</th><th></th></tr></thead>
+        <tbody>
+          <tr>
+            <td>王小明</td>
+            <td><span class="state-pill state-done-high">已完成</span></td>
+            <td class="mono">88</td>
+            <td class="mono">91%</td>
+            <td>10/01 14:20</td>
+            <td><span class="expand-toggle">收合 ▴</span></td>
+          </tr>
+          <tr class="expanded-row">
+            <td colspan="6">
+              <div class="expand-panel">
+                <div class="sub-card"><div class="t">朗讀</div><div class="v">96%</div><div class="sub">cpm 142</div></div>
+                <div class="sub-card"><div class="t">理解-字面</div><div class="v">3/3</div><div class="sub">100%</div></div>
+                <div class="sub-card"><div class="t">理解-推論</div><div class="v">2/3</div><div class="sub">67%</div></div>
+                <div class="sub-card"><div class="t">理解-評鑑</div><div class="v">2/2</div><div class="sub">100%</div></div>
+                <div class="sub-card"><div class="t">生字</div><div class="v">8/9</div><div class="sub">1 字錯：「喝」</div></div>
+                <div class="link-full">查看完整報告 →（既有 TeacherSessionReportPage，不重做）</div>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>林雨萱</td>
+            <td><span class="state-pill state-inprogress">進行中 · 第 3/5 步</span></td>
+            <td class="mono" style="color:var(--on-surface-faint);">—</td>
+            <td class="mono" style="color:var(--on-surface-faint);">—</td>
+            <td style="color:var(--on-surface-faint);">尚未送出</td>
+            <td><span class="expand-toggle">展開 ▾</span></td>
+          </tr>
+          <tr>
+            <td>陳柏宇</td>
+            <td><span class="state-pill state-notstarted">未開始</span></td>
+            <td class="mono" style="color:var(--on-surface-faint);">—</td>
+            <td class="mono" style="color:var(--on-surface-faint);">—</td>
+            <td style="color:var(--on-surface-faint);">—</td>
+            <td><span class="expand-toggle" style="color:var(--on-surface-faint);">—</span></td>
+          </tr>
+          <tr>
+            <td>李佳蓉</td>
+            <td><span class="state-pill state-done-high">已完成</span></td>
+            <td class="mono">95</td>
+            <td class="mono">97%</td>
+            <td>09/26 09:12</td>
+            <td><span class="expand-toggle">展開 ▾</span></td>
+          </tr>
+          <tr>
+            <td>張宇恩</td>
+            <td><span class="state-pill state-done-mid">已完成</span></td>
+            <td class="mono">58</td>
+            <td class="mono">63%</td>
+            <td>09/30 20:04</td>
+            <td><span class="expand-toggle">展開 ▾</span></td>
+          </tr>
+          <tr>
+            <td>黃詩涵</td>
+            <td><span class="state-pill state-inprogress">進行中 · 第 1/5 步</span></td>
+            <td class="mono" style="color:var(--on-surface-faint);">—</td>
+            <td class="mono" style="color:var(--on-surface-faint);">—</td>
+            <td style="color:var(--on-surface-faint);">尚未送出</td>
+            <td><span class="expand-toggle">展開 ▾</span></td>
+          </tr>
+          <tr>
+            <td>吳冠廷</td>
+            <td><span class="state-pill state-done-low">已完成</span></td>
+            <td class="mono">31</td>
+            <td class="mono">38%</td>
+            <td>09/29 16:40</td>
+            <td><span class="expand-toggle">展開 ▾</span></td>
+          </tr>
+          <tr>
+            <td colspan="6" style="text-align:center; color:var(--on-surface-faint); font-size:12.5px; padding:14px;">… 其餘 21 位學生略（線框圖示意：14 已完成 / 2 進行中 / 5 未開始）</td>
+          </tr>
+          <tr class="avg-row">
+            <td>全班平均</td>
+            <td>19 / 28 已交</td>
+            <td class="mono">61</td>
+            <td class="mono">68%</td>
+            <td colspan="2"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="annotation">設計依據：README §4.2 —— <b>三態顯示取代「None → 0」的靜默轉換</b>（陳柏宇「未開始」顯灰色，不是紅色 0；林雨萱/黃詩涵「進行中」顯示卡在第幾步，不給假分數）。根因實測見 <a href="#">#3359</a>：測試班級 10/54 格矩陣曾經是「沒分數顯示成 0」，6/9 位學生至少中一次。展開列的大題分解資料全部來自既有 <b>TeacherSessionReportResponse</b>（朗讀／理解三維度／生字），不需新建後端欄位——唯一限制是目前只到「大題」粒度，逐題對錯需要 <code>mcq_attempt</code> 補時間戳與外鍵才做得到（README §6 資料缺口）。</p>
+
+    <!-- ========== VIEW 2：跨作業趨勢（small multiples） ========== -->
+    <div style="margin-top:8px;">
+      <h1 style="font-size:17px;">跨作業趨勢（取代原「跨課文分析」的班級角度）</h1>
+      <p class="lead">每份作業一張小圖，不是把所有分數塞進同一條折線 —— 樣本數少的作業老實顯示樣本數，不假裝是完整趨勢。</p>
+      <div class="small-multiples">
+        <div class="sm-card">
+          <div class="sm-title">贏得喝采的輸家</div>
+          <div class="sm-sub">19 筆有分數　平均 61</div>
+          <div class="sm-chart">
+            <div class="sm-avgline" style="bottom:38%;"></div>
+            <div class="sm-bar" style="height:88%;"></div><div class="sm-bar" style="height:31%;"></div>
+            <div class="sm-bar" style="height:58%;"></div><div class="sm-bar hi" style="height:95%;"></div>
+            <div class="sm-bar" style="height:64%;"></div><div class="sm-bar" style="height:70%;"></div>
+            <div class="sm-bar" style="height:55%;"></div>
+          </div>
+          <div class="sm-footer"><span>09/26</span><span>10/09</span></div>
+        </div>
+        <div class="sm-card">
+          <div class="sm-title">小木偶奇遇記（理解）</div>
+          <div class="sm-sub">28 筆有分數　平均 88</div>
+          <div class="sm-chart">
+            <div class="sm-avgline" style="bottom:70%;"></div>
+            <div class="sm-bar hi" style="height:92%;"></div><div class="sm-bar hi" style="height:88%;"></div>
+            <div class="sm-bar hi" style="height:95%;"></div><div class="sm-bar hi" style="height:90%;"></div>
+            <div class="sm-bar hi" style="height:85%;"></div><div class="sm-bar hi" style="height:91%;"></div>
+            <div class="sm-bar hi" style="height:87%;"></div>
+          </div>
+          <div class="sm-footer"><span>09/20</span><span>10/05</span></div>
+        </div>
+        <div class="sm-card">
+          <div class="sm-title">古詩兩首（朗讀＋理解）</div>
+          <div class="sm-sub"><span class="sparse-tag">樣本數：3</span>　平均 76（其餘 19 份已交但無分數，見 <a href="#">#3360</a>）</div>
+          <div class="sm-chart">
+            <div class="sm-avgline" style="bottom:60%;"></div>
+            <div class="sm-bar" style="height:72%;"></div><div class="sm-bar" style="height:68%;"></div>
+            <div class="sm-bar hi" style="height:88%;"></div>
+          </div>
+          <div class="sm-footer"><span>10/08</span><span>10/09</span></div>
+        </div>
+      </div>
+      <p class="annotation">設計依據：Tufte small multiples —— 同一份小圖表（班平均正確率走勢）針對每份作業並排顯示，而不是把所有作業塞進同一條折線。<b>「古詩兩首」刻意示範了 bug 修好後的誠實呈現方式</b>：22 人已交，但只有 3 筆有分數（其餘 19 筆完成卻 <code>overall_score</code> 是 null，見 #3360 的根因），圖表標「樣本數：3」而不是假裝畫出一條完整趨勢線——這正是 README §4.3 的設計決定：樣本稀疏時要讓老師看見「稀疏」本身，而不是被一條看起來完整的線誤導。每張小圖疊一條「班平均」虛線（research.md §14 引用 ReadTheory 做法），老師不用自己心算這個分數算不算正常。</p>
+    </div>
+  </div>
+</div>
+</body>
+</html>
