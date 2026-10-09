@@ -79,10 +79,12 @@ export function ClassOverviewPanel({ data }: ClassOverviewPanelProps) {
       </div>
 
       {/* Class score trend */}
-      {data.class_score_trend.length > 1 && (
+      {data.total_sessions > 0 && (
         <div className="bg-white rounded-2xl shadow-card p-5">
           <h3 className="text-base font-semibold text-gray-700 mb-4">班級整體分數趨勢</h3>
-          <ResponsiveContainer width="100%" height={200}>
+          <p className="text-sm text-gray-500 mb-2">共 {data.total_sessions} 筆練習，{data.sample_count} 筆有分數，{data.completed_without_score} 筆完成但無分數</p>
+          {data.sample_count < 3 && <p className="text-sm text-gray-500 mb-2">樣本數：{data.sample_count}</p>}
+          {data.class_score_trend.length > 0 && <ResponsiveContainer width="100%" height={200}>
             <LineChart data={data.class_score_trend}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis
@@ -101,7 +103,7 @@ export function ClassOverviewPanel({ data }: ClassOverviewPanelProps) {
                 name="班級平均"
               />
             </LineChart>
-          </ResponsiveContainer>
+          </ResponsiveContainer>}
         </div>
       )}
 
@@ -213,10 +215,12 @@ export function StudentDetailPanel({ pattern }: StudentDetailPanelProps) {
       </div>
 
       {/* Score trend */}
-      {pattern.score_trend.length > 1 && (
+      {pattern.total_sessions > 0 && (
         <div className="bg-white rounded-2xl shadow-card p-4">
           <h4 className="text-sm font-semibold text-gray-700 mb-3">分數學習曲線</h4>
-          <ResponsiveContainer width="100%" height={180}>
+          <p className="text-sm text-gray-500 mb-2">共 {pattern.total_sessions} 筆練習，{pattern.sample_count} 筆有分數，{pattern.completed_without_score} 筆完成但無分數</p>
+          {pattern.sample_count < 3 && <p className="text-sm text-gray-500 mb-2">樣本數：{pattern.sample_count}</p>}
+          {pattern.score_trend.length > 0 && <ResponsiveContainer width="100%" height={180}>
             <LineChart data={pattern.score_trend}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis
@@ -240,7 +244,7 @@ export function StudentDetailPanel({ pattern }: StudentDetailPanelProps) {
                 dot={{ r: 3 }}
               />
             </LineChart>
-          </ResponsiveContainer>
+          </ResponsiveContainer>}
         </div>
       )}
 
