@@ -22,7 +22,7 @@ owner: young
 `cross_text_analysis_service.py` 分析一個學生橫跨**所有**完成課文的學習模式，輸出：
 - `text_type_performance`：依文體/類別/年級聚合分數
 - `vocabulary_growth`：詞彙累積時間線
-- `difficulty_progression`：分數 vs 課文難度的時間線
+- `difficulty_progression`：分數 vs 課文難度的時間線，依 `completed_at` 排序，缺值時用 `started_at`
 - `common_error_patterns`：跨多篇課文重複出現的錯誤字
 
 本 service **唯讀** — 不寫 DB，只讀 `LearningSession` + `Text` + `CharacterError`。
@@ -41,6 +41,8 @@ owner: young
 {
     "student_id": int,
     "total_completed_texts": int,      # 0 ≤ N
+    "sample_count": int,               # 有分數的完成紀錄
+    "completed_without_score": int,    # 已完成但無分數
     "has_enough_data": bool,           # False when N < MIN_SESSIONS_FOR_ANALYSIS
     "text_type_performance": {
         "by_genre": list[dict],        # [{"label": str, "avg_score": float, "attempts": int}]
@@ -67,7 +69,7 @@ owner: young
 |------|--------|
 | `_build_text_type_performance` | avg_score = round(sum/len, 1)；空輸入 → 三個空 list |
 | `_build_vocabulary_growth` | cumulative_words 單調遞增（非遞減）；new_words ≥ 0 |
-| `_build_difficulty_progression` | 輸出長度 ≤ 輸入 pairs 長度（None completed_at 被跳過）|
+| `_build_difficulty_progression` | 依完成時間排序，缺完成時間時用開始時間；缺分數維持 null，不填 0 |
 | `_build_common_error_patterns` | 回傳最多 10 項；只含跨 ≥ 2 篇課文的字 |
 
 ## 5. 班級分析（analyze_class_cross_text_patterns）
@@ -80,7 +82,7 @@ owner: young
 
 - `_completed_sessions_with_text` 的 joinedload 是否避免 N+1 — 待查（需 real DB trace）
 - `analyze_class_cross_text_patterns` 對大班級（50+ 學生）的性能 — 待查
-- `completed_at is None` 的 session 被正確跳過 — 待查（需 mock DB）
+- `completed_at is None` 的 session 以 `started_at` 排序
 
 ## 7. 允許 / 禁止的改動
 
