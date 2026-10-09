@@ -122,7 +122,7 @@ class HeatmapStoryEntry(BaseModel):
 class HeatmapScoreEntry(BaseModel):
     student_id: int
     story_id: str
-    score: float
+    score: float | None
     status: str
 
     model_config = {"from_attributes": True}

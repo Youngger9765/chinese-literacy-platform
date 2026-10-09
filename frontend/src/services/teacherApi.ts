@@ -116,7 +116,7 @@ export interface HeatmapStory {
 export interface HeatmapScore {
   student_id: number;
   story_id: string;
-  score: number;
+  score: number | null;
   status: string;
 }
 
