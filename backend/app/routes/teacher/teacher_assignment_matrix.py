@@ -97,6 +97,16 @@ def _latest_per_student(subs: list[AssignmentSubmission]) -> dict[tuple[int, int
     return latest
 
 
+def _submission_score(sub: AssignmentSubmission | None) -> float | None:
+    """The submission's score, or — for submissions that lost the submit/score
+    race before #3373 was fixed — the linked session's overall_score."""
+    if sub is None:
+        return None
+    if sub.score is not None:
+        return sub.score
+    return sub.session.overall_score if sub.session is not None else None
+
+
 def _cell_state(sub: AssignmentSubmission | None) -> str:
     if sub is None:
         return "not_assigned"
@@ -164,7 +174,7 @@ def get_assignment_matrix(
                 student_id=s.id,
                 assignment_id=a.id,
                 state=state,
-                score=sub.score if state == "completed" and sub is not None else None,
+                score=_submission_score(sub) if state == "completed" else None,
                 current_step=current_step,
             ))
 

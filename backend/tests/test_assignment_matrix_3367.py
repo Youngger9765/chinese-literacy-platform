@@ -257,6 +257,26 @@ class TestAssignmentMatrix:
         assert cells[(s3, a1)]["state"] == "not_assigned"
         assert cells[(s3, a2)]["state"] == "not_assigned"
 
+    def test_falls_back_to_session_score_when_submission_lost_the_race(self, client, teacher, seeded):
+        # #3373: submitted before the session was scored → submission.score stayed None.
+        db = TestingSessionLocal()
+        sub = (db.query(AssignmentSubmission)
+               .filter(AssignmentSubmission.assignment_id == seeded["a1"],
+                       AssignmentSubmission.student_id == seeded["ids"][0]).one())
+        original = sub.score
+        sub.score = None
+        db.commit()
+        try:
+            body = client.get(f"/api/teacher/classrooms/{seeded['cid']}/assignment-matrix",
+                              headers=auth_header(teacher["token"])).json()
+            cell = next(c for c in body["cells"]
+                        if c["student_id"] == seeded["ids"][0] and c["assignment_id"] == seeded["a1"])
+            assert cell["score"] == 88.0  # the session's overall_score
+        finally:
+            sub.score = original
+            db.commit()
+            db.close()
+
     def test_latest_attempt_wins(self, client, teacher, seeded):
         body = self._get(client, teacher["token"], seeded["cid"]).json()
         cell = next(c for c in body["cells"]
