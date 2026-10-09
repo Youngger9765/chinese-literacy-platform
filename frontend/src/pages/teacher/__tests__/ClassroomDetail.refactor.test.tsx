@@ -13,6 +13,7 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter, useLocation } from 'react-router-dom';
 import ClassroomDetail from '../ClassroomDetail';
 import * as classroomApi from '../../../services/classroomApi';
 
@@ -47,6 +48,9 @@ vi.mock('../CrossTextAnalytics', () => ({ default: () => <div data-testid="cross
 vi.mock('../../components/teacher/AtRiskStudents', () => ({ default: () => <div data-testid="at-risk-students" /> }));
 vi.mock('../ErrorHeatmapTab', () => ({ default: () => <div data-testid="error-heatmap-tab" /> }));
 vi.mock('../CoTeachingTab', () => ({ default: () => <div data-testid="co-teaching-tab" /> }));
+vi.mock('../panel/TodayOverviewTab', () => ({ default: () => <div data-testid="today-overview-tab" /> }));
+vi.mock('../panel/AssignmentsPanel', () => ({ default: () => <div data-testid="assignments-panel" /> }));
+vi.mock('../panel/ClassSwitcher', () => ({ default: () => null }));
 
 // ── Fixtures ─────────────────────────────────────────────────────────────────
 
@@ -64,8 +68,18 @@ const MOCK_CLASSROOM = {
   school_name: '測試國小',
 };
 
-function renderDetail(classroomId = 42) {
-  return render(<ClassroomDetail classroomId={classroomId} onBack={vi.fn()} />);
+function LocationProbe() {
+  const loc = useLocation();
+  return <div data-testid="location">{loc.search}</div>;
+}
+
+function renderDetail(classroomId = 42, url = `/teacher/classroom/${classroomId}`) {
+  return render(
+    <MemoryRouter initialEntries={[url]}>
+      <ClassroomDetail classroomId={classroomId} onBack={vi.fn()} />
+      <LocationProbe />
+    </MemoryRouter>,
+  );
 }
 
 // ── Setup ─────────────────────────────────────────────────────────────────────
@@ -142,59 +156,41 @@ describe('ClassroomDetail (refactor characterization) — render with mock data'
   });
 });
 
-describe('ClassroomDetail (refactor characterization) — tab switching', () => {
-  it('renders progress tab by default', async () => {
+describe('ClassroomDetail — tabs (#3367 layout)', () => {
+  it('opens on 今日總覽 by default', async () => {
     renderDetail();
-    await waitFor(() => {
-      expect(screen.getByTestId('student-progress-tab')).toBeInTheDocument();
-    });
+    await waitFor(() => expect(screen.getByTestId('today-overview-tab')).toBeInTheDocument());
   });
 
-  it('switches to 課文管理 tab on click', async () => {
+  it('switching tab writes ?tab= so a refresh or class switch keeps it', async () => {
     const user = userEvent.setup();
     renderDetail();
-    await waitFor(() => screen.getByText('課文管理'));
-
-    await user.click(screen.getByRole('button', { name: '課文管理' }));
-    expect(screen.getByTestId('text-management-tab')).toBeInTheDocument();
-    expect(screen.queryByTestId('student-progress-tab')).toBeNull();
+    await waitFor(() => screen.getByRole('tab', { name: '作業' }));
+    await user.click(screen.getByRole('tab', { name: '作業' }));
+    expect(screen.getByTestId('assignments-panel')).toBeInTheDocument();
+    expect(screen.getByTestId('location').textContent).toContain('tab=assignments');
   });
 
-  it('switches to 學生名單 tab on click', async () => {
-    const user = userEvent.setup();
-    renderDetail();
-    await waitFor(() => screen.getByText('學生名單'));
-
-    await user.click(screen.getByRole('button', { name: '學生名單' }));
-    expect(screen.getByTestId('student-list-tab')).toBeInTheDocument();
+  it('an old ?tab=progress link lands on 學生學習紀錄', async () => {
+    renderDetail(42, '/teacher/classroom/42?tab=progress');
+    await waitFor(() => expect(screen.getByTestId('student-progress-tab')).toBeInTheDocument());
   });
 
-  it('switches to 學習分析 tab on click', async () => {
+  it('學習分析 shows the analytics and cross-text views together', async () => {
     const user = userEvent.setup();
     renderDetail();
-    await waitFor(() => screen.getByText('學習分析'));
-
-    await user.click(screen.getByRole('button', { name: '學習分析' }));
+    await waitFor(() => screen.getByRole('tab', { name: '學習分析' }));
+    await user.click(screen.getByRole('tab', { name: '學習分析' }));
     expect(screen.getByTestId('classroom-analytics')).toBeInTheDocument();
+    expect(screen.getByTestId('cross-text-analytics')).toBeInTheDocument();
   });
 
   it('switches to 協同教師 tab on click', async () => {
     const user = userEvent.setup();
     renderDetail();
-    await waitFor(() => screen.getByText('協同教師'));
-
-    await user.click(screen.getByRole('button', { name: '協同教師' }));
+    await waitFor(() => screen.getByRole('tab', { name: '協同教師' }));
+    await user.click(screen.getByRole('tab', { name: '協同教師' }));
     expect(screen.getByTestId('co-teaching-tab')).toBeInTheDocument();
-  });
-
-  it('renders all 8 tab labels', async () => {
-    renderDetail();
-    await waitFor(() => screen.getByText('學生進度'));
-
-    const tabLabels = ['學生進度', '學生名單', '課文管理', '學習分析', '跨課文分析', '早期介入', '錯字熱力圖', '協同教師'];
-    for (const label of tabLabels) {
-      expect(screen.getByRole('button', { name: label })).toBeInTheDocument();
-    }
   });
 });
 
@@ -278,16 +274,14 @@ describe('ClassroomDetail (refactor characterization) — join code copy', () =>
   });
 });
 
-describe('ClassroomDetail (refactor characterization) — student roster via StudentListTab', () => {
-  it('passes classroom prop to StudentListTab', async () => {
+describe('ClassroomDetail — student roster in the class header (#3367)', () => {
+  it('shows the roster without switching tabs, and it can be collapsed', async () => {
     const user = userEvent.setup();
     renderDetail();
-    await waitFor(() => screen.getByText('學生名單'));
-
-    await user.click(screen.getByRole('button', { name: '學生名單' }));
-    const listTab = screen.getByTestId('student-list-tab');
-    expect(listTab).toBeInTheDocument();
-    // ClassroomHeaderCard passes classroom name down
+    const listTab = await screen.findByTestId('student-list-tab');
     expect(listTab.getAttribute('data-classroom')).toBe('三年甲班');
+    expect(screen.queryByRole('tab', { name: '學生名單' })).toBeNull();
+    await user.click(screen.getByRole('button', { name: /學生名單（/ }));
+    expect(screen.queryByTestId('student-list-tab')).toBeNull();
   });
 });
