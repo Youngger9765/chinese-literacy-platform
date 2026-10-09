@@ -22,6 +22,16 @@ const AssignmentItemStats: React.FC<AssignmentItemStatsProps> = ({ data }) => {
     );
   }
 
+  // Submitted, but none of the parts was recorded (older practice flow, or a
+  // score-only submission). Saying "完成率 0%" would read as "nobody did it".
+  if (data.items.every((i) => i.completed === 0)) {
+    return (
+      <div className="rounded-xl border border-gray-200 p-5 text-gray-600">
+        已交 {data.submitted_count} 人，但這份作業沒有記錄到分項成績（朗讀、理解、生字），只能看總分
+      </div>
+    );
+  }
+
   const weakestKey = data.items.find((i) => i.correct_rate !== null)?.key;
 
   return (

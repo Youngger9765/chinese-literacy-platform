@@ -315,3 +315,12 @@ class TestAssignmentItemStats:
         resp = client.get(f"/api/teacher/classrooms/{seeded['cid']}/assignment-matrix",
                           headers=auth_header(teacher["token"]))
         assert resp.status_code == 400
+
+    def test_cell_cap_is_separate_from_row_cap(self, client, teacher, seeded, monkeypatch):
+        # 4 students x 2 assignments = 8 cells: a large class is not refused by the row cap.
+        from app.routes.teacher import teacher_assignment_matrix as m
+        monkeypatch.setattr(m, "_MATRIX_ROW_LIMIT", 7)
+        url = f"/api/teacher/classrooms/{seeded['cid']}/assignment-matrix"
+        assert client.get(url, headers=auth_header(teacher["token"])).status_code == 200
+        monkeypatch.setattr(m, "_MATRIX_CELL_LIMIT", 7)
+        assert client.get(url, headers=auth_header(teacher["token"])).status_code == 400

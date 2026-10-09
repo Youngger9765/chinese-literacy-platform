@@ -27,4 +27,11 @@ describe('AssignmentItemStats (#3367)', () => {
     expect(screen.getByText(/還沒有學生交這份作業/)).toBeInTheDocument();
     expect(screen.queryByText('0%')).not.toBeInTheDocument();
   });
+
+  it('says parts were not recorded instead of showing 0% completion', () => {
+    const blank = items.map((i) => ({ ...i, completed: 0, total: 1, completion_rate: 0, correct_rate: null, error_rate: null }));
+    render(<AssignmentItemStats data={{ assignment_id: 1, submitted_count: 1, items: blank }} />);
+    expect(screen.getByText(/沒有記錄到分項成績/)).toBeInTheDocument();
+    expect(screen.queryByText(/完成率 0%/)).not.toBeInTheDocument();
+  });
 });

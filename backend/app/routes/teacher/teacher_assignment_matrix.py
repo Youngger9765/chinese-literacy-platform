@@ -34,13 +34,14 @@ _COMPLETED = {"submitted", "graded"}
 # Same bound as the heatmap (teacher_analytics._HEATMAP_SESSION_LIMIT): refuse
 # rather than silently truncate or load an unbounded table into memory.
 _MATRIX_ROW_LIMIT = 5_000
+# Cells are built in memory from rows already fetched, so they can go higher;
+# this only stops a pathological class (e.g. a 1,445-student test class × many
+# assignments) from building an unbounded response.
+_MATRIX_CELL_LIMIT = 50_000
 
 
 def _too_many(what: str) -> HTTPException:
-    return HTTPException(
-        status_code=400,
-        detail=f"此班級的{what}數量超過上限 {_MATRIX_ROW_LIMIT:,} 筆，請聯絡管理員",
-    )
+    return HTTPException(status_code=400, detail=f"此班級的{what}數量超過上限，請聯絡管理員")
 
 
 class MatrixStudent(BaseModel):
@@ -145,7 +146,7 @@ def get_assignment_matrix(
         if assignment_ids
         else []
     )
-    if len(subs) > _MATRIX_ROW_LIMIT or len(students) * len(assignments) > _MATRIX_ROW_LIMIT:
+    if len(subs) > _MATRIX_ROW_LIMIT or len(students) * len(assignments) > _MATRIX_CELL_LIMIT:
         raise _too_many("作業紀錄")
     latest = _latest_per_student(subs)
 
