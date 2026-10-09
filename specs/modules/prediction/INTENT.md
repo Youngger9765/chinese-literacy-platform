@@ -21,7 +21,7 @@ owner: young
 
 ## 1. 這個 module 在管什麼
 
-`predict_learning_difficulty()` 分析學生的 `LearningSession` 記錄，對其學習困難程度給出預測結果（低/中/高），讓教師在問題惡化前提早介入。
+`predict_learning_difficulty()` 分析學生的 `LearningSession` 記錄，對其學習困難程度給出預測結果（資料不足/低/中/高），讓教師在問題惡化前提早介入。
 
 **這是純規則引擎，不含 ML 模型、不含 LLM 呼叫。**
 
@@ -32,27 +32,27 @@ owner: young
 | 前期正確率低 | < 60% | 前 3 篇課文平均正確率不足 |
 | 生字錯誤率高 | > 30% | 錯誤獨特生字數 / 所有獨特生字數 |
 | 正確率持續下滑 | 連續 3 session | 嚴格遞減 |
-| 低投入度 | 最長間隔 > 14 天 | session 間空白過長 |
+| 低投入度 | 最長間隔 ≥ 14 天 | session 間空白或最後一次練習至今過長 |
 | 多篇卡關 | ≥ 2 篇 | 同課嘗試 ≥ 3 次且進步 < 5% |
 
 ## 3. 核心不變量
 
-### 3.1 無 session 記錄時安全回傳 `risk_level: "low"`
+### 3.1 無 session 記錄時安全回傳 `risk_level: "insufficient_data"`
 
 `_empty_prediction()` 永遠返回合法結構：
-- `risk_level == "low"`（不是 None、不是空字串）
+- `risk_level == "insufficient_data"`（不是 None、不是空字串）
 - `confidence_score == 0.0`（明確表達沒有資料支撐）
 
-**禁止**：無資料時返回 `risk_level: "no_data"` 或 `None`，呼叫者不做防禦。
+**禁止**：無資料時返回 `risk_level: "low"`、`"no_data"` 或 `None`。
 
 ### 3.2 pure helper 函數在相同輸入下確定性輸出
 
 `_check_declining_trend()`、`_check_stuck_count()`、`_compute_risk_level()` 不訪問 DB，
 給定相同的 session 串列必然返回相同結果。這使得 UI 呈現、教師報告不會因時間點而變動。
 
-### 3.3 risk_level 只有三個合法值
+### 3.3 risk_level 有四個合法值
 
-`_compute_risk_level()` 返回值只能是 `"low"`、`"medium"`、`"high"`，
+`_compute_risk_level()` 返回值只能是 `"insufficient_data"`、`"low"`、`"medium"`、`"high"`，
 不能返回其他字串或 None。
 
 ### 3.4 confidence_score 在 [0, 1] 範圍內
@@ -79,13 +79,13 @@ owner: young
 
 ⛔ **禁止（會破壞契約）**
 - 讓 `predict_learning_difficulty()` 在無 session 時 raise exception
-- 讓 `_compute_risk_level()` 返回 `"low"` 以外的第四個 level 值（前端 UI hard-coded 三色）
+- 讓 `_compute_risk_level()` 返回上述四個值以外的 level
 - 讓 `confidence_score > 1.0`（前端進度條上限 100%）
 - 讓 pure helpers 引入隨機性或時間依賴
 
 ## 5. 教學 / 產品脈絡
 
-- 預測結果以 badge 顯示在教師儀表板，顏色：綠（low）/ 黃（medium）/ 紅（high）
+- 預測結果以 badge 顯示在教師儀表板，顏色：灰（insufficient_data）/ 綠（low）/ 黃（medium）/ 紅（high）
 - `confidence_score` 低時（< 0.3）教師界面顯示「資料不足，僅供參考」
 - `recommended_actions` 對教師以條列呈現，字串由 service 負責，前端只做顯示
 

@@ -176,7 +176,7 @@ class LearningCurveResponse(BaseModel):
 class AtRiskStudentResponse(BaseModel):
     student_id: int
     student_name: str
-    risk_level: str          # "low" | "medium" | "high"
+    risk_level: str          # "insufficient_data" | "low" | "medium" | "high"
     risk_factors: list[str]
     recommended_actions: list[str]
     confidence_score: float

@@ -255,7 +255,7 @@ export interface ClassroomCrossTextPattern {
 export interface AtRiskStudent {
   student_id: number;
   student_name: string;
-  risk_level: 'low' | 'medium' | 'high';
+  risk_level: 'low' | 'medium' | 'high' | 'insufficient_data';
   risk_factors: string[];
   recommended_actions: string[];
   confidence_score: number;
