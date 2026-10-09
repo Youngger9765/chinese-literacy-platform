@@ -16,8 +16,8 @@ from sqlalchemy.orm import Session
 from ...auth.dependencies import get_current_user
 from ...database import get_db
 from ...models.reading_history import ReadingHistory, ReadingTarget
-from ...models.school import Classroom, ClassroomStudent
-from ...models.user import User
+from ...models.school import Classroom, ClassroomStudent, ClassroomTeacher
+from ...models.user import Role, User, UserRole
 
 router = APIRouter(tags=["teacher"])
 logger = logging.getLogger(__name__)
@@ -149,6 +149,33 @@ async def get_student_reading_progress(
 
 # ── PUT /api/teacher/reading-targets/{lesson_id} ─────────────────────────────
 
+_TARGET_SETTER_ROLES = ("teacher", "homeroom_teacher", "system_admin")
+
+
+def _require_can_set_targets(user: User, db: Session) -> None:
+    """Teachers only: a class owner/co-teacher, or a user holding a teacher role.
+
+    Class ownership is what makes someone a teacher elsewhere in this module
+    (``_require_teacher_access_to_student``), and many real teacher accounts
+    have no role row — so both are accepted. Students and parents have neither.
+    """
+    owns_class = (
+        db.query(Classroom.id).filter(Classroom.teacher_id == user.id).first() is not None
+        or db.query(ClassroomTeacher.id).filter(ClassroomTeacher.teacher_id == user.id).first() is not None
+    )
+    if owns_class:
+        return
+    has_role = (
+        db.query(UserRole.id)
+        .join(Role, UserRole.role_id == Role.id)
+        .filter(UserRole.user_id == user.id, UserRole.is_active.is_(True), Role.name.in_(_TARGET_SETTER_ROLES))
+        .first()
+        is not None
+    )
+    if not has_role:
+        raise HTTPException(status_code=403, detail="只有老師可以設定目標速度")
+
+
 @router.put("/teacher/reading-targets/{lesson_id}", response_model=ReadingTargetResponse)
 async def set_reading_target(
     lesson_id: str,
@@ -156,7 +183,12 @@ async def set_reading_target(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Set or update the CPM target for a lesson (teacher only)."""
+    """Set or update the CPM target for a lesson (teacher only).
+
+    #3356: this used to check only that the caller was logged in, so any student
+    could create a target row that every student on that lesson then saw.
+    """
+    _require_can_set_targets(current_user, db)
     existing = (
         db.query(ReadingTarget)
         .filter(
