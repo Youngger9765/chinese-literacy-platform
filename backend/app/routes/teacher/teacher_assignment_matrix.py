@@ -31,6 +31,17 @@ router = APIRouter(tags=["teacher"])
 
 _COMPLETED = {"submitted", "graded"}
 
+# Same bound as the heatmap (teacher_analytics._HEATMAP_SESSION_LIMIT): refuse
+# rather than silently truncate or load an unbounded table into memory.
+_MATRIX_ROW_LIMIT = 5_000
+
+
+def _too_many(what: str) -> HTTPException:
+    return HTTPException(
+        status_code=400,
+        detail=f"此班級的{what}數量超過上限 {_MATRIX_ROW_LIMIT:,} 筆，請聯絡管理員",
+    )
+
 
 class MatrixStudent(BaseModel):
     id: int
@@ -120,6 +131,7 @@ def get_assignment_matrix(
         .options(joinedload(Assignment.text))
         .filter(Assignment.classroom_id == classroom_id, Assignment.is_active.is_(True))
         .order_by(Assignment.created_at, Assignment.id)
+        .limit(_MATRIX_ROW_LIMIT + 1)
         .all()
     )
     assignment_ids = [a.id for a in assignments]
@@ -128,10 +140,13 @@ def get_assignment_matrix(
         db.query(AssignmentSubmission)
         .options(joinedload(AssignmentSubmission.session))
         .filter(AssignmentSubmission.assignment_id.in_(assignment_ids))
+        .limit(_MATRIX_ROW_LIMIT + 1)
         .all()
         if assignment_ids
         else []
     )
+    if len(subs) > _MATRIX_ROW_LIMIT or len(students) * len(assignments) > _MATRIX_ROW_LIMIT:
+        raise _too_many("作業紀錄")
     latest = _latest_per_student(subs)
 
     cells: list[MatrixCell] = []
@@ -196,17 +211,28 @@ def get_assignment_item_stats(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    # A missing assignment and someone else's assignment answer the same 404, so
+    # the endpoint can't be used to probe which assignment ids exist.
+    not_found = HTTPException(status_code=404, detail="Assignment not found")
     assignment = db.query(Assignment).filter(Assignment.id == assignment_id).first()
     if assignment is None:
-        raise HTTPException(status_code=404, detail="Assignment not found")
-    _check_classroom_access(current_user, assignment.classroom_id, db)
+        raise not_found
+    try:
+        _check_classroom_access(current_user, assignment.classroom_id, db)
+    except HTTPException as exc:
+        if exc.status_code == 403:
+            raise not_found from exc
+        raise
 
     subs = (
         db.query(AssignmentSubmission)
         .options(joinedload(AssignmentSubmission.session))
         .filter(AssignmentSubmission.assignment_id == assignment_id)
+        .limit(_MATRIX_ROW_LIMIT + 1)
         .all()
     )
+    if len(subs) > _MATRIX_ROW_LIMIT:
+        raise _too_many("作業紀錄")
     finished = [
         sub.session for sub in _latest_per_student(subs).values()
         if sub.status in _COMPLETED and sub.session is not None

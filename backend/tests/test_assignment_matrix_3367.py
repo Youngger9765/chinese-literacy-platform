@@ -302,6 +302,16 @@ class TestAssignmentItemStats:
         assert items["reading"]["correct_rate"] == 96.0
         assert items["vocab"]["correct_rate"] == 80.0  # 0-1 scale normalised to percent
 
-    def test_student_and_other_teacher_forbidden(self, client, students, other_teacher, seeded):
-        assert self._get(client, students[0]["token"], seeded["a1"]).status_code == 403
-        assert self._get(client, other_teacher["token"], seeded["a1"]).status_code == 403
+    def test_student_and_other_teacher_get_the_same_404_as_a_missing_id(self, client, students, other_teacher, seeded):
+        # Same answer as a non-existent id, so assignment ids can't be enumerated.
+        assert self._get(client, students[0]["token"], seeded["a1"]).status_code == 404
+        assert self._get(client, other_teacher["token"], seeded["a1"]).status_code == 404
+        assert self._get(client, other_teacher["token"], 999_999).status_code == 404
+
+    def test_over_the_row_limit_is_refused(self, client, teacher, seeded, monkeypatch):
+        from app.routes.teacher import teacher_assignment_matrix as m
+        monkeypatch.setattr(m, "_MATRIX_ROW_LIMIT", 1)
+        assert self._get(client, teacher["token"], seeded["a2"]).status_code == 400
+        resp = client.get(f"/api/teacher/classrooms/{seeded['cid']}/assignment-matrix",
+                          headers=auth_header(teacher["token"]))
+        assert resp.status_code == 400
