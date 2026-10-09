@@ -10,11 +10,14 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router-dom';
 import ClassroomDetail from '../ClassroomDetail';
 import * as classroomApi from '../../../services/classroomApi';
 
 // --- Mocks ---
 
+vi.mock('../panel/ClassSwitcher', () => ({ default: () => null }));
+vi.mock('../panel/TodayOverviewTab', () => ({ default: () => null }));
 vi.mock('../../../contexts/AuthContext', () => ({
   useAuth: () => ({ token: 'test-token', user: { id: 1, role: 'teacher' } }),
 }));
@@ -63,7 +66,11 @@ const MOCK_CLASSROOM = {
 };
 
 function renderDetail() {
-  return render(<ClassroomDetail classroomId={42} onBack={vi.fn()} />);
+  return render(
+    <MemoryRouter>
+      <ClassroomDetail classroomId={42} onBack={vi.fn()} />
+    </MemoryRouter>,
+  );
 }
 
 describe('ClassroomDetail — join_code UI (#1643)', () => {

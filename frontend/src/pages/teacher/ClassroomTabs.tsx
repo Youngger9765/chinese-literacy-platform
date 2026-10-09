@@ -1,107 +1,80 @@
 /**
- * ClassroomTabs — Issue #1943 + Issue #1986
+ * ClassroomTabs — Issue #1943 + #1986, re-laid out for #3367
  *
- * Renders a 2-row grouped tab bar:
- *   Row 1 (日常管理): 學生進度 / 學生名單 / 課文管理 / 協同教師
- *   Row 2 (進階分析): 學習分析 / 跨課文分析 / 早期介入 / 錯字熱力圖
+ * 一排分頁，依老師的任務排，不依資料來源排（設計規格 docs/design/teacher-panel-redesign §2.2）：
+ *   今日總覽 / 作業 / 學生學習紀錄 / 早期介入 / 錯字總表 / 學習分析 / 協同教師
  *
- * All tab components remain unchanged — this is purely a presentation change.
+ * 舊分頁的去向（舊連結 ?tab=… 仍可用，見 resolveTabKey）：
+ *   學生名單 → 班級頁首（ClassroomDetail）
+ *   課文管理 → 作業分頁的「自學課文庫」
+ *   課堂即時 → 今日總覽的卡片
+ *   學生進度 → 學生學習紀錄
+ *   跨課文分析 → 學習分析
  */
 import React from 'react';
-import { ClassroomDetailResponse } from '../../services/classroomApi';
 import StudentProgressTab from './StudentProgressTab';
-import TextManagementTab from './TextManagementTab';
-import StudentListTab from './StudentListTab';
 import ClassroomAnalytics from './ClassroomAnalytics';
 import CrossTextAnalytics from './CrossTextAnalytics';
 import AtRiskStudents from '../../components/teacher/AtRiskStudents';
 import ErrorHeatmapTab from './ErrorHeatmapTab';
 import CoTeachingTab from './CoTeachingTab';
-import LiveMonitorTab from './LiveMonitorTab';
+import TodayOverviewTab from './panel/TodayOverviewTab';
+import AssignmentsPanel from './panel/AssignmentsPanel';
 
-type TabKey = 'progress' | 'live' | 'texts' | 'students' | 'analytics' | 'cross-text' | 'at-risk' | 'error-heatmap' | 'teachers';
+type TabKey = 'overview' | 'assignments' | 'learning' | 'at-risk' | 'error-heatmap' | 'analytics' | 'teachers';
 
-interface TabDef {
-  key: TabKey;
-  label: string;
-}
-
-const CORE_TABS: TabDef[] = [
-  { key: 'progress', label: '學生進度' },
-  { key: 'live', label: '課堂即時' },
-  { key: 'students', label: '學生名單' },
-  { key: 'texts', label: '課文管理' },
+export const TABS: { key: TabKey; label: string }[] = [
+  { key: 'overview', label: '今日總覽' },
+  { key: 'assignments', label: '作業' },
+  { key: 'learning', label: '學生學習紀錄' },
+  { key: 'at-risk', label: '早期介入' },
+  { key: 'error-heatmap', label: '錯字總表' },
+  { key: 'analytics', label: '學習分析' },
   { key: 'teachers', label: '協同教師' },
 ];
 
-const ANALYSIS_TABS: TabDef[] = [
-  { key: 'analytics', label: '學習分析' },
-  { key: 'cross-text', label: '跨課文分析' },
-  { key: 'at-risk', label: '早期介入' },
-  { key: 'error-heatmap', label: '錯字熱力圖' },
-];
+/** Old ?tab= values from before #3367, so bookmarks and links keep working. */
+const LEGACY_TAB_KEYS: Record<string, TabKey> = {
+  progress: 'learning',
+  live: 'overview',
+  students: 'overview',
+  texts: 'assignments',
+  'cross-text': 'analytics',
+};
 
-// Backwards-compat export (kept for any external consumers)
-export const TABS: { key: TabKey; label: string; group?: 'core' | 'analysis' | 'other' }[] = [
-  { key: 'progress', label: '學生進度', group: 'core' },
-  { key: 'live', label: '課堂即時', group: 'core' },
-  { key: 'students', label: '學生名單', group: 'core' },
-  { key: 'texts', label: '課文管理', group: 'core' },
-  { key: 'analytics', label: '學習分析', group: 'analysis' },
-  { key: 'cross-text', label: '跨課文分析', group: 'analysis' },
-  { key: 'at-risk', label: '早期介入', group: 'analysis' },
-  { key: 'error-heatmap', label: '錯字熱力圖', group: 'analysis' },
-  { key: 'teachers', label: '協同教師', group: 'other' },
-];
-
-// Props passed through to StudentListTab
-interface StudentListTabPassthroughProps {
-  token: string | null;
-  studentIdInput: string;
-  setStudentIdInput: (v: string) => void;
-  isAddingStudent: boolean;
-  addStudentError: string;
-  setAddStudentError: (v: string) => void;
-  onAddStudent: (e: React.FormEvent) => void;
-  removingStudentId: number | null;
-  onRemoveStudent: (student: { id: number; username: string; full_name?: string }) => void;
-  setRemovingStudentId: (id: number | null) => void;
-  formatDate: (dateStr: string) => string;
-  onStudentsImported: () => void;
+export function resolveTabKey(raw: string | null | undefined): TabKey {
+  if (!raw) return 'overview';
+  if (TABS.some((t) => t.key === raw)) return raw as TabKey;
+  return LEGACY_TAB_KEYS[raw] ?? 'overview';
 }
 
 interface ClassroomTabsProps {
   activeTab: TabKey;
   onTabChange: (tab: TabKey) => void;
   classroomId: number;
-  classroom: ClassroomDetailResponse;
-  studentListProps: StudentListTabPassthroughProps;
+  ownerId: number;
+  selectedAssignmentId: number | null;
+  onSelectAssignment: (id: number | null) => void;
 }
 
-interface TabRowProps {
-  groupLabel: string;
-  tabs: TabDef[];
-  activeTab: TabKey;
-  onTabChange: (tab: TabKey) => void;
-  hasBorderBottom?: boolean;
-}
-
-const TabRow: React.FC<TabRowProps> = ({ groupLabel, tabs, activeTab, onTabChange, hasBorderBottom = true }) => (
-  <div
-    role="group"
-    aria-label={groupLabel}
-    className={`flex items-center gap-1 px-4 ${hasBorderBottom ? 'border-b border-gray-200' : 'border-b border-gray-100'}`}
-  >
-    <span className="text-xs font-medium text-gray-400 pr-2 shrink-0 py-2 select-none">
-      {groupLabel}
-    </span>
-    <span className="w-px h-4 bg-gray-200 shrink-0" aria-hidden="true" />
-    <nav className="flex -mb-px" aria-label={groupLabel}>
-      {tabs.map((tab) => (
+const ClassroomTabs: React.FC<ClassroomTabsProps> = ({
+  activeTab,
+  onTabChange,
+  classroomId,
+  ownerId,
+  selectedAssignmentId,
+  onSelectAssignment,
+}) => (
+  <div className="bg-white rounded-2xl shadow-card">
+    <nav className="flex overflow-x-auto border-b border-gray-200 px-2" aria-label="班級分頁" role="tablist">
+      {TABS.map((tab) => (
         <button
           key={tab.key}
+          type="button"
+          role="tab"
+          aria-selected={activeTab === tab.key}
           onClick={() => onTabChange(tab.key)}
-          className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors cursor-pointer shrink-0 ${
+          className={`px-4 py-3 text-base font-medium border-b-2 -mb-px transition-colors cursor-pointer shrink-0 ${
             activeTab === tab.key
               ? 'border-accent text-accent'
               : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -111,88 +84,47 @@ const TabRow: React.FC<TabRowProps> = ({ groupLabel, tabs, activeTab, onTabChang
         </button>
       ))}
     </nav>
-  </div>
-);
 
-const ClassroomTabs: React.FC<ClassroomTabsProps> = ({
-  activeTab,
-  onTabChange,
-  classroomId,
-  classroom,
-  studentListProps,
-}) => (
-  <div className="bg-white rounded-2xl shadow-card">
-    {/* 2-row grouped tab bar */}
-    <div className="overflow-x-auto">
-      <TabRow
-        groupLabel="日常管理"
-        tabs={CORE_TABS}
-        activeTab={activeTab}
-        onTabChange={onTabChange}
-        hasBorderBottom={false}
+    {activeTab === 'overview' && (
+      <TodayOverviewTab
+        classroomId={classroomId}
+        onOpenAssignment={(id) => {
+          onSelectAssignment(id);
+          onTabChange('assignments');
+        }}
+        onOpenAtRisk={() => onTabChange('at-risk')}
       />
-      <TabRow
-        groupLabel="進階分析"
-        tabs={ANALYSIS_TABS}
-        activeTab={activeTab}
-        onTabChange={onTabChange}
-        hasBorderBottom
-      />
-    </div>
-
-    {/* Tab content */}
-    {activeTab === 'progress' && (
-      <StudentProgressTab classroomId={classroomId} />
     )}
 
-    {activeTab === 'live' && (
-      <LiveMonitorTab classroomId={classroomId} />
+    {activeTab === 'assignments' && (
+      <AssignmentsPanel
+        classroomId={classroomId}
+        selectedAssignmentId={selectedAssignmentId}
+        onSelectAssignment={onSelectAssignment}
+      />
     )}
+
+    {activeTab === 'learning' && (
+      <div>
+        <p className="px-5 pt-5 text-sm text-gray-500">
+          每位學生的所有練習（含自己選的自學課文），點開學生看個人學習曲線、指導紀錄與標籤；老師指派的作業成績看「作業」分頁
+        </p>
+        <StudentProgressTab classroomId={classroomId} />
+      </div>
+    )}
+
+    {activeTab === 'at-risk' && <AtRiskStudents classroomId={classroomId} />}
+
+    {activeTab === 'error-heatmap' && <ErrorHeatmapTab classroomId={classroomId} />}
 
     {activeTab === 'analytics' && (
-      <ClassroomAnalytics classroomId={classroomId} />
+      <div className="divide-y divide-gray-100">
+        <ClassroomAnalytics classroomId={classroomId} />
+        <CrossTextAnalytics classroomId={classroomId} />
+      </div>
     )}
 
-    {activeTab === 'cross-text' && (
-      <CrossTextAnalytics classroomId={classroomId} />
-    )}
-
-    {activeTab === 'at-risk' && (
-      <AtRiskStudents classroomId={classroomId} />
-    )}
-
-    {activeTab === 'error-heatmap' && (
-      <ErrorHeatmapTab classroomId={classroomId} />
-    )}
-
-    {activeTab === 'texts' && (
-      <TextManagementTab classroomId={classroomId} />
-    )}
-
-    {activeTab === 'students' && (
-      <StudentListTab
-        classroom={classroom}
-        token={studentListProps.token}
-        studentIdInput={studentListProps.studentIdInput}
-        setStudentIdInput={studentListProps.setStudentIdInput}
-        isAddingStudent={studentListProps.isAddingStudent}
-        addStudentError={studentListProps.addStudentError}
-        setAddStudentError={studentListProps.setAddStudentError}
-        onAddStudent={studentListProps.onAddStudent}
-        removingStudentId={studentListProps.removingStudentId}
-        onRemoveStudent={studentListProps.onRemoveStudent}
-        setRemovingStudentId={studentListProps.setRemovingStudentId}
-        formatDate={studentListProps.formatDate}
-        onStudentsImported={studentListProps.onStudentsImported}
-      />
-    )}
-
-    {activeTab === 'teachers' && (
-      <CoTeachingTab
-        classroomId={classroomId}
-        ownerId={classroom.teacher_id}
-      />
-    )}
+    {activeTab === 'teachers' && <CoTeachingTab classroomId={classroomId} ownerId={ownerId} />}
   </div>
 );
 

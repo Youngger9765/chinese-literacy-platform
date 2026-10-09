@@ -737,3 +737,51 @@ export interface PreviewTokenResponse {
 export function requestPreviewToken(studentId: number): Promise<PreviewTokenResponse> {
   return post(`/api/teacher/students/${studentId}/preview-token`, {});
 }
+
+// ── Assignment matrix + per-item class stats (#3367) ─────────────────────────
+
+/** completed | in_progress | not_started | not_assigned — never coerce to a score. */
+export type MatrixCellState = 'completed' | 'in_progress' | 'not_started' | 'not_assigned';
+
+export interface AssignmentMatrixResponse {
+  students: Array<{ id: number; name: string }>;
+  assignments: Array<{ id: number; title: string; due_date: string | null }>;
+  cells: Array<{
+    student_id: number;
+    assignment_id: number;
+    state: MatrixCellState;
+    score: number | null;
+    current_step: string | null;
+  }>;
+}
+
+export function getAssignmentMatrix(
+  _token: string,
+  classroomId: number,
+): Promise<AssignmentMatrixResponse> {
+  return get(`/api/teacher/classrooms/${classroomId}/assignment-matrix`);
+}
+
+export interface AssignmentItemStat {
+  key: string;
+  label: string;
+  completed: number;
+  total: number;
+  completion_rate: number | null;
+  correct_rate: number | null;
+  error_rate: number | null;
+}
+
+export interface AssignmentItemStatsResponse {
+  assignment_id: number;
+  submitted_count: number;
+  /** Sorted weakest first by the backend. */
+  items: AssignmentItemStat[];
+}
+
+export function getAssignmentItemStats(
+  _token: string,
+  assignmentId: number,
+): Promise<AssignmentItemStatsResponse> {
+  return get(`/api/teacher/assignments/${assignmentId}/item-stats`);
+}
