@@ -109,7 +109,7 @@ describe('StudentPreviewPage (#3027)', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText(/載入預覽失敗/)).toBeInTheDocument();
+      expect(screen.getByText(/載入推薦練習失敗/)).toBeInTheDocument();
     });
   });
 

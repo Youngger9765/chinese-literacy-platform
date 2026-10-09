@@ -1,5 +1,6 @@
 /**
- * StudentPreviewPage — teacher "preview as student" read-only view (Issue #3027).
+ * StudentPreviewPage — teacher "推薦練習" read-only page (Issue #3027, renamed in #3220).
+ * It only lists AI story recommendations; it does NOT show the student's screen.
  *
  * Hans's on-site teacher feedback: a fully-shipped student feature (AI story
  * recommendations) was reported missing because teachers have no way to see
@@ -47,7 +48,8 @@ const StudentPreviewPage: React.FC = () => {
         const data = await getStoryRecommendations(state.previewToken, state.studentId, 5);
         if (!cancelled) setRecs(data.recommendations);
       } catch {
-        if (!cancelled) setError('載入預覽失敗，預覽權杖可能已過期，請重新進入預覽');
+        // #3220：按鈕已正名為「推薦練習」，錯誤訊息要指向畫面上真的存在的那顆按鈕
+        if (!cancelled) setError('載入推薦練習失敗，權杖可能已過期，請按「返回」後重新點「推薦練習」');
       } finally {
         if (!cancelled) setLoading(false);
       }

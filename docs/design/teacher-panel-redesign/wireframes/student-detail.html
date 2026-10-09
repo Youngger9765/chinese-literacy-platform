@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>學生個人頁（下鑽頁，非導覽節點）</title>
+<style>
+  :root {
+    --surface: #FBF6EE; --surface-0: #FFFFFF; --surface-low: #F5F0E8;
+    --surface-container: #ECE8DF; --surface-high: #E7E2D8;
+    --on-surface: #302F2A; --on-surface-variant: #5E5B55; --on-surface-faint: #8A8678;
+    --accent: #564ABF; --accent-bg: #EDEBF9; --accent-bg-subtle: #E0DCF5;
+    --self-study: #0E7A4F; --self-study-bg: #E4F3EC;
+    --success: #006947; --success-bg: #E3F2EC;
+    --warning: #D97706; --warning-bg: #FEF3E2;
+    --med: #B45309; --med-bg:#FEF3E2;
+    --shadow-card: 0 0 32px rgba(136, 152, 170, 0.12);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Noto Sans TC","PingFang TC","Microsoft JhengHei",ui-sans-serif,system-ui,sans-serif; background: var(--surface); color: var(--on-surface); font-size: 16px; line-height: 1.6; }
+  .wf-banner { background:#1A1740; color:#E0DCF5; font-size:13px; padding:7px 16px; text-align:center; }
+  .wf-shell { display:flex; min-height:100vh; }
+  .wf-sidebar { width:216px; flex-shrink:0; background:var(--surface-0); border-right:1px solid var(--surface-high); padding:20px 12px; }
+  .wf-logo { font-weight:700; font-size:17px; padding:0 8px 22px; color:var(--accent); }
+  .wf-nav-item { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:10px; font-size:15px; font-weight:600; color:var(--on-surface-variant); margin-bottom:2px; }
+  .wf-nav-item.active { background:var(--accent-bg); color:var(--accent); }
+  .wf-main { flex:1; padding:28px 36px 64px; max-width:1180px; }
+  .wf-tag { display:inline-block; font-size:11px; font-weight:700; letter-spacing:.02em; padding:3px 9px; border-radius:999px; background:var(--accent-bg); color:var(--accent); margin-bottom:14px; }
+  .breadcrumb { font-size:13px; color:var(--on-surface-variant); margin-bottom:10px; }
+  .breadcrumb b { color:var(--on-surface); }
+
+  .head-card { background:var(--surface-0); border:1px solid var(--surface-high); border-radius:16px; padding:20px 22px; box-shadow:var(--shadow-card); margin-bottom:18px; }
+  .head-row { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; }
+  h1 { font-size:21px; font-weight:700; margin:0 0 4px; }
+  .lead { color:var(--on-surface-variant); font-size:13.5px; margin:0; }
+  .tag-row { display:flex; gap:6px; margin-top:10px; flex-wrap:wrap; }
+  .tag { font-size:11.5px; font-weight:700; padding:3px 10px; border-radius:999px; }
+  .tag.watch { background:var(--med-bg); color:var(--med); }
+  .tag.improving { background:var(--success-bg); color:var(--success); }
+  .stat-mini { text-align:right; }
+  .stat-mini .num { font-size:24px; font-weight:800; }
+  .stat-mini .label { font-size:11.5px; color:var(--on-surface-variant); }
+
+  .wf-card { background:var(--surface-0); border:1px solid var(--surface-high); border-radius:16px; padding:18px 20px; box-shadow:var(--shadow-card); margin-bottom:18px; }
+  .section-title { font-size:14.5px; font-weight:700; margin:0 0 12px; display:flex; justify-content:space-between; align-items:center; }
+  .note-box { background:var(--surface-low); border-radius:10px; padding:10px 12px; font-size:13px; color:var(--on-surface-variant); margin-bottom:8px; }
+  .note-box b { color:var(--on-surface); }
+
+  table { width:100%; border-collapse:collapse; font-size:13.5px; }
+  th { text-align:left; font-size:11.5px; color:var(--on-surface-variant); font-weight:700; padding:9px 10px; border-bottom:1px solid var(--surface-high); }
+  td { padding:11px 10px; border-bottom:1px solid var(--surface-low); vertical-align:middle; }
+  tr:last-child td { border-bottom:none; }
+  .mono { font-variant-numeric:tabular-nums; font-family:"SF Mono","Menlo",monospace; }
+  .cell-score { display:inline-flex; align-items:center; justify-content:center; min-width:38px; height:24px; border-radius:7px; font-weight:800; font-size:12.5px; }
+  .score-high { background:var(--success-bg); color:var(--success); }
+  .score-mid { background:var(--warning-bg); color:var(--warning); }
+  .link { color:var(--accent); font-size:12.5px; font-weight:700; }
+
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+  .trend-chart { height:120px; display:flex; align-items:flex-end; gap:3px; border-bottom:1px solid var(--surface-high); padding-bottom:4px; }
+  .tbar { flex:1; background:var(--accent-bg-subtle); border-radius:2px 2px 0 0; }
+  .tbar.hi { background:var(--accent); }
+  .chart-caption { font-size:11.5px; color:var(--on-surface-faint); margin-top:6px; }
+
+  .self-study-row { display:flex; justify-content:space-between; align-items:center; font-size:13.5px; padding:8px 0; border-bottom:1px solid var(--surface-low); }
+  .self-study-row:last-child { border-bottom:none; }
+  .self-study-row .pill { background:var(--self-study-bg); color:var(--self-study); font-size:11.5px; font-weight:700; padding:2px 8px; border-radius:999px; }
+
+  .risk-sync { background:var(--med-bg); border-radius:10px; padding:12px 14px; font-size:13px; }
+  .risk-sync b { color:var(--med); }
+
+  .gap-box { border:1px dashed var(--surface-high); border-radius:10px; padding:16px; text-align:center; color:var(--on-surface-faint); font-size:13px; }
+
+  .annotation { font-size:12.5px; color:var(--on-surface-variant); border-left:3px solid var(--accent-bg-subtle); padding:10px 14px; margin:14px 0 0; background:var(--surface-low); border-radius:0 8px 8px 0; line-height:1.65; }
+  .annotation b { color:var(--on-surface); }
+</style>
+</head>
+<body>
+<div class="wf-banner">WIREFRAME — issue #3357 教師面板重設計 · 對應 README §8 · 非真實資料 · 這是下鑽頁，不是導覽 tab</div>
+<div class="wf-shell">
+  <div class="wf-sidebar">
+    <div class="wf-logo">LingoLeap</div>
+    <div class="wf-nav-item active">🏫 班級</div>
+    <div class="wf-nav-item">❓ 使用說明</div>
+  </div>
+  <div class="wf-main">
+    <span class="wf-tag">四年甲班</span>
+    <div class="breadcrumb">作業 &gt; 贏得喝采的輸家 &gt; <b>吳冠廷</b>（從矩陣的學生列、早期介入卡片皆可點進這頁）</div>
+
+    <div class="head-card">
+      <div class="head-row">
+        <div>
+          <h1>吳冠廷</h1>
+          <p class="lead">帳號 stu_wu07　四年甲班　整體正確率 41%</p>
+          <div class="tag-row">
+            <span class="tag watch">需要關注</span>
+          </div>
+        </div>
+        <div class="stat-mini">
+          <div class="num" style="color:var(--high, #B91C1C);">高風險</div>
+          <div class="label">與早期介入頁狀態同步</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="wf-card">
+      <div class="section-title">個人指導紀錄（老師寫的一般性提醒）</div>
+      <div class="note-box">「容易分心，建議拆成短段落練習」— 記於 09/15</div>
+      <div class="note-box">「這週朗讀明顯進步，鼓勵繼續」— 記於 09/22</div>
+      <span class="link">+ 新增一則</span>
+    </div>
+
+    <div class="wf-card">
+      <div class="section-title">本學期作業表現<span class="link">查看矩陣中的完整列 →</span></div>
+      <table>
+        <thead><tr><th>作業</th><th>分數</th><th>正確率</th><th></th></tr></thead>
+        <tbody>
+          <tr>
+            <td>贏得喝采的輸家</td><td><span class="cell-score score-mid">31</span></td><td class="mono">38%</td>
+            <td><span class="link">展開大題 →</span></td>
+          </tr>
+          <tr>
+            <td>小木偶奇遇記（理解）</td><td><span class="cell-score score-mid">45</span></td><td class="mono">48%</td>
+            <td><span class="link">展開大題 →</span></td>
+          </tr>
+          <tr>
+            <td>古詩兩首（朗讀＋理解）</td><td style="color:var(--on-surface-faint);">進行中</td><td style="color:var(--on-surface-faint);">—</td>
+            <td><span class="link">展開大題 →</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="wf-card">
+      <div class="section-title">長期趨勢（合併原「跨課文分析」個人視角 + 原「學生進度」學習曲線 —— 原本是兩套重工元件）</div>
+      <div class="trend-chart">
+        <div class="tbar" style="height:52%;"></div><div class="tbar" style="height:45%;"></div>
+        <div class="tbar" style="height:50%;"></div><div class="tbar" style="height:41%;"></div>
+        <div class="tbar hi" style="height:38%;"></div>
+      </div>
+      <div class="chart-caption">近 5 筆有分數的作業（不含自學）— 09/01 → 10/09，呈緩慢下滑</div>
+    </div>
+
+    <div class="grid-2">
+      <div class="wf-card" style="margin-bottom:0;">
+        <div class="section-title">自學紀錄（獨立分區，不混入上方作業表現）</div>
+        <div class="self-study-row"><span>十二生肖的故事</span><span class="pill">76 分</span></div>
+        <div class="self-study-row"><span>勇敢的小錫兵</span><span class="pill">82 分</span></div>
+        <div class="self-study-row" style="color:var(--on-surface-faint);"><span>本月共 3 次</span><span></span></div>
+      </div>
+      <div class="wf-card" style="margin-bottom:0;">
+        <div class="section-title">早期介入狀態（與早期介入頁同一份文案，不是兩套）</div>
+        <div class="risk-sync">
+          <b>高風險</b> — 前期課文正確率偏低（38.4%）、連續 3 次下滑、生字錯誤率偏高<br>
+          建議行動：安排一對一朗讀指導，從較簡單的課文開始
+        </div>
+      </div>
+    </div>
+
+    <div class="wf-card">
+      <div class="section-title">作答時間軸 / 猜題標記</div>
+      <div class="gap-box">
+        尚無作答時間 / 猜題資料<br>
+        <span style="font-size:11.5px;">這是真正的資料模型缺口（README §6），不是這頁沒做——目前 <code>mcq_attempt</code> 表缺「題目出現時間」與回連 session 的外鍵，無法可靠判斷。</span>
+      </div>
+    </div>
+
+    <p class="annotation">設計依據：README §8 —— 這一頁<b>吸收</b>原「學生進度」tab（<code>StudentProgressTab.tsx</code>／<code>StudentExpandedPanel.tsx</code>／<code>StudentTagManager.tsx</code>／<code>TeacherInstructionPanel.tsx</code>）與原「跨課文分析」的個人視角（<code>CrossTextChartGrid</code> 的 <code>StudentDetailPanel</code>），不是重建——這兩支舊元件做的是同一件事（單一學生跨時間/跨課文的分數曲線），合併後只剩一個真相來源。早期介入狀態刻意跟早期介入 tab 共用同一段文案（不是兩套獨立算出來的句子），直接回應現場回饋「分數和入班觀察也有落差，不確定是資料收集或判定的問題」——至少先讓同一個學生在平台裡任何地方看到的結論是一致的。</p>
+  </div>
+</div>
+</body>
+</html>
