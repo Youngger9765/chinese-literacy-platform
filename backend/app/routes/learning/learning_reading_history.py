@@ -11,12 +11,13 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
-from sqlalchemy import desc
+from sqlalchemy import desc, select, union
 from sqlalchemy.orm import Session
 
 from ...auth.dependencies import get_current_user
 from ...database import get_db
 from ...models.reading_history import ReadingHistory, ReadingTarget
+from ...models.school import Classroom, ClassroomStudent, ClassroomTeacher
 from ...models.user import User
 from ._helpers import verify_student_access
 
@@ -235,10 +236,20 @@ async def get_reading_summary(
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
 def _get_target_cpm(student_id: int, lesson_id: str, db: Session) -> tuple[float, str]:
-    """Get the CPM target for a student+lesson. Teacher-set takes priority."""
+    """Get the CPM target for a student+lesson. Teacher-set takes priority.
+
+    #3356: only a target set by one of *this student's* teachers applies. The
+    lookup used to take the newest row for the lesson from anyone on the
+    platform, so a teacher of another school (or any user) changed it for all.
+    """
+    class_ids = select(ClassroomStudent.classroom_id).where(ClassroomStudent.student_id == student_id)
+    teacher_ids = union(
+        select(Classroom.teacher_id).where(Classroom.id.in_(class_ids)),
+        select(ClassroomTeacher.teacher_id).where(ClassroomTeacher.classroom_id.in_(class_ids)),
+    )
     teacher_target = (
         db.query(ReadingTarget)
-        .filter(ReadingTarget.lesson_id == lesson_id)
+        .filter(ReadingTarget.lesson_id == lesson_id, ReadingTarget.teacher_id.in_(teacher_ids))
         .order_by(desc(ReadingTarget.updated_at))
         .first()
     )
