@@ -72,10 +72,25 @@
   .sm-avgline::after { content:"班平均"; position:absolute; right:0; top:-14px; font-size:9.5px; color:var(--on-surface-faint); background:var(--surface-0); padding:0 3px; }
   .sm-footer { display:flex; justify-content:space-between; font-size:11px; color:var(--on-surface-faint); margin-top:6px; }
   .sparse-tag { color:var(--warning); font-weight:700; }
+
+  /* 逐大題全班統計（§4.3，main 複審補） */
+  .item-stats-card { background:var(--surface-0); border:1px solid var(--surface-high); border-radius:16px; padding:18px 20px; box-shadow:var(--shadow-card); margin-bottom:20px; }
+  .item-stats-title { font-size:14.5px; font-weight:700; margin:0 0 2px; }
+  .item-stats-sub { font-size:12.5px; color:var(--on-surface-variant); margin:0 0 14px; }
+  .item-row { display:grid; grid-template-columns:120px 1fr 70px 70px 70px; align-items:center; gap:12px; padding:9px 0; border-bottom:1px solid var(--surface-low); }
+  .item-row:last-child { border-bottom:none; }
+  .item-row.worst { background:var(--error-bg); margin:0 -10px; padding:9px 10px; border-radius:8px; border-bottom:none; }
+  .item-name { font-size:13.5px; font-weight:700; }
+  .item-row.worst .item-name::before { content:"⚠ "; color:var(--error); }
+  .item-bar-wrap { height:10px; background:var(--surface-container); border-radius:5px; overflow:hidden; }
+  .item-bar-fill { height:100%; background:var(--accent); border-radius:5px; }
+  .item-row.worst .item-bar-fill { background:var(--error); }
+  .item-stat-num { font-size:12.5px; text-align:right; font-variant-numeric:tabular-nums; }
+  .item-stat-label { font-size:9.5px; color:var(--on-surface-faint); display:block; text-align:right; }
 </style>
 </head>
 <body>
-<div class="wf-banner">WIREFRAME — issue #3357 教師面板重設計 · 對應 README §4.2 / §4.3 · 非真實資料</div>
+<div class="wf-banner">WIREFRAME — issue #3357 教師面板重設計 · 對應 README §4.2 / §4.3 / §4.4 · 非真實資料</div>
 <div class="wf-shell">
   <div class="wf-sidebar">
     <div class="wf-logo">LingoLeap</div>
@@ -94,6 +109,49 @@
     </div>
 
     <!-- ========== VIEW 1：單一作業矩陣 ========== -->
+
+    <div class="item-stats-card">
+      <div class="item-stats-title">逐大題全班統計</div>
+      <div class="item-stats-sub">19 人已交 · 依正確率由低到高排序 · 最低的一項醒目標示（對應 README §1「作業詳情頁『逐大題』卡片直接排序顯示最低正確率的大題」）</div>
+
+      <div class="item-row worst">
+        <div class="item-name">理解-推論</div>
+        <div class="item-bar-wrap"><div class="item-bar-fill" style="width:58%;"></div></div>
+        <div><div class="item-stat-num">17/19</div><span class="item-stat-label">完成率 89%</span></div>
+        <div><div class="item-stat-num" style="color:var(--error);">58%</div><span class="item-stat-label">正確率</span></div>
+        <div><div class="item-stat-num" style="color:var(--error);">42%</div><span class="item-stat-label">錯誤率</span></div>
+      </div>
+      <div class="item-row">
+        <div class="item-name">理解-評鑑</div>
+        <div class="item-bar-wrap"><div class="item-bar-fill" style="width:75%;"></div></div>
+        <div><div class="item-stat-num">16/19</div><span class="item-stat-label">完成率 84%</span></div>
+        <div><div class="item-stat-num">75%</div><span class="item-stat-label">正確率</span></div>
+        <div><div class="item-stat-num">25%</div><span class="item-stat-label">錯誤率</span></div>
+      </div>
+      <div class="item-row">
+        <div class="item-name">生字</div>
+        <div class="item-bar-wrap"><div class="item-bar-fill" style="width:79%;"></div></div>
+        <div><div class="item-stat-num">19/19</div><span class="item-stat-label">完成率 100%</span></div>
+        <div><div class="item-stat-num">79%</div><span class="item-stat-label">正確率</span></div>
+        <div><div class="item-stat-num">21%</div><span class="item-stat-label">錯誤率</span></div>
+      </div>
+      <div class="item-row">
+        <div class="item-name">理解-字面</div>
+        <div class="item-bar-wrap"><div class="item-bar-fill" style="width:81%;"></div></div>
+        <div><div class="item-stat-num">18/19</div><span class="item-stat-label">完成率 95%</span></div>
+        <div><div class="item-stat-num">81%</div><span class="item-stat-label">正確率</span></div>
+        <div><div class="item-stat-num">19%</div><span class="item-stat-label">錯誤率</span></div>
+      </div>
+      <div class="item-row">
+        <div class="item-name">朗讀</div>
+        <div class="item-bar-wrap"><div class="item-bar-fill" style="width:84%;"></div></div>
+        <div><div class="item-stat-num">19/19</div><span class="item-stat-label">完成率 100%</span></div>
+        <div><div class="item-stat-num">84%</div><span class="item-stat-label">正確率</span></div>
+        <div><div class="item-stat-num">16%</div><span class="item-stat-label">錯誤率</span></div>
+      </div>
+      <p class="annotation" style="margin:14px 0 0;">main 複審補：v3 只做到「點進單一學生」才看得到大題分解，沒有「全班」這一層——老師要自己一個個學生點開再心算平均。這裡在學生列表<b>之前</b>先把全班聚合算好：五個大題的完成率/正確率/錯誤率，依正確率升冪排序，「理解-推論」最低（58%）用紅底標出，老師一眼就知道這份作業全班卡在哪個大題，不用先點進下面任何一位學生。資料來源跟下方展開列同一份 <code>TeacherSessionReportResponse</code>，只是這裡是對 19 筆已交記錄做聚合，不是單筆展開。</p>
+    </div>
+
     <div class="wf-card">
       <table>
         <thead><tr><th>學生</th><th>狀態</th><th>分數</th><th>正確率</th><th>完成時間</th><th></th></tr></thead>

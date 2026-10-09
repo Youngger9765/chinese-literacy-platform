@@ -59,10 +59,32 @@
   .section-title { font-size:15px; font-weight:700; margin:28px 0 4px; }
   .library-badge { font-size:11px; font-weight:700; color:var(--accent); }
   .wizard-note { font-size:12.5px; color:var(--on-surface-variant); }
+
+  /* 班級作業總表（§4.1）—— 學生 × 全部作業格狀矩陣 */
+  .viewtabs { display:flex; gap:2px; border-bottom:1px solid var(--surface-high); margin:0 0 18px; }
+  .viewtab { padding:10px 16px; font-size:14px; font-weight:700; color:var(--on-surface-variant); border-bottom:2.5px solid transparent; }
+  .viewtab.active { color:var(--accent); border-bottom-color:var(--accent); }
+  .matrix-scroll { overflow-x:auto; }
+  table.overview-matrix { border-collapse:separate; border-spacing:0; font-size:13px; min-width:860px; }
+  table.overview-matrix th, table.overview-matrix td { padding:8px 10px; border-bottom:1px solid var(--surface-low); border-right:1px solid var(--surface-low); text-align:center; white-space:nowrap; }
+  table.overview-matrix thead th { background:var(--surface-low); font-size:11px; color:var(--on-surface-variant); font-weight:700; position:sticky; top:0; z-index:2; }
+  table.overview-matrix thead th.stu-col-head { text-align:left; position:sticky; left:0; top:0; z-index:3; background:var(--surface-low); }
+  table.overview-matrix td.stu-col { text-align:left; font-weight:600; position:sticky; left:0; background:var(--surface-0); z-index:1; border-right:1px solid var(--surface-high); }
+  table.overview-matrix th.assign-col { cursor:default; }
+  table.overview-matrix th.assign-col .link { font-size:11.5px; }
+  .ov-cell { display:inline-flex; align-items:center; justify-content:center; min-width:34px; height:24px; border-radius:6px; font-weight:800; font-size:12px; }
+  .ov-done-high { background:var(--success-bg); color:var(--success); }
+  .ov-done-mid { background:var(--warning-bg); color:var(--warning); }
+  .ov-done-low { background:var(--error-bg); color:var(--error); }
+  .ov-inprogress { background:var(--surface-0); color:var(--warning); border:1px dashed var(--warning); font-size:10.5px; font-weight:700; }
+  .ov-notstarted { color:var(--on-surface-faint); }
+  .ov-unassigned { background:repeating-linear-gradient(135deg, var(--surface-low), var(--surface-low) 4px, var(--surface-container) 4px, var(--surface-container) 8px); color:var(--on-surface-faint); font-size:10px; }
+  .matrix-legend { display:flex; gap:16px; flex-wrap:wrap; font-size:12px; color:var(--on-surface-variant); margin:10px 0 0; }
+  .matrix-legend .lg-item { display:flex; align-items:center; gap:6px; }
 </style>
 </head>
 <body>
-<div class="wf-banner">WIREFRAME — issue #3357 教師面板重設計 · 對應 README §3 / §4.3 · 非真實資料</div>
+<div class="wf-banner">WIREFRAME — issue #3357 教師面板重設計 · 對應 README §3 / §4.1 / §4.4 · 非真實資料</div>
 <div class="wf-shell">
   <div class="wf-sidebar">
     <div class="wf-logo">LingoLeap</div>
@@ -87,6 +109,108 @@
       <span class="tab">錯字總表</span>
       <span class="tab">協同教師</span>
     </div>
+
+    <div class="viewtabs">
+      <span class="viewtab active">班級作業總表（預設畫面）</span>
+      <span class="viewtab">清單檢視</span>
+    </div>
+
+    <div class="wf-card" style="padding:18px 20px 14px;">
+      <div class="section-title" style="margin-bottom:2px;">班級作業總表（學生 × 全部作業）</div>
+      <p class="wizard-note" style="margin-bottom:14px;">回應現場回饋「矩陣那裡只看他出的作業……看懂每次上課的作業完成度」—— 一張格子看完整班全部正式作業的完成狀況，不用一份一份作業點進去。點欄位頂端的作業名稱 → 進入該作業的單一作業矩陣（逐大題統計＋橫向展開）；點列首學生姓名 → 進入學生個人頁。</p>
+      <div class="matrix-scroll">
+        <table class="overview-matrix">
+          <thead>
+            <tr>
+              <th class="stu-col-head">學生</th>
+              <th class="assign-col"><span class="link">贏得喝采的輸家</span><br>09/28 逾期</th>
+              <th class="assign-col"><span class="link">古詩兩首</span><br>10/09 今天</th>
+              <th class="assign-col"><span class="link">小木偶奇遇記</span><br>10/05 已過期</th>
+              <th class="assign-col"><span class="link">月亮的秘密</span><br>10/16</th>
+              <th class="assign-col"><span class="link">阿嬤的菜園</span><br>10/23</th>
+              <th class="assign-col"><span class="link">科學小偵探</span><br>10/30（草稿）</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="stu-col"><span class="link">王小明</span></td>
+              <td><span class="ov-cell ov-done-high">88</span></td>
+              <td><span class="ov-cell ov-inprogress">3/5</span></td>
+              <td><span class="ov-cell ov-done-high">92</span></td>
+              <td class="ov-notstarted">—</td>
+              <td class="ov-notstarted">—</td>
+              <td><span class="ov-cell ov-unassigned">草稿</span></td>
+            </tr>
+            <tr>
+              <td class="stu-col"><span class="link">林雨萱</span></td>
+              <td><span class="ov-cell ov-inprogress">3/5</span></td>
+              <td class="ov-notstarted">—</td>
+              <td><span class="ov-cell ov-done-high">88</span></td>
+              <td class="ov-notstarted">—</td>
+              <td class="ov-notstarted">—</td>
+              <td><span class="ov-cell ov-unassigned">草稿</span></td>
+            </tr>
+            <tr>
+              <td class="stu-col"><span class="link">陳柏宇</span></td>
+              <td class="ov-notstarted">未開始</td>
+              <td class="ov-notstarted">—</td>
+              <td><span class="ov-cell ov-done-mid">64</span></td>
+              <td class="ov-notstarted">—</td>
+              <td class="ov-notstarted">—</td>
+              <td><span class="ov-cell ov-unassigned">草稿</span></td>
+            </tr>
+            <tr>
+              <td class="stu-col"><span class="link">李佳蓉</span></td>
+              <td><span class="ov-cell ov-done-high">95</span></td>
+              <td><span class="ov-cell ov-done-high">91</span></td>
+              <td><span class="ov-cell ov-done-high">97</span></td>
+              <td><span class="ov-cell ov-done-high">90</span></td>
+              <td class="ov-notstarted">—</td>
+              <td><span class="ov-cell ov-unassigned">草稿</span></td>
+            </tr>
+            <tr>
+              <td class="stu-col"><span class="link">張宇恩</span></td>
+              <td><span class="ov-cell ov-done-mid">58</span></td>
+              <td class="ov-notstarted">未開始</td>
+              <td><span class="ov-cell ov-done-mid">61</span></td>
+              <td class="ov-notstarted">—</td>
+              <td class="ov-notstarted">—</td>
+              <td><span class="ov-cell ov-unassigned">草稿</span></td>
+            </tr>
+            <tr>
+              <td class="stu-col"><span class="link">吳冠廷</span></td>
+              <td><span class="ov-cell ov-done-low">31</span></td>
+              <td><span class="ov-cell ov-inprogress">1/5</span></td>
+              <td><span class="ov-cell ov-done-low">45</span></td>
+              <td class="ov-notstarted">—</td>
+              <td class="ov-notstarted">—</td>
+              <td><span class="ov-cell ov-unassigned">草稿</span></td>
+            </tr>
+            <tr>
+              <td class="stu-col" style="color:var(--on-surface-faint);">邱柏丞<span style="font-size:10px; font-weight:400;">（10/02 新轉入）</span></td>
+              <td><span class="ov-cell ov-unassigned">未指派</span></td>
+              <td class="ov-notstarted">未開始</td>
+              <td><span class="ov-cell ov-unassigned">未指派</span></td>
+              <td class="ov-notstarted">—</td>
+              <td class="ov-notstarted">—</td>
+              <td><span class="ov-cell ov-unassigned">草稿</span></td>
+            </tr>
+            <tr>
+              <td colspan="7" style="text-align:center; color:var(--on-surface-faint); font-size:12px; padding:10px;">… 其餘 21 位學生略（線框圖示意）</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="matrix-legend">
+        <span class="lg-item"><span class="ov-cell ov-done-high">88</span> 已完成（依分數上色）</span>
+        <span class="lg-item"><span class="ov-cell ov-inprogress">3/5</span> 進行中（第幾步）</span>
+        <span class="lg-item" style="color:var(--on-surface-faint);">— 未開始</span>
+        <span class="lg-item"><span class="ov-cell ov-unassigned">未指派</span> 不在此作業指派名單內</span>
+      </div>
+      <p class="annotation">設計依據：README §4.1 —— main 複審指出 v3 漏掉這張「學生 × 全部作業」總表，只拆成清單＋單一作業矩陣，老師仍要一份一份點進去拼湊完成度全貌。第一欄（學生）與第一列（作業）皆 <code>position:sticky</code>，橫向很多份作業、縱向很多學生時仍看得到對照軸。「邱柏丞」示範<b>未指派</b>狀態的真實成因：10/02 才轉入班級，而 <code>assignment_lifecycle_service.py</code> 的 <code>AssignmentSubmission</code> 是在建立作業當下對「當時」在班學生批次建立，之後轉入的學生不會回溯補上——這不是 bug，是設計決定，但矩陣要誠實呈現這個狀態，不能跟「未開始」混在一起（未指派 = 系統沒有要求他做；未開始 = 系統要求了但他還沒動手，兩者對老師的下一步行動完全不同）。</p>
+    </div>
+
+    <p class="wizard-note" style="margin:4px 0 18px;">↓ 清單檢視（既有畫面，點上方「清單檢視」或任一作業的「查看矩陣」也可切換到對應頁）</p>
 
     <div class="row-between">
       <div class="pillbar">
