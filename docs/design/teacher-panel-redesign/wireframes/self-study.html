@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tab 3 學生自學總覽</title>
+<style>
+  :root {
+    --surface: #FBF6EE; --surface-0: #FFFFFF; --surface-low: #F5F0E8;
+    --surface-container: #ECE8DF; --surface-high: #E7E2D8;
+    --on-surface: #302F2A; --on-surface-variant: #5E5B55; --on-surface-faint: #8A8678;
+    --accent: #564ABF; --accent-bg: #EDEBF9; --accent-bg-subtle: #E0DCF5;
+    --self-study: #0E7A4F; --self-study-bg: #E4F3EC; --self-study-bg-mid:#CFEBDD;
+    --success: #006947; --success-bg: #E3F2EC;
+    --warning: #D97706; --warning-bg: #FEF3E2;
+    --shadow-card: 0 0 32px rgba(136, 152, 170, 0.12);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Noto Sans TC","PingFang TC","Microsoft JhengHei",ui-sans-serif,system-ui,sans-serif; background: var(--surface); color: var(--on-surface); font-size: 16px; line-height: 1.6; }
+  .wf-banner { background:#1A1740; color:#E0DCF5; font-size:13px; padding:7px 16px; text-align:center; }
+  .wf-shell { display:flex; min-height:100vh; }
+  .wf-sidebar { width:216px; flex-shrink:0; background:var(--surface-0); border-right:1px solid var(--surface-high); padding:20px 12px; }
+  .wf-logo { font-weight:700; font-size:17px; padding:0 8px 22px; color:var(--accent); }
+  .wf-nav-item { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:10px; font-size:15px; font-weight:600; color:var(--on-surface-variant); margin-bottom:2px; }
+  .wf-nav-item.active { background:var(--accent-bg); color:var(--accent); }
+  .wf-main { flex:1; padding:28px 36px 64px; max-width:1180px; }
+  .wf-tag { display:inline-block; font-size:11px; font-weight:700; letter-spacing:.02em; padding:3px 9px; border-radius:999px; background:var(--self-study-bg); color:var(--self-study); margin-bottom:14px; }
+  h1 { font-size:22px; font-weight:700; margin:0 0 4px; }
+  p.lead { color:var(--on-surface-variant); font-size:14px; margin:0 0 4px; }
+  .tabs { display:flex; gap:2px; border-bottom:1px solid var(--surface-high); margin:18px 0 22px; flex-wrap:wrap; }
+  .tab { padding:11px 15px; font-size:14px; font-weight:700; color:var(--on-surface-variant); border-bottom:2.5px solid transparent; }
+  .tab.active { color:var(--self-study); border-bottom-color:var(--self-study); }
+  .notice { display:flex; align-items:center; gap:10px; background:var(--self-study-bg); border:1px solid var(--self-study-bg-mid); border-radius:12px; padding:14px 16px; font-size:13.5px; color:var(--self-study); font-weight:600; margin-bottom:20px; }
+  .wf-card { background:var(--surface-0); border:1px solid var(--surface-high); border-radius:16px; padding:0; box-shadow:var(--shadow-card); overflow:hidden; }
+  table { width:100%; border-collapse:collapse; font-size:14px; }
+  th { text-align:left; font-size:12px; color:var(--on-surface-variant); font-weight:700; padding:12px 16px; border-bottom:1px solid var(--surface-high); background:var(--surface-low); }
+  td { padding:13px 16px; border-bottom:1px solid var(--surface-low); vertical-align:middle; }
+  tr:last-child td { border-bottom:none; }
+  .mono { font-variant-numeric:tabular-nums; font-family:"SF Mono","Menlo",monospace; }
+  .cell-score { display:inline-flex; align-items:center; justify-content:center; min-width:40px; height:26px; border-radius:7px; font-weight:800; font-size:13px; padding:0 6px; background:var(--self-study-bg); color:var(--self-study); }
+  .cell-score.mid { background:var(--warning-bg); color:var(--warning); }
+  .barwrap { width:90px; height:8px; background:var(--surface-container); border-radius:4px; overflow:hidden; display:inline-block; vertical-align:middle; margin-right:6px; }
+  .bar { height:100%; background:var(--self-study); }
+  .link { color:var(--self-study); font-size:13px; font-weight:700; }
+  .annotation { font-size:12.5px; color:var(--on-surface-variant); border-left:3px solid var(--self-study-bg-mid); padding:10px 14px; margin:18px 0; background:var(--surface-low); border-radius:0 8px 8px 0; line-height:1.65; }
+  .annotation b { color:var(--on-surface); }
+  .book-row { display:flex; gap:8px; flex-wrap:wrap; margin-top:4px; }
+  .book-chip { font-size:11.5px; background:var(--surface-container); color:var(--on-surface-variant); padding:3px 9px; border-radius:999px; }
+</style>
+</head>
+<body>
+<div class="wf-banner">WIREFRAME — issue #3357 教師面板重設計 · 對應 README §4.2 / §7 · 非真實資料</div>
+<div class="wf-shell">
+  <div class="wf-sidebar">
+    <div class="wf-logo">LingoLeap</div>
+    <div class="wf-nav-item active">🏫 班級</div>
+    <div class="wf-nav-item">❓ 使用說明</div>
+  </div>
+  <div class="wf-main">
+    <span class="wf-tag">四年甲班 · Tab 3 學生自學總覽</span>
+    <h1>學生自學總覽</h1>
+    <p class="lead">學生自己選的練習，不是老師出的作業，僅供參考。</p>
+
+    <div class="tabs">
+      <span class="tab">今日總覽</span>
+      <span class="tab">作業</span>
+      <span class="tab active">學生自學總覽</span>
+      <span class="tab">早期介入</span>
+      <span class="tab">錯字總表</span>
+      <span class="tab">協同教師</span>
+    </div>
+
+    <div class="notice">⚠️ 這一頁的分數<b>不計入作業表現</b>，也不會出現在「作業」tab 的矩陣裡（§4.2 已把矩陣改成只吃 <code>session_mode == "assignment"</code>）</div>
+
+    <div class="wf-card">
+      <table>
+        <thead><tr><th>學生</th><th>本月練習次數</th><th>平均分數</th><th>最近一次練習</th><th>最近讀過</th><th></th></tr></thead>
+        <tbody>
+          <tr>
+            <td>王小明</td>
+            <td class="mono">14</td>
+            <td><span class="cell-score">89</span></td>
+            <td>10/08</td>
+            <td class="book-row"><span class="book-chip">十二生肖的故事</span><span class="book-chip">勇敢的小錫兵</span></td>
+            <td><span class="link">查看個人頁 →</span></td>
+          </tr>
+          <tr>
+            <td>林雨萱</td>
+            <td class="mono">6</td>
+            <td><span class="cell-score mid">64</span></td>
+            <td>10/02</td>
+            <td class="book-row"><span class="book-chip">十二生肖的故事</span></td>
+            <td><span class="link">查看個人頁 →</span></td>
+          </tr>
+          <tr>
+            <td>陳柏宇</td>
+            <td class="mono" style="color:var(--on-surface-faint);">0</td>
+            <td class="mono" style="color:var(--on-surface-faint);">—</td>
+            <td style="color:var(--on-surface-faint);">尚未使用自學功能</td>
+            <td style="color:var(--on-surface-faint);">—</td>
+            <td><span class="link" style="color:var(--on-surface-faint);">—</span></td>
+          </tr>
+          <tr>
+            <td>李佳蓉</td>
+            <td class="mono">21</td>
+            <td><span class="cell-score">93</span></td>
+            <td>10/09</td>
+            <td class="book-row"><span class="book-chip">十二生肖的故事</span><span class="book-chip">勇敢的小錫兵</span><span class="book-chip">+3 篇</span></td>
+            <td><span class="link">查看個人頁 →</span></td>
+          </tr>
+          <tr>
+            <td colspan="6" style="text-align:center; color:var(--on-surface-faint); font-size:12.5px; padding:14px;">… 其餘 24 位學生略（線框圖示意）</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="annotation">設計依據：README §4.2 / §7 —— 資料源跟作業矩陣是<b>同一支 heatmap API</b>，差別只在 <code>session_mode</code> 篩選反過來（<code>self_study</code> 而非 <code>assignment</code>）。刻意改用<b>綠色系</b>而非作業矩陣的分數色階，是 Tufte graphical integrity 的應用：兩張表座標結構一樣（學生列表＋分數），但代表的語意不同（考核 vs 參考），顏色要變、結構要一致，老師才能用同一套讀圖習慣又不會把兩種數字混在一起判斷。<br>這個 tab 跟「作業」tab 裡的「自學課文庫」篩選是同一份 <code>ClassroomText</code> 資料的兩個呈現面：那邊回答「學生可以讀什麼」（書單／設定），這裡回答「學生實際讀了什麼、讀得怎樣」（成果／事後回顧）。</p>
+  </div>
+</div>
+</body>
+</html>

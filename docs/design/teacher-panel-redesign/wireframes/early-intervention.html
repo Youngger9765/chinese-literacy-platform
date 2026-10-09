@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tab 4 早期介入</title>
+<style>
+  :root {
+    --surface: #FBF6EE; --surface-0: #FFFFFF; --surface-low: #F5F0E8;
+    --surface-container: #ECE8DF; --surface-high: #E7E2D8;
+    --on-surface: #302F2A; --on-surface-variant: #5E5B55; --on-surface-faint: #8A8678;
+    --accent: #564ABF; --accent-bg: #EDEBF9;
+    --high: #B91C1C; --high-bg:#FDECEC; --high-border:#F3C6C6;
+    --med: #B45309; --med-bg:#FEF3E2; --med-border:#F6DCA8;
+    --low: #006947; --low-bg:#E3F2EC; --low-border:#BFE2D2;
+    --insuff: #5E5B55; --insuff-bg:#ECE8DF; --insuff-border:#D9D4CA;
+    --shadow-card: 0 0 32px rgba(136, 152, 170, 0.12);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Noto Sans TC","PingFang TC","Microsoft JhengHei",ui-sans-serif,system-ui,sans-serif; background: var(--surface); color: var(--on-surface); font-size: 16px; line-height: 1.6; }
+  .wf-banner { background:#1A1740; color:#E0DCF5; font-size:13px; padding:7px 16px; text-align:center; }
+  .wf-shell { display:flex; min-height:100vh; }
+  .wf-sidebar { width:216px; flex-shrink:0; background:var(--surface-0); border-right:1px solid var(--surface-high); padding:20px 12px; }
+  .wf-logo { font-weight:700; font-size:17px; padding:0 8px 22px; color:var(--accent); }
+  .wf-nav-item { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:10px; font-size:15px; font-weight:600; color:var(--on-surface-variant); margin-bottom:2px; }
+  .wf-nav-item.active { background:var(--accent-bg); color:var(--accent); }
+  .wf-main { flex:1; padding:28px 36px 64px; max-width:1180px; }
+  .wf-tag { display:inline-block; font-size:11px; font-weight:700; letter-spacing:.02em; padding:3px 9px; border-radius:999px; background:var(--accent-bg); color:var(--accent); margin-bottom:14px; }
+  h1 { font-size:22px; font-weight:700; margin:0 0 4px; }
+  p.lead { color:var(--on-surface-variant); font-size:14px; margin:0 0 4px; }
+  .tabs { display:flex; gap:2px; border-bottom:1px solid var(--surface-high); margin:18px 0 22px; flex-wrap:wrap; }
+  .tab { padding:11px 15px; font-size:14px; font-weight:700; color:var(--on-surface-variant); border-bottom:2.5px solid transparent; }
+  .tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+  .summary-row { display:flex; gap:14px; margin-bottom:20px; }
+  .summary-chip { flex:1; border-radius:12px; padding:12px 16px; font-weight:700; font-size:13.5px; display:flex; justify-content:space-between; align-items:center; }
+  .risk-card { border-radius:14px; border:1px solid; padding:16px 18px; margin-bottom:12px; box-shadow:var(--shadow-card); background:var(--surface-0); }
+  .risk-card.high { border-color:var(--high-border); }
+  .risk-card.med { border-color:var(--med-border); }
+  .risk-card.low { border-color:var(--low-border); }
+  .risk-card.insuff { border-color:var(--insuff-border); background:var(--surface-low); }
+  .rc-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+  .rc-name { font-size:15.5px; font-weight:700; }
+  .badge { font-size:11.5px; font-weight:800; padding:3px 10px; border-radius:999px; }
+  .badge.high { background:var(--high-bg); color:var(--high); }
+  .badge.med { background:var(--med-bg); color:var(--med); }
+  .badge.low { background:var(--low-bg); color:var(--low); }
+  .badge.insuff { background:var(--insuff-bg); color:var(--insuff); }
+  .rc-factor { font-size:13.5px; color:var(--on-surface); margin:4px 0; padding-left:16px; position:relative; }
+  .rc-factor::before { content:"●"; position:absolute; left:0; font-size:7px; top:6px; color:var(--on-surface-faint); }
+  .rc-action-box { margin-top:10px; padding:10px 12px; border-radius:9px; font-size:13px; }
+  .rc-action-box.high { background:var(--high-bg); }
+  .rc-action-box.med { background:var(--med-bg); }
+  .rc-action-label { font-size:11px; font-weight:800; text-transform:none; margin-bottom:3px; color:var(--on-surface-variant); }
+  .lexia-chip { display:inline-block; font-size:10.5px; font-weight:800; padding:2px 8px; border-radius:999px; background:var(--surface-0); border:1px solid var(--surface-high); color:var(--on-surface-variant); margin-right:6px; margin-bottom:4px; }
+  .annotation { font-size:12.5px; color:var(--on-surface-variant); border-left:3px solid var(--accent); padding:10px 14px; margin:18px 0; background:var(--surface-low); border-radius:0 8px 8px 0; line-height:1.65; }
+  .annotation b { color:var(--on-surface); }
+  .section-label { font-size:12px; font-weight:800; color:var(--on-surface-variant); margin:22px 0 8px; letter-spacing:.03em; }
+</style>
+</head>
+<body>
+<div class="wf-banner">WIREFRAME — issue #3357 教師面板重設計 · 對應 README §5.2 · 非真實資料</div>
+<div class="wf-shell">
+  <div class="wf-sidebar">
+    <div class="wf-logo">LingoLeap</div>
+    <div class="wf-nav-item active">🏫 班級</div>
+    <div class="wf-nav-item">❓ 使用說明</div>
+  </div>
+  <div class="wf-main">
+    <span class="wf-tag">四年甲班 · Tab 4 早期介入</span>
+    <h1>早期介入</h1>
+    <p class="lead">28 位學生 — 2 位高風險、1 位中風險、1 位資料不足、24 位低風險（全部顯示，不會整批隱藏）</p>
+
+    <div class="tabs">
+      <span class="tab">今日總覽</span>
+      <span class="tab">作業</span>
+      <span class="tab">學生自學總覽</span>
+      <span class="tab active">早期介入</span>
+      <span class="tab">錯字總表</span>
+      <span class="tab">協同教師</span>
+    </div>
+
+    <div class="section-label">需要關注（高 → 中 → 資料不足，預設全部展開）</div>
+
+    <div class="risk-card high">
+      <div class="rc-head"><span class="rc-name">吳冠廷</span><span class="badge high">高風險</span></div>
+      <div class="rc-factor">前期課文正確率偏低（38.4%，低於 60%）</div>
+      <div class="rc-factor">連續 3 次下滑（52% → 45% → 38%）</div>
+      <div class="rc-factor">生字錯誤率偏高（9 字 / 篇，班平均 3.2 字）</div>
+      <div class="rc-action-box high">
+        <div class="rc-action-label">建議行動</div>
+        <span class="lexia-chip">需要我介入教學</span>
+        安排一對一朗讀指導，從較簡單的課文開始；優先檢查生字基礎是否穩固。
+      </div>
+    </div>
+
+    <div class="risk-card med">
+      <div class="rc-head"><span class="rc-name">張宇恩</span><span class="badge med">中風險</span></div>
+      <div class="rc-factor">前期課文正確率偏低（55.3%，低於 60%）</div>
+      <div class="rc-action-box med">
+        <div class="rc-action-label">建議行動</div>
+        <span class="lexia-chip">需要用量提醒</span>
+        鼓勵增加朗讀練習次數，觀察下兩次作業正確率是否回升。
+      </div>
+    </div>
+
+    <div class="risk-card insuff">
+      <div class="rc-head"><span class="rc-name">陳柏宇</span><span class="badge insuff">資料不足</span></div>
+      <div class="rc-factor">尚無已完成作業／自學紀錄可供判斷（<code>early_accuracy</code>／<code>max_inactivity_days</code> 皆為 null）</div>
+      <div class="rc-action-box" style="background:var(--insuff-bg);">
+        <div class="rc-action-label">建議行動</div>
+        先確認這位學生是否知道如何開始練習，而非判定為低風險放著不管。
+      </div>
+    </div>
+
+    <div class="section-label">低風險（24 位，預設收合成清單，點擊可展開個別詳情）</div>
+    <div class="risk-card low" style="padding:12px 18px;">
+      <div class="rc-head" style="margin-bottom:0;">
+        <span class="rc-name" style="font-size:13.5px; font-weight:600; color:var(--on-surface-variant);">王小明、李佳蓉、林雨萱 … 其餘 24 位</span>
+        <span class="badge low">低風險</span>
+      </div>
+    </div>
+
+    <p class="annotation">設計依據：README §5.2 —— 修正兩個根因實測確認的缺陷（見 <a href="#">#3364</a>）：① <b>建議文字預設展開</b>，不收在「詳情」按鈕後面（舊版 <code>AtRiskStudents.tsx:63-66</code> 把這些內容收合，摘要只顯示截斷的第一條）② <b>新增「資料不足」第四態</b>，且這類學生<b>預設仍要顯示</b>——舊版 <code>risk_level !== 'low'</code> 的篩選會把「資料不足」跟「真的低風險」混在一起整批隱藏（<code>AtRiskStudents.tsx:186</code>），測試班級裡有 3 位學生其實帶著真實風險因子卻因此被判 low、完全看不到。右上角的「建議行動」標籤（需要用量提醒／需要我介入教學）是參考 research.md §14 引用 Lexia Action Plan 的四分類做法，把風險等級直接翻譯成「老師下一步該做什麼」，比純列風險因子句子更有行動指引（本次先做文字分類示意，完整四分類規則留待下一輪迭代）。</p>
+  </div>
+</div>
+</body>
+</html>
