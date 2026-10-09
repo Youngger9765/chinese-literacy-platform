@@ -192,7 +192,8 @@ def get_at_risk_students(
             )
         )
 
-    order = {"high": 0, "medium": 1, "low": 2}
+    # 資料不足 sits above low-risk: the teacher still needs to look at them (#3364).
+    order = {"high": 0, "medium": 1, "insufficient_data": 2, "low": 3}
     results.sort(key=lambda r: (order.get(r.risk_level, 3), r.student_name))
 
     return results

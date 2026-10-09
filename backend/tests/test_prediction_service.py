@@ -154,7 +154,7 @@ class TestEmptyPrediction:
 
     def test_empty_returns_low_risk(self):
         result = svc._empty_prediction()
-        assert result["risk_level"] == "low"
+        assert result["risk_level"] == "insufficient_data"
         assert result["confidence_score"] == 0.0
         assert result["risk_factors"] == []
 
@@ -238,10 +238,14 @@ class TestEngagementGap:
         assert gap is not None
         assert gap <= svc.INACTIVITY_DAYS
 
-    def test_single_session_no_gap(self):
+    def test_single_recent_session_has_zero_gap(self):
         sessions = [MagicMock(started_at=_now())]
         gap = svc._check_engagement_gap(sessions)
-        assert gap is None
+        assert gap == 0
+
+    def test_last_practice_23_days_ago_is_inactivity(self):
+        sessions = [MagicMock(started_at=_now() - timedelta(days=23))]
+        assert svc._check_engagement_gap(sessions) >= 23
 
 
 class TestStuckCount:
@@ -285,7 +289,12 @@ class TestRiskLevelMapping:
 
     def test_one_factor_low(self):
         level, _ = svc._compute_risk_level(["factor1"], [MagicMock()] * 10)
-        assert level == "low"
+        assert level == "medium"
+
+    def test_no_judgable_data_is_insufficient(self):
+        sessions = [MagicMock(accuracy=None, started_at=None)]
+        level, _ = svc._compute_risk_level([], sessions)
+        assert level == "insufficient_data"
 
     def test_two_factors_medium(self):
         level, _ = svc._compute_risk_level(["f1", "f2"], [MagicMock()] * 10)
@@ -311,6 +320,34 @@ class TestRiskLevelMapping:
 
 
 class TestAtRiskEndpoint:
+
+    def test_23_days_without_practice_has_risk_factor(self):
+        db = _new_db()
+        try:
+            student = _make_user(db, "stu3364inactive@test.com", "Inactive Student")
+            _make_session(db, student.id, accuracy=90.0, started_at=_now() - timedelta(days=23))
+            db.commit()
+
+            result = svc.predict_learning_difficulty(student.id, db)
+            assert result["risk_level"] == "medium"
+            assert result["supporting_data"]["max_inactivity_days"] >= 23
+            assert any("未練習" in factor for factor in result["risk_factors"])
+            assert result["recommended_actions"]
+        finally:
+            db.close()
+
+    def test_last_practice_older_than_lookback_is_still_inactive(self):
+        db = _new_db()
+        try:
+            student = _make_user(db, "stu3364old@test.com", "Old Inactive Student")
+            _make_session(db, student.id, accuracy=90.0, started_at=_now() - timedelta(days=90))
+            db.commit()
+
+            result = svc.predict_learning_difficulty(student.id, db)
+            assert result["risk_level"] == "medium"
+            assert any("未練習" in factor for factor in result["risk_factors"])
+        finally:
+            db.close()
 
     def test_endpoint_returns_200(self):
         db = _new_db()
@@ -392,7 +429,7 @@ class TestAtRiskEndpoint:
             for field in ("student_id", "student_name", "risk_level", "risk_factors",
                           "recommended_actions", "confidence_score", "supporting_data"):
                 assert field in item, f"Missing field: {field}"
-            assert item["risk_level"] in ("low", "medium", "high")
+            assert item["risk_level"] == "insufficient_data"
         finally:
             db.close()
 

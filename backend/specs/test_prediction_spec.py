@@ -39,10 +39,10 @@ class _Session:
 # CONTRACT 1 — _empty_prediction: safe fall-back structure
 # =========================================================================
 
-def test_empty_prediction_risk_level_is_low() -> None:
-    """No-data prediction must never claim high/medium risk."""
+def test_empty_prediction_risk_level_is_insufficient_data() -> None:
+    """No-data prediction must not claim a measured risk level."""
     ep = _empty_prediction()
-    assert ep["risk_level"] == "low"
+    assert ep["risk_level"] == "insufficient_data"
 
 
 def test_empty_prediction_confidence_is_zero() -> None:
@@ -67,12 +67,12 @@ def test_empty_prediction_lists_are_empty() -> None:
 # CONTRACT 2 — _compute_risk_level: only 3 valid levels
 # =========================================================================
 
-VALID_RISK_LEVELS = {"low", "medium", "high"}
+VALID_RISK_LEVELS = {"insufficient_data", "low", "medium", "high"}
 
 
 @pytest.mark.parametrize("factor_count,expected_level", [
     (0, "low"),
-    (1, "low"),
+    (1, "medium"),
     (2, "medium"),
     (3, "medium"),
     (4, "high"),
