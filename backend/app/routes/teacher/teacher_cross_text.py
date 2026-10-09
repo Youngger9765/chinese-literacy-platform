@@ -56,6 +56,8 @@ def get_cross_text_analysis(
             classroom_name=classroom.name,
             total_students=0,
             total_sessions=0,
+            sample_count=0,
+            completed_without_score=0,
             text_difficulty_ranking=[],
             class_score_trend=[],
             common_error_chars=[],
@@ -70,7 +72,6 @@ def get_cross_text_analysis(
             LearningSession.status == "completed",
             LearningSession.story_slug.isnot(None),
         )
-        .order_by(LearningSession.started_at.asc())
         .all()
     )
 
@@ -92,17 +93,8 @@ def get_cross_text_analysis(
         except (ValueError, TypeError):
             return slug
 
-    # -- Class-level score trend (daily avg) --
-    daily_scores: dict[str, list[float]] = defaultdict(list)
-    for s in all_sessions:
-        if s.overall_score is not None:
-            day = s.started_at.strftime("%Y-%m-%d")
-            daily_scores[day].append(s.overall_score)
-
-    class_score_trend = [
-        {"date": day, "avg_score": round(sum(scores) / len(scores), 1)}
-        for day, scores in sorted(daily_scores.items())
-    ]
+    class_score_trend = _build_class_score_trend(all_sessions)
+    sample_count = sum(1 for s in all_sessions if s.overall_score is not None)
 
     # -- Text difficulty ranking --
     text_scores: dict[str, list[float]] = defaultdict(list)
@@ -165,11 +157,34 @@ def get_cross_text_analysis(
         classroom_name=classroom.name,
         total_students=len(student_ids),
         total_sessions=len(all_sessions),
+        sample_count=sample_count,
+        completed_without_score=len(all_sessions) - sample_count,
         text_difficulty_ranking=text_difficulty_ranking,
         class_score_trend=class_score_trend,
         common_error_chars=common_error_chars,
         student_patterns=student_patterns,
     )
+
+
+def _trend_time(session: LearningSession):
+    return session.completed_at or session.started_at
+
+
+def _build_class_score_trend(all_sessions: list[LearningSession]) -> list[dict]:
+    """Class average per completion day (#3360).
+
+    Grouping used to key on ``started_at``, so a student who opened ten lessons
+    on one day and finished them over ten days collapsed into a single point.
+    The class line stays a daily average, keyed on when the work was finished.
+    """
+    daily_scores: dict[str, list[float]] = defaultdict(list)
+    for s in all_sessions:
+        if s.overall_score is not None:
+            daily_scores[_trend_time(s).strftime("%Y-%m-%d")].append(s.overall_score)
+    return [
+        {"date": day, "avg_score": round(sum(scores) / len(scores), 1)}
+        for day, scores in sorted(daily_scores.items())
+    ]
 
 
 def _build_student_patterns(
@@ -191,16 +206,18 @@ def _build_student_patterns(
         s_session_ids = {s.id for s in s_sessions}
         s_errors = [e for e in all_char_errors if e.session_id in s_session_ids]
 
-        # Score trend
+        scored_sessions = sorted(
+            (s for s in s_sessions if s.overall_score is not None),
+            key=lambda item: (_trend_time(item), item.id),
+        )
         score_trend = [
             {
-                "date": s.started_at.strftime("%Y-%m-%d"),
+                "date": _trend_time(s).strftime("%Y-%m-%d"),
                 "score": s.overall_score,
                 "story_slug": s.story_slug,
                 "title": get_title(s.story_slug) if s.story_slug else None,
             }
-            for s in s_sessions
-            if s.overall_score is not None
+            for s in scored_sessions
         ]
 
         # Text performance breakdown
@@ -271,6 +288,8 @@ def _build_student_patterns(
                 student_name=student_map.get(sid, f"Student {sid}"),
                 total_texts_attempted=len(slug_sessions),
                 total_sessions=len(s_sessions),
+                sample_count=len(scored_sessions),
+                completed_without_score=len(s_sessions) - len(scored_sessions),
                 overall_avg_score=round(sum(all_scores) / len(all_scores), 1)
                 if all_scores
                 else None,

@@ -221,6 +221,8 @@ export interface StudentCrossTextPattern {
   student_name: string;
   total_texts_attempted: number;
   total_sessions: number;
+  sample_count: number;
+  completed_without_score: number;
   overall_avg_score: number | null;
   score_trend: Array<{
     date: string;
@@ -239,6 +241,8 @@ export interface ClassroomCrossTextPattern {
   classroom_name: string;
   total_students: number;
   total_sessions: number;
+  sample_count: number;
+  completed_without_score: number;
   text_difficulty_ranking: Array<{
     story_slug: string;
     title: string | null;
@@ -255,7 +259,7 @@ export interface ClassroomCrossTextPattern {
 export interface AtRiskStudent {
   student_id: number;
   student_name: string;
-  risk_level: 'low' | 'medium' | 'high';
+  risk_level: 'low' | 'medium' | 'high' | 'insufficient_data';
   risk_factors: string[];
   recommended_actions: string[];
   confidence_score: number;

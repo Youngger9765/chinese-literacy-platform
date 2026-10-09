@@ -176,7 +176,7 @@ class LearningCurveResponse(BaseModel):
 class AtRiskStudentResponse(BaseModel):
     student_id: int
     student_name: str
-    risk_level: str          # "low" | "medium" | "high"
+    risk_level: str          # "insufficient_data" | "low" | "medium" | "high"
     risk_factors: list[str]
     recommended_actions: list[str]
     confidence_score: float
@@ -331,6 +331,8 @@ class StudentCrossTextPattern(BaseModel):
     student_name: str
     total_texts_attempted: int
     total_sessions: int
+    sample_count: int
+    completed_without_score: int
     overall_avg_score: float | None
     score_trend: list[dict]  # [{date, score, story_slug, title}] sorted by date
     text_performance: list[TextPerformanceSummary]
@@ -344,6 +346,8 @@ class ClassroomCrossTextPattern(BaseModel):
     classroom_name: str
     total_students: int
     total_sessions: int
+    sample_count: int
+    completed_without_score: int
     text_difficulty_ranking: list[dict]  # [{story_slug, title, avg_score, attempt_count}]
     class_score_trend: list[dict]  # [{date, avg_score}]
     common_error_chars: list[dict]  # [{char, student_count, total_errors}]

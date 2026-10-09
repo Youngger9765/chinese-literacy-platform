@@ -4,7 +4,7 @@
  * Displays a classroom's at-risk students with colour-coded risk level badges,
  * risk factor lists, and recommended intervention actions.
  *
- * Shows only medium/high-risk students by default with a toggle for all students.
+ * Shows intervention needs and insufficient data by default; low-risk names are collapsed.
  */
 
 import React, { useEffect, useState } from 'react';
@@ -22,11 +22,13 @@ function RiskBadge({ level }: { level: AtRiskStudent['risk_level'] }) {
     high: 'bg-red-100 text-red-800 border-red-200',
     medium: 'bg-yellow-100 text-yellow-800 border-yellow-200',
     low: 'bg-green-100 text-green-800 border-green-200',
+    insufficient_data: 'bg-gray-100 text-gray-700 border-gray-200',
   };
   const labels: Record<AtRiskStudent['risk_level'], string> = {
     high: '高風險',
     medium: '中風險',
     low: '低風險',
+    insufficient_data: '資料不足',
   };
   return (
     <span
@@ -34,7 +36,7 @@ function RiskBadge({ level }: { level: AtRiskStudent['risk_level'] }) {
     >
       <span
         className={`w-1.5 h-1.5 rounded-full ${
-          level === 'high' ? 'bg-red-500' : level === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
+          level === 'high' ? 'bg-red-500' : level === 'medium' ? 'bg-yellow-500' : level === 'low' ? 'bg-green-500' : 'bg-gray-400'
         }`}
       />
       {labels[level]}
@@ -59,7 +61,6 @@ function ConfidenceBar({ score }: { score: number }) {
 // ── Student card ──────────────────────────────────────────────────────────────
 
 function StudentRiskCard({ student }: { student: AtRiskStudent }) {
-  const [expanded, setExpanded] = useState(false);
   const hasDetails =
     student.risk_factors.length > 0 || student.recommended_actions.length > 0;
 
@@ -70,6 +71,8 @@ function StudentRiskCard({ student }: { student: AtRiskStudent }) {
           ? 'border-red-200 bg-red-50'
           : student.risk_level === 'medium'
           ? 'border-yellow-200 bg-yellow-50'
+          : student.risk_level === 'insufficient_data'
+          ? 'border-gray-200 bg-gray-50'
           : 'border-gray-200 bg-white'
       }`}
     >
@@ -80,36 +83,21 @@ function StudentRiskCard({ student }: { student: AtRiskStudent }) {
             <RiskBadge level={student.risk_level} />
           </div>
 
-          {student.risk_level !== 'low' && (
+          {student.risk_level === 'insufficient_data' && (
+            <p className="mt-2 text-xs text-gray-600">尚無足夠練習資料，暫時無法判斷風險</p>
+          )}
+
+          {student.risk_level !== 'low' && student.risk_level !== 'insufficient_data' && (
             <div className="mt-2">
               <p className="text-xs text-gray-500 mb-1">預測可信度</p>
               <ConfidenceBar score={student.confidence_score} />
             </div>
           )}
 
-          {/* Quick summary of first risk factor */}
-          {!expanded && student.risk_factors.length > 0 && (
-            <p className="mt-2 text-xs text-gray-600 line-clamp-1">
-              {student.risk_factors[0]}
-              {student.risk_factors.length > 1 && (
-                <span className="text-gray-400"> 等 {student.risk_factors.length} 個風險因子</span>
-              )}
-            </p>
-          )}
         </div>
-
-        {hasDetails && (
-          <button
-            onClick={() => setExpanded((v) => !v)}
-            className="shrink-0 text-xs text-gray-400 hover:text-gray-700 transition-colors cursor-pointer"
-            aria-label={expanded ? '收合詳細資訊' : '展開詳細資訊'}
-          >
-            {expanded ? '收合' : '詳情'}
-          </button>
-        )}
       </div>
 
-      {expanded && hasDetails && (
+      {hasDetails && (
         <div className="mt-3 space-y-3 border-t border-gray-200 pt-3">
           {student.risk_factors.length > 0 && (
             <div>
@@ -151,7 +139,7 @@ const AtRiskStudents: React.FC<AtRiskStudentsProps> = ({ classroomId }) => {
   const [students, setStudents] = useState<AtRiskStudent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-  const [showAll, setShowAll] = useState(false);
+  const [showLow, setShowLow] = useState(false);
 
   useEffect(() => {
     if (!token) return;
@@ -183,8 +171,8 @@ const AtRiskStudents: React.FC<AtRiskStudentsProps> = ({ classroomId }) => {
     );
   }
 
-  const atRisk = students.filter((s) => s.risk_level !== 'low');
-  const displayed = showAll ? students : atRisk;
+  const needsAttention = students.filter((s) => s.risk_level !== 'low');
+  const lowRisk = students.filter((s) => s.risk_level === 'low');
 
   const highCount = students.filter((s) => s.risk_level === 'high').length;
   const medCount = students.filter((s) => s.risk_level === 'medium').length;
@@ -195,7 +183,7 @@ const AtRiskStudents: React.FC<AtRiskStudentsProps> = ({ classroomId }) => {
       <div>
         <h3 className="text-base font-semibold text-gray-900">早期介入預測</h3>
         <p className="text-sm text-gray-500 mt-0.5">
-          根據學生前期練習訊號（正確率、錯字率、練習頻率）自動預測學習困難風險。
+          根據學生前期練習訊號（正確率、錯字率、練習頻率）自動預測學習困難風險
         </p>
       </div>
 
@@ -232,35 +220,36 @@ const AtRiskStudents: React.FC<AtRiskStudentsProps> = ({ classroomId }) => {
       )}
 
       {/* Student list */}
-      {displayed.length > 0 && (
+      {needsAttention.length > 0 && (
         <div className="space-y-3">
-          {displayed.map((s) => (
+          {needsAttention.map((s) => (
             <StudentRiskCard key={s.student_id} student={s} />
           ))}
         </div>
       )}
 
-      {atRisk.length === 0 && students.length > 0 && !showAll && (
+      {needsAttention.length === 0 && students.length > 0 && (
         <div className="text-center py-8 text-gray-400">
           <p className="text-sm">目前所有學生均為低風險</p>
         </div>
       )}
 
-      {/* Toggle show all */}
-      {students.length > 0 && (
-        <button
-          onClick={() => setShowAll((v) => !v)}
-          className="text-xs text-gray-400 hover:text-gray-700 transition-colors underline underline-offset-2 cursor-pointer"
-        >
-          {showAll
-            ? `只顯示高/中風險學生（${atRisk.length} 人）`
-            : `顯示全部學生（${students.length} 人）`}
-        </button>
+      {lowRisk.length > 0 && (
+        <div className="border border-gray-200 rounded-lg">
+          <button
+            onClick={() => setShowLow((v) => !v)}
+            aria-expanded={showLow}
+            className="w-full text-left px-4 py-2 text-sm text-gray-600 cursor-pointer"
+          >
+            低風險學生 {lowRisk.length} 人 {showLow ? '收合' : '展開'}
+          </button>
+          {showLow && <div className="border-t border-gray-200 px-4 py-2 text-sm text-gray-600">{lowRisk.map((s) => s.student_name).join('、')}</div>}
+        </div>
       )}
 
       {/* Explainability note */}
       <p className="text-xs text-gray-400 border-t border-gray-100 pt-3">
-        預測依據：前期課文正確率、生字錯誤率、正確率趨勢、練習頻率、卡點數量。此為規則引擎預測，非機器學習模型，準確率隨學習紀錄增加而提升。
+        預測依據：前期課文正確率、生字錯誤率、正確率趨勢、練習頻率、卡點數量，此為規則引擎預測，準確率隨學習紀錄增加而提升
       </p>
     </div>
   );

@@ -36,7 +36,11 @@ MIN_SESSIONS_FOR_ANALYSIS = 2
 
 def _score(session: LearningSession) -> float | None:
     """Return the best available aggregate score for a session."""
-    return session.overall_score or session.accuracy
+    return session.overall_score if session.overall_score is not None else session.accuracy
+
+
+def _trend_time(session: LearningSession) -> datetime:
+    return session.completed_at or session.started_at
 
 
 def _completed_sessions_with_text(
@@ -57,11 +61,10 @@ def _completed_sessions_with_text(
             LearningSession.student_id == student_id,
             LearningSession.status == "completed",
         )
-        .order_by(LearningSession.completed_at.asc())
         .all()
     )
 
-    return [(s, s.text) for s in sessions]
+    return [(s, s.text) for s in sorted(sessions, key=lambda item: (_trend_time(item), item.id))]
 
 
 # ── text-type performance ─────────────────────────────────────────────────────
@@ -143,8 +146,6 @@ def _build_vocabulary_growth(
     timeline: list[dict] = []
 
     for idx, (session, text) in enumerate(pairs, start=1):
-        if session.completed_at is None:
-            continue
 
         # Collect vocab from the text's vocabulary list (if any)
         new_words: set[str] = set()
@@ -161,7 +162,7 @@ def _build_vocabulary_growth(
         seen_words |= new_words
         timeline.append({
             "session_index": idx,
-            "completed_at": session.completed_at.isoformat(),
+            "completed_at": _trend_time(session).isoformat(),
             "text_title": text.title if text else (session.story_slug or ""),
             "new_words": len(new_words),
             "cumulative_words": len(seen_words),
@@ -188,13 +189,12 @@ def _build_difficulty_progression(
         }
     """
     progression: list[dict] = []
-    for idx, (session, text) in enumerate(pairs, start=1):
-        if session.completed_at is None:
-            continue
+    ordered_pairs = sorted(pairs, key=lambda pair: (_trend_time(pair[0]), pair[0].id))
+    for idx, (session, text) in enumerate(ordered_pairs, start=1):
         score = _score(session)
         progression.append({
             "session_index": idx,
-            "completed_at": session.completed_at.isoformat(),
+            "completed_at": _trend_time(session).isoformat(),
             "text_title": text.title if text else (session.story_slug or ""),
             "grade": text.grade if text else None,
             "genre": text.genre if text else None,
@@ -291,6 +291,8 @@ def analyze_cross_text_patterns(student_id: int, db: "DbSession") -> dict:
         }
     """
     pairs = _completed_sessions_with_text(student_id, db)
+    sample_count = sum(_score(session) is not None for session, _ in pairs)
+    completed_without_score = len(pairs) - sample_count
 
     has_enough = len(pairs) >= MIN_SESSIONS_FOR_ANALYSIS
 
@@ -303,6 +305,8 @@ def analyze_cross_text_patterns(student_id: int, db: "DbSession") -> dict:
         return {
             "student_id": student_id,
             "total_completed_texts": len(pairs),
+            "sample_count": sample_count,
+            "completed_without_score": completed_without_score,
             "has_enough_data": False,
             "text_type_performance": {"by_genre": [], "by_category": [], "by_grade": []},
             "vocabulary_growth": [],
@@ -345,6 +349,8 @@ def analyze_cross_text_patterns(student_id: int, db: "DbSession") -> dict:
     return {
         "student_id": student_id,
         "total_completed_texts": len(pairs),
+        "sample_count": sample_count,
+        "completed_without_score": completed_without_score,
         "has_enough_data": True,
         "text_type_performance": text_type_performance,
         "vocabulary_growth": vocabulary_growth,
@@ -381,6 +387,8 @@ def analyze_class_cross_text_patterns(
             "class_genre_performance": [],
             "class_common_errors": [],
             "student_summaries": [],
+            "sample_count": 0,
+            "completed_without_score": 0,
         }
 
     # Collect genre scores across all students
@@ -388,9 +396,13 @@ def analyze_class_cross_text_patterns(
     class_error_count: Counter[str] = Counter()
     student_summaries: list[dict] = []
     students_with_data = 0
+    sample_count = 0
+    completed_without_score = 0
 
     for sid in student_ids:
         analysis = analyze_cross_text_patterns(sid, db)
+        sample_count += analysis["sample_count"]
+        completed_without_score += analysis["completed_without_score"]
         if analysis["has_enough_data"]:
             students_with_data += 1
             for entry in analysis["text_type_performance"]["by_genre"]:
@@ -401,6 +413,8 @@ def analyze_class_cross_text_patterns(
         student_summaries.append({
             "student_id": sid,
             "total_completed_texts": analysis["total_completed_texts"],
+            "sample_count": analysis["sample_count"],
+            "completed_without_score": analysis["completed_without_score"],
             "has_enough_data": analysis["has_enough_data"],
             "summary": analysis["summary"],
         })
@@ -424,6 +438,8 @@ def analyze_class_cross_text_patterns(
     return {
         "total_students": len(student_ids),
         "students_with_enough_data": students_with_data,
+        "sample_count": sample_count,
+        "completed_without_score": completed_without_score,
         "class_genre_performance": class_genre_performance,
         "class_common_errors": class_common_errors,
         "student_summaries": student_summaries,
