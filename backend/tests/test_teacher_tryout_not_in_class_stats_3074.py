@@ -124,7 +124,8 @@ def _register_user(client, suffix: str) -> dict:
     return {"token": token, "user_id": me.json()["id"]}
 
 
-def _seed_session(student_id: int, classroom_id: int, story_slug: str, score):
+def _seed_session(student_id: int, classroom_id: int, story_slug: str, score,
+                  session_mode: str = "assignment"):
     db = TestingSessionLocal()
     db.add(
         LearningSession(
@@ -133,6 +134,7 @@ def _seed_session(student_id: int, classroom_id: int, story_slug: str, score):
             story_slug=story_slug,
             overall_score=score,
             status="completed",
+            session_mode=session_mode,
         )
     )
     db.commit()
