@@ -30,6 +30,7 @@ def reset_student_password(
 ) -> ResetPasswordResponse:
     """Reset an enrolled student's password for an authorized classroom member."""
     classroom = get_classroom_or_404(classroom_id, db)
+    # Matches get_classroom_detail's owner/co-teacher/admin gate, not owner-only mutation gates, because co-teacher resets are an explicit product requirement.
     require_classroom_member(classroom, current_user, db)
 
     caller_has_teacher_authority = (
@@ -59,6 +60,30 @@ def reset_student_password(
     user = db.query(User).filter(User.id == student_id).first()
     if user is None:
         raise HTTPException(status_code=404, detail="Student not found")
+
+    if user.student_profile is not None and user.student_profile.school_id != classroom.school_id:
+        raise HTTPException(
+            status_code=403,
+            detail="Student does not belong to this classroom's school",
+        )
+
+    has_mismatching_school_role = (
+        db.query(UserRole)
+        .join(Role)
+        .filter(
+            UserRole.user_id == student_id,
+            UserRole.is_active.is_(True),
+            UserRole.scope_type == "school",
+            UserRole.scope_id.is_not(None),
+            UserRole.scope_id != str(classroom.school_id),
+        )
+        .first()
+    )
+    if has_mismatching_school_role is not None:
+        raise HTTPException(
+            status_code=403,
+            detail="Student does not belong to this classroom's school",
+        )
 
     privileged_role = (
         db.query(UserRole)

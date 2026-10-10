@@ -567,6 +567,88 @@ def test_co_teacher_can_reset_password_200(client):
     assert resp.status_code == 200, resp.text
 
 
+def test_gate_matches_get_classroom_detail_semantics(client):
+    owner = _register_user(client, "resetpw_gate_owner")
+    co_teacher = _register_user(client, "resetpw_gate_coteacher")
+    student = _register_user(client, "resetpw_gate_student")
+    school_id = _create_school_for_teacher(owner["user_id"])
+    _assign_role(co_teacher["user_id"], "teacher", scope_type="school", scope_id=str(school_id))
+    _assign_role(student["user_id"], "student", scope_type="school", scope_id=str(school_id))
+    classroom_id = _create_classroom(client, owner, school_id)
+    _enroll_student(client, owner, classroom_id, student["user_id"])
+
+    db = TestingSessionLocal()
+    try:
+        db.add(
+            ClassroomTeacher(
+                classroom_id=classroom_id,
+                teacher_id=co_teacher["user_id"],
+                role="assistant",
+            )
+        )
+        db.commit()
+    finally:
+        db.close()
+
+    detail_resp = client.get(
+        f"/api/classrooms/{classroom_id}", headers=auth_header(co_teacher["token"])
+    )
+    reset_resp = _reset_password(client, co_teacher, classroom_id, student["user_id"])
+
+    assert detail_resp.status_code == 200, detail_resp.text
+    assert reset_resp.status_code == 200, reset_resp.text
+
+
+def test_cross_school_student_cannot_have_password_reset_403(client):
+    owner = _register_user(client, "resetpw_cross_school_owner")
+    victim = _register_user(client, "resetpw_cross_school_victim2")
+    school_a_id = _create_school_for_teacher(owner["user_id"], org_id=f"org-{uuid.uuid4().hex[:8]}")
+    school_b_id = _create_org_and_school(f"org-{uuid.uuid4().hex[:8]}")
+    _assign_role(victim["user_id"], "student", scope_type="school", scope_id=str(school_b_id))
+    classroom_id = _create_classroom(client, owner, school_a_id)
+
+    db = TestingSessionLocal()
+    try:
+        db.add(ClassroomStudent(classroom_id=classroom_id, student_id=victim["user_id"]))
+        db.commit()
+        victim_before = db.query(User).filter(User.id == victim["user_id"]).first()
+        assert victim_before is not None
+        password_hash_before = victim_before.password_hash
+    finally:
+        db.close()
+
+    resp = _reset_password(client, owner, classroom_id, victim["user_id"])
+    assert resp.status_code == 403, resp.text
+
+    db = TestingSessionLocal()
+    try:
+        victim_after = db.query(User).filter(User.id == victim["user_id"]).first()
+        assert victim_after is not None
+        assert victim_after.password_hash == password_hash_before
+    finally:
+        db.close()
+
+
+def test_no_determinable_school_affiliation_still_allows_reset(client):
+    owner = _register_user(client, "resetpw_no_profile_owner")
+    student = _register_user(client, "resetpw_no_profile_student")
+    school_id = _create_school_for_teacher(owner["user_id"])
+    _assign_role(student["user_id"], "student", scope_type="school", scope_id=str(school_id))
+    classroom_id = _create_classroom(client, owner, school_id)
+    _enroll_student(client, owner, classroom_id, student["user_id"])
+
+    db = TestingSessionLocal()
+    try:
+        student_before = db.query(User).filter(User.id == student["user_id"]).first()
+        assert student_before is not None
+        assert student_before.student_profile is None
+    finally:
+        db.close()
+
+    resp = _reset_password(client, owner, classroom_id, student["user_id"])
+    assert resp.status_code == 200, resp.text
+
+
 def test_system_admin_can_reset_password_200(client):
     owner = _register_user(client, "resetpw_admin_owner")
     system_admin = _register_user(client, "resetpw_system_admin")
