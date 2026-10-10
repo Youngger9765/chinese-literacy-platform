@@ -47,6 +47,12 @@ class Settings(BaseSettings):
     # Set QA_TOOLS_SHARED_SECRET in staging/preview Cloud Run to require an
     # `x-qa-token` header on every QA-board request (fail-closed once set).
     qa_tools_shared_secret: str = ""
+    # Junyi class/student import via BigQuery (issue #3380).
+    # False (default): GET/POST /api/classrooms/junyi-import/* return 404.
+    # Flip via Cloud Run env var JUNYI_CLASS_IMPORT_ENABLED=true once the Junyi
+    # infra team has granted roles/bigquery.dataViewer on data_mart and the ID
+    # mapping below has been verified against real BigQuery data (see #3380).
+    junyi_class_import_enabled: bool = False
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 

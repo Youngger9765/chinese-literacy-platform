@@ -149,3 +149,31 @@ class StudentEnrolledClassroom(BaseModel):
 class StudentEnrolledClassroomsResponse(BaseModel):
     classrooms: list[StudentEnrolledClassroom]
     total: int
+
+
+# ── Junyi Class/Student Import (issue #3380) ──────────────────────────────────
+
+
+class JunyiImportableClass(BaseModel):
+    junyi_class_id: str
+    class_name: str
+    class_code: str | None
+    student_count: int
+    already_imported: bool
+
+
+class JunyiImportClassesResponse(BaseModel):
+    linked: bool
+    classes: list[JunyiImportableClass]
+
+
+class JunyiImportRequest(BaseModel):
+    school_id: int
+    junyi_class_ids: list[str] = Field(..., min_length=1, max_length=50)
+
+
+class JunyiImportResponse(BaseModel):
+    added_students: int
+    skipped_existing_students: int
+    classes_created: int
+    classes_reused: int
