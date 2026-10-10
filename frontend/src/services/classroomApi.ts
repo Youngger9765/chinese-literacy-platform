@@ -253,7 +253,8 @@ export interface BatchCreateResult {
     password: string;
     user_id: number;
   }[];
-  errors: string[];
+  // Backend returns objects (BatchStudentError), not strings.
+  errors: { name: string; seat_number: string; error: string }[];
 }
 
 export async function batchCreateStudents(

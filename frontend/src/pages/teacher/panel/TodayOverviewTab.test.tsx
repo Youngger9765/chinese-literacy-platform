@@ -57,10 +57,10 @@ describe('TodayOverviewTab (#3367)', () => {
     expect(screen.getByText('LiveMonitor:9')).toBeInTheDocument();
   });
 
-  it('查看矩陣 opens that assignment', async () => {
+  it('查看 opens that assignment', async () => {
     const onOpen = vi.fn();
     render(<TodayOverviewTab classroomId={9} onOpenAssignment={onOpen} onOpenAtRisk={vi.fn()} />);
-    const buttons = await screen.findAllByRole('button', { name: /查看矩陣/ });
+    const buttons = await screen.findAllByRole('button', { name: '查看' });
     await userEvent.click(buttons[0]);
     expect(onOpen).toHaveBeenCalledWith(2);
   });

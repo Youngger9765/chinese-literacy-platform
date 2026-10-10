@@ -15,6 +15,7 @@ import {
   getClassroomLiveMonitor,
 } from '../../../services/teacherApi';
 import LiveMonitorTab from '../LiveMonitorTab';
+import { distinctTitles } from './AssignmentMatrixGrid';
 
 interface TodayOverviewTabProps {
   classroomId: number;
@@ -41,6 +42,7 @@ function dayKey(d: Date): string {
 
 /** Overdue / due-today first, then by due date; assignments without a due date last. */
 export function buildAssignmentProgress(matrix: AssignmentMatrixResponse, now: Date): AssignmentProgressRow[] {
+  const titles = distinctTitles(matrix.assignments);
   const rows = matrix.assignments.map((a) => {
     const cells = matrix.cells.filter((c) => c.assignment_id === a.id);
     let dueState: AssignmentProgressRow['dueState'] = 'none';
@@ -51,7 +53,7 @@ export function buildAssignmentProgress(matrix: AssignmentMatrixResponse, now: D
     }
     return {
       id: a.id,
-      title: a.title,
+      title: titles.get(a.id) ?? a.title,
       dueDate: a.due_date,
       submitted: cells.filter((c) => c.state === 'completed').length,
       assigned: cells.filter((c) => c.state !== 'not_assigned').length,
@@ -92,9 +94,9 @@ function SummaryCard({ value, label, tone, onClick }: { value: string; label: st
     <Tag
       type={onClick ? 'button' : undefined}
       onClick={onClick}
-      className={`text-left rounded-2xl border bg-white p-5 border-l-4 ${tone} ${onClick ? 'hover:shadow-card cursor-pointer' : ''}`}
+      className={`text-left rounded-2xl border bg-white p-4 sm:p-5 border-l-4 ${tone} ${onClick ? 'hover:shadow-card cursor-pointer' : ''}`}
     >
-      <div className="text-3xl font-bold text-gray-900">{value}</div>
+      <div className="text-2xl sm:text-3xl font-bold text-gray-900">{value}</div>
       <div className="text-gray-600 mt-1">{label}</div>
     </Tag>
   );
@@ -177,7 +179,7 @@ const TodayOverviewTab: React.FC<TodayOverviewTabProps> = ({ classroomId, onOpen
             <thead>
               <tr className="text-sm text-gray-500 border-b border-gray-200">
                 <th className="py-2 font-medium">作業</th>
-                <th className="py-2 font-medium">到期日</th>
+                <th className="py-2 font-medium hidden sm:table-cell">到期日</th>
                 <th className="py-2 font-medium">已交 / 總數</th>
                 <th className="py-2" />
               </tr>
@@ -188,12 +190,12 @@ const TodayOverviewTab: React.FC<TodayOverviewTabProps> = ({ classroomId, onOpen
                   key={r.id}
                   className={`border-b border-gray-100 ${r.dueState === 'overdue' ? 'bg-red-50' : r.dueState === 'today' ? 'bg-amber-50' : ''}`}
                 >
-                  <td className="py-3 font-semibold text-gray-900">{r.title}</td>
-                  <td className="py-3 text-gray-700">{formatDue(r)}</td>
+                  <td className="py-3 font-semibold text-gray-900">{r.title}<div className="sm:hidden text-sm font-normal text-gray-500">{formatDue(r)}</div></td>
+                  <td className="py-3 text-gray-700 hidden sm:table-cell">{formatDue(r)}</td>
                   <td className="py-3 tabular-nums">{r.submitted} / {r.assigned}</td>
                   <td className="py-3 text-right">
                     <button type="button" onClick={() => onOpenAssignment(r.id)} className="text-accent font-medium hover:underline cursor-pointer">
-                      查看矩陣 →
+                      查看
                     </button>
                   </td>
                 </tr>

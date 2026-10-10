@@ -286,6 +286,15 @@ def create_assignment(
     classroom = _get_classroom_or_404(classroom_id, db)
     _require_owner_or_admin(classroom, current_user, db)
 
+    if payload.student_ids is not None:
+        # Only students of this class can be given its assignment (#3378).
+        enrolled = {
+            sid for (sid,) in db.query(ClassroomStudent.student_id)
+            .filter(ClassroomStudent.classroom_id == classroom_id).all()
+        }
+        if not set(payload.student_ids) <= enrolled:
+            raise HTTPException(status_code=400, detail="只能指派給這個班級的學生")
+
     try:
         assignment = create_assignment_with_submissions(
             classroom_id,

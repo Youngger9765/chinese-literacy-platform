@@ -117,6 +117,12 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
     loadClassroom();
   }, [loadClassroom]);
 
+  // An empty class opens on "add students" — the first thing to do after creating one (#3378).
+  const isEmptyClass = classroom !== null && classroom.students.length === 0;
+  useEffect(() => {
+    if (isEmptyClass) setIsRosterOpen(true);
+  }, [isEmptyClass]);
+
   const startEditing = () => {
     if (!classroom) return;
     setEditName(classroom.name);

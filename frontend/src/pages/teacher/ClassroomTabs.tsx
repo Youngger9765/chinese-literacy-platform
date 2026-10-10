@@ -23,11 +23,11 @@ type TabKey =
   | 'error-heatmap' | 'analytics' | 'learning' | 'teachers';
 
 /** The tabs shown in the bar. 「更多」 stands for every key in MORE_TABS. */
-export const TABS: { key: TabKey; label: string }[] = [
-  { key: 'overview', label: '今日總覽' },
-  { key: 'assignments', label: '作業' },
-  { key: 'students', label: '學生' },
-  { key: 'at-risk', label: '早期介入' },
+export const TABS: { key: TabKey; label: string; short: string }[] = [
+  { key: 'overview', label: '今日總覽', short: '總覽' },
+  { key: 'assignments', label: '作業', short: '作業' },
+  { key: 'students', label: '學生', short: '學生' },
+  { key: 'at-risk', label: '早期介入', short: '關注' },
 ];
 
 export const MORE_TABS: { key: TabKey; label: string }[] = [
@@ -67,7 +67,7 @@ interface ClassroomTabsProps {
 }
 
 const tabClass = (active: boolean) =>
-  `px-5 py-3 text-base font-medium border-b-2 -mb-px transition-colors cursor-pointer shrink-0 ${
+  `px-1 sm:px-5 py-3 text-[15px] sm:text-base font-medium text-center border-b-2 -mb-px transition-colors cursor-pointer shrink-0 ${
     active ? 'border-accent text-accent' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
   }`;
 
@@ -87,17 +87,21 @@ const ClassroomTabs: React.FC<ClassroomTabsProps> = ({
 
   return (
     <div className="bg-white rounded-2xl shadow-card">
-      <nav className="flex overflow-x-auto border-b border-gray-200 px-2" aria-label="班級分頁" role="tablist">
+      <nav className="grid grid-cols-5 sm:flex overflow-x-auto border-b border-gray-200 px-1 sm:px-2" aria-label="班級分頁" role="tablist">
         {TABS.map((tab) => (
           <button
             key={tab.key}
             type="button"
             role="tab"
+            aria-label={tab.label}
             aria-selected={activeTab === tab.key}
             onClick={() => onTabChange(tab.key)}
             className={tabClass(activeTab === tab.key)}
           >
-            {tab.label}
+            {/* Phones get short labels so all five tabs fit one row (codex screen audit #7);
+                the accessible name is always the full label (aria-label). */}
+            <span className="sm:hidden" aria-hidden="true">{tab.short}</span>
+            <span className="hidden sm:inline" aria-hidden="true">{tab.label}</span>
           </button>
         ))}
         <button

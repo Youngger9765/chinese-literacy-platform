@@ -2,6 +2,7 @@ import React from 'react';
 import { AssignmentResponse } from '../../services/assignmentApi';
 import AssignmentCard from './components/AssignmentCard';
 import AssignmentCreateForm from './components/AssignmentCreateForm';
+import AssignTargetPicker from './panel/AssignTargetPicker';
 import AssignmentExpandedPanel from './components/AssignmentExpandedPanel';
 import AssignmentInlineEdit from './components/AssignmentInlineEdit';
 import { completionPercentage, formatDate, isOverdue } from './components/assignmentUtils';
@@ -41,6 +42,10 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
     setFormDueDate,
     formSkipCompleted,
     setFormSkipCompleted,
+    formStudentIds,
+    setFormStudentIds,
+    formExtraClassIds,
+    setFormExtraClassIds,
     formGoals,
     setFormGoals,
     isCreating,
@@ -307,6 +312,15 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
           onSubmit={handleCreate}
           onClose={() => setShowCreateForm(false)}
           onRetryStories={retryLoadStories}
+          targetPicker={
+            <AssignTargetPicker
+              classroomId={classroomId}
+              studentIds={formStudentIds}
+              onStudentIds={setFormStudentIds}
+              extraClassIds={formExtraClassIds}
+              onExtraClassIds={setFormExtraClassIds}
+            />
+          }
         />
       )}
 

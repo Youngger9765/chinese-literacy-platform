@@ -47,7 +47,7 @@ const AssignmentItemStats: React.FC<AssignmentItemStatsProps> = ({ data }) => {
             <li
               key={item.key}
               data-weakest={weakest || undefined}
-              className={`grid grid-cols-[7rem_1fr_auto] items-center gap-4 rounded-lg px-3 py-2.5 ${weakest ? 'bg-red-50' : ''}`}
+              className={`grid grid-cols-1 sm:grid-cols-[7rem_1fr_auto] items-center gap-2 sm:gap-4 rounded-lg px-3 py-2.5 ${weakest ? 'bg-red-50' : ''}`}
             >
               <span className={`font-semibold ${weakest ? 'text-red-700' : 'text-gray-800'}`}>
                 {weakest && <span aria-hidden="true">⚠ </span>}

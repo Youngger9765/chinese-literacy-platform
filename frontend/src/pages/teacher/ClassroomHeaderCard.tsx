@@ -144,7 +144,7 @@ const ClassroomHeaderCard: React.FC<ClassroomHeaderCardProps> = ({
           </div>
         </form>
       ) : (
-        <div className="flex items-start justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h2 className="text-xl font-bold text-gray-900">{classroom.name}</h2>
             <div className="flex flex-wrap items-center gap-3 mt-2 text-sm text-gray-500">
@@ -160,7 +160,7 @@ const ClassroomHeaderCard: React.FC<ClassroomHeaderCardProps> = ({
               </span>
             </div>
           </div>
-          <div className="flex gap-2 shrink-0">
+          <div className="flex flex-wrap gap-2 shrink-0">
             <button
               onClick={onStartEditing}
               className="px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
@@ -242,7 +242,7 @@ const ClassroomHeaderCard: React.FC<ClassroomHeaderCardProps> = ({
               把此代碼給學生，他們從首頁「加入班級」輸入即可加入
             </p>
           </div>
-          <div className="flex gap-2 shrink-0">
+          <div className="flex flex-wrap gap-2 shrink-0">
             <ClassroomJoinQrButton classroomName={classroom.name} joinCode={classroom.join_code} />
             <button
               onClick={onCopyJoinCode}

@@ -3316,3 +3316,43 @@ class TestIssue1982PendingAssignmentStart500:
         assert "session_id" in data, f"Missing session_id in response: {data}"
         assert data["status"] == "in_progress", f"Expected in_progress, got: {data.get('status')}"
         assert data["session_id"] is not None, "session_id must be set after start"
+
+
+# ---------------------------------------------------------------------------
+# #3378 — assign to part of the class (均一 style: 全班或部分學生)
+# ---------------------------------------------------------------------------
+
+
+class TestAssignToSomeStudents:
+    def _post(self, client, teacher, cid, **extra):
+        return client.post(
+            f"/api/classrooms/{cid}/assignments",
+            json={"classroom_id": cid, "story_id": VALID_STORY_ID, "title": "部分學生", **extra},
+            headers=auth_header(teacher["token"]),
+        )
+
+    def _students(self, client, teacher, aid):
+        data = client.get(f"/api/assignments/{aid}", headers=auth_header(teacher["token"])).json()
+        return sorted(s["student_id"] for s in data["submissions"])
+
+    def test_only_the_chosen_students_get_it(self, client, teacher, classroom_with_students, student1, student2):
+        resp = self._post(client, teacher, classroom_with_students, student_ids=[student1["user_id"]])
+        assert resp.status_code == 201, resp.text
+        assert self._students(client, teacher, resp.json()["id"]) == [student1["user_id"]]
+
+    def test_omitting_student_ids_still_assigns_the_whole_class(self, client, teacher, classroom_with_students, student1, student2):
+        resp = self._post(client, teacher, classroom_with_students)
+        assert resp.status_code == 201, resp.text
+        assert self._students(client, teacher, resp.json()["id"]) == sorted([student1["user_id"], student2["user_id"]])
+
+    def test_a_student_outside_the_class_is_rejected_and_nothing_is_created(self, client, teacher, other_teacher, classroom_with_students):
+        before = len(client.get(f"/api/classrooms/{classroom_with_students}/assignments",
+                                headers=auth_header(teacher["token"])).json())
+        resp = self._post(client, teacher, classroom_with_students, student_ids=[other_teacher["user_id"]])
+        assert resp.status_code == 400, resp.text
+        after = len(client.get(f"/api/classrooms/{classroom_with_students}/assignments",
+                               headers=auth_header(teacher["token"])).json())
+        assert after == before
+
+    def test_an_empty_list_is_rejected(self, client, teacher, classroom_with_students):
+        assert self._post(client, teacher, classroom_with_students, student_ids=[]).status_code == 422
