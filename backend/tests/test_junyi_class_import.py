@@ -11,7 +11,7 @@ Architecture under test (see issue #3380 for full rationale):
   this also proves the route layer never touches the network in tests.
 - The verified ID mapping uses "user_id_key_" + User.junyi_identity_id;
   malformed prefixes still fail closed.
-- Dedup: students by User.junyi_identity_id, then an unlinked email account;
+- Dedup: students by User.junyi_identity_id only;
   classrooms by (teacher_id, junyi_class_id) with a partial unique index.
 
 Run:
@@ -593,9 +593,9 @@ class TestDisplayNameFallback:
             assert len(set(names)) == 2
 
 
-# PRD R4 -- dedup by email for pre-existing unlinked accounts
-class TestEmailLinkFallback:
-    def test_preexisting_email_account_is_linked_not_duplicated(self, client):
+# Unverified email addresses must never link a Junyi identity to an account.
+class TestEmailLinkSafety:
+    def test_preexisting_email_account_is_not_auto_linked_a_new_synthetic_account_is_created(self, client):
         teacher = _register_teacher(client, "email_link", _test_school_id, "email-link")
         with TestingSessionLocal() as db:
             user = User(email="student_old@example.com", password_hash="password", name="Existing", email_verified=True)
@@ -606,9 +606,31 @@ class TestEmailLinkFallback:
         row = _row("user_id_key_email-link", "email-class", "舊生班", "user_id_key_email-stu", "暱稱", user_data_email="Student_Old@example.com")
         assert _import_rows(client, teacher, [row], ["email-class"]).status_code == 200
         with TestingSessionLocal() as db:
-            assert db.query(User).count() == before
-            assert db.get(User, user_id).junyi_identity_id == "email-stu"
-            assert db.query(ClassroomStudent).filter(ClassroomStudent.student_id == user_id).count() == 1
+            assert db.query(User).count() == before + 1
+            assert db.get(User, user_id).junyi_identity_id is None
+            imported = db.query(User).filter(User.junyi_identity_id == "email-stu").one()
+            assert imported.id != user_id
+            assert imported.email.endswith("@student.lingoleap.local")
+            assert db.query(ClassroomStudent).filter(ClassroomStudent.student_id == imported.id).count() == 1
+
+    def test_import_never_links_to_an_unrelated_active_account_by_email(self, client):
+        teacher = _register_teacher(client, "email_attacker", _test_school_id, "email-attacker")
+        unrelated = _register_teacher(client, "email_victim", _test_school_id)
+        with TestingSessionLocal() as db:
+            victim = db.get(User, unrelated["user_id"])
+            before = (victim.email, victim.name, victim.password_hash, victim.email_verified, victim.is_active)
+        row = _row(
+            "user_id_key_email-attacker", "victim-class", "保護班",
+            "user_id_key_victim-student", "學生", user_data_email=unrelated["email"],
+        )
+        assert _import_rows(client, teacher, [row], ["victim-class"]).status_code == 200
+        with TestingSessionLocal() as db:
+            victim = db.get(User, unrelated["user_id"])
+            assert victim.junyi_identity_id is None
+            assert (victim.email, victim.name, victim.password_hash, victim.email_verified, victim.is_active) == before
+            imported = db.query(User).filter(User.junyi_identity_id == "victim-student").one()
+            assert imported.id != victim.id
+            assert imported.email.endswith("@student.lingoleap.local")
 
     def test_email_match_never_hijacks_an_already_linked_account(self, client):
         teacher = _register_teacher(client, "email_guard", _test_school_id, "email-guard")
