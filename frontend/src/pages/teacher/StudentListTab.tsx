@@ -173,7 +173,7 @@ const StudentListTab: React.FC<StudentListTabProps> = ({
             <div key={s.id} className="px-5 py-3 flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-900">{s.name}</p>
-                <p className="text-xs text-gray-500">{s.email}</p>
+                <p className="text-xs text-gray-500 hidden sm:block">{s.email}</p>
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-xs text-gray-400 hidden sm:inline">{formatDate(s.enrolled_at)}</span>

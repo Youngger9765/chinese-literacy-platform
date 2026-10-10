@@ -45,7 +45,7 @@ const props = {
 describe('ClassroomTabs layout (#3367)', () => {
   it('shows four daily tabs plus 更多 (#3376: keep it simple)', () => {
     render(<ClassroomTabs {...props} />);
-    const labels = screen.getAllByRole('tab').map((t) => t.textContent);
+    const labels = screen.getAllByRole('tab').map((t) => t.getAttribute('aria-label') ?? t.textContent);
     expect(labels).toEqual(['今日總覽', '作業', '學生', '早期介入', '更多']);
     expect(TABS).toHaveLength(4);
     expect(MORE_TABS.map((t) => t.label)).toEqual(['錯字總表', '學習分析', '詳細學習紀錄', '協同教師']);

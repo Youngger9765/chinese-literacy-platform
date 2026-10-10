@@ -53,4 +53,30 @@ describe('學生分頁 (#3376)', () => {
     expect(row).toHaveTextContent('96');
     expect(row).toHaveTextContent('—');
   });
+
+  it('opened from one assignment shows only that assignment, with a way back to it', async () => {
+    vi.mocked(api.getStudentAssignments).mockResolvedValue({
+      student_id: 1, student_name: '王小明',
+      rows: [
+        { assignment_id: 10, title: '甲', due_date: null, state: 'completed', score: 80, current_step: null, reading_accuracy: 96, comprehension: null, vocab: null, error_chars: [] },
+        { assignment_id: 11, title: '乙', due_date: null, state: 'completed', score: 70, current_step: null, reading_accuracy: 90, comprehension: null, vocab: null, error_chars: [] },
+      ],
+    });
+    const { StudentDetail } = await import('./StudentsPanel');
+    render(<StudentDetail classroomId={9} studentId={1} onlyAssignmentId={11} backLabel="← 回「乙」" onBack={vi.fn()} />);
+    expect(await screen.findByRole('button', { name: '← 回「乙」' })).toBeInTheDocument();
+    expect(screen.queryAllByText('甲')).toHaveLength(0);
+    expect(screen.getAllByText('乙').length).toBeGreaterThan(0);
+  });
+
+  it('when no part was recorded anywhere, says so instead of columns of dashes', async () => {
+    vi.mocked(api.getStudentAssignments).mockResolvedValue({
+      student_id: 1, student_name: '王小明',
+      rows: [{ assignment_id: 10, title: '甲', due_date: null, state: 'completed', score: null, current_step: null, reading_accuracy: null, comprehension: null, vocab: null, error_chars: [] }],
+    });
+    const { StudentDetail } = await import('./StudentsPanel');
+    render(<StudentDetail classroomId={9} studentId={1} onBack={vi.fn()} />);
+    expect(await screen.findByText(/沒有記錄到朗讀、理解、生字的分項成績/)).toBeInTheDocument();
+    expect(screen.queryByRole('columnheader', { name: '朗讀' })).not.toBeInTheDocument();
+  });
 });

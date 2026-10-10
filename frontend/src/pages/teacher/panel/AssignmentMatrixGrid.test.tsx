@@ -69,3 +69,18 @@ describe('AssignmentMatrixGrid (#3367)', () => {
     expect(onStudent).toHaveBeenCalledWith(2);
   });
 });
+
+import { distinctTitles } from './AssignmentMatrixGrid';
+
+describe('distinctTitles (codex screen audit #5)', () => {
+  it('numbers repeats in order and leaves unique titles alone', () => {
+    const m = distinctTitles([
+      { id: 1, title: '贏得喝采的輸家' },
+      { id: 2, title: '古詩兩首' },
+      { id: 3, title: '贏得喝采的輸家' },
+    ]);
+    expect(m.get(1)).toBe('贏得喝采的輸家（第 1 次）');
+    expect(m.get(2)).toBe('古詩兩首');
+    expect(m.get(3)).toBe('贏得喝采的輸家（第 2 次）');
+  });
+});

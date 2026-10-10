@@ -15,6 +15,7 @@ import {
   getClassroomLiveMonitor,
 } from '../../../services/teacherApi';
 import LiveMonitorTab from '../LiveMonitorTab';
+import { distinctTitles } from './AssignmentMatrixGrid';
 
 interface TodayOverviewTabProps {
   classroomId: number;
@@ -41,6 +42,7 @@ function dayKey(d: Date): string {
 
 /** Overdue / due-today first, then by due date; assignments without a due date last. */
 export function buildAssignmentProgress(matrix: AssignmentMatrixResponse, now: Date): AssignmentProgressRow[] {
+  const titles = distinctTitles(matrix.assignments);
   const rows = matrix.assignments.map((a) => {
     const cells = matrix.cells.filter((c) => c.assignment_id === a.id);
     let dueState: AssignmentProgressRow['dueState'] = 'none';
@@ -51,7 +53,7 @@ export function buildAssignmentProgress(matrix: AssignmentMatrixResponse, now: D
     }
     return {
       id: a.id,
-      title: a.title,
+      title: titles.get(a.id) ?? a.title,
       dueDate: a.due_date,
       submitted: cells.filter((c) => c.state === 'completed').length,
       assigned: cells.filter((c) => c.state !== 'not_assigned').length,
