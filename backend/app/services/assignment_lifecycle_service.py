@@ -324,11 +324,12 @@ def create_assignment_with_submissions(
             ))
 
     # Bulk-create submissions for all enrolled students
-    enrollments = (
-        db.query(ClassroomStudent)
-        .filter(ClassroomStudent.classroom_id == classroom_id)
-        .all()
-    )
+    enrollments_q = db.query(ClassroomStudent).filter(ClassroomStudent.classroom_id == classroom_id)
+    if payload.student_ids is not None:
+        # #3378: part of the class. Students left out read "未指派" in the matrix,
+        # same as someone who joined after the assignment went out.
+        enrollments_q = enrollments_q.filter(ClassroomStudent.student_id.in_(payload.student_ids))
+    enrollments = enrollments_q.all()
     # Defensive dedupe: legacy/corrupt data may contain repeated student links.
     # Avoid unique constraint conflicts on (assignment_id, student_id).
     unique_student_ids: set[int] = set()
