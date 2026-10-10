@@ -3,12 +3,12 @@
   "_provenance": {
     "derived_from": "npx tsc --noEmit，取 error 行、排除測試檔（*.test.* / *.spec.* / *.eval.* / __tests__ / __smoke__ / test(s) 路徑片段）",
     "generated_by": "frontend/scripts/run-typecheck-ratchet.mjs --write-baseline",
-    "frozen_at": "2026-09-14T05:15:46.208Z",
-    "edition": "git 2cd25c11239e",
+    "frozen_at": "2026-10-10T09:28:42.926Z",
+    "edition": "git cd698f6cb0b0",
     "note": "⚠️ 這是產物不是真值。tsconfig、TypeScript 版本或排除規則改了，這個數字就會動 —— 重跑 --write-baseline，不要手改。"
   },
   "schemaVersion": 2,
-  "shippedErrors": 36,
+  "shippedErrors": 34,
   "entries": [
     {
       "file": "src/components/layout/Sidebar.tsx",
@@ -159,16 +159,6 @@
       "file": "src/pages/student/StudentProfile.tsx",
       "code": "TS2339",
       "text": "Property 'longest_streak' does not exist on type 'StreakInfo'."
-    },
-    {
-      "file": "src/pages/teacher/ClassroomDetail.tsx",
-      "code": "TS2322",
-      "text": "Type '(student: StudentInClassroomResponse) => Promise<void>' is not assignable to type '(student: { id: number; username: string; full_name?: string; }) => void'."
-    },
-    {
-      "file": "src/pages/teacher/ClassroomTabs.tsx",
-      "code": "TS2322",
-      "text": "Type '(student: { id: number; username: string; full_name?: string; }) => void' is not assignable to type '(s: StudentInClassroomResponse) => void'."
     },
     {
       "file": "src/pages/teacher/components/CrossTextChartGrid.tsx",
