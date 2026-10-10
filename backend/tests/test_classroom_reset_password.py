@@ -26,7 +26,7 @@ from app.database import get_db
 from app.main import app
 from app.models import Base
 from app.models.organization import Organization
-from app.models.school import School
+from app.models.school import ClassroomStudent, ClassroomTeacher, School
 from app.models.user import Role, StudentProfile, User, UserRole
 
 
@@ -157,6 +157,18 @@ def _assign_role(
     try:
         role = db.query(Role).filter(Role.name == role_name).first()
         assert role is not None
+        if role_name == "student":
+            teacher_role = db.query(Role).filter(Role.name == "teacher").first()
+            assert teacher_role is not None
+            (
+                db.query(UserRole)
+                .filter(
+                    UserRole.user_id == user_id,
+                    UserRole.role_id == teacher_role.id,
+                    UserRole.is_active.is_(True),
+                )
+                .update({UserRole.is_active: False}, synchronize_session=False)
+            )
         exists = (
             db.query(UserRole)
             .filter(
@@ -177,6 +189,27 @@ def _assign_role(
                 )
             )
             db.commit()
+        else:
+            db.commit()
+    finally:
+        db.close()
+
+
+def _deactivate_teacher_roles(user_id: int) -> None:
+    db = TestingSessionLocal()
+    try:
+        teacher_role = db.query(Role).filter(Role.name == "teacher").first()
+        assert teacher_role is not None
+        (
+            db.query(UserRole)
+            .filter(
+                UserRole.user_id == user_id,
+                UserRole.role_id == teacher_role.id,
+                UserRole.is_active.is_(True),
+            )
+            .update({UserRole.is_active: False}, synchronize_session=False)
+        )
+        db.commit()
     finally:
         db.close()
 
@@ -366,3 +399,92 @@ def test_password_never_appears_in_logs(client, caplog):
         assert new_password not in record.getMessage(), (
             "New password leaked into logs — reset-password endpoint must never log the plaintext password"
         )
+
+
+def test_cannot_reset_password_of_a_teacher_account_403(client):
+    owner = _register_user(client, "resetpw_privileged_owner")
+    teacher_target = _register_user(client, "resetpw_privileged_teacher")
+    target_school_id = _create_school_for_teacher(teacher_target["user_id"])
+    owner_school_id = _create_school_for_teacher(owner["user_id"])
+    classroom_id = _create_classroom(client, owner, owner_school_id)
+
+    db = TestingSessionLocal()
+    try:
+        db.add(
+            ClassroomStudent(
+                classroom_id=classroom_id,
+                student_id=teacher_target["user_id"],
+            )
+        )
+        db.commit()
+    finally:
+        db.close()
+
+    assert target_school_id != owner_school_id
+    resp = _reset_password(client, owner, classroom_id, teacher_target["user_id"])
+    assert resp.status_code == 403, resp.text
+
+
+def test_cannot_reset_password_of_an_admin_account_403(client):
+    owner = _register_user(client, "resetpw_privileged_owner2")
+    admin_target = _register_user(client, "resetpw_privileged_admin")
+    _deactivate_teacher_roles(admin_target["user_id"])
+    _assign_role(admin_target["user_id"], "system_admin", scope_type="platform")
+    owner_school_id = _create_school_for_teacher(owner["user_id"])
+    classroom_id = _create_classroom(client, owner, owner_school_id)
+
+    db = TestingSessionLocal()
+    try:
+        db.add(
+            ClassroomStudent(
+                classroom_id=classroom_id,
+                student_id=admin_target["user_id"],
+            )
+        )
+        db.commit()
+    finally:
+        db.close()
+
+    resp = _reset_password(client, owner, classroom_id, admin_target["user_id"])
+    assert resp.status_code == 403, resp.text
+
+
+def test_co_teacher_can_reset_password_200(client):
+    owner = _register_user(client, "resetpw_coteacher_owner")
+    co_teacher = _register_user(client, "resetpw_coteacher")
+    student = _register_user(client, "resetpw_coteacher_student")
+    school_id = _create_school_for_teacher(owner["user_id"])
+    _assign_role(co_teacher["user_id"], "teacher", scope_type="school", scope_id=str(school_id))
+    _assign_role(student["user_id"], "student", scope_type="school", scope_id=str(school_id))
+    classroom_id = _create_classroom(client, owner, school_id)
+    _enroll_student(client, owner, classroom_id, student["user_id"])
+
+    db = TestingSessionLocal()
+    try:
+        db.add(
+            ClassroomTeacher(
+                classroom_id=classroom_id,
+                teacher_id=co_teacher["user_id"],
+                role="assistant",
+            )
+        )
+        db.commit()
+    finally:
+        db.close()
+
+    resp = _reset_password(client, co_teacher, classroom_id, student["user_id"])
+    assert resp.status_code == 200, resp.text
+
+
+def test_system_admin_can_reset_password_200(client):
+    owner = _register_user(client, "resetpw_admin_owner")
+    system_admin = _register_user(client, "resetpw_system_admin")
+    student = _register_user(client, "resetpw_admin_student")
+    school_id = _create_school_for_teacher(owner["user_id"])
+    _assign_role(system_admin["user_id"], "system_admin", scope_type="platform")
+    _assign_role(student["user_id"], "student", scope_type="school", scope_id=str(school_id))
+    classroom_id = _create_classroom(client, owner, school_id)
+    _enroll_student(client, owner, classroom_id, student["user_id"])
+
+    resp = _reset_password(client, system_admin, classroom_id, student["user_id"])
+    assert resp.status_code == 200, resp.text
