@@ -24,6 +24,7 @@ from .classroom_batch import router as _batch_router
 from .classroom_crud import router as _crud_router
 from .classroom_csv import router as _csv_router
 from .classroom_join import router as _join_router
+from .classroom_password import router as _password_router
 from .classroom_students import router as _students_router
 
 router = APIRouter(tags=["classrooms"])
@@ -42,3 +43,4 @@ router.include_router(_join_router)
 router.include_router(_students_router)
 router.include_router(_batch_router)
 router.include_router(_csv_router)
+router.include_router(_password_router)
