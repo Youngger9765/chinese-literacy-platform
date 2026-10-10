@@ -48,9 +48,14 @@ vi.mock('../CrossTextAnalytics', () => ({ default: () => <div data-testid="cross
 vi.mock('../../components/teacher/AtRiskStudents', () => ({ default: () => <div data-testid="at-risk-students" /> }));
 vi.mock('../ErrorHeatmapTab', () => ({ default: () => <div data-testid="error-heatmap-tab" /> }));
 vi.mock('../CoTeachingTab', () => ({ default: () => <div data-testid="co-teaching-tab" /> }));
-vi.mock('../panel/TodayOverviewTab', () => ({ default: () => <div data-testid="today-overview-tab" /> }));
+vi.mock('../panel/TodayOverviewTab', () => ({
+  default: ({ onOpenAssignment }: { onOpenAssignment: (id: number) => void }) => (
+    <div data-testid="today-overview-tab"><button onClick={() => onOpenAssignment(7)}>查看矩陣</button></div>
+  ),
+}));
 vi.mock('../panel/AssignmentsPanel', () => ({ default: () => <div data-testid="assignments-panel" /> }));
 vi.mock('../panel/ClassSwitcher', () => ({ default: () => null }));
+vi.mock('../panel/StudentsPanel', () => ({ default: () => <div data-testid="students-panel" /> }));
 
 // ── Fixtures ─────────────────────────────────────────────────────────────────
 
@@ -171,26 +176,46 @@ describe('ClassroomDetail — tabs (#3367 layout)', () => {
     expect(screen.getByTestId('location').textContent).toContain('tab=assignments');
   });
 
-  it('an old ?tab=progress link lands on 學生學習紀錄', async () => {
+  it('an old ?tab=progress link lands on 詳細學習紀錄 under 更多', async () => {
     renderDetail(42, '/teacher/classroom/42?tab=progress');
     await waitFor(() => expect(screen.getByTestId('student-progress-tab')).toBeInTheDocument());
   });
 
-  it('學習分析 shows the analytics and cross-text views together', async () => {
+  it('學習分析 (under 更多) shows the analytics and cross-text views together', async () => {
     const user = userEvent.setup();
     renderDetail();
-    await waitFor(() => screen.getByRole('tab', { name: '學習分析' }));
-    await user.click(screen.getByRole('tab', { name: '學習分析' }));
+    await waitFor(() => screen.getByRole('tab', { name: '更多' }));
+    await user.click(screen.getByRole('tab', { name: '更多' }));
+    await user.click(screen.getByRole('button', { name: '學習分析' }));
     expect(screen.getByTestId('classroom-analytics')).toBeInTheDocument();
     expect(screen.getByTestId('cross-text-analytics')).toBeInTheDocument();
   });
 
-  it('switches to 協同教師 tab on click', async () => {
+  it('協同教師 is reachable under 更多', async () => {
     const user = userEvent.setup();
     renderDetail();
-    await waitFor(() => screen.getByRole('tab', { name: '協同教師' }));
-    await user.click(screen.getByRole('tab', { name: '協同教師' }));
+    await waitFor(() => screen.getByRole('tab', { name: '更多' }));
+    await user.click(screen.getByRole('tab', { name: '更多' }));
+    await user.click(screen.getByRole('button', { name: '協同教師' }));
     expect(screen.getByTestId('co-teaching-tab')).toBeInTheDocument();
+  });
+
+  it('查看矩陣 on 今日總覽 lands on 作業 with that assignment open (#3376 audit)', async () => {
+    const user = userEvent.setup();
+    renderDetail();
+    await user.click(await screen.findByRole('button', { name: '查看矩陣' }));
+    const search = screen.getByTestId('location').textContent ?? '';
+    expect(search).toContain('tab=assignments');
+    expect(search).toContain('assignment=7');
+  });
+
+  it('學生 tab shows the student panel and writes ?tab=students', async () => {
+    const user = userEvent.setup();
+    renderDetail();
+    await waitFor(() => screen.getByRole('tab', { name: '學生' }));
+    await user.click(screen.getByRole('tab', { name: '學生' }));
+    expect(screen.getByTestId('students-panel')).toBeInTheDocument();
+    expect(screen.getByTestId('location').textContent).toContain('tab=students');
   });
 });
 
@@ -274,14 +299,14 @@ describe('ClassroomDetail (refactor characterization) — join code copy', () =>
   });
 });
 
-describe('ClassroomDetail — student roster in the class header (#3367)', () => {
-  it('shows the roster without switching tabs, and it can be collapsed', async () => {
+describe('ClassroomDetail — student roster in the class header (#3367, collapsed #3376)', () => {
+  it('starts collapsed with the head count, and expands without switching tabs', async () => {
     const user = userEvent.setup();
     renderDetail();
-    const listTab = await screen.findByTestId('student-list-tab');
-    expect(listTab.getAttribute('data-classroom')).toBe('三年甲班');
-    expect(screen.queryByRole('tab', { name: '學生名單' })).toBeNull();
-    await user.click(screen.getByRole('button', { name: /學生名單（/ }));
+    const toggle = await screen.findByRole('button', { name: /學生名單（/ });
     expect(screen.queryByTestId('student-list-tab')).toBeNull();
+    await user.click(toggle);
+    const listTab = screen.getByTestId('student-list-tab');
+    expect(listTab.getAttribute('data-classroom')).toBe('三年甲班');
   });
 });

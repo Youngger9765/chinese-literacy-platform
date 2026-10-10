@@ -83,6 +83,7 @@ class ItemStat(BaseModel):
 class AssignmentItemStatsResponse(BaseModel):
     assignment_id: int
     submitted_count: int
+    assigned_count: int
     items: list[ItemStat]
 
 
@@ -192,11 +193,18 @@ def get_assignment_matrix(
 def _vocab_percent(vocab_result) -> float | None:
     if not isinstance(vocab_result, dict):
         return None
-    value = vocab_result.get("accuracy")
-    if not isinstance(value, (int, float)):
+    value = _num(vocab_result.get("accuracy"))
+    if value is None:
         return None
     # Older sessions store 0-1, newer ones 0-100 (same rule as gamification_service).
     return float(value) * 100 if value <= 1 else float(value)
+
+
+def _num(value) -> float | None:
+    """Stored JSON is client-written: a malformed value must read as missing, not 500."""
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return None
+    return float(value)
 
 
 def _reading_result(session) -> dict:
@@ -211,16 +219,20 @@ def _reading_accuracy(session) -> float | None:
     # #3376: the session.accuracy column is mostly empty; the reading step
     # writes its result into reading_result / full_reading_result instead.
     r = _reading_result(session)
-    if r.get("match_rate") is not None:
-        return round(float(r["match_rate"]) * 100, 1)
-    if r.get("accuracy") is not None:
-        return round(float(r["accuracy"]), 1)
+    match_rate = _num(r.get("match_rate"))
+    if match_rate is not None:
+        return round(match_rate * 100, 1)
+    accuracy = _num(r.get("accuracy"))
+    if accuracy is not None:
+        return round(accuracy, 1)
     return session.accuracy
 
 
 def _error_chars(session) -> list[str]:
-    chars = _reading_result(session).get("error_chars") or []
-    return [str(c) for c in chars][:30]
+    chars = _reading_result(session).get("error_chars")
+    if not isinstance(chars, list):
+        return []
+    return [c for c in chars if isinstance(c, str) and len(c) <= 4][:30]
 
 
 def _comprehension(session) -> float | None:
@@ -274,11 +286,11 @@ def get_assignment_item_stats(
     )
     if len(subs) > _MATRIX_ROW_LIMIT:
         raise _too_many("作業紀錄")
-    finished = [
-        sub.session for sub in _latest_per_student(subs).values()
-        if sub.status in _COMPLETED and sub.session is not None
-    ]
-    total = len(finished)
+    latest = list(_latest_per_student(subs).values())
+    finished = [sub.session for sub in latest if sub.status in _COMPLETED and sub.session is not None]
+    # Completion is over everyone assigned, not just those who submitted — 1 of
+    # 10 submitting must read 1/10, not 100% (#3376 audit).
+    total = len(latest)
 
     items: list[ItemStat] = []
     for key, label, extract in _ITEMS:
@@ -296,7 +308,9 @@ def get_assignment_item_stats(
 
     # Weakest part first; parts nobody has a result for go last.
     items.sort(key=lambda i: (i.correct_rate is None, i.correct_rate or 0))
-    return AssignmentItemStatsResponse(assignment_id=assignment_id, submitted_count=total, items=items)
+    return AssignmentItemStatsResponse(
+        assignment_id=assignment_id, submitted_count=len(finished), assigned_count=total, items=items
+    )
 
 
 class StudentAssignmentRow(BaseModel):
@@ -355,10 +369,13 @@ def get_student_assignments(
             AssignmentSubmission.assignment_id.in_([a.id for a in assignments]),
             AssignmentSubmission.student_id == student_id,
         )
+        .limit(_MATRIX_ROW_LIMIT + 1)
         .all()
         if assignments
         else []
     )
+    if len(assignments) > _MATRIX_ROW_LIMIT or len(subs) > _MATRIX_ROW_LIMIT:
+        raise _too_many("作業紀錄")
     latest = _latest_per_student(subs)
 
     rows: list[StudentAssignmentRow] = []

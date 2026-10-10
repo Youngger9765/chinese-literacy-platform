@@ -27,7 +27,7 @@ const AssignmentItemStats: React.FC<AssignmentItemStatsProps> = ({ data }) => {
   if (data.items.every((i) => i.completed === 0)) {
     return (
       <div className="rounded-xl border border-gray-200 p-5 text-gray-600">
-        已交 {data.submitted_count} 人，但這份作業沒有記錄到分項成績（朗讀、理解、生字），只能看總分
+        已交 {data.submitted_count} 人，但這份作業沒有記錄到分項成績（朗讀、理解、生字）
       </div>
     );
   }
@@ -38,7 +38,7 @@ const AssignmentItemStats: React.FC<AssignmentItemStatsProps> = ({ data }) => {
     <div className="rounded-xl border border-gray-200 p-5">
       <h3 className="text-base font-semibold text-gray-900">逐大題全班統計</h3>
       <p className="text-sm text-gray-500 mt-0.5 mb-4">
-        {data.submitted_count} 人已交・依正確率由低到高排序・最低的一項紅色標示
+        {data.submitted_count} / {data.assigned_count} 人已交・完成率以全班計・依正確率由低到高排序
       </p>
       <ul className="space-y-1" aria-label="逐大題統計">
         {data.items.map((item) => {

@@ -106,6 +106,7 @@ const TodayOverviewTab: React.FC<TodayOverviewTabProps> = ({ classroomId, onOpen
   const [atRisk, setAtRisk] = useState<AtRiskStudent[] | null>(null);
   const [live, setLive] = useState<LiveMonitorResponse | null>(null);
   const [showLive, setShowLive] = useState(false);
+  const [atRiskFailed, setAtRiskFailed] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -118,7 +119,8 @@ const TodayOverviewTab: React.FC<TodayOverviewTabProps> = ({ classroomId, onOpen
       .catch(() => !cancelled && setError('無法載入作業進度'));
     getAtRiskStudents(token, classroomId)
       .then((d) => !cancelled && setAtRisk(d))
-      .catch(() => !cancelled && setAtRisk([]));
+      // A failed load must not read as "0 students need attention".
+      .catch(() => !cancelled && setAtRiskFailed(true));
     getClassroomLiveMonitor(token, classroomId)
       .then((d) => !cancelled && setLive(d))
       .catch(() => !cancelled && setLive(null));
@@ -145,7 +147,7 @@ const TodayOverviewTab: React.FC<TodayOverviewTabProps> = ({ classroomId, onOpen
           tone="border-l-accent"
         />
         <SummaryCard
-          value={needsAttention === null ? '…' : `${needsAttention} 位`}
+          value={atRiskFailed ? '—' : needsAttention === null ? '…' : `${needsAttention} 位`}
           label="需要關注的學生（早期介入中/高風險）"
           tone="border-l-amber-500"
           onClick={onOpenAtRisk}
@@ -165,13 +167,13 @@ const TodayOverviewTab: React.FC<TodayOverviewTabProps> = ({ classroomId, onOpen
       )}
 
       <section className="rounded-2xl border border-gray-200 bg-white p-5">
-        <h3 className="text-lg font-bold text-gray-900">本週作業進度</h3>
+        <h3 className="text-lg font-bold text-gray-900">作業進度</h3>
         <p className="text-gray-500 text-sm mt-0.5 mb-4">依到期日排序，逾期與今天到期排最前面</p>
         {error && <p className="text-red-600 text-sm">{error}</p>}
         {!matrix && !error && <div className="h-32 rounded-xl bg-gray-100 animate-pulse" />}
         {matrix && rows.length === 0 && <p className="text-gray-500">這個班級還沒有指派作業</p>}
         {rows.length > 0 && (
-          <table className="w-full text-left" aria-label="本週作業進度">
+          <table className="w-full text-left" aria-label="作業進度">
             <thead>
               <tr className="text-sm text-gray-500 border-b border-gray-200">
                 <th className="py-2 font-medium">作業</th>

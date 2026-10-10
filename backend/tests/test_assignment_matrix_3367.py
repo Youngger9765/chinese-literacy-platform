@@ -315,6 +315,9 @@ class TestAssignmentItemStats:
         # #3376: session.accuracy is empty here; the reading step wrote reading_result.
         body = self._get(client, teacher["token"], seeded["a1"]).json()
         assert body["submitted_count"] == 1
+        # 3 assigned (one submitted, one in progress, one not started): completion is 1/3, not 1/1.
+        assert body["assigned_count"] == 3
+        assert {i["key"]: i for i in body["items"]}["reading"]["completion_rate"] == 33.3
         items = {i["key"]: i for i in body["items"]}
         assert items["reading"]["correct_rate"] == 96.0
         assert items["vocab"]["correct_rate"] == 80.0  # 0-1 scale normalised to percent
@@ -372,3 +375,18 @@ class TestStudentAssignments:
 
     def test_student_outside_the_class_is_404(self, client, teacher, other_teacher, seeded):
         assert self._get(client, teacher["token"], seeded["cid"], other_teacher["user_id"]).status_code == 404
+
+
+def test_malformed_stored_reading_result_reads_as_missing_not_500():
+    """Security review: client-written JSON must never crash the teacher view."""
+    from types import SimpleNamespace
+    from app.routes.teacher.teacher_assignment_matrix import _error_chars, _reading_accuracy, _vocab_percent
+
+    bad = SimpleNamespace(full_reading_result={"match_rate": "oops", "error_chars": "abc"},
+                          reading_result=None, accuracy=None)
+    assert _reading_accuracy(bad) is None
+    assert _error_chars(bad) == []
+    assert _vocab_percent({"accuracy": "x"}) is None
+    mixed = SimpleNamespace(full_reading_result={"error_chars": ["喝", {"x": 1}, "x" * 50]},
+                            reading_result=None, accuracy=None)
+    assert _error_chars(mixed) == ["喝"]

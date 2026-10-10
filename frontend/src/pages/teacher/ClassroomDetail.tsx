@@ -44,7 +44,10 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
   const activeTab = resolveTabKey(searchParams.get('tab'));
   const assignmentParam = searchParams.get('assignment');
   const selectedAssignmentId = assignmentParam ? Number(assignmentParam) || null : null;
-  const [isRosterOpen, setIsRosterOpen] = useState(true);
+  // Collapsed by default so the class page opens on content, not the roster (#3376).
+  const [isRosterOpen, setIsRosterOpen] = useState(false);
+  const studentParam = searchParams.get('student');
+  const selectedStudentId = studentParam ? Number(studentParam) || null : null;
 
   const updateParams = (patch: Record<string, string | null>) => {
     const next = new URLSearchParams(searchParams);
@@ -55,7 +58,13 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
     setSearchParams(next, { replace: true });
   };
   const setActiveTab = (tab: TabKey) =>
-    updateParams({ tab, assignment: tab === 'assignments' ? searchParams.get('assignment') : null });
+    updateParams({
+      tab,
+      assignment: tab === 'assignments' ? searchParams.get('assignment') : null,
+      student: tab === 'students' ? searchParams.get('student') : null,
+    });
+  const setSelectedStudent = (id: number | null) =>
+    updateParams({ tab: 'students', assignment: null, student: id === null ? null : String(id) });
   const setSelectedAssignment = (id: number | null) =>
     updateParams({ tab: 'assignments', assignment: id === null ? null : String(id) });
   const switchClassroom = (id: number) => navigate(`/teacher/classroom/${id}?tab=${activeTab}`);
@@ -376,6 +385,8 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
           ownerId={classroom.teacher_id}
           selectedAssignmentId={selectedAssignmentId}
           onSelectAssignment={setSelectedAssignment}
+          selectedStudentId={selectedStudentId}
+          onSelectStudent={setSelectedStudent}
         />
       </div>
     </div>

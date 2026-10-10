@@ -23,7 +23,8 @@ const data: ClassroomHeatmap = {
 it('shows unscored statuses without a red zero and keeps a real zero', () => {
   render(<HeatmapChart data={data} />);
   const cells = within(screen.getByRole('table')).getAllByRole('cell');
-  expect(cells[1]).toHaveTextContent('未完成');
+  // completed without a score: 已交, same word as the class assignment matrix (#3376)
+  expect(cells[1]).toHaveTextContent('已交');
   expect(cells[2]).toHaveTextContent('進行中');
   expect(cells[2].querySelector('span')).toHaveClass('border-dashed');
   expect(cells[3]).toHaveTextContent('未完成');

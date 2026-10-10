@@ -350,7 +350,11 @@ def process_session_completion(
         weights: list[float] = []
         # Accuracy from reading (weight: 40%)
         if learning_session.accuracy is not None:
-            scores.append(learning_session.accuracy * 100)
+            # The column takes 0-100 (SessionUpdateRequest) but older writers used
+            # 0-1; multiplying a percentage by 100 again produced scores in the
+            # thousands (#3376 audit). Same normalisation as the vocab branch below.
+            acc = float(learning_session.accuracy)
+            scores.append(acc * 100 if acc <= 1 else acc)
             weights.append(0.4)
         elif reading_accuracy is not None:
             scores.append(reading_accuracy)
