@@ -20,6 +20,7 @@ import {
   removeStudent,
   exportClassroomReport,
   regenerateClassroomCode,
+  deleteClassroom,
   ClassroomDetailResponse,
   StudentInClassroomResponse,
   ClassroomApiError,
@@ -61,10 +62,10 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
     updateParams({
       tab,
       assignment: tab === 'assignments' ? searchParams.get('assignment') : null,
-      student: tab === 'students' ? searchParams.get('student') : null,
+      student: tab === 'data' ? searchParams.get('student') : null,
     });
   const setSelectedStudent = (id: number | null) =>
-    updateParams({ tab: 'students', assignment: null, student: id === null ? null : String(id) });
+    updateParams({ tab: 'data', assignment: null, student: id === null ? null : String(id) });
   const setSelectedAssignment = (id: number | null) =>
     updateParams({ tab: 'assignments', assignment: id === null ? null : String(id) });
   const switchClassroom = (id: number) => navigate(`/teacher/classroom/${id}?tab=${activeTab}`);
@@ -94,6 +95,10 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
   const [isCopied, setIsCopied] = useState(false);
   const [showRegenConfirm, setShowRegenConfirm] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
+
+  // Delete classroom state
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const loadClassroom = useCallback(async () => {
     if (!token) return;
@@ -262,6 +267,24 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
     }
   };
 
+  const handleDeleteClassroom = async () => {
+    if (!token || !classroom) return;
+    setIsDeleting(true);
+    setShowDeleteConfirm(false);
+    try {
+      await deleteClassroom(token, classroom.id);
+      onBack();
+    } catch (err) {
+      if (err instanceof ClassroomApiError) {
+        setError(err.message);
+      } else {
+        setError('解散班級失敗');
+      }
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const formatDate = (dateStr: string) =>
     new Date(dateStr).toLocaleDateString('zh-TW', { year: 'numeric', month: 'long', day: 'numeric' });
 
@@ -316,6 +339,74 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
 
   if (!classroom) return null;
 
+  const settingsContent = (
+    <>
+      <ClassroomHeaderCard
+        classroom={classroom}
+        isEditing={isEditing}
+        editName={editName}
+        editGrade={editGrade}
+        isSaving={isSaving}
+        editError={editError}
+        onStartEditing={startEditing}
+        onCancelEditing={() => setIsEditing(false)}
+        onEditNameChange={setEditName}
+        onEditGradeChange={setEditGrade}
+        onSaveEdit={handleSaveEdit}
+        isTogglingActive={isTogglingActive}
+        onToggleActive={handleToggleActive}
+        isExporting={isExporting}
+        onExportCsv={handleExportCsv}
+        isDeleting={isDeleting}
+        showDeleteConfirm={showDeleteConfirm}
+        onShowDeleteConfirm={() => setShowDeleteConfirm(true)}
+        onHideDeleteConfirm={() => setShowDeleteConfirm(false)}
+        onDeleteClassroom={handleDeleteClassroom}
+        isCopied={isCopied}
+        showRegenConfirm={showRegenConfirm}
+        isRegenerating={isRegenerating}
+        onCopyJoinCode={handleCopyJoinCode}
+        onShowRegenConfirm={() => setShowRegenConfirm(true)}
+        onHideRegenConfirm={() => setShowRegenConfirm(false)}
+        onRegenerateCode={handleRegenerateCode}
+        formatDate={formatDate}
+      />
+
+      <section className="bg-white rounded-2xl shadow-card" aria-label="學生名單">
+        <button
+          type="button"
+          onClick={() => setIsRosterOpen((v) => !v)}
+          aria-expanded={isRosterOpen}
+          className="w-full flex items-center justify-between px-6 py-4 text-left cursor-pointer"
+        >
+          <span className="text-lg font-semibold text-gray-900">
+            學生名單（{classroom.students.length} 人）
+          </span>
+          <span className="text-sm text-gray-500">{isRosterOpen ? '收合 ▲' : '展開 ▼'}</span>
+        </button>
+        {isRosterOpen && (
+          <div className="border-t border-gray-100">
+            <StudentListTab
+              classroom={classroom}
+              token={token}
+              studentIdInput={studentIdInput}
+              setStudentIdInput={setStudentIdInput}
+              isAddingStudent={isAddingStudent}
+              addStudentError={addStudentError}
+              setAddStudentError={setAddStudentError}
+              onAddStudent={handleAddStudent}
+              removingStudentId={removingStudentId}
+              onRemoveStudent={handleRemoveStudent}
+              setRemovingStudentId={setRemovingStudentId}
+              formatDate={formatDate}
+              onStudentsImported={loadClassroom}
+            />
+          </div>
+        )}
+      </section>
+    </>
+  );
+
   return (
     <div className="flex-1 overflow-y-auto p-6 sm:p-8">
       <div className="max-w-4xl mx-auto space-y-6">
@@ -332,65 +423,6 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
           </div>
         )}
 
-        <ClassroomHeaderCard
-          classroom={classroom}
-          isEditing={isEditing}
-          editName={editName}
-          editGrade={editGrade}
-          isSaving={isSaving}
-          editError={editError}
-          onStartEditing={startEditing}
-          onCancelEditing={() => setIsEditing(false)}
-          onEditNameChange={setEditName}
-          onEditGradeChange={setEditGrade}
-          onSaveEdit={handleSaveEdit}
-          isTogglingActive={isTogglingActive}
-          onToggleActive={handleToggleActive}
-          isExporting={isExporting}
-          onExportCsv={handleExportCsv}
-          isCopied={isCopied}
-          showRegenConfirm={showRegenConfirm}
-          isRegenerating={isRegenerating}
-          onCopyJoinCode={handleCopyJoinCode}
-          onShowRegenConfirm={() => setShowRegenConfirm(true)}
-          onHideRegenConfirm={() => setShowRegenConfirm(false)}
-          onRegenerateCode={handleRegenerateCode}
-          formatDate={formatDate}
-        />
-
-        <section className="bg-white rounded-2xl shadow-card" aria-label="學生名單">
-          <button
-            type="button"
-            onClick={() => setIsRosterOpen((v) => !v)}
-            aria-expanded={isRosterOpen}
-            className="w-full flex items-center justify-between px-6 py-4 text-left cursor-pointer"
-          >
-            <span className="text-lg font-semibold text-gray-900">
-              學生名單（{classroom.students.length} 人）
-            </span>
-            <span className="text-sm text-gray-500">{isRosterOpen ? '收合 ▲' : '展開 ▼'}</span>
-          </button>
-          {isRosterOpen && (
-            <div className="border-t border-gray-100">
-              <StudentListTab
-                classroom={classroom}
-                token={token}
-                studentIdInput={studentIdInput}
-                setStudentIdInput={setStudentIdInput}
-                isAddingStudent={isAddingStudent}
-                addStudentError={addStudentError}
-                setAddStudentError={setAddStudentError}
-                onAddStudent={handleAddStudent}
-                removingStudentId={removingStudentId}
-                onRemoveStudent={handleRemoveStudent}
-                setRemovingStudentId={setRemovingStudentId}
-                formatDate={formatDate}
-                onStudentsImported={loadClassroom}
-              />
-            </div>
-          )}
-        </section>
-
         <ClassroomTabs
           activeTab={activeTab}
           onTabChange={setActiveTab}
@@ -400,6 +432,7 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
           onSelectAssignment={setSelectedAssignment}
           selectedStudentId={selectedStudentId}
           onSelectStudent={setSelectedStudent}
+          settingsContent={settingsContent}
         />
       </div>
     </div>

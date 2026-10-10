@@ -35,6 +35,13 @@ interface ClassroomHeaderCardProps {
   isExporting: boolean;
   onExportCsv: () => void;
 
+  // Delete classroom
+  isDeleting: boolean;
+  showDeleteConfirm: boolean;
+  onShowDeleteConfirm: () => void;
+  onHideDeleteConfirm: () => void;
+  onDeleteClassroom: () => void;
+
   // Join code
   isCopied: boolean;
   showRegenConfirm: boolean;
@@ -64,6 +71,11 @@ const ClassroomHeaderCard: React.FC<ClassroomHeaderCardProps> = ({
   onToggleActive,
   isExporting,
   onExportCsv,
+  isDeleting,
+  showDeleteConfirm,
+  onShowDeleteConfirm,
+  onHideDeleteConfirm,
+  onDeleteClassroom,
   isCopied,
   showRegenConfirm,
   isRegenerating,
@@ -189,6 +201,15 @@ const ClassroomHeaderCard: React.FC<ClassroomHeaderCardProps> = ({
             >
               {isExporting ? '匯出中...' : '匯出 CSV'}
             </button>
+            <button
+              onClick={onShowDeleteConfirm}
+              disabled={isDeleting}
+              className={`px-3 py-1.5 rounded-lg border border-red-300 text-red-700 text-sm hover:bg-red-50 transition-colors cursor-pointer ${
+                isDeleting ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+            >
+              {isDeleting ? '解散中...' : '解散班級'}
+            </button>
           </div>
         </div>
       )}
@@ -311,6 +332,39 @@ const ClassroomHeaderCard: React.FC<ClassroomHeaderCardProps> = ({
               className="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium transition-colors cursor-pointer"
             >
               確定
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {showDeleteConfirm && (
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="delete-dialog-title"
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+      >
+        <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full mx-4">
+          <h3 id="delete-dialog-title" className="text-base font-bold text-gray-900 mb-2">
+            確定要解散「{classroom.name}」嗎？
+          </h3>
+          <p className="text-sm text-gray-600 mb-6">
+            班級內的作業與指派紀錄將一併刪除，且無法復原
+          </p>
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={onHideDeleteConfirm}
+              className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors cursor-pointer"
+            >
+              取消
+            </button>
+            <button
+              onClick={onDeleteClassroom}
+              disabled={isDeleting}
+              className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white text-sm font-medium transition-colors cursor-pointer"
+            >
+              {isDeleting ? '解散中...' : '確定解散'}
             </button>
           </div>
         </div>

@@ -27,6 +27,12 @@ export interface StudentInClassroomResponse {
   enrolled_at: string;
 }
 
+export interface ResetPasswordResult {
+  username: string;
+  email: string;
+  password: string;
+}
+
 export interface ClassroomDetailResponse extends ClassroomResponse {
   students: StudentInClassroomResponse[];
   join_code?: string | null;
@@ -156,6 +162,31 @@ export async function removeStudent(
     },
   );
   return handleResponse<{ message: string }>(res);
+}
+
+// --- Delete classroom ---
+
+export async function deleteClassroom(token: string, classroomId: number): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/classrooms/${classroomId}`, {
+    method: 'DELETE',
+    headers: authHeaders(token),
+  });
+  await handleResponse<unknown>(res);
+}
+
+export async function resetStudentPassword(
+  token: string,
+  classroomId: number,
+  studentId: number,
+): Promise<ResetPasswordResult> {
+  const res = await fetch(
+    `${API_BASE}/api/classrooms/${classroomId}/students/${studentId}/reset-password`,
+    {
+      method: 'POST',
+      headers: authHeaders(token),
+    },
+  );
+  return handleResponse<ResetPasswordResult>(res);
 }
 
 // --- Regenerate join code ---
