@@ -16,7 +16,7 @@ import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import ClassroomTabs, { TABS, resolveTabKey } from '../ClassroomTabs';
+import ClassroomTabs, { TABS, resolveInitialView, resolveTabKey } from '../ClassroomTabs';
 
 vi.mock('../CoTeachingTab', () => ({ default: () => <div>CoTeaching</div> }));
 vi.mock('../panel/AssignmentsPanel', () => ({
@@ -104,5 +104,19 @@ describe('ClassroomTabs — Junyi three-tab layout (#3384)', () => {
     ['nonsense', 'settings'],
   ])('resolves ?tab=%s to %s', (raw, expected) => {
     expect(resolveTabKey(raw)).toBe(expected);
+  });
+
+  it.each([
+    ['overview', 'today'],
+    ['students', 'students'],
+    ['at-risk', 'at-risk'],
+    ['error-heatmap', 'error-heatmap'],
+    ['analytics', 'analytics'],
+    ['learning', 'learning'],
+    ['progress', 'learning'],
+    ['live', 'today'],
+    ['cross-text', 'analytics'],
+  ])('resolves legacy ?tab=%s to initial view %s', (raw, expected) => {
+    expect(resolveInitialView(raw)).toBe(expected);
   });
 });

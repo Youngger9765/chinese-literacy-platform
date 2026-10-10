@@ -177,16 +177,38 @@ describe('ClassroomDetail — Junyi three-tab layout (#3384)', () => {
     expect(screen.getByTestId('location').textContent).toContain('tab=assignments');
   });
 
-  it('an old ?tab=progress link lands on the aggregated 班級數據 view', async () => {
+  it('an old ?tab=progress link opens 詳細學習紀錄 directly', async () => {
     renderDetail(42, '/teacher/classroom/42?tab=progress');
-    await waitFor(() => expect(screen.getByTestId('today-overview-tab')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByTestId('student-progress-tab')).toBeInTheDocument());
   });
 
-  it('學習分析 in 班級數據 shows analytics and cross-text views together', async () => {
+  it.each([
+    ['error-heatmap', 'error-heatmap-tab'],
+    ['analytics', 'classroom-analytics'],
+    ['learning', 'student-progress-tab'],
+  ])('an old ?tab=%s link opens its data view directly', async (legacyTab, testId) => {
+    renderDetail(42, `/teacher/classroom/42?tab=${legacyTab}`);
+    await waitFor(() => expect(screen.getByTestId(testId)).toBeInTheDocument());
+  });
+
+  it('an explicit valid view overrides the legacy tab hint', async () => {
+    renderDetail(42, '/teacher/classroom/42?tab=progress&view=analytics');
+    await waitFor(() => expect(screen.getByTestId('classroom-analytics')).toBeInTheDocument());
+    expect(screen.queryByTestId('student-progress-tab')).not.toBeInTheDocument();
+  });
+
+  it('persists a selected data view through the URL and remount', async () => {
     const user = userEvent.setup();
-    renderDetail(42, '/teacher/classroom/42?tab=analytics');
+    const { unmount } = renderDetail(42, '/teacher/classroom/42?tab=data');
     await user.click(await screen.findByRole('button', { name: '學習分析' }));
+    expect(screen.getByTestId('location').textContent).toContain('tab=data');
+    expect(screen.getByTestId('location').textContent).toContain('view=analytics');
     expect(screen.getByTestId('classroom-analytics')).toBeInTheDocument();
+
+    const url = `/teacher/classroom/42${screen.getByTestId('location').textContent}`;
+    unmount();
+    renderDetail(42, url);
+    expect(await screen.findByTestId('classroom-analytics')).toBeInTheDocument();
     expect(screen.getByTestId('cross-text-analytics')).toBeInTheDocument();
   });
 
