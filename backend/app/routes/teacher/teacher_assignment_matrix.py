@@ -199,12 +199,42 @@ def _vocab_percent(vocab_result) -> float | None:
     return float(value) * 100 if value <= 1 else float(value)
 
 
+def _reading_result(session) -> dict:
+    """Full-text reading wins over the paragraph result — same order the teacher
+    learning curve uses (teacher_student_sessions.get_learning_curve)."""
+    fr = session.full_reading_result if isinstance(session.full_reading_result, dict) else {}
+    rr = session.reading_result if isinstance(session.reading_result, dict) else {}
+    return fr if fr else rr
+
+
+def _reading_accuracy(session) -> float | None:
+    # #3376: the session.accuracy column is mostly empty; the reading step
+    # writes its result into reading_result / full_reading_result instead.
+    r = _reading_result(session)
+    if r.get("match_rate") is not None:
+        return round(float(r["match_rate"]) * 100, 1)
+    if r.get("accuracy") is not None:
+        return round(float(r["accuracy"]), 1)
+    return session.accuracy
+
+
+def _error_chars(session) -> list[str]:
+    chars = _reading_result(session).get("error_chars") or []
+    return [str(c) for c in chars][:30]
+
+
+def _comprehension(session) -> float | None:
+    if session.comprehension_score is not None:
+        return session.comprehension_score
+    levels = [v for v in (session.literal_score, session.inferential_score, session.evaluative_score) if v is not None]
+    return round(sum(levels) / len(levels), 1) if levels else None
+
+
+# Three parts a teacher reads at a glance (Young 2026-10-10: keep it simple).
 # (key, label, extractor) — order here is only the tie-break order.
 _ITEMS = (
-    ("reading", "朗讀", lambda s: s.accuracy),
-    ("literal", "理解-字面", lambda s: s.literal_score),
-    ("inferential", "理解-推論", lambda s: s.inferential_score),
-    ("evaluative", "理解-評鑑", lambda s: s.evaluative_score),
+    ("reading", "朗讀", _reading_accuracy),
+    ("comprehension", "閱讀理解", _comprehension),
     ("vocab", "生字", lambda s: _vocab_percent(s.vocab_result)),
 )
 
@@ -267,3 +297,86 @@ def get_assignment_item_stats(
     # Weakest part first; parts nobody has a result for go last.
     items.sort(key=lambda i: (i.correct_rate is None, i.correct_rate or 0))
     return AssignmentItemStatsResponse(assignment_id=assignment_id, submitted_count=total, items=items)
+
+
+class StudentAssignmentRow(BaseModel):
+    assignment_id: int
+    title: str
+    due_date: datetime | None
+    state: str
+    score: float | None
+    current_step: str | None
+    reading_accuracy: float | None
+    comprehension: float | None
+    vocab: float | None
+    error_chars: list[str]
+
+
+class StudentAssignmentsResponse(BaseModel):
+    student_id: int
+    student_name: str
+    rows: list[StudentAssignmentRow]
+
+
+@router.get(
+    "/teacher/classrooms/{classroom_id}/students/{student_id}/assignments",
+    response_model=StudentAssignmentsResponse,
+)
+def get_student_assignments(
+    classroom_id: int,
+    student_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """One student's results for every assignment in this class (#3376):
+    state, score, the three parts, and which characters they misread."""
+    _check_classroom_access(current_user, classroom_id, db)
+    enrollment = (
+        db.query(ClassroomStudent)
+        .options(joinedload(ClassroomStudent.student))
+        .filter(ClassroomStudent.classroom_id == classroom_id, ClassroomStudent.student_id == student_id)
+        .first()
+    )
+    if enrollment is None:
+        raise HTTPException(status_code=404, detail="Student not in this classroom")
+
+    assignments = (
+        db.query(Assignment)
+        .options(joinedload(Assignment.text))
+        .filter(Assignment.classroom_id == classroom_id, Assignment.is_active.is_(True))
+        .order_by(Assignment.created_at, Assignment.id)
+        .limit(_MATRIX_ROW_LIMIT + 1)
+        .all()
+    )
+    subs = (
+        db.query(AssignmentSubmission)
+        .options(joinedload(AssignmentSubmission.session))
+        .filter(
+            AssignmentSubmission.assignment_id.in_([a.id for a in assignments]),
+            AssignmentSubmission.student_id == student_id,
+        )
+        .all()
+        if assignments
+        else []
+    )
+    latest = _latest_per_student(subs)
+
+    rows: list[StudentAssignmentRow] = []
+    for a in assignments:
+        sub = latest.get((a.id, student_id))
+        state = _cell_state(sub)
+        sess = sub.session if sub is not None else None
+        progress = sess.step_progress if sess is not None and isinstance(sess.step_progress, dict) else {}
+        rows.append(StudentAssignmentRow(
+            assignment_id=a.id,
+            title=a.title or resolve_title_for_assignment(a, db),
+            due_date=a.due_date,
+            state=state,
+            score=_submission_score(sub) if state == "completed" else None,
+            current_step=progress.get("current_step") if state == "in_progress" else None,
+            reading_accuracy=_reading_accuracy(sess) if sess is not None else None,
+            comprehension=_comprehension(sess) if sess is not None else None,
+            vocab=_vocab_percent(sess.vocab_result) if sess is not None else None,
+            error_chars=_error_chars(sess) if sess is not None else [],
+        ))
+    return StudentAssignmentsResponse(student_id=student_id, student_name=enrollment.student.name, rows=rows)

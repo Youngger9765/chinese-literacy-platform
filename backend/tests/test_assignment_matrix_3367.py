@@ -217,7 +217,8 @@ def seeded(teacher, students, school_id):
     s0, s1, s2, s3 = (s["user_id"] for s in students)
     # a1: s0 done with full breakdown, s1 in progress, s2 never started, s3 joined later (no row)
     _seed_submission(a1, s0, "submitted", score=88.0, session_kwargs=dict(
-        status="completed", accuracy=96.0, literal_score=100.0, inferential_score=60.0,
+        status="completed", reading_result={"match_rate": 0.96, "error_chars": ["喝", "采"]},
+        literal_score=100.0, inferential_score=60.0,
         evaluative_score=100.0, vocab_result={"accuracy": 0.8}, overall_score=88.0,
         step_progress={"current_step": "report", "steps_completed": []}))
     _seed_submission(a1, s1, "in_progress", session_kwargs=dict(
@@ -297,25 +298,21 @@ class TestAssignmentItemStats:
     def _get(self, client, token, aid):
         return client.get(f"/api/teacher/assignments/{aid}/item-stats", headers=auth_header(token))
 
-    def test_items_sorted_by_correct_rate_ascending(self, client, teacher, seeded):
+    def test_three_parts_sorted_weakest_first(self, client, teacher, seeded):
         resp = self._get(client, teacher["token"], seeded["a2"])
         assert resp.status_code == 200
         body = resp.json()
         assert body["submitted_count"] == 2  # latest attempt per student only
+        assert {i["key"] for i in body["items"]} == {"reading", "comprehension", "vocab"}
         items = {i["key"]: i for i in body["items"]}
-        # inferential: latest attempts 80 and 20 → 50
-        assert items["inferential"]["correct_rate"] == 50.0
-        assert items["inferential"]["error_rate"] == 50.0
-        assert items["inferential"]["completed"] == 2
-        # vocab: only s1 has a vocab result (60 on a 0-100 scale)
-        assert items["vocab"]["completed"] == 1
-        assert items["vocab"]["completion_rate"] == 50.0
-        assert items["vocab"]["correct_rate"] == 60.0
+        # comprehension: no comprehension_score → mean of the three levels: (100+80+90)/3=90, (100+20+50)/3≈56.7
+        assert items["comprehension"]["correct_rate"] == round((90.0 + 56.7) / 2, 1)
+        assert items["vocab"]["completed"] == 1 and items["vocab"]["completion_rate"] == 50.0
         rates = [i["correct_rate"] for i in body["items"] if i["correct_rate"] is not None]
         assert rates == sorted(rates)
-        assert body["items"][0]["key"] == "inferential"
 
-    def test_unsubmitted_students_are_not_counted(self, client, teacher, seeded):
+    def test_reading_accuracy_comes_from_the_reading_result(self, client, teacher, seeded):
+        # #3376: session.accuracy is empty here; the reading step wrote reading_result.
         body = self._get(client, teacher["token"], seeded["a1"]).json()
         assert body["submitted_count"] == 1
         items = {i["key"]: i for i in body["items"]}
@@ -344,3 +341,34 @@ class TestAssignmentItemStats:
         assert client.get(url, headers=auth_header(teacher["token"])).status_code == 200
         monkeypatch.setattr(m, "_MATRIX_CELL_LIMIT", 7)
         assert client.get(url, headers=auth_header(teacher["token"])).status_code == 400
+
+
+class TestStudentAssignments:
+    def _get(self, client, token, cid, sid):
+        return client.get(f"/api/teacher/classrooms/{cid}/students/{sid}/assignments", headers=auth_header(token))
+
+    def test_one_student_across_all_assignments(self, client, teacher, seeded):
+        s0 = seeded["ids"][0]
+        resp = self._get(client, teacher["token"], seeded["cid"], s0)
+        assert resp.status_code == 200
+        rows = {r["assignment_id"]: r for r in resp.json()["rows"]}
+        a1 = rows[seeded["a1"]]
+        assert a1["state"] == "completed" and a1["score"] == 88.0
+        assert a1["reading_accuracy"] == 96.0
+        assert a1["error_chars"] == ["喝", "采"]  # what the teacher asked for: which ones they got wrong
+        assert rows[seeded["a2"]]["score"] == 91.0
+
+    def test_in_progress_and_not_assigned(self, client, teacher, seeded):
+        s1, s3 = seeded["ids"][1], seeded["ids"][3]
+        r1 = {r["assignment_id"]: r for r in self._get(client, teacher["token"], seeded["cid"], s1).json()["rows"]}
+        assert r1[seeded["a1"]]["state"] == "in_progress" and r1[seeded["a1"]]["current_step"] == "comprehension"
+        r3 = self._get(client, teacher["token"], seeded["cid"], s3).json()["rows"]
+        assert {r["state"] for r in r3} == {"not_assigned"}
+
+    def test_other_teacher_and_student_cannot_read(self, client, other_teacher, students, seeded):
+        s0 = seeded["ids"][0]
+        assert self._get(client, other_teacher["token"], seeded["cid"], s0).status_code == 403
+        assert self._get(client, students[1]["token"], seeded["cid"], s0).status_code == 403
+
+    def test_student_outside_the_class_is_404(self, client, teacher, other_teacher, seeded):
+        assert self._get(client, teacher["token"], seeded["cid"], other_teacher["user_id"]).status_code == 404
