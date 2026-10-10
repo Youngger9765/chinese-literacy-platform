@@ -44,20 +44,6 @@ function RiskBadge({ level }: { level: AtRiskStudent['risk_level'] }) {
   );
 }
 
-function ConfidenceBar({ score }: { score: number }) {
-  const pct = Math.round(score * 100);
-  const color =
-    pct >= 70 ? 'bg-red-400' : pct >= 40 ? 'bg-yellow-400' : 'bg-green-400';
-  return (
-    <div className="flex items-center gap-2">
-      <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-        <div className={`h-full ${color} rounded-full`} style={{ width: `${pct}%` }} />
-      </div>
-      <span className="text-xs text-gray-400 w-7 text-right">{pct}%</span>
-    </div>
-  );
-}
-
 // ── Student card ──────────────────────────────────────────────────────────────
 
 function StudentRiskCard({ student }: { student: AtRiskStudent }) {
@@ -85,13 +71,6 @@ function StudentRiskCard({ student }: { student: AtRiskStudent }) {
 
           {student.risk_level === 'insufficient_data' && (
             <p className="mt-2 text-xs text-gray-600">尚無足夠練習資料，暫時無法判斷風險</p>
-          )}
-
-          {student.risk_level !== 'low' && student.risk_level !== 'insufficient_data' && (
-            <div className="mt-2">
-              <p className="text-xs text-gray-500 mb-1">預測可信度</p>
-              <ConfidenceBar score={student.confidence_score} />
-            </div>
           )}
 
         </div>

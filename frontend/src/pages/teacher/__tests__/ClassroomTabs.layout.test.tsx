@@ -11,7 +11,7 @@ import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import ClassroomTabs, { TABS, resolveTabKey } from '../ClassroomTabs';
+import ClassroomTabs, { TABS, MORE_TABS, resolveTabKey } from '../ClassroomTabs';
 
 vi.mock('../StudentProgressTab', () => ({ default: () => <div>StudentProgress</div> }));
 vi.mock('../ClassroomAnalytics', () => ({ default: () => <div>Analytics</div> }));
@@ -24,6 +24,7 @@ vi.mock('../panel/AssignmentsPanel', () => ({
     <div>Assignments:{String(selectedAssignmentId)}</div>
   ),
 }));
+vi.mock('../panel/StudentsPanel', () => ({ default: () => <div>StudentsPanel</div> }));
 vi.mock('../panel/TodayOverviewTab', () => ({
   default: ({ onOpenAssignment }: { onOpenAssignment: (id: number) => void }) => (
     <button onClick={() => onOpenAssignment(7)}>open-7</button>
@@ -37,27 +38,36 @@ const props = {
   ownerId: 1,
   selectedAssignmentId: null,
   onSelectAssignment: vi.fn(),
+  selectedStudentId: null,
+  onSelectStudent: vi.fn(),
 };
 
 describe('ClassroomTabs layout (#3367)', () => {
-  it('shows the seven task-ordered tabs in one row', () => {
+  it('shows four daily tabs plus 更多 (#3376: keep it simple)', () => {
     render(<ClassroomTabs {...props} />);
-    const labels = screen.getAllByRole('tab').map((t) => t.textContent);
-    expect(labels).toEqual(['今日總覽', '作業', '學生學習紀錄', '早期介入', '錯字總表', '學習分析', '協同教師']);
-    expect(TABS).toHaveLength(7);
+    const labels = screen.getAllByRole('tab').map((t) => t.getAttribute('aria-label') ?? t.textContent);
+    expect(labels).toEqual(['今日總覽', '作業', '學生', '早期介入', '更多']);
+    expect(TABS).toHaveLength(4);
+    expect(MORE_TABS.map((t) => t.label)).toEqual(['錯字總表', '學習分析', '詳細學習紀錄', '協同教師']);
   });
 
-  it('no longer has a separate 學生名單 / 課文管理 / 課堂即時 tab', () => {
-    render(<ClassroomTabs {...props} />);
-    for (const gone of ['學生名單', '課文管理', '課堂即時', '跨課文分析']) {
-      expect(screen.queryByRole('tab', { name: gone })).not.toBeInTheDocument();
-    }
+  it('更多 opens the less-used views behind one tab', async () => {
+    const onTabChange = vi.fn();
+    render(<ClassroomTabs {...props} onTabChange={onTabChange} />);
+    await userEvent.click(screen.getByRole('tab', { name: '更多' }));
+    expect(onTabChange).toHaveBeenCalledWith('error-heatmap');
+  });
+
+  it('a 更多 view keeps 更多 highlighted and shows its sub-menu', () => {
+    render(<ClassroomTabs {...props} activeTab="analytics" />);
+    expect(screen.getByRole('tab', { name: '更多' })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByRole('button', { name: '學習分析' })).toHaveAttribute('aria-pressed', 'true');
   });
 
   it.each([
     ['progress', 'learning'],
     ['live', 'overview'],
-    ['students', 'overview'],
+    ['students', 'students'],
     ['texts', 'assignments'],
     ['cross-text', 'analytics'],
     ['at-risk', 'at-risk'],
@@ -73,7 +83,9 @@ describe('ClassroomTabs layout (#3367)', () => {
     render(<ClassroomTabs {...props} onTabChange={onTabChange} onSelectAssignment={onSelectAssignment} />);
     await userEvent.click(screen.getByText('open-7'));
     expect(onSelectAssignment).toHaveBeenCalledWith(7);
-    expect(onTabChange).toHaveBeenCalledWith('assignments');
+    // One URL update only: a second onTabChange rebuilt the URL from stale params
+    // and dropped ?assignment= (#3376 audit). onSelectAssignment switches the tab itself.
+    expect(onTabChange).not.toHaveBeenCalled();
   });
 
   it('clicking a tab reports its key', async () => {

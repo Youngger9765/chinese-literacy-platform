@@ -114,7 +114,10 @@ const BatchCreateStudentsPanel: React.FC<BatchCreateStudentsPanelProps> = ({
               </p>
               <ul className="list-disc list-inside text-xs text-red-700 space-y-1">
                 {batchResult.errors.map((err, i) => (
-                  <li key={i}>{err}</li>
+                  <li key={i}>
+                    {err.name}
+                    {err.seat_number ? `（座號 ${err.seat_number}）` : ''}：{err.error}
+                  </li>
                 ))}
               </ul>
             </div>

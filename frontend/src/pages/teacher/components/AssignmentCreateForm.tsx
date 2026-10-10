@@ -25,6 +25,8 @@ export interface AssignmentCreateFormProps {
   onSubmit: (event: FormEvent) => void;
   onClose: () => void;
   onRetryStories: () => void;
+  /** #3378: 派給誰 (whole class / some students / other classes) */
+  targetPicker?: React.ReactNode;
 }
 
 export const AssignmentCreateForm: React.FC<AssignmentCreateFormProps> = ({
@@ -49,6 +51,7 @@ export const AssignmentCreateForm: React.FC<AssignmentCreateFormProps> = ({
   onSubmit,
   onClose,
   onRetryStories,
+  targetPicker,
 }) => (
   <div className="p-5 border-b border-gray-100 bg-gray-50/50">
     <div className="flex items-center justify-between mb-3">
@@ -141,6 +144,8 @@ export const AssignmentCreateForm: React.FC<AssignmentCreateFormProps> = ({
           </div>
         </div>
       </fieldset>
+
+      {targetPicker && <div className="border-t border-gray-100 pt-3">{targetPicker}</div>}
 
       {/* Group B: 設定選項 */}
       <fieldset className="border-t border-gray-100 pt-3">

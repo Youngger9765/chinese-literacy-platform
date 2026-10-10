@@ -44,7 +44,10 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
   const activeTab = resolveTabKey(searchParams.get('tab'));
   const assignmentParam = searchParams.get('assignment');
   const selectedAssignmentId = assignmentParam ? Number(assignmentParam) || null : null;
-  const [isRosterOpen, setIsRosterOpen] = useState(true);
+  // Collapsed by default so the class page opens on content, not the roster (#3376).
+  const [isRosterOpen, setIsRosterOpen] = useState(false);
+  const studentParam = searchParams.get('student');
+  const selectedStudentId = studentParam ? Number(studentParam) || null : null;
 
   const updateParams = (patch: Record<string, string | null>) => {
     const next = new URLSearchParams(searchParams);
@@ -55,7 +58,13 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
     setSearchParams(next, { replace: true });
   };
   const setActiveTab = (tab: TabKey) =>
-    updateParams({ tab, assignment: tab === 'assignments' ? searchParams.get('assignment') : null });
+    updateParams({
+      tab,
+      assignment: tab === 'assignments' ? searchParams.get('assignment') : null,
+      student: tab === 'students' ? searchParams.get('student') : null,
+    });
+  const setSelectedStudent = (id: number | null) =>
+    updateParams({ tab: 'students', assignment: null, student: id === null ? null : String(id) });
   const setSelectedAssignment = (id: number | null) =>
     updateParams({ tab: 'assignments', assignment: id === null ? null : String(id) });
   const switchClassroom = (id: number) => navigate(`/teacher/classroom/${id}?tab=${activeTab}`);
@@ -107,6 +116,12 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
   useEffect(() => {
     loadClassroom();
   }, [loadClassroom]);
+
+  // An empty class opens on "add students" — the first thing to do after creating one (#3378).
+  const isEmptyClass = classroom !== null && classroom.students.length === 0;
+  useEffect(() => {
+    if (isEmptyClass) setIsRosterOpen(true);
+  }, [isEmptyClass]);
 
   const startEditing = () => {
     if (!classroom) return;
@@ -262,7 +277,14 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
     </button>
   );
 
-  if (isLoading) {
+  // #3378 fix: only show the full-page skeleton on the very first load.
+  // Background refreshes (after creating students / an assignment / editing)
+  // also set isLoading=true, and this early-return used to unmount the whole
+  // tree whenever that happened -- including AddStudentsPanel's local
+  // `result` state, so the "已建立 N 個帳號" banner and its 列印帳密卡 button
+  // (R2/R3) could never actually be seen: they got wiped the instant the
+  // post-create reload kicked in.
+  if (isLoading && !classroom) {
     return (
       <div className="flex-1 overflow-y-auto p-6 sm:p-8">
         <div className="max-w-4xl mx-auto">
@@ -376,6 +398,8 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
           ownerId={classroom.teacher_id}
           selectedAssignmentId={selectedAssignmentId}
           onSelectAssignment={setSelectedAssignment}
+          selectedStudentId={selectedStudentId}
+          onSelectStudent={setSelectedStudent}
         />
       </div>
     </div>

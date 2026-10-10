@@ -31,6 +31,9 @@ export function useAssignments(classroomId: number) {
   const [isLoadingStories, setIsLoadingStories] = useState(false);
   const [storiesError, setStoriesError] = useState<string | null>(null);
   const [selectedStoryId, setSelectedStoryId] = useState('');
+  // #3378: 派給誰 — null = whole class; extra classes get the same assignment (whole class)
+  const [formStudentIds, setFormStudentIds] = useState<number[] | null>(null);
+  const [formExtraClassIds, setFormExtraClassIds] = useState<number[]>([]);
   const [formTitle, setFormTitle] = useState('');
   const [formDescription, setFormDescription] = useState('');
   const [formDueDate, setFormDueDate] = useState('');
@@ -153,7 +156,12 @@ export function useAssignments(classroomId: number) {
     setIsCreating(true);
     setCreateError('');
     try {
-      await createAssignment(token, classroomId, {
+      if (formStudentIds !== null && formStudentIds.length === 0) {
+        setCreateError('請至少勾選一位學生，或改成全班');
+        setIsCreating(false);
+        return;
+      }
+      const base = {
         story_id: selectedStoryId,
         title: formTitle.trim() || undefined,
         description: formDescription.trim() || undefined,
@@ -162,7 +170,27 @@ export function useAssignments(classroomId: number) {
         target_accuracy: formGoals.target_accuracy,
         difficulty_label: formGoals.difficulty_label,
         skip_completed_steps: formSkipCompleted,
+      };
+      await createAssignment(token, classroomId, {
+        ...base,
+        ...(formStudentIds !== null ? { student_ids: formStudentIds } : {}),
       });
+      // Same assignment to the teacher's other classes (均一's 任務代碼, without the code).
+      const failed: number[] = [];
+      for (const otherId of formExtraClassIds) {
+        try {
+          await createAssignment(token, otherId, base);
+        } catch {
+          failed.push(otherId);
+        }
+      }
+      setFormStudentIds(null);
+      setFormExtraClassIds([]);
+      if (failed.length > 0) {
+        setCreateError(`這個班已派好，但有 ${failed.length} 個其他班沒有派成功，請到該班再派一次`);
+        await loadAssignments();
+        return;
+      }
       setShowCreateForm(false);
       await loadAssignments();
     } catch (err) {
@@ -322,6 +350,10 @@ export function useAssignments(classroomId: number) {
     setFormDueDate,
     formSkipCompleted,
     setFormSkipCompleted,
+    formStudentIds,
+    setFormStudentIds,
+    formExtraClassIds,
+    setFormExtraClassIds,
     formGoals,
     setFormGoals,
     isCreating,

@@ -122,6 +122,7 @@ import AssignmentsPanel from '../pages/teacher/panel/AssignmentsPanel';
 import AssignmentMatrixGrid from '../pages/teacher/panel/AssignmentMatrixGrid';
 import AssignmentItemStats from '../pages/teacher/panel/AssignmentItemStats';
 import ClassSwitcher from '../pages/teacher/panel/ClassSwitcher';
+import StudentsPanel from '../pages/teacher/panel/StudentsPanel';
 
 // ── Minimal fixtures ─────────────────────────────────────────────────────────
 
@@ -548,13 +549,16 @@ describe('render-smoke: teacher panel (#3367) mounts without TDZ', () => {
     mountGuard('TodayOverviewTab', <TodayOverviewTab classroomId={1} onOpenAssignment={() => {}} onOpenAtRisk={() => {}} />);
   });
   it('AssignmentsPanel', () => {
-    mountGuard('AssignmentsPanel', <AssignmentsPanel classroomId={1} selectedAssignmentId={null} onSelectAssignment={() => {}} />);
+    mountGuard('AssignmentsPanel', <AssignmentsPanel classroomId={1} selectedAssignmentId={null} onSelectAssignment={() => {}} onOpenStudent={() => {}} />);
+  });
+  it('StudentsPanel', () => {
+    mountGuard('StudentsPanel', <StudentsPanel classroomId={1} selectedStudentId={null} onSelectStudent={() => {}} />);
   });
   it('AssignmentMatrixGrid', () => {
     mountGuard('AssignmentMatrixGrid', <AssignmentMatrixGrid data={{ students: [], assignments: [], cells: [] }} onOpenAssignment={() => {}} />);
   });
   it('AssignmentItemStats', () => {
-    mountGuard('AssignmentItemStats', <AssignmentItemStats data={{ assignment_id: 1, submitted_count: 0, items: [] }} />);
+    mountGuard('AssignmentItemStats', <AssignmentItemStats data={{ assignment_id: 1, submitted_count: 0, assigned_count: 0, items: [] }} />);
   });
   it('ClassSwitcher', () => {
     mountGuard('ClassSwitcher', <ClassSwitcher currentId={1} onSwitch={() => {}} />);

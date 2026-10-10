@@ -51,6 +51,8 @@ class AssignmentCreateRequest(BaseModel):
     difficulty_label: str | None = None
     # Issue #1762: teacher can enable smart-skip of already-completed steps
     skip_completed_steps: bool = False
+    # #3378: assign to part of the class. Omitted = everyone enrolled (unchanged).
+    student_ids: list[int] | None = Field(None, min_length=1, max_length=500)
 
     @model_validator(mode="after")
     def _exactly_one_text_source(self) -> "AssignmentCreateRequest":

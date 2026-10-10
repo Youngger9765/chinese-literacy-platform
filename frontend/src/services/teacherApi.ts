@@ -775,6 +775,7 @@ export interface AssignmentItemStat {
 export interface AssignmentItemStatsResponse {
   assignment_id: number;
   submitted_count: number;
+  assigned_count: number;
   /** Sorted weakest first by the backend. */
   items: AssignmentItemStat[];
 }
@@ -784,4 +785,34 @@ export function getAssignmentItemStats(
   assignmentId: number,
 ): Promise<AssignmentItemStatsResponse> {
   return get(`/api/teacher/assignments/${assignmentId}/item-stats`);
+}
+
+// ── One student's results across a class's assignments (#3376) ──────────────
+
+export interface StudentAssignmentRow {
+  assignment_id: number;
+  title: string;
+  due_date: string | null;
+  state: MatrixCellState;
+  score: number | null;
+  current_step: string | null;
+  reading_accuracy: number | null;
+  comprehension: number | null;
+  vocab: number | null;
+  /** Characters the student misread in the reading step. */
+  error_chars: string[];
+}
+
+export interface StudentAssignmentsResponse {
+  student_id: number;
+  student_name: string;
+  rows: StudentAssignmentRow[];
+}
+
+export function getStudentAssignments(
+  _token: string,
+  classroomId: number,
+  studentId: number,
+): Promise<StudentAssignmentsResponse> {
+  return get(`/api/teacher/classrooms/${classroomId}/students/${studentId}/assignments`);
 }

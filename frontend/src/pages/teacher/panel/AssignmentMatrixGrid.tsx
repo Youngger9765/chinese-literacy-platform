@@ -13,6 +13,7 @@ type Cell = AssignmentMatrixResponse['cells'][number];
 interface AssignmentMatrixGridProps {
   data: AssignmentMatrixResponse;
   onOpenAssignment: (assignmentId: number) => void;
+  onOpenStudent?: (studentId: number) => void;
 }
 
 function stepLabel(step: string | null): string | null {
@@ -27,7 +28,30 @@ function scoreClass(score: number | null): string {
   return 'bg-red-100 text-red-700';
 }
 
-export function CellBadge({ cell }: { cell: Cell | undefined }) {
+/**
+ * Same lesson assigned twice reads identically (codex screen audit #5): number
+ * repeats in creation order so 總覽、總表、詳情、學生頁 all say 「第 2 次」.
+ */
+export function distinctTitles<T extends { id: number; title: string }>(items: T[]): Map<number, string> {
+  const total = new Map<string, number>();
+  for (const a of items) total.set(a.title, (total.get(a.title) ?? 0) + 1);
+  const seen = new Map<string, number>();
+  const out = new Map<number, string>();
+  for (const a of items) {
+    if ((total.get(a.title) ?? 0) < 2) { out.set(a.id, a.title); continue; }
+    const n = (seen.get(a.title) ?? 0) + 1;
+    seen.set(a.title, n);
+    out.set(a.id, `${a.title}（第 ${n} 次）`);
+  }
+  return out;
+}
+
+/** Past the due date and still not handed in (均一's red: 已截止未完成). */
+export function isOverdue(dueDate: string | null, now: Date = new Date()): boolean {
+  return dueDate !== null && new Date(dueDate) < now;
+}
+
+export function CellBadge({ cell, overdue = false }: { cell: Cell | undefined; overdue?: boolean }) {
   if (!cell || cell.state === 'not_assigned') {
     return (
       <span
@@ -42,6 +66,13 @@ export function CellBadge({ cell }: { cell: Cell | undefined }) {
     return (
       <span className={`inline-block min-w-10 px-2 py-0.5 rounded text-sm font-semibold ${scoreClass(cell.score)}`}>
         {cell.score !== null ? Math.round(cell.score) : '已交'}
+      </span>
+    );
+  }
+  if (overdue && (cell.state === 'in_progress' || cell.state === 'not_started')) {
+    return (
+      <span className="inline-block px-2 py-0.5 rounded text-xs font-semibold bg-red-100 text-red-700">
+        逾期未交{cell.state === 'in_progress' ? '・做到一半' : ''}
       </span>
     );
   }
@@ -61,7 +92,7 @@ function formatDue(due: string | null): string {
   return new Date(due).toLocaleDateString('zh-TW', { month: 'numeric', day: 'numeric' });
 }
 
-const AssignmentMatrixGrid: React.FC<AssignmentMatrixGridProps> = ({ data, onOpenAssignment }) => {
+const AssignmentMatrixGrid: React.FC<AssignmentMatrixGridProps> = ({ data, onOpenAssignment, onOpenStudent }) => {
   const { students, assignments, cells } = data;
 
   if (assignments.length === 0) {
@@ -71,11 +102,13 @@ const AssignmentMatrixGrid: React.FC<AssignmentMatrixGridProps> = ({ data, onOpe
     return <p className="py-10 text-center text-gray-500">這個班級還沒有學生</p>;
   }
 
+  const titles = distinctTitles(assignments);
   const cellMap = new Map<string, Cell>();
   for (const c of cells) cellMap.set(`${c.student_id}:${c.assignment_id}`, c);
 
   return (
     <div>
+      {assignments.length > 1 && <p className="sm:hidden text-sm text-gray-500 mb-1">← 左右滑動看更多作業 →</p>}
       <div className="overflow-auto max-h-[70vh] border border-gray-200 rounded-xl">
         <table className="min-w-full text-sm border-separate border-spacing-0" aria-label="班級作業總表">
           <thead>
@@ -90,7 +123,7 @@ const AssignmentMatrixGrid: React.FC<AssignmentMatrixGridProps> = ({ data, onOpe
                     onClick={() => onOpenAssignment(a.id)}
                     className="font-semibold text-accent hover:underline cursor-pointer"
                   >
-                    {a.title}
+                    {titles.get(a.id)}
                   </button>
                   <div className="text-xs text-gray-500 font-normal">{formatDue(a.due_date)}</div>
                 </th>
@@ -101,11 +134,17 @@ const AssignmentMatrixGrid: React.FC<AssignmentMatrixGridProps> = ({ data, onOpe
             {students.map((s) => (
               <tr key={s.id}>
                 <th scope="row" className="sticky left-0 z-10 bg-white px-4 py-2.5 text-left font-medium text-gray-900 border-b border-r border-gray-100 whitespace-nowrap">
-                  {s.name}
+                  {onOpenStudent ? (
+                    <button type="button" onClick={() => onOpenStudent(s.id)} className="text-gray-900 hover:text-accent hover:underline cursor-pointer">
+                      {s.name}
+                    </button>
+                  ) : (
+                    s.name
+                  )}
                 </th>
                 {assignments.map((a) => (
                   <td key={a.id} className="px-3 py-2.5 text-center border-b border-gray-100">
-                    <CellBadge cell={cellMap.get(`${s.id}:${a.id}`)} />
+                    <CellBadge cell={cellMap.get(`${s.id}:${a.id}`)} overdue={isOverdue(a.due_date)} />
                   </td>
                 ))}
               </tr>
@@ -114,9 +153,11 @@ const AssignmentMatrixGrid: React.FC<AssignmentMatrixGridProps> = ({ data, onOpe
         </table>
       </div>
       <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-gray-600">
-        <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded bg-green-100 text-green-800 font-semibold">88</span>已完成（依分數上色）</span>
+        <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded bg-green-100 text-green-800 font-semibold">88</span>已交（分數）</span>
+        <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded bg-gray-100 text-gray-600 font-semibold">已交</span>已交・沒有分數</span>
         <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded border border-dashed border-amber-400 text-amber-700 text-xs">進行中</span>做到哪一步</span>
         <span className="flex items-center gap-1.5"><span className="text-gray-400">未開始</span>派了還沒動</span>
+        <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded bg-red-100 text-red-700 text-xs font-semibold">逾期未交</span>過了期限還沒交</span>
         <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded text-xs text-gray-400 bg-gray-100">未指派</span>派作業時還不在班上</span>
       </div>
     </div>
