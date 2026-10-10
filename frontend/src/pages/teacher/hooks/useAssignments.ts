@@ -17,7 +17,7 @@ import { Story } from '../../../types';
 
 export type StatusFilter = 'all' | 'active' | 'inactive' | 'overdue';
 
-export function useAssignments(classroomId: number) {
+export function useAssignments(classroomId: number, onChanged?: () => void) {
   const { token } = useAuth();
 
   const [assignments, setAssignments] = useState<AssignmentResponse[]>([]);
@@ -189,10 +189,12 @@ export function useAssignments(classroomId: number) {
       if (failed.length > 0) {
         setCreateError(`這個班已派好，但有 ${failed.length} 個其他班沒有派成功，請到該班再派一次`);
         await loadAssignments();
+        onChanged?.();
         return;
       }
       setShowCreateForm(false);
       await loadAssignments();
+      onChanged?.();
     } catch (err) {
       if (err instanceof AssignmentApiError) {
         setCreateError(err.message);
@@ -213,6 +215,7 @@ export function useAssignments(classroomId: number) {
       setAssignments((prev) =>
         prev.map((item) => (item.id === updated.id ? updated : item)),
       );
+      onChanged?.();
     } catch (err) {
       if (err instanceof AssignmentApiError) {
         setError(err.message);
@@ -233,6 +236,7 @@ export function useAssignments(classroomId: number) {
         setExpandedId(null);
         setExpandedDetail(null);
       }
+      onChanged?.();
     } catch (err) {
       if (err instanceof AssignmentApiError) {
         setError(err.message);
@@ -273,6 +277,7 @@ export function useAssignments(classroomId: number) {
       });
       setAssignments((prev) => prev.map((assignment) => (assignment.id === updated.id ? updated : assignment)));
       setEditingId(null);
+      onChanged?.();
     } catch (err) {
       if (err instanceof AssignmentApiError) {
         setEditError(err.message);

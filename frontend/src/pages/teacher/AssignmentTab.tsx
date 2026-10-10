@@ -10,6 +10,7 @@ import { StatusFilter, useAssignments } from './hooks/useAssignments';
 
 interface AssignmentTabProps {
   classroomId: number;
+  onChanged?: () => void;
 }
 
 const STATUS_TABS: { key: StatusFilter; label: string }[] = [
@@ -19,7 +20,7 @@ const STATUS_TABS: { key: StatusFilter; label: string }[] = [
   { key: 'inactive', label: '已停用' },
 ];
 
-const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
+const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId, onChanged }) => {
   const {
     assignments,
     isLoading,
@@ -79,7 +80,7 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
     handleSaveEdit,
     handleExpand,
     handleGraded,
-  } = useAssignments(classroomId);
+  } = useAssignments(classroomId, onChanged);
 
   const renderEditForm = (assignment: AssignmentResponse, variant: 'mobile' | 'desktop') => (
     <AssignmentInlineEdit

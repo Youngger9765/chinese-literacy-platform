@@ -422,6 +422,51 @@ export function downloadCsvTemplate(token: string): void {
     });
 }
 
+// --- Junyi class/student import (#3380) ---
+
+export interface JunyiImportableClass {
+  junyi_class_id: string;
+  class_name: string;
+  class_code: string | null;
+  student_count: number;
+  already_imported: boolean;
+}
+
+export interface JunyiImportClassesResult {
+  linked: boolean;
+  classes: JunyiImportableClass[];
+}
+
+export interface JunyiImportResult {
+  added_students: number;
+  skipped_existing_students: number;
+  classes_created: number;
+  classes_reused: number;
+}
+
+export async function listJunyiImportableClasses(
+  token: string,
+  schoolId: number,
+): Promise<JunyiImportClassesResult> {
+  const res = await fetch(`${API_BASE}/api/classrooms/junyi-import/classes?school_id=${schoolId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return handleResponse<JunyiImportClassesResult>(res);
+}
+
+export async function importJunyiClasses(
+  token: string,
+  schoolId: number,
+  junyiClassIds: string[],
+): Promise<JunyiImportResult> {
+  const res = await fetch(`${API_BASE}/api/classrooms/junyi-import/import`, {
+    method: 'POST',
+    headers: authHeaders(token),
+    body: JSON.stringify({ school_id: schoolId, junyi_class_ids: junyiClassIds }),
+  });
+  return handleResponse<JunyiImportResult>(res);
+}
+
 // --- Export classroom report as CSV (#235) ---
 
 export function exportClassroomReport(token: string, classroomId: number): void {

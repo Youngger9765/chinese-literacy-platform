@@ -64,6 +64,11 @@ def pytest_runtest_setup(item):
         join_preview_rate_limiter.reset()
     except (ImportError, AttributeError):
         pass
+    try:
+        from app.routes.classrooms.classroom_junyi_import import _junyi_import_rate_limiter
+        _junyi_import_rate_limiter.reset()
+    except (ImportError, AttributeError):
+        pass
     # #3171: ai_rate_limiter / tts_rate_limiter 原本漏在這裡之外。
     #
     # ai_rate_limiter 是模組層全域，key 是 `ai:{get_client_key(request)}`，而在
