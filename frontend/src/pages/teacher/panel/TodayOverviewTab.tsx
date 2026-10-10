@@ -92,9 +92,9 @@ function SummaryCard({ value, label, tone, onClick }: { value: string; label: st
     <Tag
       type={onClick ? 'button' : undefined}
       onClick={onClick}
-      className={`text-left rounded-2xl border bg-white p-5 border-l-4 ${tone} ${onClick ? 'hover:shadow-card cursor-pointer' : ''}`}
+      className={`text-left rounded-2xl border bg-white p-4 sm:p-5 border-l-4 ${tone} ${onClick ? 'hover:shadow-card cursor-pointer' : ''}`}
     >
-      <div className="text-3xl font-bold text-gray-900">{value}</div>
+      <div className="text-2xl sm:text-3xl font-bold text-gray-900">{value}</div>
       <div className="text-gray-600 mt-1">{label}</div>
     </Tag>
   );
@@ -193,7 +193,7 @@ const TodayOverviewTab: React.FC<TodayOverviewTabProps> = ({ classroomId, onOpen
                   <td className="py-3 tabular-nums">{r.submitted} / {r.assigned}</td>
                   <td className="py-3 text-right">
                     <button type="button" onClick={() => onOpenAssignment(r.id)} className="text-accent font-medium hover:underline cursor-pointer">
-                      查看矩陣 →
+                      查看
                     </button>
                   </td>
                 </tr>

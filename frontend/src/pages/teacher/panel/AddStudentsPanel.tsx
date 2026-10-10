@@ -112,6 +112,9 @@ const AddStudentsPanel: React.FC<AddStudentsPanelProps> = ({
 
       {mode === 'no-account' && (
         <div className="space-y-3">
+          <p className="text-sm text-amber-800 bg-amber-50 rounded-lg px-3 py-2">
+            學生用均一帳號登入的話，請改選「已經有帳號」，讓學生用均一登入後輸入班級代碼，才不會多出一組重複的帳號
+          </p>
           <label htmlFor="roster-input" className="block text-sm text-gray-700">
             一行一位學生，可以寫「座號 姓名」或只寫姓名；也可以只填人數（例如 28）
           </label>
@@ -162,7 +165,7 @@ const AddStudentsPanel: React.FC<AddStudentsPanelProps> = ({
         <div className="space-y-3">
           {joinCode && (
             <p className="text-gray-700">
-              請學生登入後輸入班級代碼{' '}
+              請學生登入（可用均一帳號）後輸入班級代碼{' '}
               <span className="font-mono text-2xl font-bold tracking-widest text-accent align-middle">{joinCode}</span>
             </p>
           )}
