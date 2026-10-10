@@ -171,7 +171,17 @@ export async function deleteClassroom(token: string, classroomId: number): Promi
     method: 'DELETE',
     headers: authHeaders(token),
   });
-  await handleResponse<unknown>(res);
+  if (!res.ok) {
+    onApiUnauthorized(res);
+    let message = `Request failed: ${res.status}`;
+    try {
+      const body = await res.json();
+      message = body.detail ?? body.message ?? message;
+    } catch {
+      // ignore JSON parse errors
+    }
+    throw new ClassroomApiError(message, res.status);
+  }
 }
 
 export async function resetStudentPassword(
