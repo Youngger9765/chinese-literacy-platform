@@ -53,6 +53,21 @@ class Settings(BaseSettings):
     # infra team has granted roles/bigquery.dataViewer on data_mart and the ID
     # mapping below has been verified against real BigQuery data (see #3380).
     junyi_class_import_enabled: bool = False
+    # Which BigQuery client backs the Junyi import feature (issue #3380).
+    # "fake" (default): DemoJunyiBigQueryClient with a small fixed demo
+    #   dataset -- safe to enable junyi_class_import_enabled on staging
+    #   before Junyi has granted real BigQuery access.
+    # "real": RealJunyiBigQueryClient, talks to actual BigQuery. Only switch
+    #   this once roles/bigquery.dataViewer has been granted (see PRD SS6).
+    junyi_bq_mode: str = "fake"
+    # Dedicated service account for Junyi BigQuery queries (issue #3380 CTO
+    # review addendum). Has only roles/bigquery.jobUser, zero downloadable
+    # keys -- narrower than the Cloud Run default identity. Empty string
+    # falls back to the ambient Cloud Run default identity (pre-#3380
+    # behaviour). This repo does NOT grant this account IAM permissions or
+    # the Cloud Run runtime's impersonation right (roles/iam.serviceAccountTokenCreator)
+    # -- that is Junyi/infra's side, tracked in PRD SS6.
+    junyi_bigquery_service_account: str = "lingoleap-junyi-bq@lingoleap-dev.iam.gserviceaccount.com"
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 

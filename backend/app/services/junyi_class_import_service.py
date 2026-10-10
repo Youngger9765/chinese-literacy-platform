@@ -1,30 +1,27 @@
-"""Junyi class/student import business logic (issue #3380).
+"""On-demand Junyi import with one combined student query (issue #3380).
 
-On-demand import at request time — no nightly sync, no new DB table, no
-migration. Dedup keys:
-- students by ``User.junyi_identity_id`` (already unique).
-- classrooms by ``(teacher_id, school_id, name)`` — v1, isolated behind
-  ``find_existing_imported_classroom`` so it can be swapped for a real
-  ``classrooms.junyi_class_id`` column later without touching every call site.
-
-The authoritative allowlist of class ids a teacher may act on is whatever
-``bq_client.list_classes_for_teacher()`` returns for THAT teacher's key. Any
-requested id outside that set is silently dropped (defense in depth on top of
-the parametrised BQ ``WHERE teacher_user_id = @caller`` clause — see the IDOR
-test).
+Classrooms are keyed by teacher and Junyi class ID. Students are resolved by
+Junyi ID, then by an unlinked account's email, then created with a synthetic
+email and a shared unusable password hash. Names come from the BigQuery
+nickname/username chain, then a numbered placeholder. The list endpoint uses
+the cheaper class-summary query.
 """
 
 import hashlib
 import logging
 import secrets
+from functools import lru_cache
 
+from sqlalchemy import func
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from ..auth.password import hash_password
 from ..models.school import Classroom, ClassroomStudent, ClassroomTeacher
 from ..models.user import Role, StudentProfile, User, UserRole
-from ..routes.classrooms.helpers import create_submissions_for_new_student, generate_join_code
 from .junyi_bigquery_client import (
+    SYNTHETIC_STUDENT_EMAIL_DOMAIN,
+    JunyiClassStudentImportRow,
     student_identity_id_from_user_id_key,
     teacher_user_id_key,
 )
@@ -32,20 +29,26 @@ from .junyi_bigquery_client import (
 logger = logging.getLogger(__name__)
 
 
+@lru_cache(maxsize=1)
+def _synthetic_account_password_hash() -> str:
+    """One bcrypt hash shared by every Junyi-imported synthetic student
+    account (#3380). These accounts authenticate via Junyi SSO / teacher
+    enrollment, never password login -- computing bcrypt once instead of
+    once per student cuts a 71-student import from ~26s to ~1s. The
+    plaintext input is a process-local random secret immediately
+    discarded, so this hash is not a valid password for any login
+    attempt (see TestSyntheticAccountsCannotPasswordLogin)."""
+    return hash_password(secrets.token_hex(32))
+
+
 def find_existing_imported_classroom(
-    db: Session, teacher_id: int, school_id: int, class_name: str
+    db: Session, teacher_id: int, junyi_class_id: str
 ) -> Classroom | None:
-    """v1 dedup key: (teacher_id, school_id, name). Isolated in this one
-    function on purpose — #3380 documents this as a known limitation (a
-    renamed Junyi class will not be matched and will create a second
-    classroom); replacing it with a real classrooms.junyi_class_id column
-    later only requires changing this function, not every call site."""
     return (
         db.query(Classroom)
         .filter(
             Classroom.teacher_id == teacher_id,
-            Classroom.school_id == school_id,
-            Classroom.name == class_name,
+            Classroom.junyi_class_id == junyi_class_id,
         )
         .first()
     )
@@ -61,13 +64,11 @@ def list_importable_classes(db: Session, teacher: User, school_id: int, bq_clien
         return {"linked": False, "classes": []}
 
     teacher_key = teacher_user_id_key(teacher.junyi_identity_id)
-    summaries = bq_client.list_classes_for_teacher(teacher_key)
+    summaries = bq_client.list_class_summaries_for_teacher(teacher_key)
 
     classes = []
     for summary in summaries:
-        existing = find_existing_imported_classroom(
-            db, teacher.id, school_id, summary.class_name
-        )
+        existing = find_existing_imported_classroom(db, teacher.id, summary.junyi_class_id)
         classes.append(
             {
                 "junyi_class_id": summary.junyi_class_id,
@@ -97,12 +98,14 @@ def import_junyi_classes(
     if teacher.junyi_identity_id is None:
         raise ValueError("Teacher is not linked to a Junyi identity")
 
+    from ..routes.classrooms.helpers import create_submissions_for_new_student, generate_join_code
+
     teacher_key = teacher_user_id_key(teacher.junyi_identity_id)
-    authoritative = bq_client.list_classes_for_teacher(teacher_key)
-    # THIS is the authz allowlist. Silently drop any requested id not in
-    # valid_ids (do not raise, do not reveal whether it belongs to someone else).
-    by_id = {c.junyi_class_id: c for c in authoritative}
-    requested = set(requested_class_ids)
+    # This call happening first is what guarantees PRD R7's 'nothing written on BQ error' -- do not move DB writes before this line.
+    rows = bq_client.list_class_and_student_rows_for_import(teacher_key)
+    by_class: dict[str, list[JunyiClassStudentImportRow]] = {}
+    for row in rows:
+        by_class.setdefault(row.junyi_class_id, []).append(row)
 
     student_role = db.query(Role).filter(Role.name == "student").first()
 
@@ -110,38 +113,45 @@ def import_junyi_classes(
     skipped_existing_students = 0
     classes_created = 0
     classes_reused = 0
+    counter = 0
 
     for class_id in requested_class_ids:
-        if class_id not in by_id:
+        if class_id not in by_class:
             continue  # fail-closed authz: not this teacher's class
-        summary = by_id[class_id]
+        rows_for_class = by_class[class_id]
+        summary = rows_for_class[0]
 
-        classroom = find_existing_imported_classroom(
-            db, teacher.id, school_id, summary.class_name
-        )
+        classroom = find_existing_imported_classroom(db, teacher.id, class_id)
         if classroom is None:
             classroom = Classroom(
                 name=summary.class_name,
                 school_id=school_id,
                 teacher_id=teacher.id,
                 join_code=generate_join_code(db),
+                junyi_class_id=class_id,
             )
             db.add(classroom)
-            db.flush()
-            db.add(
-                ClassroomTeacher(
-                    classroom_id=classroom.id,
-                    teacher_id=teacher.id,
-                    role="primary",
-                    invited_by=teacher.id,
+            try:
+                db.flush()
+            except IntegrityError:
+                db.rollback()
+                classroom = find_existing_imported_classroom(db, teacher.id, class_id)
+                classes_reused += 1
+            else:
+                db.add(
+                    ClassroomTeacher(
+                        classroom_id=classroom.id,
+                        teacher_id=teacher.id,
+                        role="primary",
+                        invited_by=teacher.id,
+                    )
                 )
-            )
-            classes_created += 1
+                classes_created += 1
         else:
             classes_reused += 1
 
-        rows = bq_client.list_students_for_class(summary.junyi_class_id, teacher_key)
-        for row in rows:
+        for row in rows_for_class:
+            counter += 1
             identity_id = student_identity_id_from_user_id_key(row.student_user_id)
             if identity_id is None:
                 # Fail-closed: unverified mapping didn't match — skip, don't crash.
@@ -152,15 +162,27 @@ def import_junyi_classes(
                 .filter(User.junyi_identity_id == identity_id)
                 .first()
             )
+            if student is None and row.student_email:
+                student = (
+                    db.query(User)
+                    .filter(
+                        func.lower(User.email) == row.student_email.lower(),
+                        User.junyi_identity_id.is_(None),
+                        User.is_active.is_(True),
+                    )
+                    .first()
+                )
+                if student is not None:
+                    student.junyi_identity_id = identity_id
             if student is None:
                 synthetic_email = (
                     f"junyi-{hashlib.sha256(identity_id.encode()).hexdigest()[:16]}"
-                    "@student.lingoleap.local"
+                    f"{SYNTHETIC_STUDENT_EMAIL_DOMAIN}"
                 )
                 student = User(
                     email=synthetic_email,
-                    password_hash=hash_password(secrets.token_hex(32)),
-                    name=row.student_nickname,
+                    password_hash=_synthetic_account_password_hash(),
+                    name=(row.display_name or "").strip() or f"均一學生 {counter}",
                     junyi_identity_id=identity_id,
                     email_verified=True,
                 )

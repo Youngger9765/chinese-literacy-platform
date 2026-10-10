@@ -106,4 +106,18 @@ Young 2026-10-11 確認架構：**老師按下匯入當下才查，只存他勾�
 3. 後端用 `lingoleap-junyi-bq` 身分執行：先測試站，正式站另議
 
 ## 7. 驗證結果
-（由實作 agent 填：每條 R 的正向／反向測試名稱、紅→綠證據、mutation 結果、codex 檢查結論、測試站實測）
+
+| 需求 | 正向測試 | 反向測試 | 紅→綠證據 | Mutation 結果 |
+|---|---|---|---|---|
+| R1 列自己的班 | `test_positive_control_own_school_succeeds`, `test_already_imported_class_flagged_in_listing` | `test_list_classes_reports_not_linked`, `test_student_role_cannot_list_or_import`, `test_unauthenticated_cannot_list_or_import` | 原先學生角色得到 200 → 加 teacher role gate 後授權測試 5 passed | 固定 `already_imported=False` → 對應測試 1 failed；還原後 1 passed |
+| R2 只能匯自己的班 | `test_positive_control_own_school_succeeds` | `test_cannot_import_another_teachers_junyi_class_idor` | 原始 client/service 介面不合導致 500 → 匯入測試通過 | 移除 fake client 的 teacher key 過濾 → 1 failed；還原後 1 passed |
+| R3 班級不重複 | `test_reimport_same_class_does_not_duplicate_classroom`, `test_two_teachers_same_junyi_class_id_get_separate_classrooms` | `test_renamed_class_reimport_does_not_duplicate`, `test_concurrent_double_import_reuses_not_duplicates` | 原始匯入測試 500 → 新增欄位、唯一索引與重查處理後 32 passed | 移除唯一限制 → race 測試 1 failed；還原後 1 passed |
+| R4 學生不重複 | `test_reimport_adds_only_new_students`, `test_preexisting_email_account_is_linked_not_duplicated` | `test_email_match_never_hijacks_an_already_linked_account` | 原始匯入測試 500 → email 連結與學生去重測試通過 | 關閉 email fallback → 1 failed；還原後 1 passed |
+| R5 學生名字 | `test_empty_nickname_falls_back_to_username` | `test_both_nickname_and_username_empty_falls_back_to_placeholder`, `test_two_nameless_students_in_same_import_get_distinct_placeholders` | 原始匯入測試 500 → 名字後備測試通過 | 固定 placeholder 編號 → 1 failed；還原後 1 passed |
+| R6 SSO 沿用帳號 | `test_first_sso_login_promotes_synthetic_email_to_real_one` | `test_promotion_skipped_if_real_email_already_taken_by_someone_else`, `test_non_synthetic_account_email_is_never_touched_by_sso_login`, `test_imported_student_cannot_password_login` | SSO synthetic email 更新加入後 3 passed | 拿掉 synthetic domain 檢查 → 1 failed；還原後 1 passed |
+| R7 查詢失敗 | `test_no_matching_bq_rows_returns_empty_not_error` | `test_list_classes_returns_503_on_bq_error`, `test_import_returns_503_and_writes_nothing_on_bq_error` | 原始 list 回 500 → BQ error 轉成 503 並驗證寫入數不變 | 將 503 改為 500 → 1 failed；還原後 1 passed |
+| R8 成本效能 | `test_import_uses_one_combined_query`, `test_real_queries_set_byte_caps_and_split_list_from_import`, `test_70_student_import_completes_quickly` | `test_real_query_billing_limit_failure_is_not_empty_result`, `test_imported_student_cannot_password_login` | 70 人匯入測試通過，兩種 BigQuery 查詢的 byte caps 與 JOIN 分工測試通過 | 移除密碼雜湊快取 → 70 人效能測試 1 failed（20.36s）；還原後 1 passed（3.92s） |
+| R9 功能開關 | `test_positive_control_own_school_succeeds` | `test_list_classes_404_when_flag_disabled`, `test_import_404_when_flag_disabled` | 開關關閉測試通過 | 跳過 flag gate → 1 failed；還原後 1 passed |
+| R10 畫面 | `JunyiClassImportSection.test.tsx` 的班級選擇、匯入統計、T+1 提示 smoke test | 同檔的 flag off 隱藏、未綁定說明、零選擇不可送出測試 | frontend smoke test only, see `JunyiClassImportSection.test.tsx`：5 passed | 前端僅 smoke test，未做 mutation |
+
+測試站實測：本次未部署，尚無測試站證據

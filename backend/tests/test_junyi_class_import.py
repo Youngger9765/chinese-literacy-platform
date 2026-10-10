@@ -9,15 +9,10 @@ Architecture under test (see issue #3380 for full rationale):
   dependency override — the autouse `_no_outbound_network` fixture in
   conftest.py would hard-fail any test that tried to reach real BigQuery, so
   this also proves the route layer never touches the network in tests.
-- ID mapping is UNVERIFIED (Junyi's BigQuery table backfills T+1 after this
-  issue was filed): teacher_user_id / student_user_id are assumed to be
-  "user_id_key_" + our User.junyi_identity_id. Because it is unverified, every
-  code path that consumes it must fail closed: a non-matching prefix is
-  skipped, never guessed at or crashed on.
-- Dedup: students by User.junyi_identity_id (already unique). Classrooms by
-  (teacher_id, school_id, name) — v1, isolated behind one function so it can
-  be swapped for a real classrooms.junyi_class_id column later without
-  touching every call site.
+- The verified ID mapping uses "user_id_key_" + User.junyi_identity_id;
+  malformed prefixes still fail closed.
+- Dedup: students by User.junyi_identity_id, then an unlinked email account;
+  classrooms by (teacher_id, junyi_class_id) with a partial unique index.
 
 Run:
     cd backend && python -m pytest tests/test_junyi_class_import.py -v
@@ -26,6 +21,7 @@ Run:
 import os
 import sys
 import uuid
+import time
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
@@ -181,7 +177,8 @@ def _make_fake_client(rows):
     return FakeJunyiBigQueryClient(rows)
 
 
-def _row(teacher_key, class_id, class_name, student_key, student_nickname, class_code="ABCDE"):
+def _row(teacher_key, class_id, class_name, student_key, student_nickname, class_code="ABCDE",
+         user_data_nickname=None, user_data_username=None, user_data_email=None):
     return {
         "teacher_user_id": teacher_key,
         "class_id": class_id,
@@ -189,6 +186,9 @@ def _row(teacher_key, class_id, class_name, student_key, student_nickname, class
         "class_code": class_code,
         "student_user_id": student_key,
         "student_nickname": student_nickname,
+        "user_data_nickname": user_data_nickname,
+        "user_data_username": user_data_username,
+        "user_data_email": user_data_email,
     }
 
 
@@ -422,7 +422,7 @@ class TestStudentDedup:
 
 
 # ===========================================================================
-# Dedup — classrooms (v1: teacher + name)
+# Dedup — classrooms
 # ===========================================================================
 
 
@@ -487,6 +487,21 @@ class TestClassroomDedup:
 
 
 class TestAuthorization:
+    def test_student_role_cannot_list_or_import(self, client):
+        user = _register_teacher(client, "student_role", _test_school_id, "student-role")
+        with TestingSessionLocal() as db:
+            db.query(UserRole).filter(UserRole.user_id == user["user_id"]).delete()
+            student_role = db.query(Role).filter(Role.name == "student").one()
+            db.add(UserRole(user_id=user["user_id"], role_id=student_role.id, scope_type="school", scope_id=str(_test_school_id)))
+            db.commit()
+        headers = auth_header(user["token"])
+        assert client.get(f"/api/classrooms/junyi-import/classes?school_id={_test_school_id}", headers=headers).status_code == 403
+        assert client.post("/api/classrooms/junyi-import/import", json={"school_id": _test_school_id, "junyi_class_ids": ["x"]}, headers=headers).status_code == 403
+
+    def test_unauthenticated_cannot_list_or_import(self, client):
+        assert client.get(f"/api/classrooms/junyi-import/classes?school_id={_test_school_id}").status_code == 401
+        assert client.post("/api/classrooms/junyi-import/import", json={"school_id": _test_school_id, "junyi_class_ids": ["x"]}).status_code == 401
+
     def test_teacher_without_school_membership_forbidden(self, client):
         """Lowest-privilege role (plain 'teacher'), but NOT a member of the
         school being queried — must be rejected, same boundary as
@@ -540,3 +555,214 @@ class TestAuthorization:
             assert db.query(Classroom).filter(Classroom.name == "受害班級").count() == 0
         finally:
             db.close()
+
+
+def _import_rows(client, teacher, rows, class_ids):
+    fake = _make_fake_client(rows)
+    dep, override = _bq_dependency_override(fake)
+    app.dependency_overrides[dep] = override
+    return client.post(
+        "/api/classrooms/junyi-import/import",
+        json={"school_id": _test_school_id, "junyi_class_ids": class_ids},
+        headers=auth_header(teacher["token"]),
+    )
+
+
+# PRD R5 -- display name fallback order
+class TestDisplayNameFallback:
+    def test_empty_nickname_falls_back_to_username(self, client):
+        teacher = _register_teacher(client, "name_user", _test_school_id, "name-user")
+        row = _row("user_id_key_name-user", "name-class", "名字班", "user_id_key_name-stu", "", user_data_username="qizhuo")
+        assert _import_rows(client, teacher, [row], ["name-class"]).status_code == 200
+        with TestingSessionLocal() as db:
+            assert db.query(User).filter(User.junyi_identity_id == "name-stu").one().name == "qizhuo"
+
+    def test_both_nickname_and_username_empty_falls_back_to_placeholder(self, client):
+        teacher = _register_teacher(client, "name_blank", _test_school_id, "name-blank")
+        row = _row("user_id_key_name-blank", "blank-class", "空名班", "user_id_key_blank-stu", "")
+        assert _import_rows(client, teacher, [row], ["blank-class"]).status_code == 200
+        with TestingSessionLocal() as db:
+            assert db.query(User).filter(User.junyi_identity_id == "blank-stu").one().name.startswith("均一學生 ")
+
+    def test_two_nameless_students_in_same_import_get_distinct_placeholders(self, client):
+        teacher = _register_teacher(client, "name_two", _test_school_id, "name-two")
+        rows = [_row("user_id_key_name-two", "two-class", "雙人班", f"user_id_key_blank-{i}", "") for i in range(2)]
+        assert _import_rows(client, teacher, rows, ["two-class"]).status_code == 200
+        with TestingSessionLocal() as db:
+            names = [db.query(User).filter(User.junyi_identity_id == f"blank-{i}").one().name for i in range(2)]
+            assert len(set(names)) == 2
+
+
+# PRD R4 -- dedup by email for pre-existing unlinked accounts
+class TestEmailLinkFallback:
+    def test_preexisting_email_account_is_linked_not_duplicated(self, client):
+        teacher = _register_teacher(client, "email_link", _test_school_id, "email-link")
+        with TestingSessionLocal() as db:
+            user = User(email="student_old@example.com", password_hash="password", name="Existing", email_verified=True)
+            db.add(user)
+            db.commit()
+            user_id = user.id
+            before = db.query(User).count()
+        row = _row("user_id_key_email-link", "email-class", "舊生班", "user_id_key_email-stu", "暱稱", user_data_email="Student_Old@example.com")
+        assert _import_rows(client, teacher, [row], ["email-class"]).status_code == 200
+        with TestingSessionLocal() as db:
+            assert db.query(User).count() == before
+            assert db.get(User, user_id).junyi_identity_id == "email-stu"
+            assert db.query(ClassroomStudent).filter(ClassroomStudent.student_id == user_id).count() == 1
+
+    def test_email_match_never_hijacks_an_already_linked_account(self, client):
+        teacher = _register_teacher(client, "email_guard", _test_school_id, "email-guard")
+        with TestingSessionLocal() as db:
+            user = User(email="linked@example.com", password_hash="password", name="Linked", junyi_identity_id="prior-id", email_verified=True)
+            db.add(user)
+            db.commit()
+            user_id = user.id
+            before = db.query(User).count()
+        row = _row("user_id_key_email-guard", "guard-class", "保護班", "user_id_key_other-id", "Other", user_data_email="linked@example.com")
+        assert _import_rows(client, teacher, [row], ["guard-class"]).status_code == 200
+        with TestingSessionLocal() as db:
+            assert db.get(User, user_id).junyi_identity_id == "prior-id"
+            assert db.query(User).count() == before + 1
+
+
+# PRD R7 -- BigQuery failure surfaces as 503, writes nothing
+class TestBigQueryErrorSurfacesAsServiceUnavailable:
+    def test_list_classes_returns_503_on_bq_error(self, client):
+        from app.services.junyi_bigquery_client import FakeJunyiBigQueryClient
+        teacher = _register_teacher(client, "bq_list", _test_school_id, "bq-list")
+        dep, override = _bq_dependency_override(FakeJunyiBigQueryClient([], raise_error=True))
+        app.dependency_overrides[dep] = override
+        response = client.get(f"/api/classrooms/junyi-import/classes?school_id={_test_school_id}", headers=auth_header(teacher["token"]))
+        assert response.status_code == 503
+        assert response.json()["detail"] == "暫時查不到均一資料，請稍後再試"
+
+    def test_import_returns_503_and_writes_nothing_on_bq_error(self, client):
+        from app.services.junyi_bigquery_client import FakeJunyiBigQueryClient
+        teacher = _register_teacher(client, "bq_import", _test_school_id, "bq-import")
+        with TestingSessionLocal() as db:
+            before = (db.query(Classroom).count(), db.query(User).count())
+        dep, override = _bq_dependency_override(FakeJunyiBigQueryClient([], raise_error=True))
+        app.dependency_overrides[dep] = override
+        response = client.post("/api/classrooms/junyi-import/import", json={"school_id": _test_school_id, "junyi_class_ids": ["bad"]}, headers=auth_header(teacher["token"]))
+        assert response.status_code == 503
+        with TestingSessionLocal() as db:
+            assert (db.query(Classroom).count(), db.query(User).count()) == before
+
+
+# PRD R3 -- stable classroom identity and concurrency
+class TestClassroomDedupByJunyiClassId:
+    def test_renamed_class_reimport_does_not_duplicate(self, client):
+        teacher = _register_teacher(client, "rename_class", _test_school_id, "rename-class")
+        row = _row("user_id_key_rename-class", "stable-id", "舊班名", "user_id_key_rename-stu", "甲")
+        assert _import_rows(client, teacher, [row], ["stable-id"]).status_code == 200
+        row["class_name"] = "新班名"
+        response = _import_rows(client, teacher, [row], ["stable-id"])
+        assert response.status_code == 200
+        assert response.json()["classes_reused"] == 1
+        with TestingSessionLocal() as db:
+            assert db.query(Classroom).filter(Classroom.teacher_id == teacher["user_id"], Classroom.junyi_class_id == "stable-id").count() == 1
+
+    def test_two_teachers_same_junyi_class_id_get_separate_classrooms(self, client):
+        a = _register_teacher(client, "teacher_a", _test_school_id, "teacher-a")
+        b = _register_teacher(client, "teacher_b", _test_school_id, "teacher-b")
+        rows = [_row(f"user_id_key_teacher-{suffix}", "shared-class", "同編號班", f"user_id_key_student-{suffix}", suffix) for suffix in ("a", "b")]
+        assert _import_rows(client, a, rows, ["shared-class"]).status_code == 200
+        assert _import_rows(client, b, rows, ["shared-class"]).status_code == 200
+        with TestingSessionLocal() as db:
+            assert db.query(Classroom).filter(Classroom.junyi_class_id == "shared-class").count() == 2
+
+    def test_concurrent_double_import_reuses_not_duplicates(self, client, monkeypatch):
+        from app.services import junyi_class_import_service as service
+        teacher = _register_teacher(client, "race_class", _test_school_id, "race-class")
+        with TestingSessionLocal() as db:
+            existing = Classroom(name="先建立", school_id=_test_school_id, teacher_id=teacher["user_id"], junyi_class_id="race-id", join_code=uuid.uuid4().hex[:8])
+            db.add(existing)
+            db.commit()
+            existing_id = existing.id
+        real_find = service.find_existing_imported_classroom
+        calls = 0
+        def race_find(db, teacher_id, class_id):
+            nonlocal calls
+            calls += 1
+            return None if calls == 1 else real_find(db, teacher_id, class_id)
+        monkeypatch.setattr(service, "find_existing_imported_classroom", race_find)
+        row = _row("user_id_key_race-class", "race-id", "競爭班", "user_id_key_race-stu", "甲")
+        response = _import_rows(client, teacher, [row], ["race-id"])
+        assert response.status_code == 200
+        assert response.json()["classes_reused"] == 1
+        assert calls >= 2
+        with TestingSessionLocal() as db:
+            assert db.query(Classroom).filter(Classroom.teacher_id == teacher["user_id"], Classroom.junyi_class_id == "race-id").count() == 1
+            assert db.get(Classroom, existing_id) is not None
+
+
+# PRD R6/R8 -- synthetic accounts reject passwords, import stays fast
+class TestSyntheticAccountsCannotPasswordLogin:
+    def test_imported_student_cannot_password_login(self, client):
+        teacher = _register_teacher(client, "no_pw", _test_school_id, "no-pw")
+        row = _row("user_id_key_no-pw", "pw-class", "密碼班", "user_id_key_no-pw-stu", "甲")
+        assert _import_rows(client, teacher, [row], ["pw-class"]).status_code == 200
+        with TestingSessionLocal() as db:
+            email = db.query(User).filter(User.junyi_identity_id == "no-pw-stu").one().email
+        for guess in ("", "password", "123456", email):
+            assert client.post("/api/auth/login", json={"email": email, "password": guess}).status_code == 401
+
+
+class TestImportPerformance:
+    def test_real_queries_set_byte_caps_and_split_list_from_import(self, monkeypatch):
+        from app.services.junyi_bigquery_client import RealJunyiBigQueryClient
+        calls = []
+        class Job:
+            def result(self):
+                return []
+        class QueryClient:
+            def query(self, sql, job_config):
+                calls.append((sql, job_config.maximum_bytes_billed))
+                return Job()
+        bq = RealJunyiBigQueryClient()
+        monkeypatch.setattr(bq, "_build_client", lambda: QueryClient())
+        assert bq.list_class_summaries_for_teacher("user_id_key_test") == []
+        assert bq.list_class_and_student_rows_for_import("user_id_key_test") == []
+        assert len(calls) == 2
+        assert "UserData" not in calls[0][0]
+        assert "LEFT JOIN" in calls[1][0]
+        assert calls[0][1] == 2 * 1024 * 1024 * 1024
+        assert calls[1][1] == 4 * 1024 * 1024 * 1024
+
+    def test_real_query_billing_limit_failure_is_not_empty_result(self, monkeypatch):
+        from app.services.junyi_bigquery_client import JunyiBigQueryError, RealJunyiBigQueryClient
+        class QueryClient:
+            def query(self, sql, job_config):
+                raise RuntimeError("maximum bytes billed exceeded")
+        bq = RealJunyiBigQueryClient()
+        monkeypatch.setattr(bq, "_build_client", lambda: QueryClient())
+        with pytest.raises(JunyiBigQueryError):
+            bq.list_class_summaries_for_teacher("user_id_key_test")
+        with pytest.raises(JunyiBigQueryError):
+            bq.list_class_and_student_rows_for_import("user_id_key_test")
+
+    def test_import_uses_one_combined_query(self, client):
+        teacher = _register_teacher(client, "single_query", _test_school_id, "single-query")
+        rows = [_row("user_id_key_single-query", f"one-query-{i}", f"班{i}", f"user_id_key_query-stu-{i}", f"學生{i}") for i in range(3)]
+        fake = _make_fake_client(rows)
+        calls = []
+        original = fake.list_class_and_student_rows_for_import
+        def counted(key):
+            calls.append(key)
+            return original(key)
+        fake.list_class_and_student_rows_for_import = counted
+        dep, override = _bq_dependency_override(fake)
+        app.dependency_overrides[dep] = override
+        response = client.post("/api/classrooms/junyi-import/import", json={"school_id": _test_school_id, "junyi_class_ids": [f"one-query-{i}" for i in range(3)]}, headers=auth_header(teacher["token"]))
+        assert response.status_code == 200
+        assert calls == ["user_id_key_single-query"]
+
+    def test_70_student_import_completes_quickly(self, client):
+        teacher = _register_teacher(client, "perf", _test_school_id, "perf-teacher")
+        rows = [_row("user_id_key_perf-teacher", f"perf-class-{i % 3}", f"效能班{i % 3}", f"user_id_key_perf-stu-{i}", f"學生{i}") for i in range(70)]
+        started = time.monotonic()
+        response = _import_rows(client, teacher, rows, [f"perf-class-{i}" for i in range(3)])
+        elapsed = time.monotonic() - started
+        assert response.status_code == 200
+        assert response.json()["added_students"] == 70
+        assert elapsed < 5

@@ -9,6 +9,8 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     UniqueConstraint,
+    Index,
+    text,
     func,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -57,10 +59,20 @@ class School(Base):
 
 class Classroom(Base):
     __tablename__ = "classrooms"
+    __table_args__ = (
+        Index(
+            "uq_classrooms_teacher_junyi_class",
+            "teacher_id",
+            "junyi_class_id",
+            unique=True,
+            postgresql_where=text("junyi_class_id IS NOT NULL"),
+        ),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     school_id: Mapped[int] = mapped_column(ForeignKey("schools.id"), nullable=False, index=True)
     teacher_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
+    junyi_class_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     grade: Mapped[int | None] = mapped_column(Integer, nullable=True)
     join_code: Mapped[str | None] = mapped_column(String(8), unique=True, nullable=True)
