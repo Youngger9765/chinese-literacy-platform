@@ -153,7 +153,7 @@ const AssignmentsPanel: React.FC<AssignmentsPanelProps> = ({ classroomId, select
           <div className="border-t border-gray-100 p-4 space-y-6">
             <section aria-label="正式作業">
               <h3 className="font-semibold text-gray-800 mb-2">正式作業（會進上面的總表）</h3>
-              <AssignmentTab classroomId={classroomId} />
+              <AssignmentTab classroomId={classroomId} onChanged={load} />
             </section>
             <section aria-label="自學課文庫">
               <h3 className="font-semibold text-gray-800">自學課文庫</h3>
