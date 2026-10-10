@@ -103,6 +103,12 @@ class BatchStudentCreateResponse(BaseModel):
     warnings: list[str] = []
 
 
+class ResetPasswordResponse(BaseModel):
+    username: str
+    email: str
+    password: str
+
+
 # ── Student Search ──────────────────────────────────────────────────────────
 
 
