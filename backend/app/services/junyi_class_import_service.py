@@ -131,11 +131,11 @@ def import_junyi_classes(
                 join_code=generate_join_code(db),
                 junyi_class_id=class_id,
             )
-            db.add(classroom)
             try:
-                db.flush()
+                with db.begin_nested():
+                    db.add(classroom)
+                    db.flush()
             except IntegrityError:
-                db.rollback()
                 classroom = find_existing_imported_classroom(db, teacher.id, class_id)
                 classes_reused += 1
             else:

@@ -717,6 +717,57 @@ class TestClassroomDedupByJunyiClassId:
             assert db.query(Classroom).filter(Classroom.teacher_id == teacher["user_id"], Classroom.junyi_class_id == "race-id").count() == 1
             assert db.get(Classroom, existing_id) is not None
 
+    def test_conflict_on_one_classroom_does_not_discard_earlier_classrooms_in_same_request(self, client, monkeypatch):
+        from app.services import junyi_class_import_service as service
+
+        teacher = _register_teacher(client, "batch_race", _test_school_id, "batch-race")
+        with TestingSessionLocal() as db:
+            existing = Classroom(
+                name="既有班", school_id=_test_school_id, teacher_id=teacher["user_id"],
+                junyi_class_id="batch-b", join_code=uuid.uuid4().hex[:8],
+            )
+            db.add(existing)
+            db.commit()
+            existing_id = existing.id
+
+        real_find = service.find_existing_imported_classroom
+        missed_b = False
+
+        def race_find(db, teacher_id, class_id):
+            nonlocal missed_b
+            if class_id == "batch-b" and not missed_b:
+                missed_b = True
+                return None
+            return real_find(db, teacher_id, class_id)
+
+        monkeypatch.setattr(service, "find_existing_imported_classroom", race_find)
+        rows = [
+            _row("user_id_key_batch-race", "batch-a", "甲班", "user_id_key_batch-a1", "甲一"),
+            _row("user_id_key_batch-race", "batch-a", "甲班", "user_id_key_batch-a2", "甲二"),
+            _row("user_id_key_batch-race", "batch-b", "乙班", "user_id_key_batch-b1", "乙一"),
+        ]
+        response = _import_rows(client, teacher, rows, ["batch-a", "batch-b"])
+        assert response.status_code == 200
+        assert missed_b
+        assert response.json()["classes_created"] == 1
+        assert response.json()["classes_reused"] == 1
+        assert response.json()["added_students"] == 3
+
+        with TestingSessionLocal() as db:
+            classrooms = db.query(Classroom).filter(
+                Classroom.teacher_id == teacher["user_id"],
+                Classroom.junyi_class_id.in_(["batch-a", "batch-b"]),
+            ).all()
+            assert len(classrooms) == 2
+            by_id = {classroom.junyi_class_id: classroom for classroom in classrooms}
+            assert by_id["batch-b"].id == existing_id
+            assert db.query(ClassroomStudent).filter(
+                ClassroomStudent.classroom_id == by_id["batch-a"].id,
+            ).count() == 2
+            assert db.query(ClassroomStudent).filter(
+                ClassroomStudent.classroom_id == existing_id,
+            ).count() == 1
+
 
 # PRD R6/R8 -- synthetic accounts reject passwords, import stays fast
 class TestSyntheticAccountsCannotPasswordLogin:
