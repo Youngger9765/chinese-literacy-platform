@@ -28,6 +28,7 @@ from app.models import Base
 from app.models.organization import Organization
 from app.models.school import ClassroomStudent, ClassroomTeacher, School
 from app.models.user import Role, StudentProfile, User, UserRole
+from app.services.password_reset_service import generate_password_reset_token
 
 
 engine = create_engine(
@@ -303,6 +304,36 @@ def test_student_cannot_reset_own_password_via_teacher_endpoint_403(client):
     assert resp.status_code == 403
 
 
+def test_student_only_owner_cannot_reset_enrolled_victims_password_403(client):
+    caller = _register_user(client, "resetpw_student_only_owner")
+    victim = _register_user(client, "resetpw_cross_school_victim")
+    caller_school_id = _create_org_and_school(f"org-{uuid.uuid4().hex[:8]}")
+    victim_school_id = _create_school_for_teacher(victim["user_id"])
+    _assign_role(caller["user_id"], "student", scope_type="school", scope_id=str(caller_school_id))
+    _assign_role(victim["user_id"], "student", scope_type="school", scope_id=str(victim_school_id))
+    classroom_id = _create_classroom(client, caller, caller_school_id)
+    _enroll_student(client, caller, classroom_id, victim["user_id"])
+
+    db = TestingSessionLocal()
+    try:
+        victim_before = db.query(User).filter(User.id == victim["user_id"]).first()
+        assert victim_before is not None
+        password_hash_before = victim_before.password_hash
+    finally:
+        db.close()
+
+    resp = _reset_password(client, caller, classroom_id, victim["user_id"])
+    assert resp.status_code == 403, resp.text
+
+    db = TestingSessionLocal()
+    try:
+        victim_after = db.query(User).filter(User.id == victim["user_id"]).first()
+        assert victim_after is not None
+        assert victim_after.password_hash == password_hash_before
+    finally:
+        db.close()
+
+
 def test_non_enrolled_student_404_or_403(client):
     teacher = _register_user(client, "resetpw_owner4")
     not_enrolled = _register_user(client, "resetpw_not_enrolled")
@@ -378,6 +409,66 @@ def test_side_effects_verified_by_direct_db_reread(client):
         assert after.student_profile.password_changed is False, (
             "password_changed must be reset to False to force a change on next login"
         )
+    finally:
+        db.close()
+
+
+def test_profileless_student_gets_password_changed_enforced(client):
+    teacher = _register_user(client, "resetpw_profileless_owner")
+    student = _register_user(client, "resetpw_profileless_student")
+    school_id = _create_school_for_teacher(teacher["user_id"])
+    _assign_role(student["user_id"], "student", scope_type="school", scope_id=str(school_id))
+    classroom_id = _create_classroom(client, teacher, school_id)
+    _enroll_student(client, teacher, classroom_id, student["user_id"])
+
+    db = TestingSessionLocal()
+    try:
+        before = db.query(User).filter(User.id == student["user_id"]).first()
+        assert before is not None
+        assert before.student_profile is None
+    finally:
+        db.close()
+
+    resp = _reset_password(client, teacher, classroom_id, student["user_id"])
+    assert resp.status_code == 200, resp.text
+
+    db = TestingSessionLocal()
+    try:
+        after = db.query(User).filter(User.id == student["user_id"]).first()
+        assert after is not None
+        assert after.student_profile is not None
+        assert after.student_profile.password_changed is False
+    finally:
+        db.close()
+
+
+def test_teacher_reset_invalidates_outstanding_recovery_token(client):
+    teacher = _register_user(client, "resetpw_recovery_owner")
+    student = _register_user(client, "resetpw_recovery_student")
+    school_id = _create_school_for_teacher(teacher["user_id"])
+    _assign_role(student["user_id"], "student", scope_type="school", scope_id=str(school_id))
+    classroom_id = _create_classroom(client, teacher, school_id)
+    _enroll_student(client, teacher, classroom_id, student["user_id"])
+
+    db = TestingSessionLocal()
+    try:
+        user = db.query(User).filter(User.id == student["user_id"]).first()
+        assert user is not None
+        generate_password_reset_token(db, user)
+        assert user.password_reset_token is not None
+        assert user.password_reset_expires is not None
+    finally:
+        db.close()
+
+    resp = _reset_password(client, teacher, classroom_id, student["user_id"])
+    assert resp.status_code == 200, resp.text
+
+    db = TestingSessionLocal()
+    try:
+        after = db.query(User).filter(User.id == student["user_id"]).first()
+        assert after is not None
+        assert after.password_reset_token is None
+        assert after.password_reset_expires is None
     finally:
         db.close()
 
