@@ -263,9 +263,10 @@ def _compute_risk_level(
     # Confidence grows with session count (more data = more reliable)
     data_confidence = min(session_count / 5.0, 1.0)  # saturates at 5 sessions
 
-    if factor_count == 0 and not any(
-        s.accuracy is not None or s.started_at is not None for s in sessions
-    ):
+    # No accuracy anywhere means we never measured how they read — that is
+    # "not enough data", not "low risk" (#3376 audit: a started-but-unscored
+    # student was filed as low and hidden).
+    if factor_count == 0 and not any(s.accuracy is not None for s in sessions):
         return "insufficient_data", 0.0
 
     if factor_count == 0:

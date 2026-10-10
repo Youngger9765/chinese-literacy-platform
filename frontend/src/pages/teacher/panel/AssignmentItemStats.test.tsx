@@ -11,7 +11,7 @@ const items = [
 
 describe('AssignmentItemStats (#3367)', () => {
   it('lists every part with completion, correct and error rate, weakest marked', () => {
-    render(<AssignmentItemStats data={{ assignment_id: 1, submitted_count: 19, items }} />);
+    render(<AssignmentItemStats data={{ assignment_id: 1, submitted_count: 19, assigned_count: 19, items }} />);
     const rows = screen.getAllByRole('listitem');
     expect(rows.map((r) => r.textContent?.match(/^⚠? ?(\S+?)\d/)?.[1] ?? '')).toBeTruthy();
     expect(rows[0]).toHaveAttribute('data-weakest', 'true');
@@ -23,14 +23,14 @@ describe('AssignmentItemStats (#3367)', () => {
   });
 
   it('explains the empty state instead of showing zeros', () => {
-    render(<AssignmentItemStats data={{ assignment_id: 1, submitted_count: 0, items }} />);
+    render(<AssignmentItemStats data={{ assignment_id: 1, submitted_count: 0, assigned_count: 10, items }} />);
     expect(screen.getByText(/還沒有學生交這份作業/)).toBeInTheDocument();
     expect(screen.queryByText('0%')).not.toBeInTheDocument();
   });
 
   it('says parts were not recorded instead of showing 0% completion', () => {
     const blank = items.map((i) => ({ ...i, completed: 0, total: 1, completion_rate: 0, correct_rate: null, error_rate: null }));
-    render(<AssignmentItemStats data={{ assignment_id: 1, submitted_count: 1, items: blank }} />);
+    render(<AssignmentItemStats data={{ assignment_id: 1, submitted_count: 1, assigned_count: 10, items: blank }} />);
     expect(screen.getByText(/沒有記錄到分項成績/)).toBeInTheDocument();
     expect(screen.queryByText(/完成率 0%/)).not.toBeInTheDocument();
   });

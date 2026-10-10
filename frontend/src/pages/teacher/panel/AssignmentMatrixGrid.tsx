@@ -13,6 +13,7 @@ type Cell = AssignmentMatrixResponse['cells'][number];
 interface AssignmentMatrixGridProps {
   data: AssignmentMatrixResponse;
   onOpenAssignment: (assignmentId: number) => void;
+  onOpenStudent?: (studentId: number) => void;
 }
 
 function stepLabel(step: string | null): string | null {
@@ -61,7 +62,7 @@ function formatDue(due: string | null): string {
   return new Date(due).toLocaleDateString('zh-TW', { month: 'numeric', day: 'numeric' });
 }
 
-const AssignmentMatrixGrid: React.FC<AssignmentMatrixGridProps> = ({ data, onOpenAssignment }) => {
+const AssignmentMatrixGrid: React.FC<AssignmentMatrixGridProps> = ({ data, onOpenAssignment, onOpenStudent }) => {
   const { students, assignments, cells } = data;
 
   if (assignments.length === 0) {
@@ -101,7 +102,13 @@ const AssignmentMatrixGrid: React.FC<AssignmentMatrixGridProps> = ({ data, onOpe
             {students.map((s) => (
               <tr key={s.id}>
                 <th scope="row" className="sticky left-0 z-10 bg-white px-4 py-2.5 text-left font-medium text-gray-900 border-b border-r border-gray-100 whitespace-nowrap">
-                  {s.name}
+                  {onOpenStudent ? (
+                    <button type="button" onClick={() => onOpenStudent(s.id)} className="text-gray-900 hover:text-accent hover:underline cursor-pointer">
+                      {s.name}
+                    </button>
+                  ) : (
+                    s.name
+                  )}
                 </th>
                 {assignments.map((a) => (
                   <td key={a.id} className="px-3 py-2.5 text-center border-b border-gray-100">

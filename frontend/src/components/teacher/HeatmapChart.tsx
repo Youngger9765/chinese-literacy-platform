@@ -23,6 +23,8 @@ function getScoreColor(score: number | null, status: string): string {
 
 function getScoreLabel(score: number | null, status: string): string {
   if (status === 'in_progress') return '進行中';
+  // Same word as the class assignment matrix: done, just no score recorded (#3376 audit).
+  if (status === 'completed' && score === null) return '已交';
   if (status !== 'completed' || score === null) return '未完成';
   return String(Math.round(score));
 }
