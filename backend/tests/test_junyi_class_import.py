@@ -11,7 +11,7 @@ Architecture under test (see issue #3380 for full rationale):
   this also proves the route layer never touches the network in tests.
 - The verified ID mapping uses "user_id_key_" + User.junyi_identity_id;
   malformed prefixes still fail closed.
-- Dedup: students by User.junyi_identity_id, then an unlinked email account;
+- Dedup: students by User.junyi_identity_id only;
   classrooms by (teacher_id, junyi_class_id) with a partial unique index.
 
 Run:
@@ -593,9 +593,9 @@ class TestDisplayNameFallback:
             assert len(set(names)) == 2
 
 
-# PRD R4 -- dedup by email for pre-existing unlinked accounts
-class TestEmailLinkFallback:
-    def test_preexisting_email_account_is_linked_not_duplicated(self, client):
+# Unverified email addresses must never link a Junyi identity to an account.
+class TestEmailLinkSafety:
+    def test_preexisting_email_account_is_not_auto_linked_a_new_synthetic_account_is_created(self, client):
         teacher = _register_teacher(client, "email_link", _test_school_id, "email-link")
         with TestingSessionLocal() as db:
             user = User(email="student_old@example.com", password_hash="password", name="Existing", email_verified=True)
@@ -606,9 +606,31 @@ class TestEmailLinkFallback:
         row = _row("user_id_key_email-link", "email-class", "舊生班", "user_id_key_email-stu", "暱稱", user_data_email="Student_Old@example.com")
         assert _import_rows(client, teacher, [row], ["email-class"]).status_code == 200
         with TestingSessionLocal() as db:
-            assert db.query(User).count() == before
-            assert db.get(User, user_id).junyi_identity_id == "email-stu"
-            assert db.query(ClassroomStudent).filter(ClassroomStudent.student_id == user_id).count() == 1
+            assert db.query(User).count() == before + 1
+            assert db.get(User, user_id).junyi_identity_id is None
+            imported = db.query(User).filter(User.junyi_identity_id == "email-stu").one()
+            assert imported.id != user_id
+            assert imported.email.endswith("@student.lingoleap.local")
+            assert db.query(ClassroomStudent).filter(ClassroomStudent.student_id == imported.id).count() == 1
+
+    def test_import_never_links_to_an_unrelated_active_account_by_email(self, client):
+        teacher = _register_teacher(client, "email_attacker", _test_school_id, "email-attacker")
+        unrelated = _register_teacher(client, "email_victim", _test_school_id)
+        with TestingSessionLocal() as db:
+            victim = db.get(User, unrelated["user_id"])
+            before = (victim.email, victim.name, victim.password_hash, victim.email_verified, victim.is_active)
+        row = _row(
+            "user_id_key_email-attacker", "victim-class", "保護班",
+            "user_id_key_victim-student", "學生", user_data_email=unrelated["email"],
+        )
+        assert _import_rows(client, teacher, [row], ["victim-class"]).status_code == 200
+        with TestingSessionLocal() as db:
+            victim = db.get(User, unrelated["user_id"])
+            assert victim.junyi_identity_id is None
+            assert (victim.email, victim.name, victim.password_hash, victim.email_verified, victim.is_active) == before
+            imported = db.query(User).filter(User.junyi_identity_id == "victim-student").one()
+            assert imported.id != victim.id
+            assert imported.email.endswith("@student.lingoleap.local")
 
     def test_email_match_never_hijacks_an_already_linked_account(self, client):
         teacher = _register_teacher(client, "email_guard", _test_school_id, "email-guard")
@@ -694,6 +716,57 @@ class TestClassroomDedupByJunyiClassId:
         with TestingSessionLocal() as db:
             assert db.query(Classroom).filter(Classroom.teacher_id == teacher["user_id"], Classroom.junyi_class_id == "race-id").count() == 1
             assert db.get(Classroom, existing_id) is not None
+
+    def test_conflict_on_one_classroom_does_not_discard_earlier_classrooms_in_same_request(self, client, monkeypatch):
+        from app.services import junyi_class_import_service as service
+
+        teacher = _register_teacher(client, "batch_race", _test_school_id, "batch-race")
+        with TestingSessionLocal() as db:
+            existing = Classroom(
+                name="既有班", school_id=_test_school_id, teacher_id=teacher["user_id"],
+                junyi_class_id="batch-b", join_code=uuid.uuid4().hex[:8],
+            )
+            db.add(existing)
+            db.commit()
+            existing_id = existing.id
+
+        real_find = service.find_existing_imported_classroom
+        missed_b = False
+
+        def race_find(db, teacher_id, class_id):
+            nonlocal missed_b
+            if class_id == "batch-b" and not missed_b:
+                missed_b = True
+                return None
+            return real_find(db, teacher_id, class_id)
+
+        monkeypatch.setattr(service, "find_existing_imported_classroom", race_find)
+        rows = [
+            _row("user_id_key_batch-race", "batch-a", "甲班", "user_id_key_batch-a1", "甲一"),
+            _row("user_id_key_batch-race", "batch-a", "甲班", "user_id_key_batch-a2", "甲二"),
+            _row("user_id_key_batch-race", "batch-b", "乙班", "user_id_key_batch-b1", "乙一"),
+        ]
+        response = _import_rows(client, teacher, rows, ["batch-a", "batch-b"])
+        assert response.status_code == 200
+        assert missed_b
+        assert response.json()["classes_created"] == 1
+        assert response.json()["classes_reused"] == 1
+        assert response.json()["added_students"] == 3
+
+        with TestingSessionLocal() as db:
+            classrooms = db.query(Classroom).filter(
+                Classroom.teacher_id == teacher["user_id"],
+                Classroom.junyi_class_id.in_(["batch-a", "batch-b"]),
+            ).all()
+            assert len(classrooms) == 2
+            by_id = {classroom.junyi_class_id: classroom for classroom in classrooms}
+            assert by_id["batch-b"].id == existing_id
+            assert db.query(ClassroomStudent).filter(
+                ClassroomStudent.classroom_id == by_id["batch-a"].id,
+            ).count() == 2
+            assert db.query(ClassroomStudent).filter(
+                ClassroomStudent.classroom_id == existing_id,
+            ).count() == 1
 
 
 # PRD R6/R8 -- synthetic accounts reject passwords, import stays fast

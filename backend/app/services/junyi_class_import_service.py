@@ -1,8 +1,10 @@
 """On-demand Junyi import with one combined student query (issue #3380).
 
 Classrooms are keyed by teacher and Junyi class ID. Students are resolved by
-Junyi ID, then by an unlinked account's email, then created with a synthetic
-email and a shared unusable password hash. Names come from the BigQuery
+Junyi ID, then created with a synthetic email and a shared unusable password
+hash. A pre-existing email account may remain separate until a verified
+account-linking method exists; this deliberate limitation is tracked in the
+follow-up issue to #3380. Names come from the BigQuery
 nickname/username chain, then a numbered placeholder. The list endpoint uses
 the cheaper class-summary query.
 """
@@ -12,7 +14,6 @@ import logging
 import secrets
 from functools import lru_cache
 
-from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -130,11 +131,11 @@ def import_junyi_classes(
                 join_code=generate_join_code(db),
                 junyi_class_id=class_id,
             )
-            db.add(classroom)
             try:
-                db.flush()
+                with db.begin_nested():
+                    db.add(classroom)
+                    db.flush()
             except IntegrityError:
-                db.rollback()
                 classroom = find_existing_imported_classroom(db, teacher.id, class_id)
                 classes_reused += 1
             else:
@@ -162,18 +163,6 @@ def import_junyi_classes(
                 .filter(User.junyi_identity_id == identity_id)
                 .first()
             )
-            if student is None and row.student_email:
-                student = (
-                    db.query(User)
-                    .filter(
-                        func.lower(User.email) == row.student_email.lower(),
-                        User.junyi_identity_id.is_(None),
-                        User.is_active.is_(True),
-                    )
-                    .first()
-                )
-                if student is not None:
-                    student.junyi_identity_id = identity_id
             if student is None:
                 synthetic_email = (
                     f"junyi-{hashlib.sha256(identity_id.encode()).hexdigest()[:16]}"
