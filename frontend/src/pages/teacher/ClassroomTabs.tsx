@@ -7,7 +7,7 @@
 import React from 'react';
 import CoTeachingTab from './CoTeachingTab';
 import AssignmentsPanel from './panel/AssignmentsPanel';
-import ClassDataTab from './panel/ClassDataTab';
+import ClassDataTab, { type DataView as ClassDataView } from './panel/ClassDataTab';
 
 type TabKey = 'settings' | 'assignments' | 'data';
 
@@ -34,6 +34,22 @@ export const LEGACY_TAB_KEYS: Record<string, TabKey> = {
   'cross-text': 'data',
 };
 
+export const LEGACY_VIEW_HINTS: Record<string, ClassDataView> = {
+  overview: 'today',
+  students: 'students',
+  'at-risk': 'at-risk',
+  'error-heatmap': 'error-heatmap',
+  analytics: 'analytics',
+  learning: 'learning',
+  progress: 'learning',
+  live: 'today',
+  'cross-text': 'analytics',
+};
+
+export function resolveInitialView(raw: string | null | undefined): ClassDataView | null {
+  return raw ? LEGACY_VIEW_HINTS[raw] ?? null : null;
+}
+
 export function resolveTabKey(raw: string | null | undefined): TabKey {
   if (!raw) return 'settings';
   if (ALL_KEYS.has(raw)) return raw as TabKey;
@@ -49,6 +65,8 @@ interface ClassroomTabsProps {
   onSelectAssignment: (id: number | null) => void;
   selectedStudentId: number | null;
   onSelectStudent: (id: number | null) => void;
+  initialView?: string | null;
+  onViewChange?: (view: string) => void;
   settingsContent: React.ReactNode;
 }
 
@@ -89,6 +107,8 @@ const ClassroomTabs: React.FC<ClassroomTabsProps> = ({
   onSelectAssignment,
   selectedStudentId,
   onSelectStudent,
+  initialView,
+  onViewChange,
   settingsContent,
 }) => (
   <div className="bg-white rounded-2xl shadow-card">
@@ -130,6 +150,8 @@ const ClassroomTabs: React.FC<ClassroomTabsProps> = ({
         selectedStudentId={selectedStudentId}
         onSelectStudent={onSelectStudent}
         onSelectAssignment={onSelectAssignment}
+        initialView={initialView ?? undefined}
+        onViewChange={onViewChange}
       />
     )}
   </div>

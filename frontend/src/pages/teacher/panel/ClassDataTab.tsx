@@ -14,6 +14,8 @@ interface ClassDataTabProps {
   selectedStudentId: number | null;
   onSelectStudent: (id: number | null) => void;
   onSelectAssignment: (id: number | null) => void;
+  initialView?: string;
+  onViewChange?: (view: string) => void;
 }
 
 const DATA_VIEWS: { key: DataView; label: string }[] = [
@@ -30,12 +32,21 @@ const ClassDataTab: React.FC<ClassDataTabProps> = ({
   selectedStudentId,
   onSelectStudent,
   onSelectAssignment,
+  initialView,
+  onViewChange,
 }) => {
-  const [view, setView] = useState<DataView>('today');
+  const [view, setView] = useState<DataView>((initialView as DataView | undefined) ?? 'today');
+  const changeView = (nextView: DataView) => {
+    setView(nextView);
+    onViewChange?.(nextView);
+  };
 
   useEffect(() => {
-    if (selectedStudentId !== null) setView('students');
-  }, [selectedStudentId]);
+    if (selectedStudentId !== null && view !== 'students') {
+      setView('students');
+      onViewChange?.('students');
+    }
+  }, [selectedStudentId, view, onViewChange]);
 
   const renderContent = () => {
     switch (view) {
@@ -44,7 +55,7 @@ const ClassDataTab: React.FC<ClassDataTabProps> = ({
           <TodayOverviewTab
             classroomId={classroomId}
             onOpenAssignment={onSelectAssignment}
-            onOpenAtRisk={() => setView('at-risk')}
+            onOpenAtRisk={() => changeView('at-risk')}
           />
         );
       case 'students':
@@ -82,7 +93,7 @@ const ClassDataTab: React.FC<ClassDataTabProps> = ({
             key={item.key}
             type="button"
             aria-current={view === item.key ? 'page' : undefined}
-            onClick={() => setView(item.key)}
+            onClick={() => changeView(item.key)}
             className={`shrink-0 rounded-lg px-3 py-2 text-left text-sm transition-colors cursor-pointer ${
               view === item.key ? 'bg-accent-bg text-accent font-medium' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
             }`}

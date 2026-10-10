@@ -26,7 +26,7 @@ import {
   ClassroomApiError,
 } from '../../services/classroomApi';
 import ClassroomHeaderCard from './ClassroomHeaderCard';
-import ClassroomTabs, { TabKey, resolveTabKey } from './ClassroomTabs';
+import ClassroomTabs, { TabKey, resolveInitialView, resolveTabKey } from './ClassroomTabs';
 import StudentListTab from './StudentListTab';
 import ClassSwitcher from './panel/ClassSwitcher';
 
@@ -49,6 +49,10 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
   const [isRosterOpen, setIsRosterOpen] = useState(false);
   const studentParam = searchParams.get('student');
   const selectedStudentId = studentParam ? Number(studentParam) || null : null;
+  const rawTab = searchParams.get('tab');
+  const viewParam = searchParams.get('view');
+  const validViews = new Set(['today', 'students', 'at-risk', 'error-heatmap', 'analytics', 'learning']);
+  const initialView = (viewParam && validViews.has(viewParam) ? viewParam : null) ?? resolveInitialView(rawTab);
 
   const updateParams = (patch: Record<string, string | null>) => {
     const next = new URLSearchParams(searchParams);
@@ -63,11 +67,13 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
       tab,
       assignment: tab === 'assignments' ? searchParams.get('assignment') : null,
       student: tab === 'data' ? searchParams.get('student') : null,
+      view: tab === 'data' ? searchParams.get('view') : null,
     });
   const setSelectedStudent = (id: number | null) =>
     updateParams({ tab: 'data', assignment: null, student: id === null ? null : String(id) });
   const setSelectedAssignment = (id: number | null) =>
-    updateParams({ tab: 'assignments', assignment: id === null ? null : String(id) });
+    updateParams({ tab: 'assignments', assignment: id === null ? null : String(id), view: null });
+  const setSelectedView = (view: string) => updateParams({ tab: 'data', view });
   const switchClassroom = (id: number) => navigate(`/teacher/classroom/${id}?tab=${activeTab}`);
 
   // Edit state
@@ -432,6 +438,8 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
           onSelectAssignment={setSelectedAssignment}
           selectedStudentId={selectedStudentId}
           onSelectStudent={setSelectedStudent}
+          initialView={initialView}
+          onViewChange={setSelectedView}
           settingsContent={settingsContent}
         />
       </div>
