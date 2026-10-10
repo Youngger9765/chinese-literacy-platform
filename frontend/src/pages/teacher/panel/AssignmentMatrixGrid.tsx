@@ -28,7 +28,12 @@ function scoreClass(score: number | null): string {
   return 'bg-red-100 text-red-700';
 }
 
-export function CellBadge({ cell }: { cell: Cell | undefined }) {
+/** Past the due date and still not handed in (均一's red: 已截止未完成). */
+export function isOverdue(dueDate: string | null, now: Date = new Date()): boolean {
+  return dueDate !== null && new Date(dueDate) < now;
+}
+
+export function CellBadge({ cell, overdue = false }: { cell: Cell | undefined; overdue?: boolean }) {
   if (!cell || cell.state === 'not_assigned') {
     return (
       <span
@@ -43,6 +48,13 @@ export function CellBadge({ cell }: { cell: Cell | undefined }) {
     return (
       <span className={`inline-block min-w-10 px-2 py-0.5 rounded text-sm font-semibold ${scoreClass(cell.score)}`}>
         {cell.score !== null ? Math.round(cell.score) : '已交'}
+      </span>
+    );
+  }
+  if (overdue && (cell.state === 'in_progress' || cell.state === 'not_started')) {
+    return (
+      <span className="inline-block px-2 py-0.5 rounded text-xs font-semibold bg-red-100 text-red-700">
+        逾期未交{cell.state === 'in_progress' ? '・做到一半' : ''}
       </span>
     );
   }
@@ -112,7 +124,7 @@ const AssignmentMatrixGrid: React.FC<AssignmentMatrixGridProps> = ({ data, onOpe
                 </th>
                 {assignments.map((a) => (
                   <td key={a.id} className="px-3 py-2.5 text-center border-b border-gray-100">
-                    <CellBadge cell={cellMap.get(`${s.id}:${a.id}`)} />
+                    <CellBadge cell={cellMap.get(`${s.id}:${a.id}`)} overdue={isOverdue(a.due_date)} />
                   </td>
                 ))}
               </tr>
@@ -124,6 +136,7 @@ const AssignmentMatrixGrid: React.FC<AssignmentMatrixGridProps> = ({ data, onOpe
         <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded bg-green-100 text-green-800 font-semibold">88</span>已完成（依分數上色）</span>
         <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded border border-dashed border-amber-400 text-amber-700 text-xs">進行中</span>做到哪一步</span>
         <span className="flex items-center gap-1.5"><span className="text-gray-400">未開始</span>派了還沒動</span>
+        <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded bg-red-100 text-red-700 text-xs font-semibold">逾期未交</span>過了期限還沒交</span>
         <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded text-xs text-gray-400 bg-gray-100">未指派</span>派作業時還不在班上</span>
       </div>
     </div>

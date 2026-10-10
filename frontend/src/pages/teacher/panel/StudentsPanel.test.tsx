@@ -47,7 +47,8 @@ describe('學生分頁 (#3376)', () => {
 
   it('one student shows the characters they misread and dashes for missing parts', async () => {
     render(<StudentsPanel classroomId={9} selectedStudentId={1} onSelectStudent={vi.fn()} />);
-    expect(await screen.findByText('喝采')).toBeInTheDocument();
+    // shown in the phone cards and the desktop table (CSS picks one)
+    expect((await screen.findAllByText('喝采')).length).toBeGreaterThan(0);
     const row = screen.getByRole('row', { name: /甲/ });
     expect(row).toHaveTextContent('96');
     expect(row).toHaveTextContent('—');

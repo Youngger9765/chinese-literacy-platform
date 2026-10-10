@@ -12,7 +12,7 @@ const data: AssignmentMatrixResponse = {
     { id: 3, name: '陳柏宇' },
     { id: 4, name: '邱柏丞' },
   ],
-  assignments: [{ id: 10, title: '贏得喝采的輸家', due_date: '2026-09-28T00:00:00Z' }],
+  assignments: [{ id: 10, title: '贏得喝采的輸家', due_date: '2999-09-28T00:00:00Z' }],
   cells: [
     { student_id: 1, assignment_id: 10, state: 'completed', score: 88, current_step: null },
     { student_id: 2, assignment_id: 10, state: 'in_progress', score: null, current_step: 'comprehension' },
@@ -51,5 +51,21 @@ describe('AssignmentMatrixGrid (#3367)', () => {
   it('says so when the class has no assignments', () => {
     render(<AssignmentMatrixGrid data={{ ...data, assignments: [], cells: [] }} onOpenAssignment={vi.fn()} />);
     expect(screen.getByText('這個班級還沒有指派作業')).toBeInTheDocument();
+  });
+
+  it('past the due date, unfinished work is red 逾期未交; finished and not-assigned are not', () => {
+    const past = { ...data, assignments: [{ ...data.assignments[0], due_date: '2020-01-01T00:00:00Z' }] };
+    render(<AssignmentMatrixGrid data={past} onOpenAssignment={vi.fn()} />);
+    expect(within(rowOf('林雨萱')).getByText(/逾期未交/)).toBeInTheDocument();
+    expect(within(rowOf('陳柏宇')).getByText('逾期未交')).toBeInTheDocument();
+    expect(within(rowOf('王小明')).getByText('88')).toBeInTheDocument();
+    expect(within(rowOf('邱柏丞')).getByText('未指派')).toBeInTheDocument();
+  });
+
+  it('student names open that student when a handler is given', async () => {
+    const onStudent = vi.fn();
+    render(<AssignmentMatrixGrid data={data} onOpenAssignment={vi.fn()} onOpenStudent={onStudent} />);
+    await userEvent.click(screen.getByRole('button', { name: '林雨萱' }));
+    expect(onStudent).toHaveBeenCalledWith(2);
   });
 });

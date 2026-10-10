@@ -203,6 +203,8 @@ export async function createAssignment(
     difficulty_label?: string | null;
     // Issue #1762: smart-skip already-completed steps
     skip_completed_steps?: boolean;
+    // #3378: part of the class; omitted = everyone
+    student_ids?: number[];
   },
 ): Promise<AssignmentResponse> {
   const res = await fetch(

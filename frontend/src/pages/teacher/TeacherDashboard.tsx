@@ -102,7 +102,8 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
       setNewName('');
       setNewGrade('');
       setShowCreateForm(false);
-      await loadClassrooms();
+      // 均一模式 (#3378): a new class goes straight to "add students".
+      onSelectClassroom(created.id);
     } catch (err) {
       if (err instanceof ClassroomApiError) {
         setCreateError(err.message);

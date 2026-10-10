@@ -177,7 +177,7 @@ const TodayOverviewTab: React.FC<TodayOverviewTabProps> = ({ classroomId, onOpen
             <thead>
               <tr className="text-sm text-gray-500 border-b border-gray-200">
                 <th className="py-2 font-medium">作業</th>
-                <th className="py-2 font-medium">到期日</th>
+                <th className="py-2 font-medium hidden sm:table-cell">到期日</th>
                 <th className="py-2 font-medium">已交 / 總數</th>
                 <th className="py-2" />
               </tr>
@@ -188,8 +188,8 @@ const TodayOverviewTab: React.FC<TodayOverviewTabProps> = ({ classroomId, onOpen
                   key={r.id}
                   className={`border-b border-gray-100 ${r.dueState === 'overdue' ? 'bg-red-50' : r.dueState === 'today' ? 'bg-amber-50' : ''}`}
                 >
-                  <td className="py-3 font-semibold text-gray-900">{r.title}</td>
-                  <td className="py-3 text-gray-700">{formatDue(r)}</td>
+                  <td className="py-3 font-semibold text-gray-900">{r.title}<div className="sm:hidden text-sm font-normal text-gray-500">{formatDue(r)}</div></td>
+                  <td className="py-3 text-gray-700 hidden sm:table-cell">{formatDue(r)}</td>
                   <td className="py-3 tabular-nums">{r.submitted} / {r.assigned}</td>
                   <td className="py-3 text-right">
                     <button type="button" onClick={() => onOpenAssignment(r.id)} className="text-accent font-medium hover:underline cursor-pointer">

@@ -13,7 +13,7 @@ import {
   getAssignmentMatrix,
   getStudentAssignments,
 } from '../../../services/teacherApi';
-import { CellBadge } from './AssignmentMatrixGrid';
+import { CellBadge, isOverdue } from './AssignmentMatrixGrid';
 
 interface StudentsPanelProps {
   classroomId: number;
@@ -50,7 +50,26 @@ export function StudentDetail({ classroomId, studentId, onBack }: { classroomId:
           {data.rows.length === 0 ? (
             <p className="text-gray-500">這個班級還沒有指派作業</p>
           ) : (
-            <table className="w-full text-left" aria-label="這位學生的作業">
+            <>
+            <ul className="sm:hidden space-y-3" aria-label="這位學生的作業（手機）">
+              {data.rows.map((r) => (
+                <li key={r.assignment_id} className="rounded-xl border border-gray-200 p-4 space-y-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <span className="font-semibold text-gray-900">{r.title}</span>
+                    <CellBadge cell={{ student_id: studentId, assignment_id: r.assignment_id, state: r.state, score: r.score, current_step: r.current_step }} overdue={isOverdue(r.due_date)} />
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 text-center text-sm">
+                    <div><div className="text-gray-500">朗讀</div><div className="font-semibold tabular-nums">{pct(r.reading_accuracy)}</div></div>
+                    <div><div className="text-gray-500">理解</div><div className="font-semibold tabular-nums">{pct(r.comprehension)}</div></div>
+                    <div><div className="text-gray-500">生字</div><div className="font-semibold tabular-nums">{pct(r.vocab)}</div></div>
+                  </div>
+                  {r.error_chars.length > 0 && (
+                    <p className="text-sm"><span className="text-gray-500">唸錯的字 </span><span className="text-red-700 tracking-widest">{r.error_chars.join('')}</span></p>
+                  )}
+                </li>
+              ))}
+            </ul>
+            <table className="hidden sm:table w-full text-left" aria-label="這位學生的作業">
               <thead>
                 <tr className="text-sm text-gray-500 border-b border-gray-200">
                   <th className="py-2 font-medium">作業</th>
@@ -66,7 +85,7 @@ export function StudentDetail({ classroomId, studentId, onBack }: { classroomId:
                   <tr key={r.assignment_id} className="border-b border-gray-100 align-top">
                     <td className="py-3 font-medium text-gray-900">{r.title}</td>
                     <td className="py-3">
-                      <CellBadge cell={{ student_id: studentId, assignment_id: r.assignment_id, state: r.state, score: r.score, current_step: r.current_step }} />
+                      <CellBadge cell={{ student_id: studentId, assignment_id: r.assignment_id, state: r.state, score: r.score, current_step: r.current_step }} overdue={isOverdue(r.due_date)} />
                     </td>
                     <td className="py-3 text-right tabular-nums">{pct(r.reading_accuracy)}</td>
                     <td className="py-3 text-right tabular-nums">{pct(r.comprehension)}</td>
@@ -82,6 +101,7 @@ export function StudentDetail({ classroomId, studentId, onBack }: { classroomId:
                 ))}
               </tbody>
             </table>
+            </>
           )}
           <p className="text-sm text-gray-500">「—」代表這份作業沒有記錄到那一部分</p>
         </>

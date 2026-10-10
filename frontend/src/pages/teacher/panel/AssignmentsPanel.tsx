@@ -19,7 +19,7 @@ import {
 import AssignmentTab from '../AssignmentTab';
 import TextManagementTab from '../TextManagementTab';
 import AssignmentItemStats from './AssignmentItemStats';
-import AssignmentMatrixGrid, { CellBadge } from './AssignmentMatrixGrid';
+import AssignmentMatrixGrid, { CellBadge, isOverdue } from './AssignmentMatrixGrid';
 
 interface AssignmentsPanelProps {
   classroomId: number;
@@ -75,7 +75,7 @@ function AssignmentDrilldown({
               <button type="button" onClick={() => onOpenStudent(s.id)} className="text-gray-900 hover:text-accent hover:underline cursor-pointer">
                 {s.name}
               </button>
-              <CellBadge cell={cells.find((c) => c.student_id === s.id)} />
+              <CellBadge cell={cells.find((c) => c.student_id === s.id)} overdue={isOverdue(assignment?.due_date ?? null)} />
             </li>
           ))}
         </ul>

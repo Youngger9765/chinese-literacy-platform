@@ -299,14 +299,22 @@ describe('ClassroomDetail (refactor characterization) — join code copy', () =>
   });
 });
 
-describe('ClassroomDetail — student roster in the class header (#3367, collapsed #3376)', () => {
-  it('starts collapsed with the head count, and expands without switching tabs', async () => {
+describe('ClassroomDetail — student roster in the class header (#3367, collapsed #3376, #3378)', () => {
+  it('a class with students starts collapsed, and expands without switching tabs', async () => {
+    vi.mocked(classroomApi.getClassroomDetail).mockResolvedValue({
+      ...MOCK_CLASSROOM,
+      students: [{ id: 5, name: '小明', email: 'a@b.c', enrolled_at: '2026-01-01T00:00:00Z' }],
+    } as never);
     const user = userEvent.setup();
     renderDetail();
     const toggle = await screen.findByRole('button', { name: /學生名單（/ });
     expect(screen.queryByTestId('student-list-tab')).toBeNull();
     await user.click(toggle);
-    const listTab = screen.getByTestId('student-list-tab');
-    expect(listTab.getAttribute('data-classroom')).toBe('三年甲班');
+    expect(screen.getByTestId('student-list-tab').getAttribute('data-classroom')).toBe('三年甲班');
+  });
+
+  it('an empty class opens straight on adding students (均一-style first step)', async () => {
+    renderDetail();
+    expect(await screen.findByTestId('student-list-tab')).toBeInTheDocument();
   });
 });
