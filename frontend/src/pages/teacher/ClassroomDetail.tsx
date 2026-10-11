@@ -34,12 +34,19 @@ import ClassListSidebar from './panel/ClassListSidebar';
 interface ClassroomDetailProps {
   classroomId: number;
   onBack: () => void;
+  /**
+   * #3411: when this page is reached right after creating the classroom,
+   * the caller already has the full response from the POST -- seed state
+   * with it so the page has something to render on its very first paint
+   * instead of depending entirely on a fresh GET /api/classrooms/:id.
+   */
+  initialClassroom?: ClassroomDetailResponse;
 }
 
-const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }) => {
+const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack, initialClassroom }) => {
   const { token, user } = useAuth();
-  const [classroom, setClassroom] = useState<ClassroomDetailResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [classroom, setClassroom] = useState<ClassroomDetailResponse | null>(initialClassroom ?? null);
+  const [isLoading, setIsLoading] = useState(!initialClassroom);
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();

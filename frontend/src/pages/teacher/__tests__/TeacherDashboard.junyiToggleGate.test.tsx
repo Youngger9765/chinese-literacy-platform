@@ -120,7 +120,7 @@ describe('TeacherDashboard — Junyi import toggle visibility (issue #3406)', ()
     vi.mocked(classroomApi.listJunyiImportableClasses).mockRejectedValue(
       new classroomApi.ClassroomApiError('Not Found', 404),
     );
-    vi.mocked(classroomApi.createClassroom).mockResolvedValue({
+    const createdClassroom = {
       id: 42,
       name: '五年甲班',
       grade: 5,
@@ -129,7 +129,8 @@ describe('TeacherDashboard — Junyi import toggle visibility (issue #3406)', ()
       teacher_id: 1,
       is_active: true,
       created_at: '2026-10-01T00:00:00Z',
-    });
+    };
+    vi.mocked(classroomApi.createClassroom).mockResolvedValue(createdClassroom);
 
     const { onSelectClassroom } = renderDashboard();
     await openCreateDialog();
@@ -147,7 +148,9 @@ describe('TeacherDashboard — Junyi import toggle visibility (issue #3406)', ()
       });
     });
     await waitFor(() => {
-      expect(onSelectClassroom).toHaveBeenCalledWith(42);
+      // #3411: the just-created classroom object is now passed as a second
+      // arg so the detail page can render it without a second round trip.
+      expect(onSelectClassroom).toHaveBeenCalledWith(42, createdClassroom);
     });
   });
 });

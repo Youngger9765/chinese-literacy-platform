@@ -10,8 +10,9 @@
  * - OnboardingWrapper    — first-time student onboarding overlay
  */
 import React, { Suspense, useState } from 'react';
-import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { Navigate, useNavigate, useParams, useSearchParams, useLocation } from 'react-router-dom';
 import { lazy } from 'react';
+import type { ClassroomResponse } from '../../services/classroomApi';
 import { useAuth } from '../../contexts/AuthContext';
 import { hasRole } from '../../services/authApi';
 import { clearActiveSession } from '../../services/api';
@@ -246,19 +247,35 @@ export const WritePage: React.FC = () => {
   );
 };
 
-/** Teacher classroom detail page — extracts classroomId from URL params. */
+/**
+ * Teacher classroom detail page — extracts classroomId from URL params.
+ *
+ * #3411: a classroom just created by this same navigation (see
+ * TeacherDashboardPage below) arrives as router state, so ClassroomDetail
+ * can render it the instant it mounts instead of depending on a fresh
+ * GET /api/classrooms/:id that was observed racing with this very
+ * navigation and occasionally losing it.
+ */
 export const ClassroomDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const classroomId = id ? parseInt(id, 10) : null;
+  const location = useLocation();
+  const justCreated = (location.state as { justCreated?: ClassroomResponse } | null)?.justCreated;
 
   if (classroomId == null || isNaN(classroomId)) {
     return <Navigate to="/teacher" replace />;
   }
 
+  const initialClassroom =
+    justCreated && justCreated.id === classroomId
+      ? { ...justCreated, students: [] }
+      : undefined;
+
   return (
     <ClassroomDetail
       classroomId={classroomId}
+      initialClassroom={initialClassroom}
       onBack={() => navigate('/teacher')}
     />
   );
@@ -270,7 +287,9 @@ export const TeacherDashboardPage: React.FC = () => {
 
   return (
     <TeacherDashboard
-      onSelectClassroom={(id) => navigate(`/teacher/classroom/${id}`)}
+      onSelectClassroom={(id, justCreated) =>
+        navigate(`/teacher/classroom/${id}`, justCreated ? { state: { justCreated } } : undefined)
+      }
     />
   );
 };
