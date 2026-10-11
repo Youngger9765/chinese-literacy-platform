@@ -347,6 +347,75 @@ def test_empty_classroom_returns_no_alerts(client):
         db.close()
 
 
+# ── Tests: Alerts authz (#3405) ─────────────────────────────────────────────
+#
+# Every test above calls /alerts as the owning teacher only. The endpoint runs
+# _check_classroom_access(current_user, classroom_id, db) (teacher_alerts.py)
+# but nothing here proved that call actually fires — if someone deleted that
+# one line, every test above would still pass. These lock the gate itself,
+# least-privilege style (rules/testing-strategy.md): a real enrolled student
+# and a real unrelated teacher, each paired with the owner as positive control.
+
+
+def test_alerts_requires_auth_401(client):
+    """No Authorization header at all — must not reach the handler."""
+    # Deliberately NOT using _get_as: this hits the real get_current_user
+    # dependency with no override, so a missing/invalid token is the only
+    # thing that can produce this result.
+    resp = client.get("/api/teacher/classrooms/1/alerts")
+    assert resp.status_code == 401
+
+
+def test_alerts_other_teacher_gets_403(client):
+    """A teacher who owns a different classroom must not see this one's alerts."""
+    db = _new_db()
+    try:
+        owner = _make_user(db, "t_alerts_owner@test.com", "Owner")
+        other = _make_user(db, "t_alerts_other@test.com", "Other")
+        school = _make_school(db)
+        classroom = _make_classroom(db, owner.id, school.id)
+        student = _make_user(db, "s_alerts_authz1@test.com", "Student")
+        _enroll(db, classroom.id, student.id)
+        db.commit()
+
+        # Positive control: the actual owner can still read it.
+        owner_resp = _get_as(client, f"/api/teacher/classrooms/{classroom.id}/alerts", owner)
+        assert owner_resp.status_code == 200
+
+        other_resp = _get_as(client, f"/api/teacher/classrooms/{classroom.id}/alerts", other)
+        assert other_resp.status_code == 403
+    finally:
+        db.close()
+
+
+def test_alerts_enrolled_student_gets_403(client):
+    """A student enrolled in the class is not a teacher of it."""
+    db = _new_db()
+    try:
+        teacher = _make_user(db, "t_alerts_student_gate@test.com", "TeacherGate")
+        school = _make_school(db)
+        classroom = _make_classroom(db, teacher.id, school.id)
+        student = _make_user(db, "s_alerts_authz2@test.com", "EnrolledStudent")
+        _enroll(db, classroom.id, student.id)
+        db.commit()
+
+        resp = _get_as(client, f"/api/teacher/classrooms/{classroom.id}/alerts", student)
+        assert resp.status_code == 403
+    finally:
+        db.close()
+
+
+def test_alerts_missing_classroom_gets_404(client):
+    db = _new_db()
+    try:
+        teacher = _make_user(db, "t_alerts_404@test.com", "Teacher404")
+        db.commit()
+        resp = _get_as(client, "/api/teacher/classrooms/999999/alerts", teacher)
+        assert resp.status_code == 404
+    finally:
+        db.close()
+
+
 # ── Tests: Learning Curve ─────────────────────────────────────────────────────
 
 
