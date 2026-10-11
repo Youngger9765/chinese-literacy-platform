@@ -293,6 +293,13 @@ class TestAssignmentMatrix:
     def test_unauthenticated(self, client, seeded):
         assert client.get(f"/api/teacher/classrooms/{seeded['cid']}/assignment-matrix").status_code == 401
 
+    def test_empty_classroom_returns_empty_arrays(self, client, teacher, school_id):
+        empty_cid = _seed_classroom(teacher["user_id"], school_id)
+        resp = self._get(client, teacher["token"], empty_cid)
+        assert resp.status_code == 200
+        body = resp.json()
+        assert body == {"students": [], "assignments": [], "cells": []}
+
 
 class TestAssignmentItemStats:
     def _get(self, client, token, aid):
@@ -344,6 +351,20 @@ class TestAssignmentItemStats:
         assert client.get(url, headers=auth_header(teacher["token"])).status_code == 200
         monkeypatch.setattr(m, "_MATRIX_CELL_LIMIT", 7)
         assert client.get(url, headers=auth_header(teacher["token"])).status_code == 400
+
+    def test_zero_assigned_students_no_division_by_zero(self, client, teacher, school_id):
+        empty_cid = _seed_classroom(teacher["user_id"], school_id)
+        aid = _seed_assignment(empty_cid, teacher["user_id"], "No Students Yet")
+        resp = self._get(client, teacher["token"], aid)
+        assert resp.status_code == 200
+        body = resp.json()
+        assert body["assigned_count"] == 0
+        assert body["submitted_count"] == 0
+        for item in body["items"]:
+            assert item["completed"] == 0
+            assert item["total"] == 0
+            assert item["completion_rate"] is None
+            assert item["correct_rate"] is None
 
 
 class TestStudentAssignments:

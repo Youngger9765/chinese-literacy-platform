@@ -335,6 +335,26 @@ def test_delete_classroom_cross_org_admin_403(client):
     assert resp.status_code == 403
 
 
+def test_delete_classroom_student_role_forbidden_403(client):
+    teacher = _register_user(client, "delete_student_role_teacher")
+    student = _register_user(client, "delete_student_role_student")
+    school_id = _create_school_for_teacher(teacher["user_id"])
+    classroom_id = _create_classroom(client, teacher, school_id, "Student Role")
+    _enroll_student(client, teacher, classroom_id, student["user_id"])
+
+    resp = client.delete(
+        f"/api/classrooms/{classroom_id}",
+        headers=auth_header(student["token"]),
+    )
+    assert resp.status_code == 403
+
+    owner_get_resp = client.get(
+        f"/api/classrooms/{classroom_id}",
+        headers=auth_header(teacher["token"]),
+    )
+    assert owner_get_resp.status_code == 200
+
+
 def test_delete_classroom_not_found_404(client):
     teacher = _register_user(client, "delete_not_found")
     school_id = _create_school_for_teacher(teacher["user_id"])

@@ -460,3 +460,10 @@ class TestAtRiskEndpoint:
             assert res.status_code == 403
         finally:
             db.close()
+
+    def test_unauthenticated_gets_401(self):
+        # Deliberately not using _get_as — hits the real get_current_user
+        # dependency with no override, so a missing token is the only thing
+        # that can produce a 401 here.
+        res = client.get("/api/teacher/classrooms/1/at-risk-students")
+        assert res.status_code == 401

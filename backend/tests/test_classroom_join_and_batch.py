@@ -847,6 +847,25 @@ class TestBatchStudentCreation:
         )
         assert resp.status_code == 403
 
+    def test_batch_create_student_role_forbidden_403(
+        self, client, teacher, student_user, school_id
+    ):
+        create_resp = client.post(
+            "/api/classrooms",
+            json={"name": "Batch Student Role 403", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        )
+        classroom_id = create_resp.json()["id"]
+
+        resp = client.post(
+            f"/api/classrooms/{classroom_id}/students/batch",
+            json={
+                "students": [{"name": "Forbidden Student", "seat_number": "01"}]
+            },
+            headers=auth_header(student_user["token"]),
+        )
+        assert resp.status_code == 403
+
     def test_batch_create_requires_auth(self, client, teacher, school_id):
         create_resp = client.post(
             "/api/classrooms",
