@@ -662,7 +662,7 @@ def test_no_determinable_school_affiliation_still_allows_reset(client):
     assert resp.status_code == 200, resp.text
 
 
-def test_roleless_sso_style_student_can_have_password_reset_200(client):
+def test_roleless_sso_style_student_now_denied_403(client):
     owner = _register_user(client, "resetpw_roleless_owner")
     roleless_student = _register_user(client, "resetpw_roleless_sso_student")
     _deactivate_all_roles(roleless_student["user_id"])
@@ -681,11 +681,16 @@ def test_roleless_sso_style_student_can_have_password_reset_200(client):
             .all()
         )
         assert active_roles == []
+        target = db.query(User).filter(User.id == roleless_student["user_id"]).first()
+        assert target is not None
+        assert target.student_profile is None
     finally:
         db.close()
 
+    # Intentionally reverses the previous round's allow-when-no-signal design:
+    # the project owner explicitly chose fail-closed for roleless SSO-style targets.
     resp = _reset_password(client, owner, classroom_id, roleless_student["user_id"])
-    assert resp.status_code == 200, resp.text
+    assert resp.status_code == 403, resp.text
 
 
 def test_roleless_target_with_mismatching_school_role_still_denied_403(client):
@@ -729,3 +734,30 @@ def test_system_admin_can_reset_password_200(client):
 
     resp = _reset_password(client, system_admin, classroom_id, student["user_id"])
     assert resp.status_code == 200, resp.text
+
+
+def test_caller_teacher_role_scoped_to_different_school_denied_403(client):
+    """Coverage gap found during the fail-closed caller-scoping fix (#3384):
+    a caller who is classroom.teacher_id (so require_classroom_member passes)
+    but whose own active teacher role is scoped to a DIFFERENT school than
+    the classroom must still be denied -- holding a teacher-tier role
+    somewhere is not enough, it must be a teacher role at THIS classroom's
+    school."""
+    owner = _register_user(client, "resetpw_wrongschool_caller")
+    student = _register_user(client, "resetpw_wrongschool_student")
+    _deactivate_all_roles(owner["user_id"])
+    school_a_id = _create_org_and_school(f"org-{uuid.uuid4().hex[:8]}")
+    school_b_id = _create_org_and_school(f"org-{uuid.uuid4().hex[:8]}")
+    # Caller has standing to CREATE a classroom at School A (any active
+    # school-scoped role satisfies create_classroom's is_school_member check
+    # -- a pre-existing architectural gap, see
+    # test_student_only_owner_cannot_reset_enrolled_victims_password_403),
+    # but their only TEACHER role is at School B, a different school.
+    _assign_role(owner["user_id"], "student", scope_type="school", scope_id=str(school_a_id))
+    _assign_role(owner["user_id"], "teacher", scope_type="school", scope_id=str(school_b_id))
+    _assign_role(student["user_id"], "student", scope_type="school", scope_id=str(school_a_id))
+    classroom_id = _create_classroom(client, owner, school_a_id)
+    _enroll_student(client, owner, classroom_id, student["user_id"])
+
+    resp = _reset_password(client, owner, classroom_id, student["user_id"])
+    assert resp.status_code == 403, resp.text

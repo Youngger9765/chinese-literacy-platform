@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from ...auth.dependencies import get_current_user
 from ...auth.password import hash_password
-from ...auth.policies import require_classroom_member
+from ...auth.policies import is_system_admin, require_classroom_member
 from ...database import get_db
 from ...models.school import ClassroomStudent
 from ...models.user import Role, StudentProfile, User, UserRole
@@ -33,18 +33,24 @@ def reset_student_password(
     # Matches get_classroom_detail's owner/co-teacher/admin gate, not owner-only mutation gates, because co-teacher resets are an explicit product requirement.
     require_classroom_member(classroom, current_user, db)
 
-    caller_has_teacher_authority = (
-        db.query(UserRole)
-        .join(Role)
-        .filter(
-            UserRole.user_id == current_user.id,
-            UserRole.is_active.is_(True),
-            Role.name.in_(("teacher", "system_admin", "org_admin", "org_owner")),
+    if not is_system_admin(current_user.id, db):
+        caller_has_school_teacher_role = (
+            db.query(UserRole)
+            .join(Role)
+            .filter(
+                UserRole.user_id == current_user.id,
+                UserRole.is_active.is_(True),
+                Role.name == "teacher",
+                UserRole.scope_type == "school",
+                UserRole.scope_id == str(classroom.school_id),
+            )
+            .first()
         )
-        .first()
-    )
-    if caller_has_teacher_authority is None:
-        raise HTTPException(status_code=403, detail="Caller does not hold teacher authority")
+        if caller_has_school_teacher_role is None:
+            raise HTTPException(
+                status_code=403,
+                detail="Caller does not hold teacher authority at this classroom's school",
+            )
 
     enrollment = (
         db.query(ClassroomStudent)
@@ -61,46 +67,46 @@ def reset_student_password(
     if user is None:
         raise HTTPException(status_code=404, detail="Student not found")
 
-    if user.student_profile is not None and user.student_profile.school_id != classroom.school_id:
-        raise HTTPException(
-            status_code=403,
-            detail="Student does not belong to this classroom's school",
-        )
-
-    has_mismatching_school_role = (
-        db.query(UserRole)
+    active_target_roles = (
+        db.query(Role.name, UserRole.scope_type, UserRole.scope_id)
         .join(Role)
         .filter(
             UserRole.user_id == student_id,
             UserRole.is_active.is_(True),
-            UserRole.scope_type == "school",
-            UserRole.scope_id.is_not(None),
-            UserRole.scope_id != str(classroom.school_id),
         )
-        .first()
+        .all()
     )
-    if has_mismatching_school_role is not None:
-        raise HTTPException(
-            status_code=403,
-            detail="Student does not belong to this classroom's school",
-        )
 
-    active_target_role_names = {
-        role_name
-        for (role_name,) in (
-            db.query(Role.name)
-            .join(UserRole)
-            .filter(
-                UserRole.user_id == student_id,
-                UserRole.is_active.is_(True),
-            )
-            .all()
-        )
-    }
-    if active_target_role_names and active_target_role_names != {"student"}:
+    has_disallowed_target_role = any(
+        role_name != "student"
+        or scope_type != "school"
+        or scope_id != str(classroom.school_id)
+        for role_name, scope_type, scope_id in active_target_roles
+    )
+    if has_disallowed_target_role:
         raise HTTPException(
             status_code=403,
             detail="Cannot reset password for a non-student account",
+        )
+
+    if (
+        user.student_profile is not None
+        and user.student_profile.school_id != classroom.school_id
+    ):
+        raise HTTPException(
+            status_code=403,
+            detail="Student is not a verified member of this classroom's school",
+        )
+
+    has_matching_student_role = bool(active_target_roles)
+    has_matching_student_profile = (
+        user.student_profile is not None
+        and user.student_profile.school_id == classroom.school_id
+    )
+    if not has_matching_student_role and not has_matching_student_profile:
+        raise HTTPException(
+            status_code=403,
+            detail="Student is not a verified member of this classroom's school",
         )
 
     password = "".join(
