@@ -70,6 +70,7 @@ vi.mock('../CoTeachingTab', () => ({ default: () => <div data-testid="co-teachin
 vi.mock('../panel/TodayOverviewTab', () => ({ default: () => <div data-testid="today-overview-tab" /> }));
 vi.mock('../panel/AssignmentsPanel', () => ({ default: () => <div data-testid="assignments-panel" /> }));
 vi.mock('../panel/ClassSwitcher', () => ({ default: () => null }));
+vi.mock('../panel/ClassListSidebar', () => ({ default: () => null }));
 vi.mock('../panel/StudentsPanel', () => ({ default: () => <div data-testid="students-panel" /> }));
 
 const MOCK_CLASSROOM = {

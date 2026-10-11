@@ -29,6 +29,7 @@ import ClassroomHeaderCard from './ClassroomHeaderCard';
 import ClassroomTabs, { TabKey, resolveInitialView, resolveTabKey } from './ClassroomTabs';
 import StudentListTab from './StudentListTab';
 import ClassSwitcher from './panel/ClassSwitcher';
+import ClassListSidebar from './panel/ClassListSidebar';
 
 interface ClassroomDetailProps {
   classroomId: number;
@@ -415,33 +416,43 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
 
   return (
     <div className="flex-1 overflow-y-auto p-6 sm:p-8">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <BackButton />
-          <ClassSwitcher currentId={classroomId} onSwitch={switchClassroom} />
-        </div>
+      <div className="max-w-6xl mx-auto">
+        <div className="lg:flex lg:gap-6 lg:items-start">
+          <aside className="hidden lg:block w-56 shrink-0">
+            <ClassListSidebar currentId={classroomId} onSwitch={switchClassroom} />
+          </aside>
 
-        {/* Inline error */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
-            {error}
-            <button onClick={() => setError('')} className="ml-2 underline cursor-pointer">關閉</button>
+          <div className="flex-1 min-w-0 space-y-6">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <BackButton />
+              <div className="lg:hidden">
+                <ClassSwitcher currentId={classroomId} onSwitch={switchClassroom} />
+              </div>
+            </div>
+
+            {/* Inline error */}
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
+                {error}
+                <button onClick={() => setError('')} className="ml-2 underline cursor-pointer">關閉</button>
+              </div>
+            )}
+
+            <ClassroomTabs
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              classroomId={classroomId}
+              ownerId={classroom.teacher_id}
+              selectedAssignmentId={selectedAssignmentId}
+              onSelectAssignment={setSelectedAssignment}
+              selectedStudentId={selectedStudentId}
+              onSelectStudent={setSelectedStudent}
+              initialView={initialView}
+              onViewChange={setSelectedView}
+              settingsContent={settingsContent}
+            />
           </div>
-        )}
-
-        <ClassroomTabs
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          classroomId={classroomId}
-          ownerId={classroom.teacher_id}
-          selectedAssignmentId={selectedAssignmentId}
-          onSelectAssignment={setSelectedAssignment}
-          selectedStudentId={selectedStudentId}
-          onSelectStudent={setSelectedStudent}
-          initialView={initialView}
-          onViewChange={setSelectedView}
-          settingsContent={settingsContent}
-        />
+        </div>
       </div>
     </div>
   );
