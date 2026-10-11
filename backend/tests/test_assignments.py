@@ -3356,3 +3356,92 @@ class TestAssignToSomeStudents:
 
     def test_an_empty_list_is_rejected(self, client, teacher, classroom_with_students):
         assert self._post(client, teacher, classroom_with_students, student_ids=[]).status_code == 422
+
+
+# ---------------------------------------------------------------------------
+# #3393 — a 「部分學生」assignment's exclusion must survive new enrollments.
+#
+# create_submissions_for_new_student() back-fills every *active* assignment
+# for a newly-enrolled student (#996, so whole-class assignments reach late
+# joiners). It does not distinguish a whole-class assignment from a partial
+# one, so a student who joins AFTER a partial assignment was created gets
+# auto-enrolled into it even though they were never selected.
+# ---------------------------------------------------------------------------
+
+
+class TestIssue3393PartialAssignmentExcludesLateJoiner:
+    def _my_assignment_ids(self, client, token) -> set[int]:
+        resp = client.get("/api/assignments/my", headers=auth_header(token))
+        assert resp.status_code == 200, resp.text
+        return {a["assignment_id"] for a in resp.json()}
+
+    def test_partial_assignment_excludes_student_who_joins_later(
+        self, client, teacher, school_id
+    ):
+        classroom_id = _create_classroom(
+            client, teacher, school_id, "Issue 3393 Partial Classroom"
+        )
+        student_a = _register_user(client, "asn_3393_a")
+        _make_student_role(student_a["user_id"], school_id)
+        _enroll_student(client, teacher, classroom_id, student_a["user_id"])
+
+        # Partial assignment: only student_a is targeted.
+        create_resp = client.post(
+            f"/api/classrooms/{classroom_id}/assignments",
+            json={
+                "classroom_id": classroom_id,
+                "story_id": VALID_STORY_ID,
+                "title": "Issue 3393 partial assignment",
+                "student_ids": [student_a["user_id"]],
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assert create_resp.status_code == 201, create_resp.text
+        assignment_id = create_resp.json()["id"]
+
+        # student_c joins the classroom AFTER the partial assignment exists
+        # and was never selected for it.
+        student_c = _register_user(client, "asn_3393_c")
+        _make_student_role(student_c["user_id"], school_id)
+        _enroll_student(client, teacher, classroom_id, student_c["user_id"])
+
+        my_ids = self._my_assignment_ids(client, student_c["token"])
+        assert assignment_id not in my_ids, (
+            "Issue #3393 regression: student_c was never selected for the "
+            f"partial assignment {assignment_id} but it showed up in their "
+            f"/api/assignments/my list: {my_ids}"
+        )
+
+    def test_positive_control_whole_class_assignment_still_reaches_late_joiner(
+        self, client, teacher, school_id
+    ):
+        """Proves the test above can actually detect presence (#996 behaviour)."""
+        classroom_id = _create_classroom(
+            client, teacher, school_id, "Issue 3393 Whole Class Control"
+        )
+        student_a = _register_user(client, "asn_3393_wc_a")
+        _make_student_role(student_a["user_id"], school_id)
+        _enroll_student(client, teacher, classroom_id, student_a["user_id"])
+
+        # Whole-class assignment: student_ids omitted entirely.
+        create_resp = client.post(
+            f"/api/classrooms/{classroom_id}/assignments",
+            json={
+                "classroom_id": classroom_id,
+                "story_id": VALID_STORY_ID,
+                "title": "Issue 3393 whole-class control assignment",
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assert create_resp.status_code == 201, create_resp.text
+        assignment_id = create_resp.json()["id"]
+
+        student_c = _register_user(client, "asn_3393_wc_c")
+        _make_student_role(student_c["user_id"], school_id)
+        _enroll_student(client, teacher, classroom_id, student_c["user_id"])
+
+        my_ids = self._my_assignment_ids(client, student_c["token"])
+        assert assignment_id in my_ids, (
+            "Positive control failed: a whole-class assignment must still "
+            f"back-fill a late joiner (#996). Got: {my_ids}"
+        )
