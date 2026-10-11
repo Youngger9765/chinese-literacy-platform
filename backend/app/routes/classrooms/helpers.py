@@ -128,6 +128,11 @@ def create_submissions_for_new_student(
         .filter(
             Assignment.classroom_id == classroom_id,
             Assignment.is_active == True,
+            # Issue #3393: only whole-class assignments back-fill late joiners.
+            # A "part of the class" assignment (student_ids selected at creation)
+            # must stay scoped to whoever the teacher picked at the time -- a
+            # student enrolling afterwards was never selected for it.
+            Assignment.assigned_to_all == True,
         )
         .all()
     )
