@@ -30,6 +30,7 @@ vi.mock('../../../services/classroomApi', () => ({
   removeStudent: vi.fn(),
   exportClassroomReport: vi.fn(),
   regenerateClassroomCode: vi.fn(),
+  deleteClassroom: vi.fn(),
   ClassroomApiError: class ClassroomApiError extends Error {
     status: number;
     constructor(message: string, status: number) {
