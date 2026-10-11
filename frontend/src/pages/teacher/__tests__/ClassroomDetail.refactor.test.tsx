@@ -56,6 +56,7 @@ vi.mock('../panel/TodayOverviewTab', () => ({
 }));
 vi.mock('../panel/AssignmentsPanel', () => ({ default: () => <div data-testid="assignments-panel" /> }));
 vi.mock('../panel/ClassSwitcher', () => ({ default: () => null }));
+vi.mock('../panel/ClassListSidebar', () => ({ default: () => null }));
 vi.mock('../panel/StudentsPanel', () => ({ default: () => <div data-testid="students-panel" /> }));
 
 // ── Fixtures ─────────────────────────────────────────────────────────────────

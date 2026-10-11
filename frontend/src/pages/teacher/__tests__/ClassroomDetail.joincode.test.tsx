@@ -17,6 +17,7 @@ import * as classroomApi from '../../../services/classroomApi';
 // --- Mocks ---
 
 vi.mock('../panel/ClassSwitcher', () => ({ default: () => null }));
+vi.mock('../panel/ClassListSidebar', () => ({ default: () => null }));
 vi.mock('../panel/TodayOverviewTab', () => ({ default: () => null }));
 vi.mock('../../../contexts/AuthContext', () => ({
   useAuth: () => ({ token: 'test-token', user: { id: 1, role: 'teacher' } }),

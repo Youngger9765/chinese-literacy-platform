@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { AssignmentResponse } from '../../services/assignmentApi';
 import AssignmentCard from './components/AssignmentCard';
 import AssignmentCreateForm from './components/AssignmentCreateForm';
@@ -11,6 +11,7 @@ import { StatusFilter, useAssignments } from './hooks/useAssignments';
 interface AssignmentTabProps {
   classroomId: number;
   onChanged?: () => void;
+  openSignal?: number;
 }
 
 const STATUS_TABS: { key: StatusFilter; label: string }[] = [
@@ -20,7 +21,7 @@ const STATUS_TABS: { key: StatusFilter; label: string }[] = [
   { key: 'inactive', label: '已停用' },
 ];
 
-const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId, onChanged }) => {
+const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId, onChanged, openSignal }) => {
   const {
     assignments,
     isLoading,
@@ -81,6 +82,15 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId, onChanged })
     handleExpand,
     handleGraded,
   } = useAssignments(classroomId, onChanged);
+
+  const openedSignalRef = useRef(0);
+  useEffect(() => {
+    if (openSignal && openSignal !== openedSignalRef.current) {
+      openedSignalRef.current = openSignal;
+      handleOpenCreateForm();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openSignal]);
 
   const renderEditForm = (assignment: AssignmentResponse, variant: 'mobile' | 'desktop') => (
     <AssignmentInlineEdit
