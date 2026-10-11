@@ -673,6 +673,57 @@ class TestRemoveStudent:
         )
         assert resp.status_code == 403
 
+    def test_remove_student_requires_auth(self, client, teacher, student1, school_id):
+        create_resp = client.post(
+            "/api/classrooms",
+            json={"name": "Remove Auth Test", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        )
+        classroom_id = create_resp.json()["id"]
+        client.post(
+            f"/api/classrooms/{classroom_id}/students",
+            json={"student_id": student1["user_id"]},
+            headers=auth_header(teacher["token"]),
+        )
+
+        resp = client.delete(f"/api/classrooms/{classroom_id}/students/{student1['user_id']}")
+        assert resp.status_code == 401
+
+    def test_remove_student_student_role_forbidden(
+        self, client, teacher, student1, student2, school_id
+    ):
+        """A student (not a teacher/admin at all) must not be able to remove a
+        classmate — distinct from the other-teacher case above: this caller
+        owns no classroom anywhere, not just a different one."""
+        create_resp = client.post(
+            "/api/classrooms",
+            json={"name": "Remove Student Role Test", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        )
+        classroom_id = create_resp.json()["id"]
+        client.post(
+            f"/api/classrooms/{classroom_id}/students",
+            json={"student_id": student1["user_id"]},
+            headers=auth_header(teacher["token"]),
+        )
+        client.post(
+            f"/api/classrooms/{classroom_id}/students",
+            json={"student_id": student2["user_id"]},
+            headers=auth_header(teacher["token"]),
+        )
+
+        resp = client.delete(
+            f"/api/classrooms/{classroom_id}/students/{student1['user_id']}",
+            headers=auth_header(student2["token"]),
+        )
+        assert resp.status_code == 403
+        # Positive control: still enrolled after the rejected attempt.
+        list_resp = client.get(
+            f"/api/classrooms/{classroom_id}/students",
+            headers=auth_header(teacher["token"]),
+        )
+        assert student1["user_id"] in [s["id"] for s in list_resp.json()]
+
 
 # ===========================================================================
 # GET /api/classrooms/{id}/students — List students
