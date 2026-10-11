@@ -5,6 +5,7 @@ import { useWorkspace } from '../../contexts/WorkspaceContext';
 import {
   listMyClassrooms,
   createClassroom,
+  listJunyiImportableClasses,
   ClassroomResponse,
   ClassroomApiError,
 } from '../../services/classroomApi';
@@ -42,6 +43,14 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
   const [newGrade, setNewGrade] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState('');
+
+  // Issue #3406: the "匯入均一班級學生" toggle must stay hidden until we know
+  // the feature is actually available — otherwise a teacher on an env where
+  // JUNYI_CLASS_IMPORT_ENABLED is off clicks it and sees an empty panel
+  // (JunyiClassImportSection 404s and renders null).
+  // null = unknown/probing (toggle hidden, no flash), true = available,
+  // false = confirmed off (list endpoint 404s).
+  const [junyiImportAvailable, setJunyiImportAvailable] = useState<boolean | null>(null);
 
   /**
    * When the teacher is in multiple schools, filter classrooms to the
@@ -81,6 +90,39 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
   useEffect(() => {
     loadClassrooms();
   }, [loadClassrooms]);
+
+  // Issue #3406: probe the Junyi import feature exactly once per dialog
+  // open, before rendering the toggle. Reset to "unknown" on close so a
+  // stale availability result never leaks into the next open.
+  useEffect(() => {
+    if (!showCreateForm) {
+      setJunyiImportAvailable(null);
+      return;
+    }
+    if (!token || teacherSchoolId == null) return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        await listJunyiImportableClasses(token, teacherSchoolId);
+        if (!cancelled) setJunyiImportAvailable(true);
+      } catch (err) {
+        if (cancelled) return;
+        if (err instanceof ClassroomApiError && err.status === 404) {
+          // Feature flag off on this env — keep the toggle hidden.
+          setJunyiImportAvailable(false);
+        } else {
+          // Any other error (401/500/network) isn't what this probe is
+          // for — don't hide a feature that's actually enabled. The real
+          // fetch inside JunyiClassImportSection will surface it properly.
+          setJunyiImportAvailable(true);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [showCreateForm, token, teacherSchoolId]);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -209,7 +251,12 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
           <div className="bg-white rounded-2xl shadow-card p-5">
             <h2 className="text-base font-bold text-gray-900 mb-4">建立新班級</h2>
 
-            {/* Creation method chooser (#3380) */}
+            {/* Creation method chooser (#3380). The Junyi toggle (#3406) only
+                renders once we've confirmed the feature is actually available
+                on this env — otherwise clicking it opens an empty panel
+                (JunyiClassImportSection 404s and renders null). While the
+                probe is in flight (junyiImportAvailable === null) the toggle
+                stays hidden too, so there's no flash-then-disappear. */}
             <div className="flex gap-2 mb-4">
               <button
                 type="button"
@@ -222,20 +269,22 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
               >
                 手動建立
               </button>
-              <button
-                type="button"
-                onClick={() => setCreationMethod('junyi')}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  creationMethod === 'junyi'
-                    ? 'bg-accent text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                匯入均一班級學生
-              </button>
+              {junyiImportAvailable === true && (
+                <button
+                  type="button"
+                  onClick={() => setCreationMethod('junyi')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    creationMethod === 'junyi'
+                      ? 'bg-accent text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  匯入均一班級學生
+                </button>
+              )}
             </div>
 
-            {creationMethod === 'manual' ? (
+            {creationMethod === 'manual' || junyiImportAvailable !== true ? (
             <form onSubmit={handleCreate} className="space-y-4">
               {createError && (
                 <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
