@@ -105,6 +105,12 @@ const AssignmentsPanel: React.FC<AssignmentsPanelProps> = ({ classroomId, select
   const [matrix, setMatrix] = useState<AssignmentMatrixResponse | null>(null);
   const [error, setError] = useState('');
   const [showManage, setShowManage] = useState(false);
+  const [createSignal, setCreateSignal] = useState(0);
+
+  const handleCreateClick = () => {
+    setShowManage(true);
+    setCreateSignal((s) => s + 1);
+  };
 
   const load = useCallback(async () => {
     if (!token) return;
@@ -135,6 +141,18 @@ const AssignmentsPanel: React.FC<AssignmentsPanelProps> = ({ classroomId, select
 
   return (
     <div className="p-5 space-y-5">
+      <div className="flex justify-end">
+        <button
+          type="button"
+          onClick={handleCreateClick}
+          className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg bg-accent hover:bg-accent-hover text-white text-sm font-semibold transition-colors cursor-pointer"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+          建立任務
+        </button>
+      </div>
       {error && <p className="text-red-600 text-sm">{error} <button className="underline" onClick={load}>重試</button></p>}
       {!matrix && !error && <div className="h-64 rounded-xl bg-gray-100 animate-pulse" />}
       {matrix && <AssignmentMatrixGrid data={matrix} onOpenAssignment={onSelectAssignment} onOpenStudent={onOpenStudent} />}
@@ -153,7 +171,7 @@ const AssignmentsPanel: React.FC<AssignmentsPanelProps> = ({ classroomId, select
           <div className="border-t border-gray-100 p-4 space-y-6">
             <section aria-label="正式作業">
               <h3 className="font-semibold text-gray-800 mb-2">正式作業（會進上面的總表）</h3>
-              <AssignmentTab classroomId={classroomId} />
+              <AssignmentTab classroomId={classroomId} onChanged={load} openSignal={createSignal} />
             </section>
             <section aria-label="自學課文庫">
               <h3 className="font-semibold text-gray-800">自學課文庫</h3>

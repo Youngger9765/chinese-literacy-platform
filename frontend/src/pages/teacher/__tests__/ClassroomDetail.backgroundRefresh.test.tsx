@@ -30,6 +30,7 @@ vi.mock('../../../services/classroomApi', () => ({
   removeStudent: vi.fn(),
   exportClassroomReport: vi.fn(),
   regenerateClassroomCode: vi.fn(),
+  deleteClassroom: vi.fn(),
   ClassroomApiError: class ClassroomApiError extends Error {
     status: number;
     constructor(message: string, status: number) {
@@ -69,6 +70,7 @@ vi.mock('../CoTeachingTab', () => ({ default: () => <div data-testid="co-teachin
 vi.mock('../panel/TodayOverviewTab', () => ({ default: () => <div data-testid="today-overview-tab" /> }));
 vi.mock('../panel/AssignmentsPanel', () => ({ default: () => <div data-testid="assignments-panel" /> }));
 vi.mock('../panel/ClassSwitcher', () => ({ default: () => null }));
+vi.mock('../panel/ClassListSidebar', () => ({ default: () => null }));
 vi.mock('../panel/StudentsPanel', () => ({ default: () => <div data-testid="students-panel" /> }));
 
 const MOCK_CLASSROOM = {
@@ -120,6 +122,7 @@ describe('ClassroomDetail background refresh does not remount the roster (#3378)
     // it only appears once the `isEmptyClass` effect flips isRosterOpen,
     // one render tick after the classroom name first becomes visible.
     await waitFor(() => screen.getByTestId('student-list-tab'));
+    await waitFor(() => expect(studentListTabMounts).toBe(1));
     expect(screen.getByText('三年甲班')).toBeInTheDocument();
     expect(studentListTabMounts).toBe(1);
 

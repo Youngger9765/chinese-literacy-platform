@@ -27,6 +27,12 @@ export interface StudentInClassroomResponse {
   enrolled_at: string;
 }
 
+export interface ResetPasswordResult {
+  username: string;
+  email: string;
+  password: string;
+}
+
 export interface ClassroomDetailResponse extends ClassroomResponse {
   students: StudentInClassroomResponse[];
   join_code?: string | null;
@@ -156,6 +162,41 @@ export async function removeStudent(
     },
   );
   return handleResponse<{ message: string }>(res);
+}
+
+// --- Delete classroom ---
+
+export async function deleteClassroom(token: string, classroomId: number): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/classrooms/${classroomId}`, {
+    method: 'DELETE',
+    headers: authHeaders(token),
+  });
+  if (!res.ok) {
+    onApiUnauthorized(res);
+    let message = `Request failed: ${res.status}`;
+    try {
+      const body = await res.json();
+      message = body.detail ?? body.message ?? message;
+    } catch {
+      // ignore JSON parse errors
+    }
+    throw new ClassroomApiError(message, res.status);
+  }
+}
+
+export async function resetStudentPassword(
+  token: string,
+  classroomId: number,
+  studentId: number,
+): Promise<ResetPasswordResult> {
+  const res = await fetch(
+    `${API_BASE}/api/classrooms/${classroomId}/students/${studentId}/reset-password`,
+    {
+      method: 'POST',
+      headers: authHeaders(token),
+    },
+  );
+  return handleResponse<ResetPasswordResult>(res);
 }
 
 // --- Regenerate join code ---
@@ -379,6 +420,51 @@ export function downloadCsvTemplate(token: string): void {
       document.body.removeChild(a);
       URL.revokeObjectURL(blobUrl);
     });
+}
+
+// --- Junyi class/student import (#3380) ---
+
+export interface JunyiImportableClass {
+  junyi_class_id: string;
+  class_name: string;
+  class_code: string | null;
+  student_count: number;
+  already_imported: boolean;
+}
+
+export interface JunyiImportClassesResult {
+  linked: boolean;
+  classes: JunyiImportableClass[];
+}
+
+export interface JunyiImportResult {
+  added_students: number;
+  skipped_existing_students: number;
+  classes_created: number;
+  classes_reused: number;
+}
+
+export async function listJunyiImportableClasses(
+  token: string,
+  schoolId: number,
+): Promise<JunyiImportClassesResult> {
+  const res = await fetch(`${API_BASE}/api/classrooms/junyi-import/classes?school_id=${schoolId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return handleResponse<JunyiImportClassesResult>(res);
+}
+
+export async function importJunyiClasses(
+  token: string,
+  schoolId: number,
+  junyiClassIds: string[],
+): Promise<JunyiImportResult> {
+  const res = await fetch(`${API_BASE}/api/classrooms/junyi-import/import`, {
+    method: 'POST',
+    headers: authHeaders(token),
+    body: JSON.stringify({ school_id: schoolId, junyi_class_ids: junyiClassIds }),
+  });
+  return handleResponse<JunyiImportResult>(res);
 }
 
 // --- Export classroom report as CSV (#235) ---

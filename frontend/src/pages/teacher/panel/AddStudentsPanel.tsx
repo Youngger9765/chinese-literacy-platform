@@ -140,21 +140,29 @@ const AddStudentsPanel: React.FC<AddStudentsPanelProps> = ({
             </button>
           </div>
           {error && <p className="text-red-600 text-sm">{error}</p>}
-          {result && (
+          {result && result.created.length === 0 && (
+            <div className="rounded-xl border border-red-200 bg-red-50 p-4 space-y-2">
+              <p className="font-semibold text-red-800">沒有學生建立成功</p>
+              <p className="text-sm text-red-700">
+                {result.errors.length > 0
+                  ? `有 ${result.errors.length} 位建立失敗，請更換座號後再試`
+                  : '請確認輸入內容後再試一次'}
+              </p>
+            </div>
+          )}
+          {result && result.created.length > 0 && (
             <div className="rounded-xl border border-green-200 bg-green-50 p-4 space-y-3">
               <p className="font-semibold text-green-800">已建立 {result.created.length} 個帳號</p>
               {result.errors.length > 0 && (
                 <p className="text-sm text-red-700">有 {result.errors.length} 位沒有建立成功（多半是座號重複），請改座號再試</p>
               )}
-              {result.created.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => openCredentialCards(classroomName, result.created)}
-                  className="h-11 px-5 rounded-lg bg-white border border-accent text-accent font-semibold cursor-pointer"
-                >
-                  列印帳密卡
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={() => openCredentialCards(classroomName, result.created)}
+                className="h-11 px-5 rounded-lg bg-white border border-accent text-accent font-semibold cursor-pointer"
+              >
+                列印帳密卡
+              </button>
               <p className="text-sm text-gray-600">帳號密碼只會顯示這一次，請先列印或抄下來</p>
             </div>
           )}

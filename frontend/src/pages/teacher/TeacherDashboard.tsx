@@ -12,6 +12,7 @@ import SchoolSwitcher from '../../components/teacher/SchoolSwitcher';
 import { Skeleton, SkeletonText } from '../../components/ui/Skeleton';
 import LoadingIndicator from '../../components/ui/LoadingIndicator';
 import { useToast } from '../../components/ui/Toast';
+import JunyiClassImportSection from './JunyiClassImportSection';
 
 interface TeacherDashboardProps {
   onSelectClassroom: (classroomId: number) => void;
@@ -36,6 +37,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
 
   // Create form state
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [creationMethod, setCreationMethod] = useState<'manual' | 'junyi'>('manual');
   const [newName, setNewName] = useState('');
   const [newGrade, setNewGrade] = useState('');
   const [isCreating, setIsCreating] = useState(false);
@@ -206,6 +208,34 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
         {showCreateForm && (
           <div className="bg-white rounded-2xl shadow-card p-5">
             <h2 className="text-base font-bold text-gray-900 mb-4">建立新班級</h2>
+
+            {/* Creation method chooser (#3380) */}
+            <div className="flex gap-2 mb-4">
+              <button
+                type="button"
+                onClick={() => setCreationMethod('manual')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  creationMethod === 'manual'
+                    ? 'bg-accent text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                手動建立
+              </button>
+              <button
+                type="button"
+                onClick={() => setCreationMethod('junyi')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  creationMethod === 'junyi'
+                    ? 'bg-accent text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                匯入均一班級學生
+              </button>
+            </div>
+
+            {creationMethod === 'manual' ? (
             <form onSubmit={handleCreate} className="space-y-4">
               {createError && (
                 <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
@@ -274,6 +304,22 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
                 </button>
               </div>
             </form>
+            ) : (
+              teacherSchoolId != null ? (
+                <JunyiClassImportSection
+                  token={token!}
+                  schoolId={teacherSchoolId}
+                  onImported={() => {
+                    setShowCreateForm(false);
+                    setCreationMethod('manual');
+                    showToast('均一班級匯入完成', 'success');
+                    loadClassrooms();
+                  }}
+                />
+              ) : (
+                <p className="text-sm text-gray-500">尚未指派學校，請聯繫管理員</p>
+              )
+            )}
           </div>
         )}
 
