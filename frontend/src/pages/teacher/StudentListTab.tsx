@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import type { ClassroomDetailResponse, StudentInClassroomResponse } from '../../services/classroomApi';
 import CsvUploadModal from './CsvUploadModal';
 import AddStudentsPanel from './panel/AddStudentsPanel';
+import { resetStudentPassword } from '../../services/classroomApi';
 import { generateParentInviteCode } from '../../services/parentApi';
 
 // ── Per-student parent invite button ─────────────────────────────────────────
@@ -62,6 +63,55 @@ const ParentInviteButton: React.FC<{ token: string; studentId: number; studentNa
         className="text-xs text-indigo-500 hover:text-indigo-700 disabled:opacity-50 transition-colors cursor-pointer"
       >
         {isGenerating ? '產生中…' : '家長邀請碼'}
+      </button>
+      {error && <span className="text-xs text-red-500">{error}</span>}
+    </div>
+  );
+};
+
+// ── Per-student password reset button ────────────────────────────────────────
+
+const ResetPasswordButton: React.FC<{
+  token: string;
+  classroomId: number;
+  studentId: number;
+  studentName: string;
+}> = ({ token, classroomId, studentId, studentName }) => {
+  const [result, setResult] = useState<{ username: string; email: string; password: string } | null>(null);
+  const [isResetting, setIsResetting] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleReset = async () => {
+    if (!window.confirm(`確定要重設「${studentName}」的密碼嗎？`)) return;
+    setIsResetting(true);
+    setError('');
+    try {
+      setResult(await resetStudentPassword(token, classroomId, studentId));
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : '重設密碼失敗');
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
+  if (result) {
+    return (
+      <div className="flex flex-col items-end gap-0.5 text-xs">
+        <span className="font-mono text-gray-700">帳號：{result.username}</span>
+        <span className="font-mono text-gray-700">新密碼：{result.password}</span>
+        <span className="text-gray-500">密碼只會顯示這一次，請抄下來</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col items-end gap-0.5">
+      <button
+        onClick={handleReset}
+        disabled={isResetting}
+        className="text-xs text-amber-600 hover:text-amber-800 disabled:opacity-50 transition-colors cursor-pointer"
+      >
+        {isResetting ? '重設中…' : '重設密碼'}
       </button>
       {error && <span className="text-xs text-red-500">{error}</span>}
     </div>
@@ -178,6 +228,12 @@ const StudentListTab: React.FC<StudentListTabProps> = ({
               <div className="flex items-center gap-3">
                 <span className="text-xs text-gray-400 hidden sm:inline">{formatDate(s.enrolled_at)}</span>
                 <ParentInviteButton token={token} studentId={s.id} studentName={s.name} />
+                <ResetPasswordButton
+                  token={token}
+                  classroomId={classroom.id}
+                  studentId={s.id}
+                  studentName={s.name}
+                />
                 {removingStudentId === s.id ? (
                   <div className="flex gap-2">
                     <button onClick={() => onRemoveStudent(s)} className="text-xs text-red-600 font-medium hover:text-red-800 transition-colors cursor-pointer">確認移除</button>
