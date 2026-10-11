@@ -16,7 +16,7 @@ import { useToast } from '../../components/ui/Toast';
 import JunyiClassImportSection from './JunyiClassImportSection';
 
 interface TeacherDashboardProps {
-  onSelectClassroom: (classroomId: number) => void;
+  onSelectClassroom: (classroomId: number, justCreated?: ClassroomResponse) => void;
 }
 
 const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }) => {
@@ -147,7 +147,11 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
       setNewGrade('');
       setShowCreateForm(false);
       // 均一模式 (#3378): a new class goes straight to "add students".
-      onSelectClassroom(created.id);
+      // #3411: pass the classroom we already have so ClassroomDetail can
+      // render it immediately instead of depending on a fresh GET that
+      // raced with the navigation and sometimes lost (bounced back to the
+      // list before the detail page had anything to show).
+      onSelectClassroom(created.id, created);
     } catch (err) {
       if (err instanceof ClassroomApiError) {
         setCreateError(err.message);
