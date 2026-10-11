@@ -85,20 +85,22 @@ def reset_student_password(
             detail="Student does not belong to this classroom's school",
         )
 
-    privileged_role = (
-        db.query(UserRole)
-        .join(Role)
-        .filter(
-            UserRole.user_id == student_id,
-            UserRole.is_active.is_(True),
-            Role.name.in_(("teacher", "system_admin", "org_admin", "org_owner")),
+    active_target_role_names = {
+        role_name
+        for (role_name,) in (
+            db.query(Role.name)
+            .join(UserRole)
+            .filter(
+                UserRole.user_id == student_id,
+                UserRole.is_active.is_(True),
+            )
+            .all()
         )
-        .first()
-    )
-    if privileged_role is not None:
+    }
+    if active_target_role_names and active_target_role_names != {"student"}:
         raise HTTPException(
             status_code=403,
-            detail="Cannot reset password for a privileged account",
+            detail="Cannot reset password for a non-student account",
         )
 
     password = "".join(

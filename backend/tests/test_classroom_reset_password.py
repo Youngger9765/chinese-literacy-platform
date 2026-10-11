@@ -215,6 +215,19 @@ def _deactivate_teacher_roles(user_id: int) -> None:
         db.close()
 
 
+def _deactivate_all_roles(user_id: int) -> None:
+    db = TestingSessionLocal()
+    try:
+        (
+            db.query(UserRole)
+            .filter(UserRole.user_id == user_id, UserRole.is_active.is_(True))
+            .update({UserRole.is_active: False}, synchronize_session=False)
+        )
+        db.commit()
+    finally:
+        db.close()
+
+
 def _create_school_for_teacher(teacher_id: int, *, org_id: str | None = None) -> int:
     school_id = _create_org_and_school(org_id) if org_id else _create_org_and_school(f"org-{uuid.uuid4().hex[:8]}")
     _assign_role(teacher_id, "teacher", scope_type="school", scope_id=str(school_id))
@@ -495,8 +508,9 @@ def test_password_never_appears_in_logs(client, caplog):
 def test_cannot_reset_password_of_a_teacher_account_403(client):
     owner = _register_user(client, "resetpw_privileged_owner")
     teacher_target = _register_user(client, "resetpw_privileged_teacher")
-    target_school_id = _create_school_for_teacher(teacher_target["user_id"])
     owner_school_id = _create_school_for_teacher(owner["user_id"])
+    _deactivate_all_roles(teacher_target["user_id"])
+    _assign_role(teacher_target["user_id"], "teacher", scope_type="school", scope_id=str(owner_school_id))
     classroom_id = _create_classroom(client, owner, owner_school_id)
 
     db = TestingSessionLocal()
@@ -511,7 +525,6 @@ def test_cannot_reset_password_of_a_teacher_account_403(client):
     finally:
         db.close()
 
-    assert target_school_id != owner_school_id
     resp = _reset_password(client, owner, classroom_id, teacher_target["user_id"])
     assert resp.status_code == 403, resp.text
 
@@ -647,6 +660,61 @@ def test_no_determinable_school_affiliation_still_allows_reset(client):
 
     resp = _reset_password(client, owner, classroom_id, student["user_id"])
     assert resp.status_code == 200, resp.text
+
+
+def test_roleless_sso_style_student_can_have_password_reset_200(client):
+    owner = _register_user(client, "resetpw_roleless_owner")
+    roleless_student = _register_user(client, "resetpw_roleless_sso_student")
+    _deactivate_all_roles(roleless_student["user_id"])
+    school_id = _create_school_for_teacher(owner["user_id"])
+    classroom_id = _create_classroom(client, owner, school_id)
+    _enroll_student(client, owner, classroom_id, roleless_student["user_id"])
+
+    db = TestingSessionLocal()
+    try:
+        active_roles = (
+            db.query(UserRole)
+            .filter(
+                UserRole.user_id == roleless_student["user_id"],
+                UserRole.is_active.is_(True),
+            )
+            .all()
+        )
+        assert active_roles == []
+    finally:
+        db.close()
+
+    resp = _reset_password(client, owner, classroom_id, roleless_student["user_id"])
+    assert resp.status_code == 200, resp.text
+
+
+def test_roleless_target_with_mismatching_school_role_still_denied_403(client):
+    owner = _register_user(client, "resetpw_roleless_cross_school_owner")
+    target = _register_user(client, "resetpw_roleless_cross_school_target")
+    _deactivate_all_roles(target["user_id"])
+    classroom_school_id = _create_school_for_teacher(owner["user_id"])
+    other_school_id = _create_org_and_school(f"org-{uuid.uuid4().hex[:8]}")
+    _assign_role(target["user_id"], "teacher", scope_type="school", scope_id=str(other_school_id))
+    classroom_id = _create_classroom(client, owner, classroom_school_id)
+    _enroll_student(client, owner, classroom_id, target["user_id"])
+
+    db = TestingSessionLocal()
+    try:
+        active_roles = (
+            db.query(UserRole)
+            .filter(
+                UserRole.user_id == target["user_id"],
+                UserRole.is_active.is_(True),
+            )
+            .all()
+        )
+        assert len(active_roles) == 1
+        assert active_roles[0].scope_id == str(other_school_id)
+    finally:
+        db.close()
+
+    resp = _reset_password(client, owner, classroom_id, target["user_id"])
+    assert resp.status_code == 403, resp.text
 
 
 def test_system_admin_can_reset_password_200(client):
