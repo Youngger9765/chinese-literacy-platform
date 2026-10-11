@@ -112,8 +112,13 @@ const GuidedStep = z
     // Optional context passage shown above this step (e.g. the 例一 worked example),
     // so a worked example is self-contained. Presentation-only; never the answer.
     context: z.string().nullish(),
+    // 「沒有標準答案」：作答即完成、不判對錯（自我覺察／個人經驗／自我檢核…）。mirrors pydantic.
+    noCorrectAnswer: z.boolean().nullish(),
   })
   .strict()
+  .refine((s) => !s.noCorrectAnswer || s.answer == null, {
+    message: 'a noCorrectAnswer step must not carry an answer',
+  })
   .refine(
     (s) =>
       (s.type !== 'select' && s.type !== 'multi_select') ||
@@ -207,6 +212,72 @@ const KeypointsTableQuestion = z
   })
   .strict();
 
+// 表格作答（mirrors pydantic TableExerciseQuestion）：學習單「在表格裡勾選／填寫」的整張表，
+// 作答位就地作答、逐格判分。slot↔cell 參照與答案範圍在 LessonSchema.superRefine 檢查
+// （這裡要維持純 ZodObject 才能進 discriminatedUnion）。
+const TableSlot = z
+  .object({
+    id: z.string().min(1),
+    type: z.enum(['choice', 'multi_choice', 'text']),
+    options: z.array(z.string()).default([]),
+    answer: z.union([z.number().int().min(0), z.array(z.number().int().min(0)), z.string(), z.null()]).nullish(),
+    noCorrectAnswer: z.boolean().default(false),
+  })
+  .strict();
+
+const TableExerciseCell = z
+  .object({
+    text: z.string().default(''),
+    slots: z.array(z.string()).default([]),
+    matrixOption: z.number().int().min(0).nullish(),
+  })
+  .strict();
+
+const TableExerciseQuestion = z
+  .object({
+    kind: z.literal('table_exercise'),
+    instruction: z.string().min(1),
+    headers: z.array(z.string()).default([]),
+    rows: z.array(z.array(TableExerciseCell)).min(1),
+    slots: z.array(TableSlot).min(1),
+  })
+  .strict();
+
+export type TableSlotT = z.infer<typeof TableSlot>;
+
+/** table_exercise coherence (mirrors pydantic): unique slot ids, every cell ref known, every
+ *  slot drawn, choice answers in range, no answer on a noCorrectAnswer slot. */
+function tableExerciseError(q: z.infer<typeof TableExerciseQuestion>): string | null {
+  const byId = new Map(q.slots.map((s) => [s.id, s]));
+  if (byId.size !== q.slots.length) return 'table_exercise slot ids must be unique';
+  const used = new Set<string>();
+  for (const row of q.rows) {
+    for (const cell of row) {
+      for (const sid of cell.slots) {
+        if (!byId.has(sid)) return `table_exercise cell references unknown slot '${sid}'`;
+        used.add(sid);
+      }
+      if (cell.matrixOption != null) {
+        const slot = cell.slots.length === 1 ? byId.get(cell.slots[0]) : undefined;
+        if (!slot || slot.type === 'text' || cell.matrixOption >= slot.options.length) {
+          return 'matrixOption out of range';
+        }
+      }
+    }
+  }
+  for (const s of q.slots) {
+    if (!used.has(s.id)) return `table_exercise slot '${s.id}' never drawn`;
+    if (s.noCorrectAnswer && s.answer != null) return `slot '${s.id}' is noCorrectAnswer but carries an answer`;
+    if (s.type !== 'text') {
+      if (s.options.length < 2) return `slot '${s.id}' needs >= 2 options`;
+      if (s.answer == null && !s.noCorrectAnswer) return `slot '${s.id}' has no answer`;
+      const idx = s.answer == null ? [] : Array.isArray(s.answer) ? s.answer : [s.answer];
+      if (idx.some((i) => typeof i !== 'number' || i >= s.options.length)) return `slot '${s.id}' answer out of range`;
+    }
+  }
+  return null;
+}
+
 export const QuestionSchema = z.discriminatedUnion('kind', [
   MultipleChoiceQuestion,
   FillInBlankQuestion,
@@ -215,6 +286,7 @@ export const QuestionSchema = z.discriminatedUnion('kind', [
   GuidedStepsQuestion,
   GraphicTextIntegrationQuestion,
   KeypointsTableQuestion,
+  TableExerciseQuestion,
   CustomQuestion,
 ]);
 export type Question = z.infer<typeof QuestionSchema>;
@@ -297,6 +369,35 @@ const ParallelPassageBlock = z
   })
   .strict();
 
+// 通用只讀 block（mirrors pydantic GenericBlock）：轉換器認不得的原稿內容照順序拆成
+// 標題／文字／選項／表格。只讀、不判分、不帶答案。
+const GenericPart = z
+  .object({
+    kind: z.enum(['heading', 'text', 'options', 'table']),
+    text: z.string().nullish(),
+    items: z.array(z.string()).default([]),
+    headers: z.array(z.string()).default([]),
+    rows: z.array(z.array(z.string())).default([]),
+    depth: z.number().int().min(0).default(0),
+  })
+  .strict()
+  .refine((p) => (p.kind !== 'heading' && p.kind !== 'text') || !!p.text?.trim(), {
+    message: 'generic heading/text part needs text',
+  })
+  .refine((p) => p.kind !== 'options' || p.items.length > 0, { message: 'generic options part needs items' })
+  .refine((p) => p.kind !== 'table' || p.rows.length > 0 || p.headers.length > 0, {
+    message: 'generic table part needs rows or headers',
+  });
+
+const GenericBlock = z
+  .object({
+    id: z.string().min(1),
+    type: z.literal('generic'),
+    reason: z.string().nullish(),
+    parts: z.array(GenericPart).min(1),
+  })
+  .strict();
+
 /** Machine-comparable answer. Shape depends on answerSpace (see backend docstring). */
 const AnswerValue = z.union([
   z.number(),
@@ -367,6 +468,7 @@ export const BlockSchema = z.discriminatedUnion('type', [
   FigureBlock,
   TableBlock,
   ParallelPassageBlock,
+  GenericBlock,
   ExerciseBlock,
 ]);
 export type Block = z.infer<typeof BlockSchema>;
@@ -398,6 +500,10 @@ export const LessonSchema = z
         .map((b) => b.id),
     );
     for (const b of lesson.blocks) {
+      if (b.type === 'exercise' && b.question.kind === 'table_exercise') {
+        const err = tableExerciseError(b.question);
+        if (err) ctx.addIssue({ code: z.ZodIssueCode.custom, message: `exercise '${b.id}': ${err}` });
+      }
       if (b.type === 'table') {
         // Gap 2(a): vmerged section-label column coherence (mirrors pydantic _check_grid).
         if (b.rowSections != null) {
