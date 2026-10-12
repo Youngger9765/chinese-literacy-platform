@@ -957,6 +957,10 @@ class TestImportPerformance:
         assert bq.list_class_and_student_rows_for_import("user_id_key_test") == []
         assert len(calls) == 2
         assert "UserData" not in calls[0][0]
+        # Empty Junyi classes have one join row with a NULL student; COUNT(*)
+        # showed them as "1 student" (found against real BigQuery, #3380).
+        assert "COUNT(DISTINCT student_user_id)" in calls[0][0]
+        assert "COUNT(*)" not in calls[0][0]
         assert "LEFT JOIN" in calls[1][0]
         assert calls[0][1] == 2 * 1024 * 1024 * 1024
         assert calls[1][1] == 4 * 1024 * 1024 * 1024
@@ -998,3 +1002,17 @@ class TestImportPerformance:
         assert response.status_code == 200
         assert response.json()["added_students"] == 70
         assert elapsed < 5
+
+
+def test_empty_junyi_class_lists_zero_students_not_one():
+    """A Junyi class with no students exists in the joins table as a single row
+    whose student_user_id is NULL. The listing must say 0, not 1 — otherwise the
+    teacher is told a class has a student and the import creates an empty class."""
+    from app.services.junyi_bigquery_client import FakeJunyiBigQueryClient
+    key = "user_id_key_teacher-empty"
+    client = FakeJunyiBigQueryClient([
+        {"teacher_user_id": key, "class_id": "empty", "class_name": "空班", "class_code": "E1", "student_user_id": None},
+        {"teacher_user_id": key, "class_id": "full", "class_name": "有人", "class_code": "F1", "student_user_id": "user_id_key_s1"},
+    ])
+    counts = {r.junyi_class_id: r.student_count for r in client.list_class_summaries_for_teacher(key)}
+    assert counts == {"empty": 0, "full": 1}
