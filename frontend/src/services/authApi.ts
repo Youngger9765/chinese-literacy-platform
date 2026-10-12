@@ -26,6 +26,9 @@ export interface AuthUser {
   has_classroom: boolean;
   /** Issue #457: mirrors ENFORCE_TEACHER_GATING env var on the backend. */
   teacher_gating_enforced: boolean;
+  /** Issue #3438: server-computed, live on every /users/me call — the
+   *  authoritative source AuthContext derives `mustChangePassword` from. */
+  must_change_password: boolean;
 }
 
 /** Check if user has a specific role (ignores scope). */

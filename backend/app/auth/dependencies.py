@@ -1,12 +1,22 @@
-from fastapi import Depends, HTTPException, Header, status
+from fastapi import Depends, HTTPException, Header, Request, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
 from ..database import get_db
 from ..models.user import User, UserRole, Role
 from .jwt import decode_token
+from .password_policy import compute_must_change_password
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login", auto_error=False)
+
+# #3438: endpoints a student with a pending forced password change may still
+# reach -- GET /users/me (so the frontend can render gate state) and the
+# change-password endpoint itself (the only escape hatch). Everything else
+# behind get_current_user is blocked with 403 while this is true.
+_PASSWORD_CHANGE_EXEMPT: set[tuple[str, str]] = {
+    ("POST", "/api/auth/change-password"),
+    ("GET", "/api/users/me"),
+}
 
 
 async def get_optional_user(
@@ -31,6 +41,7 @@ async def get_optional_user(
 
 
 async def get_current_user(
+    request: Request,
     token: str | None = Depends(oauth2_scheme),
     db: Session = Depends(get_db),
 ) -> User:
@@ -57,6 +68,13 @@ async def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User not found or inactive",
         )
+    if compute_must_change_password(user):
+        if (request.method, request.url.path) not in _PASSWORD_CHANGE_EXEMPT:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="PASSWORD_CHANGE_REQUIRED",
+            )
+
     return user
 
 

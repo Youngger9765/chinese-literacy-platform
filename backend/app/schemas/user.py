@@ -34,6 +34,9 @@ class UserResponse(BaseModel):
     # Issue #457: whether the teacher-gating feature is active (reads ENFORCE_TEACHER_GATING).
     # Frontend uses this to decide whether to redirect to the waiting screen.
     teacher_gating_enforced: bool = False
+    # Issue #3438: server-computed, live on every GET /users/me call -- the
+    # authoritative source AuthContext derives mustChangePassword from.
+    must_change_password: bool = False
 
     model_config = {"from_attributes": True}
 
