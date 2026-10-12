@@ -80,7 +80,8 @@ describe('ClassroomDetail renders initialClassroom immediately (#3411)', () => {
       </MemoryRouter>,
     );
     expect(screen.getByText('QA 測試班')).toBeInTheDocument();
-    expect(screen.getByText('學生名單（0 人）')).toBeInTheDocument();
+    // StudentListTab is stubbed here; the roster section itself must be on screen
+    expect(screen.getByTestId('student-list-tab')).toBeInTheDocument();
   });
 
   it('without initialClassroom, shows the loading skeleton instead (no regression)', () => {

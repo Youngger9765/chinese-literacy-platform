@@ -37,7 +37,11 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
   const { toast, showToast } = useToast();
 
   // Create form state
-  const [showCreateForm, setShowCreateForm] = useState(false);
+  // The class page's left column has a 建立班級 button that lands here with
+  // intent 'create' (Junyi-parity layout), so open the form straight away.
+  const [showCreateForm, setShowCreateForm] = useState(
+    (location.state as { intent?: string } | null)?.intent === 'create',
+  );
   const [creationMethod, setCreationMethod] = useState<'manual' | 'junyi'>('manual');
   const [newName, setNewName] = useState('');
   const [newGrade, setNewGrade] = useState('');

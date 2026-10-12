@@ -62,67 +62,53 @@ const classroomNoStudents = {
   student_count: 0,
 };
 
-describe('ClassroomHeaderCard — join code accordion (#1987)', () => {
-  it('1. collapsed by default when classroom has ≥1 student', () => {
-    render(<ClassroomHeaderCard {...baseProps} classroom={classroomWithStudents} />);
-    // Panel should be hidden (aria-hidden="true")
-    const panel = document.getElementById('join-code-panel');
-    expect(panel).not.toBeNull();
-    expect(panel?.getAttribute('aria-hidden')).toBe('true');
-    // Toggle button should be aria-expanded=false
-    const toggleBtn = screen.getByRole('button', { name: /加入代碼/i });
-    expect(toggleBtn).toHaveAttribute('aria-expanded', 'false');
+// The 加入代碼 accordion (#1987) was replaced by the Junyi-parity header, where
+// 班級代碼 sits in the title row and is always visible — the accordion hid the
+// one thing a teacher reads out to the class.
+describe('ClassroomHeaderCard — 班級代碼 in the title row (Junyi parity)', () => {
+  it.each([
+    ['with students', classroomWithStudents],
+    ['without students', classroomNoStudents],
+  ])('code, copy and regenerate are visible without any toggle (%s)', (_label, c) => {
+    render(<ClassroomHeaderCard {...baseProps} classroom={c} />);
+    const code = screen.getByText('LMC2PA');
+    expect(code.closest('[aria-hidden="true"], [hidden]')).toBeNull();
+    expect(screen.getByRole('button', { name: /複製代碼/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /重生代碼/ })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /加入代碼/ })).toBeNull();
   });
 
-  it('2. expanded by default when classroom has 0 students', () => {
-    render(<ClassroomHeaderCard {...baseProps} classroom={classroomNoStudents} />);
-    // Join code should be visible
-    expect(screen.getByText('LMC2PA')).toBeInTheDocument();
-    const codeText = screen.getByText('LMC2PA');
-    // Should NOT be hidden
-    const hiddenPanel = codeText.closest('[aria-hidden="true"], [hidden]');
-    expect(hiddenPanel).toBeNull();
+  it('copy and regenerate call their handlers', () => {
+    const onCopyJoinCode = vi.fn();
+    const onShowRegenConfirm = vi.fn();
+    render(
+      <ClassroomHeaderCard
+        {...baseProps}
+        classroom={classroomWithStudents}
+        onCopyJoinCode={onCopyJoinCode}
+        onShowRegenConfirm={onShowRegenConfirm}
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: /複製代碼/ }));
+    fireEvent.click(screen.getByRole('button', { name: /重生代碼/ }));
+    expect(onCopyJoinCode).toHaveBeenCalledTimes(1);
+    expect(onShowRegenConfirm).toHaveBeenCalledTimes(1);
   });
 
-  it('3. clicking the toggle button expands the collapsed panel', () => {
-    render(<ClassroomHeaderCard {...baseProps} classroom={classroomWithStudents} />);
-    // Find the accordion toggle button for join code
-    const toggleBtn = screen.getByRole('button', { name: /加入代碼/i });
-    fireEvent.click(toggleBtn);
-    // After click, code should be visible
-    expect(screen.getByText('LMC2PA')).toBeInTheDocument();
-    const codeText = screen.getByText('LMC2PA');
-    const hiddenPanel = codeText.closest('[aria-hidden="true"], [hidden]');
-    expect(hiddenPanel).toBeNull();
-  });
-
-  it('4. clicking toggle again collapses the expanded panel', () => {
-    render(<ClassroomHeaderCard {...baseProps} classroom={classroomNoStudents} />);
-    // Initially expanded (0 students) → aria-hidden="false"
-    const panel = document.getElementById('join-code-panel');
-    expect(panel?.getAttribute('aria-hidden')).toBe('false');
-    const toggleBtn = screen.getByRole('button', { name: /加入代碼/i });
-    fireEvent.click(toggleBtn);
-    // After collapse → aria-hidden="true"
-    expect(panel?.getAttribute('aria-hidden')).toBe('true');
-    expect(toggleBtn).toHaveAttribute('aria-expanded', 'false');
-  });
-
-  it('5. toggle button has correct aria-expanded state', () => {
-    render(<ClassroomHeaderCard {...baseProps} classroom={classroomWithStudents} />);
-    const toggleBtn = screen.getByRole('button', { name: /加入代碼/i });
-    // Initially collapsed → aria-expanded="false"
-    expect(toggleBtn).toHaveAttribute('aria-expanded', 'false');
-    fireEvent.click(toggleBtn);
-    // After expand → aria-expanded="true"
-    expect(toggleBtn).toHaveAttribute('aria-expanded', 'true');
-  });
-
-  it('6. copy and regen buttons are accessible when expanded', () => {
-    render(<ClassroomHeaderCard {...baseProps} classroom={classroomWithStudents} />);
-    const toggleBtn = screen.getByRole('button', { name: /加入代碼/i });
-    fireEvent.click(toggleBtn);
-    expect(screen.getByRole('button', { name: /複製代碼/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /重生代碼/i })).toBeInTheDocument();
+  it('新增學生 tile calls onAddStudents; the pencil starts editing', () => {
+    const onAddStudents = vi.fn();
+    const onStartEditing = vi.fn();
+    render(
+      <ClassroomHeaderCard
+        {...baseProps}
+        classroom={classroomWithStudents}
+        onAddStudents={onAddStudents}
+        onStartEditing={onStartEditing}
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: /新增學生/ }));
+    fireEvent.click(screen.getByRole('button', { name: /編輯班級名稱/ }));
+    expect(onAddStudents).toHaveBeenCalledTimes(1);
+    expect(onStartEditing).toHaveBeenCalledTimes(1);
   });
 });

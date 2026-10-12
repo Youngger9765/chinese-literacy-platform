@@ -6,6 +6,7 @@
  * this is the >=1024px alternative, not a replacement.
  */
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
 import { ClassroomResponse, listMyClassrooms } from '../../../services/classroomApi';
 
@@ -16,6 +17,7 @@ interface ClassListSidebarProps {
 
 const ClassListSidebar: React.FC<ClassListSidebarProps> = ({ currentId, onSwitch }) => {
   const { token } = useAuth();
+  const navigate = useNavigate();
   const [classrooms, setClassrooms] = useState<ClassroomResponse[]>([]);
   const [showInactive, setShowInactive] = useState(false);
 
@@ -26,9 +28,8 @@ const ClassListSidebar: React.FC<ClassListSidebarProps> = ({ currentId, onSwitch
       .catch(() => setClassrooms([]));
   }, [token]);
 
-  // A single class has nothing to switch to; don't add a control that does
-  // nothing (matches ClassSwitcher's own rule).
-  if (classrooms.length < 2) return null;
+  // Junyi-parity: the column is always there (even with one class) because it
+  // also holds 建立班級 — with nothing there the page showed an empty gap that looked broken.
 
   const activeClassrooms = classrooms.filter((classroom) => classroom.is_active !== false);
   const inactiveClassrooms = classrooms.filter((classroom) => classroom.is_active === false);
@@ -36,11 +37,11 @@ const ClassListSidebar: React.FC<ClassListSidebarProps> = ({ currentId, onSwitch
   const renderClassroom = (classroom: ClassroomResponse, isInactive = false) => {
     const isCurrent = classroom.id === currentId;
     const className = isInactive
-      ? `w-full text-left px-3 py-2 rounded-lg text-sm font-normal transition-colors cursor-pointer truncate ${
+      ? `w-full text-left px-5 py-3 text-base font-normal transition-colors cursor-pointer break-words ${
           isCurrent ? 'bg-gray-50 text-gray-400' : 'text-gray-400 hover:bg-gray-50'
         }`
-      : `w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer truncate ${
-          isCurrent ? 'bg-accent-bg text-accent' : 'text-gray-700 hover:bg-gray-50'
+      : `w-full text-left px-5 py-3 text-base font-medium transition-colors cursor-pointer break-words border-r-4 ${
+          isCurrent ? 'bg-accent-bg text-accent border-accent' : 'text-gray-700 hover:bg-gray-50 border-transparent'
         }`;
 
     return (
@@ -59,11 +60,21 @@ const ClassListSidebar: React.FC<ClassListSidebarProps> = ({ currentId, onSwitch
   };
 
   return (
-    <nav aria-label="我的班級" className="bg-white rounded-2xl shadow-card p-3">
-      <h2 className="px-2 py-1.5 text-sm font-semibold text-gray-500">我的班級</h2>
-      <ul className="space-y-0.5">{activeClassrooms.map((classroom) => renderClassroom(classroom))}</ul>
+    <nav aria-label="我的班級" className="py-4">
+      <div className="px-4 pb-4 border-b border-gray-200">
+        <button
+          type="button"
+          onClick={() => navigate('/teacher', { state: { intent: 'create' } })}
+          className="w-full inline-flex items-center justify-center gap-1.5 h-11 rounded-lg bg-accent hover:bg-accent-hover text-white text-base font-medium transition-colors cursor-pointer"
+        >
+          <span aria-hidden="true" className="text-lg leading-none">＋</span>
+          建立班級
+        </button>
+      </div>
+      <h2 className="px-5 pt-4 pb-2 text-base font-bold text-gray-900">我的班級</h2>
+      <ul>{activeClassrooms.map((classroom) => renderClassroom(classroom))}</ul>
       {inactiveClassrooms.length > 0 && (
-        <div className="mt-2 border-t border-gray-100 pt-2">
+        <div className="mt-2 border-t border-gray-100 pt-2 px-4">
           <button
             type="button"
             onClick={() => setShowInactive((isOpen) => !isOpen)}

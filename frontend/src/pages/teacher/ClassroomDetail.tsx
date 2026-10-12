@@ -53,8 +53,8 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack, 
   const activeTab = resolveTabKey(searchParams.get('tab'));
   const assignmentParam = searchParams.get('assignment');
   const selectedAssignmentId = assignmentParam ? Number(assignmentParam) || null : null;
-  // Collapsed by default so the class page opens on content, not the roster (#3376).
-  const [isRosterOpen, setIsRosterOpen] = useState(false);
+  // Junyi-parity: the roster table is always shown; adding students opens a modal.
+  const [isAddStudentsOpen, setIsAddStudentsOpen] = useState(false);
   const studentParam = searchParams.get('student');
   const selectedStudentId = studentParam ? Number(studentParam) || null : null;
   const rawTab = searchParams.get('tab');
@@ -139,7 +139,7 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack, 
   // An empty class opens on "add students" — the first thing to do after creating one (#3378).
   const isEmptyClass = classroom !== null && classroom.students.length === 0;
   useEffect(() => {
-    if (isEmptyClass) setIsRosterOpen(true);
+    if (isEmptyClass) setIsAddStudentsOpen(true);
   }, [isEmptyClass]);
 
   const startEditing = () => {
@@ -383,24 +383,15 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack, 
         onShowRegenConfirm={() => setShowRegenConfirm(true)}
         onHideRegenConfirm={() => setShowRegenConfirm(false)}
         onRegenerateCode={handleRegenerateCode}
+        onAddStudents={() => setIsAddStudentsOpen(true)}
         formatDate={formatDate}
       />
 
-      <section className="bg-white rounded-2xl shadow-card" aria-label="學生名單">
-        <button
-          type="button"
-          onClick={() => setIsRosterOpen((v) => !v)}
-          aria-expanded={isRosterOpen}
-          className="w-full flex items-center justify-between px-6 py-4 text-left cursor-pointer"
-        >
-          <span className="text-lg font-semibold text-gray-900">
-            學生名單（{classroom.students.length} 人）
-          </span>
-          <span className="text-sm text-gray-500">{isRosterOpen ? '收合 ▲' : '展開 ▼'}</span>
-        </button>
-        {isRosterOpen && (
-          <div className="border-t border-gray-100">
+      <section className="rounded-xl border border-gray-200 overflow-hidden" aria-label="學生名單">
             <StudentListTab
+              isAddStudentsOpen={isAddStudentsOpen}
+              onCloseAddStudents={() => setIsAddStudentsOpen(false)}
+              onOpenAddStudents={() => setIsAddStudentsOpen(true)}
               classroom={classroom}
               token={token}
               studentIdInput={studentIdInput}
@@ -415,66 +406,56 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack, 
               formatDate={formatDate}
               onStudentsImported={loadClassroom}
             />
-          </div>
-        )}
       </section>
+
+      <div className="flex justify-end">
+        <button
+          type="button"
+          onClick={() => setActiveTab('assignments')}
+          className="h-11 px-6 rounded-lg bg-accent hover:bg-accent-hover text-white text-base font-medium transition-colors cursor-pointer"
+        >
+          指派任務
+        </button>
+      </div>
     </>
   );
 
   return (
-    <div className="flex-1 overflow-y-auto p-6 sm:p-8">
-      <div className="max-w-6xl mx-auto">
-        {/*
-         * #3424: this page's own "我的班級" column (ClassListSidebar, w-56)
-         * used to switch in at `lg:` (1024px) — the SAME breakpoint where the
-         * app's global left nav (components/layout/Sidebar.tsx) is already
-         * showing its expanded w-56 rail. At exactly 768-1279px both fixed
-         * ~224px columns were on screen at once, squeezing the remaining
-         * content to ~480-576px — not enough room for the header card's
-         * name+buttons row or the join-code button group, which is what
-         * produced the mid-word wraps and the clipped "重生代碼" button.
-         * Moving this column's breakpoint to `xl:` (1280px) keeps the
-         * single-column + ClassSwitcher-dropdown layout (the one 390 already
-         * used) all the way through tablet widths, matching the issue's own
-         * suggested fix.
-         */}
-        <div className="xl:flex xl:gap-6 xl:items-start">
-          <aside className="hidden xl:block w-56 shrink-0">
-            <ClassListSidebar currentId={classroomId} onSwitch={switchClassroom} />
-          </aside>
-
-          <div className="flex-1 min-w-0 space-y-6">
-            <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="flex-1 overflow-y-auto">
+      {/*
+       * Junyi-parity layout: full-width tab bar on top, then the persistent
+       * 「我的班級」 column (>= xl, 1280px — below that the app's own left nav
+       * plus this column left too little room, see #3424) and the tab content
+       * filling the rest. Narrower screens get the ClassSwitcher dropdown.
+       */}
+      <ClassroomTabs
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        classroomId={classroomId}
+        ownerId={classroom.teacher_id}
+        selectedAssignmentId={selectedAssignmentId}
+        onSelectAssignment={setSelectedAssignment}
+        selectedStudentId={selectedStudentId}
+        onSelectStudent={setSelectedStudent}
+        initialView={initialView}
+        onViewChange={setSelectedView}
+        settingsContent={settingsContent}
+        sidebar={<ClassListSidebar currentId={classroomId} onSwitch={switchClassroom} />}
+        topSlot={
+          <>
+            <div className="flex flex-wrap items-center justify-between gap-3 xl:hidden">
               <BackButton />
-              <div className="xl:hidden">
-                <ClassSwitcher currentId={classroomId} onSwitch={switchClassroom} />
-              </div>
+              <ClassSwitcher currentId={classroomId} onSwitch={switchClassroom} />
             </div>
-
-            {/* Inline error */}
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
                 {error}
                 <button onClick={() => setError('')} className="ml-2 underline cursor-pointer">關閉</button>
               </div>
             )}
-
-            <ClassroomTabs
-              activeTab={activeTab}
-              onTabChange={setActiveTab}
-              classroomId={classroomId}
-              ownerId={classroom.teacher_id}
-              selectedAssignmentId={selectedAssignmentId}
-              onSelectAssignment={setSelectedAssignment}
-              selectedStudentId={selectedStudentId}
-              onSelectStudent={setSelectedStudent}
-              initialView={initialView}
-              onViewChange={setSelectedView}
-              settingsContent={settingsContent}
-            />
-          </div>
-        </div>
-      </div>
+          </>
+        }
+      />
     </div>
   );
 };

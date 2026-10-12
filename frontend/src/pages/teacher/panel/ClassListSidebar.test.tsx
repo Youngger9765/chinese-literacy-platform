@@ -1,9 +1,17 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render as rtlRender, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
 import ClassListSidebar from './ClassListSidebar';
 import * as classroomApi from '../../../services/classroomApi';
+
+const navigateSpy = vi.fn();
+vi.mock('react-router-dom', async (orig) => ({
+  ...(await orig<typeof import('react-router-dom')>()),
+  useNavigate: () => navigateSpy,
+}));
+const render = (ui: React.ReactElement) => rtlRender(<MemoryRouter>{ui}</MemoryRouter>);
 
 vi.mock('../../../contexts/AuthContext', () => ({ useAuth: () => ({ token: 't' }) }));
 vi.mock('../../../services/classroomApi', async (orig) => ({
@@ -26,11 +34,17 @@ describe('ClassListSidebar — desktop left class list (#3401)', () => {
     vi.mocked(classroomApi.listMyClassrooms).mockResolvedValue({ items: classrooms, total: 2 } as never);
   });
 
-  it('renders nothing while there is only one classroom (nothing to switch to)', async () => {
+  it('still shows the column with one classroom: 建立班級 + the class (Junyi parity)', async () => {
     vi.mocked(classroomApi.listMyClassrooms).mockResolvedValue({ items: [classrooms[0]], total: 1 } as never);
-    const { container } = render(<ClassListSidebar currentId={1} onSwitch={vi.fn()} />);
-    await waitFor(() => expect(classroomApi.listMyClassrooms).toHaveBeenCalled());
-    expect(container).toBeEmptyDOMElement();
+    render(<ClassListSidebar currentId={1} onSwitch={vi.fn()} />);
+    expect(await screen.findByRole('button', { name: /四年甲班/ })).toHaveAttribute('aria-current', 'true');
+    expect(screen.getByRole('button', { name: /建立班級/ })).toBeInTheDocument();
+  });
+
+  it('建立班級 goes to the class list with the create form open', async () => {
+    render(<ClassListSidebar currentId={1} onSwitch={vi.fn()} />);
+    await userEvent.click(await screen.findByRole('button', { name: /建立班級/ }));
+    expect(navigateSpy).toHaveBeenCalledWith('/teacher', { state: { intent: 'create' } });
   });
 
   it('lists every classroom and marks the current one', async () => {

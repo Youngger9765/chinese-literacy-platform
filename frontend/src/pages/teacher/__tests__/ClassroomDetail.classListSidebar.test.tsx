@@ -30,7 +30,9 @@ vi.mock('../../../services/classroomApi', () => ({
 
 vi.mock('../StudentListTab', () => ({ default: () => <div data-testid="student-list-tab" /> }));
 vi.mock('../ClassroomTabs', () => ({
-  default: () => <div data-testid="classroom-tabs" />,
+  // The class column is now handed to ClassroomTabs (Junyi-parity layout), so
+  // the stub renders it to keep checking that ClassroomDetail wires it up.
+  default: ({ sidebar }: { sidebar?: React.ReactNode }) => <div data-testid="classroom-tabs">{sidebar}</div>,
   resolveInitialView: () => null,
   resolveTabKey: () => 'settings',
 }));
