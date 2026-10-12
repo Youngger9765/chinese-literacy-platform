@@ -24,6 +24,7 @@ import {
   ClassroomDetailResponse,
   StudentInClassroomResponse,
   ClassroomApiError,
+  BatchCreateResult,
 } from '../../services/classroomApi';
 import ClassroomHeaderCard from './ClassroomHeaderCard';
 import ClassroomTabs, { TabKey, resolveInitialView, resolveTabKey } from './ClassroomTabs';
@@ -41,9 +42,15 @@ interface ClassroomDetailProps {
    * instead of depending entirely on a fresh GET /api/classrooms/:id.
    */
   initialClassroom?: ClassroomDetailResponse;
+  /**
+   * Students created together with the class in the 建立班級 dialog. Their
+   * passwords are only ever returned once, so the class page opens straight on
+   * the result (and its 列印帳密卡 button) instead of losing them.
+   */
+  initialAddResult?: BatchCreateResult;
 }
 
-const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack, initialClassroom }) => {
+const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack, initialClassroom, initialAddResult }) => {
   const { token, user } = useAuth();
   const [classroom, setClassroom] = useState<ClassroomDetailResponse | null>(initialClassroom ?? null);
   const [isLoading, setIsLoading] = useState(!initialClassroom);
@@ -54,7 +61,7 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack, 
   const assignmentParam = searchParams.get('assignment');
   const selectedAssignmentId = assignmentParam ? Number(assignmentParam) || null : null;
   // Junyi-parity: the roster table is always shown; adding students opens a modal.
-  const [isAddStudentsOpen, setIsAddStudentsOpen] = useState(false);
+  const [isAddStudentsOpen, setIsAddStudentsOpen] = useState(Boolean(initialAddResult));
   const studentParam = searchParams.get('student');
   const selectedStudentId = studentParam ? Number(studentParam) || null : null;
   const rawTab = searchParams.get('tab');
@@ -390,6 +397,7 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack, 
       <section className="rounded-xl border border-gray-200 overflow-hidden" aria-label="學生名單">
             <StudentListTab
               isAddStudentsOpen={isAddStudentsOpen}
+              initialAddResult={initialAddResult}
               onCloseAddStudents={() => setIsAddStudentsOpen(false)}
               onOpenAddStudents={() => setIsAddStudentsOpen(true)}
               classroom={classroom}

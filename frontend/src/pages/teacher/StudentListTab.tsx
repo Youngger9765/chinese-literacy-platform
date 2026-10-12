@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import type { ClassroomDetailResponse, StudentInClassroomResponse } from '../../services/classroomApi';
+import type { BatchCreateResult, ClassroomDetailResponse, StudentInClassroomResponse } from '../../services/classroomApi';
 import CsvUploadModal from './CsvUploadModal';
 import AddStudentsPanel from './panel/AddStudentsPanel';
 import { resetStudentPassword } from '../../services/classroomApi';
@@ -141,6 +141,7 @@ interface StudentListTabProps {
   isAddStudentsOpen: boolean;
   onCloseAddStudents: () => void;
   onOpenAddStudents: () => void;
+  initialAddResult?: BatchCreateResult;
 }
 
 const StudentListTab: React.FC<StudentListTabProps> = ({
@@ -160,6 +161,7 @@ const StudentListTab: React.FC<StudentListTabProps> = ({
   isAddStudentsOpen,
   onCloseAddStudents,
   onOpenAddStudents,
+  initialAddResult,
 }) => {
   const [showCsvModal, setShowCsvModal] = useState(false);
 
@@ -206,6 +208,7 @@ const StudentListTab: React.FC<StudentListTabProps> = ({
         nextSeat={classroom.students.length + 1}
         onCreated={onStudentsImported}
         onOpenCsv={() => setShowCsvModal(true)}
+        initialResult={initialAddResult}
         addByIdForm={
           <>
             <form onSubmit={onAddStudent} className="flex gap-3 items-end">

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useWorkspace } from '../../contexts/WorkspaceContext';
@@ -6,9 +7,12 @@ import {
   listMyClassrooms,
   createClassroom,
   listJunyiImportableClasses,
+  batchCreateStudents,
   ClassroomResponse,
   ClassroomApiError,
+  BatchCreateResult,
 } from '../../services/classroomApi';
+import { parseRoster } from './panel/AddStudentsPanel';
 import SchoolSwitcher from '../../components/teacher/SchoolSwitcher';
 import { Skeleton, SkeletonText } from '../../components/ui/Skeleton';
 import LoadingIndicator from '../../components/ui/LoadingIndicator';
@@ -16,7 +20,11 @@ import { useToast } from '../../components/ui/Toast';
 import JunyiClassImportSection from './JunyiClassImportSection';
 
 interface TeacherDashboardProps {
-  onSelectClassroom: (classroomId: number, justCreated?: ClassroomResponse) => void;
+  onSelectClassroom: (
+    classroomId: number,
+    justCreated?: ClassroomResponse,
+    createdStudents?: BatchCreateResult,
+  ) => void;
 }
 
 const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }) => {
@@ -42,7 +50,10 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
   const [showCreateForm, setShowCreateForm] = useState(
     (location.state as { intent?: string } | null)?.intent === 'create',
   );
-  const [creationMethod, setCreationMethod] = useState<'manual' | 'junyi'>('manual');
+  // Junyi-parity: one question in the 建立班級 dialog — how do students join?
+  //   create: 幫學生建立帳號（貼名單或填人數）／ join: 學生已有帳號（建好後給班級代碼）／ junyi: 匯入均一班級
+  const [creationMethod, setCreationMethod] = useState<'create' | 'join' | 'junyi'>('create');
+  const [rosterText, setRosterText] = useState('');
   const [newName, setNewName] = useState('');
   const [newGrade, setNewGrade] = useState('');
   const [isCreating, setIsCreating] = useState(false);
@@ -147,16 +158,29 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
         grade,
       });
       setClassrooms((prev) => [...prev, created]);
+      // Students typed into the dialog are created right away, so one 建立
+      // gives a class with accounts. Their passwords come back only once, so
+      // the result travels to the class page, which opens on it.
+      const roster = creationMethod === 'create' ? parseRoster(rosterText, 1) : [];
+      let createdStudents: BatchCreateResult | undefined;
+      if (roster.length > 0) {
+        try {
+          createdStudents = await batchCreateStudents(token, created.id, roster);
+        } catch {
+          showToast('班級已建立，但學生帳號沒有建成功，請在班級頁按「新增學生」再試一次', 'error');
+        }
+      }
       showToast(`班級「${created.name}」建立成功！`, 'success');
       setNewName('');
       setNewGrade('');
+      setRosterText('');
       setShowCreateForm(false);
       // 均一模式 (#3378): a new class goes straight to "add students".
       // #3411: pass the classroom we already have so ClassroomDetail can
       // render it immediately instead of depending on a fresh GET that
       // raced with the navigation and sometimes lost (bounced back to the
       // list before the detail page had anything to show).
-      onSelectClassroom(created.id, created);
+      onSelectClassroom(created.id, created, createdStudents);
     } catch (err) {
       if (err instanceof ClassroomApiError) {
         setCreateError(err.message);
@@ -255,52 +279,27 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
           </div>
         )}
 
-        {/* Create form */}
-        {showCreateForm && (
-          <div className="bg-white rounded-2xl shadow-card p-5">
-            <h2 className="text-base font-bold text-gray-900 mb-4">建立新班級</h2>
+        {/* Create dialog — Junyi-parity: centred modal, one question about students */}
+        {/* Portalled to <body>: an animated (transformed) ancestor otherwise turns
+            `fixed inset-0` into "inset of that ancestor" and the top strip stays undimmed. */}
+        {showCreateForm && createPortal(
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="create-classroom-title"
+            className="fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/40 p-3 sm:p-6 overflow-y-auto"
+          >
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl my-auto p-5 sm:p-7">
+            <h2 id="create-classroom-title" className="text-xl font-bold text-gray-900 mb-5">建立新班級</h2>
 
-            {/* Creation method chooser (#3380). The Junyi toggle (#3406) only
-                renders once we've confirmed the feature is actually available
-                on this env — otherwise clicking it opens an empty panel
-                (JunyiClassImportSection 404s and renders null). While the
-                probe is in flight (junyiImportAvailable === null) the toggle
-                stays hidden too, so there's no flash-then-disappear. */}
-            <div className="flex gap-2 mb-4">
-              <button
-                type="button"
-                onClick={() => setCreationMethod('manual')}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  creationMethod === 'manual'
-                    ? 'bg-accent text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                手動建立
-              </button>
-              {junyiImportAvailable === true && (
-                <button
-                  type="button"
-                  onClick={() => setCreationMethod('junyi')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    creationMethod === 'junyi'
-                      ? 'bg-accent text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  匯入均一班級學生
-                </button>
-              )}
-            </div>
+            {createError && (
+              <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3 mb-4">
+                {createError}
+              </div>
+            )}
 
-            {creationMethod === 'manual' || junyiImportAvailable !== true ? (
-            <form onSubmit={handleCreate} className="space-y-4">
-              {createError && (
-                <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
-                  {createError}
-                </div>
-              )}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {creationMethod !== 'junyi' && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
                 <div>
                   <label htmlFor="classroom-name" className="block text-sm font-medium text-gray-700 mb-1">
                     班級名稱 <span className="text-red-500">*</span>
@@ -313,7 +312,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
                     placeholder="例：五年甲班"
                     required
                     autoFocus
-                    className="w-full h-10 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+                    className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-base focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
                   />
                 </div>
                 <div>
@@ -324,7 +323,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
                     id="classroom-grade"
                     value={newGrade}
                     onChange={(e) => setNewGrade(e.target.value)}
-                    className="w-full h-10 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+                    className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white text-base focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
                   >
                     <option value="">未指定</option>
                     <optgroup label="國小">
@@ -340,36 +339,56 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
                   </select>
                 </div>
               </div>
-              <div className="flex gap-3 justify-end">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowCreateForm(false);
-                    setCreateError('');
-                    setNewName('');
-                    setNewGrade('');
-                  }}
-                  className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors"
-                >
-                  取消
-                </button>
-                <button
-                  type="submit"
-                  disabled={isCreating || !newName.trim()}
-                  className="bg-accent hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-white px-5 py-2 rounded-lg font-medium text-sm transition-colors"
-                >
-                  {isCreating ? '建立中...' : '建立'}
-                </button>
+            )}
+
+            {/* The Junyi option (#3406) only renders once the probe confirmed the
+                feature is available on this env, so it never opens an empty panel. */}
+            <fieldset className="mb-5">
+              <legend className="text-base text-gray-700 mb-2">請選擇加入學生的方式</legend>
+              <div className="rounded-xl bg-gray-50 border border-gray-200 p-4 space-y-3">
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="creation-method"
+                    checked={creationMethod === 'create'}
+                    onChange={() => setCreationMethod('create')}
+                    className="mt-1 w-5 h-5 accent-accent"
+                  />
+                  <span className="text-base text-gray-900">還沒有帳號：幫學生建立帳號</span>
+                </label>
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="creation-method"
+                    checked={creationMethod === 'join'}
+                    onChange={() => setCreationMethod('join')}
+                    className="mt-1 w-5 h-5 accent-accent"
+                  />
+                  <span className="text-base text-gray-900">學生已有帳號（含均一帳號）：建好後給學生班級代碼加入</span>
+                </label>
+                {junyiImportAvailable === true && (
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="creation-method"
+                      checked={creationMethod === 'junyi'}
+                      onChange={() => setCreationMethod('junyi')}
+                      className="mt-1 w-5 h-5 accent-accent"
+                    />
+                    <span className="text-base text-gray-900">匯入均一班級學生：直接帶入我在均一的班級與學生</span>
+                  </label>
+                )}
               </div>
-            </form>
-            ) : (
+            </fieldset>
+
+            {creationMethod === 'junyi' && junyiImportAvailable === true ? (
               teacherSchoolId != null ? (
                 <JunyiClassImportSection
                   token={token!}
                   schoolId={teacherSchoolId}
                   onImported={() => {
                     setShowCreateForm(false);
-                    setCreationMethod('manual');
+                    setCreationMethod('create');
                     showToast('均一班級匯入完成', 'success');
                     loadClassrooms();
                   }}
@@ -377,8 +396,62 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
               ) : (
                 <p className="text-sm text-gray-500">尚未指派學校，請聯繫管理員</p>
               )
+            ) : (
+              <form onSubmit={handleCreate} className="space-y-4">
+                {creationMethod === 'create' && (
+                  <div className="space-y-2">
+                    <label htmlFor="create-roster" className="block text-base font-semibold text-gray-800">
+                      幫學生建立帳號與密碼
+                    </label>
+                    <p className="text-sm text-gray-600">
+                      一行一位學生，可以寫「座號 姓名」或只寫姓名；也可以只填人數（例如 28）。可以先空著，之後在班級頁按「新增學生」
+                    </p>
+                    <textarea
+                      id="create-roster"
+                      value={rosterText}
+                      onChange={(e) => setRosterText(e.target.value)}
+                      rows={5}
+                      placeholder={'1 王小明\n2 林雨萱\n3 陳柏宇'}
+                      className="w-full px-3 py-2 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-base focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
+                    />
+                  </div>
+                )}
+                {creationMethod === 'join' && (
+                  <p className="text-base text-gray-700 bg-sky-50 rounded-lg px-4 py-3">
+                    建好後，班級頁上方會有「班級代碼」，學生登入後在首頁「加入班級」輸入就會加入
+                  </p>
+                )}
+                <div className="flex gap-3 justify-end">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowCreateForm(false);
+                      setCreateError('');
+                      setNewName('');
+                      setNewGrade('');
+                      setRosterText('');
+                    }}
+                    className="h-11 px-5 rounded-lg border border-gray-300 text-gray-700 text-base font-medium hover:bg-gray-50 transition-colors"
+                  >
+                    取消
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isCreating || !newName.trim()}
+                    className="h-11 bg-accent hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 rounded-lg font-medium text-base transition-colors"
+                  >
+                    {isCreating
+                      ? '建立中...'
+                      : creationMethod === 'create' && parseRoster(rosterText, 1).length > 0
+                        ? `建立班級和 ${parseRoster(rosterText, 1).length} 個學生帳號`
+                        : '確定建立班級'}
+                  </button>
+                </div>
+              </form>
             )}
           </div>
+          </div>,
+          document.body,
         )}
 
         {/* Error state */}

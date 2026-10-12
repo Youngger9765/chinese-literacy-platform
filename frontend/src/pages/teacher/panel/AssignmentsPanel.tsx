@@ -141,36 +141,53 @@ const AssignmentsPanel: React.FC<AssignmentsPanelProps> = ({ classroomId, select
 
   return (
     <div className="p-5 space-y-5">
-      <div className="flex justify-end">
-        <button
-          type="button"
-          onClick={handleCreateClick}
-          className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg bg-accent hover:bg-accent-hover text-white text-sm font-semibold transition-colors cursor-pointer"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.5v15m7.5-7.5h-15" />
-          </svg>
-          建立作業
-        </button>
+      {/* Junyi-parity toolbar: 建立 / 管理 on the left, status legend on the right */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={handleCreateClick}
+            className="inline-flex items-center gap-2 h-11 px-5 rounded-lg bg-accent hover:bg-accent-hover text-white text-base font-semibold transition-colors cursor-pointer"
+          >
+            建立作業
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowManage((v) => !v)}
+            aria-expanded={showManage}
+            className="inline-flex items-center h-11 px-5 rounded-lg border border-gray-300 text-gray-700 text-base font-medium hover:bg-gray-50 transition-colors cursor-pointer"
+          >
+            管理作業
+          </button>
+        </div>
+        {matrix && matrix.assignments.length > 0 && (
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-600" aria-label="狀態說明">
+            <span className="flex items-center gap-1.5"><span className="w-4 h-4 rounded bg-green-200" />已交</span>
+            <span className="flex items-center gap-1.5"><span className="w-4 h-4 rounded border border-dashed border-amber-400" />進行中</span>
+            <span className="flex items-center gap-1.5"><span className="w-4 h-4 rounded bg-white border border-gray-300" />未開始</span>
+            <span className="flex items-center gap-1.5"><span className="w-4 h-4 rounded bg-red-200" />逾期未交</span>
+          </div>
+        )}
       </div>
-      {error && <p className="text-red-600 text-sm">{error} <button className="underline" onClick={load}>重試</button></p>}
-      {!matrix && !error && <div className="h-64 rounded-xl bg-gray-100 animate-pulse" />}
-      {matrix && <AssignmentMatrixGrid data={matrix} onOpenAssignment={onSelectAssignment} onOpenStudent={onOpenStudent} />}
 
-      <section className="rounded-xl border border-gray-200" aria-label="建立與管理作業">
-        <button
-          type="button"
-          onClick={() => setShowManage((v) => !v)}
-          aria-expanded={showManage}
-          className="w-full flex items-center justify-between px-4 py-3 text-left font-semibold text-gray-800 cursor-pointer"
-        >
-          建立與管理作業
-          <span className="text-sm font-normal text-gray-500">{showManage ? '收合 ▲' : '展開 ▼'}</span>
-        </button>
-        {showManage && (
-          <div className="border-t border-gray-100 p-4 space-y-6">
+      {showManage && (
+        <section className="rounded-xl border border-gray-200" aria-label="建立與管理作業">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+            <h3 className="font-semibold text-gray-800 text-lg">建立與管理作業</h3>
+            <button
+              type="button"
+              onClick={() => setShowManage(false)}
+              className="text-sm text-gray-500 hover:text-gray-800 cursor-pointer"
+            >
+              收合 ▲
+            </button>
+          </div>
+          <div className="p-4 space-y-6">
             <section aria-label="正式作業">
-              <h3 className="font-semibold text-gray-800 mb-2">正式作業（會進上面的總表）</h3>
+              <h3 className="font-semibold text-gray-800 mb-2">正式作業（會進下面的總表）</h3>
               <AssignmentTab classroomId={classroomId} onChanged={load} openSignal={createSignal} />
             </section>
             <section aria-label="自學課文庫">
@@ -181,8 +198,12 @@ const AssignmentsPanel: React.FC<AssignmentsPanelProps> = ({ classroomId, select
               <TextManagementTab classroomId={classroomId} />
             </section>
           </div>
-        )}
-      </section>
+        </section>
+      )}
+
+      {error && <p className="text-red-600 text-sm">{error} <button className="underline" onClick={load}>重試</button></p>}
+      {!matrix && !error && <div className="h-64 rounded-xl bg-gray-100 animate-pulse" />}
+      {matrix && <AssignmentMatrixGrid data={matrix} onOpenAssignment={onSelectAssignment} onOpenStudent={onOpenStudent} />}
     </div>
   );
 };
