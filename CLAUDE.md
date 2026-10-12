@@ -294,7 +294,7 @@ golden set：`~/.claude/hooks/tests/meeting-agenda-to-repo-guard.eval.sh`（12 c
 | Task | Model | Region | 鎖定原因 |
 |------|-------|--------|---------|
 | 8 個 text/JSON tasks（socratic / comprehension / vocab / reading / story / exit_ticket / sentence_validate / teacher_comment）| `gemini-2.5-flash-lite` | global | 4-way A/B：quality tie, cost -78% (#1744) |
-| `omo_identifier` | `gemini-flash-lite-latest` (=3.1 Lite) | global | Fair A/B conf 0.973 vs 0.934 (#1729) |
+| `omo_identifier` | `gemini-2.5-flash-lite` | global | `gemini-flash-lite-latest` 在 Vertex global 回 404，2026-10-12 換掉（#3440，準確度未重做 A/B；原 #1729 A/B conf 0.973 vs 0.934）|
 | **`omo_grader`** | **`gemini-2.5-flash`** | **us-central1** | **LOCKED — lettered circle 5/5 vs 1/5 spatial (#1730)** |
 
 ### 比較維度 checklist（換 model 前測這些）

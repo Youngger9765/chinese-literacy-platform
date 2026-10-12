@@ -198,7 +198,11 @@ def _impersonated_credentials():
     return impersonated_credentials.Credentials(
         source_credentials=source_credentials,
         target_principal=settings.junyi_bigquery_service_account,
-        target_scopes=["https://www.googleapis.com/auth/bigquery.readonly"],
+        # Full bigquery scope, not bigquery.readonly: running a query creates a
+        # job (jobs.insert), which the readonly scope refuses with 403
+        # "insufficient authentication scopes" (#3380). Data access is still
+        # limited by the SA's IAM roles (jobUser here, dataViewer on the source).
+        target_scopes=["https://www.googleapis.com/auth/bigquery"],
         lifetime=300,
     )
 
