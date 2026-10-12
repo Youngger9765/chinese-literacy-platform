@@ -6,14 +6,15 @@ import PasswordStrengthIndicator from '../components/PasswordStrengthIndicator';
 
 const ChangePasswordPage: React.FC = () => {
   const navigate = useNavigate();
-  const { token, mustChangePassword, loginPassword, clearMustChangePassword } = useAuth();
+  const { token, mustChangePassword, clearMustChangePassword, refreshUser } = useAuth();
+  const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // If user arrived here without must_change_password flag, redirect to home
-  if (!mustChangePassword || !token || !loginPassword) {
+  if (!mustChangePassword || !token) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-amber-50 px-4">
         <div className="w-full max-w-sm text-center">
@@ -32,6 +33,11 @@ const ChangePasswordPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    if (!currentPassword) {
+      setError('請輸入目前的密碼');
+      return;
+    }
 
     if (!newPassword || !confirmPassword) {
       setError('請填寫所有欄位');
@@ -58,14 +64,15 @@ const ChangePasswordPage: React.FC = () => {
       return;
     }
 
-    if (newPassword === loginPassword) {
+    if (newPassword === currentPassword) {
       setError('新密碼不能與舊密碼相同');
       return;
     }
 
     setIsSubmitting(true);
     try {
-      await changePassword(loginPassword, newPassword, token);
+      await changePassword(currentPassword, newPassword, token);
+      await refreshUser();
       clearMustChangePassword();
       navigate('/', { replace: true });
     } catch (err) {
@@ -107,6 +114,21 @@ const ChangePasswordPage: React.FC = () => {
               {error}
             </div>
           )}
+
+          <div>
+            <label htmlFor="current-password" className="block text-sm font-medium text-gray-700 mb-1">
+              目前密碼
+            </label>
+            <input
+              id="current-password"
+              type="password"
+              autoComplete="current-password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              placeholder="輸入目前使用的密碼"
+              className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+            />
+          </div>
 
           {/* New Password */}
           <div>
