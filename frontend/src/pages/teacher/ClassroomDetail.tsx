@@ -424,15 +424,29 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack, 
   return (
     <div className="flex-1 overflow-y-auto p-6 sm:p-8">
       <div className="max-w-6xl mx-auto">
-        <div className="lg:flex lg:gap-6 lg:items-start">
-          <aside className="hidden lg:block w-56 shrink-0">
+        {/*
+         * #3424: this page's own "我的班級" column (ClassListSidebar, w-56)
+         * used to switch in at `lg:` (1024px) — the SAME breakpoint where the
+         * app's global left nav (components/layout/Sidebar.tsx) is already
+         * showing its expanded w-56 rail. At exactly 768-1279px both fixed
+         * ~224px columns were on screen at once, squeezing the remaining
+         * content to ~480-576px — not enough room for the header card's
+         * name+buttons row or the join-code button group, which is what
+         * produced the mid-word wraps and the clipped "重生代碼" button.
+         * Moving this column's breakpoint to `xl:` (1280px) keeps the
+         * single-column + ClassSwitcher-dropdown layout (the one 390 already
+         * used) all the way through tablet widths, matching the issue's own
+         * suggested fix.
+         */}
+        <div className="xl:flex xl:gap-6 xl:items-start">
+          <aside className="hidden xl:block w-56 shrink-0">
             <ClassListSidebar currentId={classroomId} onSwitch={switchClassroom} />
           </aside>
 
           <div className="flex-1 min-w-0 space-y-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <BackButton />
-              <div className="lg:hidden">
+              <div className="xl:hidden">
                 <ClassSwitcher currentId={classroomId} onSwitch={switchClassroom} />
               </div>
             </div>

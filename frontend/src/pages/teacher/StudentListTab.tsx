@@ -220,28 +220,40 @@ const StudentListTab: React.FC<StudentListTabProps> = ({
       ) : (
         <div className="divide-y divide-gray-100">
           {classroom.students.map((s) => (
-            <div key={s.id} className="px-5 py-3 flex items-center justify-between">
-              <div>
+            // #3424: this row used to be a single `flex items-center justify-between`
+            // line with no `flex-wrap`. At tablet widths the action labels
+            // (家長邀請碼／重設密碼／移除) had no room and wrapped mid-word
+            // ("家長邀／請碼"), and 移除 sat 12px from 重設密碼 with no
+            // separation — easy to mis-tap. `flex-wrap` lets the actions drop
+            // to their own line instead of squeezing; `whitespace-nowrap` on
+            // each label stops the mid-word break; the border-l gives 移除
+            // its own visually separated zone.
+            <div key={s.id} className="px-5 py-3 flex flex-wrap items-center justify-between gap-y-1.5 gap-x-3">
+              <div className="min-w-0">
                 <p className="text-sm font-medium text-gray-900">{s.name}</p>
                 <p className="text-xs text-gray-500 hidden sm:block">{s.email}</p>
               </div>
-              <div className="flex items-center gap-3">
-                <span className="text-xs text-gray-400 hidden sm:inline">{formatDate(s.enrolled_at)}</span>
-                <ParentInviteButton token={token} studentId={s.id} studentName={s.name} />
-                <ResetPasswordButton
-                  token={token}
-                  classroomId={classroom.id}
-                  studentId={s.id}
-                  studentName={s.name}
-                />
-                {removingStudentId === s.id ? (
-                  <div className="flex gap-2">
-                    <button onClick={() => onRemoveStudent(s)} className="text-xs text-red-600 font-medium hover:text-red-800 transition-colors cursor-pointer">確認移除</button>
-                    <button onClick={() => setRemovingStudentId(null)} className="text-xs text-gray-500 hover:text-gray-700 transition-colors cursor-pointer">取消</button>
-                  </div>
-                ) : (
-                  <button onClick={() => onRemoveStudent(s)} className="text-xs text-gray-400 hover:text-red-600 transition-colors cursor-pointer">移除</button>
-                )}
+              <div className="flex items-center flex-wrap gap-3">
+                <span className="text-xs text-gray-400 hidden sm:inline whitespace-nowrap">{formatDate(s.enrolled_at)}</span>
+                <span className="whitespace-nowrap"><ParentInviteButton token={token} studentId={s.id} studentName={s.name} /></span>
+                <span className="whitespace-nowrap">
+                  <ResetPasswordButton
+                    token={token}
+                    classroomId={classroom.id}
+                    studentId={s.id}
+                    studentName={s.name}
+                  />
+                </span>
+                <div className="pl-3 ml-0.5 border-l border-gray-200">
+                  {removingStudentId === s.id ? (
+                    <div className="flex gap-2 whitespace-nowrap">
+                      <button onClick={() => onRemoveStudent(s)} className="text-xs text-red-600 font-medium hover:text-red-800 transition-colors cursor-pointer whitespace-nowrap">確認移除</button>
+                      <button onClick={() => setRemovingStudentId(null)} className="text-xs text-gray-500 hover:text-gray-700 transition-colors cursor-pointer whitespace-nowrap">取消</button>
+                    </div>
+                  ) : (
+                    <button onClick={() => onRemoveStudent(s)} className="text-xs text-gray-400 hover:text-red-600 transition-colors cursor-pointer whitespace-nowrap px-1 py-1 -m-1">移除</button>
+                  )}
+                </div>
               </div>
             </div>
           ))}
