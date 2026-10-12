@@ -25,7 +25,7 @@ vi.mock('../../../services/assignmentApi', async (orig) => ({
 vi.mock('../../../services/api', () => ({ fetchStories: vi.fn().mockResolvedValue({ stories: [], total: 0, grades: [] }) }));
 vi.mock('../TextManagementTab', () => ({ default: () => <div>TextManagementTab</div> }));
 
-const emptyMatrix = { assignments: [], students: [], cells: [] };
+const emptyMatrix = { assignments: [], students: [{ id: 1, name: '王小明' }], cells: [] };
 
 describe('AssignmentsPanel — 建立任務 button at the top (#3401)', () => {
   beforeEach(() => {
@@ -47,11 +47,14 @@ describe('AssignmentsPanel — 建立任務 button at the top (#3401)', () => {
     const topButton = await screen.findByRole('button', { name: '建立作業' });
     expect(topButton).toBeInTheDocument();
 
-    // It must appear before the "建立與管理作業" collapsible section in the DOM
-    // (i.e. above the matrix / manage section, reference-UI).
-    const manageHeading = screen.getByRole('button', { name: /建立與管理作業/ });
+    // Junyi-parity toolbar: 建立作業 then 管理作業, both above the matrix.
+    const manageButton = screen.getByRole('button', { name: '管理作業' });
     expect(
-      topButton.compareDocumentPosition(manageHeading) & Node.DOCUMENT_POSITION_FOLLOWING,
+      topButton.compareDocumentPosition(manageButton) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    const matrix = await screen.findByRole('table', { name: '班級作業總表' });
+    expect(
+      manageButton.compareDocumentPosition(matrix) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
   });
 
@@ -71,8 +74,8 @@ describe('AssignmentsPanel — 建立任務 button at the top (#3401)', () => {
 
     await userEvent.click(screen.getByRole('button', { name: '建立作業' }));
 
-    // Expands the collapsible section...
-    expect(screen.getByRole('button', { name: /建立與管理作業/ })).toHaveAttribute('aria-expanded', 'true');
+    // Opens the manage section...
+    expect(screen.getByRole('button', { name: '管理作業' })).toHaveAttribute('aria-expanded', 'true');
     // ...and opens the existing create-assignment form (AssignmentCreateForm renders a
     // "選擇課文" field) without the user having to click "建立作業" a second time.
     await waitFor(() => expect(screen.getByText('選擇課文')).toBeInTheDocument());

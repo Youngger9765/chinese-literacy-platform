@@ -68,11 +68,19 @@ interface ClassroomTabsProps {
   initialView?: string | null;
   onViewChange?: (view: string) => void;
   settingsContent: React.ReactNode;
+  /** Junyi-parity layout: persistent class column next to the tab content (>= xl). */
+  sidebar?: React.ReactNode;
+  /** Rendered above the tab content (class switcher on narrow screens, errors). */
+  topSlot?: React.ReactNode;
 }
 
+// Junyi-parity: three equal full-width cells; the selected one is a solid filled
+// block (not an underline) so the current section is obvious from across a room.
 const tabClass = (active: boolean) =>
-  `px-3 sm:px-5 py-3 text-[15px] sm:text-base font-medium text-center border-b-2 -mb-px transition-colors cursor-pointer shrink-0 ${
-    active ? 'border-accent text-accent' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+  `flex-1 min-w-0 py-3 sm:py-3.5 text-base sm:text-xl font-medium text-center border-b-4 transition-colors cursor-pointer whitespace-nowrap ${
+    active
+      ? 'bg-accent text-white border-accent-hover'
+      : 'bg-white text-gray-500 border-gray-200 hover:text-gray-800 hover:bg-gray-50'
   }`;
 
 const CoTeachingSection: React.FC<{ classroomId: number; ownerId: number }> = ({ classroomId, ownerId }) => {
@@ -110,9 +118,11 @@ const ClassroomTabs: React.FC<ClassroomTabsProps> = ({
   initialView,
   onViewChange,
   settingsContent,
+  sidebar,
+  topSlot,
 }) => (
-  <div className="bg-white rounded-2xl shadow-card">
-    <nav className="flex overflow-x-auto border-b border-gray-200 px-1 sm:px-2" aria-label="班級分頁" role="tablist">
+  <div className="min-h-full flex flex-col">
+    <nav className="flex sticky top-0 z-10 shadow-sm" aria-label="班級分頁" role="tablist">
       {TABS.map((tab) => (
         <button
           key={tab.key}
@@ -128,6 +138,13 @@ const ClassroomTabs: React.FC<ClassroomTabsProps> = ({
       ))}
     </nav>
 
+    <div className="flex-1 xl:flex xl:items-stretch">
+      {sidebar && (
+        <aside className="hidden xl:block w-60 shrink-0 bg-white border-r border-gray-200">{sidebar}</aside>
+      )}
+      <div className="flex-1 min-w-0 p-4 sm:p-6 space-y-4">
+        {topSlot}
+        <div className="bg-white rounded-2xl shadow-card max-w-[1200px]">
     {activeTab === 'settings' && (
       <div className="p-5 space-y-5">
         {settingsContent}
@@ -154,6 +171,9 @@ const ClassroomTabs: React.FC<ClassroomTabsProps> = ({
         onViewChange={onViewChange}
       />
     )}
+        </div>
+      </div>
+    </div>
   </div>
 );
 

@@ -47,27 +47,40 @@ const baseProps = {
   setRemovingStudentId: vi.fn(),
   formatDate: (s: string) => s,
   onStudentsImported: vi.fn(),
+  isAddStudentsOpen: false,
+  onCloseAddStudents: vi.fn(),
+  onOpenAddStudents: vi.fn(),
 };
 
 describe('StudentListTab — roster row wrap safety (#3424)', () => {
   it('the actions row wraps instead of squeezing labels mid-word', () => {
     render(<StudentListTab {...baseProps} />);
     const removeBtn = screen.getByRole('button', { name: '移除' });
-    const actionsRow = removeBtn.closest('div')!.parentElement!;
-    expect(actionsRow.className).toMatch(/\bflex-wrap\b/);
+    // Junyi-parity table: on phones each row is a wrapping flex card, a table row from sm up
+    const row = removeBtn.closest('tr')!;
+    expect(row.className).toMatch(/\bflex-wrap\b/);
+    expect(row.className).toMatch(/\bsm:table-row\b/);
   });
 
   it('每個動作標籤都有 whitespace-nowrap，不會斷字', () => {
     render(<StudentListTab {...baseProps} />);
-    expect(screen.getByText('家長邀請碼').closest('.whitespace-nowrap')).not.toBeNull();
-    expect(screen.getByText('重設密碼').closest('.whitespace-nowrap')).not.toBeNull();
+    expect(screen.getByRole('button', { name: '家長邀請碼' }).closest('.whitespace-nowrap')).not.toBeNull();
+    expect(screen.getByRole('button', { name: '重設密碼' }).closest('.whitespace-nowrap')).not.toBeNull();
     expect(screen.getByRole('button', { name: '移除' }).className).toMatch(/whitespace-nowrap/);
   });
 
-  it('移除按鈕跟其他操作之間有視覺分隔（border-l），降低誤觸風險', () => {
+  it('移除在自己的欄位、跟重設密碼分開，降低誤觸風險', () => {
     render(<StudentListTab {...baseProps} />);
-    const removeBtn = screen.getByRole('button', { name: '移除' });
-    const separatedWrapper = removeBtn.parentElement!;
-    expect(separatedWrapper.className).toMatch(/border-l/);
+    const removeCell = screen.getByRole('button', { name: '移除' }).closest('td')!;
+    const resetCell = screen.getByRole('button', { name: '重設密碼' }).closest('td')!;
+    expect(removeCell).not.toBe(resetCell);
+    expect(removeCell.className).toMatch(/\bml-auto\b/);
+  });
+
+  it('新增學生 form is not inline; it opens in a dialog when asked', () => {
+    const { rerender } = render(<StudentListTab {...baseProps} />);
+    expect(screen.queryByRole('dialog')).toBeNull();
+    rerender(<StudentListTab {...baseProps} isAddStudentsOpen />);
+    expect(screen.getByRole('dialog', { name: '新增學生' })).toBeInTheDocument();
   });
 });

@@ -50,6 +50,8 @@ interface AddStudentsPanelProps {
   /** The existing "add by student ID" form, shown under 已有帳號. */
   addByIdForm: React.ReactNode;
   onOpenCsv: () => void;
+  /** Result of students created in the 建立班級 dialog, shown once here. */
+  initialResult?: BatchCreateResult;
 }
 
 const AddStudentsPanel: React.FC<AddStudentsPanelProps> = ({
@@ -61,12 +63,13 @@ const AddStudentsPanel: React.FC<AddStudentsPanelProps> = ({
   onCreated,
   addByIdForm,
   onOpenCsv,
+  initialResult,
 }) => {
   const [mode, setMode] = useState<Mode>('no-account');
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const [result, setResult] = useState<BatchCreateResult | null>(null);
+  const [result, setResult] = useState<BatchCreateResult | null>(initialResult ?? null);
 
   const parsed = parseRoster(text, nextSeat);
 

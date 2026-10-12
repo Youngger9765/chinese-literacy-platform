@@ -51,7 +51,8 @@ vi.mock('../../../contexts/WorkspaceContext', () => ({
 
 import TeacherDashboard from '../TeacherDashboard';
 
-const JUNYI_TOGGLE_NAME = '匯入均一班級學生';
+// Junyi-parity dialog: the import option is a radio, not a tab button
+const JUNYI_TOGGLE_NAME = /匯入均一班級學生/;
 
 function renderDashboard() {
   const onSelectClassroom = vi.fn();
@@ -96,9 +97,9 @@ describe('TeacherDashboard — Junyi import toggle visibility (issue #3406)', ()
     // Hidden both before and after the probe settles to "unavailable" — the
     // initial state is `null` (unknown), which already renders as hidden,
     // so there's no show-then-hide flash on the way to "off".
-    expect(screen.queryByRole('button', { name: JUNYI_TOGGLE_NAME })).not.toBeInTheDocument();
+    expect(screen.queryByRole('radio', { name: JUNYI_TOGGLE_NAME })).not.toBeInTheDocument();
     // Manual mode remains the (only) option, fully usable.
-    expect(screen.getByRole('button', { name: '手動建立' })).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: /幫學生建立帳號/ })).toBeInTheDocument();
     expect(screen.getByPlaceholderText('例：五年甲班')).toBeInTheDocument();
   });
 
@@ -112,7 +113,7 @@ describe('TeacherDashboard — Junyi import toggle visibility (issue #3406)', ()
     await openCreateDialog();
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: JUNYI_TOGGLE_NAME })).toBeInTheDocument();
+      expect(screen.getByRole('radio', { name: JUNYI_TOGGLE_NAME })).toBeInTheDocument();
     });
   });
 
@@ -138,7 +139,7 @@ describe('TeacherDashboard — Junyi import toggle visibility (issue #3406)', ()
     fireEvent.change(screen.getByPlaceholderText('例：五年甲班'), {
       target: { value: '五年甲班' },
     });
-    fireEvent.click(screen.getByRole('button', { name: '建立' }));
+    fireEvent.click(screen.getByRole('button', { name: '確定建立班級' }));
 
     await waitFor(() => {
       expect(classroomApi.createClassroom).toHaveBeenCalledWith('test-token', {
@@ -150,7 +151,7 @@ describe('TeacherDashboard — Junyi import toggle visibility (issue #3406)', ()
     await waitFor(() => {
       // #3411: the just-created classroom object is now passed as a second
       // arg so the detail page can render it without a second round trip.
-      expect(onSelectClassroom).toHaveBeenCalledWith(42, createdClassroom);
+      expect(onSelectClassroom).toHaveBeenCalledWith(42, createdClassroom, undefined);
     });
   });
 });

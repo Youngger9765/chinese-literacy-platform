@@ -12,7 +12,7 @@
 import React, { Suspense, useState } from 'react';
 import { Navigate, useNavigate, useParams, useSearchParams, useLocation } from 'react-router-dom';
 import { lazy } from 'react';
-import type { ClassroomResponse } from '../../services/classroomApi';
+import type { BatchCreateResult, ClassroomResponse } from '../../services/classroomApi';
 import { useAuth } from '../../contexts/AuthContext';
 import { hasRole } from '../../services/authApi';
 import { clearActiveSession } from '../../services/api';
@@ -261,7 +261,8 @@ export const ClassroomDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const classroomId = id ? parseInt(id, 10) : null;
   const location = useLocation();
-  const justCreated = (location.state as { justCreated?: ClassroomResponse } | null)?.justCreated;
+  const navState = location.state as { justCreated?: ClassroomResponse; createdStudents?: BatchCreateResult } | null;
+  const justCreated = navState?.justCreated;
 
   if (classroomId == null || isNaN(classroomId)) {
     return <Navigate to="/teacher" replace />;
@@ -276,6 +277,7 @@ export const ClassroomDetailPage: React.FC = () => {
     <ClassroomDetail
       classroomId={classroomId}
       initialClassroom={initialClassroom}
+      initialAddResult={justCreated && justCreated.id === classroomId ? navState?.createdStudents : undefined}
       onBack={() => navigate('/teacher')}
     />
   );
@@ -287,8 +289,8 @@ export const TeacherDashboardPage: React.FC = () => {
 
   return (
     <TeacherDashboard
-      onSelectClassroom={(id, justCreated) =>
-        navigate(`/teacher/classroom/${id}`, justCreated ? { state: { justCreated } } : undefined)
+      onSelectClassroom={(id, justCreated, createdStudents) =>
+        navigate(`/teacher/classroom/${id}`, justCreated ? { state: { justCreated, createdStudents } } : undefined)
       }
     />
   );

@@ -95,11 +95,38 @@ function formatDue(due: string | null): string {
 const AssignmentMatrixGrid: React.FC<AssignmentMatrixGridProps> = ({ data, onOpenAssignment, onOpenStudent }) => {
   const { students, assignments, cells } = data;
 
-  if (assignments.length === 0) {
-    return <p className="py-10 text-center text-gray-500">這個班級還沒有指派作業</p>;
-  }
   if (students.length === 0) {
-    return <p className="py-10 text-center text-gray-500">這個班級還沒有學生</p>;
+    return <p className="py-10 text-center text-gray-500">這個班級還沒有學生，先到「班級設定」新增學生</p>;
+  }
+  if (assignments.length === 0) {
+    // Junyi-parity: even before the first assignment, show who is in the class,
+    // so the teacher sees the grid the assignments will fill.
+    return (
+      <div className="space-y-3">
+        <p className="flex items-center gap-2 rounded-lg bg-sky-50 text-sky-900 px-4 py-3 text-base">
+          <span aria-hidden="true" className="w-5 h-5 shrink-0 rounded-full border-2 border-sky-500 text-sky-600 text-xs font-bold leading-4 text-center">i</span>
+          按「建立作業」選一課派給學生，開始建立這個班的第一份作業
+        </p>
+        <div className="inline-block border border-gray-200 rounded-xl overflow-hidden">
+          <table className="text-base" aria-label="班級作業總表">
+            <thead>
+              <tr>
+                <th className="bg-gray-50 px-6 py-3 text-left font-medium text-gray-600 border-b border-gray-200">學生</th>
+              </tr>
+            </thead>
+            <tbody>
+              {students.map((s) => (
+                <tr key={s.id}>
+                  <th scope="row" className="px-6 py-2.5 text-left font-medium text-gray-900 border-b border-gray-100 whitespace-nowrap">
+                    {s.name}
+                  </th>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
   }
 
   const titles = distinctTitles(assignments);

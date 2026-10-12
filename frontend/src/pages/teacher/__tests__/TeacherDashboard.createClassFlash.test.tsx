@@ -77,10 +77,10 @@ describe('TeacherDashboard — create classroom flash (issue #3420)', () => {
     fireEvent.change(screen.getByPlaceholderText('例：五年甲班'), {
       target: { value: '五年甲班' },
     });
-    fireEvent.click(screen.getByRole('button', { name: '建立' }));
+    fireEvent.click(screen.getByRole('button', { name: '確定建立班級' }));
 
     await waitFor(() => {
-      expect(onSelectClassroom).toHaveBeenCalledWith(42, createdClassroom);
+      expect(onSelectClassroom).toHaveBeenCalledWith(42, createdClassroom, undefined);
     });
 
     expect(screen.queryByText('尚未建立班級')).not.toBeInTheDocument();

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import type { ClassroomDetailResponse, StudentInClassroomResponse } from '../../services/classroomApi';
+import type { BatchCreateResult, ClassroomDetailResponse, StudentInClassroomResponse } from '../../services/classroomApi';
 import CsvUploadModal from './CsvUploadModal';
 import AddStudentsPanel from './panel/AddStudentsPanel';
 import { resetStudentPassword } from '../../services/classroomApi';
@@ -56,11 +56,11 @@ const ParentInviteButton: React.FC<{ token: string; studentId: number; studentNa
   }
 
   return (
-    <div className="flex flex-col items-end gap-0.5">
+    <div className="flex flex-col items-start gap-0.5">
       <button
         onClick={handleGenerate}
         disabled={isGenerating}
-        className="text-xs text-indigo-500 hover:text-indigo-700 disabled:opacity-50 transition-colors cursor-pointer"
+        className="text-sm text-indigo-600 hover:text-indigo-800 disabled:opacity-50 transition-colors cursor-pointer"
       >
         {isGenerating ? '產生中…' : '家長邀請碼'}
       </button>
@@ -96,7 +96,7 @@ const ResetPasswordButton: React.FC<{
 
   if (result) {
     return (
-      <div className="flex flex-col items-end gap-0.5 text-xs">
+      <div className="flex flex-col items-start gap-0.5 text-sm">
         <span className="font-mono text-gray-700">帳號：{result.username}</span>
         <span className="font-mono text-gray-700">新密碼：{result.password}</span>
         <span className="text-gray-500">密碼只會顯示這一次，請抄下來</span>
@@ -105,11 +105,11 @@ const ResetPasswordButton: React.FC<{
   }
 
   return (
-    <div className="flex flex-col items-end gap-0.5">
+    <div className="flex flex-col items-start gap-0.5">
       <button
         onClick={handleReset}
         disabled={isResetting}
-        className="text-xs text-amber-600 hover:text-amber-800 disabled:opacity-50 transition-colors cursor-pointer"
+        className="text-sm px-2.5 py-1 rounded-md border border-amber-300 text-amber-700 hover:bg-amber-50 disabled:opacity-50 transition-colors cursor-pointer"
       >
         {isResetting ? '重設中…' : '重設密碼'}
       </button>
@@ -117,6 +117,11 @@ const ResetPasswordButton: React.FC<{
     </div>
   );
 };
+
+// Students created by the teacher get a synthetic e-mail; the part before "@"
+// is the login name printed on the credential card, so show that, not the e-mail.
+const accountName = (email: string) =>
+  email.endsWith('@student.lingoleap.local') ? email.split('@')[0] : email;
 
 interface StudentListTabProps {
   classroom: ClassroomDetailResponse;
@@ -132,6 +137,11 @@ interface StudentListTabProps {
   setRemovingStudentId: (id: number | null) => void;
   formatDate: (d: string) => string;
   onStudentsImported: () => void;
+  /** Junyi-parity: the add-students form lives in a modal opened by 新增學生. */
+  isAddStudentsOpen: boolean;
+  onCloseAddStudents: () => void;
+  onOpenAddStudents: () => void;
+  initialAddResult?: BatchCreateResult;
 }
 
 const StudentListTab: React.FC<StudentListTabProps> = ({
@@ -148,6 +158,10 @@ const StudentListTab: React.FC<StudentListTabProps> = ({
   setRemovingStudentId,
   formatDate,
   onStudentsImported,
+  isAddStudentsOpen,
+  onCloseAddStudents,
+  onOpenAddStudents,
+  initialAddResult,
 }) => {
   const [showCsvModal, setShowCsvModal] = useState(false);
 
@@ -166,7 +180,26 @@ const StudentListTab: React.FC<StudentListTabProps> = ({
         />
       )}
 
-      {/* 加學生 —— 均一模式：先問「學生有沒有帳號」(#3378) */}
+      {/* 加學生 —— 均一模式：先問「學生有沒有帳號」(#3378)；版面對齊均一後收進彈窗 */}
+      {isAddStudentsOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="add-students-title"
+          className="fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/40 p-3 sm:p-6 overflow-y-auto"
+        >
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl my-auto">
+            <div className="flex items-center justify-between px-6 pt-5">
+              <h2 id="add-students-title" className="text-xl font-bold text-gray-900">新增學生</h2>
+              <button
+                type="button"
+                onClick={onCloseAddStudents}
+                aria-label="關閉"
+                className="w-9 h-9 inline-flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
       <AddStudentsPanel
         token={token}
         classroomId={classroom.id}
@@ -175,6 +208,7 @@ const StudentListTab: React.FC<StudentListTabProps> = ({
         nextSeat={classroom.students.length + 1}
         onCreated={onStudentsImported}
         onOpenCsv={() => setShowCsvModal(true)}
+        initialResult={initialAddResult}
         addByIdForm={
           <>
             <form onSubmit={onAddStudent} className="flex gap-3 items-end">
@@ -207,57 +241,78 @@ const StudentListTab: React.FC<StudentListTabProps> = ({
         }
       />
 
+            <div className="flex justify-end px-6 pb-5">
+              <button
+                type="button"
+                onClick={onCloseAddStudents}
+                className="h-10 px-5 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 cursor-pointer"
+              >
+                完成
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {classroom.students.length === 0 ? (
         <div className="p-8 text-center">
-          <div className="inline-flex items-center justify-center w-12 h-12 bg-accent-bg rounded-xl mb-3">
-            <svg className="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-          </div>
-          <p className="text-sm font-medium text-gray-700 mb-1">尚無學生</p>
-          <p className="text-xs text-gray-500">用上方「加學生」建立帳號或請學生輸入班級代碼</p>
+          <p className="text-base font-medium text-gray-700 mb-3">這個班級還沒有學生</p>
+          <button
+            type="button"
+            onClick={onOpenAddStudents}
+            className="h-11 px-6 rounded-lg bg-accent hover:bg-accent-hover text-white text-base font-medium cursor-pointer"
+          >
+            ＋ 新增學生
+          </button>
         </div>
       ) : (
-        <div className="divide-y divide-gray-100">
-          {classroom.students.map((s) => (
-            // #3424: this row used to be a single `flex items-center justify-between`
-            // line with no `flex-wrap`. At tablet widths the action labels
-            // (家長邀請碼／重設密碼／移除) had no room and wrapped mid-word
-            // ("家長邀／請碼"), and 移除 sat 12px from 重設密碼 with no
-            // separation — easy to mis-tap. `flex-wrap` lets the actions drop
-            // to their own line instead of squeezing; `whitespace-nowrap` on
-            // each label stops the mid-word break; the border-l gives 移除
-            // its own visually separated zone.
-            <div key={s.id} className="px-5 py-3 flex flex-wrap items-center justify-between gap-y-1.5 gap-x-3">
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-gray-900">{s.name}</p>
-                <p className="text-xs text-gray-500 hidden sm:block">{s.email}</p>
-              </div>
-              <div className="flex items-center flex-wrap gap-3">
-                <span className="text-xs text-gray-400 hidden sm:inline whitespace-nowrap">{formatDate(s.enrolled_at)}</span>
-                <span className="whitespace-nowrap"><ParentInviteButton token={token} studentId={s.id} studentName={s.name} /></span>
-                <span className="whitespace-nowrap">
+        <table className="w-full text-left">
+          <thead className="hidden sm:table-header-group bg-gray-50 text-sm text-gray-600">
+            <tr>
+              <th scope="col" className="px-4 py-3 font-medium w-16 text-center whitespace-nowrap">座號</th>
+              <th scope="col" className="px-4 py-3 font-medium whitespace-nowrap">學生姓名</th>
+              <th scope="col" className="px-4 py-3 font-medium whitespace-nowrap">帳號</th>
+              <th scope="col" className="px-4 py-3 font-medium whitespace-nowrap">家長邀請碼</th>
+              <th scope="col" className="px-4 py-3 font-medium whitespace-nowrap">重設密碼</th>
+              <th scope="col" className="px-4 py-3 font-medium text-right whitespace-nowrap">操作</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-100">
+            {classroom.students.map((s, i) => (
+              // #3424 kept: labels never break mid-word (whitespace-nowrap); on phones
+              // each row stacks into a card instead of a squeezed table row.
+              <tr key={s.id} className="flex flex-wrap items-center gap-x-3 gap-y-1.5 px-4 py-3 sm:table-row sm:p-0">
+                <td className="hidden sm:table-cell px-4 py-3 text-center text-gray-500">{i + 1}</td>
+                <td className="sm:px-4 sm:py-3 min-w-0 basis-full sm:basis-auto">
+                  <p className="text-base font-medium text-gray-900">{s.name}</p>
+                </td>
+                <td className="sm:px-4 sm:py-3 text-sm text-gray-500 font-mono break-all">{accountName(s.email)}</td>
+                <td className="sm:px-4 sm:py-3 whitespace-nowrap">
+                  <ParentInviteButton token={token} studentId={s.id} studentName={s.name} />
+                </td>
+                <td className="sm:px-4 sm:py-3 whitespace-nowrap">
                   <ResetPasswordButton
                     token={token}
                     classroomId={classroom.id}
                     studentId={s.id}
                     studentName={s.name}
                   />
-                </span>
-                <div className="pl-3 ml-0.5 border-l border-gray-200">
+                </td>
+                <td className="sm:px-4 sm:py-3 sm:text-right whitespace-nowrap ml-auto sm:ml-0">
+                  <span className="sr-only">加入於 {formatDate(s.enrolled_at)}</span>
                   {removingStudentId === s.id ? (
-                    <div className="flex gap-2 whitespace-nowrap">
-                      <button onClick={() => onRemoveStudent(s)} className="text-xs text-red-600 font-medium hover:text-red-800 transition-colors cursor-pointer whitespace-nowrap">確認移除</button>
-                      <button onClick={() => setRemovingStudentId(null)} className="text-xs text-gray-500 hover:text-gray-700 transition-colors cursor-pointer whitespace-nowrap">取消</button>
-                    </div>
+                    <span className="inline-flex gap-2 whitespace-nowrap">
+                      <button onClick={() => onRemoveStudent(s)} className="text-sm text-red-600 font-medium hover:text-red-800 transition-colors cursor-pointer whitespace-nowrap">確認移除</button>
+                      <button onClick={() => setRemovingStudentId(null)} className="text-sm text-gray-500 hover:text-gray-700 transition-colors cursor-pointer whitespace-nowrap">取消</button>
+                    </span>
                   ) : (
-                    <button onClick={() => onRemoveStudent(s)} className="text-xs text-gray-400 hover:text-red-600 transition-colors cursor-pointer whitespace-nowrap px-1 py-1 -m-1">移除</button>
+                    <button onClick={() => onRemoveStudent(s)} className="text-sm text-gray-400 hover:text-red-600 transition-colors cursor-pointer whitespace-nowrap px-1 py-1 -m-1">移除</button>
                   )}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
     </>
   );

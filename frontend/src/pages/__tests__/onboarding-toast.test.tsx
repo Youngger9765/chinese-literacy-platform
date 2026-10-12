@@ -114,7 +114,7 @@ describe('Teacher create classroom — success toast', () => {
     await userEvent.type(nameInput, '五年甲班');
 
     // Submit
-    const submitBtn = screen.getByRole('button', { name: '建立' });
+    const submitBtn = screen.getByRole('button', { name: '確定建立班級' });
     fireEvent.click(submitBtn);
 
     // Toast with class name should appear

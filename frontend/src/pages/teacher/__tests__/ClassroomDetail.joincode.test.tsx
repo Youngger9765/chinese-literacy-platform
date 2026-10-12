@@ -178,7 +178,7 @@ describe('ClassroomDetail — join_code UI (#1643)', () => {
       expect(screen.getByText('ABC123')).toBeInTheDocument();
     });
 
-    expect(screen.getByText(/把此代碼給學生/i)).toBeInTheDocument();
+    expect(screen.getByText(/加入班級」輸入班級代碼/)).toBeInTheDocument();
   });
 
   it('7. classroom with null join_code still renders the section (no code yet)', async () => {
@@ -192,8 +192,8 @@ describe('ClassroomDetail — join_code UI (#1643)', () => {
       expect(screen.queryByText('三年甲班')).toBeInTheDocument();
     });
 
-    // The section header should still appear
-    expect(screen.getByText(/加入代碼/i)).toBeInTheDocument();
+    // The label should still appear
+    expect(screen.getByText(/^班級代碼：/)).toBeInTheDocument();
     // Show a placeholder or "—" for null code
     expect(screen.getByText(/—|尚未產生/i)).toBeInTheDocument();
   });
