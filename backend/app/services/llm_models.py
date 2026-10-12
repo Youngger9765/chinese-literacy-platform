@@ -4,13 +4,14 @@ Each task has its own (model, location) tuple chosen by A/B test.
 See: docs/ai/llm-model-ab-2026-05.md
 
 Decision rules (Issue #1734 — 2026-05-20):
-  - gemini-flash-lite-latest @ global  →  all text/JSON generation tasks + OMO identifier
+  - gemini-2.5-flash-lite @ global     →  all text/JSON generation tasks + OMO identifier
       Quality parity (3/3 complete) + 29-49% faster + 22-46% cheaper vs 2.5-flash
   - gemini-2.5-flash @ us-central1    →  OMO grader only (vision/spatial reasoning)
       Lettered circle accuracy 5/5 vs 1/5 (spatial reasoning gap)
 
 OMO grader is LOCKED on gemini-2.5-flash per Issue #1730 — DO NOT change.
-OMO identifier: moved to gemini-flash-lite-latest per Issue #1729 A/B (15/16 accuracy parity).
+OMO identifier: was gemini-flash-lite-latest (#1729); that alias now returns 404 on Vertex
+global, so it moved to gemini-2.5-flash-lite (#3440). Accuracy not re-A/B-tested.
 """
 
 from __future__ import annotations
@@ -49,9 +50,11 @@ TASK_MODELS: dict[str, tuple[str, str]] = {
     "teacher_comment": ("gemini-2.5-flash-lite", "global"),
 
     # ── Vision / Multimodal tasks ─────────────────────────────────────────────
-    # Per #1729 A/B (5/18): flash-lite-latest at global = 15/16 accuracy parity with 2.5-flash
+    # #3440 (2026-10-12): gemini-flash-lite-latest returns 404 NOT_FOUND at global (verified
+    # with the project owner account too), so identification was failing. 2.5-flash-lite
+    # is verified working on the same path, including image input.
     # Location: global (uses _get_client() default — no region-specific routing needed)
-    "omo_identifier": ("gemini-flash-lite-latest", "global"),
+    "omo_identifier": ("gemini-2.5-flash-lite", "global"),
     # LOCKED per #1730: lettered circle accuracy 5/5 vs 1/5, non-negotiable
     "omo_grader": ("gemini-2.5-flash", "us-central1"),
 

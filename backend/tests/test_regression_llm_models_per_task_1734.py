@@ -5,7 +5,8 @@ Guards against accidental model reassignment in llm_models.py.
 Key decisions locked by these tests:
   - omo_grader MUST stay on gemini-2.5-flash @ us-central1 (Issue #1730)
     Reason: lettered-circle spatial reasoning accuracy 5/5 vs 1/5 with flash-lite
-  - omo_identifier moved to gemini-flash-lite-latest @ global (Issue #1729)
+  - omo_identifier moved to gemini-flash-lite-latest @ global (Issue #1729),
+    then to gemini-2.5-flash-lite when that alias started returning 404 (#3440)
     Reason: 15/16 accuracy parity with 2.5-flash, faster + cheaper
   - 8 text/JSON generation tasks moved to gemini-2.5-flash-lite @ global (Issue #1744)
     Reason: 3/3 complete quality parity, 29-49% faster, 22-46% cheaper
@@ -99,17 +100,16 @@ class TestOmoGraderLock:
 
 
 class TestOmoIdentifierAssignment:
-    """omo_identifier moved to gemini-flash-lite-latest @ global — Issue #1729.
-
-    A/B test result: 15/16 accuracy parity with 2.5-flash.
+    """omo_identifier: gemini-flash-lite-latest (#1729) now 404s on Vertex
+    global, so it moved to gemini-2.5-flash-lite @ global (#3440).
     """
 
-    def test_omo_identifier_uses_flash_lite_latest(self):
-        """omo_identifier must use gemini-flash-lite-latest."""
+    def test_omo_identifier_uses_2_5_flash_lite(self):
+        """omo_identifier must use gemini-2.5-flash-lite (flash-lite-latest returns 404)."""
         model, location = get_model_for_task("omo_identifier")
-        assert model == "gemini-flash-lite-latest", (
+        assert model == "gemini-2.5-flash-lite", (
             f"omo_identifier model is {model!r}. "
-            f"Expected 'gemini-flash-lite-latest' per Issue #1729 A/B result."
+            f"Expected 'gemini-2.5-flash-lite' — gemini-flash-lite-latest returns 404 (#3440)."
         )
 
     def test_omo_identifier_location_is_global(self):
