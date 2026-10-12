@@ -162,7 +162,11 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ onNavigateToStudent
       {isOpen && (
         <div
           ref={panelRef}
-          className="absolute right-0 top-full mt-2 w-96 bg-white rounded-xl shadow-xl border border-gray-200 z-50 flex flex-col max-h-[80vh]"
+          // #3425: fixed w-96 (384px) overflowed a 390px phone screen once this
+          // bell also rendered inside the teacher mobile "更多" drawer.
+          // `max-w-[calc(100vw-2rem)]` caps it to the viewport minus a 1rem
+          // margin on each side everywhere this component is used.
+          className="absolute right-0 top-full mt-2 w-96 max-w-[calc(100vw-2rem)] bg-white rounded-xl shadow-xl border border-gray-200 z-50 flex flex-col max-h-[80vh]"
         >
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">

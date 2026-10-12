@@ -56,6 +56,13 @@ interface MobileTabBarProps {
   viewLabels: Record<WorkspaceView, { icon: string; label: string }>;
   onSwitchView: (view: WorkspaceView) => void;
   onLogout: () => void;
+  /**
+   * #3425: teacher role gets the notification center (desktop already shows
+   * it via <NotificationBell> in the aside footer). Passed as a node rather
+   * than a boolean so this component doesn't need to know about teacher
+   * auth/fetching — Sidebar decides whether to render it.
+   */
+  notificationSlot?: React.ReactNode;
 }
 
 function isActiveLocal(pathname: string, path: string): boolean {
@@ -80,12 +87,17 @@ const MobileTabBar: React.FC<MobileTabBarProps> = ({
   viewLabels,
   onSwitchView,
   onLogout,
+  notificationSlot,
 }) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const allItems = [...studentItems, ...teacherItems];
   const topItems = allItems.slice(0, 4);
   const moreItems = [...allItems.slice(4), ...extraItems];
-  const showMoreButton = moreItems.length > 0 || hasMultipleViews;
+  // #3425: teacher-role users only had 3 items (班級管理/作業管理/使用說明) and
+  // no extraItems, so moreItems was empty and this button never rendered --
+  // the drawer's 登出/隱私政策/notification slot below were unreachable on a
+  // phone, which is exactly the shared-device problem the issue reported.
+  const showMoreButton = moreItems.length > 0 || hasMultipleViews || !!notificationSlot;
 
   return (
     <>
@@ -212,6 +224,22 @@ const MobileTabBar: React.FC<MobileTabBarProps> = ({
               </div>
             )}
 
+            {/*
+             * #3425: teacher's mobile bottom nav had no way to reach the
+             * notification center at all -- NotificationBell only rendered
+             * in the desktop aside footer (`hidden md:flex`). Reuses the
+             * same self-contained component; its dropdown panel positions
+             * itself relative to this wrapper.
+             */}
+            {notificationSlot && (
+              <div className="mt-4 border-t border-gray-100 pt-3">
+                <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2 px-1">
+                  通知
+                </p>
+                {notificationSlot}
+              </div>
+            )}
+
             <div className="mt-4 border-t border-gray-100 pt-3">
               <button
                 type="button"
@@ -318,6 +346,11 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
 
   const mobileExtraItems: NavItem[] = [
     ...(activeView === 'admin' ? getAdminExtraItems() : []),
+    // #3425: teacher view (plain teacher role, not admin) only has 3 primary
+    // items and no extras, so the "更多" button never appeared on a phone --
+    // there was no mobile path to 登出/隱私政策 at all. Giving it this one
+    // extra item is also what makes `moreItems.length > 0` true again.
+    ...(activeView === 'teacher' ? [{ icon: '🔒', label: '隱私政策', path: '/privacy' }] : []),
     ...parentItems,
     ...(activeView === 'student' ? studentToolsItems : []),
   ];
@@ -538,6 +571,11 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
         activeView={activeView}
         availableViews={availableViews}
         viewLabels={VIEW_LABELS}
+        notificationSlot={
+          isTeacher ? (
+            <NotificationBell onNavigateToStudent={(classroomId) => navigate(`/teacher/classroom/${classroomId}`)} />
+          ) : undefined
+        }
         onSwitchView={(view) => {
           setActiveView(view);
           const home: Record<WorkspaceView, string> = {
