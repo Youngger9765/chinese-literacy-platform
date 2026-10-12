@@ -22,7 +22,7 @@ const DATA_VIEWS: { key: DataView; label: string }[] = [
   { key: 'today', label: '今日總覽' },
   { key: 'students', label: '學生總表' },
   { key: 'at-risk', label: '早期介入' },
-  { key: 'error-heatmap', label: '錯字總表' },
+  { key: 'error-heatmap', label: '錯字熱力圖' },
   { key: 'analytics', label: '學習分析' },
   { key: 'learning', label: '詳細學習紀錄' },
 ];

@@ -172,7 +172,7 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId, onChanged, o
                   : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
               }`}
             >
-              {assignment.is_active ? '進行中' : '已停用'}
+              {assignment.is_active ? '使用中' : '已停用'}
             </button>
           </td>
           <td className="py-2.5 text-center" onClick={(event) => event.stopPropagation()}>

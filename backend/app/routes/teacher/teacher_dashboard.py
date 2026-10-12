@@ -284,7 +284,7 @@ def get_classroom_stats(
         durations = []
         for s in completed_sessions:
             delta = (s.completed_at - s.started_at).total_seconds() / 60.0
-            if delta > 0:
+            if delta >= 1.0:  # #3427: sub-minute completions are data artifacts
                 durations.append(delta)
         if durations:
             avg_duration = round(sum(durations) / len(durations), 1)

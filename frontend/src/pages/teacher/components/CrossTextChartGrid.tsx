@@ -64,7 +64,7 @@ export function ClassOverviewPanel({ data }: ClassOverviewPanelProps) {
           { label: '總學習次數', value: data.total_sessions },
           { label: '已練習課文數', value: data.text_difficulty_ranking.length },
           {
-            label: '最新班級均分',
+            label: '最新一次班級均分',
             value: lastTrend ? `${lastTrend.avg_score} 分` : '--',
           },
         ].map((stat) => (

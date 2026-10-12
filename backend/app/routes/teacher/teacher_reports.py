@@ -52,26 +52,49 @@ def get_classroom_error_vocab(
     if not student_ids:
         return []
 
-    # Query CharacterError joined through LearningSession, filtered by classroom students
+    # #3427: grouping by character plus error_type split a character into multiple
+    # ranking rows, causing this endpoint to disagree with the error heatmap.
     rows = (
         db.query(
             CharacterError.character,
-            CharacterError.error_type,
             func.count(CharacterError.id).label("count"),
             func.count(func.distinct(LearningSession.student_id)).label("student_count"),
         )
         .join(LearningSession, CharacterError.session_id == LearningSession.id)
         .filter(LearningSession.student_id.in_(student_ids))
-        .group_by(CharacterError.character, CharacterError.error_type)
+        .group_by(CharacterError.character)
         .order_by(func.count(CharacterError.id).desc())
         .limit(20)
         .all()
     )
 
+    top_characters = [row.character for row in rows]
+    error_type_rows = (
+        db.query(
+            CharacterError.character,
+            CharacterError.error_type,
+            func.count(CharacterError.id).label("count"),
+        )
+        .join(LearningSession, CharacterError.session_id == LearningSession.id)
+        .filter(
+            LearningSession.student_id.in_(student_ids),
+            CharacterError.character.in_(top_characters),
+        )
+        .group_by(CharacterError.character, CharacterError.error_type)
+        .all()
+        if top_characters
+        else []
+    )
+    dominant_error_types: dict[str, tuple[str, int]] = {}
+    for row in error_type_rows:
+        current = dominant_error_types.get(row.character)
+        if current is None or row.count > current[1]:
+            dominant_error_types[row.character] = (row.error_type, row.count)
+
     return [
         ErrorVocabItem(
             character=row.character,
-            error_type=row.error_type,
+            error_type=dominant_error_types[row.character][0],
             count=row.count,
             student_count=row.student_count,
         )
