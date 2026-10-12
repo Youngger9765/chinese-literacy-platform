@@ -156,18 +156,25 @@ const ClassroomHeaderCard: React.FC<ClassroomHeaderCardProps> = ({
           </div>
         </form>
       ) : (
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <h2 className="text-xl font-bold text-gray-900">{classroom.name}</h2>
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
+          {/*
+           * #3424: at tablet widths this row only had `sm:flex-row` (no
+           * wrap), so when the name+buttons didn't fit one line the browser
+           * shrank the name box instead of wrapping — producing mid-word
+           * breaks like "RWD審／查-1012". `sm:flex-wrap` + `min-w-0` lets the
+           * button group drop to its own line instead of squeezing the name.
+           */}
+          <div className="min-w-0">
+            <h2 className="text-xl font-bold text-gray-900 break-words">{classroom.name}</h2>
             <div className="flex flex-wrap items-center gap-3 mt-2 text-sm text-gray-500">
               {classroom.grade != null && (
-                <span className="bg-accent-bg text-accent text-xs font-medium px-2.5 py-0.5 rounded">
+                <span className="bg-accent-bg text-accent text-xs font-medium px-2.5 py-0.5 rounded whitespace-nowrap">
                   {classroom.grade} 年級
                 </span>
               )}
-              <span>{classroom.student_count} 位學生</span>
-              <span>{formatDate(classroom.created_at)}</span>
-              <span className={classroom.is_active ? 'text-emerald-600' : 'text-gray-400'}>
+              <span className="whitespace-nowrap">{classroom.student_count} 位學生</span>
+              <span className="whitespace-nowrap">{formatDate(classroom.created_at)}</span>
+              <span className={`whitespace-nowrap ${classroom.is_active ? 'text-emerald-600' : 'text-gray-400'}`}>
                 {classroom.is_active ? '使用中' : '已停用'}
               </span>
             </div>
@@ -250,8 +257,15 @@ const ClassroomHeaderCard: React.FC<ClassroomHeaderCardProps> = ({
         aria-hidden={!joinCodeOpen}
         className={`transition-all duration-200 ${joinCodeOpen ? 'block' : 'hidden'}`}
       >
-        <div className="px-6 pb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex-1">
+        {/*
+         * #3424: at tablet widths (double-sidebar squeeze, see ClassroomDetail)
+         * this row had no wrap, so when the code + QR/複製/重生 buttons didn't
+         * fit one line, the parent card's `overflow-hidden` clipped
+         * "重生代碼" down to "重生代". `sm:flex-wrap` lets the button group
+         * drop to its own line instead of being cut off.
+         */}
+        <div className="px-6 pb-5 flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-between gap-4">
+          <div className="flex-1 min-w-0">
             {classroom.join_code ? (
               <p className="font-mono text-2xl font-bold tracking-widest text-accent select-all">
                 {classroom.join_code}
