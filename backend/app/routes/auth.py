@@ -27,6 +27,7 @@ from ..auth.classroom_check import compute_has_classroom
 from ..auth.dependencies import get_current_user
 from ..auth.jwt import create_access_token
 from ..auth.password import hash_password, verify_password
+from ..auth.password_policy import compute_must_change_password
 from ..auth.rate_limiter import InMemoryRateLimiter, real_client_ip
 from ..config import settings
 from ..database import get_db
@@ -211,9 +212,7 @@ def login(req: LoginRequest, request: Request, db: Session = Depends(get_db)):
     user.last_login_at = datetime.now(timezone.utc)
     db.commit()
 
-    must_change = False
-    if user.student_profile and not user.student_profile.password_changed:
-        must_change = True
+    must_change = compute_must_change_password(user)
 
     has_classroom = compute_has_classroom(db, user.id)
 
