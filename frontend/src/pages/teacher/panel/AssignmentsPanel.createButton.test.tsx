@@ -44,7 +44,7 @@ describe('AssignmentsPanel — 建立任務 button at the top (#3401)', () => {
     );
     await waitFor(() => expect(teacherApi.getAssignmentMatrix).toHaveBeenCalled());
 
-    const topButton = await screen.findByRole('button', { name: '建立任務' });
+    const topButton = await screen.findByRole('button', { name: '建立作業' });
     expect(topButton).toBeInTheDocument();
 
     // It must appear before the "建立與管理作業" collapsible section in the DOM
@@ -69,7 +69,7 @@ describe('AssignmentsPanel — 建立任務 button at the top (#3401)', () => {
     // The manage section starts collapsed, so the create form is not visible yet.
     expect(screen.queryByText('選擇課文')).not.toBeInTheDocument();
 
-    await userEvent.click(screen.getByRole('button', { name: '建立任務' }));
+    await userEvent.click(screen.getByRole('button', { name: '建立作業' }));
 
     // Expands the collapsible section...
     expect(screen.getByRole('button', { name: /建立與管理作業/ })).toHaveAttribute('aria-expanded', 'true');
@@ -88,10 +88,10 @@ describe('AssignmentsPanel — 建立任務 button at the top (#3401)', () => {
       />,
     );
     await waitFor(() => expect(teacherApi.getAssignmentMatrix).toHaveBeenCalled());
-    await userEvent.click(screen.getByRole('button', { name: '建立任務' }));
+    await userEvent.click(screen.getByRole('button', { name: '建立作業' }));
     await waitFor(() => expect(screen.getByText('選擇課文')).toBeInTheDocument());
 
-    await userEvent.click(screen.getByRole('button', { name: '建立任務' }));
+    await userEvent.click(screen.getByRole('button', { name: '建立作業' }));
     expect(screen.getByText('選擇課文')).toBeInTheDocument();
   });
 });

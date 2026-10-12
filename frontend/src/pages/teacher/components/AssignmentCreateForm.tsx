@@ -1,4 +1,4 @@
-import React, { FormEvent } from 'react';
+import React, { FormEvent, useEffect, useRef } from 'react';
 import ReadingGoalsForm, { GoalsFormState } from '../../../components/teacher/ReadingGoalsForm';
 import { ZhTWDatePicker } from '../../../components/ui/ZhTWDatePicker';
 import { Story } from '../../../types';
@@ -52,7 +52,15 @@ export const AssignmentCreateForm: React.FC<AssignmentCreateFormProps> = ({
   onClose,
   onRetryStories,
   targetPicker,
-}) => (
+}) => {
+  const selectRef = useRef<HTMLSelectElement>(null);
+
+  useEffect(() => {
+    selectRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'center' });
+    selectRef.current?.focus();
+  }, []);
+
+  return (
   <div className="p-5 border-b border-gray-100 bg-gray-50/50">
     <div className="flex items-center justify-between mb-3">
       <h4 className="text-sm font-bold text-gray-900">建立新作業</h4>
@@ -99,6 +107,7 @@ export const AssignmentCreateForm: React.FC<AssignmentCreateFormProps> = ({
             ) : (
               <select
                 id="assign-story"
+                ref={selectRef}
                 value={selectedStoryId}
                 onChange={(event) => setSelectedStoryId(event.target.value)}
                 required
@@ -210,6 +219,7 @@ export const AssignmentCreateForm: React.FC<AssignmentCreateFormProps> = ({
       </div>
     </form>
   </div>
-);
+  );
+};
 
 export default AssignmentCreateForm;
