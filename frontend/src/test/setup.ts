@@ -17,3 +17,11 @@ if (typeof window !== 'undefined' && typeof window.matchMedia !== 'function') {
       dispatchEvent: () => false,
     }) as unknown as MediaQueryList;
 }
+
+// jsdom does not implement scrollIntoView. Components that call it on mount
+// (e.g. AssignmentCreateForm scrolling the lesson-select into view) throw
+// "scrollIntoView is not a function" and take their whole test suite down,
+// even in suites that never intended to assert on scrolling.
+if (typeof Element !== 'undefined' && typeof Element.prototype.scrollIntoView !== 'function') {
+  Element.prototype.scrollIntoView = () => {};
+}
