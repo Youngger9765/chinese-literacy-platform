@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import StudentsPanel, { summarizeStudents } from './StudentsPanel';
 import * as api from '../../../services/teacherApi';
@@ -41,8 +41,34 @@ describe('學生分頁 (#3376)', () => {
   it('clicking a name asks to open that student', async () => {
     const onSelect = vi.fn();
     render(<StudentsPanel classroomId={9} selectedStudentId={null} onSelectStudent={onSelect} />);
-    await userEvent.click(await screen.findByRole('button', { name: '王小明' }));
+    const desktopTable = await screen.findByRole('table', { name: '學生名單' });
+    await userEvent.click(within(desktopTable).getByRole('button', { name: '王小明' }));
     expect(onSelect).toHaveBeenCalledWith(1);
+  });
+
+  it('renders mobile summary cards alongside the desktop student table', async () => {
+    render(<StudentsPanel classroomId={9} selectedStudentId={null} onSelectStudent={vi.fn()} />);
+
+    const mobileList = await screen.findByRole('list', { name: '學生名單（手機）' });
+    const desktopTable = screen.getByRole('table', { name: '學生名單' });
+
+    expect(mobileList).toHaveClass('sm:hidden');
+    expect(desktopTable).toHaveClass('hidden', 'sm:table');
+    expect(within(mobileList).getAllByRole('listitem')).toHaveLength(2);
+    expect(mobileList).toHaveTextContent('已交作業 2 / 2');
+    expect(mobileList).toHaveTextContent('平均分數 86');
+    expect(mobileList).toHaveTextContent('已交作業 0 / 1');
+    expect(mobileList).toHaveTextContent('平均分數 —');
+  });
+
+  it('clicking a name in a mobile summary card asks to open that student', async () => {
+    const onSelect = vi.fn();
+    render(<StudentsPanel classroomId={9} selectedStudentId={null} onSelectStudent={onSelect} />);
+
+    const mobileList = await screen.findByRole('list', { name: '學生名單（手機）' });
+    await userEvent.click(within(mobileList).getByRole('button', { name: '林雨萱' }));
+
+    expect(onSelect).toHaveBeenCalledWith(2);
   });
 
   it('one student shows the characters they misread and dashes for missing parts', async () => {
