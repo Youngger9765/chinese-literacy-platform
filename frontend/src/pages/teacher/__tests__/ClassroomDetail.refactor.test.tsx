@@ -43,7 +43,15 @@ vi.mock('../../../services/classroomApi', () => ({
 
 vi.mock('../StudentProgressTab', () => ({ default: () => <div data-testid="student-progress-tab" /> }));
 vi.mock('../TextManagementTab', () => ({ default: () => <div data-testid="text-management-tab" /> }));
-vi.mock('../StudentListTab', () => ({ default: (props: { classroom: { name: string } }) => <div data-testid="student-list-tab" data-classroom={props.classroom?.name} /> }));
+vi.mock('../StudentListTab', () => ({
+  default: (props: { classroom: { name: string }; isAddStudentsOpen: boolean }) => (
+    <div
+      data-testid="student-list-tab"
+      data-classroom={props.classroom?.name}
+      data-add-open={String(props.isAddStudentsOpen)}
+    />
+  ),
+}));
 vi.mock('../ClassroomAnalytics', () => ({ default: () => <div data-testid="classroom-analytics" /> }));
 vi.mock('../CrossTextAnalytics', () => ({ default: () => <div data-testid="cross-text-analytics" /> }));
 vi.mock('../../components/teacher/AtRiskStudents', () => ({ default: () => <div data-testid="at-risk-students" /> }));
@@ -124,7 +132,7 @@ describe('ClassroomDetail (refactor characterization) — render with mock data'
   it('renders student count', async () => {
     renderDetail();
     await waitFor(() => {
-      expect(screen.getByText(/5 位學生/)).toBeInTheDocument();
+      expect(screen.getByText('班級人數').parentElement?.textContent).toMatch(/班級人數\s*5\s*位/);
     });
   });
 
@@ -241,11 +249,6 @@ describe('ClassroomDetail (refactor characterization) — join code copy', () =>
     const user = userEvent.setup();
     renderDetail();
     await waitFor(() => expect(screen.getAllByText('ABC123').length).toBeGreaterThan(0));
-      // The header became an accordion (#1943 follow-up): the code panel, and
-      // with it the copy and regenerate buttons, only render once the 加入代碼
-      // toggle is opened. This characterization test was written when they were
-      // always on screen.
-      await user.click(screen.getByRole('button', { name: /加入代碼/i }));
 
     await user.click(screen.getByRole('button', { name: /複製代碼/i }));
     // Read the clipboard rather than spying on writeText: userEvent.setup()
@@ -262,11 +265,6 @@ describe('ClassroomDetail (refactor characterization) — join code copy', () =>
     const user = userEvent.setup();
     renderDetail();
     await waitFor(() => expect(screen.getAllByText('ABC123').length).toBeGreaterThan(0));
-      // The header became an accordion (#1943 follow-up): the code panel, and
-      // with it the copy and regenerate buttons, only render once the 加入代碼
-      // toggle is opened. This characterization test was written when they were
-      // always on screen.
-      await user.click(screen.getByRole('button', { name: /加入代碼/i }));
 
     await user.click(screen.getByRole('button', { name: /複製代碼/i }));
     await waitFor(() => {
@@ -278,11 +276,6 @@ describe('ClassroomDetail (refactor characterization) — join code copy', () =>
     const user = userEvent.setup();
     renderDetail();
     await waitFor(() => expect(screen.getAllByText('ABC123').length).toBeGreaterThan(0));
-      // The header became an accordion (#1943 follow-up): the code panel, and
-      // with it the copy and regenerate buttons, only render once the 加入代碼
-      // toggle is opened. This characterization test was written when they were
-      // always on screen.
-      await user.click(screen.getByRole('button', { name: /加入代碼/i }));
 
     await user.click(screen.getByRole('button', { name: /重生代碼/i }));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
@@ -298,11 +291,6 @@ describe('ClassroomDetail (refactor characterization) — join code copy', () =>
     const user = userEvent.setup();
     renderDetail();
     await waitFor(() => expect(screen.getAllByText('ABC123').length).toBeGreaterThan(0));
-      // The header became an accordion (#1943 follow-up): the code panel, and
-      // with it the copy and regenerate buttons, only render once the 加入代碼
-      // toggle is opened. This characterization test was written when they were
-      // always on screen.
-      await user.click(screen.getByRole('button', { name: /加入代碼/i }));
 
     await user.click(screen.getByRole('button', { name: /重生代碼/i }));
     await user.click(screen.getByRole('button', { name: /確定/i }));
@@ -317,21 +305,32 @@ describe('ClassroomDetail (refactor characterization) — join code copy', () =>
 });
 
 describe('ClassroomDetail — student roster in the class header (#3367, collapsed #3376, #3378)', () => {
-  it('a class with students starts collapsed, and expands without switching tabs', async () => {
+  it('a class with students shows the roster right away, with 新增學生 closed (Junyi parity)', async () => {
     vi.mocked(classroomApi.getClassroomDetail).mockResolvedValue({
       ...MOCK_CLASSROOM,
       students: [{ id: 5, name: '小明', email: 'a@b.c', enrolled_at: '2026-01-01T00:00:00Z' }],
     } as never);
     const user = userEvent.setup();
     renderDetail();
-    const toggle = await screen.findByRole('button', { name: /學生名單（/ });
-    expect(screen.queryByTestId('student-list-tab')).toBeNull();
-    await user.click(toggle);
-    expect(screen.getByTestId('student-list-tab').getAttribute('data-classroom')).toBe('三年甲班');
+    const roster = await screen.findByTestId('student-list-tab');
+    expect(roster.getAttribute('data-classroom')).toBe('三年甲班');
+    expect(roster.getAttribute('data-add-open')).toBe('false');
+    await user.click(screen.getByRole('button', { name: /新增學生/ }));
+    expect(screen.getByTestId('student-list-tab').getAttribute('data-add-open')).toBe('true');
+  });
+
+  it('指派任務 under the roster jumps to the 指派任務 tab', async () => {
+    const user = userEvent.setup();
+    renderDetail();
+    await screen.findByTestId('student-list-tab');
+    const goAssign = screen.getAllByRole('button', { name: '指派任務' }).find((b) => b.getAttribute('role') !== 'tab')!;
+    await user.click(goAssign);
+    expect(screen.getByTestId('location').textContent).toContain('tab=assignments');
   });
 
   it('an empty class opens straight on adding students (均一-style first step)', async () => {
     renderDetail();
-    expect(await screen.findByTestId('student-list-tab')).toBeInTheDocument();
+    const roster = await screen.findByTestId('student-list-tab');
+    await waitFor(() => expect(roster.getAttribute('data-add-open')).toBe('true'));
   });
 });

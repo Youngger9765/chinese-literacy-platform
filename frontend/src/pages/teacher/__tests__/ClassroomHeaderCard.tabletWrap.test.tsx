@@ -63,15 +63,18 @@ describe('ClassroomHeaderCard — tablet wrap safety (#3424)', () => {
   it('name/badges row wraps instead of squeezing the name box', () => {
     render(<ClassroomHeaderCard {...baseProps} classroom={classroom} />);
     const name = screen.getByText('RWD審查-1012');
+    // Junyi-parity header: [name + pencil] and [班級代碼 group] sit in one row that wraps as a whole
     const row = name.closest('div')!.parentElement!;
-    expect(row.className).toMatch(/\bsm:flex-wrap\b/);
+    expect(row.className).toMatch(/\bflex-wrap\b/);
+    expect(name.className).toMatch(/\bbreak-words\b/);
   });
 
   it('join-code button row wraps instead of being clipped by overflow-hidden', () => {
     // 0 students -> accordion starts expanded, so the button row is visible.
     render(<ClassroomHeaderCard {...baseProps} classroom={{ ...classroom, student_count: 0 }} />);
     const regenBtn = screen.getByRole('button', { name: /重生代碼/i });
-    const buttonRow = regenBtn.closest('div')!.parentElement!;
-    expect(buttonRow.className).toMatch(/\bsm:flex-wrap\b/);
+    const buttonRow = regenBtn.closest('div')!;
+    expect(buttonRow.className).toMatch(/\bflex-wrap\b/);
+    expect(regenBtn.className).toMatch(/\bwhitespace-nowrap\b/);
   });
 });

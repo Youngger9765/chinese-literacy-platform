@@ -48,9 +48,16 @@ describe('AssignmentMatrixGrid (#3367)', () => {
     expect(onOpen).toHaveBeenCalledWith(10);
   });
 
-  it('says so when the class has no assignments', () => {
+  it('with no assignments yet, says what to do and still lists the students (Junyi parity)', () => {
     render(<AssignmentMatrixGrid data={{ ...data, assignments: [], cells: [] }} onOpenAssignment={vi.fn()} />);
-    expect(screen.getByText('這個班級還沒有指派作業')).toBeInTheDocument();
+    expect(screen.getByText(/按「建立作業」選一課派給學生/)).toBeInTheDocument();
+    const table = screen.getByRole('table', { name: '班級作業總表' });
+    for (const s of data.students) expect(within(table).getByText(s.name)).toBeInTheDocument();
+  });
+
+  it('with no students, points the teacher to 班級設定', () => {
+    render(<AssignmentMatrixGrid data={{ ...data, students: [], cells: [] }} onOpenAssignment={vi.fn()} />);
+    expect(screen.getByText(/先到「班級設定」新增學生/)).toBeInTheDocument();
   });
 
   it('past the due date, unfinished work is red 逾期未交; finished and not-assigned are not', () => {
