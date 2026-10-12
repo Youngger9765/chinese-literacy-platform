@@ -21,9 +21,15 @@ interface Props {
   className?: string;
   /** Fires after a new rate is persisted, e.g. to restart playback. */
   onChange?: (rate: number) => void;
+  /**
+   * #3397: `sm` 給讀全文-做記號用 —— 那一步的主角是標記，速度列只是附屬，
+   * 預設尺寸跟主按鈕一樣大會搶走注意力（mentor 回饋）。
+   */
+  size?: 'md' | 'sm';
 }
 
-const TtsSpeedPicker: React.FC<Props> = ({ className, onChange }) => {
+const TtsSpeedPicker: React.FC<Props> = ({ className, onChange, size = 'md' }) => {
+  const sm = size === 'sm';
   const [rate, setRate] = useState<number>(() => getTtsPlaybackRate());
 
   const pick = (value: number) => {
@@ -40,9 +46,11 @@ const TtsSpeedPicker: React.FC<Props> = ({ className, onChange }) => {
     <div
       role="group"
       aria-label="朗讀速度"
-      className={`flex items-center gap-1 rounded-full bg-surface-container-lowest shadow-editorial px-2 ${className ?? ''}`}
+      className={`flex items-center rounded-full bg-surface-container-lowest ${
+        sm ? 'gap-0.5 px-1.5 border border-outline-variant/40' : 'gap-1 px-2 shadow-editorial'
+      } ${className ?? ''}`}
     >
-      <span className="material-symbols-outlined text-base text-on-surface-variant" aria-hidden="true">
+      <span className={`material-symbols-outlined ${sm ? 'text-sm' : 'text-base'} text-on-surface-variant`} aria-hidden="true">
         speed
       </span>
       {TTS_RATE_OPTIONS.map((opt) => {
@@ -57,7 +65,7 @@ const TtsSpeedPicker: React.FC<Props> = ({ className, onChange }) => {
             // reader user tabbing straight onto "慢" needs to know what is
             // slow. aria-pressed (not colour alone) carries which is active.
             aria-label={`朗讀速度 ${opt.label}`}
-            className={`h-9 min-w-9 px-2 rounded-full font-headline text-sm transition-all active:scale-[0.98] ${
+            className={`${sm ? 'h-7 min-w-7 px-1.5 text-xs' : 'h-9 min-w-9 px-2 text-sm'} rounded-full font-headline transition-all active:scale-[0.98] ${
               active
                 ? 'bg-accent text-white font-bold'
                 : 'text-on-surface-variant hover:bg-surface-container-low'
