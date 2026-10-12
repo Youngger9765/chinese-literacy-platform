@@ -150,7 +150,7 @@ const AssignmentsPanel: React.FC<AssignmentsPanelProps> = ({ classroomId, select
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.5v15m7.5-7.5h-15" />
           </svg>
-          建立任務
+          建立作業
         </button>
       </div>
       {error && <p className="text-red-600 text-sm">{error} <button className="underline" onClick={load}>重試</button></p>}

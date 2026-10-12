@@ -17,7 +17,7 @@
 | `story_structure` | **2.5-flash-lite** | gemini-2.5-flash-lite | global | 78% cheaper, faster |
 | `reading_analysis` | **2.5-flash-lite** | gemini-2.5-flash-lite | global | 80% cheaper, faster |
 | `teacher_comment` | **2.5-flash-lite** | gemini-2.5-flash-lite | global | same family, consistent |
-| `omo_identifier` | flash-lite-latest | gemini-flash-lite-latest | global | LOCKED per #1729 (identifier swap) |
+| `omo_identifier` | **2.5-flash-lite** | gemini-2.5-flash-lite | global | 2026-10-12: gemini-flash-lite-latest returns 404 at global, swapped (#3440); accuracy not re-A/B-tested (was #1729) |
 | `omo_grader` | **2.5-flash** | gemini-2.5-flash | us-central1 | LOCKED per #1730 (vision reasoning) |
 
 ---

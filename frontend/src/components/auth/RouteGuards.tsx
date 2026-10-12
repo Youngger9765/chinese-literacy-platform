@@ -37,11 +37,13 @@ const AuthLoadingSpinner: React.FC = () => (
  * sides agree on the destination, so it no longer matters who wins.
  */
 export const PublicOnlyRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, needsTermsAcceptance, mustChangePassword } = useAuth();
   const location = useLocation();
 
   if (isLoading) return <AuthLoadingSpinner />;
   if (isAuthenticated) {
+    if (mustChangePassword) return <Navigate to="/change-password" replace />;
+    if (needsTermsAcceptance) return <Navigate to="/terms" replace />;
     const fromLocation = (location.state as { from?: { pathname: string; search?: string } })?.from;
     const to = fromLocation ? `${fromLocation.pathname}${fromLocation.search ?? ''}` : '/';
     return <Navigate to={to} replace />;

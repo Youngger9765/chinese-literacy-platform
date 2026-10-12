@@ -92,7 +92,7 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({
                 : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
             }`}
           >
-            {assignment.is_active ? '進行中' : '已停用'}
+            {assignment.is_active ? '使用中' : '已停用'}
           </button>
         </div>
 

@@ -176,30 +176,48 @@ const StudentsPanel: React.FC<StudentsPanelProps> = ({ classroomId, selectedStud
     <div className="p-5">
       {error && <p className="text-red-600">{error}</p>}
       {!matrix && !error && <div className="h-40 rounded-xl bg-gray-100 animate-pulse" />}
-      {matrix && (
-        <table className="w-full text-left" aria-label="學生名單">
-          <thead>
-            <tr className="text-sm text-gray-500 border-b border-gray-200">
-              <th className="py-2 font-medium">學生</th>
-              <th className="py-2 font-medium">已交作業</th>
-              <th className="py-2 font-medium">平均分數</th>
-            </tr>
-          </thead>
-          <tbody>
-            {summarizeStudents(matrix).map((s) => (
-              <tr key={s.id} className="border-b border-gray-100">
-                <td className="py-3">
+      {matrix && (() => {
+        const students = summarizeStudents(matrix);
+        return (
+          <>
+            <ul className="sm:hidden space-y-3" aria-label="學生名單（手機）">
+              {students.map((s) => (
+                <li key={s.id} className="rounded-xl border border-gray-200 p-4 space-y-2">
                   <button type="button" onClick={() => onSelectStudent(s.id)} className="font-semibold text-accent hover:underline cursor-pointer">
                     {s.name}
                   </button>
-                </td>
-                <td className="py-3 tabular-nums">{s.submitted} / {s.assigned}</td>
-                <td className="py-3 tabular-nums">{s.average ?? '—'}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div><div className="text-gray-500">已交作業 </div><div className="font-semibold tabular-nums">{s.submitted} / {s.assigned}</div></div>
+                    <div><div className="text-gray-500">平均分數 </div><div className="font-semibold tabular-nums">{s.average ?? '—'}</div></div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <table className="hidden sm:table w-full text-left" aria-label="學生名單">
+              <thead>
+                <tr className="text-sm text-gray-500 border-b border-gray-200">
+                  <th className="py-2 font-medium">學生</th>
+                  <th className="py-2 font-medium">已交作業</th>
+                  <th className="py-2 font-medium">平均分數</th>
+                </tr>
+              </thead>
+              <tbody>
+                {students.map((s) => (
+                  <tr key={s.id} className="border-b border-gray-100">
+                    <td className="py-3">
+                      <button type="button" onClick={() => onSelectStudent(s.id)} className="font-semibold text-accent hover:underline cursor-pointer">
+                        {s.name}
+                      </button>
+                    </td>
+                    <td className="py-3 tabular-nums">{s.submitted} / {s.assigned}</td>
+                    <td className="py-3 tabular-nums">{s.average ?? '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
+        );
+      })()}
     </div>
   );
 };

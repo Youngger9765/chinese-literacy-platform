@@ -64,4 +64,9 @@ describe('TodayOverviewTab (#3367)', () => {
     await userEvent.click(buttons[0]);
     expect(onOpen).toHaveBeenCalledWith(2);
   });
+
+  it('labels outstanding student-assignment pairs as 人次', async () => {
+    render(<TodayOverviewTab classroomId={9} onOpenAssignment={vi.fn()} onOpenAtRisk={vi.fn()} />);
+    expect(await screen.findByText('3 人次')).toBeInTheDocument();
+  });
 });

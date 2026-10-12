@@ -22,7 +22,7 @@ const DATA_VIEWS: { key: DataView; label: string }[] = [
   { key: 'today', label: '今日總覽' },
   { key: 'students', label: '學生總表' },
   { key: 'at-risk', label: '早期介入' },
-  { key: 'error-heatmap', label: '錯字總表' },
+  { key: 'error-heatmap', label: '錯字熱力圖' },
   { key: 'analytics', label: '學習分析' },
   { key: 'learning', label: '詳細學習紀錄' },
 ];
@@ -84,6 +84,14 @@ const ClassDataTab: React.FC<ClassDataTabProps> = ({
 
   return (
     <div className="flex flex-col sm:flex-row">
+      {/*
+       * #3424: below `sm` this nav is a horizontally-scrolling row with no
+       * visual cue — 錯字總表 got cut in half and 學習分析／詳細學習紀錄
+       * were off-screen with nothing telling the teacher to swipe. Reuses
+       * the same hint pattern as AssignmentMatrixGrid's
+       * "← 左右滑動看更多作業 →".
+       */}
+      <p className="sm:hidden text-xs text-gray-400 px-4 pt-3 pb-1">← 左右滑動看更多 →</p>
       <nav
         aria-label="班級數據項目"
         className="flex sm:w-48 sm:shrink-0 gap-2 overflow-x-auto border-b sm:border-b-0 sm:border-r border-gray-200 p-4 sm:flex-col"

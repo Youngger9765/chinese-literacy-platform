@@ -24,7 +24,9 @@ export function credentialCardsHtml(classroomName: string, rows: CredentialRow[]
 </div>`,
     )
     .join('\n');
-  return `<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><title>${esc(classroomName)} 帳密卡</title>
+  return `<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${esc(classroomName)} 帳密卡</title>
 <style>
   @page { size: A4; margin: 10mm; }
   body { font-family: "Noto Sans TC", system-ui, sans-serif; margin: 0; }
@@ -37,6 +39,11 @@ export function credentialCardsHtml(classroomName: string, rows: CredentialRow[]
   .url { font-size: 8pt; color: #777; margin-top: 2mm; word-break: break-all; }
   @media screen { body { padding: 16px; } .hint { margin-bottom: 12px; font-size: 14px; } }
   @media print { .hint { display: none; } }
+  /* #3424: no viewport meta meant mobile browsers rendered this popup at the
+     default ~980px desktop viewport, so screen-preview text came out tiny.
+     Below ~480px CSS px also drop the 3-column grid to 1 column so a card
+     isn't itself squeezed before the viewport fix even helps. */
+  @media screen and (max-width: 480px) { .grid { grid-template-columns: 1fr; } }
 </style></head><body>
 <p class="hint">列印後沿虛線剪下，發給每位學生（建議貼在課本第一頁）</p>
 <div class="grid">${cards}</div>

@@ -346,6 +346,30 @@ class TestEnhancedClassroomStats:
         assert data["completion_rate"] == 0.0
         assert data["avg_session_duration_minutes"] is None
 
+    def test_stats_ignores_subminute_session_duration(
+        self, client, teacher, school_id
+    ):
+        student = _register_user(client, "short_stats_duration")
+        classroom_id = _create_classroom_with_students(
+            client, teacher, [student], school_id, "Short Stats Duration"
+        )
+        started_at = datetime.now(timezone.utc) - timedelta(minutes=10)
+        db = TestingSessionLocal()
+        db.add(LearningSession(
+            student_id=student["user_id"], story_slug="1", status="completed",
+            started_at=started_at, completed_at=started_at + timedelta(seconds=2),
+        ))
+        db.commit()
+        db.close()
+
+        resp = client.get(
+            f"/api/teacher/classrooms/{classroom_id}/stats",
+            headers=_auth(teacher["token"]),
+        )
+
+        assert resp.status_code == 200
+        assert resp.json()["avg_session_duration_minutes"] is None
+
 
 # ===========================================================================
 # Error vocabulary endpoint
@@ -439,6 +463,50 @@ class TestErrorVocabEndpoint:
         if len(data) >= 2:
             assert data[0]["count"] >= data[1]["count"]
 
+    def test_aggregates_error_types_per_character_for_ranking(
+        self, client, teacher, student1, student2, school_id
+    ):
+        classroom_id = _create_classroom_with_students(
+            client, teacher, [student1, student2], school_id, "ErrorVocab Aggregate"
+        )
+        now = datetime.now(timezone.utc)
+        db = TestingSessionLocal()
+        first_session = LearningSession(
+            student_id=student1["user_id"], story_slug="1", status="completed",
+            started_at=now - timedelta(hours=1), completed_at=now,
+        )
+        second_session = LearningSession(
+            student_id=student2["user_id"], story_slug="1", status="completed",
+            started_at=now - timedelta(hours=1), completed_at=now,
+        )
+        db.add_all([first_session, second_session])
+        db.flush()
+        db.add_all([
+            CharacterError(session_id=first_session.id, character="子", error_type="substitution"),
+            CharacterError(session_id=first_session.id, character="子", error_type="substitution"),
+            CharacterError(session_id=first_session.id, character="子", error_type="substitution"),
+            CharacterError(session_id=first_session.id, character="子", error_type="omission"),
+            CharacterError(session_id=first_session.id, character="子", error_type="omission"),
+            CharacterError(session_id=second_session.id, character="他", error_type="substitution"),
+            CharacterError(session_id=second_session.id, character="他", error_type="substitution"),
+            CharacterError(session_id=second_session.id, character="他", error_type="substitution"),
+            CharacterError(session_id=second_session.id, character="他", error_type="substitution"),
+        ])
+        db.commit()
+        db.close()
+
+        resp = client.get(
+            f"/api/teacher/classrooms/{classroom_id}/error-vocab",
+            headers=_auth(teacher["token"]),
+        )
+
+        assert resp.status_code == 200
+        data = resp.json()
+        zi_rows = [item for item in data if item["character"] == "子"]
+        assert len(zi_rows) == 1
+        assert zi_rows[0]["count"] == 5
+        assert [item["character"] for item in data[:2]] == ["子", "他"]
+
     def test_empty_classroom_returns_empty(self, client, teacher, school_id):
         classroom_id = _create_classroom_with_students(
             client, teacher, [], school_id, "ErrorVocab Empty"
@@ -528,6 +596,68 @@ class TestTimeStatsEndpoint:
         assert data["avg_minutes_per_session"] is not None
         assert data["avg_minutes_per_session"] > 0
         assert data["study_days"] >= 1
+
+    def test_returns_null_durations_for_only_subminute_session(
+        self, client, teacher, school_id
+    ):
+        student = _register_user(client, "short_time_duration")
+        classroom_id = _create_classroom_with_students(
+            client, teacher, [student], school_id, "Short Time Duration"
+        )
+        started_at = datetime.now(timezone.utc) - timedelta(minutes=10)
+        db = TestingSessionLocal()
+        db.add(LearningSession(
+            student_id=student["user_id"], story_slug="1", status="completed",
+            started_at=started_at, completed_at=started_at + timedelta(seconds=2),
+        ))
+        db.commit()
+        db.close()
+
+        resp = client.get(
+            f"/api/teacher/classrooms/{classroom_id}/time-stats",
+            headers=_auth(teacher["token"]),
+        )
+
+        assert resp.status_code == 200
+        assert resp.json()["total_hours"] is None
+        assert resp.json()["avg_minutes_per_session"] is None
+
+    def test_excludes_subminute_session_from_duration_averages(
+        self, client, teacher, school_id
+    ):
+        student = _register_user(client, "mixed_time_duration")
+        classroom_id = _create_classroom_with_students(
+            client, teacher, [student], school_id, "Mixed Time Duration"
+        )
+        started_at = datetime.now(timezone.utc) - timedelta(hours=1)
+        db = TestingSessionLocal()
+        db.add_all([
+            LearningSession(
+                student_id=student["user_id"], story_slug="1", status="completed",
+                started_at=started_at, completed_at=started_at + timedelta(minutes=20),
+            ),
+            LearningSession(
+                student_id=student["user_id"], story_slug="2", status="completed",
+                started_at=started_at, completed_at=started_at + timedelta(seconds=2),
+            ),
+        ])
+        db.commit()
+        db.close()
+
+        time_stats = client.get(
+            f"/api/teacher/classrooms/{classroom_id}/time-stats",
+            headers=_auth(teacher["token"]),
+        )
+        stats = client.get(
+            f"/api/teacher/classrooms/{classroom_id}/stats",
+            headers=_auth(teacher["token"]),
+        )
+
+        assert time_stats.status_code == 200
+        assert time_stats.json()["total_hours"] == 0.3
+        assert time_stats.json()["avg_minutes_per_session"] == 20.0
+        assert stats.status_code == 200
+        assert stats.json()["avg_session_duration_minutes"] == 20.0
 
     def test_empty_classroom_returns_defaults(self, client, teacher, school_id):
         classroom_id = _create_classroom_with_students(

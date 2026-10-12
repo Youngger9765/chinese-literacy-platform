@@ -163,6 +163,18 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 # Logging middleware
 # ---------------------------------------------------------------------------
 
+class ApiNoStoreCacheMiddleware(BaseHTTPMiddleware):
+    """Prevent browsers from caching dynamic API responses."""
+
+    async def dispatch(self, request: Request, call_next) -> Response:
+        response = await call_next(request)
+        if request.url.path.startswith("/api/") and not response.headers.get(
+            "cache-control"
+        ):
+            response.headers["Cache-Control"] = "no-store"
+        return response
+
+
 class RequestLoggingMiddleware(BaseHTTPMiddleware):
     """Log every HTTP request with duration and attach a request_id.
 
@@ -487,6 +499,10 @@ app = FastAPI(
 # or not — verified via adversarial review (appsec-pentest-reviewer) probing
 # the actual response headers and log output of a blocked request.
 app.add_middleware(PreviewModeWriteGuardMiddleware)
+
+# Add API no-store inside the response security wrappers so route-defined
+# Cache-Control headers are visible and preserved before outer middleware runs.
+app.add_middleware(ApiNoStoreCacheMiddleware)
 
 # Security headers must be added before CORSMiddleware so they appear on
 # every response (including CORS preflight responses).

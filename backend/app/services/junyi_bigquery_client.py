@@ -57,7 +57,8 @@ def teacher_user_id_key(junyi_identity_id: str) -> str:
 def student_identity_id_from_user_id_key(student_user_id: str) -> str | None:
     if not student_user_id or not student_user_id.startswith(JUNYI_USER_ID_KEY_PREFIX):
         return None
-    return student_user_id[len(JUNYI_USER_ID_KEY_PREFIX):]
+    suffix = student_user_id[len(JUNYI_USER_ID_KEY_PREFIX):]
+    return suffix or None
 
 
 class JunyiBigQueryError(Exception):
@@ -197,7 +198,11 @@ def _impersonated_credentials():
     return impersonated_credentials.Credentials(
         source_credentials=source_credentials,
         target_principal=settings.junyi_bigquery_service_account,
-        target_scopes=["https://www.googleapis.com/auth/bigquery.readonly"],
+        # Full bigquery scope, not bigquery.readonly: running a query creates a
+        # job (jobs.insert), which the readonly scope refuses with 403
+        # "insufficient authentication scopes" (#3380). Data access is still
+        # limited by the SA's IAM roles (jobUser here, dataViewer on the source).
+        target_scopes=["https://www.googleapis.com/auth/bigquery"],
         lifetime=300,
     )
 

@@ -142,6 +142,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
         school_id: teacherSchoolId,
         grade,
       });
+      setClassrooms((prev) => [...prev, created]);
       showToast(`班級「${created.name}」建立成功！`, 'success');
       setNewName('');
       setNewGrade('');
