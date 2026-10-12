@@ -18,6 +18,7 @@ import logging
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 logger = logging.getLogger(__name__)
@@ -180,7 +181,18 @@ def login(req: LoginRequest, request: Request, db: Session = Depends(get_db)):
     if "@" in req.email:
         user = db.query(User).filter(User.email == req.email, User.is_active == True).first()
     else:
-        user = db.query(User).filter(User.username == req.email, User.is_active == True).first()
+        # Issue #3426: student usernames are system-generated (join_code +
+        # seat_number) and always stored uppercase (classroom_batch.py /
+        # classroom_csv.py call .upper()), but credential cards print them
+        # uppercase while students often type lowercase on tablets. Usernames
+        # can't collide case-insensitively by construction (generator only
+        # emits uppercase ASCII + digits), so this is a strict widening with
+        # no new collision risk.
+        user = (
+            db.query(User)
+            .filter(func.lower(User.username) == req.email.lower(), User.is_active == True)
+            .first()
+        )
 
     if not user or not verify_password(req.password, user.password_hash):
         raise HTTPException(
