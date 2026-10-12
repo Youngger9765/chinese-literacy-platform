@@ -144,7 +144,7 @@ const TodayOverviewTab: React.FC<TodayOverviewTabProps> = ({ classroomId, onOpen
     <div className="p-5 space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <SummaryCard
-          value={pending === null ? '…' : `${pending} 份`}
+          value={pending === null ? '…' : `${pending} 人次`}
           label={dueToday ? `待交作業・「${dueToday.title}」今天到期` : '待交作業（逾期與今天到期）'}
           tone="border-l-accent"
         />

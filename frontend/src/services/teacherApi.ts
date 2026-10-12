@@ -65,7 +65,7 @@ export interface ErrorVocabItem {
 }
 
 export interface TimeStats {
-  total_hours: number;
+  total_hours: number | null;
   avg_minutes_per_session: number | null;
   study_days: number;
   sessions_this_week: number;
