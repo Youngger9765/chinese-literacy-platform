@@ -48,6 +48,21 @@ def test_promotion_skipped_if_real_email_already_taken_by_someone_else(db):
     assert is_new is False
 
 
+def test_promotion_skipped_if_inactive_account_holds_real_email(db):
+    original = _user(db, "junyi-abc123@student.lingoleap.local", "jid-promo-1")
+    inactive = _user(db, "real@example-junyi.invalid", None)
+    inactive.is_active = False
+    db.commit()
+
+    user, is_new = resolve_junyi_user(db, _payload())
+    db.commit()
+
+    assert user.id == original.id
+    assert user.email == "junyi-abc123@student.lingoleap.local"
+    assert inactive.email == "real@example-junyi.invalid"
+    assert is_new is False
+
+
 def test_non_synthetic_account_email_is_never_touched_by_sso_login(db):
     original = _user(db, "old@example-junyi.invalid", "jid-promo-1")
     user, is_new = resolve_junyi_user(db, _payload())

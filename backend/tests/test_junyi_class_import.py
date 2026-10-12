@@ -317,6 +317,26 @@ class TestFailClosedMapping:
         finally:
             db.close()
 
+    def test_empty_student_identity_suffix_is_skipped_not_imported(self, client):
+        teacher = _register_teacher(client, "empty_suffix", _test_school_id, junyi_identity_id="empty-suffix")
+        rows = [
+            _row("user_id_key_empty-suffix", "empty-suffix-class", "空後綴班", "user_id_key_", "空"),
+        ]
+        fake = _make_fake_client(rows)
+        dep, override = _bq_dependency_override(fake)
+        app.dependency_overrides[dep] = override
+
+        resp = client.post(
+            "/api/classrooms/junyi-import/import",
+            json={"school_id": _test_school_id, "junyi_class_ids": ["empty-suffix-class"]},
+            headers=auth_header(teacher["token"]),
+        )
+
+        assert resp.status_code == 200
+        assert resp.json()["added_students"] == 0
+        with TestingSessionLocal() as db:
+            assert db.query(User).filter(User.junyi_identity_id == "").count() == 0
+
 
 # ===========================================================================
 # Dedup — students
@@ -324,6 +344,70 @@ class TestFailClosedMapping:
 
 
 class TestStudentDedup:
+    def test_student_insert_race_reuses_concurrently_created_student(self, client, monkeypatch):
+        from app.services import junyi_class_import_service as service
+
+        teacher_data = _register_teacher(client, "student_race", _test_school_id, "student-race")
+        with TestingSessionLocal() as competing_db:
+            competing_db.add(User(
+                email="race-existing@example.com",
+                password_hash="password",
+                name="Race Existing",
+                junyi_identity_id="race-student",
+                email_verified=True,
+            ))
+            competing_db.commit()
+
+        db = TestingSessionLocal()
+        try:
+            teacher = db.get(User, teacher_data["user_id"])
+            original_query = db.query
+            original_flush = db.flush
+            hide_existing_once = True
+            fail_insert_once = True
+
+            class MissingStudentQuery:
+                def filter(self, *args):
+                    return self
+
+                def first(self):
+                    return None
+
+            def query(model, *args, **kwargs):
+                nonlocal hide_existing_once
+                if model is User and hide_existing_once:
+                    hide_existing_once = False
+                    return MissingStudentQuery()
+                return original_query(model, *args, **kwargs)
+
+            def flush(*args, **kwargs):
+                nonlocal fail_insert_once
+                if fail_insert_once and any(
+                    isinstance(item, User) and item.junyi_identity_id == "race-student"
+                    for item in db.new
+                ):
+                    fail_insert_once = False
+                    raise service.IntegrityError("insert", {}, Exception("concurrent insert"))
+                return original_flush(*args, **kwargs)
+
+            monkeypatch.setattr(db, "query", query)
+            monkeypatch.setattr(db, "flush", flush)
+            result = service.import_junyi_classes(
+                db,
+                teacher,
+                _test_school_id,
+                ["race-student-class"],
+                _make_fake_client([
+                    _row("user_id_key_student-race", "race-student-class", "競爭學生班", "user_id_key_race-student", "甲"),
+                    _row("user_id_key_student-race", "race-student-class", "競爭學生班", "user_id_key_race-new", "乙"),
+                ]),
+            )
+            assert result["added_students"] == 2
+            assert db.query(User).filter(User.junyi_identity_id == "race-student").count() == 1
+            assert db.query(User).filter(User.junyi_identity_id == "race-new").count() == 1
+        finally:
+            db.close()
+
     def test_reimport_adds_only_new_students(self, client):
         teacher = _register_teacher(client, "dedup_students", _test_school_id, junyi_identity_id="http://id.ju/dedup1")
         teacher_key = "user_id_key_http://id.ju/dedup1"
@@ -479,6 +563,81 @@ class TestClassroomDedup:
             headers=auth_header(teacher["token"]),
         ).json()
         assert after["classes"][0]["already_imported"] is True
+
+    def test_same_junyi_class_cannot_be_reused_across_schools(self, client):
+        teacher = _register_teacher(client, "cross_school", _test_school_id, junyi_identity_id="http://id.ju/cross-school")
+        with TestingSessionLocal() as db:
+            teacher_role = db.query(Role).filter(Role.name == "teacher").one()
+            db.add(UserRole(
+                user_id=teacher["user_id"],
+                role_id=teacher_role.id,
+                scope_type="school",
+                scope_id=str(_other_school_id),
+            ))
+            db.commit()
+
+        teacher_key = "user_id_key_http://id.ju/cross-school"
+        rows = [
+            _row(teacher_key, "cross-school-class", "跨校班", "user_id_key_cross-student-a", "甲"),
+        ]
+        fake = _make_fake_client(rows)
+        dep, override = _bq_dependency_override(fake)
+        app.dependency_overrides[dep] = override
+
+        first = client.post(
+            "/api/classrooms/junyi-import/import",
+            json={"school_id": _test_school_id, "junyi_class_ids": ["cross-school-class"]},
+            headers=auth_header(teacher["token"]),
+        )
+        assert first.status_code == 200
+
+        with TestingSessionLocal() as db:
+            classroom = db.query(Classroom).filter(
+                Classroom.teacher_id == teacher["user_id"],
+                Classroom.junyi_class_id == "cross-school-class",
+            ).one()
+            assert classroom.school_id == _test_school_id
+            roster_before = db.query(ClassroomStudent).filter(
+                ClassroomStudent.classroom_id == classroom.id,
+            ).count()
+            assert roster_before == 1
+
+        rows.append(_row(
+            teacher_key,
+            "cross-school-class",
+            "跨校班",
+            "user_id_key_cross-student-b",
+            "乙",
+        ))
+        second = client.post(
+            "/api/classrooms/junyi-import/import",
+            json={"school_id": _other_school_id, "junyi_class_ids": ["cross-school-class"]},
+            headers=auth_header(teacher["token"]),
+        )
+        assert second.status_code == 400
+        assert "其他學校" in second.json()["detail"]
+
+        listing = client.get(
+            f"/api/classrooms/junyi-import/classes?school_id={_other_school_id}",
+            headers=auth_header(teacher["token"]),
+        )
+        assert listing.status_code == 200
+        class_entry = next(
+            item for item in listing.json()["classes"]
+            if item["junyi_class_id"] == "cross-school-class"
+        )
+        assert class_entry["already_imported"] is False
+
+        with TestingSessionLocal() as db:
+            classroom = db.query(Classroom).filter(
+                Classroom.teacher_id == teacher["user_id"],
+                Classroom.junyi_class_id == "cross-school-class",
+            ).one()
+            assert classroom.school_id == _test_school_id
+            assert db.query(ClassroomStudent).filter(
+                ClassroomStudent.classroom_id == classroom.id,
+            ).count() == roster_before
+            assert db.query(User).filter(User.junyi_identity_id == "cross-student-b").count() == 0
 
 
 # ===========================================================================

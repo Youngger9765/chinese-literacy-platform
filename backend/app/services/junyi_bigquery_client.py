@@ -57,7 +57,8 @@ def teacher_user_id_key(junyi_identity_id: str) -> str:
 def student_identity_id_from_user_id_key(student_user_id: str) -> str | None:
     if not student_user_id or not student_user_id.startswith(JUNYI_USER_ID_KEY_PREFIX):
         return None
-    return student_user_id[len(JUNYI_USER_ID_KEY_PREFIX):]
+    suffix = student_user_id[len(JUNYI_USER_ID_KEY_PREFIX):]
+    return suffix or None
 
 
 class JunyiBigQueryError(Exception):
