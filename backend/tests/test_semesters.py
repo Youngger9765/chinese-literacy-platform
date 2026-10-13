@@ -293,6 +293,9 @@ class TestSemesterService:
         expected_expire = date(2025, 6, 30) + timedelta(days=7)  # end_date + grace_days
         assert ct_row.expires_at is not None
         assert ct_row.expires_at.date() == expected_expire
+        # Expires at the END of that day in Taiwan (16:00 UTC), not 08:00 Taiwan.
+        exp = ct_row.expires_at if ct_row.expires_at.tzinfo else ct_row.expires_at.replace(tzinfo=timezone.utc)
+        assert exp.astimezone(timezone.utc).hour == 16
 
     def test_activate_does_not_overwrite_existing_expires_at(self, school_id):
         """ClassroomText rows that already have expires_at should not be changed."""
