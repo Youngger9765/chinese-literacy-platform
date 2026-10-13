@@ -326,6 +326,75 @@ def redeem_invite_code(
     )
 
 
+class StudentParentLink(BaseModel):
+    link_id: int
+    parent_name: str
+    parent_email: str
+    linked_at: datetime
+
+
+def _require_teacher_of_student(teacher: User, student_id: int, db: Session) -> None:
+    if not _is_teacher_of_student(teacher, student_id, db):
+        raise HTTPException(status_code=403, detail="You are not a teacher of this student")
+
+
+@router.get("/parents/students/{student_id}/links", response_model=list[StudentParentLink])
+def list_student_parent_links(
+    student_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """#3517: the student's teacher sees which parents are linked."""
+    _require_teacher_of_student(current_user, student_id, db)
+    rows = (
+        db.query(ParentStudentLink, User)
+        .join(User, User.id == ParentStudentLink.parent_id)
+        .filter(ParentStudentLink.student_id == student_id, ParentStudentLink.is_active == True)  # noqa: E712
+        .order_by(ParentStudentLink.linked_at)
+        .all()
+    )
+    return [
+        StudentParentLink(link_id=link.id, parent_name=parent.name or "", parent_email=parent.email or "", linked_at=link.linked_at)
+        for link, parent in rows
+    ]
+
+
+@router.delete("/parents/students/{student_id}/links/{link_id}", status_code=204)
+def revoke_student_parent_link(
+    student_id: int,
+    link_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """#3517: the student's teacher cuts a parent off; the parent loses access at once."""
+    _require_teacher_of_student(current_user, student_id, db)
+    link = (
+        db.query(ParentStudentLink)
+        .filter(ParentStudentLink.id == link_id, ParentStudentLink.student_id == student_id)
+        .first()
+    )
+    if link is None:
+        raise HTTPException(status_code=404, detail="Link not found")
+    link.is_active = False
+    # A revoked parent may still hold a second, unused code for this child; without
+    # this they could re-link the moment they're cut off. Teachers can issue new ones.
+    now = datetime.now(timezone.utc)
+    voided = (
+        db.query(ParentInviteCode)
+        .filter(
+            ParentInviteCode.student_id == student_id,
+            ParentInviteCode.used == False,  # noqa: E712
+            ParentInviteCode.expires_at > now,
+        )
+        .update({ParentInviteCode.expires_at: now}, synchronize_session=False)
+    )
+    db.commit()
+    logger.info(
+        "Teacher %d revoked parent link %d (parent %d, student %d); voided %d unused codes",
+        current_user.id, link_id, link.parent_id, student_id, voided,
+    )
+
+
 @router.get("/parents/children", response_model=LinkedChildrenResponse)
 def list_linked_children(
     current_user: User = Depends(get_current_user),

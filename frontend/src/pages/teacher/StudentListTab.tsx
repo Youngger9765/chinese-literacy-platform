@@ -3,7 +3,12 @@ import type { BatchCreateResult, ClassroomDetailResponse, StudentInClassroomResp
 import CsvUploadModal from './CsvUploadModal';
 import AddStudentsPanel from './panel/AddStudentsPanel';
 import { resetStudentPassword } from '../../services/classroomApi';
-import { generateParentInviteCode } from '../../services/parentApi';
+import {
+  generateParentInviteCode,
+  listStudentParentLinks,
+  revokeStudentParentLink,
+  type StudentParentLink,
+} from '../../services/parentApi';
 import * as featureFlags from '../../config/featureFlags';
 
 // ── Per-student parent invite button ─────────────────────────────────────────
@@ -66,6 +71,81 @@ const ParentInviteButton: React.FC<{ token: string; studentId: number; studentNa
         {isGenerating ? '產生中…' : '家長邀請碼'}
       </button>
       {error && <span className="text-xs text-red-500">{error}</span>}
+    </div>
+  );
+};
+
+// ── Per-student linked parents (#3517) ───────────────────────────────────────
+
+export const LinkedParentsButton: React.FC<{ token: string; studentId: number; studentName: string }> = ({
+  token,
+  studentId,
+  studentName,
+}) => {
+  const [links, setLinks] = useState<StudentParentLink[] | null>(null);
+  const [open, setOpen] = useState(false);
+  const [error, setError] = useState('');
+
+  const toggle = async () => {
+    if (open) {
+      setOpen(false);
+      return;
+    }
+    setOpen(true);
+    setError('');
+    try {
+      setLinks(await listStudentParentLinks(token, studentId));
+    } catch {
+      setError('讀取失敗');
+    }
+  };
+
+  const revoke = async (link: StudentParentLink) => {
+    if (!window.confirm(`確定取消 ${link.parent_name || link.parent_email} 與 ${studentName} 的連結？取消後對方就看不到孩子的學習資料。`)) return;
+    try {
+      await revokeStudentParentLink(token, studentId, link.link_id);
+      setLinks((prev) => (prev ?? []).filter((l) => l.link_id !== link.link_id));
+    } catch {
+      setError('取消失敗，請再試一次');
+    }
+  };
+
+  return (
+    <div className="relative inline-block">
+      <button
+        type="button"
+        onClick={toggle}
+        aria-expanded={open}
+        className="text-sm text-gray-500 hover:text-gray-700 cursor-pointer whitespace-nowrap"
+      >
+        已連結家長
+      </button>
+      {open && (
+        <div className="absolute z-20 mt-1 right-0 w-64 bg-white border border-gray-200 rounded-lg shadow-lg p-3 text-sm whitespace-normal">
+          {error && <p className="text-red-600">{error}</p>}
+          {links === null && !error && <p className="text-gray-500">讀取中…</p>}
+          {links !== null && links.length === 0 && <p className="text-gray-500">還沒有家長連結</p>}
+          {links !== null && links.length > 0 && (
+            <ul className="space-y-2" aria-label={`${studentName} 的家長`}>
+              {links.map((l) => (
+                <li key={l.link_id} className="flex items-center justify-between gap-2">
+                  <span className="min-w-0">
+                    <span className="block font-medium text-gray-900 truncate">{l.parent_name || '家長'}</span>
+                    <span className="block text-xs text-gray-500 truncate">{l.parent_email}</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => revoke(l)}
+                    className="shrink-0 text-xs text-red-600 hover:text-red-800 cursor-pointer"
+                  >
+                    取消連結
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
     </div>
   );
 };
@@ -296,7 +376,10 @@ const StudentListTab: React.FC<StudentListTabProps> = ({
                 <td className="lg:px-4 lg:py-3 text-sm text-gray-500 font-mono whitespace-nowrap">{accountName(s.email)}</td>
                 {showParentInvite && (
                   <td className="lg:px-4 lg:py-3 whitespace-nowrap">
-                    <ParentInviteButton token={token} studentId={s.id} studentName={s.name} />
+                    <div className="flex items-center gap-3">
+                      <ParentInviteButton token={token} studentId={s.id} studentName={s.name} />
+                      <LinkedParentsButton token={token} studentId={s.id} studentName={s.name} />
+                    </div>
                   </td>
                 )}
                 <td className="lg:px-4 lg:py-3 whitespace-nowrap">
