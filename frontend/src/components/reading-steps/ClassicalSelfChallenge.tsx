@@ -11,6 +11,7 @@
 import React, { useState } from 'react';
 import type { Story, ClassicalSelfChallengeQuestionItem } from '../../types';
 import NextStepFooter from '../learning/NextStepFooter';
+import { normalizeSelfChallenge } from './classicalShapes';
 
 export interface ClassicalSelfChallengeProps {
   story: Story;
@@ -55,7 +56,7 @@ const QuestionItem: React.FC<{ item: ClassicalSelfChallengeQuestionItem }> = ({ 
 };
 
 const ClassicalSelfChallenge: React.FC<ClassicalSelfChallengeProps> = ({ story, onFinish }) => {
-  const content = story.selfChallenge;
+  const content = normalizeSelfChallenge(story.selfChallenge);
   const [showTranslation, setShowTranslation] = useState(false);
 
   if (!content || !content.passage) {
@@ -79,7 +80,7 @@ const ClassicalSelfChallenge: React.FC<ClassicalSelfChallengeProps> = ({ story, 
             {content.optional_note && (
               <p className="text-xs text-on-surface-variant/70">{content.optional_note}</p>
             )}
-            {content.instruction && <p className="text-sm text-on-surface-variant mt-1">{content.instruction}</p>}
+            {content.instruction && <p className="text-sm text-on-surface-variant mt-1 whitespace-pre-line">{content.instruction}</p>}
             {content.strategy_banner && (
               <p className="text-sm text-accent mt-2">{content.strategy_banner}</p>
             )}
@@ -114,7 +115,7 @@ const ClassicalSelfChallenge: React.FC<ClassicalSelfChallengeProps> = ({ story, 
               </button>
               {showTranslation && (
                 <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6">
-                  <p className="text-base leading-loose text-on-surface-variant">{content.translation}</p>
+                  <p className="text-base leading-loose text-on-surface-variant whitespace-pre-line">{content.translation}</p>
                 </div>
               )}
             </div>
@@ -125,8 +126,8 @@ const ClassicalSelfChallenge: React.FC<ClassicalSelfChallengeProps> = ({ story, 
               {content.part_one.label && (
                 <h3 className="text-sm font-headline font-bold text-on-surface-variant">{content.part_one.label}</h3>
               )}
-              {content.part_one.items.map((item) => (
-                <QuestionItem key={item.index} item={item} />
+              {content.part_one.items.map((item, i) => (
+                <QuestionItem key={i} item={item} />
               ))}
             </div>
           )}
@@ -136,8 +137,8 @@ const ClassicalSelfChallenge: React.FC<ClassicalSelfChallengeProps> = ({ story, 
               {content.part_two.label && (
                 <h3 className="text-sm font-headline font-bold text-on-surface-variant">{content.part_two.label}</h3>
               )}
-              {content.part_two.items.map((item) => (
-                <QuestionItem key={item.index} item={item} />
+              {content.part_two.items.map((item, i) => (
+                <QuestionItem key={i} item={item} />
               ))}
             </div>
           )}
