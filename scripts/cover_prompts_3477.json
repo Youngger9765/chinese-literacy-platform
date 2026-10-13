@@ -1,0 +1,98 @@
+{
+ "L0114": {
+  "model": "gemini-2.5-flash-image",
+  "mode": "generate",
+  "prompt": "Scene: a Taiwanese leopard cat (small wild cat, spotted coat, white stripes on its forehead) at the edge of a lowland forest beside rice paddies, a rural road with a car in the distance; the cat pauses, looking back toward the forest — the dilemma of whether to relocate it for conservation. Match the illustration style of the reference image exactly: warm, detailed digital storybook illustration for a Taiwanese children's reading textbook cover, soft lighting, full-bleed landscape 4:3, no border. Absolutely no text, letters, numbers or writing anywhere.",
+  "status": "ok"
+ },
+ "L0115": {
+  "model": "gemini-2.5-flash-image",
+  "mode": "generate",
+  "prompt": "Scene: a coastal nuclear power plant with its round domes on one side and a bright city skyline at dusk on the other, a family standing on a hill between them looking at both; a balance scale motif in the sky suggests a difficult choice about nuclear energy. Calm, thoughtful mood. Match the illustration style of the reference image exactly: warm, detailed digital storybook illustration for a Taiwanese children's reading textbook cover, soft lighting, full-bleed landscape 4:3, no border. Absolutely no text, letters, numbers or writing anywhere.",
+  "status": "ok"
+ },
+ "L0009": {
+  "model": "gemini-2.5-flash-image",
+  "mode": "edit-remove-text",
+  "prompt": "Remove every piece of text from this illustration: titles, captions, letters, numbers, writing on signs, banners, jerseys, scoreboards, labels and packaging. Fill those areas naturally so the scene looks complete and intentional. Keep everything else the same: composition, characters, objects, colors and illustration style. The result must contain no text or letter-like marks at all. Full-bleed landscape 4:3 image, no border.",
+  "status": "ok"
+ },
+ "L0013": {
+  "model": "gemini-2.5-flash-image",
+  "mode": "edit-remove-text",
+  "prompt": "Remove every piece of text from this illustration: titles, captions, letters, numbers, writing on signs, banners, jerseys, scoreboards, labels and packaging. Fill those areas naturally so the scene looks complete and intentional. Keep everything else the same: composition, characters, objects, colors and illustration style. The result must contain no text or letter-like marks at all. Full-bleed landscape 4:3 image, no border.",
+  "status": "ok"
+ },
+ "L0024": {
+  "model": "gemini-2.5-flash-image",
+  "mode": "edit-remove-text",
+  "prompt": "Remove every piece of text from this illustration: titles, captions, letters, numbers, writing on signs, banners, jerseys, scoreboards, labels and packaging. Fill those areas naturally so the scene looks complete and intentional. Keep everything else the same: composition, characters, objects, colors and illustration style. The result must contain no text or letter-like marks at all. Full-bleed landscape 4:3 image, no border. Also remove every sign, banner and board in the stadium that carries characters; replace them with plain colored panels.",
+  "status": "ok"
+ },
+ "L0027": {
+  "model": "gemini-2.5-flash-image",
+  "mode": "edit-remove-text",
+  "prompt": "Remove every piece of text from this illustration: titles, captions, letters, numbers, writing on signs, banners, jerseys, scoreboards, labels and packaging. Fill those areas naturally so the scene looks complete and intentional. Keep everything else the same: composition, characters, objects, colors and illustration style. The result must contain no text or letter-like marks at all. Full-bleed landscape 4:3 image, no border.",
+  "status": "ok"
+ },
+ "L0028": {
+  "model": "gemini-2.5-flash-image",
+  "mode": "edit-remove-text",
+  "prompt": "Remove every piece of text from this illustration: titles, captions, letters, numbers, writing on signs, banners, jerseys, scoreboards, labels and packaging. Fill those areas naturally so the scene looks complete and intentional. Keep everything else the same: composition, characters, objects, colors and illustration style. The result must contain no text or letter-like marks at all. Full-bleed landscape 4:3 image, no border.",
+  "status": "ok"
+ },
+ "L0030": {
+  "model": "gemini-2.5-flash-image",
+  "mode": "edit-remove-text",
+  "prompt": "Remove every piece of text from this illustration: titles, captions, letters, numbers, writing on signs, banners, jerseys, scoreboards, labels and packaging. Fill those areas naturally so the scene looks complete and intentional. Keep everything else the same: composition, characters, objects, colors and illustration style. The result must contain no text or letter-like marks at all. Full-bleed landscape 4:3 image, no border. This is a two-panel image: the LEFT panel shows a muscular six-pack torso and the RIGHT panel shows a round belly in a sports top. Keep BOTH panels fully drawn exactly as they are; only remove the words at the bottom of each panel.",
+  "status": "ok"
+ },
+ "L0032": {
+  "model": "gemini-2.5-flash-image",
+  "mode": "edit-remove-text",
+  "prompt": "Remove every piece of text from this illustration: titles, captions, letters, numbers, writing on signs, banners, jerseys, scoreboards, labels and packaging. Fill those areas naturally so the scene looks complete and intentional. Keep everything else the same: composition, characters, objects, colors and illustration style. The result must contain no text or letter-like marks at all. Full-bleed landscape 4:3 image, no border.",
+  "status": "ok"
+ },
+ "L0033": {
+  "model": "gemini-2.5-flash-image",
+  "mode": "edit-remove-text",
+  "prompt": "Remove every piece of text from this illustration: titles, captions, letters, numbers, writing on signs, banners, jerseys, scoreboards, labels and packaging. Fill those areas naturally so the scene looks complete and intentional. Keep everything else the same: composition, characters, objects, colors and illustration style. The result must contain no text or letter-like marks at all. Full-bleed landscape 4:3 image, no border.",
+  "status": "ok"
+ },
+ "L0036": {
+  "model": "gemini-2.5-flash-image",
+  "mode": "edit-remove-text",
+  "prompt": "Remove every piece of text from this illustration: titles, captions, letters, numbers, writing on signs, banners, jerseys, scoreboards, labels and packaging. Fill those areas naturally so the scene looks complete and intentional. Keep everything else the same: composition, characters, objects, colors and illustration style. The result must contain no text or letter-like marks at all. Full-bleed landscape 4:3 image, no border. Repaint the whole upper stand area behind the team as a plain green wall and empty seats with no boards, banners or signs of any kind. Make the players' jerseys plain with no lettering or numbers, and replace the banners and boards along the stands with plain colored panels.",
+  "status": "ok"
+ },
+ "L0053": {
+  "model": "gemini-2.5-flash-image",
+  "mode": "edit-remove-text",
+  "prompt": "Remove every piece of text from this illustration: titles, captions, letters, numbers, writing on signs, banners, jerseys, scoreboards, labels and packaging. Fill those areas naturally so the scene looks complete and intentional. Keep everything else the same: composition, characters, objects, colors and illustration style. The result must contain no text or letter-like marks at all. Full-bleed landscape 4:3 image, no border.",
+  "status": "ok"
+ },
+ "L0058": {
+  "model": "gemini-2.5-flash-image",
+  "mode": "edit-remove-text",
+  "prompt": "Remove every piece of text from this illustration: titles, captions, letters, numbers, writing on signs, banners, jerseys, scoreboards, labels and packaging. Fill those areas naturally so the scene looks complete and intentional. Keep everything else the same: composition, characters, objects, colors and illustration style. The result must contain no text or letter-like marks at all. Full-bleed landscape 4:3 image, no border.",
+  "status": "ok"
+ },
+ "L0071": {
+  "model": "gemini-2.5-flash-image",
+  "mode": "edit-remove-text",
+  "prompt": "Remove every piece of text from this illustration: titles, captions, letters, numbers, writing on signs, banners, jerseys, scoreboards, labels and packaging. Fill those areas naturally so the scene looks complete and intentional. Keep everything else the same: composition, characters, objects, colors and illustration style. The result must contain no text or letter-like marks at all. Full-bleed landscape 4:3 image, no border.",
+  "status": "ok"
+ },
+ "L0072": {
+  "model": "gemini-2.5-flash-image",
+  "mode": "edit-remove-text",
+  "prompt": "Remove every piece of text from this illustration: titles, captions, letters, numbers, writing on signs, banners, jerseys, scoreboards, labels and packaging. Fill those areas naturally so the scene looks complete and intentional. Keep everything else the same: composition, characters, objects, colors and illustration style. The result must contain no text or letter-like marks at all. Full-bleed landscape 4:3 image, no border.",
+  "status": "ok"
+ },
+ "L0126": {
+  "model": "gemini-2.5-flash-image",
+  "mode": "edit-remove-text",
+  "prompt": "Remove every piece of text from this illustration: titles, captions, letters, numbers, writing on signs, banners, jerseys, scoreboards, labels and packaging. Fill those areas naturally so the scene looks complete and intentional. Keep everything else the same: composition, characters, objects, colors and illustration style. The result must contain no text or letter-like marks at all. Full-bleed landscape 4:3 image, no border.",
+  "status": "ok"
+ }
+}
