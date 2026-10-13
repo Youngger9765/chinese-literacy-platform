@@ -336,3 +336,31 @@ class TestNotificationsEndpointNoN1:
             f"Notifications endpoint issued {n_queries} queries for {NUM_STUDENTS} students. "
             f"Expected < {NUM_STUDENTS * 2}."
         )
+
+
+class TestDashboardDoesNotLoadSessionBlobs:
+    """#3519: progress and stats only need a few session columns. Whole rows carry
+    several JSONB result blobs; loading them for every session of the class is what
+    made these endpoints slow at real history sizes."""
+
+    @staticmethod
+    def _statements(fn) -> list[str]:
+        stmts: list[str] = []
+        listener = lambda conn, cursor, statement, *a: stmts.append(statement)
+        event.listen(engine, "before_cursor_execute", listener)
+        try:
+            fn()
+        finally:
+            event.remove(engine, "before_cursor_execute", listener)
+        return stmts
+
+    @pytest.mark.parametrize("suffix", ["progress", "stats"])
+    def test_no_result_blobs_selected(self, client, teacher_token, suffix):
+        cid = _state["classroom_id"]
+        stmts = self._statements(
+            lambda: client.get(f"/api/teacher/classrooms/{cid}/{suffix}", headers=auth_header(teacher_token))
+        )
+        session_selects = [s for s in stmts if "FROM learning_sessions" in s]
+        assert session_selects, "positive control: the endpoint does read learning_sessions"
+        blobs = [s for s in session_selects if "learning_sessions.comprehension_result" in s]
+        assert blobs == [], blobs[0][:200]
