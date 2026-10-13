@@ -364,3 +364,17 @@ class TestDashboardDoesNotLoadSessionBlobs:
         assert session_selects, "positive control: the endpoint does read learning_sessions"
         blobs = [s for s in session_selects if "learning_sessions.comprehension_result" in s]
         assert blobs == [], blobs[0][:200]
+def test_class_alerts_select_no_session_blobs(client, teacher_token):
+    """#3519: class alerts need scores and last-practice dates only."""
+    cid = _state["classroom_id"]
+    stmts: list[str] = []
+    listener = lambda conn, cursor, statement, *a: stmts.append(statement)
+    event.listen(engine, "before_cursor_execute", listener)
+    try:
+        r = client.get(f"/api/teacher/classrooms/{cid}/alerts", headers=auth_header(teacher_token))
+    finally:
+        event.remove(engine, "before_cursor_execute", listener)
+    assert r.status_code == 200
+    session_selects = [s for s in stmts if "FROM learning_sessions" in s]
+    assert session_selects, "positive control: alerts does read learning_sessions"
+    assert [s for s in session_selects if "learning_sessions.comprehension_result" in s] == []
