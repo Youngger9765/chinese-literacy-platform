@@ -11,7 +11,7 @@ export type ClassicalToken =
   | { kind: 'dot' }
   | { kind: 'note'; value: number };
 
-const CJK = /[㐀-鿿豈-﫿」』）)]/;
+const CJK = /[㐀-鿿豈-﫿」』）)》〉]/;
 
 /** `noteCount` = number of 注釋 entries; only digits 1..noteCount become notes. */
 export function tokenizeClassical(text: string, noteCount: number): ClassicalToken[] {

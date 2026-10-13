@@ -60,6 +60,14 @@ describe('#3485 原文 dots and note numbers', () => {
     ]);
   });
 
+  it('文-L10 renders all three of its 注釋 numbers, including the one after 《素書》', () => {
+    const ct = (served as Any)['文-L10'];
+    const { container } = render(
+      <ClassicalText story={{ id: 1, title: 't', classicalText: ct } as unknown as Story} onFinish={vi.fn()} />,
+    );
+    expect([...container.querySelectorAll('p.font-serif sup')].map((e) => e.textContent)).toEqual(['1', '2', '3']);
+  });
+
   it('文-L5 renders both of its 注釋 numbers as superscripts', () => {
     const ct = (served as Any)['文-L5'];
     const { container } = render(
