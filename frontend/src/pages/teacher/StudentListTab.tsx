@@ -4,6 +4,7 @@ import CsvUploadModal from './CsvUploadModal';
 import AddStudentsPanel from './panel/AddStudentsPanel';
 import { resetStudentPassword } from '../../services/classroomApi';
 import { generateParentInviteCode } from '../../services/parentApi';
+import * as featureFlags from '../../config/featureFlags';
 
 // ── Per-student parent invite button ─────────────────────────────────────────
 
@@ -164,6 +165,9 @@ const StudentListTab: React.FC<StudentListTabProps> = ({
   initialAddResult,
 }) => {
   const [showCsvModal, setShowCsvModal] = useState(false);
+  // Parent portal is off unless VITE_PARENT_PORTAL_ENABLED=true; a code a parent
+  // cannot enter anywhere is a dead end, so the teacher half follows the flag.
+  const showParentInvite = featureFlags.PARENT_PORTAL_ENABLED;
 
   return (
     <>
@@ -272,7 +276,9 @@ const StudentListTab: React.FC<StudentListTabProps> = ({
               <th scope="col" className="px-4 py-3 font-medium w-16 text-center whitespace-nowrap">座號</th>
               <th scope="col" className="px-4 py-3 font-medium whitespace-nowrap">學生姓名</th>
               <th scope="col" className="px-4 py-3 font-medium whitespace-nowrap">帳號</th>
-              <th scope="col" className="px-4 py-3 font-medium whitespace-nowrap">家長邀請碼</th>
+              {showParentInvite && (
+                <th scope="col" className="px-4 py-3 font-medium whitespace-nowrap">家長邀請碼</th>
+              )}
               <th scope="col" className="px-4 py-3 font-medium whitespace-nowrap">重設密碼</th>
               <th scope="col" className="px-4 py-3 font-medium text-right whitespace-nowrap">操作</th>
             </tr>
@@ -287,9 +293,11 @@ const StudentListTab: React.FC<StudentListTabProps> = ({
                   <p className="text-base font-medium text-gray-900">{s.name}</p>
                 </td>
                 <td className="lg:px-4 lg:py-3 text-sm text-gray-500 font-mono whitespace-nowrap">{accountName(s.email)}</td>
-                <td className="lg:px-4 lg:py-3 whitespace-nowrap">
-                  <ParentInviteButton token={token} studentId={s.id} studentName={s.name} />
-                </td>
+                {showParentInvite && (
+                  <td className="lg:px-4 lg:py-3 whitespace-nowrap">
+                    <ParentInviteButton token={token} studentId={s.id} studentName={s.name} />
+                  </td>
+                )}
                 <td className="lg:px-4 lg:py-3 whitespace-nowrap">
                   <ResetPasswordButton
                     token={token}
