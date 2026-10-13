@@ -173,6 +173,23 @@ describe('AssessmentReport — realistic modern-flow session (#2835)', () => {
     expect(Number(matched![2])).toBe(expectedTotal);
   });
 
+  it('progress line stays on one line on phones (dots shrink, text does not)', () => {
+    // 390px QA: 9 dots + 「已完成 0 / 9 關卡」 wrapped the text onto two lines.
+    const { container } = render(
+      <AssessmentReport
+        session={REALISTIC_SESSION}
+        story={REALISTIC_STORY}
+        onRetry={vi.fn()}
+        stepProgressData={REALISTIC_STEP_PROGRESS}
+      />,
+    );
+    const p = [...container.querySelectorAll('p')].find((el) => /已完成\s*\d+\s*\/\s*\d+\s*關卡/.test(el.textContent ?? ''));
+    expect(p).toBeTruthy();
+    expect(p!.className).toMatch(/\bwhitespace-nowrap\b/);
+    expect(p!.className).toMatch(/\bshrink-0\b/);
+    expect((p!.previousElementSibling as HTMLElement).className).toMatch(/\bmin-w-0\b/);
+  });
+
   it('does NOT render a fixed "/ 6" denominator in the progress indicator', () => {
     const { container } = render(
       <AssessmentReport
