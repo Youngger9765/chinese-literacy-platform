@@ -226,7 +226,9 @@ class LearningSession(Base):
         "ReadingAttemptHistory",
         back_populates="session",
         cascade="all, delete-orphan",
-        lazy="selectin",
+        # Not eager (#3519): nothing reads it off a session, and selectin made every
+        # LearningSession query also load every attempt snapshot.
+        lazy="select",
         order_by="ReadingAttemptHistory.attempt_no",
     )
     dialogue_turns: Mapped[list["DialogueTurn"]] = relationship(
@@ -234,7 +236,7 @@ class LearningSession(Base):
         back_populates="learning_session",
         order_by="DialogueTurn.turn_order",
         cascade="all, delete-orphan",
-        lazy="selectin",
+        lazy="select",  # see reading_attempts (#3519)
     )
 
 
