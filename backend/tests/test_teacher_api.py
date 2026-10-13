@@ -31,6 +31,7 @@ from app.models import Base
 from app.models.user import Role, UserRole
 from app.models.school import School
 from app.models.session import LearningSession
+from _school_student import grant_school_student_role
 
 
 # ---------------------------------------------------------------------------
@@ -164,6 +165,13 @@ def _register_user(client, suffix: str) -> dict:
     return {"email": email, "name": name, "token": token, "user_id": user_id}
 
 
+def _register_student(client, suffix: str) -> dict:
+    """Register a user who is a student of the test school (#3534: only those can be enrolled)."""
+    user = _register_user(client, suffix)
+    grant_school_student_role(TestingSessionLocal, user["user_id"], school_id=_test_school_id)
+    return user
+
+
 def auth_header(token: str) -> dict:
     return {"Authorization": f"Bearer {token}"}
 
@@ -213,12 +221,12 @@ def other_teacher(client):
 
 @pytest.fixture(scope="module")
 def student1(client):
-    return _register_user(client, "tch_stu1")
+    return _register_student(client, "tch_stu1")
 
 
 @pytest.fixture(scope="module")
 def student2(client):
-    return _register_user(client, "tch_stu2")
+    return _register_student(client, "tch_stu2")
 
 
 @pytest.fixture(scope="module")
@@ -517,7 +525,7 @@ class TestGetClassroomProgress:
         )
         classroom_id = create_resp.json()["id"]
 
-        fresh_student = _register_user(client, "tch_fresh_stu")
+        fresh_student = _register_student(client, "tch_fresh_stu")
         client.post(
             f"/api/classrooms/{classroom_id}/students",
             json={"student_id": fresh_student["user_id"]},
@@ -599,8 +607,8 @@ class TestTeacherDashboardFullFlow:
         check progress endpoint.
         """
         teacher = _register_user(client, "tch_flow_teacher")
-        stu_a = _register_user(client, "tch_flow_stu_a")
-        stu_b = _register_user(client, "tch_flow_stu_b")
+        stu_a = _register_student(client, "tch_flow_stu_a")
+        stu_b = _register_student(client, "tch_flow_stu_b")
         headers = auth_header(teacher["token"])
 
         # Create two classrooms

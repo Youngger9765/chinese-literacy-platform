@@ -26,6 +26,7 @@ from app.models.assignment import Assignment, AssignmentSubmission
 from app.models.organization import Organization
 from app.models.school import Classroom, ClassroomStudent, ClassroomTeacher, ClassroomText, School
 from app.models.user import Role, UserRole
+from _school_student import grant_school_student_role
 
 
 engine = create_engine(
@@ -198,6 +199,8 @@ def _create_classroom(client, teacher: dict, school_id: int, name: str = "Delete
 
 
 def _enroll_student(client, teacher: dict, classroom_id: int, student_id: int) -> None:
+    # #3534: only a student of the classroom's school can be enrolled.
+    grant_school_student_role(TestingSessionLocal, student_id, classroom_id=classroom_id)
     resp = client.post(
         f"/api/classrooms/{classroom_id}/students",
         json={"student_id": student_id},

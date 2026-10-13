@@ -7,7 +7,8 @@ from sqlalchemy.orm import Session, joinedload
 from ...auth.dependencies import get_current_user
 from ...database import get_db
 from ...models.school import ClassroomStudent
-from ...models.user import User
+from ...auth.policies import is_system_admin
+from ...models.user import Role, User, UserRole
 from ...schemas.classroom import (
     ClassroomStudentAddRequest,
     StudentInClassroomResponse,
@@ -26,6 +27,32 @@ router = APIRouter(tags=["classrooms"])
 logger = logging.getLogger(__name__)
 
 
+
+def _school_student_ids(school_id: int | None, db: Session):
+    """Subquery: users holding an active student role scoped to this school."""
+    return (
+        db.query(UserRole.user_id)
+        .join(Role, UserRole.role_id == Role.id)
+        .filter(
+            UserRole.is_active == True,  # noqa: E712
+            Role.name == "student",
+            UserRole.scope_type == "school",
+            UserRole.scope_id == str(school_id),
+        )
+        .scalar_subquery()
+    )
+
+
+def _is_student_of_school(user_id: int, school_id: int | None, db: Session) -> bool:
+    if school_id is None:
+        return False
+    return (
+        db.query(User.id)
+        .filter(User.id == user_id, User.id.in_(_school_student_ids(school_id, db)))
+        .first()
+        is not None
+    )
+
 @router.post(
     "/classrooms/{classroom_id}/students",
     status_code=201,
@@ -42,8 +69,15 @@ def add_student_to_classroom(
     require_owner_or_admin(classroom, current_user, db)
 
     student = db.query(User).filter(User.id == payload.student_id).first()
-    if student is None:
-        raise HTTPException(status_code=404, detail="Student user not found")
+    # Only a student of this classroom's school (#3534). Without this, any user id —
+    # another school's child, a teacher, an admin — could be enrolled, after which
+    # every "is this my student?" check lets the teacher read their data. Same 404
+    # whether the id doesn't exist or isn't eligible, so ids can't be probed.
+    if student is None or not (
+        is_system_admin(current_user.id, db)
+        or _is_student_of_school(student.id, classroom.school_id, db)
+    ):
+        raise HTTPException(status_code=404, detail="找不到這所學校的這位學生")
 
     existing = (
         db.query(ClassroomStudent)
@@ -184,19 +218,19 @@ def search_students_for_classroom(
     )
 
     search_pattern = f"%{payload.query}%"
-    results = (
-        db.query(User)
-        .filter(
-            User.is_active == True,
-            User.id.notin_(enrolled_ids_select.scalar_subquery()),
-            or_(
-                User.name.ilike(search_pattern),
-                User.email.ilike(search_pattern),
-            ),
-        )
-        .limit(10)
-        .all()
+    query = db.query(User).filter(
+        User.is_active == True,
+        User.id.notin_(enrolled_ids_select.scalar_subquery()),
+        or_(
+            User.name.ilike(search_pattern),
+            User.email.ilike(search_pattern),
+        ),
     )
+    # Only students of this classroom's school (#3534). Unscoped, any teacher could
+    # page through every account's name and email on the platform.
+    if not is_system_admin(current_user.id, db):
+        query = query.filter(User.id.in_(_school_student_ids(classroom.school_id, db)))
+    results = query.limit(10).all()
 
     return [
         StudentSearchResult(id=u.id, name=u.name, email=u.email)

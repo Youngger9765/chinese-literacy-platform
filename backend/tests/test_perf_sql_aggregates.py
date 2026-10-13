@@ -36,6 +36,7 @@ from app.models.user import Role, UserRole
 from app.models.school import School, Classroom, ClassroomStudent
 from app.models.session import LearningSession
 from app.models.text import Text
+from _school_student import grant_school_student_role
 
 
 # ---------------------------------------------------------------------------
@@ -487,7 +488,8 @@ class TestTimeStatsSQLAggregate:
         assert resp.status_code == 201
         classroom_id = resp.json()["id"]
 
-        # Enroll student
+        # Enroll student (#3534: must be a student of the classroom's school)
+        grant_school_student_role(TestingSessionLocal, student["user_id"], classroom_id=classroom_id)
         client.post(
             f"/api/classrooms/{classroom_id}/students",
             json={"student_id": student["user_id"]},

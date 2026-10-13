@@ -31,6 +31,7 @@ from app.models import Base
 from app.models.user import Role, UserRole
 from app.models.school import School
 from app.models.session import CharacterError, LearningSession
+from _school_student import grant_school_student_role
 
 
 # ---------------------------------------------------------------------------
@@ -216,6 +217,8 @@ def _create_classroom_with_students(client, teacher, students, school_id, name="
     classroom_id = resp.json()["id"]
 
     for student in students:
+        # #3534: only a student of the classroom's school can be enrolled.
+        grant_school_student_role(TestingSessionLocal, student["user_id"], classroom_id=classroom_id)
         client.post(
             f"/api/classrooms/{classroom_id}/students",
             json={"student_id": student["user_id"]},
