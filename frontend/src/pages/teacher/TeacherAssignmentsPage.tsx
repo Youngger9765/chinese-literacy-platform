@@ -32,12 +32,17 @@ const TeacherAssignmentsPage: React.FC = () => {
     setError('');
     try {
       const data = await listMyClassrooms(token);
-      setClassrooms(data.items);
-      if (data.items.length > 0) {
+      // Active classes first: a teacher opening 作業管理 means a class they
+      // still teach, not one they turned off (it used to open on an 已停用 one).
+      const ordered = [...data.items].sort(
+        (a, b) => Number(b.is_active !== false) - Number(a.is_active !== false),
+      );
+      setClassrooms(ordered);
+      if (ordered.length > 0) {
         const ids = new Set(data.items.map((c) => c.id));
         const valid = selectedId && ids.has(selectedId);
         if (!valid) {
-          const first = data.items[0].id;
+          const first = ordered[0].id;
           setSelectedId(first);
           setSearchParams({ classroom: String(first) }, { replace: true });
         }
@@ -147,6 +152,7 @@ const TeacherAssignmentsPage: React.FC = () => {
                 <option key={c.id} value={c.id}>
                   {c.name}
                   {c.grade != null ? ` (${c.grade} 年級)` : ''}
+                  {c.is_active === false ? '（已停用）' : ''}
                 </option>
               ))}
             </select>

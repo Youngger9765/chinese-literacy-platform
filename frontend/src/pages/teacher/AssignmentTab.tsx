@@ -166,7 +166,7 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId, onChanged, o
                 event.stopPropagation();
                 handleToggleActive(assignment);
               }}
-              className={`inline-block px-1.5 py-0.5 rounded text-xs font-medium transition-colors cursor-pointer ${
+              className={`whitespace-nowrap inline-block px-1.5 py-0.5 rounded text-xs font-medium transition-colors cursor-pointer ${
                 assignment.is_active
                   ? 'bg-green-100 text-green-700 hover:bg-green-200'
                   : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
@@ -425,9 +425,9 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId, onChanged, o
                   <th className="pb-2 font-medium w-6"></th>
                   <th className="pb-2 font-medium">作業名稱</th>
                   <th className="pb-2 font-medium">課文</th>
-                  <th className="pb-2 font-medium">截止日期</th>
-                  <th className="pb-2 font-medium text-center">完成率</th>
-                  <th className="pb-2 font-medium text-center">狀態</th>
+                  <th className="pb-2 font-medium whitespace-nowrap">截止日期</th>
+                  <th className="pb-2 font-medium text-center whitespace-nowrap">完成率</th>
+                  <th className="pb-2 font-medium text-center whitespace-nowrap">狀態</th>
                   <th className="pb-2 font-medium w-16"></th>
                 </tr>
               </thead>

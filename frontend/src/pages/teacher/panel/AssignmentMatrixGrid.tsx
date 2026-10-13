@@ -51,6 +51,24 @@ export function isOverdue(dueDate: string | null, now: Date = new Date()): boole
   return dueDate !== null && new Date(dueDate) < now;
 }
 
+/**
+ * One legend, rendered next to 建立作業 (Junyi puts it top-right). Uses the
+ * same badges as the cells: a second legend with different swatches used to
+ * sit under the table and the two disagreed (green 已交 vs grey 已交 chips).
+ */
+export function MatrixLegend() {
+  return (
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-600" aria-label="狀態說明">
+      <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded bg-green-100 text-green-800 font-semibold">88</span>已交（分數）</span>
+      <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded bg-gray-100 text-gray-600 font-semibold">已交</span>沒有分數</span>
+      <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded border border-dashed border-amber-400 text-amber-700 text-xs">進行中</span></span>
+      <span className="flex items-center gap-1.5"><span className="text-gray-400">未開始</span></span>
+      <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded bg-red-100 text-red-700 text-xs font-semibold">逾期未交</span></span>
+      <span className="flex items-center gap-1.5" title="派作業時還不在班上"><span className="px-2 py-0.5 rounded text-xs text-gray-400 bg-gray-100">未指派</span></span>
+    </div>
+  );
+}
+
 export function CellBadge({ cell, overdue = false }: { cell: Cell | undefined; overdue?: boolean }) {
   if (!cell || cell.state === 'not_assigned') {
     return (
@@ -178,14 +196,6 @@ const AssignmentMatrixGrid: React.FC<AssignmentMatrixGridProps> = ({ data, onOpe
             ))}
           </tbody>
         </table>
-      </div>
-      <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-gray-600">
-        <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded bg-green-100 text-green-800 font-semibold">88</span>已交（分數）</span>
-        <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded bg-gray-100 text-gray-600 font-semibold">已交</span>已交・沒有分數</span>
-        <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded border border-dashed border-amber-400 text-amber-700 text-xs">進行中</span>做到哪一步</span>
-        <span className="flex items-center gap-1.5"><span className="text-gray-400">未開始</span>派了還沒動</span>
-        <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded bg-red-100 text-red-700 text-xs font-semibold">逾期未交</span>過了期限還沒交</span>
-        <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded text-xs text-gray-400 bg-gray-100">未指派</span>派作業時還不在班上</span>
       </div>
     </div>
   );

@@ -267,7 +267,7 @@ const StudentListTab: React.FC<StudentListTabProps> = ({
         </div>
       ) : (
         <table className="w-full text-left">
-          <thead className="hidden sm:table-header-group bg-gray-50 text-sm text-gray-600">
+          <thead className="hidden lg:table-header-group bg-gray-50 text-sm text-gray-600">
             <tr>
               <th scope="col" className="px-4 py-3 font-medium w-16 text-center whitespace-nowrap">座號</th>
               <th scope="col" className="px-4 py-3 font-medium whitespace-nowrap">學生姓名</th>
@@ -281,16 +281,16 @@ const StudentListTab: React.FC<StudentListTabProps> = ({
             {classroom.students.map((s, i) => (
               // #3424 kept: labels never break mid-word (whitespace-nowrap); on phones
               // each row stacks into a card instead of a squeezed table row.
-              <tr key={s.id} className="flex flex-wrap items-center gap-x-3 gap-y-1.5 px-4 py-3 sm:table-row sm:p-0">
-                <td className="hidden sm:table-cell px-4 py-3 text-center text-gray-500">{i + 1}</td>
-                <td className="sm:px-4 sm:py-3 min-w-0 basis-full sm:basis-auto">
+              <tr key={s.id} className="flex flex-wrap items-center gap-x-3 gap-y-1.5 px-4 py-3 lg:table-row lg:p-0">
+                <td className="hidden lg:table-cell px-4 py-3 text-center text-gray-500">{i + 1}</td>
+                <td className="lg:px-4 lg:py-3 min-w-0 basis-full lg:basis-auto">
                   <p className="text-base font-medium text-gray-900">{s.name}</p>
                 </td>
-                <td className="sm:px-4 sm:py-3 text-sm text-gray-500 font-mono break-all">{accountName(s.email)}</td>
-                <td className="sm:px-4 sm:py-3 whitespace-nowrap">
+                <td className="lg:px-4 lg:py-3 text-sm text-gray-500 font-mono whitespace-nowrap">{accountName(s.email)}</td>
+                <td className="lg:px-4 lg:py-3 whitespace-nowrap">
                   <ParentInviteButton token={token} studentId={s.id} studentName={s.name} />
                 </td>
-                <td className="sm:px-4 sm:py-3 whitespace-nowrap">
+                <td className="lg:px-4 lg:py-3 whitespace-nowrap">
                   <ResetPasswordButton
                     token={token}
                     classroomId={classroom.id}
@@ -298,7 +298,7 @@ const StudentListTab: React.FC<StudentListTabProps> = ({
                     studentName={s.name}
                   />
                 </td>
-                <td className="sm:px-4 sm:py-3 sm:text-right whitespace-nowrap ml-auto sm:ml-0">
+                <td className="lg:px-4 lg:py-3 lg:text-right whitespace-nowrap ml-auto lg:ml-0">
                   <span className="sr-only">加入於 {formatDate(s.enrolled_at)}</span>
                   {removingStudentId === s.id ? (
                     <span className="inline-flex gap-2 whitespace-nowrap">

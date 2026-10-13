@@ -19,7 +19,7 @@ import {
 import AssignmentTab from '../AssignmentTab';
 import TextManagementTab from '../TextManagementTab';
 import AssignmentItemStats from './AssignmentItemStats';
-import AssignmentMatrixGrid, { CellBadge, distinctTitles, isOverdue } from './AssignmentMatrixGrid';
+import AssignmentMatrixGrid, { CellBadge, MatrixLegend, distinctTitles, isOverdue } from './AssignmentMatrixGrid';
 import { StudentDetail } from './StudentsPanel';
 
 interface AssignmentsPanelProps {
@@ -164,12 +164,7 @@ const AssignmentsPanel: React.FC<AssignmentsPanelProps> = ({ classroomId, select
           </button>
         </div>
         {matrix && matrix.assignments.length > 0 && (
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-600" aria-label="狀態說明">
-            <span className="flex items-center gap-1.5"><span className="w-4 h-4 rounded bg-green-200" />已交</span>
-            <span className="flex items-center gap-1.5"><span className="w-4 h-4 rounded border border-dashed border-amber-400" />進行中</span>
-            <span className="flex items-center gap-1.5"><span className="w-4 h-4 rounded bg-white border border-gray-300" />未開始</span>
-            <span className="flex items-center gap-1.5"><span className="w-4 h-4 rounded bg-red-200" />逾期未交</span>
-          </div>
+          <MatrixLegend />
         )}
       </div>
 
