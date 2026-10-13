@@ -123,16 +123,16 @@ def get_classroom_progress(
     )
     session_counts: dict[int, int] = {row.student_id: row.cnt for row in session_count_rows}
 
-    # Batch-load latest session per student using a window function approach:
-    # fetch all sessions ordered desc and keep only the first per student in Python.
+    # Latest session per student: newest first, keep the first per student. Only the
+    # two columns used below — whole rows carry several JSONB result blobs (#3519).
     all_sessions_for_latest = (
-        db.query(LearningSession)
+        db.query(LearningSession.student_id, LearningSession.started_at, LearningSession.story_slug)
         .filter(LearningSession.student_id.in_(student_ids_in_classroom))
         .order_by(LearningSession.student_id, LearningSession.started_at.desc())
         .all()
         if student_ids_in_classroom else []
     )
-    latest_session_by_student: dict[int, LearningSession] = {}
+    latest_session_by_student: dict = {}
     for s in all_sessions_for_latest:
         if s.student_id not in latest_session_by_student:
             latest_session_by_student[s.student_id] = s
@@ -270,7 +270,7 @@ def get_classroom_stats(
 
     # Average session duration (completed sessions with both timestamps)
     completed_sessions = (
-        db.query(LearningSession)
+        db.query(LearningSession.started_at, LearningSession.completed_at)  # columns only (#3519)
         .filter(
             LearningSession.student_id.in_(student_ids),
             _is_done,
