@@ -2,7 +2,7 @@ import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import AssignmentMatrixGrid from './AssignmentMatrixGrid';
+import AssignmentMatrixGrid, { assignmentCounts } from './AssignmentMatrixGrid';
 import type { AssignmentMatrixResponse } from '../../../services/teacherApi';
 
 const data: AssignmentMatrixResponse = {
@@ -89,5 +89,23 @@ describe('distinctTitles (codex screen audit #5)', () => {
     expect(m.get(1)).toBe('贏得喝采的輸家（第 1 次）');
     expect(m.get(2)).toBe('古詩兩首');
     expect(m.get(3)).toBe('贏得喝采的輸家（第 2 次）');
+  });
+});
+
+// Khan Academy / Junyi show how many handed in right on each assignment; the
+// teacher used to count red and green cells by eye.
+describe('per-assignment counts', () => {
+  it('each assignment header says 已交 N / assigned (not_assigned excluded)', () => {
+    render(<AssignmentMatrixGrid data={data} onOpenAssignment={vi.fn()} />);
+    expect(screen.getByText('已交 1 / 3')).toBeInTheDocument();
+  });
+
+  it('assignmentCounts splits assigned students by state, overdue replacing unfinished', () => {
+    expect(assignmentCounts(data.cells, 10, false)).toEqual({
+      assigned: 3, submitted: 1, inProgress: 1, notStarted: 1, overdue: 0,
+    });
+    expect(assignmentCounts(data.cells, 10, true)).toEqual({
+      assigned: 3, submitted: 1, inProgress: 0, notStarted: 0, overdue: 2,
+    });
   });
 });

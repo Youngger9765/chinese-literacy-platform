@@ -19,7 +19,7 @@ import {
 import AssignmentTab from '../AssignmentTab';
 import TextManagementTab from '../TextManagementTab';
 import AssignmentItemStats from './AssignmentItemStats';
-import AssignmentMatrixGrid, { CellBadge, MatrixLegend, distinctTitles, isOverdue } from './AssignmentMatrixGrid';
+import AssignmentMatrixGrid, { CellBadge, MatrixLegend, assignmentCounts, distinctTitles, isOverdue } from './AssignmentMatrixGrid';
 import { StudentDetail } from './StudentsPanel';
 
 interface AssignmentsPanelProps {
@@ -80,6 +80,22 @@ function AssignmentDrilldown({
       <div>
         <h3 className="text-xl font-bold text-gray-900">{title}</h3>
         <p className="text-gray-500 mt-1">{submitted} / {assigned} 人已交</p>
+        {(() => {
+          const n = assignmentCounts(matrix.cells, assignmentId, isOverdue(assignment?.due_date ?? null));
+          const chip = (label: string, value: number, cls: string) => (
+            <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium ${cls}`}>
+              {label}<span className="text-lg font-bold">{value}</span>
+            </span>
+          );
+          return (
+            <div className="flex flex-wrap gap-2 mt-3" aria-label="各狀態人數">
+              {chip('已交', n.submitted, 'bg-green-100 text-green-800')}
+              {n.inProgress > 0 && chip('進行中', n.inProgress, 'border border-dashed border-amber-400 text-amber-700')}
+              {n.notStarted > 0 && chip('未開始', n.notStarted, 'bg-gray-100 text-gray-600')}
+              {n.overdue > 0 && chip('逾期未交', n.overdue, 'bg-red-100 text-red-700')}
+            </div>
+          );
+        })()}
       </div>
       {error && <p className="text-red-600 text-sm">{error}</p>}
       {stats ? <AssignmentItemStats data={stats} /> : !error && <div className="h-40 rounded-xl bg-gray-100 animate-pulse" />}
