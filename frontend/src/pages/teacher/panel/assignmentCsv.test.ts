@@ -37,3 +37,20 @@ describe('assignmentCsv', () => {
     expect(rows[1]).toBe('王小明,已交,88');
   });
 });
+
+describe('assignmentCsv — formula injection', () => {
+  it('a name starting with = + - @ is written as text, not a formula', () => {
+    const m = {
+      students: [{ id: 1, name: '=HYPERLINK("http://x","y")' }, { id: 2, name: '+1' }, { id: 3, name: '-2' }, { id: 4, name: '@cmd' }],
+      assignments: [{ id: 10, title: 't', due_date: null }],
+      cells: [],
+    } as never;
+    const rows = assignmentCsv(m, 10, false).split('\r\n').slice(1);
+    expect(rows).toEqual([
+      `"'=HYPERLINK(""http://x"",""y"")",未指派,`,
+      "'+1,未指派,",
+      "'-2,未指派,",
+      "'@cmd,未指派,",
+    ]);
+  });
+});

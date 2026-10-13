@@ -13,7 +13,14 @@ function stateLabel(cell: Cell | undefined, overdue: boolean): string {
   return cell.state === 'in_progress' ? '進行中' : '未開始';
 }
 
-const field = (v: string) => (/[",\r\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v);
+// Names can come from students (Junyi nicknames). A cell starting with = + - @
+// (or tab / CR) runs as a formula when the teacher opens the file in Excel, so
+// prefix it with ' to keep it text (OWASP CSV injection guidance).
+const neutralise = (v: string) => (/^[=+\-@\t\r]/.test(v) ? `'${v}` : v);
+const field = (raw: string) => {
+  const v = neutralise(raw);
+  return /[",\r\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
+};
 
 export function assignmentCsv(matrix: AssignmentMatrixResponse, assignmentId: number, overdue: boolean): string {
   const byStudent = new Map<number, Cell>();
