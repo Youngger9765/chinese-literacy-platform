@@ -89,7 +89,21 @@ function formatDue(row: AssignmentProgressRow): string {
   return [date, label && `（${label}）`].filter(Boolean).join('');
 }
 
-function SummaryCard({ value, label, tone, onClick }: { value: string; label: string; tone: string; onClick?: () => void }) {
+// Short label + one line of small print: a full sentence as the label wrapped
+// to three lines on 1280 (Tufte: keep the number and its name, demote the rest).
+function SummaryCard({
+  value,
+  label,
+  hint,
+  tone,
+  onClick,
+}: {
+  value: string;
+  label: string;
+  hint?: string;
+  tone: string;
+  onClick?: () => void;
+}) {
   const Tag = onClick ? 'button' : 'div';
   return (
     <Tag
@@ -98,7 +112,8 @@ function SummaryCard({ value, label, tone, onClick }: { value: string; label: st
       className={`text-left rounded-2xl border bg-white p-4 sm:p-5 border-l-4 ${tone} ${onClick ? 'hover:shadow-card cursor-pointer' : ''}`}
     >
       <div className="text-2xl sm:text-3xl font-bold text-gray-900">{value}</div>
-      <div className="text-gray-600 mt-1">{label}</div>
+      <div className="text-gray-800 font-medium mt-1">{label}</div>
+      {hint && <div className="text-sm text-gray-500 mt-0.5">{hint}</div>}
     </Tag>
   );
 }
@@ -146,18 +161,21 @@ const TodayOverviewTab: React.FC<TodayOverviewTabProps> = ({ classroomId, onOpen
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <SummaryCard
           value={pending === null ? '…' : `${pending} 人次`}
-          label={dueToday ? `待交作業・「${dueToday.title}」今天到期` : '待交作業（逾期與今天到期）'}
+          label="待交作業"
+          hint={dueToday ? `「${dueToday.title}」今天到期` : '逾期＋今天到期'}
           tone="border-l-accent"
         />
         <SummaryCard
           value={atRiskFailed ? '—' : needsAttention === null ? '…' : `${needsAttention} 位`}
-          label="需要關注的學生（早期介入中/高風險）"
+          label="需要關注"
+          hint="早期介入中、高風險"
           tone="border-l-amber-500"
           onClick={onOpenAtRisk}
         />
         <SummaryCard
-          value={onlineCount === null ? '—' : `${onlineCount} 位在線`}
-          label={showLive ? '課堂即時・點這裡收合' : '課堂即時・點開看詳情'}
+          value={onlineCount === null ? '—' : `${onlineCount} 位`}
+          label="目前在線"
+          hint={showLive ? '點這裡收合課堂即時' : '點開看課堂即時'}
           tone="border-l-gray-400"
           onClick={() => setShowLive((v) => !v)}
         />
