@@ -18,6 +18,10 @@ vi.mock('../../../services/classroomApi', async () => {
 });
 vi.mock('../../../services/parentApi', () => ({ generateParentInviteCode: vi.fn() }));
 vi.mock('../CsvUploadModal', () => ({ default: () => null }));
+// The roster's 家長邀請碼 only exists while the parent portal is on (see the
+// parent-portal describe below); these layout checks run with it on.
+const flags = vi.hoisted(() => ({ PARENT_PORTAL_ENABLED: true }));
+vi.mock('../../../config/featureFlags', () => flags);
 
 const classroom: ClassroomDetailResponse = {
   id: 1,
@@ -85,5 +89,23 @@ describe('StudentListTab — roster row wrap safety (#3424)', () => {
     expect(screen.queryByRole('dialog')).toBeNull();
     rerender(<StudentListTab {...baseProps} isAddStudentsOpen />);
     expect(screen.getByRole('dialog', { name: '新增學生' })).toBeInTheDocument();
+  });
+});
+
+// The parent portal is behind VITE_PARENT_PORTAL_ENABLED, which no deploy sets,
+// so a parent handed a code had nowhere to enter it. Hide the teacher half too.
+describe('StudentListTab — 家長邀請碼 follows the parent-portal flag', () => {
+  it('portal off: no 家長邀請碼 column or button', () => {
+    flags.PARENT_PORTAL_ENABLED = false;
+    render(<StudentListTab {...baseProps} />);
+    expect(screen.queryByRole('button', { name: '家長邀請碼' })).toBeNull();
+    expect(screen.queryByRole('columnheader', { name: '家長邀請碼' })).toBeNull();
+    flags.PARENT_PORTAL_ENABLED = true;
+  });
+
+  it('portal on: the button is there', () => {
+    flags.PARENT_PORTAL_ENABLED = true;
+    render(<StudentListTab {...baseProps} />);
+    expect(screen.getByRole('button', { name: '家長邀請碼' })).toBeInTheDocument();
   });
 });
