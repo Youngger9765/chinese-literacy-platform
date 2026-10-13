@@ -1,5 +1,5 @@
 /**
- * StepProgressStrip — flex-wrap grid showing learning step status (max 5 per row).
+ * StepProgressStrip — flex-wrap grid showing learning step status (3 per row on phones, 5 from sm).
  *
  * Shared by MyAssignments and LearningHistoryPage.
  * Each step bubble shows: completed (green), current (yellow), or pending (gray).
@@ -32,7 +32,7 @@ const StepProgressStrip: React.FC<StepProgressStripProps> = ({
           <div
             key={step.id}
             title={step.label}
-            className={`w-[calc((100%-1.5rem)/5)] min-h-[40px] rounded-md border px-2 py-1 flex items-center justify-center transition-colors ${
+            className={`w-[calc((100%-0.75rem)/3)] sm:w-[calc((100%-1.5rem)/5)] min-h-[40px] rounded-md border px-1.5 sm:px-2 py-1 flex items-center justify-center transition-colors ${
               isDone
                 ? 'bg-green-100 border-green-200 text-green-800'
                 : isCurrent
