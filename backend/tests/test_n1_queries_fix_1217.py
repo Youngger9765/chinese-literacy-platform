@@ -784,3 +784,21 @@ class TestAdminReportExportN1:
             f"/admin/reports/export issued {q} queries for {n} enrollments. "
             f"Expected < {n + 8} after 3-layer joinedload fix."
         )
+
+
+class TestClassExportStudentNamesN1:
+    """#3519: the class CSV export looked up each student's name with its own query."""
+
+    def test_export_user_lookups_do_not_scale_with_roster(self, client, teacher_token):
+        cid = _state["classroom_id"]
+        stmts: list[str] = []
+        listener = lambda conn, cursor, statement, *a: stmts.append(statement)
+        event.listen(engine, "before_cursor_execute", listener)
+        try:
+            resp = client.get(f"/api/teacher/classrooms/{cid}/export", headers=auth_header(teacher_token))
+        finally:
+            event.remove(engine, "before_cursor_execute", listener)
+        assert resp.status_code == 200
+        assert resp.text.count("\n") >= NUM_ASSIGNMENTS  # header + one row per student
+        user_selects = [s for s in stmts if "FROM users" in s]
+        assert len(user_selects) < NUM_ASSIGNMENTS, len(user_selects)

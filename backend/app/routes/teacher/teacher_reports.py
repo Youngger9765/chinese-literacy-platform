@@ -7,7 +7,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
 from sqlalchemy import func
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from ...auth.dependencies import get_current_user
 from ...database import get_db
@@ -124,6 +124,7 @@ def export_classroom_report(
 
     enrollments = (
         db.query(ClassroomStudent)
+        .options(joinedload(ClassroomStudent.student))  # names: 1 query, not 1 per row (#3519)
         .filter(ClassroomStudent.classroom_id == classroom_id)
         .all()
     )
