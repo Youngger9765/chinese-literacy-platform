@@ -4,6 +4,7 @@
  * Split from api.ts (#646). Covers all endpoints under /api/parents/.
  */
 
+import type { StudentAssignmentResponse } from './assignmentApi';
 import type { StudentDashboardData } from './learningApi';
 import { API_BASE } from './apiConfig';
 
@@ -91,5 +92,18 @@ export async function fetchChildDashboard(
     { headers: { Authorization: `Bearer ${token}` } },
   );
   if (!res.ok) throw new Error(`fetchChildDashboard failed: ${res.status}`);
+  return res.json();
+}
+
+/** #3515: the linked child's assignments — same shape the student sees. */
+export async function fetchChildAssignments(
+  token: string,
+  studentId: number,
+): Promise<StudentAssignmentResponse[]> {
+  const res = await fetch(
+    `${API_BASE}/api/parents/children/${studentId}/assignments`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  if (!res.ok) throw new Error(`fetchChildAssignments failed: ${res.status}`);
   return res.json();
 }

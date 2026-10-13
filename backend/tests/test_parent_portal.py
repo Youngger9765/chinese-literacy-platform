@@ -347,3 +347,57 @@ class TestChildDashboard:
             headers=auth_header(other_token),
         )
         assert r.status_code == 403, r.text
+
+
+class TestChildAssignmentsAndTitles:
+    """#3515 — the parent page shows the child's assignments and lesson titles."""
+
+    def _linked(self, client, tag):
+        from app.models.assignment import Assignment, AssignmentSubmission
+        from app.models.session import LearningSession
+
+        teacher_id, teacher_token = _register(client, f"t_{tag}")
+        student_id, _ = _register(client, f"s_{tag}")
+        other_id, _ = _register(client, f"o_{tag}")
+        db = TestingSessionLocal()
+        school = School(name="S")
+        db.add(school)
+        db.flush()
+        room = Classroom(school_id=school.id, teacher_id=teacher_id, name="C", join_code=uuid.uuid4().hex[:6].upper())
+        db.add(room)
+        db.flush()
+        for sid in (student_id, other_id):
+            db.add(ClassroomStudent(classroom_id=room.id, student_id=sid))
+        a = Assignment(classroom_id=room.id, teacher_id=teacher_id, story_id="20011", title="第一課作業")
+        db.add(a)
+        db.flush()
+        sess = LearningSession(student_id=student_id, story_slug="20011", status="completed")
+        db.add(sess)
+        db.flush()
+        db.add(AssignmentSubmission(assignment_id=a.id, student_id=student_id, status="submitted", session_id=sess.id))
+        db.add(AssignmentSubmission(assignment_id=a.id, student_id=other_id, status="pending"))
+        db.commit()
+        db.close()
+        code = client.post(f"/api/parents/invite-codes?student_id={student_id}", headers=auth_header(teacher_token)).json()["code"]
+        _, parent_token = _register(client, f"p_{tag}")
+        assert client.post("/api/parents/link", json={"code": code}, headers=auth_header(parent_token)).status_code == 201
+        return student_id, other_id, parent_token
+
+    def test_linked_parent_sees_the_childs_assignment_and_its_status(self, client):
+        student_id, _, parent_token = self._linked(client, "asg")
+        r = client.get(f"/api/parents/children/{student_id}/assignments", headers=auth_header(parent_token))
+        assert r.status_code == 200, r.text
+        rows = r.json()
+        assert [(x["title"], x["status"]) for x in rows] == [("第一課作業", "submitted")]
+
+    def test_parent_cannot_read_an_unlinked_childs_assignments(self, client):
+        _, other_id, parent_token = self._linked(client, "asg2")
+        r = client.get(f"/api/parents/children/{other_id}/assignments", headers=auth_header(parent_token))
+        assert r.status_code == 403, r.text
+
+    def test_dashboard_carries_lesson_titles(self, client):
+        student_id, _, parent_token = self._linked(client, "ttl")
+        data = client.get(f"/api/parents/children/{student_id}/dashboard", headers=auth_header(parent_token)).json()
+        assert data["completed_story_slugs"] == ["20011"]
+        titles = {s["slug"]: s["title"] for s in data["completed_stories"]}
+        assert titles["20011"] != "20011" and len(titles["20011"]) > 1

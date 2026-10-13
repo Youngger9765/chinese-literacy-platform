@@ -37,6 +37,11 @@ class DailyActivity(BaseModel):
     avg_score: float | None
 
 
+class CompletedStory(BaseModel):
+    slug: str
+    title: str
+
+
 class DashboardResponse(BaseModel):
     # Cumulative stats
     total_sessions: int
@@ -52,9 +57,23 @@ class DashboardResponse(BaseModel):
     daily_activity: list[DailyActivity]
     # Slugs of completed stories (for "already read" badges)
     completed_story_slugs: list[str]
+    # #3515: titles for the same slugs, so the parent page shows 課名 not "20011".
+    completed_stories: list[CompletedStory] = []
 
 
 # ── Endpoint ──────────────────────────────────────────────────────────────────
+
+def _story_title(slug: str) -> str:
+    """Lesson title for a story slug; falls back to the slug when it no longer resolves."""
+    from ...services.lesson_loader import get_lesson_by_id
+    from ...utils.slug import normalize_story_slug
+
+    try:
+        lesson = get_lesson_by_id(int(normalize_story_slug(slug)))
+    except (ValueError, TypeError):
+        lesson = None
+    return lesson["title"] if lesson else slug
+
 
 @router.get("/learning/students/{student_id}/dashboard", response_model=DashboardResponse)
 def get_student_dashboard(
@@ -169,6 +188,7 @@ def get_student_dashboard(
 
     # Completed story slugs — use canonical query (Issue #981)
     completed_story_slugs = get_completed_story_slugs(db, student_id)
+    completed_stories = [CompletedStory(slug=s, title=_story_title(s)) for s in completed_story_slugs]
 
     return DashboardResponse(
         total_sessions=total_sessions,
@@ -180,4 +200,5 @@ def get_student_dashboard(
         longest_streak=longest_streak,
         daily_activity=daily_activity,
         completed_story_slugs=completed_story_slugs,
+        completed_stories=completed_stories,
     )
