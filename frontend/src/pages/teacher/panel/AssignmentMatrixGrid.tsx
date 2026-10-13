@@ -94,7 +94,7 @@ export function MatrixLegend() {
       <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded border border-dashed border-amber-400 text-amber-700 text-xs">進行中</span></span>
       <span className="flex items-center gap-1.5"><span className="text-gray-400">未開始</span></span>
       <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded bg-red-50 text-red-600 border border-red-200 text-xs font-medium">逾期未交</span></span>
-      <span className="flex items-center gap-1.5" title="派作業時還不在班上"><span className="px-2 py-0.5 rounded text-xs text-gray-400 bg-gray-100">未指派</span></span>
+      <span className="flex items-center gap-1.5" title="這份作業只指派給部分學生，這位學生不在名單內（跟幾時加入班級無關，全班作業不管何時加入都會收到）"><span className="px-2 py-0.5 rounded text-xs text-gray-400 bg-gray-100">未指派</span></span>
     </div>
   );
 }
@@ -104,7 +104,7 @@ export function CellBadge({ cell, overdue = false }: { cell: Cell | undefined; o
     return (
       <span
         className="inline-block whitespace-nowrap shrink-0 px-2 py-0.5 rounded text-xs text-gray-400 bg-[repeating-linear-gradient(45deg,#f3f4f6,#f3f4f6_4px,#e5e7eb_4px,#e5e7eb_8px)]"
-        title="這位學生不在這份作業的指派名單內（作業派出後才加入班級）"
+        title="這位學生不在這份作業的指派名單內（老師指派的是部分學生，不是全班；跟幾時加入班級無關）"
       >
         未指派
       </span>

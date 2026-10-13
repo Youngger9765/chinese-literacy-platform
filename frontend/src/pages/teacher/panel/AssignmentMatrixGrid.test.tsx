@@ -2,7 +2,7 @@ import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import AssignmentMatrixGrid, { assignmentCounts, CellBadge } from './AssignmentMatrixGrid';
+import AssignmentMatrixGrid, { assignmentCounts, CellBadge, MatrixLegend } from './AssignmentMatrixGrid';
 import type { AssignmentMatrixResponse } from '../../../services/teacherApi';
 
 const data: AssignmentMatrixResponse = {
@@ -144,5 +144,29 @@ describe('CellBadge never wraps', () => {
     const el = render(<CellBadge cell={c} overdue={overdue as boolean} />).container.firstElementChild!;
     expect(el.className).toMatch(/\bwhitespace-nowrap\b/);
     expect(el.className).toMatch(/\bshrink-0\b/);
+  });
+});
+
+// Hans (#3448 C5/C6 manual QA): a student who joins a class AFTER a 全班
+// assignment went out still receives it — 未指派 only means the teacher
+// picked specific students and this one wasn't on the list. The old wording
+// ("派作業時還不在班上" / "作業派出後才加入班級") implied join timing decides
+// 未指派, which is wrong and misled Hans during manual QA.
+describe('未指派 tooltip does not blame join timing (#3496)', () => {
+  it('MatrixLegend explains 未指派 without mentioning when the student joined', () => {
+    render(<MatrixLegend />);
+    const badge = screen.getByText('未指派');
+    const tooltip = badge.closest('[title]')!.getAttribute('title')!;
+    expect(tooltip).not.toMatch(/還不在班上/);
+    expect(tooltip).not.toMatch(/才加入班級/);
+    expect(tooltip).toMatch(/部分學生/);
+  });
+
+  it('CellBadge (not_assigned) explains 未指派 without mentioning when the student joined', () => {
+    render(<CellBadge cell={{ student_id: 1, assignment_id: 10, state: 'not_assigned', score: null, current_step: null } as never} />);
+    const tooltip = screen.getByText('未指派').getAttribute('title')!;
+    expect(tooltip).not.toMatch(/還不在班上/);
+    expect(tooltip).not.toMatch(/才加入班級/);
+    expect(tooltip).toMatch(/部分學生/);
   });
 });
