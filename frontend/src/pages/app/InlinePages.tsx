@@ -303,7 +303,8 @@ export const OnboardingWrapper: React.FC = () => {
 
   const isStudent =
     user !== null &&
-    !hasRole(user, 'teacher', 'system_admin', 'principal', 'director', 'org_owner', 'org_admin', 'homeroom_teacher');
+    // #3515: a parent got the student tour (「QA家長 同學！這裡是你的朗讀練習基地」) on /parent.
+    !hasRole(user, 'teacher', 'system_admin', 'principal', 'director', 'org_owner', 'org_admin', 'homeroom_teacher', 'parent');
 
   const shouldShow = isStudent && user !== null && !user.onboarding_completed && !dismissed;
 
