@@ -3,6 +3,7 @@ import logging
 from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends
+from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 
 from ...auth.dependencies import get_current_user
@@ -61,40 +62,33 @@ def _build_classroom_alerts_for_teacher(
 
     all_student_ids = list({e.student_id for e in all_enrollments})
 
-    # Batch-load all scored sessions and latest sessions for all students at once
-    all_scored_sessions = (
-        db.query(LearningSession)
-        .filter(
-            LearningSession.student_id.in_(all_student_ids),
-            LearningSession.overall_score.isnot(None),
-        )
-        .order_by(LearningSession.student_id, LearningSession.started_at.asc())
-        .all()
-        if all_student_ids else []
-    )
-    scored_by_student: dict[int, list[LearningSession]] = {}
-    for s in all_scored_sessions:
-        scored_by_student.setdefault(s.student_id, []).append(s)
-
-    all_latest = (
-        db.query(LearningSession)
-        .filter(LearningSession.student_id.in_(all_student_ids))
-        .order_by(LearningSession.student_id, LearningSession.started_at.desc())
-        .all()
-        if all_student_ids else []
-    )
-    latest_by_student: dict[int, LearningSession] = {}
-    for s in all_latest:
-        if s.student_id not in latest_by_student:
-            latest_by_student[s.student_id] = s
+    # Only the columns the rules read, aggregated in SQL (#3519). Loading full
+    # LearningSession rows here pulled every session the teacher's students ever had,
+    # twice, on a bell that polls every 60 s.
+    scores_by_student: dict[int, list[float]] = {}
+    latest_by_student: dict[int, datetime] = {}
+    if all_student_ids:
+        for sid, score in (
+            db.query(LearningSession.student_id, LearningSession.overall_score)
+            .filter(
+                LearningSession.student_id.in_(all_student_ids),
+                LearningSession.overall_score.isnot(None),
+            )
+            .order_by(LearningSession.student_id, LearningSession.started_at.asc())
+        ):
+            scores_by_student.setdefault(sid, []).append(score)
+        for sid, latest in (
+            db.query(LearningSession.student_id, func.max(LearningSession.started_at))
+            .filter(LearningSession.student_id.in_(all_student_ids))
+            .group_by(LearningSession.student_id)
+        ):
+            latest_by_student[sid] = latest
 
     for classroom in classrooms:
         enrollments = enrollments_by_classroom.get(classroom.id, [])
         for enrollment in enrollments:
             student = enrollment.student
-            student_sessions = scored_by_student.get(student.id, [])
-            latest_session = latest_by_student.get(student.id)
-            last_session_date = latest_session.started_at if latest_session else None
+            last_session_date = latest_by_student.get(student.id)
 
             is_inactive = (
                 last_session_date is None
@@ -121,7 +115,7 @@ def _build_classroom_alerts_for_teacher(
                 ))
                 continue
 
-            scores = [s.overall_score for s in student_sessions if s.overall_score is not None]
+            scores = scores_by_student.get(student.id, [])
             if scores:
                 avg_score = sum(scores) / len(scores)
                 if avg_score < 50:

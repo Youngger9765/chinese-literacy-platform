@@ -269,3 +269,103 @@ def test_empty_classrooms_returns_empty(client, db):
     assert data["total"] == 0
     assert data["unread"] == 0
     assert data["items"] == []
+
+
+# ── #3519: the bell polls every 60 s; it must not scale with history size ─────
+
+
+def _add_student_with_scores(db, classroom, name, scores):
+    """Scores oldest→newest, one per day ending yesterday; also attaches the heavy
+    child rows (dialogue turns, attempt snapshots) that used to be eager-loaded."""
+    from app.models.session import DialogueTurn, ReadingAttemptHistory
+
+    student = User(name=name, email=f"{name}@test.com", username=name, password_hash="h", is_active=True)
+    db.add(student)
+    db.flush()
+    db.add(ClassroomStudent(classroom_id=classroom.id, student_id=student.id))
+    now = datetime.now(timezone.utc)
+    for i, score in enumerate(scores):
+        started = now - timedelta(days=len(scores) - i)
+        s = LearningSession(
+            student_id=student.id, classroom_id=classroom.id, story_slug="1", status="completed",
+            overall_score=score, started_at=started, completed_at=started + timedelta(minutes=10),
+        )
+        db.add(s)
+        db.flush()
+        db.add(ReadingAttemptHistory(session_id=s.id, attempt_no=1, reading_result={"x": "y" * 50}))
+        db.add(DialogueTurn(socratic_session_id="s", learning_session_id=s.id, turn_order=1, role="ai", text="hi"))
+    db.flush()
+    return student
+
+
+def _get_counting_queries(client):
+    stmts: list[str] = []
+
+    def _on(conn, cursor, statement, *a):
+        stmts.append(statement)
+
+    event.listen(engine, "before_cursor_execute", _on)
+    try:
+        resp = client.get("/api/teacher/notifications")
+    finally:
+        event.remove(engine, "before_cursor_execute", _on)
+    assert resp.status_code == 200, resp.text
+    return resp.json(), stmts
+
+
+def test_alert_rules_unchanged_with_column_queries(client, db, teacher_and_classroom):
+    classroom = teacher_and_classroom["classroom"]
+    _add_student_with_scores(db, classroom, "low", [40, 45, 30])
+    _add_student_with_scores(db, classroom, "falling", [90, 80, 70])
+    _add_student_with_scores(db, classroom, "fine", [80, 85, 90])
+    db.commit()
+    _auth_override(teacher_and_classroom["teacher"])
+
+    data, _ = _get_counting_queries(client)
+    by_name = {i["student_name"]: i for i in data["items"]}
+    assert by_name["low"]["alert_type"] == "low_performance"
+    assert "38" in by_name["low"]["detail"]  # (40+45+30)/3 = 38.3
+    assert by_name["falling"]["alert_type"] == "declining"
+    assert "90 → 80 → 70" in by_name["falling"]["detail"]
+    assert "fine" not in by_name
+    assert by_name["Inactive Student"]["alert_type"] == "inactive"
+    # last_session_date comes from MAX(started_at) now — still yesterday
+    assert by_name["low"]["last_session_date"] is not None
+
+
+def test_query_count_does_not_grow_with_session_history(client, db, teacher_and_classroom):
+    classroom = teacher_and_classroom["classroom"]
+    _auth_override(teacher_and_classroom["teacher"])
+    _add_student_with_scores(db, classroom, "a", [80] * 3)
+    db.commit()
+    _, small = _get_counting_queries(client)
+    for n in range(5):
+        _add_student_with_scores(db, classroom, f"b{n}", [80] * 40)
+    db.commit()
+    _, big = _get_counting_queries(client)
+
+    assert len(big) == len(small), (len(small), len(big))
+    heavy = [s for s in big if "dialogue_turns" in s or "reading_attempt_history" in s]
+    assert heavy == [], heavy[:1]
+    # The bell only needs scores and last-practice dates — never whole session rows
+    # (each carries several JSONB result blobs).
+    full_rows = [s for s in big if "learning_sessions.comprehension_result" in s]
+    assert full_rows == [], full_rows[:1]
+
+
+def test_loading_sessions_does_not_pull_dialogue_or_attempt_rows(db, teacher_and_classroom):
+    """#3519: these two relationships were `lazy="selectin"`, so *every* LearningSession
+    query in the app (stats, alerts, progress, matrix…) also loaded every dialogue turn
+    and every attempt snapshot. Nothing reads them off a session."""
+    _add_student_with_scores(db, teacher_and_classroom["classroom"], "c", [80] * 5)
+    db.commit()
+    db.expire_all()
+    stmts: list[str] = []
+    listener = lambda conn, cursor, statement, *a: stmts.append(statement)
+    event.listen(engine, "before_cursor_execute", listener)
+    try:
+        rows = db.query(LearningSession).all()
+    finally:
+        event.remove(engine, "before_cursor_execute", listener)
+    assert len(rows) == 5
+    assert [s for s in stmts if "dialogue_turns" in s or "reading_attempt_history" in s] == []
