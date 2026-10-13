@@ -107,3 +107,27 @@ export async function fetchChildAssignments(
   if (!res.ok) throw new Error(`fetchChildAssignments failed: ${res.status}`);
   return res.json();
 }
+
+/** #3517: parents linked to a student, as the student's teacher sees them. */
+export interface StudentParentLink {
+  link_id: number;
+  parent_name: string;
+  parent_email: string;
+  linked_at: string;
+}
+
+export async function listStudentParentLinks(token: string, studentId: number): Promise<StudentParentLink[]> {
+  const res = await fetch(`${API_BASE}/api/parents/students/${studentId}/links`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error(`listStudentParentLinks failed: ${res.status}`);
+  return res.json();
+}
+
+export async function revokeStudentParentLink(token: string, studentId: number, linkId: number): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/parents/students/${studentId}/links/${linkId}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error(`revokeStudentParentLink failed: ${res.status}`);
+}

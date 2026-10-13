@@ -401,3 +401,53 @@ class TestChildAssignmentsAndTitles:
         assert data["completed_story_slugs"] == ["20011"]
         titles = {s["slug"]: s["title"] for s in data["completed_stories"]}
         assert titles["20011"] != "20011" and len(titles["20011"]) > 1
+
+
+class TestTeacherRevokesParentLink:
+    """#3517 — a teacher can see and cut a parent's link; the parent loses access at once."""
+
+    @pytest.fixture(autouse=True)
+    def _no_register_rate_limit(self, monkeypatch):
+        # These tests sign up several accounts; the 5/min registration limit is not under test here.
+        from app.routes import auth as auth_routes
+        monkeypatch.setattr(auth_routes.rate_limiter, "check", lambda *a, **k: True)
+
+    def _setup(self, client, tag):
+        teacher_id, teacher_token = _register(client, f"rt_{tag}")
+        student_id, _ = _register(client, f"rs_{tag}")
+        _make_classroom_with_student(teacher_id, student_id)
+        code = client.post(f"/api/parents/invite-codes?student_id={student_id}", headers=auth_header(teacher_token)).json()["code"]
+        _, parent_token = _register(client, f"rp_{tag}")
+        assert client.post("/api/parents/link", json={"code": code}, headers=auth_header(parent_token)).status_code == 201
+        return teacher_token, student_id, parent_token
+
+    def test_teacher_sees_the_link_and_revoking_cuts_the_parent_off(self, client):
+        teacher_token, student_id, parent_token = self._setup(client, "a")
+        links = client.get(f"/api/parents/students/{student_id}/links", headers=auth_header(teacher_token)).json()
+        assert len(links) == 1 and links[0]["parent_name"].startswith("rp_a")
+        # control: the parent can read the child before
+        assert client.get(f"/api/parents/children/{student_id}/dashboard", headers=auth_header(parent_token)).status_code == 200
+        r = client.delete(f"/api/parents/students/{student_id}/links/{links[0]['link_id']}", headers=auth_header(teacher_token))
+        assert r.status_code == 204, r.text
+        assert client.get(f"/api/parents/children/{student_id}/dashboard", headers=auth_header(parent_token)).status_code == 403
+        assert client.get(f"/api/parents/children/{student_id}/assignments", headers=auth_header(parent_token)).status_code == 403
+        assert client.get("/api/parents/children", headers=auth_header(parent_token)).json()["children"] == []
+        assert client.get(f"/api/parents/students/{student_id}/links", headers=auth_header(teacher_token)).json() == []
+
+    def test_another_teacher_can_neither_list_nor_revoke(self, client):
+        _, student_id, parent_token = self._setup(client, "b")
+        _, stranger_token = _register(client, "rt_stranger")
+        assert client.get(f"/api/parents/students/{student_id}/links", headers=auth_header(stranger_token)).status_code == 403
+        # find the link id via the real teacher-free path: try a plausible id range
+        r = client.delete(f"/api/parents/students/{student_id}/links/1", headers=auth_header(stranger_token))
+        assert r.status_code == 403
+        assert client.get(f"/api/parents/children/{student_id}/dashboard", headers=auth_header(parent_token)).status_code == 200
+
+    def test_a_link_id_from_another_student_is_not_found(self, client):
+        teacher_c, student_c, _ = self._setup(client, "c")
+        teacher_d, student_d, parent_d = self._setup(client, "d")
+        foreign_id = client.get(f"/api/parents/students/{student_d}/links", headers=auth_header(teacher_d)).json()[0]["link_id"]
+        # Teacher of c names d's link under c's student id: refused, and d's parent keeps access.
+        r = client.delete(f"/api/parents/students/{student_c}/links/{foreign_id}", headers=auth_header(teacher_c))
+        assert r.status_code == 404
+        assert client.get(f"/api/parents/children/{student_d}/dashboard", headers=auth_header(parent_d)).status_code == 200
