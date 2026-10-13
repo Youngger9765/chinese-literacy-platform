@@ -103,7 +103,7 @@ export function CellBadge({ cell, overdue = false }: { cell: Cell | undefined; o
   if (!cell || cell.state === 'not_assigned') {
     return (
       <span
-        className="inline-block px-2 py-0.5 rounded text-xs text-gray-400 bg-[repeating-linear-gradient(45deg,#f3f4f6,#f3f4f6_4px,#e5e7eb_4px,#e5e7eb_8px)]"
+        className="inline-block whitespace-nowrap shrink-0 px-2 py-0.5 rounded text-xs text-gray-400 bg-[repeating-linear-gradient(45deg,#f3f4f6,#f3f4f6_4px,#e5e7eb_4px,#e5e7eb_8px)]"
         title="這位學生不在這份作業的指派名單內（作業派出後才加入班級）"
       >
         未指派
@@ -112,14 +112,14 @@ export function CellBadge({ cell, overdue = false }: { cell: Cell | undefined; o
   }
   if (cell.state === 'completed') {
     return (
-      <span className={`inline-block min-w-10 px-2 py-0.5 rounded text-sm font-semibold ${scoreClass(cell.score)}`}>
+      <span className={`inline-block whitespace-nowrap shrink-0 min-w-10 px-2 py-0.5 rounded text-sm font-semibold ${scoreClass(cell.score)}`}>
         {cell.score !== null ? Math.round(cell.score) : '已交'}
       </span>
     );
   }
   if (overdue && (cell.state === 'in_progress' || cell.state === 'not_started')) {
     return (
-      <span className="inline-block px-2 py-0.5 rounded text-xs font-medium bg-red-50 text-red-600 border border-red-200">
+      <span className="inline-block whitespace-nowrap shrink-0 px-2 py-0.5 rounded text-xs font-medium bg-red-50 text-red-600 border border-red-200">
         逾期未交{cell.state === 'in_progress' ? '・做到一半' : ''}
       </span>
     );
@@ -127,12 +127,12 @@ export function CellBadge({ cell, overdue = false }: { cell: Cell | undefined; o
   if (cell.state === 'in_progress') {
     const label = stepLabel(cell.current_step);
     return (
-      <span className="inline-block px-2 py-0.5 rounded text-xs font-medium text-amber-700 border border-dashed border-amber-400">
+      <span className="inline-block whitespace-nowrap shrink-0 px-2 py-0.5 rounded text-xs font-medium text-amber-700 border border-dashed border-amber-400">
         進行中{label ? `・${label}` : ''}
       </span>
     );
   }
-  return <span className="text-sm text-gray-400">未開始</span>;
+  return <span className="text-sm text-gray-400 whitespace-nowrap shrink-0">未開始</span>;
 }
 
 function formatDue(due: string | null): string {

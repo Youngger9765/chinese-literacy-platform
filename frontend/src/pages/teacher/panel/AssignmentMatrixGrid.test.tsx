@@ -127,3 +127,22 @@ describe('CellBadge colours — red only means 逾期未交', () => {
     expect(cls(<CellBadge cell={cell('not_started', null)} overdue />)).toMatch(/red/);
   });
 });
+
+// On 390 the student detail squeezed 「逾期未交」 to 「逾期未／交」 and 「已交」 to
+// 「已／交」: every state badge must stay on one line and not shrink.
+describe('CellBadge never wraps', () => {
+  const cell = (state: string, score: number | null) =>
+    ({ student_id: 1, assignment_id: 10, state, score, current_step: null }) as never;
+  it.each([
+    ['completed with score', cell('completed', 90), false],
+    ['completed no score', cell('completed', null), false],
+    ['in progress', cell('in_progress', null), false],
+    ['not started', cell('not_started', null), false],
+    ['overdue', cell('not_started', null), true],
+    ['not assigned', cell('not_assigned', null), false],
+  ])('%s', (_l, c, overdue) => {
+    const el = render(<CellBadge cell={c} overdue={overdue as boolean} />).container.firstElementChild!;
+    expect(el.className).toMatch(/\bwhitespace-nowrap\b/);
+    expect(el.className).toMatch(/\bshrink-0\b/);
+  });
+});
