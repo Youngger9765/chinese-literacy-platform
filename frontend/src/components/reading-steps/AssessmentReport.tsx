@@ -200,9 +200,15 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({
   // fall back to the original completedSections/6 display rather than
   // showing a false "0 completed" for an already-finished session.
   const hasStepCompletionData = Array.isArray(session?.completedSteps);
+  // 'report' and 'lesson-intro' are cover/summary steps with no pass/fail
+  // concept. 'lesson-intro' in particular can never actually appear in
+  // completedSteps (clicking past it only sets an in-memory flag, nothing
+  // persists a completion for it) — counting it here meant the progress bar
+  // could never reach its own total and allActiveStepsDone/恭喜完成練習 never
+  // fired, no matter how much real work the student finished (#3494 follow-up).
   const activeStepIds = resolveActiveSteps(story?.stepSequence)
     .map((s) => s.id)
-    .filter((id) => id !== 'report');
+    .filter((id) => id !== 'report' && id !== 'lesson-intro');
   const completedStepIds = session?.completedSteps ?? [];
   const totalActiveSteps = hasStepCompletionData ? activeStepIds.length : 0;
   const completedActiveStepsCount = hasStepCompletionData
