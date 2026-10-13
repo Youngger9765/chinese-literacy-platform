@@ -12,6 +12,7 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 import pytest
+from fastapi import Depends
 from datetime import datetime, timezone
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -71,7 +72,14 @@ def w():
     client = TestClient(app)
 
     def call(as_user, method, path, **kw):
-        app.dependency_overrides[get_current_user] = lambda: as_user
+        # Load the caller from the request's own DB session, as the real dependency
+        # does — a user object from another session can't be written back.
+        uid = as_user.id
+
+        def _current(db=Depends(get_db)):
+            return db.get(User, uid)
+
+        app.dependency_overrides[get_current_user] = _current
         return client.request(method, path, **kw)
 
     yield {"call": call, "kid": kid, "other_kid": other_kid, "teacher": teacher,
@@ -133,3 +141,21 @@ def test_exit_ticket_submit_is_for_the_sessions_child(w):
     assert r.status_code == 200 and r.json() == {"score": 80, "correct_count": 4, "total": 5, "passed": True}
     assert w["call"](w["other_kid"], "POST", p, json=body).status_code == 403
     assert w["call"](w["kid"], "POST", p, json={**body, "score": 101}).status_code == 422
+
+
+def test_patch_me_changes_only_profile_fields(w):
+    """Extra keys must be ignored: a child must not be able to switch email, deactivate
+    or promote themself through the profile endpoint."""
+    r = w["call"](w["kid"], "PATCH", "/api/users/me",
+                  json={"name": "新名字", "email": "evil@example.com", "is_active": False,
+                        "roles": [{"role_name": "system_admin"}], "password_hash": "x"})
+    assert r.status_code == 200, r.text
+    s = Session()
+    try:
+        u = s.query(User).filter(User.id == w["kid"].id).one()
+        assert u.name == "新名字"  # positive control: the allowed field did change
+        assert u.email == "kid@example.com" and u.is_active is True and u.password_hash == "x"
+        role_names = {ur.role.name for ur in s.query(UserRole).filter(UserRole.user_id == u.id)}
+        assert role_names == {"student"}
+    finally:
+        s.close()
