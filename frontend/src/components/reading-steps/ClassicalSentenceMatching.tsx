@@ -9,6 +9,7 @@
 import React, { useState } from 'react';
 import type { Story } from '../../types';
 import NextStepFooter from '../learning/NextStepFooter';
+import { normalizeSentenceMatching } from './classicalShapes';
 
 export interface ClassicalSentenceMatchingProps {
   story: Story;
@@ -16,10 +17,10 @@ export interface ClassicalSentenceMatchingProps {
 }
 
 const ClassicalSentenceMatching: React.FC<ClassicalSentenceMatchingProps> = ({ story, onFinish }) => {
-  const content = story.sentenceMatching;
-  const [revealed, setRevealed] = useState<Record<number, boolean>>({});
+  const content = normalizeSentenceMatching(story.sentenceMatching);
+  const [revealed, setRevealed] = useState<Record<string, boolean>>({});
 
-  if (!content || content.segments.length === 0) {
+  if (!content) {
     return (
       <div className="flex-1 flex items-center justify-center bg-surface">
         <div className="text-center space-y-4 p-8">
@@ -37,44 +38,70 @@ const ClassicalSentenceMatching: React.FC<ClassicalSentenceMatchingProps> = ({ s
         <div className="max-w-3xl mx-auto px-6 md:px-16 py-8 space-y-6 w-full">
           <div className="text-center">
             <h2 className="text-xl font-headline font-bold text-on-surface mb-1">文白句子比對</h2>
-            {content.instruction && <p className="text-sm text-on-surface-variant">{content.instruction}</p>}
+            {content.instruction && (
+              <p className="text-sm text-on-surface-variant whitespace-pre-line">{content.instruction}</p>
+            )}
           </div>
 
-          {content.reference_sentences && Object.keys(content.reference_sentences).length > 0 && (
-            <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-5">
-              <h3 className="text-sm font-headline font-bold text-on-surface-variant mb-2">
-                {content.reference_label || '參考句：'}
-              </h3>
-              <ol className="space-y-1 text-sm text-on-surface-variant list-decimal list-inside">
-                {Object.entries(content.reference_sentences).map(([num, text]) => (
-                  <li key={num}>{text}</li>
-                ))}
-              </ol>
-            </div>
-          )}
+          {content.parts.map((part, pi) => (
+            <section key={pi} className="space-y-4" aria-label={part.label ?? `第 ${pi + 1} 題`}>
+              {content.parts.length > 1 && (
+                <h3 className="text-base font-headline font-bold text-on-surface">{part.label ?? `第 ${pi + 1} 題`}</h3>
+              )}
 
-          <div className="space-y-4">
-            {content.segments.map((seg) => (
-              <div key={seg.index} className="bg-surface-container-lowest rounded-3xl shadow-editorial p-5 space-y-3">
-                <p className="text-lg leading-relaxed text-on-surface font-serif">
-                  {seg.index}. {seg.classical}
-                </p>
-                {revealed[seg.index] ? (
+              {Object.keys(part.referenceSentences).length > 0 && (
+                <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-5">
+                  <h4 className="text-sm font-headline font-bold text-on-surface-variant mb-2">
+                    {part.referenceLabel || '參考句：'}
+                  </h4>
+                  <ol className="space-y-1 text-sm text-on-surface-variant">
+                    {Object.entries(part.referenceSentences).map(([n, text]) => (
+                      <li key={n}>
+                        <span className="font-bold">［{n}］</span>
+                        {text}
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )}
+
+              {part.example && (
+                <div className="bg-accent/5 rounded-3xl p-5 space-y-1">
+                  <p className="text-xs font-bold text-accent">例句</p>
+                  <p className="text-lg leading-relaxed text-on-surface font-serif">{part.example.classical}</p>
                   <p className="text-sm text-accent">
-                    對應參考句：{content.reference_sentences?.[String(seg.answer)] ?? `第 ${seg.answer} 句`}
+                    對應參考句：［{part.example.answer}］{part.referenceSentences[String(part.example.answer)] ?? ''}
                   </p>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => setRevealed((r) => ({ ...r, [seg.index]: true }))}
-                    className="text-sm text-accent hover:brightness-110 transition-colors"
-                  >
-                    顯示答案
-                  </button>
-                )}
+                </div>
+              )}
+
+              <div className="space-y-4">
+                {part.segments.map((seg) => {
+                  const key = `${pi}-${seg.index}`;
+                  return (
+                    <div key={key} className="bg-surface-container-lowest rounded-3xl shadow-editorial p-5 space-y-3">
+                      <p className="text-lg leading-relaxed text-on-surface font-serif">
+                        {seg.index}. {seg.classical}
+                      </p>
+                      {revealed[key] ? (
+                        <p className="text-sm text-accent">
+                          對應參考句：［{seg.answer}］{part.referenceSentences[String(seg.answer)] ?? ''}
+                        </p>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setRevealed((r) => ({ ...r, [key]: true }))}
+                          className="text-sm text-accent hover:brightness-110 transition-colors"
+                        >
+                          顯示答案
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
-            ))}
-          </div>
+            </section>
+          ))}
         </div>
       </div>
 
