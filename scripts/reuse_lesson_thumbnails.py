@@ -48,6 +48,23 @@ REGISTRY = ROOT / "docs" / "curriculum" / "lesson-uid-registry.yml"
 _PUNCT = "「」『』（）(),，。.？?！!：:；;、－-—～~　 "
 
 
+# The registry's first-edition code↔title pairs are shifted in the G8 block, so the
+# title join put another lesson's cover on these eight (a theater on 《甜蜜》, an orchid
+# on 《石虎》...). Each image below was checked by eye against the lesson (#3477).
+# 石虎保育 (L0114) and 核能 (L0115) have no correct first-edition image and are left
+# for generation.
+MANUAL_COVERS: dict[str, str] = {
+    "L0108": "G8-L11",   # 虎襲事件 — tiger
+    "L0109": "G8-L15",   # 球場上的另類指揮家 — tactics clipboard on grass
+    "L0117": "G8-L7",    # 讓你口中的甜蜜… — sugar cube with seedling
+    "L0126": "G8-L6a",   # 戲院、賭場、檳榔攤 — theater
+    "L0128": "G8-L9a",   # 讓黑猩猩被看見的人 — chimpanzee
+    "L0129": "G8-L10",   # 「按讚」背後的真相 — like button
+    "L0147": "G8-L13",   # 構樹 — tree with two people
+    "L0148": "G8-L14",   # 破解蝴蝶蘭的花期密碼 — orchid and sundial
+}
+
+
 def norm_title(t: str | None) -> str:
     t = unicodedata.normalize("NFKC", t or "")
     return "".join(c for c in t if c not in _PUNCT)
@@ -102,7 +119,8 @@ def main() -> int:
     for lesson in get_all_lessons():
         uid = lesson["lesson_uid"]
         key = norm_title(lesson["title"])
-        code = first_edition.get(key)
+        manual = uid in MANUAL_COVERS
+        code = MANUAL_COVERS[uid] if manual else first_edition.get(key)
         if not code:
             new_lesson += 1
             continue
@@ -137,8 +155,9 @@ def main() -> int:
                 json.dumps({
                     "reused_from_first_edition": True,
                     "first_edition_code": code,
-                    "matched_on": "title",
-                    "note": "課號在二修重編過，照課號接會接到別課的圖（#2683）",
+                    "matched_on": "manual" if manual else "title",
+                    "note": ("課名對照表八年級段錯位，照課名接到別課的圖；逐張看過一版圖後人工指定（#3477）"
+                             if manual else "課號在二修重編過，照課號接會接到別課的圖（#2683）"),
                 }, ensure_ascii=False, indent=2) + "\n",
                 encoding="utf-8",
             )
