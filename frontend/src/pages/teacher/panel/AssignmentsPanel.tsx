@@ -21,6 +21,7 @@ import TextManagementTab from '../TextManagementTab';
 import AssignmentItemStats from './AssignmentItemStats';
 import AssignmentMatrixGrid, { CellBadge, MatrixLegend, assignmentCounts, distinctTitles, isOverdue } from './AssignmentMatrixGrid';
 import { StudentDetail } from './StudentsPanel';
+import { assignmentCsv, downloadAssignmentCsv } from './assignmentCsv';
 
 interface AssignmentsPanelProps {
   classroomId: number;
@@ -78,7 +79,21 @@ function AssignmentDrilldown({
         ← 回班級作業總表
       </button>
       <div>
-        <h3 className="text-xl font-bold text-gray-900">{title}</h3>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <h3 className="text-xl font-bold text-gray-900">{title}</h3>
+          <button
+            type="button"
+            onClick={() =>
+              downloadAssignmentCsv(
+                `${title}.csv`,
+                assignmentCsv(matrix, assignmentId, isOverdue(assignment?.due_date ?? null)),
+              )
+            }
+            className="inline-flex items-center gap-1.5 h-10 px-4 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 cursor-pointer whitespace-nowrap"
+          >
+            下載這份作業成績（CSV）
+          </button>
+        </div>
         <p className="text-gray-500 mt-1">{submitted} / {assigned} 人已交</p>
         {(() => {
           const n = assignmentCounts(matrix.cells, assignmentId, isOverdue(assignment?.due_date ?? null));

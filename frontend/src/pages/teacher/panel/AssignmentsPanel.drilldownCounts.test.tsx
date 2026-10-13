@@ -49,3 +49,23 @@ describe('AssignmentsPanel — assignment detail opens on status counts', () => 
     await waitFor(() => expect(counts.textContent).toBe('已交1逾期未交2'));
   });
 });
+
+describe('AssignmentsPanel — download one assignment as CSV', () => {
+  it('the detail has a download button that builds the CSV from the matrix', async () => {
+    const created: string[] = [];
+    const origCreate = URL.createObjectURL;
+    URL.createObjectURL = ((b: Blob) => { created.push(String(b.size)); return 'blob:x'; }) as never;
+    URL.revokeObjectURL = (() => {}) as never;
+    vi.mocked(teacherApi.getAssignmentItemStats).mockResolvedValue({ items: [] } as never);
+    vi.mocked(teacherApi.getAssignmentMatrix).mockResolvedValue({
+      students: [{ id: 1, name: '甲' }],
+      assignments: [{ id: 10, title: '課文', due_date: null }],
+      cells: [{ student_id: 1, assignment_id: 10, state: 'completed', score: 90, current_step: null }],
+    } as never);
+    render(<AssignmentsPanel classroomId={9} selectedAssignmentId={10} onSelectAssignment={vi.fn()} onOpenStudent={vi.fn()} />);
+    const btn = await screen.findByRole('button', { name: /下載這份作業成績/ });
+    btn.click();
+    expect(created.length).toBe(1);
+    URL.createObjectURL = origCreate;
+  });
+});
