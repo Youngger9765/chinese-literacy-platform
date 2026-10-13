@@ -542,9 +542,13 @@ export interface SelfCheckBeforeReadingContent {
 
 export interface ClassicalTextContent {
   source_label?: string;
+  /** Some lessons carry the source as `source` instead of `source_label`. */
+  source?: string;
+  /** Worksheet's own explanation of the 斷詞 dots, when it prints one. */
+  note_dots?: string;
   paragraphs: string[];
   annotations_label?: string;
-  annotations?: { term: string; text: string }[];
+  annotations?: { index?: number; no?: number; term: string; text: string }[];
 }
 
 export interface ModernTranslationContent {
