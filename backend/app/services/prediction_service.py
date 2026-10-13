@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import logging
 from collections import defaultdict
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING
 
@@ -43,7 +44,50 @@ LOOKBACK_DAYS = 60             # analysis window
 # ── Public API ────────────────────────────────────────────────────────────────
 
 
-def predict_learning_difficulty(student_id: int, db: "DbSession") -> dict:
+
+def load_lookback_sessions(student_ids: list[int], db: "DbSession") -> dict[int, list[LearningSession]]:
+    """Sessions in the lookback window per student, oldest first — one query."""
+    if not student_ids:
+        return {}
+    cutoff = datetime.now(timezone.utc) - timedelta(days=LOOKBACK_DAYS)
+    out: dict[int, list[LearningSession]] = {}
+    for s in (
+        db.query(LearningSession)
+        .filter(LearningSession.student_id.in_(student_ids), LearningSession.started_at >= cutoff)
+        .order_by(LearningSession.student_id, LearningSession.started_at.asc())
+    ):
+        out.setdefault(s.student_id, []).append(s)
+    return out
+
+
+@dataclass
+class ErrorStats:
+    chars: set[str] = field(default_factory=set)  # distinct wrong characters
+    total: int = 0  # every CharacterError row (the no-transcript fallback uses it)
+
+
+def load_error_stats_by_student(
+    sessions_by_student: dict[int, list[LearningSession]], db: "DbSession"
+) -> dict[int, ErrorStats]:
+    """Character-error stats per student over the given sessions — one query."""
+    owner = {s.id: sid for sid, ss in sessions_by_student.items() for s in ss}
+    if not owner:
+        return {}
+    out: dict[int, ErrorStats] = {}
+    for session_id, ch in db.query(CharacterError.session_id, CharacterError.character).filter(
+        CharacterError.session_id.in_(list(owner))
+    ):
+        st = out.setdefault(owner[session_id], ErrorStats())
+        st.chars.add(ch)
+        st.total += 1
+    return out
+
+def predict_learning_difficulty(
+    student_id: int,
+    db: "DbSession",
+    *,
+    preloaded: "tuple[list[LearningSession], ErrorStats] | None" = None,
+) -> dict:
     """Analyse early learning signals and return a risk prediction.
 
     Returns:
@@ -55,17 +99,14 @@ def predict_learning_difficulty(student_id: int, db: "DbSession") -> dict:
         supporting_data: dict,
       }
     """
-    cutoff = datetime.now(timezone.utc) - timedelta(days=LOOKBACK_DAYS)
-
-    sessions = (
-        db.query(LearningSession)
-        .filter(
-            LearningSession.student_id == student_id,
-            LearningSession.started_at >= cutoff,
-        )
-        .order_by(LearningSession.started_at.asc())
-        .all()
-    )
+    # `preloaded` = (this student's sessions in the lookback window, oldest first;
+    # their character-error stats over those sessions). A class-wide caller
+    # loads both once for everyone instead of 2+ queries per student (#3519).
+    if preloaded is not None:
+        sessions, preloaded_errors = preloaded
+    else:
+        sessions = load_lookback_sessions([student_id], db).get(student_id, [])
+        preloaded_errors = None
 
     if not sessions:
         latest_session = (
@@ -90,7 +131,7 @@ def predict_learning_difficulty(student_id: int, db: "DbSession") -> dict:
         recommended_actions.append("安排一對一朗讀指導，從較簡單的課文開始")
 
     # Signal 2 — high character error rate
-    error_rate = _check_character_error_rate(student_id, sessions, db)
+    error_rate = _check_character_error_rate(student_id, sessions, db, errors=preloaded_errors)
     supporting["character_error_rate"] = error_rate
     if error_rate is not None and error_rate > HIGH_ERROR_RATE_THRESHOLD:
         risk_factors.append(f"生字錯誤率偏高（{error_rate:.0%}）")
@@ -172,21 +213,16 @@ def _check_character_error_rate(
     student_id: int,
     sessions: list[LearningSession],
     db: "DbSession",
+    errors: "ErrorStats | None" = None,
 ) -> float | None:
     """Ratio of unique characters with errors to total unique characters seen."""
     session_ids = [s.id for s in sessions]
     if not session_ids:
         return None
 
-    from sqlalchemy import func as sa_func
-
-    error_chars = set(
-        row.character
-        for row in db.query(CharacterError.character)
-        .filter(CharacterError.session_id.in_(session_ids))
-        .distinct()
-        .all()
-    )
+    if errors is None:
+        errors = load_error_stats_by_student({student_id: sessions}, db).get(student_id, ErrorStats())
+    error_chars = errors.chars
 
     # Gather unique characters from reading_result across sessions
     all_chars: set[str] = set()
@@ -202,12 +238,7 @@ def _check_character_error_rate(
         # Fall back: use error count / sessions ratio proxy
         if not sessions:
             return None
-        total_errors = (
-            db.query(sa_func.count(CharacterError.id))
-            .filter(CharacterError.session_id.in_(session_ids))
-            .scalar()
-            or 0
-        )
+        total_errors = errors.total
         return min(total_errors / (len(sessions) * 20), 1.0)  # 20 chars/session estimate
 
     return len(error_chars) / len(all_chars) if all_chars else None

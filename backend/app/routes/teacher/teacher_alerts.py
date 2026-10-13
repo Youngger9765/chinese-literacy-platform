@@ -11,7 +11,12 @@ from ...dependencies.tenant import _check_classroom_access
 from ...models.school import ClassroomStudent
 from ...models.session import LearningSession
 from ...models.user import User
-from ...services.prediction_service import predict_learning_difficulty
+from ...services.prediction_service import (
+    ErrorStats,
+    load_error_stats_by_student,
+    load_lookback_sessions,
+    predict_learning_difficulty,
+)
 from .teacher_schemas import AtRiskStudentResponse, StudentAlertResponse
 
 
@@ -175,10 +180,18 @@ def get_at_risk_students(
     if not enrollments:
         return []
 
+    student_ids = [e.student_id for e in enrollments]
+    sessions_by_student = load_lookback_sessions(student_ids, db)
+    errors_by_student = load_error_stats_by_student(sessions_by_student, db)
+
     results: list[AtRiskStudentResponse] = []
     for enrollment in enrollments:
         student = enrollment.student
-        prediction = predict_learning_difficulty(student.id, db)
+        prediction = predict_learning_difficulty(
+            student.id,
+            db,
+            preloaded=(sessions_by_student.get(student.id, []), errors_by_student.get(student.id, ErrorStats())),
+        )
 
         results.append(
             AtRiskStudentResponse(
