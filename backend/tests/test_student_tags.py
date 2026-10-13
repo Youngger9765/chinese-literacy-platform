@@ -31,6 +31,7 @@ from app.database import get_db
 from app.models import Base
 from app.models.user import Role, UserRole
 from app.models.school import School
+from _school_student import grant_school_student_role
 
 
 # ---------------------------------------------------------------------------
@@ -188,6 +189,7 @@ def classroom_id(client, teacher, student, school_id):
     assert create_resp.status_code == 201
     cid = create_resp.json()["id"]
 
+    grant_school_student_role(TestingSessionLocal, student["user_id"], classroom_id=cid)
     enroll_resp = client.post(
         f"/api/classrooms/{cid}/students",
         json={"student_id": student["user_id"]},
@@ -407,6 +409,7 @@ class TestTagCRUDFlow:
         assert cls_resp.status_code == 201
         cid = cls_resp.json()["id"]
 
+        grant_school_student_role(TestingSessionLocal, student_data["user_id"], classroom_id=cid)
         enroll = client.post(
             f"/api/classrooms/{cid}/students",
             json={"student_id": student_data["user_id"]},

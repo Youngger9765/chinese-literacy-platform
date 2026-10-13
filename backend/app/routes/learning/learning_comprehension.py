@@ -355,6 +355,19 @@ async def comprehension_restart(
 
     Called when the student clicks '重新開始'.
     """
+    # clear_session deletes every dialogue turn of db_session_id, so it must be the
+    # caller's own session — same IDOR guard as /comprehension/chat (#3535).
+    if payload.db_session_id is not None:
+        owned = (
+            db.query(LearningSession)
+            .filter(
+                LearningSession.id == payload.db_session_id,
+                LearningSession.student_id == current_user.id,
+            )
+            .first()
+        )
+        if owned is None:
+            raise HTTPException(status_code=403, detail="Session not found or access denied")
     socratic_agent.clear_session(
         session_id=payload.session_id,
         db=db,

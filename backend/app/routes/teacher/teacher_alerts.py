@@ -3,6 +3,7 @@ import logging
 from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends
+from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 
 from ...auth.dependencies import get_current_user
@@ -11,7 +12,12 @@ from ...dependencies.tenant import _check_classroom_access
 from ...models.school import ClassroomStudent
 from ...models.session import LearningSession
 from ...models.user import User
-from ...services.prediction_service import predict_learning_difficulty
+from ...services.prediction_service import (
+    ErrorStats,
+    load_error_stats_by_student,
+    load_lookback_sessions,
+    predict_learning_difficulty,
+)
 from .teacher_schemas import AtRiskStudentResponse, StudentAlertResponse
 
 
@@ -56,31 +62,25 @@ def get_classroom_alerts(
     now = datetime.now(timezone.utc)
     inactive_cutoff = now - timedelta(days=INACTIVE_DAYS)
 
-    # Batch-load all scored sessions for alert analysis (single query instead of N)
-    all_scored_sessions = (
-        db.query(LearningSession)
+    # Only what the rules read, aggregated in SQL (#3519) — whole session rows carry
+    # several JSONB result blobs and this loaded every one of them, twice.
+    scores_by_student: dict[int, list[float]] = {}
+    for sid, score in (
+        db.query(LearningSession.student_id, LearningSession.overall_score)
         .filter(
             LearningSession.student_id.in_(student_ids),
             LearningSession.overall_score.isnot(None),
         )
         .order_by(LearningSession.student_id, LearningSession.started_at.asc())
-        .all()
-    )
-    scored_by_student: dict[int, list[LearningSession]] = {}
-    for s in all_scored_sessions:
-        scored_by_student.setdefault(s.student_id, []).append(s)
+    ):
+        scores_by_student.setdefault(sid, []).append(score)
 
-    # Batch-load latest session per student
-    all_latest_sessions = (
-        db.query(LearningSession)
+    latest_by_student: dict[int, datetime] = dict(
+        db.query(LearningSession.student_id, func.max(LearningSession.started_at))
         .filter(LearningSession.student_id.in_(student_ids))
-        .order_by(LearningSession.student_id, LearningSession.started_at.desc())
+        .group_by(LearningSession.student_id)
         .all()
     )
-    latest_by_student: dict[int, LearningSession] = {}
-    for s in all_latest_sessions:
-        if s.student_id not in latest_by_student:
-            latest_by_student[s.student_id] = s
 
     def _make_aware(dt: datetime) -> datetime:
         return dt.replace(tzinfo=timezone.utc) if dt.tzinfo is None else dt
@@ -88,8 +88,7 @@ def get_classroom_alerts(
     alerts: list[StudentAlertResponse] = []
     for enrollment in enrollments:
         student = enrollment.student
-        latest = latest_by_student.get(student.id)
-        last_date = latest.started_at if latest else None
+        last_date = latest_by_student.get(student.id)
 
         is_inactive = last_date is None or _make_aware(last_date) < inactive_cutoff
         if is_inactive:
@@ -108,8 +107,7 @@ def get_classroom_alerts(
             )
             continue
 
-        scored = scored_by_student.get(student.id, [])
-        scores = [s.overall_score for s in scored if s.overall_score is not None]
+        scores = scores_by_student.get(student.id, [])
 
         if scores:
             avg_score = sum(scores) / len(scores)
@@ -175,10 +173,18 @@ def get_at_risk_students(
     if not enrollments:
         return []
 
+    student_ids = [e.student_id for e in enrollments]
+    sessions_by_student = load_lookback_sessions(student_ids, db)
+    errors_by_student = load_error_stats_by_student(sessions_by_student, db)
+
     results: list[AtRiskStudentResponse] = []
     for enrollment in enrollments:
         student = enrollment.student
-        prediction = predict_learning_difficulty(student.id, db)
+        prediction = predict_learning_difficulty(
+            student.id,
+            db,
+            preloaded=(sessions_by_student.get(student.id, []), errors_by_student.get(student.id, ErrorStats())),
+        )
 
         results.append(
             AtRiskStudentResponse(

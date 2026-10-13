@@ -34,6 +34,7 @@ from app.database import get_db
 from app.models import Base
 from app.models.user import Role, UserRole
 from app.models.school import School
+from _school_student import grant_school_student_role
 
 
 # ---------------------------------------------------------------------------
@@ -220,6 +221,8 @@ def _fresh_student(client) -> dict:
     token = _register(client, "Boundary Student", f"boundary_student_{suffix}@test.com")
     me = client.get("/api/users/me", headers=_h(token))
     assert me.status_code == 200, me.text
+    # #3534: a real student of the boundary classrooms' school, so it can be enrolled.
+    grant_school_student_role(TestingSessionLocal, me.json()["id"], school_id=_test_school_id)
     return {"token": token, "user_id": me.json()["id"]}
 
 

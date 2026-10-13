@@ -22,7 +22,7 @@ interface AuthContextValue {
    */
   teacherGatingEnforced: boolean;
   login: (email: string, password: string) => Promise<{ mustChangePassword: boolean }>;
-  register: (email: string, password: string, name: string) => Promise<RegisterResponse>;
+  register: (email: string, password: string, name: string, role?: 'parent') => Promise<RegisterResponse>;
   logout: (options?: { skipJunyiRedirect?: boolean }) => void;
   clearMustChangePassword: () => void;
   /** Re-fetch user data from /api/users/me and update the context. */
@@ -237,9 +237,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { mustChangePassword: needsPasswordChange };
   }, []);
 
-  const register = useCallback(async (email: string, password: string, name: string): Promise<RegisterResponse> => {
+  const register = useCallback(async (email: string, password: string, name: string, role?: 'parent'): Promise<RegisterResponse> => {
     // Registration no longer auto-logs in — user must verify email first (issue #460).
-    const response = await apiRegister(email, password, name);
+    const response = await apiRegister(email, password, name, role);
     return response;
   }, []);
 
