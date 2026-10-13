@@ -140,9 +140,9 @@ const ClassroomTabs: React.FC<ClassroomTabsProps> = ({
 
     <div className="flex-1 xl:flex xl:items-stretch">
       {sidebar && (
-        <aside className="hidden xl:block w-60 shrink-0 bg-white border-r border-gray-200">{sidebar}</aside>
+        <aside className="hidden xl:block w-52 shrink-0 bg-white border-r border-gray-200">{sidebar}</aside>
       )}
-      <div className="flex-1 min-w-0 p-4 sm:p-6 space-y-4">
+      <div className="flex-1 min-w-0 p-4 sm:p-6 xl:p-5 space-y-4">
         {topSlot}
         <div className="bg-white rounded-2xl shadow-card max-w-[1200px]">
     {activeTab === 'settings' && (

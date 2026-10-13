@@ -83,7 +83,7 @@ const ClassDataTab: React.FC<ClassDataTabProps> = ({
   };
 
   return (
-    <div className="flex flex-col sm:flex-row">
+    <div className="flex flex-col lg:flex-row">
       {/*
        * #3424: below `sm` this nav is a horizontally-scrolling row with no
        * visual cue — 錯字總表 got cut in half and 學習分析／詳細學習紀錄
@@ -91,10 +91,10 @@ const ClassDataTab: React.FC<ClassDataTabProps> = ({
        * the same hint pattern as AssignmentMatrixGrid's
        * "← 左右滑動看更多作業 →".
        */}
-      <p className="sm:hidden text-xs text-gray-400 px-4 pt-3 pb-1">← 左右滑動看更多 →</p>
+      <p className="lg:hidden text-xs text-gray-400 px-4 pt-3 pb-1">← 左右滑動看更多 →</p>
       <nav
         aria-label="班級數據項目"
-        className="flex sm:w-48 sm:shrink-0 gap-2 overflow-x-auto border-b sm:border-b-0 sm:border-r border-gray-200 p-4 sm:flex-col"
+        className="flex lg:w-40 lg:shrink-0 gap-2 overflow-x-auto border-b lg:border-b-0 lg:border-r border-gray-200 p-4 lg:flex-col"
       >
         {DATA_VIEWS.map((item) => (
           <button

@@ -59,7 +59,10 @@ describe('StudentListTab — roster row wrap safety (#3424)', () => {
     // Junyi-parity table: on phones each row is a wrapping flex card, a table row from sm up
     const row = removeBtn.closest('tr')!;
     expect(row.className).toMatch(/\bflex-wrap\b/);
-    expect(row.className).toMatch(/\bsm:table-row\b/);
+    // Table layout only from lg (1024px): at 768 the six columns squeezed names and
+    // accounts into one-character lines and clipped 移除, so tablets get the card rows.
+    expect(row.className).toMatch(/\blg:table-row\b/);
+    expect(row.className).not.toMatch(/\bsm:table-row\b/);
   });
 
   it('每個動作標籤都有 whitespace-nowrap，不會斷字', () => {

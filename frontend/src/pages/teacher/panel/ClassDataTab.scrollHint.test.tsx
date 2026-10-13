@@ -17,7 +17,7 @@ vi.mock('./TodayOverviewTab', () => ({ default: () => null }));
 vi.mock('./StudentsPanel', () => ({ default: () => null }));
 
 describe('ClassDataTab — mobile scroll hint for sub-tabs (#3424)', () => {
-  it('shows a sm:hidden "左右滑動" hint above the sub-tab nav', () => {
+  it('shows a "左右滑動" hint above the sub-tab nav until the side menu appears (lg)', () => {
     render(
       <ClassDataTab
         classroomId={9}
@@ -27,7 +27,8 @@ describe('ClassDataTab — mobile scroll hint for sub-tabs (#3424)', () => {
       />,
     );
     const hint = screen.getByText('← 左右滑動看更多 →');
-    expect(hint.className).toMatch(/\bsm:hidden\b/);
+    // tablets get the top row too (the side menu left the heatmap too narrow at 768)
+    expect(hint.className).toMatch(/\blg:hidden\b/);
   });
 
   it('the hint appears before the sub-tab nav so it reads as guidance for it', () => {
