@@ -4,7 +4,7 @@ import {
   AssignmentResponse,
   SubmissionResponse,
 } from '../../../services/assignmentApi';
-import { completionPercentage, formatDate, isOverdue } from './assignmentUtils';
+import { completionPercentage, formatDate, isOverdue, completionCounts } from './assignmentUtils';
 import AssignmentExpandedPanel from './AssignmentExpandedPanel';
 import AssignmentInlineEdit from './AssignmentInlineEdit';
 
@@ -60,7 +60,7 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({
   onGraded,
 }) => {
   const displayTitle = assignment.title || assignment.story_title;
-  const completionPct = completionPercentage(assignment.completed_count, assignment.submission_count);
+  const completionPct = completionPercentage(completionCounts(assignment).done, completionCounts(assignment).total);
 
   return (
     <div>
@@ -126,7 +126,7 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({
                       : 'bg-gray-100 text-gray-500'
                 }`}
               >
-                {assignment.completed_count}/{assignment.submission_count}
+                {completionCounts(assignment).done}/{completionCounts(assignment).total}
               </span>
             </p>
           </div>

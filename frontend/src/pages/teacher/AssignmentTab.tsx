@@ -5,7 +5,7 @@ import AssignmentCreateForm from './components/AssignmentCreateForm';
 import AssignTargetPicker from './panel/AssignTargetPicker';
 import AssignmentExpandedPanel from './components/AssignmentExpandedPanel';
 import AssignmentInlineEdit from './components/AssignmentInlineEdit';
-import { completionPercentage, formatDate, isOverdue } from './components/assignmentUtils';
+import { completionPercentage, formatDate, isOverdue, completionCounts } from './components/assignmentUtils';
 import { StatusFilter, useAssignments } from './hooks/useAssignments';
 
 interface AssignmentTabProps {
@@ -111,7 +111,7 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId, onChanged, o
   const renderDesktopRow = (assignment: AssignmentResponse) => {
     const isExpanded = expandedId === assignment.id;
     const displayTitle = assignment.title || assignment.story_title;
-    const completionPct = completionPercentage(assignment.completed_count, assignment.submission_count);
+    const completionPct = completionPercentage(completionCounts(assignment).done, completionCounts(assignment).total);
     const isConfirmingDelete = confirmDeleteId === assignment.id;
     const isDeleting = deletingId === assignment.id;
     const isEditing = editingId === assignment.id;
@@ -157,7 +157,7 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId, onChanged, o
                     : 'bg-gray-100 text-gray-500'
               }`}
             >
-              {assignment.completed_count}/{assignment.submission_count}
+              {completionCounts(assignment).done}/{completionCounts(assignment).total}
             </span>
           </td>
           <td className="py-2.5 text-center">
