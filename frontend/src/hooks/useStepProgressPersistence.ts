@@ -160,7 +160,13 @@ export function useStepProgressPersistence({
   );
 
   const requiredAssignmentSteps = useMemo(
-    () => lessonActiveSteps.filter((s) => s.id !== 'report').map((s) => ({ id: s.id, label: s.label })),
+    // 'report' and 'lesson-intro' are cover/summary steps with no pass/fail
+    // concept — nothing ever marks lesson-intro complete in the persisted
+    // steps_completed array (clicking 開始閱讀 only sets in-memory
+    // session.introCompleted), so counting it as required meant an
+    // assignment-flow student could NEVER reach isAssignmentReadyForSubmit
+    // (#3494, Hans PR #3448 manual QA).
+    () => lessonActiveSteps.filter((s) => s.id !== 'report' && s.id !== 'lesson-intro').map((s) => ({ id: s.id, label: s.label })),
     [lessonActiveSteps],
   );
   const completedStepsSet = useMemo(

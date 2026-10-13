@@ -163,7 +163,7 @@ describe('AssessmentReport — realistic modern-flow session (#2835)', () => {
 
     const expectedTotal = resolveActiveSteps(REALISTIC_STORY.stepSequence)
       .map((step) => step.id)
-      .filter((id) => id !== 'report').length;
+      .filter((id) => id !== 'report' && id !== 'lesson-intro').length;
 
     // 掃描前提：算不出關卡數的話，下面的斷言會變成恆綠
     expect(expectedTotal).toBeGreaterThan(6);
@@ -242,5 +242,37 @@ describe('AssessmentReport — teacher/history views without completedSteps data
       <AssessmentReport session={HISTORY_SESSION} story={REALISTIC_STORY} onRetry={vi.fn()} readOnly />,
     );
     expect(container.textContent).not.toMatch(/已完成\s*0\s*\/\s*\d+\s*關卡/);
+  });
+});
+
+describe('AssessmentReport — lesson-intro can never actually be "completed" (#3494 follow-up)', () => {
+  // In production, 'lesson-intro' NEVER appears in completedSteps — clicking
+  // past it (handleStartReading in useLearningStepNavigation.ts) only sets an
+  // in-memory flag, never persists a step-progress completion. Before #3494,
+  // activeStepIds/totalActiveSteps only excluded 'report', so EVERY student
+  // (assignment or self-study) was permanently stuck one step short: the
+  // progress bar never reached its own total and allActiveStepsDone/恭喜完成
+  // never fired, no matter how much of the lesson they actually finished.
+  const COMPLETED_EVERYTHING_BUT_INTRO: LearningSession = {
+    ...REALISTIC_SESSION,
+    completedSteps: resolveActiveSteps(REALISTIC_STORY.stepSequence)
+      .map((s) => s.id)
+      .filter((id) => id !== 'lesson-intro' && id !== 'report'),
+  };
+
+  it('shows the completion celebration once every REAL step is done, without lesson-intro ever being "completed"', () => {
+    render(
+      <AssessmentReport
+        session={COMPLETED_EVERYTHING_BUT_INTRO}
+        story={REALISTIC_STORY}
+        onRetry={vi.fn()}
+        stepProgressData={{ ...REALISTIC_STEP_PROGRESS, steps_completed: COMPLETED_EVERYTHING_BUT_INTRO.completedSteps! }}
+      />,
+    );
+    expect(screen.getByText('恭喜完成練習！')).toBeInTheDocument();
+    // The progress bar itself must not render at all once done (it's only
+    // shown while !allActiveStepsDone) — a stray "已完成 N-1 / N" would mean
+    // lesson-intro silently crept back into the denominator.
+    expect(screen.queryByText(/已完成\s*\d+\s*\/\s*\d+\s*關卡/)).toBeNull();
   });
 });
