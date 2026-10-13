@@ -451,3 +451,14 @@ class TestTeacherRevokesParentLink:
         r = client.delete(f"/api/parents/students/{student_c}/links/{foreign_id}", headers=auth_header(teacher_c))
         assert r.status_code == 404
         assert client.get(f"/api/parents/children/{student_d}/dashboard", headers=auth_header(parent_d)).status_code == 200
+
+    def test_revoked_parent_cannot_relink_with_a_spare_code(self, client):
+        teacher_token, student_id, parent_token = self._setup(client, "e")
+        spare = client.post(f"/api/parents/invite-codes?student_id={student_id}", headers=auth_header(teacher_token)).json()["code"]
+        link_id = client.get(f"/api/parents/students/{student_id}/links", headers=auth_header(teacher_token)).json()[0]["link_id"]
+        assert client.delete(f"/api/parents/students/{student_id}/links/{link_id}", headers=auth_header(teacher_token)).status_code == 204
+        assert client.post("/api/parents/link", json={"code": spare}, headers=auth_header(parent_token)).status_code >= 400
+        assert client.get(f"/api/parents/children/{student_id}/dashboard", headers=auth_header(parent_token)).status_code == 403
+        # control: a code issued after the revoke still works (the teacher can re-invite)
+        fresh = client.post(f"/api/parents/invite-codes?student_id={student_id}", headers=auth_header(teacher_token)).json()["code"]
+        assert client.post("/api/parents/link", json={"code": fresh}, headers=auth_header(parent_token)).status_code == 201

@@ -376,8 +376,23 @@ def revoke_student_parent_link(
     if link is None:
         raise HTTPException(status_code=404, detail="Link not found")
     link.is_active = False
+    # A revoked parent may still hold a second, unused code for this child; without
+    # this they could re-link the moment they're cut off. Teachers can issue new ones.
+    now = datetime.now(timezone.utc)
+    voided = (
+        db.query(ParentInviteCode)
+        .filter(
+            ParentInviteCode.student_id == student_id,
+            ParentInviteCode.used == False,  # noqa: E712
+            ParentInviteCode.expires_at > now,
+        )
+        .update({ParentInviteCode.expires_at: now}, synchronize_session=False)
+    )
     db.commit()
-    logger.info("Teacher %d revoked parent link %d (student %d)", current_user.id, link_id, student_id)
+    logger.info(
+        "Teacher %d revoked parent link %d (parent %d, student %d); voided %d unused codes",
+        current_user.id, link_id, link.parent_id, student_id, voided,
+    )
 
 
 @router.get("/parents/children", response_model=LinkedChildrenResponse)
