@@ -37,10 +37,10 @@ const ClassListSidebar: React.FC<ClassListSidebarProps> = ({ currentId, onSwitch
   const renderClassroom = (classroom: ClassroomResponse, isInactive = false) => {
     const isCurrent = classroom.id === currentId;
     const className = isInactive
-      ? `w-full text-left px-5 py-3 text-base font-normal transition-colors cursor-pointer break-words ${
+      ? `w-full text-left px-4 py-3 text-base font-normal transition-colors cursor-pointer break-words ${
           isCurrent ? 'bg-gray-50 text-gray-400' : 'text-gray-400 hover:bg-gray-50'
         }`
-      : `w-full text-left px-5 py-3 text-base font-medium transition-colors cursor-pointer break-words border-r-4 ${
+      : `w-full text-left px-4 py-3 text-base font-medium transition-colors cursor-pointer break-words border-r-4 ${
           isCurrent ? 'bg-accent-bg text-accent border-accent' : 'text-gray-700 hover:bg-gray-50 border-transparent'
         }`;
 

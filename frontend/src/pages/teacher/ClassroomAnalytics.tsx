@@ -206,9 +206,10 @@ const ClassroomAnalytics: React.FC<ClassroomAnalyticsProps> = ({ classroomId }) 
             value={
               stats.avg_session_duration_minutes !== null
                 ? `${stats.avg_session_duration_minutes}`
-                : '—（沒有記錄時長）'
+                : '—'
             }
             sub={stats.avg_session_duration_minutes !== null ? '分鐘' : undefined}
+            note={stats.avg_session_duration_minutes === null ? '沒有記錄時長' : undefined}
           />
         </div>
       )}
@@ -218,8 +219,9 @@ const ClassroomAnalytics: React.FC<ClassroomAnalyticsProps> = ({ classroomId }) 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <StatCard
             label="總學習時數"
-            value={timeStats.total_hours !== null ? `${timeStats.total_hours}` : '—（沒有記錄時長）'}
+            value={timeStats.total_hours !== null ? `${timeStats.total_hours}` : '—'}
             sub={timeStats.total_hours !== null ? '小時' : undefined}
+            note={timeStats.total_hours === null ? '沒有記錄時長' : undefined}
           />
           <StatCard label="學習天數" value={`${timeStats.study_days}`} sub="天" />
           <StatCard label="本週練習" value={`${timeStats.sessions_this_week}`} sub="次" />
@@ -324,10 +326,13 @@ function StatCard({
   label,
   value,
   sub,
+  note,
 }: {
   label: string;
   value: string;
   sub?: string;
+  /** Why the value is missing, in small text under it (a long reason in the big number wrapped badly). */
+  note?: string;
 }) {
   return (
     <div className="bg-gray-50 rounded-lg p-4 text-center">
@@ -336,6 +341,7 @@ function StatCard({
         {value}
         {sub && <span className="text-xs font-normal text-gray-500 ml-0.5">{sub}</span>}
       </p>
+      {note && <p className="text-xs text-gray-500 mt-1">{note}</p>}
     </div>
   );
 }
