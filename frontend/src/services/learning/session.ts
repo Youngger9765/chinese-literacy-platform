@@ -431,6 +431,8 @@ export interface StudentDashboardData {
   longest_streak: number;
   daily_activity: DailyActivity[];
   completed_story_slugs: string[];
+  /** #3515: titles for the same slugs (parent page shows 課名, not "20011"). */
+  completed_stories?: { slug: string; title: string }[];
 }
 
 export async function fetchStudentDashboard(

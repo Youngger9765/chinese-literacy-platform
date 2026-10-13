@@ -15,6 +15,7 @@ from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, ConfigDict
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from ..auth.dependencies import get_current_user
@@ -94,15 +95,21 @@ def _grant_parent_role(user: User, db: Session) -> None:
     role = db.query(Role).filter(Role.name == "parent").first()
     if role is None:
         # Auto-create the role if it doesn't exist yet (first-time setup)
-        role = Role(
-            name="parent",
-            display_name="家長",
-            scope_level="platform",
-            description="Parent — read-only access to linked children's progress",
-            is_active=True,
-        )
-        db.add(role)
-        db.flush()
+        # Two first-ever parents can race here; the loser re-reads the row the
+        # winner created instead of failing on the unique name.
+        try:
+            with db.begin_nested():
+                role = Role(
+                    name="parent",
+                    display_name="家長",
+                    scope_level="platform",
+                    description="Parent — read-only access to linked children's progress",
+                    is_active=True,
+                )
+                db.add(role)
+                db.flush()
+        except IntegrityError:
+            role = db.query(Role).filter(Role.name == "parent").one()
 
     user_role = UserRole(
         user_id=user.id,
@@ -347,6 +354,22 @@ def list_linked_children(
             )
 
     return LinkedChildrenResponse(children=children)
+
+
+@router.get("/parents/children/{student_id}/assignments")
+def get_child_assignments(
+    student_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """The linked child's assignments (#3515): what the teacher assigned, due, done or not.
+
+    Read-only; the parent must hold an active link to this child.
+    """
+    from .assignments import list_assignments_for_student
+
+    _require_parent_link(current_user, student_id, db)
+    return list_assignments_for_student(student_id, db)
 
 
 @router.get("/parents/children/{student_id}/dashboard", response_model=DashboardResponse)

@@ -133,7 +133,12 @@ def get_my_assignments(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Get all assignments for the current student.
+    """Get all assignments for the current student."""
+    return list_assignments_for_student(current_user.id, db, status)
+
+
+def list_assignments_for_student(student_id: int, db: Session, status: str | None = None):
+    """All active assignments for one student (also used by the parent view, #3515).
 
     Batch-loads Assignment (with Text), LearningSession, and Classroom in one pass
     to avoid 2N+1 queries that would otherwise occur when looping through submissions.
@@ -147,7 +152,7 @@ def get_my_assignments(
             joinedload(AssignmentSubmission.assignment).joinedload(Assignment.text),
         )
         .filter(
-            AssignmentSubmission.student_id == current_user.id,
+            AssignmentSubmission.student_id == student_id,
             Assignment.is_active == True,  # noqa: E712
         )
     )
