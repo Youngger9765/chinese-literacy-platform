@@ -23,10 +23,12 @@ function stepLabel(step: string | null): string | null {
 }
 
 function scoreClass(score: number | null): string {
-  if (score === null) return 'bg-gray-100 text-gray-600';
+  // Green = handed in. Red is reserved for 逾期未交, so a low score is orange,
+  // and a hand-in without a score is green (grey read like 未開始).
+  if (score === null) return 'bg-green-100 text-green-800';
   if (score >= 80) return 'bg-green-100 text-green-800';
   if (score >= 60) return 'bg-yellow-100 text-yellow-800';
-  return 'bg-red-100 text-red-700';
+  return 'bg-orange-100 text-orange-800';
 }
 
 /**
@@ -87,10 +89,11 @@ export function MatrixLegend() {
   return (
     <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-600" aria-label="狀態說明">
       <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded bg-green-100 text-green-800 font-semibold">88</span>已交（分數）</span>
-      <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded bg-gray-100 text-gray-600 font-semibold">已交</span>沒有分數</span>
+      <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded bg-green-100 text-green-800 font-semibold">已交</span>沒有分數</span>
+      <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded bg-orange-100 text-orange-800 font-semibold">52</span>低於 60 分</span>
       <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded border border-dashed border-amber-400 text-amber-700 text-xs">進行中</span></span>
       <span className="flex items-center gap-1.5"><span className="text-gray-400">未開始</span></span>
-      <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded bg-red-100 text-red-700 text-xs font-semibold">逾期未交</span></span>
+      <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded bg-red-50 text-red-600 border border-red-200 text-xs font-medium">逾期未交</span></span>
       <span className="flex items-center gap-1.5" title="派作業時還不在班上"><span className="px-2 py-0.5 rounded text-xs text-gray-400 bg-gray-100">未指派</span></span>
     </div>
   );
@@ -116,7 +119,7 @@ export function CellBadge({ cell, overdue = false }: { cell: Cell | undefined; o
   }
   if (overdue && (cell.state === 'in_progress' || cell.state === 'not_started')) {
     return (
-      <span className="inline-block px-2 py-0.5 rounded text-xs font-semibold bg-red-100 text-red-700">
+      <span className="inline-block px-2 py-0.5 rounded text-xs font-medium bg-red-50 text-red-600 border border-red-200">
         逾期未交{cell.state === 'in_progress' ? '・做到一半' : ''}
       </span>
     );

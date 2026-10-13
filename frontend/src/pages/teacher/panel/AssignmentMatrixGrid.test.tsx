@@ -2,7 +2,7 @@ import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import AssignmentMatrixGrid, { assignmentCounts } from './AssignmentMatrixGrid';
+import AssignmentMatrixGrid, { assignmentCounts, CellBadge } from './AssignmentMatrixGrid';
 import type { AssignmentMatrixResponse } from '../../../services/teacherApi';
 
 const data: AssignmentMatrixResponse = {
@@ -107,5 +107,23 @@ describe('per-assignment counts', () => {
     expect(assignmentCounts(data.cells, 10, true)).toEqual({
       assigned: 3, submitted: 1, inProgress: 0, notStarted: 0, overdue: 2,
     });
+  });
+});
+
+// Red meant two things: a low score (handed in, < 60) and 逾期未交 (not handed
+// in). A teacher scanning for who has not submitted could not tell them apart.
+describe('CellBadge colours — red only means 逾期未交', () => {
+  const cell = (state: string, score: number | null) =>
+    ({ student_id: 1, assignment_id: 10, state, score, current_step: null }) as never;
+  const cls = (ui: React.ReactElement) => render(ui).container.firstElementChild!.className;
+
+  it('a handed-in low score is not red', () => {
+    expect(cls(<CellBadge cell={cell('completed', 42)} />)).not.toMatch(/red/);
+  });
+  it('handed in without a score reads as handed in (green), not grey like 未開始', () => {
+    expect(cls(<CellBadge cell={cell('completed', null)} />)).toMatch(/green/);
+  });
+  it('逾期未交 is red', () => {
+    expect(cls(<CellBadge cell={cell('not_started', null)} overdue />)).toMatch(/red/);
   });
 });
