@@ -16,16 +16,25 @@
 import React, { useState } from 'react';
 import type { Story } from '../../types';
 import NextStepFooter from '../learning/NextStepFooter';
+import { tokenizeClassical, DEFAULT_DOT_NOTE } from './classicalTextTokens';
 
 export interface ClassicalTextProps {
   story: Story;
   onFinish: () => void;
 }
 
+const paragraphText = (p: unknown): string =>
+  typeof p === 'string' ? p : p && typeof p === 'object' && typeof (p as { text?: unknown }).text === 'string' ? (p as { text: string }).text : '';
+
+/** The 注釋 number the passage points at: the entry's own index/no, else its position. */
+const noteNo = (a: { index?: number; no?: number }, i: number): number | undefined => a.index ?? a.no ?? i + 1;
+
 const ClassicalText: React.FC<ClassicalTextProps> = ({ story, onFinish }) => {
   const [showTranslation, setShowTranslation] = useState(false);
   const classical = story.classicalText;
   const translation = story.modernTranslation;
+  const noteCount = classical?.annotations?.length ?? 0;
+  const hasDots = !!classical?.paragraphs.some((p) => paragraphText(p).includes('.'));
 
   if (!classical || classical.paragraphs.length === 0) {
     return (
@@ -45,15 +54,33 @@ const ClassicalText: React.FC<ClassicalTextProps> = ({ story, onFinish }) => {
         <div className="max-w-3xl mx-auto px-6 md:px-16 py-8 space-y-6 w-full">
           <div className="text-center">
             <h2 className="text-xl font-headline font-bold text-on-surface mb-1">原文</h2>
-            {classical.source_label && (
-              <p className="text-sm text-on-surface-variant">{classical.source_label}</p>
+            {(classical.source_label || classical.source) && (
+              <p className="text-sm text-on-surface-variant">{classical.source_label || classical.source}</p>
             )}
           </div>
+
+          {hasDots && (
+            <p className="text-sm text-on-surface-variant bg-accent/5 rounded-2xl px-4 py-3">
+              {(classical.note_dots || DEFAULT_DOT_NOTE).replace(/「\.」/g, '「·」')}
+            </p>
+          )}
 
           <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 space-y-4">
             {classical.paragraphs.map((p, i) => (
               <p key={i} className="text-lg leading-loose text-on-surface font-serif">
-                {p}
+                {tokenizeClassical(paragraphText(p), noteCount).map((t, k) =>
+                  t.kind === 'dot' ? (
+                    <span key={k} className="text-accent font-bold px-px" aria-hidden="true">
+                      ·
+                    </span>
+                  ) : t.kind === 'note' ? (
+                    <sup key={k} className="text-xs text-accent font-sans ml-px" aria-label={`注釋 ${t.value}`}>
+                      {t.value}
+                    </sup>
+                  ) : (
+                    <React.Fragment key={k}>{t.value}</React.Fragment>
+                  ),
+                )}
               </p>
             ))}
           </div>
@@ -91,7 +118,10 @@ const ClassicalText: React.FC<ClassicalTextProps> = ({ story, onFinish }) => {
               <dl className="space-y-2">
                 {classical.annotations.map((a, i) => (
                   <div key={i} className="flex gap-2 text-sm">
-                    <dt className="font-bold text-on-surface shrink-0">{a.term}</dt>
+                    <dt className="font-bold text-on-surface shrink-0">
+                      {noteNo(a, i) !== undefined && <span className="text-accent mr-1">{noteNo(a, i)}</span>}
+                      {a.term}
+                    </dt>
                     <dd className="text-on-surface-variant">{a.text}</dd>
                   </div>
                 ))}
