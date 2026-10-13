@@ -144,17 +144,19 @@ const KeyPassageReadingControls: React.FC<KeyPassageReadingControlsProps> = ({
           /* idle */
           <div className="w-full flex flex-wrap items-center gap-3">
             {/* #3023: speed sits next to AI 朗讀, not in a settings page. */}
-            <TtsSpeedPicker className="h-14 shrink-0" />
+            {/* Own row on phones: beside two flex-1 buttons it squeezed 開始朗讀
+                off the right edge at 390px. */}
+            <TtsSpeedPicker className="h-14 w-full justify-center sm:w-auto" />
             <button
               onClick={onSpeak}
-              className="flex-1 h-14 rounded-full font-headline font-bold text-lg bg-surface-container-lowest shadow-editorial text-on-surface hover:bg-surface-container-low active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+              className="flex-1 h-14 whitespace-nowrap rounded-full font-headline font-bold text-lg bg-surface-container-lowest shadow-editorial text-on-surface hover:bg-surface-container-low active:scale-[0.98] transition-all flex items-center justify-center gap-2"
             >
               <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>volume_up</span>
               AI 朗讀
             </button>
             <button
               onClick={onStartSession}
-              className="flex-1 h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-3 animate-pulse"
+              className="flex-1 h-14 whitespace-nowrap rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-3 animate-pulse"
               style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
             >
               <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>mic</span>
