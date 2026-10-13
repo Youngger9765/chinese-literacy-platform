@@ -17,6 +17,21 @@ interface AssignmentMatrixGridProps {
   onOpenStudent?: (studentId: number) => void;
 }
 
+/** #3497: two students with the same name get their login account after the name. */
+export function studentLabel(
+  s: { name: string; account?: string | null },
+  duplicateNames: Set<string>,
+): string {
+  return duplicateNames.has(s.name) && s.account ? `${s.name}（${s.account}）` : s.name;
+}
+
+function duplicateNameSet(students: { name: string }[]): Set<string> {
+  const seen = new Set<string>();
+  const dup = new Set<string>();
+  for (const s of students) (seen.has(s.name) ? dup : seen).add(s.name);
+  return dup;
+}
+
 function stepLabel(step: string | null): string | null {
   if (!step) return null;
   return STEP_REGISTRY[resolveStepId(step)]?.label ?? null;
@@ -141,6 +156,7 @@ function formatDue(due: string | null): string {
 }
 
 const AssignmentMatrixGrid: React.FC<AssignmentMatrixGridProps> = ({ data, onOpenAssignment, onOpenStudent }) => {
+  const dupNames = duplicateNameSet(data.students);
   const { students, assignments, cells } = data;
 
   if (students.length === 0) {
@@ -166,7 +182,7 @@ const AssignmentMatrixGrid: React.FC<AssignmentMatrixGridProps> = ({ data, onOpe
               {students.map((s) => (
                 <tr key={s.id}>
                   <th scope="row" className="px-6 py-2.5 text-left font-medium text-gray-900 border-b border-gray-100 whitespace-nowrap">
-                    {s.name}
+                    {studentLabel(s, dupNames)}
                   </th>
                 </tr>
               ))}
@@ -219,10 +235,10 @@ const AssignmentMatrixGrid: React.FC<AssignmentMatrixGridProps> = ({ data, onOpe
                 <th scope="row" className="sticky left-0 z-10 bg-white px-4 py-2.5 text-left font-medium text-gray-900 border-b border-r border-gray-100 whitespace-nowrap">
                   {onOpenStudent ? (
                     <button type="button" onClick={() => onOpenStudent(s.id)} className="text-gray-900 hover:text-accent hover:underline cursor-pointer">
-                      {s.name}
+                      {studentLabel(s, dupNames)}
                     </button>
                   ) : (
-                    s.name
+                    studentLabel(s, dupNames)
                   )}
                 </th>
                 {assignments.map((a) => (
