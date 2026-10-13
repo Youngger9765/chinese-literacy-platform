@@ -47,6 +47,19 @@ def _too_many(what: str) -> HTTPException:
 class MatrixStudent(BaseModel):
     id: int
     name: str
+    # #3497: the login account, so two students with the same name can be
+    # told apart -- the roster already shows it next to each name.
+    account: str | None = None
+
+
+_STUDENT_EMAIL_DOMAIN = "@student.lingoleap.local"
+
+
+def _account(user) -> str | None:
+    if user.username:
+        return user.username
+    email = user.email or ""
+    return email[: -len(_STUDENT_EMAIL_DOMAIN)] if email.endswith(_STUDENT_EMAIL_DOMAIN) else email or None
 
 
 class MatrixAssignment(BaseModel):
@@ -136,7 +149,7 @@ def get_assignment_matrix(
         .order_by(ClassroomStudent.id)
         .all()
     )
-    students = [MatrixStudent(id=e.student_id, name=e.student.name) for e in enrollments]
+    students = [MatrixStudent(id=e.student_id, name=e.student.name, account=_account(e.student)) for e in enrollments]
 
     assignments = (
         db.query(Assignment)

@@ -744,7 +744,8 @@ export function requestPreviewToken(studentId: number): Promise<PreviewTokenResp
 export type MatrixCellState = 'completed' | 'in_progress' | 'not_started' | 'not_assigned';
 
 export interface AssignmentMatrixResponse {
-  students: Array<{ id: number; name: string }>;
+  /** `account` = login account, used to tell same-name students apart (#3497). */
+  students: Array<{ id: number; name: string; account?: string | null }>;
   assignments: Array<{ id: number; title: string; due_date: string | null }>;
   cells: Array<{
     student_id: number;

@@ -210,6 +210,7 @@ const StudentListTab: React.FC<StudentListTabProps> = ({
         classroomName={classroom.name}
         joinCode={classroom.join_code}
         nextSeat={classroom.students.length + 1}
+        existingNames={classroom.students.map((s) => s.name)}
         onCreated={onStudentsImported}
         onOpenCsv={() => setShowCsvModal(true)}
         initialResult={initialAddResult}

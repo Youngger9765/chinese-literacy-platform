@@ -52,6 +52,19 @@ interface AddStudentsPanelProps {
   onOpenCsv: () => void;
   /** Result of students created in the 建立班級 dialog, shown once here. */
   initialResult?: BatchCreateResult;
+  /** Names already in the class, to warn before creating a same-name student (#3497). */
+  existingNames?: string[];
+}
+
+/** Names in the pasted roster that repeat an existing student or each other (#3497). */
+export function duplicateNames(parsed: ParsedStudent[], existingNames: string[]): string[] {
+  const seen = new Set(existingNames);
+  const dup = new Set<string>();
+  for (const p of parsed) {
+    if (seen.has(p.name)) dup.add(p.name);
+    seen.add(p.name);
+  }
+  return [...dup];
 }
 
 const AddStudentsPanel: React.FC<AddStudentsPanelProps> = ({
@@ -64,6 +77,7 @@ const AddStudentsPanel: React.FC<AddStudentsPanelProps> = ({
   addByIdForm,
   onOpenCsv,
   initialResult,
+  existingNames = [],
 }) => {
   const [mode, setMode] = useState<Mode>('no-account');
   const [text, setText] = useState('');
@@ -72,6 +86,7 @@ const AddStudentsPanel: React.FC<AddStudentsPanelProps> = ({
   const [result, setResult] = useState<BatchCreateResult | null>(initialResult ?? null);
 
   const parsed = parseRoster(text, nextSeat);
+  const dupes = duplicateNames(parsed, existingNames);
 
   const create = async () => {
     if (parsed.length === 0) return;
@@ -129,6 +144,11 @@ const AddStudentsPanel: React.FC<AddStudentsPanelProps> = ({
             placeholder={'1 王小明\n2 林雨萱\n3 陳柏宇'}
             className="w-full px-3 py-2 rounded-lg border border-gray-300 text-base focus:outline-none focus:ring-2 focus:ring-accent/40"
           />
+          {dupes.length > 0 && (
+            <p role="status" className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+              班上會有同名的學生：{dupes.join('、')}。可以照常建立，但作業總表上不好分辨，建議在名字後加註（例如 {dupes[0]}A）
+            </p>
+          )}
           <div className="flex flex-wrap items-center gap-3">
             <button
               type="button"
