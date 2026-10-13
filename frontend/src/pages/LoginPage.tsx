@@ -1,3 +1,4 @@
+import { PARENT_PORTAL_ENABLED } from '../config/featureFlags';
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -260,6 +261,18 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
             註冊帳號
           </button>
         </p>
+        {PARENT_PORTAL_ENABLED && (
+          <p className="text-center text-sm text-gray-500 mt-2">
+            家長？{' '}
+            <button
+              type="button"
+              onClick={() => navigate('/register?role=parent')}
+              className="text-accent hover:text-accent-hover font-medium transition-colors"
+            >
+              由此註冊，輸入老師給的邀請碼
+            </button>
+          </p>
+        )}
 
         {/* Quick login buttons — only shown in non-production environments */}
         {import.meta.env.VITE_SHOW_DEMO_LOGIN !== 'false' && (

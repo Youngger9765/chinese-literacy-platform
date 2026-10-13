@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { AuthError, resendVerification } from '../services/authApi';
 import PasswordStrengthIndicator from '../components/PasswordStrengthIndicator';
 import GoogleSignInButton from '../components/GoogleSignInButton';
+import { PARENT_PORTAL_ENABLED } from '../config/featureFlags';
 
 interface RegisterPageProps {
   onSwitchToLogin?: () => void;
@@ -12,6 +13,9 @@ interface RegisterPageProps {
 const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin }) => {
   const navigate = useNavigate();
   const { register, loginWithGoogle } = useAuth();
+  const [searchParams] = useSearchParams();
+  // #3513: parents sign up here too (only while the parent portal is on).
+  const [asParent, setAsParent] = useState(PARENT_PORTAL_ENABLED && searchParams.get('role') === 'parent');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -58,7 +62,7 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin }) => {
 
     setIsSubmitting(true);
     try {
-      const result = await register(email.trim(), password, name.trim());
+      const result = await register(email.trim(), password, name.trim(), asParent ? 'parent' : undefined);
       // Staging/preview auto_verified=true → skip "check your email" screen, go straight to login
       // (no email pipeline exists; account is already verified server-side)
       if (result.auto_verified) {
@@ -194,8 +198,30 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin }) => {
             <span className="text-white font-black text-2xl">L</span>
           </div>
           <h1 className="text-2xl font-bold text-gray-900">AI 朗讀助教</h1>
-          <p className="text-gray-500 text-sm mt-1">教師註冊</p>
+          <p className="text-gray-500 text-sm mt-1">{asParent ? '家長註冊' : '教師註冊'}</p>
         </div>
+
+        {PARENT_PORTAL_ENABLED && (
+          <div className="flex gap-1 rounded-xl bg-gray-100 p-1 mb-3" role="tablist" aria-label="註冊身分">
+            {([['teacher', '我是老師'], ['parent', '我是家長']] as const).map(([k, label]) => (
+              <button
+                key={k}
+                type="button"
+                role="tab"
+                aria-selected={asParent === (k === 'parent')}
+                onClick={() => setAsParent(k === 'parent')}
+                className={`flex-1 h-10 rounded-lg text-sm font-medium ${asParent === (k === 'parent') ? 'bg-white shadow text-accent' : 'text-gray-600'}`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
+        {asParent && (
+          <div className="bg-sky-50 border border-sky-200 text-sky-800 text-sm rounded-lg px-4 py-3 mb-2">
+            註冊後登入，輸入老師給的 8 碼「家長邀請碼」，就能看到孩子的學習狀況。
+          </div>
+        )}
 
         {/* Student notice */}
         <div className="bg-amber-100 border border-amber-300 text-amber-800 text-sm rounded-lg px-4 py-3 mb-2">
@@ -289,7 +315,8 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin }) => {
           </button>
         </form>
 
-        {/* Google Sign-In */}
+        {/* Google Sign-In — teacher sign-up only; a Google sign-in creates a teacher. */}
+        {!asParent && (
         <div className="mt-4">
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
@@ -303,6 +330,7 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin }) => {
             <GoogleSignInButton onCredential={handleGoogleCredential} width={352} />
           </div>
         </div>
+        )}
 
         {/* Switch to Login */}
         <p className="text-center text-sm text-gray-500 mt-6">

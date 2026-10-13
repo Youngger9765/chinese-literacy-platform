@@ -128,11 +128,13 @@ export async function register(
   email: string,
   password: string,
   name: string,
+  role?: 'parent',
 ): Promise<RegisterResponse> {
   const res = await fetch(`${API_BASE}/api/auth/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password, name }),
+    // #3513: role is only sent for a parent sign-up; omitted = teacher.
+    body: JSON.stringify(role ? { email, password, name, role } : { email, password, name }),
   });
   return handleAuthResponse<RegisterResponse>(res);
 }

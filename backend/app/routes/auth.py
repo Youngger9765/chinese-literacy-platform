@@ -130,6 +130,13 @@ def register(req: RegisterRequest, request: Request, db: Session = Depends(get_d
         raise HTTPException(status_code=429, detail="Too many requests. Please try again later.")
 
     block_student_self_registration(req.role)
+    # #3513: a parent signs up as a parent — no teacher role, no school.
+    wants_parent = (req.role or "").strip().lower() == "parent"
+    if wants_parent and not settings.parent_portal_enabled:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="家長功能目前暫時關閉，請聯繫老師或管理員。",
+        )
     enforce_password_strength(req.password)
 
     existing = db.query(User).filter(User.email == req.email).first()
@@ -146,7 +153,11 @@ def register(req: RegisterRequest, request: Request, db: Session = Depends(get_d
         name=req.name,
     )
 
-    assign_teacher_to_school(db, user)
+    if wants_parent:
+        from .parents import _grant_parent_role
+        _grant_parent_role(user, db)
+    else:
+        assign_teacher_to_school(db, user)
     db.commit()
     db.refresh(user)
 
