@@ -241,6 +241,14 @@ class TestAssignmentMatrix:
     def _get(self, client, token, cid):
         return client.get(f"/api/teacher/classrooms/{cid}/assignment-matrix", headers=auth_header(token))
 
+    def test_each_student_carries_its_login_account(self, client, teacher, students, seeded):
+        # #3497: same-name students are told apart by account, as in the roster.
+        body = self._get(client, teacher["token"], seeded["cid"]).json()
+        got = {s["id"]: s["account"] for s in body["students"]}
+        assert len(got) == 4
+        for st in students:
+            assert got[st["user_id"]] == st["email"]
+
     def test_every_cell_has_one_of_four_states(self, client, teacher, seeded):
         resp = self._get(client, teacher["token"], seeded["cid"])
         assert resp.status_code == 200
@@ -411,3 +419,12 @@ def test_malformed_stored_reading_result_reads_as_missing_not_500():
     mixed = SimpleNamespace(full_reading_result={"error_chars": ["喝", {"x": 1}, "x" * 50]},
                             reading_result=None, accuracy=None)
     assert _error_chars(mixed) == ["喝"]
+
+
+def test_account_label_prefers_username_then_strips_the_student_domain():
+    # #3497: batch-created students log in with the account shown in the roster.
+    from types import SimpleNamespace
+    from app.routes.teacher.teacher_assignment_matrix import _account
+    assert _account(SimpleNamespace(username="srjdv53", email="srjdv53@student.lingoleap.local")) == "srjdv53"
+    assert _account(SimpleNamespace(username=None, email="srjdv56@student.lingoleap.local")) == "srjdv56"
+    assert _account(SimpleNamespace(username=None, email="kid@example.com")) == "kid@example.com"
