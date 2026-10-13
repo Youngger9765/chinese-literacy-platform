@@ -37,6 +37,7 @@ from app.models import Base
 from app.models.user import Role, UserRole
 from app.models.school import School
 from app.models.organization import Organization
+from _school_student import grant_school_student_role
 
 
 # ---------------------------------------------------------------------------
@@ -139,6 +140,13 @@ def client():
 @pytest.fixture(scope="module")
 def school_id():
     return _test_school_id
+
+
+def _register_student(client, suffix: str) -> dict:
+    """Register a user who is a student of the test school (#3534: only those can be enrolled)."""
+    user = _register_user(client, suffix)
+    grant_school_student_role(TestingSessionLocal, user["user_id"], school_id=_test_school_id)
+    return user
 
 
 def auth_header(token: str) -> dict:
@@ -249,12 +257,12 @@ def other_teacher(client):
 
 @pytest.fixture(scope="module")
 def student1(client):
-    return _register_user(client, "student1")
+    return _register_student(client, "student1")
 
 
 @pytest.fixture(scope="module")
 def student2(client):
-    return _register_user(client, "student2")
+    return _register_student(client, "student2")
 
 
 # ===========================================================================
@@ -725,7 +733,7 @@ class TestAdminFullFlow:
         admin = _register_user(client, "flow_admin")
         _make_admin(admin["user_id"])
         teacher = _register_user(client, "flow_teacher")
-        student = _register_user(client, "flow_student")
+        student = _register_student(client, "flow_student")
         admin_headers = auth_header(admin["token"])
 
         # 1. List users

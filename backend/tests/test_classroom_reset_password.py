@@ -253,6 +253,21 @@ def _enroll_student(client, teacher: dict, classroom_id: int, student_id: int) -
     assert resp.status_code in (200, 201), resp.text
 
 
+def _enroll_directly(classroom_id: int, student_id: int) -> None:
+    """Enroll by DB row, bypassing the add-student endpoint.
+
+    For targets the endpoint now refuses to enroll (#3534: not a student of the
+    classroom's school) — these tests check that reset-password still denies them
+    if such an enrollment exists anyway (legacy rows, data imported before #3534).
+    """
+    db = TestingSessionLocal()
+    try:
+        db.add(ClassroomStudent(classroom_id=classroom_id, student_id=student_id))
+        db.commit()
+    finally:
+        db.close()
+
+
 def _reset_password(client, caller: dict, classroom_id: int, student_id: int):
     return client.post(
         f"/api/classrooms/{classroom_id}/students/{student_id}/reset-password",
@@ -325,7 +340,7 @@ def test_student_only_owner_cannot_reset_enrolled_victims_password_403(client):
     _assign_role(caller["user_id"], "student", scope_type="school", scope_id=str(caller_school_id))
     _assign_role(victim["user_id"], "student", scope_type="school", scope_id=str(victim_school_id))
     classroom_id = _create_classroom(client, caller, caller_school_id)
-    _enroll_student(client, caller, classroom_id, victim["user_id"])
+    _enroll_directly(classroom_id, victim["user_id"])
 
     db = TestingSessionLocal()
     try:
@@ -668,7 +683,7 @@ def test_roleless_sso_style_student_now_denied_403(client):
     _deactivate_all_roles(roleless_student["user_id"])
     school_id = _create_school_for_teacher(owner["user_id"])
     classroom_id = _create_classroom(client, owner, school_id)
-    _enroll_student(client, owner, classroom_id, roleless_student["user_id"])
+    _enroll_directly(classroom_id, roleless_student["user_id"])
 
     db = TestingSessionLocal()
     try:
@@ -701,7 +716,7 @@ def test_roleless_target_with_mismatching_school_role_still_denied_403(client):
     other_school_id = _create_org_and_school(f"org-{uuid.uuid4().hex[:8]}")
     _assign_role(target["user_id"], "teacher", scope_type="school", scope_id=str(other_school_id))
     classroom_id = _create_classroom(client, owner, classroom_school_id)
-    _enroll_student(client, owner, classroom_id, target["user_id"])
+    _enroll_directly(classroom_id, target["user_id"])
 
     db = TestingSessionLocal()
     try:

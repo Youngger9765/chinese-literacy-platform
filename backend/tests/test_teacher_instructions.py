@@ -31,6 +31,7 @@ from app.database import get_db
 from app.models import Base
 from app.models.user import Role, UserRole
 from app.models.school import School
+from _school_student import grant_school_student_role
 
 
 # ---------------------------------------------------------------------------
@@ -219,7 +220,8 @@ def classroom_with_student(client, teacher, student1, school_id):
     assert create_resp.status_code == 201
     classroom_id = create_resp.json()["id"]
 
-    # Add student
+    # Add student (#3534: must be a student of the classroom's school)
+    grant_school_student_role(TestingSessionLocal, student1["user_id"], classroom_id=classroom_id)
     add_resp = client.post(
         f"/api/classrooms/{classroom_id}/students",
         json={"student_id": student1["user_id"]},
