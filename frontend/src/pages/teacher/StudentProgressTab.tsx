@@ -209,11 +209,11 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
             <tr className="border-b border-gray-100 text-left text-gray-500">
               <th className="pb-2 font-medium w-6"></th>
               <th className="pb-2 font-medium">學生姓名</th>
-              <th className="pb-2 font-medium">最近練習日期</th>
+              <th className="pb-2 font-medium whitespace-nowrap">最近練習日期</th>
               <th className="pb-2 font-medium">最近練習課文</th>
-              <th className="pb-2 font-medium text-center">練習次數</th>
+              <th className="pb-2 font-medium text-center whitespace-nowrap">練習次數</th>
               <th className="pb-2 font-medium text-center w-20">推薦練習</th>
-              <th className="pb-2 font-medium text-center w-10">指示</th>
+              <th className="pb-2 font-medium text-center w-14 whitespace-nowrap">指示</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
@@ -261,7 +261,7 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
                         </button>
                       </div>
                     </td>
-                    <td className="py-2.5 text-gray-600">{formatDate(student.last_session_date)}</td>
+                    <td className="py-2.5 text-gray-600 whitespace-nowrap">{formatDate(student.last_session_date)}</td>
                     <td className="py-2.5 text-gray-600">{student.last_text_title ?? '-'}</td>
                     <td className="py-2.5 text-gray-600 text-center">
                       <span className={`inline-block min-w-[2rem] px-2 py-0.5 rounded-full text-xs font-medium ${
@@ -291,7 +291,7 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
                           event.stopPropagation();
                           openInstruction(student);
                         }}
-                        className="relative inline-flex items-center justify-center px-2.5 py-1 rounded-md text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 transition-colors"
+                        className="relative inline-flex items-center justify-center px-2.5 py-1 rounded-md text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 transition-colors whitespace-nowrap"
                         title="AI 教學指示"
                       >
                         留言
