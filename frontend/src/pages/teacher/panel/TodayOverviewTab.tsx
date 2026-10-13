@@ -16,6 +16,7 @@ import {
 } from '../../../services/teacherApi';
 import LiveMonitorTab from '../LiveMonitorTab';
 import { distinctTitles } from './AssignmentMatrixGrid';
+import { isPastDue } from '../../../utils/dueDate';
 
 interface TodayOverviewTabProps {
   classroomId: number;
@@ -49,7 +50,7 @@ export function buildAssignmentProgress(matrix: AssignmentMatrixResponse, now: D
     if (a.due_date) {
       const due = new Date(a.due_date);
       if (dayKey(due) === dayKey(now)) dueState = 'today';
-      else dueState = due < now ? 'overdue' : 'upcoming';
+      else dueState = isPastDue(a.due_date, now) ? 'overdue' : 'upcoming';
     }
     return {
       id: a.id,

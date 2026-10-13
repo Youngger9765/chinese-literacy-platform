@@ -7,6 +7,7 @@
 import React from 'react';
 import { STEP_REGISTRY, resolveStepId } from '../../../config/stepConfig';
 import { AssignmentMatrixResponse } from '../../../services/teacherApi';
+import { isPastDue } from '../../../utils/dueDate';
 
 type Cell = AssignmentMatrixResponse['cells'][number];
 
@@ -74,7 +75,7 @@ export function assignmentCounts(cells: Cell[], assignmentId: number, overdue: b
 
 /** Past the due date and still not handed in (均一's red: 已截止未完成). */
 export function isOverdue(dueDate: string | null, now: Date = new Date()): boolean {
-  return dueDate !== null && new Date(dueDate) < now;
+  return isPastDue(dueDate, now);
 }
 
 /**
