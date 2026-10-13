@@ -33,6 +33,9 @@ def _deactivate_school_semesters(school_id: int | None, db: Session) -> None:
     ).update({"is_active": False})
 
 
+_TAIPEI = timezone(timedelta(hours=8))
+
+
 def _propagate_expires_at(semester: Semester, db: Session) -> int:
     """Set expires_at on ClassroomText rows for classrooms in this school.
 
@@ -44,9 +47,11 @@ def _propagate_expires_at(semester: Semester, db: Session) -> int:
     if semester.school_id is None:
         return 0
 
+    # Texts stay available through the whole expiry day in Taiwan time. Midnight
+    # UTC was 08:00 in Taiwan, so they disappeared that morning instead.
     expires_dt = datetime.combine(
-        semester.expires_at_date, datetime.min.time(), tzinfo=timezone.utc
-    )
+        semester.expires_at_date + timedelta(days=1), datetime.min.time(), tzinfo=_TAIPEI
+    ).astimezone(timezone.utc)
 
     # Collect classroom IDs for this school
     classroom_ids = [
