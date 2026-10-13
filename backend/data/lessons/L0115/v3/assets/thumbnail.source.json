@@ -2,5 +2,7 @@
   "reused_from_first_edition": true,
   "first_edition_code": "G8-L15",
   "matched_on": "title",
-  "note": "課號在二修重編過，照課號接會接到別課的圖（#2683）"
+  "note": "課號在二修重編過，照課號接會接到別課的圖（#2683）",
+  "cover_fix_3477": "generated",
+  "note_3477": "一版沒有這課的正確圖，Gemini 2.5 Flash Image 依既有封面畫風新畫（#3477）"
 }

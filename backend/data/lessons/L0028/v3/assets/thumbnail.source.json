@@ -2,5 +2,7 @@
   "reused_from_first_edition": true,
   "first_edition_code": "G5-L17",
   "matched_on": "title",
-  "note": "課號在二修重編過，照課號接會接到別課的圖（#2683）"
+  "note": "課號在二修重編過，照課號接會接到別課的圖（#2683）",
+  "cover_fix_3477": "edited-remove-text",
+  "note_3477": "原圖有 AI 亂碼字，Gemini 2.5 Flash Image 只去掉文字、其餘保留（#3477）"
 }
