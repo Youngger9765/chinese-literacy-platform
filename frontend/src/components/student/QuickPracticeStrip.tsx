@@ -6,8 +6,6 @@
  *
  * Cards:
  *   - 筆順字帖  → /write          (no story needed)
- *   - 聽寫挑戰  → /library        (needs story — goes to library first)
- *   - 造句練習  → /library        (needs story)
  * Hidden (Issue #1638): 字典查詢 removed from UI per 5/15 meeting.
  *   Backend DictionaryService preserved; /dictionary route still accessible directly.
  *
@@ -35,20 +33,9 @@ const QUICK_CARDS: PracticeCard[] = [
     description: '跟動畫練正確筆順',
     route: '/write',
   },
-  {
-    icon: '🎧',
-    title: '聽寫挑戰',
-    description: 'AI 唸字，你來打字',
-    route: '/library',
-    needsStory: true,
-  },
-  {
-    icon: '✏️',
-    title: '造句練習',
-    description: '練習用詞語造好句',
-    route: '/library',
-    needsStory: true,
-  },
+  // #3491: 聽寫挑戰／造句練習 cards removed — both steps are switched off
+  // (dictation 2026-03-27, sentence-practice 2026-05-01), so the cards only
+  // led to the library and then to an ordinary 課程簡介.
   // Hidden: 字典查詢 — removed from UI per 5/15 meeting (Issue #1638).
   // Backend DictionaryService and /api/dictionary/* endpoints are preserved.
   // The /dictionary route in AppRoutes.tsx is also preserved for direct access.
