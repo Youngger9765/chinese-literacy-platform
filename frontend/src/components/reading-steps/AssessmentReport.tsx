@@ -260,7 +260,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({
         !allActiveStepsDone &&
         totalActiveSteps > 0 && (
           <div className="bg-blue-50 border border-blue-100 rounded-2xl px-5 py-3 flex items-center gap-3">
-            <div className="flex gap-1">
+            <div className="flex gap-1 min-w-0">
               {Array.from({ length: totalActiveSteps }).map((_, i) => (
                 <div
                   key={i}
@@ -268,7 +268,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({
                 />
               ))}
             </div>
-            <p className="text-sm text-blue-700 font-medium">
+            <p className="text-sm text-blue-700 font-medium whitespace-nowrap shrink-0">
               已完成 <span className="font-black">{completedActiveStepsCount}</span> / {totalActiveSteps} 關卡
             </p>
           </div>
@@ -276,7 +276,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({
       ) : (
         completedSections < 6 && (
           <div className="bg-blue-50 border border-blue-100 rounded-2xl px-5 py-3 flex items-center gap-3">
-            <div className="flex gap-1">
+            <div className="flex gap-1 min-w-0">
               {Array.from({ length: 6 }).map((_, i) => (
                 <div
                   key={i}
@@ -284,7 +284,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({
                 />
               ))}
             </div>
-            <p className="text-sm text-blue-700 font-medium">
+            <p className="text-sm text-blue-700 font-medium whitespace-nowrap shrink-0">
               已完成 <span className="font-black">{completedSections}</span> / 6 環節
             </p>
           </div>
