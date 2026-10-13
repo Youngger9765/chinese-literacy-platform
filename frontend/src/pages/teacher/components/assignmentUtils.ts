@@ -1,3 +1,4 @@
+import { isPastDue } from '../../../utils/dueDate';
 export function formatDate(dateStr: string | null): string {
   if (!dateStr) return '-';
   return new Date(dateStr).toLocaleDateString('zh-TW', {
@@ -8,8 +9,7 @@ export function formatDate(dateStr: string | null): string {
 }
 
 export function isOverdue(dueDateStr: string | null): boolean {
-  if (!dueDateStr) return false;
-  return new Date(dueDateStr) < new Date();
+  return isPastDue(dueDateStr);
 }
 
 export function completionPercentage(completedCount: number, submissionCount: number): number {
