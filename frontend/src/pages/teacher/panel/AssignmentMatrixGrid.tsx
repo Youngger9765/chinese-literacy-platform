@@ -46,6 +46,32 @@ export function distinctTitles<T extends { id: number; title: string }>(items: T
   return out;
 }
 
+export interface AssignmentCounts {
+  assigned: number;
+  submitted: number;
+  inProgress: number;
+  notStarted: number;
+  overdue: number;
+}
+
+/**
+ * How the students assigned to one assignment split by state (Khan Academy
+ * shows these counts on every assignment). Past the due date, unfinished work
+ * counts as overdue instead of in-progress / not-started, matching the cells.
+ */
+export function assignmentCounts(cells: Cell[], assignmentId: number, overdue: boolean): AssignmentCounts {
+  const out: AssignmentCounts = { assigned: 0, submitted: 0, inProgress: 0, notStarted: 0, overdue: 0 };
+  for (const c of cells) {
+    if (c.assignment_id !== assignmentId || c.state === 'not_assigned') continue;
+    out.assigned += 1;
+    if (c.state === 'completed') out.submitted += 1;
+    else if (overdue) out.overdue += 1;
+    else if (c.state === 'in_progress') out.inProgress += 1;
+    else out.notStarted += 1;
+  }
+  return out;
+}
+
 /** Past the due date and still not handed in (均一's red: 已截止未完成). */
 export function isOverdue(dueDate: string | null, now: Date = new Date()): boolean {
   return dueDate !== null && new Date(dueDate) < now;
@@ -171,6 +197,14 @@ const AssignmentMatrixGrid: React.FC<AssignmentMatrixGridProps> = ({ data, onOpe
                     {titles.get(a.id)}
                   </button>
                   <div className="text-xs text-gray-500 font-normal">{formatDue(a.due_date)}</div>
+                  {(() => {
+                    const n = assignmentCounts(cells, a.id, isOverdue(a.due_date));
+                    return (
+                      <div className="text-xs font-semibold text-gray-700 whitespace-nowrap">
+                        已交 {n.submitted} / {n.assigned}
+                      </div>
+                    );
+                  })()}
                 </th>
               ))}
             </tr>
