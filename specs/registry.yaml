@@ -811,3 +811,20 @@ modules:
   last_reviewed: 2026-09-14
   owner: young
   intent: specs/modules/zhuyin/INTENT.md
+- spec_id: zhuyin_challenge.question_generation
+  module: zhuyin-challenge
+  title: 注音挑戰出題 — 獨立模組，給課文產生破音字讀音選擇題
+  stability: active
+  canonical_source: backend/app/services/zhuyin_challenge.py
+  owns_code:
+  - backend/app/services/zhuyin_challenge.py
+  - backend/scripts/report_zhuyin_challenge.py
+  owns_data: []
+  spec_tests:
+  - backend/tests/test_zhuyin_challenge_3551.py
+  related_issues:
+  - 3551
+  source_meetings: []
+  last_reviewed: 2026-10-14
+  owner: young
+  intent: specs/modules/zhuyin-challenge/INTENT.md
