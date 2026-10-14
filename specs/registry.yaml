@@ -303,6 +303,29 @@ modules:
   last_reviewed: 2026-06-02
   owner: young
   intent: specs/modules/listening/INTENT.md
+- spec_id: live-quiz.engine.round-types-and-authz
+  module: live-quiz
+  title: 班級經營／課堂搶答 — 回合類型可插拔引擎、答案洩漏防護、計分可重算
+  stability: active
+  canonical_source: backend/app/services/live_quiz/engine.py
+  owns_code:
+  - backend/app/models/live_quiz.py
+  - backend/app/services/live_quiz/**
+  - backend/app/routes/live_quiz.py
+  - backend/app/schemas/live_quiz.py
+  - backend/alembic/versions/c371b776d12f_create_live_quiz_tables.py
+  spec_tests:
+  - backend/tests/test_live_quiz_engine.py
+  - backend/tests/test_live_quiz_round_choice.py
+  - backend/tests/test_live_quiz_sources.py
+  - backend/tests/test_live_quiz_scoring.py
+  - backend/tests/test_live_quiz_recompute.py
+  - backend/tests/test_live_quiz_rate_limit.py
+  related_issues:
+  - 3551
+  last_reviewed: 2026-10-15
+  owner: young
+  intent: specs/modules/live-quiz/INTENT.md
 - spec_id: mcq.rescue.scaffold_and_fail_closed
   module: mcq-rescue
   title: MCQ 救援對話 — 鷹架不洩題 + Fail-Closed + State Machine 契約
