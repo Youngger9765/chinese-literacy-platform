@@ -293,6 +293,9 @@ export async function completeSelfPracticeSession(
       status: 'completed',
     }),
   });
+  // #3437: always drain the body. Over HTTP/3 Chromium keeps a response whose body
+  // is never read open indefinitely, so the report page never reached network-idle.
+  await res.text().catch(() => undefined);
   if (res.status === 401) {
     throw new SessionExpiredError('completeSelfPracticeSession: token expired');
   }
