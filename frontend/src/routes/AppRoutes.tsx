@@ -69,6 +69,8 @@ const TeacherHome = lazy(() => import('../pages/teacher/TeacherHome'));
 const StudentPreviewPage = lazy(() => import('../pages/teacher/StudentPreviewPage'));
 const TeacherMyTextsPage = lazy(() => import('../pages/teacher/TeacherMyTextsPage'));
 const TeacherAssignmentsPage = lazy(() => import('../pages/teacher/TeacherAssignmentsPage'));
+const TeacherLeaguePage = lazy(() => import('../pages/teacher/TeacherLeaguePage'));
+const StudentOurClassPage = lazy(() => import('../pages/student/StudentOurClassPage'));
 const TeacherSessionReportPage = lazy(() => import('../pages/teacher/TeacherSessionReportPage'));
 const ProjectHubPage = lazy(() => import('../pages/ProjectHubPage'));
 
@@ -270,6 +272,26 @@ const AppRoutes: React.FC = () => (
           <ProtectedRoute>
             <AppShell>
               <TeacherSessionReportPage />
+            </AppShell>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/teacher/league"
+        element={
+          <ProtectedRoute>
+            <AppShell>
+              <TeacherLeaguePage />
+            </AppShell>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/student/our-class"
+        element={
+          <ProtectedRoute>
+            <AppShell>
+              <StudentOurClassPage />
             </AppShell>
           </ProtectedRoute>
         }
