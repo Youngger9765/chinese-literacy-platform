@@ -33,4 +33,15 @@ describe('CoTeachingTab — invite button does not shrink (#3424)', () => {
     expect(inviteBtn.className).toMatch(/\bshrink-0\b/);
     expect(inviteBtn.className).toMatch(/\bwhitespace-nowrap\b/);
   });
+
+  it('email input can shrink (min-w-0) and uses 16px on phones so iOS does not zoom (#3544)', async () => {
+    // Once the button stopped shrinking (#3424), the flex-1 input kept its intrinsic
+    // width (inputs default to min-width:auto) and pushed 邀請 past the card edge
+    // on an iPhone 14 Pro: button right 352px vs card right 320px at 393 wide.
+    // Below 16px, iOS Safari also zooms the page when the field is focused.
+    render(<CoTeachingTab classroomId={1} ownerId={1} />);
+    const input = await screen.findByPlaceholderText('輸入教師 Email');
+    expect(input.className).toMatch(/\bmin-w-0\b/);
+    expect(input.className).toMatch(/(^|\s)text-base(\s|$)/);
+  });
 });
