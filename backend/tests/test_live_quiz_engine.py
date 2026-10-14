@@ -807,6 +807,40 @@ class TestUiUxReview20261015:
         )
         assert after_start.status_code == 409
 
+    def test_zhuyin_only_game_returns_zhuyin_rounds_and_scores_correctly(self, client, teacher, student1):
+        """Coordinator instruction (zhuyin merged into staging): a game
+        created with ONLY the zhuyin type returns zhuyin questions whose
+        answers match the module's output, and plays through normally."""
+        game = _create_game(client, teacher, lesson_uids=[LESSON_A], source_modules=["zhuyin"])
+        assert game["rounds_total"] > 0
+        client.post(f"/api/live-quiz/games/{game['code']}/join", headers=auth_header(student1["token"]))
+        client.post(f"/api/live-quiz/games/{game['code']}/start", headers=auth_header(teacher["token"]))
+
+        db = TestingSessionLocal()
+        try:
+            row = live_quiz_engine.get_game_by_code(db, game["code"])
+            payload = row.rounds_snapshot[0]["payload"]
+        finally:
+            db.close()
+        assert payload["source_module"] == "zhuyin"
+        assert "extra" in payload and "target_index" in payload["extra"]
+        assert 2 <= len(payload["options"]) <= 4
+
+        resp = client.post(
+            f"/api/live-quiz/games/{game['code']}/answer",
+            json={"submission": {"choice_key": payload["correct_key"]}},
+            headers=auth_header(student1["token"]),
+        )
+        assert resp.json()["is_correct"] is True
+
+        # Player view during the question phase must never leak correct_key,
+        # same uniform rule as every other source module.
+        state = client.get(
+            f"/api/live-quiz/games/{game['code']}/state", headers=auth_header(student1["token"])
+        ).json()
+        assert "correct_key" not in state["round"]
+        assert state["round"]["extra"]["target_index"] == payload["extra"]["target_index"]
+
     def test_presence_online_count(self, client, teacher, student1, student2):
         game = _create_game(client, teacher, lesson_uids=[LESSON_A])
         client.post(f"/api/live-quiz/games/{game['code']}/join", headers=auth_header(student1["token"]))

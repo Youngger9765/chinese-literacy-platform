@@ -7,12 +7,13 @@ multiple-choice questions) can call any of them identically. Adding a new
 question type is exactly one new module + one new line here (PRD
 independence rule #2); nothing else changes.
 
-``zhuyin`` (注音挑戰) is registered conditionally: its question-generation
-module (``feat/issue-3551-zhuyin-challenge``, a sibling PR) owns the
-polyphonic-character logic, so this adapter is a thin wrapper around its
-public ``generate_zhuyin_questions()``. Until that module lands, importing
-it fails and the adapter is simply left out of the registry — the setup
-screen's question-type picker only offers types present here.
+``zhuyin`` (注音挑戰) is a thin wrapper around the independent
+``app.services.zhuyin_challenge`` module (its own PR, #3551, merged into
+staging — owns the polyphonic-character/heteronym logic entirely; this
+adapter only reshapes its output into QuizItem). It is REQUIRED — one of
+the four selectable question types — not optional; the ``try/except``
+below is defensive (so a local checkout mid-rebase doesn't hard-crash the
+whole registry import), not a feature flag.
 """
 from __future__ import annotations
 

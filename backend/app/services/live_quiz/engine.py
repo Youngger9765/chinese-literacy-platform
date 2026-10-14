@@ -32,7 +32,7 @@ from .codes import generate_live_quiz_code
 from .round_types import ROUND_TYPES
 from .round_types.choice import DEFAULT_READING_SECONDS
 
-DEFAULT_SOURCE_MODULES = ("comprehension", "vocab_definitions", "vocab_application")
+DEFAULT_SOURCE_MODULES = ("comprehension", "vocab_definitions", "vocab_application", "zhuyin")
 VALID_QUESTION_COUNT_MODES = ("all", 10, 15, 20)
 MAX_READING_SECONDS = 30
 # Presence (UI/UX review #6): a player's last_seen_at within this window
