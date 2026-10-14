@@ -2,11 +2,13 @@
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException, Request
+from sqlalchemy import or_
 from sqlalchemy.orm import Session, joinedload
 
 from ...auth.dependencies import get_current_user
 from ...database import get_db
-from ...models.school import ClassroomStudent
+from ...models.school import Classroom, ClassroomStudent, ClassroomTeacher, School
+from ...services.email_domains import is_public_email_domain
 from ...auth.policies import is_system_admin
 from ...models.user import Role, User, UserRole
 from ...schemas.classroom import (
@@ -28,30 +30,44 @@ logger = logging.getLogger(__name__)
 
 
 
-def _school_student_ids(school_id: int | None, db: Session):
-    """Subquery: users holding an active student role scoped to this school."""
-    return (
+def _eligible_student_ids(classroom, teacher_id: int, db: Session):
+    """Subquery of students this teacher may find/enrol in `classroom`.
+
+    Students of the classroom's school (#3534). If that "school" is really a public
+    mail domain (legacy shared gmail.com 學校 etc.), its members are strangers to each
+    other, so narrow further to students this teacher created or already teaches (#3541).
+    """
+    q = (
         db.query(UserRole.user_id)
         .join(Role, UserRole.role_id == Role.id)
         .filter(
             UserRole.is_active == True,  # noqa: E712
             Role.name == "student",
             UserRole.scope_type == "school",
-            UserRole.scope_id == str(school_id),
+            UserRole.scope_id == str(classroom.school_id),
         )
-        .scalar_subquery()
     )
+    school = db.get(School, classroom.school_id) if classroom.school_id is not None else None
+    if school is not None and is_public_email_domain(school.domain):
+        my_classrooms = (
+            db.query(Classroom.id).filter(Classroom.teacher_id == teacher_id)
+            .union(db.query(ClassroomTeacher.classroom_id).filter(ClassroomTeacher.teacher_id == teacher_id))
+        )
+        taught = db.query(ClassroomStudent.student_id).filter(ClassroomStudent.classroom_id.in_(my_classrooms))
+        q = q.filter(or_(UserRole.granted_by == teacher_id, UserRole.user_id.in_(taught)))
+    return q.scalar_subquery()
 
 
-def _is_student_of_school(user_id: int, school_id: int | None, db: Session) -> bool:
-    if school_id is None:
+def _is_eligible_student(user_id: int, classroom, teacher_id: int, db: Session) -> bool:
+    if classroom.school_id is None:
         return False
     return (
         db.query(User.id)
-        .filter(User.id == user_id, User.id.in_(_school_student_ids(school_id, db)))
+        .filter(User.id == user_id, User.id.in_(_eligible_student_ids(classroom, teacher_id, db)))
         .first()
         is not None
     )
+
 
 @router.post(
     "/classrooms/{classroom_id}/students",
@@ -75,7 +91,7 @@ def add_student_to_classroom(
     # whether the id doesn't exist or isn't eligible, so ids can't be probed.
     if student is None or not (
         is_system_admin(current_user.id, db)
-        or _is_student_of_school(student.id, classroom.school_id, db)
+        or _is_eligible_student(student.id, classroom, current_user.id, db)
     ):
         raise HTTPException(status_code=404, detail="找不到這所學校的這位學生")
 
@@ -229,7 +245,7 @@ def search_students_for_classroom(
     # Only students of this classroom's school (#3534). Unscoped, any teacher could
     # page through every account's name and email on the platform.
     if not is_system_admin(current_user.id, db):
-        query = query.filter(User.id.in_(_school_student_ids(classroom.school_id, db)))
+        query = query.filter(User.id.in_(_eligible_student_ids(classroom, current_user.id, db)))
     results = query.limit(10).all()
 
     return [
