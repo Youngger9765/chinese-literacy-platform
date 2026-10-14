@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 import time
 import uuid
 import traceback
@@ -41,8 +42,10 @@ from .routes.curriculum_qa import router as curriculum_qa_router
 from .routes.admin_story_structure_lab import router as admin_story_structure_lab_router
 from .routes.assets import router as assets_router
 from .routes.worksheets import router as worksheets_router
+from .routes.live_quiz import router as live_quiz_router
 from .utils.logging_config import setup_logging
 from .auth.rate_limiter import general_rate_limiter, real_ip_from_xff
+from .services.live_quiz.engine import is_authenticated_member_by_code
 from .services.seed import seed_default_data, repair_pii_accounts
 
 # Initialise structured logging before anything else
@@ -294,6 +297,9 @@ class GlobalRateLimitMiddleware:
     """
 
     _EXEMPT_PATHS = ("/health", "/docs", "/redoc", "/openapi.json", "/")
+    # /api/live-quiz/games/{code}/state|answer — see the membership-gated
+    # exemption below (#3551 external review #3).
+    _LIVE_QUIZ_RATE_EXEMPT_RE = re.compile(r"^/api/live-quiz/games/([^/]+)/(state|answer)$")
     # Read operations are much burstier during UI navigation (route mounts,
     # parallel data loaders, prefetch). Keep write operations stricter.
     # Allow env overrides so local dev (React StrictMode double-invocations,
@@ -347,6 +353,55 @@ class GlobalRateLimitMiddleware:
         if scope.get("method", "").upper() == "OPTIONS":
             await self.app(scope, receive, send)
             return
+
+        # Live-quiz polling (#3551 external review #3): a class of 30+
+        # students each polling /state ~1/s would blow straight through the
+        # 300/min per-IP read budget on its own (one classroom NAT = one
+        # IP). The naive fix — "exempt /api/live-quiz/*/state and /answer
+        # from the per-IP limit" — would also exempt an UNAUTHENTICATED
+        # caller or someone polling a game they have nothing to do with, so
+        # instead this only skips per-IP counting when the request is BOTH
+        # authenticated (JWT already decoded by RequestLoggingMiddleware,
+        # which runs outside this one — see request.state.user_id there)
+        # AND the host/a joined player of THIS game. Everyone else
+        # (anonymous, or guessing codes) stays under the normal limit.
+        #
+        # This intentionally does NOT replace per-IP limiting with a
+        # separate "N req/s per user per game" counter: that counter would
+        # be per-process under Cloud Run's multiple instances and would not
+        # actually bound anything globally (external review #3). A verified
+        # member's state/answer calls are naturally bounded by classroom
+        # size and the ~1 req/s poll interval, so simply exempting them is
+        # both simpler and more honest than a fake-precision limit.
+        live_quiz_match = self._LIVE_QUIZ_RATE_EXEMPT_RE.match(path)
+        if live_quiz_match:
+            state = scope.get("state") or {}
+            raw_user_id = state.get("user_id")
+            if raw_user_id is not None:
+                try:
+                    user_id = int(raw_user_id)
+                    code = live_quiz_match.group(1)
+                    # Lazy import (not a top-level binding): looked up fresh on
+                    # every call so tests can monkeypatch `app.database.
+                    # SessionLocal` to their own test engine, same pattern as
+                    # `lifespan()`'s repair_pii_accounts call above.
+                    from .database import SessionLocal as _SessionLocal
+                    db = _SessionLocal()
+                    try:
+                        member = is_authenticated_member_by_code(db, code, user_id)
+                    finally:
+                        db.close()
+                except Exception:
+                    logger.warning(
+                        "live-quiz rate-limit membership check failed; falling back to per-IP limiting",
+                        exc_info=True,
+                    )
+                    member = False
+                if member:
+                    await self.app(scope, receive, send)
+                    return
+            # Unauthenticated or non-member: fall through to normal per-IP
+            # limiting below, same as any other /api/* request.
 
         # Extract the real client IP (#2470 HIGH-1a): take the GCP-appended
         # second-from-right XFF entry, not the client-controlled leftmost one.
@@ -573,6 +628,7 @@ app.include_router(curriculum_qa_router, prefix="/api", tags=["curriculum-qa"])
 app.include_router(admin_story_structure_lab_router, prefix="/api", tags=["admin-story-structure-lab"])
 # No /api prefix — matches the Firebase Hosting `/assets/**` rewrite target (#2486).
 app.include_router(assets_router)
+app.include_router(live_quiz_router, prefix="/api", tags=["live-quiz"])
 # Role-gated worksheet download (#3276) — separate from the public assets proxy above.
 app.include_router(worksheets_router)
 
