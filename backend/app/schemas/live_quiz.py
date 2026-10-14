@@ -19,7 +19,8 @@ class LiveQuizCreateRequest(BaseModel):
     lesson_uids: list[str] = Field(min_length=1)
     source_modules: list[str] | None = None
     round_type: str = "choice"
-    question_count_mode: str | int = "all"
+    # UI/UX review §12: "設定頁預設只露...題數（預設 10）、秒數（預設 30）".
+    question_count_mode: str | int = 10
     seconds: int = 30
     # UI/UX review 2026-10-15 #2: stem-alone reading phase before the answer
     # window opens. 0 is explicitly allowed (disables the delay).

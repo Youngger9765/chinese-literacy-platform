@@ -443,6 +443,30 @@ def end_game(
     return game
 
 
+def _previous_game_correct_count(db: Session, user_id: int, *, exclude_game_id: int) -> int | None:
+    """This student's correct-answer count in their most recent OTHER
+    ENDED game — the "進步" (improvement) half of §13's replacement for
+    rank: "改顯示答對題數與進步". None if they have no prior ended game."""
+    prev_player = (
+        db.query(LiveQuizPlayer)
+        .join(LiveQuizGame, LiveQuizGame.id == LiveQuizPlayer.game_id)
+        .filter(
+            LiveQuizPlayer.user_id == user_id,
+            LiveQuizGame.id != exclude_game_id,
+            LiveQuizGame.status == "ended",
+        )
+        .order_by(LiveQuizGame.ended_at.desc())
+        .first()
+    )
+    if prev_player is None:
+        return None
+    return (
+        db.query(LiveQuizAnswer)
+        .filter(LiveQuizAnswer.player_id == prev_player.id, LiveQuizAnswer.is_correct.is_(True))
+        .count()
+    )
+
+
 def _compute_leaderboard(game: LiveQuizGame, limit: int | None = None) -> list[dict]:
     ranked = sorted(game.players, key=lambda p: (-p.total_score, p.joined_at, p.id))
     entries = [
@@ -606,8 +630,18 @@ def build_state(db: Session, game: LiveQuizGame, user: User, after_version: int 
             correct_count = sum(1 for a in round_answers if a.is_correct)  # host-only, see below
 
     practice_mode = bool(game.settings.get("practice_mode"))
+
+    # PRD §13 final ranking decision (2026-10-15): "學生手機不顯示名次...
+    # 改顯示答對題數與進步" — students never see rank or total_score, full
+    # stop, not just under practice_mode. The ranked leaderboard (names +
+    # scores + ranks for every player) is therefore HOST-ONLY: the host's
+    # own projector-rendering decision ("投影只公開前三名、不顯示分數") is a
+    # frontend concern layered on top of data the host legitimately needs
+    # for classroom management — it is not this API's job to also serve a
+    # truncated copy to players, because players should never receive the
+    # ranked list AT ALL.
     leaderboard = None
-    if game.status in ("reveal", "ended") and not (practice_mode and not is_host):
+    if is_host and game.status in ("reveal", "ended"):
         is_last = idx == rounds_total - 1
         if game.status == "ended" or game.settings.get("show_leaderboard_after_each") or is_last:
             leaderboard = game.cached_leaderboard
@@ -615,13 +649,21 @@ def build_state(db: Session, game: LiveQuizGame, user: User, after_version: int 
     your_player = None
     if player is not None:
         eligible = idx > player.joined_at_round_index
-        your_player = {"player_id": player.id, "display_name": player.display_name, "eligible": eligible}
-        if not practice_mode:
-            rank_entry = next(
-                (e for e in (game.cached_leaderboard or []) if e["player_id"] == player.id), None
-            )
-            your_player["total_score"] = player.total_score
-            your_player["rank"] = rank_entry["rank"] if rank_entry else None
+        correct_count = (
+            db.query(LiveQuizAnswer)
+            .filter(LiveQuizAnswer.player_id == player.id, LiveQuizAnswer.is_correct.is_(True))
+            .count()
+        )
+        your_player = {
+            "player_id": player.id,
+            "display_name": player.display_name,
+            "eligible": eligible,
+            "correct_count": correct_count,
+        }
+        if game.status == "ended":
+            previous = _previous_game_correct_count(db, player.user_id, exclude_game_id=game.id)
+            your_player["previous_game_correct_count"] = previous
+            your_player["improved"] = (correct_count > previous) if previous is not None else None
         if game.status in ("reveal", "ended") and 0 <= idx < rounds_total:
             my_answer = (
                 db.query(LiveQuizAnswer)
@@ -634,6 +676,8 @@ def build_state(db: Session, game: LiveQuizGame, user: User, after_version: int 
             # simply didn't answer in time); both cases share this None.
             your_player["last_answer_correct"] = my_answer.is_correct if my_answer else None
             if not practice_mode:
+                # Immediate per-question feedback, not a comparative ranking
+                # — §13 only forbids rank/total_score, not this.
                 your_player["last_answer_points"] = my_answer.points if my_answer else 0
 
     state = {

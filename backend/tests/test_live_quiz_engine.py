@@ -841,6 +841,89 @@ class TestUiUxReview20261015:
         assert "correct_key" not in state["round"]
         assert state["round"]["extra"]["target_index"] == payload["extra"]["target_index"]
 
+    def test_players_never_see_rank_or_total_score_even_outside_practice_mode(
+        self, client, teacher, student1, student2
+    ):
+        """PRD §13 final ranking decision (2026-10-15): "學生手機不顯示
+        名次" — unconditionally, not just under practice_mode."""
+        game = _create_game(client, teacher, lesson_uids=[LESSON_A], practice_mode=False)
+        client.post(f"/api/live-quiz/games/{game['code']}/join", headers=auth_header(student1["token"]))
+        client.post(f"/api/live-quiz/games/{game['code']}/join", headers=auth_header(student2["token"]))
+        client.post(f"/api/live-quiz/games/{game['code']}/start", headers=auth_header(teacher["token"]))
+        db = TestingSessionLocal()
+        try:
+            row = live_quiz_engine.get_game_by_code(db, game["code"])
+            correct_key = row.rounds_snapshot[0]["payload"]["correct_key"]
+        finally:
+            db.close()
+        client.post(
+            f"/api/live-quiz/games/{game['code']}/answer", json={"submission": {"choice_key": correct_key}},
+            headers=auth_header(student1["token"]),
+        )
+        client.post(f"/api/live-quiz/games/{game['code']}/reveal", headers=auth_header(teacher["token"]))
+
+        state = client.get(
+            f"/api/live-quiz/games/{game['code']}/state", headers=auth_header(student1["token"])
+        ).json()
+        assert "rank" not in state["your_player"]
+        assert "total_score" not in state["your_player"]
+        assert "leaderboard" not in state  # the ranked list is host-only, full stop
+        assert state["your_player"]["correct_count"] == 1
+
+    def test_host_still_sees_full_leaderboard_and_roster(self, client, teacher, student1):
+        game = _create_game(client, teacher, lesson_uids=[LESSON_A])
+        client.post(f"/api/live-quiz/games/{game['code']}/join", headers=auth_header(student1["token"]))
+        client.post(f"/api/live-quiz/games/{game['code']}/start", headers=auth_header(teacher["token"]))
+        client.post(
+            f"/api/live-quiz/games/{game['code']}/answer", json={"submission": {"choice_key": "A"}},
+            headers=auth_header(student1["token"]),
+        )
+        client.post(f"/api/live-quiz/games/{game['code']}/reveal", headers=auth_header(teacher["token"]))
+
+        host_state = client.get(
+            f"/api/live-quiz/games/{game['code']}/state", headers=auth_header(teacher["token"])
+        ).json()
+        assert "leaderboard" in host_state
+        assert host_state["leaderboard"][0]["player_id"] == (
+            next(p["player_id"] for p in host_state["players"] if p["display_name"] == student1["name"])
+        )
+        assert "total_score" in host_state["players"][0]
+
+    def test_improvement_vs_previous_game_shown_at_end(self, client, teacher, student1):
+        """UI/UX §13: "改顯示答對題數與進步" — the second game shows
+        whether the student did better than their last one."""
+        game1 = _create_game(client, teacher, lesson_uids=[LESSON_A], question_count_mode="all")
+        client.post(f"/api/live-quiz/games/{game1['code']}/join", headers=auth_header(student1["token"]))
+        client.post(f"/api/live-quiz/games/{game1['code']}/start", headers=auth_header(teacher["token"]))
+        wrong_resp = client.post(
+            f"/api/live-quiz/games/{game1['code']}/answer", json={"submission": {"choice_key": "Z"}},
+            headers=auth_header(student1["token"]),
+        )
+        assert wrong_resp.json()["is_correct"] is False
+        client.post(f"/api/live-quiz/games/{game1['code']}/end", headers=auth_header(teacher["token"]))
+
+        game2 = _create_game(client, teacher, lesson_uids=[LESSON_A])
+        client.post(f"/api/live-quiz/games/{game2['code']}/join", headers=auth_header(student1["token"]))
+        client.post(f"/api/live-quiz/games/{game2['code']}/start", headers=auth_header(teacher["token"]))
+        db = TestingSessionLocal()
+        try:
+            row = live_quiz_engine.get_game_by_code(db, game2["code"])
+            correct_key = row.rounds_snapshot[0]["payload"]["correct_key"]
+        finally:
+            db.close()
+        client.post(
+            f"/api/live-quiz/games/{game2['code']}/answer", json={"submission": {"choice_key": correct_key}},
+            headers=auth_header(student1["token"]),
+        )
+        client.post(f"/api/live-quiz/games/{game2['code']}/end", headers=auth_header(teacher["token"]))
+
+        state = client.get(
+            f"/api/live-quiz/games/{game2['code']}/state", headers=auth_header(student1["token"])
+        ).json()
+        assert state["your_player"]["previous_game_correct_count"] == 0
+        assert state["your_player"]["correct_count"] == 1
+        assert state["your_player"]["improved"] is True
+
     def test_presence_online_count(self, client, teacher, student1, student2):
         game = _create_game(client, teacher, lesson_uids=[LESSON_A])
         client.post(f"/api/live-quiz/games/{game['code']}/join", headers=auth_header(student1["token"]))
