@@ -82,17 +82,20 @@ const MultipleChoiceExercise: React.FC<Props> = ({
   const isLast = current === questions.length - 1;
   const questionId = `${lessonId}-q${current}`;
 
-  function handleSelect(label: string) {
+  function handleSelect(label: string, text?: string) {
     if (revealed) return;
     const correct = label === q.answer;
 
     // Telemetry — every click, including wrong answers where the student
     // never opens the rescue dialog (Issue #1507 / Young 5/8 meeting).
+    // choice_text (#3028) is the option's literal text, for the class-wide
+    // distractor-distribution view a teacher uses to plan tomorrow's lesson.
     if (token) {
       recordMcqAttempt(token, {
         lesson_id: lessonId,
         question_id: questionId,
         choice: label,
+        choice_text: text,
         is_correct: correct,
       });
     }
@@ -225,7 +228,7 @@ const MultipleChoiceExercise: React.FC<Props> = ({
             return (
               <button
                 key={label}
-                onClick={() => handleSelect(label)}
+                onClick={() => handleSelect(label, opt)}
                 disabled={revealed}
                 className={btnClass}
               >

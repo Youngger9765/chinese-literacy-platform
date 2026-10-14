@@ -49,10 +49,12 @@ const TraitInferenceExercise: React.FC<Props> = ({
       const labelIdx = traitOptions.indexOf(selected);
       // Defensive slice — backend choice column is VARCHAR(8)
       const choice = (labelIdx >= 0 ? OPTION_LABELS[labelIdx] : selected).slice(0, 8);
+      // choice_text (#3028) — `selected` is already the trait's literal text.
       recordMcqAttempt(token, {
         lesson_id: lessonId ?? '',
         question_id: questionId,
         choice,
+        choice_text: selected,
         is_correct: correctAnswer,
       });
     }

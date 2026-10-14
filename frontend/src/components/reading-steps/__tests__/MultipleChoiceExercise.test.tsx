@@ -156,6 +156,7 @@ describe('MultipleChoiceExercise', () => {
       lesson_id: 'g7-l29',
       question_id: 'g7-l29-q0',
       choice: 'A',
+      choice_text: '自然環境',
       is_correct: false,
     });
 
@@ -166,6 +167,7 @@ describe('MultipleChoiceExercise', () => {
       lesson_id: 'g7-l29',
       question_id: 'g7-l29-q0',
       choice: 'B',
+      choice_text: '科技發展',
       is_correct: true,
     });
 
@@ -175,10 +177,26 @@ describe('MultipleChoiceExercise', () => {
       lesson_id: 'g7-l29',
       question_id: 'g7-l29-q1',
       choice: 'A',
+      choice_text: '樂觀',
       is_correct: true,
     });
 
     expect(recordMcqAttempt, '三次作答就要三筆紀錄').toHaveBeenCalledTimes(3);
+  });
+
+  // ── Issue #3028 — choice_text telemetry (session_id/attempt_no are
+  // resolved server-side; the client's only new job is sending the
+  // option's literal text) ────────────────────────────────────────────
+
+  it('sends choice_text with the option literal text (#3028)', () => {
+    render(<MultipleChoiceExercise questions={questions} onComplete={() => {}} lessonId="g7-l29" />);
+
+    fireEvent.click(screen.getByText('人際關係').closest('button')!);
+
+    expect(recordMcqAttempt).toHaveBeenCalledWith(
+      'test-token',
+      expect.objectContaining({ choice: 'C', choice_text: '人際關係' }),
+    );
   });
 
   // ── Issue #3024 — instant positive feedback + progress bar ──────────────
