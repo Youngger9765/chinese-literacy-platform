@@ -94,6 +94,9 @@ export interface McqAttemptPayload {
   lesson_id: string;
   question_id: string;
   choice: string;
+  /** The option's literal text (Issue #3028) — session_id/attempt_no are
+   *  resolved server-side, not sent by the client. */
+  choice_text?: string;
   is_correct: boolean;
 }
 

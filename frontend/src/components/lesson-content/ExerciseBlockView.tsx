@@ -177,11 +177,13 @@ const ExerciseBlockViewBody: React.FC<
         onCorrect();
       }
       // telemetry (choice letter truncated to VARCHAR(8)) — fire-and-forget.
+      // choice_text (#3028) is the option's literal text.
       if (token) {
         recordMcqAttempt(token, {
           lesson_id: lessonCode,
           question_id: exercise.id,
           choice: (LETTERS[i] ?? String(i)).slice(0, 8),
+          choice_text: q.options?.[i],
           is_correct: result.verdict === true,
         });
       }

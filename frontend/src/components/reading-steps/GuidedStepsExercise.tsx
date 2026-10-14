@@ -153,7 +153,8 @@ const GuidedStepsExercise: React.FC<Props> = ({
       if (answer === null) return;
       const isCorrect = answer === (step.answer ?? 0);
 
-      // Telemetry (Issue #1507)
+      // Telemetry (Issue #1507). choice_text (#3028) is the option's literal
+      // text for the class-wide distractor-distribution view.
       if (token) {
         const labels = OPTION_LABELS.slice(0, (step.options ?? []).length);
         const idx = answer as number;
@@ -161,6 +162,7 @@ const GuidedStepsExercise: React.FC<Props> = ({
           lesson_id: lessonId ?? '',
           question_id: `${lessonId ?? ''}-spotlight-guided-${stepIdx}`,
           choice: (labels[idx] ?? String(idx)).slice(0, 8),
+          choice_text: (step.options ?? [])[idx],
           is_correct: isCorrect,
         });
       }
