@@ -86,7 +86,16 @@ export interface StudentSession {
 export interface TeacherDialogueTurn {
   id: number;
   turn_order: number;
-  role: string;
+  /**
+   * 後端 `DialogueTurn.role` 實際只寫這三種
+   * （`backend/app/routes/learning/learning_comprehension.py` 的三個 insert）。
+   * 原本宣告成 `string`，比現實寬 —— 收窄之後才能跟學生端的 `DialogueTurnItem`
+   * 通用，教師報告頁才能重用 StepRecordsView（#3220）。
+   *
+   * ⚠️ 別跟 `ai_comprehension.py` 裡的 `role="user"` 搞混，那是 Gemini API 的
+   * content role，不是資料庫這一欄。
+   */
+  role: 'ai' | 'student' | 'feedback';
   text: string;
   is_correct: boolean | null;
   phase: string | null;
