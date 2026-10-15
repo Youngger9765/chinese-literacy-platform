@@ -200,25 +200,19 @@ const StepDots: React.FC<StepDotsProps> = ({
   // to the far edges of the header — 「左右的 < > 拉到圈圈左右側，不要離那麼遠」.
   // min-w-0 keeps overflow-x-auto working when the dots are wider than the space.
   return (
-    <div className="relative min-w-0 max-w-full">
-    {fades.left && (
-      <span
-        aria-hidden="true"
-        data-testid="stepper-fade-left"
-        className="pointer-events-none absolute inset-y-0 left-0 w-6 z-10 bg-gradient-to-r from-white to-transparent"
-      />
-    )}
-    {fades.right && (
-      <span
-        aria-hidden="true"
-        data-testid="stepper-fade-right"
-        className="pointer-events-none absolute inset-y-0 right-0 w-6 z-10 bg-gradient-to-l from-white to-transparent"
-      />
-    )}
     <div
       ref={scrollRef}
       className="min-w-0 max-w-full overflow-x-auto scrollbar-hide overscroll-x-contain"
       aria-label="學習步驟進度"
+      data-fade-left={fades.left || undefined}
+      data-fade-right={fades.right || undefined}
+      // Fade the dots themselves at an edge that still has more steps past it.
+      // A mask rather than a coloured overlay: the header is translucent
+      // ("glass"), so any solid-colour gradient showed as a stripe.
+      style={fades.left || fades.right ? {
+        maskImage: `linear-gradient(to right, ${fades.left ? 'transparent' : '#000'} 0, #000 24px, #000 calc(100% - 24px), ${fades.right ? 'transparent' : '#000'} 100%)`,
+        WebkitMaskImage: `linear-gradient(to right, ${fades.left ? 'transparent' : '#000'} 0, #000 24px, #000 calc(100% - 24px), ${fades.right ? 'transparent' : '#000'} 100%)`,
+      } : undefined}
     >
       <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 flex-nowrap justify-center min-w-max px-0.5">
       <NavArrow dir="prev" step={prevStep} disabled={navDisabled} onClick={onStepClick} />
@@ -299,7 +293,6 @@ const StepDots: React.FC<StepDotsProps> = ({
       })}
       <NavArrow dir="next" step={nextStep} disabled={navDisabled} onClick={onStepClick} />
       </div>
-    </div>
     </div>
   );
 };
