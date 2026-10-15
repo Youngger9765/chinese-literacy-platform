@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import os
 import re
@@ -561,8 +562,25 @@ class PreviewModeWriteGuardMiddleware(BaseHTTPMiddleware):
         return await call_next(request)
 
 
+def configure_default_executor(loop) -> None:
+    """Size asyncio's default executor for a classroom (2026-10-16).
+
+    asyncio.to_thread runs on it, and Python's default is min(32, cpu+4) = 5
+    threads on a 1-vCPU Cloud Run instance. /reading/transcribe pushes
+    transcode, silence check and the Gemini call through it, so with 5
+    threads the 6th student per instance queued — and the queue time counted
+    toward the Gemini timeout. The work is mostly waiting on the network or
+    on an ffmpeg subprocess, so more threads than CPUs is the right shape.
+    """
+    from concurrent.futures import ThreadPoolExecutor
+
+    workers = int(os.environ.get("ASYNC_THREAD_WORKERS", "32"))
+    loop.set_default_executor(ThreadPoolExecutor(max_workers=max(1, workers), thread_name_prefix="async-io"))
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    configure_default_executor(asyncio.get_running_loop())
     # seed_default_data() internally respects ENABLE_TEST_SEED and ENVIRONMENT:
     # on prod (ENABLE_TEST_SEED=false) it only runs non-seeding startup tasks
     # (YAML → texts sync, migration patches) without creating demo accounts.
