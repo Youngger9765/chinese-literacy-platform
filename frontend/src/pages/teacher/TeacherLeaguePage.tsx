@@ -31,6 +31,18 @@ import {
   type LeagueSeasonBoard,
 } from '../../services/leagueApi';
 
+const INVITATION_STATUS_LABEL: Record<string, string> = {
+  pending: '等待對方接受',
+  accepted: '已接受',
+  declined: '已婉拒',
+  expired: '邀請失效',
+  revoked: '已撤回',
+};
+
+export function invitationStatusLabel(status: string): string {
+  return INVITATION_STATUS_LABEL[status] ?? status;
+}
+
 function toLocalInputValue(d: Date): string {
   const pad = (n: number) => String(n).padStart(2, '0');
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
@@ -341,7 +353,7 @@ const TeacherLeaguePage: React.FC = () => {
         {previewError && <p className="text-sm text-red-600 mt-2">{previewError}</p>}
         {preview && preview.status !== 'pending' && (
           <p className="text-sm text-gray-500 mt-2">
-            這組邀請碼目前狀態是「{preview.status === 'expired' ? '邀請失效' : preview.status}」，無法使用。
+            這組邀請碼目前狀態是「{invitationStatusLabel(preview.status)}」，無法使用。
           </p>
         )}
         {preview && preview.status === 'pending' && (
@@ -388,7 +400,7 @@ const TeacherLeaguePage: React.FC = () => {
             {invitations.map((inv) => (
               <li key={inv.id} className="flex items-center justify-between text-sm border-b border-gray-100 pb-2">
                 <span className="font-mono">{inv.code}</span>
-                <span className="text-gray-500">{inv.status === 'expired' ? '邀請失效' : inv.status}</span>
+                <span className="text-gray-500">{invitationStatusLabel(inv.status)}</span>
                 {inv.status === 'pending' && inv.inviter_classroom_id === selectedClassroomId && (
                   <button
                     type="button"
