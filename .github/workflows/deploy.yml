@@ -71,8 +71,8 @@ jobs:
       #    不要為了省錢調回 512Mi —— 差額量級是每月美分，代價是拒絕服務。
       #    鎖：backend/specs/test_workflow_path_filters_spec.py（test_backend_memory_is_at_least_1gi）
       # Classroom capacity (2026-10-16 CTO review), learning experience first:
-      # min 1 warm instance so the first class of the day never waits for a cold
-      # start (~US$13/month); up to 12 instances x 40 concurrent requests covers
+      # min 0 (Young 2026-10-16: no always-on instance; the first request after
+      # idle waits for a cold start); up to 12 instances x 40 concurrent requests covers
       # 10 classes reading or playing the live quiz at once. DB pool 8+4 per
       # instance = 144 connections, under the 400 allowed by db-custom-2-7680.
       - name: Deploy backend to Cloud Run
@@ -84,7 +84,7 @@ jobs:
             --project ${{ env.PROJECT_ID }} \
             --memory=1Gi \
             --cpu=1 \
-            --min-instances=1 \
+            --min-instances=0 \
             --max-instances=12 \
             --concurrency=40 \
             --timeout=300s \
