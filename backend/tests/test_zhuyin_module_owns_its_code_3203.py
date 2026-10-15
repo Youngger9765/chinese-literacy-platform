@@ -48,6 +48,10 @@ EXEMPT = {
     # ── #3551：獨立的注音挑戰出題模組，登記在它自己的 module 底下 ──
     "backend/app/services/zhuyin_challenge.py": "owner 是 zhuyin-challenge module（見 specs/modules/zhuyin-challenge/INTENT.md），不是 zhuyin",
     "backend/scripts/report_zhuyin_challenge.py": "同上，zhuyin-challenge module 的報告腳本",
+    # ── #3551：live-quiz 的注音挑戰 adapter —— 只把 zhuyin_challenge 的輸出
+    #    reshape 成 QuizItem，不決定任何字的讀音，owner 是 live-quiz module
+    #    （見 specs/modules/live-quiz/INTENT.md） ──
+    "backend/app/services/live_quiz/sources/zhuyin.py": "owner 是 live-quiz module，純轉接層（reshape zhuyin_challenge 輸出），不決定讀音",
     # ── 文件 ──
     "docs/audit/zhuyin-facts-2026-09-12.md": "稽核紀錄（⚠️ 對現在的 main 已過期，見 INTENT §1）",
     "docs/prd/zhuyin-single-source-of-truth.md": "PRD（⚠️ 同上，已過期）",

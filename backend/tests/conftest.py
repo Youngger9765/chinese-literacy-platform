@@ -88,6 +88,12 @@ def pytest_runtest_setup(item):
         tts_rate_limiter.reset()
     except (ImportError, AttributeError):
         pass
+    try:
+        # #3551: per-user join-code-guessing guard — same #3171 shape, same fix.
+        from app.routes.live_quiz import _join_rate_limiter
+        _join_rate_limiter.reset()
+    except (ImportError, AttributeError):
+        pass
 
 
 # ── 測試不准打真的 GCS ──────────────────────────────────────────────────────
