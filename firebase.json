@@ -46,7 +46,7 @@
           ]
         },
         {
-          "source": "**/!(*.*)",
+          "source": "/",
           "headers": [
             {
               "key": "Cache-Control",
@@ -55,7 +55,16 @@
           ]
         },
         {
-          "source": "**/*.html",
+          "source": "/!(api|assets|q)",
+          "headers": [
+            {
+              "key": "Cache-Control",
+              "value": "no-cache"
+            }
+          ]
+        },
+        {
+          "source": "/!(api|assets|q)/**",
           "headers": [
             {
               "key": "Cache-Control",
@@ -111,7 +120,7 @@
           ]
         },
         {
-          "source": "**/!(*.*)",
+          "source": "/",
           "headers": [
             {
               "key": "Cache-Control",
@@ -120,7 +129,16 @@
           ]
         },
         {
-          "source": "**/*.html",
+          "source": "/!(api|assets|q)",
+          "headers": [
+            {
+              "key": "Cache-Control",
+              "value": "no-cache"
+            }
+          ]
+        },
+        {
+          "source": "/!(api|assets|q)/**",
           "headers": [
             {
               "key": "Cache-Control",
@@ -176,7 +194,7 @@
           ]
         },
         {
-          "source": "**/!(*.*)",
+          "source": "/",
           "headers": [
             {
               "key": "Cache-Control",
@@ -185,7 +203,16 @@
           ]
         },
         {
-          "source": "**/*.html",
+          "source": "/!(api|assets|q)",
+          "headers": [
+            {
+              "key": "Cache-Control",
+              "value": "no-cache"
+            }
+          ]
+        },
+        {
+          "source": "/!(api|assets|q)/**",
           "headers": [
             {
               "key": "Cache-Control",
