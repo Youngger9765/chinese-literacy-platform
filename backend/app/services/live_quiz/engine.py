@@ -587,7 +587,14 @@ def build_state(db: Session, game: LiveQuizGame, user: User, after_version: int 
     # Presence (#6): bumped on EVERY poll, even the cheap "unchanged" path
     # below — that's the one signal that must never be skipped, since it's
     # the only thing that changes almost every call.
-    if player is not None:
+    # Throttled: writing (and committing) on every 1 s poll was the main cost
+    # under load (2026-10-15 staging, 90 pollers: p95 19.5 s) — the commit also
+    # expired the game row, forcing a re-read of its whole rounds snapshot.
+    # Half the online window keeps the host's indicator accurate.
+    if player is not None and (
+        player.last_seen_at is None
+        or now - _aware(player.last_seen_at) >= timedelta(seconds=ONLINE_WINDOW_SECONDS / 2)
+    ):
         player.last_seen_at = now
         db.commit()
 
