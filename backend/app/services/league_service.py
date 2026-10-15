@@ -270,10 +270,29 @@ def accept_invitation(
 
 
 def decline_invitation(
-    db: Session, *, invitation: LeagueInvitation, responder: User, now: datetime | None = None
+    db: Session,
+    *,
+    invitation: LeagueInvitation,
+    responder: User,
+    decliner_classroom: Classroom,
+    now: datetime | None = None,
 ) -> LeagueInvitation:
+    """2026-10-15 security fix — mirrors `accept_invitation`'s checks.
+
+    Defense in depth: the route already gates this with
+    `_require_owner_strict`, but this function must independently refuse
+    to act for a mismatched user/classroom even if some future caller
+    invokes it directly without going through the route layer."""
+    if responder.id != decliner_classroom.teacher_id:
+        raise LeagueError("僅班級擁有者可以回應邀請", status_code=403)
+
     now = _ensure_aware(now) if now else datetime.now(timezone.utc)
     invitation = _lock_invitation(db, invitation.id)
+
+    if invitation.inviter_classroom_id == decliner_classroom.id:
+        raise LeagueError("不能回應自己發出的邀請，請使用撤回功能", status_code=403)
+
+    _require_same_org(db, invitation.inviter_classroom, decliner_classroom)
 
     if invitation.status == INVITATION_PENDING and now >= _ensure_aware(invitation.game_start):
         invitation.status = INVITATION_EXPIRED

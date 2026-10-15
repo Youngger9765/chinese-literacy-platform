@@ -269,7 +269,10 @@ class TestAcceptInvitation:
         teacher_a, teacher_b, classroom_a, classroom_b = _two_classrooms_same_org(db_session)
         invitation = self._pending(db_session, teacher_a, classroom_a)
         db_session.commit()
-        svc.decline_invitation(db_session, invitation=invitation, responder=teacher_b, now=NOW)
+        svc.decline_invitation(
+            db_session, invitation=invitation, responder=teacher_b,
+            decliner_classroom=classroom_b, now=NOW,
+        )
         with pytest.raises(svc.LeagueError) as exc:
             svc.accept_invitation(
                 db_session, code=invitation.code, acceptor=teacher_b,

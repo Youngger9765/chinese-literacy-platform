@@ -547,3 +547,257 @@ class TestPrivacyContract:
             headers=_h(ctx["secret_student_token"]),
         )
         assert r.status_code == 403
+
+
+class TestDeclineInvitationAuthz:
+    """2026-10-15 security finding (reviewed, verified on commit 0ed1f0de0):
+    `decline` had NO authorization at all — unlike its sibling `accept`,
+    which requires `_require_owner_strict` on the invitee classroom. Any
+    authenticated user holding the code (including a bare student) could
+    kill a pending invitation.
+
+    Fix mirrors `accept` exactly: the request body must name a classroom,
+    the route checks `_require_owner_strict` on it, and the service
+    independently re-checks owner-match + "not the inviter's own
+    classroom" + same-org (defense in depth — these must hold even if the
+    route-level check were ever bypassed by a future caller)."""
+
+    def _setup_invitation(self, client, db):
+        org = _make_org(db)
+        school = _make_school(db, org)
+        owner_a_token, owner_a_id = _register(client, name="邀請方老師")
+        owner_b_token, owner_b_id = _register(client, name="受邀方老師")
+        owner_c_token, owner_c_id = _register(client, name="不相干老師")
+        student_token, student_id = _register(client, name="學生")
+        classroom_a = _make_classroom(db, school, owner_a_id)
+        classroom_b = _make_classroom(db, school, owner_b_id)
+        classroom_c = _make_classroom(db, school, owner_c_id)
+        _enroll(db, classroom_a, student_id)
+        created = client.post(
+            "/api/league/invitations", json=_invite_payload(classroom_a.id), headers=_h(owner_a_token)
+        ).json()
+        return {
+            "code": created["code"],
+            "classroom_a": classroom_a,
+            "classroom_b": classroom_b,
+            "classroom_c": classroom_c,
+            "owner_a_token": owner_a_token,
+            "owner_b_token": owner_b_token,
+            "owner_c_token": owner_c_token,
+            "student_token": student_token,
+        }
+
+    def test_student_with_code_cannot_decline(self, client, db):
+        ctx = self._setup_invitation(client, db)
+        r = client.post(
+            f"/api/league/invitations/{ctx['code']}/decline",
+            json={"invitee_classroom_id": ctx["classroom_b"].id},
+            headers=_h(ctx["student_token"]),
+        )
+        assert r.status_code == 403, r.text
+
+    def test_teacher_cannot_decline_citing_a_classroom_that_is_not_theirs(self, client, db):
+        """Teacher C legitimately owns classroom_c elsewhere in the same
+        org, but has nothing to do with this invitation. Citing someone
+        else's classroom_id (classroom_b, not their own) must 403 — same
+        as the existing `test_only_invitee_owner_can_accept` pattern."""
+        ctx = self._setup_invitation(client, db)
+        r = client.post(
+            f"/api/league/invitations/{ctx['code']}/decline",
+            json={"invitee_classroom_id": ctx["classroom_b"].id},
+            headers=_h(ctx["owner_c_token"]),
+        )
+        assert r.status_code == 403, r.text
+
+    def test_inviting_teacher_cannot_decline_own_invitation(self, client, db):
+        """They should use revoke, not decline, for their own invitation."""
+        ctx = self._setup_invitation(client, db)
+        r = client.post(
+            f"/api/league/invitations/{ctx['code']}/decline",
+            json={"invitee_classroom_id": ctx["classroom_a"].id},
+            headers=_h(ctx["owner_a_token"]),
+        )
+        assert r.status_code == 403, r.text
+
+    def test_invitee_classroom_owner_can_decline(self, client, db):
+        """Positive control — mirrors accept's success path exactly."""
+        ctx = self._setup_invitation(client, db)
+        r = client.post(
+            f"/api/league/invitations/{ctx['code']}/decline",
+            json={"invitee_classroom_id": ctx["classroom_b"].id},
+            headers=_h(ctx["owner_b_token"]),
+        )
+        assert r.status_code == 200, r.text
+        assert r.json()["status"] == "declined"
+
+
+class TestAuthzMatrixAllEndpoints:
+    """Consolidated authz audit (2026-10-15, prompted by the decline_invitation
+    finding above): every league endpoint that takes a caller-supplied
+    classroom_id / team_id / invitation_id, exercised with the LOWEST-
+    privilege role that should be denied (negative control) AND the
+    legitimate role that should succeed (positive control) in the same
+    test. This is the single place to look when adding a new league
+    endpoint — add a pair of assertions here for it."""
+
+    def _build(self, client, db):
+        org = _make_org(db)
+        school = _make_school(db, org)
+        owner_a_token, owner_a_id = _register(client, name="矩陣老師A")
+        owner_b_token, owner_b_id = _register(client, name="矩陣老師B")
+        owner_c_token, owner_c_id = _register(client, name="矩陣老師C")
+        stranger_token, _ = _register(client, name="矩陣路人")
+        classroom_a = _make_classroom(db, school, owner_a_id)
+        classroom_b = _make_classroom(db, school, owner_b_id)
+        classroom_c = _make_classroom(db, school, owner_c_id)
+
+        start = NOW + timedelta(minutes=10)
+        end = start + timedelta(days=2)
+
+        # Invitation 1: accepted (A invites, B accepts) — board / season-list
+        # / roster / anomalies entries read from this one.
+        inv1 = client.post(
+            "/api/league/invitations",
+            json=_invite_payload(classroom_a.id, start=start, end=end),
+            headers=_h(owner_a_token),
+        ).json()
+        accepted = client.post(
+            f"/api/league/invitations/{inv1['code']}/accept",
+            json={"invitee_classroom_id": classroom_b.id, "invitee_team_grade": 5},
+            headers=_h(owner_b_token),
+        )
+        assert accepted.status_code == 200, accepted.text
+        season = db.query(LeagueSeason).filter(LeagueSeason.invitation_id == inv1["id"]).first()
+        team_a = (
+            db.query(LeagueTeam)
+            .filter(LeagueTeam.season_id == season.id, LeagueTeam.classroom_id == classroom_a.id)
+            .first()
+        )
+
+        # Invitation 2: left pending — decline / revoke entries consume this.
+        inv2 = client.post(
+            "/api/league/invitations",
+            json=_invite_payload(classroom_a.id, start=start, end=end),
+            headers=_h(owner_a_token),
+        ).json()
+
+        return {
+            "owner_a_token": owner_a_token,
+            "owner_c_token": owner_c_token,
+            "stranger_token": stranger_token,
+            "classroom_a": classroom_a,
+            "classroom_c": classroom_c,
+            "season_id": season.id,
+            "team_a_id": team_a.id,
+            "inv2_code": inv2["code"],
+            "inv2_id": inv2["id"],
+        }
+
+    def test_create_invitation_owner_only(self, client, db):
+        ctx = self._build(client, db)
+        deny = client.post(
+            "/api/league/invitations",
+            json=_invite_payload(ctx["classroom_a"].id),
+            headers=_h(ctx["owner_c_token"]),
+        )
+        assert deny.status_code == 403, deny.text
+        allow = client.post(
+            "/api/league/invitations",
+            json=_invite_payload(ctx["classroom_a"].id),
+            headers=_h(ctx["owner_a_token"]),
+        )
+        assert allow.status_code == 201, allow.text
+
+    def test_list_invitations_owner_only(self, client, db):
+        ctx = self._build(client, db)
+        deny = client.get(
+            f"/api/league/invitations?classroom_id={ctx['classroom_a'].id}",
+            headers=_h(ctx["stranger_token"]),
+        )
+        assert deny.status_code == 403, deny.text
+        allow = client.get(
+            f"/api/league/invitations?classroom_id={ctx['classroom_a'].id}",
+            headers=_h(ctx["owner_a_token"]),
+        )
+        assert allow.status_code == 200, allow.text
+
+    def test_revoke_inviter_only(self, client, db):
+        ctx = self._build(client, db)
+        deny = client.post(
+            f"/api/league/invitations/{ctx['inv2_id']}/revoke", headers=_h(ctx["owner_c_token"])
+        )
+        assert deny.status_code == 403, deny.text
+        allow = client.post(
+            f"/api/league/invitations/{ctx['inv2_id']}/revoke", headers=_h(ctx["owner_a_token"])
+        )
+        assert allow.status_code == 200, allow.text
+
+    def test_decline_same_org_non_inviter_can_decline_stranger_cannot(self, client, db):
+        """Mirrors accept's permissiveness exactly: any same-org classroom
+        other than the inviter's own may legitimately decline on behalf of
+        itself (just as any same-org classroom may legitimately accept —
+        there is no pre-designated invitee until one or the other
+        happens); a bare stranger with no classroom at all may not."""
+        ctx = self._build(client, db)
+        deny = client.post(
+            f"/api/league/invitations/{ctx['inv2_code']}/decline",
+            json={"invitee_classroom_id": ctx["classroom_c"].id},
+            headers=_h(ctx["stranger_token"]),
+        )
+        assert deny.status_code == 403, deny.text
+        allow = client.post(
+            f"/api/league/invitations/{ctx['inv2_code']}/decline",
+            json={"invitee_classroom_id": ctx["classroom_c"].id},
+            headers=_h(ctx["owner_c_token"]),
+        )
+        assert allow.status_code == 200, allow.text
+
+    def test_season_board_requires_season_membership(self, client, db):
+        ctx = self._build(client, db)
+        deny = client.get(
+            f"/api/league/seasons/{ctx['season_id']}/board", headers=_h(ctx["stranger_token"])
+        )
+        assert deny.status_code == 403, deny.text
+        allow = client.get(
+            f"/api/league/seasons/{ctx['season_id']}/board", headers=_h(ctx["owner_a_token"])
+        )
+        assert allow.status_code == 200, allow.text
+
+    def test_classroom_seasons_owner_only(self, client, db):
+        ctx = self._build(client, db)
+        deny = client.get(
+            f"/api/league/classrooms/{ctx['classroom_a'].id}/seasons",
+            headers=_h(ctx["owner_c_token"]),
+        )
+        assert deny.status_code == 403, deny.text
+        allow = client.get(
+            f"/api/league/classrooms/{ctx['classroom_a'].id}/seasons",
+            headers=_h(ctx["owner_a_token"]),
+        )
+        assert allow.status_code == 200, allow.text
+
+    def test_roster_progress_team_owner_only(self, client, db):
+        ctx = self._build(client, db)
+        deny = client.get(
+            f"/api/league/seasons/{ctx['season_id']}/teams/{ctx['team_a_id']}/roster",
+            headers=_h(ctx["owner_c_token"]),
+        )
+        assert deny.status_code == 403, deny.text
+        allow = client.get(
+            f"/api/league/seasons/{ctx['season_id']}/teams/{ctx['team_a_id']}/roster",
+            headers=_h(ctx["owner_a_token"]),
+        )
+        assert allow.status_code == 200, allow.text
+
+    def test_anomalies_team_owner_only(self, client, db):
+        ctx = self._build(client, db)
+        deny = client.get(
+            f"/api/league/seasons/{ctx['season_id']}/teams/{ctx['team_a_id']}/anomalies",
+            headers=_h(ctx["owner_c_token"]),
+        )
+        assert deny.status_code == 403, deny.text
+        allow = client.get(
+            f"/api/league/seasons/{ctx['season_id']}/teams/{ctx['team_a_id']}/anomalies",
+            headers=_h(ctx["owner_a_token"]),
+        )
+        assert allow.status_code == 200, allow.text

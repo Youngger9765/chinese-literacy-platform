@@ -116,6 +116,10 @@ class AcceptInvitationRequest(BaseModel):
     invitee_team_grade: int
 
 
+class DeclineInvitationRequest(BaseModel):
+    invitee_classroom_id: int
+
+
 # ── Invitations ───────────────────────────────────────────────────────────────
 
 
@@ -195,14 +199,29 @@ def accept_invitation(
 @router.post("/invitations/{code}/decline", response_model=InvitationResponse)
 def decline_invitation(
     code: str,
+    payload: DeclineInvitationRequest,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> InvitationResponse:
+    """2026-10-15 security fix — mirrors `accept_invitation` above exactly.
+
+    Previously this took no body and did zero authorization: any
+    authenticated user holding the code (including a bare student) could
+    decline and kill a pending invitation. Now the caller must name the
+    classroom they're declining on behalf of, and `_require_owner_strict`
+    gates it the same way `accept` gates `invitee_classroom_id` — plus the
+    service re-checks owner-match / not-the-inviter / same-org
+    independently, so the authorization can't be bypassed by any future
+    caller of the service function directly."""
+    classroom = _get_classroom_or_404(payload.invitee_classroom_id, db)
+    _require_owner_strict(classroom, current_user, db)
     invitation = svc.get_invitation_by_code(db, code)
     if invitation is None:
         raise HTTPException(status_code=404, detail="Invitation not found")
     try:
-        updated = svc.decline_invitation(db, invitation=invitation, responder=current_user)
+        updated = svc.decline_invitation(
+            db, invitation=invitation, responder=current_user, decliner_classroom=classroom
+        )
     except svc.LeagueError as exc:
         raise _handle_league_error(exc)
     return InvitationResponse.from_model(updated)
