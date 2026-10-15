@@ -182,3 +182,65 @@ def test_other_endpoints_unaffected_by_the_live_quiz_exemption(client):
         client.get("/api/users/me", headers=auth_header(user["token"])).status_code for _ in range(15)
     ]
     assert 429 in statuses, statuses
+
+
+def _make_game_with_player(client, prefix):
+    teacher = _register_user(client, f"{prefix}_t")
+    student = _register_user(client, f"{prefix}_s")
+    game = client.post(
+        "/api/live-quiz/games",
+        json={"lesson_uids": [LESSON_A], "source_modules": ["comprehension"], "seconds": 30, "reading_seconds": 0},
+        headers=auth_header(teacher["token"]),
+    ).json()
+    client.post(f"/api/live-quiz/games/{game['code']}/join", headers=auth_header(student["token"]))
+    return game, student
+
+
+def test_membership_check_is_cached_not_run_on_every_poll(client, monkeypatch):
+    """2026-10-15 staging load test: 30 students polling /state 1/s made the
+    middleware run 2 DB queries per poll; on the small staging DB requests
+    queued up to 150 s and, once the pool ran dry, the check threw and members
+    fell back to per-IP limiting (69 x 429 for joined players). A joined
+    player's membership must be looked up once, not on every poll."""
+    import app.main as main_mod
+
+    game, student = _make_game_with_player(client, "rl_cache")
+    calls = []
+    real = main_mod.is_authenticated_member_by_code
+
+    def spy(db, code, user_id):
+        calls.append(1)
+        return real(db, code, user_id)
+
+    monkeypatch.setattr(main_mod, "is_authenticated_member_by_code", spy)
+    statuses = [
+        client.get(f"/api/live-quiz/games/{game['code']}/state", headers=auth_header(student["token"])).status_code
+        for _ in range(15)
+    ]
+    assert all(s == 200 for s in statuses), statuses
+    assert len(calls) <= 1, f"membership DB lookup ran {len(calls)} times for 15 polls"
+
+
+def test_membership_check_does_not_run_on_the_event_loop(client, monkeypatch):
+    """The lookup is a blocking DB call; inside async middleware it must run in
+    a worker thread, or every in-flight request on the instance stalls behind it."""
+    import asyncio
+    import app.main as main_mod
+
+    game, student = _make_game_with_player(client, "rl_thread")
+    on_loop = []
+    real = main_mod.is_authenticated_member_by_code
+
+    def spy(db, code, user_id):
+        try:
+            asyncio.get_running_loop()
+            on_loop.append(True)
+        except RuntimeError:
+            on_loop.append(False)
+        return real(db, code, user_id)
+
+    monkeypatch.setattr(main_mod, "is_authenticated_member_by_code", spy)
+    main_mod._live_quiz_member_cache.clear()
+    r = client.get(f"/api/live-quiz/games/{game['code']}/state", headers=auth_header(student["token"]))
+    assert r.status_code == 200
+    assert on_loop == [False], f"membership check ran on the event loop: {on_loop}"
