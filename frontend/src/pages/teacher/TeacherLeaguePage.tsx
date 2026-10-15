@@ -150,9 +150,12 @@ const TeacherLeaguePage: React.FC = () => {
   };
 
   const handleDecline = async () => {
-    if (!token || !preview) return;
+    // 2026-10-15 — declineInvitation now requires the classroom the
+    // response is on behalf of, same as handleAccept above (backend
+    // security fix: decline used to take no body / no auth check at all).
+    if (!token || !preview || selectedClassroomId == null) return;
     try {
-      await declineInvitation(token, preview.code);
+      await declineInvitation(token, preview.code, selectedClassroomId);
       setPreview(null);
       setCodeInput('');
     } catch (err) {

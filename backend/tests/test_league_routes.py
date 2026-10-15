@@ -630,6 +630,27 @@ class TestDeclineInvitationAuthz:
         assert r.status_code == 200, r.text
         assert r.json()["status"] == "declined"
 
+    def test_cross_org_classroom_cannot_decline(self, client, db):
+        """`_require_same_org` must independently be enforced for decline,
+        not just inherited from accept's code path — a classroom owner in
+        a DIFFERENT org (who is not the inviter, so the self-invite check
+        alone would let this through) must still 403. Nothing in the
+        TestDeclineInvitationAuthz suite above ever exercised two
+        different orgs, so this is the one that actually proves
+        `_require_same_org` is load-bearing on the decline path
+        specifically (mutation-checked below)."""
+        ctx = self._setup_invitation(client, db)
+        other_org = _make_org(db)
+        other_school = _make_school(db, other_org)
+        outside_token, outside_id = _register(client, name="跨機構老師")
+        outside_classroom = _make_classroom(db, other_school, outside_id)
+        r = client.post(
+            f"/api/league/invitations/{ctx['code']}/decline",
+            json={"invitee_classroom_id": outside_classroom.id},
+            headers=_h(outside_token),
+        )
+        assert r.status_code == 403, r.text
+
 
 class TestAuthzMatrixAllEndpoints:
     """Consolidated authz audit (2026-10-15, prompted by the decline_invitation

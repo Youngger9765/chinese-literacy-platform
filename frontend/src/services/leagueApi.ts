@@ -157,10 +157,19 @@ export async function acceptInvitation(
   return handleResponse<LeagueInvitation>(res);
 }
 
-export async function declineInvitation(token: string, code: string): Promise<LeagueInvitation> {
+export async function declineInvitation(
+  token: string,
+  code: string,
+  invitee_classroom_id: number,
+): Promise<LeagueInvitation> {
+  // 2026-10-15 — backend now requires invitee_classroom_id in the body
+  // (mirrors acceptInvitation's contract exactly, see backend/app/routes/
+  // league.py decline_invitation's security fix). Previously this sent no
+  // body at all, which the new backend contract rejects with 422.
   const res = await fetch(`${API_BASE}/api/league/invitations/${code}/decline`, {
     method: 'POST',
     headers: authHeaders(token),
+    body: JSON.stringify({ invitee_classroom_id }),
   });
   return handleResponse<LeagueInvitation>(res);
 }
