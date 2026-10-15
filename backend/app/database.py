@@ -1,7 +1,16 @@
+import os
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from typing import Generator
 from .config import settings
+
+def _int_env(name: str, default: int) -> int:
+    try:
+        return max(0, int(os.environ.get(name, default)))
+    except (TypeError, ValueError):
+        return default
+
 
 _engine_kwargs = {}
 if settings.database_url.startswith("sqlite"):
@@ -23,8 +32,13 @@ if settings.database_url.startswith("sqlite"):
         _engine_kwargs["poolclass"] = StaticPool
 else:
     _engine_kwargs["pool_pre_ping"] = True
-    _engine_kwargs["pool_size"] = 10
-    _engine_kwargs["max_overflow"] = 5
+    # Per INSTANCE. Cloud SQL caps connections for the whole database
+    # (db-g1-small: 50, db-f1-micro: 25, minus 3 reserved), so
+    # instances x (pool + overflow) must stay under it. Each environment sets
+    # these to match its --max-instances (2026-10-16, 300-player live-quiz
+    # scale-out); the defaults are the old fixed values.
+    _engine_kwargs["pool_size"] = _int_env("DB_POOL_SIZE", 10)
+    _engine_kwargs["max_overflow"] = _int_env("DB_MAX_OVERFLOW", 5)
     _engine_kwargs["pool_timeout"] = 30
     _engine_kwargs["pool_recycle"] = 1800
 
