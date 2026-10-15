@@ -145,6 +145,125 @@ describe('sub_block（巢狀小題）', () => {
     expect(screen.getByText(/工作記憶/)).toBeTruthy();
     expect(screen.getByText(/籃子/)).toBeTruthy();
   });
+
+  /**
+   * #3559 / #3562 回歸鎖 —— 現場老師回報「聚光燈沒有選項可以點」
+   * 「填答時沒有辦法作答」，真環境（staging，lesson 20016 聚光燈 7/11）
+   * 用 gstack browse 重現：帶 `answer` 的子題選項畫出來的是純文字
+   * `<div>`（只有一個 aria-hidden 的 ☐ 符號），完全沒有 onClick / button /
+   * role，手指怎麼點都沒有任何反應。
+   *
+   * 這條鎖只問一件事：帶 `options` + `answer` 的巢狀子題，畫出來的
+   * 選項必須是**真的可以互動的控制項**（role=button），不能只是印文字。
+   * 舊版本這條會紅：之前的 renderSubBlock 把每個選項畫成純文字 <div>，
+   * `getByRole('button', { name: /旁邊的朋友/ })` 找不到任何東西。
+   */
+  it('帶 answer 的子題選項要能點選（真環境重現：L0016 第 7 關「小試身手」）', () => {
+    renderSpotlight([
+      {
+        type: 'sub_block',
+        label: '◎ 小試身手',
+        items: [
+          {
+            type: 'single',
+            prompt: '(第一段)我心想這人的確蠻不錯，聽說還常常幫忙同學，講話又幽默，或許是個很有意思的人。',
+            options: { '1': '旁邊的朋友', '2': '隔壁班同學' },
+            answer: 2,
+          },
+        ],
+      },
+    ]);
+    const option = screen.getByRole('button', { name: /隔壁班同學/ });
+    fireEvent.click(option);
+    fireEvent.click(screen.getByRole('button', { name: '確認' }));
+    expect(screen.getByText(/答對了/)).toBeTruthy();
+  });
+
+  it('帶 answer 的子題選錯要顯示再想想看，不可以謊報答對', () => {
+    renderSpotlight([
+      {
+        type: 'sub_block',
+        items: [
+          {
+            type: 'single',
+            prompt: '(第一段)但我最愛的笑話類型是諧音冷笑話，不知道他會不會覺得跟這種人相處起來很沒意思呢？',
+            options: { '1': '喜歡', '2': '不喜歡' },
+            answer: 1,
+          },
+        ],
+      },
+    ]);
+    fireEvent.click(screen.getByRole('button', { name: /不喜歡/ }));
+    fireEvent.click(screen.getByRole('button', { name: '確認' }));
+    expect(screen.getByText(/再想想看/)).toBeTruthy();
+    expect(screen.queryByText(/答對了/)).toBeNull();
+  });
+
+  it('沒有 answer 的子題（純展示／填空類）維持現狀不報錯', () => {
+    // 「◎推論小偵探」那類填空子題沒有 options/answer，不在本次修復範圍，
+    // 只要確保它不會因為這次改動而壞掉。
+    renderSpotlight([
+      { type: 'sub_block', label: '◎推論小偵探', stem: 'A：第一個「這」是指（　）' },
+    ]);
+    expect(screen.getByText(/第一個「這」是指/)).toBeTruthy();
+  });
+
+  /**
+   * self-review 抓到的真實邊界案例 —— 不是這次要修的兩張票，但如果沒有
+   * 這條鎖就會在合併時悄悄引入新的 regression。
+   *
+   * 78 課用 sub_block 的課裡，有 6 課（L0002/L0005/L0006/L0010/L0012/
+   * L0174）的子題是**複選**，`answer` 是一個陣列（如 `[1, 2, 3]`），不是
+   * 單一值。真環境資料見 L0002「堅殼硬甲」第 1 題。
+   *
+   * 把陣列直接丟給 `resolveSingleCorrect`（單選題用的判分函式）會在
+   * `answer.trim()` 那行丟出 TypeError，把這 6 課的聚光燈一起弄壞 ——
+   * 跟 #3559/#3562 同一種「學生點不下去」，只是換一個死法、換一批課。
+   */
+  it('answer 是陣列的子題（複選，真實資料：L0002 堅殼硬甲）要能複選且不能 throw', () => {
+    renderSpotlight([
+      {
+        type: 'sub_block',
+        label: '◎小試身手：堅殼硬甲',
+        items: [
+          {
+            type: 'single',
+            stem: '這一段舉哪些動物的例子？',
+            options: { '1': '柴棺龜', '2': '食蛇龜', '3': '穿山甲', '4': '枯葉蝶' },
+            answer: [1, 2, 3],
+          },
+        ],
+      },
+    ]);
+    const boxes = screen.getAllByRole('checkbox');
+    expect(boxes).toHaveLength(4);
+    fireEvent.click(boxes[0]); // 柴棺龜
+    fireEvent.click(boxes[1]); // 食蛇龜
+    fireEvent.click(boxes[2]); // 穿山甲
+    fireEvent.click(screen.getByRole('button', { name: '確認' }));
+    expect(screen.getByText(/答對了/)).toBeTruthy();
+  });
+
+  it('answer 是陣列的子題選錯數量要顯示再想想看，不能謊報答對', () => {
+    renderSpotlight([
+      {
+        type: 'sub_block',
+        items: [
+          {
+            type: 'single',
+            stem: '這一段舉哪些動物的例子？',
+            options: { '1': '柴棺龜', '2': '食蛇龜', '3': '穿山甲', '4': '枯葉蝶' },
+            answer: [1, 2, 3],
+          },
+        ],
+      },
+    ]);
+    const boxes = screen.getAllByRole('checkbox');
+    fireEvent.click(boxes[0]); // 只選一個，答案要三個
+    fireEvent.click(screen.getByRole('button', { name: '確認' }));
+    expect(screen.getByText(/再想想看/)).toBeTruthy();
+    expect(screen.queryByText(/答對了/)).toBeNull();
+  });
 });
 
 describe('exercise（小試身手）', () => {
@@ -160,10 +279,48 @@ describe('exercise（小試身手）', () => {
         ],
       },
     ]);
-    expect(screen.getByText(/扇子/)).toBeTruthy();
-    expect(screen.getByText(/鑽石/)).toBeTruthy();
+    // #3559 修復後「扇子」「鑽石」除了代號表本身，每一小題也各有一顆可點的
+    // 選項按鈕 —— 所以現在會出現不只一次，改用 getAllByText。
+    expect(screen.getAllByText(/扇子/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/鑽石/).length).toBeGreaterThan(0);
     expect(screen.getByText(/孔雀開屏/)).toBeTruthy();
     expect(screen.getByText(/璀璨/)).toBeTruthy();
+  });
+
+  /**
+   * #3559 回歸鎖 —— 現場老師回報《感情小日記1》「聚光燈沒有選項可以點」。
+   * 真環境重現（staging，lesson 20017）：這個 exercise block 的每一題
+   * (`items[].stem`) 只印成一行純文字，連 ☐ 符號都沒有，`option_bank`
+   * 的代號表印在上面但跟題目完全沒有連動 —— 學生看不到任何可以點的東西。
+   *
+   * 這個形狀教材本身明印「沒有標準答案」（L0017：
+   * 「◎小試身手：(沒有標準答案，請依據你自己的想法、感受判斷)」），
+   * 所以不要求判對錯，只要求**每一題都能選出 option_bank 裡的一個選項**，
+   * 而且選了之後畫面上看得出來「已經選了哪一個」。
+   */
+  it('沒有專屬 answer 的 exercise 子題要能從代號表選一個（真環境重現：L0017 小試身手）', () => {
+    renderSpotlight([
+      {
+        type: 'exercise',
+        label: '小試身手（第一張表·課文中的互動）',
+        instruction: '◎小試身手：(沒有標準答案，請依據你自己的想法、感受判斷)',
+        option_bank: { '1': '友情', '2': '愛情', '3': '難以區分' },
+        items: [
+          { type: 'single', index: 1, prompt: '被詢問要不要幫忙時，突然結巴、害羞' },
+          { type: 'single', index: 2, prompt: '上體育課被分到同一組時，感到害羞、緊張' },
+        ],
+      },
+    ]);
+    // 每一題都要有三個可點的選項按鈕（友情／愛情／難以區分）
+    const rows = screen.getAllByText(/突然結巴、害羞$/);
+    expect(rows.length).toBeGreaterThan(0);
+    const loveButtons = screen.getAllByRole('button', { name: '愛情' });
+    expect(loveButtons.length).toBe(2); // 兩題各一顆「愛情」按鈕
+    fireEvent.click(loveButtons[0]);
+    expect(loveButtons[0].getAttribute('aria-pressed')).toBe('true');
+    // 另一題沒被點到的仍是未選取
+    const ambiguousButtons = screen.getAllByRole('button', { name: '難以區分' });
+    expect(ambiguousButtons[1].getAttribute('aria-pressed')).toBe('false');
   });
 });
 

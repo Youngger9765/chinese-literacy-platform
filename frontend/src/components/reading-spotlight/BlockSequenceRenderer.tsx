@@ -242,6 +242,150 @@ const BlockSequenceRenderer: React.FC<Props> = ({
   );
 
   /**
+   * 巢狀子題的選項。#3559 / #3562：現場老師回報「聚光燈沒有選項可以點」
+   * 「填答時沒有辦法作答」—— 真環境重現（lesson 20016 聚光燈 7/11「小試身手」）
+   * 確認這裡以前永遠只畫純文字 `<div>`（只有一個 aria-hidden 的 ☐ 符號），
+   * 完全沒有 onClick / button，學生怎麼點都沒有反應。
+   *
+   * 只在 `answer` 存在時才接上互動（match #2082 single/multi 題型的
+   * 「點選→確認→對/錯」UX，不自己發明一套新樣式）；沒有 `answer` 的子題
+   * （例如「◎推論小偵探」那種純填空提示）維持原本的純展示渲染，不在這次
+   * 修復範圍內。
+   *
+   * 🔴 self-review 抓到：`answer` 不保證是單一值 —— 78 課 sub_block 裡有
+   * 6 課（L0002/L0005/L0006/L0010/L0012/L0174）是複選，`answer` 是一個
+   * 陣列（如 `[1, 3, 4]`）。直接把陣列丟給 `resolveSingleCorrect` 會在
+   * `answer.trim()` 那行丟出 runtime TypeError，把這 6 課的聚光燈也弄壞 ——
+   * 跟這次要修的 bug 是同一種「學生點不下去」，只是換一種死法。
+   * 所以這裡先按 `Array.isArray(answer)` 分流成單選／複選兩條路徑，
+   * 複選仿 `case 'multi'` 的 toggle + 排序後比對。
+   */
+  const renderSubBlockOptions = (
+    key: string,
+    opts: [string, string][],
+    answer: unknown,
+  ): React.ReactElement => {
+    if (answer === undefined || answer === null) {
+      return (
+        <div className="space-y-1.5 mb-2">
+          {opts.map(([ok, ov]) => (
+            <div key={ok} className="rounded-lg border border-gray-200 px-3 py-2 text-base text-on-surface">
+              <span aria-hidden className="mr-2 text-on-surface-variant">☐</span>
+              {ok}. {ov}
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    const fb = feedback[key];
+
+    if (Array.isArray(answer)) {
+      const selected = (blockState[key] as number[] | undefined) ?? [];
+      const toggle = (oi: number) =>
+        setBlockValue(
+          key,
+          selected.includes(oi) ? selected.filter((x) => x !== oi) : [...selected, oi],
+        );
+      return (
+        <div className="space-y-1.5 mb-2">
+          {opts.map(([ok, ov], oi) => (
+            <button
+              key={ok}
+              type="button"
+              role="checkbox"
+              aria-checked={selected.includes(oi)}
+              disabled={fb !== undefined && fb !== null}
+              onClick={() => toggle(oi)}
+              className={[
+                'w-full text-left rounded-lg border px-3 py-2 text-base transition-colors',
+                selected.includes(oi)
+                  ? 'border-violet-500 bg-violet-50 text-violet-900'
+                  : 'border-gray-200 hover:border-violet-300',
+              ].join(' ')}
+            >
+              <span aria-hidden className="mr-2 text-on-surface-variant">
+                {selected.includes(oi) ? '☑' : '☐'}
+              </span>
+              {ok}. {ov}
+            </button>
+          ))}
+          {fb === null || fb === undefined ? (
+            <button
+              type="button"
+              disabled={selected.length === 0}
+              onClick={() => {
+                // answer 的代號是 1-based（跟題本一致），selected 的 index 是 0-based。
+                const answerIdx = (answer as (string | number)[]).map((a) => Number(a) - 1);
+                const correct =
+                  selected.length === answerIdx.length &&
+                  [...selected].sort().join(',') === [...answerIdx].sort().join(',');
+                setFeedback((prev) => ({ ...prev, [key]: correct }));
+              }}
+              className="mt-1 px-4 py-1.5 rounded-full text-base font-medium text-white bg-violet-600 disabled:opacity-40"
+            >
+              確認
+            </button>
+          ) : (
+            <p className={`text-base font-medium ${fb ? 'text-green-700' : 'text-amber-700'}`}>
+              {fb ? '✓ 答對了' : '再想想看'}
+            </p>
+          )}
+        </div>
+      );
+    }
+
+    const selected = blockState[key] as number | undefined;
+    const optionKeys = opts.map(([ok]) => ok);
+    return (
+      <div className="space-y-1.5 mb-2">
+        {opts.map(([ok, ov], oi) => (
+          <button
+            key={ok}
+            type="button"
+            disabled={fb !== undefined && fb !== null}
+            onClick={() => setBlockValue(key, oi)}
+            className={[
+              'w-full text-left rounded-lg border px-3 py-2 text-base transition-colors',
+              selected === oi
+                ? 'border-violet-500 bg-violet-50 text-violet-900'
+                : 'border-gray-200 hover:border-violet-300',
+            ].join(' ')}
+          >
+            <span aria-hidden className="mr-2 text-on-surface-variant">
+              {selected === oi ? '☑' : '☐'}
+            </span>
+            {ok}. {ov}
+          </button>
+        ))}
+        {fb === null || fb === undefined ? (
+          <button
+            type="button"
+            disabled={typeof selected !== 'number'}
+            onClick={() => {
+              if (typeof selected !== 'number') return;
+              const correct = resolveSingleCorrect(
+                opts.map(([, ov]) => ov),
+                answer as string | number,
+                selected,
+                optionKeys,
+              );
+              setFeedback((prev) => ({ ...prev, [key]: correct }));
+            }}
+            className="mt-1 px-4 py-1.5 rounded-full text-base font-medium text-white bg-violet-600 disabled:opacity-40"
+          >
+            確認
+          </button>
+        ) : (
+          <p className={`text-base font-medium ${fb ? 'text-green-700' : 'text-amber-700'}`}>
+            {fb ? '✓ 答對了' : '再想想看'}
+          </p>
+        )}
+      </div>
+    );
+  };
+
+  /**
    * 巢狀小題遞迴渲染。深度用縮排與字級表示，不另外編號 ——
    * 教材上的「一、（一）1.」序號是 Word 自動編號，抽取結果裡本來就沒有。
    */
@@ -266,16 +410,7 @@ const BlockSequenceRenderer: React.FC<Props> = ({
             <p key={i} className="text-base text-on-surface mb-2 whitespace-pre-wrap leading-relaxed">{t}</p>
           ))}
         {sb.hint ? <p className="text-sm text-on-surface-variant mb-2">{sb.hint}</p> : null}
-        {opts.length > 0 ? (
-          <div className="space-y-1.5 mb-2">
-            {opts.map(([ok, ov]) => (
-              <div key={ok} className="rounded-lg border border-gray-200 px-3 py-2 text-base text-on-surface">
-                <span aria-hidden className="mr-2 text-on-surface-variant">☐</span>
-                {ok}. {ov}
-              </div>
-            ))}
-          </div>
-        ) : null}
+        {opts.length > 0 ? renderSubBlockOptions(key, opts, sb.answer) : null}
         {(sb.items ?? []).map((it, i) =>
           renderSubBlock(it as Parameters<typeof renderSubBlock>[0], `${key}-${i}`, depth + 1),
         )}
@@ -754,8 +889,20 @@ const BlockSequenceRenderer: React.FC<Props> = ({
         );
 
       // 小試身手：打勾表格 ＋ 填代號，兩種練習共用一個容器。
+      //
+      // #3559 現場老師回報《感情小日記1》「聚光燈沒有選項可以點」。真環境重現
+      // （lesson 20017）發現兩個缺陷疊在一起：① 這裡以前只讀 `it.stem`，但這一
+      // 課的資料是 `it.prompt` —— 題目本身整段印不出來，畫面只看得到「1.2.3.…」
+      // 的編號 ② 就算題目印得出來，每一題也完全沒有可以點的東西：`option_bank`
+      // 只是印在最上面的代號表，跟底下每一題毫無連動。
+      //
+      // 這個 block 明印「沒有標準答案」（`note` 欄逐字寫著），所以不比對對錯 ——
+      // 只需要讓每一題都能從 `option_bank` 選一個，選了要看得出來選了哪個。
+      // 題目自己帶 `options`/`answer`（另一種 exercise 資料形狀，本次沒有真實
+      // 案例回報）維持原本的純文字渲染，不在這次修復範圍內。
       case 'exercise': {
         const ex = block as unknown as SpotlightExerciseBlock;
+        const bank = ex.option_bank ? Object.entries(ex.option_bank) : [];
         return (
           <div key={key} className="rounded-xl border border-gray-200 bg-white p-5">
             {ex.label ? <div className="text-sm font-semibold text-violet-700 mb-1">{ex.label}</div> : null}
@@ -767,17 +914,45 @@ const BlockSequenceRenderer: React.FC<Props> = ({
             ) : null}
             {ex.option_bank ? (
               <div className="mb-3 flex flex-wrap gap-x-4 gap-y-1 rounded-lg bg-gray-50 p-3">
-                {Object.entries(ex.option_bank).map(([k, v]) => (
+                {bank.map(([k, v]) => (
                   <span key={k} className="text-base text-on-surface">{k}. {v}</span>
                 ))}
               </div>
             ) : null}
-            {(ex.items ?? []).map((it, i) => (
-              <div key={i} className="flex items-start gap-2 py-1.5 border-t border-gray-100 first:border-t-0">
-                <span className="text-base text-on-surface-variant shrink-0">{it.index ?? i + 1}.</span>
-                <span className="text-base text-on-surface whitespace-pre-wrap">{it.stem}</span>
-              </div>
-            ))}
+            {(ex.items ?? []).map((it, i) => {
+              const text = promptOf(it);
+              const hasOwnOptions = Boolean(it.options);
+              const itemKey = `${key}-item-${i}`;
+              const picked = blockState[itemKey] as string | undefined;
+              return (
+                <div key={i} className="flex flex-col gap-1.5 py-1.5 border-t border-gray-100 first:border-t-0">
+                  <div className="flex items-start gap-2">
+                    <span className="text-base text-on-surface-variant shrink-0">{it.index ?? i + 1}.</span>
+                    <span className="text-base text-on-surface whitespace-pre-wrap">{text}</span>
+                  </div>
+                  {!hasOwnOptions && bank.length > 0 ? (
+                    <div className="flex flex-wrap gap-2 pl-5">
+                      {bank.map(([bk, bv]) => (
+                        <button
+                          key={bk}
+                          type="button"
+                          aria-pressed={picked === bk}
+                          onClick={() => setBlockValue(itemKey, bk)}
+                          className={[
+                            'rounded-full border px-3 py-1 text-sm transition-colors',
+                            picked === bk
+                              ? 'border-violet-500 bg-violet-50 text-violet-900'
+                              : 'border-gray-200 hover:border-violet-300',
+                          ].join(' ')}
+                        >
+                          {bv}
+                        </button>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              );
+            })}
           </div>
         );
       }
