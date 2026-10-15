@@ -84,3 +84,39 @@ def test_presence_still_refreshed_after_window(client, teacher, student1, monkey
     client.get(f"/api/live-quiz/games/{code}/state", headers=auth_header(student1["token"]))
     host = client.get(f"/api/live-quiz/games/{code}/state", headers=auth_header(teacher["token"])).json()
     assert host["online_count"] == 1, host.get("players")
+
+
+def test_another_students_answer_does_not_wake_every_student(client, teacher, student1):
+    """O(n^2) under load: each answer bumped game.version, so all N students'
+    next polls took the full path and each re-read every answer of the round.
+    Students don't render answered_count, so their version must only move on
+    host actions; the host still sees answers arrive."""
+    from tests.test_live_quiz_engine import _register_user, _grant_student_role
+
+    other = _register_user(client, "lq_cost_other")
+    _grant_student_role(other["user_id"])
+    game = _create_game(client, teacher)
+    code = game["code"]
+    for u in (student1, other):
+        client.post(f"/api/live-quiz/games/{code}/join", headers=auth_header(u["token"]))
+    client.post(f"/api/live-quiz/games/{code}/start", json={}, headers=auth_header(teacher["token"]))
+
+    s_ver = client.get(f"/api/live-quiz/games/{code}/state", headers=auth_header(student1["token"])).json()["version"]
+    host0 = client.get(f"/api/live-quiz/games/{code}/state", headers=auth_header(teacher["token"])).json()
+    st = client.get(f"/api/live-quiz/games/{code}/state", headers=auth_header(other["token"])).json()
+    key = st["round"]["options"][0]["key"]
+    r = client.post(f"/api/live-quiz/games/{code}/answer", json={"submission": {"choice_key": key}},
+                    headers=auth_header(other["token"]))
+    assert r.status_code == 200, r.text
+
+    s = client.get(f"/api/live-quiz/games/{code}/state?after_version={s_ver}", headers=auth_header(student1["token"])).json()
+    assert s.get("unchanged") is True, f"student woken by someone else's answer: {s}"
+
+    h = client.get(f"/api/live-quiz/games/{code}/state?after_version={host0['version']}",
+                   headers=auth_header(teacher["token"])).json()
+    assert not h.get("unchanged") and h["answered_count"] == host0["answered_count"] + 1, h
+
+    # a host action still wakes the student
+    client.post(f"/api/live-quiz/games/{code}/reveal", json={}, headers=auth_header(teacher["token"]))
+    s2 = client.get(f"/api/live-quiz/games/{code}/state?after_version={s_ver}", headers=auth_header(student1["token"])).json()
+    assert not s2.get("unchanged") and s2["status"] == "reveal", s2
