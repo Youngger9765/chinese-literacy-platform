@@ -10,10 +10,11 @@ from __future__ import annotations
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Path, Query
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request
 from sqlalchemy.orm import Session
 
-from ..auth.dependencies import get_current_user
+from ..auth.dependencies import get_current_user, oauth2_scheme
+from ..auth.jwt import decode_token
 from ..auth.rate_limiter import InMemoryRateLimiter
 from ..database import get_db
 from ..models.user import User
@@ -139,15 +140,43 @@ def remove_player(
     engine.remove_player(db, game, current_user, player_id)
 
 
+def _unchanged_from_memory(code: str, after_version: int | None, token: str | None) -> dict | None:
+    """Steady-state fast path (see engine._FastPollCache): a verified JWT plus
+    a recent full poll by the same player. Anything else falls through to the
+    normal authenticated, DB-backed path below."""
+    if after_version is None or not token:
+        return None
+    try:
+        user_id = int(decode_token(token)["sub"])
+    except Exception:
+        return None
+    return engine.fast_poll_cache.unchanged(code.upper(), user_id, after_version)
+
+
+async def _state_user(
+    request: Request,
+    code: GameCode,
+    after_version: int | None = Query(default=None),
+    token: str | None = Depends(oauth2_scheme),
+    db: Session = Depends(get_db),
+):
+    fast = _unchanged_from_memory(code, after_version, token)
+    if fast is not None:
+        return fast
+    return await get_current_user(request, token, db)
+
+
 @router.get("/games/{code}/state")
 def get_state(
     code: GameCode,
     after_version: int | None = Query(default=None),
-    current_user: User = Depends(get_current_user),
+    resolved=Depends(_state_user),
     db: Session = Depends(get_db),
 ):
+    if isinstance(resolved, dict):  # answered from memory, no DB touched
+        return resolved
     game = engine.get_game_by_code(db, code)
-    return engine.build_state(db, game, current_user, after_version=after_version)
+    return engine.build_state(db, game, resolved, after_version=after_version)
 
 
 @router.post("/games/{code}/answer")

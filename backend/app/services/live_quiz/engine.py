@@ -9,6 +9,9 @@ cleanly.
 """
 from __future__ import annotations
 
+import threading
+import time
+
 import random
 import secrets
 from datetime import datetime, timedelta, timezone
@@ -216,6 +219,7 @@ def _maybe_expire(db: Session, game: LiveQuizGame) -> None:
         game.cached_leaderboard = _compute_leaderboard(game)
         game.version += 1
         db.commit()
+        fast_poll_cache.invalidate(game.code)
         db.refresh(game)
 
 
@@ -357,9 +361,11 @@ def remove_player(db: Session, game: LiveQuizGame, user: User, player_id: int) -
     ).first()
     if player is None:
         raise HTTPException(status_code=404, detail="Player not found in this game")
+    removed_user_id = player.user_id
     db.delete(player)
     game.version += 1
     db.commit()
+    fast_poll_cache.forget_player(game.code, removed_user_id)
 
 
 def start_game(
@@ -379,6 +385,7 @@ def start_game(
     game.current_round_started_at = _now()
     game.version += 1
     db.commit()
+    fast_poll_cache.invalidate(game.code)
     db.refresh(game)
     return game
 
@@ -395,6 +402,7 @@ def reveal_round(
     game.cached_leaderboard = _compute_leaderboard(game)
     game.version += 1
     db.commit()
+    fast_poll_cache.invalidate(game.code)
     db.refresh(game)
     return game
 
@@ -415,6 +423,7 @@ def next_round(
     game.status = "question"
     game.version += 1
     db.commit()
+    fast_poll_cache.invalidate(game.code)
     db.refresh(game)
     return game
 
@@ -439,6 +448,7 @@ def end_game(
     game.cached_leaderboard = _compute_leaderboard(game)
     game.version += 1
     db.commit()
+    fast_poll_cache.invalidate(game.code)
     db.refresh(game)
     return game
 
@@ -574,6 +584,73 @@ def submit_answer(db: Session, game: LiveQuizGame, player: LiveQuizPlayer, submi
 _PHASE_ORDER = {"lobby": 0, "question": 1, "reveal": 2, "ended": 3}
 
 
+class _FastPollCache:
+    """Answer a player's unchanged poll from memory (per process).
+
+    After the first two load fixes, 3 games x 30 players on one staging
+    instance still sat at ~2 s p50 per poll: every unchanged poll ran 3
+    SELECTs (user, game, player). A player's poll is answered without the DB
+    only when BOTH hold:
+      - this player passed a full, authenticated poll within PLAYER_TTL
+        (so presence, deactivation and must-change-password are re-checked
+        at least that often, and the host's online indicator stays right);
+      - this game's phase was read from the DB within PHASE_TTL (host
+        actions in this process invalidate it at once; in another instance
+        a student sees the change at most PHASE_TTL later).
+    """
+
+    PHASE_TTL = 1.0
+    # a third of the online window: worst-case presence age stays under it
+    # (presence write throttle 1/2 + this 1/3 < 1)
+    PLAYER_TTL = ONLINE_WINDOW_SECONDS / 3
+    MAX = 50000
+
+    def __init__(self):
+        self._phase: dict[str, tuple[int, str, float]] = {}
+        self._players: dict[tuple[str, int], float] = {}
+        self._lock = threading.Lock()
+
+    def remember(self, code: str, user_id: int, version: int, status: str) -> None:
+        now = time.monotonic()
+        with self._lock:
+            if len(self._players) >= self.MAX:
+                self._players.clear()
+                self._phase.clear()
+            self._phase[code] = (version, status, now + self.PHASE_TTL)
+            self._players[(code, user_id)] = now + self.PLAYER_TTL
+
+    def unchanged(self, code: str, user_id: int, after_version: int) -> dict | None:
+        now = time.monotonic()
+        with self._lock:
+            ph = self._phase.get(code)
+            pl = self._players.get((code, user_id))
+        if ph is None or pl is None or ph[2] < now or pl < now or ph[0] != after_version:
+            return None
+        return {
+            "code": code,
+            "status": ph[1],
+            "version": ph[0],
+            "server_now": _now().isoformat(),
+            "unchanged": True,
+        }
+
+    def invalidate(self, code: str) -> None:
+        with self._lock:
+            self._phase.pop(code, None)
+
+    def forget_player(self, code: str, user_id: int) -> None:
+        with self._lock:
+            self._players.pop((code, user_id), None)
+
+    def clear(self) -> None:
+        with self._lock:
+            self._phase.clear()
+            self._players.clear()
+
+
+fast_poll_cache = _FastPollCache()
+
+
 def _player_phase_version(game: LiveQuizGame) -> int:
     """What a PLAYER's poll is versioned on. ``game.version`` also moves on
     every join and every answer (the host needs those live), but a player's
@@ -612,6 +689,8 @@ def build_state(db: Session, game: LiveQuizGame, user: User, after_version: int 
         db.commit()
 
     version = game.version if is_host else _player_phase_version(game)
+    if player is not None:
+        fast_poll_cache.remember(game.code, user.id, version, game.status)
     if after_version is not None and after_version == version:
         return {
             "code": game.code,
