@@ -571,6 +571,19 @@ def submit_answer(db: Session, game: LiveQuizGame, player: LiveQuizPlayer, submi
 # Role-aware state (polling)
 # ---------------------------------------------------------------------------
 
+_PHASE_ORDER = {"lobby": 0, "question": 1, "reveal": 2, "ended": 3}
+
+
+def _player_phase_version(game: LiveQuizGame) -> int:
+    """What a PLAYER's poll is versioned on. ``game.version`` also moves on
+    every join and every answer (the host needs those live), but a player's
+    screen only changes on host actions — start / next / reveal / end. Using
+    game.version for players woke all N of them on each of the N answers in
+    a round, each re-reading the round's answers: O(n^2) per question
+    (2026-10-15 staging load test). Monotonic as the game advances."""
+    return (game.current_round_index + 1) * 4 + _PHASE_ORDER.get(game.status, 0)
+
+
 def build_state(db: Session, game: LiveQuizGame, user: User, after_version: int | None = None) -> dict:
     """Role-aware poll response — see also UI/UX review 2026-10-15 items
     #2 (reading phase), #4 (resume with server-side timing — every timestamp
@@ -587,15 +600,23 @@ def build_state(db: Session, game: LiveQuizGame, user: User, after_version: int 
     # Presence (#6): bumped on EVERY poll, even the cheap "unchanged" path
     # below — that's the one signal that must never be skipped, since it's
     # the only thing that changes almost every call.
-    if player is not None:
+    # Throttled: writing (and committing) on every 1 s poll was the main cost
+    # under load (2026-10-15 staging, 90 pollers: p95 19.5 s) — the commit also
+    # expired the game row, forcing a re-read of its whole rounds snapshot.
+    # Half the online window keeps the host's indicator accurate.
+    if player is not None and (
+        player.last_seen_at is None
+        or now - _aware(player.last_seen_at) >= timedelta(seconds=ONLINE_WINDOW_SECONDS / 2)
+    ):
         player.last_seen_at = now
         db.commit()
 
-    if after_version is not None and after_version == game.version:
+    version = game.version if is_host else _player_phase_version(game)
+    if after_version is not None and after_version == version:
         return {
             "code": game.code,
             "status": game.status,
-            "version": game.version,
+            "version": version,
             "server_now": now.isoformat(),
             "unchanged": True,
         }
@@ -620,7 +641,7 @@ def build_state(db: Session, game: LiveQuizGame, user: User, after_version: int 
             game.status == "question" and answer_open_at is not None and now < answer_open_at
         )
         round_view = round_module.player_view(payload, revealed, show_options=not in_reading_phase)
-        if game.status in ("question", "reveal"):
+        if is_host and game.status in ("question", "reveal"):
             round_answers = (
                 db.query(LiveQuizAnswer)
                 .filter(LiveQuizAnswer.game_id == game.id, LiveQuizAnswer.round_index == idx)
@@ -683,7 +704,7 @@ def build_state(db: Session, game: LiveQuizGame, user: User, after_version: int 
     state = {
         "code": game.code,
         "status": game.status,
-        "version": game.version,
+        "version": version,
         "server_now": now.isoformat(),
         "round_index": idx,
         "rounds_total": rounds_total,
