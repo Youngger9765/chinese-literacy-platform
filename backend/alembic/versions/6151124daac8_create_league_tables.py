@@ -3,8 +3,13 @@
 See docs/prd/2026-10-14-chinese-star-league-prd.md §7/§10/§11.
 
 Revision ID: 6151124daac8
-Revises: d5e6f7g8h9i0
+Revises: c371b776d12f
 Create Date: 2026-10-15 00:00:00.000000
+
+Note: originally created against d5e6f7g8h9i0; re-chained onto
+c371b776d12f (live_quiz, #3551) after that migration landed on staging
+first from a parallel branch — both had the same down_revision, which
+would have produced two heads. No schema change, just revision ordering.
 
 """
 from typing import Union
@@ -15,7 +20,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision: str = "6151124daac8"
-down_revision: Union[str, None] = "d5e6f7g8h9i0"
+down_revision: Union[str, None] = "c371b776d12f"
 branch_labels = None
 depends_on = None
 

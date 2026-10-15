@@ -23,6 +23,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import StudentProgressDashboard from '../../components/student/StudentProgressDashboard';
 import RecommendedStories from '../../components/student/RecommendedStories';
 import SessionResumePrompt from '../../components/SessionResumePrompt';
+import LiveQuizInviteBanner from '../../components/student/home/LiveQuizInviteBanner';
 import RecentBadgesStrip from '../../components/gamification/RecentBadgesStrip';
 import QuickPracticeStrip from '../../components/student/QuickPracticeStrip';
 import {
@@ -134,6 +135,10 @@ const StudentHome: React.FC = () => {
           <SessionResumePrompt onDismiss={() => setShowResumePrompt(false)} />
         </div>
       )}
+
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-4">
+        <LiveQuizInviteBanner />
+      </div>
 
       <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-6 pb-10 space-y-6">
         {/* ── Top row: compact greeting + inline XP pill ─────────────────── */}
