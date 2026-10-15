@@ -13,7 +13,8 @@ from sqlalchemy.orm import Session
 
 from ..database import get_db
 from ..models.user import User
-from ..auth.dependencies import get_current_user
+from ..auth.dependencies import get_current_user, oauth2_scheme
+from ..auth.jwt import decode_token
 from ..auth.rate_limiter import ai_rate_limiter, get_client_key
 from ..services.lesson_loader import (
     search_lessons, get_lesson_by_id, get_available_grades,
@@ -563,8 +564,48 @@ def list_stories(
     )
 
 
+# -- #3555: no answer key for anonymous callers ------------------------------
+# GET /stories/{id} is public. Without a valid login it used to return every
+# multiple-choice `answer` (871 MCQs in 176 of 179 lessons on staging,
+# 2026-10-15). Anonymous callers now get the questions without `answer` /
+# `explanation` (top level and every repeat round). A verified JWT — signature
+# only, no DB round trip — still gets them, because the student renderers grade
+# locally.
+_MCQ_ANSWER_KEYS = ("answer", "explanation")
+
+
+def _strip_mcq_answers(items):
+    if not items:
+        return items
+    return [
+        {k: v for k, v in q.items() if k not in _MCQ_ANSWER_KEYS} if isinstance(q, dict) else q
+        for q in items
+    ]
+
+
+def _strip_round_mcq_answers(rounds):
+    if not rounds:
+        return rounds
+    out = {}
+    for slug, mods in rounds.items():
+        if isinstance(mods, dict) and mods.get("multiple_choice"):
+            mods = dict(mods)
+            mods["multiple_choice"] = _strip_mcq_answers(mods["multiple_choice"])
+        out[slug] = mods
+    return out
+
+
+def _has_valid_login(token: str | None) -> bool:
+    if not token:
+        return False
+    try:
+        return bool(decode_token(token).get("sub"))
+    except Exception:
+        return False
+
+
 @router.get("/stories/{story_id}", response_model=StoryDetail)
-def get_story(story_id: str):
+def get_story(story_id: str, token: str | None = Depends(oauth2_scheme)):
     """Get full story detail by ID (lesson_number).
 
     Accepts a numeric string (e.g. "3") or L-prefixed format (e.g. "L06").
@@ -602,6 +643,7 @@ def get_story(story_id: str):
     # passage is worse than serving none.
     key_reading = story.get("key_reading")
 
+    logged_in = _has_valid_login(token)  # #3555
     return StoryDetail(
         id=story["id"],
         lesson_number=story["lesson_number"],
@@ -625,7 +667,7 @@ def get_story(story_id: str):
         paragraphs=story["paragraphs"],
         vocabulary=story["vocabulary"],
         fill_in_blank=story["fill_in_blank"],
-        multiple_choice=story["multiple_choice"],
+        multiple_choice=story["multiple_choice"] if logged_in else _strip_mcq_answers(story["multiple_choice"]),  # #3555
         vocab_bank=story.get("vocab_bank"),
         knowledge_video_url=story.get("knowledge_video_url"),
         # Full video list (#1683): catalog has multiple videos; frontend KnowledgeStation renders all.
@@ -648,7 +690,7 @@ def get_story(story_id: str):
         #    後端算得再對也送不出去，而且不會有任何錯誤或紅燈。
         #    2026-08-25 實測：L0063 三輪的資料在 loader 裡都在，
         #    但 API 回應的 repeat_rounds 是空的，就是漏了這兩行。
-        repeat_rounds=story.get("repeat_rounds"),
+        repeat_rounds=story.get("repeat_rounds") if logged_in else _strip_round_mcq_answers(story.get("repeat_rounds")),  # #3555
         key_readings=story.get("key_readings"),
         worksheet_intro=story.get("worksheet_intro"),
         # Lesson intro (#1443) — docx 說明/導讀 or excel fallback
