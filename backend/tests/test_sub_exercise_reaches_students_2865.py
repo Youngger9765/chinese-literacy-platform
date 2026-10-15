@@ -155,9 +155,13 @@ def test_sub_exercises_are_excluded_from_the_used_code_mechanic():
     #    同一個守衛多守一件事。
     #    改成只比對前綴，讓「再加一個 && 條件」不會誤報，但把 `isSubExercise`
     #    整個拿掉仍然會紅。
-    assert "if (!isSubExercise" in src, \
+    #    #3560 把 usedCodes 的寫入搬進答對後的 setTimeout，守衛先算成
+    #    `const shouldLockCode = !isSubExercise && …`；兩種寫法都接受，
+    #    拿掉 `!isSubExercise` 仍然會紅。
+    import re
+    assert re.search(r"if \(!isSubExercise|shouldLockCode = !isSubExercise", src), \
         "答對時仍會寫進 usedCodes —— 會關掉後面某一題的正確答案"
-    assert "!isSubExercise && usedCodes.has(code)" in src, \
+    assert re.search(r"!isSubExercise\s*&&\s*usedCodes\.has\(code\)", src), \
         "選項仍會被灰掉 —— 看得到但點不下去"
     assert src.index("const currentSentence") < src.index("const isSubExercise"), \
         "isSubExercise 宣告在 currentSentence 之前 —— mount 會 TDZ 白屏"

@@ -375,11 +375,22 @@ const FillInBlankExercise: React.FC<Props> = ({
       // ⛔ 子練習答對不記進 usedCodes —— 那份集合是給主題目的一對一配對用的，
       //    記進去會把後面某一題的正確答案關掉（見 isSubExercise 那段）。
       // 只有在「一個詞配一題」成立時才鎖 —— 否則會把後面某一題的正解關掉（#3117）。
-      if (!isSubExercise && oneToOne) {
-        const newUsed = new Set(usedCodes);
-        newUsed.add(code);
-        setUsedCodes(newUsed);
-      }
+      //
+      // 🔴 #3560 — `usedCodes` 的更新以前寫在這裡，跟下面 `setCurrentIdx`
+      // 的 1200ms 延遲**不是同一個 tick**。真環境重現（lesson 20016 語詞
+      // 應用第 2 題「諧音」）：答對的瞬間 usedCodes 就立刻存進
+      // localStorage／DB（#2848 那個 useEffect 監聽 usedCodes 變動），
+      // 但 currentIdx 還停在**剛剛那一題**整整 1.2 秒（「答對了！」動畫
+      // 還在跑）。平板上這 1.2 秒很容易被中斷（關頁、斷線、下課鈴）——
+      // 一中斷，存下來的進度就是「currentIdx 還指著這一題，但這一題
+      // 自己的正確答案已經被標記用過」。重新打開時，這一題的正解就顯示
+      // 成灰色、不可點的「已使用」decoy，學生永遠答不了這一題。
+      //
+      // 修法：把 usedCodes 的更新搬進下面的 setTimeout，跟 currentIdx
+      // 的前進綁在同一個 tick —— 兩者要嘛一起還沒發生，要嘛一起發生，
+      // 不會再有「只做了一半」的中間快照。用 functional updater（讀
+      // prev）而非這裡捕捉的 `usedCodes`，避免 1200ms 後讀到過期的閉包值。
+      const shouldLockCode = !isSubExercise && oneToOne;
 
       const alreadyRecorded = firstTryResults.some((r) => r.sentenceIdx === currentOriginalIdx);
       if (!alreadyRecorded) {
@@ -400,6 +411,13 @@ const FillInBlankExercise: React.FC<Props> = ({
       // A10: auto-advance after correct — hold ~1.2s so the student sees their
       // correct word sitting in the sentence bracket before moving on.
       setTimeout(() => {
+        if (shouldLockCode) {
+          setUsedCodes((prev) => {
+            const next = new Set(prev);
+            next.add(code);
+            return next;
+          });
+        }
         setCurrentIdx((i) => i + 1);
         setFeedback('idle');
         setSelectedCode(null);
@@ -644,7 +662,15 @@ const FillInBlankExercise: React.FC<Props> = ({
               demo?.step === 'pick' ? 'ring-4 ring-amber-300/40 rounded-2xl p-1' : ''
             }`}>
               {availableEntries.map(([code, word]) => {
-                const isUsedDecoy = !isSubExercise && usedCodes.has(code);
+                // #3560 第二道防線：就算 usedCodes 裡混進了「當前這一題自己的
+                // 正解代號」（例如舊版留下的壞快照、或任何我們還沒想到的來源），
+                // 畫面上也絕對不可以把它畫成灰色不可點的已使用 decoy —— 一旦
+                // 畫成那樣，學生就永遠答不了當下這一題。「已使用」只該管
+                // 別的題目用過的代號，不該管這一題自己的正解。
+                const isUsedDecoy =
+                  !isSubExercise &&
+                  usedCodes.has(code) &&
+                  !isAcceptedCode(currentSentence, code);
                 const isDemoTarget = demo?.targetCode === code;
                 const isWrongSelected =
                   feedback === 'wrong' &&
