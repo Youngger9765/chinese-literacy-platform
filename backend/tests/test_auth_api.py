@@ -1926,3 +1926,32 @@ class TestHasClassroomLoginResponse:
         })
         assert resp.status_code == 200
         assert resp.json()["has_classroom"] is True
+
+
+class TestClassroomLoginBurst:
+    def test_thirty_students_on_one_school_ip_can_all_log_in(self, client):
+        """2026-10-15 staging: a class of 30 tablets shares one school IP.
+        Login was limited to 10/min per IP, so 30 students needed 154 s to
+        get in and 20 of them saw 429s. Distinct accounts behind one IP must
+        not throttle each other; brute force on ONE account is still capped
+        (see TestRateLimiting.test_login_rate_limit_exceeded)."""
+        import uuid
+        from app.routes.auth import rate_limiter
+
+        users = []
+        for i in range(30):
+            rate_limiter.reset()  # setup only: register is 5/min per IP
+            email = f"burst{i}_{uuid.uuid4().hex[:6]}@example.com"
+            r = client.post("/api/auth/register", json={"email": email, "password": "SecurePass123!", "name": f"Burst {i}"})
+            assert r.status_code == 201, r.text
+            tok = r.json().get("verification_token")
+            if tok:
+                client.get(f"/api/auth/verify-email?token={tok}")
+            users.append(email)
+        rate_limiter.reset()
+        statuses = [
+            client.post("/api/auth/login", json={"email": e, "password": "SecurePass123!"}).status_code
+            for e in users
+        ]
+        assert statuses.count(429) == 0, statuses
+        assert statuses.count(200) == 30, statuses
