@@ -120,3 +120,45 @@ def test_another_students_answer_does_not_wake_every_student(client, teacher, st
     client.post(f"/api/live-quiz/games/{code}/reveal", json={}, headers=auth_header(teacher["token"]))
     s2 = client.get(f"/api/live-quiz/games/{code}/state?after_version={s_ver}", headers=auth_header(student1["token"])).json()
     assert not s2.get("unchanged") and s2["status"] == "reveal", s2
+
+
+def test_steady_state_unchanged_poll_touches_no_db(client, teacher, student1):
+    """3-games staging run after the first two fixes: answers no longer timed
+    out, but polls still took ~2 s at p50 because every unchanged poll ran 3
+    SELECTs (user, game, player). Once a player has done a full poll, repeat
+    unchanged polls within the presence window are answered from memory."""
+    code = _joined_game(client, teacher, student1)
+    ver = client.get(f"/api/live-quiz/games/{code}/state", headers=auth_header(student1["token"])).json()["version"]
+    with _SqlCounter() as c:
+        for _ in range(3):
+            r = client.get(f"/api/live-quiz/games/{code}/state?after_version={ver}", headers=auth_header(student1["token"]))
+            assert r.status_code == 200 and r.json().get("unchanged") is True
+    assert c.stmts == [], f"unchanged polls still hit the DB: {c.stmts}"
+
+
+def test_fast_path_does_not_hide_a_host_action(client, teacher, student1):
+    code = _joined_game(client, teacher, student1)
+    ver = client.get(f"/api/live-quiz/games/{code}/state", headers=auth_header(student1["token"])).json()["version"]
+    client.post(f"/api/live-quiz/games/{code}/reveal", json={}, headers=auth_header(teacher["token"]))
+    s = client.get(f"/api/live-quiz/games/{code}/state?after_version={ver}", headers=auth_header(student1["token"])).json()
+    assert not s.get("unchanged") and s["status"] == "reveal", s
+
+
+def test_fast_path_still_requires_a_valid_token(client, teacher, student1):
+    code = _joined_game(client, teacher, student1)
+    ver = client.get(f"/api/live-quiz/games/{code}/state", headers=auth_header(student1["token"])).json()["version"]
+    r = client.get(f"/api/live-quiz/games/{code}/state?after_version={ver}", headers=auth_header("not-a-jwt"))
+    assert r.status_code == 401
+    r = client.get(f"/api/live-quiz/games/{code}/state?after_version={ver}")
+    assert r.status_code == 401
+
+
+def test_fast_path_does_not_serve_a_non_member(client, teacher, student1):
+    from tests.test_live_quiz_engine import _register_user, _grant_student_role
+
+    code = _joined_game(client, teacher, student1)
+    ver = client.get(f"/api/live-quiz/games/{code}/state", headers=auth_header(student1["token"])).json()["version"]
+    outsider = _register_user(client, "lq_fast_out")
+    _grant_student_role(outsider["user_id"])
+    r = client.get(f"/api/live-quiz/games/{code}/state?after_version={ver}", headers=auth_header(outsider["token"]))
+    assert r.status_code == 403, r.text
