@@ -73,8 +73,8 @@ jobs:
       # Classroom capacity (2026-10-16 CTO review), learning experience first:
       # min 1 warm instance (Young 2026-10-16) so the first class of the day never
       # waits for a cold start (~US$13/month); up to 12 instances x 40 concurrent requests covers
-      # 10 classes reading or playing the live quiz at once. DB pool 8+4 per
-      # instance = 144 connections, under the 400 allowed by db-custom-2-7680.
+      # 10 classes reading or playing the live quiz at once. DB pool 6+2 per
+      # instance = 96 connections, under the 100 allowed by db-custom-1-3840.
       - name: Deploy backend to Cloud Run
         run: |
           gcloud run deploy ${{ env.BACKEND_SERVICE }} \
@@ -90,7 +90,7 @@ jobs:
             --timeout=300s \
             --add-cloudsql-instances=lingoleap-dev:asia-east1:lingoleap-db \
             --service-account=lingoleap-junyi-bq@lingoleap-dev.iam.gserviceaccount.com \
-            --set-env-vars="^::^ALLOWED_ORIGINS=https://lingoleap-frontend-958347263320.asia-east1.run.app,https://lingoleap-prod.web.app::DATABASE_URL=${{ secrets.DATABASE_URL }}::RUN_MIGRATIONS=true::AZURE_SPEECH_KEY=${{ secrets.AZURE_SPEECH_KEY }}::AZURE_SPEECH_REGION=eastus::TTS_PROVIDER=azure::ENVIRONMENT=production::ENABLE_TEST_SEED=false::JWT_SECRET_KEY=${{ secrets.PROD_JWT_SECRET_KEY }}::GCS_OMO_BUCKET=lingoleap-omo-uploads-prod::READING_AUDIO_GCS_BUCKET=lingoleap-reading-audio-prod::BUILD_SHA=${{ github.sha }}::JUNYI_CLASS_IMPORT_ENABLED=true::JUNYI_BQ_MODE=real::DB_POOL_SIZE=8::DB_MAX_OVERFLOW=4::ASYNC_THREAD_WORKERS=32"
+            --set-env-vars="^::^ALLOWED_ORIGINS=https://lingoleap-frontend-958347263320.asia-east1.run.app,https://lingoleap-prod.web.app::DATABASE_URL=${{ secrets.DATABASE_URL }}::RUN_MIGRATIONS=true::AZURE_SPEECH_KEY=${{ secrets.AZURE_SPEECH_KEY }}::AZURE_SPEECH_REGION=eastus::TTS_PROVIDER=azure::ENVIRONMENT=production::ENABLE_TEST_SEED=false::JWT_SECRET_KEY=${{ secrets.PROD_JWT_SECRET_KEY }}::GCS_OMO_BUCKET=lingoleap-omo-uploads-prod::READING_AUDIO_GCS_BUCKET=lingoleap-reading-audio-prod::BUILD_SHA=${{ github.sha }}::JUNYI_CLASS_IMPORT_ENABLED=true::JUNYI_BQ_MODE=real::DB_POOL_SIZE=6::DB_MAX_OVERFLOW=2::ASYNC_THREAD_WORKERS=32"
 
       # #3162: staging has had this since #1449; production never got it.
       #
