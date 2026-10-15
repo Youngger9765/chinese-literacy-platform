@@ -272,3 +272,36 @@ class TestComputeStudentScore:
                 db_session, student.id, 5, WINDOW_START, WINDOW_END, LEAGUE_WEIGHTS_V1
             )
         assert result.points == 0.0
+
+
+class TestRealCatalogueGrades:
+    """Staging 2026-10-16: the first real self-chosen completion made
+    /league/seasons/{id}/my-summary 500 ("'<' not supported between 'str' and
+    'int'"). Every lesson's catalogue grade is a STRING ('4'..'9'), and 27 of
+    179 are categories ('文言文', '品格教育'). The tests above patch grades as
+    ints, so they never saw it. These use the real catalogue, no patch."""
+
+    def _score(self, db_session, slug, team_grade):
+        student = make_student(db_session)
+        complete_lesson(
+            db_session, student, slug,
+            started_at=NOW - timedelta(minutes=10), completed_at=NOW, session_mode="self_study",
+        )
+        db_session.commit()
+        return compute_student_score(
+            db_session, student.id, team_grade, WINDOW_START, WINDOW_END, LEAGUE_WEIGHTS_V1
+        )
+
+    def test_numeric_string_grade_counts_at_or_above_the_floor(self, db_session):
+        r = self._score(db_session, "20011", 4)  # catalogue grade '4'
+        assert r.lessons_counted == 1
+
+    def test_numeric_string_grade_below_the_floor_does_not_count(self, db_session):
+        r = self._score(db_session, "20011", 9)  # '4' < 9 - 2
+        assert r.lessons_counted == 0
+
+    def test_category_lessons_count_for_any_team(self, db_session):
+        """文言文 / 品格教育 are not grade-levelled; a student who reads one on
+        their own still contributes (excluding them would discourage it)."""
+        assert self._score(db_session, "20156", 9).lessons_counted == 1  # 文言文
+        assert self._score(db_session, "20167", 4).lessons_counted == 1  # 品格教育
