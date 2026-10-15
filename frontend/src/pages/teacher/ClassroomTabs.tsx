@@ -8,13 +8,15 @@ import React from 'react';
 import CoTeachingTab from './CoTeachingTab';
 import AssignmentsPanel from './panel/AssignmentsPanel';
 import ClassDataTab, { type DataView as ClassDataView } from './panel/ClassDataTab';
+import LeagueProgressTab from './panel/LeagueProgressTab';
 
-type TabKey = 'settings' | 'assignments' | 'data';
+type TabKey = 'settings' | 'assignments' | 'data' | 'league';
 
 export const TABS: { key: TabKey; label: string }[] = [
   { key: 'settings', label: '班級設定' },
   { key: 'assignments', label: '指派任務' },
   { key: 'data', label: '班級數據' },
+  { key: 'league', label: '班級賽' },
 ];
 
 const ALL_KEYS = new Set<string>(TABS.map((tab) => tab.key));
@@ -171,6 +173,8 @@ const ClassroomTabs: React.FC<ClassroomTabsProps> = ({
         onViewChange={onViewChange}
       />
     )}
+
+    {activeTab === 'league' && <LeagueProgressTab classroomId={classroomId} />}
         </div>
       </div>
     </div>

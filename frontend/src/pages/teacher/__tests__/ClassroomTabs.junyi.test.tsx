@@ -32,6 +32,9 @@ vi.mock('../panel/ClassDataTab', () => ({
     </div>
   ),
 }));
+vi.mock('../panel/LeagueProgressTab', () => ({
+  default: () => <div>LeagueProgressTab</div>,
+}));
 
 const props = {
   activeTab: 'settings' as const,
@@ -46,11 +49,18 @@ const props = {
 };
 
 describe('ClassroomTabs — Junyi three-tab layout (#3384)', () => {
-  it('shows exactly the three Junyi-named tabs in order', () => {
+  // 班級賽 (league MVP, docs/prd/2026-10-14-chinese-star-league-prd.md §10)
+  // added as a 4th tab after the original three.
+  it('shows the Junyi-named tabs plus 班級賽 in order', () => {
     render(<ClassroomTabs {...props} />);
     const labels = screen.getAllByRole('tab').map((t) => t.getAttribute('aria-label') ?? t.textContent);
-    expect(labels).toEqual(['班級設定', '指派任務', '班級數據']);
-    expect(TABS.map((t) => t.key)).toEqual(['settings', 'assignments', 'data']);
+    expect(labels).toEqual(['班級設定', '指派任務', '班級數據', '班級賽']);
+    expect(TABS.map((t) => t.key)).toEqual(['settings', 'assignments', 'data', 'league']);
+  });
+
+  it('班級賽 renders the league progress tab', () => {
+    render(<ClassroomTabs {...props} activeTab="league" />);
+    expect(screen.getByText('LeagueProgressTab')).toBeInTheDocument();
   });
 
   it('班級設定 renders the passed-in settings content plus co-teaching management', () => {

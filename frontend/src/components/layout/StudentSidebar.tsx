@@ -74,6 +74,7 @@ export function getStudentNavItems(pendingAssignmentCount = 0): NavItem[] {
     { icon: '🏠', label: '主頁', path: '/student' },
     { icon: '📚', label: '圖書館', path: '/library' },
     { icon: '🏫', label: '班級作業', path: '/assignments', badge: pendingAssignmentCount },
+    { icon: '🏆', label: '我們班', path: '/student/our-class' },
     { icon: '🎮', label: '課堂搶答', path: '/live' },
     { icon: '➕', label: '加入班級', path: '/join' },
     { icon: '📖', label: '學習紀錄', path: '/learning-history' },

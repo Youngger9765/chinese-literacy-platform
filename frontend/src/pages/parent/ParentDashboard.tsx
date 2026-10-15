@@ -32,6 +32,7 @@ import {
   listLinkedChildren,
   redeemParentInviteCode,
 } from '../../services/parentApi';
+import { getMyLeagueHistory, type LeagueMySummary } from '../../services/leagueApi';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -118,6 +119,48 @@ const ChartTooltip: React.FC<TooltipProps> = ({ active, payload, label }) => {
   );
 };
 
+// ── League tile — one extra tile, NO RANK (PRD §10 UIUX) ─────────────────────
+// Parents see their own linked child's contribution + class average, never
+// another family's child, and never a cross-class rank/position.
+
+const LeagueTile: React.FC<{ studentId: number; token: string }> = ({ studentId, token }) => {
+  const [seasons, setSeasons] = useState<LeagueMySummary[] | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    getMyLeagueHistory(token, studentId)
+      .then((rows) => {
+        if (!cancelled) setSeasons(rows);
+      })
+      .catch(() => {
+        if (!cancelled) setSeasons([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [token, studentId]);
+
+  if (seasons === null) {
+    return <div className="bg-gray-100 rounded-xl h-14 animate-pulse" />;
+  }
+  if (seasons.length === 0) {
+    return (
+      <div className="rounded-xl p-3 bg-white border border-gray-200 text-sm text-gray-500">
+        🏆 班級賽：目前沒有進行中的班級賽季
+      </div>
+    );
+  }
+  const latest = seasons[0];
+  return (
+    <div className="rounded-xl p-3 bg-white border border-gray-200 flex items-center justify-between text-sm">
+      <span className="text-gray-600">🏆 {latest.season_name}</span>
+      <span className="text-gray-900 font-medium">
+        貢獻 {latest.my_points} 分（班級平均 {latest.class_average_points.toFixed(1)}）
+      </span>
+    </div>
+  );
+};
+
 // ── Child progress panel ──────────────────────────────────────────────────────
 
 const ChildProgressPanel: React.FC<{ child: LinkedChild; token: string }> = ({
@@ -198,6 +241,9 @@ const ChildProgressPanel: React.FC<{ child: LinkedChild; token: string }> = ({
           icon="⭐"
         />
       </div>
+
+      {/* 班級賽 tile — one extra tile, no rank (PRD §10 UIUX) */}
+      <LeagueTile studentId={child.student_id} token={token} />
 
       {data.total_sessions === 0 && (
         <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm text-amber-800">
