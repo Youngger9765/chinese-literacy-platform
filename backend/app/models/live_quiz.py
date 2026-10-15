@@ -1,4 +1,4 @@
-"""Live Quiz (課堂搶答, UI label 班級經營) — Kahoot-style class-wide quiz.
+"""Live Quiz (課堂搶答, UI label 班級經營) — in-class, live-paced quiz game.
 Issue #3551. Not to be confused with 競賽, a separate future league module.
 
 Three tables, deliberately generic so a second round type (字盤找詞回合,
@@ -7,7 +7,7 @@ word search — next PR) can plug in without a schema change:
 - LiveQuizGame    — one play session. rounds_snapshot is a frozen JSON
   list of {round_index, round_type, payload} built once at creation time
   (independence rule #3 in the PRD: a later curriculum edit must never affect
-  a game already in flight). settings is the Kahoot-style options the host
+  a game already in flight). settings is the live-paced options the host
   picked (seconds, shuffle, show_leaderboard_after_each, double_points_last,
   streak_bonus, practice_mode, question_count_mode) — see
   specs/modules/live-quiz/INTENT.md for what each one does.
@@ -82,7 +82,7 @@ class LiveQuizGame(Base):
     )
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="lobby", index=True)
 
-    # Kahoot-style settings the host picked at setup. Frozen at creation —
+    # Live-paced settings the host picked at setup. Frozen at creation —
     # changing a teacher's "defaults" later must never reach a running game.
     settings: Mapped[dict] = mapped_column(
         JSONB, nullable=False, server_default=text("'{}'::jsonb")

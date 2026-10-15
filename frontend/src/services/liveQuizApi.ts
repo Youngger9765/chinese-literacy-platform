@@ -17,6 +17,29 @@ export class LiveQuizApiError extends Error {
   }
 }
 
+// The game code is 6 digits (see backend services/live_quiz/codes.py), and
+// it reaches this file two ways: typed by hand (already sanitized to
+// digits-only by StudentLiveQuizJoin) and from a route param (`/live/:code`,
+// `/teacher/live/:code`) — a raw URL segment a caller can put ANYTHING in,
+// including `..%2F..%2Fsomething`. Every function below that builds a
+// fetch path from `code` validates it first, so a crafted link can never
+// turn into a request against some other endpoint carrying the caller's
+// bearer token (client-side path traversal / CSPT). Callers that read
+// `code` from `useParams` should check `isValidLiveQuizCode` themselves
+// too, so a malformed code never even reaches these functions — see
+// StudentLiveQuizPlay.tsx / TeacherLiveQuizHost.tsx / TeacherLiveQuizHistory.tsx.
+const GAME_CODE_RE = /^\d{6}$/;
+
+export function isValidLiveQuizCode(code: string | null | undefined): code is string {
+  return typeof code === 'string' && GAME_CODE_RE.test(code);
+}
+
+function assertGameCode(code: string): void {
+  if (!GAME_CODE_RE.test(code)) {
+    throw new LiveQuizApiError('無效的課堂搶答代碼', 400);
+  }
+}
+
 function authHeaders(token: string): Record<string, string> {
   return { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
 }
@@ -227,7 +250,8 @@ export async function joinLiveQuizGame(
   token: string,
   code: string,
 ): Promise<{ player_id: number; display_name: string; game_code: string }> {
-  const res = await fetch(`${API_BASE}/api/live-quiz/games/${code}/join`, {
+  assertGameCode(code);
+  const res = await fetch(`${API_BASE}/api/live-quiz/games/${encodeURIComponent(code)}/join`, {
     method: 'POST',
     headers: authHeaders(token),
   });
@@ -235,10 +259,11 @@ export async function joinLiveQuizGame(
 }
 
 export async function removeLiveQuizPlayer(token: string, code: string, playerId: number): Promise<void> {
-  const res = await fetch(`${API_BASE}/api/live-quiz/games/${code}/players/${playerId}`, {
-    method: 'DELETE',
-    headers: authHeaders(token),
-  });
+  assertGameCode(code);
+  const res = await fetch(
+    `${API_BASE}/api/live-quiz/games/${encodeURIComponent(code)}/players/${encodeURIComponent(String(playerId))}`,
+    { method: 'DELETE', headers: authHeaders(token) },
+  );
   return handleResponse(res);
 }
 
@@ -247,8 +272,9 @@ export async function getLiveQuizState(
   code: string,
   afterVersion?: number,
 ): Promise<LiveQuizState> {
-  const qs = afterVersion != null ? `?after_version=${afterVersion}` : '';
-  const res = await fetch(`${API_BASE}/api/live-quiz/games/${code}/state${qs}`, {
+  assertGameCode(code);
+  const qs = afterVersion != null ? `?after_version=${encodeURIComponent(String(afterVersion))}` : '';
+  const res = await fetch(`${API_BASE}/api/live-quiz/games/${encodeURIComponent(code)}/state${qs}`, {
     headers: authHeaders(token),
   });
   return handleResponse<LiveQuizState>(res);
@@ -259,7 +285,8 @@ export async function submitLiveQuizAnswer(
   code: string,
   submission: Record<string, unknown>,
 ): Promise<{ round_index: number; is_correct: boolean; points: number }> {
-  const res = await fetch(`${API_BASE}/api/live-quiz/games/${code}/answer`, {
+  assertGameCode(code);
+  const res = await fetch(`${API_BASE}/api/live-quiz/games/${encodeURIComponent(code)}/answer`, {
     method: 'POST',
     headers: authHeaders(token),
     body: JSON.stringify({ submission }),
@@ -278,7 +305,8 @@ async function hostControl(
   action: 'start' | 'reveal' | 'next' | 'end',
   body: HostControlBody = {},
 ): Promise<LiveQuizState> {
-  const res = await fetch(`${API_BASE}/api/live-quiz/games/${code}/${action}`, {
+  assertGameCode(code);
+  const res = await fetch(`${API_BASE}/api/live-quiz/games/${encodeURIComponent(code)}/${action}`, {
     method: 'POST',
     headers: authHeaders(token),
     body: JSON.stringify(body),
@@ -296,7 +324,8 @@ export const endLiveQuizGame = (token: string, code: string, body?: HostControlB
   hostControl(token, code, 'end', body);
 
 export async function getLiveQuizResults(token: string, code: string): Promise<LiveQuizResults> {
-  const res = await fetch(`${API_BASE}/api/live-quiz/games/${code}/results`, {
+  assertGameCode(code);
+  const res = await fetch(`${API_BASE}/api/live-quiz/games/${encodeURIComponent(code)}/results`, {
     headers: authHeaders(token),
   });
   return handleResponse(res);

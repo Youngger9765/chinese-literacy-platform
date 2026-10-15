@@ -4,7 +4,7 @@ Revision ID: c371b776d12f
 Revises: d5e6f7g8h9i0
 Create Date: 2026-10-14 00:00:00.000000
 
-Issue #3551 — 課堂挑戰 (Kahoot-style in-class quiz). See
+Issue #3551 — 課堂搶答 (in-class, live-paced quiz game). See
 backend/app/models/live_quiz.py and specs/modules/live-quiz/INTENT.md for the
 shape rationale (generic `submission` JSON so a second round type can plug
 in without a further migration; `cached_leaderboard` / `round_started_at`

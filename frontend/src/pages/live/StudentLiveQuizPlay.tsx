@@ -13,7 +13,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useLiveQuizPoll } from '../../components/live-quiz/useLiveQuizPoll';
 import OptionGrid from '../../components/live-quiz/OptionGrid';
 import CountdownBar from '../../components/live-quiz/CountdownBar';
-import { joinLiveQuizGame, submitLiveQuizAnswer, LiveQuizApiError } from '../../services/liveQuizApi';
+import { joinLiveQuizGame, submitLiveQuizAnswer, isValidLiveQuizCode, LiveQuizApiError } from '../../services/liveQuizApi';
 
 const StudentLiveQuizPlay: React.FC = () => {
   const { code } = useParams<{ code: string }>();
@@ -28,6 +28,15 @@ const StudentLiveQuizPlay: React.FC = () => {
 
   useEffect(() => {
     if (!token || !code) return;
+    // A route param is a raw URL segment a caller controls completely (QR
+    // deep-link, bookmarked URL, hand-typed address bar) — reject anything
+    // that isn't the 6-digit shape BEFORE it ever reaches the API client,
+    // so a crafted `/live/..%2F..%2Fsomething` link can never turn into a
+    // request against some other endpoint carrying this student's token.
+    if (!isValidLiveQuizCode(code)) {
+      setJoinError('找不到這場搶答');
+      return;
+    }
     joinLiveQuizGame(token, code)
       .then(() => setJoined(true))
       .catch((err) => {

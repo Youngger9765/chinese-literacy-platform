@@ -8,6 +8,7 @@ import { useAuth } from '../../../contexts/AuthContext';
 import {
   listMyLiveQuizGames,
   getLiveQuizResults,
+  isValidLiveQuizCode,
   type LiveQuizGameSummary,
   type LiveQuizResults,
 } from '../../../services/liveQuizApi';
@@ -24,6 +25,13 @@ const LiveQuizHistoryDetail: React.FC<{ code: string; token: string }> = ({ code
   const [error, setError] = useState('');
 
   useEffect(() => {
+    // `code` comes from `/teacher/live/history/:code` — a raw URL segment,
+    // reject anything that isn't the 6-digit shape before it ever reaches
+    // the API client (see liveQuizApi.ts's assertGameCode docstring).
+    if (!isValidLiveQuizCode(code)) {
+      setError('找不到這場搶答');
+      return;
+    }
     getLiveQuizResults(token, code)
       .then(setResults)
       .catch(() => setError('讀取這場課堂搶答的結果失敗'));

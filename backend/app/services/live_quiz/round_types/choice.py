@@ -53,7 +53,7 @@ def _shuffle_display_positions(item: QuizItem, rng: random.Random) -> tuple[list
     re-deriving ``correct_key`` from the NEW position, using this game's own
     seeded rng) breaks that correlation: the stored/served correct_key means
     "the correct shape is in position C of THIS game", not "the source
-    material's answer is C". Fixed Kahoot-style per source/correct_key for
+    material's answer is C". Fixed single-answer-per-key for
     a given game.seed; a different game re-rolls the shuffled seed and gets
     a different arrangement.
 

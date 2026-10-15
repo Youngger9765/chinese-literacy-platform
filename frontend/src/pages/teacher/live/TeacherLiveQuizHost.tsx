@@ -17,6 +17,7 @@ import {
   revealLiveQuizRound,
   nextLiveQuizRound,
   endLiveQuizGame,
+  isValidLiveQuizCode,
   LiveQuizApiError,
 } from '../../../services/liveQuizApi';
 import TeacherLiveQuizSetup from './TeacherLiveQuizSetup';
@@ -33,11 +34,15 @@ const TeacherLiveQuizHost: React.FC = () => {
   const [actionError, setActionError] = useState('');
   const [takeoverPrompt, setTakeoverPrompt] = useState<(() => void) | null>(null);
 
-  const { state, error: pollError } = useLiveQuizPoll(token ?? null, routeCode ?? null);
+  // routeCode is a raw URL segment (`/teacher/live/:code`) — never hand an
+  // unvalidated one to the poll loop. See liveQuizApi.ts's assertGameCode
+  // docstring for why (client-side path traversal / CSPT).
+  const routeCodeValid = isValidLiveQuizCode(routeCode);
+  const { state, error: pollError } = useLiveQuizPoll(token ?? null, routeCodeValid ? routeCode : null);
 
   const runControl = useCallback(
     async (fn: (token: string, code: string, body?: { device_id?: string; confirm_takeover?: boolean }) => Promise<unknown>) => {
-      if (!token || !routeCode) return;
+      if (!token || !routeCode || !routeCodeValid) return;
       setBusy(true);
       setActionError('');
       try {
@@ -57,7 +62,7 @@ const TeacherLiveQuizHost: React.FC = () => {
         setBusy(false);
       }
     },
-    [token, routeCode],
+    [token, routeCode, routeCodeValid],
   );
 
   if (!routeCode) {
@@ -65,6 +70,14 @@ const TeacherLiveQuizHost: React.FC = () => {
       <TeacherLiveQuizSetup
         onCreated={(code) => navigate(`/teacher/live/${code}`)}
       />
+    );
+  }
+
+  if (!routeCodeValid) {
+    return (
+      <div className="flex min-h-screen items-center justify-center px-6 text-center">
+        <p className="text-on-surface-variant">找不到這場搶答</p>
+      </div>
     );
   }
 

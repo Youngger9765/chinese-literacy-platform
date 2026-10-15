@@ -8,7 +8,9 @@ nothing outside this module imports it.
 """
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy.orm import Session
 
 from ..auth.dependencies import get_current_user
@@ -19,6 +21,15 @@ from ..schemas.live_quiz import HostControlRequest, LiveQuizAnswerRequest, LiveQ
 from ..services.live_quiz import engine
 
 router = APIRouter(prefix="/live-quiz", tags=["live-quiz"])
+
+# Every game code is exactly 6 digits (services/live_quiz/codes.py). Constrain
+# the path param itself so a malformed value (path-traversal segment, letters,
+# wrong length) 422s at the routing layer before any handler body — the
+# frontend client (liveQuizApi.ts) validates the same shape, but a path
+# param is attacker-controlled input regardless of what any particular
+# client sends, so the server must not trust it either (external security
+# review on PR for #3551).
+GameCode = Annotated[str, Path(pattern=r"^\d{6}$")]
 
 # Strict PER-USER (not per-IP) limiter against code-guessing (external
 # review #3): a classroom's 300/min per-IP budget is for legitimate
@@ -104,7 +115,7 @@ def get_open_invite(
 
 @router.post("/games/{code}/join", status_code=201)
 def join_game(
-    code: str,
+    code: GameCode,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -117,7 +128,7 @@ def join_game(
 
 @router.delete("/games/{code}/players/{player_id}", status_code=204)
 def remove_player(
-    code: str,
+    code: GameCode,
     player_id: int,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
@@ -130,7 +141,7 @@ def remove_player(
 
 @router.get("/games/{code}/state")
 def get_state(
-    code: str,
+    code: GameCode,
     after_version: int | None = Query(default=None),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
@@ -141,7 +152,7 @@ def get_state(
 
 @router.post("/games/{code}/answer")
 def submit_answer(
-    code: str,
+    code: GameCode,
     payload: LiveQuizAnswerRequest,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
@@ -162,7 +173,7 @@ def submit_answer(
 
 @router.post("/games/{code}/start")
 def start_game(
-    code: str,
+    code: GameCode,
     payload: HostControlRequest = HostControlRequest(),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
@@ -176,7 +187,7 @@ def start_game(
 
 @router.post("/games/{code}/reveal")
 def reveal_round(
-    code: str,
+    code: GameCode,
     payload: HostControlRequest = HostControlRequest(),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
@@ -190,7 +201,7 @@ def reveal_round(
 
 @router.post("/games/{code}/next")
 def next_round(
-    code: str,
+    code: GameCode,
     payload: HostControlRequest = HostControlRequest(),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
@@ -204,7 +215,7 @@ def next_round(
 
 @router.post("/games/{code}/end")
 def end_game(
-    code: str,
+    code: GameCode,
     payload: HostControlRequest = HostControlRequest(),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
@@ -221,7 +232,7 @@ def end_game(
 
 @router.get("/games/{code}/results")
 def get_results(
-    code: str,
+    code: GameCode,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
