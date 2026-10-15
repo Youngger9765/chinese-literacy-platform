@@ -119,10 +119,19 @@ def _ensure_aware(dt: datetime) -> datetime:
     return dt
 
 
-def _lesson_grade(story_slug: str | None) -> int | None:
+# Catalogue grades that are not grade levels (2026-10-16): these lessons are
+# not levelled, so a self-chosen completion always counts.
+UNLEVELLED = "unlevelled"
+
+
+def _lesson_grade(story_slug: str | None) -> int | str | None:
     """Grade from the in-memory lesson catalogue (not Text.grade — see
-    module docstring). Returns None if the slug doesn't resolve to a real
-    lesson (e.g. legacy data, or a non-numeric slug)."""
+    module docstring).
+
+    The catalogue stores grades as STRINGS ('4'..'9') and some lessons as a
+    category ('文言文', '品格教育'). Returns the int level, UNLEVELLED for a
+    category, or None if the slug doesn't resolve to a real lesson (e.g.
+    legacy data, or a non-numeric slug)."""
     if not story_slug:
         return None
     try:
@@ -132,7 +141,13 @@ def _lesson_grade(story_slug: str | None) -> int | None:
     lesson = get_lesson_by_id(lesson_id)
     if not lesson:
         return None
-    return lesson.get("grade")
+    raw = lesson.get("grade")
+    if raw is None:
+        return None
+    try:
+        return int(str(raw).strip())
+    except ValueError:
+        return UNLEVELLED if str(raw).strip() else None
 
 
 def _first_completions(
@@ -196,7 +211,7 @@ def compute_student_score(
         if mode != "assignment":
             grade = _lesson_grade(slug)
             floor = team_grade - weights.grade_floor_offset
-            if grade is None or grade < floor:
+            if grade is None or (grade != UNLEVELLED and grade < floor):
                 continue  # below floor — simply doesn't qualify, not an anomaly
 
         eligible.append((slug, mode, completed_at))

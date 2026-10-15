@@ -394,6 +394,23 @@ class TestMyHistoryParentAccess:
         assert r.json() == []  # no seasons yet, but access itself is allowed
 
 
+def _id_like_values(obj):
+    """Every value stored under an id-like key (`id`, `*_id`) anywhere in a
+    parsed JSON body. Student ids are small ints, so a substring search of the
+    raw text matched points/averages/roster sizes that merely contain the same
+    digits (e.g. id 5 inside 12.5) — once scoring produced non-zero numbers."""
+    out = []
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            if k == "id" or k.endswith("_id"):
+                out.append(v)
+            out += _id_like_values(v)
+    elif isinstance(obj, list):
+        for v in obj:
+            out += _id_like_values(v)
+    return out
+
+
 class TestPrivacyContract:
     """The 2026-10-15 mandate: no league response may leak a student's
     name/email/user_id/student_id outside the viewer's own team/class, nor
@@ -483,9 +500,11 @@ class TestPrivacyContract:
         for value in (
             ctx["secret_student_name"], ctx["b_student_name"],
             ctx["owner_a_name"], ctx["owner_b_name"],
-            str(ctx["secret_student_id"]), str(ctx["b_student_id"]),
         ):
             assert value not in dumped, f"leaked value {value!r}"
+        ids = _id_like_values(r.json())
+        for sid in (ctx["secret_student_id"], ctx["b_student_id"]):
+            assert sid not in ids and str(sid) not in ids, f"leaked student id {sid} in {ids}"
 
     def test_my_summary_has_no_other_students_pii(self, client, db):
         ctx = self._full_match(client, db)
@@ -496,7 +515,8 @@ class TestPrivacyContract:
         assert r.status_code == 200, r.text
         dumped = r.text
         assert ctx["b_student_name"] not in dumped
-        assert str(ctx["b_student_id"]) not in dumped
+        ids = _id_like_values(r.json())
+        assert ctx["b_student_id"] not in ids and str(ctx["b_student_id"]) not in ids, ids
         assert ctx["owner_a_name"] not in dumped
         assert ctx["owner_b_name"] not in dumped
 
