@@ -19,7 +19,7 @@ _PASSWORD_CHANGE_EXEMPT: set[tuple[str, str]] = {
 }
 
 
-async def get_optional_user(
+def get_optional_user(
     authorization: str | None = Header(None),
     db: Session = Depends(get_db),
 ) -> User | None:
@@ -40,7 +40,7 @@ async def get_optional_user(
         return None
 
 
-async def get_current_user(
+def get_current_user(
     request: Request,
     token: str | None = Depends(oauth2_scheme),
     db: Session = Depends(get_db),
@@ -106,7 +106,7 @@ def require_role(*role_names: str, scope_type: str | None = None, scope_id: str 
                      dependencies=[Depends(require_role("principal", "director", scope_type="school"))])
         def manage_school(school_id: int): ...
     """
-    async def _check_role(
+    def _check_role(
         current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db),
     ) -> User:

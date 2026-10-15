@@ -186,8 +186,15 @@ def login(req: LoginRequest, request: Request, db: Session = Depends(get_db)):
     Accepts either an email address or a username in the `email` field.
     If the value contains '@', it is treated as an email; otherwise as a username.
     """
+    # Two buckets (2026-10-15): a class of 30 tablets shares one school IP,
+    # and 10/min per IP locked 20 of them out. The per-IP cap is now sized
+    # for a classroom; guessing ONE account's password is still capped at
+    # 10/min by the per-account bucket.
     client_ip = real_client_ip(request)
-    if not rate_limiter.check(f"login:{client_ip}", max_requests=10, window_seconds=60):
+    account_key = (req.email or "").strip().lower()
+    if not rate_limiter.check(f"login:{client_ip}", max_requests=60, window_seconds=60):
+        raise HTTPException(status_code=429, detail="Too many requests. Please try again later.")
+    if not rate_limiter.check(f"login:acct:{account_key}", max_requests=10, window_seconds=60):
         raise HTTPException(status_code=429, detail="Too many requests. Please try again later.")
 
     if "@" in req.email:

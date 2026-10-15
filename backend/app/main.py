@@ -1,10 +1,14 @@
+import asyncio
 import logging
 import os
+import re
 import time
 import uuid
+import threading
 import traceback
 from contextlib import asynccontextmanager
 
+import anyio
 import sentry_sdk
 
 from fastapi import FastAPI, Request
@@ -28,6 +32,7 @@ from .routes.cleanup import router as cleanup_router
 from .routes.dictionary import router as dictionary_router
 from .routes.parents import router as parents_router
 from .routes.gamification import router as gamification_router
+from .routes.league import router as league_router
 from .routes.health import router as health_router
 from .routes.semesters import router as semesters_router
 from .routes.co_teaching import router as co_teaching_router
@@ -41,8 +46,10 @@ from .routes.curriculum_qa import router as curriculum_qa_router
 from .routes.admin_story_structure_lab import router as admin_story_structure_lab_router
 from .routes.assets import router as assets_router
 from .routes.worksheets import router as worksheets_router
+from .routes.live_quiz import router as live_quiz_router
 from .utils.logging_config import setup_logging
 from .auth.rate_limiter import general_rate_limiter, real_ip_from_xff
+from .services.live_quiz.engine import is_authenticated_member_by_code
 from .services.seed import seed_default_data, repair_pii_accounts
 
 # Initialise structured logging before anything else
@@ -280,6 +287,57 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
             )
 
 
+class _LiveQuizMemberCache:
+    """Positive-only (code, user_id) -> "is a member" cache for the rate-limit
+    exemption below. Joining is append-only, so a cached "yes" can only go
+    stale if the host removes a player — then the worst case is that player's
+    polls stay exempt for up to TTL seconds while the route itself returns 403.
+    Negatives are never cached, so a non-member is re-checked every time and
+    stays under the per-IP limit. Per process, bounded, cleared when full."""
+
+    TTL = 60.0
+    MAX = 20000
+
+    def __init__(self):
+        self._d: dict[tuple[str, int], float] = {}
+        self._lock = threading.Lock()
+
+    def get(self, code: str, user_id: int) -> bool:
+        with self._lock:
+            exp = self._d.get((code, user_id))
+            if exp is None:
+                return False
+            if exp < time.monotonic():
+                del self._d[(code, user_id)]
+                return False
+            return True
+
+    def put(self, code: str, user_id: int) -> None:
+        with self._lock:
+            if len(self._d) >= self.MAX:
+                self._d.clear()
+            self._d[(code, user_id)] = time.monotonic() + self.TTL
+
+    def clear(self) -> None:
+        with self._lock:
+            self._d.clear()
+
+
+_live_quiz_member_cache = _LiveQuizMemberCache()
+
+
+def _lookup_live_quiz_member(code: str, user_id: int) -> bool:
+    # Lazy import (not a top-level binding): looked up fresh on every call so
+    # tests can monkeypatch `app.database.SessionLocal` to their own engine.
+    from .database import SessionLocal as _SessionLocal
+
+    db = _SessionLocal()
+    try:
+        return is_authenticated_member_by_code(db, code, user_id)
+    finally:
+        db.close()
+
+
 class GlobalRateLimitMiddleware:
     """Pure ASGI middleware for global per-IP rate limiting on /api/* and /assets/*.
 
@@ -294,6 +352,15 @@ class GlobalRateLimitMiddleware:
     """
 
     _EXEMPT_PATHS = ("/health", "/docs", "/redoc", "/openapi.json", "/")
+    # /api/live-quiz/games/{code}/state|answer — see the membership-gated
+    # exemption below (#3551 external review #3).
+    _LIVE_QUIZ_RATE_EXEMPT_RE = re.compile(r"^/api/live-quiz/games/([^/]+)/(state|answer)$")
+    # /join is not membership-gated (you are not a member yet) but has its own
+    # per-user limit (10/min, routes/live_quiz.py). 10 classes in one school
+    # share one NAT IP: 300 joins in a minute exhausted the per-IP write budget
+    # on staging (2026-10-16). An authenticated join skips the per-IP count;
+    # an anonymous one still pays it (and gets 401 from the route).
+    _LIVE_QUIZ_JOIN_RE = re.compile(r"^/api/live-quiz/games/[^/]+/join$")
     # Read operations are much burstier during UI navigation (route mounts,
     # parallel data loaders, prefetch). Keep write operations stricter.
     # Allow env overrides so local dev (React StrictMode double-invocations,
@@ -347,6 +414,58 @@ class GlobalRateLimitMiddleware:
         if scope.get("method", "").upper() == "OPTIONS":
             await self.app(scope, receive, send)
             return
+
+        # Live-quiz polling (#3551 external review #3): a class of 30+
+        # students each polling /state ~1/s would blow straight through the
+        # 300/min per-IP read budget on its own (one classroom NAT = one
+        # IP). The naive fix — "exempt /api/live-quiz/*/state and /answer
+        # from the per-IP limit" — would also exempt an UNAUTHENTICATED
+        # caller or someone polling a game they have nothing to do with, so
+        # instead this only skips per-IP counting when the request is BOTH
+        # authenticated (JWT already decoded by RequestLoggingMiddleware,
+        # which runs outside this one — see request.state.user_id there)
+        # AND the host/a joined player of THIS game. Everyone else
+        # (anonymous, or guessing codes) stays under the normal limit.
+        #
+        # This intentionally does NOT replace per-IP limiting with a
+        # separate "N req/s per user per game" counter: that counter would
+        # be per-process under Cloud Run's multiple instances and would not
+        # actually bound anything globally (external review #3). A verified
+        # member's state/answer calls are naturally bounded by classroom
+        # size and the ~1 req/s poll interval, so simply exempting them is
+        # both simpler and more honest than a fake-precision limit.
+        if self._LIVE_QUIZ_JOIN_RE.match(path) and (scope.get("state") or {}).get("user_id") is not None:
+            await self.app(scope, receive, send)
+            return
+
+        live_quiz_match = self._LIVE_QUIZ_RATE_EXEMPT_RE.match(path)
+        if live_quiz_match:
+            state = scope.get("state") or {}
+            raw_user_id = state.get("user_id")
+            if raw_user_id is not None:
+                try:
+                    user_id = int(raw_user_id)
+                    code = live_quiz_match.group(1)
+                    member = _live_quiz_member_cache.get(code, user_id)
+                    if not member:
+                        # Blocking DB call: run it off the event loop, or every
+                        # in-flight request on this instance waits behind it
+                        # (2026-10-15 staging load test, 30 pollers: requests
+                        # queued up to 150 s and members fell back to 429s).
+                        member = await anyio.to_thread.run_sync(_lookup_live_quiz_member, code, user_id)
+                        if member:
+                            _live_quiz_member_cache.put(code, user_id)
+                except Exception:
+                    logger.warning(
+                        "live-quiz rate-limit membership check failed; falling back to per-IP limiting",
+                        exc_info=True,
+                    )
+                    member = False
+                if member:
+                    await self.app(scope, receive, send)
+                    return
+            # Unauthenticated or non-member: fall through to normal per-IP
+            # limiting below, same as any other /api/* request.
 
         # Extract the real client IP (#2470 HIGH-1a): take the GCP-appended
         # second-from-right XFF entry, not the client-controlled leftmost one.
@@ -453,8 +572,25 @@ class PreviewModeWriteGuardMiddleware(BaseHTTPMiddleware):
         return await call_next(request)
 
 
+def configure_default_executor(loop) -> None:
+    """Size asyncio's default executor for a classroom (2026-10-16).
+
+    asyncio.to_thread runs on it, and Python's default is min(32, cpu+4) = 5
+    threads on a 1-vCPU Cloud Run instance. /reading/transcribe pushes
+    transcode, silence check and the Gemini call through it, so with 5
+    threads the 6th student per instance queued — and the queue time counted
+    toward the Gemini timeout. The work is mostly waiting on the network or
+    on an ffmpeg subprocess, so more threads than CPUs is the right shape.
+    """
+    from concurrent.futures import ThreadPoolExecutor
+
+    workers = int(os.environ.get("ASYNC_THREAD_WORKERS", "32"))
+    loop.set_default_executor(ThreadPoolExecutor(max_workers=max(1, workers), thread_name_prefix="async-io"))
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    configure_default_executor(asyncio.get_running_loop())
     # seed_default_data() internally respects ENABLE_TEST_SEED and ENVIRONMENT:
     # on prod (ENABLE_TEST_SEED=false) it only runs non-seeding startup tasks
     # (YAML → texts sync, migration patches) without creating demo accounts.
@@ -560,6 +696,7 @@ app.include_router(cleanup_router, prefix="/api", tags=["admin-cleanup"])
 app.include_router(dictionary_router, prefix="/api", tags=["dictionary"])
 app.include_router(parents_router, prefix="/api", tags=["parents"])
 app.include_router(gamification_router, prefix="/api", tags=["gamification"])
+app.include_router(league_router, prefix="/api", tags=["league"])
 app.include_router(health_router)
 app.include_router(semesters_router, prefix="/api", tags=["semesters"])
 app.include_router(co_teaching_router, prefix="/api", tags=["co-teaching"])
@@ -573,6 +710,7 @@ app.include_router(curriculum_qa_router, prefix="/api", tags=["curriculum-qa"])
 app.include_router(admin_story_structure_lab_router, prefix="/api", tags=["admin-story-structure-lab"])
 # No /api prefix — matches the Firebase Hosting `/assets/**` rewrite target (#2486).
 app.include_router(assets_router)
+app.include_router(live_quiz_router, prefix="/api", tags=["live-quiz"])
 # Role-gated worksheet download (#3276) — separate from the public assets proxy above.
 app.include_router(worksheets_router)
 

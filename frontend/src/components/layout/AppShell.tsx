@@ -144,6 +144,18 @@ const NavArrow: React.FC<{
   );
 };
 
+/**
+ * #3549: the step row scrolls sideways on a phone with its scrollbar hidden,
+ * so nothing told a student there were more steps off-screen. Which edges
+ * still have content past them (1px slack for sub-pixel scroll positions).
+ */
+export function stepperEdgeFades(scrollLeft: number, clientWidth: number, scrollWidth: number) {
+  return {
+    left: scrollLeft > 1,
+    right: scrollLeft + clientWidth < scrollWidth - 1,
+  };
+}
+
 const StepDots: React.FC<StepDotsProps> = ({
   steps,
   annotations,
@@ -155,6 +167,24 @@ const StepDots: React.FC<StepDotsProps> = ({
   navDisabled,
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [fades, setFades] = useState({ left: false, right: false });
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const update = () => {
+      const next = stepperEdgeFades(el.scrollLeft, el.clientWidth, el.scrollWidth);
+      setFades((prev) => (prev.left === next.left && prev.right === next.right ? prev : next));
+    };
+    update();
+    el.addEventListener('scroll', update, { passive: true });
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(update) : null;
+    ro?.observe(el);
+    return () => {
+      el.removeEventListener('scroll', update);
+      ro?.disconnect();
+    };
+  }, [steps.length]);
 
   useEffect(() => {
     const container = scrollRef.current;
@@ -174,6 +204,15 @@ const StepDots: React.FC<StepDotsProps> = ({
       ref={scrollRef}
       className="min-w-0 max-w-full overflow-x-auto scrollbar-hide overscroll-x-contain"
       aria-label="學習步驟進度"
+      data-fade-left={fades.left || undefined}
+      data-fade-right={fades.right || undefined}
+      // Fade the dots themselves at an edge that still has more steps past it.
+      // A mask rather than a coloured overlay: the header is translucent
+      // ("glass"), so any solid-colour gradient showed as a stripe.
+      style={fades.left || fades.right ? {
+        maskImage: `linear-gradient(to right, ${fades.left ? 'transparent' : '#000'} 0, #000 24px, #000 calc(100% - 24px), ${fades.right ? 'transparent' : '#000'} 100%)`,
+        WebkitMaskImage: `linear-gradient(to right, ${fades.left ? 'transparent' : '#000'} 0, #000 24px, #000 calc(100% - 24px), ${fades.right ? 'transparent' : '#000'} 100%)`,
+      } : undefined}
     >
       <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 flex-nowrap justify-center min-w-max px-0.5">
       <NavArrow dir="prev" step={prevStep} disabled={navDisabled} onClick={onStepClick} />
@@ -214,7 +253,7 @@ const StepDots: React.FC<StepDotsProps> = ({
             <button
               type="button"
               onClick={() => onStepClick(step)}
-              className={`${sizeClass} rounded-full text-xs sm:text-sm md:text-base font-bold flex items-center justify-center transition-all hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${dotClass}`}
+              className={`${sizeClass} relative before:absolute before:-inset-1 before:content-[''] rounded-full text-xs sm:text-sm md:text-base font-bold flex items-center justify-center transition-all hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${dotClass}`}
               aria-label={ann?.a11yLabel ?? `${i + 1}. ${step.label}`}
               aria-current={isActive ? 'step' : undefined}
               title={ann?.partNo ? `${step.label}（第 ${ann.partNo} 篇）` : step.label}

@@ -70,6 +70,13 @@ jobs:
       #    lru_cache，514/512 的餘裕本來就是負的。
       #    不要為了省錢調回 512Mi —— 差額量級是每月美分，代價是拒絕服務。
       #    鎖：backend/specs/test_workflow_path_filters_spec.py（test_backend_memory_is_at_least_1gi）
+      # Classroom capacity (2026-10-16, measured on staging): reading recordings are
+      # transcoded with ffmpeg (CPU-bound), so 30 students reading at once must be
+      # spread over several instances and each instance needs 2 vCPU. Concurrency
+      # 8 forces the spread; with concurrency 40 all 30 landed on one 1-vCPU
+      # instance (median 31 s). 2 vCPU + 8 per instance, warm: median 6.9 s.
+      # min 3 warm instances so a class never waits for cold starts (~15-25 s
+      # each); max 12. DB pool 6+2 per instance = 96 < 100 (db-custom-1-3840).
       - name: Deploy backend to Cloud Run
         run: |
           gcloud run deploy ${{ env.BACKEND_SERVICE }} \
@@ -78,13 +85,14 @@ jobs:
             --region ${{ env.REGION }} \
             --project ${{ env.PROJECT_ID }} \
             --memory=1Gi \
-            --cpu=1 \
-            --min-instances=0 \
-            --max-instances=3 \
+            --cpu=2 \
+            --min-instances=3 \
+            --max-instances=12 \
+            --concurrency=8 \
             --timeout=300s \
             --add-cloudsql-instances=lingoleap-dev:asia-east1:lingoleap-db \
             --service-account=lingoleap-junyi-bq@lingoleap-dev.iam.gserviceaccount.com \
-            --set-env-vars="^::^ALLOWED_ORIGINS=https://lingoleap-frontend-958347263320.asia-east1.run.app,https://lingoleap-prod.web.app::DATABASE_URL=${{ secrets.DATABASE_URL }}::RUN_MIGRATIONS=true::AZURE_SPEECH_KEY=${{ secrets.AZURE_SPEECH_KEY }}::AZURE_SPEECH_REGION=eastus::TTS_PROVIDER=azure::ENVIRONMENT=production::ENABLE_TEST_SEED=false::JWT_SECRET_KEY=${{ secrets.PROD_JWT_SECRET_KEY }}::GCS_OMO_BUCKET=lingoleap-omo-uploads-prod::READING_AUDIO_GCS_BUCKET=lingoleap-reading-audio-prod::BUILD_SHA=${{ github.sha }}::JUNYI_CLASS_IMPORT_ENABLED=true::JUNYI_BQ_MODE=real"
+            --set-env-vars="^::^ALLOWED_ORIGINS=https://lingoleap-frontend-958347263320.asia-east1.run.app,https://lingoleap-prod.web.app::DATABASE_URL=${{ secrets.DATABASE_URL }}::RUN_MIGRATIONS=true::AZURE_SPEECH_KEY=${{ secrets.AZURE_SPEECH_KEY }}::AZURE_SPEECH_REGION=eastus::TTS_PROVIDER=azure::ENVIRONMENT=production::ENABLE_TEST_SEED=false::JWT_SECRET_KEY=${{ secrets.PROD_JWT_SECRET_KEY }}::GCS_OMO_BUCKET=lingoleap-omo-uploads-prod::READING_AUDIO_GCS_BUCKET=lingoleap-reading-audio-prod::BUILD_SHA=${{ github.sha }}::JUNYI_CLASS_IMPORT_ENABLED=true::JUNYI_BQ_MODE=real::DB_POOL_SIZE=6::DB_MAX_OVERFLOW=2::ASYNC_THREAD_WORKERS=32"
 
       # #3162: staging has had this since #1449; production never got it.
       #

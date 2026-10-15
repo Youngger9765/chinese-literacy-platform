@@ -242,7 +242,14 @@ export interface SpotlightExerciseBlock {
   instruction?: string;
   option_bank?: Record<string, string>;
   rows?: Record<string, unknown>[];
-  items?: { index?: number; stem?: string; answer?: string | number }[];
+  items?: {
+    index?: number;
+    stem?: string;
+    prompt?: string;
+    instruction?: string;
+    options?: Record<string, string> | string[];
+    answer?: string | number;
+  }[];
 }
 
 export interface SpotlightUnknownBlock {

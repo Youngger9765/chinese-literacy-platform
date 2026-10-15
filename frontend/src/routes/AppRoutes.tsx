@@ -69,8 +69,17 @@ const TeacherHome = lazy(() => import('../pages/teacher/TeacherHome'));
 const StudentPreviewPage = lazy(() => import('../pages/teacher/StudentPreviewPage'));
 const TeacherMyTextsPage = lazy(() => import('../pages/teacher/TeacherMyTextsPage'));
 const TeacherAssignmentsPage = lazy(() => import('../pages/teacher/TeacherAssignmentsPage'));
+const TeacherLeaguePage = lazy(() => import('../pages/teacher/TeacherLeaguePage'));
+const StudentOurClassPage = lazy(() => import('../pages/student/StudentOurClassPage'));
 const TeacherSessionReportPage = lazy(() => import('../pages/teacher/TeacherSessionReportPage'));
 const ProjectHubPage = lazy(() => import('../pages/ProjectHubPage'));
+
+// 班級經營 / 課堂搶答 (live quiz, #3551) — host screen is fullscreen (no
+// AppShell chrome), history list uses the ordinary teacher shell.
+const TeacherLiveQuizHost = lazy(() => import('../pages/teacher/live/TeacherLiveQuizHost'));
+const TeacherLiveQuizHistory = lazy(() => import('../pages/teacher/live/TeacherLiveQuizHistory'));
+const StudentLiveQuizJoin = lazy(() => import('../pages/live/StudentLiveQuizJoin'));
+const StudentLiveQuizPlay = lazy(() => import('../pages/live/StudentLiveQuizPlay'));
 
 // OMO (Online-Merge-Offline) paper worksheet upload (Issue #1343)
 const OmoPage = lazy(() => import('../pages/omo/OmoPage'));
@@ -264,12 +273,71 @@ const AppRoutes: React.FC = () => (
           </ProtectedRoute>
         }
       />
+      {/* 班級經營 / 課堂搶答 (#3551) — host screen is fullscreen, no AppShell
+          (PRD §9 item 9: "投影頁全螢幕，不套原本的頁面外框"), same pattern as
+          LearningAppShell below. History list uses the normal teacher shell. */}
+      <Route
+        path="/teacher/live/history"
+        element={
+          <ProtectedRoute>
+            <AppShell>
+              <TeacherLiveQuizHistory />
+            </AppShell>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/teacher/live/history/:code"
+        element={
+          <ProtectedRoute>
+            <AppShell>
+              <TeacherLiveQuizHistory />
+            </AppShell>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/teacher/live"
+        element={
+          <ProtectedRoute>
+            <TeacherLiveQuizHost />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/teacher/live/:code"
+        element={
+          <ProtectedRoute>
+            <TeacherLiveQuizHost />
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/teacher/students/:studentId/sessions/:sessionId/report"
         element={
           <ProtectedRoute>
             <AppShell>
               <TeacherSessionReportPage />
+            </AppShell>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/teacher/league"
+        element={
+          <ProtectedRoute>
+            <AppShell>
+              <TeacherLeaguePage />
+            </AppShell>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/student/our-class"
+        element={
+          <ProtectedRoute>
+            <AppShell>
+              <StudentOurClassPage />
             </AppShell>
           </ProtectedRoute>
         }
@@ -405,6 +473,24 @@ const AppRoutes: React.FC = () => (
             <AppShell>
               <DictionaryPage />
             </AppShell>
+          </ProtectedRoute>
+        }
+      />
+      {/* 課堂搶答 join flow (#3551) — fullscreen like the host screen, no
+          AppShell. /live/:code also serves the QR deep-link target. */}
+      <Route
+        path="/live"
+        element={
+          <ProtectedRoute>
+            <StudentLiveQuizJoin />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/live/:code"
+        element={
+          <ProtectedRoute>
+            <StudentLiveQuizPlay />
           </ProtectedRoute>
         }
       />

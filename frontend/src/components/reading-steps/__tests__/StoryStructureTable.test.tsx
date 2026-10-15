@@ -183,6 +183,90 @@ describe('StoryStructureTable', () => {
     expect(inputs.length).toBe(4);
   });
 
+  // #3563 回歸鎖 —— 現場老師回報「文章重點表版面跑掉」。真環境重現
+  // （staging，lesson 20016「這是什麼意思」第 6/11 步）：matrix 佈局「配對」
+  // 子類的第一欄是整句例句（真實資料見下方 `section`），不是短區段標題，
+  // 但舊版一律套 `writingMode: vertical-rl` + 固定窄欄，長句被逐字往下
+  // 擠成一條看不懂的直書。
+  it('長句 section 標題（真實資料：L0016 配對題）不可以逐字直書擠壓', async () => {
+    const longSentence = '1.這訓練量對先發選手來說只是「小意思」。';
+    const worksheetStructure = {
+      layout: 'worksheet_table',
+      title: '這是什麼「意思」？',
+      worksheet_rows: [
+        {
+          kind: 'section_block',
+          section: longSentence,
+          items: [
+            {
+              label: '配對',
+              value: '①表達歉意或害羞 ②表示對某人有好感',
+            },
+          ],
+        },
+      ],
+      rows: [
+        {
+          label: longSentence,
+          value: '',
+          interactive_type: 'display',
+          sub_rows: [
+            {
+              label: '配對',
+              value: '①表達歉意或害羞 ②表示對某人有好感',
+              interactive_type: 'checkbox',
+              options: ['表達歉意或害羞', '表示對某人有好感'],
+            },
+          ],
+        },
+      ],
+    };
+
+    mockFetchSuccess(worksheetStructure);
+    const { container } = render(
+      <StoryStructureTable storyId="lesson-20016" showCoach={false} />
+    );
+
+    await waitFor(() => expect(screen.getByText(longSentence)).toBeTruthy());
+
+    // 整句話要原封不動讀得到，不能被拆成逐字
+    const sectionCell = screen.getByText(longSentence).closest('td');
+    expect(sectionCell).toBeTruthy();
+    // 不可以是直書 —— 這正是被回報的「逐字往下堆疊、看不懂」版面
+    expect(sectionCell?.style.writingMode).not.toBe('vertical-rl');
+  });
+
+  // 對照組：短區段標題（真實資料：全庫 31 課皆 ≤9 字，例如「主角」）
+  // 仍要維持直書——這個修復不能讓既有版面跟著壞掉。
+  it('短 section 標題（真實資料形狀）維持直書，不受這次修復影響', async () => {
+    const worksheetStructure = {
+      layout: 'worksheet_table',
+      title: '文章重點表',
+      worksheet_rows: [
+        {
+          kind: 'section_block',
+          section: '主角',
+          items: [{ label: '問題1', value: '小明' }],
+        },
+      ],
+      rows: [
+        {
+          label: '主角',
+          value: '',
+          interactive_type: 'display',
+          sub_rows: [{ label: '問題1', value: '小明', interactive_type: 'display' }],
+        },
+      ],
+    };
+
+    mockFetchSuccess(worksheetStructure);
+    render(<StoryStructureTable storyId="lesson-short" showCoach={false} />);
+
+    await waitFor(() => expect(screen.getByText('主角')).toBeTruthy());
+    const sectionCell = screen.getByText('主角').closest('td');
+    expect(sectionCell?.style.writingMode).toBe('vertical-rl');
+  });
+
   it('re-fetches when storyId prop changes', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
