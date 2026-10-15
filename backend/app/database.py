@@ -5,11 +5,14 @@ from sqlalchemy.orm import sessionmaker, Session
 from typing import Generator
 from .config import settings
 
-def _int_env(name: str, default: int) -> int:
+def _int_env(name: str, default: int, lo: int, hi: int) -> int:
+    """Bounded int from env. Bounds matter: SQLAlchemy reads pool_size=0 as
+    "no limit", so a bad value must never fall through as 0."""
     try:
-        return max(0, int(os.environ.get(name, default)))
+        value = int(os.environ.get(name, default))
     except (TypeError, ValueError):
         return default
+    return min(hi, max(lo, value))
 
 
 _engine_kwargs = {}
@@ -37,8 +40,8 @@ else:
     # instances x (pool + overflow) must stay under it. Each environment sets
     # these to match its --max-instances (2026-10-16, 300-player live-quiz
     # scale-out); the defaults are the old fixed values.
-    _engine_kwargs["pool_size"] = _int_env("DB_POOL_SIZE", 10)
-    _engine_kwargs["max_overflow"] = _int_env("DB_MAX_OVERFLOW", 5)
+    _engine_kwargs["pool_size"] = _int_env("DB_POOL_SIZE", 10, lo=1, hi=50)
+    _engine_kwargs["max_overflow"] = _int_env("DB_MAX_OVERFLOW", 5, lo=0, hi=50)
     _engine_kwargs["pool_timeout"] = 30
     _engine_kwargs["pool_recycle"] = 1800
 

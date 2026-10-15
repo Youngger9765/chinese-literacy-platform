@@ -78,9 +78,9 @@ jobs:
       #    不要為了省錢調回 512Mi —— 差額量級是每月美分，代價是拒絕服務。
       #    鎖：backend/specs/test_workflow_path_filters_spec.py（test_backend_memory_is_at_least_1gi）
       # Classroom capacity (2026-10-16 CTO review): up to 8 instances x 40
-      # concurrent requests; DB pool 6+2 per instance = 64 connections, under the
-      # 100 allowed by the staging DB tier during load tests (db-custom-1-3840). Billed per request,
-      # 0 instances and 0 cost when idle. Prod mirrors this at a larger size.
+      # concurrent requests. The staging DB stays db-f1-micro (25 connections,
+      # 3 reserved), so the pool is 2+0 per instance: 8 x 2 = 16. Billed per
+      # request, 0 instances and 0 cost when idle.
       - name: Deploy backend to Cloud Run (Staging)
         run: |
           gcloud run deploy ${{ env.BACKEND_SERVICE }} \
@@ -97,7 +97,7 @@ jobs:
             --timeout=300s \
             --add-cloudsql-instances=lingoleap-dev:asia-east1:lingoleap-staging-db \
             --service-account=lingoleap-junyi-bq@lingoleap-dev.iam.gserviceaccount.com \
-            --set-env-vars="^::^ALLOWED_ORIGINS=https://lingoleap-frontend-staging-958347263320.asia-east1.run.app,https://lingoleap-frontend-958347263320.asia-east1.run.app,https://lingoleap-staging.web.app,https://lingoleap-dev.web.app::DATABASE_URL=${{ secrets.STAGING_DATABASE_URL }}::RUN_MIGRATIONS=true::AZURE_SPEECH_KEY=${{ secrets.AZURE_SPEECH_KEY }}::AZURE_SPEECH_REGION=eastus::TTS_PROVIDER=azure::ENVIRONMENT=staging::JWT_SECRET_KEY=${{ secrets.STAGING_JWT_SECRET_KEY }}::GCS_OMO_BUCKET=lingoleap-omo-uploads-staging::READING_AUDIO_GCS_BUCKET=lingoleap-reading-audio-staging::BUILD_SHA=${{ github.sha }}::JUNYI_CLASS_IMPORT_ENABLED=true::JUNYI_BQ_MODE=real::PARENT_PORTAL_ENABLED=true::DB_POOL_SIZE=6::DB_MAX_OVERFLOW=2::ASYNC_THREAD_WORKERS=32"
+            --set-env-vars="^::^ALLOWED_ORIGINS=https://lingoleap-frontend-staging-958347263320.asia-east1.run.app,https://lingoleap-frontend-958347263320.asia-east1.run.app,https://lingoleap-staging.web.app,https://lingoleap-dev.web.app::DATABASE_URL=${{ secrets.STAGING_DATABASE_URL }}::RUN_MIGRATIONS=true::AZURE_SPEECH_KEY=${{ secrets.AZURE_SPEECH_KEY }}::AZURE_SPEECH_REGION=eastus::TTS_PROVIDER=azure::ENVIRONMENT=staging::JWT_SECRET_KEY=${{ secrets.STAGING_JWT_SECRET_KEY }}::GCS_OMO_BUCKET=lingoleap-omo-uploads-staging::READING_AUDIO_GCS_BUCKET=lingoleap-reading-audio-staging::BUILD_SHA=${{ github.sha }}::JUNYI_CLASS_IMPORT_ENABLED=true::JUNYI_BQ_MODE=real::PARENT_PORTAL_ENABLED=true::DB_POOL_SIZE=2::DB_MAX_OVERFLOW=0::ASYNC_THREAD_WORKERS=32"
 
       - name: Promote backend traffic to latest revision (Fixes #1449)
         run: |

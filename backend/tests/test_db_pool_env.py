@@ -1,33 +1,35 @@
-"""Pool size per instance must be settable per environment: instances x
-(pool + overflow) has to stay under the Cloud SQL connection cap
-(db-g1-small 50, db-f1-micro 25) once Cloud Run scales out for a
-300-player live quiz."""
-import importlib
+"""Pool size per instance must be settable per environment (instances x
+(pool + overflow) has to stay under the Cloud SQL connection cap), and a bad
+value must never turn into "unlimited": SQLAlchemy reads pool_size=0 as no
+limit (commit security review 2026-10-16)."""
 import os
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 
-def test_int_env_reads_overrides_and_falls_back(monkeypatch):
+def test_reads_override(monkeypatch):
     import app.database as db
     monkeypatch.setenv("DB_POOL_SIZE", "4")
-    assert db._int_env("DB_POOL_SIZE", 10) == 4
+    assert db._int_env("DB_POOL_SIZE", 10, lo=1, hi=50) == 4
+
+
+def test_bad_or_missing_value_falls_back(monkeypatch):
+    import app.database as db
     monkeypatch.setenv("DB_POOL_SIZE", "not-a-number")
-    assert db._int_env("DB_POOL_SIZE", 10) == 10
+    assert db._int_env("DB_POOL_SIZE", 10, lo=1, hi=50) == 10
     monkeypatch.delenv("DB_POOL_SIZE")
-    assert db._int_env("DB_POOL_SIZE", 10) == 10
-    monkeypatch.setenv("DB_MAX_OVERFLOW", "-3")
-    assert db._int_env("DB_MAX_OVERFLOW", 5) == 0
+    assert db._int_env("DB_POOL_SIZE", 10, lo=1, hi=50) == 10
 
 
-def test_postgres_engine_uses_the_env_values(monkeypatch):
-    """Build the engine kwargs the same way the module does for a Postgres URL."""
+def test_pool_size_zero_or_negative_is_never_unlimited(monkeypatch):
     import app.database as db
-    from sqlalchemy import create_engine
+    for v in ("0", "-3"):
+        monkeypatch.setenv("DB_POOL_SIZE", v)
+        assert db._int_env("DB_POOL_SIZE", 10, lo=1, hi=50) == 1
 
-    monkeypatch.setenv("DB_POOL_SIZE", "4")
-    monkeypatch.setenv("DB_MAX_OVERFLOW", "1")
-    eng = create_engine("postgresql://u:p@localhost/x", pool_size=db._int_env("DB_POOL_SIZE", 10),
-                        max_overflow=db._int_env("DB_MAX_OVERFLOW", 5))
-    assert eng.pool.size() == 4 and eng.pool._max_overflow == 1
+
+def test_huge_value_is_capped(monkeypatch):
+    import app.database as db
+    monkeypatch.setenv("DB_MAX_OVERFLOW", "100000")
+    assert db._int_env("DB_MAX_OVERFLOW", 5, lo=0, hi=50) == 50
