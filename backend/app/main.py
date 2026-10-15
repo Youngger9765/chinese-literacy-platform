@@ -3,9 +3,11 @@ import os
 import re
 import time
 import uuid
+import threading
 import traceback
 from contextlib import asynccontextmanager
 
+import anyio
 import sentry_sdk
 
 from fastapi import FastAPI, Request
@@ -283,6 +285,57 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
             )
 
 
+class _LiveQuizMemberCache:
+    """Positive-only (code, user_id) -> "is a member" cache for the rate-limit
+    exemption below. Joining is append-only, so a cached "yes" can only go
+    stale if the host removes a player — then the worst case is that player's
+    polls stay exempt for up to TTL seconds while the route itself returns 403.
+    Negatives are never cached, so a non-member is re-checked every time and
+    stays under the per-IP limit. Per process, bounded, cleared when full."""
+
+    TTL = 60.0
+    MAX = 20000
+
+    def __init__(self):
+        self._d: dict[tuple[str, int], float] = {}
+        self._lock = threading.Lock()
+
+    def get(self, code: str, user_id: int) -> bool:
+        with self._lock:
+            exp = self._d.get((code, user_id))
+            if exp is None:
+                return False
+            if exp < time.monotonic():
+                del self._d[(code, user_id)]
+                return False
+            return True
+
+    def put(self, code: str, user_id: int) -> None:
+        with self._lock:
+            if len(self._d) >= self.MAX:
+                self._d.clear()
+            self._d[(code, user_id)] = time.monotonic() + self.TTL
+
+    def clear(self) -> None:
+        with self._lock:
+            self._d.clear()
+
+
+_live_quiz_member_cache = _LiveQuizMemberCache()
+
+
+def _lookup_live_quiz_member(code: str, user_id: int) -> bool:
+    # Lazy import (not a top-level binding): looked up fresh on every call so
+    # tests can monkeypatch `app.database.SessionLocal` to their own engine.
+    from .database import SessionLocal as _SessionLocal
+
+    db = _SessionLocal()
+    try:
+        return is_authenticated_member_by_code(db, code, user_id)
+    finally:
+        db.close()
+
+
 class GlobalRateLimitMiddleware:
     """Pure ASGI middleware for global per-IP rate limiting on /api/* and /assets/*.
 
@@ -381,16 +434,15 @@ class GlobalRateLimitMiddleware:
                 try:
                     user_id = int(raw_user_id)
                     code = live_quiz_match.group(1)
-                    # Lazy import (not a top-level binding): looked up fresh on
-                    # every call so tests can monkeypatch `app.database.
-                    # SessionLocal` to their own test engine, same pattern as
-                    # `lifespan()`'s repair_pii_accounts call above.
-                    from .database import SessionLocal as _SessionLocal
-                    db = _SessionLocal()
-                    try:
-                        member = is_authenticated_member_by_code(db, code, user_id)
-                    finally:
-                        db.close()
+                    member = _live_quiz_member_cache.get(code, user_id)
+                    if not member:
+                        # Blocking DB call: run it off the event loop, or every
+                        # in-flight request on this instance waits behind it
+                        # (2026-10-15 staging load test, 30 pollers: requests
+                        # queued up to 150 s and members fell back to 429s).
+                        member = await anyio.to_thread.run_sync(_lookup_live_quiz_member, code, user_id)
+                        if member:
+                            _live_quiz_member_cache.put(code, user_id)
                 except Exception:
                     logger.warning(
                         "live-quiz rate-limit membership check failed; falling back to per-IP limiting",
