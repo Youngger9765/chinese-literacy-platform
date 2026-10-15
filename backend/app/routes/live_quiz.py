@@ -153,7 +153,7 @@ def _unchanged_from_memory(code: str, after_version: int | None, token: str | No
     return engine.fast_poll_cache.unchanged(code.upper(), user_id, after_version)
 
 
-async def _state_user(
+def _state_user(
     request: Request,
     code: GameCode,
     after_version: int | None = Query(default=None),
@@ -163,7 +163,7 @@ async def _state_user(
     fast = _unchanged_from_memory(code, after_version, token)
     if fast is not None:
         return fast
-    return await get_current_user(request, token, db)
+    return get_current_user(request, token, db)
 
 
 @router.get("/games/{code}/state")
