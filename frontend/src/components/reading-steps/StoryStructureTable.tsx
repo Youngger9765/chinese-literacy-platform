@@ -391,6 +391,28 @@ function sectionVerticalLabel(section: string): string {
   return section.replace(/\s+/g, '');
 }
 
+/**
+ * #3563 現場老師回報「文章重點表版面跑掉」—— 真環境重現（lesson 20016
+ * 「這是什麼意思」文章重點表 6/11）確認：`matrix` 佈局的「配對」子類
+ * （`columns: [例句, 配對]`）第一欄存的是**整句例句**（真實資料 21~25
+ * 字），不是這個直書欄位原本設計給的短區段標題（真實資料全庫其餘 31 課
+ * 都 ≤9 字，如「主角」「段落一」）。
+ *
+ * `writingMode: vertical-rl` 配上固定 `w-10`（2.5rem）窄欄，對 1~2 字的
+ * 短標題是正常直書效果；套在一整句例句上就是逐字往下堆疊、彼此重疊、
+ * 完全無法閱讀——這正是被回報的版面。
+ *
+ * 全庫掃過：33 課 matrix 佈局裡，第一欄字數只有這一課（L0016）落在
+ * 21~25 字，其餘 31 課都 ≤9 字，兩群之間有清楚的落差，所以這裡用字數
+ * 當判準——短的維持直書（不改動既有 31 課的版面），長的改成一般橫式、
+ * 可換行的儲存格。
+ */
+const SECTION_LABEL_VERTICAL_MAX_LEN = 12;
+
+function isVerticalSectionLabel(label: string): boolean {
+  return label.length > 0 && label.length <= SECTION_LABEL_VERTICAL_MAX_LEN;
+}
+
 // ── Inline blank inputs (worksheet table cells) ─────────────────────────────
 
 interface InlineBlankInputProps {
@@ -967,17 +989,23 @@ const WorksheetTable: React.FC<WorksheetTableProps> = ({
               const showSection = itemIdx === 0;
               const sectionLabel =
                 chunkIdx === 0 ? sectionVerticalLabel(wsRow.section) : '';
+              const sectionIsVertical = isVerticalSectionLabel(sectionLabel);
 
               return (
                 <tr key={`sec-${wsIdx}-${chunkIdx}-${itemIdx}`}>
                   {showSection && (
                     <td
                       rowSpan={chunk.length}
-                      className={`${cellBorder} text-center font-medium w-10 align-middle ${
-                        sectionLabel ? 'bg-white' : ''
-                      }`}
+                      className={[
+                        cellBorder,
+                        'font-medium align-middle',
+                        sectionLabel ? 'bg-white' : '',
+                        sectionIsVertical
+                          ? 'text-center w-10'
+                          : 'text-left whitespace-pre-line w-1/4',
+                      ].join(' ')}
                       style={
-                        sectionLabel
+                        sectionIsVertical
                           ? { writingMode: 'vertical-rl', textOrientation: 'upright' }
                           : undefined
                       }
