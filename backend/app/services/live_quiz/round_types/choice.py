@@ -47,15 +47,31 @@ def _shuffle_display_positions(item: QuizItem, rng: random.Random) -> tuple[list
 
     External review #1a: an unauthenticated public endpoint
     (``GET /api/stories/{id}``) already exposes a comprehension question's
-    source-material answer letter. A source adapter's A/B/C/D is that
-    source letter — if a round's ``correct_key`` always equalled it, anyone
-    could cross-reference the two. Shuffling the on-screen position (and
-    re-deriving ``correct_key`` from the NEW position, using this game's own
-    seeded rng) breaks that correlation: the stored/served correct_key means
-    "the correct shape is in position C of THIS game", not "the source
-    material's answer is C". Fixed single-answer-per-key for
-    a given game.seed; a different game re-rolls the shuffled seed and gets
-    a different arrangement.
+    source-material answer LETTER. A source adapter's A/B/C/D is that
+    source letter — without this shuffle, a round's ``correct_key`` would
+    always equal it, so anyone could read the public endpoint's letter and
+    use it directly against this game.
+
+    What this actually defends against: that one narrow attack (matching
+    the LEAKED LETTER against this game's correct_key). Re-deriving
+    ``correct_key`` from a per-game seeded shuffle means the served
+    correct_key means "the correct shape is in position C of THIS game",
+    not "the source material's answer is C" — so the leaked letter alone
+    is useless here.
+
+    What this does NOT defend against (external review #2, 2026-10-15 —
+    do not read this as "the leak is handled"): that same public endpoint
+    also returns the option TEXTS, not just the letter. A student can read
+    the correct option's literal text from the public endpoint and match
+    it against whichever on-screen position this game's shuffle happens
+    to have put it in — the shuffle changes WHERE the text sits, it
+    doesn't hide the text itself, so text-based lookup bypasses this
+    entirely. The real fix is #3555 (stop the public lesson API from
+    shipping answers in the first place); that is a separate module/PR,
+    not this one — do not treat this shuffle as a substitute for it.
+
+    Fixed single-answer-per-key for a given game.seed; a different game
+    re-rolls the shuffled seed and gets a different arrangement.
 
     This is the only place option order is decided for what actually ships
     in the frozen snapshot — an adapter's own option order
