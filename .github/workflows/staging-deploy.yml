@@ -77,10 +77,10 @@ jobs:
       #    lru_cache，514/512 的餘裕本來就是負的。
       #    不要為了省錢調回 512Mi —— 差額量級是每月美分，代價是拒絕服務。
       #    鎖：backend/specs/test_workflow_path_filters_spec.py（test_backend_memory_is_at_least_1gi）
-      # Classroom capacity (2026-10-16 CTO review): up to 8 instances x 40
-      # concurrent requests. The staging DB stays db-f1-micro (25 connections,
-      # 3 reserved), so the pool is 2+0 per instance: 8 x 2 = 16. Billed per
-      # request, 0 instances and 0 cost when idle.
+      # Classroom capacity (2026-10-16, measured): 2 vCPU and 8 concurrent
+      # requests per instance so reading-recording transcodes spread across
+      # instances (see deploy.yml). Staging keeps min 0 (idle = 0 cost) and the
+      # db-f1-micro DB (25 connections): pool 2+0 per instance, 8 x 2 = 16.
       - name: Deploy backend to Cloud Run (Staging)
         run: |
           gcloud run deploy ${{ env.BACKEND_SERVICE }} \
@@ -90,10 +90,10 @@ jobs:
             --project ${{ env.PROJECT_ID }} \
             --allow-unauthenticated \
             --memory=1Gi \
-            --cpu=1 \
+            --cpu=2 \
             --min-instances=0 \
             --max-instances=8 \
-            --concurrency=40 \
+            --concurrency=8 \
             --timeout=300s \
             --add-cloudsql-instances=lingoleap-dev:asia-east1:lingoleap-staging-db \
             --service-account=lingoleap-junyi-bq@lingoleap-dev.iam.gserviceaccount.com \
