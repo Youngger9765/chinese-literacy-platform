@@ -144,6 +144,18 @@ const NavArrow: React.FC<{
   );
 };
 
+/**
+ * #3549: the step row scrolls sideways on a phone with its scrollbar hidden,
+ * so nothing told a student there were more steps off-screen. Which edges
+ * still have content past them (1px slack for sub-pixel scroll positions).
+ */
+export function stepperEdgeFades(scrollLeft: number, clientWidth: number, scrollWidth: number) {
+  return {
+    left: scrollLeft > 1,
+    right: scrollLeft + clientWidth < scrollWidth - 1,
+  };
+}
+
 const StepDots: React.FC<StepDotsProps> = ({
   steps,
   annotations,
@@ -155,6 +167,24 @@ const StepDots: React.FC<StepDotsProps> = ({
   navDisabled,
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [fades, setFades] = useState({ left: false, right: false });
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const update = () => {
+      const next = stepperEdgeFades(el.scrollLeft, el.clientWidth, el.scrollWidth);
+      setFades((prev) => (prev.left === next.left && prev.right === next.right ? prev : next));
+    };
+    update();
+    el.addEventListener('scroll', update, { passive: true });
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(update) : null;
+    ro?.observe(el);
+    return () => {
+      el.removeEventListener('scroll', update);
+      ro?.disconnect();
+    };
+  }, [steps.length]);
 
   useEffect(() => {
     const container = scrollRef.current;
@@ -170,6 +200,21 @@ const StepDots: React.FC<StepDotsProps> = ({
   // to the far edges of the header — 「左右的 < > 拉到圈圈左右側，不要離那麼遠」.
   // min-w-0 keeps overflow-x-auto working when the dots are wider than the space.
   return (
+    <div className="relative min-w-0 max-w-full">
+    {fades.left && (
+      <span
+        aria-hidden="true"
+        data-testid="stepper-fade-left"
+        className="pointer-events-none absolute inset-y-0 left-0 w-6 z-10 bg-gradient-to-r from-white to-transparent"
+      />
+    )}
+    {fades.right && (
+      <span
+        aria-hidden="true"
+        data-testid="stepper-fade-right"
+        className="pointer-events-none absolute inset-y-0 right-0 w-6 z-10 bg-gradient-to-l from-white to-transparent"
+      />
+    )}
     <div
       ref={scrollRef}
       className="min-w-0 max-w-full overflow-x-auto scrollbar-hide overscroll-x-contain"
@@ -214,7 +259,7 @@ const StepDots: React.FC<StepDotsProps> = ({
             <button
               type="button"
               onClick={() => onStepClick(step)}
-              className={`${sizeClass} rounded-full text-xs sm:text-sm md:text-base font-bold flex items-center justify-center transition-all hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${dotClass}`}
+              className={`${sizeClass} relative before:absolute before:-inset-1 before:content-[''] rounded-full text-xs sm:text-sm md:text-base font-bold flex items-center justify-center transition-all hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${dotClass}`}
               aria-label={ann?.a11yLabel ?? `${i + 1}. ${step.label}`}
               aria-current={isActive ? 'step' : undefined}
               title={ann?.partNo ? `${step.label}（第 ${ann.partNo} 篇）` : step.label}
@@ -254,6 +299,7 @@ const StepDots: React.FC<StepDotsProps> = ({
       })}
       <NavArrow dir="next" step={nextStep} disabled={navDisabled} onClick={onStepClick} />
       </div>
+    </div>
     </div>
   );
 };
