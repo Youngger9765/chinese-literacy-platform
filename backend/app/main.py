@@ -355,6 +355,12 @@ class GlobalRateLimitMiddleware:
     # /api/live-quiz/games/{code}/state|answer — see the membership-gated
     # exemption below (#3551 external review #3).
     _LIVE_QUIZ_RATE_EXEMPT_RE = re.compile(r"^/api/live-quiz/games/([^/]+)/(state|answer)$")
+    # /join is not membership-gated (you are not a member yet) but has its own
+    # per-user limit (10/min, routes/live_quiz.py). 10 classes in one school
+    # share one NAT IP: 300 joins in a minute exhausted the per-IP write budget
+    # on staging (2026-10-16). An authenticated join skips the per-IP count;
+    # an anonymous one still pays it (and gets 401 from the route).
+    _LIVE_QUIZ_JOIN_RE = re.compile(r"^/api/live-quiz/games/[^/]+/join$")
     # Read operations are much burstier during UI navigation (route mounts,
     # parallel data loaders, prefetch). Keep write operations stricter.
     # Allow env overrides so local dev (React StrictMode double-invocations,
@@ -428,6 +434,10 @@ class GlobalRateLimitMiddleware:
         # member's state/answer calls are naturally bounded by classroom
         # size and the ~1 req/s poll interval, so simply exempting them is
         # both simpler and more honest than a fake-precision limit.
+        if self._LIVE_QUIZ_JOIN_RE.match(path) and (scope.get("state") or {}).get("user_id") is not None:
+            await self.app(scope, receive, send)
+            return
+
         live_quiz_match = self._LIVE_QUIZ_RATE_EXEMPT_RE.match(path)
         if live_quiz_match:
             state = scope.get("state") or {}

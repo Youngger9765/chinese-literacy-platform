@@ -244,3 +244,37 @@ def test_membership_check_does_not_run_on_the_event_loop(client, monkeypatch):
     r = client.get(f"/api/live-quiz/games/{game['code']}/state", headers=auth_header(student["token"]))
     assert r.status_code == 200
     assert on_loop == [False], f"membership check ran on the event loop: {on_loop}"
+
+
+def test_authenticated_join_is_not_counted_against_the_school_ip(client, monkeypatch):
+    """10 classes in one school share one NAT IP. Staging load test 2026-10-16:
+    300 joins in a minute from one IP hit the per-IP write budget (90/min).
+    /join already has a per-user limiter (10/min), so an authenticated join
+    must not draw on the shared per-IP budget; an anonymous one still does."""
+    monkeypatch.setattr(GlobalRateLimitMiddleware, "WRITE_LIMIT", 3)
+    teacher = _register_user(client, "rl_join_t")
+    game = client.post(
+        "/api/live-quiz/games",
+        json={"lesson_uids": [LESSON_A], "source_modules": ["comprehension"], "seconds": 30, "reading_seconds": 0},
+        headers=auth_header(teacher["token"]),
+    ).json()
+    from app.routes.auth import rate_limiter as auth_rate_limiter
+    students = []
+    for i in range(6):  # setup only: register/login have their own limits
+        auth_rate_limiter.reset()
+        general_rate_limiter.reset()
+        students.append(_register_user(client, f"rl_join_s{i}"))
+    general_rate_limiter.reset()
+    statuses = [
+        client.post(f"/api/live-quiz/games/{game['code']}/join", headers=auth_header(s["token"])).status_code
+        for s in students
+    ]
+    assert statuses.count(429) == 0, statuses
+    assert statuses.count(201) == 6, statuses
+
+
+def test_anonymous_join_still_counts_against_the_ip(client, monkeypatch):
+    monkeypatch.setattr(GlobalRateLimitMiddleware, "WRITE_LIMIT", 3)
+    general_rate_limiter.reset()
+    statuses = [client.post("/api/live-quiz/games/123456/join").status_code for _ in range(6)]
+    assert 429 in statuses, statuses
