@@ -30,6 +30,7 @@ import type {
 import { camelizeKeys } from '../schema/camelize';
 import { LessonSchema } from '../schema/lessonContent';
 import { API_BASE } from './apiConfig';
+import { authToken } from '../utils/storage';
 import { ASSET_BASE } from '../config/assetBase';
 import { stepSequenceFromManifest } from '../config/stepConfig';
 import type { ManifestSection } from '../config/stepConfig';
@@ -392,7 +393,9 @@ export async function fetchStory(id: string): Promise<Story> {
   }
 
   const request = (async () => {
-    const res = await fetch(`${API_BASE}/api/stories/${id}`);
+    // #3555: the detail only carries multiple-choice answers for a logged-in
+    // caller, and the student renderers grade locally from them.
+    const res = await fetch(`${API_BASE}/api/stories/${id}`, { headers: authToken.authHeader() });
     if (!res.ok) throw new Error(`fetchStory failed: ${res.status}`);
     const data: ApiStoryDetail = await res.json();
     return apiDetailToStory(data);
