@@ -34,6 +34,7 @@ const StudentLiveQuizJoin: React.FC = () => {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-surface px-6 py-10">
       <h1 className="mb-1 text-xl font-bold text-on-surface">加入課堂搶答</h1>
+      <p className="mb-1 text-sm text-on-surface-variant">現在全班一起玩，約 10 分鐘</p>
       <p className="mb-8 text-sm text-on-surface-variant">輸入老師投影的 6 位數代碼</p>
 
       <div className="mb-8 flex gap-2" aria-live="polite">

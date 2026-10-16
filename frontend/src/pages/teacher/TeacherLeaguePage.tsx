@@ -1,5 +1,7 @@
 /**
- * TeacherLeaguePage — 班級賽 (teacher-facing).
+ * TeacherLeaguePage — 跨班賽季 (teacher-facing; code identifier/route stay
+ * `league` / `/teacher/league` — only the user-facing label changed,
+ * 2026-10-16 #3554 follow-up, Young-approved).
  *
  * Lets a classroom owner: create a one-time invite code for a cross-class
  * invitational, preview + accept/decline a code someone shared with them,
@@ -292,7 +294,8 @@ const TeacherLeaguePage: React.FC = () => {
   if (ownedClassrooms.length === 0) {
     return (
       <div className="p-6">
-        <h1 className="text-xl font-bold text-on-surface mb-2">班級賽</h1>
+        <h1 className="text-xl font-bold text-on-surface mb-1">跨班賽季</h1>
+        <p className="text-sm text-on-surface-variant mb-2">和別班比幾週，平常讀課文就累積</p>
         <p className="text-on-surface-variant">你目前沒有自己擔任班級擁有者的班級，無法建立跨班邀請賽。</p>
       </div>
     );
@@ -306,8 +309,8 @@ const TeacherLeaguePage: React.FC = () => {
     <div className="min-h-full bg-surface">
       <div className="p-4 md:p-6 max-w-4xl mx-auto space-y-6">
         <div>
-          <h1 className="text-xl font-bold text-on-surface">讀家星圖 · 班級賽</h1>
-          <p className="text-sm text-on-surface-variant mt-0.5">跟其他班級一起累積讀家能量</p>
+          <h1 className="text-xl font-bold text-on-surface">讀家星圖 · 跨班賽季</h1>
+          <p className="text-sm text-on-surface-variant mt-0.5">和別班比幾週，平常讀課文就累積</p>
         </div>
 
         {error && (

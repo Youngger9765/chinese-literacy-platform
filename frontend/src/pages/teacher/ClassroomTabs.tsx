@@ -16,7 +16,7 @@ export const TABS: { key: TabKey; label: string }[] = [
   { key: 'settings', label: '班級設定' },
   { key: 'assignments', label: '指派任務' },
   { key: 'data', label: '班級數據' },
-  { key: 'league', label: '班級賽' },
+  { key: 'league', label: '跨班賽季' },
 ];
 
 const ALL_KEYS = new Set<string>(TABS.map((tab) => tab.key));

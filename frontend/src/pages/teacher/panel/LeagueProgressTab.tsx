@@ -1,5 +1,6 @@
 /**
- * LeagueProgressTab — ClassroomTabs 「班級賽」progress tab (teacher-only).
+ * LeagueProgressTab — ClassroomTabs 「跨班賽季」progress tab (teacher-only;
+ * label renamed from 班級賽 2026-10-16, code identifiers unchanged).
  *
  * Lists this classroom's current/latest league season and its roster,
  * 尚未參與 (not yet participated) FIRST, in neutral grey (not red) — PRD
@@ -79,7 +80,7 @@ const LeagueProgressTab: React.FC<LeagueProgressTabProps> = ({ classroomId }) =>
   if (seasons.length === 0) {
     return (
       <div className="p-5 text-center text-on-surface-variant text-sm">
-        這個班級還沒有參加任何班級賽季。到「班級賽」頁面建立或接受跨班邀請即可開始。
+        這個班級還沒有參加任何跨班賽季。到「跨班賽季」頁面建立或接受跨班邀請即可開始。
       </div>
     );
   }

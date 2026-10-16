@@ -521,7 +521,7 @@ def list_my_seasons(db: Session, student: User) -> list[LeagueSeason]:
 
 def get_team_roster_progress(db: Session, team: LeagueTeam, season: LeagueSeason) -> list[dict]:
     """Per-student participation for the teacher's own team — PRD §10 UIUX:
-    the ClassroomTabs "班級賽" progress tab lists 尚未參與 (not yet
+    the ClassroomTabs "跨班賽季" progress tab lists 尚未參與 (not yet
     participated) FIRST, in neutral grey, teacher-only. Includes student_id
     so the route can resolve real names (teacher already has legitimate
     access to their own students, same precedent as get_team_anomalies).

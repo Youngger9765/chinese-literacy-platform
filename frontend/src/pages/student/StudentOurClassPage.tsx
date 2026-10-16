@@ -43,8 +43,9 @@ const StudentOurClassPage: React.FC = () => {
   if (seasons.length === 0) {
     return (
       <div className="p-6 max-w-xl mx-auto">
-        <h1 className="text-xl font-semibold text-gray-900 mb-2">我們班</h1>
-        <p className="text-gray-500">老師還沒有開啟班級賽季，等老師邀請跨班比賽後就會出現在這裡。</p>
+        <h1 className="text-xl font-semibold text-gray-900 mb-1">我們班</h1>
+        <p className="text-sm text-gray-500 mb-2">和別班比幾週，平常讀課文就累積</p>
+        <p className="text-gray-500">老師還沒有開啟跨班賽季，等老師邀請跨班比賽後就會出現在這裡。</p>
       </div>
     );
   }
@@ -53,7 +54,10 @@ const StudentOurClassPage: React.FC = () => {
 
   return (
     <div className="p-4 md:p-6 max-w-xl mx-auto space-y-4">
-      <h1 className="text-xl font-semibold text-gray-900">我們班</h1>
+      <div>
+        <h1 className="text-xl font-semibold text-gray-900">我們班</h1>
+        <p className="text-sm text-gray-500 mt-0.5">和別班比幾週，平常讀課文就累積</p>
+      </div>
 
       {/* 多隊切換 state */}
       {seasons.length > 1 && (

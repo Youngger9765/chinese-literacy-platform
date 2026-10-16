@@ -139,7 +139,8 @@ const TeacherLiveQuizSetup: React.FC<Props> = ({ onCreated }) => {
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
       <h1 className="text-2xl font-bold text-on-surface mb-1">班級經營</h1>
-      <p className="text-sm text-on-surface-variant mb-6">課堂搶答 — 選課文、設定題目，開場讓學生用手機加入</p>
+      <p className="text-sm text-on-surface-variant mb-1">課堂搶答 · 現在全班一起玩，約 10 分鐘</p>
+      <p className="text-sm text-on-surface-variant mb-6">選課文、設定題目，開場讓學生用手機加入</p>
 
       {error && (
         <div className="mb-4 rounded-lg bg-error/10 px-4 py-3 text-sm text-error" role="alert">

@@ -356,7 +356,7 @@ const LeagueHistorySection: React.FC = () => {
   if (seasons.length === 0) {
     return (
       <div className="text-center py-8 text-on-surface-variant text-sm">
-        還沒有參加過班級賽季，等老師開啟跨班邀請賽後就會出現在這裡。
+        還沒有參加過跨班賽季，等老師開啟跨班邀請賽後就會出現在這裡。
       </div>
     );
   }

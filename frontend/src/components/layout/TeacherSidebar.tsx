@@ -49,8 +49,18 @@ export function getTeacherNavItems(): NavItem[] {
   return [
     { icon: '🏫', label: '班級管理', path: '/teacher' },
     { icon: '📋', label: '作業管理', path: '/teacher/assignments' },
-    { icon: '🏆', label: '班級賽', path: '/teacher/league' },
-    { icon: '🎮', label: '課堂搶答', path: '/teacher/live' },
+    {
+      icon: '🏆',
+      label: '跨班賽季',
+      path: '/teacher/league',
+      description: '和別班比幾週，平常讀課文就累積',
+    },
+    {
+      icon: '🎮',
+      label: '課堂搶答',
+      path: '/teacher/live',
+      description: '現在全班一起玩，約 10 分鐘',
+    },
     // /help had no entry anywhere in the UI until #3142 — it existed only in
     // the un-authenticated route allowlist, so nobody could reach it.
     { icon: '❓', label: '使用說明', path: '/help' },

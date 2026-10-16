@@ -307,7 +307,7 @@ def get_team_roster_progress(
     db: Session = Depends(get_db),
 ) -> list[dict]:
     """Teacher-only (that team's owning classroom): per-student participation,
-    尚未參與 first, for the ClassroomTabs "班級賽" progress tab (PRD §10)."""
+    尚未參與 first, for the ClassroomTabs "跨班賽季" progress tab (PRD §10)."""
     season = _get_season_or_404(season_id, db)
     team = db.query(LeagueTeam).filter(LeagueTeam.id == team_id, LeagueTeam.season_id == season_id).first()
     if team is None:
