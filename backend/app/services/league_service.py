@@ -13,6 +13,7 @@ See docs/prd/2026-10-14-chinese-star-league-prd.md §7/§10/§11.
 """
 from __future__ import annotations
 
+import math
 import secrets
 from datetime import datetime, timezone
 
@@ -333,6 +334,21 @@ def _register_team(
     return team
 
 
+def _chest_participants_needed(roster_size: int, participants: int, ratio: float) -> int:
+    """How many MORE participants (score > 0) this roster needs before it
+    crosses the treasure-chest participation ratio. 0 once already eligible
+    or when the roster is empty (nothing to unlock).
+
+    2026-10-16 UI redesign (#3554 follow-up): the "還差 N 人解鎖寶箱" copy
+    needs this number — `treasure_chest_eligible` alone can only render a
+    static locked/unlocked state, not a "you're close" progress hint.
+    """
+    if roster_size <= 0:
+        return 0
+    required = math.ceil(ratio * roster_size)
+    return max(0, required - participants)
+
+
 # ── Boards / results ─────────────────────────────────────────────────────────
 
 
@@ -365,6 +381,7 @@ def get_season_board(db: Session, season: LeagueSeason) -> list[dict]:
             participants = sum(1 for r in results if r.points > 0)
 
         participation_ratio = (participants / roster_size) if roster_size else 0.0
+        chest_eligible = participation_ratio >= weights.treasure_chest_participation_ratio
         rows.append(
             {
                 "team_id": team.id,
@@ -375,8 +392,14 @@ def get_season_board(db: Session, season: LeagueSeason) -> list[dict]:
                 "participant_count": participants,
                 "average_points": average,
                 "team_badge_earned": average >= weights.badge_threshold,
-                "treasure_chest_eligible": participation_ratio
-                >= weights.treasure_chest_participation_ratio,
+                "treasure_chest_eligible": chest_eligible,
+                # 2026-10-16 UI redesign (#3554 follow-up, PRD §12): frozen
+                # per-season thresholds the frontend draws progress toward,
+                # instead of hardcoding LEAGUE_WEIGHTS_V1's numbers.
+                "badge_threshold": weights.badge_threshold,
+                "treasure_chest_participants_needed": _chest_participants_needed(
+                    roster_size, participants, weights.treasure_chest_participation_ratio
+                ),
             }
         )
 
@@ -452,6 +475,7 @@ def get_my_team_summary(db: Session, student: User, season: LeagueSeason) -> dic
     roster_size = len(roster)
     participants = sum(1 for r in all_results if r.points > 0)
     average = sum(r.points for r in all_results) / roster_size if roster_size else 0.0
+    participation_ratio = (participants / roster_size) if roster_size else 0.0
 
     return {
         "season_id": season.id,
@@ -463,6 +487,14 @@ def get_my_team_summary(db: Session, student: User, season: LeagueSeason) -> dic
         "class_badge_earned": average >= weights.badge_threshold,
         "participant_count": participants,
         "roster_size": roster_size,
+        # 2026-10-16 UI redesign (#3554 follow-up, PRD §12) — same contract
+        # as get_season_board's new fields, see that function's comment.
+        "badge_threshold": weights.badge_threshold,
+        "treasure_chest_eligible": participation_ratio
+        >= weights.treasure_chest_participation_ratio,
+        "treasure_chest_participants_needed": _chest_participants_needed(
+            roster_size, participants, weights.treasure_chest_participation_ratio
+        ),
     }
 
 

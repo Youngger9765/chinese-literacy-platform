@@ -252,3 +252,63 @@ league_team_roster_members  team_id / student_id / locked_at
 5. 個人資料保留至賽季結束後一年，之後只留班級彙總
 6. 個人排行榜延後（待方大哥確認排名政策）
 7. MVP 照第 10 節共識範圍開工
+
+## 12. UI 重新設計 + 功能補齊（2026-10-16，#3554 後續）
+
+> 起因：Young 驗收 MVP（#3554 留言 2026-10-15）後指示「畫面請重新設計 有質感的；功能都要跟星空探險隊一樣」。
+> MVP 當時只照抄了星空探險隊的**計分規則**（§5），畫面是純白表單＋列表，且星空的敘事／對戰視覺／寶箱提示／個人進度圖像化都還沒做。本節補這兩塊：**功能補齊**（§12.1 逐項對照）＋ **視覺重新設計**（§12.2）。
+
+### 12.1 功能逐項對照（均一星空探險隊 vs 我們）
+
+調研方法：讀本機唯讀 clone `~/project/junyiacademy` 的 `frontend/legacy/leader-board-package/{src/Overview.jsx, src/Progress.jsx, leader-score.handlebars.js, class-statistics.handlebars.js, star-gift.js, star-gift.handlebars.js}` 與 `backend/junyi/achievement/avatars/avatar_model.py`（僅讀公開原始碼架構，不涉均一內部資料，同 §2 既有調研紀律）。
+
+| # | 星空探險隊功能 | 本次狀態 | 說明 |
+|---|---|---|---|
+| 1 | 故事敘事 + 主視覺（狐狸貓星球 / 暗黑力量，`Overview.jsx`）| **Done（自有 IP）** | 讀家自己的故事與美術，不沿用均一的角色/文案/圖檔（CLAUDE.md IP 邊界）。主題定為「讀家星圖」：書蟲角色＋星圖隱喻，由本次 CSS/inline SVG 自繪，無外部圖檔依賴 |
+| 2 | 集體清除進度條，兩隊能量並排（`Progress.jsx` 的雙 Legend + 中央 Progress 環）| **Done（改造，非照搬數字）** | 均一的「3,000 單位暗黑力量／每 40 點換 1 單位燃料」是**全國多校累積池**的敘事數字，我們的賽季規模是兩班邀請賽，沒有對應的全國池可換算，照搬數字會是假數據。改為：兩班的「平均分 → 班級徽章門檻（120分，`weights.badge_threshold`）」各自一條能量條，左右並排面對面，兩條都滿即雙方都解鎖班級徽章——保留「兩隊並肩朝同一目標推進」的視覺精神，但目標是兩隊都已知、已驗證存在的真實門檻，不是編造的全域數字 |
+| 3 | 兩種隊伍（星塵小隊／光束小隊，依報名分組）| **Partial（概念對應，分隊邏輯不同）** | 我們的「兩隊」＝邀請方班級 vs 應邀方班級（跨班邀請賽結構），不是同校內依人數分兩組；均一的分隊概念不直接適用於我們的賽制（PRD §4 已定案），這裡只借視覺語言（兩隊對照），不借分隊規則 |
+| 4 | 個人進度（`Progress.jsx` 下方「個人進度」文字區塊：總分／平均／換算燃料）| **Done** | 讀家記憶既有 `my_points`／`class_average_points`；本次新增 `badge_threshold` 讓前端畫真正的「我的分數 → 個人徽章門檻」進度環，不再只有文字 |
+| 5 | 全國／縣市排名（`leader-score.handlebars.js`：全國排名／縣市排名／頭像／名稱／縣市／學校／班級／星空點數 八欄表格）| **Not possible this round（已知缺口，非本票新發現）** | 需要兩個前提都不存在：① `official` 型賽季（全平台開放報名，PRD §4 schema 已留但 MVP 不開放，Phase 3）② `School` 的結構化縣市欄位（PRD §9.5 待 Young 決定是否新增，屬 migration 核准流程）。本次**不**新增這兩者（超出 league-only 的 additive 範圍），維持 PRD 既有 Phase 3 規劃 |
+| 6 | 班排名＋累計貢獻點數（`class-statistics.handlebars.js`：班排名／姓名／累計貢獻點數，老師視角真名）| **Done（重新設計）** | 對應 `LeagueProgressTab`（teacher-only，班級內真名——PRD §6 既有規則：自己班內維持現狀真名顯示）。本次改造列表視覺＋依分數排序＋尚未參與維持灰色中性（PRD §10 UIUX 既有規則不變）|
+| 7 | 限定頭貼（`avatar_model.py` 的 `avatar_type="foxcat"` 活動類頭貼，達成條件解鎖專屬大頭貼）| **Partial（降scope，誠實標註）** | 完整「可切換大頭貼」系統＝新的頭像資產＋選擇器 UI＋使用者資料綁定，超出本次 UI 改版的合理範圍（也不是 Young 這次要的核心——他要的是「畫面有質感」，不是新頭像系統）。本次做**成就徽章視覺卡**（個人徽章／班級徽章，達門檻即解鎖的插畫式徽章，仿既有 `BadgeGrid.tsx` 視覺語言），不做可切換大頭貼。完整頭像系統列為後續，需要 Young 決定是否值得做 |
+| 8 | 寶箱機制（`star-gift.js`：班級過半參與解鎖隨機寶箱）| **Done（補完提示文案）** | `treasure_chest_eligible` 布林值 MVP 已有；本次新增 `treasure_chest_participants_needed`（§12.3 後端變更），讓 UI 能顯示「還差 N 人」而非只有「鎖住／解鎖」兩態。真正的「隨機加分」機制仍是 PRD Phase 2（MVP 範圍, PRD §4 已明載），本次不做隨機加分，只做參與度提示 |
+| 9 | 夜幕低垂（`star-gift.js` `countDown`：22:01–隔日起算凍結畫面更新）| **Not done（既有明確延後決定）** | PRD §9.7／§10 分期表已將此列為 Phase 4，2026-10-15 review 時已決定不排進 MVP；本次沒有新資訊推翻這個決定，維持延後 |
+| 10 | 介紹影片（`Overview.jsx` 內嵌 YouTube）| **Not done this round** | 沒有既有讀家主題動畫素材；真要做需要走 `animation-director`／影像學院產線（另案），不在這次「重新設計 UI＋補功能」的程式碼改動範圍內。本次版面保留一個可放影片的區塊位置（之後補影片不必再動版面），但暫不放假的佔位影片 |
+| 11 | 邀請流程（班級報名／邀請碼）| **Done（保留邏輯，重新設計視覺）** | 功能、授權矩陣、安全檢查全部不動（PRD §7 已定案的邀請碼機制），只重做視覺：三步驟改成卡片式精靈流程，而非純表單堆疊 |
+| 12 | 個人排行榜（跨班排名＋暱稱系統）| **Not possible — 既有明確產品決策，非本票可重啟** | PRD §11.6「個人排行榜延後（待方大哥確認排名政策）」是 Young 2026-10-15 已定案的決策，不是遺漏。本次不重啟這個範圍 |
+
+**小結**：12 項中 Done 5、Done(重新設計/改造) 2、Partial 2、Not possible/not done（既有明確理由）3。沒有一項是「忘記做」——每個 Not done/Not possible 都對應 PRD 既有章節的明確決定或明確的技術前提缺口。
+
+### 12.2 視覺重新設計決策（UIUX，Young 授權由開發端判斷的小決定，附理由）
+
+1. **沿用既有「Tactile Scholar」設計系統，不另開深色星空主題**——`DESIGN.md` 明載全站「Dark Mode：暫不實作（Phase 6+ 考慮）」。幫單一功能硬套深色全頁主題，會跟全站其他頁面（白色／暖米底）視覺斷裂，那是「不一致」不是「有質感」。改用既有 `GamificationHero.tsx` 已驗證過的語言（`bg-gradient-to-br from-accent to-accent/80` 深紫漸層卡片＋白字＋`bg-white/20` 進度軌道）做對戰首頁的英雄區塊——本身就有「成就／星空」的質感，且與全站一致。星圖／書蟲意象改用 inline SVG／CSS 繪製的星點裝飾做點綴，不做整頁換膚
+2. **徽章視覺比照既有 `BadgeGrid.tsx` 的卡片語言**（彩色邊框＋圖示＋鎖定灰階＋解鎖高亮），個人徽章用 `accent`（品牌紫）、班級徽章用 `tertiary-container`（鼓勵橙）系統色，不新創色票
+3. **兩隊面對面的能量條**放在對戰首頁最上方（Young 指定的版面需求），用左右鏡像布局：桌面（≥768px）左右並排、手機（<768px）上下堆疊，中間放共同門檻與「VS」視覺錨點
+4. **行動裝置優先**：三個斷點（390／768／1280）都要可讀，手機版把「建立邀請賽」三步驟改成單欄精靈（一次顯示一步＋進度點），不是桌面三欄表單縮小
+5. **文案延續既有中文風格**（不加句號、短句、鼓勵語氣），不使用星空探險隊的專有名詞（暗黑力量／恆毅星塵／理解光束等一律不出現）
+
+### 12.3 後端變更（additive only，無新表／無 migration）
+
+新增兩個計算欄位到既有兩個 response（`get_season_board` 的每一列、`get_my_team_summary`）：`badge_threshold`（該賽季凍結的徽章門檻）、`treasure_chest_participants_needed`（距解鎖寶箱還差幾人，0＝已解鎖）。純粹從既有 `weights_snapshot` 算出來，**不新增欄位到資料庫、不改既有欄位語意、不需要 migration**——TDD：`backend/tests/test_league_service.py` 新增 3 條測試（先紅後綠），見 git log。
+
+### 12.4 畫面清單（本次改動的檔案）
+
+| 畫面 | 檔案 | 改動 |
+|---|---|---|
+| 班級賽首頁（老師）| `frontend/src/pages/teacher/TeacherLeaguePage.tsx` | 全面重畫：對戰英雄區（兩隊能量條＋VS）＋精靈式邀請流程＋排行榜卡片化＋徽章/寶箱提示 |
+| 班級賽進度 tab（老師，`ClassroomTabs` 內）| `frontend/src/pages/teacher/panel/LeagueProgressTab.tsx` | 列表視覺重畫＋個人分數條＋班級彙總卡片置頂 |
+| 讀家記憶（學生，`學習紀錄` 內）| `frontend/src/pages/student/LearningHistoryPage.tsx`（`LeagueHistorySection`）| 個人進度環＋徽章卡片＋班級寶箱提示，取代純文字列 |
+
+### 12.5 待 Young 決定（本次沒有動，列出來給他選）
+
+1. §5 全國／縣市排名：要不要排進下一輪（需要 `official` 賽季型態實作 + `School.county` 欄位 migration）
+2. §7 完整可切換頭像系統 vs 現在的成就徽章卡：值不值得做
+3. §10 介紹影片：要不要排進影像學院產線
+
+
+### 12.6 CTO 自審（`redutek-cto` skill 框架）
+
+- **可逆性**：全部是 two-way door——UI 改版（CSS/元件）與 API 新增欄位都可逆、不碰 schema、不影響既有呼叫者（純新增欄位，舊 client 忽略新欄位不受影響）。不需要慢想，直接做
+- **build vs buy**：UI 元件全部複用既有 `GamificationHero`／`BadgeGrid` 的視覺語言與既有 Tailwind 設計 token，沒有新裝套件、沒有新建設計系統
+- **複雜度預算**：沒有新表、沒有新服務、沒有新依賴；只改 3 個既有檔案 + 2 個既有函式新增欄位
+- **驗證才宣稱完成**：§12.3 的 TDD 已先紅後綠（見 commit）；UI 改動後跑 `npm run lint` + `npm run test`（render-smoke）+ headless 截圖三斷點，PR 合併後在 staging 用真資料（建一組跨班邀請賽＋學生真實完成一課）驗證，結果見 PR 說明與最終報告
