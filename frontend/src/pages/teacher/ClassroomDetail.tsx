@@ -27,6 +27,7 @@ import {
   BatchCreateResult,
 } from '../../services/classroomApi';
 import ClassroomHeaderCard from './ClassroomHeaderCard';
+import ClassroomPkSettingsPanel from './ClassroomPkSettingsPanel';
 import ClassroomTabs, { TabKey, resolveInitialView, resolveTabKey } from './ClassroomTabs';
 import StudentListTab from './StudentListTab';
 import ClassSwitcher from './panel/ClassSwitcher';
@@ -393,6 +394,17 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack, 
         onAddStudents={() => setIsAddStudentsOpen(true)}
         formatDate={formatDate}
       />
+
+      {token && (
+        <ClassroomPkSettingsPanel
+          token={token}
+          classroomId={classroom.id}
+          pkHuman={classroom.pk_human}
+          onChanged={(pkHuman) =>
+            setClassroom((prev) => (prev ? { ...prev, pk_human: pkHuman } : prev))
+          }
+        />
+      )}
 
       <section className="rounded-xl border border-gray-200 overflow-hidden" aria-label="學生名單">
             <StudentListTab

@@ -77,6 +77,16 @@ class Classroom(Base):
     grade: Mapped[int | None] = mapped_column(Integer, nullable=True)
     join_code: Mapped[str | None] = mapped_column(String(8), unique=True, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    # Issue #3586 (PK mode): per-classroom feature toggles the teacher
+    # controls, e.g. {"pk_human": true}. One JSON blob instead of one
+    # column per feature so a future class-level toggle never needs
+    # another migration -- read it through
+    # services/pk/classroom_features.get_classroom_feature(), which
+    # supplies the default for any key not present (an empty '{}' class
+    # is NOT the same as "everything off"; each key has its own default).
+    feature_settings: Mapped[dict] = mapped_column(
+        JSON, nullable=False, server_default=text("'{}'")
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

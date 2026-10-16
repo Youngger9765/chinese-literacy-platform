@@ -47,9 +47,12 @@ from .routes.admin_story_structure_lab import router as admin_story_structure_la
 from .routes.assets import router as assets_router
 from .routes.worksheets import router as worksheets_router
 from .routes.live_quiz import router as live_quiz_router
+from .routes.pk import router as pk_router
 from .utils.logging_config import setup_logging
 from .auth.rate_limiter import general_rate_limiter, real_ip_from_xff
 from .services.live_quiz.engine import is_authenticated_member_by_code
+from .services.pk.matchmaking import is_authenticated_queue_owner as pk_is_authenticated_queue_owner
+from .services.pk.engine import is_authenticated_match_participant as pk_is_authenticated_match_participant
 from .services.seed import seed_default_data, repair_pii_accounts
 
 # Initialise structured logging before anything else
@@ -326,6 +329,65 @@ class _LiveQuizMemberCache:
 _live_quiz_member_cache = _LiveQuizMemberCache()
 
 
+class _PkIdMemberCache:
+    """Same shape as ``_LiveQuizMemberCache`` (positive-only, TTL, bounded)
+    but keyed by a raw integer id (``pk_queue.id`` or ``pk_matches.id``)
+    instead of a 6-char code — PRD §12's "比照 live_quiz 已經驗證過的兩招"
+    recommendation, applied to PK's queue-poll and match-state/-answer
+    paths (see GlobalRateLimitMiddleware below)."""
+
+    TTL = 60.0
+    MAX = 20000
+
+    def __init__(self):
+        self._d: dict[tuple[int, int], float] = {}
+        self._lock = threading.Lock()
+
+    def get(self, resource_id: int, user_id: int) -> bool:
+        with self._lock:
+            exp = self._d.get((resource_id, user_id))
+            if exp is None:
+                return False
+            if exp < time.monotonic():
+                del self._d[(resource_id, user_id)]
+                return False
+            return True
+
+    def put(self, resource_id: int, user_id: int) -> None:
+        with self._lock:
+            if len(self._d) >= self.MAX:
+                self._d.clear()
+            self._d[(resource_id, user_id)] = time.monotonic() + self.TTL
+
+    def clear(self) -> None:
+        with self._lock:
+            self._d.clear()
+
+
+_pk_queue_member_cache = _PkIdMemberCache()
+_pk_match_member_cache = _PkIdMemberCache()
+
+
+def _lookup_pk_queue_member(queue_id: int, user_id: int) -> bool:
+    from .database import SessionLocal as _SessionLocal
+
+    db = _SessionLocal()
+    try:
+        return pk_is_authenticated_queue_owner(db, queue_id, user_id)
+    finally:
+        db.close()
+
+
+def _lookup_pk_match_member(match_id: int, user_id: int) -> bool:
+    from .database import SessionLocal as _SessionLocal
+
+    db = _SessionLocal()
+    try:
+        return pk_is_authenticated_match_participant(db, match_id, user_id)
+    finally:
+        db.close()
+
+
 def _lookup_live_quiz_member(code: str, user_id: int) -> bool:
     # Lazy import (not a top-level binding): looked up fresh on every call so
     # tests can monkeypatch `app.database.SessionLocal` to their own engine.
@@ -355,6 +417,11 @@ class GlobalRateLimitMiddleware:
     # /api/live-quiz/games/{code}/state|answer — see the membership-gated
     # exemption below (#3551 external review #3).
     _LIVE_QUIZ_RATE_EXEMPT_RE = re.compile(r"^/api/live-quiz/games/([^/]+)/(state|answer)$")
+    # /api/pk/queue/{id}/poll and /api/pk/matches/{id}/(state|answer) — PRD
+    # §12's "另開一條 PK 專屬的豁免規則" (see the membership-gated exemption
+    # block below, mirroring _LIVE_QUIZ_RATE_EXEMPT_RE's pattern).
+    _PK_QUEUE_RATE_EXEMPT_RE = re.compile(r"^/api/pk/queue/(\d+)/poll$")
+    _PK_MATCH_RATE_EXEMPT_RE = re.compile(r"^/api/pk/matches/(\d+)/(?:state|answer)$")
     # /join is not membership-gated (you are not a member yet) but has its own
     # per-user limit (10/min, routes/live_quiz.py). 10 classes in one school
     # share one NAT IP: 300 joins in a minute exhausted the per-IP write budget
@@ -458,6 +525,44 @@ class GlobalRateLimitMiddleware:
                 except Exception:
                     logger.warning(
                         "live-quiz rate-limit membership check failed; falling back to per-IP limiting",
+                        exc_info=True,
+                    )
+                    member = False
+                if member:
+                    await self.app(scope, receive, send)
+                    return
+            # Unauthenticated or non-member: fall through to normal per-IP
+            # limiting below, same as any other /api/* request.
+
+        # PK polling (PRD §12, same reasoning/shape as the live-quiz block
+        # above): a classroom's worth of students simultaneously waiting in
+        # the matchmaking queue or mid-battle would otherwise share one
+        # classroom-NAT IP's per-IP budget. Exempt only when the caller is
+        # BOTH authenticated AND the owner/a participant of THIS resource —
+        # a stranger polling someone else's queue_id/match_id still pays
+        # the per-IP limit.
+        pk_queue_match = self._PK_QUEUE_RATE_EXEMPT_RE.match(path)
+        pk_match_match = self._PK_MATCH_RATE_EXEMPT_RE.match(path) if not pk_queue_match else None
+        if pk_queue_match or pk_match_match:
+            state = scope.get("state") or {}
+            raw_user_id = state.get("user_id")
+            if raw_user_id is not None:
+                try:
+                    user_id = int(raw_user_id)
+                    if pk_queue_match:
+                        resource_id = int(pk_queue_match.group(1))
+                        cache, lookup_fn = _pk_queue_member_cache, _lookup_pk_queue_member
+                    else:
+                        resource_id = int(pk_match_match.group(1))
+                        cache, lookup_fn = _pk_match_member_cache, _lookup_pk_match_member
+                    member = cache.get(resource_id, user_id)
+                    if not member:
+                        member = await anyio.to_thread.run_sync(lookup_fn, resource_id, user_id)
+                        if member:
+                            cache.put(resource_id, user_id)
+                except Exception:
+                    logger.warning(
+                        "pk rate-limit membership check failed; falling back to per-IP limiting",
                         exc_info=True,
                     )
                     member = False
@@ -711,6 +816,7 @@ app.include_router(admin_story_structure_lab_router, prefix="/api", tags=["admin
 # No /api prefix — matches the Firebase Hosting `/assets/**` rewrite target (#2486).
 app.include_router(assets_router)
 app.include_router(live_quiz_router, prefix="/api", tags=["live-quiz"])
+app.include_router(pk_router, prefix="/api", tags=["pk"])
 # Role-gated worksheet download (#3276) — separate from the public assets proxy above.
 app.include_router(worksheets_router)
 
