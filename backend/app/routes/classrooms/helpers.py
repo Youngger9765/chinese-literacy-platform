@@ -17,6 +17,7 @@ from ...models.assignment import Assignment, AssignmentSubmission
 from ...models.school import Classroom, ClassroomStudent, ClassroomTeacher
 from ...models.user import Role, User, UserRole
 from ...schemas.classroom import ClassroomDetailResponse, ClassroomResponse, StudentInClassroomResponse
+from ...services.pk import classroom_features as pk_classroom_features
 
 logger = logging.getLogger(__name__)
 
@@ -198,6 +199,7 @@ def classroom_to_response(classroom: Classroom, db: Session) -> ClassroomRespons
         is_active=classroom.is_active,
         created_at=classroom.created_at,
         student_count=student_count(classroom, db),
+        pk_human=pk_classroom_features.get_classroom_feature(classroom, "pk_human"),
     )
 
 
@@ -223,4 +225,5 @@ def classroom_to_detail_response(classroom: Classroom) -> ClassroomDetailRespons
         created_at=classroom.created_at,
         student_count=len(students),
         students=students,
+        pk_human=pk_classroom_features.get_classroom_feature(classroom, "pk_human"),
     )

@@ -52,10 +52,27 @@ def make_school(db, *, name: str = "測試國小", org: Organization | None = No
 
 
 def make_classroom(
-    db, school: School, teacher: User, *, name: str = "測試班級", grade: int | None = 4
+    db,
+    school: School,
+    teacher: User,
+    *,
+    name: str = "測試班級",
+    grade: int | None = 4,
+    feature_settings: dict | None = None,
 ) -> Classroom:
+    """``feature_settings``: PK mode's per-classroom toggles (issue #3586,
+    e.g. {"pk_human": True}) — None leaves the column at its DB default
+    ({} -> every feature defaults OFF per
+    services/pk/classroom_features.FEATURE_DEFAULTS), explicitly passed
+    gives tests control without every OTHER caller of this shared factory
+    needing to know PK mode exists."""
     classroom = Classroom(
-        id=_next_id(), school_id=school.id, teacher_id=teacher.id, name=name, grade=grade
+        id=_next_id(),
+        school_id=school.id,
+        teacher_id=teacher.id,
+        name=name,
+        grade=grade,
+        **({"feature_settings": feature_settings} if feature_settings is not None else {}),
     )
     db.add(classroom)
     db.flush()

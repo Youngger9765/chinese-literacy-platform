@@ -86,6 +86,12 @@ export function getStudentNavItems(pendingAssignmentCount = 0): NavItem[] {
       path: '/live',
       description: '現在全班一起玩，約 10 分鐘',
     },
+    {
+      icon: '⚔️',
+      label: 'PK 對戰',
+      path: '/pk',
+      description: '一對一，隨時挑戰同學或文學家',
+    },
     { icon: '➕', label: '加入班級', path: '/join' },
     { icon: '📖', label: '學習紀錄', path: '/learning-history' },
     // /help had no entry anywhere in the UI until #3142.
