@@ -16,6 +16,24 @@ class ClassroomUpdateRequest(BaseModel):
     is_active: bool | None = None
 
 
+class ClassroomPkSettingsRequest(BaseModel):
+    """PATCH /classrooms/{id}/pk-settings body — issue #3586 §7.4.
+
+    One typed field today (`pk_human`) so the public API stays OpenAPI-typed,
+    even though the underlying storage (`classrooms.feature_settings`) is a
+    schemaless JSON column for forward-compat — see
+    app/services/pk/classroom_features.py. There is deliberately no
+    `pk_ai` field: Young 2026-10-16 "AI PK 跟班級無關" — 挑戰文學家 is never
+    gated by classroom settings, so there is nothing here to toggle for it.
+    """
+
+    pk_human: bool
+
+
+class ClassroomPkSettingsResponse(BaseModel):
+    pk_human: bool
+
+
 class ClassroomStudentAddRequest(BaseModel):
     student_id: int
 
@@ -58,6 +76,12 @@ class ClassroomResponse(BaseModel):
     is_active: bool
     created_at: datetime
     student_count: int
+    # Issue #3586 §7.4 — 真人 PK 班級開關，teacher-visible, default False.
+    # Populated via services/pk/classroom_features.get_classroom_feature(),
+    # never read directly off the raw `feature_settings` column (that's the
+    # whole point of the typed accessor: a brand-new class with
+    # feature_settings == {} must report False here, not omit the field).
+    pk_human: bool = False
 
     model_config = {"from_attributes": True}
 
@@ -148,6 +172,11 @@ class StudentEnrolledClassroom(BaseModel):
     teacher_name: str
     is_active: bool
     enrolled_at: datetime
+    # Issue #3586 §7.4 — whether THIS classroom has 真人 PK turned on. The
+    # frontend's "show 找同學 PK or not" decision is "ANY enrolled classroom
+    # has pk_human=True" (StudentPkEntry.tsx), computed client-side over the
+    # list this field appears in — not a separate aggregate endpoint.
+    pk_human: bool = False
 
     model_config = {"from_attributes": True}
 

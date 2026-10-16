@@ -462,6 +462,9 @@ export interface StudentEnrolledClassroom {
   teacher_name: string;
   is_active: boolean;
   enrolled_at: string;
+  /** 這個班級是否開放真人 PK — issue #3586 §7.4, default false. AI PK
+   * (挑戰文學家) has no equivalent field: it is never gated by classroom. */
+  pk_human: boolean;
 }
 
 export interface StudentEnrolledClassroomsResponse {

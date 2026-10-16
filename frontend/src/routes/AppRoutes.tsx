@@ -80,6 +80,10 @@ const TeacherLiveQuizHost = lazy(() => import('../pages/teacher/live/TeacherLive
 const TeacherLiveQuizHistory = lazy(() => import('../pages/teacher/live/TeacherLiveQuizHistory'));
 const StudentLiveQuizJoin = lazy(() => import('../pages/live/StudentLiveQuizJoin'));
 const StudentLiveQuizPlay = lazy(() => import('../pages/live/StudentLiveQuizPlay'));
+const StudentPkEntry = lazy(() => import('../pages/pk/StudentPkEntry'));
+const StudentPkQueueWait = lazy(() => import('../pages/pk/StudentPkQueueWait'));
+const StudentPkOpponentSelect = lazy(() => import('../pages/pk/StudentPkOpponentSelect'));
+const StudentPkMatch = lazy(() => import('../pages/pk/StudentPkMatch'));
 
 // OMO (Online-Merge-Offline) paper worksheet upload (Issue #1343)
 const OmoPage = lazy(() => import('../pages/omo/OmoPage'));
@@ -491,6 +495,40 @@ const AppRoutes: React.FC = () => (
         element={
           <ProtectedRoute>
             <StudentLiveQuizPlay />
+          </ProtectedRoute>
+        }
+      />
+      {/* PK 對戰（雙人 PK 模式, #3586）— full-screen like the live-quiz flow
+          above, no AppShell (PRD §3.3: "PK 對戰全程...走全螢幕遊戲版面"). */}
+      <Route
+        path="/pk"
+        element={
+          <ProtectedRoute>
+            <StudentPkEntry />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/pk/queue/:queueId"
+        element={
+          <ProtectedRoute>
+            <StudentPkQueueWait />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/pk/opponents"
+        element={
+          <ProtectedRoute>
+            <StudentPkOpponentSelect />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/pk/match/:matchId"
+        element={
+          <ProtectedRoute>
+            <StudentPkMatch />
           </ProtectedRoute>
         }
       />

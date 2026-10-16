@@ -25,6 +25,7 @@ from ...schemas.classroom import (
 from ...services.classroom_dev_filter import is_dev_classroom
 from ...services.classroom_lifecycle_service import delete_classroom_with_cleanup
 from ...services.input_sanitizer import sanitize_ai_input
+from ...services.pk import classroom_features as pk_classroom_features
 from .helpers import (
     classroom_to_detail_response,
     classroom_to_response,
@@ -261,6 +262,7 @@ def list_my_enrolled_classrooms(
             teacher_name=teacher.name,
             is_active=classroom.is_active,
             enrolled_at=cs.enrolled_at,
+            pk_human=pk_classroom_features.get_classroom_feature(classroom, "pk_human"),
         )
         for cs, classroom, teacher in rows
     ]

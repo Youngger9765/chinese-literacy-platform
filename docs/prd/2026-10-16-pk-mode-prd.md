@@ -72,7 +72,7 @@ AI 對手 = **規則型機器人，不叫 LLM**，以中文文學人物分級，
 
 ### 3.2 老師端
 
-1. 班級設定新增「開放 PK 對戰」開關（預設關閉，見 §7.4 與 CTO 審查）
+1. 班級設定新增「開放 PK 對戰」開關——僅管真人 PK，AI PK 不受此開關影響（預設關閉，見 §7.4 與 CTO 審查）
 2. 老師可以看「本班 PK 活動」：本週打了幾場、誰還沒打過、不看個別對戰內容（跟 `live_quiz` 的「歷次課堂挑戰」清單同精神，但 PK 是學生自發的，老師看的是參與度不是裁判）
 
 ### 3.3 視覺與互動語言：要讓學生覺得「這是在玩遊戲」，不是在寫作業（2026-10-16 Young 明確要求）
@@ -268,9 +268,38 @@ created_at / updated_at
 
 ### 7.4 既有表的改動（不算在「3 張新表」裡，但要走 migration 核准）
 
-`classrooms` 新增 1 個可為空欄位：`pk_enabled boolean, nullable, default false`。老師端開關寫這一欄。**預設關閉**（決定，理由：PK 讓學生之間直接配對作答，老師應該主動選擇開啟，而不是上線當天全平台所有班級突然都能配對——這跟 `live_quiz` 需要老師主動開場主持是同一種「老師先知情、才開放」的態度，不是自動全開）。
+**2026-10-16 定案修訂（Young 兩輪指示，取代上一版的 `pk_enabled`）**：
 
-這是對**既有表**的新增欄位，不是新表，但仍然是 schema 改動——實作前要照專案既有規則先問 Young、拿到明確同意才能跑 `alembic revision`（這份 PRD 不建立 migration，只先把要加的欄位寫清楚）。
+`classrooms` 新增 1 個欄位：`feature_settings JSONB, NOT NULL, server default '{}'`。
+不是專屬的 `pk_enabled boolean` 欄位，而是一個**無 schema 的 JSON 設定欄位**——
+Young：「跟班級有關的都讓老師可以控制」，把它設計成一個可以裝未來任何班級層級開關的
+容器，這樣下一個「老師可以開關的東西」出現時不需要再多跑一次 schema 變動，只要在
+`services/pk/classroom_features.py` 的 `FEATURE_DEFAULTS` 字典多加一個 key。
+讀取一律透過該檔案的 typed accessor（`get_classroom_feature(classroom, key)`），
+不直接讀 raw column——這樣一個從沒碰過這欄位的舊班級（`feature_settings == {}`）
+才會正確回報每個 key 自己的預設值，而不是「整欄是空的所以全部當 False」這種隱性假設
+（萬一哪天新 key 的預設該是 True，那樣寫就會悄悄把既有班級全部打錯）。
+
+**目前唯一認得的 key：`pk_human`**（boolean，預設 **false**）——管「真人 PK」
+（找同學配對 + 邀請碼），邏輯與上一版 `pk_enabled` 相同：**預設關閉**，老師要主動
+選擇開啟（同 `live_quiz` 需要老師主動開場主持的「老師先知情、才開放」態度）。
+寫入時只接受已知 key 與布林值，未知 key 一律拒絕（`validate_feature_settings_patch`）。
+
+**`pk_ai`（挑戰文學家 / AI PK）刻意沒有對應的 key**——這是 Young 第二輪的更正：
+「AI PK 跟班級無關」。AI PK 對任何已登入學生永遠開放，不管有沒有加入班級、
+班級的 `feature_settings` 寫了什麼都不影響它；§3 的 `create_ai_match` /
+`POST /api/pk/challenge-ai` 路徑完全不檢查這個欄位。第 75 行與 §11 的 API 表已同步修正。
+
+介面：`PATCH /api/classrooms/{id}/pk-settings`，body `{"pk_human": boolean}`，
+僅班級擁有者/共同老師可呼叫（`require_owner_or_admin`），回應 `{"pk_human": boolean}`。
+`pk_human` 的目前值會一併出現在 `GET /api/classrooms/{id}`（老師端）與
+`GET /api/classrooms/my-enrollments`（學生端，每個學生自己每個班級各一個布林值）
+的回應裡，供前端據此顯示/隱藏「找同學 PK」入口——學生如果同時在多個班級，
+**只要有任何一個班級開放真人 PK 就顯示入口**（跨班級取「任一個 true」，不是取
+「全部都要 true」；這是實作時依這份 PRD 的既有精神——老師主動開放、學生端盡量
+不要因為別的班級沒開而被連帶卡住——做的決定並記錄在這裡，Young 未另行否決）。
+
+這是對**既有表**的新增欄位，不是新表，但仍然是 schema 改動——實作前要照專案既有規則先問 Young、拿到明確同意才能動工。**2026-10-16 已取得明確同意**（Young 核准 `pk_enabled` 欄位，隨後核准改為 `feature_settings` JSONB 設計），schema 變動腳本已建立（`8101b84f0160_add_classroom_feature_settings.py`，接在 3 張 PK 新表的那一版之後，單一 head）。
 
 ## 8. 防弊與隱私
 
@@ -490,7 +519,7 @@ SELECT q.id FROM pk_queue q
 | GET | `/api/pk/matches/{id}/result` | 對戰結束後的完整結果（含每題解析、積分變化、是否解鎖新人物卡）|
 | GET | `/api/pk/history` | 自己的對戰紀錄列表（也用來算解鎖了哪些人物卡）|
 | GET | `/api/pk/rating/me` | 目前積分（內部使用，不在任何學生可見畫面顯示原始數字，§5.2）|
-| PATCH | `/api/classrooms/{id}/pk-settings` | 老師開關本班 PK（寫 §7.4 的 `pk_enabled`）|
+| PATCH | `/api/classrooms/{id}/pk-settings` | 老師開關本班真人 PK（寫 §7.4 的 `feature_settings.pk_human`；AI PK 不受影響）|
 | GET | `/api/classrooms/{id}/pk-activity` | 老師看本班 PK 參與度（場次數、誰還沒打過），不看對戰內容 |
 
 ## 12. 容量估算

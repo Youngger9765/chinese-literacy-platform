@@ -18,6 +18,9 @@ export interface ClassroomResponse {
   is_active: boolean;
   created_at: string;
   student_count: number;
+  /** 真人 PK（同學配對對戰）班級開關 — issue #3586 §7.4，預設 false。
+   * AI PK（挑戰文學家）沒有對應欄位：永遠開放，不受班級設定影響。 */
+  pk_human: boolean;
 }
 
 export interface StudentInClassroomResponse {
@@ -134,6 +137,26 @@ export async function updateClassroom(
     body: JSON.stringify(data),
   });
   return handleResponse<ClassroomResponse>(res);
+}
+
+export interface ClassroomPkSettingsResponse {
+  pk_human: boolean;
+}
+
+/** PATCH /classrooms/{id}/pk-settings — issue #3586 §7.4. Teacher-only
+ * (owner/co-teacher with edit rights); server re-checks ownership itself,
+ * this is just the HTTP call. */
+export async function updateClassroomPkSettings(
+  token: string,
+  classroomId: number,
+  pkHuman: boolean,
+): Promise<ClassroomPkSettingsResponse> {
+  const res = await fetch(`${API_BASE}/api/classrooms/${classroomId}/pk-settings`, {
+    method: 'PATCH',
+    headers: authHeaders(token),
+    body: JSON.stringify({ pk_human: pkHuman }),
+  });
+  return handleResponse<ClassroomPkSettingsResponse>(res);
 }
 
 export async function addStudent(
