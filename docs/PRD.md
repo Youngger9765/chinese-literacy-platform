@@ -3,6 +3,7 @@
 
 > Product Requirements Document
 > Version 1.7 | 2026-03-14
+> 個別功能的規格與目前狀態：**[`docs/prd/README.md`](prd/README.md)（PRD 總覽 SOT 索引）**
 
 ---
 
