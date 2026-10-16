@@ -19,17 +19,28 @@ function authHeaders(token: string): Record<string, string> {
   return { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
 }
 
+// #3610: every PK screen shows `PkApiError.message` to the student as-is.
+// A server detail that isn't Chinese (an unhandled 500, a FastAPI 422
+// validation array, a stray English detail) must never reach a child's
+// screen — swap it for a Chinese message. Chinese details pass through.
+const HAS_CJK = /[一-鿿]/;
+const PK_GENERIC_ERROR = '發生錯誤，請稍後再試一次';
+
+function studentFacingMessage(detail: unknown): string {
+  return typeof detail === 'string' && HAS_CJK.test(detail) ? detail : PK_GENERIC_ERROR;
+}
+
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
     onApiUnauthorized(res);
-    let message = `Request failed: ${res.status}`;
+    let detail: unknown = undefined;
     try {
       const body = await res.json();
-      message = body.detail ?? body.message ?? message;
+      detail = body?.detail ?? body?.message;
     } catch {
       // ignore JSON parse errors
     }
-    throw new PkApiError(message, res.status);
+    throw new PkApiError(studentFacingMessage(detail), res.status);
   }
   if (res.status === 204) return undefined as T;
   return res.json() as Promise<T>;

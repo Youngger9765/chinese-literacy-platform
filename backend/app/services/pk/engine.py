@@ -78,26 +78,64 @@ def get_or_create_rating(db: Session, student_id: int) -> PkRating:
 # Scope / lessons
 # ---------------------------------------------------------------------------
 
+# #3610: these details are shown to the student verbatim (pkApi.ts surfaces
+# `detail` as the on-screen error), so they are Chinese.
+_ERR_UNKNOWN_LESSON = "找不到這一課的題目，請回上一頁重新選擇"
+_ERR_UNKNOWN_GRADE = "找不到這個年級的題庫，請回上一頁重新選擇"
+_ERR_UNKNOWN_SCOPE = "不支援這種題目範圍，請回上一頁重新選擇"
+_ERR_EMPTY_POOL = "這個年級目前還沒有題目，請改選其他範圍"
+
+# Classroom.grade is validated 1..12 (schemas/classroom.py); a classroom in
+# that range whose grade has no lessons of its own still gets a pool.
+_CLASSROOM_GRADE_RANGE = range(1, 13)
+
+
+def resolve_pool_grade(scope_ref: str) -> str:
+    """The grade whose lessons a ``grade_pool`` scope actually draws from.
+
+    #3610: grade-3 classrooms exist (demo 三年甲班) but the library starts at
+    grade 4, so ``scope_ref="3"`` used to dead-end the student in English.
+    A numeric classroom grade with no lessons falls back to the NEAREST grade
+    that has some, preferring the higher one on a tie ("學得會" over "太簡單"
+    is a wash at equal distance; a slightly harder pool is still on-level
+    practice, an easier one is review). Non-numeric pools (品格教育／文言文)
+    are only valid as themselves.
+    """
+    available = [str(g) for g in get_available_grades()]
+    if scope_ref in available:
+        return scope_ref
+    try:
+        wanted = int(scope_ref)
+    except (TypeError, ValueError):
+        raise HTTPException(status_code=400, detail=_ERR_UNKNOWN_GRADE)
+    if wanted not in _CLASSROOM_GRADE_RANGE:
+        raise HTTPException(status_code=400, detail=_ERR_UNKNOWN_GRADE)
+    numeric = sorted(int(g) for g in available if g.isdigit())
+    if not numeric:
+        raise HTTPException(status_code=400, detail=_ERR_EMPTY_POOL)
+    best = min(numeric, key=lambda g: (abs(g - wanted), -g))
+    return str(best)
+
+
 def validate_scope(scope_type: str, scope_ref: str) -> None:
     if scope_type == "lesson":
         if load_lesson(scope_ref) is None:
-            raise HTTPException(status_code=400, detail=f"Unknown lesson: {scope_ref}")
+            raise HTTPException(status_code=400, detail=_ERR_UNKNOWN_LESSON)
     elif scope_type == "grade_pool":
-        valid_grades = {str(g) for g in get_available_grades()}
-        if scope_ref not in valid_grades:
-            raise HTTPException(status_code=400, detail=f"Unknown grade: {scope_ref}")
+        resolve_pool_grade(scope_ref)
     else:
-        raise HTTPException(status_code=400, detail=f"Unknown scope_type: {scope_type}")
+        raise HTTPException(status_code=400, detail=_ERR_UNKNOWN_SCOPE)
 
 
 def _load_lessons_for_scope(scope_type: str, scope_ref: str) -> list[dict]:
     if scope_type == "lesson":
         lesson = load_lesson(scope_ref)
         if lesson is None:
-            raise HTTPException(status_code=400, detail=f"Unknown lesson: {scope_ref}")
+            raise HTTPException(status_code=400, detail=_ERR_UNKNOWN_LESSON)
         return [{"lesson_uid": scope_ref, "lesson": lesson}]
-    # grade_pool
-    results = search_lessons(grade=scope_ref)
+    if scope_type != "grade_pool":
+        raise HTTPException(status_code=400, detail=_ERR_UNKNOWN_SCOPE)
+    results = search_lessons(grade=resolve_pool_grade(scope_ref))
     lessons = []
     for entry in results:
         uid = entry.get("lesson_uid")
@@ -107,7 +145,7 @@ def _load_lessons_for_scope(scope_type: str, scope_ref: str) -> list[dict]:
         if lesson is not None:
             lessons.append({"lesson_uid": uid, "lesson": lesson})
     if not lessons:
-        raise HTTPException(status_code=400, detail=f"No lessons found for grade {scope_ref!r}")
+        raise HTTPException(status_code=400, detail=_ERR_EMPTY_POOL)
     return lessons
 
 
