@@ -11,6 +11,7 @@
 | [`docs/PRD.md`](../PRD.md) | 產品目標、目標用戶、閱讀科學基礎、市場策略（總綱，不含個別功能細節） |
 | [`docs/BRD.md`](../BRD.md) | 商業需求 |
 | [`docs/launch/2026-10-launch-plan.md`](../launch/2026-10-launch-plan.md) | 產品發表會準備清單 |
+| [`docs/launch/TODO.md`](../launch/TODO.md) | 發表會進度表（隨時更新） |
 
 ## 二、學習模式與遊戲化（2026-10）
 
