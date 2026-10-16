@@ -312,21 +312,52 @@ function classifyInteractive(value: string): InteractiveType {
   return countBlanks(value) > 0 ? 'fill_blank' : 'display';
 }
 
-function resolveGradeIndex(
+/**
+ * Maps each `worksheet_rows[i]` to its matching index in `rows` (the grading
+ * array) — without assuming the label text on a worksheet row is unique.
+ *
+ * `rows` and `worksheet_rows` are built server-side from the same source list,
+ * in the same order, one `rows` entry per non-title group and one
+ * `worksheet_rows` entry per non-title 'pair'/'section_block' group
+ * (`backend/app/routes/stories.py` `_merge_parsed_to_structure_rows` /
+ * `_build_worksheet_rows`). So the Nth worksheet row carrying a given
+ * (label, has-sub-rows) shape always corresponds to the Nth `rows` entry with
+ * that same shape — even when two unrelated worksheet rows happen to share
+ * identical label text. That happens for real: a "tail" sentence re-uses its
+ * parent row's label (`keypoints_to_structure.py`), and a matrix-layout table
+ * repeats a column-less category label (e.g. 「感受」「原因」) once per
+ * unrelated paragraph.
+ *
+ * The previous implementation did `rows.findIndex(r => r.label === label)`
+ * per worksheet row, independently, with no memory of earlier matches — so
+ * it always returned the FIRST occurrence, and every repeat of that label
+ * silently bound to the first occurrence's answer key. Typing into one box
+ * then live-updated every other box carrying the same label (2026-10-16
+ * field report: typing in the first blank of a multi-blank 文章重點表 made
+ * later blanks show the same text).
+ */
+function buildWorksheetRowIndexMap(
   rows: StructureRow[],
-  wsRow: WorksheetRow,
-  itemIdx?: number,
-): { rowIdx: number; subIdx?: number } {
-  if (wsRow.kind === 'pair') {
-    const rowIdx = rows.findIndex(
-      (r) => r.label === wsRow.label && !(r.sub_rows && r.sub_rows.length > 0),
-    );
-    return { rowIdx };
-  }
-  const rowIdx = rows.findIndex(
-    (r) => r.label === wsRow.section && !!(r.sub_rows && r.sub_rows.length > 0),
-  );
-  return { rowIdx, subIdx: itemIdx };
+  worksheetRows: WorksheetRow[],
+): number[] {
+  const consumedCount = new Map<string, number>();
+  return worksheetRows.map((wsRow) => {
+    const isSection = wsRow.kind !== 'pair';
+    const label = isSection ? wsRow.section : wsRow.label;
+    const occurrenceKey = `${isSection ? 1 : 0}:${label}`;
+    const skip = consumedCount.get(occurrenceKey) ?? 0;
+    consumedCount.set(occurrenceKey, skip + 1);
+
+    let seen = 0;
+    for (let i = 0; i < rows.length; i += 1) {
+      const row = rows[i];
+      const hasSubRows = !!(row.sub_rows && row.sub_rows.length > 0);
+      if (row.label !== label || hasSubRows !== isSection) continue;
+      if (seen === skip) return i;
+      seen += 1;
+    }
+    return -1;
+  });
 }
 
 function getLabelAccent(label: string): {
@@ -889,6 +920,14 @@ const WorksheetTable: React.FC<WorksheetTableProps> = ({
   const { title, worksheet_rows = [], rows } = structure;
   const cellBorder = 'border border-black px-2 py-2 align-top';
 
+  // See `buildWorksheetRowIndexMap` — one entry per `worksheet_rows[i]`,
+  // computed once so that a repeated label resolves to successive `rows`
+  // entries instead of every repeat colliding on the first match.
+  const rowIndexMap = useMemo(
+    () => buildWorksheetRowIndexMap(rows, worksheet_rows),
+    [rows, worksheet_rows],
+  );
+
   const renderValueCell = (
     value: string,
     rowIdx: number,
@@ -953,7 +992,7 @@ const WorksheetTable: React.FC<WorksheetTableProps> = ({
         )}
         {worksheet_rows.map((wsRow, wsIdx) => {
           if (wsRow.kind === 'pair') {
-            const { rowIdx } = resolveGradeIndex(rows, wsRow);
+            const rowIdx = rowIndexMap[wsIdx] ?? -1;
             const row = rows[rowIdx];
             return (
               <tr key={`pair-${wsIdx}`}>
@@ -984,7 +1023,8 @@ const WorksheetTable: React.FC<WorksheetTableProps> = ({
           return chunks.flatMap((chunk, chunkIdx) =>
             chunk.map((item, itemIdx) => {
               const globalItemIdx = chunkIdx * SECTION_CHUNK_SIZE + itemIdx;
-              const { rowIdx, subIdx } = resolveGradeIndex(rows, wsRow, globalItemIdx);
+              const rowIdx = rowIndexMap[wsIdx] ?? -1;
+              const subIdx = globalItemIdx;
               const subRow = rowIdx >= 0 ? rows[rowIdx]?.sub_rows?.[subIdx ?? 0] : undefined;
               const showSection = itemIdx === 0;
               const sectionLabel =
