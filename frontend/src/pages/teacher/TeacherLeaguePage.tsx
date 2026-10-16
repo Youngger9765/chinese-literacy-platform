@@ -11,7 +11,7 @@
  * Route: /teacher/league
  * PRD: docs/prd/2026-10-14-chinese-star-league-prd.md §10 (UIUX states:
  * 無賽季 / 未報名 / 中途加入 / 多隊切換 / 已結束 / 0 分 / 離線 / 邀請失效) +
- * §12 (2026-10-16 visual redesign + feature-parity vs Junyi 星空探險隊).
+ * §12 (2026-10-16 visual redesign + feature-parity with the reference league).
  *
  * All data-fetching logic is unchanged from the MVP — this redesign only
  * reorganizes the JSX: the most recent season now renders as a prominent
@@ -43,6 +43,8 @@ import {
 import BattleHero from '../../components/league/BattleHero';
 import LeagueBadgeCard from '../../components/league/LeagueBadgeCard';
 import { displayPoints } from '../../components/league/leagueVisuals';
+import { DEFAULT_THEME_FALLBACK } from '../../components/league/leagueTheme';
+import { findBadge } from '../../types/leagueTheme';
 
 const INVITATION_STATUS_LABEL: Record<string, string> = {
   pending: '等待對方接受',
@@ -304,12 +306,17 @@ const TeacherLeaguePage: React.FC = () => {
   const primaryBoard = primarySeason ? boards[primarySeason.season_id] : undefined;
   const olderSeasons = primarySeason ? seasons.slice(1) : seasons;
   const myRow = primaryBoard?.board.find((r) => r.classroom_id === selectedClassroomId);
+  // 2026-10-16 (#3594): the narrative skin comes from the active season's
+  // resolved theme — falls back to a neutral default before any season
+  // has loaded (or if an older cached response ever lacks `theme`).
+  const activeTheme = primaryBoard?.theme ?? DEFAULT_THEME_FALLBACK;
+  const classBadge = findBadge(activeTheme, 'class_badge');
 
   return (
     <div className="min-h-full bg-surface">
       <div className="p-4 md:p-6 max-w-4xl mx-auto space-y-6">
         <div>
-          <h1 className="text-xl font-bold text-on-surface">讀家星圖 · 跨班賽季</h1>
+          <h1 className="text-xl font-bold text-on-surface">{activeTheme.title} · 跨班賽季</h1>
           <p className="text-sm text-on-surface-variant mt-0.5">和別班比幾週，平常讀課文就累積</p>
         </div>
 
@@ -342,6 +349,7 @@ const TeacherLeaguePage: React.FC = () => {
         {/* ── 對戰首頁：最新賽季的能量條（PRD §12 Young 指定需求）──────── */}
         {primarySeason && primaryBoard && primaryBoard.board.length === 2 && (
           <BattleHero
+            theme={activeTheme}
             seasonName={primaryBoard.season_name}
             rows={[primaryBoard.board[0], primaryBoard.board[1]]}
             viewerClassroomId={selectedClassroomId}
@@ -355,14 +363,16 @@ const TeacherLeaguePage: React.FC = () => {
             <LeagueBadgeCard
               kind="class"
               earned={myRow.team_badge_earned}
-              title="班級徽章"
-              description={`平均 ${displayPoints(myRow.badge_threshold)} 分達標`}
+              title={classBadge?.name ?? '班級徽章'}
+              description={classBadge?.description ?? `平均 ${displayPoints(myRow.badge_threshold)} 分達標`}
+              icon={classBadge?.art}
             />
             <LeagueBadgeCard
               kind="class"
               earned={myRow.treasure_chest_eligible}
-              title="神秘寶箱"
-              description="全班過半參與即可解鎖"
+              title={activeTheme.chest.name}
+              description={activeTheme.chest.description}
+              icon={activeTheme.chest.art}
             />
           </div>
         )}

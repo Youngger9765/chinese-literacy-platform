@@ -494,7 +494,19 @@ class TestPrivacyContract:
         )
         assert r.status_code == 200, r.text
         dumped = r.text
-        banned_keys = ["student_id", "\"name\"", "email", "teacher_id", "teacher_name"]
+        # 2026-10-16 (#3594): the bare `"name"` key used to be banned outright
+        # as a belt-and-suspenders catch for a person's name ever landing
+        # under a generically-named key. The board response now legitimately
+        # carries a `theme` object (season storyline content — chest/badge
+        # display names, e.g. `"chest":{"name":"絲路寶箱",...}`), which is
+        # copy, not PII, and would false-positive on a bare `"name"` scan.
+        # The REAL protection is unchanged: no endpoint in this file emits a
+        # bare `"name"` key for a PERSON (people's names are always under
+        # `student_name`/`teacher_name`, both still explicitly banned below),
+        # and the value-leak + id-leak assertions further down in this test
+        # independently verify no actual PII value/id made it into the
+        # response regardless of which key it would have been under.
+        banned_keys = ["student_id", "\"student_name\"", "email", "teacher_id", "\"teacher_name\""]
         for k in banned_keys:
             assert k not in dumped, f"found banned field {k!r}"
         for value in (

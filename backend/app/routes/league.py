@@ -25,6 +25,8 @@ from ..models.league import LeagueSeason, LeagueTeam, LeagueTeamRosterMember
 from ..models.school import Classroom, ClassroomStudent
 from ..models.user import User
 from ..services import league_service as svc
+from ..services import story_pack_service as theme_svc
+from ..services.story_pack_store import get_story_pack_store
 from .classrooms import _get_classroom_or_404
 
 router = APIRouter(prefix="/league", tags=["league"])
@@ -283,7 +285,19 @@ def get_season_board(
     season = _get_season_or_404(season_id, db)
     _require_season_member(season, current_user, db)
     board = svc.get_season_board_cached(db, season)
-    return {"season_id": season.id, "season_name": season.name, "board": board}
+    # Additive-only (PRD §13.5): `theme` is a new field, old clients that
+    # don't read it are unaffected. Falls back through season override →
+    # platform active default → shipped builtin default (see
+    # story_pack_store.resolve_pack_for_season). Field stays named "theme"
+    # here for backward compat with the already-shipped frontend, even
+    # though the backing store is the generic story_pack module now.
+    theme = theme_svc.get_pack_for_season(get_story_pack_store(db), season)
+    return {
+        "season_id": season.id,
+        "season_name": season.name,
+        "board": board,
+        "theme": theme.model_dump(),
+    }
 
 
 @router.get("/seasons/{season_id}/my-summary")
@@ -294,9 +308,12 @@ def get_my_season_summary(
 ) -> dict:
     season = _get_season_or_404(season_id, db)
     try:
-        return svc.get_my_team_summary(db, current_user, season)
+        summary = svc.get_my_team_summary(db, current_user, season)
     except svc.LeagueError as exc:
         raise _handle_league_error(exc)
+    theme = theme_svc.get_pack_for_season(get_story_pack_store(db), season)
+    summary["theme"] = theme.model_dump()
+    return summary
 
 
 @router.get("/seasons/{season_id}/teams/{team_id}/roster")
@@ -385,11 +402,13 @@ def get_my_history(
             raise HTTPException(status_code=404, detail="Student not found")
 
     seasons = svc.list_my_seasons(db, subject)
+    store = get_story_pack_store(db)
     history = []
     for season in seasons:
         try:
             summary = svc.get_my_team_summary(db, subject, season)
         except svc.LeagueError:
             continue
+        summary["theme"] = theme_svc.get_pack_for_season(store, season).model_dump()
         history.append(summary)
     return history

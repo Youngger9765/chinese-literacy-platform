@@ -31,6 +31,8 @@ import {
 import BattleHero from '../../components/league/BattleHero';
 import LeagueBadgeCard from '../../components/league/LeagueBadgeCard';
 import { chestHintText, displayPoints } from '../../components/league/leagueVisuals';
+import { DEFAULT_THEME_FALLBACK } from '../../components/league/leagueTheme';
+import { findBadge } from '../../types/leagueTheme';
 
 const StudentOurClassPage: React.FC = () => {
   const { token } = useAuth();
@@ -91,6 +93,9 @@ const StudentOurClassPage: React.FC = () => {
   }
 
   const season = seasons[activeIndex];
+  const activeTheme = season.theme ?? DEFAULT_THEME_FALLBACK;
+  const individualBadge = findBadge(activeTheme, 'individual_badge');
+  const classBadge = findBadge(activeTheme, 'class_badge');
 
   return (
     <div className="p-4 md:p-6 max-w-xl mx-auto space-y-4">
@@ -120,6 +125,7 @@ const StudentOurClassPage: React.FC = () => {
       {/* ── 對戰首頁：跟老師看到的同一個能量條，學生也看得到對方班 ──── */}
       {board && board.board.length === 2 && (
         <BattleHero
+          theme={board.theme ?? activeTheme}
           seasonName={board.season_name}
           rows={[board.board[0], board.board[1]]}
           viewerClassroomId={null}
@@ -154,14 +160,16 @@ const StudentOurClassPage: React.FC = () => {
           <LeagueBadgeCard
             kind="individual"
             earned={season.individual_badge_earned}
-            title="個人徽章"
-            description={`累積 ${displayPoints(season.badge_threshold)} 分達標`}
+            title={individualBadge?.name ?? '個人徽章'}
+            description={individualBadge?.description ?? `累積 ${displayPoints(season.badge_threshold)} 分達標`}
+            icon={individualBadge?.art}
           />
           <LeagueBadgeCard
             kind="class"
             earned={season.class_badge_earned}
-            title="班級徽章"
-            description="班級平均達標"
+            title={classBadge?.name ?? '班級徽章'}
+            description={classBadge?.description ?? '班級平均達標'}
+            icon={classBadge?.art}
           />
         </div>
       </div>
