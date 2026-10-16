@@ -448,3 +448,246 @@ class TestTieBreakAndRatingUpdate:
         assert match.status == "completed"
         assert match.side_a_score == match.side_b_score == 5000
         assert match.winner_user_id == a.id  # a was faster every round
+
+
+# ---------------------------------------------------------------------------
+# Issue #3602 B2: an AI opponent's score must only reveal progressively,
+# never the full 5-round total from round 1
+# ---------------------------------------------------------------------------
+
+class TestAiOpponentScoreRevealsProgressively:
+    def test_opponent_score_is_zero_before_round_zero_reveals(self, db_session, classroom, clock):
+        a = _enrolled_student(db_session, classroom)
+        match = svc.create_ai_match(
+            db_session, a, scope_type="lesson", scope_ref=LESSON_A, bot_tier=7, classroom_id=classroom.id
+        )
+        # The AI's full 5-round score is precomputed and stored on
+        # side_b_score at creation -- the bug (pre-fix) read that column
+        # directly for opponent_score, so a sufficiently-accurate tier
+        # (7 = ~95%) would show a near-5000 total before round 0 even
+        # starts. The fix must show 0 regardless of how high side_b_score
+        # already is.
+        assert match.side_b_score > 0  # sanity: the AI really did precompute a nonzero total
+        state = svc.build_match_state(db_session, match, a)  # lazily starts round 0, no answers yet
+        assert state["opponent_score"] == 0
+
+    def test_opponent_score_only_includes_revealed_rounds(self, db_session, classroom, clock, monkeypatch):
+        """Force the AI to answer correctly every round (deterministic) and
+        step through reveals one at a time, asserting opponent_score only
+        ever reflects rounds that have actually revealed so far."""
+        from app.services.pk import ai_tiers
+
+        def _always_correct(tier, payload, rng):
+            return {"choice_key": payload["correct_key"], "is_correct": True, "elapsed_ms": 1000}
+
+        monkeypatch.setattr(ai_tiers, "sample_ai_answer", _always_correct)
+
+        a = _enrolled_student(db_session, classroom)
+        match = svc.create_ai_match(
+            db_session, a, scope_type="lesson", scope_ref=LESSON_A, bot_tier=1, classroom_id=classroom.id
+        )
+        assert match.side_b_score == 5000  # every AI round is correct
+
+        state = svc.build_match_state(db_session, match, a)
+        assert state["opponent_score"] == 0  # round 0 not revealed yet
+
+        for i in range(5):
+            payload = match.rounds_snapshot[i]["payload"]
+            svc.submit_match_answer(db_session, match, a, payload["correct_key"])  # triggers reveal
+            state = svc.build_match_state(db_session, match, a)
+            assert state["opponent_score"] == 1000 * (i + 1)
+            clock.advance(seconds=REVEAL_SECONDS + 0.5)
+
+
+# ---------------------------------------------------------------------------
+# Issue #3602 B3: an AI win must never be reported as a draw
+# ---------------------------------------------------------------------------
+
+def _force_ai_win(db_session, classroom, clock, monkeypatch):
+    """Student answers every round wrong; AI (forced 100% accurate) wins
+    outright 5000:0 -- unambiguous, no tie-break needed."""
+    from app.services.pk import ai_tiers
+
+    def _always_correct(tier, payload, rng):
+        return {"choice_key": payload["correct_key"], "is_correct": True, "elapsed_ms": 1000}
+
+    monkeypatch.setattr(ai_tiers, "sample_ai_answer", _always_correct)
+
+    a = _enrolled_student(db_session, classroom)
+    match = svc.create_ai_match(
+        db_session, a, scope_type="lesson", scope_ref=LESSON_A, bot_tier=4, classroom_id=classroom.id
+    )
+    for i in range(5):
+        payload = match.rounds_snapshot[i]["payload"]
+        wrong = next(o["key"] for o in payload["options"] if o["key"] != payload["correct_key"])
+        svc.submit_match_answer(db_session, match, a, wrong)
+        clock.advance(seconds=REVEAL_SECONDS + 0.5)
+        svc.advance_if_needed(db_session, match)
+    assert match.status == "completed"
+    assert match.side_a_score == 0
+    assert match.side_b_score == 5000
+    return a, match
+
+
+class TestAiWinIsNotReportedAsDraw:
+    def test_match_row_has_no_winner_user_id_even_though_ai_won(self, db_session, classroom, clock, monkeypatch):
+        """Documents the root cause: winner_user_id is None here exactly
+        like a real draw would be -- any reader trusting it alone cannot
+        tell the two apart."""
+        a, match = _force_ai_win(db_session, classroom, clock, monkeypatch)
+        assert match.winner_user_id is None
+
+    def test_get_match_result_outcome_is_loss_not_draw(self, db_session, classroom, clock, monkeypatch):
+        a, match = _force_ai_win(db_session, classroom, clock, monkeypatch)
+        result = svc.get_match_result(db_session, match, a)
+        assert result["outcome"] == "loss"
+
+    def test_build_match_state_winner_side_is_opponent_not_draw(self, db_session, classroom, clock, monkeypatch):
+        a, match = _force_ai_win(db_session, classroom, clock, monkeypatch)
+        state = svc.build_match_state(db_session, match, a)
+        assert state["winner_side"] == "opponent"
+
+    def test_list_history_outcome_is_loss_not_draw(self, db_session, classroom, clock, monkeypatch):
+        a, match = _force_ai_win(db_session, classroom, clock, monkeypatch)
+        history = svc.list_history(db_session, a)
+        entry = next(h for h in history if h["match_id"] == match.id)
+        assert entry["outcome"] == "loss"
+
+    def test_a_real_draw_is_still_reported_as_draw(self, db_session, classroom, clock):
+        """Regression guard the other direction: the fix must not turn a
+        genuine human-vs-human draw into something else."""
+        a = _enrolled_student(db_session, classroom)
+        b = _enrolled_student(db_session, classroom)
+        match = svc.create_human_match(
+            db_session, a, b, scope_type="lesson", scope_ref=LESSON_A, classroom_id=classroom.id
+        )
+        for i in range(5):
+            payload = match.rounds_snapshot[i]["payload"]
+            correct = payload["correct_key"]
+            svc.submit_match_answer(db_session, match, a, correct)
+            svc.submit_match_answer(db_session, match, b, correct)
+            clock.advance(seconds=REVEAL_SECONDS + 0.5)
+            svc.advance_if_needed(db_session, match)
+        assert match.status == "completed"
+        assert match.winner_user_id is None
+        assert svc.get_match_result(db_session, match, a)["outcome"] == "draw"
+        assert svc.build_match_state(db_session, match, a)["winner_side"] == "draw"
+
+    def test_student_winning_against_ai_is_still_a_win(self, db_session, classroom, clock):
+        """Regression guard: the one case winner_user_id DID already handle
+        correctly (student beats AI -> side_a_user_id) must keep working."""
+        a = _enrolled_student(db_session, classroom)
+        match = svc.create_ai_match(
+            db_session, a, scope_type="lesson", scope_ref=LESSON_A, bot_tier=1, classroom_id=classroom.id
+        )
+        for i in range(5):
+            payload = match.rounds_snapshot[i]["payload"]
+            svc.submit_match_answer(db_session, match, a, payload["correct_key"])
+            clock.advance(seconds=REVEAL_SECONDS + 0.5)
+            svc.advance_if_needed(db_session, match)
+        assert match.status == "completed"
+        assert match.side_a_score == 5000
+        assert svc.get_match_result(db_session, match, a)["outcome"] == "win"
+        assert svc.build_match_state(db_session, match, a)["winner_side"] == "me"
+
+
+# ---------------------------------------------------------------------------
+# Issue #3602 B6: the AI figure's expression must change with match events
+# ---------------------------------------------------------------------------
+
+class TestAiExpression:
+    def test_human_match_has_no_expression(self, db_session, classroom, clock):
+        a = _enrolled_student(db_session, classroom)
+        b = _enrolled_student(db_session, classroom)
+        match = svc.create_human_match(
+            db_session, a, b, scope_type="lesson", scope_ref=LESSON_A, classroom_id=classroom.id
+        )
+        state = svc.build_match_state(db_session, match, a)
+        assert state["ai_expression"] is None
+
+    def test_thinking_while_round_is_live(self, db_session, classroom, clock):
+        a = _enrolled_student(db_session, classroom)
+        match = svc.create_ai_match(
+            db_session, a, scope_type="lesson", scope_ref=LESSON_A, bot_tier=4, classroom_id=classroom.id
+        )
+        state = svc.build_match_state(db_session, match, a)  # starts round 0, nobody has answered
+        assert state["ai_expression"] == "thinking"
+
+    def test_happy_when_ai_answers_its_own_round_correctly(self, db_session, classroom, clock, monkeypatch):
+        from app.services.pk import ai_tiers
+
+        monkeypatch.setattr(
+            ai_tiers,
+            "sample_ai_answer",
+            lambda tier, payload, rng: {"choice_key": payload["correct_key"], "is_correct": True, "elapsed_ms": 1000},
+        )
+        a = _enrolled_student(db_session, classroom)
+        match = svc.create_ai_match(
+            db_session, a, scope_type="lesson", scope_ref=LESSON_A, bot_tier=1, classroom_id=classroom.id
+        )
+        payload = match.rounds_snapshot[0]["payload"]
+        wrong = next(o["key"] for o in payload["options"] if o["key"] != payload["correct_key"])
+        svc.submit_match_answer(db_session, match, a, wrong)  # triggers reveal; I'm wrong, AI is right
+        state = svc.build_match_state(db_session, match, a)
+        assert state["revealing"] is True
+        assert state["ai_expression"] == "happy"
+
+    def test_impressed_when_student_right_and_ai_wrong(self, db_session, classroom, clock, monkeypatch):
+        from app.services.pk import ai_tiers
+
+        monkeypatch.setattr(
+            ai_tiers,
+            "sample_ai_answer",
+            lambda tier, payload, rng: {
+                "choice_key": next(o["key"] for o in payload["options"] if o["key"] != payload["correct_key"]),
+                "is_correct": False,
+                "elapsed_ms": 1000,
+            },
+        )
+        a = _enrolled_student(db_session, classroom)
+        match = svc.create_ai_match(
+            db_session, a, scope_type="lesson", scope_ref=LESSON_A, bot_tier=1, classroom_id=classroom.id
+        )
+        payload = match.rounds_snapshot[0]["payload"]
+        svc.submit_match_answer(db_session, match, a, payload["correct_key"])  # I'm right, AI is wrong
+        state = svc.build_match_state(db_session, match, a)
+        assert state["ai_expression"] == "impressed"
+
+    def test_frustrated_when_both_wrong(self, db_session, classroom, clock, monkeypatch):
+        from app.services.pk import ai_tiers
+
+        monkeypatch.setattr(
+            ai_tiers,
+            "sample_ai_answer",
+            lambda tier, payload, rng: {
+                "choice_key": next(o["key"] for o in payload["options"] if o["key"] != payload["correct_key"]),
+                "is_correct": False,
+                "elapsed_ms": 1000,
+            },
+        )
+        a = _enrolled_student(db_session, classroom)
+        match = svc.create_ai_match(
+            db_session, a, scope_type="lesson", scope_ref=LESSON_A, bot_tier=1, classroom_id=classroom.id
+        )
+        payload = match.rounds_snapshot[0]["payload"]
+        wrong = next(o["key"] for o in payload["options"] if o["key"] != payload["correct_key"])
+        svc.submit_match_answer(db_session, match, a, wrong)  # both wrong
+        state = svc.build_match_state(db_session, match, a)
+        assert state["ai_expression"] == "frustrated"
+
+    def test_victory_when_ai_wins_and_defeat_when_student_wins(self, db_session, classroom, clock, monkeypatch):
+        a, match = _force_ai_win(db_session, classroom, clock, monkeypatch)
+        state = svc.build_match_state(db_session, match, a)
+        assert state["ai_expression"] == "victory"
+
+        b = _enrolled_student(db_session, classroom)
+        match2 = svc.create_ai_match(
+            db_session, b, scope_type="lesson", scope_ref=LESSON_A, bot_tier=1, classroom_id=classroom.id
+        )
+        for i in range(5):
+            payload = match2.rounds_snapshot[i]["payload"]
+            svc.submit_match_answer(db_session, match2, b, payload["correct_key"])
+            clock.advance(seconds=REVEAL_SECONDS + 0.5)
+            svc.advance_if_needed(db_session, match2)
+        state2 = svc.build_match_state(db_session, match2, b)
+        assert state2["ai_expression"] == "defeat"

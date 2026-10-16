@@ -267,7 +267,16 @@ def list_my_enrolled_classrooms(
         for cs, classroom, teacher in rows
     ]
 
-    return StudentEnrolledClassroomsResponse(classrooms=classrooms, total=len(classrooms))
+    # #3602 B1: grade lives on StudentProfile (1:1, nullable relationship),
+    # NOT on User itself -- a user with no StudentProfile row at all
+    # (registered outside the school-import flow) must fall back to None,
+    # not raise.
+    student_profile = current_user.student_profile
+    student_grade = student_profile.grade if student_profile is not None else None
+
+    return StudentEnrolledClassroomsResponse(
+        classrooms=classrooms, total=len(classrooms), student_grade=student_grade
+    )
 
 
 @router.get("/classrooms/join-preview", response_model=ClassroomJoinPreviewResponse)

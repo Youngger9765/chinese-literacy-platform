@@ -272,7 +272,17 @@ export function getPkFigure(tier: number): PkFigure {
   return f;
 }
 
+// #3602 B5: was `/pk/figures/...`, served from frontend/public/pk/ — that
+// directory collides with the SPA's own `/pk` route (nginx's
+// `try_files $uri $uri/ /index.html` sees a real `pk` directory in the
+// docroot and 301s `/pk` -> `/pk/`, then 403s on `/pk/` itself instead of
+// ever reaching index.html). Moved to frontend/public/pk-art/, which has no
+// matching client route.
 export function pkFigureAssetPath(tier: number, file: string): string {
   const f = getPkFigure(tier);
-  return `/pk/figures/${f.tier}-${f.slug}/${file}`;
+  return `/pk-art/figures/${f.tier}-${f.slug}/${file}`;
+}
+
+export function pkFigurePortraitUrl(tier: number, expression: PkExpressionKey): string {
+  return pkFigureAssetPath(tier, `portrait-${expression}.svg`);
 }
