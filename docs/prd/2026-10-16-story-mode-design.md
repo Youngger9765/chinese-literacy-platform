@@ -1,6 +1,6 @@
 # 設計規格｜AI PK 與跨班賽季的 2D 劇情模式
 
-> 狀態：設計提案，待 CTO／UIUX／Young review｜2026-10-16 建立
+> 狀態（2026-10-17）：設計與素材已合併進 staging，尚未接進畫面；狀態以 [`docs/prd/README.md`](README.md) 為準
 > 範圍：**純設計 + 美術資產，不含功能程式碼、不含 migration**。本文件 + `frontend/public/story-assets/`
 > 下的資產是交付物；實際把它們接進 React 元件／後端路由是後續實作票的工作，不在本票範圍。
 
