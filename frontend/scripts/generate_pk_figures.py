@@ -21,7 +21,7 @@ group (eyebrows/eyes/mouth) swaps, per §10.5.3 "同一張基礎立繪，只換�
 局部". "defeat" (the AI loses) is explicitly gentle, never mocking.
 
 Run: python3 scripts/generate_pk_figures.py
-Output: public/pk/figures/<tier>-<slug>/{icon.svg, portrait-<expr>.svg, ART_BRIEF.md}
+Output: public/pk-art/figures/<tier>-<slug>/{icon.svg, portrait-<expr>.svg, ART_BRIEF.md} (#3602 B5: moved off public/pk/ -- that path collided with the SPA's own /pk route)
 """
 from __future__ import annotations
 
@@ -29,7 +29,7 @@ import os
 from dataclasses import dataclass, field
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUT_ROOT = os.path.normpath(os.path.join(HERE, "..", "public", "pk", "figures"))
+OUT_ROOT = os.path.normpath(os.path.join(HERE, "..", "public", "pk-art", "figures"))  # #3602 B5
 
 EXPRESSIONS = ("idle", "thinking", "happy", "impressed", "frustrated", "victory", "defeat")
 

@@ -1100,6 +1100,63 @@ class TestMyEnrollments:
         assert data["total"] == 1
         assert data["classrooms"][0]["is_active"] is False
 
+    def test_student_grade_reflects_student_profile_not_any_classroom(self, client, school_id):
+        """Issue #3602 B1: the response must carry the student's OWN
+        ``StudentProfile.grade`` independent of classroom data — this is
+        what lets AI PK resolve a grade even when a student's classroom has
+        no grade set. See frontend/src/pages/pk/resolvePkGrade.ts."""
+        teacher = _register_user(client, "grade_teacher")
+        student = _register_student(client, "grade_student")
+
+        # The student's enrolled classroom deliberately has NO grade — the
+        # response's top-level student_grade must still come through from
+        # the user's own profile, not be null just because this classroom
+        # lacks one.
+        classroom_id = client.post(
+            "/api/classrooms",
+            json={"name": "Gradeless Class", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        ).json()["id"]
+        client.post(
+            f"/api/classrooms/{classroom_id}/students",
+            json={"student_id": student["user_id"]},
+            headers=auth_header(teacher["token"]),
+        )
+
+        db = TestingSessionLocal()
+        try:
+            from app.models.user import StudentProfile
+
+            db.add(
+                StudentProfile(
+                    user_id=student["user_id"],
+                    school_id=school_id,
+                    grade=5,
+                    password_changed=True,
+                )
+            )
+            db.commit()
+        finally:
+            db.close()
+
+        resp = client.get(
+            "/api/classrooms/my-enrollments",
+            headers=auth_header(student["token"]),
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["student_grade"] == 5
+        assert data["classrooms"][0]["grade"] is None  # the classroom itself still has none
+
+    def test_student_grade_is_null_when_profile_has_no_grade(self, client, school_id):
+        student = _register_student(client, "no_grade_student")
+        resp = client.get(
+            "/api/classrooms/my-enrollments",
+            headers=auth_header(student["token"]),
+        )
+        assert resp.status_code == 200
+        assert resp.json()["student_grade"] is None
+
 
 # ===========================================================================
 # GET /api/classrooms — Admin sees ALL platform classrooms (Issue #1919 Bug B)

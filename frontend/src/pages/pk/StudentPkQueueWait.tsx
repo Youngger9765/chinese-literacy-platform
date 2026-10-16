@@ -18,6 +18,10 @@ interface LocationState {
   scopeType?: PkScopeType;
   scopeRef?: string;
   classroomId?: number | null;
+  /** #3602 B4: set when this wait screen is the INVITE CREATOR waiting for
+   * their friend to redeem the code (StudentPkEntry.handleCreateInvite),
+   * as opposed to the generic "找同學 PK" matchmaking pool wait. */
+  inviteCode?: string;
 }
 
 const StudentPkQueueWait: React.FC = () => {
@@ -26,6 +30,7 @@ const StudentPkQueueWait: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const locState = (location.state as LocationState) ?? {};
+  const isInviteCreator = !!locState.inviteCode;
 
   const [suggestAi, setSuggestAi] = useState(false);
   const [error, setError] = useState('');
@@ -93,8 +98,22 @@ const StudentPkQueueWait: React.FC = () => {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-surface px-6 py-10 text-center">
       <div className="mb-6 h-12 w-12 animate-spin rounded-full border-4 border-accent border-t-transparent" aria-hidden="true" />
-      <h1 className="text-lg font-bold text-on-surface">正在尋找同學…</h1>
-      <p className="mt-1 text-sm text-on-surface-variant">配到人馬上開始，或是先去挑戰一位文學家</p>
+      {/* #3602 B4: the invite creator used to never land here at all (see
+          StudentPkEntry.handleCreateInvite) — now reusing this same
+          poll-and-redirect screen, but with copy that matches "waiting on a
+          specific friend" instead of "searching the matching pool". */}
+      <h1 className="text-lg font-bold text-on-surface">
+        {isInviteCreator ? '等待同學輸入邀請碼…' : '正在尋找同學…'}
+      </h1>
+      {isInviteCreator ? (
+        <div className="mt-2 flex flex-col items-center gap-1">
+          <p className="text-sm text-on-surface-variant">把這組代碼給同學：</p>
+          <p className="text-3xl font-bold tracking-widest text-accent">{locState.inviteCode}</p>
+          <p className="text-xs text-on-surface-variant">5 分鐘內有效</p>
+        </div>
+      ) : (
+        <p className="mt-1 text-sm text-on-surface-variant">配到人馬上開始，或是先去挑戰一位文學家</p>
+      )}
       {error && <p className="mt-2 text-xs text-error">{error}</p>}
 
       <div className="mt-10 flex w-full max-w-xs flex-col gap-3">

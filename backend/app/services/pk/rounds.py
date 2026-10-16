@@ -36,6 +36,40 @@ def reorder_by_difficulty(rounds: list[dict]) -> list[dict]:
     return [{**r, "round_index": i} for i, r in enumerate(ordered)]
 
 
+def _stratified_pick(per_module_pool: dict[str, list[dict]], n: int) -> list[dict]:
+    """#3602 "also": staging QA found AI matches coming back nearly all
+    注音 (zhuyin) — ``choice.generate_rounds`` samples uniformly over the
+    COMBINED pool across all modules, and zhuyin's source adapter tends to
+    produce far more raw items per lesson than the other three, so a
+    uniform sample is proportionally dominated by it even though every
+    module was "included".
+
+    This does a round-robin draw across ``MODULE_DIFFICULTY_ORDER`` instead
+    — one item per module per pass — so every module that has AT LEAST ONE
+    item available is guaranteed to appear in the result (as long as there
+    are enough modules-with-items to cover ``n``), rather than leaving it to
+    chance weighted by how many items that module happened to generate.
+    Each module's own list already came back independently seeded-shuffled
+    from ``generate_rounds``, so "take the next unused item" is itself a
+    random pick within that module, not always index 0."""
+    cursors = {m: 0 for m in MODULE_DIFFICULTY_ORDER}
+    picked: list[dict] = []
+    while len(picked) < n:
+        progressed = False
+        for module in MODULE_DIFFICULTY_ORDER:
+            if len(picked) >= n:
+                break
+            pool = per_module_pool.get(module, [])
+            i = cursors[module]
+            if i < len(pool):
+                picked.append(pool[i])
+                cursors[module] = i + 1
+                progressed = True
+        if not progressed:
+            break  # every module's pool exhausted (caller already validated n <= total)
+    return picked
+
+
 def build_pk_rounds(
     lessons: list[dict], rng: random.Random, *, rounds_per_match: int = ROUNDS_PER_MATCH
 ) -> list[dict]:
@@ -44,18 +78,30 @@ def build_pk_rounds(
 
     PRD §6.1: PK does not do its own "reading phase" (stem-alone delay) —
     `reading_seconds=0` always.
+
+    Each module is queried independently (capped at ``rounds_per_match``
+    items each — we never need more than that from any single module) and
+    then combined via ``_stratified_pick`` so the final 5 rounds draw from
+    every available module instead of whichever one happens to have the
+    biggest raw pool (#3602 "also": question mix was almost all zhuyin).
     """
-    settings = {
-        "seconds": ANSWER_SECONDS,
-        "reading_seconds": 0,
-        "question_count_mode": int(rounds_per_match),
-        "source_modules": list(MODULE_DIFFICULTY_ORDER),
-        "shuffle": False,  # we do our own difficulty-ordered sort below
-    }
-    pool_rounds, _fallback_used = choice.generate_rounds(lessons, settings, rng)
-    if len(pool_rounds) < rounds_per_match:
+    per_module_pool: dict[str, list[dict]] = {}
+    for module in MODULE_DIFFICULTY_ORDER:
+        settings = {
+            "seconds": ANSWER_SECONDS,
+            "reading_seconds": 0,
+            "question_count_mode": int(rounds_per_match),
+            "source_modules": [module],
+            "shuffle": False,  # we do our own difficulty-ordered sort below
+        }
+        module_rounds, _fallback_used = choice.generate_rounds(lessons, settings, rng)
+        per_module_pool[module] = module_rounds
+
+    total_available = sum(len(v) for v in per_module_pool.values())
+    if total_available < rounds_per_match:
         raise HTTPException(
             status_code=400,
             detail=f"這個範圍的題目不夠，無法開始 PK 對戰（至少需要 {rounds_per_match} 題）",
         )
-    return reorder_by_difficulty(pool_rounds)
+    selected = _stratified_pick(per_module_pool, rounds_per_match)
+    return reorder_by_difficulty(selected)

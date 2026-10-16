@@ -119,6 +119,9 @@ export interface PkMatchState {
   bot_tier: number | null;
   suggest_ai: boolean;
   winner_side?: 'me' | 'opponent' | 'draw';
+  /** Issue #3602 B6 / PRD §11 "AI 對戰時附帶當前應顯示的人物表情" — null for a
+   * human match (see data/pkFigures.ts PkExpressionKey for the value set). */
+  ai_expression?: string | null;
 }
 
 export interface PkAnswerResult {

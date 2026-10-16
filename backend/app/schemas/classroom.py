@@ -184,6 +184,14 @@ class StudentEnrolledClassroom(BaseModel):
 class StudentEnrolledClassroomsResponse(BaseModel):
     classrooms: list[StudentEnrolledClassroom]
     total: int
+    # Issue #3602 B1: the student's own profile grade
+    # (``StudentProfile.grade``, None if the user has no profile row at
+    # all), independent of any classroom. AI PK (挑戰文學家) must work
+    # "regardless of class" (Young 2026-10-16) — a classroom with no grade
+    # set (or no classroom at all) must not block it, so the frontend needs
+    # a grade signal that doesn't depend on classroom data quality. See
+    # frontend/src/pages/pk/resolvePkGrade.ts for the full fallback order.
+    student_grade: int | None = None
 
 
 # ── Junyi Class/Student Import (issue #3380) ──────────────────────────────────

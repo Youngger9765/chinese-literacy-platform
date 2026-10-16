@@ -9,7 +9,7 @@
  */
 import React, { useState } from 'react';
 import type { PkMatchResult } from '../../services/pkApi';
-import { getPkFigure } from '../../data/pkFigures';
+import { getPkFigure, pkFigureAssetPath, pkFigurePortraitUrl, type PkExpressionKey } from '../../data/pkFigures';
 
 interface PkResultScreenProps {
   result: PkMatchResult;
@@ -30,6 +30,15 @@ const PkResultScreen: React.FC<PkResultScreenProps> = ({ result, onRematch, onCh
   const ratingDelta =
     result.rating_before != null && result.rating_after != null ? result.rating_after - result.rating_before : null;
   const unlockedFigure = result.newly_unlocked_tier != null ? getPkFigure(result.newly_unlocked_tier) : null;
+  // #3602 B6 / PRD §10.5.1 "贏了之後的人物卡" + §10.5.3 結果畫面 victory/defeat
+  // rows: the figure never showed up on this screen at all before. 'draw'
+  // has no dedicated expression in that table, so no portrait for it.
+  const aiResultFigure = result.opponent_type === 'AI' && result.bot_tier != null ? getPkFigure(result.bot_tier) : null;
+  const aiResultExpression: PkExpressionKey | null =
+    aiResultFigure == null ? null : result.outcome === 'win' ? 'defeat' : result.outcome === 'loss' ? 'victory' : null;
+  // #3602 "also": a tied score is decided by total answer time (PRD §4),
+  // but the screen never said so -- staging QA: "同分時看不出輸贏原因".
+  const decidedByTime = result.outcome !== 'draw' && result.my_score === result.opponent_score;
 
   const toggle = (idx: number) => {
     setExpanded((prev) => {
@@ -52,6 +61,14 @@ const PkResultScreen: React.FC<PkResultScreenProps> = ({ result, onRematch, onCh
         </>
       )}
 
+      {aiResultFigure && aiResultExpression && (
+        <img
+          src={pkFigurePortraitUrl(aiResultFigure.tier, aiResultExpression)}
+          alt={aiResultFigure.name}
+          className="h-28 w-28 object-contain animate-pop"
+        />
+      )}
+
       <h1 className={`text-3xl font-extrabold ${copy.colorClass} ${copy.animClass}`}>{copy.title}</h1>
 
       <div className="mt-4 flex items-center gap-6 text-xl font-bold text-on-surface">
@@ -59,6 +76,10 @@ const PkResultScreen: React.FC<PkResultScreenProps> = ({ result, onRematch, onCh
         <span className="text-on-surface-variant text-sm font-normal">:</span>
         <span>{result.opponent_score}</span>
       </div>
+
+      {decidedByTime && (
+        <p className="mt-1 text-xs text-on-surface-variant">分數打平，由作答總時間快慢決定勝負</p>
+      )}
 
       {ratingDelta != null && (
         <p className="mt-1 text-xs text-on-surface-variant">
@@ -69,7 +90,7 @@ const PkResultScreen: React.FC<PkResultScreenProps> = ({ result, onRematch, onCh
       {unlockedFigure && (
         <div className="mt-6 flex flex-col items-center gap-2 rounded-2xl bg-accent-bg px-6 py-4 animate-pop">
           <img
-            src={`/pk/figures/${unlockedFigure.tier}-${unlockedFigure.slug}/icon.svg`}
+            src={pkFigureAssetPath(unlockedFigure.tier, 'icon.svg')}
             alt={unlockedFigure.name}
             className="h-16 w-16"
           />

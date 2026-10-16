@@ -470,6 +470,11 @@ export interface StudentEnrolledClassroom {
 export interface StudentEnrolledClassroomsResponse {
   classrooms: StudentEnrolledClassroom[];
   total: number;
+  /** Issue #3602 B1 — the student's own profile grade, independent of any
+   * classroom. Used as a fallback when resolving AI PK's question scope
+   * (see pages/pk/resolvePkGrade.ts) so a classroom with no grade set (or
+   * no classroom at all) never has to block 挑戰文學家. */
+  student_grade: number | null;
 }
 
 export async function fetchMyEnrolledClassrooms(

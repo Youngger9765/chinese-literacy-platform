@@ -21,7 +21,7 @@ import PkOptionButtons from '../../components/pk/PkOptionButtons';
 import PkScoreBar from '../../components/pk/PkScoreBar';
 import PkComboBadge, { computeCombo, type PkAnswerLite } from '../../components/pk/PkComboBadge';
 import PkResultScreen from '../../components/pk/PkResultScreen';
-import { getPkFigure } from '../../data/pkFigures';
+import { getPkFigure, pkFigureAssetPath, pkFigurePortraitUrl, type PkExpressionKey } from '../../data/pkFigures';
 import { getPkMatchResult, submitPkAnswer, PkApiError, type PkMatchResult } from '../../services/pkApi';
 
 // Scene-slot note (2026-10-16, Young): a separate design doc for a 2D
@@ -45,6 +45,25 @@ interface LocationState {
 }
 
 const MAX_SCORE = 5000; // PRD §4: 5 題 x 1000 分滿分
+
+/**
+ * #3602 "also": a zhuyin round's stem is a plain sentence containing the
+ * asked character somewhere in it (backend's extra.target_index, a
+ * character offset — see live_quiz/sources/zhuyin.py) with no visual
+ * marker at all for which character is being asked about -- staging QA:
+ * "畫面上看不到問的是「適」還是「的」...學生沒辦法作答". Bold + underline the
+ * target character inline, same span otherwise unstyled.
+ */
+function renderStemWithTarget(stem: string, targetIndex?: number | null): React.ReactNode {
+  if (targetIndex == null || targetIndex < 0 || targetIndex >= stem.length) return stem;
+  return (
+    <>
+      {stem.slice(0, targetIndex)}
+      <span className="font-bold text-accent underline underline-offset-2">{stem[targetIndex]}</span>
+      {stem.slice(targetIndex + 1)}
+    </>
+  );
+}
 
 const StudentPkMatch: React.FC = () => {
   const { matchId } = useParams<{ matchId: string }>();
@@ -127,7 +146,8 @@ const StudentPkMatch: React.FC = () => {
       <PkVsScreen
         myName={user?.name ?? '你'}
         opponentName={opponentName}
-        opponentAvatarUrl={aiFigure ? `/pk/figures/${aiFigure.tier}-${aiFigure.slug}/portrait-idle.svg` : undefined}
+        // #3602 B5: moved off /pk/figures to avoid colliding with this SPA's own /pk route
+        opponentAvatarUrl={aiFigure ? pkFigureAssetPath(aiFigure.tier, 'portrait-idle.svg') : undefined}
         opponentIsAi={locState.opponentType === 'ai'}
         opponentTier={locState.tier}
         onDone={() => setPhase(locState.opponentType === 'ai' ? 'intro' : 'battle')}
@@ -169,6 +189,13 @@ const StudentPkMatch: React.FC = () => {
 
   const round = state.round;
   const isLastRound = state.round_index === state.rounds_total - 1;
+  // #3602 B6: drive the opponent's portrait off the backend-computed
+  // ai_expression (PRD §10.5.3) instead of always showing portrait-idle —
+  // null for a human match (no figure to react).
+  const opponentAvatarUrl =
+    aiFigure && state.ai_expression
+      ? pkFigurePortraitUrl(aiFigure.tier, state.ai_expression as PkExpressionKey)
+      : undefined;
 
   return (
     <div className="flex min-h-screen flex-col bg-surface px-5 py-6">
@@ -186,6 +213,7 @@ const StudentPkMatch: React.FC = () => {
           maxScore={MAX_SCORE}
           colorClass="bg-tertiary-container"
           isAi={state.opponent_type === 'AI'}
+          avatarUrl={opponentAvatarUrl}
         />
       </div>
 
@@ -207,7 +235,9 @@ const StudentPkMatch: React.FC = () => {
             <PkCountdownRing roundStartedAt={state.round_started_at} seconds={round.seconds} serverNow={state.server_now} />
           )}
 
-          <p className="text-center text-lg font-medium text-on-surface max-w-md">{round.stem}</p>
+          <p className="text-center text-lg font-medium text-on-surface max-w-md">
+            {renderStemWithTarget(round.stem, round.extra?.target_index)}
+          </p>
 
           <PkOptionButtons
             options={round.options}

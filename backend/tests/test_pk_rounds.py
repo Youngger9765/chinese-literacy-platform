@@ -101,3 +101,57 @@ class TestBuildPkRounds:
         a = svc.build_pk_rounds(lessons, random.Random(42), rounds_per_match=5)
         b = svc.build_pk_rounds(lessons, random.Random(42), rounds_per_match=5)
         assert a == b
+
+
+def _fake_lesson_skewed(n_comprehension: int, n_vocab_definitions: int) -> dict:
+    """A lesson with a LOT of comprehension items and only a FEW
+    vocab_definitions items — the shape staging QA actually hit with
+    zhuyin vs the other three modules (#3602 "also": "題庫幾乎都是注音")."""
+    bank = [f"詞{i}" for i in range(max(2, n_vocab_definitions) + 1)]
+    return {
+        "title": "假課文",
+        "version_id": "v1",
+        "comprehension": {
+            "questions": [
+                {"index": i, "stem": f"題{i}？", "answer": "A",
+                 "options": {"A": "正確", "B": "錯誤1", "C": "錯誤2", "D": "錯誤3"}}
+                for i in range(1, n_comprehension + 1)
+            ]
+        },
+        "vocab_definitions": {
+            "vocabulary_bank": bank,
+            "items": [
+                {"index": i, "word": bank[i], "definition": f"定義{i}"}
+                for i in range(n_vocab_definitions)
+            ],
+        },
+    }
+
+
+class TestBuildPkRoundsQuestionMix:
+    """#3602 "also": "題庫幾乎都是注音...rebalance to include 語詞/理解 types
+    where available" — a plain pool-wide sample lets whichever module
+    happens to generate the most raw items dominate every match, even
+    though the scarce module genuinely has items available."""
+
+    def test_scarce_module_still_represented_despite_being_outnumbered(self):
+        # 40 comprehension items vs only 2 vocab_definitions items in the
+        # combined pool (42 total) -- a uniform 5-of-42 sample very rarely
+        # includes either of the 2 scarce items. Checked across a spread of
+        # seeds: the fix must include vocab_definitions EVERY time (it's a
+        # guaranteed round-robin pick, not a probabilistic improvement).
+        lessons = [{"lesson_uid": "FAKE_SKEW", "lesson": _fake_lesson_skewed(40, 2)}]
+        for seed in range(1, 15):
+            built = svc.build_pk_rounds(lessons, random.Random(seed), rounds_per_match=5)
+            modules = [r["payload"]["source_module"] for r in built]
+            assert "vocab_definitions" in modules, f"seed={seed} picked only {modules}"
+
+    def test_still_fills_remaining_slots_from_the_abundant_module(self):
+        lessons = [{"lesson_uid": "FAKE_SKEW", "lesson": _fake_lesson_skewed(40, 2)}]
+        built = svc.build_pk_rounds(lessons, random.Random(7), rounds_per_match=5)
+        assert len(built) == 5
+        modules = [r["payload"]["source_module"] for r in built]
+        # Only 2 vocab_definitions items exist -- the remaining 3 slots can
+        # only come from comprehension.
+        assert modules.count("vocab_definitions") == 2
+        assert modules.count("comprehension") == 3

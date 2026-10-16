@@ -12,7 +12,7 @@
  *   silence).
  */
 import React, { useEffect, useRef, useState } from 'react';
-import type { PkFigure } from '../../data/pkFigures';
+import { pkFigureAssetPath, type PkFigure } from '../../data/pkFigures';
 import { usePrefersReducedMotion } from './usePrefersReducedMotion';
 
 interface PkFigureIntroProps {
@@ -52,7 +52,7 @@ const PkFigureIntro: React.FC<PkFigureIntroProps> = ({ figure, firstTime, onDone
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [beatIndex, reducedMotion]);
 
-  const portraitUrl = `/pk/figures/${figure.tier}-${figure.slug}/portrait-idle.svg`;
+  const portraitUrl = pkFigureAssetPath(figure.tier, 'portrait-idle.svg');  // #3602 B5
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-surface px-6 py-8">

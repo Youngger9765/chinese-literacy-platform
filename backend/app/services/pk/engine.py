@@ -50,6 +50,15 @@ def _aware(dt: datetime | None) -> datetime | None:
 
 LIMIT_MS = ANSWER_SECONDS * 1000
 
+# #3602 B5: this used to be served from frontend/public/pk/figures/, which
+# collides with the SPA's own `/pk` route — nginx's `try_files $uri $uri/
+# /index.html` sees a real directory named `pk` in the docroot and 301s
+# `/pk` -> `/pk/`, then 403s on `/pk/` itself instead of ever falling
+# through to index.html (autoindex is off, so an unlisted directory with no
+# index file is a dead end). Moved the assets to frontend/public/pk-art/,
+# a path with no matching client route, so it can never shadow `/pk`.
+PK_FIGURE_ASSET_BASE = "/pk-art/figures"
+
 
 # ---------------------------------------------------------------------------
 # Rating
@@ -334,6 +343,90 @@ def _is_ai_match(match: PkMatch) -> bool:
     return match.side_b_bot_tier is not None
 
 
+def _outcome_side(match: PkMatch) -> str:
+    """"a" | "b" | "draw" — recomputed from the match's own stored
+    scores/answer-timing rather than trusted from ``winner_user_id``.
+
+    #3602 B3: ``winner_user_id`` cannot represent "side b won" when side b
+    is an AI opponent — ``_finalize_match`` sets it to ``side_b_user_id``,
+    which is always None for an AI match (there is no user to point at).
+    That makes "AI won" and "true draw" both read back as
+    ``winner_user_id is None``, so any caller that branches on
+    ``winner_user_id`` alone (the old ``get_match_result`` /
+    ``build_match_state`` / ``list_history`` all did) reports the student's
+    loss-to-the-AI as a draw.
+
+    ``decide_winner`` is a pure function of scores + total time, both of
+    which are already persisted on the row — recomputing it here needs no
+    migration and is guaranteed consistent with what ``_finalize_match``
+    decided originally (same inputs, same function)."""
+    rounds_total = len(match.rounds_snapshot)
+    side_a_time = scoring.total_time_ms(match.side_a_answers, rounds_total=rounds_total, limit_ms=LIMIT_MS)
+    side_b_time = scoring.total_time_ms(match.side_b_answers, rounds_total=rounds_total, limit_ms=LIMIT_MS)
+    return scoring.decide_winner(
+        side_a_score=match.side_a_score,
+        side_b_score=match.side_b_score,
+        side_a_total_time_ms=side_a_time,
+        side_b_total_time_ms=side_b_time,
+    )
+
+
+def _outcome_for_user(match: PkMatch, user_id: int) -> str:
+    """"win" | "loss" | "draw" from ``user_id``'s perspective — see
+    ``_outcome_side`` for why this does not read ``winner_user_id``."""
+    side_outcome = _outcome_side(match)
+    if side_outcome == "draw":
+        return "draw"
+    my_side = "a" if user_id == match.side_a_user_id else "b"
+    return "win" if side_outcome == my_side else "loss"
+
+
+def _revealed_score(match: PkMatch, side: str) -> int:
+    """Sum of ``side``'s points for rounds that have actually been revealed
+    (strictly-earlier rounds, plus the current round once it is revealing)
+    — never the raw running total.
+
+    #3602 B2: an AI opponent's full 5-round score is computed and stored on
+    ``side_b_score`` at match CREATION time (it never "waits" to be
+    polled), so reading that column directly for ``opponent_score`` leaked
+    the AI's final total from round 1. This closes the same narrow leak on
+    the human side too: ``submit_match_answer`` bumps the running score the
+    instant a side submits, which can be before the round has actually
+    entered its reveal phase for the OTHER side that hasn't answered yet."""
+    idx = match.current_round_index
+    revealed_through = idx if match.reveal_started_at is not None else idx - 1
+    return sum(a["points"] for a in _answers_for(match, side) if a["round_index"] <= revealed_through)
+
+
+def _ai_expression(match: PkMatch, round_view: dict | None, revealing: bool) -> str | None:
+    """PRD §10.5.3 event -> expression table. None for a human match (no
+    figure to react, §8.2). Priority when a round reveals with both sides'
+    results known (table doesn't define this overlap explicitly): the AI's
+    own result wins (it reacts to itself first) over being impressed by the
+    opponent, which only shows when the AI itself got it wrong."""
+    if not _is_ai_match(match):
+        return None
+    if match.status == "completed":
+        side_outcome = _outcome_side(match)
+        if side_outcome == "b":
+            return "victory"
+        if side_outcome == "a":
+            return "defeat"
+        return "idle"  # draw has no dedicated expression in §10.5.3
+    if round_view is None:
+        return "idle"
+    if not revealing:
+        return "thinking"
+    ai_correct = bool(round_view.get("opponent_is_correct"))
+    my_choice = round_view.get("my_choice_key")
+    my_correct = my_choice is not None and my_choice == round_view.get("correct_key")
+    if ai_correct:
+        return "happy"
+    if my_correct:
+        return "impressed"
+    return "frustrated"
+
+
 def _finalize_match(db: Session, match: PkMatch) -> None:
     rounds_total = len(match.rounds_snapshot)
     side_a_time = scoring.total_time_ms(match.side_a_answers, rounds_total=rounds_total, limit_ms=LIMIT_MS)
@@ -587,15 +680,29 @@ def build_match_state(db: Session, match: PkMatch, user: User) -> dict:
         "my_name": my_user.name if my_user else None,
         "opponent_name": opponent_user.name if opponent_user else None,
         "my_score": match.side_a_score if side == "a" else match.side_b_score,
-        "opponent_score": match.side_b_score if side == "a" else match.side_a_score,
+        # #3602 B2: never the raw running total — an AI opponent's is fully
+        # precomputed at creation (see create_ai_match), so reading
+        # side_b_score directly would show the AI's final 5-round score
+        # from round 1. _revealed_score only counts rounds that have
+        # actually revealed, which also happens to close a narrower version
+        # of the same leak on the human side (see its docstring).
+        "opponent_score": _revealed_score(match, "b" if side == "a" else "a"),
         "opponent_type": opponent_label,
         "bot_tier": match.side_b_bot_tier if (_is_ai_match(match)) else None,
         "suggest_ai": False,
+        # #3602 B6 / PRD §11 "AI 對戰時附帶當前應顯示的人物表情": None for a
+        # human match.
+        "ai_expression": _ai_expression(match, round_view, revealing),
     }
     if match.status == "completed":
-        state["winner_side"] = (
-            "me" if match.winner_user_id == user.id else ("opponent" if match.winner_user_id else "draw")
-        )
+        # #3602 B3: recomputed from scores/time, not match.winner_user_id
+        # (which is None both for a true draw AND for an AI win — see
+        # _outcome_side's docstring).
+        side_outcome = _outcome_side(match)
+        if side_outcome == "draw":
+            state["winner_side"] = "draw"
+        else:
+            state["winner_side"] = "me" if side_outcome == side else "opponent"
     return state
 
 
@@ -612,12 +719,10 @@ def get_match_result(db: Session, match: PkMatch, user: User) -> dict:
     my_rating_before = match.side_a_rating_before if side == "a" else match.side_b_rating_before
     my_rating_after = match.side_a_rating_after if side == "a" else match.side_b_rating_after
 
-    if match.winner_user_id is None:
-        outcome = "draw"
-    elif match.winner_user_id == user.id:
-        outcome = "win"
-    else:
-        outcome = "loss"
+    # #3602 B3: recomputed, not read off match.winner_user_id — see
+    # _outcome_side's docstring for why that column alone conflates an AI
+    # win with a true draw.
+    outcome = _outcome_for_user(match, user.id)
 
     rounds = []
     for i, round_def in enumerate(match.rounds_snapshot):
@@ -703,8 +808,8 @@ def get_opponents_view(db: Session, user: User) -> dict:
                 "slug": t.slug,
                 "name": t.name,
                 "speed_label": t.speed_label,
-                "icon_url": f"/pk/figures/{t.tier}-{t.slug}/icon.svg",
-                "portrait_url": f"/pk/figures/{t.tier}-{t.slug}/portrait-idle.svg",
+                "icon_url": f"{PK_FIGURE_ASSET_BASE}/{t.tier}-{t.slug}/icon.svg",
+                "portrait_url": f"{PK_FIGURE_ASSET_BASE}/{t.tier}-{t.slug}/portrait-idle.svg",
                 "recommended": t.tier == recommended.tier,
                 "unlocked": t.tier in unlocked,
                 "previously_played": t.tier in played,
@@ -737,14 +842,9 @@ def list_history(db: Session, user: User) -> list[dict]:
         side = "a" if m.side_a_user_id == user.id else "b"
         my_score = m.side_a_score if side == "a" else m.side_b_score
         opp_score = m.side_b_score if side == "a" else m.side_a_score
-        if m.status != "completed":
-            outcome = None
-        elif m.winner_user_id is None:
-            outcome = "draw"
-        elif m.winner_user_id == user.id:
-            outcome = "win"
-        else:
-            outcome = "loss"
+        # #3602 B3: same recomputation as get_match_result — see
+        # _outcome_side's docstring.
+        outcome = None if m.status != "completed" else _outcome_for_user(m, user.id)
         out.append(
             {
                 "match_id": m.id,

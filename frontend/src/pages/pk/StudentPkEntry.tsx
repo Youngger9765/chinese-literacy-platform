@@ -14,6 +14,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { fetchMyEnrolledClassrooms, type StudentEnrolledClassroom } from '../../services/learning/session';
 import { createPkInvite, joinPkQueue, PkApiError, type PkScopeType } from '../../services/pkApi';
+import { resolveGradeForAiPk } from './resolvePkGrade';
 
 type Scope = { type: PkScopeType; ref: string; label: string };
 
@@ -24,6 +25,11 @@ const StudentPkEntry: React.FC = () => {
   const lessonUid = searchParams.get('lessonUid');
   const lessonTitle = searchParams.get('lessonTitle');
 
+  // issue #3602 B1: the raw list is kept (not just the one "active"
+  // classroom) because resolving a grade for AI PK needs to look across
+  // ALL enrolled classrooms, not just whichever one happens to be active.
+  const [classrooms, setClassrooms] = useState<StudentEnrolledClassroom[]>([]);
+  const [studentGrade, setStudentGrade] = useState<number | null>(null);
   const [classroom, setClassroom] = useState<StudentEnrolledClassroom | null>(null);
   // issue #3586 §7.4 (final): 真人 PK (找同學 PK + 邀請碼) is gated per
   // classroom via `pk_human`; a student in several classes should see the
@@ -40,28 +46,38 @@ const StudentPkEntry: React.FC = () => {
   const [showInviteRedeem, setShowInviteRedeem] = useState(false);
   const [inviteCodeInput, setInviteCodeInput] = useState('');
   const [showInviteCreate, setShowInviteCreate] = useState(false);
-  const [createdInviteCode, setCreatedInviteCode] = useState<string | null>(null);
 
   useEffect(() => {
     if (!token) return;
     fetchMyEnrolledClassrooms(token)
       .then((res) => {
+        // #3602 B1: prefer whichever classroom has 真人 PK turned on (that's
+        // the one handleFindClassmate/handleCreateInvite will actually bind
+        // the request to) — falling back to "active, then first" only when
+        // none does, same as before.
+        const pkHumanClassroom = res.classrooms.find((c) => c.pk_human) ?? null;
         const active = res.classrooms.find((c) => c.is_active) ?? res.classrooms[0] ?? null;
-        setClassroom(active);
+        setClassrooms(res.classrooms);
+        setClassroom(pkHumanClassroom ?? active);
         setCanFindClassmate(res.classrooms.some((c) => c.pk_human));
+        setStudentGrade(res.student_grade);
       })
       .finally(() => setLoaded(true));
   }, [token]);
 
-  const currentScope: Scope | null =
+  // #3602 B1: AI PK (挑戰文學家) must work for every logged-in student
+  // "regardless of class" (Young 2026-10-16) — resolving a grade no longer
+  // depends solely on the one `classroom` chosen above having a grade set.
+  // See resolvePkGrade.ts for the full fallback order and why.
+  const resolvedGrade = resolveGradeForAiPk(classrooms, classroom?.grade ?? null, studentGrade);
+
+  const currentScope: Scope =
     scopeChoice === 'lesson' && lessonUid
       ? { type: 'lesson', ref: lessonUid, label: lessonTitle ?? '這一課' }
-      : classroom?.grade != null
-        ? { type: 'grade_pool', ref: String(classroom.grade), label: `${classroom.grade} 年級題庫` }
-        : null;
+      : { type: 'grade_pool', ref: String(resolvedGrade), label: `${resolvedGrade} 年級題庫` };
 
   const handleFindClassmate = async () => {
-    if (!token || !currentScope) return;
+    if (!token) return;
     setBusy(true);
     setError('');
     try {
@@ -80,7 +96,6 @@ const StudentPkEntry: React.FC = () => {
   };
 
   const handleChallengeFigure = () => {
-    if (!currentScope) return;
     const qs = new URLSearchParams({
       scopeType: currentScope.type,
       scopeRef: currentScope.ref,
@@ -90,7 +105,7 @@ const StudentPkEntry: React.FC = () => {
   };
 
   const handleRedeemInvite = async () => {
-    if (!token || !currentScope || inviteCodeInput.trim().length !== 6) return;
+    if (!token || inviteCodeInput.trim().length !== 6) return;
     setBusy(true);
     setError('');
     try {
@@ -109,7 +124,7 @@ const StudentPkEntry: React.FC = () => {
   };
 
   const handleCreateInvite = async () => {
-    if (!token || !classroom?.id || !currentScope) return;
+    if (!token || !classroom?.id) return;
     setBusy(true);
     setError('');
     try {
@@ -118,10 +133,24 @@ const StudentPkEntry: React.FC = () => {
         scope_ref: currentScope.ref,
         classroom_id: classroom.id,
       });
-      setCreatedInviteCode(res.invite_code);
+      // #3602 B4: the creator used to just stash the code in local state and
+      // sit on THIS page forever — queue_id was returned but never used, so
+      // when the friend redeemed the code, the creator had no way to find
+      // out the match had started. Navigate into the same queue-wait screen
+      // handleFindClassmate uses (it already polls queue_id and redirects to
+      // /pk/match/{id} once status flips to "matched" — redeem_invite sets
+      // exactly that on THIS queue row). Pass the code along so the wait
+      // screen can still show it to the creator while they wait.
+      navigate(`/pk/queue/${res.queue_id}`, {
+        state: {
+          scopeType: currentScope.type,
+          scopeRef: currentScope.ref,
+          classroomId: classroom.id,
+          inviteCode: res.invite_code,
+        },
+      });
     } catch (err) {
       setError(err instanceof PkApiError ? err.message : '發生錯誤，請重試');
-    } finally {
       setBusy(false);
     }
   };
@@ -162,93 +191,85 @@ const StudentPkEntry: React.FC = () => {
         </div>
       )}
 
-      {!currentScope && (
+      {/* #3602 B1: this is now purely informational — it no longer blocks
+          挑戰文學家, which always has a resolved scope (see resolvedGrade
+          above). It only explains why 找同學 PK isn't offered. */}
+      {classrooms.length === 0 && (
         <p className="mt-8 max-w-xs text-center text-sm text-on-surface-variant">
-          還沒有加入班級，先加入班級才能使用 PK 對戰喔。
+          還沒有加入班級，加入班級後就能找同學 PK 囉！現在可以先挑戰文學家。
         </p>
       )}
 
-      {currentScope && (
-        <>
-          <div className="mt-10 flex w-full max-w-sm flex-col gap-4">
-            {canFindClassmate && (
+      <div className="mt-10 flex w-full max-w-sm flex-col gap-4">
+        {canFindClassmate && (
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => void handleFindClassmate()}
+            className="rounded-2xl bg-accent px-6 py-6 text-lg font-bold text-white shadow active:scale-95 transition-transform disabled:opacity-50"
+          >
+            找同學 PK
+          </button>
+        )}
+        <button
+          type="button"
+          disabled={busy}
+          onClick={handleChallengeFigure}
+          className="rounded-2xl border-2 border-accent px-6 py-6 text-lg font-bold text-accent active:scale-95 transition-transform disabled:opacity-50"
+        >
+          挑戰文學家
+        </button>
+      </div>
+
+      {canFindClassmate && classroom?.id != null && (
+        <div className="mt-6 w-full max-w-sm space-y-2 text-sm">
+          <button
+            type="button"
+            onClick={() => setShowInviteRedeem((v) => !v)}
+            className="text-accent underline"
+          >
+            有邀請碼嗎？
+          </button>
+          {showInviteRedeem && (
+            <div className="flex gap-2">
+              <input
+                value={inviteCodeInput}
+                onChange={(e) => setInviteCodeInput(e.target.value.toUpperCase().slice(0, 6))}
+                placeholder="輸入 6 碼邀請碼"
+                className="flex-1 rounded-lg border border-surface-dim px-3 py-2 uppercase tracking-widest"
+                maxLength={6}
+              />
+              <button
+                type="button"
+                disabled={busy || inviteCodeInput.length !== 6}
+                onClick={() => void handleRedeemInvite()}
+                className="rounded-lg bg-accent px-4 py-2 font-semibold text-white disabled:opacity-40"
+              >
+                加入
+              </button>
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={() => setShowInviteCreate((v) => !v)}
+            className="block text-accent underline"
+          >
+            產生邀請碼給同學
+          </button>
+          {showInviteCreate && (
+            <div className="rounded-lg bg-surface-container px-4 py-3 text-center">
               <button
                 type="button"
                 disabled={busy}
-                onClick={() => void handleFindClassmate()}
-                className="rounded-2xl bg-accent px-6 py-6 text-lg font-bold text-white shadow active:scale-95 transition-transform disabled:opacity-50"
+                onClick={() => void handleCreateInvite()}
+                className="rounded-lg bg-accent px-4 py-2 font-semibold text-white disabled:opacity-50"
               >
-                找同學 PK
+                產生邀請碼
               </button>
-            )}
-            <button
-              type="button"
-              disabled={busy}
-              onClick={handleChallengeFigure}
-              className="rounded-2xl border-2 border-accent px-6 py-6 text-lg font-bold text-accent active:scale-95 transition-transform disabled:opacity-50"
-            >
-              挑戰文學家
-            </button>
-          </div>
-
-          {canFindClassmate && classroom?.id != null && currentScope.type !== undefined && (
-            <div className="mt-6 w-full max-w-sm space-y-2 text-sm">
-              <button
-                type="button"
-                onClick={() => setShowInviteRedeem((v) => !v)}
-                className="text-accent underline"
-              >
-                有邀請碼嗎？
-              </button>
-              {showInviteRedeem && (
-                <div className="flex gap-2">
-                  <input
-                    value={inviteCodeInput}
-                    onChange={(e) => setInviteCodeInput(e.target.value.toUpperCase().slice(0, 6))}
-                    placeholder="輸入 6 碼邀請碼"
-                    className="flex-1 rounded-lg border border-surface-dim px-3 py-2 uppercase tracking-widest"
-                    maxLength={6}
-                  />
-                  <button
-                    type="button"
-                    disabled={busy || inviteCodeInput.length !== 6}
-                    onClick={() => void handleRedeemInvite()}
-                    className="rounded-lg bg-accent px-4 py-2 font-semibold text-white disabled:opacity-40"
-                  >
-                    加入
-                  </button>
-                </div>
-              )}
-
-              <button
-                type="button"
-                onClick={() => setShowInviteCreate((v) => !v)}
-                className="block text-accent underline"
-              >
-                產生邀請碼給同學
-              </button>
-              {showInviteCreate && (
-                <div className="rounded-lg bg-surface-container px-4 py-3 text-center">
-                  {createdInviteCode ? (
-                    <p className="text-2xl font-bold tracking-widest text-accent">{createdInviteCode}</p>
-                  ) : (
-                    <button
-                      type="button"
-                      disabled={busy}
-                      onClick={() => void handleCreateInvite()}
-                      className="rounded-lg bg-accent px-4 py-2 font-semibold text-white"
-                    >
-                      產生邀請碼
-                    </button>
-                  )}
-                  {createdInviteCode && (
-                    <p className="mt-1 text-xs text-on-surface-variant">5 分鐘內有效，告訴同學這組代碼</p>
-                  )}
-                </div>
-              )}
             </div>
           )}
-        </>
+        </div>
       )}
 
       {error && <p className="mt-4 text-sm text-error">{error}</p>}
