@@ -1,5 +1,5 @@
 """League Theme Studio is system_admin-only — every route in
-admin_league_themes.py. The guard is router-level
+admin_story_packs.py. The guard is router-level
 (`dependencies=[require_role("system_admin")]`), so it is easy to believe
 a specific sub-route only checks login. These tests run the real routes
 with the lowest roles that can log in (teacher, student) and a positive
@@ -23,8 +23,8 @@ from app.database import get_db
 from app.main import app
 from app.models import Base
 from app.models.user import Role, User, UserRole
-from app.services.league_theme_defaults import TANG_THEME_KEY
-from app.services.league_theme_store import InMemoryThemeStore, get_theme_store
+from app.services.story_pack_defaults import MYTH_PACK_KEY, TANG_PACK_KEY
+from app.services.story_pack_store import InMemoryStoryPackStore, get_story_pack_store
 
 engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
 Session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -64,21 +64,21 @@ def make_client():
 
 @pytest.fixture(autouse=True)
 def _isolated_theme_store(monkeypatch):
-    """The admin routes call `get_theme_store()` (process-wide singleton)
+    """The admin routes call `get_story_pack_store()` (process-wide singleton)
     — swap it for a fresh store per test so these tests can't bleed state
     into each other or into test_league_theme_service.py's assumptions."""
-    import app.routes.admin_league_themes as routes_mod
+    import app.routes.admin_story_packs as routes_mod
 
-    fresh = InMemoryThemeStore()
-    monkeypatch.setattr(routes_mod, "get_theme_store", lambda: fresh)
+    fresh = InMemoryStoryPackStore()
+    monkeypatch.setattr(routes_mod, "get_story_pack_store", lambda *_args, **_kwargs: fresh)
     return fresh
 
 
 GET_PATHS = [
-    "/api/admin/league-themes",
-    "/api/admin/league-themes/active",
-    f"/api/admin/league-themes/{TANG_THEME_KEY}",
-    "/api/admin/league-themes/seasons/1",
+    "/api/admin/story-packs",
+    "/api/admin/story-packs/active",
+    f"/api/admin/story-packs/{TANG_PACK_KEY}",
+    "/api/admin/story-packs/seasons/1",
 ]
 
 
@@ -90,31 +90,31 @@ def test_non_admin_get_is_forbidden(make_client, role, path):
 
 @pytest.mark.parametrize("role", ["teacher", "student"])
 def test_non_admin_cannot_validate(make_client, role):
-    r = make_client(role).post("/api/admin/league-themes/validate", json={"payload": {}})
+    r = make_client(role).post("/api/admin/story-packs/validate", json={"payload": {}})
     assert r.status_code == 403
 
 
 @pytest.mark.parametrize("role", ["teacher", "student"])
 def test_non_admin_cannot_set_active(make_client, role):
-    r = make_client(role).put("/api/admin/league-themes/active", json={"key": TANG_THEME_KEY})
+    r = make_client(role).put("/api/admin/story-packs/active", json={"key": TANG_PACK_KEY})
     assert r.status_code == 403
 
 
 @pytest.mark.parametrize("role", ["teacher", "student"])
 def test_non_admin_cannot_upsert(make_client, role):
-    r = make_client(role).put(f"/api/admin/league-themes/some-theme", json={"payload": {}})
+    r = make_client(role).put(f"/api/admin/story-packs/some-theme", json={"payload": {}})
     assert r.status_code == 403
 
 
 @pytest.mark.parametrize("role", ["teacher", "student"])
 def test_non_admin_cannot_delete(make_client, role):
-    r = make_client(role).delete("/api/admin/league-themes/some-theme")
+    r = make_client(role).delete("/api/admin/story-packs/some-theme")
     assert r.status_code == 403
 
 
 @pytest.mark.parametrize("role", ["teacher", "student"])
 def test_non_admin_cannot_assign_season_theme(make_client, role):
-    r = make_client(role).put("/api/admin/league-themes/seasons/1", json={"key": TANG_THEME_KEY})
+    r = make_client(role).put("/api/admin/story-packs/seasons/1", json={"key": TANG_PACK_KEY})
     assert r.status_code == 403
 
 
@@ -123,18 +123,18 @@ class TestSystemAdminPositiveControl:
     that never resolves. system_admin gets past the guard."""
 
     def test_system_admin_can_list(self, make_client):
-        r = make_client("system_admin").get("/api/admin/league-themes")
+        r = make_client("system_admin").get("/api/admin/story-packs")
         assert r.status_code == 200
         keys = {t["key"] for t in r.json()}
-        assert TANG_THEME_KEY in keys
+        assert TANG_PACK_KEY in keys
 
     def test_system_admin_can_get_active_default(self, make_client):
-        r = make_client("system_admin").get("/api/admin/league-themes/active")
+        r = make_client("system_admin").get("/api/admin/story-packs/active")
         assert r.status_code == 200
-        assert r.json()["key"] == TANG_THEME_KEY
+        assert r.json()["key"] == MYTH_PACK_KEY  # default pack is 上古神話 (Young 2026-10-16)
 
     def test_system_admin_can_validate(self, make_client):
-        r = make_client("system_admin").post("/api/admin/league-themes/validate", json={"payload": {}})
+        r = make_client("system_admin").post("/api/admin/story-packs/validate", json={"payload": {}})
         assert r.status_code == 200
         assert r.json()["valid"] is False
         assert len(r.json()["errors"]) > 0
@@ -155,17 +155,17 @@ class TestSystemAdminPositiveControl:
             ],
             "result_copy": {"win": "勝利", "lose": "再接再厲", "draw": "平手"},
         }
-        r = client.put("/api/admin/league-themes/ming-voyage", json={"payload": payload})
+        r = client.put("/api/admin/story-packs/ming-voyage", json={"payload": payload})
         assert r.status_code == 200, r.text
 
-        r2 = client.get("/api/admin/league-themes/ming-voyage")
+        r2 = client.get("/api/admin/story-packs/ming-voyage")
         assert r2.status_code == 200
         assert r2.json()["title"] == "鄭和下西洋賽"
 
     def test_system_admin_cannot_overwrite_builtin(self, make_client):
         # A fully VALID payload — this must fail on the builtin-key
         # collision (409), not on schema validation (422), so the payload
-        # has to actually pass LeagueTheme validation first.
+        # has to actually pass StoryPack validation first.
         valid_payload = {
             "era": "明",
             "title": "鄭和下西洋賽",
@@ -181,17 +181,17 @@ class TestSystemAdminPositiveControl:
             "result_copy": {"win": "勝利", "lose": "再接再厲", "draw": "平手"},
         }
         client = make_client("system_admin")
-        r = client.put(f"/api/admin/league-themes/{TANG_THEME_KEY}", json={"payload": valid_payload})
+        r = client.put(f"/api/admin/story-packs/{TANG_PACK_KEY}", json={"payload": valid_payload})
         assert r.status_code == 409
 
     def test_system_admin_can_assign_and_read_season_theme(self, make_client):
-        from app.services.league_theme_defaults import SONG_THEME_KEY
+        from app.services.story_pack_defaults import SONG_PACK_KEY
 
         client = make_client("system_admin")
-        r = client.put("/api/admin/league-themes/seasons/123", json={"key": SONG_THEME_KEY})
+        r = client.put("/api/admin/story-packs/seasons/123", json={"key": SONG_PACK_KEY})
         assert r.status_code == 200
-        assert r.json()["theme"]["key"] == SONG_THEME_KEY
+        assert r.json()["pack"]["key"] == SONG_PACK_KEY
 
-        r2 = client.get("/api/admin/league-themes/seasons/123")
+        r2 = client.get("/api/admin/story-packs/seasons/123")
         assert r2.status_code == 200
-        assert r2.json()["effective_theme"]["key"] == SONG_THEME_KEY
+        assert r2.json()["effective_pack"]["key"] == SONG_PACK_KEY

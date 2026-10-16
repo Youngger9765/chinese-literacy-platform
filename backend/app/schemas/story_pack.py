@@ -1,49 +1,37 @@
-"""LeagueTheme — the editable STORYLINE/CHEST/BADGE content schema for 跨班賽季.
+"""StoryPack — the editable world/story content for a game mode's "skin"
+(PRD §13, generalized 2026-10-16 per Young's direction: this started as
+league-only `LeagueTheme` and is now a generic, subject-agnostic content
+container any game mode can bind to).
 
-See docs/prd/2026-10-14-chinese-star-league-prd.md §13 for the design.
+content_guidelines (short note, per Young 2026-10-16 — MVP scope, no new
+schema fields for this beyond the validator below):
+    - Frame every pack as travelling INTO a story/book
+      ("掉進《山海經》這本書"), never as "going back to our country's
+      history" — this is a literature world, not a nation's history.
+    - Never use nation/ethnicity framing words — see
+      `BANNED_POLITICAL_TERMS` below; the schema validator rejects them in
+      every free-text field, so this is enforced, not just documented.
+    - Any antagonist/conflict must be abstract (fog, time turbulence, a
+      forgotten page) — never a people, country, or ethnic group. Prefer
+      「冒險／挑戰」framing over「大戰」(also rejected by the validator).
+    - Dynasty names (唐/宋/...) are era LABELS only, not historical combat
+      framing.
+    - A pack must still work if the game mode never reads its new fields —
+      only era/title/intro/faction_labels/energy_bar_label/milestones/
+      chest/badges/result_copy exist today (MVP scope, 2026-10-16: richer
+      per-mode slots — NPC dialogue trees, chapter objects with citations,
+      subject/age/realm metadata — were explicitly deferred, not built, to
+      keep this PR to "the smallest thing that works"; chapter structure
+      and citations for content-heavy packs like 上古神話 are expressed as
+      ordinary `milestones` entries, not a new nested model).
 
-What this schema covers (content, back-office-editable, AI-generatable):
-    era / title / intro narrative / faction banners / energy-bar label /
-    milestone captions / chest {name, description, art} / badge
-    {name, description, art} / win-lose-draw copy.
-
-What this schema explicitly does NOT cover (fixed in code, never touched
-here): scoring weights, badge thresholds, treasure-chest participation
-ratio, grade-floor offset — all of those stay in
-`app/services/league_scoring.py::LeagueWeights`. The two badge entries and
-the one chest entry below carry TEXT ONLY; there is no numeric/threshold
-field anywhere in this module. `BADGE_KEYS` is the fixed set of mechanics a
-theme's badges must map onto 1:1 — a theme cannot invent a third badge or
-drop one of the two.
-
-Security/safety posture (this is content an LLM may generate and a
-non-engineer may paste in, so it must fail closed):
-    - `extra="forbid"` everywhere — an unknown key is rejected, not ignored.
-    - Every free-text field has a length cap and is checked for HTML/script
-      injection markers (`<`, `>`, `javascript:`, `on\\w+=`) — content is
-      copy, never markup.
-    - `LeagueThemeArt` is either `emoji` (a short glyph from the already-
-      bundled font, same posture as the existing hardcoded 🏅⭐🏆🔒 in
-      EnergyBar.tsx/LeagueBadgeCard.tsx — "bundled assets only", no external
-      image URLs) or `svg` (inline SVG run through `sanitize_svg`, which
-      allow-lists tags/attributes and rejects `<script>`, `on*=`,
-      `javascript:`, `<foreignObject>`, external `url(...)`/`href`).
-
-Versioning / forward-compat (2026-10-16, requested alongside a separate,
-not-yet-written 2D story-mode design doc — NPC guide characters, dialogue
-scenes, milestone cutscenes):
-    - `schema_version` is a real field, not decoration — a future story
-      mode bumps it (e.g. 2) and adds its own validated scenes schema. This
-      module deliberately does NOT accept an unvalidated `scenes` key
-      today: `extra="forbid"` rejects it, same as any other unknown key,
-      and `test_league_theme_schema.py::test_scenes_key_rejected_until_
-      story_mode_schema_lands` is the trip-wire that forces whoever adds
-      real scenes support to consciously touch this file (and that test)
-      rather than have it silently start accepting arbitrary scene data.
-    - `background_art` is optional decorative art (era backdrop) shown
-      behind the existing BattleHero gradient card — see PRD §12.2 decision
-      #1 (no new full-page dark theme; this stays a subtle overlay, not a
-      theme swap of the card chrome itself).
+What this schema explicitly does NOT cover (still fixed in code for
+league, never touched here): scoring weights, badge thresholds,
+treasure-chest participation ratio, grade-floor offset — all of those stay
+in `app/services/league_scoring.py::LeagueWeights`. A pack's `badges` list
+carries TEXT ONLY, keyed onto whatever fixed mechanic keys the consuming
+game mode defines (league's are `individual_badge`/`class_badge` — see
+`BADGE_KEY_INDIVIDUAL`/`BADGE_KEY_CLASS`).
 """
 from __future__ import annotations
 
@@ -52,19 +40,48 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-# ── Fixed mechanic keys a theme's badges must map onto (never extended by
-# theme content — see league.py models / league_scoring.py for the actual
-# mechanics these are cosmetic skins for). ─────────────────────────────────
+# ── Fixed mechanic keys league's badges map onto (never extended by pack
+# content — see app/models/league.py / league_scoring.py for the actual
+# mechanics these are cosmetic skins for). Other game modes binding to
+# StoryPack later will define their own badge-key sets. ───────────────────
 BADGE_KEY_INDIVIDUAL = "individual_badge"
 BADGE_KEY_CLASS = "class_badge"
 BADGE_KEYS: frozenset[str] = frozenset({BADGE_KEY_INDIVIDUAL, BADGE_KEY_CLASS})
 
+# ── Political-neutrality guard (Young 2026-10-16) ──────────────────────────
+# Content must never use nation/ethnicity framing — this app is used by
+# Taiwan schools and must stay neutral regardless of which side a reader
+# leans. Checked as a plain substring match across every free-text field;
+# a false positive (a legitimate word containing one of these as a
+# substring) is an acceptable cost given the explicit instruction to hard-
+# reject these, and none of the shipped pack copy uses them.
+BANNED_POLITICAL_TERMS: tuple[str, ...] = (
+    "中華", "中國", "祖國", "民族", "我國", "炎黃子孫", "統一", "收復", "大一統",
+    # 「大戰」framing guard — Young: rename combat/war framing to 冒險／挑戰
+    # in all user-visible copy. Not a nation-identity term, but cheap to
+    # also hard-block here as defense-in-depth for the same instruction.
+    "大戰",
+)
+
 _NO_MARKUP_RE = re.compile(r"[<>]|javascript:|on\w+\s*=", re.IGNORECASE)
+
+
+class BannedTermError(ValueError):
+    pass
+
+
+def _forbid_banned_terms(value: str, *, field_name: str) -> None:
+    for term in BANNED_POLITICAL_TERMS:
+        if term in value:
+            raise BannedTermError(
+                f"{field_name} 不可包含「{term}」——請改用中立的書中世界／冒險框架描述（見 content_guidelines）"
+            )
 
 
 def _forbid_markup(value: str, *, field_name: str) -> str:
     if _NO_MARKUP_RE.search(value):
         raise ValueError(f"{field_name} 不可包含 HTML/script 標記")
+    _forbid_banned_terms(value, field_name=field_name)
     return value
 
 
@@ -104,7 +121,7 @@ def sanitize_svg(raw: str) -> str:
 
     This is a REJECTING validator, not a rewriting sanitizer: it never
     silently strips a disallowed tag/attribute and lets the rest through
-    (that would let a theme author believe their art rendered as submitted
+    (that would let a pack author believe their art rendered as submitted
     when a dangerous fragment was quietly dropped). Fail closed: reject the
     whole payload, tell the author exactly what's disallowed.
     """
@@ -124,11 +141,10 @@ def sanitize_svg(raw: str) -> str:
     return raw
 
 
-class LeagueThemeArt(BaseModel):
+class StoryPackArt(BaseModel):
     """Decorative art for a chest/badge — "bundled assets only", never an
     externally-hosted image URL. Two kinds:
-      - emoji: a short glyph already shipped in the app's font (same trust
-        level as the hardcoded 🏅⭐🏆 already in the current components).
+      - emoji: a short glyph already shipped in the app's font.
       - svg: inline SVG, allow-list sanitized by `sanitize_svg`.
     """
 
@@ -138,21 +154,35 @@ class LeagueThemeArt(BaseModel):
     value: str = Field(..., min_length=1, max_length=4000)
 
     @model_validator(mode="after")
-    def _validate_value_for_kind(self) -> "LeagueThemeArt":
+    def _validate_value_for_kind(self) -> "StoryPackArt":
+        # Both branches must also clear the banned-term check — `art.value`
+        # is free text (an emoji glyph, or an SVG that can legally contain
+        # <text>/<tspan> nodes per the allow-list below) reachable from
+        # background_art/chest.art/badge.art, all writable through the same
+        # admin endpoint as every other field. Code review 2026-10-16 found
+        # this field was the one gap where the neutrality validator wasn't
+        # actually wired up despite the module docstring's "every free-text
+        # field" claim — see test_story_pack_schema.py::
+        # TestPoliticalNeutralityValidator::test_banned_term_in_art_* for the
+        # mutation-tested regression lock.
         if self.kind == "emoji":
             if len(self.value) > 8:
                 raise ValueError("emoji art 過長（上限 8 字元）")
             if _NO_MARKUP_RE.search(self.value):
                 raise ValueError("emoji art 不可包含 HTML/script 標記")
+            _forbid_banned_terms(self.value, field_name="emoji art")
         else:
             sanitize_svg(self.value)
+            _forbid_banned_terms(self.value, field_name="SVG art")
         return self
 
 
-class LeagueThemeMilestone(BaseModel):
-    """A caption shown when progress toward the (already-frozen, unchanged)
-    `badge_threshold` crosses `ratio`. Presentation-only — picking which
-    caption to show never changes how many points anything is worth."""
+class StoryPackMilestone(BaseModel):
+    """A caption shown when progress toward a fixed, mode-owned threshold
+    crosses `ratio`. Presentation-only — picking which caption to show
+    never changes how many points anything is worth. For content-heavy
+    packs (e.g. 上古神話), each milestone doubles as one narrative "chapter"
+    beat — see module docstring for why this isn't a separate model."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -165,12 +195,12 @@ class LeagueThemeMilestone(BaseModel):
         return _forbid_markup(v, field_name="milestone message")
 
 
-class LeagueThemeChest(BaseModel):
+class StoryPackChest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     name: str = Field(..., min_length=1, max_length=20)
     description: str = Field(..., min_length=1, max_length=80)
-    art: LeagueThemeArt
+    art: StoryPackArt
 
     @field_validator("name", "description")
     @classmethod
@@ -178,13 +208,13 @@ class LeagueThemeChest(BaseModel):
         return _forbid_markup(v, field_name="chest text")
 
 
-class LeagueThemeBadge(BaseModel):
+class StoryPackBadge(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     key: Literal["individual_badge", "class_badge"]
     name: str = Field(..., min_length=1, max_length=20)
     description: str = Field(..., min_length=1, max_length=80)
-    art: LeagueThemeArt
+    art: StoryPackArt
 
     @field_validator("name", "description")
     @classmethod
@@ -192,11 +222,10 @@ class LeagueThemeBadge(BaseModel):
         return _forbid_markup(v, field_name="badge text")
 
 
-class LeagueThemeResultCopy(BaseModel):
+class StoryPackResultCopy(BaseModel):
     """Win/lose/draw flavor text shown once a season is finalized. Pure
-    copy — which side is "win" vs "lose" is decided by comparing the
-    already-computed average_points of the two board rows (frontend-only
-    comparison, see leagueTheme.ts::pickResultCopy); this schema never
+    copy — which side is "win" vs "lose" is decided by the consuming game
+    mode comparing its own already-computed scores; this schema never
     changes who wins."""
 
     model_config = ConfigDict(extra="forbid")
@@ -211,28 +240,22 @@ class LeagueThemeResultCopy(BaseModel):
         return _forbid_markup(v, field_name="result copy")
 
 
-class LeagueTheme(BaseModel):
-    """The full editable storyline/chest/badge content for one theme.
+class StoryPack(BaseModel):
+    """The full editable world/story content for one pack.
 
     `extra="forbid"` at every level in this module means an AI-generated or
     hand-pasted JSON payload with an unexpected key (e.g. a stray
     `badge_threshold` someone tried to sneak in to change scoring) is
-    REJECTED outright, not silently dropped — see `validate_theme_payload`
-    in league_theme_service.py for how routes surface that as a 422 with
-    the offending field path.
+    REJECTED outright, not silently dropped.
     """
 
     model_config = ConfigDict(extra="forbid")
 
     schema_version: Literal[1] = Field(
         default=1,
-        description=(
-            "Content schema version. A future 2D story-mode (NPC guide "
-            "characters / dialogue scenes / milestone cutscenes) will bump "
-            "this and add its own validated `scenes` schema — see module "
-            "docstring. Never changed by theme authors; bump only when the "
-            "Python schema itself gains a new validated shape."
-        ),
+        description="Content schema version. MVP scope (2026-10-16): no "
+        "versioned shape change yet — see module docstring for what was "
+        "deliberately deferred.",
     )
     key: str = Field(..., min_length=2, max_length=48)
     era: str = Field(..., min_length=1, max_length=20)
@@ -240,14 +263,14 @@ class LeagueTheme(BaseModel):
     intro: list[str] = Field(..., min_length=1, max_length=4)
     faction_labels: list[str] = Field(..., min_length=2, max_length=2)
     energy_bar_label: str = Field(..., min_length=1, max_length=10)
-    milestones: list[LeagueThemeMilestone] = Field(default_factory=list, max_length=6)
-    background_art: LeagueThemeArt | None = Field(
+    milestones: list[StoryPackMilestone] = Field(default_factory=list, max_length=6)
+    background_art: StoryPackArt | None = Field(
         default=None,
-        description="Optional subtle era backdrop shown behind the existing BattleHero gradient card (never a full theme swap of the card chrome).",
+        description="Optional subtle backdrop art shown behind the hero card.",
     )
-    chest: LeagueThemeChest
-    badges: list[LeagueThemeBadge] = Field(..., min_length=2, max_length=2)
-    result_copy: LeagueThemeResultCopy
+    chest: StoryPackChest
+    badges: list[StoryPackBadge] = Field(..., min_length=2, max_length=2)
+    result_copy: StoryPackResultCopy
 
     @field_validator("key")
     @classmethod
@@ -286,7 +309,7 @@ class LeagueTheme(BaseModel):
 
     @field_validator("milestones")
     @classmethod
-    def _milestones_sorted_unique(cls, v: list[LeagueThemeMilestone]) -> list[LeagueThemeMilestone]:
+    def _milestones_sorted_unique(cls, v: list[StoryPackMilestone]) -> list[StoryPackMilestone]:
         ratios = [m.ratio for m in v]
         if len(set(ratios)) != len(ratios):
             raise ValueError("milestones 的 ratio 不可重複")
@@ -296,7 +319,7 @@ class LeagueTheme(BaseModel):
 
     @field_validator("badges")
     @classmethod
-    def _badges_cover_fixed_keys_exactly(cls, v: list[LeagueThemeBadge]) -> list[LeagueThemeBadge]:
+    def _badges_cover_fixed_keys_exactly(cls, v: list[StoryPackBadge]) -> list[StoryPackBadge]:
         keys = {b.key for b in v}
         if keys != BADGE_KEYS:
             raise ValueError(
@@ -305,8 +328,8 @@ class LeagueTheme(BaseModel):
         return v
 
 
-class LeagueThemeSummary(BaseModel):
-    """List-view row — enough to pick a theme without fetching full content."""
+class StoryPackSummary(BaseModel):
+    """List-view row — enough to pick a pack without fetching full content."""
 
     model_config = ConfigDict(extra="forbid")
 

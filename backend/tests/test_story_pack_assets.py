@@ -12,8 +12,8 @@ from pathlib import Path
 
 import pytest
 
-from app.schemas.league_theme import sanitize_svg
-from app.services.league_theme_defaults import SONG_THEME, TANG_THEME
+from app.schemas.story_pack import sanitize_svg
+from app.services.story_pack_defaults import SONG_PACK, TANG_PACK
 
 _ASSETS_DIR = Path(__file__).resolve().parent.parent / "app" / "assets" / "league_themes"
 _SVG_FILES = sorted(_ASSETS_DIR.glob("*.svg"))
@@ -36,21 +36,21 @@ def test_each_bundled_svg_passes_the_real_sanitizer(path: Path):
 
 
 def test_tang_theme_uses_bundled_background_and_chest_art():
-    assert TANG_THEME.background_art is not None
-    assert TANG_THEME.background_art.kind == "svg"
-    assert TANG_THEME.chest.art.kind == "svg"
-    assert "<svg" in TANG_THEME.background_art.value
-    assert "<svg" in TANG_THEME.chest.art.value
+    assert TANG_PACK.background_art is not None
+    assert TANG_PACK.background_art.kind == "svg"
+    assert TANG_PACK.chest.art.kind == "svg"
+    assert "<svg" in TANG_PACK.background_art.value
+    assert "<svg" in TANG_PACK.chest.art.value
 
 
 def test_song_theme_uses_bundled_background_and_chest_art():
-    assert SONG_THEME.background_art is not None
-    assert SONG_THEME.background_art.kind == "svg"
-    assert SONG_THEME.chest.art.kind == "svg"
+    assert SONG_PACK.background_art is not None
+    assert SONG_PACK.background_art.kind == "svg"
+    assert SONG_PACK.chest.art.kind == "svg"
 
 
 def test_tang_and_song_background_art_differ():
-    assert TANG_THEME.background_art.value != SONG_THEME.background_art.value
+    assert TANG_PACK.background_art.value != SONG_PACK.background_art.value
 
 
 def test_prompts_json_documents_every_asset():

@@ -137,6 +137,17 @@ class LeagueSeason(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
+    # Per-season story pack override (PRD §13.4, #3594; generalized from
+    # `theme_key` 2026-10-16). NULL means "no override — fall back to the
+    # platform active default, then the builtin default" (see
+    # story_pack_store.resolve_pack_for_season). References story_packs.key
+    # (not .id) because that's the stable, human-readable identifier used
+    # everywhere else a pack is addressed (API paths, BUILTIN_PACKS dict
+    # keys) — both builtin and custom pack rows exist in story_packs so
+    # this FK is satisfiable either way.
+    story_pack_key: Mapped[str | None] = mapped_column(
+        String(48), ForeignKey("story_packs.key"), nullable=True, index=True
+    )
 
     invitation: Mapped["LeagueInvitation | None"] = relationship(
         "LeagueInvitation", back_populates="season"

@@ -25,8 +25,8 @@ from app.database import get_db
 from app.models import Base
 from app.models.organization import Organization
 from app.models.school import Classroom, ClassroomStudent, ClassroomTeacher, School
-from app.services.league_theme_defaults import SONG_THEME_KEY, TANG_THEME_KEY
-from app.services.league_theme_store import InMemoryThemeStore
+from app.services.story_pack_defaults import MYTH_PACK_KEY, SONG_PACK_KEY
+from app.services.story_pack_store import InMemoryStoryPackStore
 
 engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
 
@@ -75,13 +75,13 @@ def db():
 
 @pytest.fixture(autouse=True)
 def _isolated_theme_store(monkeypatch):
-    fresh = InMemoryThemeStore()
+    fresh = InMemoryStoryPackStore()
     import app.routes.league as league_routes
 
-    monkeypatch.setattr(league_routes, "get_theme_store", lambda: fresh)
-    import app.routes.admin_league_themes as admin_routes
+    monkeypatch.setattr(league_routes, "get_story_pack_store", lambda *_args, **_kwargs: fresh)
+    import app.routes.admin_story_packs as admin_routes
 
-    monkeypatch.setattr(admin_routes, "get_theme_store", lambda: fresh)
+    monkeypatch.setattr(admin_routes, "get_story_pack_store", lambda *_args, **_kwargs: fresh)
     return fresh
 
 
@@ -184,7 +184,7 @@ class TestThemeEmbeddedInBoardResponse:
         assert r.status_code == 200, r.text
         body = r.json()
         assert "theme" in body
-        assert body["theme"]["key"] == TANG_THEME_KEY
+        assert body["theme"]["key"] == MYTH_PACK_KEY  # default pack is 上古神話 (Young 2026-10-16)
         # The existing contract (board rows) must be unchanged by this addition.
         assert "board" in body and len(body["board"]) == 2
 
@@ -193,18 +193,18 @@ class TestThemeEmbeddedInBoardResponse:
 
         # Assign via the admin API would require system_admin; here we poke
         # the (test-isolated) store directly, same as the admin route would.
-        from app.services.league_theme_store import get_theme_store
+        from app.services.story_pack_store import get_story_pack_store
 
-        # The autouse fixture monkeypatched routes.league/admin_league_themes'
-        # get_theme_store — fetch the SAME instance those modules now return.
+        # The autouse fixture monkeypatched routes.league/admin_story_packs'
+        # get_story_pack_store — fetch the SAME instance those modules now return.
         import app.routes.league as league_routes
 
-        store = league_routes.get_theme_store()
-        store.set_season_theme_key(season_id, SONG_THEME_KEY)
+        store = league_routes.get_story_pack_store(db)
+        store.set_season_story_pack_key(season_id, SONG_PACK_KEY)
 
         r = client.get(f"/api/league/seasons/{season_id}/board", headers=_h(inviter_token))
         assert r.status_code == 200
-        assert r.json()["theme"]["key"] == SONG_THEME_KEY
+        assert r.json()["theme"]["key"] == SONG_PACK_KEY
 
 
 class TestThemeEmbeddedInMySummaryAndHistory:
@@ -213,7 +213,7 @@ class TestThemeEmbeddedInMySummaryAndHistory:
         r = client.get(f"/api/league/seasons/{season_id}/my-summary", headers=_h(student_token))
         assert r.status_code == 200, r.text
         body = r.json()
-        assert body["theme"]["key"] == TANG_THEME_KEY
+        assert body["theme"]["key"] == MYTH_PACK_KEY  # default pack is 上古神話 (Young 2026-10-16)
         # Existing fields still present (no regression on the summary contract).
         assert "my_points" in body and "badge_threshold" in body
 
@@ -224,3 +224,86 @@ class TestThemeEmbeddedInMySummaryAndHistory:
         history = r.json()
         assert len(history) >= 1
         assert all("theme" in entry for entry in history)
+
+
+class TestSwapPacksKeepsMechanicsUnchanged:
+    """Young's MVP acceptance bar (2026-10-16): 「確保幾組可以自由替換」— with
+    all five builtin packs, switching a season's pack must immediately
+    change all story text/art while leaving scores/chests/badges mechanics
+    completely unchanged, and switching back must work too. This test
+    cycles through all five builtin packs on the SAME season and the SAME
+    board snapshot (no learning activity happens between switches, so any
+    difference in the mechanics fields can only come from the pack swap
+    itself, not from real score changes)."""
+
+    ALL_PACK_KEYS = [
+        "myth", "tang-dynasty", "song-dynasty", "wuxia", "detective",
+    ]
+
+    # Fields that must be byte-identical across every pack swap — these are
+    # league_scoring.py's output, never touched by story_pack content.
+    MECHANICS_FIELDS = [
+        "team_id", "classroom_id", "classroom_name", "grade", "roster_size",
+        "participant_count", "average_points", "team_badge_earned",
+        "treasure_chest_eligible", "badge_threshold",
+        "treasure_chest_participants_needed", "rank",
+    ]
+
+    def test_swap_all_five_packs_mechanics_unchanged_content_changes(self, client, db):
+        from app.services.story_pack_store import get_story_pack_store
+        import app.routes.league as league_routes
+
+        season_id, inviter_token, _invitee, _student = _build_accepted_season(client, db)
+        store = league_routes.get_story_pack_store(db)
+
+        baseline_board = None
+        seen_titles = set()
+
+        for key in self.ALL_PACK_KEYS:
+            store.set_season_story_pack_key(season_id, key)
+
+            r = client.get(f"/api/league/seasons/{season_id}/board", headers=_h(inviter_token))
+            assert r.status_code == 200, r.text
+            body = r.json()
+
+            # Content changed: this pack's own title is now embedded.
+            assert body["theme"]["key"] == key
+            seen_titles.add(body["theme"]["title"])
+
+            board = body["board"]
+            if baseline_board is None:
+                baseline_board = board
+                continue
+
+            # Mechanics unchanged: every scoring field is byte-identical to
+            # the very first pack's board, regardless of which pack is active.
+            assert len(board) == len(baseline_board)
+            for before_row, after_row in zip(baseline_board, board):
+                for field in self.MECHANICS_FIELDS:
+                    assert after_row[field] == before_row[field], (
+                        f"pack swap to {key!r} changed mechanics field "
+                        f"{field!r}: {before_row[field]!r} -> {after_row[field]!r}"
+                    )
+
+        # All five packs really did produce five distinct titles — proves
+        # the swap actually changed content, not just a no-op loop.
+        assert len(seen_titles) == len(self.ALL_PACK_KEYS)
+
+    def test_switch_back_to_original_pack_restores_same_content(self, client, db):
+        from app.services.story_pack_store import get_story_pack_store
+        import app.routes.league as league_routes
+
+        season_id, inviter_token, _invitee, _student = _build_accepted_season(client, db)
+        store = league_routes.get_story_pack_store(db)
+
+        store.set_season_story_pack_key(season_id, "tang-dynasty")
+        r1 = client.get(f"/api/league/seasons/{season_id}/board", headers=_h(inviter_token))
+        original_theme = r1.json()["theme"]
+
+        store.set_season_story_pack_key(season_id, "wuxia")
+        r2 = client.get(f"/api/league/seasons/{season_id}/board", headers=_h(inviter_token))
+        assert r2.json()["theme"]["key"] == "wuxia"
+
+        store.set_season_story_pack_key(season_id, "tang-dynasty")
+        r3 = client.get(f"/api/league/seasons/{season_id}/board", headers=_h(inviter_token))
+        assert r3.json()["theme"] == original_theme

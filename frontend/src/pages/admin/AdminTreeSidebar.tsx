@@ -29,6 +29,7 @@ export type TreeNodeSelection =
   | { type: 'lesson_audio'; id: 'lesson_audio' }
   | { type: 'story_structure_lab'; id: 'story_structure_lab' }
   | { type: 'keypoints_qa'; id: 'keypoints_qa' }
+  | { type: 'story_pack_studio'; id: 'story_pack_studio' }
   | { type: 'create_org'; id: 'create_org' };
 
 type TreeNodeType = TreeNodeSelection['type'];

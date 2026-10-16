@@ -336,3 +336,56 @@ Young 核准：使用者看得到的名稱**「班級賽」／「班級賽季」
 **判定（Young 2026-10-16 定案）**：**維持現狀，不改程式碼**。這是刻意設計（比照均一星空探險隊「只算第一次」），不是 bug。小明是測試用的 QA 帳號，已經把 175 堂課幾乎全部洗過一輪，才會踩到這個邊界；**真實學生**面對的是完整 175 堂課的課程庫，長期使用下仍會有大量尚未完成過的課可以在新賽季賺分，不會出現「完全沒有分可拿」的情況。
 
 **影響範圍**：僅影響「已經把課程庫刷得很熟的重度帳號（主要是內部 QA／demo 帳號）在全新賽季的第一時間」；不影響一般學生的正常使用體驗。往後如果真實學生長期使用後也開始出現類似狀況（例如升到高年級、課程庫被刷完），可以再重新評估是否要加「賽季內重做也能計分一次」之類的機制，但**本票不處理**。
+
+## 14. Story Pack 模組（2026-10-16，由 LeagueTheme 通用化）
+
+Young 核准將「主題內容」從 league 專用的 `league_themes` 改名為通用的 `story_packs`
+（issue #3594 留言：「同意建主題表」，同日追加「泛用化」指示）——**資料庫 schema 與
+LeagueTheme 核准的完全相同，只是改成跟遊戲模式無關的名稱**，方便之後其他遊戲模式
+（PK、迷城密室……）共用同一張表。這次是 **MVP 範圍**（Young 2026-10-16 明令：「先
+MVP，不要把重心放在劇情包擴展」），下列是故意沒做、留到之後真的有第二個消費者時
+再做的部分。
+
+**現在有的**：
+- `story_packs` 表（id / key unique / content JSONB / is_builtin / created_by /
+  created_at / updated_at）+ `league_seasons.story_pack_key`（nullable FK）。
+- `app/schemas/story_pack.py`：`StoryPack` schema，欄位跟原本 `LeagueTheme`
+  完全一樣（era/title/intro/faction_labels/energy_bar_label/milestones/
+  chest/badges/result_copy）——**內容豐富的劇情包（如上古神話的多個篇章）直接用
+  既有的 `milestones` 陣列表達，每個篇章一條，標題/引用都寫進 `message` 裡**，
+  沒有另外建一個 chapter/scene 巢狀 model。
+- **政治中立驗證器**（`BANNED_POLITICAL_TERMS`）：`_forbid_markup` 內建擋
+  中華／中國／祖國／民族／我國／炎黃子孫／統一／收復／大一統／大戰，任何一個
+  出現在任何文字欄位（title/intro/milestone/chest/badge/result_copy……）都會被
+  Pydantic validator 擋下 422，不是只靠人工審查內容。所有劇情包的故事框架一律
+  是「掉進一本書／故事」，衝突一律是抽象的（迷霧、時間亂流），不是某個國家或
+  民族。
+- 五個內建劇情包：**上古神話**（預設，引用《三五歷紀》《淮南子》《尚書》
+  《史記》四段真實古籍出處）、唐、宋、武俠（原創世界，無既有小說/遊戲角色門派
+  名稱，无暴力詞彙）、偵探劇（少年偵探社，無真實地點人物，無犯罪暴力詞彙）。
+- 管理頁「劇情包管理」（`/admin` 側欄）：列表／編輯 JSON（即時驗證錯誤）／
+  指派給某賽季——跟原本 League Theme Studio 功能相同，只是改名。
+- `SqlAlchemyStoryPackStore` 是正式環境的 store；「平台預設」指標仍是
+  process-local（不是 DB 欄位——Young 核准的 schema 本來就沒有這個欄位），
+  已在 code docstring + 管理頁 UI 上明確寫「正式站多台伺服器可能不會立即同步」
+  的警語。
+
+**這次刻意沒做（之後才評估的）**：
+- **多遊戲模式的 adapter 介面**：目前 season-assignment（`get_season_story_pack_key`
+  等）還是直接寫在 `story_pack_store.py` 裡查 `LeagueSeason`，沒有抽成跟遊戲
+  模式無關的介面。等 PK／迷城密室真的要綁 story pack 時，再各自定義自己的
+  FK 欄位（例如 `pk_matches.story_pack_key`）跟一支小小的查詢函式，不要在只有
+  一個消費者時先蓋抽象層。
+- **NPC／對話／章節物件（含引用出處的結構化欄位）／realm·time_axis·space_scale
+  等瀏覽用 metadata／suited_subjects·age_range**：這些都曾經在規劃中出現過，
+  但 Young 2026-10-16 明確說「先 MVP」收斂掉了，連同「台灣原住民族神話篇章」
+  （射日傳說，泰雅族版本已查證來源但需要文化內容審查，留到之後）一起延後。
+  如果之後真的要做，schema_version 已經是 `Literal[1]`，可以在那時候 bump 成 2
+  並加上有版本控管的新欄位，不會動到現有五個劇情包的資料。
+
+**怎麼換劇情包**：系統管理員在「劇情包管理」選一個賽季 ID、按「指派給此賽季」。
+切換**只改故事文字/美術**（title/intro/chest/badge 的文字與 emoji），完全不碰
+`league_scoring.py` 的計分（`LeagueWeights`／`badge_threshold`／寶箱參與比例），
+regression lock 見 `tests/test_story_pack_embedded_in_responses.py::
+TestSwapPacksKeepsMechanicsUnchanged`（連續切換五個劇情包，逐欄位比對計分欄位
+byte-identical，只有 `theme.key`/`theme.title` 隨劇情包改變）。
