@@ -312,3 +312,18 @@ league_team_roster_members  team_id / student_id / locked_at
 - **build vs buy**：UI 元件全部複用既有 `GamificationHero`／`BadgeGrid` 的視覺語言與既有 Tailwind 設計 token，沒有新裝套件、沒有新建設計系統
 - **複雜度預算**：沒有新表、沒有新服務、沒有新依賴；只改 3 個既有檔案 + 2 個既有函式新增欄位
 - **驗證才宣稱完成**：§12.3 的 TDD 已先紅後綠（見 commit）；UI 改動後跑 `npm run lint` + `npm run test`（render-smoke）+ headless 截圖三斷點，PR 合併後在 staging 用真資料（建一組跨班邀請賽＋學生真實完成一課）驗證，結果見 PR 說明與最終報告
+
+### 12.7 命名定案（2026-10-16，Young 核准）
+
+Young 核准：使用者看得到的名稱**「班級賽」／「班級賽季」一律改為「跨班賽季」**（教師側側欄、`ClassroomTabs` tab、`TeacherLeaguePage` 標題、學生端「我們班」頁與讀家記憶空狀態文案、家長儀表板）。**程式碼識別碼（`league`、`TeacherLeaguePage`、路由 `/teacher/league`）維持不變**，只改使用者看到的字。
+
+同時核准在側欄項目與頁面標題下方各加一行副標，幫使用者分清楚「課堂搶答」（單堂課、約 10 分鐘的即時活動）跟「跨班賽季」（跨週累積的長期賽季）這兩個外觀相似（都是遊戲化🎮🏆圖示）但性質完全不同的功能：
+
+| 功能 | 副標文案 |
+|---|---|
+| 課堂搶答 | 現在全班一起玩，約 10 分鐘 |
+| 跨班賽季 | 和別班比幾週，平常讀課文就累積 |
+
+落地：`NavItem` 新增 `description?: string`（`NavButton.tsx`），側欄展開時（≥768px 平板/桌面）在 label 下方顯示；390px 手機版用的是 `MobileTabBar`（底部固定列，icon+極短 label），螢幕驗證過放不下副標，故 390px 維持不顯示——這是刻意的版面判斷，不是遺漏。
+
+同一批順手把學生端「我們班」頁（`StudentOurClassPage.tsx`）補上跟老師端同樣的「兩隊能量條對戰首頁」（之前完全沒有，只有自己兩個數字卡片），補齊原始需求 §「student views: battle home with both classes' energy bars face to face」在學生端的缺口。
