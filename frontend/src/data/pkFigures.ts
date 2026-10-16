@@ -272,6 +272,21 @@ export function getPkFigure(tier: number): PkFigure {
   return f;
 }
 
+// PK gamification MVP (launch-plan, 2026-10-17): Li Bai (tier 7) already has
+// a richer, game-quality PNG illustration set committed under
+// frontend/public/story-assets/pk-li-bai/ (see _prompts.json there — it was
+// produced in an earlier session via codex image_gen, generalized from the
+// 跨班賽季 story-pack work). The other six figures still only have the
+// original placeholder-quality SVG set below. This map is the SINGLE place
+// that decides "which art source wins" for a figure — every call site (VS
+// screen, battle screen, result screen, opponent-select, figure intro) goes
+// through pkFigureAssetPath/pkFigurePortraitUrl/pkFigureIconUrl, so adding a
+// figure's richer set here switches its art everywhere at once instead of
+// each screen having to special-case it.
+const PK_PNG_ART_OVERRIDE: Partial<Record<number, string>> = {
+  7: '/story-assets/pk-li-bai',
+};
+
 // #3602 B5: was `/pk/figures/...`, served from frontend/public/pk/ — that
 // directory collides with the SPA's own `/pk` route (nginx's
 // `try_files $uri $uri/ /index.html` sees a real `pk` directory in the
@@ -280,9 +295,17 @@ export function getPkFigure(tier: number): PkFigure {
 // matching client route.
 export function pkFigureAssetPath(tier: number, file: string): string {
   const f = getPkFigure(tier);
+  const pngDir = PK_PNG_ART_OVERRIDE[tier];
+  if (pngDir) {
+    return `${pngDir}/${file.replace(/\.svg$/, '.png')}`;
+  }
   return `/pk-art/figures/${f.tier}-${f.slug}/${file}`;
 }
 
 export function pkFigurePortraitUrl(tier: number, expression: PkExpressionKey): string {
   return pkFigureAssetPath(tier, `portrait-${expression}.svg`);
+}
+
+export function pkFigureIconUrl(tier: number): string {
+  return pkFigureAssetPath(tier, 'icon.svg');
 }

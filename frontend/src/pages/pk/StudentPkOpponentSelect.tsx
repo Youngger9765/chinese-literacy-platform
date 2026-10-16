@@ -8,6 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { pkFigureIconUrl } from '../../data/pkFigures';
 import { challengePkAi, getPkOpponents, PkApiError, type PkOpponent, type PkScopeType } from '../../services/pkApi';
 
 const StudentPkOpponentSelect: React.FC = () => {
@@ -76,7 +77,13 @@ const StudentPkOpponentSelect: React.FC = () => {
                   推薦挑戰
                 </span>
               )}
-              <img src={opp.icon_url} alt={opp.name} className="h-12 w-12" />
+              {/* PK gamification MVP (launch-plan, 2026-10-17): resolve the
+                  icon via the shared frontend art-source helper instead of
+                  trusting the backend's icon_url verbatim — that field is
+                  always the SVG path (backend/app/services/pk/engine.py),
+                  so a figure with a richer PNG override (data/pkFigures.ts)
+                  would otherwise never show it here. */}
+              <img src={pkFigureIconUrl(opp.tier)} alt={opp.name} className="h-14 w-14 sm:h-16 sm:w-16" />
               <span className="text-sm font-semibold text-on-surface">{opp.name}</span>
               <span className="text-xs text-on-surface-variant">{opp.speed_label}</span>
               {opp.unlocked && (
