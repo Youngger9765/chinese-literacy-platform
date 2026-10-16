@@ -29,6 +29,12 @@ export interface LeagueBoardRow {
   average_points: number;
   team_badge_earned: boolean;
   treasure_chest_eligible: boolean;
+  /** Frozen per-season threshold (PRD §5 weights are versioned/frozen —
+   * never hardcode 120 on the frontend). Added 2026-10-16 UI redesign. */
+  badge_threshold: number;
+  /** 0 once `treasure_chest_eligible` is true. Added 2026-10-16 so the
+   * "還差 N 人解鎖寶箱" hint doesn't need the ratio recomputed client-side. */
+  treasure_chest_participants_needed: number;
   rank: number;
 }
 
@@ -48,6 +54,11 @@ export interface LeagueMySummary {
   class_badge_earned: boolean;
   participant_count: number;
   roster_size: number;
+  /** Added 2026-10-16 UI redesign — see LeagueBoardRow for why this must
+   * come from the response, not a hardcoded constant. */
+  badge_threshold: number;
+  treasure_chest_eligible: boolean;
+  treasure_chest_participants_needed: number;
 }
 
 export interface LeagueClassroomSeason {

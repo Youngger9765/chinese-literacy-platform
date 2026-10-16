@@ -23,6 +23,9 @@ import {
   LeagueApiError,
   type LeagueMySummary,
 } from '../../services/leagueApi';
+import EnergyBar from '../../components/league/EnergyBar';
+import LeagueBadgeCard from '../../components/league/LeagueBadgeCard';
+import { chestHintText, displayPoints } from '../../components/league/leagueVisuals';
 
 type TabKey = 'assignment' | 'self';
 
@@ -352,23 +355,52 @@ const LeagueHistorySection: React.FC = () => {
   }
   if (seasons.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-400 text-sm">
-        還沒有參加過班級賽季，等老師開啟跨班邀請賽後就會出現在這裡。
+      <div className="text-center py-8 text-on-surface-variant text-sm">
+        還沒有參加過跨班賽季，等老師開啟跨班邀請賽後就會出現在這裡。
       </div>
     );
   }
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {seasons.map((s) => (
-        <div key={s.season_id} className="bg-white rounded-2xl shadow-card p-4">
-          <h3 className="text-base font-medium text-gray-900">{s.season_name}</h3>
-          <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
-            <span>我的貢獻：{s.my_points} 分</span>
-            <span>班級平均：{s.class_average_points.toFixed(1)} 分</span>
+        <div key={s.season_id} className="bg-surface-container-lowest rounded-2xl shadow-card p-4">
+          <h3 className="text-base font-bold text-on-surface mb-3">{s.season_name}</h3>
+
+          <div className="rounded-xl bg-gradient-to-br from-accent to-accent/80 p-3">
+            <EnergyBar
+              label="我的貢獻"
+              points={s.my_points}
+              threshold={s.badge_threshold}
+              badgeEarned={s.individual_badge_earned}
+              tone="accent"
+            />
+          </div>
+
+          <div className="mt-3 flex items-center gap-4 text-xs text-on-surface-variant">
+            <span>班級平均 {displayPoints(s.class_average_points)} 分</span>
             <span>
               全班 {s.participant_count}/{s.roster_size} 人已參與
             </span>
           </div>
+
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <LeagueBadgeCard
+              kind="individual"
+              earned={s.individual_badge_earned}
+              title="個人徽章"
+              description={`累積 ${displayPoints(s.badge_threshold)} 分達標`}
+            />
+            <LeagueBadgeCard
+              kind="class"
+              earned={s.class_badge_earned}
+              title="班級徽章"
+              description="班級平均達標"
+            />
+          </div>
+
+          <p className="mt-2 text-[11px] text-on-surface-variant">
+            {chestHintText(s.treasure_chest_eligible, s.treasure_chest_participants_needed)}
+          </p>
         </div>
       ))}
     </div>

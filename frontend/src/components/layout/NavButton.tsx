@@ -12,6 +12,16 @@ export interface NavItem {
   label: string;
   path: string;
   badge?: number;
+  /**
+   * Optional one-line hint shown under the label on the expanded sidebar
+   * (tablet+ widths). 2026-10-16 (#3554 follow-up, Young-approved copy):
+   * tells apart 課堂搶答 ("現在全班一起玩，約 10 分鐘") from 跨班賽季
+   * ("和別班比幾週，平常讀課文就累積") — two features that otherwise look
+   * alike from the icon+label alone. Not rendered when collapsed (no
+   * room) — the mobile bottom tab bar never renders it either (icon+label
+   * only, see Sidebar.tsx's MobileTabBar).
+   */
+  description?: string;
 }
 
 export interface NavButtonProps {
@@ -41,7 +51,14 @@ export const NavButton: React.FC<NavButtonProps> = ({ item, collapsed, active, o
     >
       <span className="text-lg shrink-0" aria-hidden="true">{item.icon}</span>
       {!collapsed && (
-        <span className="text-sm truncate">{item.label}</span>
+        <span className="flex flex-col items-start min-w-0 text-left">
+          <span className="text-sm truncate">{item.label}</span>
+          {item.description && (
+            <span className="text-[11px] font-normal text-gray-400 truncate w-full">
+              {item.description}
+            </span>
+          )}
+        </span>
       )}
       {item.badge != null && item.badge > 0 && (
         <span

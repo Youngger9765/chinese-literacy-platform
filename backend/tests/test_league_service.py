@@ -343,6 +343,56 @@ class TestSeasonBoard:
         for row in board:
             assert banned.isdisjoint(row.keys())
 
+    def test_board_exposes_badge_threshold_and_chest_gap(self, db_session):
+        """2026-10-16 UI redesign (#3554 follow-up): the "還差 N 人解鎖寶箱" /
+        badge-progress-ring UI needs the threshold numbers themselves, not
+        just the two booleans — otherwise the frontend would have to
+        hardcode LEAGUE_WEIGHTS_V1's values, which breaks the moment a
+        season is created with a different weights_version (PRD §5: weights
+        are frozen per-season, so the UI must read them from the response,
+        not from a constant)."""
+        season, classroom_a, classroom_b = self._season_with_scores(db_session)
+        board = svc.get_season_board(db_session, season)
+        row_a = next(r for r in board if r["classroom_id"] == classroom_a.id)
+        row_b = next(r for r in board if r["classroom_id"] == classroom_b.id)
+
+        # Both rows carry the season's frozen badge threshold (120.0 for v1).
+        assert row_a["badge_threshold"] == pytest.approx(120.0)
+        assert row_b["badge_threshold"] == pytest.approx(120.0)
+
+        # Classroom A: 1/2 participated (ratio 0.5 == the v1 threshold
+        # exactly) -> already eligible -> 0 more needed.
+        assert row_a["treasure_chest_eligible"] is True
+        assert row_a["treasure_chest_participants_needed"] == 0
+        # Classroom B: 2/2 participated -> also eligible -> 0 more needed.
+        assert row_b["treasure_chest_eligible"] is True
+        assert row_b["treasure_chest_participants_needed"] == 0
+
+    def test_treasure_chest_participants_needed_counts_up_from_zero_participants(self, db_session):
+        """A fresh team with nobody scoring yet needs ceil(0.5 * roster) more
+        participants, not a boolean the UI has to invert itself."""
+        teacher_a, teacher_b, classroom_a, classroom_b = _two_classrooms_same_org(db_session)
+        # 3-student roster, zero participants so far.
+        for _ in range(3):
+            enroll_student(db_session, classroom_a, make_student(db_session))
+        enroll_student(db_session, classroom_b, make_student(db_session))
+
+        invitation = svc.create_invitation(
+            db_session, creator=teacher_a, inviter_classroom=classroom_a, inviter_team_grade=5,
+            game_start=NOW, game_end=NOW + timedelta(days=2),
+        )
+        db_session.commit()
+        updated = svc.accept_invitation(
+            db_session, code=invitation.code, acceptor=teacher_b, invitee_classroom=classroom_b,
+            invitee_team_grade=5, now=NOW - timedelta(hours=1),
+        )
+        board = svc.get_season_board(db_session, updated.season)
+        row_a = next(r for r in board if r["classroom_id"] == classroom_a.id)
+        assert row_a["participant_count"] == 0
+        assert row_a["treasure_chest_eligible"] is False
+        # ceil(0.5 * 3) = 2 participants needed to cross the 50% ratio.
+        assert row_a["treasure_chest_participants_needed"] == 2
+
 
 class TestSeasonFinalization:
     def test_does_not_finalize_before_game_end(self, db_session):
@@ -383,6 +433,20 @@ class TestMyTeamSummaryAndHistory:
         assert "classmates" not in dumped_keys
         assert "roster" not in dumped_keys
         assert {"my_points", "class_average_points", "participant_count", "roster_size"} <= dumped_keys
+
+    def test_summary_exposes_badge_threshold_and_chest_gap(self, db_session):
+        """Same 2026-10-16 contract as the board row (see
+        TestSeasonBoard.test_board_exposes_badge_threshold_and_chest_gap) —
+        讀家記憶 needs the raw threshold to draw a progress ring toward "my
+        points -> badge", not just the earned boolean."""
+        season, classroom_a, _ = TestSeasonBoard()._season_with_scores(db_session)
+        team_a = next(t for t in season.teams if t.classroom_id == classroom_a.id)
+        viewer = team_a.roster[0].student
+        summary = svc.get_my_team_summary(db_session, viewer, season)
+        assert summary["badge_threshold"] == pytest.approx(120.0)
+        # 1 of 2 roster members participated == exactly the 0.5 ratio -> eligible.
+        assert summary["treasure_chest_eligible"] is True
+        assert summary["treasure_chest_participants_needed"] == 0
 
     def test_non_member_gets_404(self, db_session):
         season, _, _ = TestSeasonBoard()._season_with_scores(db_session)
