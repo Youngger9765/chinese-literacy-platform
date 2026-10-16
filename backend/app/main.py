@@ -44,6 +44,7 @@ from .routes.admin_seed import router as admin_seed_router
 from .routes.omo import router as omo_router
 from .routes.curriculum_qa import router as curriculum_qa_router
 from .routes.admin_story_structure_lab import router as admin_story_structure_lab_router
+from .routes.admin_league_themes import router as admin_league_themes_router
 from .routes.assets import router as assets_router
 from .routes.worksheets import router as worksheets_router
 from .routes.live_quiz import router as live_quiz_router
@@ -708,6 +709,7 @@ app.include_router(admin_seed_router, prefix="/api", tags=["admin-seed"])
 app.include_router(omo_router, prefix="/api", tags=["omo"])
 app.include_router(curriculum_qa_router, prefix="/api", tags=["curriculum-qa"])
 app.include_router(admin_story_structure_lab_router, prefix="/api", tags=["admin-story-structure-lab"])
+app.include_router(admin_league_themes_router, prefix="/api", tags=["admin-league-themes"])
 # No /api prefix — matches the Firebase Hosting `/assets/**` rewrite target (#2486).
 app.include_router(assets_router)
 app.include_router(live_quiz_router, prefix="/api", tags=["live-quiz"])
