@@ -11,7 +11,7 @@
  * Route: /teacher/league
  * PRD: docs/prd/2026-10-14-chinese-star-league-prd.md §10 (UIUX states:
  * 無賽季 / 未報名 / 中途加入 / 多隊切換 / 已結束 / 0 分 / 離線 / 邀請失效) +
- * §12 (2026-10-16 visual redesign + feature-parity vs Junyi 星空探險隊).
+ * §12 (2026-10-16 visual redesign + feature-parity with the reference league).
  *
  * All data-fetching logic is unchanged from the MVP — this redesign only
  * reorganizes the JSX: the most recent season now renders as a prominent

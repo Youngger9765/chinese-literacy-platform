@@ -31,7 +31,7 @@
 |---|---|---|
 | 參賽單位 | 團隊賽，**以「班級」為單位報名**，每隊至少 3 人；不限同校同班，可自組「線上班級」跨校組隊；**一位學生最多報名 3 個團隊** | [2025 常見問答](https://www.junyiacademy.org/event/2025-star-exploration-faq/) |
 | 年級範圍 | 涵蓋 **1–9 年級** | [2025 活動介紹](https://www.junyiacademy.org/event/2025-star-exploration-intro/) |
-| 賽季結構 | 兩階段時間窗：**報名期**（如 10/12–11/9）→ **算分期**（如 11/9–11/27，約 3 週，刻意排在段考後、學習扶助成長測驗前，讓學生能專心參賽、複習觀念）| [2025 活動說明](https://www.junyiacademy.org/event/2025-star-exploration-rule/)｜[2025 活動介紹](https://www.junyiacademy.org/event/2025-star-exploration-intro/)｜本機 clone `junyiacademy/backend/junyi/marketing_event/campaign_model.py`（`register_start/end`、`game_start/end` 兩段式欄位）|
+| 賽季結構 | 兩階段時間窗：**報名期**（如 10/12–11/9）→ **算分期**（如 11/9–11/27，約 3 週，刻意排在段考後、學習扶助成長測驗前，讓學生能專心參賽、複習觀念）| 參考產品公開活動說明 |
 | 積分來源 | 技能升等（二級 1 分／三級 2 分／精熟 4 分）＋ 影片**首次完整觀看**（1 分）＋ 老師指派技能且達精熟（**+2 分**）；**學習扶助任務包要整包做完才算分，做一半＝0 分** | [2025 常見問答](https://www.junyiacademy.org/event/2025-star-exploration-faq/)｜[vocus.cc 分析文](https://vocus.cc/article/637c920afd897800012bafdf) |
 | 防灌水規則 | 只採計「報名年級－2」以上程度的技能；**只算賽程期間新增的分數**（降級不扣分、已得分保留，但重新升級不會再給分）| [2025 常見問答](https://www.junyiacademy.org/event/2025-star-exploration-faq/)｜[十年回顧](https://official.junyiacademy.org/star-exploration-10-years/) |
 | 班級排名 | **班級「平均」積分**（不是總分）——這樣大班小班才公平；**依年級分組**，分全國榜與縣市榜 | [vocus.cc 分析文](https://vocus.cc/article/637c920afd897800012bafdf)：「競賽以班級平均點數與全國小隊比較，而非總分」 |
@@ -40,7 +40,6 @@
 | 寶箱機制 | 班級**過半（≥50%）學生參與**後，解鎖隨機加分寶箱——這是**鼓勵參與度**的機制，不是防作弊 | [vocus.cc 分析文](https://vocus.cc/article/637c920afd897800012bafdf) |
 | 「夜幕低垂」 | 每日 22:00–隔日 6:00 排行榜畫面凍結不更新（不是防作弊，是**防熬夜**的心理設計）| [2025 常見問答](https://www.junyiacademy.org/event/2025-star-exploration-faq/) |
 | 核心理念 | 「**只要投入就一定會被看見的舞台**」——獎勵效力（投入度），不是獎勵天賦（能力）| [十年回顧](https://official.junyiacademy.org/star-exploration-10-years/) |
-| 技術骨架 | `MesCampaign`（賽季期間設定）／`MesPlayer`（個人參賽實體，`score` 累積、`exercise_highest_levels` 防重複計分）／`MesGroupPlayer`（團隊分數彙總）| 本機 clone `junyiacademy/backend/junyi/marketing_event/{campaign_model,player_model}.py` |
 | 規模 | 十年累積近 20 萬人次參與；第三季單季 500+ 校、17,339 人（較前季 +5,000 人）；活動期間學習時間由平均 205 分鐘增至 417 分鐘、活躍天數 6→10 天 | [十年回顧](https://official.junyiacademy.org/star-exploration-10-years/)｜[第三季回顧](https://official.junyiacademy.org/blog/starexplore-season3-review/) |
 
 ### 2.2 未查證（誠實標註，不假裝查到）
@@ -214,7 +213,7 @@ league_team_roster_members  team_id / student_id / locked_at
 - [星空探險隊第三季回顧（official.junyiacademy.org blog）](https://official.junyiacademy.org/blog/starexplore-season3-review/)
 - [星空探險隊十年回顧（official.junyiacademy.org）](https://official.junyiacademy.org/star-exploration-10-years/)
 - [vocus.cc：星空探險隊賽制與教育理念分析](https://vocus.cc/article/637c920afd897800012bafdf)
-- 本機唯讀 clone `~/project/junyiacademy`（`backend/junyi/marketing_event/{campaign_model,player_model}.py`）——僅讀取其公開原始碼架構作為賽制技術參考
+- 參考產品的公開網頁與公開文章（以上連結）；內部程式碼細節不寫進本 repo
 - 本 repo 原始碼（§3/§5/§8 的技術對照與風險，皆為本次規劃實際讀取/測試驗證，非轉述）：`backend/app/models/{gamification,session,text}.py`、`backend/app/services/gamification_service.py`、`backend/app/routes/{stories,gamification}.py`、`backend/app/services/lesson_indexes.py`
 
 ## 10. CTO 與 UIUX 審查（2026-10-15）與據此修正
@@ -260,20 +259,20 @@ league_team_roster_members  team_id / student_id / locked_at
 
 ### 12.1 功能逐項對照（均一星空探險隊 vs 我們）
 
-調研方法：讀本機唯讀 clone `~/project/junyiacademy` 的 `frontend/legacy/leader-board-package/{src/Overview.jsx, src/Progress.jsx, leader-score.handlebars.js, class-statistics.handlebars.js, star-gift.js, star-gift.handlebars.js}` 與 `backend/junyi/achievement/avatars/avatar_model.py`（僅讀公開原始碼架構，不涉均一內部資料，同 §2 既有調研紀律）。
+調研方法：依公開網頁、公開文章與實際活動畫面整理功能清單；內部程式碼細節不寫進本 repo（完整調研紀錄留在私有 repo）。
 
 | # | 星空探險隊功能 | 本次狀態 | 說明 |
 |---|---|---|---|
-| 1 | 故事敘事 + 主視覺（狐狸貓星球 / 暗黑力量，`Overview.jsx`）| **Done（自有 IP）** | 讀家自己的故事與美術，不沿用均一的角色/文案/圖檔（CLAUDE.md IP 邊界）。主題定為「讀家星圖」：書蟲角色＋星圖隱喻，由本次 CSS/inline SVG 自繪，無外部圖檔依賴 |
-| 2 | 集體清除進度條，兩隊能量並排（`Progress.jsx` 的雙 Legend + 中央 Progress 環）| **Done（改造，非照搬數字）** | 均一的「3,000 單位暗黑力量／每 40 點換 1 單位燃料」是**全國多校累積池**的敘事數字，我們的賽季規模是兩班邀請賽，沒有對應的全國池可換算，照搬數字會是假數據。改為：兩班的「平均分 → 班級徽章門檻（120分，`weights.badge_threshold`）」各自一條能量條，左右並排面對面，兩條都滿即雙方都解鎖班級徽章——保留「兩隊並肩朝同一目標推進」的視覺精神，但目標是兩隊都已知、已驗證存在的真實門檻，不是編造的全域數字 |
+| 1 | 故事敘事 + 主視覺（狐狸貓星球 / 暗黑力量）| **Done（自有 IP）** | 讀家自己的故事與美術，不沿用均一的角色/文案/圖檔（CLAUDE.md IP 邊界）。主題定為「讀家星圖」：書蟲角色＋星圖隱喻，由本次 CSS/inline SVG 自繪，無外部圖檔依賴 |
+| 2 | 集體清除進度條，兩隊能量並排| **Done（改造，非照搬數字）** | 均一的「3,000 單位暗黑力量／每 40 點換 1 單位燃料」是**全國多校累積池**的敘事數字，我們的賽季規模是兩班邀請賽，沒有對應的全國池可換算，照搬數字會是假數據。改為：兩班的「平均分 → 班級徽章門檻（120分，`weights.badge_threshold`）」各自一條能量條，左右並排面對面，兩條都滿即雙方都解鎖班級徽章——保留「兩隊並肩朝同一目標推進」的視覺精神，但目標是兩隊都已知、已驗證存在的真實門檻，不是編造的全域數字 |
 | 3 | 兩種隊伍（星塵小隊／光束小隊，依報名分組）| **Partial（概念對應，分隊邏輯不同）** | 我們的「兩隊」＝邀請方班級 vs 應邀方班級（跨班邀請賽結構），不是同校內依人數分兩組；均一的分隊概念不直接適用於我們的賽制（PRD §4 已定案），這裡只借視覺語言（兩隊對照），不借分隊規則 |
-| 4 | 個人進度（`Progress.jsx` 下方「個人進度」文字區塊：總分／平均／換算燃料）| **Done** | 讀家記憶既有 `my_points`／`class_average_points`；本次新增 `badge_threshold` 讓前端畫真正的「我的分數 → 個人徽章門檻」進度環，不再只有文字 |
-| 5 | 全國／縣市排名（`leader-score.handlebars.js`：全國排名／縣市排名／頭像／名稱／縣市／學校／班級／星空點數 八欄表格）| **Not possible this round（已知缺口，非本票新發現）** | 需要兩個前提都不存在：① `official` 型賽季（全平台開放報名，PRD §4 schema 已留但 MVP 不開放，Phase 3）② `School` 的結構化縣市欄位（PRD §9.5 待 Young 決定是否新增，屬 migration 核准流程）。本次**不**新增這兩者（超出 league-only 的 additive 範圍），維持 PRD 既有 Phase 3 規劃 |
-| 6 | 班排名＋累計貢獻點數（`class-statistics.handlebars.js`：班排名／姓名／累計貢獻點數，老師視角真名）| **Done（重新設計）** | 對應 `LeagueProgressTab`（teacher-only，班級內真名——PRD §6 既有規則：自己班內維持現狀真名顯示）。本次改造列表視覺＋依分數排序＋尚未參與維持灰色中性（PRD §10 UIUX 既有規則不變）|
-| 7 | 限定頭貼（`avatar_model.py` 的 `avatar_type="foxcat"` 活動類頭貼，達成條件解鎖專屬大頭貼）| **Partial（降scope，誠實標註）** | 完整「可切換大頭貼」系統＝新的頭像資產＋選擇器 UI＋使用者資料綁定，超出本次 UI 改版的合理範圍（也不是 Young 這次要的核心——他要的是「畫面有質感」，不是新頭像系統）。本次做**成就徽章視覺卡**（個人徽章／班級徽章，達門檻即解鎖的插畫式徽章，仿既有 `BadgeGrid.tsx` 視覺語言），不做可切換大頭貼。完整頭像系統列為後續，需要 Young 決定是否值得做 |
-| 8 | 寶箱機制（`star-gift.js`：班級過半參與解鎖隨機寶箱）| **Done（補完提示文案）** | `treasure_chest_eligible` 布林值 MVP 已有；本次新增 `treasure_chest_participants_needed`（§12.3 後端變更），讓 UI 能顯示「還差 N 人」而非只有「鎖住／解鎖」兩態。真正的「隨機加分」機制仍是 PRD Phase 2（MVP 範圍, PRD §4 已明載），本次不做隨機加分，只做參與度提示 |
-| 9 | 夜幕低垂（`star-gift.js` `countDown`：22:01–隔日起算凍結畫面更新）| **Not done（既有明確延後決定）** | PRD §9.7／§10 分期表已將此列為 Phase 4，2026-10-15 review 時已決定不排進 MVP；本次沒有新資訊推翻這個決定，維持延後 |
-| 10 | 介紹影片（`Overview.jsx` 內嵌 YouTube）| **Not done this round** | 沒有既有讀家主題動畫素材；真要做需要走 `animation-director`／影像學院產線（另案），不在這次「重新設計 UI＋補功能」的程式碼改動範圍內。本次版面保留一個可放影片的區塊位置（之後補影片不必再動版面），但暫不放假的佔位影片 |
+| 4 | 個人進度| **Done** | 讀家記憶既有 `my_points`／`class_average_points`；本次新增 `badge_threshold` 讓前端畫真正的「我的分數 → 個人徽章門檻」進度環，不再只有文字 |
+| 5 | 全國／縣市排名| **Not possible this round（已知缺口，非本票新發現）** | 需要兩個前提都不存在：① `official` 型賽季（全平台開放報名，PRD §4 schema 已留但 MVP 不開放，Phase 3）② `School` 的結構化縣市欄位（PRD §9.5 待 Young 決定是否新增，屬 migration 核准流程）。本次**不**新增這兩者（超出 league-only 的 additive 範圍），維持 PRD 既有 Phase 3 規劃 |
+| 6 | 班排名＋累計貢獻點數| **Done（重新設計）** | 對應 `LeagueProgressTab`（teacher-only，班級內真名——PRD §6 既有規則：自己班內維持現狀真名顯示）。本次改造列表視覺＋依分數排序＋尚未參與維持灰色中性（PRD §10 UIUX 既有規則不變）|
+| 7 | 限定頭貼（活動限定頭貼，達成條件解鎖專屬大頭貼）| **Partial（降scope，誠實標註）** | 完整「可切換大頭貼」系統＝新的頭像資產＋選擇器 UI＋使用者資料綁定，超出本次 UI 改版的合理範圍（也不是 Young 這次要的核心——他要的是「畫面有質感」，不是新頭像系統）。本次做**成就徽章視覺卡**（個人徽章／班級徽章，達門檻即解鎖的插畫式徽章，仿既有 `BadgeGrid.tsx` 視覺語言），不做可切換大頭貼。完整頭像系統列為後續，需要 Young 決定是否值得做 |
+| 8 | 寶箱機制（班級過半參與解鎖隨機寶箱）| **Done（補完提示文案）** | `treasure_chest_eligible` 布林值 MVP 已有；本次新增 `treasure_chest_participants_needed`（§12.3 後端變更），讓 UI 能顯示「還差 N 人」而非只有「鎖住／解鎖」兩態。真正的「隨機加分」機制仍是 PRD Phase 2（MVP 範圍, PRD §4 已明載），本次不做隨機加分，只做參與度提示 |
+| 9 | 夜幕低垂（22:01–隔日起算凍結畫面更新）| **Not done（既有明確延後決定）** | PRD §9.7／§10 分期表已將此列為 Phase 4，2026-10-15 review 時已決定不排進 MVP；本次沒有新資訊推翻這個決定，維持延後 |
+| 10 | 介紹影片| **Not done this round** | 沒有既有讀家主題動畫素材；真要做需要走 `animation-director`／影像學院產線（另案），不在這次「重新設計 UI＋補功能」的程式碼改動範圍內。本次版面保留一個可放影片的區塊位置（之後補影片不必再動版面），但暫不放假的佔位影片 |
 | 11 | 邀請流程（班級報名／邀請碼）| **Done（保留邏輯，重新設計視覺）** | 功能、授權矩陣、安全檢查全部不動（PRD §7 已定案的邀請碼機制），只重做視覺：三步驟改成卡片式精靈流程，而非純表單堆疊 |
 | 12 | 個人排行榜（跨班排名＋暱稱系統）| **Not possible — 既有明確產品決策，非本票可重啟** | PRD §11.6「個人排行榜延後（待方大哥確認排名政策）」是 Young 2026-10-15 已定案的決策，不是遺漏。本次不重啟這個範圍 |
 
