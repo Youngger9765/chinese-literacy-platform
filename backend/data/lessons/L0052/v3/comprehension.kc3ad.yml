@@ -38,6 +38,16 @@ comprehension:
       圖的內容只在像素裡：A 是骨骼標本、B 是有背鰭的鯊魚、C 是完整的藍鯨、
 
       D 是嘴部被深色繩索纏繞的藍鯨（答案）。'
+    # #3621：四張手繪圖其實都在 assets/ 裡，只是先前的抽取只留了圖說文字、
+    # 沒把圖片本身接上選項 —— 於是正解 D 的文字是空的，整題被 `_mcq_from`
+    # 判「正解答不出來」而扣留（content_known_gaps.yaml 的 image_options_only_captions）。
+    # 逐張開圖核對：fig10=骨骼標本、fig11=有背鰭的鯊魚、fig12=完整的藍鯨、
+    # fig13=嘴部被深色繩索纏繞的藍鯨 —— 跟上面 option_note 的文字描述一一對上。
+    option_images:
+      A: fig10.jpeg
+      B: fig11.jpeg
+      C: fig12.jpeg
+      D: fig13.jpeg
   - index: 4
     answer: B
     stem: 下列哪一組正確區分「證據」和「判斷」？

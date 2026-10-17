@@ -10,7 +10,7 @@ from __future__ import annotations
 import random
 
 from ..sources import SOURCE_ADAPTERS
-from ..sources.base import QuizItem, warn_skipped_once
+from ..sources.base import QuizItem, _option_to_dict, warn_skipped_once
 
 NAME = "choice"
 
@@ -82,12 +82,20 @@ def _shuffle_display_positions(item: QuizItem, rng: random.Random) -> tuple[list
     This is the only place option order is decided for what actually ships
     in the frozen snapshot — an adapter's own option order
     (``QuizItem.options``) never reaches a payload unshuffled.
+
+    #3621: this used to rebuild each option as a bare ``{"key", "text"}``
+    dict by hand, which silently dropped ``QuizOption.image`` — a handful
+    of comprehension options are a picture, not text (「下列哪一張圖…」),
+    and this rebuild is the one place between the source adapter and the
+    frozen payload that could lose that field without anything failing
+    loudly. It now goes through the same ``_option_to_dict`` helper
+    ``to_payload`` uses, so the two can't drift apart again.
     """
-    pairs = [(o.text, o.key == item.correct_key) for o in item.options]
+    pairs = [(o, o.key == item.correct_key) for o in item.options]
     rng.shuffle(pairs)
     keys = _KEYS[: len(pairs)]
-    options = [{"key": k, "text": text} for k, (text, _is_correct) in zip(keys, pairs)]
-    correct_key = next(k for k, (_text, is_correct) in zip(keys, pairs) if is_correct)
+    options = [{**_option_to_dict(opt), "key": k} for k, (opt, _is_correct) in zip(keys, pairs)]
+    correct_key = next(k for k, (_opt, is_correct) in zip(keys, pairs) if is_correct)
     return options, correct_key
 
 
