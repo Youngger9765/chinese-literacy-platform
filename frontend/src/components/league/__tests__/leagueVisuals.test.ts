@@ -46,18 +46,25 @@ describe('energyPercent', () => {
 });
 
 describe('chestHintText', () => {
-  it('shows the unlocked message when eligible', () => {
-    expect(chestHintText(true, 0)).toBe('全班已解鎖神秘寶箱！');
+  // #3615: the chest wording follows the active story pack — it used to be
+  // hardcoded「神秘寶箱」for every pack.
+  it('shows the unlocked message with the pack chest name when eligible', () => {
+    expect(chestHintText('絲路寶箱', true, 0)).toBe('全班已解鎖絲路寶箱！');
   });
 
   it('shows the unlocked message when needed <= 0 even if eligible is somehow false', () => {
     // Defensive: the two fields should never disagree, but the copy must
     // not say "還差 0 人" (reads as a bug, not good news) if they do.
-    expect(chestHintText(false, 0)).toBe('全班已解鎖神秘寶箱！');
+    expect(chestHintText('瓦子寶箱', false, 0)).toBe('全班已解鎖瓦子寶箱！');
   });
 
-  it('shows the gap count when not yet eligible', () => {
-    expect(chestHintText(false, 2)).toBe('還差 2 人就能解鎖神秘寶箱');
+  it('shows the gap count with the pack chest name when not yet eligible', () => {
+    expect(chestHintText('秘笈寶箱', false, 2)).toBe('還差 2 人就能解鎖秘笈寶箱');
+  });
+
+  it('never falls back to the old hardcoded「神秘寶箱」when given a name', () => {
+    expect(chestHintText('線索百寶箱', false, 3)).not.toContain('神秘寶箱');
+    expect(chestHintText('線索百寶箱', true, 0)).not.toContain('神秘寶箱');
   });
 });
 

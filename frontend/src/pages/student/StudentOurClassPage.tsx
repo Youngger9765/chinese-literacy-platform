@@ -153,7 +153,7 @@ const StudentOurClassPage: React.FC = () => {
         <p className="text-sm text-on-surface-variant">
           全班 {season.participant_count}/{season.roster_size} 人已參與
           {' · '}
-          {chestHintText(season.treasure_chest_eligible, season.treasure_chest_participants_needed)}
+          {chestHintText(activeTheme.chest.name, season.treasure_chest_eligible, season.treasure_chest_participants_needed)}
         </p>
 
         <div className="grid grid-cols-2 gap-2">

@@ -82,13 +82,14 @@ const EraBackdrop: React.FC<{ art: LeagueTheme['background_art'] }> = ({ art }) 
 
 interface TeamBlockProps {
   row: LeagueBoardRow;
+  chestName: string;
   threshold: number;
   tone: 'accent' | 'tertiary';
   isViewer: boolean;
   factionLabel: string;
 }
 
-const TeamBlock: React.FC<TeamBlockProps> = ({ row, threshold, tone, isViewer, factionLabel }) => (
+const TeamBlock: React.FC<TeamBlockProps> = ({ row, chestName, threshold, tone, isViewer, factionLabel }) => (
   <div className="flex-1 min-w-0">
     <div className="flex items-center gap-1.5 mb-1">
       {isViewer && (
@@ -106,7 +107,7 @@ const TeamBlock: React.FC<TeamBlockProps> = ({ row, threshold, tone, isViewer, f
       tone={tone}
     />
     <p className="mt-1.5 text-[11px] text-white/80">
-      {chestHintText(row.treasure_chest_eligible, row.treasure_chest_participants_needed)}
+      {chestHintText(chestName, row.treasure_chest_eligible, row.treasure_chest_participants_needed)}
       {' · '}全班 {row.participant_count}/{row.roster_size} 人已參與
     </p>
   </div>
@@ -148,6 +149,7 @@ const BattleHero: React.FC<BattleHeroProps> = ({ theme, seasonName, rows, viewer
         <div className="flex flex-col sm:flex-row items-stretch gap-3 sm:gap-4">
           <TeamBlock
             row={left}
+            chestName={theme.chest.name}
             threshold={threshold}
             tone="accent"
             isViewer={left.classroom_id === viewerClassroomId}
@@ -163,6 +165,7 @@ const BattleHero: React.FC<BattleHeroProps> = ({ theme, seasonName, rows, viewer
 
           <TeamBlock
             row={right}
+            chestName={theme.chest.name}
             threshold={threshold}
             tone="tertiary"
             isViewer={right.classroom_id === viewerClassroomId}
