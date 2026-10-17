@@ -8,6 +8,7 @@ letter — "轉接層只收「正解是單一 A–D」的題目".
 """
 from __future__ import annotations
 
+from . import base
 from .base import QuizItem, QuizOption
 
 _VALID_KEYS = ("A", "B", "C", "D")
@@ -42,23 +43,33 @@ def generate_items(lesson_uid: str, lesson: dict, rng=None) -> list[QuizItem]:
             continue
         if answer not in options:
             continue
+        # #3610: the correct option's text is blank → the question cannot be
+        # answered in a text-only game. All known cases are "下列哪一張圖"
+        # image questions (L0052 Q3: D is a drawing with no label in the
+        # source worksheet — deliberately empty, not a transcription miss).
+        # Same rule the lesson API already applies (lesson_indexes.py,
+        # "正解那一格是空的 → 這一題答不出來"): withhold it, keep the rest.
+        if not str(options.get(answer) or "").strip():
+            continue
         quiz_options = [
             QuizOption(key=k, text=str(options[k]))
             for k in _VALID_KEYS
-            if k in options and options[k]
+            if k in options and str(options[k] or "").strip()
         ]
         if len(quiz_options) < 2:
             continue
-        items.append(
-            QuizItem(
-                source_module="comprehension",
-                lesson_uid=lesson_uid,
-                lesson_title=lesson_title,
-                version_id=version_id,
-                source_index=str(q.get("index", "")),
-                stem=stem,
-                options=quiz_options,
-                correct_key=answer,
-            )
+        # #3610: build_item drops (and logs once) a row that fails
+        # QuizItem validation instead of failing the whole pool.
+        item = base.build_item(
+            source_module="comprehension",
+            lesson_uid=lesson_uid,
+            lesson_title=lesson_title,
+            version_id=version_id,
+            source_index=str(q.get("index", "")),
+            stem=stem,
+            options=quiz_options,
+            correct_key=answer,
         )
+        if item is not None:
+            items.append(item)
     return items
