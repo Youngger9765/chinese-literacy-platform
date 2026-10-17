@@ -28,4 +28,5 @@ def test_story_adapter_falls_back_when_pack_lookup_raises(monkeypatch):
 
 def test_story_pack_existing_banned_term_validator_still_rejects_copy():
     with pytest.raises(BannedTermError):
-        _forbid_banned_terms("中國", field_name="測試")
+        # _forbid_banned_terms no longer accepts field_name after #3619.
+        _forbid_banned_terms("中國")
