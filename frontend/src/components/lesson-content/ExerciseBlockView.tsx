@@ -28,6 +28,7 @@ import MultiChoiceInput from './inputs/MultiChoiceInput';
 import OrderingInput from './inputs/OrderingInput';
 import TraitInput from './inputs/TraitInput';
 import GuidedStepsInput, { type GuidedQuestion } from './inputs/GuidedStepsInput';
+import TableExerciseInput, { type TableQuestion } from './inputs/TableExerciseInput';
 import KeypointsTableInput, { type KeypointsQuestion } from './inputs/KeypointsTableInput';
 import FillInBlankInput, { type FillShape } from './inputs/FillInBlankInput';
 import CustomExerciseView from './inputs/CustomExerciseView';
@@ -158,6 +159,21 @@ const ExerciseBlockViewBody: React.FC<
           if (done && verdict !== true) {
             onCorrect();
           }
+        }}
+      />
+    );
+  }
+
+  // ── table_exercise：表格就地作答，逐格判分（同 guided_steps：元件自己判、回報完成）──
+  if (q.kind === 'table_exercise') {
+    return (
+      <TableExerciseInput
+        question={q as TableQuestion}
+        value={(value as Record<string, unknown>) ?? {}}
+        onChange={(v) => onValueChange(v)}
+        onAllDone={(done) => {
+          onGraded({ verdict: done ? true : null, needsReview: false });
+          if (done && verdict !== true) onCorrect();
         }}
       />
     );

@@ -97,7 +97,9 @@ const SpotlightPage: React.FC = () => {
       lesson.blocks.some(
         (b) =>
           b.type === 'exercise' &&
-          (b.question.kind === 'guided_steps' || b.question.kind === 'graphic_text_integration'),
+          (b.question.kind === 'guided_steps' ||
+            b.question.kind === 'graphic_text_integration' ||
+            b.question.kind === 'table_exercise'),
       );
     if (lesson && lessonHasSpotlight) {
       return (

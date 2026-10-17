@@ -37,6 +37,11 @@ FAIL-CLOSED: any exception (ValidationError, bad spotlight shape) is logged at W
 swallowed → None. The API emits ``lesson_content: null`` and the frontend falls back to
 its ``storyToLesson`` stopgap. A supply gap never white-screens a page.
 
+NO PARTIAL LESSONS: the adapter records where every source block went (``Coverage``).
+If any block could not be carried, the lesson is withheld (null) rather than served with
+questions missing — the legacy renderer still draws the whole worksheet, so switching a
+lesson over early is a downgrade, not progress.
+
 Note this is what surfaces the 32 lessons whose extraction produced zero spotlight blocks:
 ``Lesson`` requires ``blocks`` to be non-empty, so they validate-fail and serve null rather
 than an empty shell. That is the intended behaviour — see
@@ -113,9 +118,25 @@ def _build_by_story_id(story_id: int) -> Optional[dict]:
         # with_keypoints=False rather than an empty dict: asking for a block from a
         # source that no longer exists would log a `no_keypoints_source` gap against
         # all 175 lessons, which reads as a content defect and is not one.
+        # identity 一定要傳：二修的 spotlight payload 不帶身分（`lesson_uid` 在檔案根層，
+        # lesson_uid_loader 拆外層時沒帶進來），不傳的話 adapter 對每一課都 raise。
+        coverage = adapter.Coverage()
         lesson_dict = adapter.assemble_lesson(
-            spot, {}, adapter.GapLog(), with_keypoints=False
+            spot, {}, adapter.GapLog(), with_keypoints=False,
+            identity=story.get("lesson_uid"),
+            lesson_code=story.get("lesson_code") or story.get("grade_code"),
+            coverage=coverage,
         )
+        # 防降級閘門：原稿有任何 block 轉不過去，就不供應 —— 學生繼續走 legacy
+        # BlockSequenceRenderer（它今天畫得出全部內容），而不是被切到一個少了題目的新版面。
+        if coverage.dropped:
+            logger.info(
+                "lesson_content withheld for story id=%s: %d source block(s) not carried (%s)",
+                story_id,
+                len(coverage.dropped),
+                sorted({d["reason"] for d in coverage.dropped}),
+            )
+            return None
         # Title authority: the display lesson's own title is what the student sees.
         # Prefer it over whatever the spotlight carried; fall back to the assembled one.
         display_title = story.get("title")
