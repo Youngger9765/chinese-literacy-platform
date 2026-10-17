@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import random
 
+from . import base
 from .base import QuizItem, QuizOption
 
 _KEYS = ("A", "B", "C", "D")
@@ -46,16 +47,18 @@ def generate_items(lesson_uid: str, lesson: dict, rng: random.Random | None = No
         rng.shuffle(words)
         quiz_options = [QuizOption(key=_KEYS[i], text=w) for i, w in enumerate(words)]
         correct_key = _KEYS[words.index(word)]
-        items.append(
-            QuizItem(
-                source_module="vocab_definitions",
-                lesson_uid=lesson_uid,
-                lesson_title=lesson_title,
-                version_id=version_id,
-                source_index=str(entry.get("index", "")),
-                stem=str(definition),
-                options=quiz_options,
-                correct_key=correct_key,
-            )
+        # #3610: build_item drops (and logs once) a row that fails
+        # QuizItem validation instead of failing the whole pool.
+        item = base.build_item(
+            source_module="vocab_definitions",
+            lesson_uid=lesson_uid,
+            lesson_title=lesson_title,
+            version_id=version_id,
+            source_index=str(entry.get("index", "")),
+            stem=str(definition),
+            options=quiz_options,
+            correct_key=correct_key,
         )
+        if item is not None:
+            items.append(item)
     return items

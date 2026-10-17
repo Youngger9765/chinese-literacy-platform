@@ -21,6 +21,7 @@ from __future__ import annotations
 import random
 
 from ...zhuyin_challenge import generate_zhuyin_questions
+from . import base
 from .base import QuizItem, QuizOption
 
 _KEYS = ("A", "B", "C", "D")
@@ -47,17 +48,19 @@ def generate_items(lesson_uid: str, lesson: dict, rng: random.Random | None = No
         keys = _KEYS[: len(q.options)]
         quiz_options = [QuizOption(key=k, text=reading) for k, reading in zip(keys, q.options)]
         correct_key = keys[q.answer_index]
-        items.append(
-            QuizItem(
-                source_module="zhuyin",
-                lesson_uid=lesson_uid,
-                lesson_title=lesson_title,
-                version_id=version_id,
-                source_index=q.id,
-                stem=q.sentence,
-                options=quiz_options,
-                correct_key=correct_key,
-                extra={"target_index": q.target_index},
-            )
+        # #3610: build_item drops (and logs once) a row that fails
+        # QuizItem validation instead of failing the whole pool.
+        item = base.build_item(
+            source_module="zhuyin",
+            lesson_uid=lesson_uid,
+            lesson_title=lesson_title,
+            version_id=version_id,
+            source_index=q.id,
+            stem=q.sentence,
+            options=quiz_options,
+            correct_key=correct_key,
+            extra={"target_index": q.target_index},
         )
+        if item is not None:
+            items.append(item)
     return items
