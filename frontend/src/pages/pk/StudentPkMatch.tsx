@@ -21,7 +21,9 @@ import PkOptionButtons from '../../components/pk/PkOptionButtons';
 import PkScoreBar from '../../components/pk/PkScoreBar';
 import PkComboBadge, { computeCombo, type PkAnswerLite } from '../../components/pk/PkComboBadge';
 import PkResultScreen from '../../components/pk/PkResultScreen';
-import { getPkFigure, pkFigureAssetPath, pkFigurePortraitUrl, type PkExpressionKey } from '../../data/pkFigures';
+import PkFigurePortrait from '../../components/pk/PkFigurePortrait';
+import { resolveAiExpression } from '../../components/pk/pkExpression';
+import { getPkFigure, pkFigureAssetPath } from '../../data/pkFigures';
 import { getPkMatchResult, submitPkAnswer, PkApiError, type PkMatchResult } from '../../services/pkApi';
 
 // Scene-slot note (2026-10-16, Young): a separate design doc for a 2D
@@ -189,19 +191,54 @@ const StudentPkMatch: React.FC = () => {
 
   const round = state.round;
   const isLastRound = state.round_index === state.rounds_total - 1;
+  // PK gamification MVP (launch-plan, 2026-10-17): the figure used to be
+  // derived ONLY from location.state.tier (set by whoever navigated here),
+  // so a hard page reload mid-match (no location.state — see this file's
+  // header comment on the `phase` initial value) silently lost track of
+  // which AI the student was fighting, and both the small score-bar avatar
+  // and the new large portrait panel below would disappear. The /state poll
+  // itself already carries `bot_tier` (null for a human match), so prefer
+  // that — it's authoritative and survives a reload; locState.tier only
+  // matters before the first poll response exists (the 'vs'/'intro' phases
+  // above, which run before polling starts).
+  const battleAiTier = state.bot_tier ?? aiFigure?.tier ?? null;
+  const battleAiFigure = battleAiTier != null ? getPkFigure(battleAiTier) : null;
   // #3602 B6: drive the opponent's portrait off the backend-computed
   // ai_expression (PRD §10.5.3) instead of always showing portrait-idle —
-  // null for a human match (no figure to react).
-  const opponentAvatarUrl =
-    aiFigure && state.ai_expression
-      ? pkFigurePortraitUrl(aiFigure.tier, state.ai_expression as PkExpressionKey)
-      : undefined;
+  // resolveAiExpression defaults to 'idle' for a human match (ai_expression
+  // is null, §8.2 — no figure to react) or an unrecognized wire value.
+  const battleAiExpression = resolveAiExpression(state.ai_expression);
+  const opponentAvatarUrl = battleAiFigure ? pkFigureAssetPath(battleAiFigure.tier, `portrait-${battleAiExpression}.svg`) : undefined;
 
   return (
     <div className="flex min-h-screen flex-col bg-surface px-5 py-6">
       {pollError && (
         <div className="mb-3 rounded-lg bg-surface-container-low px-3 py-2 text-center text-xs text-on-surface-variant">
           連線中斷，正在重新連線…
+        </div>
+      )}
+
+      {/* PK gamification MVP: the AI used to only ever show up as the 8x8px
+          avatar next to its score bar below — at battle scale that's nearly
+          invisible, which is a big part of why this screen read as "a form"
+          rather than a fight against a character. This panel is the large,
+          expression-switching portrait PRD §3.3/§10.5.3 asks for; the small
+          score-bar avatar stays too (useful as a compact "whose turn" cue
+          right next to the number), the two aren't redundant at this size
+          difference. */}
+      {battleAiFigure && (
+        <div className="mb-3 flex justify-center">
+          <div className="relative flex h-28 w-24 items-end justify-center overflow-hidden rounded-2xl bg-gradient-to-b from-accent-bg/70 to-transparent sm:h-36 sm:w-32 md:h-44 md:w-40">
+            <PkFigurePortrait
+              tier={battleAiFigure.tier}
+              expression={battleAiExpression}
+              name={battleAiFigure.name}
+              className="h-full w-full object-contain"
+            />
+            <span className="absolute -top-2 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold text-white">
+              {battleAiFigure.name}・Lv.{battleAiFigure.tier}
+            </span>
+          </div>
         </div>
       )}
 
@@ -235,9 +272,15 @@ const StudentPkMatch: React.FC = () => {
             <PkCountdownRing roundStartedAt={state.round_started_at} seconds={round.seconds} serverNow={state.server_now} />
           )}
 
-          <p className="text-center text-lg font-medium text-on-surface max-w-md">
-            {renderStemWithTarget(round.stem, round.extra?.target_index)}
-          </p>
+          {/* PK gamification MVP: wrap the stem in a visible card instead of
+              bare text floating on the page background — PRD §16.5/§18 #9
+              asks for a "clearly readable question card" at 390px, and a
+              card is also a basic game-UI affordance a plain <p> isn't. */}
+          <div className="w-full max-w-md rounded-2xl bg-surface-container-lowest px-5 py-4 shadow-sm">
+            <p className="text-center text-lg font-medium text-on-surface">
+              {renderStemWithTarget(round.stem, round.extra?.target_index)}
+            </p>
+          </div>
 
           <PkOptionButtons
             options={round.options}

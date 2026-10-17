@@ -9,7 +9,8 @@
  */
 import React, { useState } from 'react';
 import type { PkMatchResult } from '../../services/pkApi';
-import { getPkFigure, pkFigureAssetPath, pkFigurePortraitUrl, type PkExpressionKey } from '../../data/pkFigures';
+import { getPkFigure, pkFigureIconUrl, type PkExpressionKey } from '../../data/pkFigures';
+import PkFigurePortrait from './PkFigurePortrait';
 
 interface PkResultScreenProps {
   result: PkMatchResult;
@@ -62,10 +63,11 @@ const PkResultScreen: React.FC<PkResultScreenProps> = ({ result, onRematch, onCh
       )}
 
       {aiResultFigure && aiResultExpression && (
-        <img
-          src={pkFigurePortraitUrl(aiResultFigure.tier, aiResultExpression)}
-          alt={aiResultFigure.name}
-          className="h-28 w-28 object-contain animate-pop"
+        <PkFigurePortrait
+          tier={aiResultFigure.tier}
+          expression={aiResultExpression}
+          name={aiResultFigure.name}
+          className="h-36 w-36 sm:h-44 sm:w-44 object-contain animate-pop"
         />
       )}
 
@@ -90,7 +92,7 @@ const PkResultScreen: React.FC<PkResultScreenProps> = ({ result, onRematch, onCh
       {unlockedFigure && (
         <div className="mt-6 flex flex-col items-center gap-2 rounded-2xl bg-accent-bg px-6 py-4 animate-pop">
           <img
-            src={pkFigureAssetPath(unlockedFigure.tier, 'icon.svg')}
+            src={pkFigureIconUrl(unlockedFigure.tier)}
             alt={unlockedFigure.name}
             className="h-16 w-16"
           />
