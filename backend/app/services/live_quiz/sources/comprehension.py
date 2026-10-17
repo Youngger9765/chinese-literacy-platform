@@ -43,18 +43,29 @@ def generate_items(lesson_uid: str, lesson: dict, rng=None) -> list[QuizItem]:
             continue
         if answer not in options:
             continue
-        # #3610: the correct option's text is blank → the question cannot be
-        # answered in a text-only game. All known cases are "下列哪一張圖"
-        # image questions (L0052 Q3: D is a drawing with no label in the
-        # source worksheet — deliberately empty, not a transcription miss).
-        # Same rule the lesson API already applies (lesson_indexes.py,
-        # "正解那一格是空的 → 這一題答不出來"): withhold it, keep the rest.
-        if not str(options.get(answer) or "").strip():
+        # #3621: some comprehension options are a DRAWING, not text
+        # (「下列哪一張圖…」questions) — `option_images` carries the asset
+        # filename per letter, built the same way `lesson_indexes._mcq_from`
+        # does for the student-facing API so the two never disagree on
+        # which questions are servable.
+        img_map = q.get("option_images")
+        img_map = img_map if isinstance(img_map, dict) else {}
+
+        def _image_url(key: str, _img_map: dict = img_map) -> str | None:
+            fname = _img_map.get(key)
+            return f"/assets/lesson/{lesson_uid}/{fname}" if fname else None
+
+        # #3610 + #3621: the correct option's text can be blank when the
+        # real content is a picture. Withhold the question only when the
+        # answer has NEITHER text NOR an image — same rule the lesson API
+        # already applies (lesson_indexes.py, "正解那一格是空的 → 這一題
+        # 答不出來"), now extended to also check for an image.
+        if not str(options.get(answer) or "").strip() and not _image_url(answer):
             continue
         quiz_options = [
-            QuizOption(key=k, text=str(options[k]))
+            QuizOption(key=k, text=str(options[k] or ""), image=_image_url(k))
             for k in _VALID_KEYS
-            if k in options and str(options[k] or "").strip()
+            if k in options and (str(options[k] or "").strip() or _image_url(k))
         ]
         if len(quiz_options) < 2:
             continue

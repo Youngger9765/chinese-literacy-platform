@@ -11,8 +11,13 @@
  * live-quiz's plain ✓/✗ badge.
  */
 import React from 'react';
+import { ASSET_BASE } from '../../config/assetBase';
 import { shapeForOptionIndex } from '../live-quiz/liveQuizShapes';
 import type { PkOption } from '../../services/pkApi';
+
+function resolveOptionImageUrl(url: string): string {
+  return url.startsWith('/assets/') ? `${ASSET_BASE}${url.slice('/assets'.length)}` : url;
+}
 
 interface PkOptionButtonsProps {
   options: PkOption[];
@@ -35,6 +40,7 @@ const PkOptionButtons: React.FC<PkOptionButtonsProps> = ({
     <div className="grid grid-cols-2 gap-3 sm:gap-4 w-full max-w-md mx-auto" role="group" aria-label="選項">
       {options.map((opt, i) => {
         const shape = shapeForOptionIndex(i);
+        const imageUrl = opt.image ? resolveOptionImageUrl(opt.image) : null;
         const isCorrect = revealed && opt.key === correctKey;
         const isWrongSelected = revealed && !isCorrect && opt.key === selectedKey;
         const isSelected = !revealed && opt.key === selectedKey;
@@ -45,7 +51,7 @@ const PkOptionButtons: React.FC<PkOptionButtonsProps> = ({
             type="button"
             disabled={disabled}
             onClick={() => onSelect(opt.key)}
-            aria-label={`${shape.label}：${opt.text}`}
+            aria-label={imageUrl ? `${shape.label}：圖片選項` : `${shape.label}：${opt.text}`}
             aria-pressed={isSelected}
             className={[
               'relative flex min-h-[120px] sm:min-h-[140px] flex-col items-center justify-center gap-2 rounded-2xl p-3 text-center shadow-sm transition-transform duration-150',
@@ -58,10 +64,19 @@ const PkOptionButtons: React.FC<PkOptionButtonsProps> = ({
               disabled ? 'cursor-not-allowed' : 'cursor-pointer',
             ].join(' ')}
           >
-            <span className="text-[40px] leading-none" aria-hidden="true">
-              {shape.glyph}
-            </span>
-            <span className="text-base font-medium leading-snug break-words">{opt.text}</span>
+            {imageUrl ? (
+              <img
+                src={imageUrl}
+                alt={`${shape.label}：圖片選項`}
+                loading="lazy"
+                className="h-20 w-20 sm:h-28 sm:w-28 object-contain"
+              />
+            ) : (
+              <span className="text-[40px] leading-none" aria-hidden="true">
+                {shape.glyph}
+              </span>
+            )}
+            {opt.text && <span className="text-base font-medium leading-snug break-words">{opt.text}</span>}
             {revealed && (isCorrect || isWrongSelected) && (
               <span
                 className="absolute -top-2 -right-2 flex h-9 w-9 items-center justify-center rounded-full bg-white text-xl font-bold shadow"

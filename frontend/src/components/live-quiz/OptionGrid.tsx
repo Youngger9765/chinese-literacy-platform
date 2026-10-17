@@ -10,8 +10,13 @@
  * - Correct/wrong uses ✓/✗ + text, never color alone (colorblind-safe).
  */
 import React from 'react';
+import { ASSET_BASE } from '../../config/assetBase';
 import type { LiveQuizOption } from '../../services/liveQuizApi';
 import { shapeForOptionIndex } from './liveQuizShapes';
+
+function resolveOptionImageUrl(url: string): string {
+  return url.startsWith('/assets/') ? `${ASSET_BASE}${url.slice('/assets'.length)}` : url;
+}
 
 interface OptionGridProps {
   options: LiveQuizOption[];
@@ -44,6 +49,7 @@ const OptionGrid: React.FC<OptionGridProps> = ({
     <div className={`grid ${gridClass} gap-3 sm:gap-4 w-full`} role="group" aria-label="選項">
       {options.map((opt, i) => {
         const shape = shapeForOptionIndex(i);
+        const imageUrl = opt.image ? resolveOptionImageUrl(opt.image) : null;
         const revealed = correctKey != null;
         const isCorrect = revealed && opt.key === correctKey;
         const isWrongSelected = revealed && !isCorrect && opt.key === selectedKey;
@@ -55,7 +61,7 @@ const OptionGrid: React.FC<OptionGridProps> = ({
             type="button"
             disabled={disabled || mode === 'host'}
             onClick={() => onSelect?.(opt.key)}
-            aria-label={mode === 'player' ? `${shape.label}` : `${shape.label}：${opt.text}`}
+            aria-label={imageUrl ? `${shape.label}：圖片選項` : mode === 'player' ? `${shape.label}` : `${shape.label}：${opt.text}`}
             aria-pressed={isSelected}
             className={[
               'relative flex items-center justify-center rounded-2xl shadow-sm transition-transform',
@@ -67,14 +73,23 @@ const OptionGrid: React.FC<OptionGridProps> = ({
               disabled && mode === 'player' ? 'cursor-not-allowed' : mode === 'player' ? 'cursor-pointer' : '',
             ].join(' ')}
           >
-            <span
-              className={mode === 'host' ? 'leading-none mr-4 shrink-0' : 'text-[56px] leading-none'}
-              style={mode === 'host' ? { fontSize: 'clamp(32px, 8px + 1.875vw, 44px)' } : undefined}
-              aria-hidden="true"
-            >
-              {shape.glyph}
-            </span>
-            {mode === 'host' && (
+            {imageUrl ? (
+              <img
+                src={imageUrl}
+                alt={`${shape.label}：圖片選項`}
+                loading="lazy"
+                className={mode === 'host' ? 'h-16 w-16 object-contain mr-4 shrink-0' : 'h-20 w-20 sm:h-28 sm:w-28 object-contain'}
+              />
+            ) : (
+              <span
+                className={mode === 'host' ? 'leading-none mr-4 shrink-0' : 'text-[56px] leading-none'}
+                style={mode === 'host' ? { fontSize: 'clamp(32px, 8px + 1.875vw, 44px)' } : undefined}
+                aria-hidden="true"
+              >
+                {shape.glyph}
+              </span>
+            )}
+            {mode === 'host' && opt.text && (
               // PRD §12: 選項 32px（1280 寬）／44px（1920 寬）.
               <span
                 className="font-medium leading-snug break-words"

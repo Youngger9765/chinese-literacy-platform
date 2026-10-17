@@ -94,6 +94,10 @@ export interface PkChallengeAiResponse {
 export interface PkOption {
   key: string;
   text: string;
+  /** #3621 — see LiveQuizOption in liveQuizApi.ts for the same field on
+   *  the live-quiz side; PK reuses the same backend round-generation code
+   *  so the shape is identical. */
+  image?: string;
 }
 
 export interface PkRoundView {
