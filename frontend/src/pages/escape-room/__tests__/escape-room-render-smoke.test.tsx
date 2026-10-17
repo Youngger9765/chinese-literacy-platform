@@ -58,7 +58,7 @@ import MistBar from '../../../components/escape-room/MistBar';
 import TeammateRow from '../../../components/escape-room/TeammateRow';
 import StudentEscapeRoomEntry from '../StudentEscapeRoomEntry';
 import StudentEscapeRoomRun from '../StudentEscapeRoomRun';
-import { getEscapeRoomRunState } from '../../../services/escapeRoomApi';
+import { getEscapeRoomRunState, submitEscapeRoomRescue } from '../../../services/escapeRoomApi';
 
 function renderAt(path: string, routePath: string, Element: React.FC): void {
   render(
@@ -120,6 +120,33 @@ describe('迷城密室無障礙', () => {
 
     expect(await screen.findAllByRole('button', { name: /選項/ })).toHaveLength(1);
     expect(screen.getByRole('button', { name: '選項 乙：第二個答案' })).toBeInTheDocument();
+  });
+
+  it('隊友被定住時顯示救援題並提交救援答案', async () => {
+    vi.mocked(getEscapeRoomRunState).mockResolvedValueOnce({
+      ...RUN_STATE,
+      rescue_question: {
+        stem: '要用哪一把鑰匙救援隊友？',
+        options: [
+          { key: 'red-key', text: '紅色鑰匙' },
+          { key: 'blue-key', text: '藍色鑰匙' },
+        ],
+        seconds: 20,
+        extra_time_ms: 0,
+      },
+    });
+
+    renderAt('/escape-room/run/1', '/escape-room/run/:runId', StudentEscapeRoomRun);
+
+    expect(await screen.findByText('要用哪一把鑰匙救援隊友？')).toBeInTheDocument();
+    const redKeyOption = screen.getByRole('button', { name: '選項 red-key：紅色鑰匙' });
+    const blueKeyOption = screen.getByRole('button', { name: '選項 blue-key：藍色鑰匙' });
+    expect(redKeyOption).toBeEnabled();
+    expect(blueKeyOption).toBeEnabled();
+
+    await userEvent.setup().click(redKeyOption);
+
+    expect(submitEscapeRoomRescue).toHaveBeenCalledWith('測試憑證', 1, { choice_key: 'red-key' });
   });
 });
 
