@@ -10,7 +10,7 @@ from __future__ import annotations
 import random
 
 from ..sources import SOURCE_ADAPTERS
-from ..sources.base import QuizItem
+from ..sources.base import QuizItem, warn_skipped_once
 
 NAME = "choice"
 
@@ -38,7 +38,13 @@ def _collect_items(lessons: list[dict], source_modules: list[str], rng: random.R
             adapter = SOURCE_ADAPTERS.get(module)
             if adapter is None:
                 continue
-            pool.extend(adapter(uid, lesson, rng))
+            # #3610: backstop — an adapter blowing up on ONE lesson's data
+            # must not fail the whole pool (that turned every grade-6 PK
+            # request into a 500). Skip that lesson×module, log once.
+            try:
+                pool.extend(adapter(uid, lesson, rng))
+            except (ValueError, TypeError, KeyError) as exc:
+                warn_skipped_once(f"{module}:{uid}", f"adapter failed: {exc}")
     return pool
 
 

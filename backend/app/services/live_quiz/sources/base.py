@@ -8,6 +8,7 @@ adapter reads one already-loaded lesson dict (from
 """
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass, field
 
 
@@ -78,3 +79,38 @@ class QuizItem:
         if self.extra:
             payload["extra"] = self.extra
         return payload
+
+
+# ---------------------------------------------------------------------------
+# #3610: one malformed source row must never take down a whole question pool.
+#
+# Before this, adapters built every ``QuizItem`` directly, so a single row
+# failing ``__post_init__`` (L0052 Q3: an image question whose correct
+# option D is a picture with no text) raised out of the adapter, out of
+# ``choice.generate_rounds``, and turned EVERY grade-6 PK request into a 500.
+# Adapters now go through ``build_item``, and ``choice._collect_items`` also
+# survives a whole adapter call failing for one lesson. Either way the bad row
+# is dropped and logged — once per row per process, not once per request:
+# the same pool is rebuilt on every PK match / game creation, and a
+# per-request WARNING for a known, unchanging content row is only noise.
+# ---------------------------------------------------------------------------
+
+_log = logging.getLogger(__name__)
+_WARNED: set = set()
+
+
+def warn_skipped_once(key: str, message: str) -> None:
+    if key in _WARNED:
+        return
+    _WARNED.add(key)
+    _log.warning("live_quiz: skipped question source row %s: %s", key, message)
+
+
+def build_item(**kwargs) -> QuizItem | None:
+    """``QuizItem(**kwargs)``, or ``None`` (logged once) when the row is invalid."""
+    try:
+        return QuizItem(**kwargs)
+    except ValueError as exc:
+        key = f"{kwargs.get('source_module')}:{kwargs.get('lesson_uid')}:#{kwargs.get('source_index', '')}"
+        warn_skipped_once(key, str(exc))
+        return None
