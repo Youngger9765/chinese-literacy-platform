@@ -49,6 +49,7 @@ from .routes.assets import router as assets_router
 from .routes.worksheets import router as worksheets_router
 from .routes.live_quiz import router as live_quiz_router
 from .routes.pk import router as pk_router
+from .routes.escape_room import router as escape_room_router
 from .utils.logging_config import setup_logging
 from .auth.rate_limiter import general_rate_limiter, real_ip_from_xff
 from .services.live_quiz.engine import is_authenticated_member_by_code
@@ -819,6 +820,7 @@ app.include_router(admin_story_packs_router, prefix="/api", tags=["admin-story-p
 app.include_router(assets_router)
 app.include_router(live_quiz_router, prefix="/api", tags=["live-quiz"])
 app.include_router(pk_router, prefix="/api", tags=["pk"])
+app.include_router(escape_room_router, prefix="/api", tags=["escape-room"])
 # Role-gated worksheet download (#3276) — separate from the public assets proxy above.
 app.include_router(worksheets_router)
 
