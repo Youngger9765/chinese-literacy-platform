@@ -243,6 +243,16 @@ class TestCreateGame:
         assert game["status"] == "lobby"
         assert game["rounds_total"] > 0
 
+    def test_grade_6_comprehension_with_blank_answer_image_question_creates(self, client, teacher):
+        # #3616 prod hotfix: L0052 Q3's correct option D has no text; on
+        # production every game including L0052 + comprehension 500'd.
+        game = _create_game(
+            client, teacher, lesson_uids=["L0051", "L0052", "L0053"], source_modules=["comprehension"]
+        )
+        assert game["rounds_total"] > 0
+        solo = _create_game(client, teacher, lesson_uids=["L0052"], source_modules=["comprehension"])
+        assert solo["rounds_total"] > 0
+
     def test_multi_lesson_mix_pools_both_lessons(self, client, teacher):
         game = _create_game(client, teacher, lesson_uids=[LESSON_A, LESSON_B])
         state = client.get(
