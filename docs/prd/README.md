@@ -22,7 +22,7 @@
 | 劇情包（故事、寶箱、徽章可整包替換） | `story_packs` | 見 league PRD 劇情包一節 | MVP 五包：上古神話（預設）、唐、宋、武俠、偵探劇 | staging | #3594 |
 | 雙人 PK（同學或 AI 文學家，1 對 1） | `pk` | [pk-mode-prd](2026-10-16-pk-mode-prd.md) | 第一版在 staging，6 個 bug 修正中 | staging | #3586、#3602 |
 | 2D 劇情模式（NPC 對話、表情、素材） | — | [story-mode-design](2026-10-16-story-mode-design.md) | 設計與素材完成，尚未接進畫面 | staging（素材） | #3595 |
-| 迷城密室（AI 隊友合作闖關） | `escape_room` | [escape-room-prd](2026-10-16-escape-room-prd.md) | 只有 PRD；**課堂搶答、跨班賽季、PK 完整上線後才開工**（Young 2026-10-17） | — | #3599 |
+| 迷城密室（AI 隊友合作闖關） | `escape_room` | [escape-room-prd](2026-10-16-escape-room-prd.md) | 只有 PRD；遊戲化前幾項上 staging 並指派 Hans 驗收後開工（Young 2026-10-17 更新，取代「完整上線後才開工」），新增資料表需 Young 核准 | — | #3599 |
 
 ### 跨功能的共同規則（各 PRD 都適用）
 
