@@ -240,68 +240,6 @@ exports[`StudentSidebar — role=student nav items > snapshot — collapsed=fals
     </span>
   </button>
   <button
-    aria-label="我們班"
-    class="
-        relative w-full flex items-center gap-3 rounded-lg transition-colors
-        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
-        px-3 py-2.5
-        text-gray-600 hover:bg-gray-50 hover:text-gray-900
-      "
-    type="button"
-  >
-    <span
-      aria-hidden="true"
-      class="text-lg shrink-0"
-    >
-      🏆
-    </span>
-    <span
-      class="flex flex-col items-start min-w-0 text-left"
-    >
-      <span
-        class="text-sm truncate"
-      >
-        我們班
-      </span>
-      <span
-        class="text-[11px] font-normal text-gray-400 truncate w-full"
-      >
-        和別班比幾週，平常讀課文就累積
-      </span>
-    </span>
-  </button>
-  <button
-    aria-label="課堂搶答"
-    class="
-        relative w-full flex items-center gap-3 rounded-lg transition-colors
-        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
-        px-3 py-2.5
-        text-gray-600 hover:bg-gray-50 hover:text-gray-900
-      "
-    type="button"
-  >
-    <span
-      aria-hidden="true"
-      class="text-lg shrink-0"
-    >
-      🎮
-    </span>
-    <span
-      class="flex flex-col items-start min-w-0 text-left"
-    >
-      <span
-        class="text-sm truncate"
-      >
-        課堂搶答
-      </span>
-      <span
-        class="text-[11px] font-normal text-gray-400 truncate w-full"
-      >
-        現在全班一起玩，約 10 分鐘
-      </span>
-    </span>
-  </button>
-  <button
     aria-label="PK 對戰"
     class="
         relative w-full flex items-center gap-3 rounded-lg transition-colors
@@ -470,42 +408,6 @@ exports[`StudentSidebar — role=student nav items > snapshot — collapsed=true
       class="text-lg shrink-0"
     >
       🏫
-    </span>
-  </button>
-  <button
-    aria-label="我們班"
-    class="
-        relative w-full flex items-center gap-3 rounded-lg transition-colors
-        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
-        justify-center px-2 py-2.5
-        text-gray-600 hover:bg-gray-50 hover:text-gray-900
-      "
-    title="我們班"
-    type="button"
-  >
-    <span
-      aria-hidden="true"
-      class="text-lg shrink-0"
-    >
-      🏆
-    </span>
-  </button>
-  <button
-    aria-label="課堂搶答"
-    class="
-        relative w-full flex items-center gap-3 rounded-lg transition-colors
-        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
-        justify-center px-2 py-2.5
-        text-gray-600 hover:bg-gray-50 hover:text-gray-900
-      "
-    title="課堂搶答"
-    type="button"
-  >
-    <span
-      aria-hidden="true"
-      class="text-lg shrink-0"
-    >
-      🎮
     </span>
   </button>
   <button

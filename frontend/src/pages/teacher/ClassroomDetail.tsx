@@ -400,8 +400,10 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack, 
           token={token}
           classroomId={classroom.id}
           pkHuman={classroom.pk_human}
-          onChanged={(pkHuman) =>
-            setClassroom((prev) => (prev ? { ...prev, pk_human: pkHuman } : prev))
+          league={classroom.league}
+          liveQuiz={classroom.live_quiz}
+          onChanged={(next) =>
+            setClassroom((prev) => (prev ? { ...prev, ...next } : prev))
           }
         />
       )}

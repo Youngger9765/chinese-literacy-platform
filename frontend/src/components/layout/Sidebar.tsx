@@ -24,6 +24,7 @@ import { useWorkspace, type WorkspaceView } from '../../contexts/WorkspaceContex
 import { useLearningNav } from '../../contexts/LearningNavContext';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import { hasRole } from '../../services/authApi';
+import { fetchMyEnrolledClassrooms } from '../../services/learning/session';
 import NotificationBell from '../teacher/NotificationBell';
 import ZhuyinToggle from '../ui/ZhuyinToggle';
 import { SIDEBAR_STORAGE_KEY } from './sidebarUtils';
@@ -266,7 +267,7 @@ const MobileTabBar: React.FC<MobileTabBarProps> = ({
 // ---------------------------------------------------------------------------
 
 const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
-  const { user, logout } = useAuth();
+  const { user, logout, token } = useAuth();
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const { selectedStory: navStory } = useLearningNav();
@@ -311,6 +312,27 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
 
   const { activeView, setActiveView, availableViews, hasMultipleViews } = useWorkspace();
 
+  // issue #3607: 跨班賽季／課堂搶答 sidebar entries only show when ANY of
+  // the student's enrolled classrooms has the corresponding flag on —
+  // same "ANY enrolled classroom" pattern StudentPkEntry.tsx already uses
+  // for pk_human. Starts false (hidden) until the real enrollment data
+  // loads, so a disabled feature is never flashed before disappearing.
+  // Scoped to activeView === 'student': teacher/admin sessions never need
+  // this student-only enrollment lookup (critic-agent review note).
+  const [leagueEnabled, setLeagueEnabled] = useState(false);
+  const [liveQuizEnabled, setLiveQuizEnabled] = useState(false);
+  useEffect(() => {
+    if (!token || activeView !== 'student') return;
+    fetchMyEnrolledClassrooms(token)
+      .then((res) => {
+        setLeagueEnabled(res.classrooms.some((c) => c.league));
+        setLiveQuizEnabled(res.classrooms.some((c) => c.live_quiz));
+      })
+      .catch(() => {
+        /* best-effort — entries simply stay hidden if this fails */
+      });
+  }, [token, activeView]);
+
   const VIEW_LABELS: Record<WorkspaceView, { icon: string; label: string }> = {
     admin: { icon: '⚙️', label: '管理員' },
     teacher: { icon: '🏫', label: '老師' },
@@ -336,7 +358,9 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
   // ---------------------------------------------------------------------------
 
   const mobileStudentItems: NavItem[] =
-    activeView === 'student' ? getStudentNavItems(pendingAssignmentCount) : [];
+    activeView === 'student'
+      ? getStudentNavItems(pendingAssignmentCount, { league: leagueEnabled, liveQuiz: liveQuizEnabled })
+      : [];
 
   const mobileTeacherItems: NavItem[] =
     activeView === 'teacher' || activeView === 'admin' ? getTeacherNavItems() : [];
@@ -366,6 +390,8 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
           pendingAssignmentCount={pendingAssignmentCount}
           collapsed={collapsed}
           onNavigate={handleNavigate}
+          leagueEnabled={leagueEnabled}
+          liveQuizEnabled={liveQuizEnabled}
         />
       );
     }

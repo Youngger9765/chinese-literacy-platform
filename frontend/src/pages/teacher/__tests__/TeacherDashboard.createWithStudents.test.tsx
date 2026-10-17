@@ -46,6 +46,7 @@ describe('TeacherDashboard — create class and student accounts in one step', (
   const created = {
     id: 42, name: '五年甲班', grade: 5, student_count: 0,
     school_id: 1, teacher_id: 1, is_active: true, created_at: '2026-10-01T00:00:00Z',
+    pk_human: false, league: false, live_quiz: false,
   };
   const batch = { created: [{ name: '王小明', seat_number: '1', username: 'abc1', password: 'pw-shown-once', user_id: 7 }], errors: [], warnings: [] };
 

@@ -30,6 +30,7 @@ from ...models.live_quiz import (
 from ...models.school import Classroom, ClassroomStudent, ClassroomTeacher
 from ...models.user import User
 from ...services.lesson_uid_loader import load_lesson
+from ..pk import classroom_features
 from . import recompute
 from .codes import generate_live_quiz_code
 from .round_types import ROUND_TYPES
@@ -70,6 +71,15 @@ def _load_lessons(lesson_uids: list[str]) -> list[dict]:
             raise HTTPException(status_code=400, detail=f"Unknown lesson: {uid}")
         lessons.append({"lesson_uid": uid, "lesson": lesson})
     return lessons
+
+
+def _require_live_quiz_enabled(db: Session, classroom: Classroom) -> None:
+    """issue #3607: 課堂搶答 is OFF by default per classroom. Only applies
+    when a game IS targeted at a classroom — a classless (code/QR-only)
+    game has no classroom to gate against and is never blocked (PRD: "code-
+    based join for games not tied to a class keeps working")."""
+    if not classroom_features.get_classroom_feature(classroom, "live_quiz", db=db):
+        raise HTTPException(status_code=403, detail="老師還沒開放課堂搶答")
 
 
 def _require_classroom_owned_by(db: Session, classroom_id: int, teacher: User) -> Classroom:
@@ -126,7 +136,8 @@ def create_game(
         raise HTTPException(status_code=400, detail=f"reading_seconds must be 0-{MAX_READING_SECONDS}")
 
     if classroom_id is not None:
-        _require_classroom_owned_by(db, classroom_id, host)
+        classroom = _require_classroom_owned_by(db, classroom_id, host)
+        _require_live_quiz_enabled(db, classroom)
 
     lessons = _load_lessons(lesson_uids)
 
@@ -291,7 +302,21 @@ def join_game(db: Session, code: str, user: User) -> LiveQuizPlayer:
 
     existing = get_player_for_user(db, game, user)
     if existing is not None:
+        # Already a player (e.g. the join call is re-sent / retried) —
+        # idempotent return, same as before issue #3607. A teacher
+        # disabling live_quiz mid-game must not retroactively evict
+        # someone already admitted; the gate below only applies to
+        # genuinely NEW joins.
         return existing
+
+    # issue #3607: a classless game (classroom_id is None) is pure code/QR
+    # join and is never gated. A class-tied game is re-checked HERE (not
+    # just at creation time) because the teacher may have turned
+    # live_quiz off for that classroom AFTER the game was created.
+    if game.classroom_id is not None:
+        classroom = db.query(Classroom).filter(Classroom.id == game.classroom_id).first()
+        if classroom is not None:
+            _require_live_quiz_enabled(db, classroom)
 
     if game.status == "ended":
         raise HTTPException(status_code=409, detail="This game has ended")
@@ -836,11 +861,26 @@ def find_open_invite_for_student(db: Session, user: User) -> dict | None:
     ]
     if not classroom_ids:
         return None
+
+    # issue #3607: "class-based join without code" is this discovery query
+    # itself — a classroom with live_quiz off must not surface a game here
+    # at all, which is what makes the student-home banner disappear (there
+    # is no separate banner-visibility flag; the banner simply renders
+    # nothing when this returns None). Explicit-value-wins + legacy-usage
+    # fallback both come from the shared accessor, same as everywhere else.
+    enabled_classroom_ids = [
+        c.id
+        for c in db.query(Classroom).filter(Classroom.id.in_(classroom_ids)).all()
+        if classroom_features.get_classroom_feature(c, "live_quiz", db=db)
+    ]
+    if not enabled_classroom_ids:
+        return None
+
     now = _now()
     game = (
         db.query(LiveQuizGame)
         .filter(
-            LiveQuizGame.classroom_id.in_(classroom_ids),
+            LiveQuizGame.classroom_id.in_(enabled_classroom_ids),
             # UI/UX review #3: late join works at any point before the game
             # ends, so the invite banner should keep inviting stragglers
             # through "question"/"reveal", not just "lobby".

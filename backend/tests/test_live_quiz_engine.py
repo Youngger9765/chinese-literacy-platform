@@ -630,6 +630,15 @@ class TestInvitesHistoryAndResults:
             f"/api/classrooms/{classroom_id}/students", json={"student_id": student1["user_id"]},
             headers=auth_header(teacher["token"]),
         )
+        # issue #3607: live_quiz is OFF by default per classroom (a brand
+        # new classroom here has no history to fall back on) — this test
+        # is about invite visibility, not the feature gate itself (that
+        # gets its own dedicated class below), so opt the room in first.
+        enable = client.patch(
+            f"/api/classrooms/{classroom_id}/pk-settings", json={"live_quiz": True},
+            headers=auth_header(teacher["token"]),
+        )
+        assert enable.status_code == 200, enable.text
         game = _create_game(client, teacher, lesson_uids=[LESSON_A], classroom_id=classroom_id)
 
         invited = client.get("/api/live-quiz/invites", headers=auth_header(student1["token"])).json()
@@ -945,3 +954,150 @@ class TestUiUxReview20261015:
             f"/api/live-quiz/games/{game['code']}/state", headers=auth_header(teacher["token"])
         ).json()
         assert host_state["online_count"] == 1
+
+
+# ---------------------------------------------------------------------------
+# issue #3607 — 課堂搶答 (live_quiz) is OFF by default per classroom. Gated:
+# (1) creating a game TARGETED at a classroom (classroom_id set), (2) the
+# "class-based join without code" banner (students only ever see/discover a
+# game through /api/live-quiz/invites, never by typing a code, when it's
+# tied to a classroom), and (3) actually joining a class-tied game whose
+# classroom has since had the feature turned off. A classless game
+# (classroom_id=None, "code/QR-only") is NEVER gated — that's the explicit
+# "code-based join for games not tied to a class keeps working" carve-out.
+# Each negative case pairs with a positive control (rules/testing-strategy.md).
+# ---------------------------------------------------------------------------
+
+def _make_classroom_via_api(client, teacher, *, live_quiz: bool | None = None) -> int:
+    resp = client.post(
+        "/api/classrooms", json={"name": f"LQ Gate Room {uuid.uuid4().hex[:6]}", "school_id": _test_school_id},
+        headers=auth_header(teacher["token"]),
+    )
+    assert resp.status_code == 201, resp.text
+    classroom_id = resp.json()["id"]
+    if live_quiz is not None:
+        patched = client.patch(
+            f"/api/classrooms/{classroom_id}/pk-settings", json={"live_quiz": live_quiz},
+            headers=auth_header(teacher["token"]),
+        )
+        assert patched.status_code == 200, patched.text
+    return classroom_id
+
+
+class TestLiveQuizFeatureGate:
+    def test_create_game_targeted_at_a_classroom_is_blocked_when_off(self, client, teacher):
+        room_id = _make_classroom_via_api(client, teacher, live_quiz=False)
+        resp = client.post(
+            "/api/live-quiz/games",
+            json={"lesson_uids": [LESSON_A], "classroom_id": room_id},
+            headers=auth_header(teacher["token"]),
+        )
+        assert resp.status_code == 403, resp.text
+        assert "開放" in resp.json()["detail"]
+
+    def test_create_game_targeted_at_a_brand_new_classroom_with_empty_settings_is_blocked(self, client, teacher):
+        """No explicit key at all (== {}) behaves the same as explicit
+        False — default OFF, not an implicit "undecided == on"."""
+        room_id = _make_classroom_via_api(client, teacher, live_quiz=None)
+        resp = client.post(
+            "/api/live-quiz/games",
+            json={"lesson_uids": [LESSON_A], "classroom_id": room_id},
+            headers=auth_header(teacher["token"]),
+        )
+        assert resp.status_code == 403, resp.text
+
+    def test_create_game_targeted_at_a_classroom_succeeds_when_on(self, client, teacher):
+        """Positive control for the two tests above."""
+        room_id = _make_classroom_via_api(client, teacher, live_quiz=True)
+        resp = client.post(
+            "/api/live-quiz/games",
+            json={"lesson_uids": [LESSON_A], "classroom_id": room_id},
+            headers=auth_header(teacher["token"]),
+        )
+        assert resp.status_code == 201, resp.text
+
+    def test_create_game_with_no_classroom_is_never_gated(self, client, teacher):
+        """classroom_id omitted entirely ("不指定班級（只用代碼／QR 加入）")
+        must always work regardless of any classroom's feature state —
+        there is no classroom to gate against."""
+        resp = client.post(
+            "/api/live-quiz/games", json={"lesson_uids": [LESSON_A]}, headers=auth_header(teacher["token"]),
+        )
+        assert resp.status_code == 201, resp.text
+
+    def test_invite_banner_hides_games_from_a_disabled_classroom(self, client, teacher, student1):
+        room_id = _make_classroom_via_api(client, teacher, live_quiz=True)
+        client.post(
+            f"/api/classrooms/{room_id}/students", json={"student_id": student1["user_id"]},
+            headers=auth_header(teacher["token"]),
+        )
+        game = _create_game(client, teacher, lesson_uids=[LESSON_A], classroom_id=room_id)
+
+        # Visible while on.
+        visible = client.get("/api/live-quiz/invites", headers=auth_header(student1["token"])).json()
+        assert visible["invite"]["code"] == game["code"]
+
+        # Teacher turns it off mid-session — the banner must stop surfacing it.
+        off = client.patch(
+            f"/api/classrooms/{room_id}/pk-settings", json={"live_quiz": False},
+            headers=auth_header(teacher["token"]),
+        )
+        assert off.status_code == 200, off.text
+        hidden = client.get("/api/live-quiz/invites", headers=auth_header(student1["token"])).json()
+        assert hidden["invite"] is None
+
+    def test_joining_a_class_tied_game_is_blocked_once_the_classroom_is_disabled(self, client, teacher, student2):
+        """The explicit-code join endpoint is the same one the banner's
+        link points at — if the classroom backing the game has since been
+        turned off, the direct join call must 403 too, not just the banner
+        discovery step."""
+        room_id = _make_classroom_via_api(client, teacher, live_quiz=True)
+        client.post(
+            f"/api/classrooms/{room_id}/students", json={"student_id": student2["user_id"]},
+            headers=auth_header(teacher["token"]),
+        )
+        game = _create_game(client, teacher, lesson_uids=[LESSON_A], classroom_id=room_id)
+
+        client.patch(
+            f"/api/classrooms/{room_id}/pk-settings", json={"live_quiz": False},
+            headers=auth_header(teacher["token"]),
+        )
+
+        resp = client.post(f"/api/live-quiz/games/{game['code']}/join", headers=auth_header(student2["token"]))
+        assert resp.status_code == 403, resp.text
+        assert "開放" in resp.json()["detail"]
+
+    def test_joining_a_classless_game_by_code_is_never_gated(self, client, teacher, student1):
+        """Positive control for the carve-out: a game with NO classroom_id
+        is pure code/QR join and must always work, independent of any
+        classroom's live_quiz state (there's nothing to check it against)."""
+        game = _create_game(client, teacher, lesson_uids=[LESSON_A])  # classroom_id omitted
+        resp = client.post(f"/api/live-quiz/games/{game['code']}/join", headers=auth_header(student1["token"]))
+        assert resp.status_code == 201, resp.text
+
+    def test_a_classroom_with_real_live_quiz_history_but_no_key_is_treated_as_on(self, client, teacher, student1):
+        """Backward compat (#3607): a classroom that already hosted a
+        live-quiz game before this toggle existed, and has no explicit
+        `live_quiz` key, must still be able to create (and students join) a
+        NEW game — the feature was already in use."""
+        room_id = _make_classroom_via_api(client, teacher, live_quiz=True)
+        _create_game(client, teacher, lesson_uids=[LESSON_A], classroom_id=room_id)
+        # Clear the key back to "never set" (simulating a pre-toggle
+        # classroom whose only signal is real usage history) while keeping
+        # the game that already exists for it.
+        db = TestingSessionLocal()
+        try:
+            from app.models.school import Classroom
+
+            room = db.query(Classroom).filter(Classroom.id == room_id).first()
+            room.feature_settings = {}
+            db.commit()
+        finally:
+            db.close()
+
+        resp = client.post(
+            "/api/live-quiz/games",
+            json={"lesson_uids": [LESSON_A], "classroom_id": room_id},
+            headers=auth_header(teacher["token"]),
+        )
+        assert resp.status_code == 201, resp.text

@@ -10,7 +10,12 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { fetchStories, fetchStory } from '../../../services/api';
 import type { Story } from '../../../types';
 import { gradeLabel } from '../../../utils/gradeLabel';
-import { listMyClassrooms, type ClassroomResponse } from '../../../services/classroomApi';
+import {
+  listMyClassrooms,
+  updateClassroomFeatureSettings,
+  ClassroomApiError,
+  type ClassroomResponse,
+} from '../../../services/classroomApi';
 import { createLiveQuizGame, LiveQuizApiError } from '../../../services/liveQuizApi';
 
 const QUESTION_TYPES: { key: string; label: string }[] = [
@@ -52,6 +57,11 @@ const TeacherLiveQuizSetup: React.FC<Props> = ({ onCreated }) => {
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  // issue #3607: 課堂搶答 is OFF by default per classroom when targeting
+  // one — "不指定班級" (classroomId === '') is never gated, only a chosen
+  // classroom can be disabled.
+  const [enablingLiveQuiz, setEnablingLiveQuiz] = useState(false);
+  const selectedClassroom = classroomId === '' ? null : classrooms.find((c) => c.id === classroomId) ?? null;
 
   useEffect(() => {
     fetchStories(token ?? undefined)
@@ -73,6 +83,21 @@ const TeacherLiveQuizSetup: React.FC<Props> = ({ onCreated }) => {
     () => (gradeFilter ? stories.filter((s) => s.grade === gradeFilter) : stories),
     [stories, gradeFilter],
   );
+
+  const handleEnableLiveQuiz = async () => {
+    if (!token || selectedClassroom == null || enablingLiveQuiz) return;
+    setEnablingLiveQuiz(true);
+    try {
+      const result = await updateClassroomFeatureSettings(token, selectedClassroom.id, { live_quiz: true });
+      setClassrooms((prev) =>
+        prev.map((c) => (c.id === selectedClassroom.id ? { ...c, live_quiz: result.live_quiz } : c)),
+      );
+    } catch (err) {
+      setError(err instanceof ClassroomApiError ? err.message : '開啟課堂搶答失敗，請稍後再試');
+    } finally {
+      setEnablingLiveQuiz(false);
+    }
+  };
 
   const toggleStory = (id: string) => {
     setSelectedIds((prev) => {
@@ -162,6 +187,23 @@ const TeacherLiveQuizSetup: React.FC<Props> = ({ onCreated }) => {
             </option>
           ))}
         </select>
+
+        {/* issue #3607: 課堂搶答 OFF for the selected classroom — the page
+            stays usable ("不指定班級" still works), but a clear one-click
+            prompt shows instead of letting the teacher submit into a 403. */}
+        {selectedClassroom && !selectedClassroom.live_quiz && (
+          <div className="mt-2 flex items-center justify-between gap-3 rounded-lg bg-accent-bg px-3 py-2 text-sm">
+            <span className="text-accent">老師還沒為「{selectedClassroom.name}」開放課堂搶答</span>
+            <button
+              type="button"
+              onClick={handleEnableLiveQuiz}
+              disabled={enablingLiveQuiz}
+              className="shrink-0 rounded-lg bg-accent px-3 py-1 text-xs font-semibold text-white disabled:opacity-50"
+            >
+              {enablingLiveQuiz ? '開啟中…' : '一鍵開啟'}
+            </button>
+          </div>
+        )}
       </section>
 
       <section className="mb-6">

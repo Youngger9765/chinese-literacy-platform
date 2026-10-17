@@ -16,22 +16,45 @@ class ClassroomUpdateRequest(BaseModel):
     is_active: bool | None = None
 
 
-class ClassroomPkSettingsRequest(BaseModel):
-    """PATCH /classrooms/{id}/pk-settings body — issue #3586 §7.4.
+class ClassroomFeatureSettingsRequest(BaseModel):
+    """PATCH /classrooms/{id}/pk-settings body — issue #3586 §7.4, extended
+    by issue #3607 to cover 跨班賽季 (league) and 課堂搶答 (live_quiz) on
+    the same endpoint (route path kept as `/pk-settings` for backward
+    compat with existing callers; it now covers three toggles, not one).
 
-    One typed field today (`pk_human`) so the public API stays OpenAPI-typed,
-    even though the underlying storage (`classrooms.feature_settings`) is a
-    schemaless JSON column for forward-compat — see
-    app/services/pk/classroom_features.py. There is deliberately no
-    `pk_ai` field: Young 2026-10-16 "AI PK 跟班級無關" — 挑戰文學家 is never
-    gated by classroom settings, so there is nothing here to toggle for it.
+    Every field is Optional and the route only writes the ones actually
+    present in the request body (`exclude_unset`) — so a single switch's
+    PATCH call (e.g. `{"league": true}`) never touches the other two keys,
+    the same merge-not-overwrite guarantee `validate_feature_settings_patch`
+    + the route's merge-into-existing-dict logic already gave `pk_human`
+    alone. Three typed fields (not a free-form dict) so the public API
+    stays OpenAPI-typed, even though the underlying storage
+    (`classrooms.feature_settings`) is a schemaless JSON column for
+    forward-compat — see app/services/pk/classroom_features.py. There is
+    deliberately no `pk_ai` field: Young 2026-10-16 "AI PK 跟班級無關" —
+    挑戰文學家 is never gated by classroom settings, so there is nothing
+    here to toggle for it.
     """
 
-    pk_human: bool
+    pk_human: bool | None = None
+    league: bool | None = None
+    live_quiz: bool | None = None
 
 
-class ClassroomPkSettingsResponse(BaseModel):
+# Backward-compat alias — issue #3586 named this ClassroomPkSettingsRequest
+# when it only had one field; issue #3607 generalized it to three. Nothing
+# in this codebase imports the old name anymore, but keeping the alias
+# costs nothing and avoids an import break for any out-of-tree caller.
+ClassroomPkSettingsRequest = ClassroomFeatureSettingsRequest
+
+
+class ClassroomFeatureSettingsResponse(BaseModel):
     pk_human: bool
+    league: bool
+    live_quiz: bool
+
+
+ClassroomPkSettingsResponse = ClassroomFeatureSettingsResponse
 
 
 class ClassroomStudentAddRequest(BaseModel):
@@ -82,6 +105,13 @@ class ClassroomResponse(BaseModel):
     # whole point of the typed accessor: a brand-new class with
     # feature_settings == {} must report False here, not omit the field).
     pk_human: bool = False
+    # Issue #3607 — 跨班賽季／課堂搶答班級開關，same accessor, same
+    # default-False-until-set rule. Unlike pk_human, an absent key here can
+    # resolve to True via the accessor's legacy-usage backward-compat rule
+    # (a classroom that was already using the feature before the toggle
+    # existed) — see services/pk/classroom_features.py.
+    league: bool = False
+    live_quiz: bool = False
 
     model_config = {"from_attributes": True}
 
@@ -177,6 +207,12 @@ class StudentEnrolledClassroom(BaseModel):
     # has pk_human=True" (StudentPkEntry.tsx), computed client-side over the
     # list this field appears in — not a separate aggregate endpoint.
     pk_human: bool = False
+    # Issue #3607 — same per-classroom-then-ANY pattern as pk_human above,
+    # for 跨班賽季 (league) and 課堂搶答 (live_quiz): the sidebar entries for
+    # those two features are hidden unless ANY enrolled classroom has the
+    # corresponding flag on (see components/layout/StudentSidebar.tsx).
+    league: bool = False
+    live_quiz: bool = False
 
     model_config = {"from_attributes": True}
 
