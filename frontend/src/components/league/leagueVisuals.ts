@@ -29,12 +29,16 @@ export function energyPercent(points: number, threshold: number): number {
 
 /** 「還差 N 人解鎖寶箱」 copy — PRD §12.1 item 8. Eligible already (needed
  * <= 0) returns the unlocked message instead of "還差 0 人", which would
- * read as a glitch rather than good news. */
-export function chestHintText(eligible: boolean, participantsNeeded: number): string {
+ * read as a glitch rather than good news.
+ *
+ * `chestName` is the active story pack's `chest.name` (#3615 — this used to
+ * hardcode「神秘寶箱」for every pack, so 唐/宋/武俠/偵探 all showed the same
+ * word while their own chest card said something else). */
+export function chestHintText(chestName: string, eligible: boolean, participantsNeeded: number): string {
   if (eligible || participantsNeeded <= 0) {
-    return '全班已解鎖神秘寶箱！';
+    return `全班已解鎖${chestName}！`;
   }
-  return `還差 ${participantsNeeded} 人就能解鎖神秘寶箱`;
+  return `還差 ${participantsNeeded} 人就能解鎖${chestName}`;
 }
 
 /** Display formatting for a points value. Whole numbers (and anything

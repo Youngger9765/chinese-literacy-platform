@@ -23,6 +23,7 @@ import {
 } from '../../../services/leagueApi';
 import EnergyBar from '../../../components/league/EnergyBar';
 import { chestHintText, displayPoints } from '../../../components/league/leagueVisuals';
+import { DEFAULT_THEME_FALLBACK } from '../../../components/league/leagueTheme';
 
 interface LeagueProgressTabProps {
   classroomId: number;
@@ -33,6 +34,8 @@ const LeagueProgressTab: React.FC<LeagueProgressTabProps> = ({ classroomId }) =>
   const [seasons, setSeasons] = useState<LeagueClassroomSeason[]>([]);
   const [activeSeasonId, setActiveSeasonId] = useState<number | null>(null);
   const [boardRow, setBoardRow] = useState<LeagueBoardRow | null>(null);
+  // #3615: the chest wording follows this season's story pack.
+  const [chestName, setChestName] = useState<string>(DEFAULT_THEME_FALLBACK.chest.name);
   const [roster, setRoster] = useState<LeagueRosterProgressEntry[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -65,6 +68,7 @@ const LeagueProgressTab: React.FC<LeagueProgressTabProps> = ({ classroomId }) =>
           return;
         }
         setBoardRow(row);
+        setChestName((board.theme ?? DEFAULT_THEME_FALLBACK).chest.name);
         return getTeamRosterProgress(token, activeSeasonId, row.team_id).then(setRoster);
       })
       .catch((err) => setError(err instanceof LeagueApiError ? err.message : '載入排行榜失敗'));
@@ -111,7 +115,7 @@ const LeagueProgressTab: React.FC<LeagueProgressTabProps> = ({ classroomId }) =>
             tone="accent"
           />
           <p className="mt-2 text-[11px] text-white/80">
-            {chestHintText(boardRow.treasure_chest_eligible, boardRow.treasure_chest_participants_needed)}
+            {chestHintText(chestName, boardRow.treasure_chest_eligible, boardRow.treasure_chest_participants_needed)}
           </p>
         </div>
       )}

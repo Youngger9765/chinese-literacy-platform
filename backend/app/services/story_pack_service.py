@@ -8,30 +8,30 @@ from pydantic import ValidationError
 
 from ..schemas.story_pack import StoryPack, StoryPackSummary
 from .story_pack_defaults import BUILTIN_PACKS
+from .story_pack_errors import translate_validation_error
 from .story_pack_store import StoryPackStore, StoryPackStoreError, resolve_pack, resolve_pack_for_season
 
 
 class StoryPackServiceError(Exception):
-    def __init__(self, message: str, status_code: int = 400):
+    def __init__(self, message: str, status_code: int = 400, errors: list[dict] | None = None):
         super().__init__(message)
         self.message = message
         self.status_code = status_code
+        # Field-level validation errors, see validate_pack_payload.
+        self.errors = errors or []
 
 
 def validate_pack_payload(raw: dict) -> tuple[StoryPack | None, list[dict]]:
-    """Live-validation entry point (no write). Returns (pack, []) on
-    success, or (None, errors) where each error is
-    {"loc": "a.b.c", "msg": "..."} — shaped for a form/JSON-editor UI to
-    highlight the offending field, not Pydantic's raw exception repr."""
+    """Live-validation entry point, no write. Returns pack and an empty list
+    on success, or None and errors where each error is a dict with
+    loc = machine path like chest.name, field = Chinese label shown to the
+    admin like 寶箱名稱, msg = Chinese description of what is wrong.
+    Issue 3615: these used to be raw Pydantic English like Value error."""
     try:
         pack = StoryPack(**raw)
         return pack, []
     except ValidationError as exc:
-        errors = [
-            {"loc": ".".join(str(p) for p in e["loc"]), "msg": e["msg"]}
-            for e in exc.errors()
-        ]
-        return None, errors
+        return None, [translate_validation_error(e) for e in exc.errors()]
 
 
 def list_packs(store: StoryPackStore) -> list[StoryPackSummary]:
@@ -56,7 +56,7 @@ def get_pack_or_404(store: StoryPackStore, key: str) -> StoryPack:
 def upsert_custom_pack(store: StoryPackStore, raw: dict) -> StoryPack:
     pack, errors = validate_pack_payload(raw)
     if pack is None:
-        raise StoryPackServiceError("劇情包內容驗證失敗", status_code=422)
+        raise StoryPackServiceError("劇情包內容驗證失敗", status_code=422, errors=errors)
     try:
         return store.upsert_custom(pack)
     except StoryPackStoreError as exc:
