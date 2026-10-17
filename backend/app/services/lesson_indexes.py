@@ -836,20 +836,40 @@ def _mcq_from(l: dict, section: dict | None = None) -> list[dict]:
         answer = q.get("answer")
         if answer and answer > last:
             continue          # answer points past every option — withhold the question
-        # 正解那一格是空的 → 這一題答不出來，不能送到學生面前。
+        # #3621: a handful of comprehension options are a DRAWING, not
+        # text ("下列哪一張圖…") — `option_images` (added per-lesson in the
+        # YAML, keyed A-D like `options`) carries the asset filename for
+        # those. Resolve it into the same same-origin asset route
+        # `app/routes/assets.py::get_lesson_asset` already serves spotlight
+        # figures through, BEFORE deciding whether to withhold the question.
+        uid = l.get("lesson_uid")
+        img_map = q.get("option_images")
+        img_map = img_map if isinstance(img_map, dict) else {}
+
+        def _option_image_url(key: str, _img_map: dict = img_map, _uid: str | None = uid) -> str | None:
+            fname = _img_map.get(key)
+            return f"/assets/lesson/{_uid}/{fname}" if (fname and _uid) else None
+
+        answer_image = _option_image_url(answer) if answer else None
+        # 正解那一格是空的「且」沒有圖片 → 這一題答不出來，不能送到學生面前。
         #
-        # 🔴 三題這樣送出去過（L0073 / L0052 / L0143），全是「下列哪一張圖」：
+        # 🔴 這樣送出去過三題（L0073 / L0052 / L0143），全是「下列哪一張圖」：
         #    四個選項是四張圖（w:drawing），文字層只有「A.」「B.」「C.」「D.」
         #    加上教師版的橘色括號註記 —— 而註記偏偏就缺在正確的那一個。
         #    學生看到四個選項、正確的那個是空白，選哪個都被判錯。
         #
-        # 判準用「正解那格是空的」而不是 `options_are_images` 旗標：三課裡只有
-        # L0143 帶那個旗標，用旗標會修好一課、看起來卻像修完了。
-        if answer and not str(opts.get(answer, "")).strip():
+        # #3621 之後兩課（L0052/L0143）補上了 `option_images`，所以它們不再
+        # 被這條擋下；L0073 的圖仍然沒有抽到，繼續被這條擋住（誠實扣留，
+        # 見 content_known_gaps.yaml）。
+        if answer and not str(opts.get(answer, "")).strip() and not answer_image:
             continue
+        option_images = (
+            [_option_image_url(k) for k in letters] if img_map else None
+        )
         out.append({
             "question": q.get("stem", ""),
             "options": [opts.get(k, "") for k in letters],
+            "option_images": option_images,
             "answer": answer,
             # 教師版的說明：`questions` 那批叫 `option_corrections`，
             # `items` 那批叫 `option_notes`。兩個都收，欄位名不同不代表意思不同。

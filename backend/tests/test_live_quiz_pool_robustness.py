@@ -33,11 +33,18 @@ def test_comprehension_withholds_question_whose_correct_option_is_blank():
 
 
 def test_comprehension_real_l0052_keeps_its_valid_questions():
+    """#3621: Q3's drawing was identified (assets/fig10-13.jpeg) and wired in
+    as `option_images` — it's no longer withheld, it's served WITH an image
+    on the answer option instead of blank text."""
     lesson = load_lesson("L0052")
     items = comprehension.generate_items("L0052", lesson)
     idx = {i.source_index for i in items}
-    assert "3" not in idx           # the blank-answer image question
-    assert len(items) >= 3          # the lesson's other questions survive
+    assert "3" in idx               # now served, not withheld
+    q3 = next(i for i in items if i.source_index == "3")
+    answer_option = next(o for o in q3.options if o.key == q3.correct_key)
+    assert answer_option.text == ""
+    assert answer_option.image == "/assets/lesson/L0052/fig13.jpeg"
+    assert len(items) >= 4          # the lesson's other questions survive
 
 
 def _raising_adapter(lesson_uid, lesson, rng=None):
@@ -123,7 +130,12 @@ def test_every_lesson_every_source_produces_only_valid_items(monkeypatch):
             for it in items:
                 assert isinstance(it, QuizItem)
                 assert it.correct_key in {o.key for o in it.options}
-                assert all(str(o.text).strip() for o in it.options), f"blank option in {it.item_id}"
+                # #3621: an option may legitimately have blank text when its
+                # real content is a picture (「下列哪一張圖…」) — it must then
+                # carry `.image` instead. Neither present is still invalid.
+                assert all(str(o.text).strip() or o.image for o in it.options), (
+                    f"option with neither text nor image in {it.item_id}"
+                )
             per_module[module] += len(items)
     assert dropped == [], f"adapter produced items that fail validation: {dropped[:10]}"
     for module, n in per_module.items():
