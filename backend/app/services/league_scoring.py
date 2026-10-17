@@ -180,6 +180,36 @@ def _first_completions(
     return first
 
 
+def _first_completions_bulk(
+    db: Session, student_ids: list[int]
+) -> dict[int, dict[str, tuple[str, datetime, datetime]]]:
+    if not student_ids:
+        return {}
+    rows = (
+        db.query(
+            LearningSession.student_id,
+            LearningSession.story_slug,
+            LearningSession.session_mode,
+            LearningSession.started_at,
+            LearningSession.completed_at,
+        )
+        .filter(
+            LearningSession.student_id.in_(student_ids),
+            LearningSession.status == "completed",
+            LearningSession.completed_at.isnot(None),
+            LearningSession.story_slug.isnot(None),
+        )
+        .order_by(LearningSession.completed_at.asc())
+        .all()
+    )
+    completions: dict[int, dict[str, tuple[str, datetime, datetime]]] = {}
+    for student_id, slug, mode, started_at, completed_at in rows:
+        first = completions.setdefault(student_id, {})
+        if slug not in first:
+            first[slug] = (mode, started_at, completed_at)
+    return completions
+
+
 def compute_student_score(
     db: Session,
     student_id: int,
@@ -193,6 +223,37 @@ def compute_student_score(
     full rule set and the known "own account" limitation.
     """
     completions = _first_completions(db, student_id)
+    return _score_from_completions(completions, team_grade, window_start, window_end, weights)
+
+
+def compute_student_scores_bulk(
+    db: Session,
+    student_ids: list[int],
+    team_grade: int,
+    window_start: datetime,
+    window_end: datetime,
+    weights: LeagueWeights,
+) -> dict[int, ScoreResult]:
+    completions_by_student = _first_completions_bulk(db, student_ids)
+    return {
+        student_id: _score_from_completions(
+            completions_by_student.get(student_id, {}),
+            team_grade,
+            window_start,
+            window_end,
+            weights,
+        )
+        for student_id in student_ids
+    }
+
+
+def _score_from_completions(
+    completions: dict[str, tuple[str, datetime, datetime]],
+    team_grade: int,
+    window_start: datetime,
+    window_end: datetime,
+    weights: LeagueWeights,
+) -> ScoreResult:
 
     # Filter to the window + apply the 3-minute rule + the grade floor,
     # collecting anomalies as we go.

@@ -35,7 +35,7 @@ from ..models.school import Classroom, ClassroomStudent, School
 from ..models.user import User
 from .league_scoring import (
     LEAGUE_WEIGHTS_BY_VERSION,
-    compute_student_score,
+    compute_student_scores_bulk,
     weights_from_snapshot,
     weights_snapshot_for_version,
 )
@@ -373,10 +373,10 @@ def get_season_board(db: Session, season: LeagueSeason) -> list[dict]:
         if roster_size == 0:
             average, participants = 0.0, 0
         else:
-            results = [
-                compute_student_score(db, m.student_id, team.grade, game_start, game_end, weights)
-                for m in roster
-            ]
+            scores = compute_student_scores_bulk(
+                db, [member.student_id for member in roster], team.grade, game_start, game_end, weights
+            )
+            results = [scores[member.student_id] for member in roster]
             average = sum(r.points for r in results) / roster_size
             participants = sum(1 for r in results if r.points > 0)
 
@@ -465,13 +465,11 @@ def get_my_team_summary(db: Session, student: User, season: LeagueSeason) -> dic
         .filter(LeagueTeamRosterMember.team_id == team.id)
         .all()
     )
-    all_results = [
-        compute_student_score(db, m.student_id, team.grade, game_start, game_end, weights)
-        for m in roster
-    ]
-    my_result = compute_student_score(
-        db, student.id, team.grade, game_start, game_end, weights
+    scores = compute_student_scores_bulk(
+        db, [member.student_id for member in roster], team.grade, game_start, game_end, weights
     )
+    all_results = [scores[member.student_id] for member in roster]
+    my_result = scores[student.id]
     roster_size = len(roster)
     participants = sum(1 for r in all_results if r.points > 0)
     average = sum(r.points for r in all_results) / roster_size if roster_size else 0.0
@@ -534,11 +532,12 @@ def get_team_roster_progress(db: Session, team: LeagueTeam, season: LeagueSeason
         .filter(LeagueTeamRosterMember.team_id == team.id)
         .all()
     )
+    scores = compute_student_scores_bulk(
+        db, [member.student_id for member in roster], team.grade, game_start, game_end, weights
+    )
     rows = []
     for member in roster:
-        result = compute_student_score(
-            db, member.student_id, team.grade, game_start, game_end, weights
-        )
+        result = scores[member.student_id]
         rows.append(
             {
                 "student_id": member.student_id,
@@ -564,11 +563,12 @@ def get_team_anomalies(db: Session, team: LeagueTeam, season: LeagueSeason) -> l
         .filter(LeagueTeamRosterMember.team_id == team.id)
         .all()
     )
+    scores = compute_student_scores_bulk(
+        db, [member.student_id for member in roster], team.grade, game_start, game_end, weights
+    )
     out = []
     for member in roster:
-        result = compute_student_score(
-            db, member.student_id, team.grade, game_start, game_end, weights
-        )
+        result = scores[member.student_id]
         if result.anomalies:
             out.append(
                 {
