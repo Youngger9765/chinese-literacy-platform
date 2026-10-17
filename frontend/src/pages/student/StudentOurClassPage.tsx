@@ -122,6 +122,23 @@ const StudentOurClassPage: React.FC = () => {
         </div>
       )}
 
+      {/* ── 本季劇情：老師端看得到劇情包的標題與開場，學生也要看得到。
+          用 my-history 自帶的 theme（不靠 board），所以 board 載入失敗時
+          劇情一樣在，issue 3615。 ──── */}
+      <section
+        data-testid="student-story-intro"
+        aria-label="本季劇情"
+        className="bg-surface-container-lowest rounded-2xl shadow-card p-5 space-y-2"
+      >
+        <p className="text-xs font-medium text-accent">{activeTheme.era} · 本季劇情</p>
+        <h2 className="text-lg font-bold text-on-surface">{activeTheme.title}</h2>
+        {activeTheme.intro.map((paragraph, i) => (
+          <p key={i} className="text-sm text-on-surface-variant leading-relaxed">
+            {paragraph}
+          </p>
+        ))}
+      </section>
+
       {/* ── 對戰首頁：跟老師看到的同一個能量條，學生也看得到對方班 ──── */}
       {board && board.board.length === 2 && (
         <BattleHero

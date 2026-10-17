@@ -1,0 +1,344 @@
+[
+  {
+    "schema_version": 1,
+    "key": "myth",
+    "era": "上古",
+    "title": "上古神話歷險記",
+    "intro": [
+      "一陣書頁翻動的風吹來，兩班讀家一起掉進了古書裡的上古神話世界。",
+      "書中的文字被一層奇怪的迷霧遮住了——每讀完一篇課文，就能驅散一塊迷霧，翻開下一個故事。",
+      "從盤古開天到大禹治水，四段古老的故事正等著被重新讀懂。"
+    ],
+    "faction_labels": [
+      "探書隊",
+      "尋光隊"
+    ],
+    "energy_bar_label": "書頁亮度",
+    "milestones": [
+      {
+        "ratio": 0.25,
+        "message": "盤古一斧劈開混沌，天與地終於分開——《三五歷紀》記載的開天第一步"
+      },
+      {
+        "ratio": 0.5,
+        "message": "天破了一角，女媧煉五色石補天——出自《淮南子．覽冥訓》"
+      },
+      {
+        "ratio": 0.75,
+        "message": "十日並出，后羿張弓射下九個——《淮南子．本經訓》裡的英雄"
+      },
+      {
+        "ratio": 1.0,
+        "message": "大禹治水成功，故事從神話走進了信史——《尚書》與《史記．夏本紀》"
+      }
+    ],
+    "background_art": null,
+    "chest": {
+      "name": "神話寶箱",
+      "description": "全班過半同學都翻開了書，寶箱就會出現",
+      "art": {
+        "kind": "emoji",
+        "value": "📜"
+      }
+    },
+    "badges": [
+      {
+        "key": "individual_badge",
+        "name": "尋頁勳章",
+        "description": "獨自讀完全部篇章，找回遺失的書頁",
+        "art": {
+          "kind": "emoji",
+          "value": "🔍"
+        }
+      },
+      {
+        "key": "class_badge",
+        "name": "點亮迷霧勳章",
+        "description": "全班平均達標，一起驅散了迷霧",
+        "art": {
+          "kind": "emoji",
+          "value": "🌤️"
+        }
+      }
+    ],
+    "result_copy": {
+      "win": "你們的書頁率先變得清晰，這段故事由你們讀懂了！",
+      "lose": "迷霧還沒散去，下一段故事換你們挑戰",
+      "draw": "兩隊同時讀懂了這段故事，迷霧一起散去了"
+    }
+  },
+  {
+    "schema_version": 1,
+    "key": "tang-dynasty",
+    "era": "唐",
+    "title": "大唐風雲賽",
+    "intro": [
+      "一陣風吹開了一本描寫長安城的古書，兩班讀家一起走進了書裡的絲路世界。",
+      "每讀完一篇課文，就像為書中的驛站補上一份糧草；糧草齊備，烽火台就能點亮下一程。"
+    ],
+    "faction_labels": [
+      "長安守軍",
+      "塞外行旅"
+    ],
+    "energy_bar_label": "軍糧",
+    "milestones": [
+      {
+        "ratio": 0.25,
+        "message": "糧草剛起步，驛站已經感受到暖意"
+      },
+      {
+        "ratio": 0.5,
+        "message": "糧倉過半，商隊士氣大振"
+      },
+      {
+        "ratio": 0.75,
+        "message": "烽火將燃，再加把勁就能照亮全程"
+      },
+      {
+        "ratio": 1.0,
+        "message": "糧倉全滿，烽火點亮，絲路暢通無阻"
+      }
+    ],
+    "background_art": {
+      "kind": "svg",
+      "value": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 400 160\" width=\"400\" height=\"160\">\n  <g fill=\"none\" stroke=\"#D99358\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" opacity=\"0.48\">\n    <path d=\"M8 139C50 130 68 146 107 137S168 115 207 123S275 142 337 133\"/>\n    <path d=\"M18 147C66 139 87 151 122 143S174 126 211 132\" opacity=\"0.55\"/>\n    <path d=\"M35 119C47 110 63 107 78 112\" opacity=\"0.5\"/>\n    <path d=\"M95 101C108 95 121 94 135 99\" opacity=\"0.36\"/>\n  </g>\n  <g fill=\"#B96548\" opacity=\"0.46\">\n    <path d=\"M40 125c3-8 10-10 15-5 4-7 12-5 15 3l5 2-3 3h-6l-2 8h-3l1-8H50l-1 8h-3l1-8h-7zm13-4c2 0 3 2 4 4h6c-2-4-4-6-7-6-2 0-3 1-3 2z\"/>\n    <path d=\"M80 119c3-7 9-9 14-5 4-6 11-4 14 3l5 2-3 3h-6l-2 8h-3l1-8H89l-1 8h-3l1-8h-7zm12-4c2 0 3 2 4 4h6c-2-4-4-6-7-6-2 0-3 1-3 2z\"/>\n    <path d=\"M31 122l5-8 3 1-3 8zm43-4l5-8 3 1-3 8z\"/>\n  </g>\n  <g fill=\"#D99358\" opacity=\"0.42\">\n    <path d=\"M316 134V65h7V48h7V34h5v14h7v17h7v69h-9v-26h-8v26zm10-69h6V54h-6zm0 12h6v-6h-6zm0 12h6v-6h-6z\"/>\n    <path d=\"M309 134h40v4h-40z\"/>\n    <path d=\"M321 34l7-12 7 12z\"/>\n    <path d=\"M342 80l18 9v45h-12v-31h-6z\" opacity=\"0.75\"/>\n  </g>\n  <g fill=\"none\" stroke=\"#B96548\" stroke-width=\"1.3\" stroke-linecap=\"round\" stroke-linejoin=\"round\" opacity=\"0.4\">\n    <path d=\"M278 134h90\"/>\n    <path d=\"M355 89v-9m0 0 4 4m-4-4-4 4\"/>\n    <path d=\"M330 22v-9m0 0 3 3m-3-3-3 3\"/>\n    <path d=\"M145 136c10-7 18-8 28-4\"/>\n  </g>\n  <circle cx=\"294\" cy=\"42\" r=\"4\" fill=\"#D99358\" opacity=\"0.3\"/>\n  <circle cx=\"282\" cy=\"56\" r=\"2\" fill=\"#B96548\" opacity=\"0.3\"/>\n</svg>"
+    },
+    "chest": {
+      "name": "絲路寶箱",
+      "description": "全班過半同學都上路了，寶箱就在驛站裡等著開啟",
+      "art": {
+        "kind": "svg",
+        "value": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 48 48\" width=\"48\" height=\"48\"><path fill=\"#9A572B\" d=\"M7 20h34v19a4 4 0 0 1-4 4H11a4 4 0 0 1-4-4V20z\"/><path fill=\"#C47A36\" d=\"M7 20v-4.5C7 10.8 10.8 7 15.5 7h17C37.2 7 41 10.8 41 15.5V20H7z\"/><path fill=\"#E5A93D\" d=\"M5 19h38v5H5zM10 20h4v23h-4zM34 20h4v23h-4z\"/><path fill=\"#E5A93D\" d=\"M19 22h10v7h-1v8a3 3 0 0 1-3 3h-2a3 3 0 0 1-3-3v-8h-1v-7zm3 3v3h4v-3h-4z\"/><path fill=\"#744020\" d=\"M14 31h20v3H14z\"/><path fill=\"#F3C65A\" d=\"M21 25h6v3h-6z\"/></svg>"
+      }
+    },
+    "badges": [
+      {
+        "key": "individual_badge",
+        "name": "行者勳章",
+        "description": "一路讀下去，累積達標，獨得這份旅人的榮耀",
+        "art": {
+          "kind": "emoji",
+          "value": "🎖️"
+        }
+      },
+      {
+        "key": "class_badge",
+        "name": "守關勳章",
+        "description": "全班平均達標，一起守住了這座驛站",
+        "art": {
+          "kind": "emoji",
+          "value": "🏯"
+        }
+      }
+    ],
+    "result_copy": {
+      "win": "烽火率先點亮，這一程由你們守住了！",
+      "lose": "糧草還在路上，下一程換你們點亮烽火",
+      "draw": "兩班的烽火同時點亮，絲路因你們而暢通"
+    }
+  },
+  {
+    "schema_version": 1,
+    "key": "song-dynasty",
+    "era": "宋",
+    "title": "汴京風華賽",
+    "intro": [
+      "一陣風吹開了一本描寫汴京城的古書，兩班讀家一起走進了書裡的瓦子世界。",
+      "每讀完一篇課文，就像替書坊多刻好一塊雕版；雕版集滿，整條街的燈籠就會一起點亮。"
+    ],
+    "faction_labels": [
+      "汴京書坊",
+      "江南書院"
+    ],
+    "energy_bar_label": "墨量",
+    "milestones": [
+      {
+        "ratio": 0.25,
+        "message": "第一塊雕版刻好，書坊門口已經有人探頭張望"
+      },
+      {
+        "ratio": 0.5,
+        "message": "墨量過半，街坊開始排隊等著翻閱"
+      },
+      {
+        "ratio": 0.75,
+        "message": "雕版快集滿了，再刻幾塊燈籠就能點亮"
+      },
+      {
+        "ratio": 1.0,
+        "message": "雕版集滿，滿街燈籠齊亮，新書刻印完成"
+      }
+    ],
+    "background_art": {
+      "kind": "svg",
+      "value": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 400 160\" width=\"400\" height=\"160\">\n  <g fill=\"none\" stroke=\"#C84B4B\" stroke-width=\"1.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" opacity=\"0.42\">\n    <path d=\"M0 14H400\"/>\n    <path d=\"M27 14V27M82 14V23M137 14V29M192 14V24M247 14V29M302 14V22M357 14V27\"/>\n  </g>\n  <g fill=\"#C84B4B\" fill-opacity=\"0.14\" stroke=\"#C84B4B\" stroke-width=\"1.1\" stroke-linejoin=\"round\" opacity=\"0.68\">\n    <path d=\"M18 29L23 24H31L36 29V43L31 48H23L18 43Z\"/>\n    <path d=\"M23 48V53M31 48V53M21 53H33\" fill=\"none\"/>\n    <path d=\"M74 25L79 20H87L92 25V39L87 44H79L74 39Z\"/>\n    <path d=\"M79 44V49M87 44V49M77 49H89\" fill=\"none\"/>\n    <path d=\"M127 31L133 25H141L147 31V47L141 53H133L127 47Z\"/>\n    <path d=\"M133 53V59M141 53V59M131 59H143\" fill=\"none\"/>\n    <path d=\"M184 26L189 21H197L202 26V40L197 45H189L184 40Z\"/>\n    <path d=\"M189 45V50M197 45V50M187 50H199\" fill=\"none\"/>\n    <path d=\"M238 31L244 25H252L258 31V47L252 53H244L238 47Z\"/>\n    <path d=\"M244 53V59M252 53V59M242 59H254\" fill=\"none\"/>\n  </g>\n  <g fill=\"#A63D52\" fill-opacity=\"0.16\" stroke=\"#A63D52\" stroke-width=\"1.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" opacity=\"0.72\">\n    <path d=\"M270 160V145H280V132H290V118H300V103H310V88H320V72H330V57H340V42H350V57H360V72H370V88H380V103H390V160Z\" fill=\"none\"/>\n    <path d=\"M293 118H397L389 111H301Z\"/>\n    <path d=\"M287 103H393L384 96H296Z\"/>\n    <path d=\"M281 88H387L378 81H290Z\"/>\n    <path d=\"M294 78H374L367 71H301Z\"/>\n    <path d=\"M304 63H364L358 57H310Z\"/>\n    <path d=\"M330 42L340 31L350 42Z\"/>\n    <path d=\"M303 118V160M324 103V160M346 88V160M368 103V160M389 118V160\"/>\n    <path d=\"M310 126H318V139H310ZM332 111H340V124H332ZM354 96H362V109H354ZM376 111H384V124H376Z\" fill=\"#C84B4B\" fill-opacity=\"0.25\"/>\n    <path d=\"M266 145C278 139 285 139 297 145M288 132C300 126 309 126 321 132M310 118C322 112 332 112 344 118\" fill=\"none\"/>\n  </g>\n  <g fill=\"none\" stroke=\"#C84B4B\" stroke-width=\"1\" stroke-linecap=\"round\" opacity=\"0.34\">\n    <path d=\"M4 145C32 136 54 138 76 148C98 157 119 155 141 145C164 134 189 136 211 147C230 156 251 156 270 148\"/>\n    <circle cx=\"61\" cy=\"139\" r=\"2.5\" fill=\"#C84B4B\" fill-opacity=\"0.35\" stroke=\"none\"/>\n    <circle cx=\"214\" cy=\"145\" r=\"2\" fill=\"#C84B4B\" fill-opacity=\"0.35\" stroke=\"none\"/>\n  </g>\n</svg>"
+    },
+    "chest": {
+      "name": "瓦子寶箱",
+      "description": "全班過半同學都動筆了，書坊的寶箱就會打開",
+      "art": {
+        "kind": "svg",
+        "value": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 48 48\" width=\"48\" height=\"48\" fill=\"none\">\n  <path fill=\"#F6E2A5\" d=\"M8 18h32v22a4 4 0 0 1-4 4H12a4 4 0 0 1-4-4V18Z\"/>\n  <path fill=\"#C94732\" d=\"M8 22h32v18a4 4 0 0 1-4 4H12a4 4 0 0 1-4-4V22Z\"/>\n  <path fill=\"#A9362B\" d=\"M8 22h32v5H8z\"/>\n  <path fill=\"#F4C65D\" d=\"M21 18h6v26h-6z\"/>\n  <path fill=\"#F8D982\" d=\"M8 15a4 4 0 0 1 4-4h24a4 4 0 0 1 4 4v7H8z\"/>\n  <path fill=\"#C94732\" d=\"M10 16a3 3 0 0 1 3-3h22a3 3 0 0 1 3 3v3H10z\"/>\n  <path fill=\"#F4C65D\" d=\"M21 11h6v11h-6z\"/>\n  <path fill=\"#F4C65D\" d=\"M24 14c-5 0-8-3-7-6 3-1 6 1 7 6Zm0 0c5 0 8-3 7-6-3-1-6 1-7 6Z\"/>\n  <path fill=\"#FFE9A2\" d=\"M24 14c-2-3-4-4-5-4 0 2 2 4 5 4Zm0 0c2-3 4-4 5-4 0 2-2 4-5 4Z\"/>\n  <path fill=\"#8F2E29\" d=\"M14 29h5v2h-5zm15 0h5v2h-5z\"/>\n</svg>"
+      }
+    },
+    "badges": [
+      {
+        "key": "individual_badge",
+        "name": "刻工勳章",
+        "description": "一人刻滿一部書的雕版，技藝獨得認可",
+        "art": {
+          "kind": "emoji",
+          "value": "🖋️"
+        }
+      },
+      {
+        "key": "class_badge",
+        "name": "書坊勳章",
+        "description": "全班平均達標，一起刻完了這部新書",
+        "art": {
+          "kind": "emoji",
+          "value": "🏮"
+        }
+      }
+    ],
+    "result_copy": {
+      "win": "滿街燈籠率先點亮，這部新書由你們刻成！",
+      "lose": "雕版還差幾塊，下一部書換你們刻成",
+      "draw": "兩間書坊的燈籠同時點亮，街坊今晚讀得特別開心"
+    }
+  },
+  {
+    "schema_version": 1,
+    "key": "wuxia",
+    "era": "武林",
+    "title": "武林修練記",
+    "intro": [
+      "一陣風吹開了一本武俠小說，兩班讀家一起走進了書裡的武林世界。",
+      "書裡的武功秘笈被風吹散了幾頁，每讀完一篇課文，就能找回一頁、練成一招。"
+    ],
+    "faction_labels": [
+      "清風山莊",
+      "明月谷"
+    ],
+    "energy_bar_label": "內力",
+    "milestones": [
+      {
+        "ratio": 0.25,
+        "message": "蹲馬步練基本功，雖然枯燥，卻是扎穩根基的第一步"
+      },
+      {
+        "ratio": 0.5,
+        "message": "學會了輕功，身手變得靈活，一躍而起"
+      },
+      {
+        "ratio": 0.75,
+        "message": "與同門切磋劍法，在你來我往中練出默契"
+      },
+      {
+        "ratio": 1.0,
+        "message": "練成壓箱底的絕招，終於能行俠仗義、濟弱扶傾"
+      }
+    ],
+    "background_art": null,
+    "chest": {
+      "name": "秘笈寶箱",
+      "description": "全班過半同學都開始修練，秘笈寶箱就會打開",
+      "art": {
+        "kind": "emoji",
+        "value": "📖"
+      }
+    },
+    "badges": [
+      {
+        "key": "individual_badge",
+        "name": "武學奇才勳章",
+        "description": "個人武功大進，獨得師門讚賞",
+        "art": {
+          "kind": "emoji",
+          "value": "🥋"
+        }
+      },
+      {
+        "key": "class_badge",
+        "name": "同心協力勳章",
+        "description": "全班平均達標，一起練成了團體武藝",
+        "art": {
+          "kind": "emoji",
+          "value": "🤝"
+        }
+      }
+    ],
+    "result_copy": {
+      "win": "你們率先練成絕招，技高一籌！",
+      "lose": "內力還差一點，下一回合再切磋",
+      "draw": "兩班同時練成絕招，不分軒輊"
+    }
+  },
+  {
+    "schema_version": 1,
+    "key": "detective",
+    "era": "校園",
+    "title": "少年偵探社事件簿",
+    "intro": [
+      "兩班讀家加入了神秘的少年偵探社，準備一起解開學校裡發生的小謎團。",
+      "每答對一題，就能找到一條新線索——線索湊齊，謎底就會水落石出。"
+    ],
+    "faction_labels": [
+      "謎團調查隊",
+      "線索調查隊"
+    ],
+    "energy_bar_label": "線索",
+    "milestones": [
+      {
+        "ratio": 0.25,
+        "message": "第一件案子：消失的班費撲滿——是誰不小心碰倒了呢？"
+      },
+      {
+        "ratio": 0.5,
+        "message": "第二件案子：圖書館神秘留言條——是誰想傳遞什麼訊息？"
+      },
+      {
+        "ratio": 0.75,
+        "message": "第三件案子：不見的教室掛圖——線索指向被放錯的角落"
+      },
+      {
+        "ratio": 1.0,
+        "message": "最後的謎底大公開：所有線索湊在一起，真相終於清楚了！"
+      }
+    ],
+    "background_art": null,
+    "chest": {
+      "name": "線索百寶箱",
+      "description": "全班過半同學都交出破案報告，百寶箱就會打開",
+      "art": {
+        "kind": "emoji",
+        "value": "🔎"
+      }
+    },
+    "badges": [
+      {
+        "key": "individual_badge",
+        "name": "名偵探勳章",
+        "description": "獨自破解全部案件，推理力滿分",
+        "art": {
+          "kind": "emoji",
+          "value": "🕵️"
+        }
+      },
+      {
+        "key": "class_badge",
+        "name": "團隊推理勳章",
+        "description": "全班平均達標，一起破了案",
+        "art": {
+          "kind": "emoji",
+          "value": "🧩"
+        }
+      }
+    ],
+    "result_copy": {
+      "win": "你們率先破解所有謎團，真相大白！",
+      "lose": "線索還差一點，下一件案子見真章",
+      "draw": "兩隊同時破案，謎底一起揭曉"
+    }
+  }
+]
