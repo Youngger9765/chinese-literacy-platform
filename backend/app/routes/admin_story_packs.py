@@ -25,6 +25,7 @@ than Young's approval covered — see that docstring).
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -122,6 +123,10 @@ def upsert_pack(
     try:
         return svc.upsert_custom_pack(get_story_pack_store(db), raw).model_dump()
     except svc.StoryPackServiceError as exc:
+        if exc.errors:
+            # Issue 3615: hand the studio the same field-level Chinese errors
+            # the live validator returns, not just a generic sentence.
+            return JSONResponse(status_code=exc.status_code, content={"detail": exc.message, "errors": exc.errors})
         raise _handle_service_error(exc)
 
 

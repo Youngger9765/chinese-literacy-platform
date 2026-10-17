@@ -78,7 +78,12 @@ const MOCK_ROWS: [LeagueBoardRow, LeagueBoardRow] = [
   },
 ];
 
-type FieldError = { loc: string; msg: string };
+/** One server-side validation error. `field` is the Chinese label and
+ * `msg` the Chinese description; `loc` is the JSON path, shown small so an
+ * admin editing raw JSON can find the spot. Issue 3615. */
+type FieldError = { loc: string; field?: string; msg: string };
+
+const JSON_SYNTAX_HINT = 'JSON 語法錯誤：請檢查逗號、引號與括號是否成對';
 
 const StoryPackStudioPage: React.FC = () => {
   const { token } = useAuth();
@@ -151,8 +156,9 @@ const StoryPackStudioPage: React.FC = () => {
     try {
       raw = JSON.parse(jsonText);
       setJsonParseError(null);
-    } catch (err) {
-      setJsonParseError(err instanceof Error ? err.message : 'JSON 格式錯誤');
+    } catch {
+      // The browser's own message is English, so show a Chinese hint.
+      setJsonParseError(JSON_SYNTAX_HINT);
       setParsedPack(null);
       return;
     }
@@ -401,11 +407,17 @@ const StoryPackStudioPage: React.FC = () => {
                 />
                 {(jsonParseError || fieldErrors.length > 0) && (
                   <div className="p-3 border-t border-gray-100 bg-red-50/50">
-                    {jsonParseError && <p className="text-xs text-red-700">{jsonParseError}</p>}
-                    <ul className="text-xs text-red-700 list-disc ml-4">
+                    {jsonParseError && (
+                      <p data-testid="story-pack-json-error" className="text-xs text-red-700">
+                        {jsonParseError}
+                      </p>
+                    )}
+                    <ul className="text-xs text-red-700 space-y-1">
                       {fieldErrors.map((e, i) => (
-                        <li key={i}>
-                          <code>{e.loc}</code>: {e.msg}
+                        <li key={i} data-testid="story-pack-field-error">
+                          <span className="font-semibold">{e.field ?? e.loc}</span>
+                          ：{e.msg}
+                          {e.loc && <code className="ml-1 text-[10px] text-red-400">{e.loc}</code>}
                         </li>
                       ))}
                     </ul>

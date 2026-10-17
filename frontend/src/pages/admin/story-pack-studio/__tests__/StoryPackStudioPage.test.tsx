@@ -147,4 +147,65 @@ describe('StoryPackStudioPage', () => {
     await waitFor(() => expect(screen.getByText('內建劇情包不可覆蓋或刪除，請另存新 key')).toBeInTheDocument());
     expect(screen.queryByRole('button', { name: '刪除' })).not.toBeInTheDocument();
   });
+
+  // Issue 3615: errors must be Chinese and field-level, one row per field.
+  it('lists each validation error under its Chinese field label', async () => {
+    mockFetchPack.mockResolvedValue(VALID_PACK_BODY);
+    mockValidatePackPayload.mockResolvedValue({
+      valid: false,
+      errors: [
+        { loc: 'chest.name', field: '寶箱名稱', msg: '不可包含「中國」，請改用中立的書中世界／冒險描述' },
+        { loc: 'intro.1', field: '開場白第 2 段', msg: '最多 160 個字' },
+      ],
+    });
+    render(<StoryPackStudioPage />);
+    await waitFor(() => expect(screen.getByText('鄭和下西洋賽')).toBeInTheDocument());
+    fireEvent.click(screen.getByText('鄭和下西洋賽'));
+
+    const rows = await screen.findAllByTestId('story-pack-field-error');
+    expect(rows).toHaveLength(2);
+    expect(rows[0]).toHaveTextContent('寶箱名稱');
+    expect(rows[0]).toHaveTextContent('不可包含「中國」');
+    expect(rows[1]).toHaveTextContent('開場白第 2 段');
+    expect(rows[1]).toHaveTextContent('最多 160 個字');
+    expect(screen.getByText('2 項錯誤')).toBeInTheDocument();
+  });
+
+  it('a rejected save shows the server field errors, in Chinese', async () => {
+    mockFetchPack.mockResolvedValue(VALID_PACK_BODY);
+    const api = await import('../../../../services/adminStoryPackApi');
+    mockUpsertPack.mockRejectedValue(
+      new api.AdminStoryPackApiError('劇情包內容驗證失敗', 422, [
+        { loc: 'badges.1.description', field: '第 2 個徽章說明', msg: '不可包含「大一統」，請改用中立的書中世界／冒險描述' },
+      ] as never),
+    );
+    render(<StoryPackStudioPage />);
+    await waitFor(() => expect(screen.getByText('鄭和下西洋賽')).toBeInTheDocument());
+    fireEvent.click(screen.getByText('鄭和下西洋賽'));
+    await waitFor(() => expect(screen.getByRole('button', { name: '儲存' })).toBeEnabled());
+
+    fireEvent.click(screen.getByRole('button', { name: '儲存' }));
+
+    const rows = await screen.findAllByTestId('story-pack-field-error');
+    expect(rows[0]).toHaveTextContent('第 2 個徽章說明');
+    expect(rows[0]).toHaveTextContent('不可包含「大一統」');
+    expect(screen.getByText('劇情包內容驗證失敗')).toBeInTheDocument();
+  });
+
+  it('a JSON syntax error is explained in Chinese, not the browser English message', async () => {
+    mockFetchPack.mockResolvedValue(VALID_PACK_BODY);
+    render(<StoryPackStudioPage />);
+    await waitFor(() => expect(screen.getByText('鄭和下西洋賽')).toBeInTheDocument());
+    fireEvent.click(screen.getByText('鄭和下西洋賽'));
+    await waitFor(() => screen.getByRole('textbox'));
+
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'oops not json' } });
+
+    const detail = await screen.findByTestId('story-pack-json-error');
+    const text = detail.textContent ?? '';
+    expect(text).toContain('逗號');
+    for (const english of ['Unexpected', 'token', 'position', 'is not valid']) {
+      expect(text).not.toContain(english);
+    }
+  });
 });

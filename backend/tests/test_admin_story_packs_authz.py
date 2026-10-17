@@ -195,3 +195,38 @@ class TestSystemAdminPositiveControl:
         r2 = client.get("/api/admin/story-packs/seasons/123")
         assert r2.status_code == 200
         assert r2.json()["effective_pack"]["key"] == SONG_PACK_KEY
+
+
+
+class TestUpsertRejectionCarriesFieldErrors:
+    """Issue 3615: a rejected save must tell the admin WHICH field is wrong,
+    in Chinese — not just「劇情包內容驗證失敗」."""
+
+    def _payload_with_banned_word(self):
+        from app.services.story_pack_defaults import BUILTIN_PACKS
+
+        p = BUILTIN_PACKS[TANG_PACK_KEY].model_dump(mode="json")
+        p.pop("key")
+        p["chest"]["name"] = "中國寶箱"
+        return p
+
+    def test_put_invalid_returns_422_with_chinese_field_errors(self, make_client):
+        client = make_client("system_admin")
+        r = client.put("/api/admin/story-packs/qa-banned", json={"payload": self._payload_with_banned_word()})
+        assert r.status_code == 422, r.text
+        body = r.json()
+        assert body["detail"] == "劇情包內容驗證失敗"
+        hits = [e for e in body["errors"] if e["loc"] == "chest.name"]
+        assert len(hits) == 1, body
+        assert hits[0]["field"] == "寶箱名稱"
+        assert "「中國」" in hits[0]["msg"]
+        assert "Value error" not in r.text
+
+    def test_validate_endpoint_returns_same_field_errors(self, make_client):
+        client = make_client("system_admin")
+        payload = dict(self._payload_with_banned_word(), key="qa-banned")
+        r = client.post("/api/admin/story-packs/validate", json={"payload": payload})
+        assert r.status_code == 200
+        hits = [e for e in r.json()["errors"] if e["loc"] == "chest.name"]
+        assert hits and hits[0]["field"] == "寶箱名稱"
+        assert "Value error" not in r.text
