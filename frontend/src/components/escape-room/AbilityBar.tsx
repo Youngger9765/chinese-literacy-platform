@@ -20,7 +20,8 @@ const AbilityBar: React.FC<AbilityBarProps> = ({ used, disabled, onUse }) => (
   >
     <div className="mx-auto flex max-w-xl gap-2">
       {ABILITIES.map((ability) => {
-        const unavailable = disabled || used.includes(ability.key);
+        const actuallyUsed = used.includes(ability.key);
+        const unavailable = disabled || actuallyUsed;
         return (
           <button
             key={ability.key}
@@ -28,10 +29,10 @@ const AbilityBar: React.FC<AbilityBarProps> = ({ used, disabled, onUse }) => (
             disabled={unavailable}
             onClick={() => onUse(ability.key)}
             className="min-h-12 flex-1 rounded-xl border border-accent px-2 py-2 text-center text-xs font-semibold text-accent transition disabled:border-slate-300 disabled:bg-slate-100 disabled:text-slate-400 sm:text-sm"
-            aria-label={`${ability.title}，${unavailable ? '已使用' : ability.description}`}
+            aria-label={`${ability.title}，${actuallyUsed ? '已使用' : ability.description}`}
           >
             <span className="block">{ability.title}</span>
-            <span className="hidden font-normal sm:block">{unavailable ? '已使用' : ability.description}</span>
+            <span className="hidden font-normal sm:block">{actuallyUsed ? '已使用' : ability.description}</span>
           </button>
         );
       })}
