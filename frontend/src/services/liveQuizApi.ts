@@ -68,6 +68,11 @@ export type LiveQuizStatus = 'lobby' | 'question' | 'reveal' | 'ended';
 export interface LiveQuizOption {
   key: string;
   text: string;
+  /** #3621: present only for the handful of comprehension options whose
+   *  real content is a picture (「下列哪一張圖…」). Same-origin relative
+   *  path from the backend (`/assets/lesson/<uid>/<file>`) — resolved onto
+   *  ASSET_BASE in OptionGrid, the single place host/player render options. */
+  image?: string;
 }
 
 export interface LiveQuizRoundView {

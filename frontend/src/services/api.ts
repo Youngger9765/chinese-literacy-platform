@@ -115,7 +115,8 @@ interface ApiStoryDetail extends ApiStoryListItem {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fill_in_blank: Array<Record<string, any>> | null;
   multiple_choice: Array<{ question: string; options: string[]; answer: string | null;
-    explanation: string | null; material_table?: Record<string, unknown> | null }> | null;
+    explanation: string | null; material_table?: Record<string, unknown> | null;
+    option_images?: (string | null)[] | null }> | null;
   vocab_bank: Record<string, string> | null;
   knowledge_video_url: string | null;
   // Full video list (#1683). null for legacy lessons without video_links field.
@@ -299,7 +300,10 @@ function apiDetailToStory(detail: ApiStoryDetail): Story {
             accepted_answers?: string[];
           }>
       : undefined,
-    multipleChoice: detail.multiple_choice ?? undefined,
+    multipleChoice: detail.multiple_choice?.map((q) => ({
+      ...q,
+      option_images: q.option_images?.map((img) => (img ? resolveAssetUrl(img) : null)) ?? q.option_images,
+    })) ?? undefined,
     vocabBank: detail.vocab_bank ?? undefined,
     knowledgeVideoUrl: detail.knowledge_video_url ?? undefined,
     videoLinks: detail.video_links ?? undefined,

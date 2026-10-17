@@ -718,7 +718,12 @@ def test_every_served_choice_question_has_its_answer_among_the_options():
     option regex leaves this test green, because the damaged questions are filtered out
     upstream and simply never arrive. What that break actually costs is coverage, which
     is why `test_comprehension_coverage_does_not_slip` exists beside it. Both are
-    needed; neither substitutes for the other."""
+    needed; neither substitutes for the other.
+
+    #3621: the answer slot's text can legitimately be blank when its real
+    content is a picture (「下列哪一張圖…」) — `option_images` then carries
+    the asset for that same index. Blank text AND no image is still broken.
+    """
     from app.services.lesson_loader import get_all_lessons
 
     broken = []
@@ -730,7 +735,12 @@ def test_every_served_choice_question_has_its_answer_among_the_options():
             # The API serves options as a positional list and the answer as its letter,
             # so A is opts[0]. A letter past the end means an option was lost.
             idx = ord(str(ans).upper()) - ord("A") if str(ans)[:1].isalpha() else -1
-            if not (0 <= idx < len(opts)) or not str(opts[idx]).strip():
+            if not (0 <= idx < len(opts)):
+                broken.append((lesson["lesson_uid"], q.get("question", "")[:24], ans, len(opts)))
+                continue
+            imgs = q.get("option_images") or [None] * len(opts)
+            has_image = idx < len(imgs) and bool(imgs[idx])
+            if not str(opts[idx]).strip() and not has_image:
                 broken.append((lesson["lesson_uid"], q.get("question", "")[:24], ans, len(opts)))
     assert broken == [], f"answer not among options: {broken[:4]}"
 
@@ -1117,6 +1127,12 @@ def test_no_option_ends_in_the_marker_s_bracket():
 
     The guard against over-stripping is not "keep some brackets" but the two below:
     nothing is emptied, and the section coverage does not fall.
+
+    #3621: a bare-bracket option is also allowed through when ITS OWN slot
+    carries an `option_images` entry — the real content is a picture, the
+    bracket is the teacher's caption-or-nothing, same shape as the
+    already-documented L0073 gap, just resolved with a real image instead
+    of staying withheld.
     """
     from app.services.lesson_loader import get_all_lessons
 
@@ -1128,45 +1144,62 @@ def test_no_option_ends_in_the_marker_s_bracket():
     gap_uids = _image_option_gap_uids()
     assert gap_uids, "ledger lost image_options_only_captions — refusing to run blind"
 
-    left = [
-        (l["lesson_uid"], o[:40]) for l in get_all_lessons()
-        for q in (l.get("multiple_choice") or [])
-        for o in (q.get("options") or [])
-        if o and o.strip().endswith(("）", ")"))
-        and not (
-            l["lesson_uid"] in gap_uids
-            and re.fullmatch(r"[（(][^（）()]+[）)]", o.strip())
-        )
-    ]
+    left = []
+    for l in get_all_lessons():
+        for q in (l.get("multiple_choice") or []):
+            opts = q.get("options") or []
+            imgs = q.get("option_images") or [None] * len(opts)
+            for idx, o in enumerate(opts):
+                if not o or not o.strip().endswith(("）", ")")):
+                    continue
+                is_bare_bracket = bool(re.fullmatch(r"[（(][^（）()]+[）)]", o.strip()))
+                has_image = idx < len(imgs) and bool(imgs[idx])
+                if is_bare_bracket and (has_image or l["lesson_uid"] in gap_uids):
+                    continue
+                left.append((l["lesson_uid"], o[:40]))
     assert left == [], f"marker brackets still visible: {left[:4]}"
 
 
 def test_stripping_annotations_never_empties_an_option():
     """The real guard against over-stripping. An option that is ENTIRELY a parenthesis
     is the teacher edition's rationale standing in for the overwritten correct option —
-    removing its brackets would leave nothing at all."""
+    removing its brackets would leave nothing at all.
+
+    #3621: an emptied answer is also legitimate when that same slot carries
+    an `option_images` entry (the real content is a picture) — same shape
+    as the ledger-documented gap, just resolved with a real image."""
     from app.services.lesson_loader import get_all_lessons
 
-    empty = [
-        (l["lesson_uid"], q.get("question", "")[:26])
-        for l in get_all_lessons()
-        for q in (l.get("multiple_choice") or [])
-        for o in (q.get("options") or [])
-        if o is not None and not str(o).strip() and q.get("answer")
-        and (q.get("options") or []).index(o) == ord(str(q["answer"])[0]) - 65
-    ]
-    # L0143 and L0052 arrive here already empty: their options are pictures and
-    # the correct one carries no caption, so there was never any text to strip.
-    # Registered with the source evidence in
-    # content_known_gaps.yaml#image_options_only_captions. Anything outside that
-    # list means a strip really did empty an answer, which is what this guards.
     gap_uids = _image_option_gap_uids()
-    unexpected = [e for e in empty if e[0] not in gap_uids]
+
+    empty_total = []
+    unexpected = []
+    for l in get_all_lessons():
+        for q in (l.get("multiple_choice") or []):
+            opts = q.get("options") or []
+            answer = q.get("answer")
+            if not answer:
+                continue
+            idx = ord(str(answer)[0]) - 65
+            if not (0 <= idx < len(opts)):
+                continue
+            o = opts[idx]
+            if o is None or str(o).strip():
+                continue
+            empty_total.append((l["lesson_uid"], q.get("question", "")[:26]))
+            imgs = q.get("option_images") or [None] * len(opts)
+            has_image = idx < len(imgs) and bool(imgs[idx])
+            if not has_image and l["lesson_uid"] not in gap_uids:
+                unexpected.append((l["lesson_uid"], q.get("question", "")[:26]))
+
     assert unexpected == [], f"answer option emptied by the strip: {unexpected[:4]}"
-    assert len(empty) <= len(gap_uids), (
-        f"more emptied answers ({len(empty)}) than the ledger records "
-        f"({len(gap_uids)}): {empty[:4]}"
-    )
+    # Every emptied answer is now accounted for by exactly one of the two
+    # legitimate reasons above (documented gap, or backed by a real image —
+    # the latter is itself file-existence-checked by
+    # TestClassLevelSweepEveryOptionHasTextOrImage in
+    # test_comprehension_option_images_3621.py, so this can't silently
+    # degrade into "mark it has_image and skip the check").
+    assert empty_total, "positive control: expected at least one emptied answer in the corpus"
 
 
 def test_the_teacher_edition_rationale_still_fills_the_missing_option():

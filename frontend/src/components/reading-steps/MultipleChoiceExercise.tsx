@@ -208,6 +208,7 @@ const MultipleChoiceExercise: React.FC<Props> = ({
             const isAnswerLabel = q.answer === label;
             // #2199: wrong-flash state — briefly highlight the wrong pick before clearing
             const isWrongFlash = wrongFeedback && isChosen;
+            const optionImage = q.option_images?.[idx] ?? null;
 
             let btnClass =
               'flex items-start gap-3 rounded-lg border p-3 text-sm text-left transition-all ';
@@ -235,7 +236,15 @@ const MultipleChoiceExercise: React.FC<Props> = ({
                 <span className="shrink-0 w-6 h-6 rounded-full border border-current flex items-center justify-center text-xs font-bold">
                   {label}
                 </span>
-                <span>{zh(opt)}</span>
+                {optionImage && (
+                  <img
+                    src={optionImage}
+                    alt={`選項 ${label}`}
+                    loading="lazy"
+                    className="h-24 w-24 sm:h-32 sm:w-32 object-contain rounded-md border border-gray-200 bg-white flex-shrink-0"
+                  />
+                )}
+                {opt && <span>{zh(opt)}</span>}
                 {revealed && isAnswerLabel && (
                   <span className="ml-auto text-green-600 text-lg">✓</span>
                 )}
