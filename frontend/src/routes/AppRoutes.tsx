@@ -84,6 +84,8 @@ const StudentPkEntry = lazy(() => import('../pages/pk/StudentPkEntry'));
 const StudentPkQueueWait = lazy(() => import('../pages/pk/StudentPkQueueWait'));
 const StudentPkOpponentSelect = lazy(() => import('../pages/pk/StudentPkOpponentSelect'));
 const StudentPkMatch = lazy(() => import('../pages/pk/StudentPkMatch'));
+const StudentEscapeRoomEntry = lazy(() => import('../pages/escape-room/StudentEscapeRoomEntry'));
+const StudentEscapeRoomRun = lazy(() => import('../pages/escape-room/StudentEscapeRoomRun'));
 
 // OMO (Online-Merge-Offline) paper worksheet upload (Issue #1343)
 const OmoPage = lazy(() => import('../pages/omo/OmoPage'));
@@ -529,6 +531,22 @@ const AppRoutes: React.FC = () => (
         element={
           <ProtectedRoute>
             <StudentPkMatch />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/escape-room"
+        element={
+          <ProtectedRoute>
+            <StudentEscapeRoomEntry />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/escape-room/run/:runId"
+        element={
+          <ProtectedRoute>
+            <StudentEscapeRoomRun />
           </ProtectedRoute>
         }
       />
