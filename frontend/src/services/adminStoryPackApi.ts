@@ -14,15 +14,23 @@ import type { LeagueTheme, LeagueThemeSummary } from '../types/leagueTheme';
  * Follows the same pattern as roleApi.ts / storyStructureLabApi.ts.
  */
 
+/** Issue 3615: `field` is the Chinese field label, `msg` the Chinese
+ * description, `loc` the JSON path. */
+export interface StoryPackFieldError {
+  loc: string;
+  field?: string;
+  msg: string;
+}
+
 export interface ValidatePackResult {
   valid: boolean;
-  errors: Array<{ loc: string; msg: string }>;
+  errors: Array<StoryPackFieldError>;
 }
 
 export class AdminStoryPackApiError extends Error {
   status: number;
-  errors?: Array<{ loc: string; msg: string }>;
-  constructor(message: string, status: number, errors?: Array<{ loc: string; msg: string }>) {
+  errors?: Array<StoryPackFieldError>;
+  constructor(message: string, status: number, errors?: Array<StoryPackFieldError>) {
     super(message);
     this.name = 'AdminStoryPackApiError';
     this.status = status;
@@ -39,10 +47,13 @@ function authHeaders(token: string): Record<string, string> {
 
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
-    let message = `Request failed: ${res.status}`;
+    // Issue 3615: everything shown to the admin is Chinese. A non-string
+    // detail is FastAPI's own English request-validation list.
+    let message = `請求失敗（${res.status}）`;
     try {
       const body = await res.json();
-      message = body.detail ?? body.message ?? message;
+      const detail = body.detail ?? body.message;
+      if (typeof detail === 'string') message = detail;
     } catch {
       // ignore JSON parse errors
     }
@@ -111,9 +122,9 @@ export async function upsertPack(
   if (res.status === 422) {
     const body = await res.json().catch(() => ({}));
     throw new AdminStoryPackApiError(
-      body.detail ?? '劇情包內容驗證失敗',
+      typeof body.detail === 'string' ? body.detail : '劇情包內容驗證失敗',
       422,
-      body.errors,
+      Array.isArray(body.errors) ? body.errors : undefined,
     );
   }
   return handleResponse<LeagueTheme>(res);

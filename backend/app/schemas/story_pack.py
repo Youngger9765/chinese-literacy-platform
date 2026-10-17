@@ -36,9 +36,17 @@ game mode defines (league's are `individual_badge`/`class_badge` — see
 from __future__ import annotations
 
 import re
-from typing import Literal
+from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import (
+    AfterValidator,
+    BaseModel,
+    ConfigDict,
+    Field,
+    StringConstraints,
+    field_validator,
+    model_validator,
+)
 
 # ── Fixed mechanic keys league's badges map onto (never extended by pack
 # content — see app/models/league.py / league_scoring.py for the actual
@@ -70,18 +78,20 @@ class BannedTermError(ValueError):
     pass
 
 
-def _forbid_banned_terms(value: str, *, field_name: str) -> None:
+# Error messages below are shown verbatim to the admin (issue 3615): Chinese
+# only, and they do NOT name the field — story_pack_service attaches the
+# Chinese field label from the error's location, so the message says only
+# WHAT is wrong.
+def _forbid_banned_terms(value: str) -> None:
     for term in BANNED_POLITICAL_TERMS:
         if term in value:
-            raise BannedTermError(
-                f"{field_name} 不可包含「{term}」——請改用中立的書中世界／冒險框架描述（見 content_guidelines）"
-            )
+            raise BannedTermError(f"不可包含「{term}」，請改用中立的書中世界／冒險描述")
 
 
-def _forbid_markup(value: str, *, field_name: str) -> str:
+def _forbid_markup(value: str) -> str:
     if _NO_MARKUP_RE.search(value):
-        raise ValueError(f"{field_name} 不可包含 HTML/script 標記")
-    _forbid_banned_terms(value, field_name=field_name)
+        raise ValueError("不可包含 HTML 或程式標記")
+    _forbid_banned_terms(value)
     return value
 
 
@@ -126,18 +136,18 @@ def sanitize_svg(raw: str) -> str:
     whole payload, tell the author exactly what's disallowed.
     """
     if len(raw) > 4000:
-        raise SvgValidationError("SVG 內容過長（上限 4000 字元）")
+        raise SvgValidationError("SVG 內容過長，最多 4000 個字元")
     if "<svg" not in raw.lower():
-        raise SvgValidationError("SVG art 必須包含 <svg> 根元素")
+        raise SvgValidationError("SVG 圖必須以「<svg>」根元素包起來")
     if _SVG_DANGEROUS_RE.search(raw):
-        raise SvgValidationError("SVG 含有不允許的標記（script/事件屬性/外部 url()/foreignObject 等）")
+        raise SvgValidationError("SVG 含有不允許的內容：程式、事件屬性、外部連結或內嵌物件")
     for tag in _SVG_TAG_RE.findall(raw):
         if tag.lower() not in _SVG_ALLOWED_TAGS:
-            raise SvgValidationError(f"SVG 含有不允許的標籤：<{tag}>")
+            raise SvgValidationError(f"SVG 含有不允許的標籤「<{tag}>」")
     for attr in _SVG_ATTR_RE.findall(raw):
         bare = attr.split(":")[-1].lower()
         if bare not in _SVG_ALLOWED_ATTRS and attr.lower() not in _SVG_ALLOWED_ATTRS:
-            raise SvgValidationError(f"SVG 含有不允許的屬性：{attr}")
+            raise SvgValidationError(f"SVG 含有不允許的屬性「{attr}」")
     return raw
 
 
@@ -167,13 +177,13 @@ class StoryPackArt(BaseModel):
         # mutation-tested regression lock.
         if self.kind == "emoji":
             if len(self.value) > 8:
-                raise ValueError("emoji art 過長（上限 8 字元）")
+                raise ValueError("表情符號過長，最多 8 個字元")
             if _NO_MARKUP_RE.search(self.value):
-                raise ValueError("emoji art 不可包含 HTML/script 標記")
-            _forbid_banned_terms(self.value, field_name="emoji art")
+                raise ValueError("表情符號不可包含 HTML 或程式標記")
+            _forbid_banned_terms(self.value)
         else:
             sanitize_svg(self.value)
-            _forbid_banned_terms(self.value, field_name="SVG art")
+            _forbid_banned_terms(self.value)
         return self
 
 
@@ -192,7 +202,7 @@ class StoryPackMilestone(BaseModel):
     @field_validator("message")
     @classmethod
     def _no_markup(cls, v: str) -> str:
-        return _forbid_markup(v, field_name="milestone message")
+        return _forbid_markup(v)
 
 
 class StoryPackChest(BaseModel):
@@ -205,7 +215,7 @@ class StoryPackChest(BaseModel):
     @field_validator("name", "description")
     @classmethod
     def _no_markup(cls, v: str) -> str:
-        return _forbid_markup(v, field_name="chest text")
+        return _forbid_markup(v)
 
 
 class StoryPackBadge(BaseModel):
@@ -219,7 +229,7 @@ class StoryPackBadge(BaseModel):
     @field_validator("name", "description")
     @classmethod
     def _no_markup(cls, v: str) -> str:
-        return _forbid_markup(v, field_name="badge text")
+        return _forbid_markup(v)
 
 
 class StoryPackResultCopy(BaseModel):
@@ -237,7 +247,13 @@ class StoryPackResultCopy(BaseModel):
     @field_validator("win", "lose", "draw")
     @classmethod
     def _no_markup(cls, v: str) -> str:
-        return _forbid_markup(v, field_name="result copy")
+        return _forbid_markup(v)
+
+
+# Per-item types so an error lands on the exact paragraph / label
+# ("intro.1"), not on the whole list — the admin sees「開場白第 2 段」.
+_IntroParagraph = Annotated[str, StringConstraints(min_length=1, max_length=160), AfterValidator(_forbid_markup)]
+_FactionLabel = Annotated[str, StringConstraints(min_length=1, max_length=12), AfterValidator(_forbid_markup)]
 
 
 class StoryPack(BaseModel):
@@ -260,8 +276,8 @@ class StoryPack(BaseModel):
     key: str = Field(..., min_length=2, max_length=48)
     era: str = Field(..., min_length=1, max_length=20)
     title: str = Field(..., min_length=1, max_length=40)
-    intro: list[str] = Field(..., min_length=1, max_length=4)
-    faction_labels: list[str] = Field(..., min_length=2, max_length=2)
+    intro: list[_IntroParagraph] = Field(..., min_length=1, max_length=4)
+    faction_labels: list[_FactionLabel] = Field(..., min_length=2, max_length=2)
     energy_bar_label: str = Field(..., min_length=1, max_length=10)
     milestones: list[StoryPackMilestone] = Field(default_factory=list, max_length=6)
     background_art: StoryPackArt | None = Field(
@@ -276,45 +292,27 @@ class StoryPack(BaseModel):
     @classmethod
     def _key_is_slug(cls, v: str) -> str:
         if not re.fullmatch(r"[a-z0-9][a-z0-9-]{1,47}", v):
-            raise ValueError("key 必須是小寫字母/數字/連字號組成的 slug（例如 tang-dynasty）")
+            raise ValueError("只能用小寫英文字母、數字和連字號，至少 2 個字元，例如「tang-dynasty」")
         return v
 
     @field_validator("era", "title")
     @classmethod
     def _no_markup_single(cls, v: str) -> str:
-        return _forbid_markup(v, field_name="era/title")
-
-    @field_validator("intro")
-    @classmethod
-    def _intro_paragraphs(cls, v: list[str]) -> list[str]:
-        for p in v:
-            if not (1 <= len(p) <= 160):
-                raise ValueError("intro 每段長度必須在 1–160 字元之間")
-            _forbid_markup(p, field_name="intro paragraph")
-        return v
-
-    @field_validator("faction_labels")
-    @classmethod
-    def _faction_labels_len(cls, v: list[str]) -> list[str]:
-        for label in v:
-            if not (1 <= len(label) <= 12):
-                raise ValueError("faction_labels 每個長度必須在 1–12 字元之間")
-            _forbid_markup(label, field_name="faction label")
-        return v
+        return _forbid_markup(v)
 
     @field_validator("energy_bar_label")
     @classmethod
     def _no_markup_bar(cls, v: str) -> str:
-        return _forbid_markup(v, field_name="energy_bar_label")
+        return _forbid_markup(v)
 
     @field_validator("milestones")
     @classmethod
     def _milestones_sorted_unique(cls, v: list[StoryPackMilestone]) -> list[StoryPackMilestone]:
         ratios = [m.ratio for m in v]
         if len(set(ratios)) != len(ratios):
-            raise ValueError("milestones 的 ratio 不可重複")
+            raise ValueError("各里程碑的進度比例不可重複")
         if ratios != sorted(ratios):
-            raise ValueError("milestones 必須依 ratio 由小到大排列")
+            raise ValueError("里程碑必須依進度比例由小到大排列")
         return v
 
     @field_validator("badges")
@@ -322,9 +320,7 @@ class StoryPack(BaseModel):
     def _badges_cover_fixed_keys_exactly(cls, v: list[StoryPackBadge]) -> list[StoryPackBadge]:
         keys = {b.key for b in v}
         if keys != BADGE_KEYS:
-            raise ValueError(
-                f"badges 必須恰好對應固定機制 {sorted(BADGE_KEYS)}（收到 {sorted(keys)}）"
-            )
+            raise ValueError("徽章必須恰好是個人徽章與班級徽章各一個")
         return v
 
 

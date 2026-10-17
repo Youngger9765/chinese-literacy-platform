@@ -26,6 +26,7 @@ import {
 import EnergyBar from '../../components/league/EnergyBar';
 import LeagueBadgeCard from '../../components/league/LeagueBadgeCard';
 import { chestHintText, displayPoints } from '../../components/league/leagueVisuals';
+import { DEFAULT_THEME_FALLBACK } from '../../components/league/leagueTheme';
 
 type TabKey = 'assignment' | 'self';
 
@@ -399,7 +400,11 @@ const LeagueHistorySection: React.FC = () => {
           </div>
 
           <p className="mt-2 text-[11px] text-on-surface-variant">
-            {chestHintText(s.treasure_chest_eligible, s.treasure_chest_participants_needed)}
+            {chestHintText(
+              (s.theme ?? DEFAULT_THEME_FALLBACK).chest.name,
+              s.treasure_chest_eligible,
+              s.treasure_chest_participants_needed,
+            )}
           </p>
         </div>
       ))}
