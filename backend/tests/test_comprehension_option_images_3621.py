@@ -129,10 +129,12 @@ class TestClassLevelSweepEveryOptionHasTextOrImage:
         documented_gap_uids = {l["lesson_uid"] for l in gaps["lessons"]}
 
         undocumented_violations: list[str] = []
+        broken_image_refs: list[str] = []
         image_options_seen = 0
 
         for lesson in build_all_lessons():
             uid = lesson["lesson_uid"]
+            vid = lesson.get("version_id") or "v3"
             for q in (lesson.get("multiple_choice") or []):
                 options = q.get("options") or []
                 option_images = q.get("option_images") or [None] * len(options)
@@ -140,6 +142,10 @@ class TestClassLevelSweepEveryOptionHasTextOrImage:
                     img = option_images[idx] if idx < len(option_images) else None
                     if img:
                         image_options_seen += 1
+                        fname = img.rsplit('/', 1)[-1]
+                        asset_path = LESSONS_ROOT / uid / vid / "assets" / fname
+                        if not asset_path.is_file():
+                            broken_image_refs.append(f"{uid}: {img} -> {asset_path}")
                     if not str(text or "").strip() and not img:
                         if uid not in documented_gap_uids:
                             undocumented_violations.append(
@@ -149,6 +155,9 @@ class TestClassLevelSweepEveryOptionHasTextOrImage:
         assert undocumented_violations == [], (
             "Found comprehension option(s) with neither text nor image, "
             f"and not registered as a known gap: {undocumented_violations}"
+        )
+        assert broken_image_refs == [], (
+            f"option_images point at files that do not exist on disk: {broken_image_refs}"
         )
         assert image_options_seen > 0, (
             "Positive control failed: swept 0 image-backed options — the "
