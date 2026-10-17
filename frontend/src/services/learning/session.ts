@@ -465,6 +465,11 @@ export interface StudentEnrolledClassroom {
   /** 這個班級是否開放真人 PK — issue #3586 §7.4, default false. AI PK
    * (挑戰文學家) has no equivalent field: it is never gated by classroom. */
   pk_human: boolean;
+  /** 這個班級是否開放跨班賽季 — issue #3607, default false (backward-compat:
+   * a classroom with real league history and no explicit key reports true). */
+  league: boolean;
+  /** 這個班級是否開放課堂搶答 — issue #3607, same default/backward-compat rule. */
+  live_quiz: boolean;
 }
 
 export interface StudentEnrolledClassroomsResponse {

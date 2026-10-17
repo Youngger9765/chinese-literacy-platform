@@ -336,6 +336,47 @@ class TestListClassrooms:
         assert isinstance(data["items"], list)
         assert isinstance(data["total"], int)
 
+    def test_list_reflects_feature_settings_not_just_always_false(self, client, school_id):
+        """Regression lock (issue #3607 code review finding): the inline
+        ClassroomResponse construction in list_my_classrooms used to omit
+        pk_human/league/live_quiz entirely, so the LIST endpoint always
+        reported them False even for a classroom with the keys explicitly
+        turned on via PATCH /classrooms/{id}/pk-settings — only the
+        single-classroom detail endpoint (classroom_to_response/
+        classroom_to_detail_response) read the real value. This pins the
+        list endpoint to the real per-classroom state too."""
+        owner = _register_user(client, "feature_list_owner")
+        created = client.post(
+            "/api/classrooms",
+            json={"name": "Feature List Test", "school_id": school_id},
+            headers=auth_header(owner["token"]),
+        )
+        assert created.status_code == 201, created.text
+        room_id = created.json()["id"]
+
+        # Default: a brand-new classroom reports all three as False on the
+        # LIST endpoint, not just on the detail endpoint.
+        before = client.get("/api/classrooms", headers=auth_header(owner["token"]))
+        assert before.status_code == 200, before.text
+        before_item = next(i for i in before.json()["items"] if i["id"] == room_id)
+        assert before_item["pk_human"] is False
+        assert before_item["league"] is False
+        assert before_item["live_quiz"] is False
+
+        patched = client.patch(
+            f"/api/classrooms/{room_id}/pk-settings",
+            json={"pk_human": True, "league": True},
+            headers=auth_header(owner["token"]),
+        )
+        assert patched.status_code == 200, patched.text
+
+        after = client.get("/api/classrooms", headers=auth_header(owner["token"]))
+        assert after.status_code == 200, after.text
+        after_item = next(i for i in after.json()["items"] if i["id"] == room_id)
+        assert after_item["pk_human"] is True
+        assert after_item["league"] is True
+        assert after_item["live_quiz"] is False  # untouched key stays at its default
+
 
 # ===========================================================================
 # GET /api/classrooms/{id} — Classroom detail

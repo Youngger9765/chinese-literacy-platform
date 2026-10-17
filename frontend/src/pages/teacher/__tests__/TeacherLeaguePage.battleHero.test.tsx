@@ -14,11 +14,18 @@ vi.mock('../../../contexts/AuthContext', () => ({
   useAuth: () => ({ token: 'test-token', user: { id: 1, name: '李老師' } }),
 }));
 
-vi.mock('../../../services/classroomApi', () => ({
+vi.mock('../../../services/classroomApi', async (orig) => ({
+  ...(await orig<typeof import('../../../services/classroomApi')>()),
   listMyClassrooms: vi.fn(() =>
     Promise.resolve({
       items: [
-        { id: 1, name: '三年甲班', teacher_id: 1, school_id: 1, grade: 3, created_at: '', student_count: 2 },
+        {
+          id: 1, name: '三年甲班', teacher_id: 1, school_id: 1, grade: 3, created_at: '', student_count: 2,
+          // issue #3607: league already enabled for this classroom — this
+          // test is about the battle-hero render, not the feature-gate
+          // prompt (that gets its own dedicated test file).
+          league: true,
+        },
       ],
       total: 1,
     }),

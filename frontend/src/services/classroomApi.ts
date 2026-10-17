@@ -21,6 +21,11 @@ export interface ClassroomResponse {
   /** 真人 PK（同學配對對戰）班級開關 — issue #3586 §7.4，預設 false。
    * AI PK（挑戰文學家）沒有對應欄位：永遠開放，不受班級設定影響。 */
   pk_human: boolean;
+  /** 跨班賽季（league）班級開關 — issue #3607，預設 false。向下相容：已有
+   * 歷史使用紀錄（真的建立過隊伍／賽季）的班級即使沒有這個 key 也會是 true。 */
+  league: boolean;
+  /** 課堂搶答（live_quiz）班級開關 — issue #3607，預設 false，向下相容規則同上。 */
+  live_quiz: boolean;
 }
 
 export interface StudentInClassroomResponse {
@@ -139,24 +144,43 @@ export async function updateClassroom(
   return handleResponse<ClassroomResponse>(res);
 }
 
-export interface ClassroomPkSettingsResponse {
+export interface ClassroomFeatureSettingsResponse {
   pk_human: boolean;
+  league: boolean;
+  live_quiz: boolean;
 }
 
-/** PATCH /classrooms/{id}/pk-settings — issue #3586 §7.4. Teacher-only
+/** @deprecated kept for any stray caller — prefer ClassroomFeatureSettingsResponse. */
+export type ClassroomPkSettingsResponse = ClassroomFeatureSettingsResponse;
+
+/** PATCH /classrooms/{id}/pk-settings — issue #3586 §7.4, extended by issue
+ * #3607 to carry all three per-classroom feature switches on one endpoint
+ * (route path kept as `/pk-settings` for backward compat). Teacher-only
  * (owner/co-teacher with edit rights); server re-checks ownership itself,
- * this is just the HTTP call. */
+ * this is just the HTTP call. Only the keys actually present in `data` are
+ * written server-side (merge, not overwrite) — omit a key to leave it
+ * untouched rather than passing its current value back. */
+export async function updateClassroomFeatureSettings(
+  token: string,
+  classroomId: number,
+  data: { pk_human?: boolean; league?: boolean; live_quiz?: boolean },
+): Promise<ClassroomFeatureSettingsResponse> {
+  const res = await fetch(`${API_BASE}/api/classrooms/${classroomId}/pk-settings`, {
+    method: 'PATCH',
+    headers: authHeaders(token),
+    body: JSON.stringify(data),
+  });
+  return handleResponse<ClassroomFeatureSettingsResponse>(res);
+}
+
+/** @deprecated use updateClassroomFeatureSettings — kept so any stray
+ * caller of the single-switch form keeps working. */
 export async function updateClassroomPkSettings(
   token: string,
   classroomId: number,
   pkHuman: boolean,
 ): Promise<ClassroomPkSettingsResponse> {
-  const res = await fetch(`${API_BASE}/api/classrooms/${classroomId}/pk-settings`, {
-    method: 'PATCH',
-    headers: authHeaders(token),
-    body: JSON.stringify({ pk_human: pkHuman }),
-  });
-  return handleResponse<ClassroomPkSettingsResponse>(res);
+  return updateClassroomFeatureSettings(token, classroomId, { pk_human: pkHuman });
 }
 
 export async function addStudent(

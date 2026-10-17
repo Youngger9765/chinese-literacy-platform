@@ -130,6 +130,9 @@ describe('TeacherDashboard — Junyi import toggle visibility (issue #3406)', ()
       teacher_id: 1,
       is_active: true,
       created_at: '2026-10-01T00:00:00Z',
+      pk_human: false,
+      league: false,
+      live_quiz: false,
     };
     vi.mocked(classroomApi.createClassroom).mockResolvedValue(createdClassroom);
 

@@ -22,7 +22,12 @@
  */
 import React, { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { listMyClassrooms, type ClassroomResponse } from '../../services/classroomApi';
+import {
+  listMyClassrooms,
+  updateClassroomFeatureSettings,
+  ClassroomApiError,
+  type ClassroomResponse,
+} from '../../services/classroomApi';
 import {
   acceptInvitation,
   createInvitation,
@@ -117,6 +122,27 @@ const TeacherLeaguePage: React.FC = () => {
   const [joinMode, setJoinMode] = useState<'create' | 'join'>('create');
 
   const ownedClassrooms = classrooms.filter((c) => c.teacher_id === user?.id);
+  const selectedClassroom = classrooms.find((c) => c.id === selectedClassroomId);
+  // issue #3607: 跨班賽季 is OFF by default per classroom — the page itself
+  // stays visible (teacher can still see past seasons/board for a class
+  // that WAS enabled, via backward-compat), but creating/accepting an
+  // invitation for a disabled classroom 403s server-side. This local flag
+  // drives the one-click enable prompt below.
+  const [enablingLeague, setEnablingLeague] = useState(false);
+  const handleEnableLeague = async () => {
+    if (!token || selectedClassroomId == null || enablingLeague) return;
+    setEnablingLeague(true);
+    try {
+      const result = await updateClassroomFeatureSettings(token, selectedClassroomId, { league: true });
+      setClassrooms((prev) =>
+        prev.map((c) => (c.id === selectedClassroomId ? { ...c, league: result.league } : c)),
+      );
+    } catch (err) {
+      setError(err instanceof ClassroomApiError ? err.message : '開啟跨班賽季失敗，請稍後再試');
+    } finally {
+      setEnablingLeague(false);
+    }
+  };
 
   const loadClassroomData = useCallback(
     async (classroomId: number) => {
@@ -343,6 +369,24 @@ const TeacherLeaguePage: React.FC = () => {
                 </option>
               ))}
             </select>
+          </div>
+        )}
+
+        {/* issue #3607: 跨班賽季 OFF for the selected classroom — page stays
+            visible (past seasons/board still render below if any exist via
+            backward compat), but a clear one-click prompt replaces the
+            "create new invitation" path until the teacher turns it on. */}
+        {selectedClassroom && !selectedClassroom.league && (
+          <div className="flex items-center justify-between gap-3 rounded-xl bg-accent-bg px-4 py-3 text-sm">
+            <span className="text-accent">老師還沒為「{selectedClassroom.name}」開放跨班賽季</span>
+            <button
+              type="button"
+              onClick={handleEnableLeague}
+              disabled={enablingLeague}
+              className="shrink-0 rounded-lg bg-accent px-4 py-1.5 font-semibold text-white disabled:opacity-50"
+            >
+              {enablingLeague ? '開啟中…' : '一鍵開啟'}
+            </button>
           </div>
         )}
 

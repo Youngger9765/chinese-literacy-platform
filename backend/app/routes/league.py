@@ -26,6 +26,7 @@ from ..models.school import Classroom, ClassroomStudent
 from ..models.user import User
 from ..services import league_service as svc
 from ..services import story_pack_service as theme_svc
+from ..services.pk import classroom_features
 from ..services.story_pack_store import get_story_pack_store
 from .classrooms import _get_classroom_or_404
 
@@ -39,6 +40,21 @@ def _require_owner_strict(classroom: Classroom, user: User, db: Session) -> None
     if is_system_admin(user.id, db):
         return
     raise HTTPException(status_code=403, detail="僅班級擁有者可以執行此操作")
+
+
+def _require_league_enabled(classroom: Classroom, db: Session) -> None:
+    """issue #3607: 跨班賽季 is OFF by default per classroom — creating an
+    invitation FOR a classroom, or accepting one INTO a classroom, both
+    require that classroom to have `league` turned on. Placed in the route
+    layer (not league_service.py) deliberately: this module's own docstring
+    already draws that boundary ("Authorization... lives in
+    routes/league.py"), and keeping it here means every direct-service-call
+    test in test_league_service.py is untouched by this gate — only the
+    HTTP surface (what a teacher's UI actually calls) is gated, matching
+    how `_require_owner_strict` above is enforced.
+    """
+    if not classroom_features.get_classroom_feature(classroom, "league", db=db):
+        raise HTTPException(status_code=403, detail="老師還沒開放跨班賽季")
 
 
 def _handle_league_error(exc: svc.LeagueError) -> HTTPException:
@@ -133,6 +149,7 @@ def create_invitation(
 ) -> InvitationResponse:
     classroom = _get_classroom_or_404(payload.inviter_classroom_id, db)
     _require_owner_strict(classroom, current_user, db)
+    _require_league_enabled(classroom, db)
     try:
         invitation = svc.create_invitation(
             db,
@@ -185,6 +202,7 @@ def accept_invitation(
 ) -> InvitationResponse:
     classroom = _get_classroom_or_404(payload.invitee_classroom_id, db)
     _require_owner_strict(classroom, current_user, db)
+    _require_league_enabled(classroom, db)
     try:
         invitation = svc.accept_invitation(
             db,

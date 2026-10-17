@@ -123,7 +123,14 @@ def _make_school(db, org):
 
 
 def _make_classroom(db, school, teacher_id, *, grade=5):
-    classroom = Classroom(school_id=school.id, teacher_id=teacher_id, name=f"班級-{uuid.uuid4().hex[:6]}", grade=grade)
+    # issue #3607: league is OFF by default per classroom — this file is
+    # about story-pack/theme content embedded in league responses, not the
+    # feature gate itself, so opt every classroom in (same pattern as
+    # test_league_routes.py's _make_classroom).
+    classroom = Classroom(
+        school_id=school.id, teacher_id=teacher_id, name=f"班級-{uuid.uuid4().hex[:6]}", grade=grade,
+        feature_settings={"league": True},
+    )
     db.add(classroom)
     db.commit()
     db.refresh(classroom)

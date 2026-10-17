@@ -517,7 +517,10 @@ class TestClassroomPkSettings:
             headers=auth_header(teacher["token"]),
         )
         assert patched.status_code == 200, patched.text
-        assert patched.json() == {"pk_human": True}
+        # issue #3607: the response now reports all three switches, not
+        # just the one touched — league/live_quiz stay at their default
+        # (False) since this room has no history for either.
+        assert patched.json() == {"pk_human": True, "league": False, "live_quiz": False}
 
         after = client.get(f"/api/classrooms/{room_id}", headers=auth_header(teacher["token"]))
         assert after.status_code == 200, after.text
@@ -530,7 +533,7 @@ class TestClassroomPkSettings:
             headers=auth_header(teacher["token"]),
         )
         assert off.status_code == 200, off.text
-        assert off.json() == {"pk_human": False}
+        assert off.json() == {"pk_human": False, "league": False, "live_quiz": False}
 
     def test_a_different_teacher_cannot_toggle_room_a(self, client):
         other_teacher = _register_teacher(client)
@@ -604,3 +607,102 @@ class TestClassroomPkSettings:
             assert room.feature_settings == {"some_future_key": "untouched", "pk_human": True}
         finally:
             db.close()
+
+
+# ---------------------------------------------------------------------------
+# PATCH /api/classrooms/{id}/pk-settings — issue #3607 extension: the same
+# endpoint now also carries `league` and `live_quiz`. These tests cover the
+# three-switch surface specifically (independent toggling + per-key merge);
+# TestClassroomPkSettings above still covers the original pk_human-only
+# authz/validation matrix, which is unchanged.
+# ---------------------------------------------------------------------------
+
+class TestClassroomFeatureSettingsThreeSwitches:
+    def _room(self, client, teacher, *, feature_settings=None):
+        db = TestingSessionLocal()
+        try:
+            kwargs = {}
+            if feature_settings is not None:
+                kwargs["feature_settings"] = feature_settings
+            room = Classroom(
+                school_id=_school_id, teacher_id=teacher["user_id"], name="3-switch room", grade=4, **kwargs
+            )
+            db.add(room)
+            db.commit()
+            return room.id
+        finally:
+            db.close()
+
+    def test_a_brand_new_classroom_reports_all_three_off(self, client):
+        teacher = _register_teacher(client)
+        room_id = self._room(client, teacher)
+        resp = client.get(f"/api/classrooms/{room_id}", headers=auth_header(teacher["token"]))
+        assert resp.status_code == 200, resp.text
+        body = resp.json()
+        assert body["pk_human"] is False
+        assert body["league"] is False
+        assert body["live_quiz"] is False
+
+    def test_toggling_league_alone_does_not_touch_pk_human_or_live_quiz(self, client):
+        teacher = _register_teacher(client)
+        room_id = self._room(client, teacher, feature_settings={"pk_human": True, "live_quiz": True})
+        resp = client.patch(
+            f"/api/classrooms/{room_id}/pk-settings",
+            json={"league": True},
+            headers=auth_header(teacher["token"]),
+        )
+        assert resp.status_code == 200, resp.text
+        assert resp.json() == {"pk_human": True, "league": True, "live_quiz": True}
+
+    def test_toggling_live_quiz_off_does_not_revert_a_classroom_that_had_no_key_but_real_history(self, client):
+        """Backward-compat (#3607): a classroom with real live-quiz history
+        and NO explicit key reports True (legacy fallback). Explicitly
+        turning league on must not disturb that live_quiz fallback."""
+        teacher = _register_teacher(client)
+        room_id = self._room(client, teacher)  # feature_settings == {}
+        db = TestingSessionLocal()
+        try:
+            from datetime import datetime, timedelta, timezone
+            from app.models.live_quiz import LiveQuizGame
+
+            now = datetime.now(timezone.utc)
+            db.add(
+                LiveQuizGame(
+                    code="998877", host_teacher_id=teacher["user_id"], classroom_id=room_id,
+                    status="ended", settings={}, rounds_snapshot=[], seed=1, version=1,
+                    created_at=now, expires_at=now + timedelta(hours=3),
+                )
+            )
+            db.commit()
+        finally:
+            db.close()
+
+        before = client.get(f"/api/classrooms/{room_id}", headers=auth_header(teacher["token"]))
+        assert before.json()["live_quiz"] is True  # legacy fallback, no key written yet
+
+        resp = client.patch(
+            f"/api/classrooms/{room_id}/pk-settings",
+            json={"league": True},
+            headers=auth_header(teacher["token"]),
+        )
+        assert resp.status_code == 200, resp.text
+        assert resp.json() == {"pk_human": False, "league": True, "live_quiz": True}
+
+    def test_a_different_teacher_cannot_toggle_league_or_live_quiz(self, client):
+        teacher = _register_teacher(client)
+        room_id = self._room(client, teacher)
+        other_teacher = _register_teacher(client)
+        resp = client.patch(
+            f"/api/classrooms/{room_id}/pk-settings",
+            json={"league": True, "live_quiz": True},
+            headers=auth_header(other_teacher["token"]),
+        )
+        assert resp.status_code == 403, resp.text
+
+    def test_student_cannot_toggle_league_or_live_quiz(self, client, student_in_room_a):
+        resp = client.patch(
+            f"/api/classrooms/{_room_a_id}/pk-settings",
+            json={"league": True},
+            headers=auth_header(student_in_room_a["token"]),
+        )
+        assert resp.status_code == 403, resp.text
