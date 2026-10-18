@@ -303,6 +303,12 @@ export function storyToLesson(story: Story | null | undefined): AdapterResult {
           question: mcq.question,
           options: mcq.options,
           explanation: mcq.explanation ?? null,
+          // #3621: carry the picture-answer option images through — dropping
+          // this field here is exactly how the 閱讀理解 step kept withholding
+          // L0052/L0143 even after the backend + legacy MultipleChoiceExercise
+          // path were fixed (LESSON_RENDERER_V1 defaults ON and goes through
+          // THIS adapter, not the legacy component).
+          option_images: mcq.option_images ?? undefined,
         },
         answerSpace: 'choice',
         answer: 0,
@@ -320,6 +326,7 @@ export function storyToLesson(story: Story | null | undefined): AdapterResult {
         question: mcq.question,
         options: mcq.options,
         explanation: mcq.explanation ?? null,
+        option_images: mcq.option_images ?? undefined,
       },
       answerSpace: 'choice',
       answer: idx,

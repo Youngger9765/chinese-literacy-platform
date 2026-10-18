@@ -250,3 +250,30 @@ describe('MultipleChoiceExercise', () => {
     expect(bar.style.width).toBe('100%');
   });
 });
+
+describe('with option_images', () => {
+  const imageQuestion: MultipleChoiceItem = {
+    question: '下列哪一張圖最符合小藍鯨生前被漁具纏繞的情況？',
+    options: ['藍鯨骨骼標本', '鯊魚', '藍鯨', ''],
+    option_images: [
+      '/assets/lesson/L0052/fig10.jpeg',
+      '/assets/lesson/L0052/fig11.jpeg',
+      '/assets/lesson/L0052/fig12.jpeg',
+      '/assets/lesson/L0052/fig13.jpeg',
+    ],
+    answer: 'D',
+    explanation: null,
+  };
+
+  it('shows every image, including the answer with empty text', () => {
+    render(<MultipleChoiceExercise questions={[imageQuestion]} onComplete={() => {}} />);
+    const images = screen.getAllByRole('img');
+    expect(images.map((img) => img.getAttribute('src'))).toEqual(imageQuestion.option_images);
+    expect(screen.getByRole('button', { name: /D/ }).textContent).not.toContain('undefined');
+  });
+
+  it('keeps text-only questions free of option images', () => {
+    render(<MultipleChoiceExercise questions={questions} onComplete={() => {}} />);
+    expect(screen.queryAllByRole('img')).toHaveLength(0);
+  });
+});
