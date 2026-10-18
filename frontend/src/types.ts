@@ -90,6 +90,11 @@ export interface MultipleChoiceItem {
   /** 這一題要讀的那張表（#3277）。形狀跟課文層的 `inline_table` 一樣
    *  （`{title, columns, rows, source_line}`），所以走同一個轉接器。 */
   material_table?: Record<string, unknown> | null;
+  /** #3621: 圖片選項（下列哪一張圖…題型）。跟 `options` 同長度同順序，
+   *  null = 該選項沒有圖片（維持純文字）。只有極少數題目（正解本身是一張
+   *  圖、文字欄位原稿就是空的）會有值。已由 api.ts 的 resolveAssetUrl
+   *  解析成可直接丟進 <img src> 的完整 URL。 */
+  option_images?: (string | null)[] | null;
 }
 
 // 閱讀策略練習 (#943)

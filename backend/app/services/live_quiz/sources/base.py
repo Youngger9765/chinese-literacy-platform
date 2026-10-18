@@ -16,6 +16,26 @@ from dataclasses import dataclass, field
 class QuizOption:
     key: str    # "A".."D" — display key shown on the host projector
     text: str
+    # #3621: a handful of comprehension options are a DRAWING, not text —
+    # the source worksheet's correct answer for "下列哪一張圖…" questions is
+    # a picture with no caption. `text` stays "" for those (never None, so
+    # existing text-only consumers keep working); `image` carries a
+    # same-origin asset path (`/assets/lesson/<uid>/<filename>`, same route
+    # `app/routes/assets.py::get_lesson_asset` already serves spotlight
+    # figures from) for the player/host screens to render instead.
+    image: str | None = None
+
+
+def _option_to_dict(o: "QuizOption") -> dict:
+    """The one place a `QuizOption` becomes the dict shape shipped to the
+    frontend — so `to_payload` and the per-game shuffle in
+    `round_types/choice.py` can never drift from each other on which keys
+    an option carries (the shuffle used to rebuild `{"key", "text"}` by
+    hand and silently drop `.image` — #3621)."""
+    d = {"key": o.key, "text": o.text}
+    if o.image:
+        d["image"] = o.image
+    return d
 
 
 @dataclass(frozen=True)
@@ -72,7 +92,7 @@ class QuizItem:
             "lesson_version_id": self.version_id,
             "lesson_title": self.lesson_title,
             "stem": self.stem,
-            "options": [{"key": o.key, "text": o.text} for o in self.options],
+            "options": [_option_to_dict(o) for o in self.options],
             "correct_key": self.correct_key,
             "seconds": seconds,
         }

@@ -15,6 +15,15 @@ comprehension:
     options_note: '四個選項是四張圖（w:drawing）。文字層只有「A.」「B.」「C.」「D.」加上教師版的橘色括號註記；
 
       A 沒有註記。括號裡的字是註記，不是選項內容本身。'
+    # #3621：四張圖都在 assets/ 裡（緊接在通用裝飾圖示 fig1-5 之後），逐張開圖核對
+    # 內容跟上面 options_note 描述的順序一致：fig6=血管被血塊堵住（血栓，答案）、
+    # fig7=血管暢通、fig8=血液流動方向、fig9=血球。之前只抽到圖說括號文字，
+    # A（答案）沒有括號註記所以文字是空的，整題被判「正解答不出來」而扣留。
+    option_images:
+      A: fig6.jpeg
+      B: fig7.jpeg
+      C: fig8.jpeg
+      D: fig9.jpeg
     answer: A
     explanation: (血栓為血管堵住，所以為A)
   - index: 2
