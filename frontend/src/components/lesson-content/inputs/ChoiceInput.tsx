@@ -12,6 +12,12 @@ import React from 'react';
 
 interface Props {
   options: string[];
+  /** #3621: same length/index as `options`. A handful of comprehension
+   *  options are a DRAWING, not text ("下列哪一張圖…") — the source
+   *  worksheet's correct answer has no caption, so `options[i]` can be ""
+   *  while `images[i]` carries the asset URL to render instead. Absent for
+   *  plain text-only questions. */
+  images?: (string | null)[] | null;
   /** Currently selected index, or null. */
   value: number | null;
   onChange: (index: number) => void;
@@ -22,7 +28,7 @@ interface Props {
 
 const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 
-const ChoiceInput: React.FC<Props> = ({ options, value, onChange, disabled, verdict }) => {
+const ChoiceInput: React.FC<Props> = ({ options, images, value, onChange, disabled, verdict }) => {
   const locked = disabled || (verdict !== undefined && verdict !== null);
   return (
     <div className="space-y-2" role="radiogroup">
@@ -47,7 +53,15 @@ const ChoiceInput: React.FC<Props> = ({ options, value, onChange, disabled, verd
             <span className="shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-full border border-current text-xs font-bold">
               {LETTERS[oi] ?? oi + 1}
             </span>
-            <span className="flex-1 whitespace-pre-wrap">{opt}</span>
+            {images?.[oi] && (
+              <img
+                src={images[oi] as string}
+                alt={`選項 ${LETTERS[oi] ?? oi + 1}`}
+                loading="lazy"
+                className="h-24 w-24 sm:h-32 sm:w-32 object-contain rounded-md border border-gray-200 bg-white flex-shrink-0"
+              />
+            )}
+            {opt && <span className="flex-1 whitespace-pre-wrap">{opt}</span>}
           </button>
         );
       })}

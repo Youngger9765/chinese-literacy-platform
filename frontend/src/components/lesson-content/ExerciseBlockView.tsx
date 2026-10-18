@@ -215,6 +215,7 @@ const ExerciseBlockViewBody: React.FC<
         <p className="text-lg font-medium text-on-surface mb-4 leading-relaxed whitespace-pre-wrap">{q.question}</p>
         <ChoiceInput
           options={q.options}
+          images={q.option_images}
           value={typeof value === 'number' ? value : null}
           onChange={handlePick}
           verdict={verdict}

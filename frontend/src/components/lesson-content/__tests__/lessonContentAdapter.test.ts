@@ -159,6 +159,63 @@ describe('storyToLesson — plain 一般課文', () => {
   });
 });
 
+describe('storyToLesson — #3621 option_images (picture-answer MCQs)', () => {
+  /** L0052 Q3 shape: the correct option (D) is a drawing, text is blank. */
+  function imageOptionStory(): Story {
+    return {
+      id: 'L0052',
+      title: '小藍鯨之死',
+      level: '6',
+      content: [],
+      thumbnail: '',
+      category: 'Science',
+      filename: 'L0052',
+      lesson_code: 'L0052',
+      paragraphs: ['第三段：小藍鯨生前被漁具纏繞。'],
+      multipleChoice: [
+        {
+          question: '根據第三段，哪一張圖最符合小藍鯨生前被漁具纏繞的情況？',
+          options: ['藍鯨骨骼標本', '鯊魚', '藍鯨', ''],
+          option_images: [
+            'https://backend.example/assets/lesson/L0052/fig10.jpeg',
+            'https://backend.example/assets/lesson/L0052/fig11.jpeg',
+            'https://backend.example/assets/lesson/L0052/fig12.jpeg',
+            'https://backend.example/assets/lesson/L0052/fig13.jpeg',
+          ],
+          answer: 'D',
+          explanation: null,
+        },
+      ],
+    } as Story;
+  }
+
+  it('carries option_images from the Story MCQ into the exercise block question', () => {
+    const { lesson, gaps } = storyToLesson(imageOptionStory());
+    expect(lesson, gaps.join('; ')).not.toBeNull();
+    const ex = lesson!.blocks.find((b) => b.id === 'ex-mcq-1');
+    expect(ex).toBeDefined();
+    if (!ex || ex.type !== 'exercise') throw new Error('expected exercise block');
+    expect(ex.question.kind).toBe('multiple_choice');
+    if (ex.question.kind !== 'multiple_choice') throw new Error('expected multiple_choice');
+    expect(ex.question.option_images).toEqual([
+      'https://backend.example/assets/lesson/L0052/fig10.jpeg',
+      'https://backend.example/assets/lesson/L0052/fig11.jpeg',
+      'https://backend.example/assets/lesson/L0052/fig12.jpeg',
+      'https://backend.example/assets/lesson/L0052/fig13.jpeg',
+    ]);
+  });
+
+  it('a text-only MCQ (no option_images on the Story) still validates and carries no image field', () => {
+    const { lesson, gaps } = storyToLesson(plainTextStory());
+    expect(lesson, gaps.join('; ')).not.toBeNull();
+    const ex = lesson!.blocks.find((b) => b.id === 'ex-mcq-1');
+    if (!ex || ex.type !== 'exercise' || ex.question.kind !== 'multiple_choice') {
+      throw new Error('expected multiple_choice exercise block');
+    }
+    expect(ex.question.option_images == null).toBe(true);
+  });
+});
+
 describe('regression: hand-written G7-L30 fixture does NOT change (bypasses the adapter)', () => {
   it('still resolves to paired and keeps p→media pairing', () => {
     const lesson = loadFixture('G7-L30.lesson.yml');
