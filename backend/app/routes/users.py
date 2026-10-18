@@ -7,6 +7,7 @@ from sqlalchemy import and_, or_
 from sqlalchemy.orm import Session, joinedload, selectinload
 
 from ..auth.classroom_check import compute_has_classroom
+from ..auth.password_policy import compute_must_change_password
 from ..auth.dependencies import get_current_user, get_user_org_ids, require_role
 from ..auth.policies import is_system_admin, resolve_user_org_ids
 from ..models.school import School
@@ -103,6 +104,7 @@ def get_me(
         roles=roles,
         has_classroom=has_classroom,
         teacher_gating_enforced=settings.enforce_teacher_gating,
+        must_change_password=compute_must_change_password(current_user),
     )
 
 

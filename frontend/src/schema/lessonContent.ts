@@ -54,6 +54,13 @@ const MultipleChoiceQuestion = z
     question: z.string().min(1),
     options: z.array(z.string()).min(2),
     explanation: z.string().nullish(),
+    // #3621: a handful of comprehension options are a DRAWING, not text
+    // ("下列哪一張圖…") — the source worksheet's correct answer has no
+    // caption. Same-length-as-options, same-index-as-options array of
+    // same-origin asset URLs (resolved by api.ts's resolveAssetUrl before
+    // it ever reaches the Story the adapter reads); null/absent entries
+    // mean that option stays text-only.
+    option_images: z.array(z.string().nullable()).nullish(),
   })
   .strict();
 

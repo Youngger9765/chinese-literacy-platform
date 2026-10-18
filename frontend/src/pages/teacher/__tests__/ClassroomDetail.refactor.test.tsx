@@ -30,6 +30,7 @@ vi.mock('../../../services/classroomApi', () => ({
   removeStudent: vi.fn(),
   exportClassroomReport: vi.fn(),
   regenerateClassroomCode: vi.fn(),
+  deleteClassroom: vi.fn(),
   ClassroomApiError: class ClassroomApiError extends Error {
     status: number;
     constructor(message: string, status: number) {
@@ -42,7 +43,15 @@ vi.mock('../../../services/classroomApi', () => ({
 
 vi.mock('../StudentProgressTab', () => ({ default: () => <div data-testid="student-progress-tab" /> }));
 vi.mock('../TextManagementTab', () => ({ default: () => <div data-testid="text-management-tab" /> }));
-vi.mock('../StudentListTab', () => ({ default: (props: { classroom: { name: string } }) => <div data-testid="student-list-tab" data-classroom={props.classroom?.name} /> }));
+vi.mock('../StudentListTab', () => ({
+  default: (props: { classroom: { name: string }; isAddStudentsOpen: boolean }) => (
+    <div
+      data-testid="student-list-tab"
+      data-classroom={props.classroom?.name}
+      data-add-open={String(props.isAddStudentsOpen)}
+    />
+  ),
+}));
 vi.mock('../ClassroomAnalytics', () => ({ default: () => <div data-testid="classroom-analytics" /> }));
 vi.mock('../CrossTextAnalytics', () => ({ default: () => <div data-testid="cross-text-analytics" /> }));
 vi.mock('../../components/teacher/AtRiskStudents', () => ({ default: () => <div data-testid="at-risk-students" /> }));
@@ -55,6 +64,7 @@ vi.mock('../panel/TodayOverviewTab', () => ({
 }));
 vi.mock('../panel/AssignmentsPanel', () => ({ default: () => <div data-testid="assignments-panel" /> }));
 vi.mock('../panel/ClassSwitcher', () => ({ default: () => null }));
+vi.mock('../panel/ClassListSidebar', () => ({ default: () => null }));
 vi.mock('../panel/StudentsPanel', () => ({ default: () => <div data-testid="students-panel" /> }));
 
 // ── Fixtures ─────────────────────────────────────────────────────────────────
@@ -122,7 +132,7 @@ describe('ClassroomDetail (refactor characterization) — render with mock data'
   it('renders student count', async () => {
     renderDetail();
     await waitFor(() => {
-      expect(screen.getByText(/5 位學生/)).toBeInTheDocument();
+      expect(screen.getByText('班級人數').parentElement?.textContent).toMatch(/班級人數\s*5\s*位/);
     });
   });
 
@@ -161,61 +171,76 @@ describe('ClassroomDetail (refactor characterization) — render with mock data'
   });
 });
 
-describe('ClassroomDetail — tabs (#3367 layout)', () => {
-  it('opens on 今日總覽 by default', async () => {
+describe('ClassroomDetail — Junyi three-tab layout (#3384)', () => {
+  it('opens on 班級設定 by default', async () => {
     renderDetail();
-    await waitFor(() => expect(screen.getByTestId('today-overview-tab')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole('tab', { name: '班級設定' })).toHaveAttribute('aria-selected', 'true'));
   });
 
-  it('switching tab writes ?tab= so a refresh or class switch keeps it', async () => {
+  it('switching to 指派任務 writes ?tab= so a refresh or class switch keeps it', async () => {
     const user = userEvent.setup();
     renderDetail();
-    await waitFor(() => screen.getByRole('tab', { name: '作業' }));
-    await user.click(screen.getByRole('tab', { name: '作業' }));
+    await waitFor(() => screen.getByRole('tab', { name: '指派任務' }));
+    await user.click(screen.getByRole('tab', { name: '指派任務' }));
     expect(screen.getByTestId('assignments-panel')).toBeInTheDocument();
     expect(screen.getByTestId('location').textContent).toContain('tab=assignments');
   });
 
-  it('an old ?tab=progress link lands on 詳細學習紀錄 under 更多', async () => {
+  it('an old ?tab=progress link opens 詳細學習紀錄 directly', async () => {
     renderDetail(42, '/teacher/classroom/42?tab=progress');
     await waitFor(() => expect(screen.getByTestId('student-progress-tab')).toBeInTheDocument());
   });
 
-  it('學習分析 (under 更多) shows the analytics and cross-text views together', async () => {
+  it.each([
+    ['error-heatmap', 'error-heatmap-tab'],
+    ['analytics', 'classroom-analytics'],
+    ['learning', 'student-progress-tab'],
+  ])('an old ?tab=%s link opens its data view directly', async (legacyTab, testId) => {
+    renderDetail(42, `/teacher/classroom/42?tab=${legacyTab}`);
+    await waitFor(() => expect(screen.getByTestId(testId)).toBeInTheDocument());
+  });
+
+  it('an explicit valid view overrides the legacy tab hint', async () => {
+    renderDetail(42, '/teacher/classroom/42?tab=progress&view=analytics');
+    await waitFor(() => expect(screen.getByTestId('classroom-analytics')).toBeInTheDocument());
+    expect(screen.queryByTestId('student-progress-tab')).not.toBeInTheDocument();
+  });
+
+  it('persists a selected data view through the URL and remount', async () => {
     const user = userEvent.setup();
-    renderDetail();
-    await waitFor(() => screen.getByRole('tab', { name: '更多' }));
-    await user.click(screen.getByRole('tab', { name: '更多' }));
-    await user.click(screen.getByRole('button', { name: '學習分析' }));
+    const { unmount } = renderDetail(42, '/teacher/classroom/42?tab=data');
+    await user.click(await screen.findByRole('button', { name: '學習分析' }));
+    expect(screen.getByTestId('location').textContent).toContain('tab=data');
+    expect(screen.getByTestId('location').textContent).toContain('view=analytics');
     expect(screen.getByTestId('classroom-analytics')).toBeInTheDocument();
+
+    const url = `/teacher/classroom/42${screen.getByTestId('location').textContent}`;
+    unmount();
+    renderDetail(42, url);
+    expect(await screen.findByTestId('classroom-analytics')).toBeInTheDocument();
     expect(screen.getByTestId('cross-text-analytics')).toBeInTheDocument();
   });
 
-  it('協同教師 is reachable under 更多', async () => {
-    const user = userEvent.setup();
+  it('協同教師 is reachable under 班級設定', async () => {
     renderDetail();
-    await waitFor(() => screen.getByRole('tab', { name: '更多' }));
-    await user.click(screen.getByRole('tab', { name: '更多' }));
-    await user.click(screen.getByRole('button', { name: '協同教師' }));
-    expect(screen.getByTestId('co-teaching-tab')).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByTestId('co-teaching-tab')).toBeInTheDocument());
   });
 
-  it('查看矩陣 on 今日總覽 lands on 作業 with that assignment open (#3376 audit)', async () => {
+  it('查看矩陣 on 今日總覽 lands on 指派任務 with that assignment open (#3376 audit)', async () => {
     const user = userEvent.setup();
-    renderDetail();
+    renderDetail(42, '/teacher/classroom/42?tab=data');
     await user.click(await screen.findByRole('button', { name: '查看矩陣' }));
     const search = screen.getByTestId('location').textContent ?? '';
     expect(search).toContain('tab=assignments');
     expect(search).toContain('assignment=7');
   });
 
-  it('學生 tab shows the student panel and writes ?tab=students', async () => {
+  it('學生總表 shows the student panel while keeping 班級數據 selected', async () => {
     const user = userEvent.setup();
-    renderDetail();
-    await waitFor(() => screen.getByRole('tab', { name: '學生' }));
-    await user.click(screen.getByRole('tab', { name: '學生' }));
+    renderDetail(42, '/teacher/classroom/42?tab=data');
+    await user.click(await screen.findByRole('button', { name: '學生總表' }));
     expect(screen.getByTestId('students-panel')).toBeInTheDocument();
-    expect(screen.getByTestId('location').textContent).toContain('tab=students');
+    expect(screen.getByTestId('location').textContent).toContain('tab=data');
   });
 });
 
@@ -224,11 +249,6 @@ describe('ClassroomDetail (refactor characterization) — join code copy', () =>
     const user = userEvent.setup();
     renderDetail();
     await waitFor(() => expect(screen.getAllByText('ABC123').length).toBeGreaterThan(0));
-      // The header became an accordion (#1943 follow-up): the code panel, and
-      // with it the copy and regenerate buttons, only render once the 加入代碼
-      // toggle is opened. This characterization test was written when they were
-      // always on screen.
-      await user.click(screen.getByRole('button', { name: /加入代碼/i }));
 
     await user.click(screen.getByRole('button', { name: /複製代碼/i }));
     // Read the clipboard rather than spying on writeText: userEvent.setup()
@@ -245,11 +265,6 @@ describe('ClassroomDetail (refactor characterization) — join code copy', () =>
     const user = userEvent.setup();
     renderDetail();
     await waitFor(() => expect(screen.getAllByText('ABC123').length).toBeGreaterThan(0));
-      // The header became an accordion (#1943 follow-up): the code panel, and
-      // with it the copy and regenerate buttons, only render once the 加入代碼
-      // toggle is opened. This characterization test was written when they were
-      // always on screen.
-      await user.click(screen.getByRole('button', { name: /加入代碼/i }));
 
     await user.click(screen.getByRole('button', { name: /複製代碼/i }));
     await waitFor(() => {
@@ -261,11 +276,6 @@ describe('ClassroomDetail (refactor characterization) — join code copy', () =>
     const user = userEvent.setup();
     renderDetail();
     await waitFor(() => expect(screen.getAllByText('ABC123').length).toBeGreaterThan(0));
-      // The header became an accordion (#1943 follow-up): the code panel, and
-      // with it the copy and regenerate buttons, only render once the 加入代碼
-      // toggle is opened. This characterization test was written when they were
-      // always on screen.
-      await user.click(screen.getByRole('button', { name: /加入代碼/i }));
 
     await user.click(screen.getByRole('button', { name: /重生代碼/i }));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
@@ -281,11 +291,6 @@ describe('ClassroomDetail (refactor characterization) — join code copy', () =>
     const user = userEvent.setup();
     renderDetail();
     await waitFor(() => expect(screen.getAllByText('ABC123').length).toBeGreaterThan(0));
-      // The header became an accordion (#1943 follow-up): the code panel, and
-      // with it the copy and regenerate buttons, only render once the 加入代碼
-      // toggle is opened. This characterization test was written when they were
-      // always on screen.
-      await user.click(screen.getByRole('button', { name: /加入代碼/i }));
 
     await user.click(screen.getByRole('button', { name: /重生代碼/i }));
     await user.click(screen.getByRole('button', { name: /確定/i }));
@@ -300,21 +305,32 @@ describe('ClassroomDetail (refactor characterization) — join code copy', () =>
 });
 
 describe('ClassroomDetail — student roster in the class header (#3367, collapsed #3376, #3378)', () => {
-  it('a class with students starts collapsed, and expands without switching tabs', async () => {
+  it('a class with students shows the roster right away, with 新增學生 closed (Junyi parity)', async () => {
     vi.mocked(classroomApi.getClassroomDetail).mockResolvedValue({
       ...MOCK_CLASSROOM,
       students: [{ id: 5, name: '小明', email: 'a@b.c', enrolled_at: '2026-01-01T00:00:00Z' }],
     } as never);
     const user = userEvent.setup();
     renderDetail();
-    const toggle = await screen.findByRole('button', { name: /學生名單（/ });
-    expect(screen.queryByTestId('student-list-tab')).toBeNull();
-    await user.click(toggle);
-    expect(screen.getByTestId('student-list-tab').getAttribute('data-classroom')).toBe('三年甲班');
+    const roster = await screen.findByTestId('student-list-tab');
+    expect(roster.getAttribute('data-classroom')).toBe('三年甲班');
+    expect(roster.getAttribute('data-add-open')).toBe('false');
+    await user.click(screen.getByRole('button', { name: /新增學生/ }));
+    expect(screen.getByTestId('student-list-tab').getAttribute('data-add-open')).toBe('true');
+  });
+
+  it('指派任務 under the roster jumps to the 指派任務 tab', async () => {
+    const user = userEvent.setup();
+    renderDetail();
+    await screen.findByTestId('student-list-tab');
+    const goAssign = screen.getAllByRole('button', { name: '指派任務' }).find((b) => b.getAttribute('role') !== 'tab')!;
+    await user.click(goAssign);
+    expect(screen.getByTestId('location').textContent).toContain('tab=assignments');
   });
 
   it('an empty class opens straight on adding students (均一-style first step)', async () => {
     renderDetail();
-    expect(await screen.findByTestId('student-list-tab')).toBeInTheDocument();
+    const roster = await screen.findByTestId('student-list-tab');
+    await waitFor(() => expect(roster.getAttribute('data-add-open')).toBe('true'));
   });
 });

@@ -300,6 +300,10 @@ def create_assignment_with_submissions(
         difficulty_label=payload.difficulty_label,
         # Issue #1762: smart skip setting
         skip_completed_steps=payload.skip_completed_steps,
+        # Issue #3393: a student_ids list means "part of the class" -- students
+        # who join later must NOT be auto-enrolled into it (see
+        # create_submissions_for_new_student in routes/classrooms/helpers.py).
+        assigned_to_all=payload.student_ids is None,
     )
     db.add(assignment)
     db.flush()  # get assignment.id

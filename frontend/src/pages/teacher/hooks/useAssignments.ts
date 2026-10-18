@@ -14,6 +14,7 @@ import {
 } from '../../../services/assignmentApi';
 import { fetchStories } from '../../../services/api';
 import { Story } from '../../../types';
+import { isPastDue } from '../../../utils/dueDate';
 
 export type StatusFilter = 'all' | 'active' | 'inactive' | 'overdue';
 
@@ -107,11 +108,11 @@ export function useAssignments(classroomId: number, onChanged?: () => void) {
     return assignments.filter((assignment) => {
       switch (statusFilter) {
         case 'active':
-          return assignment.is_active && (!assignment.due_date || new Date(assignment.due_date) >= now);
+          return assignment.is_active && !isPastDue(assignment.due_date, now);
         case 'inactive':
           return !assignment.is_active;
         case 'overdue':
-          return assignment.is_active && assignment.due_date != null && new Date(assignment.due_date) < now;
+          return assignment.is_active && isPastDue(assignment.due_date, now);
         default:
           return true;
       }
@@ -123,11 +124,11 @@ export function useAssignments(classroomId: number, onChanged?: () => void) {
     return {
       all: assignments.length,
       active: assignments.filter(
-        (assignment) => assignment.is_active && (!assignment.due_date || new Date(assignment.due_date) >= now),
+        (assignment) => assignment.is_active && !isPastDue(assignment.due_date, now),
       ).length,
       inactive: assignments.filter((assignment) => !assignment.is_active).length,
       overdue: assignments.filter(
-        (assignment) => assignment.is_active && assignment.due_date != null && new Date(assignment.due_date) < now,
+        (assignment) => assignment.is_active && isPastDue(assignment.due_date, now),
       ).length,
     };
   }, [assignments]);

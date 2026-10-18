@@ -24,6 +24,7 @@ import { useWorkspace, type WorkspaceView } from '../../contexts/WorkspaceContex
 import { useLearningNav } from '../../contexts/LearningNavContext';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import { hasRole } from '../../services/authApi';
+import { fetchMyEnrolledClassrooms } from '../../services/learning/session';
 import NotificationBell from '../teacher/NotificationBell';
 import ZhuyinToggle from '../ui/ZhuyinToggle';
 import { SIDEBAR_STORAGE_KEY } from './sidebarUtils';
@@ -56,6 +57,13 @@ interface MobileTabBarProps {
   viewLabels: Record<WorkspaceView, { icon: string; label: string }>;
   onSwitchView: (view: WorkspaceView) => void;
   onLogout: () => void;
+  /**
+   * #3425: teacher role gets the notification center (desktop already shows
+   * it via <NotificationBell> in the aside footer). Passed as a node rather
+   * than a boolean so this component doesn't need to know about teacher
+   * auth/fetching — Sidebar decides whether to render it.
+   */
+  notificationSlot?: React.ReactNode;
 }
 
 function isActiveLocal(pathname: string, path: string): boolean {
@@ -80,12 +88,17 @@ const MobileTabBar: React.FC<MobileTabBarProps> = ({
   viewLabels,
   onSwitchView,
   onLogout,
+  notificationSlot,
 }) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const allItems = [...studentItems, ...teacherItems];
   const topItems = allItems.slice(0, 4);
   const moreItems = [...allItems.slice(4), ...extraItems];
-  const showMoreButton = moreItems.length > 0 || hasMultipleViews;
+  // #3425: teacher-role users only had 3 items (班級管理/作業管理/使用說明) and
+  // no extraItems, so moreItems was empty and this button never rendered --
+  // the drawer's 登出/隱私政策/notification slot below were unreachable on a
+  // phone, which is exactly the shared-device problem the issue reported.
+  const showMoreButton = moreItems.length > 0 || hasMultipleViews || !!notificationSlot;
 
   return (
     <>
@@ -212,6 +225,22 @@ const MobileTabBar: React.FC<MobileTabBarProps> = ({
               </div>
             )}
 
+            {/*
+             * #3425: teacher's mobile bottom nav had no way to reach the
+             * notification center at all -- NotificationBell only rendered
+             * in the desktop aside footer (`hidden md:flex`). Reuses the
+             * same self-contained component; its dropdown panel positions
+             * itself relative to this wrapper.
+             */}
+            {notificationSlot && (
+              <div className="mt-4 border-t border-gray-100 pt-3">
+                <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2 px-1">
+                  通知
+                </p>
+                {notificationSlot}
+              </div>
+            )}
+
             <div className="mt-4 border-t border-gray-100 pt-3">
               <button
                 type="button"
@@ -238,7 +267,7 @@ const MobileTabBar: React.FC<MobileTabBarProps> = ({
 // ---------------------------------------------------------------------------
 
 const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
-  const { user, logout } = useAuth();
+  const { user, logout, token } = useAuth();
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const { selectedStory: navStory } = useLearningNav();
@@ -283,6 +312,27 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
 
   const { activeView, setActiveView, availableViews, hasMultipleViews } = useWorkspace();
 
+  // issue #3607: 跨班賽季／課堂搶答 sidebar entries only show when ANY of
+  // the student's enrolled classrooms has the corresponding flag on —
+  // same "ANY enrolled classroom" pattern StudentPkEntry.tsx already uses
+  // for pk_human. Starts false (hidden) until the real enrollment data
+  // loads, so a disabled feature is never flashed before disappearing.
+  // Scoped to activeView === 'student': teacher/admin sessions never need
+  // this student-only enrollment lookup (critic-agent review note).
+  const [leagueEnabled, setLeagueEnabled] = useState(false);
+  const [liveQuizEnabled, setLiveQuizEnabled] = useState(false);
+  useEffect(() => {
+    if (!token || activeView !== 'student') return;
+    fetchMyEnrolledClassrooms(token)
+      .then((res) => {
+        setLeagueEnabled(res.classrooms.some((c) => c.league));
+        setLiveQuizEnabled(res.classrooms.some((c) => c.live_quiz));
+      })
+      .catch(() => {
+        /* best-effort — entries simply stay hidden if this fails */
+      });
+  }, [token, activeView]);
+
   const VIEW_LABELS: Record<WorkspaceView, { icon: string; label: string }> = {
     admin: { icon: '⚙️', label: '管理員' },
     teacher: { icon: '🏫', label: '老師' },
@@ -308,7 +358,9 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
   // ---------------------------------------------------------------------------
 
   const mobileStudentItems: NavItem[] =
-    activeView === 'student' ? getStudentNavItems(pendingAssignmentCount) : [];
+    activeView === 'student'
+      ? getStudentNavItems(pendingAssignmentCount, { league: leagueEnabled, liveQuiz: liveQuizEnabled })
+      : [];
 
   const mobileTeacherItems: NavItem[] =
     activeView === 'teacher' || activeView === 'admin' ? getTeacherNavItems() : [];
@@ -318,6 +370,11 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
 
   const mobileExtraItems: NavItem[] = [
     ...(activeView === 'admin' ? getAdminExtraItems() : []),
+    // #3425: teacher view (plain teacher role, not admin) only has 3 primary
+    // items and no extras, so the "更多" button never appeared on a phone --
+    // there was no mobile path to 登出/隱私政策 at all. Giving it this one
+    // extra item is also what makes `moreItems.length > 0` true again.
+    ...(activeView === 'teacher' ? [{ icon: '🔒', label: '隱私政策', path: '/privacy' }] : []),
     ...parentItems,
     ...(activeView === 'student' ? studentToolsItems : []),
   ];
@@ -333,6 +390,8 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
           pendingAssignmentCount={pendingAssignmentCount}
           collapsed={collapsed}
           onNavigate={handleNavigate}
+          leagueEnabled={leagueEnabled}
+          liveQuizEnabled={liveQuizEnabled}
         />
       );
     }
@@ -538,6 +597,11 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
         activeView={activeView}
         availableViews={availableViews}
         viewLabels={VIEW_LABELS}
+        notificationSlot={
+          isTeacher ? (
+            <NotificationBell onNavigateToStudent={(classroomId) => navigate(`/teacher/classroom/${classroomId}`)} />
+          ) : undefined
+        }
         onSwitchView={(view) => {
           setActiveView(view);
           const home: Record<WorkspaceView, string> = {

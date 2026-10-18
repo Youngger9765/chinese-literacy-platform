@@ -30,6 +30,10 @@ import AssessmentReport from '../../components/reading-steps/AssessmentReport';
 import TeacherCommentSection from '../../components/teacher/TeacherCommentSection';
 import PageLoader from '../../components/ui/PageLoader';
 import { SpotlightStrategyRecord } from '../student/session-history/SpotlightStrategyRecord';
+import { StepRecordsView } from '../student/session-history/StepRecordsView';
+import { buildComprehensionScores } from '../student/session-history/helpers';
+import { getTeacherStudentDialogue } from '../../services/teacherApi';
+import type { SessionDetailResponse } from '../../services/learningApi';
 
 // ---------------------------------------------------------------------------
 // Helpers — map raw backend dicts to frontend types
@@ -275,22 +279,39 @@ const TeacherSessionReportPage: React.FC = () => {
         />
       )}
 
-      {/* Issue #1549 — raw step_progress placeholder. A proper per-step
-          breakdown UI (vocab chars practiced, dictation answers, etc.) is
-          tracked in a follow-up issue; for now we expose the JSON so the
-          data wiring is verifiable end-to-end. */}
+      {/* #3220 第二期：這裡原本是 #1549 留下的 `JSON.stringify(step_progress)`
+          placeholder —— 資料早就送到教師端了，只是以 raw JSON 呈現，老師讀不了。
+          學生端「作答紀錄」分頁用的 StepRecordsView 渲染的就是同一份資料，
+          所以這裡重用它，而不是另寫一套。
+
+          ⚠️ 對話來源必須注入教師端那支：StepRecordsView 預設打
+          `/learning/sessions/{id}/dialogue`，那走 get_owned_session，
+          老師打會 403。 */}
       {report?.step_progress && (
-        <details className="mt-8 bg-white border border-gray-200 rounded-xl overflow-hidden">
-          <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50">
-            學習步驟細節（原始資料）
-            <span className="ml-2 text-xs text-gray-400">
+        <div className="mt-8">
+          <h2 className="mb-3 text-lg font-bold text-gray-900">
+            作答紀錄
+            <span className="ml-2 text-xs font-normal text-gray-400">
               {(report.step_progress.steps_completed?.length ?? 0)} 步已完成
             </span>
-          </summary>
-          <pre className="px-4 py-3 text-xs text-gray-800 bg-gray-50 overflow-x-auto whitespace-pre-wrap break-words border-t border-gray-200">
-            {JSON.stringify(report.step_progress, null, 2)}
-          </pre>
-        </details>
+          </h2>
+          <StepRecordsView
+            // 教師端的 28 個欄位完整涵蓋 SessionDetailResponse 的 19 個
+            // （由 TeacherSessionReportPage.stepRecords.test.tsx 的型別斷言守著，
+            //   任一邊欄位漂移會在 build 期就紅，不會等到執行期破圖）
+            detail={report as unknown as SessionDetailResponse}
+            comprehensionScores={buildComprehensionScores(
+              report as unknown as SessionDetailResponse,
+            )}
+            token={token!}
+            sessionId={Number(sessionId)}
+            loadDialogue={() =>
+              getTeacherStudentDialogue(token!, Number(studentId), Number(sessionId)).then(
+                (r) => r.turns,
+              )
+            }
+          />
+        </div>
       )}
     </div>
   );

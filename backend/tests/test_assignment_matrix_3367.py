@@ -241,6 +241,14 @@ class TestAssignmentMatrix:
     def _get(self, client, token, cid):
         return client.get(f"/api/teacher/classrooms/{cid}/assignment-matrix", headers=auth_header(token))
 
+    def test_each_student_carries_its_login_account(self, client, teacher, students, seeded):
+        # #3497: same-name students are told apart by account, as in the roster.
+        body = self._get(client, teacher["token"], seeded["cid"]).json()
+        got = {s["id"]: s["account"] for s in body["students"]}
+        assert len(got) == 4
+        for st in students:
+            assert got[st["user_id"]] == st["email"]
+
     def test_every_cell_has_one_of_four_states(self, client, teacher, seeded):
         resp = self._get(client, teacher["token"], seeded["cid"])
         assert resp.status_code == 200
@@ -292,6 +300,13 @@ class TestAssignmentMatrix:
 
     def test_unauthenticated(self, client, seeded):
         assert client.get(f"/api/teacher/classrooms/{seeded['cid']}/assignment-matrix").status_code == 401
+
+    def test_empty_classroom_returns_empty_arrays(self, client, teacher, school_id):
+        empty_cid = _seed_classroom(teacher["user_id"], school_id)
+        resp = self._get(client, teacher["token"], empty_cid)
+        assert resp.status_code == 200
+        body = resp.json()
+        assert body == {"students": [], "assignments": [], "cells": []}
 
 
 class TestAssignmentItemStats:
@@ -345,6 +360,20 @@ class TestAssignmentItemStats:
         monkeypatch.setattr(m, "_MATRIX_CELL_LIMIT", 7)
         assert client.get(url, headers=auth_header(teacher["token"])).status_code == 400
 
+    def test_zero_assigned_students_no_division_by_zero(self, client, teacher, school_id):
+        empty_cid = _seed_classroom(teacher["user_id"], school_id)
+        aid = _seed_assignment(empty_cid, teacher["user_id"], "No Students Yet")
+        resp = self._get(client, teacher["token"], aid)
+        assert resp.status_code == 200
+        body = resp.json()
+        assert body["assigned_count"] == 0
+        assert body["submitted_count"] == 0
+        for item in body["items"]:
+            assert item["completed"] == 0
+            assert item["total"] == 0
+            assert item["completion_rate"] is None
+            assert item["correct_rate"] is None
+
 
 class TestStudentAssignments:
     def _get(self, client, token, cid, sid):
@@ -390,3 +419,12 @@ def test_malformed_stored_reading_result_reads_as_missing_not_500():
     mixed = SimpleNamespace(full_reading_result={"error_chars": ["喝", {"x": 1}, "x" * 50]},
                             reading_result=None, accuracy=None)
     assert _error_chars(mixed) == ["喝"]
+
+
+def test_account_label_prefers_username_then_strips_the_student_domain():
+    # #3497: batch-created students log in with the account shown in the roster.
+    from types import SimpleNamespace
+    from app.routes.teacher.teacher_assignment_matrix import _account
+    assert _account(SimpleNamespace(username="srjdv53", email="srjdv53@student.lingoleap.local")) == "srjdv53"
+    assert _account(SimpleNamespace(username=None, email="srjdv56@student.lingoleap.local")) == "srjdv56"
+    assert _account(SimpleNamespace(username=None, email="kid@example.com")) == "kid@example.com"

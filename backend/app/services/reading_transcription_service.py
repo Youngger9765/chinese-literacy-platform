@@ -35,6 +35,7 @@ from __future__ import annotations
 import re as _re_mod
 
 import asyncio
+import functools
 import io
 import logging
 import subprocess
@@ -362,6 +363,35 @@ def _transcode_to_ogg(audio_bytes: bytes, source_mime: str) -> bytes | None:
                 pass
 
 
+# Hedged request (2026-10-16): Gemini usually answers a reading transcription in
+# 4-7 s, but about 1 in 30 calls stalled past the 30 s timeout under a class-wide
+# burst and the student got a fallback. If the first call is still running after
+# HEDGE_AFTER_SECONDS, send one duplicate and use whichever succeeds first. The
+# outer GEMINI_TIMEOUT is unchanged, so the worst case is no slower.
+HEDGE_AFTER_SECONDS = 10.0
+
+
+async def _hedged_call(call, *, hedge_after: float):
+    """Run blocking ``call()`` in a thread; if it hasn't finished after
+    ``hedge_after`` seconds, start one more and return the first success.
+    A failure before the hedge point is raised as-is (no retry on errors)."""
+    first = asyncio.ensure_future(asyncio.to_thread(call))
+    done, _ = await asyncio.wait({first}, timeout=hedge_after)
+    if done:
+        return first.result()
+    pending = {first, asyncio.ensure_future(asyncio.to_thread(call))}
+    last_exc: BaseException | None = None
+    while pending:
+        done, pending = await asyncio.wait(pending, return_when=asyncio.FIRST_COMPLETED)
+        for task in done:
+            if task.exception() is None:
+                for other in pending:
+                    other.cancel()  # the thread finishes on its own; result discarded
+                return task.result()
+            last_exc = task.exception()
+    raise last_exc  # both failed
+
+
 async def transcribe_reading_audio(
     audio_bytes: bytes,
     mime_type: str,
@@ -487,8 +517,9 @@ async def transcribe_reading_audio(
 
     try:
         response = await asyncio.wait_for(
-            asyncio.to_thread(
-                client.models.generate_content,
+            _hedged_call(
+                functools.partial(
+                    client.models.generate_content,
                 model=model,
                 contents=contents,
                 config=genai_types.GenerateContentConfig(
@@ -502,6 +533,8 @@ async def transcribe_reading_audio(
                         disable=True
                     ),
                 ),
+                ),
+                hedge_after=HEDGE_AFTER_SECONDS,
             ),
             timeout=GEMINI_TIMEOUT,
         )

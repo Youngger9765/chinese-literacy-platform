@@ -18,6 +18,7 @@ import logging
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 logger = logging.getLogger(__name__)
@@ -26,6 +27,7 @@ from ..auth.classroom_check import compute_has_classroom
 from ..auth.dependencies import get_current_user
 from ..auth.jwt import create_access_token
 from ..auth.password import hash_password, verify_password
+from ..auth.password_policy import compute_must_change_password
 from ..auth.rate_limiter import InMemoryRateLimiter, real_client_ip
 from ..config import settings
 from ..database import get_db
@@ -128,6 +130,13 @@ def register(req: RegisterRequest, request: Request, db: Session = Depends(get_d
         raise HTTPException(status_code=429, detail="Too many requests. Please try again later.")
 
     block_student_self_registration(req.role)
+    # #3513: a parent signs up as a parent — no teacher role, no school.
+    wants_parent = (req.role or "").strip().lower() == "parent"
+    if wants_parent and not settings.parent_portal_enabled:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="家長功能目前暫時關閉，請聯繫老師或管理員。",
+        )
     enforce_password_strength(req.password)
 
     existing = db.query(User).filter(User.email == req.email).first()
@@ -144,7 +153,11 @@ def register(req: RegisterRequest, request: Request, db: Session = Depends(get_d
         name=req.name,
     )
 
-    assign_teacher_to_school(db, user)
+    if wants_parent:
+        from .parents import _grant_parent_role
+        _grant_parent_role(user, db)
+    else:
+        assign_teacher_to_school(db, user)
     db.commit()
     db.refresh(user)
 
@@ -173,14 +186,32 @@ def login(req: LoginRequest, request: Request, db: Session = Depends(get_db)):
     Accepts either an email address or a username in the `email` field.
     If the value contains '@', it is treated as an email; otherwise as a username.
     """
+    # Two buckets (2026-10-15): a class of 30 tablets shares one school IP,
+    # and 10/min per IP locked 20 of them out. The per-IP cap is now sized
+    # for a classroom; guessing ONE account's password is still capped at
+    # 10/min by the per-account bucket.
     client_ip = real_client_ip(request)
-    if not rate_limiter.check(f"login:{client_ip}", max_requests=10, window_seconds=60):
+    account_key = (req.email or "").strip().lower()
+    if not rate_limiter.check(f"login:{client_ip}", max_requests=60, window_seconds=60):
+        raise HTTPException(status_code=429, detail="Too many requests. Please try again later.")
+    if not rate_limiter.check(f"login:acct:{account_key}", max_requests=10, window_seconds=60):
         raise HTTPException(status_code=429, detail="Too many requests. Please try again later.")
 
     if "@" in req.email:
         user = db.query(User).filter(User.email == req.email, User.is_active == True).first()
     else:
-        user = db.query(User).filter(User.username == req.email, User.is_active == True).first()
+        # Issue #3426: student usernames are system-generated (join_code +
+        # seat_number) and always stored uppercase (classroom_batch.py /
+        # classroom_csv.py call .upper()), but credential cards print them
+        # uppercase while students often type lowercase on tablets. Usernames
+        # can't collide case-insensitively by construction (generator only
+        # emits uppercase ASCII + digits), so this is a strict widening with
+        # no new collision risk.
+        user = (
+            db.query(User)
+            .filter(func.lower(User.username) == req.email.lower(), User.is_active == True)
+            .first()
+        )
 
     if not user or not verify_password(req.password, user.password_hash):
         raise HTTPException(
@@ -199,9 +230,7 @@ def login(req: LoginRequest, request: Request, db: Session = Depends(get_db)):
     user.last_login_at = datetime.now(timezone.utc)
     db.commit()
 
-    must_change = False
-    if user.student_profile and not user.student_profile.password_changed:
-        must_change = True
+    must_change = compute_must_change_password(user)
 
     has_classroom = compute_has_classroom(db, user.id)
 

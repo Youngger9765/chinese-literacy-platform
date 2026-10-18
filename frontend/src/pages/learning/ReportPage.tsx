@@ -1,26 +1,31 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { stepPath } from '../../config/stepPath';
 import { useNavigate, useParams } from 'react-router-dom';
-import AssessmentReport from '../../components/reading-steps/AssessmentReport';
 import XPAwardToast, { type XPAwardResult } from '../../components/gamification/XPAwardToast';
 import { useLearningContext } from '../../layouts/LearningLayout';
 import { useAuth } from '../../contexts/AuthContext';
 import { reportSessionComplete } from '../../services/gamificationApi';
-import {
-  fetchDialogueHistory,
-  getComprehensionScore,
-  type ComprehensionScoreResult,
-} from '../../services/learningApi';
+import { resolveActiveSteps } from '../../config/stepConfig';
+import StepReportCards from '../../components/report/StepReportCards';
+import { useReportProgress } from '../../components/report/useReportProgress';
+import { buildStepReportCards, marksFromAnnotations } from '../../components/report/reportCardsModel';
+
+/**
+ * 報告頁（#3399）：每一關一張卡片，完成打綠勾，點開看分數與作答。
+ *
+ * 以前這裡是 AssessmentReport —— 朗讀六環節診斷、AI 理解度評分、折線圖。
+ * Mentor 回饋那些對學生太複雜，學生只要看到「我做完了哪些、做得怎樣」。
+ * AssessmentReport 仍在老師端與歷史紀錄頁使用，這裡只換學生流程的報告頁。
+ * 拿掉的 AI 理解度評分（getComprehensionScore）是一次 LLM 呼叫，現在不再打。
+ */
 
 const ReportPage: React.FC = () => {
   const { storyId } = useParams<{ storyId: string }>();
   const {
     selectedStory,
     session,
-    handleRetry,
     handleSessionComplete,
     dbSessionId,
-    assignmentReadingGoals,
     isAssignmentReadyForSubmit,
     missingAssignmentSteps,
     firstIncompleteStepPath,
@@ -53,10 +58,6 @@ const ReportPage: React.FC = () => {
 
   const [xpResult, setXpResult] = useState<XPAwardResult | null>(null);
   const [showXpToast, setShowXpToast] = useState(false);
-
-  // Three-level comprehension scores (Issue #243)
-  const [comprehensionScores, setComprehensionScores] = useState<ComprehensionScoreResult | null>(null);
-  const [comprehensionScoresLoading, setComprehensionScoresLoading] = useState(false);
 
   // Clear active session from localStorage when report is reached
   useEffect(() => {
@@ -115,43 +116,24 @@ const ReportPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dbSessionId, hasActiveAssignment, isAssignmentReadyForSubmit]);
 
-  // Fetch 3-level comprehension scores when dialogue data is available (Issue #243)
-  useEffect(() => {
-    if (hasActiveAssignment && !isAssignmentReadyForSubmit) return;
-    if (!dbSessionId || !token || !selectedStory || !session?.comprehensionResult) return;
+  // 進度與記號都直接讀 DB（含重新整理後的 carry-forward，理由見 hook）。
+  const report = useReportProgress(dbSessionId, token, storyId, stepProgressData);
 
-    setComprehensionScoresLoading(true);
-    fetchDialogueHistory(token, dbSessionId)
-      .then((history) => {
-        if (!history.turns || history.turns.length === 0) {
-          setComprehensionScoresLoading(false);
-          return;
-        }
-        // Filter to only ai/student turns (exclude 'feedback' turns used for internal bookkeeping)
-        const dialogueTurns = history.turns
-          .filter((t) => t.role === 'ai' || t.role === 'student')
-          .map((t) => ({ role: t.role as 'ai' | 'student', text: t.text }));
-        // Join paragraph array into a single string for the AI evaluation prompt
-        const storyText = Array.isArray(selectedStory.content)
-          ? selectedStory.content.join('\n')
-          : (selectedStory.content as string);
-        return getComprehensionScore(token, dbSessionId, {
-          storyTitle: selectedStory.title,
-          storyText,
-          dialogueTurns,
-        });
-      })
-      .then((scores) => {
-        if (scores) setComprehensionScores(scores);
-      })
-      .catch((err: Error) => {
-        // Non-critical — AssessmentReport falls back to basic comprehension result
-        console.warn('Comprehension scoring failed (non-blocking):', err.message);
-      })
-      .finally(() => setComprehensionScoresLoading(false));
-  // Run once per report page load — dbSessionId is the stable identifier
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dbSessionId, hasActiveAssignment, isAssignmentReadyForSubmit]);
+  const cards = useMemo(
+    () =>
+      buildStepReportCards(
+        resolveActiveSteps(selectedStory?.stepSequence),
+        report.progress?.steps_completed ?? session?.completedSteps,
+        report.progress?.step_data,
+        report.annotations ? marksFromAnnotations(report.annotations, selectedStory?.content) : null,
+      ),
+    [selectedStory?.stepSequence, selectedStory?.content, report.progress, report.annotations, session?.completedSteps],
+  );
+
+  const handleDismissToast = useCallback(() => {
+    setShowXpToast(false);
+    setXpResult(null);
+  }, []);
 
   if (hasActiveAssignment && !isAssignmentReadyForSubmit) {
     return (
@@ -192,34 +174,17 @@ const ReportPage: React.FC = () => {
     );
   }
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks -- pre-existing pattern, hook is after early return guard (#2289)
-  const handleDismissToast = useCallback(() => {
-    setShowXpToast(false);
-    setXpResult(null);
-  }, []);
-
   return (
-    <div className="flex-1 overflow-y-auto p-8 max-w-4xl mx-auto w-full">
-      <AssessmentReport
-        session={session}
-        story={selectedStory}
-        onRetry={handleRetry}
-        onGoToVocab={() => navigate(`/learn/${storyId}/character-practice`)}
-        dbSessionId={dbSessionId}
-        token={token}
-        comprehensionScores={comprehensionScores}
-        comprehensionScoresLoading={comprehensionScoresLoading}
-        stepProgressData={stepProgressData}
-        readingGoals={
-          assignmentReadingGoals
-            ? {
-                effectiveCpm: assignmentReadingGoals.effective_cpm,
-                effectiveAccuracy: assignmentReadingGoals.effective_accuracy,
-                difficultyLabel: assignmentReadingGoals.difficulty_label,
-              }
-            : undefined
-        }
-      />
+    <div className="flex-1 overflow-y-auto px-4 py-6 sm:p-8 max-w-4xl mx-auto w-full">
+      {report.loading && dbSessionId ? (
+        <p className="py-16 text-center text-on-surface-variant" role="status">載入學習成果…</p>
+      ) : (
+        <StepReportCards
+          storyTitle={selectedStory?.title}
+          cards={cards}
+          onGoToStep={(stepId) => navigate(stepPath(storyId!, stepId))}
+        />
+      )}
 
       {showXpToast && xpResult && (
         <XPAwardToast result={xpResult} onDismiss={handleDismissToast} />

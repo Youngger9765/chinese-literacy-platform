@@ -93,7 +93,7 @@ class ErrorVocabItem(BaseModel):
 
 
 class TimeStatsResponse(BaseModel):
-    total_hours: float
+    total_hours: float | None
     avg_minutes_per_session: float | None
     study_days: int
     sessions_this_week: int

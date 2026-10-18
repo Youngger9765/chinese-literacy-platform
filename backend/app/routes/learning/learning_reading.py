@@ -791,6 +791,12 @@ async def transcribe_reading_endpoint(
     )
 
     # ── 4. Call Gemini (fail-closed — never 500 on AI failure) ───────────────
+    # Give the DB connection back before the 10-30 s wait (2026-10-16): the auth
+    # lookup checked one out and the session would otherwise hold it until the
+    # response, so a class reading at once tied up the per-instance pool. The
+    # session is reusable afterwards (log_ai_usage below opens a fresh one) and
+    # close() keeps current_user's loaded attributes.
+    db.close()
     start_time = time.monotonic()
     result = await transcribe_reading_audio(
         audio_bytes=audio_bytes,

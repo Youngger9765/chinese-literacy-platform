@@ -7,6 +7,7 @@
 import React from 'react';
 import { STEP_REGISTRY, resolveStepId } from '../../../config/stepConfig';
 import { AssignmentMatrixResponse } from '../../../services/teacherApi';
+import { isPastDue } from '../../../utils/dueDate';
 
 type Cell = AssignmentMatrixResponse['cells'][number];
 
@@ -16,16 +17,33 @@ interface AssignmentMatrixGridProps {
   onOpenStudent?: (studentId: number) => void;
 }
 
+/** #3497: two students with the same name get their login account after the name. */
+export function studentLabel(
+  s: { name: string; account?: string | null },
+  duplicateNames: Set<string>,
+): string {
+  return duplicateNames.has(s.name) && s.account ? `${s.name}（${s.account}）` : s.name;
+}
+
+function duplicateNameSet(students: { name: string }[]): Set<string> {
+  const seen = new Set<string>();
+  const dup = new Set<string>();
+  for (const s of students) (seen.has(s.name) ? dup : seen).add(s.name);
+  return dup;
+}
+
 function stepLabel(step: string | null): string | null {
   if (!step) return null;
   return STEP_REGISTRY[resolveStepId(step)]?.label ?? null;
 }
 
 function scoreClass(score: number | null): string {
-  if (score === null) return 'bg-gray-100 text-gray-600';
+  // Green = handed in. Red is reserved for 逾期未交, so a low score is orange,
+  // and a hand-in without a score is green (grey read like 未開始).
+  if (score === null) return 'bg-green-100 text-green-800';
   if (score >= 80) return 'bg-green-100 text-green-800';
   if (score >= 60) return 'bg-yellow-100 text-yellow-800';
-  return 'bg-red-100 text-red-700';
+  return 'bg-orange-100 text-orange-800';
 }
 
 /**
@@ -46,17 +64,62 @@ export function distinctTitles<T extends { id: number; title: string }>(items: T
   return out;
 }
 
+export interface AssignmentCounts {
+  assigned: number;
+  submitted: number;
+  inProgress: number;
+  notStarted: number;
+  overdue: number;
+}
+
+/**
+ * How the students assigned to one assignment split by state (Khan Academy
+ * shows these counts on every assignment). Past the due date, unfinished work
+ * counts as overdue instead of in-progress / not-started, matching the cells.
+ */
+export function assignmentCounts(cells: Cell[], assignmentId: number, overdue: boolean): AssignmentCounts {
+  const out: AssignmentCounts = { assigned: 0, submitted: 0, inProgress: 0, notStarted: 0, overdue: 0 };
+  for (const c of cells) {
+    if (c.assignment_id !== assignmentId || c.state === 'not_assigned') continue;
+    out.assigned += 1;
+    if (c.state === 'completed') out.submitted += 1;
+    else if (overdue) out.overdue += 1;
+    else if (c.state === 'in_progress') out.inProgress += 1;
+    else out.notStarted += 1;
+  }
+  return out;
+}
+
 /** Past the due date and still not handed in (均一's red: 已截止未完成). */
 export function isOverdue(dueDate: string | null, now: Date = new Date()): boolean {
-  return dueDate !== null && new Date(dueDate) < now;
+  return isPastDue(dueDate, now);
+}
+
+/**
+ * One legend, rendered next to 建立作業 (Junyi puts it top-right). Uses the
+ * same badges as the cells: a second legend with different swatches used to
+ * sit under the table and the two disagreed (green 已交 vs grey 已交 chips).
+ */
+export function MatrixLegend() {
+  return (
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-600" aria-label="狀態說明">
+      <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded bg-green-100 text-green-800 font-semibold">88</span>已交（分數）</span>
+      <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded bg-green-100 text-green-800 font-semibold">已交</span>沒有分數</span>
+      <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded bg-orange-100 text-orange-800 font-semibold">52</span>低於 60 分</span>
+      <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded border border-dashed border-amber-400 text-amber-700 text-xs">進行中</span></span>
+      <span className="flex items-center gap-1.5"><span className="text-gray-400">未開始</span></span>
+      <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded bg-red-50 text-red-600 border border-red-200 text-xs font-medium">逾期未交</span></span>
+      <span className="flex items-center gap-1.5" title="這份作業只指派給部分學生，這位學生不在名單內（跟幾時加入班級無關，全班作業不管何時加入都會收到）"><span className="px-2 py-0.5 rounded text-xs text-gray-400 bg-gray-100">未指派</span></span>
+    </div>
+  );
 }
 
 export function CellBadge({ cell, overdue = false }: { cell: Cell | undefined; overdue?: boolean }) {
   if (!cell || cell.state === 'not_assigned') {
     return (
       <span
-        className="inline-block px-2 py-0.5 rounded text-xs text-gray-400 bg-[repeating-linear-gradient(45deg,#f3f4f6,#f3f4f6_4px,#e5e7eb_4px,#e5e7eb_8px)]"
-        title="這位學生不在這份作業的指派名單內（作業派出後才加入班級）"
+        className="inline-block whitespace-nowrap shrink-0 px-2 py-0.5 rounded text-xs text-gray-400 bg-[repeating-linear-gradient(45deg,#f3f4f6,#f3f4f6_4px,#e5e7eb_4px,#e5e7eb_8px)]"
+        title="這位學生不在這份作業的指派名單內（老師指派的是部分學生，不是全班；跟幾時加入班級無關）"
       >
         未指派
       </span>
@@ -64,14 +127,14 @@ export function CellBadge({ cell, overdue = false }: { cell: Cell | undefined; o
   }
   if (cell.state === 'completed') {
     return (
-      <span className={`inline-block min-w-10 px-2 py-0.5 rounded text-sm font-semibold ${scoreClass(cell.score)}`}>
+      <span className={`inline-block whitespace-nowrap shrink-0 min-w-10 px-2 py-0.5 rounded text-sm font-semibold ${scoreClass(cell.score)}`}>
         {cell.score !== null ? Math.round(cell.score) : '已交'}
       </span>
     );
   }
   if (overdue && (cell.state === 'in_progress' || cell.state === 'not_started')) {
     return (
-      <span className="inline-block px-2 py-0.5 rounded text-xs font-semibold bg-red-100 text-red-700">
+      <span className="inline-block whitespace-nowrap shrink-0 px-2 py-0.5 rounded text-xs font-medium bg-red-50 text-red-600 border border-red-200">
         逾期未交{cell.state === 'in_progress' ? '・做到一半' : ''}
       </span>
     );
@@ -79,12 +142,12 @@ export function CellBadge({ cell, overdue = false }: { cell: Cell | undefined; o
   if (cell.state === 'in_progress') {
     const label = stepLabel(cell.current_step);
     return (
-      <span className="inline-block px-2 py-0.5 rounded text-xs font-medium text-amber-700 border border-dashed border-amber-400">
+      <span className="inline-block whitespace-nowrap shrink-0 px-2 py-0.5 rounded text-xs font-medium text-amber-700 border border-dashed border-amber-400">
         進行中{label ? `・${label}` : ''}
       </span>
     );
   }
-  return <span className="text-sm text-gray-400">未開始</span>;
+  return <span className="text-sm text-gray-400 whitespace-nowrap shrink-0">未開始</span>;
 }
 
 function formatDue(due: string | null): string {
@@ -93,13 +156,41 @@ function formatDue(due: string | null): string {
 }
 
 const AssignmentMatrixGrid: React.FC<AssignmentMatrixGridProps> = ({ data, onOpenAssignment, onOpenStudent }) => {
+  const dupNames = duplicateNameSet(data.students);
   const { students, assignments, cells } = data;
 
-  if (assignments.length === 0) {
-    return <p className="py-10 text-center text-gray-500">這個班級還沒有指派作業</p>;
-  }
   if (students.length === 0) {
-    return <p className="py-10 text-center text-gray-500">這個班級還沒有學生</p>;
+    return <p className="py-10 text-center text-gray-500">這個班級還沒有學生，先到「班級設定」新增學生</p>;
+  }
+  if (assignments.length === 0) {
+    // Junyi-parity: even before the first assignment, show who is in the class,
+    // so the teacher sees the grid the assignments will fill.
+    return (
+      <div className="space-y-3">
+        <p className="flex items-center gap-2 rounded-lg bg-sky-50 text-sky-900 px-4 py-3 text-base">
+          <span aria-hidden="true" className="w-5 h-5 shrink-0 rounded-full border-2 border-sky-500 text-sky-600 text-xs font-bold leading-4 text-center">i</span>
+          按「建立作業」選一課派給學生，開始建立這個班的第一份作業
+        </p>
+        <div className="inline-block border border-gray-200 rounded-xl overflow-hidden">
+          <table className="text-base" aria-label="班級作業總表">
+            <thead>
+              <tr>
+                <th className="bg-gray-50 px-6 py-3 text-left font-medium text-gray-600 border-b border-gray-200">學生</th>
+              </tr>
+            </thead>
+            <tbody>
+              {students.map((s) => (
+                <tr key={s.id}>
+                  <th scope="row" className="px-6 py-2.5 text-left font-medium text-gray-900 border-b border-gray-100 whitespace-nowrap">
+                    {studentLabel(s, dupNames)}
+                  </th>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
   }
 
   const titles = distinctTitles(assignments);
@@ -126,6 +217,14 @@ const AssignmentMatrixGrid: React.FC<AssignmentMatrixGridProps> = ({ data, onOpe
                     {titles.get(a.id)}
                   </button>
                   <div className="text-xs text-gray-500 font-normal">{formatDue(a.due_date)}</div>
+                  {(() => {
+                    const n = assignmentCounts(cells, a.id, isOverdue(a.due_date));
+                    return (
+                      <div className="text-xs font-semibold text-gray-700 whitespace-nowrap">
+                        已交 {n.submitted} / {n.assigned}
+                      </div>
+                    );
+                  })()}
                 </th>
               ))}
             </tr>
@@ -136,10 +235,10 @@ const AssignmentMatrixGrid: React.FC<AssignmentMatrixGridProps> = ({ data, onOpe
                 <th scope="row" className="sticky left-0 z-10 bg-white px-4 py-2.5 text-left font-medium text-gray-900 border-b border-r border-gray-100 whitespace-nowrap">
                   {onOpenStudent ? (
                     <button type="button" onClick={() => onOpenStudent(s.id)} className="text-gray-900 hover:text-accent hover:underline cursor-pointer">
-                      {s.name}
+                      {studentLabel(s, dupNames)}
                     </button>
                   ) : (
-                    s.name
+                    studentLabel(s, dupNames)
                   )}
                 </th>
                 {assignments.map((a) => (
@@ -151,14 +250,6 @@ const AssignmentMatrixGrid: React.FC<AssignmentMatrixGridProps> = ({ data, onOpe
             ))}
           </tbody>
         </table>
-      </div>
-      <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-gray-600">
-        <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded bg-green-100 text-green-800 font-semibold">88</span>已交（分數）</span>
-        <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded bg-gray-100 text-gray-600 font-semibold">已交</span>已交・沒有分數</span>
-        <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded border border-dashed border-amber-400 text-amber-700 text-xs">進行中</span>做到哪一步</span>
-        <span className="flex items-center gap-1.5"><span className="text-gray-400">未開始</span>派了還沒動</span>
-        <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded bg-red-100 text-red-700 text-xs font-semibold">逾期未交</span>過了期限還沒交</span>
-        <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded text-xs text-gray-400 bg-gray-100">未指派</span>派作業時還不在班上</span>
       </div>
     </div>
   );

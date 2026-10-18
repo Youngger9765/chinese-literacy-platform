@@ -25,6 +25,7 @@ from ...schemas.classroom import (
 from ...services.classroom_dev_filter import is_dev_classroom
 from ...services.classroom_lifecycle_service import delete_classroom_with_cleanup
 from ...services.input_sanitizer import sanitize_ai_input
+from ...services.pk import classroom_features as pk_classroom_features
 from .helpers import (
     classroom_to_detail_response,
     classroom_to_response,
@@ -192,6 +193,16 @@ def list_my_classrooms(
                 is_active=c.is_active,
                 created_at=c.created_at,
                 student_count=student_counts.get(c.id, 0),
+                # issue #3607: this inline construction used to omit
+                # pk_human entirely (silently defaulting to False even for
+                # an enabled classroom) — fixed while adding league/
+                # live_quiz so the teacher-facing feature-toggle prompt
+                # (ClassroomDetail / TeacherLeaguePage / live-quiz setup)
+                # can trust this list endpoint's flags, not just the
+                # per-classroom detail endpoint's.
+                pk_human=pk_classroom_features.get_classroom_feature(c, "pk_human", db=db),
+                league=pk_classroom_features.get_classroom_feature(c, "league", db=db),
+                live_quiz=pk_classroom_features.get_classroom_feature(c, "live_quiz", db=db),
             )
             for c in items
         ],
@@ -261,11 +272,23 @@ def list_my_enrolled_classrooms(
             teacher_name=teacher.name,
             is_active=classroom.is_active,
             enrolled_at=cs.enrolled_at,
+            pk_human=pk_classroom_features.get_classroom_feature(classroom, "pk_human", db=db),
+            league=pk_classroom_features.get_classroom_feature(classroom, "league", db=db),
+            live_quiz=pk_classroom_features.get_classroom_feature(classroom, "live_quiz", db=db),
         )
         for cs, classroom, teacher in rows
     ]
 
-    return StudentEnrolledClassroomsResponse(classrooms=classrooms, total=len(classrooms))
+    # #3602 B1: grade lives on StudentProfile (1:1, nullable relationship),
+    # NOT on User itself -- a user with no StudentProfile row at all
+    # (registered outside the school-import flow) must fall back to None,
+    # not raise.
+    student_profile = current_user.student_profile
+    student_grade = student_profile.grade if student_profile is not None else None
+
+    return StudentEnrolledClassroomsResponse(
+        classrooms=classrooms, total=len(classrooms), student_grade=student_grade
+    )
 
 
 @router.get("/classrooms/join-preview", response_model=ClassroomJoinPreviewResponse)
@@ -344,7 +367,7 @@ def get_classroom_detail(
     if classroom is None:
         raise HTTPException(status_code=404, detail="Classroom not found")
     require_member_or_admin(classroom, current_user, db)
-    return classroom_to_detail_response(classroom)
+    return classroom_to_detail_response(classroom, db)
 
 
 @router.patch("/classrooms/{classroom_id}", response_model=ClassroomResponse)

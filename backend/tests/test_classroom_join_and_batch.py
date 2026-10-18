@@ -35,6 +35,7 @@ from app.database import get_db
 from app.models import Base
 from app.models.user import Role, UserRole
 from app.models.school import School
+from _school_student import grant_school_student_role
 
 
 # ---------------------------------------------------------------------------
@@ -177,6 +178,13 @@ def _make_admin(user_data: dict) -> dict:
     db.commit()
     db.close()
     return user_data
+
+
+def _register_student(client, suffix: str) -> dict:
+    """Register a user who is a student of the test school (#3534: only those can be enrolled)."""
+    user = _register_user(client, suffix)
+    grant_school_student_role(TestingSessionLocal, user["user_id"], school_id=_test_school_id)
+    return user
 
 
 def auth_header(token: str) -> dict:
@@ -847,6 +855,25 @@ class TestBatchStudentCreation:
         )
         assert resp.status_code == 403
 
+    def test_batch_create_student_role_forbidden_403(
+        self, client, teacher, student_user, school_id
+    ):
+        create_resp = client.post(
+            "/api/classrooms",
+            json={"name": "Batch Student Role 403", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        )
+        classroom_id = create_resp.json()["id"]
+
+        resp = client.post(
+            f"/api/classrooms/{classroom_id}/students/batch",
+            json={
+                "students": [{"name": "Forbidden Student", "seat_number": "01"}]
+            },
+            headers=auth_header(student_user["token"]),
+        )
+        assert resp.status_code == 403
+
     def test_batch_create_requires_auth(self, client, teacher, school_id):
         create_resp = client.post(
             "/api/classrooms",
@@ -1070,7 +1097,7 @@ class TestStudentSearch:
         classroom_id = create_resp.json()["id"]
 
         # Register a searchable user
-        searchable = _register_user(client, "searchable_user")
+        searchable = _register_student(client, "searchable_user")
 
         # Search by partial name
         search_resp = client.post(
@@ -1093,7 +1120,7 @@ class TestStudentSearch:
         classroom_id = create_resp.json()["id"]
 
         # Register and enroll a student
-        enrolled = _register_user(client, "enrolled_search")
+        enrolled = _register_student(client, "enrolled_search")
         client.post(
             f"/api/classrooms/{classroom_id}/students",
             json={"student_id": enrolled["user_id"]},
@@ -1118,7 +1145,7 @@ class TestStudentSearch:
         )
         classroom_id = create_resp.json()["id"]
 
-        searchable = _register_user(client, "email_search_user")
+        searchable = _register_student(client, "email_search_user")
 
         search_resp = client.post(
             f"/api/classrooms/{classroom_id}/students/search",
@@ -1273,7 +1300,7 @@ class TestJoinCodeFullFlow:
         assert new_join_resp.status_code == 200
 
         # 9. Search for students not in classroom
-        not_enrolled = _register_user(client, "flow2_searchable")
+        not_enrolled = _register_student(client, "flow2_searchable")
         search_resp = client.post(
             f"/api/classrooms/{classroom_id}/students/search",
             json={"query": "flow2_searchable"},

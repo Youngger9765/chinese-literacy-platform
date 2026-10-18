@@ -53,7 +53,7 @@ describe('TodayOverviewTab (#3367)', () => {
   it('keeps 課堂即時 reachable as a card that opens the live view (#3025)', async () => {
     render(<TodayOverviewTab classroomId={9} onOpenAssignment={vi.fn()} onOpenAtRisk={vi.fn()} />);
     expect(screen.queryByText('LiveMonitor:9')).not.toBeInTheDocument();
-    await userEvent.click(await screen.findByText(/課堂即時・點開看詳情/));
+    await userEvent.click(await screen.findByText(/點開看課堂即時/));
     expect(screen.getByText('LiveMonitor:9')).toBeInTheDocument();
   });
 
@@ -63,5 +63,19 @@ describe('TodayOverviewTab (#3367)', () => {
     const buttons = await screen.findAllByRole('button', { name: '查看' });
     await userEvent.click(buttons[0]);
     expect(onOpen).toHaveBeenCalledWith(2);
+  });
+
+  it('labels outstanding student-assignment pairs as 人次', async () => {
+    render(<TodayOverviewTab classroomId={9} onOpenAssignment={vi.fn()} onOpenAtRisk={vi.fn()} />);
+    expect(await screen.findByText('3 人次')).toBeInTheDocument();
+  });
+
+  it('cards read as number + short name + one line of small print (no sentence labels)', async () => {
+    render(<TodayOverviewTab classroomId={9} onOpenAssignment={vi.fn()} onOpenAtRisk={vi.fn()} />);
+    expect(await screen.findByText('待交作業')).toBeInTheDocument();
+    expect(screen.getByText('需要關注')).toBeInTheDocument();
+    expect(screen.getByText('早期介入中、高風險')).toBeInTheDocument();
+    expect(screen.getByText('目前在線')).toBeInTheDocument();
+    expect(screen.queryByText(/需要關注的學生（/)).toBeNull();
   });
 });

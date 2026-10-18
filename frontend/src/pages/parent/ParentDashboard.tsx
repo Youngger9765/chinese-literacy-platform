@@ -23,17 +23,43 @@ import {
 } from 'recharts';
 import { useAuth } from '../../contexts/AuthContext';
 import type { StudentDashboardData } from '../../services/learningApi';
+import type { StudentAssignmentResponse } from '../../services/assignmentApi';
+import { isPastDue } from '../../utils/dueDate';
 import {
   LinkedChild,
+  fetchChildAssignments,
   fetchChildDashboard,
   listLinkedChildren,
   redeemParentInviteCode,
 } from '../../services/parentApi';
+import { getMyLeagueHistory, type LeagueMySummary } from '../../services/leagueApi';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 function formatShortDate(iso: string): string {
   const d = new Date(iso);
+  return `${d.getMonth() + 1}/${d.getDate()}`;
+}
+
+const STATUS_LABEL: Record<string, { text: string; cls: string }> = {
+  submitted: { text: '已交', cls: 'bg-green-100 text-green-800' },
+  graded: { text: '已交', cls: 'bg-green-100 text-green-800' },
+  in_progress: { text: '進行中', cls: 'bg-amber-100 text-amber-800' },
+  pending: { text: '還沒開始', cls: 'bg-gray-100 text-gray-600' },
+};
+
+/** One row per assignment: the latest attempt wins (#3515). */
+export function latestPerAssignment(rows: StudentAssignmentResponse[]): StudentAssignmentResponse[] {
+  const byId = new Map<number, StudentAssignmentResponse>();
+  for (const r of rows) {
+    const prev = byId.get(r.assignment_id);
+    if (!prev || (r.attempt_number ?? 1) >= (prev.attempt_number ?? 1)) byId.set(r.assignment_id, r);
+  }
+  return [...byId.values()];
+}
+
+function formatDue(due: string): string {
+  const d = new Date(due);
   return `${d.getMonth() + 1}/${d.getDate()}`;
 }
 
@@ -93,6 +119,48 @@ const ChartTooltip: React.FC<TooltipProps> = ({ active, payload, label }) => {
   );
 };
 
+// ── League tile — one extra tile, NO RANK (PRD §10 UIUX) ─────────────────────
+// Parents see their own linked child's contribution + class average, never
+// another family's child, and never a cross-class rank/position.
+
+const LeagueTile: React.FC<{ studentId: number; token: string }> = ({ studentId, token }) => {
+  const [seasons, setSeasons] = useState<LeagueMySummary[] | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    getMyLeagueHistory(token, studentId)
+      .then((rows) => {
+        if (!cancelled) setSeasons(rows);
+      })
+      .catch(() => {
+        if (!cancelled) setSeasons([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [token, studentId]);
+
+  if (seasons === null) {
+    return <div className="bg-gray-100 rounded-xl h-14 animate-pulse" />;
+  }
+  if (seasons.length === 0) {
+    return (
+      <div className="rounded-xl p-3 bg-white border border-gray-200 text-sm text-gray-500">
+        🏆 跨班賽季：目前沒有進行中的跨班賽季
+      </div>
+    );
+  }
+  const latest = seasons[0];
+  return (
+    <div className="rounded-xl p-3 bg-white border border-gray-200 flex items-center justify-between text-sm">
+      <span className="text-gray-600">🏆 {latest.season_name}</span>
+      <span className="text-gray-900 font-medium">
+        貢獻 {latest.my_points} 分（班級平均 {latest.class_average_points.toFixed(1)}）
+      </span>
+    </div>
+  );
+};
+
 // ── Child progress panel ──────────────────────────────────────────────────────
 
 const ChildProgressPanel: React.FC<{ child: LinkedChild; token: string }> = ({
@@ -100,6 +168,7 @@ const ChildProgressPanel: React.FC<{ child: LinkedChild; token: string }> = ({
   token,
 }) => {
   const [data, setData] = useState<StudentDashboardData | null>(null);
+  const [assignments, setAssignments] = useState<StudentAssignmentResponse[] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -110,6 +179,11 @@ const ChildProgressPanel: React.FC<{ child: LinkedChild; token: string }> = ({
       .then(setData)
       .catch((err: Error) => setError(err.message))
       .finally(() => setIsLoading(false));
+    // Assignments load on their own: a failure here must not hide the progress panel.
+    setAssignments(null);
+    fetchChildAssignments(token, child.student_id)
+      .then((rows) => setAssignments(latestPerAssignment(rows)))
+      .catch(() => setAssignments([]));
   }, [token, child.student_id]);
 
   if (isLoading) {
@@ -168,6 +242,9 @@ const ChildProgressPanel: React.FC<{ child: LinkedChild; token: string }> = ({
         />
       </div>
 
+      {/* 跨班賽季 tile — one extra tile, no rank (PRD §10 UIUX) */}
+      <LeagueTile studentId={child.student_id} token={token} />
+
       {data.total_sessions === 0 && (
         <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm text-amber-800">
           孩子尚未開始任何課文練習。
@@ -177,7 +254,7 @@ const ChildProgressPanel: React.FC<{ child: LinkedChild; token: string }> = ({
       {/* 30-day activity chart */}
       {hasActivity && (
         <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <h3 className="text-sm font-semibold text-gray-700 mb-3">近 30 天學習曲線</h3>
+          <h3 className="text-sm font-semibold text-gray-700 mb-3">近 30 天每天完成篇數</h3>
           <ResponsiveContainer width="100%" height={120}>
             <AreaChart data={chartData} margin={{ top: 4, right: 4, left: -24, bottom: 0 }}>
               <defs>
@@ -195,7 +272,7 @@ const ChildProgressPanel: React.FC<{ child: LinkedChild; token: string }> = ({
                 axisLine={false}
               />
               <YAxis
-                domain={[0, 100]}
+                allowDecimals={false}
                 tick={{ fontSize: 10, fill: '#9ca3af' }}
                 tickLine={false}
                 axisLine={false}
@@ -203,8 +280,8 @@ const ChildProgressPanel: React.FC<{ child: LinkedChild; token: string }> = ({
               <Tooltip content={<ChartTooltip />} />
               <Area
                 type="monotone"
-                dataKey="score"
-                name="score"
+                dataKey="sessions"
+                name="sessions"
                 stroke="#5B4FC4"
                 strokeWidth={2}
                 fill="url(#parentScoreGradient)"
@@ -215,6 +292,41 @@ const ChildProgressPanel: React.FC<{ child: LinkedChild; token: string }> = ({
           </ResponsiveContainer>
         </div>
       )}
+
+      {/* Teacher's assignments for this child (#3515) */}
+      <div className="bg-white rounded-xl border border-gray-200 p-4">
+        <h3 className="text-sm font-semibold text-gray-700 mb-2">老師派的作業</h3>
+        {assignments === null ? (
+          <p className="text-sm text-gray-400">載入中…</p>
+        ) : assignments.length === 0 ? (
+          <p className="text-sm text-gray-500">目前沒有作業</p>
+        ) : (
+          <ul className="divide-y divide-gray-100" aria-label="老師派的作業">
+            {assignments.map((a) => {
+              const done = a.status === 'submitted' || a.status === 'graded';
+              const overdue = !done && isPastDue(a.due_date);
+              const st = overdue
+                ? { text: '逾期未交', cls: 'bg-red-100 text-red-700' }
+                : STATUS_LABEL[a.status] ?? STATUS_LABEL.pending;
+              return (
+                <li key={a.assignment_id} className="py-2 flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">{a.title || a.story_title}</p>
+                    <p className="text-xs text-gray-500 truncate">
+                      {a.title && a.story_title ? `${a.story_title}・` : ''}
+                      {a.due_date ? `截止 ${formatDue(a.due_date)}` : '沒有截止日'}
+                      {a.score != null ? `・${a.score} 分` : ''}
+                    </p>
+                  </div>
+                  <span className={`shrink-0 whitespace-nowrap text-xs px-2 py-0.5 rounded-full font-medium ${st.cls}`}>
+                    {st.text}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
 
       {/* Completed stories list */}
       {data.completed_story_slugs.length > 0 && (
@@ -228,7 +340,7 @@ const ChildProgressPanel: React.FC<{ child: LinkedChild; token: string }> = ({
                 key={slug}
                 className="inline-block px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-xs font-medium"
               >
-                {slug}
+                {data.completed_stories?.find((s) => s.slug === slug)?.title ?? slug}
               </span>
             ))}
           </div>

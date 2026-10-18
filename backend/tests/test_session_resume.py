@@ -400,3 +400,38 @@ class TestResumeFlow:
         assert status2["is_resumable"] is False
         assert status2["is_completed"] is True
         assert status2["completed_at"] is not None
+
+
+class TestCompletedAtIsServerTime:
+    """League integrity (2026-10-16): the cross-class league counts a lesson
+    by `completed_at` (inside the season window, >= 3 min after started_at).
+    PATCH used to setattr a client-supplied `completed_at`, so a student could
+    back-date a completion into any season or skip the 3-minute rule. The
+    frontend never sends it; the server's clock is the only source."""
+
+    def test_client_completed_at_is_ignored(self, client, user_a):
+        session_id = _create_session(client, user_a["token"], VALID_SLUG)
+        forged = "2020-01-01T00:00:00+00:00"
+        r = client.patch(
+            f"/api/learning/sessions/{session_id}",
+            json={"status": "completed", "completed_at": forged},
+            headers=auth_header(user_a["token"]),
+        )
+        assert r.status_code == 200, r.text
+        data = client.get(
+            f"/api/learning/sessions/{session_id}/status", headers=auth_header(user_a["token"])
+        ).json()
+        assert data["completed_at"] is not None
+        assert not data["completed_at"].startswith("2020"), data["completed_at"]
+
+    def test_completed_at_cannot_be_set_without_completing(self, client, user_a):
+        session_id = _create_session(client, user_a["token"], VALID_SLUG)
+        client.patch(
+            f"/api/learning/sessions/{session_id}",
+            json={"completed_at": "2099-01-01T00:00:00+00:00"},
+            headers=auth_header(user_a["token"]),
+        )
+        data = client.get(
+            f"/api/learning/sessions/{session_id}/status", headers=auth_header(user_a["token"])
+        ).json()
+        assert data["completed_at"] is None, data

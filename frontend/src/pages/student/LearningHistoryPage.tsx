@@ -18,6 +18,15 @@ import { listAllToolboxSessions, type ToolboxSession } from '../../services/tool
 import { TOOL_OPTIONS } from '../../components/tools/ToolPicker';
 import { ACTIVE_STEPS } from '../../config/stepConfig';
 import StepProgressStrip from '../../components/ui/StepProgressStrip';
+import {
+  getMyLeagueHistory,
+  LeagueApiError,
+  type LeagueMySummary,
+} from '../../services/leagueApi';
+import EnergyBar from '../../components/league/EnergyBar';
+import LeagueBadgeCard from '../../components/league/LeagueBadgeCard';
+import { chestHintText, displayPoints } from '../../components/league/leagueVisuals';
+import { DEFAULT_THEME_FALLBACK } from '../../components/league/leagueTheme';
 
 type TabKey = 'assignment' | 'self';
 
@@ -26,6 +35,13 @@ const SECTIONS: { key: TabKey; label: string }[] = [
   { key: 'self', label: '自學紀錄' },
   { key: 'assignment', label: '作業回顧' },
 ];
+
+// 讀家記憶 (PRD §10 UIUX: "讀家記憶 as a tab inside 學習紀錄") rendered as its
+// OWN stacked section below SECTIONS, same reasoning as the #2889 comment
+// above SECTIONS: nothing on this page should sit behind an unlabelled
+// click, and league history is a different data source (not a
+// learning_source filter on fetchLearningSessions), so it gets its own
+// small component rather than forcing it through TabContent/source=TabKey.
 
 const PAGE_SIZE = 20;
 
@@ -308,6 +324,95 @@ const TabContent: React.FC<{ source: TabKey }> = ({ source }) => {
 };
 
 // ---------------------------------------------------------------------------
+// 讀家記憶 section — own league history (never a classmate's score, PRD §6)
+// ---------------------------------------------------------------------------
+
+const LeagueHistorySection: React.FC = () => {
+  const { token } = useAuth();
+  const [seasons, setSeasons] = useState<LeagueMySummary[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (!token) return;
+    setIsLoading(true);
+    getMyLeagueHistory(token)
+      .then(setSeasons)
+      .catch((err) => {
+        setError(err instanceof LeagueApiError ? err.message : '無法載入讀家記憶，請稍後再試');
+      })
+      .finally(() => setIsLoading(false));
+  }, [token]);
+
+  if (isLoading) {
+    return <div className="h-4 bg-gray-200 animate-pulse rounded w-1/3" />;
+  }
+  if (error) {
+    return (
+      <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
+        {error}
+      </div>
+    );
+  }
+  if (seasons.length === 0) {
+    return (
+      <div className="text-center py-8 text-on-surface-variant text-sm">
+        還沒有參加過跨班賽季，等老師開啟跨班邀請賽後就會出現在這裡。
+      </div>
+    );
+  }
+  return (
+    <div className="space-y-4">
+      {seasons.map((s) => (
+        <div key={s.season_id} className="bg-surface-container-lowest rounded-2xl shadow-card p-4">
+          <h3 className="text-base font-bold text-on-surface mb-3">{s.season_name}</h3>
+
+          <div className="rounded-xl bg-gradient-to-br from-accent to-accent/80 p-3">
+            <EnergyBar
+              label="我的貢獻"
+              points={s.my_points}
+              threshold={s.badge_threshold}
+              badgeEarned={s.individual_badge_earned}
+              tone="accent"
+            />
+          </div>
+
+          <div className="mt-3 flex items-center gap-4 text-xs text-on-surface-variant">
+            <span>班級平均 {displayPoints(s.class_average_points)} 分</span>
+            <span>
+              全班 {s.participant_count}/{s.roster_size} 人已參與
+            </span>
+          </div>
+
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <LeagueBadgeCard
+              kind="individual"
+              earned={s.individual_badge_earned}
+              title="個人徽章"
+              description={`累積 ${displayPoints(s.badge_threshold)} 分達標`}
+            />
+            <LeagueBadgeCard
+              kind="class"
+              earned={s.class_badge_earned}
+              title="班級徽章"
+              description="班級平均達標"
+            />
+          </div>
+
+          <p className="mt-2 text-[11px] text-on-surface-variant">
+            {chestHintText(
+              (s.theme ?? DEFAULT_THEME_FALLBACK).chest.name,
+              s.treasure_chest_eligible,
+              s.treasure_chest_participants_needed,
+            )}
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// ---------------------------------------------------------------------------
 // Page
 // ---------------------------------------------------------------------------
 
@@ -340,6 +445,13 @@ const LearningHistoryPage: React.FC = () => {
             <TabContent source={section.key} />
           </section>
         ))}
+
+        <section aria-label="讀家記憶">
+          <h2 className="text-sm font-bold text-gray-900 mb-3 pb-2 border-b border-gray-200">
+            讀家記憶
+          </h2>
+          <LeagueHistorySection />
+        </section>
       </div>
     </div>
   );

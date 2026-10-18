@@ -1,10 +1,14 @@
+import asyncio
 import logging
 import os
+import re
 import time
 import uuid
+import threading
 import traceback
 from contextlib import asynccontextmanager
 
+import anyio
 import sentry_sdk
 
 from fastapi import FastAPI, Request
@@ -28,6 +32,7 @@ from .routes.cleanup import router as cleanup_router
 from .routes.dictionary import router as dictionary_router
 from .routes.parents import router as parents_router
 from .routes.gamification import router as gamification_router
+from .routes.league import router as league_router
 from .routes.health import router as health_router
 from .routes.semesters import router as semesters_router
 from .routes.co_teaching import router as co_teaching_router
@@ -39,10 +44,17 @@ from .routes.admin_seed import router as admin_seed_router
 from .routes.omo import router as omo_router
 from .routes.curriculum_qa import router as curriculum_qa_router
 from .routes.admin_story_structure_lab import router as admin_story_structure_lab_router
+from .routes.admin_story_packs import router as admin_story_packs_router
 from .routes.assets import router as assets_router
 from .routes.worksheets import router as worksheets_router
+from .routes.live_quiz import router as live_quiz_router
+from .routes.pk import router as pk_router
+from .routes.escape_room import router as escape_room_router
 from .utils.logging_config import setup_logging
 from .auth.rate_limiter import general_rate_limiter, real_ip_from_xff
+from .services.live_quiz.engine import is_authenticated_member_by_code
+from .services.pk.matchmaking import is_authenticated_queue_owner as pk_is_authenticated_queue_owner
+from .services.pk.engine import is_authenticated_match_participant as pk_is_authenticated_match_participant
 from .services.seed import seed_default_data, repair_pii_accounts
 
 # Initialise structured logging before anything else
@@ -163,6 +175,18 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 # Logging middleware
 # ---------------------------------------------------------------------------
 
+class ApiNoStoreCacheMiddleware(BaseHTTPMiddleware):
+    """Prevent browsers from caching dynamic API responses."""
+
+    async def dispatch(self, request: Request, call_next) -> Response:
+        response = await call_next(request)
+        if request.url.path.startswith("/api/") and not response.headers.get(
+            "cache-control"
+        ):
+            response.headers["Cache-Control"] = "no-store"
+        return response
+
+
 class RequestLoggingMiddleware(BaseHTTPMiddleware):
     """Log every HTTP request with duration and attach a request_id.
 
@@ -268,6 +292,116 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
             )
 
 
+class _LiveQuizMemberCache:
+    """Positive-only (code, user_id) -> "is a member" cache for the rate-limit
+    exemption below. Joining is append-only, so a cached "yes" can only go
+    stale if the host removes a player — then the worst case is that player's
+    polls stay exempt for up to TTL seconds while the route itself returns 403.
+    Negatives are never cached, so a non-member is re-checked every time and
+    stays under the per-IP limit. Per process, bounded, cleared when full."""
+
+    TTL = 60.0
+    MAX = 20000
+
+    def __init__(self):
+        self._d: dict[tuple[str, int], float] = {}
+        self._lock = threading.Lock()
+
+    def get(self, code: str, user_id: int) -> bool:
+        with self._lock:
+            exp = self._d.get((code, user_id))
+            if exp is None:
+                return False
+            if exp < time.monotonic():
+                del self._d[(code, user_id)]
+                return False
+            return True
+
+    def put(self, code: str, user_id: int) -> None:
+        with self._lock:
+            if len(self._d) >= self.MAX:
+                self._d.clear()
+            self._d[(code, user_id)] = time.monotonic() + self.TTL
+
+    def clear(self) -> None:
+        with self._lock:
+            self._d.clear()
+
+
+_live_quiz_member_cache = _LiveQuizMemberCache()
+
+
+class _PkIdMemberCache:
+    """Same shape as ``_LiveQuizMemberCache`` (positive-only, TTL, bounded)
+    but keyed by a raw integer id (``pk_queue.id`` or ``pk_matches.id``)
+    instead of a 6-char code — PRD §12's "比照 live_quiz 已經驗證過的兩招"
+    recommendation, applied to PK's queue-poll and match-state/-answer
+    paths (see GlobalRateLimitMiddleware below)."""
+
+    TTL = 60.0
+    MAX = 20000
+
+    def __init__(self):
+        self._d: dict[tuple[int, int], float] = {}
+        self._lock = threading.Lock()
+
+    def get(self, resource_id: int, user_id: int) -> bool:
+        with self._lock:
+            exp = self._d.get((resource_id, user_id))
+            if exp is None:
+                return False
+            if exp < time.monotonic():
+                del self._d[(resource_id, user_id)]
+                return False
+            return True
+
+    def put(self, resource_id: int, user_id: int) -> None:
+        with self._lock:
+            if len(self._d) >= self.MAX:
+                self._d.clear()
+            self._d[(resource_id, user_id)] = time.monotonic() + self.TTL
+
+    def clear(self) -> None:
+        with self._lock:
+            self._d.clear()
+
+
+_pk_queue_member_cache = _PkIdMemberCache()
+_pk_match_member_cache = _PkIdMemberCache()
+
+
+def _lookup_pk_queue_member(queue_id: int, user_id: int) -> bool:
+    from .database import SessionLocal as _SessionLocal
+
+    db = _SessionLocal()
+    try:
+        return pk_is_authenticated_queue_owner(db, queue_id, user_id)
+    finally:
+        db.close()
+
+
+def _lookup_pk_match_member(match_id: int, user_id: int) -> bool:
+    from .database import SessionLocal as _SessionLocal
+
+    db = _SessionLocal()
+    try:
+        return pk_is_authenticated_match_participant(db, match_id, user_id)
+    finally:
+        db.close()
+
+
+def _lookup_live_quiz_member(code: str, user_id: int) -> bool:
+    # Lazy import (not a top-level binding): looked up fresh on every call so
+    # tests can monkeypatch `app.database.SessionLocal` to their own engine.
+    from .database import SessionLocal as _SessionLocal
+
+    db = _SessionLocal()
+    try:
+        return is_authenticated_member_by_code(db, code, user_id)
+    finally:
+        db.close()
+
+
 class GlobalRateLimitMiddleware:
     """Pure ASGI middleware for global per-IP rate limiting on /api/* and /assets/*.
 
@@ -282,6 +416,20 @@ class GlobalRateLimitMiddleware:
     """
 
     _EXEMPT_PATHS = ("/health", "/docs", "/redoc", "/openapi.json", "/")
+    # /api/live-quiz/games/{code}/state|answer — see the membership-gated
+    # exemption below (#3551 external review #3).
+    _LIVE_QUIZ_RATE_EXEMPT_RE = re.compile(r"^/api/live-quiz/games/([^/]+)/(state|answer)$")
+    # /api/pk/queue/{id}/poll and /api/pk/matches/{id}/(state|answer) — PRD
+    # §12's "另開一條 PK 專屬的豁免規則" (see the membership-gated exemption
+    # block below, mirroring _LIVE_QUIZ_RATE_EXEMPT_RE's pattern).
+    _PK_QUEUE_RATE_EXEMPT_RE = re.compile(r"^/api/pk/queue/(\d+)/poll$")
+    _PK_MATCH_RATE_EXEMPT_RE = re.compile(r"^/api/pk/matches/(\d+)/(?:state|answer)$")
+    # /join is not membership-gated (you are not a member yet) but has its own
+    # per-user limit (10/min, routes/live_quiz.py). 10 classes in one school
+    # share one NAT IP: 300 joins in a minute exhausted the per-IP write budget
+    # on staging (2026-10-16). An authenticated join skips the per-IP count;
+    # an anonymous one still pays it (and gets 401 from the route).
+    _LIVE_QUIZ_JOIN_RE = re.compile(r"^/api/live-quiz/games/[^/]+/join$")
     # Read operations are much burstier during UI navigation (route mounts,
     # parallel data loaders, prefetch). Keep write operations stricter.
     # Allow env overrides so local dev (React StrictMode double-invocations,
@@ -335,6 +483,96 @@ class GlobalRateLimitMiddleware:
         if scope.get("method", "").upper() == "OPTIONS":
             await self.app(scope, receive, send)
             return
+
+        # Live-quiz polling (#3551 external review #3): a class of 30+
+        # students each polling /state ~1/s would blow straight through the
+        # 300/min per-IP read budget on its own (one classroom NAT = one
+        # IP). The naive fix — "exempt /api/live-quiz/*/state and /answer
+        # from the per-IP limit" — would also exempt an UNAUTHENTICATED
+        # caller or someone polling a game they have nothing to do with, so
+        # instead this only skips per-IP counting when the request is BOTH
+        # authenticated (JWT already decoded by RequestLoggingMiddleware,
+        # which runs outside this one — see request.state.user_id there)
+        # AND the host/a joined player of THIS game. Everyone else
+        # (anonymous, or guessing codes) stays under the normal limit.
+        #
+        # This intentionally does NOT replace per-IP limiting with a
+        # separate "N req/s per user per game" counter: that counter would
+        # be per-process under Cloud Run's multiple instances and would not
+        # actually bound anything globally (external review #3). A verified
+        # member's state/answer calls are naturally bounded by classroom
+        # size and the ~1 req/s poll interval, so simply exempting them is
+        # both simpler and more honest than a fake-precision limit.
+        if self._LIVE_QUIZ_JOIN_RE.match(path) and (scope.get("state") or {}).get("user_id") is not None:
+            await self.app(scope, receive, send)
+            return
+
+        live_quiz_match = self._LIVE_QUIZ_RATE_EXEMPT_RE.match(path)
+        if live_quiz_match:
+            state = scope.get("state") or {}
+            raw_user_id = state.get("user_id")
+            if raw_user_id is not None:
+                try:
+                    user_id = int(raw_user_id)
+                    code = live_quiz_match.group(1)
+                    member = _live_quiz_member_cache.get(code, user_id)
+                    if not member:
+                        # Blocking DB call: run it off the event loop, or every
+                        # in-flight request on this instance waits behind it
+                        # (2026-10-15 staging load test, 30 pollers: requests
+                        # queued up to 150 s and members fell back to 429s).
+                        member = await anyio.to_thread.run_sync(_lookup_live_quiz_member, code, user_id)
+                        if member:
+                            _live_quiz_member_cache.put(code, user_id)
+                except Exception:
+                    logger.warning(
+                        "live-quiz rate-limit membership check failed; falling back to per-IP limiting",
+                        exc_info=True,
+                    )
+                    member = False
+                if member:
+                    await self.app(scope, receive, send)
+                    return
+            # Unauthenticated or non-member: fall through to normal per-IP
+            # limiting below, same as any other /api/* request.
+
+        # PK polling (PRD §12, same reasoning/shape as the live-quiz block
+        # above): a classroom's worth of students simultaneously waiting in
+        # the matchmaking queue or mid-battle would otherwise share one
+        # classroom-NAT IP's per-IP budget. Exempt only when the caller is
+        # BOTH authenticated AND the owner/a participant of THIS resource —
+        # a stranger polling someone else's queue_id/match_id still pays
+        # the per-IP limit.
+        pk_queue_match = self._PK_QUEUE_RATE_EXEMPT_RE.match(path)
+        pk_match_match = self._PK_MATCH_RATE_EXEMPT_RE.match(path) if not pk_queue_match else None
+        if pk_queue_match or pk_match_match:
+            state = scope.get("state") or {}
+            raw_user_id = state.get("user_id")
+            if raw_user_id is not None:
+                try:
+                    user_id = int(raw_user_id)
+                    if pk_queue_match:
+                        resource_id = int(pk_queue_match.group(1))
+                        cache, lookup_fn = _pk_queue_member_cache, _lookup_pk_queue_member
+                    else:
+                        resource_id = int(pk_match_match.group(1))
+                        cache, lookup_fn = _pk_match_member_cache, _lookup_pk_match_member
+                    member = cache.get(resource_id, user_id)
+                    if not member:
+                        member = await anyio.to_thread.run_sync(lookup_fn, resource_id, user_id)
+                        if member:
+                            cache.put(resource_id, user_id)
+                except Exception:
+                    logger.warning(
+                        "pk rate-limit membership check failed; falling back to per-IP limiting",
+                        exc_info=True,
+                    )
+                    member = False
+                if member:
+                    await self.app(scope, receive, send)
+                    return
+            # Unauthenticated or non-member: fall through to normal per-IP
+            # limiting below, same as any other /api/* request.
 
         # Extract the real client IP (#2470 HIGH-1a): take the GCP-appended
         # second-from-right XFF entry, not the client-controlled leftmost one.
@@ -441,8 +679,25 @@ class PreviewModeWriteGuardMiddleware(BaseHTTPMiddleware):
         return await call_next(request)
 
 
+def configure_default_executor(loop) -> None:
+    """Size asyncio's default executor for a classroom (2026-10-16).
+
+    asyncio.to_thread runs on it, and Python's default is min(32, cpu+4) = 5
+    threads on a 1-vCPU Cloud Run instance. /reading/transcribe pushes
+    transcode, silence check and the Gemini call through it, so with 5
+    threads the 6th student per instance queued — and the queue time counted
+    toward the Gemini timeout. The work is mostly waiting on the network or
+    on an ffmpeg subprocess, so more threads than CPUs is the right shape.
+    """
+    from concurrent.futures import ThreadPoolExecutor
+
+    workers = int(os.environ.get("ASYNC_THREAD_WORKERS", "32"))
+    loop.set_default_executor(ThreadPoolExecutor(max_workers=max(1, workers), thread_name_prefix="async-io"))
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    configure_default_executor(asyncio.get_running_loop())
     # seed_default_data() internally respects ENABLE_TEST_SEED and ENVIRONMENT:
     # on prod (ENABLE_TEST_SEED=false) it only runs non-seeding startup tasks
     # (YAML → texts sync, migration patches) without creating demo accounts.
@@ -487,6 +742,10 @@ app = FastAPI(
 # or not — verified via adversarial review (appsec-pentest-reviewer) probing
 # the actual response headers and log output of a blocked request.
 app.add_middleware(PreviewModeWriteGuardMiddleware)
+
+# Add API no-store inside the response security wrappers so route-defined
+# Cache-Control headers are visible and preserved before outer middleware runs.
+app.add_middleware(ApiNoStoreCacheMiddleware)
 
 # Security headers must be added before CORSMiddleware so they appear on
 # every response (including CORS preflight responses).
@@ -544,6 +803,7 @@ app.include_router(cleanup_router, prefix="/api", tags=["admin-cleanup"])
 app.include_router(dictionary_router, prefix="/api", tags=["dictionary"])
 app.include_router(parents_router, prefix="/api", tags=["parents"])
 app.include_router(gamification_router, prefix="/api", tags=["gamification"])
+app.include_router(league_router, prefix="/api", tags=["league"])
 app.include_router(health_router)
 app.include_router(semesters_router, prefix="/api", tags=["semesters"])
 app.include_router(co_teaching_router, prefix="/api", tags=["co-teaching"])
@@ -555,8 +815,12 @@ app.include_router(admin_seed_router, prefix="/api", tags=["admin-seed"])
 app.include_router(omo_router, prefix="/api", tags=["omo"])
 app.include_router(curriculum_qa_router, prefix="/api", tags=["curriculum-qa"])
 app.include_router(admin_story_structure_lab_router, prefix="/api", tags=["admin-story-structure-lab"])
+app.include_router(admin_story_packs_router, prefix="/api", tags=["admin-story-packs"])
 # No /api prefix — matches the Firebase Hosting `/assets/**` rewrite target (#2486).
 app.include_router(assets_router)
+app.include_router(live_quiz_router, prefix="/api", tags=["live-quiz"])
+app.include_router(pk_router, prefix="/api", tags=["pk"])
+app.include_router(escape_room_router, prefix="/api", tags=["escape-room"])
 # Role-gated worksheet download (#3276) — separate from the public assets proxy above.
 app.include_router(worksheets_router)
 

@@ -18,8 +18,8 @@ describe('AssignTargetPicker (#3378)', () => {
     } as never);
     vi.spyOn(classroomApi, 'listMyClassrooms').mockResolvedValue({
       items: [
-        { id: 9, name: '四甲', school_id: 1, teacher_id: 1, grade: 4, is_active: true, created_at: '', student_count: 2 },
-        { id: 10, name: '四乙', school_id: 1, teacher_id: 1, grade: 4, is_active: true, created_at: '', student_count: 3 },
+        { id: 9, name: '四甲', school_id: 1, teacher_id: 1, grade: 4, is_active: true, created_at: '', student_count: 2, pk_human: false, league: false, live_quiz: false },
+        { id: 10, name: '四乙', school_id: 1, teacher_id: 1, grade: 4, is_active: true, created_at: '', student_count: 3, pk_human: false, league: false, live_quiz: false },
       ],
       total: 2,
     });

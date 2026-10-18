@@ -125,7 +125,12 @@ const ClassroomListPreview: React.FC<ClassroomListPreviewProps> = ({ classrooms,
             <div className="flex items-center gap-3">
               <span className="text-2xl" aria-hidden="true">🏫</span>
               <div>
-                <div className="text-sm font-semibold text-gray-800">{classroom.name}</div>
+                <div className="text-sm font-semibold text-gray-800">
+                  {classroom.name}
+                  {classroom.is_active === false && (
+                    <span className="ml-2 text-xs font-normal text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">已停用</span>
+                  )}
+                </div>
                 {classroom.grade != null && (
                   <div className="text-xs text-gray-400 mt-0.5">{classroom.grade} 年級</div>
                 )}
@@ -171,7 +176,10 @@ const TeacherHome: React.FC = () => {
         const active = result.items.filter((c) => c.is_active);
         const totalStudents = result.items.reduce((sum, c) => sum + c.student_count, 0);
 
-        setClassrooms(result.items);
+        // Active classes first: the home list used to open on 已停用 ones.
+        setClassrooms(
+          [...result.items].sort((a, b) => Number(b.is_active !== false) - Number(a.is_active !== false)),
+        );
         setStats({
           classroomCount: result.total,
           studentCount: totalStudents,

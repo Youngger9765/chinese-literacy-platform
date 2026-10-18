@@ -46,7 +46,8 @@ const TtsSpeedPicker: React.FC<Props> = ({ className, onChange, size = 'md' }) =
     <div
       role="group"
       aria-label="朗讀速度"
-      className={`flex items-center rounded-full bg-surface-container-lowest ${
+      // shrink-0（#3478）：手機上被「開始朗讀」等兄弟元素擠壓時，語速列不能縮，否則字會變直排。
+      className={`flex shrink-0 items-center rounded-full bg-surface-container-lowest ${
         sm ? 'gap-0.5 px-1.5 border border-outline-variant/40' : 'gap-1 px-2 shadow-editorial'
       } ${className ?? ''}`}
     >
@@ -65,7 +66,8 @@ const TtsSpeedPicker: React.FC<Props> = ({ className, onChange, size = 'md' }) =
             // reader user tabbing straight onto "慢" needs to know what is
             // slow. aria-pressed (not colour alone) carries which is active.
             aria-label={`朗讀速度 ${opt.label}`}
-            className={`${sm ? 'h-7 min-w-7 px-1.5 text-xs' : 'h-9 min-w-9 px-2 text-sm'} rounded-full font-headline transition-all active:scale-[0.98] ${
+            // whitespace-nowrap（#3478）：390px 上「稍慢」「正常」不換行成直排。
+            className={`${sm ? 'h-7 min-w-7 px-1.5 text-xs' : 'h-9 min-w-9 px-2 text-sm'} whitespace-nowrap rounded-full font-headline transition-all active:scale-[0.98] ${
               active
                 ? 'bg-accent text-white font-bold'
                 : 'text-on-surface-variant hover:bg-surface-container-low'

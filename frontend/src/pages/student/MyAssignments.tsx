@@ -272,6 +272,17 @@ const MyAssignments: React.FC = () => {
                   : '還沒有已批改的作業'}
             </p>
             <p className="text-xs text-on-surface-variant">老師指派的作業會顯示在這裡</p>
+            {/* Nothing assigned is not "nothing to do": point to self-study, as
+                Khan Academy's empty states point to the next practice. */}
+            {activeFilter === 'pending' && (
+              <button
+                type="button"
+                onClick={() => navigate('/library')}
+                className="mt-4 inline-flex items-center gap-1.5 h-10 px-5 rounded-full bg-accent hover:bg-accent-hover text-white text-sm font-medium cursor-pointer"
+              >
+                📚 去圖書館自己練習
+              </button>
+            )}
           </div>
         ) : (
           /* Assignment cards */

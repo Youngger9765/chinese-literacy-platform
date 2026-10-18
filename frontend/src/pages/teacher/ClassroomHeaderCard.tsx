@@ -8,7 +8,7 @@
  *    with a QR button (#3081) for projecting the code so students scan
  *    instead of typing
  */
-import React, { useState } from 'react';
+import React from 'react';
 import { ClassroomDetailResponse } from '../../services/classroomApi';
 import ClassroomJoinQrButton from '../../components/qr/ClassroomJoinQrButton';
 
@@ -35,6 +35,13 @@ interface ClassroomHeaderCardProps {
   isExporting: boolean;
   onExportCsv: () => void;
 
+  // Delete classroom
+  isDeleting: boolean;
+  showDeleteConfirm: boolean;
+  onShowDeleteConfirm: () => void;
+  onHideDeleteConfirm: () => void;
+  onDeleteClassroom: () => void;
+
   // Join code
   isCopied: boolean;
   showRegenConfirm: boolean;
@@ -43,6 +50,9 @@ interface ClassroomHeaderCardProps {
   onShowRegenConfirm: () => void;
   onHideRegenConfirm: () => void;
   onRegenerateCode: () => void;
+
+  // Junyi-parity: 新增學生 opens the add-students modal owned by the page
+  onAddStudents?: () => void;
 
   // Util
   formatDate: (dateStr: string) => string;
@@ -64,6 +74,11 @@ const ClassroomHeaderCard: React.FC<ClassroomHeaderCardProps> = ({
   onToggleActive,
   isExporting,
   onExportCsv,
+  isDeleting,
+  showDeleteConfirm,
+  onShowDeleteConfirm,
+  onHideDeleteConfirm,
+  onDeleteClassroom,
   isCopied,
   showRegenConfirm,
   isRegenerating,
@@ -71,15 +86,14 @@ const ClassroomHeaderCard: React.FC<ClassroomHeaderCardProps> = ({
   onShowRegenConfirm,
   onHideRegenConfirm,
   onRegenerateCode,
+  onAddStudents,
   formatDate,
 }) => {
-  // Default: collapsed for established classrooms (≥1 student), expanded for new (0 student)
-  const [joinCodeOpen, setJoinCodeOpen] = useState(classroom.student_count === 0);
 
   return (
     <>
     {/* Classroom info card */}
-    <div className="bg-white rounded-2xl shadow-card p-6">
+    <div>
       {isEditing ? (
         <form onSubmit={onSaveEdit} className="space-y-4">
           <h2 className="text-base font-bold text-gray-900">編輯班級</h2>
@@ -144,146 +158,120 @@ const ClassroomHeaderCard: React.FC<ClassroomHeaderCardProps> = ({
           </div>
         </form>
       ) : (
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <h2 className="text-xl font-bold text-gray-900">{classroom.name}</h2>
-            <div className="flex flex-wrap items-center gap-3 mt-2 text-sm text-gray-500">
-              {classroom.grade != null && (
-                <span className="bg-accent-bg text-accent text-xs font-medium px-2.5 py-0.5 rounded">
-                  {classroom.grade} 年級
+        <div className="space-y-4">
+          {/*
+           * Junyi-parity header: 班名＋鉛筆 / 班級代碼 on one line, a stat box,
+           * and an icon-tile action row on the right. #3424's rule still holds:
+           * every group may wrap as a whole, nothing breaks mid-word.
+           */}
+          <div className="flex flex-wrap items-center gap-x-8 gap-y-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <h2 className="text-2xl font-bold text-gray-900 break-words">{classroom.name}</h2>
+              <button
+                type="button"
+                onClick={onStartEditing}
+                aria-label="編輯班級名稱與年級"
+                title="編輯"
+                className="shrink-0 w-8 h-8 inline-flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-800 cursor-pointer"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+              </button>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-lg text-gray-700 whitespace-nowrap">
+                班級代碼：
+                <span className="font-mono font-bold tracking-wider text-accent select-all">
+                  {classroom.join_code ?? '—'}
                 </span>
-              )}
-              <span>{classroom.student_count} 位學生</span>
-              <span>{formatDate(classroom.created_at)}</span>
-              <span className={classroom.is_active ? 'text-emerald-600' : 'text-gray-400'}>
-                {classroom.is_active ? '使用中' : '已停用'}
               </span>
+              <button
+                onClick={onCopyJoinCode}
+                disabled={!classroom.join_code}
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md border border-gray-300 text-gray-700 text-sm hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
+              >
+                {isCopied ? <span className="text-emerald-600">已複製</span> : '複製代碼'}
+              </button>
+              <ClassroomJoinQrButton classroomName={classroom.name} joinCode={classroom.join_code} />
+              <button
+                onClick={onShowRegenConfirm}
+                disabled={isRegenerating}
+                className="inline-flex items-center px-2.5 py-1 rounded-md border border-amber-300 text-amber-700 text-sm hover:bg-amber-50 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
+              >
+                {isRegenerating ? '產生中...' : '重生代碼'}
+              </button>
             </div>
           </div>
-          <div className="flex flex-wrap gap-2 shrink-0">
-            <button
-              onClick={onStartEditing}
-              className="px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
-            >
-              編輯
-            </button>
-            <button
-              onClick={onToggleActive}
-              disabled={isTogglingActive}
-              className={`px-3 py-1.5 rounded-lg border text-sm transition-colors cursor-pointer ${
-                isTogglingActive ? 'opacity-50 cursor-not-allowed' : ''
-              } ${
-                classroom.is_active
-                  ? 'border-gray-300 text-gray-700 hover:bg-gray-50'
-                  : 'border-emerald-300 text-emerald-700 hover:bg-emerald-50'
-              }`}
-            >
-              {isTogglingActive ? '更新中...' : classroom.is_active ? '停用' : '啟用'}
-            </button>
-            <button
-              onClick={onExportCsv}
-              disabled={isExporting}
-              className={`px-3 py-1.5 rounded-lg border border-blue-300 text-blue-700 text-sm hover:bg-blue-50 transition-colors cursor-pointer ${
-                isExporting ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-            >
-              {isExporting ? '匯出中...' : '匯出 CSV'}
-            </button>
+          <p className="text-sm text-gray-500">學生登入後在首頁「加入班級」輸入班級代碼，就會加入這個班</p>
+
+          <div className="flex flex-wrap items-stretch justify-between gap-4">
+            <div className="grid grid-cols-3 sm:flex items-stretch border border-gray-300 rounded-lg divide-x divide-gray-300 bg-white w-full sm:w-auto">
+              <div className="px-3 sm:px-5 py-3 flex flex-col sm:flex-row items-center gap-1 sm:gap-4">
+                <span className="text-sm text-gray-500 whitespace-nowrap">班級人數</span>
+                <span className="text-3xl font-semibold text-gray-900">{classroom.student_count}<span className="text-base font-normal text-gray-600 ml-1.5">位</span></span>
+              </div>
+              <div className="px-3 sm:px-5 py-3 flex flex-col sm:flex-row items-center gap-1 sm:gap-4">
+                <span className="text-sm text-gray-500 whitespace-nowrap">年級</span>
+                <span className="text-xl font-semibold text-gray-900 whitespace-nowrap">
+                  {classroom.grade != null ? `${classroom.grade} 年級` : '未指定'}
+                </span>
+              </div>
+              <div className="px-3 sm:px-5 py-3 flex items-center justify-center">
+                <span className={`text-base font-medium whitespace-nowrap ${classroom.is_active ? 'text-emerald-600' : 'text-gray-400'}`}>
+                  {classroom.is_active ? '使用中' : '已停用'}
+                </span>
+                <span className="sr-only">建立於 {formatDate(classroom.created_at)}</span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-4 sm:flex sm:flex-wrap gap-2 w-full sm:w-auto" role="group" aria-label="班級操作">
+              {onAddStudents && (
+                <button
+                  type="button"
+                  onClick={onAddStudents}
+                  className="sm:w-20 h-[72px] flex flex-col items-center justify-center gap-1 rounded-lg border border-gray-200 bg-white shadow-sm hover:bg-accent-bg text-gray-700 cursor-pointer"
+                >
+                  <span aria-hidden="true" className="w-7 h-7 rounded-full bg-accent text-white text-xl leading-7 text-center">＋</span>
+                  <span className="text-xs whitespace-nowrap">新增學生</span>
+                </button>
+              )}
+              <button
+                onClick={onExportCsv}
+                disabled={isExporting}
+                className="sm:w-20 h-[72px] flex flex-col items-center justify-center gap-1 rounded-lg border border-gray-200 bg-white shadow-sm hover:bg-blue-50 text-gray-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <svg className="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                <span className="text-xs whitespace-nowrap">{isExporting ? '匯出中...' : '匯出 CSV'}</span>
+              </button>
+              <button
+                onClick={onToggleActive}
+                disabled={isTogglingActive}
+                className="sm:w-20 h-[72px] flex flex-col items-center justify-center gap-1 rounded-lg border border-gray-200 bg-white shadow-sm hover:bg-gray-50 text-gray-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <svg className={`w-7 h-7 ${classroom.is_active ? 'text-gray-500' : 'text-emerald-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={classroom.is_active ? 'M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z' : 'M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664zM21 12a9 9 0 11-18 0 9 9 0 0118 0z'} />
+                </svg>
+                <span className="text-xs whitespace-nowrap">
+                  {isTogglingActive ? '更新中...' : classroom.is_active ? '停用' : '啟用'}
+                </span>
+              </button>
+              <button
+                onClick={onShowDeleteConfirm}
+                disabled={isDeleting}
+                className="sm:w-20 h-[72px] flex flex-col items-center justify-center gap-1 rounded-lg border border-gray-200 bg-white shadow-sm hover:bg-red-50 text-gray-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <svg className="w-7 h-7 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                <span className="text-xs whitespace-nowrap">{isDeleting ? '解散中...' : '解散班級'}</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
-    </div>
-
-    {/* Join Code card — accordion */}
-    <div className="bg-white rounded-2xl shadow-card overflow-hidden">
-      {/* Accordion header / toggle */}
-      <button
-        type="button"
-        onClick={() => setJoinCodeOpen((prev) => !prev)}
-        aria-expanded={joinCodeOpen}
-        aria-controls="join-code-panel"
-        className="w-full flex items-center justify-between px-6 py-3 text-left hover:bg-gray-50 transition-colors"
-      >
-        <span className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-          加入代碼
-          {classroom.join_code && !joinCodeOpen && (
-            <span className="font-mono text-xs font-medium text-accent bg-accent-bg px-2 py-0.5 rounded tracking-wider">
-              {classroom.join_code}
-            </span>
-          )}
-        </span>
-        <svg
-          className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${joinCodeOpen ? 'rotate-180' : ''}`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          aria-hidden="true"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
-
-      {/* Accordion body */}
-      <div
-        id="join-code-panel"
-        aria-hidden={!joinCodeOpen}
-        className={`transition-all duration-200 ${joinCodeOpen ? 'block' : 'hidden'}`}
-      >
-        <div className="px-6 pb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex-1">
-            {classroom.join_code ? (
-              <p className="font-mono text-2xl font-bold tracking-widest text-accent select-all">
-                {classroom.join_code}
-              </p>
-            ) : (
-              <p className="font-mono text-2xl font-bold tracking-widest text-gray-300">—</p>
-            )}
-            <p className="text-xs text-gray-400 mt-1.5">
-              把此代碼給學生，他們從首頁「加入班級」輸入即可加入
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2 shrink-0">
-            <ClassroomJoinQrButton classroomName={classroom.name} joinCode={classroom.join_code} />
-            <button
-              onClick={onCopyJoinCode}
-              disabled={!classroom.join_code}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 text-sm hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              {isCopied ? (
-                <>
-                  <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-emerald-600">已複製</span>
-                </>
-              ) : (
-                <>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                  </svg>
-                  複製代碼
-                </>
-              )}
-            </button>
-            <button
-              onClick={onShowRegenConfirm}
-              disabled={isRegenerating}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-amber-300 text-amber-700 text-sm hover:bg-amber-50 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              {isRegenerating ? (
-                '產生中...'
-              ) : (
-                <>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                  重生代碼
-                </>
-              )}
-            </button>
-          </div>
-        </div>
-      </div>
     </div>
 
     {/* Confirm regenerate dialog */}
@@ -311,6 +299,39 @@ const ClassroomHeaderCard: React.FC<ClassroomHeaderCardProps> = ({
               className="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium transition-colors cursor-pointer"
             >
               確定
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {showDeleteConfirm && (
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="delete-dialog-title"
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+      >
+        <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full mx-4">
+          <h3 id="delete-dialog-title" className="text-base font-bold text-gray-900 mb-2">
+            確定要解散「{classroom.name}」嗎？
+          </h3>
+          <p className="text-sm text-gray-600 mb-6">
+            班級內的作業與指派紀錄將一併刪除，且無法復原
+          </p>
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={onHideDeleteConfirm}
+              className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors cursor-pointer"
+            >
+              取消
+            </button>
+            <button
+              onClick={onDeleteClassroom}
+              disabled={isDeleting}
+              className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white text-sm font-medium transition-colors cursor-pointer"
+            >
+              {isDeleting ? '解散中...' : '確定解散'}
             </button>
           </div>
         </div>

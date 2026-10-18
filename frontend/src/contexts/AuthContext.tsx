@@ -22,7 +22,7 @@ interface AuthContextValue {
    */
   teacherGatingEnforced: boolean;
   login: (email: string, password: string) => Promise<{ mustChangePassword: boolean }>;
-  register: (email: string, password: string, name: string) => Promise<RegisterResponse>;
+  register: (email: string, password: string, name: string, role?: 'parent') => Promise<RegisterResponse>;
   logout: (options?: { skipJunyiRedirect?: boolean }) => void;
   clearMustChangePassword: () => void;
   /** Re-fetch user data from /api/users/me and update the context. */
@@ -56,7 +56,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<AuthUser | null>(null);
   const [token, setToken] = useState<string | null>(() => authToken.get());
   const [isLoading, setIsLoading] = useState(true);
-  const [mustChangePassword, setMustChangePassword] = useState(false);
   const [loginPassword, setLoginPassword] = useState<string | null>(null);
 
   // Load user from stored token on mount (page reload / direct token hydration).
@@ -232,16 +231,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setToken(newToken);
 
     if (needsPasswordChange) {
-      setMustChangePassword(true);
       setLoginPassword(password);
     }
 
     return { mustChangePassword: needsPasswordChange };
   }, []);
 
-  const register = useCallback(async (email: string, password: string, name: string): Promise<RegisterResponse> => {
+  const register = useCallback(async (email: string, password: string, name: string, role?: 'parent'): Promise<RegisterResponse> => {
     // Registration no longer auto-logs in — user must verify email first (issue #460).
-    const response = await apiRegister(email, password, name);
+    const response = await apiRegister(email, password, name, role);
     return response;
   }, []);
 
@@ -283,7 +281,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     clearAuthSession();
     setToken(null);
     setUser(null);
-    setMustChangePassword(false);
     setLoginPassword(null);
 
     // For Junyi-sourced sessions (#1260), redirect through Junyi /logout to
@@ -310,7 +307,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [logout]);
 
   const clearMustChangePassword = useCallback(() => {
-    setMustChangePassword(false);
     setLoginPassword(null);
   }, []);
 
@@ -333,6 +329,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Derived: user is authenticated but hasn't accepted terms
   const needsTermsAcceptance = !!user && !user.terms_accepted;
+  const mustChangePassword = !!user?.must_change_password;
 
   // Issue #457: classroom gate state — default to true (safe) while loading
   const hasClassroom = user ? (user.has_classroom ?? true) : true;

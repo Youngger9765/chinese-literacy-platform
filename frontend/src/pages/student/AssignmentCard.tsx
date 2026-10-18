@@ -8,6 +8,7 @@ import React from 'react';
 import type { StudentAssignmentResponse } from '../../services/assignmentApi';
 import StepProgressStrip from '../../components/ui/StepProgressStrip';
 import type { StepConfig } from '../../config/stepConfig';
+import { isPastDue } from '../../utils/dueDate';
 
 // ---------------------------------------------------------------------------
 // Helpers (previously inline in MyAssignments.tsx)
@@ -23,8 +24,7 @@ export function formatDate(dateStr: string | null): string {
 }
 
 export function isOverdue(dueDateStr: string | null): boolean {
-  if (!dueDateStr) return false;
-  return new Date(dueDateStr) < new Date();
+  return isPastDue(dueDateStr);
 }
 
 function StatusBadge({ status }: { status: string }) {

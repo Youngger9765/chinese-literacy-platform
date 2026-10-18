@@ -55,6 +55,13 @@ class Assignment(Base):
     difficulty_label: Mapped[str | None] = mapped_column(String(10), nullable=True)  # 初級/中級/高級
     # Issue #1762: teacher can enable smart-skip of steps the student already completed
     skip_completed_steps: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    # Issue #3393: whether this assignment targets the whole class (True) or only
+    # the student_ids selected at creation time (False). Existing rows default to
+    # True (whole class) because #3378's partial-assignment feature only just
+    # shipped -- every assignment created before it was effectively whole-class.
+    # create_submissions_for_new_student() uses this to decide whether a student
+    # who joins the classroom LATER should be back-filled into this assignment.
+    assigned_to_all: Mapped[bool] = mapped_column(Boolean, server_default="true", nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

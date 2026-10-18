@@ -18,6 +18,7 @@ from ..auth.dependencies import get_current_user, get_user_org_ids
 from ..auth.policies import is_system_admin, resolve_user_org_ids
 from ..database import get_db
 from ..models.school import Classroom, ClassroomStudent, School
+from ..models.session import LearningSession
 from ..models.user import User
 from ..services.gamification_service import (
     award_xp,
@@ -226,6 +227,14 @@ def on_session_complete(
     Can be called by the student themselves or a teacher/admin.
     """
     _assert_can_view(current_user, body.student_id, db)
+    # Settlement is idempotent per session_id, so the session must be this student's:
+    # otherwise a child could settle a classmate's session for their own XP and the
+    # classmate's real completion would then be skipped as "already processed" (#3531).
+    session = db.query(LearningSession).filter(LearningSession.id == body.session_id).first()
+    if session is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Session not found")
+    if session.student_id != body.student_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Session does not belong to this student")
     result = process_session_completion(
         db,
         student_id=body.student_id,

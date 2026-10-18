@@ -94,6 +94,12 @@ def update_session(
         # DEPRECATED (#1182): silently discard writes to current_step integer column.
         if field == "current_step":
             continue
+        # completed_at is server time only (2026-10-16): the cross-class league
+        # counts a lesson by it (season window, >= 3 min after started_at), and a
+        # client value let a student back-date or fast-forward a completion.
+        # The frontend never sends it; it is set below when status -> completed.
+        if field == "completed_at":
+            continue
         setattr(session, field, value)
 
     # Auto-set completed_at when status changes to completed (Issue #1070)

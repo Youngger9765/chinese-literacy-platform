@@ -19,8 +19,9 @@ import {
 import AssignmentTab from '../AssignmentTab';
 import TextManagementTab from '../TextManagementTab';
 import AssignmentItemStats from './AssignmentItemStats';
-import AssignmentMatrixGrid, { CellBadge, distinctTitles, isOverdue } from './AssignmentMatrixGrid';
+import AssignmentMatrixGrid, { CellBadge, MatrixLegend, assignmentCounts, distinctTitles, isOverdue } from './AssignmentMatrixGrid';
 import { StudentDetail } from './StudentsPanel';
+import { assignmentCsv, downloadAssignmentCsv } from './assignmentCsv';
 
 interface AssignmentsPanelProps {
   classroomId: number;
@@ -78,8 +79,38 @@ function AssignmentDrilldown({
         ← 回班級作業總表
       </button>
       <div>
-        <h3 className="text-xl font-bold text-gray-900">{title}</h3>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <h3 className="text-xl font-bold text-gray-900">{title}</h3>
+          <button
+            type="button"
+            onClick={() =>
+              downloadAssignmentCsv(
+                `${title}.csv`,
+                assignmentCsv(matrix, assignmentId, isOverdue(assignment?.due_date ?? null)),
+              )
+            }
+            className="inline-flex items-center gap-1.5 h-10 px-4 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 cursor-pointer whitespace-nowrap"
+          >
+            下載這份作業成績（CSV）
+          </button>
+        </div>
         <p className="text-gray-500 mt-1">{submitted} / {assigned} 人已交</p>
+        {(() => {
+          const n = assignmentCounts(matrix.cells, assignmentId, isOverdue(assignment?.due_date ?? null));
+          const chip = (label: string, value: number, cls: string) => (
+            <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium ${cls}`}>
+              {label}<span className="text-lg font-bold">{value}</span>
+            </span>
+          );
+          return (
+            <div className="flex flex-wrap gap-2 mt-3" aria-label="各狀態人數">
+              {chip('已交', n.submitted, 'bg-green-100 text-green-800')}
+              {n.inProgress > 0 && chip('進行中', n.inProgress, 'border border-dashed border-amber-400 text-amber-700')}
+              {n.notStarted > 0 && chip('未開始', n.notStarted, 'bg-gray-100 text-gray-600')}
+              {n.overdue > 0 && chip('逾期未交', n.overdue, 'bg-red-100 text-red-700')}
+            </div>
+          );
+        })()}
       </div>
       {error && <p className="text-red-600 text-sm">{error}</p>}
       {stats ? <AssignmentItemStats data={stats} /> : !error && <div className="h-40 rounded-xl bg-gray-100 animate-pulse" />}
@@ -105,6 +136,12 @@ const AssignmentsPanel: React.FC<AssignmentsPanelProps> = ({ classroomId, select
   const [matrix, setMatrix] = useState<AssignmentMatrixResponse | null>(null);
   const [error, setError] = useState('');
   const [showManage, setShowManage] = useState(false);
+  const [createSignal, setCreateSignal] = useState(0);
+
+  const handleCreateClick = () => {
+    setShowManage(true);
+    setCreateSignal((s) => s + 1);
+  };
 
   const load = useCallback(async () => {
     if (!token) return;
@@ -135,25 +172,49 @@ const AssignmentsPanel: React.FC<AssignmentsPanelProps> = ({ classroomId, select
 
   return (
     <div className="p-5 space-y-5">
-      {error && <p className="text-red-600 text-sm">{error} <button className="underline" onClick={load}>重試</button></p>}
-      {!matrix && !error && <div className="h-64 rounded-xl bg-gray-100 animate-pulse" />}
-      {matrix && <AssignmentMatrixGrid data={matrix} onOpenAssignment={onSelectAssignment} onOpenStudent={onOpenStudent} />}
+      {/* Junyi-parity toolbar: 建立 / 管理 on the left, status legend on the right */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={handleCreateClick}
+            className="inline-flex items-center gap-2 h-11 px-5 rounded-lg bg-accent hover:bg-accent-hover text-white text-base font-semibold transition-colors cursor-pointer"
+          >
+            建立作業
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowManage((v) => !v)}
+            aria-expanded={showManage}
+            className="inline-flex items-center h-11 px-5 rounded-lg border border-gray-300 text-gray-700 text-base font-medium hover:bg-gray-50 transition-colors cursor-pointer"
+          >
+            管理作業
+          </button>
+        </div>
+        {matrix && matrix.assignments.length > 0 && (
+          <MatrixLegend />
+        )}
+      </div>
 
-      <section className="rounded-xl border border-gray-200" aria-label="建立與管理作業">
-        <button
-          type="button"
-          onClick={() => setShowManage((v) => !v)}
-          aria-expanded={showManage}
-          className="w-full flex items-center justify-between px-4 py-3 text-left font-semibold text-gray-800 cursor-pointer"
-        >
-          建立與管理作業
-          <span className="text-sm font-normal text-gray-500">{showManage ? '收合 ▲' : '展開 ▼'}</span>
-        </button>
-        {showManage && (
-          <div className="border-t border-gray-100 p-4 space-y-6">
+      {showManage && (
+        <section className="rounded-xl border border-gray-200" aria-label="建立與管理作業">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+            <h3 className="font-semibold text-gray-800 text-lg">建立與管理作業</h3>
+            <button
+              type="button"
+              onClick={() => setShowManage(false)}
+              className="text-sm text-gray-500 hover:text-gray-800 cursor-pointer"
+            >
+              收合 ▲
+            </button>
+          </div>
+          <div className="p-4 space-y-6">
             <section aria-label="正式作業">
-              <h3 className="font-semibold text-gray-800 mb-2">正式作業（會進上面的總表）</h3>
-              <AssignmentTab classroomId={classroomId} onChanged={load} />
+              <h3 className="font-semibold text-gray-800 mb-2">正式作業（會進下面的總表）</h3>
+              <AssignmentTab classroomId={classroomId} onChanged={load} openSignal={createSignal} />
             </section>
             <section aria-label="自學課文庫">
               <h3 className="font-semibold text-gray-800">自學課文庫</h3>
@@ -163,8 +224,12 @@ const AssignmentsPanel: React.FC<AssignmentsPanelProps> = ({ classroomId, select
               <TextManagementTab classroomId={classroomId} />
             </section>
           </div>
-        )}
-      </section>
+        </section>
+      )}
+
+      {error && <p className="text-red-600 text-sm">{error} <button className="underline" onClick={load}>重試</button></p>}
+      {!matrix && !error && <div className="h-64 rounded-xl bg-gray-100 animate-pulse" />}
+      {matrix && <AssignmentMatrixGrid data={matrix} onOpenAssignment={onSelectAssignment} onOpenStudent={onOpenStudent} />}
     </div>
   );
 };

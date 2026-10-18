@@ -92,7 +92,10 @@ describe('JunyiClassImportSection', () => {
     expect(screen.getByText('已匯入')).toBeInTheDocument();
 
     // T+1 freshness note always shown
-    expect(screen.getByText(/今天新建的班.*明天才查得到|明天.*查得到/)).toBeInTheDocument();
+    // #3498: the note covers students added today, not only new classes.
+    const note = screen.getByText(/每日備份/);
+    expect(note.textContent).toMatch(/晚一天/);
+    expect(note.textContent).toMatch(/今天才加入班上的學生/);
   });
 
   it('imports selected classes and shows "新增 N 位、已存在略過 M 位"', async () => {

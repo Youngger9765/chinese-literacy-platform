@@ -460,3 +460,82 @@ class TestAtRiskEndpoint:
             assert res.status_code == 403
         finally:
             db.close()
+
+    def test_unauthenticated_gets_401(self):
+        # Deliberately not using _get_as — hits the real get_current_user
+        # dependency with no override, so a missing token is the only thing
+        # that can produce a 401 here.
+        res = client.get("/api/teacher/classrooms/1/at-risk-students")
+        assert res.status_code == 401
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# #3519 — at-risk list batch-loads the class instead of 2+ queries per student
+# ══════════════════════════════════════════════════════════════════════════════
+
+
+def _class_with_students(db, tag: str, n: int, with_transcript: bool):
+    teacher = _make_user(db, f"t3519{tag}@test.com", f"T {tag}")
+    classroom = _make_classroom(db, teacher.id, _make_school(db).id)
+    now = _now()
+    for i in range(n):
+        st = _make_user(db, f"s3519{tag}{i}@test.com", f"S {tag} {i:02d}")
+        db.add(ClassroomStudent(classroom_id=classroom.id, student_id=st.id))
+        for k in range(4):
+            sess = _make_session(db, st.id, f"st{k}", 70.0 - k * (i % 3) * 5, now - timedelta(days=k * 3 + i))
+            if with_transcript:
+                sess.reading_result = {"transcript": "我們去學校讀書寫字"}
+            for ch in ("學", "校", "字")[: i % 4]:
+                db.add(CharacterError(session_id=sess.id, character=ch, error_type="substitution"))
+    db.commit()
+    return teacher, classroom
+
+
+def _count(fn):
+    stmts: list[str] = []
+    listener = lambda conn, cursor, statement, *a: stmts.append(statement)
+    event.listen(engine, "before_cursor_execute", listener)
+    try:
+        out = fn()
+    finally:
+        event.remove(engine, "before_cursor_execute", listener)
+    return out, stmts
+
+
+@pytest.mark.parametrize("with_transcript", [True, False])
+def test_at_risk_matches_per_student_prediction(with_transcript):
+    """The batched route must give exactly what predict_learning_difficulty gives per
+    student — both the transcript path and the error-count fallback path."""
+    db = _new_db()
+    try:
+        teacher, classroom = _class_with_students(db, f"eq{int(with_transcript)}", 6, with_transcript)
+        got = {r["student_id"]: r for r in _get_as(f"/api/teacher/classrooms/{classroom.id}/at-risk-students", teacher).json()}
+        assert len(got) == 6
+        rates = set()
+        for sid, row in got.items():
+            want = svc.predict_learning_difficulty(sid, db)
+            assert row["risk_level"] == want["risk_level"]
+            assert row["risk_factors"] == want["risk_factors"]
+            assert row["supporting_data"] == want["supporting_data"]
+            rates.add(row["supporting_data"]["character_error_rate"])
+        assert len(rates) > 1  # the fixture really varies error rates (not all None/equal)
+        if not with_transcript:
+            # Fallback = every error row / (sessions × 20). Student i has i%4 errors in
+            # each of 4 sessions. Hand-computed so a shared helper can't be wrong twice.
+            for sid, row in got.items():
+                i = int(row["student_name"].split()[-1])
+                assert row["supporting_data"]["character_error_rate"] == pytest.approx(4 * (i % 4) / 80)
+    finally:
+        db.close()
+
+
+def test_at_risk_query_count_does_not_grow_with_class_size():
+    db = _new_db()
+    try:
+        t_small, c_small = _class_with_students(db, "qs", 2, False)
+        t_big, c_big = _class_with_students(db, "qb", 12, False)
+        _, small = _count(lambda: _get_as(f"/api/teacher/classrooms/{c_small.id}/at-risk-students", t_small))
+        _, big = _count(lambda: _get_as(f"/api/teacher/classrooms/{c_big.id}/at-risk-students", t_big))
+        assert len(big) == len(small), (len(small), len(big))
+    finally:
+        db.close()

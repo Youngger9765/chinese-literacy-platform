@@ -2,6 +2,9 @@ import './index.css';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import { installStaleChunkRecovery } from './utils/staleChunkRecovery';
+
+installStaleChunkRecovery();
 
 // Extend Window to support GA4 gtag and dataLayer.
 declare global {

@@ -37,6 +37,7 @@ logger = logging.getLogger(__name__)
 # (e.g. date range or story filter) rather than silently receiving truncated data.
 # Mirrors _ADMIN_EXPORT_ROW_LIMIT in organizations.py.
 _HEATMAP_SESSION_LIMIT = 5_000
+_MIN_MEANINGFUL_SESSION_MINUTES = 1.0  # #3427: sub-minute completions are data artifacts
 
 
 @router.get(
@@ -100,11 +101,11 @@ def get_classroom_time_stats(
         if completed_at.tzinfo is None:
             completed_at = completed_at.replace(tzinfo=timezone.utc)
         delta = (completed_at - started_at).total_seconds() / 60.0
-        if delta > 0:
+        if delta >= _MIN_MEANINGFUL_SESSION_MINUTES:
             total_minutes += delta
             duration_count += 1
 
-    total_hours = round(total_minutes / 60.0, 1)
+    total_hours = round(total_minutes / 60.0, 1) if duration_count else None
     avg_minutes = round(total_minutes / duration_count, 1) if duration_count else None
 
     # ── Distinct study days via SQL COUNT DISTINCT (Issue #1224) ──────────────

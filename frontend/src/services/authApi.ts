@@ -26,6 +26,9 @@ export interface AuthUser {
   has_classroom: boolean;
   /** Issue #457: mirrors ENFORCE_TEACHER_GATING env var on the backend. */
   teacher_gating_enforced: boolean;
+  /** Issue #3438: server-computed, live on every /users/me call — the
+   *  authoritative source AuthContext derives `mustChangePassword` from. */
+  must_change_password: boolean;
 }
 
 /** Check if user has a specific role (ignores scope). */
@@ -125,11 +128,13 @@ export async function register(
   email: string,
   password: string,
   name: string,
+  role?: 'parent',
 ): Promise<RegisterResponse> {
   const res = await fetch(`${API_BASE}/api/auth/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password, name }),
+    // #3513: role is only sent for a parent sign-up; omitted = teacher.
+    body: JSON.stringify(role ? { email, password, name, role } : { email, password, name }),
   });
   return handleAuthResponse<RegisterResponse>(res);
 }

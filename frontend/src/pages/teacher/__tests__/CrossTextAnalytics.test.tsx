@@ -135,7 +135,7 @@ describe('CrossTextAnalytics — class overview (default view)', () => {
     await waitFor(() => expect(screen.getByText('學生人數')).toBeInTheDocument());
     expect(screen.getByText('總學習次數')).toBeInTheDocument();
     expect(screen.getByText('已練習課文數')).toBeInTheDocument();
-    expect(screen.getByText('最新班級均分')).toBeInTheDocument();
+    expect(screen.getByText('最新一次班級均分')).toBeInTheDocument();
   });
 
   it('shows class overview by default (班級總覽 button active)', async () => {

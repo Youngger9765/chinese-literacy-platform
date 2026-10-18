@@ -76,7 +76,7 @@ def list_importable_classes(db: Session, teacher: User, school_id: int, bq_clien
                 "class_name": summary.class_name,
                 "class_code": summary.class_code,
                 "student_count": summary.student_count,
-                "already_imported": existing is not None,
+                "already_imported": existing is not None and existing.school_id == school_id,
             }
         )
     return {"linked": True, "classes": classes}
@@ -123,6 +123,8 @@ def import_junyi_classes(
         summary = rows_for_class[0]
 
         classroom = find_existing_imported_classroom(db, teacher.id, class_id)
+        if classroom is not None and classroom.school_id != school_id:
+            raise ValueError("此均一班級已匯入至其他學校，請聯繫系統管理員")
         if classroom is None:
             classroom = Classroom(
                 name=summary.class_name,
@@ -175,15 +177,25 @@ def import_junyi_classes(
                     junyi_identity_id=identity_id,
                     email_verified=True,
                 )
-                db.add(student)
-                db.flush()
-                db.add(
-                    StudentProfile(
-                        user_id=student.id,
-                        school_id=school_id,
-                        student_number=None,
+                try:
+                    with db.begin_nested():
+                        db.add(student)
+                        db.flush()
+                        db.add(
+                            StudentProfile(
+                                user_id=student.id,
+                                school_id=school_id,
+                                student_number=None,
+                            )
+                        )
+                except IntegrityError:
+                    student = (
+                        db.query(User)
+                        .filter(User.junyi_identity_id == identity_id)
+                        .first()
                     )
-                )
+                    if student is None:
+                        raise
 
             # Grant the school-scoped student role if not already present
             # (reuse pattern from classroom_csv.py upload_csv_students).
@@ -218,15 +230,20 @@ def import_junyi_classes(
                 .first()
             )
             if existing_enrollment is None:
-                db.add(
-                    ClassroomStudent(
-                        classroom_id=classroom.id,
-                        student_id=student.id,
-                    )
-                )
-                db.flush()
-                create_submissions_for_new_student(classroom.id, student.id, db)
-                added_students += 1
+                try:
+                    with db.begin_nested():
+                        db.add(
+                            ClassroomStudent(
+                                classroom_id=classroom.id,
+                                student_id=student.id,
+                            )
+                        )
+                        db.flush()
+                except IntegrityError:
+                    skipped_existing_students += 1
+                else:
+                    create_submissions_for_new_student(classroom.id, student.id, db)
+                    added_students += 1
             else:
                 skipped_existing_students += 1
 

@@ -227,7 +227,6 @@ def resolve_junyi_user(db: Session, junyi_data: dict) -> tuple[User, bool]:
     if user is not None and junyi_email and user.email.endswith(SYNTHETIC_STUDENT_EMAIL_DOMAIN):
         email_taken_by_someone_else = db.query(User).filter(
             User.email == junyi_email,
-            User.is_active.is_(True),
             User.id != user.id,
         ).first()
         if email_taken_by_someone_else is None:
@@ -235,7 +234,7 @@ def resolve_junyi_user(db: Session, junyi_data: dict) -> tuple[User, bool]:
         else:
             logger.warning(
                 "junyi_login: cannot promote synthetic email for user %d -- "
-                "%s is already used by another active account; leaving synthetic email in place",
+                "%s is already used by another account; leaving synthetic email in place",
                 user.id, junyi_email,
             )
 

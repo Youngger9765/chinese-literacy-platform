@@ -10,8 +10,9 @@
  * - OnboardingWrapper    — first-time student onboarding overlay
  */
 import React, { Suspense, useState } from 'react';
-import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { Navigate, useNavigate, useParams, useSearchParams, useLocation } from 'react-router-dom';
 import { lazy } from 'react';
+import type { BatchCreateResult, ClassroomResponse } from '../../services/classroomApi';
 import { useAuth } from '../../contexts/AuthContext';
 import { hasRole } from '../../services/authApi';
 import { clearActiveSession } from '../../services/api';
@@ -246,19 +247,37 @@ export const WritePage: React.FC = () => {
   );
 };
 
-/** Teacher classroom detail page — extracts classroomId from URL params. */
+/**
+ * Teacher classroom detail page — extracts classroomId from URL params.
+ *
+ * #3411: a classroom just created by this same navigation (see
+ * TeacherDashboardPage below) arrives as router state, so ClassroomDetail
+ * can render it the instant it mounts instead of depending on a fresh
+ * GET /api/classrooms/:id that was observed racing with this very
+ * navigation and occasionally losing it.
+ */
 export const ClassroomDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const classroomId = id ? parseInt(id, 10) : null;
+  const location = useLocation();
+  const navState = location.state as { justCreated?: ClassroomResponse; createdStudents?: BatchCreateResult } | null;
+  const justCreated = navState?.justCreated;
 
   if (classroomId == null || isNaN(classroomId)) {
     return <Navigate to="/teacher" replace />;
   }
 
+  const initialClassroom =
+    justCreated && justCreated.id === classroomId
+      ? { ...justCreated, students: [] }
+      : undefined;
+
   return (
     <ClassroomDetail
       classroomId={classroomId}
+      initialClassroom={initialClassroom}
+      initialAddResult={justCreated && justCreated.id === classroomId ? navState?.createdStudents : undefined}
       onBack={() => navigate('/teacher')}
     />
   );
@@ -270,7 +289,9 @@ export const TeacherDashboardPage: React.FC = () => {
 
   return (
     <TeacherDashboard
-      onSelectClassroom={(id) => navigate(`/teacher/classroom/${id}`)}
+      onSelectClassroom={(id, justCreated, createdStudents) =>
+        navigate(`/teacher/classroom/${id}`, justCreated ? { state: { justCreated, createdStudents } } : undefined)
+      }
     />
   );
 };
@@ -282,7 +303,8 @@ export const OnboardingWrapper: React.FC = () => {
 
   const isStudent =
     user !== null &&
-    !hasRole(user, 'teacher', 'system_admin', 'principal', 'director', 'org_owner', 'org_admin', 'homeroom_teacher');
+    // #3515: a parent got the student tour (「QA家長 同學！這裡是你的朗讀練習基地」) on /parent.
+    !hasRole(user, 'teacher', 'system_admin', 'principal', 'director', 'org_owner', 'org_admin', 'homeroom_teacher', 'parent');
 
   const shouldShow = isStudent && user !== null && !user.onboarding_completed && !dismissed;
 

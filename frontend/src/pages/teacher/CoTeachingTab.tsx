@@ -121,12 +121,22 @@ const CoTeachingTab: React.FC<CoTeachingTabProps> = ({ classroomId, ownerId }) =
               onChange={(e) => setInviteEmail(e.target.value)}
               placeholder="輸入教師 Email"
               disabled={isInviting}
-              className="flex-1 text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:bg-gray-100"
+              className="flex-1 min-w-0 text-base sm:text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:bg-gray-100"
             />
+            {/*
+             * #3544: an input's default min-width:auto kept it at its intrinsic width,
+             * pushing 邀請 past the card on an iPhone 14 Pro → min-w-0. 16px on phones
+             * because iOS Safari zooms the page when a smaller input is focused.
+             */}
+            {/*
+             * #3424: button had no `shrink-0`, so next to a `flex-1` input at
+             * 390 width it shrank along with the row and "邀請" wrapped into
+             * a vertical "邀／請", overflowing the card edge.
+             */}
             <button
               type="submit"
               disabled={isInviting || !inviteEmail.trim()}
-              className="text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
+              className="shrink-0 whitespace-nowrap text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
             >
               {isInviting ? '邀請中...' : '邀請'}
             </button>

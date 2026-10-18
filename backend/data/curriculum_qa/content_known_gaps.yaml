@@ -361,22 +361,11 @@ image_options_only_captions:
     原稿 XML 逐題查過：題幹之後 9000 字元內 drawing=3、blip=2，選項行是
     「A.」「B. (血管暢通)」「C. (血液流動方向)」「D.(血球)」——
     A 是正解且沒有圖說。L0052 同形狀（D 是正解且空白）。
-  how_it_looks_to_a_student: >-
-    L0143 看到四個選項：空白 / (血管暢通) / (血液流動方向) / (血球)；
-    L0052 看到：藍鯨骨骼標本 / 鯊魚 / 藍鯨 / 空白。兩題都答不了。
   why_not_stripped: >-
     這些括號**不能跟老師的批改註記一起剝**：整個選項就是一個括號，剝掉什麼都不剩，
     會從「三個有字一個空」變成「四個都空」。
     test_stripping_annotations_never_empties_an_option 就是守這件事。
   lessons:
-    - lesson_uid: L0143
-      question: 依文中所述，下列哪一個圖是「血栓」?
-      answer: A
-      empty_option: A
-    - lesson_uid: L0052
-      question: 根據第三段，哪一張圖最符合小藍鯨生前被漁具纏繞的情況
-      answer: D
-      empty_option: D
     - lesson_uid: L0073
       question: 作者「升上國中的新鮮感」隨著時間有何變化？下列哪一張圖最能說明？
       answer: C
@@ -384,17 +373,28 @@ image_options_only_captions:
       note: >-
         這一課四個選項全是空的（老師一個圖說都沒寫）。原本記成 2 課是漏數 ——
         當時的查法只列了「正解為空」的那兩課，沒有涵蓋「整題四格全空」。
-  count_lessons: 3
+  count_lessons: 1
   contained_since: "2026-09-06"
+  resolved_2026_10_17: >-
+    L0143 / L0052 已修好（#3621）：`assets/` 裡其實有抽好的四張手繪圖
+    （L0143 fig6-9、L0052 fig10-13，內容逐張比對跟上面 evidence 描述一一對上），
+    只是先前只留了圖說文字沒接上圖片本身。兩課的 `comprehension.*.yml` 新增
+    `option_images: {A:..., B:..., C:..., D:...}`，`_mcq_from` 改成
+    「文字或圖片任一有內容就送出該選項的題目」，閱讀理解、課堂搶答、PK 三處
+    都加了圖片選項的渲染。**L0073 查不到圖** —— 原稿的 PDF 本身就沒有把這四張
+    趨勢圖渲染出來（見下方 note），`assets/` 裡對應的 fig 檔也不存在（該課
+    fig1-12 全是跟內容無關的通用裝飾圖示），需要重新從原始 DOCX 抓圖才能查，
+    而這台機器的 Drive 存取目前卡在互動式重新授權，仍標為扣留。
   containment: >-
-    這三題現在被扣留、不再送到學生面前（`_mcq_from` 判「正解那格是空的」就不送）。
-    ⛔ 缺口本身沒有補 —— 圖仍然沒有被抽出來當選項，那三題學生就是做不到。
-    差別只在於：以前是「看得到但選什麼都錯」，現在是「不出現」。
-    判準刻意用空白正解而不是 `options_are_images` 旗標：三課裡只有 L0143 帶那個旗標。
+    L0073 這一題目前被扣留、不送到學生面前（`_mcq_from` 判「正解那格是空的
+    且沒有圖片」就不送）。⛔ 缺口本身沒有補 —— 圖仍然沒有被抽出來當選項，
+    這題學生就是做不到。差別只在於：以前是「看得到但選什麼都錯」，現在是
+    「不出現」。
   how_to_close: >-
-    把圖抽出來當選項（跟聚光燈的 figN.png 同一條路，三課的 assets/ 裡都有 figN.png），
-    或請教材端補印文字選項。補上之後 `_mcq_from` 會自動放行，不需要改 code。
-    不在我方 code 的範圍內修得掉。
+    重新從原始 DOCX 抓這四張趨勢圖（Drive 存取需要互動式重新授權），確認
+    LibreOffice 當初為何沒把它們渲染進 PDF、圖是否仍在 DOCX 的 drawing XML 裡可
+    直接取得。拿到圖之後比照 L0143/L0052 的修法：補 `option_images`，
+    `_mcq_from` 已經會自動放行，不需要再改 code。
 
 mcq_options_emitted_as_guides:
   count: 0

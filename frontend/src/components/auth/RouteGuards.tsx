@@ -37,11 +37,13 @@ const AuthLoadingSpinner: React.FC = () => (
  * sides agree on the destination, so it no longer matters who wins.
  */
 export const PublicOnlyRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, needsTermsAcceptance, mustChangePassword } = useAuth();
   const location = useLocation();
 
   if (isLoading) return <AuthLoadingSpinner />;
   if (isAuthenticated) {
+    if (mustChangePassword) return <Navigate to="/change-password" replace />;
+    if (needsTermsAcceptance) return <Navigate to="/terms" replace />;
     const fromLocation = (location.state as { from?: { pathname: string; search?: string } })?.from;
     const to = fromLocation ? `${fromLocation.pathname}${fromLocation.search ?? ''}` : '/';
     return <Navigate to={to} replace />;
@@ -50,13 +52,38 @@ export const PublicOnlyRoute: React.FC<{ children: React.ReactNode }> = ({ child
   return <>{children}</>;
 };
 
-/** Redirect unauthenticated users to /login. Redirect ToS-pending users to /terms. */
+/**
+ * Redirect unauthenticated users to /login. Redirect ToS-pending users to
+ * /terms, and password-change-pending users to /change-password.
+ *
+ * #3412: mustChangePassword MUST be checked before needsTermsAcceptance.
+ * A brand new batch-created student (or one whose password a teacher just
+ * reset) has both pending -- neither has ever been done. If the ToS check
+ * ran first it would redirect straight past /change-password to /terms
+ * (its own exemption only covered '/terms', not '/change-password'), and
+ * nothing afterward ever sends the student back -- the forced password
+ * change silently never happens, and the teacher-issued password (printed
+ * on a one-time credential card) stays valid forever.
+ *
+ * While a password change is pending, the ToS check is skipped entirely
+ * (not just redirected past) so landing on /terms directly also bounces to
+ * /change-password -- both requirements are satisfied in a fixed order
+ * instead of racing each other.
+ */
 export const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated, isLoading, needsTermsAcceptance } = useAuth();
+  const { isAuthenticated, isLoading, needsTermsAcceptance, mustChangePassword } = useAuth();
   const location = useLocation();
 
   if (isLoading) return <AuthLoadingSpinner />;
   if (!isAuthenticated) return <Navigate to="/login" state={{ from: location }} replace />;
+
+  // Password-change gate takes priority over the ToS gate (#3412).
+  if (mustChangePassword) {
+    if (location.pathname !== '/change-password') {
+      return <Navigate to="/change-password" replace />;
+    }
+    return <>{children}</>;
+  }
 
   // ToS gate: redirect to /terms if user hasn't accepted yet (except when already on /terms)
   if (needsTermsAcceptance && location.pathname !== '/terms') {
@@ -85,7 +112,7 @@ export const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ childr
  *     annotating entirely
  */
 export const LearningRouteGate: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated, isLoading, needsTermsAcceptance } = useAuth();
+  const { isAuthenticated, isLoading, needsTermsAcceptance, mustChangePassword } = useAuth();
   const location = useLocation();
 
   if (isLoading) return <AuthLoadingSpinner />;
@@ -101,6 +128,13 @@ export const LearningRouteGate: React.FC<{ children: React.ReactNode }> = ({ chi
       );
     }
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  // #3412: same priority fix as ProtectedRoute -- a student with a pending
+  // forced password change must not reach lesson content via a bookmarked
+  // /learn link before changing it, and the ToS gate must not run first.
+  if (mustChangePassword) {
+    return <Navigate to="/change-password" replace />;
   }
 
   if (needsTermsAcceptance && location.pathname !== '/terms') {

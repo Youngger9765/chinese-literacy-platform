@@ -107,8 +107,10 @@ const JunyiClassImportSection: React.FC<JunyiClassImportSectionProps> = ({
 
   return (
     <div className="space-y-3">
-      <p className="text-xs text-gray-500">
-        均一今天新建的班，明天才查得到
+      {/* #3498: the import reads Junyi's daily backup, so it runs a day behind
+          Junyi -- for new students too, not only new classes. */}
+      <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+        資料來自均一的每日備份，通常比均一晚一天：今天才在均一建的班、或今天才加入班上的學生，明天才匯得進來
       </p>
 
       {error && (

@@ -1,16 +1,17 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { AssignmentResponse } from '../../services/assignmentApi';
 import AssignmentCard from './components/AssignmentCard';
 import AssignmentCreateForm from './components/AssignmentCreateForm';
 import AssignTargetPicker from './panel/AssignTargetPicker';
 import AssignmentExpandedPanel from './components/AssignmentExpandedPanel';
 import AssignmentInlineEdit from './components/AssignmentInlineEdit';
-import { completionPercentage, formatDate, isOverdue } from './components/assignmentUtils';
+import { completionPercentage, formatDate, isOverdue, completionCounts } from './components/assignmentUtils';
 import { StatusFilter, useAssignments } from './hooks/useAssignments';
 
 interface AssignmentTabProps {
   classroomId: number;
   onChanged?: () => void;
+  openSignal?: number;
 }
 
 const STATUS_TABS: { key: StatusFilter; label: string }[] = [
@@ -20,7 +21,7 @@ const STATUS_TABS: { key: StatusFilter; label: string }[] = [
   { key: 'inactive', label: '已停用' },
 ];
 
-const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId, onChanged }) => {
+const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId, onChanged, openSignal }) => {
   const {
     assignments,
     isLoading,
@@ -82,6 +83,15 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId, onChanged })
     handleGraded,
   } = useAssignments(classroomId, onChanged);
 
+  const openedSignalRef = useRef(0);
+  useEffect(() => {
+    if (openSignal && openSignal !== openedSignalRef.current) {
+      openedSignalRef.current = openSignal;
+      handleOpenCreateForm();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openSignal]);
+
   const renderEditForm = (assignment: AssignmentResponse, variant: 'mobile' | 'desktop') => (
     <AssignmentInlineEdit
       editTitle={editTitle}
@@ -101,7 +111,7 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId, onChanged })
   const renderDesktopRow = (assignment: AssignmentResponse) => {
     const isExpanded = expandedId === assignment.id;
     const displayTitle = assignment.title || assignment.story_title;
-    const completionPct = completionPercentage(assignment.completed_count, assignment.submission_count);
+    const completionPct = completionPercentage(completionCounts(assignment).done, completionCounts(assignment).total);
     const isConfirmingDelete = confirmDeleteId === assignment.id;
     const isDeleting = deletingId === assignment.id;
     const isEditing = editingId === assignment.id;
@@ -147,7 +157,7 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId, onChanged })
                     : 'bg-gray-100 text-gray-500'
               }`}
             >
-              {assignment.completed_count}/{assignment.submission_count}
+              {completionCounts(assignment).done}/{completionCounts(assignment).total}
             </span>
           </td>
           <td className="py-2.5 text-center">
@@ -156,13 +166,13 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId, onChanged })
                 event.stopPropagation();
                 handleToggleActive(assignment);
               }}
-              className={`inline-block px-1.5 py-0.5 rounded text-xs font-medium transition-colors cursor-pointer ${
+              className={`whitespace-nowrap inline-block px-1.5 py-0.5 rounded text-xs font-medium transition-colors cursor-pointer ${
                 assignment.is_active
                   ? 'bg-green-100 text-green-700 hover:bg-green-200'
                   : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
               }`}
             >
-              {assignment.is_active ? '進行中' : '已停用'}
+              {assignment.is_active ? '使用中' : '已停用'}
             </button>
           </td>
           <td className="py-2.5 text-center" onClick={(event) => event.stopPropagation()}>
@@ -415,9 +425,9 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId, onChanged })
                   <th className="pb-2 font-medium w-6"></th>
                   <th className="pb-2 font-medium">作業名稱</th>
                   <th className="pb-2 font-medium">課文</th>
-                  <th className="pb-2 font-medium">截止日期</th>
-                  <th className="pb-2 font-medium text-center">完成率</th>
-                  <th className="pb-2 font-medium text-center">狀態</th>
+                  <th className="pb-2 font-medium whitespace-nowrap">截止日期</th>
+                  <th className="pb-2 font-medium text-center whitespace-nowrap">完成率</th>
+                  <th className="pb-2 font-medium text-center whitespace-nowrap">狀態</th>
                   <th className="pb-2 font-medium w-16"></th>
                 </tr>
               </thead>

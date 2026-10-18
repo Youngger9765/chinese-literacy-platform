@@ -24,6 +24,7 @@ from ..models.user import User, UserRole, Role
 from ..models.school import School
 from ..services.input_sanitizer import sanitize_ai_input
 from ..utils.password_validator import validate_password_strength
+from .email_domains import is_public_email_domain
 
 logger = logging.getLogger(__name__)
 
@@ -95,7 +96,14 @@ def assign_teacher_to_school(db: Session, user: User) -> None:
     """
     domain = user.email.split("@")[-1].lower()
 
-    school = db.query(School).filter(School.domain == domain).first()
+    # A public mail domain is not a school (#3541): grouping every gmail teacher into
+    # one school let strangers see and enrol each other's students. Each gets their own.
+    if is_public_email_domain(domain):
+        school = School(name=f"{user.name or domain} 的學校", domain=None, admin_user_id=user.id)
+        db.add(school)
+        db.flush()
+    else:
+        school = db.query(School).filter(School.domain == domain).first()
 
     if school is None:
         school = School(
@@ -105,7 +113,7 @@ def assign_teacher_to_school(db: Session, user: User) -> None:
         )
         db.add(school)
         db.flush()
-    else:
+    elif school.domain is not None:
         validate_teacher_email_domain(school, domain)
 
     teacher_role = db.query(Role).filter(Role.name == "teacher").first()

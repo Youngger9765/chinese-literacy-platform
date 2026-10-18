@@ -31,6 +31,7 @@ from app.models import Base
 from app.models.user import Role, UserRole
 from app.models.school import School
 from app.models.session import LearningSession
+from _school_student import grant_school_student_role
 
 
 # ---------------------------------------------------------------------------
@@ -124,6 +125,13 @@ def school_id():
     return _test_school_id
 
 
+def _register_student(client, suffix: str) -> dict:
+    """Register a user who is a student of the test school (#3534: only those can be enrolled)."""
+    user = _register_user(client, suffix)
+    grant_school_student_role(TestingSessionLocal, user["user_id"], school_id=_test_school_id)
+    return user
+
+
 def auth_header(token: str) -> dict:
     return {"Authorization": f"Bearer {token}"}
 
@@ -208,12 +216,12 @@ def other_teacher(client):
 
 @pytest.fixture(scope="module")
 def student1(client):
-    return _register_user(client, "exp_stu1")
+    return _register_student(client, "exp_stu1")
 
 
 @pytest.fixture(scope="module")
 def student2(client):
-    return _register_user(client, "exp_stu2")
+    return _register_student(client, "exp_stu2")
 
 
 @pytest.fixture(scope="module")

@@ -77,6 +77,10 @@ jobs:
       #    lru_cache，514/512 的餘裕本來就是負的。
       #    不要為了省錢調回 512Mi —— 差額量級是每月美分，代價是拒絕服務。
       #    鎖：backend/specs/test_workflow_path_filters_spec.py（test_backend_memory_is_at_least_1gi）
+      # Classroom capacity (2026-10-16, measured): 2 vCPU and 8 concurrent
+      # requests per instance so reading-recording transcodes spread across
+      # instances (see deploy.yml). Staging keeps min 0 (idle = 0 cost) and the
+      # db-f1-micro DB (25 connections): pool 2+0 per instance, 8 x 2 = 16.
       - name: Deploy backend to Cloud Run (Staging)
         run: |
           gcloud run deploy ${{ env.BACKEND_SERVICE }} \
@@ -86,12 +90,14 @@ jobs:
             --project ${{ env.PROJECT_ID }} \
             --allow-unauthenticated \
             --memory=1Gi \
-            --cpu=1 \
+            --cpu=2 \
             --min-instances=0 \
-            --max-instances=1 \
+            --max-instances=8 \
+            --concurrency=8 \
             --timeout=300s \
             --add-cloudsql-instances=lingoleap-dev:asia-east1:lingoleap-staging-db \
-            --set-env-vars="^::^ALLOWED_ORIGINS=https://lingoleap-frontend-staging-958347263320.asia-east1.run.app,https://lingoleap-frontend-958347263320.asia-east1.run.app,https://lingoleap-staging.web.app,https://lingoleap-dev.web.app::DATABASE_URL=${{ secrets.STAGING_DATABASE_URL }}::RUN_MIGRATIONS=true::AZURE_SPEECH_KEY=${{ secrets.AZURE_SPEECH_KEY }}::AZURE_SPEECH_REGION=eastus::TTS_PROVIDER=azure::ENVIRONMENT=staging::JWT_SECRET_KEY=${{ secrets.STAGING_JWT_SECRET_KEY }}::GCS_OMO_BUCKET=lingoleap-omo-uploads-staging::READING_AUDIO_GCS_BUCKET=lingoleap-reading-audio-staging::BUILD_SHA=${{ github.sha }}::JUNYI_CLASS_IMPORT_ENABLED=true::JUNYI_BQ_MODE=fake"
+            --service-account=lingoleap-junyi-bq@lingoleap-dev.iam.gserviceaccount.com \
+            --set-env-vars="^::^ALLOWED_ORIGINS=https://lingoleap-frontend-staging-958347263320.asia-east1.run.app,https://lingoleap-frontend-958347263320.asia-east1.run.app,https://lingoleap-staging.web.app,https://lingoleap-dev.web.app::DATABASE_URL=${{ secrets.STAGING_DATABASE_URL }}::RUN_MIGRATIONS=true::AZURE_SPEECH_KEY=${{ secrets.AZURE_SPEECH_KEY }}::AZURE_SPEECH_REGION=eastus::TTS_PROVIDER=azure::ENVIRONMENT=staging::JWT_SECRET_KEY=${{ secrets.STAGING_JWT_SECRET_KEY }}::GCS_OMO_BUCKET=lingoleap-omo-uploads-staging::READING_AUDIO_GCS_BUCKET=lingoleap-reading-audio-staging::BUILD_SHA=${{ github.sha }}::JUNYI_CLASS_IMPORT_ENABLED=true::JUNYI_BQ_MODE=real::PARENT_PORTAL_ENABLED=true::DB_POOL_SIZE=2::DB_MAX_OVERFLOW=0::ASYNC_THREAD_WORKERS=32"
 
       - name: Promote backend traffic to latest revision (Fixes #1449)
         run: |
@@ -155,6 +161,7 @@ jobs:
           docker build \
             --build-arg VITE_API_URL=${{ steps.backend-url.outputs.url }} \
             --build-arg VITE_SHOW_DEMO_LOGIN=true \
+            --build-arg VITE_PARENT_PORTAL_ENABLED=true \
             --build-arg "VITE_DEMO_ADMIN_EMAIL=${DEMO_ADMIN_EMAIL}" \
             --build-arg "VITE_DEMO_ADMIN_PW=${DEMO_ADMIN_PW}" \
             --build-arg "VITE_DEMO_TEACHER_EMAIL=${DEMO_TEACHER_EMAIL}" \
@@ -252,6 +259,7 @@ jobs:
         env:
           VITE_API_URL: ""
           VITE_SHOW_DEMO_LOGIN: "true"
+          VITE_PARENT_PORTAL_ENABLED: "true"
           VITE_DEMO_ADMIN_EMAIL: ${{ secrets.DEMO_ADMIN_EMAIL }}
           VITE_DEMO_ADMIN_PW: ${{ secrets.DEMO_ADMIN_PW }}
           VITE_DEMO_TEACHER_EMAIL: ${{ secrets.DEMO_TEACHER_EMAIL }}

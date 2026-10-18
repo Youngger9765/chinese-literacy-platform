@@ -293,6 +293,9 @@ export async function completeSelfPracticeSession(
       status: 'completed',
     }),
   });
+  // #3437: always drain the body. Over HTTP/3 Chromium keeps a response whose body
+  // is never read open indefinitely, so the report page never reached network-idle.
+  await res.text().catch(() => undefined);
   if (res.status === 401) {
     throw new SessionExpiredError('completeSelfPracticeSession: token expired');
   }
@@ -431,6 +434,8 @@ export interface StudentDashboardData {
   longest_streak: number;
   daily_activity: DailyActivity[];
   completed_story_slugs: string[];
+  /** #3515: titles for the same slugs (parent page shows 課名, not "20011"). */
+  completed_stories?: { slug: string; title: string }[];
 }
 
 export async function fetchStudentDashboard(
@@ -457,11 +462,24 @@ export interface StudentEnrolledClassroom {
   teacher_name: string;
   is_active: boolean;
   enrolled_at: string;
+  /** 這個班級是否開放真人 PK — issue #3586 §7.4, default false. AI PK
+   * (挑戰文學家) has no equivalent field: it is never gated by classroom. */
+  pk_human: boolean;
+  /** 這個班級是否開放跨班賽季 — issue #3607, default false (backward-compat:
+   * a classroom with real league history and no explicit key reports true). */
+  league: boolean;
+  /** 這個班級是否開放課堂搶答 — issue #3607, same default/backward-compat rule. */
+  live_quiz: boolean;
 }
 
 export interface StudentEnrolledClassroomsResponse {
   classrooms: StudentEnrolledClassroom[];
   total: number;
+  /** Issue #3602 B1 — the student's own profile grade, independent of any
+   * classroom. Used as a fallback when resolving AI PK's question scope
+   * (see pages/pk/resolvePkGrade.ts) so a classroom with no grade set (or
+   * no classroom at all) never has to block 挑戰文學家. */
+  student_grade: number | null;
 }
 
 export async function fetchMyEnrolledClassrooms(

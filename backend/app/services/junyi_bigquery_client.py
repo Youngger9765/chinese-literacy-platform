@@ -57,7 +57,8 @@ def teacher_user_id_key(junyi_identity_id: str) -> str:
 def student_identity_id_from_user_id_key(student_user_id: str) -> str | None:
     if not student_user_id or not student_user_id.startswith(JUNYI_USER_ID_KEY_PREFIX):
         return None
-    return student_user_id[len(JUNYI_USER_ID_KEY_PREFIX):]
+    suffix = student_user_id[len(JUNYI_USER_ID_KEY_PREFIX):]
+    return suffix or None
 
 
 class JunyiBigQueryError(Exception):
@@ -98,16 +99,17 @@ class FakeJunyiBigQueryClient:
             class_id = row.get("class_id")
             if class_id is None:
                 continue
+            has_student = row.get("student_user_id") is not None
             existing = summaries.get(class_id)
             if existing is None:
                 summaries[class_id] = JunyiClassSummaryRow(
                     junyi_class_id=class_id,
                     class_name=row.get("class_name"),
                     class_code=row.get("class_code"),
-                    student_count=1,
+                    student_count=1 if has_student else 0,
                 )
                 order.append(class_id)
-            else:
+            elif has_student:
                 existing.student_count += 1
         return [summaries[cid] for cid in order]
 
@@ -197,7 +199,11 @@ def _impersonated_credentials():
     return impersonated_credentials.Credentials(
         source_credentials=source_credentials,
         target_principal=settings.junyi_bigquery_service_account,
-        target_scopes=["https://www.googleapis.com/auth/bigquery.readonly"],
+        # Full bigquery scope, not bigquery.readonly: running a query creates a
+        # job (jobs.insert), which the readonly scope refuses with 403
+        # "insufficient authentication scopes" (#3380). Data access is still
+        # limited by the SA's IAM roles (jobUser here, dataViewer on the source).
+        target_scopes=["https://www.googleapis.com/auth/bigquery"],
         lifetime=300,
     )
 
@@ -225,7 +231,7 @@ class RealJunyiBigQueryClient:
                 "SELECT class_id, "
                 "ANY_VALUE(class_name) AS class_name, "
                 "ANY_VALUE(class_code) AS class_code, "
-                "COUNT(*) AS student_count "
+                "COUNT(DISTINCT student_user_id) AS student_count "
                 f"FROM `{self._JOINS_TABLE}` "
                 "WHERE teacher_user_id = @teacher_user_id_key "
                 "GROUP BY class_id"

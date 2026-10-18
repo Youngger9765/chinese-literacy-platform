@@ -43,6 +43,7 @@ class AuditAction(str, Enum):
     VIEW_SESSION = "view_session"
     EXPORT_REPORT = "export_report"
     DELETE_STUDENT = "delete_student"
+    RESET_STUDENT_PASSWORD = "reset_student_password"
 
 
 def audit_log(

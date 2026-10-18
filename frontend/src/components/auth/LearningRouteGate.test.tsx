@@ -45,6 +45,7 @@ function renderAt(path: string) {
           }
         />
         <Route path="/login" element={<div>LOGIN-PAGE</div>} />
+        <Route path="/change-password" element={<div>CHANGE-PASSWORD-PAGE</div>} />
       </Routes>
     </MemoryRouter>
   );
@@ -122,6 +123,18 @@ describe('LearningRouteGate', () => {
         needsTermsAcceptance: true,
       });
       renderAt('/learn/1/character-practice');
+      expect(screen.queryByText('PROTECTED-SHELL')).not.toBeInTheDocument();
+    });
+
+    it('#3412: a pending forced password change wins over the terms gate -- sent to /change-password, not /terms', () => {
+      mockAuth.mockReturnValue({
+        isAuthenticated: true,
+        isLoading: false,
+        needsTermsAcceptance: true,
+        mustChangePassword: true,
+      });
+      renderAt('/learn/1/character-practice');
+      expect(screen.getByText('CHANGE-PASSWORD-PAGE')).toBeInTheDocument();
       expect(screen.queryByText('PROTECTED-SHELL')).not.toBeInTheDocument();
     });
   });

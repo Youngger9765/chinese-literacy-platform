@@ -11,6 +11,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
+  LabelList,
 } from 'recharts';
 import { useAuth } from '../../contexts/AuthContext';
 import {
@@ -205,9 +206,10 @@ const ClassroomAnalytics: React.FC<ClassroomAnalyticsProps> = ({ classroomId }) 
             value={
               stats.avg_session_duration_minutes !== null
                 ? `${stats.avg_session_duration_minutes}`
-                : '-'
+                : '—'
             }
-            sub="分鐘"
+            sub={stats.avg_session_duration_minutes !== null ? '分鐘' : undefined}
+            note={stats.avg_session_duration_minutes === null ? '沒有記錄時長' : undefined}
           />
         </div>
       )}
@@ -215,7 +217,12 @@ const ClassroomAnalytics: React.FC<ClassroomAnalyticsProps> = ({ classroomId }) 
       {/* Time stats row */}
       {timeStats && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <StatCard label="總學習時數" value={`${timeStats.total_hours}`} sub="小時" />
+          <StatCard
+            label="總學習時數"
+            value={timeStats.total_hours !== null ? `${timeStats.total_hours}` : '—'}
+            sub={timeStats.total_hours !== null ? '小時' : undefined}
+            note={timeStats.total_hours === null ? '沒有記錄時長' : undefined}
+          />
           <StatCard label="學習天數" value={`${timeStats.study_days}`} sub="天" />
           <StatCard label="本週練習" value={`${timeStats.sessions_this_week}`} sub="次" />
           <StatCard label="上週練習" value={`${timeStats.sessions_last_week}`} sub="次" />
@@ -272,7 +279,7 @@ const ClassroomAnalytics: React.FC<ClassroomAnalyticsProps> = ({ classroomId }) 
           常見錯字排行（前 10）
         </h3>
         {errorVocab.length > 0 ? (
-          <ResponsiveContainer width="100%" height={280}>
+          <ResponsiveContainer width="100%" height={Math.max(220, Math.min(errorVocab.length, 10) * 36)}>
             <BarChart
               data={errorVocab.slice(0, 10)}
               layout="vertical"
@@ -285,21 +292,24 @@ const ClassroomAnalytics: React.FC<ClassroomAnalyticsProps> = ({ classroomId }) 
                 dataKey="character"
                 tick={{ fontSize: 14 }}
                 width={40}
+                interval={0}
               />
               <Tooltip
-                formatter={(value: number, name: string) => {
-                  if (name === 'count') return [value, '錯誤次數'];
-                  if (name === 'student_count') return [value, '學生人數'];
-                  return [value, name];
+                content={({ active, payload }) => {
+                  const item = payload?.[0]?.payload as ErrorVocabItem | undefined;
+                  if (!active || !item) return null;
+                  return (
+                    <div className="rounded border border-gray-200 bg-white px-3 py-2 text-xs shadow-sm">
+                      <p>{item.character}</p>
+                      <p>錯誤次數：{item.count}</p>
+                      <p>學生人數：{item.student_count}</p>
+                    </div>
+                  );
                 }}
               />
-              <Bar dataKey="count" fill="#ef4444" name="count" radius={[0, 4, 4, 0]} />
-              <Bar
-                dataKey="student_count"
-                fill="#f59e0b"
-                name="student_count"
-                radius={[0, 4, 4, 0]}
-              />
+              <Bar dataKey="count" fill="#ef4444" name="count" radius={[0, 4, 4, 0]}>
+                <LabelList dataKey="count" position="right" style={{ fontSize: 12 }} />
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         ) : (
@@ -316,10 +326,13 @@ function StatCard({
   label,
   value,
   sub,
+  note,
 }: {
   label: string;
   value: string;
   sub?: string;
+  /** Why the value is missing, in small text under it (a long reason in the big number wrapped badly). */
+  note?: string;
 }) {
   return (
     <div className="bg-gray-50 rounded-lg p-4 text-center">
@@ -328,6 +341,7 @@ function StatCard({
         {value}
         {sub && <span className="text-xs font-normal text-gray-500 ml-0.5">{sub}</span>}
       </p>
+      {note && <p className="text-xs text-gray-500 mt-1">{note}</p>}
     </div>
   );
 }

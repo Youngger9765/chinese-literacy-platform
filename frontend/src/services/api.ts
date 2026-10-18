@@ -30,6 +30,7 @@ import type {
 import { camelizeKeys } from '../schema/camelize';
 import { LessonSchema } from '../schema/lessonContent';
 import { API_BASE } from './apiConfig';
+import { authToken } from '../utils/storage';
 import { ASSET_BASE } from '../config/assetBase';
 import { stepSequenceFromManifest } from '../config/stepConfig';
 import type { ManifestSection } from '../config/stepConfig';
@@ -114,7 +115,8 @@ interface ApiStoryDetail extends ApiStoryListItem {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fill_in_blank: Array<Record<string, any>> | null;
   multiple_choice: Array<{ question: string; options: string[]; answer: string | null;
-    explanation: string | null; material_table?: Record<string, unknown> | null }> | null;
+    explanation: string | null; material_table?: Record<string, unknown> | null;
+    option_images?: (string | null)[] | null }> | null;
   vocab_bank: Record<string, string> | null;
   knowledge_video_url: string | null;
   // Full video list (#1683). null for legacy lessons without video_links field.
@@ -298,7 +300,10 @@ function apiDetailToStory(detail: ApiStoryDetail): Story {
             accepted_answers?: string[];
           }>
       : undefined,
-    multipleChoice: detail.multiple_choice ?? undefined,
+    multipleChoice: detail.multiple_choice?.map((q) => ({
+      ...q,
+      option_images: q.option_images?.map((img) => (img ? resolveAssetUrl(img) : null)) ?? q.option_images,
+    })) ?? undefined,
     vocabBank: detail.vocab_bank ?? undefined,
     knowledgeVideoUrl: detail.knowledge_video_url ?? undefined,
     videoLinks: detail.video_links ?? undefined,
@@ -392,7 +397,9 @@ export async function fetchStory(id: string): Promise<Story> {
   }
 
   const request = (async () => {
-    const res = await fetch(`${API_BASE}/api/stories/${id}`);
+    // #3555: the detail only carries multiple-choice answers for a logged-in
+    // caller, and the student renderers grade locally from them.
+    const res = await fetch(`${API_BASE}/api/stories/${id}`, { headers: authToken.authHeader() });
     if (!res.ok) throw new Error(`fetchStory failed: ${res.status}`);
     const data: ApiStoryDetail = await res.json();
     return apiDetailToStory(data);

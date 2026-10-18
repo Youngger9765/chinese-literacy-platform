@@ -1,15 +1,25 @@
-from fastapi import Depends, HTTPException, Header, status
+from fastapi import Depends, HTTPException, Header, Request, status
 from fastapi.security import OAuth2PasswordBearer
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from ..database import get_db
 from ..models.user import User, UserRole, Role
 from .jwt import decode_token
+from .password_policy import compute_must_change_password
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login", auto_error=False)
 
+# #3438: endpoints a student with a pending forced password change may still
+# reach -- GET /users/me (so the frontend can render gate state) and the
+# change-password endpoint itself (the only escape hatch). Everything else
+# behind get_current_user is blocked with 403 while this is true.
+_PASSWORD_CHANGE_EXEMPT: set[tuple[str, str]] = {
+    ("POST", "/api/auth/change-password"),
+    ("GET", "/api/users/me"),
+}
 
-async def get_optional_user(
+
+def get_optional_user(
     authorization: str | None = Header(None),
     db: Session = Depends(get_db),
 ) -> User | None:
@@ -30,7 +40,8 @@ async def get_optional_user(
         return None
 
 
-async def get_current_user(
+def get_current_user(
+    request: Request,
     token: str | None = Depends(oauth2_scheme),
     db: Session = Depends(get_db),
 ) -> User:
@@ -51,12 +62,24 @@ async def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    user = db.query(User).filter(User.id == user_id, User.is_active == True).first()
+    user = (
+        db.query(User)
+        .options(joinedload(User.student_profile))
+        .filter(User.id == user_id, User.is_active == True)
+        .first()
+    )
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User not found or inactive",
         )
+    if compute_must_change_password(user):
+        if (request.method, request.url.path) not in _PASSWORD_CHANGE_EXEMPT:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="PASSWORD_CHANGE_REQUIRED",
+            )
+
     return user
 
 
@@ -83,7 +106,7 @@ def require_role(*role_names: str, scope_type: str | None = None, scope_id: str 
                      dependencies=[Depends(require_role("principal", "director", scope_type="school"))])
         def manage_school(school_id: int): ...
     """
-    async def _check_role(
+    def _check_role(
         current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db),
     ) -> User:

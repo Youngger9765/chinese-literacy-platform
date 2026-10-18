@@ -35,6 +35,8 @@ from app.models import Base
 from app.models.user import Role, UserRole
 from app.models.school import School
 
+from _school_student import grant_school_student_role
+
 
 # ---------------------------------------------------------------------------
 # Test database setup (SQLite in-memory with StaticPool)
@@ -173,6 +175,13 @@ def _register_user(client, suffix: str) -> dict:
     return {"email": email, "name": name, "token": token, "user_id": user_id}
 
 
+def _register_student(client, suffix: str) -> dict:
+    """Register a user who is a student of the test school (#3534: only those can be enrolled)."""
+    user = _register_user(client, suffix)
+    grant_school_student_role(TestingSessionLocal, user["user_id"], school_id=_test_school_id)
+    return user
+
+
 def auth_header(token: str) -> dict:
     return {"Authorization": f"Bearer {token}"}
 
@@ -189,12 +198,12 @@ def other_teacher(client):
 
 @pytest.fixture(scope="module")
 def student1(client):
-    return _register_user(client, "student1")
+    return _register_student(client, "student1")
 
 
 @pytest.fixture(scope="module")
 def student2(client):
-    return _register_user(client, "student2")
+    return _register_student(client, "student2")
 
 
 # ===========================================================================
@@ -326,6 +335,47 @@ class TestListClassrooms:
         assert "total" in data
         assert isinstance(data["items"], list)
         assert isinstance(data["total"], int)
+
+    def test_list_reflects_feature_settings_not_just_always_false(self, client, school_id):
+        """Regression lock (issue #3607 code review finding): the inline
+        ClassroomResponse construction in list_my_classrooms used to omit
+        pk_human/league/live_quiz entirely, so the LIST endpoint always
+        reported them False even for a classroom with the keys explicitly
+        turned on via PATCH /classrooms/{id}/pk-settings — only the
+        single-classroom detail endpoint (classroom_to_response/
+        classroom_to_detail_response) read the real value. This pins the
+        list endpoint to the real per-classroom state too."""
+        owner = _register_user(client, "feature_list_owner")
+        created = client.post(
+            "/api/classrooms",
+            json={"name": "Feature List Test", "school_id": school_id},
+            headers=auth_header(owner["token"]),
+        )
+        assert created.status_code == 201, created.text
+        room_id = created.json()["id"]
+
+        # Default: a brand-new classroom reports all three as False on the
+        # LIST endpoint, not just on the detail endpoint.
+        before = client.get("/api/classrooms", headers=auth_header(owner["token"]))
+        assert before.status_code == 200, before.text
+        before_item = next(i for i in before.json()["items"] if i["id"] == room_id)
+        assert before_item["pk_human"] is False
+        assert before_item["league"] is False
+        assert before_item["live_quiz"] is False
+
+        patched = client.patch(
+            f"/api/classrooms/{room_id}/pk-settings",
+            json={"pk_human": True, "league": True},
+            headers=auth_header(owner["token"]),
+        )
+        assert patched.status_code == 200, patched.text
+
+        after = client.get("/api/classrooms", headers=auth_header(owner["token"]))
+        assert after.status_code == 200, after.text
+        after_item = next(i for i in after.json()["items"] if i["id"] == room_id)
+        assert after_item["pk_human"] is True
+        assert after_item["league"] is True
+        assert after_item["live_quiz"] is False  # untouched key stays at its default
 
 
 # ===========================================================================
@@ -514,7 +564,7 @@ class TestAddStudent:
         assignment_id = assignment_resp.json()["id"]
         assert assignment_resp.json()["submission_count"] == 0
 
-        late_student = _register_user(client, "late_add_backfill")
+        late_student = _register_student(client, "late_add_backfill")
         add_resp = client.post(
             f"/api/classrooms/{classroom_id}/students",
             json={"student_id": late_student["user_id"]},
@@ -577,7 +627,7 @@ class TestAddStudent:
             headers=auth_header(teacher["token"]),
         )
         assert resp.status_code == 404
-        assert resp.json()["detail"] == "Student user not found"
+        assert resp.json()["detail"] == "找不到這所學校的這位學生"
 
     def test_add_student_403_for_other_teacher(self, client, teacher, other_teacher, student1, school_id):
         create_resp = client.post(
@@ -672,6 +722,57 @@ class TestRemoveStudent:
             headers=auth_header(other_teacher["token"]),
         )
         assert resp.status_code == 403
+
+    def test_remove_student_requires_auth(self, client, teacher, student1, school_id):
+        create_resp = client.post(
+            "/api/classrooms",
+            json={"name": "Remove Auth Test", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        )
+        classroom_id = create_resp.json()["id"]
+        client.post(
+            f"/api/classrooms/{classroom_id}/students",
+            json={"student_id": student1["user_id"]},
+            headers=auth_header(teacher["token"]),
+        )
+
+        resp = client.delete(f"/api/classrooms/{classroom_id}/students/{student1['user_id']}")
+        assert resp.status_code == 401
+
+    def test_remove_student_student_role_forbidden(
+        self, client, teacher, student1, student2, school_id
+    ):
+        """A student (not a teacher/admin at all) must not be able to remove a
+        classmate — distinct from the other-teacher case above: this caller
+        owns no classroom anywhere, not just a different one."""
+        create_resp = client.post(
+            "/api/classrooms",
+            json={"name": "Remove Student Role Test", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        )
+        classroom_id = create_resp.json()["id"]
+        client.post(
+            f"/api/classrooms/{classroom_id}/students",
+            json={"student_id": student1["user_id"]},
+            headers=auth_header(teacher["token"]),
+        )
+        client.post(
+            f"/api/classrooms/{classroom_id}/students",
+            json={"student_id": student2["user_id"]},
+            headers=auth_header(teacher["token"]),
+        )
+
+        resp = client.delete(
+            f"/api/classrooms/{classroom_id}/students/{student1['user_id']}",
+            headers=auth_header(student2["token"]),
+        )
+        assert resp.status_code == 403
+        # Positive control: still enrolled after the rejected attempt.
+        list_resp = client.get(
+            f"/api/classrooms/{classroom_id}/students",
+            headers=auth_header(teacher["token"]),
+        )
+        assert student1["user_id"] in [s["id"] for s in list_resp.json()]
 
 
 # ===========================================================================
@@ -768,8 +869,8 @@ class TestFullClassroomFlow:
         teacher = _register_user(client, "flow_teacher")
 
         # Register two fresh students
-        stu1 = _register_user(client, "flow_stu1")
-        stu2 = _register_user(client, "flow_stu2")
+        stu1 = _register_student(client, "flow_stu1")
+        stu2 = _register_student(client, "flow_stu2")
 
         headers = auth_header(teacher["token"])
 
@@ -889,7 +990,7 @@ class TestMyEnrollments:
     def test_student_enrolled_in_one_classroom(self, client, school_id):
         """Student enrolled in exactly 1 classroom: list returns that classroom with teacher info."""
         teacher = _register_user(client, "enroll_teacher_single")
-        student = _register_user(client, "enroll_student_single")
+        student = _register_student(client, "enroll_student_single")
 
         # Teacher creates classroom
         create_resp = client.post(
@@ -931,7 +1032,7 @@ class TestMyEnrollments:
         """Student enrolled in 2 classrooms: list returns both."""
         teacher_a = _register_user(client, "multi_teacher_a")
         teacher_b = _register_user(client, "multi_teacher_b")
-        student = _register_user(client, "multi_student")
+        student = _register_student(client, "multi_student")
 
         # Create two classrooms
         class_a_id = client.post(
@@ -974,8 +1075,8 @@ class TestMyEnrollments:
     def test_enrollments_scoped_to_current_student(self, client, school_id):
         """A student does NOT see classrooms belonging to other students."""
         teacher = _register_user(client, "scope_teacher")
-        student_a = _register_user(client, "scope_student_a")
-        student_b = _register_user(client, "scope_student_b")
+        student_a = _register_student(client, "scope_student_a")
+        student_b = _register_student(client, "scope_student_b")
 
         # Create classroom, enroll only student_a
         classroom_id = client.post(
@@ -1010,7 +1111,7 @@ class TestMyEnrollments:
     def test_inactive_classroom_still_returned(self, client, school_id):
         """Inactive classrooms are still included — frontend handles is_active filtering."""
         teacher = _register_user(client, "inactive_teacher")
-        student = _register_user(client, "inactive_student")
+        student = _register_student(client, "inactive_student")
 
         classroom_id = client.post(
             "/api/classrooms",
@@ -1039,6 +1140,63 @@ class TestMyEnrollments:
         data = resp.json()
         assert data["total"] == 1
         assert data["classrooms"][0]["is_active"] is False
+
+    def test_student_grade_reflects_student_profile_not_any_classroom(self, client, school_id):
+        """Issue #3602 B1: the response must carry the student's OWN
+        ``StudentProfile.grade`` independent of classroom data — this is
+        what lets AI PK resolve a grade even when a student's classroom has
+        no grade set. See frontend/src/pages/pk/resolvePkGrade.ts."""
+        teacher = _register_user(client, "grade_teacher")
+        student = _register_student(client, "grade_student")
+
+        # The student's enrolled classroom deliberately has NO grade — the
+        # response's top-level student_grade must still come through from
+        # the user's own profile, not be null just because this classroom
+        # lacks one.
+        classroom_id = client.post(
+            "/api/classrooms",
+            json={"name": "Gradeless Class", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        ).json()["id"]
+        client.post(
+            f"/api/classrooms/{classroom_id}/students",
+            json={"student_id": student["user_id"]},
+            headers=auth_header(teacher["token"]),
+        )
+
+        db = TestingSessionLocal()
+        try:
+            from app.models.user import StudentProfile
+
+            db.add(
+                StudentProfile(
+                    user_id=student["user_id"],
+                    school_id=school_id,
+                    grade=5,
+                    password_changed=True,
+                )
+            )
+            db.commit()
+        finally:
+            db.close()
+
+        resp = client.get(
+            "/api/classrooms/my-enrollments",
+            headers=auth_header(student["token"]),
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["student_grade"] == 5
+        assert data["classrooms"][0]["grade"] is None  # the classroom itself still has none
+
+    def test_student_grade_is_null_when_profile_has_no_grade(self, client, school_id):
+        student = _register_student(client, "no_grade_student")
+        resp = client.get(
+            "/api/classrooms/my-enrollments",
+            headers=auth_header(student["token"]),
+        )
+        assert resp.status_code == 200
+        assert resp.json()["student_grade"] is None
 
 
 # ===========================================================================

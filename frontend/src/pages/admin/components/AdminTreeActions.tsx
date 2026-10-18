@@ -103,6 +103,21 @@ const AdminTreeActions: React.FC<AdminTreeActionsProps> = ({ selectedNode, onSel
         </span>
       </button>
 
+      {/* Story Pack Studio（劇情包管理）*/}
+      <button
+        onClick={() => onSelectNode({ type: 'story_pack_studio', id: 'story_pack_studio' })}
+        className={`flex items-center gap-2 w-full px-3 py-2.5 text-left transition-colors cursor-pointer ${
+          isSelected(selectedNode, 'story_pack_studio', 'story_pack_studio')
+            ? 'bg-amber-50 text-amber-700'
+            : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
+        }`}
+      >
+        <span className={`text-sm shrink-0 w-4 text-center ${isSelected(selectedNode, 'story_pack_studio', 'story_pack_studio') ? 'text-amber-500' : ''}`} aria-hidden="true">🏆</span>
+        <span className={`text-sm ${isSelected(selectedNode, 'story_pack_studio', 'story_pack_studio') ? 'font-semibold' : ''}`}>
+          劇情包管理
+        </span>
+      </button>
+
       {/* 朗讀測試集 — 外部集成板（新分頁）。同源開啟，admin 的 token 讓 recordings 直接載入 (#2448) */}
       <a
         href={READING_TESTSET_URL}

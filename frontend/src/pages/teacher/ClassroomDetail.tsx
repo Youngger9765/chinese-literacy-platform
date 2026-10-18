@@ -20,34 +20,55 @@ import {
   removeStudent,
   exportClassroomReport,
   regenerateClassroomCode,
+  deleteClassroom,
   ClassroomDetailResponse,
   StudentInClassroomResponse,
   ClassroomApiError,
+  BatchCreateResult,
 } from '../../services/classroomApi';
 import ClassroomHeaderCard from './ClassroomHeaderCard';
-import ClassroomTabs, { TabKey, resolveTabKey } from './ClassroomTabs';
+import ClassroomPkSettingsPanel from './ClassroomPkSettingsPanel';
+import ClassroomTabs, { TabKey, resolveInitialView, resolveTabKey } from './ClassroomTabs';
 import StudentListTab from './StudentListTab';
 import ClassSwitcher from './panel/ClassSwitcher';
+import ClassListSidebar from './panel/ClassListSidebar';
 
 interface ClassroomDetailProps {
   classroomId: number;
   onBack: () => void;
+  /**
+   * #3411: when this page is reached right after creating the classroom,
+   * the caller already has the full response from the POST -- seed state
+   * with it so the page has something to render on its very first paint
+   * instead of depending entirely on a fresh GET /api/classrooms/:id.
+   */
+  initialClassroom?: ClassroomDetailResponse;
+  /**
+   * Students created together with the class in the 建立班級 dialog. Their
+   * passwords are only ever returned once, so the class page opens straight on
+   * the result (and its 列印帳密卡 button) instead of losing them.
+   */
+  initialAddResult?: BatchCreateResult;
 }
 
-const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }) => {
+const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack, initialClassroom, initialAddResult }) => {
   const { token, user } = useAuth();
-  const [classroom, setClassroom] = useState<ClassroomDetailResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [classroom, setClassroom] = useState<ClassroomDetailResponse | null>(initialClassroom ?? null);
+  const [isLoading, setIsLoading] = useState(!initialClassroom);
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = resolveTabKey(searchParams.get('tab'));
   const assignmentParam = searchParams.get('assignment');
   const selectedAssignmentId = assignmentParam ? Number(assignmentParam) || null : null;
-  // Collapsed by default so the class page opens on content, not the roster (#3376).
-  const [isRosterOpen, setIsRosterOpen] = useState(false);
+  // Junyi-parity: the roster table is always shown; adding students opens a modal.
+  const [isAddStudentsOpen, setIsAddStudentsOpen] = useState(Boolean(initialAddResult));
   const studentParam = searchParams.get('student');
   const selectedStudentId = studentParam ? Number(studentParam) || null : null;
+  const rawTab = searchParams.get('tab');
+  const viewParam = searchParams.get('view');
+  const validViews = new Set(['today', 'students', 'at-risk', 'error-heatmap', 'analytics', 'learning']);
+  const initialView = (viewParam && validViews.has(viewParam) ? viewParam : null) ?? resolveInitialView(rawTab);
 
   const updateParams = (patch: Record<string, string | null>) => {
     const next = new URLSearchParams(searchParams);
@@ -61,12 +82,14 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
     updateParams({
       tab,
       assignment: tab === 'assignments' ? searchParams.get('assignment') : null,
-      student: tab === 'students' ? searchParams.get('student') : null,
+      student: tab === 'data' ? searchParams.get('student') : null,
+      view: tab === 'data' ? searchParams.get('view') : null,
     });
   const setSelectedStudent = (id: number | null) =>
-    updateParams({ tab: 'students', assignment: null, student: id === null ? null : String(id) });
+    updateParams({ tab: 'data', assignment: null, student: id === null ? null : String(id) });
   const setSelectedAssignment = (id: number | null) =>
-    updateParams({ tab: 'assignments', assignment: id === null ? null : String(id) });
+    updateParams({ tab: 'assignments', assignment: id === null ? null : String(id), view: null });
+  const setSelectedView = (view: string) => updateParams({ tab: 'data', view });
   const switchClassroom = (id: number) => navigate(`/teacher/classroom/${id}?tab=${activeTab}`);
 
   // Edit state
@@ -95,6 +118,10 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
   const [showRegenConfirm, setShowRegenConfirm] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
 
+  // Delete classroom state
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
   const loadClassroom = useCallback(async () => {
     if (!token) return;
     setIsLoading(true);
@@ -120,7 +147,7 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
   // An empty class opens on "add students" — the first thing to do after creating one (#3378).
   const isEmptyClass = classroom !== null && classroom.students.length === 0;
   useEffect(() => {
-    if (isEmptyClass) setIsRosterOpen(true);
+    if (isEmptyClass) setIsAddStudentsOpen(true);
   }, [isEmptyClass]);
 
   const startEditing = () => {
@@ -262,6 +289,24 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
     }
   };
 
+  const handleDeleteClassroom = async () => {
+    if (!token || !classroom) return;
+    setIsDeleting(true);
+    setShowDeleteConfirm(false);
+    try {
+      await deleteClassroom(token, classroom.id);
+      onBack();
+    } catch (err) {
+      if (err instanceof ClassroomApiError) {
+        setError(err.message);
+      } else {
+        setError('解散班級失敗');
+      }
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const formatDate = (dateStr: string) =>
     new Date(dateStr).toLocaleDateString('zh-TW', { year: 'numeric', month: 'long', day: 'numeric' });
 
@@ -316,92 +361,123 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
 
   if (!classroom) return null;
 
-  return (
-    <div className="flex-1 overflow-y-auto p-6 sm:p-8">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <BackButton />
-          <ClassSwitcher currentId={classroomId} onSwitch={switchClassroom} />
-        </div>
+  const settingsContent = (
+    <>
+      <ClassroomHeaderCard
+        classroom={classroom}
+        isEditing={isEditing}
+        editName={editName}
+        editGrade={editGrade}
+        isSaving={isSaving}
+        editError={editError}
+        onStartEditing={startEditing}
+        onCancelEditing={() => setIsEditing(false)}
+        onEditNameChange={setEditName}
+        onEditGradeChange={setEditGrade}
+        onSaveEdit={handleSaveEdit}
+        isTogglingActive={isTogglingActive}
+        onToggleActive={handleToggleActive}
+        isExporting={isExporting}
+        onExportCsv={handleExportCsv}
+        isDeleting={isDeleting}
+        showDeleteConfirm={showDeleteConfirm}
+        onShowDeleteConfirm={() => setShowDeleteConfirm(true)}
+        onHideDeleteConfirm={() => setShowDeleteConfirm(false)}
+        onDeleteClassroom={handleDeleteClassroom}
+        isCopied={isCopied}
+        showRegenConfirm={showRegenConfirm}
+        isRegenerating={isRegenerating}
+        onCopyJoinCode={handleCopyJoinCode}
+        onShowRegenConfirm={() => setShowRegenConfirm(true)}
+        onHideRegenConfirm={() => setShowRegenConfirm(false)}
+        onRegenerateCode={handleRegenerateCode}
+        onAddStudents={() => setIsAddStudentsOpen(true)}
+        formatDate={formatDate}
+      />
 
-        {/* Inline error */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
-            {error}
-            <button onClick={() => setError('')} className="ml-2 underline cursor-pointer">關閉</button>
-          </div>
-        )}
-
-        <ClassroomHeaderCard
-          classroom={classroom}
-          isEditing={isEditing}
-          editName={editName}
-          editGrade={editGrade}
-          isSaving={isSaving}
-          editError={editError}
-          onStartEditing={startEditing}
-          onCancelEditing={() => setIsEditing(false)}
-          onEditNameChange={setEditName}
-          onEditGradeChange={setEditGrade}
-          onSaveEdit={handleSaveEdit}
-          isTogglingActive={isTogglingActive}
-          onToggleActive={handleToggleActive}
-          isExporting={isExporting}
-          onExportCsv={handleExportCsv}
-          isCopied={isCopied}
-          showRegenConfirm={showRegenConfirm}
-          isRegenerating={isRegenerating}
-          onCopyJoinCode={handleCopyJoinCode}
-          onShowRegenConfirm={() => setShowRegenConfirm(true)}
-          onHideRegenConfirm={() => setShowRegenConfirm(false)}
-          onRegenerateCode={handleRegenerateCode}
-          formatDate={formatDate}
+      {token && (
+        <ClassroomPkSettingsPanel
+          token={token}
+          classroomId={classroom.id}
+          pkHuman={classroom.pk_human}
+          league={classroom.league}
+          liveQuiz={classroom.live_quiz}
+          onChanged={(next) =>
+            setClassroom((prev) => (prev ? { ...prev, ...next } : prev))
+          }
         />
+      )}
 
-        <section className="bg-white rounded-2xl shadow-card" aria-label="學生名單">
-          <button
-            type="button"
-            onClick={() => setIsRosterOpen((v) => !v)}
-            aria-expanded={isRosterOpen}
-            className="w-full flex items-center justify-between px-6 py-4 text-left cursor-pointer"
-          >
-            <span className="text-lg font-semibold text-gray-900">
-              學生名單（{classroom.students.length} 人）
-            </span>
-            <span className="text-sm text-gray-500">{isRosterOpen ? '收合 ▲' : '展開 ▼'}</span>
-          </button>
-          {isRosterOpen && (
-            <div className="border-t border-gray-100">
-              <StudentListTab
-                classroom={classroom}
-                token={token}
-                studentIdInput={studentIdInput}
-                setStudentIdInput={setStudentIdInput}
-                isAddingStudent={isAddingStudent}
-                addStudentError={addStudentError}
-                setAddStudentError={setAddStudentError}
-                onAddStudent={handleAddStudent}
-                removingStudentId={removingStudentId}
-                onRemoveStudent={handleRemoveStudent}
-                setRemovingStudentId={setRemovingStudentId}
-                formatDate={formatDate}
-                onStudentsImported={loadClassroom}
-              />
-            </div>
-          )}
-        </section>
+      <section className="rounded-xl border border-gray-200 overflow-hidden" aria-label="學生名單">
+            <StudentListTab
+              isAddStudentsOpen={isAddStudentsOpen}
+              initialAddResult={initialAddResult}
+              onCloseAddStudents={() => setIsAddStudentsOpen(false)}
+              onOpenAddStudents={() => setIsAddStudentsOpen(true)}
+              classroom={classroom}
+              token={token}
+              studentIdInput={studentIdInput}
+              setStudentIdInput={setStudentIdInput}
+              isAddingStudent={isAddingStudent}
+              addStudentError={addStudentError}
+              setAddStudentError={setAddStudentError}
+              onAddStudent={handleAddStudent}
+              removingStudentId={removingStudentId}
+              onRemoveStudent={handleRemoveStudent}
+              setRemovingStudentId={setRemovingStudentId}
+              formatDate={formatDate}
+              onStudentsImported={loadClassroom}
+            />
+      </section>
 
-        <ClassroomTabs
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          classroomId={classroomId}
-          ownerId={classroom.teacher_id}
-          selectedAssignmentId={selectedAssignmentId}
-          onSelectAssignment={setSelectedAssignment}
-          selectedStudentId={selectedStudentId}
-          onSelectStudent={setSelectedStudent}
-        />
+      <div className="flex justify-end">
+        <button
+          type="button"
+          onClick={() => setActiveTab('assignments')}
+          className="h-11 px-6 rounded-lg bg-accent hover:bg-accent-hover text-white text-base font-medium transition-colors cursor-pointer"
+        >
+          指派任務
+        </button>
       </div>
+    </>
+  );
+
+  return (
+    <div className="flex-1 overflow-y-auto">
+      {/*
+       * Junyi-parity layout: full-width tab bar on top, then the persistent
+       * 「我的班級」 column (>= xl, 1280px — below that the app's own left nav
+       * plus this column left too little room, see #3424) and the tab content
+       * filling the rest. Narrower screens get the ClassSwitcher dropdown.
+       */}
+      <ClassroomTabs
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        classroomId={classroomId}
+        ownerId={classroom.teacher_id}
+        selectedAssignmentId={selectedAssignmentId}
+        onSelectAssignment={setSelectedAssignment}
+        selectedStudentId={selectedStudentId}
+        onSelectStudent={setSelectedStudent}
+        initialView={initialView}
+        onViewChange={setSelectedView}
+        settingsContent={settingsContent}
+        sidebar={<ClassListSidebar currentId={classroomId} onSwitch={switchClassroom} />}
+        topSlot={
+          <>
+            <div className="flex flex-wrap items-center justify-between gap-3 xl:hidden">
+              <BackButton />
+              <ClassSwitcher currentId={classroomId} onSwitch={switchClassroom} />
+            </div>
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
+                {error}
+                <button onClick={() => setError('')} className="ml-2 underline cursor-pointer">關閉</button>
+              </div>
+            )}
+          </>
+        }
+      />
     </div>
   );
 };
