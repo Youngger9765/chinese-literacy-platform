@@ -323,10 +323,18 @@ def join_game(db: Session, code: str, user: User) -> LiveQuizPlayer:
     if len(game.players) >= MAX_PLAYERS_PER_GAME:
         raise HTTPException(status_code=409, detail="This game is full")
 
+    # #3630 security review: a player with no profile `name` previously fell
+    # back to `user.email` as the displayed name, which is then shown on the
+    # leaderboard and the (projected, product-launch) podium — leaking a
+    # student's email address to the whole class/room. Fall back to a
+    # non-PII placeholder instead: "學生" + this join's 1-indexed position in
+    # the game (computed from the already-loaded `game.players` list above,
+    # before this player is added), e.g. "學生1", "學生2". Never user.email.
+    anonymous_display_name = f"學生{len(game.players) + 1}"
     player = LiveQuizPlayer(
         game_id=game.id,
         user_id=user.id,
-        display_name=user.name or user.email,
+        display_name=user.name or anonymous_display_name,
         joined_at_round_index=game.current_round_index,
     )
     db.add(player)

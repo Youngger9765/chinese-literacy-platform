@@ -19,7 +19,7 @@ from sqlalchemy.pool import StaticPool
 from app.main import app
 from app.database import get_db
 from app.models import Base
-from app.models.user import Role, UserRole
+from app.models.user import Role, User, UserRole
 from app.models.school import School
 from app.services.live_quiz import engine as live_quiz_engine
 
@@ -291,6 +291,49 @@ class TestJoinAndRoster:
         resp = client.post(f"/api/live-quiz/games/{game['code']}/join", headers=auth_header(student1["token"]))
         assert resp.status_code == 201
         assert resp.json()["display_name"] == student1["name"]
+
+    def test_nameless_player_never_shows_email_anywhere(self, client, teacher, student1):
+        """#3630 security review (Young): display_name used to fall back to
+        user.email when the profile had no name — leaking the student's
+        email on the host's screen, the leaderboard, and the projected
+        podium. A nameless player must get a non-PII placeholder instead,
+        and that email must never surface on ANY of the three surfaces a
+        teacher/projector can see: the join response itself, the live
+        /state leaderboard, and the post-game /results ranking+players.
+        """
+        db = TestingSessionLocal()
+        try:
+            user = db.get(User, student1["user_id"])
+            user.name = ""  # falsy, like a never-completed profile — NOT NULL at the DB level
+            db.commit()
+        finally:
+            db.close()
+
+        game = _create_game(client, teacher, lesson_uids=[LESSON_A])
+
+        join_resp = client.post(f"/api/live-quiz/games/{game['code']}/join", headers=auth_header(student1["token"]))
+        assert join_resp.status_code == 201
+        joined_name = join_resp.json()["display_name"]
+        assert student1["email"] not in joined_name
+        assert "@" not in joined_name
+        assert joined_name.startswith("學生")
+
+        client.post(f"/api/live-quiz/games/{game['code']}/start", headers=auth_header(teacher["token"]))
+        state = client.get(
+            f"/api/live-quiz/games/{game['code']}/state", headers=auth_header(teacher["token"])
+        ).json()
+        state_names = [p["display_name"] for p in state["players"]]
+        assert all(student1["email"] not in n and "@" not in n for n in state_names)
+        assert joined_name in state_names
+
+        client.post(f"/api/live-quiz/games/{game['code']}/end", headers=auth_header(teacher["token"]))
+        results = client.get(
+            f"/api/live-quiz/games/{game['code']}/results", headers=auth_header(teacher["token"])
+        ).json()
+        ranking_names = [p["display_name"] for p in results["ranking"]]
+        players_names = [p["display_name"] for p in results["players"]]
+        assert all(student1["email"] not in n and "@" not in n for n in ranking_names)
+        assert all(student1["email"] not in n and "@" not in n for n in players_names)
 
     def test_joining_twice_is_idempotent(self, client, teacher, student1):
         game = _create_game(client, teacher)

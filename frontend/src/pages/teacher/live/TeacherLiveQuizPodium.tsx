@@ -1,18 +1,18 @@
 /**
- * TeacherLiveQuizPodium — 結束畫面：頒獎台（前三名，投影不顯示分數）＋
+ * TeacherLiveQuizPodium — 結束畫面：高質感頒獎台（#3630，2026-10-18 規格更正：
+ * 前三名的台座上「會」顯示分數，跟名字一起出現 — 不是原先規劃的「投影不顯示分數」）＋
  * 每題答對率（老師查看，不投影也沒關係 — 這是老師自己回顧用）.
  */
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getLiveQuizResults, type LiveQuizResults, type LiveQuizState } from '../../../services/liveQuizApi';
+import PodiumCeremony from '../../../components/podium/PodiumCeremony';
 
 interface Props {
   state: LiveQuizState;
   token: string;
   code: string;
 }
-
-const MEDALS = ['🥇', '🥈', '🥉'];
 
 const TeacherLiveQuizPodium: React.FC<Props> = ({ state, token, code }) => {
   const [results, setResults] = useState<LiveQuizResults | null>(null);
@@ -33,15 +33,7 @@ const TeacherLiveQuizPodium: React.FC<Props> = ({ state, token, code }) => {
         {state.ended_by_host ? '老師提前結束了這場課堂搶答' : '課堂搶答結束！'}
       </h1>
 
-      <div className="mb-10 flex items-end justify-center gap-6">
-        {top3.map((e, i) => (
-          <div key={e.player_id} className="flex flex-col items-center">
-            <span className="text-5xl" aria-hidden="true">{MEDALS[i]}</span>
-            <span className="mt-2 text-lg font-semibold text-on-surface">{e.display_name}</span>
-          </div>
-        ))}
-        {top3.length === 0 && <p className="text-on-surface-variant">沒有玩家完成這場搶答</p>}
-      </div>
+      <PodiumCeremony topThree={top3} />
 
       {results && (
         <section className="mb-10">
