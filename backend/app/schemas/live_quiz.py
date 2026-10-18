@@ -10,6 +10,8 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field, field_validator
 
+from ..services.live_quiz import reading_pace
+
 ALLOWED_SECONDS = (20, 30, 45, 60)
 ALLOWED_QUESTION_COUNT_MODES = ("all", 10, 15, 20)
 MAX_READING_SECONDS = 30
@@ -22,9 +24,16 @@ class LiveQuizCreateRequest(BaseModel):
     # UI/UX review §12: "設定頁預設只露...題數（預設 10）、秒數（預設 30）".
     question_count_mode: str | int = 10
     seconds: int = 30
-    # UI/UX review 2026-10-15 #2: stem-alone reading phase before the answer
-    # window opens. 0 is explicitly allowed (disables the delay).
-    reading_seconds: int = 4
+    # issue #3631 P0 #1: mutually exclusive with `reading_pace` below.
+    # `None` (the default, and what the Setup UI now sends) means "compute
+    # per-item from reading_pace"; an explicit int keeps the old UI/UX
+    # review 2026-10-15 #2 behaviour (one fixed delay for every round in
+    # the game, 0 disables it) for backward compat with any caller that
+    # still wants that — the live_quiz Setup page itself no longer exposes
+    # a raw-seconds input.
+    reading_seconds: int | None = None
+    # 慢/標準/快 — only used when reading_seconds is None.
+    reading_pace: str = reading_pace.DEFAULT_PACE
     classroom_id: int | None = None
     shuffle: bool = False
     show_leaderboard_after_each: bool = True
@@ -43,9 +52,16 @@ class LiveQuizCreateRequest(BaseModel):
 
     @field_validator("reading_seconds")
     @classmethod
-    def _reading_seconds_bounded(cls, v: int) -> int:
-        if not (0 <= v <= MAX_READING_SECONDS):
+    def _reading_seconds_bounded(cls, v: int | None) -> int | None:
+        if v is not None and not (0 <= v <= MAX_READING_SECONDS):
             raise ValueError(f"reading_seconds must be 0-{MAX_READING_SECONDS}")
+        return v
+
+    @field_validator("reading_pace")
+    @classmethod
+    def _reading_pace_allowed(cls, v: str) -> str:
+        if v not in reading_pace.VALID_PACES:
+            raise ValueError(f"reading_pace must be one of {reading_pace.VALID_PACES}")
         return v
 
     @field_validator("question_count_mode")
