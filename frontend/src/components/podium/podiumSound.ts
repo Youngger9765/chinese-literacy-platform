@@ -48,7 +48,15 @@ export function resetPodiumAudioStateForTests(): void {
   ctxCreationFailed = false;
 }
 
-function getSharedAudioContext(): AudioContext | null {
+/**
+ * Exported (2026-10-19, issue #3631 P0 #6) so the rest of the live-quiz
+ * flow (lobby / countdown / reveal chimes — see
+ * `../live-quiz/liveQuizRoundSound.ts`) shares this SAME context and mute
+ * preference instead of spinning up a second Web Audio system. One live
+ * quiz session should have exactly one AudioContext and one mute toggle,
+ * lobby through podium.
+ */
+export function getSharedAudioContext(): AudioContext | null {
   if (ctxCreationFailed) return null;
   if (sharedCtx) return sharedCtx;
   try {
@@ -68,8 +76,12 @@ function getSharedAudioContext(): AudioContext | null {
 
 /** A short ascending tone — used for the rise of one note. Every node
  *  call is individually guarded so one broken method can't take the whole
- *  chime down with it. */
-function playTone(ctx: AudioContext, frequency: number, startAt: number, duration: number, peakGain = 0.22): void {
+ *  chime down with it.
+ *
+ *  Exported (#3631 P0 #6) as the one shared "play a simple synthesized
+ *  beep" primitive — the live-quiz lobby/countdown/reveal chimes build on
+ *  this instead of duplicating their own oscillator-node boilerplate. */
+export function playTone(ctx: AudioContext, frequency: number, startAt: number, duration: number, peakGain = 0.22): void {
   try {
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();

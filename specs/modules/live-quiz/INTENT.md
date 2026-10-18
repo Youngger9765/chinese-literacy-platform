@@ -17,8 +17,9 @@ spec_tests:
   - backend/tests/test_live_quiz_scoring.py
   - backend/tests/test_live_quiz_recompute.py
   - backend/tests/test_live_quiz_rate_limit.py
-related_issues: [3551]
-last_reviewed: 2026-10-15
+  - backend/tests/test_live_quiz_reading_pace_3631.py
+related_issues: [3551, 3630, 3631]
+last_reviewed: 2026-10-19
 owner: young
 ---
 
@@ -97,26 +98,37 @@ PRD §10：「競賽＝主題：課文 × 回合類型 × 屬性」。第一期�
    送出去），是另一支正在處理的 PR，**本 module 不修、也不能把這段洗牌
    當成 #3555 的替代品**
 
-## 5. 排名政策（PRD §13 定案，2026-10-15）
+## 5. 排名政策（2026-10-15 PRD §13 定案，**2026-10-18 Young 針對學生端覆寫，#3631**）
 
-> 「補救教學學生不需要排名」是平台既有立場（`docs/gamification-plan.md`）。
+> 「補救教學學生不需要排名」是平台既有立場（`docs/gamification-plan.md`）——
+> 這條立場仍然成立，但 2026-10-18 Young 針對「每題揭曉的即時回饋」決定
+> 不完全套用：學生需要看到自己的分數與相對位置才有競賽感，純粹隱藏
+> 反而違背 Kahoot 式課堂搶答的體驗預期。**下面這段是現況，不是舊政策**；
+> 舊政策「學生手機永遠看不到名次或總分」整段已被取代，保留在 git history。
 
-- **學生手機永遠看不到名次或總分**（不是只在 practice_mode 下）——
-  `build_state()` 給 player 的 `your_player` 只有 `correct_count`
-  （本場答對題數）+ `previous_game_correct_count` / `improved`
-  （遊戲結束時，跟自己上一場比較的進步）
-- 完整排名（`leaderboard`，含每個人的分數與名次）**只給 host**——這不是
-  「前端不渲染」，是後端完全不回傳給非 host 的請求。投影端怎麼呈現已經
-  拿到的完整資料，跟這裡的資料隔離是兩件事：
+- **每題揭曉（`reveal`／`ended`，非 practice_mode）時，`your_player` 給
+  這位玩家本題得分（`last_answer_points`）＋累計總分（`total_score`）**
+  —— `engine._player_rank_info()`（`engine.py`）算出這位玩家自己的名次：
+  - 若排進全場前 5 名：給 `rank`（1-based 整數，就是這位玩家自己的名次）
+  - 若排在第 6 名以後：給 `rank_delta`（相對「這一回合開始前」名次的
+    正負位移；正＝前進、負＝後退、0＝不變），**絕不**給 `rank` 數字——
+    前端渲染成「這題前進/後退了 N 名」，不可以顯示「第 N 名」
+  - `rank_delta` 的「之前」是**用這回合的得分反推**（`total_score` 減掉
+    這回合自己拿到的分數），不是存一份名次歷史——沒有新資料表、沒有
+    migration
+  - practice_mode 仍然整組隱藏（`total_score`／`rank`／`rank_delta`／
+    `last_answer_points` 一律不給），跟原本 `last_answer_points` 的
+    practice_mode 閘門是同一條
+- **完整排名（`leaderboard`，含每個人的分數與名次的整份陣列）仍然只給
+  host**——這一條沒有變，`_player_rank_info()` 回傳的是「這一個玩家自己
+  的一個數字」，不是整份名單，拿不到別人的分數或名字：
   - **頒獎台（結束畫面）只公開前三名、顯示分數 —— 已實作（#3630）**，
-    2026-10-18 規格更正：原規劃「投影不顯示分數」，Young 改為台座上
-    名字與分數一併顯示，見 `frontend/src/components/podium/PodiumCeremony.tsx`
-  - **揭曉畫面只公開前五名、顯示分數 —— 待實作，追蹤於 #3631**，同一則
-    2026-10-18 規格更正也涵蓋這裡，但 `TeacherLiveQuizReveal.tsx`
-    目前還沒改（現況仍是只有名次沒有分數）；這一條只記規格決定，
-    不是已完成的現況，#3631 落地前不要把它當成現況引用
-  - **唯一不變的是學生手機永遠看不到名次**（上面那條）
-- 第一期不做雙倍分 / 連對加分的**使用者介面**（§13 決定）；後端的
+    見 `frontend/src/components/podium/PodiumCeremony.tsx`
+  - **揭曉畫面公開前五名、顯示分數 —— 已實作（#3631）**，
+    `TeacherLiveQuizReveal.tsx` 從前三名無分數改成前五名＋分數；
+    **最後一題的揭曉不顯示這個排行榜**，直接讓老師按鈕進頒獎台
+    （保留驚喜，同 Kahoot）
+- 第一期不做雙倍分 / 連對加分的**使用者介面**（§13 決定，未變）；後端的
   `double_points_last` / `streak_bonus` 設定保留、預設 `False`、測試齊全，
   但沒有前端開關——如果以後 Young 決定要做，只要加一個設定開關，不用動
   引擎或資料表
@@ -150,5 +162,33 @@ drop 掉這個 seam（原本為了「兩班玩同一組題目」設計），因�
 - ✅ 調整 `scoring.py` 的加分公式（但要過 mutation 測試）
 - ⛔ 讓任何 round type 直接寫 `LiveQuizGame` / `LiveQuizPlayer` 欄位
   （一律透過 `engine.py` 的函式，round type 只收/吐資料）
-- ⛔ 讓 `build_state()` 把 `leaderboard` 或 `rank` 回傳給非 host 的呼叫者
+- ⛔ 讓 `build_state()` 把完整的 `leaderboard` 陣列（含別人的名字/分數）
+  回傳給非 host 的呼叫者——自己的 `your_player.rank`（§5，#3631 新增）
+  是唯一例外，那是「這位玩家自己的一個數字」，不是整份名單
+- ⛔ 讓第 6 名以後的玩家拿到 `rank` 數字（只能給 `rank_delta`）——前端
+  不可以把 `rank_delta` 換算回「第 N 名」字樣顯示給使用者
 - ⛔ 揭曉前任何角色的 `/state` 回應出現 `correct_key`
+
+## 9. 讀題時間與看解析（#3631 新增，2026-10-18 Young 定案）
+
+**讀題時間**：`round_types/choice.generate_rounds` 的 `settings` 多兩個
+互斥的鍵（只會出現一個）：
+
+- `reading_seconds`（int，手動覆寫，舊行為）——**每一回合**都用這個固定
+  秒數，不管題幹長短；`app/services/pk/rounds.py` 用這個把 PK 的讀題
+  時間固定成 `0`（PK 不要讀題停留），這個escape hatch 完全沒動
+- `reading_pace`（`"slow"|"standard"|"fast"`，預設 `"standard"`，老師
+  在設定頁選）——**每一回合各自**用 `reading_pace.compute_reading_seconds
+  (stem, pace)` 算秒數（字數 × 速度係數，夾在 2–20 秒之間），同一場遊戲
+  裡長題幹跟短題幹的讀題時間不一樣
+
+新增模組 `backend/app/services/live_quiz/reading_pace.py`，純函數、無狀態、
+係數與上下限理由（含實測全題庫字數分布）寫在該檔 docstring；
+`test_live_quiz_reading_pace_3631.py` 對全部 179 課、四種題型、三種速度
+掃過一輪，鎖住「結果一定落在上下限內」。
+
+**看解析**：`QuizItem`（`sources/base.py`）新增 `explanation: str | None`
+欄位，只有 `comprehension` adapter 會填（讀 yml 本來就有的 `explanation`
+欄位，179 課裡 50 課有）；`player_view()` 的揭曉閘門跟 `correct_key` 共用
+同一個 `revealed` 判斷——沒有解析文字時完全不出現這個 key（不是空字串），
+前端用「有沒有這個 key」決定要不要畫「看解析」按鈕。

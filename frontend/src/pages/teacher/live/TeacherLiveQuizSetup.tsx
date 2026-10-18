@@ -32,6 +32,15 @@ const COUNT_OPTIONS: { key: 'all' | 10 | 15 | 20; label: string }[] = [
   { key: 20, label: '20 題' },
   { key: 'all', label: '全部' },
 ];
+// issue #3631 P0 #1: "選項出現時間依題目長度...老師可選 慢／標準／快" —
+// replaces the old raw-seconds input. The actual per-question seconds are
+// computed server-side from each round's own stem length
+// (reading_pace.compute_reading_seconds).
+const READING_PACE_OPTIONS: { key: 'slow' | 'standard' | 'fast'; label: string }[] = [
+  { key: 'slow', label: '慢' },
+  { key: 'standard', label: '標準' },
+  { key: 'fast', label: '快' },
+];
 
 interface Props {
   onCreated: (code: string, fallback: boolean) => void;
@@ -50,7 +59,7 @@ const TeacherLiveQuizSetup: React.FC<Props> = ({ onCreated }) => {
   const [seconds, setSeconds] = useState(30);
   const [countMode, setCountMode] = useState<'all' | 10 | 15 | 20>(10);
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [readingSeconds, setReadingSeconds] = useState(4);
+  const [readingPace, setReadingPace] = useState<'slow' | 'standard' | 'fast'>('standard');
   const [shuffle, setShuffle] = useState(false);
   const [showLeaderboardAfterEach, setShowLeaderboardAfterEach] = useState(true);
   const [practiceMode, setPracticeMode] = useState(false);
@@ -146,7 +155,7 @@ const TeacherLiveQuizSetup: React.FC<Props> = ({ onCreated }) => {
         lesson_uids: lessonUids,
         source_modules: [...types],
         seconds,
-        reading_seconds: readingSeconds,
+        reading_pace: readingPace,
         question_count_mode: countMode,
         classroom_id: classroomId === '' ? null : classroomId,
         shuffle,
@@ -301,16 +310,24 @@ const TeacherLiveQuizSetup: React.FC<Props> = ({ onCreated }) => {
           <div className="mt-3 space-y-3 rounded-lg border border-surface-dim bg-surface-container-low p-4">
             <div>
               <label className="mb-1 block text-xs font-medium text-on-surface-variant">
-                讀題時間（秒，0 = 不停留直接顯示選項）
+                讀題速度（先只顯示題幹，選項延後出現；依題目長度自動調整秒數）
               </label>
-              <input
-                type="number"
-                min={0}
-                max={30}
-                value={readingSeconds}
-                onChange={(e) => setReadingSeconds(Math.max(0, Math.min(30, Number(e.target.value))))}
-                className="w-24 rounded-lg border border-surface-dim bg-white px-3 py-1.5 text-sm"
-              />
+              <div className="flex gap-2">
+                {READING_PACE_OPTIONS.map((p) => (
+                  <button
+                    key={p.key}
+                    type="button"
+                    onClick={() => setReadingPace(p.key)}
+                    className={`rounded-full border px-4 py-1.5 text-sm transition-colors ${
+                      readingPace === p.key
+                        ? 'border-accent bg-accent-bg text-accent font-medium'
+                        : 'border-surface-dim text-on-surface-variant'
+                    }`}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
             </div>
             <label className="flex items-center gap-2 text-sm">
               <input type="checkbox" checked={shuffle} onChange={(e) => setShuffle(e.target.checked)} className="h-4 w-4 accent-accent" />

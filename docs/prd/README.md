@@ -17,7 +17,7 @@
 
 | 功能 | 工程代號 | PRD | 狀態 | 環境 | 票 |
 |---|---|---|---|---|---|
-| 課堂搶答（類 Kahoot，老師帶全班） | `live_quiz` | [class-quiz-prd](2026-10-14-class-quiz-prd.md) | 已上線，待 Hans 驗收 | prod | #3551 |
+| 課堂搶答（類 Kahoot，老師帶全班） | `live_quiz` | [class-quiz-prd](2026-10-14-class-quiz-prd.md) | 基本功能已上線待 Hans 驗收（prod）；頒獎台高質感改版（#3630）＋ P0 六項改善（#3631，讀題速度/看解析/前五名分數/學生名次/跳過排行直進頒獎台/音效）已上 staging，驗收步驟併入 #3551，待 Hans 驗收後一併上 prod | prod（基本功能）／staging（#3630+#3631） | #3551、#3630、#3631 |
 | 跨班賽季（兩班比幾週，平常讀課文就累積） | `league` | [chinese-star-league-prd](2026-10-14-chinese-star-league-prd.md) | 新畫面＋劇情包已合併，staging 驗證中 | staging | #3554、#3594 |
 | 劇情包（故事、寶箱、徽章可整包替換） | `story_packs` | 見 league PRD 劇情包一節 | MVP 五包：上古神話（預設）、唐、宋、武俠、偵探劇 | staging | #3594 |
 | 雙人 PK（同學或 AI 文學家，1 對 1） | `pk` | [pk-mode-prd](2026-10-16-pk-mode-prd.md) | 第一版在 staging，6 個 bug 修正中 | staging | #3586、#3602 |

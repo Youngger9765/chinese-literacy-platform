@@ -31,17 +31,26 @@ from ...models.school import Classroom, ClassroomStudent, ClassroomTeacher
 from ...models.user import User
 from ...services.lesson_uid_loader import load_lesson
 from ..pk import classroom_features
+from . import reading_pace as reading_pace_presets
 from . import recompute
 from .codes import generate_live_quiz_code
 from .round_types import ROUND_TYPES
-from .round_types.choice import DEFAULT_READING_SECONDS
 
 DEFAULT_SOURCE_MODULES = ("comprehension", "vocab_definitions", "vocab_application", "zhuyin")
 VALID_QUESTION_COUNT_MODES = ("all", 10, 15, 20)
+# This bound applies ONLY to the explicit, manual `reading_seconds` override
+# (below) — the pace-based per-item computation has its own, separate bound
+# (`reading_pace.MAX_READING_SECONDS`, currently 20) baked into
+# `reading_pace.compute_reading_seconds` itself.
 MAX_READING_SECONDS = 30
 # Presence (UI/UX review #6): a player's last_seen_at within this window
 # counts as "online" in the host's roster view.
 ONLINE_WINDOW_SECONDS = 10
+# issue #3631 P0 #4: a player sees their own exact rank only in the top N;
+# 2026-10-15's PRD §13 "學生手機不顯示名次" is overridden by this for
+# per-question feedback (2026-10-18, Young) — see build_state's
+# `_player_rank_info` docstring.
+TOP_RANK_SHOWN_TO_PLAYER = 5
 
 
 def _now() -> datetime:
@@ -113,7 +122,13 @@ def create_game(
     round_type: str = "choice",
     question_count_mode="all",
     seconds: int = 30,
-    reading_seconds: int = DEFAULT_READING_SECONDS,
+    # issue #3631 P0 #1: these two are mutually exclusive. `reading_seconds`
+    # (manual override, kept for backward compat / PK-style internal callers)
+    # takes precedence when given; otherwise `reading_pace` selects a
+    # 慢/標準/快 preset and each round's reading_seconds is computed from
+    # ITS OWN stem length (see round_types/choice.generate_rounds).
+    reading_seconds: int | None = None,
+    reading_pace: str = reading_pace_presets.DEFAULT_PACE,
     classroom_id: int | None = None,
     shuffle: bool = False,
     show_leaderboard_after_each: bool = True,
@@ -132,8 +147,14 @@ def create_game(
         str(m) for m in VALID_QUESTION_COUNT_MODES
     }:
         raise HTTPException(status_code=400, detail=f"Invalid question_count_mode: {question_count_mode}")
-    if not (0 <= reading_seconds <= MAX_READING_SECONDS):
-        raise HTTPException(status_code=400, detail=f"reading_seconds must be 0-{MAX_READING_SECONDS}")
+    if reading_seconds is not None:
+        if not (0 <= reading_seconds <= MAX_READING_SECONDS):
+            raise HTTPException(status_code=400, detail=f"reading_seconds must be 0-{MAX_READING_SECONDS}")
+    elif reading_pace not in reading_pace_presets.VALID_PACES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"reading_pace must be one of {reading_pace_presets.VALID_PACES}",
+        )
 
     if classroom_id is not None:
         classroom = _require_classroom_owned_by(db, classroom_id, host)
@@ -146,7 +167,6 @@ def create_game(
 
     settings = {
         "seconds": int(seconds),
-        "reading_seconds": int(reading_seconds),
         "question_count_mode": question_count_mode if question_count_mode == "all" else int(question_count_mode),
         "shuffle": bool(shuffle),
         "show_leaderboard_after_each": bool(show_leaderboard_after_each),
@@ -165,6 +185,14 @@ def create_game(
         "lesson_uids": list(lesson_uids),
         "round_type": round_type,
     }
+    # issue #3631 P0 #1: mutually exclusive — explicit override wins when
+    # given (0 seconds disables the reading phase entirely for every round);
+    # otherwise the chosen pace preset drives round_types/choice's per-item
+    # computation. Exactly one of the two keys is ever present.
+    if reading_seconds is not None:
+        settings["reading_seconds"] = int(reading_seconds)
+    else:
+        settings["reading_pace"] = reading_pace
 
     round_module = ROUND_TYPES[round_type]
     rounds, question_count_fallback = round_module.generate_rounds(lessons, settings, rng)
@@ -524,6 +552,59 @@ def _compute_leaderboard(game: LiveQuizGame, limit: int | None = None) -> list[d
     return entries[:limit] if limit else entries
 
 
+def _rank_with_scores(game: LiveQuizGame, score_for: dict[int, int]) -> dict[int, int]:
+    """player_id -> 1-based rank, given an arbitrary score per player.
+
+    Same tie-break as `_compute_leaderboard` (score desc, joined_at asc, id
+    asc) so "a player's rank" means the same thing everywhere in this
+    module, whether computed from `total_score` (the real leaderboard) or
+    from the synthetic "score excluding this round" `_player_rank_info`
+    below builds.
+    """
+    ranked = sorted(
+        game.players,
+        key=lambda p: (-score_for.get(p.id, p.total_score), p.joined_at, p.id),
+    )
+    return {p.id: i + 1 for i, p in enumerate(ranked)}
+
+
+def _player_rank_info(db: Session, game: LiveQuizGame, player: LiveQuizPlayer, idx: int) -> dict:
+    """issue #3631 P0 #4 (2026-10-18, Young — overrides PRD §13's "players
+    never see rank/score"): "前五名顯示自己名次；第六名以後顯示「這題前進／
+    後退了幾名」，不顯示「第 N 名」".
+
+    "Before this round" is derived, not stored: `total_score` already is
+    the cumulative sum of every round's points including this one, so
+    subtracting THIS round's own points back out recovers each player's
+    standing as it was immediately before this round started — no separate
+    per-round rank history column needed (and none was added; this stays
+    entirely inside `settings`/existing tables, no migration).
+
+    This never returns the full ranked list — only this ONE player's own
+    number (`rank`) or signed delta (`rank_delta`) — so it cannot leak
+    anyone else's name or score; the full `leaderboard` array stays
+    host-only exactly as before (see `build_state`'s `leaderboard` gate,
+    unrelated to this and unchanged by it).
+    """
+    points_this_round = dict(
+        db.query(LiveQuizAnswer.player_id, LiveQuizAnswer.points)
+        .filter(LiveQuizAnswer.game_id == game.id, LiveQuizAnswer.round_index == idx)
+        .all()
+    )
+    scores_after = {p.id: p.total_score for p in game.players}
+    scores_before = {
+        p.id: p.total_score - points_this_round.get(p.id, 0) for p in game.players
+    }
+    rank_after = _rank_with_scores(game, scores_after)[player.id]
+    if rank_after <= TOP_RANK_SHOWN_TO_PLAYER:
+        return {"rank": rank_after}
+    rank_before = _rank_with_scores(game, scores_before)[player.id]
+    # Positive = moved toward rank 1 ("前進"); negative = moved away
+    # ("後退"); 0 = unchanged (e.g. round 0, where every player's
+    # "before" score is 0 and the tie-break alone decided the baseline).
+    return {"rank_delta": rank_before - rank_after}
+
+
 # ---------------------------------------------------------------------------
 # Answering
 # ---------------------------------------------------------------------------
@@ -809,9 +890,13 @@ def build_state(db: Session, game: LiveQuizGame, user: User, after_version: int 
             # simply didn't answer in time); both cases share this None.
             your_player["last_answer_correct"] = my_answer.is_correct if my_answer else None
             if not practice_mode:
-                # Immediate per-question feedback, not a comparative ranking
-                # — §13 only forbids rank/total_score, not this.
+                # issue #3631 P0 #4: this round's own points + running total
+                # + (top 5 only) exact rank, else a signed "advanced/
+                # retreated N places" delta — see _player_rank_info.
+                # practice_mode hides all of this, same gate as before.
                 your_player["last_answer_points"] = my_answer.points if my_answer else 0
+                your_player["total_score"] = player.total_score
+                your_player.update(_player_rank_info(db, game, player, idx))
 
     state = {
         "code": game.code,

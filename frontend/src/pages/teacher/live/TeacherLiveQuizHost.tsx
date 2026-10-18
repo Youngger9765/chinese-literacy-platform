@@ -11,6 +11,7 @@ import React, { useCallback, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useLiveQuizPoll } from '../../../components/live-quiz/useLiveQuizPoll';
+import { useLiveQuizRoundSound } from '../../../components/live-quiz/useLiveQuizRoundSound';
 import {
   getHostDeviceId,
   startLiveQuizGame,
@@ -39,6 +40,9 @@ const TeacherLiveQuizHost: React.FC = () => {
   // docstring for why (client-side path traversal / CSPT).
   const routeCodeValid = isValidLiveQuizCode(routeCode);
   const { state, error: pollError } = useLiveQuizPoll(token ?? null, routeCodeValid ? routeCode : null);
+  // issue #3631 P0 #6 — called unconditionally (rules-of-hooks) BEFORE the
+  // early returns below, even though `state` is null during those states.
+  const { muted, toggleMuted } = useLiveQuizRoundSound(state);
 
   const runControl = useCallback(
     async (fn: (token: string, code: string, body?: { device_id?: string; confirm_takeover?: boolean }) => Promise<unknown>) => {
@@ -131,12 +135,29 @@ const TeacherLiveQuizHost: React.FC = () => {
     </button>
   );
 
+  // issue #3631 P0 #6 — one mute toggle for the whole lobby/question/reveal
+  // flow (the podium has its own, from #3630, sharing the same storage key
+  // — see liveQuizRoundSound.ts). Not shown on "ended": PodiumCeremony
+  // renders its own toggle already.
+  const muteButton = state.status !== 'ended' && (
+    <button
+      type="button"
+      onClick={toggleMuted}
+      aria-pressed={muted}
+      aria-label={muted ? '開啟音效' : '關閉音效'}
+      className="fixed left-4 top-4 z-40 rounded-full border border-surface-dim bg-white/90 px-3 py-1.5 text-sm shadow hover:bg-white"
+    >
+      {muted ? '🔇' : '🔊'}
+    </button>
+  );
+
   switch (state.status) {
     case 'lobby':
       return (
         <>
           {actionBar}
           {endEarlyButton}
+          {muteButton}
           <TeacherLiveQuizLobby
             state={state}
             token={token ?? ''}
@@ -151,6 +172,7 @@ const TeacherLiveQuizHost: React.FC = () => {
         <>
           {actionBar}
           {endEarlyButton}
+          {muteButton}
           <TeacherLiveQuizQuestion state={state} onReveal={() => void runControl(revealLiveQuizRound)} revealing={busy} />
         </>
       );
@@ -159,6 +181,7 @@ const TeacherLiveQuizHost: React.FC = () => {
         <>
           {actionBar}
           {endEarlyButton}
+          {muteButton}
           <TeacherLiveQuizReveal state={state} onNext={() => void runControl(nextLiveQuizRound)} advancing={busy} />
         </>
       );

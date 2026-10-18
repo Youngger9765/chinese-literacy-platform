@@ -17,6 +17,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app.main import app
+from app.auth.jwt import create_access_token
 from app.database import get_db
 from app.models import Base
 from app.models.user import Role, User, UserRole
@@ -152,6 +153,37 @@ def _grant_student_role(user_id: int) -> None:
         db.close()
 
 
+def _direct_student_token(suffix: str) -> dict:
+    """Creates a ``User`` row + "student" role directly via the DB and mints
+    a JWT with ``create_access_token`` — bypassing `/api/auth/register`
+    entirely, which is rate-limited at 5 requests/60s PER IP
+    (`app/routes/auth.py`) and every `TestClient` call shares one fake IP.
+    A single scenario needing >4 simultaneous players (on top of the
+    `teacher` fixture's own registration) hits that cap through the normal
+    fixtures; this is the escape hatch for exactly that, used only by
+    issue #3631's rank-visibility tests below."""
+    db = TestingSessionLocal()
+    try:
+        unique = uuid.uuid4().hex[:8]
+        user = User(
+            email=f"{suffix}_{unique}@example.com",
+            password_hash="x",  # never used — no login flow, token is minted directly
+            name=f"{suffix.title()} {unique}",
+            is_active=True,
+            email_verified=True,
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+        role = db.query(Role).filter(Role.name == "student").first()
+        db.add(UserRole(user_id=user.id, role_id=role.id, scope_type="school", scope_id=str(_test_school_id)))
+        db.commit()
+        token = create_access_token(user.id)
+        return {"email": user.email, "name": user.name, "token": token, "user_id": user.id}
+    finally:
+        db.close()
+
+
 @pytest.fixture()
 def teacher(client):
     u = _register_user(client, "lq_teacher")
@@ -283,6 +315,37 @@ class TestCreateGame:
             headers=auth_header(teacher["token"]),
         )
         assert resp.status_code == 422
+
+    def test_reading_pace_lands_in_settings_when_reading_seconds_not_given(self, client, teacher):
+        """issue #3631 P0 #1: the public API no longer exposes a raw
+        "讀題時間（秒）" number — teachers pick a 慢/標準/快 preset, and the
+        actual per-round seconds are computed server-side from each round's
+        own stem length (see test_live_quiz_round_choice.py)."""
+        game = _create_game(client, teacher, lesson_uids=[LESSON_A], reading_seconds=None, reading_pace="fast")
+        assert game["settings"]["reading_pace"] == "fast"
+        assert "reading_seconds" not in game["settings"]
+
+    def test_reading_pace_defaults_to_standard(self, client, teacher):
+        game = _create_game(client, teacher, lesson_uids=[LESSON_A], reading_seconds=None)
+        assert game["settings"]["reading_pace"] == "standard"
+
+    def test_rejects_invalid_reading_pace(self, client, teacher):
+        resp = client.post(
+            "/api/live-quiz/games",
+            json={"lesson_uids": [LESSON_A], "source_modules": ["comprehension"], "seconds": 30,
+                  "question_count_mode": "all", "reading_pace": "ludicrous-speed"},
+            headers=auth_header(teacher["token"]),
+        )
+        assert resp.status_code == 422
+
+    def test_explicit_reading_seconds_still_accepted_for_backward_compat(self, client, teacher):
+        """PK and any other internal caller of the lower-level
+        ``choice.generate_rounds`` keep the explicit-override escape hatch;
+        this just confirms the PUBLIC schema field itself hasn't been
+        removed, only made optional (default None -> pace-based)."""
+        game = _create_game(client, teacher, lesson_uids=[LESSON_A], reading_seconds=12)
+        assert game["settings"]["reading_seconds"] == 12
+        assert "reading_pace" not in game["settings"]
 
 
 class TestJoinAndRoster:
@@ -649,6 +712,7 @@ class TestSettingsBehaviour:
         state = client.get(f"/api/live-quiz/games/{game['code']}/state", headers=auth_header(student1["token"])).json()
         assert "total_score" not in state["your_player"]
         assert "rank" not in state["your_player"]
+        assert "rank_delta" not in state["your_player"]  # issue #3631 P0 #4 — practice mode hides this too
         assert "leaderboard" not in state
 
     def test_show_leaderboard_after_each_toggle(self, client, teacher, student1, tiny_lessons):
@@ -903,11 +967,17 @@ class TestUiUxReview20261015:
         assert "correct_key" not in state["round"]
         assert state["round"]["extra"]["target_index"] == payload["extra"]["target_index"]
 
-    def test_players_never_see_rank_or_total_score_even_outside_practice_mode(
+    def test_players_never_see_the_full_ranked_leaderboard_object(
         self, client, teacher, student1, student2
     ):
-        """PRD §13 final ranking decision (2026-10-15): "學生手機不顯示
-        名次" — unconditionally, not just under practice_mode."""
+        """PRD §13 (2026-10-15) said students never see rank or total_score
+        at all; issue #3631 P0 #4 (2026-10-18, Young) overrides that for
+        PER-QUESTION feedback — see TestPlayerRankVisibility3631 below for
+        the new rank/total_score/rank_delta behaviour. What's UNCHANGED:
+        the full ranked ``leaderboard`` array (every player's name + score +
+        rank) is still host-only, full stop — a player's own
+        ``your_player.rank`` is a single number about THEMSELVES, never the
+        list."""
         game = _create_game(client, teacher, lesson_uids=[LESSON_A], practice_mode=False)
         client.post(f"/api/live-quiz/games/{game['code']}/join", headers=auth_header(student1["token"]))
         client.post(f"/api/live-quiz/games/{game['code']}/join", headers=auth_header(student2["token"]))
@@ -927,10 +997,13 @@ class TestUiUxReview20261015:
         state = client.get(
             f"/api/live-quiz/games/{game['code']}/state", headers=auth_header(student1["token"])
         ).json()
-        assert "rank" not in state["your_player"]
-        assert "total_score" not in state["your_player"]
-        assert "leaderboard" not in state  # the ranked list is host-only, full stop
+        assert "leaderboard" not in state  # the ranked LIST is host-only, full stop
         assert state["your_player"]["correct_count"] == 1
+        # With only 2 players, student1 (who answered correctly) is
+        # unambiguously in the top 5 -> sees an actual rank number.
+        assert state["your_player"]["rank"] in (1, 2)
+        assert "rank_delta" not in state["your_player"]
+        assert state["your_player"]["total_score"] >= 500
 
     def test_host_still_sees_full_leaderboard_and_roster(self, client, teacher, student1):
         game = _create_game(client, teacher, lesson_uids=[LESSON_A])
@@ -1007,6 +1080,207 @@ class TestUiUxReview20261015:
             f"/api/live-quiz/games/{game['code']}/state", headers=auth_header(teacher["token"])
         ).json()
         assert host_state["online_count"] == 1
+
+
+class TestPlayerRankVisibility3631:
+    """issue #3631 P0 #4 (2026-10-18, Young — overrides PRD §13's "players
+    never see rank/score"): each question's reveal gives a player their OWN
+    points for that round + running total; a top-5 player sees their actual
+    rank; 6th place or lower sees "advanced/retreated N places" instead,
+    never "第 N 名". The full ranked ``leaderboard`` array stays host-only
+    (TestUiUxReview20261015.test_players_never_see_the_full_ranked_leaderboard_object).
+
+    All three HTTP-level tests below separate players by WRONG(=0 points)
+    vs CORRECT(=500-1000 points) rather than by relative speed among
+    correct answers — that gap is large enough to make rank purely
+    deterministic regardless of real wall-clock jitter between POSTs.
+    """
+
+    def test_top5_player_sees_own_rank_not_a_delta(self, client, teacher):
+        # 5 players via `_direct_student_token` (not 5 separate fixtures) —
+        # combined with the `teacher` fixture's own registration, 5 more
+        # `/register` calls would exceed that endpoint's 5/60s-per-IP cap.
+        players = [_direct_student_token(f"lq_top5_{i}") for i in range(5)]
+        game = _create_game(client, teacher, lesson_uids=[LESSON_A])
+        for p in players:
+            client.post(f"/api/live-quiz/games/{game['code']}/join", headers=auth_header(p["token"]))
+        client.post(f"/api/live-quiz/games/{game['code']}/start", headers=auth_header(teacher["token"]))
+        db = TestingSessionLocal()
+        try:
+            row = live_quiz_engine.get_game_by_code(db, game["code"])
+            correct_key = row.rounds_snapshot[0]["payload"]["correct_key"]
+        finally:
+            db.close()
+        for p in players:
+            client.post(
+                f"/api/live-quiz/games/{game['code']}/answer",
+                json={"submission": {"choice_key": correct_key}}, headers=auth_header(p["token"]),
+            )
+        client.post(f"/api/live-quiz/games/{game['code']}/reveal", headers=auth_header(teacher["token"]))
+
+        state = client.get(
+            f"/api/live-quiz/games/{game['code']}/state", headers=auth_header(players[0]["token"])
+        ).json()
+        your = state["your_player"]
+        assert 1 <= your["rank"] <= 5
+        assert "rank_delta" not in your
+        assert your["total_score"] >= 500
+        assert your["last_answer_points"] >= 500
+
+    def test_sixth_place_sees_rank_delta_not_rank(self, client, teacher):
+        # 6 players via `_direct_student_token`, same reason as the test
+        # above (6 `/register` calls would exceed the 5/60s-per-IP cap).
+        players = [_direct_student_token(f"lq_6th_{i}") for i in range(6)]
+        sixth = players[-1]
+
+        game = _create_game(client, teacher, lesson_uids=[LESSON_A])
+        for p in players:
+            client.post(f"/api/live-quiz/games/{game['code']}/join", headers=auth_header(p["token"]))
+        client.post(f"/api/live-quiz/games/{game['code']}/start", headers=auth_header(teacher["token"]))
+        db = TestingSessionLocal()
+        try:
+            row = live_quiz_engine.get_game_by_code(db, game["code"])
+            correct_key = row.rounds_snapshot[0]["payload"]["correct_key"]
+        finally:
+            db.close()
+        # The first 5 answer correctly (>=500 each); the 6th never answers
+        # at all -> guaranteed 0 points, guaranteed last place.
+        for p in players[:5]:
+            client.post(
+                f"/api/live-quiz/games/{game['code']}/answer",
+                json={"submission": {"choice_key": correct_key}}, headers=auth_header(p["token"]),
+            )
+        client.post(f"/api/live-quiz/games/{game['code']}/reveal", headers=auth_header(teacher["token"]))
+
+        state = client.get(
+            f"/api/live-quiz/games/{game['code']}/state", headers=auth_header(sixth["token"])
+        ).json()
+        your = state["your_player"]
+        assert "rank" not in your
+        assert "rank_delta" in your
+        # Round 0: EVERY player's score-before-this-round is 0 (nobody has
+        # scored yet), so the "before" ranking is a full tie broken by join
+        # order alone — the 6th-to-join player is already last there too.
+        # Round 0 itself therefore moved this player zero places.
+        assert your["rank_delta"] == 0
+        assert your["total_score"] == 0
+
+    def test_practice_mode_hides_rank_delta_too(self, client, teacher, student1):
+        """Extends test_practice_mode_hides_score_and_rank's existing
+        coverage (same gate, `if not practice_mode`) to the new field."""
+        game = _create_game(client, teacher, lesson_uids=[LESSON_A], practice_mode=True)
+        client.post(f"/api/live-quiz/games/{game['code']}/join", headers=auth_header(student1["token"]))
+        client.post(f"/api/live-quiz/games/{game['code']}/start", headers=auth_header(teacher["token"]))
+        # Deliberately never answer -> would be "last place" if scored at all.
+        client.post(f"/api/live-quiz/games/{game['code']}/reveal", headers=auth_header(teacher["token"]))
+        state = client.get(
+            f"/api/live-quiz/games/{game['code']}/state", headers=auth_header(student1["token"])
+        ).json()
+        assert "rank" not in state["your_player"]
+        assert "rank_delta" not in state["your_player"]
+        assert "total_score" not in state["your_player"]
+
+    def test_rank_delta_sign_reflects_movement_caused_by_this_round(self, client, teacher):
+        """Direct DB construction (not HTTP) for exact, non-flaky score
+        control — the two tests above correctly avoid asserting on relative
+        speed-bonus ordering between two CORRECT answers; this one needs
+        that precision, so it builds the rows directly instead, the same
+        pattern `test_presence_online_count` / `test_late_answer_rejected`
+        already use for exact DB-level control elsewhere in this file.
+
+        8 players, round 1 just revealed. Round-0-only contributions (used
+        as the "before this round" baseline) are 800/700/600/500/400/300/
+        200/0 for p1..p8. In round 1, p1..p7 answer nothing (unchanged);
+        p8 alone scores +250 this round. Both the mover (p8) and its
+        nearest neighbour (p7) stay OUTSIDE the top 5 both before and
+        after — this isolates the SIGN of rank_delta from the (separately,
+        already covered) top-5-vs-not boundary.
+
+            before (= round-0 totals):  p1..p8 ranked 1..8 in listed order
+            after  (= current totals):  p1(800) p2(700) p3(600) p4(500)
+                                         p5(400) p6(300) p8(250) p7(200)
+                                         -> ranks 1..8
+            p8: before=8, after=7 -> delta = +1 (advanced)
+            p7: before=7, after=8 -> delta = -1 (retreated)
+        """
+        from datetime import datetime, timedelta, timezone
+
+        from app.models.live_quiz import LiveQuizAnswer, LiveQuizGame, LiveQuizPlayer
+
+        db = TestingSessionLocal()
+        try:
+            now = datetime.now(timezone.utc)
+
+            def _payload(stem):
+                return {"item_id": f"x:{stem}", "source_module": "comprehension", "lesson_uid": "L1",
+                        "lesson_title": "t", "stem": stem, "options": [], "correct_key": "A",
+                        "seconds": 30, "reading_seconds": 2}
+
+            game = LiveQuizGame(
+                code="999002", host_teacher_id=teacher["user_id"], status="reveal",
+                settings={"seconds": 30, "reading_pace": "standard", "source_modules": ["comprehension"]},
+                rounds_snapshot=[
+                    {"round_index": 0, "round_type": "choice", "payload": _payload("round0")},
+                    {"round_index": 1, "round_type": "choice", "payload": _payload("round1")},
+                ],
+                seed=1, current_round_index=1, current_round_started_at=now, version=1,
+                created_at=now, expires_at=now + timedelta(hours=3),
+            )
+            db.add(game)
+            db.commit()
+            db.refresh(game)
+
+            round0_scores = [800, 700, 600, 500, 400, 300, 200, 0]
+            round1_scores = [0, 0, 0, 0, 0, 0, 0, 250]  # only p8 (index 7) scores this round
+            users = []
+            players = []
+            for i, (r0, r1) in enumerate(zip(round0_scores, round1_scores)):
+                u = _direct_student_token(f"lq_rankdelta_{i}")
+                users.append(u)
+                p = LiveQuizPlayer(
+                    game_id=game.id, user_id=u["user_id"], display_name=f"p{i + 1}",
+                    total_score=r0 + r1, joined_at=now - timedelta(seconds=100 - i),
+                    joined_at_round_index=-1,
+                )
+                db.add(p)
+                players.append(p)
+            db.commit()
+            for p in players:
+                db.refresh(p)
+
+            for i, p in enumerate(players):
+                if round0_scores[i]:
+                    db.add(LiveQuizAnswer(
+                        game_id=game.id, player_id=p.id, round_index=0, submission={"choice_key": "A"},
+                        is_correct=True, points=round0_scores[i], elapsed_ms=0,
+                        round_started_at=now, answered_at=now,
+                    ))
+                if round1_scores[i]:
+                    db.add(LiveQuizAnswer(
+                        game_id=game.id, player_id=p.id, round_index=1, submission={"choice_key": "A"},
+                        is_correct=True, points=round1_scores[i], elapsed_ms=0,
+                        round_started_at=now, answered_at=now,
+                    ))
+            db.commit()
+            db.refresh(game)
+
+            p1_user = db.query(User).filter(User.id == users[0]["user_id"]).first()
+            p7_user = db.query(User).filter(User.id == users[6]["user_id"]).first()
+            p8_user = db.query(User).filter(User.id == users[7]["user_id"]).first()
+
+            p1_state = live_quiz_engine.build_state(db, game, p1_user)
+            assert p1_state["your_player"]["rank"] == 1
+            assert "rank_delta" not in p1_state["your_player"]
+
+            p7_state = live_quiz_engine.build_state(db, game, p7_user)
+            assert "rank" not in p7_state["your_player"]
+            assert p7_state["your_player"]["rank_delta"] == -1
+
+            p8_state = live_quiz_engine.build_state(db, game, p8_user)
+            assert "rank" not in p8_state["your_player"]
+            assert p8_state["your_player"]["rank_delta"] == 1
+        finally:
+            db.close()
 
 
 # ---------------------------------------------------------------------------

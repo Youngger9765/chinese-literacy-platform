@@ -69,6 +69,14 @@ def generate_items(lesson_uid: str, lesson: dict, rng=None) -> list[QuizItem]:
         ]
         if len(quiz_options) < 2:
             continue
+        # issue #3631 P0 #2: 50/180 comprehension yml files carry an
+        # `explanation` key per question (the source worksheet's printed
+        # answer rationale) — carried through as-is, no other adapter has
+        # this field. A non-string/blank value is treated the same as
+        # absent so `QuizItem.explanation` stays `str | None`, never "".
+        explanation = q.get("explanation")
+        explanation = str(explanation).strip() or None if explanation else None
+
         # #3610: build_item drops (and logs once) a row that fails
         # QuizItem validation instead of failing the whole pool.
         item = base.build_item(
@@ -80,6 +88,7 @@ def generate_items(lesson_uid: str, lesson: dict, rng=None) -> list[QuizItem]:
             stem=stem,
             options=quiz_options,
             correct_key=answer,
+            explanation=explanation,
         )
         if item is not None:
             items.append(item)
