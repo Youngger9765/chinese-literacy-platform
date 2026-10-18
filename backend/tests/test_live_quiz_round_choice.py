@@ -106,6 +106,15 @@ class TestGenerateRounds:
         by_stem = {r["payload"]["stem"]: r["payload"]["reading_seconds"] for r in rounds}
         assert by_stem["短"] < by_stem["這是一句明顯長很多的題目敘述文字，用來確認比較長的題目會拿到比較長的讀題時間。"]
 
+    def test_explicit_reading_seconds_wins_when_both_are_given(self):
+        """Critic review note (2026-10-19): if a caller somehow sends both
+        keys, the explicit numeric override must win — the pace preset is
+        only a fallback for "no explicit value given", never a tie-break."""
+        settings = {"source_modules": ["comprehension"], "seconds": 30,
+                    "question_count_mode": "all", "reading_seconds": 7, "reading_pace": "fast"}
+        rounds, _fallback = choice.generate_rounds(_long_stem_lessons_fixture(), settings, random.Random(1))
+        assert all(r["payload"]["reading_seconds"] == 7 for r in rounds)
+
     def test_reading_pace_setting_selects_the_preset(self):
         settings_slow = {"source_modules": ["comprehension"], "seconds": 30,
                           "question_count_mode": "all", "reading_pace": "slow"}

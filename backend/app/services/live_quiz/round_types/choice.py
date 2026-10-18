@@ -165,6 +165,15 @@ def generate_rounds(lessons: list[dict], settings: dict, rng: random.Random) -> 
         if explicit_reading_seconds is not None:
             payload["reading_seconds"] = int(explicit_reading_seconds)
         else:
+            # Critic review note (2026-10-18): this reuses
+            # `scorable_char_count`, whose own docstring says it is "NOT
+            # fine as a scoring input" — that caveat is about using it to
+            # grade a reading, not about counting roughly how many
+            # characters a stem has. `reading_pace.compute_reading_seconds`
+            # already documents this as an ESTIMATE (no first-party
+            # measurement of students' silent recognition speed exists),
+            # and the MIN/MAX clamp keeps a bad estimate from ever reaching
+            # an absurd value either way.
             payload["reading_seconds"] = reading_pace.compute_reading_seconds(item.stem, pace)
         rounds.append({"round_index": i, "round_type": NAME, "payload": payload})
     return rounds, fallback_used
@@ -205,6 +214,16 @@ def player_view(payload: dict, revealed: bool, show_options: bool = True) -> dic
     ``options`` — the server enforces "stem alone for N seconds" rather than
     trusting the client's local countdown, the same fail-closed posture as
     hiding ``correct_key`` pre-reveal.
+
+    Critic review note (2026-10-18): the ``payload.get("reading_seconds",
+    DEFAULT_READING_SECONDS)`` fallback a few lines below is intentionally
+    dead in practice — ``generate_rounds`` always sets ``reading_seconds``
+    on every payload it builds (explicit override or pace-computed), so
+    this only matters for a hand-built payload in a test. It is NOT an
+    oversight that ``DEFAULT_READING_SECONDS`` now aliases
+    ``reading_pace.MIN_READING_SECONDS`` (2, was the literal ``4`` before
+    #3631) — it is just "the lowest sane value" as a safety net, not a
+    meaningful default any real caller relies on.
     """
     view = {
         "item_id": payload.get("item_id"),

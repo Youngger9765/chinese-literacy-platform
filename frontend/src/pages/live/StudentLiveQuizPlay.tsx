@@ -5,12 +5,16 @@
  * `/live` → confirm → navigate-here path — joining is idempotent
  * server-side either way). Phases: waiting in lobby / reading (stem only,
  * "看大螢幕讀題") / answering (shapes only, no option text) / reveal
- * (✓／✗ + points, never rank) / ended (答對題數 + 進步, never rank).
+ * (✓／✗ + this round's points + running total; top 5 see their own rank,
+ * 6th place or lower see a signed "前進/後退 N 名" delta instead — never
+ * a literal "第 N 名" outside the top 5, see issue #3631 P0 #4) / ended
+ * (答對題數 + 進步 vs last game).
  */
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLiveQuizPoll } from '../../components/live-quiz/useLiveQuizPoll';
+import { useLiveQuizRoundSound } from '../../components/live-quiz/useLiveQuizRoundSound';
 import OptionGrid from '../../components/live-quiz/OptionGrid';
 import CountdownBar from '../../components/live-quiz/CountdownBar';
 import { joinLiveQuizGame, submitLiveQuizAnswer, isValidLiveQuizCode, LiveQuizApiError } from '../../services/liveQuizApi';
@@ -25,6 +29,8 @@ const StudentLiveQuizPlay: React.FC = () => {
   const lastAnsweredRoundRef = useRef<number | null>(null);
 
   const { state, error: pollError } = useLiveQuizPoll(joined && token ? token : null, joined ? (code ?? null) : null);
+  // issue #3631 P0 #6 — called unconditionally before any early return.
+  const { muted, toggleMuted } = useLiveQuizRoundSound(state);
 
   useEffect(() => {
     if (!token || !code) return;
@@ -103,6 +109,19 @@ const StudentLiveQuizPlay: React.FC = () => {
 
   return (
     <div className="flex min-h-screen flex-col bg-surface px-5 py-6">
+      {/* issue #3631 P0 #6 — same shared mute toggle/storage as the host's
+          projector screen and the #3630 podium (liveQuizRoundSound.ts). */}
+      {state.status !== 'ended' && (
+        <button
+          type="button"
+          onClick={toggleMuted}
+          aria-pressed={muted}
+          aria-label={muted ? '開啟音效' : '關閉音效'}
+          className="fixed right-3 top-3 z-40 rounded-full border border-surface-dim bg-white/90 px-2.5 py-1 text-sm shadow"
+        >
+          {muted ? '🔇' : '🔊'}
+        </button>
+      )}
       {pollError && (
         <div className="mb-3 rounded-lg bg-surface-container-low px-3 py-2 text-center text-xs text-on-surface-variant">
           連線中斷，正在重新連線…（你的作答會在重新連線後送出）
@@ -163,6 +182,26 @@ const StudentLiveQuizPlay: React.FC = () => {
               <span className="text-6xl" aria-hidden="true">✗</span>
               <p className="mt-3 text-xl font-bold text-on-surface">答錯了</p>
             </>
+          )}
+          {/* issue #3631 P0 #4: running total always shown (unless practice
+              mode, where the backend omits these fields entirely); top 5
+              see their actual rank, everyone else sees a signed
+              前進/後退 delta instead — never "第 N 名" outside the top 5. */}
+          {yourPlayer.total_score != null && (
+            <p className="mt-4 text-sm text-on-surface-variant">總分 {yourPlayer.total_score} 分</p>
+          )}
+          {yourPlayer.rank != null ? (
+            <p className="mt-1 text-sm font-medium text-accent">目前第 {yourPlayer.rank} 名</p>
+          ) : (
+            yourPlayer.rank_delta != null && (
+              <p className="mt-1 text-sm font-medium text-accent">
+                {yourPlayer.rank_delta > 0
+                  ? `這題前進了 ${yourPlayer.rank_delta} 名`
+                  : yourPlayer.rank_delta < 0
+                    ? `這題後退了 ${Math.abs(yourPlayer.rank_delta)} 名`
+                    : '名次不變'}
+              </p>
+            )
           )}
         </div>
       )}

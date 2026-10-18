@@ -1119,7 +1119,7 @@ class TestPlayerRankVisibility3631:
         client.post(f"/api/live-quiz/games/{game['code']}/reveal", headers=auth_header(teacher["token"]))
 
         state = client.get(
-            f"/api/live-quiz/games/{game['code']}/state", headers=auth_header(student1["token"])
+            f"/api/live-quiz/games/{game['code']}/state", headers=auth_header(players[0]["token"])
         ).json()
         your = state["your_player"]
         assert 1 <= your["rank"] <= 5

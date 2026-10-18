@@ -86,6 +86,10 @@ export interface LiveQuizRoundView {
   reading_seconds: number;
   extra?: { target_index: number };
   correct_key?: string;
+  /** issue #3631 P0 #2 — only present once revealed AND the question has
+   *  explanation text (comprehension only, ~50/180 lessons). Absent, not
+   *  empty string, when there is nothing to show. */
+  explanation?: string;
 }
 
 export interface LiveQuizHostPlayer {
@@ -104,6 +108,15 @@ export interface LiveQuizYourPlayer {
   improved?: boolean | null;
   last_answer_correct?: boolean | null;
   last_answer_points?: number;
+  /** issue #3631 P0 #4 — running total score. Present alongside
+   *  last_answer_points (reveal/ended, non-practice-mode only). */
+  total_score?: number;
+  /** Present ONLY when this player is in the top 5 after this round. */
+  rank?: number;
+  /** Present ONLY when NOT in the top 5 — signed places moved by this
+   *  round (positive = advanced toward rank 1, negative = retreated,
+   *  0 = unchanged). Render as "前進/後退 N 名", never "第 N 名". */
+  rank_delta?: number;
 }
 
 export interface LiveQuizLeaderboardEntry {
@@ -115,7 +128,13 @@ export interface LiveQuizLeaderboardEntry {
 
 export interface LiveQuizSettings {
   seconds: number;
-  reading_seconds: number;
+  // issue #3631 P0 #1 — mutually exclusive: exactly one of the two is
+  // present. `reading_seconds` is the legacy/manual-override shape (one
+  // fixed value for every round); `reading_pace` is what the Setup page
+  // now sends, and each round's own reading_seconds is computed
+  // server-side from its stem length (see round.reading_seconds instead).
+  reading_seconds?: number;
+  reading_pace?: 'slow' | 'standard' | 'fast';
   question_count_mode: 'all' | number;
   shuffle: boolean;
   show_leaderboard_after_each: boolean;
@@ -157,7 +176,12 @@ export interface LiveQuizCreateRequest {
   source_modules?: string[];
   question_count_mode?: 'all' | number;
   seconds?: number;
+  /** Manual override (advanced/back-compat) — when set, every round gets
+   *  exactly this many reading seconds. The Setup page no longer sends
+   *  this; it sends `reading_pace` instead. */
   reading_seconds?: number;
+  /** 慢/標準/快 — ignored by the backend when reading_seconds is set. */
+  reading_pace?: 'slow' | 'standard' | 'fast';
   classroom_id?: number | null;
   shuffle?: boolean;
   show_leaderboard_after_each?: boolean;

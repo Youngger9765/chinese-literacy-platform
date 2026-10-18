@@ -321,9 +321,12 @@ modules:
   - backend/tests/test_live_quiz_scoring.py
   - backend/tests/test_live_quiz_recompute.py
   - backend/tests/test_live_quiz_rate_limit.py
+  - backend/tests/test_live_quiz_reading_pace_3631.py
   related_issues:
   - 3551
-  last_reviewed: 2026-10-15
+  - 3630
+  - 3631
+  last_reviewed: 2026-10-19
   owner: young
   intent: specs/modules/live-quiz/INTENT.md
 - spec_id: mcq.rescue.scaffold_and_fail_closed
