@@ -12,6 +12,7 @@
  */
 import React, { useState } from 'react';
 import OptionGrid from '../../../components/live-quiz/OptionGrid';
+import StemWithTarget from '../../../components/live-quiz/StemWithTarget';
 import type { LiveQuizState } from '../../../services/liveQuizApi';
 
 interface Props {
@@ -41,7 +42,7 @@ const TeacherLiveQuizReveal: React.FC<Props> = ({ state, onNext, advancing }) =>
         className="mb-6 max-w-5xl text-center font-bold leading-snug text-on-surface"
         style={{ fontSize: 'clamp(32px, 6px + 2vw, 44px)' }}
       >
-        {round.stem}
+        <StemWithTarget stem={round.stem} targetIndex={round.extra?.target_index} />
       </p>
       <div className="mb-8 w-full max-w-4xl">
         <OptionGrid options={round.options} mode="host" correctKey={round.correct_key} />

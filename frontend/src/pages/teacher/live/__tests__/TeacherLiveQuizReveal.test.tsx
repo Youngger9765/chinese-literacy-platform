@@ -117,3 +117,38 @@ describe('TeacherLiveQuizReveal — last round skips straight to podium (P0 #5)'
     expect(screen.getByRole('button', { name: '下一題' })).toBeTruthy();
   });
 });
+
+describe('TeacherLiveQuizReveal — zhuyin target character is marked (#3642)', () => {
+  it('marks only the asked character when the stem repeats it', () => {
+    const stem = '她卻不改性子，說：不後悔。';
+    const targetIndex = stem.lastIndexOf('不');
+    const { container } = render(
+      <TeacherLiveQuizReveal
+        state={baseState({
+          round: {
+            item_id: 'z', source_module: 'zhuyin', lesson_uid: 'L1', lesson_title: 't',
+            stem, options: [{ key: 'A', text: 'ㄅㄨˋ' }, { key: 'B', text: 'ㄅㄨˊ' }],
+            correct_key: 'A', seconds: 30, reading_seconds: 2,
+            extra: { target_index: targetIndex },
+          } as LiveQuizState['round'],
+        })}
+        onNext={vi.fn()}
+        advancing={false}
+      />,
+    );
+    const marked = container.querySelectorAll('[data-testid="stem-target"]');
+    expect(marked.length).toBe(1);
+    expect(marked[0].textContent).toBe('不');
+    // the marked one is the second 不, not the first
+    const stemEl = marked[0].parentElement as HTMLElement;
+    expect(stemEl.textContent?.indexOf('不後悔')).toBe(targetIndex);
+    expect(stemEl.textContent?.slice(0, targetIndex + 1).endsWith('不')).toBe(true);
+  });
+
+  it('renders the plain stem when there is no target', () => {
+    const { container } = render(
+      <TeacherLiveQuizReveal state={baseState({})} onNext={vi.fn()} advancing={false} />,
+    );
+    expect(container.querySelectorAll('[data-testid="stem-target"]').length).toBe(0);
+  });
+});

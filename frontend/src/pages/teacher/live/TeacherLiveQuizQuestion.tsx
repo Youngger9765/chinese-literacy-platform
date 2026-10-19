@@ -6,6 +6,7 @@
 import React from 'react';
 import OptionGrid from '../../../components/live-quiz/OptionGrid';
 import CountdownBar from '../../../components/live-quiz/CountdownBar';
+import StemWithTarget from '../../../components/live-quiz/StemWithTarget';
 import type { LiveQuizState } from '../../../services/liveQuizApi';
 
 interface Props {
@@ -35,7 +36,7 @@ const TeacherLiveQuizQuestion: React.FC<Props> = ({ state, onReveal, revealing }
             className="max-w-5xl font-bold leading-snug text-on-surface"
             style={{ fontSize: 'clamp(40px, 8px + 2.5vw, 56px)' }}
           >
-            {round.stem}
+            <StemWithTarget stem={round.stem} targetIndex={round.extra?.target_index} />
           </p>
         </div>
       ) : (
@@ -45,7 +46,7 @@ const TeacherLiveQuizQuestion: React.FC<Props> = ({ state, onReveal, revealing }
               className="mb-4 max-w-5xl font-bold leading-snug text-on-surface"
               style={{ fontSize: 'clamp(40px, 8px + 2.5vw, 56px)' }}
             >
-              {round.stem}
+              <StemWithTarget stem={round.stem} targetIndex={round.extra?.target_index} />
             </p>
             {state.answer_open_at && (
               <CountdownBar
