@@ -9,11 +9,15 @@ from __future__ import annotations
 
 from app.main import app
 
+from tests._route_walk import walk_routes
+
 _BANNED_PATH_SUBSTRINGS = ("message", "chat", "dm", "whisper", "comment", "broadcast")
 
 
 def _team_arena_routes() -> list[str]:
-    return [r.path for r in app.routes if getattr(r, "path", "").startswith("/api/team-arena")]
+    # walk_routes, not a flat app.routes scan: newer FastAPI (CI runs an
+    # unpinned version) nests include_router() routes, so a flat scan sees none.
+    return sorted({r.path for r in walk_routes(app) if r.path.startswith("/api/team-arena")})
 
 
 class TestNoChildToChildMessaging:
