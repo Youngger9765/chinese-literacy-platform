@@ -18,6 +18,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTeamArenaPoll } from '../../components/team-arena/useTeamArenaPoll';
+import StemWithTarget from '../../components/live-quiz/StemWithTarget';
 import {
   joinTeamArenaSession,
   claimTeamArenaLane,
@@ -236,7 +237,9 @@ const StudentTeamArenaPlay: React.FC = () => {
           <p className="mb-2 text-sm font-semibold text-accent">
             {ownMatch.am_i_active ? '輪到你了！' : '隊友作答中，你可以助攻'}
           </p>
-          <p className="mb-6 text-lg font-medium text-on-surface">{payload?.stem}</p>
+          <p className="mb-6 text-lg font-medium text-on-surface">
+            {payload?.stem != null && <StemWithTarget stem={payload.stem} targetIndex={payload.extra?.target_index} />}
+          </p>
 
           {!options ? (
             <p className="text-center text-on-surface-variant">請先仔細讀題目，稍後選項才會出現</p>
