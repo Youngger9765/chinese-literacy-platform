@@ -194,3 +194,30 @@ class TestJoinSession:
         with pytest.raises(HTTPException) as exc:
             svc.join_session(db_session, late_student, session.code)
         assert exc.value.status_code == 409
+
+    def test_rostered_student_can_reopen_page_after_start_and_after_end(self, db_session, classroom_enabled, teacher):
+        """#3632 staging QA: the play page calls join on every mount, so a
+        student whose tablet refreshed mid-game got 「本場已經開始，無法加入」
+        and was locked out. A student already on the roster must get back in
+        at every stage; a NEW student is still refused (see the test above)."""
+        students = []
+        for _ in range(4):
+            s = make_student(db_session)
+            enroll_student(db_session, classroom_enabled, s)
+            students.append(s)
+        db_session.commit()
+        session = svc.create_session(
+            db_session, teacher, classroom_id=classroom_enabled.id,
+            scope_type="grade_pool", scope_ref="4",
+        )
+        for s in students:
+            svc.join_session(db_session, s, session.code)
+        svc.assign_teams(db_session, session, teacher, action="auto")
+        svc.control(db_session, session, teacher, action="start")
+
+        for s in students:
+            assert svc.join_session(db_session, s, session.code).status == "playing"
+        assert session.scoreboard["roster"].count(students[0].id) == 1
+
+        svc.control(db_session, session, teacher, action="end")
+        assert svc.join_session(db_session, students[0], session.code).status == "ended"

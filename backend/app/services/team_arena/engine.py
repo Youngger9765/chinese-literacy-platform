@@ -365,9 +365,14 @@ def create_session(
 def join_session(db: Session, student: User, code: str) -> TeamArenaSession:
     session = _get_session_by_code(db, code)
     _require_classroom_membership(db, session.classroom_id, student.id)
+    roster = list(session.scoreboard.get("roster", []))
+    # A student already on the roster is re-opening the page (refresh, tablet
+    # slept): let them back in at any stage. Only NEW students are shut out
+    # once the match has started (#3632 staging QA).
+    if student.id in roster:
+        return session
     if session.status != "lobby":
         raise HTTPException(status_code=409, detail="本場已經開始，無法加入")
-    roster = list(session.scoreboard.get("roster", []))
     if student.id not in roster:
         roster.append(student.id)
         session.scoreboard = {**session.scoreboard, "roster": roster}
