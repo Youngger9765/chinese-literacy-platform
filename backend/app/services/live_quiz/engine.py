@@ -240,19 +240,23 @@ def is_authenticated_member_by_code(db: Session, code: str, user_id: int) -> boo
     game still correctly exempts its real members (the route itself will
     404/409 appropriately once it loads the game for real).
     """
-    rows = (
+    # Resolve the code exactly like ``get_game_by_code`` (newest row wins):
+    # codes are reused after a game ends, and checking every game that ever
+    # used the code exempted a previous game's players from the limit (#3647).
+    row = (
         db.query(LiveQuizGame.id, LiveQuizGame.host_teacher_id)
         .filter(LiveQuizGame.code == code.upper())
-        .all()
+        .order_by(LiveQuizGame.id.desc())
+        .first()
     )
-    if not rows:
+    if row is None:
         return False
-    if any(host_id == user_id for _gid, host_id in rows):
+    game_id, host_id = row
+    if host_id == user_id:
         return True
-    game_ids = [gid for gid, _host_id in rows]
     return (
         db.query(LiveQuizPlayer.id)
-        .filter(LiveQuizPlayer.game_id.in_(game_ids), LiveQuizPlayer.user_id == user_id)
+        .filter(LiveQuizPlayer.game_id == game_id, LiveQuizPlayer.user_id == user_id)
         .first()
         is not None
     )
@@ -298,10 +302,14 @@ def join_game(db: Session, code: str, user: User) -> LiveQuizPlayer:
     if len(game.players) >= MAX_PLAYERS_PER_GAME:
         raise HTTPException(status_code=409, detail="This game is full")
 
+    # A nameless profile must never fall back to the student's email: the name
+    # is projected to the whole class (leaderboard, podium). Use a non-PII
+    # placeholder by join order instead, same as staging (#3630).
+    anonymous_display_name = f"學生{len(game.players) + 1}"
     player = LiveQuizPlayer(
         game_id=game.id,
         user_id=user.id,
-        display_name=user.name or user.email,
+        display_name=user.name or anonymous_display_name,
         joined_at_round_index=game.current_round_index,
     )
     db.add(player)
