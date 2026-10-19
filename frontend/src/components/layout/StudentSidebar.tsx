@@ -87,7 +87,7 @@ export function getStudentNavItems(pendingAssignmentCount = 0): NavItem[] {
       icon: '🎮',
       label: '遊戲區',
       path: '/game-hub',
-      description: '跨班賽季、課堂搶答、PK 對戰、迷城密室',
+      description: '跨班賽季、課堂搶答、PK 對戰、迷城密室、五人對抗賽',
     },
     { icon: '➕', label: '加入班級', path: '/join' },
     { icon: '📖', label: '學習紀錄', path: '/learning-history' },

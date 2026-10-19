@@ -1,14 +1,15 @@
 """五人對抗賽 (team_arena) — issue #3632, PRD docs/prd/2026-10-18-team-arena-prd.md.
 
-⛔ 2026-10-18: Young has NOT yet approved creating these tables for real
-(PRD §9 states this explicitly: "本 PRD 不建 migration...實作前要另外取得
-Young 明確同意"). This model file exists so slice 1's pure-function engine
-has something to test against via `Base.metadata.create_all()` in SQLite
-(same pattern every other test module in this repo already uses — see
-`backend/tests/conftest.py`). NO alembic revision has been created for
-this. Do not run `alembic revision --autogenerate` against this model
-until that approval is recorded (see git history / issue #3632 for when
-it lands).
+✅ 2026-10-19: Young approved building these tables for real ("可以建表",
+PRD §9 originally required this explicit sign-off before any migration).
+See `alembic/versions/59f448723e7f_create_team_arena_tables.py`.
+
+Until that approval (2026-10-18 and earlier), this model file existed
+ONLY so slice 1's pure-function engine had something to test against via
+`Base.metadata.create_all()` in SQLite (same pattern every other test
+module in this repo already uses — see `backend/tests/conftest.py`); that
+SQLite-only testing path still works unchanged and is still how every
+test in this repo exercises these models, migration or not.
 
 Three tables, matching PRD §9.1 verbatim (column names/types/purpose are
 the PRD's own draft, not invented here):

@@ -520,7 +520,7 @@ class TestClassroomPkSettings:
         # issue #3607: the response now reports all three switches, not
         # just the one touched — league/live_quiz stay at their default
         # (False) since this room has no history for either.
-        assert patched.json() == {"pk_human": True, "league": False, "live_quiz": False}
+        assert patched.json() == {"pk_human": True, "league": False, "live_quiz": False, "team_arena": False}
 
         after = client.get(f"/api/classrooms/{room_id}", headers=auth_header(teacher["token"]))
         assert after.status_code == 200, after.text
@@ -533,7 +533,7 @@ class TestClassroomPkSettings:
             headers=auth_header(teacher["token"]),
         )
         assert off.status_code == 200, off.text
-        assert off.json() == {"pk_human": False, "league": False, "live_quiz": False}
+        assert off.json() == {"pk_human": False, "league": False, "live_quiz": False, "team_arena": False}
 
     def test_a_different_teacher_cannot_toggle_room_a(self, client):
         other_teacher = _register_teacher(client)
@@ -652,7 +652,7 @@ class TestClassroomFeatureSettingsThreeSwitches:
             headers=auth_header(teacher["token"]),
         )
         assert resp.status_code == 200, resp.text
-        assert resp.json() == {"pk_human": True, "league": True, "live_quiz": True}
+        assert resp.json() == {"pk_human": True, "league": True, "live_quiz": True, "team_arena": False}
 
     def test_toggling_live_quiz_off_does_not_revert_a_classroom_that_had_no_key_but_real_history(self, client):
         """Backward-compat (#3607): a classroom with real live-quiz history
@@ -686,7 +686,7 @@ class TestClassroomFeatureSettingsThreeSwitches:
             headers=auth_header(teacher["token"]),
         )
         assert resp.status_code == 200, resp.text
-        assert resp.json() == {"pk_human": False, "league": True, "live_quiz": True}
+        assert resp.json() == {"pk_human": False, "league": True, "live_quiz": True, "team_arena": False}
 
     def test_a_different_teacher_cannot_toggle_league_or_live_quiz(self, client):
         teacher = _register_teacher(client)

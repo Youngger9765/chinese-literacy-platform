@@ -13,8 +13,9 @@
  * 跨班賽季 and 課堂搶答 stay locked ("老師尚未開啟") until ANY of the
  * student's enrolled classrooms has the corresponding flag on. PK 對戰 and
  * 迷城密室 are never classroom-gated (issue #3633 explicit: "AI PK、迷城
- * 密室不受班級開關限制"). 五人對抗賽 has no feature yet, so it is always
- * disabled with "即將推出" regardless of classroom flags.
+ * 密室不受班級開關限制"). 五人對抗賽 (issue #3632) now follows the SAME
+ * classroom-flag rule as 跨班賽季／課堂搶答 — the card is no longer a
+ * permanently-disabled "即將推出" placeholder.
  *
  * Old routes are untouched — this page is a new front door, not a
  * replacement for /student/our-class, /live, /pk, /escape-room.
@@ -88,6 +89,7 @@ const StudentGameHubPage: React.FC = () => {
   // disappearing again.
   const [leagueEnabled, setLeagueEnabled] = useState(false);
   const [liveQuizEnabled, setLiveQuizEnabled] = useState(false);
+  const [teamArenaEnabled, setTeamArenaEnabled] = useState(false);
 
   useEffect(() => {
     if (!token) return;
@@ -96,6 +98,7 @@ const StudentGameHubPage: React.FC = () => {
         const flags = computeStudentGameFlags(res.classrooms);
         setLeagueEnabled(flags.league);
         setLiveQuizEnabled(flags.liveQuiz);
+        setTeamArenaEnabled(flags.teamArena);
       })
       .catch(() => {
         /* best-effort — cards simply stay locked if this fails */
@@ -143,9 +146,9 @@ const StudentGameHubPage: React.FC = () => {
       key: 'five-vs-five',
       label: '五人對抗賽',
       description: '五人一組，組隊競賽',
-      path: null,
-      locked: true,
-      lockedText: '即將推出',
+      path: '/team-arena',
+      locked: !teamArenaEnabled,
+      lockedText: '老師尚未開啟',
       emoji: '🛡️',
     },
   ];

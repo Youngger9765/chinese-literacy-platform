@@ -60,7 +60,7 @@ export function getTeacherNavItems(): NavItem[] {
       icon: '🎮',
       label: '遊戲區',
       path: '/teacher/game-hub',
-      description: '跨班賽季、課堂搶答、班級內 PK 開關',
+      description: '跨班賽季、課堂搶答、班級內 PK 開關、五人對抗賽',
     },
     // /help had no entry anywhere in the UI until #3142 — it existed only in
     // the un-authenticated route allowlist, so nobody could reach it.

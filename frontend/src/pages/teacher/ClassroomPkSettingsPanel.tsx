@@ -27,7 +27,7 @@
 import React, { useState } from 'react';
 import { updateClassroomFeatureSettings, ClassroomApiError } from '../../services/classroomApi';
 
-type FeatureKey = 'pk_human' | 'league' | 'live_quiz';
+type FeatureKey = 'pk_human' | 'league' | 'live_quiz' | 'team_arena';
 
 interface ClassroomPkSettingsPanelProps {
   token: string;
@@ -35,13 +35,22 @@ interface ClassroomPkSettingsPanelProps {
   pkHuman: boolean;
   league: boolean;
   liveQuiz: boolean;
-  onChanged: (next: { pk_human: boolean; league: boolean; live_quiz: boolean }) => void;
+  /** Issue #3632 — 五人對抗賽班級開關. Optional (default false) so existing
+   * callers/tests that predate this field keep compiling unchanged. */
+  teamArena?: boolean;
+  onChanged: (next: {
+    pk_human: boolean;
+    league: boolean;
+    live_quiz: boolean;
+    team_arena?: boolean;
+  }) => void;
 }
 
 const SWITCHES: { key: FeatureKey; title: string; description: string; ariaLabel: string }[] = [
   { key: 'pk_human', title: '真人 PK', description: '同學之間配對對戰，預設關閉', ariaLabel: '真人 PK 開關' },
   { key: 'league', title: '跨班賽季', description: '跟其他班一起比幾週，附故事劇情包，預設關閉', ariaLabel: '跨班賽季開關' },
   { key: 'live_quiz', title: '課堂搶答', description: '現在全班一起即時搶答，約 10 分鐘，預設關閉', ariaLabel: '課堂搶答開關' },
+  { key: 'team_arena', title: '五人對抗賽', description: '五人一組，組隊競賽，預設關閉', ariaLabel: '五人對抗賽開關' },
 ];
 
 const ClassroomPkSettingsPanel: React.FC<ClassroomPkSettingsPanelProps> = ({
@@ -50,6 +59,7 @@ const ClassroomPkSettingsPanel: React.FC<ClassroomPkSettingsPanelProps> = ({
   pkHuman,
   league,
   liveQuiz,
+  teamArena = false,
   onChanged,
 }) => {
   const [savingKey, setSavingKey] = useState<FeatureKey | null>(null);
@@ -59,6 +69,7 @@ const ClassroomPkSettingsPanel: React.FC<ClassroomPkSettingsPanelProps> = ({
     pk_human: pkHuman,
     league,
     live_quiz: liveQuiz,
+    team_arena: teamArena,
   };
 
   const handleToggle = async (key: FeatureKey) => {

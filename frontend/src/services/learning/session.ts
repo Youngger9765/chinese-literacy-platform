@@ -470,6 +470,9 @@ export interface StudentEnrolledClassroom {
   league: boolean;
   /** 這個班級是否開放課堂搶答 — issue #3607, same default/backward-compat rule. */
   live_quiz: boolean;
+  /** 這個班級是否開放五人對抗賽 — issue #3632, default false, no backward-compat
+   * fallback (brand new mode, same rule as pk_human). */
+  team_arena: boolean;
 }
 
 export interface StudentEnrolledClassroomsResponse {
@@ -497,10 +500,11 @@ export interface StudentEnrolledClassroomsResponse {
  */
 export function computeStudentGameFlags(
   classrooms: StudentEnrolledClassroom[],
-): { league: boolean; liveQuiz: boolean } {
+): { league: boolean; liveQuiz: boolean; teamArena: boolean } {
   return {
     league: classrooms.some((c) => c.league),
     liveQuiz: classrooms.some((c) => c.live_quiz),
+    teamArena: classrooms.some((c) => c.team_arena),
   };
 }
 
