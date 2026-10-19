@@ -163,7 +163,7 @@ export type ClassroomPkSettingsResponse = ClassroomFeatureSettingsResponse;
 export async function updateClassroomFeatureSettings(
   token: string,
   classroomId: number,
-  data: { pk_human?: boolean; league?: boolean; live_quiz?: boolean },
+  data: { pk_human?: boolean; league?: boolean; live_quiz?: boolean; team_arena?: boolean },
 ): Promise<ClassroomFeatureSettingsResponse> {
   const res = await fetch(`${API_BASE}/api/classrooms/${classroomId}/pk-settings`, {
     method: 'PATCH',
