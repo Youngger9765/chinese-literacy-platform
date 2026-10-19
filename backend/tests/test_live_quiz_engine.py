@@ -1473,3 +1473,32 @@ class TestRevealOptionCounts:
         client.post(f"/api/live-quiz/games/{game['code']}/reveal", headers=auth_header(teacher["token"]))
         state = client.get(f"/api/live-quiz/games/{game['code']}/state", headers=auth_header(student1["token"])).json()
         assert "option_counts" not in state
+
+
+class TestMemberByCodeResolvesNewestGame:
+    """#3647: codes are reused once a game ends. The rate-limit exemption
+    check must resolve a code to the SAME game the route does (newest row),
+    not to every game that ever used it."""
+
+    def test_old_game_member_is_not_member_of_reused_code(self, client, teacher, student1, student2):
+        old = _create_game(client, teacher, lesson_uids=[LESSON_A])
+        client.post(f"/api/live-quiz/games/{old['code']}/join", headers=auth_header(student1["token"]))
+        client.post(f"/api/live-quiz/games/{old['code']}/end", headers=auth_header(teacher["token"]))
+        new = _create_game(client, teacher, lesson_uids=[LESSON_A])
+        db = TestingSessionLocal()
+        try:
+            new_row = live_quiz_engine.get_game_by_code(db, new["code"])
+            new_row.code = old["code"]  # simulate the code being reused
+            db.commit()
+        finally:
+            db.close()
+        client.post(f"/api/live-quiz/games/{old['code']}/join", headers=auth_header(student2["token"]))
+        db = TestingSessionLocal()
+        try:
+            # student1 only joined the ENDED game that used this code before
+            assert live_quiz_engine.is_authenticated_member_by_code(db, old["code"], student1["user_id"]) is False
+            # positive control: student2 joined the current game
+            assert live_quiz_engine.is_authenticated_member_by_code(db, old["code"], student2["user_id"]) is True
+            assert live_quiz_engine.is_authenticated_member_by_code(db, old["code"].lower(), student2["user_id"]) is True
+        finally:
+            db.close()
