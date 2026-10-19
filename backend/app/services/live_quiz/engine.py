@@ -822,6 +822,7 @@ def build_state(db: Session, game: LiveQuizGame, user: User, after_version: int 
     round_view = None
     answered_count = None
     correct_count = None
+    option_counts = None
     if 0 <= idx < rounds_total:
         round_def = game.rounds_snapshot[idx]
         payload = round_def["payload"]
@@ -842,6 +843,14 @@ def build_state(db: Session, game: LiveQuizGame, user: User, after_version: int 
             )
             answered_count = len(round_answers)
             correct_count = sum(1 for a in round_answers if a.is_correct)  # host-only, see below
+            if game.status == "reveal":
+                # PRD §4 step 4: how many players picked each option. Host-only and
+                # only after reveal — during the question it would hint the crowd.
+                option_counts = {o["key"]: 0 for o in payload.get("options", [])}
+                for a in round_answers:
+                    key = (a.submission or {}).get("choice_key")
+                    if key in option_counts:
+                        option_counts[key] += 1
 
     practice_mode = bool(game.settings.get("practice_mode"))
 
@@ -934,6 +943,8 @@ def build_state(db: Session, game: LiveQuizGame, user: User, after_version: int 
         # right before their own answer is revealed.
         if correct_count is not None:
             state["correct_count"] = correct_count
+        if option_counts is not None:
+            state["option_counts"] = option_counts
     if leaderboard is not None:
         state["leaderboard"] = leaderboard
     if your_player is not None:

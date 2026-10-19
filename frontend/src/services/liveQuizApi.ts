@@ -158,6 +158,8 @@ export interface LiveQuizState {
   round: LiveQuizRoundView | null;
   answered_count: number | null;
   correct_count?: number;
+  /** Host-only, reveal-only: players per option key. */
+  option_counts?: Record<string, number>;
   players_count: number;
   is_host: boolean;
   classroom_id: number | null;

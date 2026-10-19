@@ -1428,3 +1428,48 @@ class TestLiveQuizFeatureGate:
             headers=auth_header(teacher["token"]),
         )
         assert resp.status_code == 201, resp.text
+
+
+class TestRevealOptionCounts:
+    """PRD §4 step 4: reveal shows how many players picked each option —
+    host only, and only once the round is revealed (never during the
+    question, which would hint the crowd's choice)."""
+
+    def _play_round(self, client, teacher, student1, student2, student3):
+        game = _create_game(client, teacher, lesson_uids=[LESSON_A], practice_mode=False)
+        for s in (student1, student2, student3):
+            client.post(f"/api/live-quiz/games/{game['code']}/join", headers=auth_header(s["token"]))
+        client.post(f"/api/live-quiz/games/{game['code']}/start", headers=auth_header(teacher["token"]))
+        db = TestingSessionLocal()
+        try:
+            row = live_quiz_engine.get_game_by_code(db, game["code"])
+            payload = row.rounds_snapshot[0]["payload"]
+            correct = payload["correct_key"]
+            wrong = next(o["key"] for o in payload["options"] if o["key"] != correct)
+        finally:
+            db.close()
+        for s, key in ((student1, correct), (student2, correct), (student3, wrong)):
+            client.post(
+                f"/api/live-quiz/games/{game['code']}/answer",
+                json={"submission": {"choice_key": key}}, headers=auth_header(s["token"]),
+            )
+        return game, correct, wrong
+
+    def test_host_sees_counts_per_option_after_reveal(self, client, teacher, student1, student2, student3):
+        game, correct, wrong = self._play_round(client, teacher, student1, student2, student3)
+        before = client.get(f"/api/live-quiz/games/{game['code']}/state", headers=auth_header(teacher["token"])).json()
+        assert "option_counts" not in before  # not during the question
+        client.post(f"/api/live-quiz/games/{game['code']}/reveal", headers=auth_header(teacher["token"]))
+        state = client.get(f"/api/live-quiz/games/{game['code']}/state", headers=auth_header(teacher["token"])).json()
+        counts = state["option_counts"]
+        assert counts[correct] == 2
+        assert counts[wrong] == 1
+        assert sum(counts.values()) == 3
+        option_keys = {o["key"] for o in state["round"]["options"]}
+        assert set(counts) == option_keys  # every option present, zero if nobody picked it
+
+    def test_players_never_see_option_counts(self, client, teacher, student1, student2, student3):
+        game, _, _ = self._play_round(client, teacher, student1, student2, student3)
+        client.post(f"/api/live-quiz/games/{game['code']}/reveal", headers=auth_header(teacher["token"]))
+        state = client.get(f"/api/live-quiz/games/{game['code']}/state", headers=auth_header(student1["token"])).json()
+        assert "option_counts" not in state

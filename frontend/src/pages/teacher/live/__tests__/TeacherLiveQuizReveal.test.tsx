@@ -152,3 +152,24 @@ describe('TeacherLiveQuizReveal — zhuyin target character is marked (#3642)', 
     expect(container.querySelectorAll('[data-testid="stem-target"]').length).toBe(0);
   });
 });
+
+describe('TeacherLiveQuizReveal — how many picked each option (PRD §4 step 4)', () => {
+  it('shows the count on every option, including zero', () => {
+    const { container } = render(
+      <TeacherLiveQuizReveal
+        state={baseState({ option_counts: { A: 3, B: 0 } } as Partial<LiveQuizState>)}
+        onNext={vi.fn()}
+        advancing={false}
+      />,
+    );
+    const counts = Array.from(container.querySelectorAll('[data-testid="option-count"]')).map((e) => e.textContent);
+    expect(counts).toEqual(['3 人', '0 人']);
+  });
+
+  it('shows no counts when the server sent none', () => {
+    const { container } = render(
+      <TeacherLiveQuizReveal state={baseState({})} onNext={vi.fn()} advancing={false} />,
+    );
+    expect(container.querySelectorAll('[data-testid="option-count"]').length).toBe(0);
+  });
+});
