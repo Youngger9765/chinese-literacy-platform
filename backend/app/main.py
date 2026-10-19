@@ -56,6 +56,7 @@ from .auth.rate_limiter import general_rate_limiter, real_ip_from_xff
 from .services.live_quiz.engine import is_authenticated_member_by_code
 from .services.pk.matchmaking import is_authenticated_queue_owner as pk_is_authenticated_queue_owner
 from .services.pk.engine import is_authenticated_match_participant as pk_is_authenticated_match_participant
+from .services.team_arena.engine import is_authenticated_session_member as team_arena_is_authenticated_member
 from .services.seed import seed_default_data, repair_pii_accounts
 
 # Initialise structured logging before anything else
@@ -371,6 +372,17 @@ _pk_queue_member_cache = _PkIdMemberCache()
 _pk_match_member_cache = _PkIdMemberCache()
 
 
+class _TeamArenaCodeMemberCache(_LiveQuizMemberCache):
+    """Same (code, user_id) -> bool shape as `_LiveQuizMemberCache` — team_arena
+    addresses a session by CODE like live_quiz does (not a numeric id like
+    PK), so this reuses that shape by inheritance rather than copy-pasting
+    the identical body a third time. Still its own cache INSTANCE (below),
+    not shared storage with live_quiz's games."""
+
+
+_team_arena_member_cache = _TeamArenaCodeMemberCache()
+
+
 def _lookup_pk_queue_member(queue_id: int, user_id: int) -> bool:
     from .database import SessionLocal as _SessionLocal
 
@@ -387,6 +399,16 @@ def _lookup_pk_match_member(match_id: int, user_id: int) -> bool:
     db = _SessionLocal()
     try:
         return pk_is_authenticated_match_participant(db, match_id, user_id)
+    finally:
+        db.close()
+
+
+def _lookup_team_arena_member(code: str, user_id: int) -> bool:
+    from .database import SessionLocal as _SessionLocal
+
+    db = _SessionLocal()
+    try:
+        return team_arena_is_authenticated_member(db, code, user_id)
     finally:
         db.close()
 
@@ -425,6 +447,11 @@ class GlobalRateLimitMiddleware:
     # block below, mirroring _LIVE_QUIZ_RATE_EXEMPT_RE's pattern).
     _PK_QUEUE_RATE_EXEMPT_RE = re.compile(r"^/api/pk/queue/(\d+)/poll$")
     _PK_MATCH_RATE_EXEMPT_RE = re.compile(r"^/api/pk/matches/(\d+)/(?:state|answer)$")
+    # /api/team-arena/sessions/{code}/state|answer — same reasoning as the
+    # live-quiz block (PRD §7 "限流" row: "state／answer 不算入同位址限流，
+    # 改成『每場次、每人』上限＋加入時驗證成員身分"), same code-keyed shape
+    # as live_quiz (not a numeric id like PK).
+    _TEAM_ARENA_RATE_EXEMPT_RE = re.compile(r"^/api/team-arena/sessions/([^/]+)/(?:state|answer)$")
     # /join is not membership-gated (you are not a member yet) but has its own
     # per-user limit (10/min, routes/live_quiz.py). 10 classes in one school
     # share one NAT IP: 300 joins in a minute exhausted the per-IP write budget
@@ -566,6 +593,41 @@ class GlobalRateLimitMiddleware:
                 except Exception:
                     logger.warning(
                         "pk rate-limit membership check failed; falling back to per-IP limiting",
+                        exc_info=True,
+                    )
+                    member = False
+                if member:
+                    await self.app(scope, receive, send)
+                    return
+            # Unauthenticated or non-member: fall through to normal per-IP
+            # limiting below, same as any other /api/* request.
+
+        # Team-arena polling (PRD §7 "限流", same reasoning/shape as the
+        # live-quiz block above): a classroom's worth of students sharing
+        # one NAT IP, each polling /state ~1/s across potentially several
+        # concurrent matches in one session, would blow straight through
+        # the per-IP read budget on its own. Exempt only when the caller is
+        # BOTH authenticated AND the teacher/a joined member of THIS
+        # session (is_authenticated_session_member — includes lobby-only
+        # roster members, not just post-team-formation TeamArenaMember
+        # rows, since the busiest pre-game polling window is exactly the
+        # lobby wait before teams are assigned).
+        team_arena_match = self._TEAM_ARENA_RATE_EXEMPT_RE.match(path)
+        if team_arena_match:
+            state = scope.get("state") or {}
+            raw_user_id = state.get("user_id")
+            if raw_user_id is not None:
+                try:
+                    user_id = int(raw_user_id)
+                    code = team_arena_match.group(1)
+                    member = _team_arena_member_cache.get(code, user_id)
+                    if not member:
+                        member = await anyio.to_thread.run_sync(_lookup_team_arena_member, code, user_id)
+                        if member:
+                            _team_arena_member_cache.put(code, user_id)
+                except Exception:
+                    logger.warning(
+                        "team-arena rate-limit membership check failed; falling back to per-IP limiting",
                         exc_info=True,
                     )
                     member = False

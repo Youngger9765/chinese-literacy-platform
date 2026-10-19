@@ -24,6 +24,7 @@ import {
   submitTeamArenaAnswer,
   getTeamArenaResult,
   isUnchangedState,
+  teamArenaMyOutcome,
   TeamArenaApiError,
   TEAM_ARENA_LANE_LABELS,
   TEAM_ARENA_PRIMARY_LANES,
@@ -172,12 +173,13 @@ const StudentTeamArenaPlay: React.FC = () => {
 
   if (state.status === 'ended') {
     const me = result?.me;
+    const outcome = ownMatch ? teamArenaMyOutcome(ownMatch) : null;
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-surface px-6 py-10 text-center">
         <h1 className="mb-4 text-xl font-bold text-on-surface">比賽結束</h1>
-        {ownMatch?.winner && (
+        {outcome && (
           <p className="mb-4 text-base font-semibold text-accent">
-            {ownMatch.winner === 'draw' ? '平手' : ownMatch.match_status === 'ended' ? '比賽結果已產生' : ''}
+            {outcome === 'draw' ? '平手' : outcome === 'win' ? '你的隊伍獲勝！' : '你的隊伍差一點，下次再加油'}
           </p>
         )}
         {me && (
@@ -212,12 +214,22 @@ const StudentTeamArenaPlay: React.FC = () => {
         {TEAM_ARENA_PRIMARY_LANES.map((lane) => (
           <div key={lane} className="flex-1 rounded bg-surface-container p-1 text-center text-[10px]">
             {TEAM_ARENA_LANE_LABELS[lane]}
-            <div className="font-bold">{ownMatch.towers_down[lane] ?? 0}/2</div>
+            <div className="font-bold">{ownMatch.towers_down?.[lane] ?? 0}/2</div>
           </div>
         ))}
       </div>
 
-      {!currentRound ? (
+      {ownMatch.match_status === 'ended' ? (
+        // My match already ended (base conquered) while the session/other
+        // matches continue — show the outcome now instead of waiting
+        // forever for a "next round" that will never come for this match.
+        <p className="text-center text-base font-semibold text-accent">
+          {(() => {
+            const outcome = teamArenaMyOutcome(ownMatch);
+            return outcome === 'draw' ? '平手' : outcome === 'win' ? '你的隊伍獲勝！' : '你的隊伍差一點，下次再加油';
+          })()}
+        </p>
+      ) : !currentRound ? (
         <p className="text-center text-on-surface-variant">等待下一回合…</p>
       ) : (
         <>

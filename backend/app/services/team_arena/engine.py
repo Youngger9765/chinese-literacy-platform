@@ -259,6 +259,41 @@ def get_session_by_code(db: Session, code: str) -> TeamArenaSession:
     return _get_session_by_code(db, code)
 
 
+def is_authenticated_session_member(db: Session, code: str, user_id: int) -> bool:
+    """Cheap, read-only membership check keyed by CODE — same purpose as
+    live_quiz.engine.is_authenticated_member_by_code /
+    pk.matchmaking.is_authenticated_queue_owner: `GlobalRateLimitMiddleware`
+    (pure ASGI, no FastAPI Depends) calls this to decide whether to exempt
+    a `/state` or `/answer` request from the per-IP rate limit (PRD §7
+    "限流" row: "state／answer 不算入同位址限流，改成『每場次、每人』上限＋
+    加入時驗證成員身分"). No status filter and no write side effect on
+    purpose — middleware must never write to the DB on a hot polling path;
+    the route itself still 404s/409s appropriately once it loads the
+    session for real.
+    """
+    sessions = db.query(TeamArenaSession).filter(TeamArenaSession.code == code.upper()).all()
+    if not sessions:
+        return False
+    if any(s.teacher_id == user_id for s in sessions):
+        return True
+    session_ids = [s.id for s in sessions]
+    is_team_member = (
+        db.query(TeamArenaMember.id)
+        .filter(TeamArenaMember.session_id.in_(session_ids), TeamArenaMember.student_id == user_id)
+        .first()
+        is not None
+    )
+    if is_team_member:
+        return True
+    # A student who has joined the LOBBY (PRD §6 大廳) but whose teams
+    # haven't been formed yet has no TeamArenaMember row at all (that row
+    # is only created by assign_teams) — this is exactly when a class's
+    # worth of students would be polling /state waiting for the teacher to
+    # start, so missing this case would defeat the whole point of the
+    # exemption during the busiest pre-game window.
+    return any(user_id in (s.scoreboard or {}).get("roster", []) for s in sessions)
+
+
 # ---------------------------------------------------------------------------
 # Creation + join
 # ---------------------------------------------------------------------------
@@ -695,8 +730,13 @@ def _end_match(session: TeamArenaSession, match_no: int) -> None:
     )
     a["match_status"] = "ended"
     b["match_status"] = "ended"
+    # Critic review (slice 3): both tiles of the SAME match must agree on
+    # who won — this used to write an INVERTED value into `b["winner"]`
+    # (e.g. winner="a" produced a["winner"]="a" but b["winner"]="b"),
+    # which looks plausible (it's a valid winner value) but told the
+    # teacher's two tiles for the same match contradictory stories.
     a["winner"] = winner
-    b["winner"] = "a" if winner == "b" else ("b" if winner == "a" else "draw")
+    b["winner"] = winner
     flag_modified(session, "scoreboard")
 
 
@@ -924,11 +964,22 @@ def _public_round_view(round_state: dict, *, show_options: bool) -> dict:
 
 
 def _team_summary(team_cache: dict) -> dict:
+    """Always returns a well-formed shape, even for an EMPTY team_cache —
+    critic review (slice 3): `session.scoreboard["matches"]` only exists
+    once `_start()` has run, so a teacher's `/state` poll taken in the
+    window between "自動分隊" (teams formed) and "開始比賽" (start) used to
+    hit this with `team_cache == {}`, and the old `if team_cache else {}`
+    callers returned a BARE `{}` with no fields at all — which crashed
+    every consumer that assumed `towers_down`/`base_hits`/etc. exist
+    (TeacherTeamArenaHost.tsx's `team.towers_down[lane]`, no optional
+    chaining). Defaults here describe "a team that hasn't played yet":
+    every tower standing, zero score, still active, no winner.
+    """
     return {
-        "towers_down": dict(team_cache["towers_down"]),
-        "base_hits": team_cache["base_hits"],
-        "score": team_cache["score"],
-        "match_status": team_cache["match_status"],
+        "towers_down": dict(team_cache.get("towers_down") or {lane: 0 for lane in PRIMARY_LANES}),
+        "base_hits": team_cache.get("base_hits", 0),
+        "score": team_cache.get("score", 0),
+        "match_status": team_cache.get("match_status", "active"),
         "winner": team_cache.get("winner"),
     }
 
@@ -945,6 +996,22 @@ def get_state(db: Session, session: TeamArenaSession, user: User) -> dict:
     _advance_if_needed(db, session)
 
     is_teacher = session.teacher_id == user.id
+    if not is_teacher:
+        is_team_member = (
+            db.query(TeamArenaMember.id)
+            .filter(TeamArenaMember.session_id == session.id, TeamArenaMember.student_id == user.id)
+            .first()
+            is not None
+        )
+        is_roster_member = user.id in (session.scoreboard or {}).get("roster", [])
+        # A stranger who merely knows the code gets nothing — not even the
+        # "own_match: None" shape, which would otherwise leak this
+        # session's existence/status to anyone (rate-limit exemption test
+        # caught this gap: is_authenticated_session_member already treats
+        # roster-only membership as real membership, this must match it).
+        if not is_team_member and not is_roster_member:
+            raise HTTPException(status_code=403, detail="You are not a member of this session")
+
     base = {
         "code": session.code,
         "status": session.status,
@@ -959,7 +1026,7 @@ def get_state(db: Session, session: TeamArenaSession, user: User) -> dict:
         for (match_no, side), team_members in by_team.items():
             key = f"{match_no}:{side}"
             team_cache = session.scoreboard.get("matches", {}).get(key, {})
-            entry = _team_summary(team_cache) if team_cache else {}
+            entry = _team_summary(team_cache)
             if team_cache and team_cache.get("match_status") != "ended" and session.status == "playing":
                 round_state = team_cache.get("current_round")
                 if round_state and round_state.get("turn_no") == session.turn_no:
@@ -979,7 +1046,7 @@ def get_state(db: Session, session: TeamArenaSession, user: User) -> dict:
 
     key = f"{member.match_no}:{member.side}"
     team_cache = session.scoreboard.get("matches", {}).get(key, {})
-    own_match = _team_summary(team_cache) if team_cache else {}
+    own_match = _team_summary(team_cache)
     if team_cache and team_cache.get("match_status") != "ended" and session.status == "playing":
         round_state = team_cache.get("current_round")
         if round_state and round_state.get("turn_no") == session.turn_no:
@@ -987,6 +1054,7 @@ def get_state(db: Session, session: TeamArenaSession, user: User) -> dict:
                 round_state, show_options=_show_options_now(session, round_state)
             )
     own_match["my_lane"] = member.lane
+    own_match["my_side"] = "a" if member.side == 0 else "b"
     own_match["am_i_active"] = (
         bool(own_match.get("current_round"))
         and own_match["current_round"]["active_student_id"] == user.id
@@ -1008,7 +1076,7 @@ def get_result(db: Session, session: TeamArenaSession, user: User) -> dict:
     for (match_no, side), _team_members in by_team.items():
         key = f"{match_no}:{side}"
         team_cache = session.scoreboard.get("matches", {}).get(key, {})
-        matches[key] = _team_summary(team_cache) if team_cache else {}
+        matches[key] = _team_summary(team_cache)
 
     member = (
         db.query(TeamArenaMember)

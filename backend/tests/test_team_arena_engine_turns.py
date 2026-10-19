@@ -265,6 +265,38 @@ class TestActiveCorrectAnswerAdvancesTowers:
         assert session.scoreboard["matches"]["0:0"]["score"] >= 100
 
 
+class TestGetStateRejectsNonMembers:
+    """Rate-limit exemption test (test_team_arena_rate_limit.py) found this
+    gap: a non-member (authenticated, but never joined/assigned to this
+    session) used to get a 200 with `own_match: None` instead of a 403 —
+    leaking the session's existence/status to a stranger who merely knows
+    the code, unlike pk/live_quiz's equivalent routes."""
+
+    def test_stranger_gets_403(self, arena):
+        db, session = arena["db"], arena["session"]
+        stranger = make_student(db, name="路人")
+        db.commit()
+        with pytest.raises(HTTPException) as exc:
+            svc.get_state(db, session, stranger)
+        assert exc.value.status_code == 403
+
+    def test_roster_only_member_not_yet_team_assigned_is_allowed(self, db_session, clock):
+        school = make_school(db_session)
+        teacher = make_teacher(db_session)
+        room = make_classroom(db_session, school, teacher, feature_settings={"team_arena": True})
+        db_session.commit()
+        student = make_student(db_session)
+        enroll_student(db_session, room, student)
+        db_session.commit()
+        session = svc.create_session(
+            db_session, teacher, classroom_id=room.id, scope_type="lesson", scope_ref=LESSON_A,
+        )
+        svc.join_session(db_session, student, session.code)
+        # No assign_teams call yet — this student is lobby-roster-only.
+        state = svc.get_state(db_session, session, student)
+        assert state["own_match"] is None
+
+
 class TestOptionsHiddenDuringReadingPhase:
     """Critic review (slice 2): _public_round_view stripped correct_key
     pre-reveal but NOT `options` — every poller saw the full answer list
@@ -340,6 +372,60 @@ class TestStateVersionIncrementsOnMutation:
         svc.submit_answer(db, session, active, choice_key="A")
         after = svc.get_state(db, session, active)["state_version"]
         assert after > before
+
+
+class TestEndMatchWinnerConsistency:
+    """Critic review (slice 3): _end_match's actual scoreboard WRITE path
+    (not just the pure decide_match_winner function, which IS already
+    tested) used to flip the winner for side b — a["winner"]="a" paired
+    with b["winner"]="b" for the exact same match, so the two tiles for
+    the same match told the teacher contradictory stories. Calls the real
+    `_end_match` against a real session's real scoreboard dict (not a
+    hand-built fixture), so this still exercises the actual write path —
+    it just skips replaying dozens of real turns to reach the end state."""
+
+    @pytest.mark.parametrize("winning_side,expected", [(0, "a"), (1, "b")])
+    def test_both_sides_record_the_same_winner(self, arena, winning_side, expected):
+        db, session = arena["db"], arena["session"]
+        matches = session.scoreboard["matches"]
+        matches["0:0"]["base_hits"] = svc.BASE_HITS_TO_WIN if winning_side == 0 else 0
+        matches["0:1"]["base_hits"] = svc.BASE_HITS_TO_WIN if winning_side == 1 else 0
+
+        svc._end_match(session, 0)
+
+        a = session.scoreboard["matches"]["0:0"]
+        b = session.scoreboard["matches"]["0:1"]
+        assert a["match_status"] == "ended"
+        assert b["match_status"] == "ended"
+        assert a["winner"] == b["winner"] == expected, (
+            f"both tiles of the SAME match must agree on who won: a={a['winner']!r} b={b['winner']!r}"
+        )
+
+    def test_draw_is_also_consistent(self, arena):
+        db, session = arena["db"], arena["session"]
+        svc._end_match(session, 0)  # both sides start at base_hits=0, score=0 -> draw
+        a = session.scoreboard["matches"]["0:0"]
+        b = session.scoreboard["matches"]["0:1"]
+        assert a["winner"] == b["winner"] == "draw"
+
+
+class TestOwnMatchExposesMySide:
+    """Fix for a gap the critic flagged: the frontend needs to know which
+    side ("a"/"b") the student is actually on to correctly say win/lose
+    relative to `winner`, not just echo a generic "比賽結果已產生"."""
+
+    def test_side_0_member_is_side_a(self, arena):
+        db, session = arena["db"], arena["session"]
+        student = _active_student(arena, 0, 0)
+        state = svc.get_state(db, session, student)
+        assert state["own_match"]["my_side"] == "a"
+
+    def test_side_1_member_is_side_b(self, arena):
+        db, session = arena["db"], arena["session"]
+        member = next(m for m in arena["members"] if m.match_no == 0 and m.side == 1)
+        student = next(s for s in arena["students"] if s.id == member.student_id)
+        state = svc.get_state(db, session, student)
+        assert state["own_match"]["my_side"] == "b"
 
 
 class TestControlEnd:

@@ -133,7 +133,18 @@ export interface TeamArenaTeamSummary {
 
 export interface TeamArenaOwnMatch extends TeamArenaTeamSummary {
   my_lane: TeamArenaLane;
+  my_side: 'a' | 'b';
   am_i_active: boolean;
+}
+
+/** Win/lose/draw relative to the student's OWN side — `winner` on the
+ * wire is always 'a'/'b'/'draw' regardless of who's asking, so this must
+ * be derived client-side by comparing against `my_side`, never read
+ * directly as if 'a' meant "me". */
+export function teamArenaMyOutcome(ownMatch: TeamArenaOwnMatch): 'win' | 'lose' | 'draw' | null {
+  if (!ownMatch.winner) return null;
+  if (ownMatch.winner === 'draw') return 'draw';
+  return ownMatch.winner === ownMatch.my_side ? 'win' : 'lose';
 }
 
 export interface TeamArenaStoryView {

@@ -94,6 +94,27 @@ class TestAssignTeamsAuto:
         assert exc.value.status_code == 400
 
 
+class TestGetStateBeforeStartHasWellFormedTiles:
+    """Critic review (slice 3): right after 自動分隊 but before 開始比賽,
+    `session.scoreboard["matches"]` doesn't exist yet (only `_start()`
+    populates it) — teacher's `/state` poll in that window used to return
+    `{}` for every match tile (no towers_down/base_hits/score/match_status
+    at all), which crashed the real TeacherTeamArenaHost.tsx component the
+    instant it tried to render `team.towers_down[lane]`."""
+
+    def test_teacher_state_has_well_formed_tiles_before_start(self, setup):
+        db, session, teacher = setup["db"], setup["session"], setup["teacher"]
+        svc.assign_teams(db, session, teacher, action="auto")
+        state = svc.get_state(db, session, teacher)
+        assert state["matches"], "expected at least one match tile once teams are formed"
+        for key, team in state["matches"].items():
+            assert team["towers_down"] == {lane: 0 for lane in PRIMARY_LANES}, key
+            assert team["base_hits"] == 0, key
+            assert team["score"] == 0, key
+            assert team["match_status"] == "active", key
+            assert team["winner"] is None, key
+
+
 class TestAssignTeamsSwap:
     def test_swap_exchanges_seats_not_identity(self, setup):
         db, session, teacher, students = setup["db"], setup["session"], setup["teacher"], setup["students"]

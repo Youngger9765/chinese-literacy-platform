@@ -328,7 +328,7 @@ const TeacherTeamArenaHost: React.FC = () => {
         {matchEntries.map(([key, team]) => (
           <div key={key} className="rounded-xl border border-surface-dim bg-white p-4">
             <p className="mb-2 text-sm font-semibold text-on-surface">
-              {teacherState.story.team_labels[Number(key.split(':')[1]) as 0 | 1]} — 第 {Number(key.split(':')[0]) + 1} 場
+              {teacherState.story.team_labels[Number(key.split(':')[1]) === 1 ? 1 : 0]} — 第 {Number(key.split(':')[0]) + 1} 場
             </p>
             <div className="mb-2 flex gap-1">
               {TEAM_ARENA_PRIMARY_LANES.map((lane) => (
@@ -338,12 +338,12 @@ const TeacherTeamArenaHost: React.FC = () => {
                   title={TEAM_ARENA_LANE_LABELS[lane]}
                 >
                   {TEAM_ARENA_LANE_LABELS[lane]}
-                  <div className="font-bold">{team.towers_down[lane] ?? 0}/2</div>
+                  <div className="font-bold">{team.towers_down?.[lane] ?? 0}/2</div>
                 </div>
               ))}
             </div>
             <p className="text-sm text-on-surface-variant">
-              主堡 {team.base_hits}/2 · 分數 {team.score}
+              主堡 {team.base_hits ?? 0}/2 · 分數 {team.score ?? 0}
               {team.match_status === 'ended' && team.winner && (
                 <span className="ml-2 font-semibold text-accent">
                   {team.winner === 'draw' ? '平手' : `${team.winner === 'a' ? '左' : '右'}隊獲勝`}
