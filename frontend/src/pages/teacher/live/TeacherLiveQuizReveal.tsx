@@ -45,7 +45,7 @@ const TeacherLiveQuizReveal: React.FC<Props> = ({ state, onNext, advancing }) =>
         <StemWithTarget stem={round.stem} targetIndex={round.extra?.target_index} />
       </p>
       <div className="mb-8 w-full max-w-4xl">
-        <OptionGrid options={round.options} mode="host" correctKey={round.correct_key} />
+        <OptionGrid options={round.options} mode="host" correctKey={round.correct_key} counts={state.option_counts} />
       </div>
 
       {/* issue #3631 P0 #2: 揭曉畫面多一顆「看解析」按鈕，只在題庫有解析
