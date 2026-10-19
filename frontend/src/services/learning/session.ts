@@ -482,6 +482,28 @@ export interface StudentEnrolledClassroomsResponse {
   student_grade: number | null;
 }
 
+/**
+ * computeStudentGameFlags — issue #3633 game-hub consolidation.
+ *
+ * The single "ANY enrolled classroom has it on" rule for 跨班賽季 (league)
+ * and 課堂搶答 (live_quiz). This used to be computed inline inside
+ * Sidebar.tsx's own fetch effect (issue #3607); it now lives here so
+ * StudentGameHubPage (the hub page that replaced the three separate
+ * sidebar entries) reuses the exact same rule instead of re-deriving it.
+ *
+ * PK 對戰 (pk_human) and 迷城密室 are intentionally absent: neither is ever
+ * classroom-gated (AI PK: Young 2026-10-16 "AI PK 跟班級無關"; 迷城密室:
+ * issue #3633 "不受班級開關限制").
+ */
+export function computeStudentGameFlags(
+  classrooms: StudentEnrolledClassroom[],
+): { league: boolean; liveQuiz: boolean } {
+  return {
+    league: classrooms.some((c) => c.league),
+    liveQuiz: classrooms.some((c) => c.live_quiz),
+  };
+}
+
 export async function fetchMyEnrolledClassrooms(
   token: string,
 ): Promise<StudentEnrolledClassroomsResponse> {

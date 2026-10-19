@@ -1,16 +1,16 @@
 /**
- * issue #3607 — 跨班賽季 (league) and 課堂搶答 (live_quiz) sidebar entries are
- * hidden by default per classroom, same pattern as pk_human's existing
- * StudentPkEntry.tsx "ANY enrolled classroom has it on" logic. These tests
- * cover StudentSidebar's own entry-visibility prop surface directly
- * (getStudentNavItems + <StudentSidebar> render) — the data-fetching that
- * computes these flags lives one level up in Sidebar.tsx and is exercised
- * manually via staging QA (not unit-tested here, consistent with how this
- * file never tested Sidebar.tsx's own data fetching either).
+ * issue #3633 — 遊戲化模式集中成一個「遊戲區」入口 (student side).
  *
- * PK 對戰 ("/pk") must remain unconditionally visible regardless of the
- * flags — AI PK (挑戰文學家) is never gated by classroom settings
- * (Young 2026-10-16: "AI PK 跟班級無關").
+ * REWRITE of the #3607 feature-gate test: 我們班／課堂搶答／PK 對戰 used to
+ * be three separate, individually-gated sidebar entries. They are now
+ * collapsed into a single, ALWAYS-visible 「遊戲區」 entry pointing at
+ * `/game-hub` — the per-mode locking (老師尚未開啟 for 跨班賽季/課堂搶答)
+ * moved to the hub page's cards (see StudentGameHubPage.test.tsx), so the
+ * sidebar itself no longer needs `leagueEnabled`/`liveQuizEnabled` at all.
+ *
+ * 五人對抗賽 and 迷城密室 never had sidebar entries (迷城密室 is exactly the
+ * bug this issue fixes — "有頁面但側欄完全沒有入口") — both only appear as
+ * cards inside the hub page, not here.
  */
 import React from 'react';
 import { render, screen } from '@testing-library/react';
@@ -20,61 +20,33 @@ import { StudentSidebar, getStudentNavItems } from '../StudentSidebar';
 
 const renderWithRouter = (ui: React.ReactElement) => render(<MemoryRouter>{ui}</MemoryRouter>);
 
-describe('getStudentNavItems — feature flags (#3607)', () => {
-  it('hides 我們班 and 課堂搶答 when no flags are passed (default: hidden until known)', () => {
+describe('getStudentNavItems — game-hub consolidation (#3633)', () => {
+  it('has exactly one 遊戲區 item pointing at /game-hub', () => {
+    const items = getStudentNavItems(0);
+    const gameHubItems = items.filter((i) => i.label === '遊戲區');
+    expect(gameHubItems).toHaveLength(1);
+    expect(gameHubItems[0].path).toBe('/game-hub');
+  });
+
+  it('no longer has separate 我們班／課堂搶答／PK 對戰 entries', () => {
     const items = getStudentNavItems(0);
     expect(items.find((i) => i.label === '我們班')).toBeUndefined();
     expect(items.find((i) => i.label === '課堂搶答')).toBeUndefined();
+    expect(items.find((i) => i.label === 'PK 對戰')).toBeUndefined();
   });
 
-  it('shows 我們班 only when league=true', () => {
-    const items = getStudentNavItems(0, { league: true, liveQuiz: false });
-    expect(items.find((i) => i.label === '我們班')).toBeDefined();
-    expect(items.find((i) => i.label === '課堂搶答')).toBeUndefined();
-  });
-
-  it('shows 課堂搶答 only when liveQuiz=true', () => {
-    const items = getStudentNavItems(0, { league: false, liveQuiz: true });
-    expect(items.find((i) => i.label === '我們班')).toBeUndefined();
-    expect(items.find((i) => i.label === '課堂搶答')).toBeDefined();
-  });
-
-  it('shows both when both flags are true', () => {
-    const items = getStudentNavItems(0, { league: true, liveQuiz: true });
-    expect(items.find((i) => i.label === '我們班')).toBeDefined();
-    expect(items.find((i) => i.label === '課堂搶答')).toBeDefined();
-  });
-
-  it('PK 對戰 is always present regardless of flags (AI PK is never gated)', () => {
-    expect(getStudentNavItems(0).find((i) => i.label === 'PK 對戰')).toBeDefined();
-    expect(
-      getStudentNavItems(0, { league: true, liveQuiz: true }).find((i) => i.label === 'PK 對戰'),
-    ).toBeDefined();
+  it('遊戲區 is always present regardless of how many args are passed (no flags needed any more)', () => {
+    expect(getStudentNavItems().find((i) => i.label === '遊戲區')).toBeDefined();
+    expect(getStudentNavItems(5).find((i) => i.label === '遊戲區')).toBeDefined();
   });
 });
 
-describe('<StudentSidebar> — feature flag props render (#3607)', () => {
-  it('does not render 我們班/課堂搶答 buttons when both flags default to false', () => {
+describe('<StudentSidebar> — renders the single 遊戲區 entry (#3633)', () => {
+  it('renders exactly one 遊戲區 button, never the old three', () => {
     renderWithRouter(<StudentSidebar pendingAssignmentCount={0} collapsed={false} onNavigate={vi.fn()} />);
+    expect(screen.getByRole('button', { name: /遊戲區/ })).toBeTruthy();
     expect(screen.queryByRole('button', { name: /我們班/ })).toBeNull();
     expect(screen.queryByRole('button', { name: /課堂搶答/ })).toBeNull();
-    // Always-on entries still render.
-    expect(screen.getByRole('button', { name: /PK 對戰/ })).toBeTruthy();
-  });
-
-  it('renders 我們班 when leagueEnabled=true', () => {
-    renderWithRouter(
-      <StudentSidebar pendingAssignmentCount={0} collapsed={false} onNavigate={vi.fn()} leagueEnabled />,
-    );
-    expect(screen.getByRole('button', { name: /我們班/ })).toBeTruthy();
-    expect(screen.queryByRole('button', { name: /課堂搶答/ })).toBeNull();
-  });
-
-  it('renders 課堂搶答 when liveQuizEnabled=true', () => {
-    renderWithRouter(
-      <StudentSidebar pendingAssignmentCount={0} collapsed={false} onNavigate={vi.fn()} liveQuizEnabled />,
-    );
-    expect(screen.getByRole('button', { name: /課堂搶答/ })).toBeTruthy();
-    expect(screen.queryByRole('button', { name: /我們班/ })).toBeNull();
+    expect(screen.queryByRole('button', { name: /PK 對戰/ })).toBeNull();
   });
 });

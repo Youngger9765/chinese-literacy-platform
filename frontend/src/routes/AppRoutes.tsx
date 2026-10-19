@@ -71,6 +71,11 @@ const TeacherMyTextsPage = lazy(() => import('../pages/teacher/TeacherMyTextsPag
 const TeacherAssignmentsPage = lazy(() => import('../pages/teacher/TeacherAssignmentsPage'));
 const TeacherLeaguePage = lazy(() => import('../pages/teacher/TeacherLeaguePage'));
 const StudentOurClassPage = lazy(() => import('../pages/student/StudentOurClassPage'));
+// 遊戲區 (#3633) — consolidates 跨班賽季/課堂搶答/PK 對戰/迷城密室 (student) and
+// 跨班賽季/課堂搶答/班級內 PK (teacher) into one hub page each. Old routes above
+// are untouched.
+const StudentGameHubPage = lazy(() => import('../pages/student/StudentGameHubPage'));
+const TeacherGameHubPage = lazy(() => import('../pages/teacher/TeacherGameHubPage'));
 const TeacherSessionReportPage = lazy(() => import('../pages/teacher/TeacherSessionReportPage'));
 const ProjectHubPage = lazy(() => import('../pages/ProjectHubPage'));
 
@@ -344,6 +349,28 @@ const AppRoutes: React.FC = () => (
           <ProtectedRoute>
             <AppShell>
               <StudentOurClassPage />
+            </AppShell>
+          </ProtectedRoute>
+        }
+      />
+      {/* 遊戲區 (#3633) — replaces the scattered sidebar entries above with
+          one hub: a card each for 跨班賽季/課堂搶答/PK 對戰/迷城密室. */}
+      <Route
+        path="/game-hub"
+        element={
+          <ProtectedRoute>
+            <AppShell>
+              <StudentGameHubPage />
+            </AppShell>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/teacher/game-hub"
+        element={
+          <ProtectedRoute>
+            <AppShell>
+              <TeacherGameHubPage />
             </AppShell>
           </ProtectedRoute>
         }

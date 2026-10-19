@@ -45,21 +45,22 @@ export const TeacherSidebar: React.FC<TeacherSidebarProps> = ({
  * component. Adding an entry to one copy and not the other is invisible:
  * the sidebar gains it, the mobile tab bar silently does not (#3142).
  */
+/**
+ * issue #3633: 跨班賽季 (/teacher/league) and 課堂搶答 (/teacher/live) used
+ * to be two separate entries here. They collapse into a single 「遊戲區」
+ * entry that gathers the per-class switches (reusing
+ * <ClassroomPkSettingsPanel>) and links out to these same two pages — see
+ * TeacherGameHubPage.tsx. The old routes are untouched.
+ */
 export function getTeacherNavItems(): NavItem[] {
   return [
     { icon: '🏫', label: '班級管理', path: '/teacher' },
     { icon: '📋', label: '作業管理', path: '/teacher/assignments' },
     {
-      icon: '🏆',
-      label: '跨班賽季',
-      path: '/teacher/league',
-      description: '和別班比幾週，平常讀課文就累積',
-    },
-    {
       icon: '🎮',
-      label: '課堂搶答',
-      path: '/teacher/live',
-      description: '現在全班一起玩，約 10 分鐘',
+      label: '遊戲區',
+      path: '/teacher/game-hub',
+      description: '跨班賽季、課堂搶答、班級內 PK 開關',
     },
     // /help had no entry anywhere in the UI until #3142 — it existed only in
     // the un-authenticated route allowlist, so nobody could reach it.
