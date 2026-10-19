@@ -266,20 +266,40 @@ def is_authenticated_session_member(db: Session, code: str, user_id: int) -> boo
     (pure ASGI, no FastAPI Depends) calls this to decide whether to exempt
     a `/state` or `/answer` request from the per-IP rate limit (PRD §7
     "限流" row: "state／answer 不算入同位址限流，改成『每場次、每人』上限＋
-    加入時驗證成員身分"). No status filter and no write side effect on
-    purpose — middleware must never write to the DB on a hot polling path;
-    the route itself still 404s/409s appropriately once it loads the
-    session for real.
+    加入時驗證成員身分"). No write side effect on purpose — middleware must
+    never write to the DB on a hot polling path; the route itself still
+    404s/409s appropriately once it loads the session for real.
+
+    Automated security review (post-push, #3632): this used to aggregate
+    membership across EVERY historical session row sharing this code
+    (`.all()` + `any(...)`) — a code is only reused once the OLD session
+    holding it has ended, so a user who was a member of that OLD session
+    was incorrectly still treated as exempt for polling a brand NEW
+    session that later reused the same code. Must resolve to the exact
+    same row `_get_session_by_code`/the route itself would (newest row
+    with this code), then check membership against ONLY that one session.
+
+    Known, accepted trade-off (critic review): if a code is reused within
+    seconds of its old session ending, a real member of the OLD session
+    now loses the rate-limit EXEMPTION for that narrow window (not access
+    — every functional route already only ever resolves "newest row wins"
+    via `_get_session_by_code`, so this just makes the middleware's
+    behavior consistent with what the real endpoints already did). Not a
+    new regression; not worth special-casing further.
     """
-    sessions = db.query(TeamArenaSession).filter(TeamArenaSession.code == code.upper()).all()
-    if not sessions:
+    session = (
+        db.query(TeamArenaSession)
+        .filter(TeamArenaSession.code == code.upper())
+        .order_by(TeamArenaSession.id.desc())
+        .first()
+    )
+    if session is None:
         return False
-    if any(s.teacher_id == user_id for s in sessions):
+    if session.teacher_id == user_id:
         return True
-    session_ids = [s.id for s in sessions]
     is_team_member = (
         db.query(TeamArenaMember.id)
-        .filter(TeamArenaMember.session_id.in_(session_ids), TeamArenaMember.student_id == user_id)
+        .filter(TeamArenaMember.session_id == session.id, TeamArenaMember.student_id == user_id)
         .first()
         is not None
     )
@@ -291,7 +311,7 @@ def is_authenticated_session_member(db: Session, code: str, user_id: int) -> boo
     # worth of students would be polling /state waiting for the teacher to
     # start, so missing this case would defeat the whole point of the
     # exemption during the busiest pre-game window.
-    return any(user_id in (s.scoreboard or {}).get("roster", []) for s in sessions)
+    return user_id in (session.scoreboard or {}).get("roster", [])
 
 
 # ---------------------------------------------------------------------------
@@ -1067,7 +1087,31 @@ def get_state(db: Session, session: TeamArenaSession, user: User) -> dict:
 # no individual ranking)
 # ---------------------------------------------------------------------------
 
+def _require_session_participant(db: Session, session: TeamArenaSession, user: User) -> None:
+    """Automated security review (post-push, #3632): get_result had NO
+    participant check — any authenticated user who merely knew the code
+    could read a session's full result once it ended. Teacher, or an
+    actual TeamArenaMember row — deliberately STRICTER than
+    is_authenticated_session_member (which also allows bare lobby-roster
+    membership, appropriate for a pre-game poll with no real score data
+    yet): a result screen only exists post-game, so a student who joined
+    the roster but was never placed on a team by assign_teams has nothing
+    of their own here and shouldn't see anyone else's either.
+    """
+    if session.teacher_id == user.id:
+        return
+    is_member = (
+        db.query(TeamArenaMember.id)
+        .filter(TeamArenaMember.session_id == session.id, TeamArenaMember.student_id == user.id)
+        .first()
+        is not None
+    )
+    if not is_member:
+        raise HTTPException(status_code=403, detail="You are not a participant of this session")
+
+
 def get_result(db: Session, session: TeamArenaSession, user: User) -> dict:
+    _require_session_participant(db, session, user)
     if session.status != "ended":
         raise HTTPException(status_code=409, detail="這場比賽還沒結束")
 

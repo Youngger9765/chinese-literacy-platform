@@ -106,8 +106,6 @@ def _register_user(client, suffix: str) -> dict:
 
 
 def _make_classroom_as(client, teacher_token: str, teacher_user_id: int) -> int:
-    from app.models.school import ClassroomTeacher
-
     db = TestingSessionLocal()
     try:
         role = db.query(Role).filter(Role.name == "teacher").first()
@@ -183,6 +181,66 @@ def test_non_member_state_polling_still_counts_against_per_ip_limit(client):
     ]
     assert 403 in statuses, "sanity: route-level membership check should still fire at least once"
     assert 429 in statuses, f"non-member traffic should eventually hit the per-IP limit, got {statuses}"
+
+
+def test_malformed_code_never_touches_the_db(client, monkeypatch):
+    """Automated security review (post-push, #3632): a garbage path segment
+    (too long, wrong charset) can never be a real session code — the
+    format check must reject it BEFORE the DB lookup runs at all, so an
+    authenticated attacker hammering made-up codes can't force a query per
+    request."""
+    import app.main as main_mod
+
+    user = _register_user(client, "ta_rl_malformed")
+    calls = []
+    real = main_mod.team_arena_is_authenticated_member
+
+    def spy(db, code, user_id):
+        calls.append(code)
+        return real(db, code, user_id)
+
+    monkeypatch.setattr(main_mod, "team_arena_is_authenticated_member", spy)
+
+    # Too long, and contains characters outside A-Z0-9 — both independently
+    # fail the 4-8 char A-Z0-9 shape check.
+    resp = client.get(
+        "/api/team-arena/sessions/not-a-real-code-at-all!!/state", headers=auth_header(user["token"])
+    )
+    # 422 (FastAPI's own path-param length validation) or 404 (engine's own
+    # lookup) are both "the route still answers correctly" — what matters
+    # here is that the rate-limit exemption's OWN membership lookup never
+    # ran for a shape that can never be a real code.
+    assert resp.status_code in (404, 422), resp.status_code
+    assert calls == [], f"expected the DB lookup to never run for a malformed code, got {calls}"
+
+
+def test_well_formed_but_unknown_code_is_cached_negative_not_requeried(client, monkeypatch):
+    """Point 3's other half: even a well-formed code that resolves to no
+    session (or to a session the caller isn't in) should only hit the DB
+    once per short window, not once per poll."""
+    import app.main as main_mod
+
+    user = _register_user(client, "ta_rl_neg_cache")
+    main_mod._team_arena_negative_member_cache.clear()
+    calls = []
+    real = main_mod.team_arena_is_authenticated_member
+
+    def spy(db, code, user_id):
+        calls.append(code)
+        return real(db, code, user_id)
+
+    monkeypatch.setattr(main_mod, "team_arena_is_authenticated_member", spy)
+
+    statuses = [
+        client.get("/api/team-arena/sessions/ZZZZZZ/state", headers=auth_header(user["token"])).status_code
+        for _ in range(10)
+    ]
+    # 404 while still under the (tiny, monkeypatched) per-IP read budget,
+    # then 429 once it's exhausted — exactly the correct behavior for a
+    # non-member: the negative cache saves DB load, it never exempts them
+    # from the per-IP limiter itself.
+    assert all(status in (404, 429) for status in statuses), statuses
+    assert len(calls) <= 1, f"expected the DB lookup to be cached, got {len(calls)} calls: {calls}"
 
 
 def test_other_endpoints_unaffected_by_the_team_arena_exemption(client):

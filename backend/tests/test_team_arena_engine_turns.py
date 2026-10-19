@@ -101,7 +101,7 @@ def _member_for(arena, student):
 
 
 def _active_student(arena, match_no, side):
-    db, session = arena["db"], arena["session"]
+    session = arena["session"]
     team = [m for m in arena["members"] if m.match_no == match_no and m.side == side]
     local = session.turn_no % len(team)
     active_member = next(m for m in team if m.rotation_order == local)
@@ -109,7 +109,7 @@ def _active_student(arena, match_no, side):
 
 
 def _teammate_not_active(arena, match_no, side):
-    db, session = arena["db"], arena["session"]
+    session = arena["session"]
     team = [m for m in arena["members"] if m.match_no == match_no and m.side == side]
     local = session.turn_no % len(team)
     other = next(m for m in team if m.rotation_order != local)
@@ -386,7 +386,7 @@ class TestEndMatchWinnerConsistency:
 
     @pytest.mark.parametrize("winning_side,expected", [(0, "a"), (1, "b")])
     def test_both_sides_record_the_same_winner(self, arena, winning_side, expected):
-        db, session = arena["db"], arena["session"]
+        session = arena["session"]
         matches = session.scoreboard["matches"]
         matches["0:0"]["base_hits"] = svc.BASE_HITS_TO_WIN if winning_side == 0 else 0
         matches["0:1"]["base_hits"] = svc.BASE_HITS_TO_WIN if winning_side == 1 else 0
@@ -402,7 +402,7 @@ class TestEndMatchWinnerConsistency:
         )
 
     def test_draw_is_also_consistent(self, arena):
-        db, session = arena["db"], arena["session"]
+        session = arena["session"]
         svc._end_match(session, 0)  # both sides start at base_hits=0, score=0 -> draw
         a = session.scoreboard["matches"]["0:0"]
         b = session.scoreboard["matches"]["0:1"]
@@ -435,6 +435,77 @@ class TestControlEnd:
         ended = svc.control(db, session, teacher, action="end")
         assert ended.status == "ended"
         assert ended.ended_at is not None
+
+
+class TestGetResultRequiresParticipant:
+    """Automated security review (post-push, #3632): get_result had NO
+    participant check at all — any authenticated user who knew the code
+    could read a session's full result once it ended. Fixed via
+    _require_session_participant (teacher or an actual TeamArenaMember —
+    stricter than is_authenticated_session_member, which also allows bare
+    lobby-roster membership; a result screen only exists post-game, and a
+    student never placed on a team has nothing of their own to see and
+    shouldn't see anyone else's)."""
+
+    def test_non_participant_is_rejected(self, arena):
+        db, session, teacher = arena["db"], arena["session"], arena["teacher"]
+        svc.control(db, session, teacher, action="end")
+        db.refresh(session)
+        stranger = make_student(db, name="路人")
+        db.commit()
+        with pytest.raises(HTTPException) as exc:
+            svc.get_result(db, session, stranger)
+        assert exc.value.status_code == 403  # _require_session_participant only ever raises 403
+
+    def test_teacher_is_allowed(self, arena):
+        db, session, teacher = arena["db"], arena["session"], arena["teacher"]
+        svc.control(db, session, teacher, action="end")
+        db.refresh(session)
+        result = svc.get_result(db, session, teacher)
+        assert "matches" in result
+
+    def test_real_team_member_is_allowed(self, arena):
+        db, session, teacher, students = arena["db"], arena["session"], arena["teacher"], arena["students"]
+        svc.control(db, session, teacher, action="end")
+        db.refresh(session)
+        result = svc.get_result(db, session, students[0])
+        assert "matches" in result
+
+    def test_roster_only_never_assigned_student_is_rejected(self, db_session, clock):
+        """A student who joined the LOBBY roster but was never placed into
+        a team (e.g. joined after auto-assign already ran) has nothing of
+        their own in the result and should not see anyone else's either —
+        stricter than get_state's lobby-polling allowance."""
+        school = make_school(db_session)
+        teacher = make_teacher(db_session)
+        room = make_classroom(db_session, school, teacher, feature_settings={"team_arena": True})
+        db_session.commit()
+        students = []
+        for _ in range(4):
+            s = make_student(db_session)
+            enroll_student(db_session, room, s)
+            students.append(s)
+        db_session.commit()
+        session = svc.create_session(
+            db_session, teacher, classroom_id=room.id, scope_type="lesson", scope_ref=LESSON_A,
+        )
+        for s in students:
+            svc.join_session(db_session, s, session.code)
+        svc.assign_teams(db_session, session, teacher, action="auto")
+
+        late_joiner = make_student(db_session, name="晚到的學生")
+        enroll_student(db_session, room, late_joiner)
+        db_session.commit()
+        # join_session only allows joining while status == "lobby" — still
+        # true here since assign_teams doesn't flip status, only control
+        # "start" does.
+        svc.join_session(db_session, late_joiner, session.code)
+
+        svc.control(db_session, session, teacher, action="end")
+        db_session.refresh(session)
+        with pytest.raises(HTTPException) as exc:
+            svc.get_result(db_session, session, late_joiner)
+        assert exc.value.status_code == 403  # _require_session_participant only ever raises 403
 
 
 class TestGetResultOnlyAfterEnded:

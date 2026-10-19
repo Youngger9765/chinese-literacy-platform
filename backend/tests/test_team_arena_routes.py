@@ -367,6 +367,30 @@ class TestFullHappyPathThroughHttp:
         assert "me" in result.json()
 
 
+class TestResultRequiresParticipantThroughHttp:
+    """Route-level confirmation of the engine-level participant check
+    (test_team_arena_engine_turns.py::TestGetResultRequiresParticipant) —
+    automated security review (post-push, #3632): get_result had no
+    participant check at all."""
+
+    def test_non_member_gets_403_via_http(self, client, owner_teacher, student_in_room, unenrolled_student):
+        create = client.post(
+            "/api/team-arena/sessions",
+            json={"classroom_id": _room_enabled_id, "scope_type": "lesson", "scope_ref": LESSON_A},
+            headers=auth_header(owner_teacher["token"]),
+        )
+        code = create.json()["code"]
+        client.post(f"/api/team-arena/sessions/{code}/join", headers=auth_header(student_in_room["token"]))
+        client.post(
+            f"/api/team-arena/sessions/{code}/control", json={"action": "end"},
+            headers=auth_header(owner_teacher["token"]),
+        )
+        resp = client.get(
+            f"/api/team-arena/sessions/{code}/result", headers=auth_header(unenrolled_student["token"])
+        )
+        assert resp.status_code == 403, resp.text
+
+
 class TestCodeLookupSurvivesEnding:
     """Regression lock: get_session_by_code must NOT filter out `ended`
     sessions — the first version of this route did, and every poll/result

@@ -71,3 +71,40 @@ class TestIsAuthenticatedSessionMember:
         normalization get_session_by_code already applies)."""
         session, teacher, _student = session_with_member
         assert svc.is_authenticated_session_member(db_session, session.code.lower(), teacher.id) is True
+
+    def test_reused_code_resolves_to_the_same_latest_session_the_route_would(self, db_session):
+        """Automated security review (post-push, #3632): this must resolve
+        to the SAME session `_get_session_by_code` (what the actual route
+        uses) would pick — the newest row with that code — not aggregate
+        membership across EVERY historical session that ever held it. A
+        member of an OLD, already-ended session must not be treated as a
+        member of a NEW session that later reused the exact same code."""
+        school = make_school(db_session)
+        teacher = make_teacher(db_session)
+        room = make_classroom(db_session, school, teacher, feature_settings={"team_arena": True})
+        db_session.commit()
+        old_member = make_student(db_session, name="舊場次的學生")
+        new_member = make_student(db_session, name="新場次的學生")
+        db_session.commit()
+
+        from app.models.team_arena import TeamArenaSession
+
+        old_session = TeamArenaSession(
+            classroom_id=room.id, teacher_id=teacher.id, code="REUSED",
+            status="ended", scoreboard={"roster": [old_member.id]},
+        )
+        db_session.add(old_session)
+        db_session.commit()
+
+        new_session = TeamArenaSession(
+            classroom_id=room.id, teacher_id=teacher.id, code="REUSED",
+            status="lobby", scoreboard={"roster": [new_member.id]},
+        )
+        db_session.add(new_session)
+        db_session.commit()
+
+        resolved = svc.get_session_by_code(db_session, "REUSED")
+        assert resolved.id == new_session.id, "sanity: the route itself must resolve to the NEWEST row"
+
+        assert svc.is_authenticated_session_member(db_session, "REUSED", new_member.id) is True
+        assert svc.is_authenticated_session_member(db_session, "REUSED", old_member.id) is False
