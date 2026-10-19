@@ -142,7 +142,15 @@ class TeamArenaMember(Base):
         JSONB, nullable=False, server_default=text("'[]'::jsonb")
     )
     # PRD §3.3: "上場者斷線（超過 15 秒沒輪詢）：該回合直接記為『沒推進』並
-    # 換下一位".
+    # 換下一位". ⚠️ Modeled but NOT YET WRITTEN anywhere (critic review,
+    # slice 2): the engine's turn clock is purely time-based (every turn
+    # ends on `answer_seconds` elapsing regardless of who polled), which
+    # already satisfies "沒推進" for a silent/disconnected active player
+    # without needing a separate presence signal — `answer_seconds` is
+    # always >= the PRD's 15s disconnect threshold, so the dedicated
+    # per-member staleness check this column implies is redundant for v1.
+    # Left in the model (not removed) so a future "show a disconnect icon"
+    # UI feature has a place to write without a schema change.
     last_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     session: Mapped["TeamArenaSession"] = relationship("TeamArenaSession", foreign_keys=[session_id])
