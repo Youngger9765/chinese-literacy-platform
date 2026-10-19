@@ -100,7 +100,26 @@ def test_regex_is_anchored_both_ends(monkeypatch):
     assert s.preview_origin_regex.endswith("$")
 
 
-def test_middleware_receives_the_regex(monkeypatch):
+@pytest.fixture
+def _restore_app_modules():
+    """Reloading app.main rewrites its module globals in place, and every test
+    module collected earlier still holds the ORIGINAL app object, whose
+    middleware reads those globals (member caches, lookups, limiter wiring).
+    Without restoring them, every later test that goes through the real
+    middleware sees a half-new app -- the team-arena and live-quiz rate-limit
+    tests failed only when run after this file (#3632)."""
+    import app.main as main_module
+
+    main_snapshot = dict(vars(main_module))
+    config_snapshot = dict(vars(config_module))
+    yield
+    vars(main_module).clear()
+    vars(main_module).update(main_snapshot)
+    vars(config_module).clear()
+    vars(config_module).update(config_snapshot)
+
+
+def test_middleware_receives_the_regex(monkeypatch, _restore_app_modules):
     """Positive control on the wiring: the property is useless if main.py drops it.
 
     Asserting on the built app (not on a copy of the logic) is the point --

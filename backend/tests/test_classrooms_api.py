@@ -378,6 +378,46 @@ class TestListClassrooms:
         assert after_item["live_quiz"] is False  # untouched key stays at its default
 
 
+
+    def test_list_and_detail_and_enrollment_report_team_arena(self, client, school_id):
+        """Same regression shape as test_list_reflects_feature_settings_not_
+        just_always_false, for the `team_arena` key added alongside 五人對抗賽
+        (issue #3632) — every place pk_human/league/live_quiz are reported
+        (list, detail, PATCH response, and the student-facing my-enrollments
+        endpoint) must also report team_arena, default False, toggleable via
+        the same PATCH /pk-settings endpoint."""
+        owner = _register_user(client, "feature_ta_owner")
+        created = client.post(
+            "/api/classrooms",
+            json={"name": "Team Arena Feature Test", "school_id": school_id},
+            headers=auth_header(owner["token"]),
+        )
+        assert created.status_code == 201, created.text
+        room_id = created.json()["id"]
+
+        before_list = client.get("/api/classrooms", headers=auth_header(owner["token"]))
+        before_item = next(i for i in before_list.json()["items"] if i["id"] == room_id)
+        assert before_item["team_arena"] is False
+
+        before_detail = client.get(f"/api/classrooms/{room_id}", headers=auth_header(owner["token"]))
+        assert before_detail.json()["team_arena"] is False
+
+        patched = client.patch(
+            f"/api/classrooms/{room_id}/pk-settings",
+            json={"team_arena": True},
+            headers=auth_header(owner["token"]),
+        )
+        assert patched.status_code == 200, patched.text
+        assert patched.json()["team_arena"] is True
+
+        after_list = client.get("/api/classrooms", headers=auth_header(owner["token"]))
+        after_item = next(i for i in after_list.json()["items"] if i["id"] == room_id)
+        assert after_item["team_arena"] is True
+
+        after_detail = client.get(f"/api/classrooms/{room_id}", headers=auth_header(owner["token"]))
+        assert after_detail.json()["team_arena"] is True
+
+
 # ===========================================================================
 # GET /api/classrooms/{id} — Classroom detail
 # ===========================================================================

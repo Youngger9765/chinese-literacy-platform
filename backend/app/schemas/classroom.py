@@ -39,6 +39,7 @@ class ClassroomFeatureSettingsRequest(BaseModel):
     pk_human: bool | None = None
     league: bool | None = None
     live_quiz: bool | None = None
+    team_arena: bool | None = None
 
 
 # Backward-compat alias — issue #3586 named this ClassroomPkSettingsRequest
@@ -52,6 +53,7 @@ class ClassroomFeatureSettingsResponse(BaseModel):
     pk_human: bool
     league: bool
     live_quiz: bool
+    team_arena: bool
 
 
 ClassroomPkSettingsResponse = ClassroomFeatureSettingsResponse
@@ -112,6 +114,9 @@ class ClassroomResponse(BaseModel):
     # existed) — see services/pk/classroom_features.py.
     league: bool = False
     live_quiz: bool = False
+    # Issue #3632 — 五人對抗賽班級開關, same accessor, same default-False rule
+    # as pk_human (brand new, no legacy-usage fallback).
+    team_arena: bool = False
 
     model_config = {"from_attributes": True}
 
@@ -213,6 +218,8 @@ class StudentEnrolledClassroom(BaseModel):
     # corresponding flag on (see components/layout/StudentSidebar.tsx).
     league: bool = False
     live_quiz: bool = False
+    # Issue #3632 — same per-classroom-then-ANY pattern, for 五人對抗賽.
+    team_arena: bool = False
 
     model_config = {"from_attributes": True}
 
