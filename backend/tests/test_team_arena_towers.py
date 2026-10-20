@@ -1,144 +1,123 @@
-"""TDD for team_arena.towers — PRD §3.1/§3.2 (地圖：四條路線＋主堡, 計分)."""
+"""TDD for team_arena.towers v2 — PRD §0 v2 改版 L,
+docs/prd/2026-10-18-team-arena-prd.md."""
 from __future__ import annotations
 
-import pytest
-
-from app.services.team_arena.teams import PRIMARY_LANES
-from app.services.team_arena.towers import (
-    BASE_HITS_TO_WIN,
-    TOWERS_PER_LANE,
-    apply_correct_answer,
-    new_path_state,
-)
+from app.services.team_arena import towers as svc
 
 
-class TestNewPathState:
-    def test_starts_with_zero_towers_down_and_zero_base_hits(self):
-        state = new_path_state()
-        assert state.base_hits == 0
-        for lane in PRIMARY_LANES:
-            assert state.towers_down[lane] == 0
+class TestComputeDamage:
+    def test_instant_correct_answer_deals_max_damage(self):
+        assert svc.compute_damage(elapsed_ms=0, limit_ms=30_000, weapon_used=False) == (
+            svc.BASE_DAMAGE + svc.MAX_SPEED_BONUS
+        )
+
+    def test_last_instant_correct_answer_deals_base_damage_only(self):
+        assert svc.compute_damage(elapsed_ms=30_000, limit_ms=30_000, weapon_used=False) == svc.BASE_DAMAGE
+
+    def test_overtime_elapsed_clamped_to_base_damage(self):
+        assert svc.compute_damage(elapsed_ms=99_999, limit_ms=30_000, weapon_used=False) == svc.BASE_DAMAGE
+
+    def test_weapon_used_halves_final_damage(self):
+        full = svc.compute_damage(elapsed_ms=0, limit_ms=30_000, weapon_used=False)
+        halved = svc.compute_damage(elapsed_ms=0, limit_ms=30_000, weapon_used=True)
+        assert halved == full // 2
+
+    def test_weapon_used_never_drops_below_half_base_damage(self):
+        # Slowest possible answer + weapon used: must still be BASE_DAMAGE // 2,
+        # never 0 or negative.
+        damage = svc.compute_damage(elapsed_ms=30_000, limit_ms=30_000, weapon_used=True)
+        assert damage == svc.BASE_DAMAGE // svc.WEAPON_DAMAGE_DIVISOR
+
+    def test_midpoint_elapsed_deals_midpoint_bonus(self):
+        damage = svc.compute_damage(elapsed_ms=15_000, limit_ms=30_000, weapon_used=False)
+        assert damage == svc.BASE_DAMAGE + round(svc.MAX_SPEED_BONUS * 0.5)
 
 
-class TestApplyCorrectAnswerAdvancesOwnLane:
-    def test_first_correct_knocks_outer_tower(self):
-        state = new_path_state()
-        new_state, event = apply_correct_answer(state, "zhuyin")
-        assert new_state.towers_down["zhuyin"] == 1
-        assert event == "tower_down"
-        assert new_state.base_hits == 0
+class TestApplyDamageTowerProgression:
+    def test_partial_damage_does_not_fell_the_tower(self):
+        state = svc.new_path_state()
+        new_state, event = svc.apply_damage(state, 10)
+        assert event == "damage"
+        assert new_state.towers_destroyed == 0
+        assert new_state.current_hp == svc.STRUCTURE_HP - 10
 
-    def test_second_correct_on_same_lane_clears_it(self):
-        state = new_path_state()
-        state, _ = apply_correct_answer(state, "zhuyin")
-        state, event = apply_correct_answer(state, "zhuyin")
-        assert state.towers_down["zhuyin"] == TOWERS_PER_LANE
-        assert event == "lane_cleared"
+    def test_exact_lethal_damage_fells_first_tower(self):
+        state = svc.new_path_state()
+        new_state, event = svc.apply_damage(state, svc.STRUCTURE_HP)
+        assert event == "tower_fallen"
+        assert new_state.towers_destroyed == 1
+        assert new_state.current_hp == svc.STRUCTURE_HP  # fresh tower
+        assert not new_state.base_destroyed
 
-    def test_other_lanes_unaffected(self):
-        state = new_path_state()
-        state, _ = apply_correct_answer(state, "zhuyin")
-        assert state.towers_down["vocab_definitions"] == 0
-        assert state.towers_down["vocab_application"] == 0
-        assert state.towers_down["comprehension"] == 0
+    def test_overkill_damage_still_only_fells_one_tower(self):
+        state = svc.new_path_state()
+        new_state, event = svc.apply_damage(state, svc.STRUCTURE_HP + 999)
+        assert event == "tower_fallen"
+        assert new_state.towers_destroyed == 1
+        assert new_state.current_hp == svc.STRUCTURE_HP  # overflow does not carry
 
+    def test_felling_the_last_tower_starts_attacking_the_base(self):
+        state = svc.PathState(towers_destroyed=svc.TOWER_COUNT - 1, current_hp=svc.STRUCTURE_HP)
+        new_state, event = svc.apply_damage(state, svc.STRUCTURE_HP)
+        assert event == "tower_fallen_to_base"
+        assert new_state.towers_destroyed == svc.TOWER_COUNT
+        assert new_state.current_hp == svc.STRUCTURE_HP
+        assert not new_state.base_destroyed
+        assert new_state.is_attacking_base()
 
-class TestLaneClearedThenBaseHits:
-    """PRD §3.1: "某條路兩座塔都倒之後，該路之後的答對改打主堡"."""
+    def test_destroying_the_base_ends_it(self):
+        state = svc.PathState(towers_destroyed=svc.TOWER_COUNT, current_hp=svc.STRUCTURE_HP)
+        new_state, event = svc.apply_damage(state, svc.STRUCTURE_HP)
+        assert event == "base_destroyed"
+        assert new_state.base_destroyed is True
 
-    def test_third_correct_on_cleared_lane_hits_base(self):
-        state = new_path_state()
-        state, _ = apply_correct_answer(state, "zhuyin")
-        state, _ = apply_correct_answer(state, "zhuyin")  # lane cleared
-        state, event = apply_correct_answer(state, "zhuyin")
-        assert state.base_hits == 1
-        assert event == "base_hit"
-        # the lane's own tower count must not keep incrementing past clear
-        assert state.towers_down["zhuyin"] == TOWERS_PER_LANE
+    def test_damage_after_base_destroyed_is_a_defensive_noop(self):
+        state = svc.PathState(towers_destroyed=svc.TOWER_COUNT, current_hp=0, base_destroyed=True)
+        new_state, event = svc.apply_damage(state, 50)
+        assert event == "already_won"
+        assert new_state == state
 
-    def test_base_conquered_at_configured_hits(self):
-        state = new_path_state()
-        for _ in range(TOWERS_PER_LANE):
-            state, _ = apply_correct_answer(state, "zhuyin")
+    def test_full_sweep_from_fresh_to_base_destroyed(self):
+        state = svc.new_path_state()
         events = []
-        for _ in range(BASE_HITS_TO_WIN):
-            state, event = apply_correct_answer(state, "zhuyin")
+        for _ in range(svc.TOWER_COUNT + 1):
+            state, event = svc.apply_damage(state, svc.STRUCTURE_HP)
             events.append(event)
-        assert state.base_hits == BASE_HITS_TO_WIN
-        assert events[-1] == "base_conquered"
-        assert state.is_base_conquered() is True
-
-    def test_base_hits_never_exceed_win_threshold(self):
-        """A match that has already ended must not keep accumulating base
-        hits if `apply_correct_answer` is (incorrectly) called again — this
-        is a defensive cap, the caller (engine, slice 2) is expected to stop
-        calling once `is_base_conquered()` is True."""
-        state = new_path_state()
-        for _ in range(TOWERS_PER_LANE + BASE_HITS_TO_WIN + 3):
-            state, _event = apply_correct_answer(state, "zhuyin")
-        assert state.base_hits == BASE_HITS_TO_WIN
+        assert events == ["tower_fallen", "tower_fallen", "tower_fallen_to_base", "base_destroyed"]
+        assert state.base_destroyed is True
 
 
-class TestTwoLanesClearedDoNotDoubleCountBase:
-    def test_clearing_two_lanes_then_hitting_base_from_either(self):
-        state = new_path_state()
-        for lane in ("zhuyin", "vocab_definitions"):
-            for _ in range(TOWERS_PER_LANE):
-                state, _ = apply_correct_answer(state, lane)
-        state, event = apply_correct_answer(state, "vocab_definitions")
-        assert event == "base_hit"
-        assert state.base_hits == 1
-        state, event = apply_correct_answer(state, "zhuyin")
-        assert event == "base_conquered"
-        assert state.base_hits == 2
+class TestDecideWinner:
+    def test_opponent_base_destroyed_wins_for_me(self):
+        me = svc.new_path_state()
+        opponent = svc.PathState(towers_destroyed=svc.TOWER_COUNT, current_hp=0, base_destroyed=True)
+        assert svc.decide_winner(me, opponent) == "a"
+        assert svc.decide_winner(opponent, me) == "b"
 
+    def test_fewer_own_towers_destroyed_wins_on_turns_exhausted(self):
+        """Both arguments are DEFENSIVE states (how much damage THIS side
+        has itself taken) — taking FEWER hits means this side is further
+        ahead (PRD "比誰推得比較前面" read from the opponent's own damage)."""
+        less_damaged = svc.PathState(towers_destroyed=1, current_hp=10)
+        more_damaged = svc.PathState(towers_destroyed=2, current_hp=80)
+        assert svc.decide_winner(less_damaged, more_damaged) == "a"
+        assert svc.decide_winner(more_damaged, less_damaged) == "b"
 
-class TestInvalidLaneRejected:
-    def test_unknown_lane_raises(self):
-        state = new_path_state()
-        with pytest.raises(ValueError):
-            apply_correct_answer(state, "not-a-lane")
+    def test_same_towers_destroyed_higher_remaining_hp_wins(self):
+        less_damaged = svc.PathState(towers_destroyed=1, current_hp=90)
+        more_damaged = svc.PathState(towers_destroyed=1, current_hp=20)
+        assert svc.decide_winner(less_damaged, more_damaged) == "a"
+        assert svc.decide_winner(more_damaged, less_damaged) == "b"
 
-    def test_support_lane_is_not_a_tower_lane(self):
-        """PRD §3.1: support has no fixed lane of its own — 系統替他挑
-        本隊推進最少的那條路出題 (the engine, not this module, resolves
-        'support' into one of the PRIMARY_LANES before calling here)."""
-        state = new_path_state()
-        with pytest.raises(ValueError):
-            apply_correct_answer(state, "support")
+    def test_exact_tie_is_a_draw(self):
+        state = svc.PathState(towers_destroyed=1, current_hp=50)
+        assert svc.decide_winner(state, state) == "draw"
 
+    def test_draw_never_depends_on_a_time_argument(self):
+        # Documents the PRD's own wording: "不用秒數硬分勝負" — this
+        # function signature has no elapsed/time parameter at all.
+        import inspect
 
-class TestNoOpAfterBaseConquered:
-    """Critic review (slice 1): the original defensive cap only guarded
-    repeated calls on the SAME lane that scored the winning hit — a call on
-    a DIFFERENT, still-uncleared lane after the base was already conquered
-    silently advanced that other lane instead of being a no-op. This is the
-    regression lock for that fix."""
-
-    def _conquered_state(self):
-        state = new_path_state()
-        for _ in range(TOWERS_PER_LANE + BASE_HITS_TO_WIN):
-            state, _ = apply_correct_answer(state, "zhuyin")
-        assert state.is_base_conquered() is True
-        return state
-
-    def test_cross_lane_call_after_conquest_is_a_full_noop(self):
-        state = self._conquered_state()
-        before = dict(state.towers_down)
-        new_state, event = apply_correct_answer(state, "vocab_definitions")
-        assert event == "base_conquered"
-        assert new_state.towers_down == before
-        assert new_state.base_hits == BASE_HITS_TO_WIN
-
-    def test_cross_lane_call_after_conquest_does_not_advance_that_lane(self):
-        state = self._conquered_state()
-        new_state, _event = apply_correct_answer(state, "comprehension")
-        assert new_state.towers_down["comprehension"] == 0
-
-
-class TestStateIsImmutable:
-    def test_apply_correct_answer_does_not_mutate_input(self):
-        state = new_path_state()
-        before = dict(state.towers_down)
-        apply_correct_answer(state, "zhuyin")
-        assert state.towers_down == before
+        sig = inspect.signature(svc.decide_winner)
+        assert "elapsed" not in sig.parameters
+        assert "time" not in sig.parameters

@@ -1,8 +1,7 @@
 """Membership-gated rate-limit exemption for /api/team-arena/*/state and
-/answer — same shape and reasoning as test_live_quiz_rate_limit.py, PRD §7
-"限流" row. Through the REAL ASGI middleware stack, not a unit test of the
-helper function in isolation (that lives in
-test_team_arena_engine_rate_limit_membership.py).
+/answer — v2, same shape and reasoning as test_live_quiz_rate_limit.py,
+PRD §7 "限流" row (unchanged by v2). Through the REAL ASGI middleware
+stack, not a unit test of the helper function in isolation.
 """
 from __future__ import annotations
 
@@ -19,13 +18,9 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app.main import app, GlobalRateLimitMiddleware
-from app.auth.rate_limiter import general_rate_limiter
 from app.database import get_db
 from app.models import Base
-from app.models.user import Role, UserRole
-from app.models.school import Classroom, School
-
-LESSON_A = "L0125"
+from app.models.school import Classroom, ClassroomStudent, School
 
 engine_db = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
 
@@ -39,8 +34,6 @@ def _set_sqlite_pragma(dbapi_connection, connection_record):
 
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine_db)
 
-_school_id = 0
-
 
 def _override_get_db():
     db = TestingSessionLocal()
@@ -52,16 +45,7 @@ def _override_get_db():
 
 @pytest.fixture(scope="module", autouse=True)
 def setup_db():
-    global _school_id
     Base.metadata.create_all(bind=engine_db)
-    session = TestingSessionLocal()
-    session.add(Role(name="teacher", display_name="Teacher", scope_level="school"))
-    session.add(Role(name="student", display_name="Student", scope_level="school"))
-    school = School(name="Team Arena Rate Limit School")
-    session.add(school)
-    session.commit()
-    _school_id = school.id
-    session.close()
 
     from app.routes.auth import rate_limiter
     rate_limiter.reset()
@@ -105,147 +89,56 @@ def _register_user(client, suffix: str) -> dict:
     return {"email": email, "token": token, "user_id": me.json()["id"]}
 
 
-def _make_classroom_as(client, teacher_token: str, teacher_user_id: int) -> int:
+def _enroll_with_grade(user_id: int, grade: int = 4) -> None:
     db = TestingSessionLocal()
     try:
-        role = db.query(Role).filter(Role.name == "teacher").first()
-        db.add(UserRole(user_id=teacher_user_id, role_id=role.id, scope_type="school", scope_id=str(_school_id)))
-        room = Classroom(
-            school_id=_school_id, teacher_id=teacher_user_id, name="rl room", grade=4,
-            feature_settings={"team_arena": True},
-        )
+        school = School(name=f"RL School {uuid.uuid4().hex[:6]}")
+        db.add(school)
+        db.flush()
+        room = Classroom(school_id=school.id, teacher_id=user_id, name="RL room", grade=grade)
         db.add(room)
-        db.commit()
-        return room.id
-    finally:
-        db.close()
-
-
-def _enroll(student_user_id: int, classroom_id: int) -> None:
-    from app.models.school import ClassroomStudent
-
-    db = TestingSessionLocal()
-    try:
-        db.add(ClassroomStudent(classroom_id=classroom_id, student_id=student_user_id))
+        db.flush()
+        db.add(ClassroomStudent(classroom_id=room.id, student_id=user_id))
         db.commit()
     finally:
         db.close()
 
 
-@pytest.fixture(autouse=True)
-def _tiny_read_limit(monkeypatch):
-    monkeypatch.setattr(GlobalRateLimitMiddleware, "READ_LIMIT", 5)
-    general_rate_limiter.reset()
-    yield
-    general_rate_limiter.reset()
+class TestTeamArenaRateLimitExemption:
+    def test_member_polling_state_is_exempt_while_a_non_exempt_read_still_429s(self, client, monkeypatch):
+        """Positive control first (PRD overclaim-bias doctrine: a "no 429"
+        result only means something if the limit was actually tight enough
+        to bite something): with READ_LIMIT patched down to 3, hammering a
+        NON-exempt read endpoint from the same client 429s well before 10
+        calls. A host polling THEIR OWN session's /state, under the exact
+        same tight limit, never does — because
+        is_authenticated_session_member() exempts it (PRD §7 "限流" row)."""
+        monkeypatch.setattr(GlobalRateLimitMiddleware, "READ_LIMIT", 3)
 
+        host = _register_user(client, "ta_rl_host")
+        _enroll_with_grade(host["user_id"])
 
-def test_joined_member_state_polling_is_exempt_from_per_ip_limit(client):
-    teacher = _register_user(client, "ta_rl_teacher")
-    student = _register_user(client, "ta_rl_student")
-    room_id = _make_classroom_as(client, teacher["token"], teacher["user_id"])
-    _enroll(student["user_id"], room_id)
+        # Positive control: /api/users/me is an ordinary, non-exempt read.
+        control_statuses = [
+            client.get("/api/users/me", headers=auth_header(host["token"])).status_code for _ in range(10)
+        ]
+        assert 429 in control_statuses, (
+            f"positive control never hit 429 -- READ_LIMIT patch didn't take effect: {control_statuses}"
+        )
 
-    created = client.post(
-        "/api/team-arena/sessions",
-        json={"classroom_id": room_id, "scope_type": "lesson", "scope_ref": LESSON_A},
-        headers=auth_header(teacher["token"]),
-    ).json()
-    code = created["code"]
-    client.post(f"/api/team-arena/sessions/{code}/join", headers=auth_header(student["token"]))
+        created = client.post("/api/team-arena/sessions", json={"team_size": 2}, headers=auth_header(host["token"]))
+        assert created.status_code == 201, created.text
+        code = created.json()["code"]
 
-    # 3x the tiny limit — would 429 immediately if this traffic were being
-    # counted against the per-IP bucket at all.
-    statuses = [
-        client.get(f"/api/team-arena/sessions/{code}/state", headers=auth_header(student["token"])).status_code
-        for _ in range(15)
-    ]
-    assert all(s == 200 for s in statuses), statuses
+        statuses = [
+            client.get(f"/api/team-arena/sessions/{code}/state", headers=auth_header(host["token"])).status_code
+            for _ in range(10)
+        ]
+        assert 429 not in statuses, statuses
 
-
-def test_non_member_state_polling_still_counts_against_per_ip_limit(client):
-    teacher = _register_user(client, "ta_rl_teacher2")
-    outsider = _register_user(client, "ta_rl_outsider")
-    room_id = _make_classroom_as(client, teacher["token"], teacher["user_id"])
-
-    created = client.post(
-        "/api/team-arena/sessions",
-        json={"classroom_id": room_id, "scope_type": "lesson", "scope_ref": LESSON_A},
-        headers=auth_header(teacher["token"]),
-    ).json()
-    code = created["code"]
-
-    statuses = [
-        client.get(f"/api/team-arena/sessions/{code}/state", headers=auth_header(outsider["token"])).status_code
-        for _ in range(15)
-    ]
-    assert 403 in statuses, "sanity: route-level membership check should still fire at least once"
-    assert 429 in statuses, f"non-member traffic should eventually hit the per-IP limit, got {statuses}"
-
-
-def test_malformed_code_never_touches_the_db(client, monkeypatch):
-    """Automated security review (post-push, #3632): a garbage path segment
-    (too long, wrong charset) can never be a real session code — the
-    format check must reject it BEFORE the DB lookup runs at all, so an
-    authenticated attacker hammering made-up codes can't force a query per
-    request."""
-    import app.main as main_mod
-
-    user = _register_user(client, "ta_rl_malformed")
-    calls = []
-    real = main_mod.team_arena_is_authenticated_member
-
-    def spy(db, code, user_id):
-        calls.append(code)
-        return real(db, code, user_id)
-
-    monkeypatch.setattr(main_mod, "team_arena_is_authenticated_member", spy)
-
-    # Too long, and contains characters outside A-Z0-9 — both independently
-    # fail the 4-8 char A-Z0-9 shape check.
-    resp = client.get(
-        "/api/team-arena/sessions/not-a-real-code-at-all!!/state", headers=auth_header(user["token"])
-    )
-    # 422 (FastAPI's own path-param length validation) or 404 (engine's own
-    # lookup) are both "the route still answers correctly" — what matters
-    # here is that the rate-limit exemption's OWN membership lookup never
-    # ran for a shape that can never be a real code.
-    assert resp.status_code in (404, 422), resp.status_code
-    assert calls == [], f"expected the DB lookup to never run for a malformed code, got {calls}"
-
-
-def test_well_formed_but_unknown_code_is_cached_negative_not_requeried(client, monkeypatch):
-    """Point 3's other half: even a well-formed code that resolves to no
-    session (or to a session the caller isn't in) should only hit the DB
-    once per short window, not once per poll."""
-    import app.main as main_mod
-
-    user = _register_user(client, "ta_rl_neg_cache")
-    main_mod._team_arena_negative_member_cache.clear()
-    calls = []
-    real = main_mod.team_arena_is_authenticated_member
-
-    def spy(db, code, user_id):
-        calls.append(code)
-        return real(db, code, user_id)
-
-    monkeypatch.setattr(main_mod, "team_arena_is_authenticated_member", spy)
-
-    statuses = [
-        client.get("/api/team-arena/sessions/ZZZZZZ/state", headers=auth_header(user["token"])).status_code
-        for _ in range(10)
-    ]
-    # 404 while still under the (tiny, monkeypatched) per-IP read budget,
-    # then 429 once it's exhausted — exactly the correct behavior for a
-    # non-member: the negative cache saves DB load, it never exempts them
-    # from the per-IP limiter itself.
-    assert all(status in (404, 429) for status in statuses), statuses
-    assert len(calls) <= 1, f"expected the DB lookup to be cached, got {len(calls)} calls: {calls}"
-
-
-def test_other_endpoints_unaffected_by_the_team_arena_exemption(client):
-    user = _register_user(client, "ta_rl_other_endpoint")
-    statuses = [
-        client.get("/api/users/me", headers=auth_header(user["token"])).status_code for _ in range(15)
-    ]
-    assert 429 in statuses, statuses
+    def test_unknown_code_does_not_crash_the_membership_check(self, client):
+        host = _register_user(client, "ta_rl_bad_code")
+        resp = client.get("/api/team-arena/sessions/ZZZZZZ/state", headers=auth_header(host["token"]))
+        # 404 from the real route (not a member of anything, code doesn't
+        # exist) -- the middleware's membership lookup itself must not 500.
+        assert resp.status_code == 404

@@ -1,17 +1,11 @@
-"""TDD for team_arena.engine — session create/join (PRD §10, §13 AC1)."""
+"""TDD for team_arena.engine v2 — room create/join, PRD §0 v2 改版 A/B/C/K."""
 from __future__ import annotations
 
 import pytest
 from fastapi import HTTPException
 
 from app.services.team_arena import engine as svc
-from league_factories import (
-    enroll_student,
-    make_classroom,
-    make_school,
-    make_student,
-    make_teacher,
-)
+from league_factories import enroll_student, make_classroom, make_school, make_student, make_teacher
 
 
 @pytest.fixture()
@@ -33,191 +27,179 @@ def db_session():
         Base.metadata.drop_all(engine)
 
 
-@pytest.fixture()
-def school(db_session):
-    return make_school(db_session)
+def _student_with_grade(db, grade=4, name="學生"):
+    """No StudentProfile factory exists in league_factories — the engine's
+    fallback path (resolve via ANY enrolled classroom's grade) is the
+    simplest one to exercise from shared test fixtures, so every test here
+    goes through it rather than hand-building a StudentProfile row."""
+    teacher = make_teacher(db)
+    school = make_school(db)
+    room = make_classroom(db, school, teacher, grade=grade)
+    student = make_student(db, name=name)
+    enroll_student(db, room, student)
+    db.commit()
+    return student
 
 
-@pytest.fixture()
-def teacher(db_session):
-    return make_teacher(db_session)
+class TestResolveHostGrade:
+    def test_resolves_from_enrolled_classroom(self, db_session):
+        host = _student_with_grade(db_session, grade=4)
+        assert svc._resolve_host_grade(db_session, host) == "4"
 
-
-@pytest.fixture()
-def classroom_enabled(db_session, school, teacher):
-    room = make_classroom(db_session, school, teacher, feature_settings={"team_arena": True})
-    db_session.commit()
-    return room
-
-
-@pytest.fixture()
-def classroom_disabled(db_session, school, teacher):
-    room = make_classroom(db_session, school, teacher)
-    db_session.commit()
-    return room
-
-
-class TestCreateSessionFeatureGate:
-    """PRD §13 AC1: 班級沒打開 team_arena -> POST /sessions 回 403."""
-
-    def test_disabled_classroom_rejected(self, db_session, classroom_disabled, teacher):
-        with pytest.raises(HTTPException) as exc:
-            svc.create_session(
-                db_session, teacher, classroom_id=classroom_disabled.id,
-                scope_type="grade_pool", scope_ref="4",
-            )
-        assert exc.value.status_code == 403
-
-    def test_enabled_classroom_allowed(self, db_session, classroom_enabled, teacher):
-        session = svc.create_session(
-            db_session, teacher, classroom_id=classroom_enabled.id,
-            scope_type="grade_pool", scope_ref="4",
-        )
-        assert session.status == "lobby"
-        assert session.code and len(session.code) == 6
-
-
-class TestCreateSessionOwnership:
-    def test_non_owning_teacher_rejected(self, db_session, classroom_enabled, school):
-        other_teacher = make_teacher(db_session, name="別班老師")
+    def test_no_classroom_no_profile_raises_400(self, db_session):
+        host = make_student(db_session)
         db_session.commit()
         with pytest.raises(HTTPException) as exc:
-            svc.create_session(
-                db_session, other_teacher, classroom_id=classroom_enabled.id,
-                scope_type="grade_pool", scope_ref="4",
-            )
-        assert exc.value.status_code == 403
-
-    def test_unknown_classroom_404(self, db_session, teacher):
-        with pytest.raises(HTTPException) as exc:
-            svc.create_session(
-                db_session, teacher, classroom_id=999_999,
-                scope_type="grade_pool", scope_ref="4",
-            )
-        assert exc.value.status_code == 404
+            svc._resolve_host_grade(db_session, host)
+        assert exc.value.status_code == 400
 
 
-class TestCreateSessionSettingsDefaults:
-    def test_defaults_applied(self, db_session, classroom_enabled, teacher):
-        session = svc.create_session(
-            db_session, teacher, classroom_id=classroom_enabled.id,
-            scope_type="grade_pool", scope_ref="4",
-        )
+class TestCreateSession:
+    def test_defaults_applied_and_host_auto_seated(self, db_session):
+        host = _student_with_grade(db_session, grade=4)
+        session = svc.create_session(db_session, host)
+
+        assert session.status == "lobby"
+        assert session.classroom_id is None  # PRD rule B
+        assert session.teacher_id == host.id  # v2: host id
+        assert len(session.code) == 6
+        assert session.settings["team_size"] == 5
         assert session.settings["turns_per_player"] == 2
         assert session.settings["answer_seconds"] == 30
-        assert session.settings["reading_speed"] == "standard"
+        assert session.settings["scope_ref"] == "4"
 
-    def test_custom_settings_persisted(self, db_session, classroom_enabled, teacher):
+        from app.models.team_arena import TeamArenaMember
+        seated = db_session.query(TeamArenaMember).filter(TeamArenaMember.session_id == session.id).all()
+        assert len(seated) == 1
+        assert seated[0].student_id == host.id
+        assert seated[0].side == 0  # default side "a"
+
+    def test_custom_settings_and_side(self, db_session):
+        host = _student_with_grade(db_session, grade=4)
         session = svc.create_session(
-            db_session, teacher, classroom_id=classroom_enabled.id,
-            scope_type="grade_pool", scope_ref="4",
-            turns_per_player=3, answer_seconds=45, reading_speed="slow",
-            story_pack_key="tang-dynasty",
+            db_session, host, team_size=3, turns_per_player=1, answer_seconds=45, side="b",
         )
-        assert session.settings["turns_per_player"] == 3
+        assert session.settings["team_size"] == 3
+        assert session.settings["turns_per_player"] == 1
         assert session.settings["answer_seconds"] == 45
-        assert session.settings["reading_speed"] == "slow"
-        assert session.settings["story_pack_key"] == "tang-dynasty"
 
-    def test_invalid_scope_rejected(self, db_session, classroom_enabled, teacher):
-        with pytest.raises(HTTPException):
-            svc.create_session(
-                db_session, teacher, classroom_id=classroom_enabled.id,
-                scope_type="not-a-scope", scope_ref="4",
-            )
+        from app.models.team_arena import TeamArenaMember
+        seated = db_session.query(TeamArenaMember).filter(TeamArenaMember.session_id == session.id).first()
+        assert seated.side == 1  # "b"
+
+    def test_invalid_team_size_rejected(self, db_session):
+        host = _student_with_grade(db_session, grade=4)
+        with pytest.raises(HTTPException) as exc:
+            svc.create_session(db_session, host, team_size=6)
+        assert exc.value.status_code == 400
+
+    def test_host_without_grade_rejected(self, db_session):
+        host = make_student(db_session)
+        db_session.commit()
+        with pytest.raises(HTTPException) as exc:
+            svc.create_session(db_session, host)
+        assert exc.value.status_code == 400
 
 
 class TestJoinSession:
-    def test_classroom_member_can_join(self, db_session, classroom_enabled, teacher):
-        student = make_student(db_session)
-        enroll_student(db_session, classroom_enabled, student)
+    def test_any_student_can_join_regardless_of_classroom(self, db_session):
+        """PRD rule B: "拿到代碼的全平台任何學生都能加入" — the joiner is a
+        student with NO relationship to the host's classroom at all."""
+        host = _student_with_grade(db_session, grade=4)
+        session = svc.create_session(db_session, host)
+
+        stranger = make_student(db_session, name="陌生同學")
         db_session.commit()
+        joined = svc.join_session(db_session, stranger, session.code, side="b")
+        assert joined.code == session.code
 
-        session = svc.create_session(
-            db_session, teacher, classroom_id=classroom_enabled.id,
-            scope_type="grade_pool", scope_ref="4",
-        )
-        result = svc.join_session(db_session, student, session.code)
-        assert result.id == session.id
-        assert student.id in result.scoreboard.get("roster", [])
-
-    def test_non_member_rejected(self, db_session, classroom_enabled, teacher):
-        outsider = make_student(db_session, name="外班學生")
+    def test_join_full_side_rejected(self, db_session):
+        host = _student_with_grade(db_session, grade=4)
+        session = svc.create_session(db_session, host, team_size=2, side="a")
+        s2 = make_student(db_session, name="s2")
         db_session.commit()
-        session = svc.create_session(
-            db_session, teacher, classroom_id=classroom_enabled.id,
-            scope_type="grade_pool", scope_ref="4",
-        )
-        with pytest.raises(HTTPException) as exc:
-            svc.join_session(db_session, outsider, session.code)
-        assert exc.value.status_code == 403
+        svc.join_session(db_session, s2, session.code, side="a")  # fills side a (2/2)
 
-    def test_unknown_code_404(self, db_session):
-        student = make_student(db_session)
+        s3 = make_student(db_session, name="s3")
         db_session.commit()
         with pytest.raises(HTTPException) as exc:
-            svc.join_session(db_session, student, "ZZZZZZ")
-        assert exc.value.status_code == 404
-
-    def test_double_join_is_idempotent(self, db_session, classroom_enabled, teacher):
-        student = make_student(db_session)
-        enroll_student(db_session, classroom_enabled, student)
-        db_session.commit()
-        session = svc.create_session(
-            db_session, teacher, classroom_id=classroom_enabled.id,
-            scope_type="grade_pool", scope_ref="4",
-        )
-        svc.join_session(db_session, student, session.code)
-        svc.join_session(db_session, student, session.code)
-        result = svc.join_session(db_session, student, session.code)
-        assert result.scoreboard["roster"].count(student.id) == 1
-
-    def test_join_after_started_rejected(self, db_session, classroom_enabled, teacher):
-        students = []
-        for _ in range(4):
-            s = make_student(db_session)
-            enroll_student(db_session, classroom_enabled, s)
-            students.append(s)
-        db_session.commit()
-        session = svc.create_session(
-            db_session, teacher, classroom_id=classroom_enabled.id,
-            scope_type="grade_pool", scope_ref="4",
-        )
-        for s in students:
-            svc.join_session(db_session, s, session.code)
-        svc.assign_teams(db_session, session, teacher, action="auto")
-        svc.control(db_session, session, teacher, action="start")
-
-        late_student = make_student(db_session)
-        enroll_student(db_session, classroom_enabled, late_student)
-        db_session.commit()
-        with pytest.raises(HTTPException) as exc:
-            svc.join_session(db_session, late_student, session.code)
+            svc.join_session(db_session, s3, session.code, side="a")
         assert exc.value.status_code == 409
 
-    def test_rostered_student_can_reopen_page_after_start_and_after_end(self, db_session, classroom_enabled, teacher):
-        """#3632 staging QA: the play page calls join on every mount, so a
-        student whose tablet refreshed mid-game got 「本場已經開始，無法加入」
-        and was locked out. A student already on the roster must get back in
-        at every stage; a NEW student is still refused (see the test above)."""
-        students = []
-        for _ in range(4):
-            s = make_student(db_session)
-            enroll_student(db_session, classroom_enabled, s)
-            students.append(s)
+    def test_join_after_start_rejected_for_new_student(self, db_session):
+        host = _student_with_grade(db_session, grade=4)
+        session = svc.create_session(db_session, host, team_size=2, side="a")
+        others = [make_student(db_session, name=f"s{i}") for i in range(3)]
         db_session.commit()
-        session = svc.create_session(
-            db_session, teacher, classroom_id=classroom_enabled.id,
-            scope_type="grade_pool", scope_ref="4",
-        )
-        for s in students:
-            svc.join_session(db_session, s, session.code)
-        svc.assign_teams(db_session, session, teacher, action="auto")
-        svc.control(db_session, session, teacher, action="start")
+        svc.join_session(db_session, others[0], session.code, side="a")
+        svc.join_session(db_session, others[1], session.code, side="b")
+        svc.join_session(db_session, others[2], session.code, side="b")
+        svc.control(db_session, session, host, action="start")
 
-        for s in students:
-            assert svc.join_session(db_session, s, session.code).status == "playing"
-        assert session.scoreboard["roster"].count(students[0].id) == 1
+        newcomer = make_student(db_session, name="late")
+        db_session.commit()
+        with pytest.raises(HTTPException) as exc:
+            svc.join_session(db_session, newcomer, session.code, side="a")
+        assert exc.value.status_code == 409
 
-        svc.control(db_session, session, teacher, action="end")
-        assert svc.join_session(db_session, students[0], session.code).status == "ended"
+    def test_rejoin_after_start_is_idempotent(self, db_session):
+        """Explicit DELIVERY requirement: rejoin after start must keep
+        working for rostered students."""
+        host = _student_with_grade(db_session, grade=4)
+        session = svc.create_session(db_session, host, team_size=2, side="a")
+        others = [make_student(db_session, name=f"s{i}") for i in range(3)]
+        db_session.commit()
+        svc.join_session(db_session, others[0], session.code, side="a")
+        svc.join_session(db_session, others[1], session.code, side="b")
+        svc.join_session(db_session, others[2], session.code, side="b")
+        svc.control(db_session, session, host, action="start")
+
+        # Host AND a rostered student can both call join again post-start
+        # without error (page refresh / tablet slept).
+        again = svc.join_session(db_session, host, session.code, side="b")
+        assert again.status == "playing"
+        again2 = svc.join_session(db_session, others[0], session.code, side="b")
+        assert again2.status == "playing"
+
+    def test_unknown_code_404(self, db_session):
+        stranger = make_student(db_session)
+        db_session.commit()
+        with pytest.raises(HTTPException) as exc:
+            svc.join_session(db_session, stranger, "ZZZZZZ", side="a")
+        assert exc.value.status_code == 404
+
+
+class TestStartGate:
+    def test_cannot_start_until_both_sides_full(self, db_session):
+        """PRD rule C: "兩隊都滿額開房的人才能按開始"."""
+        host = _student_with_grade(db_session, grade=4)
+        session = svc.create_session(db_session, host, team_size=3, side="a")
+        with pytest.raises(HTTPException) as exc:
+            svc.control(db_session, session, host, action="start")
+        assert exc.value.status_code == 409
+
+    def test_only_host_can_start(self, db_session):
+        host = _student_with_grade(db_session, grade=4)
+        session = svc.create_session(db_session, host, team_size=2, side="a")
+        others = [make_student(db_session, name=f"s{i}") for i in range(3)]
+        db_session.commit()
+        svc.join_session(db_session, others[0], session.code, side="a")
+        svc.join_session(db_session, others[1], session.code, side="b")
+        svc.join_session(db_session, others[2], session.code, side="b")
+
+        with pytest.raises(HTTPException) as exc:
+            svc.control(db_session, session, others[0], action="start")
+        assert exc.value.status_code == 403
+
+    def test_starts_once_both_sides_full(self, db_session):
+        host = _student_with_grade(db_session, grade=4)
+        session = svc.create_session(db_session, host, team_size=2, side="a")
+        others = [make_student(db_session, name=f"s{i}") for i in range(3)]
+        db_session.commit()
+        svc.join_session(db_session, others[0], session.code, side="a")
+        svc.join_session(db_session, others[1], session.code, side="b")
+        svc.join_session(db_session, others[2], session.code, side="b")
+
+        started = svc.control(db_session, session, host, action="start")
+        assert started.status == "playing"
+        assert started.settings["total_turns"] == session.settings["turns_per_player"] * 2

@@ -88,5 +88,4 @@ def update_pk_settings(
         pk_human=classroom_features.get_classroom_feature(classroom, "pk_human", db=db),
         league=classroom_features.get_classroom_feature(classroom, "league", db=db),
         live_quiz=classroom_features.get_classroom_feature(classroom, "live_quiz", db=db),
-        team_arena=classroom_features.get_classroom_feature(classroom, "team_arena", db=db),
     )

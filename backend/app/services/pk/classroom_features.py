@@ -12,10 +12,13 @@ recognized keys here rather than creating a second, parallel mechanism:
 - "pk_human"   (真人 PK — 同學配對對戰／邀請碼, PRD §2)
 - "league"     (跨班賽季＋劇情包 — cross-class invitational seasons)
 - "live_quiz"  (課堂搶答 — in-class live-paced quiz)
-- "team_arena" (五人對抗賽 — 5-person team turn-based quiz battle, issue
-  #3632, PRD docs/prd/2026-10-18-team-arena-prd.md §9.2). Brand new like
-  `pk_human`: never existed before this toggle, so it has NO legacy-usage
-  fallback — an absent key is always `False`, never inferred from history.
+
+多人對抗賽 (team_arena, issue #3632) is deliberately NOT a key here as of
+its v2 rewrite (2026-10-20, PRD docs/prd/2026-10-18-team-arena-prd.md §0
+"⭐ v2 改版" rule B: "拿掉班級開關...老師端入口移除") — v2 rooms are
+student-hosted and classroom-independent, so there is nothing left to
+toggle per classroom for it. (v1 briefly had a "team_arena" key here; it
+is gone, not merely defaulted off.)
 
 "挑戰文學家" (AI PK) is deliberately NOT a key here — Young 2026-10-16:
 "AI PK 跟班級無關", it is always available to any logged-in student
@@ -55,7 +58,6 @@ FEATURE_DEFAULTS: dict[str, bool] = {
     "pk_human": False,
     "league": False,
     "live_quiz": False,
-    "team_arena": False,
 }
 
 

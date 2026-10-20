@@ -204,7 +204,6 @@ def classroom_to_response(classroom: Classroom, db: Session) -> ClassroomRespons
         # legacy-usage backward-compat rule (see classroom_features.py).
         league=pk_classroom_features.get_classroom_feature(classroom, "league", db=db),
         live_quiz=pk_classroom_features.get_classroom_feature(classroom, "live_quiz", db=db),
-        team_arena=pk_classroom_features.get_classroom_feature(classroom, "team_arena", db=db),
     )
 
 
@@ -233,5 +232,4 @@ def classroom_to_detail_response(classroom: Classroom, db: Session) -> Classroom
         pk_human=pk_classroom_features.get_classroom_feature(classroom, "pk_human", db=db),
         league=pk_classroom_features.get_classroom_feature(classroom, "league", db=db),
         live_quiz=pk_classroom_features.get_classroom_feature(classroom, "live_quiz", db=db),
-        team_arena=pk_classroom_features.get_classroom_feature(classroom, "team_arena", db=db),
     )
