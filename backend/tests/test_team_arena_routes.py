@@ -218,3 +218,42 @@ class TestEndToEndHappyPath:
         result = client.get(f"/api/team-arena/sessions/{code}/result", headers=auth_header(host["token"]))
         assert result.status_code == 200
         assert "sides" in result.json()
+
+
+class TestOptionsOpenReachesPollingClient:
+    def test_after_version_poll_is_not_unchanged_once_options_open(self, client, monkeypatch):
+        """Staging QA 2026-10-20: options open on the clock, which never bumped
+        state_version, so a client polling with after_version kept getting
+        "unchanged" and showed 「請先仔細讀題目」 for ~26 s of a 30 s turn."""
+        from datetime import timedelta
+
+        from app.services.team_arena import engine
+
+        host = _register(client, "ta_open_host")
+        _enroll_with_grade(host["user_id"])
+        code = client.post(
+            "/api/team-arena/sessions",
+            json={"team_size": 2, "turns_per_player": 1, "answer_seconds": 45},
+            headers=auth_header(host["token"]),
+        ).json()["code"]
+        for suffix, side in (("ta_open_1", "a"), ("ta_open_2", "b"), ("ta_open_3", "b")):
+            p = _register(client, suffix)
+            assert client.post(f"/api/team-arena/sessions/{code}/join", json={"side": side}, headers=auth_header(p["token"])).status_code == 201
+        assert client.post(f"/api/team-arena/sessions/{code}/control", json={"action": "start"}, headers=auth_header(host["token"])).status_code == 200
+
+        # Find the player who is active on turn 0 among the host's side.
+        first = client.get(f"/api/team-arena/sessions/{code}/state", headers=auth_header(host["token"])).json()
+        rnd = (first.get("own_match") or {}).get("current_round")
+        assert rnd is not None and first["own_match"]["am_i_active"], first
+        assert rnd.get("options") is None, "should still be in the reading phase right after start"
+        v0 = first["state_version"]
+
+        # Unchanged while still reading (positive control: the cheap path works).
+        same = client.get(f"/api/team-arena/sessions/{code}/state?after_version={v0}", headers=auth_header(host["token"])).json()
+        assert same.get("unchanged") is True
+
+        real_now = engine._now
+        monkeypatch.setattr(engine, "_now", lambda: real_now() + timedelta(seconds=rnd["reading_seconds"] + 1))
+        later = client.get(f"/api/team-arena/sessions/{code}/state?after_version={v0}", headers=auth_header(host["token"])).json()
+        assert later.get("unchanged") is not True, "options opened but the poll still said unchanged"
+        assert later["own_match"]["current_round"]["options"], later
