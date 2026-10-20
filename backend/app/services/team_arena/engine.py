@@ -499,6 +499,10 @@ def _ensure_current_round(
         "weapon_used": None,
         "eliminated_options": None,
         "hint_text": None,
+        # Computed once per round so the page can grey 看提示 out up front
+        # (PRD rule J) instead of letting the student click into a 409
+        # 「這題沒有提示」 (staging QA 2026-10-21).
+        "hint_available": weapons_mod.build_hint(payload) is not None,
         "call_teammate_active": False,
     }
     side_cache["current_round"] = current
@@ -874,6 +878,7 @@ def _public_round_view(round_state: dict, *, db: Session, viewer: TeamArenaMembe
         "answer_seconds": round_state["answer_seconds"],
         "revealed": revealed,
         "hint_text": round_state.get("hint_text"),
+        "hint_available": round_state.get("hint_available", True),
         "call_teammate_active": call_teammate_active,
     }
     if revealed:
