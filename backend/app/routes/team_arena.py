@@ -93,6 +93,13 @@ def get_state(
 ):
     session = _session_for(db, code)
     state = engine.get_state(db, session, current_user)
+    # Options open on the clock (reading_seconds after the turn starts), which
+    # never bumps state_version — so a client polling with after_version got
+    # "unchanged" and stayed on 「請先仔細讀題目」 for the whole answer window
+    # (staging QA 2026-10-20: options open at ~6 s, screen updated at ~26 s).
+    # Fold "are my options open" into the version the client echoes back.
+    own_round = (state.get("own_match") or {}).get("current_round") or {}
+    state["state_version"] = state["state_version"] * 2 + (1 if own_round.get("options") else 0)
     if after_version is not None and after_version == state["state_version"]:
         return {"state_version": state["state_version"], "unchanged": True}
     return state
