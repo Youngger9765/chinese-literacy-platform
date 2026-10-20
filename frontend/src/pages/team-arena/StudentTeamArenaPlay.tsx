@@ -57,7 +57,10 @@ const MIN_OPTIONS_TO_ELIMINATE = 3;
 // display-only, same "no shared types package" reasoning as above.
 const TOWER_COUNT = 3;
 
-type VisualEffect = { kind: 'attack'; side: TeamArenaSide; variant: AttackVariant } | { kind: 'collapse'; side: TeamArenaSide } | { kind: 'victory'; side: TeamArenaSide };
+type VisualEffect =
+  | { kind: 'attack'; side: TeamArenaSide; variant: AttackVariant; then?: 'collapse' | 'victory' }
+  | { kind: 'collapse'; side: TeamArenaSide }
+  | { kind: 'victory'; side: TeamArenaSide };
 
 // `sides[side].towers_destroyed` is how many of THAT side's OWN towers
 // have fallen (it is damage TAKEN by that side, not dealt by it) -- a
@@ -182,18 +185,23 @@ const StudentTeamArenaPlay: React.FC = () => {
     // Staging: one effect at a time (motion-craft — don't animate two
     // things at once); extras this tick are simply dropped.
     const event = events[0];
-    if (event.kind === 'base_destroyed') {
-      setEffects((prev) => ({ ...prev, [event.side]: { kind: 'victory', side: event.side } }));
-    } else if (event.kind === 'tower_fallen') {
-      setEffects((prev) => ({ ...prev, [event.side]: { kind: 'collapse', side: event.side } }));
-    } else {
-      const variant = pickAttackVariant(lastAttackVariantRef.current);
-      lastAttackVariantRef.current = variant;
-      setEffects((prev) => ({ ...prev, [event.side]: { kind: 'attack', side: event.side, variant } }));
-    }
+    // Every hit plays a random attack first. A fast correct answer usually
+    // topples a tower in one hit (80 + speed bonus vs 100 HP), so showing
+    // only the collapse meant the attack animation almost never played
+    // (staging QA 2026-10-21: 0 attacks in a full match). The collapse /
+    // victory follows the attack via `then`.
+    const variant = pickAttackVariant(lastAttackVariantRef.current);
+    lastAttackVariantRef.current = variant;
+    const then = event.kind === 'base_destroyed' ? 'victory' : event.kind === 'tower_fallen' ? 'collapse' : undefined;
+    setEffects((prev) => ({ ...prev, [event.side]: { kind: 'attack', side: event.side, variant, then } }));
   }, [state]);
 
-  const clearEffect = (side: TeamArenaSide) => setEffects((prev) => ({ ...prev, [side]: undefined }));
+  const clearEffect = (side: TeamArenaSide) =>
+    setEffects((prev) => {
+      const cur = prev[side];
+      if (cur?.kind === 'attack' && cur.then) return { ...prev, [side]: { kind: cur.then, side } };
+      return { ...prev, [side]: undefined };
+    });
 
   useEffect(() => {
     if (state && !isUnchangedState(state) && state.status === 'ended' && token && routeCode && !result) {
