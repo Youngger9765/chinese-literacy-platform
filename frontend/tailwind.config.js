@@ -126,6 +126,53 @@ export default {
           '40%':  { transform: 'scale(1.15) translateY(-8px)', opacity: '1' },
           '100%': { transform: 'scale(0.4) translateY(-40px)', opacity: '0' },
         },
+        // 多人對抗賽 (#3632 PRD rule N) — six distinct attack styles, each
+        // with its own path/rotation signature so a random, never-twice-
+        // in-a-row pick is visually obvious, not just a recolor of the
+        // same motion. motion-craft skill: no linear easing on any
+        // positional move, one thing moving per frame, <=1.5s total.
+        'attack-rock': {
+          '0%':   { transform: 'translate(-60px, 10px) scale(0.6) rotate(-20deg)', opacity: '0' },
+          '15%':  { opacity: '1' },
+          '55%':  { transform: 'translate(-10px, -36px) scale(1.05) rotate(80deg)', opacity: '1' },
+          '100%': { transform: 'translate(0, 0) scale(1) rotate(160deg)', opacity: '0' },
+        },
+        'attack-lightning': {
+          '0%':   { transform: 'scaleY(0.2) translateY(-50px)', opacity: '0' },
+          '20%':  { transform: 'scaleY(1.1) translateY(0)', opacity: '1' },
+          '35%':  { opacity: '0.4' },
+          '50%':  { opacity: '1' },
+          '100%': { transform: 'scaleY(1) translateY(0)', opacity: '0' },
+        },
+        'attack-fireball': {
+          '0%':   { transform: 'translateX(-70px) scale(0.7)', opacity: '0' },
+          '20%':  { opacity: '1' },
+          '70%':  { transform: 'translateX(0) scale(1.15)', opacity: '1' },
+          '100%': { transform: 'translateX(8px) scale(0.9)', opacity: '0' },
+        },
+        'attack-arrows': {
+          '0%':   { transform: 'translateY(-60px) rotate(35deg) scale(0.8)', opacity: '0' },
+          '25%':  { opacity: '1' },
+          '80%':  { transform: 'translateY(0) rotate(35deg) scale(1)', opacity: '1' },
+          '100%': { transform: 'translateY(6px) rotate(35deg) scale(0.95)', opacity: '0' },
+        },
+        'attack-tornado': {
+          '0%':   { transform: 'scale(0.3) rotate(0deg)', opacity: '0' },
+          '20%':  { opacity: '1' },
+          '80%':  { transform: 'scale(1.1) rotate(540deg)', opacity: '1' },
+          '100%': { transform: 'scale(0.9) rotate(720deg)', opacity: '0' },
+        },
+        'attack-meteor': {
+          '0%':   { transform: 'translate(-80px, -60px) scale(0.5) rotate(-35deg)', opacity: '0' },
+          '20%':  { opacity: '1' },
+          '70%':  { transform: 'translate(0, 0) scale(1.1) rotate(-35deg)', opacity: '1' },
+          '100%': { transform: 'translate(10px, 10px) scale(0.85) rotate(-35deg)', opacity: '0' },
+        },
+        'tower-collapse': {
+          '0%':   { transform: 'translateY(0) scale(1) rotate(0deg)', opacity: '1' },
+          '30%':  { transform: 'translateY(2px) scale(1.03) rotate(-2deg)', opacity: '1' },
+          '100%': { transform: 'translateY(18px) scale(0.75) rotate(6deg)', opacity: '0' },
+        },
       },
       animation: {
         shake: 'shake 0.45s ease-in-out',
@@ -140,6 +187,13 @@ export default {
         'confetti-drop-3': 'confetti-drop-3 0.9s ease-in 0s forwards',
         'star-burst': 'star-burst 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)',
         'fly-away': 'fly-away 0.55s cubic-bezier(0.4, 0, 0.6, 1) forwards',
+        'attack-rock': 'attack-rock 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) forwards',
+        'attack-lightning': 'attack-lightning 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) forwards',
+        'attack-fireball': 'attack-fireball 0.8s cubic-bezier(0.22, 0.61, 0.36, 1) forwards',
+        'attack-arrows': 'attack-arrows 0.85s cubic-bezier(0.22, 0.61, 0.36, 1) forwards',
+        'attack-tornado': 'attack-tornado 1.1s cubic-bezier(0.34, 1.26, 0.64, 1) forwards',
+        'attack-meteor': 'attack-meteor 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) forwards',
+        'tower-collapse': 'tower-collapse 0.7s cubic-bezier(0.55, 0.06, 0.68, 0.19) forwards',
       },
     },
   },

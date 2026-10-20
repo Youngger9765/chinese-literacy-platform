@@ -1,7 +1,9 @@
 /**
- * 五人對抗賽 (team_arena) API client — issue #3632,
- * docs/prd/2026-10-18-team-arena-prd.md §10. Follows the same pattern as
- * pkApi.ts/liveQuizApi.ts (this repo's closest sibling features).
+ * 多人對抗賽 (team_arena) API client — v2, issue #3632,
+ * docs/prd/2026-10-18-team-arena-prd.md §0 "⭐ v2 改版" §10. Mirrors
+ * app.services.team_arena.engine's response shapes exactly (role-aware
+ * dicts, not a parallel type hierarchy the backend has to stay in sync
+ * with by hand).
  */
 import { onApiUnauthorized } from './sessionGuard';
 import { API_BASE } from './apiConfig';
@@ -45,52 +47,30 @@ async function handleResponse<T>(res: Response): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-// --- Types (mirrors services/team_arena/engine.py response shapes) ---
+// --- Types ---
 
-export type TeamArenaScopeType = 'lesson' | 'grade_pool';
-export type TeamArenaReadingSpeed = 'slow' | 'standard' | 'fast';
 export type TeamArenaSessionStatus = 'lobby' | 'playing' | 'paused' | 'ended';
-export type TeamArenaLane =
-  | 'zhuyin'
-  | 'vocab_definitions'
-  | 'vocab_application'
-  | 'comprehension'
-  | 'support';
+export type TeamArenaSide = 'a' | 'b';
+export type TeamArenaWeapon = 'call_teammate' | 'eliminate' | 'hint';
 
-export const TEAM_ARENA_PRIMARY_LANES: TeamArenaLane[] = [
-  'zhuyin',
-  'vocab_definitions',
-  'vocab_application',
-  'comprehension',
-];
-
-export const TEAM_ARENA_LANE_LABELS: Record<TeamArenaLane, string> = {
-  zhuyin: '注音路',
-  vocab_definitions: '詞義路',
-  vocab_application: '應用路',
-  comprehension: '閱讀路',
-  support: '支援位',
+export const TEAM_ARENA_WEAPON_LABELS: Record<TeamArenaWeapon, string> = {
+  call_teammate: '呼叫隊友',
+  eliminate: '刪減法',
+  hint: '看提示',
 };
 
 export interface TeamArenaCreateSessionRequest {
-  classroom_id: number;
-  scope_type: TeamArenaScopeType;
-  scope_ref: string;
+  team_size?: 2 | 3 | 4 | 5;
   turns_per_player?: 1 | 2 | 3;
   answer_seconds?: 20 | 30 | 45;
-  reading_speed?: TeamArenaReadingSpeed;
   story_pack_key?: string | null;
+  side?: TeamArenaSide;
 }
 
 export interface TeamArenaCreateSessionResponse {
   code: string;
   status: TeamArenaSessionStatus;
 }
-
-export type TeamArenaTeamsRequest =
-  | { action: 'auto' }
-  | { action: 'swap'; student_a_id: number; student_b_id: number }
-  | { action: 'override'; student_id: number; grade_pool_override: boolean };
 
 export interface TeamArenaOption {
   key: string;
@@ -112,39 +92,50 @@ export interface TeamArenaRoundPayload {
   extra?: { target_index: number } | null;
 }
 
+/** The viewer's OWN side's current round — shape differs by role:
+ * - active player: full question + any weapon effects they triggered.
+ * - teammate (not summoned): `{turn_no, called_for_help: false}` only.
+ * - teammate (summoned via 呼叫隊友): stem + full options + suggestions
+ *   are NOT included here (those only ever appear on the ACTIVE player's
+ *   own view — PRD rule H). */
 export interface TeamArenaCurrentRound {
   turn_no: number;
-  lane: TeamArenaLane;
-  active_student_id: number;
-  payload: TeamArenaRoundPayload;
-  reading_seconds: number;
-  answer_seconds: number;
-  revealed: boolean;
+  called_for_help?: boolean;
+  stem?: string;
+  extra?: { target_index: number } | null;
+  options?: TeamArenaOption[] | null;
+  reading_seconds?: number;
+  answer_seconds?: number;
+  revealed?: boolean;
+  correct_key?: string;
+  hint_text?: string | null;
+  call_teammate_active?: boolean;
+  suggestions?: { student_id: number; display_name: string; choice_key: string }[];
 }
 
-export interface TeamArenaTeamSummary {
-  towers_down: Record<string, number>;
-  base_hits: number;
-  score: number;
+export interface TeamArenaSidePublicMember {
+  student_id: number;
+  display_name: string;
+}
+
+export interface TeamArenaSidePublic {
+  seated: number;
+  team_size: number;
+  towers_destroyed: number;
+  current_hp: number;
+  base_destroyed: boolean;
   match_status: 'active' | 'ended';
-  winner: 'a' | 'b' | 'draw' | null;
-  current_round?: TeamArenaCurrentRound;
+  winner: TeamArenaSide | 'draw' | null;
+  members: TeamArenaSidePublicMember[];
 }
 
-export interface TeamArenaOwnMatch extends TeamArenaTeamSummary {
-  my_lane: TeamArenaLane;
-  my_side: 'a' | 'b';
+export interface TeamArenaOwnMatch {
+  my_side: TeamArenaSide;
+  match_status: 'active' | 'ended';
+  winner: TeamArenaSide | 'draw' | null;
   am_i_active: boolean;
-}
-
-/** Win/lose/draw relative to the student's OWN side — `winner` on the
- * wire is always 'a'/'b'/'draw' regardless of who's asking, so this must
- * be derived client-side by comparing against `my_side`, never read
- * directly as if 'a' meant "me". */
-export function teamArenaMyOutcome(ownMatch: TeamArenaOwnMatch): 'win' | 'lose' | 'draw' | null {
-  if (!ownMatch.winner) return null;
-  if (ownMatch.winner === 'draw') return 'draw';
-  return ownMatch.winner === ownMatch.my_side ? 'win' : 'lose';
+  current_round: TeamArenaCurrentRound | null;
+  weapons_used: Record<TeamArenaWeapon, boolean>;
 }
 
 export interface TeamArenaStoryView {
@@ -167,42 +158,58 @@ interface TeamArenaStateBase {
   turn_no: number;
   state_version: number;
   story: TeamArenaStoryView;
+  team_size: number;
+  is_host: boolean;
+  // PRD v2 rule P: 決戰時刻 — true for every turn in the final lap.
+  showdown: boolean;
+  sides: Record<TeamArenaSide, TeamArenaSidePublic>;
+  own_match: TeamArenaOwnMatch | null;
   unchanged?: false;
 }
 
-export interface TeamArenaTeacherState extends TeamArenaStateBase {
-  matches: Record<string, TeamArenaTeamSummary>;
-}
-
-export interface TeamArenaStudentState extends TeamArenaStateBase {
-  own_match: TeamArenaOwnMatch | null;
-}
-
-export type TeamArenaState = TeamArenaTeacherState | TeamArenaStudentState | TeamArenaUnchangedState;
+export type TeamArenaState = TeamArenaStateBase | TeamArenaUnchangedState;
 
 export function isUnchangedState(state: TeamArenaState): state is TeamArenaUnchangedState {
   return (state as TeamArenaUnchangedState).unchanged === true;
 }
 
-export function isTeacherState(state: TeamArenaState): state is TeamArenaTeacherState {
-  return !isUnchangedState(state) && 'matches' in state;
-}
-
 export interface TeamArenaAnswerResult {
-  role: 'active' | 'assist';
   turn_no: number;
 }
 
-export interface TeamArenaResultMe {
-  lane: TeamArenaLane;
-  turns_played: number;
-  towers_knocked: number;
-  assists: number;
+export interface TeamArenaWeaponResult {
+  status: string;
+  weapon: TeamArenaWeapon;
+  options?: TeamArenaOption[];
+  hint_text?: string;
 }
 
+export interface TeamArenaResultPlayer {
+  student_id: number;
+  display_name: string;
+  highlight: string;
+}
+
+export interface TeamArenaResultSide {
+  towers_destroyed: number;
+  base_destroyed: boolean;
+  match_status: 'active' | 'ended';
+  winner: TeamArenaSide | 'draw' | null;
+}
+
+/** PRD §0 v2 rule Q: NO individual ranking or numeric score anywhere in
+ * this shape — only a team result + one highlight sentence per player. */
 export interface TeamArenaResult {
-  matches: Record<string, TeamArenaTeamSummary>;
-  me: TeamArenaResultMe | null;
+  sides: Record<TeamArenaSide, TeamArenaResultSide>;
+  players: Record<TeamArenaSide, TeamArenaResultPlayer[]>;
+  me: { my_side: TeamArenaSide; highlight: string } | null;
+}
+
+/** Win/lose/draw relative to the student's OWN side. */
+export function teamArenaMyOutcome(ownMatch: Pick<TeamArenaOwnMatch, 'winner' | 'my_side'>): 'win' | 'lose' | 'draw' | null {
+  if (!ownMatch.winner) return null;
+  if (ownMatch.winner === 'draw') return 'draw';
+  return ownMatch.winner === ownMatch.my_side ? 'win' : 'lose';
 }
 
 // --- API functions ---
@@ -222,36 +229,12 @@ export async function createTeamArenaSession(
 export async function joinTeamArenaSession(
   token: string,
   code: string,
+  side: TeamArenaSide,
 ): Promise<{ code: string; status: TeamArenaSessionStatus }> {
   const res = await fetch(`${API_BASE}/api/team-arena/sessions/${encodeURIComponent(code)}/join`, {
     method: 'POST',
     headers: authHeaders(token),
-  });
-  return handleResponse(res);
-}
-
-export async function assignTeamArenaTeams(
-  token: string,
-  code: string,
-  body: TeamArenaTeamsRequest,
-): Promise<{ status: string }> {
-  const res = await fetch(`${API_BASE}/api/team-arena/sessions/${encodeURIComponent(code)}/teams`, {
-    method: 'POST',
-    headers: authHeaders(token),
-    body: JSON.stringify(body),
-  });
-  return handleResponse(res);
-}
-
-export async function claimTeamArenaLane(
-  token: string,
-  code: string,
-  lane: TeamArenaLane,
-): Promise<{ status: string }> {
-  const res = await fetch(`${API_BASE}/api/team-arena/sessions/${encodeURIComponent(code)}/lane`, {
-    method: 'POST',
-    headers: authHeaders(token),
-    body: JSON.stringify({ lane }),
+    body: JSON.stringify({ side }),
   });
   return handleResponse(res);
 }
@@ -287,6 +270,32 @@ export async function submitTeamArenaAnswer(
   choiceKey: string,
 ): Promise<TeamArenaAnswerResult> {
   const res = await fetch(`${API_BASE}/api/team-arena/sessions/${encodeURIComponent(code)}/answer`, {
+    method: 'POST',
+    headers: authHeaders(token),
+    body: JSON.stringify({ choice_key: choiceKey }),
+  });
+  return handleResponse(res);
+}
+
+export async function submitTeamArenaWeapon(
+  token: string,
+  code: string,
+  weapon: TeamArenaWeapon,
+): Promise<TeamArenaWeaponResult> {
+  const res = await fetch(`${API_BASE}/api/team-arena/sessions/${encodeURIComponent(code)}/weapons`, {
+    method: 'POST',
+    headers: authHeaders(token),
+    body: JSON.stringify({ weapon }),
+  });
+  return handleResponse(res);
+}
+
+export async function submitTeamArenaSuggestion(
+  token: string,
+  code: string,
+  choiceKey: string,
+): Promise<{ status: string }> {
+  const res = await fetch(`${API_BASE}/api/team-arena/sessions/${encodeURIComponent(code)}/suggest`, {
     method: 'POST',
     headers: authHeaders(token),
     body: JSON.stringify({ choice_key: choiceKey }),

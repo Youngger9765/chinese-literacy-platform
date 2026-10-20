@@ -72,17 +72,6 @@ const TeacherGameHubPage: React.FC = () => {
             <span className="block text-xs text-gray-500">主持即時搶答</span>
           </span>
         </button>
-        <button
-          type="button"
-          onClick={() => navigate('/teacher/team-arena')}
-          className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-4 text-left transition-colors hover:border-accent hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
-        >
-          <span className="text-2xl shrink-0" aria-hidden="true">🛡️</span>
-          <span className="min-w-0">
-            <span className="block text-sm font-semibold text-gray-900">五人對抗賽</span>
-            <span className="block text-xs text-gray-500">開一場組隊競賽</span>
-          </span>
-        </button>
       </section>
 
       <h2 className="text-base font-semibold text-gray-700 mb-3">班級開關</h2>
@@ -109,7 +98,6 @@ const TeacherGameHubPage: React.FC = () => {
                   pkHuman={classroom.pk_human}
                   league={classroom.league}
                   liveQuiz={classroom.live_quiz}
-                  teamArena={classroom.team_arena}
                   onChanged={(next) =>
                     setClassrooms((prev) =>
                       prev.map((c) => (c.id === classroom.id ? { ...c, ...next } : c)),

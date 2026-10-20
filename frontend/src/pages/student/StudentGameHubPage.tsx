@@ -11,11 +11,10 @@
  * the shared `computeStudentGameFlags` — see services/learning/session.ts
  * for why that logic lives there instead of being re-derived here):
  * 跨班賽季 and 課堂搶答 stay locked ("老師尚未開啟") until ANY of the
- * student's enrolled classrooms has the corresponding flag on. PK 對戰 and
- * 迷城密室 are never classroom-gated (issue #3633 explicit: "AI PK、迷城
- * 密室不受班級開關限制"). 五人對抗賽 (issue #3632) now follows the SAME
- * classroom-flag rule as 跨班賽季／課堂搶答 — the card is no longer a
- * permanently-disabled "即將推出" placeholder.
+ * student's enrolled classrooms has the corresponding flag on. PK 對戰、
+ * 迷城密室、and 多人對抗賽 (issue #3632 v2: "拿掉班級開關") are never
+ * classroom-gated — all three are always available to any logged-in
+ * student regardless of class or class settings.
  *
  * Old routes are untouched — this page is a new front door, not a
  * replacement for /student/our-class, /live, /pk, /escape-room.
@@ -89,7 +88,6 @@ const StudentGameHubPage: React.FC = () => {
   // disappearing again.
   const [leagueEnabled, setLeagueEnabled] = useState(false);
   const [liveQuizEnabled, setLiveQuizEnabled] = useState(false);
-  const [teamArenaEnabled, setTeamArenaEnabled] = useState(false);
 
   useEffect(() => {
     if (!token) return;
@@ -98,7 +96,6 @@ const StudentGameHubPage: React.FC = () => {
         const flags = computeStudentGameFlags(res.classrooms);
         setLeagueEnabled(flags.league);
         setLiveQuizEnabled(flags.liveQuiz);
-        setTeamArenaEnabled(flags.teamArena);
       })
       .catch(() => {
         /* best-effort — cards simply stay locked if this fails */
@@ -143,12 +140,12 @@ const StudentGameHubPage: React.FC = () => {
       emoji: '🏰',
     },
     {
-      key: 'five-vs-five',
-      label: '五人對抗賽',
-      description: '五人一組，組隊競賽',
+      key: 'team-arena',
+      label: '多人對抗賽',
+      description: '2～5 人一組，答題推塔對抗',
       path: '/team-arena',
-      locked: !teamArenaEnabled,
-      lockedText: '老師尚未開啟',
+      locked: false,
+      lockedText: '',
       emoji: '🛡️',
     },
   ];
