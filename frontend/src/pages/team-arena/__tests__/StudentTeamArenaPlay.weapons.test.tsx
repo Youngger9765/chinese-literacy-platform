@@ -127,8 +127,12 @@ describe('StudentTeamArenaPlay weapons UI', () => {
     renderPlay();
     const eliminateBtn = await screen.findByText('刪減法');
     expect(eliminateBtn.closest('button')?.disabled).toBe(true);
-    // The other two weapons are unaffected by option count.
+    // The other two weapons are unaffected by option count (team-lead
+    // review of #3655 staging screenshots, 2026-10-20: wanted explicit
+    // confirmation that 呼叫隊友 specifically stays usable here too, not
+    // just 看提示).
     expect(screen.getByText('看提示').closest('button')?.disabled).toBe(false);
+    expect(screen.getByText('呼叫隊友').closest('button')?.disabled).toBe(false);
   });
 
   it('刪減法 stays enabled with 3+ options', async () => {
@@ -159,5 +163,20 @@ describe('StudentTeamArenaPlay weapons UI', () => {
     renderPlay();
     await screen.findByText('呼叫隊友');
     expect(screen.queryByTestId('showdown-banner')).toBeNull();
+  });
+
+  it('shows the hint text once 看提示 has been used and the server returned it (team-lead review of #3655 staging screenshots, 2026-10-20: the earlier screenshot was taken before the poll refreshed, so no bug -- this locks that the text DOES render once state carries it)', async () => {
+    mockState = baseState({ weaponsUsed: { hint: true } });
+    (mockState as { own_match: { current_round: { hint_text: string | null } } }).own_match.current_round.hint_text =
+      '同一課「在眾人期待的目光下」裡的「待」，唸法跟這題一樣';
+    renderPlay();
+    expect(await screen.findByText('💡 同一課「在眾人期待的目光下」裡的「待」，唸法跟這題一樣')).toBeTruthy();
+  });
+
+  it('does not show a hint box when hint_text is null (not used yet)', async () => {
+    mockState = baseState();
+    renderPlay();
+    await screen.findByText('呼叫隊友');
+    expect(screen.queryByText(/💡/)).toBeNull();
   });
 });

@@ -54,13 +54,12 @@ class TestApplyEliminate:
 
 
 class TestBuildHint:
-    def test_zhuyin_hint_shows_surrounding_word(self):
+    def test_old_neighbour_window_hint_is_gone(self):
+        """Staging QA 2026-10-20: the hint printed 「這個字出現在『索不是』這個詞裡」 —
+        a ±1 character window, not a word. A payload with no lesson table must
+        now get no hint rather than a made-up 「詞」."""
         payload = {"source_module": "zhuyin", "stem": "男孩叫正太。", "extra": {"target_index": 4}}
-        hint = svc.build_hint(payload)
-        assert hint is not None
-        assert "太" in hint
-        # Must never leak the raw correct_key / reading answer itself.
-        assert "correct_key" not in hint
+        assert svc.build_hint(payload) is None
 
     def test_zhuyin_without_target_index_has_no_hint(self):
         payload = {"source_module": "zhuyin", "stem": "男孩叫正太。", "extra": {}}
@@ -83,3 +82,47 @@ class TestBuildHint:
         }
         hint = svc.build_hint(payload)
         assert hint is None  # no hint data for comprehension today (documented)
+
+
+class TestZhuyinHintEveryLesson:
+    """Class-level sweep over every lesson's real 注音 questions: whenever a
+    hint is given it must point to ANOTHER sentence of the same lesson where
+    the asked character has the SAME curated reading, and it must never print
+    the reading itself."""
+
+    def test_every_hint_is_true_and_never_prints_the_reading(self):
+        from pathlib import Path
+
+        from app.services.lesson_zhuyin import lesson_zhuyin_table
+        from app.services.live_quiz.sources import zhuyin as zsrc
+
+        lessons_dir = Path(__file__).resolve().parents[1] / "data" / "lessons"
+        uids = sorted(p.name for p in lessons_dir.iterdir() if p.is_dir() and p.name.startswith("L"))
+        hints = questions = 0
+        for uid in uids:
+            for item in zsrc.generate_items(uid, {}, random.Random(3)):
+                payload = item.to_payload(seconds=30)
+                questions += 1
+                hint = svc.build_hint(payload)
+                if hint is None:
+                    continue
+                hints += 1
+                stem = payload["stem"]
+                ti = payload["extra"]["target_index"]
+                char = stem[ti]
+                correct = next(o["text"] for o in payload["options"] if o["key"] == payload["correct_key"])
+                assert correct not in hint, (uid, hint)
+                clause = hint.split("「")[1].split("」")[0]
+                assert char in clause, (uid, hint)
+                table = lesson_zhuyin_table(uid)
+                asked = {(text, text.find(stem) + ti) for text in table if stem in text}
+                assert any(
+                    text[i] == char
+                    and table[text].get(i) == correct
+                    and (text, i) not in asked
+                    and clause in text[max(0, i - len(clause)) : i + len(clause)]
+                    for text in table
+                    for i in range(len(text))
+                ), (uid, hint)
+        assert questions > 100, questions
+        assert hints > 0, "sweep produced no hints at all — the lookup is broken, not the data"
