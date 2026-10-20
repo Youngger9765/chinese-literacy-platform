@@ -470,9 +470,6 @@ export interface StudentEnrolledClassroom {
   league: boolean;
   /** 這個班級是否開放課堂搶答 — issue #3607, same default/backward-compat rule. */
   live_quiz: boolean;
-  /** 這個班級是否開放五人對抗賽 — issue #3632, default false, no backward-compat
-   * fallback (brand new mode, same rule as pk_human). */
-  team_arena: boolean;
 }
 
 export interface StudentEnrolledClassroomsResponse {
@@ -494,17 +491,17 @@ export interface StudentEnrolledClassroomsResponse {
  * StudentGameHubPage (the hub page that replaced the three separate
  * sidebar entries) reuses the exact same rule instead of re-deriving it.
  *
- * PK 對戰 (pk_human) and 迷城密室 are intentionally absent: neither is ever
- * classroom-gated (AI PK: Young 2026-10-16 "AI PK 跟班級無關"; 迷城密室:
- * issue #3633 "不受班級開關限制").
+ * PK 對戰 (pk_human)、迷城密室、and 多人對抗賽 (issue #3632 v2) are
+ * intentionally absent: none of the three is ever classroom-gated (AI PK:
+ * Young 2026-10-16 "AI PK 跟班級無關"; 迷城密室: issue #3633 "不受班級開關
+ * 限制"; 多人對抗賽 v2: "拿掉班級開關").
  */
 export function computeStudentGameFlags(
   classrooms: StudentEnrolledClassroom[],
-): { league: boolean; liveQuiz: boolean; teamArena: boolean } {
+): { league: boolean; liveQuiz: boolean } {
   return {
     league: classrooms.some((c) => c.league),
     liveQuiz: classrooms.some((c) => c.live_quiz),
-    teamArena: classrooms.some((c) => c.team_arena),
   };
 }
 

@@ -91,11 +91,9 @@ const StudentPkOpponentSelect = lazy(() => import('../pages/pk/StudentPkOpponent
 const StudentPkMatch = lazy(() => import('../pages/pk/StudentPkMatch'));
 const StudentEscapeRoomEntry = lazy(() => import('../pages/escape-room/StudentEscapeRoomEntry'));
 const StudentEscapeRoomRun = lazy(() => import('../pages/escape-room/StudentEscapeRoomRun'));
-// 五人對抗賽 (team_arena, #3632) — same fullscreen-no-AppShell precedent as
-// live_quiz above. ⚠️ Not yet linked from any nav/hub (StudentGameHubPage's
-// card stays "即將推出" until this is ready to go live) — routes exist so
-// the feature can be smoke-tested directly by URL before that flip.
-const TeacherTeamArenaHost = lazy(() => import('../pages/teacher/team-arena/TeacherTeamArenaHost'));
+// 多人對抗賽 (team_arena, #3632) — v2: any student hosts/joins, same
+// fullscreen-no-AppShell precedent as live_quiz above. No teacher entry
+// (PRD §0 v2 rule B: "老師端入口移除") — /teacher/team-arena is gone.
 const StudentTeamArenaJoin = lazy(() => import('../pages/team-arena/StudentTeamArenaJoin'));
 const StudentTeamArenaPlay = lazy(() => import('../pages/team-arena/StudentTeamArenaPlay'));
 
@@ -327,23 +325,6 @@ const AppRoutes: React.FC = () => (
         element={
           <ProtectedRoute>
             <TeacherLiveQuizHost />
-          </ProtectedRoute>
-        }
-      />
-      {/* 五人對抗賽 (#3632) — same fullscreen precedent as /teacher/live above. */}
-      <Route
-        path="/teacher/team-arena"
-        element={
-          <ProtectedRoute>
-            <TeacherTeamArenaHost />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/teacher/team-arena/:code"
-        element={
-          <ProtectedRoute>
-            <TeacherTeamArenaHost />
           </ProtectedRoute>
         }
       />
@@ -601,7 +582,7 @@ const AppRoutes: React.FC = () => (
           </ProtectedRoute>
         }
       />
-      {/* 五人對抗賽 (#3632) — same fullscreen precedent as /live above. */}
+      {/* 多人對抗賽 (#3632) — same fullscreen precedent as /live above. */}
       <Route
         path="/team-arena"
         element={

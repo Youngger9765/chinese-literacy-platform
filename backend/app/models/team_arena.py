@@ -1,29 +1,44 @@
-"""五人對抗賽 (team_arena) — issue #3632, PRD docs/prd/2026-10-18-team-arena-prd.md.
+"""多人對抗賽 (team_arena) — issue #3632, PRD docs/prd/2026-10-18-team-arena-prd.md
+§0 "⭐ v2 改版".
 
-✅ 2026-10-19: Young approved building these tables for real ("可以建表",
-PRD §9 originally required this explicit sign-off before any migration).
-See `alembic/versions/59f448723e7f_create_team_arena_tables.py`.
+✅ 2026-10-19: Young approved building these tables for real ("可以建表").
+✅ 2026-10-20: Young approved the v2 rewrite's ONE schema change ("改表") —
+`classroom_id` is now nullable (a v2 room belongs to no classroom at all;
+rule B: 拿掉班級開關). See
+`alembic/versions/59f448723e7f_create_team_arena_tables.py` (v1's CREATE)
+and the newer migration that ALTERs `classroom_id` to nullable (v2).
 
-Until that approval (2026-10-18 and earlier), this model file existed
-ONLY so slice 1's pure-function engine had something to test against via
-`Base.metadata.create_all()` in SQLite (same pattern every other test
-module in this repo already uses — see `backend/tests/conftest.py`); that
-SQLite-only testing path still works unchanged and is still how every
-test in this repo exercises these models, migration or not.
+Three tables, same shapes v1 shipped to staging — v2 reinterprets two
+columns' MEANING rather than their type (PRD §0 v2 table "資料表變更",
+explicitly scoped to avoid a second migration):
 
-Three tables, matching PRD §9.1 verbatim (column names/types/purpose are
-the PRD's own draft, not invented here):
-
-- TeamArenaSession  — one teacher-hosted activity (code, lobby/playing/
-  paused/ended, settings, turn clock, scoreboard cache).
-- TeamArenaMember   — one student's seat within one session (which match,
-  which side, which lane, locked rotation_order, optional per-student
-  grade_pool_override that lives ONLY on this row — PRD §5: "只存在這一場
-  的名單上，不建學生程度檔案").
-- TeamArenaAnswer   — one submission (active or assist), unique per
-  (session, member, turn) so a second submission in the same turn is
-  rejected at the DB level, not just in application code (PRD §13 AC4:
-  "同回合第二次作答回 409").
+- TeamArenaSession  — one ROOM (not a teacher-hosted activity anymore).
+  `classroom_id` is always NULL for a v2 room. `teacher_id` now stores the
+  room HOST's user id (any student — the column still points at `users`,
+  so no type change is needed; "teacher" is legacy naming, not a role
+  claim). `settings` holds `team_size`/`turns_per_player`/`answer_seconds`/
+  `scope_ref` (the host's own grade) /`story_pack_key`/`total_turns` once
+  play starts.
+- TeamArenaMember   — one student's seat (which side, locked
+  `rotation_order` = join sequence within that side). `lane` is UNUSED in
+  v2 (PRD §0: "保留欄位、寫入固定值，避免多一次 migration") — every row
+  always writes the fixed value `"support"` (one of the five values the
+  existing CHECK constraint already allows, chosen because it is the
+  closest-to-meaningless label among the five). `grade_pool_override` is
+  likewise unused (always False — v2 has no per-student difficulty
+  override UI). `question_queue` now holds BOTH this member's own
+  pre-drawn, TYPE-MIXED question queue AND their per-weapon usage quota
+  (`{"queue": [...], "weapons_used": {"call_teammate": bool, "eliminate":
+  bool, "hint": bool}}`) — PRD §0: "武器使用次數存在既有的 JSON 欄位，不加
+  欄位".
+- TeamArenaAnswer   — one submission. `role="active"` is the seated
+  player's real, scored answer (unique per (session, member, turn) so a
+  second submission in the same turn is rejected at the DB level).
+  `role="assist"` is repurposed in v2 as a teammate's 呼叫隊友 SUGGESTION
+  (never scored, never counted as "answering for them" — PRD §0 rule E:
+  "不是當棒的隊友...只能回應隊友的『呼叫隊友』，不能代答") — the same
+  unique constraint now means "one suggestion per teammate per turn"
+  rather than "one assist answer per turn".
 
 Independence (same four rules `live_quiz`/`pk`/`escape_room`/`league`
 already established, PRD §7 table "依賴方向"): this module imports nothing
@@ -53,10 +68,20 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import Base
 
 TEAM_ARENA_SESSION_STATUSES = ("lobby", "playing", "paused", "ended")
-# PRD §3.1 canonical lane order; §3.1 also defines "support" as the 5th,
-# floating lane — see services/team_arena/teams.py PRIMARY_LANES/LANES for
-# the single source of truth this CheckConstraint must stay in sync with.
+# v1 leftover — kept ONLY because the DB CHECK constraint on `lane` (built
+# by v1's migration, not reissued by v2's) already enforces one of these
+# five values, and v2 was explicitly scoped to ONE schema change
+# (classroom_id nullable). v2 never reads or assigns meaning to `lane` —
+# every row's `lane` is always written as the fixed filler value
+# `"support"` (services/team_arena/engine.py `_FIXED_LANE`), chosen because
+# it is the one value among these five that never claimed to be a real
+# question-type lane in the first place.
 TEAM_ARENA_LANES = ("zhuyin", "vocab_definitions", "vocab_application", "comprehension", "support")
+# "active"  — the seated player's real, scored answer for a turn.
+# "assist"  — v2 repurposes this as a teammate's 呼叫隊友 SUGGESTION (never
+#             scored, never an answer on the active player's behalf — PRD
+#             §0 v2 rule E). v1 used "assist" for a scored bonus-answer
+#             concept that v2 removes entirely.
 TEAM_ARENA_ANSWER_ROLES = ("active", "assist")
 
 
@@ -78,7 +103,12 @@ class TeamArenaSession(Base):
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    classroom_id: Mapped[int] = mapped_column(ForeignKey("classrooms.id"), nullable=False, index=True)
+    # v2 (PRD §0 "資料表變更"): nullable now — a v2 room belongs to no
+    # classroom at all. Always NULL for every v2-created row; kept
+    # nullable (not dropped) only because a second migration to drop it
+    # entirely was explicitly out of scope for this approval.
+    classroom_id: Mapped[int | None] = mapped_column(ForeignKey("classrooms.id"), nullable=True, index=True)
+    # v2: stores the room HOST's user id (any student, not a teacher).
     teacher_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
     code: Mapped[str] = mapped_column(String(6), nullable=False, index=True)
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="lobby", index=True)
@@ -102,7 +132,7 @@ class TeamArenaSession(Base):
     )
     ended_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
-    classroom: Mapped["Classroom"] = relationship("Classroom", foreign_keys=[classroom_id])  # type: ignore[name-defined]
+    classroom: Mapped["Classroom | None"] = relationship("Classroom", foreign_keys=[classroom_id])  # type: ignore[name-defined]
     teacher: Mapped["User"] = relationship("User", foreign_keys=[teacher_id])  # type: ignore[name-defined]
 
 
@@ -129,18 +159,35 @@ class TeamArenaMember(Base):
         ForeignKey("team_arena_sessions.id"), nullable=False, index=True
     )
     student_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
+    # v2: always 0 — one room is exactly one match, no multi-match fan-out
+    # (v1 let one teacher-hosted session contain several concurrent
+    # matches; v2 rooms are 1 room = 1 host = 1 match).
     match_no: Mapped[int] = mapped_column(SmallInteger, nullable=False)
     side: Mapped[int] = mapped_column(SmallInteger, nullable=False)
+    # v2: UNUSED (always the fixed value "support" — see module docstring
+    # and the TEAM_ARENA_LANES comment above). Kept non-null/constrained
+    # only because its CHECK constraint predates this rewrite.
     lane: Mapped[str] = mapped_column(String(20), nullable=False)
+    # Locked at join time = join ORDER within this side (0, 1, 2, ... —
+    # the first student to pick a side is rotation_order 0 on that side).
+    # This IS the turn rotation: turn N's active player on a side is
+    # whoever has rotation_order == N % team_size.
     rotation_order: Mapped[int] = mapped_column(SmallInteger, nullable=False)
-    # PRD §5: "只存在這一場的名單上，不建學生程度檔案，學生自己與隊友看不到
-    # 這個標記" — lives on THIS row only, never copied anywhere else.
+    # v2: UNUSED (always False — no per-student difficulty override UI in
+    # v2). Kept because dropping it would be a second schema change.
     grade_pool_override: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
-    # Pre-generated, frozen question snapshot for this member's whole
-    # match — PRD §7 "出題" row: same "frozen at creation" precedent as
-    # `live_quiz_games.rounds_snapshot` / `pk_matches.rounds_snapshot`.
-    question_queue: Mapped[list] = mapped_column(
-        JSONB, nullable=False, server_default=text("'[]'::jsonb")
+    # v2 (PRD §0 "資料表變更": "武器使用次數存在既有的 JSON 欄位，不加欄位")
+    # — this ONE column now carries two things for this member's whole
+    # match: `{"queue": [<frozen round entry>, ...turns_per_player of
+    # them>], "weapons_used": {"call_teammate": bool, "eliminate": bool,
+    # "hint": bool}}`. Each entry in `queue` is the same frozen
+    # `{round_index, round_type, payload}` shape
+    # `live_quiz_choice.generate_rounds` already produces — this member's
+    # questions may be ANY of the four source modules mixed together (PRD
+    # §0 rule D: "每一題可能是任何題型...混出"), never grouped by a single
+    # lane the way v1's per-lane pools were.
+    question_queue: Mapped[dict] = mapped_column(
+        JSONB, nullable=False, server_default=text("'{}'::jsonb")
     )
     # PRD §3.3: "上場者斷線（超過 15 秒沒輪詢）：該回合直接記為『沒推進』並
     # 換下一位". ⚠️ Modeled but NOT YET WRITTEN anywhere (critic review,

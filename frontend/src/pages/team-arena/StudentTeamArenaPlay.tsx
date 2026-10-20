@@ -1,35 +1,46 @@
 /**
- * StudentTeamArenaPlay — `/team-arena/:code`, the student's phone screen
- * (issue #3632, PRD §6 "學生手機").
+ * StudentTeamArenaPlay — `/team-arena/:code`, v2 (issue #3632, PRD §0 v2
+ * 改版). Every player — including the host — lands here; the host is
+ * simply the student who also sees the room code and a Start button.
  *
- * Auto-joins on mount (idempotent server-side, same pattern as
- * StudentLiveQuizPlay.tsx). Phases follow `state.own_match`/`state.status`:
- * lobby (waiting for teams, then lane self-claim) → playing (reading /
- * answering as 上場 or 助攻 / revealed) → paused → ended (fetches result).
+ * Join flow: if the URL carries `?side=a|b` (set by StudentTeamArenaJoin
+ * when a student types in a code), auto-join with that side on mount —
+ * idempotent server-side if already seated (rejoin after refresh/sleep).
+ * Arriving WITHOUT a `?side` (host coming straight from "開房", or a bare
+ * shared link) skips the join call and polls state directly; a stranger
+ * hitting a bare link gets an inline "選哪一隊" picker the first time
+ * `/state` 403s them (PRD rule C: "學生加入時自己選隊" — this is the
+ * fallback entry for that same choice, not a second code path).
  *
- * "答對/答錯" after reveal is derived CLIENT-SIDE by comparing the locally
- * remembered `selectedKey` against the now-visible `payload.correct_key`
- * — the server's submit-answer ack never reveals correctness (PRD §3.4:
- * "每回合結束...不公開對錯" until reveal), and `own_match` has no separate
- * "was I right" field, so this comparison is the one place that
- * information can legitimately surface, using only already-public data.
+ * Attack animations (PRD rule N) are derived PURELY from the public
+ * `sides` summary (towers_destroyed/current_hp/base_destroyed deltas
+ * between polls, see detectSideEvents.ts) — never from a per-round
+ * payload — so every viewer (both sides, the host) sees them identically
+ * without leaking which question was answered or by whom.
  */
 import React, { useEffect, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTeamArenaPoll } from '../../components/team-arena/useTeamArenaPoll';
 import StemWithTarget from '../../components/live-quiz/StemWithTarget';
+import AttackAnimation from '../../components/team-arena/AttackAnimation';
+import { TowerCollapse, VictoryBurst } from '../../components/team-arena/TowerCollapse';
+import { pickAttackVariant, type AttackVariant } from '../../components/team-arena/attackAnimations';
+import { detectSideEvents, type SideSnapshot } from '../../components/team-arena/detectSideEvents';
 import {
   joinTeamArenaSession,
-  claimTeamArenaLane,
+  controlTeamArena,
   submitTeamArenaAnswer,
+  submitTeamArenaWeapon,
+  submitTeamArenaSuggestion,
   getTeamArenaResult,
+  getTeamArenaState,
   isUnchangedState,
   teamArenaMyOutcome,
   TeamArenaApiError,
-  TEAM_ARENA_LANE_LABELS,
-  TEAM_ARENA_PRIMARY_LANES,
-  type TeamArenaLane,
+  TEAM_ARENA_WEAPON_LABELS,
+  type TeamArenaSide,
+  type TeamArenaWeapon,
   type TeamArenaResult,
 } from '../../services/teamArenaApi';
 
@@ -37,34 +48,109 @@ function isValidTeamArenaCode(code: string | undefined): code is string {
   return !!code && /^[A-Z0-9]{4,8}$/.test(code);
 }
 
+// Mirrors services/team_arena/weapons.py::MIN_OPTIONS_TO_ELIMINATE (PRD
+// rule I) -- a client-side copy, not a shared import (backend/frontend
+// don't share a types package here), so greying the button out matches
+// exactly what the server would otherwise 409 on.
+const MIN_OPTIONS_TO_ELIMINATE = 3;
+// Mirrors services/team_arena/towers.py::TOWER_COUNT (PRD rule L) --
+// display-only, same "no shared types package" reasoning as above.
+const TOWER_COUNT = 3;
+
+type VisualEffect = { kind: 'attack'; side: TeamArenaSide; variant: AttackVariant } | { kind: 'collapse'; side: TeamArenaSide } | { kind: 'victory'; side: TeamArenaSide };
+
+const SideBar: React.FC<{
+  label: string;
+  sideData: { towers_destroyed: number; current_hp: number; seated: number; team_size: number };
+  effect: VisualEffect | null;
+  onEffectComplete: () => void;
+}> = ({ label, sideData, effect, onEffectComplete }) => (
+  <div className="relative flex-1 rounded-xl border border-surface-dim bg-surface-container p-3 text-center overflow-hidden">
+    <p className="text-xs font-semibold text-on-surface-variant">{label}</p>
+    <p className="text-lg font-bold text-on-surface">{sideData.towers_destroyed}/{TOWER_COUNT} 座塔</p>
+    <div className="mt-1 h-2 w-full rounded-full bg-surface-dim">
+      <div
+        className="h-2 rounded-full bg-accent transition-all"
+        style={{ width: `${Math.max(0, Math.min(100, sideData.current_hp))}%` }}
+      />
+    </div>
+    <p className="mt-1 text-[10px] text-on-surface-variant">
+      {sideData.seated}/{sideData.team_size} 人
+    </p>
+    {effect?.kind === 'attack' && <AttackAnimation variant={effect.variant} onComplete={onEffectComplete} />}
+    {effect?.kind === 'collapse' && <TowerCollapse onComplete={onEffectComplete} />}
+    {effect?.kind === 'victory' && <VictoryBurst onComplete={onEffectComplete} />}
+  </div>
+);
+
 const StudentTeamArenaPlay: React.FC = () => {
   const { code: routeCode } = useParams<{ code: string }>();
+  const [searchParams] = useSearchParams();
   const { token } = useAuth();
+
   const [joinError, setJoinError] = useState('');
-  const [joined, setJoined] = useState(false);
+  const [joinAttempted, setJoinAttempted] = useState(false);
+  const [pendingSidePick, setPendingSidePick] = useState(false);
+  const [sidePickError, setSidePickError] = useState('');
+
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState('');
-  const [laneError, setLaneError] = useState('');
+  const [weaponError, setWeaponError] = useState('');
+  const [weaponBusy, setWeaponBusy] = useState<TeamArenaWeapon | null>(null);
   const [result, setResult] = useState<TeamArenaResult | null>(null);
+  const [startError, setStartError] = useState('');
+
   const lastAnsweredTurnRef = useRef<number | null>(null);
+  const prevSidesRef = useRef<Record<TeamArenaSide, SideSnapshot> | null>(null);
+  const lastAttackVariantRef = useRef<AttackVariant | null>(null);
+  const [effects, setEffects] = useState<Partial<Record<TeamArenaSide, VisualEffect>>>({});
 
   const codeValid = isValidTeamArenaCode(routeCode);
-  const { state, error: pollError } = useTeamArenaPoll(token ?? null, joined && codeValid ? routeCode : null);
+  const sideParam = searchParams.get('side');
 
+  const { state, error: pollError } = useTeamArenaPoll(
+    token ?? null,
+    joinAttempted && codeValid ? routeCode : null,
+  );
+
+  // Initial join. Two entry shapes:
+  //  - URL carries `?side=a|b` (StudentTeamArenaJoin's flow): join with
+  //    that side immediately. Idempotent server-side if already seated.
+  //  - Bare link (host coming from "開房", or a shared URL with no side
+  //    param): probe membership with one direct `/state` call. A host or
+  //    already-seated student gets a real state back and polling starts
+  //    normally; a stranger gets a 403 (checked by STATUS CODE, never by
+  //    matching the error string -- teamArenaApi.ts deliberately replaces
+  //    any non-Chinese server detail with a generic message, so string
+  //    sniffing here would silently stop working) and sees the inline
+  //    side-picker instead (PRD rule C: "學生加入時自己選隊").
   useEffect(() => {
     if (!token || !routeCode) return;
     if (!codeValid) {
       setJoinError('找不到這場比賽');
       return;
     }
-    joinTeamArenaSession(token, routeCode)
-      .then(() => setJoined(true))
+    if (sideParam === 'a' || sideParam === 'b') {
+      joinTeamArenaSession(token, routeCode, sideParam)
+        .then(() => setJoinAttempted(true))
+        .catch((err) => {
+          setJoinError(err instanceof TeamArenaApiError ? err.message : '加入失敗，請確認代碼是否正確');
+        });
+      return;
+    }
+    getTeamArenaState(token, routeCode)
+      .then(() => setJoinAttempted(true))
       .catch((err) => {
-        setJoinError(err instanceof TeamArenaApiError ? err.message : '加入失敗，請確認代碼是否正確');
+        if (err instanceof TeamArenaApiError && err.status === 403) {
+          setPendingSidePick(true);
+          return;
+        }
+        setJoinError(err instanceof TeamArenaApiError ? err.message : '找不到這場比賽');
       });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, routeCode, codeValid]);
 
-  const ownMatch = state && !isUnchangedState(state) && 'own_match' in state ? state.own_match : null;
+  const ownMatch = state && !isUnchangedState(state) ? state.own_match : null;
   const currentRound = ownMatch?.current_round ?? null;
   const turnNo = currentRound?.turn_no;
 
@@ -72,18 +158,52 @@ const StudentTeamArenaPlay: React.FC = () => {
     if (turnNo != null && lastAnsweredTurnRef.current !== turnNo) {
       setSelectedKey(null);
       setSubmitError('');
+      setWeaponError('');
     }
   }, [turnNo]);
+
+  // Attack/collapse/victory animations, derived from the public sides
+  // summary only (see module docstring).
+  useEffect(() => {
+    if (!state || isUnchangedState(state)) return;
+    const events = detectSideEvents(prevSidesRef.current, state.sides as Record<TeamArenaSide, SideSnapshot>);
+    prevSidesRef.current = state.sides as Record<TeamArenaSide, SideSnapshot>;
+    if (events.length === 0) return;
+    // Staging: one effect at a time (motion-craft — don't animate two
+    // things at once); extras this tick are simply dropped.
+    const event = events[0];
+    if (event.kind === 'base_destroyed') {
+      setEffects((prev) => ({ ...prev, [event.side]: { kind: 'victory', side: event.side } }));
+    } else if (event.kind === 'tower_fallen') {
+      setEffects((prev) => ({ ...prev, [event.side]: { kind: 'collapse', side: event.side } }));
+    } else {
+      const variant = pickAttackVariant(lastAttackVariantRef.current);
+      lastAttackVariantRef.current = variant;
+      setEffects((prev) => ({ ...prev, [event.side]: { kind: 'attack', side: event.side, variant } }));
+    }
+  }, [state]);
+
+  const clearEffect = (side: TeamArenaSide) => setEffects((prev) => ({ ...prev, [side]: undefined }));
 
   useEffect(() => {
     if (state && !isUnchangedState(state) && state.status === 'ended' && token && routeCode && !result) {
       getTeamArenaResult(token, routeCode)
         .then(setResult)
-        .catch(() => {
-          /* ownMatch summary already shows the per-match outcome */
-        });
+        .catch(() => {});
     }
   }, [state, token, routeCode, result]);
+
+  const handlePickSide = async (side: TeamArenaSide) => {
+    if (!token || !routeCode) return;
+    setSidePickError('');
+    try {
+      await joinTeamArenaSession(token, routeCode, side);
+      setPendingSidePick(false);
+      setJoinAttempted(true);
+    } catch (err) {
+      setSidePickError(err instanceof TeamArenaApiError ? err.message : '加入失敗，請重試');
+    }
+  };
 
   const handleAnswer = async (key: string) => {
     if (!token || !routeCode || selectedKey) return;
@@ -97,13 +217,35 @@ const StudentTeamArenaPlay: React.FC = () => {
     }
   };
 
-  const handleClaimLane = async (lane: TeamArenaLane) => {
+  const handleSuggest = async (key: string) => {
     if (!token || !routeCode) return;
-    setLaneError('');
     try {
-      await claimTeamArenaLane(token, routeCode, lane);
+      await submitTeamArenaSuggestion(token, routeCode, key);
+    } catch {
+      // best-effort — teammate suggestions are a soft-help feature
+    }
+  };
+
+  const handleWeapon = async (weapon: TeamArenaWeapon) => {
+    if (!token || !routeCode || weaponBusy) return;
+    setWeaponError('');
+    setWeaponBusy(weapon);
+    try {
+      await submitTeamArenaWeapon(token, routeCode, weapon);
     } catch (err) {
-      setLaneError(err instanceof TeamArenaApiError ? err.message : '選擇失敗，請重試');
+      setWeaponError(err instanceof TeamArenaApiError ? err.message : '使用失敗，請重試');
+    } finally {
+      setWeaponBusy(null);
+    }
+  };
+
+  const handleStart = async () => {
+    if (!token || !routeCode) return;
+    setStartError('');
+    try {
+      await controlTeamArena(token, routeCode, 'start');
+    } catch (err) {
+      setStartError(err instanceof TeamArenaApiError ? err.message : '無法開始，請確認兩隊都滿額');
     }
   };
 
@@ -115,7 +257,25 @@ const StudentTeamArenaPlay: React.FC = () => {
     );
   }
 
-  if (!joined || (!state && !pollError)) {
+  if (pendingSidePick) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-surface px-6 py-10 text-center">
+        <h1 className="mb-6 text-lg font-bold text-on-surface">加入這場多人對抗賽</h1>
+        <p className="mb-4 text-sm text-on-surface-variant">選一隊加入</p>
+        <div className="grid w-full max-w-xs grid-cols-2 gap-3">
+          <button type="button" onClick={() => handlePickSide('a')} className="rounded-xl border-2 border-surface-dim px-4 py-3 text-base font-semibold text-on-surface">
+            甲隊
+          </button>
+          <button type="button" onClick={() => handlePickSide('b')} className="rounded-xl border-2 border-surface-dim px-4 py-3 text-base font-semibold text-on-surface">
+            乙隊
+          </button>
+        </div>
+        {sidePickError && <p className="mt-3 text-sm text-red-600">{sidePickError}</p>}
+      </div>
+    );
+  }
+
+  if (!joinAttempted || (!state && !pollError)) {
     return (
       <div className="flex min-h-screen items-center justify-center" role="status" aria-label="載入中">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-accent border-t-transparent" />
@@ -132,33 +292,40 @@ const StudentTeamArenaPlay: React.FC = () => {
   }
 
   if (state.status === 'lobby') {
+    const bothFull = state.sides.a.seated === state.team_size && state.sides.b.seated === state.team_size;
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-surface px-6 py-10 text-center">
-        {!ownMatch ? (
-          <p className="text-on-surface-variant">等待老師分隊…</p>
-        ) : (
-          <>
-            <p className="mb-1 text-lg font-bold text-on-surface">我的路線：{TEAM_ARENA_LANE_LABELS[ownMatch.my_lane]}</p>
-            <p className="mb-6 text-sm text-on-surface-variant">還可以換一條路線（先選先得）</p>
-            <div className="grid w-full max-w-xs grid-cols-2 gap-2">
-              {TEAM_ARENA_PRIMARY_LANES.map((lane) => (
-                <button
-                  key={lane}
-                  type="button"
-                  onClick={() => handleClaimLane(lane)}
-                  className={`rounded-lg border px-3 py-3 text-sm font-semibold ${
-                    ownMatch.my_lane === lane
-                      ? 'border-accent bg-accent-bg text-accent'
-                      : 'border-surface-dim text-on-surface-variant'
-                  }`}
-                >
-                  {TEAM_ARENA_LANE_LABELS[lane]}
-                </button>
-              ))}
+        <p className="mb-1 text-sm text-on-surface-variant">房間代碼</p>
+        <p className="mb-6 font-mono text-4xl font-bold tracking-widest text-accent">{state.code}</p>
+        <div className="flex w-full max-w-sm gap-3">
+          {(['a', 'b'] as const).map((side) => (
+            <div key={side} className="flex-1 rounded-xl border border-surface-dim p-3">
+              <p className="mb-2 text-sm font-semibold text-on-surface">{side === 'a' ? '甲隊' : '乙隊'}</p>
+              <p className="mb-2 text-xs text-on-surface-variant">
+                {state.sides[side].seated}/{state.team_size} 人
+              </p>
+              <ul className="space-y-1 text-xs text-on-surface">
+                {state.sides[side].members.map((m) => (
+                  <li key={m.student_id}>{m.display_name}</li>
+                ))}
+              </ul>
             </div>
-            {laneError && <p className="mt-3 text-sm text-red-600">{laneError}</p>}
-            <p className="mt-6 text-sm text-on-surface-variant">等老師按下「開始比賽」</p>
+          ))}
+        </div>
+        {state.is_host ? (
+          <>
+            <button
+              type="button"
+              onClick={handleStart}
+              disabled={!bothFull}
+              className="mt-6 w-full max-w-xs rounded-xl bg-accent px-4 py-3 text-base font-semibold text-white shadow-sm disabled:opacity-40"
+            >
+              {bothFull ? '開始比賽' : '等兩隊都滿額才能開始'}
+            </button>
+            {startError && <p className="mt-3 text-sm text-red-600">{startError}</p>}
           </>
+        ) : (
+          <p className="mt-6 text-sm text-on-surface-variant">等開房的同學按「開始比賽」</p>
         )}
       </div>
     );
@@ -167,27 +334,37 @@ const StudentTeamArenaPlay: React.FC = () => {
   if (state.status === 'paused') {
     return (
       <div className="flex min-h-screen items-center justify-center px-6 text-center">
-        <p className="text-on-surface-variant">老師暫停了比賽，請稍候</p>
+        <p className="text-on-surface-variant">比賽暫停中，請稍候</p>
       </div>
     );
   }
 
   if (state.status === 'ended') {
-    const me = result?.me;
     const outcome = ownMatch ? teamArenaMyOutcome(ownMatch) : null;
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-surface px-6 py-10 text-center">
         <h1 className="mb-4 text-xl font-bold text-on-surface">比賽結束</h1>
         {outcome && (
-          <p className="mb-4 text-base font-semibold text-accent">
+          <p className="mb-6 text-base font-semibold text-accent">
             {outcome === 'draw' ? '平手' : outcome === 'win' ? '你的隊伍獲勝！' : '你的隊伍差一點，下次再加油'}
           </p>
         )}
-        {me && (
-          <div className="rounded-xl border border-surface-dim bg-white p-4 text-sm text-on-surface">
-            <p>上場次數：{me.turns_played}</p>
-            <p>推倒塔數：{me.towers_knocked}</p>
-            <p>助攻次數：{me.assists}</p>
+        {result && (
+          <div className="grid w-full max-w-sm grid-cols-2 gap-3 text-left">
+            {(['a', 'b'] as const).map((side) => (
+              <div key={side} className="rounded-xl border border-surface-dim p-3">
+                <p className="mb-2 text-sm font-bold text-on-surface">{side === 'a' ? '甲隊' : '乙隊'}</p>
+                <p className="mb-2 text-xs text-on-surface-variant">{result.sides[side].towers_destroyed}/{TOWER_COUNT} 座塔</p>
+                <ul className="space-y-1.5 text-xs text-on-surface">
+                  {result.players[side].map((p) => (
+                    <li key={p.student_id}>
+                      <span className="font-semibold">{p.display_name}</span>
+                      <span className="block text-on-surface-variant">{p.highlight}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
         )}
       </div>
@@ -203,27 +380,30 @@ const StudentTeamArenaPlay: React.FC = () => {
     );
   }
 
-  const payload = currentRound?.payload;
+  const payload = currentRound && 'stem' in currentRound ? currentRound : null;
   const options = payload?.options;
   const answered = selectedKey != null;
   const revealed = !!currentRound?.revealed;
   const wasCorrect = revealed && answered && payload?.correct_key != null ? selectedKey === payload.correct_key : null;
+  const weaponsUsed = ownMatch.weapons_used;
 
   return (
     <div className="flex min-h-screen flex-col bg-surface px-5 py-6">
-      <div className="mb-3 flex gap-1">
-        {TEAM_ARENA_PRIMARY_LANES.map((lane) => (
-          <div key={lane} className="flex-1 rounded bg-surface-container p-1 text-center text-[10px]">
-            {TEAM_ARENA_LANE_LABELS[lane]}
-            <div className="font-bold">{ownMatch.towers_down?.[lane] ?? 0}/2</div>
-          </div>
-        ))}
+      {state.showdown && (
+        <div
+          className="mb-3 rounded-lg bg-amber-500/90 px-3 py-2 text-center text-sm font-bold text-white animate-pop"
+          data-testid="showdown-banner"
+        >
+          ⚔️ 決戰時刻！傷害 ×2
+        </div>
+      )}
+
+      <div className="mb-4 flex gap-2">
+        <SideBar label="甲隊" sideData={state.sides.a} effect={effects.a ?? null} onEffectComplete={() => clearEffect('a')} />
+        <SideBar label="乙隊" sideData={state.sides.b} effect={effects.b ?? null} onEffectComplete={() => clearEffect('b')} />
       </div>
 
       {ownMatch.match_status === 'ended' ? (
-        // My match already ended (base conquered) while the session/other
-        // matches continue — show the outcome now instead of waiting
-        // forever for a "next round" that will never come for this match.
         <p className="text-center text-base font-semibold text-accent">
           {(() => {
             const outcome = teamArenaMyOutcome(ownMatch);
@@ -232,14 +412,22 @@ const StudentTeamArenaPlay: React.FC = () => {
         </p>
       ) : !currentRound ? (
         <p className="text-center text-on-surface-variant">等待下一回合…</p>
+      ) : !ownMatch.am_i_active && !currentRound.called_for_help ? (
+        <p className="text-center text-on-surface-variant">輪到隊友了，等待中…</p>
       ) : (
         <>
-          <p className="mb-2 text-sm font-semibold text-accent">
-            {ownMatch.am_i_active ? '輪到你了！' : '隊友作答中，你可以助攻'}
-          </p>
-          <p className="mb-6 text-lg font-medium text-on-surface">
+          {!ownMatch.am_i_active && currentRound.called_for_help && (
+            <p className="mb-2 text-sm font-semibold text-accent">隊友呼叫你幫忙！點一個建議答案</p>
+          )}
+          {ownMatch.am_i_active && <p className="mb-2 text-sm font-semibold text-accent">輪到你了！</p>}
+
+          <p className="mb-4 text-lg font-medium text-on-surface">
             {payload?.stem != null && <StemWithTarget stem={payload.stem} targetIndex={payload.extra?.target_index} />}
           </p>
+
+          {ownMatch.am_i_active && currentRound.hint_text && (
+            <p className="mb-3 rounded-lg bg-accent-bg px-3 py-2 text-sm text-accent">💡 {currentRound.hint_text}</p>
+          )}
 
           {!options ? (
             <p className="text-center text-on-surface-variant">請先仔細讀題目，稍後選項才會出現</p>
@@ -248,12 +436,13 @@ const StudentTeamArenaPlay: React.FC = () => {
               {options.map((opt) => {
                 const isSelected = selectedKey === opt.key;
                 const isCorrectChoice = revealed && payload?.correct_key === opt.key;
+                const onClick = ownMatch.am_i_active ? () => handleAnswer(opt.key) : () => handleSuggest(opt.key);
                 return (
                   <button
                     key={opt.key}
                     type="button"
-                    disabled={answered}
-                    onClick={() => handleAnswer(opt.key)}
+                    disabled={ownMatch.am_i_active && answered}
+                    onClick={onClick}
                     className={`rounded-xl border-2 px-4 py-3 text-left text-base ${
                       isCorrectChoice
                         ? 'border-green-500 bg-green-50'
@@ -270,10 +459,53 @@ const StudentTeamArenaPlay: React.FC = () => {
             </div>
           )}
 
+          {ownMatch.am_i_active && options && (
+            <div className="mt-4">
+              <div className="grid grid-cols-3 gap-2">
+                {(Object.keys(TEAM_ARENA_WEAPON_LABELS) as TeamArenaWeapon[]).map((w) => {
+                  // PRD rule I: "本來就只有 2 個選項的題目不能用，按鈕灰掉且
+                  // 不扣次數" -- the frontend already has `options.length`
+                  // in scope, so it greys this out BEFORE a round-trip ever
+                  // happens (the backend still enforces + 409s too, this is
+                  // defense in depth / avoiding a pointless error flash).
+                  const cannotEliminate = w === 'eliminate' && options.length < MIN_OPTIONS_TO_ELIMINATE;
+                  return (
+                    <button
+                      key={w}
+                      type="button"
+                      disabled={weaponsUsed[w] || weaponBusy !== null || answered || cannotEliminate}
+                      onClick={() => handleWeapon(w)}
+                      className="rounded-lg border border-surface-dim px-2 py-2 text-xs font-semibold text-on-surface disabled:opacity-40"
+                    >
+                      {TEAM_ARENA_WEAPON_LABELS[w]}
+                    </button>
+                  );
+                })}
+              </div>
+              {weaponError && <p className="mt-2 text-xs text-red-600">{weaponError}</p>}
+              {currentRound.call_teammate_active && (
+                <div className="mt-3 rounded-lg border border-surface-dim p-2">
+                  <p className="mb-1 text-xs font-semibold text-on-surface-variant">隊友建議</p>
+                  {currentRound.suggestions && currentRound.suggestions.length > 0 ? (
+                    <ul className="space-y-1 text-xs text-on-surface">
+                      {currentRound.suggestions.map((s) => (
+                        <li key={s.student_id}>
+                          {s.display_name}：{s.choice_key}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-xs text-on-surface-variant">等待隊友建議…</p>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
           {submitError && <p className="mt-3 text-sm text-red-600">{submitError}</p>}
-          {revealed && answered && wasCorrect != null && (
+          {revealed && ownMatch.am_i_active && answered && wasCorrect != null && (
             <p className={`mt-4 text-center text-base font-semibold ${wasCorrect ? 'text-green-600' : 'text-on-surface-variant'}`}>
-              {wasCorrect ? (ownMatch.am_i_active ? '答對了！推倒一座塔' : '你也答對了，助攻 +1') : '這題沒有推進，正解是 ' + payload?.correct_key}
+              {wasCorrect ? '答對了！攻擊對方！' : '這題沒有推進，正解是 ' + payload?.correct_key}
             </p>
           )}
         </>

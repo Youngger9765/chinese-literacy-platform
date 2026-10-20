@@ -402,7 +402,6 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack, 
           pkHuman={classroom.pk_human}
           league={classroom.league}
           liveQuiz={classroom.live_quiz}
-          teamArena={classroom.team_arena}
           onChanged={(next) =>
             setClassroom((prev) => (prev ? { ...prev, ...next } : prev))
           }

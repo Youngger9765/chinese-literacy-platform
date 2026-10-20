@@ -26,9 +26,6 @@ export interface ClassroomResponse {
   league: boolean;
   /** 課堂搶答（live_quiz）班級開關 — issue #3607，預設 false，向下相容規則同上。 */
   live_quiz: boolean;
-  /** 五人對抗賽（team_arena）班級開關 — issue #3632，預設 false，跟 pk_human
-   * 一樣沒有向下相容 fallback（全新功能，沒有「已經在用」的舊班級）。 */
-  team_arena: boolean;
 }
 
 export interface StudentInClassroomResponse {
@@ -151,7 +148,6 @@ export interface ClassroomFeatureSettingsResponse {
   pk_human: boolean;
   league: boolean;
   live_quiz: boolean;
-  team_arena: boolean;
 }
 
 /** @deprecated kept for any stray caller — prefer ClassroomFeatureSettingsResponse. */
@@ -167,7 +163,7 @@ export type ClassroomPkSettingsResponse = ClassroomFeatureSettingsResponse;
 export async function updateClassroomFeatureSettings(
   token: string,
   classroomId: number,
-  data: { pk_human?: boolean; league?: boolean; live_quiz?: boolean; team_arena?: boolean },
+  data: { pk_human?: boolean; league?: boolean; live_quiz?: boolean },
 ): Promise<ClassroomFeatureSettingsResponse> {
   const res = await fetch(`${API_BASE}/api/classrooms/${classroomId}/pk-settings`, {
     method: 'PATCH',

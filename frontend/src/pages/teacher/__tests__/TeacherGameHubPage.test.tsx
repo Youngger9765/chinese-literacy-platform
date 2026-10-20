@@ -40,11 +40,9 @@ vi.mock('../ClassroomPkSettingsPanel', () => ({
     pkHuman: boolean;
     league: boolean;
     liveQuiz: boolean;
-    teamArena?: boolean;
   }) => (
     <div data-testid={`settings-panel-${props.classroomId}`}>
-      pkHuman={String(props.pkHuman)} league={String(props.league)} liveQuiz={String(props.liveQuiz)}{' '}
-      teamArena={String(props.teamArena)}
+      pkHuman={String(props.pkHuman)} league={String(props.league)} liveQuiz={String(props.liveQuiz)}
     </div>
   ),
 }));
@@ -57,7 +55,6 @@ function classroom(overrides: Partial<{
   pk_human: boolean;
   league: boolean;
   live_quiz: boolean;
-  team_arena: boolean;
 }> = {}) {
   return {
     id: 1,
@@ -71,7 +68,6 @@ function classroom(overrides: Partial<{
     pk_human: false,
     league: false,
     live_quiz: false,
-    team_arena: false,
     ...overrides,
   };
 }
@@ -96,11 +92,10 @@ describe('<TeacherGameHubPage> — links to the existing pages (#3633)', () => {
     expect(mockNavigate).toHaveBeenCalledWith('/teacher/live');
   });
 
-  it('clicking 五人對抗賽 navigates to /teacher/team-arena (#3632)', async () => {
+  it('has no 五人對抗賽／多人對抗賽 entry at all (#3632 v2: "老師端入口移除")', async () => {
     listMyClassrooms.mockResolvedValue({ items: [], total: 0 });
     render(<TeacherGameHubPage />);
-    fireEvent.click(screen.getByRole('button', { name: /五人對抗賽/ }));
-    expect(mockNavigate).toHaveBeenCalledWith('/teacher/team-arena');
+    expect(screen.queryByRole('button', { name: /對抗賽/ })).toBeNull();
   });
 });
 
@@ -108,7 +103,7 @@ describe('<TeacherGameHubPage> — per-class switches reuse <ClassroomPkSettings
   it('renders one settings panel per classroom with the right props (does not re-implement the switches)', async () => {
     listMyClassrooms.mockResolvedValue({
       items: [
-        classroom({ id: 1, name: '四年甲班', pk_human: true, league: false, live_quiz: true, team_arena: true }),
+        classroom({ id: 1, name: '四年甲班', pk_human: true, league: false, live_quiz: true }),
         classroom({ id: 2, name: '四年乙班' }),
       ],
       total: 2,
@@ -123,13 +118,11 @@ describe('<TeacherGameHubPage> — per-class switches reuse <ClassroomPkSettings
     expect(panel1.textContent).toContain('pkHuman=true');
     expect(panel1.textContent).toContain('league=false');
     expect(panel1.textContent).toContain('liveQuiz=true');
-    expect(panel1.textContent).toContain('teamArena=true');
 
     const panel2 = screen.getByTestId('settings-panel-2');
     expect(panel2.textContent).toContain('pkHuman=false');
     expect(panel2.textContent).toContain('league=false');
     expect(panel2.textContent).toContain('liveQuiz=false');
-    expect(panel2.textContent).toContain('teamArena=false');
   });
 
   it('shows a friendly empty state with zero classrooms (does not crash)', async () => {

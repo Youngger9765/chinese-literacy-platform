@@ -203,7 +203,6 @@ def list_my_classrooms(
                 pk_human=pk_classroom_features.get_classroom_feature(c, "pk_human", db=db),
                 league=pk_classroom_features.get_classroom_feature(c, "league", db=db),
                 live_quiz=pk_classroom_features.get_classroom_feature(c, "live_quiz", db=db),
-                team_arena=pk_classroom_features.get_classroom_feature(c, "team_arena", db=db),
             )
             for c in items
         ],
@@ -276,7 +275,6 @@ def list_my_enrolled_classrooms(
             pk_human=pk_classroom_features.get_classroom_feature(classroom, "pk_human", db=db),
             league=pk_classroom_features.get_classroom_feature(classroom, "league", db=db),
             live_quiz=pk_classroom_features.get_classroom_feature(classroom, "live_quiz", db=db),
-            team_arena=pk_classroom_features.get_classroom_feature(classroom, "team_arena", db=db),
         )
         for cs, classroom, teacher in rows
     ]
