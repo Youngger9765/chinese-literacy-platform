@@ -80,11 +80,57 @@ def build_hint(payload: dict) -> str | None:
     extra = payload.get("extra") or {}
     target_index = extra.get("target_index")
     stem = payload.get("stem") or ""
-    if not isinstance(target_index, int) or not (0 <= target_index < len(stem)):
+    lesson_uid = payload.get("lesson_uid")
+    if not isinstance(target_index, int) or not (0 <= target_index < len(stem)) or not lesson_uid:
         return None
-    start = max(0, target_index - 1)
-    end = min(len(stem), target_index + 2)
-    word = stem[start:end]
-    if not word:
+    # Staging QA (2026-10-20): the old hint took one neighbour on each side and
+    # called it 「這個詞」, which was usually not a word (「索不是」) and only
+    # repeated what the stem already shows. Instead point to ANOTHER sentence of
+    # the same lesson where this character has the same curated reading — true,
+    # useful, and it never prints the reading itself.
+    from ..lesson_zhuyin import lesson_zhuyin_table
+
+    table = lesson_zhuyin_table(lesson_uid) or {}
+    # The stem is a slice of a passage, so look the reading up from the answer
+    # key the server already holds (this runs server-side; the reading itself
+    # is never put in the hint text).
+    correct_key = payload.get("correct_key")
+    reading = next((o.get("text") for o in payload.get("options") or [] if o.get("key") == correct_key), None)
+    if not reading:
         return None
-    return f"這個字出現在「{word}」這個詞裡"
+    char = stem[target_index]
+    best: tuple[tuple[int, int], str] | None = None
+    for text, readings in table.items():
+        own = text.find(stem)
+        for i, ch in enumerate(text):
+            if own >= 0 and i == own + target_index:
+                continue  # the very occurrence this question asks about
+            if ch == char and readings.get(i) == reading:
+                clause, whole = _clause_around(text, i)
+                if clause and clause != char:
+                    # prefer a clause shown in full; shortest first
+                    rank = (0 if whole else 1, len(clause))
+                    if best is None or rank < best[0]:
+                        best = (rank, clause)
+    if best is None:
+        return None
+    return f"同一課「{best[1]}」裡的「{char}」，唸法跟這題一樣"
+
+
+_CLAUSE_BREAKS = set("，。！？；：、「」『』（）()…—\n ")
+
+
+def _clause_around(text: str, i: int, limit: int = 14) -> tuple[str, bool]:
+    """The punctuation-delimited clause containing text[i], trimmed to `limit`
+    characters centred on i. Returns (clause, shown_in_full)."""
+    start = i
+    while start > 0 and text[start - 1] not in _CLAUSE_BREAKS:
+        start -= 1
+    end = i + 1
+    while end < len(text) and text[end] not in _CLAUSE_BREAKS:
+        end += 1
+    if end - start <= limit:
+        return text[start:end], True
+    start = max(start, i - limit // 2)
+    end = min(end, start + limit)
+    return text[start:end], False

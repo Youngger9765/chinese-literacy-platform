@@ -59,15 +59,25 @@ const TOWER_COUNT = 3;
 
 type VisualEffect = { kind: 'attack'; side: TeamArenaSide; variant: AttackVariant } | { kind: 'collapse'; side: TeamArenaSide } | { kind: 'victory'; side: TeamArenaSide };
 
+// `sides[side].towers_destroyed` is how many of THAT side's OWN towers
+// have fallen (it is damage TAKEN by that side, not dealt by it) -- a
+// bare "N/3 座塔" next to a team's own label reads backwards (team-lead
+// review of #3655 staging screenshots, 2026-10-20: 甲隊 personally
+// destroyed 3 of 乙隊's towers, each player's highlight said so, but the
+// panel labelled 甲隊 showed "0/3 座塔"). Every caller must show BOTH an
+// offense count (towers this side knocked down = the OTHER side's
+// towers_destroyed) and a defense count (towers this side has left).
 const SideBar: React.FC<{
   label: string;
   sideData: { towers_destroyed: number; current_hp: number; seated: number; team_size: number };
+  opponentTowersDestroyed: number;
   effect: VisualEffect | null;
   onEffectComplete: () => void;
-}> = ({ label, sideData, effect, onEffectComplete }) => (
+}> = ({ label, sideData, opponentTowersDestroyed, effect, onEffectComplete }) => (
   <div className="relative flex-1 rounded-xl border border-surface-dim bg-surface-container p-3 text-center overflow-hidden">
     <p className="text-xs font-semibold text-on-surface-variant">{label}</p>
-    <p className="text-lg font-bold text-on-surface">{sideData.towers_destroyed}/{TOWER_COUNT} 座塔</p>
+    <p className="text-sm font-bold text-on-surface">已打倒對方 {opponentTowersDestroyed} 座塔</p>
+    <p className="text-xs text-on-surface-variant">我方剩 {TOWER_COUNT - sideData.towers_destroyed} 座塔</p>
     <div className="mt-1 h-2 w-full rounded-full bg-surface-dim">
       <div
         className="h-2 rounded-full bg-accent transition-all"
@@ -351,10 +361,13 @@ const StudentTeamArenaPlay: React.FC = () => {
         )}
         {result && (
           <div className="grid w-full max-w-sm grid-cols-2 gap-3 text-left">
-            {(['a', 'b'] as const).map((side) => (
+            {(['a', 'b'] as const).map((side) => {
+              const other = side === 'a' ? 'b' : 'a';
+              return (
               <div key={side} className="rounded-xl border border-surface-dim p-3">
                 <p className="mb-2 text-sm font-bold text-on-surface">{side === 'a' ? '甲隊' : '乙隊'}</p>
-                <p className="mb-2 text-xs text-on-surface-variant">{result.sides[side].towers_destroyed}/{TOWER_COUNT} 座塔</p>
+                <p className="mb-1 text-xs font-semibold text-on-surface">已打倒對方 {result.sides[other].towers_destroyed} 座塔</p>
+                <p className="mb-2 text-xs text-on-surface-variant">我方剩 {TOWER_COUNT - result.sides[side].towers_destroyed} 座塔</p>
                 <ul className="space-y-1.5 text-xs text-on-surface">
                   {result.players[side].map((p) => (
                     <li key={p.student_id}>
@@ -364,7 +377,8 @@ const StudentTeamArenaPlay: React.FC = () => {
                   ))}
                 </ul>
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
@@ -399,8 +413,8 @@ const StudentTeamArenaPlay: React.FC = () => {
       )}
 
       <div className="mb-4 flex gap-2">
-        <SideBar label="甲隊" sideData={state.sides.a} effect={effects.a ?? null} onEffectComplete={() => clearEffect('a')} />
-        <SideBar label="乙隊" sideData={state.sides.b} effect={effects.b ?? null} onEffectComplete={() => clearEffect('b')} />
+        <SideBar label="甲隊" sideData={state.sides.a} opponentTowersDestroyed={state.sides.b.towers_destroyed} effect={effects.a ?? null} onEffectComplete={() => clearEffect('a')} />
+        <SideBar label="乙隊" sideData={state.sides.b} opponentTowersDestroyed={state.sides.a.towers_destroyed} effect={effects.b ?? null} onEffectComplete={() => clearEffect('b')} />
       </div>
 
       {ownMatch.match_status === 'ended' ? (
