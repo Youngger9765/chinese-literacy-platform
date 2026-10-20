@@ -257,3 +257,31 @@ class TestOptionsOpenReachesPollingClient:
         later = client.get(f"/api/team-arena/sessions/{code}/state?after_version={v0}", headers=auth_header(host["token"])).json()
         assert later.get("unchanged") is not True, "options opened but the poll still said unchanged"
         assert later["own_match"]["current_round"]["options"], later
+
+
+class TestHintAvailabilityReachesActivePlayer:
+    """Staging QA 2026-10-21: 看提示 was clickable on a question with no hint
+    and answered 409 「這題沒有提示」. The active player's round view must say
+    up front whether a hint exists (PRD rule J: 按鈕灰掉且不扣次數)."""
+
+    @pytest.mark.parametrize("hint, expected", [(None, False), ("同一課「某句」裡的「字」，唸法跟這題一樣", True)])
+    def test_round_view_carries_hint_available(self, client, monkeypatch, hint, expected):
+        from app.services.team_arena import weapons
+
+        monkeypatch.setattr(weapons, "build_hint", lambda payload: hint)
+        host = _register(client, f"ta_hint_host_{expected}")
+        _enroll_with_grade(host["user_id"])
+        code = client.post(
+            "/api/team-arena/sessions",
+            json={"team_size": 2, "turns_per_player": 1, "answer_seconds": 45},
+            headers=auth_header(host["token"]),
+        ).json()["code"]
+        for suffix, side in (("a", "a"), ("b1", "b"), ("b2", "b")):
+            p = _register(client, f"ta_hint_{suffix}_{expected}")
+            assert client.post(f"/api/team-arena/sessions/{code}/join", json={"side": side}, headers=auth_header(p["token"])).status_code == 201
+        assert client.post(f"/api/team-arena/sessions/{code}/control", json={"action": "start"}, headers=auth_header(host["token"])).status_code == 200
+
+        state = client.get(f"/api/team-arena/sessions/{code}/state", headers=auth_header(host["token"])).json()
+        rnd = state["own_match"]["current_round"]
+        assert state["own_match"]["am_i_active"], state
+        assert rnd["hint_available"] is expected

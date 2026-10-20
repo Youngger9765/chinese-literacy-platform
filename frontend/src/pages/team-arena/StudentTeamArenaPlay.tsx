@@ -491,11 +491,12 @@ const StudentTeamArenaPlay: React.FC = () => {
                   // happens (the backend still enforces + 409s too, this is
                   // defense in depth / avoiding a pointless error flash).
                   const cannotEliminate = w === 'eliminate' && options.length < MIN_OPTIONS_TO_ELIMINATE;
+                  const noHint = w === 'hint' && currentRound.hint_available === false;
                   return (
                     <button
                       key={w}
                       type="button"
-                      disabled={weaponsUsed[w] || weaponBusy !== null || answered || cannotEliminate}
+                      disabled={weaponsUsed[w] || weaponBusy !== null || answered || cannotEliminate || noHint}
                       onClick={() => handleWeapon(w)}
                       className="rounded-lg border border-surface-dim px-2 py-2 text-xs font-semibold text-on-surface disabled:opacity-40"
                     >

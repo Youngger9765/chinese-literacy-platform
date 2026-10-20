@@ -173,6 +173,21 @@ describe('StudentTeamArenaPlay weapons UI', () => {
     expect(await screen.findByText('💡 同一課「在眾人期待的目光下」裡的「待」，唸法跟這題一樣')).toBeTruthy();
   });
 
+  it('看提示 is greyed out up front when the server says this question has no hint (staging QA 2026-10-21: it was clickable and answered 「這題沒有提示」)', async () => {
+    mockState = baseState();
+    (mockState as { own_match: { current_round: { hint_available?: boolean } } }).own_match.current_round.hint_available = false;
+    renderPlay();
+    expect((await screen.findByText('看提示')).closest('button')?.disabled).toBe(true);
+    expect(screen.getByText('呼叫隊友').closest('button')?.disabled).toBe(false);
+  });
+
+  it('看提示 stays enabled when a hint is available', async () => {
+    mockState = baseState();
+    (mockState as { own_match: { current_round: { hint_available?: boolean } } }).own_match.current_round.hint_available = true;
+    renderPlay();
+    expect((await screen.findByText('看提示')).closest('button')?.disabled).toBe(false);
+  });
+
   it('does not show a hint box when hint_text is null (not used yet)', async () => {
     mockState = baseState();
     renderPlay();
