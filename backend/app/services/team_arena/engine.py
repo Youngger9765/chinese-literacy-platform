@@ -624,11 +624,15 @@ def submit_answer(db: Session, session: TeamArenaSession, student: User, *, choi
     is_correct = bool(choice_key) and choice_key == correct_key
     elapsed_ms = max(0, int(elapsed_since_options_opened * 1000))
     weapon_used_this_turn = round_state.get("weapon_used") is not None
+    showdown = towers.is_showdown_turn(
+        session.turn_no, session.settings.get("total_turns", 0), session.settings["team_size"]
+    )
 
     damage = 0
     if is_correct:
         damage = towers.compute_damage(
-            elapsed_ms=elapsed_ms, limit_ms=answer_seconds * 1000, weapon_used=weapon_used_this_turn
+            elapsed_ms=elapsed_ms, limit_ms=answer_seconds * 1000,
+            weapon_used=weapon_used_this_turn, showdown=showdown,
         )
 
     answer = TeamArenaAnswer(
@@ -651,6 +655,7 @@ def submit_answer(db: Session, session: TeamArenaSession, student: User, *, choi
         db.rollback()
         raise HTTPException(status_code=409, detail="這回合已經作答過了") from exc
 
+    event = None
     if is_correct:
         opponent_key = "b" if side_key == "a" else "a"
         opponent_cache = session.scoreboard["sides"][opponent_key]
@@ -659,13 +664,29 @@ def submit_answer(db: Session, session: TeamArenaSession, student: User, *, choi
             current_hp=opponent_cache["current_hp"],
             base_destroyed=opponent_cache["base_destroyed"],
         )
-        new_state, event = towers.apply_damage(state, damage)
+        new_state, event = towers.apply_damage(state, damage, showdown=showdown)
         opponent_cache["towers_destroyed"] = new_state.towers_destroyed
         opponent_cache["current_hp"] = new_state.current_hp
         opponent_cache["base_destroyed"] = new_state.base_destroyed
-        flag_modified(session, "scoreboard")
         if event == "base_destroyed":
             _end_session(db, session)
+
+    # PRD v2 rule Q: the end screen needs a REAL, never-invented highlight
+    # per player — appended here (existing `scoreboard` JSONB, no new
+    # column) is the only record of WHICH correct answers actually felled
+    # a structure or used a weapon, since `TeamArenaAnswer` itself has no
+    # spare column for that. See `_compute_highlights`.
+    events_log = session.scoreboard.setdefault("events", [])
+    events_log.append({
+        "turn_no": session.turn_no,
+        "student_id": member.student_id,
+        "side": side_key,
+        "correct": is_correct,
+        "event": event,
+        "elapsed_ms": elapsed_ms,
+        "weapon": round_state.get("weapon_used"),
+    })
+    flag_modified(session, "scoreboard")
 
     _bump_version(session)
     db.commit()
@@ -882,6 +903,12 @@ def get_state(db: Session, session: TeamArenaSession, user: User) -> dict:
         "story": resolve_story_for_session(session.settings.get("story_pack_key")),
         "team_size": session.settings.get("team_size"),
         "is_host": is_host,
+        # PRD v2 rule P: 決戰時刻 — both student and host screens must show
+        # a clear banner once the final lap starts. Computed the same way
+        # submit_answer does (shared turn clock, same inputs).
+        "showdown": towers.is_showdown_turn(
+            session.turn_no, session.settings.get("total_turns", 0), session.settings.get("team_size", 0)
+        ),
     }
 
     by_side = _members_by_side(db, session.id)
@@ -938,8 +965,70 @@ def get_state(db: Session, session: TeamArenaSession, user: User) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# Result (only after ended)
+# Result (only after ended) — PRD v2 rule Q: NO individual ranking or
+# per-player score anywhere in this payload. Team result (win/lose/draw,
+# towers down) plus one REAL, never-invented highlight sentence per
+# player, built only from events `submit_answer` actually logged.
 # ---------------------------------------------------------------------------
+
+_HIGHLIGHT_BASE_DESTROYED = "幫隊伍攻破了對方主堡！"
+_HIGHLIGHT_TOWER_FALLEN = "打倒了一座塔"
+_HIGHLIGHT_FASTEST = "全場答得最快的一次"
+_HIGHLIGHT_CALL_TEAMMATE = "用呼叫隊友幫隊伍答對"
+_HIGHLIGHT_STREAK = "連續答對，手感超穩"
+# PRD rule Q: "沒有亮點事件的人給一句中性的參與感謝，不能是負面描述" — this
+# is the only fallback, and it is used verbatim, never softened into
+# something that reads as an excuse for a weak performance.
+_HIGHLIGHT_NEUTRAL = "完整參與了這場比賽"
+
+
+def _compute_highlights(session: TeamArenaSession, members: list[TeamArenaMember]) -> dict[int, str]:
+    """Returns {student_id: one Chinese sentence}. Every non-neutral
+    sentence traces back to a specific logged event in
+    `session.scoreboard["events"]` (appended by `submit_answer`) — nothing
+    here is inferred or guessed. Priority (most impressive wins when a
+    player qualifies for more than one): base destroyed > tower felled >
+    fastest correct answer of the match > a correct answer made using 呼叫
+    隊友 > a 2+ correct-answer streak > neutral participation line.
+    """
+    events: list[dict] = session.scoreboard.get("events", [])
+    highlights: dict[int, str] = {}
+
+    for e in events:
+        if not e.get("correct"):
+            continue
+        sid = e["student_id"]
+        if e.get("event") == "base_destroyed":
+            highlights[sid] = _HIGHLIGHT_BASE_DESTROYED
+        elif e.get("event") in ("tower_fallen", "tower_fallen_to_base"):
+            highlights.setdefault(sid, _HIGHLIGHT_TOWER_FALLEN)
+
+    correct_events = [e for e in events if e.get("correct")]
+    if correct_events:
+        fastest = min(correct_events, key=lambda e: e.get("elapsed_ms", 0))
+        highlights.setdefault(fastest["student_id"], _HIGHLIGHT_FASTEST)
+
+    for e in events:
+        if e.get("correct") and e.get("weapon") == "call_teammate":
+            highlights.setdefault(e["student_id"], _HIGHLIGHT_CALL_TEAMMATE)
+
+    by_student: dict[int, list[dict]] = {}
+    for e in events:
+        by_student.setdefault(e["student_id"], []).append(e)
+    for sid, evs in by_student.items():
+        evs.sort(key=lambda e: e["turn_no"])
+        run = best = 0
+        for e in evs:
+            run = run + 1 if e.get("correct") else 0
+            best = max(best, run)
+        if best >= 2:
+            highlights.setdefault(sid, _HIGHLIGHT_STREAK)
+
+    for m in members:
+        highlights.setdefault(m.student_id, _HIGHLIGHT_NEUTRAL)
+
+    return highlights
+
 
 def get_result(db: Session, session: TeamArenaSession, user: User) -> dict:
     is_host = session.teacher_id == user.id
@@ -963,23 +1052,24 @@ def get_result(db: Session, session: TeamArenaSession, user: User) -> dict:
             "winner": cache.get("winner"),
         }
 
+    by_side = _members_by_side(db, session.id)
+    all_members = by_side.get("a", []) + by_side.get("b", [])
+    highlights = _compute_highlights(session, all_members)
+
+    # PRD rule Q: "每人一句" — the whole roster's highlights are shown on
+    # the shared end screen (not a private "only you see this" stat, the
+    # way v1's per-player numbers were) — deliberately NO numeric field
+    # anywhere in here that could be read as a score or used to rank.
+    players: dict[str, list[dict]] = {
+        side_key: [
+            {"student_id": m.student_id, "display_name": _display_name(m), "highlight": highlights[m.student_id]}
+            for m in by_side.get(side_key, [])
+        ]
+        for side_key in ("a", "b")
+    }
+
     me = None
     if member is not None:
-        answers = (
-            db.query(TeamArenaAnswer)
-            .filter(TeamArenaAnswer.session_id == session.id, TeamArenaAnswer.member_id == member.id)
-            .all()
-        )
-        turns_played = sum(1 for a in answers if a.role == "active")
-        towers_knocked = sum(1 for a in answers if a.role == "active" and a.correct)
-        suggestions_given = sum(1 for a in answers if a.role == "assist")
-        weapons_used = member.question_queue.get("weapons_used") or {}
-        me = {
-            "my_side": COLUMN_TO_SIDE[member.side],
-            "turns_played": turns_played,
-            "towers_knocked": towers_knocked,
-            "suggestions_given": suggestions_given,
-            "weapons_used": {k: bool(weapons_used.get(k)) for k in WEAPON_KEYS},
-        }
+        me = {"my_side": COLUMN_TO_SIDE[member.side], "highlight": highlights.get(member.student_id, _HIGHLIGHT_NEUTRAL)}
 
-    return {"sides": sides, "me": me}
+    return {"sides": sides, "players": players, "me": me}

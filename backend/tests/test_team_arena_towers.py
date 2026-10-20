@@ -65,9 +65,11 @@ class TestApplyDamageTowerProgression:
         assert not new_state.base_destroyed
         assert new_state.is_attacking_base()
 
-    def test_destroying_the_base_ends_it(self):
+    def test_destroying_the_base_ends_it_during_showdown(self):
+        """PRD v2 rule P: the base can only truly fall during 決戰時刻 (or
+        see TestShowdownBaseFloor below for the pre-showdown floor)."""
         state = svc.PathState(towers_destroyed=svc.TOWER_COUNT, current_hp=svc.STRUCTURE_HP)
-        new_state, event = svc.apply_damage(state, svc.STRUCTURE_HP)
+        new_state, event = svc.apply_damage(state, svc.STRUCTURE_HP, showdown=True)
         assert event == "base_destroyed"
         assert new_state.base_destroyed is True
 
@@ -77,14 +79,103 @@ class TestApplyDamageTowerProgression:
         assert event == "already_won"
         assert new_state == state
 
-    def test_full_sweep_from_fresh_to_base_destroyed(self):
+    def test_full_sweep_from_fresh_to_base_destroyed_during_showdown(self):
         state = svc.new_path_state()
         events = []
         for _ in range(svc.TOWER_COUNT + 1):
-            state, event = svc.apply_damage(state, svc.STRUCTURE_HP)
+            state, event = svc.apply_damage(state, svc.STRUCTURE_HP, showdown=True)
             events.append(event)
         assert events == ["tower_fallen", "tower_fallen", "tower_fallen_to_base", "base_destroyed"]
         assert state.base_destroyed is True
+
+
+class TestShowdownBaseFloor:
+    """PRD v2 rule P: 主堡血量在決戰時刻之前不會真的降到 0 以下（最低停在
+    BASE_HP_FLOOR_BEFORE_SHOWDOWN）；towers are NEVER floored, only the
+    base."""
+
+    def test_lethal_hit_on_base_before_showdown_is_floored_not_destroyed(self):
+        state = svc.PathState(towers_destroyed=svc.TOWER_COUNT, current_hp=svc.STRUCTURE_HP)
+        new_state, event = svc.apply_damage(state, svc.STRUCTURE_HP, showdown=False)
+        assert event == "base_floor_held"
+        assert new_state.base_destroyed is False
+        assert new_state.current_hp == svc.BASE_HP_FLOOR_BEFORE_SHOWDOWN
+
+    def test_already_at_floor_stays_at_floor_pre_showdown(self):
+        state = svc.PathState(
+            towers_destroyed=svc.TOWER_COUNT, current_hp=svc.BASE_HP_FLOOR_BEFORE_SHOWDOWN
+        )
+        new_state, event = svc.apply_damage(state, 999, showdown=False)
+        assert event == "base_floor_held"
+        assert new_state.current_hp == svc.BASE_HP_FLOOR_BEFORE_SHOWDOWN
+        assert new_state.base_destroyed is False
+
+    def test_non_lethal_hit_on_base_before_showdown_still_lands_normally(self):
+        state = svc.PathState(towers_destroyed=svc.TOWER_COUNT, current_hp=svc.STRUCTURE_HP)
+        new_state, event = svc.apply_damage(state, 10, showdown=False)
+        assert event == "damage"
+        assert new_state.current_hp == svc.STRUCTURE_HP - 10
+
+    def test_floor_never_applies_to_a_tower_pre_showdown(self):
+        """Only the BASE is floored — a tower can fall at any point in the
+        match, showdown or not."""
+        state = svc.new_path_state()
+        new_state, event = svc.apply_damage(state, svc.STRUCTURE_HP, showdown=False)
+        assert event == "tower_fallen"
+        assert new_state.towers_destroyed == 1
+
+    def test_showdown_true_lets_the_base_actually_fall(self):
+        state = svc.PathState(towers_destroyed=svc.TOWER_COUNT, current_hp=svc.STRUCTURE_HP)
+        new_state, event = svc.apply_damage(state, svc.STRUCTURE_HP, showdown=True)
+        assert event == "base_destroyed"
+        assert new_state.base_destroyed is True
+
+
+class TestIsShowdownTurn:
+    def test_before_final_lap_is_not_showdown(self):
+        # turns_per_player=3, team_size=2 -> total_turns=6, final lap = turns 4,5
+        assert svc.is_showdown_turn(0, total_turns=6, team_size=2) is False
+        assert svc.is_showdown_turn(3, total_turns=6, team_size=2) is False
+
+    def test_final_lap_is_showdown(self):
+        assert svc.is_showdown_turn(4, total_turns=6, team_size=2) is True
+        assert svc.is_showdown_turn(5, total_turns=6, team_size=2) is True
+
+    def test_single_lap_game_is_showdown_from_turn_zero(self):
+        # turns_per_player=1 -> the only lap IS the final lap.
+        assert svc.is_showdown_turn(0, total_turns=3, team_size=3) is True
+
+
+class TestComputeDamageSpeedCapAndShowdown:
+    def test_speed_bonus_is_exactly_25_percent_of_base_not_an_independent_pool(self):
+        """PRD v2 rule O: locks the RATIO itself — a future refactor that
+        decouples MAX_SPEED_BONUS back into an arbitrary flat constant
+        (v1-of-this-module's own original design) would fail this."""
+        assert svc.MAX_SPEED_BONUS == round(svc.BASE_DAMAGE * 0.25)
+
+    def test_instant_answer_caps_at_125_percent_of_base(self):
+        damage = svc.compute_damage(elapsed_ms=0, limit_ms=30_000, weapon_used=False)
+        assert damage == svc.BASE_DAMAGE + svc.MAX_SPEED_BONUS
+        assert damage <= round(svc.BASE_DAMAGE * 1.25)
+
+    def test_showdown_doubles_the_already_weapon_halved_total(self):
+        """elapsed_ms=1500 (not 0) deliberately makes the pre-weapon total
+        ODD (80 + round(20*0.95) = 99) — critic review: at elapsed_ms=0 the
+        pre-weapon total is 100, and `(100 // 2) * 2` happens to equal
+        `(100 * 2) // 2`, so that value could not tell a correct
+        "halve-then-double" implementation apart from a buggy
+        "double-then-halve" one. 99 can: halve-then-double gives
+        `(99 // 2) * 2 = 98`; double-then-halve gives `(99 * 2) // 2 = 99`.
+        """
+        normal = svc.compute_damage(elapsed_ms=1500, limit_ms=30_000, weapon_used=True, showdown=False)
+        showdown = svc.compute_damage(elapsed_ms=1500, limit_ms=30_000, weapon_used=True, showdown=True)
+        assert normal == 49  # (80 + 19) // 2 -- ground truth, not just a relative comparison
+        assert showdown == 98  # 49 * 2, NOT (80+19)*2//2 == 99 (the buggy order)
+
+    def test_showdown_without_weapon_doubles_full_damage(self):
+        normal = svc.compute_damage(elapsed_ms=0, limit_ms=30_000, weapon_used=False, showdown=False)
+        showdown = svc.compute_damage(elapsed_ms=0, limit_ms=30_000, weapon_used=False, showdown=True)
+        assert showdown == normal * 2
 
 
 class TestDecideWinner:

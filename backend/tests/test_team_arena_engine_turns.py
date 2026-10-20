@@ -214,8 +214,11 @@ class TestDamage:
     def test_faster_answer_deals_more_damage(self, db_session, clock):
         """Two independent arenas (fresh RNG seeds don't matter — damage is
         a pure function of elapsed/limit) compared at two different
-        speeds."""
-        arena_fast = _make_arena(db_session, clock, answer_seconds=20)
+        speeds. turns_per_player=2 (not the default 1) so turn 0 is NOT
+        PRD rule P's 決戰時刻 -- a single-lap game makes its only turn the
+        final lap by definition, which would double BOTH measurements and
+        mask the speed difference this test exists to prove."""
+        arena_fast = _make_arena(db_session, clock, turns_per_player=2, answer_seconds=20)
         fast_member = _member_for(arena_fast, arena_fast["side_a"][0])
         _answer(arena_fast, fast_member, correct=True, elapsed_after_open=0.0)
         fast_damage = _total_damage(arena_fast["session"].scoreboard["sides"]["b"])
@@ -227,7 +230,7 @@ class TestDamage:
         engine2 = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False})
         Base.metadata.create_all(engine2)
         db2 = sessionmaker(bind=engine2)()
-        arena_slow = _make_arena(db2, clock, answer_seconds=20)
+        arena_slow = _make_arena(db2, clock, turns_per_player=2, answer_seconds=20)
         slow_member = _member_for(arena_slow, arena_slow["side_a"][0])
         _answer(arena_slow, slow_member, correct=True, elapsed_after_open=19.5)
         slow_damage = _total_damage(arena_slow["session"].scoreboard["sides"]["b"])
@@ -256,22 +259,41 @@ class TestCorrectKeyNeverLeaksPreReveal:
 
 
 class TestTowerProgressionAndWinConditions:
-    def test_destroying_opponent_base_ends_session_early(self, db_session, clock):
+    def test_base_floors_at_1hp_before_showdown_then_falls_during_it(self, db_session, clock):
+        """PRD v2 rule P end-to-end: team_size=2, turns_per_player=3 ->
+        total_turns=6, 決戰時刻 = turns 4-5 (the last `team_size`=2 turns).
+        Side a lands an instant, correct answer on EVERY one of its turns
+        -> max damage each time; the 4th hit (turn_no=3, still pre-
+        showdown) would fell the base but must floor at 1hp instead; the
+        5th hit (turn_no=4, now showdown) actually destroys it."""
         arena = _make_arena(db_session, clock, team_size=2, turns_per_player=3, answer_seconds=20)
-        # Side a answers correctly, instantly, every one of its turns ->
-        # max damage (100) each time; 4 correct hits (400) is enough to
-        # destroy all 3 towers + base (300 + 100). Side b never answers
-        # (times out every turn — no penalty, just no damage dealt back).
-        hits = 0
-        while arena["session"].status == "playing" and hits < 4:
+
+        def _land_one_hit():
             svc.get_state(arena["db"], arena["session"], arena["host"])
             active_student_id = arena["session"].scoreboard["sides"]["a"]["current_round"]["active_student_id"]
             member = next(m for m in arena["members"] if m.student_id == active_student_id)
             _answer(arena, member, correct=True, elapsed_after_open=0.0)
-            hits += 1
-            if arena["session"].status == "playing":
-                _force_next_turn(arena)
 
+        # Hits 1-3: fell all 3 towers (turns 0, 1, 2).
+        for _ in range(3):
+            _land_one_hit()
+            _force_next_turn(arena)
+        cache_b = arena["session"].scoreboard["sides"]["b"]
+        assert cache_b["towers_destroyed"] == towers.TOWER_COUNT
+        assert cache_b["current_hp"] == towers.STRUCTURE_HP  # now attacking a fresh base
+
+        # Hit 4 (turn_no=3): still PRE-showdown (showdown starts at
+        # turn_no=4) -- base must NOT fall, floors at 1hp instead.
+        _land_one_hit()
+        cache_b = arena["session"].scoreboard["sides"]["b"]
+        assert cache_b["base_destroyed"] is False
+        assert cache_b["current_hp"] == towers.BASE_HP_FLOOR_BEFORE_SHOWDOWN
+        assert arena["session"].status == "playing"
+        _force_next_turn(arena)
+
+        # Hit 5 (turn_no=4): now IN showdown -- this hit actually destroys
+        # the base and ends the whole session immediately.
+        _land_one_hit()
         assert arena["session"].status == "ended"
         assert arena["session"].scoreboard["sides"]["b"]["base_destroyed"] is True
         assert arena["session"].scoreboard["sides"]["a"]["winner"] == "a"
@@ -279,7 +301,17 @@ class TestTowerProgressionAndWinConditions:
 
     def test_turns_exhausted_without_base_destroyed_decides_by_progress(self, arena):
         """team_size=2, turns_per_player=1 -> total_turns=2, nowhere near
-        enough damage to finish a base — exercises the tie-break path."""
+        enough damage to finish a base — exercises the tie-break path.
+
+        Code-reviewer note: turns_per_player=1 means turn_no=0 is this
+        match's only lap AND its final lap -- i.e. is_showdown_turn is
+        True from the start (see test_single_lap_game_is_showdown_from_
+        turn_zero in test_team_arena_towers.py), so the one correct
+        answer below actually deals DOUBLED damage. The assertion below
+        only needs "a dealt some damage, b dealt none" (strictly ahead),
+        which holds regardless — it is not asserting an exact HP value,
+        so the showdown doubling does not change what this test proves.
+        """
         active_a0 = _member_for(arena, arena["side_a"][0])
         _answer(arena, active_a0, correct=True, elapsed_after_open=0.0)  # a deals dmg to b
         # b never answers EITHER of its two turns (times out) -> no damage
@@ -295,14 +327,49 @@ class TestTowerProgressionAndWinConditions:
 
 
 class TestGetResult:
-    def test_result_reports_my_stats_and_hides_other_sides_round(self, arena):
+    def test_result_has_no_individual_ranking_or_score_only_a_highlight(self, arena):
+        """PRD §0 v2 rule Q: no per-player ranking/score anywhere in this
+        payload -- only a team result and one real highlight sentence."""
         active_a0 = _member_for(arena, arena["side_a"][0])
         _answer(arena, active_a0, correct=True, elapsed_after_open=0.0)
         svc.control(arena["db"], arena["session"], arena["host"], action="end")
         result = svc.get_result(arena["db"], arena["session"], active_a0.student)
-        assert result["me"]["turns_played"] == 1
-        assert result["me"]["towers_knocked"] == 1
+
         assert "a" in result["sides"] and "b" in result["sides"]
+        assert set(result["me"].keys()) == {"my_side", "highlight"}
+        assert isinstance(result["me"]["highlight"], str) and result["me"]["highlight"]
+
+        # The whole roster is visible (both sides), each with a name + a
+        # highlight sentence only -- no numeric field anywhere that could
+        # be read as a score or used to rank players against each other.
+        for side_key in ("a", "b"):
+            for player in result["players"][side_key]:
+                assert set(player.keys()) == {"student_id", "display_name", "highlight"}
+
+    def test_highlight_traces_to_a_real_logged_event_not_invention(self, arena):
+        """The player who fells the opponent's tower gets the tower-fallen
+        highlight; this is derived from the events log `submit_answer`
+        appends, not guessed from aggregate stats."""
+        active_a0 = _member_for(arena, arena["side_a"][0])
+        _answer(arena, active_a0, correct=True, elapsed_after_open=0.0)
+        events = arena["session"].scoreboard["events"]
+        assert events and events[0]["student_id"] == active_a0.student_id
+        assert events[0]["correct"] is True
+        assert events[0]["event"] in ("tower_fallen", "damage", "tower_fallen_to_base", "base_destroyed")
+
+        svc.control(arena["db"], arena["session"], arena["host"], action="end")
+        result = svc.get_result(arena["db"], arena["session"], active_a0.student)
+        my_highlight = result["me"]["highlight"]
+        assert my_highlight != svc._HIGHLIGHT_NEUTRAL  # this player DID do something real
+
+    def test_player_with_no_events_gets_a_neutral_non_negative_line(self, arena):
+        """A member who never got to act (e.g. the match ended before
+        their turn) still gets a highlight -- a neutral one, never a
+        negative framing of "did nothing"."""
+        svc.control(arena["db"], arena["session"], arena["host"], action="end")
+        someone = arena["side_b"][0]  # never answered in this test
+        result = svc.get_result(arena["db"], arena["session"], someone)
+        assert result["me"]["highlight"] == svc._HIGHLIGHT_NEUTRAL
 
     def test_result_before_ended_is_409(self, arena):
         with pytest.raises(HTTPException) as exc:

@@ -1,4 +1,4 @@
-"""多人對抗賽 v2：單隊的推塔狀態機與傷害公式 — PRD §0 v2 改版 L/N,
+"""多人對抗賽 v2：單隊的推塔狀態機與傷害公式 — PRD §0 v2 改版 L/O/P,
 docs/prd/2026-10-18-team-arena-prd.md.
 
 v2 replaces v1's four-lane "注音路/詞義路/應用路/閱讀路" map (v1
@@ -22,20 +22,30 @@ from dataclasses import dataclass
 # PRD v2 rule L: "每隊 3 座塔＋1 座主堡".
 TOWER_COUNT = 3
 # Design choice (Claude 判斷, not specified by the PRD): each structure
-# (tower or base) has 100 HP. Combined with BASE_DAMAGE/MAX_SPEED_BONUS
-# below, the fastest possible correct answer (100 dmg) can one-shot a
-# single structure, while the slowest still deals more than half
-# (BASE_DAMAGE alone) — so a single team is never stuck grinding forever,
-# but speed still visibly matters (PRD L: "答得快扣比較多").
+# (tower or base) has 100 HP.
 STRUCTURE_HP = 100
-# PRD v2 rule L: "答對扣『對方當前那座』的血（答得快扣比較多...）".
-BASE_DAMAGE = 50
-MAX_SPEED_BONUS = 50
+# PRD v2 rule O: "答對一律先給固定基礎傷害，答得快最多再加 +25%" — a FIXED
+# floor dealt on every correct answer, plus a SPEED BONUS capped as a
+# FRACTION of that floor (not an independent flat pool the way an earlier
+# draft of this module briefly had it — see git history if curious; a
+# flat 1:1 bonus pool reads as "faster = proportionally more", exactly
+# what rule O explicitly rules out).
+BASE_DAMAGE = 80
+MAX_SPEED_BONUS_RATIO = 0.25
+MAX_SPEED_BONUS = round(BASE_DAMAGE * MAX_SPEED_BONUS_RATIO)
 # PRD v2 rule G: "用了武器的那題答對得分減半（避免每題都開）" — applied as
-# integer floor division on the final damage number, not on the two
-# components separately (a slow + weapon-used answer must still deal at
-# least BASE_DAMAGE // 2, never zero).
+# integer floor division on the TOTAL (base + speed bonus), never on the
+# two components separately (a slow + weapon-used answer must still deal
+# at least BASE_DAMAGE // 2, never zero). PRD rule O reaffirms this is a
+# discount on the FINAL total, not on the base alone.
 WEAPON_DAMAGE_DIVISOR = 2
+# PRD v2 rule P: "決戰時刻...雙方傷害 ×2" — applied as the LAST multiplier,
+# on top of whatever weapon halving already did.
+SHOWDOWN_DAMAGE_MULTIPLIER = 2
+# PRD v2 rule P: "決戰時刻開始之前，主堡血量不會真的降到 0 以下（最低停在
+# 1 血）" — the base (never a tower) cannot drop below this floor outside
+# of 決戰時刻.
+BASE_HP_FLOOR_BEFORE_SHOWDOWN = 1
 
 
 @dataclass(frozen=True)
@@ -57,19 +67,25 @@ def new_path_state() -> PathState:
     return PathState(towers_destroyed=0, current_hp=STRUCTURE_HP, base_destroyed=False)
 
 
-def compute_damage(*, elapsed_ms: int, limit_ms: int, weapon_used: bool) -> int:
-    """Pure function of (elapsed_ms, limit_ms, weapon_used) — same
-    recomputability goal every other scoring helper in this codebase
+def compute_damage(*, elapsed_ms: int, limit_ms: int, weapon_used: bool, showdown: bool = False) -> int:
+    """Pure function of (elapsed_ms, limit_ms, weapon_used, showdown) —
+    same recomputability goal every other scoring helper in this codebase
     documents (round_types/choice.py::score_submission). Only ever called
     for a CORRECT active answer — wrong/timeout answers never reach here
     (see module docstring).
 
-    PRD v2 rule L: faster answers deal more damage, linearly interpolated
-    between BASE_DAMAGE (answered right at the time limit) and
-    BASE_DAMAGE + MAX_SPEED_BONUS (answered instantly). Rule G: a weapon
-    used this turn halves the FINAL number (floor division), never the
-    speed component alone — so damage is always >= BASE_DAMAGE //
-    WEAPON_DAMAGE_DIVISOR regardless of how slow the answer was.
+    Order of operations (PRD v2 rule O's own wording: 武器減半是對「加完速
+    度分之後的總傷害」打折, and rule P layers 決戰時刻 ×2 on top of that):
+      1. BASE_DAMAGE, always dealt.
+      2. + a speed bonus linearly interpolated between 0 (answered right
+         at the time limit) and MAX_SPEED_BONUS = BASE_DAMAGE *
+         MAX_SPEED_BONUS_RATIO (answered instantly) — PRD rule O: capped
+         at +25%, never "faster = proportionally more".
+      3. // WEAPON_DAMAGE_DIVISOR if a weapon was used this turn (floor
+         division on the TOTAL from step 2, not on BASE_DAMAGE alone).
+      4. * SHOWDOWN_DAMAGE_MULTIPLIER if this turn is 決戰時刻 (applied
+         AFTER the weapon halving, per rule O's explicit "總傷害" wording
+         — a weapon-used showdown hit is (base+bonus)//2*2, not full).
     """
     limit_ms = max(1, int(limit_ms))
     elapsed_clamped = max(0, min(int(elapsed_ms), limit_ms))
@@ -77,16 +93,43 @@ def compute_damage(*, elapsed_ms: int, limit_ms: int, weapon_used: bool) -> int:
     damage = BASE_DAMAGE + speed_bonus
     if weapon_used:
         damage //= WEAPON_DAMAGE_DIVISOR
+    if showdown:
+        damage *= SHOWDOWN_DAMAGE_MULTIPLIER
     return damage
 
 
-def apply_damage(state: PathState, damage: int) -> tuple[PathState, str]:
+def is_showdown_turn(turn_no: int, total_turns: int, team_size: int) -> bool:
+    """PRD v2 rule P: "決戰時刻" is every player's FINAL turn — the last
+    `team_size` turns out of `total_turns` (both sides share one global
+    turn clock, so this is a single shared window, not computed
+    per-side). `total_turns` is always `turns_per_player * team_size`
+    (engine._start) so this window is always exactly one full lap wide.
+    """
+    if team_size <= 0 or total_turns <= 0:
+        return False
+    return turn_no >= total_turns - team_size
+
+
+def apply_damage(state: PathState, damage: int, *, showdown: bool = False) -> tuple[PathState, str]:
     """Returns (new_state, event) where event is one of:
       "damage"              — hit landed, current structure still standing
+      "base_floor_held"     — PRD rule P: this hit WOULD have destroyed
+                               the base before 決戰時刻, but the base is
+                               floored at BASE_HP_FLOOR_BEFORE_SHOWDOWN
+                               instead — still standing, "one more hit"
+                               away, but not actually fallen yet.
       "tower_fallen"        — a tower (not the last) was knocked down
       "tower_fallen_to_base" — the LAST tower fell; now attacking the base
       "base_destroyed"      — the base itself was knocked down, match over
       "already_won"         — defensive no-op; base was already destroyed
+
+    PRD v2 rule P: the floor ONLY protects the BASE (`state.
+    is_attacking_base()`), never a tower — towers can fall at any point in
+    the match, showdown or not. `showdown=False` is the default because
+    every OTHER caller of this function (towers.py's own test suite, any
+    future non-turn-based use) should not need to think about the
+    showdown window unless it actually applies; the engine is the only
+    caller that computes and passes a real value.
 
     Overflow damage (a hit bigger than the remaining HP) does not carry
     into the next structure — MVP simplification (documented, not a bug):
@@ -99,7 +142,18 @@ def apply_damage(state: PathState, damage: int) -> tuple[PathState, str]:
     if state.base_destroyed:
         return state, "already_won"
 
-    new_hp = state.current_hp - max(0, int(damage))
+    damage = max(0, int(damage))
+
+    if state.is_attacking_base() and not showdown:
+        floored_hp = max(BASE_HP_FLOOR_BEFORE_SHOWDOWN, state.current_hp - damage)
+        would_have_fallen = state.current_hp - damage <= 0
+        return PathState(
+            towers_destroyed=state.towers_destroyed,
+            current_hp=floored_hp,
+            base_destroyed=False,
+        ), ("base_floor_held" if would_have_fallen else "damage")
+
+    new_hp = state.current_hp - damage
     if new_hp > 0:
         return PathState(
             towers_destroyed=state.towers_destroyed,
