@@ -19,7 +19,7 @@
  */
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 
 vi.mock('../../../contexts/AuthContext', () => ({
@@ -103,18 +103,18 @@ describe('StudentTeamArenaPlay tower-count label (in-game top bar)', () => {
     renderPlay();
     // 甲隊 personally knocked down 3 of 乙隊's towers -- the panel labelled
     // 甲隊 must say it destroyed 3, NOT show a bare "0/3" next to 甲隊.
-    await screen.findByText('甲隊');
-    expect(screen.getByText('已打倒對方 3 座塔')).toBeTruthy();
+    const a = await screen.findByTestId('side-bar-甲隊');
+    expect(within(a).getByText('已打倒對方 3 座塔')).toBeTruthy();
     // 甲隊 itself has taken no damage -- all 3 of its own towers remain.
-    expect(screen.getByText('我方剩 3 座塔')).toBeTruthy();
+    expect(within(a).getByText('我方剩 3 座塔')).toBeTruthy();
   });
 
   it('shows the losing side correctly: 0 destroyed, 0 remaining', async () => {
     mockState = playingState();
     renderPlay();
-    await screen.findByText('乙隊');
-    expect(screen.getByText('已打倒對方 0 座塔')).toBeTruthy();
-    expect(screen.getByText('我方剩 0 座塔')).toBeTruthy();
+    const b = await screen.findByTestId('side-bar-乙隊');
+    expect(within(b).getByText('已打倒對方 0 座塔')).toBeTruthy();
+    expect(within(b).getByText('我方剩 0 座塔')).toBeTruthy();
   });
 
   it('never renders the old ambiguous "N/3 座塔" format', async () => {
@@ -130,10 +130,12 @@ describe('StudentTeamArenaPlay tower-count label (end screen)', () => {
     mockState = endedState();
     renderPlay();
     await screen.findByText('比賽結束');
-    await screen.findByText('已打倒對方 3 座塔');
-    expect(screen.getByText('我方剩 3 座塔')).toBeTruthy();
-    expect(screen.getByText('已打倒對方 0 座塔')).toBeTruthy();
-    expect(screen.getByText('我方剩 0 座塔')).toBeTruthy();
+    const ra = await screen.findByTestId('result-side-a');
+    const rb = screen.getByTestId('result-side-b');
+    expect(within(ra).getByText('已打倒對方 3 座塔')).toBeTruthy();
+    expect(within(ra).getByText('我方剩 3 座塔')).toBeTruthy();
+    expect(within(rb).getByText('已打倒對方 0 座塔')).toBeTruthy();
+    expect(within(rb).getByText('我方剩 0 座塔')).toBeTruthy();
     expect(screen.queryByText(/^\d\/3 座塔$/)).toBeNull();
   });
 });

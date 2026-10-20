@@ -74,7 +74,7 @@ const SideBar: React.FC<{
   effect: VisualEffect | null;
   onEffectComplete: () => void;
 }> = ({ label, sideData, opponentTowersDestroyed, effect, onEffectComplete }) => (
-  <div className="relative flex-1 rounded-xl border border-surface-dim bg-surface-container p-3 text-center overflow-hidden">
+  <div data-testid={`side-bar-${label}`} className="relative flex-1 rounded-xl border border-surface-dim bg-surface-container p-3 text-center overflow-hidden">
     <p className="text-xs font-semibold text-on-surface-variant">{label}</p>
     <p className="text-sm font-bold text-on-surface">已打倒對方 {opponentTowersDestroyed} 座塔</p>
     <p className="text-xs text-on-surface-variant">我方剩 {TOWER_COUNT - sideData.towers_destroyed} 座塔</p>
@@ -364,7 +364,7 @@ const StudentTeamArenaPlay: React.FC = () => {
             {(['a', 'b'] as const).map((side) => {
               const other = side === 'a' ? 'b' : 'a';
               return (
-              <div key={side} className="rounded-xl border border-surface-dim p-3">
+              <div key={side} data-testid={`result-side-${side}`} className="rounded-xl border border-surface-dim p-3">
                 <p className="mb-2 text-sm font-bold text-on-surface">{side === 'a' ? '甲隊' : '乙隊'}</p>
                 <p className="mb-1 text-xs font-semibold text-on-surface">已打倒對方 {result.sides[other].towers_destroyed} 座塔</p>
                 <p className="mb-2 text-xs text-on-surface-variant">我方剩 {TOWER_COUNT - result.sides[side].towers_destroyed} 座塔</p>
