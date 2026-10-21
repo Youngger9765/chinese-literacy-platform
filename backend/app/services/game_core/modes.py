@@ -1,6 +1,10 @@
 """Single registry of every student-facing game mode — issue #3663 round 2
 ("既獨立且彈性": a new mode should be one registry entry + its own package,
-not a hand-edited list copy-pasted into N files).
+not a hand-edited list copy-pasted into N files). Round 3 extends this to
+the TEACHER side (ClassroomPkSettingsPanel.tsx's switches panel,
+TeacherGameHubPage.tsx's management-page nav) — the goal stated then is now
+literal: adding a mode is one registry entry + its own package, for
+students AND teachers.
 
 This is a DOCUMENTATION + DERIVATION layer, not a new enforcement
 mechanism. It does not itself gate anything at runtime — the actual gate
@@ -30,6 +34,16 @@ directly from `classroom_gated` — a future mode would need to say
 explicitly whether its gate blocks the whole entry point or only a
 sub-feature inside it, which isn't info this registry tracks (yet) because
 no second mode has needed it.
+
+Round-2-to-round-3 correction worth flagging: `label`/`description` here
+now consistently mean the STUDENT hub card's text for every mode (they
+used to diverge from the frontend mirror `gameModes.ts` specifically for
+`pk_human` — this file said "真人 PK" / "同學之間配對對戰" while the
+frontend mirror already said "PK 對戰" / "一對一，隨時挑戰同學或文學家" —
+nothing in the backend actually read this field's value anywhere, so
+fixing the drift here was a no-op for runtime behavior). The teacher
+SWITCH's own distinct copy ("真人 PK") now lives in `teacher_switch_title`
+below, where it belongs conceptually.
 """
 from __future__ import annotations
 
@@ -50,15 +64,14 @@ class GameMode:
 
     label: str
     """Chinese display label — matches the student game-hub card title
-    (`StudentGameHubPage.tsx`) for every mode except `pk_human`, whose hub
-    card is titled "PK 對戰" (combined AI+human entry) while this registry's
-    label is "真人 PK" (matches the teacher-facing switch title in
-    `ClassroomPkSettingsPanel.tsx`, since that's the only UI this specific
-    key maps 1:1 onto) — see docstring note above."""
+    (`StudentGameHubPage.tsx`) for every mode. The teacher-facing switch's
+    OWN title (which differs from this for `pk_human`: "真人 PK" vs this
+    field's "PK 對戰") is `teacher_switch_title` below, not this field."""
 
     description: str
     """Short Chinese description, one sentence, no trailing punctuation
-    (matches this repo's `rules/chinese-style.md`)."""
+    (matches this repo's `rules/chinese-style.md`) — matches the student
+    hub card's subtitle, same scope note as `label` above."""
 
     hub_route: str
     """Where the student game-hub card navigates to."""
@@ -93,6 +106,47 @@ class GameMode:
     reference (shown nowhere in the product UI; this is for the next
     engineer reading this registry, not end users)."""
 
+    # ------------------------------------------------------------------
+    # Teacher side (issue #3663 round 3) — None for a mode with no
+    # teacher-facing switch / no teacher management page. The two groups
+    # (switch fields, hub fields) are independent: pk_human has switch
+    # fields but no hub fields (no `/teacher/pk` management page exists);
+    # escape_room/team_arena have neither (no teacher involvement at all
+    # today). Enforced "all-or-none within a group" by
+    # _assert_teacher_fields_consistent() below, not just documented.
+    # ------------------------------------------------------------------
+
+    teacher_switch_order: int | None = None
+    """This mode's position in `ClassroomPkSettingsPanel.tsx`'s switches
+    list — NOT the same as this tuple's own declaration order (the panel's
+    on-screen order is 真人PK, 跨班賽季, 課堂搶答; this registry orders
+    league/live_quiz first because those two are what the STUDENT hub
+    cares about locking — see module docstring). Must be unique among
+    modes that have one."""
+
+    teacher_switch_title: str | None = None
+    """The switch panel's own title for this mode — may differ from
+    `label` (see `pk_human`)."""
+
+    teacher_switch_description: str | None = None
+    """The switch panel's own description — typically ends with "，預設
+    關閉" (switch-specific copy explaining what toggling it does), unlike
+    the student hub card's `description` which explains what the ACTIVITY
+    is."""
+
+    teacher_switch_aria_label: str | None = None
+
+    teacher_hub_route: str | None = None
+    """Where `TeacherGameHubPage.tsx`'s management-page nav button for
+    this mode goes — distinct from the student `hub_route` (e.g. league:
+    student goes to `/student/our-class`, teacher goes to
+    `/teacher/league`). `None` if this mode has no teacher management
+    page at all (pk_human/escape_room/team_arena today)."""
+
+    teacher_hub_label: str | None = None
+    teacher_hub_description: str | None = None
+    teacher_hub_emoji: str | None = None
+
 
 MODES: tuple[GameMode, ...] = (
     GameMode(
@@ -105,6 +159,14 @@ MODES: tuple[GameMode, ...] = (
         has_legacy_usage_fallback=True,
         requires_classroom_membership=True,
         host_note="老師邀請／接受其他班級加入賽季；學生需屬於已加入某賽季的班級才能参與該賽季",
+        teacher_switch_order=1,
+        teacher_switch_title="跨班賽季",
+        teacher_switch_description="跟其他班一起比幾週，附故事劇情包，預設關閉",
+        teacher_switch_aria_label="跨班賽季開關",
+        teacher_hub_route="/teacher/league",
+        teacher_hub_label="跨班賽季",
+        teacher_hub_description="查看排行榜、建立邀請",
+        teacher_hub_emoji="🏆",
     ),
     GameMode(
         key="live_quiz",
@@ -116,17 +178,32 @@ MODES: tuple[GameMode, ...] = (
         has_legacy_usage_fallback=True,
         requires_classroom_membership=True,
         host_note="老師主持；學生需屬於開啟課堂搶答的班級才能加入該場",
+        teacher_switch_order=2,
+        teacher_switch_title="課堂搶答",
+        teacher_switch_description="現在全班一起即時搶答，約 10 分鐘，預設關閉",
+        teacher_switch_aria_label="課堂搶答開關",
+        teacher_hub_route="/teacher/live",
+        teacher_hub_label="課堂搶答",
+        teacher_hub_description="主持即時搶答",
+        teacher_hub_emoji="🎮",
     ),
     GameMode(
         key="pk_human",
-        label="真人 PK",
-        description="同學之間配對對戰",
+        label="PK 對戰",
+        description="一對一，隨時挑戰同學或文學家",
         hub_route="/pk",
         classroom_gated=True,
         default_enabled=False,
         has_legacy_usage_fallback=False,
         requires_classroom_membership=True,
         host_note="同學配對對戰需屬於開啟真人 PK 的班級；挑戰文學家（AI）不受此開關限制，任何已登入學生皆可玩，且其 hub 入口（PK 對戰）本身從不因此開關被鎖",
+        teacher_switch_order=0,
+        teacher_switch_title="真人 PK",
+        teacher_switch_description="同學之間配對對戰，預設關閉",
+        teacher_switch_aria_label="真人 PK 開關",
+        # No teacher_hub_* — there is no `/teacher/pk` management page;
+        # ClassroomPkSettingsPanel's switch is the only teacher-facing
+        # surface this mode has.
     ),
     GameMode(
         key="escape_room",
@@ -172,11 +249,63 @@ def _assert_default_enabled_only_meaningful_when_gated(modes: tuple["GameMode", 
         )
 
 
+def _assert_teacher_fields_consistent(modes: tuple["GameMode", ...]) -> None:
+    """Two invariants, both enforced (not just documented) because a half-
+    specified entry here would silently crash or misrender the Python/TS
+    consumers rather than failing loudly at import time:
+
+    1. The four `teacher_switch_*` fields are all-set or all-None together
+       (a mode either has a switch or it doesn't — there's no valid
+       "has a title but no aria-label" state).
+    2. Same for the four `teacher_hub_*` fields.
+    3. `teacher_switch_order` is unique among modes that have one (a
+       duplicate would make the panel's render order ambiguous/arbitrary).
+    """
+    switch_group_errors = []
+    hub_group_errors = []
+    for m in modes:
+        switch_fields = (m.teacher_switch_order, m.teacher_switch_title,
+                          m.teacher_switch_description, m.teacher_switch_aria_label)
+        if any(f is not None for f in switch_fields) and any(f is None for f in switch_fields):
+            switch_group_errors.append(m.key)
+        hub_fields = (m.teacher_hub_route, m.teacher_hub_label,
+                      m.teacher_hub_description, m.teacher_hub_emoji)
+        if any(f is not None for f in hub_fields) and any(f is None for f in hub_fields):
+            hub_group_errors.append(m.key)
+    if switch_group_errors:
+        raise ValueError(
+            f"GameMode teacher_switch_* fields must be all-set or all-None: {switch_group_errors!r}"
+        )
+    if hub_group_errors:
+        raise ValueError(
+            f"GameMode teacher_hub_* fields must be all-set or all-None: {hub_group_errors!r}"
+        )
+
+    orders = [m.teacher_switch_order for m in modes if m.teacher_switch_order is not None]
+    duplicates = sorted({o for o in orders if orders.count(o) > 1})
+    if duplicates:
+        raise ValueError(f"GameMode.teacher_switch_order has duplicate values: {duplicates!r}")
+
+
 _assert_default_enabled_only_meaningful_when_gated(MODES)
+_assert_teacher_fields_consistent(MODES)
 
 MODES_BY_KEY: dict[str, GameMode] = {m.key: m for m in MODES}
 CLASSROOM_GATED_MODES: tuple[GameMode, ...] = tuple(m for m in MODES if m.classroom_gated)
 CLASSROOM_GATED_KEYS: tuple[str, ...] = tuple(m.key for m in CLASSROOM_GATED_MODES)
+
+# Teacher-facing switch list, in the panel's own on-screen order — the
+# single source `ClassroomPkSettingsPanel.tsx`'s SWITCHES array is derived
+# from (via the mirrored frontend/src/data/gameModes.ts).
+TEACHER_SWITCH_MODES: tuple[GameMode, ...] = tuple(
+    sorted((m for m in MODES if m.teacher_switch_order is not None), key=lambda m: m.teacher_switch_order)
+)
+
+# Teacher game-hub management-page nav buttons, in MODES' own declaration
+# order (league then live_quiz today — matches the page's existing
+# left-to-right button order; no separate ordering field needed since
+# nothing has required one to differ from declaration order yet).
+TEACHER_HUB_MODES: tuple[GameMode, ...] = tuple(m for m in MODES if m.teacher_hub_route is not None)
 
 
 def _classroom_has_league_history(db: Session, classroom_id: int) -> bool:
