@@ -225,3 +225,75 @@ class TestBackwardCompatLegacyUsage:
         to look up, so passing `db` must not change its behavior at all."""
         room = self._classroom(db_session)
         assert svc.get_classroom_feature(room, "pk_human", db=db_session) is False
+
+
+class TestGatedFeatureValues:
+    """issue #3663 round 2: `gated_feature_values()` replaces the
+    `pk_human=get_classroom_feature(...), league=get_classroom_feature(...),
+    live_quiz=get_classroom_feature(...)` triplet that used to be
+    copy-pasted at every call site building a `ClassroomResponse`/
+    `ClassroomDetailResponse`/`StudentEnrolledClassroom`/
+    `ClassroomFeatureSettingsResponse`. Must return exactly the same dict
+    those three individual calls would have produced, for every
+    combination of explicit/absent/legacy-fallback the existing
+    `TestGetClassroomFeature`/`TestBackwardCompatLegacyUsage` suites above
+    already cover for each key individually."""
+
+    @pytest.fixture()
+    def db_session(self):
+        from sqlalchemy import create_engine
+        from sqlalchemy.orm import sessionmaker
+        from app.models.base import Base
+        import app.models  # noqa: F401
+
+        engine = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False})
+        Base.metadata.create_all(engine)
+        SessionLocal = sessionmaker(bind=engine)
+        session = SessionLocal()
+        try:
+            yield session
+        finally:
+            session.close()
+            Base.metadata.drop_all(engine)
+
+    def _classroom(self, db, *, feature_settings=None):
+        from league_factories import make_classroom, make_school, make_teacher
+
+        teacher = make_teacher(db)
+        school = make_school(db)
+        return make_classroom(db, school, teacher, feature_settings=feature_settings)
+
+    def test_returns_all_three_classroom_gated_keys(self, db_session):
+        room = self._classroom(db_session)
+        assert svc.gated_feature_values(room, db_session) == {
+            "pk_human": False,
+            "league": False,
+            "live_quiz": False,
+        }
+
+    def test_matches_three_individual_calls_with_mixed_explicit_and_legacy_values(self, db_session):
+        from app.models.live_quiz import LiveQuizGame
+        from datetime import datetime, timedelta, timezone
+
+        room = self._classroom(db_session, feature_settings={"pk_human": True, "league": False})
+        now = datetime.now(timezone.utc)
+        db_session.add(
+            LiveQuizGame(
+                code="111222", host_teacher_id=room.teacher_id, classroom_id=room.id,
+                status="ended", settings={}, rounds_snapshot=[], seed=1, version=1,
+                created_at=now, expires_at=now + timedelta(hours=3),
+            )
+        )
+        db_session.commit()
+
+        expected = {
+            key: svc.get_classroom_feature(room, key, db=db_session)
+            for key in ("pk_human", "league", "live_quiz")
+        }
+        assert svc.gated_feature_values(room, db_session) == expected
+        # Spelled out, not just "matches itself": explicit True wins for
+        # pk_human, explicit False wins for league even though neither has
+        # a legacy probe that could override it, and live_quiz's absent
+        # key resolves True via the legacy-usage fallback (a real
+        # LiveQuizGame row exists for this room).
+        assert expected == {"pk_human": True, "league": False, "live_quiz": True}

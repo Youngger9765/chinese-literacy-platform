@@ -7,25 +7,17 @@ Despite living under `services/pk/` (its original home, issue #3586), this
 module is now the general accessor for EVERY per-classroom feature toggle,
 not just 真人 PK — issue #3607 (2026-10-17, Young: "班級的 跨班賽季＋劇情包、
 班級內 PK、課堂搶答 都是 default off，要老師啟動才能用") added two more
-recognized keys here rather than creating a second, parallel mechanism:
+recognized keys here rather than creating a second, parallel mechanism.
 
-- "pk_human"   (真人 PK — 同學配對對戰／邀請碼, PRD §2)
-- "league"     (跨班賽季＋劇情包 — cross-class invitational seasons)
-- "live_quiz"  (課堂搶答 — in-class live-paced quiz)
-
-多人對抗賽 (team_arena, issue #3632) is deliberately NOT a key here as of
-its v2 rewrite (2026-10-20, PRD docs/prd/2026-10-18-team-arena-prd.md §0
-"⭐ v2 改版" rule B: "拿掉班級開關...老師端入口移除") — v2 rooms are
-student-hosted and classroom-independent, so there is nothing left to
-toggle per classroom for it. (v1 briefly had a "team_arena" key here; it
-is gone, not merely defaulted off.)
-
-"挑戰文學家" (AI PK) is deliberately NOT a key here — Young 2026-10-16:
-"AI PK 跟班級無關", it is always available to any logged-in student
-regardless of class or class settings, including a student with no class
-at all (see routes/pk.py challenge_ai — no feature check, only the existing
-classroom-membership check if a classroom_id happens to be supplied, which
-is an authz/attribution concern, not a feature gate).
+2026-10-21 (issue #3663 round 2): the recognized-key list, each key's
+default, and the legacy-usage-fallback probes moved to
+`services/game_core/modes.py` — that module is now the single declaration
+point ("new mode = one registry entry"), this module just imports it under
+its original names so every existing caller (and every test that imports
+`FEATURE_DEFAULTS` or calls `get_classroom_feature`/
+`validate_feature_settings_patch`) keeps working unchanged. See that
+module's docstring for the full list of recognized keys and why
+team_arena/escape_room/AI-PK are deliberately absent from it.
 
 Backward compatibility (issue #3607): league and live_quiz EXISTED and were
 unconditionally available before this toggle — prod already has 3 teachers
@@ -50,50 +42,13 @@ from typing import Any
 
 from sqlalchemy.orm import Session
 
-# PRD: "default 真人 PK 是 disable" — a brand-new class (feature_settings
-# == {}) must NOT be treated as "everything off" implicitly; each key has
-# its own explicit default here so adding a second key later can default
-# to `True` without silently flipping every existing class.
-FEATURE_DEFAULTS: dict[str, bool] = {
-    "pk_human": False,
-    "league": False,
-    "live_quiz": False,
-}
+from ..game_core.modes import CLASSROOM_GATED_KEYS, FEATURE_DEFAULTS, LEGACY_USAGE_PROBES
 
-
-def _classroom_has_league_history(db: Session, classroom_id: int) -> bool:
-    """True iff this classroom has ever registered a league team (which
-    only ever happens via an accepted invitation — see
-    services/league_service.py:_register_team). Imported lazily to avoid
-    a module-load-order dependency between services/pk/ and models/league.py
-    (neither currently imports the other; keeping the import local here
-    keeps it that way even if that ever changes)."""
-    from ...models.league import LeagueTeam
-
-    return (
-        db.query(LeagueTeam.id).filter(LeagueTeam.classroom_id == classroom_id).first()
-        is not None
-    )
-
-
-def _classroom_has_live_quiz_history(db: Session, classroom_id: int) -> bool:
-    """True iff this classroom has ever hosted a live-quiz game (any
-    status — even an 'ended' one is evidence the class used the feature)."""
-    from ...models.live_quiz import LiveQuizGame
-
-    return (
-        db.query(LiveQuizGame.id).filter(LiveQuizGame.classroom_id == classroom_id).first()
-        is not None
-    )
-
-
-# Only league/live_quiz get a legacy-usage fallback (see module docstring).
-# pk_human is deliberately absent from this dict — it never existed before
-# the toggle, so there is no history that could ever justify an implicit True.
-_LEGACY_USAGE_PROBES = {
-    "league": _classroom_has_league_history,
-    "live_quiz": _classroom_has_live_quiz_history,
-}
+# Re-exported under its original private name — `_LEGACY_USAGE_PROBES` has
+# never been imported by anything outside this file (confirmed by grep
+# before this refactor), kept as an alias purely so a reader who remembers
+# the old name finds it immediately.
+_LEGACY_USAGE_PROBES = LEGACY_USAGE_PROBES
 
 
 def get_classroom_feature(classroom: Any, key: str, db: Session | None = None) -> bool:
@@ -123,6 +78,22 @@ def get_classroom_feature(classroom: Any, key: str, db: Session | None = None) -
             return True
 
     return FEATURE_DEFAULTS[key]
+
+
+def gated_feature_values(classroom: Any, db: Session) -> dict[str, bool]:
+    """``{key: get_classroom_feature(classroom, key, db=db) for key in
+    CLASSROOM_GATED_KEYS}`` — replaces the ``pk_human=...``/``league=...``/
+    ``live_quiz=...`` triplet that used to be copy-pasted four times across
+    ``routes/classrooms/classroom_crud.py`` and
+    ``routes/classrooms/helpers.py`` (issue #3663 round 2). Spread this
+    into a ``ClassroomResponse``/``ClassroomDetailResponse``/
+    ``StudentEnrolledClassroom`` constructor call via ``**`` — those
+    Pydantic models still declare `pk_human`/`league`/`live_quiz` as their
+    own static fields (see docs/architecture/game-modules.md's note on why
+    that's intentionally not auto-generated), this only removes the
+    duplicated *values* side, not the schema declarations.
+    """
+    return {key: get_classroom_feature(classroom, key, db=db) for key in CLASSROOM_GATED_KEYS}
 
 
 def validate_feature_settings_patch(payload: dict) -> dict:
