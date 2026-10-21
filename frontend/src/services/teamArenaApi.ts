@@ -109,6 +109,8 @@ export interface TeamArenaCurrentRound {
   revealed?: boolean;
   correct_key?: string;
   hint_text?: string | null;
+  /** false = this question has no hint data; grey 看提示 out (PRD rule J). */
+  hint_available?: boolean;
   call_teammate_active?: boolean;
   suggestions?: { student_id: number; display_name: string; choice_key: string }[];
 }
