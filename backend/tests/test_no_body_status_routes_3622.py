@@ -27,9 +27,10 @@ def _no_body_routes():
                     continue
                 kw = {k.arg: k.value for k in dec.keywords}
                 status = kw.get("status_code")
-                value = getattr(status, "value", None)
-                if value is None and isinstance(status, ast.Attribute):
+                if isinstance(status, ast.Attribute):  # status.HTTP_204_NO_CONTENT
                     value = 204 if "204" in status.attr else 304 if "304" in status.attr else None
+                else:
+                    value = getattr(status, "value", None)
                 if value in NO_BODY:
                     yield path.relative_to(APP.parent), fn, kw
 
@@ -46,3 +47,15 @@ def test_annotated_no_body_routes_declare_response_model_none():
         if fn.returns is not None and "response_model" not in kw
     ]
     assert not offenders, "add response_model=None: " + ", ".join(offenders)
+
+
+def test_scanner_recognises_the_attribute_form():
+    """Lock the scanner itself: status.HTTP_204_NO_CONTENT must be read as 204."""
+    import tempfile
+
+    src = "from fastapi import status\n@router.delete('/x', status_code=status.HTTP_204_NO_CONTENT)\ndef f() -> None: ...\n"
+    tree = ast.parse(src)
+    dec = tree.body[1].decorator_list[0]
+    kw = {k.arg: k.value for k in dec.keywords}
+    st = kw["status_code"]
+    assert isinstance(st, ast.Attribute) and "204" in st.attr
