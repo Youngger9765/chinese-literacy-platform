@@ -811,6 +811,13 @@ export interface StudentAssignmentRow {
   vocab: number | null;
   /** Characters the student misread in the reading step. */
   error_chars: string[];
+  /**
+   * Issue #3682: set once the student has started (not only once they
+   * submit), so the teacher can still reach the one report page that shows
+   * what a student stuck mid-lesson has already answered
+   * (`/teacher/students/{id}/sessions/{id}/report`).
+   */
+  session_id: number | null;
 }
 
 export interface StudentAssignmentsResponse {

@@ -10,6 +10,7 @@
  *   - Expand/collapse attempt history for multi-attempt students
  */
 import React, { useState, useRef, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import type {
   SubmissionResponse,
   StudentAttemptGroup,
@@ -18,6 +19,28 @@ import ReadingMetricsPanel from './ReadingMetricsPanel';
 import AttemptHistoryPanel from './AttemptHistoryPanel';
 import { statusBadge, formatDate } from '../assignmentDetailUtils.tsx';
 import { getSubmissionReadingAudio } from '../../../services/teacherApi';
+
+// ── AnswerRecordLink — Issue #3682 ────────────────────────────────────────────
+/** A student stuck mid-lesson (pending/in_progress) used to be a dead end
+ *  here: score, 朗讀數據, 評語, 批改 and 錄音 are all gated on
+ *  submitted/graded, so the row was six dashes. session_id is set as soon
+ *  as the student starts (regardless of status) — whenever it's present,
+ *  link to the report page that already renders their recorded progress
+ *  step by step, so "沒做完" no longer means "看不到他做了什麼". */
+function AnswerRecordLink({ studentId, sessionId }: { studentId: number; sessionId: number | null }) {
+  if (sessionId === null) {
+    return <span className="text-gray-300 text-xs">—</span>;
+  }
+  return (
+    <Link
+      to={`/teacher/students/${studentId}/sessions/${sessionId}/report`}
+      className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border border-accent/30 text-accent text-xs hover:bg-accent-bg transition-colors whitespace-nowrap"
+      title="查看這位學生目前答過的內容"
+    >
+      作答紀錄
+    </Link>
+  );
+}
 
 // ── PlayAudioButton — inline audio replay for a submission (Issue #2326) ──────
 /** Fetches a 10-min signed URL and plays the student's reading recording.
@@ -257,6 +280,12 @@ const AssignmentSubmissionTable: React.FC<Props> = ({
           />
         </div>
       )}
+
+      {sub.session_id !== null && (
+        <div>
+          <AnswerRecordLink studentId={sub.student_id} sessionId={sub.session_id} />
+        </div>
+      )}
     </div>
   );
 
@@ -383,10 +412,13 @@ const AssignmentSubmissionTable: React.FC<Props> = ({
                 <span className="text-gray-300">—</span>
               )}
             </td>
+            <td className="py-1.5 text-center">
+              <AnswerRecordLink studentId={group.student_id} sessionId={latest.session_id} />
+            </td>
           </tr>
           {expandedMetricsId === latest.id && (
             <tr>
-              <td colSpan={8} className="pb-2 pt-0">
+              <td colSpan={9} className="pb-2 pt-0">
                 <ReadingMetricsPanel
                   studentName={group.student_name}
                   readingAccuracy={latest.reading_accuracy}
@@ -509,10 +541,13 @@ const AssignmentSubmissionTable: React.FC<Props> = ({
               <span className="text-gray-300">—</span>
             )}
           </td>
+          <td className="py-1.5 text-center">
+            <AnswerRecordLink studentId={sub.student_id} sessionId={sub.session_id} />
+          </td>
         </tr>
         {expandedMetricsId === sub.id && (
           <tr>
-            <td colSpan={8} className="pb-2 pt-0">
+            <td colSpan={9} className="pb-2 pt-0">
               <ReadingMetricsPanel
                 studentName={sub.student_name}
                 readingAccuracy={sub.reading_accuracy}
@@ -545,6 +580,7 @@ const AssignmentSubmissionTable: React.FC<Props> = ({
               <th className="pb-1.5 font-medium">評語</th>
               <th className="pb-1.5 font-medium text-center">批改</th>
               <th className="pb-1.5 font-medium text-center">錄音</th>
+              <th className="pb-1.5 font-medium text-center">作答紀錄</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">

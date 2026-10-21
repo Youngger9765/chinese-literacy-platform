@@ -57,6 +57,9 @@ def submission_to_response(
         reading_cpm=r_cpm,
         reading_error_chars=r_error_chars,
         teacher_feedback=submission.teacher_feedback,
+        # Issue #3682: present as soon as the student has started, not only
+        # once they submit — see SubmissionResponse.session_id docstring.
+        session_id=submission.session_id,
     )
 
 
@@ -89,6 +92,7 @@ def assignment_attempt_groups_to_response(
                     reading_cpm=r_cpm,
                     reading_error_chars=r_err,
                     teacher_feedback=sub.teacher_feedback,
+                    session_id=sub.session_id,  # Issue #3682
                 )
             )
         groups.append(
