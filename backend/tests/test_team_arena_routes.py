@@ -285,3 +285,47 @@ class TestHintAvailabilityReachesActivePlayer:
         rnd = state["own_match"]["current_round"]
         assert state["own_match"]["am_i_active"], state
         assert rnd["hint_available"] is expected
+
+
+class TestOpponentNamesAreNotExposed:
+    """Security review 2026-10-21: anyone with the 6-char code can join from
+    any school, and /state + /result sent every player's real name to both
+    teams. Real names only for the viewer's own team; the other team gets
+    neutral seat labels."""
+
+    def test_state_and_result_hide_the_other_teams_real_names(self, client):
+        host = _register(client, "ta_names_host")
+        _enroll_with_grade(host["user_id"])
+        code = client.post(
+            "/api/team-arena/sessions",
+            json={"team_size": 2, "turns_per_player": 1, "answer_seconds": 45},
+            headers=auth_header(host["token"]),
+        ).json()["code"]
+        mate = _register(client, "ta_names_mate")
+        b1 = _register(client, "ta_names_oppa")
+        b2 = _register(client, "ta_names_oppb")
+        for p, side in ((mate, "a"), (b1, "b"), (b2, "b")):
+            assert client.post(f"/api/team-arena/sessions/{code}/join", json={"side": side}, headers=auth_header(p["token"])).status_code == 201
+
+        def names(token, path, key):
+            body = client.get(f"/api/team-arena/sessions/{code}/{path}", headers=auth_header(token)).json()
+            if key == "sides":
+                return {s: [m["display_name"] for m in body["sides"][s]["members"]] for s in ("a", "b")}
+            return {s: [p["display_name"] for p in body["players"][s]] for s in ("a", "b")}
+
+        a_view = names(host["token"], "state", "sides")
+        b_view = names(b1["token"], "state", "sides")
+        # Own team: real names (positive control — the fix must not anonymise everyone).
+        assert any("Ta_Names_Mate" in n for n in a_view["a"]), a_view
+        assert any("Ta_Names_Oppa" in n for n in b_view["b"]), b_view
+        # Other team: seat labels only, no real name anywhere.
+        assert a_view["b"] == ["乙隊 1 號", "乙隊 2 號"], a_view
+        assert b_view["a"] == ["甲隊 1 號", "甲隊 2 號"], b_view
+        assert "Oppa" not in str(a_view["b"]) and "Mate" not in str(b_view["a"])
+
+        assert client.post(f"/api/team-arena/sessions/{code}/control", json={"action": "start"}, headers=auth_header(host["token"])).status_code == 200
+        assert client.post(f"/api/team-arena/sessions/{code}/control", json={"action": "end"}, headers=auth_header(host["token"])).status_code == 200
+        ra = names(host["token"], "result", "players")
+        rb = names(b1["token"], "result", "players")
+        assert ra["b"] == ["乙隊 1 號", "乙隊 2 號"] and rb["a"] == ["甲隊 1 號", "甲隊 2 號"], (ra, rb)
+        assert any("Ta_Names_Mate" in n for n in ra["a"]), ra
