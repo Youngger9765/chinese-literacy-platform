@@ -134,7 +134,12 @@ MODES: tuple[GameMode, ...] = (
         description="闖關解謎，救回被困的同伴",
         hub_route="/escape-room",
         classroom_gated=False,
-        default_enabled=True,
+        # Meaningless field for a non-gated mode (see `GameMode.default_enabled`
+        # docstring) — held at its one valid value (False) and enforced by
+        # _assert_default_enabled_only_meaningful_when_gated() below, not
+        # just documented, so a future entry can't silently set this True
+        # and have it look like a real "defaults on" claim.
+        default_enabled=False,
         has_legacy_usage_fallback=False,
         requires_classroom_membership=False,
         host_note="v1：單人＋AI 隊友，任何已登入學生皆可玩，不受任何班級設定影響",
@@ -145,12 +150,29 @@ MODES: tuple[GameMode, ...] = (
         description="2～5 人一組，答題推塔對抗",
         hub_route="/team-arena",
         classroom_gated=False,
-        default_enabled=True,
+        default_enabled=False,  # see escape_room's comment above
         has_legacy_usage_fallback=False,
         requires_classroom_membership=False,
         host_note="v2：學生自行開房／加入房號，不受班級設定影響（v1 曾有班級開關，已於 #3632 v2 移除，非只是預設關閉）",
     ),
 )
+
+
+def _assert_default_enabled_only_meaningful_when_gated(modes: tuple["GameMode", ...]) -> None:
+    """Makes the `default_enabled` docstring's claim ("meaningless — always
+    False — when classroom_gated is False") an enforced invariant instead
+    of just a comment a future entry could silently violate. Raises
+    ValueError naming every offending mode (not just the first) so a
+    multi-mode mistake isn't fixed one error at a time."""
+    offenders = [m.key for m in modes if not m.classroom_gated and m.default_enabled]
+    if offenders:
+        raise ValueError(
+            "GameMode.default_enabled must be False when classroom_gated is "
+            f"False (it has no meaning otherwise): {offenders!r}"
+        )
+
+
+_assert_default_enabled_only_meaningful_when_gated(MODES)
 
 MODES_BY_KEY: dict[str, GameMode] = {m.key: m for m in MODES}
 CLASSROOM_GATED_MODES: tuple[GameMode, ...] = tuple(m for m in MODES if m.classroom_gated)
