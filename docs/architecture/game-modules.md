@@ -120,6 +120,12 @@ _CLASSROOM_GRADE_RANGE` 越界檢查，且錯誤文案（`_ERR_UNKNOWN_GRADE`/
 **本次已處理**（見 §4 PR-1）：抽出 `pk` + `escape_room` 那兩份完全相同的拷貝到
 `backend/app/services/game_core/scope.py`，`team_arena` 的第三份維持原樣不動。
 
+> **Round 3 更新（issue #3673，team lead 已核准）**：team_arena 的
+> `resolve_pool_grade` 確認沒有任何測試釘住它自己的錯誤文案，已改成直接
+> `from ..game_core.scope import resolve_pool_grade`（刪除本地那份、拿掉現在
+> 死掉的 `_ERR_UNKNOWN_GRADE` 常數），越界檢查與錯誤文案現在跟 pk／escape_room
+> 完全一致。上面「待 Young 確認」的狀態已解除，見該 PR。
+
 ### 2.2 輪詢版本短路 —— 三份幾乎相同的 route 層判斷式
 
 | 位置 | 版本欄位名 | 短路寫法 |
@@ -260,9 +266,10 @@ adapter」做得最好的範例**，建議作為未來新模式（如 PK 的故�
 - **不統一 StoryPack adapter**（§2.6）——現狀是正面範例，硬抽象只會製造
   if-mode-then 分支。
 - **不統一輪詢版本欄位命名**——改動面（前後端契約）大於效益。
-- **不幫 PK 補上「學生N」fallback 或幫 team_arena 的 `resolve_pool_grade`
-  補越界檢查**——這兩個都是「現有行為是否刻意」的產品問題，不是技術重構，
-  本次盤點只據實記錄，留給 Young 決定後再排進技術 ticket。
+- ~~不幫 PK 補上「學生N」fallback 或幫 team_arena 的 `resolve_pool_grade`
+  補越界檢查~~——**Round 3 更新**：team lead 已決定兩項都做（#3672「是，PK
+  補上跟另外兩個模式共用一個 helper／同一個 1-based 索引基準」；#3673「是，
+  team_arena 重用 game_core.scope」），兩張票都已完成並合併，見對應 PR。
 - **不現在就建立 escape_room 的真人組隊班級開關**——Phase 2 尚未核准
   （PRD 原文：「真人組隊模式（Phase 2）需要的額外表不在本次批准範圍」）。
 - **不統一前端輪詢 hook**——詳見 §4 ④，風險判斷為「本次不做」，但已留
@@ -272,10 +279,15 @@ adapter」做得最好的範例**，建議作為未來新模式（如 PK 的故�
 
 ## 7. Follow-up tickets（建議開票順序）
 
-1. `StemWithTarget` 元件統一（§2.4、§4②）——已有具體實作方案，只差截圖驗證
-   流程，最快可完成的一張。
-2. 跟 Young 確認 team_arena 的 `resolve_pool_grade` 行為差異是否刻意（§2.1、
-   §4③），確認後再決定要不要補進 `game_core.scope`。
+1. ~~`StemWithTarget` 元件統一~~（§2.4、§4②）—— **已完成**，PK 改用共用元件，
+   見 round 2 PR。
+2. ~~跟 Young 確認 team_arena 的 `resolve_pool_grade` 行為差異是否刻意~~
+   （§2.1、§4③）—— **已完成**，team lead 核准後直接重用 `game_core.scope`，
+   見 round 3 PR（issue #3673）。
 3. PK 輪詢行為補齊（退避＋慢速階段）＋之後才抽 `useGamePoll` 共用 hook
-   （§2.3、§4④，刻意拆成兩張票，不要一次做完）。
-4. 產品面決定 PK 要不要有「學生N」匿名 fallback（§2.5、§4⑥）。
+   （§2.3、§4④，刻意拆成兩張票，不要一次做完）——仍未做，見 issue #3671。
+4. ~~產品面決定 PK 要不要有「學生N」匿名 fallback~~（§2.5、§4⑥）—— **已完成**，
+   team lead 核准後 PK／live_quiz／team_arena 三模式共用一個 helper、同一個
+   1-based 索引基準，見 round 3 PR（issue #3672）。
+5. 版本欄位命名不一致（`version` vs `state_version`，§2.2）—— 仍未做，綁在
+   issue #3671 一起處理（跟 useGamePoll 統一一起做才划算，見該 issue 說明）。

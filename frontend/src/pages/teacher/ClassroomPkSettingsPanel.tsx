@@ -26,6 +26,7 @@
  */
 import React, { useState } from 'react';
 import { updateClassroomFeatureSettings, ClassroomApiError } from '../../services/classroomApi';
+import { TEACHER_SWITCH_MODES } from '../../data/gameModes';
 
 type FeatureKey = 'pk_human' | 'league' | 'live_quiz';
 
@@ -42,11 +43,36 @@ interface ClassroomPkSettingsPanelProps {
   }) => void;
 }
 
-const SWITCHES: { key: FeatureKey; title: string; description: string; ariaLabel: string }[] = [
-  { key: 'pk_human', title: '真人 PK', description: '同學之間配對對戰，預設關閉', ariaLabel: '真人 PK 開關' },
-  { key: 'league', title: '跨班賽季', description: '跟其他班一起比幾週，附故事劇情包，預設關閉', ariaLabel: '跨班賽季開關' },
-  { key: 'live_quiz', title: '課堂搶答', description: '現在全班一起即時搶答，約 10 分鐘，預設關閉', ariaLabel: '課堂搶答開關' },
-];
+// issue #3663 round 3: this list used to be its own hand-typed array here.
+// It's now derived from the shared `game_core` mode registry
+// (`TEACHER_SWITCH_MODES`, already in the panel's own on-screen order —
+// NOT `GAME_MODES`' declaration order, see that module's docstring), so a
+// future 4th switch is one registry entry, not an edit to this file too.
+//
+// `assertFeatureKey` replaces a blind `as FeatureKey` cast (critic-agent
+// review: a silent cast here would let a future classroom-gated mode with
+// no corresponding `FeatureKey` update PATCH an unexpected key to the
+// backend with no compiler error). This throws loudly instead — the
+// Python-side `_assert_teacher_fields_consistent` invariant checks the
+// registry's own internal consistency but has no concept of this file's
+// narrower TS union, so this is the one place that specific mismatch can
+// still be caught (see gameModes.ts's "no cross-language codegen" note).
+const FEATURE_KEYS: readonly FeatureKey[] = ['pk_human', 'league', 'live_quiz'];
+
+function assertFeatureKey(key: string): FeatureKey {
+  if (!(FEATURE_KEYS as readonly string[]).includes(key)) {
+    throw new Error(`ClassroomPkSettingsPanel: unexpected teacher-switch mode key ${JSON.stringify(key)}`);
+  }
+  return key as FeatureKey;
+}
+
+const SWITCHES: { key: FeatureKey; title: string; description: string; ariaLabel: string }[] =
+  TEACHER_SWITCH_MODES.map((mode) => ({
+    key: assertFeatureKey(mode.key),
+    title: mode.teacherSwitchTitle ?? '',
+    description: mode.teacherSwitchDescription ?? '',
+    ariaLabel: mode.teacherSwitchAriaLabel ?? '',
+  }));
 
 const ClassroomPkSettingsPanel: React.FC<ClassroomPkSettingsPanelProps> = ({
   token,
