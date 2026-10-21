@@ -116,6 +116,16 @@ def _display_name(member: TeamArenaMember) -> str:
     return name or f"學生{member.rotation_order + 1}"
 
 
+def _name_for_viewer(member: TeamArenaMember, side_key: str, index: int, viewer_side: str | None) -> str:
+    """Real display names only for the viewer's OWN team. Anyone with the
+    6-char code can join from any school, so the other team (and anyone
+    not seated) sees a neutral seat label instead of a minor's real name
+    (security review 2026-10-21)."""
+    if viewer_side == side_key:
+        return _display_name(member)
+    return f"{'甲' if side_key == 'a' else '乙'}隊 {index + 1} 號"
+
+
 # ---------------------------------------------------------------------------
 # Grade pool resolution (host's OWN grade — PRD rule K, no teacher choice)
 # ---------------------------------------------------------------------------
@@ -917,6 +927,7 @@ def get_state(db: Session, session: TeamArenaSession, user: User) -> dict:
     }
 
     by_side = _members_by_side(db, session.id)
+    viewer_side = COLUMN_TO_SIDE[member.side] if member is not None else None
     sides_public: dict[str, dict] = {}
     for side_key in ("a", "b"):
         team_members = by_side.get(side_key, [])
@@ -930,7 +941,8 @@ def get_state(db: Session, session: TeamArenaSession, user: User) -> dict:
             "match_status": cache.get("match_status", "active"),
             "winner": cache.get("winner"),
             "members": [
-                {"student_id": m.student_id, "display_name": _display_name(m)} for m in team_members
+                {"student_id": m.student_id, "display_name": _name_for_viewer(m, side_key, i, viewer_side)}
+                for i, m in enumerate(team_members)
             ],
         }
     base["sides"] = sides_public
@@ -1060,6 +1072,7 @@ def get_result(db: Session, session: TeamArenaSession, user: User) -> dict:
     by_side = _members_by_side(db, session.id)
     all_members = by_side.get("a", []) + by_side.get("b", [])
     highlights = _compute_highlights(session, all_members)
+    viewer_side = COLUMN_TO_SIDE[member.side] if member is not None else None
 
     # PRD rule Q: "每人一句" — the whole roster's highlights are shown on
     # the shared end screen (not a private "only you see this" stat, the
@@ -1067,8 +1080,12 @@ def get_result(db: Session, session: TeamArenaSession, user: User) -> dict:
     # anywhere in here that could be read as a score or used to rank.
     players: dict[str, list[dict]] = {
         side_key: [
-            {"student_id": m.student_id, "display_name": _display_name(m), "highlight": highlights[m.student_id]}
-            for m in by_side.get(side_key, [])
+            {
+                "student_id": m.student_id,
+                "display_name": _name_for_viewer(m, side_key, i, viewer_side),
+                "highlight": highlights[m.student_id],
+            }
+            for i, m in enumerate(by_side.get(side_key, []))
         ]
         for side_key in ("a", "b")
     }
