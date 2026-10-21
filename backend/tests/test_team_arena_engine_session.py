@@ -54,6 +54,30 @@ class TestResolveHostGrade:
         assert exc.value.status_code == 400
 
 
+class TestResolvePoolGrade:
+    """issue #3663 round 3 (#3673): team_arena used to have its own copy of
+    `resolve_pool_grade` missing the out-of-range guard pk/escape_room's
+    shared `game_core.scope` copy already had — `scope_ref="99"` would
+    silently resolve to the nearest available grade instead of failing
+    closed. Now `svc.resolve_pool_grade` IS that shared function
+    (re-exported, same as pk/escape_room's engines already do), so this
+    locks the behavior at the exact name team_arena calls it by."""
+
+    def test_rejects_an_out_of_range_grade(self, monkeypatch):
+        from app.services.game_core import scope as scope_svc
+
+        monkeypatch.setattr(scope_svc, "get_available_grades", lambda: [4, 5, 6])
+        with pytest.raises(HTTPException) as exc:
+            svc.resolve_pool_grade("99")
+        assert exc.value.status_code == 400
+
+    def test_still_resolves_nearest_grade_for_an_in_range_value(self, monkeypatch):
+        from app.services.game_core import scope as scope_svc
+
+        monkeypatch.setattr(scope_svc, "get_available_grades", lambda: [4, 6])
+        assert svc.resolve_pool_grade("3") == "4"
+
+
 class TestCreateSession:
     def test_defaults_applied_and_host_auto_seated(self, db_session):
         host = _student_with_grade(db_session, grade=4)
