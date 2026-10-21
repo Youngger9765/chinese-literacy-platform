@@ -40,9 +40,10 @@ from sqlalchemy.orm.attributes import flag_modified
 from ...models.school import Classroom, ClassroomStudent
 from ...models.team_arena import TeamArenaAnswer, TeamArenaMember, TeamArenaSession
 from ...models.user import User
-from ...services.lesson_loader import get_available_grades, search_lessons
+from ...services.lesson_loader import search_lessons
 from ...services.lesson_uid_loader import load_lesson
 from ..game_core.display_name import resolve_display_name
+from ..game_core.scope import resolve_pool_grade
 from ..live_quiz import reading_pace
 from ..live_quiz.round_types import choice as live_quiz_choice
 from . import towers
@@ -70,7 +71,6 @@ _CODE_LENGTH = 6
 _CODE_CHARS = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"
 _MAX_CODE_RETRIES = 10
 
-_ERR_UNKNOWN_GRADE = "找不到這個年級的題庫，請聯絡老師確認年級設定"
 _ERR_EMPTY_POOL = "這個年級目前還沒有題目，請改天再試"
 _ERR_NO_GRADE = "找不到你的年級，請先加入班級或請老師設定年級後再開房"
 
@@ -131,19 +131,15 @@ def _name_for_viewer(member: TeamArenaMember, side_key: str, index: int, viewer_
 # ---------------------------------------------------------------------------
 # Grade pool resolution (host's OWN grade — PRD rule K, no teacher choice)
 # ---------------------------------------------------------------------------
-
-def resolve_pool_grade(scope_ref: str) -> str:
-    available = [str(g) for g in get_available_grades()]
-    if scope_ref in available:
-        return scope_ref
-    try:
-        wanted = int(scope_ref)
-    except (TypeError, ValueError):
-        raise HTTPException(status_code=400, detail=_ERR_UNKNOWN_GRADE)
-    numeric = sorted(int(g) for g in available if g.isdigit())
-    if not numeric:
-        raise HTTPException(status_code=400, detail=_ERR_EMPTY_POOL)
-    return str(min(numeric, key=lambda g: (abs(g - wanted), -g)))
+#
+# issue #3663 round 3 (#3673): this used to be its own copy, missing the
+# out-of-range grade guard pk/escape_room's shared `game_core.scope` copy
+# has (a `scope_ref` like "99" would silently resolve to "the nearest
+# available grade" instead of failing closed). Nothing pinned this
+# module's own error text (confirmed: no test referenced
+# `resolve_pool_grade`/`_ERR_UNKNOWN_GRADE` before this change), so this is
+# now the exact shared function — same guard, same error copy as pk/
+# escape_room — imported above rather than redefined here.
 
 
 def _resolve_host_grade(db: Session, user: User) -> str:

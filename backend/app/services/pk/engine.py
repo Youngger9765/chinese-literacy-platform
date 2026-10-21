@@ -82,12 +82,14 @@ def get_or_create_rating(db: Session, student_id: int) -> PkRating:
 # Scope / lessons
 #
 # `resolve_pool_grade`/`validate_scope`/`_load_lessons_for_scope` moved to
-# `services/game_core/scope.py` (2026-10-21, issue #3663 architecture audit)
-# — this module, 迷城密室's engine, and (until then) nothing else needed the
-# exact same "scope_type/scope_ref -> concrete lesson list" resolution, down
-# to byte-identical error strings. Imported above so existing call sites in
-# this file (and `engine.resolve_pool_grade(...)` from tests/monkeypatches)
-# keep working unchanged.
+# `services/game_core/scope.py` (2026-10-21, issue #3663 round 1) — this
+# module and 迷城密室's engine needed the exact same "scope_type/scope_ref
+# -> concrete lesson list" resolution, down to byte-identical error
+# strings. As of round 3 (#3673) `resolve_pool_grade` specifically is also
+# reused by team_arena/engine.py (its own copy was missing the
+# out-of-range guard this shared version has). Imported above so existing
+# call sites in this file (and `engine.resolve_pool_grade(...)` from
+# tests/monkeypatches) keep working unchanged.
 # ---------------------------------------------------------------------------
 
 
