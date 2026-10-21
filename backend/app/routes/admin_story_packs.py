@@ -130,7 +130,7 @@ def upsert_pack(
         raise _handle_service_error(exc)
 
 
-@router.delete("/{key}", status_code=204)
+@router.delete("/{key}", status_code=204, response_model=None)
 def delete_pack(
     key: str, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)
 ) -> None:
