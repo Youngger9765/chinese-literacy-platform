@@ -40,5 +40,5 @@ sentry-sdk[fastapi]>=2.0
 google-cloud-texttospeech>=2.14
 google-cloud-bigquery>=3.0
 pypdfium2>=4.30
-Pillow>=10.0
+Pillow>=13.0.0
 qrcode[pil]==8.2
