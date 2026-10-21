@@ -107,14 +107,28 @@ def build_hint(payload: dict) -> str | None:
                 continue  # the very occurrence this question asks about
             if ch == char and readings.get(i) == reading:
                 clause, whole = _clause_around(text, i)
+                # Some lessons print the reading inline (「暈ㄩㄣˋ」); a clause
+                # carrying 注音 would hand the student the answer.
+                if any(_is_zhuyin(ch2) for ch2 in clause):
+                    continue
                 if clause and clause != char:
-                    # prefer a clause shown in full; shortest first
-                    rank = (0 if whole else 1, len(clause))
+                    # Prefer a clause shown in full that is long enough to read
+                    # as a phrase (≥4 chars); then a trimmed long one; a tiny
+                    # whole clause like 「他了」 only as a last resort.
+                    tier = 0 if whole and len(clause) >= MIN_CLAUSE_CHARS else 1 if not whole else 2
+                    rank = (tier, len(clause))
                     if best is None or rank < best[0]:
                         best = (rank, clause)
     if best is None:
         return None
     return f"同一課「{best[1]}」裡的「{char}」，唸法跟這題一樣"
+
+
+MIN_CLAUSE_CHARS = 4
+
+
+def _is_zhuyin(ch: str) -> bool:
+    return "\u3105" <= ch <= "\u312f" or "\u31a0" <= ch <= "\u31bf" or ch in "ˊˇˋ˙"
 
 
 _CLAUSE_BREAKS = set("，。！？；：、「」『』（）()…—\n ")
