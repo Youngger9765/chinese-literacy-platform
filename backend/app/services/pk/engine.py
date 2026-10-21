@@ -27,8 +27,11 @@ from ...models.pk import (
 )
 from ...models.school import Classroom, ClassroomStudent
 from ...models.user import User
-from ...services.lesson_loader import get_available_grades, search_lessons
-from ...services.lesson_uid_loader import load_lesson
+from ..game_core.scope import (
+    load_lessons_for_scope as _load_lessons_for_scope,
+    resolve_pool_grade,  # noqa: F401 — re-exported: tests call `engine.resolve_pool_grade(...)`
+    validate_scope,  # noqa: F401 — re-exported: matchmaking.py calls `pk_engine.validate_scope(...)`
+)
 from . import ai_tiers
 from . import classroom_features
 from . import rating_service
@@ -76,77 +79,15 @@ def get_or_create_rating(db: Session, student_id: int) -> PkRating:
 
 # ---------------------------------------------------------------------------
 # Scope / lessons
+#
+# `resolve_pool_grade`/`validate_scope`/`_load_lessons_for_scope` moved to
+# `services/game_core/scope.py` (2026-10-21, issue #3663 architecture audit)
+# — this module, 迷城密室's engine, and (until then) nothing else needed the
+# exact same "scope_type/scope_ref -> concrete lesson list" resolution, down
+# to byte-identical error strings. Imported above so existing call sites in
+# this file (and `engine.resolve_pool_grade(...)` from tests/monkeypatches)
+# keep working unchanged.
 # ---------------------------------------------------------------------------
-
-# #3610: these details are shown to the student verbatim (pkApi.ts surfaces
-# `detail` as the on-screen error), so they are Chinese.
-_ERR_UNKNOWN_LESSON = "找不到這一課的題目，請回上一頁重新選擇"
-_ERR_UNKNOWN_GRADE = "找不到這個年級的題庫，請回上一頁重新選擇"
-_ERR_UNKNOWN_SCOPE = "不支援這種題目範圍，請回上一頁重新選擇"
-_ERR_EMPTY_POOL = "這個年級目前還沒有題目，請改選其他範圍"
-
-# Classroom.grade is validated 1..12 (schemas/classroom.py); a classroom in
-# that range whose grade has no lessons of its own still gets a pool.
-_CLASSROOM_GRADE_RANGE = range(1, 13)
-
-
-def resolve_pool_grade(scope_ref: str) -> str:
-    """The grade whose lessons a ``grade_pool`` scope actually draws from.
-
-    #3610: grade-3 classrooms exist (demo 三年甲班) but the library starts at
-    grade 4, so ``scope_ref="3"`` used to dead-end the student in English.
-    A numeric classroom grade with no lessons falls back to the NEAREST grade
-    that has some, preferring the higher one on a tie ("學得會" over "太簡單"
-    is a wash at equal distance; a slightly harder pool is still on-level
-    practice, an easier one is review). Non-numeric pools (品格教育／文言文)
-    are only valid as themselves.
-    """
-    available = [str(g) for g in get_available_grades()]
-    if scope_ref in available:
-        return scope_ref
-    try:
-        wanted = int(scope_ref)
-    except (TypeError, ValueError):
-        raise HTTPException(status_code=400, detail=_ERR_UNKNOWN_GRADE)
-    if wanted not in _CLASSROOM_GRADE_RANGE:
-        raise HTTPException(status_code=400, detail=_ERR_UNKNOWN_GRADE)
-    numeric = sorted(int(g) for g in available if g.isdigit())
-    if not numeric:
-        raise HTTPException(status_code=400, detail=_ERR_EMPTY_POOL)
-    best = min(numeric, key=lambda g: (abs(g - wanted), -g))
-    return str(best)
-
-
-def validate_scope(scope_type: str, scope_ref: str) -> None:
-    if scope_type == "lesson":
-        if load_lesson(scope_ref) is None:
-            raise HTTPException(status_code=400, detail=_ERR_UNKNOWN_LESSON)
-    elif scope_type == "grade_pool":
-        resolve_pool_grade(scope_ref)
-    else:
-        raise HTTPException(status_code=400, detail=_ERR_UNKNOWN_SCOPE)
-
-
-def _load_lessons_for_scope(scope_type: str, scope_ref: str) -> list[dict]:
-    if scope_type == "lesson":
-        lesson = load_lesson(scope_ref)
-        if lesson is None:
-            raise HTTPException(status_code=400, detail=_ERR_UNKNOWN_LESSON)
-        return [{"lesson_uid": scope_ref, "lesson": lesson}]
-    if scope_type != "grade_pool":
-        raise HTTPException(status_code=400, detail=_ERR_UNKNOWN_SCOPE)
-    results = search_lessons(grade=resolve_pool_grade(scope_ref))
-    lessons = []
-    for entry in results:
-        uid = entry.get("lesson_uid")
-        if not uid:
-            continue
-        lesson = load_lesson(uid)
-        if lesson is not None:
-            lessons.append({"lesson_uid": uid, "lesson": lesson})
-    if not lessons:
-        raise HTTPException(status_code=400, detail=_ERR_EMPTY_POOL)
-    return lessons
 
 
 def require_classroom_membership(db: Session, classroom_id: int, student_id: int) -> None:

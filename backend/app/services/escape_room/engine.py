@@ -10,15 +10,15 @@ from sqlalchemy.orm.attributes import flag_modified
 
 from ...models.escape_room import EscapeRoomRun
 from ...models.user import User
-from ...services.lesson_loader import get_available_grades, search_lessons
-from ...services.lesson_uid_loader import load_lesson
+from ..game_core.scope import (
+    ERR_EMPTY_POOL as _ERR_EMPTY_POOL,
+    load_lessons_for_scope as _load_lessons_for_scope,
+    resolve_pool_grade,  # noqa: F401 — re-exported: tests call `svc.resolve_pool_grade(...)`
+    validate_scope,
+)
 from ..live_quiz.round_types import choice
 from .story_adapter import DEFAULT_DIALOGUE, resolve_story_for_run
 
-_ERR_UNKNOWN_LESSON = "找不到這一課的題目，請回上一頁重新選擇"
-_ERR_UNKNOWN_GRADE = "找不到這個年級的題庫，請回上一頁重新選擇"
-_ERR_UNKNOWN_SCOPE = "不支援這種題目範圍，請回上一頁重新選擇"
-_ERR_EMPTY_POOL = "這個年級目前還沒有題目，請改選其他範圍"
 _MIST_STEP = 10
 _TEAMMATES = ("bookworm", "lantern", "compass")
 RUN_TIME_BUDGET_SECONDS = 600
@@ -30,51 +30,6 @@ def _now() -> datetime:
 
 def _iso_now() -> str:
     return _now().isoformat()
-
-
-def resolve_pool_grade(scope_ref: str) -> str:
-    available = [str(grade) for grade in get_available_grades()]
-    if scope_ref in available:
-        return scope_ref
-    try:
-        wanted = int(scope_ref)
-    except (TypeError, ValueError):
-        raise HTTPException(status_code=400, detail=_ERR_UNKNOWN_GRADE)
-    if wanted not in range(1, 13):
-        raise HTTPException(status_code=400, detail=_ERR_UNKNOWN_GRADE)
-    numeric = sorted(int(grade) for grade in available if grade.isdigit())
-    if not numeric:
-        raise HTTPException(status_code=400, detail=_ERR_EMPTY_POOL)
-    return str(min(numeric, key=lambda grade: (abs(grade - wanted), -grade)))
-
-
-def validate_scope(scope_type: str, scope_ref: str) -> None:
-    if scope_type == "lesson":
-        if load_lesson(scope_ref) is None:
-            raise HTTPException(status_code=400, detail=_ERR_UNKNOWN_LESSON)
-    elif scope_type == "grade_pool":
-        resolve_pool_grade(scope_ref)
-    else:
-        raise HTTPException(status_code=400, detail=_ERR_UNKNOWN_SCOPE)
-
-
-def _load_lessons_for_scope(scope_type: str, scope_ref: str) -> list[dict]:
-    if scope_type == "lesson":
-        lesson = load_lesson(scope_ref)
-        if lesson is None:
-            raise HTTPException(status_code=400, detail=_ERR_UNKNOWN_LESSON)
-        return [{"lesson_uid": scope_ref, "lesson": lesson}]
-    if scope_type != "grade_pool":
-        raise HTTPException(status_code=400, detail=_ERR_UNKNOWN_SCOPE)
-    lessons = []
-    for entry in search_lessons(grade=resolve_pool_grade(scope_ref)):
-        uid = entry.get("lesson_uid")
-        lesson = load_lesson(uid) if uid else None
-        if lesson is not None:
-            lessons.append({"lesson_uid": uid, "lesson": lesson})
-    if not lessons:
-        raise HTTPException(status_code=400, detail=_ERR_EMPTY_POOL)
-    return lessons
 
 
 def _rounds(lessons: list[dict], sources: list[str]) -> list[dict]:
