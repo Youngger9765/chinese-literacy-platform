@@ -723,6 +723,15 @@ class TestTeacherDialogueHistory:
         assert turns[1]["role"] == "student"
         assert turns[2]["role"] == "feedback"
         assert turns[2]["is_correct"] is True
+        # Issue #3682 跟進：之前這裡從沒人斷言過實際的對話內容，所以
+        # TeacherDialogueTurnResponse 把 ORM 的 .text 序列化成 JSON 的
+        # "content" 鍵（跟前端 TeacherDialogueTurn.text / ComprehensionRecord
+        # 讀的完全對不上）活了很久沒被抓到——教師報告頁的對話泡泡全部是空的，
+        # 直到 #3682 修掉 hasComprehension 死欄位、真的在 staging 點開報告頁
+        # 才第一次被看見。鎖住回應鍵一定是 "text"，不是 "content"。
+        assert turns[0]["text"] == "這篇課文的主角是誰？"
+        assert turns[1]["text"] == "小英"
+        assert "content" not in turns[0]
 
     def test_teacher_gets_empty_list_when_no_dialogue(self, client):
         """Returns empty turns list when session has no dialogue recorded."""
