@@ -114,6 +114,8 @@ class TestZhuyinHintEveryLesson:
                 assert correct not in hint, (uid, hint)
                 clause = hint.split("「")[1].split("」")[0]
                 assert char in clause, (uid, hint)
+                # No 注音 of any kind in a hint (some lessons print readings inline, 「暈ㄩㄣˋ」).
+                assert not any("\u3100" <= c <= "\u312f" or "\u31a0" <= c <= "\u31bf" or "\u02b0" <= c <= "\u02ff" for c in hint), (uid, hint)
                 table = lesson_zhuyin_table(uid)
                 asked = {(text, text.find(stem) + ti) for text in table if stem in text}
                 assert any(
@@ -126,3 +128,46 @@ class TestZhuyinHintEveryLesson:
                 ), (uid, hint)
         assert questions > 100, questions
         assert hints > 0, "sweep produced no hints at all — the lookup is broken, not the data"
+
+
+class TestHintPrefersReadablePhrases:
+    def test_whole_short_clause_loses_to_a_longer_one(self, monkeypatch):
+        """Staging 2026-10-21: hint picked 「他了」 although a longer clause
+        with the same character and reading existed."""
+        table = {
+            "問題：好？": {3: "ㄏㄠˇ"},
+            "他好了，": {1: "ㄏㄠˇ"},
+            "大家都覺得很好看。": {6: "ㄏㄠˇ"},
+        }
+        monkeypatch.setattr("app.services.lesson_zhuyin.lesson_zhuyin_table", lambda uid: table)
+        payload = {
+            "source_module": "zhuyin",
+            "lesson_uid": "LX",
+            "stem": "問題：好？",
+            "extra": {"target_index": 3},
+            "options": [{"key": "A", "text": "ㄏㄠˇ"}, {"key": "B", "text": "ㄏㄠˋ"}],
+            "correct_key": "A",
+        }
+        hint = svc.build_hint(payload)
+        assert hint == "同一課「大家都覺得很好看」裡的「好」，唸法跟這題一樣", hint
+
+    def test_every_sweep_hint_clause_is_at_least_four_chars_when_possible(self):
+        """Class-level: across all lessons, a hint shorter than 4 chars only
+        appears when no ≥4-char candidate exists. Measured 2026-10-21: old
+        ranking 8,972 / 24,050 hints under 4 chars (37%); new 274 (1.1%)."""
+        from pathlib import Path
+
+        from app.services.live_quiz.sources import zhuyin as zsrc
+
+        lessons_dir = Path(__file__).resolve().parents[1] / "data" / "lessons"
+        short = total = 0
+        for p in sorted(x for x in lessons_dir.iterdir() if x.is_dir() and x.name.startswith("L")):
+            for item in zsrc.generate_items(p.name, {}, random.Random(3)):
+                hint = svc.build_hint(item.to_payload(seconds=30))
+                if not hint:
+                    continue
+                total += 1
+                clause = hint.split("「")[1].split("」")[0]
+                short += len(clause) < 4
+        assert total > 1000, total
+        assert short / total < 0.02, (short, total)
