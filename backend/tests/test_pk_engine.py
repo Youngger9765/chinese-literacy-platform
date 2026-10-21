@@ -217,6 +217,32 @@ class TestMatchStateNames:
         assert state["opponent_name"] is None
         assert state["my_name"] == a.name
 
+    def test_falls_back_to_student_n_when_a_participant_has_no_name(self, db_session, classroom, clock):
+        """issue #3663 round 3 (#3672): PK previously had NO 學生N fallback
+        at all — a student with a blank `.name` showed as a blank/None
+        name instead of the "學生N" placeholder live_quiz/team_arena
+        already use. Side 'a' is always seat 1, side 'b' seat 2 (PK has no
+        join-order counter to reuse, it's always exactly two sides)."""
+        a = _enrolled_student(db_session, classroom)
+        a.name = ""  # falsy, like a never-completed profile — NOT NULL at the DB level
+        b = _enrolled_student(db_session, classroom)
+        db_session.commit()
+        match = svc.create_human_match(
+            db_session, a, b, scope_type="lesson", scope_ref=LESSON_A, classroom_id=classroom.id
+        )
+        state_a = svc.build_match_state(db_session, match, a)
+        state_b = svc.build_match_state(db_session, match, b)
+        # From a's own view: a's blank name falls back to seat 1 ("學生1");
+        # b's real name is used as-is for the opponent.
+        assert state_a["my_name"] == "學生1"
+        assert state_a["opponent_name"] == b.name
+        # From b's view (opponent is a): same seat-1 fallback for a, shown
+        # as the OPPONENT this time — proves the seat index travels with
+        # the participant, not with whichever field ("my"/"opponent") it's
+        # read into.
+        assert state_b["opponent_name"] == "學生1"
+        assert state_b["my_name"] == b.name
+
 
 class TestServerAuthoritativeTiming:
     def test_elapsed_ms_computed_from_server_clock_not_client_input(self, db_session, classroom, clock):

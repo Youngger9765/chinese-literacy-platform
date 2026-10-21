@@ -27,6 +27,7 @@ from ...models.pk import (
 )
 from ...models.school import Classroom, ClassroomStudent
 from ...models.user import User
+from ..game_core.display_name import resolve_display_name
 from ..game_core.scope import (
     load_lessons_for_scope as _load_lessons_for_scope,
     resolve_pool_grade,  # noqa: F401 — re-exported: tests call `engine.resolve_pool_grade(...)`
@@ -642,6 +643,14 @@ def build_match_state(db: Session, match: PkMatch, user: User) -> dict:
 
     my_user = match.side_a_user if side == "a" else match.side_b_user
     opponent_user = None if _is_ai_match(match) else (match.side_b_user if side == "a" else match.side_a_user)
+    # issue #3663 round 3 (#3672): PK previously had NO "學生N" fallback at
+    # all here (`my_user.name if my_user else None` showed a blank/None
+    # name for a student with no profile name set, unlike live_quiz/
+    # team_arena). PK has no join-order counter to reuse (it's always
+    # exactly two sides) — side 'a' is a fixed seat 1, side 'b' seat 2,
+    # same shared `game_core.display_name` policy as the other two modes.
+    my_seat = 1 if side == "a" else 2
+    opponent_seat = 2 if side == "a" else 1
 
     state = {
         "match_id": match.id,
@@ -656,8 +665,8 @@ def build_match_state(db: Session, match: PkMatch, user: User) -> dict:
         else None,
         "seconds": ANSWER_SECONDS,
         "round": round_view,
-        "my_name": my_user.name if my_user else None,
-        "opponent_name": opponent_user.name if opponent_user else None,
+        "my_name": resolve_display_name(my_user.name, my_seat) if my_user else None,
+        "opponent_name": resolve_display_name(opponent_user.name, opponent_seat) if opponent_user else None,
         "my_score": match.side_a_score if side == "a" else match.side_b_score,
         # #3602 B2: never the raw running total — an AI opponent's is fully
         # precomputed at creation (see create_ai_match), so reading
