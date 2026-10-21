@@ -14,6 +14,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { usePkMatchPoll } from '../../components/pk/usePkMatchPoll';
+import StemWithTarget from '../../components/live-quiz/StemWithTarget';
 import PkVsScreen from '../../components/pk/PkVsScreen';
 import PkFigureIntro from '../../components/pk/PkFigureIntro';
 import PkCountdownRing from '../../components/pk/PkCountdownRing';
@@ -48,24 +49,16 @@ interface LocationState {
 
 const MAX_SCORE = 5000; // PRD §4: 5 題 x 1000 分滿分
 
-/**
- * #3602 "also": a zhuyin round's stem is a plain sentence containing the
- * asked character somewhere in it (backend's extra.target_index, a
- * character offset — see live_quiz/sources/zhuyin.py) with no visual
- * marker at all for which character is being asked about -- staging QA:
- * "畫面上看不到問的是「適」還是「的」...學生沒辦法作答". Bold + underline the
- * target character inline, same span otherwise unstyled.
- */
-function renderStemWithTarget(stem: string, targetIndex?: number | null): React.ReactNode {
-  if (targetIndex == null || targetIndex < 0 || targetIndex >= stem.length) return stem;
-  return (
-    <>
-      {stem.slice(0, targetIndex)}
-      <span className="font-bold text-accent underline underline-offset-2">{stem[targetIndex]}</span>
-      {stem.slice(targetIndex + 1)}
-    </>
-  );
-}
+// #3602 "also": a zhuyin round's stem is a plain sentence containing the
+// asked character somewhere in it (backend's extra.target_index, a
+// character offset — see live_quiz/sources/zhuyin.py) with no visual
+// marker at all for which character is being asked about -- staging QA:
+// "畫面上看不到問的是「適」還是「的」...學生沒辦法作答". `StemWithTarget`
+// (issue #3663 round 2: this screen used to carry its own inline copy of
+// this exact logic) bolds + underlines the target character inline; this
+// screen's own classes are passed through so the rendered output is
+// unchanged from before this screen started reusing the shared component.
+const PK_STEM_TARGET_CLASS_NAME = 'font-bold text-accent underline underline-offset-2';
 
 const StudentPkMatch: React.FC = () => {
   const { matchId } = useParams<{ matchId: string }>();
@@ -278,7 +271,11 @@ const StudentPkMatch: React.FC = () => {
               card is also a basic game-UI affordance a plain <p> isn't. */}
           <div className="w-full max-w-md rounded-2xl bg-surface-container-lowest px-5 py-4 shadow-sm">
             <p className="text-center text-lg font-medium text-on-surface">
-              {renderStemWithTarget(round.stem, round.extra?.target_index)}
+              <StemWithTarget
+                stem={round.stem}
+                targetIndex={round.extra?.target_index}
+                className={PK_STEM_TARGET_CLASS_NAME}
+              />
             </p>
           </div>
 
