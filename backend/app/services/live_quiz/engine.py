@@ -30,6 +30,7 @@ from ...models.live_quiz import (
 from ...models.school import Classroom, ClassroomStudent, ClassroomTeacher
 from ...models.user import User
 from ...services.lesson_uid_loader import load_lesson
+from ..game_core.display_name import resolve_display_name
 from ..pk import classroom_features
 from . import reading_pace as reading_pace_presets
 from . import recompute
@@ -359,14 +360,15 @@ def join_game(db: Session, code: str, user: User) -> LiveQuizPlayer:
     # back to `user.email` as the displayed name, which is then shown on the
     # leaderboard and the (projected, product-launch) podium — leaking a
     # student's email address to the whole class/room. Fall back to a
-    # non-PII placeholder instead: "學生" + this join's 1-indexed position in
-    # the game (computed from the already-loaded `game.players` list above,
-    # before this player is added), e.g. "學生1", "學生2". Never user.email.
-    anonymous_display_name = f"學生{len(game.players) + 1}"
+    # non-PII placeholder instead (issue #3663 round 3 #3672: shared
+    # `game_core.display_name` helper, same "學生N" policy team_arena and
+    # now pk use): "學生" + this join's 1-indexed position in the game
+    # (computed from the already-loaded `game.players` list above, before
+    # this player is added), e.g. "學生1", "學生2". Never user.email.
     player = LiveQuizPlayer(
         game_id=game.id,
         user_id=user.id,
-        display_name=user.name or anonymous_display_name,
+        display_name=resolve_display_name(user.name, len(game.players) + 1),
         joined_at_round_index=game.current_round_index,
     )
     db.add(player)

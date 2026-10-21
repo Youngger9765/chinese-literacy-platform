@@ -42,6 +42,7 @@ from ...models.team_arena import TeamArenaAnswer, TeamArenaMember, TeamArenaSess
 from ...models.user import User
 from ...services.lesson_loader import get_available_grades, search_lessons
 from ...services.lesson_uid_loader import load_lesson
+from ..game_core.display_name import resolve_display_name
 from ..live_quiz import reading_pace
 from ..live_quiz.round_types import choice as live_quiz_choice
 from . import towers
@@ -109,11 +110,12 @@ def _display_name(member: TeamArenaMember) -> str:
     """PRD §0 v2 rule M (unchanged from the pre-existing #3630 rule):
     other students only ever see a display name, never school/class/
     email — and a blank/missing name falls back to "學生N" (N = this
-    member's 1-based rotation position), same fallback shape
-    live_quiz.engine's own `anonymous_display_name` already uses."""
+    member's 1-based rotation position), via the shared
+    `game_core.display_name` helper (issue #3663 round 3 #3672: live_quiz
+    and pk use the exact same policy, now from one place)."""
     student = member.student
-    name = (student.name or "").strip() if student is not None else ""
-    return name or f"學生{member.rotation_order + 1}"
+    name = student.name if student is not None else None
+    return resolve_display_name(name, member.rotation_order + 1)
 
 
 def _name_for_viewer(member: TeamArenaMember, side_key: str, index: int, viewer_side: str | None) -> str:
