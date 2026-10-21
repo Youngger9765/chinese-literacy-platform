@@ -199,11 +199,11 @@ def classroom_to_response(classroom: Classroom, db: Session) -> ClassroomRespons
         is_active=classroom.is_active,
         created_at=classroom.created_at,
         student_count=student_count(classroom, db),
-        pk_human=pk_classroom_features.get_classroom_feature(classroom, "pk_human", db=db),
-        # issue #3607: `db` passed so an absent key can fall back to the
-        # legacy-usage backward-compat rule (see classroom_features.py).
-        league=pk_classroom_features.get_classroom_feature(classroom, "league", db=db),
-        live_quiz=pk_classroom_features.get_classroom_feature(classroom, "live_quiz", db=db),
+        # issue #3663 round 2: the pk_human/league/live_quiz triplet is now
+        # derived from the game_core.modes registry (`db` passed so an
+        # absent key can fall back to league/live_quiz's legacy-usage rule
+        # — see classroom_features.py).
+        **pk_classroom_features.gated_feature_values(classroom, db),
     )
 
 
@@ -229,7 +229,5 @@ def classroom_to_detail_response(classroom: Classroom, db: Session) -> Classroom
         created_at=classroom.created_at,
         student_count=len(students),
         students=students,
-        pk_human=pk_classroom_features.get_classroom_feature(classroom, "pk_human", db=db),
-        league=pk_classroom_features.get_classroom_feature(classroom, "league", db=db),
-        live_quiz=pk_classroom_features.get_classroom_feature(classroom, "live_quiz", db=db),
+        **pk_classroom_features.gated_feature_values(classroom, db),
     )

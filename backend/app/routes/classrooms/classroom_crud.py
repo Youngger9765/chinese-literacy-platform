@@ -199,10 +199,9 @@ def list_my_classrooms(
                 # live_quiz so the teacher-facing feature-toggle prompt
                 # (ClassroomDetail / TeacherLeaguePage / live-quiz setup)
                 # can trust this list endpoint's flags, not just the
-                # per-classroom detail endpoint's.
-                pk_human=pk_classroom_features.get_classroom_feature(c, "pk_human", db=db),
-                league=pk_classroom_features.get_classroom_feature(c, "league", db=db),
-                live_quiz=pk_classroom_features.get_classroom_feature(c, "live_quiz", db=db),
+                # per-classroom detail endpoint's. issue #3663 round 2:
+                # triplet now derived from the game_core.modes registry.
+                **pk_classroom_features.gated_feature_values(c, db),
             )
             for c in items
         ],
@@ -272,9 +271,7 @@ def list_my_enrolled_classrooms(
             teacher_name=teacher.name,
             is_active=classroom.is_active,
             enrolled_at=cs.enrolled_at,
-            pk_human=pk_classroom_features.get_classroom_feature(classroom, "pk_human", db=db),
-            league=pk_classroom_features.get_classroom_feature(classroom, "league", db=db),
-            live_quiz=pk_classroom_features.get_classroom_feature(classroom, "live_quiz", db=db),
+            **pk_classroom_features.gated_feature_values(classroom, db),
         )
         for cs, classroom, teacher in rows
     ]

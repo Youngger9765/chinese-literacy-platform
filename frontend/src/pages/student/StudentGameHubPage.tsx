@@ -23,6 +23,23 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { fetchMyEnrolledClassrooms, computeStudentGameFlags } from '../../services/learning/session';
+import { GAME_MODES, type GameModeKey } from '../../data/gameModes';
+
+/** Visual-only decoration per mode (icon + lock copy) — not part of the
+ * shared `GAME_MODES` registry because it's purely cosmetic / this page's
+ * own concern, unlike label/description/route which other consumers could
+ * plausibly need too. Keyed by the same `GameModeKey` so a new registry
+ * entry with no decoration here falls back to the generic emoji default
+ * below rather than crashing. */
+const DECORATIONS: Partial<Record<GameModeKey, { imageSrc?: string; emoji?: string }>> = {
+  league: { imageSrc: '/story-assets/league-tang/guide-changan-icon.png' },
+  live_quiz: { emoji: '🎮' },
+  pk_human: { imageSrc: '/story-assets/pk-li-bai/icon.png' },
+  escape_room: { emoji: '🏰' },
+  team_arena: { emoji: '🛡️' },
+};
+
+const LOCKED_TEXT = '老師尚未開啟';
 
 interface GameHubCard {
   key: string;
@@ -102,53 +119,27 @@ const StudentGameHubPage: React.FC = () => {
       });
   }, [token]);
 
-  const cards: GameHubCard[] = [
-    {
-      key: 'league',
-      label: '跨班賽季',
-      description: '和別班比幾週，平常讀課文就累積',
-      path: '/student/our-class',
-      locked: !leagueEnabled,
-      lockedText: '老師尚未開啟',
-      imageSrc: '/story-assets/league-tang/guide-changan-icon.png',
-    },
-    {
-      key: 'live-quiz',
-      label: '課堂搶答',
-      description: '現在全班一起玩，約 10 分鐘',
-      path: '/live',
-      locked: !liveQuizEnabled,
-      lockedText: '老師尚未開啟',
-      emoji: '🎮',
-    },
-    {
-      key: 'pk',
-      label: 'PK 對戰',
-      description: '一對一，隨時挑戰同學或文學家',
-      path: '/pk',
-      locked: false,
-      lockedText: '',
-      imageSrc: '/story-assets/pk-li-bai/icon.png',
-    },
-    {
-      key: 'escape-room',
-      label: '迷城密室',
-      description: '闖關解謎，救回被困的同伴',
-      path: '/escape-room',
-      locked: false,
-      lockedText: '',
-      emoji: '🏰',
-    },
-    {
-      key: 'team-arena',
-      label: '多人對抗賽',
-      description: '2～5 人一組，答題推塔對抗',
-      path: '/team-arena',
-      locked: false,
-      lockedText: '',
-      emoji: '🛡️',
-    },
-  ];
+  // Lock state per mode — ONLY league/live_quiz ever lock the whole hub
+  // entry (see data/gameModes.ts and backend game_core/modes.py's
+  // docstring for why `classroomGated` is not the same question: pk_human
+  // has a classroom switch too, but its hub card never locks because AI
+  // PK inside it is always reachable). A new classroom-gated mode that
+  // DOES want its whole hub card to lock would be added here explicitly,
+  // not inferred from `classroomGated` alone.
+  const lockState: Partial<Record<GameModeKey, boolean>> = {
+    league: !leagueEnabled,
+    live_quiz: !liveQuizEnabled,
+  };
+
+  const cards: GameHubCard[] = GAME_MODES.map((mode) => ({
+    key: mode.key,
+    label: mode.label,
+    description: mode.description,
+    path: mode.hubRoute,
+    locked: lockState[mode.key] ?? false,
+    lockedText: lockState[mode.key] ? LOCKED_TEXT : '',
+    ...DECORATIONS[mode.key],
+  }));
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6">

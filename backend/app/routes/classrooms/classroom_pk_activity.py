@@ -84,8 +84,4 @@ def update_pk_settings(
     db.commit()
     db.refresh(classroom)
 
-    return ClassroomFeatureSettingsResponse(
-        pk_human=classroom_features.get_classroom_feature(classroom, "pk_human", db=db),
-        league=classroom_features.get_classroom_feature(classroom, "league", db=db),
-        live_quiz=classroom_features.get_classroom_feature(classroom, "live_quiz", db=db),
-    )
+    return ClassroomFeatureSettingsResponse(**classroom_features.gated_feature_values(classroom, db))
