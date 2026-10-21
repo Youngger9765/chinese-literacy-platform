@@ -116,7 +116,8 @@ export interface TeamArenaCurrentRound {
 }
 
 export interface TeamArenaSidePublicMember {
-  student_id: number;
+  /** null for the other team (only your own team gets real account ids). */
+  student_id: number | null;
   display_name: string;
 }
 
@@ -187,7 +188,8 @@ export interface TeamArenaWeaponResult {
 }
 
 export interface TeamArenaResultPlayer {
-  student_id: number;
+  /** null for the other team. */
+  student_id: number | null;
   display_name: string;
   highlight: string;
 }

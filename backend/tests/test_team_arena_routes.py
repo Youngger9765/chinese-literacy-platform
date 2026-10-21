@@ -329,3 +329,29 @@ class TestOpponentNamesAreNotExposed:
         rb = names(b1["token"], "result", "players")
         assert ra["b"] == ["乙隊 1 號", "乙隊 2 號"] and rb["a"] == ["甲隊 1 號", "甲隊 2 號"], (ra, rb)
         assert any("Ta_Names_Mate" in n for n in ra["a"]), ra
+
+    def test_other_team_gets_no_account_ids(self, client):
+        """Push security review 2026-10-21: seat labels alone were not enough —
+        the real users.id still identified the same student across matches."""
+        host = _register(client, "ta_ids_host")
+        _enroll_with_grade(host["user_id"])
+        code = client.post(
+            "/api/team-arena/sessions",
+            json={"team_size": 2, "turns_per_player": 1, "answer_seconds": 45},
+            headers=auth_header(host["token"]),
+        ).json()["code"]
+        mate, b1, b2 = (_register(client, f"ta_ids_{x}") for x in ("mate", "b1", "b2"))
+        for p, side in ((mate, "a"), (b1, "b"), (b2, "b")):
+            assert client.post(f"/api/team-arena/sessions/{code}/join", json={"side": side}, headers=auth_header(p["token"])).status_code == 201
+
+        st = client.get(f"/api/team-arena/sessions/{code}/state", headers=auth_header(host["token"])).json()
+        assert {m["student_id"] for m in st["sides"]["a"]["members"]} == {host["user_id"], mate["user_id"]}
+        assert [m["student_id"] for m in st["sides"]["b"]["members"]] == [None, None]
+        ids_seen = {m.get("student_id") for side in st["sides"].values() for m in side["members"]}
+        assert b1["user_id"] not in ids_seen and b2["user_id"] not in ids_seen
+
+        assert client.post(f"/api/team-arena/sessions/{code}/control", json={"action": "start"}, headers=auth_header(host["token"])).status_code == 200
+        assert client.post(f"/api/team-arena/sessions/{code}/control", json={"action": "end"}, headers=auth_header(host["token"])).status_code == 200
+        res = client.get(f"/api/team-arena/sessions/{code}/result", headers=auth_header(b1["token"])).json()
+        assert [p["student_id"] for p in res["players"]["a"]] == [None, None]
+        assert {p["student_id"] for p in res["players"]["b"]} == {b1["user_id"], b2["user_id"]}

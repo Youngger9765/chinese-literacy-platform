@@ -324,7 +324,7 @@ const StudentTeamArenaPlay: React.FC = () => {
               </p>
               <ul className="space-y-1 text-xs text-on-surface">
                 {state.sides[side].members.map((m) => (
-                  <li key={m.student_id}>{m.display_name}</li>
+                  <li key={`${m.display_name}-${m.student_id ?? 'x'}`}>{m.display_name}</li>
                 ))}
               </ul>
             </div>
@@ -378,7 +378,7 @@ const StudentTeamArenaPlay: React.FC = () => {
                 <p className="mb-2 text-xs text-on-surface-variant">我方剩 {TOWER_COUNT - result.sides[side].towers_destroyed} 座塔</p>
                 <ul className="space-y-1.5 text-xs text-on-surface">
                   {result.players[side].map((p) => (
-                    <li key={p.student_id}>
+                    <li key={`${p.display_name}-${p.student_id ?? 'x'}`}>
                       <span className="font-semibold">{p.display_name}</span>
                       <span className="block text-on-surface-variant">{p.highlight}</span>
                     </li>
