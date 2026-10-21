@@ -1,6 +1,14 @@
 /**
  * AttemptHistoryPanel — collapsible rows for a student's prior attempts.
  * Extracted from AssignmentDetailPanel (Issue #1853).
+ *
+ * Issue #3682 scope note: the "作答紀錄" link added to the current attempt in
+ * AssignmentSubmissionTable.tsx is intentionally NOT repeated here. These rows
+ * are superseded, older attempts (one row per retry before the latest) — a
+ * teacher checking "what has this student answered" cares about their current
+ * attempt, not a stuck-and-abandoned earlier one. If that turns out to be
+ * wrong in practice, `attempt.session_id` is already available on every row
+ * here to wire the same link.
  */
 import React from 'react';
 import type { AttemptResponse } from '../../../services/assignmentApi';

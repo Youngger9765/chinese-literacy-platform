@@ -6,6 +6,7 @@
  * 刻意只放老師每天會看的東西；完整學習曲線、標籤、指導紀錄在「更多 → 詳細學習紀錄」。
  */
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
 import {
   AssignmentMatrixResponse,
@@ -14,6 +15,26 @@ import {
   getStudentAssignments,
 } from '../../../services/teacherApi';
 import { CellBadge, distinctTitles, isOverdue } from './AssignmentMatrixGrid';
+
+/**
+ * Issue #3682: a student stuck mid-lesson (state in_progress / pending) has
+ * nothing in 朗讀/理解/生字 yet, so without this link their row was a dead
+ * end — "進行中" and nothing else. Whenever session_id is present (set as
+ * soon as the student starts, regardless of status) this links to the one
+ * page that already renders what they've answered step by step.
+ */
+function AnswerRecordLink({ studentId, sessionId }: { studentId: number; sessionId: number | null }) {
+  if (sessionId === null) return null;
+  return (
+    <Link
+      to={`/teacher/students/${studentId}/sessions/${sessionId}/report`}
+      className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs font-medium text-accent border border-accent/30 hover:bg-accent-bg transition-colors whitespace-nowrap"
+      title="查看這位學生目前答過的內容"
+    >
+      作答紀錄
+    </Link>
+  );
+}
 
 interface StudentsPanelProps {
   classroomId: number;
@@ -75,7 +96,10 @@ export function StudentDetail({
                 <li key={r.assignment_id} className="rounded-xl border border-gray-200 p-4 space-y-2">
                   <div className="flex items-start justify-between gap-2">
                     <span className="font-semibold text-gray-900">{r.title}</span>
-                    <CellBadge cell={{ student_id: studentId, assignment_id: r.assignment_id, state: r.state, score: r.score, current_step: r.current_step }} overdue={isOverdue(r.due_date)} />
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <CellBadge cell={{ student_id: studentId, assignment_id: r.assignment_id, state: r.state, score: r.score, current_step: r.current_step }} overdue={isOverdue(r.due_date)} />
+                      <AnswerRecordLink studentId={studentId} sessionId={r.session_id} />
+                    </div>
                   </div>
                   {!noParts && <div className="grid grid-cols-3 gap-2 text-center text-sm">
                     <div><div className="text-gray-500">朗讀</div><div className="font-semibold tabular-nums">{pct(r.reading_accuracy)}</div></div>
@@ -97,6 +121,7 @@ export function StudentDetail({
                   {!noParts && <th className="py-2 font-medium text-right">理解</th>}
                   {!noParts && <th className="py-2 font-medium text-right">生字</th>}
                   {!noParts && <th className="py-2 font-medium pl-4">唸錯的字</th>}
+                  <th className="py-2 font-medium pl-4">作答紀錄</th>
                 </tr>
               </thead>
               <tbody>
@@ -118,6 +143,9 @@ export function StudentDetail({
                       )}
                     </td>
                     </>}
+                    <td className="py-3 pl-4">
+                      <AnswerRecordLink studentId={studentId} sessionId={r.session_id} />
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -125,7 +153,9 @@ export function StudentDetail({
             </>
           )}
           {noParts ? (
-            <p className="text-sm text-gray-600">這些作業沒有記錄到朗讀、理解、生字的分項成績，只看得到交了沒有</p>
+            <p className="text-sm text-gray-600">
+              這些作業沒有記錄到朗讀、理解、生字的分項成績——點「作答紀錄」看他目前做到哪裡、答了什麼
+            </p>
           ) : (
             <p className="text-sm text-gray-500">「—」代表這份作業沒有記錄到那一部分</p>
           )}

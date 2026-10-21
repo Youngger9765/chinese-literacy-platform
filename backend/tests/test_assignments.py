@@ -740,6 +740,132 @@ class TestGetAssignmentDetail:
         assert resp.status_code == 403
 
 
+class TestAssignmentSubmissionExposesSessionId:
+    """Regression test for Issue #3682.
+
+    A teacher reported that once a student's lesson got stuck mid-way (a page
+    bug kept them from finishing), the assignment-management screen showed
+    nothing at all for that student — every column (score, reading metrics,
+    grade button, audio button) renders as a dash until the submission reaches
+    'submitted'/'graded'. There was no way to even LINK to the one report page
+    (`/teacher/students/{id}/sessions/{id}/report`) that already renders the
+    student's recorded step-by-step progress, because the submission response
+    never carried the `session_id` the frontend needs to build that link.
+
+    This locks the fix at the data layer: once a student has started an
+    assignment (so `AssignmentSubmission.session_id` is set), the teacher-facing
+    `GET /api/assignments/{id}` response must expose that `session_id` — for a
+    submission that is still `in_progress`, not just once it's `submitted`.
+    """
+
+    def test_session_id_null_before_student_starts(
+        self, client, teacher, classroom_with_students
+    ):
+        create_resp = client.post(
+            f"/api/classrooms/{classroom_with_students}/assignments",
+            json={
+                "classroom_id": classroom_with_students,
+                "story_id": VALID_STORY_ID,
+                "title": "Session Id Pending Test",
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assignment_id = create_resp.json()["id"]
+
+        resp = client.get(
+            f"/api/assignments/{assignment_id}",
+            headers=auth_header(teacher["token"]),
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert len(data["submissions"]) == 2
+        for sub in data["submissions"]:
+            assert sub["status"] == "pending"
+            # Nobody started it yet — there is no session to link to.
+            assert sub["session_id"] is None
+
+    def test_session_id_present_while_in_progress(
+        self, client, teacher, student1, classroom_with_students
+    ):
+        """The bug: a student who started (but never finished) an assignment
+        must still be linkable from the teacher's assignment-management
+        screen — not only after they submit."""
+        create_resp = client.post(
+            f"/api/classrooms/{classroom_with_students}/assignments",
+            json={
+                "classroom_id": classroom_with_students,
+                "story_id": VALID_STORY_ID,
+                "title": "Session Id In Progress Test",
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assignment_id = create_resp.json()["id"]
+
+        start_resp = client.post(
+            f"/api/assignments/{assignment_id}/start",
+            headers=auth_header(student1["token"]),
+        )
+        assert start_resp.status_code == 200
+        expected_session_id = start_resp.json()["session_id"]
+
+        resp = client.get(
+            f"/api/assignments/{assignment_id}",
+            headers=auth_header(teacher["token"]),
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+
+        flat_sub = next(s for s in data["submissions"] if s["student_id"] == student1["user_id"])
+        assert flat_sub["status"] == "in_progress"
+        assert flat_sub["session_id"] == expected_session_id
+
+        # The grouped view (submissions_by_student, #1764) must carry the
+        # same session_id on its attempts — that's the shape the grouped
+        # desktop table in AssignmentSubmissionTable.tsx actually reads.
+        group = next(
+            g for g in data["submissions_by_student"] if g["student_id"] == student1["user_id"]
+        )
+        assert group["attempts"][0]["session_id"] == expected_session_id
+
+    def test_session_id_present_after_submit(
+        self, client, teacher, student1, classroom_with_students
+    ):
+        """Completed submissions keep carrying session_id too (no regression
+        for the already-working case)."""
+        create_resp = client.post(
+            f"/api/classrooms/{classroom_with_students}/assignments",
+            json={
+                "classroom_id": classroom_with_students,
+                "story_id": VALID_STORY_ID,
+                "title": "Session Id Submitted Test",
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assignment_id = create_resp.json()["id"]
+
+        start_resp = client.post(
+            f"/api/assignments/{assignment_id}/start",
+            headers=auth_header(student1["token"]),
+        )
+        expected_session_id = start_resp.json()["session_id"]
+
+        submit_resp = client.post(
+            f"/api/assignments/{assignment_id}/submit",
+            headers=auth_header(student1["token"]),
+        )
+        assert submit_resp.status_code == 200
+
+        resp = client.get(
+            f"/api/assignments/{assignment_id}",
+            headers=auth_header(teacher["token"]),
+        )
+        sub = next(
+            s for s in resp.json()["submissions"] if s["student_id"] == student1["user_id"]
+        )
+        assert sub["status"] == "submitted"
+        assert sub["session_id"] == expected_session_id
+
+
 # ====================================================================# PATCH /api/assignments/{id} — Update assignment
 # ====================================================================
 
