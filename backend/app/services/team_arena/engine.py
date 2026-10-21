@@ -941,7 +941,12 @@ def get_state(db: Session, session: TeamArenaSession, user: User) -> dict:
             "match_status": cache.get("match_status", "active"),
             "winner": cache.get("winner"),
             "members": [
-                {"student_id": m.student_id, "display_name": _name_for_viewer(m, side_key, i, viewer_side)}
+                {
+                    # Real account id only for the viewer's own team: an id
+                    # lets anyone recognise the same student across matches.
+                    "student_id": m.student_id if viewer_side == side_key else None,
+                    "display_name": _name_for_viewer(m, side_key, i, viewer_side),
+                }
                 for i, m in enumerate(team_members)
             ],
         }
@@ -1081,7 +1086,7 @@ def get_result(db: Session, session: TeamArenaSession, user: User) -> dict:
     players: dict[str, list[dict]] = {
         side_key: [
             {
-                "student_id": m.student_id,
+                "student_id": m.student_id if viewer_side == side_key else None,
                 "display_name": _name_for_viewer(m, side_key, i, viewer_side),
                 "highlight": highlights[m.student_id],
             }
