@@ -30,6 +30,7 @@ import AssessmentReport from '../../components/reading-steps/AssessmentReport';
 import TeacherCommentSection from '../../components/teacher/TeacherCommentSection';
 import PageLoader from '../../components/ui/PageLoader';
 import { SpotlightStrategyRecord } from '../student/session-history/SpotlightStrategyRecord';
+import { VocabApplicationRecord } from '../student/session-history/VocabApplicationRecord';
 import { StepRecordsView } from '../student/session-history/StepRecordsView';
 import { buildComprehensionScores } from '../student/session-history/helpers';
 import { getTeacherStudentDialogue } from '../../services/teacherApi';
@@ -255,6 +256,17 @@ const TeacherSessionReportPage: React.FC = () => {
                 ? story.strategyExercise
                 : null
             }
+          />
+        </div>
+      )}
+
+      {/* Issue #3682 跟進 — session.vocab_result 從不被現行 VocabApplication.tsx
+          寫入，真正的填空作答存在 step_progress.step_data['vocab-application']。
+          跟 spotlight 同一個道理：直接讀 step_progress，不要經過死欄位。 */}
+      {report?.step_progress?.step_data?.['vocab-application'] && (
+        <div className="mb-6">
+          <VocabApplicationRecord
+            stepData={report.step_progress.step_data['vocab-application'] as Record<string, unknown>}
           />
         </div>
       )}
