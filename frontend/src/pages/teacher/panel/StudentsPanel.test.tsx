@@ -1,9 +1,14 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
+import { render as rtlRender, screen, within } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
 import StudentsPanel, { summarizeStudents } from './StudentsPanel';
 import * as api from '../../../services/teacherApi';
+
+// AnswerRecordLink (Issue #3682) renders a react-router <Link> — every test
+// that mounts StudentsPanel/StudentDetail needs a router context for it.
+const render = (ui: React.ReactElement) => rtlRender(<MemoryRouter>{ui}</MemoryRouter>);
 
 vi.mock('../../../contexts/AuthContext', () => ({ useAuth: () => ({ token: 't' }) }));
 
@@ -26,7 +31,7 @@ describe('學生分頁 (#3376)', () => {
       student_name: '王小明',
       rows: [{
         assignment_id: 10, title: '甲', due_date: null, state: 'completed', score: 80, current_step: null,
-        reading_accuracy: 96, comprehension: null, vocab: 80, error_chars: ['喝', '采'],
+        reading_accuracy: 96, comprehension: null, vocab: 80, error_chars: ['喝', '采'], session_id: 501,
       }],
     });
   });
@@ -84,8 +89,8 @@ describe('學生分頁 (#3376)', () => {
     vi.mocked(api.getStudentAssignments).mockResolvedValue({
       student_id: 1, student_name: '王小明',
       rows: [
-        { assignment_id: 10, title: '甲', due_date: null, state: 'completed', score: 80, current_step: null, reading_accuracy: 96, comprehension: null, vocab: null, error_chars: [] },
-        { assignment_id: 11, title: '乙', due_date: null, state: 'completed', score: 70, current_step: null, reading_accuracy: 90, comprehension: null, vocab: null, error_chars: [] },
+        { assignment_id: 10, title: '甲', due_date: null, state: 'completed', score: 80, current_step: null, reading_accuracy: 96, comprehension: null, vocab: null, error_chars: [], session_id: 501 },
+        { assignment_id: 11, title: '乙', due_date: null, state: 'completed', score: 70, current_step: null, reading_accuracy: 90, comprehension: null, vocab: null, error_chars: [], session_id: 502 },
       ],
     });
     const { StudentDetail } = await import('./StudentsPanel');
@@ -98,11 +103,50 @@ describe('學生分頁 (#3376)', () => {
   it('when no part was recorded anywhere, says so instead of columns of dashes', async () => {
     vi.mocked(api.getStudentAssignments).mockResolvedValue({
       student_id: 1, student_name: '王小明',
-      rows: [{ assignment_id: 10, title: '甲', due_date: null, state: 'completed', score: null, current_step: null, reading_accuracy: null, comprehension: null, vocab: null, error_chars: [] }],
+      rows: [{ assignment_id: 10, title: '甲', due_date: null, state: 'completed', score: null, current_step: null, reading_accuracy: null, comprehension: null, vocab: null, error_chars: [], session_id: 503 }],
     });
     const { StudentDetail } = await import('./StudentsPanel');
     render(<StudentDetail classroomId={9} studentId={1} onBack={vi.fn()} />);
     expect(await screen.findByText(/沒有記錄到朗讀、理解、生字的分項成績/)).toBeInTheDocument();
     expect(screen.queryByRole('columnheader', { name: '朗讀' })).not.toBeInTheDocument();
+  });
+
+  // Issue #3682: a student stuck mid-lesson (in_progress, no part recorded
+  // yet) must still be reachable from here — not just a dead-end "進行中".
+  it('a student stuck in_progress with a session gets a link to their answer record', async () => {
+    vi.mocked(api.getStudentAssignments).mockResolvedValue({
+      student_id: 2, student_name: '林雨萱',
+      rows: [{
+        assignment_id: 10, title: '甲', due_date: null, state: 'in_progress', score: null,
+        current_step: 'comprehension', reading_accuracy: null, comprehension: null, vocab: null,
+        error_chars: [], session_id: 777,
+      }],
+    });
+    const { StudentDetail } = await import('./StudentsPanel');
+    render(<StudentDetail classroomId={9} studentId={2} onBack={vi.fn()} />);
+
+    // rendered once in the mobile card and once in the desktop table (CSS
+    // picks one, same pattern as the existing dup-text test above)
+    const links = await screen.findAllByRole('link', { name: '作答紀錄' });
+    expect(links.length).toBeGreaterThan(0);
+    for (const link of links) {
+      expect(link).toHaveAttribute('href', '/teacher/students/2/sessions/777/report');
+    }
+  });
+
+  it('no session yet (never started) shows no answer-record link', async () => {
+    vi.mocked(api.getStudentAssignments).mockResolvedValue({
+      student_id: 2, student_name: '林雨萱',
+      rows: [{
+        assignment_id: 10, title: '甲', due_date: null, state: 'not_started', score: null,
+        current_step: null, reading_accuracy: null, comprehension: null, vocab: null,
+        error_chars: [], session_id: null,
+      }],
+    });
+    const { StudentDetail } = await import('./StudentsPanel');
+    render(<StudentDetail classroomId={9} studentId={2} onBack={vi.fn()} />);
+
+    expect((await screen.findAllByText('甲')).length).toBeGreaterThan(0);
+    expect(screen.queryByRole('link', { name: '作答紀錄' })).not.toBeInTheDocument();
   });
 });

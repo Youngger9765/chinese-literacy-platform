@@ -337,6 +337,13 @@ class StudentAssignmentRow(BaseModel):
     comprehension: float | None
     vocab: float | None
     error_chars: list[str]
+    # Issue #3682: a student stuck mid-lesson (state == in_progress) still has
+    # no score/comprehension/vocab breakdown to show — but they DO have a
+    # session, which already carries a readable per-step record
+    # (TeacherSessionReportPage + step_progress). Exposing it here is what
+    # lets the teacher screen link to "what has this student answered so
+    # far" instead of only showing a dash.
+    session_id: int | None = None
 
 
 class StudentAssignmentsResponse(BaseModel):
@@ -408,5 +415,6 @@ def get_student_assignments(
             comprehension=_comprehension(sess) if sess is not None else None,
             vocab=_vocab_percent(sess.vocab_result) if sess is not None else None,
             error_chars=_error_chars(sess) if sess is not None else [],
+            session_id=sub.session_id if sub is not None else None,  # Issue #3682
         ))
     return StudentAssignmentsResponse(student_id=student_id, student_name=enrollment.student.name, rows=rows)
