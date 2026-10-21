@@ -355,3 +355,96 @@ class TestOpponentNamesAreNotExposed:
         res = client.get(f"/api/team-arena/sessions/{code}/result", headers=auth_header(b1["token"])).json()
         assert [p["student_id"] for p in res["players"]["a"]] == [None, None]
         assert {p["student_id"] for p in res["players"]["b"]} == {b1["user_id"], b2["user_id"]}
+
+
+class TestPlayEndpointsThroughHttp:
+    """#3683: answer / weapons / suggest / pause-resume-next were only tested
+    at engine level. These go through the real routes, so caller binding
+    (who may act on THIS room) is exercised end to end."""
+
+    def _playing_room(self, client, tag):
+        host = _register(client, f"ta_{tag}_host")
+        _enroll_with_grade(host["user_id"])
+        code = client.post(
+            "/api/team-arena/sessions",
+            json={"team_size": 2, "turns_per_player": 2, "answer_seconds": 45},
+            headers=auth_header(host["token"]),
+        ).json()["code"]
+        mate, b1, b2 = (_register(client, f"ta_{tag}_{x}") for x in ("mate", "b1", "b2"))
+        for p, side in ((mate, "a"), (b1, "b"), (b2, "b")):
+            assert client.post(f"/api/team-arena/sessions/{code}/join", json={"side": side}, headers=auth_header(p["token"])).status_code == 201
+        assert client.post(f"/api/team-arena/sessions/{code}/control", json={"action": "start"}, headers=auth_header(host["token"])).status_code == 200
+        outsider = _register(client, f"ta_{tag}_out")
+        return code, host, mate, b1, b2, outsider
+
+    def _active_and_idle(self, client, code, a, b):
+        sa = client.get(f"/api/team-arena/sessions/{code}/state", headers=auth_header(a["token"])).json()
+        return (a, b, sa) if sa["own_match"]["am_i_active"] else (b, a, client.get(f"/api/team-arena/sessions/{code}/state", headers=auth_header(b["token"])).json())
+
+    def _open_options(self, monkeypatch, seconds):
+        from datetime import timedelta
+
+        from app.services.team_arena import engine
+
+        real = engine._now
+        monkeypatch.setattr(engine, "_now", lambda: real() + timedelta(seconds=seconds + 1))
+
+    def test_answer_route_binds_the_caller(self, client, monkeypatch):
+        code, host, mate, b1, b2, outsider = self._playing_room(client, "ans")
+        active, idle, st = self._active_and_idle(client, code, host, mate)
+        rnd = st["own_match"]["current_round"]
+        url = f"/api/team-arena/sessions/{code}/answer"
+        # Reading phase: nobody can answer yet.
+        assert client.post(url, json={"choice_key": "A"}, headers=auth_header(active["token"])).status_code == 409
+        self._open_options(monkeypatch, rnd["reading_seconds"])
+        key = client.get(f"/api/team-arena/sessions/{code}/state", headers=auth_header(active["token"])).json()["own_match"]["current_round"]["options"][0]["key"]
+        assert client.post(url, json={"choice_key": key}, headers=auth_header(idle["token"])).status_code == 403
+        assert client.post(url, json={"choice_key": key}, headers=auth_header(outsider["token"])).status_code in (403, 404)
+        ok = client.post(url, json={"choice_key": key}, headers=auth_header(active["token"]))
+        assert ok.status_code == 200, ok.text
+
+    def test_weapon_route_quota_and_caller(self, client, monkeypatch):
+        code, host, mate, b1, b2, outsider = self._playing_room(client, "wpn")
+        active, idle, st = self._active_and_idle(client, code, host, mate)
+        self._open_options(monkeypatch, st["own_match"]["current_round"]["reading_seconds"])
+        url = f"/api/team-arena/sessions/{code}/weapons"
+        assert client.post(url, json={"weapon": "call_teammate"}, headers=auth_header(idle["token"])).status_code == 403
+        assert client.post(url, json={"weapon": "call_teammate"}, headers=auth_header(outsider["token"])).status_code in (403, 404)
+        first = client.post(url, json={"weapon": "call_teammate"}, headers=auth_header(active["token"]))
+        assert first.status_code == 200, first.text
+        again = client.post(url, json={"weapon": "call_teammate"}, headers=auth_header(active["token"]))
+        assert again.status_code == 409, again.text
+        assert client.post(url, json={"weapon": "not_a_weapon"}, headers=auth_header(active["token"])).status_code in (400, 409, 422)
+
+    def test_suggest_route_only_for_called_teammate(self, client, monkeypatch):
+        code, host, mate, b1, b2, outsider = self._playing_room(client, "sug")
+        active, idle, st = self._active_and_idle(client, code, host, mate)
+        self._open_options(monkeypatch, st["own_match"]["current_round"]["reading_seconds"])
+        url = f"/api/team-arena/sessions/{code}/suggest"
+        key = client.get(f"/api/team-arena/sessions/{code}/state", headers=auth_header(active["token"])).json()["own_match"]["current_round"]["options"][0]["key"]
+        # Nobody called yet.
+        assert client.post(url, json={"choice_key": key}, headers=auth_header(idle["token"])).status_code == 409
+        assert client.post(f"/api/team-arena/sessions/{code}/weapons", json={"weapon": "call_teammate"}, headers=auth_header(active["token"])).status_code == 200
+        # The active player cannot suggest to themself; an opponent and an outsider cannot suggest.
+        assert client.post(url, json={"choice_key": key}, headers=auth_header(active["token"])).status_code == 403
+        assert client.post(url, json={"choice_key": key}, headers=auth_header(b1["token"])).status_code in (403, 409)
+        assert client.post(url, json={"choice_key": key}, headers=auth_header(outsider["token"])).status_code in (403, 404)
+        assert client.post(url, json={"choice_key": "Z"}, headers=auth_header(idle["token"])).status_code == 400
+        ok = client.post(url, json={"choice_key": key}, headers=auth_header(idle["token"]))
+        assert ok.status_code == 200, ok.text
+        seen = client.get(f"/api/team-arena/sessions/{code}/state", headers=auth_header(active["token"])).json()["own_match"]["current_round"]
+        assert [s["choice_key"] for s in seen.get("suggestions", [])] == [key]
+
+    def test_pause_resume_next_only_by_host(self, client):
+        code, host, mate, b1, b2, outsider = self._playing_room(client, "ctl")
+        url = f"/api/team-arena/sessions/{code}/control"
+        for p in (mate, b1, outsider):
+            assert client.post(url, json={"action": "pause"}, headers=auth_header(p["token"])).status_code in (403, 404)
+        assert client.post(url, json={"action": "resume"}, headers=auth_header(host["token"])).status_code == 409
+        assert client.post(url, json={"action": "pause"}, headers=auth_header(host["token"])).json()["status"] == "paused"
+        assert client.post(url, json={"action": "next"}, headers=auth_header(host["token"])).status_code == 409
+        assert client.post(url, json={"action": "resume"}, headers=auth_header(host["token"])).json()["status"] == "playing"
+        turn0 = client.get(f"/api/team-arena/sessions/{code}/state", headers=auth_header(host["token"])).json()["turn_no"]
+        nxt = client.post(url, json={"action": "next"}, headers=auth_header(host["token"]))
+        assert nxt.status_code == 200, nxt.text
+        assert client.get(f"/api/team-arena/sessions/{code}/state", headers=auth_header(host["token"])).json()["turn_no"] == turn0 + 1
