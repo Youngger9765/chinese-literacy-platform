@@ -10,6 +10,7 @@ from sqlalchemy.orm import sessionmaker
 from app.models.base import Base
 import app.models  # noqa: F401
 from app.services.escape_room import engine as svc
+from app.services.game_core import scope as scope_svc
 from league_factories import make_student
 
 
@@ -102,7 +103,11 @@ def test_start_run_has_four_ordered_chambers_and_gate(run_factory):
 
 
 def test_grade_pool_uses_nearest_available_grade(monkeypatch):
-    monkeypatch.setattr(svc, "get_available_grades", lambda: [4, 6])
+    # `resolve_pool_grade` itself now lives in `game_core.scope` (issue
+    # #3663 — shared verbatim with PK, see that module's docstring), so the
+    # dependency it reads at call time must be patched there, not on this
+    # module's re-exported name.
+    monkeypatch.setattr(scope_svc, "get_available_grades", lambda: [4, 6])
     assert svc.resolve_pool_grade("5") == "6"
 
 
