@@ -284,6 +284,19 @@ export async function loginViaUI(
   await page.waitForTimeout(500);
   await acceptTermsIfShown(page);
   await skipOnboardingTourIfShown(page);
+
+  // #3714: StudentHome's own classroom-fetch effect calls an unguarded
+  // `navigate(..., {replace:true})` when it resolves — with no "component
+  // still mounted" check. If that fetch is still in flight when the next
+  // helper clicks a sidebar item (openGameHubViaSidebar, immediately
+  // after this function returns in every spec), the late response can
+  // silently drag the browser BACK to `/library?classroom=X` seconds
+  // later, overriding wherever the user has since navigated to — this is
+  // the real bug, reproduced live and reported, not inferred. Letting that
+  // fetch settle here (its usual real-world latency) before any spec's
+  // next click closes the race window this harness would otherwise walk
+  // straight into, every time, for every spec.
+  await page.waitForTimeout(4000);
 }
 
 /** Navigate from wherever the student currently is to the game hub via the
@@ -317,12 +330,14 @@ export async function openGameHubCard(page: Page, label: string): Promise<void> 
   // unlocked card as locked. Only fall back to checking "locked" once the
   // unlocked form has genuinely never shown up.
   //
-  // One reload-and-retry built in: CI hit a case (#3685, all 5 specs in
-  // one run) where the sidebar's "遊戲區" nav item was already marked
-  // active (the route DID change) but the main content was still the
-  // PREVIOUS page's content indefinitely — a stuck lazy-chunk Suspense
-  // render, not just slowness a longer timeout would fix. A reload is
-  // exactly what a real student stuck on a half-loaded page would do.
+  // One retry built in: CI hit a case (#3685) where the current page was
+  // not actually the game hub at all — `/library?classroom=X` — because
+  // of the real #3714 navigation race (StudentHome's unguarded async
+  // redirect winning against the user's own subsequent click). A reload
+  // re-triggers that exact same race (it reloads `/library`, not
+  // `/game-hub`) so it cannot help; re-clicking the sidebar entry again
+  // does, since by the second attempt the stale redirect has long since
+  // fired and can't win a second time.
   for (let attempt = 0; attempt < 2; attempt++) {
     const appeared = await unlocked.waitFor({ state: 'visible', timeout: 30000 }).then(() => true).catch(() => false);
     if (appeared) {
@@ -333,9 +348,8 @@ export async function openGameHubCard(page: Page, label: string): Promise<void> 
       throw new Error(`Game hub card "${label}" is locked (classroom feature not enabled)`);
     }
     if (attempt === 0) {
-      await page.reload();
-      await page.waitForTimeout(1000);
+      await openGameHubViaSidebar(page);
     }
   }
-  throw new Error(`Game hub card "${label}" not found at all (even after a reload)`);
+  throw new Error(`Game hub card "${label}" not found at all (even after retrying the sidebar click)`);
 }
