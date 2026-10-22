@@ -32,6 +32,17 @@ interface UseLearningSessionBootstrapReturn {
   assignmentContext: AssignmentContext | null;
   assignmentReadingGoals: AssignmentReadingGoals | null;
   dbSessionId: number | null;
+  /** Issue #3707 — true once the sessionStorage restore-lookup has run at
+   *  least once for the current storyId (regardless of whether it found a
+   *  session). False means dbSessionId's current `null` is still unchecked
+   *  and must not be treated as "no existing session". */
+  hasCheckedStoredSession: boolean;
+  /** Issue #3707 — true once the orphaned-in-progress-session lookup has
+   *  settled (found one / created a new one / failed), for the case where
+   *  hasCheckedStoredSession resolved to "nothing stored". False while that
+   *  fetch is in flight or hasn't started (recovery doesn't apply — e.g.
+   *  toolbox mode, or dbSessionId is already non-null). */
+  hasCheckedForOrphanedSession: boolean;
   isLoading: boolean;
   error: string | null;
   selectedStory: Story | null;
@@ -61,6 +72,29 @@ export function useLearningSessionBootstrap({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [dbSessionId, setDbSessionId] = useState<number | null>(null);
+  // Issue #3707 — false until the sessionStorage restore-lookup below has
+  // actually run once (regardless of outcome), true forever after. Lets
+  // LearningLayout tell "we haven't checked for an existing session yet"
+  // (must wait) apart from "we checked and there genuinely isn't one"
+  // (dbSessionId === null is final) — see the restore effect for why this
+  // distinction matters.
+  //
+  // Scope note (critic review): this protects the FIRST mount only, not a
+  // later storyId change on an instance that stays mounted (e.g. one-課多篇
+  // navigating between texts without unmounting LearningLayout). Once true
+  // it never resets, so a subsequent storyId swap gets no re-check window
+  // from this flag — the pre-existing dbSessionId reset in the effect below
+  // is still the only guard for that case, same as before this fix.
+  const [hasCheckedStoredSession, setHasCheckedStoredSession] = useState(false);
+  // Issue #3707 (critic review finding #2) — same race, sibling path: when
+  // sessionStorage genuinely has no session for this story (hasCheckedStoredSession
+  // is already true, dbSessionId stayed null), the effect below fires an async
+  // lookup for an orphaned in_progress session before falling back to creating
+  // a new one. LearningLayout's gate must keep waiting through that lookup too —
+  // otherwise a step page mounts with dbSessionId still null on this exact same
+  // "checked storage, found nothing, haven't checked the server yet" render,
+  // reintroducing #3707 via the recovery path instead of the storage-restore path.
+  const [hasCheckedForOrphanedSession, setHasCheckedForOrphanedSession] = useState(false);
   const [assignmentContext, setAssignmentContext] = useState<AssignmentContext | null>(() => readAssignmentContext());
   const [assignmentReadingGoals] = useState<AssignmentReadingGoals | null>(() => {
     try {
@@ -70,6 +104,15 @@ export function useLearningSessionBootstrap({
       return null;
     }
   });
+  // Shared between ensureDbSession() (called manually, e.g. from
+  // handleStartReading) and the auto-recovery effect below — both can try to
+  // create a session for this story, and this ref is their mutex. A narrow
+  // edge case this doesn't cover: if ensureDbSession() wins the race, the
+  // auto-recovery effect's own early return (isCreatingSession.current is
+  // already true) never reaches its `.finally()`, so
+  // hasCheckedForOrphanedSession stays false for that render cycle — resolved
+  // once ensureDbSession's own call sets dbSessionId, which makes this
+  // hook's third waitingForProgress clause moot anyway (dbSessionId !== null).
   const isCreatingSession = useRef(false);
   const isToolboxFlow = isToolboxMode();
 
@@ -122,38 +165,36 @@ export function useLearningSessionBootstrap({
   );
 
   useEffect(() => {
-    if (isToolboxMode()) {
-      setDbSessionId(null);
-      return;
+    // Issue #3707 — single exit point so `hasCheckedStoredSession` flips to
+    // true exactly once per lookup, on every path (found / not found / bad
+    // value / storage unavailable). Previously each branch returned early
+    // right after `setDbSessionId`, which is what let a step page mount
+    // while dbSessionId still held its unchecked `null` default.
+    let nextId: number | null = null;
+
+    if (!isToolboxMode() && storyId && activeDbSessionStorageKey) {
+      try {
+        const directRaw = sessionStorage.getItem(activeDbSessionStorageKey);
+        const legacyRaw = legacyDbSessionStorageKey
+          ? sessionStorage.getItem(legacyDbSessionStorageKey)
+          : null;
+        const chosenRaw = directRaw ?? legacyRaw;
+        if (chosenRaw) {
+          const parsed = parseInt(chosenRaw, 10);
+          if (!Number.isNaN(parsed)) {
+            nextId = parsed;
+            if (!directRaw && legacyRaw) {
+              sessionStorage.setItem(activeDbSessionStorageKey, String(parsed));
+            }
+          }
+        }
+      } catch {
+        nextId = null;
+      }
     }
 
-    if (!storyId || !activeDbSessionStorageKey) {
-      setDbSessionId(null);
-      return;
-    }
-
-    try {
-      const directRaw = sessionStorage.getItem(activeDbSessionStorageKey);
-      const legacyRaw = legacyDbSessionStorageKey
-        ? sessionStorage.getItem(legacyDbSessionStorageKey)
-        : null;
-      const chosenRaw = directRaw ?? legacyRaw;
-      if (!chosenRaw) {
-        setDbSessionId(null);
-        return;
-      }
-      const parsed = parseInt(chosenRaw, 10);
-      if (Number.isNaN(parsed)) {
-        setDbSessionId(null);
-        return;
-      }
-      setDbSessionId(parsed);
-      if (!directRaw && legacyRaw) {
-        sessionStorage.setItem(activeDbSessionStorageKey, String(parsed));
-      }
-    } catch {
-      setDbSessionId(null);
-    }
+    setDbSessionId(nextId);
+    setHasCheckedStoredSession(true);
   }, [storyId, activeDbSessionStorageKey, legacyDbSessionStorageKey]);
 
   useEffect(() => {
@@ -272,6 +313,7 @@ export function useLearningSessionBootstrap({
       })
       .finally(() => {
         isCreatingSession.current = false;
+        setHasCheckedForOrphanedSession(true);
       });
   }, [token, storyId, dbSessionId, isLoading, storeSessionId]);
 
@@ -281,6 +323,8 @@ export function useLearningSessionBootstrap({
     assignmentContext,
     assignmentReadingGoals,
     dbSessionId,
+    hasCheckedStoredSession,
+    hasCheckedForOrphanedSession,
     isLoading,
     error,
     selectedStory,
