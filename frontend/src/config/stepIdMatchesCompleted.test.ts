@@ -42,6 +42,18 @@ describe('stepIdMatchesCompleted (#3682 fix C part 3)', () => {
     expect(stepIdMatchesCompleted('comprehension#round2', completed, allRequired)).toBe(false);
   });
 
+  it('mutation guard: the 2-round case (the most common real shape of a multi-passage lesson) must also be rejected, not just 3+', () => {
+    // Critic-agent review caught that mutating the ambiguity threshold from
+    // `sameBaseCount <= 1` to `<= 2` would slip past every existing test in
+    // this file, because the only ambiguous-lesson case above uses 3 rounds.
+    // A genuinely 2-round lesson is the MORE common real shape (一課多篇
+    // 最常見是兩篇), so it must have its own lock.
+    const allRequired = ['comprehension#round1', 'comprehension#round2'];
+    const completed = new Set(['comprehension']);
+    expect(stepIdMatchesCompleted('comprehension#round1', completed, allRequired)).toBe(false);
+    expect(stepIdMatchesCompleted('comprehension#round2', completed, allRequired)).toBe(false);
+  });
+
   it('returns false when nothing matches at all', () => {
     expect(stepIdMatchesCompleted('comprehension#pjhxh', new Set(['spotlight#pjhxh']), ['comprehension#pjhxh'])).toBe(false);
   });

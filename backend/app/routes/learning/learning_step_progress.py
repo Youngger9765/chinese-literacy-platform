@@ -91,8 +91,17 @@ def save_step_progress(
     # 那一局部的 state 代表全部真相）。step_data 逐 step key 合併：incoming
     # 裡有的 key 蓋過去，incoming 沒帶到的 key 保留舊的——同一個理由，用戶端
     # 一次只會完整帶著「目前這一步」的資料，不代表其他步驟的資料不存在了。
+    # Issue #3682 follow-up (team-lead review): a blind union can't tell a
+    # DELIBERATE un-complete apart from the premature-empty-save race this
+    # fix exists to guard against — e.g. useStepProgressPersistence
+    # .resetTutorStep's 「再讀一次」 redo flow (#2532/#2533), which removes
+    # 'paragraph-reading' from steps_completed on purpose. `reset_steps`
+    # names exactly which step ids to drop; everything else still only
+    # ever grows via the union below.
+    reset_steps = set(payload.reset_steps or [])
     existing_steps_completed = existing_sp.steps_completed if existing_sp is not None else []
-    merged_steps_completed = list(existing_steps_completed)
+    base_steps_completed = [s for s in existing_steps_completed if s not in reset_steps]
+    merged_steps_completed = list(base_steps_completed)
     for step_id in payload.steps_completed:
         if step_id not in merged_steps_completed:
             merged_steps_completed.append(step_id)

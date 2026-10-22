@@ -429,6 +429,47 @@ export function resolveActiveSteps(lessonStepSequence?: string[] | null): StepCo
 }
 
 /**
+ * #3682 fix C (part 3, backward-compat) — does `completed` satisfy `requiredId`?
+ *
+ * Exact match always satisfies. Beyond that, a BARE entry in `completed`
+ * (no `#slug`) satisfies a composite `requiredId` (`base#slug`) ONLY WHEN
+ * this lesson has exactly ONE required step sharing that base id — i.e.
+ * there is no ambiguity about which round the bare (legacy, pre-fix) entry
+ * refers to. This exists purely so already-in-progress sessions (saved
+ * before #3682's write-path fix started keying current_step/
+ * steps_completed correctly) can self-heal instead of being permanently
+ * stuck: without it, a student whose `comprehension#<round>` step was saved
+ * as a bare `'comprehension'` before the fix shipped could never satisfy
+ * the (correctly composite) requirement again, even after the fix lands.
+ *
+ * Deliberately does NOT do the reverse (a composite completed entry
+ * satisfying a bare requirement) and does NOT treat two DIFFERENT
+ * composite ids as equivalent — only a non-ambiguous bare↔composite match
+ * for the SAME base id, and only when that base id isn't shared by more
+ * than one required step in this lesson (a genuinely multi-round lesson
+ * must not let one legacy bare entry silently satisfy every round).
+ */
+export function stepIdMatchesCompleted(
+  requiredId: string,
+  completed: ReadonlySet<string> | string[],
+  allRequiredIds: readonly string[],
+): boolean {
+  const completedSet = completed instanceof Set ? completed : new Set(completed);
+  if (completedSet.has(requiredId)) return true;
+
+  const hashIdx = requiredId.indexOf('#');
+  if (hashIdx < 0) return false; // requiredId itself is bare — exact match already checked above
+  const base = requiredId.slice(0, hashIdx);
+  if (!completedSet.has(base)) return false;
+
+  const sameBaseCount = allRequiredIds.filter((id) => {
+    const i = id.indexOf('#');
+    return (i < 0 ? id : id.slice(0, i)) === base;
+  }).length;
+  return sameBaseCount <= 1;
+}
+
+/**
  * Parser section `type` → STEP_REGISTRY `id` aliases (#2526).
  *
  * The printed-worksheet parser emits a `type` vocabulary that does NOT line up
