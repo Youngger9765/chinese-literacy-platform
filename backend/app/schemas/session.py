@@ -200,6 +200,23 @@ class StepProgressSaveRequest(BaseModel):
             raise ValueError(f"step_data has more than {MAX_PROGRESS_ITEMS} keys")
         return v
 
+    # Issue #3695 (reported as part of #3682): true when the frontend's own
+    # required-step check (every non-cover step for this lesson, see
+    # stepConfig.ts filterRequiredAssignmentSteps) says this session is
+    # complete. This is a HINT ONLY (team-lead review, integrity follow-up) —
+    # the backend does NOT trust it for the actual submit decision. It's used
+    # purely to avoid recomputing readiness on every single progress save;
+    # maybe_auto_submit_assignment_session independently verifies readiness
+    # server-side against the session's own stored steps_completed and this
+    # assignment's own required-step list (loaded from the lesson's data, not
+    # from this flag or anything else the client sent). A forged/stale flag
+    # with genuinely-missing steps is therefore a silent no-op, not a
+    # submission — see assignment_queries.is_assignment_ready_for_submit.
+    assignment_ready_for_submit: bool = Field(
+        False,
+        description="Hint only — true when the frontend's own required-step check reports completion. The backend independently re-verifies before submitting.",
+    )
+
 
 class StepProgressResponse(BaseModel):
     """Response for GET/PUT /api/learning/sessions/{id}/progress."""

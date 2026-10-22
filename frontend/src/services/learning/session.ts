@@ -500,6 +500,16 @@ export interface StepProgressData {
    * entirely (or send []) for an ordinary save.
    */
   reset_steps?: string[];
+  /**
+   * Issue #3695 (reported as part of #3682) — true when every required
+   * (non-cover) step for this lesson is complete, per
+   * `filterRequiredAssignmentSteps` (stepConfig.ts). Lets the backend
+   * auto-submit a linked in-progress assignment without depending on
+   * sessionStorage surviving the whole session. Not part of the persisted
+   * step_progress shape — it's a request-time signal only, never echoed back
+   * by GET /progress.
+   */
+  assignment_ready_for_submit?: boolean;
 }
 
 export interface StepProgressResponse {

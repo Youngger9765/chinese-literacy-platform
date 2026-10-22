@@ -428,6 +428,32 @@ export function resolveActiveSteps(lessonStepSequence?: string[] | null): StepCo
     .filter((s): s is StepConfig => !!s && s.enabled);
 }
 
+// ---------------------------------------------------------------------------
+// filterRequiredAssignmentSteps — the non-cover steps an assignment needs
+// ---------------------------------------------------------------------------
+
+/**
+ * Given this lesson's active steps (from `resolveActiveSteps`), return only
+ * the ones an assignment-flow student must clear before the assignment can
+ * be submitted.
+ *
+ * Excludes:
+ * - 'lesson-intro' — cover page with no pass/fail concept. Nothing in the
+ *   codebase ever adds it to the persisted steps_completed array (clicking
+ *   開始閱讀 only sets in-memory session.introCompleted), so counting it as
+ *   required meant an assignment-flow student could NEVER finish (#3494).
+ * - 'report' — the results page itself, not a step the student practiced.
+ *
+ * This is the single source of truth for "is this assignment done" — used by
+ * both useStepProgressPersistence's isAssignmentReadyForSubmit (gates the
+ * submit button / auto-submit flag) AND the assignment list's progress count
+ * (MyAssignments.tsx / AssignmentCard), so the two can never show a different
+ * total than the one that actually decides submission (#3682).
+ */
+export function filterRequiredAssignmentSteps(steps: StepConfig[]): StepConfig[] {
+  return steps.filter((s) => s.id !== 'report' && s.id !== 'lesson-intro');
+}
+
 /**
  * #3682 fix C (part 3, backward-compat) — does `completed` satisfy `requiredId`?
  *
