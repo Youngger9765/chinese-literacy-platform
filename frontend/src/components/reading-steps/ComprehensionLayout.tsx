@@ -497,12 +497,25 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
         ) : (
           /* ══════════════════════════════════════════════════════════════════
            * Standard 2-column layout — lessons without graphic-text images.
-           * Unchanged from #1701 / #1703.
+           * #1701 / #1703 原本只在 `md:`（768px）切兩欄，窄到 iPad 直放／橫放
+           * 這個區間，右欄只分得到 12 格裡的 5 格，裡面的表格（例如文章重點表
+           * 的 WorksheetTable）就被壓成一條逐字往下疊的窄欄（#3696 現場老師
+           * 回報、真環境重現）
+           *
+           * 改成 `xl:`（1280px）才兩欄並排，`xl` 以下兩塊直接上下堆疊、共用
+           * 同一個捲軸，讓右欄拿到完整寬度——跟上面 `hasImages` 那個分支
+           * 已經在用的「單一 overflow-y-auto 捲動區」是同一招，不是新發明的
+           * 機制。平板（iPad 768/1024）與手機都落在這個堆疊區間，文章重點表
+           * 的 `min-w-[28rem]` 水平捲動只在 `xl` 以上、兩欄並排、右欄仍然
+           * 不夠寬時才會真的派上用場
            * ══════════════════════════════════════════════════════════════════ */
-          <div className="w-full h-full grid grid-cols-1 md:grid-cols-12 grid-rows-[1fr] gap-6">
+          <div className="w-full h-full flex flex-col gap-6 overflow-y-auto pr-1 xl:grid xl:grid-cols-12 xl:grid-rows-[1fr] xl:overflow-visible xl:pr-0">
 
-            {/* Left: text card (col-span-7) */}
-            <div className="md:col-span-7 min-h-0 flex flex-col">
+            {/* Left: text card (xl:col-span-7). 堆疊時排第二——參考課文常常比
+                練習長很多，排第一會讓學生捲過一整篇課文才看到題目（Young
+                verbal feedback on #3696 screenshots）。xl 以上照舊是左欄，
+                order-none 取消上面的順序覆寫。 */}
+            <div className="order-2 flex flex-col xl:order-none xl:col-span-7 xl:min-h-0">
               <StoryTextCard
                 story={story}
                 zhuyinLines={zhuyinLines}
@@ -512,8 +525,10 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
               />
             </div>
 
-            {/* Right: reference panels + exercise (col-span-5) */}
-            <div className="md:col-span-5 min-h-0 flex flex-col gap-3 overflow-y-auto custom-scrollbar pr-1">
+            {/* Right: reference panels + exercise (xl:col-span-5). 堆疊時排
+                第一，讓題目不需要捲過整篇參考課文就看得到；需要課文時課文
+                就在下面，不是不見了。 */}
+            <div className="order-1 flex flex-col gap-3 custom-scrollbar xl:order-none xl:col-span-5 xl:min-h-0 xl:overflow-y-auto xl:pr-1">
               {hasTables && (
                 <CollapsibleRefPanel
                   icon="table_chart"

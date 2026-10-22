@@ -116,3 +116,67 @@ describe('ComprehensionLayout per-paragraph pairing (#2085)', () => {
     expect(screen.queryByText('圖文對照閱讀')).toBeNull();
   });
 });
+
+/**
+ * #3696 回歸鎖 —— 現場老師回報「文章重點表版面在 iPad 直放時被壓成一窄條」。
+ *
+ * 根因：標準兩欄版面（無圖文對照的課）只在 `md:`（768px）就切成兩欄，右欄只拿到
+ * 12 格裡的 5 格，裡面的表格（WorksheetTable 等）在這個寬度被壓到逐字往下疊、
+ * 完全無法閱讀；而且第一眼看到的是一欄空的勾選框，看不出表格其實可以橫向捲動。
+ *
+ * 修法：兩欄並排改到 `xl:`（1280px）才啟動，`xl` 以下兩塊直接上下堆疊、共用
+ * 一個捲軸，右欄因此拿到完整寬度，不需要水平捲動就能正常換行。
+ *
+ * 這條鎖只問 class 層級的意圖有沒有被不小心改回去 —— jsdom 測不出真實版面，
+ * 實際排版用 staging 上的螢幕截圖驗證（768×1024 / 1024×768）。
+ */
+describe('ComprehensionLayout 標準兩欄版面在窄螢幕要堆疊（#3696）', () => {
+  it('兩欄並排延後到 xl，不再在 md 就切開', () => {
+    const { container } = render(
+      <ComprehensionLayout story={standardLessonStory}>
+        <div>exercise panel</div>
+      </ComprehensionLayout>,
+    );
+    const textCard = container.querySelector('[data-comprehension-lesson-text]');
+    expect(textCard).toBeTruthy();
+    const leftCol = textCard!.parentElement!;
+    const root = leftCol.parentElement!;
+
+    // 根層：窄螢幕是 flex 直向堆疊，只有 xl 以上才變成 12 格的 grid。
+    expect(root.className).toContain('flex');
+    expect(root.className).toContain('flex-col');
+    expect(root.className).toContain('xl:grid');
+    expect(root.className).toContain('xl:grid-cols-12');
+    expect(root.className).not.toMatch(/(^|\s)md:grid-cols-12(\s|$)/);
+
+    // 左欄（參考課文）：col-span 延後到 xl。
+    expect(leftCol.className).toContain('xl:col-span-7');
+    expect(leftCol.className).not.toMatch(/(^|\s)md:col-span-7(\s|$)/);
+
+    // 右欄（重點表/練習）：col-span 延後到 xl，窄螢幕不再自己開獨立捲軸
+    // （捲動交給 root 統一處理，跟 hasImages 分支已經在用的單一捲動區同一招）。
+    const rightCol = leftCol.nextElementSibling as HTMLElement;
+    expect(rightCol).toBeTruthy();
+    expect(rightCol.className).toContain('xl:col-span-5');
+    expect(rightCol.className).not.toMatch(/(^|\s)md:col-span-5(\s|$)/);
+  });
+
+  it('堆疊時練習排在參考課文前面，不需要捲過整篇課文才看到題目', () => {
+    const { container } = render(
+      <ComprehensionLayout story={standardLessonStory}>
+        <div>exercise panel</div>
+      </ComprehensionLayout>,
+    );
+    const textCard = container.querySelector('[data-comprehension-lesson-text]');
+    const leftCol = textCard!.parentElement!; // 參考課文
+    const rightCol = leftCol.nextElementSibling as HTMLElement; // 重點表/練習
+
+    // DOM 順序不變（CSS order 只改視覺順序，不改文件順序），只有視覺順序用
+    // order 調換：窄螢幕右欄（練習）排第一，xl 以上用 order-none 取消覆寫、
+    // 恢復成左文右練習的原始版面。
+    expect(leftCol.className).toContain('order-2');
+    expect(leftCol.className).toContain('xl:order-none');
+    expect(rightCol.className).toContain('order-1');
+    expect(rightCol.className).toContain('xl:order-none');
+  });
+});
