@@ -271,8 +271,16 @@ def test_save_progress_nonexistent_session(client, student):
     assert resp.status_code == 404
 
 
-def test_save_progress_empty_payload(client, student, session_id):
-    """Empty progress payload is valid (resets to empty state)."""
+def test_save_progress_empty_steps_completed_does_not_wipe_prior_progress(client, student, session_id):
+    """Issue #3682 production root cause: a PUT with steps_completed=[] must
+    NEVER erase previously-completed steps. This happens for real when a
+    student reopens a lesson and the page fires an early save with the
+    initial (empty) local state before the GET-loaded progress has been
+    applied — see learning_step_progress.py's monotonic-union fix.
+
+    current_step and step_data for keys present in the payload still update
+    normally (this test only locks that steps_completed never shrinks).
+    """
     empty = {"current_step": None, "steps_completed": [], "step_data": {}}
     resp = client.put(
         f"/api/learning/sessions/{session_id}/progress",
@@ -282,8 +290,44 @@ def test_save_progress_empty_payload(client, student, session_id):
     assert resp.status_code == 200
     sp = resp.json()["step_progress"]
     assert sp["current_step"] is None
-    assert sp["steps_completed"] == []
-    assert sp["step_data"] == {}
+    # The bug: this used to be [] here, wiping "reading-annotation" and "tutor"
+    # that test_save_progress_overwrites (earlier in this file) had already saved.
+    assert sp["steps_completed"] == ["reading-annotation", "tutor"]
+
+
+def test_save_progress_merges_step_data_per_key_not_full_overwrite(client, student, fresh_session_id):
+    """Issue #3682: step_data must merge per step key, not replace wholesale.
+    A save that only includes one step's data must not erase another step's
+    previously-saved data."""
+    first = {
+        "current_step": "reading-annotation",
+        "steps_completed": ["reading-annotation"],
+        "step_data": {"reading-annotation": {"totalMarks": 3}},
+    }
+    resp1 = client.put(
+        f"/api/learning/sessions/{fresh_session_id}/progress",
+        json=first,
+        headers=auth_header(student["token"]),
+    )
+    assert resp1.status_code == 200, resp1.text
+
+    second = {
+        "current_step": "tutor",
+        "steps_completed": ["tutor"],
+        "step_data": {"tutor": {"lineResults": []}},
+    }
+    resp2 = client.put(
+        f"/api/learning/sessions/{fresh_session_id}/progress",
+        json=second,
+        headers=auth_header(student["token"]),
+    )
+    assert resp2.status_code == 200, resp2.text
+    sp = resp2.json()["step_progress"]
+    # Both steps' data must be present — the second save must not have erased
+    # the first step's data just because this payload didn't mention it.
+    assert sp["step_data"]["reading-annotation"] == {"totalMarks": 3}
+    assert sp["step_data"]["tutor"] == {"lineResults": []}
+    assert set(sp["steps_completed"]) == {"reading-annotation", "tutor"}
 
 
 # ---------------------------------------------------------------------------

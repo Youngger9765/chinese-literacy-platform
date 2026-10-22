@@ -80,12 +80,32 @@ def save_step_progress(
     ) + 1
     existing_meta["last_synced_at"] = datetime.now(tz=timezone.utc).isoformat()
 
+    # Issue #3682 跟進（production root cause）：這裡本來是整段 overwrite——
+    # 一次 PUT 帶 steps_completed=[] 就會把先前已完成的步驟全部清空。真實發生
+    # 過的案例：重新打開課程時，畫面在「GET 載入舊進度」完成並套用進 state
+    # 之前，就先用初始（空）的本地 state 打了一次 PUT；那個版本號仍然比目前
+    # 存的新，樂觀鎖擋不住，就這樣把已完成的步驟真的洗掉了。
+    #
+    # 修法：steps_completed 只能增加、不能減少——跟已存的做聯集，不直接採信
+    # incoming 這個值本身（不管它是漏了、還是真的想清空，都不可信任客戶端
+    # 那一局部的 state 代表全部真相）。step_data 逐 step key 合併：incoming
+    # 裡有的 key 蓋過去，incoming 沒帶到的 key 保留舊的——同一個理由，用戶端
+    # 一次只會完整帶著「目前這一步」的資料，不代表其他步驟的資料不存在了。
+    existing_steps_completed = existing_sp.steps_completed if existing_sp is not None else []
+    merged_steps_completed = list(existing_steps_completed)
+    for step_id in payload.steps_completed:
+        if step_id not in merged_steps_completed:
+            merged_steps_completed.append(step_id)
+
+    existing_step_data = existing_sp.step_data if existing_sp is not None else {}
+    merged_step_data = {**existing_step_data, **payload.step_data}
+
     # Version is stored at the top level so the frontend can read it directly
     # from StepProgressData.version. __meta keeps other metadata (source, etc.).
     session.step_progress = {
         "current_step": payload.current_step,
-        "steps_completed": payload.steps_completed,
-        "step_data": payload.step_data,
+        "steps_completed": merged_steps_completed,
+        "step_data": merged_step_data,
         "version": next_version,
         "__meta": existing_meta,
     }
