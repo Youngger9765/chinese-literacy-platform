@@ -19,9 +19,10 @@ import {
   blockStateKey,
   countVisibleSegments,
   figureLabelFromBlock,
-  isBlockAnswered,
   isInteractiveBlock,
   isSectionHeaderPrompt,
+  isTopBlockAnswered,
+  isTopBlockInteractive,
   resolveFreeTextCorrect,
   resolveLessonCode,
   resolveSingleCorrect,
@@ -136,9 +137,9 @@ const BlockSequenceRenderer: React.FC<Props> = ({
       const allComplete = segments.every((seg, segIdx) => {
         const interactive = seg
           .map((b, i) => ({ b, i }))
-          .filter(({ b }) => isInteractiveBlock(b.type));
+          .filter(({ b }) => isTopBlockInteractive(b.type));
         return interactive.every(({ b, i }) =>
-          isBlockAnswered(b, nextState, blockStateKey(segIdx, i)),
+          isTopBlockAnswered(b, nextState, blockStateKey(segIdx, i)),
         );
       });
       if (allComplete) {
@@ -321,6 +322,9 @@ const BlockSequenceRenderer: React.FC<Props> = ({
                   selected.length === answerIdx.length &&
                   [...selected].sort().join(',') === [...answerIdx].sort().join(',');
                 setFeedback((prev) => ({ ...prev, [key]: correct }));
+                // #3682 — 巢狀 sub_block 的「確認」以前從不觸發完成度檢查，
+                // 頁尾的前進按鈕永遠停用（詳見 spotlightBlockLogic.ts 的說明）。
+                checkCompletion({ ...blockState, [key]: selected });
               }}
               className="mt-1 px-4 py-1.5 rounded-full text-base font-medium text-white bg-violet-600 disabled:opacity-40"
             >
@@ -371,6 +375,8 @@ const BlockSequenceRenderer: React.FC<Props> = ({
                 optionKeys,
               );
               setFeedback((prev) => ({ ...prev, [key]: correct }));
+              // #3682 — 同上，單選的「確認」也要觸發完成度檢查。
+              checkCompletion({ ...blockState, [key]: selected });
             }}
             className="mt-1 px-4 py-1.5 rounded-full text-base font-medium text-white bg-violet-600 disabled:opacity-40"
           >
@@ -390,12 +396,64 @@ const BlockSequenceRenderer: React.FC<Props> = ({
    * 教材上的「一、（一）1.」序號是 Word 自動編號，抽取結果裡本來就沒有。
    */
   const renderSubBlock = (
-    sb: { label?: string; prompt?: string; stem?: string; intro?: string; instruction?: string;
+    sb: { type?: string; label?: string; prompt?: string; stem?: string; intro?: string; instruction?: string;
           hint?: string; value?: string; options?: Record<string, string> | string[];
-          answer?: unknown; blanks?: { answer: string }[]; items?: unknown[]; reflection?: string },
+          answer?: unknown; blanks?: { answer: string }[]; items?: unknown[]; reflection?: string;
+          paragraphs?: string[] },
     key: string,
     depth: number,
   ): React.ReactElement => {
+    // #3682 — 巢狀 items 裡混著一段參考短文（`passage`）跟一題多空格的開放式
+    // 問答（`free_text` + `blanks`，如「推論小偵探」）。這兩種型別沒有自己的
+    // prompt/stem/options 欄位，以前落進下面的通用邏輯就什麼都印不出來：
+    // 短文看不到、也沒有任何輸入框，這一題永遠答不了（真實案例 L0016）。
+    if (sb.type === 'passage' && Array.isArray(sb.paragraphs)) {
+      return (
+        <div key={key} className={depth > 0 ? 'mt-3 pl-4 border-l-2 border-gray-100' : ''}>
+          <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+            {sb.paragraphs.map((p, i) => (
+              <p key={i} className="text-base text-on-surface mb-2 last:mb-0 leading-relaxed whitespace-pre-wrap">
+                {p}
+              </p>
+            ))}
+          </div>
+        </div>
+      );
+    }
+    if (sb.type === 'free_text') {
+      const value = String(blockState[key] ?? '');
+      const submitted = feedback[key] === true;
+      return (
+        <div key={key} className={depth > 0 ? 'mt-3 pl-4 border-l-2 border-gray-100' : ''}>
+          {sb.prompt ? (
+            <p className="text-base font-medium text-on-surface mb-2 whitespace-pre-wrap">{sb.prompt}</p>
+          ) : null}
+          <textarea
+            value={value}
+            disabled={submitted}
+            onChange={(e) => setBlockValue(key, e.target.value)}
+            rows={2}
+            placeholder="請在此寫下你的答案…"
+            className="w-full resize-none rounded-lg border border-gray-200 px-3 py-2 text-base"
+          />
+          {!submitted ? (
+            <button
+              type="button"
+              disabled={value.trim().length === 0}
+              onClick={() => {
+                setFeedback((prev) => ({ ...prev, [key]: true }));
+                checkCompletion({ ...blockState, [key]: value });
+              }}
+              className="mt-2 px-4 py-1.5 rounded-full text-base font-medium text-white bg-violet-600 disabled:opacity-40"
+            >
+              送出
+            </button>
+          ) : (
+            <p className="mt-2 text-base font-medium text-green-700">✓ 已完成</p>
+          )}
+        </div>
+      );
+    }
     const opts = Array.isArray(sb.options)
       ? sb.options.map((v, i) => [String(i + 1), v] as [string, string])
       : Object.entries(sb.options ?? {});
