@@ -978,7 +978,7 @@ const WorksheetTable: React.FC<WorksheetTableProps> = ({
   };
 
   return (
-    <table className="w-full border-collapse border border-black text-sm bg-white">
+    <table className="w-full min-w-[28rem] border-collapse border border-black text-sm bg-white">
       <tbody>
         {title && (
           <tr>
