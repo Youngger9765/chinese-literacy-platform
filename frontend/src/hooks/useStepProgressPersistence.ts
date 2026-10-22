@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import type { AuthUser } from '../services/authApi';
 import { clearActiveSession, saveActiveSession } from '../services/api';
-import { resolveActiveSteps, stepIdMatchesCompleted, STEP_PATH_TO_NUMBER } from '../config/stepConfig';
+import { filterRequiredAssignmentSteps, resolveActiveSteps, stepIdMatchesCompleted, STEP_PATH_TO_NUMBER } from '../config/stepConfig';
 import { useProgressSync } from './useProgressSync';
 import type { StepProgressData } from '../services/learningApi';
 import type {
@@ -189,13 +189,10 @@ export function useStepProgressPersistence({
   );
 
   const requiredAssignmentSteps = useMemo(
-    // 'report' and 'lesson-intro' are cover/summary steps with no pass/fail
-    // concept — nothing ever marks lesson-intro complete in the persisted
-    // steps_completed array (clicking 開始閱讀 only sets in-memory
-    // session.introCompleted), so counting it as required meant an
-    // assignment-flow student could NEVER reach isAssignmentReadyForSubmit
-    // (#3494, Hans PR #3448 manual QA).
-    () => lessonActiveSteps.filter((s) => s.id !== 'report' && s.id !== 'lesson-intro').map((s) => ({ id: s.id, label: s.label })),
+    // See filterRequiredAssignmentSteps (stepConfig.ts) — single source of
+    // truth shared with the assignment list's progress count (#3682), so
+    // "done" never means two different things in two different screens.
+    () => filterRequiredAssignmentSteps(lessonActiveSteps).map((s) => ({ id: s.id, label: s.label })),
     [lessonActiveSteps],
   );
   const completedStepsSet = useMemo(
@@ -333,6 +330,33 @@ export function useStepProgressPersistence({
           current_step: opts.currentStep ?? prev.current_step,
           steps_completed: Array.from(completed),
           step_data: mergedStepData,
+          // Issue #3682 — tells the backend every required step is done, so it
+          // can auto-submit a linked assignment from the DB side of the wire.
+          //
+          // Uses stepIdMatchesCompleted — the SAME satisfaction rule
+          // missingAssignmentSteps/isAssignmentReadyForSubmit use below (round-
+          // aware legacy-bare-entry backward compat, #3682 fix C part 3) — so
+          // this flag and the UI's own "ready to submit" state can never
+          // disagree. Computed fresh from `completed` (the list about to be
+          // sent in THIS save), not from the isAssignmentReadyForSubmit return
+          // value (which reflects the previous render's stepProgressState and
+          // would lag one render behind this save). Deliberately NOT gated on
+          // hasActiveAssignment/isAssignmentFlow: that flag is itself derived
+          // from sessionStorage.getItem('activeAssignmentId')
+          // (useLearningSessionBootstrap.ts), which is exactly what goes
+          // missing when a student opens the lesson in a new tab, restarts
+          // their browser, or comes back days later — the root cause of this
+          // bug. requiredAssignmentSteps depends only on this story's own
+          // step list, never on sessionStorage, so the flag still comes out
+          // true in that scenario. The backend only acts on it when the
+          // session is actually linked to an in_progress AssignmentSubmission
+          // (maybe_auto_submit_assignment_session), so sending `true` for a
+          // plain self-practice session is a harmless no-op.
+          assignment_ready_for_submit:
+            requiredAssignmentSteps.length > 0 &&
+            requiredAssignmentSteps.every((s) =>
+              stepIdMatchesCompleted(s.id, completed, requiredAssignmentSteps.map((r) => r.id)),
+            ),
         };
 
         const prevSig = JSON.stringify(prev);
@@ -357,7 +381,7 @@ export function useStepProgressPersistence({
         return next;
       });
     },
-    [flushProgress, syncProgress, setSession],
+    [flushProgress, syncProgress, setSession, requiredAssignmentSteps],
   );
 
 
