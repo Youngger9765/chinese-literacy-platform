@@ -68,7 +68,10 @@ const MyAssignments: React.FC = () => {
     if (a.current_step) {
       const hashIdx = a.current_step.indexOf('#');
       const baseId = hashIdx < 0 ? a.current_step : a.current_step.slice(0, hashIdx);
-      if (stepIdSet.has(baseId)) {
+      const slug = hashIdx < 0 ? null : a.current_step.slice(hashIdx + 1);
+      // The slug ends up in the resume URL, so only accept the shape real
+      // passage slugs have; anything else falls back to the first step.
+      if (stepIdSet.has(baseId) && (slug === null || /^[A-Za-z0-9_-]{1,32}$/.test(slug))) {
         return a.current_step;
       }
     }

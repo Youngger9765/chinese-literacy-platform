@@ -90,4 +90,24 @@ describe('MyAssignments — 繼續 preserves the round query param (#3682 fix C)
     const destination = navigateSpy.mock.calls[0][0] as string;
     expect(destination).toBe('/learn/20017/comprehension?p=pjhxh');
   });
+
+  it('falls back to the default step when the stored round slug has an unexpected shape', async () => {
+    const { getMyAssignments } = await import('../../../services/assignmentApi');
+    vi.mocked(getMyAssignments).mockResolvedValueOnce([
+      { ...IN_PROGRESS_MULTI_PASSAGE_ASSIGNMENT, current_step: 'comprehension#../../admin?x=1' },
+    ]);
+    navigateSpy.mockClear();
+    render(
+      <MemoryRouter>
+        <MyAssignments />
+      </MemoryRouter>,
+    );
+    const resumeBtn = await screen.findByRole('button', { name: '繼續' });
+    await userEvent.click(resumeBtn);
+
+    expect(navigateSpy).toHaveBeenCalledTimes(1);
+    const destination = navigateSpy.mock.calls[0][0] as string;
+    expect(destination).not.toContain('admin');
+    expect(destination).not.toContain('comprehension');
+  });
 });
