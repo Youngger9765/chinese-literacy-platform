@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import type { AuthUser } from '../services/authApi';
 import { clearActiveSession, saveActiveSession } from '../services/api';
@@ -79,6 +79,32 @@ interface UseStepProgressPersistenceReturn {
   dismissMidSessionBadgeUnlocks: () => void;
 }
 
+/**
+ * Merge progress loaded from the server into what the page already holds.
+ *
+ * Issue #3694: when two saves race, the losing one gets a 409 and the page
+ * reloads progress from the server. That reload can return a snapshot taken
+ * before the winning save landed, so replacing local state with it erased a
+ * step the student had just finished; the page then asked them to redo it
+ * even though the server (which only ever adds completed steps) still had it.
+ * Completed steps therefore only grow here too, and step data the page
+ * already has for a step wins over the loaded copy.
+ */
+export function mergeLoadedStepProgress(
+  local: StepProgressData,
+  loaded: StepProgressData,
+): StepProgressData {
+  const completed = [...(loaded.steps_completed ?? [])];
+  for (const id of local.steps_completed ?? []) {
+    if (!completed.includes(id)) completed.push(id);
+  }
+  return {
+    current_step: loaded.current_step ?? local.current_step ?? null,
+    steps_completed: completed,
+    step_data: { ...(loaded.step_data ?? {}), ...(local.step_data ?? {}) },
+  };
+}
+
 export function useStepProgressPersistence({
   storyId,
   user,
@@ -153,6 +179,9 @@ export function useStepProgressPersistence({
     steps_completed: [],
     step_data: {},
   });
+  // Latest progress for the load handler below, which runs from async callbacks.
+  const stepProgressStateRef = useRef(stepProgressState);
+  useEffect(() => { stepProgressStateRef.current = stepProgressState; }, [stepProgressState]);
 
   const lessonActiveSteps = useMemo(
     () => resolveActiveSteps(selectedStory?.stepSequence),
@@ -209,14 +238,16 @@ export function useStepProgressPersistence({
       }
     },
     onProgressLoaded: (data) => {
-      const loadedCompleted = Array.isArray(data.steps_completed) ? data.steps_completed : [];
       const loadedStepData = (data.step_data ?? {}) as Record<string, unknown>;
-
-      setStepProgressState({
+      // Never let a reload drop a step this page already completed (#3694).
+      const merged = mergeLoadedStepProgress(stepProgressStateRef.current, {
         current_step: data.current_step ?? null,
-        steps_completed: loadedCompleted,
+        steps_completed: Array.isArray(data.steps_completed) ? data.steps_completed : [],
         step_data: loadedStepData,
       });
+      const loadedCompleted = merged.steps_completed;
+      stepProgressStateRef.current = merged;
+      setStepProgressState(merged);
 
       if (loadedStepData.tutor) {
         const tutorData = loadedStepData.tutor as Record<string, unknown>;
