@@ -16,6 +16,7 @@ from ..schemas.assignment import (
     StudentAssignmentResponse,
 )
 from ..services.assignment_queries import (
+    resolve_step_sequence_for_assignment,
     resolve_story_slug_for_assignment,
     resolve_title_for_assignment,
 )
@@ -62,6 +63,7 @@ def student_assignment_to_response(
         "session_id": session_id,
         "current_step": current_step,
         "steps_completed": steps_completed,
+        "step_sequence": resolve_step_sequence_for_assignment(assignment),
         "submitted_at": submission.submitted_at,
         "score": submission.score,
         "teacher_feedback": submission.teacher_feedback,  # Issue #424
@@ -340,6 +342,50 @@ def submit_assignment_session(
         submission.student_id, assignment.id, score,
     )
     return submission
+
+
+def maybe_auto_submit_assignment_session(
+    session_id: int,
+    db: Session,
+) -> AssignmentSubmission | None:
+    """Auto-submit the assignment linked to ``session_id`` if it is still in_progress.
+
+    Issue #3682 root cause: the frontend's auto-submit trigger read
+    `activeAssignmentId` from sessionStorage, which does not survive a new tab,
+    a browser restart, or coming back days later — so a student who genuinely
+    finished every required step (steps_completed was saved to the DB
+    correctly the whole time) never got submitted, and the teacher dashboard
+    showed "進行中" with every column "—" forever.
+
+    This is called from save_step_progress whenever the frontend reports every
+    required step complete (StepProgressSaveRequest.assignment_ready_for_submit).
+    It must NOT depend on sessionStorage: the link from a session to the
+    assignment it belongs to lives in the DB (AssignmentSubmission.session_id),
+    so this works even when the frontend no longer "knows" this is an
+    assignment session.
+
+    Idempotent / safe no-op when:
+    - session_id is not linked to any AssignmentSubmission (self-practice session)
+    - the submission is already submitted/graded
+    - the assignment row is missing (shouldn't happen, FK-protected, defensive only)
+
+    Returns the updated AssignmentSubmission when a submit happened, else None.
+    """
+    submission = (
+        db.query(AssignmentSubmission)
+        .filter(AssignmentSubmission.session_id == session_id)
+        .first()
+    )
+    if submission is None or submission.status in ("submitted", "graded"):
+        return None
+
+    assignment = (
+        db.query(Assignment).filter(Assignment.id == submission.assignment_id).first()
+    )
+    if assignment is None:
+        return None
+
+    return submit_assignment_session(assignment, submission, db)
 
 
 def restart_assignment_session(
