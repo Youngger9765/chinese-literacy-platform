@@ -87,3 +87,112 @@ def resolve_step_sequence_for_assignment(assignment: Assignment) -> list[str] | 
         return None
     seq = lesson.get("step_sequence")
     return list(seq) if isinstance(seq, list) else None
+
+
+# ── Server-side required-step verification (Issue #3695 integrity follow-up) ──
+#
+# Team-lead review: the auto-submit route (learning_step_progress.save_step_progress)
+# originally trusted StepProgressSaveRequest.assignment_ready_for_submit outright —
+# any student could send that flag after completing one step and get submitted
+# early. The flag is now only a HINT (cheap pre-filter so this isn't recomputed on
+# every save); maybe_auto_submit_assignment_session independently verifies
+# readiness against the session's own server-stored (already-merged,
+# never-shrinks) steps_completed using this module's own notion of the
+# assignment's required steps — never the client's.
+
+# Mirrors frontend/src/config/stepConfig.ts filterRequiredAssignmentSteps:
+# excludes the two cover/summary steps that are never marked complete by a
+# student (lesson-intro has no pass/fail concept; report is the results page
+# itself).
+_NON_REQUIRED_STEP_IDS = frozenset({"lesson-intro", "report"})
+
+# Server-side mirror of frontend/src/config/stepConfig.ts DEFAULT_STEP_SEQUENCE
+# filtered to STEP_REGISTRY's currently-`enabled` steps, with 'lesson-intro'/
+# 'report' already excluded — i.e. resolveActiveSteps(undefined) run through
+# filterRequiredAssignmentSteps(). Used ONLY when resolve_step_sequence_for_assignment
+# returns None (a DB-authored/forked text, or a platform lesson with no
+# manifest_sections — #3697) and there is no per-lesson sequence to load.
+#
+# ⚠️ Keep in sync with the frontend by hand — there is no shared data source for
+# this list. Five of DEFAULT_STEP_SEQUENCE's sixteen steps are currently
+# disabled in STEP_REGISTRY (paragraph-reading [2026-07-20], three 2026-05-01
+# hidden steps, one 2026-03-27 hidden step) and are deliberately NOT in this
+# list. Drift here fails SAFE, not unsafe: it would make a legitimate default-sequence
+# assignment stop auto-submitting (stays in_progress, teacher sees nothing
+# wrong except the status never flips) — it can never let an incomplete
+# submission through, since adding a bogus required id only makes this check
+# MORE strict, never less.
+DEFAULT_REQUIRED_STEP_IDS: list[str] = [
+    "full-text-annotate",
+    "key-passage-reading",
+    "vocab-definition",
+    "vocab-application",
+    "spotlight",
+    "keypoints-table",
+    "comprehension",
+    "vocab-review",
+    "knowledge-station",
+]
+
+
+def compute_required_step_ids_for_assignment(assignment: Assignment) -> list[str]:
+    """This assignment's required step ids, computed server-side (never trusting the client).
+
+    Loads the lesson's own `step_sequence` (resolve_step_sequence_for_assignment)
+    when available and strips the two non-required cover steps; falls back to
+    DEFAULT_REQUIRED_STEP_IDS when the lesson has no custom sequence.
+    """
+    step_sequence = resolve_step_sequence_for_assignment(assignment)
+    if step_sequence:
+        return [s for s in step_sequence if s not in _NON_REQUIRED_STEP_IDS]
+    return list(DEFAULT_REQUIRED_STEP_IDS)
+
+
+def is_required_step_satisfied(
+    required_id: str,
+    completed: set[str],
+    all_required_ids: list[str],
+) -> bool:
+    """Does `completed` satisfy `required_id`? Server-side mirror of
+    frontend/src/config/stepConfig.ts stepIdMatchesCompleted (#3682 fix C part 3).
+
+    Exact match always satisfies. Beyond that, a BARE entry in `completed`
+    (no `#slug`) satisfies a composite `required_id` (`base#slug`) ONLY WHEN
+    this lesson has exactly ONE required step sharing that base id — i.e.
+    there is no ambiguity about which round the bare (legacy, or directly-
+    API-driven) entry refers to. A genuinely multi-round lesson must not let
+    one bare entry silently satisfy every round sharing that base.
+    """
+    if required_id in completed:
+        return True
+
+    hash_idx = required_id.find("#")
+    if hash_idx < 0:
+        return False  # required_id itself is bare — exact match already checked above
+    base = required_id[:hash_idx]
+    if base not in completed:
+        return False
+
+    same_base_count = sum(
+        1
+        for rid in all_required_ids
+        if (rid[: rid.find("#")] if "#" in rid else rid) == base
+    )
+    return same_base_count <= 1
+
+
+def is_assignment_ready_for_submit(
+    assignment: Assignment,
+    completed_step_ids: list[str] | set[str],
+) -> bool:
+    """True when every one of this assignment's required steps is satisfied
+    by `completed_step_ids` (the session's own server-stored steps_completed —
+    callers must pass the merged, post-union value, never a client payload
+    directly)."""
+    completed = set(completed_step_ids)
+    required_ids = compute_required_step_ids_for_assignment(assignment)
+    if not required_ids:
+        return False
+    return all(
+        is_required_step_satisfied(rid, completed, required_ids) for rid in required_ids
+    )
