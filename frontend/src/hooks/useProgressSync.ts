@@ -140,8 +140,10 @@ export function useProgressSync({
   }, [dbSessionId, token]);
 
   // ── Flush helper ──────────────────────────────────────────────────────────
+  // Set after doSave is defined; lets a rejected save resend itself once (#3694).
+  const retrySaveRef = useRef<(data: StepProgressData, isRetry: boolean) => void>(() => {});
   const doSave = useCallback(
-    (data: StepProgressData) => {
+    (data: StepProgressData, isRetry = false) => {
       if (!token || dbSessionId === null) return;
       // Issue #3682 fix A (production root cause) — never PUT before the
       // initial GET has resolved and been merged into the caller's state.
@@ -178,6 +180,11 @@ export function useProgressSync({
           if (err instanceof StaleVersionError) {
             // Refresh from server; next save will use the newer version
             lastServerVersionRef.current = err.storedVersion;
+            // Issue #3694: the rejected save may be the only one carrying a step
+            // the student just finished. The server only ever adds completed
+            // steps, so resending it at the new version cannot erase anything.
+            // One retry only, so two tabs can't ping-pong.
+            if (!isRetry) retrySaveRef.current(data, true);
             loadStepProgress(token, dbSessionId)
               .then((res) => {
                 if (res.step_progress) onProgressLoadedRef.current?.(res.step_progress);
@@ -192,6 +199,7 @@ export function useProgressSync({
 
   // Keep a ref to the latest doSave so unmount cleanup always uses the current version
   const doSaveRef = useRef(doSave);
+  useEffect(() => { retrySaveRef.current = doSave; }, [doSave]);
   useEffect(() => { doSaveRef.current = doSave; }, [doSave]);
 
   // ── Debounced sync ────────────────────────────────────────────────────────
