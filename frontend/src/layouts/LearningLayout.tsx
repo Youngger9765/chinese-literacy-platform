@@ -28,6 +28,61 @@ import { useLearningSessionBootstrap } from '../hooks/useLearningSessionBootstra
 import { useStepProgressPersistence } from '../hooks/useStepProgressPersistence';
 import { useLearningStepNavigation } from '../hooks/useLearningStepNavigation';
 
+// ---------------------------------------------------------------------------
+// computeWaitingForProgress — pure, exported so it can be regression-locked
+// directly (Issue #3707) without rendering the whole component tree.
+// ---------------------------------------------------------------------------
+
+export interface WaitingForProgressInput {
+  /** false until useLearningSessionBootstrap's sessionStorage restore-lookup
+   *  has run at least once for the current storyId. */
+  hasCheckedStoredSession: boolean;
+  dbSessionId: number | null;
+  /** useProgressSync's "DB load in flight" flag — only meaningful once
+   *  dbSessionId is non-null. */
+  isProgressLoading: boolean;
+  /** false until the orphaned-in-progress-session lookup has settled, for
+   *  the case where hasCheckedStoredSession resolved to "nothing stored". */
+  hasCheckedForOrphanedSession: boolean;
+  /** Toolbox practice never has a dbSessionId and never attempts the
+   *  orphaned-session lookup — must not wait on hasCheckedForOrphanedSession. */
+  isToolboxFlow: boolean;
+}
+
+/**
+ * Issue #1549 / #3707 — should the step page's Outlet stay gated behind the
+ * "載入學習進度中..." spinner?
+ *
+ * Three independent reasons to keep waiting, any one is sufficient:
+ * 1. We haven't even checked sessionStorage for an existing session yet
+ *    (dbSessionId's current `null` could still turn into a real id).
+ * 2. There IS a session (dbSessionId resolved non-null) but its progress
+ *    hasn't loaded from the DB yet — a step page must not useState-init its
+ *    local answers from an empty snapshot (#1549).
+ * 3. There's genuinely no stored session (checked storage, found nothing),
+ *    but this isn't toolbox mode, and the follow-up lookup for an orphaned
+ *    in_progress session on the server hasn't settled yet — until it has,
+ *    dbSessionId's `null` is exactly as "unchecked" as in case 1 (#3707).
+ *
+ * See the call site in LearningLayout for the full incident writeup; kept
+ * here as a standalone pure function so `useLearningSessionBootstrap.test.ts`-
+ * style tests can lock the exact boolean logic without mounting the router
+ * tree, Outlet, or any step page.
+ */
+export function computeWaitingForProgress({
+  hasCheckedStoredSession,
+  dbSessionId,
+  isProgressLoading,
+  hasCheckedForOrphanedSession,
+  isToolboxFlow,
+}: WaitingForProgressInput): boolean {
+  return (
+    !hasCheckedStoredSession ||
+    (dbSessionId !== null && isProgressLoading) ||
+    (dbSessionId === null && !isToolboxFlow && !hasCheckedForOrphanedSession)
+  );
+}
+
 /** Idle time before showing warning modal (15 minutes). */
 const IDLE_WARNING_TIMEOUT_MS = 15 * 60 * 1000;
 /** Countdown duration shown in the warning modal (60 seconds). */
@@ -164,6 +219,8 @@ const LearningLayout: React.FC = () => {
     isAssignmentFlow,
     assignmentReadingGoals,
     dbSessionId,
+    hasCheckedStoredSession,
+    hasCheckedForOrphanedSession,
     isLoading,
     error,
     selectedStory,
@@ -425,12 +482,17 @@ const LearningLayout: React.FC = () => {
     );
   }
 
-  // Issue #1549 — when a DB session exists but step_progress is still loading,
-  // delay child render so pages don't initialise local state from an empty
-  // snapshot. Without this gate the async DB load lands after the child has
-  // already useState-initialised with undefined, and the rehydrated answers
-  // never appear in the UI even though they're stored correctly.
-  const waitingForProgress = dbSessionId !== null && isProgressLoading;
+  // Issue #1549 / #3707 — delay child route render until we're sure of
+  // dbSessionId AND (when one exists) its progress has loaded. See
+  // computeWaitingForProgress's doc comment above for the full incident
+  // writeup of why each of its three clauses exists.
+  const waitingForProgress = computeWaitingForProgress({
+    hasCheckedStoredSession,
+    dbSessionId,
+    isProgressLoading,
+    hasCheckedForOrphanedSession,
+    isToolboxFlow: isToolboxMode(),
+  });
 
   return (
     <>
