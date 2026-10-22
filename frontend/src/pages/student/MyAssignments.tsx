@@ -76,25 +76,36 @@ const MyAssignments: React.FC = () => {
 
   const getResumeStepPath = (a: StudentAssignmentResponse): string => {
     // #2916/#3682 fix C — a.current_step can be a composite round key
-    // (`comprehension#pjhxh`) for multi-part lessons. The progress-wipe fix
-    // (#3693) worked around this by stripping the round slug and checking
-    // only the base id + a syntactic slug shape, because back then
-    // `stepIdSet` was still built from the GLOBAL `ACTIVE_STEPS` list (bare
-    // ids only, see the comment on getAssignmentSteps above) — the real
-    // composite id could never be a member of it.
+    // (`comprehension#pjhxh`) for multi-part lessons.
     //
-    // That workaround is unneeded now that `steps` is resolved from THIS
-    // assignment's own step_sequence (#3697): a genuinely current composite
-    // id (the same one a round-aware step page would have written) is
-    // already an exact member of `stepIdSet`, so a plain exact match both
-    // covers that case AND — unlike the syntactic-only check — correctly
-    // falls through to the first step for a stale/renamed round slug left
-    // over from a content edit, rather than accepting it just because it
-    // "looks like" a slug.
+    // #3697 resolves `steps` from THIS assignment's own step_sequence instead
+    // of the global default, so a lesson that DECLARES per-round entries
+    // (e.g. `key-passage-reading#4uee3` as its own step_sequence item) now
+    // has that exact composite id as a member of `stepIdSet` — try that
+    // first, since (unlike a syntactic-only check) it correctly falls
+    // through for a stale/renamed round slug left over from a content edit.
+    //
+    // But most lessons have NO custom step_sequence at all (falls back to
+    // DEFAULT_STEP_SEQUENCE, bare ids only) — a.current_step can still be a
+    // round-keyed id there (comprehension's rounds aren't declared in
+    // step_sequence, only expressed at runtime via `?p=`). For that case
+    // keep the progress-wipe fix's (#3693) base-id + syntactic-slug check:
+    // strip the round, confirm the BASE id is a real step for this lesson,
+    // and only accept a slug that could possibly be a real round reference
+    // (not e.g. a path-traversal payload — test: "falls back to the default
+    // step when the stored round slug has an unexpected shape").
     const steps = getAssignmentSteps(a);
     const stepIdSet = new Set(steps.map((s) => s.id));
-    if (a.current_step && stepIdSet.has(a.current_step)) {
-      return a.current_step;
+    if (a.current_step) {
+      if (stepIdSet.has(a.current_step)) {
+        return a.current_step;
+      }
+      const hashIdx = a.current_step.indexOf('#');
+      const baseId = hashIdx < 0 ? a.current_step : a.current_step.slice(0, hashIdx);
+      const slug = hashIdx < 0 ? null : a.current_step.slice(hashIdx + 1);
+      if (stepIdSet.has(baseId) && (slug === null || /^[A-Za-z0-9_-]{1,32}$/.test(slug))) {
+        return a.current_step;
+      }
     }
     return steps[0]?.id ?? 'full-text-annotate';
   };
