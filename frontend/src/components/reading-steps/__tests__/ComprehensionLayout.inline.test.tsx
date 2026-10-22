@@ -160,4 +160,23 @@ describe('ComprehensionLayout 標準兩欄版面在窄螢幕要堆疊（#3696）
     expect(rightCol.className).toContain('xl:col-span-5');
     expect(rightCol.className).not.toMatch(/(^|\s)md:col-span-5(\s|$)/);
   });
+
+  it('堆疊時練習排在參考課文前面，不需要捲過整篇課文才看到題目', () => {
+    const { container } = render(
+      <ComprehensionLayout story={standardLessonStory}>
+        <div>exercise panel</div>
+      </ComprehensionLayout>,
+    );
+    const textCard = container.querySelector('[data-comprehension-lesson-text]');
+    const leftCol = textCard!.parentElement!; // 參考課文
+    const rightCol = leftCol.nextElementSibling as HTMLElement; // 重點表/練習
+
+    // DOM 順序不變（CSS order 只改視覺順序，不改文件順序），只有視覺順序用
+    // order 調換：窄螢幕右欄（練習）排第一，xl 以上用 order-none 取消覆寫、
+    // 恢復成左文右練習的原始版面。
+    expect(leftCol.className).toContain('order-2');
+    expect(leftCol.className).toContain('xl:order-none');
+    expect(rightCol.className).toContain('order-1');
+    expect(rightCol.className).toContain('xl:order-none');
+  });
 });

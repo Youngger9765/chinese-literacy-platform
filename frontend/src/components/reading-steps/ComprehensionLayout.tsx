@@ -511,8 +511,11 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
            * ══════════════════════════════════════════════════════════════════ */
           <div className="w-full h-full flex flex-col gap-6 overflow-y-auto pr-1 xl:grid xl:grid-cols-12 xl:grid-rows-[1fr] xl:overflow-visible xl:pr-0">
 
-            {/* Left: text card (xl:col-span-7) */}
-            <div className="flex flex-col xl:col-span-7 xl:min-h-0">
+            {/* Left: text card (xl:col-span-7). 堆疊時排第二——參考課文常常比
+                練習長很多，排第一會讓學生捲過一整篇課文才看到題目（Young
+                verbal feedback on #3696 screenshots）。xl 以上照舊是左欄，
+                order-none 取消上面的順序覆寫。 */}
+            <div className="order-2 flex flex-col xl:order-none xl:col-span-7 xl:min-h-0">
               <StoryTextCard
                 story={story}
                 zhuyinLines={zhuyinLines}
@@ -522,8 +525,10 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
               />
             </div>
 
-            {/* Right: reference panels + exercise (xl:col-span-5) */}
-            <div className="flex flex-col gap-3 custom-scrollbar xl:col-span-5 xl:min-h-0 xl:overflow-y-auto xl:pr-1">
+            {/* Right: reference panels + exercise (xl:col-span-5). 堆疊時排
+                第一，讓題目不需要捲過整篇參考課文就看得到；需要課文時課文
+                就在下面，不是不見了。 */}
+            <div className="order-1 flex flex-col gap-3 custom-scrollbar xl:order-none xl:col-span-5 xl:min-h-0 xl:overflow-y-auto xl:pr-1">
               {hasTables && (
                 <CollapsibleRefPanel
                   icon="table_chart"
