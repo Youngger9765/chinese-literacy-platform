@@ -195,6 +195,11 @@ class StudentAssignmentResponse(BaseModel):
     # Step progress persistence (Issue #660)
     current_step: str | None = None
     steps_completed: list[str] = Field(default_factory=list)
+    # Issue #3682: this lesson's own step order (None for lessons without one,
+    # e.g. DB-authored/forked texts — frontend falls back to its default
+    # sequence in that case). Lets the assignment-card progress count match
+    # the actual steps this lesson uses instead of a global default.
+    step_sequence: list[str] | None = None
     submitted_at: datetime | None
     score: float | None
     teacher_feedback: str | None  # per-student teacher feedback (Issue #424)

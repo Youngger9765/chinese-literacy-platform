@@ -2,6 +2,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import {
   stepSequenceFromManifest,
   resolveActiveSteps,
+  filterRequiredAssignmentSteps,
   STEP_REGISTRY,
   KNOWN_UNMAPPED_WORKSHEET_TYPES,
 } from './stepConfig';
@@ -150,5 +151,57 @@ describe('stepSequenceFromManifest — REAL parser vocabulary alias map (#2526)'
     expect(
       warnSpy.mock.calls.some((args) => args.some((a) => String(a).includes('reading_timer'))),
     ).toBe(false); //                             no longer warns — it's mapped
+  });
+});
+
+// ---------------------------------------------------------------------------
+// filterRequiredAssignmentSteps (#3697/#3682)
+// ---------------------------------------------------------------------------
+
+describe('filterRequiredAssignmentSteps', () => {
+  it('excludes lesson-intro and report from the default sequence', () => {
+    const steps = filterRequiredAssignmentSteps(resolveActiveSteps(undefined));
+    const ids = steps.map((s) => s.id);
+    expect(ids).not.toContain('lesson-intro');
+    expect(ids).not.toContain('report');
+    expect(ids.length).toBe(resolveActiveSteps(undefined).length - 2);
+  });
+
+  it('preserves round-keyed multi-part ids unchanged (#2916/#2930 shape)', () => {
+    // A real multi-part lesson's own step_sequence carries ids like
+    // `key-passage-reading#4uee3` — resolveActiveSteps keeps the full keyed
+    // id (looked up via the base id, but reported as the keyed one) so that
+    // per-round completion state never collides across parts of the same
+    // lesson. filterRequiredAssignmentSteps must pass these straight through:
+    // it only removes 'lesson-intro' / 'report' by exact id, nothing else.
+    const customSequence = [
+      'lesson-intro',
+      'full-text-annotate',
+      'key-passage-reading#4uee3',
+      'comprehension',
+      'report',
+    ];
+    const steps = filterRequiredAssignmentSteps(resolveActiveSteps(customSequence));
+    const ids = steps.map((s) => s.id);
+    expect(ids).toEqual(['full-text-annotate', 'key-passage-reading#4uee3', 'comprehension']);
+  });
+
+  it('produces exactly the 9 known non-cover steps of the default sequence, in order (#3697)', () => {
+    // A concrete, hand-written expectation — not "the function agrees with
+    // itself" — so a future edit to DEFAULT_STEP_SEQUENCE, STEP_REGISTRY's
+    // enabled flags, or this filter that silently drops/reorders/re-includes
+    // a step fails here, not just in the live assignment-card render test.
+    const ids = filterRequiredAssignmentSteps(resolveActiveSteps(undefined)).map((s) => s.id);
+    expect(ids).toEqual([
+      'full-text-annotate',
+      'key-passage-reading',
+      'vocab-definition',
+      'vocab-application',
+      'spotlight',
+      'keypoints-table',
+      'comprehension',
+      'vocab-review',
+      'knowledge-station',
+    ]);
   });
 });

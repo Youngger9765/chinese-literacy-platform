@@ -125,6 +125,15 @@ export interface StudentAssignmentResponse extends ReadingGoals {
   session_id: number | null;
   current_step: string | null;
   steps_completed: string[];
+  /**
+   * Issue #3682 — this lesson's own step order (null for lessons without one,
+   * e.g. DB-authored/forked texts). Use `resolveActiveSteps(step_sequence)`
+   * instead of the global `ACTIVE_STEPS` default when computing this
+   * assignment's progress count — round-keyed multi-part step ids
+   * (`key-passage-reading#4uee3`, #2916) only resolve correctly against this
+   * lesson's own sequence.
+   */
+  step_sequence: string[] | null;
   submitted_at: string | null;
   score: number | null;
   /** Per-student teacher feedback visible to the student (Issue #424). */

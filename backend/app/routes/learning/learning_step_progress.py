@@ -18,6 +18,7 @@ from ...database import get_db
 from ...models.session import LearningSession
 from ...models.user import User
 from ...schemas.session import StepProgressResponse, StepProgressSaveRequest, parse_step_progress
+from ...services.assignment_session_service import maybe_auto_submit_assignment_session
 # DEPRECATED (#1182): _STEP_KEY_TO_NUM / _MAX_STEP_NUM / _normalize_step_key were used
 # to sync the integer current_step column. Sync removed; imports no longer needed here.
 
@@ -151,6 +152,16 @@ def save_step_progress(
         session_id, current_user.id, payload.current_step, len(payload.steps_completed),
         xp_awarded, badges_unlocked,
     )
+
+    # Issue #3682 — auto-submit a linked assignment the moment every required
+    # step is reported complete, without relying on the frontend's sessionStorage
+    # still knowing this is an assignment session (that's exactly what goes
+    # missing in a new tab / browser restart / resuming days later — the
+    # bug this fixes). Safe no-op for self-practice sessions and for sessions
+    # already submitted/graded — see maybe_auto_submit_assignment_session.
+    if payload.assignment_ready_for_submit:
+        maybe_auto_submit_assignment_session(session_id, db)
+
     return StepProgressResponse(
         session_id=session.id,
         step_progress=session.step_progress,

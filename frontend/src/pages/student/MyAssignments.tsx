@@ -12,7 +12,7 @@ import {
   fetchMyEnrolledClassrooms,
   type StudentEnrolledClassroom,
 } from '../../services/learningApi';
-import { ACTIVE_STEPS } from '../../config/stepConfig';
+import { filterRequiredAssignmentSteps, resolveActiveSteps, type StepConfig } from '../../config/stepConfig';
 import { writeAssignmentSessionContext } from '../../utils/assignmentSessionContext';
 import AssignmentCard from './AssignmentCard';
 import AssignmentFilters, { type FilterTab } from './AssignmentFilters';
@@ -31,9 +31,28 @@ const MyAssignments: React.FC = () => {
   const [startingId, setStartingId] = useState<number | null>(null);
   const [classroomFilter, setClassroomFilter] = useState<string>('all');
 
-  const assignmentSteps = useMemo(() => ACTIVE_STEPS, []);
-  const defaultStepPath = assignmentSteps[0]?.id ?? 'full-text-annotate';
-  const stepIdSet = useMemo(() => new Set(assignmentSteps.map((s) => s.id)), [assignmentSteps]);
+  // Issue #3682 — this used to be a single global `ACTIVE_STEPS` list
+  // (resolveActiveSteps() called with no step_sequence, i.e. always the
+  // DEFAULT_STEP_SEQUENCE), applied to every assignment regardless of which
+  // lesson it actually used. A lesson with its own `step_sequence` — in
+  // particular a multi-part lesson whose round-keyed step ids look like
+  // `key-passage-reading#4uee3` (#2916/#2930) — has NO overlap with that
+  // global list, so `steps_completed` entries for it never matched and the
+  // card showed "0/11" or "1/11" for a student who had finished most or all
+  // of the real steps. Resolve per-assignment instead.
+  const getAssignmentSteps = useCallback(
+    (a: StudentAssignmentResponse): StepConfig[] => resolveActiveSteps(a.step_sequence),
+    [],
+  );
+
+  // The denominator/numerator shown as "學習關卡進度 N/M" must be the SAME
+  // required-step list that decides isAssignmentReadyForSubmit
+  // (useStepProgressPersistence.ts) — excluding 'lesson-intro'/'report' — or
+  // "8 done, ready to submit" could still render as "8/11" instead of "8/8".
+  const getAssignmentProgressSteps = useCallback(
+    (a: StudentAssignmentResponse): StepConfig[] => filterRequiredAssignmentSteps(getAssignmentSteps(a)),
+    [getAssignmentSteps],
+  );
 
   // Build classroom name -> teacher name lookup
   const classroomTeacherMap = useMemo(() => {
@@ -45,37 +64,39 @@ const MyAssignments: React.FC = () => {
   }, [classrooms]);
 
   const getCompletedSteps = (a: StudentAssignmentResponse): Set<string> => {
+    const progressSteps = getAssignmentProgressSteps(a);
     if (a.status === 'submitted' || a.status === 'graded') {
-      return new Set(assignmentSteps.map((step) => step.id));
+      return new Set(progressSteps.map((step) => step.id));
     }
+    const stepIdSet = new Set(progressSteps.map((s) => s.id));
     return new Set(
       (a.steps_completed ?? []).filter((stepKey) => stepIdSet.has(stepKey)),
     );
   };
 
   const getResumeStepPath = (a: StudentAssignmentResponse): string => {
-    // Issue #3682 fix C（production root cause）：一課多篇時 `a.current_step`
-    // 現在正確存成 `comprehension#pjhxh` 這種帶輪次的複合 key（見
-    // useStepProgressPersistence.saveStepProgressPatch 的 #3682 修法），但
-    // `stepIdSet` 是從全站共用、不分輪次的 `ACTIVE_STEPS` 建的，裡面只有
-    // bare id。拿複合 key 直接去對只有 bare id 的集合，查一次就落空，
-    // 「繼續」因此永遠退回第一步，連帶把輪次整個弄丟——這正是
-    // recheck-prod.log case (b) 的根因：落地網址沒有 `?p=`。
+    // #2916/#3682 fix C — a.current_step can be a composite round key
+    // (`comprehension#pjhxh`) for multi-part lessons. The progress-wipe fix
+    // (#3693) worked around this by stripping the round slug and checking
+    // only the base id + a syntactic slug shape, because back then
+    // `stepIdSet` was still built from the GLOBAL `ACTIVE_STEPS` list (bare
+    // ids only, see the comment on getAssignmentSteps above) — the real
+    // composite id could never be a member of it.
     //
-    // 修法：成員檢查改比對「拿掉輪次後的 base id」，回傳值仍然是原始、
-    // 可能帶輪次的 `a.current_step`，輪次才能一路活著傳進
-    // stepPath()（它本來就看得懂 `base#slug` → `?p=`）。
-    if (a.current_step) {
-      const hashIdx = a.current_step.indexOf('#');
-      const baseId = hashIdx < 0 ? a.current_step : a.current_step.slice(0, hashIdx);
-      const slug = hashIdx < 0 ? null : a.current_step.slice(hashIdx + 1);
-      // The slug ends up in the resume URL, so only accept the shape real
-      // passage slugs have; anything else falls back to the first step.
-      if (stepIdSet.has(baseId) && (slug === null || /^[A-Za-z0-9_-]{1,32}$/.test(slug))) {
-        return a.current_step;
-      }
+    // That workaround is unneeded now that `steps` is resolved from THIS
+    // assignment's own step_sequence (#3697): a genuinely current composite
+    // id (the same one a round-aware step page would have written) is
+    // already an exact member of `stepIdSet`, so a plain exact match both
+    // covers that case AND — unlike the syntactic-only check — correctly
+    // falls through to the first step for a stale/renamed round slug left
+    // over from a content edit, rather than accepting it just because it
+    // "looks like" a slug.
+    const steps = getAssignmentSteps(a);
+    const stepIdSet = new Set(steps.map((s) => s.id));
+    if (a.current_step && stepIdSet.has(a.current_step)) {
+      return a.current_step;
     }
-    return defaultStepPath;
+    return steps[0]?.id ?? 'full-text-annotate';
   };
 
   const loadData = useCallback(async () => {
@@ -154,7 +175,12 @@ const MyAssignments: React.FC = () => {
         },
         sessionId: result.session_id,
       });
-      navigate(buildStepPath(textKey, defaultStepPath));
+      // #3682 — first step of THIS lesson's own sequence, not the global default
+      // (StartAssignmentResponse doesn't carry step_sequence; look up the
+      // already-loaded list entry, which does).
+      const original = assignments.find((x) => x.assignment_id === assignmentId);
+      const firstStepPath = resolveActiveSteps(original?.step_sequence)[0]?.id ?? 'full-text-annotate';
+      navigate(buildStepPath(textKey, firstStepPath));
     } catch (err) {
       if (err instanceof AssignmentApiError) {
         setError(err.message);
@@ -309,7 +335,7 @@ const MyAssignments: React.FC = () => {
               <AssignmentCard
                 key={a.assignment_id}
                 assignment={a}
-                steps={assignmentSteps}
+                steps={getAssignmentProgressSteps(a)}
                 completedSteps={getCompletedSteps(a)}
                 currentStepPath={a.status === 'in_progress' ? getResumeStepPath(a) : null}
                 teacherName={classroomTeacherMap.get(a.classroom_name)}
