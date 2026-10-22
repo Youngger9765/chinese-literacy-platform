@@ -44,7 +44,7 @@ from sqlalchemy.pool import StaticPool
 from app.main import app
 from app.database import get_db
 from app.models import Base
-from app.models.assignment import AssignmentSubmission
+from app.models.assignment import Assignment, AssignmentSubmission
 from app.models.session import LearningSession
 from app.models.school import School
 from app.models.user import Role, UserRole
@@ -250,6 +250,24 @@ def _learning_session(session_id: int) -> LearningSession:
         db.close()
 
 
+# Issue #3695 integrity follow-up (team-lead review): the backend no longer
+# trusts assignment_ready_for_submit outright — it independently re-verifies
+# against this assignment's OWN required steps (compute_required_step_ids_for_assignment),
+# loaded from the real lesson data for story_id (these "2010x" numbers ARE
+# real seeded lessons, each with its own round-keyed step_sequence — NOT the
+# DEFAULT_REQUIRED_STEP_IDS fallback, which only applies when a lesson has no
+# custom sequence at all). A test that claims "every required step done" for
+# a given story must send that lesson's actual round-keyed ids, so this helper
+# reuses the real production function (a transient, unpersisted Assignment is
+# enough — the function only reads .story_id/.text_id) instead of
+# reimplementing the lookup.
+from app.services.assignment_queries import compute_required_step_ids_for_assignment
+
+
+def _required_steps_for_story(story_id: str) -> list[str]:
+    return compute_required_step_ids_for_assignment(Assignment(story_id=story_id))
+
+
 # ---------------------------------------------------------------------------
 # The core regression: completion via progress-save alone, no /submit call
 # ---------------------------------------------------------------------------
@@ -272,7 +290,7 @@ class TestAutoSubmitWithoutManualSubmitCall:
             f"/api/learning/sessions/{session_id}/progress",
             json={
                 "current_step": "report",
-                "steps_completed": ["full-text-annotate", "comprehension", "report"],
+                "steps_completed": _required_steps_for_story("20101") + ["report"],
                 "step_data": {},
                 "assignment_ready_for_submit": True,
             },
@@ -287,6 +305,112 @@ class TestAutoSubmitWithoutManualSubmitCall:
         session = _learning_session(session_id)
         assert session.status == "completed"
         assert session.completed_at is not None
+
+    def test_flag_true_with_missing_required_steps_does_not_submit(self, client, teacher):
+        """Issue #3695 integrity follow-up (team-lead review): the client's
+        assignment_ready_for_submit flag must be a HINT only, never trusted
+        outright. A student who completes one real step and then forges the
+        flag must get a silent no-op, not a submission — the backend has to
+        independently verify the session's own stored steps_completed covers
+        this assignment's REAL required steps (loaded server-side from the
+        lesson data), not whatever the client claims."""
+        student, classroom_id = _create_classroom_with_student(client, teacher, "missingsteps")
+        assignment_id = _create_assignment(client, teacher, classroom_id, "20102")
+        session_id = _start_assignment(client, student, assignment_id)
+
+        required = _required_steps_for_story("20102")
+        assert len(required) > 1, "fixture assumption: story 20102 needs more than one step"
+
+        resp = client.put(
+            f"/api/learning/sessions/{session_id}/progress",
+            json={
+                "current_step": required[0],
+                # Only the FIRST required step is actually done; the flag lies.
+                "steps_completed": [required[0]],
+                "step_data": {},
+                "assignment_ready_for_submit": True,
+            },
+            headers=auth_header(student["token"]),
+        )
+        assert resp.status_code == 200, resp.text
+        assert _submission_for_session(session_id).status == "in_progress", (
+            "a forged ready=True flag with genuinely missing steps must not submit"
+        )
+
+        # Completing the rest for real (still carrying the flag) must then submit —
+        # proves this isn't "never submits", only "doesn't trust the flag alone".
+        resp2 = client.put(
+            f"/api/learning/sessions/{session_id}/progress",
+            json={
+                "current_step": required[-1],
+                "steps_completed": required,
+                "step_data": {},
+                "assignment_ready_for_submit": True,
+                "version": 1,
+            },
+            headers=auth_header(student["token"]),
+        )
+        assert resp2.status_code == 200, resp2.text
+        assert _submission_for_session(session_id).status == "submitted"
+
+    def test_bare_step_id_satisfies_a_single_passage_lessons_requirement(self, client, teacher):
+        """A student (or a direct API caller, same as the staging recheck)
+        whose steps_completed uses bare ids still submits for a lesson whose
+        own step_sequence is round-keyed, AS LONG AS each base id is
+        unambiguous (exactly one round per base) — mirrors
+        stepConfig.ts stepIdMatchesCompleted's backward-compat shim, verified
+        server-side too now."""
+        student, classroom_id = _create_classroom_with_student(client, teacher, "barematch")
+        assignment_id = _create_assignment(client, teacher, classroom_id, "20102")
+        session_id = _start_assignment(client, student, assignment_id)
+
+        required = _required_steps_for_story("20102")
+        bare_ids = sorted({(r.split("#")[0] if "#" in r else r) for r in required})
+        assert len(bare_ids) == len(required), "fixture assumption: story 20102 has no repeated base id"
+
+        resp = client.put(
+            f"/api/learning/sessions/{session_id}/progress",
+            json={
+                "current_step": bare_ids[-1],
+                "steps_completed": bare_ids,  # bare, no round slugs at all
+                "step_data": {},
+                "assignment_ready_for_submit": True,
+            },
+            headers=auth_header(student["token"]),
+        )
+        assert resp.status_code == 200, resp.text
+        assert _submission_for_session(session_id).status == "submitted"
+
+    def test_bare_step_id_does_not_satisfy_an_ambiguous_multi_round_requirement(self, client, teacher):
+        """The flip side: a multi-passage lesson where TWO rounds share the
+        same base id (e.g. full-text-annotate#33uhx AND full-text-annotate#r4d9j)
+        must NOT let one bare 'full-text-annotate' entry silently satisfy both —
+        that would under-count real work and submit early."""
+        student, classroom_id = _create_classroom_with_student(client, teacher, "ambiguous")
+        assignment_id = _create_assignment(client, teacher, classroom_id, "20111")
+        session_id = _start_assignment(client, student, assignment_id)
+
+        required = _required_steps_for_story("20111")
+        bases = [r.split("#")[0] if "#" in r else r for r in required]
+        dup_bases = {b for b in bases if bases.count(b) > 1}
+        assert dup_bases, "fixture assumption: story 20111 has at least one repeated base id"
+
+        resp = client.put(
+            f"/api/learning/sessions/{session_id}/progress",
+            json={
+                "current_step": "comprehension",
+                # Every base id present exactly once (bare) — satisfies the
+                # non-ambiguous ones, but NOT the duplicated bases.
+                "steps_completed": sorted(set(bases)),
+                "step_data": {},
+                "assignment_ready_for_submit": True,
+            },
+            headers=auth_header(student["token"]),
+        )
+        assert resp.status_code == 200, resp.text
+        assert _submission_for_session(session_id).status == "in_progress", (
+            "a bare id must not resolve an ambiguous (2+ round) base requirement"
+        )
 
     def test_progress_save_without_the_flag_does_not_submit(self, client, teacher):
         """Sanity / backward-compat: a save that does NOT claim readiness
@@ -317,7 +441,7 @@ class TestAutoSubmitWithoutManualSubmitCall:
 
         body = {
             "current_step": "report",
-            "steps_completed": ["full-text-annotate", "comprehension", "report"],
+            "steps_completed": _required_steps_for_story("20103") + ["report"],
             "step_data": {},
             "assignment_ready_for_submit": True,
         }
