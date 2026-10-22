@@ -1,8 +1,8 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import type { AuthUser } from '../services/authApi';
 import { clearActiveSession, saveActiveSession } from '../services/api';
-import { resolveActiveSteps, STEP_PATH_TO_NUMBER } from '../config/stepConfig';
+import { resolveActiveSteps, stepIdMatchesCompleted, STEP_PATH_TO_NUMBER } from '../config/stepConfig';
 import { useProgressSync } from './useProgressSync';
 import type { StepProgressData } from '../services/learningApi';
 import type {
@@ -79,6 +79,32 @@ interface UseStepProgressPersistenceReturn {
   dismissMidSessionBadgeUnlocks: () => void;
 }
 
+/**
+ * Merge progress loaded from the server into what the page already holds.
+ *
+ * Issue #3694: when two saves race, the losing one gets a 409 and the page
+ * reloads progress from the server. That reload can return a snapshot taken
+ * before the winning save landed, so replacing local state with it erased a
+ * step the student had just finished; the page then asked them to redo it
+ * even though the server (which only ever adds completed steps) still had it.
+ * Completed steps therefore only grow here too, and step data the page
+ * already has for a step wins over the loaded copy.
+ */
+export function mergeLoadedStepProgress(
+  local: StepProgressData,
+  loaded: StepProgressData,
+): StepProgressData {
+  const completed = [...(loaded.steps_completed ?? [])];
+  for (const id of local.steps_completed ?? []) {
+    if (!completed.includes(id)) completed.push(id);
+  }
+  return {
+    current_step: loaded.current_step ?? local.current_step ?? null,
+    steps_completed: completed,
+    step_data: { ...(loaded.step_data ?? {}), ...(local.step_data ?? {}) },
+  };
+}
+
 export function useStepProgressPersistence({
   storyId,
   user,
@@ -153,6 +179,9 @@ export function useStepProgressPersistence({
     steps_completed: [],
     step_data: {},
   });
+  // Latest progress for the load handler below, which runs from async callbacks.
+  const stepProgressStateRef = useRef(stepProgressState);
+  useEffect(() => { stepProgressStateRef.current = stepProgressState; }, [stepProgressState]);
 
   const lessonActiveSteps = useMemo(
     () => resolveActiveSteps(selectedStory?.stepSequence),
@@ -173,10 +202,17 @@ export function useStepProgressPersistence({
     () => new Set(stepProgressState.steps_completed ?? []),
     [stepProgressState.steps_completed],
   );
-  const missingAssignmentSteps = useMemo(
-    () => requiredAssignmentSteps.filter((s) => !completedStepsSet.has(s.id)),
-    [requiredAssignmentSteps, completedStepsSet],
-  );
+  const missingAssignmentSteps = useMemo(() => {
+    // #3682 fix C (part 3) — a legacy bare completion entry (saved before
+    // the write-path fix started keying current_step/steps_completed
+    // correctly) must still satisfy a now-composite requirement when there
+    // is no ambiguity about which round it was for. See
+    // stepIdMatchesCompleted's own doc comment for why.
+    const requiredIds = requiredAssignmentSteps.map((s) => s.id);
+    return requiredAssignmentSteps.filter(
+      (s) => !stepIdMatchesCompleted(s.id, completedStepsSet, requiredIds),
+    );
+  }, [requiredAssignmentSteps, completedStepsSet]);
   const isAssignmentReadyForSubmit = missingAssignmentSteps.length === 0;
   const firstIncompleteStepPath = missingAssignmentSteps[0]?.id ?? 'full-text-annotate';
   const hasActiveAssignment = useMemo(() => {
@@ -202,14 +238,16 @@ export function useStepProgressPersistence({
       }
     },
     onProgressLoaded: (data) => {
-      const loadedCompleted = Array.isArray(data.steps_completed) ? data.steps_completed : [];
       const loadedStepData = (data.step_data ?? {}) as Record<string, unknown>;
-
-      setStepProgressState({
+      // Never let a reload drop a step this page already completed (#3694).
+      const merged = mergeLoadedStepProgress(stepProgressStateRef.current, {
         current_step: data.current_step ?? null,
-        steps_completed: loadedCompleted,
+        steps_completed: Array.isArray(data.steps_completed) ? data.steps_completed : [],
         step_data: loadedStepData,
       });
+      const loadedCompleted = merged.steps_completed;
+      stepProgressStateRef.current = merged;
+      setStepProgressState(merged);
 
       if (loadedStepData.tutor) {
         const tutorData = loadedStepData.tutor as Record<string, unknown>;
@@ -313,9 +351,20 @@ export function useStepProgressPersistence({
       // 這裡補上網址帶的輪次；單篇課沒有 `#`，keyed === stepId，行為不變（#2930）。
       const k = opts.currentStepKey ?? '';
       const keyed = k.startsWith(`${opts.stepId}#`) ? k : opts.stepId;
+      // Issue #3682 fix C（production root cause）：每個步驟頁呼叫這支時，
+      // `currentStep` 傳的也是寫死的 bare id（跟 `opts.stepId` 一模一樣）——
+      // 從來沒有人把輪次補上去。於是 `step_progress.current_step` 永遠是
+      // bare 的，「班級作業→繼續」讀到它組網址時自然沒有 `?p=`，回到的頁
+      // 讀不到輪次，這一步的完成紀錄也跟著存成 bare key，永遠對不上這堂課
+      // 真正要求的 `base#slug`（recheck-prod.log case (b)）。
+      //
+      // 修法：caller 回報的就是「自己這一步」時（絕大多數真實呼叫都是這
+      // 樣——`currentStep === stepId`），一併套用已經算好的 `keyed`；呼叫端
+      // 明確指向別的步驟（例如完成後轉場到下一步）時維持原樣，不覆蓋。
+      const keyedCurrentStep = opts.currentStep === opts.stepId ? keyed : opts.currentStep;
       persistStepProgressState(
         {
-          currentStep: opts.currentStep,
+          currentStep: keyedCurrentStep,
           completeStep: opts.markCompleted ? keyed : undefined,
           stepDataPatch: {
             [keyed]: {
@@ -429,6 +478,11 @@ export function useStepProgressPersistence({
             paragraph_summaries_data: {},
           },
         },
+        // Issue #3682 follow-up (team-lead review): the server's steps_completed
+        // is now a monotonic union — simply omitting 'paragraph-reading' here
+        // would get it silently re-added from stored data. reset_steps makes
+        // this a DELIBERATE un-complete the server must honor, not a race.
+        reset_steps: ['paragraph-reading'],
       };
       flushProgress(next); // immediate — the student may navigate right after
       return next;

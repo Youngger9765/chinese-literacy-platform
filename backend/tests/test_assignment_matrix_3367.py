@@ -397,6 +397,23 @@ class TestStudentAssignments:
         r3 = self._get(client, teacher["token"], seeded["cid"], s3).json()["rows"]
         assert {r["state"] for r in r3} == {"not_assigned"}
 
+    def test_in_progress_row_carries_session_id_issue_3682(self, client, teacher, seeded):
+        """A student stuck mid-lesson (in_progress, never submitted) must still
+        carry session_id — that's what the teacher UI needs to link to the
+        page that shows what they've actually answered so far. Issue #3682:
+        before this fix the row had no session_id at all, so there was no
+        way to reach that page for anyone who hadn't finished."""
+        s1 = seeded["ids"][1]
+        r1 = {r["assignment_id"]: r for r in self._get(client, teacher["token"], seeded["cid"], s1).json()["rows"]}
+        assert r1[seeded["a1"]]["session_id"] is not None
+
+    def test_pending_row_session_id_is_null(self, client, teacher, seeded):
+        """A student who never started has no session to link to."""
+        s2 = seeded["ids"][2]
+        r2 = {r["assignment_id"]: r for r in self._get(client, teacher["token"], seeded["cid"], s2).json()["rows"]}
+        assert r2[seeded["a1"]]["state"] == "not_started"
+        assert r2[seeded["a1"]]["session_id"] is None
+
     def test_other_teacher_and_student_cannot_read(self, client, other_teacher, students, seeded):
         s0 = seeded["ids"][0]
         assert self._get(client, other_teacher["token"], seeded["cid"], s0).status_code == 403

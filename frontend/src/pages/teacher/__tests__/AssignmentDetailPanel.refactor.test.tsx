@@ -18,7 +18,12 @@
 
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render as rtlRender, screen, fireEvent } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+
+// Issue #3682: AssignmentSubmissionTable's AnswerRecordLink renders a
+// react-router <Link>, so every render in this file needs a router context.
+const render = (ui: React.ReactElement) => rtlRender(<MemoryRouter>{ui}</MemoryRouter>);
 
 // ─── Pre-refactor: import from the monolithic panel. After refactor, these will
 // point at the extracted files. The test itself does NOT change.
@@ -62,6 +67,7 @@ function makeSubmission(overrides: Partial<SubmissionResponse> = {}): Submission
     reading_cpm: null,
     reading_error_chars: [],
     teacher_feedback: null,
+    session_id: null,
     ...overrides,
   };
 }
@@ -77,6 +83,7 @@ function makeAttempt(overrides: Partial<AttemptResponse> = {}): AttemptResponse 
     reading_cpm: null,
     reading_error_chars: [],
     teacher_feedback: null,
+    session_id: null,
     ...overrides,
   };
 }

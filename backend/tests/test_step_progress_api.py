@@ -271,8 +271,16 @@ def test_save_progress_nonexistent_session(client, student):
     assert resp.status_code == 404
 
 
-def test_save_progress_empty_payload(client, student, session_id):
-    """Empty progress payload is valid (resets to empty state)."""
+def test_save_progress_empty_steps_completed_does_not_wipe_prior_progress(client, student, session_id):
+    """Issue #3682 production root cause: a PUT with steps_completed=[] must
+    NEVER erase previously-completed steps. This happens for real when a
+    student reopens a lesson and the page fires an early save with the
+    initial (empty) local state before the GET-loaded progress has been
+    applied — see learning_step_progress.py's monotonic-union fix.
+
+    current_step and step_data for keys present in the payload still update
+    normally (this test only locks that steps_completed never shrinks).
+    """
     empty = {"current_step": None, "steps_completed": [], "step_data": {}}
     resp = client.put(
         f"/api/learning/sessions/{session_id}/progress",
@@ -282,8 +290,182 @@ def test_save_progress_empty_payload(client, student, session_id):
     assert resp.status_code == 200
     sp = resp.json()["step_progress"]
     assert sp["current_step"] is None
-    assert sp["steps_completed"] == []
-    assert sp["step_data"] == {}
+    # The bug: this used to be [] here, wiping "reading-annotation" and "tutor"
+    # that test_save_progress_overwrites (earlier in this file) had already saved.
+    assert sp["steps_completed"] == ["reading-annotation", "tutor"]
+
+
+def test_explicit_reset_steps_removes_a_deliberately_un_completed_step(client, student, fresh_session_id):
+    """Issue #3682 follow-up (team-lead review): the monotonic-union fix for
+    steps_completed must not silently undo a DELIBERATE un-complete, such as
+    useStepProgressPersistence.resetTutorStep's 「再讀一次」 redo flow (#2532/
+    #2533), which removes 'paragraph-reading' from steps_completed on purpose
+    so the student can retry it.
+
+    A blind union would re-add it right back from the stored data, since the
+    client's payload simply omits it (indistinguishable, under a blind union,
+    from the #3682 premature-empty-save race this fix exists to guard
+    against). The `reset_steps` field makes the removal EXPLICIT so the
+    server can tell the two apart: anything named in `reset_steps` is
+    dropped from the stored list even though the union would otherwise keep
+    it, and (unlike a plain omission) is NOT re-added just because it's
+    still missing from this same payload's steps_completed.
+    """
+    first = {
+        "current_step": "tutor",
+        "steps_completed": ["paragraph-reading", "character-practice"],
+        "step_data": {
+            "tutor": {"readingAttempt": {"accuracy": 0.98, "cpm": 120}},
+        },
+    }
+    resp1 = client.put(
+        f"/api/learning/sessions/{fresh_session_id}/progress",
+        json=first,
+        headers=auth_header(student["token"]),
+    )
+    assert resp1.status_code == 200, resp1.text
+    assert set(resp1.json()["step_progress"]["steps_completed"]) == {
+        "paragraph-reading",
+        "character-practice",
+    }
+
+    reset_payload = {
+        "current_step": "paragraph-reading",
+        "steps_completed": ["character-practice"],
+        "step_data": {"tutor": {"readingAttempt": None, "completed_paragraphs": []}},
+        "reset_steps": ["paragraph-reading"],
+    }
+    resp2 = client.put(
+        f"/api/learning/sessions/{fresh_session_id}/progress",
+        json=reset_payload,
+        headers=auth_header(student["token"]),
+    )
+    assert resp2.status_code == 200, resp2.text
+    sp = resp2.json()["step_progress"]
+    # The explicitly-reset step must actually be gone — not silently
+    # resurrected by the union.
+    assert sp["steps_completed"] == ["character-practice"]
+    # Untouched sibling step must survive (this is still otherwise monotonic).
+    assert "character-practice" in sp["steps_completed"]
+
+
+def test_plain_save_without_reset_steps_still_never_removes_anything(client, student, fresh_session_id):
+    """Regression guard for the fix above: a save that does NOT name
+    anything in reset_steps must remain exactly as monotonic as before —
+    omitting reset_steps (or sending an empty list) must not accidentally
+    start removing steps again."""
+    first = {
+        "current_step": "tutor",
+        "steps_completed": ["paragraph-reading"],
+        "step_data": {},
+    }
+    client.put(
+        f"/api/learning/sessions/{fresh_session_id}/progress",
+        json=first,
+        headers=auth_header(student["token"]),
+    )
+
+    plain = {
+        "current_step": "character-practice",
+        "steps_completed": [],  # the #3682 premature-save shape — no reset_steps named
+        "step_data": {},
+    }
+    resp = client.put(
+        f"/api/learning/sessions/{fresh_session_id}/progress",
+        json=plain,
+        headers=auth_header(student["token"]),
+    )
+    assert resp.status_code == 200, resp.text
+    assert resp.json()["step_progress"]["steps_completed"] == ["paragraph-reading"]
+
+
+def test_reset_step_can_be_re_completed_afterwards(client, student, fresh_session_id):
+    """After an explicit reset, the student redoing the step must be able to
+    mark it complete again (the reset must not be "sticky" / permanently
+    block that step id from steps_completed)."""
+    client.put(
+        f"/api/learning/sessions/{fresh_session_id}/progress",
+        json={"current_step": "tutor", "steps_completed": ["paragraph-reading"], "step_data": {}},
+        headers=auth_header(student["token"]),
+    )
+    client.put(
+        f"/api/learning/sessions/{fresh_session_id}/progress",
+        json={
+            "current_step": "paragraph-reading",
+            "steps_completed": [],
+            "step_data": {},
+            "reset_steps": ["paragraph-reading"],
+        },
+        headers=auth_header(student["token"]),
+    )
+    resp = client.put(
+        f"/api/learning/sessions/{fresh_session_id}/progress",
+        json={"current_step": "tutor", "steps_completed": ["paragraph-reading"], "step_data": {}},
+        headers=auth_header(student["token"]),
+    )
+    assert resp.status_code == 200, resp.text
+    assert resp.json()["step_progress"]["steps_completed"] == ["paragraph-reading"]
+
+
+def test_reset_and_recomplete_in_the_same_request_keeps_it_completed(client, student, fresh_session_id):
+    """Overlap edge case (critic-agent review): a SINGLE request can legally
+    name a step in BOTH `reset_steps` AND `steps_completed` at once — e.g.
+    resetTutorStep fires a reset, then the student immediately re-finishes
+    the same step before the next save (both could, in principle, coalesce
+    into one PUT). Completion must win: the step ends up completed, not
+    stuck removed, when both are asserted in the same payload."""
+    client.put(
+        f"/api/learning/sessions/{fresh_session_id}/progress",
+        json={"current_step": "tutor", "steps_completed": ["paragraph-reading"], "step_data": {}},
+        headers=auth_header(student["token"]),
+    )
+    resp = client.put(
+        f"/api/learning/sessions/{fresh_session_id}/progress",
+        json={
+            "current_step": "tutor",
+            "steps_completed": ["paragraph-reading"],
+            "step_data": {},
+            "reset_steps": ["paragraph-reading"],
+        },
+        headers=auth_header(student["token"]),
+    )
+    assert resp.status_code == 200, resp.text
+    assert resp.json()["step_progress"]["steps_completed"] == ["paragraph-reading"]
+
+
+def test_save_progress_merges_step_data_per_key_not_full_overwrite(client, student, fresh_session_id):
+    """Issue #3682: step_data must merge per step key, not replace wholesale.
+    A save that only includes one step's data must not erase another step's
+    previously-saved data."""
+    first = {
+        "current_step": "reading-annotation",
+        "steps_completed": ["reading-annotation"],
+        "step_data": {"reading-annotation": {"totalMarks": 3}},
+    }
+    resp1 = client.put(
+        f"/api/learning/sessions/{fresh_session_id}/progress",
+        json=first,
+        headers=auth_header(student["token"]),
+    )
+    assert resp1.status_code == 200, resp1.text
+
+    second = {
+        "current_step": "tutor",
+        "steps_completed": ["tutor"],
+        "step_data": {"tutor": {"lineResults": []}},
+    }
+    resp2 = client.put(
+        f"/api/learning/sessions/{fresh_session_id}/progress",
+        json=second,
+        headers=auth_header(student["token"]),
+    )
+    assert resp2.status_code == 200, resp2.text
+    sp = resp2.json()["step_progress"]
+    # Both steps' data must be present — the second save must not have erased
+    # the first step's data just because this payload didn't mention it.
+    assert sp["step_data"]["reading-annotation"] == {"totalMarks": 3}
+    assert sp["step_data"]["tutor"] == {"lineResults": []}
+    assert set(sp["steps_completed"]) == {"reading-annotation", "tutor"}
 
 
 # ---------------------------------------------------------------------------
@@ -450,3 +632,21 @@ def test_midsession_step_complete_does_not_block_session_complete_settlement(
         "Mid-session step_complete XP incorrectly suppressed the "
         f"session_complete settlement. Got breakdown: {body['xp_breakdown']!r}"
     )
+
+
+def test_save_progress_rejects_oversized_payloads(client, student, fresh_session_id):
+    """Issue #3682: steps_completed is a monotonic union, so whatever a client
+    writes there is permanent. Oversized lists, keys or ids are rejected with
+    422 before anything is stored."""
+    url = f"/api/learning/sessions/{fresh_session_id}/progress"
+    too_many = {"current_step": None, "steps_completed": [f"s{i}" for i in range(201)], "step_data": {}}
+    too_many_keys = {"current_step": None, "steps_completed": [], "step_data": {f"k{i}": {} for i in range(201)}}
+    too_long = {"current_step": "x" * 129, "steps_completed": [], "step_data": {}}
+    for body in (too_many, too_many_keys, too_long):
+        resp = client.put(url, json=body, headers=auth_header(student["token"]))
+        assert resp.status_code == 422, body.keys()
+
+    ok = {"current_step": "vocab-definition#64nww", "steps_completed": ["vocab-definition#64nww"], "step_data": {}}
+    resp = client.put(url, json=ok, headers=auth_header(student["token"]))
+    assert resp.status_code == 200
+    assert resp.json()["step_progress"]["steps_completed"] == ["vocab-definition#64nww"]

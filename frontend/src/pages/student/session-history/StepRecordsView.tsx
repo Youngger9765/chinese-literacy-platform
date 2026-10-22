@@ -38,25 +38,52 @@ export const StepRecordsView: React.FC<StepRecordsViewProps> = ({
   loadDialogue,
 }) => {
   const [turns, setTurns] = useState<DialogueTurnItem[]>([]);
-  const [loadingTurns, setLoadingTurns] = useState(false);
+  const [loadingTurns, setLoadingTurns] = useState(true);
+  const [dialogueChecked, setDialogueChecked] = useState(false);
 
+  // Issue #3682: this used to be gated on `detail.comprehension_result`, but no
+  // current step component ever writes that scalar column — the real
+  // conversation lives in the DialogueTurn table from the moment the student
+  // answers the first question, independent of whether the session (or even
+  // just the comprehension step) has finished. Gating the fetch on a column
+  // that's always null meant this dialogue call never actually ran in
+  // production, so a student's already-given answers were invisible even
+  // while they were mid-conversation. Always check; whether anything renders
+  // is decided below by what actually comes back, not by that dead column.
   useEffect(() => {
-    if (!detail.comprehension_result) return;
     setLoadingTurns(true);
+    setDialogueChecked(false);
     const load = loadDialogue ?? (() => fetchDialogueHistory(token, sessionId).then((r) => r.turns));
     load()
       .then(setTurns)
       .catch(() => {
         /* non-critical */
       })
-      .finally(() => setLoadingTurns(false));
-  }, [token, sessionId, loadDialogue, detail.comprehension_result]);
+      .finally(() => {
+        setLoadingTurns(false);
+        setDialogueChecked(true);
+      });
+  }, [token, sessionId, loadDialogue]);
 
   const hasReading = !!detail.reading_result;
   const hasKeyPassageReading = !!detail.full_reading_result;
-  const hasComprehension = !!detail.comprehension_result;
+  // Keep the legacy field as a fallback (older sessions may still carry it),
+  // but real turns are the signal that actually reflects current step code.
+  const hasComprehension = !!detail.comprehension_result || turns.length > 0;
   const hasVocab = !!detail.vocab_result;
   const hasAny = hasReading || hasKeyPassageReading || hasComprehension || hasVocab;
+
+  // The dialogue check is the only async gate here — if it's still in flight
+  // and nothing else has data yet, wait for it instead of flashing "尚無作答
+  // 紀錄" and then yanking it away once turns arrive.
+  if (!hasAny && !dialogueChecked) {
+    return (
+      <div className="space-y-2" aria-label="作答紀錄載入中">
+        <div className="h-4 bg-gray-200 animate-pulse rounded w-1/3" />
+        <div className="h-20 bg-gray-100 animate-pulse rounded-xl" />
+      </div>
+    );
+  }
 
   if (!hasAny) {
     return (

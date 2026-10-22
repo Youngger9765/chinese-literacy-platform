@@ -92,6 +92,13 @@ class SubmissionResponse(BaseModel):
     reading_cpm: float | None = None         # chars per minute from reading_result
     reading_error_chars: list[str] = []      # mispronounced/skipped chars
     teacher_feedback: str | None = None  # per-student teacher feedback (Issue #424)
+    # Issue #3682: the linked LearningSession id, set as soon as the student
+    # starts (not only once they submit). Without this the teacher's
+    # assignment screen has no way to link to the one page that already
+    # shows a student's recorded step-by-step progress
+    # (/teacher/students/{id}/sessions/{id}/report), so a student stuck
+    # mid-lesson is completely invisible there.
+    session_id: int | None = None
 
     model_config = {"from_attributes": True}
 
@@ -142,6 +149,8 @@ class AttemptResponse(BaseModel):
     reading_cpm: float | None = None
     reading_error_chars: list[str] = []
     teacher_feedback: str | None = None
+    # Issue #3682 — same reasoning as SubmissionResponse.session_id above.
+    session_id: int | None = None
 
     model_config = {"from_attributes": True}
 

@@ -68,6 +68,14 @@ export interface SubmissionResponse {
   reading_error_chars: string[];
   /** Per-student teacher feedback, set when grading (Issue #424). */
   teacher_feedback: string | null;
+  /**
+   * Issue #3682: set as soon as the student starts the assignment, not only
+   * once they submit. Lets the teacher screen link to the one report page
+   * that already shows a student's recorded step-by-step progress
+   * (`/teacher/students/{id}/sessions/{id}/report`), even while the student
+   * is still `in_progress` (e.g. stuck mid-lesson).
+   */
+  session_id: number | null;
 }
 
 /** Issue #1764 Fix 4: a single submission attempt row for one student. */
@@ -81,6 +89,8 @@ export interface AttemptResponse {
   reading_cpm: number | null;
   reading_error_chars: string[];
   teacher_feedback: string | null;
+  /** Issue #3682 — see SubmissionResponse.session_id. */
+  session_id: number | null;
 }
 
 /** Issue #1764 Fix 4: all attempts by one student, grouped for teacher dashboard. */

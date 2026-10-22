@@ -85,6 +85,11 @@ export function useProgressSync({
   // resolved. The flag flips on first .finally() of the load effect.
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const isProgressLoading = !!token && dbSessionId !== null && !hasLoadedOnce;
+  // Issue #3682 (production root cause, fix A) — mirror `hasLoadedOnce` in a
+  // ref so doSave / the unload beacon below can synchronously check the
+  // LATEST loaded state without needing it in their own dependency arrays
+  // (adding it there would recreate doSave every render once loaded).
+  const hasLoadedOnceRef = useRef(false);
 
   // Stash onProgressLoaded behind a ref so the doSave / syncProgress / flushProgress
   // identities don't change every render when the caller passes an inline arrow.
@@ -109,6 +114,7 @@ export function useProgressSync({
     // from null → id), reset the loaded flag so isProgressLoading flips back
     // to true synchronously on the next render.
     setHasLoadedOnce(false);
+    hasLoadedOnceRef.current = false;
     loadStepProgress(token, dbSessionId)
       .then((res) => {
         const stepProgress = res.step_progress;
@@ -120,7 +126,10 @@ export function useProgressSync({
       .catch(() => {
         // Non-fatal: fallback to localStorage handled by caller
       })
-      .finally(() => setHasLoadedOnce(true));
+      .finally(() => {
+        setHasLoadedOnce(true);
+        hasLoadedOnceRef.current = true;
+      });
     // Only run once when dbSessionId first becomes available
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dbSessionId, token]);
@@ -129,6 +138,17 @@ export function useProgressSync({
   const doSave = useCallback(
     (data: StepProgressData) => {
       if (!token || dbSessionId === null) return;
+      // Issue #3682 fix A (production root cause) — never PUT before the
+      // initial GET has resolved and been merged into the caller's state.
+      // A save queued while that GET is still in flight is built from a
+      // stale/empty local snapshot (e.g. a child step page's mount effect
+      // firing before onProgressLoaded hydrated state); by the time it
+      // would actually fire, lastServerVersionRef has already been updated
+      // BY that same GET, so the optimistic-concurrency version check no
+      // longer catches it as stale. Drop it — the caller's local state gets
+      // correctly re-hydrated by onProgressLoaded, and the next genuine
+      // save (post-load) will carry that merged state as its base.
+      if (!hasLoadedOnceRef.current) return;
       const withVersion: StepProgressData = {
         ...data,
         version: lastServerVersionRef.current,
@@ -213,7 +233,9 @@ export function useProgressSync({
       clearTimeout(debounceTimerRef.current);
       debounceTimerRef.current = null;
 
-      if (token && dbSessionId !== null) {
+      // Issue #3682 fix A — same guard as doSave: never beacon a save built
+      // from a pre-load stale snapshot.
+      if (token && dbSessionId !== null && hasLoadedOnceRef.current) {
         saveStepProgressBeacon(token, dbSessionId, {
           ...latestDataRef.current,
           version: lastServerVersionRef.current,

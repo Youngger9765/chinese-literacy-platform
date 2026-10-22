@@ -249,13 +249,20 @@ class ErrorHeatmapResponse(BaseModel):
 class TeacherDialogueTurnResponse(BaseModel):
     id: int
     role: str
-    content: str = Field(validation_alias="text")
+    # Issue #3682 跟進：這裡原本叫 `content`（靠 validation_alias="text" 從 ORM
+    # 的 .text 讀進來），但 Pydantic v2 的 alias 只管輸入方向——序列化輸出仍然
+    # 用欄位名本身，所以 JSON 回應一直是 `content`，不是 `text`。前端
+    # `TeacherDialogueTurn`/`DialogueTurnItem` 型別、以及 `ComprehensionRecord`
+    # 讀的都是 `turn.text`，兩邊對不起來，老師報告頁的對話泡泡一直是空的字——
+    # 而且因為 #3682 修復前 `hasComprehension` 根本沒被觸發過，這個欄位名落差
+    # 從來沒人發現。直接跟 ORM 欄位同名，不要再用 alias 製造這種落差。
+    text: str
     turn_order: int
     is_correct: bool | None = None
     phase: str | None = None
     created_at: datetime
 
-    model_config = {"from_attributes": True, "populate_by_name": True}
+    model_config = {"from_attributes": True}
 
 
 class TeacherDialogueHistoryResponse(BaseModel):
