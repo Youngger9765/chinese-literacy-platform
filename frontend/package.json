@@ -13,7 +13,8 @@
 
     "test": "vitest run",
     "test:watch": "vitest",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "e2e:games": "playwright test tests/e2e/games"
   },
   "dependencies": {
     "date-fns": "^4.3.0",
