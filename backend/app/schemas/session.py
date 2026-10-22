@@ -2,7 +2,8 @@ from datetime import datetime
 from typing import Any, Literal
 import logging
 
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import BaseModel, Field, StringConstraints, ValidationError, field_validator
+from typing import Annotated
 
 logger = logging.getLogger(__name__)
 
@@ -161,19 +162,43 @@ class ComprehensionScoreResponse(BaseModel):
 
 # ── Step Progress (Issue #660) ────────────────────────────────────────────────
 
+# Issue #3682: steps_completed is a monotonic union on the server, so anything a
+# client writes there stays forever. Bound the sizes so a bad client cannot grow a
+# session's progress without limit. Generous on purpose: a multi-passage lesson has
+# about 11 steps per passage.
+MAX_PROGRESS_ITEMS = 200
+_StepId = Annotated[str, StringConstraints(max_length=128)]
+
+
 class StepProgressSaveRequest(BaseModel):
     """Body for PUT /api/learning/sessions/{id}/progress.
 
     Fields mirror the localStorage schema so the frontend can send
     the same object it writes to localStorage.
     """
-    current_step: str | None = Field(None, description="Active step path, e.g. 'vocab-definition'")
-    steps_completed: list[str] = Field(default_factory=list, description="List of completed step path keys")
+    current_step: _StepId | None = Field(None, description="Active step path, e.g. 'vocab-definition'")
+    steps_completed: list[_StepId] = Field(default_factory=list, max_length=MAX_PROGRESS_ITEMS, description="List of completed step path keys")
     step_data: dict[str, Any] = Field(default_factory=dict, description="Per-step serialised progress data")
     # Optimistic concurrency version (#1187): monotonically increasing counter from client.
     # Backend rejects writes where incoming version < stored version to prevent stale
     # overwrites after a previous save failure.
     version: int | None = Field(None, ge=0, description="Client-side version counter")
+    # Issue #3682 follow-up: steps_completed is now a monotonic union (never shrinks
+    # on a plain save, to survive the #3682 premature-empty-save race). That union
+    # would also silently undo a DELIBERATE un-complete — e.g. useStepProgressPersistence
+    # .resetTutorStep's 「再讀一次」 redo flow (#2532/#2533), which removes
+    # 'paragraph-reading' from steps_completed on purpose. `reset_steps` makes that
+    # intent explicit: any step id named here is dropped from the stored list even
+    # though the union would otherwise keep it (a plain omission, with nothing named
+    # here, still only ever grows the list).
+    reset_steps: list[_StepId] = Field(default_factory=list, max_length=MAX_PROGRESS_ITEMS, description="Step ids to deliberately un-complete")
+
+    @field_validator("step_data")
+    @classmethod
+    def _cap_step_data_keys(cls, v: dict[str, Any]) -> dict[str, Any]:
+        if len(v) > MAX_PROGRESS_ITEMS:
+            raise ValueError(f"step_data has more than {MAX_PROGRESS_ITEMS} keys")
+        return v
 
 
 class StepProgressResponse(BaseModel):
