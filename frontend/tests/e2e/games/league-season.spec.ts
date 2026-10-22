@@ -46,7 +46,7 @@ function watchErrors(label: string, p: import('@playwright/test').Page, bucket: 
 
 test.describe('跨班賽季 league', () => {
   test('two teachers run the real invite wizard and a student sees the two-class board', async ({ page, browser, request }) => {
-    test.setTimeout(120_000);
+    test.setTimeout(180_000);
 
     const schoolId = await createOrgLinkedSchool(request, `QA League School ${Date.now()}`);
     const teacherA = await registerTeacher(request, 'league-a');

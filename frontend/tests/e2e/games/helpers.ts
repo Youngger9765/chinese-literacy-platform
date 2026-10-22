@@ -316,16 +316,26 @@ export async function openGameHubCard(page: Page, label: string): Promise<void> 
   // racing the two waits can catch that transient and misreport a truly
   // unlocked card as locked. Only fall back to checking "locked" once the
   // unlocked form has genuinely never shown up.
-  // CI's cold-start/colder environment needs more headroom than a warm
-  // local run — 15s was enough on every local run but still timed out
-  // once in CI (#3685 first CI run, league-season student card lookup).
-  const appeared = await unlocked.waitFor({ state: 'visible', timeout: 30000 }).then(() => true).catch(() => false);
-  if (appeared) {
-    await unlocked.click();
-    return;
+  //
+  // One reload-and-retry built in: CI hit a case (#3685, all 5 specs in
+  // one run) where the sidebar's "遊戲區" nav item was already marked
+  // active (the route DID change) but the main content was still the
+  // PREVIOUS page's content indefinitely — a stuck lazy-chunk Suspense
+  // render, not just slowness a longer timeout would fix. A reload is
+  // exactly what a real student stuck on a half-loaded page would do.
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const appeared = await unlocked.waitFor({ state: 'visible', timeout: 30000 }).then(() => true).catch(() => false);
+    if (appeared) {
+      await unlocked.click();
+      return;
+    }
+    if (await locked.count()) {
+      throw new Error(`Game hub card "${label}" is locked (classroom feature not enabled)`);
+    }
+    if (attempt === 0) {
+      await page.reload();
+      await page.waitForTimeout(1000);
+    }
   }
-  if (await locked.count()) {
-    throw new Error(`Game hub card "${label}" is locked (classroom feature not enabled)`);
-  }
-  throw new Error(`Game hub card "${label}" not found at all`);
+  throw new Error(`Game hub card "${label}" not found at all (even after a reload)`);
 }

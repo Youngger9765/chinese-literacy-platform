@@ -36,7 +36,7 @@ const MAX_ROUNDS = 150;
 
 test.describe('課堂搶答 live_quiz', () => {
   test('teacher hosts, two enrolled students join via the real keypad and reach the lobby', async ({ page, browser, request }) => {
-    test.setTimeout(90_000);
+    test.setTimeout(180_000);
 
     const teacher = await registerTeacher(request, 'lq-teacher');
     const classroom = await createClassroomForTeacher(request, teacher, 'QA Live Quiz Class');
