@@ -54,8 +54,26 @@ const MyAssignments: React.FC = () => {
   };
 
   const getResumeStepPath = (a: StudentAssignmentResponse): string => {
-    if (a.current_step && stepIdSet.has(a.current_step)) {
-      return a.current_step;
+    // Issue #3682 fix C（production root cause）：一課多篇時 `a.current_step`
+    // 現在正確存成 `comprehension#pjhxh` 這種帶輪次的複合 key（見
+    // useStepProgressPersistence.saveStepProgressPatch 的 #3682 修法），但
+    // `stepIdSet` 是從全站共用、不分輪次的 `ACTIVE_STEPS` 建的，裡面只有
+    // bare id。拿複合 key 直接去對只有 bare id 的集合，查一次就落空，
+    // 「繼續」因此永遠退回第一步，連帶把輪次整個弄丟——這正是
+    // recheck-prod.log case (b) 的根因：落地網址沒有 `?p=`。
+    //
+    // 修法：成員檢查改比對「拿掉輪次後的 base id」，回傳值仍然是原始、
+    // 可能帶輪次的 `a.current_step`，輪次才能一路活著傳進
+    // stepPath()（它本來就看得懂 `base#slug` → `?p=`）。
+    if (a.current_step) {
+      const hashIdx = a.current_step.indexOf('#');
+      const baseId = hashIdx < 0 ? a.current_step : a.current_step.slice(0, hashIdx);
+      const slug = hashIdx < 0 ? null : a.current_step.slice(hashIdx + 1);
+      // The slug ends up in the resume URL, so only accept the shape real
+      // passage slugs have; anything else falls back to the first step.
+      if (stepIdSet.has(baseId) && (slug === null || /^[A-Za-z0-9_-]{1,32}$/.test(slug))) {
+        return a.current_step;
+      }
     }
     return defaultStepPath;
   };

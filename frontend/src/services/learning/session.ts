@@ -491,6 +491,15 @@ export interface StepProgressData {
   step_data: Record<string, unknown>;
   /** Optimistic concurrency version (#1187). Increments with each successful save. */
   version?: number;
+  /**
+   * Issue #3682 follow-up: steps_completed is a monotonic union on the
+   * backend (never shrinks from a plain save — see learning_step_progress.py).
+   * `reset_steps` makes a DELIBERATE un-complete explicit (e.g. resetTutorStep's
+   * 「再讀一次」 redo flow, #2532/#2533) — step ids named here are dropped from
+   * the stored list even though the union would otherwise keep them. Omit
+   * entirely (or send []) for an ordinary save.
+   */
+  reset_steps?: string[];
 }
 
 export interface StepProgressResponse {

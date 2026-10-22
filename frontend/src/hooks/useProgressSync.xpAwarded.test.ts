@@ -48,6 +48,15 @@ describe('useProgressSync — onXpAwarded (#3024)', () => {
       useProgressSync({ token: 't', dbSessionId: 1, onXpAwarded }),
     );
 
+    // Let the initial GET (mocked, resolves to step_progress: null) settle
+    // first — doSave now requires hasLoadedOnce before it will PUT (#3682
+    // fix A), matching real usage where LearningLayout never mounts a step
+    // page that calls flushProgress until after the initial load resolves.
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
     await act(async () => {
       result.current.flushProgress({ current_step: 'x', steps_completed: ['vocab-definition'], step_data: {} });
       await Promise.resolve();
@@ -68,6 +77,15 @@ describe('useProgressSync — onXpAwarded (#3024)', () => {
     const { result } = renderHook(() =>
       useProgressSync({ token: 't', dbSessionId: 1, onXpAwarded }),
     );
+
+    // Let the initial GET (mocked, resolves to step_progress: null) settle
+    // first — doSave now requires hasLoadedOnce before it will PUT (#3682
+    // fix A), matching real usage where LearningLayout never mounts a step
+    // page that calls flushProgress until after the initial load resolves.
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
 
     await act(async () => {
       result.current.flushProgress({ current_step: 'x', steps_completed: [], step_data: {} });
@@ -90,6 +108,15 @@ describe('useProgressSync — onXpAwarded (#3024)', () => {
       useProgressSync({ token: 't', dbSessionId: 1, onXpAwarded }),
     );
 
+    // Let the initial GET (mocked, resolves to step_progress: null) settle
+    // first — doSave now requires hasLoadedOnce before it will PUT (#3682
+    // fix A), matching real usage where LearningLayout never mounts a step
+    // page that calls flushProgress until after the initial load resolves.
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
     await act(async () => {
       result.current.flushProgress({ current_step: 'x', steps_completed: [], step_data: {} });
       await Promise.resolve();
@@ -105,6 +132,15 @@ describe('useProgressSync — onXpAwarded (#3024)', () => {
       step_progress: { current_step: 'x', steps_completed: [], step_data: {}, version: 1 },
     });
     const { result } = renderHook(() => useProgressSync({ token: 't', dbSessionId: 1 }));
+
+    // Let the initial GET (mocked, resolves to step_progress: null) settle
+    // first — doSave now requires hasLoadedOnce before it will PUT (#3682
+    // fix A), matching real usage where LearningLayout never mounts a step
+    // page that calls flushProgress until after the initial load resolves.
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
 
     await act(async () => {
       result.current.flushProgress({ current_step: 'x', steps_completed: [], step_data: {} });

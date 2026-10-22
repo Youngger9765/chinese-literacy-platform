@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import type { AuthUser } from '../services/authApi';
 import { clearActiveSession, saveActiveSession } from '../services/api';
-import { resolveActiveSteps, STEP_PATH_TO_NUMBER } from '../config/stepConfig';
+import { resolveActiveSteps, stepIdMatchesCompleted, STEP_PATH_TO_NUMBER } from '../config/stepConfig';
 import { useProgressSync } from './useProgressSync';
 import type { StepProgressData } from '../services/learningApi';
 import type {
@@ -173,10 +173,17 @@ export function useStepProgressPersistence({
     () => new Set(stepProgressState.steps_completed ?? []),
     [stepProgressState.steps_completed],
   );
-  const missingAssignmentSteps = useMemo(
-    () => requiredAssignmentSteps.filter((s) => !completedStepsSet.has(s.id)),
-    [requiredAssignmentSteps, completedStepsSet],
-  );
+  const missingAssignmentSteps = useMemo(() => {
+    // #3682 fix C (part 3) — a legacy bare completion entry (saved before
+    // the write-path fix started keying current_step/steps_completed
+    // correctly) must still satisfy a now-composite requirement when there
+    // is no ambiguity about which round it was for. See
+    // stepIdMatchesCompleted's own doc comment for why.
+    const requiredIds = requiredAssignmentSteps.map((s) => s.id);
+    return requiredAssignmentSteps.filter(
+      (s) => !stepIdMatchesCompleted(s.id, completedStepsSet, requiredIds),
+    );
+  }, [requiredAssignmentSteps, completedStepsSet]);
   const isAssignmentReadyForSubmit = missingAssignmentSteps.length === 0;
   const firstIncompleteStepPath = missingAssignmentSteps[0]?.id ?? 'full-text-annotate';
   const hasActiveAssignment = useMemo(() => {
@@ -313,9 +320,20 @@ export function useStepProgressPersistence({
       // 這裡補上網址帶的輪次；單篇課沒有 `#`，keyed === stepId，行為不變（#2930）。
       const k = opts.currentStepKey ?? '';
       const keyed = k.startsWith(`${opts.stepId}#`) ? k : opts.stepId;
+      // Issue #3682 fix C（production root cause）：每個步驟頁呼叫這支時，
+      // `currentStep` 傳的也是寫死的 bare id（跟 `opts.stepId` 一模一樣）——
+      // 從來沒有人把輪次補上去。於是 `step_progress.current_step` 永遠是
+      // bare 的，「班級作業→繼續」讀到它組網址時自然沒有 `?p=`，回到的頁
+      // 讀不到輪次，這一步的完成紀錄也跟著存成 bare key，永遠對不上這堂課
+      // 真正要求的 `base#slug`（recheck-prod.log case (b)）。
+      //
+      // 修法：caller 回報的就是「自己這一步」時（絕大多數真實呼叫都是這
+      // 樣——`currentStep === stepId`），一併套用已經算好的 `keyed`；呼叫端
+      // 明確指向別的步驟（例如完成後轉場到下一步）時維持原樣，不覆蓋。
+      const keyedCurrentStep = opts.currentStep === opts.stepId ? keyed : opts.currentStep;
       persistStepProgressState(
         {
-          currentStep: opts.currentStep,
+          currentStep: keyedCurrentStep,
           completeStep: opts.markCompleted ? keyed : undefined,
           stepDataPatch: {
             [keyed]: {
@@ -429,6 +447,11 @@ export function useStepProgressPersistence({
             paragraph_summaries_data: {},
           },
         },
+        // Issue #3682 follow-up (team-lead review): the server's steps_completed
+        // is now a monotonic union — simply omitting 'paragraph-reading' here
+        // would get it silently re-added from stored data. reset_steps makes
+        // this a DELIBERATE un-complete the server must honor, not a race.
+        reset_steps: ['paragraph-reading'],
       };
       flushProgress(next); // immediate — the student may navigate right after
       return next;
