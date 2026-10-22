@@ -138,6 +138,89 @@ export function isBlockAnswered(
   }
 }
 
+/**
+ * `sub_block`（巢狀小題，例如「◎ 小試身手」「◎推論小偵探」）本身不在
+ * `INTERACTIVE_BLOCK_TYPES` 裡，所以它整組都被當成「不用回答的 context」——
+ * 不只是沒被算進完成度，而是**完全沒有任何程式碼路徑會去檢查它**。
+ *
+ * 真環境重現（L0016《這是什麼「意思」？》，#3682 追查 #3559 的延伸）：
+ * 這一課唯一一節的頂層 block 只有 `concept_box` / `guide` / 兩個 `sub_block`，
+ * 一個 `single` / `multi` / `free_text` 頂層 block 都沒有 —— `checkCompletion`
+ * 要檢查的清單永遠是空陣列，`[].every(...)` 永遠為真，**但沒有任何呼叫點會去
+ * 呼叫它**（`renderSubBlockOptions` 的「確認」鈕只設 feedback，從不觸發完成度
+ * 檢查）。結果是：不管學生怎麼答，「下一關」永遠鎖死，跟內容對不對無關。
+ *
+ * 這兩個函式把 sub_block 的巢狀 items 攤平成跟渲染端同一組 key
+ * （`${parentKey}-${i}`，見 `renderSubBlock` 的遞迴），只收「真的要回答」的項目：
+ * - `single` / `multi` 要帶 `answer` 才算 —— 沒有 `answer` 的選項畫出來本來就是
+ *   唯讀參考文字（`renderSubBlockOptions` 的第一個分支），不该要求回答。
+ * - `free_text` 一律算（巢狀的開放式問答沒有「不用答」這個狀態）。
+ * - `passage` 是參考短文，一律跳過。
+ */
+const NESTED_ANSWERABLE_TYPES = new Set(['single', 'multi', 'free_text']);
+
+export interface SubBlockAnswerSlot {
+  item: Record<string, unknown>;
+  key: string;
+}
+
+function isNestedItemAnswerable(item: Record<string, unknown>): boolean {
+  const type = item.type;
+  if (type === 'free_text') return true;
+  if (type === 'single' || type === 'multi') {
+    return item.answer !== undefined && item.answer !== null;
+  }
+  return false;
+}
+
+export function collectSubBlockAnswerSlots(
+  items: unknown[] | undefined,
+  parentKey: string,
+): SubBlockAnswerSlot[] {
+  const out: SubBlockAnswerSlot[] = [];
+  (items ?? []).forEach((raw, i) => {
+    if (typeof raw !== 'object' || raw === null) return;
+    const item = raw as Record<string, unknown> & { items?: unknown[] };
+    const key = `${parentKey}-${i}`;
+    if (isNestedItemAnswerable(item)) {
+      out.push({ item, key });
+    }
+    if (Array.isArray(item.items)) {
+      out.push(...collectSubBlockAnswerSlots(item.items, key));
+    }
+  });
+  return out;
+}
+
+/** 整個 sub_block 有沒有答完——沒有任何需要回答的巢狀項目（純參考文字）視為已完成。 */
+export function isSubBlockAnswered(
+  block: { items?: unknown[] },
+  state: Record<string, unknown>,
+  key: string,
+): boolean {
+  const slots = collectSubBlockAnswerSlots(block.items, `${key}-s`);
+  return slots.every(({ item, key: slotKey }) =>
+    isBlockAnswered(item as unknown as SpotlightBlock, state, slotKey),
+  );
+}
+
+/** 頂層 block 算不算「這一段需要互動」——補上 `sub_block`，否則它整組被當 context。 */
+export function isTopBlockInteractive(type: string): boolean {
+  return isInteractiveBlock(type) || type === 'sub_block';
+}
+
+/** 頂層 block 答完了沒——`sub_block` 改用遞迴檢查，其餘沿用既有 `isBlockAnswered`。 */
+export function isTopBlockAnswered(
+  block: SpotlightBlock,
+  state: Record<string, unknown>,
+  key: string,
+): boolean {
+  if (block.type === 'sub_block') {
+    return isSubBlockAnswered(block as { items?: unknown[] }, state, key);
+  }
+  return isBlockAnswered(block, state, key);
+}
+
 export function isSegmentComplete(
   segment: SpotlightBlock[],
   segmentIdx: number,
@@ -145,12 +228,12 @@ export function isSegmentComplete(
 ): boolean {
   const interactive = segment
     .map((b, i) => ({ b, i }))
-    .filter(({ b }) => isInteractiveBlock(b.type));
+    .filter(({ b }) => isTopBlockInteractive(b.type));
 
   if (interactive.length === 0) return true;
 
   return interactive.every(({ b, i }) =>
-    isBlockAnswered(b, state, blockStateKey(segmentIdx, i)),
+    isTopBlockAnswered(b, state, blockStateKey(segmentIdx, i)),
   );
 }
 
