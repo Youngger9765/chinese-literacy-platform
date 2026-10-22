@@ -234,6 +234,23 @@ export function useStepProgressPersistence({
         setMidSessionBadgeUnlocks((prev) => [...prev, ...badgesUnlocked]);
       }
     },
+    // The server only ever adds completed steps, so after each save its list is
+    // the truth. If a racing save left this page missing a step the server has,
+    // adopt it; otherwise the student is asked to redo a finished step (#3694).
+    onProgressSaved: (data) => {
+      const serverCompleted = Array.isArray(data.steps_completed) ? data.steps_completed : [];
+      const local = stepProgressStateRef.current;
+      const missing = serverCompleted.filter((id) => !local.steps_completed.includes(id));
+      if (missing.length === 0) return;
+      const merged = { ...local, steps_completed: [...local.steps_completed, ...missing] };
+      stepProgressStateRef.current = merged;
+      setStepProgressState(merged);
+      setSession((prev) => {
+        if (!prev) return prev;
+        const have = prev.completedSteps ?? [];
+        return { ...prev, completedSteps: [...have, ...serverCompleted.filter((id) => !have.includes(id))] };
+      });
+    },
     onProgressLoaded: (data) => {
       const loadedStepData = (data.step_data ?? {}) as Record<string, unknown>;
       // Never let a reload drop a step this page already completed (#3694).
