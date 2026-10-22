@@ -203,17 +203,18 @@ class StepProgressSaveRequest(BaseModel):
     # Issue #3695 (reported as part of #3682): true when the frontend's own
     # required-step check (every non-cover step for this lesson, see
     # stepConfig.ts filterRequiredAssignmentSteps) says this session is
-    # complete. The backend does NOT recompute readiness itself — the
-    # per-lesson step list is frontend config — it only uses this flag to
-    # decide whether to auto-submit a linked assignment, and that decision is
-    # gated server-side on the session actually being linked to an
-    # in_progress AssignmentSubmission (see
-    # maybe_auto_submit_assignment_session). A forged/stale flag can at most
-    # submit a student's own in-progress assignment early; it can never
-    # submit someone else's or re-submit one already submitted/graded.
+    # complete. This is a HINT ONLY (team-lead review, integrity follow-up) —
+    # the backend does NOT trust it for the actual submit decision. It's used
+    # purely to avoid recomputing readiness on every single progress save;
+    # maybe_auto_submit_assignment_session independently verifies readiness
+    # server-side against the session's own stored steps_completed and this
+    # assignment's own required-step list (loaded from the lesson's data, not
+    # from this flag or anything else the client sent). A forged/stale flag
+    # with genuinely-missing steps is therefore a silent no-op, not a
+    # submission — see assignment_queries.is_assignment_ready_for_submit.
     assignment_ready_for_submit: bool = Field(
         False,
-        description="True when the frontend's required-step check reports completion",
+        description="Hint only — true when the frontend's own required-step check reports completion. The backend independently re-verifies before submitting.",
     )
 
 

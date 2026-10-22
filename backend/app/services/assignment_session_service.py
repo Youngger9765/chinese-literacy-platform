@@ -15,7 +15,9 @@ from ..schemas.assignment import (
     StartAssignmentResponse,
     StudentAssignmentResponse,
 )
+from ..schemas.session import parse_step_progress
 from ..services.assignment_queries import (
+    is_assignment_ready_for_submit,
     resolve_step_sequence_for_assignment,
     resolve_story_slug_for_assignment,
     resolve_title_for_assignment,
@@ -364,10 +366,23 @@ def maybe_auto_submit_assignment_session(
     so this works even when the frontend no longer "knows" this is an
     assignment session.
 
+    Issue #3695 integrity follow-up (team-lead review): the caller's
+    assignment_ready_for_submit flag is a HINT ONLY, used upstream purely to
+    avoid running this check on every single progress save. The actual
+    decision here is made independently: this function loads the session's
+    own server-stored (already merged by save_step_progress's monotonic
+    union — never a client payload directly) steps_completed, computes this
+    assignment's required steps from its own lesson data
+    (assignment_queries.is_assignment_ready_for_submit — NOT the client's
+    notion of "required"), and only submits when that independent check
+    passes. A client that forges the flag after completing one step gets a
+    silent no-op, not a submission.
+
     Idempotent / safe no-op when:
     - session_id is not linked to any AssignmentSubmission (self-practice session)
     - the submission is already submitted/graded
     - the assignment row is missing (shouldn't happen, FK-protected, defensive only)
+    - the independently-verified required steps are not all actually satisfied
 
     Returns the updated AssignmentSubmission when a submit happened, else None.
     """
@@ -383,6 +398,23 @@ def maybe_auto_submit_assignment_session(
         db.query(Assignment).filter(Assignment.id == submission.assignment_id).first()
     )
     if assignment is None:
+        return None
+
+    learning_session = (
+        db.query(LearningSession).filter(LearningSession.id == session_id).first()
+    )
+    if learning_session is None:
+        return None
+
+    stored_progress = parse_step_progress(
+        learning_session.step_progress,
+        session_id=session_id,
+        context="maybe_auto_submit_assignment_session",
+    )
+    completed_step_ids = (
+        stored_progress.steps_completed if stored_progress is not None else []
+    )
+    if not is_assignment_ready_for_submit(assignment, completed_step_ids):
         return None
 
     return submit_assignment_session(assignment, submission, db)
