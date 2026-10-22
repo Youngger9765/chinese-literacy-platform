@@ -39,6 +39,8 @@ export interface UseProgressSyncOptions {
    * Use this to hydrate in-memory state from the DB on page load / refresh.
    */
   onProgressLoaded?: (data: StepProgressData) => void;
+  /** Called with the server's stored progress after every successful save (#3694). */
+  onProgressSaved?: (data: StepProgressData) => void;
   /**
    * Issue #3024 — called after a successful save when the backend awarded
    * XP and/or unlocked badges for a newly-completed step mid-session. NOT
@@ -69,6 +71,7 @@ export function useProgressSync({
   token,
   dbSessionId,
   onProgressLoaded,
+  onProgressSaved,
   onXpAwarded,
 }: UseProgressSyncOptions): UseProgressSyncReturn {
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -98,6 +101,8 @@ export function useProgressSync({
   // step-data sync on every render, bursting the rate-limited PUT endpoint.
   const onProgressLoadedRef = useRef(onProgressLoaded);
   useEffect(() => { onProgressLoadedRef.current = onProgressLoaded; }, [onProgressLoaded]);
+  const onProgressSavedRef = useRef(onProgressSaved);
+  useEffect(() => { onProgressSavedRef.current = onProgressSaved; }, [onProgressSaved]);
   const onXpAwardedRef = useRef(onXpAwarded);
   useEffect(() => { onXpAwardedRef.current = onXpAwarded; }, [onXpAwarded]);
 
@@ -158,6 +163,7 @@ export function useProgressSync({
           // Track the new server version for the next save
           if (res.step_progress) {
             lastServerVersionRef.current = readStoredVersion(res.step_progress);
+            onProgressSavedRef.current?.(res.step_progress);
           }
           // Issue #3024 — surface mid-session XP/badge awards for a
           // newly-completed step. Absent on old responses / GET-shaped
