@@ -15,6 +15,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import {
+  collectSubBlockAnswerSlots,
   countVisibleSegments,
   isBlockAnswered,
   isSegmentComplete,
@@ -135,6 +136,22 @@ describe('全庫：聚光燈沒有到不了的段', () => {
             else if (b.type === 'fill_table') {
               const rows = (b as { rows?: unknown[] }).rows;
               if (!Array.isArray(rows) || rows.length === 0) state[key] = true; // 指路牌有「知道了」
+            }
+            // #3682 — `sub_block`（巢狀小題）本身不在上面任何一個 `else if`
+            // 裡，但它的巢狀 items 現在也要真的答完才算完成（見
+            // `isSubBlockAnswered`）。跟上面同一個原則：只填「畫面上真的
+            // 給了控制項」的東西 —— `collectSubBlockAnswerSlots` 只收
+            // `single`/`multi`（有 `answer`）跟 `free_text`，`passage` 這類
+            // 純參考文字不會被收進來，不會假裝它也填得了。
+            else if (b.type === 'sub_block') {
+              const slots = collectSubBlockAnswerSlots(
+                (b as { items?: unknown[] }).items,
+                `${key}-s`,
+              );
+              for (const slot of slots) {
+                const itemType = (slot.item as { type?: string }).type;
+                state[slot.key] = itemType === 'free_text' ? 'x' : 0;
+              }
             }
           }),
         );

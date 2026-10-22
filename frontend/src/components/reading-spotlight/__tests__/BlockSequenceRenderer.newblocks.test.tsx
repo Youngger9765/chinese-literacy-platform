@@ -443,3 +443,79 @@ describe('題幹欄位有三個名字', () => {
     expect(screen.getByText('這個故事想告訴我們什麼？')).toBeTruthy();
   });
 });
+
+describe('sub_block 巢狀 passage + free_text（#3682 回歸鎖）', () => {
+  /**
+   * 真環境重現：L0016《這是什麼「意思」？》聚光燈第二個 sub_block「◎推論小偵探」
+   * —— `items` 裡是 `passage`（參考短文）+ `free_text`（`blanks` 多空格問答）。
+   * 修好之前：短文整段印不出來、free_text 沒有任何輸入框，而且就算把前一個
+   * sub_block（小試身手，6 題單選）全部答對，「下一關」依然鎖死 ——
+   * 因為 `sub_block` 本身不算 interactive，完成度檢查從來沒被觸發過。
+   */
+  const subBlocks = (onComplete: () => void) => {
+    const spotlight = {
+      lesson: 'TEST-L1',
+      strategy_name: '推論代名詞',
+      strategy_type: 'inference',
+      blocks: [
+        {
+          type: 'sub_block',
+          label: '◎ 小試身手',
+          items: [
+            {
+              type: 'single',
+              prompt: '第一題',
+              options: { '1': '甲', '2': '乙' },
+              answer: 2,
+            },
+          ],
+        },
+        {
+          type: 'sub_block',
+          label: '◎推論小偵探',
+          instruction: '底下文字中的「這」是指不同的事情，請試試看推論「這」是指什麼？',
+          items: [
+            { type: 'passage', paragraphs: ['小恩今天到教室後，發現抽屜裡多了一張紙條。'] },
+            {
+              type: 'free_text',
+              prompt: 'A：第一個「這」是指（　）',
+              blanks: [{ answer: '紙條' }],
+            },
+          ],
+        },
+      ],
+    };
+    return render(<BlockSequenceRenderer spotlight={spotlight as never} onComplete={onComplete} />);
+  };
+
+  it('巢狀的參考短文要印得出來，不能整段消失', () => {
+    subBlocks(() => {});
+    expect(screen.getByText(/小恩今天到教室後，發現抽屜裡多了一張紙條/)).toBeTruthy();
+  });
+
+  it('巢狀的 free_text 要有輸入框可以打字，不能只印文字', () => {
+    subBlocks(() => {});
+    expect(screen.getByText(/第一個「這」是指/)).toBeTruthy();
+    expect(screen.getByPlaceholderText('請在此寫下你的答案…')).toBeTruthy();
+  });
+
+  it('兩個 sub_block 都答完才算完成，而且真的會解鎖「下一關」', () => {
+    const onComplete = vi.fn();
+    subBlocks(onComplete);
+
+    // 只答第一個 sub_block（小試身手單選）—— 還不算完成。
+    fireEvent.click(screen.getByRole('button', { name: /乙/ }));
+    fireEvent.click(screen.getByRole('button', { name: '確認' }));
+    expect(screen.queryByText('✓ 閱讀聚光燈練習完成')).toBeNull();
+    expect(onComplete).not.toHaveBeenCalled();
+
+    // 再答第二個 sub_block（推論小偵探的開放式問答）。
+    fireEvent.change(screen.getByPlaceholderText('請在此寫下你的答案…'), {
+      target: { value: '紙條' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: '送出' }));
+
+    expect(screen.getByText('✓ 閱讀聚光燈練習完成')).toBeTruthy();
+    expect(onComplete).toHaveBeenCalled();
+  });
+});
