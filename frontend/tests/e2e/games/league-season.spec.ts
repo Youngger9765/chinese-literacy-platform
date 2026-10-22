@@ -46,7 +46,7 @@ function watchErrors(label: string, p: import('@playwright/test').Page, bucket: 
 
 test.describe('跨班賽季 league', () => {
   test('two teachers run the real invite wizard and a student sees the two-class board', async ({ page, browser, request }) => {
-    test.setTimeout(60_000);
+    test.setTimeout(120_000);
 
     const schoolId = await createOrgLinkedSchool(request, `QA League School ${Date.now()}`);
     const teacherA = await registerTeacher(request, 'league-a');
@@ -171,25 +171,34 @@ test.describe('跨班賽季 league', () => {
     // fresh API login) because loginViaUI already rotated this student's
     // password past the forced first-login change — the original temp
     // password from batchCreateStudents no longer works.
-    await page.evaluate(async (id) => {
+    // Absolute BACKEND URL, not a relative `/api/...` path — a relative
+    // fetch resolves against the CURRENT PAGE's origin, which only happens
+    // to proxy `/api/**` to the backend on `lingoleap-staging.web.app`
+    // (Firebase Hosting rewrite). CI's PLAYWRIGHT_BASE_URL points directly
+    // at the Cloud Run frontend service instead, which has no such rewrite
+    // and returned a bare nginx 405 for this POST (#3685 CI failure). The
+    // real app itself always calls the backend's own absolute origin
+    // (`VITE_API_URL`), so this is also just matching real behavior, not a
+    // CI-only patch.
+    await page.evaluate(async ({ id, backend }) => {
       const token = window.localStorage.getItem('lingoleap_token');
-      const res = await fetch(`/api/assignments/${id}/start`, {
+      const res = await fetch(`${backend}/api/assignments/${id}/start`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error(`start failed: ${res.status} ${await res.text()}`);
-    }, assignmentId);
+    }, { id: assignmentId, backend: BACKEND });
 
     await page.waitForTimeout(3 * 60 * 1000 + 10_000);
 
-    await page.evaluate(async (id) => {
+    await page.evaluate(async ({ id, backend }) => {
       const token = window.localStorage.getItem('lingoleap_token');
-      const res = await fetch(`/api/assignments/${id}/submit`, {
+      const res = await fetch(`${backend}/api/assignments/${id}/submit`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error(`submit failed: ${res.status} ${await res.text()}`);
-    }, assignmentId);
+    }, { id: assignmentId, backend: BACKEND });
 
     await page.reload();
     await expect(contributionValue).toBeVisible({ timeout: 15000 });

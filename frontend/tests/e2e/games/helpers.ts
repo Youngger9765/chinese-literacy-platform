@@ -316,7 +316,10 @@ export async function openGameHubCard(page: Page, label: string): Promise<void> 
   // racing the two waits can catch that transient and misreport a truly
   // unlocked card as locked. Only fall back to checking "locked" once the
   // unlocked form has genuinely never shown up.
-  const appeared = await unlocked.waitFor({ state: 'visible', timeout: 15000 }).then(() => true).catch(() => false);
+  // CI's cold-start/colder environment needs more headroom than a warm
+  // local run — 15s was enough on every local run but still timed out
+  // once in CI (#3685 first CI run, league-season student card lookup).
+  const appeared = await unlocked.waitFor({ state: 'visible', timeout: 30000 }).then(() => true).catch(() => false);
   if (appeared) {
     await unlocked.click();
     return;
