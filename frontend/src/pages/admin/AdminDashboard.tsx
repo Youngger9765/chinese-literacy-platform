@@ -14,6 +14,7 @@ import LessonAudioTable from './lesson-audio/LessonAudioTable';
 import StoryStructureLabPage from './story-structure-lab/StoryStructureLabPage';
 import KeypointsQADashboard from './KeypointsQADashboard';
 import StoryPackStudioPage from './story-pack-studio/StoryPackStudioPage';
+import IapAllowlistPanel from './IapAllowlistPanel';
 import { BuildingIcon, ShieldIcon } from '../../components/icons';
 import {
   listRoles,
@@ -33,6 +34,7 @@ const PANEL_SLUGS: Record<string, TreeNodeSelection> = {
   'story-structure-lab': { type: 'story_structure_lab', id: 'story_structure_lab' },
   'keypoints-qa': { type: 'keypoints_qa', id: 'keypoints_qa' },
   'story-pack-studio': { type: 'story_pack_studio', id: 'story_pack_studio' },
+  'iap-allowlist': { type: 'iap_allowlist', id: 'iap_allowlist' },
   'roles': { type: 'roles', id: 'roles' },
   'users': { type: 'users', id: 'users' },
   'create-org': { type: 'create_org', id: 'create_org' },
@@ -186,6 +188,7 @@ const AdminDashboard: React.FC = () => {
         {selectedNode?.type === 'story_structure_lab' && <StoryStructureLabPage />}
         {selectedNode?.type === 'keypoints_qa' && <KeypointsQADashboard />}
         {selectedNode?.type === 'story_pack_studio' && <StoryPackStudioPage />}
+        {selectedNode?.type === 'iap_allowlist' && <IapAllowlistPanel />}
       </div>
     </div>
   );

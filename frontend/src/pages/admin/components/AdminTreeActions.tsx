@@ -5,7 +5,7 @@
  * Extracted from AdminTreeSidebar (Issue #1950).
  */
 import React from 'react';
-import { ShieldIcon, UsersIcon } from '../../../components/icons';
+import { ShieldIcon, UsersIcon, LockIcon } from '../../../components/icons';
 import { StoriesIcon, TtsAuditIcon, StructureLabIcon } from './AdminTreeIcons';
 import { READING_TESTSET_URL, type TreeNodeSelection } from '../AdminTreeSidebar';
 
@@ -115,6 +115,21 @@ const AdminTreeActions: React.FC<AdminTreeActionsProps> = ({ selectedNode, onSel
         <span className={`text-sm shrink-0 w-4 text-center ${isSelected(selectedNode, 'story_pack_studio', 'story_pack_studio') ? 'text-amber-500' : ''}`} aria-hidden="true">🏆</span>
         <span className={`text-sm ${isSelected(selectedNode, 'story_pack_studio', 'story_pack_studio') ? 'font-semibold' : ''}`}>
           劇情包管理
+        </span>
+      </button>
+
+      {/* IAP 開通名單（#3720）— 唯讀，誰目前能透過 IAP 進 staging/預覽站 */}
+      <button
+        onClick={() => onSelectNode({ type: 'iap_allowlist', id: 'iap_allowlist' })}
+        className={`flex items-center gap-2 w-full px-3 py-2.5 text-left transition-colors cursor-pointer ${
+          isSelected(selectedNode, 'iap_allowlist', 'iap_allowlist')
+            ? 'bg-slate-100 text-slate-700'
+            : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
+        }`}
+      >
+        <LockIcon className={isSelected(selectedNode, 'iap_allowlist', 'iap_allowlist') ? 'text-slate-500' : ''} />
+        <span className={`text-sm ${isSelected(selectedNode, 'iap_allowlist', 'iap_allowlist') ? 'font-semibold' : ''}`}>
+          IAP 開通名單
         </span>
       </button>
 
