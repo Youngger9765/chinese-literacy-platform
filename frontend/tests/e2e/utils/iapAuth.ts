@@ -151,34 +151,88 @@ function mintTokenSelfSigned(audience: string): string {
   throw new Error('no usable credentials to mint a self-signed IAP JWT');
 }
 
-let cached: Record<string, string> | null = null;
+// #3731：快取要在硬性過期前主動重簽，不是簽好就用到 process 結束。過了
+// `MAX_TOKEN_LIFETIME_S - REFRESH_MARGIN_S`（預設 45 分鐘）就重簽一張
+// 新的；跟 scripts/iap_token.py 的邏輯對稱，同一個理由（長跑的
+// Playwright 套件如果剛好跑超過 1 小時，不該在那之後開始收到 401）。
+const REFRESH_MARGIN_S = 900;
+
+/** 測試用的時鐘切換點 —— mock 這個名字，不要 mock 全域的 `Date.now`。 */
+let _now: () => number = () => Date.now();
+
+interface CacheEntry {
+  header: Record<string, string>;
+  mintedAtMs: number;
+}
+
+/** audience -> 快取的 header + 簽署時間。IAP 還沒打開時這個 map 永遠是空的。 */
+const tokenCache = new Map<string, CacheEntry>();
+
+function isWithinRefreshWindow(mintedAtMs: number): boolean {
+  return _now() - mintedAtMs < (MAX_TOKEN_LIFETIME_S - REFRESH_MARGIN_S) * 1000;
+}
+
+function isWithinHardExpiry(mintedAtMs: number): boolean {
+  return _now() - mintedAtMs < MAX_TOKEN_LIFETIME_S * 1000;
+}
 
 /**
  * 回傳 `{ 'Proxy-Authorization': 'Bearer <token>' }` 或 `{}`，永不丟例外。
- * 第一次呼叫後快取 —— 同一個 process 裡的所有 request 共用同一張 token。
+ * 同一個 audience 在 `REFRESH_MARGIN_S` 定義的緩衝之前都用同一張快取的
+ * token，過了就主動重簽；重簽這次剛好失敗的話，只要舊 token 還沒到它
+ * 自己的硬性 1 小時期限，就先用它頂著（好過完全不帶 header）。
  *
  * @param mintToken 測試專用注入點；正常呼叫不要傳，用預設的自簽 JWT 實作。
  */
 export function getIapProxyAuthHeader(
   mintToken: TokenMinter = mintTokenSelfSigned,
 ): Record<string, string> {
-  if (cached) return cached;
   const audience = process.env.IAP_AUDIENCE;
-  if (!audience) {
-    cached = {};
-    return cached;
+  if (!audience) return {};
+
+  const entry = tokenCache.get(audience);
+  if (entry && isWithinRefreshWindow(entry.mintedAtMs)) {
+    return entry.header;
   }
+
   try {
     const token = mintToken(audience);
-    cached = token ? { 'Proxy-Authorization': `Bearer ${token}` } : {};
+    if (token) {
+      const header = { 'Proxy-Authorization': `Bearer ${token}` };
+      tokenCache.set(audience, { header, mintedAtMs: _now() });
+      return header;
+    }
   } catch {
-    // 沒有可用憑證 / gcloud 不在 / 簽署被拒 —— 安靜放棄，呼叫端走無 header 路徑
-    cached = {};
+    // 沒有可用憑證 / gcloud 不在 / 簽署被拒 —— 往下看有沒有舊的能頂著
   }
-  return cached;
+
+  // 重簽失敗了。如果手上還有一張沒到硬性 1 小時期限的舊 token，寧可用它
+  // 頂著也不要直接不帶 header。印一行警告（只有「這次重簽真的失敗了」
+  // 才會走到這裡，不是每個 request 都印）：不然 ambient 憑證真的斷線時
+  // 會被這個 fallback 悄悄蓋住，直到緩衝也用完才突然變成一片 401。
+  if (entry && isWithinHardExpiry(entry.mintedAtMs)) {
+    const ageS = Math.round((_now() - entry.mintedAtMs) / 1000);
+    // eslint-disable-next-line no-console -- 刻意的操作可見度，見上方註解
+    console.warn(
+      `iapAuth: re-mint failed for ${audience}, falling back to a token minted ${ageS}s ago (not yet hard-expired)`,
+    );
+    return entry.header;
+  }
+  tokenCache.delete(audience);
+  return {};
 }
 
 /** 測試專用：清掉記憶體快取，讓下一次呼叫重新判斷環境變數。 */
 export function _resetIapProxyAuthHeaderCacheForTests(): void {
-  cached = null;
+  tokenCache.clear();
+}
+
+/** 測試專用：換掉內部時鐘來源，模擬時間流逝而不用真的等待。 */
+export function _setClockForTests(now: () => number): void {
+  _now = now;
+}
+
+/** 測試專用：把時鐘換回真正的 `Date.now`。 */
+export function _resetClockForTests(): void {
+  _now = () => Date.now();
 }

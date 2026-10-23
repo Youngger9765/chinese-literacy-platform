@@ -240,6 +240,83 @@ class GetIapToken(unittest.TestCase):
         iam_mint.assert_called_once_with("https://from-env.example.com")
 
 
+class TokenCacheTtl(unittest.TestCase):
+    """#3731: the cache must refresh BEFORE the JWT's own 1h hard expiry,
+    not just cache forever (the original `@lru_cache(maxsize=None)` never
+    expired -- dormant today since nothing sets IAP_AUDIENCE, but a long-
+    running caller like locustfile.py would start getting 401s an hour in
+    if the first real deploy with IAP on shipped that behavior).
+    """
+
+    def setUp(self):
+        iap_token.get_iap_token.cache_clear()
+        self._env_audience_backup = os.environ.pop("IAP_AUDIENCE", None)
+        self._env_creds_backup = os.environ.pop("GOOGLE_APPLICATION_CREDENTIALS", None)
+        self._clock = 1_000_000.0
+        self._monotonic_patch = mock.patch.object(iap_token, "_monotonic", lambda: self._clock)
+        self._monotonic_patch.start()
+
+    def tearDown(self):
+        self._monotonic_patch.stop()
+        iap_token.get_iap_token.cache_clear()
+        if self._env_audience_backup is not None:
+            os.environ["IAP_AUDIENCE"] = self._env_audience_backup
+        if self._env_creds_backup is not None:
+            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = self._env_creds_backup
+
+    def test_reuses_the_cached_token_within_the_refresh_window_without_re_minting(self):
+        with mock.patch.object(iap_token, "_mint_via_iam_credentials", return_value="tok-1") as iam_mint:
+            first = iap_token.get_iap_token("https://example.com")
+            second = iap_token.get_iap_token("https://example.com")
+        self.assertEqual(first, "tok-1")
+        self.assertEqual(second, "tok-1")
+        iam_mint.assert_called_once()
+
+    def test_remints_once_the_refresh_margin_has_passed_well_before_hard_expiry(self):
+        with mock.patch.object(
+            iap_token, "_mint_via_iam_credentials", side_effect=["tok-1", "tok-2"]
+        ) as iam_mint:
+            first = iap_token.get_iap_token("https://example.com")
+            self._clock += 2701  # 45:01 in -- past the 2700s refresh margin, before the 3600s hard expiry
+            second = iap_token.get_iap_token("https://example.com")
+        self.assertEqual(first, "tok-1")
+        self.assertEqual(second, "tok-2")
+        self.assertEqual(iam_mint.call_count, 2)
+
+    def test_falls_back_to_the_stale_but_not_yet_hard_expired_token_when_a_remint_attempt_fails(self):
+        with mock.patch.object(
+            iap_token, "_mint_via_iam_credentials", side_effect=["tok-1", RuntimeError("IAM Credentials API down")]
+        ):
+            first = iap_token.get_iap_token("https://example.com")
+            self._clock += 2701
+            second = iap_token.get_iap_token("https://example.com")
+        self.assertEqual(first, "tok-1")
+        self.assertEqual(second, "tok-1")  # stale but still valid -- better than no header at all
+
+    def test_returns_none_once_both_the_refresh_margin_and_the_hard_expiry_have_passed_and_remint_still_fails(self):
+        with mock.patch.object(
+            iap_token,
+            "_mint_via_iam_credentials",
+            side_effect=["tok-1", RuntimeError("IAM Credentials API down")],
+        ):
+            iap_token.get_iap_token("https://example.com")
+            self._clock += 3601  # past the hard 1h expiry too
+            second = iap_token.get_iap_token("https://example.com")
+        self.assertIsNone(second)
+
+    def test_cache_is_keyed_per_audience_not_shared_globally(self):
+        with mock.patch.object(
+            iap_token, "_mint_via_iam_credentials", side_effect=lambda aud: f"tok-for-{aud}"
+        ) as iam_mint:
+            a = iap_token.get_iap_token("https://a.example.com")
+            b = iap_token.get_iap_token("https://b.example.com")
+            a_again = iap_token.get_iap_token("https://a.example.com")
+        self.assertEqual(a, "tok-for-https://a.example.com")
+        self.assertEqual(b, "tok-for-https://b.example.com")
+        self.assertEqual(a_again, a)
+        self.assertEqual(iam_mint.call_count, 2)  # a's second call was cached, not re-minted
+
+
 class IapHeader(unittest.TestCase):
     def setUp(self):
         iap_token.get_iap_token.cache_clear()

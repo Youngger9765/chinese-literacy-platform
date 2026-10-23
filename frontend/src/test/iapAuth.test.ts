@@ -39,6 +39,8 @@ import { join } from 'node:path';
 import {
   getIapProxyAuthHeader,
   _resetIapProxyAuthHeaderCacheForTests,
+  _setClockForTests,
+  _resetClockForTests,
 } from '../../tests/e2e/utils/iapAuth';
 
 function decodeJwtPayload(token: string): Record<string, unknown> {
@@ -169,4 +171,79 @@ describe('getIapProxyAuthHeader — default (self-signed JWT) minter, key-file b
   // "minter throws -> {} not throw" contract above (DI section) already
   // locks the wrapper's error-swallowing behavior generically, independent
   // of which minter is plugged in, so this is not a coverage gap.
+});
+
+describe('getIapProxyAuthHeader — token cache TTL (refresh before the 1h hard expiry, #3731)', () => {
+  const audience = 'https://example.com';
+  let clock: number;
+
+  beforeEach(() => {
+    _resetIapProxyAuthHeaderCacheForTests();
+    vi.unstubAllEnvs();
+    vi.stubEnv('IAP_AUDIENCE', audience);
+    clock = 1_000_000_000;
+    _setClockForTests(() => clock);
+  });
+
+  afterEach(() => {
+    _resetClockForTests();
+    vi.unstubAllEnvs();
+  });
+
+  it('reuses the cached token within the refresh window without re-minting', () => {
+    const mintToken = vi.fn(() => 'tok-1');
+    getIapProxyAuthHeader(mintToken);
+    getIapProxyAuthHeader(mintToken);
+    expect(mintToken).toHaveBeenCalledTimes(1);
+  });
+
+  it('re-mints once the refresh margin has passed, well before the hard 1h expiry', () => {
+    const mintToken = vi.fn().mockReturnValueOnce('tok-1').mockReturnValueOnce('tok-2');
+    const first = getIapProxyAuthHeader(mintToken);
+    clock += 2_701_000; // 45:01 in -- past the 2700s refresh margin, before the 3600s hard expiry
+    const second = getIapProxyAuthHeader(mintToken);
+    expect(first).toEqual({ 'Proxy-Authorization': 'Bearer tok-1' });
+    expect(second).toEqual({ 'Proxy-Authorization': 'Bearer tok-2' });
+    expect(mintToken).toHaveBeenCalledTimes(2);
+  });
+
+  it('falls back to the stale-but-not-yet-hard-expired token when a re-mint attempt fails', () => {
+    const mintToken = vi
+      .fn()
+      .mockReturnValueOnce('tok-1')
+      .mockImplementationOnce(() => {
+        throw new Error('IAM Credentials API down');
+      });
+    const first = getIapProxyAuthHeader(mintToken);
+    clock += 2_701_000;
+    const second = getIapProxyAuthHeader(mintToken);
+    expect(first).toEqual({ 'Proxy-Authorization': 'Bearer tok-1' });
+    expect(second).toEqual({ 'Proxy-Authorization': 'Bearer tok-1' }); // stale but still valid
+  });
+
+  it('returns {} once both the refresh margin and the hard expiry have passed and re-mint still fails', () => {
+    const mintToken = vi.fn().mockReturnValueOnce('tok-1').mockImplementation(() => {
+      throw new Error('IAM Credentials API down');
+    });
+    getIapProxyAuthHeader(mintToken);
+    clock += 3_601_000; // past the hard 1h expiry too
+    const second = getIapProxyAuthHeader(mintToken);
+    expect(second).toEqual({});
+  });
+
+  it('caches per audience, not globally', () => {
+    const mintToken = vi.fn((aud: string) => `tok-for-${aud}`);
+    // getIapProxyAuthHeader reads process.env.IAP_AUDIENCE directly, so to
+    // exercise a second audience we flip the env var between calls rather
+    // than passing it as an argument.
+    const first = getIapProxyAuthHeader(mintToken);
+    vi.stubEnv('IAP_AUDIENCE', 'https://other.example.com');
+    const second = getIapProxyAuthHeader(mintToken);
+    vi.stubEnv('IAP_AUDIENCE', audience);
+    const firstAgain = getIapProxyAuthHeader(mintToken);
+    expect(first).toEqual({ 'Proxy-Authorization': `Bearer tok-for-${audience}` });
+    expect(second).toEqual({ 'Proxy-Authorization': 'Bearer tok-for-https://other.example.com' });
+    expect(firstAgain).toEqual(first);
+    expect(mintToken).toHaveBeenCalledTimes(2); // first audience's second lookup was cached, not re-minted
+  });
 });

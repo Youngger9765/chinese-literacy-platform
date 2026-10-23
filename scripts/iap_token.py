@@ -34,10 +34,21 @@ OAuth client，官方文件說明它不支援這種程式化核發的 token。
 這是唯一一份實作 —— bash 呼叫端 (`scripts/lib/iap-token.sh`) 透過
 `python3 scripts/iap_token.py <audience>` 的 CLI 模式轉呼叫這裡，
 不在 bash 裡重算一次；Node 那端 (`frontend/tests/e2e/utils/iapAuth.ts`)
-用 `google-auth-library` 做同一件事（詳見該檔案的註解）。
+用同樣的邏輯（本機金鑰簽 / `gcloud iam service-accounts sign-jwt`
+代簽），詳見該檔案的註解。
+
+## 快取有 TTL，會在硬性過期前主動重簽（#3731）
+
+JWT 的 `exp` 最多 1 小時，但快取本身**不是**簽好就用到天荒地老——
+過了 `_MAX_TOKEN_LIFETIME_S - _REFRESH_MARGIN_S`（預設 45 分鐘）就會
+主動重簽一張新的，不會讓呼叫端在長跑程序裡（例如
+`tests/load-testing/locustfile.py`）撞到一張已經過期的 token 開始
+收到 401。如果重簽這一次剛好失敗（IAM Credentials API 暫時打不通、
+`gcloud` 一時連不上），但手上舊的 token 都還沒到它自己的硬性 1 小時
+期限，會先用那張舊的頂著——總比直接不帶 header 好。
 
 這階段 IAP 還沒打開、沒有人設 IAP_AUDIENCE，所以 get_iap_token() 永遠
-回傳 None —— 對呼叫端是零行為改變。
+回傳 None、快取從來不會被寫入 —— 對呼叫端是零行為改變。
 
 Usage (library)：
     from scripts.iap_token import iap_header, urlopen_with_iap
@@ -54,12 +65,23 @@ import os
 import sys
 import time
 import urllib.request
-from functools import lru_cache
 from typing import Mapping
 
 # 服務帳號自簽 JWT 的有效期上限。#3730 canary 實測這個值可行；拉更長
 # 沒驗證過，寧可讓呼叫端更常重簽，也不要發一張沒試過時效的 token。
 _MAX_TOKEN_LIFETIME_S = 3600
+
+# #3731：快取要在硬性過期前多久主動重簽。45 分鐘進去就重簽（留 15 分鐘
+# 緩衝），不是簽好就用滿整個 1 小時——長跑程序才不會剛好撞到過期瞬間。
+_REFRESH_MARGIN_S = 900
+
+# 測試用的時鐘切換點（mock 這個名字，不要 mock stdlib 的 time.monotonic
+# 本身——那樣會連 TTL 測試以外的東西一起受影響）。
+_monotonic = time.monotonic
+
+# audience -> (token, 簽署當下的單調時間)。IAP 還沒打開、沒有人設
+# IAP_AUDIENCE 時這個 dict 永遠是空的。
+_token_cache: dict[str, tuple[str, float]] = {}
 
 
 def _build_claims(audience: str, sa_email: str, now: int | None = None) -> dict[str, object]:
@@ -124,28 +146,83 @@ def _mint_via_iam_credentials(audience: str, sa_email: str | None = None) -> str
     return _encode(signer, _build_claims(audience, email))
 
 
-@lru_cache(maxsize=None)
+def _mint(audience: str) -> str | None:
+    """實際去簽一張新的 token（不碰快取）。有金鑰檔優先走本機簽，
+    否則走 IAM Credentials 代簽——跟原本 `get_iap_token` 的分支邏輯
+    一樣，只是抽出來讓快取邏輯不用重複寫這段判斷。
+    """
+    key_path = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS", "")
+    if key_path and os.path.isfile(key_path):
+        token = _mint_via_key_file(key_path, audience)
+        if token:
+            return token
+    return _mint_via_iam_credentials(audience)
+
+
+def _is_within_refresh_window(minted_at: float) -> bool:
+    return (_monotonic() - minted_at) < (_MAX_TOKEN_LIFETIME_S - _REFRESH_MARGIN_S)
+
+
+def _is_within_hard_expiry(minted_at: float) -> bool:
+    return (_monotonic() - minted_at) < _MAX_TOKEN_LIFETIME_S
+
+
 def get_iap_token(audience: str | None = None) -> str | None:
-    """要 (並快取) 一張瞄準 `audience` 的服務帳號自簽 JWT。
+    """要 (並快取，有 TTL) 一張瞄準 `audience` 的服務帳號自簽 JWT。
 
     任何要不到的情況一律回傳 None，不丟例外：沒設 audience、沒有可用
     憑證、簽章失敗。呼叫端必須把 None 當成「這次請求不帶 IAP header、
     照舊發送」—— 跟 IAP 還沒打開時的行為完全一樣。
+
+    快取不是簽好就用到天荒地老：過了 `_REFRESH_MARGIN_S` 定義的緩衝
+    就會主動重簽（見模組開頭「快取有 TTL」那段，#3731）。
     """
     aud = audience or os.environ.get("IAP_AUDIENCE", "")
     if not aud:
         return None
+
+    cached = _token_cache.get(aud)
+    if cached is not None and _is_within_refresh_window(cached[1]):
+        return cached[0]
+
     try:
-        key_path = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS", "")
-        if key_path and os.path.isfile(key_path):
-            token = _mint_via_key_file(key_path, aud)
-            if token:
-                return token
-        return _mint_via_iam_credentials(aud)
+        token = _mint(aud)
     except Exception:
         # 沒裝 google-auth 相關套件 / 沒有有效憑證 / 簽章 API 拒絕 ——
-        # 安靜放棄，呼叫端走無 header 路徑
-        return None
+        # 當作這次沒簽到，往下看有沒有舊的能頂著
+        token = None
+
+    if token:
+        _token_cache[aud] = (token, _monotonic())
+        return token
+
+    # 這次重簽失敗了。如果手上還有一張沒到硬性 1 小時期限的舊 token，
+    # 寧可用它頂著也不要直接不帶 header——它還是會被 IAP 接受。印一行到
+    # stderr（不是每個 request 都印，只有「這次重簽真的失敗了」才會走到
+    # 這裡）：不然 IAM Credentials API 真的斷線時會被這個 fallback 悄悄
+    # 蓋住，直到 15 分鐘緩衝也用完才突然變成一片 401，不知道中間發生過
+    # 什麼事。
+    if cached is not None and _is_within_hard_expiry(cached[1]):
+        age_s = int(_monotonic() - cached[1])
+        print(
+            f"iap_token: re-mint failed for {aud}, falling back to a token "
+            f"minted {age_s}s ago (not yet hard-expired)",
+            file=sys.stderr,
+        )
+        return cached[0]
+    if cached is not None:
+        _token_cache.pop(aud, None)
+    return None
+
+
+def _reset_token_cache_for_tests() -> None:
+    _token_cache.clear()
+
+
+# 相容舊呼叫法：這支原本是 `functools.lru_cache` 包的，測試檔一直用
+# `get_iap_token.cache_clear()` 清快取；換成手動 TTL 快取後保留這個
+# 介面，不用把所有呼叫端跟著改名。
+get_iap_token.cache_clear = _reset_token_cache_for_tests  # type: ignore[attr-defined]
 
 
 def iap_header(audience: str | None = None) -> dict[str, str]:
