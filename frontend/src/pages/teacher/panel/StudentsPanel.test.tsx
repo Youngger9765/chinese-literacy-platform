@@ -150,3 +150,88 @@ describe('學生分頁 (#3376)', () => {
     expect(screen.queryByRole('link', { name: '作答紀錄' })).not.toBeInTheDocument();
   });
 });
+
+describe('自主練習 section (self-practice sessions)', () => {
+  beforeEach(() => {
+    vi.spyOn(api, 'getStudentSessions').mockResolvedValue([]);
+  });
+
+  it('shows self-practice sessions that are not linked to any assignment, and excludes the assignment-linked one', async () => {
+    vi.mocked(api.getStudentAssignments).mockResolvedValue({
+      student_id: 1,
+      student_name: '王小明',
+      rows: [{
+        assignment_id: 10, title: '甲', due_date: null, state: 'completed', score: 80, current_step: null,
+        reading_accuracy: 96, comprehension: null, vocab: 80, error_chars: [], session_id: 501,
+      }],
+    });
+    vi.mocked(api.getStudentSessions).mockResolvedValue([
+      { id: 501, story_title: '甲', started_at: '2026-10-01T00:00:00Z', completed_at: '2026-10-01T00:10:00Z', overall_score: 80, status: 'completed' },
+      { id: 900, story_title: '自己讀的課文', started_at: '2026-10-05T00:00:00Z', completed_at: '2026-10-05T00:08:00Z', overall_score: 95, status: 'completed' },
+    ]);
+
+    const { StudentDetail } = await import('./StudentsPanel');
+    render(<StudentDetail classroomId={9} studentId={1} onBack={vi.fn()} />);
+
+    expect(await screen.findByText('自主練習')).toBeInTheDocument();
+    expect(screen.getAllByText('自己讀的課文').length).toBeGreaterThan(0);
+    expect(screen.getAllByRole('link', { name: '查看報告' })).toHaveLength(1);
+  });
+
+  it('shows nothing when every session is already linked to an assignment', async () => {
+    vi.mocked(api.getStudentAssignments).mockResolvedValue({
+      student_id: 1,
+      student_name: '王小明',
+      rows: [{
+        assignment_id: 10, title: '甲', due_date: null, state: 'completed', score: 80, current_step: null,
+        reading_accuracy: 96, comprehension: null, vocab: 80, error_chars: [], session_id: 501,
+      }],
+    });
+    vi.mocked(api.getStudentSessions).mockResolvedValue([
+      { id: 501, story_title: '甲', started_at: '2026-10-01T00:00:00Z', completed_at: '2026-10-01T00:10:00Z', overall_score: 80, status: 'completed' },
+    ]);
+
+    const { StudentDetail } = await import('./StudentsPanel');
+    render(<StudentDetail classroomId={9} studentId={1} onBack={vi.fn()} />);
+
+    await screen.findAllByText('甲');
+    expect(screen.queryByText('自主練習')).not.toBeInTheDocument();
+  });
+
+  it('does not show self-practice when opened from a single assignment (onlyAssignmentId)', async () => {
+    vi.mocked(api.getStudentAssignments).mockResolvedValue({
+      student_id: 1,
+      student_name: '王小明',
+      rows: [{
+        assignment_id: 10, title: '甲', due_date: null, state: 'completed', score: 80, current_step: null,
+        reading_accuracy: 96, comprehension: null, vocab: 80, error_chars: [], session_id: 501,
+      }],
+    });
+    vi.mocked(api.getStudentSessions).mockResolvedValue([
+      { id: 900, story_title: '自己讀的課文', started_at: '2026-10-05T00:00:00Z', completed_at: null, overall_score: null, status: 'in_progress' },
+    ]);
+
+    const { StudentDetail } = await import('./StudentsPanel');
+    render(<StudentDetail classroomId={9} studentId={1} onlyAssignmentId={10} backLabel="← 回「甲」" onBack={vi.fn()} />);
+
+    await screen.findByRole('button', { name: '← 回「甲」' });
+    expect(screen.queryByText('自主練習')).not.toBeInTheDocument();
+  });
+
+  it('shows an in-progress self-practice session without a score', async () => {
+    vi.mocked(api.getStudentAssignments).mockResolvedValue({
+      student_id: 1,
+      student_name: '王小明',
+      rows: [],
+    });
+    vi.mocked(api.getStudentSessions).mockResolvedValue([
+      { id: 900, story_title: '自己讀的課文', started_at: '2026-10-05T00:00:00Z', completed_at: null, overall_score: null, status: 'in_progress' },
+    ]);
+
+    const { StudentDetail } = await import('./StudentsPanel');
+    render(<StudentDetail classroomId={9} studentId={1} onBack={vi.fn()} />);
+
+    expect(await screen.findByText('自主練習')).toBeInTheDocument();
+    expect(screen.getAllByText('進行中').length).toBeGreaterThan(0);
+  });
+});
