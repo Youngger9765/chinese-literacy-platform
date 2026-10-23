@@ -18,6 +18,10 @@ env:
   REGISTRY: asia-east1-docker.pkg.dev/lingoleap-dev/lingoleap
   BACKEND_SERVICE: lingoleap-backend-staging
   FRONTEND_SERVICE: lingoleap-frontend-staging
+  # #3719 — IAP 準備：同 preview-deploy.yml 的同名開關，預設 false。
+  # 唯一的 on/off 開關只有這一行；真的要在 staging 上測 IAP 前，先讀
+  # docs/iap-runbook.md。
+  IAP_ENABLED: 'false'
 
 jobs:
   detect-changes:
@@ -103,6 +107,15 @@ jobs:
         run: |
           gcloud run services update-traffic ${{ env.BACKEND_SERVICE }} \
             --to-latest \
+            --region ${{ env.REGION }} \
+            --project ${{ env.PROJECT_ID }}
+
+      # #3719 — IAP 準備：預設關，改上面 env.IAP_ENABLED 才會跑。
+      - name: （IAP_ENABLED 時）替 staging backend 開 IAP
+        if: env.IAP_ENABLED == 'true'
+        run: |
+          gcloud beta run services update ${{ env.BACKEND_SERVICE }} \
+            --iap \
             --region ${{ env.REGION }} \
             --project ${{ env.PROJECT_ID }}
 
@@ -205,6 +218,15 @@ jobs:
         run: |
           gcloud run services update-traffic ${{ env.FRONTEND_SERVICE }} \
             --to-latest \
+            --region ${{ env.REGION }} \
+            --project ${{ env.PROJECT_ID }}
+
+      # #3719 — IAP 準備：同上，預設關。
+      - name: （IAP_ENABLED 時）替 staging frontend 開 IAP
+        if: env.IAP_ENABLED == 'true'
+        run: |
+          gcloud beta run services update ${{ env.FRONTEND_SERVICE }} \
+            --iap \
             --region ${{ env.REGION }} \
             --project ${{ env.PROJECT_ID }}
 
