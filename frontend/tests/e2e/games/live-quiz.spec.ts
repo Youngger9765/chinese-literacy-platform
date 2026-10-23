@@ -5,16 +5,15 @@
  *  1. (passing) Teacher real journey (sidebar → 遊戲區 → 課堂搶答 → setup
  *     → 開場) hosting for a real classroom; two enrolled students join via
  *     the real numeric-keypad UI and reach the waiting lobby.
- *  2. (test.fixme, #3710) Playing a full game to the podium/leaderboard —
- *     blocked by a real bug: once the server-timed reading phase ends,
- *     every player's (and the host's) screen stays stuck showing "看大螢幕
- *     讀題" forever and never reveals options, because the poll's
- *     version-based "unchanged" shortcut doesn't encode that time-derived
- *     sub-phase transition. A page reload recovers instantly (proving it's
- *     a stale-cache bug, not a slow reading timer) — reproduced live on
- *     staging with a real account, not inferred from source. The test body
- *     is kept intact (not deleted) so it runs for real the moment #3710 is
- *     fixed.
+ *  2. (passing, fixed by #3710) Playing a full game to the podium/
+ *     leaderboard — previously blocked by a real bug: once the server-
+ *     timed reading phase ended, every player's (and the host's) screen
+ *     stayed stuck showing "看大螢幕讀題" forever and never revealed
+ *     options, because the poll's version-based "unchanged" shortcut
+ *     didn't encode that time-derived sub-phase transition. A page reload
+ *     recovered instantly (proving it was a stale-cache bug, not a slow
+ *     reading timer) — reproduced live on staging with a real account,
+ *     not inferred from source.
  *  3. (passing, fixed by #3708) A student NOT enrolled in the host's
  *     classroom cannot join by code anymore — `join_game` now checks
  *     `ClassroomStudent` membership for the joining user, not just that
@@ -100,12 +99,12 @@ test.describe('課堂搶答 live_quiz', () => {
   });
 
   /**
-   * #3710 — blocked. Kept as a full, real implementation (not deleted) so
-   * it exercises the real game-to-leaderboard path the moment the stuck
-   * reading-phase bug is fixed; today it cannot progress past round 1.
+   * #3710 — fixed. Exercises the real game-to-leaderboard path end to
+   * end; previously could not progress past round 1 because the polled
+   * state_version never changed when the reading phase ended on the
+   * clock alone.
    */
   test('teacher hosts, two enrolled students play a full game to the leaderboard', async ({ page, browser, request }) => {
-    test.fixme(true, 'blocked by #3710 — players (and host) get stuck on 看大螢幕讀題 forever once the reading phase ends; only a page reload recovers');
     test.setTimeout(300_000);
 
     const teacher = await registerTeacher(request, 'lq-teacher-full');
@@ -189,15 +188,10 @@ test.describe('課堂搶答 live_quiz', () => {
   /**
    * #3685 acceptance criterion: "a student not in the class cannot join".
    *
-   * #3708 — blocked. `live_quiz.engine.join_game`
-   * (backend/app/services/live_quiz/engine.py) only checks that the
-   * GAME's classroom has the live_quiz feature turned on
-   * (`_require_live_quiz_enabled`) — it never checks that the joining user
-   * is actually a `ClassroomStudent` of that classroom. Any authenticated
-   * student who learns/guesses the 6-digit code can join a class-tied
-   * game. This test is the reproduction: an outsider student (enrolled in
-   * a DIFFERENT classroom) joins via the real `/live` → type code →
-   * confirm flow and is accepted.
+   * #3708 — fixed. `live_quiz.engine.join_game` checks that the joining
+   * user is a `ClassroomStudent` of the game's classroom. This test uses
+   * an outsider student enrolled in a different classroom and verifies
+   * rejection through the real `/live` → type code → confirm flow.
    */
   test('a student outside the class should not be able to join by code', async ({ page, request }) => {
     test.setTimeout(60_000);
@@ -243,8 +237,8 @@ test.describe('課堂搶答 live_quiz', () => {
     await page.getByRole('button', { name: '確認加入' }).click();
     await page.waitForTimeout(2000);
 
-    // Expected (and currently failing) behavior: the outsider should see a
-    // rejection, not the lobby/question state of a class they are not in.
+    // The outsider should see a rejection, not the lobby/question state
+    // of a class they are not in.
     await expect(page.getByText(/等待老師開始|看大螢幕讀題/)).not.toBeVisible();
   });
 });
