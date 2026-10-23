@@ -728,6 +728,62 @@ class TestUiUxReview20261015:
         )
         assert resp.status_code == 200
 
+    def test_polled_version_changes_once_the_reading_deadline_elapses(self, client, teacher, student1):
+        """Issue #3710: a client polling with ``after_version`` equal to
+        whatever version it last saw got ``unchanged: true`` forever once
+        the reading phase ended, because ``_player_phase_version`` only
+        encodes (round_index, status) — never the time-derived reading→
+        answer sub-phase transition. Every player's (and the host's)
+        screen stayed stuck on "看大螢幕讀題" until a page reload (which
+        omits ``after_version`` and always gets the full state back).
+        """
+        game = _create_game(client, teacher, lesson_uids=[LESSON_A], reading_seconds=4)
+        client.post(f"/api/live-quiz/games/{game['code']}/join", headers=auth_header(student1["token"]))
+        client.post(f"/api/live-quiz/games/{game['code']}/start", headers=auth_header(teacher["token"]))
+
+        reading_state = client.get(
+            f"/api/live-quiz/games/{game['code']}/state", headers=auth_header(student1["token"])
+        ).json()
+        assert "options" not in (reading_state["round"] or {})
+        seen_version = reading_state["version"]
+
+        # Host-side too — the bug report said the HOST's screen also got
+        # stuck, and the host polls on a different raw version source
+        # (game.version, not _player_phase_version).
+        host_reading_state = client.get(
+            f"/api/live-quiz/games/{game['code']}/state", headers=auth_header(teacher["token"])
+        ).json()
+        assert "options" not in (host_reading_state["round"] or {})
+        host_seen_version = host_reading_state["version"]
+
+        # Simulate the 4s reading delay having elapsed (same technique as
+        # test_reading_phase_opens_after_delay_elapses above) and force the
+        # in-memory fast-poll cache to expire immediately — same effect as
+        # its real 1s TTL lapsing between polls, just deterministic here.
+        db = TestingSessionLocal()
+        try:
+            from datetime import datetime, timedelta, timezone
+            row = live_quiz_engine.get_game_by_code(db, game["code"])
+            row.current_round_started_at = datetime.now(timezone.utc) - timedelta(seconds=5)
+            db.commit()
+        finally:
+            db.close()
+        live_quiz_engine.fast_poll_cache.invalidate(game["code"])
+
+        polled = client.get(
+            f"/api/live-quiz/games/{game['code']}/state?after_version={seen_version}",
+            headers=auth_header(student1["token"]),
+        ).json()
+        assert polled.get("unchanged") is not True, polled
+        assert "options" in (polled.get("round") or {}), polled
+
+        host_polled = client.get(
+            f"/api/live-quiz/games/{game['code']}/state?after_version={host_seen_version}",
+            headers=auth_header(teacher["token"]),
+        ).json()
+        assert host_polled.get("unchanged") is not True, host_polled
+        assert "options" in (host_polled.get("round") or {}), host_polled
+
     def test_reading_seconds_zero_disables_the_delay(self, client, teacher, student1):
         game = _create_game(client, teacher, lesson_uids=[LESSON_A], reading_seconds=0)
         client.post(f"/api/live-quiz/games/{game['code']}/join", headers=auth_header(student1["token"]))
