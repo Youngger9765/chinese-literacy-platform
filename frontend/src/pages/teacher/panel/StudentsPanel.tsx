@@ -11,8 +11,10 @@ import { useAuth } from '../../../contexts/AuthContext';
 import {
   AssignmentMatrixResponse,
   StudentAssignmentsResponse,
+  StudentSession,
   getAssignmentMatrix,
   getStudentAssignments,
+  getStudentSessions,
 } from '../../../services/teacherApi';
 import { CellBadge, distinctTitles, isOverdue } from './AssignmentMatrixGrid';
 
@@ -71,6 +73,21 @@ export function StudentDetail({
       .catch(() => setError('無法載入這位學生的作業'));
   }, [token, classroomId, studentId]);
 
+  // Self-practice sessions (not linked to any assignment) — matrix/assignment
+  // screens have no path to this data at all otherwise. Fetched separately
+  // from `data` (assignment rows) since it's a different endpoint/shape; the
+  // dedup against assignment-linked session ids happens below, once both are
+  // loaded.
+  const [sessions, setSessions] = useState<StudentSession[] | null>(null);
+
+  useEffect(() => {
+    if (!token) return;
+    setSessions(null);
+    getStudentSessions(token, studentId)
+      .then(setSessions)
+      .catch(() => setSessions([]));
+  }, [token, studentId]);
+
   return (
     <div className="space-y-4">
       <button type="button" onClick={onBack} className="text-sm text-gray-500 hover:text-gray-800 cursor-pointer">
@@ -84,6 +101,15 @@ export function StudentDetail({
           .map((r) => ({ ...r, title: titles.get(r.assignment_id) ?? r.title }));
         // Every part empty for every row: one sentence instead of columns of dashes (codex screen audit #1).
         const noParts = rows.every((r) => r.reading_accuracy === null && r.comprehension === null && r.vocab === null && r.error_chars.length === 0);
+        // Self-practice = a session NOT already linked to one of this
+        // student's assignment rows. Hidden when viewing a single assignment
+        // (onlyAssignmentId) since that's a narrower, assignment-only context.
+        const assignmentSessionIds = new Set(
+          data.rows.map((r) => r.session_id).filter((id): id is number => id !== null),
+        );
+        const selfPracticeSessions = !onlyAssignmentId
+          ? (sessions ?? []).filter((s) => !assignmentSessionIds.has(s.id))
+          : [];
         return (
         <>
           <h3 className="text-xl font-bold text-gray-900">{data.student_name}</h3>
@@ -158,6 +184,34 @@ export function StudentDetail({
             </p>
           ) : (
             <p className="text-sm text-gray-500">「—」代表這份作業沒有記錄到那一部分</p>
+          )}
+          {selfPracticeSessions.length > 0 && (
+            <div className="space-y-2 pt-2">
+              <h4 className="text-base font-semibold text-gray-900">自主練習</h4>
+              <ul className="space-y-2" aria-label="自主練習紀錄">
+                {selfPracticeSessions.map((s) => (
+                  <li
+                    key={s.id}
+                    className="rounded-xl border border-gray-200 p-3 flex items-center justify-between gap-3"
+                  >
+                    <div className="min-w-0">
+                      <p className="font-medium text-gray-900 truncate">{s.story_title ?? '（未知課文）'}</p>
+                      <p className="text-xs text-gray-500">
+                        {s.status === 'completed'
+                          ? `已完成${s.overall_score !== null ? ` · ${Math.round(s.overall_score)} 分` : ''}`
+                          : '進行中'}
+                      </p>
+                    </div>
+                    <Link
+                      to={`/teacher/students/${studentId}/sessions/${s.id}/report`}
+                      className="shrink-0 inline-flex items-center gap-0.5 px-2 py-1 rounded text-xs font-medium text-accent border border-accent/30 hover:bg-accent-bg transition-colors"
+                    >
+                      查看報告
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
         </>
         );
