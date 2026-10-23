@@ -282,5 +282,72 @@ class Cli(unittest.TestCase):
             fake_print.assert_called_once_with("abc")
 
 
+class SidecarBindAddress(unittest.TestCase):
+    """#3733 canary found: binding 127.0.0.1 makes Cloud Run's startup probe
+    fail (ERROR_CONNECTION_FAILED x3) -- reproduced locally (curl from
+    outside the container got CURLE_GOT_NOTHING against a 127.0.0.1-bound
+    server reached via Docker's port-forwarding, exactly the same class of
+    "reachable from inside, not from outside" failure), fixed by binding
+    0.0.0.0 instead, and reproduced-then-fixed again to confirm. This test
+    locks the binding itself (not just that *a* socket accepts connections)
+    so a future revert back to 127.0.0.1 is caught here, in a test, rather
+    than only on the next real deploy.
+    """
+
+    def test_binds_all_interfaces_not_just_loopback(self):
+        server = run_invoker_token._build_server(0)
+        try:
+            host, _port = server.server_address
+            self.assertEqual(host, "0.0.0.0")
+        finally:
+            server.server_close()
+
+
+class ServeCliStartup(unittest.TestCase):
+    """The sidecar's own `--serve` startup path: which port it binds to
+    (SIDECAR_PORT, deliberately NOT `PORT` -- Cloud Run has special meaning
+    for that name and might inject its own value for every container in a
+    revision, silently overriding whatever the image's Dockerfile sets) and
+    that it logs a flushed startup line (the canary's "zero sidecar stdout
+    lines in the logs at all" turned out to be Python's default full-
+    buffered stdout under a non-tty, not proof the process never started --
+    this closes that observability gap going forward).
+    """
+
+    def test_reads_SIDECAR_PORT_env_var_and_logs_a_flushed_startup_line(self):
+        fake_server = mock.Mock()
+        with mock.patch.dict(os.environ, {"SIDECAR_PORT": "9999"}), \
+             mock.patch.object(run_invoker_token, "_build_server", return_value=fake_server) as build, \
+             mock.patch("builtins.print") as fake_print:
+            run_invoker_token.main(["run_invoker_token.py", "--serve"])
+        build.assert_called_once_with(9999)
+        fake_server.serve_forever.assert_called_once()
+        fake_print.assert_called_once()
+        args, kwargs = fake_print.call_args
+        self.assertIn("9999", args[0])
+        self.assertTrue(kwargs.get("flush"), "startup line must be flush=True or it won't show up in Cloud Run logs")
+
+    def test_defaults_to_8081_when_SIDECAR_PORT_unset(self):
+        fake_server = mock.Mock()
+        env_without_port = {k: v for k, v in os.environ.items() if k != "SIDECAR_PORT"}
+        with mock.patch.dict(os.environ, env_without_port, clear=True), \
+             mock.patch.object(run_invoker_token, "_build_server", return_value=fake_server) as build, \
+             mock.patch("builtins.print"):
+            run_invoker_token.main(["run_invoker_token.py", "--serve"])
+        build.assert_called_once_with(8081)
+
+    def test_does_not_read_the_generic_PORT_env_var(self):
+        # The whole point of SIDECAR_PORT: a Cloud-Run-injected PORT=8080
+        # for the ingress container must NOT leak into this sidecar's own
+        # port selection.
+        fake_server = mock.Mock()
+        with mock.patch.dict(os.environ, {"PORT": "8080"}, clear=False), \
+             mock.patch.object(run_invoker_token, "_build_server", return_value=fake_server) as build, \
+             mock.patch("builtins.print"):
+            os.environ.pop("SIDECAR_PORT", None)
+            run_invoker_token.main(["run_invoker_token.py", "--serve"])
+        build.assert_called_once_with(8081)
+
+
 if __name__ == "__main__":
     unittest.main()

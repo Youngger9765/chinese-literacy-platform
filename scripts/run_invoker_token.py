@@ -42,7 +42,7 @@ Usage (library)：
     headers = {**base_headers, **invoker_header(audience)}
 
 Usage (sidecar server，給 nginx `auth_request` 打)：
-    BACKEND_INVOKER_AUDIENCE=https://backend.run.app PORT=8081 \
+    BACKEND_INVOKER_AUDIENCE=https://backend.run.app SIDECAR_PORT=8081 \
         python3 scripts/run_invoker_token.py --serve
 """
 
@@ -179,17 +179,30 @@ def _build_server(port: int):
             # nginx 每次 auth_request 的子請求都洗進 Cloud Run log。
             pass
 
-    return http.server.HTTPServer(("127.0.0.1", port), _Handler)
+    # ⚠️ 綁 0.0.0.0，不要綁 127.0.0.1——canary 實測過(2026-10-24)綁
+    # 127.0.0.1 時 Cloud Run 的 startup probe 連不上（3 次
+    # ERROR_CONNECTION_FAILED），換成 0.0.0.0 才過。這是容器化服務的標準
+    # 慣例：只綁 loopback 對「平台層的健康檢查從哪個角度連進來」這件事
+    # 太脆弱，綁所有介面才確定涵蓋得到。
+    return http.server.HTTPServer(("0.0.0.0", port), _Handler)  # noqa: S104
 
 
 def main(argv: list[str]) -> int:
     """CLI:
         python3 scripts/run_invoker_token.py <audience>   # 印出 bare token
         python3 scripts/run_invoker_token.py --serve      # 常駐當 sidecar
-                                                           # (讀 PORT 環境變數，預設 8081)
+                                                           # (讀 SIDECAR_PORT 環境變數，預設 8081)
     """
     if len(argv) > 1 and argv[1] == "--serve":
-        port = int(os.environ.get("PORT", "8081"))
+        # 故意不讀 `PORT`：那個名字在 Cloud Run 整套生態裡有特別意義
+        # （平台會為 ingress 容器注入），用它當 sidecar 自己的聽波通道
+        # 有被平台注入值悄悄覆蓋的風險——改用一個 Cloud Run 不會
+        # 特別處理的名字，避免跟平台自己的約定扒上。
+        port = int(os.environ.get("SIDECAR_PORT", "8081"))
+        # 故意用 print(..., flush=True)：Python 對非-tty 的 stdout 預設是
+        # full-buffered，容器裡不 flush 就不會出現在 Cloud Run log——
+        # 上一輪 canary 實測就是因為這樣，連「有沒有啟動過」都分不出來。
+        print(f"run_invoker_token sidecar listening on 0.0.0.0:{port}", flush=True)
         _build_server(port).serve_forever()
         return 0
     audience = argv[1] if len(argv) > 1 else None

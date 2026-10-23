@@ -12,6 +12,6 @@ FROM python:3.12-alpine
 WORKDIR /app
 COPY scripts/run_invoker_token.py ./run_invoker_token.py
 # No external deps -- stdlib only (urllib, http.server, base64, json).
-ENV PORT=8081
+ENV SIDECAR_PORT=8081
 EXPOSE 8081
 CMD ["python3", "run_invoker_token.py", "--serve"]
