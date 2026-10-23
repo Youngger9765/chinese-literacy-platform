@@ -17,6 +17,7 @@
  * 貢獻" went from 0 to something. `test.setTimeout` is raised accordingly.
  */
 import { test, expect } from '../fixtures/pageerror-fixture';
+import { getIapProxyAuthHeader } from '../utils/iapAuth';
 import {
   adminToken,
   batchCreateStudents,
@@ -58,7 +59,7 @@ test.describe('跨班賽季 league', () => {
     const [studentA] = await batchCreateStudents(request, teacherA, classroomA.id, 1, 'league');
     await batchCreateStudents(request, teacherB, classroomB.id, 1, 'league-b');
 
-    const ctxB = await browser.newContext();
+    const ctxB = await browser.newContext({ extraHTTPHeaders: getIapProxyAuthHeader() }) /* #3719 */;
     const pageB = await ctxB.newPage();
     const errors: string[] = [];
     watchErrors('teacherA', page, errors);
@@ -97,7 +98,7 @@ test.describe('跨班賽季 league', () => {
     await pageB.waitForTimeout(2000);
 
     // ── Student in class A: real entry → sidebar → 跨班賽季 → see board ──
-    const ctxS = await browser.newContext();
+    const ctxS = await browser.newContext({ extraHTTPHeaders: getIapProxyAuthHeader() }) /* #3719 */;
     const pageS = await ctxS.newPage();
     watchErrors('student', pageS, errors);
     await loginViaUI(pageS, studentA.email, studentA.password);

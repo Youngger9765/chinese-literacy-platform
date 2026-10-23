@@ -269,7 +269,14 @@ jobs:
         env:
           BACKEND_URL: ${{ steps.preview-urls.outputs.backend_url }}
           FRONTEND_URL: ${{ steps.preview-urls.outputs.frontend_url }}
+          # #3719 — IAP 準備：preview 未來可能在前面加一層 IAP。沒有任何
+          # secret 可讀時（還沒打開 IAP）下面是空陣列，跟今天完全一樣。
+          IAP_AUDIENCE: ${{ secrets.IAP_AUDIENCE }}
         run: |
+          source scripts/lib/iap-token.sh
+          IAP_AUTH_ARGS=()
+          IAP_TOKEN="$(iap_token "${IAP_AUDIENCE:-}")"
+          [ -n "${IAP_TOKEN}" ] && IAP_AUTH_ARGS=(-H "Proxy-Authorization: Bearer ${IAP_TOKEN}")
           # CORS env update creates a new Cloud Run revision which is cold.
           # Browsers hitting a cold revision see 5xx without CORS headers,
           # surfacing as spurious "blocked by CORS policy" console errors.
@@ -280,7 +287,7 @@ jobs:
           #    for the first fetch(), ensuring the API route + CORS middleware
           #    are both JIT-loaded before the real user request arrives.
           for i in 1 2 3; do
-            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$BACKEND_URL/" || echo timeout)
+            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "${IAP_AUTH_ARGS[@]+${IAP_AUTH_ARGS[@]}}" "$BACKEND_URL/" || echo timeout)
             echo "Warmup root attempt $i: HTTP $code"
             case "$code" in timeout|000) sleep 2 ;; *) break ;; esac
           done
@@ -290,6 +297,7 @@ jobs:
               -H "Origin: $FRONTEND_URL" \
               -H "Access-Control-Request-Method: GET" \
               -H "Access-Control-Request-Headers: authorization,content-type" \
+              "${IAP_AUTH_ARGS[@]+${IAP_AUTH_ARGS[@]}}" \
               "${BACKEND_URL}${path}" || echo timeout)
             echo "Preflight $path: HTTP $code"
           done
@@ -316,6 +324,8 @@ jobs:
           E2E_BACKEND_URL: ${{ steps.preview-urls.outputs.backend_url }}
           E2E_ONLY_LESSONS: "20063"      # G6-L22，三篇，Hans 回報的那一課
           E2E_EXPECT_DEPLOYED: "1"
+          # #3719 — IAP 準備：見「Warm backend」步驟的同一段說明。
+          IAP_AUDIENCE: ${{ secrets.IAP_AUDIENCE }}
         run: |
           npm ci
           npx playwright install chromium --with-deps

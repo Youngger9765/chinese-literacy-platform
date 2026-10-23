@@ -48,6 +48,7 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { speakTextWithProgress } from '../../src/services/ttsApi';
+import { getIapProxyAuthHeader } from '../../tests/e2e/utils/iapAuth';
 
 const STAGING_API = 'https://lingoleap-backend-staging-958347263320.asia-east1.run.app';
 
@@ -65,7 +66,9 @@ interface MappingResponse {
 }
 
 async function fetchJsonReal<T>(url: string): Promise<T> {
-  const res = await fetch(url);
+  // #3719: real network call to staging from Node, outside any Playwright
+  // fixture — needs the IAP header passed explicitly.
+  const res = await fetch(url, { headers: getIapProxyAuthHeader() });
   if (!res.ok) throw new Error(`${url} → HTTP ${res.status}`);
   return res.json() as Promise<T>;
 }

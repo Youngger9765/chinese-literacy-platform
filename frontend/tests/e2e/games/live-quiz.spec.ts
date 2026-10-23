@@ -20,6 +20,7 @@
  *     the game's classroom has the feature on.
  */
 import { test, expect } from '../fixtures/pageerror-fixture';
+import { getIapProxyAuthHeader } from '../utils/iapAuth';
 import {
   batchCreateStudents,
   createClassroomForTeacher,
@@ -66,8 +67,8 @@ test.describe('課堂搶答 live_quiz', () => {
     await expect(page.getByText(code)).toBeVisible();
 
     // ── Two enrolled students join via the real numeric-keypad UI ────────
-    const ctxA = await browser.newContext();
-    const ctxB = await browser.newContext();
+    const ctxA = await browser.newContext({ extraHTTPHeaders: getIapProxyAuthHeader() }) /* #3719 */;
+    const ctxB = await browser.newContext({ extraHTTPHeaders: getIapProxyAuthHeader() }) /* #3719 */;
     const sa = await ctxA.newPage();
     const sb = await ctxB.newPage();
     watch('studentA', sa);
@@ -129,8 +130,8 @@ test.describe('課堂搶答 live_quiz', () => {
     await page.waitForURL(/\/teacher\/live\/[A-Z0-9]{6}/i, { timeout: 20000 });
     const code = page.url().split('/').pop()!;
 
-    const ctxA = await browser.newContext();
-    const ctxB = await browser.newContext();
+    const ctxA = await browser.newContext({ extraHTTPHeaders: getIapProxyAuthHeader() }) /* #3719 */;
+    const ctxB = await browser.newContext({ extraHTTPHeaders: getIapProxyAuthHeader() }) /* #3719 */;
     const sa = await ctxA.newPage();
     const sb = await ctxB.newPage();
     watch('studentA', sa);
