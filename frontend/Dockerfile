@@ -27,9 +27,15 @@ RUN npm run build
 # Stage 2: Serve with nginx
 FROM nginx:alpine
 COPY --from=build /app/dist /usr/share/nginx/html
-# SPA fallback: all routes → index.html
-# absolute_redirect off: dir 尾斜線 301（如 /presentation → /presentation/）改送相對 Location，
-# 否則 nginx 用內部 listen 8080 + http 拼絕對 URL → http://host:8080/... 對外連不到（Cloud Run 只開 443）
-RUN echo 'server { listen 8080; absolute_redirect off; location / { root /usr/share/nginx/html; try_files $uri $uri/ /index.html; } }' > /etc/nginx/conf.d/default.conf
+
+# #3719 — IAP 準備：staging/preview 的部署腳本在 build 這個 image 之前就已經
+# 知道自己這次 backend 的 Cloud Run 網址，傳進來就會同源轉送 /api、/assets、
+# /q（跟 firebase.json 的 rewrite 同一組前綴）。不傳（production 走這裡，
+# production 的 Firebase Hosting 路線本來就已經同源，見 firebase.json）就是
+# 今天這樣，只有 SPA fallback —— 零改變。細節/取捨見 render-nginx-conf.sh。
+ARG BACKEND_INTERNAL_URL=""
+ENV BACKEND_INTERNAL_URL=${BACKEND_INTERNAL_URL}
+COPY docker/render-nginx-conf.sh /tmp/render-nginx-conf.sh
+RUN sh /tmp/render-nginx-conf.sh && rm /tmp/render-nginx-conf.sh
 EXPOSE 8080
 CMD ["nginx", "-g", "daemon off;"]

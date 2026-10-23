@@ -69,9 +69,13 @@ export async function getErrorPatterns(
   studentId: number,
   storySlug?: string,
 ): Promise<ErrorPatternsResponse> {
-  const url = new URL(`${API_BASE}/api/learning/students/${studentId}/error-patterns`);
-  if (storySlug) url.searchParams.set('story_slug', storySlug);
-  const res = await fetch(url.toString(), {
+  // #3719: `new URL(path)` with no base throws on a relative string
+  // (IAP-prep's same-origin API_BASE="" for staging/preview, already true
+  // of prod's Firebase build). Build the query string by hand instead of
+  // going through URL, so the request stays byte-identical to before in
+  // both the relative and absolute cases — no extra absolutization.
+  const qs = storySlug ? `?${new URLSearchParams({ story_slug: storySlug })}` : '';
+  const res = await fetch(`${API_BASE}/api/learning/students/${studentId}/error-patterns${qs}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   if (!res.ok) throw new Error(`getErrorPatterns failed: ${res.status}`);
