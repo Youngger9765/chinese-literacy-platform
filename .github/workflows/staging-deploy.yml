@@ -107,13 +107,19 @@ jobs:
             --project ${{ env.PROJECT_ID }}
 
       - name: Verify backend health
+        env:
+          IAP_AUDIENCE: ${{ secrets.IAP_AUDIENCE }}
         run: |
+          source scripts/lib/iap-token.sh
+          IAP_AUTH_ARGS=()
+          IAP_TOKEN="$(iap_token "${IAP_AUDIENCE:-}")"
+          [ -n "${IAP_TOKEN}" ] && IAP_AUTH_ARGS=(-H "Proxy-Authorization: Bearer ${IAP_TOKEN}")
           URL=$(gcloud run services describe ${{ env.BACKEND_SERVICE }} \
             --region ${{ env.REGION }} \
             --project ${{ env.PROJECT_ID }} \
             --format='value(status.url)')
           for i in 1 2 3 4 5; do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL/")
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${IAP_AUTH_ARGS[@]+${IAP_AUTH_ARGS[@]}}" "$URL/")
             echo "Attempt $i: Backend health = $STATUS"
             [ "$STATUS" = "200" ] && exit 0
             sleep 10
@@ -197,13 +203,19 @@ jobs:
             --project ${{ env.PROJECT_ID }}
 
       - name: Verify frontend health
+        env:
+          IAP_AUDIENCE: ${{ secrets.IAP_AUDIENCE }}
         run: |
+          source scripts/lib/iap-token.sh
+          IAP_AUTH_ARGS=()
+          IAP_TOKEN="$(iap_token "${IAP_AUDIENCE:-}")"
+          [ -n "${IAP_TOKEN}" ] && IAP_AUTH_ARGS=(-H "Proxy-Authorization: Bearer ${IAP_TOKEN}")
           URL=$(gcloud run services describe ${{ env.FRONTEND_SERVICE }} \
             --region ${{ env.REGION }} \
             --project ${{ env.PROJECT_ID }} \
             --format='value(status.url)')
           for i in 1 2 3 4 5; do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL/")
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${IAP_AUTH_ARGS[@]+${IAP_AUTH_ARGS[@]}}" "$URL/")
             echo "Attempt $i: Frontend health = $STATUS"
             [ "$STATUS" = "200" ] && exit 0
             sleep 10
@@ -304,12 +316,37 @@ jobs:
     env:
       STAGING_BACKEND: https://lingoleap-backend-staging-958347263320.asia-east1.run.app
     steps:
+      - uses: actions/checkout@v6
+
+      # #3719 — IAP 準備：staging 未來可能在前面加一層 IAP。IAP_AUDIENCE 沒有
+      # 任何 secret 可讀（還沒打開 IAP），所以下面每一步都跟今天完全一樣——
+      # 這一步只是把「打開時只要設一個 secret」這件事準備好。
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Mint IAP token once for this job (masked)
+        id: iap
+        env:
+          IAP_AUDIENCE: ${{ secrets.IAP_AUDIENCE }}
+        run: |
+          source scripts/lib/iap-token.sh
+          TOKEN="$(iap_token "${IAP_AUDIENCE:-}")"
+          if [ -n "${TOKEN}" ]; then
+            echo "::add-mask::${TOKEN}"
+          fi
+          echo "IAP_TOKEN=${TOKEN}" >> "$GITHUB_ENV"
+
       - name: Wait for Cloud Run to be ready
         run: sleep 15
 
       - name: Smoke test /api/health (expect 200)
         run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${STAGING_BACKEND}/api/health")
+          IAP_AUTH_ARGS=(); [ -n "${IAP_TOKEN:-}" ] && IAP_AUTH_ARGS=(-H "Proxy-Authorization: Bearer ${IAP_TOKEN}")
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${IAP_AUTH_ARGS[@]+${IAP_AUTH_ARGS[@]}}" "${STAGING_BACKEND}/api/health")
           echo "/api/health -> $STATUS"
           if [ "$STATUS" != "200" ]; then
             echo "FAIL: /api/health returned $STATUS, expected 200"
@@ -318,7 +355,8 @@ jobs:
 
       - name: Smoke test /api/teacher/story-tags (expect 200 or 401, not 500)
         run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${STAGING_BACKEND}/api/teacher/story-tags")
+          IAP_AUTH_ARGS=(); [ -n "${IAP_TOKEN:-}" ] && IAP_AUTH_ARGS=(-H "Proxy-Authorization: Bearer ${IAP_TOKEN}")
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${IAP_AUTH_ARGS[@]+${IAP_AUTH_ARGS[@]}}" "${STAGING_BACKEND}/api/teacher/story-tags")
           echo "/api/teacher/story-tags -> $STATUS"
           if [ "$STATUS" = "500" ]; then
             echo "FAIL: /api/teacher/story-tags returned 500"
@@ -327,7 +365,8 @@ jobs:
 
       - name: Smoke test /api/schools (expect 200 or 401, not 500)
         run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${STAGING_BACKEND}/api/schools")
+          IAP_AUTH_ARGS=(); [ -n "${IAP_TOKEN:-}" ] && IAP_AUTH_ARGS=(-H "Proxy-Authorization: Bearer ${IAP_TOKEN}")
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${IAP_AUTH_ARGS[@]+${IAP_AUTH_ARGS[@]}}" "${STAGING_BACKEND}/api/schools")
           echo "/api/schools -> $STATUS"
           if [ "$STATUS" = "500" ]; then
             echo "FAIL: /api/schools returned 500"
@@ -336,7 +375,8 @@ jobs:
 
       - name: Smoke test /api/organizations (expect 200 or 401, not 500)
         run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${STAGING_BACKEND}/api/organizations")
+          IAP_AUTH_ARGS=(); [ -n "${IAP_TOKEN:-}" ] && IAP_AUTH_ARGS=(-H "Proxy-Authorization: Bearer ${IAP_TOKEN}")
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${IAP_AUTH_ARGS[@]+${IAP_AUTH_ARGS[@]}}" "${STAGING_BACKEND}/api/organizations")
           echo "/api/organizations -> $STATUS"
           if [ "$STATUS" = "500" ]; then
             echo "FAIL: /api/organizations returned 500"

@@ -59,6 +59,7 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+from iap_token import urlopen_with_iap as _urlopen_with_iap
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 # Import the worktree's backend services (spotlight_contract), not the venv's repo.
@@ -337,7 +338,9 @@ def git_info() -> dict[str, str]:
 # ---------------------------------------------------------------------------
 def api_get(path: str, timeout: int = 60) -> Any:
     url = f"{STAGING_API}{path}"
-    with urllib.request.urlopen(url, timeout=timeout) as resp:
+    # #3719: IAP-prep — adds Proxy-Authorization when IAP_AUDIENCE is set;
+    # with IAP off (today) this is exactly the old urlopen call.
+    with _urlopen_with_iap(url, timeout=timeout) as resp:
         return json.loads(resp.read().decode("utf-8"))
 
 

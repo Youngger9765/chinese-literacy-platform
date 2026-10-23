@@ -28,14 +28,17 @@
  * 一個「環境正在換」造成的紅，跟「code 壞了」造成的紅必須長得不一樣，
  * 否則下一個人會去修一個沒壞的東西（我自己就差點）。
  *
- * ⚠️ 這支不需要 `gcloud`、不需要 GitHub API、不需要 `workflow` scope ——
- * 只用 base URL 本身。改 `.github/workflows/` 需要 `workflow` scope 的 token，
- * 而那個限制正好逼出這個更簡單的作法。
+ * ⚠️ 這支不需要 GitHub API、不需要 `workflow` scope —— 只用 base URL 本身。
+ * 改 `.github/workflows/` 需要 `workflow` scope 的 token，而那個限制正好
+ * 逼出這個更簡單的作法。（#3719：設了 IAP_AUDIENCE 時會多呼叫一次
+ * `gcloud` 要 IAP 通行證 —— 現在沒人設，所以這句話在今天仍然成立。）
  */
+import { getIapProxyAuthHeader } from './utils/iapAuth';
 
 /** 從 index.html 取出 entry bundle 的檔名（換 revision 就會變）。 */
 async function entryFingerprint(baseURL: string): Promise<string | null> {
-  const res = await fetch(baseURL, { headers: { 'cache-control': 'no-cache' } });
+  // #3719: 直接打前端 origin 本身 —— IAP 若套用在前端服務上，這支也要帶通行證。
+  const res = await fetch(baseURL, { headers: { 'cache-control': 'no-cache', ...getIapProxyAuthHeader() } });
   if (!res.ok) return null;
   const html = await res.text();
   // Vite 產的 entry：<script ... src="/assets/index-<hash>.js">

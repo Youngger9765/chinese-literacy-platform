@@ -13,6 +13,7 @@
  * player's real name is NEVER shown — only "甲隊/乙隊 N 號".
  */
 import { test, expect } from '../fixtures/pageerror-fixture';
+import { getIapProxyAuthHeader } from '../utils/iapAuth';
 import type { Page } from '@playwright/test';
 import {
   batchCreateStudents,
@@ -70,7 +71,7 @@ test.describe('多人對抗賽 team_arena', () => {
     const rotated = students.map((_, i) => `QaArena2026Aa${i}`);
 
     const errors: string[] = [];
-    const contexts = await Promise.all(students.map(() => browser.newContext()));
+    const contexts = await Promise.all(students.map(() => browser.newContext({ extraHTTPHeaders: getIapProxyAuthHeader() }) /* #3719 */));
     const pages = await Promise.all(contexts.map((c) => c.newPage()));
     await Promise.all(pages.map((p, i) => watchErrors(p, `s${i + 1}`, errors)));
 

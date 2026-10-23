@@ -131,6 +131,9 @@ jobs:
               打不到的外部行為就明說重現受限）。
               staging 前端 https://lingoleap-frontend-staging-958347263320.asia-east1.run.app
               後端 https://lingoleap-backend-staging-958347263320.asia-east1.run.app
+              （#3719：若哪天這兩個網址前面多了一層 Google 身分驗證、curl 打
+              不通，先看 `scripts/lib/iap-token.sh` 跟 `scripts/iap_token.py`
+              ——那是給自動化用的通行證小工具，不是這張票的 bug。）
             - 重現不了：回貼 comment 說明試了什麼、請發文者補充重現步驟，結束。
             - 重現到了：把重現方式貼成 comment，繼續開工。
 

@@ -24,6 +24,8 @@ from typing import Any
 
 import yaml
 
+from iap_token import urlopen_with_iap as _urlopen_with_iap
+
 DEFAULT_BASE_URL = "https://lingoleap-backend-staging-958347263320.asia-east1.run.app"
 DEFAULT_OUT = Path(".qa-screenshots/spotlight-sweep/faithfulness-report.json")
 
@@ -146,7 +148,9 @@ def http_json(url: str, retries: int = 5, timeout: int = 30) -> Any:
     last_err: Exception | None = None
     for attempt in range(retries):
         try:
-            with urllib.request.urlopen(url, timeout=timeout) as resp:
+            # #3719: IAP-prep — adds Proxy-Authorization when IAP_AUDIENCE is
+            # set; with IAP off (today) this is exactly the old urlopen call.
+            with _urlopen_with_iap(url, timeout=timeout) as resp:
                 return json.load(resp)
         except urllib.error.HTTPError as err:
             last_err = err
