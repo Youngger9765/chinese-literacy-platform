@@ -15,6 +15,13 @@ env:
   PROJECT_ID: lingoleap-dev
   REGION: asia-east1
   REGISTRY: asia-east1-docker.pkg.dev/lingoleap-dev/lingoleap
+  # #3719 — IAP 準備：預設 false，等於今天的行為（兩個 preview 服務都還是
+  # --allow-unauthenticated）。要真的在 preview 上測 IAP 時，改這一行
+  # 成 'true' 開一個 PR 就會套用，不必再去改 gcloud 指令本身——
+  # 真正的 on/off 開關只有這一行。驗證方法與限制見
+  # docs/iap-runbook.md。目前仍然是 false，staging 與日常 preview
+  # 完全不受影響。
+  IAP_ENABLED: 'false'
 
 jobs:
   detect-changes:
@@ -116,6 +123,18 @@ jobs:
             --add-cloudsql-instances=lingoleap-dev:asia-east1:lingoleap-preview-db \
             --set-env-vars="^::^ALLOWED_ORIGINS=https://placeholder.run.app::DATABASE_URL=${{ secrets.PREVIEW_DATABASE_URL }}::RUN_MIGRATIONS=true::ENVIRONMENT=preview::JWT_SECRET_KEY=${{ secrets.PREVIEW_JWT_SECRET_KEY }}::GCS_OMO_BUCKET=lingoleap-omo-uploads-preview::AZURE_SPEECH_KEY=${{ secrets.AZURE_SPEECH_KEY }}::AZURE_SPEECH_REGION=eastus::TTS_PROVIDER=azure::BUILD_SHA=${{ github.event.pull_request.head.sha }}"
 
+      # #3719 — IAP 準備：預設關（IAP_ENABLED=false），這一步整個 skip，
+      # 跟今天行為一致。只有刻意把上面 env.IAP_ENABLED 改成 'true' 開 PR
+      # 才會執行。用 `gcloud beta run services update --iap`——Cloud Run
+      # 原生 IAP 整合，不是 HTTPS LB 那一套，不需要額外的 LB/NEG 資源。
+      - name: （IAP_ENABLED 時）替 backend preview 開 IAP
+        if: env.IAP_ENABLED == 'true' && (needs.detect-changes.outputs.backend == 'true' || github.event.action == 'opened')
+        run: |
+          gcloud beta run services update ${{ env.BACKEND_SERVICE }} \
+            --iap \
+            --region ${{ env.REGION }} \
+            --project ${{ env.PROJECT_ID }}
+
       - name: Get backend preview URL
         id: backend-url
         run: |
@@ -172,6 +191,15 @@ jobs:
             --min-instances=0 \
             --max-instances=1 \
             --timeout=300s
+
+      # #3719 — IAP 準備：同上，預設關、改 env.IAP_ENABLED 才會跑。
+      - name: （IAP_ENABLED 時）替 frontend preview 開 IAP
+        if: env.IAP_ENABLED == 'true' && (needs.detect-changes.outputs.frontend == 'true' || github.event.action == 'opened')
+        run: |
+          gcloud beta run services update ${{ env.FRONTEND_SERVICE }} \
+            --iap \
+            --region ${{ env.REGION }} \
+            --project ${{ env.PROJECT_ID }}
 
       # 部署失敗時 gcloud 只說「container failed to start and listen on PORT」——
       # 真正的原因在容器自己的 log 裡，而那要有 gcloud 憑證才讀得到。
