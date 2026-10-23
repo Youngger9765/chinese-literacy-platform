@@ -35,6 +35,12 @@ COPY --from=build /app/dist /usr/share/nginx/html
 # 今天這樣，只有 SPA fallback —— 零改變。細節/取捨見 render-nginx-conf.sh。
 ARG BACKEND_INTERNAL_URL=""
 ENV BACKEND_INTERNAL_URL=${BACKEND_INTERNAL_URL}
+# #3733 — only non-empty once backend switches from allow-unauthenticated to
+# Cloud Run invoker auth. See docker/render-nginx-conf.sh's comment block and
+# scripts/run_invoker_token.py's module docstring for the full picture; this
+# only matters for the throwaway canary pair, not today's staging/preview.
+ARG BACKEND_INVOKER_SIDECAR_PORT=""
+ENV BACKEND_INVOKER_SIDECAR_PORT=${BACKEND_INVOKER_SIDECAR_PORT}
 COPY docker/render-nginx-conf.sh /tmp/render-nginx-conf.sh
 RUN sh /tmp/render-nginx-conf.sh && rm /tmp/render-nginx-conf.sh
 EXPOSE 8080
