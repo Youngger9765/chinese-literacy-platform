@@ -99,6 +99,18 @@ class SubmissionResponse(BaseModel):
     # (/teacher/students/{id}/sessions/{id}/report), so a student stuck
     # mid-lesson is completely invisible there.
     session_id: int | None = None
+    # Issue #NEW (teacher missing-steps view): the exact same required-step
+    # accounting assignment_queries.is_assignment_ready_for_submit uses, so a
+    # teacher sees "完成 X/Y 關，缺：..." for a stuck submission instead of a
+    # permanent, unexplained "進行中". marked_complete_by_teacher is a
+    # derived flag (read from the linked LearningSession's
+    # step_progress.__meta — see assignment_session_service
+    # .mark_submission_complete_by_teacher) so the UI can show a "老師標記"
+    # badge on a submission a teacher force-completed, never a schema change.
+    required_step_count: int = 0
+    completed_step_count: int = 0
+    missing_step_ids: list[str] = Field(default_factory=list)
+    marked_complete_by_teacher: bool = False
 
     model_config = {"from_attributes": True}
 
@@ -151,6 +163,11 @@ class AttemptResponse(BaseModel):
     teacher_feedback: str | None = None
     # Issue #3682 — same reasoning as SubmissionResponse.session_id above.
     session_id: int | None = None
+    # Issue #NEW — same reasoning as SubmissionResponse's equivalent fields.
+    required_step_count: int = 0
+    completed_step_count: int = 0
+    missing_step_ids: list[str] = Field(default_factory=list)
+    marked_complete_by_teacher: bool = False
 
     model_config = {"from_attributes": True}
 

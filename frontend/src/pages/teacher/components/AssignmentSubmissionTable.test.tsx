@@ -1,10 +1,17 @@
 import React from 'react';
-import { describe, it, expect, vi } from 'vitest';
-import { render as rtlRender, screen, within } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render as rtlRender, screen, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import AssignmentSubmissionTable from './AssignmentSubmissionTable';
 import type { SubmissionResponse } from '../../../services/assignmentApi';
+import * as assignmentApi from '../../../services/assignmentApi';
+
+vi.mock('../../../contexts/AuthContext', () => ({ useAuth: () => ({ token: 'test-token' }) }));
+vi.mock('../../../services/assignmentApi', async (orig) => ({
+  ...(await orig<typeof import('../../../services/assignmentApi')>()),
+  markSubmissionComplete: vi.fn(),
+}));
 
 // AnswerRecordLink (Issue #3682) renders a react-router <Link>.
 const render = (ui: React.ReactElement) => rtlRender(<MemoryRouter>{ui}</MemoryRouter>);
@@ -35,6 +42,10 @@ function makeSubmission(overrides: Partial<SubmissionResponse>): SubmissionRespo
     reading_error_chars: [],
     teacher_feedback: null,
     session_id: null,
+    required_step_count: 0,
+    completed_step_count: 0,
+    missing_step_ids: [],
+    marked_complete_by_teacher: false,
     ...overrides,
   };
 }
@@ -54,6 +65,7 @@ describe('AssignmentSubmissionTable (#3682)', () => {
         useGrouped={false}
         gradeForm={gradeForm}
         assignmentId={1}
+        onSubmissionUpdated={vi.fn()}
       />,
     );
 
@@ -75,6 +87,7 @@ describe('AssignmentSubmissionTable (#3682)', () => {
         useGrouped={false}
         gradeForm={gradeForm}
         assignmentId={1}
+        onSubmissionUpdated={vi.fn()}
       />,
     );
 
@@ -95,6 +108,7 @@ describe('AssignmentSubmissionTable (#3682)', () => {
         useGrouped={false}
         gradeForm={gradeForm}
         assignmentId={1}
+        onSubmissionUpdated={vi.fn()}
       />,
     );
 
@@ -118,6 +132,7 @@ describe('AssignmentSubmissionTable (#3682)', () => {
         useGrouped={false}
         gradeForm={gradeForm}
         assignmentId={1}
+        onSubmissionUpdated={vi.fn()}
       />,
     );
     const table = screen.getByRole('table');
@@ -133,5 +148,156 @@ describe('AssignmentSubmissionTable (#3682)', () => {
     const metricsRow = within(table).getAllByRole('row')[2];
     const metricsCell = within(metricsRow).getByRole('cell');
     expect(metricsCell).toHaveAttribute('colspan', String(headerCells.length));
+  });
+});
+
+describe('AssignmentSubmissionTable — missing-steps view + teacher mark-complete override (#3723)', () => {
+  beforeEach(() => {
+    vi.mocked(assignmentApi.markSubmissionComplete).mockReset();
+  });
+
+  it('an in_progress submission shows which required steps are still missing', () => {
+    const submissions = [
+      makeSubmission({
+        id: 20, student_id: 6, student_name: '張小華', status: 'in_progress', session_id: 700,
+        required_step_count: 8, completed_step_count: 5,
+        missing_step_ids: ['spotlight', 'vocab-review', 'knowledge-station'],
+      }),
+    ];
+    render(
+      <AssignmentSubmissionTable
+        submissions={submissions}
+        groups={[]}
+        useGrouped={false}
+        gradeForm={gradeForm}
+        assignmentId={1}
+        onSubmissionUpdated={vi.fn()}
+      />,
+    );
+
+    expect(screen.getAllByText(/完成 5\/8 關/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/閱讀聚光燈、語詞複習、知識補給站/).length).toBeGreaterThan(0);
+  });
+
+  it('a pending submission with no steps done yet still shows the full missing list', () => {
+    const submissions = [
+      makeSubmission({
+        id: 21, student_id: 7, student_name: '林小雨', status: 'pending', session_id: null,
+        required_step_count: 8, completed_step_count: 0,
+        missing_step_ids: ['full-text-annotate', 'key-passage-reading'],
+      }),
+    ];
+    render(
+      <AssignmentSubmissionTable
+        submissions={submissions}
+        groups={[]}
+        useGrouped={false}
+        gradeForm={gradeForm}
+        assignmentId={1}
+        onSubmissionUpdated={vi.fn()}
+      />,
+    );
+
+    expect(screen.getAllByText(/完成 0\/8 關/).length).toBeGreaterThan(0);
+  });
+
+  it('a completed submission shows no missing-steps line and no mark-complete button', () => {
+    const submissions = [
+      makeSubmission({
+        id: 22, student_id: 8, student_name: '王大明', status: 'submitted', score: 90, session_id: 800,
+        required_step_count: 8, completed_step_count: 8, missing_step_ids: [],
+      }),
+    ];
+    render(
+      <AssignmentSubmissionTable
+        submissions={submissions}
+        groups={[]}
+        useGrouped={false}
+        gradeForm={gradeForm}
+        assignmentId={1}
+        onSubmissionUpdated={vi.fn()}
+      />,
+    );
+
+    expect(screen.queryByText(/完成 \d+\/\d+ 關/)).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: '標記完成' })).not.toBeInTheDocument();
+  });
+
+  it('clicking 標記完成 asks for confirmation before calling the API', async () => {
+    const submissions = [
+      makeSubmission({
+        id: 23, student_id: 9, student_name: '陳小芬', status: 'in_progress', session_id: 900,
+        required_step_count: 8, completed_step_count: 3, missing_step_ids: ['spotlight'],
+      }),
+    ];
+    render(
+      <AssignmentSubmissionTable
+        submissions={submissions}
+        groups={[]}
+        useGrouped={false}
+        gradeForm={gradeForm}
+        assignmentId={1}
+        onSubmissionUpdated={vi.fn()}
+      />,
+    );
+
+    await userEvent.click(screen.getAllByRole('button', { name: '標記完成' })[0]);
+    expect(screen.getAllByText(/確定/).length).toBeGreaterThan(0);
+    expect(assignmentApi.markSubmissionComplete).not.toHaveBeenCalled();
+  });
+
+  it('confirming calls markSubmissionComplete and reports the updated submission back up', async () => {
+    const updated: SubmissionResponse = makeSubmission({
+      id: 24, student_id: 10, student_name: '黃小安', status: 'submitted', session_id: 1000,
+      required_step_count: 8, completed_step_count: 8, missing_step_ids: [],
+      marked_complete_by_teacher: true,
+    });
+    vi.mocked(assignmentApi.markSubmissionComplete).mockResolvedValue(updated);
+    const onSubmissionUpdated = vi.fn();
+
+    const submissions = [
+      makeSubmission({
+        id: 24, student_id: 10, student_name: '黃小安', status: 'in_progress', session_id: 1000,
+        required_step_count: 8, completed_step_count: 3, missing_step_ids: ['spotlight'],
+      }),
+    ];
+    render(
+      <AssignmentSubmissionTable
+        submissions={submissions}
+        groups={[]}
+        useGrouped={false}
+        gradeForm={gradeForm}
+        assignmentId={1}
+        onSubmissionUpdated={onSubmissionUpdated}
+      />,
+    );
+
+    await userEvent.click(screen.getAllByRole('button', { name: '標記完成' })[0]);
+    await userEvent.click(screen.getByRole('button', { name: '確定標記' }));
+
+    await waitFor(() => expect(onSubmissionUpdated).toHaveBeenCalledWith(updated));
+    expect(assignmentApi.markSubmissionComplete).toHaveBeenCalledWith('test-token', 1, 24);
+  });
+
+  it('a submission a teacher already force-completed shows the 老師標記 badge', () => {
+    const submissions = [
+      makeSubmission({
+        id: 25, student_id: 11, student_name: '劉小傑', status: 'submitted', session_id: 1100,
+        required_step_count: 8, completed_step_count: 8, missing_step_ids: [],
+        marked_complete_by_teacher: true,
+      }),
+    ];
+    render(
+      <AssignmentSubmissionTable
+        submissions={submissions}
+        groups={[]}
+        useGrouped={false}
+        gradeForm={gradeForm}
+        assignmentId={1}
+        onSubmissionUpdated={vi.fn()}
+      />,
+    );
+
+    expect(screen.getAllByText('老師標記').length).toBeGreaterThan(0);
   });
 });

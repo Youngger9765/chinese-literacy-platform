@@ -76,6 +76,20 @@ export interface SubmissionResponse {
    * is still `in_progress` (e.g. stuck mid-lesson).
    */
   session_id: number | null;
+  /**
+   * Missing-steps view + teacher mark-complete override: the exact same
+   * required-step accounting the backend's auto-submit gate uses
+   * (assignment_queries.is_assignment_ready_for_submit), so "完成 X/Y
+   * 關，缺：..." can never show a different answer than what actually
+   * decides submission. marked_complete_by_teacher is a derived flag (read
+   * from the linked LearningSession's step_progress.__meta) — true only
+   * when a teacher force-completed this submission via POST
+   * .../mark-complete, never when a student finished it themselves.
+   */
+  required_step_count: number;
+  completed_step_count: number;
+  missing_step_ids: string[];
+  marked_complete_by_teacher: boolean;
 }
 
 /** Issue #1764 Fix 4: a single submission attempt row for one student. */
@@ -91,6 +105,11 @@ export interface AttemptResponse {
   teacher_feedback: string | null;
   /** Issue #3682 — see SubmissionResponse.session_id. */
   session_id: number | null;
+  /** See SubmissionResponse's equivalent fields. */
+  required_step_count: number;
+  completed_step_count: number;
+  missing_step_ids: string[];
+  marked_complete_by_teacher: boolean;
 }
 
 /** Issue #1764 Fix 4: all attempts by one student, grouped for teacher dashboard. */
@@ -366,6 +385,27 @@ export async function gradeSubmission(
       method: 'PATCH',
       headers: authHeaders(token),
       body: JSON.stringify(body),
+    },
+  );
+  return handleResponse<SubmissionResponse>(res);
+}
+
+/**
+ * Teacher override: force-complete a submission a broken step could never
+ * clear. Reuses the same submit path a student's own submit uses, so
+ * scoring behaves identically; the returned SubmissionResponse carries
+ * marked_complete_by_teacher: true.
+ */
+export async function markSubmissionComplete(
+  token: string,
+  assignmentId: number,
+  submissionId: number,
+): Promise<SubmissionResponse> {
+  const res = await fetch(
+    `${API_BASE}/api/assignments/${assignmentId}/submissions/${submissionId}/mark-complete`,
+    {
+      method: 'POST',
+      headers: authHeaders(token),
     },
   );
   return handleResponse<SubmissionResponse>(res);
