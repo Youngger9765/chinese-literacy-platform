@@ -1402,6 +1402,65 @@ class TestLiveQuizFeatureGate:
         resp = client.post(f"/api/live-quiz/games/{game['code']}/join", headers=auth_header(student1["token"]))
         assert resp.status_code == 201, resp.text
 
+    def test_an_outsider_not_enrolled_in_the_game_classroom_cannot_join(self, client, teacher, student1, student2):
+        """Issue #3708: ``join_game`` only checked that the GAME's classroom
+        has the live_quiz feature turned on (``_require_live_quiz_enabled``)
+        — it never checked that the joining user is actually a
+        ``ClassroomStudent`` of that classroom. Any authenticated student
+        who learns/guesses the 6-digit code could join a class-tied game
+        they were never enrolled in. student1 is enrolled in room_id;
+        student2 is enrolled nowhere (not in this classroom) and must be
+        rejected.
+        """
+        room_id = _make_classroom_via_api(client, teacher, live_quiz=True)
+        client.post(
+            f"/api/classrooms/{room_id}/students", json={"student_id": student1["user_id"]},
+            headers=auth_header(teacher["token"]),
+        )
+        game = _create_game(client, teacher, lesson_uids=[LESSON_A], classroom_id=room_id)
+
+        outsider_resp = client.post(
+            f"/api/live-quiz/games/{game['code']}/join", headers=auth_header(student2["token"])
+        )
+        assert outsider_resp.status_code == 403, outsider_resp.text
+
+    def test_an_enrolled_student_can_join_the_class_tied_game(self, client, teacher, student1):
+        """Positive control for the test above — the enrollment check must
+        not collaterally block the student who IS actually in the class."""
+        room_id = _make_classroom_via_api(client, teacher, live_quiz=True)
+        client.post(
+            f"/api/classrooms/{room_id}/students", json={"student_id": student1["user_id"]},
+            headers=auth_header(teacher["token"]),
+        )
+        game = _create_game(client, teacher, lesson_uids=[LESSON_A], classroom_id=room_id)
+
+        resp = client.post(f"/api/live-quiz/games/{game['code']}/join", headers=auth_header(student1["token"]))
+        assert resp.status_code == 201, resp.text
+
+    def test_a_student_enrolled_in_a_different_classroom_still_cannot_join(self, client, teacher, student1, student2):
+        """Critic review follow-up on #3708: the regression test above only
+        proves "enrolled nowhere" is rejected. This proves the check is
+        actually SCOPED to THIS game's classroom, not just "is this user
+        enrolled in anything, anywhere" — student2 has their own, separate,
+        live_quiz-enabled classroom (so their game-hub access isn't the
+        reason they're rejected) but is not in room_id, the classroom this
+        specific game is tied to.
+        """
+        room_id = _make_classroom_via_api(client, teacher, live_quiz=True)
+        client.post(
+            f"/api/classrooms/{room_id}/students", json={"student_id": student1["user_id"]},
+            headers=auth_header(teacher["token"]),
+        )
+        other_room_id = _make_classroom_via_api(client, teacher, live_quiz=True)
+        client.post(
+            f"/api/classrooms/{other_room_id}/students", json={"student_id": student2["user_id"]},
+            headers=auth_header(teacher["token"]),
+        )
+        game = _create_game(client, teacher, lesson_uids=[LESSON_A], classroom_id=room_id)
+
+        resp = client.post(f"/api/live-quiz/games/{game['code']}/join", headers=auth_header(student2["token"]))
+        assert resp.status_code == 403, resp.text
+
     def test_a_classroom_with_real_live_quiz_history_but_no_key_is_treated_as_on(self, client, teacher, student1):
         """Backward compat (#3607): a classroom that already hosted a
         live-quiz game before this toggle existed, and has no explicit

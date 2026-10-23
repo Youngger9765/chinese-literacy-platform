@@ -15,10 +15,10 @@
  *     staging with a real account, not inferred from source. The test body
  *     is kept intact (not deleted) so it runs for real the moment #3710 is
  *     fixed.
- *  3. (test.fixme, #3708) A student NOT enrolled in the host's classroom
- *     should not be able to join by code — reproduced: the join succeeds
- *     because `join_game` never checks `ClassroomStudent` membership for
- *     the joining user, only that the game's classroom has the feature on.
+ *  3. (passing, fixed by #3708) A student NOT enrolled in the host's
+ *     classroom cannot join by code anymore — `join_game` now checks
+ *     `ClassroomStudent` membership for the joining user, not just that
+ *     the game's classroom has the feature on.
  */
 import { test, expect } from '../fixtures/pageerror-fixture';
 import {
@@ -200,7 +200,6 @@ test.describe('課堂搶答 live_quiz', () => {
    * confirm flow and is accepted.
    */
   test('a student outside the class should not be able to join by code', async ({ page, request }) => {
-    test.fixme(true, 'blocked by #3708 — join_game never checks ClassroomStudent membership, only that the game classroom has live_quiz on');
     test.setTimeout(60_000);
 
     const teacher = await registerTeacher(request, 'lq-teacher-outsider');
