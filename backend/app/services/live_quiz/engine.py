@@ -297,6 +297,22 @@ def join_game(db: Session, code: str, user: User) -> LiveQuizPlayer:
     if existing is not None:
         return existing
 
+    # issue #3708: a game tied to a classroom only admits students enrolled
+    # in that classroom; any authenticated student who learned the 6-digit
+    # code could join before. Classless code/QR games stay open.
+    if game.classroom_id is not None:
+        is_enrolled = (
+            db.query(ClassroomStudent)
+            .filter(
+                ClassroomStudent.classroom_id == game.classroom_id,
+                ClassroomStudent.student_id == user.id,
+            )
+            .first()
+            is not None
+        )
+        if not is_enrolled:
+            raise HTTPException(status_code=403, detail="你不是這個班級的學生，無法加入")
+
     if game.status == "ended":
         raise HTTPException(status_code=409, detail="This game has ended")
     if len(game.players) >= MAX_PLAYERS_PER_GAME:
