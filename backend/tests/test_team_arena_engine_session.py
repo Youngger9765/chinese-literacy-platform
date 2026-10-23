@@ -1,6 +1,8 @@
 """TDD for team_arena.engine v2 — room create/join, PRD §0 v2 改版 A/B/C/K."""
 from __future__ import annotations
 
+from datetime import timedelta
+
 import pytest
 from fastapi import HTTPException
 
@@ -227,3 +229,83 @@ class TestStartGate:
         started = svc.control(db_session, session, host, action="start")
         assert started.status == "playing"
         assert started.settings["total_turns"] == session.settings["turns_per_player"] * 2
+
+
+class TestOpenRoomCap:
+    """Security review 2026-10-21 (low-risk L2): "team_arena 開房...沒有每
+    人/每房限流" — a host could otherwise call create_session forever with
+    no upper bound. MAX_OPEN_HOSTED_ROOMS caps how many of a host's own
+    rooms may be open (not ended) at once; a lobby room nobody else ever
+    joined, sitting past ROOM_ABANDONED_AFTER_MINUTES, doesn't count — it's
+    abandoned, not actually occupying a slot anyone cares about.
+    """
+
+    def test_rejects_once_the_host_hits_the_cap(self, db_session):
+        host = _student_with_grade(db_session, grade=4)
+        for _ in range(svc.MAX_OPEN_HOSTED_ROOMS):
+            svc.create_session(db_session, host)
+
+        with pytest.raises(HTTPException) as exc:
+            svc.create_session(db_session, host)
+        assert exc.value.status_code == 429
+
+    def test_under_cap_still_succeeds(self, db_session):
+        """Positive control: one room under the cap must not be blocked by
+        the same guard that rejects at-cap hosts above."""
+        host = _student_with_grade(db_session, grade=4)
+        for _ in range(svc.MAX_OPEN_HOSTED_ROOMS - 1):
+            svc.create_session(db_session, host)
+
+        session = svc.create_session(db_session, host)
+        assert session.status == "lobby"
+
+    def test_another_hosts_rooms_do_not_count(self, db_session):
+        host = _student_with_grade(db_session, grade=4)
+        other = _student_with_grade(db_session, grade=4, name="別人")
+        for _ in range(svc.MAX_OPEN_HOSTED_ROOMS):
+            svc.create_session(db_session, other)
+
+        session = svc.create_session(db_session, host)
+        assert session.status == "lobby"
+
+    def test_ended_rooms_do_not_count(self, db_session):
+        host = _student_with_grade(db_session, grade=4)
+        for _ in range(svc.MAX_OPEN_HOSTED_ROOMS):
+            s = svc.create_session(db_session, host)
+            s.status = "ended"
+        db_session.commit()
+
+        session = svc.create_session(db_session, host)
+        assert session.status == "lobby"
+
+    def test_abandoned_lobby_past_the_idle_window_does_not_count(self, db_session):
+        """Nobody but the host ever joined, and it's been sitting long
+        enough (ROOM_ABANDONED_AFTER_MINUTES) that nobody is coming — this
+        must not permanently lock the host out of opening a replacement."""
+        host = _student_with_grade(db_session, grade=4)
+
+        for _ in range(svc.MAX_OPEN_HOSTED_ROOMS):
+            s = svc.create_session(db_session, host)
+            s.created_at = svc._now() - timedelta(minutes=svc.ROOM_ABANDONED_AFTER_MINUTES + 1)
+        db_session.commit()
+
+        session = svc.create_session(db_session, host)
+        assert session.status == "lobby"
+
+    def test_a_lobby_someone_else_joined_still_counts_even_when_idle(self, db_session):
+        """A room with a real second player waiting in it is NOT
+        abandoned just because nobody has pressed start yet — only a
+        lobby still occupied solely by the host gets excluded."""
+        host = _student_with_grade(db_session, grade=4)
+
+        for i in range(svc.MAX_OPEN_HOSTED_ROOMS):
+            s = svc.create_session(db_session, host)
+            mate = make_student(db_session, name=f"mate{i}")
+            db_session.commit()
+            svc.join_session(db_session, mate, s.code, side="b")
+            s.created_at = svc._now() - timedelta(minutes=svc.ROOM_ABANDONED_AFTER_MINUTES + 1)
+        db_session.commit()
+
+        with pytest.raises(HTTPException) as exc:
+            svc.create_session(db_session, host)
+        assert exc.value.status_code == 429

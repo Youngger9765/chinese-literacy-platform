@@ -37,6 +37,56 @@ _INVITE_CODE_LENGTH = 6
 _INVITE_CODE_CHARS = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"
 _MAX_RETRIES = 10
 
+# Resource-exhaustion guard (same spirit as team_arena's
+# MAX_OPEN_HOSTED_ROOMS — the security review that flagged team_arena's
+# missing per-host limit didn't name PK explicitly, but the shape is
+# identical: nothing stops a student calling POST /queue or POST /invite
+# forever). A plain queue entry and an invite are the same underlying row
+# (`invite_code` just distinguishes them) and the same resource being
+# piled up, so one shared cap covers both entry points. 3 lets a student
+# have a couple of genuine concurrent attempts (an invite for a specific
+# friend AND open matchmaking at the same time, say) without letting one
+# account accumulate unbounded "waiting" rows.
+MAX_OPEN_QUEUE_ENTRIES = 3
+
+
+def _count_open_queue_entries(db: Session, student_id: int, *, now: datetime | None = None) -> int:
+    """How many of `student_id`'s own "waiting" rows count against
+    MAX_OPEN_QUEUE_ENTRIES. An invite stops counting once it's past its
+    OWN `invite_expires_at` (this module is lazy/no-cron — see module
+    docstring — so a stale invite just hasn't been touched by a redeem
+    attempt yet, it isn't actually "open" anymore). A plain queue entry
+    (no invite_code, no fixed expiry of its own) stops counting once it's
+    sat this long with no opponent, reusing the same INVITE_LIFETIME_MINUTES
+    window rather than inventing a second magic number.
+    """
+    now = now or _now()
+    cutoff = now - timedelta(minutes=INVITE_LIFETIME_MINUTES)
+    rows = (
+        db.query(PkQueue)
+        .filter(PkQueue.student_id == student_id, PkQueue.status == "waiting")
+        .all()
+    )
+    count = 0
+    for row in rows:
+        if row.invite_code is not None:
+            expires = _aware(row.invite_expires_at)
+            if expires is not None and now > expires:
+                continue  # abandoned invite, nobody redeemed it in time
+        elif _aware(row.created_at) < cutoff:
+            continue  # abandoned plain queue entry, no opponent showed up
+        count += 1
+    return count
+
+
+def _enforce_open_queue_cap(db: Session, student_id: int) -> None:
+    if _count_open_queue_entries(db, student_id) >= MAX_OPEN_QUEUE_ENTRIES:
+        raise HTTPException(
+            status_code=429,
+            detail=f"你同時開著的配對／邀請已經達到上限（最多 {MAX_OPEN_QUEUE_ENTRIES} 個），"
+            "請先取消其中一個，或等它自然過期後再開新的",
+        )
+
 
 def _now() -> datetime:
     return datetime.now(timezone.utc)
@@ -82,6 +132,7 @@ def create_queue_entry(
     pk_engine.validate_scope(scope_type, scope_ref)
     _require_membership(db, classroom_id, student.id)
     pk_engine.require_pk_human_enabled(db, classroom_id)
+    _enforce_open_queue_cap(db, student.id)
     q = PkQueue(
         student_id=student.id,
         classroom_id=classroom_id,
@@ -106,6 +157,7 @@ def create_invite(
     pk_engine.validate_scope(scope_type, scope_ref)
     _require_membership(db, classroom_id, student.id)
     pk_engine.require_pk_human_enabled(db, classroom_id)
+    _enforce_open_queue_cap(db, student.id)
     now = _now()
     code = _generate_invite_code(db)
     q = PkQueue(

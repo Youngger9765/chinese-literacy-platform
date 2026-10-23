@@ -31,9 +31,10 @@ from __future__ import annotations
 
 import random
 import secrets
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from fastapi import HTTPException
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.attributes import flag_modified
 
@@ -73,6 +74,52 @@ _MAX_CODE_RETRIES = 10
 
 _ERR_EMPTY_POOL = "這個年級目前還沒有題目，請改天再試"
 _ERR_NO_GRADE = "找不到你的年級，請先加入班級或請老師設定年級後再開房"
+
+# Resource-exhaustion guard — security review 2026-10-21 low-risk item L2:
+# "team_arena 開房...沒有每人/每房限流", a host could otherwise call
+# POST /sessions forever with no upper bound. A team_size-5 room needs up
+# to 9 OTHER students to fill both sides, so a host legitimately juggling
+# a couple of simultaneous attempts (one side didn't fill, try again)
+# needs more than one slot — 3 is generous for that without letting one
+# account pile up double digits of rows.
+MAX_OPEN_HOSTED_ROOMS = 3
+# A lobby room nobody but the host ever joined, sitting this long, is
+# treated as abandoned and doesn't count against the cap above — PRD
+# rounds run in minutes, not hours, so 10 minutes of nobody joining means
+# nobody is coming. Without this, a host whose first room never filled
+# would be permanently locked out of opening a replacement.
+ROOM_ABANDONED_AFTER_MINUTES = 10
+
+
+def _count_open_hosted_rooms(db: Session, host_id: int, *, now: datetime | None = None) -> int:
+    """How many of `host_id`'s own rooms count against
+    MAX_OPEN_HOSTED_ROOMS: every non-ended room, EXCEPT a lobby room that
+    (a) nobody but the host ever joined and (b) has sat idle past
+    ROOM_ABANDONED_AFTER_MINUTES — that one is abandoned, not occupying a
+    slot anyone is coming back to.
+    """
+    now = now or _now()
+    cutoff = now - timedelta(minutes=ROOM_ABANDONED_AFTER_MINUTES)
+    sessions = (
+        db.query(TeamArenaSession)
+        .filter(TeamArenaSession.teacher_id == host_id, TeamArenaSession.status != "ended")
+        .all()
+    )
+    if not sessions:
+        return 0
+    stale_lobby_ids = [
+        s.id for s in sessions if s.status == "lobby" and _aware(s.created_at) < cutoff
+    ]
+    solo_abandoned_ids: set[int] = set()
+    if stale_lobby_ids:
+        member_counts = dict(
+            db.query(TeamArenaMember.session_id, func.count(TeamArenaMember.id))
+            .filter(TeamArenaMember.session_id.in_(stale_lobby_ids))
+            .group_by(TeamArenaMember.session_id)
+            .all()
+        )
+        solo_abandoned_ids = {sid for sid in stale_lobby_ids if member_counts.get(sid, 0) <= 1}
+    return sum(1 for s in sessions if s.id not in solo_abandoned_ids)
 
 
 def _now() -> datetime:
@@ -292,6 +339,12 @@ def create_session(
         raise HTTPException(status_code=400, detail=f"answer_seconds must be one of {ANSWER_SECONDS_CHOICES}")
     if side not in SIDE_KEYS:
         raise HTTPException(status_code=400, detail=f"side must be one of {SIDE_KEYS}")
+    if _count_open_hosted_rooms(db, host.id) >= MAX_OPEN_HOSTED_ROOMS:
+        raise HTTPException(
+            status_code=429,
+            detail=f"你同時開的房間已經達到上限（最多 {MAX_OPEN_HOSTED_ROOMS} 間），"
+            "請先結束其中一間，或等它自動視為已放棄後再開新的",
+        )
 
     grade = resolve_pool_grade(_resolve_host_grade(db, host))
 
