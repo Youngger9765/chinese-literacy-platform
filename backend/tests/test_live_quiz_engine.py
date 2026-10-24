@@ -728,6 +728,62 @@ class TestUiUxReview20261015:
         )
         assert resp.status_code == 200
 
+    def test_polled_version_changes_once_the_reading_deadline_elapses(self, client, teacher, student1):
+        """Issue #3710: a client polling with ``after_version`` equal to
+        whatever version it last saw got ``unchanged: true`` forever once
+        the reading phase ended, because ``_player_phase_version`` only
+        encodes (round_index, status) — never the time-derived reading→
+        answer sub-phase transition. Every player's (and the host's)
+        screen stayed stuck on "看大螢幕讀題" until a page reload (which
+        omits ``after_version`` and always gets the full state back).
+        """
+        game = _create_game(client, teacher, lesson_uids=[LESSON_A], reading_seconds=4)
+        client.post(f"/api/live-quiz/games/{game['code']}/join", headers=auth_header(student1["token"]))
+        client.post(f"/api/live-quiz/games/{game['code']}/start", headers=auth_header(teacher["token"]))
+
+        reading_state = client.get(
+            f"/api/live-quiz/games/{game['code']}/state", headers=auth_header(student1["token"])
+        ).json()
+        assert "options" not in (reading_state["round"] or {})
+        seen_version = reading_state["version"]
+
+        # Host-side too — the bug report said the HOST's screen also got
+        # stuck, and the host polls on a different raw version source
+        # (game.version, not _player_phase_version).
+        host_reading_state = client.get(
+            f"/api/live-quiz/games/{game['code']}/state", headers=auth_header(teacher["token"])
+        ).json()
+        assert "options" not in (host_reading_state["round"] or {})
+        host_seen_version = host_reading_state["version"]
+
+        # Simulate the 4s reading delay having elapsed (same technique as
+        # test_reading_phase_opens_after_delay_elapses above) and force the
+        # in-memory fast-poll cache to expire immediately — same effect as
+        # its real 1s TTL lapsing between polls, just deterministic here.
+        db = TestingSessionLocal()
+        try:
+            from datetime import datetime, timedelta, timezone
+            row = live_quiz_engine.get_game_by_code(db, game["code"])
+            row.current_round_started_at = datetime.now(timezone.utc) - timedelta(seconds=5)
+            db.commit()
+        finally:
+            db.close()
+        live_quiz_engine.fast_poll_cache.invalidate(game["code"])
+
+        polled = client.get(
+            f"/api/live-quiz/games/{game['code']}/state?after_version={seen_version}",
+            headers=auth_header(student1["token"]),
+        ).json()
+        assert polled.get("unchanged") is not True, polled
+        assert "options" in (polled.get("round") or {}), polled
+
+        host_polled = client.get(
+            f"/api/live-quiz/games/{game['code']}/state?after_version={host_seen_version}",
+            headers=auth_header(teacher["token"]),
+        ).json()
+        assert host_polled.get("unchanged") is not True, host_polled
+        assert "options" in (host_polled.get("round") or {}), host_polled
+
     def test_reading_seconds_zero_disables_the_delay(self, client, teacher, student1):
         game = _create_game(client, teacher, lesson_uids=[LESSON_A], reading_seconds=0)
         client.post(f"/api/live-quiz/games/{game['code']}/join", headers=auth_header(student1["token"]))
@@ -1031,3 +1087,47 @@ class TestNamelessPlayerNoEmail:
         players_names = [p["display_name"] for p in results["players"]]
         assert all(student1["email"] not in n and "@" not in n for n in ranking_names)
         assert all(student1["email"] not in n and "@" not in n for n in players_names)
+
+
+def _make_classroom_for_3708(client, teacher) -> int:
+    resp = client.post(
+        "/api/classrooms", json={"name": f"LQ 3708 Room {uuid.uuid4().hex[:6]}", "school_id": _test_school_id},
+        headers=auth_header(teacher["token"]),
+    )
+    assert resp.status_code == 201, resp.text
+    return resp.json()["id"]
+
+
+class TestJoinRequiresEnrollment3708:
+    """Issue #3708: a game tied to a classroom only admits students enrolled
+    in that classroom."""
+
+    def _enroll(self, client, teacher, room_id, student):
+        r = client.post(
+            f"/api/classrooms/{room_id}/students", json={"student_id": student["user_id"]},
+            headers=auth_header(teacher["token"]),
+        )
+        assert r.status_code in (200, 201), r.text
+
+    def test_an_outsider_not_enrolled_in_the_game_classroom_cannot_join(self, client, teacher, student1, student2):
+        room_id = _make_classroom_for_3708(client, teacher)
+        self._enroll(client, teacher, room_id, student1)
+        game = _create_game(client, teacher, lesson_uids=[LESSON_A], classroom_id=room_id)
+        resp = client.post(f"/api/live-quiz/games/{game['code']}/join", headers=auth_header(student2["token"]))
+        assert resp.status_code == 403, resp.text
+
+    def test_an_enrolled_student_can_join_the_class_tied_game(self, client, teacher, student1):
+        room_id = _make_classroom_for_3708(client, teacher)
+        self._enroll(client, teacher, room_id, student1)
+        game = _create_game(client, teacher, lesson_uids=[LESSON_A], classroom_id=room_id)
+        resp = client.post(f"/api/live-quiz/games/{game['code']}/join", headers=auth_header(student1["token"]))
+        assert resp.status_code == 201, resp.text
+
+    def test_a_student_enrolled_in_a_different_classroom_still_cannot_join(self, client, teacher, student1, student2):
+        room_id = _make_classroom_for_3708(client, teacher)
+        self._enroll(client, teacher, room_id, student1)
+        other = _make_classroom_for_3708(client, teacher)
+        self._enroll(client, teacher, other, student2)
+        game = _create_game(client, teacher, lesson_uids=[LESSON_A], classroom_id=room_id)
+        resp = client.post(f"/api/live-quiz/games/{game['code']}/join", headers=auth_header(student2["token"]))
+        assert resp.status_code == 403, resp.text

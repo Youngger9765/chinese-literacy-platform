@@ -64,8 +64,16 @@ const StudentHome: React.FC = () => {
   useEffect(() => {
     if (!token || !user) return;
 
+    // Issue #3714: these three fetches have no cancel guard, so a response
+    // arriving after this component already unmounted (student navigated
+    // away, e.g. clicked a sidebar link) would still fire — most visibly
+    // the auto-redirect below, which would navigate the student BACK to
+    // /library and override wherever they'd already gone.
+    let cancelled = false;
+
     fetchMyEnrolledClassrooms(token)
       .then((res) => {
+        if (cancelled) return;
         setClassrooms(res.classrooms);
         if (res.classrooms.length === 1 && res.classrooms[0].is_active) {
           // keep the auto-redirect behaviour from the prior revision
@@ -73,15 +81,25 @@ const StudentHome: React.FC = () => {
         }
       })
       .catch(() => { /* non-fatal */ })
-      .finally(() => setClassroomsLoaded(true));
+      .finally(() => {
+        if (!cancelled) setClassroomsLoaded(true);
+      });
 
     fetchGamificationSummary(user.id, token)
-      .then(setGamification)
+      .then((summary) => {
+        if (!cancelled) setGamification(summary);
+      })
       .catch(() => { /* non-fatal */ });
 
     getMyAssignments(token)
-      .then(setAssignments)
+      .then((list) => {
+        if (!cancelled) setAssignments(list);
+      })
       .catch(() => { /* non-fatal */ });
+
+    return () => {
+      cancelled = true;
+    };
   }, [token, user, navigate]);
 
   /** Today's active assignment, if any.

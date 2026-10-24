@@ -4,8 +4,8 @@
  * Mocks API calls and verifies the full page renders the correct sub-components.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
-import { BrowserRouter, MemoryRouter } from 'react-router-dom';
+import { render, screen, waitFor, act } from '@testing-library/react';
+import { BrowserRouter, MemoryRouter, useLocation } from 'react-router-dom';
 
 // Mock API modules
 vi.mock('../../../../services/learningApi', () => ({
@@ -41,7 +41,10 @@ vi.mock('../../../../components/student/QuickPracticeStrip', () => ({
   default: () => <div data-testid="quick-practice-strip" />,
 }));
 
-import { fetchMyEnrolledClassrooms } from '../../../../services/learningApi';
+import {
+  fetchMyEnrolledClassrooms,
+  type StudentEnrolledClassroom,
+} from '../../../../services/learningApi';
 import { fetchGamificationSummary } from '../../../../services/gamificationApi';
 import { getMyAssignments } from '../../../../services/assignmentApi';
 import StudentHome from '../../../../pages/student/StudentHome';
@@ -199,5 +202,50 @@ describe('StudentHome integration', () => {
     await waitFor(() => {
       expect(screen.getByText('Lv.2')).toBeTruthy();
     });
+  });
+
+  it('does not redirect to /library after the student has already navigated away (#3714)', async () => {
+    // Issue #3714: the enrolled-classrooms fetch auto-redirects to
+    // /library when the student has exactly one ACTIVE classroom. That
+    // redirect was fired from the effect's .then() with no cancel guard,
+    // so a slow response arriving after the student already navigated
+    // elsewhere (e.g. clicked a sidebar link) would navigate them BACK to
+    // /library — overriding wherever they'd already gone.
+    let resolveFetch!: (value: { classrooms: StudentEnrolledClassroom[] }) => void;
+    const pendingFetch = new Promise<{ classrooms: StudentEnrolledClassroom[] }>((resolve) => {
+      resolveFetch = resolve;
+    });
+    vi.mocked(fetchMyEnrolledClassrooms).mockReturnValue(pendingFetch);
+    vi.mocked(fetchGamificationSummary).mockResolvedValue(mockGamification);
+    vi.mocked(getMyAssignments).mockResolvedValue([]);
+
+    function LocationProbe() {
+      const location = useLocation();
+      return <div data-testid="location">{location.pathname}</div>;
+    }
+
+    const { rerender } = render(
+      <MemoryRouter initialEntries={['/student']}>
+        <LocationProbe />
+        <StudentHome />
+      </MemoryRouter>,
+    );
+
+    // The student navigates away from /student before the fetch resolves
+    // — simulated here by unmounting StudentHome while the router (and
+    // LocationProbe, which keeps reporting the current path) stay mounted,
+    // exactly as they would on a real route change.
+    rerender(
+      <MemoryRouter initialEntries={['/student']}>
+        <LocationProbe />
+      </MemoryRouter>,
+    );
+
+    await act(async () => {
+      resolveFetch({ classrooms: [{ ...mockClassroom, is_active: true }] });
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    expect(screen.getByTestId('location').textContent).toBe('/student');
   });
 });
