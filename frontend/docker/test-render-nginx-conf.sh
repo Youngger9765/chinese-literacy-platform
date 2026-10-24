@@ -85,31 +85,25 @@ ACTUAL_SPA=$(cat "$OUT_SPA")
 check_cmd "SPA-only output unchanged when nothing is configured" \
   test "$ACTUAL_SPA" = "$EXPECTED_SPA"
 
-# --- 1b. Proxy path, invoker sidecar NOT configured: must be byte-identical
-#     whether or not the BACKEND_INVOKER_SIDECAR_PORT machinery exists in
-#     the script at all. Captured once as a golden file alongside this test
-#     (regenerate deliberately with `--update-golden` if render-nginx-conf.sh
-#     legitimately changes the #3719 proxy behavior itself). ---
-OUT_PROXY="$WORKDIR/proxy.conf"
+# --- 1b. Proxy requested WITHOUT the invoker sidecar: must now be a hard
+#     BUILD FAILURE (#3740), not a silently-renderable config. Before #3740
+#     this combination rendered a working-looking proxy that quietly
+#     reproduced the exact shared-rate-limit-bucket regression (X-Client-IP
+#     sent, never trusted, every proxied request falls back to the old
+#     broken XFF rule) -- refusing to build it outright is the fix, not
+#     just a warning comment. ---
+OUT_HALF_CONFIGURED="$WORKDIR/half-configured.conf"
+HALF_CONFIGURED_STDERR="$WORKDIR/half-configured.stderr"
+HALF_CONFIGURED_RC=0
 ( export BACKEND_INTERNAL_URL="https://lingoleap-backend-xyz.a.run.app"
   unset BACKEND_INVOKER_SIDECAR_PORT 2>/dev/null || true
-  run_render "$OUT_PROXY" )
+  run_render "$OUT_HALF_CONFIGURED" ) >/dev/null 2>"$HALF_CONFIGURED_STDERR" || HALF_CONFIGURED_RC=$?
 
-GOLDEN="$SCRIPT_DIR/testdata/proxy-no-invoker.golden.conf"
-if [ "${1:-}" = "--update-golden" ]; then
-  mkdir -p "$(dirname "$GOLDEN")"
-  cp "$OUT_PROXY" "$GOLDEN"
-  echo "updated golden file: $GOLDEN"
-  exit 0
-fi
+check_cmd "BACKEND_INTERNAL_URL without BACKEND_INVOKER_SIDECAR_PORT fails the build (exit $HALF_CONFIGURED_RC, want nonzero)" \
+  test "$HALF_CONFIGURED_RC" != "0"
 
-if [ ! -f "$GOLDEN" ]; then
-  echo "FAIL - golden file missing: $GOLDEN (run with --update-golden once to create it)"
-  FAILED=1
-else
-  check_cmd "proxy output byte-identical to golden when BACKEND_INVOKER_SIDECAR_PORT unset" \
-    diff -q "$GOLDEN" "$OUT_PROXY"
-fi
+check_cmd "the build failure names #3740 so a future reader can find the reasoning" \
+  grep -q "3740" "$HALF_CONFIGURED_STDERR"
 
 # --- 2. Invoker sidecar configured: structural assertions ---
 OUT_INVOKER="$WORKDIR/invoker.conf"
@@ -144,6 +138,14 @@ check_cmd "X-Serverless-Authorization set from the map result (never Authorizati
 
 check_cmd_not "Authorization header is never touched by this wiring" \
   grep -q 'proxy_set_header Authorization' "$OUT_INVOKER"
+
+# --- 3. #3740: real client IP behind the proxy ---
+check_cmd "derived_client_ip map present (second-from-right XFF, mirrors backend's real_ip_from_xff)" \
+  grep -q 'map $http_x_forwarded_for $derived_client_ip' "$OUT_INVOKER"
+
+X_CLIENT_IP_COUNT=$(grep -c 'proxy_set_header X-Client-IP $derived_client_ip;' "$OUT_INVOKER")
+check_cmd "X-Client-IP wired into all 3 backend-proxying locations (found $X_CLIENT_IP_COUNT, want 3)" \
+  test "$X_CLIENT_IP_COUNT" = "3"
 
 if [ "$FAILED" = "1" ]; then
   echo ""

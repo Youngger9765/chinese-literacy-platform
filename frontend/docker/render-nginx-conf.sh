@@ -72,20 +72,73 @@ fi
 # the Host header and SNI.
 BACKEND_HOST=$(printf '%s' "$BACKEND_INTERNAL_URL" | sed -E 's#^[a-zA-Z]+://##; s#/+$##')
 
+# #3740 — real client IP behind this same-origin proxy. Always computed
+# whenever we're proxying at all (not gated on BACKEND_INVOKER_SIDECAR_PORT
+# below): the #3728 regression that broke backend's per-IP rate limiting
+# affects every proxied request regardless of whether the invoker-auth
+# sidecar is also in the picture. nginx derives the real end-user IP the
+# SAME way backend's own real_ip_from_xff() already does for direct
+# traffic (second-from-right of X-Forwarded-For -- GCP's own ingress
+# always appends exactly [real-client-ip, lb-ip] to whatever arrived at
+# THIS service), then passes it on as X-Client-IP. Backend only trusts
+# that header when this request also carries a Cloud-Run-verified
+# X-Serverless-Authorization identifying the frontend's own service
+# account (see backend/app/auth/rate_limiter.py's trusted_proxy_client_ip)
+# -- so setting this header here is necessary but not sufficient on its
+# own; the design deliberately doesn't rely on nginx being the only thing
+# that can reach backend (#3740: backend stays directly reachable for CI/
+# health-checks, so a fixed hop-count or "trust X-Client-IP unconditionally"
+# design was rejected as forgeable).
+#
+# The two map patterns below are tried in order (first match wins); the
+# second-from-right one requires at least 2 comma-separated entries, the
+# third handles exactly one entry, and `default $remote_addr` covers no
+# XFF at all -- same fallback shape as real_ip_from_xff(xff, peer).
+# Verified live against nginx:alpine for 2/3/4-entry and no-comma inputs
+# before relying on it here (see PR description, not re-derived blind).
+CLIENT_IP_MAP='
+map $http_x_forwarded_for $derived_client_ip {
+  default $remote_addr;
+  "~^(?:[^,]*,\s*)*?([^,]+)\s*,\s*[^,\s]+$" $1;
+  "~^\s*([^,\s]+)\s*$" $1;
+}
+'
+
 # #3733 — only non-empty once backend switches to Cloud Run invoker auth.
 INVOKER_PORT="${BACKEND_INVOKER_SIDECAR_PORT:-}"
 
-if [ -n "$INVOKER_PORT" ]; then
-  # `map`'s result is an EMPTY string when there's no token (nginx then
-  # omits the header entirely instead of sending a malformed empty bearer
-  # value — see comment block above), or "Bearer <token>" otherwise.
-  MAP_BLOCK="
+# #3740 — fail the BUILD, not just the runtime behavior, if someone ever
+# wires BACKEND_INTERNAL_URL into a deploy step without ALSO wiring the
+# sidecar port. The X-Client-IP this script sends is only trustworthy to
+# backend when X-Serverless-Authorization also proves it came from the
+# frontend's own service account (see backend/app/auth/rate_limiter.py) --
+# that header is ONLY attached by the sidecar/auth_request wiring below.
+# Same-origin-proxy WITHOUT the sidecar reproduces the exact #3740
+# regression (X-Client-IP sent, never trusted, every proxied request
+# silently falls back to the old broken XFF rule) while looking, from the
+# build-arg surface, like the fix is in place. Refuse to build that
+# half-configured, silently-still-broken combination.
+if [ -z "$INVOKER_PORT" ]; then
+  echo "render-nginx-conf.sh: BACKEND_INTERNAL_URL is set but BACKEND_INVOKER_SIDECAR_PORT is not." >&2
+  echo "Same-origin proxying without the invoker-auth sidecar reproduces the #3740 regression" >&2
+  echo "(X-Client-IP sent but never trusted -- every proxied request silently falls back to the" >&2
+  echo "old broken per-IP rate-limit rule). Set BOTH or neither; refusing to build just one." >&2
+  exit 1
+fi
+
+# Past the guard above, INVOKER_PORT is guaranteed non-empty here -- no
+# "proxy without a sidecar" branch exists to fall into (see #3740 guard).
+#
+# `map`'s result is an EMPTY string when there's no token (nginx then
+# omits the header entirely instead of sending a malformed empty bearer
+# value — see comment block above), or "Bearer <token>" otherwise.
+MAP_BLOCK="
 map \$invoker_raw_token \$invoker_auth_header {
   ''      '';
   default \"Bearer \$invoker_raw_token\";
 }
 "
-  SIDECAR_LOCATIONS="
+SIDECAR_LOCATIONS="
   location = /_invoker_token {
     internal;
     proxy_pass http://127.0.0.1:${INVOKER_PORT}/;
@@ -99,18 +152,13 @@ map \$invoker_raw_token \$invoker_auth_header {
     return 200;
   }
 "
-  AUTH_REQUEST_LINES="
+AUTH_REQUEST_LINES="
     auth_request /_invoker_token;
     auth_request_set \$invoker_raw_token \$upstream_http_x_invoker_token;
     proxy_set_header X-Serverless-Authorization \$invoker_auth_header;"
-else
-  MAP_BLOCK=""
-  SIDECAR_LOCATIONS=""
-  AUTH_REQUEST_LINES=""
-fi
 
 cat > "$OUT" <<NGINXCONF
-${MAP_BLOCK}server {
+${CLIENT_IP_MAP}${MAP_BLOCK}server {
   listen 8080;
   absolute_redirect off;
   root /usr/share/nginx/html;
@@ -121,6 +169,7 @@ ${SIDECAR_LOCATIONS}
     proxy_pass ${BACKEND_INTERNAL_URL};
     proxy_set_header Host ${BACKEND_HOST};
     proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+    proxy_set_header X-Client-IP \$derived_client_ip;
     proxy_set_header X-Forwarded-Proto \$scheme;
     proxy_ssl_server_name on;
   }
@@ -143,6 +192,7 @@ ${SIDECAR_LOCATIONS}
     proxy_pass ${BACKEND_INTERNAL_URL};
     proxy_set_header Host ${BACKEND_HOST};
     proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+    proxy_set_header X-Client-IP \$derived_client_ip;
     proxy_set_header X-Forwarded-Proto \$scheme;
     proxy_ssl_server_name on;
   }
@@ -151,6 +201,7 @@ ${SIDECAR_LOCATIONS}
     proxy_pass ${BACKEND_INTERNAL_URL};
     proxy_set_header Host ${BACKEND_HOST};
     proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+    proxy_set_header X-Client-IP \$derived_client_ip;
     proxy_set_header X-Forwarded-Proto \$scheme;
     proxy_ssl_server_name on;
   }

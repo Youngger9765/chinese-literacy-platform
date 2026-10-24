@@ -17,6 +17,8 @@ a single user's traffic is ordinarily served by one instance.  If shared-state
 limiting becomes a requirement, replace the store with Redis.
 """
 
+import base64
+import json
 import threading
 import time
 from typing import NamedTuple
@@ -121,6 +123,82 @@ def real_client_ip(request: Request) -> str:
         request.headers.get("x-forwarded-for", ""),
         request.client.host if request.client else None,
     )
+
+
+def _decode_jwt_payload_unverified(token: str) -> dict | None:
+    """Decode a JWT's payload without verifying its signature.
+
+    SAFE ONLY for tokens whose signature has ALREADY been verified by a
+    platform we trust before this code ever sees them. Cloud Run's own
+    ingress verifies X-Serverless-Authorization's signature and strips it
+    before forwarding the token to this app -- confirmed via
+    https://docs.cloud.google.com/run/docs/authenticating/service-to-service
+    ("removes the signature before passing the token to the user
+    container"). This mirrors scripts/run_invoker_token.py's
+    `_decode_exp` on the minting side: same trust boundary (the platform
+    itself), same reason signature re-verification is unnecessary here.
+
+    Never call this on a token from an untrusted source to establish
+    identity on its own -- it proves nothing by itself; the caller
+    (trusted_proxy_client_ip below) only uses the result AFTER confirming
+    the token arrived via the one header Cloud Run itself attaches to a
+    platform-verified call.
+    """
+    try:
+        parts = token.split(".")
+        if len(parts) < 2:
+            return None
+        payload_b64 = parts[1]
+        padded = payload_b64 + "=" * (-len(payload_b64) % 4)
+        decoded = json.loads(base64.urlsafe_b64decode(padded))
+        return decoded if isinstance(decoded, dict) else None
+    except Exception:
+        return None
+
+
+def trusted_proxy_client_ip(
+    xff: str,
+    peer: str | None,
+    x_serverless_authorization: str,
+    x_client_ip: str,
+    frontend_proxy_sa: str,
+) -> str:
+    """Real end-user IP, trusting X-Client-IP ONLY when Cloud Run itself
+    verified this request as coming from the configured frontend service
+    account (#3740 -- the #3728 regression postmortem: the same-origin
+    proxy added a hop that broke the old "always trust XFF's second-from-
+    right entry" assumption, collapsing every user behind the proxy into
+    one shared rate-limit bucket).
+
+    Why not just trust X-Client-IP outright: backend stays DIRECTLY
+    reachable (CI, health checks, #3733's design never fully closes it off
+    to "only via the proxy") -- unconditionally trusting a header the
+    caller can set on a direct request would let anyone forge their own
+    IP and evade the per-IP limiter entirely.
+
+    Why not a fixed hop-count instead: same reason. With backend directly
+    reachable, an attacker can prepend arbitrary fake entries to
+    X-Forwarded-For on a direct call; a fixed "always trust the Nth-from-
+    right" rule can't tell that apart from a real proxy hop. This design
+    was explicitly rejected for #3740.
+
+    The identity check is what makes X-Client-IP trustworthy, not its
+    mere presence: decode X-Serverless-Authorization's payload (signature
+    already verified+stripped by Cloud Run itself -- see
+    _decode_jwt_payload_unverified) and require its `email` claim to
+    match frontend_proxy_sa exactly. Any mismatch, missing claim, decode
+    failure, empty config, or missing X-Client-IP falls back to the
+    existing XFF rule -- the same thing a direct, non-proxied request
+    already gets today.
+    """
+    if frontend_proxy_sa and x_serverless_authorization and x_client_ip:
+        token = x_serverless_authorization
+        if token[:7].lower() == "bearer ":
+            token = token[7:]
+        claims = _decode_jwt_payload_unverified(token)
+        if claims is not None and claims.get("email") == frontend_proxy_sa:
+            return x_client_ip
+    return real_ip_from_xff(xff, peer)
 
 
 def get_client_key(request: Request) -> str:

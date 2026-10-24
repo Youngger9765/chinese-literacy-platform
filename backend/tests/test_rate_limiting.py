@@ -34,6 +34,7 @@ from sqlalchemy.pool import StaticPool
 from unittest.mock import AsyncMock, patch, MagicMock
 
 from app.main import app
+from app.config import settings
 from app.database import get_db
 from app.models import Base
 from app.models.user import Role, User
@@ -711,6 +712,127 @@ class TestGlobalRateLimitMiddleware:
         assert GlobalRateLimitMiddleware.WINDOW == 60
 
 
+class TestGlobalRateLimitMiddlewareTrustedProxyWiring:
+    """#3740 — the unit tests in TestTrustedProxyClientIp exercise
+    trusted_proxy_client_ip() as a pure function; none of them go through
+    GlobalRateLimitMiddleware's actual ASGI header extraction in main.py
+    (byte-string header names, .decode(), argument order into the function).
+    A real bug there -- e.g. swapping x_serverless_authorization and
+    x_client_ip positionally, or reading the wrong byte-string key -- would
+    pass every test in TestTrustedProxyClientIp unchanged. These two tests
+    close that gap by sending real HTTP headers through TestClient and
+    asserting which bucket actually got exhausted (flagged as a real,
+    if narrow, test gap by critic review before this was added)."""
+
+    FRONTEND_SA = "frontend-sa@lingoleap-dev.iam.gserviceaccount.com"
+
+    @staticmethod
+    def _fake_serverless_auth(email: str) -> str:
+        return TestTrustedProxyClientIp._fake_serverless_auth(email)
+
+    def test_valid_identity_keys_the_bucket_by_x_client_ip_not_xff(self, client):
+        """With a valid frontend identity, exhausting the X-Client-IP-derived
+        bucket (not the XFF-derived one) must be what makes the real request
+        429 -- proving main.py actually wires X-Client-IP through when
+        trusted, not just that the pure function would."""
+        from app.main import GlobalRateLimitMiddleware
+
+        client_ip = "198.51.100.77"  # what nginx derived for the real end user
+        nginx_xff = "203.0.113.9, 10.0.0.5"  # nginx's own hop -- must be ignored here
+
+        for _ in range(GlobalRateLimitMiddleware.READ_LIMIT):
+            general_rate_limiter.check_with_info(
+                f"global:ip:{client_ip}:read",
+                GlobalRateLimitMiddleware.READ_LIMIT,
+                GlobalRateLimitMiddleware.WINDOW,
+            )
+
+        with patch.object(settings, "frontend_proxy_sa", self.FRONTEND_SA):
+            resp = client.get(
+                "/api/stories",
+                headers={
+                    "X-Forwarded-For": nginx_xff,
+                    "X-Serverless-Authorization": self._fake_serverless_auth(self.FRONTEND_SA),
+                    "X-Client-IP": client_ip,
+                },
+            )
+        assert resp.status_code == 429
+
+    def test_valid_identity_does_not_exhaust_the_xff_derived_bucket(self, client):
+        """Mirror of the above: exhausting the XFF-derived bucket must NOT
+        429 a request carrying a valid identity + a different X-Client-IP --
+        if main.py ignored X-Client-IP and used XFF anyway, this would 429
+        when it shouldn't."""
+        from app.main import GlobalRateLimitMiddleware
+
+        client_ip = "198.51.100.78"
+        nginx_xff = "203.0.113.9, 10.0.0.5"
+        xff_derived_ip = "10.0.0.5"  # what real_ip_from_xff(nginx_xff) resolves to
+
+        for _ in range(GlobalRateLimitMiddleware.READ_LIMIT):
+            general_rate_limiter.check_with_info(
+                f"global:ip:{xff_derived_ip}:read",
+                GlobalRateLimitMiddleware.READ_LIMIT,
+                GlobalRateLimitMiddleware.WINDOW,
+            )
+
+        with patch.object(settings, "frontend_proxy_sa", self.FRONTEND_SA):
+            resp = client.get(
+                "/api/stories",
+                headers={
+                    "X-Forwarded-For": nginx_xff,
+                    "X-Serverless-Authorization": self._fake_serverless_auth(self.FRONTEND_SA),
+                    "X-Client-IP": client_ip,
+                },
+            )
+        assert resp.status_code != 429
+
+    def test_missing_identity_keys_the_bucket_by_xff_not_x_client_ip(self, client):
+        """No X-Serverless-Authorization at all (direct/CI traffic shape):
+        exhausting the X-Client-IP-named bucket must have no effect -- the
+        real request should still succeed, because without identity the
+        header is never consulted."""
+        from app.main import GlobalRateLimitMiddleware
+
+        spoofed_client_ip = "9.9.9.9"
+        xff = "1.1.1.1, 5.5.5.5, 2.2.2.2"
+        xff_derived_ip = "5.5.5.5"
+
+        for _ in range(GlobalRateLimitMiddleware.READ_LIMIT):
+            general_rate_limiter.check_with_info(
+                f"global:ip:{spoofed_client_ip}:read",
+                GlobalRateLimitMiddleware.READ_LIMIT,
+                GlobalRateLimitMiddleware.WINDOW,
+            )
+
+        with patch.object(settings, "frontend_proxy_sa", self.FRONTEND_SA):
+            resp = client.get(
+                "/api/stories",
+                headers={
+                    "X-Forwarded-For": xff,
+                    "X-Client-IP": spoofed_client_ip,
+                },
+            )
+        assert resp.status_code != 429
+
+        # And exhausting the ACTUAL xff-derived bucket does 429 it.
+        for _ in range(GlobalRateLimitMiddleware.READ_LIMIT):
+            general_rate_limiter.check_with_info(
+                f"global:ip:{xff_derived_ip}:read",
+                GlobalRateLimitMiddleware.READ_LIMIT,
+                GlobalRateLimitMiddleware.WINDOW,
+            )
+        with patch.object(settings, "frontend_proxy_sa", self.FRONTEND_SA):
+            resp = client.get(
+                "/api/stories",
+                headers={
+                    "X-Forwarded-For": xff,
+                    "X-Client-IP": spoofed_client_ip,
+                },
+            )
+        assert resp.status_code == 429
+
+
 class TestRealClientIpXFF:
     """#2470 HIGH-1a: real client IP must come from the GCP-appended second-from-right
     X-Forwarded-For entry, never the client-controlled leftmost one — else an attacker
@@ -736,6 +858,163 @@ class TestRealClientIpXFF:
         from app.auth.rate_limiter import real_ip_from_xff
         assert real_ip_from_xff("", "10.0.0.1") == "10.0.0.1"
         assert real_ip_from_xff("") == "unknown"
+
+
+# ===========================================================================
+# #3740 — real client IP behind the same-origin proxy, without letting an
+# attacker forge X-Client-IP on a direct call (backend stays reachable both
+# ways: via the frontend's proxy AND directly, e.g. CI/health-checks).
+# ===========================================================================
+
+
+class TestTrustedProxyClientIp:
+    """trusted_proxy_client_ip must only trust X-Client-IP when Cloud Run
+    itself verified the caller as the configured frontend service account
+    (via X-Serverless-Authorization's platform-verified, signature-stripped
+    JWT) -- never on the header's mere presence."""
+
+    FRONTEND_SA = "frontend-sa@lingoleap-dev.iam.gserviceaccount.com"
+    OTHER_SA = "someone-else-sa@lingoleap-dev.iam.gserviceaccount.com"
+
+    @staticmethod
+    def _fake_serverless_auth(email: str | None, prefix: str = "Bearer ") -> str:
+        """Build a JWT-shaped string with a real, decodable payload and a
+        fake signature segment -- matches how scripts/test_run_invoker_token.py
+        builds fixtures for the same reason: _decode_jwt_payload_unverified
+        never checks the signature (the trust boundary is Cloud Run's own
+        platform having already verified it before stripping it), so a
+        fake signature segment is fine for testing the decode+compare logic.
+        """
+        import base64
+        import json
+
+        header = base64.urlsafe_b64encode(b'{"alg":"RS256"}').rstrip(b"=").decode()
+        claims: dict = {"aud": "https://backend.example.com"}
+        if email is not None:
+            claims["email"] = email
+        payload = base64.urlsafe_b64encode(json.dumps(claims).encode()).rstrip(b"=").decode()
+        return f"{prefix}{header}.{payload}.fake-signature-removed-by-google"
+
+    def test_direct_request_no_identity_header_uses_xff_rule(self):
+        # The "direct request" case: no X-Serverless-Authorization at all
+        # (e.g. CI or a health check hitting backend's public URL directly).
+        from app.auth.rate_limiter import trusted_proxy_client_ip
+        ip = trusted_proxy_client_ip(
+            xff="1.1.1.1, 5.5.5.5, 9.9.9.9",
+            peer=None,
+            x_serverless_authorization="",
+            x_client_ip="",
+            frontend_proxy_sa=self.FRONTEND_SA,
+        )
+        assert ip == "5.5.5.5"  # same as real_ip_from_xff's second-from-right
+
+    def test_proxied_request_with_valid_frontend_identity_uses_x_client_ip(self):
+        from app.auth.rate_limiter import trusted_proxy_client_ip
+        ip = trusted_proxy_client_ip(
+            xff="203.0.113.9, 10.0.0.1",  # nginx's own hop -- NOT the real user
+            peer=None,
+            x_serverless_authorization=self._fake_serverless_auth(self.FRONTEND_SA),
+            x_client_ip="198.51.100.42",  # the real end-user IP nginx derived
+            frontend_proxy_sa=self.FRONTEND_SA,
+        )
+        assert ip == "198.51.100.42"
+
+    def test_spoofed_x_client_ip_without_identity_is_ignored(self):
+        # No X-Serverless-Authorization at all, but X-Client-IP IS present
+        # (an attacker hitting backend directly and just setting the header
+        # themselves, hoping it's trusted outright).
+        from app.auth.rate_limiter import trusted_proxy_client_ip
+        ip = trusted_proxy_client_ip(
+            xff="1.1.1.1, 5.5.5.5, 9.9.9.9",
+            peer=None,
+            x_serverless_authorization="",
+            x_client_ip="9.9.9.9",  # attacker-forged, must be ignored
+            frontend_proxy_sa=self.FRONTEND_SA,
+        )
+        assert ip == "5.5.5.5"  # XFF rule, X-Client-IP never consulted
+
+    def test_identity_of_a_different_service_account_is_ignored(self):
+        # A real, well-formed, platform-verified identity -- just not the
+        # configured frontend one. Must NOT be trusted for X-Client-IP.
+        from app.auth.rate_limiter import trusted_proxy_client_ip
+        ip = trusted_proxy_client_ip(
+            xff="1.1.1.1, 5.5.5.5, 9.9.9.9",
+            peer=None,
+            x_serverless_authorization=self._fake_serverless_auth(self.OTHER_SA),
+            x_client_ip="198.51.100.42",
+            frontend_proxy_sa=self.FRONTEND_SA,
+        )
+        assert ip == "5.5.5.5"  # falls back to XFF rule, not the other SA's claim
+
+    def test_missing_email_claim_is_ignored(self):
+        from app.auth.rate_limiter import trusted_proxy_client_ip
+        ip = trusted_proxy_client_ip(
+            xff="1.1.1.1, 5.5.5.5, 9.9.9.9",
+            peer=None,
+            x_serverless_authorization=self._fake_serverless_auth(None),  # no email claim at all
+            x_client_ip="198.51.100.42",
+            frontend_proxy_sa=self.FRONTEND_SA,
+        )
+        assert ip == "5.5.5.5"
+
+    def test_empty_frontend_proxy_sa_config_never_trusts_anything(self):
+        # Zero-behavior-change invariant: until FRONTEND_PROXY_SA is
+        # actually configured, X-Client-IP must never be trusted even if
+        # everything else lines up perfectly.
+        from app.auth.rate_limiter import trusted_proxy_client_ip
+        ip = trusted_proxy_client_ip(
+            xff="1.1.1.1, 5.5.5.5, 9.9.9.9",
+            peer=None,
+            x_serverless_authorization=self._fake_serverless_auth(self.FRONTEND_SA),
+            x_client_ip="198.51.100.42",
+            frontend_proxy_sa="",  # not configured
+        )
+        assert ip == "5.5.5.5"
+
+    def test_malformed_token_does_not_crash_and_falls_back_to_xff(self):
+        from app.auth.rate_limiter import trusted_proxy_client_ip
+        ip = trusted_proxy_client_ip(
+            xff="1.1.1.1, 5.5.5.5, 9.9.9.9",
+            peer=None,
+            x_serverless_authorization="Bearer not-a-real-jwt-at-all",
+            x_client_ip="198.51.100.42",
+            frontend_proxy_sa=self.FRONTEND_SA,
+        )
+        assert ip == "5.5.5.5"
+
+    def test_missing_x_client_ip_header_falls_back_even_with_valid_identity(self):
+        # Valid frontend identity but no X-Client-IP in the request at
+        # all (e.g. an older frontend build before this was wired up) --
+        # must not crash, must fall back cleanly.
+        from app.auth.rate_limiter import trusted_proxy_client_ip
+        ip = trusted_proxy_client_ip(
+            xff="1.1.1.1, 5.5.5.5, 9.9.9.9",
+            peer=None,
+            x_serverless_authorization=self._fake_serverless_auth(self.FRONTEND_SA),
+            x_client_ip="",
+            frontend_proxy_sa=self.FRONTEND_SA,
+        )
+        assert ip == "5.5.5.5"
+
+    def test_email_containing_the_frontend_sa_as_a_substring_is_not_enough(self):
+        # The comparison must be EXACT equality, not "contains" -- an
+        # attacker who can get Google to issue them a token for a service
+        # account whose email happens to contain the configured frontend
+        # SA as a substring (e.g. a lookalike project, or the frontend SA
+        # name embedded in a longer attacker-controlled string) must not
+        # be trusted. (Mutation-caught: `frontend_proxy_sa in email` passed
+        # every other test here unchanged -- this is the one that catches
+        # that exact mistake.)
+        from app.auth.rate_limiter import trusted_proxy_client_ip
+        lookalike_email = self.FRONTEND_SA + ".evil-attacker.example.com"
+        ip = trusted_proxy_client_ip(
+            xff="1.1.1.1, 5.5.5.5, 9.9.9.9",
+            peer=None,
+            x_serverless_authorization=self._fake_serverless_auth(lookalike_email),
+            x_client_ip="198.51.100.42",
+            frontend_proxy_sa=self.FRONTEND_SA,
+        )
+        assert ip == "5.5.5.5"
 
 
 # ===========================================================================

@@ -53,7 +53,7 @@ from .routes.pk import router as pk_router
 from .routes.escape_room import router as escape_room_router
 from .routes.team_arena import router as team_arena_router
 from .utils.logging_config import setup_logging
-from .auth.rate_limiter import general_rate_limiter, real_ip_from_xff
+from .auth.rate_limiter import general_rate_limiter, trusted_proxy_client_ip
 from .services.live_quiz.engine import is_authenticated_member_by_code
 from .services.pk.matchmaking import is_authenticated_queue_owner as pk_is_authenticated_queue_owner
 from .services.pk.engine import is_authenticated_match_participant as pk_is_authenticated_match_participant
@@ -723,12 +723,26 @@ class GlobalRateLimitMiddleware:
             # Unauthenticated or non-member: fall through to normal per-IP
             # limiting below, same as any other /api/* request.
 
-        # Extract the real client IP (#2470 HIGH-1a): take the GCP-appended
-        # second-from-right XFF entry, not the client-controlled leftmost one.
+        # Extract the real client IP (#2470 HIGH-1a, #3740): take the
+        # GCP-appended second-from-right XFF entry -- UNLESS this request
+        # was verified by Cloud Run itself as coming from the frontend's
+        # own service account (the same-origin proxy hop), in which case
+        # trust the X-Client-IP the frontend derived instead. See
+        # trusted_proxy_client_ip's docstring for why (#3740 postmortem:
+        # the proxy hop broke the plain XFF rule, collapsing every user
+        # behind it into one shared bucket).
         headers_raw = dict(scope.get("headers", []))
         forwarded_for = headers_raw.get(b"x-forwarded-for", b"").decode()
+        serverless_auth = headers_raw.get(b"x-serverless-authorization", b"").decode()
+        client_ip_header = headers_raw.get(b"x-client-ip", b"").decode()
         client = scope.get("client")
-        ip = real_ip_from_xff(forwarded_for, client[0] if client else None)
+        ip = trusted_proxy_client_ip(
+            forwarded_for,
+            client[0] if client else None,
+            serverless_auth,
+            client_ip_header,
+            settings.frontend_proxy_sa,
+        )
         method = scope.get("method", "GET").upper()
         # OPTIONS is handled above (#3227) and never reaches here.
         is_read = method in ("GET", "HEAD")
