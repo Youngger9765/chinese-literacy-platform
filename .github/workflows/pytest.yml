@@ -43,6 +43,9 @@ jobs:
               - 'frontend/src/pages/pk/resolvePkGrade.ts'
               - 'frontend/src/components/league/__tests__/fixtures/builtinStoryPacks.json'
               - 'frontend/scripts/eval/tts-alignment.eval.ts'
+              # #3750：test_demo_seed_cleanup_3750 鎖住兩支 e2e 用固定 prefix 灌示範學生
+              - 'frontend/tests/e2e/demo-path.spec.ts'
+              - 'frontend/tests/e2e/full-qa.spec.ts'
               # 要求/必做關卡清單的兩種算法必須一致 —— 這支是跑真前端程式碼的
               # runner（test_required_steps_parity_3695.py），不是重寫，改它
               # 等於直接改驗收答案。
