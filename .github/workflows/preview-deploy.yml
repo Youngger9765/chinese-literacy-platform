@@ -163,16 +163,8 @@ jobs:
           DEMO_STUDENT_EMAIL: ${{ secrets.DEMO_STUDENT_EMAIL }}
           DEMO_STUDENT_PW: ${{ secrets.DEMO_STUDENT_PW }}
         run: |
-          # #3719 — IAP 準備：VITE_API_URL 留空字串，讓 build 出來的 JS 打相對
-          # 路徑 /api/*（apiConfig.ts 用 `??`，空字串不會被當成 undefined）。
-          # BACKEND_INTERNAL_URL 告訴這個 preview frontend 自己的 nginx
-          # 要把這些同源的 /api、/assets、/q 轉送去哪
-          # （見 frontend/docker/render-nginx-conf.sh）—— 跟上面算出來的
-          # backend URL 是同一個，所以 preview 沒有自己的後端時一樣會
-          # 退回共用 staging，跟今天的行為一致。
           docker build \
-            --build-arg VITE_API_URL="" \
-            --build-arg BACKEND_INTERNAL_URL=${{ steps.backend-url.outputs.url }} \
+            --build-arg VITE_API_URL=${{ steps.backend-url.outputs.url }} \
             --build-arg VITE_SHOW_DEMO_LOGIN=true \
             --build-arg "VITE_DEMO_ADMIN_EMAIL=${DEMO_ADMIN_EMAIL}" \
             --build-arg "VITE_DEMO_ADMIN_PW=${DEMO_ADMIN_PW}" \
