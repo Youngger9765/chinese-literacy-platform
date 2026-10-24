@@ -3,8 +3,10 @@
 #
 # 均一未來可能在 staging/preview 的 Cloud Run 服務前面加一層 IAP
 # (Google 身分驗證)。這支讓任何 bash 腳本/workflow 用同一套邏輯：
-# 有憑證且設定了要瞄準的 audience 時，帶上一張 Google 簽名的 ID token；
-# 沒設定就安靜地不帶 header —— 跟 IAP 還沒打開時行為完全一樣。
+# 有憑證且設定了要瞄準的 audience 時，帶上一張服務帳號自簽的 JWT
+# （#3730 canary 實測過：一般 Google 簽名的 ID token 會被 IAP 拒絕，
+# 見 scripts/iap_token.py 開頭的說明）；沒設定就安靜地不帶 header ——
+# 跟 IAP 還沒打開時行為完全一樣。
 #
 # 邏輯只有一份，寫在 scripts/iap_token.py —— 這支只是轉呼叫，不重算一次。
 #
