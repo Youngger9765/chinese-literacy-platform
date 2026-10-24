@@ -14,6 +14,23 @@ Post-demo P2-P4 work (NOT implemented here):
   - Quality distribution (excellent/normal/weak buckets)
   - Realistic per-step step_data for vocab/comprehension
   - AI-generated ai_analysis via Vertex Gemini
+
+Cleanup (issue #3750):
+  - `seed_demo_students` is idempotent per email, but that only holds when a
+    caller reuses the same `prefix`. Two e2e specs instead minted a brand
+    new prefix every run (`'e2e' + Date.now()...`), so every run permanently
+    enrolled ONE MORE @testdata.lingoleap.dev account into the same shared
+    staging classroom (classroom_id=1) with nothing ever cleaning them up.
+    Over ~4.5 months that classroom's roster grew to 1,928 "students"
+    (1,927 of them throwaway), which 跨班賽季 (league) then displayed
+    verbatim as "全班 1,698 人已參與" the first time a real person looked.
+  - `cleanup_demo_students` reverses that: it removes the ClassroomStudent
+    enrollment AND any already-locked LeagueTeamRosterMember rows for
+    @testdata.lingoleap.dev accounts in one classroom. It intentionally
+    does NOT delete the User or LearningSession rows those accounts
+    created — many other tables reference users.id without
+    ON DELETE CASCADE, so deleting the accounts themselves is a bigger,
+    separately-riskier operation than this bug needs fixed.
 """
 import json
 import logging
@@ -23,18 +40,41 @@ from sqlalchemy.orm import Session
 
 from ..auth.password import hash_password
 from ..models.assignment import Assignment
+from ..models.league import LeagueTeam, LeagueTeamRosterMember
 from ..models.school import Classroom, ClassroomStudent
 from ..models.session import LearningSession
 from ..models.user import User
-from ..schemas.admin_seed import DemoStudentSeedRequest, DemoStudentSeedResponse, SeededStudentInfo
+from ..schemas.admin_seed import (
+    DemoStudentCleanupResponse,
+    DemoStudentSeedRequest,
+    DemoStudentSeedResponse,
+    SeededStudentInfo,
+)
 
 logger = logging.getLogger(__name__)
+
+
+class DemoSeedCapExceeded(Exception):
+    """Raised when a seed call would push a classroom's throwaway
+    @testdata.lingoleap.dev account count past
+    _MAX_DEMO_STUDENTS_PER_CLASSROOM (#3750). Deliberately NOT a ValueError
+    subclass so the route can tell "classroom not found" (404) apart from
+    "guard tripped" (409) without string-matching the message."""
 
 # ---------------------------------------------------------------------------
 # Constants — fixed "good student" profile for the demo
 # ---------------------------------------------------------------------------
 
 _DEMO_EMAIL_DOMAIN = "testdata.lingoleap.dev"
+_DEMO_EMAIL_SUFFIX = f"@{_DEMO_EMAIL_DOMAIN}"
+
+# #3750 — a caller that passes a unique `prefix` every call (e.g. one built
+# from a timestamp) defeats this service's per-email idempotency and can
+# enroll an unbounded number of throwaway accounts into one classroom. 20 is
+# comfortably above any real demo/QA need seen so far (the admin "[Demo]"
+# button caps at 10 per click); if a legitimate scenario needs more, raise
+# this constant deliberately rather than removing the guard.
+_MAX_DEMO_STUDENTS_PER_CLASSROOM = 20
 
 _ALL_STEPS: list[str] = [
     "reading_annotation",
@@ -76,6 +116,41 @@ def seed_demo_students(
     classroom = db.query(Classroom).filter(Classroom.id == req.classroom_id).first()
     if classroom is None:
         raise ValueError(f"Classroom {req.classroom_id} not found")
+
+    existing_demo_count = (
+        db.query(ClassroomStudent)
+        .join(User, User.id == ClassroomStudent.student_id)
+        .filter(
+            ClassroomStudent.classroom_id == req.classroom_id,
+            User.email.like(f"%{_DEMO_EMAIL_SUFFIX}"),
+        )
+        .count()
+    )
+    # Only accounts this call would actually ADD count against the cap: the
+    # same email is reused idempotently, so re-seeding a fixed prefix whose
+    # accounts are already enrolled adds nothing and must not be refused
+    # even when the classroom is already over the cap (#3757 review).
+    requested_emails = [
+        f"{req.prefix}{str(i).zfill(2)}@{_DEMO_EMAIL_DOMAIN}" for i in range(1, req.count + 1)
+    ]
+    already_enrolled = {
+        email
+        for (email,) in db.query(User.email)
+        .join(ClassroomStudent, ClassroomStudent.student_id == User.id)
+        .filter(
+            ClassroomStudent.classroom_id == req.classroom_id,
+            User.email.in_(requested_emails),
+        )
+        .all()
+    }
+    would_add = len(requested_emails) - len(already_enrolled)
+    if would_add > 0 and existing_demo_count + would_add > _MAX_DEMO_STUDENTS_PER_CLASSROOM:
+        raise DemoSeedCapExceeded(
+            f"Classroom {req.classroom_id} already has {existing_demo_count} seeded "
+            f"@{_DEMO_EMAIL_DOMAIN} accounts; adding {would_add} more would exceed the "
+            f"{_MAX_DEMO_STUDENTS_PER_CLASSROOM}-account guard (#3750). Reuse an existing "
+            "prefix instead of minting a new one, or call cleanup_demo_students first."
+        )
 
     story_slug = _get_story_slug_for_classroom(db, req.classroom_id)
 
@@ -230,3 +305,105 @@ def _create_completed_session(
     db.add(session)
     db.flush()
     return session
+
+
+# ---------------------------------------------------------------------------
+# Cleanup (#3750) — undo a classroom polluted by defeated-idempotency seeding
+# ---------------------------------------------------------------------------
+
+def cleanup_demo_students(
+    db: Session, classroom_id: int, *, dry_run: bool = True
+) -> DemoStudentCleanupResponse:
+    """Remove throwaway @testdata.lingoleap.dev enrollments from one
+    classroom: current ClassroomStudent rows AND any already-locked
+    LeagueTeamRosterMember rows from a previously-registered league team
+    (league rosters are locked at registration time — see
+    league_service.py's module docstring — so a classroom's live
+    enrollment and an existing season's roster_size are two different
+    numbers and both need fixing).
+
+    `dry_run=True` (the DEFAULT) only counts what would be removed and
+    performs no deletion/commit at all — safe to call against a real
+    classroom (including on prod, if ENABLE_TEST_SEED is ever true there)
+    without risking the one thing this bug must never cause: deleting a
+    real student's enrollment. Pass `dry_run=False` explicitly to actually
+    delete. The filter itself (`User.email LIKE '%@testdata.lingoleap.dev'`)
+    is the real/fake boundary — see test_real_students_never_match_the_seed_domain_filter
+    for the negative control proving ordinary student emails never match it.
+
+    Idempotent: calling this again once nothing matches is a no-op that
+    returns zero counts. Scoped to one classroom — another classroom's
+    @testdata.lingoleap.dev accounts are never touched.
+
+    Deliberately does NOT delete the underlying User or LearningSession
+    rows: many other tables reference users.id without ON DELETE CASCADE
+    (assignments, pk, team_arena, reading_history, ...), so deleting the
+    accounts themselves is a separately-riskier operation this bug does
+    not need. The accounts become ordinary unenrolled, unreferenced-by-
+    any-classroom test users.
+    """
+    classroom = db.query(Classroom).filter(Classroom.id == classroom_id).first()
+    if classroom is None:
+        raise ValueError(f"Classroom {classroom_id} not found")
+
+    fake_student_ids = [
+        row[0]
+        for row in db.query(User.id)
+        .join(ClassroomStudent, ClassroomStudent.student_id == User.id)
+        .filter(
+            ClassroomStudent.classroom_id == classroom_id,
+            User.email.like(f"%{_DEMO_EMAIL_SUFFIX}"),
+        )
+        .all()
+    ]
+
+    if not fake_student_ids:
+        return DemoStudentCleanupResponse(
+            classroom_id=classroom_id,
+            dry_run=dry_run,
+            classroom_students_removed=0,
+            league_roster_rows_removed=0,
+        )
+
+    roster_query = db.query(LeagueTeamRosterMember).filter(
+        LeagueTeamRosterMember.team_id.in_(
+            db.query(LeagueTeam.id).filter(LeagueTeam.classroom_id == classroom_id)
+        ),
+        LeagueTeamRosterMember.student_id.in_(fake_student_ids),
+    )
+    enrollment_query = db.query(ClassroomStudent).filter(
+        ClassroomStudent.classroom_id == classroom_id,
+        ClassroomStudent.student_id.in_(fake_student_ids),
+    )
+
+    if dry_run:
+        roster_count = roster_query.count()
+        enrollment_count = enrollment_query.count()
+        logger.info(
+            "demo_seed_cleanup: DRY RUN — would remove %d enrollments + %d locked "
+            "league roster rows from classroom %d (#3750)",
+            enrollment_count, roster_count, classroom_id,
+        )
+        return DemoStudentCleanupResponse(
+            classroom_id=classroom_id,
+            dry_run=True,
+            classroom_students_removed=enrollment_count,
+            league_roster_rows_removed=roster_count,
+        )
+
+    roster_removed = roster_query.delete(synchronize_session=False)
+    enrollment_removed = enrollment_query.delete(synchronize_session=False)
+    db.commit()
+
+    logger.info(
+        "demo_seed_cleanup: removed %d enrollments + %d locked league roster rows "
+        "from classroom %d (#3750)",
+        enrollment_removed, roster_removed, classroom_id,
+    )
+
+    return DemoStudentCleanupResponse(
+        classroom_id=classroom_id,
+        dry_run=False,
+        classroom_students_removed=enrollment_removed,
+        league_roster_rows_removed=roster_removed,
+    )

@@ -26,3 +26,17 @@ class DemoStudentSeedResponse(BaseModel):
     students: list[SeededStudentInfo]
     story_slug: str | None
     note: str
+
+
+class DemoStudentCleanupResponse(BaseModel):
+    """Issue #3750 — reverses a classroom polluted by seed calls that
+    defeated seed_demo_students's per-email idempotency.
+
+    `dry_run=True` (the default) only counts what WOULD be removed and
+    performs no deletion — a caller must pass `dry_run=False` explicitly
+    to actually mutate data. Never defaults to deleting."""
+
+    classroom_id: int
+    dry_run: bool
+    classroom_students_removed: int
+    league_roster_rows_removed: int

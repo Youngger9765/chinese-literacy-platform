@@ -306,9 +306,17 @@ test.describe('C. Admin path', () => {
     const token = await getToken(request, 'admin');
     test.skip(!token, 'Cannot login as admin');
 
+    // #3750 — a fixed prefix, NOT Date.now(). seed_demo_students is
+    // idempotent per email; this assertion (students_created === 1) is true
+    // whether the account is newly created or reused, so a fresh prefix
+    // bought this test nothing except a brand-new permanent enrollment in
+    // the shared staging classroom (classroom_id: 1) on every run. ~4.5
+    // months of that, across this spec and demo-path.spec.ts, is how
+    // classroom_id=1 ended up with 1,927 throwaway accounts — see the
+    // issue for the full chain to the "全班 1,698 人已參與" bug this caused.
     const seedRes = await request.post(`${BACKEND}/api/admin/seed/demo-students`, {
       headers: { Authorization: `Bearer ${token}` },
-      data: { classroom_id: 1, count: 1, prefix: 'qa' + Date.now().toString().slice(-6) },
+      data: { classroom_id: 1, count: 1, prefix: 'qa-fullqa-smoke' },
     });
     expect(seedRes.ok()).toBeTruthy();
     const body = await seedRes.json();
