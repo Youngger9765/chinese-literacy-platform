@@ -75,3 +75,4 @@ frontend/scripts/*.cjs
 # 已追蹤的檔案不受這條規則影響（gitignore 只擋新增的 untracked 檔）。
 *.docx
 !backend/tests/fixtures/synthetic_worksheet.docx
+qa-shots/
