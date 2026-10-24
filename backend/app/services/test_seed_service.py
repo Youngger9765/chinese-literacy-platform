@@ -126,10 +126,28 @@ def seed_demo_students(
         )
         .count()
     )
-    if existing_demo_count + req.count > _MAX_DEMO_STUDENTS_PER_CLASSROOM:
+    # Only accounts this call would actually ADD count against the cap: the
+    # same email is reused idempotently, so re-seeding a fixed prefix whose
+    # accounts are already enrolled adds nothing and must not be refused
+    # even when the classroom is already over the cap (#3757 review).
+    requested_emails = [
+        f"{req.prefix}{str(i).zfill(2)}@{_DEMO_EMAIL_DOMAIN}" for i in range(1, req.count + 1)
+    ]
+    already_enrolled = {
+        email
+        for (email,) in db.query(User.email)
+        .join(ClassroomStudent, ClassroomStudent.student_id == User.id)
+        .filter(
+            ClassroomStudent.classroom_id == req.classroom_id,
+            User.email.in_(requested_emails),
+        )
+        .all()
+    }
+    would_add = len(requested_emails) - len(already_enrolled)
+    if would_add > 0 and existing_demo_count + would_add > _MAX_DEMO_STUDENTS_PER_CLASSROOM:
         raise DemoSeedCapExceeded(
             f"Classroom {req.classroom_id} already has {existing_demo_count} seeded "
-            f"@{_DEMO_EMAIL_DOMAIN} accounts; adding {req.count} more would exceed the "
+            f"@{_DEMO_EMAIL_DOMAIN} accounts; adding {would_add} more would exceed the "
             f"{_MAX_DEMO_STUDENTS_PER_CLASSROOM}-account guard (#3750). Reuse an existing "
             "prefix instead of minting a new one, or call cleanup_demo_students first."
         )

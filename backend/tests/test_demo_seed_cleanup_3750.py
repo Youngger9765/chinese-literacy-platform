@@ -412,3 +412,41 @@ class TestSeedDemoStudentsCapGuard:
             .count()
         )
         assert enrolled == 1, "reusing the same prefix must stay idempotent, not accumulate"
+
+    def test_reusing_a_prefix_in_an_already_full_classroom_is_not_rejected(self, db_session):
+        """Code review on #3757: the cap counted every requested id as new.
+        Staging's classroom 1 still carries ~29 seeded accounts (> the cap),
+        so once merged every e2e reseed of its own fixed prefix -- which adds
+        zero rows -- got a 409 and the smoke specs broke. Only accounts this
+        call would actually add may count against the cap."""
+        assert seed_demo_students is not None
+        org = make_org(db_session)
+        school = make_school(db_session, org=org)
+        teacher = make_teacher(db_session)
+        classroom = make_classroom(db_session, school, teacher)
+        db_session.commit()
+
+        from app.services.test_seed_service import _MAX_DEMO_STUDENTS_PER_CLASSROOM
+
+        seed_demo_students(
+            db_session,
+            DemoStudentSeedRequest(classroom_id=classroom.id, count=1, prefix="e2e-smoke"),
+        )
+        for i in range(_MAX_DEMO_STUDENTS_PER_CLASSROOM + 5):
+            classroom_member = _make_fake_seed_student(db_session, 900 + i)
+            db_session.add(ClassroomStudent(classroom_id=classroom.id, student_id=classroom_member.id))
+        db_session.commit()
+
+        # Same fixed prefix again: adds nothing, must not be rejected.
+        result = seed_demo_students(
+            db_session,
+            DemoStudentSeedRequest(classroom_id=classroom.id, count=1, prefix="e2e-smoke"),
+        )
+        assert result.students_created == 1
+
+        # A brand-new prefix in the same over-cap classroom is still refused.
+        with pytest.raises(DemoSeedCapExceeded):
+            seed_demo_students(
+                db_session,
+                DemoStudentSeedRequest(classroom_id=classroom.id, count=1, prefix="fresh-prefix"),
+            )
