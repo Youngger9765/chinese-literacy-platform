@@ -89,7 +89,7 @@ const StudentTeamArenaJoin: React.FC = () => {
         </div>
         <h1 className="mb-1 text-xl font-bold text-on-surface">多人對抗賽</h1>
         <p className="mb-1 text-sm text-on-surface-variant">2～5 人一隊，答題推塔，攻下對方主堡獲勝</p>
-        <p className="mb-8 text-xs text-on-surface-variant">開房或輸入代碼跟同學一起進房，答對題目才能推進攻塔</p>
+        <p className="mb-8 text-xs text-on-surface-variant">發起或輸入代碼加入比賽，答對題目才能推進攻塔</p>
         <div className="flex w-full max-w-xs flex-col gap-3">
           <button
             type="button"
