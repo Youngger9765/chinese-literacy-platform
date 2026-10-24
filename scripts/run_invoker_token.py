@@ -163,15 +163,42 @@ get_invoker_token.cache_clear = _reset_token_cache_for_tests  # type: ignore[att
 # ---------------------------------------------------------------------------
 
 
+_LOOPBACK_ADDRESSES = ("127.0.0.1", "::1")
+
+
+def _decide_sidecar_response(path: str, client_ip: str) -> tuple[int, dict[str, str]]:
+    """純決策邏輯（不摸 socket），舆 BaseHTTPRequestHandler 的 I/O 機制分開，
+    好讓單元測試直接叫。一個真正接 TCP 的測試無法模擬「非 loopback」
+    呼叫端（測試自己跟服務都在 localhost），所以要測那一路必須絕開真實
+    socket。
+
+    深度防禦（2026-10-24 自動化安全審查指出）：Cloud Run 本身只暴露
+    ingress 容器的 port 給外部，sidecar 的 port 本來就不應該從實例外面
+    被打到，但不要只依賴這一層：未來情報未必一直成立，所以
+    自己再檢一次呼叫端地址——只有呼叫端真的是 loopback（即 nginx 在
+    同一個 Cloud Run 實例裡打 127.0.0.1）才發 token；非 loopback 呼叫端只能走
+    /healthz（回 200、不帶 token），其他路徑一律 403。
+    """
+    if path == "/healthz":
+        return 200, {}
+
+    if client_ip not in _LOOPBACK_ADDRESSES:
+        return 403, {}
+
+    token = get_invoker_token()
+    headers = {"X-Invoker-Token": token} if token else {}
+    return 200, headers
+
+
 def _build_server(port: int):
     import http.server
 
     class _Handler(http.server.BaseHTTPRequestHandler):
         def do_GET(self) -> None:  # noqa: N802 (BaseHTTPRequestHandler's own naming convention)
-            token = get_invoker_token()
-            self.send_response(200)
-            if token:
-                self.send_header("X-Invoker-Token", token)
+            status, headers = _decide_sidecar_response(self.path, self.client_address[0])
+            self.send_response(status)
+            for name, value in headers.items():
+                self.send_header(name, value)
             self.end_headers()
 
         def log_message(self, format: str, *args: object) -> None:  # noqa: A002

@@ -263,6 +263,69 @@ class SidecarServer(unittest.TestCase):
                 self.assertEqual(resp.status, 200)
                 self.assertIsNone(resp.headers.get("X-Invoker-Token"))
 
+    def test_healthz_is_200_with_no_token_even_from_loopback(self):
+        # /healthz exists purely for Cloud Run's startup/liveness probe --
+        # it must never leak a token, even to a caller that WOULD otherwise
+        # qualify for one (loopback).
+        with mock.patch.object(run_invoker_token, "get_invoker_token", return_value="tok-abc"):
+            port = self._start_server()
+            with urllib.request.urlopen(f"http://127.0.0.1:{port}/healthz", timeout=5) as resp:  # noqa: S310
+                self.assertEqual(resp.status, 200)
+                self.assertIsNone(resp.headers.get("X-Invoker-Token"))
+
+
+class DecideSidecarResponse(unittest.TestCase):
+    """Defense-in-depth per #3733's automated security review (2026-10-24):
+    Cloud Run itself only exposes the ingress container's port externally,
+    so the sidecar's port shouldn't be reachable from outside the instance
+    at all -- but that's a platform guarantee, not something this code
+    should assume will always hold. This locks the decision logic directly
+    (not through a real socket -- a real TCP test client connecting from
+    this same test process would always present as 127.0.0.1, so there is
+    no way to genuinely simulate "a non-loopback caller" without this
+    pure-function split).
+    """
+
+    def setUp(self):
+        run_invoker_token.get_invoker_token.cache_clear()
+
+    def test_loopback_ipv4_gets_the_token_header(self):
+        with mock.patch.object(run_invoker_token, "get_invoker_token", return_value="tok-abc"):
+            status, headers = run_invoker_token._decide_sidecar_response("/", "127.0.0.1")
+        self.assertEqual(status, 200)
+        self.assertEqual(headers, {"X-Invoker-Token": "tok-abc"})
+
+    def test_loopback_ipv6_gets_the_token_header_too(self):
+        with mock.patch.object(run_invoker_token, "get_invoker_token", return_value="tok-abc"):
+            status, headers = run_invoker_token._decide_sidecar_response("/", "::1")
+        self.assertEqual(status, 200)
+        self.assertEqual(headers, {"X-Invoker-Token": "tok-abc"})
+
+    def test_non_loopback_gets_403_on_root_path(self):
+        with mock.patch.object(run_invoker_token, "get_invoker_token", return_value="tok-abc") as get_tok:
+            status, headers = run_invoker_token._decide_sidecar_response("/", "10.1.2.3")
+        self.assertEqual(status, 403)
+        self.assertEqual(headers, {})
+        # Must reject before even asking for a token -- a non-loopback
+        # caller should never cause a mint attempt, let alone see one.
+        get_tok.assert_not_called()
+
+    def test_non_loopback_gets_200_with_no_token_on_healthz(self):
+        with mock.patch.object(run_invoker_token, "get_invoker_token", return_value="tok-abc") as get_tok:
+            status, headers = run_invoker_token._decide_sidecar_response("/healthz", "10.1.2.3")
+        self.assertEqual(status, 200)
+        self.assertEqual(headers, {})
+        get_tok.assert_not_called()
+
+    def test_loopback_also_gets_no_token_on_healthz(self):
+        # /healthz never leaks a token, not even to a legitimate caller --
+        # it's a pure probe endpoint, not an alternate way to fetch one.
+        with mock.patch.object(run_invoker_token, "get_invoker_token", return_value="tok-abc") as get_tok:
+            status, headers = run_invoker_token._decide_sidecar_response("/healthz", "127.0.0.1")
+        self.assertEqual(status, 200)
+        self.assertEqual(headers, {})
+        get_tok.assert_not_called()
+
 
 class Cli(unittest.TestCase):
     def setUp(self):
