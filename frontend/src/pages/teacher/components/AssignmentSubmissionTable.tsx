@@ -449,7 +449,27 @@ const AssignmentSubmissionTable: React.FC<Props> = ({
                 {group.student_name}
               </div>
             </td>
-            <td className="py-1.5 text-center">{statusBadge(group.latest_status)}</td>
+            <td className="py-1.5 text-center">
+              {statusBadge(group.latest_status)}
+              {latest.marked_complete_by_teacher && <TeacherMarkedBadge />}
+              {/* #3723: the desktop grouped table is what teachers see by
+                  default — it rendered neither the missing-steps line nor the
+                  mark-complete action (only the phone cards and the flat
+                  table did), so the feature was invisible on a computer. */}
+              {latest.status !== 'submitted' && latest.status !== 'graded' && (
+                <>
+                  <MissingStepsLine sub={latest} />
+                  {latest.session_id !== null && (
+                    <MarkCompleteAction
+                      assignmentId={assignmentId}
+                      submissionId={latest.id}
+                      studentName={group.student_name}
+                      onMarked={onSubmissionUpdated}
+                    />
+                  )}
+                </>
+              )}
+            </td>
             <td className="py-1.5 text-center text-gray-500">{group.attempts.length}</td>
             <td className="py-1.5 text-gray-700 text-center font-medium">
               {gradingId === latest.id ? (

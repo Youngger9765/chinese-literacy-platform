@@ -4,7 +4,7 @@ import { render as rtlRender, screen, within, waitFor } from '@testing-library/r
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import AssignmentSubmissionTable from './AssignmentSubmissionTable';
-import type { SubmissionResponse } from '../../../services/assignmentApi';
+import type { SubmissionResponse, StudentAttemptGroup } from '../../../services/assignmentApi';
 import * as assignmentApi from '../../../services/assignmentApi';
 
 vi.mock('../../../contexts/AuthContext', () => ({ useAuth: () => ({ token: 'test-token' }) }));
@@ -299,5 +299,34 @@ describe('AssignmentSubmissionTable — missing-steps view + teacher mark-comple
     );
 
     expect(screen.getAllByText('老師標記').length).toBeGreaterThan(0);
+  });
+});
+
+describe('AssignmentSubmissionTable — desktop grouped table shows missing steps (#3723)', () => {
+  it('the grouped (default desktop) table renders the missing-steps line and the mark-complete action', () => {
+    const latest = makeSubmission({
+      id: 31, student_id: 9, student_name: '林小安', status: 'in_progress', session_id: 801,
+      required_step_count: 8, completed_step_count: 3,
+      missing_step_ids: ['spotlight', 'vocab-review'],
+    });
+    const groups = [{
+      student_id: 9, student_name: '林小安', latest_status: 'in_progress', latest_score: null,
+      latest_attempt_number: 1, attempts: [{ ...latest, attempt_number: 1 }],
+    }] as unknown as StudentAttemptGroup[];
+    render(
+      <AssignmentSubmissionTable
+        submissions={[latest]}
+        groups={groups}
+        useGrouped={true}
+        gradeForm={gradeForm}
+        assignmentId={1}
+        onSubmissionUpdated={vi.fn()}
+      />,
+    );
+    // Scope to the desktop <table>; the phone cards render the line too and
+    // used to hide that the table itself never did.
+    const table = screen.getByRole('table');
+    expect(within(table).getByText(/完成 3\/8 關/)).toBeTruthy();
+    expect(within(table).getByRole('button', { name: '標記完成' })).toBeTruthy();
   });
 });
