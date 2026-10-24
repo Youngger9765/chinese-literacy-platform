@@ -73,7 +73,7 @@ _CODE_CHARS = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"
 _MAX_CODE_RETRIES = 10
 
 _ERR_EMPTY_POOL = "這個年級目前還沒有題目，請改天再試"
-_ERR_NO_GRADE = "找不到你的年級，請先加入班級或請老師設定年級後再開房"
+_ERR_NO_GRADE = "找不到你的年級，請先加入班級或請老師設定年級後再發起比賽"
 
 # Resource-exhaustion guard — security review 2026-10-21 low-risk item L2:
 # "team_arena 開房...沒有每人/每房限流", a host could otherwise call
@@ -342,8 +342,8 @@ def create_session(
     if _count_open_hosted_rooms(db, host.id) >= MAX_OPEN_HOSTED_ROOMS:
         raise HTTPException(
             status_code=429,
-            detail=f"你同時開的房間已經達到上限（最多 {MAX_OPEN_HOSTED_ROOMS} 間），"
-            "請先結束其中一間，或等它自動視為已放棄後再開新的",
+            detail=f"你同時發起的比賽已經達到上限（最多 {MAX_OPEN_HOSTED_ROOMS} 場），"
+            "請先結束其中一場，或等它自動視為已放棄後再開新的",
         )
 
     grade = resolve_pool_grade(_resolve_host_grade(db, host))
@@ -388,7 +388,7 @@ def join_session(db: Session, student: User, code: str, *, side: str) -> TeamAre
         return session
 
     if session.status != "lobby":
-        raise HTTPException(status_code=409, detail="本房已經開始，無法加入")
+        raise HTTPException(status_code=409, detail="這場比賽已經開始，無法加入")
     if side not in SIDE_KEYS:
         raise HTTPException(status_code=400, detail=f"side must be one of {SIDE_KEYS}")
 
@@ -443,7 +443,7 @@ def _members_by_side(db: Session, session_id: int) -> dict[str, list[TeamArenaMe
 
 def control(db: Session, session: TeamArenaSession, user: User, *, action: str) -> TeamArenaSession:
     if session.teacher_id != user.id:
-        raise HTTPException(status_code=403, detail="只有開房的人能控制這場")
+        raise HTTPException(status_code=403, detail="只有發起比賽的同學能控制這場")
     if action == "start":
         return _start(db, session)
     if action == "pause":

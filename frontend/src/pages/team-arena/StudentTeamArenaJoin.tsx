@@ -70,7 +70,7 @@ const StudentTeamArenaJoin: React.FC = () => {
       });
       navigate(`/team-arena/${res.code}`);
     } catch (err) {
-      setHostError(err instanceof TeamArenaApiError ? err.message : '開房失敗，請稍後再試');
+      setHostError(err instanceof TeamArenaApiError ? err.message : '發起比賽失敗，請稍後再試');
       setCreating(false);
     }
   };
@@ -89,14 +89,14 @@ const StudentTeamArenaJoin: React.FC = () => {
         </div>
         <h1 className="mb-1 text-xl font-bold text-on-surface">多人對抗賽</h1>
         <p className="mb-1 text-sm text-on-surface-variant">2～5 人一隊，答題推塔，攻下對方主堡獲勝</p>
-        <p className="mb-8 text-xs text-on-surface-variant">開房或輸入代碼跟同學一起進房，答對題目才能推進攻塔</p>
+        <p className="mb-8 text-xs text-on-surface-variant">發起或輸入代碼加入比賽，答對題目才能推進攻塔</p>
         <div className="flex w-full max-w-xs flex-col gap-3">
           <button
             type="button"
             onClick={() => setMode('host')}
             className="w-full rounded-xl bg-accent px-4 py-3 text-base font-semibold text-white shadow-sm"
           >
-            開一間房
+            發起比賽
           </button>
           <button
             type="button"
@@ -113,7 +113,7 @@ const StudentTeamArenaJoin: React.FC = () => {
   if (mode === 'host') {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-surface px-6 py-10">
-        <h1 className="mb-6 text-xl font-bold text-on-surface">開一間房</h1>
+        <h1 className="mb-6 text-xl font-bold text-on-surface">發起比賽</h1>
         <div className="w-full max-w-xs space-y-5">
           <div>
             <p className="mb-2 text-sm font-semibold text-on-surface">每隊人數</p>
@@ -160,7 +160,7 @@ const StudentTeamArenaJoin: React.FC = () => {
             disabled={creating}
             className="w-full rounded-xl bg-accent px-4 py-3 text-base font-semibold text-white shadow-sm disabled:opacity-50"
           >
-            {creating ? '開房中…' : '開房'}
+            {creating ? '建立中…' : '發起比賽'}
           </button>
           <button type="button" onClick={() => setMode('choose')} className="w-full text-sm text-on-surface-variant">
             返回
@@ -174,7 +174,7 @@ const StudentTeamArenaJoin: React.FC = () => {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-surface px-6 py-10">
       <h1 className="mb-1 text-xl font-bold text-on-surface">輸入代碼加入</h1>
-      <p className="mb-8 text-sm text-on-surface-variant">向開房的同學要 6 碼代碼</p>
+      <p className="mb-8 text-sm text-on-surface-variant">向發起比賽的同學要 6 碼代碼</p>
 
       <form onSubmit={handleJoinSubmit} className="w-full max-w-xs space-y-5">
         <input

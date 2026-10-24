@@ -3,7 +3,7 @@
  *
  * Real multi-student journey: 4 separate browser contexts (host + 3
  * students), each logging in through the real `/login` form, walking
- * sidebar → 遊戲區 → 多人對抗賽 → 開一間房／輸入代碼加入, answering
+ * sidebar → 遊戲區 → 多人對抗賽 → 發起比賽／輸入代碼加入, answering
  * rounds until the match ends, then checking the result screen.
  *
  * Verifies: read-phase options are hidden until the player's own turn
@@ -77,14 +77,14 @@ test.describe('多人對抗賽 team_arena', () => {
 
     const [host, mate, opp1, opp2] = pages;
 
-    // ── Real entry: login → sidebar → 遊戲區 → 多人對抗賽 → 開一間房 ──────
+    // ── Real entry: login → sidebar → 遊戲區 → 多人對抗賽 → 發起比賽 ──────
     await loginViaUI(host, students[0].email, students[0].password, { newPassword: rotated[0] });
     await openGameHubViaSidebar(host);
     await openGameHubCard(host, '多人對抗賽');
     await expect(host.getByRole('heading', { name: '多人對抗賽' })).toBeVisible();
-    await host.getByRole('button', { name: '開一間房' }).click();
+    await host.getByRole('button', { name: '發起比賽' }).click();
     await host.getByRole('button', { name: new RegExp(`^${TEAM_SIZE}`) }).first().click();
-    await host.getByRole('button', { name: '開房' }).click();
+    await host.getByRole('button', { name: '發起比賽' }).click();
     await host.waitForURL(/\/team-arena\/[A-Z0-9]{6}/, { timeout: 20000 });
     const code = host.url().split('/').pop()!.split('?')[0];
     expect(code).toMatch(/^[A-Z0-9]{6}$/);
