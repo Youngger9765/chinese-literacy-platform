@@ -271,13 +271,16 @@ const BUILDERS: Record<string, Builder> = {
  * @param steps         這一課學生走得到的關卡（resolveActiveSteps），已排除 report。
  * @param stepsCompleted DB 的 step_progress.steps_completed
  * @param stepData       DB 的 step_progress.step_data
- * @param marks          讀全文-做記號的記號；null = 還在載入
+ * @param marks          讀全文-做記號的記號；null = 還在載入，undefined = 這份呼叫方
+ *                       沒有能力提供記號資料（例如老師端：後端沒有教師專屬的
+ *                       annotations 端點，見 TeacherSessionReportPage）—— 卡片
+ *                       會略過記號細節，不會誤報「還沒有做記號」或卡在「載入中」。
  */
 export function buildStepReportCards(
   steps: StepConfig[],
   stepsCompleted: string[] | null | undefined,
   stepData: Record<string, unknown> | null | undefined,
-  marks: MarkedWord[] | null,
+  marks: MarkedWord[] | null | undefined,
 ): StepReportCard[] {
   const done = new Set((stepsCompleted ?? []).map(normalizeStepKey));
   const data = normalizeStepData(stepData);
