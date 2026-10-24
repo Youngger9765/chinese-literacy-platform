@@ -15,6 +15,9 @@ import type {
   SubmissionResponse,
   StudentAttemptGroup,
 } from '../../../services/assignmentApi';
+import { markSubmissionComplete, AssignmentApiError } from '../../../services/assignmentApi';
+import { useAuth } from '../../../contexts/AuthContext';
+import { stepIdToLabel } from '../../../config/stepConfig';
 import ReadingMetricsPanel from './ReadingMetricsPanel';
 import AttemptHistoryPanel from './AttemptHistoryPanel';
 import { statusBadge, formatDate } from '../assignmentDetailUtils.tsx';
@@ -39,6 +42,113 @@ function AnswerRecordLink({ studentId, sessionId }: { studentId: number; session
     >
       作答紀錄
     </Link>
+  );
+}
+
+// ── Missing-steps view + teacher mark-complete override — Issue #3723 ───────
+/** "完成 X/Y 關，缺：..." — uses the SAME required-step accounting the
+ *  backend's auto-submit gate computes (assignment_queries
+ *  .is_assignment_ready_for_submit), so this can never show a different
+ *  answer than what actually decides submission. Renders nothing for a
+ *  completed submission or a lesson with no required-step data. */
+interface StepCompletion {
+  required_step_count: number;
+  completed_step_count: number;
+  missing_step_ids: string[];
+}
+
+function MissingStepsLine({ sub }: { sub: StepCompletion }) {
+  if (sub.required_step_count === 0) return null;
+  const missingLabels = sub.missing_step_ids.map(stepIdToLabel);
+  return (
+    <p className="mt-1 text-[11px] text-gray-500 whitespace-nowrap">
+      完成 {sub.completed_step_count}/{sub.required_step_count} 關
+      {missingLabels.length > 0 && <>，缺：{missingLabels.join('、')}</>}
+    </p>
+  );
+}
+
+/** A teacher override for a submission a broken step could never clear
+ *  (#3682's reported case) — reuses the same submit path a student's own
+ *  submit uses, so scoring behaves identically. Requires a confirmation
+ *  click before calling the API. */
+function MarkCompleteAction({
+  assignmentId,
+  submissionId,
+  studentName,
+  onMarked,
+}: {
+  assignmentId: number;
+  submissionId: number;
+  studentName: string;
+  onMarked: (updated: SubmissionResponse) => void;
+}) {
+  const { token } = useAuth();
+  const [confirming, setConfirming] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleConfirm = useCallback(async () => {
+    if (!token) return;
+    setSaving(true);
+    setError('');
+    try {
+      const updated = await markSubmissionComplete(token, assignmentId, submissionId);
+      onMarked(updated);
+      setConfirming(false);
+    } catch (err) {
+      setError(err instanceof AssignmentApiError ? err.message : '標記失敗，請重試');
+    } finally {
+      setSaving(false);
+    }
+  }, [token, assignmentId, submissionId, onMarked]);
+
+  if (confirming) {
+    return (
+      <span className="mt-1 inline-flex flex-wrap items-center gap-1">
+        <span className="text-[11px] text-gray-600">確定將 {studentName} 標記完成？</span>
+        <button
+          onClick={handleConfirm}
+          disabled={saving}
+          className="px-1.5 py-0.5 rounded bg-accent text-white text-[11px] font-medium hover:bg-accent-hover disabled:opacity-50 cursor-pointer transition-colors"
+        >
+          {saving ? '...' : '確定標記'}
+        </button>
+        <button
+          onClick={() => setConfirming(false)}
+          className="px-1.5 py-0.5 rounded border border-gray-300 text-gray-600 text-[11px] hover:bg-gray-50 cursor-pointer transition-colors"
+        >
+          取消
+        </button>
+        {error && <span className="text-red-600 text-[11px]">{error}</span>}
+      </span>
+    );
+  }
+
+  return (
+    <div className="mt-1">
+      <button
+        onClick={() => setConfirming(true)}
+        title={`將 ${studentName} 的這份作業標記為已完成`}
+        className="px-1.5 py-0.5 rounded border border-amber-300 text-amber-700 text-[11px] hover:bg-amber-50 cursor-pointer transition-colors"
+      >
+        標記完成
+      </button>
+    </div>
+  );
+}
+
+/** "老師標記" badge next to the status pill for a submission a teacher
+ *  force-completed via MarkCompleteAction (never shown for a student's own
+ *  normal submit). */
+function TeacherMarkedBadge() {
+  return (
+    <span
+      className="ml-1 inline-block px-1 py-0.5 rounded bg-gray-100 text-gray-500 text-[10px] align-middle"
+      title="這份作業由老師標記完成"
+    >
+      老師標記
+    </span>
   );
 }
 
@@ -143,6 +253,10 @@ interface Props {
   gradeForm: GradeFormProps;
   /** Assignment ID passed down for audio replay (grouped rows lack it on AttemptResponse). */
   assignmentId: number;
+  /** Issue #3723: called with the updated SubmissionResponse after a teacher
+   *  mark-complete action succeeds, so the caller can patch its local state
+   *  the same way it already does for onGraded. */
+  onSubmissionUpdated: (updated: SubmissionResponse) => void;
 }
 
 const AssignmentSubmissionTable: React.FC<Props> = ({
@@ -151,6 +265,7 @@ const AssignmentSubmissionTable: React.FC<Props> = ({
   useGrouped,
   gradeForm,
   assignmentId,
+  onSubmissionUpdated,
 }) => {
   const {
     gradingId,
@@ -175,6 +290,7 @@ const AssignmentSubmissionTable: React.FC<Props> = ({
         <span className="font-medium text-gray-900 text-sm">{sub.student_name}</span>
         <div className="flex items-center gap-2">
           {statusBadge(sub.status)}
+          {sub.marked_complete_by_teacher && <TeacherMarkedBadge />}
           {gradingId === sub.id ? (
             <div className="flex items-center gap-1">
               <button
@@ -201,6 +317,20 @@ const AssignmentSubmissionTable: React.FC<Props> = ({
           ) : null}
         </div>
       </div>
+
+      {sub.status !== 'submitted' && sub.status !== 'graded' && (
+        <div>
+          <MissingStepsLine sub={sub} />
+          {sub.session_id !== null && (
+            <MarkCompleteAction
+              assignmentId={assignmentId}
+              submissionId={sub.id}
+              studentName={sub.student_name}
+              onMarked={onSubmissionUpdated}
+            />
+          )}
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
         <div>
@@ -442,7 +572,23 @@ const AssignmentSubmissionTable: React.FC<Props> = ({
       <React.Fragment key={sub.id}>
         <tr>
           <td className="py-1.5 text-gray-700">{sub.student_name}</td>
-          <td className="py-1.5 text-center">{statusBadge(sub.status)}</td>
+          <td className="py-1.5 text-center">
+            {statusBadge(sub.status)}
+            {sub.marked_complete_by_teacher && <TeacherMarkedBadge />}
+            {sub.status !== 'submitted' && sub.status !== 'graded' && (
+              <>
+                <MissingStepsLine sub={sub} />
+                {sub.session_id !== null && (
+                  <MarkCompleteAction
+                    assignmentId={assignmentId}
+                    submissionId={sub.id}
+                    studentName={sub.student_name}
+                    onMarked={onSubmissionUpdated}
+                  />
+                )}
+              </>
+            )}
+          </td>
           <td className="py-1.5 text-gray-500">{formatDate(sub.submitted_at)}</td>
           <td className="py-1.5 text-gray-700 text-center font-medium">
             {gradingId === sub.id ? (

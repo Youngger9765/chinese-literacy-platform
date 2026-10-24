@@ -323,7 +323,44 @@ export function useAssignments(classroomId: number, onChanged?: () => void) {
       const completedCount = newSubs.filter((submission) =>
         ['submitted', 'graded'].includes(submission.status),
       ).length;
-      return { ...prev, submissions: newSubs, completed_count: completedCount };
+      // submissions_by_student (StudentAttemptGroup[]) is what the desktop
+      // grouped table actually renders from whenever useGrouped is true --
+      // which is almost always, since every enrolled student gets a
+      // submission row at assignment-creation time. This used to only be
+      // populated on load/refetch, never patched after a grade or
+      // mark-complete update, so the desktop view could keep showing a
+      // stale status/score until the panel was collapsed and reopened.
+      const newGroups = (prev.submissions_by_student ?? []).map((group) => {
+        const attemptIdx = group.attempts.findIndex((a) => a.id === updated.id);
+        if (attemptIdx === -1) return group;
+        const newAttempts = group.attempts.map((a) =>
+          a.id === updated.id
+            ? {
+                ...a,
+                status: updated.status,
+                submitted_at: updated.submitted_at,
+                score: updated.score,
+                teacher_feedback: updated.teacher_feedback,
+                required_step_count: updated.required_step_count,
+                completed_step_count: updated.completed_step_count,
+                missing_step_ids: updated.missing_step_ids,
+                marked_complete_by_teacher: updated.marked_complete_by_teacher,
+              }
+            : a,
+        );
+        // attempts is sorted desc by attempt_number (index 0 = latest), so
+        // only keep latest_status/latest_score in sync when the updated
+        // attempt actually IS the group's most recent one.
+        return attemptIdx === 0
+          ? { ...group, attempts: newAttempts, latest_status: updated.status, latest_score: updated.score }
+          : { ...group, attempts: newAttempts };
+      });
+      return {
+        ...prev,
+        submissions: newSubs,
+        submissions_by_student: newGroups,
+        completed_count: completedCount,
+      };
     });
     setAssignments((prev) =>
       prev.map((assignment) => {

@@ -53,6 +53,7 @@ from ..services.assignment_responses import (
     build_assignment_response,
 )
 from ..services.assignment_session_service import (
+    mark_submission_complete_by_teacher,
     restart_assignment_session,
     start_assignment_session,
     start_assignment_to_response,
@@ -388,12 +389,12 @@ def get_assignment_detail(
     submission_responses = []
     for sub in submissions:
         # student already loaded via joinedload — no extra query
-        submission_responses.append(submission_to_response(sub, db, student=sub.student))
+        submission_responses.append(submission_to_response(sub, assignment, db, student=sub.student))
 
     return AssignmentDetailResponse(
         **base.model_dump(),
         submissions=submission_responses,
-        submissions_by_student=assignment_attempt_groups_to_response(submissions, db),
+        submissions_by_student=assignment_attempt_groups_to_response(assignment, submissions, db),
     )
 
 
@@ -453,7 +454,61 @@ def grade_submission(
     submission = grade_assignment_submission(submission, payload, current_user.id, db)
 
     student = db.query(User).filter(User.id == submission.student_id).first()
-    return submission_to_response(submission, db, student=student)
+    return submission_to_response(submission, assignment, db, student=student)
+
+
+# ── Teacher Mark-Complete Endpoint (Issue #NEW) ───────────────────────────────
+
+
+@router.post(
+    "/assignments/{assignment_id}/submissions/{submission_id}/mark-complete",
+    response_model=SubmissionResponse,
+)
+def mark_submission_complete(
+    assignment_id: int,
+    submission_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Teacher override for a submission a broken step could never clear.
+
+    A student whose lesson gets stuck on a broken step (#3682's reported
+    case) can never satisfy every required step server-side
+    (assignment_queries.is_assignment_ready_for_submit), so the assignment
+    sits "in_progress" forever even once the teacher has looked at the
+    student's recorded progress
+    (/teacher/students/{id}/sessions/{id}/report) and judged the work done.
+    This lets the owning teacher force-submit it — see
+    assignment_session_service.mark_submission_complete_by_teacher for what
+    that reuses and what it records.
+    """
+    assignment = db.query(Assignment).filter(Assignment.id == assignment_id).first()
+    if assignment is None:
+        raise HTTPException(status_code=404, detail="Assignment not found")
+
+    _require_assignment_owner_or_admin(assignment, current_user, db)
+
+    submission = (
+        db.query(AssignmentSubmission)
+        .filter(
+            AssignmentSubmission.id == submission_id,
+            AssignmentSubmission.assignment_id == assignment_id,
+        )
+        .first()
+    )
+    if submission is None:
+        raise HTTPException(status_code=404, detail="Submission not found")
+
+    if submission.status in ("submitted", "graded"):
+        raise HTTPException(status_code=400, detail="此學生已經完成，無需再標記")
+
+    if submission.session_id is None:
+        raise HTTPException(status_code=400, detail="這位學生尚未開始作答，無法標記完成")
+
+    submission = mark_submission_complete_by_teacher(assignment, submission, current_user, db)
+
+    student = db.query(User).filter(User.id == submission.student_id).first()
+    return submission_to_response(submission, assignment, db, student=student)
 
 
 # ── Teacher Delete Endpoint ───────────────────────────────────────────────────
