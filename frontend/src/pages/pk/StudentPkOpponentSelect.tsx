@@ -4,12 +4,16 @@
  * 7 figure cards side by side; the one whose virtual rating is closest to
  * the student's current (hidden) rating gets a "推薦挑戰" badge, but every
  * card is clickable regardless — recommendation, never a hard gate (§5.2).
+ *
+ * #3747: this screen had no way back to `/pk` except the browser's own
+ * back button (no AppShell on any PK route) — added GameBackButton.
  */
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { pkFigureIconUrl } from '../../data/pkFigures';
 import { challengePkAi, getPkOpponents, PkApiError, type PkOpponent, type PkScopeType } from '../../services/pkApi';
+import GameBackButton from '../../components/game/GameBackButton';
 
 const StudentPkOpponentSelect: React.FC = () => {
   const { token } = useAuth();
@@ -53,7 +57,10 @@ const StudentPkOpponentSelect: React.FC = () => {
 
   return (
     <div className="flex min-h-screen flex-col items-center bg-surface px-5 py-8">
-      <h1 className="text-xl font-bold text-on-surface">選一位對手</h1>
+      <div className="w-full max-w-2xl">
+        <GameBackButton to="/pk" label="PK 對戰" />
+      </div>
+      <h1 className="mt-2 text-xl font-bold text-on-surface">選一位對手</h1>
       <p className="mt-1 text-sm text-on-surface-variant">7 位文學家，等你來挑戰</p>
       {error && <p className="mt-2 text-sm text-error">{error}</p>}
 

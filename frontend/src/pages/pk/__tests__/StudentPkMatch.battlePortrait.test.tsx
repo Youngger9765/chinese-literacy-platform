@@ -68,7 +68,7 @@ import StudentPkMatch from '../StudentPkMatch';
 
 describe('StudentPkMatch battle-phase AI portrait', () => {
   it('renders the large AI portrait resolved from state.bot_tier even with no location.state (resume)', async () => {
-    const { getByAltText } = render(
+    const { getAllByAltText, getAllByTestId } = render(
       <MemoryRouter initialEntries={['/pk/match/1']}>
         <Routes>
           <Route path="/pk/match/:matchId" element={<StudentPkMatch />} />
@@ -77,11 +77,18 @@ describe('StudentPkMatch battle-phase AI portrait', () => {
     );
 
     await waitFor(() => {
-      const img = getByAltText('李白') as HTMLImageElement;
+      // The opponent now appears on the right twice (compact row on phones,
+      // side column on wide screens; CSS shows one). Both must resolve.
+      const imgs = getAllByAltText('李白') as HTMLImageElement[];
+      expect(imgs.length).toBe(2);
+      const img = imgs[0];
       // tier 7 -> the PNG override (data/pkFigures.ts), and ai_expression
       // 'thinking' from the poll response above -- both the asset-resolution
       // AND the expression-for-event wiring are exercised by this one path.
-      expect(img.getAttribute('src')).toBe('/story-assets/pk-li-bai/portrait-thinking.png');
+      for (const i of imgs) expect(i.getAttribute('src')).toBe('/story-assets/pk-li-bai/portrait-thinking.png');
+      expect(img).toBeTruthy();
+      // the student is never on the opponent side
+      expect(getAllByTestId('pk-panel-me').length).toBe(2);
     });
   });
 });

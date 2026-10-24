@@ -19,10 +19,9 @@ import PkVsScreen from '../../components/pk/PkVsScreen';
 import PkFigureIntro from '../../components/pk/PkFigureIntro';
 import PkCountdownRing from '../../components/pk/PkCountdownRing';
 import PkOptionButtons from '../../components/pk/PkOptionButtons';
-import PkScoreBar from '../../components/pk/PkScoreBar';
+import PkPlayerPanel from '../../components/pk/PkPlayerPanel';
 import PkComboBadge, { computeCombo, type PkAnswerLite } from '../../components/pk/PkComboBadge';
 import PkResultScreen from '../../components/pk/PkResultScreen';
-import PkFigurePortrait from '../../components/pk/PkFigurePortrait';
 import { resolveAiExpression } from '../../components/pk/pkExpression';
 import { getPkFigure, pkFigureAssetPath } from '../../data/pkFigures';
 import { getPkMatchResult, submitPkAnswer, PkApiError, type PkMatchResult } from '../../services/pkApi';
@@ -158,6 +157,9 @@ const StudentPkMatch: React.FC = () => {
     return (
       <PkResultScreen
         result={result}
+        myName={state?.my_name ?? undefined}
+        opponentName={state?.opponent_name ?? undefined}
+        maxScore={MAX_SCORE}
         onRematch={() => navigate(-1)}
         onChangeOpponent={() => navigate('/pk', { replace: true })}
         onBack={() => navigate('/pk', { replace: true })}
@@ -201,6 +203,8 @@ const StudentPkMatch: React.FC = () => {
   // resolveAiExpression defaults to 'idle' for a human match (ai_expression
   // is null, §8.2 — no figure to react) or an unrecognized wire value.
   const battleAiExpression = resolveAiExpression(state.ai_expression);
+  const myName = state.my_name ?? '你';
+  const opponentName = state.opponent_name ?? aiFigure?.name ?? '對手';
   const opponentAvatarUrl = battleAiFigure ? pkFigureAssetPath(battleAiFigure.tier, `portrait-${battleAiExpression}.svg`) : undefined;
 
   return (
@@ -211,42 +215,23 @@ const StudentPkMatch: React.FC = () => {
         </div>
       )}
 
-      {/* PK gamification MVP: the AI used to only ever show up as the 8x8px
-          avatar next to its score bar below — at battle scale that's nearly
-          invisible, which is a big part of why this screen read as "a form"
-          rather than a fight against a character. This panel is the large,
-          expression-switching portrait PRD §3.3/§10.5.3 asks for; the small
-          score-bar avatar stays too (useful as a compact "whose turn" cue
-          right next to the number), the two aren't redundant at this size
-          difference. */}
-      {battleAiFigure && (
-        <div className="mb-3 flex justify-center">
-          <div className="relative flex h-28 w-24 items-end justify-center overflow-hidden rounded-2xl bg-gradient-to-b from-accent-bg/70 to-transparent sm:h-36 sm:w-32 md:h-44 md:w-40">
-            <PkFigurePortrait
-              tier={battleAiFigure.tier}
-              expression={battleAiExpression}
-              name={battleAiFigure.name}
-              className="h-full w-full object-contain"
-            />
-            <span className="absolute -top-2 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold text-white">
-              {battleAiFigure.name}・Lv.{battleAiFigure.tier}
-            </span>
-          </div>
-        </div>
-      )}
-
-      <div className="flex flex-col gap-2 mb-4">
-        <PkScoreBar label={state.my_name ?? '你'} score={state.my_score} maxScore={MAX_SCORE} colorClass="bg-accent" />
-        <PkScoreBar
-          label={state.opponent_name ?? aiFigure?.name ?? '對手'}
-          score={state.opponent_score}
-          maxScore={MAX_SCORE}
-          colorClass="bg-tertiary-container"
-          isAi={state.opponent_type === 'AI'}
-          avatarUrl={opponentAvatarUrl}
-        />
+      {/* Young 2026-10-24: the opponent portrait used to sit above the
+          question and eat most of the screen. Now the student is on the
+          left and the opponent on the right — side columns on wide
+          screens, one compact row on phones — so the question stays in the
+          middle and each score reads as "whose" at a glance. */}
+      <div className="mb-3 flex items-stretch gap-2 lg:hidden">
+        <PkPlayerPanel side="me" size="compact" name={myName} score={state.my_score} maxScore={MAX_SCORE} leading={state.my_score > state.opponent_score} />
+        <div className="flex items-center text-sm font-extrabold text-on-surface-variant" aria-hidden="true">VS</div>
+        <PkPlayerPanel side="opponent" size="compact" name={opponentName} score={state.opponent_score} maxScore={MAX_SCORE} imageUrl={opponentAvatarUrl} isAi={state.opponent_type === 'AI'} leading={state.opponent_score > state.my_score} />
       </div>
 
+      <div className="flex flex-1 gap-6 lg:items-start">
+        <aside className="hidden w-56 shrink-0 lg:block">
+          <PkPlayerPanel side="me" name={myName} score={state.my_score} maxScore={MAX_SCORE} leading={state.my_score > state.opponent_score} />
+        </aside>
+
+        <div className="flex min-w-0 flex-1 flex-col">
       <div className="flex items-center justify-between mb-2">
         <span
           className={[
@@ -295,6 +280,21 @@ const StudentPkMatch: React.FC = () => {
           )}
         </div>
       )}
+        </div>
+
+        <aside className="hidden w-56 shrink-0 lg:block">
+          <PkPlayerPanel
+            side="opponent"
+            name={opponentName}
+            score={state.opponent_score}
+            maxScore={MAX_SCORE}
+            imageUrl={opponentAvatarUrl}
+            isAi={state.opponent_type === 'AI'}
+            subtitle={battleAiFigure ? `Lv.${battleAiFigure.tier}` : undefined}
+            leading={state.opponent_score > state.my_score}
+          />
+        </aside>
+      </div>
     </div>
   );
 };

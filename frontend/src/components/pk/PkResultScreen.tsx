@@ -10,10 +10,14 @@
 import React, { useState } from 'react';
 import type { PkMatchResult } from '../../services/pkApi';
 import { getPkFigure, pkFigureIconUrl, type PkExpressionKey } from '../../data/pkFigures';
-import PkFigurePortrait from './PkFigurePortrait';
+import { pkFigurePortraitUrl } from '../../data/pkFigures';
+import PkPlayerPanel from './PkPlayerPanel';
 
 interface PkResultScreenProps {
   result: PkMatchResult;
+  myName?: string;
+  opponentName?: string;
+  maxScore?: number;
   onRematch: () => void;
   onChangeOpponent: () => void;
   onBack: () => void;
@@ -25,7 +29,7 @@ const OUTCOME_COPY: Record<PkMatchResult['outcome'], { title: string; colorClass
   loss: { title: '再接再厲！', colorClass: 'text-tertiary', animClass: 'animate-fade-in' },
 };
 
-const PkResultScreen: React.FC<PkResultScreenProps> = ({ result, onRematch, onChangeOpponent, onBack }) => {
+const PkResultScreen: React.FC<PkResultScreenProps> = ({ result, myName, opponentName, maxScore = 5000, onRematch, onChangeOpponent, onBack }) => {
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
   const copy = OUTCOME_COPY[result.outcome];
   const ratingDelta =
@@ -39,6 +43,8 @@ const PkResultScreen: React.FC<PkResultScreenProps> = ({ result, onRematch, onCh
     aiResultFigure == null ? null : result.outcome === 'win' ? 'defeat' : result.outcome === 'loss' ? 'victory' : null;
   // #3602 "also": a tied score is decided by total answer time (PRD §4),
   // but the screen never said so -- staging QA: "同分時看不出輸贏原因".
+  const myCorrect = result.rounds.filter((r) => r.my_is_correct).length;
+  const opponentCorrect = result.rounds.filter((r) => r.opponent_is_correct).length;
   const decidedByTime = result.outcome !== 'draw' && result.my_score === result.opponent_score;
 
   const toggle = (idx: number) => {
@@ -62,21 +68,31 @@ const PkResultScreen: React.FC<PkResultScreenProps> = ({ result, onRematch, onCh
         </>
       )}
 
-      {aiResultFigure && aiResultExpression && (
-        <PkFigurePortrait
-          tier={aiResultFigure.tier}
-          expression={aiResultExpression}
-          name={aiResultFigure.name}
-          className="h-36 w-36 sm:h-44 sm:w-44 object-contain animate-pop"
-        />
-      )}
-
+      {/* Young 2026-10-24: "1000 : 3000 完全看不出是誰的成績" — each score
+          now sits on its owner's side: the student left, the opponent right,
+          the outcome in the middle. */}
       <h1 className={`text-3xl font-extrabold ${copy.colorClass} ${copy.animClass}`}>{copy.title}</h1>
 
-      <div className="mt-4 flex items-center gap-6 text-xl font-bold text-on-surface">
-        <span>{result.my_score}</span>
-        <span className="text-on-surface-variant text-sm font-normal">:</span>
-        <span>{result.opponent_score}</span>
+      <div className="mt-5 grid w-full max-w-2xl grid-cols-[1fr_auto_1fr] items-center gap-3">
+        <PkPlayerPanel
+          side="me"
+          name={myName ?? '你'}
+          score={result.my_score}
+          maxScore={maxScore}
+          subtitle={`答對 ${myCorrect} / ${result.rounds.length} 題`}
+          leading={result.outcome === 'win'}
+        />
+        <div className="text-lg font-extrabold text-on-surface-variant" aria-hidden="true">VS</div>
+        <PkPlayerPanel
+          side="opponent"
+          name={opponentName ?? aiResultFigure?.name ?? '對手'}
+          score={result.opponent_score}
+          maxScore={maxScore}
+          imageUrl={aiResultFigure ? pkFigurePortraitUrl(aiResultFigure.tier, aiResultExpression ?? 'idle') : undefined}
+          isAi={result.opponent_type === 'AI'}
+          subtitle={`答對 ${opponentCorrect} / ${result.rounds.length} 題`}
+          leading={result.outcome === 'loss'}
+        />
       </div>
 
       {decidedByTime && (
