@@ -15,6 +15,13 @@ env:
   PROJECT_ID: lingoleap-dev
   REGION: asia-east1
   REGISTRY: asia-east1-docker.pkg.dev/lingoleap-dev/lingoleap
+  # #3719 — IAP 準備：預設 false，等於今天的行為（兩個 preview 服務都還是
+  # --allow-unauthenticated）。要真的在 preview 上測 IAP 時，改這一行
+  # 成 'true' 開一個 PR 就會套用，不必再去改 gcloud 指令本身——
+  # 真正的 on/off 開關只有這一行。驗證方法與限制見
+  # docs/iap-runbook.md。目前仍然是 false，staging 與日常 preview
+  # 完全不受影響。
+  IAP_ENABLED: 'false'
 
 jobs:
   detect-changes:
@@ -116,6 +123,18 @@ jobs:
             --add-cloudsql-instances=lingoleap-dev:asia-east1:lingoleap-preview-db \
             --set-env-vars="^::^ALLOWED_ORIGINS=https://placeholder.run.app::DATABASE_URL=${{ secrets.PREVIEW_DATABASE_URL }}::RUN_MIGRATIONS=true::ENVIRONMENT=preview::JWT_SECRET_KEY=${{ secrets.PREVIEW_JWT_SECRET_KEY }}::GCS_OMO_BUCKET=lingoleap-omo-uploads-preview::AZURE_SPEECH_KEY=${{ secrets.AZURE_SPEECH_KEY }}::AZURE_SPEECH_REGION=eastus::TTS_PROVIDER=azure::BUILD_SHA=${{ github.event.pull_request.head.sha }}"
 
+      # #3719 — IAP 準備：預設關（IAP_ENABLED=false），這一步整個 skip，
+      # 跟今天行為一致。只有刻意把上面 env.IAP_ENABLED 改成 'true' 開 PR
+      # 才會執行。用 `gcloud beta run services update --iap`——Cloud Run
+      # 原生 IAP 整合，不是 HTTPS LB 那一套，不需要額外的 LB/NEG 資源。
+      - name: （IAP_ENABLED 時）替 backend preview 開 IAP
+        if: env.IAP_ENABLED == 'true' && (needs.detect-changes.outputs.backend == 'true' || github.event.action == 'opened')
+        run: |
+          gcloud beta run services update ${{ env.BACKEND_SERVICE }} \
+            --iap \
+            --region ${{ env.REGION }} \
+            --project ${{ env.PROJECT_ID }}
+
       - name: Get backend preview URL
         id: backend-url
         run: |
@@ -144,8 +163,16 @@ jobs:
           DEMO_STUDENT_EMAIL: ${{ secrets.DEMO_STUDENT_EMAIL }}
           DEMO_STUDENT_PW: ${{ secrets.DEMO_STUDENT_PW }}
         run: |
+          # #3719 — IAP 準備：VITE_API_URL 留空字串，讓 build 出來的 JS 打相對
+          # 路徑 /api/*（apiConfig.ts 用 `??`，空字串不會被當成 undefined）。
+          # BACKEND_INTERNAL_URL 告訴這個 preview frontend 自己的 nginx
+          # 要把這些同源的 /api、/assets、/q 轉送去哪
+          # （見 frontend/docker/render-nginx-conf.sh）—— 跟上面算出來的
+          # backend URL 是同一個，所以 preview 沒有自己的後端時一樣會
+          # 退回共用 staging，跟今天的行為一致。
           docker build \
-            --build-arg VITE_API_URL=${{ steps.backend-url.outputs.url }} \
+            --build-arg VITE_API_URL="" \
+            --build-arg BACKEND_INTERNAL_URL=${{ steps.backend-url.outputs.url }} \
             --build-arg VITE_SHOW_DEMO_LOGIN=true \
             --build-arg "VITE_DEMO_ADMIN_EMAIL=${DEMO_ADMIN_EMAIL}" \
             --build-arg "VITE_DEMO_ADMIN_PW=${DEMO_ADMIN_PW}" \
@@ -172,6 +199,15 @@ jobs:
             --min-instances=0 \
             --max-instances=1 \
             --timeout=300s
+
+      # #3719 — IAP 準備：同上，預設關、改 env.IAP_ENABLED 才會跑。
+      - name: （IAP_ENABLED 時）替 frontend preview 開 IAP
+        if: env.IAP_ENABLED == 'true' && (needs.detect-changes.outputs.frontend == 'true' || github.event.action == 'opened')
+        run: |
+          gcloud beta run services update ${{ env.FRONTEND_SERVICE }} \
+            --iap \
+            --region ${{ env.REGION }} \
+            --project ${{ env.PROJECT_ID }}
 
       # 部署失敗時 gcloud 只說「container failed to start and listen on PORT」——
       # 真正的原因在容器自己的 log 裡，而那要有 gcloud 憑證才讀得到。
@@ -261,7 +297,14 @@ jobs:
         env:
           BACKEND_URL: ${{ steps.preview-urls.outputs.backend_url }}
           FRONTEND_URL: ${{ steps.preview-urls.outputs.frontend_url }}
+          # #3719 — IAP 準備：preview 未來可能在前面加一層 IAP。沒有任何
+          # secret 可讀時（還沒打開 IAP）下面是空陣列，跟今天完全一樣。
+          IAP_AUDIENCE: ${{ secrets.IAP_AUDIENCE }}
         run: |
+          source scripts/lib/iap-token.sh
+          IAP_AUTH_ARGS=()
+          IAP_TOKEN="$(iap_token "${IAP_AUDIENCE:-}")"
+          [ -n "${IAP_TOKEN}" ] && IAP_AUTH_ARGS=(-H "Proxy-Authorization: Bearer ${IAP_TOKEN}")
           # CORS env update creates a new Cloud Run revision which is cold.
           # Browsers hitting a cold revision see 5xx without CORS headers,
           # surfacing as spurious "blocked by CORS policy" console errors.
@@ -272,7 +315,7 @@ jobs:
           #    for the first fetch(), ensuring the API route + CORS middleware
           #    are both JIT-loaded before the real user request arrives.
           for i in 1 2 3; do
-            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$BACKEND_URL/" || echo timeout)
+            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "${IAP_AUTH_ARGS[@]+${IAP_AUTH_ARGS[@]}}" "$BACKEND_URL/" || echo timeout)
             echo "Warmup root attempt $i: HTTP $code"
             case "$code" in timeout|000) sleep 2 ;; *) break ;; esac
           done
@@ -282,6 +325,7 @@ jobs:
               -H "Origin: $FRONTEND_URL" \
               -H "Access-Control-Request-Method: GET" \
               -H "Access-Control-Request-Headers: authorization,content-type" \
+              "${IAP_AUTH_ARGS[@]+${IAP_AUTH_ARGS[@]}}" \
               "${BACKEND_URL}${path}" || echo timeout)
             echo "Preflight $path: HTTP $code"
           done
@@ -308,6 +352,8 @@ jobs:
           E2E_BACKEND_URL: ${{ steps.preview-urls.outputs.backend_url }}
           E2E_ONLY_LESSONS: "20063"      # G6-L22，三篇，Hans 回報的那一課
           E2E_EXPECT_DEPLOYED: "1"
+          # #3719 — IAP 準備：見「Warm backend」步驟的同一段說明。
+          IAP_AUDIENCE: ${{ secrets.IAP_AUDIENCE }}
         run: |
           npm ci
           npx playwright install chromium --with-deps

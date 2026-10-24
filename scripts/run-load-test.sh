@@ -16,6 +16,8 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 LOAD_TEST_DIR="$REPO_ROOT/tests/load-testing"
 REPORTS_DIR="$LOAD_TEST_DIR/reports"
+# shellcheck source=lib/iap-token.sh
+source "${REPO_ROOT}/scripts/lib/iap-token.sh"
 
 # ---------------------------------------------------------------------------
 # Configurable defaults (override via env vars)
@@ -45,8 +47,16 @@ if ! command -v locust &>/dev/null; then
 fi
 
 # Check host reachability (non-fatal — staging may require auth)
+# #3719 — IAP 準備：IAP_AUDIENCE 沒設時（現在就是這樣）這裡是空陣列，
+# 跟今天的 curl 完全一樣；真正跑壓測的請求由 locustfile.py 自己的
+# on_start 掛 header，這裡只是 preflight 探活。
+IAP_AUTH_ARGS=()
+IAP_TOKEN="$(iap_token "${IAP_AUDIENCE:-}")"
+if [[ -n "${IAP_TOKEN}" ]]; then
+  IAP_AUTH_ARGS=(-H "Proxy-Authorization: Bearer ${IAP_TOKEN}")
+fi
 if command -v curl &>/dev/null; then
-  STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 "$HOST/stories" || echo "000")
+  STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 "${IAP_AUTH_ARGS[@]+${IAP_AUTH_ARGS[@]}}" "$HOST/stories" || echo "000")
   if [[ "$STATUS" == "000" ]]; then
     echo "[WARN] Cannot reach $HOST — proceeding anyway (may require VPN or auth)."
   else
