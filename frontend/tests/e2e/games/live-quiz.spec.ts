@@ -157,7 +157,9 @@ test.describe('課堂搶答 live_quiz', () => {
         const group = p.getByRole('group', { name: '選項' });
         if (await group.count()) {
           const btn = group.getByRole('button').first();
-          if (await btn.count() && !(await btn.isDisabled())) await btn.click();
+          // The answer window can close between the check and the click; the
+          // options then unmount and an unbounded click would hang the test.
+          if (await btn.count() && !(await btn.isDisabled())) await btn.click({ timeout: 2000 }).catch(() => {});
         }
       }
       const revealBtn = page.getByRole('button', { name: '揭曉答案' });
@@ -178,7 +180,10 @@ test.describe('課堂搶答 live_quiz', () => {
 
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible({ timeout: 15000 });
     for (const p of [sa, sb]) {
-      await expect(p.getByText(/課堂搶答結束|題答對/)).toBeVisible({ timeout: 20000 });
+      // The end screen shows both 「課堂搶答結束！」 and a 「題答對」 stat line, so
+      // a text match on either is ambiguous under strict mode; on the student
+      // screen 「課堂搶答結束！」 is a <p>, not a heading, so match its text alone.
+      await expect(p.getByText(/課堂搶答結束/)).toBeVisible({ timeout: 20000 });
     }
 
     expect(errors, `console/page errors:\n${errors.join('\n')}`).toHaveLength(0);
