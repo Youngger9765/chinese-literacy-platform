@@ -2,6 +2,8 @@
  * #3747: this screen had no way back to 遊戲區 except the browser's own
  * back button (no AppShell on this route) — added GameBackButton. The
  * banner/explanation and RWD card below were already in place.
+ * #3756: added `EscapeRoomHistoryPanel` ("我的挑戰紀錄") — same
+ * "後端已有資料就做，不需要 migration" reasoning PkHistoryPanel used.
  */
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -14,6 +16,7 @@ import {
 } from '../../services/escapeRoomApi';
 import { resolveGradeForAiPk } from '../pk/resolvePkGrade';
 import GameBackButton from '../../components/game/GameBackButton';
+import EscapeRoomHistoryPanel from '../../components/escape-room/EscapeRoomHistoryPanel';
 
 interface Scope {
   type: EscapeRoomScopeType;
@@ -109,6 +112,7 @@ const StudentEscapeRoomEntry: React.FC = () => {
         </button>
         {error && <p className="mt-4 text-sm text-error" role="alert">{error}</p>}
       </div>
+      {token && <EscapeRoomHistoryPanel token={token} />}
     </main>
   );
 };

@@ -46,6 +46,17 @@ def start_run(
     return {"run_id": run.id}
 
 
+@router.get("/runs/mine")
+def get_my_history(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """#3756: "我的挑戰紀錄" — declared BEFORE `/runs/{run_id}/...` so FastAPI's
+    path-matching doesn't try to parse the literal "mine" as a run_id (same
+    ordering requirement as any `/x/{id}` + `/x/literal` pair)."""
+    return {"runs": engine.list_history(db, current_user)}
+
+
 @router.get("/runs/{run_id}/state")
 def get_run_state(
     run_id: int,

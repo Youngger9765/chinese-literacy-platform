@@ -1,5 +1,5 @@
 /**
- * StudentGameHubPage — `/game-hub` (issue #3633).
+ * StudentGameHubPage — `/game-hub` (issue #3633, issue #3756 round 2).
  *
  * One card per game mode, replacing the three scattered sidebar entries
  * (我們班/課堂搶答/PK 對戰) this issue consolidates, and finally giving
@@ -16,8 +16,15 @@
  * classroom-gated — all three are always available to any logged-in
  * student regardless of class or class settings.
  *
- * Old routes are untouched — this page is a new front door, not a
- * replacement for /student/our-class, /live, /pk, /escape-room.
+ * #3756: the flat 5-card grid gave no signal about WHICH of the two very
+ * different things a student is about to do — "I can start this myself
+ * right now" vs "this needs a teacher to open it or classmates to join".
+ * `classroomGated` (gameModes.ts) is NOT that distinction (team_arena has
+ * no classroom switch at all, yet still needs classmates in the room) —
+ * `SECTION_OF` below is a deliberate product grouping, not derived from
+ * the registry's gating flags. Old routes are untouched — this page is a
+ * new front door, not a replacement for /student/our-class, /live, /pk,
+ * /escape-room.
  */
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -41,6 +48,31 @@ const DECORATIONS: Partial<Record<GameModeKey, { imageSrc?: string; emoji?: stri
 
 const LOCKED_TEXT = '老師尚未開啟';
 
+/** #3756: which of the two hub sections each mode belongs in, plus the
+ * one-line "start condition" badge shown on every card of that mode
+ * regardless of its current lock state (unlike `lockedText`, which only
+ * appears while actually locked — a 課堂搶答 card the teacher HAS turned
+ * on still needs a live code from them, so "需要老師開始" stays true). */
+type Section = 'self' | 'class';
+const SECTION_OF: Record<GameModeKey, Section> = {
+  pk_human: 'self',
+  escape_room: 'self',
+  live_quiz: 'class',
+  team_arena: 'class',
+  league: 'class',
+};
+const START_CONDITION: Record<GameModeKey, string> = {
+  pk_human: '隨時可玩',
+  escape_room: '隨時可玩',
+  live_quiz: '需要老師開始',
+  team_arena: '找同學一起',
+  league: '需要老師開始',
+};
+const SECTION_COPY: Record<Section, { title: string; subtitle: string }> = {
+  self: { title: '自己玩', subtitle: '不用等任何人，現在就能開始' },
+  class: { title: '跟班上一起玩', subtitle: '要老師開始，或找同學一起' },
+};
+
 interface GameHubCard {
   key: string;
   label: string;
@@ -48,6 +80,8 @@ interface GameHubCard {
   path: string | null;
   locked: boolean;
   lockedText: string;
+  startCondition: string;
+  section: Section;
   imageSrc?: string;
   emoji?: string;
 }
@@ -87,6 +121,15 @@ const GameHubCardButton: React.FC<{ card: GameHubCard; onOpen: () => void }> = (
       </div>
       <span className="text-base font-semibold text-gray-900">{card.label}</span>
       <span className="text-xs text-gray-500">{card.description}</span>
+      {/* #3756: informational "when can I start this" badge — independent
+          of lock state (see START_CONDITION docstring above). Shown
+          whenever the card is not locked; the lockedText badge below
+          already covers the locked case so the two never stack. */}
+      {!card.locked && (
+        <span className="mt-1 text-[11px] font-medium text-accent bg-accent-bg rounded-full px-2 py-0.5">
+          {card.startCondition}
+        </span>
+      )}
       {card.locked && (
         <span className="mt-1 text-[11px] font-medium text-gray-400 bg-gray-100 rounded-full px-2 py-0.5">
           {card.lockedText}
@@ -138,22 +181,53 @@ const StudentGameHubPage: React.FC = () => {
     path: mode.hubRoute,
     locked: lockState[mode.key] ?? false,
     lockedText: lockState[mode.key] ? LOCKED_TEXT : '',
+    startCondition: START_CONDITION[mode.key],
+    section: SECTION_OF[mode.key],
     ...DECORATIONS[mode.key],
   }));
+
+  // #3756: split into the two sections, but keep GAME_MODES' own relative
+  // order within each section (no extra sort) so this stays a pure
+  // regrouping, not a re-prioritization.
+  const selfPlayCards = cards.filter((c) => c.section === 'self');
+  const classPlayCards = cards.filter((c) => c.section === 'class');
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6">
       <h1 className="text-xl font-bold text-gray-900 mb-1">遊戲區</h1>
       <p className="text-sm text-gray-500 mb-6">挑一個玩法，開始闖關</p>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {cards.map((card) => (
-          <GameHubCardButton
-            key={card.key}
-            card={card}
-            onOpen={() => card.path && navigate(card.path)}
-          />
-        ))}
-      </div>
+
+      <section aria-labelledby="game-hub-section-self" className="mb-8">
+        <h2 id="game-hub-section-self" className="text-base font-bold text-gray-900">
+          {SECTION_COPY.self.title}
+        </h2>
+        <p className="text-xs text-gray-500 mb-3">{SECTION_COPY.self.subtitle}</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {selfPlayCards.map((card) => (
+            <GameHubCardButton
+              key={card.key}
+              card={card}
+              onOpen={() => card.path && navigate(card.path)}
+            />
+          ))}
+        </div>
+      </section>
+
+      <section aria-labelledby="game-hub-section-class">
+        <h2 id="game-hub-section-class" className="text-base font-bold text-gray-900">
+          {SECTION_COPY.class.title}
+        </h2>
+        <p className="text-xs text-gray-500 mb-3">{SECTION_COPY.class.subtitle}</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {classPlayCards.map((card) => (
+            <GameHubCardButton
+              key={card.key}
+              card={card}
+              onOpen={() => card.path && navigate(card.path)}
+            />
+          ))}
+        </div>
+      </section>
     </div>
   );
 };

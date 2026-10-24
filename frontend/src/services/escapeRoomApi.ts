@@ -178,3 +178,23 @@ export async function getEscapeRoomUnlocks(token: string): Promise<EscapeRoomUnl
   const res = await fetch(`${API_BASE}/api/escape-room/unlocks`, { headers: authHeaders(token) });
   return handleResponse(res);
 }
+
+/** #3756: "我的挑戰紀錄" — one row per past run, most-recent-first. */
+export interface EscapeRoomHistoryEntry {
+  run_id: number;
+  scope_type: EscapeRoomScopeType;
+  scope_ref: string;
+  result: EscapeRoomRunStatus;
+  started_at: string;
+  completed_at: string | null;
+  duration_seconds: number | null;
+}
+
+export interface EscapeRoomHistoryResponse {
+  runs: EscapeRoomHistoryEntry[];
+}
+
+export async function getEscapeRoomHistory(token: string): Promise<EscapeRoomHistoryResponse> {
+  const res = await fetch(`${API_BASE}/api/escape-room/runs/mine`, { headers: authHeaders(token) });
+  return handleResponse(res);
+}

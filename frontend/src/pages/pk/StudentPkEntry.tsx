@@ -182,15 +182,27 @@ const StudentPkEntry: React.FC = () => {
       <h1 className="mt-2 text-2xl font-bold text-on-surface">PK 對戰</h1>
       <p className="mt-1 text-sm text-on-surface-variant">一對一，隨時挑戰同學或文學家</p>
 
-      {/* #3747: "也沒有解說或是圖像 banner 之類的" — a short "怎麼玩" card so
-          a first-time student knows what's about to happen before tapping
-          一個按鈕就跳進配對/對戰. No new art asset dependency (the figure
-          PNGs for 6 of 7 opponents are still being generated — see #3745 —
-          so this banner is deliberately illustration-free, built from the
-          design tokens already in use everywhere else on this screen). */}
-      <div className="mt-6 w-full max-w-sm rounded-2xl bg-accent-bg px-5 py-4">
-        <p className="text-sm font-bold text-accent">怎麼玩？</p>
-        <ul className="mt-2 space-y-1 text-xs text-on-surface-variant">
+      {/* #3747 → #3756: "也沒有解說或是圖像 banner 之類的" — #3747 added a
+          plain-text card (deliberately illustration-free because 6 of 7
+          opponents' PNGs did not exist yet). #3756 upgrades it into an
+          actual hero banner now that 李白's full art set exists (#3745) —
+          but still does NOT depend on the other six (their PNGs, and
+          `pkFigures.ts`'s `PK_PNG_ART_OVERRIDE`, are a separate in-flight
+          workstream this page must not block on or collide with). The
+          icon here is read-only decoration: a gradient hero strip with
+          李白's existing `icon.png` anchored to one side, same "怎麼玩"
+          bullets as before. */}
+      <div className="mt-6 w-full max-w-sm overflow-hidden rounded-2xl bg-gradient-to-br from-accent to-accent/70 px-5 py-4 text-white shadow-sm">
+        <div className="flex items-center gap-3">
+          <img
+            src="/story-assets/pk-li-bai/icon.png"
+            alt=""
+            aria-hidden="true"
+            className="h-14 w-14 shrink-0 rounded-full border-2 border-white/60 bg-white/20 object-contain p-1"
+          />
+          <p className="text-sm font-bold">怎麼玩？</p>
+        </div>
+        <ul className="mt-3 space-y-1 text-xs text-white/90">
           <li>• 5 題搶答，答得又對又快分數越高</li>
           <li>• 平手時看誰總作答時間比較快</li>
           <li>• 打贏文學家可以解鎖他的人物卡</li>

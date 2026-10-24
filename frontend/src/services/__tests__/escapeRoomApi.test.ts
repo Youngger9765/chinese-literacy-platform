@@ -4,6 +4,7 @@ import {
   startEscapeRoomRun,
   submitEscapeRoomAnswer,
   submitEscapeRoomGateAnswer,
+  getEscapeRoomHistory,
 } from '../escapeRoomApi';
 
 describe('escapeRoomApi', () => {
@@ -57,6 +58,17 @@ describe('escapeRoomApi', () => {
       2,
       expect.stringContaining('/runs/42/gate-answer'),
       expect.objectContaining({ body: JSON.stringify({ choice_key: 'B' }) }),
+    );
+  });
+
+  it('#3756：我的挑戰紀錄帶授權打 /runs/mine', async () => {
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify({ runs: [] }), { status: 200, headers: { 'Content-Type': 'application/json' } }),
+    );
+    await expect(getEscapeRoomHistory('憑證')).resolves.toEqual({ runs: [] });
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.stringContaining('/api/escape-room/runs/mine'),
+      expect.objectContaining({ headers: expect.objectContaining({ Authorization: 'Bearer 憑證' }) }),
     );
   });
 });

@@ -315,3 +315,43 @@ def get_run_result(run: EscapeRoomRun, db: Session | None = None) -> dict:
         ).distinct().all()
         ]
     return result
+
+
+_HISTORY_LIMIT = 20
+
+
+def list_history(db: Session, user: User) -> list[dict]:
+    """#3756: "其他遊戲的玩法說明與戰績（後端已有資料就做）" — unlike
+    課堂搶答/多人對抗賽 (per docs/reviews/2026-10-24-game-area-uiux-cto-review.md,
+    both need a new persistent-history table), 迷城密室 already has every
+    column a "我的挑戰紀錄" list needs on `EscapeRoomRun` itself
+    (`student_id`/`result`/`started_at`/`completed_at`) — this is a read
+    query, not a new table. Mirrors `pk.engine.list_history`'s shape
+    (most-recent-first, ISO timestamps, nothing left for the caller to
+    compute) so `PkHistoryPanel`'s sibling component can reuse the same
+    rendering conventions.
+    """
+    runs = (
+        db.query(EscapeRoomRun)
+        .filter(EscapeRoomRun.student_id == user.id)
+        .order_by(EscapeRoomRun.started_at.desc())
+        .limit(_HISTORY_LIMIT)
+        .all()
+    )
+    out = []
+    for run in runs:
+        duration_seconds = None
+        if run.completed_at is not None:
+            duration_seconds = round((run.completed_at - run.started_at).total_seconds())
+        out.append(
+            {
+                "run_id": run.id,
+                "scope_type": run.scope_type,
+                "scope_ref": run.scope_ref,
+                "result": run.result,
+                "started_at": run.started_at.isoformat(),
+                "completed_at": run.completed_at.isoformat() if run.completed_at else None,
+                "duration_seconds": duration_seconds,
+            }
+        )
+    return out
