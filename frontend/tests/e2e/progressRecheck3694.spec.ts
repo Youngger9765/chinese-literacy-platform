@@ -178,6 +178,12 @@ function makeActorFactory(browser: Browser, puts: PutRecord[], pageErrors: strin
   async function closeCtx(ctx: BrowserContext, page: Page) {
     await page.waitForTimeout(7000); // > 5s debounce — let any pending PUT fire before we capture storageState
     storage = await ctx.storageState();
+    // Close the tab the way a child does, so beforeunload/pagehide run and the
+    // app's keepalive flush (useProgressSync) sends whatever the debounce still
+    // holds. ctx.close() alone skips unload handlers, so a save the debounce
+    // re-armed during the wait above would be dropped by the TEST, not the app.
+    await page.close({ runBeforeUnload: true });
+    await new Promise((r) => setTimeout(r, 3000));
     await ctx.close();
     openContexts.splice(openContexts.indexOf(ctx), 1);
   }
