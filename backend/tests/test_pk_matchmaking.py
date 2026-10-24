@@ -355,3 +355,94 @@ class TestPkHumanFeatureGate:
 
         _, match = svc.redeem_invite(db_session, b, invite.invite_code)
         assert match is not None
+
+
+class TestOpenQueueCap:
+    """Resource-exhaustion guard, same spirit as team_arena's
+    MAX_OPEN_HOSTED_ROOMS: a student could otherwise call POST /queue or
+    POST /invite forever with no upper bound. MAX_OPEN_QUEUE_ENTRIES caps
+    how many of a student's own "waiting" rows (plain queue entries AND
+    invites — both are "I started something, waiting for someone else")
+    may exist at once; a row nobody is coming back for doesn't count.
+    """
+
+    def test_rejects_queue_entry_once_the_student_hits_the_cap(self, db_session, classroom):
+        a = _enrolled_student(db_session, classroom)
+        for _ in range(svc.MAX_OPEN_QUEUE_ENTRIES):
+            svc.create_queue_entry(db_session, a, scope_type="grade_pool", scope_ref="4", classroom_id=classroom.id)
+
+        with pytest.raises(Exception) as exc:
+            svc.create_queue_entry(db_session, a, scope_type="grade_pool", scope_ref="4", classroom_id=classroom.id)
+        assert exc.value.status_code == 429
+
+    def test_rejects_invite_once_the_student_hits_the_cap(self, db_session, classroom):
+        """The cap is shared across BOTH entry points — an invite is just
+        a queue row with invite_code set, same resource being piled up."""
+        a = _enrolled_student(db_session, classroom)
+        for _ in range(svc.MAX_OPEN_QUEUE_ENTRIES):
+            svc.create_queue_entry(db_session, a, scope_type="grade_pool", scope_ref="4", classroom_id=classroom.id)
+
+        with pytest.raises(Exception) as exc:
+            svc.create_invite(db_session, a, scope_type="lesson", scope_ref="L0125", classroom_id=classroom.id)
+        assert exc.value.status_code == 429
+
+    def test_under_cap_still_succeeds(self, db_session, classroom):
+        """Positive control: one entry under the cap must not be blocked
+        by the same guard that rejects at-cap students above."""
+        a = _enrolled_student(db_session, classroom)
+        for _ in range(svc.MAX_OPEN_QUEUE_ENTRIES - 1):
+            svc.create_queue_entry(db_session, a, scope_type="grade_pool", scope_ref="4", classroom_id=classroom.id)
+
+        q = svc.create_queue_entry(db_session, a, scope_type="grade_pool", scope_ref="4", classroom_id=classroom.id)
+        assert q.status == "waiting"
+
+    def test_another_students_entries_do_not_count(self, db_session, classroom):
+        a = _enrolled_student(db_session, classroom)
+        other = _enrolled_student(db_session, classroom)
+        for _ in range(svc.MAX_OPEN_QUEUE_ENTRIES):
+            svc.create_queue_entry(db_session, other, scope_type="grade_pool", scope_ref="4", classroom_id=classroom.id)
+
+        q = svc.create_queue_entry(db_session, a, scope_type="grade_pool", scope_ref="4", classroom_id=classroom.id)
+        assert q.status == "waiting"
+
+    def test_matched_entries_do_not_count(self, db_session, classroom):
+        a = _enrolled_student(db_session, classroom)
+        for _ in range(svc.MAX_OPEN_QUEUE_ENTRIES):
+            q = svc.create_queue_entry(db_session, a, scope_type="grade_pool", scope_ref="4", classroom_id=classroom.id)
+            q.status = "matched"
+        db_session.commit()
+
+        q = svc.create_queue_entry(db_session, a, scope_type="grade_pool", scope_ref="4", classroom_id=classroom.id)
+        assert q.status == "waiting"
+
+    def test_abandoned_plain_queue_entry_past_the_idle_window_does_not_count(self, db_session, classroom):
+        a = _enrolled_student(db_session, classroom)
+        for _ in range(svc.MAX_OPEN_QUEUE_ENTRIES):
+            q = svc.create_queue_entry(db_session, a, scope_type="grade_pool", scope_ref="4", classroom_id=classroom.id)
+            q.created_at = datetime.now(timezone.utc) - timedelta(minutes=svc.INVITE_LIFETIME_MINUTES + 1)
+        db_session.commit()
+
+        q = svc.create_queue_entry(db_session, a, scope_type="grade_pool", scope_ref="4", classroom_id=classroom.id)
+        assert q.status == "waiting"
+
+    def test_invite_past_its_own_expiry_does_not_count(self, db_session, classroom):
+        a = _enrolled_student(db_session, classroom)
+        for _ in range(svc.MAX_OPEN_QUEUE_ENTRIES):
+            q = svc.create_invite(db_session, a, scope_type="lesson", scope_ref="L0125", classroom_id=classroom.id)
+            q.invite_expires_at = datetime.now(timezone.utc) - timedelta(seconds=1)
+        db_session.commit()
+
+        q = svc.create_invite(db_session, a, scope_type="lesson", scope_ref="L0125", classroom_id=classroom.id)
+        assert q.invite_code is not None
+
+    def test_a_fresh_invite_still_counts_even_when_old_enough_a_plain_entry_would_not(self, db_session, classroom):
+        """An invite's own `invite_expires_at` (5 min) governs it, not the
+        generic idle window applied to plain queue rows — a fresh invite
+        must still count toward the cap."""
+        a = _enrolled_student(db_session, classroom)
+        for _ in range(svc.MAX_OPEN_QUEUE_ENTRIES):
+            svc.create_invite(db_session, a, scope_type="lesson", scope_ref="L0125", classroom_id=classroom.id)
+
+        with pytest.raises(Exception) as exc:
+            svc.create_queue_entry(db_session, a, scope_type="grade_pool", scope_ref="4", classroom_id=classroom.id)
+        assert exc.value.status_code == 429

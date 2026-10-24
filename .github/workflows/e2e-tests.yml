@@ -72,6 +72,19 @@ jobs:
         working-directory: frontend
         run: npx playwright install chromium --with-deps
 
+      # #3719 — IAP 準備：staging 未來可能在前面加一層 IAP。這裡先把 gcloud
+      # 認證就位，讓 scripts/lib/iap-token.sh 跟 playwright.config.ts 的
+      # getIapProxyAuthHeader() 能在設了 IAP_AUDIENCE 之後要到通行證。
+      # IAP_AUDIENCE 現在沒有任何 secret 可讀（還沒打開 IAP），所以下面
+      # 每一步都跟今天完全一樣 —— 這一步只是把「打開時只要設一個 secret」
+      # 這件事準備好。
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
       # ⚠️ 這裡原本寫著「這幾支 spec 只能打 staging」，理由有兩條，**兩條都已經不成立**
       #    （#3242 逐條查證，別再照舊結論走）：
       #
@@ -100,11 +113,19 @@ jobs:
       # 在搬遷之前，擋競態的是 `globalSetup.ts` 的環境穩定檢查（#3244）。
       - name: Wait for staging to be healthy
         id: wait
+        env:
+          IAP_AUDIENCE: ${{ secrets.IAP_AUDIENCE }}
         run: |
+          source "${GITHUB_WORKSPACE}/scripts/lib/iap-token.sh"
+          IAP_AUTH_ARGS=()
+          IAP_TOKEN="$(iap_token "${IAP_AUDIENCE:-}")"
+          if [ -n "${IAP_TOKEN}" ]; then
+            IAP_AUTH_ARGS=(-H "Proxy-Authorization: Bearer ${IAP_TOKEN}")
+          fi
           STAGING_URL="https://lingoleap-frontend-staging-958347263320.asia-east1.run.app"
           echo "Waiting for staging frontend $STAGING_URL to respond with HTTP 200..."
           for i in $(seq 1 30); do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$STAGING_URL" || echo "000")
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${IAP_AUTH_ARGS[@]+${IAP_AUTH_ARGS[@]}}" "$STAGING_URL" || echo "000")
             if [ "$STATUS" = "200" ]; then
               echo "Staging is up (attempt $i) — running E2E against staging"
               echo "effective_url=${STAGING_URL}" >> "$GITHUB_OUTPUT"
@@ -126,6 +147,8 @@ jobs:
           # 讓它回報而不是把整個 gate 弄紅（merge 後的 staging 跑才是判準）。
           E2E_EXPECT_DEPLOYED: ${{ github.ref == 'refs/heads/staging' && '1' || '0' }}
           CI: 'true'
+          # #3719 — IAP 準備：見上面「Wait for staging to be healthy」註解。
+          IAP_AUDIENCE: ${{ secrets.IAP_AUDIENCE }}
         run: |
           # Run all specs in testDir (tests/e2e). The old hardcoded list named 6
           # spec files that were consolidated into demo-path + full-qa (#2062 — that

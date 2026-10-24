@@ -51,6 +51,8 @@ from story_structure_qa_lib import (  # noqa: E402
     verify_interaction_profile_contract,
 )
 
+from iap_token import iap_header as _iap_header  # noqa: E402
+
 DEFAULT_SCHEMA_DIR = ROOT / "private/curriculum-source/_online-schema"
 DEFAULT_STAGING = "https://lingoleap-backend-staging-958347263320.asia-east1.run.app"
 DEFAULT_STAGING_FE = "https://lingoleap-frontend-staging-958347263320.asia-east1.run.app"
@@ -69,7 +71,9 @@ def load_mod(name: str, path: Path):
 
 def http_json(url: str, *, token: str | None = None, method: str = "GET", body: dict | None = None) -> dict:
     data = None
-    headers = {"Content-Type": "application/json"}
+    # #3719: IAP-prep — adds Proxy-Authorization when IAP_AUDIENCE is set;
+    # with IAP off (today) _iap_header() is {}, so this is unchanged.
+    headers = {"Content-Type": "application/json", **_iap_header()}
     if token:
         headers["Authorization"] = f"Bearer {token}"
     if body is not None:

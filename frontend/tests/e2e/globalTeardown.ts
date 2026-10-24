@@ -8,14 +8,15 @@
  *    要的是讓讀 log 的人知道「別去修一個沒壞的東西」。
  *    （真正的修法是讓 E2E 不打共用 staging —— 那要改 workflow，見 #3242。）
  */
-
+import { getIapProxyAuthHeader } from './utils/iapAuth';
 
 export default async function globalTeardown() {
   const before = process.env.E2E_ENTRY_FINGERPRINT;
   if (!before) return;
   const baseURL = process.env.PLAYWRIGHT_BASE_URL || 'https://lingoleap-staging.web.app';
   try {
-    const res = await fetch(baseURL, { headers: { 'cache-control': 'no-cache' } });
+    // #3719: 直接打前端 origin，跟 waitForStableDeploy.ts 同一個理由要帶通行證。
+    const res = await fetch(baseURL, { headers: { 'cache-control': 'no-cache', ...getIapProxyAuthHeader() } });
     const html = await res.text();
     const m = html.match(/\/assets\/index-[A-Za-z0-9_-]+\.js/);
     const after = m ? m[0] : null;

@@ -41,6 +41,7 @@ from .routes.tts_audit import router as tts_audit_router
 from .routes.admin_sessions import router as admin_sessions_router
 from .routes.library import router as library_router
 from .routes.admin_seed import router as admin_seed_router
+from .routes.admin_iap_allowlist import router as admin_iap_allowlist_router
 from .routes.omo import router as omo_router
 from .routes.curriculum_qa import router as curriculum_qa_router
 from .routes.admin_story_structure_lab import router as admin_story_structure_lab_router
@@ -960,6 +961,7 @@ app.include_router(tts_audit_router)
 app.include_router(admin_sessions_router, prefix="/api", tags=["admin-sessions"])
 app.include_router(library_router, prefix="/api", tags=["library"])
 app.include_router(admin_seed_router, prefix="/api", tags=["admin-seed"])
+app.include_router(admin_iap_allowlist_router, prefix="/api", tags=["admin-iap-allowlist"])
 app.include_router(omo_router, prefix="/api", tags=["omo"])
 app.include_router(curriculum_qa_router, prefix="/api", tags=["curriculum-qa"])
 app.include_router(admin_story_structure_lab_router, prefix="/api", tags=["admin-story-structure-lab"])

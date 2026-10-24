@@ -21,10 +21,19 @@ SLA targets (PRD):
 from __future__ import annotations
 
 import random
+import sys
 import time
+from pathlib import Path
 
 from locust import HttpUser, TaskSet, between, events, task
 from locust.runners import MasterRunner, WorkerRunner
+
+# #3719 — IAP 準備：staging 未來可能在前面加一層 IAP。locustfile.py 跑在自己的
+# 行程裡（不是 pytest/unittest），repo 根目錄不在 sys.path 上，所以要自己補上
+# 才拿得到 scripts/iap_token.py 這唯一一份實作。沒設 IAP_AUDIENCE（現在就是
+# 這樣）時 iap_header() 回傳 {}，對每個使用者的 headers 是零行為改變。
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
+from iap_token import iap_header  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # Shared test data
@@ -375,6 +384,8 @@ class StudentBrowsingUser(HttpUser):
     auth_headers: dict[str, str] = {}
 
     def on_start(self):
+        # #3719 — IAP 準備：見檔頭說明，沒設 IAP_AUDIENCE 時是空 dict。
+        self.client.headers.update(iap_header())
         uid = f"loadtest_student_browse_{self.environment.runner.user_count}_{id(self)}"
         token = _register_and_login(self.client, uid)
         if token:
@@ -394,6 +405,8 @@ class StudentReadingUser(HttpUser):
     auth_headers: dict[str, str] = {}
 
     def on_start(self):
+        # #3719 — IAP 準備：見檔頭說明，沒設 IAP_AUDIENCE 時是空 dict。
+        self.client.headers.update(iap_header())
         uid = f"loadtest_student_read_{self.environment.runner.user_count}_{id(self)}"
         token = _register_and_login(self.client, uid)
         if token:
@@ -413,6 +426,8 @@ class TeacherDashboardUser(HttpUser):
     auth_headers: dict[str, str] = {}
 
     def on_start(self):
+        # #3719 — IAP 準備：見檔頭說明，沒設 IAP_AUDIENCE 時是空 dict。
+        self.client.headers.update(iap_header())
         uid = f"loadtest_teacher_{self.environment.runner.user_count}_{id(self)}"
         token = _register_teacher_and_login(self.client, uid)
         if token:
@@ -435,6 +450,8 @@ class MixedWorkloadUser(HttpUser):
     auth_headers: dict[str, str] = {}
 
     def on_start(self):
+        # #3719 — IAP 準備：見檔頭說明，沒設 IAP_AUDIENCE 時是空 dict。
+        self.client.headers.update(iap_header())
         uid = f"loadtest_mixed_{self.environment.runner.user_count}_{id(self)}"
         # Randomly assign role: 70% student, 30% teacher
         if random.random() < 0.7:

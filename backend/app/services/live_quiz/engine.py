@@ -350,6 +350,25 @@ def join_game(db: Session, code: str, user: User) -> LiveQuizPlayer:
         classroom = db.query(Classroom).filter(Classroom.id == game.classroom_id).first()
         if classroom is not None:
             _require_live_quiz_enabled(db, classroom)
+            # issue #3708: the feature-enabled check above only asks "is
+            # 課堂搶答 turned on for this classroom" — it never asked "is
+            # THIS user actually a member of this classroom". Any
+            # authenticated student who learned/guessed the 6-digit code
+            # could join a class-tied game they were never enrolled in.
+            # Host/co-teacher rules are untouched — this only gates the
+            # student join path, and only for games tied to a classroom
+            # (classless code/QR games stay ungated per #3607 above).
+            is_enrolled = (
+                db.query(ClassroomStudent)
+                .filter(
+                    ClassroomStudent.classroom_id == game.classroom_id,
+                    ClassroomStudent.student_id == user.id,
+                )
+                .first()
+                is not None
+            )
+            if not is_enrolled:
+                raise HTTPException(status_code=403, detail="你不是這個班級的學生，無法加入")
 
     if game.status == "ended":
         raise HTTPException(status_code=409, detail="This game has ended")
@@ -808,7 +827,31 @@ def build_state(db: Session, game: LiveQuizGame, user: User, after_version: int 
         player.last_seen_at = now
         db.commit()
 
-    version = game.version if is_host else _player_phase_version(game)
+    rounds_total = len(game.rounds_snapshot)
+    idx = game.current_round_index
+    question_shown_at = _aware(game.current_round_started_at)
+    answer_open_at = None
+    reading_seconds = 0
+    if 0 <= idx < rounds_total:
+        reading_seconds = game.rounds_snapshot[idx]["payload"].get("reading_seconds", 0)
+        if question_shown_at is not None:
+            answer_open_at = question_shown_at + timedelta(seconds=reading_seconds)
+    in_reading_phase = (
+        game.status == "question" and answer_open_at is not None and now < answer_open_at
+    )
+
+    # issue #3710: options opening is time-derived (reading_seconds after
+    # the round started), not a host action — nothing bumps game.version
+    # (or the player phase version) when the clock alone crosses
+    # answer_open_at. A client polling with after_version therefore got
+    # "unchanged: true" forever once the reading phase ended, and every
+    # player's (and the host's) screen stayed stuck on "看大螢幕讀題" — only
+    # a reload (which omits after_version) recovered. Fold "is reading
+    # still open" into the version actually compared/reported, same fix
+    # team_arena's get_state route applies to its own options-open clock
+    # (backend/app/routes/team_arena.py).
+    raw_version = game.version if is_host else _player_phase_version(game)
+    version = raw_version * 2 + (0 if in_reading_phase else 1)
     if player is not None:
         fast_poll_cache.remember(game.code, user.id, version, game.status)
     if after_version is not None and after_version == version:
@@ -820,11 +863,6 @@ def build_state(db: Session, game: LiveQuizGame, user: User, after_version: int 
             "unchanged": True,
         }
 
-    rounds_total = len(game.rounds_snapshot)
-    idx = game.current_round_index
-    question_shown_at = _aware(game.current_round_started_at)
-    answer_open_at = None
-    reading_seconds = 0
     round_view = None
     answered_count = None
     correct_count = None
@@ -834,12 +872,6 @@ def build_state(db: Session, game: LiveQuizGame, user: User, after_version: int 
         payload = round_def["payload"]
         round_module = ROUND_TYPES[round_def["round_type"]]
         revealed = game.status in ("reveal", "ended")
-        reading_seconds = payload.get("reading_seconds", 0)
-        if question_shown_at is not None:
-            answer_open_at = question_shown_at + timedelta(seconds=reading_seconds)
-        in_reading_phase = (
-            game.status == "question" and answer_open_at is not None and now < answer_open_at
-        )
         round_view = round_module.player_view(payload, revealed, show_options=not in_reading_phase)
         if is_host and game.status in ("question", "reveal"):
             round_answers = (

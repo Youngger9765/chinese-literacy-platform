@@ -1,4 +1,5 @@
 import { defineConfig } from '@playwright/test';
+import { getIapProxyAuthHeader } from './tests/e2e/utils/iapAuth';
 
 export default defineConfig({
   testDir: './tests/e2e',
@@ -20,5 +21,13 @@ export default defineConfig({
     baseURL: process.env.PLAYWRIGHT_BASE_URL || 'https://lingoleap-staging.web.app',
     screenshot: 'only-on-failure',
     trace: 'retain-on-failure',
+    // #3719 — IAP 準備：有一天 staging/preview 的 Cloud Run 服務前面可能
+    // 加一層 IAP。這個 context option 套用到預設的 `page` fixture（所有
+    // 瀏覽器請求，含頁面 JS 自己發的 fetch/XHR）跟 `request` fixture
+    // （APIRequestContext）—— 但不套用到 spec 自己手動開的
+    // `browser.newContext()`/`chromium.launch()`，那些要各自顯式帶。
+    // 現在 IAP_AUDIENCE 沒人設，getIapProxyAuthHeader() 回傳 {}，等於沒加
+    // 這個 option，零行為改變。
+    extraHTTPHeaders: getIapProxyAuthHeader(),
   },
 });

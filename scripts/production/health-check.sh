@@ -10,6 +10,10 @@
 
 set -euo pipefail
 
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+# shellcheck source=../lib/iap-token.sh
+source "${REPO_ROOT}/scripts/lib/iap-token.sh"
+
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
@@ -39,6 +43,14 @@ case "${ENV}" in
     ;;
 esac
 
+# #3719 — IAP 準備：staging 未來可能在前面加一層 IAP。IAP_AUDIENCE 沒設時
+# （現在就是這樣）這裡算出來永遠是空陣列，curl 行為跟今天完全一樣。
+IAP_AUTH_ARGS=()
+IAP_TOKEN="$(iap_token "${IAP_AUDIENCE:-}")"
+if [[ -n "${IAP_TOKEN}" ]]; then
+  IAP_AUTH_ARGS=(-H "Proxy-Authorization: Bearer ${IAP_TOKEN}")
+fi
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -51,7 +63,7 @@ check_http() {
   local timeout="${4:-10}"
 
   local status
-  status=$(curl -s -o /dev/null -w "%{http_code}" --max-time "${timeout}" "${url}" 2>/dev/null || echo "000")
+  status=$(curl -s -o /dev/null -w "%{http_code}" --max-time "${timeout}" "${IAP_AUTH_ARGS[@]+${IAP_AUTH_ARGS[@]}}" "${url}" 2>/dev/null || echo "000")
 
   if [[ "${status}" == "${expected_status}" ]]; then
     log "  [PASS] ${name} — HTTP ${status}"
@@ -70,7 +82,7 @@ check_json_field() {
   local timeout="${5:-10}"
 
   local body
-  body=$(curl -s --max-time "${timeout}" "${url}" 2>/dev/null || echo "{}")
+  body=$(curl -s --max-time "${timeout}" "${IAP_AUTH_ARGS[@]+${IAP_AUTH_ARGS[@]}}" "${url}" 2>/dev/null || echo "{}")
 
   local actual
   actual=$(echo "${body}" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('${field}','MISSING'))" 2>/dev/null || echo "PARSE_ERROR")
@@ -90,7 +102,7 @@ check_response_time() {
   local max_ms="${3:-2000}"
 
   local elapsed_ms
-  elapsed_ms=$(curl -s -o /dev/null -w "%{time_total}" --max-time 10 "${url}" 2>/dev/null | awk '{printf "%d", $1*1000}' || echo "99999")
+  elapsed_ms=$(curl -s -o /dev/null -w "%{time_total}" --max-time 10 "${IAP_AUTH_ARGS[@]+${IAP_AUTH_ARGS[@]}}" "${url}" 2>/dev/null | awk '{printf "%d", $1*1000}' || echo "99999")
 
   if [[ "${elapsed_ms}" -le "${max_ms}" ]]; then
     log "  [PASS] ${name} — ${elapsed_ms}ms (threshold: ${max_ms}ms)"
@@ -121,7 +133,7 @@ check_response_time "Frontend latency" "${FRONTEND_URL}/" 3000
 
 echo ""
 log "3. Backend component health"
-DETAILED=$(curl -s --max-time 10 "${BACKEND_URL}/api/health/detailed" 2>/dev/null || echo "{}")
+DETAILED=$(curl -s --max-time 10 "${IAP_AUTH_ARGS[@]+${IAP_AUTH_ARGS[@]}}" "${BACKEND_URL}/api/health/detailed" 2>/dev/null || echo "{}")
 DB_STATUS=$(echo "${DETAILED}" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('components',{}).get('database',{}).get('status','unknown'))" 2>/dev/null || echo "parse_error")
 AI_STATUS=$(echo "${DETAILED}" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('components',{}).get('ai_service',{}).get('status','unknown'))" 2>/dev/null || echo "parse_error")
 

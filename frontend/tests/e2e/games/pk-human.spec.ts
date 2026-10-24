@@ -7,6 +7,7 @@
  * both land on a result screen with a score and an outcome.
  */
 import { test, expect } from '../fixtures/pageerror-fixture';
+import { getIapProxyAuthHeader } from '../utils/iapAuth';
 import {
   batchCreateStudents,
   createClassroomForTeacher,
@@ -28,8 +29,8 @@ test.describe('PK 對戰 pk_human', () => {
     await enableClassroomFeatures(request, teacher, classroom.id, { pk_human: true });
     const students = await batchCreateStudents(request, teacher, classroom.id, 2, 'pk');
 
-    const ctxA = await browser.newContext();
-    const ctxB = await browser.newContext();
+    const ctxA = await browser.newContext({ extraHTTPHeaders: getIapProxyAuthHeader() }) /* #3719 */;
+    const ctxB = await browser.newContext({ extraHTTPHeaders: getIapProxyAuthHeader() }) /* #3719 */;
     const a = await ctxA.newPage();
     const b = await ctxB.newPage();
     const errors: string[] = [];
