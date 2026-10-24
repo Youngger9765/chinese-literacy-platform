@@ -61,7 +61,7 @@ function MissingStepsLine({ sub }: { sub: StepCompletion }) {
   if (sub.required_step_count === 0) return null;
   const missingLabels = sub.missing_step_ids.map(stepIdToLabel);
   return (
-    <p className="mt-1 text-[11px] text-gray-500 whitespace-nowrap">
+    <p className="mt-1 max-w-[260px] mx-auto text-[11px] leading-snug text-gray-500 whitespace-normal break-words">
       完成 {sub.completed_step_count}/{sub.required_step_count} 關
       {missingLabels.length > 0 && <>，缺：{missingLabels.join('、')}</>}
     </p>
