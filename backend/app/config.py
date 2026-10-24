@@ -47,6 +47,27 @@ class Settings(BaseSettings):
     # Set QA_TOOLS_SHARED_SECRET in staging/preview Cloud Run to require an
     # `x-qa-token` header on every QA-board request (fail-closed once set).
     qa_tools_shared_secret: str = ""
+    # frontend's runtime service account email — #3740/#3733. Backend stays
+    # directly reachable (CI, health checks), so trusting an X-Client-IP
+    # header outright would let anyone forge their own IP for rate-limiting
+    # purposes. Only requests THIS backend itself cryptographically
+    # verified as coming from this exact service account (via
+    # X-Frontend-Identity, see app/auth/rate_limiter.py's
+    # trusted_proxy_client_ip / _verify_frontend_identity) get X-Client-IP
+    # trusted; everyone else falls back to the existing X-Forwarded-For
+    # rule. Empty (default): nobody is trusted, X-Client-IP is always
+    # ignored -- zero behavior change until this is actually set.
+    frontend_proxy_sa: str = ""
+    # Expected `aud` claim on the X-Frontend-Identity token — #3740 follow-
+    # up security review. This must equal the SAME value the sidecar
+    # requests from the metadata server as BACKEND_INVOKER_AUDIENCE (this
+    # backend's own Cloud Run URL) — that's what makes the token this
+    # backend verifies actually scoped to calls meant for it, not a
+    # genuinely-Google-signed token minted for some other service and
+    # replayed here. Required alongside frontend_proxy_sa for
+    # trusted_proxy_client_ip to trust anything; empty (default) means
+    # verification is never attempted.
+    backend_audience: str = ""
     # Junyi class/student import via BigQuery (issue #3380).
     # False (default): GET/POST /api/classrooms/junyi-import/* return 404.
     # Flip via Cloud Run env var JUNYI_CLASS_IMPORT_ENABLED=true once the Junyi

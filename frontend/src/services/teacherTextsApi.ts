@@ -91,12 +91,18 @@ export async function listMyTexts(
   token: string,
   params?: { search?: string; grade?: number; genre?: string },
 ): Promise<TeacherTextListResponse> {
-  const url = new URL(`${API_BASE}/api/teacher/my-texts`);
-  if (params?.search) url.searchParams.set('search', params.search);
-  if (params?.grade !== undefined) url.searchParams.set('grade', String(params.grade));
-  if (params?.genre) url.searchParams.set('genre', params.genre);
+  // #3719: `new URL(path)` with no base throws on a relative string
+  // (IAP-prep's same-origin API_BASE="" for staging/preview, already true
+  // of prod's Firebase build). Build the query string by hand instead of
+  // going through URL, so the request stays byte-identical to before in
+  // both the relative and absolute cases — no extra absolutization.
+  const qp = new URLSearchParams();
+  if (params?.search) qp.set('search', params.search);
+  if (params?.grade !== undefined) qp.set('grade', String(params.grade));
+  if (params?.genre) qp.set('genre', params.genre);
+  const qs = qp.toString() ? `?${qp}` : '';
 
-  const res = await fetch(url.toString(), {
+  const res = await fetch(`${API_BASE}/api/teacher/my-texts${qs}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   return handleResponse<TeacherTextListResponse>(res);
