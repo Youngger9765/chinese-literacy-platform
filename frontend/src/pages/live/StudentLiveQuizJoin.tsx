@@ -9,6 +9,14 @@
  *
  * #3747: this screen had no way back to 遊戲區 except the browser's own
  * back button (no AppShell on this route) — added GameBackButton.
+ *
+ * #3761: small inline icon next to the title (not a full hero banner like
+ * PK/escape-room/team-arena's entry screens) — this page's numeric keypad
+ * already uses most of the 390px-viewport's vertical space (confirmed in
+ * #3756's "before" screenshot), so a full banner would push "下一步" below
+ * the fold on mobile. The matching full lobby experience lives one step
+ * further in, at `LiveQuizWaitingRoom` (the actual wait screen after
+ * joining), which has the room this page doesn't.
  */
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -40,6 +48,12 @@ const StudentLiveQuizJoin: React.FC = () => {
       <div className="mb-2 w-full max-w-xs">
         <GameBackButton to="/game-hub" />
       </div>
+      <img
+        src="/story-assets/live-quiz-hub/icon.png"
+        alt=""
+        aria-hidden="true"
+        className="mb-2 h-12 w-12 object-contain"
+      />
       <h1 className="mb-1 text-xl font-bold text-on-surface">加入課堂搶答</h1>
       <p className="mb-1 text-sm text-on-surface-variant">現在全班一起玩，約 10 分鐘</p>
       <p className="mb-8 text-sm text-on-surface-variant">輸入老師投影的 6 位數代碼</p>

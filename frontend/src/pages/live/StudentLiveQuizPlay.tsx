@@ -9,19 +9,29 @@
  * 6th place or lower see a signed "前進/後退 N 名" delta instead — never
  * a literal "第 N 名" outside the top 5, see issue #3631 P0 #4) / ended
  * (答對題數 + 進步 vs last game).
+ *
+ * #3761 (game-academy audit + Young, round 3): the lobby phase used to be
+ * two lines of centered text and nothing else ("幾乎全空白，沒有返回/退出
+ * 方式"). It's now `LiveQuizWaitingRoom` — hero visual, my name/avatar
+ * card, an anonymous "同學牆" sized to `players_count` (see that
+ * component's docstring for why it's anonymous, not named), icon-based
+ * "怎麼玩" steps, and a "離開" button that confirms before navigating away
+ * (same `window.confirm` pattern `TeacherLiveQuizHost.tsx` already uses).
  */
 import React, { useEffect, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLiveQuizPoll } from '../../components/live-quiz/useLiveQuizPoll';
 import { useLiveQuizRoundSound } from '../../components/live-quiz/useLiveQuizRoundSound';
 import OptionGrid from '../../components/live-quiz/OptionGrid';
 import CountdownBar from '../../components/live-quiz/CountdownBar';
+import LiveQuizWaitingRoom from '../../components/live-quiz/LiveQuizWaitingRoom';
 import { joinLiveQuizGame, submitLiveQuizAnswer, isValidLiveQuizCode, LiveQuizApiError } from '../../services/liveQuizApi';
 
 const StudentLiveQuizPlay: React.FC = () => {
   const { code } = useParams<{ code: string }>();
   const { token, user } = useAuth();
+  const navigate = useNavigate();
   const [joinError, setJoinError] = useState('');
   const [joined, setJoined] = useState(false);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
@@ -129,10 +139,15 @@ const StudentLiveQuizPlay: React.FC = () => {
       )}
 
       {state.status === 'lobby' && (
-        <div className="flex flex-1 flex-col items-center justify-center text-center">
-          <p className="text-lg font-medium text-on-surface">等待老師開始…</p>
-          <p className="mt-1 text-sm text-on-surface-variant">你好，{user?.name ?? '同學'}</p>
-        </div>
+        <LiveQuizWaitingRoom
+          myName={user?.name ?? '同學'}
+          playersCount={state.players_count}
+          onLeave={() => {
+            if (window.confirm('確定要離開嗎？離開後需要重新輸入代碼才能加入。')) {
+              navigate('/game-hub');
+            }
+          }}
+        />
       )}
 
       {state.status === 'question' && round && (

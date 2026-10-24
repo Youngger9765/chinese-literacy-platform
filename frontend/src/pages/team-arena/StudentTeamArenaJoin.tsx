@@ -8,6 +8,12 @@
  * #3747: the choose screen had no way back to 遊戲區 (host/join sub-screens
  * already had "返回" back to choose) — added GameBackButton + a short
  * "怎麼玩" line.
+ *
+ * #3761 (game-academy audit: "入口有一句話說明，無主視覺橫幅"): the choose
+ * screen's intro is now a hero banner using the new codex image_gen towers
+ * icon (`story-assets/team-arena-hub/icon.png`, same one the game-hub card
+ * uses) instead of plain centered text, matching the PK/escape-room entry
+ * screens' visual weight.
  */
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -83,14 +89,22 @@ const StudentTeamArenaJoin: React.FC = () => {
 
   if (mode === 'choose') {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-surface px-6 py-10">
-        <div className="mb-2 w-full max-w-xs">
+      <div className="flex min-h-screen flex-col items-center bg-surface px-6 py-10">
+        <div className="mb-4 w-full max-w-xl">
           <GameBackButton to="/game-hub" />
         </div>
-        <h1 className="mb-1 text-xl font-bold text-on-surface">多人對抗賽</h1>
-        <p className="mb-1 text-sm text-on-surface-variant">2～5 人一隊，答題推塔，攻下對方主堡獲勝</p>
-        <p className="mb-8 text-xs text-on-surface-variant">發起或輸入代碼加入比賽，答對題目才能推進攻塔</p>
-        <div className="flex w-full max-w-xs flex-col gap-3">
+        <div className="w-full max-w-xl overflow-hidden rounded-3xl bg-gradient-to-br from-[#1FA6A6] to-[#E0792B] px-5 py-6 text-center shadow-sm sm:px-8">
+          <img
+            src="/story-assets/team-arena-hub/icon.png"
+            alt=""
+            aria-hidden="true"
+            className="mx-auto h-24 w-24 object-contain drop-shadow-md"
+          />
+          <h1 className="mt-2 text-2xl font-bold text-white">多人對抗賽</h1>
+          <p className="mt-1 text-sm text-white/90">2～5 人一隊，答題推塔，攻下對方主堡獲勝</p>
+          <p className="mt-1 text-xs text-white/80">發起或輸入代碼加入比賽，答對題目才能推進攻塔</p>
+        </div>
+        <div className="mt-8 flex w-full max-w-xs flex-col gap-3">
           <button
             type="button"
             onClick={() => setMode('host')}

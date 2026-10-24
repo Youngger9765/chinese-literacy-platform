@@ -80,10 +80,19 @@ const StudentEscapeRoomEntry: React.FC = () => {
       <div className="w-full max-w-lg">
         <GameBackButton to="/game-hub" />
       </div>
-      <div className="mt-4 w-full max-w-lg rounded-3xl bg-accent-bg p-6 text-center shadow-sm sm:p-10">
-        <p className="text-sm font-semibold text-accent">書中世界探索</p>
-        <h1 className="mt-2 text-3xl font-bold">迷城密室</h1>
-        <p className="mt-3 text-sm leading-6 text-on-surface-variant">和三位書中夥伴一起解開機關，把被迷霧遮住的字跡找回來</p>
+      <div className="mt-4 w-full max-w-lg rounded-3xl bg-gradient-to-br from-[#6D5BD0] to-[#4B3F99] p-6 text-center text-white shadow-sm sm:p-10">
+        {/* #3761: the new codex image_gen lantern icon (also used on the
+            game-hub card) replaces the plain gradient card — same "already
+            had a decent banner, just no illustration" gap as team-arena. */}
+        <img
+          src="/story-assets/escape-room-hub/icon.png"
+          alt=""
+          aria-hidden="true"
+          className="mx-auto h-20 w-20 object-contain drop-shadow-md"
+        />
+        <p className="mt-2 text-sm font-semibold text-white/90">書中世界探索</p>
+        <h1 className="mt-1 text-3xl font-bold">迷城密室</h1>
+        <p className="mt-3 text-sm leading-6 text-white/90">和三位書中夥伴一起解開機關，把被迷霧遮住的字跡找回來</p>
 
         {lessonUid && (
           <div className="mt-7 flex rounded-full bg-white/80 p-1 text-sm" role="group" aria-label="題目範圍">
@@ -104,7 +113,7 @@ const StudentEscapeRoomEntry: React.FC = () => {
           </div>
         )}
 
-        <p className="mt-6 rounded-xl bg-white/80 px-4 py-3 text-sm" aria-live="polite">
+        <p className="mt-6 rounded-xl bg-white/80 px-4 py-3 text-sm text-on-surface" aria-live="polite">
           本局範圍：{scope.label}
         </p>
         <button type="button" disabled={busy} onClick={() => void handleStart()} className="btn-immersive mt-7 w-full disabled:opacity-50">

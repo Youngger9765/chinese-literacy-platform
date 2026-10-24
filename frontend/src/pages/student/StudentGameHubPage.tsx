@@ -1,5 +1,5 @@
 /**
- * StudentGameHubPage — `/game-hub` (issue #3633, issue #3756 round 2).
+ * StudentGameHubPage — `/game-hub` (issue #3633, #3756, #3761 round 3).
  *
  * One card per game mode, replacing the three scattered sidebar entries
  * (我們班/課堂搶答/PK 對戰) this issue consolidates, and finally giving
@@ -22,9 +22,18 @@
  * `classroomGated` (gameModes.ts) is NOT that distinction (team_arena has
  * no classroom switch at all, yet still needs classmates in the room) —
  * `SECTION_OF` below is a deliberate product grouping, not derived from
- * the registry's gating flags. Old routes are untouched — this page is a
- * new front door, not a replacement for /student/our-class, /live, /pk,
- * /escape-room.
+ * the registry's gating flags.
+ *
+ * #3761 (Young, round 3 after reviewing #3756's screenshots): "卡片小、
+ * 畫面大半空白；emoji 跟角色插畫風格不一致" — every card below now has a
+ * full-height illustrated hero image (either an existing character
+ * portrait, or one of the three new codex image_gen icons committed under
+ * `story-assets/{live-quiz,escape-room,team-arena}-hub/`), a per-mode
+ * gradient backdrop, and the desktop grid now widens self-play to 2 large
+ * columns and class-play to 3, instead of the old generic 1/2/3 grid that
+ * left the same small-icon cards whether there were 2 or 5 of them. Old
+ * routes are untouched — this page is a new front door, not a replacement
+ * for /student/our-class, /live, /pk, /escape-room.
  */
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -32,18 +41,37 @@ import { useAuth } from '../../contexts/AuthContext';
 import { fetchMyEnrolledClassrooms, computeStudentGameFlags } from '../../services/learning/session';
 import { GAME_MODES, type GameModeKey } from '../../data/gameModes';
 
-/** Visual-only decoration per mode (icon + lock copy) — not part of the
- * shared `GAME_MODES` registry because it's purely cosmetic / this page's
- * own concern, unlike label/description/route which other consumers could
- * plausibly need too. Keyed by the same `GameModeKey` so a new registry
- * entry with no decoration here falls back to the generic emoji default
- * below rather than crashing. */
-const DECORATIONS: Partial<Record<GameModeKey, { imageSrc?: string; emoji?: string }>> = {
-  league: { imageSrc: '/story-assets/league-tang/guide-changan-icon.png' },
-  live_quiz: { emoji: '🎮' },
-  pk_human: { imageSrc: '/story-assets/pk-li-bai/icon.png' },
-  escape_room: { emoji: '🏰' },
-  team_arena: { emoji: '🛡️' },
+/** #3761: one illustrated hero image per mode + a matching gradient
+ * backdrop so the card reads as a small "poster" instead of a tiny icon on
+ * white. PK reuses 李白's existing full-portrait (`portrait-idle.png`,
+ * already committed under story-assets/pk-li-bai/ since #3745) instead of
+ * the 128x128 icon the old hub card used — same asset, just a bigger
+ * cousin of it, not a new generation. 跨班賽季 reuses the guide's
+ * "greet" full-body pose (already committed) the same way. The other
+ * three are new codex image_gen icons for THIS issue (prompts recorded in
+ * each folder's `_prompts.json`), replacing the old generic emoji. */
+const HERO: Record<GameModeKey, { src: string; gradient: string }> = {
+  pk_human: { src: '/story-assets/pk-li-bai/portrait-idle.png', gradient: 'from-[#8B7FD1] to-[#6D5BD0]' },
+  escape_room: { src: '/story-assets/escape-room-hub/icon.png', gradient: 'from-[#6D5BD0] to-[#4B3F99]' },
+  live_quiz: { src: '/story-assets/live-quiz-hub/icon.png', gradient: 'from-[#F0624D] to-[#D63B2F]' },
+  team_arena: { src: '/story-assets/team-arena-hub/icon.png', gradient: 'from-[#1FA6A6] to-[#E0792B]' },
+  league: { src: '/story-assets/league-tang/guide-changan-greet.png', gradient: 'from-[#6D7B8F] to-[#4A5568]' },
+};
+
+/** #3761: punchier, more inviting one-liners (same facts as #3756's plain
+ * descriptions — nothing here claims a feature that doesn't exist). Kept
+ * in this page rather than editing `gameModes.ts`'s `description` field,
+ * even though that field IS the single source for this exact card's copy
+ * (its own docstring says so) — the registry's `description` is reused
+ * verbatim by `frontend/src/data/__tests__/gameModes.test.ts`'s pinned
+ * string test and read by nothing else, so changing it here keeps the
+ * blast radius to this one file instead of a cross-cutting rename. */
+const TAGLINE: Record<GameModeKey, string> = {
+  pk_human: '一對一尬題，向同學或文學家下戰帖',
+  escape_room: '闖關解謎，和書中夥伴一起逃出迷霧',
+  live_quiz: '全班一起搶答，看誰反應最快',
+  team_arena: '組隊攻城，合力推倒對方城塔',
+  league: '跨班巡迴賽，讀課文就在幫班上加分',
 };
 
 const LOCKED_TEXT = '老師尚未開啟';
@@ -74,20 +102,28 @@ const SECTION_COPY: Record<Section, { title: string; subtitle: string }> = {
 };
 
 interface GameHubCard {
-  key: string;
+  key: GameModeKey;
   label: string;
-  description: string;
+  tagline: string;
   path: string | null;
   locked: boolean;
   lockedText: string;
   startCondition: string;
   section: Section;
-  imageSrc?: string;
-  emoji?: string;
+  heroSrc: string;
+  heroGradient: string;
 }
 
-const GameHubCardButton: React.FC<{ card: GameHubCard; onOpen: () => void }> = ({ card, onOpen }) => {
+/** #3761: large "poster" card — hero image fills the top ~60%, title +
+ * tagline + badge sit on a solid panel below so text stays readable
+ * regardless of what's happening in the illustration above it. */
+const GameHubCardButton: React.FC<{ card: GameHubCard; onOpen: () => void; size: 'lg' | 'md' }> = ({
+  card,
+  onOpen,
+  size,
+}) => {
   const disabled = card.locked || !card.path;
+  const heroHeight = size === 'lg' ? 'h-48 sm:h-56' : 'h-40 sm:h-44';
   return (
     <button
       type="button"
@@ -95,46 +131,44 @@ const GameHubCardButton: React.FC<{ card: GameHubCard; onOpen: () => void }> = (
       disabled={disabled}
       aria-label={card.locked ? `${card.label}（${card.lockedText}）` : card.label}
       className={`
-        flex flex-col items-center gap-2 rounded-2xl border p-5 text-center transition-all
+        group flex flex-col overflow-hidden rounded-3xl border text-left shadow-sm transition-all
         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
         ${disabled
-          ? 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed'
-          : 'border-gray-200 bg-white hover:border-accent hover:shadow-md cursor-pointer'
+          ? 'border-gray-200 opacity-60 cursor-not-allowed'
+          : 'border-gray-200 hover:-translate-y-0.5 hover:shadow-lg cursor-pointer'
         }
       `}
     >
       <div
-        className={`w-16 h-16 rounded-full flex items-center justify-center shrink-0 ${
-          disabled ? 'bg-gray-200' : 'bg-accent-bg'
+        className={`relative flex ${heroHeight} items-end justify-center bg-gradient-to-br ${card.heroGradient} ${
+          disabled ? 'grayscale' : ''
         }`}
-        aria-hidden="true"
       >
-        {card.imageSrc ? (
-          <img
-            src={card.imageSrc}
-            alt=""
-            className={`w-12 h-12 object-contain ${disabled ? 'grayscale' : ''}`}
-          />
-        ) : (
-          <span className="text-3xl">{card.emoji}</span>
+        <img
+          src={card.heroSrc}
+          alt=""
+          aria-hidden="true"
+          className="h-full w-full object-contain p-3 drop-shadow-md"
+        />
+      </div>
+      <div className="flex flex-1 flex-col gap-1 bg-white px-4 py-3">
+        <span className="text-lg font-bold text-gray-900">{card.label}</span>
+        <span className="text-sm text-gray-500">{card.tagline}</span>
+        {/* #3756: informational "when can I start this" badge — independent
+            of lock state (see START_CONDITION docstring above). Shown
+            whenever the card is not locked; the lockedText badge below
+            already covers the locked case so the two never stack. */}
+        {!card.locked && (
+          <span className="mt-1 w-fit text-[11px] font-medium text-accent bg-accent-bg rounded-full px-2 py-0.5">
+            {card.startCondition}
+          </span>
+        )}
+        {card.locked && (
+          <span className="mt-1 w-fit text-[11px] font-medium text-gray-400 bg-gray-100 rounded-full px-2 py-0.5">
+            {card.lockedText}
+          </span>
         )}
       </div>
-      <span className="text-base font-semibold text-gray-900">{card.label}</span>
-      <span className="text-xs text-gray-500">{card.description}</span>
-      {/* #3756: informational "when can I start this" badge — independent
-          of lock state (see START_CONDITION docstring above). Shown
-          whenever the card is not locked; the lockedText badge below
-          already covers the locked case so the two never stack. */}
-      {!card.locked && (
-        <span className="mt-1 text-[11px] font-medium text-accent bg-accent-bg rounded-full px-2 py-0.5">
-          {card.startCondition}
-        </span>
-      )}
-      {card.locked && (
-        <span className="mt-1 text-[11px] font-medium text-gray-400 bg-gray-100 rounded-full px-2 py-0.5">
-          {card.lockedText}
-        </span>
-      )}
     </button>
   );
 };
@@ -177,13 +211,14 @@ const StudentGameHubPage: React.FC = () => {
   const cards: GameHubCard[] = GAME_MODES.map((mode) => ({
     key: mode.key,
     label: mode.label,
-    description: mode.description,
+    tagline: TAGLINE[mode.key],
     path: mode.hubRoute,
     locked: lockState[mode.key] ?? false,
     lockedText: lockState[mode.key] ? LOCKED_TEXT : '',
     startCondition: START_CONDITION[mode.key],
     section: SECTION_OF[mode.key],
-    ...DECORATIONS[mode.key],
+    heroSrc: HERO[mode.key].src,
+    heroGradient: HERO[mode.key].gradient,
   }));
 
   // #3756: split into the two sections, but keep GAME_MODES' own relative
@@ -193,20 +228,23 @@ const StudentGameHubPage: React.FC = () => {
   const classPlayCards = cards.filter((c) => c.section === 'class');
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-6">
+    <div className="max-w-6xl mx-auto px-4 py-6">
       <h1 className="text-xl font-bold text-gray-900 mb-1">遊戲區</h1>
       <p className="text-sm text-gray-500 mb-6">挑一個玩法，開始闖關</p>
 
-      <section aria-labelledby="game-hub-section-self" className="mb-8">
+      <section aria-labelledby="game-hub-section-self" className="mb-10">
         <h2 id="game-hub-section-self" className="text-base font-bold text-gray-900">
           {SECTION_COPY.self.title}
         </h2>
         <p className="text-xs text-gray-500 mb-3">{SECTION_COPY.self.subtitle}</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* #3761: desktop keeps these 2 cards LARGE side-by-side (not a
+            3-up grid that would leave a half-empty row for only 2 items). */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           {selfPlayCards.map((card) => (
             <GameHubCardButton
               key={card.key}
               card={card}
+              size="lg"
               onOpen={() => card.path && navigate(card.path)}
             />
           ))}
@@ -218,11 +256,12 @@ const StudentGameHubPage: React.FC = () => {
           {SECTION_COPY.class.title}
         </h2>
         <p className="text-xs text-gray-500 mb-3">{SECTION_COPY.class.subtitle}</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {classPlayCards.map((card) => (
             <GameHubCardButton
               key={card.key}
               card={card}
+              size="md"
               onOpen={() => card.path && navigate(card.path)}
             />
           ))}

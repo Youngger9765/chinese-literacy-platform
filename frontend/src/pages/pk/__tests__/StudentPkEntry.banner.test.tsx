@@ -1,9 +1,11 @@
 /**
- * #3756: StudentPkEntry's "怎麼玩" card upgraded from a plain text block
- * (#3747) into a hero banner using 李白's existing icon.png. Locks: the
- * banner still shows the same explanation bullets, and now also renders a
- * decorative (aria-hidden) image anchored to 李白's already-committed art
- * asset — not a new file this PR adds, and not `pkFigures.ts`.
+ * #3756 → #3761 (round 3): StudentPkEntry's banner went plain-text (#3747)
+ * → single gradient card with one icon (#3756) → full `PkHeroBanner` with
+ * all 7 PK_FIGURES lined up + icon-based "怎麼玩" steps (#3761, after Young
+ * reviewed #3756's screenshots: "大半畫面空白，不像遊戲"). Dedicated
+ * PkHeroBanner unit tests live in
+ * `components/pk/__tests__/PkHeroBanner.test.tsx`; this file only checks
+ * that StudentPkEntry actually renders it.
  */
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
@@ -20,6 +22,7 @@ vi.mock('../../../services/pkApi', () => ({
   createPkInvite: vi.fn(() => new Promise(() => {})),
   getPkHistory: vi.fn(() => new Promise(() => {})),
   getPkRatingMe: vi.fn(() => new Promise(() => {})),
+  getPkOpponents: vi.fn(() => new Promise(() => {})),
 }));
 
 vi.mock('../../../services/learning/session', () => ({
@@ -30,8 +33,8 @@ vi.mock('../../../services/learning/session', () => ({
 
 import StudentPkEntry from '../StudentPkEntry';
 
-describe('<StudentPkEntry> — 主視覺橫幅 (#3756)', () => {
-  it('shows the 怎麼玩 banner with its explanation bullets and a decorative 李白 icon', async () => {
+describe('<StudentPkEntry> — 主視覺橫幅 (#3756/#3761)', () => {
+  it('renders PkHeroBanner (title, 怎麼玩 label, and the 3 step texts)', async () => {
     render(
       <MemoryRouter initialEntries={['/pk']}>
         <Routes>
@@ -41,13 +44,23 @@ describe('<StudentPkEntry> — 主視覺橫幅 (#3756)', () => {
     );
 
     await waitFor(() => expect(screen.getByText('怎麼玩？')).toBeTruthy());
+    expect(screen.getByRole('heading', { name: 'PK 對戰' })).toBeTruthy();
     expect(screen.getByText(/5 題搶答/)).toBeTruthy();
     expect(screen.getByText(/打贏文學家可以解鎖他的人物卡/)).toBeTruthy();
+  });
 
-    const banner = screen.getByText('怎麼玩？').closest('div')?.parentElement;
-    const icon = banner?.querySelector('img[src="/story-assets/pk-li-bai/icon.png"]');
-    expect(icon).toBeTruthy();
-    expect(icon?.getAttribute('alt')).toBe('');
-    expect(icon?.getAttribute('aria-hidden')).toBe('true');
+  it('lines up all 7 PK figures, starting with 李白 (tier 7, the one with real committed art)', async () => {
+    render(
+      <MemoryRouter initialEntries={['/pk']}>
+        <Routes>
+          <Route path="/pk" element={<StudentPkEntry />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    await waitFor(() => expect(screen.getByRole('heading', { name: 'PK 對戰' })).toBeTruthy());
+    const libaiImg = document.querySelector('img[src="/story-assets/pk-li-bai/portrait-idle.png"]');
+    expect(libaiImg).toBeTruthy();
+    expect(libaiImg?.getAttribute('alt')).toBe('');
   });
 });
