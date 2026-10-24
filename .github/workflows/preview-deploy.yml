@@ -22,6 +22,13 @@ env:
   # docs/iap-runbook.md。目前仍然是 false，staging 與日常 preview
   # 完全不受影響。
   IAP_ENABLED: 'false'
+  # #3728/#3740 — 同源代理 build-time 開關，預設 false：關掉時這個 job
+  # 建出來的 preview image 跟 #3741 revert 之後完全一樣（VITE_API_URL
+  # 指到 backend 絕對網址，無 BACKEND_INTERNAL_URL、無
+  # BACKEND_INVOKER_SIDECAR_PORT）。同一個理由、同一段完整說明見
+  # staging-deploy.yml 這個開關旁的註解——這裡不重複貼一次，兩邊要改
+  # 一起改。
+  SAME_ORIGIN_PROXY_ENABLED: 'false'
 
 jobs:
   detect-changes:
@@ -163,16 +170,27 @@ jobs:
           DEMO_STUDENT_EMAIL: ${{ secrets.DEMO_STUDENT_EMAIL }}
           DEMO_STUDENT_PW: ${{ secrets.DEMO_STUDENT_PW }}
         run: |
-          # #3719 — IAP 準備：VITE_API_URL 留空字串，讓 build 出來的 JS 打相對
-          # 路徑 /api/*（apiConfig.ts 用 `??`，空字串不會被當成 undefined）。
-          # BACKEND_INTERNAL_URL 告訴這個 preview frontend 自己的 nginx
-          # 要把這些同源的 /api、/assets、/q 轉送去哪
-          # （見 frontend/docker/render-nginx-conf.sh）—— 跟上面算出來的
-          # backend URL 是同一個，所以 preview 沒有自己的後端時一樣會
-          # 退回共用 staging，跟今天的行為一致。
+          # #3719/#3728/#3740 — SAME_ORIGIN_PROXY_ENABLED=false (default,
+          # full why in staging-deploy.yml's copy of this switch): build
+          # EXACTLY like today/post-#3741-revert — VITE_API_URL points
+          # straight at the resolved backend URL, no BACKEND_INTERNAL_URL,
+          # no BACKEND_INVOKER_SIDECAR_PORT, nginx never proxies anything.
+          # =true: VITE_API_URL stays empty (relative /api/*, apiConfig.ts's
+          # `??` doesn't treat empty string as undefined). BACKEND_INTERNAL_URL
+          # tells this preview frontend's own nginx where to forward
+          # same-origin /api, /assets, /q (see
+          # frontend/docker/render-nginx-conf.sh) -- same URL as resolved
+          # above, so a preview with no backend of its own falls back to
+          # shared staging either way, matching today's behavior.
+          # BACKEND_INVOKER_SIDECAR_PORT must travel with it or the build
+          # fails outright (fail-closed guard, intentional).
+          if [ "${{ env.SAME_ORIGIN_PROXY_ENABLED }}" = "true" ]; then
+            PROXY_BUILD_ARGS=(--build-arg VITE_API_URL= --build-arg "BACKEND_INTERNAL_URL=${{ steps.backend-url.outputs.url }}" --build-arg BACKEND_INVOKER_SIDECAR_PORT=8081)
+          else
+            PROXY_BUILD_ARGS=(--build-arg "VITE_API_URL=${{ steps.backend-url.outputs.url }}")
+          fi
           docker build \
-            --build-arg VITE_API_URL="" \
-            --build-arg BACKEND_INTERNAL_URL=${{ steps.backend-url.outputs.url }} \
+            "${PROXY_BUILD_ARGS[@]}" \
             --build-arg VITE_SHOW_DEMO_LOGIN=true \
             --build-arg "VITE_DEMO_ADMIN_EMAIL=${DEMO_ADMIN_EMAIL}" \
             --build-arg "VITE_DEMO_ADMIN_PW=${DEMO_ADMIN_PW}" \

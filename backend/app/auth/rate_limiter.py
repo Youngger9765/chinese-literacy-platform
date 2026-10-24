@@ -17,8 +17,6 @@ a single user's traffic is ordinarily served by one instance.  If shared-state
 limiting becomes a requirement, replace the store with Redis.
 """
 
-import base64
-import json
 import threading
 import time
 from typing import NamedTuple
@@ -125,50 +123,105 @@ def real_client_ip(request: Request) -> str:
     )
 
 
-def _decode_jwt_payload_unverified(token: str) -> dict | None:
-    """Decode a JWT's payload without verifying its signature.
+_now = time.time
 
-    SAFE ONLY for tokens whose signature has ALREADY been verified by a
-    platform we trust before this code ever sees them. Cloud Run's own
-    ingress verifies X-Serverless-Authorization's signature and strips it
-    before forwarding the token to this app -- confirmed via
-    https://docs.cloud.google.com/run/docs/authenticating/service-to-service
-    ("removes the signature before passing the token to the user
-    container"). This mirrors scripts/run_invoker_token.py's
-    `_decode_exp` on the minting side: same trust boundary (the platform
-    itself), same reason signature re-verification is unnecessary here.
+# raw token string -> (verified email, the audience it was verified
+# against, that token's own `exp` claim). #3740 follow-up: the same token
+# is reused by the sidecar across MANY requests within its TTL window
+# (scripts/run_invoker_token.py's own cache), so without this, every
+# proxied request would pay for a fresh signature verification (and, on a
+# cold cert cache, a network round trip to fetch Google's public keys)
+# for a token we already fully verified moments ago. Positive-only cache
+# -- a token that fails verification is cheap to reject again next time,
+# and caching failures would risk permanently rejecting a token that was
+# merely rejected due to a transient cert-fetch error.
+#
+# The audience is part of the cached value (not just the email+exp) so
+# that a cache hit still re-checks it: if BACKEND_AUDIENCE is ever
+# reconfigured, a still-unexpired entry from before the change won't
+# silently keep being trusted against the OLD audience (review note --
+# low severity in practice since a config change requires a redeploy,
+# which also clears this in-process dict, but cheap to close outright).
+_verified_identity_cache: dict[str, tuple[str, str, float]] = {}
 
-    Never call this on a token from an untrusted source to establish
-    identity on its own -- it proves nothing by itself; the caller
-    (trusted_proxy_client_ip below) only uses the result AFTER confirming
-    the token arrived via the one header Cloud Run itself attaches to a
-    platform-verified call.
+
+def _verify_frontend_identity(token: str, audience: str) -> str | None:
+    """Cryptographically verify a Google-issued ID token and return its
+    verified `email` claim, or None if verification fails for ANY reason.
+
+    #3740 follow-up (security review): the original design decoded
+    X-Serverless-Authorization's JWT payload WITHOUT verifying its
+    signature, reasoning that Cloud Run's own platform strips/re-attaches
+    it only after verifying it itself. That guarantee is conditional on
+    this backend requiring Cloud Run invoker auth
+    (--no-allow-unauthenticated + roles/run.invoker) -- while the backend
+    still allows unauthenticated access (true today, and true for any
+    window between configuring FRONTEND_PROXY_SA and actually locking the
+    backend down), nothing in the platform validates or strips that
+    header for a request that reaches the app directly: a caller could
+    set X-Serverless-Authorization themselves with a forged, unsigned
+    payload claiming email=FRONTEND_PROXY_SA, and the old code would have
+    trusted it outright.
+
+    This function makes identity verification self-contained instead of
+    depending on which auth mode the backend happens to be in: it
+    verifies the token's signature, expiry, and audience itself, the same
+    way this app already verifies real end-user Google Sign-In tokens
+    (see app/services/sso_login_service.py's verify_google_id_token) --
+    google.oauth2.id_token.verify_oauth2_token fetches Google's public
+    certs and raises ValueError on any bad signature, expired token, or
+    audience mismatch. A token that is merely well-formed JSON but not
+    actually signed by Google fails here, where the old unverified-decode
+    approach would have accepted it.
     """
+    cached = _verified_identity_cache.get(token)
+    if cached is not None and cached[1] == audience and cached[2] > _now():
+        return cached[0]
+
     try:
-        parts = token.split(".")
-        if len(parts) < 2:
-            return None
-        payload_b64 = parts[1]
-        padded = payload_b64 + "=" * (-len(payload_b64) % 4)
-        decoded = json.loads(base64.urlsafe_b64decode(padded))
-        return decoded if isinstance(decoded, dict) else None
+        from google.auth.transport import requests as google_requests
+        from google.oauth2 import id_token as google_id_token
+
+        claims = google_id_token.verify_oauth2_token(token, google_requests.Request(), audience)
     except Exception:
         return None
+
+    if not claims.get("email_verified"):
+        return None
+    email = claims.get("email")
+    if not isinstance(email, str) or not email:
+        return None
+
+    exp = claims.get("exp")
+    if isinstance(exp, (int, float)):
+        _verified_identity_cache[token] = (email, audience, float(exp))
+
+    return email
 
 
 def trusted_proxy_client_ip(
     xff: str,
     peer: str | None,
-    x_serverless_authorization: str,
+    x_frontend_identity: str,
     x_client_ip: str,
     frontend_proxy_sa: str,
+    backend_audience: str,
 ) -> str:
-    """Real end-user IP, trusting X-Client-IP ONLY when Cloud Run itself
-    verified this request as coming from the configured frontend service
-    account (#3740 -- the #3728 regression postmortem: the same-origin
-    proxy added a hop that broke the old "always trust XFF's second-from-
-    right entry" assumption, collapsing every user behind the proxy into
-    one shared rate-limit bucket).
+    """Real end-user IP, trusting X-Client-IP ONLY when THIS backend has
+    itself cryptographically verified the request as coming from the
+    configured frontend service account (#3740 -- the #3728 regression
+    postmortem: the same-origin proxy added a hop that broke the old
+    "always trust XFF's second-from-right entry" assumption, collapsing
+    every user behind the proxy into one shared rate-limit bucket).
+
+    Why X-Frontend-Identity and not X-Serverless-Authorization: the latter
+    is a Cloud-Run-owned header the platform may rewrite or strip
+    depending on the backend's own auth mode (see
+    _verify_frontend_identity's docstring for why that made the old
+    design's trust conditional on a configuration this backend doesn't
+    control from here). X-Frontend-Identity is an ordinary header Cloud
+    Run never touches; this function verifies its content itself instead
+    of trusting the platform to have already done so.
 
     Why not just trust X-Client-IP outright: backend stays DIRECTLY
     reachable (CI, health checks, #3733's design never fully closes it off
@@ -182,21 +235,13 @@ def trusted_proxy_client_ip(
     right" rule can't tell that apart from a real proxy hop. This design
     was explicitly rejected for #3740.
 
-    The identity check is what makes X-Client-IP trustworthy, not its
-    mere presence: decode X-Serverless-Authorization's payload (signature
-    already verified+stripped by Cloud Run itself -- see
-    _decode_jwt_payload_unverified) and require its `email` claim to
-    match frontend_proxy_sa exactly. Any mismatch, missing claim, decode
-    failure, empty config, or missing X-Client-IP falls back to the
-    existing XFF rule -- the same thing a direct, non-proxied request
-    already gets today.
+    Any verification failure, email mismatch, empty config, or missing
+    X-Client-IP falls back to the existing XFF rule -- the same thing a
+    direct, non-proxied request already gets today.
     """
-    if frontend_proxy_sa and x_serverless_authorization and x_client_ip:
-        token = x_serverless_authorization
-        if token[:7].lower() == "bearer ":
-            token = token[7:]
-        claims = _decode_jwt_payload_unverified(token)
-        if claims is not None and claims.get("email") == frontend_proxy_sa:
+    if frontend_proxy_sa and backend_audience and x_frontend_identity and x_client_ip:
+        email = _verify_frontend_identity(x_frontend_identity, backend_audience)
+        if email == frontend_proxy_sa:
             return x_client_ip
     return real_ip_from_xff(xff, peer)
 

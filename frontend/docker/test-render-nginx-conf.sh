@@ -143,9 +143,25 @@ check_cmd_not "Authorization header is never touched by this wiring" \
 check_cmd "derived_client_ip map present (second-from-right XFF, mirrors backend's real_ip_from_xff)" \
   grep -q 'map $http_x_forwarded_for $derived_client_ip' "$OUT_INVOKER"
 
-X_CLIENT_IP_COUNT=$(grep -c 'proxy_set_header X-Client-IP $derived_client_ip;' "$OUT_INVOKER")
+# `|| true` below is load-bearing, not decorative: `grep -c` still PRINTS
+# "0" on zero matches, but exits 1 -- and under this script's `set -eu`, a
+# bare `VAR=$(cmd)` assignment statement (unlike a command inside an `if`)
+# still aborts the ENTIRE script the instant `cmd` exits nonzero, before
+# check_cmd ever runs. That's exactly the silent-death class of bug this
+# file's own header comment warns about, just one line earlier than where
+# it was first caught -- confirmed by deliberately zeroing out the match
+# count during mutation testing and watching the script die with no "FAIL"
+# printed at all, rather than a loud one.
+X_CLIENT_IP_COUNT=$(grep -c 'proxy_set_header X-Client-IP $derived_client_ip;' "$OUT_INVOKER" || true)
 check_cmd "X-Client-IP wired into all 3 backend-proxying locations (found $X_CLIENT_IP_COUNT, want 3)" \
   test "$X_CLIENT_IP_COUNT" = "3"
+
+# --- 4. #3740 follow-up (security review): X-Frontend-Identity carries the
+# same raw token under a header Cloud Run never touches, so backend can
+# verify it itself instead of trusting X-Serverless-Authorization blindly.
+X_FRONTEND_IDENTITY_COUNT=$(grep -c 'proxy_set_header X-Frontend-Identity $invoker_raw_token;' "$OUT_INVOKER" || true)
+check_cmd "X-Frontend-Identity wired into all 3 backend-proxying locations (found $X_FRONTEND_IDENTITY_COUNT, want 3)" \
+  test "$X_FRONTEND_IDENTITY_COUNT" = "3"
 
 if [ "$FAILED" = "1" ]; then
   echo ""

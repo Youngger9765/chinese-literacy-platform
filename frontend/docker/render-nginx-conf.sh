@@ -152,10 +152,23 @@ SIDECAR_LOCATIONS="
     return 200;
   }
 "
+# #3740 follow-up (security review) — X-Serverless-Authorization above is a
+# Cloud-Run-owned header the platform may rewrite or strip depending on
+# backend's own auth mode (see backend/app/auth/rate_limiter.py's
+# _verify_frontend_identity docstring for the full reasoning); backend can't
+# unconditionally trust it to decide whose X-Client-IP to believe. Send the
+# SAME raw token again under an ordinary header name Cloud Run never
+# touches, so backend can cryptographically verify it itself regardless of
+# whichever auth mode it's currently in. Same empty-string-omits-header
+# behavior as X-Serverless-Authorization above when the sidecar has no
+# token (nginx docs: an empty proxy_set_header value removes the header
+# entirely) -- no separate map needed, $invoker_raw_token is already either
+# a bare token or empty.
 AUTH_REQUEST_LINES="
     auth_request /_invoker_token;
     auth_request_set \$invoker_raw_token \$upstream_http_x_invoker_token;
-    proxy_set_header X-Serverless-Authorization \$invoker_auth_header;"
+    proxy_set_header X-Serverless-Authorization \$invoker_auth_header;
+    proxy_set_header X-Frontend-Identity \$invoker_raw_token;"
 
 cat > "$OUT" <<NGINXCONF
 ${CLIENT_IP_MAP}${MAP_BLOCK}server {

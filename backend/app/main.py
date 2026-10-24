@@ -724,24 +724,30 @@ class GlobalRateLimitMiddleware:
             # limiting below, same as any other /api/* request.
 
         # Extract the real client IP (#2470 HIGH-1a, #3740): take the
-        # GCP-appended second-from-right XFF entry -- UNLESS this request
-        # was verified by Cloud Run itself as coming from the frontend's
-        # own service account (the same-origin proxy hop), in which case
-        # trust the X-Client-IP the frontend derived instead. See
+        # GCP-appended second-from-right XFF entry -- UNLESS this backend
+        # has itself cryptographically verified this request as coming
+        # from the frontend's own service account (the same-origin proxy
+        # hop, via X-Frontend-Identity), in which case trust the
+        # X-Client-IP the frontend derived instead. See
         # trusted_proxy_client_ip's docstring for why (#3740 postmortem:
         # the proxy hop broke the plain XFF rule, collapsing every user
-        # behind it into one shared bucket).
+        # behind it into one shared bucket) and why X-Frontend-Identity
+        # gets verified here rather than trusting Cloud Run's own
+        # X-Serverless-Authorization unconditionally (follow-up security
+        # review: that trust was conditional on an auth mode this backend
+        # doesn't control from this call site).
         headers_raw = dict(scope.get("headers", []))
         forwarded_for = headers_raw.get(b"x-forwarded-for", b"").decode()
-        serverless_auth = headers_raw.get(b"x-serverless-authorization", b"").decode()
+        frontend_identity = headers_raw.get(b"x-frontend-identity", b"").decode()
         client_ip_header = headers_raw.get(b"x-client-ip", b"").decode()
         client = scope.get("client")
         ip = trusted_proxy_client_ip(
             forwarded_for,
             client[0] if client else None,
-            serverless_auth,
+            frontend_identity,
             client_ip_header,
             settings.frontend_proxy_sa,
+            settings.backend_audience,
         )
         method = scope.get("method", "GET").upper()
         # OPTIONS is handled above (#3227) and never reaches here.

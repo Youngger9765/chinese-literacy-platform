@@ -22,6 +22,28 @@ env:
   # 唯一的 on/off 開關只有這一行；真的要在 staging 上測 IAP 前，先讀
   # docs/iap-runbook.md。
   IAP_ENABLED: 'false'
+  # #3728/#3740 — 同源代理（frontend nginx 轉送 /api、/assets、/q 去
+  # backend）的 build-time 開關，預設 false：關掉時這個 job 建出來的
+  # image 跟 #3741 revert 之後的 staging 完全一樣（VITE_API_URL 指到
+  # backend 絕對網址，沒有 BACKEND_INTERNAL_URL / 沒有
+  # BACKEND_INVOKER_SIDECAR_PORT，nginx 不會轉送任何東西）——這是刻意
+  # 的，不是疏漏：#3728 曾經在沒有這個開關的情況下對每個 staging/preview
+  # build 無條件打開代理，讓 backend 的限流器把代理那一跳的 IP 當成每個
+  # 使用者的 IP，所有人共用同一個 300 次配額（#3740 postmortem）。
+  #
+  # ⚠️ 只打開這一行還不夠：render-nginx-conf.sh 在只有代理、沒有 sidecar
+  # 的狀態下**會讓這個 build 直接失敗**（#3740 新增的 fail-closed 檢查，
+  # 刻意設計成「半套設定」連 image 都建不出來，而不是建出一個會重現同一
+  # 個 bug 的 image）。要真的打開代理，backend 還必須：
+  #   (1) 已設定 FRONTEND_PROXY_SA + BACKEND_AUDIENCE（見
+  #       backend/app/config.py）
+  #   (2) 這個 job 的 frontend deploy 步驟已經改成多容器部署，把
+  #       scripts/run_invoker_token.py --serve 的 sidecar 跟 frontend
+  #       一起上（目前這個 workflow **還沒有**這一步 —— 只在拋棄式 canary
+  #       上手動驗證過，見 docs/iap-runbook.md）
+  # 這三件事沒有一起做，打開這個開關不會讓代理可用，只會讓 build 直接
+  # 壞掉（安全失敗，不是悄悄重現 regression）。
+  SAME_ORIGIN_PROXY_ENABLED: 'false'
 
 jobs:
   detect-changes:
@@ -177,14 +199,26 @@ jobs:
           DEMO_STUDENT_EMAIL: ${{ secrets.DEMO_STUDENT_EMAIL }}
           DEMO_STUDENT_PW: ${{ secrets.DEMO_STUDENT_PW }}
         run: |
-          # #3719 — IAP 準備：VITE_API_URL 留空字串，讓 build 出來的 JS 打相對
-          # 路徑 /api/*（apiConfig.ts 用 `??`，空字串不會被當成 undefined）——
-          # 跟下面 Firebase 那個 job 一直在用的招一樣。BACKEND_INTERNAL_URL
-          # 告訴這個 frontend 自己的 nginx 要把這些同源的 /api、/assets、/q
-          # 轉送去哪（見 frontend/docker/render-nginx-conf.sh）。
+          # #3719/#3728/#3740 — SAME_ORIGIN_PROXY_ENABLED=false (default,
+          # see the env: block above for the full why): build EXACTLY like
+          # today/post-#3741-revert — VITE_API_URL points straight at
+          # backend's absolute URL, no BACKEND_INTERNAL_URL,
+          # no BACKEND_INVOKER_SIDECAR_PORT, nginx never proxies anything.
+          # =true: VITE_API_URL stays empty (relative /api/* -- apiConfig.ts
+          # uses `??`, empty string isn't treated as undefined, same trick
+          # the Firebase Hosting job below already relies on).
+          # BACKEND_INTERNAL_URL tells this frontend's own nginx where to
+          # forward same-origin /api, /assets, /q (see
+          # frontend/docker/render-nginx-conf.sh). BACKEND_INVOKER_SIDECAR_PORT
+          # must travel with it or the build fails outright (fail-closed
+          # guard, see the env: block comment for why that's intentional).
+          if [ "${{ env.SAME_ORIGIN_PROXY_ENABLED }}" = "true" ]; then
+            PROXY_BUILD_ARGS=(--build-arg VITE_API_URL= --build-arg "BACKEND_INTERNAL_URL=${{ steps.backend-url.outputs.url }}" --build-arg BACKEND_INVOKER_SIDECAR_PORT=8081)
+          else
+            PROXY_BUILD_ARGS=(--build-arg "VITE_API_URL=${{ steps.backend-url.outputs.url }}")
+          fi
           docker build \
-            --build-arg VITE_API_URL="" \
-            --build-arg BACKEND_INTERNAL_URL=${{ steps.backend-url.outputs.url }} \
+            "${PROXY_BUILD_ARGS[@]}" \
             --build-arg VITE_SHOW_DEMO_LOGIN=true \
             --build-arg VITE_PARENT_PORTAL_ENABLED=true \
             --build-arg "VITE_DEMO_ADMIN_EMAIL=${DEMO_ADMIN_EMAIL}" \
