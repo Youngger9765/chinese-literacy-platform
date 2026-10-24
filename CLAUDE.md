@@ -479,11 +479,11 @@ curl -s "$BACKEND/api/stories?page_size=300" | python3 -c "import json,sys; d=js
 
 ## 簡報資料（公開，不需登入）
 
-| 文件 | URL |
+| 文件 | URL（正式站） |
 |------|-----|
-| 教授簡介（3 分鐘版） | https://lingoleap-frontend-staging-958347263320.asia-east1.run.app/presentation/short.html |
-| 完整平台說明書 | https://lingoleap-frontend-staging-958347263320.asia-east1.run.app/presentation/full.html |
-| 閱讀理解技能樹研究 | https://lingoleap-frontend-staging-958347263320.asia-east1.run.app/presentation/research.html |
+| 教授簡介（3 分鐘版） | https://lingoleap-prod.web.app/presentation/short.html |
+| 完整平台說明書 | https://lingoleap-prod.web.app/presentation/full.html |
+| 閱讀理解技能樹研究 | https://lingoleap-prod.web.app/presentation/research.html |
 
 ### ⚠️ GitHub Pages 只發佈 Brand Book，不發佈 docs/（2026-08-04 收斂）
 
