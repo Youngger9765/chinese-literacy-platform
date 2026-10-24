@@ -6,9 +6,13 @@
  * — this page's own input is already numeric-only (`inputMode="numeric"`);
  * the reverse direction (classroom join page nudging here) lives in
  * JoinClassroomPage.tsx's own sanitizeCode, out of scope for this file.
+ *
+ * #3747: this screen had no way back to 遊戲區 except the browser's own
+ * back button (no AppShell on this route) — added GameBackButton.
  */
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import GameBackButton from '../../components/game/GameBackButton';
 
 function sanitizeDigits(raw: string): string {
   return raw.replace(/\D/g, '').slice(0, 6);
@@ -33,6 +37,9 @@ const StudentLiveQuizJoin: React.FC = () => {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-surface px-6 py-10">
+      <div className="mb-2 w-full max-w-xs">
+        <GameBackButton to="/game-hub" />
+      </div>
       <h1 className="mb-1 text-xl font-bold text-on-surface">加入課堂搶答</h1>
       <p className="mb-1 text-sm text-on-surface-variant">現在全班一起玩，約 10 分鐘</p>
       <p className="mb-8 text-sm text-on-surface-variant">輸入老師投影的 6 位數代碼</p>

@@ -4,6 +4,10 @@
  * becomes host) or JOIN one by its 6-char code — no teacher, no
  * classroom. Codes use the confusable-avoiding A-Z0-9 alphabet
  * (engine.py `_CODE_CHARS`).
+ *
+ * #3747: the choose screen had no way back to 遊戲區 (host/join sub-screens
+ * already had "返回" back to choose) — added GameBackButton + a short
+ * "怎麼玩" line.
  */
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -13,6 +17,7 @@ import {
   TeamArenaApiError,
   type TeamArenaSide,
 } from '../../services/teamArenaApi';
+import GameBackButton from '../../components/game/GameBackButton';
 
 function sanitizeCode(raw: string): string {
   return raw.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
@@ -79,8 +84,12 @@ const StudentTeamArenaJoin: React.FC = () => {
   if (mode === 'choose') {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-surface px-6 py-10">
+        <div className="mb-2 w-full max-w-xs">
+          <GameBackButton to="/game-hub" />
+        </div>
         <h1 className="mb-1 text-xl font-bold text-on-surface">多人對抗賽</h1>
-        <p className="mb-8 text-sm text-on-surface-variant">2～5 人一隊，答題推塔，攻下對方主堡獲勝</p>
+        <p className="mb-1 text-sm text-on-surface-variant">2～5 人一隊，答題推塔，攻下對方主堡獲勝</p>
+        <p className="mb-8 text-xs text-on-surface-variant">開房或輸入代碼跟同學一起進房，答對題目才能推進攻塔</p>
         <div className="flex w-full max-w-xs flex-col gap-3">
           <button
             type="button"

@@ -1,3 +1,8 @@
+/**
+ * #3747: this screen had no way back to 遊戲區 except the browser's own
+ * back button (no AppShell on this route) — added GameBackButton. The
+ * banner/explanation and RWD card below were already in place.
+ */
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -8,6 +13,7 @@ import {
   type EscapeRoomScopeType,
 } from '../../services/escapeRoomApi';
 import { resolveGradeForAiPk } from '../pk/resolvePkGrade';
+import GameBackButton from '../../components/game/GameBackButton';
 
 interface Scope {
   type: EscapeRoomScopeType;
@@ -68,7 +74,10 @@ const StudentEscapeRoomEntry: React.FC = () => {
 
   return (
     <main className="flex min-h-screen flex-col items-center bg-surface px-5 py-10 text-on-surface">
-      <div className="w-full max-w-lg rounded-3xl bg-accent-bg p-6 text-center shadow-sm sm:p-10">
+      <div className="w-full max-w-lg">
+        <GameBackButton to="/game-hub" />
+      </div>
+      <div className="mt-4 w-full max-w-lg rounded-3xl bg-accent-bg p-6 text-center shadow-sm sm:p-10">
         <p className="text-sm font-semibold text-accent">書中世界探索</p>
         <h1 className="mt-2 text-3xl font-bold">迷城密室</h1>
         <p className="mt-3 text-sm leading-6 text-on-surface-variant">和三位書中夥伴一起解開機關，把被迷霧遮住的字跡找回來</p>

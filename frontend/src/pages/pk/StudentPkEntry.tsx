@@ -8,6 +8,14 @@
  * "一對一，隨時挑戰同學或文學家".
  *
  * Full-screen game surface (§3.3) — no AppShell.
+ *
+ * #3747 (Young, 2026-10-24): "畫面太隨便了，也沒有解說或是圖像 banner 之類
+ * 的，也要有回到上一頁的按鈕啊！！！！ 或是過去的戰績表現啊" — this screen
+ * had a title + one line of subtitle and nothing else. Added below: a back
+ * button to 遊戲區 (GameBackButton — this page has no AppShell sidebar to
+ * fall back on), a "怎麼玩" explanation card, and a 戰績 panel wired to the
+ * existing `/api/pk/history` + `/api/pk/rating/me` endpoints (the backend
+ * has carried these since #3586/#3602; nothing ever rendered them).
  */
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -15,6 +23,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import { fetchMyEnrolledClassrooms, type StudentEnrolledClassroom } from '../../services/learning/session';
 import { createPkInvite, joinPkQueue, PkApiError, type PkScopeType } from '../../services/pkApi';
 import { resolveGradeForAiPk } from './resolvePkGrade';
+import GameBackButton from '../../components/game/GameBackButton';
+import PkHistoryPanel from '../../components/pk/PkHistoryPanel';
 
 type Scope = { type: PkScopeType; ref: string; label: string };
 
@@ -165,8 +175,27 @@ const StudentPkEntry: React.FC = () => {
 
   return (
     <div className="flex min-h-screen flex-col items-center bg-surface px-6 py-10">
-      <h1 className="text-2xl font-bold text-on-surface">PK 對戰</h1>
+      <div className="w-full max-w-sm">
+        <GameBackButton to="/game-hub" />
+      </div>
+
+      <h1 className="mt-2 text-2xl font-bold text-on-surface">PK 對戰</h1>
       <p className="mt-1 text-sm text-on-surface-variant">一對一，隨時挑戰同學或文學家</p>
+
+      {/* #3747: "也沒有解說或是圖像 banner 之類的" — a short "怎麼玩" card so
+          a first-time student knows what's about to happen before tapping
+          一個按鈕就跳進配對/對戰. No new art asset dependency (the figure
+          PNGs for 6 of 7 opponents are still being generated — see #3745 —
+          so this banner is deliberately illustration-free, built from the
+          design tokens already in use everywhere else on this screen). */}
+      <div className="mt-6 w-full max-w-sm rounded-2xl bg-accent-bg px-5 py-4">
+        <p className="text-sm font-bold text-accent">怎麼玩？</p>
+        <ul className="mt-2 space-y-1 text-xs text-on-surface-variant">
+          <li>• 5 題搶答，答得又對又快分數越高</li>
+          <li>• 平手時看誰總作答時間比較快</li>
+          <li>• 打贏文學家可以解鎖他的人物卡</li>
+        </ul>
+      </div>
 
       {lessonUid && (
         <div className="mt-6 flex gap-2 rounded-full bg-surface-container p-1 text-sm">
@@ -273,6 +302,8 @@ const StudentPkEntry: React.FC = () => {
       )}
 
       {error && <p className="mt-4 text-sm text-error">{error}</p>}
+
+      {token && <PkHistoryPanel token={token} />}
     </div>
   );
 };
