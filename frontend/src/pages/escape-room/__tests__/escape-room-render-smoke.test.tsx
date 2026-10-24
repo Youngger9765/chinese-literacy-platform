@@ -50,6 +50,7 @@ vi.mock('../../../services/escapeRoomApi', () => ({
   activateEscapeRoomAbility: vi.fn(() => Promise.resolve(RUN_STATE)),
   getEscapeRoomResult: vi.fn(() => Promise.resolve({ run_id: 1, result: 'escaped', message: '已逃脫', unlocked_skins: [] })),
   getEscapeRoomUnlocks: vi.fn(() => Promise.resolve({ unlocks: [] })),
+  getEscapeRoomHistory: vi.fn(() => Promise.resolve({ runs: [] })),
 }));
 
 import AbilityBar from '../../../components/escape-room/AbilityBar';

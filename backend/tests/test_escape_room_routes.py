@@ -186,6 +186,66 @@ def test_unlocks_uses_contract_name(route_env):
     assert response.json() == {"unlocks": []}
 
 
+def test_my_history_is_empty_for_a_student_with_no_runs(route_env):
+    client, *_ = route_env
+    response = client.get("/api/escape-room/runs/mine", headers=_headers())
+    assert response.status_code == 200, response.text
+    assert response.json() == {"runs": []}
+
+
+def test_my_history_lists_my_own_run_with_result_and_timing(route_env):
+    # #3756: 後端已有資料就做 — EscapeRoomRun already carries result/
+    # started_at/completed_at, this just needs a read query (see
+    # engine.list_history docstring), not a new migration.
+    client, *_ = route_env
+    run_id = _create_run(client)
+    response = client.get("/api/escape-room/runs/mine", headers=_headers())
+    assert response.status_code == 200, response.text
+    runs = response.json()["runs"]
+    assert len(runs) == 1
+    assert runs[0]["run_id"] == run_id
+    assert runs[0]["result"] == "in_progress"
+    assert runs[0]["completed_at"] is None
+    assert runs[0]["duration_seconds"] is None
+    assert runs[0]["started_at"] is not None
+
+    # Answer the comprehension gate correctly to finish the run so a
+    # completed row with a non-null duration also gets exercised. Each of
+    # the 4 chambers takes 2 correct answers (2 questions/chamber) before
+    # it unlocks and the next chamber_index becomes answerable.
+    for chamber_index in range(4):
+        for _ in range(2):
+            response = client.post(
+                f"/api/escape-room/runs/{run_id}/answer",
+                json={"chamber_index": chamber_index, "choice_key": "A"},
+                headers=_headers(),
+            )
+            assert response.status_code == 200, response.text
+    client.post(
+        f"/api/escape-room/runs/{run_id}/gate-answer",
+        json={"choice_key": "A"},
+        headers=_headers(),
+    )
+
+    response = client.get("/api/escape-room/runs/mine", headers=_headers())
+    runs = response.json()["runs"]
+    assert len(runs) == 1
+    assert runs[0]["result"] == "escaped"
+    assert runs[0]["completed_at"] is not None
+    assert runs[0]["duration_seconds"] is not None
+    assert runs[0]["duration_seconds"] >= 0
+
+
+def test_my_history_never_shows_another_students_runs(route_env):
+    client, owner, other, current_user = route_env
+    _create_run(client)  # owner's run
+    current_user["value"] = other
+
+    response = client.get("/api/escape-room/runs/mine", headers=_headers())
+    assert response.status_code == 200, response.text
+    assert response.json() == {"runs": []}
+
+
 def test_every_grade_and_builtin_story_pack_can_start_or_fail_safely(route_env):
     client, *_ = route_env
     tested_grades = 0

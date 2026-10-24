@@ -165,6 +165,61 @@ describe('<StudentGameHubPage> — navigation (#3633, extended #3632 v2)', () =>
   });
 });
 
+describe('<StudentGameHubPage> — 自己玩／跟班上一起玩 sections (#3756)', () => {
+  it('renders both section headings with their one-line explanation', async () => {
+    fetchMyEnrolledClassrooms.mockResolvedValue(classroomsResponse([]));
+    render(<StudentGameHubPage />);
+    expect(screen.getByRole('heading', { name: '自己玩' })).toBeTruthy();
+    expect(screen.getByText('不用等任何人，現在就能開始')).toBeTruthy();
+    expect(screen.getByRole('heading', { name: '跟班上一起玩' })).toBeTruthy();
+    expect(screen.getByText('要老師開始，或找同學一起')).toBeTruthy();
+  });
+
+  it('PK 對戰、迷城密室 are under 自己玩; 課堂搶答、多人對抗賽、跨班賽季 are under 跟班上一起玩', async () => {
+    fetchMyEnrolledClassrooms.mockResolvedValue(classroomsResponse([]));
+    render(<StudentGameHubPage />);
+    await waitFor(() => expect(fetchMyEnrolledClassrooms).toHaveBeenCalled());
+
+    const selfSection = screen.getByRole('heading', { name: '自己玩' }).closest('section');
+    const classSection = screen.getByRole('heading', { name: '跟班上一起玩' }).closest('section');
+    expect(selfSection).toBeTruthy();
+    expect(classSection).toBeTruthy();
+
+    for (const label of ['PK 對戰', '迷城密室']) {
+      expect(
+        Array.from(selfSection!.querySelectorAll('button')).some((b) => b.textContent?.includes(label)),
+      ).toBe(true);
+    }
+    for (const label of ['課堂搶答', '多人對抗賽', '跨班賽季']) {
+      expect(
+        Array.from(classSection!.querySelectorAll('button')).some((b) => b.textContent?.includes(label)),
+      ).toBe(true);
+    }
+  });
+
+  it('每張未鎖卡片都有開始條件徽章（隨時可玩／需要老師開始／找同學一起）', async () => {
+    fetchMyEnrolledClassrooms.mockResolvedValue(
+      classroomsResponse([{ league: true, liveQuiz: true }]),
+    );
+    render(<StudentGameHubPage />);
+    await waitFor(() => expect(fetchMyEnrolledClassrooms).toHaveBeenCalled());
+
+    expect(screen.getAllByText('隨時可玩')).toHaveLength(2); // PK 對戰、迷城密室
+    expect(screen.getByText('找同學一起')).toBeTruthy(); // 多人對抗賽
+    expect(screen.getAllByText('需要老師開始')).toHaveLength(2); // 課堂搶答、跨班賽季 (unlocked here)
+  });
+
+  it('a locked card shows 老師尚未開啟 instead of its start-condition badge (no stacking)', async () => {
+    fetchMyEnrolledClassrooms.mockResolvedValue(classroomsResponse([]));
+    render(<StudentGameHubPage />);
+    await waitFor(() => expect(fetchMyEnrolledClassrooms).toHaveBeenCalled());
+
+    const liveQuizButton = screen.getByRole('button', { name: /課堂搶答/ });
+    expect(liveQuizButton.textContent).toContain('老師尚未開啟');
+    expect(liveQuizButton.textContent).not.toContain('需要老師開始');
+  });
+});
+
 describe('<StudentGameHubPage> — resilience (render smoke)', () => {
   it('does not throw when the enrollment fetch rejects (fail-safe: classroom-gated cards simply stay locked)', async () => {
     fetchMyEnrolledClassrooms.mockRejectedValue(new Error('network error'));
