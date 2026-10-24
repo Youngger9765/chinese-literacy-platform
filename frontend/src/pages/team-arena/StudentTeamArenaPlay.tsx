@@ -313,7 +313,7 @@ const StudentTeamArenaPlay: React.FC = () => {
     const bothFull = state.sides.a.seated === state.team_size && state.sides.b.seated === state.team_size;
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-surface px-6 py-10 text-center">
-        <p className="mb-1 text-sm text-on-surface-variant">房間代碼</p>
+        <p className="mb-1 text-sm text-on-surface-variant">比賽代碼</p>
         <p className="mb-6 font-mono text-4xl font-bold tracking-widest text-accent">{state.code}</p>
         <div className="flex w-full max-w-sm gap-3">
           {(['a', 'b'] as const).map((side) => (
@@ -343,7 +343,7 @@ const StudentTeamArenaPlay: React.FC = () => {
             {startError && <p className="mt-3 text-sm text-red-600">{startError}</p>}
           </>
         ) : (
-          <p className="mt-6 text-sm text-on-surface-variant">等開房的同學按「開始比賽」</p>
+          <p className="mt-6 text-sm text-on-surface-variant">等發起比賽的同學按「開始比賽」</p>
         )}
       </div>
     );
