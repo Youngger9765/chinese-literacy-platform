@@ -8,7 +8,7 @@ import { BABIES_20011, OPENING_20011, STOPS_20011 } from './island/islandData';
 import { buildStopsFromSequence, buildOpeningForTitle, buildBabiesForVocabulary } from './island/islandTemplate';
 import type { IslandBaby, IslandStop } from './island/islandTemplate';
 import { createIslandWorld } from './island/createIslandWorld';
-import { ISLAND_STEP_DONE, shouldMarkVisitedOnReturn } from './island/storyMode';
+import { parseIslandReturnMessage, shouldMarkVisitedOnReturn } from './island/storyMode';
 import IslandListMode from './island/IslandListMode';
 import { createIslandAudio, readMuted, writeMuted, type IslandAudio } from './island/islandAudio';
 
@@ -202,7 +202,8 @@ export default function ReadingIslandLab() {
   useEffect(() => {
     const onMessage = (event: MessageEvent) => {
       if (event.origin !== window.location.origin) return;
-      if ((event.data as { type?: string } | null)?.type === ISLAND_STEP_DONE) void returnRef.current(true);
+      const parsed = parseIslandReturnMessage(event.data);
+      if (parsed) void returnRef.current(parsed.finished);
     };
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);

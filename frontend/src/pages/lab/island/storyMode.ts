@@ -23,6 +23,36 @@ export function notifyIslandStepDone(step: string): void {
 }
 
 /**
+ * 跟 ISLAND_STEP_DONE 刻意分開的第二個訊號：學習頁壞掉（StepErrorBoundary 接住
+ * React 錯誤）時，故事模式下的「跳過此步驟」要變成「回到島上」，但**不算完成**。
+ * 不能沿用 notifyIslandStepDone——接收端（ReadingIslandLab 的 message listener）
+ * 收到 ISLAND_STEP_DONE 一律當 finished=true 處理，會把壞掉沒做完的站誤記成
+ * 已完成、錯誤點燈。
+ */
+export const ISLAND_STEP_ABORTED = 'island-step-aborted';
+
+export function notifyIslandStepAborted(): void {
+  try {
+    window.top?.postMessage({ type: ISLAND_STEP_ABORTED }, window.location.origin);
+  } catch {
+    /* 不在島上就什麼都不做 */
+  }
+}
+
+/**
+ * ReadingIslandLab 的 window message listener 用這支決定收到的訊息要不要觸發
+ * returnToIsland、finished 要傳 true 還是 false。回傳 null 代表不是這兩種島嶼
+ * 訊號（例如 HMR 或其他 postMessage 流量），listener 應該完全忽略。
+ */
+export function parseIslandReturnMessage(data: unknown): { finished: boolean } | null {
+  if (typeof data !== 'object' || data === null) return null;
+  const type = (data as { type?: unknown }).type;
+  if (type === ISLAND_STEP_DONE) return { finished: true };
+  if (type === ISLAND_STEP_ABORTED) return { finished: false };
+  return null;
+}
+
+/**
  * 回到島上時要不要把這一站記成「做過」。
  * - 學習頁回報做完（finished）一律記：課程簡介在平台設計上不會進 steps_completed，
  *   只靠伺服器進度判定，第一區永遠集不滿，後面的霧永遠不散
