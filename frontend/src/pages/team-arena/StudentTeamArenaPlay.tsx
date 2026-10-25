@@ -25,6 +25,7 @@ import { useTeamArenaPoll } from '../../components/team-arena/useTeamArenaPoll';
 import GameResultActions from '../../components/game/GameResultActions';
 import StemWithTarget from '../../components/live-quiz/StemWithTarget';
 import AttackAnimation from '../../components/team-arena/AttackAnimation';
+import TeammateActionToast, { type TeammateActionTone } from '../../components/team-arena/TeammateActionToast';
 import { TowerCollapse, VictoryBurst } from '../../components/team-arena/TowerCollapse';
 import { pickAttackVariant, type AttackVariant } from '../../components/team-arena/attackAnimations';
 import { detectSideEvents, type SideSnapshot } from '../../components/team-arena/detectSideEvents';
@@ -135,6 +136,7 @@ const StudentTeamArenaPlay: React.FC = () => {
   const prevSidesRef = useRef<Record<TeamArenaSide, SideSnapshot> | null>(null);
   const lastAttackVariantRef = useRef<AttackVariant | null>(null);
   const [effects, setEffects] = useState<Partial<Record<TeamArenaSide, VisualEffect>>>({});
+  const [teammateToast, setTeammateToast] = useState<{ text: string; tone: TeammateActionTone } | null>(null);
 
   const codeValid = isValidTeamArenaCode(routeCode);
   const sideParam = searchParams.get('side');
@@ -212,7 +214,36 @@ const StudentTeamArenaPlay: React.FC = () => {
     lastAttackVariantRef.current = variant;
     const then = event.kind === 'base_destroyed' ? 'victory' : event.kind === 'tower_fallen' ? 'collapse' : undefined;
     setEffects((prev) => ({ ...prev, [event.side]: { kind: 'attack', side: event.side, variant, then } }));
-  }, [state]);
+
+    // #3778 (game-academy audit r2 P2-1): "隊友的貢獻是沉默的" — the
+    // SideBar animation above already plays for every viewer, but nothing
+    // names it out loud as the viewer's OWN team's doing. Only tower/base
+    // events (not every HP chip-damage tick, which fires far more often
+    // and would spam this) get an explicit toast, framed from the
+    // viewer's own side so a bench teammate (not just the student who
+    // just answered) sees it too.
+    const mySide = ownMatch?.my_side;
+    if (mySide && event.kind !== 'damage') {
+      const scoredByUs = event.side !== mySide;
+      const text =
+        event.kind === 'base_destroyed'
+          ? scoredByUs
+            ? '太棒了！我方攻下對方主堡了！'
+            : '我方主堡被攻下了，比賽結束'
+          : scoredByUs
+            ? '隊友打倒了一座塔！'
+            : '我方一座塔被打倒了，加油追回來！';
+      setTeammateToast({ text, tone: scoredByUs ? 'good' : 'bad' });
+    }
+  }, [state, ownMatch?.my_side]);
+
+  // Auto-dismiss the toast — it's a transient callout, not a persistent
+  // status (that's what the SideBar numbers are for).
+  useEffect(() => {
+    if (!teammateToast) return;
+    const timer = setTimeout(() => setTeammateToast(null), 2500);
+    return () => clearTimeout(timer);
+  }, [teammateToast]);
 
   const clearEffect = (side: TeamArenaSide) =>
     setEffects((prev) => {
@@ -450,6 +481,7 @@ const StudentTeamArenaPlay: React.FC = () => {
 
   return (
     <div className="flex min-h-screen flex-col bg-surface px-5 py-6">
+      {teammateToast && <TeammateActionToast text={teammateToast.text} tone={teammateToast.tone} />}
       {state.showdown && (
         <div
           className="mb-3 rounded-lg bg-amber-500/90 px-3 py-2 text-center text-sm font-bold text-white animate-pop"
