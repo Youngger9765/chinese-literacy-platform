@@ -462,5 +462,55 @@ class Cli(unittest.TestCase):
             fake_print.assert_called_once_with("abc")
 
 
+class LocustfileWiresIapPerRequest(unittest.TestCase):
+    """#3731 的修法真正落在 locustfile：每個 HttpUser 都要掛 install_iap_auth。
+
+    library 的測試證明 install_iap_auth 本身會每次重問，但 locustfile 改回
+    `self.client.headers.update(iap_header())` 時 library 測試照樣全綠——
+    這支才鎖得住「壓測跑超過 1 小時開始 401」那個真正的 bug。
+    """
+
+    def setUp(self):
+        import ast
+        path = os.path.join(os.path.dirname(__file__), "..", "tests", "load-testing", "locustfile.py")
+        with open(path, encoding="utf-8") as fh:
+            self.source = fh.read()
+        self.tree = ast.parse(self.source)
+
+    def _http_users(self):
+        import ast
+        return [
+            node for node in ast.walk(self.tree)
+            if isinstance(node, ast.ClassDef)
+            and any(getattr(base, "id", None) == "HttpUser" for base in node.bases)
+        ]
+
+    def test_every_http_user_installs_per_request_iap_auth(self):
+        import ast
+        users = self._http_users()
+        self.assertGreater(len(users), 0, "locustfile 裡找不到任何 HttpUser，量具壞了")
+        for cls in users:
+            on_start = next(
+                (n for n in cls.body if isinstance(n, ast.FunctionDef) and n.name == "on_start"), None
+            )
+            self.assertIsNotNone(on_start, f"{cls.name} 沒有 on_start")
+            calls = [
+                n for n in ast.walk(on_start)
+                if isinstance(n, ast.Call) and getattr(n.func, "id", None) == "install_iap_auth"
+            ]
+            self.assertTrue(calls, f"{cls.name}.on_start 沒有 install_iap_auth(self.client)")
+
+    def test_no_session_pins_a_one_time_iap_header(self):
+        # 只看真正的呼叫（AST），檔頭註解裡把舊寫法當反例寫出來不算
+        import ast
+        pinned = [
+            n for n in ast.walk(self.tree)
+            if isinstance(n, ast.Call)
+            and getattr(n.func, "attr", None) == "update"
+            and any(isinstance(arg, ast.Call) and getattr(arg.func, "id", None) == "iap_header" for arg in n.args)
+        ]
+        self.assertEqual(pinned, [], "有 session 用 headers.update(iap_header()) 把第一張 token 釘死")
+
+
 if __name__ == "__main__":
     unittest.main()
