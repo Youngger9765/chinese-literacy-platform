@@ -26,6 +26,7 @@ import { useLiveQuizRoundSound } from '../../components/live-quiz/useLiveQuizRou
 import OptionGrid from '../../components/live-quiz/OptionGrid';
 import CountdownBar from '../../components/live-quiz/CountdownBar';
 import LiveQuizWaitingRoom from '../../components/live-quiz/LiveQuizWaitingRoom';
+import GameResultActions from '../../components/game/GameResultActions';
 import { joinLiveQuizGame, submitLiveQuizAnswer, isValidLiveQuizCode, LiveQuizApiError } from '../../services/liveQuizApi';
 
 const StudentLiveQuizPlay: React.FC = () => {
@@ -237,6 +238,10 @@ const StudentLiveQuizPlay: React.FC = () => {
                   : null}
             </p>
           )}
+          {/* #3771 (game-academy audit r2 P0-2): this screen had ZERO
+              interactive elements. No "再玩一場" here — a student never
+              starts their own round, the teacher does. */}
+          <GameResultActions onBackToHub={() => navigate('/game-hub')} />
         </div>
       )}
     </div>
