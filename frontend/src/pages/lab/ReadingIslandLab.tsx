@@ -6,7 +6,7 @@ import { fetchLearningSessions, loadStepProgress } from '../../services/learning
 import { stepPath } from '../../config/stepPath';
 import { BABIES, OPENING, STOPS } from './island/islandData';
 import { createIslandWorld } from './island/createIslandWorld';
-import { ISLAND_STEP_DONE } from './island/storyMode';
+import { ISLAND_STEP_DONE, shouldMarkVisitedOnReturn } from './island/storyMode';
 
 interface LessonData {
   title: string;
@@ -125,11 +125,11 @@ export default function ReadingIslandLab() {
     window.setTimeout(() => setModule(index), 1700);
     window.setTimeout(() => setDoor(null), 2300);
   };
-  const returnToIsland = async () => {
+  const returnToIsland = async (finished = false) => {
     const index = module;
     setModule(null);
     const reliable = await refreshProgress();
-    if (index !== null && !reliable) {
+    if (index !== null && shouldMarkVisitedOnReturn({ finished, reliable })) {
       const step = stepFor(index);
       if (step) setVisited((previous) => {
         const next = [...new Set([...previous, step])];
@@ -144,7 +144,7 @@ export default function ReadingIslandLab() {
   useEffect(() => {
     const onMessage = (event: MessageEvent) => {
       if (event.origin !== window.location.origin) return;
-      if ((event.data as { type?: string } | null)?.type === ISLAND_STEP_DONE) void returnRef.current();
+      if ((event.data as { type?: string } | null)?.type === ISLAND_STEP_DONE) void returnRef.current(true);
     };
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);

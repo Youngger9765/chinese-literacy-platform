@@ -67,10 +67,13 @@ const CATEGORY_LABEL: Record<string, string> = {
 interface IntroProps {
   story: Story;
   onStartReading: () => void;
-  onBack: () => void;
+  /** 不給就不顯示「返回圖書館」 */
+  onBack?: () => void;
+  /** 喝采島故事模式：一次一關，不顯示快速跳轉的步驟清單 */
+  storyMode?: boolean;
 }
 
-const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
+const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack, storyMode = false }) => {
   const [showUploadedModal, setShowUploadedModal] = useState(false);
   const [priorUpload, setPriorUpload] = useState<OmoPriorUploadResponse | null>(null);
   const { zhuyinActive, processZhuyin } = useZhuyin();
@@ -427,7 +430,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
               This uses chip badges so each step is directly accessible. */}
           {(() => {
             const digitalSteps = resolveActiveSteps(story.stepSequence).filter(s => s.id !== 'lesson-intro');
-            if (digitalSteps.length === 0) return null;
+            if (storyMode || digitalSteps.length === 0) return null;
             return (
               <div className="space-y-2 pb-2">
                 <p className="text-xs text-gray-400 text-center">
@@ -474,6 +477,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
           </svg>
         </button>
         {/* Secondary — clearly less prominent */}
+        {onBack && (
         <button
           type="button"
           onClick={onBack}
@@ -481,6 +485,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
         >
           返回圖書館
         </button>
+        )}
       </div>
 
       {/* 紙本學習單 PDF Modal (#1444) */}

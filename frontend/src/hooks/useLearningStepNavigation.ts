@@ -146,6 +146,11 @@ export function useLearningStepNavigation({
     );
     persistStep(STEP_PATH_TO_NUMBER[firstReadingStep]);
     ensureDbSession();
+    // 喝采島故事模式：簡介看完就是這一關做完，回到島上，不在教材框裡往下一關走
+    if (isIslandStoryMode()) {
+      notifyIslandStepDone('lesson-intro');
+      return;
+    }
     navigate(isToolboxMode() ? '/tools' : stepPath(storyId, firstReadingStep));
   }, [storyId, selectedStory, navigate, persistStep, ensureDbSession, setSession]);
 

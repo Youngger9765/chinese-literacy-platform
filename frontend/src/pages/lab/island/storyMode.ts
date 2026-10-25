@@ -21,3 +21,14 @@ export function notifyIslandStepDone(step: string): void {
     /* 不在島上就什麼都不做 */
   }
 }
+
+/**
+ * 回到島上時要不要把這一站記成「做過」。
+ * - 學習頁回報做完（finished）一律記：課程簡介在平台設計上不會進 steps_completed，
+ *   只靠伺服器進度判定，第一區永遠集不滿，後面的霧永遠不散
+ * - 只按「回到島上」中途離開：伺服器進度可信就不記
+ * - 完全拿不到伺服器進度：沿用舊行為，去過就記
+ */
+export function shouldMarkVisitedOnReturn({ finished, reliable }: { finished: boolean; reliable: boolean }): boolean {
+  return finished || !reliable;
+}
