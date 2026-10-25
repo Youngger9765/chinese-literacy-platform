@@ -474,10 +474,12 @@ export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
       (beam.material as THREE.MeshBasicMaterial).opacity = 0.12 + 0.06 * Math.sin(elapsed * 2.5) + (elapsed < guideUntil ? 0.15 : 0);
       const from = new THREE.Vector3(player.position.x, 0.6, player.position.z);
       const to = new THREE.Vector3(target.x, 0.6, target.z);
-      const showTrail = from.distanceTo(to) > 6;
+      const gap = from.distanceTo(to);
+      const showTrail = gap > 8;
+      const t0 = Math.min(0.9, 3 / Math.max(gap, 0.001)); // 光點離主角至少 3 公尺
       trailDots.forEach((dot, k) => {
         // 光點從腳前 2 公尺開始，不擠在鏡頭前
-        const t = 0.12 + (((k / trailDots.length) + elapsed * 0.18) % 1) * 0.88;
+        const t = t0 + (((k / trailDots.length) + elapsed * 0.18) % 1) * (1 - t0);
         dot.visible = showTrail;
         dot.position.lerpVectors(from, to, t);
         dot.position.y = 0.6 + Math.sin(t * Math.PI) * 1.2 + Math.sin(elapsed * 4 + k) * 0.06;
