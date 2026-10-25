@@ -451,7 +451,7 @@ export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
       }
     }
     zonedThings.forEach((thing) => { thing.visible = (thing.userData.zone as number) <= unlockedZone; });
-    lighthouseBeams.forEach((pivot) => { pivot.rotation.y -= dt * 0.9; });
+    lighthouseBeams.forEach((pivot) => { pivot.visible = mode === 'first'; pivot.rotation.y -= dt * 0.9; });
     // 對準建築：第一人稱看畫面中央，上帝視角看滑鼠
     raycaster.setFromCamera(mode === 'first' ? new THREE.Vector2(0, 0) : pointerNdc, camera);
     const hit = raycaster.intersectObjects(buildingGroups.filter((group) => group.visible), true)[0];
@@ -474,9 +474,10 @@ export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
       (beam.material as THREE.MeshBasicMaterial).opacity = 0.12 + 0.06 * Math.sin(elapsed * 2.5) + (elapsed < guideUntil ? 0.15 : 0);
       const from = new THREE.Vector3(player.position.x, 0.6, player.position.z);
       const to = new THREE.Vector3(target.x, 0.6, target.z);
-      const showTrail = elapsed < guideUntil || from.distanceTo(to) > 6;
+      const showTrail = from.distanceTo(to) > 6;
       trailDots.forEach((dot, k) => {
-        const t = ((k / trailDots.length) + elapsed * 0.18) % 1;
+        // 光點從腳前 2 公尺開始，不擠在鏡頭前
+        const t = 0.12 + (((k / trailDots.length) + elapsed * 0.18) % 1) * 0.88;
         dot.visible = showTrail;
         dot.position.lerpVectors(from, to, t);
         dot.position.y = 0.6 + Math.sin(t * Math.PI) * 1.2 + Math.sin(elapsed * 4 + k) * 0.06;
