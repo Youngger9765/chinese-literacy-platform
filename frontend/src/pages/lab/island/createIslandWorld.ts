@@ -356,7 +356,14 @@ export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
   const pointerdown = (event: PointerEvent) => { dragX = event.clientX; dragY = event.clientY; downAt = { x: event.clientX, y: event.clientY }; renderer.domElement.setPointerCapture(event.pointerId); };
   const pointerup = (event: PointerEvent) => {
     if (mode !== 'god' || Math.hypot(event.clientX - downAt.x, event.clientY - downAt.y) > 6) return;
-    if (hovered !== null) events.onPick?.(hovered);
+    // 放開滑鼠當下就判斷點到哪棟，不等下一個畫面（否則快點時會落空）
+    const rect = renderer.domElement.getBoundingClientRect();
+    const ndc = new THREE.Vector2(((event.clientX - rect.left) / rect.width) * 2 - 1, -((event.clientY - rect.top) / rect.height) * 2 + 1);
+    raycaster.setFromCamera(ndc, camera);
+    const hitNow = raycaster.intersectObjects(buildingGroups.filter((group) => group.visible), true)[0];
+    let picked: number | null = null;
+    if (hitNow) { let o: THREE.Object3D | null = hitNow.object; while (o && o.userData.index === undefined) o = o.parent; picked = (o?.userData.index as number | undefined) ?? null; }
+    if (picked !== null) events.onPick?.(picked);
   };
   const pointermove = (event: PointerEvent) => {
     const rect = renderer.domElement.getBoundingClientRect();
