@@ -247,7 +247,7 @@ export default function ReadingIslandLab() {
         </div>
       )}
       <button type="button" onClick={() => setMode(mode === 'first' ? 'god' : 'first')} className="absolute bottom-24 right-4 z-20 rounded-full md:bottom-20 border-2 border-white bg-[#233e4b]/90 px-4 py-2 text-sm font-bold text-[#fff1d0] shadow-lg transition hover:scale-105 active:scale-95 md:right-7">{mode === 'first' ? '展開上帝視角' : '回到第一人稱'}</button>
-      {opening < 0 && module === null && door === null && (
+      {opening < 0 && module === null && door === null && !listMode && (
         <button type="button" aria-label="切換清單模式" onClick={() => setListMode(true)} className="absolute bottom-24 left-4 z-20 rounded-full md:bottom-20 border-2 border-white bg-[#233e4b]/90 px-4 py-2 text-sm font-bold text-[#fff1d0] shadow-lg transition hover:scale-105 active:scale-95 md:left-7">清單模式</button>
       )}
       {listMode && (
