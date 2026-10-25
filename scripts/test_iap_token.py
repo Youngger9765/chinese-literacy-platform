@@ -333,6 +333,99 @@ class IapHeader(unittest.TestCase):
             self.assertNotIn("Authorization", headers)
 
 
+class _RecordingAdapter:
+    """A requests transport adapter that never touches the network: it just
+    records the headers each outgoing request actually carried and returns
+    an empty 200. Lets the session tests below run a real `requests.Session`
+    end to end (header merge, auth hook, prepare) without a server.
+    """
+
+    def __init__(self):
+        self.sent_headers: list[dict[str, str]] = []
+
+    def send(self, request, **_kwargs):
+        import requests
+
+        self.sent_headers.append(dict(request.headers))
+        resp = requests.Response()
+        resp.status_code = 200
+        resp.request = request
+        resp.url = request.url
+        resp._content = b""
+        return resp
+
+    def close(self):
+        pass
+
+
+class InstallIapAuthOnLongLivedSession(unittest.TestCase):
+    """#3731, the caller half: the TTL cache in get_iap_token() only helps
+    if the caller asks again per request. locustfile.py used to do
+    `self.client.headers.update(iap_header())` once in on_start, freezing
+    the first token into the session for the user's whole lifetime -- so a
+    load test running past the JWT's 1h exp would start getting 401s even
+    with the cache re-minting correctly underneath. install_iap_auth() must
+    make every request on the session re-ask for the header.
+    """
+
+    def setUp(self):
+        import requests
+
+        iap_token.get_iap_token.cache_clear()
+        self._env_audience_backup = os.environ.pop("IAP_AUDIENCE", None)
+        self._env_creds_backup = os.environ.pop("GOOGLE_APPLICATION_CREDENTIALS", None)
+        self._clock = 1_000_000.0
+        self._monotonic_patch = mock.patch.object(iap_token, "_monotonic", lambda: self._clock)
+        self._monotonic_patch.start()
+        self.session = requests.Session()
+        self.adapter = _RecordingAdapter()
+        self.session.mount("https://", self.adapter)
+
+    def tearDown(self):
+        self._monotonic_patch.stop()
+        self.session.close()
+        iap_token.get_iap_token.cache_clear()
+        os.environ.pop("IAP_AUDIENCE", None)
+        if self._env_audience_backup is not None:
+            os.environ["IAP_AUDIENCE"] = self._env_audience_backup
+        if self._env_creds_backup is not None:
+            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = self._env_creds_backup
+
+    def test_a_request_sent_after_the_refresh_margin_carries_the_re_minted_token(self):
+        os.environ["IAP_AUDIENCE"] = "https://svc.example.com"
+        with mock.patch.object(
+            iap_token, "_mint_via_iam_credentials", side_effect=["tok-1", "tok-2"]
+        ):
+            iap_token.install_iap_auth(self.session)
+            self.session.get("https://svc.example.com/api/health")
+            self._clock += 2701  # 45:01 in -- the cache re-mints from here on
+            self.session.get("https://svc.example.com/api/health")
+        self.assertEqual(self.adapter.sent_headers[0]["Proxy-Authorization"], "Bearer tok-1")
+        self.assertEqual(self.adapter.sent_headers[1]["Proxy-Authorization"], "Bearer tok-2")
+
+    def test_per_request_app_authorization_header_is_left_alone(self):
+        # Positive control for the "doesn't collide" half: locust tasks pass
+        # the app's own JWT per request as `Authorization`; installing IAP
+        # auth must add Proxy-Authorization alongside it, not replace it.
+        os.environ["IAP_AUDIENCE"] = "https://svc.example.com"
+        with mock.patch.object(iap_token, "_mint_via_iam_credentials", return_value="tok-1"):
+            iap_token.install_iap_auth(self.session)
+            self.session.get(
+                "https://svc.example.com/api/me", headers={"Authorization": "Bearer app-jwt"}
+            )
+        sent = self.adapter.sent_headers[0]
+        self.assertEqual(sent["Authorization"], "Bearer app-jwt")
+        self.assertEqual(sent["Proxy-Authorization"], "Bearer tok-1")
+
+    def test_iap_off_sends_no_proxy_authorization_and_never_tries_to_sign(self):
+        # The state for the whole repo today: no IAP_AUDIENCE -> zero change.
+        with mock.patch.object(iap_token, "_mint") as mint:
+            iap_token.install_iap_auth(self.session)
+            self.session.get("https://svc.example.com/api/health")
+        self.assertNotIn("Proxy-Authorization", self.adapter.sent_headers[0])
+        mint.assert_not_called()
+
+
 class UrlopenWithIap(unittest.TestCase):
     def test_no_token_calls_plain_urlopen(self):
         with mock.patch.object(iap_token, "iap_header", return_value={}), \
