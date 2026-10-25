@@ -5,13 +5,22 @@ interface WorldEvents {
   onNear: (index: number | null) => void;
   onFogEdge: () => void;
   onMove: (x: number, z: number) => void;
+  onHover?: (index: number | null) => void;
 }
+
 
 const zoneCenters = [
   { x: -2, z: 5, radius: 14 },
   { x: 11, z: -9, radius: 13 },
   { x: 13, z: -23, radius: 14 },
 ];
+
+export type ViewMode = 'first' | 'god';
+const zoneOf = (x: number, z: number) => {
+  let best = 0; let dist = Infinity;
+  zoneCenters.forEach((zone, index) => { const d = Math.hypot(x - zone.x, z - zone.z) / zone.radius; if (d < dist) { dist = d; best = index; } });
+  return best;
+};
 
 export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
   const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
@@ -122,6 +131,7 @@ export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
       cave.rotation.z = Math.PI;
     }
   });
+  const zonedThings: THREE.Object3D[] = [];
   for (let i = 0; i < 105; i++) {
     const zone = zoneCenters[i % 3];
     const angle = i * 2.399;
@@ -131,6 +141,8 @@ export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
     if (STOPS.some((stop) => Math.hypot(stop.x - x, stop.z - z) < 2.7)) continue;
     const tree = new THREE.Group();
     tree.position.set(x, 0.42, z);
+    tree.userData.zone = zoneOf(x, z);
+    zonedThings.push(tree);
     scene.add(tree);
     const height = 1.2 + (i % 5) * 0.18;
     cylinder(tree, 0.12, 0.18, height, wood, 0, height / 2);
@@ -140,11 +152,21 @@ export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
   }
 
   const buildingGroups: THREE.Group[] = [];
+  const halos: THREE.Mesh[] = [];
+  const lighthouseBeams: THREE.Group[] = [];
   STOPS.forEach((stop, i) => {
     const root = new THREE.Group();
     root.position.set(stop.x, 0.42, stop.z);
+    root.userData.zone = stop.zone;
+    root.userData.index = i;
     scene.add(root);
     buildingGroups.push(root);
+    zonedThings.push(root);
+    const halo = new THREE.Mesh(new THREE.TorusGeometry(2.1, 0.09, 8, 48), new THREE.MeshBasicMaterial({ color: 0xffe2a0, transparent: true, opacity: 0, depthWrite: false }));
+    halo.rotation.x = Math.PI / 2;
+    halo.position.y = 0.25;
+    root.add(halo);
+    halos.push(halo);
     cylinder(root, 1.65, 1.8, 0.2, sand, 0, 0.06);
     const windowMat = material(0x69858a, { emissive: 0xffd277, emissiveIntensity: 0 });
     glowMaterials.push(windowMat);
@@ -152,6 +174,17 @@ export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
       cylinder(root, 0.72, 1.16, 4.9, cream, 0, 2.55);
       cylinder(root, 1.05, 1.05, 0.3, copper, 0, 5.05);
       cylinder(root, 0.95, 0.95, 1.05, windowMat, 0, 5.63);
+      // 燈塔光束：錐尖在燈室、開口朝外，繞塔順時針轉（從上往下看）
+      const beamPivot = new THREE.Group();
+      beamPivot.position.set(0, 5.63, 0);
+      beamPivot.userData.lighthouseBeam = true;
+      root.add(beamPivot);
+      const beamGeo = new THREE.ConeGeometry(1.6, 14, 24, 1, true);
+      beamGeo.translate(0, -7, 0);
+      beamGeo.rotateZ(Math.PI / 2);
+      const beamMesh = new THREE.Mesh(beamGeo, new THREE.MeshBasicMaterial({ color: 0xfff1c2, transparent: true, opacity: 0.22, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending }));
+      beamPivot.add(beamMesh);
+      lighthouseBeams.push(beamPivot);
       cone(root, 1.18, 1.05, slate, 0, 6.7);
       for (let j = 0; j < 4; j++) box(root, 0.18, 1.65, 0.18, copper, Math.cos(j * Math.PI / 2) * 0.75, 5.64, Math.sin(j * Math.PI / 2) * 0.75);
     } else if (i === 1) {
@@ -249,17 +282,41 @@ export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
   const player = sprite('/lab-island/sprites/adventurer.png', 1.8, 2.3);
   player.position.set(-3, 1.5, 15);
   const xiaoling = sprite('/lab-island/sprites/xiaoling.png', 0.9, 1.1);
-  const babies = BABIES.map((baby) => sprite(`/lab-island/sprites/${baby.art}`, 1.5, 1.5));
+  const babies = BABIES.map((baby) => {
+    const item = sprite(`/lab-island/sprites/${baby.art}`, 1.5, 1.5);
+    item.userData.zone = zoneOf(baby.x, baby.z);
+    zonedThings.push(item);
+    return item;
+  });
+  // 過關引導：下一關的光柱＋地上的光點
+  const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 1.4, 30, 24, 1, true), new THREE.MeshBasicMaterial({ color: 0xffd98a, transparent: true, opacity: 0.28, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending }));
+  beam.visible = false;
+  scene.add(beam);
+  const trailDots = Array.from({ length: 26 }, () => {
+    const dot = new THREE.Mesh(new THREE.SphereGeometry(0.16, 10, 8), new THREE.MeshBasicMaterial({ color: 0xffe7a8, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false }));
+    dot.visible = false;
+    scene.add(dot);
+    return dot;
+  });
+  const raycaster = new THREE.Raycaster();
+  const pointerNdc = new THREE.Vector2(0, 0);
+  let mode: ViewMode = 'first';
+  let pitch = -0.05;
+  let dragY = 0;
+  let hovered: number | null = null;
+  let nextStop: number | null = 0;
+  let guideUntil = 0;
+  let turnTo: number | null = null;
   const fogs = zoneCenters.slice(1).map((zone, index) => {
     const group = new THREE.Group();
     group.position.set(zone.x, 2.2, zone.z);
     scene.add(group);
-    const fogMat = new THREE.MeshBasicMaterial({ color: 0xc7d5d9, transparent: true, opacity: 0.84, depthWrite: false, side: THREE.DoubleSide });
-    add(group, new THREE.SphereGeometry(zone.radius * 0.95, 24, 12), fogMat).scale.y = 0.32;
+    const fogMat = new THREE.MeshBasicMaterial({ color: 0xc7d5d9, transparent: true, opacity: 0.97, depthWrite: false, side: THREE.DoubleSide });
+    add(group, new THREE.SphereGeometry(zone.radius * 1.05, 24, 12), fogMat).scale.y = 0.55;
     for (let i = 0; i < 35; i++) {
       const a = i * 2.4;
       const r = zone.radius * Math.sqrt((i + 0.5) / 35);
-      const cloudMat = new THREE.MeshBasicMaterial({ color: 0xe2e9e9, transparent: true, opacity: 0.55, depthWrite: false });
+      const cloudMat = new THREE.MeshBasicMaterial({ color: 0xe2e9e9, transparent: true, opacity: 0.8, depthWrite: false });
       add(group, new THREE.IcosahedronGeometry(1.2 + i % 3, 1), cloudMat, Math.sin(a) * r, -0.1 + i % 4, Math.cos(a) * r);
     }
     group.userData.zone = index + 1;
@@ -287,11 +344,16 @@ export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
     if (event.key === ' ' && jumping === 0) verticalSpeed = 5.5;
   };
   const keyup = (event: KeyboardEvent) => keys.delete(event.key.toLowerCase());
-  const pointerdown = (event: PointerEvent) => { dragX = event.clientX; renderer.domElement.setPointerCapture(event.pointerId); };
+  const pointerdown = (event: PointerEvent) => { dragX = event.clientX; dragY = event.clientY; renderer.domElement.setPointerCapture(event.pointerId); };
   const pointermove = (event: PointerEvent) => {
+    const rect = renderer.domElement.getBoundingClientRect();
+    pointerNdc.set(((event.clientX - rect.left) / rect.width) * 2 - 1, -((event.clientY - rect.top) / rect.height) * 2 + 1);
     if (!renderer.domElement.hasPointerCapture(event.pointerId)) return;
     yaw -= (event.clientX - dragX) * 0.005;
+    if (mode === 'first') pitch = Math.max(-0.9, Math.min(0.7, pitch - (event.clientY - dragY) * 0.004));
     dragX = event.clientX;
+    dragY = event.clientY;
+    turnTo = null;
   };
   const resize = () => {
     const w = container.clientWidth;
@@ -359,10 +421,66 @@ export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
         baby.position.set(data.x + Math.sin(elapsed + index) * 0.32, 1.65 + Math.sin(elapsed * 2 + index) * 0.14, data.z + Math.cos(elapsed + index) * 0.3);
         baby.material.rotation = Math.hypot(player.position.x - data.x, player.position.z - data.z) < 3 ? Math.sin(elapsed * 2) * 0.16 : 0;
       });
-      const focus = new THREE.Vector3(player.position.x, 1.45, player.position.z);
-      const desired = focus.clone().add(new THREE.Vector3(Math.sin(yaw) * 11.5, 7.2, Math.cos(yaw) * 11.5));
-      camera.position.lerp(desired, Math.min(1, dt * 4));
-      camera.lookAt(focus);
+      if (turnTo !== null) {
+        const target = STOPS[turnTo];
+        const want = Math.atan2(-(target.x - player.position.x), -(target.z - player.position.z));
+        let diff = want - yaw;
+        diff = Math.atan2(Math.sin(diff), Math.cos(diff));
+        yaw += diff * Math.min(1, dt * 2.2);
+        if (Math.abs(diff) < 0.02) turnTo = null;
+      }
+      if (mode === 'first') {
+        player.visible = false;
+        const eye = new THREE.Vector3(player.position.x, 1.75 + jumping + (length > 0.08 ? Math.sin(elapsed * 11) * 0.05 : 0), player.position.z);
+        camera.position.lerp(eye, Math.min(1, dt * 14));
+        const look = new THREE.Vector3(-Math.sin(yaw) * Math.cos(pitch), Math.sin(pitch), -Math.cos(yaw) * Math.cos(pitch));
+        camera.lookAt(camera.position.clone().add(look));
+        xiaoling.position.copy(camera.position).add(new THREE.Vector3(Math.cos(yaw) * 0.9 - Math.sin(yaw) * 1.6, -0.35 + Math.sin(elapsed * 3) * 0.08, -Math.sin(yaw) * 0.9 - Math.cos(yaw) * 1.6));
+      } else {
+        player.visible = true;
+        const open = zoneCenters.filter((_, index) => index <= unlockedZone);
+        const cx = open.reduce((sum, zone) => sum + zone.x, 0) / open.length;
+        const cz = open.reduce((sum, zone) => sum + zone.z, 0) / open.length;
+        const span = 22 + unlockedZone * 9;
+        const desired = new THREE.Vector3(cx + Math.sin(yaw) * span * 0.55, span, cz + Math.cos(yaw) * span * 0.55);
+        camera.position.lerp(desired, Math.min(1, dt * 3));
+        camera.lookAt(cx, 0, cz);
+      }
+    }
+    zonedThings.forEach((thing) => { thing.visible = (thing.userData.zone as number) <= unlockedZone; });
+    lighthouseBeams.forEach((pivot) => { pivot.rotation.y -= dt * 0.9; });
+    // 對準建築：第一人稱看畫面中央，上帝視角看滑鼠
+    raycaster.setFromCamera(mode === 'first' ? new THREE.Vector2(0, 0) : pointerNdc, camera);
+    const hit = raycaster.intersectObjects(buildingGroups.filter((group) => group.visible), true)[0];
+    let found: number | null = null;
+    if (hit) { let o: THREE.Object3D | null = hit.object; while (o && o.userData.index === undefined) o = o.parent; found = (o?.userData.index as number | undefined) ?? null; }
+    if (found !== hovered) { hovered = found; events.onHover?.(found); }
+    halos.forEach((halo, index) => {
+      const mat = halo.material as THREE.MeshBasicMaterial;
+      const on = index === hovered || index === near;
+      mat.opacity += ((on ? 0.95 : index === nextStop ? 0.45 : 0) - mat.opacity) * Math.min(1, dt * 8);
+      halo.scale.setScalar(1 + (on ? 0.12 * Math.sin(elapsed * 6) : 0.04 * Math.sin(elapsed * 2)));
+      buildingGroups[index].scale.setScalar(1 + (index === hovered ? 0.035 : 0));
+    });
+    // 下一關的引導光柱與光點
+    if (nextStop !== null && STOPS[nextStop].zone <= unlockedZone) {
+      const target = STOPS[nextStop];
+      beam.visible = true;
+      beam.position.set(target.x, 15, target.z);
+      (beam.material as THREE.MeshBasicMaterial).opacity = 0.18 + 0.1 * Math.sin(elapsed * 2.5) + (elapsed < guideUntil ? 0.25 : 0);
+      const from = new THREE.Vector3(player.position.x, 0.6, player.position.z);
+      const to = new THREE.Vector3(target.x, 0.6, target.z);
+      const showTrail = elapsed < guideUntil || from.distanceTo(to) > 6;
+      trailDots.forEach((dot, k) => {
+        const t = ((k / trailDots.length) + elapsed * 0.18) % 1;
+        dot.visible = showTrail;
+        dot.position.lerpVectors(from, to, t);
+        dot.position.y = 0.6 + Math.sin(t * Math.PI) * 1.2 + Math.sin(elapsed * 4 + k) * 0.06;
+        dot.scale.setScalar(0.6 + Math.sin(t * Math.PI) * 0.8);
+      });
+    } else {
+      beam.visible = false;
+      trailDots.forEach((dot) => { dot.visible = false; });
     }
     fogs.forEach((fog, index) => {
       const open = index + 1 <= unlockedZone;
@@ -377,7 +495,15 @@ export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
   };
   frame = requestAnimationFrame(animate);
   return {
-    setProgress(nextZone: number, done: number[]) { unlockedZone = nextZone; completed = done; },
+    setProgress(nextZone: number, done: number[]) {
+      const newlyDone = done.length > completed.length;
+      unlockedZone = nextZone;
+      completed = done;
+      const next = STOPS.findIndex((_, index) => !done.includes(index));
+      nextStop = next < 0 ? null : next;
+      if (newlyDone && nextStop !== null) { guideUntil = elapsed + 12; turnTo = nextStop; }
+    },
+    setMode(next: ViewMode) { mode = next; if (next === 'first') pitch = -0.05; },
     setStick(x: number, z: number) { stickDirection = { x, z }; },
     setPaused(value: boolean) { paused = value; },
     jump() { if (jumping === 0) verticalSpeed = 5.5; },

@@ -39,9 +39,14 @@ export default function ReadingIslandLab() {
     const step = stepFor(index);
     return step && (completed.includes(step) || visited.includes(step)) ? [index] : [];
   }), [stepFor, completed, visited]);
-  const unlockedZone = doneIndexes.some((index) => index >= 6) || doneIndexes.filter((index) => index >= 3).length >= 3
-    ? 2
-    : doneIndexes.some((index) => index <= 2) ? 1 : 0;
+  // 一區全部讀完才散開下一區的霧：沒去過的地方保持神秘
+  const zoneDone = (zone: number) => STOPS.every((stop, index) => stop.zone !== zone || doneIndexes.includes(index));
+  const unlockedZone = zoneDone(0) ? (zoneDone(1) ? 2 : 1) : 0;
+  const nextIndex = STOPS.findIndex((_, index) => !doneIndexes.includes(index));
+  const [mode, setMode] = useState<'first' | 'god'>('first');
+  const [hovered, setHovered] = useState<number | null>(null);
+  const [guide, setGuide] = useState('');
+  const prevDone = useRef(0);
 
   useEffect(() => {
     try { setVisited(JSON.parse(sessionStorage.getItem(storageKey) ?? '[]') as string[]); } catch { setVisited([]); }
@@ -84,6 +89,7 @@ export default function ReadingIslandLab() {
         hintTimer.current = setTimeout(() => setFogHint(false), 2500);
       },
       onMove: (x, z) => setPosition({ x, z }),
+      onHover: setHovered,
     });
     worldRef.current = world;
     return () => {
@@ -94,6 +100,17 @@ export default function ReadingIslandLab() {
   }, [student, storyId]);
 
   useEffect(() => { worldRef.current?.setProgress(unlockedZone, doneIndexes); }, [unlockedZone, doneIndexes]);
+  useEffect(() => { worldRef.current?.setMode(mode); }, [mode]);
+  useEffect(() => {
+    if (doneIndexes.length > prevDone.current && prevDone.current > 0 || (doneIndexes.length > 0 && prevDone.current === 0 && module === null && opening < 0)) {
+      const zoneOpened = nextIndex >= 0 && STOPS.every((stop, i) => stop.zone !== STOPS[nextIndex].zone || !doneIndexes.includes(i));
+      setGuide(nextIndex < 0 ? '整座島都亮起來了！' : `${zoneOpened ? '迷霧散開了！' : ''}跟著金色光柱，下一站：${STOPS[nextIndex].name}`);
+      const timer = setTimeout(() => setGuide(''), 7000);
+      prevDone.current = doneIndexes.length;
+      return () => clearTimeout(timer);
+    }
+    prevDone.current = doneIndexes.length;
+  }, [doneIndexes, nextIndex, module, opening]);
   useEffect(() => { worldRef.current?.setPaused(module !== null || opening >= 0); }, [module, opening]);
 
   const openModule = (index: number) => {
@@ -152,6 +169,10 @@ export default function ReadingIslandLab() {
           <button type="button" onClick={() => openModule(near)} className="rounded-xl bg-[#32796e] px-8 py-2 font-bold text-white shadow-md">進入</button>
         </div>
       )}
+      <button type="button" onClick={() => setMode(mode === 'first' ? 'god' : 'first')} className="absolute right-4 top-24 z-20 rounded-full border-2 border-white bg-[#233e4b]/90 px-4 py-2 text-sm font-bold text-[#fff1d0] shadow-lg transition hover:scale-105 active:scale-95 md:right-7 md:top-28">{mode === 'first' ? '展開上帝視角' : '回到第一人稱'}</button>
+      {mode === 'first' && opening < 0 && module === null && <div className={`pointer-events-none absolute left-1/2 top-1/2 z-10 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 transition ${hovered !== null ? 'scale-150 border-amber-300 bg-amber-200/40' : 'border-white/80'}`} />}
+      {hovered !== null && opening < 0 && module === null && <div className="pointer-events-none absolute left-1/2 top-[38%] z-20 -translate-x-1/2 animate-pulse rounded-full border-2 border-amber-200 bg-[#233e4b]/90 px-5 py-2 text-lg font-black text-[#ffe9b8] shadow-[0_0_30px_rgba(255,214,120,0.6)]">{STOPS[hovered].name}{doneIndexes.includes(hovered) ? ' ✓' : hovered === nextIndex ? ' · 下一站' : ''}</div>}
+      {guide && <div role="status" className="absolute left-1/2 top-20 z-30 -translate-x-1/2 animate-bounce rounded-2xl border-2 border-amber-200 bg-gradient-to-r from-[#f7d48a] to-[#ffe9b8] px-6 py-3 text-base font-black text-[#3b3018] shadow-[0_0_40px_rgba(255,200,90,0.7)]">{guide}</div>}
       {fogHint && <div role="status" className="absolute bottom-40 left-1/2 z-20 -translate-x-1/2 rounded-xl border border-white bg-[#f6f7f2]/95 px-5 py-3 font-bold shadow-xl">這裡還沒讀到</div>}
       {error && <div role="alert" className="absolute left-1/2 top-24 z-30 -translate-x-1/2 rounded-xl bg-[#fff1d8] px-4 py-2 text-sm font-bold shadow-lg" onClick={() => setError('')}>{error}</div>}
       <div className="absolute bottom-5 right-5 z-10 hidden rounded-xl border border-white/60 bg-[#f9f5e9]/85 px-3 py-2 text-[11px] font-bold shadow-lg md:block">位置 {position.x.toFixed(0)}, {position.z.toFixed(0)} · 迷霧 {unlockedZone === 0 ? '未散' : '正散開'}</div>
