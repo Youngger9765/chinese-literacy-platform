@@ -104,7 +104,7 @@ Nielsen Norman 兒童 UX／Sid Meier 有趣的決定）
 ### 🟢 P3-1（正面，建議保留做法）PK 對戰已是全站標竿，應作為其他玩法的規格範本
 
 - `02-pk-entry-desktop.png`（橫幅＋怎麼玩＋雙 CTA＋歷史佔位）、`02-pk-opponents-desktop.png`
-  （7 位對手頭像風格完全統一，確認 #3745／#3764 已修好）、`03-pk-zhuyin-target-char.png`
+  （7 位對手頭像風格完全統一，確認 #3745／#3764 已修好）、`03-pk-reading-target-char.png`
   （讀音題正確標出目標字＋底線）、`04-pk-results-desktop.png`（勝負banner＋雙方卡片＋
   解鎖道具＋逐題展開＋三個行動按鈕）——這一條產品線已經把 G1-G5 全部做到位，
   建議其餘 4 個玩法照這個規格補齊，而不是各自重新設計
