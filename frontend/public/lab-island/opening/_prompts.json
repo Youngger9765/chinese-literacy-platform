@@ -1,0 +1,30 @@
+{
+  "reference_for_op3": "sprites/xiaoling.png",
+  "generation": "image_gen built-in",
+  "images": [
+    {
+      "file": "op1.jpg",
+      "prompt": "Create a 16:9 wide cinematic frame for an original Taiwanese elementary-school story adventure, no text, no lettering, no logos, no existing characters or IP. Consistent visual bible for six frames: warm hand-painted animated-feature illustration, richly textured gouache and painterly brushwork, soft luminous edges, layered depth, indigo and muted blue-gray night contrasted with tiny amber lights, elegant atmospheric perspective, sophisticated movie composition, emotionally inviting rather than childish clipart. Scene 1: a small wooden boat seen in the lower left foreground crossing a dark gently rolling sea toward a mysterious gray floating island occupying the middle-right distance. Dense magnificent stars overhead; only a few faint warm lights on the island, one tiny lighthouse silhouette. Wide horizon, strong readable silhouette, ample quiet sky. No characters. Keep detail away from bottom center because subtitles will overlay there."
+    },
+    {
+      "file": "op2.jpg",
+      "prompt": "Second 16:9 frame in the SAME visual world and hand-painted animated-feature gouache style as the previously generated starry floating-island boat image: deep indigo night, muted blue-gray stone, restrained glowing amber, intricate painterly texture, soft cinematic moonlight, layered atmospheric depth. Original design, no IP characters. Close cinematic low angle at the top of the island lighthouse: a substantial BLANK weathered silver-gray metal plaque hanging under the lantern room, centered in the middle of the frame, its smooth face broad and completely empty for later HTML text overlay. Cool moonlight grazes its beveled edges, the moon high at upper left, sea and distant island lights far below. The plaque must be easy to read as the focal object. No letters, no symbols, no engraving, no watermark. Keep lower center calm for subtitles."
+    },
+    {
+      "file": "op3.jpg",
+      "prompt": "Third 16:9 frame in the SAME cinematic hand-painted animated-feature world as the previous starry sea and lighthouse silver plaque frames: deep indigo night, soft blue-gray stone, restrained amber lantern light, detailed gouache brush texture, original composition. Use the referenced local character image as an exact CHARACTER DESIGN reference for Xiao Ling: a small living white feather spirit with a feather-shaped tuft, huge expressive sapphire-blue eyes, tiny smiling mouth, feathery wings and tail. Preserve that identity closely, do not turn it into a human or generic bird. Xiao Ling drifts gently down from BEHIND the same blank gray silver plaque near the lighthouse, moving diagonally toward the lower right, luminous down feathers floating in the air. The blank plaque can be partly visible in the background, lighthouse lens and moonlit sea beyond. Inviting magical discovery, family-friendly, exquisite animation key art. No text, no letters, no watermark."
+    },
+    {
+      "file": "op4.jpg",
+      "prompt": "Fourth 16:9 cinematic frame in the SAME original hand-painted animated-feature gouache style as a starry indigo sea, moonlit lighthouse, amber lamps and blue-gray floating island: dense painterly brush texture, atmospheric perspective, tasteful luminous accents. High panoramic vantage over the gray island at night. EXACTLY SIX distinct masses of gray mist move among six different parts of the island, as if forgotten words are breathing. In the mist, suggest subtle readable silhouettes of a dragon, an owl and a balanced scale, plus three abstract swirling shapes; they are mysterious but friendly enough for elementary children, not horror. The lighthouse glows faintly at one edge, winding paths and a distant theater suggest an explorable island. Clear layered foreground to horizon. No text, no lettering, no watermark, no existing IP character. Leave lower center quiet for subtitles."
+    },
+    {
+      "file": "op5.jpg",
+      "prompt": "Fifth 16:9 frame in the SAME original warm hand-painted animated-feature gouache style and indigo/blue-gray/amber palette as the prior moonlit floating-island lighthouse scenes. View from the stone steps at the foot of the lighthouse: its old arched wooden door has just swung inward, spilling a long inviting fan of buttery golden light onto the cool blue-gray stone and damp night ground. Just inside the doorway, a single sheet of paper floats and glows gently, clearly recognizable as a paper sheet, with NO visible writing or symbols. Dust motes glitter within the light shaft, quiet stars and a sliver of sea in the background. Cinematic low-angle composition and strong emotional invitation, exquisite painted texture, child-friendly. No text, no letters, no watermark, no existing IP characters. Leave lower center visually quiet for subtitle overlay."
+    },
+    {
+      "file": "op6.jpg",
+      "prompt": "Sixth 16:9 cinematic frame in the SAME original warm hand-painted animated-feature gouache style as the previous starry indigo floating-island scenes: blue-gray night, soft moonlight, restrained amber lanterns, textured painterly strokes and deep atmosphere. A distant open-air theater on the far side of the island, viewed across a dark winding path and misty rooftops from a quiet hill. Its roof and stage are gray and dim, but a handful of faint tiny golden light particles drift up from the roof, visually like applause muffled before it can be heard. The theater is the clear focal silhouette, spacious starry sky and moonlit sea beyond; poignant and hopeful, child-friendly, elegant movie final opening frame. No people, no text, no lettering, no watermark, no existing IP characters. Bottom center calm for subtitles."
+    }
+  ]
+}

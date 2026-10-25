@@ -111,6 +111,7 @@ const TermsOfService = lazy(() => import('../pages/app/TermsOfService'));
 
 // Dev-only local demo harness for AI-extracted lesson_content (public, no API/DB).
 const DevLessonPage = lazy(() => import('../pages/dev/DevLessonPage'));
+const ReadingIslandLab = lazy(() => import('../pages/lab/ReadingIslandLab'));
 
 
 // ---------------------------------------------------------------------------
@@ -119,6 +120,7 @@ const AppRoutes: React.FC = () => (
   <Suspense fallback={<PageLoader />}>
     <StudentClassroomGuard>
     <Routes>
+      <Route path="/lab/island/:storyId" element={<ProtectedRoute><ReadingIslandLab /></ProtectedRoute>} />
       {/* Issue #457: students without classroom see this page when gating is enabled */}
       <Route
         path="/no-teacher"
