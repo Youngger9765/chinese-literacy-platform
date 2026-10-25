@@ -133,7 +133,18 @@ export default function ReadingIslandLab() {
       worldRef.current = null;
       if (hintTimer.current) clearTimeout(hintTimer.current);
     };
-  }, [student, STOPS, BABIES]);
+    // `lesson` 在 deps 裡是必要的，不是多餘的：20011 走手刻覆蓋分支時，STOPS/BABIES
+    // 在 `lesson` 還沒載入（`fetchStory` resolve 之前）就已經是 STOPS_20011/
+    // BABIES_20011 這兩個穩定參照，值不會因為 `lesson` 從 null 變成真正的課程資料
+    // 而改變。但上面的 `if (!lesson || STOPS.length === 0) return <main>載入中…` 這個
+    // render-gate 在 `lesson` 還是 null 時完全不渲染 `<div ref={canvasRef}>`，所以
+    // 這個 effect 第一次執行時 `host` 一定是 null、提早 return。如果 deps 只有
+    // `[student, STOPS, BABIES]`，`lesson` 從 null 變成真正資料的那次重新渲染，
+    // 三個 deps 的值完全沒變（同一顆 STOPS_20011 參照），effect 不會重跑，canvasRef
+    // 雖然這時候已經真的掛上 DOM，但再也沒有人去建立 3D 世界——整頁看起來正常、
+    // 沒有任何錯誤，只是畫布永遠是空的。資料來得快（fetchStory 命中快取/熱啟動）
+    // 時這個 race 不會發生，所以不是每次都能重現。
+  }, [student, STOPS, BABIES, lesson]);
 
   useEffect(() => { worldRef.current?.setProgress(unlockedZone, doneIndexes); }, [unlockedZone, doneIndexes]);
   useEffect(() => { worldRef.current?.setMode(mode); }, [mode]);
@@ -248,8 +259,11 @@ export default function ReadingIslandLab() {
         </div>
       )}
       <button type="button" onClick={() => setMode(mode === 'first' ? 'god' : 'first')} className="absolute bottom-24 right-4 z-20 rounded-full md:bottom-20 border-2 border-white bg-[#233e4b]/90 px-4 py-2 text-sm font-bold text-[#fff1d0] shadow-lg transition hover:scale-105 active:scale-95 md:right-7">{mode === 'first' ? '展開上帝視角' : '回到第一人稱'}</button>
+      {/* bottom-32（8rem）：比「聲音：開」的 bottom-[4.5rem] 高一截，兩顆按鈕
+          之前都釘在 left-4，間距只有 24px 不夠兩顆按鈕的高度，疊在一起把
+          「清單模式」的字蓋住（team-lead 2026-10-26 截圖抓到）。*/}
       {opening < 0 && module === null && door === null && !listMode && (
-        <button type="button" aria-label="切換清單模式" onClick={() => setListMode(true)} className="absolute bottom-24 left-4 z-20 rounded-full md:bottom-20 border-2 border-white bg-[#233e4b]/90 px-4 py-2 text-sm font-bold text-[#fff1d0] shadow-lg transition hover:scale-105 active:scale-95 md:left-7">清單模式</button>
+        <button type="button" aria-label="切換清單模式" onClick={() => setListMode(true)} className="absolute bottom-32 left-4 z-20 rounded-full md:bottom-28 border-2 border-white bg-[#233e4b]/90 px-4 py-2 text-sm font-bold text-[#fff1d0] shadow-lg transition hover:scale-105 active:scale-95 md:left-7">清單模式</button>
       )}
       {listMode && (
         <IslandListMode
