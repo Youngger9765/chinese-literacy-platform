@@ -19,9 +19,10 @@
  * without leaking which question was answered or by whom.
  */
 import React, { useEffect, useRef, useState } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTeamArenaPoll } from '../../components/team-arena/useTeamArenaPoll';
+import GameResultActions from '../../components/game/GameResultActions';
 import StemWithTarget from '../../components/live-quiz/StemWithTarget';
 import AttackAnimation from '../../components/team-arena/AttackAnimation';
 import { TowerCollapse, VictoryBurst } from '../../components/team-arena/TowerCollapse';
@@ -100,6 +101,7 @@ const StudentTeamArenaPlay: React.FC = () => {
   const { code: routeCode } = useParams<{ code: string }>();
   const [searchParams] = useSearchParams();
   const { token } = useAuth();
+  const navigate = useNavigate();
 
   const [joinError, setJoinError] = useState('');
   const [joinAttempted, setJoinAttempted] = useState(false);
@@ -389,6 +391,14 @@ const StudentTeamArenaPlay: React.FC = () => {
             })}
           </div>
         )}
+
+        {/* #3771 (game-academy audit r2 P0-2): this screen had ZERO
+            interactive elements — a student could only leave via the
+            browser's own back button. "再玩一場" has no single opponent
+            to rematch (unlike PK) — a team match needs both teams to
+            re-coordinate — so it goes back to the entry/join page rather
+            than instantly starting a new session. */}
+        <GameResultActions onReplay={() => navigate('/team-arena')} onBackToHub={() => navigate('/game-hub')} />
       </div>
     );
   }
