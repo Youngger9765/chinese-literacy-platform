@@ -10,9 +10,9 @@ describe('PkFigurePortrait', () => {
     expect(img.getAttribute('src')).toBe('/story-assets/pk-li-bai/portrait-victory.png');
   });
 
-  it('falls back to the SVG set for a figure with no PNG override', () => {
+  it('resolves the PNG override for Du Fu (tier 5) — #3745 extended the PNG set to all 7 figures', () => {
     const { getByAltText } = render(<PkFigurePortrait tier={5} expression="thinking" name="杜甫" />);
     const img = getByAltText('杜甫') as HTMLImageElement;
-    expect(img.getAttribute('src')).toBe('/pk-art/figures/5-du-fu/portrait-thinking.svg');
+    expect(img.getAttribute('src')).toBe('/story-assets/pk-du-fu/portrait-thinking.png');
   });
 });

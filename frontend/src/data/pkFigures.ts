@@ -276,14 +276,27 @@ export function getPkFigure(tier: number): PkFigure {
 // a richer, game-quality PNG illustration set committed under
 // frontend/public/story-assets/pk-li-bai/ (see _prompts.json there — it was
 // produced in an earlier session via codex image_gen, generalized from the
-// 跨班賽季 story-pack work). The other six figures still only have the
-// original placeholder-quality SVG set below. This map is the SINGLE place
-// that decides "which art source wins" for a figure — every call site (VS
-// screen, battle screen, result screen, opponent-select, figure intro) goes
-// through pkFigureAssetPath/pkFigurePortraitUrl/pkFigureIconUrl, so adding a
-// figure's richer set here switches its art everywhere at once instead of
-// each screen having to special-case it.
+// 跨班賽季 story-pack work). This map is the SINGLE place that decides "which
+// art source wins" for a figure — every call site (VS screen, battle screen,
+// result screen, opponent-select, figure intro) goes through
+// pkFigureAssetPath/pkFigurePortraitUrl/pkFigureIconUrl, so adding a figure's
+// richer set here switches its art everywhere at once instead of each
+// screen having to special-case it.
+//
+// #3745: the other six figures were still on the placeholder-quality SVG
+// set (only Li Bai looked finished on the opponent-select screen). Same
+// codex image_gen pipeline, same _prompts.json convention per figure dir —
+// each dir's portrait-idle.png was used as the per-figure reference so every
+// expression stays the same person, and Li Bai's portrait-idle.png seeded
+// the very first idle image for each of the six (as "a DIFFERENT person")
+// so all seven share one illustration style.
 const PK_PNG_ART_OVERRIDE: Partial<Record<number, string>> = {
+  1: '/story-assets/pk-luo-binwang',
+  2: '/story-assets/pk-meng-haoran',
+  3: '/story-assets/pk-bai-juyi',
+  4: '/story-assets/pk-li-qingzhao',
+  5: '/story-assets/pk-du-fu',
+  6: '/story-assets/pk-su-shi',
   7: '/story-assets/pk-li-bai',
 };
 
