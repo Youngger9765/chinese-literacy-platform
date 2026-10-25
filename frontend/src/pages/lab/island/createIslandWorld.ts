@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { introProgress, characterPose } from './islandMotion';
 import type { IslandBaby, IslandStop } from './islandTemplate';
+import { isSceneryExcluded } from './islandTemplate';
 
 interface WorldEvents {
   onNear: (index: number | null) => void;
@@ -146,7 +147,9 @@ export function createIslandWorld(
     const radius = 5 + (i % 13) * 0.65;
     const x = zone.x + Math.sin(angle) * radius;
     const z = zone.z + Math.cos(angle) * radius;
-    if (content.stops.some((stop) => Math.hypot(stop.x - x, stop.z - z) < 2.7)) continue;
+    // G7 2026-10-26：出生點附近的樹沒被排除過，近到擋住進島第一眼該看清楚的
+    // 港口燈塔跟路（真實座標驗過，21 號樹離出生點只有 1.79 單位）。
+    if (isSceneryExcluded(x, z, content.stops)) continue;
     const tree = new THREE.Group();
     tree.position.set(x, 0.42, z);
     tree.userData.zone = zoneOf(x, z);

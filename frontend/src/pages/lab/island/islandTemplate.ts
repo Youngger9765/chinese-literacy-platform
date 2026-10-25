@@ -124,6 +124,31 @@ export function buildOpeningForTitle(title: string): [string, string][] {
   ];
 }
 
+/**
+ * 玩家出生點，要跟 createIslandWorld.ts 的 `player.position.set(-2, 1.5, 16.5)`
+ * 同一個 x/z（y 是高度，跟風景排除無關）。兩邊各自維護一份常數（跟 ZONE_PATHS
+ * 同樣理由：這份要零依賴 three.js 才能快速跑單元測試）。
+ */
+export const PLAYER_SPAWN = { x: -2, z: 16.5 };
+
+/**
+ * 程序生成的風景物件（目前是樹）要不要被排除：離任何站點太近，或離玩家出生點
+ * 太近都要排除。後者是 2026-10-26 G7 抓到的真缺陷——出生點附近的樹沒被排除，
+ * 近到幾乎貼在玩家臉上，擋住進島第一眼該看清楚的港口燈塔跟路。
+ */
+export function isSceneryExcluded(
+  x: number,
+  z: number,
+  stops: ReadonlyArray<{ x: number; z: number }>,
+  spawn: { x: number; z: number } = PLAYER_SPAWN,
+  stopRadius = 2.7,
+  spawnRadius = 4,
+): boolean {
+  if (stops.some((stop) => Math.hypot(stop.x - x, stop.z - z) < stopRadius)) return true;
+  if (Math.hypot(spawn.x - x, spawn.z - z) < spawnRadius) return true;
+  return false;
+}
+
 const BABY_SPRITES = ['dragon-tiger.png', 'scale.png', 'owl.png', 'stone.png', 'orbs.png', 'yarn.png'] as const;
 
 /**

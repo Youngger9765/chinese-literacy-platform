@@ -13,6 +13,8 @@ import {
   buildBabiesForVocabulary,
   zoneForIndex,
   STEP_BUILDING_META,
+  PLAYER_SPAWN,
+  isSceneryExcluded,
 } from '../islandTemplate';
 
 describe('zoneForIndex — 把 N 個站分成三區，跟 20011 手刻的 3/3/4 比例一致', () => {
@@ -153,5 +155,34 @@ describe('buildBabiesForVocabulary — 從生詞表產生文字寶寶（無生�
 
   it('決定性：同一份生詞表兩次結果一樣', () => {
     expect(buildBabiesForVocabulary(vocab)).toEqual(buildBabiesForVocabulary(vocab));
+  });
+});
+
+/**
+ * G7 截圖審查抓到的真實缺陷（2026-10-26，team-lead 轉述 Young）：出生點的
+ * 第一人稱畫面右邊約三分之一被一棵前景大樹擋住，學生進島第一眼看不清楚
+ * 港口燈塔和路。程序生樹的 105 棵樹只排除了「離站點太近」（< 2.7），完全
+ * 沒考慮「離出生點太近」——用 20011 真實座標驗過，21 號樹離出生點只有
+ * 1.79 單位，幾乎貼在玩家臉上。
+ */
+describe('isSceneryExcluded — 風景物件（樹）不該擋住出生點視野', () => {
+  it('離出生點 1.79 單位的樹（真實觸發 G7 那棵，index 21）要被排除', () => {
+    expect(isSceneryExcluded(-0.84, 15.13, [], PLAYER_SPAWN)).toBe(true);
+  });
+
+  it('離出生點夠遠（>= 排除半徑）的樹不受影響', () => {
+    expect(isSceneryExcluded(20, -30, [], PLAYER_SPAWN)).toBe(false);
+  });
+
+  it('仍然保留原本「離站點太近」的排除規則（不是用出生點規則取代它）', () => {
+    const stops = [{ x: 10, z: 10 }];
+    expect(isSceneryExcluded(10.5, 10.5, stops, { x: -50, z: -50 })).toBe(true);
+  });
+
+  it('出生點座標本身要跟 createIslandWorld.ts 實際 player.position.set() 的值一致', () => {
+    // 這條測試存在的理由：如果有人改了 createIslandWorld.ts 的出生點數字卻忘了
+    // 同步這裡，isSceneryExcluded 排除的就不是真正的出生點——這條鎖不住 three.js
+    // 那邊的改動，但至少讓這個常數的值被明確寫下來、有一個會被看到的地方。
+    expect(PLAYER_SPAWN).toEqual({ x: -2, z: 16.5 });
   });
 });
