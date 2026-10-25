@@ -158,22 +158,32 @@ const LiveQuizWaitingRoom: React.FC<LiveQuizWaitingRoomProps> = ({ myName, playe
             </div>
           </div>
 
-          {/* 已加入同學的頭像牆（匿名，見檔頭註解）— round 4: `grid` instead
-              of `flex flex-wrap`, per Young's "放大成多列格狀" alternative;
-              also gives this section somewhere to grow into as the class
-              fills up, which is the other half of the "填滿可視高度" fix. */}
+          {/* 已加入同學的頭像牆（匿名，見檔頭註解）.
+              round 4b (Young reviewed `27-lobby-postrebase-desktop.png`:
+              "同學牆靠左沒置中，跟上方置中的內容不對齊"): round 4's first
+              pass used a fixed `grid-cols-4` so multi-row groups would
+              stack into a tidy 4-wide table — but a FIXED column count
+              means fewer items than a full row (here: 2) land in the
+              FIRST N columns and leave the rest of the row's columns
+              empty, which reads as left-aligned, not centered. `flex
+              flex-wrap justify-center` has no such "empty trailing
+              column" case: any count — 1, 2, or 20 — centers itself,
+              and once a row's width is used up, the overflow wraps into
+              a new row that is ALSO centered ("多人時整排置中換行"),
+              which was the actual multi-row behavior Young was after in
+              round 4, achieved without grid's fixed-column downside. */}
           <div className="w-full max-w-sm">
             <p className="mb-2 text-center text-sm font-medium text-white/90">
               {playersCount > 0 ? `目前已有 ${playersCount} 人加入` : '還沒有人加入'}
             </p>
             {otherCount > 0 ? (
-              <div data-testid="peer-wall" className="grid grid-cols-4 justify-items-center gap-x-2 gap-y-3 sm:grid-cols-6">
+              <div data-testid="peer-wall" className="flex flex-wrap items-start justify-center gap-x-3 gap-y-3">
                 {Array.from({ length: otherCount }).map((_, i) => (
                   <AnonymousPeer key={i} index={i} />
                 ))}
               </div>
             ) : (
-              <p data-testid="peer-wall" className="grid text-center text-xs text-white/70">
+              <p data-testid="peer-wall" className="text-center text-xs text-white/70">
                 你是第一位加入的，等其他同學一起來吧
               </p>
             )}

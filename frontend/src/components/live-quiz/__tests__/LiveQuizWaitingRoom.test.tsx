@@ -84,9 +84,16 @@ describe('<LiveQuizWaitingRoom> (#3761)', () => {
     expect(screen.getByText(/老師開始後.*自動/)).toBeTruthy();
   });
 
-  it('#3761 round 4 (Young: "把同學牆區放大成多列格狀"): the peer wall is laid out as a grid, not a single wrapping row', () => {
+  it('#3761 round 4 (Young: "把同學牆區放大成多列格狀"): the peer wall wraps into new rows once it runs out of width', () => {
     const { container } = render(<LiveQuizWaitingRoom myName="小明" playersCount={4} onLeave={() => {}} />);
     const wall = container.querySelector('[data-testid="peer-wall"]');
-    expect(wall?.className).toContain('grid');
+    expect(wall?.className).toContain('flex-wrap');
+  });
+
+  it('#3761 round 4b (Young reviewed `27-lobby-postrebase-desktop.png`: "同學牆靠左沒置中，跟上方置中的內容不對齊"): with only 2 peers (< one full row) the wall is still horizontally centered, not left-aligned — a 4-column CSS grid with 2 items lands them in columns 1–2 and leaves 3–4 empty, which reads as left-aligned; flex-wrap + justify-center has no such "empty trailing columns" case', () => {
+    const { container } = render(<LiveQuizWaitingRoom myName="小明" playersCount={3} onLeave={() => {}} />);
+    const wall = container.querySelector('[data-testid="peer-wall"]');
+    expect(wall?.className).toContain('justify-center');
+    expect(wall?.className).not.toContain('grid-cols');
   });
 });
