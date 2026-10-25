@@ -84,9 +84,8 @@ describe('FullTextAnnotate — read-only (anonymous QR visitor)', () => {
   });
 
   it('keeps the player out of the bottom action bar', () => {
-    // #2941 搬的是登入學生那顆。訪客頁（GuestReadingPage）沒有底部
-    // StepFooterNav，固定動作列會浮在半空中，而且訪客沒有「完成標記」
-    // 可以並排 —— 所以訪客的播放控制留在文章上方。
+    // 訪客頁（GuestReadingPage）沒有底部 StepFooterNav，固定動作列會浮在
+    // 半空中 —— 訪客的播放控制跟登入學生一樣在標題下方（#3397）。
     renderStep(true);
     expect(screen.queryByTestId('step-action-bar')).not.toBeInTheDocument();
     expect(screen.getByTestId('reading-player')).toBeInTheDocument();
@@ -109,31 +108,32 @@ describe('FullTextAnnotate — normal mode (signed-in student)', () => {
     expect(screen.getByTestId('reading-player')).toBeInTheDocument();
   });
 
-  it('puts 播放全文 next to 完成標記 in the bottom action bar (#2941)', () => {
-    // 放在文章上方時，學生一往下讀就把播放鍵捲出畫面；「完成標記」在底部那條
-    // 固定列上永遠看得到，所以兩顆並排在那裡。斷言「同一條列裡」而不是
-    // 「頁面上有」—— 後者原本就成立，改壞了也不會紅。
+  it('keeps 播放全文 out of the bottom action bar — only 完成標記 there (#3397)', () => {
+    // mentor：這一步的主題是「做記號」，底部大顆播放鍵＋速度列偏離主題。
+    // 動作列只留主 CTA；播放全文在標題下方。斷言「不在那條列裡」而不是
+    // 「頁面上有」—— 後者搬回去也不會紅。
     renderStep(false);
     const bar = screen.getByTestId('step-action-bar');
-    expect(bar).toContainElement(screen.getByTestId('reading-player'));
     expect(bar).toContainElement(screen.getByText('完成標記'));
-    // 只有一顆，沒有連舊位置一起留下來
+    expect(bar).not.toContainElement(screen.getByTestId('reading-player'));
+    // 閒置時只有標題下那一顆，沒有浮動播放器
     expect(screen.getAllByTestId('reading-player')).toHaveLength(1);
+    expect(screen.queryByTestId('floating-reading-player')).not.toBeInTheDocument();
   });
 
-  it('播放全文與完成標記等大（#2941 owner：兩個按鈕的大小要一樣）', () => {
-    // 播放鍵原本是 h-11 的次要尺寸，搬到主 CTA 旁邊就變成一大一小。
-    // 這裡鎖尺寸 class：兩顆都 w-44 h-14，任一邊改動就會紅。
+  it('播放全文是次要尺寸，不跟完成標記等大（#3397）', () => {
     renderStep(false);
     const play = screen.getByText('播放全文').closest('button')!;
-    const finish = screen.getByText('完成標記').closest('button')!;
-    for (const btn of [play, finish]) {
-      expect(btn.className).toContain('w-44');
-      expect(btn.className).toContain('h-14');
-      expect(btn.className).toContain('text-xl');
-    }
-    // 置中：動作列內容用 justify-center 而不是撐滿
-    expect(screen.getByTestId('step-action-bar').firstElementChild!.className)
-      .toContain('justify-center');
+    expect(play.className).toContain('h-8');
+    expect(play.className).not.toContain('h-14');
+    // 速度選擇也跟著縮小
+    const slow = screen.getByRole('button', { name: '朗讀速度 慢' });
+    expect(slow.className).toContain('h-7');
+  });
+
+  it('sits right under the lesson title', () => {
+    renderStep(false);
+    const title = screen.getByRole('heading', { level: 1 });
+    expect(title.parentElement).toContainElement(screen.getByTestId('reading-player'));
   });
 });

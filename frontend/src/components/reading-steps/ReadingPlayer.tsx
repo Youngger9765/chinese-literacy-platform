@@ -33,8 +33,12 @@ export interface ReadingPlayerProps {
   /**
    * 按鈕尺寸。`lg` 是給底部那條動作列用的（#2941）——
    * 它跟主 CTA「完成標記」並排，同高同字級才不會看起來一大一小。
+   *
+   * `sm`（#3397）：讀全文-做記號的主題是「標記」，mentor 認為放在底部的大顆
+   * 播放鍵＋速度列偏離主題。`sm` 是退居次要位置用的尺寸 —— 淡色底、不用主
+   * CTA 的漸層，看得出能按，但不會跟「完成標記」搶誰是主角。
    */
-  size?: 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg';
   /**
    * #3023: show the demo-voice speed picker while idle. On by default,
    * because this component IS the demo-audio surface for the guest/QR path
@@ -49,7 +53,8 @@ const BTN_BASE =
   'flex items-center justify-center gap-1.5 rounded-full font-headline font-bold ' +
   'transition-all active:scale-[0.97] disabled:opacity-50 whitespace-nowrap';
 
-const BTN_SIZE: Record<'md' | 'lg', string> = {
+const BTN_SIZE: Record<'sm' | 'md' | 'lg', string> = {
+  sm: 'h-8 px-3 text-sm',
   md: 'h-11 px-5 text-base',
   // h-14 / text-xl = 「完成標記」那顆的尺寸，兩顆並排才等高
   lg: 'h-14 px-6 text-xl',
@@ -60,7 +65,16 @@ const BTN_SIZE: Record<'md' | 'lg', string> = {
  * 一樣並且置中」。播放中的暫停/停止是次要動作，維持自身寬度 —— 三顆都撐成
  * `w-44` 會塞不進 `max-w-md` 那條列，反而被迫換行。
  */
-const IDLE_WIDTH: Record<'md' | 'lg', string> = { md: '', lg: 'w-44' };
+const IDLE_WIDTH: Record<'sm' | 'md' | 'lg', string> = { sm: '', md: '', lg: 'w-44' };
+
+/** 主要（播放／繼續）按鈕的配色。`sm` 用淡色底，其餘維持主 CTA 漸層。 */
+const PRIMARY_STYLE = {
+  sm: { className: 'bg-accent/10 text-accent hover:bg-accent/15', style: undefined },
+  gradient: {
+    className: 'text-white hover:brightness-110',
+    style: { background: 'linear-gradient(135deg, #564ABF, #9D93FF)' },
+  },
+} as const;
 
 const ReadingPlayer: React.FC<ReadingPlayerProps> = ({
   showSpeed = true,
@@ -76,13 +90,15 @@ const ReadingPlayer: React.FC<ReadingPlayerProps> = ({
   size = 'md',
 }) => {
   const BTN = `${BTN_BASE} ${BTN_SIZE[size]}`;
+  const ICON = `material-symbols-outlined ${size === 'sm' ? 'text-base' : 'text-xl'}`;
+  const primary = size === 'sm' ? PRIMARY_STYLE.sm : PRIMARY_STYLE.gradient;
   // Paused counts as active: the audio is still loaded and stop must stay
   // reachable, otherwise a paused reading can only be ended by leaving the page.
   const isActive = isPlaying || isPaused;
 
   return (
     <div
-      className={`flex items-center gap-2 ${className}`}
+      className={`flex items-center ${size === 'sm' ? 'gap-1.5' : 'gap-2'} ${className}`}
       data-testid="reading-player"
       role="group"
       aria-label="全文朗讀播放控制"
@@ -92,10 +108,12 @@ const ReadingPlayer: React.FC<ReadingPlayerProps> = ({
           type="button"
           onClick={onPlay}
           disabled={isLoading}
-          className={`${BTN} ${IDLE_WIDTH[size]} text-white shadow-[0_6px_24px_rgba(86,74,191,0.28)] hover:brightness-110`}
-          style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
+          className={`${BTN} ${IDLE_WIDTH[size]} ${primary.className} ${
+            size === 'sm' ? '' : 'shadow-[0_6px_24px_rgba(86,74,191,0.28)]'
+          }`}
+          style={primary.style}
         >
-          <span className="material-symbols-outlined text-xl" aria-hidden="true">
+          <span className={ICON} aria-hidden="true">
             {isLoading ? 'hourglass_top' : 'play_arrow'}
           </span>
           <span>{isLoading ? '準備中…' : idleLabel}</span>
@@ -108,7 +126,7 @@ const ReadingPlayer: React.FC<ReadingPlayerProps> = ({
           onClick={onPause}
           className={`${BTN} bg-surface-container-high text-on-surface hover:brightness-95`}
         >
-          <span className="material-symbols-outlined text-xl" aria-hidden="true">
+          <span className={ICON} aria-hidden="true">
             pause
           </span>
           <span>暫停</span>
@@ -119,10 +137,10 @@ const ReadingPlayer: React.FC<ReadingPlayerProps> = ({
         <button
           type="button"
           onClick={onResume}
-          className={`${BTN} text-white hover:brightness-110`}
-          style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
+          className={`${BTN} ${primary.className}`}
+          style={primary.style}
         >
-          <span className="material-symbols-outlined text-xl" aria-hidden="true">
+          <span className={ICON} aria-hidden="true">
             play_arrow
           </span>
           <span>繼續</span>
@@ -135,7 +153,7 @@ const ReadingPlayer: React.FC<ReadingPlayerProps> = ({
           onClick={onStop}
           className={`${BTN} bg-surface-container-high text-on-surface-variant hover:brightness-95`}
         >
-          <span className="material-symbols-outlined text-xl" aria-hidden="true">
+          <span className={ICON} aria-hidden="true">
             stop
           </span>
           <span>停止</span>
@@ -145,7 +163,7 @@ const ReadingPlayer: React.FC<ReadingPlayerProps> = ({
       {/* #3023: only while idle -- changing the rate mid-utterance needs the
           audio restarted to take effect, and restarting under the student is
           worse than making them choose before they press play. */}
-      {showSpeed && !isActive && <TtsSpeedPicker />}
+      {showSpeed && !isActive && <TtsSpeedPicker size={size === 'sm' ? 'sm' : 'md'} />}
     </div>
   );
 };
