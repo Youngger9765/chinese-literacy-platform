@@ -39,4 +39,25 @@ describe('useReportProgress', () => {
     expect(result.current.annotations).toEqual([mark]);
     expect(loadAnnotations).toHaveBeenCalledWith(9);
   });
+
+  // #3749 — SessionHistoryReportPage looks at one SPECIFIC past session chosen
+  // from a list. Carry-forward was designed for the live in-flow ReportPage,
+  // where a refresh silently starts a new backend session for the SAME
+  // attempt (#2889) — there, "no marks on this session yet, borrow the most
+  // recent sibling's" is correct. A historical page has no such relationship:
+  // "most recent sibling of this story" can be a LATER, unrelated attempt the
+  // student made after the one being viewed. Without carryForwardMarks=false,
+  // that later attempt's marks would render as if they belonged to the old one.
+  it('does not search sibling sessions when carryForwardMarks is false', async () => {
+    loadStepProgress.mockResolvedValue({ step_progress: { steps_completed: [], step_data: {} } });
+    loadAnnotations.mockImplementation(async (id: number) => (id === 7 ? [mark] : []));
+    const fetchSpy = vi.fn();
+    vi.stubGlobal('fetch', fetchSpy);
+    const { result } = renderHook(() => useReportProgress(10, 'tok', '20011', null, false));
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.annotations).toEqual([]);
+    expect(loadAnnotations).toHaveBeenCalledWith(10);
+    expect(loadAnnotations).not.toHaveBeenCalledWith(7);
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
 });
