@@ -179,10 +179,10 @@ export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
       beamPivot.position.set(0, 5.63, 0);
       beamPivot.userData.lighthouseBeam = true;
       root.add(beamPivot);
-      const beamGeo = new THREE.ConeGeometry(1.6, 14, 24, 1, true);
-      beamGeo.translate(0, -7, 0);
+      const beamGeo = new THREE.ConeGeometry(0.9, 7, 20, 1, true);
+      beamGeo.translate(0, -3.5, 0);
       beamGeo.rotateZ(Math.PI / 2);
-      const beamMesh = new THREE.Mesh(beamGeo, new THREE.MeshBasicMaterial({ color: 0xfff1c2, transparent: true, opacity: 0.22, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending }));
+      const beamMesh = new THREE.Mesh(beamGeo, new THREE.MeshBasicMaterial({ color: 0xfff1c2, transparent: true, opacity: 0.1, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending }));
       beamPivot.add(beamMesh);
       lighthouseBeams.push(beamPivot);
       cone(root, 1.18, 1.05, slate, 0, 6.7);
@@ -280,8 +280,9 @@ export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
     return item;
   };
   const player = sprite('/lab-island/sprites/adventurer.png', 1.8, 2.3);
-  player.position.set(-3, 1.5, 15);
+  player.position.set(-2, 1.5, 16.5);
   const xiaoling = sprite('/lab-island/sprites/xiaoling.png', 0.9, 1.1);
+  const XL_FIRST = new THREE.Vector3(0.45, 0.55, 1);
   const babies = BABIES.map((baby) => {
     const item = sprite(`/lab-island/sprites/${baby.art}`, 1.5, 1.5);
     item.userData.zone = zoneOf(baby.x, baby.z);
@@ -289,7 +290,7 @@ export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
     return item;
   });
   // 過關引導：下一關的光柱＋地上的光點
-  const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 1.4, 30, 24, 1, true), new THREE.MeshBasicMaterial({ color: 0xffd98a, transparent: true, opacity: 0.28, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending }));
+  const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.6, 26, 20, 1, true), new THREE.MeshBasicMaterial({ color: 0xffd98a, transparent: true, opacity: 0.28, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending }));
   beam.visible = false;
   scene.add(beam);
   const trailDots = Array.from({ length: 26 }, () => {
@@ -435,9 +436,11 @@ export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
         camera.position.lerp(eye, Math.min(1, dt * 14));
         const look = new THREE.Vector3(-Math.sin(yaw) * Math.cos(pitch), Math.sin(pitch), -Math.cos(yaw) * Math.cos(pitch));
         camera.lookAt(camera.position.clone().add(look));
-        xiaoling.position.copy(camera.position).add(new THREE.Vector3(Math.cos(yaw) * 0.9 - Math.sin(yaw) * 1.6, -0.35 + Math.sin(elapsed * 3) * 0.08, -Math.sin(yaw) * 0.9 - Math.cos(yaw) * 1.6));
+        xiaoling.scale.copy(XL_FIRST);
+        xiaoling.position.copy(camera.position).add(new THREE.Vector3(Math.cos(yaw) * 1.25 - Math.sin(yaw) * 2.4, -0.55 + Math.sin(elapsed * 3) * 0.08, -Math.sin(yaw) * 1.25 - Math.cos(yaw) * 2.4));
       } else {
         player.visible = true;
+        xiaoling.scale.set(0.9, 1.1, 1);
         const open = zoneCenters.filter((_, index) => index <= unlockedZone);
         const cx = open.reduce((sum, zone) => sum + zone.x, 0) / open.length;
         const cz = open.reduce((sum, zone) => sum + zone.z, 0) / open.length;
@@ -465,9 +468,10 @@ export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
     // 下一關的引導光柱與光點
     if (nextStop !== null && STOPS[nextStop].zone <= unlockedZone) {
       const target = STOPS[nextStop];
-      beam.visible = true;
-      beam.position.set(target.x, 15, target.z);
-      (beam.material as THREE.MeshBasicMaterial).opacity = 0.18 + 0.1 * Math.sin(elapsed * 2.5) + (elapsed < guideUntil ? 0.25 : 0);
+      const closeToTarget = Math.hypot(player.position.x - target.x, player.position.z - target.z) < 6;
+      beam.visible = !closeToTarget || mode === 'god';
+      beam.position.set(target.x, 14, target.z);
+      (beam.material as THREE.MeshBasicMaterial).opacity = 0.12 + 0.06 * Math.sin(elapsed * 2.5) + (elapsed < guideUntil ? 0.15 : 0);
       const from = new THREE.Vector3(player.position.x, 0.6, player.position.z);
       const to = new THREE.Vector3(target.x, 0.6, target.z);
       const showTrail = elapsed < guideUntil || from.distanceTo(to) > 6;
