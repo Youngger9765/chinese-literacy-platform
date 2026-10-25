@@ -1,13 +1,6 @@
-export interface IslandStop {
-  name: string;
-  step: string;
-  x: number;
-  z: number;
-  zone: number;
-  line: string;
-}
+import type { IslandStop, IslandBaby } from './islandTemplate';
 
-export const STOPS: IslandStop[] = [
+export const STOPS_20011: IslandStop[] = [
   { name: '港口燈塔', step: 'lesson-intro', x: -3, z: 11, zone: 0, line: '燈要亮，先叫出她的名字' },
   { name: '書卷長廊', step: 'full-text-annotate', x: -9, z: 5, zone: 0, line: '每一卷都有一段話，按順序走，別跳' },
   { name: '回音劇場', step: 'key-passage-reading', x: 3, z: 2, zone: 0, line: '這裡的歡呼和嘆氣，都是同一場比賽' },
@@ -20,7 +13,7 @@ export const STOPS: IslandStop[] = [
   { name: '星空瞭望台', step: 'report', x: 22, z: -32, zone: 2, line: '最後一個問題，要用你自己的話回答' },
 ];
 
-export const OPENING = [
+export const OPENING_20011 = [
   ['旁白', '這座島，本來很吵'],
   ['銀牌', '輸掉的人，為什麼有人為她拍手？'],
   ['小翎', '你……會讀字嗎？'],
@@ -29,7 +22,7 @@ export const OPENING = [
   ['小翎', '聽到了嗎？有人在等掌聲回來'],
 ];
 
-export const BABIES = [
+export const BABIES_20011: IslandBaby[] = [
   { name: '龍爭虎鬥', art: 'dragon-tiger.png', x: -7, z: 7 },
   { name: '勢均力敵', art: 'scale.png', x: 0, z: 4 },
   { name: '目不轉睛', art: 'owl.png', x: 5, z: 1 },

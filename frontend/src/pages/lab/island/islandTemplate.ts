@@ -1,0 +1,144 @@
+/**
+ * Island template engine — #3780 part A.
+ *
+ * 20011（贏得喝采的輸家）是手刻的 STOPS/OPENING/BABIES，風格跟內容綁死。
+ * 這支負責把「其他任何一課」的 step_sequence / title / vocabulary 決定性地
+ * 轉成同一套資料形狀：不呼叫 LLM、同一課每次重算都一模一樣。
+ *
+ * 15 種 step id 是全平台 179 課掃過一輪的真實上限（2026-10-26 全量
+ * step_sequence 調查），其中 10 種沿用 20011 已經做好的建築造型，
+ * 另外 5 種（spotlight + 4 個文言文專屬 step）是本次新增的站點類型，
+ * 造型在 createIslandWorld.ts 的建築造型分支裡實作（見 Task 2）。
+ */
+
+export interface IslandStop {
+  name: string;
+  step: string;
+  x: number;
+  z: number;
+  zone: number;
+  line: string;
+}
+
+export interface IslandBaby {
+  name: string;
+  art: string;
+  x: number;
+  z: number;
+}
+
+export const STEP_BUILDING_META: Record<string, { name: string; line: string }> = {
+  'lesson-intro': { name: '港口燈塔', line: '燈要亮，先聽完這篇在說什麼' },
+  'full-text-annotate': { name: '書卷長廊', line: '把不懂或重要的詞語做記號，沿路都看一遍' },
+  'key-passage-reading': { name: '回音劇場', line: '把指定的那一段，念到順順為止' },
+  'vocab-definition': { name: '字源館', line: '一個字拆開，裡面藏著它的意思' },
+  'vocab-application': { name: '工匠作坊', line: '把學到的詞語用進句子裡' },
+  spotlight: { name: '聚光閣', line: '這篇文章的小技巧，藏在這裡' },
+  'keypoints-table': { name: '地圖塔', line: '把課文的重點，整理成一張地圖' },
+  comprehension: { name: '謎題神殿', line: '答案不在題目裡，在課文裡' },
+  'vocab-review': { name: '精靈牧場', line: '找回來的字寶寶在這裡休息' },
+  'knowledge-station': { name: '樹屋補給站', line: '休息一下，看看跟這篇有關的延伸知識' },
+  report: { name: '星空瞭望台', line: '最後一題，用你自己的話回答' },
+  'classical-text': { name: '原文閣', line: '先讀讀看，古人是怎麼說這件事的' },
+  'classical-sentence-matching': { name: '對句碑林', line: '找出每一句古文，對應的白話是哪一句' },
+  'classical-word-matching': { name: '字牌亭', line: '方框裡的字，換成現在的說法是什麼' },
+  'classical-self-challenge': { name: '挑戰擂台', line: '選做：再讀一段古文，試試看自己行不行' },
+};
+
+/** 把 N 個站分成三區，比例跟 20011 手刻的 3/3/4 一致（見 __tests__）。 */
+export function zoneForIndex(index: number, total: number): number {
+  const b1 = Math.floor(total / 3);
+  const b2 = Math.floor((2 * total) / 3);
+  if (index < b1) return 0;
+  if (index < b2) return 1;
+  return 2;
+}
+
+/**
+ * 三條沿路曲線的控制點，跟 createIslandWorld.ts 畫路徑用的是同一份座標。
+ * 兩邊刻意各自維護一份常數、不共用 import：這裡要維持零依賴（不 import three.js）
+ * 才能在純 node 環境快速跑單元測試；createIslandWorld.ts 那份要留在 three.js
+ * 環境組 CatmullRomCurve3。改地形座標時兩邊要一起改。
+ */
+const ZONE_PATHS: ReadonlyArray<ReadonlyArray<readonly [number, number]>> = [
+  [[-3, 12], [-5, 9], [-9, 5], [-5, 1], [0, 0], [3, 2]],
+  [[3, 2], [4, -2], [7, -3], [12, -4], [8, -7], [5, -10], [10, -13], [17, -12]],
+  [[17, -12], [20, -16], [23, -20], [18, -22], [14, -24], [9, -23], [2, -22], [12, -29], [22, -32]],
+];
+
+function pointOnPolyline(points: ReadonlyArray<readonly [number, number]>, t: number) {
+  const clamped = Math.max(0, Math.min(1, t));
+  const segments = points.length - 1;
+  const pos = clamped * segments;
+  const i = Math.min(segments - 1, Math.floor(pos));
+  const localT = pos - i;
+  const [x0, z0] = points[i];
+  const [x1, z1] = points[i + 1];
+  const dx = x1 - x0;
+  const dz = z1 - z0;
+  const len = Math.hypot(dx, dz) || 1;
+  return { x: x0 + dx * localT, z: z0 + dz * localT, tx: dx / len, tz: dz / len };
+}
+
+/**
+ * 從後端 step_sequence（可能帶 `#roundSlug`）決定性產生站點清單。
+ * 一課多篇（同個 base step 出現多次）收斂成一站，取第一次出現的順序；
+ * 註冊表沒有的 id 直接跳過（不讓未來新 step type 靜默炸掉整座島，
+ * 也不會憑空生造型）。
+ */
+export function buildStopsFromSequence(sequence: string[]): IslandStop[] {
+  const bases: string[] = [];
+  for (const raw of sequence) {
+    const base = raw.split('#')[0];
+    if (STEP_BUILDING_META[base] && !bases.includes(base)) bases.push(base);
+  }
+  const total = bases.length;
+  const zoneOfIndex = bases.map((_, i) => zoneForIndex(i, total));
+  const countPerZone = [0, 0, 0];
+  zoneOfIndex.forEach((z) => { countPerZone[z] += 1; });
+  const seenInZone = [0, 0, 0];
+  return bases.map((step, index) => {
+    const zone = zoneOfIndex[index];
+    const k = seenInZone[zone]++;
+    const n = Math.max(1, countPerZone[zone]);
+    const t = (k + 0.5) / n;
+    const { x, z, tx, tz } = pointOnPolyline(ZONE_PATHS[zone], t);
+    const side = k % 2 === 0 ? 1 : -1;
+    const offset = 3 + (k % 3) * 0.6;
+    const meta = STEP_BUILDING_META[step];
+    return { name: meta.name, step, x: x + -tz * side * offset, z: z + tx * side * offset, zone, line: meta.line };
+  });
+}
+
+/**
+ * 從課名決定性產生開場白。固定嚮導角色「小翎」跨課一致（跟 20011 同一個角色，
+ * 對應 `/lab-island/sprites/xiaoling.png`），內容只帶課名、不帶劇情細節
+ * （劇情細節只有 20011 的手工覆寫才有）。
+ */
+export function buildOpeningForTitle(title: string): [string, string][] {
+  return [
+    ['旁白', `這座島，收著《${title}》這篇課文裡的字`],
+    ['小翎', '你……會讀字嗎？'],
+    ['小翎', '它們是字變的，可是忘了自己是誰'],
+    ['小翎', `照順序走過去，把《${title}》讀完，燈就會一個一個亮起來`],
+  ];
+}
+
+const BABY_SPRITES = ['dragon-tiger.png', 'scale.png', 'owl.png', 'stone.png', 'orbs.png', 'yarn.png'] as const;
+
+/**
+ * 從生詞表決定性產生最多 6 隻文字寶寶。MVP 還沒有逐字生成的專屬美術，
+ * 沿用 20011 那 6 張通用佔位圖循環套用（已知限制，不是遺漏）；
+ * 沒有生詞表時回空陣列，不炸掉。
+ */
+export function buildBabiesForVocabulary(vocabulary?: Array<{ word: string }>): IslandBaby[] {
+  const words = (vocabulary ?? []).map((v) => v.word).filter(Boolean).slice(0, 6);
+  return words.map((word, i) => {
+    const zonePath = ZONE_PATHS[i < 3 ? 0 : 1];
+    const t = ((i % 3) + 0.5) / 3;
+    const { x, z, tx, tz } = pointOnPolyline(zonePath, t);
+    const side = i % 2 === 0 ? -1 : 1;
+    const offset = 4.2;
+    return { name: word, art: BABY_SPRITES[i % BABY_SPRITES.length], x: x + -tz * side * offset, z: z + tx * side * offset };
+  });
+}

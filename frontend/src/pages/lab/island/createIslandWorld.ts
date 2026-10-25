@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { introProgress, characterPose } from './islandMotion';
-import { BABIES, STOPS } from './islandData';
+import type { IslandBaby, IslandStop } from './islandTemplate';
 
 interface WorldEvents {
   onNear: (index: number | null) => void;
@@ -26,7 +26,11 @@ const zoneOf = (x: number, z: number) => {
   return best;
 };
 
-export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
+export function createIslandWorld(
+  container: HTMLElement,
+  events: WorldEvents,
+  content: { stops: IslandStop[]; babies: IslandBaby[] },
+) {
   const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.7));
   renderer.shadowMap.enabled = true;
@@ -142,7 +146,7 @@ export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
     const radius = 5 + (i % 13) * 0.65;
     const x = zone.x + Math.sin(angle) * radius;
     const z = zone.z + Math.cos(angle) * radius;
-    if (STOPS.some((stop) => Math.hypot(stop.x - x, stop.z - z) < 2.7)) continue;
+    if (content.stops.some((stop) => Math.hypot(stop.x - x, stop.z - z) < 2.7)) continue;
     const tree = new THREE.Group();
     tree.position.set(x, 0.42, z);
     tree.userData.zone = zoneOf(x, z);
@@ -158,7 +162,7 @@ export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
   const buildingGroups: THREE.Group[] = [];
   const halos: THREE.Mesh[] = [];
   const lighthouseBeams: THREE.Group[] = [];
-  STOPS.forEach((stop, i) => {
+  content.stops.forEach((stop, i) => {
     const root = new THREE.Group();
     root.position.set(stop.x, 0.42, stop.z);
     root.userData.zone = stop.zone;
@@ -174,7 +178,7 @@ export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
     cylinder(root, 1.65, 1.8, 0.2, sand, 0, 0.06);
     const windowMat = material(0x69858a, { emissive: 0xffd277, emissiveIntensity: 0 });
     glowMaterials.push(windowMat);
-    if (i === 0) {
+    if (stop.step === 'lesson-intro') {
       cylinder(root, 0.72, 1.16, 4.9, cream, 0, 2.55);
       cylinder(root, 1.05, 1.05, 0.3, copper, 0, 5.05);
       cylinder(root, 0.95, 0.95, 1.05, windowMat, 0, 5.63);
@@ -191,7 +195,7 @@ export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
       lighthouseBeams.push(beamPivot);
       cone(root, 1.18, 1.05, slate, 0, 6.7);
       for (let j = 0; j < 4; j++) box(root, 0.18, 1.65, 0.18, copper, Math.cos(j * Math.PI / 2) * 0.75, 5.64, Math.sin(j * Math.PI / 2) * 0.75);
-    } else if (i === 1) {
+    } else if (stop.step === 'full-text-annotate') {
       for (let j = -2; j <= 2; j++) {
         cylinder(root, 0.15, 0.18, 3.1, cream, j * 0.72, 1.65);
         const scroll = cylinder(root, 0.34, 0.34, 2.5, j % 2 ? copper : gold, j * 0.72, 2.18, -0.55, 12);
@@ -199,14 +203,14 @@ export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
       }
       box(root, 4.1, 0.35, 2.2, slate, 0, 3.3);
       for (let j = -2; j <= 2; j++) box(root, 0.45, 0.26, 2.5, gold, j * 0.72, 3.55);
-    } else if (i === 2) {
+    } else if (stop.step === 'key-passage-reading') {
       for (let row = 0; row < 4; row++) {
         const arc = add(root, new THREE.TorusGeometry(1.25 + row * 0.34, 0.12, 5, 24, Math.PI), row % 2 ? copper : cream, 0, 0.22 + row * 0.42, -row * 0.22);
         arc.rotation.x = Math.PI / 2;
       }
       box(root, 1.4, 2.2, 0.3, slate, 0, 1.2, -1.6);
       add(root, new THREE.TorusGeometry(0.47, 0.12, 8, 18), gold, 0, 2.3, -1.36);
-    } else if (i === 3) {
+    } else if (stop.step === 'vocab-definition') {
       cylinder(root, 1.4, 1.6, 2, cream, 0, 1.1, 0, 8);
       for (let j = 0; j < 8; j++) {
         const a = j * Math.PI / 4;
@@ -214,34 +218,67 @@ export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
       }
       cone(root, 1.8, 1.6, slate, 0, 2.9);
       add(root, new THREE.TorusGeometry(0.42, 0.11, 8, 20), gold, 0, 2.25, 1.45);
-    } else if (i === 4) {
+    } else if (stop.step === 'vocab-application') {
       box(root, 3.3, 1.9, 2.2, cream, 0, 1.05);
       const roof = box(root, 3.8, 0.28, 2.7, copper, 0, 2.2);
       roof.rotation.z = -0.15;
       cylinder(root, 0.35, 0.4, 3.2, slate, 0.9, 3.15, -0.4);
       add(root, new THREE.TorusGeometry(0.45, 0.13, 8, 18), gold, -0.85, 2.8, 0.9);
       box(root, 1.1, 0.12, 0.65, wood, -0.6, 0.95, 1.5);
-    } else if (i === 5) {
+    } else if (stop.step === 'keypoints-table') {
       cylinder(root, 1.2, 1.6, 3.6, cream, 0, 1.9, 0, 6);
       cone(root, 1.5, 1.5, slate, 0, 4.45);
       for (let j = 0; j < 4; j++) box(root, 0.8, 0.12, 0.95, gold, Math.cos(j * Math.PI / 2) * 1.1, 2.35 + j * 0.25, Math.sin(j * Math.PI / 2) * 1.1).rotation.y = j * Math.PI / 2;
-    } else if (i === 6) {
+    } else if (stop.step === 'comprehension') {
       for (let j = -2; j <= 2; j++) cylinder(root, 0.17, 0.2, 3.2, cream, j * 0.7, 1.65, -0.5);
       box(root, 4, 0.35, 2.6, slate, 0, 3.38, -0.5);
       cone(root, 1.3, 1.9, gold, 0, 4.3, -0.5);
       for (let j = 0; j < 4; j++) cylinder(root, 0.23, 0.3, 0.7 + j * 0.15, copper, -1.2 + j * 0.8, 0.4, 1.25);
-    } else if (i === 7) {
+    } else if (stop.step === 'vocab-review') {
       for (let j = -2; j <= 2; j++) {
         cylinder(root, 0.09, 0.11, 1.4, wood, j * 0.73, 0.7);
         add(root, new THREE.IcosahedronGeometry(0.48, 1), j % 2 ? gold : material(0x9bbaa1), j * 0.73, 1.65);
       }
       add(root, new THREE.TorusGeometry(1.6, 0.1, 7, 18, Math.PI), cream, 0, 0.65, -0.9).rotation.x = Math.PI / 2;
-    } else if (i === 8) {
+    } else if (stop.step === 'knowledge-station') {
       cylinder(root, 0.5, 0.7, 3.5, wood, 0, 1.8);
       for (let j = 0; j < 3; j++) add(root, new THREE.IcosahedronGeometry(1.25, 1), grass, (j - 1) * 0.6, 3.4 + (j % 2) * 0.5);
       box(root, 2.5, 1.3, 1.8, cream, 0, 4.1);
       cone(root, 1.7, 1.2, copper, 0, 5.35);
       box(root, 0.22, 3.5, 0.22, wood, 1.25, 2.2, 0.9);
+    } else if (stop.step === 'spotlight') {
+      // 聚光閣：一座石塔，頂端是會發光的水晶燈籠（呼應「閱讀聚光燈」這個 step 的名字）
+      cylinder(root, 0.55, 0.85, 3.6, slate, 0, 1.9, 0, 8);
+      cylinder(root, 0.7, 0.7, 0.9, copper, 0, 3.85);
+      add(root, new THREE.IcosahedronGeometry(0.62, 1), material(0x8fd9c4, { emissive: 0x3fae92, emissiveIntensity: 0.4 }), 0, 4.6);
+      cone(root, 0.95, 0.9, gold, 0, 5.25);
+    } else if (stop.step === 'classical-text') {
+      // 原文閣：雙層攢尖頂的小閣樓，讀文言文原文的地方
+      cylinder(root, 1.3, 1.6, 3, cream, 0, 1.6, 0, 8);
+      cone(root, 1.9, 1.3, copper, 0, 3.6);
+      cylinder(root, 0.45, 0.6, 1.4, slate, 0, 4.4, 0, 8);
+      cone(root, 0.9, 1.0, gold, 0, 5.3);
+    } else if (stop.step === 'classical-sentence-matching') {
+      // 對句碑林：五座高低不一的石碑排成一列，找句子對應用的
+      for (let j = -2; j <= 2; j++) {
+        box(root, 0.5, 2.2 + Math.abs(j) * 0.3, 0.22, slate, j * 0.85, 1.1 + Math.abs(j) * 0.15);
+        box(root, 0.58, 0.22, 0.3, cream, j * 0.85, 0.11);
+      }
+      add(root, new THREE.TorusGeometry(0.4, 0.1, 8, 16), gold, 0, 2.6, 0);
+    } else if (stop.step === 'classical-word-matching') {
+      // 字牌亭：四根柱子撐起一片平頂，前後各掛一塊牌匾
+      box(root, 2.6, 0.18, 2.6, copper, 0, 2.6);
+      [[-1.1, -1.1], [1.1, -1.1], [-1.1, 1.1], [1.1, 1.1]].forEach(([dx, dz]) => cylinder(root, 0.13, 0.15, 2.5, wood, dx, 1.3, dz));
+      box(root, 0.5, 0.9, 0.08, gold, 0, 1.6, 1.3);
+      box(root, 0.5, 0.9, 0.08, gold, 0, 1.6, -1.3);
+    } else if (stop.step === 'classical-self-challenge') {
+      // 挑戰擂台：圓形高台加四支旗桿，自我挑戰題用的
+      cylinder(root, 2.1, 2.3, 0.6, slate, 0, 0.42, 0, 16);
+      for (let j = 0; j < 4; j++) {
+        const a = j * Math.PI / 2;
+        cylinder(root, 0.08, 0.1, 2.6, wood, Math.sin(a) * 1.9, 1.5, Math.cos(a) * 1.9);
+        box(root, 0.5, 0.7, 0.04, gold, Math.sin(a) * 1.9, 2.6, Math.cos(a) * 1.9).rotation.y = a;
+      }
     } else {
       cylinder(root, 0.9, 1.25, 4.4, slate, 0, 2.3, 0, 8);
       cylinder(root, 1.75, 1.75, 0.22, cream, 0, 4.55);
@@ -270,7 +307,7 @@ export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
     const texture = new THREE.CanvasTexture(signCanvas);
     const sign = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, depthTest: false }));
     sign.scale.set(3.3, 0.65, 1);
-    sign.position.set(0, i === 0 ? 7.8 : i === 9 ? 6.2 : 4.5, 0);
+    sign.position.set(0, stop.step === 'lesson-intro' ? 7.8 : stop.step === 'report' ? 6.2 : 4.5, 0);
     root.add(sign);
   });
 
@@ -287,7 +324,7 @@ export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
   player.position.set(-2, 1.5, 16.5);
   const xiaoling = sprite('/lab-island/sprites/xiaoling.png', 0.9, 1.1);
   const XL_FIRST = new THREE.Vector3(0.45, 0.55, 1);
-  const babies = BABIES.map((baby) => {
+  const babies = content.babies.map((baby) => {
     const item = sprite(`/lab-island/sprites/${baby.art}`, 1.5, 1.5);
     item.userData.zone = zoneOf(baby.x, baby.z);
     zonedThings.push(item);
@@ -415,7 +452,7 @@ export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
       if (length > 0.08 && mode === 'god') events.onWantFirstPerson?.();
       if (length > 0.08) travelTarget = null;
       if (travelTarget !== null && mode === 'first') {
-        const goal = STOPS[travelTarget];
+        const goal = content.stops[travelTarget];
         const gx = goal.x - player.position.x;
         const gz = goal.z - player.position.z;
         const dist = Math.hypot(gx, gz);
@@ -439,7 +476,7 @@ export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
         const moveZ = (right.z * dx + forward.z * -dz) / Math.max(1, length) * dt * 5.2;
         const nextX = player.position.x + moveX;
         const nextZ = player.position.z + moveZ;
-        const buildingCollision = STOPS.some((stop) => Math.hypot(nextX - stop.x, nextZ - stop.z) < 1.55);
+        const buildingCollision = content.stops.some((stop) => Math.hypot(nextX - stop.x, nextZ - stop.z) < 1.55);
         const hillCollision = hillPositions.some(([x, z, r]) => Math.hypot(nextX - x, nextZ - z) < r * 0.7);
         if (walkable(nextX, nextZ) && !buildingCollision && !hillCollision) {
           player.position.x = nextX;
@@ -464,7 +501,7 @@ export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
       xiaoling.position.set(player.position.x + 0.67, player.position.y + 0.85 + Math.sin(elapsed * 3) * 0.14, player.position.z + 0.12);
       let closest: number | null = null;
       let best = 3.25;
-      STOPS.forEach((stop, index) => {
+      content.stops.forEach((stop, index) => {
         if (stop.zone > unlockedZone) return;
         const d = Math.hypot(player.position.x - stop.x, player.position.z - stop.z);
         if (d < best) { best = d; closest = index; }
@@ -472,12 +509,12 @@ export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
       if (introPlaying) closest = null;
       if (closest !== near) { near = closest; events.onNear(closest); }
       babies.forEach((baby, index) => {
-        const data = BABIES[index];
+        const data = content.babies[index];
         baby.position.set(data.x + Math.sin(elapsed + index) * 0.32, 1.65 + Math.sin(elapsed * 2 + index) * 0.14, data.z + Math.cos(elapsed + index) * 0.3);
         baby.material.rotation = Math.hypot(player.position.x - data.x, player.position.z - data.z) < 3 ? Math.sin(elapsed * 2) * 0.16 : 0;
       });
       if (turnTo !== null) {
-        const target = STOPS[turnTo];
+        const target = content.stops[turnTo];
         const want = Math.atan2(-(target.x - player.position.x), -(target.z - player.position.z));
         let diff = want - yaw;
         diff = Math.atan2(Math.sin(diff), Math.cos(diff));
@@ -533,8 +570,8 @@ export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
       buildingGroups[index].scale.setScalar(1 + (index === hovered ? 0.035 : 0));
     });
     // 下一關的引導光柱與光點
-    if (nextStop !== null && STOPS[nextStop].zone <= unlockedZone) {
-      const target = STOPS[nextStop];
+    if (nextStop !== null && content.stops[nextStop].zone <= unlockedZone) {
+      const target = content.stops[nextStop];
       const closeToTarget = Math.hypot(player.position.x - target.x, player.position.z - target.z) < 6;
       beam.visible = !closeToTarget || mode === 'god';
       beam.position.set(target.x, 14, target.z);
@@ -573,7 +610,7 @@ export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
       const newlyDone = done.length > completed.length;
       unlockedZone = nextZone;
       completed = done;
-      const next = STOPS.findIndex((_, index) => !done.includes(index));
+      const next = content.stops.findIndex((_, index) => !done.includes(index));
       nextStop = next < 0 ? null : next;
       if (newlyDone && nextStop !== null) { guideUntil = elapsed + 12; turnTo = nextStop; }
     },

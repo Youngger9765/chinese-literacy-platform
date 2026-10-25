@@ -4,7 +4,9 @@ import { useAuth } from '../../contexts/AuthContext';
 import { fetchStory } from '../../services/api';
 import { fetchLearningSessions, loadStepProgress } from '../../services/learningApi';
 import { stepPath } from '../../config/stepPath';
-import { BABIES, OPENING, STOPS } from './island/islandData';
+import { BABIES_20011, OPENING_20011, STOPS_20011 } from './island/islandData';
+import { buildStopsFromSequence, buildOpeningForTitle, buildBabiesForVocabulary } from './island/islandTemplate';
+import type { IslandBaby, IslandStop } from './island/islandTemplate';
 import { createIslandWorld } from './island/createIslandWorld';
 import { ISLAND_STEP_DONE, shouldMarkVisitedOnReturn } from './island/storyMode';
 import { createIslandAudio, readMuted, writeMuted, type IslandAudio } from './island/islandAudio';
@@ -12,6 +14,7 @@ import { createIslandAudio, readMuted, writeMuted, type IslandAudio } from './is
 interface LessonData {
   title: string;
   stepSequence?: string[];
+  vocabulary?: Array<{ word: string }>;
 }
 
 type World = ReturnType<typeof createIslandWorld>;
@@ -49,11 +52,24 @@ export default function ReadingIslandLab() {
   const storageKey = `reading-island-visited:${user?.id ?? 'guest'}:${storyId}`;
   const student = user?.roles.some((role) => role.role_name === 'student') ?? false;
   const sequence = useMemo(() => lesson?.stepSequence ?? [], [lesson]);
-  const stepFor = useCallback((index: number) => sequence.find((id) => id.split('#')[0] === STOPS[index].step), [sequence]);
+  const isHandmade = storyId === '20011';
+  const STOPS = useMemo<IslandStop[]>(
+    () => (isHandmade ? STOPS_20011 : buildStopsFromSequence(sequence)),
+    [isHandmade, sequence],
+  );
+  const OPENING = useMemo(
+    () => (isHandmade ? OPENING_20011 : buildOpeningForTitle(lesson?.title ?? '')),
+    [isHandmade, lesson?.title],
+  );
+  const BABIES = useMemo<IslandBaby[]>(
+    () => (isHandmade ? BABIES_20011 : buildBabiesForVocabulary(lesson?.vocabulary)),
+    [isHandmade, lesson?.vocabulary],
+  );
+  const stepFor = useCallback((index: number) => sequence.find((id) => id.split('#')[0] === STOPS[index].step), [sequence, STOPS]);
   const doneIndexes = useMemo(() => STOPS.flatMap((_, index) => {
     const step = stepFor(index);
     return step && (completed.includes(step) || visited.includes(step)) ? [index] : [];
-  }), [stepFor, completed, visited]);
+  }), [stepFor, completed, visited, STOPS]);
   // 一區全部讀完才散開下一區的霧：沒去過的地方保持神秘
   const zoneDone = (zone: number) => STOPS.every((stop, index) => stop.zone !== zone || doneIndexes.includes(index));
   const unlockedZone = zoneDone(0) ? (zoneDone(1) ? 2 : 1) : 0;
@@ -68,10 +84,10 @@ export default function ReadingIslandLab() {
   }, [storageKey]);
 
   useEffect(() => {
-    if (storyId !== '20011' || !student) return;
+    if (!storyId || !student) return;
     let alive = true;
     fetchStory(storyId).then((story) => {
-      if (alive) setLesson({ title: story.title, stepSequence: story.stepSequence });
+      if (alive) setLesson({ title: story.title, stepSequence: story.stepSequence, vocabulary: story.vocabulary });
     }).catch(() => { if (alive) setError('課文載入失敗，請稍後再試'); });
     return () => { alive = false; };
   }, [storyId, student]);
@@ -95,7 +111,7 @@ export default function ReadingIslandLab() {
 
   useEffect(() => {
     const host = canvasRef.current;
-    if (!host || !student || storyId !== '20011') return;
+    if (!host || !student || STOPS.length === 0) return;
     const world = createIslandWorld(host, {
       onNear: setNear,
       onFogEdge: () => {
@@ -108,14 +124,14 @@ export default function ReadingIslandLab() {
       onPick: (index) => { setMode('first'); worldRef.current?.travelTo(index); },
       onWantFirstPerson: () => setMode('first'),
       onArrive: (index) => setNear(index),
-    });
+    }, { stops: STOPS, babies: BABIES });
     worldRef.current = world;
     return () => {
       world.dispose();
       worldRef.current = null;
       if (hintTimer.current) clearTimeout(hintTimer.current);
     };
-  }, [student, storyId]);
+  }, [student, STOPS, BABIES]);
 
   useEffect(() => { worldRef.current?.setProgress(unlockedZone, doneIndexes); }, [unlockedZone, doneIndexes]);
   useEffect(() => { worldRef.current?.setMode(mode); }, [mode]);
@@ -129,7 +145,7 @@ export default function ReadingIslandLab() {
       return () => clearTimeout(timer);
     }
     prevDone.current = doneIndexes.length;
-  }, [doneIndexes, nextIndex, module, opening]);
+  }, [doneIndexes, nextIndex, module, opening, STOPS]);
   useEffect(() => { worldRef.current?.setPaused(module !== null || opening >= 0); }, [module, opening]);
   useEffect(() => {
     const audio = createIslandAudio(readMuted(typeof localStorage === 'undefined' ? null : localStorage));
@@ -198,8 +214,8 @@ export default function ReadingIslandLab() {
   };
   const releaseStick = () => { stickOrigin.current = null; setJoystick({ x: 0, y: 0 }); worldRef.current?.setStick(0, 0); };
 
-  if (storyId !== '20011') return <main className="grid min-h-screen place-items-center bg-slate-900 text-white">喝采島目前只開放課文 20011</main>;
   if (!student) return <main className="grid min-h-screen place-items-center bg-slate-900 text-white">請使用學生帳號進入喝采島</main>;
+  if (!lesson || STOPS.length === 0) return <main className="grid min-h-screen place-items-center bg-slate-900 text-white">載入中…</main>;
   return (
     <main className="relative h-[100dvh] w-full overflow-hidden bg-[#bbd6dc] font-sans text-[#284650]">
       <div ref={canvasRef} className="absolute inset-0 [&_canvas]:h-full [&_canvas]:w-full" aria-label="喝采島 3D 世界，使用方向鍵或 WASD 移動" />
@@ -207,11 +223,11 @@ export default function ReadingIslandLab() {
       <header className="absolute left-4 top-4 z-10 max-w-[calc(100vw-8rem)] rounded-2xl border border-white/70 bg-[#f8f2df]/90 px-4 py-3 shadow-xl backdrop-blur-md md:left-7 md:top-7 md:px-6 md:py-4">
         <p className="text-[10px] font-bold tracking-[0.25em] text-[#a87345] md:text-xs">國語四上 · 故事冒險</p>
         <h1 className="font-serif text-2xl font-black tracking-wider md:text-3xl">喝采島</h1>
-        <p className="max-w-72 text-xs font-medium text-[#526969] md:text-sm">{lesson?.title ?? '贏得喝采的輸家'} · 掌聲藏在六個詞裡</p>
-        <div className="mt-2 flex items-center gap-2 text-xs font-bold"><span>{doneIndexes.length} / 10 座亮燈</span><span className="h-2 w-20 overflow-hidden rounded-full bg-[#d9dfd5]"><span className="block h-full rounded-full bg-amber-500 transition-all" style={{ width: `${doneIndexes.length * 10}%` }} /></span></div>
+        <p className="max-w-72 text-xs font-medium text-[#526969] md:text-sm">{lesson?.title ?? ''} · {BABIES.length} 個字詞寶寶藏在島上</p>
+        <div className="mt-2 flex items-center gap-2 text-xs font-bold"><span>{doneIndexes.length} / {STOPS.length} 座亮燈</span><span className="h-2 w-20 overflow-hidden rounded-full bg-[#d9dfd5]"><span className="block h-full rounded-full bg-amber-500 transition-all" style={{ width: `${(doneIndexes.length / Math.max(1, STOPS.length)) * 100}%` }} /></span></div>
       </header>
       <div className="absolute right-4 top-4 z-10 rounded-2xl border border-white/60 bg-[#233e4b]/85 px-3 py-2 text-right text-xs font-bold text-[#fff1d0] shadow-lg md:right-7 md:top-7 md:px-4 md:py-3">
-        <div>第一幕 · 發生了什麼</div><div className="mt-1 text-[10px] text-white/70">自由探索港口、長廊、劇場</div>
+        <div>第一幕 · 發生了什麼</div><div className="mt-1 text-[10px] text-white/70">自由探索{STOPS.filter((s) => s.zone === 0).map((s) => s.name).join('、')}</div>
       </div>
       <div className="absolute bottom-4 left-4 z-10 hidden rounded-xl border border-white/60 bg-[#f9f5e9]/90 px-4 py-2 text-xs font-semibold shadow-lg md:block">WASD / 方向鍵移動　·　空白鍵跳　·　拖曳旋轉視角</div>
       <div className="absolute bottom-5 left-5 z-10 flex items-end gap-4 md:hidden">
@@ -237,7 +253,7 @@ export default function ReadingIslandLab() {
       <div className="absolute bottom-5 right-5 z-10 hidden rounded-xl border border-white/60 bg-[#f9f5e9]/85 px-3 py-2 text-[11px] font-bold shadow-lg md:block">位置 {position.x.toFixed(0)}, {position.z.toFixed(0)} · 迷霧 {unlockedZone === 0 ? '未散' : '正散開'}</div>
       <aside className="absolute right-4 top-28 z-10 hidden w-28 flex-col gap-1 rounded-2xl border border-white/60 bg-[#f8f3e5]/85 p-2 text-center shadow-lg lg:flex" aria-label="文字寶寶">
         <p className="text-[11px] font-black">文字寶寶</p>
-        {BABIES.map((baby, index) => <div key={baby.name} className="flex items-center gap-1 text-[10px] font-semibold"><img src={`/lab-island/sprites/${baby.art}`} alt="" className={`h-7 w-7 object-contain ${completed.some((step) => step.startsWith(index === 5 ? 'vocab-review' : 'vocab-definition')) ? '' : 'grayscale opacity-60'}`} /><span>{baby.name}</span></div>)}
+        {BABIES.map((baby) => <div key={baby.name} className="flex items-center gap-1 text-[10px] font-semibold"><img src={`/lab-island/sprites/${baby.art}`} alt="" className={`h-7 w-7 object-contain ${completed.some((step) => step.startsWith('vocab-definition') || step.startsWith('vocab-review')) ? '' : 'grayscale opacity-60'}`} /><span>{baby.name}</span></div>)}
       </aside>
       {coldOpen && (
         <button type="button" onClick={enterIsland} className="absolute inset-0 z-[60] flex flex-col items-center justify-center gap-6 overflow-hidden bg-[#03101c] text-[#f6dca6]" aria-label="點一下，進入喝采島">
@@ -268,9 +284,9 @@ export default function ReadingIslandLab() {
           </div>
           <style>{'@keyframes islandMote{0%{transform:translateY(0);opacity:0}15%{opacity:.9}100%{transform:translateY(-105vh) translateX(3vw);opacity:0}}@keyframes islandKenBurns{from{transform:scale(1.02);opacity:.2}12%{opacity:1}to{transform:scale(1.12);opacity:1}}'}</style>
           <div className="relative w-full max-w-2xl rounded-3xl border border-[#f8e5bd]/50 bg-[#142f45]/90 p-6 shadow-2xl backdrop-blur-md md:p-8">
-            <div className="mb-3 flex justify-between text-xs font-bold tracking-widest text-[#f5cf91]"><span>{opening + 1} / 6</span><span>{OPENING[opening][0]}</span></div>
+            <div className="mb-3 flex justify-between text-xs font-bold tracking-widest text-[#f5cf91]"><span>{opening + 1} / {OPENING.length}</span><span>{OPENING[opening][0]}</span></div>
             <p className="min-h-16 font-serif text-xl font-bold leading-relaxed md:text-2xl">{OPENING[opening][1]}</p>
-            {opening === 5 ? <div className="mt-5 flex flex-wrap gap-3"><button type="button" onClick={() => finishOpening(() => openModule(0))} className="rounded-xl bg-[#eac78d] px-6 py-3 font-bold text-[#244653]">聽這句</button><button type="button" onClick={() => finishOpening()} className="rounded-xl border border-white/70 px-6 py-3 font-bold">直接上岸走</button></div> : <button type="button" onClick={() => { audioRef.current?.cue('whoosh'); setOpening(opening + 1); }} className="mt-5 rounded-xl bg-[#eac78d] px-7 py-3 font-bold text-[#244653]">繼續</button>}
+            {opening === OPENING.length - 1 ? <div className="mt-5 flex flex-wrap gap-3"><button type="button" onClick={() => finishOpening(() => openModule(0))} className="rounded-xl bg-[#eac78d] px-6 py-3 font-bold text-[#244653]">聽這句</button><button type="button" onClick={() => finishOpening()} className="rounded-xl border border-white/70 px-6 py-3 font-bold">直接上岸走</button></div> : <button type="button" onClick={() => { audioRef.current?.cue('whoosh'); setOpening(opening + 1); }} className="mt-5 rounded-xl bg-[#eac78d] px-7 py-3 font-bold text-[#244653]">繼續</button>}
           </div>
         </div>
       )}
