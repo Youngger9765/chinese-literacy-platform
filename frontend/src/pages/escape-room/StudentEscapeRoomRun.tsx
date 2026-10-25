@@ -4,6 +4,7 @@ import AbilityBar from '../../components/escape-room/AbilityBar';
 import ChoiceButtons from '../../components/escape-room/ChoiceButtons';
 import MistBar from '../../components/escape-room/MistBar';
 import TeammateRow from '../../components/escape-room/TeammateRow';
+import StemWithTarget from '../../components/live-quiz/StemWithTarget';
 import { usePrefersReducedMotion } from '../../components/pk/usePrefersReducedMotion';
 import { useAuth } from '../../contexts/AuthContext';
 import {
@@ -28,6 +29,30 @@ function questionTitle(state: EscapeRoomRunState): string {
 function questionKey(question: SafeQuestion | null): string {
   if (!question) return '';
   return `${question.chamber_index ?? 'gate-or-rescue'}:${question.stem}`;
+}
+
+// #3754: "這什麼爛題目啊！你要寫清楚你再問哪一個字啊" — `StemWithTarget`
+// already bolds/underlines the asked character inline (same mechanism PK/
+// team-arena/live-quiz use), but a bare highlighted character with no
+// question around it still isn't an unambiguous question. This spells it
+// out: "句中的「覺」怎麼唸？". Only zhuyin rounds carry `extra.target_index`
+// (vocab/comprehension questions don't) — anything else renders nothing.
+function targetCharPrompt(question: SafeQuestion | null): string | null {
+  const index = question?.extra?.target_index;
+  if (question == null || index == null || index < 0 || index >= question.stem.length) return null;
+  return `句中的「${question.stem[index]}」怎麼唸？`;
+}
+
+// #3754: "剩餘 0 秒 然後呢？？？？" — once the visible countdown reaches
+// zero there must be a definite result, not silence while `ChoiceButtons`
+// keeps sitting there waiting for a click. Everything that actually
+// RESOLVES a timed-out question lives server-side (`_maybe_expire_current_
+// question` in `escape_room/engine.py`, the same lazy no-cron pattern PK's
+// `advance_if_needed` uses) — this string is purely the "we're on it"
+// acknowledgement shown for however briefly it takes the poll below to
+// come back with the resolved state.
+function timeRemainingLabel(secondsRemaining: number): string {
+  return secondsRemaining > 0 ? `剩餘 ${secondsRemaining} 秒` : '時間到了，正在判定...';
 }
 
 const StudentEscapeRoomRun: React.FC = () => {
@@ -118,6 +143,20 @@ const StudentEscapeRoomRun: React.FC = () => {
     return Math.max(0, Math.ceil((allowedMs - (now - questionStartedAt)) / 1000));
   }, [now, questionStartedAt, visibleQuestion]);
 
+  // #3754: the countdown hitting zero is purely a client-side visual —
+  // nobody was asking the server whether the question actually expired, so
+  // the screen just sat there forever. Once it hits 0, poll until the
+  // server resolves it (its own lazy check runs on every `get_run_state`
+  // call) and a new question/state replaces this one. A blocked case (e.g.
+  // a rescue dialog covering the real question, or `use_ability` resetting
+  // its clock) just makes this poll a harmless no-op until it clears.
+  useEffect(() => {
+    if (secondsRemaining !== 0) return undefined;
+    void loadState();
+    const poll = window.setInterval(() => void loadState(), 1000);
+    return () => window.clearInterval(poll);
+  }, [secondsRemaining, loadState]);
+
   if (result) {
     const escaped = result.result === 'escaped';
     return (
@@ -152,8 +191,15 @@ const StudentEscapeRoomRun: React.FC = () => {
           {baseQuestion ? (
             <>
               <p className="text-sm font-semibold text-accent">{questionTitle(state)}</p>
-              <h1 className="mt-3 text-xl font-bold leading-8 sm:text-2xl">{baseQuestion.stem}</h1>
-              {secondsRemaining !== null && <p className="mt-3 text-sm text-on-surface-variant" aria-live="polite">剩餘 {secondsRemaining} 秒</p>}
+              <h1 className="mt-3 text-xl font-bold leading-8 sm:text-2xl">
+                <StemWithTarget stem={baseQuestion.stem} targetIndex={baseQuestion.extra?.target_index} />
+              </h1>
+              {targetCharPrompt(baseQuestion) && (
+                <p className="mt-2 text-sm font-medium text-accent">{targetCharPrompt(baseQuestion)}</p>
+              )}
+              {secondsRemaining !== null && (
+                <p className="mt-3 text-sm text-on-surface-variant" aria-live="polite">{timeRemainingLabel(secondsRemaining)}</p>
+              )}
               <div className="mt-7">
                 <ChoiceButtons
                   options={baseQuestion.options}
@@ -174,8 +220,15 @@ const StudentEscapeRoomRun: React.FC = () => {
           <section className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-xl">
             <p className="text-sm font-semibold text-accent">救援題</p>
             <p className="mt-3 text-sm text-on-surface-variant">{frozenTeammate ? '隊友暫時被定住了，答對這題就能把他帶回隊伍' : '答對這題就能救援隊友'}</p>
-            <h2 className="mt-4 text-xl font-bold leading-8">{state.rescue_question.stem}</h2>
-            {secondsRemaining !== null && <p className="mt-3 text-sm text-on-surface-variant" aria-live="polite">剩餘 {secondsRemaining} 秒</p>}
+            <h2 className="mt-4 text-xl font-bold leading-8">
+              <StemWithTarget stem={state.rescue_question.stem} targetIndex={state.rescue_question.extra?.target_index} />
+            </h2>
+            {targetCharPrompt(state.rescue_question) && (
+              <p className="mt-2 text-sm font-medium text-accent">{targetCharPrompt(state.rescue_question)}</p>
+            )}
+            {secondsRemaining !== null && (
+              <p className="mt-3 text-sm text-on-surface-variant" aria-live="polite">{timeRemainingLabel(secondsRemaining)}</p>
+            )}
             <div className="mt-6"><ChoiceButtons options={state.rescue_question.options} disabled={busy} onSelect={handleRescueChoice} /></div>
           </section>
         </div>

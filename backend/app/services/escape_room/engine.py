@@ -104,11 +104,42 @@ def _safe_question(question: dict, chamber_index: int | None) -> dict:
         ],
         "seconds": payload.get("seconds", 0),
         "extra_time_ms": payload.get("extra_time_ms", 0),
+        # #3754: dropped this key entirely — a zhuyin round's `extra` carries
+        # `{"target_index": N}` (the position in `stem` the question is
+        # actually asking about; the same character can appear more than
+        # once in a sentence). pk/engine.py and team_arena/engine.py's own
+        # safe-view builders both already pass this straight through
+        # (`"extra": payload.get("extra")`); this whitelist was written
+        # independently and missed it, so a 迷城密室 zhuyin question showed
+        # only the bare sentence with no way to tell which character was
+        # being asked about.
+        "extra": payload.get("extra"),
     }
 
 
 def _set_last_event(run: EscapeRoomRun, event: str) -> None:
     run.gate_snapshot["last_event"] = event
+
+
+def _question_expired(question: dict | None, started_at_iso: str | None) -> bool:
+    """#3754: "剩餘 0 秒 然後呢？？？？" — the countdown on screen is purely
+    client-side (`StudentEscapeRoomRun.tsx`'s own `setInterval`); nothing on
+    this side ever checked it, so a student who let the clock run out just
+    sat on the same question forever with live `ChoiceButtons` still
+    waiting for a click that the UI gave no indication was even still
+    expected. This is the server-side half: the one place that knows
+    whether a question's own time budget has actually elapsed.
+    """
+    if question is None or not started_at_iso:
+        return False
+    payload = question.get("payload", {})
+    allowed_ms = payload.get("seconds", 0) * 1000 + payload.get("extra_time_ms", 0)
+    if allowed_ms <= 0:
+        return False
+    started_at = datetime.fromisoformat(started_at_iso)
+    if started_at.tzinfo is None:
+        started_at = started_at.replace(tzinfo=timezone.utc)
+    return (_now() - started_at).total_seconds() * 1000 >= allowed_ms
 
 
 def _maybe_expire(db: Session, run: EscapeRoomRun) -> None:
@@ -129,6 +160,73 @@ def _current_chamber(run: EscapeRoomRun) -> tuple[int, dict] | None:
         if not chamber["unlocked"]:
             return index, chamber
     return None
+
+
+# ---------------------------------------------------------------------------
+# #3754: lazy, no-cron time-up resolution.
+#
+# Same "lazy, no-cron state machine" posture `pk/engine.py`'s
+# `advance_if_needed` documents (see that module's own docstring): every
+# poll (`get_run_state`) and every write (`_ensure_in_progress`, called by
+# `answer_chamber`/`use_rescue`/`answer_gate`/`use_ability`) runs this
+# first. It only ever resolves ONE already-expired question per call (never
+# skips ahead through several at once) — exactly as far as a real answer
+# would have advanced the run, just substituting "no answer" for a click.
+# The frontend pairs this with a poll triggered the instant its own
+# countdown reaches 0 (`StudentEscapeRoomRun.tsx`), so in practice this
+# fires within about a second of the deadline, not whenever the student
+# happens to act next.
+# ---------------------------------------------------------------------------
+
+def _maybe_expire_rescue(run: EscapeRoomRun) -> bool:
+    teammate = next((item for item in run.teammates_state if item["frozen"]), None)
+    if teammate is None:
+        return False
+    question = run.gate_snapshot.get("rescue_question")
+    if not _question_expired(question, teammate.get("frozen_at")):
+        return False
+    _apply_rescue_answer(run, teammate, correct=False)
+    return True
+
+
+def _maybe_expire_chamber(run: EscapeRoomRun) -> bool:
+    # A rescue dialog blocks the base chamber question (the frontend
+    # disables its ChoiceButtons while `rescue_question` is present) — its
+    # clock must not keep burning down unseen behind that overlay.
+    if any(item["frozen"] for item in run.teammates_state):
+        return False
+    current = _current_chamber(run)
+    if current is None:
+        return False
+    _, chamber = current
+    question = chamber["questions"][chamber["current_question"]]
+    if not _question_expired(question, chamber.get("started_at")):
+        return False
+    _apply_chamber_answer(run, chamber, correct=False)
+    return True
+
+
+def _maybe_expire_gate(run: EscapeRoomRun) -> bool:
+    if any(item["frozen"] for item in run.teammates_state):
+        return False
+    if not run.chambers_snapshot or not all(item["unlocked"] for item in run.chambers_snapshot):
+        return False
+    questions = run.gate_snapshot.get("questions", [])
+    question = questions[0] if questions else None
+    if not _question_expired(question, run.gate_snapshot.get("started_at")):
+        return False
+    _apply_gate_answer(run, correct=False)
+    return True
+
+
+def _maybe_expire_current_question(db: Session, run: EscapeRoomRun) -> None:
+    if run.result != "in_progress":
+        return
+    expired = _maybe_expire_rescue(run)
+    expired = _maybe_expire_chamber(run) or expired
+    expired = _maybe_expire_gate(run) or expired
+    if expired:
+        _persist(db, run)
 
 
 def build_run_state(run: EscapeRoomRun) -> dict:
@@ -172,6 +270,7 @@ def build_run_state(run: EscapeRoomRun) -> dict:
 
 def get_run_state(db: Session, run: EscapeRoomRun) -> dict:
     _maybe_expire(db, run)
+    _maybe_expire_current_question(db, run)
     return build_run_state(run)
 
 
@@ -189,22 +288,16 @@ def _freeze_teammate(run: EscapeRoomRun) -> bool:
 
 def _ensure_in_progress(db: Session, run: EscapeRoomRun) -> None:
     _maybe_expire(db, run)
+    _maybe_expire_current_question(db, run)
     if run.result != "in_progress":
         raise HTTPException(status_code=409, detail="這一局已經結束了")
 
 
-def answer_chamber(db: Session, run: EscapeRoomRun, user: User, chamber_index: int, choice_key: str) -> dict:
-    _ensure_in_progress(db, run)
-    if run.student_id != user.id:
-        raise HTTPException(status_code=403, detail="這一局迷城密室不屬於你")
-    if chamber_index < 0 or chamber_index >= len(run.chambers_snapshot):
-        raise HTTPException(status_code=400, detail="找不到這座機關")
-    next_index = next((i for i, item in enumerate(run.chambers_snapshot) if not item["unlocked"]), None)
-    if next_index is None or chamber_index != next_index:
-        raise HTTPException(status_code=409, detail="請依序解開機關")
-    chamber = run.chambers_snapshot[chamber_index]
-    question = chamber["questions"][chamber["current_question"]]
-    correct = choice_key == question["payload"].get("correct_key")
+def _apply_chamber_answer(run: EscapeRoomRun, chamber: dict, correct: bool) -> None:
+    """The one place a chamber question gets resolved — shared by an actual
+    `answer_chamber` submission and `_maybe_expire_chamber`'s auto-resolve
+    (#3754), which calls this with `correct=False` (no answer = wrong,
+    exactly like `answer_gate`/`use_rescue` already treat a bad guess)."""
     if correct:
         run.mist_distance = min(100, run.mist_distance + _MIST_STEP)
         chamber["correct_count"] += 1
@@ -221,9 +314,61 @@ def answer_chamber(db: Session, run: EscapeRoomRun, user: User, chamber_index: i
         if not chamber["unlocked"]:
             chamber["current_question"] = 0
             chamber["correct_count"] = 0
+        elif all(item["unlocked"] for item in run.chambers_snapshot):
+            # #3754: this chamber answer is the exact moment the gate
+            # question first becomes reachable — start ITS timeout clock
+            # here. `gate_snapshot["started_at"]` was otherwise still
+            # sitting at `start_run`'s timestamp, which could make the gate
+            # question look instantly expired the moment it appeared.
+            run.gate_snapshot["started_at"] = _iso_now()
     chamber["started_at"] = _iso_now()
+
+
+def answer_chamber(db: Session, run: EscapeRoomRun, user: User, chamber_index: int, choice_key: str) -> dict:
+    _ensure_in_progress(db, run)
+    if run.student_id != user.id:
+        raise HTTPException(status_code=403, detail="這一局迷城密室不屬於你")
+    if chamber_index < 0 or chamber_index >= len(run.chambers_snapshot):
+        raise HTTPException(status_code=400, detail="找不到這座機關")
+    next_index = next((i for i, item in enumerate(run.chambers_snapshot) if not item["unlocked"]), None)
+    if next_index is None or chamber_index != next_index:
+        raise HTTPException(status_code=409, detail="請依序解開機關")
+    chamber = run.chambers_snapshot[chamber_index]
+    question = chamber["questions"][chamber["current_question"]]
+    correct = choice_key == question["payload"].get("correct_key")
+    _apply_chamber_answer(run, chamber, correct)
     _persist(db, run)
     return build_run_state(run)
+
+
+def _refresh_blocked_question_timer(run: EscapeRoomRun) -> None:
+    """#3754: a successful rescue unblocks whichever base question was
+    sitting behind it — give that question a fresh full countdown instead
+    of resuming a clock that kept ticking the whole time the student was
+    dealing with the rescue dialog (which would otherwise often read as
+    already expired the instant the rescue closes)."""
+    current = _current_chamber(run)
+    if current is not None:
+        _, chamber = current
+        chamber["started_at"] = _iso_now()
+    elif all(item["unlocked"] for item in run.chambers_snapshot):
+        run.gate_snapshot["started_at"] = _iso_now()
+
+
+def _apply_rescue_answer(run: EscapeRoomRun, teammate: dict, correct: bool) -> None:
+    if correct:
+        teammate["frozen"] = False
+        teammate["frozen_at"] = None
+        run.mist_distance = min(100, run.mist_distance + _MIST_STEP)
+        _set_last_event(run, "rescue")
+        _refresh_blocked_question_timer(run)
+    else:
+        # #3754: a wrong guess already carried no penalty — a timed-out
+        # attempt (no guess at all) gets the same treatment, but must still
+        # restart this teammate's own clock, or the very next poll would
+        # see the exact same already-expired state and "expire" it again
+        # every call forever instead of giving the student a fresh window.
+        teammate["frozen_at"] = _iso_now()
 
 
 def use_rescue(db: Session, run: EscapeRoomRun, user: User, choice_key: str) -> dict:
@@ -235,13 +380,24 @@ def use_rescue(db: Session, run: EscapeRoomRun, user: User, choice_key: str) -> 
         raise HTTPException(status_code=409, detail="現在沒有需要救援的隊友")
     question = run.gate_snapshot.get("rescue_question")
     correct = bool(question) and choice_key == question["payload"].get("correct_key")
-    if correct:
-        teammate["frozen"] = False
-        teammate["frozen_at"] = None
-        run.mist_distance = min(100, run.mist_distance + _MIST_STEP)
-        _set_last_event(run, "rescue")
+    _apply_rescue_answer(run, teammate, correct)
     _persist(db, run)
     return build_run_state(run)
+
+
+def _apply_gate_answer(run: EscapeRoomRun, correct: bool) -> None:
+    run.gate_snapshot["answered"] = True
+    if correct and not any(item["frozen"] for item in run.teammates_state):
+        run.result = "escaped"
+        run.completed_at = _now()
+        _set_last_event(run, "escape")
+    elif not correct:
+        _set_last_event(run, "mist")
+    # #3754: the gate question can be retried (a wrong/timed-out attempt
+    # doesn't end the run) — restart its clock on every attempt, same as a
+    # chamber question already does, so it can expire again rather than
+    # reading as instantly expired on the very next poll.
+    run.gate_snapshot["started_at"] = _iso_now()
 
 
 def answer_gate(db: Session, run: EscapeRoomRun, user: User, choice_key: str) -> dict:
@@ -252,13 +408,7 @@ def answer_gate(db: Session, run: EscapeRoomRun, user: User, choice_key: str) ->
         raise HTTPException(status_code=409, detail="四座機關都解開後才能前往大門")
     question = run.gate_snapshot["questions"][0]
     correct = choice_key == question["payload"].get("correct_key")
-    run.gate_snapshot["answered"] = True
-    if correct and not any(item["frozen"] for item in run.teammates_state):
-        run.result = "escaped"
-        run.completed_at = _now()
-        _set_last_event(run, "escape")
-    elif not correct:
-        _set_last_event(run, "mist")
+    _apply_gate_answer(run, correct)
     _persist(db, run)
     return build_run_state(run)
 

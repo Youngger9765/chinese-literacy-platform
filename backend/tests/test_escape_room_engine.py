@@ -322,3 +322,116 @@ def test_hint_ability_works_on_gate_question_when_all_chambers_unlocked(run_fact
     assert options_after == options_before - 1
 
 
+# ---------------------------------------------------------------------------
+# #3754 "剩餘 0 秒 然後呢？？？？" — a question that nobody answered within its
+# own time budget must not leave the run frozen forever. Every `_round()`
+# fixture question carries `seconds: 30` and no `extra_time_ms`, so 31s is
+# always past its deadline.
+# ---------------------------------------------------------------------------
+
+class TestQuestionTimeout:
+    def test_chamber_timeout_resolves_as_wrong_and_advances(self, run_factory, db_session, clock):
+        run, user = run_factory()
+        run.mist_distance = 50
+        db_session.commit()
+        expired_stem = _current_question(run)["payload"]["stem"]
+
+        clock.advance(seconds=31)
+        state = svc.get_run_state(db_session, run)
+
+        assert state["mist_distance"] == 40  # scored exactly like a wrong answer-click
+        assert run.chambers_snapshot[0]["current_question"] == 1
+        assert state["current_chamber"]["stem"] != expired_stem  # a NEW question is now showing
+
+    def test_timeout_resolves_one_question_per_poll_not_a_skip_ahead(self, run_factory, db_session, clock):
+        """Mirrors `pk.engine.advance_if_needed`'s own "lazy, no-cron" contract:
+        a long-idle student catches up one step per poll, never several at once."""
+        run, user = run_factory()
+        clock.advance(seconds=600)  # wildly past more than one question's own budget
+
+        svc.get_run_state(db_session, run)
+        assert run.chambers_snapshot[0]["current_question"] == 1
+        assert not run.chambers_snapshot[0]["unlocked"]
+
+        # Same instant, polled again — question 2's own clock only just
+        # started (reset to "now" by the first resolve), so it must NOT
+        # also already read as expired.
+        svc.get_run_state(db_session, run)
+        assert run.chambers_snapshot[0]["current_question"] == 1
+
+    def test_chamber_timeout_is_blocked_while_a_teammate_needs_rescue(self, run_factory, db_session, clock):
+        run, user = run_factory()
+        run.mist_distance = 0
+        db_session.commit()
+        svc.answer_chamber(db_session, run, user, 0, "B")  # wrong at mist=0 -> freezes a teammate
+        assert any(t["frozen"] for t in run.teammates_state)
+        current_question_before = run.chambers_snapshot[0]["current_question"]
+
+        clock.advance(seconds=31)
+        state = svc.get_run_state(db_session, run)
+
+        assert state["rescue_question"] is not None
+        # The base chamber question is disabled behind the rescue overlay
+        # (ChoiceButtons `disabled={... || Boolean(state.rescue_question)}`)
+        # — its own clock must not keep burning down unseen.
+        assert run.chambers_snapshot[0]["current_question"] == current_question_before
+
+    def test_rescue_timeout_carries_no_penalty_but_restarts_its_own_clock(self, run_factory, db_session, clock):
+        run, user = run_factory()
+        run.mist_distance = 0
+        db_session.commit()
+        svc.answer_chamber(db_session, run, user, 0, "B")
+        frozen_slug = next(t["slug"] for t in run.teammates_state if t["frozen"])
+        before_mist = run.mist_distance
+        rescue_seconds = run.gate_snapshot["rescue_question"]["payload"].get("seconds", 30)
+
+        clock.advance(seconds=rescue_seconds + 1)
+        state = svc.get_run_state(db_session, run)
+
+        assert state["rescue_question"] is not None  # still needs rescue — same as a wrong guess
+        assert state["mist_distance"] == before_mist  # no penalty, matching a manual wrong guess
+        still_frozen = next(t for t in run.teammates_state if t["slug"] == frozen_slug)
+        assert still_frozen["frozen"]
+        frozen_at_after_expiry = still_frozen["frozen_at"]
+
+        # Polled again at the SAME instant: must not expire (and reset the
+        # clock) a second time, or this would loop forever on every poll.
+        svc.get_run_state(db_session, run)
+        assert next(t for t in run.teammates_state if t["slug"] == frozen_slug)["frozen_at"] == frozen_at_after_expiry
+
+    def test_gate_timeout_resolves_as_wrong_and_stays_retryable(self, run_factory, db_session, clock):
+        run, user = run_factory()
+        _unlock_all(db_session, run, user)
+        gate_seconds = run.gate_snapshot["questions"][0]["payload"].get("seconds", 30)
+
+        clock.advance(seconds=gate_seconds + 1)
+        state = svc.get_run_state(db_session, run)
+
+        assert state["status"] == "in_progress"  # a timeout never ends the run outright
+        assert state["gate_question"] is not None  # same question, retryable — like a wrong guess
+        assert run.gate_snapshot["answered"] is True
+
+    def test_gate_clock_starts_when_it_first_becomes_reachable(self, run_factory, db_session, clock):
+        """The gate question must not read as already-expired the instant
+        it appears just because `gate_snapshot["started_at"]` was still
+        sitting at run-creation time."""
+        run, user = run_factory()
+        for index in range(3):
+            chamber = run.chambers_snapshot[index]
+            while not chamber["unlocked"]:
+                svc.answer_chamber(db_session, run, user, index, "A")
+                chamber = run.chambers_snapshot[index]
+
+        clock.advance(seconds=400)  # long past any one question's own budget
+        chamber = run.chambers_snapshot[3]
+        while not chamber["unlocked"]:
+            svc.answer_chamber(db_session, run, user, 3, "A")
+            chamber = run.chambers_snapshot[3]
+        assert all(c["unlocked"] for c in run.chambers_snapshot)
+
+        state = svc.get_run_state(db_session, run)
+        assert state["status"] == "in_progress"
+        assert run.gate_snapshot["answered"] is False  # not auto-resolved before the student even saw it
+        assert state["gate_question"] is not None
+
+
