@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import AbilityBar from '../../components/escape-room/AbilityBar';
 import ChoiceButtons from '../../components/escape-room/ChoiceButtons';
@@ -26,11 +26,6 @@ function questionTitle(state: EscapeRoomRunState): string {
   return '大門題';
 }
 
-function questionKey(question: SafeQuestion | null): string {
-  if (!question) return '';
-  return `${question.chamber_index ?? 'gate-or-rescue'}:${question.stem}`;
-}
-
 // #3754: "這什麼爛題目啊！你要寫清楚你再問哪一個字啊" — `StemWithTarget`
 // already bolds/underlines the asked character inline (same mechanism PK/
 // team-arena/live-quiz use), but a bare highlighted character with no
@@ -55,6 +50,49 @@ function timeRemainingLabel(secondsRemaining: number): string {
   return secondsRemaining > 0 ? `剩餘 ${secondsRemaining} 秒` : '時間到了，正在判定...';
 }
 
+// #3770: "救援題與主題同時逾時，畫面永久卡死在「正在判定…」" — the previous
+// countdown was a client-started local timer reset only when `questionKey()`
+// (chamber_index + stem) changed. `gate_question` and `rescue_question` are
+// the SAME object reused on every retry (their stem never changes), so a
+// retried attempt — including the lazy server-side auto-resolve this screen
+// itself triggers below — looked, to this key, identical to the one before
+// it. The countdown reached 0 once and then could never tell a fresh window
+// had started, because nothing ever told it one had.
+//
+// Server-authoritative instead, same pattern `PkCountdownRing`/
+// `CountdownBar.tsx` already use: every question now carries its own
+// `started_at` (server time), paired with `EscapeRoomRunState.server_now`
+// for clock-skew correction. A retried attempt gets a genuinely new
+// `started_at` even with an identical stem, so this recomputes a fresh
+// countdown from it — no "did the content change" guessing involved.
+function useRemainingMs(startedAt: string | null, seconds: number, extraTimeMs: number, serverNow: string | null): number | null {
+  const [remaining, setRemaining] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!startedAt || !serverNow) {
+      setRemaining(null);
+      return undefined;
+    }
+    const startMs = new Date(startedAt).getTime();
+    const serverNowMs = new Date(serverNow).getTime();
+    const localNowMs = Date.now();
+    // Sampled once per (startedAt, serverNow) pair — i.e. once per attempt,
+    // not continuously — same as PkCountdownRing/CountdownBar.
+    const skew = serverNowMs - localNowMs;
+    const limitMs = seconds * 1000 + extraTimeMs;
+
+    const tick = () => {
+      const elapsed = Date.now() + skew - startMs;
+      setRemaining(Math.max(0, limitMs - elapsed));
+    };
+    tick();
+    const id = window.setInterval(tick, 250);
+    return () => window.clearInterval(id);
+  }, [startedAt, seconds, extraTimeMs, serverNow]);
+
+  return remaining;
+}
+
 const StudentEscapeRoomRun: React.FC = () => {
   const { runId } = useParams<{ runId: string }>();
   const numericRunId = Number(runId);
@@ -65,20 +103,8 @@ const StudentEscapeRoomRun: React.FC = () => {
   const [result, setResult] = useState<EscapeRoomResult | null>(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
-  const [questionStartedAt, setQuestionStartedAt] = useState(Date.now());
-  const [now, setNow] = useState(Date.now());
 
   const visibleQuestion = state?.rescue_question ?? state?.current_chamber ?? state?.gate_question ?? null;
-  const visibleQuestionKey = questionKey(visibleQuestion);
-
-  useEffect(() => {
-    const startedAt = Date.now();
-    setQuestionStartedAt(startedAt);
-    setNow(startedAt);
-    if (!visibleQuestionKey) return undefined;
-    const timer = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => window.clearInterval(timer);
-  }, [visibleQuestionKey]);
 
   const loadResult = useCallback(async () => {
     if (!token || !Number.isFinite(numericRunId)) return;
@@ -137,11 +163,13 @@ const StudentEscapeRoomRun: React.FC = () => {
     void applyState(() => activateEscapeRoomAbility(token, numericRunId, { ability_key: abilityKey }));
   };
 
-  const secondsRemaining = useMemo(() => {
-    if (!visibleQuestion) return null;
-    const allowedMs = visibleQuestion.seconds * 1000 + visibleQuestion.extra_time_ms;
-    return Math.max(0, Math.ceil((allowedMs - (now - questionStartedAt)) / 1000));
-  }, [now, questionStartedAt, visibleQuestion]);
+  const remainingMs = useRemainingMs(
+    visibleQuestion?.started_at ?? null,
+    visibleQuestion?.seconds ?? 0,
+    visibleQuestion?.extra_time_ms ?? 0,
+    state?.server_now ?? null,
+  );
+  const secondsRemaining = remainingMs === null ? null : Math.ceil(remainingMs / 1000);
 
   // #3754: the countdown hitting zero is purely a client-side visual —
   // nobody was asking the server whether the question actually expired, so

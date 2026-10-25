@@ -91,7 +91,7 @@ def get_run_for_user(db: Session, run_id: int, user: User) -> EscapeRoomRun:
     return run
 
 
-def _safe_question(question: dict, chamber_index: int | None) -> dict:
+def _safe_question(question: dict, chamber_index: int | None, started_at_iso: str | None = None) -> dict:
     payload = question.get("payload", {})
     removed = set(payload.get("removed_choice_keys", []))
     return {
@@ -114,6 +114,18 @@ def _safe_question(question: dict, chamber_index: int | None) -> dict:
         # only the bare sentence with no way to tell which character was
         # being asked about.
         "extra": payload.get("extra"),
+        # #3770: the gate/rescue question is the SAME dict reused across
+        # every retry (`gate_snapshot["questions"][0]` / `["rescue_question"]`
+        # never change), so a stem-keyed "did the question change" check on
+        # the frontend can never tell a retried attempt from the one before
+        # it. Server-authoritative "when did THIS attempt start" (same
+        # pattern `PkCountdownRing`/`CountdownBar` already use) fixes that:
+        # the frontend now recomputes its countdown from this timestamp
+        # every poll instead of inferring a reset from content never
+        # changing. `None` for a question type this build site doesn't pass
+        # one for (kept optional so callers that have no timer concept yet
+        # don't need updating).
+        "started_at": started_at_iso,
     }
 
 
@@ -234,17 +246,23 @@ def build_run_state(run: EscapeRoomRun) -> dict:
     current_question = None
     if current is not None:
         index, chamber = current
-        current_question = _safe_question(chamber["questions"][chamber["current_question"]], index)
+        current_question = _safe_question(
+            chamber["questions"][chamber["current_question"]], index, chamber.get("started_at")
+        )
     rescue_question = None
-    if run.result == "in_progress" and any(item["frozen"] for item in run.teammates_state):
-        question = run.gate_snapshot.get("rescue_question")
-        if question is not None:
-            rescue_question = _safe_question(question, None)
+    if run.result == "in_progress":
+        # #3770: the specific frozen teammate, not just "is anyone frozen" —
+        # its own `frozen_at` is this rescue attempt's timer anchor.
+        frozen_teammate = next((item for item in run.teammates_state if item["frozen"]), None)
+        if frozen_teammate is not None:
+            question = run.gate_snapshot.get("rescue_question")
+            if question is not None:
+                rescue_question = _safe_question(question, None, frozen_teammate.get("frozen_at"))
     gate_question = None
     if run.result == "in_progress" and current is None:
         questions = run.gate_snapshot.get("questions", [])
         if questions:
-            gate_question = _safe_question(questions[0], None)
+            gate_question = _safe_question(questions[0], None, run.gate_snapshot.get("started_at"))
     story = resolve_story_for_run(run.story_pack_key)
     used_abilities = [
         ability for ability in ("hint", "extra_time", "shield") if run.abilities_used.get(ability)
@@ -265,6 +283,10 @@ def build_run_state(run: EscapeRoomRun) -> dict:
         "gate_question": gate_question,
         "story_intro": story["intro"],
         "mist_message": DEFAULT_DIALOGUE.get(last_event, DEFAULT_DIALOGUE["mist"]),
+        # #3770: pairs with each question's `started_at` for clock-skew
+        # correction — same `server_now` role `pk.engine.build_match_state`
+        # already exposes.
+        "server_now": _iso_now(),
     }
 
 

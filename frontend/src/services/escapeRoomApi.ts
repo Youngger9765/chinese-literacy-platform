@@ -57,6 +57,14 @@ export interface SafeQuestion {
    *  （同一個字可能在句子裡出現不只一次）。跟 pkApi.ts / teamArenaApi.ts /
    *  liveQuizApi.ts 的 `extra` 欄位同一個形狀。 */
   extra?: { target_index: number } | null;
+  /** #3770: ISO timestamp — when THIS attempt's countdown started (server
+   *  time). gate/rescue questions are the same object reused every retry
+   *  (their `stem` never changes), so this is the only way the client can
+   *  tell a retried attempt apart from the one before it — pair with
+   *  `EscapeRoomRunState.server_now` for clock-skew correction, same
+   *  pattern `PkCountdownRing`/`CountdownBar` already use. `null` only for
+   *  a question with no active timer. */
+  started_at: string | null;
 }
 
 export interface EscapeRoomTeammate {
@@ -76,6 +84,9 @@ export interface EscapeRoomRunState {
   gate_question: SafeQuestion | null;
   story_intro: string;
   mist_message: string;
+  /** #3770: ISO timestamp from the server, read alongside each question's
+   *  own `started_at` for clock-skew correction. */
+  server_now: string;
 }
 
 export interface EscapeRoomStartResponse {
