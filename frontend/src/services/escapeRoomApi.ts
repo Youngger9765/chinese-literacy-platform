@@ -53,6 +53,10 @@ export interface SafeQuestion {
   options: EscapeRoomOption[];
   seconds: number;
   extra_time_ms: number;
+  /** #3754: zhuyin 題的 `{ target_index: N }` — 標出 stem 裡在問哪一個字
+   *  （同一個字可能在句子裡出現不只一次）。跟 pkApi.ts / teamArenaApi.ts /
+   *  liveQuizApi.ts 的 `extra` 欄位同一個形狀。 */
+  extra?: { target_index: number } | null;
 }
 
 export interface EscapeRoomTeammate {
