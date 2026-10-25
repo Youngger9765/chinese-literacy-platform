@@ -313,8 +313,23 @@ const StudentTeamArenaPlay: React.FC = () => {
     const bothFull = state.sides.a.seated === state.team_size && state.sides.b.seated === state.team_size;
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-surface px-6 py-10 text-center">
-        <p className="mb-1 text-sm text-on-surface-variant">比賽代碼</p>
-        <p className="mb-6 font-mono text-4xl font-bold tracking-widest text-accent">{state.code}</p>
+        {/* #3777 (game-academy audit r2 P1-2): StudentTeamArenaJoin's
+            choose screen already got a hero banner with this tower
+            illustration (#3761 round 3) — it never extended to THIS
+            screen, the in-game waiting room shown right after
+            creating/joining a room. Same asset, same gradient, so it
+            reads as one continuous flow rather than "banner, then
+            suddenly plain text" the moment a room exists. */}
+        <div className="mb-6 w-full max-w-sm overflow-hidden rounded-3xl bg-gradient-to-br from-[#1FA6A6] to-[#E0792B] px-5 py-6 shadow-sm">
+          <img
+            src="/story-assets/team-arena-hub/icon.png"
+            alt=""
+            aria-hidden="true"
+            className="mx-auto h-16 w-16 object-contain drop-shadow-md"
+          />
+          <p className="mt-2 text-sm text-white/90">比賽代碼</p>
+          <p className="font-mono text-4xl font-bold tracking-widest text-white">{state.code}</p>
+        </div>
         <div className="flex w-full max-w-sm gap-3">
           {(['a', 'b'] as const).map((side) => (
             <div key={side} className="flex-1 rounded-xl border border-surface-dim p-3">
