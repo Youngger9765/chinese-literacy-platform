@@ -9,6 +9,7 @@ import { buildStopsFromSequence, buildOpeningForTitle, buildBabiesForVocabulary 
 import type { IslandBaby, IslandStop } from './island/islandTemplate';
 import { createIslandWorld } from './island/createIslandWorld';
 import { ISLAND_STEP_DONE, shouldMarkVisitedOnReturn } from './island/storyMode';
+import IslandListMode from './island/IslandListMode';
 import { createIslandAudio, readMuted, writeMuted, type IslandAudio } from './island/islandAudio';
 
 interface LessonData {
@@ -75,6 +76,7 @@ export default function ReadingIslandLab() {
   const unlockedZone = zoneDone(0) ? (zoneDone(1) ? 2 : 1) : 0;
   const nextIndex = STOPS.findIndex((_, index) => !doneIndexes.includes(index));
   const [mode, setMode] = useState<'first' | 'god'>('first');
+  const [listMode, setListMode] = useState(false);
   const [hovered, setHovered] = useState<number | null>(null);
   const [guide, setGuide] = useState('');
   const prevDone = useRef(0);
@@ -245,6 +247,18 @@ export default function ReadingIslandLab() {
         </div>
       )}
       <button type="button" onClick={() => setMode(mode === 'first' ? 'god' : 'first')} className="absolute bottom-24 right-4 z-20 rounded-full md:bottom-20 border-2 border-white bg-[#233e4b]/90 px-4 py-2 text-sm font-bold text-[#fff1d0] shadow-lg transition hover:scale-105 active:scale-95 md:right-7">{mode === 'first' ? '展開上帝視角' : '回到第一人稱'}</button>
+      {opening < 0 && module === null && door === null && (
+        <button type="button" aria-label="切換清單模式" onClick={() => setListMode(true)} className="absolute bottom-24 left-4 z-20 rounded-full md:bottom-20 border-2 border-white bg-[#233e4b]/90 px-4 py-2 text-sm font-bold text-[#fff1d0] shadow-lg transition hover:scale-105 active:scale-95 md:left-7">清單模式</button>
+      )}
+      {listMode && (
+        <IslandListMode
+          stops={STOPS}
+          doneIndexes={doneIndexes}
+          unlockedZone={unlockedZone}
+          onClose={() => setListMode(false)}
+          onEnter={(index) => { setListMode(false); openModule(index); }}
+        />
+      )}
       {mode === 'first' && opening < 0 && module === null && <div className={`pointer-events-none absolute left-1/2 top-1/2 z-10 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 transition ${hovered !== null ? 'scale-150 border-amber-300 bg-amber-200/40' : 'border-white/80'}`} />}
       {hovered !== null && opening < 0 && module === null && !titleReveal && <div className="pointer-events-none absolute left-1/2 top-[38%] z-20 -translate-x-1/2 animate-pulse rounded-full border-2 border-amber-200 bg-[#233e4b]/90 px-5 py-2 text-lg font-black text-[#ffe9b8] shadow-[0_0_30px_rgba(255,214,120,0.6)]">{STOPS[hovered].name}{doneIndexes.includes(hovered) ? ' ✓' : hovered === nextIndex ? ' · 下一站' : ''}</div>}
       {guide && <div role="status" className="absolute left-1/2 top-20 z-30 -translate-x-1/2 animate-bounce rounded-2xl border-2 border-amber-200 bg-gradient-to-r from-[#f7d48a] to-[#ffe9b8] px-6 py-3 text-base font-black text-[#3b3018] shadow-[0_0_40px_rgba(255,200,90,0.7)]">{guide}</div>}
