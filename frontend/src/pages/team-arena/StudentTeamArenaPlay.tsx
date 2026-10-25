@@ -43,7 +43,23 @@ import {
   type TeamArenaSide,
   type TeamArenaWeapon,
   type TeamArenaResult,
+  type TeamArenaStoryView,
 } from '../../services/teamArenaApi';
+
+// #3772 (game-academy audit r2 P1-1): the backend already carries a full
+// themed narrative (story_adapter.py) — team labels like 探書隊／尋光隊
+// instead of the generic 甲隊／乙隊, and a per-outcome sentence instead of
+// a flat "平手"/"你的隊伍獲勝！". `team_labels` is NEVER null/empty — even
+// that adapter's own exception-fallback path still returns two real
+// strings (青隊/橙隊), so there's no "undefined label" case to guard here;
+// this screen's hardcoded 甲隊/乙隊 was simply never updated to read it.
+function teamLabel(story: TeamArenaStoryView, side: TeamArenaSide): string {
+  return story.team_labels[side === 'a' ? 0 : 1];
+}
+
+function resultCopy(story: TeamArenaStoryView, outcome: 'win' | 'lose' | 'draw' | null): string {
+  return outcome ? story.result_copy[outcome] : '';
+}
 
 function isValidTeamArenaCode(code: string | undefined): code is string {
   return !!code && /^[A-Z0-9]{4,8}$/.test(code);
@@ -320,7 +336,7 @@ const StudentTeamArenaPlay: React.FC = () => {
         <div className="flex w-full max-w-sm gap-3">
           {(['a', 'b'] as const).map((side) => (
             <div key={side} className="flex-1 rounded-xl border border-surface-dim p-3">
-              <p className="mb-2 text-sm font-semibold text-on-surface">{side === 'a' ? '甲隊' : '乙隊'}</p>
+              <p className="mb-2 text-sm font-semibold text-on-surface">{teamLabel(state.story, side)}</p>
               <p className="mb-2 text-xs text-on-surface-variant">
                 {state.sides[side].seated}/{state.team_size} 人
               </p>
@@ -365,9 +381,7 @@ const StudentTeamArenaPlay: React.FC = () => {
       <div className="flex min-h-screen flex-col items-center justify-center bg-surface px-6 py-10 text-center">
         <h1 className="mb-4 text-xl font-bold text-on-surface">比賽結束</h1>
         {outcome && (
-          <p className="mb-6 text-base font-semibold text-accent">
-            {outcome === 'draw' ? '平手' : outcome === 'win' ? '你的隊伍獲勝！' : '你的隊伍差一點，下次再加油'}
-          </p>
+          <p className="mb-6 text-base font-semibold text-accent">{resultCopy(state.story, outcome)}</p>
         )}
         {result && (
           <div className="grid w-full max-w-sm grid-cols-2 gap-3 text-left">
@@ -375,7 +389,7 @@ const StudentTeamArenaPlay: React.FC = () => {
               const other = side === 'a' ? 'b' : 'a';
               return (
               <div key={side} data-testid={`result-side-${side}`} className="rounded-xl border border-surface-dim p-3">
-                <p className="mb-2 text-sm font-bold text-on-surface">{side === 'a' ? '甲隊' : '乙隊'}</p>
+                <p className="mb-2 text-sm font-bold text-on-surface">{teamLabel(state.story, side)}</p>
                 <p className="mb-1 text-xs font-semibold text-on-surface">已打倒對方 {result.sides[other].towers_destroyed} 座塔</p>
                 <p className="mb-2 text-xs text-on-surface-variant">我方剩 {TOWER_COUNT - result.sides[side].towers_destroyed} 座塔</p>
                 <ul className="space-y-1.5 text-xs text-on-surface">
@@ -431,16 +445,13 @@ const StudentTeamArenaPlay: React.FC = () => {
       )}
 
       <div className="mb-4 flex gap-2">
-        <SideBar label="甲隊" sideData={state.sides.a} opponentTowersDestroyed={state.sides.b.towers_destroyed} effect={effects.a ?? null} onEffectComplete={() => clearEffect('a')} />
-        <SideBar label="乙隊" sideData={state.sides.b} opponentTowersDestroyed={state.sides.a.towers_destroyed} effect={effects.b ?? null} onEffectComplete={() => clearEffect('b')} />
+        <SideBar label={teamLabel(state.story, 'a')} sideData={state.sides.a} opponentTowersDestroyed={state.sides.b.towers_destroyed} effect={effects.a ?? null} onEffectComplete={() => clearEffect('a')} />
+        <SideBar label={teamLabel(state.story, 'b')} sideData={state.sides.b} opponentTowersDestroyed={state.sides.a.towers_destroyed} effect={effects.b ?? null} onEffectComplete={() => clearEffect('b')} />
       </div>
 
       {ownMatch.match_status === 'ended' ? (
         <p className="text-center text-base font-semibold text-accent">
-          {(() => {
-            const outcome = teamArenaMyOutcome(ownMatch);
-            return outcome === 'draw' ? '平手' : outcome === 'win' ? '你的隊伍獲勝！' : '你的隊伍差一點，下次再加油';
-          })()}
+          {resultCopy(state.story, teamArenaMyOutcome(ownMatch))}
         </p>
       ) : !currentRound ? (
         <p className="text-center text-on-surface-variant">等待下一回合…</p>
