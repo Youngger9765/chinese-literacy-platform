@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { introProgress, characterPose } from './islandMotion';
 import { BABIES, STOPS } from './islandData';
 
 interface WorldEvents {
@@ -340,6 +341,10 @@ export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
   let jumping = 0;
   let verticalSpeed = 0;
   let elapsed = 0;
+  let landedAt = -9;
+  // 開場鏡頭：從海上空推近到主角眼前（-1 = 沒在播）
+  let introStart = -1;
+  const INTRO_SECONDS = 3.2;
   let last = performance.now();
   let frame = 0;
   let near: number | null = null;
@@ -403,7 +408,10 @@ export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
       keyDirection = { x: Number(keys.has('d') || keys.has('arrowright')) - Number(keys.has('a') || keys.has('arrowleft')), z: Number(keys.has('s') || keys.has('arrowdown')) - Number(keys.has('w') || keys.has('arrowup')) };
       const dx = keyDirection.x + stickDirection.x;
       const dz = keyDirection.z + stickDirection.z;
-      let length = Math.hypot(dx, dz);
+      // 開場鏡頭還在飛的時候鎖住移動，免得學生在鏡頭外走到別站
+      const introPlaying = introStart >= 0;
+      let length = introPlaying ? 0 : Math.hypot(dx, dz);
+      if (introPlaying) travelTarget = null;
       if (length > 0.08 && mode === 'god') events.onWantFirstPerson?.();
       if (length > 0.08) travelTarget = null;
       if (travelTarget !== null && mode === 'first') {
@@ -445,9 +453,14 @@ export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
       if (verticalSpeed !== 0 || jumping > 0) {
         jumping = Math.max(0, jumping + verticalSpeed * dt);
         verticalSpeed -= 15 * dt;
-        if (jumping === 0) verticalSpeed = 0;
+        if (jumping === 0) { verticalSpeed = 0; landedAt = elapsed; }
       }
       player.position.y = 1.55 + jumping + (length > 0.08 ? Math.sin(elapsed * 13) * 0.07 : 0);
+      // 人物微動作：站著呼吸、走路擺動、落地壓扁
+      const pose = characterPose({ elapsed, moving: length > 0.08 && jumping === 0, sinceLanded: elapsed - landedAt });
+      player.scale.set(1.8 * pose.scaleX, 2.3 * pose.scaleY, 1);
+      player.material.rotation = pose.tilt;
+      xiaoling.material.rotation = Math.sin(elapsed * 2.2) * 0.07;
       xiaoling.position.set(player.position.x + 0.67, player.position.y + 0.85 + Math.sin(elapsed * 3) * 0.14, player.position.z + 0.12);
       let closest: number | null = null;
       let best = 3.25;
@@ -456,6 +469,7 @@ export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
         const d = Math.hypot(player.position.x - stop.x, player.position.z - stop.z);
         if (d < best) { best = d; closest = index; }
       });
+      if (introPlaying) closest = null;
       if (closest !== near) { near = closest; events.onNear(closest); }
       babies.forEach((baby, index) => {
         const data = BABIES[index];
@@ -473,9 +487,19 @@ export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
       if (mode === 'first') {
         player.visible = false;
         const eye = new THREE.Vector3(player.position.x, 1.75 + jumping + (length > 0.08 ? Math.sin(elapsed * 11) * 0.05 : 0), player.position.z);
-        camera.position.lerp(eye, Math.min(1, dt * 14));
         const look = new THREE.Vector3(-Math.sin(yaw) * Math.cos(pitch), Math.sin(pitch), -Math.cos(yaw) * Math.cos(pitch));
-        camera.lookAt(camera.position.clone().add(look));
+        const intro = introStart >= 0 ? introProgress(elapsed - introStart, INTRO_SECONDS) : 1;
+        if (intro < 1) {
+          // 從高空、主角背後遠處推近，視線從整座島慢慢收到主角前方
+          const from = new THREE.Vector3(player.position.x + Math.sin(yaw) * 46, 34, player.position.z + Math.cos(yaw) * 46);
+          camera.position.copy(from.lerp(eye, intro));
+          const target = new THREE.Vector3(player.position.x, 0, player.position.z - 8).lerp(eye.clone().add(look), intro);
+          camera.lookAt(target);
+        } else {
+          introStart = -1;
+          camera.position.lerp(eye, Math.min(1, dt * 14));
+          camera.lookAt(camera.position.clone().add(look));
+        }
         xiaoling.scale.copy(XL_FIRST);
         xiaoling.position.copy(camera.position).add(new THREE.Vector3(Math.cos(yaw) * 1.25 - Math.sin(yaw) * 2.4, -0.55 + Math.sin(elapsed * 3) * 0.08, -Math.sin(yaw) * 1.25 - Math.cos(yaw) * 2.4));
       } else {
@@ -558,6 +582,7 @@ export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
     setStick(x: number, z: number) { stickDirection = { x, z }; },
     setPaused(value: boolean) { paused = value; },
     jump() { if (jumping === 0) verticalSpeed = 5.5; },
+    playIntro() { introStart = elapsed; mode = 'first'; pitch = -0.05; },
     getPosition() { return { x: player.position.x, z: player.position.z }; },
     dispose() {
       cancelAnimationFrame(frame);

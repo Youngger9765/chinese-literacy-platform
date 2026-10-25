@@ -7,6 +7,7 @@ import { stepPath } from '../../config/stepPath';
 import { BABIES, OPENING, STOPS } from './island/islandData';
 import { createIslandWorld } from './island/createIslandWorld';
 import { ISLAND_STEP_DONE, shouldMarkVisitedOnReturn } from './island/storyMode';
+import { createIslandAudio, readMuted, writeMuted, type IslandAudio } from './island/islandAudio';
 
 interface LessonData {
   title: string;
@@ -14,6 +15,9 @@ interface LessonData {
 }
 
 type World = ReturnType<typeof createIslandWorld>;
+
+// 開場插畫上慢慢往上飄的光點（位置、速度、起始時間錯開，看起來不像同一批）
+const MOTES = Array.from({ length: 18 }, (_, i) => ({ x: (i * 37) % 100, d: 7 + (i % 5) * 1.6, delay: -((i * 1.3) % 9) }));
 
 export default function ReadingIslandLab() {
   const { storyId = '' } = useParams();
@@ -27,7 +31,17 @@ export default function ReadingIslandLab() {
   const [near, setNear] = useState<number | null>(null);
   const [fogHint, setFogHint] = useState(false);
   const [opening, setOpening] = useState(0);
+  // 冷開場：先一個暗畫面，學生點一下才出聲（瀏覽器規定），聲音先到、畫面晚 0.45 秒進來
+  const [coldOpen, setColdOpen] = useState(true);
+  const [titleReveal, setTitleReveal] = useState(false);
+  const audioRef = useRef<IslandAudio | null>(null);
+  const [door, setDoor] = useState<number | null>(null);
+  const doorRef = useRef(door);
+  doorRef.current = door;
+  const [muted, setMuted] = useState(() => readMuted(typeof localStorage === 'undefined' ? null : localStorage));
   const [module, setModule] = useState<number | null>(null);
+  const moduleRef = useRef(module);
+  moduleRef.current = module;
   const [joystick, setJoystick] = useState({ x: 0, y: 0 });
   const [position, setPosition] = useState({ x: -3, z: 15 });
   const stickOrigin = useRef<{ x: number; y: number } | null>(null);
@@ -108,6 +122,7 @@ export default function ReadingIslandLab() {
   useEffect(() => {
     if (doneIndexes.length > prevDone.current && prevDone.current > 0 || (doneIndexes.length > 0 && prevDone.current === 0 && module === null && opening < 0)) {
       const zoneOpened = nextIndex >= 0 && STOPS.every((stop, i) => stop.zone !== STOPS[nextIndex].zone || !doneIndexes.includes(i));
+      audioRef.current?.cue('sparkle');
       setGuide(nextIndex < 0 ? '整座島都亮起來了！' : `${zoneOpened ? '迷霧散開了！' : ''}跟著金色光柱，下一站：${STOPS[nextIndex].name}`);
       const timer = setTimeout(() => setGuide(''), 7000);
       prevDone.current = doneIndexes.length;
@@ -116,12 +131,37 @@ export default function ReadingIslandLab() {
     prevDone.current = doneIndexes.length;
   }, [doneIndexes, nextIndex, module, opening]);
   useEffect(() => { worldRef.current?.setPaused(module !== null || opening >= 0); }, [module, opening]);
+  useEffect(() => {
+    const audio = createIslandAudio(readMuted(typeof localStorage === 'undefined' ? null : localStorage));
+    audioRef.current = audio;
+    return () => { audio.dispose(); audioRef.current = null; };
+  }, []);
+  const toggleMuted = () => {
+    const next = !muted;
+    setMuted(next);
+    audioRef.current?.setMuted(next);
+    writeMuted(typeof localStorage === 'undefined' ? null : localStorage, next);
+  };
+  const enterIsland = () => {
+    audioRef.current?.start();
+    window.setTimeout(() => setColdOpen(false), 450);
+  };
+  // 開場結束：鐘聲、鏡頭從海上空推近到主角、標題飛進來
+  const finishOpening = (then?: () => void) => {
+    setOpening(-1);
+    audioRef.current?.cue('chime');
+    worldRef.current?.playIntro();
+    setTitleReveal(true);
+    window.setTimeout(() => setTitleReveal(false), 3600);
+    // 開場鏡頭期間已鎖住移動；保險起見，到時候已經有門開著就不再開
+    if (then) window.setTimeout(() => { if (doorRef.current === null && moduleRef.current === null) then(); }, 3300);
+  };
 
   // 進入關卡：先暗場、門從中間打開、光透出來，再打開平台原本的教材
-  const [door, setDoor] = useState<number | null>(null);
   const openModule = (index: number) => {
     if (!stepFor(index)) { setError('這個平台關卡尚未提供'); return; }
     setDoor(index);
+    audioRef.current?.cue('door');
     window.setTimeout(() => setModule(index), 1700);
     window.setTimeout(() => setDoor(null), 2300);
   };
@@ -199,15 +239,38 @@ export default function ReadingIslandLab() {
         <p className="text-[11px] font-black">文字寶寶</p>
         {BABIES.map((baby, index) => <div key={baby.name} className="flex items-center gap-1 text-[10px] font-semibold"><img src={`/lab-island/sprites/${baby.art}`} alt="" className={`h-7 w-7 object-contain ${completed.some((step) => step.startsWith(index === 5 ? 'vocab-review' : 'vocab-definition')) ? '' : 'grayscale opacity-60'}`} /><span>{baby.name}</span></div>)}
       </aside>
+      {coldOpen && (
+        <button type="button" onClick={enterIsland} className="absolute inset-0 z-[60] flex flex-col items-center justify-center gap-6 overflow-hidden bg-[#03101c] text-[#f6dca6]" aria-label="點一下，進入喝采島">
+          <span className="pointer-events-none absolute left-1/2 top-1/2 h-px w-[70vw] -translate-x-1/2 animate-[islandBand_3.2s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-[#ffd98f] to-transparent" aria-hidden />
+          {MOTES.slice(0, 10).map((m, i) => <span key={i} className="pointer-events-none absolute h-1 w-1 rounded-full bg-[#ffe3a3] shadow-[0_0_8px_2px_rgba(255,214,140,0.8)]" style={{ left: `${10 + m.x * 0.8}%`, top: `${30 + (i * 13) % 40}%`, animation: `islandGather ${2.4 + (i % 3) * 0.5}s ease-in-out ${i * 0.2}s infinite alternate` }} aria-hidden />)}
+          <span className="relative mt-24 animate-pulse font-serif text-lg font-bold tracking-[0.4em]">點一下，進入喝采島</span>
+          <span className="relative text-xs tracking-widest text-[#f6dca6]/60">建議開啟聲音</span>
+          <style>{'@keyframes islandBand{0%,100%{opacity:.25;transform:translate(-50%,-50%) scaleX(.3)}50%{opacity:1;transform:translate(-50%,-50%) scaleX(1)}}@keyframes islandGather{from{transform:translate(0,0);opacity:.2}to{transform:translate(calc(50vw - 50%),0);opacity:1}}'}</style>
+        </button>
+      )}
+      {titleReveal && (
+        <div className="pointer-events-none absolute inset-x-0 top-[22%] z-40 flex flex-col items-center" aria-hidden>
+          <div className="animate-[islandTitle_3.6s_ease-out_forwards] text-center">
+            <p className="font-serif text-6xl font-black tracking-[0.3em] text-[#fff1cf] drop-shadow-[0_4px_24px_rgba(255,190,90,0.9)] md:text-8xl">喝采島</p>
+            <p className="mt-3 text-sm font-bold tracking-[0.5em] text-[#ffe3a3] drop-shadow">贏得喝采的輸家</p>
+          </div>
+          <div className="mt-2 h-1 w-72 animate-[islandSweep_3.6s_ease-out_forwards] rounded-full bg-gradient-to-r from-transparent via-[#ffd98f] to-transparent" />
+          <style>{'@keyframes islandTitle{0%{transform:translateY(60px) scale(.9);opacity:0;letter-spacing:.9em}25%{transform:translateY(0) scale(1);opacity:1;letter-spacing:.3em}80%{opacity:1}100%{opacity:0;transform:translateY(-20px)}}@keyframes islandSweep{0%{transform:scaleX(0);opacity:0}30%{transform:scaleX(1);opacity:1}80%{opacity:1}100%{opacity:0}}'}</style>
+        </div>
+      )}
+      <button type="button" onClick={toggleMuted} className="absolute bottom-[4.5rem] left-4 z-[70] rounded-full border-2 border-white bg-[#233e4b]/85 px-3 py-1.5 text-xs font-bold text-[#fff1d0] shadow-lg" aria-pressed={muted}>{muted ? '聲音：關' : '聲音：開'}</button>
       {opening >= 0 && (
         <div className="absolute inset-0 z-30 flex items-end justify-center bg-[#071d32] p-4 pb-7 text-white md:pb-12">
           <div key={opening} className="absolute inset-0 animate-[islandKenBurns_9s_ease-out_forwards] bg-cover bg-center" style={{ backgroundImage: `url(/lab-island/opening/op${opening + 1}.jpg)` }} />
           <div className="absolute inset-0 bg-gradient-to-t from-[#071d32]/90 via-transparent to-transparent" />
-          <style>{'@keyframes islandKenBurns{from{transform:scale(1.02);opacity:.2}12%{opacity:1}to{transform:scale(1.12);opacity:1}}'}</style>
+          <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
+            {MOTES.map((m, i) => <span key={i} className="absolute h-1.5 w-1.5 rounded-full bg-[#ffe3a3] shadow-[0_0_10px_3px_rgba(255,214,140,0.7)]" style={{ left: `${m.x}%`, bottom: '-4%', animation: `islandMote ${m.d}s linear ${m.delay}s infinite` }} />)}
+          </div>
+          <style>{'@keyframes islandMote{0%{transform:translateY(0);opacity:0}15%{opacity:.9}100%{transform:translateY(-105vh) translateX(3vw);opacity:0}}@keyframes islandKenBurns{from{transform:scale(1.02);opacity:.2}12%{opacity:1}to{transform:scale(1.12);opacity:1}}'}</style>
           <div className="relative w-full max-w-2xl rounded-3xl border border-[#f8e5bd]/50 bg-[#142f45]/90 p-6 shadow-2xl backdrop-blur-md md:p-8">
             <div className="mb-3 flex justify-between text-xs font-bold tracking-widest text-[#f5cf91]"><span>{opening + 1} / 6</span><span>{OPENING[opening][0]}</span></div>
             <p className="min-h-16 font-serif text-xl font-bold leading-relaxed md:text-2xl">{OPENING[opening][1]}</p>
-            {opening === 5 ? <div className="mt-5 flex flex-wrap gap-3"><button type="button" onClick={() => { setOpening(-1); openModule(0); }} className="rounded-xl bg-[#eac78d] px-6 py-3 font-bold text-[#244653]">聽這句</button><button type="button" onClick={() => setOpening(-1)} className="rounded-xl border border-white/70 px-6 py-3 font-bold">直接上岸走</button></div> : <button type="button" onClick={() => setOpening(opening + 1)} className="mt-5 rounded-xl bg-[#eac78d] px-7 py-3 font-bold text-[#244653]">繼續</button>}
+            {opening === 5 ? <div className="mt-5 flex flex-wrap gap-3"><button type="button" onClick={() => finishOpening(() => openModule(0))} className="rounded-xl bg-[#eac78d] px-6 py-3 font-bold text-[#244653]">聽這句</button><button type="button" onClick={() => finishOpening()} className="rounded-xl border border-white/70 px-6 py-3 font-bold">直接上岸走</button></div> : <button type="button" onClick={() => { audioRef.current?.cue('whoosh'); setOpening(opening + 1); }} className="mt-5 rounded-xl bg-[#eac78d] px-7 py-3 font-bold text-[#244653]">繼續</button>}
           </div>
         </div>
       )}
