@@ -435,3 +435,97 @@ class TestQuestionTimeout:
         assert state["gate_question"] is not None
 
 
+# ---------------------------------------------------------------------------
+# #3770 "救援題與主題同時逾時，畫面永久卡死在「正在判定…」" — game-academy
+# audit round 2, P0-1. `gate_question` and `rescue_question` are the SAME
+# dict reused every retry (`gate_snapshot["questions"][0]` /
+# `["rescue_question"]` never change), so the frontend's stem-keyed "did the
+# question change" check can never tell a retried attempt apart from the one
+# before it — the countdown reaches 0 once and then has no signal a fresh
+# window ever started, even though #3754's lazy expire keeps correctly
+# resolving it server-side. Fix: expose a per-question `started_at` (server
+# time) that genuinely changes on every retry, same pattern
+# `pk.engine.build_match_state`'s `round_started_at`/`server_now` already use.
+# ---------------------------------------------------------------------------
+
+class TestServerAuthoritativeQuestionTimers:
+    def test_chamber_question_exposes_started_at(self, run_factory, db_session):
+        run, _ = run_factory()
+        state = svc.get_run_state(db_session, run)
+        assert state["current_chamber"]["started_at"] is not None
+
+    def test_state_exposes_server_now(self, run_factory, db_session):
+        run, _ = run_factory()
+        state = svc.get_run_state(db_session, run)
+        assert state["server_now"] is not None
+
+    def test_rescue_question_started_at_changes_on_each_retry(self, run_factory, db_session, clock):
+        run, user = run_factory()
+        run.mist_distance = 0
+        db_session.commit()
+        svc.answer_chamber(db_session, run, user, 0, "B")  # wrong at mist=0 -> freezes a teammate
+        state0 = svc.get_run_state(db_session, run)
+        started_at_0 = state0["rescue_question"]["started_at"]
+        assert started_at_0 is not None
+
+        rescue_seconds = run.gate_snapshot["rescue_question"]["payload"].get("seconds", 30)
+        clock.advance(seconds=rescue_seconds + 1)
+        state1 = svc.get_run_state(db_session, run)  # triggers the lazy auto-expire
+        started_at_1 = state1["rescue_question"]["started_at"]
+
+        assert started_at_1 != started_at_0, (
+            "a retried rescue attempt must expose a NEW started_at — otherwise the "
+            "frontend's countdown has no way to tell a fresh window began and stays "
+            "stuck at 0 forever (#3770)"
+        )
+
+    def test_gate_question_started_at_changes_on_each_retry(self, run_factory, db_session, clock):
+        run, user = run_factory()
+        _unlock_all(db_session, run, user)
+        state0 = svc.get_run_state(db_session, run)
+        started_at_0 = state0["gate_question"]["started_at"]
+        assert started_at_0 is not None
+
+        gate_seconds = run.gate_snapshot["questions"][0]["payload"].get("seconds", 30)
+        clock.advance(seconds=gate_seconds + 1)
+        state1 = svc.get_run_state(db_session, run)
+        started_at_1 = state1["gate_question"]["started_at"]
+
+        assert started_at_1 != started_at_0
+
+    def test_dual_timeout_rescue_keeps_refreshing_while_chamber_stays_paused(self, run_factory, db_session, clock):
+        """The exact reported scenario: a chamber question and a rescue
+        question overdue AT THE SAME TIME, repeated across more than one
+        cycle (the audit saw it "persist 31 秒" — a single fix that only
+        covers the first expiry would still look broken on the second)."""
+        run, user = run_factory()
+        run.mist_distance = 0
+        db_session.commit()
+        svc.answer_chamber(db_session, run, user, 0, "B")  # freezes a teammate; also stamps chamber started_at = now
+        state0 = svc.get_run_state(db_session, run)
+        chamber_started_at_0 = state0["current_chamber"]["started_at"]
+        rescue_started_at_0 = state0["rescue_question"]["started_at"]
+
+        # Both the chamber's own 30s budget and the rescue's 30s budget are
+        # now simultaneously overdue.
+        clock.advance(seconds=31)
+        state1 = svc.get_run_state(db_session, run)
+        assert state1["rescue_question"] is not None, "still needs rescue — not stuck, not ended"
+        assert state1["rescue_question"]["started_at"] != rescue_started_at_0, (
+            "rescue must get a fresh window so the frontend's countdown actually resets"
+        )
+        assert state1["current_chamber"]["started_at"] == chamber_started_at_0, (
+            "the base question is correctly paused behind the rescue overlay — it must "
+            "NOT silently expire unseen while blocked"
+        )
+
+        # A second consecutive dual-timeout cycle — this is the "persisted
+        # for 31 seconds and never moved" part of the report, not a one-shot.
+        clock.advance(seconds=31)
+        state2 = svc.get_run_state(db_session, run)
+        assert state2["rescue_question"]["started_at"] != state1["rescue_question"]["started_at"], (
+            "a SECOND dual-timeout cycle must also refresh — the reported bug was "
+            "that it stays stuck permanently, not just once"
+        )
+
+
