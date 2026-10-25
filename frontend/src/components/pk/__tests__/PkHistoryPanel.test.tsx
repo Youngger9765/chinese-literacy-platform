@@ -148,13 +148,52 @@ describe('PkHistoryPanel', () => {
     await waitFor(() => expect(screen.getByText('還沒有對戰紀錄，去挑戰第一場吧！')).toBeTruthy());
   });
 
-  it('renders nothing (not an error banner) when the fetch fails', async () => {
+  it('renders nothing (not an error banner) only when ALL THREE calls fail — not just one', async () => {
     getPkRatingMe.mockRejectedValue(new Error('network'));
-    getPkHistory.mockResolvedValue({ matches: [] });
-    getPkOpponents.mockResolvedValue({ opponents: [] });
+    getPkHistory.mockRejectedValue(new Error('network'));
+    getPkOpponents.mockRejectedValue(new Error('network'));
 
     const { container } = renderPanel();
 
     await waitFor(() => expect(container.firstChild).toBeNull());
+  });
+
+  it('#3766 (Young, staging repro — "0/7 頭像牆與戰績區完全沒出現" for a classroom-enrolled student): a SINGLE failing call must not blank a roster that other, independent calls already fetched successfully', async () => {
+    // getPkRatingMe fails (simulating whatever actually failed on staging
+    // for that account — never reproducible locally, see #3766), but
+    // getPkOpponents succeeds. Promise.all previously made ANY rejection
+    // blank the whole panel, including this already-fetched roster data
+    // that has nothing to do with rating/history.
+    getPkRatingMe.mockRejectedValue(new Error('network'));
+    getPkHistory.mockResolvedValue({ matches: [] });
+    getPkOpponents.mockResolvedValue({ opponents: SEVEN_LOCKED });
+
+    const { container } = renderPanel();
+
+    await waitFor(() => expect(container.firstChild).not.toBeNull());
+    expect(screen.getByText('0/7 位文學家已擊敗')).toBeTruthy();
+    const roster = screen.getByTestId('pk-defeat-roster');
+    expect(roster.querySelectorAll('img').length).toBe(7);
+  });
+
+  it('#3766: the same independence holds when getPkHistory (not rating) is the one that fails', async () => {
+    getPkRatingMe.mockResolvedValue({ rating: 1000, matches_played: 0, wins: 0, losses: 0, draws: 0 });
+    getPkHistory.mockRejectedValue(new Error('network'));
+    getPkOpponents.mockResolvedValue({ opponents: SEVEN_LOCKED });
+
+    renderPanel();
+
+    await waitFor(() => expect(screen.getByText('0/7 位文學家已擊敗')).toBeTruthy());
+  });
+
+  it('#3766: if getPkOpponents itself fails but rating/history succeed, the roster is simply absent (no data for it) without blanking the rating/history section', async () => {
+    getPkRatingMe.mockResolvedValue({ rating: 1000, matches_played: 0, wins: 0, losses: 0, draws: 0 });
+    getPkHistory.mockResolvedValue({ matches: [] });
+    getPkOpponents.mockRejectedValue(new Error('network'));
+
+    const { container } = renderPanel();
+
+    await waitFor(() => expect(screen.getByText('還沒有對戰紀錄，去挑戰第一場吧！')).toBeTruthy());
+    expect(container.querySelector('[data-testid="pk-defeat-roster"]')).toBeNull();
   });
 });
