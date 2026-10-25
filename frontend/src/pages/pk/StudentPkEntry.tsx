@@ -22,6 +22,13 @@
  * Replaced with `PkHeroBanner` (all 7 figures line up, icon-based "怎麼玩"
  * steps) and widened the page from `max-w-sm` to `max-w-2xl` so it actually
  * uses desktop width instead of staying phone-width on a 1440px screen.
+ *
+ * round 4 (Young: "頁面下半一半空白...桌機請把戰績/七位文學家進度放大成
+ * 可點的頭像卡牆"): widened again to `max-w-4xl` — the banner's 7-figure
+ * row was actually overflowing its `max-w-2xl` container (see
+ * PkHeroBanner's docstring for the clipping bug that caused), and a wider
+ * page gives the enlarged defeat-roster grid (PkHistoryPanel) room to
+ * breathe instead of wrapping into a cramped single column.
  */
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -182,11 +189,11 @@ const StudentPkEntry: React.FC = () => {
 
   return (
     <div className="flex min-h-screen flex-col items-center bg-surface px-6 py-10">
-      <div className="w-full max-w-2xl">
+      <div className="w-full max-w-4xl">
         <GameBackButton to="/game-hub" />
       </div>
 
-      <div className="mt-4 w-full max-w-2xl">
+      <div className="mt-4 w-full max-w-4xl">
         <PkHeroBanner />
       </div>
 
@@ -224,8 +231,14 @@ const StudentPkEntry: React.FC = () => {
 
       {/* #3761: bigger, more prominent CTAs (taller + larger text than
           #3756's version) in a side-by-side pair on wide screens so they
-          read as two equally-weighted choices instead of a stacked list. */}
-      <div className="mt-10 grid w-full max-w-xl grid-cols-1 gap-4 sm:grid-cols-2">
+          read as two equally-weighted choices instead of a stacked list.
+          round 4 (Young: "主按鈕「挑戰文學家」是白底細框，應該是實心主色
+          大按鈕"): when it's the ONLY button (找同學 PK 不可用，多數學生
+          沒加入開啟真人 PK 的班級時就是這個情況) it's now solid-filled
+          like 找同學 PK — an outline button as the SOLE call-to-action
+          read as weak/secondary. When both buttons show, 挑戰文學家 stays
+          the outline/secondary style so 找同學 PK still reads as primary. */}
+      <div className="mt-10 grid w-full max-w-3xl grid-cols-1 gap-4 sm:grid-cols-2">
         {canFindClassmate && (
           <button
             type="button"
@@ -240,8 +253,10 @@ const StudentPkEntry: React.FC = () => {
           type="button"
           disabled={busy}
           onClick={handleChallengeFigure}
-          className={`rounded-2xl border-2 border-accent px-6 py-8 text-xl font-bold text-accent active:scale-95 transition-transform disabled:opacity-50 ${
-            canFindClassmate ? '' : 'sm:col-span-2'
+          className={`rounded-2xl px-6 py-8 text-xl font-bold active:scale-95 transition-transform disabled:opacity-50 ${
+            canFindClassmate
+              ? 'border-2 border-accent text-accent'
+              : 'sm:col-span-2 bg-accent text-white shadow-md'
           }`}
         >
           挑戰文學家
@@ -249,7 +264,7 @@ const StudentPkEntry: React.FC = () => {
       </div>
 
       {canFindClassmate && classroom?.id != null && (
-        <div className="mt-6 w-full max-w-xl space-y-2 text-sm">
+        <div className="mt-6 w-full max-w-3xl space-y-2 text-sm">
           <button
             type="button"
             onClick={() => setShowInviteRedeem((v) => !v)}
@@ -301,7 +316,7 @@ const StudentPkEntry: React.FC = () => {
 
       {error && <p className="mt-4 text-sm text-error">{error}</p>}
 
-      {token && <PkHistoryPanel token={token} />}
+      {token && <PkHistoryPanel token={token} onChallenge={handleChallengeFigure} />}
     </div>
   );
 };

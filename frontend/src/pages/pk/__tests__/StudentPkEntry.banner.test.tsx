@@ -61,6 +61,9 @@ describe('<StudentPkEntry> — 主視覺橫幅 (#3756/#3761)', () => {
     await waitFor(() => expect(screen.getByRole('heading', { name: 'PK 對戰' })).toBeTruthy());
     const libaiImg = document.querySelector('img[src="/story-assets/pk-li-bai/portrait-idle.png"]');
     expect(libaiImg).toBeTruthy();
-    expect(libaiImg?.getAttribute('alt')).toBe('');
+    // #3761 round 4: PkFigureAvatar labels each banner figure with its real
+    // name (not alt="") — a screen reader lineup of 7 unnamed images would
+    // be useless, and nothing else near the banner names each figure.
+    expect(libaiImg?.getAttribute('alt')).toBe('李白');
   });
 });

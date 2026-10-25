@@ -1,13 +1,14 @@
 /**
  * PkHistoryPanel — #3747 "過去的戰績表現" + #3761 "N/7 位文學家已擊敗"
- * roster. Exercises the states a student can land on: no history yet (with
- * and without the roster), a real list (AI + human opponents,
- * win/loss/draw), and a silent failure (must render nothing, never block
- * the entry page).
+ * roster (round 3) + clickable avatar-card grid (round 4). Exercises the
+ * states a student can land on: no history yet (with and without the
+ * roster), a real list (AI + human opponents, win/loss/draw), clicking a
+ * roster card, and a silent failure (must render nothing, never block the
+ * entry page).
  */
 import React from 'react';
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import type { PkHistoryEntry, PkOpponent } from '../../../services/pkApi';
 
 const getPkRatingMe = vi.fn();
@@ -54,21 +55,28 @@ function opponent(tier: number, unlocked: boolean): PkOpponent {
 
 const SEVEN_LOCKED: PkOpponent[] = Array.from({ length: 7 }, (_, i) => opponent(i + 1, false));
 
+function renderPanel(onChallenge: () => void = () => {}) {
+  return render(<PkHistoryPanel token="t" onChallenge={onChallenge} />);
+}
+
 describe('PkHistoryPanel', () => {
   it('shows the empty-state message AND the 0/7 defeat roster when there is no completed match', async () => {
     getPkRatingMe.mockResolvedValue({ rating: 1000, matches_played: 0, wins: 0, losses: 0, draws: 0 });
     getPkHistory.mockResolvedValue({ matches: [] });
     getPkOpponents.mockResolvedValue({ opponents: SEVEN_LOCKED });
 
-    render(<PkHistoryPanel token="t" />);
+    renderPanel();
 
     await waitFor(() => expect(screen.getByText('還沒有對戰紀錄，去挑戰第一場吧！')).toBeTruthy());
     expect(screen.getByText('0/7 位文學家已擊敗')).toBeTruthy();
     const roster = screen.getByTestId('pk-defeat-roster');
-    // All 7 are locked -> all 7 thumbs carry the grayscale class.
+    // All 7 are locked -> all 7 thumbs carry the grayscale class, each a
+    // clickable card showing the figure's name as a caption.
     const imgs = roster.querySelectorAll('img');
     expect(imgs.length).toBe(7);
     imgs.forEach((img) => expect(img.className).toContain('grayscale'));
+    expect(roster.querySelectorAll('button').length).toBe(7);
+    expect(screen.getByText('文學家1')).toBeTruthy();
   });
 
   it('unlocked figures in the roster are NOT grayscaled, locked ones are', async () => {
@@ -77,13 +85,27 @@ describe('PkHistoryPanel', () => {
     const mixed = [opponent(1, true), opponent(2, false)];
     getPkOpponents.mockResolvedValue({ opponents: mixed });
 
-    render(<PkHistoryPanel token="t" />);
+    renderPanel();
 
     await waitFor(() => expect(screen.getByText('1/2 位文學家已擊敗')).toBeTruthy());
     const roster = screen.getByTestId('pk-defeat-roster');
     const imgs = Array.from(roster.querySelectorAll('img'));
     expect(imgs[0].className).not.toContain('grayscale');
     expect(imgs[1].className).toContain('grayscale');
+  });
+
+  it('#3761 round 4: clicking a roster card (locked OR unlocked) calls onChallenge', async () => {
+    getPkRatingMe.mockResolvedValue({ rating: 1000, matches_played: 0, wins: 0, losses: 0, draws: 0 });
+    getPkHistory.mockResolvedValue({ matches: [] });
+    getPkOpponents.mockResolvedValue({ opponents: [opponent(1, true), opponent(2, false)] });
+    const onChallenge = vi.fn();
+
+    renderPanel(onChallenge);
+
+    await waitFor(() => expect(screen.getByTestId('pk-defeat-roster')).toBeTruthy());
+    const cards = screen.getByTestId('pk-defeat-roster').querySelectorAll('button');
+    fireEvent.click(cards[1]);
+    expect(onChallenge).toHaveBeenCalledTimes(1);
   });
 
   it('renders rating summary and recent matches, resolving the AI opponent name from bot_tier', async () => {
@@ -104,7 +126,7 @@ describe('PkHistoryPanel', () => {
     });
     getPkOpponents.mockResolvedValue({ opponents: [] });
 
-    render(<PkHistoryPanel token="t" />);
+    renderPanel();
 
     await waitFor(() => expect(screen.getByTestId('pk-history-panel')).toBeTruthy());
     expect(screen.getByText('積分 1024')).toBeTruthy();
@@ -121,7 +143,7 @@ describe('PkHistoryPanel', () => {
     });
     getPkOpponents.mockResolvedValue({ opponents: [] });
 
-    render(<PkHistoryPanel token="t" />);
+    renderPanel();
 
     await waitFor(() => expect(screen.getByText('還沒有對戰紀錄，去挑戰第一場吧！')).toBeTruthy());
   });
@@ -131,7 +153,7 @@ describe('PkHistoryPanel', () => {
     getPkHistory.mockResolvedValue({ matches: [] });
     getPkOpponents.mockResolvedValue({ opponents: [] });
 
-    const { container } = render(<PkHistoryPanel token="t" />);
+    const { container } = renderPanel();
 
     await waitFor(() => expect(container.firstChild).toBeNull());
   });

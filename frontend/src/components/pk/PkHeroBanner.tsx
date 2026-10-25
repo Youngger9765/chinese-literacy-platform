@@ -1,48 +1,29 @@
 /**
- * PkHeroBanner — #3761 (round 3 after Young reviewed #3756's screenshots):
+ * PkHeroBanner — #3761 round 3 (after Young reviewed #3756's screenshots):
  * "現在只有一小塊紫色卡＋一個按鈕...不像遊戲。要有真正的主視覺橫幅（七位
  * 文學家並排出場或對峙構圖的插畫）". This renders all 7 PK_FIGURES in a
  * line-up, plus the "怎麼玩" 3 steps as icons instead of a bullet list.
  *
- * Does NOT touch `pkFigures.ts`'s `PK_PNG_ART_OVERRIDE` (that map still
- * only points tier 7/李白 at its PNG set — switching the other 6 tiers
- * over is a separate in-flight workstream, #3745/pk-avatars) and does NOT
- * read through `pkFigurePortraitUrl()` for that reason (it would return
- * the OLD placeholder SVGs for tiers 1-6). Instead this builds the PNG
- * path directly from each figure's `slug` — the same `story-assets/pk-
- * {slug}/portrait-idle.png` convention #3745 already established for
- * 李白, so it picks up each figure's real art automatically the moment
- * pk-avatars commits it, with zero coordination and zero risk of
- * clobbering their file. Until a given figure's PNG lands, `FigureThumb`
- * below falls back to a generic initial-circle (same pattern used
- * elsewhere in this app for a missing avatar, e.g. Sidebar.tsx's
- * `user.name.charAt(0)`) — never a broken-image icon.
+ * round 4 (Young reviewed round 3's screenshots): two real bugs here —
+ * (1) the leftmost figure (駱賓王) was visibly clipped by the card's
+ * rounded corner. Root cause: at this page's old `max-w-2xl` width, 7
+ * figures' total row width (7 × 80px + 6 × 12px gap = 632px) slightly
+ * EXCEEDS the available content width after padding, so the row actually
+ * overflows — and `justify-center` on an overflowing flex row centers the
+ * content as if it had the full natural width, which pushes part of the
+ * FIRST item off-screen to the left with no way to scroll back to it
+ * (you can only scroll toward the end, never past the start). Fixed by
+ * widening the page to `max-w-4xl` (StudentPkEntry.tsx) AND switching to
+ * `justify-start` (centering a horizontally-scrollable row is the wrong
+ * default regardless — it's the same bug waiting to resurface at any
+ * width/figure-count combination that happens to overflow).
+ * (2) each figure thumb was its own inline `FigureThumb`, a second,
+ * parallel copy of the exact fallback logic `PkHistoryPanel`'s roster had
+ * — now both use the shared `PkFigureAvatar` (see that file's docstring).
  */
-import React, { useState } from 'react';
+import React from 'react';
 import { PK_FIGURES } from '../../data/pkFigures';
-
-const FigureThumb: React.FC<{ slug: string; name: string }> = ({ slug, name }) => {
-  const [broken, setBroken] = useState(false);
-  if (broken) {
-    return (
-      <div
-        className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full border-2 border-white/70 bg-white/20 text-lg font-bold text-white sm:h-20 sm:w-20"
-        aria-hidden="true"
-      >
-        {name.charAt(0)}
-      </div>
-    );
-  }
-  return (
-    <img
-      src={`/story-assets/pk-${slug}/portrait-idle.png`}
-      alt=""
-      aria-hidden="true"
-      onError={() => setBroken(true)}
-      className="h-16 w-16 shrink-0 rounded-full border-2 border-white/70 bg-white/20 object-cover object-top sm:h-20 sm:w-20"
-    />
-  );
-};
+import PkFigureAvatar from './PkFigureAvatar';
 
 const STEPS: { icon: React.ReactNode; text: string }[] = [
   {
@@ -86,11 +67,32 @@ const PkHeroBanner: React.FC = () => {
       <div className="px-5 pb-4 pt-6 sm:px-8 sm:pt-8">
         {/* 七位文學家並排出場 — line-up composition, not a confrontation
             pose (no art direction asked for one side-vs-other split, and
-            PK is 1-on-1 against any of the 7, not a team match). */}
-        <div className="flex items-end justify-center gap-2 overflow-x-auto px-1 sm:gap-3">
-          {PK_FIGURES.map((figure) => (
-            <FigureThumb key={figure.slug} slug={figure.slug} name={figure.name} />
-          ))}
+            PK is 1-on-1 against any of the 7, not a team match).
+            `justify-start` (not `-center`) — see file docstring round-4
+            note: centering a row that can overflow clips/hides the first
+            item with no way to scroll back to it.
+            round 4 (Young: "手機版橫幅只顯示四位...要能看到全部七位"): even
+            at the smallest readable circle size, 7 figures still slightly
+            overflow a 390px viewport (328px of circles vs ~300px usable
+            width) — rather than shrink further and hurt legibility of the
+            single-character fallback labels, this keeps the row
+            horizontally scrollable and adds a right-edge fade + bouncing
+            chevron (mobile-only, `sm:hidden` — desktop already fits all 7
+            without scrolling) as the "可捲動" affordance Young asked for. */}
+        <div className="relative">
+          <div className="flex items-end justify-start gap-2 overflow-x-auto px-1 sm:gap-3 sm:justify-center">
+            {PK_FIGURES.map((figure) => (
+              <PkFigureAvatar key={figure.slug} slug={figure.slug} name={figure.name} size="md" />
+            ))}
+          </div>
+          <div
+            className="pointer-events-none absolute inset-y-0 right-0 flex w-10 items-center justify-end bg-gradient-to-l from-[#5B4DBD] to-transparent sm:hidden"
+            aria-hidden="true"
+          >
+            <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 animate-pulse text-white/80">
+              <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
         </div>
         <h1 className="mt-4 text-center text-2xl font-bold text-white sm:text-3xl">PK 對戰</h1>
         <p className="mt-1 text-center text-sm text-white/90">一對一，隨時挑戰同學或文學家</p>

@@ -27,12 +27,24 @@ describe('<LiveQuizWaitingRoom> (#3761)', () => {
     expect(screen.getByText('你')).toBeTruthy();
   });
 
-  it('renders playersCount-1 anonymous peer glyphs, never a classmate name (privacy: backend only gives students a count, not names)', () => {
+  it('renders playersCount-1 anonymous peer avatars, numbered (同學1/同學2/...), never a classmate name (privacy: backend only gives students a count, not names)', () => {
     render(<LiveQuizWaitingRoom myName="小明" playersCount={4} onLeave={() => {}} />);
     expect(screen.getByText('目前已有 4 人加入')).toBeTruthy();
-    // 3 others besides "me" — each is a plain SVG glyph, not a name.
-    const peerGlyphs = document.querySelectorAll('svg circle[cx="12"][cy="8"]');
-    expect(peerGlyphs.length).toBe(3);
+    // 3 others besides "me" — numbered placeholders, never a real name.
+    expect(screen.getByText('同學1')).toBeTruthy();
+    expect(screen.getByText('同學2')).toBeTruthy();
+    expect(screen.getByText('同學3')).toBeTruthy();
+    expect(screen.queryByText('同學4')).toBeNull();
+  });
+
+  it('#3761 round 4: each anonymous peer gets a distinct cycling color, not one flat gray', () => {
+    render(<LiveQuizWaitingRoom myName="小明" playersCount={4} onLeave={() => {}} />);
+    const first = screen.getByText('1', { selector: 'div' });
+    const second = screen.getByText('2', { selector: 'div' });
+    const third = screen.getByText('3', { selector: 'div' });
+    const colors = [first, second, third].map((el) => (el as HTMLElement).style.backgroundColor);
+    expect(new Set(colors).size).toBe(3);
+    colors.forEach((c) => expect(c).not.toBe(''));
   });
 
   it('solo join (playersCount=1) shows "你是第一位加入的" instead of an empty wall', () => {
@@ -58,5 +70,23 @@ describe('<LiveQuizWaitingRoom> (#3761)', () => {
     render(<LiveQuizWaitingRoom myName="小明" playersCount={1} onLeave={onLeave} />);
     fireEvent.click(screen.getByRole('button', { name: /離開/ }));
     expect(onLeave).toHaveBeenCalledTimes(1);
+  });
+
+  it('#3761 round 4 (Young: "桌機請讓大廳卡片填滿可視高度"): the gradient card stretches to fill its flex parent instead of staying only as tall as its own content', () => {
+    const { container } = render(<LiveQuizWaitingRoom myName="小明" playersCount={1} onLeave={() => {}} />);
+    const card = container.querySelector('[data-testid="lobby-card"]');
+    expect(card).toBeTruthy();
+    expect(card?.className).toContain('flex-1');
+  });
+
+  it('#3761 round 4 (Young: "加上「老師開始後自動進入第一題」的倒數感提示"): shows a hint that the student does not need to tap anything — the first question appears on its own once the teacher starts', () => {
+    render(<LiveQuizWaitingRoom myName="小明" playersCount={1} onLeave={() => {}} />);
+    expect(screen.getByText(/老師開始後.*自動/)).toBeTruthy();
+  });
+
+  it('#3761 round 4 (Young: "把同學牆區放大成多列格狀"): the peer wall is laid out as a grid, not a single wrapping row', () => {
+    const { container } = render(<LiveQuizWaitingRoom myName="小明" playersCount={4} onLeave={() => {}} />);
+    const wall = container.querySelector('[data-testid="peer-wall"]');
+    expect(wall?.className).toContain('grid');
   });
 });

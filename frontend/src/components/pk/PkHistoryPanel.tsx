@@ -6,7 +6,7 @@
  * `getPkRatingMe` were exported but never imported anywhere outside this
  * file and its test).
  *
- * #3761 (round 3, Young: "戰績區即使沒紀錄也要有像樣的空狀態（例：七位文學
+ * #3761 round 3 (Young: "戰績區即使沒紀錄也要有像樣的空狀態（例：七位文學
  * 家的擊敗進度 0/7，用頭像灰階表示未擊敗）"): added the "N/7 位文學家已
  * 擊敗" roster, reusing `getPkOpponents` — that endpoint already returns
  * `icon_url` + `unlocked` per figure for the opponent-select screen
@@ -16,6 +16,15 @@
  * 擊敗" as one with 3 wins has for "3/7 擊敗" — it's not conditional on
  * history existing).
  *
+ * round 4 (Young reviewed round 3's screenshots: "桌機請把戰績/七位文學家
+ * 進度放大成可點的頭像卡牆"): the roster is now a bigger grid of clickable
+ * avatar cards (name + locked/unlocked state), each navigating to the
+ * opponent-select screen via `onChallenge` — and each avatar now goes
+ * through the shared `PkFigureAvatar` (reading `slug` directly) instead of
+ * the API's own `icon_url` field, so it upgrades to real art the moment
+ * pk-avatars' PNGs land, same as `PkHeroBanner`'s figures — no longer two
+ * separate avatar code paths that would each need updating by hand.
+ *
  * Best-effort, never blocks the entry screen: a fetch failure renders
  * nothing (same pattern as StudentOurClassPage's season-board fetch) —
  * this panel is a bonus, not the page's primary job (finding an opponent).
@@ -23,6 +32,7 @@
 import React, { useEffect, useState } from 'react';
 import { getPkHistory, getPkRatingMe, getPkOpponents, type PkHistoryEntry, type PkOpponent } from '../../services/pkApi';
 import { getPkFigure } from '../../data/pkFigures';
+import PkFigureAvatar from './PkFigureAvatar';
 
 interface PkRatingSummary {
   rating: number;
@@ -34,6 +44,13 @@ interface PkRatingSummary {
 
 interface PkHistoryPanelProps {
   token: string;
+  /** Navigates to the opponent-select screen — same handler the page's
+   * own "挑戰文學家" button uses. There is no per-figure deep link (no
+   * API/route takes "start a match against tier N" directly), so every
+   * roster card leads to the same picker rather than straight into a
+   * match — "可點" means "takes you to pick", not "instantly challenges
+   * this exact figure". */
+  onChallenge: () => void;
 }
 
 type Outcome = 'win' | 'loss' | 'draw';
@@ -59,32 +76,37 @@ function formatDate(iso: string): string {
   return d.toLocaleDateString('zh-TW', { month: 'numeric', day: 'numeric' });
 }
 
-/** #3761: the "N/7 位文學家已擊敗" roster strip — grayscale + dimmed for a
- * not-yet-unlocked figure, full color for one the student has beaten. */
-const DefeatRoster: React.FC<{ opponents: PkOpponent[] }> = ({ opponents }) => {
+/** #3761 round 4: the "N/7 位文學家已擊敗" roster — a grid of clickable
+ * avatar CARDS (avatar + name), not a thin inline strip of bare icons. */
+const DefeatRoster: React.FC<{ opponents: PkOpponent[]; onChallenge: () => void }> = ({ opponents, onChallenge }) => {
   if (opponents.length === 0) return null;
   const unlockedCount = opponents.filter((o) => o.unlocked).length;
   return (
-    <div className="mb-3" data-testid="pk-defeat-roster">
-      <p className="mb-1.5 text-xs font-medium text-on-surface-variant">
+    <div className="mb-4" data-testid="pk-defeat-roster">
+      <p className="mb-2 text-sm font-medium text-on-surface-variant">
         {unlockedCount}/{opponents.length} 位文學家已擊敗
       </p>
-      <div className="flex flex-wrap gap-1.5">
+      <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-7">
         {opponents.map((o) => (
-          <img
+          <button
             key={o.tier}
-            src={o.icon_url}
-            alt={o.unlocked ? o.name : `${o.name}（尚未擊敗）`}
-            title={o.unlocked ? o.name : `${o.name}（尚未擊敗）`}
-            className={`h-8 w-8 rounded-full object-cover ${o.unlocked ? '' : 'grayscale opacity-50'}`}
-          />
+            type="button"
+            onClick={onChallenge}
+            title={o.unlocked ? `${o.name}（已擊敗）` : `${o.name}（尚未擊敗，點擊挑戰）`}
+            className="flex flex-col items-center gap-1 rounded-xl p-2 transition-colors hover:bg-surface-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          >
+            <PkFigureAvatar slug={o.slug} name={o.name} size="lg" locked={!o.unlocked} />
+            <span className={`text-xs font-medium ${o.unlocked ? 'text-on-surface' : 'text-on-surface-variant'}`}>
+              {o.name}
+            </span>
+          </button>
         ))}
       </div>
     </div>
   );
 };
 
-const PkHistoryPanel: React.FC<PkHistoryPanelProps> = ({ token }) => {
+const PkHistoryPanel: React.FC<PkHistoryPanelProps> = ({ token, onChallenge }) => {
   const [rating, setRating] = useState<PkRatingSummary | null>(null);
   const [matches, setMatches] = useState<PkHistoryEntry[] | null>(null);
   const [opponents, setOpponents] = useState<PkOpponent[]>([]);
@@ -114,7 +136,7 @@ const PkHistoryPanel: React.FC<PkHistoryPanelProps> = ({ token }) => {
   if (matches == null) {
     return (
       <div
-        className="mt-6 h-24 w-full max-w-xl animate-pulse rounded-2xl bg-surface-container"
+        className="mt-6 h-24 w-full max-w-3xl animate-pulse rounded-2xl bg-surface-container"
         aria-hidden="true"
         data-testid="pk-history-panel-loading"
       />
@@ -124,10 +146,10 @@ const PkHistoryPanel: React.FC<PkHistoryPanelProps> = ({ token }) => {
   if (matches.length === 0) {
     return (
       <div
-        className="mt-6 w-full max-w-xl rounded-2xl bg-surface-container-lowest p-4 shadow-sm"
+        className="mt-6 w-full max-w-3xl rounded-2xl bg-surface-container-lowest p-4 shadow-sm sm:p-6"
         data-testid="pk-history-panel"
       >
-        <DefeatRoster opponents={opponents} />
+        <DefeatRoster opponents={opponents} onChallenge={onChallenge} />
         <p className="text-center text-sm text-on-surface-variant">還沒有對戰紀錄，去挑戰第一場吧！</p>
       </div>
     );
@@ -137,10 +159,10 @@ const PkHistoryPanel: React.FC<PkHistoryPanelProps> = ({ token }) => {
 
   return (
     <div
-      className="mt-6 w-full max-w-xl rounded-2xl bg-surface-container-lowest p-4 shadow-sm"
+      className="mt-6 w-full max-w-3xl rounded-2xl bg-surface-container-lowest p-4 shadow-sm sm:p-6"
       data-testid="pk-history-panel"
     >
-      <DefeatRoster opponents={opponents} />
+      <DefeatRoster opponents={opponents} onChallenge={onChallenge} />
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-bold text-on-surface">我的戰績</h2>
         {rating && <span className="text-xs text-on-surface-variant">積分 {rating.rating}</span>}
