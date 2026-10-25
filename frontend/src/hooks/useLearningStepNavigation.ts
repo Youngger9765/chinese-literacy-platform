@@ -34,6 +34,7 @@ import type {
   VocabResult,
 } from '../types';
 import { buildStepFinishPayload } from './stepHandlerUtils';
+import { isIslandStoryMode, notifyIslandStepDone } from '../pages/lab/island/storyMode';
 import { lessonAwareNextStep } from './lessonAwareStepTransition';
 
 const ACTIVE_ASSIGNMENT_CONTEXT_KEY = 'activeAssignmentContext';
@@ -155,13 +156,18 @@ export function useLearningStepNavigation({
 
   const navigateAfterFinish = useCallback(
     (nextStep: string) => {
+      // 喝采島故事模式：做完這一關就回到島上，不往下一關走
+      if (isIslandStoryMode()) {
+        notifyIslandStepDone(currentStepKey);
+        return;
+      }
       if (isToolboxMode()) {
         navigate('/tools');
         return;
       }
       navigate(stepPath(storyId, nextStep));
     },
-    [navigate, storyId],
+    [navigate, storyId, currentStepKey],
   );
 
   /**

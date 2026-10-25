@@ -6,6 +6,7 @@ import { fetchLearningSessions, loadStepProgress } from '../../services/learning
 import { stepPath } from '../../config/stepPath';
 import { BABIES, OPENING, STOPS } from './island/islandData';
 import { createIslandWorld } from './island/createIslandWorld';
+import { ISLAND_STEP_DONE } from './island/storyMode';
 
 interface LessonData {
   title: string;
@@ -90,6 +91,9 @@ export default function ReadingIslandLab() {
       },
       onMove: (x, z) => setPosition({ x, z }),
       onHover: setHovered,
+      onPick: (index) => { setMode('first'); worldRef.current?.travelTo(index); },
+      onWantFirstPerson: () => setMode('first'),
+      onArrive: (index) => setNear(index),
     });
     worldRef.current = world;
     return () => {
@@ -113,9 +117,13 @@ export default function ReadingIslandLab() {
   }, [doneIndexes, nextIndex, module, opening]);
   useEffect(() => { worldRef.current?.setPaused(module !== null || opening >= 0); }, [module, opening]);
 
+  // 進入關卡：先暗場、門從中間打開、光透出來，再打開平台原本的教材
+  const [door, setDoor] = useState<number | null>(null);
   const openModule = (index: number) => {
     if (!stepFor(index)) { setError('這個平台關卡尚未提供'); return; }
-    setModule(index);
+    setDoor(index);
+    window.setTimeout(() => setModule(index), 1700);
+    window.setTimeout(() => setDoor(null), 2300);
   };
   const returnToIsland = async () => {
     const index = module;
@@ -130,6 +138,17 @@ export default function ReadingIslandLab() {
       });
     }
   };
+  // 故事模式：關卡做完由學習頁通知，直接帶回島上（不往下一關走）
+  const returnRef = useRef(returnToIsland);
+  returnRef.current = returnToIsland;
+  useEffect(() => {
+    const onMessage = (event: MessageEvent) => {
+      if (event.origin !== window.location.origin) return;
+      if ((event.data as { type?: string } | null)?.type === ISLAND_STEP_DONE) void returnRef.current();
+    };
+    window.addEventListener('message', onMessage);
+    return () => window.removeEventListener('message', onMessage);
+  }, []);
   const onStickMove = (event: React.PointerEvent<HTMLDivElement>) => {
     if (!stickOrigin.current) return;
     const x = Math.max(-1, Math.min(1, (event.clientX - stickOrigin.current.x) / 46));
@@ -189,6 +208,17 @@ export default function ReadingIslandLab() {
             <div className="mb-3 flex justify-between text-xs font-bold tracking-widest text-[#f5cf91]"><span>{opening + 1} / 6</span><span>{OPENING[opening][0]}</span></div>
             <p className="min-h-16 font-serif text-xl font-bold leading-relaxed md:text-2xl">{OPENING[opening][1]}</p>
             {opening === 5 ? <div className="mt-5 flex flex-wrap gap-3"><button type="button" onClick={() => { setOpening(-1); openModule(0); }} className="rounded-xl bg-[#eac78d] px-6 py-3 font-bold text-[#244653]">聽這句</button><button type="button" onClick={() => setOpening(-1)} className="rounded-xl border border-white/70 px-6 py-3 font-bold">直接上岸走</button></div> : <button type="button" onClick={() => setOpening(opening + 1)} className="mt-5 rounded-xl bg-[#eac78d] px-7 py-3 font-bold text-[#244653]">繼續</button>}
+          </div>
+        </div>
+      )}
+      {door !== null && (
+        <div className="pointer-events-none absolute inset-0 z-50 overflow-hidden bg-black" aria-hidden>
+          <style>{'@keyframes islandDoorL{0%,35%{transform:translateX(0)}100%{transform:translateX(-102%)}}@keyframes islandDoorR{0%,35%{transform:translateX(0)}100%{transform:translateX(102%)}}@keyframes islandDoorGlow{0%,30%{opacity:0;transform:scale(.2)}70%{opacity:1}100%{opacity:1;transform:scale(3)}}@keyframes islandDoorIn{0%{opacity:0}15%{opacity:1}100%{opacity:1}}'}</style>
+          <div className="absolute inset-0 animate-[islandDoorIn_2.3s_ease-out_forwards]">
+            <div className="absolute left-1/2 top-1/2 h-[60vmin] w-[60vmin] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,#fffbe8_0%,#ffd98a_35%,rgba(255,200,110,0)_70%)] animate-[islandDoorGlow_2s_ease-in_forwards]" />
+            <div className="absolute inset-y-0 left-0 w-1/2 border-r-4 border-[#c9944f] bg-gradient-to-r from-[#2b1a10] to-[#5a3a22] shadow-[inset_-30px_0_60px_rgba(0,0,0,.6)] animate-[islandDoorL_1.8s_cubic-bezier(.7,0,.3,1)_forwards]"><div className="absolute right-6 top-1/2 h-10 w-3 rounded-full bg-[#e7c27d]" /></div>
+            <div className="absolute inset-y-0 right-0 w-1/2 border-l-4 border-[#c9944f] bg-gradient-to-l from-[#2b1a10] to-[#5a3a22] shadow-[inset_30px_0_60px_rgba(0,0,0,.6)] animate-[islandDoorR_1.8s_cubic-bezier(.7,0,.3,1)_forwards]"><div className="absolute left-6 top-1/2 h-10 w-3 rounded-full bg-[#e7c27d]" /></div>
+            <p className="absolute bottom-[18%] left-1/2 -translate-x-1/2 font-serif text-3xl font-black tracking-widest text-[#ffe9b8] drop-shadow-[0_0_20px_rgba(255,200,100,.9)]">{STOPS[door].name}</p>
           </div>
         </div>
       )}

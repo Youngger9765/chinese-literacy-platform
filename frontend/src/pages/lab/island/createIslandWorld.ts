@@ -6,6 +6,9 @@ interface WorldEvents {
   onFogEdge: () => void;
   onMove: (x: number, z: number) => void;
   onHover?: (index: number | null) => void;
+  onPick?: (index: number) => void;
+  onWantFirstPerson?: () => void;
+  onArrive?: (index: number) => void;
 }
 
 
@@ -308,6 +311,10 @@ export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
   let nextStop: number | null = 0;
   let guideUntil = 0;
   let turnTo: number | null = null;
+  let travelTarget: number | null = null;
+  // 沿途景色：每一區有自己的天色與霧色（港口海藍 → 山谷翠綠 → 高地金黃）
+  const zoneSky = [new THREE.Color('#bcdde6'), new THREE.Color('#cfe6c8'), new THREE.Color('#f1ddb0')];
+  const skyNow = new THREE.Color('#bcdde6');
   const fogs = zoneCenters.slice(1).map((zone, index) => {
     const group = new THREE.Group();
     group.position.set(zone.x, 2.2, zone.z);
@@ -345,7 +352,12 @@ export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
     if (event.key === ' ' && jumping === 0) verticalSpeed = 5.5;
   };
   const keyup = (event: KeyboardEvent) => keys.delete(event.key.toLowerCase());
-  const pointerdown = (event: PointerEvent) => { dragX = event.clientX; dragY = event.clientY; renderer.domElement.setPointerCapture(event.pointerId); };
+  let downAt = { x: 0, y: 0 };
+  const pointerdown = (event: PointerEvent) => { dragX = event.clientX; dragY = event.clientY; downAt = { x: event.clientX, y: event.clientY }; renderer.domElement.setPointerCapture(event.pointerId); };
+  const pointerup = (event: PointerEvent) => {
+    if (mode !== 'god' || Math.hypot(event.clientX - downAt.x, event.clientY - downAt.y) > 6) return;
+    if (hovered !== null) events.onPick?.(hovered);
+  };
   const pointermove = (event: PointerEvent) => {
     const rect = renderer.domElement.getBoundingClientRect();
     pointerNdc.set(((event.clientX - rect.left) / rect.width) * 2 - 1, -((event.clientY - rect.top) / rect.height) * 2 + 1);
@@ -368,6 +380,7 @@ export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
   window.addEventListener('keyup', keyup);
   renderer.domElement.addEventListener('pointerdown', pointerdown);
   renderer.domElement.addEventListener('pointermove', pointermove);
+  renderer.domElement.addEventListener('pointerup', pointerup);
   window.addEventListener('resize', resize);
   resize();
 
@@ -383,8 +396,28 @@ export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
       keyDirection = { x: Number(keys.has('d') || keys.has('arrowright')) - Number(keys.has('a') || keys.has('arrowleft')), z: Number(keys.has('s') || keys.has('arrowdown')) - Number(keys.has('w') || keys.has('arrowup')) };
       const dx = keyDirection.x + stickDirection.x;
       const dz = keyDirection.z + stickDirection.z;
-      const length = Math.hypot(dx, dz);
-      if (length > 0.08) {
+      let length = Math.hypot(dx, dz);
+      if (length > 0.08 && mode === 'god') events.onWantFirstPerson?.();
+      if (length > 0.08) travelTarget = null;
+      if (travelTarget !== null && mode === 'first') {
+        const goal = STOPS[travelTarget];
+        const gx = goal.x - player.position.x;
+        const gz = goal.z - player.position.z;
+        const dist = Math.hypot(gx, gz);
+        if (dist < 2.9) {
+          const arrived = travelTarget;
+          travelTarget = null;
+          events.onArrive?.(arrived);
+        } else {
+          yaw += Math.atan2(Math.sin(Math.atan2(-gx, -gz) - yaw), Math.cos(Math.atan2(-gx, -gz) - yaw)) * Math.min(1, dt * 3);
+          const step = Math.min(dist - 2.8, dt * 6.5);
+          player.position.x += (gx / dist) * step;
+          player.position.z += (gz / dist) * step;
+          events.onMove(player.position.x, player.position.z);
+          length = 1;
+        }
+      }
+      if (length > 0.08 && travelTarget === null) {
         const forward = new THREE.Vector3(-Math.sin(yaw), 0, -Math.cos(yaw));
         const right = new THREE.Vector3(Math.cos(yaw), 0, -Math.sin(yaw));
         const moveX = (right.x * dx + forward.x * -dz) / Math.max(1, length) * dt * 5.2;
@@ -451,6 +484,9 @@ export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
       }
     }
     zonedThings.forEach((thing) => { thing.visible = (thing.userData.zone as number) <= unlockedZone; });
+    skyNow.lerp(zoneSky[zoneOf(player.position.x, player.position.z)], Math.min(1, dt * 0.8));
+    (scene.background as THREE.Color).copy(skyNow);
+    (scene.fog as THREE.FogExp2).color.copy(skyNow);
     lighthouseBeams.forEach((pivot) => { pivot.visible = mode === 'first'; pivot.rotation.y -= dt * 0.9; });
     // 對準建築：第一人稱看畫面中央，上帝視角看滑鼠
     raycaster.setFromCamera(mode === 'first' ? new THREE.Vector2(0, 0) : pointerNdc, camera);
@@ -511,6 +547,7 @@ export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
       if (newlyDone && nextStop !== null) { guideUntil = elapsed + 12; turnTo = nextStop; }
     },
     setMode(next: ViewMode) { mode = next; if (next === 'first') pitch = -0.05; },
+    travelTo(index: number) { travelTarget = index; mode = 'first'; pitch = -0.05; },
     setStick(x: number, z: number) { stickDirection = { x, z }; },
     setPaused(value: boolean) { paused = value; },
     jump() { if (jumping === 0) verticalSpeed = 5.5; },
@@ -522,6 +559,7 @@ export function createIslandWorld(container: HTMLElement, events: WorldEvents) {
       window.removeEventListener('resize', resize);
       renderer.domElement.removeEventListener('pointerdown', pointerdown);
       renderer.domElement.removeEventListener('pointermove', pointermove);
+      renderer.domElement.removeEventListener('pointerup', pointerup);
       scene.traverse((object) => {
         if (object instanceof THREE.Mesh) object.geometry.dispose();
         if (object instanceof THREE.Sprite) object.material.map?.dispose();
