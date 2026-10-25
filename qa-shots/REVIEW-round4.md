@@ -1,0 +1,57 @@
+# 逐畫面審查紀錄 — #3761 round 4（Young 看過 round 3 截圖後的具體修正）
+
+> 延續 `REVIEW-round3.md`。Young 逐張看了 `after-round3/01`、`02`、`03`、`05b` 後的結論：
+> 「01/02 可以，03 有裁切 bug + 六個圓還是純文字 + 主按鈕樣式不對 + 下半版面空白，
+> 05b 版型到位但同學牆太單薄」。本輪逐條對應修正，環境與截圖方式同前（本機前後端，
+> 真實帳號，staging CORS 限制同前）。
+
+## 逐條對應
+
+| Young 的意見 | 怎麼修的 | 證據 |
+|---|---|---|
+| PK 橫幅第一個圓「駱」被左邊裁切 | 根因：`max-w-2xl` 容器裝不下 7 個頭像的實際寬度（632px > 可用寬度），`justify-center` 在溢出時會把第一個項目推到看不到也滑不回去的地方。改 `justify-start` + 頁面加寬到 `max-w-4xl` | `after-round4/12-pk-entry-round4-desktop-1440.png`（駱完整露出） |
+| 六個圓還是純文字佔位，橫幅跟 0/7 進度條合併前要共用同一套頭像元件 | 新增 `PkFigureAvatar.tsx`，橫幅與戰績 roster 都改用它（直接用 `slug` 組圖片路徑，不經過 `pkFigures.ts` 的 `PK_PNG_ART_OVERRIDE`），pk-avatars 合併後兩處會同時自動換成真圖，不用再改兩份程式碼 | 同上；程式碼見 `components/pk/PkFigureAvatar.tsx` |
+| 主按鈕「挑戰文學家」應該是實心主色大按鈕（原本白底細框） | 改成條件樣式：單獨出現時（多數學生沒開真人 PK）用實心 `bg-accent text-white`；跟「找同學 PK」並存時維持外框次要樣式，讓「找同學 PK」仍是主要選項 | `after-round4/12-pk-entry-round4-desktop-1440.png` |
+| 桌機下半版面空白，戰績/七位文學家進度要放大成可點的頭像卡牆 | `PkHistoryPanel` 的 `DefeatRoster` 改成 `grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7` 的頭像卡（圖+姓名），每張都是 `<button>`，點擊導向挑戰文學家流程（沒有單一對手的深連結，所以統一導向選角頁） | 同上；新測試驗證點擊會呼叫 `onChallenge` |
+| 等待室同學牆只有一個匿名小人圖示，人數多時要是頭像網格，匿名用編號＋隨機色；加輕動效 | `AnonymousPeer` 從單一灰色剪影改成「編號＋循環色票＋姓名標籤（同學1/同學2...）」，並加 `animate-pulse` 呼吸效果、每個頭像錯開 `animation-delay` 製造輕微的接續脈動感 | `after-round4/14b-lobby-round4-three-joined.png`（真實 3 個學生帳號加入，橘色「1」+ 綠色「2」兩種顏色） |
+
+## 自評更新
+
+| 畫面 | round 3 分數 | round 4 分數 | 說明 |
+|---|---|---|---|
+| PK 入口 | 4/5 | **4.5/5** | 裁切 bug 修掉、按鈕樣式對了、roster 變成可點卡牆；剩下的缺口純粹是等 pk-avatars 的 6 張真圖，不是這輪能做的事 |
+| 課堂搶答等待室 | 3/5 | **4/5** | 同學牆從「一個灰色小人」變成可辨識的編號色塊網格，加了動效；仍然是匿名（隱私限制，見 round 3 文件說明，非前端能自行決定），這點沒有變 |
+
+## 第二輪意見對應（Young 看了 `after-round4` 截圖後的二次意見）
+
+| Young 的意見 | 怎麼修的 | 證據 |
+|---|---|---|
+| 「0/7 已擊敗」牆：駱賓王～蘇軾六格只有名字、圖是一片空白——這是破圖 | **根因不是破圖，是對比度**：直接查 live DOM（`document.querySelector(...).outerHTML`）確認 fallback `<div>`（含「駱」字、`grayscale opacity-60` class）確實有正確渲染，程式碼完全正確；真正的問題是 fallback 原本用 `bg-white/20 + text-white`，在橫幅的深紫色漸層底上看得清楚，但在戰績牆的近白色面板底上等於「20% 透明白底配白字」，視覺上就是一片空白。可見症狀跟 Young 描述的「破圖」一致，但技術上是對比度問題、不是圖片載入失敗——這個區分影響修法：改的不是圖片載入邏輯，是 fallback 的底色。`PkFigureAvatar.tsx` 的 fallback 改成固定、依 slug 雜湊決定的實色色票（`locked` 狀態另外用純灰 `#9CA3AF`），兩處都能用同一元件自動受益 | `after-round4/18-pk-entry-contrastfix-desktop.png`（橫幅與戰績牆都是清楚的實色圓圈，不再是空白）；新增 2 條測試鎖對比度（`PkFigureAvatar.test.tsx`） |
+| 手機版橫幅只顯示 4/7 位，杜甫、蘇軾、李白看不到 | 先把 `md` 尺寸手機版基準從 `h-16 w-16` 縮到 `h-10 w-10`（6/7 可見），但第 7 個仍會被容器邊緣切掉（7×40px+6×8px gap=328px，略超過手機可用寬度約 300-350px）；沒有繼續縮小（怕姓氏單字看不清楚），改用 Young 提供的替代方案：橫向可捲動 + 右緣淡出漸層 + 跳動箭頭提示（只在手機顯示，桌機已確認 7 位不用捲動） | `after-round4/19-pk-entry-contrastfix-mobile.png`（6 位完整可見）、`21-pk-entry-mobile-scrollfade.png`（確認箭頭提示渲染正常） |
+| 等待室版面下方仍空一大塊、卡片只佔畫面上半；桌機請讓大廳卡片填滿可視高度（或把同學牆區放大成多列格狀），加上「老師開始後自動進入第一題」的倒數感提示 | 三處改動：(1) 漸層卡片本身加 `flex-1`，讓它撐滿父層給的可視高度，不再只隨內容高度縮成一小塊、下面留一截裸白背景 (2) 同學牆從 `flex flex-wrap` 改成 `grid`，人數多時自然呈現多列格狀 (3) 加一顆帶脈動圓點的提示藥丸「老師開始後，畫面會自動跳到第一題，不用自己按」——沒有真正的倒數秒數可用（輪詢的 state 不帶這個欄位），所以「倒數感」用跟呼吸光暈同一套脈動動效表達，不是真的數字倒數 | `after-round4/22-lobby-desktop-fill.png`（桌機卡片撐滿、下方不再空白）、`23-lobby-mobile-fill.png`（手機版同樣撐滿）；新增 3 條測試鎖（`flex-1` class、提示文案、`grid` class） |
+
+## 自評更新（二）
+
+| 畫面 | round 4（第一版）分數 | round 4（第二版）分數 | 說明 |
+|---|---|---|---|
+| PK 入口 | 4.5/5 | **4.8/5** | 對比度 bug 修掉、手機 7 位全可見（6 直接見+1 可捲）；剩的 0.2 純粹是等 pk-avatars 的 6 張真圖落地 |
+| 課堂搶答等待室 | 4/5 | **4.7/5** | 卡片撐滿可視高度、加了倒數感提示；剩下的缺口一樣是「同學牆仍匿名」這個產品層級決定，不是這輪前端能單方升級的部分 |
+
+## Rebase 後的真頭像驗收（pk-avatars #3764、report #3762 都已合併進 staging）
+
+工頭確認 `87de582b9`（六位文學家真頭像）與 `6bdb28f5d`（報告 #3762，含 e2e 固定帳號修正）都已合併進 staging 後，
+本分支 rebase 到最新 staging（`git rebase origin/staging`，無衝突），重啟本機前端、重新截圖驗證：
+
+| 要求 | 結果 | 證據 |
+|---|---|---|
+| PK 橫幅與「0/7 已擊敗」牆七位都是真頭像 | ✅ `PkFigureAvatar` 直接用 `slug` 組圖路徑（不經過 `pkFigures.ts` 的 `PK_PNG_ART_OVERRIDE`），pk-avatars 的 PNG 一落地兩處立刻自動換成真圖，未改任何程式碼 | `after-round4/24-pk-entry-realart-desktop.png` |
+| 手機橫幅看得到全部七位 | ✅ 6 位直接可見（駱孟白李杜蘇），橫向捲到底後露出第 7 位（李白），捲動提示箭頭正常運作 | `after-round4/25-pk-entry-realart-mobile.png`、`26-pk-entry-mobile-scrolled.png`（`scrollLeft` 程式化捲到底，`34` = `scrollWidth - clientWidth`） |
+| 等待大廳下方不再空 | ✅ 卡片撐滿可視高度，三個真實學生帳號加入的同學牆、倒數感提示都正常顯示 | `after-round4/27-lobby-postrebase-desktop.png` |
+
+Rebase 後重跑：`npm run lint`（0 error）、`npm run typecheck:ratchet`（維持基準 34，沒增加）、
+`npx vitest run`（464 檔 / 3754 條全線，含 pk-avatars 與 report 兩個 PR 帶來的新測試）。
+
+## 已知限制（延續 round 3/4，未變）
+
+- 同學牆仍然匿名——如果 Young 要的是「看到真名字」，需要先決定要不要放寬 PRD §13 的隱私限制，
+  這是產品層級的決定，不是前端這邊能單方升級的部分。

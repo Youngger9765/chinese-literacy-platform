@@ -16,6 +16,19 @@
  * fall back on), a "怎麼玩" explanation card, and a 戰績 panel wired to the
  * existing `/api/pk/history` + `/api/pk/rating/me` endpoints (the backend
  * has carried these since #3586/#3602; nothing ever rendered them).
+ *
+ * #3761 (round 3, Young reviewed #3756's screenshots): "大半畫面空白，不像
+ * 遊戲" — the #3756 banner was a single small gradient card with one icon.
+ * Replaced with `PkHeroBanner` (all 7 figures line up, icon-based "怎麼玩"
+ * steps) and widened the page from `max-w-sm` to `max-w-2xl` so it actually
+ * uses desktop width instead of staying phone-width on a 1440px screen.
+ *
+ * round 4 (Young: "頁面下半一半空白...桌機請把戰績/七位文學家進度放大成
+ * 可點的頭像卡牆"): widened again to `max-w-4xl` — the banner's 7-figure
+ * row was actually overflowing its `max-w-2xl` container (see
+ * PkHeroBanner's docstring for the clipping bug that caused), and a wider
+ * page gives the enlarged defeat-roster grid (PkHistoryPanel) room to
+ * breathe instead of wrapping into a cramped single column.
  */
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -25,6 +38,7 @@ import { createPkInvite, joinPkQueue, PkApiError, type PkScopeType } from '../..
 import { resolveGradeForAiPk } from './resolvePkGrade';
 import GameBackButton from '../../components/game/GameBackButton';
 import PkHistoryPanel from '../../components/pk/PkHistoryPanel';
+import PkHeroBanner from '../../components/pk/PkHeroBanner';
 
 type Scope = { type: PkScopeType; ref: string; label: string };
 
@@ -175,38 +189,12 @@ const StudentPkEntry: React.FC = () => {
 
   return (
     <div className="flex min-h-screen flex-col items-center bg-surface px-6 py-10">
-      <div className="w-full max-w-sm">
+      <div className="w-full max-w-4xl">
         <GameBackButton to="/game-hub" />
       </div>
 
-      <h1 className="mt-2 text-2xl font-bold text-on-surface">PK 對戰</h1>
-      <p className="mt-1 text-sm text-on-surface-variant">一對一，隨時挑戰同學或文學家</p>
-
-      {/* #3747 → #3756: "也沒有解說或是圖像 banner 之類的" — #3747 added a
-          plain-text card (deliberately illustration-free because 6 of 7
-          opponents' PNGs did not exist yet). #3756 upgrades it into an
-          actual hero banner now that 李白's full art set exists (#3745) —
-          but still does NOT depend on the other six (their PNGs, and
-          `pkFigures.ts`'s `PK_PNG_ART_OVERRIDE`, are a separate in-flight
-          workstream this page must not block on or collide with). The
-          icon here is read-only decoration: a gradient hero strip with
-          李白's existing `icon.png` anchored to one side, same "怎麼玩"
-          bullets as before. */}
-      <div className="mt-6 w-full max-w-sm overflow-hidden rounded-2xl bg-gradient-to-br from-accent to-accent/70 px-5 py-4 text-white shadow-sm">
-        <div className="flex items-center gap-3">
-          <img
-            src="/story-assets/pk-li-bai/icon.png"
-            alt=""
-            aria-hidden="true"
-            className="h-14 w-14 shrink-0 rounded-full border-2 border-white/60 bg-white/20 object-contain p-1"
-          />
-          <p className="text-sm font-bold">怎麼玩？</p>
-        </div>
-        <ul className="mt-3 space-y-1 text-xs text-white/90">
-          <li>• 5 題搶答，答得又對又快分數越高</li>
-          <li>• 平手時看誰總作答時間比較快</li>
-          <li>• 打贏文學家可以解鎖他的人物卡</li>
-        </ul>
+      <div className="mt-4 w-full max-w-4xl">
+        <PkHeroBanner />
       </div>
 
       {lessonUid && (
@@ -241,13 +229,22 @@ const StudentPkEntry: React.FC = () => {
         </p>
       )}
 
-      <div className="mt-10 flex w-full max-w-sm flex-col gap-4">
+      {/* #3761: bigger, more prominent CTAs (taller + larger text than
+          #3756's version) in a side-by-side pair on wide screens so they
+          read as two equally-weighted choices instead of a stacked list.
+          round 4 (Young: "主按鈕「挑戰文學家」是白底細框，應該是實心主色
+          大按鈕"): when it's the ONLY button (找同學 PK 不可用，多數學生
+          沒加入開啟真人 PK 的班級時就是這個情況) it's now solid-filled
+          like 找同學 PK — an outline button as the SOLE call-to-action
+          read as weak/secondary. When both buttons show, 挑戰文學家 stays
+          the outline/secondary style so 找同學 PK still reads as primary. */}
+      <div className="mt-10 grid w-full max-w-3xl grid-cols-1 gap-4 sm:grid-cols-2">
         {canFindClassmate && (
           <button
             type="button"
             disabled={busy}
             onClick={() => void handleFindClassmate()}
-            className="rounded-2xl bg-accent px-6 py-6 text-lg font-bold text-white shadow active:scale-95 transition-transform disabled:opacity-50"
+            className="rounded-2xl bg-accent px-6 py-8 text-xl font-bold text-white shadow-md active:scale-95 transition-transform disabled:opacity-50"
           >
             找同學 PK
           </button>
@@ -256,14 +253,18 @@ const StudentPkEntry: React.FC = () => {
           type="button"
           disabled={busy}
           onClick={handleChallengeFigure}
-          className="rounded-2xl border-2 border-accent px-6 py-6 text-lg font-bold text-accent active:scale-95 transition-transform disabled:opacity-50"
+          className={`rounded-2xl px-6 py-8 text-xl font-bold active:scale-95 transition-transform disabled:opacity-50 ${
+            canFindClassmate
+              ? 'border-2 border-accent text-accent'
+              : 'sm:col-span-2 bg-accent text-white shadow-md'
+          }`}
         >
           挑戰文學家
         </button>
       </div>
 
       {canFindClassmate && classroom?.id != null && (
-        <div className="mt-6 w-full max-w-sm space-y-2 text-sm">
+        <div className="mt-6 w-full max-w-3xl space-y-2 text-sm">
           <button
             type="button"
             onClick={() => setShowInviteRedeem((v) => !v)}
@@ -315,7 +316,7 @@ const StudentPkEntry: React.FC = () => {
 
       {error && <p className="mt-4 text-sm text-error">{error}</p>}
 
-      {token && <PkHistoryPanel token={token} />}
+      {token && <PkHistoryPanel token={token} onChallenge={handleChallengeFigure} />}
     </div>
   );
 };
