@@ -25,9 +25,15 @@
  * pk-avatars' PNGs land, same as `PkHeroBanner`'s figures — no longer two
  * separate avatar code paths that would each need updating by hand.
  *
- * Best-effort, never blocks the entry screen: a fetch failure renders
- * nothing (same pattern as StudentOurClassPage's season-board fetch) —
- * this panel is a bonus, not the page's primary job (finding an opponent).
+ * Best-effort, never blocks the entry screen: this panel is a bonus, not
+ * the page's primary job (finding an opponent). "Never blocks" means each
+ * of the three calls (rating / history / opponents) degrades on its own —
+ * one failing doesn't hide data the others already fetched successfully.
+ * Only total failure (all three reject) renders nothing (same pattern as
+ * StudentOurClassPage's season-board fetch). See #3766: this used to be
+ * `Promise.all`, which made ANY single rejection blank the whole panel —
+ * including an already-loaded roster that has nothing to do with whatever
+ * failed — the opposite of "best-effort".
  */
 import React, { useEffect, useState } from 'react';
 import { getPkHistory, getPkRatingMe, getPkOpponents, type PkHistoryEntry, type PkOpponent } from '../../services/pkApi';
@@ -114,18 +120,46 @@ const PkHistoryPanel: React.FC<PkHistoryPanelProps> = ({ token, onChallenge }) =
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([getPkRatingMe(token), getPkHistory(token), getPkOpponents(token)])
-      .then(([r, h, o]) => {
+    // #3766 (Young, staging repro: a classroom-enrolled student with
+    // real-PK turned on saw NO "N/7 已擊敗" roster and NO 戰績 — just a
+    // blank strip below the buttons, even though the roster's own data
+    // (`getPkOpponents`) has nothing to do with rating/history). Root
+    // cause: `Promise.all` makes these three INDEPENDENT calls succeed or
+    // fail as one unit — any single rejection (here, apparently rating or
+    // history, on that specific staging account; never reproducible
+    // locally against a fresh classroom+pk_human student, see issue #3766
+    // for what was and wasn't verifiable) blanked the whole panel,
+    // including a roster that had already loaded fine. That directly
+    // contradicts this file's own "best-effort, never blocks" docstring —
+    // the three calls were wired as all-or-nothing when the data they
+    // feed isn't. `Promise.allSettled` lets each piece degrade on its
+    // own: the roster shows whenever `opponents` resolves, independent of
+    // whether rating/history came back. Only true total failure (all
+    // three reject) falls through to the old "render nothing" behavior.
+    Promise.allSettled([getPkRatingMe(token), getPkHistory(token), getPkOpponents(token)]).then(
+      ([ratingResult, historyResult, opponentsResult]) => {
         if (cancelled) return;
-        setRating(r);
-        // Only count completed matches as "戰績" — an abandoned/active row
-        // has no outcome yet and would otherwise show a confusing blank.
-        setMatches(h.matches.filter((m) => m.status === 'completed'));
-        setOpponents(o.opponents);
-      })
-      .catch(() => {
-        if (!cancelled) setFailed(true);
-      });
+        if (ratingResult.status === 'fulfilled') setRating(ratingResult.value);
+        if (historyResult.status === 'fulfilled') {
+          // Only count completed matches as "戰績" — an abandoned/active
+          // row has no outcome yet and would otherwise show a confusing
+          // blank.
+          setMatches(historyResult.value.matches.filter((m) => m.status === 'completed'));
+        } else {
+          // History failed but something else may have succeeded — treat
+          // "we don't know your history" the same as "no history yet"
+          // rather than leaving `matches` stuck at `null` forever (which
+          // would pin the loading skeleton indefinitely instead of
+          // reaching the roster's render path).
+          setMatches([]);
+        }
+        if (opponentsResult.status === 'fulfilled') setOpponents(opponentsResult.value.opponents);
+        const allFailed = [ratingResult, historyResult, opponentsResult].every(
+          (r) => r.status === 'rejected',
+        );
+        if (allFailed) setFailed(true);
+      },
+    );
     return () => {
       cancelled = true;
     };
