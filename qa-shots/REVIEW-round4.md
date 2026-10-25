@@ -37,9 +37,21 @@
 | PK 入口 | 4.5/5 | **4.8/5** | 對比度 bug 修掉、手機 7 位全可見（6 直接見+1 可捲）；剩的 0.2 純粹是等 pk-avatars 的 6 張真圖落地 |
 | 課堂搶答等待室 | 4/5 | **4.7/5** | 卡片撐滿可視高度、加了倒數感提示；剩下的缺口一樣是「同學牆仍匿名」這個產品層級決定，不是這輪前端能單方升級的部分 |
 
+## Rebase 後的真頭像驗收（pk-avatars #3764、report #3762 都已合併進 staging）
+
+工頭確認 `87de582b9`（六位文學家真頭像）與 `6bdb28f5d`（報告 #3762，含 e2e 固定帳號修正）都已合併進 staging 後，
+本分支 rebase 到最新 staging（`git rebase origin/staging`，無衝突），重啟本機前端、重新截圖驗證：
+
+| 要求 | 結果 | 證據 |
+|---|---|---|
+| PK 橫幅與「0/7 已擊敗」牆七位都是真頭像 | ✅ `PkFigureAvatar` 直接用 `slug` 組圖路徑（不經過 `pkFigures.ts` 的 `PK_PNG_ART_OVERRIDE`），pk-avatars 的 PNG 一落地兩處立刻自動換成真圖，未改任何程式碼 | `after-round4/24-pk-entry-realart-desktop.png` |
+| 手機橫幅看得到全部七位 | ✅ 6 位直接可見（駱孟白李杜蘇），橫向捲到底後露出第 7 位（李白），捲動提示箭頭正常運作 | `after-round4/25-pk-entry-realart-mobile.png`、`26-pk-entry-mobile-scrolled.png`（`scrollLeft` 程式化捲到底，`34` = `scrollWidth - clientWidth`） |
+| 等待大廳下方不再空 | ✅ 卡片撐滿可視高度，三個真實學生帳號加入的同學牆、倒數感提示都正常顯示 | `after-round4/27-lobby-postrebase-desktop.png` |
+
+Rebase 後重跑：`npm run lint`（0 error）、`npm run typecheck:ratchet`（維持基準 34，沒增加）、
+`npx vitest run`（464 檔 / 3754 條全線，含 pk-avatars 與 report 兩個 PR 帶來的新測試）。
+
 ## 已知限制（延續 round 3/4，未變）
 
-- 所有截圖本機前後端驗證（staging CORS 限制），尚未在部署後的 staging 重新截圖。
-- PK 橫幅/roster 的 6 位非李白文學家仍是姓氏圓圈 fallback（現在是看得清楚的實色圓圈，不是破圖），等 `pk-avatars`（#3745，PR #3764）合併。**合併順序：pk-avatars 先合、本 PR rebase 後再合**，merge 前不動 `main`/`staging`。
 - 同學牆仍然匿名——如果 Young 要的是「看到真名字」，需要先決定要不要放寬 PRD §13 的隱私限制，
   這是產品層級的決定，不是前端這邊能單方升級的部分。
