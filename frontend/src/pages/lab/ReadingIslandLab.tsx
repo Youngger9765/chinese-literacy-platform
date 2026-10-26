@@ -250,12 +250,34 @@ export default function ReadingIslandLab() {
     <main className="relative h-[100dvh] w-full overflow-hidden bg-[#bbd6dc] font-sans text-[#284650]">
       <div ref={canvasRef} className="absolute inset-0 [&_canvas]:h-full [&_canvas]:w-full" aria-label="喝采島 3D 世界，使用方向鍵或 WASD 移動" />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#d1e4e3]/30 via-transparent to-[#0e3440]/25" />
-      <header aria-label="喝采島標題卡" className="absolute left-4 top-4 z-10 max-w-[calc(100vw-8rem)] rounded-2xl border border-white/70 bg-[#f8f2df]/90 px-4 py-3 shadow-xl backdrop-blur-md md:left-7 md:top-7 md:px-6 md:py-4">
-        <p className="text-[10px] font-bold tracking-[0.25em] text-[#a87345] md:text-xs">國語四上 · 故事冒險</p>
-        <h1 className="font-serif text-2xl font-black tracking-wider md:text-3xl">喝采島</h1>
-        <p className="max-w-72 text-xs font-medium text-[#526969] md:text-sm">{lesson?.title ?? ''} · {BABIES.length} 個字詞寶寶藏在島上</p>
-        <div className="mt-2 flex items-center gap-2 text-xs font-bold"><span>{doneIndexes.length} / {STOPS.length} 座亮燈</span><span className="h-2 w-20 overflow-hidden rounded-full bg-[#d9dfd5]"><span className="block h-full rounded-full bg-amber-500 transition-all" style={{ width: `${(doneIndexes.length / Math.max(1, STOPS.length)) * 100}%` }} /></span></div>
-      </header>
+      {/* 標題卡 + 工具列（清單模式/聲音）共用一個 flex-col 容器——team-lead
+          2026-10-26 二次訂正：原本工具列在手機版用 `top-40` 這種猜出來的像素
+          數字卡在標題卡下方，`islandPanelOverlap.spec.ts` 證明了這個數字會
+          過期：範本模式下任何一課都會長出自己的島，課名長度不同、標題卡
+          高度就會不同（字幕可能多繞一行），猜出來的緩衝遲早又被吃掉。改成
+          讓工具列真的「排在標題卡下面」而不是「蓋一個夠高的座標」——手機版
+          這個外層 div 是真的 `flex flex-col`，工具列不再自己 `absolute` 定
+          位，不管標題卡多高都會自動被推到它下面。
+          桌機/iPad（≥768px）兩者本來就不相鄰（標題卡在左上、工具列在左下），
+          用 `md:contents` 讓這層外殼在那個斷點直接消失，不產生任何版面效果，
+          裡面兩個元素各自用自己的 `md:absolute md:...` 回到原本的位置
+          （跟這層外殼的 flex 完全無關）。*/}
+      <div className="absolute left-4 top-4 flex flex-col items-start gap-3 md:contents">
+        <header aria-label="喝采島標題卡" className="relative z-10 max-w-[calc(100vw-8rem)] rounded-2xl border border-white/70 bg-[#f8f2df]/90 px-4 py-3 shadow-xl backdrop-blur-md md:absolute md:left-7 md:top-7 md:px-6 md:py-4">
+          <p className="text-[10px] font-bold tracking-[0.25em] text-[#a87345] md:text-xs">國語四上 · 故事冒險</p>
+          <h1 className="font-serif text-2xl font-black tracking-wider md:text-3xl">喝采島</h1>
+          <p className="max-w-72 text-xs font-medium text-[#526969] md:text-sm">{lesson?.title ?? ''} · {BABIES.length} 個字詞寶寶藏在島上</p>
+          <div className="mt-2 flex items-center gap-2 text-xs font-bold"><span>{doneIndexes.length} / {STOPS.length} 座亮燈</span><span className="h-2 w-20 overflow-hidden rounded-full bg-[#d9dfd5]"><span className="block h-full rounded-full bg-amber-500 transition-all" style={{ width: `${(doneIndexes.length / Math.max(1, STOPS.length)) * 100}%` }} /></span></div>
+        </header>
+        {opening < 0 && (
+          <div aria-label="工具列" className="relative z-20 flex flex-col items-start gap-2 md:absolute md:left-7 md:bottom-28">
+            {module === null && door === null && !listMode && (
+              <button type="button" aria-label="切換清單模式" onClick={() => setListMode(true)} className="rounded-full border-2 border-white bg-[#233e4b]/90 px-4 py-2 text-sm font-bold text-[#fff1d0] shadow-lg transition hover:scale-105 active:scale-95">清單模式</button>
+            )}
+            <button type="button" onClick={toggleMuted} className="rounded-full border-2 border-white bg-[#233e4b]/85 px-3 py-1.5 text-xs font-bold text-[#fff1d0] shadow-lg" aria-pressed={muted}>{muted ? '聲音：關' : '聲音：開'}</button>
+          </div>
+        )}
+      </div>
       {/* 「第一幕」劇情說明卡——手機（<768px）收成一顆小按鈕，點開才看到完整
           內容；桌機/iPad 維持原本常駐卡片。team-lead 2026-10-26 截圖抓到：
           390px 寬放不下左上標題卡＋右上這張卡並排，會疊在一起（「國語四上」
@@ -306,26 +328,6 @@ export default function ReadingIslandLab() {
           同時出現；旁白對話框本身用 `items-end justify-center`，上緣是淨空的。*/}
       {(coldOpen || opening >= 0) && (
         <button type="button" onClick={toggleMuted} className="absolute right-4 top-4 z-[70] rounded-full border-2 border-white bg-[#233e4b]/85 px-3 py-1.5 text-xs font-bold text-[#fff1d0] shadow-lg md:right-7 md:top-7" aria-pressed={muted}>{muted ? '聲音：關' : '聲音：開'}</button>
-      )}
-      {/* 清單模式 + 聲音 統一容器（team-lead 2026-10-26 重新規劃，取代原本
-          各自調 bottom 跟 z-index 數字的補丁）：
-          - 手機（<768px）：左下角整塊讓給虛擬搖桿，這個容器搬到左上標題卡
-            下方（top-32），不再跟搖桿/跳搶同一塊地。
-          - 桌機／iPad（≥768px）：沿用原本的左下角位置（left-7/bottom-28），
-            但現在跟「聲音」共用同一個 flex 容器，不是各自獨立定位。
-          - 整個容器掛 `opening < 0`：開場旁白期間「聲音」改走上面那個右上角
-            的特例分支，這裡只處理旁白結束、回到第一人稱探索之後的狀態。
-            靜音狀態在 module（學習關卡 iframe）時還能不能切是另一件事：
-            之前聲音按鈕用 z-[70] 硬是浮在所有東西上面（含學習關卡），這裡
-            簡化成跟清單模式同一層 z-20，一併收進「opening<0 時才看得到」
-            的規則，不再為它開特例——這段 team-lead 沒有退件，維持原樣。*/}
-      {opening < 0 && (
-        <div aria-label="工具列" className="absolute left-4 top-32 z-20 flex flex-col items-start gap-2 md:left-7 md:top-auto md:bottom-28">
-          {module === null && door === null && !listMode && (
-            <button type="button" aria-label="切換清單模式" onClick={() => setListMode(true)} className="rounded-full border-2 border-white bg-[#233e4b]/90 px-4 py-2 text-sm font-bold text-[#fff1d0] shadow-lg transition hover:scale-105 active:scale-95">清單模式</button>
-          )}
-          <button type="button" onClick={toggleMuted} className="rounded-full border-2 border-white bg-[#233e4b]/85 px-3 py-1.5 text-xs font-bold text-[#fff1d0] shadow-lg" aria-pressed={muted}>{muted ? '聲音：關' : '聲音：開'}</button>
-        </div>
       )}
       {listMode && (
         <IslandListMode
