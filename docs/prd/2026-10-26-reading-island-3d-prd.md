@@ -119,6 +119,13 @@
 - **島上右側文字寶貝欄**改成顯示：這座島藏了哪些碎片、已經拿到幾片（取代舊的「6 隻寶貝」
   顯示邏輯）
 
+> ⚠️ **2026-10-26 後續更新**：產品負責人決定文字寶貝要做成完整的「養成系統」，由另一個
+> agent 在 `docs/design/word-babies/` 設計中（本 PRD 不碰那個目錄）。上面這份 2026-10-26
+> 當天的碎片散落規則是那次決定當下的紀錄，**不保證是最終方案**，實際規則以
+> `docs/design/word-babies/` 的設計文件為準。D（這一輪）**明確不做**寶貝的顯示與收集邏輯
+> ——我的群島頁的寶貝欄位這次留空或顯示「即將開放」，島上既有的 6 隻寶貝欄位（§5.4 舊規則，
+> 尚未換掉）這次也不動，等 word-babies 設計定案後再接。
+
 ### 5.5 開場內容
 
 - 20011：手工 6 張插畫＋6 句台詞
@@ -133,12 +140,34 @@
 |---|---|---|
 | `steps_completed` | `string[]` | 這堂課 `step_progress.steps_completed` 的**原始值**（不經過舊 6 步模型正規化），拿來跟範本模式 `STOPS[].step` 做前綴比對，邏輯跟前端 `stepFor()` 一致 |
 | `has_session` | `boolean` | 這堂課是否已有學習紀錄。這個端點本來就是從既有 session 聚合出來的，出現在 `texts[]` 裡就代表有 session——欄位的意義是讓前端不用去猜「出現在清單裡＝有 session」，直接讀欄位；對應 §5.2「課程簡介（lesson-intro）＝有學習紀錄就算完成」那條特例 |
+| `is_occupied` | `boolean` | **工頭判斷新增（見下方理由）**：這堂課在喝采島上是不是「佔領」了（§5.3——所有站都完成）。伺服器端用 `backend/app/services/lesson_loader.get_lesson_by_id()` 查這堂課真正的 `step_sequence`（跟 `/api/stories/{id}` 內部用的是同一份記憶體索引，零額外查詢成本），逐站比對：`lesson-intro` 看 `has_session`，其餘站看是否出現在 `steps_completed`，全部都算完成才是 `true` |
+
+**工頭判斷：為什麼要再加這個欄位（§5.3「佔領」原本沒規劃要再動後端）**——查證後發現兩件事堵死
+了純前端算「佔領」的路：① 故事模式（`isIslandStoryMode()`）完成最後一步時走
+`notifyIslandStepDone()` 提早 `return`，**完全不會**呼叫平常那個把 `session.status` 設成
+`completed` 的流程（`frontend/src/hooks/useLearningStepNavigation.ts` 的
+`navigateAfterFinish`／`handleSessionComplete`），所以舊欄位 `completion_pct`／`status` 在
+島上玩永遠不會變成「完成」，不能拿來當「佔領」的替代訊號 ② `/api/stories?page_size=300`（我的
+群島頁用來拿全部課程清單的那支）**不含 `step_sequence`**，前端不知道每堂課總共幾站，就算有
+`steps_completed` 也算不出「是不是全部站都做完」。兩條路都走不通，唯一不犯「對每一課各打一次
+API」的解法是讓**已經在算這個 session 的同一個迴圈**順手查一次課程本身的 `step_sequence`
+（記憶體查詢，不是資料庫查詢或 HTTP 呼叫），算好 `is_occupied` 直接回傳。
 
 **存取規則不變**：沿用既有 `verify_student_access`（本人或其任課老師），新欄位不另開權限。
 
-**沒有出現在 `texts[]` 的課** = 這個學生完全沒碰過那堂課（0 個站都沒做）。前端（我的群島頁）
-自己拿 `/api/stories` 的全部課程清單，跟這個端點的 `texts[]` 用 `story_slug` 對照，沒對到的
-就是「未佔領、沒開始」，不需要後端額外回傳「哪些課完全沒碰過」的清單。
+**沒有出現在 `texts[]` 的課** = 這個學生完全沒碰過那堂課（0 個站都沒做，`is_occupied` 必為
+`false`）。前端（我的群島頁）自己拿 `/api/stories` 的全部課程清單，跟這個端點的 `texts[]` 用
+`story_slug` 對照，沒對到的就是「未佔領、沒開始」。
+
+### 5.7 D1／D3 前端：路由與資料來源
+
+| 項目 | 內容 |
+|---|---|
+| D1 遊戲區「島嶼探索」卡 | 加進 `frontend/src/pages/student/StudentGameHubPage.tsx` 的「自己玩」分區（跟既有卡片同一套 hero 圖＋漸層風格），文案：「已佔領 N 座島」；文字寶貝那一欄這次顯示「即將開放」（見 §5.4 後續更新），點擊導去 `/student/archipelago` |
+| D3 我的群島頁 | 新路由 `/student/archipelago`（`frontend/src/pages/student/StudentArchipelagoPage.tsx`）。**只打兩支 API，各打一次**：① `GET /api/stories?page_size=300`（全部課程清單，斷言 `stories.length === total`）② `GET /api/learning/students/{me.id}/progress`（這支已有 `steps_completed`／`has_session`／`is_occupied`）。用 `story_slug` 對照兩份清單；`/progress` 的 `texts[]` 沒有的課 = 未佔領，顯示為「尚未探索」 |
+| 港口燈塔改看 `has_session` | `ReadingIslandLab.tsx` 的 `refreshProgress()` 現在只用 `fetchLearningSessions`＋`loadStepProgress`，`matching.length > 0` 這個既有判斷本身就等同 `has_session`——不需要换成打新端點，只要把這個既有訊號接到 `doneIndexes` 對 `lesson-intro` 那一站的判定，滿足 PRD §6「進度持久」驗收條件（換裝置/清瀏覽器，港口燈塔仍是亮的） |
+
+**驗收條件**見 §6 新增的「D1／D3 前端」段。
 
 ## 6. 驗收條件（Given / When / Then）
 
@@ -174,6 +203,16 @@
 - Given 某一站藏有碎片但學生還沒完成，Then 畫面有提示（例如發光小圖示），但不顯示是哪一隻寶貝的碎片
 - Given 我的群島頁，Then 顯示「文字寶貝 M/100 隻（碎片 K/300）」，M／K 跟伺服器學習紀錄推算結果一致
 
+**D1／D3 前端（§5.7）**
+- Given 我的群島頁載入，Then 只對 `/api/stories` 與 `/progress` 各打一次（開發時用瀏覽器
+  network 面板數一次，不是每課各打一次）
+- Given `/api/stories?page_size=300` 回來，Then 斷言回傳 `stories.length === total`
+- Given 學生完全沒碰過的課，Then 群島頁顯示「尚未探索」，不是錯誤或空白
+- Given 學生在島上完成某課所有站，When 重新整理群島頁，Then 該課顯示「已佔領」（`is_occupied: true`）
+- Given 學生只完成課程簡介（lesson-intro）那一關，When 換一個全新瀏覽器登入同帳號進同一座島，Then 港口燈塔仍是亮的（讀 `has_session`，不是只讀瀏覽器 `visited`）
+- Given 遊戲區「自己玩」區，Then 有「島嶼探索」卡，顯示已佔領島數，點擊導去我的群島頁
+- Given 文字寶貝欄位，Then 顯示「即將開放」，不嘗試顯示任何寶貝資料（§5.4 後續更新）
+
 **D2 後端（`GET /learning/students/{student_id}/progress`，§5.6）**
 - Given 學生查自己的進度，Then 200，`texts[]` 每筆都帶 `steps_completed`（陣列）與
   `has_session`（布林，為 true）
@@ -193,6 +232,7 @@
 | 真實管線 | 至少 2～3 種不同型態的關卡實際解題走完 |
 | 畫面 | 每個畫面桌機＋iPad 各一張截圖，逐張看過並寫進 `docs/reviews/2026-10-26-island-template-g7.md` |
 | D4 碎片分配函式（§5.4） | 單元測試先寫：決定性（同輸入同輸出）、總共恰好 300 片、分布均勻（每課約 1～2 片）、同一站不重複、全平台所有課都要覆蓋到至少一次掃描驗證——測試先寫、紅了才開始實作 |
+| D1／D3 畫面（§5.7，G7） | 桌機／iPad／手機都要截圖、逐張看過；`islandPanelOverlap.spec.ts`／`islandButtonOcclusion.spec.ts` 擴大範圍把「島嶼探索」卡與我的群島頁新的互動元素納入檢查，不是只測既有畫面 |
 
 重複執行同一個驗證之前，先算清楚次數能證明什麼；證明不了就不跑。
 
@@ -225,3 +265,4 @@
 | 2026-10-26 | 手機尺寸左下角重新規劃：清單模式＋聲音收進共用容器（手機移到左上，不搶虛擬搖桿位置）；開場／旁白期間聲音鍵改放右上角、不拿掉 | 手機截圖抓到按鈕互相蓋住＋壓到搖桿；第一版把開場聲音鍵整個拿掉被退回——那是學生最需要靜音的時段（教室內），已改成移位不是刪功能 |
 | 2026-10-26 | 進關卡（openModule）暫停島嶼聲音、回島（returnToIsland）恢復，尊重學生自己的靜音設定 | 學生要專心讀課文；「重點朗讀」會用麥克風錄音，背景的海浪／底墊和弦會被錄進去影響朗讀評分（team-lead 明令） |
 | 2026-10-26 | 結尾慶祝（§3「全島亮完→結尾」）改成全螢幕慶祝層（半透明遮罩＋置中卡片），新增「留在島上看看」關閉鍵；觸發條件改為只在「這次 session 裡親眼看著完成數字從沒滿變滿」才放鐘聲/光柱/粒子，不在掛載時已完成（如重新整理一座早就全亮的島）重播 | 審查員二次審查抓到兩個真 bug：① 常駐卡片沿用 `guide` 的 `top-20` 置中位置，手機 390px、收合狀態下跟標題卡重疊 8315px²、跟工具列重疊 682px² ② `prevDone` 每次掛載都從 0 開始，進度查詢回來若直接回報「全部完成」會被誤判成「剛完成」而重播 |
+| 2026-10-26 | D 進度端點再加 `is_occupied` 欄位（§5.6）；D1 遊戲區島嶼探索卡＋D3 我的群島頁＋港口燈塔改看 `has_session` 的路由與資料來源定案（§5.7）；文字寶貝這輪不做顯示/收集（改由另一個 agent 在 `docs/design/word-babies/` 設計養成系統） | 工頭判斷：查證發現故事模式完全不會觸發舊的 `session.status=completed` 流程、且 `/api/stories` 清單不含 `step_sequence`，純前端無法在不加欄位／不對每課各打一次 API 的前提下算出「佔領」，所以在同一個已審查過的端點、同一個迴圈，用既有記憶體查詢（`get_lesson_by_id`，零額外查詢成本）多算一個欄位；產品負責人同日另行決定文字寶貝改做養成系統，D 範圍明確排除 |
