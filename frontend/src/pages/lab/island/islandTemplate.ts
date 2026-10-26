@@ -167,3 +167,20 @@ export function buildBabiesForVocabulary(vocabulary?: Array<{ word: string }>): 
     return { name: word, art: BABY_SPRITES[i % BABY_SPRITES.length], x: x + -tz * side * offset, z: z + tx * side * offset };
   });
 }
+
+const ACT_NAMES = ['第一幕', '第二幕', '第三幕'];
+
+/**
+ * 右上角「第一幕」資訊卡的內容——之前這張卡片不管解鎖到哪一區，文字永遠
+ * 釘死在 zone 0（team-lead 2026-10-26 截圖抓到：全島亮完還是顯示「第一幕」）。
+ * 傳目前解鎖到的 `unlockedZone`，回傳對應的幕次名稱跟那一區的站名清單。
+ */
+export function actInfoForZone(
+  unlockedZone: number,
+  stops: ReadonlyArray<{ name: string; zone: number }>,
+): { actName: string; stationNames: string } {
+  return {
+    actName: ACT_NAMES[unlockedZone] ?? ACT_NAMES[ACT_NAMES.length - 1],
+    stationNames: stops.filter((s) => s.zone === unlockedZone).map((s) => s.name).join('、'),
+  };
+}

@@ -5,7 +5,7 @@ import { fetchStory } from '../../services/api';
 import { fetchLearningSessions, loadStepProgress } from '../../services/learningApi';
 import { stepPath } from '../../config/stepPath';
 import { BABIES_20011, OPENING_20011, STOPS_20011 } from './island/islandData';
-import { buildStopsFromSequence, buildOpeningForTitle, buildBabiesForVocabulary } from './island/islandTemplate';
+import { buildStopsFromSequence, buildOpeningForTitle, buildBabiesForVocabulary, actInfoForZone } from './island/islandTemplate';
 import type { IslandBaby, IslandStop } from './island/islandTemplate';
 import { createIslandWorld } from './island/createIslandWorld';
 import { parseIslandReturnMessage, shouldMarkVisitedOnReturn } from './island/storyMode';
@@ -74,6 +74,9 @@ export default function ReadingIslandLab() {
   // 一區全部讀完才散開下一區的霧：沒去過的地方保持神秘
   const zoneDone = (zone: number) => STOPS.every((stop, index) => stop.zone !== zone || doneIndexes.includes(index));
   const unlockedZone = zoneDone(0) ? (zoneDone(1) ? 2 : 1) : 0;
+  // 右上角「第一幕」資訊卡要跟著 unlockedZone 走，不能永遠釘在 zone 0
+  // （team-lead 2026-10-26 截圖抓到：全島亮完還是顯示「第一幕」）。
+  const actInfo = actInfoForZone(unlockedZone, STOPS);
   const nextIndex = STOPS.findIndex((_, index) => !doneIndexes.includes(index));
   const [mode, setMode] = useState<'first' | 'god'>('first');
   const [listMode, setListMode] = useState(false);
@@ -263,15 +266,15 @@ export default function ReadingIslandLab() {
         {showActInfo ? (
           <div aria-label="劇情說明卡" className="absolute right-4 top-4 z-10 max-w-[calc(100vw-8rem)] rounded-2xl border border-white/60 bg-[#233e4b]/90 px-3 py-2 text-right text-xs font-bold text-[#fff1d0] shadow-lg">
             <button type="button" aria-label="收合劇情說明" onClick={() => setShowActInfo(false)} className="mb-1 text-[10px] font-normal underline underline-offset-2">收合</button>
-            <div>第一幕 · 發生了什麼</div>
-            <div className="mt-1 text-[10px] text-white/70">自由探索{STOPS.filter((s) => s.zone === 0).map((s) => s.name).join('、')}</div>
+            <div>{actInfo.actName} · 發生了什麼</div>
+            <div className="mt-1 text-[10px] text-white/70">自由探索{actInfo.stationNames}</div>
           </div>
         ) : (
-          <button type="button" aria-label="展開劇情說明" onClick={() => setShowActInfo(true)} className="absolute right-4 top-4 z-10 rounded-full border border-white/60 bg-[#233e4b]/85 px-3 py-1.5 text-xs font-bold text-[#fff1d0] shadow-lg">第一幕</button>
+          <button type="button" aria-label="展開劇情說明" onClick={() => setShowActInfo(true)} className="absolute right-4 top-4 z-10 rounded-full border border-white/60 bg-[#233e4b]/85 px-3 py-1.5 text-xs font-bold text-[#fff1d0] shadow-lg">{actInfo.actName}</button>
         )}
       </div>
       <div aria-label="劇情說明卡" className="absolute right-4 top-4 z-10 hidden rounded-2xl border border-white/60 bg-[#233e4b]/85 px-3 py-2 text-right text-xs font-bold text-[#fff1d0] shadow-lg md:right-7 md:top-7 md:block md:px-4 md:py-3">
-        <div>第一幕 · 發生了什麼</div><div className="mt-1 text-[10px] text-white/70">自由探索{STOPS.filter((s) => s.zone === 0).map((s) => s.name).join('、')}</div>
+        <div>{actInfo.actName} · 發生了什麼</div><div className="mt-1 text-[10px] text-white/70">自由探索{actInfo.stationNames}</div>
       </div>
       <div className="absolute bottom-4 left-4 z-10 hidden rounded-xl border border-white/60 bg-[#f9f5e9]/90 px-4 py-2 text-xs font-semibold shadow-lg md:block">WASD / 方向鍵移動　·　空白鍵跳　·　拖曳旋轉視角</div>
       <div className="absolute bottom-5 left-5 z-10 flex items-end gap-4 md:hidden">

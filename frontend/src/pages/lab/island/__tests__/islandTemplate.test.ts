@@ -15,6 +15,7 @@ import {
   STEP_BUILDING_META,
   PLAYER_SPAWN,
   isSceneryExcluded,
+  actInfoForZone,
 } from '../islandTemplate';
 
 describe('zoneForIndex — 把 N 個站分成三區，跟 20011 手刻的 3/3/4 比例一致', () => {
@@ -184,5 +185,28 @@ describe('isSceneryExcluded — 風景物件（樹）不該擋住出生點視野
     // 同步這裡，isSceneryExcluded 排除的就不是真正的出生點——這條鎖不住 three.js
     // 那邊的改動，但至少讓這個常數的值被明確寫下來、有一個會被看到的地方。
     expect(PLAYER_SPAWN).toEqual({ x: -2, z: 16.5 });
+  });
+});
+
+describe('actInfoForZone — 右上角「第一幕」資訊卡要跟著解鎖的區更新（team-lead 2026-10-26）', () => {
+  // 原本這張卡片不管進度到哪裡，文字永遠釘死在 zone 0——這支測試鎖的就是
+  //「傳進去的 zone 真的會改變回傳的幕次跟站名清單」，不是給一個固定值。
+  const stops = [
+    { name: '港口燈塔', step: 'lesson-intro', x: 0, z: 0, zone: 0, line: '' },
+    { name: '書卷長廊', step: 'full-text-annotate', x: 0, z: 0, zone: 0, line: '' },
+    { name: '字源館', step: 'vocab-definition', x: 0, z: 0, zone: 1, line: '' },
+    { name: '謎題神殿', step: 'comprehension', x: 0, z: 0, zone: 2, line: '' },
+  ];
+
+  it('zone 0 →「第一幕」，站名只列 zone 0 的站', () => {
+    expect(actInfoForZone(0, stops)).toEqual({ actName: '第一幕', stationNames: '港口燈塔、書卷長廊' });
+  });
+
+  it('zone 1 →「第二幕」，站名只列 zone 1 的站（不是還停在 zone 0）', () => {
+    expect(actInfoForZone(1, stops)).toEqual({ actName: '第二幕', stationNames: '字源館' });
+  });
+
+  it('zone 2 →「第三幕」，站名只列 zone 2 的站', () => {
+    expect(actInfoForZone(2, stops)).toEqual({ actName: '第三幕', stationNames: '謎題神殿' });
   });
 });
