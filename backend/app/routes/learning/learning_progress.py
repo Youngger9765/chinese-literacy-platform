@@ -256,6 +256,15 @@ class TextProgressItem(BaseModel):
     started_at: datetime
     completed_at: datetime | None
     next_step: dict
+    # #3780 D2（PRD §5.6）：給「喝采島」範本模式用的原始動態清單，不經過上面
+    # 那個舊 6 步模型正規化——範本模式的站點 id 是 `type#錨點` 格式（例如
+    # `full-text-annotate#dcavv`），舊模型的 `STEP_NAMES` 認不得，前端要自己
+    # 用 `.split('#')[0]` 比對。`has_session` 對應 PRD §5.2 的課程簡介特例
+    # （平台設計上 lesson-intro 永遠不會寫進 steps_completed，只能靠「這一課
+    # 有學習紀錄」判斷完成）——這個端點本來就是從既有 session 聚合出來的，
+    # 出現在 `texts[]` 裡就代表有 session，欄位的意義是讓前端不用去猜。
+    steps_completed: list[str]
+    has_session: bool
 
 
 class StudentProgressResponse(BaseModel):
@@ -311,6 +320,17 @@ def get_student_progress(
         completed_count = sum(1 for v in step_statuses.values() if v == "completed")
         completion_pct = round(completed_count / 6 * 100)
 
+        # #3780 D2：raw steps_completed（不經過上面 STEP_NAMES 正規化）。
+        # 重新 parse 一次而不是從 `_compute_step_completion` 內部把它傳出來，
+        # 是因為那支函式的回傳型別（`dict[str, str]`）是舊 6 步模型的介面，
+        # 改它的簽章會動到其他呼叫端；這裡單獨、原地再 parse 一次成本很低。
+        sp = parse_step_progress(
+            s.step_progress,
+            session_id=s.id,
+            context="learning_progress.get_student_progress.steps_completed",
+        )
+        steps_completed_raw: list[str] = list(sp.steps_completed) if sp is not None and sp.steps_completed else []
+
         step_items = [
             StepStatusItem(
                 step_key=key,
@@ -342,6 +362,8 @@ def get_student_progress(
             started_at=s.started_at,
             completed_at=s.completed_at,
             next_step=next_step,
+            steps_completed=steps_completed_raw,
+            has_session=True,
         ))
 
     # Use canonical query for the aggregate count (Issue #981)
