@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { introProgress, characterPose } from './islandMotion';
 import type { IslandBaby, IslandStop } from './islandTemplate';
 import { isSceneryExcluded } from './islandTemplate';
+import { MIN_CAMERA_BUILDING_DISTANCE, NEAR_TRIGGER_RADIUS, computeSpawnFacingLighthouse } from './spawnPoint';
 
 interface WorldEvents {
   onNear: (index: number | null) => void;
@@ -14,10 +15,22 @@ interface WorldEvents {
 }
 
 
-const zoneCenters = [
+export const zoneCenters = [
   { x: -2, z: 5, radius: 14 },
   { x: 11, z: -9, radius: 13 },
   { x: 13, z: -23, radius: 14 },
+];
+
+/**
+ * 山丘的碰撞位置／半徑，跟底下畫山丘用的地形生成是同一份資料——原本只在
+ * `createIslandWorld()` 內部當閉包變數，#3780 P0-2 退件 Q3（審查員
+ * 2026-10-26）需要在純 node 環境對全部 179 課的出生點跑「不在山丘碰撞圈
+ * 裡」的回歸測試，所以拉到模組層級 export，跟 `walkable()` 用的
+ * `zoneCenters` 同一個道理：單一資料來源，不要在測試裡另外複製一份數字
+ * （複製了之後改地形容易漏改測試那邊）。
+ */
+export const hillPositions: ReadonlyArray<readonly [number, number, number]> = [
+  [-8, -1, 3.5], [-1, -6, 4], [10, -15, 4.8], [19, -27, 4], [0, -28, 3.3],
 ];
 
 export type ViewMode = 'first' | 'god';
@@ -131,7 +144,6 @@ export function createIslandWorld(
   const streamCurve = new THREE.CatmullRomCurve3([new THREE.Vector3(-2, 0.43, -3), new THREE.Vector3(3, 0.43, -1), new THREE.Vector3(5, 0.43, -4), new THREE.Vector3(9, 0.43, -5)]);
   add(scene, new THREE.TubeGeometry(streamCurve, 60, 0.38, 8), water);
 
-  const hillPositions = [[-8, -1, 3.5], [-1, -6, 4], [10, -15, 4.8], [19, -27, 4], [0, -28, 3.3]];
   hillPositions.forEach(([x, z, r], i) => {
     const hill = add(scene, new THREE.ConeGeometry(r, 2.3 + i % 3, 10), i % 2 ? grass : cliff, x, 1.25, z);
     hill.rotation.y = i * 0.9;
@@ -140,6 +152,15 @@ export function createIslandWorld(
       cave.rotation.z = Math.PI;
     }
   });
+  // #3780 P0-2：出生點改成「面向港口燈塔（lesson-intro 站）、落在觸發半徑內」
+  // ——不再是寫死的座標，算式見 spawnPoint.ts 的理由。找不到 lesson-intro
+  // （理論上不該發生，step_sequence 幾乎都以它開頭）就退回 stops[0]，
+  // 真的一站都沒有才退回原本的寫死座標，不讓整座島在這裡直接炸掉。
+  const lighthouseStop = content.stops.find((stop) => stop.step === 'lesson-intro') ?? content.stops[0];
+  const spawnPoint = lighthouseStop
+    ? computeSpawnFacingLighthouse(lighthouseStop)
+    : { x: -2, z: 16.5, yaw: 0 };
+
   const zonedThings: THREE.Object3D[] = [];
   for (let i = 0; i < 105; i++) {
     const zone = zoneCenters[i % 3];
@@ -149,7 +170,7 @@ export function createIslandWorld(
     const z = zone.z + Math.cos(angle) * radius;
     // G7 2026-10-26：出生點附近的樹沒被排除過，近到擋住進島第一眼該看清楚的
     // 港口燈塔跟路（真實座標驗過，21 號樹離出生點只有 1.79 單位）。
-    if (isSceneryExcluded(x, z, content.stops)) continue;
+    if (isSceneryExcluded(x, z, content.stops, spawnPoint)) continue;
     const tree = new THREE.Group();
     tree.position.set(x, 0.42, z);
     tree.userData.zone = zoneOf(x, z);
@@ -324,7 +345,7 @@ export function createIslandWorld(
     return item;
   };
   const player = sprite('/lab-island/sprites/adventurer.png', 1.8, 2.3);
-  player.position.set(-2, 1.5, 16.5);
+  player.position.set(spawnPoint.x, 1.5, spawnPoint.z);
   const xiaoling = sprite('/lab-island/sprites/xiaoling.png', 0.9, 1.1);
   const XL_FIRST = new THREE.Vector3(0.45, 0.55, 1);
   const babies = content.babies.map((baby) => {
@@ -376,7 +397,7 @@ export function createIslandWorld(
   let completed: number[] = [];
   let keyDirection = { x: 0, z: 0 };
   let stickDirection = { x: 0, z: 0 };
-  let yaw = 0;
+  let yaw = spawnPoint.yaw; // #3780 P0-2：一上岸就面向燈塔，不用自己轉頭找
   let dragX = 0;
   let jumping = 0;
   let verticalSpeed = 0;
@@ -479,7 +500,9 @@ export function createIslandWorld(
         const moveZ = (right.z * dx + forward.z * -dz) / Math.max(1, length) * dt * 5.2;
         const nextX = player.position.x + moveX;
         const nextZ = player.position.z + moveZ;
-        const buildingCollision = content.stops.some((stop) => Math.hypot(nextX - stop.x, nextZ - stop.z) < 1.55);
+        // #3780 P0-2：原本寫死 1.55，比建築地基半徑 1.65 還小，玩家／鏡頭會被
+        // 放行到建築實體內部，近平面貼著材質，整片畫面變成建築的顏色。
+        const buildingCollision = content.stops.some((stop) => Math.hypot(nextX - stop.x, nextZ - stop.z) < MIN_CAMERA_BUILDING_DISTANCE);
         const hillCollision = hillPositions.some(([x, z, r]) => Math.hypot(nextX - x, nextZ - z) < r * 0.7);
         if (walkable(nextX, nextZ) && !buildingCollision && !hillCollision) {
           player.position.x = nextX;
@@ -503,7 +526,10 @@ export function createIslandWorld(
       xiaoling.material.rotation = Math.sin(elapsed * 2.2) * 0.07;
       xiaoling.position.set(player.position.x + 0.67, player.position.y + 0.85 + Math.sin(elapsed * 3) * 0.14, player.position.z + 0.12);
       let closest: number | null = null;
-      let best = 3.25;
+      // #3780 P0-2：原本寫死 3.25，跟建築地基半徑沒有關聯；換成以地基半徑
+      // 為底算出來的 NEAR_TRIGGER_RADIUS，確保一定大於碰撞距離，玩家會先
+      // 觸發「發現新去處」才會被擋下，不會卡進建築才觸發。
+      let best = NEAR_TRIGGER_RADIUS;
       content.stops.forEach((stop, index) => {
         if (stop.zone > unlockedZone) return;
         const d = Math.hypot(player.position.x - stop.x, player.position.z - stop.z);
