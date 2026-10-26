@@ -32,6 +32,13 @@ PLAY_DAY_OFFSETS = [0, 2, 4]  # 週一／週三／週五，相對於每週第一
 TOTAL_DAYS = WEEKS * 7  # 126 天，約一學期
 STUDENT_ID = "sim-student-diligent-3x-week"
 
+# 2026-10-26 team-lead 跟進：正式後端的 `_WORD_BABY_EXCLUDED_STEP_IDS`
+# （backend/app/routes/learning/learning_step_progress.py）把 "report" 排除在
+# 獎勵觸發之外——那是結果頁掛載時自動標完成，不是學生真的做了什麼（跟 XP 的
+# report 排除同一個理由）。模擬腳本要跟正式後端的行為一致，不然算出來的供給量
+# 會比正式環境實際能拿到的還多（§11 的供需比會失真，看起來比真實情況樂觀）。
+WORD_BABY_EXCLUDED_STATIONS = frozenset({"report"})
+
 
 def load_lesson_stations() -> dict[str, list[tuple[str, str]]]:
     """每課 → [(station, flavor), ...]，一定包含 lesson-intro。"""
@@ -44,7 +51,10 @@ def load_lesson_stations() -> dict[str, list[tuple[str, str]]]:
         for sec in data.get("sections", []):
             module = sec.get("module")
             if module in MODULE_TO_STATION:
-                stations.append((MODULE_TO_STATION[module], MODULE_TO_FLAVOR[module]))
+                station = MODULE_TO_STATION[module]
+                if station in WORD_BABY_EXCLUDED_STATIONS:
+                    continue  # 正式後端永遠不會判定這一站，供給計算要跟它一致
+                stations.append((station, MODULE_TO_FLAVOR[module]))
             # module 是 None 或不在對照表裡（資料品質缺口，§5.1 外的雜項）就跳過，不當成一個站
         registry[lesson_uid] = stations
     return registry
