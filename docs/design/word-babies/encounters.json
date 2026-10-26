@@ -28,6 +28,6 @@
     }
   ],
   "total_encounter_rate_per_station": 0.051,
-  "rule": "完成一個站時，先用 wb_common.unit_interval(SEED, student_id, lesson_uid, station, 'encounter') 算出 0~1 的決定性數值 r。把各稀有度的 base_encounter_rate_per_station 疊成累積區間，r 落在哪個區間就是哪個稀有度出現野生寶貝（r 超過全部區間總和 = 這站沒有遭遇，最常見的結果）。決定稀有度後，從『飲食包含這一站口味家族、且該學生還沒擁有』的寶貝裡，用 wb_common.pick_index(...) 決定性挑一隻；如果這個稀有度在這個口味下已經全部被該學生擁有，就退而求其次發放 duplicate_catch_bonus（見 fragments.json）。",
+  "rule": "🏭 正式上線版：完成一個站、且 reward_log 還沒判定過遭遇時，伺服器用 `secrets` 擲一個0~1 的亂數 r（CSPRNG，不是決定性雜湊）。把各稀有度的 base_encounter_rate_per_station 疊成累積區間，r 落在哪個區間就是哪個稀有度出現野生寶貝（r 超過全部區間總和 = 這站沒有遭遇，最常見的結果）。決定稀有度後，從『飲食包含這一站口味家族、且該學生還沒擁有』的寶貝裡，再用 `secrets.choice(...)` 挑一隻；如果這個稀有度在這個口味下已經全部被該學生擁有，就退而求其次發放 duplicate_catch_bonus（見 fragments.json）。結果寫進student_station_reward_log，之後只讀不重算。🧪 這份設計草案／`simulate_balance.py` 改用 `wb_common.unit_interval(...)` + `pick_index(...)` 的決定性雜湊，只是為了讓平衡試算『跑兩次結果一樣』，**不是正式後端要照抄的公式**（同上，見 design.md §15）。",
   "catch_success_note": "目前設計：只要遭遇就直接捕捉成功（不另外設『遭遇後還可能抓不到』的二次機率），理由寫在 design.md §9 的待決清單。"
 }

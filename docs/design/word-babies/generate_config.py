@@ -8,6 +8,15 @@
 ⛔ 全程不用 random.random()、不呼叫 LLM —— 只用 wb_common 的決定性雜湊。
 跑兩次（甚至換一台機器跑）只要 `backend/data/lessons/` 內容沒變，結果必須逐位元組相同。
 輸出的四份 JSON 是「設計草案」，是給 Young 看、可以手改的起點，不是最終鎖死的正式表。
+
+🔒 2026-10-26 security review 修正（design.md §15）：這支腳本的決定性雜湊（`wb_common`
+的固定 SEED）**只用在這份設計草案與 `simulate_balance.py` 的平衡試算**，產生的是
+「100 隻的物種內容」（名字/稀有度/飲食/進化階段等固定不變的設定）——這些是公開內容，
+每個學生看到的都一樣，知道了也不算作弊。
+⛔ **正式後端絕對不可以沿用這套雜湊去決定「某學生某站有沒有掉碎片／有沒有遇到寶貝」**：
+repo 是 PUBLIC，SEED 寫死在這裡，學生或家長讀得到原始碼就能算出每一站的結果，
+「驚喜」跟「稀有度」形同虛設。正式版的判定規則見 design.md §15：伺服器用 `secrets`
+當場擲骰，寫進 `student_station_reward_log` 之後就是唯一真相，不會也不需要重算。
 """
 
 from __future__ import annotations
@@ -178,6 +187,17 @@ QUALITY_WORDS = [
     "苦盡甘來", "否極泰來", "水到渠成", "開花結果", "心花怒放", "興高采烈", "活蹦亂跳", "朝氣蓬勃",
     "生機盎然", "欣喜若狂", "喜出望外", "鳳毛麟角", "威風凜凜", "氣勢如虹", "水滴石穿", "滴水穿石",
     "水漲船高", "哄堂大笑", "叱吒風雲",
+    # 2026-10-26 security review 修正後新增——原本的規則允許「整詞含一個白名單字」就放行，
+    # 這些詞當時就是靠「含一個自然/物品/品質字」通過的（例如「遠山如洗」靠「山」、
+    # 「晶瑩飽滿」靠「瑩」一類的字），改成「3 字以上必須整詞命中」之後逐一重新讀過一遍，
+    # 確認整個詞讀起來都正向/中性才留下（跟第二輪同一批人工複閱標準，不是新標準）：
+    "一勞永逸", "一溜煙", "伴手禮", "各有千秋", "同舟共濟", "唯妙唯肖", "大放異彩", "大滿貫",
+    "如影隨形", "如魚得水", "峰迴路轉", "悄然興起", "愛不釋手", "撥雲見日", "明察秋毫",
+    "映入眼簾", "晝伏夜出", "晶瑩飽滿", "最負盛名", "月相變化", "有朝一日", "未雨綢繆",
+    "津津樂道", "活靈活現", "溫柔婉約", "濛濛亮", "生理時鐘", "突發奇想", "笑逐顏開",
+    "耳目一新", "自告奮勇", "與日俱增", "興味盎然", "色彩繽紛", "英姿颯爽", "蜂擁而至",
+    "趣味橫生", "迅疾如風", "遠山如洗", "金風送爽", "雲霧飄渺", "靈機一動", "風雨不透",
+    "風靡全球", "高朋滿座", "鮮豔欲滴", "鼎力相助",
 ]
 ACTION_WORDS = [
     "飛翔", "奔跑", "跳躍", "探索", "尋找", "追逐", "游泳", "攀爬", "滑行", "飄盪", "搖擺", "盛開",
@@ -210,17 +230,29 @@ NEG_WORDS = [
 
 
 def _is_suitable_as_pet_name(word: str) -> bool:
+    """白名單判斷——2026-10-26 security review 修正：原本的規則是『整個詞只要含一個
+    白名單字（或白名單詞的子字串）就放行』，這會讓『4 字成語裡剛好有一個自然/物品字，
+    其餘 3 個字語意不相干甚至偏負面』的詞被誤放行（粗篩時沒抓到就直接進候選池）。
+
+    修正後：
+    - **2 字詞**：單字規則適用——任一字落在 NATURE_CHARS／OBJECT_CHARS／QUALITY_CHARS
+      就算過；或整個詞剛好就是 QUALITY_WORDS／ACTION_WORDS 裡的詞。
+    - **3 字以上**：單字規則不適用，必須「整詞」等於 QUALITY_WORDS 或 ACTION_WORDS
+      裡的某一項（不是子字串、不是『詞庫某一項出現在這個詞裡面』，是這個詞本身就是
+      白名單上的那一項）。
+    """
     if any(ch in NEG_CHARS for ch in word):
         return False
     if any(bad in word for bad in NEG_WORDS):
         return False
-    if any(ch in NATURE_CHARS or ch in OBJECT_CHARS or ch in QUALITY_CHARS for ch in word):
-        return True
-    if any(qw in word for qw in QUALITY_WORDS):
-        return True
-    if any(aw in word for aw in ACTION_WORDS):
-        return True
-    return False
+
+    if len(word) == 2:
+        if any(ch in NATURE_CHARS or ch in OBJECT_CHARS or ch in QUALITY_CHARS for ch in word):
+            return True
+        return word in QUALITY_WORDS or word in ACTION_WORDS
+
+    # 3 字以上：整詞命中，不接受子字串/單字命中
+    return word in QUALITY_WORDS or word in ACTION_WORDS
 
 
 def load_vocab_pool() -> list[str]:
@@ -374,10 +406,16 @@ def build_fragments() -> dict:
         ],
         "drop_probability_by_flavor": DROP_PROBABILITY,
         "rule": (
-            "完成一個站時，用 wb_common.unit_interval(SEED, student_id, lesson_uid, station, 'fragment') "
-            "算出 0~1 的決定性數值；小於該站口味家族的 drop_probability 就掉落 1 片該口味碎片，"
-            "否則這一站不產碎片。每站最多 1 片，不重複判定（idempotent：同一站只在第一次完成時判定一次，"
-            "需要一張 student_station_reward_log 記錄是否已經判定過，見 schema-proposal.md）。"
+            "🏭 正式上線版（後端實際跑的）：完成一個站、且 student_station_reward_log 裡這個學生"
+            "這個 (lesson_uid, station) 還沒有紀錄時，伺服器用 `secrets`（CSPRNG，不是這份腳本的"
+            "決定性雜湊）擲一個 0~1 的亂數；小於該站口味家族的 drop_probability 就掉落 1 片該口味"
+            "碎片，否則這一站不產碎片。每站最多 1 片。結果立刻寫進 student_station_reward_log，"
+            "之後讀取一律讀這張表，不重算（idempotent：唯一鍵 (student_id, lesson_uid, station) "
+            "本身就保證只判定一次，不需要靠雜湊確保『重算也一樣』）。"
+            "🧪 這份設計草案與 `simulate_balance.py` 的平衡模擬，為了『跑兩次結果要一樣』才改用"
+            "`wb_common.unit_interval(SEED, student_id, lesson_uid, station, 'fragment')` 的決定性"
+            "雜湊——這是離線調參數用的工具行為，**正式後端不可以照抄這段雜湊公式**（見 generate_config.py"
+            "檔頭 2026-10-26 security review 說明／design.md §15）。"
         ),
         "duplicate_catch_bonus": {
             "description": "重複捕捉到已擁有的寶貝時，不產生第二隻，改發放該寶貝主要口味的碎片做為補償。",
@@ -399,12 +437,16 @@ def build_encounters() -> dict:
         "rarity_base_rates": rows,
         "total_encounter_rate_per_station": round(total_rate, 4),
         "rule": (
-            "完成一個站時，先用 wb_common.unit_interval(SEED, student_id, lesson_uid, station, 'encounter') "
-            "算出 0~1 的決定性數值 r。把各稀有度的 base_encounter_rate_per_station 疊成累積區間，"
-            "r 落在哪個區間就是哪個稀有度出現野生寶貝（r 超過全部區間總和 = 這站沒有遭遇，最常見的結果）。"
-            "決定稀有度後，從『飲食包含這一站口味家族、且該學生還沒擁有』的寶貝裡，"
-            "用 wb_common.pick_index(...) 決定性挑一隻；如果這個稀有度在這個口味下已經全部被該學生擁有，"
-            "就退而求其次發放 duplicate_catch_bonus（見 fragments.json）。"
+            "🏭 正式上線版：完成一個站、且 reward_log 還沒判定過遭遇時，伺服器用 `secrets` 擲一個"
+            "0~1 的亂數 r（CSPRNG，不是決定性雜湊）。把各稀有度的 base_encounter_rate_per_station "
+            "疊成累積區間，r 落在哪個區間就是哪個稀有度出現野生寶貝（r 超過全部區間總和 = 這站沒有"
+            "遭遇，最常見的結果）。決定稀有度後，從『飲食包含這一站口味家族、且該學生還沒擁有』的"
+            "寶貝裡，再用 `secrets.choice(...)` 挑一隻；如果這個稀有度在這個口味下已經全部被該學生"
+            "擁有，就退而求其次發放 duplicate_catch_bonus（見 fragments.json）。結果寫進"
+            "student_station_reward_log，之後只讀不重算。"
+            "🧪 這份設計草案／`simulate_balance.py` 改用 `wb_common.unit_interval(...)` + "
+            "`pick_index(...)` 的決定性雜湊，只是為了讓平衡試算『跑兩次結果一樣』，**不是正式後端"
+            "要照抄的公式**（同上，見 design.md §15）。"
         ),
         "catch_success_note": "目前設計：只要遭遇就直接捕捉成功（不另外設『遭遇後還可能抓不到』的二次機率），理由寫在 design.md §9 的待決清單。",
     }
