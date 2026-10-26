@@ -77,6 +77,7 @@ export default function ReadingIslandLab() {
   const nextIndex = STOPS.findIndex((_, index) => !doneIndexes.includes(index));
   const [mode, setMode] = useState<'first' | 'god'>('first');
   const [listMode, setListMode] = useState(false);
+  const [showActInfo, setShowActInfo] = useState(false); // 手機版「第一幕」卡片收合狀態
   const [hovered, setHovered] = useState<number | null>(null);
   const [guide, setGuide] = useState('');
   const prevDone = useRef(0);
@@ -246,13 +247,30 @@ export default function ReadingIslandLab() {
     <main className="relative h-[100dvh] w-full overflow-hidden bg-[#bbd6dc] font-sans text-[#284650]">
       <div ref={canvasRef} className="absolute inset-0 [&_canvas]:h-full [&_canvas]:w-full" aria-label="喝采島 3D 世界，使用方向鍵或 WASD 移動" />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#d1e4e3]/30 via-transparent to-[#0e3440]/25" />
-      <header className="absolute left-4 top-4 z-10 max-w-[calc(100vw-8rem)] rounded-2xl border border-white/70 bg-[#f8f2df]/90 px-4 py-3 shadow-xl backdrop-blur-md md:left-7 md:top-7 md:px-6 md:py-4">
+      <header aria-label="喝采島標題卡" className="absolute left-4 top-4 z-10 max-w-[calc(100vw-8rem)] rounded-2xl border border-white/70 bg-[#f8f2df]/90 px-4 py-3 shadow-xl backdrop-blur-md md:left-7 md:top-7 md:px-6 md:py-4">
         <p className="text-[10px] font-bold tracking-[0.25em] text-[#a87345] md:text-xs">國語四上 · 故事冒險</p>
         <h1 className="font-serif text-2xl font-black tracking-wider md:text-3xl">喝采島</h1>
         <p className="max-w-72 text-xs font-medium text-[#526969] md:text-sm">{lesson?.title ?? ''} · {BABIES.length} 個字詞寶寶藏在島上</p>
         <div className="mt-2 flex items-center gap-2 text-xs font-bold"><span>{doneIndexes.length} / {STOPS.length} 座亮燈</span><span className="h-2 w-20 overflow-hidden rounded-full bg-[#d9dfd5]"><span className="block h-full rounded-full bg-amber-500 transition-all" style={{ width: `${(doneIndexes.length / Math.max(1, STOPS.length)) * 100}%` }} /></span></div>
       </header>
-      <div className="absolute right-4 top-4 z-10 rounded-2xl border border-white/60 bg-[#233e4b]/85 px-3 py-2 text-right text-xs font-bold text-[#fff1d0] shadow-lg md:right-7 md:top-7 md:px-4 md:py-3">
+      {/* 「第一幕」劇情說明卡——手機（<768px）收成一顆小按鈕，點開才看到完整
+          內容；桌機/iPad 維持原本常駐卡片。team-lead 2026-10-26 截圖抓到：
+          390px 寬放不下左上標題卡＋右上這張卡並排，會疊在一起（「國語四上」
+          那行跟標題卡右半邊被蓋住）。收成按鈕而不是搬到標題卡下方，是因為
+          那個位置已經給「清單模式＋聲音」容器用了，疊上去只是換一個地方
+          繼續疊。*/}
+      <div className="md:hidden">
+        {showActInfo ? (
+          <div aria-label="劇情說明卡" className="absolute right-4 top-4 z-10 max-w-[calc(100vw-8rem)] rounded-2xl border border-white/60 bg-[#233e4b]/90 px-3 py-2 text-right text-xs font-bold text-[#fff1d0] shadow-lg">
+            <button type="button" aria-label="收合劇情說明" onClick={() => setShowActInfo(false)} className="mb-1 text-[10px] font-normal underline underline-offset-2">收合</button>
+            <div>第一幕 · 發生了什麼</div>
+            <div className="mt-1 text-[10px] text-white/70">自由探索{STOPS.filter((s) => s.zone === 0).map((s) => s.name).join('、')}</div>
+          </div>
+        ) : (
+          <button type="button" aria-label="展開劇情說明" onClick={() => setShowActInfo(true)} className="absolute right-4 top-4 z-10 rounded-full border border-white/60 bg-[#233e4b]/85 px-3 py-1.5 text-xs font-bold text-[#fff1d0] shadow-lg">第一幕</button>
+        )}
+      </div>
+      <div aria-label="劇情說明卡" className="absolute right-4 top-4 z-10 hidden rounded-2xl border border-white/60 bg-[#233e4b]/85 px-3 py-2 text-right text-xs font-bold text-[#fff1d0] shadow-lg md:right-7 md:top-7 md:block md:px-4 md:py-3">
         <div>第一幕 · 發生了什麼</div><div className="mt-1 text-[10px] text-white/70">自由探索{STOPS.filter((s) => s.zone === 0).map((s) => s.name).join('、')}</div>
       </div>
       <div className="absolute bottom-4 left-4 z-10 hidden rounded-xl border border-white/60 bg-[#f9f5e9]/90 px-4 py-2 text-xs font-semibold shadow-lg md:block">WASD / 方向鍵移動　·　空白鍵跳　·　拖曳旋轉視角</div>
@@ -299,7 +317,7 @@ export default function ReadingIslandLab() {
             簡化成跟清單模式同一層 z-20，一併收進「opening<0 時才看得到」
             的規則，不再為它開特例——這段 team-lead 沒有退件，維持原樣。*/}
       {opening < 0 && (
-        <div className="absolute left-4 top-32 z-20 flex flex-col items-start gap-2 md:left-7 md:top-auto md:bottom-28">
+        <div aria-label="工具列" className="absolute left-4 top-32 z-20 flex flex-col items-start gap-2 md:left-7 md:top-auto md:bottom-28">
           {module === null && door === null && !listMode && (
             <button type="button" aria-label="切換清單模式" onClick={() => setListMode(true)} className="rounded-full border-2 border-white bg-[#233e4b]/90 px-4 py-2 text-sm font-bold text-[#fff1d0] shadow-lg transition hover:scale-105 active:scale-95">清單模式</button>
           )}
