@@ -159,17 +159,28 @@ class TestFeedBaby:
 
     def test_feeding_your_own_owned_baby_succeeds_and_consumes_wallet(self, client, student):
         """Positive control: student feeding a baby they genuinely own succeeds (200),
-        and the wallet is drawn down correctly — this also exercises that feeding
-        can never make a wallet quantity negative (the service loop only ever
-        decrements while quantity > 0; this proves the end-to-end behavior, not just
-        the loop's internal guard in isolation)."""
+        and the wallet is actually drawn down by feeding (not just coincidentally
+        unchanged).
+
+        2026-10-26 reviewer finding: the first version of this test picked wb-001
+        (common rarity), whose stage-1 cost is 1 fragment — `seed_qty = cost - 1`
+        evaluated to 0, so the test seeded an EMPTY wallet, fed nothing, and
+        asserted "wallet.quantity == 0", which was true before AND after the
+        decrement loop ever ran. The assertion never exercised the subtraction at
+        all. Fixed by picking an uncommon-rarity baby whose stage-1 cost is 3 (>=2,
+        so seeding cost-1 is a real nonzero amount), and asserting fed_current_stage
+        advanced by exactly the seeded amount — not just "wallet is some value",
+        which a no-op would also satisfy if the seed had coincidentally been 0.
+        """
         from app.models.word_baby import StudentWordBabyState, StudentFragmentWallet
         from app.services import word_baby_config as config
 
-        baby_id = "wb-001"
+        baby_id = "wb-071"  # uncommon, stage 1 cost = 3 (non-structured, shared pool)
         baby = config.get_baby(baby_id)
+        assert baby["rarity"] == "uncommon"
         diet_flavor = baby["diet_flavors"][0]
         stage_cost = baby["stages"][0]["fragments_to_finish_stage"]
+        assert stage_cost >= 2, "test needs a baby whose stage-1 cost is at least 2"
 
         with TestingSessionLocal() as db:
             db.add(StudentWordBabyState(student_id=student["id"], baby_id=baby_id, stage_index=1))
@@ -177,7 +188,7 @@ class TestFeedBaby:
             # guaranteed to drain the wallet to zero (not go negative) and NOT
             # finish the stage — the sharpest check that the loop stops cleanly
             # when the wallet runs out, rather than needing a lucky exact match.
-            seed_qty = max(stage_cost - 1, 0)
+            seed_qty = stage_cost - 1
             db.add(StudentFragmentWallet(student_id=student["id"], flavor=diet_flavor, quantity=seed_qty))
             db.commit()
 
@@ -186,7 +197,10 @@ class TestFeedBaby:
             headers=auth_header(student["token"]),
         )
         assert resp.status_code == 200, resp.text
-        assert resp.json()["baby_id"] == baby_id
+        body = resp.json()
+        assert body["baby_id"] == baby_id
+        assert body["fed_current_stage"] == seed_qty  # consumed exactly what was seeded
+        assert body["stage_index"] == 1  # stage not finished — one short on purpose
 
         with TestingSessionLocal() as db:
             wallet = (
@@ -195,4 +209,153 @@ class TestFeedBaby:
                 .first()
             )
             assert wallet is not None
-            assert wallet.quantity == 0  # fully drained, never negative
+            assert wallet.quantity == 0  # fully drained, not left over, not negative
+
+    def test_feeding_with_an_empty_wallet_never_goes_negative(self, client, student):
+        """Wallet has strictly less than the stage needs (1 fragment against a cost
+        of 2) — feeding must consume only what exists and stop, not borrow against
+        a negative balance.
+
+        Uses a DIFFERENT baby_id (wb-053, rare) with a DIFFERENT first diet flavor
+        (書寫紀錄) than the previous test (wb-071, 朗讀表達) — `student` is a
+        module-scoped fixture shared across every test in this class, so reusing
+        the same baby_id/flavor pair here would hit the (student_id, baby_id) and
+        (student_id, flavor) unique constraints from the row the previous test
+        already committed.
+        """
+        from app.models.word_baby import StudentWordBabyState, StudentFragmentWallet
+        from app.services import word_baby_config as config
+
+        baby_id = "wb-053"
+        baby = config.get_baby(baby_id)
+        assert baby["rarity"] == "rare"
+        diet_flavor = baby["diet_flavors"][0]
+        assert baby["stages"][0]["fragments_to_finish_stage"] >= 2
+
+        with TestingSessionLocal() as db:
+            db.add(StudentWordBabyState(student_id=student["id"], baby_id=baby_id, stage_index=1))
+            db.add(StudentFragmentWallet(student_id=student["id"], flavor=diet_flavor, quantity=1))
+            db.commit()
+
+        resp = client.post(
+            f"/api/learning/students/{student['id']}/word-babies/{baby_id}/feed",
+            headers=auth_header(student["token"]),
+        )
+        assert resp.status_code == 200, resp.text
+        assert resp.json()["fed_current_stage"] == 1
+
+        with TestingSessionLocal() as db:
+            wallet = (
+                db.query(StudentFragmentWallet)
+                .filter_by(student_id=student["id"], flavor=diet_flavor)
+                .first()
+            )
+            assert wallet is not None
+            assert wallet.quantity == 0  # not negative, not left untouched
+
+
+class TestMyPetsReadOnlyForTeacherAndParent:
+    """Security review finding (2026-10-27): the "read my pets" endpoint
+    unconditionally persisted lazy-evaluated hatch-completion (and
+    weaken-state) changes to the DB regardless of who was reading — student,
+    teacher, or parent all go through `verify_student_access`, so a
+    teacher's or parent's GET of a student's pets could silently flip a
+    dormant baby into "hatched" in the DB before the student themself ever
+    looked at it. Fix: only a read BY THE STUDENT THEMSELF may persist the
+    state transition; teacher/parent reads must compute correct live display
+    values WITHOUT writing anything.
+    """
+
+    def _seed_dormant_baby_ready_to_hatch(self, student_id: int) -> None:
+        from datetime import datetime, timedelta, timezone
+
+        from app.models.word_baby import StudentWordBabyState
+
+        with TestingSessionLocal() as db:
+            db.add(
+                StudentWordBabyState(
+                    student_id=student_id,
+                    baby_id="wb-001",
+                    stage_index=1,
+                    dormant_type="繭",
+                    dormant_started_at=datetime.now(timezone.utc) - timedelta(days=1),
+                    # Deliberately way past wb-001 stage-1's 3-day hatch
+                    # requirement — guarantees a sync would hatch it
+                    # regardless of exactly how much extra credit this
+                    # particular read's elapsed-time window contributes.
+                    hatch_progress_days=999,
+                    last_cared_at=datetime.now(timezone.utc) - timedelta(hours=1),
+                )
+            )
+            db.commit()
+
+    def _seed_teacher_of(self, client, student_id: int) -> dict:
+        from app.models.school import Classroom, ClassroomStudent, School
+
+        teacher = _register_and_login(client, f"teacher_{uuid.uuid4().hex[:8]}")
+        with TestingSessionLocal() as db:
+            school = School(name="WB3780 Test School")
+            db.add(school)
+            db.flush()
+            classroom = Classroom(name="WB3780 Test Class", grade=4, teacher_id=teacher["id"], school_id=school.id)
+            db.add(classroom)
+            db.flush()
+            db.add(ClassroomStudent(student_id=student_id, classroom_id=classroom.id))
+            db.commit()
+        return teacher
+
+    def test_teacher_read_leaves_the_dormant_baby_unhatched_in_the_db(self, client):
+        from app.models.word_baby import StudentWordBabyState
+
+        pet_owner = _register_and_login(client, f"petowner_t_{uuid.uuid4().hex[:8]}")
+        teacher = self._seed_teacher_of(client, pet_owner["id"])
+        self._seed_dormant_baby_ready_to_hatch(pet_owner["id"])
+
+        resp = client.get(
+            f"/api/learning/students/{pet_owner['id']}/word-babies",
+            headers=auth_header(teacher["token"]),
+        )
+        assert resp.status_code == 200, resp.text
+        # The RESPONSE must still show the correct live (would-be-hatched)
+        # value for display purposes...
+        body = resp.json()
+        hatched_baby = next(b for b in body["babies"] if b["baby_id"] == "wb-001")
+        assert hatched_baby["dormant_type"] is None
+        assert hatched_baby["stage_index"] == 2
+
+        # ...but the DB row itself must be untouched — nothing was persisted
+        # just because a teacher looked at it.
+        with TestingSessionLocal() as db:
+            row = (
+                db.query(StudentWordBabyState)
+                .filter_by(student_id=pet_owner["id"], baby_id="wb-001")
+                .first()
+            )
+            assert row.dormant_type == "繭", "teacher's read must not persist the hatch"
+            assert row.stage_index == 1, "teacher's read must not persist the stage advance"
+            assert row.hatch_progress_days == 999, "teacher's read must not persist anything"
+
+    def test_student_read_of_their_own_pets_does_persist_the_hatch(self, client):
+        from app.models.word_baby import StudentWordBabyState
+
+        pet_owner = _register_and_login(client, f"petowner_s_{uuid.uuid4().hex[:8]}")
+        self._seed_dormant_baby_ready_to_hatch(pet_owner["id"])
+
+        resp = client.get(
+            f"/api/learning/students/{pet_owner['id']}/word-babies",
+            headers=auth_header(pet_owner["token"]),
+        )
+        assert resp.status_code == 200, resp.text
+        body = resp.json()
+        hatched_baby = next(b for b in body["babies"] if b["baby_id"] == "wb-001")
+        assert hatched_baby["dormant_type"] is None
+        assert hatched_baby["stage_index"] == 2
+
+        with TestingSessionLocal() as db:
+            row = (
+                db.query(StudentWordBabyState)
+                .filter_by(student_id=pet_owner["id"], baby_id="wb-001")
+                .first()
+            )
+            assert row.dormant_type is None, "the student's own read must persist the hatch"
+            assert row.stage_index == 2, "the student's own read must persist the stage advance"

@@ -65,8 +65,12 @@ def get_my_word_babies(
     db: Session = Depends(get_db),
 ):
     verify_student_access(student_id, current_user, db)
-    result = word_baby_service.get_my_pets(db, student_id=student_id)
-    db.commit()  # lazy evaluation 可能已經把孵化完成的狀態寫回去，讀取也要落地
+    # security review finding（2026-10-27）：孵化完成這種一次性狀態轉換只有
+    # 學生本人讀取才該落地——老師/家長恰好先讀到不該搶先寫進 DB。
+    result = word_baby_service.get_my_pets(
+        db, student_id=student_id, viewer_is_student=(current_user.id == student_id)
+    )
+    db.commit()  # 只有本人讀取時 get_my_pets 才真的弄髒了東西；非本人讀取這裡是 no-op
     return result
 
 

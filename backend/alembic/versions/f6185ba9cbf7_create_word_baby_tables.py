@@ -78,6 +78,13 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(["student_id"], ["users.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("student_id", "flavor", name="uq_student_flavor"),
+        # security review finding (2026-10-27)：應用層的「餵食不會扣成負的」
+        # 檢查只在單一請求的 read-modify-write 之間有效——兩個同時的餵食請求
+        # 各自讀到「夠扣」的快照，就可能一起把它扣成負的（race）。DB 層再補
+        # 一道 CheckConstraint 當最後防線：就算應用層邏輯有漏洞，資料庫本身
+        # 也不接受 quantity < 0 的寫入。這個 migration 還沒套用到任何環境
+        # （2026-10-26 才建），直接改這個檔案本身，不另開一個新 migration。
+        sa.CheckConstraint("quantity >= 0", name="ck_student_fragment_wallet_quantity_nonneg"),
     )
     op.create_index(
         "ix_student_fragment_wallet_student_id", "student_fragment_wallet", ["student_id"]

@@ -15,6 +15,7 @@ from datetime import datetime
 
 from sqlalchemy import (
     Boolean,
+    CheckConstraint,
     DateTime,
     ForeignKey,
     Integer,
@@ -106,6 +107,10 @@ class StudentFragmentWallet(Base):
     __tablename__ = "student_fragment_wallet"
     __table_args__ = (
         UniqueConstraint("student_id", "flavor", name="uq_student_flavor"),
+        # security review finding（2026-10-27）：跟 migration f6185ba9cbf7 的
+        # CheckConstraint 對應——DB 層最後防線，擋應用層 race condition 漏網
+        # 把數量扣成負的。
+        CheckConstraint("quantity >= 0", name="ck_student_fragment_wallet_quantity_nonneg"),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)

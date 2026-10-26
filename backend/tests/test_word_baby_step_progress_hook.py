@@ -288,3 +288,113 @@ class TestWordBabyBugDoesNotBreakStepProgressSave:
             assert _rewarded("vocab-definition") is True
             assert _rewarded("vocab-review") is True
             assert _rewarded("comprehension") is False  # the poisoned one — no orphaned row
+
+
+class TestStationMustBeGenuinelyInThisLessonsSequence:
+    """Security review finding: a student could claim ANY of the 15 valid
+    station ids for a lesson that doesn't actually contain that station,
+    farming rewards for content they never touched. `_award_word_baby_rewards`
+    must check the station is both (a) a real station in word_baby_config's
+    15-station table, and (b) actually present in THIS lesson's real
+    `step_sequence` (not just plausible-looking)."""
+
+    def test_valid_station_not_in_this_lessons_sequence_earns_nothing(
+        self, client, student, session_id
+    ):
+        """"spotlight" is a genuine PRD §5.1 station id, but L0011's real
+        step_sequence doesn't contain it — claiming it must not produce a
+        reward_log row (not even a "no reward" one; see TestInvalidStation
+        below for why no row at all)."""
+        from app.models.word_baby import StudentStationRewardLog
+
+        client.put(
+            f"/api/learning/sessions/{session_id}/progress",
+            json={"current_step": "spotlight", "steps_completed": ["spotlight"], "step_data": {}},
+            headers=auth_header(student["token"]),
+        )
+
+        with TestingSessionLocal() as db:
+            rows = (
+                db.query(StudentStationRewardLog)
+                .filter_by(student_id=student["id"], lesson_uid=_VALID_LESSON_UID, station="spotlight")
+                .all()
+            )
+            assert rows == []
+
+    def test_completely_made_up_step_id_earns_nothing(self, client, student, session_id):
+        from app.models.word_baby import StudentStationRewardLog
+
+        client.put(
+            f"/api/learning/sessions/{session_id}/progress",
+            json={
+                "current_step": "vocab-definition",
+                "steps_completed": ["totally-made-up-station-xyz"],
+                "step_data": {},
+            },
+            headers=auth_header(student["token"]),
+        )
+
+        with TestingSessionLocal() as db:
+            rows = (
+                db.query(StudentStationRewardLog)
+                .filter_by(student_id=student["id"], station="totally-made-up-station-xyz")
+                .all()
+            )
+            assert rows == []
+
+    def test_slugged_multi_part_station_id_is_matched_by_its_base_id(
+        self, client, student, session_id
+    ):
+        """L0011's real sequence has "full-text-annotate#dcavv" (multi-part round
+        slug), not the bare "full-text-annotate" — a legitimate completion
+        reported with the slug attached must still be recognized (stripped to
+        its base id for both the step_sequence check and the reward_log key)."""
+        from app.models.word_baby import StudentStationRewardLog
+
+        client.put(
+            f"/api/learning/sessions/{session_id}/progress",
+            json={
+                "current_step": "full-text-annotate#dcavv",
+                "steps_completed": ["full-text-annotate#dcavv"],
+                "step_data": {},
+            },
+            headers=auth_header(student["token"]),
+        )
+
+        with TestingSessionLocal() as db:
+            rows = (
+                db.query(StudentStationRewardLog)
+                .filter_by(
+                    student_id=student["id"], lesson_uid=_VALID_LESSON_UID, station="full-text-annotate"
+                )
+                .all()
+            )
+            assert len(rows) == 1
+
+
+class TestInvalidStationNeverGetsALogRow:
+    """Security review finding: a station outside the 15-station table
+    previously still got a (fragment_awarded=False) log row written, purely
+    to stay idempotent against repeat calls. Simpler and safer: an invalid
+    station has nothing to make idempotent — just don't persist anything."""
+
+    def test_unknown_station_produces_no_row_at_all(self, client, student, session_id):
+        from app.models.word_baby import StudentStationRewardLog
+
+        client.put(
+            f"/api/learning/sessions/{session_id}/progress",
+            json={
+                "current_step": "vocab-definition",
+                "steps_completed": ["not-a-real-station-at-all"],
+                "step_data": {},
+            },
+            headers=auth_header(student["token"]),
+        )
+
+        with TestingSessionLocal() as db:
+            count = (
+                db.query(StudentStationRewardLog)
+                .filter_by(student_id=student["id"], station="not-a-real-station-at-all")
+                .count()
+            )
+            assert count == 0

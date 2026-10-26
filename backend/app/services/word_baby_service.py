@@ -12,6 +12,7 @@ from __future__ import annotations
 import secrets as _secrets_module
 from datetime import datetime, timezone
 
+from sqlalchemy import update as sa_update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -40,6 +41,13 @@ def _now() -> datetime:
     return datetime.now(timezone.utc)
 
 
+#: 必須跟 `StudentStationRewardLog.station` 的 `String(50)` 欄寬一致
+#: （app/models/word_baby.py）——這裡重複宣告一份常數，不是從 model 讀
+#: column.type.length，因為這是「業務規則該在哪一層擋」的問題（見下方
+#: award_station_rewards 的用法），不是單純避免寫死數字。
+_STATION_COLUMN_MAX_LENGTH = 50
+
+
 # ── 獎勵判定（完成一個站時呼叫） ──────────────────────────────────────────
 
 def award_station_rewards(
@@ -50,14 +58,28 @@ def award_station_rewards(
     station: str,
     now: datetime | None = None,
     rng: _RandomSource | None = None,
-) -> StudentStationRewardLog:
+) -> StudentStationRewardLog | None:
     """完成一個站時呼叫——冪等：`student_station_reward_log` 的唯一鍵
     (student_id, lesson_uid, station) 已經有紀錄就直接回傳，不重算、不重發。
 
     這是整個獎勵系統「同一站只能發一次」的保證來源，不是靠 rng 的任何性質。
+
+    **無效 station 回傳 `None`，不寫任何 log 列**（security review finding，
+    2026-10-27）：舊版本對「不在 15 種站對照表裡」的 station 仍然寫一筆
+    `fragment_awarded=False` 的 log，理由是「保持冪等」——但一個從沒發生過
+    的無效站根本沒有東西需要保持一致，寫這筆 log 只是留下噪音，還可能讓
+    呼叫端誤以為這個 station「已經判定過」。兩種無效一視同仁走同一條路：
+    (a) 字串長度超過 DB 欄位上限（`String(50)`，惡意/亂丟的 client 可能送
+    任意長字串，要在碰到 DB 之前就擋掉，不是讓它截斷或炸錯）；
+    (b) 不在 `word_baby_config` 的 15 站對照表裡。
     """
     now = now or _now()
     rng = rng or _default_rng()
+
+    if len(station) > _STATION_COLUMN_MAX_LENGTH:
+        return None
+    if config.get_station_flavor(station) is None:
+        return None
 
     existing = _get_existing_log(db, student_id, lesson_uid, station)
     if existing is not None:
@@ -97,17 +119,15 @@ def _get_existing_log(
 def _determine_and_insert_reward(
     db: Session, *, student_id: int, lesson_uid: str, station: str, now: datetime, rng: _RandomSource
 ) -> StudentStationRewardLog:
+    # `award_station_rewards`（唯一呼叫端）已經在呼叫這裡之前擋掉長度超限
+    # 跟不在 15 站對照表裡的 station，所以這裡的 flavor 保證不是 None——
+    # 不再需要「無效站也寫一筆 log」的分支（security review finding，
+    # 2026-10-27：那個分支已經被判定為不該存在，見上層函式的 docstring）。
     flavor = config.get_station_flavor(station)
-    if flavor is None:
-        # 這個站不在 15 種站對照表裡（資料缺口／非寶貝系統管轄範圍）——
-        # 仍然寫一筆 log 保持冪等語意，不讓呼叫端每次都重新嘗試判定。
-        log = StudentStationRewardLog(
-            student_id=student_id, lesson_uid=lesson_uid, station=station,
-            fragment_awarded=False, encounter_result="none",
-        )
-        db.add(log)
-        db.flush()
-        return log
+    assert flavor is not None, (
+        f"_determine_and_insert_reward 只能在 station={station!r} 已通過"
+        f" award_station_rewards 的有效性檢查後呼叫"
+    )
 
     fragment_awarded = rng.random() < config.get_drop_probability(flavor)
     if fragment_awarded:
@@ -181,16 +201,47 @@ def _roll_encounter(
 
 
 def _add_to_wallet(db: Session, student_id: int, flavor: str, amount: int) -> None:
+    """把 `amount` 片碎片加進這個學生這個口味的背包。
+
+    **用資料庫端的原子加法，不用 Python 端的 read-modify-write**（security
+    review finding，2026-10-27）：舊版本先 `.query().first()` 讀出目前
+    quantity，在 Python 把它加 amount，等 flush/commit 才真正送出 UPDATE——
+    兩個幾乎同時的請求可能都在對方 commit 之前讀到同一個舊值，後 commit 的
+    那個會用自己算出來的字面值覆蓋掉前一個已經寫入的結果，其中一次加法就
+    這樣遺失了。改成 `UPDATE ... SET quantity = quantity + :amount`：這個
+    算式在 UPDATE 陳述式**本身**裡求值，用的是這個陳述式真正執行當下資料庫
+    裡的值，不是 Python 這邊某個時間點快照下來的舊值——兩個請求不管誰先誰
+    後，最後都會正確疊加，不會有一個被另一個蓋掉。
+    """
     wallet = (
         db.query(StudentFragmentWallet)
         .filter_by(student_id=student_id, flavor=flavor)
         .first()
     )
     if wallet is None:
+        # 第一次拿到這個口味——先建一列、立刻 flush，讓它在 DB 裡有實體列
+        # 可以被下面的原子 UPDATE 命中。兩個請求同時都想第一次建這個口味列
+        # 的話，會在這裡的 flush 撞 UniqueConstraint(student_id, flavor)
+        # 丟 IntegrityError——這個函式的唯一呼叫端（`award_station_rewards`
+        # 整段判定）已經包在外層的 `db.begin_nested()` + `except IntegrityError`
+        # 復原機制裡，不是這個函式自己要處理的範圍。
         wallet = StudentFragmentWallet(student_id=student_id, flavor=flavor, quantity=0)
         db.add(wallet)
         db.flush()
-    wallet.quantity += amount
+
+    db.execute(
+        sa_update(StudentFragmentWallet)
+        .where(
+            StudentFragmentWallet.student_id == student_id,
+            StudentFragmentWallet.flavor == flavor,
+        )
+        .values(quantity=StudentFragmentWallet.quantity + amount)
+    )
+    # 上面這行是直接送 SQL，不經過 ORM 的屬性追蹤——`wallet` 這個 Python
+    # 物件手上的 quantity 現在是執行前的舊快照。把它標記為過期，下次誰在
+    # 這個 session 裡存取 `wallet.quantity` 時會強制重新查一次，不會沿用
+    # 這個已經跟不上的值。
+    db.expire(wallet, ["quantity"])
 
 
 def _catch_baby(db: Session, *, student_id: int, baby_id: str, now: datetime) -> StudentWordBabyState:
@@ -211,10 +262,18 @@ def _catch_baby(db: Session, *, student_id: int, baby_id: str, now: datetime) ->
 # ── 照顧/孵化的 lazy evaluation（讀取時或照顧動作發生時都呼叫） ──────────
 
 def _sync_care_state(
-    db: Session, state: StudentWordBabyState, baby: dict, now: datetime, *, is_care_action: bool
-) -> None:
+    db: Session,
+    state: StudentWordBabyState,
+    baby: dict,
+    now: datetime,
+    *,
+    is_care_action: bool,
+    persist: bool = True,
+) -> dict:
     """讀取時或照顧動作發生時都呼叫——計算當下的虛弱狀態，並視情況把孵化天數
-    的累積、甚至孵化完成（進入下一階段）寫回去。
+    的累積、甚至孵化完成（進入下一階段）寫回去。回傳算出來的「當下顯示值」，
+    不管有沒有寫回 DB 呼叫端都該用這個，不要再去讀 `state.*`（`persist=False`
+    時 `state.*` 不會被更新，繼續讀它會拿到舊值）。
 
     `is_care_action=False`（純讀取）：孵化天數的「新增量」只拿來算 live 顯示值，
     **不寫回** state.hatch_progress_days（否則連續多次讀取、`last_cared_at` 沒變，
@@ -223,11 +282,19 @@ def _sync_care_state(
     `is_care_action=True`：這次呼叫本身就代表「有一個照顧動作發生」，累積量連同
     `last_cared_at = now` 一起寫回去，之後的評估從這個新基準重新算，不會跟這次
     重複計算。
+
+    `persist`（security review finding，2026-10-27）：是否把算出來的狀態轉換
+    真的寫進 `state` 物件（進而落到 DB）。**查詢「我的寶貝」這支 API 本人、
+    任課老師、連結的家長都能看**（`verify_student_access`），但孵化完成這種
+    一次性狀態轉換**只有本人的讀取才該觸發落地**——老師或家長恰好先讀到、
+    不該搶先把學生自己還沒看到的孵化結果寫進 DB。`persist=False` 時這裡只
+    計算、回傳 live 顯示值，完全不碰 `state.*` 的任何屬性，確保呼叫端即使
+    手滑忘記檢查也不會不小心把它 flush/commit 出去。
     """
     care = config.load_care()
     paused_periods = care["paused_periods"]
 
-    state.weaken_state = compute_weaken_state(
+    weaken_state = compute_weaken_state(
         state.last_cared_at,
         now,
         weaken_after_days=care["weaken_after_days"],
@@ -235,28 +302,53 @@ def _sync_care_state(
         paused_periods=paused_periods,
     )
 
-    if state.dormant_type is not None:
+    stage_index = state.stage_index
+    dormant_type = state.dormant_type
+    dormant_started_at = state.dormant_started_at
+    hatch_progress_days = state.hatch_progress_days
+    fed_current_stage = state.fed_current_stage
+    fed_by_flavor = state.fed_by_flavor
+
+    if dormant_type is not None:
         credit = effective_hatch_credit(
             state.last_cared_at, now,
             weaken_after_days=care["weaken_after_days"],
             paused_periods=paused_periods,
         )
-        live_hatch_progress = state.hatch_progress_days + credit
+        live_hatch_progress = hatch_progress_days + credit
 
-        stage = baby["stages"][state.stage_index - 1]
+        stage = baby["stages"][stage_index - 1]
         required = stage["dormancy_after_this_stage"]["hatch_days"]
         if live_hatch_progress >= required:
-            state.stage_index += 1
-            state.dormant_type = None
-            state.dormant_started_at = None
-            state.hatch_progress_days = 0
-            state.fed_current_stage = 0
-            state.fed_by_flavor = None
+            stage_index += 1
+            dormant_type = None
+            dormant_started_at = None
+            hatch_progress_days = 0
+            fed_current_stage = 0
+            fed_by_flavor = None
         elif is_care_action:
-            state.hatch_progress_days = live_hatch_progress
+            hatch_progress_days = live_hatch_progress
 
-    if is_care_action:
-        state.last_cared_at = now
+    if persist:
+        state.weaken_state = weaken_state
+        state.stage_index = stage_index
+        state.dormant_type = dormant_type
+        state.dormant_started_at = dormant_started_at
+        state.hatch_progress_days = hatch_progress_days
+        state.fed_current_stage = fed_current_stage
+        state.fed_by_flavor = fed_by_flavor
+        if is_care_action:
+            state.last_cared_at = now
+
+    return {
+        "weaken_state": weaken_state,
+        "stage_index": stage_index,
+        "dormant_type": dormant_type,
+        "dormant_started_at": dormant_started_at,
+        "hatch_progress_days": hatch_progress_days,
+        "fed_current_stage": fed_current_stage,
+        "fed_by_flavor": fed_by_flavor,
+    }
 
 
 # ── 餵食 ──────────────────────────────────────────────────────────────────
@@ -282,9 +374,19 @@ def feed_baby(
     if baby is None:
         raise BabyNotOwnedError(f"unknown baby_id {baby_id}")
 
+    # security review finding（2026-10-27）：餵食會先讀這隻寶貝跟整個錢包的
+    # 目前狀態，再用 Python 迴圈判斷扣多少、要不要進化——這整段判斷中間，
+    # 如果同一個學生從另一個請求（例如開兩個分頁同時按餵食）也在跑同一段
+    # 邏輯，兩邊各自讀到「扣之前」的快照，可能兩邊都判定「扣得動」，實際上
+    # 背包只夠一邊扣。`with_for_update()` 讓這兩筆列在 Postgres 正式環境下
+    # 用真正的資料庫列鎖排隊——第二個請求的查詢會等第一個請求 commit 之後
+    # 才拿到最新的值，不會兩邊都拿到同一份舊快照。（SQLite 測試環境下這個
+    # 呼叫是靜默 no-op，不影響測試結果——已經直接測過，見
+    # TestFeedBabyUsesRowLockingInProduction。）
     state = (
         db.query(StudentWordBabyState)
         .filter_by(student_id=student_id, baby_id=baby_id)
+        .with_for_update()
         .first()
     )
     if state is None:
@@ -299,7 +401,10 @@ def feed_baby(
     stage = baby["stages"][state.stage_index - 1]
     wallet_rows = {
         w.flavor: w
-        for w in db.query(StudentFragmentWallet).filter_by(student_id=student_id).all()
+        for w in db.query(StudentFragmentWallet)
+        .filter_by(student_id=student_id)
+        .with_for_update()
+        .all()
     }
 
     fbf = stage.get("fragments_by_flavor")
@@ -347,18 +452,33 @@ def feed_baby(
 
 # ── 查詢「我的寶貝」 ────────────────────────────────────────────────────────
 
-def get_my_pets(db: Session, *, student_id: int, now: datetime | None = None) -> dict:
+def get_my_pets(
+    db: Session, *, student_id: int, viewer_is_student: bool, now: datetime | None = None
+) -> dict:
     """組出「我的寶貝」頁要的資料：擁有的寶貝（含即時推算的虛弱狀態、是否剛
-    孵化完成）、碎片背包、M/100 K/300 進度統計。讀取時就地推算並視情況寫回
-    孵化完成的狀態（lazy evaluation，不用排程）。"""
+    孵化完成）、碎片背包、M/100 K/300 進度統計。讀取時就地推算，**只有本人
+    讀取才會把孵化完成等狀態轉換寫回去**（lazy evaluation，不用排程）。
+
+    `viewer_is_student`（security review finding，2026-10-27）：這支查詢本人、
+    任課老師、連結的家長都能呼叫（路由層的 `verify_student_access`），但孵化
+    完成這種一次性狀態轉換不該被「剛好是老師或家長先讀到」搶先寫進 DB——
+    只有 `viewer_is_student=True`（學生讀自己的資料）才會真的 persist；老師
+    /家長讀取只計算正確的 live 顯示值，不碰 DB 的任何一列。回傳的 payload
+    內容對兩種情況完全一樣（顯示值永遠是當下算出來的最新值），差別只在
+    DB 有沒有被寫入。
+    """
     now = now or _now()
 
     states = db.query(StudentWordBabyState).filter_by(student_id=student_id).all()
-    for state in states:
-        baby = config.get_baby(state.baby_id)
-        if baby is not None:
-            _sync_care_state(db, state, baby, now, is_care_action=False)
-    db.flush()
+    live_by_row_id = {
+        state.id: _sync_care_state(
+            db, state, baby, now, is_care_action=False, persist=viewer_is_student
+        )
+        for state in states
+        if (baby := config.get_baby(state.baby_id)) is not None
+    }
+    if viewer_is_student:
+        db.flush()
 
     wallet_rows = db.query(StudentFragmentWallet).filter_by(student_id=student_id).all()
 
@@ -368,16 +488,17 @@ def get_my_pets(db: Session, *, student_id: int, now: datetime | None = None) ->
         baby = config.get_baby(state.baby_id)
         if baby is None:
             continue
+        live = live_by_row_id[state.id]
         babies_payload.append({
             "baby_id": state.baby_id,
             "name": baby["name"],
             "rarity": baby["rarity"],
-            "stage_index": min(state.stage_index, baby["stage_count"]),
+            "stage_index": min(live["stage_index"], baby["stage_count"]),
             "stage_count": baby["stage_count"],
-            "fully_grown": state.stage_index > baby["stage_count"],
-            "dormant_type": state.dormant_type,
-            "weaken_state": state.weaken_state,
-            "fed_current_stage": state.fed_current_stage,
+            "fully_grown": live["stage_index"] > baby["stage_count"],
+            "dormant_type": live["dormant_type"],
+            "weaken_state": live["weaken_state"],
+            "fed_current_stage": live["fed_current_stage"],
             "caught_at": state.caught_at,
         })
 

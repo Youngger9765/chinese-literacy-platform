@@ -293,12 +293,36 @@ def _award_word_baby_rewards(
     碎片就永久遺失了。這裡改成每一站各自一層 SAVEPOINT：一站出錯只回滾
     那一站自己的部分寫入（錢包/抓到的寶貝等），記 log 後繼續下一站，不影響
     其他站、也不影響外層已經準備要存的 step_progress／XP。
-    """
-    lesson_uid = _resolve_lesson_uid(session)
-    if lesson_uid is None:
-        return  # 找不到對應的內容樹課程（如測試用的假 slug），不嘗試判定
 
-    def _try_award(station: str) -> None:
+    **站必須真的在這一課的 step_sequence 裡**（security review finding，
+    2026-10-27）：光是「station 字串長得像 15 種站之一」不夠——學生可以在
+    任何一課回報一個合法但這一課根本沒有的站（例如對沒有 spotlight 的課回報
+    "spotlight"），農到不屬於這一課內容的獎勵。這裡在呼叫 `award_station_
+    rewards` 之前，先比對（slug 剝除後的）base station id 是否真的出現在
+    這一課真實的 `step_sequence` 裡；不在的話直接跳過，連 `award_station_
+    rewards` 都不呼叫——不只是讓它回傳 None（finding #3 的無效站本來就會這
+    樣），因為「合法站但錯的課」跟「完全無效的站」是兩種不同的擋法：前者要
+    靠課程內容本身的真相（step_sequence）才擋得住，後者靠設定檔的 15 站表
+    就夠。
+    """
+    lesson = _resolve_lesson(session)
+    if lesson is None:
+        return  # 找不到對應的內容樹課程（如測試用的假 slug），不嘗試判定
+    lesson_uid = lesson.get("lesson_uid")
+    if lesson_uid is None:
+        return
+
+    # 多部分/多輪的站 id 會帶 "#slug" 後綴（如 "full-text-annotate#dcavv"）——
+    # step_sequence 裡存的是帶 slug 的完整 id，但碎片/遭遇判定跟 reward_log
+    # 的唯一鍵都用「去掉 slug 的 base id」，所以這裡兩邊都剝到 base 再比對。
+    valid_stations_in_this_lesson = {
+        raw_step_id.split("#", 1)[0] for raw_step_id in (lesson.get("step_sequence") or [])
+    }
+
+    def _try_award(step_id: str) -> None:
+        station = step_id.split("#", 1)[0]
+        if station not in valid_stations_in_this_lesson:
+            return  # 不是這一課真的有的站——跳過，不呼叫判定、不留任何紀錄
         try:
             with db.begin_nested():
                 award_station_rewards(db, student_id=student_id, lesson_uid=lesson_uid, station=station)
@@ -321,12 +345,15 @@ def _award_word_baby_rewards(
         _try_award(step_id)
 
 
-def _resolve_lesson_uid(session: "LearningSession") -> str | None:
-    """session.story_slug_derived（如 "6"）→ 內容樹的 lesson_uid（如 "L0001"）。
+def _resolve_lesson(session: "LearningSession") -> dict | None:
+    """session.story_slug_derived（如 "6"）→ 內容樹的完整 lesson dict（含
+    "lesson_uid" 跟 "step_sequence"）。
 
     這是兩個不同的編號系統（#3780 探路時發現）：`story_slug` 是這個平台
     session/路由用的編號，`lesson_uid` 是 `backend/data/lessons/` 內容樹的
     課程 id，文字寶貝的設定檔（`app/data/word_babies/*.json`）全部用後者。
+    回傳完整 dict（不只 lesson_uid 字串）是因為呼叫端還需要 `step_sequence`
+    來驗證站是不是真的屬於這一課（security review finding，2026-10-27）。
     """
     slug = session.story_slug_derived
     if not slug:
@@ -335,10 +362,7 @@ def _resolve_lesson_uid(session: "LearningSession") -> str | None:
         lesson_id = int(normalize_story_slug(slug))
     except (ValueError, TypeError):
         return None
-    lesson = get_lesson_by_id(lesson_id)
-    if lesson is None:
-        return None
-    return lesson.get("lesson_uid")
+    return get_lesson_by_id(lesson_id)
 
 
 # ── Bug C fix helpers ─────────────────────────────────────────────────────────
