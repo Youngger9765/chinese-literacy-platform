@@ -1,0 +1,33 @@
+{
+  "seed": "word-baby-v1-2026-10-26",
+  "rarity_base_rates": [
+    {
+      "rarity": "common",
+      "rarity_zh": "常見",
+      "base_encounter_rate_per_station": 0.028
+    },
+    {
+      "rarity": "uncommon",
+      "rarity_zh": "少見",
+      "base_encounter_rate_per_station": 0.012
+    },
+    {
+      "rarity": "rare",
+      "rarity_zh": "稀有",
+      "base_encounter_rate_per_station": 0.008
+    },
+    {
+      "rarity": "epic",
+      "rarity_zh": "史詩",
+      "base_encounter_rate_per_station": 0.0025
+    },
+    {
+      "rarity": "legendary",
+      "rarity_zh": "傳說",
+      "base_encounter_rate_per_station": 0.0005
+    }
+  ],
+  "total_encounter_rate_per_station": 0.051,
+  "rule": "完成一個站時，先用 wb_common.unit_interval(SEED, student_id, lesson_uid, station, 'encounter') 算出 0~1 的決定性數值 r。把各稀有度的 base_encounter_rate_per_station 疊成累積區間，r 落在哪個區間就是哪個稀有度出現野生寶貝（r 超過全部區間總和 = 這站沒有遭遇，最常見的結果）。決定稀有度後，從『飲食包含這一站口味家族、且該學生還沒擁有』的寶貝裡，用 wb_common.pick_index(...) 決定性挑一隻；如果這個稀有度在這個口味下已經全部被該學生擁有，就退而求其次發放 duplicate_catch_bonus（見 fragments.json）。",
+  "catch_success_note": "目前設計：只要遭遇就直接捕捉成功（不另外設『遭遇後還可能抓不到』的二次機率），理由寫在 design.md §9 的待決清單。"
+}

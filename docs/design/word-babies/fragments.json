@@ -1,0 +1,126 @@
+{
+  "seed": "word-baby-v1-2026-10-26",
+  "flavor_families": [
+    "語文基礎",
+    "閱讀理解",
+    "朗讀表達",
+    "書寫紀錄",
+    "文言文"
+  ],
+  "station_flavor_map": [
+    {
+      "module": "lesson_intro",
+      "station": "lesson-intro",
+      "building": "港口燈塔",
+      "flavor": "朗讀表達"
+    },
+    {
+      "module": "key_reading",
+      "station": "key-passage-reading",
+      "building": "回音劇場",
+      "flavor": "朗讀表達"
+    },
+    {
+      "module": "full_text_annotate",
+      "station": "full-text-annotate",
+      "building": "書卷長廊",
+      "flavor": "書寫紀錄"
+    },
+    {
+      "module": "writing_practice",
+      "station": "report",
+      "building": "星空瞭望台",
+      "flavor": "書寫紀錄"
+    },
+    {
+      "module": "vocab_definitions",
+      "station": "vocab-definition",
+      "building": "字源館",
+      "flavor": "語文基礎"
+    },
+    {
+      "module": "vocab_review",
+      "station": "vocab-review",
+      "building": "精靈牧場",
+      "flavor": "語文基礎"
+    },
+    {
+      "module": "vocab_application",
+      "station": "vocab-application",
+      "building": "工匠作坊",
+      "flavor": "語文基礎"
+    },
+    {
+      "module": "resources",
+      "station": "knowledge-station",
+      "building": "樹屋補給站",
+      "flavor": "語文基礎"
+    },
+    {
+      "module": "intro_guide",
+      "station": "knowledge-station",
+      "building": "樹屋補給站",
+      "flavor": "語文基礎"
+    },
+    {
+      "module": "keypoints",
+      "station": "keypoints-table",
+      "building": "地圖塔",
+      "flavor": "閱讀理解"
+    },
+    {
+      "module": "comprehension",
+      "station": "comprehension",
+      "building": "謎題神殿",
+      "flavor": "閱讀理解"
+    },
+    {
+      "module": "spotlight",
+      "station": "spotlight",
+      "building": "聚光閣",
+      "flavor": "閱讀理解"
+    },
+    {
+      "module": "classical_text",
+      "station": "classical-text",
+      "building": "原文閣",
+      "flavor": "文言文"
+    },
+    {
+      "module": "modern_translation",
+      "station": "classical-text",
+      "building": "原文閣",
+      "flavor": "文言文"
+    },
+    {
+      "module": "sentence_matching",
+      "station": "classical-sentence-matching",
+      "building": "對句碑林",
+      "flavor": "文言文"
+    },
+    {
+      "module": "word_matching",
+      "station": "classical-word-matching",
+      "building": "字牌亭",
+      "flavor": "文言文"
+    },
+    {
+      "module": "self_challenge",
+      "station": "classical-self-challenge",
+      "building": "挑戰擂台",
+      "flavor": "文言文"
+    }
+  ],
+  "drop_probability_by_flavor": {
+    "語文基礎": 0.6,
+    "閱讀理解": 0.55,
+    "朗讀表達": 0.7,
+    "書寫紀錄": 0.7,
+    "文言文": 0.9
+  },
+  "rule": "完成一個站時，用 wb_common.unit_interval(SEED, student_id, lesson_uid, station, 'fragment') 算出 0~1 的決定性數值；小於該站口味家族的 drop_probability 就掉落 1 片該口味碎片，否則這一站不產碎片。每站最多 1 片，不重複判定（idempotent：同一站只在第一次完成時判定一次，需要一張 student_station_reward_log 記錄是否已經判定過，見 schema-proposal.md）。",
+  "duplicate_catch_bonus": {
+    "description": "重複捕捉到已擁有的寶貝時，不產生第二隻，改發放該寶貝主要口味的碎片做為補償。",
+    "bonus_fragment_count": 3
+  }
+}
