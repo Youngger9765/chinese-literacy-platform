@@ -259,11 +259,37 @@ export default function ReadingIslandLab() {
         </div>
       )}
       <button type="button" onClick={() => setMode(mode === 'first' ? 'god' : 'first')} className="absolute bottom-24 right-4 z-20 rounded-full md:bottom-20 border-2 border-white bg-[#233e4b]/90 px-4 py-2 text-sm font-bold text-[#fff1d0] shadow-lg transition hover:scale-105 active:scale-95 md:right-7">{mode === 'first' ? '展開上帝視角' : '回到第一人稱'}</button>
-      {/* bottom-32（8rem）：比「聲音：開」的 bottom-[4.5rem] 高一截，兩顆按鈕
-          之前都釘在 left-4，間距只有 24px 不夠兩顆按鈕的高度，疊在一起把
-          「清單模式」的字蓋住（team-lead 2026-10-26 截圖抓到）。*/}
-      {opening < 0 && module === null && door === null && !listMode && (
-        <button type="button" aria-label="切換清單模式" onClick={() => setListMode(true)} className="absolute bottom-32 left-4 z-20 rounded-full md:bottom-28 border-2 border-white bg-[#233e4b]/90 px-4 py-2 text-sm font-bold text-[#fff1d0] shadow-lg transition hover:scale-105 active:scale-95 md:left-7">清單模式</button>
+      {/* 聲音：開場／旁白期間的特例位置（team-lead 2026-10-26 二次審查訂正）。
+          ⚠️ 第一版把這段時間的「聲音」整個拿掉，被退回——z-[70] 不是順手加的，
+          是上一輪審查特地要求的：冷開場「建議開啟聲音」之後、旁白播放期間
+          （海浪／和弦／咻聲）正是學生最需要關掉聲音的時候（例如在教室裡），
+          不能因為跟「繼續」重疊就連功能一起拿掉，要移位置不是刪掉。
+          右上角（right-4/top-4，跟桌機/iPad 的「第一幕」資訊卡同座標）這段
+          期間不會撞到東西：冷開場（z-60）跟旁白全螢幕遮罩（z-30，不透明
+          底色）都會把「第一幕」資訊卡（z-10）整個蓋住，所以兩者視覺上從不
+          同時出現；旁白對話框本身用 `items-end justify-center`，上緣是淨空的。*/}
+      {(coldOpen || opening >= 0) && (
+        <button type="button" onClick={toggleMuted} className="absolute right-4 top-4 z-[70] rounded-full border-2 border-white bg-[#233e4b]/85 px-3 py-1.5 text-xs font-bold text-[#fff1d0] shadow-lg md:right-7 md:top-7" aria-pressed={muted}>{muted ? '聲音：關' : '聲音：開'}</button>
+      )}
+      {/* 清單模式 + 聲音 統一容器（team-lead 2026-10-26 重新規劃，取代原本
+          各自調 bottom 跟 z-index 數字的補丁）：
+          - 手機（<768px）：左下角整塊讓給虛擬搖桿，這個容器搬到左上標題卡
+            下方（top-32），不再跟搖桿/跳搶同一塊地。
+          - 桌機／iPad（≥768px）：沿用原本的左下角位置（left-7/bottom-28），
+            但現在跟「聲音」共用同一個 flex 容器，不是各自獨立定位。
+          - 整個容器掛 `opening < 0`：開場旁白期間「聲音」改走上面那個右上角
+            的特例分支，這裡只處理旁白結束、回到第一人稱探索之後的狀態。
+            靜音狀態在 module（學習關卡 iframe）時還能不能切是另一件事：
+            之前聲音按鈕用 z-[70] 硬是浮在所有東西上面（含學習關卡），這裡
+            簡化成跟清單模式同一層 z-20，一併收進「opening<0 時才看得到」
+            的規則，不再為它開特例——這段 team-lead 沒有退件，維持原樣。*/}
+      {opening < 0 && (
+        <div className="absolute left-4 top-32 z-20 flex flex-col items-start gap-2 md:left-7 md:top-auto md:bottom-28">
+          {module === null && door === null && !listMode && (
+            <button type="button" aria-label="切換清單模式" onClick={() => setListMode(true)} className="rounded-full border-2 border-white bg-[#233e4b]/90 px-4 py-2 text-sm font-bold text-[#fff1d0] shadow-lg transition hover:scale-105 active:scale-95">清單模式</button>
+          )}
+          <button type="button" onClick={toggleMuted} className="rounded-full border-2 border-white bg-[#233e4b]/85 px-3 py-1.5 text-xs font-bold text-[#fff1d0] shadow-lg" aria-pressed={muted}>{muted ? '聲音：關' : '聲音：開'}</button>
+        </div>
       )}
       {listMode && (
         <IslandListMode
@@ -303,7 +329,6 @@ export default function ReadingIslandLab() {
           <style>{'@keyframes islandTitle{0%{transform:translateY(60px) scale(.9);opacity:0;letter-spacing:.9em}25%{transform:translateY(0) scale(1);opacity:1;letter-spacing:.3em}80%{opacity:1}100%{opacity:0;transform:translateY(-20px)}}@keyframes islandSweep{0%{transform:scaleX(0);opacity:0}30%{transform:scaleX(1);opacity:1}80%{opacity:1}100%{opacity:0}}'}</style>
         </div>
       )}
-      <button type="button" onClick={toggleMuted} className="absolute bottom-[4.5rem] left-4 z-[70] rounded-full border-2 border-white bg-[#233e4b]/85 px-3 py-1.5 text-xs font-bold text-[#fff1d0] shadow-lg" aria-pressed={muted}>{muted ? '聲音：關' : '聲音：開'}</button>
       {opening >= 0 && (
         <div className="absolute inset-0 z-30 flex items-end justify-center bg-[#071d32] p-4 pb-7 text-white md:pb-12">
           <div key={opening} className="absolute inset-0 animate-[islandKenBurns_9s_ease-out_forwards] bg-cover bg-center" style={{ backgroundImage: `url(/lab-island/opening/op${opening + 1}.jpg)` }} />
