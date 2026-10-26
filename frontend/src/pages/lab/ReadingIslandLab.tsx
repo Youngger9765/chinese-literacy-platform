@@ -421,7 +421,6 @@ export default function ReadingIslandLab() {
       )}
       {fogHint && <div role="status" className="absolute bottom-40 left-1/2 z-20 -translate-x-1/2 rounded-xl border border-white bg-[#f6f7f2]/95 px-5 py-3 font-bold shadow-xl">這裡還沒讀到</div>}
       {error && <div role="alert" className="absolute left-1/2 top-24 z-30 -translate-x-1/2 rounded-xl bg-[#fff1d8] px-4 py-2 text-sm font-bold shadow-lg" onClick={() => setError('')}>{error}</div>}
-      <div className="absolute bottom-5 right-5 z-10 hidden rounded-xl border border-white/60 bg-[#f9f5e9]/85 px-3 py-2 text-[11px] font-bold shadow-lg md:block">位置 {position.x.toFixed(0)}, {position.z.toFixed(0)} · 迷霧 {unlockedZone === 0 ? '未散' : '正散開'}</div>
       <aside className="absolute right-4 top-28 z-10 hidden w-28 flex-col gap-1 rounded-2xl border border-white/60 bg-[#f8f3e5]/85 p-2 text-center shadow-lg lg:flex" aria-label="文字寶寶">
         <p className="text-[11px] font-black">文字寶寶</p>
         {BABIES.map((baby) => <div key={baby.name} className="flex items-center gap-1 text-[10px] font-semibold"><img src={`/lab-island/sprites/${baby.art}`} alt="" className={`h-7 w-7 object-contain ${completed.some((step) => step.startsWith('vocab-definition') || step.startsWith('vocab-review')) ? '' : 'grayscale opacity-60'}`} /><span>{baby.name}</span></div>)}
@@ -473,7 +472,7 @@ export default function ReadingIslandLab() {
       )}
       {module !== null && (
         <div className="absolute inset-0 z-40 flex flex-col bg-[#0f2535]">
-          <div className="flex h-14 shrink-0 items-center justify-between border-b border-white/20 bg-[#172f40] px-4 text-sm font-bold text-white md:px-6"><span>{STOPS[module].name} · 平台原本的關卡</span><button type="button" onClick={() => void returnToIsland()} className="rounded-lg bg-[#e9c68e] px-4 py-2 text-[#244653]">回到島上</button></div>
+          <div className="flex h-14 shrink-0 items-center justify-between border-b border-white/20 bg-[#172f40] px-4 text-sm font-bold text-white md:px-6"><span>{STOPS[module].name}</span><button type="button" onClick={() => void returnToIsland()} className="rounded-lg bg-[#e9c68e] px-4 py-2 text-[#244653]">回到島上</button></div>
           <iframe title={`${STOPS[module].name}學習關卡`} src={stepPath(storyId, stepFor(module) ?? '')} className="h-full w-full flex-1 border-0 bg-white" />
         </div>
       )}

@@ -129,9 +129,12 @@ describe('ReadingIslandLab — 開門期間移動到別站再按「進入」不�
     const doorCueCalls = mockAudio.cue.mock.calls.filter((call) => call[0] === 'door');
     expect(doorCueCalls, '門聲只該播一次——第二次點擊如果生效了會疊播第二次').toHaveLength(1);
 
-    const moduleHeader = Array.from(document.querySelectorAll('span')).find((s) =>
-      /平台原本的關卡/.test(s.textContent || ''),
-    );
+    // #3780 P0-4：關卡頂列的「・平台原本的關卡」字樣已拿掉（playtest 回饋：
+    // 學生看不懂這是什麼，純粹是開發除錯字），頂列現在只有站名——改成找
+    // 「回到島上」按鈕的同層 `<span>`，那個位置結構沒變，一樣能唯一定位到
+    // 關卡頂列（不是 STOPS 清單或 hover 提示框裡其他含站名的文字）。
+    const returnBtn = byText('回到島上');
+    const moduleHeader = returnBtn?.parentElement?.querySelector('span');
     expect(moduleHeader?.textContent, '門開期間的第二次進入不該蓋過先點的那一站').toContain('港口燈塔');
   });
 });
