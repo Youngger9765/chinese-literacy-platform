@@ -6,6 +6,10 @@ interface IslandListModeProps {
   unlockedZone: number;
   onEnter: (index: number) => void;
   onClose: () => void;
+  /** 開門動畫進行中（door !== null）時傳 true，停用全部「進入」按鈕——
+   *  真正擋重複開站的是 openModule 自己的防護，這裡只是不讓按鈕看起來
+   *  像點了有用（team-lead 2026-10-26 明令）。 */
+  disabled?: boolean;
 }
 
 /**
@@ -15,7 +19,7 @@ interface IslandListModeProps {
  * 開門動畫、iframe、回島、亮燈、光柱、霧散全部沿用既有機制，這裡
  * 只是另一種「選到第幾站」的輸入方式。
  */
-export default function IslandListMode({ stops, doneIndexes, unlockedZone, onEnter, onClose }: IslandListModeProps) {
+export default function IslandListMode({ stops, doneIndexes, unlockedZone, onEnter, onClose, disabled = false }: IslandListModeProps) {
   return (
     <div role="dialog" aria-label="站點清單" className="absolute inset-0 z-50 flex items-center justify-center bg-[#0f2535]/90 p-4">
       <div className="max-h-[80vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-white/20 bg-[#f8f3e5] p-5 shadow-2xl">
@@ -37,8 +41,9 @@ export default function IslandListMode({ stops, doneIndexes, unlockedZone, onEnt
                   <button
                     type="button"
                     aria-label={`進入${stop.name}`}
+                    disabled={disabled}
                     onClick={() => onEnter(index)}
-                    className="shrink-0 rounded-lg bg-[#32796e] px-4 py-2 text-sm font-bold text-white"
+                    className="shrink-0 rounded-lg bg-[#32796e] px-4 py-2 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     進入
                   </button>

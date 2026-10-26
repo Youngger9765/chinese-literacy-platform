@@ -188,6 +188,13 @@ export default function ReadingIslandLab() {
 
   // 進入關卡：先暗場、門從中間打開、光透出來，再打開平台原本的教材
   const openModule = (index: number) => {
+    // 防護：已經在開門或已經在關卡裡，再呼叫一次直接忽略（team-lead
+    // 2026-10-26 明令）。沒有這道防護時，3D 世界在開門動畫期間
+    // （door !== null、module 還是 null）仍然沒被 setPaused 暫停，
+    // 學生可以移動到別站、對它的「進入」卡片或清單再點一次——會疊出
+    // 第二組 1700ms/2300ms 的 setTimeout，兩個 setModule 最後都會觸發，
+    // 時間較晚的那次蓋過先點的那一站，實際打開的會是「別站」不是先點的。
+    if (doorRef.current !== null || moduleRef.current !== null) return;
     if (!stepFor(index)) { setError('這個平台關卡尚未提供'); return; }
     setDoor(index);
     audioRef.current?.cue('door'); // 門聲先播——這時 context 還沒暫停
@@ -260,7 +267,10 @@ export default function ReadingIslandLab() {
           <div className="text-xs font-bold tracking-widest text-[#b7794e]">發現新去處</div>
           <h2 className="mt-1 text-xl font-black">{STOPS[near].name}{doneIndexes.includes(near) ? ' · 已亮燈' : ''}</h2>
           <p className="my-2 text-sm">{STOPS[near].line}</p>
-          <button type="button" onClick={() => openModule(near)} className="rounded-xl bg-[#32796e] px-8 py-2 font-bold text-white shadow-md">進入</button>
+          {/* disabled 是 UI 層的防呆，真正擋重複開站的是 openModule 自己
+              的 doorRef/moduleRef 檢查——兩層都做：這顆按鈕本來就不該讓人
+              以為點了有用（team-lead 2026-10-26 明令）。*/}
+          <button type="button" disabled={door !== null} onClick={() => openModule(near)} className="rounded-xl bg-[#32796e] px-8 py-2 font-bold text-white shadow-md disabled:cursor-not-allowed disabled:opacity-50">進入</button>
         </div>
       )}
       <button type="button" onClick={() => setMode(mode === 'first' ? 'god' : 'first')} className="absolute bottom-24 right-4 z-20 rounded-full md:bottom-20 border-2 border-white bg-[#233e4b]/90 px-4 py-2 text-sm font-bold text-[#fff1d0] shadow-lg transition hover:scale-105 active:scale-95 md:right-7">{mode === 'first' ? '展開上帝視角' : '回到第一人稱'}</button>
@@ -301,6 +311,7 @@ export default function ReadingIslandLab() {
           stops={STOPS}
           doneIndexes={doneIndexes}
           unlockedZone={unlockedZone}
+          disabled={door !== null}
           onClose={() => setListMode(false)}
           onEnter={(index) => { setListMode(false); openModule(index); }}
         />
