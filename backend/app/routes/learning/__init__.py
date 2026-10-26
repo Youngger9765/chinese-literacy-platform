@@ -46,6 +46,7 @@ from .toolbox import router as toolbox_router
 from .learning_annotations import router as annotations_router
 from .learning_audio_replay import router as audio_replay_router
 from .learning_save_audio import router as save_audio_router
+from .word_babies import router as word_babies_router
 
 router = APIRouter(tags=["learning"])
 
@@ -68,5 +69,6 @@ router.include_router(toolbox_router)
 router.include_router(annotations_router)
 router.include_router(audio_replay_router)
 router.include_router(save_audio_router)
+router.include_router(word_babies_router)
 
 __all__ = ["router"]

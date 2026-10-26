@@ -19,6 +19,9 @@ from ...models.session import LearningSession
 from ...models.user import User
 from ...schemas.session import StepProgressResponse, StepProgressSaveRequest, parse_step_progress
 from ...services.assignment_session_service import maybe_auto_submit_assignment_session
+from ...services.lesson_loader import get_lesson_by_id
+from ...services.word_baby_service import award_station_rewards
+from ...utils.slug import normalize_story_slug
 # DEPRECATED (#1182): _STEP_KEY_TO_NUM / _MAX_STEP_NUM / _normalize_step_key were used
 # to sync the integer current_step column. Sync removed; imports no longer needed here.
 
@@ -145,6 +148,25 @@ def save_step_progress(
         newly_reported=payload.steps_completed,
     )
 
+    # Issue #3780 — 文字寶貝養成系統：同一個「每個 step 完成都會流經這裡」的
+    # 位置順便觸發碎片/遭遇判定，道理跟上面的 XP 一樣（同一個 transaction，
+    # 不另開端點、不另外加 DB migration 讓前端自己呼叫）。
+    #
+    # code-reviewer finding（2026-10-26，第二輪）：第一版把整個
+    # `_award_word_baby_rewards` 迴圈包在同一層 SAVEPOINT 裡——如果一次存檔
+    # 涵蓋 3 個新完成的站，第 3 站判定時炸掉，會連第 1、2 站**已經成功**的
+    # 判定一起回滾。這幾站已經寫進 steps_completed，以後不會再被當成「新完成」
+    # 重新嘗試，碎片就永久遺失了。修法：SAVEPOINT 的範圍改成**逐站**，不是
+    # 整批——這樣移進 `_award_word_baby_rewards` 自己的迴圈裡做（見下方），
+    # 這裡只單純呼叫它，不另外包一層會牽連多站的 SAVEPOINT。
+    _award_word_baby_rewards(
+        db,
+        student_id=current_user.id,
+        session=session,
+        previously_completed=previously_completed,
+        newly_reported=payload.steps_completed,
+    )
+
     db.commit()
     db.refresh(session)
     logger.info(
@@ -227,6 +249,96 @@ def _award_step_complete_xp(
     # gamification_service.py).
     newly_unlocked = check_and_award_badges(db, student_id, session_id=session_id)
     return xp_awarded, newly_unlocked
+
+
+# ── 文字寶貝養成系統：碎片/遭遇判定觸發點（Issue #3780） ──────────────────
+
+#: 跟 XP 用同一條排除理由：'report' 是結果頁掛載時自動標完成的，不是學生真的
+#:做了什麼——如果讓它也能掉碎片，等於「打開結果頁」這個被動動作就能拿獎勵，
+#: 違反 PRD §2「學得會 > 看得下去 > 好看」的優先序（design.md §2）。
+_WORD_BABY_EXCLUDED_STEP_IDS = frozenset({"report"})
+
+
+def _award_word_baby_rewards(
+    db: Session,
+    *,
+    student_id: int,
+    session: "LearningSession",
+    previously_completed: list[str],
+    newly_reported: list[str],
+) -> None:
+    """完成一個站（steps_completed 新增一個 step_id）時，觸發文字寶貝的碎片/
+    遭遇判定——跟 `_award_step_complete_xp` 共用同一個「每個 step 完成都會流經
+    這裡」的位置（issue #3024 的先例已經證實這裡是唯一入口，不需要新端點）。
+
+    **為什麼選這裡當觸發點**（工頭判斷，team-lead 要求說明）：
+    1. `save_step_progress` 是平台上**唯一**一個「不管哪個步驟、哪種關卡類型，
+       完成了都會呼叫這支」的端點——跟 XP 系統選的是同一個理由
+    2. 跟 XP 在同一個 DB transaction 裡（`db.commit()` 統一處理），不需要
+       額外的端點或 migration 讓前端自己另外呼叫一次
+    3. `steps_completed` 的字串就是 PRD §5.1 的 15 種站 id（已跟
+       `frontend/src/config/stepConfig.ts` 的 `id` 欄位核對過是同一套命名）
+
+    **lesson-intro 的特例**（PRD §5.2）：這個步驟設計上永遠不會出現在
+    `steps_completed`（課程簡介頁不會回報「完成」），定義為「這一課有學習
+    紀錄就算完成」。這裡的處理方式：**只要這一課有任何一次 step_progress
+    儲存**（代表 session 確實存在），就嘗試判定一次 lesson-intro 的獎勵——
+    `award_station_rewards` 本身是冪等的（`student_station_reward_log` 的
+    唯一鍵保證只判定一次），所以「每次儲存都嘗試」是安全的，不會重複發放。
+
+    **逐站獨立 SAVEPOINT**（code-reviewer 第二輪 finding，2026-10-26）：
+    一次存檔可能同時涵蓋好幾個新完成的站。如果把整個迴圈包在同一層
+    SAVEPOINT 裡，其中一站判定時炸掉會連其他站**已經成功**的判定一起回滾——
+    而這些站已經寫進 steps_completed，以後不會再被當成「新完成」重新嘗試，
+    碎片就永久遺失了。這裡改成每一站各自一層 SAVEPOINT：一站出錯只回滾
+    那一站自己的部分寫入（錢包/抓到的寶貝等），記 log 後繼續下一站，不影響
+    其他站、也不影響外層已經準備要存的 step_progress／XP。
+    """
+    lesson_uid = _resolve_lesson_uid(session)
+    if lesson_uid is None:
+        return  # 找不到對應的內容樹課程（如測試用的假 slug），不嘗試判定
+
+    def _try_award(station: str) -> None:
+        try:
+            with db.begin_nested():
+                award_station_rewards(db, student_id=student_id, lesson_uid=lesson_uid, station=station)
+        except Exception:
+            logger.exception(
+                "word-baby reward award failed for station %s (lesson %s, user %d) — "
+                "skipped, other stations in this save are unaffected, step-progress + XP unaffected",
+                station, lesson_uid, student_id,
+            )
+
+    # lesson-intro：每次儲存都嘗試判定一次，冪等保證不會重複發放。
+    _try_award("lesson-intro")
+
+    already = set(previously_completed)
+    newly_completed = [
+        step_id for step_id in newly_reported
+        if step_id not in already and step_id not in _WORD_BABY_EXCLUDED_STEP_IDS
+    ]
+    for step_id in newly_completed:
+        _try_award(step_id)
+
+
+def _resolve_lesson_uid(session: "LearningSession") -> str | None:
+    """session.story_slug_derived（如 "6"）→ 內容樹的 lesson_uid（如 "L0001"）。
+
+    這是兩個不同的編號系統（#3780 探路時發現）：`story_slug` 是這個平台
+    session/路由用的編號，`lesson_uid` 是 `backend/data/lessons/` 內容樹的
+    課程 id，文字寶貝的設定檔（`app/data/word_babies/*.json`）全部用後者。
+    """
+    slug = session.story_slug_derived
+    if not slug:
+        return None
+    try:
+        lesson_id = int(normalize_story_slug(slug))
+    except (ValueError, TypeError):
+        return None
+    lesson = get_lesson_by_id(lesson_id)
+    if lesson is None:
+        return None
+    return lesson.get("lesson_uid")
 
 
 # ── Bug C fix helpers ─────────────────────────────────────────────────────────
