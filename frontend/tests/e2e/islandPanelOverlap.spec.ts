@@ -52,6 +52,11 @@ function panelsOf(page) {
     { name: '劇情說明卡/按鈕', locator: page.getByText(/第一幕|第二幕|第三幕/) },
     { name: '文字寶貝欄', locator: page.getByLabel('文字寶寶') },
     { name: '工具列（清單模式/聲音）', locator: page.getByLabel('工具列') },
+    // #3780 P0-1 退件（審查員 2026-10-26）：觸控 Chromebook 這種混合裝置
+    // 同時有「WASD 提示」跟「用搖桿走」提示、搖桿、跳——四個擠在同一個
+    // `操作提示` flex-col 容器裡，這支測試要確認改成 flex-col 之後真的
+    // 不會疊，不是靠猜座標碰運氣。
+    { name: '操作提示（WASD/搖桿文字說明）', locator: page.getByLabel('操作提示') },
     { name: '虛擬搖桿', locator: page.getByRole('group', { name: /虛擬搖桿/ }) },
     { name: '跳', locator: page.getByRole('button', { name: /^跳$/ }) },
     { name: '展開上帝視角', locator: page.getByRole('button', { name: /展開上帝視角|回到第一人稱/ }) },
@@ -114,6 +119,39 @@ for (const vp of VIEWPORTS) {
       await loginAsStudent(page);
       await enterIslandMainView(page, '20011');
       await checkCollapsedAndExpanded(page, vp.label);
+    });
+  });
+}
+
+// 混合裝置（觸控 Chromebook）：#3780 P0-1 退件案例。Playwright 的
+// `hasTouch: true`（不加 `isMobile`）會讓瀏覽器同時回報 `(any-pointer: coarse)`
+// 跟 `(any-pointer: fine)` 皆為 true，模擬「螢幕觸控 + 接了滑鼠/觸控板」
+// 的混合裝置——這時 WASD 提示、搖桿提示、搖桿、跳 四個會同時出現在畫面上，
+// 是這支測試檔案裡唯一會讓全部四個操作提示面板同時存在的情境。
+//
+// ⚠️ 第二版退件案例（審查員 2026-10-26 實測）就出在 390px 寬這組：操作提示
+// 那個 flex-col 沒有寬度上限，WASD 那行長文字撐到 324px 寬，橫向蓋過右下角
+// 「展開上帝視角」（交集 3601px²）——1280px 寬的桌機尺寸可用空間夠，測不出
+// 這個問題，所以兩種寬度都要測，不能只測桌機那組。
+const HYBRID_VIEWPORTS = [
+  { label: '1280x800（桌機尺寸，可用寬度夠）', width: 1280, height: 800 },
+  { label: '390x844（手機尺寸，第二版退件的實際案例）', width: 390, height: 844 },
+];
+
+for (const vp of HYBRID_VIEWPORTS) {
+  test.describe(`喝采島 HUD 面板不互相蓋住 — 混合裝置（觸控 Chromebook，20011，${vp.label}）`, () => {
+    test.use({ viewport: { width: vp.width, height: vp.height }, hasTouch: true });
+
+    test('WASD 提示、搖桿提示、搖桿、跳、展開上帝視角 同時出現也不互相疊住', async ({ page }) => {
+      await loginAsStudent(page);
+      await enterIslandMainView(page, '20011');
+      const panels = panelsOf(page);
+      const hint = panels.find((p) => p.name === '操作提示（WASD/搖桿文字說明）')!;
+      const hintText = await hint.locator.innerText();
+      expect(hintText, '混合裝置下 WASD 提示要出現').toContain('WASD');
+      expect(hintText, '混合裝置下搖桿提示要出現').toContain('搖桿');
+      const result = await findOverlappingPanels(page, panels);
+      expect(result.passed, describePanelOverlaps(result)).toBe(true);
     });
   });
 }
