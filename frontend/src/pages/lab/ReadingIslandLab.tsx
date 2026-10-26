@@ -375,13 +375,20 @@ export default function ReadingIslandLab() {
           的邊——不管文字多長，可用寬度有限，瀏覽器自己換行，兩邊各自佔
           各自的空間，不會疊。*/}
       <div className="absolute inset-x-4 bottom-4 z-20 flex items-end justify-between gap-3">
-        <div aria-label="操作提示" className="flex min-w-0 flex-1 flex-col items-start gap-2">
-          {(!isTouchInput || isFineInput) && (
-            <div className="rounded-xl border border-white/60 bg-[#f9f5e9]/90 px-4 py-2 text-xs font-semibold shadow-lg">WASD / 方向鍵移動　·　空白鍵跳　·　拖曳旋轉視角</div>
-          )}
-          {isTouchInput && (
-            <div className="rounded-xl border border-white/60 bg-[#f9f5e9]/90 px-4 py-2 text-xs font-semibold shadow-lg">用搖桿走、拖曳轉頭</div>
-          )}
+        <div className="flex min-w-0 flex-1 flex-col items-start gap-2">
+          {/* #3780 e2e panel-overlap 退件修正：`aria-label="操作提示"` 原本
+              貼在整個外層容器（連搖桿/跳都包在裡面），panel-overlap 測試把
+              它當一塊面板去跟「虛擬搖桿」「跳」比對 boundingBox，量到的
+              「重疊」其實是父子包含關係，不是真的視覺衝突——縮小到只包文字
+              提示本身，才是測試真正該比對的那塊。*/}
+          <div aria-label="操作提示" className="flex flex-col items-start gap-2">
+            {(!isTouchInput || isFineInput) && (
+              <div className="rounded-xl border border-white/60 bg-[#f9f5e9]/90 px-4 py-2 text-xs font-semibold shadow-lg">WASD / 方向鍵移動　·　空白鍵跳　·　拖曳旋轉視角</div>
+            )}
+            {isTouchInput && (
+              <div className="rounded-xl border border-white/60 bg-[#f9f5e9]/90 px-4 py-2 text-xs font-semibold shadow-lg">用搖桿走、拖曳轉頭</div>
+            )}
+          </div>
           {isTouchInput && (
             <div className="flex items-end gap-4">
               <div role="group" aria-label="虛擬搖桿" className="relative grid h-28 w-28 touch-none place-items-center rounded-full border-4 border-white/70 bg-[#e9ede5]/65 shadow-2xl" onPointerDown={(event) => { stickOrigin.current = { x: event.clientX, y: event.clientY }; event.currentTarget.setPointerCapture(event.pointerId); }} onPointerMove={onStickMove} onPointerUp={releaseStick} onPointerCancel={releaseStick}>
