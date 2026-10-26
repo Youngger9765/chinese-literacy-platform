@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { fetchStory } from '../../services/api';
 import { fetchLearningSessions, loadStepProgress } from '../../services/learningApi';
@@ -25,6 +25,7 @@ const MOTES = Array.from({ length: 18 }, (_, i) => ({ x: (i * 37) % 100, d: 7 + 
 
 export default function ReadingIslandLab() {
   const { storyId = '' } = useParams();
+  const navigate = useNavigate();
   const { token, user } = useAuth();
   const canvasRef = useRef<HTMLDivElement>(null);
   const worldRef = useRef<World | null>(null);
@@ -83,6 +84,14 @@ export default function ReadingIslandLab() {
   const [showActInfo, setShowActInfo] = useState(false); // 手機版「第一幕」卡片收合狀態
   const [hovered, setHovered] = useState<number | null>(null);
   const [guide, setGuide] = useState('');
+  // 全島亮完那一刻的光柱／粒子效果——只短暫播放一次，不是常駐動畫
+  // （結尾慶祝層本身用 finaleOpen 控制開關，見下方 JSX；這個只管那陣視覺flourish）。
+  const [finaleBurst, setFinaleBurst] = useState(false);
+  // 結尾慶祝全螢幕層開關（審查員 2026-10-26 二次審查訂正：原本用 isFinale 這個
+  // 衍生值直接常駐顯示一張卡片，沒有「關掉」的概念，玩家按「回遊戲區」以外沒有
+  // 別的路離開；改成獨立 state，可以用「留在島上看看」關掉，關掉後不會自己又
+  // 跳出來）。
+  const [finaleOpen, setFinaleOpen] = useState(false);
   const prevDone = useRef(0);
 
   useEffect(() => {
@@ -153,15 +162,44 @@ export default function ReadingIslandLab() {
   useEffect(() => { worldRef.current?.setProgress(unlockedZone, doneIndexes); }, [unlockedZone, doneIndexes]);
   useEffect(() => { worldRef.current?.setMode(mode); }, [mode]);
   useEffect(() => {
-    if (doneIndexes.length > prevDone.current && prevDone.current > 0 || (doneIndexes.length > 0 && prevDone.current === 0 && module === null && opening < 0)) {
-      const zoneOpened = nextIndex >= 0 && STOPS.every((stop, i) => stop.zone !== STOPS[nextIndex].zone || !doneIndexes.includes(i));
+    // 兩種情況都要處理，但結尾慶祝只能在第一種發生：
+    // ① justCompletedWithinSession：這次 session 裡親眼看著完成數字往上跳
+    //    （`prevDone.current > 0` 代表之前至少量過一次「還沒全部做完」）。
+    // ② justMountedAlreadyDone：掛載當下 `refreshProgress()` 一回來就直接
+    //    報告「全部做完」——`prevDone.current` 還是初始值 0，不代表「剛剛
+    //    完成」，只是「本來就是這樣」。
+    // 審查員 2026-10-26 二次審查抓到：原本的條件把這兩種混在一起判斷，
+    // 重新整理一座早就全亮的島、或退出又回來，都會被誤判成「剛完成」，
+    // 鐘聲跟光柱/粒子又放一次。結尾慶祝只能用 ① 觸發。
+    const justCompletedWithinSession = doneIndexes.length > prevDone.current && prevDone.current > 0;
+    const justMountedAlreadyDone = doneIndexes.length > 0 && prevDone.current === 0 && module === null && opening < 0;
+    if (justCompletedWithinSession || justMountedAlreadyDone) {
+      if (nextIndex < 0) {
+        if (!justCompletedWithinSession) {
+          // 掛載時就已經全部完成：安靜記錄進度，不重播鐘聲/光柱/慶祝層。
+          prevDone.current = doneIndexes.length;
+          return undefined;
+        }
+        // 清掉上一條還沒消失的提示（例如「迷霧散開了」）：避免跟剛打開的
+        // 慶祝層同時出現一團字（雖然慶祝層現在是全螢幕蓋住一切，理論上
+        // 不會疊到，但提示框本身還留著等 7 秒自己消失也很奇怪）。
+        setGuide('');
+        audioRef.current?.cue('chime');
+        setFinaleOpen(true);
+        setFinaleBurst(true);
+        const timer = setTimeout(() => setFinaleBurst(false), 3600);
+        prevDone.current = doneIndexes.length;
+        return () => clearTimeout(timer);
+      }
+      const zoneOpened = STOPS.every((stop, i) => stop.zone !== STOPS[nextIndex].zone || !doneIndexes.includes(i));
       audioRef.current?.cue('sparkle');
-      setGuide(nextIndex < 0 ? '整座島都亮起來了！' : `${zoneOpened ? '迷霧散開了！' : ''}跟著金色光柱，下一站：${STOPS[nextIndex].name}`);
+      setGuide(`${zoneOpened ? '迷霧散開了！' : ''}跟著金色光柱，下一站：${STOPS[nextIndex].name}`);
       const timer = setTimeout(() => setGuide(''), 7000);
       prevDone.current = doneIndexes.length;
       return () => clearTimeout(timer);
     }
     prevDone.current = doneIndexes.length;
+    return undefined;
   }, [doneIndexes, nextIndex, module, opening, STOPS]);
   useEffect(() => { worldRef.current?.setPaused(module !== null || opening >= 0); }, [module, opening]);
   useEffect(() => {
@@ -295,12 +333,23 @@ export default function ReadingIslandLab() {
             <button type="button" onClick={toggleMuted} className="rounded-full border-2 border-white bg-[#233e4b]/85 px-3 py-1.5 text-xs font-bold text-[#fff1d0] shadow-lg" aria-pressed={muted}>{muted ? '聲音：關' : '聲音：開'}</button>
           </div>
         )}
+        {/* 「下一站」/「迷霧散開了」提示——第三次訂正（審查員 2026-10-26）：
+            原本跟桌機版共用 `absolute left-1/2 top-20` 置中，手機版左欄現在
+            疊了標題卡＋劇情說明＋工具列三層，高度隨課名長度變動，量到實際
+            會長到 y≈263，跟 top-20（80px）那條固定線重疊。改成跟標題卡／
+            劇情說明／工具列收進同一個 flex-col：不管左欄多高，這則提示永遠
+            排在最下面，不用猜任何像素。桌機/iPad 版維持原本獨立置中的位置
+            （那裡從沒被抓到過重疊，不用跟著改）。*/}
+        {guide && <div role="status" className="relative z-30 max-w-[calc(100vw-2rem)] animate-bounce rounded-2xl border-2 border-amber-200 bg-gradient-to-r from-[#f7d48a] to-[#ffe9b8] px-5 py-2.5 text-sm font-black text-[#3b3018] shadow-[0_0_40px_rgba(255,200,90,0.7)] md:hidden">{guide}</div>}
       </div>
       {/* 桌機/iPad 右上角常駐「第一幕」卡片——獨立 DOM 節點，不受上面那層
           flex-col 影響，維持原本位置不變。*/}
       <div aria-label="劇情說明卡" className="absolute right-4 top-4 z-10 hidden rounded-2xl border border-white/60 bg-[#233e4b]/85 px-3 py-2 text-right text-xs font-bold text-[#fff1d0] shadow-lg md:right-7 md:top-7 md:block md:px-4 md:py-3">
         <div>{actInfo.actName} · 發生了什麼</div><div className="mt-1 text-[10px] text-white/70">自由探索{actInfo.stationNames}</div>
       </div>
+      {/* 桌機/iPad 版「下一站」提示：維持原本獨立置中位置，不受手機版那層
+          flex-col 影響。*/}
+      {guide && <div role="status" className="absolute left-1/2 top-20 z-30 hidden -translate-x-1/2 animate-bounce rounded-2xl border-2 border-amber-200 bg-gradient-to-r from-[#f7d48a] to-[#ffe9b8] px-6 py-3 text-base font-black text-[#3b3018] shadow-[0_0_40px_rgba(255,200,90,0.7)] md:block">{guide}</div>}
       <div className="absolute bottom-4 left-4 z-10 hidden rounded-xl border border-white/60 bg-[#f9f5e9]/90 px-4 py-2 text-xs font-semibold shadow-lg md:block">WASD / 方向鍵移動　·　空白鍵跳　·　拖曳旋轉視角</div>
       <div className="absolute bottom-5 left-5 z-10 flex items-end gap-4 md:hidden">
         <div role="group" aria-label="虛擬搖桿" className="relative grid h-28 w-28 touch-none place-items-center rounded-full border-4 border-white/70 bg-[#e9ede5]/65 shadow-2xl" onPointerDown={(event) => { stickOrigin.current = { x: event.clientX, y: event.clientY }; event.currentTarget.setPointerCapture(event.pointerId); }} onPointerMove={onStickMove} onPointerUp={releaseStick} onPointerCancel={releaseStick}>
@@ -344,7 +393,32 @@ export default function ReadingIslandLab() {
       )}
       {mode === 'first' && opening < 0 && module === null && <div className={`pointer-events-none absolute left-1/2 top-1/2 z-10 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 transition ${hovered !== null ? 'scale-150 border-amber-300 bg-amber-200/40' : 'border-white/80'}`} />}
       {hovered !== null && opening < 0 && module === null && !titleReveal && <div className="pointer-events-none absolute left-1/2 top-[38%] z-20 -translate-x-1/2 animate-pulse rounded-full border-2 border-amber-200 bg-[#233e4b]/90 px-5 py-2 text-lg font-black text-[#ffe9b8] shadow-[0_0_30px_rgba(255,214,120,0.6)]">{STOPS[hovered].name}{doneIndexes.includes(hovered) ? ' ✓' : hovered === nextIndex ? ' · 下一站' : ''}</div>}
-      {guide && <div role="status" className="absolute left-1/2 top-20 z-30 -translate-x-1/2 animate-bounce rounded-2xl border-2 border-amber-200 bg-gradient-to-r from-[#f7d48a] to-[#ffe9b8] px-6 py-3 text-base font-black text-[#3b3018] shadow-[0_0_40px_rgba(255,200,90,0.7)]">{guide}</div>}
+      {/* 結尾慶祝（#3780 §3「全島亮完→結尾」）——審查員 2026-10-26 二次審查
+          訂正：原本沿用 `guide` 那個 top-20 置中位置常駐顯示，手機版左欄
+          （標題卡＋劇情說明＋工具列）量到實際高度會長到 y≈263，跟 top-20
+          整個疊在一起（交集 8315px²）。改成全螢幕慶祝層（遮罩＋置中卡片）
+          ——蓋住整個 HUD 本來就是設計上要的效果，不是重疊 bug，不用再去找
+          一個「夾縫」座標。光柱／粒子只播 `finaleBurst` 那 3.6 秒，卡片跟
+          兩顆按鈕常駐到玩家自己關掉或離開。*/}
+      {finaleOpen && module === null && (
+        <div role="dialog" aria-label="結尾慶祝" className="absolute inset-0 z-50 flex items-center justify-center overflow-hidden bg-black/60 p-4">
+          {finaleBurst && (
+            <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
+              <div className="absolute left-1/2 top-0 h-full w-24 -translate-x-1/2 bg-gradient-to-b from-[#fff6da] via-[#ffe3a3]/50 to-transparent animate-[islandFinaleBeam_3.6s_ease-out_forwards]" />
+              {MOTES.map((m, i) => <span key={i} className="absolute h-1.5 w-1.5 rounded-full bg-[#ffe9b8] shadow-[0_0_12px_4px_rgba(255,220,150,0.8)]" style={{ left: `${m.x}%`, bottom: '-4%', animation: `islandFinaleMote ${Math.max(1.8, m.d * 0.5)}s ease-out ${m.delay}s 1` }} />)}
+              <style>{'@keyframes islandFinaleBeam{0%{opacity:0;transform:scaleY(.1)}20%{opacity:1}75%{opacity:1}100%{opacity:0;transform:scaleY(1)}}@keyframes islandFinaleMote{0%{transform:translateY(0);opacity:0}15%{opacity:1}100%{transform:translateY(-105vh) translateX(2vw);opacity:0}}'}</style>
+            </div>
+          )}
+          <div className="relative w-full max-w-sm rounded-3xl border-2 border-amber-200 bg-gradient-to-r from-[#f7d48a] to-[#ffe9b8] p-6 text-center shadow-[0_0_60px_rgba(255,200,90,0.8)]">
+            <p className="text-lg font-black text-[#3b3018]">整座島都亮起來了！</p>
+            <p className="mt-1 text-xs font-semibold text-[#6b5a2e]">{lesson?.title ?? '這篇課文'}，你全部讀完了</p>
+            <div className="mt-4 flex flex-col gap-2">
+              <button type="button" onClick={() => navigate('/game-hub')} className="rounded-full bg-[#244653] px-6 py-3 text-sm font-bold text-white shadow-md active:scale-95">回遊戲區</button>
+              <button type="button" onClick={() => setFinaleOpen(false)} className="rounded-full border border-[#244653]/50 px-6 py-2 text-sm font-bold text-[#244653] active:scale-95">留在島上看看</button>
+            </div>
+          </div>
+        </div>
+      )}
       {fogHint && <div role="status" className="absolute bottom-40 left-1/2 z-20 -translate-x-1/2 rounded-xl border border-white bg-[#f6f7f2]/95 px-5 py-3 font-bold shadow-xl">這裡還沒讀到</div>}
       {error && <div role="alert" className="absolute left-1/2 top-24 z-30 -translate-x-1/2 rounded-xl bg-[#fff1d8] px-4 py-2 text-sm font-bold shadow-lg" onClick={() => setError('')}>{error}</div>}
       <div className="absolute bottom-5 right-5 z-10 hidden rounded-xl border border-white/60 bg-[#f9f5e9]/85 px-3 py-2 text-[11px] font-bold shadow-lg md:block">位置 {position.x.toFixed(0)}, {position.z.toFixed(0)} · 迷霧 {unlockedZone === 0 ? '未散' : '正散開'}</div>

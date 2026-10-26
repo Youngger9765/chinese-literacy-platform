@@ -15,7 +15,7 @@
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-vi.mock('react-router-dom', () => ({ useParams: () => ({ storyId: '20011' }) }));
+vi.mock('react-router-dom', () => ({ useParams: () => ({ storyId: '20011' }), useNavigate: () => vi.fn() }));
 vi.mock('../../../contexts/AuthContext', () => ({
   useAuth: () => ({ token: 'tok', user: { id: 1, roles: [{ role_name: 'student' }] } }),
 }));
