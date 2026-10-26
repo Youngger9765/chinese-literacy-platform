@@ -269,6 +269,24 @@ export default function ReadingIslandLab() {
           <p className="max-w-72 text-xs font-medium text-[#526969] md:text-sm">{lesson?.title ?? ''} · {BABIES.length} 個字詞寶寶藏在島上</p>
           <div className="mt-2 flex items-center gap-2 text-xs font-bold"><span>{doneIndexes.length} / {STOPS.length} 座亮燈</span><span className="h-2 w-20 overflow-hidden rounded-full bg-[#d9dfd5]"><span className="block h-full rounded-full bg-amber-500 transition-all" style={{ width: `${(doneIndexes.length / Math.max(1, STOPS.length)) * 100}%` }} /></span></div>
         </header>
+        {/* 「第一幕」劇情說明——手機版（<768px）第三次訂正：原本是獨立
+            `absolute right-4 top-4`、跟標題卡各佔一角，但展開狀態的卡片
+            `max-w-[calc(100vw-8rem)]` 幾乎吃滿整個寬度，390px 螢幕上
+            右上角一展開就蓋到左上角的標題卡（量到交集 1295~1552px²，課名
+            越長標題卡越高、重疊越大）。跟標題卡、工具列一樣收進同一個
+            flex-col，收合或展開都只會把下面的元素往下推，不會再跟標題卡
+            搶同一塊畫面。桌機/iPad 維持原本右上角常駐卡片，不受影響。*/}
+        <div className="md:hidden">
+          {showActInfo ? (
+            <div aria-label="劇情說明卡" className="relative z-10 max-w-[calc(100vw-8rem)] rounded-2xl border border-white/60 bg-[#233e4b]/90 px-3 py-2 text-left text-xs font-bold text-[#fff1d0] shadow-lg">
+              <button type="button" aria-label="收合劇情說明" onClick={() => setShowActInfo(false)} className="mb-1 text-[10px] font-normal underline underline-offset-2">收合</button>
+              <div>{actInfo.actName} · 發生了什麼</div>
+              <div className="mt-1 text-[10px] text-white/70">自由探索{actInfo.stationNames}</div>
+            </div>
+          ) : (
+            <button type="button" aria-label="展開劇情說明" onClick={() => setShowActInfo(true)} className="relative z-10 rounded-full border border-white/60 bg-[#233e4b]/85 px-3 py-1.5 text-xs font-bold text-[#fff1d0] shadow-lg">{actInfo.actName}</button>
+          )}
+        </div>
         {opening < 0 && (
           <div aria-label="工具列" className="relative z-20 flex flex-col items-start gap-2 md:absolute md:left-7 md:bottom-28">
             {module === null && door === null && !listMode && (
@@ -278,23 +296,8 @@ export default function ReadingIslandLab() {
           </div>
         )}
       </div>
-      {/* 「第一幕」劇情說明卡——手機（<768px）收成一顆小按鈕，點開才看到完整
-          內容；桌機/iPad 維持原本常駐卡片。team-lead 2026-10-26 截圖抓到：
-          390px 寬放不下左上標題卡＋右上這張卡並排，會疊在一起（「國語四上」
-          那行跟標題卡右半邊被蓋住）。收成按鈕而不是搬到標題卡下方，是因為
-          那個位置已經給「清單模式＋聲音」容器用了，疊上去只是換一個地方
-          繼續疊。*/}
-      <div className="md:hidden">
-        {showActInfo ? (
-          <div aria-label="劇情說明卡" className="absolute right-4 top-4 z-10 max-w-[calc(100vw-8rem)] rounded-2xl border border-white/60 bg-[#233e4b]/90 px-3 py-2 text-right text-xs font-bold text-[#fff1d0] shadow-lg">
-            <button type="button" aria-label="收合劇情說明" onClick={() => setShowActInfo(false)} className="mb-1 text-[10px] font-normal underline underline-offset-2">收合</button>
-            <div>{actInfo.actName} · 發生了什麼</div>
-            <div className="mt-1 text-[10px] text-white/70">自由探索{actInfo.stationNames}</div>
-          </div>
-        ) : (
-          <button type="button" aria-label="展開劇情說明" onClick={() => setShowActInfo(true)} className="absolute right-4 top-4 z-10 rounded-full border border-white/60 bg-[#233e4b]/85 px-3 py-1.5 text-xs font-bold text-[#fff1d0] shadow-lg">{actInfo.actName}</button>
-        )}
-      </div>
+      {/* 桌機/iPad 右上角常駐「第一幕」卡片——獨立 DOM 節點，不受上面那層
+          flex-col 影響，維持原本位置不變。*/}
       <div aria-label="劇情說明卡" className="absolute right-4 top-4 z-10 hidden rounded-2xl border border-white/60 bg-[#233e4b]/85 px-3 py-2 text-right text-xs font-bold text-[#fff1d0] shadow-lg md:right-7 md:top-7 md:block md:px-4 md:py-3">
         <div>{actInfo.actName} · 發生了什麼</div><div className="mt-1 text-[10px] text-white/70">自由探索{actInfo.stationNames}</div>
       </div>
