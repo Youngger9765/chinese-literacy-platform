@@ -19,6 +19,13 @@ export interface IslandAudio {
   start(): void;
   cue(name: IslandCue): void;
   setMuted(muted: boolean): void;
+  /** 進關卡（openModule）時呼叫：淡出並暫停環境音（海浪／底墊和弦）。
+   *  原因：學生要專心讀課文，而「重點朗讀」那一關會錄音，背景音樂會被錄進去
+   *  影響朗讀評分（team-lead 2026-10-26 明令）。 */
+  pause(): void;
+  /** 回到島上（returnToIsland）時呼叫：恢復環境音，淡入回「目前的靜音狀態」
+   *  （不是無條件開聲音——學生進關卡前若已設成靜音，恢復後要維持靜音）。 */
+  resume(): void;
   dispose(): void;
 }
 
@@ -120,6 +127,18 @@ export function createIslandAudio(initiallyMuted: boolean): IslandAudio {
     setMuted(next) {
       muted = next;
       if (ctx && master) master.gain.setTargetAtTime(level(), ctx.currentTime, 0.15);
+    },
+    pause() {
+      if (!ctx || !master) return; // 還沒 start() 過，沒東西可暫停
+      master.gain.setTargetAtTime(0, ctx.currentTime, 0.1); // 淡出，比 setMuted 的 0.15 快一點
+      void ctx.suspend();
+    },
+    resume() {
+      if (!ctx || !master) return;
+      void ctx.resume();
+      // level() 讀的是目前的 muted 狀態——學生進關卡前若已靜音，這裡恢復的
+      // 目標值就是 0，不會因為「回島」而把靜音狀態蓋掉。
+      master.gain.setTargetAtTime(level(), ctx.currentTime, 0.1);
     },
     dispose() {
       void ctx?.close();

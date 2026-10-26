@@ -190,13 +190,18 @@ export default function ReadingIslandLab() {
   const openModule = (index: number) => {
     if (!stepFor(index)) { setError('這個平台關卡尚未提供'); return; }
     setDoor(index);
-    audioRef.current?.cue('door');
-    window.setTimeout(() => setModule(index), 1700);
+    audioRef.current?.cue('door'); // 門聲先播——這時 context 還沒暫停
+    // 門真的打開、iframe 出現的時候才暫停環境音（team-lead 2026-10-26 明令）：
+    // 學生要專心讀課文，而「重點朗讀」那一關會錄音，海浪跟底墊和弦被錄進去
+    // 會影響朗讀評分。放在 setModule 同一個 timeout，不要提早到 openModule
+    // 一開始就暫停——提早暫停會連上面那句「door」音效都被 ctx.suspend() 悶掉。
+    window.setTimeout(() => { setModule(index); audioRef.current?.pause(); }, 1700);
     window.setTimeout(() => setDoor(null), 2300);
   };
   const returnToIsland = async (finished = false) => {
     const index = module;
     setModule(null);
+    audioRef.current?.resume(); // 回到島上：恢復環境音（尊重學生目前的靜音狀態）
     const reliable = await refreshProgress();
     if (index !== null && shouldMarkVisitedOnReturn({ finished, reliable })) {
       const step = stepFor(index);

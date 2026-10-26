@@ -58,7 +58,7 @@ const { createIslandWorld } = vi.hoisted(() => ({
 }));
 vi.mock('../island/createIslandWorld', () => ({ createIslandWorld }));
 vi.mock('../island/islandAudio', () => ({
-  createIslandAudio: () => ({ start: vi.fn(), cue: vi.fn(), setMuted: vi.fn(), dispose: vi.fn() }),
+  createIslandAudio: () => ({ start: vi.fn(), cue: vi.fn(), setMuted: vi.fn(), pause: vi.fn(), resume: vi.fn(), dispose: vi.fn() }),
   readMuted: () => false,
   writeMuted: vi.fn(),
 }));
