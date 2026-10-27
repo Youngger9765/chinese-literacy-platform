@@ -53,6 +53,25 @@ describe('fetchMyWordBabies', () => {
     expect(result.fragments_in_wallet).toBe(2);
   });
 
+  it('round-trips a structured-feeding (epic/legendary) baby with a real non-null fed_by_flavor', async () => {
+    // team-lead 2026-10-27: the contract fixture previously only recorded
+    // fed_by_flavor=null (a shared-pool species) — this exercises the actual
+    // non-null shape so the contract test can't silently drift from it.
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => captures.get_my_pets_with_structured_feeding_baby,
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { fetchMyWordBabies } = await import('./wordBabyApi');
+    const result = await fetchMyWordBabies(1, 'tok');
+
+    expect(result.babies).toHaveLength(1);
+    expect(result.babies[0].baby_id).toBe('wb-041');
+    expect(result.babies[0].fed_by_flavor).toEqual({ 語文基礎: 1 });
+  });
+
   it('throws ApiError with the status code on a non-ok response', async () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: false, status: 403, json: async () => ({}) });
     vi.stubGlobal('fetch', fetchMock);

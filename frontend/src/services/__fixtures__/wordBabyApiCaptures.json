@@ -39,6 +39,31 @@
     "weaken_state": "healthy",
     "fed_current_stage": 3
   },
+  "get_my_pets_with_structured_feeding_baby": {
+    "babies": [
+      {
+        "baby_id": "wb-041",
+        "name": "濛濛亮",
+        "rarity": "legendary",
+        "stage_index": 1,
+        "stage_count": 5,
+        "fully_grown": false,
+        "dormant_type": null,
+        "weaken_state": "healthy",
+        "fed_current_stage": 1,
+        "hatch_days_remaining": null,
+        "fed_by_flavor": {
+          "語文基礎": 1
+        }
+      }
+    ],
+    "babies_owned_count": 1,
+    "babies_total_species": 100,
+    "wallet": {
+      "語文基礎": 10
+    },
+    "fragments_in_wallet": 10
+  },
   "feed_baby_404": {
     "status": 404,
     "body": {
