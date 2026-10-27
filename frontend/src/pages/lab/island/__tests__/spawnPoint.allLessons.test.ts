@@ -49,6 +49,7 @@ import {
   isBaseInLowerHalf,
   nearTriggerRadiusForStep,
   selectNearestStation,
+  findCelebrationViewpoint,
   LIGHTHOUSE_ROOF_TOP_Y,
   LIGHTHOUSE_TOWER_BASE_Y,
   MIN_CAMERA_BUILDING_DISTANCE,
@@ -200,6 +201,35 @@ describe('spawnPoint — 全平台 179 課回歸鎖（#3780 P0-2）', () => {
           };
           const selected = selectNearestStation(stops, player, fullyUnlockedZone);
           expect(selected, `第 ${id} 課「${title}」：全區解鎖時站在跨區的「${other.name}」門口卻選到別的站（index ${selected}，應為 ${otherIndex}「${other.name}」）`).toBe(otherIndex);
+        });
+      });
+
+      it('⑧ 慶祝時每一站都找得到一個合法觀景點（不穿進任何其他建築/山丘/出界，視線也沒被第三棟建築擋住）——#3780 三度審查訂正，鎖住「沿玩家→建築直線推」那個真實 bug（17.5% 穿牆／9.4% 穿山丘）', () => {
+        // 玩家位置用出生點代表「從島上某處用清單模式直接開站、沒有真的走
+        // 過去」這個真實觸發場景——原本的 bug 正是在這種「玩家離建築很遠」
+        // 的情況下才會讓直線穿過別的東西。
+        const lighthouseForSpawn = stops.find((s) => s.step === 'lesson-intro') ?? stops[0];
+        const player = computeSpawnFacingLighthouse(lighthouseForSpawn);
+        stops.forEach((target, targetIndex) => {
+          const otherBuildings = stops.filter((_, i) => i !== targetIndex).map((s) => ({ x: s.x, z: s.z }));
+          const zoneCenter = zoneCenters[target.zone];
+          const viewpoint = findCelebrationViewpoint({
+            target: { x: target.x, z: target.z },
+            player: { x: player.x, z: player.z },
+            otherBuildings,
+            hills: hillPositions,
+            zoneCenter,
+          });
+          expect(viewpoint, `第 ${id} 課「${title}」：「${target.name}」找不到任何合法觀景點`).not.toBeNull();
+          if (!viewpoint) return;
+
+          for (const other of otherBuildings) {
+            const d = Math.hypot(viewpoint.x - other.x, viewpoint.z - other.z);
+            expect(d, `第 ${id} 課「${title}」：「${target.name}」的觀景點穿進了別的建築`).toBeGreaterThanOrEqual(MIN_CAMERA_BUILDING_DISTANCE);
+          }
+          expect(isInsideAnyHill(viewpoint.x, viewpoint.z), `第 ${id} 課「${title}」：「${target.name}」的觀景點穿進了山丘碰撞圈`).toBe(false);
+          const withinIsland = Math.hypot(viewpoint.x - zoneCenter.x, viewpoint.z - zoneCenter.z) < zoneCenter.radius - 1;
+          expect(withinIsland, `第 ${id} 課「${title}」：「${target.name}」的觀景點超出島嶼範圍`).toBe(true);
         });
       });
 

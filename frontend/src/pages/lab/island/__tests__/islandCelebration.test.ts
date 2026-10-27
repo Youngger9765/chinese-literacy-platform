@@ -12,6 +12,7 @@ import {
   isHoldComplete,
   diffProgress,
   resolveCelebrationTrigger,
+  celebrationGlowBoost,
   INITIAL_PROGRESS_DIFF_STATE,
 } from '../islandCelebration';
 
@@ -165,5 +166,21 @@ describe('resolveCelebrationTrigger（同一次呼叫一次完成 2 站以上時
 
   it('全部完成（resolvedNextStop 是 null）——不觸發慶祝流程，交給結尾慶祝層處理', () => {
     expect(resolveCelebrationTrigger([3], null)).toBeNull();
+  });
+});
+
+describe('celebrationGlowBoost（慶祝中的建築窗戶要比平常已完成的穩定發光更亮）', () => {
+  it('heavy tier 比 light tier 亮（數值上限更高）', () => {
+    const heavy = celebrationGlowBoost(CELEBRATION_PROFILES.heavy, 0);
+    const light = celebrationGlowBoost(CELEBRATION_PROFILES.light, 0);
+    expect(heavy).toBeGreaterThan(light);
+  });
+
+  it('🔒 兩種分級在任何時間點都要明顯比平常「已完成」的穩定發光值(2.2±0.3)更亮，不然跟平常走近已完成的站沒有視覺差異', () => {
+    const steadyDoneMax = 2.2 + 0.3; // 平常已完成站的穩定發光上限
+    for (const t of [0, 0.3, 0.6, 1, 1.5, 2]) {
+      expect(celebrationGlowBoost(CELEBRATION_PROFILES.heavy, t)).toBeGreaterThan(steadyDoneMax);
+      expect(celebrationGlowBoost(CELEBRATION_PROFILES.light, t)).toBeGreaterThan(steadyDoneMax);
+    }
   });
 });

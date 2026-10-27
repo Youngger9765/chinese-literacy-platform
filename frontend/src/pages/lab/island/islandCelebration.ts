@@ -171,3 +171,18 @@ export function resolveCelebrationTrigger(
   if (newlyDoneIndices.length === 0 || resolvedNextStop === null) return null;
   return { justCompleted: newlyDoneIndices[0], resolvedNextStop };
 }
+
+/**
+ * 慶祝期間讓正在慶祝那棟建築的窗戶材質（`glowMaterials[index]`，emissive
+ * 顏色已經是暖黃色 `0xffd277`，平常「已完成」的穩定發光是
+ * `2.2 + sin(elapsed*3)*0.3`）額外加亮加強——不然「它亮了」這件事只靠
+ * 鏡頭轉過去跟一道白色光柱表示，跟平常走近任何一個已完成的站沒有視覺
+ * 差異（team-lead/Young 2026-10-27 真瀏覽器截圖退件）。heavy tier 比
+ * light tier 明顯更亮、脈動幅度也更大，跟 halo／粒子的分級邏輯一致
+ * （見 `CELEBRATION_PROFILES`）。
+ */
+export function celebrationGlowBoost(profile: CelebrationProfile, elapsed: number): number {
+  const base = profile.tier === 'heavy' ? 6.5 : 3.5;
+  const pulseAmp = profile.tier === 'heavy' ? 1.2 : 0.6;
+  return base + Math.sin(elapsed * 6) * pulseAmp;
+}

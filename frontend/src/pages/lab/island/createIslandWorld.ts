@@ -2,8 +2,8 @@ import * as THREE from 'three';
 import { introProgress, characterPose } from './islandMotion';
 import type { IslandBaby, IslandStop } from './islandTemplate';
 import { isSceneryExcluded } from './islandTemplate';
-import { MIN_CAMERA_BUILDING_DISTANCE, computeSpawnFacingLighthouse, selectNearestStation } from './spawnPoint';
-import { startCelebration, advanceOnTurnConverged, isHoldComplete, diffProgress, resolveCelebrationTrigger, INITIAL_PROGRESS_DIFF_STATE, type CelebrationState, type ProgressDiffState } from './islandCelebration';
+import { MIN_CAMERA_BUILDING_DISTANCE, computeSpawnFacingLighthouse, selectNearestStation, findCelebrationViewpoint, type CelebrationViewpoint } from './spawnPoint';
+import { startCelebration, advanceOnTurnConverged, isHoldComplete, diffProgress, resolveCelebrationTrigger, celebrationGlowBoost, INITIAL_PROGRESS_DIFF_STATE, type CelebrationState, type ProgressDiffState } from './islandCelebration';
 
 interface WorldEvents {
   onNear: (index: number | null) => void;
@@ -408,6 +408,18 @@ export function createIslandWorld(
   // 任何測試能跑到真正的 state machine，退回舊 bug 寫法 1528 條照樣全綠）。
   // `celebration` 為 null 代表現在沒有慶祝在進行。
   let celebration: CelebrationState | null = null;
+  // #3780 P0-3 三度審查訂正：慶祝期間鏡頭要推近到看得清楚那棟建築，但
+  // 玩家可能是從島上任何角落用清單模式直接開站，沒有真的走過去，直接
+  // 沿「玩家→建築」直線推鏡頭有 17.5% 機率穿進別的建築、9.4% 穿進山丘
+  // （真瀏覽器截圖審查抓到）。改成 `setProgress()` 剛開始慶祝那一刻，用
+  // `findCelebrationViewpoint()` 算一次合法的觀景點存起來，之後整段慶祝
+  // 都用這個固定點；找不到合法點就是 null，這時鏡頭只轉頭、不移動
+  // （見下面 `eye` 的計算）。
+  let celebrationViewpoint: CelebrationViewpoint | null = null;
+  // 暫時性除錯開關——只為了驗收「同一鏡頭位置，光暈開 vs 關」兩張對照
+  // 用，只覆蓋窗戶材質發光強度，不影響鏡頭位置／celebration 狀態機。
+  // 驗收截圖拍完就會被要求移除，不是正式功能。
+  let debugGlowOverride: number | null = null;
   // 沿途景色：每一區有自己的天色與霧色（港口海藍 → 山谷翠綠 → 高地金黃）
   const zoneSky = [new THREE.Color('#bcdde6'), new THREE.Color('#cfe6c8'), new THREE.Color('#f1ddb0')];
   const skyNow = new THREE.Color('#bcdde6');
@@ -508,6 +520,7 @@ export function createIslandWorld(
         const finishedIndex = celebration.index;
         const goTo = celebration.pendingNextStop;
         celebration = null;
+        celebrationViewpoint = null;
         nextStop = goTo;
         turnTo = goTo;
         events.onCelebrationEnd?.(finishedIndex, goTo);
@@ -605,7 +618,17 @@ export function createIslandWorld(
       }
       if (mode === 'first') {
         player.visible = false;
-        const eye = new THREE.Vector3(player.position.x, 1.75 + jumping + (length > 0.08 ? Math.sin(elapsed * 11) * 0.05 : 0), player.position.z);
+        // 慶祝期間、找得到合法觀景點時，鏡頭用那個點（不是 player.position）
+        // ——`celebrationViewpoint` 在 setProgress() 開始慶祝那一刻就算好、
+        // 保證不穿牆；找不到合法點（celebrationViewpoint 是 null）就照舊用
+        // player.position，等於這次只轉頭、不移動鏡頭。這不影響
+        // `player.position` 本身，碰撞/遊戲狀態完全不受影響，只影響鏡頭
+        // 實際渲染的位置。
+        const usingViewpoint = celebration !== null && celebrationViewpoint !== null;
+        const eyeX = usingViewpoint ? celebrationViewpoint!.x : player.position.x;
+        const eyeZ = usingViewpoint ? celebrationViewpoint!.z : player.position.z;
+        const eyeExtraHeight = usingViewpoint ? celebrationViewpoint!.extraHeight : 0;
+        const eye = new THREE.Vector3(eyeX, 1.75 + eyeExtraHeight + jumping + (length > 0.08 ? Math.sin(elapsed * 11) * 0.05 : 0), eyeZ);
         const look = new THREE.Vector3(-Math.sin(yaw) * Math.cos(pitch), Math.sin(pitch), -Math.cos(yaw) * Math.cos(pitch));
         const intro = introStart >= 0 ? introProgress(elapsed - introStart, INTRO_SECONDS) : 1;
         if (intro < 1) {
@@ -620,7 +643,11 @@ export function createIslandWorld(
           camera.lookAt(camera.position.clone().add(look));
         }
         xiaoling.scale.copy(XL_FIRST);
-        xiaoling.position.copy(camera.position).add(new THREE.Vector3(Math.cos(yaw) * 1.25 - Math.sin(yaw) * 2.4, -0.55 + Math.sin(elapsed * 3) * 0.08, -Math.sin(yaw) * 1.25 - Math.cos(yaw) * 2.4));
+        // 慶祝期間讓小翎移到畫面側邊、拉遠一點，不要擋在正中央（team-lead
+        // 2026-10-27 退件：她剛好擋在剛完成建築的正中下方）。
+        const xiaolingLateral = celebration ? 2.4 : 1.25;
+        const xiaolingForward = celebration ? 3.1 : 2.4;
+        xiaoling.position.copy(camera.position).add(new THREE.Vector3(Math.cos(yaw) * xiaolingLateral - Math.sin(yaw) * xiaolingForward, -0.55 + Math.sin(elapsed * 3) * 0.08, -Math.sin(yaw) * xiaolingLateral - Math.cos(yaw) * xiaolingForward));
       } else {
         player.visible = true;
         xiaoling.scale.set(0.9, 1.1, 1);
@@ -720,7 +747,12 @@ export function createIslandWorld(
       fog.visible = scale > 0.03;
       fog.rotation.y += dt * 0.015;
     });
-    glowMaterials.forEach((mat, index) => { mat.emissiveIntensity = progressState.completed.includes(index) ? 2.2 + Math.sin(elapsed * 3) * 0.3 : 0; });
+    glowMaterials.forEach((mat, index) => {
+      const baseGlow = progressState.completed.includes(index) ? 2.2 + Math.sin(elapsed * 3) * 0.3 : 0;
+      const celebratingThis = celebration && index === celebration.index;
+      const boosted = celebratingThis ? celebrationGlowBoost(celebration.profile, elapsed) : baseGlow;
+      mat.emissiveIntensity = celebratingThis && debugGlowOverride !== null ? debugGlowOverride : boosted;
+    });
     renderer.render(scene, camera);
   };
   frame = requestAnimationFrame(animate);
@@ -758,6 +790,19 @@ export function createIslandWorld(
         // `onCelebrationEnd`。這是刻意的規則，細節見 islandCelebration.ts
         // `startCelebration` 的註解。
         celebration = startCelebration(justCompleted, content.stops[justCompleted].step, resolvedNextStop);
+        // 慶祝一開始就算好這次要用的觀景點（固定下來，不是每一幀重算）——
+        // 找不到合法點時是 null，animate() 裡的 eye 計算會因此退回「只轉頭、
+        // 不移動鏡頭」，不會硬用一個可能穿牆的位置。
+        const celebratingStop = content.stops[justCompleted];
+        celebrationViewpoint = findCelebrationViewpoint({
+          target: { x: celebratingStop.x, z: celebratingStop.z },
+          player: { x: player.position.x, z: player.position.z },
+          otherBuildings: content.stops
+            .filter((_, index) => index !== justCompleted)
+            .map((stop) => ({ x: stop.x, z: stop.z })),
+          hills: hillPositions,
+          zoneCenter: zoneCenters[celebratingStop.zone],
+        });
         guideUntil = elapsed + 12;
         turnTo = justCompleted;
         events.onCelebrate?.(justCompleted);
@@ -788,6 +833,12 @@ export function createIslandWorld(
       });
       renderer.dispose();
       container.removeChild(renderer.domElement);
+    },
+    // 暫時性除錯開關——只為了驗收「同一鏡頭位置，光暈開 vs 關」兩張對照
+    // 用，只覆蓋窗戶材質發光強度，不影響鏡頭位置／celebration 狀態機。
+    // 驗收截圖拍完就會被要求移除，不是正式功能。
+    __debugSetGlowOverride(value: number | null) {
+      debugGlowOverride = value;
     },
   };
 }

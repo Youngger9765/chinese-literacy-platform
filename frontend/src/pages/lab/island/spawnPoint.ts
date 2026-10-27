@@ -223,3 +223,107 @@ export function selectNearestStation<T extends NearStationCandidate>(
   });
   return closest;
 }
+
+/**
+ * 慶祝期間找一個「看得清楚剛完成的建築、又不會穿進別的東西」的觀景點
+ * ——#3780 P0-3 三度審查訂正（2026-10-27）。
+ *
+ * 第一版直接沿「玩家位置→建築」這條直線把鏡頭往前推到固定觀景距離
+ * （`celebrationEyeOffset`，已移除），這個做法的前提是「玩家跟建築之間
+ * 是空的」——但玩家可能是用清單模式從島的任何一個角落直接開站，完全沒
+ * 有真的走過去，那條直線完全可能穿過其他建築或山丘。真瀏覽器截圖審查
+ * 抓到：179 課全量掃過，17.5% 的「觀景位置」落在別的建築碰撞圈裡、9.4%
+ * 落在山丘碰撞圈裡——這正是 P0-2 修過的「整片米色牆」同一類問題，只是
+ * 這次是慶祝鏡頭自己造成的，不是出生點。
+ *
+ * 正解：不要假設玩家和建築之間是空的，改成在建築**周圍**找一個合法的
+ * 立足點。在建築四周一圈取候選角度（預設每 30°、共 12 個），每個候選
+ * 都用固定的 `viewDistance` 從建築中心往外推，依照「跟玩家所在方向的
+ * 夾角」排序（優先選玩家那一側，轉頭幅度小、比較不違和），取第一個同
+ * 時滿足以下三件事的候選：① 沒有落在任何其他建築的碰撞圈內 ② 沒有落
+ * 在任何山丘的碰撞圈內 ③ 還在這一區島嶼的範圍內（沒有超出海岸線）。
+ * 另外還要檢查「這個觀景點看向建築的視線」中間有沒有被第三棟建築擋到
+ * ——用點到線段距離，候選點到建築的連線跟任何其他建築的距離都要
+ * ≥ `minBuildingDistance` 才算過。
+ *
+ * 找不到任何合法候選時回傳 `null`——呼叫端的規則是「只轉頭，不移動
+ * 鏡頭」，不要退回去用那條有風險的直線（見 `createIslandWorld.ts` 的
+ * `setProgress`）。
+ */
+export const CELEBRATION_VIEW_DISTANCE = 5.5;
+export const CELEBRATION_EXTRA_HEIGHT = 1.6;
+
+export interface CelebrationViewpoint {
+  readonly x: number;
+  readonly z: number;
+  readonly extraHeight: number;
+}
+
+export interface FindCelebrationViewpointInput {
+  readonly target: { readonly x: number; readonly z: number };
+  readonly player: { readonly x: number; readonly z: number };
+  /** 除了正在慶祝的那棟之外，島上其他所有建築的位置——呼叫端自己排除目標本身。 */
+  readonly otherBuildings: ReadonlyArray<{ readonly x: number; readonly z: number }>;
+  readonly hills: ReadonlyArray<readonly [number, number, number]>;
+  readonly zoneCenter: { readonly x: number; readonly z: number; readonly radius: number };
+  readonly minBuildingDistance?: number;
+  readonly viewDistance?: number;
+  readonly angleStepDeg?: number;
+}
+
+function normalizeAngleDiff(angle: number): number {
+  return Math.atan2(Math.sin(angle), Math.cos(angle));
+}
+
+/** 點到線段（a→b）的最短距離——平面幾何，跟 three.js 無關。 */
+function distancePointToSegment(
+  p: { x: number; z: number },
+  a: { x: number; z: number },
+  b: { x: number; z: number },
+): number {
+  const abx = b.x - a.x;
+  const abz = b.z - a.z;
+  const lenSq = abx * abx + abz * abz;
+  if (lenSq === 0) return Math.hypot(p.x - a.x, p.z - a.z);
+  let t = ((p.x - a.x) * abx + (p.z - a.z) * abz) / lenSq;
+  t = Math.max(0, Math.min(1, t));
+  return Math.hypot(p.x - (a.x + t * abx), p.z - (a.z + t * abz));
+}
+
+export function findCelebrationViewpoint(input: FindCelebrationViewpointInput): CelebrationViewpoint | null {
+  const {
+    target,
+    player,
+    otherBuildings,
+    hills,
+    zoneCenter,
+    minBuildingDistance = MIN_CAMERA_BUILDING_DISTANCE,
+    viewDistance = CELEBRATION_VIEW_DISTANCE,
+    angleStepDeg = 30,
+  } = input;
+
+  const playerAngle = Math.atan2(player.x - target.x, player.z - target.z);
+  const steps = Math.max(1, Math.round(360 / angleStepDeg));
+  const angles: number[] = [];
+  for (let i = 0; i < steps; i++) angles.push((i * angleStepDeg * Math.PI) / 180);
+  angles.sort((a, b) => Math.abs(normalizeAngleDiff(a - playerAngle)) - Math.abs(normalizeAngleDiff(b - playerAngle)));
+
+  for (const angle of angles) {
+    const candidate = { x: target.x + Math.sin(angle) * viewDistance, z: target.z + Math.cos(angle) * viewDistance };
+
+    const withinIsland = Math.hypot(candidate.x - zoneCenter.x, candidate.z - zoneCenter.z) < zoneCenter.radius - 1;
+    if (!withinIsland) continue;
+
+    const hitsBuilding = otherBuildings.some((b) => Math.hypot(candidate.x - b.x, candidate.z - b.z) < minBuildingDistance);
+    if (hitsBuilding) continue;
+
+    const hitsHill = hills.some(([hx, hz, hr]) => Math.hypot(candidate.x - hx, candidate.z - hz) < hr * 0.7);
+    if (hitsHill) continue;
+
+    const sightBlocked = otherBuildings.some((b) => distancePointToSegment(b, candidate, target) < minBuildingDistance);
+    if (sightBlocked) continue;
+
+    return { x: candidate.x, z: candidate.z, extraHeight: CELEBRATION_EXTRA_HEIGHT };
+  }
+  return null;
+}
