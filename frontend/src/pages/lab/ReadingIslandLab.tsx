@@ -428,6 +428,12 @@ export default function ReadingIslandLab() {
               <button type="button" aria-label="切換清單模式" onClick={() => setListMode(true)} className="rounded-full border-2 border-white bg-[#233e4b]/90 px-4 py-2 text-sm font-bold text-[#fff1d0] shadow-lg transition hover:scale-105 active:scale-95">清單模式</button>
             )}
             <button type="button" onClick={toggleMuted} className="rounded-full border-2 border-white bg-[#233e4b]/85 px-3 py-1.5 text-xs font-bold text-[#fff1d0] shadow-lg" aria-pressed={muted}>{muted ? '聲音：關' : '聲音：開'}</button>
+            {/* #3780 手機入口（team-lead 2026-10-28）：「文字寶寶」面板的
+                斷點是 md:flex（768px+），768px 以下這裡是唯一入口——跟工具列
+                其他兩顆按鈕共用同一個 flex-col，自動排在它們下面，不疊到
+                搖桿／跳／上帝視角（那些都在畫面另一側，見 islandPanelOverlap
+                .spec.ts 的面板清單）。*/}
+            <button type="button" onClick={() => navigate('/lab/word-babies')} className="rounded-full bg-[#244653] px-3 py-1.5 text-xs font-bold text-white shadow-lg md:hidden">我的寶貝</button>
           </div>
         )}
         {/* 「下一站」/「迷霧散開了」提示——第三次訂正（審查員 2026-10-26）：
@@ -549,7 +555,13 @@ export default function ReadingIslandLab() {
       )}
       {fogHint && <div role="status" className="absolute bottom-40 left-1/2 z-20 -translate-x-1/2 rounded-xl border border-white bg-[#f6f7f2]/95 px-5 py-3 font-bold shadow-xl">這裡還沒讀到</div>}
       {error && <div role="alert" className="absolute left-1/2 top-24 z-30 -translate-x-1/2 rounded-xl bg-[#fff1d8] px-4 py-2 text-sm font-bold shadow-lg" onClick={() => setError('')}>{error}</div>}
-      <aside className="absolute right-4 top-28 z-10 hidden w-28 flex-col gap-1 rounded-2xl border border-white/60 bg-[#f8f3e5]/85 p-2 text-center shadow-lg lg:flex" aria-label="文字寶寶">
+      {/* #3780 手機/平板入口（team-lead 2026-10-28）：這個斷點原本是
+          `lg:flex`（1024px），跟這整個檔案其餘所有響應式元素用的 `md:`
+          （768px）二分法不一致——結果是 768–1023px 之間（iPad 直向 820px
+          正好落在這段）兩邊都看不到：這個面板還沒出現（< lg），手機版的
+          工具列又已經收起（≥ md）。改成跟檔案裡其他地方一致的 `md:flex`，
+          關掉這個落差，不另外疊一顆重複按鈕。*/}
+      <aside className="absolute right-4 top-28 z-10 hidden w-28 flex-col gap-1 rounded-2xl border border-white/60 bg-[#f8f3e5]/85 p-2 text-center shadow-lg md:flex" aria-label="文字寶寶">
         <p className="text-[11px] font-black">文字寶寶</p>
         {BABIES.map((baby) => <div key={baby.name} className="flex items-center gap-1 text-[10px] font-semibold"><img src={`/lab-island/sprites/${baby.art}`} alt="" className={`h-7 w-7 object-contain ${completed.some((step) => step.startsWith('vocab-definition') || step.startsWith('vocab-review')) ? '' : 'grayscale opacity-60'}`} /><span>{baby.name}</span></div>)}
         {/* #3780 接島上（team-lead 2026-10-26）：真正的文字寶貝養成頁
