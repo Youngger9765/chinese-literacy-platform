@@ -85,7 +85,7 @@ describe('FullTextAnnotate — read-only (anonymous QR visitor)', () => {
 
   it('keeps the player out of the bottom action bar', () => {
     // 訪客頁（GuestReadingPage）沒有底部 StepFooterNav，固定動作列會浮在
-    // 半空中 —— 訪客的播放控制跟登入學生一樣在標題下方（#3397）。
+    // 半空中 —— 訪客的播放控制跟登入學生一樣在上方工具列裡（#3397）。
     renderStep(true);
     expect(screen.queryByTestId('step-action-bar')).not.toBeInTheDocument();
     expect(screen.getByTestId('reading-player')).toBeInTheDocument();
@@ -109,14 +109,15 @@ describe('FullTextAnnotate — normal mode (signed-in student)', () => {
   });
 
   it('keeps 播放全文 out of the bottom action bar — only 完成標記 there (#3397)', () => {
-    // mentor：這一步的主題是「做記號」，底部大顆播放鍵＋速度列偏離主題。
-    // 動作列只留主 CTA；播放全文在標題下方。斷言「不在那條列裡」而不是
-    // 「頁面上有」—— 後者搬回去也不會紅。
+    // mentor + owner 追加需求：這一步的主題是「做記號」，底部大顆播放鍵＋速度列
+    // 偏離主題；owner 後來再要求把它收進上方工具列，跟 QR 全文同一列。
+    // 動作列只留主 CTA。斷言「不在那條列裡」而不是「頁面上有」—— 後者搬回去
+    // 也不會紅。
     renderStep(false);
     const bar = screen.getByTestId('step-action-bar');
     expect(bar).toContainElement(screen.getByText('完成標記'));
     expect(bar).not.toContainElement(screen.getByTestId('reading-player'));
-    // 閒置時只有標題下那一顆，沒有浮動播放器
+    // 只有一顆播放器 —— 沒有殘留的浮動播放器或標題下方舊版本
     expect(screen.getAllByTestId('reading-player')).toHaveLength(1);
     expect(screen.queryByTestId('floating-reading-player')).not.toBeInTheDocument();
   });
@@ -126,14 +127,19 @@ describe('FullTextAnnotate — normal mode (signed-in student)', () => {
     const play = screen.getByText('播放全文').closest('button')!;
     expect(play.className).toContain('h-8');
     expect(play.className).not.toContain('h-14');
-    // 速度選擇也跟著縮小
-    const slow = screen.getByRole('button', { name: '朗讀速度 慢' });
-    expect(slow.className).toContain('h-7');
+    expect(play.className).not.toContain('w-44');
+    // 速度選擇收成一顆小按鈕，不是三顆攤開（#3397 第二階段）
+    expect(screen.queryByRole('button', { name: '朗讀速度 慢' })).toBeNull();
+    const speedToggle = screen.getByRole('button', { name: '朗讀速度' });
+    expect(speedToggle.className).toContain('h-8');
   });
 
-  it('sits right under the lesson title', () => {
+  it('sits in the top toolbar row, side by side with QR 全文 (#3397)', () => {
     renderStep(false);
+    const toolbar = screen.getByTestId('full-text-toolbar');
+    expect(toolbar).toContainElement(screen.getByTestId('reading-player'));
+    // 不再跟著標題：toolbar 是 sticky，標題不是它的容器
     const title = screen.getByRole('heading', { level: 1 });
-    expect(title.parentElement).toContainElement(screen.getByTestId('reading-player'));
+    expect(title.parentElement).not.toContainElement(screen.getByTestId('reading-player'));
   });
 });
