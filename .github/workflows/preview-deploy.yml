@@ -53,7 +53,7 @@ jobs:
   deploy-preview:
     name: Deploy PR Preview
     needs: detect-changes
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04  # 這個 job 會裝 Playwright，26.04 不支援
     if: github.event.action != 'closed' && github.event.pull_request.head.ref != 'staging'
 
     steps:

@@ -49,7 +49,7 @@ jobs:
     needs: detect-changes
     if: needs.detect-changes.outputs.relevant == 'true'
     name: Playwright E2E Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04  # Playwright 不支援 ubuntu-latest 現在指向的 26.04
 
     steps:
       - name: Checkout code
