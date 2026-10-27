@@ -472,7 +472,12 @@ export default function ReadingIslandLab() {
         />
       )}
       {mode === 'first' && opening < 0 && module === null && <div className={`pointer-events-none absolute left-1/2 top-1/2 z-10 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 transition ${hovered !== null ? 'scale-150 border-amber-300 bg-amber-200/40' : 'border-white/80'}`} />}
-      {hovered !== null && opening < 0 && module === null && !titleReveal && <div className="pointer-events-none absolute left-1/2 top-[38%] z-20 -translate-x-1/2 animate-pulse rounded-full border-2 border-amber-200 bg-[#233e4b]/90 px-5 py-2 text-lg font-black text-[#ffe9b8] shadow-[0_0_30px_rgba(255,214,120,0.6)]">{STOPS[hovered].name}{doneIndexes.includes(hovered) ? ' ✓' : hovered === nextIndex ? ' · 下一站' : ''}</div>}
+      {/* #3780 P0-3 四度審查訂正：慶祝時鏡頭會推近到觀景點近看剛完成的建築，
+          這塊 2D 浮動標籤原本沒有 `!celebrating` 這個條件，會疊在 3D 站牌
+          （`createIslandWorld.ts` 裡每棟建築自己的 Sprite 牌子）正上方，
+          兩塊文字疊在一起——跟上面「發現新去處」卡片用的是同一條
+          `celebrating` state，加上同一個條件即可。 */}
+      {hovered !== null && opening < 0 && module === null && !titleReveal && !celebrating && <div className="pointer-events-none absolute left-1/2 top-[38%] z-20 -translate-x-1/2 animate-pulse rounded-full border-2 border-amber-200 bg-[#233e4b]/90 px-5 py-2 text-lg font-black text-[#ffe9b8] shadow-[0_0_30px_rgba(255,214,120,0.6)]">{STOPS[hovered].name}{doneIndexes.includes(hovered) ? ' ✓' : hovered === nextIndex ? ' · 下一站' : ''}</div>}
       {/* 結尾慶祝（#3780 §3「全島亮完→結尾」）——審查員 2026-10-26 二次審查
           訂正：原本沿用 `guide` 那個 top-20 置中位置常駐顯示，手機版左欄
           （標題卡＋劇情說明＋工具列）量到實際高度會長到 y≈263，跟 top-20

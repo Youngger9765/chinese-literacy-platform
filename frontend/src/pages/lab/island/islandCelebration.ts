@@ -186,3 +186,20 @@ export function celebrationGlowBoost(profile: CelebrationProfile, elapsed: numbe
   const pulseAmp = profile.tier === 'heavy' ? 1.2 : 0.6;
   return base + Math.sin(elapsed * 6) * pulseAmp;
 }
+
+/** 完成/慶祝時整棟建築共用的暖色——跟原本 `windowMat` 的 emissive 色號一致。 */
+export const CELEBRATION_EMISSIVE_HEX = 0xffd277;
+
+/**
+ * 四度審查訂正：這一棟「現在該不該發光、多亮」的判斷，跟「怎麼把判斷
+ * 結果寫進 three.js 材質」要分開——這支不碰 three.js，純粹把一個強度
+ * 數字轉成「要不要發光＋發多亮」的決定。`intensity <= 0`（沒完成、也
+ * 沒在慶祝）回傳 `null`，請呼叫端（`islandBuildingShapes.ts` 的
+ * `applyBuildingGlow`）把材質還原成它自己建造時的基準值，而不是直接
+ * 設成黑——有些材質（`gold`／聚光閣水晶）本來就帶裝飾性的常態微光，
+ * 那個微光跟「這一站完不完成」無關，不該被這裡的判斷關掉。
+ */
+export function resolveCelebrationGlow(intensity: number): { emissiveHex: number; emissiveIntensity: number } | null {
+  if (intensity <= 0) return null;
+  return { emissiveHex: CELEBRATION_EMISSIVE_HEX, emissiveIntensity: intensity };
+}
