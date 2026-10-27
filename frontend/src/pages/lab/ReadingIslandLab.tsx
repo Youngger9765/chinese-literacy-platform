@@ -188,6 +188,7 @@ export default function ReadingIslandLab() {
       },
     }, { stops: STOPS, babies: BABIES });
     worldRef.current = world;
+    if (typeof window !== 'undefined') (window as unknown as { __islandWorld?: typeof world }).__islandWorld = world;
     return () => {
       world.dispose();
       worldRef.current = null;

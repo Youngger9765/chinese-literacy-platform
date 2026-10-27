@@ -782,5 +782,15 @@ export function createIslandWorld(
       renderer.dispose();
       container.removeChild(renderer.domElement);
     },
+    // 暫時性除錯鉤子——team-lead/Young 2026-10-27 連拍截圖看到鏡頭完全沒有
+    // 轉向剛完成的建築，程式碼靜態審查找不到原因，需要即時觀察內部狀態。
+    // 截圖診斷跑完就會被要求移除，不是正式功能。
+    __debugState() {
+      return {
+        celebration, yaw, turnTo, elapsed, mode, paused,
+        playerX: player.position.x, playerZ: player.position.z,
+        nextStop, travelTarget,
+      };
+    },
   };
 }
