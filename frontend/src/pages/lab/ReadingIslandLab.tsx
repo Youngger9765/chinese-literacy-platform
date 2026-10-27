@@ -466,6 +466,17 @@ export default function ReadingIslandLab() {
       <aside className="absolute right-4 top-28 z-10 hidden w-28 flex-col gap-1 rounded-2xl border border-white/60 bg-[#f8f3e5]/85 p-2 text-center shadow-lg lg:flex" aria-label="文字寶寶">
         <p className="text-[11px] font-black">文字寶寶</p>
         {BABIES.map((baby) => <div key={baby.name} className="flex items-center gap-1 text-[10px] font-semibold"><img src={`/lab-island/sprites/${baby.art}`} alt="" className={`h-7 w-7 object-contain ${completed.some((step) => step.startsWith('vocab-definition') || step.startsWith('vocab-review')) ? '' : 'grayscale opacity-60'}`} /><span>{baby.name}</span></div>)}
+        {/* #3780 接島上（team-lead 2026-10-26）：真正的文字寶貝養成頁
+            （過關拿碎片、餵食、圖鑑）是獨立一支系統，跟這個面板裡的裝飾性
+            字詞寶寶圖示無關——這裡只加一個入口連過去，不把兩者的資料混在
+            一起。 */}
+        <button
+          type="button"
+          onClick={() => navigate('/lab/word-babies')}
+          className="mt-1 rounded-full bg-[#244653] px-2 py-1 text-[10px] font-bold text-white active:scale-95"
+        >
+          我的寶貝
+        </button>
       </aside>
       {coldOpen && (
         <button type="button" onClick={enterIsland} className="absolute inset-0 z-[60] flex flex-col items-center justify-center gap-6 overflow-hidden bg-[#03101c] text-[#f6dca6]" aria-label="點一下，進入喝采島">
