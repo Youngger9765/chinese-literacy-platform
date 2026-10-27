@@ -24,6 +24,9 @@ import {
   isHeightFullyInView,
   isBaseInLowerHalf,
   nearTriggerRadiusForStep,
+  findCelebrationViewpoint,
+  CELEBRATION_VIEW_DISTANCE,
+  CELEBRATION_EXTRA_HEIGHT,
 } from '../spawnPoint';
 
 describe('碰撞不變量（不穿牆）', () => {
@@ -136,5 +139,111 @@ describe('computeSpawnFacingLighthouse', () => {
     const lighthouse = { x: 0, z: 0 };
     const spawn = computeSpawnFacingLighthouse(lighthouse, 10);
     expect(Math.hypot(spawn.x - lighthouse.x, spawn.z - lighthouse.z)).toBeCloseTo(10, 5);
+  });
+});
+
+/**
+ * findCelebrationViewpoint 回歸鎖——#3780 P0-3 三度審查訂正（2026-10-27）。
+ *
+ * 真實 bug：第一版直接沿「玩家→建築」直線把鏡頭推近（`celebrationEyeOffset`，
+ * 已移除），179 課全量掃過，17.5% 的位置落在別的建築碰撞圈裡、9.4% 落在
+ * 山丘碰撞圈裡——玩家可能從島上任何角落用清單模式直接開站，沒有真的走
+ * 過去，那條直線完全可能穿過別的東西。下面這組測試直接還原那個情境：
+ * 把玩家放在「跟建築之間夾著另一棟建築」的位置，驗證這次的做法不會
+ * 像舊寫法一樣直接穿過去。
+ */
+describe('findCelebrationViewpoint（慶祝期間找一個不穿牆的觀景點）', () => {
+  const zoneCenter = { x: 0, z: 0, radius: 30 };
+
+  it('四周完全淨空時，選到跟玩家同一側、距離剛好等於 CELEBRATION_VIEW_DISTANCE 的點', () => {
+    const target = { x: 0, z: 0 };
+    const player = { x: 0, z: 10 }; // 玩家在建築正北邊
+    const viewpoint = findCelebrationViewpoint({
+      target,
+      player,
+      otherBuildings: [],
+      hills: [],
+      zoneCenter,
+    });
+    expect(viewpoint).not.toBeNull();
+    expect(Math.hypot(viewpoint!.x - target.x, viewpoint!.z - target.z)).toBeCloseTo(CELEBRATION_VIEW_DISTANCE, 5);
+    expect(viewpoint!.extraHeight).toBe(CELEBRATION_EXTRA_HEIGHT);
+    // 挑的點應該跟玩家同一側（z 應該是正的，不是躲去建築另一邊）
+    expect(viewpoint!.z).toBeGreaterThan(0);
+  });
+
+  it('🔒 回歸鎖：玩家正前方那一側被另一棟建築擋住時，不能選到那個方向（舊寫法會直接穿過去）', () => {
+    const target = { x: 0, z: 0 };
+    const player = { x: 0, z: 20 }; // 玩家在正北邊，很遠
+    const blockingBuilding = { x: 0, z: CELEBRATION_VIEW_DISTANCE }; // 剛好卡在「沿直線推」會到的那個位置
+    const viewpoint = findCelebrationViewpoint({
+      target,
+      player,
+      otherBuildings: [blockingBuilding],
+      hills: [],
+      zoneCenter,
+    });
+    expect(viewpoint).not.toBeNull();
+    // 不能跟那棟擋路的建築距離太近（不能是同一個位置，也不能穿過去）
+    const distToBlocker = Math.hypot(viewpoint!.x - blockingBuilding.x, viewpoint!.z - blockingBuilding.z);
+    expect(distToBlocker).toBeGreaterThanOrEqual(MIN_CAMERA_BUILDING_DISTANCE);
+  });
+
+  it('山丘擋在玩家那一側時，改選別的角度，不會落在山丘碰撞圈裡', () => {
+    const target = { x: 0, z: 0 };
+    const player = { x: 0, z: 20 };
+    const blockingHill: readonly [number, number, number] = [0, CELEBRATION_VIEW_DISTANCE, 3];
+    const viewpoint = findCelebrationViewpoint({
+      target,
+      player,
+      otherBuildings: [],
+      hills: [blockingHill],
+      zoneCenter,
+    });
+    expect(viewpoint).not.toBeNull();
+    const [hx, hz, hr] = blockingHill;
+    expect(Math.hypot(viewpoint!.x - hx, viewpoint!.z - hz)).toBeGreaterThanOrEqual(hr * 0.7);
+  });
+
+  it('候選點看向建築的視線被第三棟建築擋住時要跳過這個候選', () => {
+    const target = { x: 10, z: 0 };
+    const player = { x: 10, z: 20 };
+    // 這棟建築不在候選點本身的位置，而是卡在「玩家那一側候選點→建築」的連線中間
+    const sightBlocker = { x: 10, z: CELEBRATION_VIEW_DISTANCE / 2 };
+    const viewpoint = findCelebrationViewpoint({
+      target,
+      player,
+      otherBuildings: [sightBlocker],
+      hills: [],
+      zoneCenter,
+    });
+    expect(viewpoint).not.toBeNull();
+    // 驗證選到的點不是玩家正前方那個被擋住的角度（z 應該不會非常接近
+    // player 方向的候選，因為那個候選的視線被擋了）
+    const playerSideCandidate = { x: target.x, z: target.z + CELEBRATION_VIEW_DISTANCE };
+    const isPlayerSideCandidate = Math.hypot(viewpoint!.x - playerSideCandidate.x, viewpoint!.z - playerSideCandidate.z) < 0.01;
+    expect(isPlayerSideCandidate).toBe(false);
+  });
+
+  it('完全被其他建築團團圍住、找不到任何合法候選時回傳 null（呼叫端的規則：這時只轉頭不移動鏡頭）', () => {
+    const target = { x: 0, z: 0 };
+    const player = { x: 0, z: 20 };
+    // 用密集的一圈建築把目標整個包住，12 個候選角度全部命中
+    const otherBuildings = Array.from({ length: 24 }, (_, i) => {
+      const angle = (i * 15 * Math.PI) / 180;
+      return { x: Math.sin(angle) * CELEBRATION_VIEW_DISTANCE, z: Math.cos(angle) * CELEBRATION_VIEW_DISTANCE };
+    });
+    const viewpoint = findCelebrationViewpoint({ target, player, otherBuildings, hills: [], zoneCenter });
+    expect(viewpoint).toBeNull();
+  });
+
+  it('候選點超出島嶼範圍（太靠近海岸線外）時要跳過', () => {
+    const smallZone = { x: 0, z: 0, radius: 6 }; // 半徑只比 CELEBRATION_VIEW_DISTANCE(5.5) 大一點點
+    const target = { x: 0, z: 0 };
+    const player = { x: 0, z: 1 };
+    const viewpoint = findCelebrationViewpoint({ target, player, otherBuildings: [], hills: [], zoneCenter: smallZone });
+    // island radius - 1 = 5，比 CELEBRATION_VIEW_DISTANCE(5.5) 還小，
+    // 理論上所有候選都會超出島嶼範圍
+    expect(viewpoint).toBeNull();
   });
 });

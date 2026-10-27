@@ -2,7 +2,9 @@ import * as THREE from 'three';
 import { introProgress, characterPose } from './islandMotion';
 import type { IslandBaby, IslandStop } from './islandTemplate';
 import { isSceneryExcluded } from './islandTemplate';
-import { MIN_CAMERA_BUILDING_DISTANCE, computeSpawnFacingLighthouse, selectNearestStation } from './spawnPoint';
+import { MIN_CAMERA_BUILDING_DISTANCE, computeSpawnFacingLighthouse, selectNearestStation, findCelebrationViewpoint, type CelebrationViewpoint } from './spawnPoint';
+import { startCelebration, advanceOnTurnConverged, isHoldComplete, diffProgress, resolveCelebrationTrigger, celebrationGlowBoost, resolveCelebrationGlow, INITIAL_PROGRESS_DIFF_STATE, type CelebrationState, type ProgressDiffState } from './islandCelebration';
+import { buildStationGroup, applyBuildingGlow, disposeObjectTree, type BuildingMaterialSlot } from './islandBuildingShapes';
 
 interface WorldEvents {
   onNear: (index: number | null) => void;
@@ -12,6 +14,17 @@ interface WorldEvents {
   onPick?: (index: number) => void;
   onWantFirstPerson?: () => void;
   onArrive?: (index: number) => void;
+  /**
+   * #3780 P0-3：剛完成一站，鏡頭正要轉過去面向它——這時播鐘聲最準
+   * （跟「畫面上燈正在亮起來」同一刻，不是等轉到下一站才響）。
+   */
+  onCelebrate?: (index: number) => void;
+  /**
+   * #3780 P0-3：面向剛完成站的停留時間結束，該顯示「下一站」導引了。
+   * `nextStop` 是 null 代表這是最後一站（全部完成），呼叫端自己決定
+   * 要不要接著播結尾慶祝——這支事件只負責「停留期結束」這件事本身。
+   */
+  onCelebrationEnd?: (index: number, nextStop: number | null) => void;
 }
 
 
@@ -74,12 +87,8 @@ export function createIslandWorld(
   const grass = material(0x769b79);
   const cliff = material(0x69706b);
   const wood = material(0x80634d);
-  const cream = material(0xf1dfb6);
-  const slate = material(0x4b6173);
   const copper = material(0xa66d52);
-  const gold = material(0xe7bb6b, { emissive: 0xc98626, emissiveIntensity: 0.12 });
   const water = material(0x4596ac, { metalness: 0.2, roughness: 0.32 });
-  const glowMaterials: THREE.MeshStandardMaterial[] = [];
   const add = (parent: THREE.Object3D, geometry: THREE.BufferGeometry, mat: THREE.Material, x = 0, y = 0, z = 0) => {
     const mesh = new THREE.Mesh(geometry, mat);
     mesh.position.set(x, y, z);
@@ -186,132 +195,34 @@ export function createIslandWorld(
   const buildingGroups: THREE.Group[] = [];
   const halos: THREE.Mesh[] = [];
   const lighthouseBeams: THREE.Group[] = [];
+  // #3780 P0-3 四度審查訂正（2026-10-27）：慶祝時「整棟建築」要有可見的
+  // 點亮變化，不能只靠單一個 `windowMat`——15 種建築類型裡，只有港口燈塔
+  // 跟星空瞭望台（走最後這個 `else` 分支）的幾何真的有用到 `windowMat`，
+  // 其餘 13 種（包含 heavy tier 幾乎全部）從來沒有任何一塊網格引用它，
+  // 不管把它的發光強度調多高，畫面上都沒有東西會變亮——這也是「已完成
+  // 穩定發光」這個舊功能對這 13 種類型一直沒有效果的同一個根因。
+  //
+  // 正解：建築的幾何＋材質蒐集抽到 `islandBuildingShapes.ts` 的
+  // `buildStationGroup()`（純函式，不經過這個 three.js renderer 閉包也能
+  // 單獨呼叫）——每棟建築的每一塊網格材質都 clone 一份（不共用模組層級
+  // 的 `cream`/`slate`/`copper`/`gold`，否則調亮一棟會連帶調亮全島同色系
+  // 的其他建築），`perBuildingMaterials[index]` 存著「這一棟真正在用的
+  // 所有材質」，之後要加亮／復原直接對這個陣列呼叫 `applyBuildingGlow`，
+  // 不管這一棟內部用了哪些具名變數、走哪個 `step` 分支。
+  const perBuildingMaterials: BuildingMaterialSlot[][] = [];
   content.stops.forEach((stop, i) => {
-    const root = new THREE.Group();
+    const built = buildStationGroup(stop, sand);
+    const root = built.root;
     root.position.set(stop.x, 0.42, stop.z);
     root.userData.zone = stop.zone;
     root.userData.index = i;
     scene.add(root);
     buildingGroups.push(root);
     zonedThings.push(root);
-    const halo = new THREE.Mesh(new THREE.TorusGeometry(2.1, 0.09, 8, 48), new THREE.MeshBasicMaterial({ color: 0xffe2a0, transparent: true, opacity: 0, depthWrite: false }));
-    halo.rotation.x = Math.PI / 2;
-    halo.position.y = 0.25;
-    root.add(halo);
-    halos.push(halo);
-    cylinder(root, 1.65, 1.8, 0.2, sand, 0, 0.06);
-    const windowMat = material(0x69858a, { emissive: 0xffd277, emissiveIntensity: 0 });
-    glowMaterials.push(windowMat);
-    if (stop.step === 'lesson-intro') {
-      cylinder(root, 0.72, 1.16, 4.9, cream, 0, 2.55);
-      cylinder(root, 1.05, 1.05, 0.3, copper, 0, 5.05);
-      cylinder(root, 0.95, 0.95, 1.05, windowMat, 0, 5.63);
-      // 燈塔光束：錐尖在燈室、開口朝外，繞塔順時針轉（從上往下看）
-      const beamPivot = new THREE.Group();
-      beamPivot.position.set(0, 5.63, 0);
-      beamPivot.userData.lighthouseBeam = true;
-      root.add(beamPivot);
-      const beamGeo = new THREE.ConeGeometry(0.9, 7, 20, 1, true);
-      beamGeo.translate(0, -3.5, 0);
-      beamGeo.rotateZ(Math.PI / 2);
-      const beamMesh = new THREE.Mesh(beamGeo, new THREE.MeshBasicMaterial({ color: 0xfff1c2, transparent: true, opacity: 0.1, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending }));
-      beamPivot.add(beamMesh);
-      lighthouseBeams.push(beamPivot);
-      cone(root, 1.18, 1.05, slate, 0, 6.7);
-      for (let j = 0; j < 4; j++) box(root, 0.18, 1.65, 0.18, copper, Math.cos(j * Math.PI / 2) * 0.75, 5.64, Math.sin(j * Math.PI / 2) * 0.75);
-    } else if (stop.step === 'full-text-annotate') {
-      for (let j = -2; j <= 2; j++) {
-        cylinder(root, 0.15, 0.18, 3.1, cream, j * 0.72, 1.65);
-        const scroll = cylinder(root, 0.34, 0.34, 2.5, j % 2 ? copper : gold, j * 0.72, 2.18, -0.55, 12);
-        scroll.rotation.z = Math.PI / 2;
-      }
-      box(root, 4.1, 0.35, 2.2, slate, 0, 3.3);
-      for (let j = -2; j <= 2; j++) box(root, 0.45, 0.26, 2.5, gold, j * 0.72, 3.55);
-    } else if (stop.step === 'key-passage-reading') {
-      for (let row = 0; row < 4; row++) {
-        const arc = add(root, new THREE.TorusGeometry(1.25 + row * 0.34, 0.12, 5, 24, Math.PI), row % 2 ? copper : cream, 0, 0.22 + row * 0.42, -row * 0.22);
-        arc.rotation.x = Math.PI / 2;
-      }
-      box(root, 1.4, 2.2, 0.3, slate, 0, 1.2, -1.6);
-      add(root, new THREE.TorusGeometry(0.47, 0.12, 8, 18), gold, 0, 2.3, -1.36);
-    } else if (stop.step === 'vocab-definition') {
-      cylinder(root, 1.4, 1.6, 2, cream, 0, 1.1, 0, 8);
-      for (let j = 0; j < 8; j++) {
-        const a = j * Math.PI / 4;
-        box(root, 0.18, 2.9, 0.16, copper, Math.sin(a) * 1.24, 1.55, Math.cos(a) * 1.24).rotation.y = a;
-      }
-      cone(root, 1.8, 1.6, slate, 0, 2.9);
-      add(root, new THREE.TorusGeometry(0.42, 0.11, 8, 20), gold, 0, 2.25, 1.45);
-    } else if (stop.step === 'vocab-application') {
-      box(root, 3.3, 1.9, 2.2, cream, 0, 1.05);
-      const roof = box(root, 3.8, 0.28, 2.7, copper, 0, 2.2);
-      roof.rotation.z = -0.15;
-      cylinder(root, 0.35, 0.4, 3.2, slate, 0.9, 3.15, -0.4);
-      add(root, new THREE.TorusGeometry(0.45, 0.13, 8, 18), gold, -0.85, 2.8, 0.9);
-      box(root, 1.1, 0.12, 0.65, wood, -0.6, 0.95, 1.5);
-    } else if (stop.step === 'keypoints-table') {
-      cylinder(root, 1.2, 1.6, 3.6, cream, 0, 1.9, 0, 6);
-      cone(root, 1.5, 1.5, slate, 0, 4.45);
-      for (let j = 0; j < 4; j++) box(root, 0.8, 0.12, 0.95, gold, Math.cos(j * Math.PI / 2) * 1.1, 2.35 + j * 0.25, Math.sin(j * Math.PI / 2) * 1.1).rotation.y = j * Math.PI / 2;
-    } else if (stop.step === 'comprehension') {
-      for (let j = -2; j <= 2; j++) cylinder(root, 0.17, 0.2, 3.2, cream, j * 0.7, 1.65, -0.5);
-      box(root, 4, 0.35, 2.6, slate, 0, 3.38, -0.5);
-      cone(root, 1.3, 1.9, gold, 0, 4.3, -0.5);
-      for (let j = 0; j < 4; j++) cylinder(root, 0.23, 0.3, 0.7 + j * 0.15, copper, -1.2 + j * 0.8, 0.4, 1.25);
-    } else if (stop.step === 'vocab-review') {
-      for (let j = -2; j <= 2; j++) {
-        cylinder(root, 0.09, 0.11, 1.4, wood, j * 0.73, 0.7);
-        add(root, new THREE.IcosahedronGeometry(0.48, 1), j % 2 ? gold : material(0x9bbaa1), j * 0.73, 1.65);
-      }
-      add(root, new THREE.TorusGeometry(1.6, 0.1, 7, 18, Math.PI), cream, 0, 0.65, -0.9).rotation.x = Math.PI / 2;
-    } else if (stop.step === 'knowledge-station') {
-      cylinder(root, 0.5, 0.7, 3.5, wood, 0, 1.8);
-      for (let j = 0; j < 3; j++) add(root, new THREE.IcosahedronGeometry(1.25, 1), grass, (j - 1) * 0.6, 3.4 + (j % 2) * 0.5);
-      box(root, 2.5, 1.3, 1.8, cream, 0, 4.1);
-      cone(root, 1.7, 1.2, copper, 0, 5.35);
-      box(root, 0.22, 3.5, 0.22, wood, 1.25, 2.2, 0.9);
-    } else if (stop.step === 'spotlight') {
-      // 聚光閣：一座石塔，頂端是會發光的水晶燈籠（呼應「閱讀聚光燈」這個 step 的名字）
-      cylinder(root, 0.55, 0.85, 3.6, slate, 0, 1.9, 0, 8);
-      cylinder(root, 0.7, 0.7, 0.9, copper, 0, 3.85);
-      add(root, new THREE.IcosahedronGeometry(0.62, 1), material(0x8fd9c4, { emissive: 0x3fae92, emissiveIntensity: 0.4 }), 0, 4.6);
-      cone(root, 0.95, 0.9, gold, 0, 5.25);
-    } else if (stop.step === 'classical-text') {
-      // 原文閣：雙層攢尖頂的小閣樓，讀文言文原文的地方
-      cylinder(root, 1.3, 1.6, 3, cream, 0, 1.6, 0, 8);
-      cone(root, 1.9, 1.3, copper, 0, 3.6);
-      cylinder(root, 0.45, 0.6, 1.4, slate, 0, 4.4, 0, 8);
-      cone(root, 0.9, 1.0, gold, 0, 5.3);
-    } else if (stop.step === 'classical-sentence-matching') {
-      // 對句碑林：五座高低不一的石碑排成一列，找句子對應用的
-      for (let j = -2; j <= 2; j++) {
-        box(root, 0.5, 2.2 + Math.abs(j) * 0.3, 0.22, slate, j * 0.85, 1.1 + Math.abs(j) * 0.15);
-        box(root, 0.58, 0.22, 0.3, cream, j * 0.85, 0.11);
-      }
-      add(root, new THREE.TorusGeometry(0.4, 0.1, 8, 16), gold, 0, 2.6, 0);
-    } else if (stop.step === 'classical-word-matching') {
-      // 字牌亭：四根柱子撐起一片平頂，前後各掛一塊牌匾
-      box(root, 2.6, 0.18, 2.6, copper, 0, 2.6);
-      [[-1.1, -1.1], [1.1, -1.1], [-1.1, 1.1], [1.1, 1.1]].forEach(([dx, dz]) => cylinder(root, 0.13, 0.15, 2.5, wood, dx, 1.3, dz));
-      box(root, 0.5, 0.9, 0.08, gold, 0, 1.6, 1.3);
-      box(root, 0.5, 0.9, 0.08, gold, 0, 1.6, -1.3);
-    } else if (stop.step === 'classical-self-challenge') {
-      // 挑戰擂台：圓形高台加四支旗桿，自我挑戰題用的
-      cylinder(root, 2.1, 2.3, 0.6, slate, 0, 0.42, 0, 16);
-      for (let j = 0; j < 4; j++) {
-        const a = j * Math.PI / 2;
-        cylinder(root, 0.08, 0.1, 2.6, wood, Math.sin(a) * 1.9, 1.5, Math.cos(a) * 1.9);
-        box(root, 0.5, 0.7, 0.04, gold, Math.sin(a) * 1.9, 2.6, Math.cos(a) * 1.9).rotation.y = a;
-      }
-    } else {
-      cylinder(root, 0.9, 1.25, 4.4, slate, 0, 2.3, 0, 8);
-      cylinder(root, 1.75, 1.75, 0.22, cream, 0, 4.55);
-      for (let j = 0; j < 8; j++) {
-        const a = j * Math.PI / 4;
-        cylinder(root, 0.1, 0.1, 0.85, gold, Math.sin(a) * 1.35, 5.05, Math.cos(a) * 1.35);
-      }
-      add(root, new THREE.IcosahedronGeometry(0.48, 1), windowMat, 0, 5.45);
-    }
+    halos.push(built.halo);
+    if (built.lighthouseBeam) lighthouseBeams.push(built.lighthouseBeam);
+    perBuildingMaterials.push(built.materials);
+
     const signCanvas = document.createElement('canvas');
     signCanvas.width = 512;
     signCanvas.height = 100;
@@ -334,6 +245,12 @@ export function createIslandWorld(
     sign.position.set(0, stop.step === 'lesson-intro' ? 7.8 : stop.step === 'report' ? 6.2 : 4.5, 0);
     root.add(sign);
   });
+  // #3780 P0-3 四度審查訂正：底部光暈環在慶祝時除了既有的脈動（見下面
+  // animate() 裡的 pulseAmp），底座本身也要放大，當「整棟建築發光」之外
+  // 的第二層回饋——原本脈動是繞著 1 倍振幅擺動，放大感很弱。這裡另外存一條
+  // 「目前的底座縮放」陣列，每幀平滑地往目標值靠近（跟 `mat.opacity` 的
+  // 平滑手法一樣），不是慶祝一開始就瞬間跳到放大後的尺寸。
+  const haloBaseScale = halos.map(() => 1);
 
   const textureLoader = new THREE.TextureLoader();
   const sprite = (url: string, width: number, height: number) => {
@@ -364,6 +281,17 @@ export function createIslandWorld(
     scene.add(dot);
     return dot;
   });
+  // #3780 P0-3：剛完成一站的慶祝粒子——跟上面 `trailDots`（指向下一站的
+  // 引導光點）分開成獨立的一池，兩者職責不同時可能同時需要顯示（剛點亮
+  // 的站還在慶祝，同時已經知道下一站在哪），不能共用同一組物件互搶。
+  // 數量取 heavy tier 的上限（見 islandCelebration.ts），light tier 時
+  // 多出來的那些維持 invisible。
+  const celebrationParticles = Array.from({ length: 18 }, () => {
+    const dot = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 6), new THREE.MeshBasicMaterial({ color: 0xfff1c2, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }));
+    dot.visible = false;
+    scene.add(dot);
+    return dot;
+  });
   const raycaster = new THREE.Raycaster();
   const pointerNdc = new THREE.Vector2(0, 0);
   let mode: ViewMode = 'first';
@@ -378,6 +306,25 @@ export function createIslandWorld(
   let guideUntil = 0;
   let turnTo: number | null = null;
   let travelTarget: number | null = null;
+  // #3780 P0-3：回島先面向剛完成的站，停留夠了才轉向下一站。三段式狀態
+  // 機（'turning' 轉去剛完成的站 → 'turnTo 收斂' → 'holding' 才開始算
+  // 停留秒數）本身是不碰 three.js/WebGL 的純函式，見 islandCelebration.ts
+  // 檔頭註解（二次審查訂正：第一版把這三個狀態攤開寫在這個閉包裡，沒有
+  // 任何測試能跑到真正的 state machine，退回舊 bug 寫法 1528 條照樣全綠）。
+  // `celebration` 為 null 代表現在沒有慶祝在進行。
+  let celebration: CelebrationState | null = null;
+  // #3780 P0-3 三度審查訂正：慶祝期間鏡頭要推近到看得清楚那棟建築，但
+  // 玩家可能是從島上任何角落用清單模式直接開站，沒有真的走過去，直接
+  // 沿「玩家→建築」直線推鏡頭有 17.5% 機率穿進別的建築、9.4% 穿進山丘
+  // （真瀏覽器截圖審查抓到）。改成 `setProgress()` 剛開始慶祝那一刻，用
+  // `findCelebrationViewpoint()` 算一次合法的觀景點存起來，之後整段慶祝
+  // 都用這個固定點；找不到合法點就是 null，這時鏡頭只轉頭、不移動
+  // （見下面 `eye` 的計算）。
+  let celebrationViewpoint: CelebrationViewpoint | null = null;
+  // 暫時性除錯開關——只為了驗收「同一鏡頭位置，光暈開 vs 關」兩張對照
+  // 用，現在覆蓋的是整棟建築的發光強度（原本只覆蓋單一窗戶材質）。
+  // 驗收截圖拍完就會在下一批被要求移除，不是正式功能。
+  let debugGlowOverride: number | null = null;
   // 沿途景色：每一區有自己的天色與霧色（港口海藍 → 山谷翠綠 → 高地金黃）
   const zoneSky = [new THREE.Color('#bcdde6'), new THREE.Color('#cfe6c8'), new THREE.Color('#f1ddb0')];
   const skyNow = new THREE.Color('#bcdde6');
@@ -398,7 +345,7 @@ export function createIslandWorld(
   });
 
   let unlockedZone = 0;
-  let completed: number[] = [];
+  let progressState: ProgressDiffState = INITIAL_PROGRESS_DIFF_STATE;
   let keyDirection = { x: 0, z: 0 };
   let stickDirection = { x: 0, z: 0 };
   let yaw = spawnPoint.yaw; // #3780 P0-2：一上岸就面向燈塔，不用自己轉頭找
@@ -470,6 +417,19 @@ export function createIslandWorld(
     last = now;
     elapsed += dt;
     if (!paused) {
+      // #3780 P0-3：停留期結束才轉向下一站——這段要在 turnTo 的轉頭邏輯
+      // 之前跑，這樣同一幀內 turnTo 改指到新目標時，下面的轉頭插值立刻
+      // 就會用新值，不會晚一幀才反應。`isHoldComplete` 是不碰 three.js 的
+      // 純函式（見 islandCelebration.ts），'turning' 階段永遠回傳 false。
+      if (celebration && isHoldComplete(celebration, elapsed)) {
+        const finishedIndex = celebration.index;
+        const goTo = celebration.pendingNextStop;
+        celebration = null;
+        celebrationViewpoint = null;
+        nextStop = goTo;
+        turnTo = goTo;
+        events.onCelebrationEnd?.(finishedIndex, goTo);
+      }
       keyDirection = { x: Number(keys.has('d') || keys.has('arrowright')) - Number(keys.has('a') || keys.has('arrowleft')), z: Number(keys.has('s') || keys.has('arrowdown')) - Number(keys.has('w') || keys.has('arrowup')) };
       const dx = keyDirection.x + stickDirection.x;
       const dz = keyDirection.z + stickDirection.z;
@@ -553,9 +513,27 @@ export function createIslandWorld(
         yaw += diff * Math.min(1, dt * 2.2);
         if (Math.abs(diff) < 0.02) turnTo = null;
       }
+      // 轉到剛完成的站了（turnTo 剛被收斂成 null），這時候才真正開始算
+      // 停留秒數——不管玩家離那棟建築多遠、要轉多大的角度，分級秒數保證
+      // 從「鏡頭已經正對著它」那一刻才起算。`advanceOnTurnConverged` 在
+      // 已經是 'holding' 時是 no-op，重複呼叫（每一幀 turnTo 收斂後都會
+      // 符合這個條件）不會把停留時間往後挪。
+      if (celebration && celebration.phase === 'turning' && turnTo === null) {
+        celebration = advanceOnTurnConverged(celebration, elapsed);
+      }
       if (mode === 'first') {
         player.visible = false;
-        const eye = new THREE.Vector3(player.position.x, 1.75 + jumping + (length > 0.08 ? Math.sin(elapsed * 11) * 0.05 : 0), player.position.z);
+        // 慶祝期間、找得到合法觀景點時，鏡頭用那個點（不是 player.position）
+        // ——`celebrationViewpoint` 在 setProgress() 開始慶祝那一刻就算好、
+        // 保證不穿牆；找不到合法點（celebrationViewpoint 是 null）就照舊用
+        // player.position，等於這次只轉頭、不移動鏡頭。這不影響
+        // `player.position` 本身，碰撞/遊戲狀態完全不受影響，只影響鏡頭
+        // 實際渲染的位置。
+        const usingViewpoint = celebration !== null && celebrationViewpoint !== null;
+        const eyeX = usingViewpoint ? celebrationViewpoint!.x : player.position.x;
+        const eyeZ = usingViewpoint ? celebrationViewpoint!.z : player.position.z;
+        const eyeExtraHeight = usingViewpoint ? celebrationViewpoint!.extraHeight : 0;
+        const eye = new THREE.Vector3(eyeX, 1.75 + eyeExtraHeight + jumping + (length > 0.08 ? Math.sin(elapsed * 11) * 0.05 : 0), eyeZ);
         const look = new THREE.Vector3(-Math.sin(yaw) * Math.cos(pitch), Math.sin(pitch), -Math.cos(yaw) * Math.cos(pitch));
         const intro = introStart >= 0 ? introProgress(elapsed - introStart, INTRO_SECONDS) : 1;
         if (intro < 1) {
@@ -570,7 +548,11 @@ export function createIslandWorld(
           camera.lookAt(camera.position.clone().add(look));
         }
         xiaoling.scale.copy(XL_FIRST);
-        xiaoling.position.copy(camera.position).add(new THREE.Vector3(Math.cos(yaw) * 1.25 - Math.sin(yaw) * 2.4, -0.55 + Math.sin(elapsed * 3) * 0.08, -Math.sin(yaw) * 1.25 - Math.cos(yaw) * 2.4));
+        // 慶祝期間讓小翎移到畫面側邊、拉遠一點，不要擋在正中央（team-lead
+        // 2026-10-27 退件：她剛好擋在剛完成建築的正中下方）。
+        const xiaolingLateral = celebration ? 2.4 : 1.25;
+        const xiaolingForward = celebration ? 3.1 : 2.4;
+        xiaoling.position.copy(camera.position).add(new THREE.Vector3(Math.cos(yaw) * xiaolingLateral - Math.sin(yaw) * xiaolingForward, -0.55 + Math.sin(elapsed * 3) * 0.08, -Math.sin(yaw) * xiaolingLateral - Math.cos(yaw) * xiaolingForward));
       } else {
         player.visible = true;
         xiaoling.scale.set(0.9, 1.1, 1);
@@ -596,11 +578,53 @@ export function createIslandWorld(
     if (found !== hovered) { hovered = found; events.onHover?.(found); }
     halos.forEach((halo, index) => {
       const mat = halo.material as THREE.MeshBasicMaterial;
-      const on = index === hovered || index === near;
-      mat.opacity += ((on ? 0.95 : index === nextStop ? 0.45 : 0) - mat.opacity) * Math.min(1, dt * 8);
-      halo.scale.setScalar(1 + (on ? 0.12 * Math.sin(elapsed * 6) : 0.04 * Math.sin(elapsed * 2)));
+      // #3780 P0-3：正在慶祝的站優先於 hover/near/nextStop 的一般規則——
+      // 回應強度跟花的力氣成正比，heavy tier 比 light tier 亮、脈動幅度
+      // 也更大（「燈亮」那部分）。
+      if (celebration && index === celebration.index) {
+        const targetOpacity = celebration.profile.tier === 'heavy' ? 1 : 0.75;
+        mat.opacity += (targetOpacity - mat.opacity) * Math.min(1, dt * 10);
+        const pulseAmp = celebration.profile.tier === 'heavy' ? 0.3 : 0.16;
+        // 底座放大（跟整棟建築發光是分開的第二層回饋）：heavy 放大到 1.6
+        // 倍、light 到 1.3 倍，平滑靠近而不是瞬間跳變。
+        const targetBaseScale = celebration.profile.tier === 'heavy' ? 1.6 : 1.3;
+        haloBaseScale[index] += (targetBaseScale - haloBaseScale[index]) * Math.min(1, dt * 8);
+        halo.scale.setScalar(haloBaseScale[index] + pulseAmp * Math.sin(elapsed * 7));
+      } else {
+        const on = index === hovered || index === near;
+        mat.opacity += ((on ? 0.95 : index === nextStop ? 0.45 : 0) - mat.opacity) * Math.min(1, dt * 8);
+        haloBaseScale[index] += (1 - haloBaseScale[index]) * Math.min(1, dt * 8);
+        halo.scale.setScalar(haloBaseScale[index] + (on ? 0.12 * Math.sin(elapsed * 6) : 0.04 * Math.sin(elapsed * 2)));
+      }
       buildingGroups[index].scale.setScalar(1 + (index === hovered ? 0.035 : 0));
     });
+    // #3780 P0-3：慶祝粒子——從剛完成那一站的地基往上、往外飄散，停留期
+    // 結束前淡出；數量跟擴散範圍依 tier 而定（heavy 比 light 多更大）。
+    if (celebration) {
+      // 捕進區塊內的 const——`celebration` 是外層 `let`，forEach 的 callback
+      // 是另一個函式邊界，TS 不會幫忙把外層的 null 檢查窄化帶進去。
+      const cel = celebration;
+      const stop = content.stops[cel.index];
+      const progress = cel.phase === 'holding'
+        ? 1 - Math.max(0, cel.holdUntil - elapsed) / cel.profile.holdSeconds
+        : 0;
+      celebrationParticles.forEach((dot, k) => {
+        const isActive = k < cel.profile.particleCount;
+        dot.visible = isActive;
+        if (!isActive) return;
+        const angle = (k / cel.profile.particleCount) * Math.PI * 2 + elapsed * 1.6;
+        const radius = 1.1 + progress * 2.3;
+        dot.position.set(
+          stop.x + Math.cos(angle) * radius,
+          1.7 + progress * 2.6 + Math.sin(elapsed * 3 + k) * 0.1,
+          stop.z + Math.sin(angle) * radius,
+        );
+        (dot.material as THREE.MeshBasicMaterial).opacity = Math.max(0, 1 - progress) * 0.9;
+        dot.scale.setScalar(0.5 + (1 - progress) * 0.5);
+      });
+    } else {
+      celebrationParticles.forEach((dot) => { dot.visible = false; });
+    }
     // 下一關的引導光柱與光點
     if (nextStop !== null && content.stops[nextStop].zone <= unlockedZone) {
       const target = content.stops[nextStop];
@@ -633,18 +657,74 @@ export function createIslandWorld(
       fog.visible = scale > 0.03;
       fog.rotation.y += dt * 0.015;
     });
-    glowMaterials.forEach((mat, index) => { mat.emissiveIntensity = completed.includes(index) ? 2.2 + Math.sin(elapsed * 3) * 0.3 : 0; });
+    // 四度審查訂正：對「這一棟真正在用的所有材質」套用，不是單一個
+    // windowMat——`resolveCelebrationGlow`（islandCelebration.ts）是不碰
+    // three.js 的純函式，吃一個 intensity 數字，判斷這一刻該不該發光／
+    // 多亮；`applyBuildingGlow`（islandBuildingShapes.ts）才是真的把結果
+    // 寫進材質那一步，兩邊都各自可以離線測試。
+    perBuildingMaterials.forEach((mats, index) => {
+      const baseGlow = progressState.completed.includes(index) ? 2.2 + Math.sin(elapsed * 3) * 0.3 : 0;
+      const celebratingThis = celebration && index === celebration.index;
+      const boosted = celebratingThis ? celebrationGlowBoost(celebration.profile, elapsed) : baseGlow;
+      const intensity = celebratingThis && debugGlowOverride !== null ? debugGlowOverride : boosted;
+      applyBuildingGlow(mats, resolveCelebrationGlow(intensity));
+    });
     renderer.render(scene, camera);
   };
   frame = requestAnimationFrame(animate);
   return {
     setProgress(nextZone: number, done: number[]) {
-      const newlyDone = done.length > completed.length;
+      // #3780 P0-3：原本「有新完成就直接轉向下一站」——鏡頭轉走的那一刻，
+      // 剛點亮的站已經不在畫面裡了。改成先轉過去面向剛完成的那一站，停留
+      // `celebrationProfileForStep()` 算出來的秒數（依這一站的份量分輕重），
+      // 停留期一到才真的轉去下一站（見 animate() 開頭的停留期結束檢查）。
+      //
+      // 三次審查訂正：`diffProgress` 把第一次呼叫（不管內容）當既有基準
+      // 接受，不產生 newlyDoneIndices——避免世界剛建立時把學生之前就做完
+      // 的站誤判成「剛完成」，安靜播一次玩家沒看到的假慶祝、把 turnTo 轉
+      // 掉，害真正的慶祝看起來像沒有轉向（見 islandCelebration.ts 的
+      // `diffProgress` 註解）。
+      const { nextState, newlyDoneIndices } = diffProgress(progressState, done);
+      progressState = nextState;
       unlockedZone = nextZone;
-      completed = done;
       const next = content.stops.findIndex((_, index) => !done.includes(index));
-      nextStop = next < 0 ? null : next;
-      if (newlyDone && nextStop !== null) { guideUntil = elapsed + 12; turnTo = nextStop; }
+      const resolvedNextStop = next < 0 ? null : next;
+      // #3780 P0-3：全部完成（resolvedNextStop === null）是最後一站——這裡
+      // 沒有「下一站」好轉過去，原本的 bug（鏡頭轉去下一站、剛點亮的站
+      // 不在畫面裡）本來就不會發生在這一格。全螢幕結尾慶祝層另有一條
+      // 已經很小心去重過的 effect 在管（ReadingIslandLab.tsx 的
+      // justCompletedWithinSession／justMountedAlreadyDone 判斷），自己
+      // 會播 chime／開全螢幕 burst；這裡如果也跟著觸發 onCelebrate 播一次
+      // chime，會在同一刻重複響兩次。所以只有「還有下一站」時才進入慶祝
+      // 流程，最後一站維持原本直接呼叫 `nextStop = null` 的寫法。
+      const trigger = resolveCelebrationTrigger(newlyDoneIndices, resolvedNextStop);
+      if (trigger) {
+        const { justCompleted } = trigger;
+        // `startCelebration` 不看前一個 `celebration` 是什麼——如果這個時候
+        // 已經有一個還沒播完（慶祝中又完成另一站），這裡會直接覆蓋掉它，
+        // 前一個永遠不會走到 `isHoldComplete`、也就不會觸發它的
+        // `onCelebrationEnd`。這是刻意的規則，細節見 islandCelebration.ts
+        // `startCelebration` 的註解。
+        celebration = startCelebration(justCompleted, content.stops[justCompleted].step, resolvedNextStop);
+        // 慶祝一開始就算好這次要用的觀景點（固定下來，不是每一幀重算）——
+        // 找不到合法點時是 null，animate() 裡的 eye 計算會因此退回「只轉頭、
+        // 不移動鏡頭」，不會硬用一個可能穿牆的位置。
+        const celebratingStop = content.stops[justCompleted];
+        celebrationViewpoint = findCelebrationViewpoint({
+          target: { x: celebratingStop.x, z: celebratingStop.z },
+          player: { x: player.position.x, z: player.position.z },
+          otherBuildings: content.stops
+            .filter((_, index) => index !== justCompleted)
+            .map((stop) => ({ x: stop.x, z: stop.z })),
+          hills: hillPositions,
+          zoneCenter: zoneCenters[celebratingStop.zone],
+        });
+        guideUntil = elapsed + 12;
+        turnTo = justCompleted;
+        events.onCelebrate?.(justCompleted);
+      } else {
+        nextStop = resolvedNextStop;
+      }
     },
     setMode(next: ViewMode) { mode = next; if (next === 'first') pitch = -0.05; },
     travelTo(index: number) { travelTarget = index; mode = 'first'; pitch = -0.05; },
@@ -663,12 +743,23 @@ export function createIslandWorld(
       renderer.domElement.removeEventListener('pointerdown', pointerdown);
       renderer.domElement.removeEventListener('pointermove', pointermove);
       renderer.domElement.removeEventListener('pointerup', pointerup);
-      scene.traverse((object) => {
-        if (object instanceof THREE.Mesh) object.geometry.dispose();
-        if (object instanceof THREE.Sprite) object.material.map?.dispose();
-      });
+      // 整棟建築改成每塊網格各自 clone 材質之後（見 islandBuildingShapes.ts
+      // 的 buildStationGroup），一個 session 建立的 THREE.Material 實例從
+      // 「全島共用約 10 個」變成「每棟建築各自 9.5 個，一個 12-16 站的
+      // session 約 115-150 個」——`renderer.dispose()` 不會自動釋放使用者
+      // 自建的材質（它只清掉自己內部的 program cache/render list），這些
+      // clone 不逐一 `.dispose()` 就會在每次離開/重進島頁時持續累積
+      // GPU-side 的 shader program 資源。`disposeObjectTree`（純函式，見
+      // islandBuildingShapes.ts）抽出來鎖測試，不是只憑眼睛看。
+      disposeObjectTree(scene);
       renderer.dispose();
       container.removeChild(renderer.domElement);
+    },
+    // 暫時性除錯開關——只為了驗收「同一鏡頭位置，光暈開 vs 關」兩張對照
+    // 用，現在覆蓋的是整棟建築的發光強度（原本只覆蓋單一窗戶材質）。
+    // 驗收截圖拍完就會在下一批被要求移除，不是正式功能。
+    __debugSetGlowOverride(value: number | null) {
+      debugGlowOverride = value;
     },
   };
 }

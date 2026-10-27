@@ -30,6 +30,13 @@
  * ⑤ 每一課每一組「燈塔—其他站」配對，玩家站在其他站的門口（碰撞邊界、
  *    朝燈塔那一側，對那一站而言已經近到不能再近）時，`selectNearestStation`
  *    選到的必須是那個其他站，不是燈塔——這條直接重現退件三輪的真實 bug
+ * ⑥ 正向對照（審查員 2026-10-26 四輪覆核發現的缺口）：玩家站在燈塔自己
+ *    的出生點，選到的要是燈塔本身——沒有這條，一個「把 lesson-intro 排除
+ *    在候選外」的假想 bug 會讓上面所有測試全綠，卻沒有任何測試真的在
+ *    「玩家站在燈塔門口」這個案例呼叫過 `selectNearestStation`
+ * ⑦ 全區解鎖（late game）時，跨區的燈塔—其他站配對也不會互搶——⑤只測
+ *    同區（出生當下 unlockedZone=0，跨區站本來就不是候選），這條把範圍
+ *    延伸到遊戲後期全區域都解鎖的情況
  *
  * 多篇課文那批（#3780 另一批工作）會讓站數變多、建築變密，這支測試會是
  * 那批真正的守門員——到時候一定會跑到。
@@ -42,6 +49,7 @@ import {
   isBaseInLowerHalf,
   nearTriggerRadiusForStep,
   selectNearestStation,
+  findCelebrationViewpoint,
   LIGHTHOUSE_ROOF_TOP_Y,
   LIGHTHOUSE_TOWER_BASE_Y,
   MIN_CAMERA_BUILDING_DISTANCE,
@@ -157,6 +165,71 @@ describe('spawnPoint — 全平台 179 課回歸鎖（#3780 P0-2）', () => {
           };
           const selected = selectNearestStation(stops, player, lighthouse.zone);
           expect(selected, `第 ${id} 課「${title}」：站在「${other.name}」門口卻選到別的站（index ${selected}，應為 ${otherIndex}「${other.name}」）`).toBe(otherIndex);
+        });
+      });
+
+      it('⑥ 正向對照：玩家站在燈塔自己的出生點，選到的是燈塔本身（防止「把 lesson-intro 排除在候選外」這種 bug 也全綠）', () => {
+        const lighthouseIndex = stops.findIndex((s) => s.step === 'lesson-intro');
+        if (lighthouseIndex < 0) return;
+        const lighthouse = stops[lighthouseIndex];
+        const spawn = computeSpawnFacingLighthouse(lighthouse);
+        const selected = selectNearestStation(stops, spawn, lighthouse.zone);
+        expect(selected, `第 ${id} 課「${title}」：站在燈塔自己的出生點卻沒選到燈塔（index ${selected}）`).toBe(lighthouseIndex);
+      });
+
+      // ⚠️ 誠實標記（team-lead/Young 2026-10-27 review）：這條是「前瞻覆蓋」
+      // 不是回歸鎖——把 `selectNearestStation` 退回退件三輪的舊比例邏輯
+      // （`距離 / 各自半徑` 直接比較）重跑這支，179 課跨區配對測過 0 筆會
+      // 紅，因為跨區的站彼此距離夠遠，舊比例邏輯的誤差在這個尺度下不會
+      // 被觸發（同區的情況才會，那是 ⑤ 在鎖）。保留它是因為它確實擴大了
+      // 「跨區不會互搶」這個情境的測試覆蓋，只是現在還沒有一個已知的真實
+      // bug 會被它抓到——不要把它當成跟 ⑤ 一樣的回歸鎖來引用。
+      it('⑦ 全區解鎖時，跨區的燈塔—其他站配對也不會互搶（審查員 2026-10-26 實測 1,326 組全部 0 搶）', () => {
+        const lighthouseIndex = stops.findIndex((s) => s.step === 'lesson-intro');
+        if (lighthouseIndex < 0) return;
+        const lighthouse = stops[lighthouseIndex];
+        const fullyUnlockedZone = Math.max(...stops.map((s) => s.zone));
+        stops.forEach((other, otherIndex) => {
+          if (otherIndex === lighthouseIndex) return;
+          if (other.zone === lighthouse.zone) return; // 同區的情況由 ⑤ 鎖，這裡只測跨區
+          const dx = lighthouse.x - other.x;
+          const dz = lighthouse.z - other.z;
+          const dist = Math.hypot(dx, dz) || 1;
+          const player = {
+            x: other.x + (dx / dist) * MIN_CAMERA_BUILDING_DISTANCE,
+            z: other.z + (dz / dist) * MIN_CAMERA_BUILDING_DISTANCE,
+          };
+          const selected = selectNearestStation(stops, player, fullyUnlockedZone);
+          expect(selected, `第 ${id} 課「${title}」：全區解鎖時站在跨區的「${other.name}」門口卻選到別的站（index ${selected}，應為 ${otherIndex}「${other.name}」）`).toBe(otherIndex);
+        });
+      });
+
+      it('⑧ 慶祝時每一站都找得到一個合法觀景點（不穿進任何其他建築/山丘/出界，視線也沒被第三棟建築擋住）——#3780 三度審查訂正，鎖住「沿玩家→建築直線推」那個真實 bug（17.5% 穿牆／9.4% 穿山丘）', () => {
+        // 玩家位置用出生點代表「從島上某處用清單模式直接開站、沒有真的走
+        // 過去」這個真實觸發場景——原本的 bug 正是在這種「玩家離建築很遠」
+        // 的情況下才會讓直線穿過別的東西。
+        const lighthouseForSpawn = stops.find((s) => s.step === 'lesson-intro') ?? stops[0];
+        const player = computeSpawnFacingLighthouse(lighthouseForSpawn);
+        stops.forEach((target, targetIndex) => {
+          const otherBuildings = stops.filter((_, i) => i !== targetIndex).map((s) => ({ x: s.x, z: s.z }));
+          const zoneCenter = zoneCenters[target.zone];
+          const viewpoint = findCelebrationViewpoint({
+            target: { x: target.x, z: target.z },
+            player: { x: player.x, z: player.z },
+            otherBuildings,
+            hills: hillPositions,
+            zoneCenter,
+          });
+          expect(viewpoint, `第 ${id} 課「${title}」：「${target.name}」找不到任何合法觀景點`).not.toBeNull();
+          if (!viewpoint) return;
+
+          for (const other of otherBuildings) {
+            const d = Math.hypot(viewpoint.x - other.x, viewpoint.z - other.z);
+            expect(d, `第 ${id} 課「${title}」：「${target.name}」的觀景點穿進了別的建築`).toBeGreaterThanOrEqual(MIN_CAMERA_BUILDING_DISTANCE);
+          }
+          expect(isInsideAnyHill(viewpoint.x, viewpoint.z), `第 ${id} 課「${title}」：「${target.name}」的觀景點穿進了山丘碰撞圈`).toBe(false);
+          const withinIsland = Math.hypot(viewpoint.x - zoneCenter.x, viewpoint.z - zoneCenter.z) < zoneCenter.radius - 1;
+          expect(withinIsland, `第 ${id} 課「${title}」：「${target.name}」的觀景點超出島嶼範圍`).toBe(true);
         });
       });
 
