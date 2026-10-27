@@ -118,3 +118,56 @@ export function advanceOnTurnConverged(state: CelebrationState, elapsed: number)
 export function isHoldComplete(state: CelebrationState, elapsed: number): boolean {
   return state.phase === 'holding' && elapsed >= state.holdUntil;
 }
+
+/**
+ * 「剛完成」判斷的基準狀態——#3780 P0-3 三次審查訂正（2026-10-27）。
+ *
+ * 真實 bug（連拍截圖＋即時狀態抓到）：引擎剛建立的世界物件，`completed`
+ * 內部變數永遠從空陣列開始，但 `setProgress()` 第一次被呼叫時，React
+ * 傳進來的 `done` 可能早就含有「這個學生之前就做完」的站（正常情境：
+ * 任何帶著既有進度回到喝采島的學生）。用「跟空陣列比對」算出來的
+ * `newlyDoneIndices` 會把這些早就做完的站全部誤判成「剛完成」，引擎在
+ * **世界剛建立的那一刻**安靜播放一次完整的假慶祝（轉向、停留、轉向下
+ * 一站）——玩家從沒看到這段，但它已經把 `turnTo` 轉到了某個方向。等到
+ * 玩家真的完成一站、真正的慶祝觸發時，鏡頭早就（在假慶祝裡）轉到那個
+ * 方向了，看起來就像「鏡頭完全沒有轉向剛完成的建築」。
+ *
+ * 修法：不管 `setProgress` 第一次呼叫收到的 `done` 內容是什麼，一律當成
+ * 「這個世界實例已知的既有基準」直接接受，不產生任何 `newlyDoneIndices`
+ * ——只有基準建立「之後」的呼叫才做真正的「跟上一次比對」diff。
+ */
+export interface ProgressDiffState {
+  readonly baselineSet: boolean;
+  readonly completed: readonly number[];
+}
+
+export const INITIAL_PROGRESS_DIFF_STATE: ProgressDiffState = { baselineSet: false, completed: [] };
+
+export function diffProgress(
+  state: ProgressDiffState,
+  done: readonly number[],
+): { nextState: ProgressDiffState; newlyDoneIndices: number[] } {
+  if (!state.baselineSet) {
+    // 第一次呼叫——不管 done 已經有幾個，都當既有基準，不是「剛完成」。
+    return { nextState: { baselineSet: true, completed: done }, newlyDoneIndices: [] };
+  }
+  const newlyDoneIndices = done.filter((index) => !state.completed.includes(index));
+  return { nextState: { baselineSet: true, completed: done }, newlyDoneIndices };
+}
+
+/**
+ * 一次 `setProgress` 呼叫裡，`newlyDoneIndices` 可能同時有好幾個（例如
+ * 學生在另一個分頁完成了某一站、回到這個分頁時進度一次跳了兩站以上）。
+ * 規則（刻意的設計，不是遺漏）：只慶祝清單裡的第一個，其餘的站照樣會
+ * 透過 `nextState.completed` 正確標記成已完成（亮燈、建築發光），只是
+ * 不會各自播一次轉向＋停留＋粒子的完整慶祝——跟「慶祝中又完成另一站」
+ * （見 `startCelebration` 的註解）同一個精神：以「這次呼叫裡最前面那個」
+ * 為準，不嘗試排隊播完每一個，避免玩家對著一串已經錯過的畫面連續等待。
+ */
+export function resolveCelebrationTrigger(
+  newlyDoneIndices: readonly number[],
+  resolvedNextStop: number | null,
+): { justCompleted: number; resolvedNextStop: number } | null {
+  if (newlyDoneIndices.length === 0 || resolvedNextStop === null) return null;
+  return { justCompleted: newlyDoneIndices[0], resolvedNextStop };
+}

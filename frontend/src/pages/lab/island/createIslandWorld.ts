@@ -3,7 +3,7 @@ import { introProgress, characterPose } from './islandMotion';
 import type { IslandBaby, IslandStop } from './islandTemplate';
 import { isSceneryExcluded } from './islandTemplate';
 import { MIN_CAMERA_BUILDING_DISTANCE, computeSpawnFacingLighthouse, selectNearestStation } from './spawnPoint';
-import { startCelebration, advanceOnTurnConverged, isHoldComplete, type CelebrationState } from './islandCelebration';
+import { startCelebration, advanceOnTurnConverged, isHoldComplete, diffProgress, resolveCelebrationTrigger, INITIAL_PROGRESS_DIFF_STATE, type CelebrationState, type ProgressDiffState } from './islandCelebration';
 
 interface WorldEvents {
   onNear: (index: number | null) => void;
@@ -428,7 +428,7 @@ export function createIslandWorld(
   });
 
   let unlockedZone = 0;
-  let completed: number[] = [];
+  let progressState: ProgressDiffState = INITIAL_PROGRESS_DIFF_STATE;
   let keyDirection = { x: 0, z: 0 };
   let stickDirection = { x: 0, z: 0 };
   let yaw = spawnPoint.yaw; // #3780 P0-2：一上岸就面向燈塔，不用自己轉頭找
@@ -720,7 +720,7 @@ export function createIslandWorld(
       fog.visible = scale > 0.03;
       fog.rotation.y += dt * 0.015;
     });
-    glowMaterials.forEach((mat, index) => { mat.emissiveIntensity = completed.includes(index) ? 2.2 + Math.sin(elapsed * 3) * 0.3 : 0; });
+    glowMaterials.forEach((mat, index) => { mat.emissiveIntensity = progressState.completed.includes(index) ? 2.2 + Math.sin(elapsed * 3) * 0.3 : 0; });
     renderer.render(scene, camera);
   };
   frame = requestAnimationFrame(animate);
@@ -730,9 +730,15 @@ export function createIslandWorld(
       // 剛點亮的站已經不在畫面裡了。改成先轉過去面向剛完成的那一站，停留
       // `celebrationProfileForStep()` 算出來的秒數（依這一站的份量分輕重），
       // 停留期一到才真的轉去下一站（見 animate() 開頭的停留期結束檢查）。
-      const newlyDoneIndices = done.filter((index) => !completed.includes(index));
+      //
+      // 三次審查訂正：`diffProgress` 把第一次呼叫（不管內容）當既有基準
+      // 接受，不產生 newlyDoneIndices——避免世界剛建立時把學生之前就做完
+      // 的站誤判成「剛完成」，安靜播一次玩家沒看到的假慶祝、把 turnTo 轉
+      // 掉，害真正的慶祝看起來像沒有轉向（見 islandCelebration.ts 的
+      // `diffProgress` 註解）。
+      const { nextState, newlyDoneIndices } = diffProgress(progressState, done);
+      progressState = nextState;
       unlockedZone = nextZone;
-      completed = done;
       const next = content.stops.findIndex((_, index) => !done.includes(index));
       const resolvedNextStop = next < 0 ? null : next;
       // #3780 P0-3：全部完成（resolvedNextStop === null）是最後一站——這裡
@@ -743,8 +749,9 @@ export function createIslandWorld(
       // 會播 chime／開全螢幕 burst；這裡如果也跟著觸發 onCelebrate 播一次
       // chime，會在同一刻重複響兩次。所以只有「還有下一站」時才進入慶祝
       // 流程，最後一站維持原本直接呼叫 `nextStop = null` 的寫法。
-      if (newlyDoneIndices.length > 0 && resolvedNextStop !== null) {
-        const justCompleted = newlyDoneIndices[0];
+      const trigger = resolveCelebrationTrigger(newlyDoneIndices, resolvedNextStop);
+      if (trigger) {
+        const { justCompleted } = trigger;
         // `startCelebration` 不看前一個 `celebration` 是什麼——如果這個時候
         // 已經有一個還沒播完（慶祝中又完成另一站），這裡會直接覆蓋掉它，
         // 前一個永遠不會走到 `isHoldComplete`、也就不會觸發它的
@@ -781,16 +788,6 @@ export function createIslandWorld(
       });
       renderer.dispose();
       container.removeChild(renderer.domElement);
-    },
-    // 暫時性除錯鉤子——team-lead/Young 2026-10-27 連拍截圖看到鏡頭完全沒有
-    // 轉向剛完成的建築，程式碼靜態審查找不到原因，需要即時觀察內部狀態。
-    // 截圖診斷跑完就會被要求移除，不是正式功能。
-    __debugState() {
-      return {
-        celebration, yaw, turnTo, elapsed, mode, paused,
-        playerX: player.position.x, playerZ: player.position.z,
-        nextStop, travelTarget,
-      };
     },
   };
 }

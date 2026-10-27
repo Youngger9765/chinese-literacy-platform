@@ -10,6 +10,9 @@ import {
   startCelebration,
   advanceOnTurnConverged,
   isHoldComplete,
+  diffProgress,
+  resolveCelebrationTrigger,
+  INITIAL_PROGRESS_DIFF_STATE,
 } from '../islandCelebration';
 
 describe('celebrationProfileForStep', () => {
@@ -98,5 +101,69 @@ describe('慶祝序列三段式狀態機（startCelebration / advanceOnTurnConve
   it('pendingNextStop 可以是 null（理論上不會發生，setProgress 已經用 resolvedNextStop !== null 擋過一次，這裡只確認型別允許、不會噴錯）', () => {
     const state = startCelebration(0, 'report', null);
     expect(state.pendingNextStop).toBeNull();
+  });
+});
+
+/**
+ * diffProgress 的回歸鎖——#3780 P0-3 三次審查訂正（2026-10-27）。
+ *
+ * 真實 bug：世界剛建立時引擎的 `completed` 內部變數永遠從空陣列開始，
+ * 但 React 傳進來的第一筆 `done` 可能已經含有玩家之前就做完的站（任何
+ * 帶著既有進度回到喝采島的學生都是這個情境）。沒有基準保護的 diff 會把
+ * 這些早就做完的站全部誤判成「剛完成」，世界剛建立那一刻就安靜播一次
+ * 玩家沒看到的假慶祝、把 turnTo 轉掉，真正的慶祝之後看起來就像完全沒
+ * 轉向。
+ */
+describe('diffProgress（世界剛建立時不能把既有進度誤判成剛完成）', () => {
+  it('🔒 回歸鎖：第一次呼叫不管 done 裡已經有幾個，都不能產生 newlyDoneIndices——這是鎖住「世界剛建立就誤判既有進度」那個真實 bug 的斷言', () => {
+    const { nextState, newlyDoneIndices } = diffProgress(INITIAL_PROGRESS_DIFF_STATE, [0, 3, 4, 5, 6, 7, 8, 9, 10]);
+    expect(newlyDoneIndices).toEqual([]);
+    expect(nextState.baselineSet).toBe(true);
+    expect(nextState.completed).toEqual([0, 3, 4, 5, 6, 7, 8, 9, 10]);
+  });
+
+  it('第一次呼叫就算 done 是空陣列，也正確建立基準（學生從全新課文開始的情境）', () => {
+    const { nextState, newlyDoneIndices } = diffProgress(INITIAL_PROGRESS_DIFF_STATE, []);
+    expect(newlyDoneIndices).toEqual([]);
+    expect(nextState.baselineSet).toBe(true);
+    expect(nextState.completed).toEqual([]);
+  });
+
+  it('基準建立之後，真正新完成的站會被正確抓到（這是真正該觸發慶祝的情境）', () => {
+    const afterFirstCall = diffProgress(INITIAL_PROGRESS_DIFF_STATE, [0, 3, 4]).nextState;
+    const { newlyDoneIndices } = diffProgress(afterFirstCall, [0, 1, 3, 4]);
+    expect(newlyDoneIndices).toEqual([1]);
+  });
+
+  it('基準建立之後，同一組 done 再呼叫一次不會重複觸發（沒有新完成就是空陣列）', () => {
+    const afterFirstCall = diffProgress(INITIAL_PROGRESS_DIFF_STATE, [0, 3, 4]).nextState;
+    const { newlyDoneIndices } = diffProgress(afterFirstCall, [0, 3, 4]);
+    expect(newlyDoneIndices).toEqual([]);
+  });
+
+  it('一次呼叫同時多出好幾個新完成的站，全部都要被抓到（不是只抓第一個，呼叫端自己決定要處理哪一個）', () => {
+    const afterFirstCall = diffProgress(INITIAL_PROGRESS_DIFF_STATE, [0]).nextState;
+    const { newlyDoneIndices } = diffProgress(afterFirstCall, [0, 2, 5]);
+    expect(newlyDoneIndices.sort()).toEqual([2, 5]);
+  });
+});
+
+describe('resolveCelebrationTrigger（同一次呼叫一次完成 2 站以上時，只慶祝第一個）', () => {
+  it('一次只完成 1 站——正常觸發慶祝', () => {
+    const trigger = resolveCelebrationTrigger([3], 5);
+    expect(trigger).toEqual({ justCompleted: 3, resolvedNextStop: 5 });
+  });
+
+  it('同一次呼叫一次完成 2 站以上（例如另一個分頁做完回來）——只慶祝清單裡的第一個，不是全部排隊播', () => {
+    const trigger = resolveCelebrationTrigger([2, 5, 7], 8);
+    expect(trigger).toEqual({ justCompleted: 2, resolvedNextStop: 8 });
+  });
+
+  it('沒有新完成的站——不觸發', () => {
+    expect(resolveCelebrationTrigger([], 5)).toBeNull();
+  });
+
+  it('全部完成（resolvedNextStop 是 null）——不觸發慶祝流程，交給結尾慶祝層處理', () => {
+    expect(resolveCelebrationTrigger([3], null)).toBeNull();
   });
 });
