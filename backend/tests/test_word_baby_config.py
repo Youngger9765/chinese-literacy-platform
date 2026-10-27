@@ -99,3 +99,39 @@ def test_loader_result_is_cached_not_reread_every_call():
     first = word_baby_config.load_babies()
     second = word_baby_config.load_babies()
     assert first is second  # same object identity = cached, not re-parsed
+
+
+def test_babies_json_is_byte_identical_across_its_three_copies():
+    """Review finding (2026-10-27, round 3): the 100-species roster exists
+    as THREE separate copies that must stay in lockstep —
+      1. docs/design/word-babies/babies.json   (design source, source of truth)
+      2. backend/app/data/word_babies/babies.json  (actually served by the API)
+      3. frontend/src/data/wordBabiesCatalog.json  (actually used by the /lab
+         dex grid + feedability logic client-side)
+    There is no build step that generates 2/3 from 1 — they were created by
+    manual copy. If someone edits one (e.g. tweaking a name in babies.json)
+    and forgets the other two, the frontend's dex/feedability logic would
+    silently diverge from what the backend actually enforces. This test is
+    the only thing that would catch that.
+    """
+    import json
+    from pathlib import Path
+
+    backend_dir = Path(__file__).resolve().parent.parent  # backend/
+    repo_root = backend_dir.parent
+
+    design_path = repo_root / "docs" / "design" / "word-babies" / "babies.json"
+    backend_path = backend_dir / "app" / "data" / "word_babies" / "babies.json"
+    frontend_path = repo_root / "frontend" / "src" / "data" / "wordBabiesCatalog.json"
+
+    design_data = json.loads(design_path.read_text(encoding="utf-8"))
+    backend_data = json.loads(backend_path.read_text(encoding="utf-8"))
+    frontend_data = json.loads(frontend_path.read_text(encoding="utf-8"))
+
+    assert backend_data == design_data, (
+        f"{backend_path} has drifted from {design_path} — re-copy it "
+        "(or regenerate via generate_config.py and re-sync both downstream copies)"
+    )
+    assert frontend_data == design_data, (
+        f"{frontend_path} has drifted from {design_path} — re-copy it"
+    )

@@ -112,6 +112,7 @@ const TermsOfService = lazy(() => import('../pages/app/TermsOfService'));
 // Dev-only local demo harness for AI-extracted lesson_content (public, no API/DB).
 const DevLessonPage = lazy(() => import('../pages/dev/DevLessonPage'));
 const ReadingIslandLab = lazy(() => import('../pages/lab/ReadingIslandLab'));
+const WordBabiesLab = lazy(() => import('../pages/lab/WordBabiesLab'));
 
 
 // ---------------------------------------------------------------------------
@@ -121,6 +122,7 @@ const AppRoutes: React.FC = () => (
     <StudentClassroomGuard>
     <Routes>
       <Route path="/lab/island/:storyId" element={<ProtectedRoute><ReadingIslandLab /></ProtectedRoute>} />
+      <Route path="/lab/word-babies" element={<ProtectedRoute><WordBabiesLab /></ProtectedRoute>} />
       {/* Issue #457: students without classroom see this page when gating is enabled */}
       <Route
         path="/no-teacher"

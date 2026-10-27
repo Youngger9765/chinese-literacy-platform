@@ -34,6 +34,16 @@ class WordBabySummary(BaseModel):
     dormant_type: str | None
     weaken_state: str
     fed_current_stage: int
+    # 前端 /lab 寶貝卡「蛋/繭/冬眠倒數」用（2026-10-27）：None = 現在不是
+    # 休眠狀態，否則是還要幾個有效天數才孵化。
+    hatch_days_remaining: int | None = None
+    # review finding（2026-10-27 第三輪）：史詩/傳說（12 隻，fragments_by_flavor
+    # 結構化餵食）每個口味各自有獨立配額，共用的 fed_current_stage 加總數字
+    # 看不出「哪個口味已經餵滿、哪個還缺」——前端要靠這個欄位才能正確判斷
+    # 餵食按鈕該不該亮（舊版只看錢包總和 > 0，對已經餵滿其中一個口味、只剩
+    # 另一個口味缺貨的情況會誤判成可以按，按下去後端其實扣不到東西）。
+    # None = 這隻寶貝這個階段是共用池（常見/少見/稀有），不適用此欄位。
+    fed_by_flavor: dict[str, int] | None = None
 
 
 class MyWordBabiesResponse(BaseModel):

@@ -359,3 +359,161 @@ class TestMyPetsReadOnlyForTeacherAndParent:
             )
             assert row.dormant_type is None, "the student's own read must persist the hatch"
             assert row.stage_index == 2, "the student's own read must persist the stage advance"
+
+
+class TestHatchDaysRemainingInResponse:
+    """Frontend requirement (word-baby /lab page, 2026-10-27): the dormant
+    (egg/cocoon/hibernation) card needs to show a countdown — "還要幾天
+    孵化". The response previously had no way to compute this: it exposed
+    `dormant_type` (a label) but not how many days are left, and the
+    per-stage hatch_days threshold + per-student accumulated progress are
+    both only known server-side. Added `hatch_days_remaining: int | None` —
+    null when not dormant, otherwise the exact number of effective days
+    still needed.
+    """
+
+    def test_dormant_baby_not_yet_ready_shows_a_positive_countdown(self, client):
+        from datetime import datetime, timedelta, timezone
+
+        from app.models.word_baby import StudentWordBabyState
+
+        pet_owner = _register_and_login(client, f"petowner_hdr1_{uuid.uuid4().hex[:8]}")
+        with TestingSessionLocal() as db:
+            db.add(
+                StudentWordBabyState(
+                    student_id=pet_owner["id"],
+                    baby_id="wb-001",  # common, stage-1 hatch_days = 3
+                    stage_index=1,
+                    dormant_type="繭",
+                    dormant_started_at=datetime.now(timezone.utc) - timedelta(days=1),
+                    hatch_progress_days=1,  # 1 of 3 days accumulated, nowhere near ready
+                    last_cared_at=datetime.now(timezone.utc) - timedelta(hours=1),
+                )
+            )
+            db.commit()
+
+        resp = client.get(
+            f"/api/learning/students/{pet_owner['id']}/word-babies",
+            headers=auth_header(pet_owner["token"]),
+        )
+        assert resp.status_code == 200, resp.text
+        baby = next(b for b in resp.json()["babies"] if b["baby_id"] == "wb-001")
+        assert baby["dormant_type"] == "繭"
+        assert baby["hatch_days_remaining"] is not None
+        assert baby["hatch_days_remaining"] > 0
+
+    def test_non_dormant_baby_has_null_countdown(self, client):
+        from app.models.word_baby import StudentWordBabyState
+
+        pet_owner = _register_and_login(client, f"petowner_hdr2_{uuid.uuid4().hex[:8]}")
+        with TestingSessionLocal() as db:
+            db.add(
+                StudentWordBabyState(student_id=pet_owner["id"], baby_id="wb-001", stage_index=1)
+            )
+            db.commit()
+
+        resp = client.get(
+            f"/api/learning/students/{pet_owner['id']}/word-babies",
+            headers=auth_header(pet_owner["token"]),
+        )
+        assert resp.status_code == 200, resp.text
+        baby = next(b for b in resp.json()["babies"] if b["baby_id"] == "wb-001")
+        assert baby["dormant_type"] is None
+        assert baby["hatch_days_remaining"] is None
+
+    def test_baby_that_just_hatched_on_this_read_has_null_countdown(self):
+        """A dormant baby whose accumulated progress already clears the
+        threshold hatches during this very read (lazy evaluation) — it's no
+        longer dormant by the time the response is built, so the countdown
+        must be null, not a stale pre-hatch number."""
+        from datetime import datetime, timedelta, timezone
+
+        from sqlalchemy import create_engine
+        from sqlalchemy.orm import sessionmaker
+
+        import app.models  # noqa: F401
+        from app.models.base import Base
+        from app.models.word_baby import StudentWordBabyState
+        from app.services.word_baby_service import get_my_pets
+        from tests.test_word_baby_service import _make_user
+
+        engine = create_engine("sqlite:///:memory:")
+        Base.metadata.create_all(engine)
+        SessionLocal = sessionmaker(bind=engine)
+        db = SessionLocal()
+        try:
+            _make_user(db, 1)
+            now = datetime.now(timezone.utc)
+            db.add(
+                StudentWordBabyState(
+                    student_id=1, baby_id="wb-001", stage_index=1,
+                    dormant_type="繭", dormant_started_at=now - timedelta(days=5),
+                    hatch_progress_days=999,  # way past wb-001 stage-1's 3-day threshold
+                    last_cared_at=now - timedelta(hours=1),
+                )
+            )
+            db.commit()
+
+            result = get_my_pets(db, student_id=1, viewer_is_student=True, now=now)
+            baby = next(b for b in result["babies"] if b["baby_id"] == "wb-001")
+            assert baby["dormant_type"] is None
+            assert baby["stage_index"] == 2
+            assert baby["hatch_days_remaining"] is None
+        finally:
+            db.close()
+
+
+class TestFedByFlavorInResponse:
+    """Security/UX review finding (2026-10-27, round 3): structured-feeding
+    species (epic/legendary, 12 of them: wb-041..wb-052) require a specific
+    quota PER diet flavor for the current stage — not a shared pool. The
+    frontend's feed button needs to know which flavors are already capped
+    off vs still outstanding to avoid enabling "餵食" when the only
+    fragments in the wallet are for an already-satisfied flavor (which the
+    real feed_baby() would silently no-op on, confusing the student: button
+    looked enabled, nothing happened). `fed_current_stage` is only the SUM
+    across flavors — the per-flavor breakdown (`fed_by_flavor`) was computed
+    internally but never serialized in the API response until now.
+    """
+
+    def test_structured_feeding_baby_exposes_fed_by_flavor(self, client):
+        from app.models.word_baby import StudentWordBabyState
+
+        pet_owner = _register_and_login(client, f"petowner_fbf_{uuid.uuid4().hex[:8]}")
+        with TestingSessionLocal() as db:
+            db.add(
+                StudentWordBabyState(
+                    student_id=pet_owner["id"],
+                    baby_id="wb-041",  # legendary, stage1 requires {文言文: 1, 語文基礎: 1}
+                    stage_index=1,
+                    fed_current_stage=1,
+                    fed_by_flavor={"語文基礎": 1},  # 語文基礎 already capped, 文言文 still 0
+                )
+            )
+            db.commit()
+
+        resp = client.get(
+            f"/api/learning/students/{pet_owner['id']}/word-babies",
+            headers=auth_header(pet_owner["token"]),
+        )
+        assert resp.status_code == 200, resp.text
+        baby = next(b for b in resp.json()["babies"] if b["baby_id"] == "wb-041")
+        assert baby["fed_by_flavor"] == {"語文基礎": 1}
+
+    def test_shared_pool_baby_has_null_fed_by_flavor(self, client):
+        from app.models.word_baby import StudentWordBabyState
+
+        pet_owner = _register_and_login(client, f"petowner_fbf2_{uuid.uuid4().hex[:8]}")
+        with TestingSessionLocal() as db:
+            db.add(
+                StudentWordBabyState(student_id=pet_owner["id"], baby_id="wb-001", stage_index=1)
+            )
+            db.commit()
+
+        resp = client.get(
+            f"/api/learning/students/{pet_owner['id']}/word-babies",
+            headers=auth_header(pet_owner["token"]),
+        )
+        assert resp.status_code == 200, resp.text
+        baby = next(b for b in resp.json()["babies"] if b["baby_id"] == "wb-001")
+        assert baby["fed_by_flavor"] is None

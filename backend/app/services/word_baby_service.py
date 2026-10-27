@@ -308,6 +308,10 @@ def _sync_care_state(
     hatch_progress_days = state.hatch_progress_days
     fed_current_stage = state.fed_current_stage
     fed_by_flavor = state.fed_by_flavor
+    # 前端「蛋/繭/冬眠倒數」用（2026-10-27）：還要幾個有效天數才孵化。
+    # None = 現在不是休眠狀態（含「這次讀取剛好孵化完成」——孵化完成那一刻
+    # dormant_type 已經清掉，不該再顯示一個孵化前的倒數字）。
+    hatch_days_remaining: int | None = None
 
     if dormant_type is not None:
         credit = effective_hatch_credit(
@@ -326,8 +330,10 @@ def _sync_care_state(
             hatch_progress_days = 0
             fed_current_stage = 0
             fed_by_flavor = None
-        elif is_care_action:
-            hatch_progress_days = live_hatch_progress
+        else:
+            hatch_days_remaining = required - live_hatch_progress
+            if is_care_action:
+                hatch_progress_days = live_hatch_progress
 
     if persist:
         state.weaken_state = weaken_state
@@ -348,6 +354,7 @@ def _sync_care_state(
         "hatch_progress_days": hatch_progress_days,
         "fed_current_stage": fed_current_stage,
         "fed_by_flavor": fed_by_flavor,
+        "hatch_days_remaining": hatch_days_remaining,
     }
 
 
@@ -499,6 +506,8 @@ def get_my_pets(
             "dormant_type": live["dormant_type"],
             "weaken_state": live["weaken_state"],
             "fed_current_stage": live["fed_current_stage"],
+            "hatch_days_remaining": live["hatch_days_remaining"],
+            "fed_by_flavor": live["fed_by_flavor"],
             "caught_at": state.caught_at,
         })
 
