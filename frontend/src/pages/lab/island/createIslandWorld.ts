@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { introProgress, characterPose } from './islandMotion';
 import type { IslandBaby, IslandStop } from './islandTemplate';
 import { isSceneryExcluded } from './islandTemplate';
-import { MIN_CAMERA_BUILDING_DISTANCE, NEAR_TRIGGER_RADIUS, computeSpawnFacingLighthouse } from './spawnPoint';
+import { MIN_CAMERA_BUILDING_DISTANCE, computeSpawnFacingLighthouse, selectNearestStation } from './spawnPoint';
 
 interface WorldEvents {
   onNear: (index: number | null) => void;
@@ -159,7 +159,7 @@ export function createIslandWorld(
   const lighthouseStop = content.stops.find((stop) => stop.step === 'lesson-intro') ?? content.stops[0];
   const spawnPoint = lighthouseStop
     ? computeSpawnFacingLighthouse(lighthouseStop)
-    : { x: -2, z: 16.5, yaw: 0 };
+    : { x: -2, z: 16.5, yaw: 0, pitch: 0 };
 
   const zonedThings: THREE.Object3D[] = [];
   for (let i = 0; i < 105; i++) {
@@ -367,7 +367,11 @@ export function createIslandWorld(
   const raycaster = new THREE.Raycaster();
   const pointerNdc = new THREE.Vector2(0, 0);
   let mode: ViewMode = 'first';
-  let pitch = -0.05;
+  // #3780 P0-2：出生時仰角不再是寫死的 -0.05（往下看一點）——燈塔太高，
+  // 不仰頭的話塔尖本來就不可能進視野（見 spawnPoint.test.ts 那條「不加
+  // 仰角塞不進視野」的對照）。`spawnPoint.pitch` 用燈塔的真實高度／相機
+  // FOV 算出來，見 spawnPoint.ts。
+  let pitch = spawnPoint.pitch;
   let dragY = 0;
   let hovered: number | null = null;
   let nextStop: number | null = 0;
@@ -525,16 +529,15 @@ export function createIslandWorld(
       player.material.rotation = pose.tilt;
       xiaoling.material.rotation = Math.sin(elapsed * 2.2) * 0.07;
       xiaoling.position.set(player.position.x + 0.67, player.position.y + 0.85 + Math.sin(elapsed * 3) * 0.14, player.position.z + 0.12);
-      let closest: number | null = null;
-      // #3780 P0-2：原本寫死 3.25，跟建築地基半徑沒有關聯；換成以地基半徑
-      // 為底算出來的 NEAR_TRIGGER_RADIUS，確保一定大於碰撞距離，玩家會先
-      // 觸發「發現新去處」才會被擋下，不會卡進建築才觸發。
-      let best = NEAR_TRIGGER_RADIUS;
-      content.stops.forEach((stop, index) => {
-        if (stop.zone > unlockedZone) return;
-        const d = Math.hypot(player.position.x - stop.x, player.position.z - stop.z);
-        if (d < best) { best = d; closest = index; }
-      });
+      // #3780 P0-2：原本全島共用一個寫死的 3.25——燈塔是全島唯一的地標級
+      // 高塔，出生距離要拉開才看得到整座塔，所以它需要自己的觸發半徑
+      // （比其他矮站大很多）。第一版用「距離 ÷ 自己的半徑」這個比例值比
+      // 大小——審查員真瀏覽器＋全平台 179 課實算抓到：燈塔半徑大超過兩倍
+      // 時，玩家站在旁邊小站的門口（對那一站已經近到不能再近），比例值
+      // 卻可能是「燈塔比較近」，9.9% 的燈塔—其他站配對會被搶走。正確做法
+      // 抽成 `selectNearestStation`（見 spawnPoint.ts）：先用各站自己的
+      // 半徑獨立判斷「有沒有進範圍」，有進範圍的候選裡才比真正的距離。
+      let closest = selectNearestStation(content.stops, player.position, unlockedZone);
       if (introPlaying) closest = null;
       if (closest !== near) { near = closest; events.onNear(closest); }
       babies.forEach((baby, index) => {
@@ -648,7 +651,9 @@ export function createIslandWorld(
     setStick(x: number, z: number) { stickDirection = { x, z }; },
     setPaused(value: boolean) { paused = value; },
     jump() { if (jumping === 0) verticalSpeed = 5.5; },
-    playIntro() { introStart = elapsed; mode = 'first'; pitch = -0.05; },
+    // #3780 P0-2：playIntro 是「一上岸、開場鏡頭飛到主角面前」那一刻——跟
+    // 出生時同一個仰角（spawnPoint.pitch），不是寫死的 -0.05。
+    playIntro() { introStart = elapsed; mode = 'first'; pitch = spawnPoint.pitch; },
     getPosition() { return { x: player.position.x, z: player.position.z }; },
     dispose() {
       cancelAnimationFrame(frame);
