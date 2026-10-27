@@ -93,7 +93,17 @@ test.describe('迷城密室 escape_room', () => {
       }
 
       const before = state.mist_distance;
-      const optionBtn = page.locator(`[aria-label^="選項 ${keyToClick}："]`);
+      // When a rescue_question is active, StudentEscapeRoomRun renders BOTH
+      // the base chamber/gate question (disabled underneath) AND the rescue
+      // dialog's own question (enabled, on top) — by design, see
+      // escape_room/engine.py's _maybe_expire_chamber comment: "A rescue dialog
+      // blocks the base chamber question (the frontend disables its
+      // ChoiceButtons while rescue_question is present)". Both can carry the
+      // same lettered option (e.g. "選項 A："), so an unscoped locator hits
+      // Playwright's strict-mode violation. Scope to the dialog whenever
+      // `question` resolved to the rescue question (see the `??` chain above).
+      const scope = state.rescue_question ? page.getByRole('dialog', { name: '救援題' }) : page;
+      const optionBtn = scope.locator(`[aria-label^="選項 ${keyToClick}："]`);
       await expect(optionBtn).toBeVisible({ timeout: 10000 });
       await optionBtn.click();
       await page.waitForTimeout(600);
