@@ -8,7 +8,8 @@ import { BABIES_20011, OPENING_20011, STOPS_20011 } from './island/islandData';
 import { buildStopsFromSequence, buildOpeningForTitle, buildBabiesForVocabulary, actInfoForZone } from './island/islandTemplate';
 import type { IslandBaby, IslandStop } from './island/islandTemplate';
 import { createIslandWorld } from './island/createIslandWorld';
-import { parseIslandReturnMessage, shouldMarkVisitedOnReturn } from './island/storyMode';
+import { parseIslandReturnMessage, parseWordBabyRewardMessage, shouldMarkVisitedOnReturn } from './island/storyMode';
+import { firstWordBabyRewardHint } from './island/wordBabyRewardHint';
 import IslandListMode from './island/IslandListMode';
 import { createIslandAudio, readMuted, writeMuted, type IslandAudio } from './island/islandAudio';
 import { isCoarsePointerDevice, isFinePointerDevice } from './island/inputMode';
@@ -36,6 +37,14 @@ export default function ReadingIslandLab() {
   const [visited, setVisited] = useState<string[]>([]);
   const [near, setNear] = useState<number | null>(null);
   const [fogHint, setFogHint] = useState(false);
+  // #3780 接島上：過關回島的「這站掉了碎片／遇到寶貝」小提示。宣告放在這裡
+  // （跟 fogHint 同一批 state）而不是靠近它實際被設定的訊息監聽器那段，是
+  // 因為 onFogEdge（下面 createIslandWorld 的 effect）需要讀 wordBabyHintRef
+  // 判斷要不要讓位——宣告順序錯會是 no-use-before-define（#2279 TDZ 同類
+  // 問題：eslint 這條規則不是裝飾用的，改這個檔案前先讀 CLAUDE.md 那段）。
+  const [wordBabyHint, setWordBabyHint] = useState<string | null>(null);
+  const wordBabyHintRef = useRef<string | null>(null);
+  useEffect(() => { wordBabyHintRef.current = wordBabyHint; }, [wordBabyHint]);
   const [opening, setOpening] = useState(0);
   // 冷開場：先一個暗畫面，學生點一下才出聲（瀏覽器規定），聲音先到、畫面晚 0.45 秒進來
   const [coldOpen, setColdOpen] = useState(true);
@@ -63,6 +72,30 @@ export default function ReadingIslandLab() {
   const stickOrigin = useRef<{ x: number; y: number } | null>(null);
   const hintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const storageKey = `reading-island-visited:${user?.id ?? 'guest'}:${storyId}`;
+  // #3780 接島上：記住「已經顯示過提示」的文字寶貝獎勵 id（StudentStation
+  // RewardLog 主鍵），讓 refreshProgress 的拉取路徑跟 WORD_BABY_REWARD
+  // postMessage 的加速路徑共用同一份排重——不管哪條先顯示，另一條都不會
+  // 再跳一次同一筆。跟 storageKey（visited）同一種 per-student-per-story
+  // sessionStorage scoping，關掉分頁/清快取就重置，可接受（同樣的設計
+  // 已用在 visited 上）。
+  const seenRewardsKey = `reading-island-seen-rewards:${user?.id ?? 'guest'}:${storyId}`;
+  const readSeenRewardIds = useCallback((): Set<number> => {
+    try { return new Set(JSON.parse(sessionStorage.getItem(seenRewardsKey) ?? '[]') as number[]); }
+    catch { return new Set(); }
+  }, [seenRewardsKey]);
+  const markRewardIdsSeen = useCallback((ids: number[]) => {
+    if (ids.length === 0) return;
+    const seen = readSeenRewardIds();
+    ids.forEach((id) => seen.add(id));
+    try { sessionStorage.setItem(seenRewardsKey, JSON.stringify([...seen])); } catch { /* 存不了就算了，頂多下次重複跳一次 */ }
+  }, [seenRewardsKey, readSeenRewardIds]);
+  const showWordBabyHint = useCallback((hint: string) => {
+    // 獎勵提示優先於迷霧提示（同一個畫面插槽，見 onFogEdge 那側的說明）。
+    if (hintTimer.current) clearTimeout(hintTimer.current);
+    setFogHint(false);
+    setWordBabyHint(hint);
+    window.setTimeout(() => setWordBabyHint(null), 4000);
+  }, []);
   const student = user?.roles.some((role) => role.role_name === 'student') ?? false;
   const sequence = useMemo(() => lesson?.stepSequence ?? [], [lesson]);
   const isHandmade = storyId === '20011';
@@ -118,7 +151,7 @@ export default function ReadingIslandLab() {
     return () => { alive = false; };
   }, [storyId, student]);
 
-  const refreshProgress = useCallback(async () => {
+  const refreshProgress = useCallback(async (announceNewRewards = false) => {
     if (!token || !storyId) return false;
     try {
       const sessions = await fetchLearningSessions(token, { story_slug: storyId, limit: 30 });
@@ -127,11 +160,28 @@ export default function ReadingIslandLab() {
       const snapshots = await Promise.all(matching.slice(0, 5).map((session) => loadStepProgress(token, session.id)));
       const steps = [...new Set(snapshots.flatMap((snapshot) => snapshot.step_progress?.steps_completed ?? []))];
       setCompleted(steps);
+
+      // #3780 接島上二次修正：這是獎勵提示真正的正確性來源（見上面
+      // showWordBabyHint 那段的說明）——`loadStepProgress` 的 GET 回應現在
+      // 帶著「這一課目前全部」的 word_baby_rewards，不依賴任何 postMessage
+      // 時序。`announceNewRewards=false`（掛載時的第一次呼叫）只建立「已
+      // 經看過」的基準，不跳提示——不然學生第一次打開頁面就會把過去累積
+      // 的所有獎勵一次跳出來。只有 returnToIsland 傳 `true` 才會真的顯示。
+      const allRewards = snapshots.flatMap((snapshot) => snapshot.word_baby_rewards ?? []);
+      const uniqueRewards = [...new Map(allRewards.map((reward) => [reward.id, reward])).values()];
+      if (announceNewRewards) {
+        const seen = readSeenRewardIds();
+        const unseen = uniqueRewards.filter((reward) => !seen.has(reward.id));
+        const hint = firstWordBabyRewardHint(unseen);
+        if (hint) showWordBabyHint(hint);
+      }
+      markRewardIdsSeen(uniqueRewards.map((reward) => reward.id));
+
       return true;
     } catch {
       return false;
     }
-  }, [token, storyId]);
+  }, [token, storyId, readSeenRewardIds, markRewardIdsSeen, showWordBabyHint]);
 
   useEffect(() => { void refreshProgress(); }, [refreshProgress]);
 
@@ -141,6 +191,7 @@ export default function ReadingIslandLab() {
     const world = createIslandWorld(host, {
       onNear: setNear,
       onFogEdge: () => {
+        if (wordBabyHintRef.current) return; // 獎勵提示優先，迷霧提示讓位
         setFogHint(true);
         if (hintTimer.current) clearTimeout(hintTimer.current);
         hintTimer.current = setTimeout(() => setFogHint(false), 2500);
@@ -262,7 +313,7 @@ export default function ReadingIslandLab() {
     const index = module;
     setModule(null);
     audioRef.current?.resume(); // 回到島上：恢復環境音（尊重學生目前的靜音狀態）
-    const reliable = await refreshProgress();
+    const reliable = await refreshProgress(true); // true：回島這個動作才要宣布新獎勵
     if (index !== null && shouldMarkVisitedOnReturn({ finished, reliable })) {
       const step = stepFor(index);
       if (step) setVisited((previous) => {
@@ -275,15 +326,37 @@ export default function ReadingIslandLab() {
   // 故事模式：關卡做完由學習頁通知，直接帶回島上（不往下一關走）
   const returnRef = useRef(returnToIsland);
   returnRef.current = returnToIsland;
+  // #3780 接島上：過關回島的「這站掉了碎片／遇到寶貝」小提示。
+  //
+  // **正確性來源是 returnToIsland 裡的 refreshProgress(true)（向後端「拉」
+  // 這一課目前的獎勵紀錄），不是這裡的 WORD_BABY_REWARD postMessage**
+  // （team-lead 2026-10-28 二次修正，code-reviewer 2026-10-27 finding）：
+  // ISLAND_STEP_DONE 會同步觸發 setModule(null) 拆掉裝著學習頁的 iframe，
+  // 連同它尚未完成的 PUT /progress 一起摧毀，而 word_baby_rewards 正是那個
+  // PUT 回應才有的資料——真實網路延遲下這個訊息幾乎必然比 PUT 先到，曾經
+  // 試過「延後拆 iframe 等訊息」的寬限期做法，但那是在猜網路速度（慢網路
+  // 一樣會輸、而且每次回島都平白拖長）。改成不依賴任何訊息時序：這裡的
+  // postMessage 監聽**保留當加速**（同一個分頁、網路夠快時可能先到，讓提示
+  // 提早一點點出現），但即使完全收不到這則訊息，回島後的 GET 拉取一樣會
+  // 顯示它——兩條路徑共用 markRewardIdsSeen／readSeenRewardIds 排重，先到
+  // 的那條顯示了，另一條就不會再顯示一次。
   useEffect(() => {
     const onMessage = (event: MessageEvent) => {
       if (event.origin !== window.location.origin) return;
       const parsed = parseIslandReturnMessage(event.data);
       if (parsed) void returnRef.current(parsed.finished);
+      const rewards = parseWordBabyRewardMessage(event.data);
+      if (rewards) {
+        const seen = readSeenRewardIds();
+        const unseen = rewards.filter((r) => !seen.has(r.id));
+        const hint = firstWordBabyRewardHint(unseen);
+        if (hint) showWordBabyHint(hint);
+        markRewardIdsSeen(rewards.map((r) => r.id));
+      }
     };
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
-  }, []);
+  }, [readSeenRewardIds, markRewardIdsSeen, showWordBabyHint]);
   const onStickMove = (event: React.PointerEvent<HTMLDivElement>) => {
     if (!stickOrigin.current) return;
     const x = Math.max(-1, Math.min(1, (event.clientX - stickOrigin.current.x) / 46));
@@ -299,6 +372,19 @@ export default function ReadingIslandLab() {
     <main className="relative h-[100dvh] w-full overflow-hidden bg-[#bbd6dc] font-sans text-[#284650]">
       <div ref={canvasRef} className="absolute inset-0 [&_canvas]:h-full [&_canvas]:w-full" aria-label="喝采島 3D 世界，使用方向鍵或 WASD 移動" />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#d1e4e3]/30 via-transparent to-[#0e3440]/25" />
+      {/* #3780：跟既有 fogHint（下方 488 行附近）同一個 bottom-1/2-translate
+          的「畫面正中下方」插槽，不是自己另外猜一個位置——那個位置已經被
+          islandPanelOverlap.spec.ts 證明在 3 種尺寸下都跟標題卡/面板/工具列
+          不衝突（390px 手機版實測過：頂部 top-4 會撞上標題卡，改這裡才乾淨）。*/}
+      {wordBabyHint && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="pointer-events-none absolute bottom-40 left-1/2 z-20 -translate-x-1/2 rounded-full border border-white/70 bg-[#244653]/95 px-5 py-2 text-sm font-bold text-[#fff1d0] shadow-xl"
+        >
+          {wordBabyHint}
+        </div>
+      )}
       {/* 標題卡 + 工具列（清單模式/聲音）共用一個 flex-col 容器——team-lead
           2026-10-26 二次訂正：原本工具列在手機版用 `top-40` 這種猜出來的像素
           數字卡在標題卡下方，`islandPanelOverlap.spec.ts` 證明了這個數字會

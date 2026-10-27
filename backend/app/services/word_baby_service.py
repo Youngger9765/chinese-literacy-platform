@@ -64,6 +64,16 @@ def award_station_rewards(
 
     這是整個獎勵系統「同一站只能發一次」的保證來源，不是靠 rng 的任何性質。
 
+    **已知、接受的殘留 race（code-reviewer finding，2026-10-27）**：呼叫端
+    `_try_award`（learning_step_progress.py）會先呼叫 `reward_log_exists`
+    判斷「這次是不是真的新發放」，但兩個真正同時的請求（例如同一個學生
+    開了兩個分頁）都可能在對方 commit 之前通過那個檢查——輸的那次撞到下面
+    的 `IntegrityError` 後重查，拿到的是**贏家已經存在的那筆 log**，於是
+    `_try_award` 會把它當成「新發放」一起附進回應。DB 狀態不會錯（還是只有
+    一筆 log、錢包不會被重複加），但前端可能在兩個分頁各跳一次同一筆獎勵
+    的提示。機率低、後果輕（只是提示重複，不是資料損壞），接受現況，不
+    為此另外加鎖。
+
     **無效 station 回傳 `None`，不寫任何 log 列**（security review finding，
     2026-10-27）：舊版本對「不在 15 種站對照表裡」的 station 仍然寫一筆
     `fragment_awarded=False` 的 log，理由是「保持冪等」——但一個從沒發生過
@@ -114,6 +124,18 @@ def _get_existing_log(
         .filter_by(student_id=student_id, lesson_uid=lesson_uid, station=station)
         .first()
     )
+
+
+def reward_log_exists(db: Session, *, student_id: int, lesson_uid: str, station: str) -> bool:
+    """是否在呼叫 `award_station_rewards` 之前就已經有這一格的 log（#3780 接島上）。
+
+    用途：把「這次 save 真的剛發放」跟「這只是重跑一次已經發過的冪等檢查」
+    區分開——後者不該被呼叫端當成新事件呈現給前端（見
+    `learning_step_progress.py` 的 `_try_award`，特別是 lesson-intro：那個站
+    設計上**每一次** step_progress 儲存都會重新嘗試判定一次，沒有這個
+    pre-check 的話，前端就會在同一個 session 裡每 5 秒自動存檔跳一次「你拿到
+    獎勵了！」，而不是只在真正發放的那一次）。"""
+    return _get_existing_log(db, student_id, lesson_uid, station) is not None
 
 
 def _determine_and_insert_reward(

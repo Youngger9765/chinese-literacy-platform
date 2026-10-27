@@ -398,3 +398,173 @@ class TestInvalidStationNeverGetsALogRow:
                 .count()
             )
             assert count == 0
+
+
+class TestWordBabyRewardsSurfacedInResponse:
+    """#3780 接島上 round: the reward-judgement hook above has always computed
+    fragment/encounter results, it just discarded them. This surfaces them
+    on `StepProgressResponse.word_baby_rewards` so the island HUD can show a
+    one-line hint — additive only, no new endpoint, no DB migration (the
+    columns already exist on StudentStationRewardLog)."""
+
+    def test_newly_completed_station_reward_appears_in_response(self, client, student, session_id):
+        resp = client.put(
+            f"/api/learning/sessions/{session_id}/progress",
+            json={
+                "current_step": "vocab-definition",
+                "steps_completed": ["vocab-definition"],
+                "step_data": {},
+            },
+            headers=auth_header(student["token"]),
+        )
+        assert resp.status_code == 200, resp.text
+        rewards = resp.json()["word_baby_rewards"]
+        assert len(rewards) >= 1
+        station_names = [r["station"] for r in rewards]
+        assert "vocab-definition" in station_names
+
+    def test_resaving_the_same_completed_step_does_not_resurface_the_reward(self, client, student, session_id):
+        payload = {
+            "current_step": "vocab-review",
+            "steps_completed": ["vocab-review"],
+            "step_data": {},
+        }
+        resp1 = client.put(
+            f"/api/learning/sessions/{session_id}/progress",
+            json=payload, headers=auth_header(student["token"]),
+        )
+        assert resp1.status_code == 200, resp1.text
+        assert any(r["station"] == "vocab-review" for r in resp1.json()["word_baby_rewards"])
+
+        resp2 = client.put(
+            f"/api/learning/sessions/{session_id}/progress",
+            json=payload, headers=auth_header(student["token"]),
+        )
+        assert resp2.status_code == 200, resp2.text
+        assert resp2.json()["word_baby_rewards"] == []
+
+    def test_lesson_intro_reward_only_surfaces_once_not_on_every_autosave(self, client, student, session_id):
+        """THE critical regression lock: lesson-intro is re-attempted on EVERY
+        save by design (PRD §5.2). Without the reward_log_exists pre-check,
+        this would re-surface "you got a reward!" to the island HUD on every
+        5-second autosave for the rest of the session — not a bug that shows
+        up as a crash, just a silently wrong/annoying product behavior, so it
+        needs its own explicit lock."""
+        first = client.put(
+            f"/api/learning/sessions/{session_id}/progress",
+            json={"current_step": "spotlight", "steps_completed": [], "step_data": {}},
+            headers=auth_header(student["token"]),
+        )
+        assert first.status_code == 200, first.text
+        first_rewards = first.json()["word_baby_rewards"]
+        assert any(r["station"] == "lesson-intro" for r in first_rewards)
+
+        second = client.put(
+            f"/api/learning/sessions/{session_id}/progress",
+            json={"current_step": "spotlight", "steps_completed": [], "step_data": {"anything": "changed"}},
+            headers=auth_header(student["token"]),
+        )
+        assert second.status_code == 200, second.text
+        second_rewards = second.json()["word_baby_rewards"]
+        assert not any(r["station"] == "lesson-intro" for r in second_rewards), (
+            "lesson-intro's reward re-surfaced on a repeat save — this is exactly "
+            "the bug reward_log_exists exists to prevent"
+        )
+
+    def test_word_baby_reward_failure_does_not_break_the_response_or_xp(
+        self, client, student, session_id, monkeypatch
+    ):
+        """Mirrors TestWordBabyBugDoesNotBreakStepProgressSave above — a bug in
+        reward logic must not cost step-progress or XP, and must not crash the
+        response when `word_baby_rewards` is read."""
+        from app.routes.learning import learning_step_progress as mod
+
+        def _boom(*args, **kwargs):
+            raise RuntimeError("simulated bug")
+
+        monkeypatch.setattr(mod, "award_station_rewards", _boom)
+
+        resp = client.put(
+            f"/api/learning/sessions/{session_id}/progress",
+            json={"current_step": "vocab-definition", "steps_completed": ["vocab-definition"], "step_data": {}},
+            headers=auth_header(student["token"]),
+        )
+        assert resp.status_code == 200, resp.text
+        assert resp.json()["word_baby_rewards"] == []
+        assert resp.json()["xp_awarded"] > 0
+
+
+class TestWordBabyRewardsReadableViaGet:
+    """#3780 接島上 二次修正（team-lead 2026-10-28）：原本靠 PUT 回應 +
+    postMessage 通知島上的設計，在真實網路延遲下會輸給 ISLAND_STEP_DONE
+    造成的 iframe 拆除——PUT 的回應永遠到不了。改成「拉」而不是「推」：
+    回島之後，島自己打 GET /progress 把這一課目前所有的獎勵紀錄讀出來，
+    不依賴任何訊息的時序。這裡是讀取既有紀錄，不是重新判定，所以沒有
+    PUT handler 那邊的冪等/SAVEPOINT 顧慮。"""
+
+    def test_get_after_put_reflects_the_granted_reward(self, client, student, session_id):
+        put_resp = client.put(
+            f"/api/learning/sessions/{session_id}/progress",
+            json={"current_step": "vocab-definition", "steps_completed": ["vocab-definition"], "step_data": {}},
+            headers=auth_header(student["token"]),
+        )
+        assert put_resp.status_code == 200, put_resp.text
+        put_reward = next(r for r in put_resp.json()["word_baby_rewards"] if r["station"] == "vocab-definition")
+
+        get_resp = client.get(
+            f"/api/learning/sessions/{session_id}/progress",
+            headers=auth_header(student["token"]),
+        )
+        assert get_resp.status_code == 200, get_resp.text
+        get_rewards = get_resp.json()["word_baby_rewards"]
+        get_reward = next(r for r in get_rewards if r["station"] == "vocab-definition")
+
+        # 同一筆 log，id 要一致——前端靠這個 id 做「顯示過了沒」的排重。
+        assert get_reward["id"] == put_reward["id"]
+        assert get_reward["fragment_awarded"] == put_reward["fragment_awarded"]
+        assert get_reward["fragment_flavor"] == put_reward["fragment_flavor"]
+
+    def test_get_keeps_returning_the_reward_on_every_subsequent_call(self, client, student, session_id):
+        """跟 PUT 不同：GET 是讀取，不是「這次新發放才出現」——同一筆獎勵
+        第二次、第三次 GET 都該看得到（排重的責任在前端 sessionStorage，
+        不是後端這個讀取端點）。"""
+        client.put(
+            f"/api/learning/sessions/{session_id}/progress",
+            json={"current_step": "vocab-definition", "steps_completed": ["vocab-definition"], "step_data": {}},
+            headers=auth_header(student["token"]),
+        )
+        first_get = client.get(
+            f"/api/learning/sessions/{session_id}/progress", headers=auth_header(student["token"]),
+        )
+        second_get = client.get(
+            f"/api/learning/sessions/{session_id}/progress", headers=auth_header(student["token"]),
+        )
+        assert any(r["station"] == "vocab-definition" for r in first_get.json()["word_baby_rewards"])
+        assert any(r["station"] == "vocab-definition" for r in second_get.json()["word_baby_rewards"])
+
+    def test_reward_from_a_different_lesson_does_not_leak_into_this_ones_get(self, client, student, session_id):
+        """同一個學生、不同課——這一課的 GET 不該看到另一課的獎勵紀錄。"""
+        other_slug = next(s for s in _ALL_LESSON_SLUGS if s != _VALID_SLUG)
+        other_session = client.post(
+            "/api/learning/sessions", json={"story_slug": other_slug}, headers=auth_header(student["token"]),
+        ).json()["id"]
+        client.put(
+            f"/api/learning/sessions/{other_session}/progress",
+            json={"current_step": "vocab-definition", "steps_completed": ["vocab-definition"], "step_data": {}},
+            headers=auth_header(student["token"]),
+        )
+
+        get_resp = client.get(
+            f"/api/learning/sessions/{session_id}/progress", headers=auth_header(student["token"]),
+        )
+        assert get_resp.status_code == 200, get_resp.text
+        assert get_resp.json()["word_baby_rewards"] == []
+
+    def test_another_students_session_is_403_not_leaked(self, client, student, session_id):
+        """team-lead 明確要求的案例：別人的 reward 讀不到。get_owned_session
+        在讀任何欄位之前就先擋 403，文字寶貝的獎勵資料不例外。"""
+        other_student = _register_and_login(client)
+        resp = client.get(
+            f"/api/learning/sessions/{session_id}/progress", headers=auth_header(other_student["token"]),
+        )
+        assert resp.status_code == 403, resp.text

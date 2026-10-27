@@ -25,6 +25,7 @@ import {
   loadStepProgress,
   StaleVersionError,
   StepProgressData,
+  WordBabyRewardItem,
 } from '../services/learningApi';
 
 const DEBOUNCE_MS = 5_000;
@@ -48,6 +49,14 @@ export interface UseProgressSyncOptions {
    * (the common case), nor for the initial GET load.
    */
   onXpAwarded?: (result: { xpAwarded: number; badgesUnlocked: string[] }) => void;
+  /**
+   * Issue #3780 接島上 — called after a successful save when the backend
+   * granted one or more word-baby rewards (fragment drop / baby encounter)
+   * for a newly-completed step mid-session. NOT called for saves whose
+   * `word_baby_rewards` is absent or empty (the common case), nor for the
+   * initial GET load. Mirrors onXpAwarded's wiring exactly (#3024).
+   */
+  onWordBabyRewarded?: (rewards: WordBabyRewardItem[]) => void;
 }
 
 export interface UseProgressSyncReturn {
@@ -73,6 +82,7 @@ export function useProgressSync({
   onProgressLoaded,
   onProgressSaved,
   onXpAwarded,
+  onWordBabyRewarded,
 }: UseProgressSyncOptions): UseProgressSyncReturn {
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const latestDataRef = useRef<StepProgressData | null>(null);
@@ -105,6 +115,8 @@ export function useProgressSync({
   useEffect(() => { onProgressSavedRef.current = onProgressSaved; }, [onProgressSaved]);
   const onXpAwardedRef = useRef(onXpAwarded);
   useEffect(() => { onXpAwardedRef.current = onXpAwarded; }, [onXpAwarded]);
+  const onWordBabyRewardedRef = useRef(onWordBabyRewarded);
+  useEffect(() => { onWordBabyRewardedRef.current = onWordBabyRewarded; }, [onWordBabyRewarded]);
 
   const readStoredVersion = (data: StepProgressData | null | undefined): number => {
     const v = data?.version;
@@ -174,6 +186,12 @@ export function useProgressSync({
           const badgesUnlocked = res.badges_unlocked ?? [];
           if (xpAwarded > 0 || badgesUnlocked.length > 0) {
             onXpAwardedRef.current?.({ xpAwarded, badgesUnlocked });
+          }
+          // Issue #3780 接島上 — surface word-baby rewards the same way,
+          // absent on old responses / GET-shaped payloads (backward compat).
+          const wordBabyRewards = res.word_baby_rewards ?? [];
+          if (wordBabyRewards.length > 0) {
+            onWordBabyRewardedRef.current?.(wordBabyRewards);
           }
         })
         .catch((err) => {

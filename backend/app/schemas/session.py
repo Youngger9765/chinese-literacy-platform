@@ -218,6 +218,23 @@ class StepProgressSaveRequest(BaseModel):
     )
 
 
+class WordBabyRewardItem(BaseModel):
+    """一個站這次 save 真的新發放的文字寶貝獎勵（#3780 接島上）。
+
+    只會出現「這次呼叫真的發放」的站——冪等重跑（特別是每次 save 都會
+    重新嘗試一次的 lesson-intro）不會重複出現，見
+    `word_baby_service.reward_log_exists` 的 docstring。"""
+    #: StudentStationRewardLog 的主鍵——前端用這個 id 做「顯示過了沒」的
+    #: sessionStorage 排重（Issue #3780 接島上二次修正：GET 端點用來讓島
+    #: 用「拉」的方式取得獎勵，而不是依賴 PUT 回應/postMessage 的時序）。
+    id: int
+    station: str
+    fragment_awarded: bool
+    fragment_flavor: str | None
+    encounter_result: Literal["none", "caught", "duplicate"]
+    encounter_baby_id: str | None
+
+
 class StepProgressResponse(BaseModel):
     """Response for GET/PUT /api/learning/sessions/{id}/progress."""
     session_id: int
@@ -230,5 +247,10 @@ class StepProgressResponse(BaseModel):
     #: Badge keys newly unlocked by THIS save (Issue #3024). Empty for GET
     #: responses and for saves that unlocked nothing.
     badges_unlocked: list[str] = Field(default_factory=list)
+    #: Word-baby fragment/encounter rewards genuinely granted by THIS save
+    #: (Issue #3780 接島上). Always [] for GET responses and for saves that
+    #: granted nothing new — added field defaults so pre-#3780 clients that
+    #: don't read it see no behavior change.
+    word_baby_rewards: list[WordBabyRewardItem] = Field(default_factory=list)
 
     model_config = {"from_attributes": True}

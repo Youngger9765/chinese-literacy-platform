@@ -53,6 +53,42 @@ export function parseIslandReturnMessage(data: unknown): { finished: boolean } |
 }
 
 /**
+ * 文字寶貝的碎片/遭遇獎勵提示（#3780 接島上）：跟 ISLAND_STEP_DONE 刻意分開
+ * 的第三個訊號——不是把 rewards 塞進同一則訊息，是因為 notifyIslandStepDone
+ * 在 useLearningStepNavigation.ts 同步呼叫（這一關做完的當下），獎勵資料卻
+ * 來自 useProgressSync 的 PUT /progress 回應（非同步、還有 5 秒 debounce），
+ * 兩者天生不同步；合成一則訊息會逼著改動已經很敏感的「做完立刻回島」導覽
+ * 時機。島側（ReadingIslandLab）收到這則獨立訊息時，不論回島動畫走到哪，
+ * 都可以把這次 save 真的新發放的獎勵排進提示佇列。
+ */
+export const WORD_BABY_REWARD = 'word-baby-reward';
+
+export interface WordBabyRewardMessagePayload {
+  id: number;
+  station: string;
+  fragment_awarded: boolean;
+  fragment_flavor: string | null;
+  encounter_result: 'none' | 'caught' | 'duplicate';
+  encounter_baby_id: string | null;
+}
+
+export function notifyIslandWordBabyReward(rewards: WordBabyRewardMessagePayload[]): void {
+  try {
+    window.top?.postMessage({ type: WORD_BABY_REWARD, rewards }, window.location.origin);
+  } catch {
+    /* 不在島上就什麼都不做 */
+  }
+}
+
+export function parseWordBabyRewardMessage(data: unknown): WordBabyRewardMessagePayload[] | null {
+  if (typeof data !== 'object' || data === null) return null;
+  const { type, rewards } = data as { type?: unknown; rewards?: unknown };
+  if (type !== WORD_BABY_REWARD) return null;
+  if (!Array.isArray(rewards)) return null;
+  return rewards as WordBabyRewardMessagePayload[];
+}
+
+/**
  * 回到島上時要不要把這一站記成「做過」。
  * - 學習頁回報做完（finished）一律記：課程簡介在平台設計上不會進 steps_completed，
  *   只靠伺服器進度判定，第一區永遠集不滿，後面的霧永遠不散

@@ -4,7 +4,15 @@
  * 只靠伺服器進度判定的話第一區永遠集不滿、後面的霧永遠不散。
  */
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { shouldMarkVisitedOnReturn, notifyIslandStepAborted, ISLAND_STEP_ABORTED, parseIslandReturnMessage } from '../storyMode';
+import {
+  shouldMarkVisitedOnReturn,
+  notifyIslandStepAborted,
+  ISLAND_STEP_ABORTED,
+  parseIslandReturnMessage,
+  notifyIslandWordBabyReward,
+  parseWordBabyRewardMessage,
+  WORD_BABY_REWARD,
+} from '../storyMode';
 
 describe('shouldMarkVisitedOnReturn', () => {
   it('marks the stop when the lesson page reported it finished, even with reliable server progress', () => {
@@ -65,5 +73,52 @@ describe('parseIslandReturnMessage', () => {
     expect(parseIslandReturnMessage(undefined)).toBeNull();
     expect(parseIslandReturnMessage('not an object')).toBeNull();
     expect(parseIslandReturnMessage({})).toBeNull();
+  });
+});
+
+/**
+ * #3780 接島上：過關回島時「這站掉了碎片／遇到寶貝」的小提示。刻意跟
+ * ISLAND_STEP_DONE 用不同的訊號（而不是把 rewards 塞進同一則訊息）——
+ * notifyIslandStepDone 在 useLearningStepNavigation.ts 同步呼叫，而獎勵資料
+ * 來自 useProgressSync 的 PUT /progress 回應（非同步、debounce 之後才會到），
+ * 兩者時間點天生不同步，合成一則訊息會逼著改動已經很敏感的導覽時機。
+ */
+describe('notifyIslandWordBabyReward', () => {
+  afterEach(() => { vi.unstubAllGlobals(); });
+
+  it('posts a WORD_BABY_REWARD message with the rewards payload to the top window', () => {
+    const postMessage = vi.fn();
+    vi.stubGlobal('window', { top: { postMessage }, location: { origin: 'https://example.test' } });
+    const rewards = [
+      { id: 1, station: 'vocab-definition', fragment_awarded: true, fragment_flavor: '語文基礎', encounter_result: 'none' as const, encounter_baby_id: null },
+    ];
+    notifyIslandWordBabyReward(rewards);
+    expect(postMessage).toHaveBeenCalledWith({ type: WORD_BABY_REWARD, rewards }, 'https://example.test');
+  });
+
+  it('does nothing (does not throw) when not inside the island iframe', () => {
+    vi.stubGlobal('window', { top: undefined, location: { origin: 'https://example.test' } });
+    expect(() => notifyIslandWordBabyReward([])).not.toThrow();
+  });
+});
+
+describe('parseWordBabyRewardMessage', () => {
+  it('WORD_BABY_REWARD → the rewards array', () => {
+    const rewards = [
+      { id: 2, station: 'lesson-intro', fragment_awarded: false, fragment_flavor: null, encounter_result: 'caught' as const, encounter_baby_id: 'wb-003' },
+    ];
+    expect(parseWordBabyRewardMessage({ type: 'word-baby-reward', rewards })).toEqual(rewards);
+  });
+
+  it('unrelated messages → null, listener ignores them', () => {
+    expect(parseWordBabyRewardMessage({ type: 'island-step-done', step: 'x' })).toBeNull();
+    expect(parseWordBabyRewardMessage(null)).toBeNull();
+    expect(parseWordBabyRewardMessage(undefined)).toBeNull();
+    expect(parseWordBabyRewardMessage('not an object')).toBeNull();
+    expect(parseWordBabyRewardMessage({})).toBeNull();
+  });
+
+  it('malformed rewards field (not an array) → null, does not crash the listener', () => {
+    expect(parseWordBabyRewardMessage({ type: 'word-baby-reward', rewards: 'not-an-array' })).toBeNull();
   });
 });

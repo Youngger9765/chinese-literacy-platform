@@ -4,6 +4,7 @@ import type { AuthUser } from '../services/authApi';
 import { clearActiveSession, saveActiveSession } from '../services/api';
 import { filterRequiredAssignmentSteps, resolveActiveSteps, stepIdMatchesCompleted, STEP_PATH_TO_NUMBER } from '../config/stepConfig';
 import { useProgressSync } from './useProgressSync';
+import { isIslandStoryMode, notifyIslandWordBabyReward } from '../pages/lab/island/storyMode';
 import type { StepProgressData } from '../services/learningApi';
 import type {
   ComprehensionResult,
@@ -232,6 +233,16 @@ export function useStepProgressPersistence({
     onXpAwarded: ({ badgesUnlocked }) => {
       if (badgesUnlocked.length > 0) {
         setMidSessionBadgeUnlocks((prev) => [...prev, ...badgesUnlocked]);
+      }
+    },
+    // #3780 接島上：過關回島的「這站掉了碎片／遇到寶貝」小提示，只在喝采島
+    // 故事模式下才有人在聽（ReadingIslandLab 的 message listener）——一般
+    // /learn 教材框完全沒有接這個訊息，所以 gate 在這裡避免做無意義的
+    // postMessage（iframe 外層是 window.top 自己時 postMessage 本來就是
+    // no-op，但明確 gate 讓意圖看得見，也省一次呼叫）。
+    onWordBabyRewarded: (rewards) => {
+      if (isIslandStoryMode()) {
+        notifyIslandWordBabyReward(rewards);
       }
     },
     // The server only ever adds completed steps, so after each save its list is

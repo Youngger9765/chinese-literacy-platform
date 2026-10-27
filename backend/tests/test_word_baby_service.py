@@ -119,6 +119,46 @@ class TestAwardStationRewardsIdempotency:
         assert db_session.query(StudentStationRewardLog).filter_by(student_id=1).count() == 2
 
 
+class TestRewardLogExists:
+    """TDD for `reward_log_exists` (#3780 接島上 round): the island HUD's
+    "過關掉碎片" hint needs to know whether a station's reward is GENUINELY
+    new this call, not a repeat of an idempotent re-check. `lesson-intro` in
+    particular is re-attempted on every single step_progress save (by design,
+    see `_award_word_baby_rewards`'s docstring) — without this pre-check, the
+    caller would surface "you got a reward!" on every 5-second autosave for
+    the rest of the session, not just the one save that actually granted it.
+    """
+
+    def test_false_before_any_reward_is_granted(self, db_session):
+        from app.services.word_baby_service import reward_log_exists
+
+        _make_user(db_session, 1)
+        assert reward_log_exists(db_session, student_id=1, lesson_uid="L0001", station="vocab-definition") is False
+
+    def test_true_after_a_reward_is_granted(self, db_session):
+        from app.services.word_baby_service import award_station_rewards, reward_log_exists
+
+        _make_user(db_session, 1)
+        award_station_rewards(
+            db_session, student_id=1, lesson_uid="L0001", station="vocab-definition",
+            now=_now(), rng=_FakeRng(random_values=[0.999999, 0.999999]),
+        )
+        db_session.commit()
+        assert reward_log_exists(db_session, student_id=1, lesson_uid="L0001", station="vocab-definition") is True
+
+    def test_does_not_leak_across_lessons(self, db_session):
+        """Same station, different lesson — must not borrow the other lesson's row."""
+        from app.services.word_baby_service import award_station_rewards, reward_log_exists
+
+        _make_user(db_session, 1)
+        award_station_rewards(
+            db_session, student_id=1, lesson_uid="L0001", station="lesson-intro",
+            now=_now(), rng=_FakeRng(random_values=[0.999999, 0.999999]),
+        )
+        db_session.commit()
+        assert reward_log_exists(db_session, student_id=1, lesson_uid="L0002", station="lesson-intro") is False
+
+
 class TestFragmentDrop:
     def test_fragment_dropped_adds_to_wallet(self, db_session):
         from app.services.word_baby_service import award_station_rewards

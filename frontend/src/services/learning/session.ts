@@ -548,6 +548,19 @@ export interface StepProgressData {
   assignment_ready_for_submit?: boolean;
 }
 
+/** One station's word-baby reward genuinely granted by THIS save (Issue
+ * #3780 接島上). Mirrors backend WordBabyRewardItem (session.py). */
+export interface WordBabyRewardItem {
+  /** StudentStationRewardLog's primary key — used by the island to dedupe
+   * "already shown" rewards via sessionStorage (接島上二次修正). */
+  id: number;
+  station: string;
+  fragment_awarded: boolean;
+  fragment_flavor: string | null;
+  encounter_result: 'none' | 'caught' | 'duplicate';
+  encounter_baby_id: string | null;
+}
+
 export interface StepProgressResponse {
   session_id: number;
   step_progress: StepProgressData | null;
@@ -555,6 +568,9 @@ export interface StepProgressResponse {
   xp_awarded?: number;
   /** Badge keys newly unlocked by THIS save (Issue #3024). Absent/[] = none. */
   badges_unlocked?: string[];
+  /** Word-baby rewards genuinely granted by THIS save (Issue #3780 接島上).
+   * Absent/[] = nothing new. */
+  word_baby_rewards?: WordBabyRewardItem[];
 }
 
 /**

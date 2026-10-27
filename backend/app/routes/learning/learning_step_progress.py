@@ -20,7 +20,7 @@ from ...models.user import User
 from ...schemas.session import StepProgressResponse, StepProgressSaveRequest, parse_step_progress
 from ...services.assignment_session_service import maybe_auto_submit_assignment_session
 from ...services.lesson_loader import get_lesson_by_id
-from ...services.word_baby_service import award_station_rewards
+from ...services.word_baby_service import award_station_rewards, reward_log_exists
 from ...utils.slug import normalize_story_slug
 # DEPRECATED (#1182): _STEP_KEY_TO_NUM / _MAX_STEP_NUM / _normalize_step_key were used
 # to sync the integer current_step column. Sync removed; imports no longer needed here.
@@ -159,7 +159,7 @@ def save_step_progress(
     # 重新嘗試，碎片就永久遺失了。修法：SAVEPOINT 的範圍改成**逐站**，不是
     # 整批——這樣移進 `_award_word_baby_rewards` 自己的迴圈裡做（見下方），
     # 這裡只單純呼叫它，不另外包一層會牽連多站的 SAVEPOINT。
-    _award_word_baby_rewards(
+    word_baby_rewards = _award_word_baby_rewards(
         db,
         student_id=current_user.id,
         session=session,
@@ -189,6 +189,7 @@ def save_step_progress(
         step_progress=session.step_progress,
         xp_awarded=xp_awarded,
         badges_unlocked=badges_unlocked,
+        word_baby_rewards=word_baby_rewards,
     )
 
 
@@ -266,10 +267,20 @@ def _award_word_baby_rewards(
     session: "LearningSession",
     previously_completed: list[str],
     newly_reported: list[str],
-) -> None:
+) -> list[dict]:
     """完成一個站（steps_completed 新增一個 step_id）時，觸發文字寶貝的碎片/
     遭遇判定——跟 `_award_step_complete_xp` 共用同一個「每個 step 完成都會流經
     這裡」的位置（issue #3024 的先例已經證實這裡是唯一入口，不需要新端點）。
+
+    **回傳值（#3780 接島上，team-lead 2026-10-27 授權新增回應欄位）**：這次呼叫
+    「真的新發放」的獎勵清單，每筆 `{"station", "fragment_awarded",
+    "fragment_flavor", "encounter_result", "encounter_baby_id"}`，給呼叫端填進
+    `StepProgressResponse.word_baby_rewards`，讓島上 HUD 能顯示「這一站掉了
+    什麼」的小提示。**「真的新發放」靠 `reward_log_exists` 在呼叫
+    `award_station_rewards` 之前先查一次**——沒有這個 pre-check，lesson-intro
+    （設計上每次 save 都會重新嘗試判定一次）會在同一個 session 裡的每次
+    autosave 都讓這個清單再出現一次同一筆獎勵，變成「每 5 秒跳一次你拿到
+    獎勵了」，而不是只在真正發放的那一次。
 
     **為什麼選這裡當觸發點**（工頭判斷，team-lead 要求說明）：
     1. `save_step_progress` 是平台上**唯一**一個「不管哪個步驟、哪種關卡類型，
@@ -307,10 +318,10 @@ def _award_word_baby_rewards(
     """
     lesson = _resolve_lesson(session)
     if lesson is None:
-        return  # 找不到對應的內容樹課程（如測試用的假 slug），不嘗試判定
+        return []  # 找不到對應的內容樹課程（如測試用的假 slug），不嘗試判定
     lesson_uid = lesson.get("lesson_uid")
     if lesson_uid is None:
-        return
+        return []
 
     # 多部分/多輪的站 id 會帶 "#slug" 後綴（如 "full-text-annotate#dcavv"）——
     # step_sequence 裡存的是帶 slug 的完整 id，但碎片/遭遇判定跟 reward_log
@@ -319,21 +330,39 @@ def _award_word_baby_rewards(
         raw_step_id.split("#", 1)[0] for raw_step_id in (lesson.get("step_sequence") or [])
     }
 
+    rewards: list[dict] = []
+
     def _try_award(step_id: str) -> None:
         station = step_id.split("#", 1)[0]
         if station not in valid_stations_in_this_lesson:
             return  # 不是這一課真的有的站——跳過，不呼叫判定、不留任何紀錄
+        # 發放前先查一次這格有沒有舊 log——這是「這次真的新發放」跟「只是
+        # 重跑一次已經發過的冪等檢查」唯一的分界，見本函式 docstring。
+        if reward_log_exists(db, student_id=student_id, lesson_uid=lesson_uid, station=station):
+            return
         try:
             with db.begin_nested():
-                award_station_rewards(db, student_id=student_id, lesson_uid=lesson_uid, station=station)
+                log = award_station_rewards(db, student_id=student_id, lesson_uid=lesson_uid, station=station)
         except Exception:
             logger.exception(
                 "word-baby reward award failed for station %s (lesson %s, user %d) — "
                 "skipped, other stations in this save are unaffected, step-progress + XP unaffected",
                 station, lesson_uid, student_id,
             )
+            return
+        if log is None:
+            return  # 無效 station（長度超限或不在 15 站對照表）——沒有東西要呈現
+        rewards.append({
+            "id": log.id,
+            "station": station,
+            "fragment_awarded": log.fragment_awarded,
+            "fragment_flavor": log.fragment_flavor,
+            "encounter_result": log.encounter_result,
+            "encounter_baby_id": log.encounter_baby_id,
+        })
 
-    # lesson-intro：每次儲存都嘗試判定一次，冪等保證不會重複發放。
+    # lesson-intro：每次儲存都嘗試判定一次，冪等保證不會重複發放（但上面的
+    # reward_log_exists pre-check 保證只有「真的新發放」那一次會進 rewards）。
     _try_award("lesson-intro")
 
     already = set(previously_completed)
@@ -343,6 +372,8 @@ def _award_word_baby_rewards(
     ]
     for step_id in newly_completed:
         _try_award(step_id)
+
+    return rewards
 
 
 def _resolve_lesson(session: "LearningSession") -> dict | None:
@@ -454,4 +485,55 @@ def get_step_progress(
     (frontend should fall back to localStorage in that case).
     """
     session = get_owned_session(session_id, current_user, db)
-    return StepProgressResponse(session_id=session.id, step_progress=session.step_progress)
+    word_baby_rewards = _load_word_baby_rewards_for_lesson(db, student_id=current_user.id, session=session)
+    return StepProgressResponse(
+        session_id=session.id,
+        step_progress=session.step_progress,
+        word_baby_rewards=word_baby_rewards,
+    )
+
+
+def _load_word_baby_rewards_for_lesson(
+    db: Session, *, student_id: int, session: "LearningSession"
+) -> list[dict]:
+    """讀出這個學生、這一課**目前已經存在**的全部文字寶貝獎勵紀錄
+    （Issue #3780 接島上二次修正，team-lead 2026-10-28）。
+
+    這不是 `_award_word_baby_rewards` 的重複——那支是 PUT handler 專用的
+    「判定 + 發放」，這支純粹是 SELECT，不碰 `award_station_rewards`，沒有
+    冪等或 SAVEPOINT 的顧慮。
+
+    **為什麼回傳「這一課全部」而不是「這次 save 新增的」**：原本的設計讓島
+    靠 PUT 回應裡的 word_baby_rewards（透過 postMessage 推給島）顯示提示，
+    但 ISLAND_STEP_DONE 會同步拆掉裝著學習頁的 iframe，而那個 PUT 的回應
+    常常還沒回來——真實網路延遲下提示幾乎不會顯示。改成回島後由島自己向
+    這個 GET 端點「拉」，不依賴任何訊息時序；GET 本來就會在回島時被
+    `refreshProgress()` 呼叫。範圍限定在「這一課全部」而不是「這次新增」
+    是刻意的：後者需要在這裡重新定義「這次」是什麼（用時間戳記？用
+    session_id？），而前端已經用 reward id 配 sessionStorage 排重解決了
+    「顯示過了沒」，範圍窄在這裡反而是多餘的複雜度。
+    """
+    lesson = _resolve_lesson(session)
+    if lesson is None:
+        return []
+    lesson_uid = lesson.get("lesson_uid")
+    if lesson_uid is None:
+        return []
+    from ...models.word_baby import StudentStationRewardLog
+
+    rows = (
+        db.query(StudentStationRewardLog)
+        .filter_by(student_id=student_id, lesson_uid=lesson_uid)
+        .all()
+    )
+    return [
+        {
+            "id": row.id,
+            "station": row.station,
+            "fragment_awarded": row.fragment_awarded,
+            "fragment_flavor": row.fragment_flavor,
+            "encounter_result": row.encounter_result,
+            "encounter_baby_id": row.encounter_baby_id,
+        }
+        for row in rows
+    ]
