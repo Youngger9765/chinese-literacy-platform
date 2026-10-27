@@ -3,7 +3,7 @@ import { introProgress, characterPose } from './islandMotion';
 import type { IslandBaby, IslandStop } from './islandTemplate';
 import { isSceneryExcluded } from './islandTemplate';
 import { MIN_CAMERA_BUILDING_DISTANCE, computeSpawnFacingLighthouse, selectNearestStation, findCelebrationViewpoint, type CelebrationViewpoint } from './spawnPoint';
-import { startCelebration, advanceOnTurnConverged, isHoldComplete, diffProgress, resolveCelebrationTrigger, celebrationGlowBoost, resolveCelebrationGlow, INITIAL_PROGRESS_DIFF_STATE, type CelebrationState, type ProgressDiffState } from './islandCelebration';
+import { startCelebration, advanceOnTurnConverged, isHoldComplete, diffProgress, resolveCelebrationTrigger, celebrationGlowBoost, steadyCompletedGlow, resolveCelebrationGlow, INITIAL_PROGRESS_DIFF_STATE, type CelebrationState, type ProgressDiffState } from './islandCelebration';
 import { buildStationGroup, applyBuildingGlow, disposeObjectTree, type BuildingMaterialSlot } from './islandBuildingShapes';
 
 interface WorldEvents {
@@ -663,7 +663,7 @@ export function createIslandWorld(
     // 多亮；`applyBuildingGlow`（islandBuildingShapes.ts）才是真的把結果
     // 寫進材質那一步，兩邊都各自可以離線測試。
     perBuildingMaterials.forEach((mats, index) => {
-      const baseGlow = progressState.completed.includes(index) ? 2.2 + Math.sin(elapsed * 3) * 0.3 : 0;
+      const baseGlow = progressState.completed.includes(index) ? steadyCompletedGlow(elapsed) : 0;
       const celebratingThis = celebration && index === celebration.index;
       const boosted = celebratingThis ? celebrationGlowBoost(celebration.profile, elapsed) : baseGlow;
       const intensity = celebratingThis && debugGlowOverride !== null ? debugGlowOverride : boosted;

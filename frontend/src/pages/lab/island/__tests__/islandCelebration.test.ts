@@ -13,6 +13,7 @@ import {
   diffProgress,
   resolveCelebrationTrigger,
   celebrationGlowBoost,
+  steadyCompletedGlow,
   INITIAL_PROGRESS_DIFF_STATE,
 } from '../islandCelebration';
 
@@ -176,9 +177,12 @@ describe('celebrationGlowBoost（慶祝中的建築窗戶要比平常已完成�
     expect(heavy).toBeGreaterThan(light);
   });
 
-  it('🔒 兩種分級在任何時間點都要明顯比平常「已完成」的穩定發光值(2.2±0.3)更亮，不然跟平常走近已完成的站沒有視覺差異', () => {
-    const steadyDoneMax = 2.2 + 0.3; // 平常已完成站的穩定發光上限
-    for (const t of [0, 0.3, 0.6, 1, 1.5, 2]) {
+  it('🔒 兩種分級在任何時間點都要明顯比平常「已完成」的穩定發光值更亮，不然跟平常走近已完成的站沒有視覺差異', () => {
+    const sampleTimes = [0, 0.3, 0.6, 1, 1.5, 2, 2.5, 3];
+    // 直接從真正的函式取上界，不在測試裡另外複製一份數字——2026-10-27
+    // 二度調校把兩邊的強度都往下調了，複製的字面值會漂移成假的保證。
+    const steadyDoneMax = Math.max(...sampleTimes.map(steadyCompletedGlow));
+    for (const t of sampleTimes) {
       expect(celebrationGlowBoost(CELEBRATION_PROFILES.heavy, t)).toBeGreaterThan(steadyDoneMax);
       expect(celebrationGlowBoost(CELEBRATION_PROFILES.light, t)).toBeGreaterThan(steadyDoneMax);
     }
