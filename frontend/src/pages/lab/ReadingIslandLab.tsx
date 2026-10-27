@@ -35,6 +35,12 @@ export default function ReadingIslandLab() {
   const [completed, setCompleted] = useState<string[]>([]);
   const [visited, setVisited] = useState<string[]>([]);
   const [near, setNear] = useState<number | null>(null);
+  // #3780 P0-3 二次審查訂正：鏡頭在轉向剛完成的站／轉向下一站的過程中，
+  // 「發現新去處」卡片不該還顯示玩家物理位置附近那一站的舊文案（叫他去
+  // 下一站，卡片卻還在講剛完成的那一站）。celebrating 為 true 的這段期間
+  // 把卡片整個收起來，等轉向動畫穩定下來、celebrating 變回 false 才恢復
+  // 正常的「物理位置最近站」顯示邏輯。
+  const [celebrating, setCelebrating] = useState(false);
   const [fogHint, setFogHint] = useState(false);
   const [opening, setOpening] = useState(0);
   // 冷開場：先一個暗畫面，學生點一下才出聲（瀏覽器規定），聲音先到、畫面晚 0.45 秒進來
@@ -44,6 +50,11 @@ export default function ReadingIslandLab() {
   const [door, setDoor] = useState<number | null>(null);
   const doorRef = useRef(door);
   doorRef.current = door;
+  // #3780 P0-3：onCelebrationEnd 是 engine 停留期結束後非同步觸發的，不在
+  // 建世界那個 effect 的 deps 裡（那個 effect 不該因為進度變化就重建整座
+  // 3D 世界）——用 ref 鏡射最新的 doneIndexes，callback 讀到的才不會是
+  // world 剛建好那一刻的舊值。
+  const doneIndexesRef = useRef<number[]>([]);
   const [muted, setMuted] = useState(() => readMuted(typeof localStorage === 'undefined' ? null : localStorage));
   const [module, setModule] = useState<number | null>(null);
   const moduleRef = useRef(module);
@@ -62,6 +73,10 @@ export default function ReadingIslandLab() {
   const [position, setPosition] = useState({ x: -3, z: 15 });
   const stickOrigin = useRef<{ x: number; y: number } | null>(null);
   const hintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // #3780 P0-3：「下一站」導引文字現在由 engine 的 onCelebrationEnd 觸發
+  // （停留在剛完成站之後才顯示），不是 React state 變化就立刻顯示，
+  // 所以清除計時器要自己存，沒有對應的 useEffect 可以掛 cleanup。
+  const guideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const storageKey = `reading-island-visited:${user?.id ?? 'guest'}:${storyId}`;
   const student = user?.roles.some((role) => role.role_name === 'student') ?? false;
   const sequence = useMemo(() => lesson?.stepSequence ?? [], [lesson]);
@@ -83,6 +98,7 @@ export default function ReadingIslandLab() {
     const step = stepFor(index);
     return step && (completed.includes(step) || visited.includes(step)) ? [index] : [];
   }), [stepFor, completed, visited, STOPS]);
+  doneIndexesRef.current = doneIndexes;
   // 一區全部讀完才散開下一區的霧：沒去過的地方保持神秘
   const zoneDone = (zone: number) => STOPS.every((stop, index) => stop.zone !== zone || doneIndexes.includes(index));
   const unlockedZone = zoneDone(0) ? (zoneDone(1) ? 2 : 1) : 0;
@@ -150,12 +166,33 @@ export default function ReadingIslandLab() {
       onPick: (index) => { setMode('first'); worldRef.current?.travelTo(index); },
       onWantFirstPerson: () => setMode('first'),
       onArrive: (index) => setNear(index),
+      // #3780 P0-3：鏡頭正要轉去面向剛完成的站，這時播鐘聲——跟「燈正在
+      // 亮起來」同一刻，不是等轉到下一站才響。
+      onCelebrate: () => { setCelebrating(true); audioRef.current?.cue('chime'); },
+      // #3780 P0-3：停留期結束、鏡頭真的要轉去下一站了，才顯示「下一站」
+      // 導引文字跟 sparkle 音效——原本這兩個是 doneIndexes 一變就立刻觸發
+      // （見下面已移除的分支），鏡頭都還沒轉過去，字就先跳出來了。
+      onCelebrationEnd: (_index, nextStopIndex) => {
+        // 轉向下一站需要一點時間收斂（見 createIslandWorld.ts 的 turnTo
+        // 插值，`Math.min(1, dt * 2.2)` 這個收斂速度），轉完才讓卡片恢復，
+        // 避免卡片還停留在剛完成那站的文案、但畫面已經轉到別處的矛盾。
+        window.setTimeout(() => setCelebrating(false), 1800);
+        if (nextStopIndex === null) { setCelebrating(false); return; }
+        const currentStops = STOPS;
+        const currentDone = doneIndexesRef.current;
+        const zoneOpened = currentStops.every((stop, i) => stop.zone !== currentStops[nextStopIndex].zone || !currentDone.includes(i));
+        audioRef.current?.cue('sparkle');
+        setGuide(`${zoneOpened ? '迷霧散開了！' : ''}跟著金色光柱，下一站：${currentStops[nextStopIndex].name}`);
+        if (guideTimer.current) clearTimeout(guideTimer.current);
+        guideTimer.current = setTimeout(() => setGuide(''), 7000);
+      },
     }, { stops: STOPS, babies: BABIES });
     worldRef.current = world;
     return () => {
       world.dispose();
       worldRef.current = null;
       if (hintTimer.current) clearTimeout(hintTimer.current);
+      if (guideTimer.current) clearTimeout(guideTimer.current);
     };
     // `lesson` 在 deps 裡是必要的，不是多餘的：20011 走手刻覆蓋分支時，STOPS/BABIES
     // 在 `lesson` 還沒載入（`fetchStory` resolve 之前）就已經是 STOPS_20011/
@@ -202,12 +239,12 @@ export default function ReadingIslandLab() {
         prevDone.current = doneIndexes.length;
         return () => clearTimeout(timer);
       }
-      const zoneOpened = STOPS.every((stop, i) => stop.zone !== STOPS[nextIndex].zone || !doneIndexes.includes(i));
-      audioRef.current?.cue('sparkle');
-      setGuide(`${zoneOpened ? '迷霧散開了！' : ''}跟著金色光柱，下一站：${STOPS[nextIndex].name}`);
-      const timer = setTimeout(() => setGuide(''), 7000);
+      // #3780 P0-3：「下一站」導引文字／sparkle 音效原本在這裡立刻觸發，
+      // 现在改由 engine 的 onCelebrationEnd 事件驅動——鏡頭要先面向剛完成
+      // 的那一站停留一段時間（分級見 islandCelebration.ts），停留期結束
+      // 才顯示導引、轉向下一站。這裡只需要繼續記錄 prevDone。
       prevDone.current = doneIndexes.length;
-      return () => clearTimeout(timer);
+      return undefined;
     }
     prevDone.current = doneIndexes.length;
     return undefined;
@@ -400,11 +437,11 @@ export default function ReadingIslandLab() {
         </div>
         <button type="button" onClick={() => setMode(mode === 'first' ? 'god' : 'first')} className="shrink-0 rounded-full border-2 border-white bg-[#233e4b]/90 px-4 py-2 text-sm font-bold text-[#fff1d0] shadow-lg transition hover:scale-105 active:scale-95">{mode === 'first' ? '展開上帝視角' : '回到第一人稱'}</button>
       </div>
-      {near !== null && module === null && opening < 0 && (
+      {near !== null && module === null && opening < 0 && !celebrating && (
         <div className="absolute bottom-5 left-1/2 z-20 w-[min(92vw,440px)] -translate-x-1/2 rounded-2xl border-2 border-white bg-[#fff9e9]/95 p-4 text-center shadow-2xl md:bottom-9">
           <div className="text-xs font-bold tracking-widest text-[#b7794e]">發現新去處</div>
           <h2 className="mt-1 text-xl font-black">{STOPS[near].name}{doneIndexes.includes(near) ? ' · 已亮燈' : ''}</h2>
-          <p className="my-2 text-sm">{STOPS[near].line}</p>
+          <p className="my-2 text-sm">{doneIndexes.includes(near) ? '已經點亮了，想再聽一次也可以' : STOPS[near].line}</p>
           {/* disabled 是 UI 層的防呆，真正擋重複開站的是 openModule 自己
               的 doorRef/moduleRef 檢查——兩層都做：這顆按鈕本來就不該讓人
               以為點了有用（team-lead 2026-10-26 明令）。*/}

@@ -1,0 +1,120 @@
+/**
+ * #3780 P0-3（playtest 2026-10-26）：「點亮那一刻要看得到，回饋強度要跟
+ * 努力成正比。現在回島時鏡頭已經轉向下一站，剛點亮的那一站根本不在畫面
+ * 裡」——回饋分級（哪一站給多大的慶祝）要寫成資料表，不要寫死在判斷式裡
+ * （之前每加一種站都要改一次 if/else，而且散落在呼叫端各處）。
+ *
+ * 「輕」給小亮（課程簡介、純複習性質的站），「重」給大一點的慶祝（真正
+ * 要花力氣完成的練習站）——不是按「用的時間長短」分，是按「這一關對
+ * 學生而言是不是一次真正的努力」分。
+ */
+
+export type CelebrationTier = 'light' | 'heavy';
+
+export const STATION_CELEBRATION_TIER: Record<string, CelebrationTier> = {
+  'lesson-intro': 'light',
+  'full-text-annotate': 'heavy',
+  'key-passage-reading': 'heavy',
+  'vocab-definition': 'light',
+  'vocab-application': 'heavy',
+  spotlight: 'heavy',
+  'keypoints-table': 'heavy',
+  comprehension: 'heavy',
+  'vocab-review': 'light',
+  'knowledge-station': 'light',
+  report: 'heavy',
+  'classical-text': 'heavy',
+  'classical-sentence-matching': 'heavy',
+  'classical-word-matching': 'light',
+  'classical-self-challenge': 'light',
+};
+
+export interface CelebrationProfile {
+  tier: CelebrationTier;
+  /** 回島後先面向剛完成的站，停留這麼多秒再轉向下一站。 */
+  holdSeconds: number;
+  /** 慶祝粒子數量。 */
+  particleCount: number;
+}
+
+export const CELEBRATION_PROFILES: Record<CelebrationTier, CelebrationProfile> = {
+  light: { tier: 'light', holdSeconds: 1.1, particleCount: 6 },
+  heavy: { tier: 'heavy', holdSeconds: 1.6, particleCount: 18 },
+};
+
+/**
+ * 查不到的 step type（理論上不該發生，`STEP_BUILDING_META` 涵蓋全平台用過
+ * 的所有 step）一律當 heavy——寧可多慶祝，也不要讓一個新站型漏接時悄悄
+ * 變成「什麼反應都沒有」。
+ */
+export function celebrationProfileForStep(step: string): CelebrationProfile {
+  const tier = STATION_CELEBRATION_TIER[step.split('#')[0]] ?? 'heavy';
+  return CELEBRATION_PROFILES[tier];
+}
+
+/**
+ * 慶祝序列的三段式狀態機——#3780 P0-3 二次審查訂正（2026-10-27）。
+ *
+ * 原本「轉向剛完成的站」跟「算停留秒數」寫在 `createIslandWorld.ts` 裡，
+ * 是同一刻一起開始的（`celebrationUntil = elapsed + holdSeconds` 跟
+ * `turnTo = justCompleted` 同一行）。玩家離那棟建築很遠時（例如用清單
+ * 模式直接開站、沒有真的走過去，需要轉動較大角度），轉頭動畫跟停留計時
+ * 並行跑，停留秒數會被轉頭時間吃掉，甚至轉到一半就已經開始轉去下一站
+ * ——剛完成的站從頭到尾沒有真的入鏡（team-lead/Young 2026-10-27 真瀏覽器
+ * 截圖退件）。
+ *
+ * 第一版修法直接把這三個變數（`celebrationPhase`／`celebrationUntil`／
+ * `pendingNextStop`）攤開寫在 `createIslandWorld.ts` 的 three.js 閉包裡，
+ * 審查員抓到：所有既有測試都 mock 掉 `createIslandWorld`，真正的狀態機
+ * 從沒被任何測試跑到過——退回舊寫法（「setProgress 當下就設
+ * celebrationUntil」）1528 條測試照樣全綠。抽成這幾個不碰 three.js／
+ * WebGL 的純函式，`createIslandWorld.ts` 的 `animate()` 只呼叫它們，
+ * 才鎖得住。
+ */
+export interface CelebrationState {
+  /** 剛完成的那一站在 `content.stops` 裡的 index。 */
+  readonly index: number;
+  readonly profile: CelebrationProfile;
+  readonly phase: 'turning' | 'holding';
+  /** 只有 `phase === 'holding'` 才有意義——'turning' 階段這個值不會被讀。 */
+  readonly holdUntil: number;
+  readonly pendingNextStop: number | null;
+}
+
+/**
+ * 開始慶祝一個剛完成的站——永遠從 'turning' 階段開始。這一刻還不知道
+ * 「轉到」要花多久，所以 `holdUntil` 填 0 只是佔位，`isHoldComplete` 在
+ * 'turning' 階段永遠回傳 false，不會去讀這個值（這正是鎖住舊 bug 的
+ * 關鍵：舊寫法是這裡就直接把 phase 設成等同 'holding' 並算好
+ * `holdUntil`，等於轉頭動畫還沒開始跑，停留計時已經在倒數）。
+ *
+ * 呼叫端若在前一個慶祝還沒播完時又呼叫一次（「慶祝中又完成另一站」），
+ * 這裡**不會**合併或排隊前一個——直接回傳全新的 state，等於放棄前一個
+ * （它永遠不會走到 holdUntil、呼叫端也就永遠不會對它觸發「轉向下一站」
+ * 事件）。這是刻意的規則，不是沒想到：目前產品面一次只會回報一站完成
+ * （見 `returnToIsland`），真的連續撞上這個情境時，「以最新完成的為準」
+ * 比「排隊播完每一個」更不會讓玩家對著一個已經過去的畫面空等。
+ */
+export function startCelebration(index: number, step: string, pendingNextStop: number | null): CelebrationState {
+  return { index, profile: celebrationProfileForStep(step), phase: 'turning', holdUntil: 0, pendingNextStop };
+}
+
+/**
+ * 鏡頭轉向剛完成的站這個動作收斂了（呼叫端的 `turnTo` 插值歸零）——這時
+ * 候才真正開始算停留秒數。已經在 'holding' 階段時是安全的 no-op（不會
+ * 把 `holdUntil` 往後挪）——呼叫端是每一幀檢查一次「turnTo 是不是
+ * null」，轉到之後的每一幀都會符合條件、重複呼叫到這支。
+ */
+export function advanceOnTurnConverged(state: CelebrationState, elapsed: number): CelebrationState {
+  if (state.phase === 'holding') return state;
+  return { ...state, phase: 'holding', holdUntil: elapsed + state.profile.holdSeconds };
+}
+
+/**
+ * 停留夠了沒——'turning' 階段（還沒轉到）永遠回傳 false，不管 `elapsed`
+ * 多大。這就是鎖住舊 bug 的斷言點：舊寫法讓「停留完成」從 `setProgress`
+ * 呼叫的那一刻就可能成立，不等轉頭動畫收斂。
+ */
+export function isHoldComplete(state: CelebrationState, elapsed: number): boolean {
+  return state.phase === 'holding' && elapsed >= state.holdUntil;
+}

@@ -3,6 +3,7 @@ import { introProgress, characterPose } from './islandMotion';
 import type { IslandBaby, IslandStop } from './islandTemplate';
 import { isSceneryExcluded } from './islandTemplate';
 import { MIN_CAMERA_BUILDING_DISTANCE, computeSpawnFacingLighthouse, selectNearestStation } from './spawnPoint';
+import { startCelebration, advanceOnTurnConverged, isHoldComplete, type CelebrationState } from './islandCelebration';
 
 interface WorldEvents {
   onNear: (index: number | null) => void;
@@ -12,6 +13,17 @@ interface WorldEvents {
   onPick?: (index: number) => void;
   onWantFirstPerson?: () => void;
   onArrive?: (index: number) => void;
+  /**
+   * #3780 P0-3：剛完成一站，鏡頭正要轉過去面向它——這時播鐘聲最準
+   * （跟「畫面上燈正在亮起來」同一刻，不是等轉到下一站才響）。
+   */
+  onCelebrate?: (index: number) => void;
+  /**
+   * #3780 P0-3：面向剛完成站的停留時間結束，該顯示「下一站」導引了。
+   * `nextStop` 是 null 代表這是最後一站（全部完成），呼叫端自己決定
+   * 要不要接著播結尾慶祝——這支事件只負責「停留期結束」這件事本身。
+   */
+  onCelebrationEnd?: (index: number, nextStop: number | null) => void;
 }
 
 
@@ -364,6 +376,17 @@ export function createIslandWorld(
     scene.add(dot);
     return dot;
   });
+  // #3780 P0-3：剛完成一站的慶祝粒子——跟上面 `trailDots`（指向下一站的
+  // 引導光點）分開成獨立的一池，兩者職責不同時可能同時需要顯示（剛點亮
+  // 的站還在慶祝，同時已經知道下一站在哪），不能共用同一組物件互搶。
+  // 數量取 heavy tier 的上限（見 islandCelebration.ts），light tier 時
+  // 多出來的那些維持 invisible。
+  const celebrationParticles = Array.from({ length: 18 }, () => {
+    const dot = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 6), new THREE.MeshBasicMaterial({ color: 0xfff1c2, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }));
+    dot.visible = false;
+    scene.add(dot);
+    return dot;
+  });
   const raycaster = new THREE.Raycaster();
   const pointerNdc = new THREE.Vector2(0, 0);
   let mode: ViewMode = 'first';
@@ -378,6 +401,13 @@ export function createIslandWorld(
   let guideUntil = 0;
   let turnTo: number | null = null;
   let travelTarget: number | null = null;
+  // #3780 P0-3：回島先面向剛完成的站，停留夠了才轉向下一站。三段式狀態
+  // 機（'turning' 轉去剛完成的站 → 'turnTo 收斂' → 'holding' 才開始算
+  // 停留秒數）本身是不碰 three.js/WebGL 的純函式，見 islandCelebration.ts
+  // 檔頭註解（二次審查訂正：第一版把這三個狀態攤開寫在這個閉包裡，沒有
+  // 任何測試能跑到真正的 state machine，退回舊 bug 寫法 1528 條照樣全綠）。
+  // `celebration` 為 null 代表現在沒有慶祝在進行。
+  let celebration: CelebrationState | null = null;
   // 沿途景色：每一區有自己的天色與霧色（港口海藍 → 山谷翠綠 → 高地金黃）
   const zoneSky = [new THREE.Color('#bcdde6'), new THREE.Color('#cfe6c8'), new THREE.Color('#f1ddb0')];
   const skyNow = new THREE.Color('#bcdde6');
@@ -470,6 +500,18 @@ export function createIslandWorld(
     last = now;
     elapsed += dt;
     if (!paused) {
+      // #3780 P0-3：停留期結束才轉向下一站——這段要在 turnTo 的轉頭邏輯
+      // 之前跑，這樣同一幀內 turnTo 改指到新目標時，下面的轉頭插值立刻
+      // 就會用新值，不會晚一幀才反應。`isHoldComplete` 是不碰 three.js 的
+      // 純函式（見 islandCelebration.ts），'turning' 階段永遠回傳 false。
+      if (celebration && isHoldComplete(celebration, elapsed)) {
+        const finishedIndex = celebration.index;
+        const goTo = celebration.pendingNextStop;
+        celebration = null;
+        nextStop = goTo;
+        turnTo = goTo;
+        events.onCelebrationEnd?.(finishedIndex, goTo);
+      }
       keyDirection = { x: Number(keys.has('d') || keys.has('arrowright')) - Number(keys.has('a') || keys.has('arrowleft')), z: Number(keys.has('s') || keys.has('arrowdown')) - Number(keys.has('w') || keys.has('arrowup')) };
       const dx = keyDirection.x + stickDirection.x;
       const dz = keyDirection.z + stickDirection.z;
@@ -553,6 +595,14 @@ export function createIslandWorld(
         yaw += diff * Math.min(1, dt * 2.2);
         if (Math.abs(diff) < 0.02) turnTo = null;
       }
+      // 轉到剛完成的站了（turnTo 剛被收斂成 null），這時候才真正開始算
+      // 停留秒數——不管玩家離那棟建築多遠、要轉多大的角度，分級秒數保證
+      // 從「鏡頭已經正對著它」那一刻才起算。`advanceOnTurnConverged` 在
+      // 已經是 'holding' 時是 no-op，重複呼叫（每一幀 turnTo 收斂後都會
+      // 符合這個條件）不會把停留時間往後挪。
+      if (celebration && celebration.phase === 'turning' && turnTo === null) {
+        celebration = advanceOnTurnConverged(celebration, elapsed);
+      }
       if (mode === 'first') {
         player.visible = false;
         const eye = new THREE.Vector3(player.position.x, 1.75 + jumping + (length > 0.08 ? Math.sin(elapsed * 11) * 0.05 : 0), player.position.z);
@@ -596,11 +646,48 @@ export function createIslandWorld(
     if (found !== hovered) { hovered = found; events.onHover?.(found); }
     halos.forEach((halo, index) => {
       const mat = halo.material as THREE.MeshBasicMaterial;
-      const on = index === hovered || index === near;
-      mat.opacity += ((on ? 0.95 : index === nextStop ? 0.45 : 0) - mat.opacity) * Math.min(1, dt * 8);
-      halo.scale.setScalar(1 + (on ? 0.12 * Math.sin(elapsed * 6) : 0.04 * Math.sin(elapsed * 2)));
+      // #3780 P0-3：正在慶祝的站優先於 hover/near/nextStop 的一般規則——
+      // 回應強度跟花的力氣成正比，heavy tier 比 light tier 亮、脈動幅度
+      // 也更大（「燈亮」那部分）。
+      if (celebration && index === celebration.index) {
+        const targetOpacity = celebration.profile.tier === 'heavy' ? 1 : 0.75;
+        mat.opacity += (targetOpacity - mat.opacity) * Math.min(1, dt * 10);
+        const pulseAmp = celebration.profile.tier === 'heavy' ? 0.3 : 0.16;
+        halo.scale.setScalar(1 + pulseAmp * Math.sin(elapsed * 7));
+      } else {
+        const on = index === hovered || index === near;
+        mat.opacity += ((on ? 0.95 : index === nextStop ? 0.45 : 0) - mat.opacity) * Math.min(1, dt * 8);
+        halo.scale.setScalar(1 + (on ? 0.12 * Math.sin(elapsed * 6) : 0.04 * Math.sin(elapsed * 2)));
+      }
       buildingGroups[index].scale.setScalar(1 + (index === hovered ? 0.035 : 0));
     });
+    // #3780 P0-3：慶祝粒子——從剛完成那一站的地基往上、往外飄散，停留期
+    // 結束前淡出；數量跟擴散範圍依 tier 而定（heavy 比 light 多更大）。
+    if (celebration) {
+      // 捕進區塊內的 const——`celebration` 是外層 `let`，forEach 的 callback
+      // 是另一個函式邊界，TS 不會幫忙把外層的 null 檢查窄化帶進去。
+      const cel = celebration;
+      const stop = content.stops[cel.index];
+      const progress = cel.phase === 'holding'
+        ? 1 - Math.max(0, cel.holdUntil - elapsed) / cel.profile.holdSeconds
+        : 0;
+      celebrationParticles.forEach((dot, k) => {
+        const isActive = k < cel.profile.particleCount;
+        dot.visible = isActive;
+        if (!isActive) return;
+        const angle = (k / cel.profile.particleCount) * Math.PI * 2 + elapsed * 1.6;
+        const radius = 1.1 + progress * 2.3;
+        dot.position.set(
+          stop.x + Math.cos(angle) * radius,
+          1.7 + progress * 2.6 + Math.sin(elapsed * 3 + k) * 0.1,
+          stop.z + Math.sin(angle) * radius,
+        );
+        (dot.material as THREE.MeshBasicMaterial).opacity = Math.max(0, 1 - progress) * 0.9;
+        dot.scale.setScalar(0.5 + (1 - progress) * 0.5);
+      });
+    } else {
+      celebrationParticles.forEach((dot) => { dot.visible = false; });
+    }
     // 下一關的引導光柱與光點
     if (nextStop !== null && content.stops[nextStop].zone <= unlockedZone) {
       const target = content.stops[nextStop];
@@ -639,12 +726,37 @@ export function createIslandWorld(
   frame = requestAnimationFrame(animate);
   return {
     setProgress(nextZone: number, done: number[]) {
-      const newlyDone = done.length > completed.length;
+      // #3780 P0-3：原本「有新完成就直接轉向下一站」——鏡頭轉走的那一刻，
+      // 剛點亮的站已經不在畫面裡了。改成先轉過去面向剛完成的那一站，停留
+      // `celebrationProfileForStep()` 算出來的秒數（依這一站的份量分輕重），
+      // 停留期一到才真的轉去下一站（見 animate() 開頭的停留期結束檢查）。
+      const newlyDoneIndices = done.filter((index) => !completed.includes(index));
       unlockedZone = nextZone;
       completed = done;
       const next = content.stops.findIndex((_, index) => !done.includes(index));
-      nextStop = next < 0 ? null : next;
-      if (newlyDone && nextStop !== null) { guideUntil = elapsed + 12; turnTo = nextStop; }
+      const resolvedNextStop = next < 0 ? null : next;
+      // #3780 P0-3：全部完成（resolvedNextStop === null）是最後一站——這裡
+      // 沒有「下一站」好轉過去，原本的 bug（鏡頭轉去下一站、剛點亮的站
+      // 不在畫面裡）本來就不會發生在這一格。全螢幕結尾慶祝層另有一條
+      // 已經很小心去重過的 effect 在管（ReadingIslandLab.tsx 的
+      // justCompletedWithinSession／justMountedAlreadyDone 判斷），自己
+      // 會播 chime／開全螢幕 burst；這裡如果也跟著觸發 onCelebrate 播一次
+      // chime，會在同一刻重複響兩次。所以只有「還有下一站」時才進入慶祝
+      // 流程，最後一站維持原本直接呼叫 `nextStop = null` 的寫法。
+      if (newlyDoneIndices.length > 0 && resolvedNextStop !== null) {
+        const justCompleted = newlyDoneIndices[0];
+        // `startCelebration` 不看前一個 `celebration` 是什麼——如果這個時候
+        // 已經有一個還沒播完（慶祝中又完成另一站），這裡會直接覆蓋掉它，
+        // 前一個永遠不會走到 `isHoldComplete`、也就不會觸發它的
+        // `onCelebrationEnd`。這是刻意的規則，細節見 islandCelebration.ts
+        // `startCelebration` 的註解。
+        celebration = startCelebration(justCompleted, content.stops[justCompleted].step, resolvedNextStop);
+        guideUntil = elapsed + 12;
+        turnTo = justCompleted;
+        events.onCelebrate?.(justCompleted);
+      } else {
+        nextStop = resolvedNextStop;
+      }
     },
     setMode(next: ViewMode) { mode = next; if (next === 'first') pitch = -0.05; },
     travelTo(index: number) { travelTarget = index; mode = 'first'; pitch = -0.05; },
