@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { introProgress, characterPose } from './islandMotion';
 import type { IslandBaby, IslandStop } from './islandTemplate';
 import { isSceneryExcluded } from './islandTemplate';
+import { MIN_CAMERA_BUILDING_DISTANCE, computeSpawnFacingLighthouse, selectNearestStation } from './spawnPoint';
 
 interface WorldEvents {
   onNear: (index: number | null) => void;
@@ -14,10 +15,22 @@ interface WorldEvents {
 }
 
 
-const zoneCenters = [
+export const zoneCenters = [
   { x: -2, z: 5, radius: 14 },
   { x: 11, z: -9, radius: 13 },
   { x: 13, z: -23, radius: 14 },
+];
+
+/**
+ * 山丘的碰撞位置／半徑，跟底下畫山丘用的地形生成是同一份資料——原本只在
+ * `createIslandWorld()` 內部當閉包變數，#3780 P0-2 退件 Q3（審查員
+ * 2026-10-26）需要在純 node 環境對全部 179 課的出生點跑「不在山丘碰撞圈
+ * 裡」的回歸測試，所以拉到模組層級 export，跟 `walkable()` 用的
+ * `zoneCenters` 同一個道理：單一資料來源，不要在測試裡另外複製一份數字
+ * （複製了之後改地形容易漏改測試那邊）。
+ */
+export const hillPositions: ReadonlyArray<readonly [number, number, number]> = [
+  [-8, -1, 3.5], [-1, -6, 4], [10, -15, 4.8], [19, -27, 4], [0, -28, 3.3],
 ];
 
 export type ViewMode = 'first' | 'god';
@@ -131,7 +144,6 @@ export function createIslandWorld(
   const streamCurve = new THREE.CatmullRomCurve3([new THREE.Vector3(-2, 0.43, -3), new THREE.Vector3(3, 0.43, -1), new THREE.Vector3(5, 0.43, -4), new THREE.Vector3(9, 0.43, -5)]);
   add(scene, new THREE.TubeGeometry(streamCurve, 60, 0.38, 8), water);
 
-  const hillPositions = [[-8, -1, 3.5], [-1, -6, 4], [10, -15, 4.8], [19, -27, 4], [0, -28, 3.3]];
   hillPositions.forEach(([x, z, r], i) => {
     const hill = add(scene, new THREE.ConeGeometry(r, 2.3 + i % 3, 10), i % 2 ? grass : cliff, x, 1.25, z);
     hill.rotation.y = i * 0.9;
@@ -140,6 +152,15 @@ export function createIslandWorld(
       cave.rotation.z = Math.PI;
     }
   });
+  // #3780 P0-2：出生點改成「面向港口燈塔（lesson-intro 站）、落在觸發半徑內」
+  // ——不再是寫死的座標，算式見 spawnPoint.ts 的理由。找不到 lesson-intro
+  // （理論上不該發生，step_sequence 幾乎都以它開頭）就退回 stops[0]，
+  // 真的一站都沒有才退回原本的寫死座標，不讓整座島在這裡直接炸掉。
+  const lighthouseStop = content.stops.find((stop) => stop.step === 'lesson-intro') ?? content.stops[0];
+  const spawnPoint = lighthouseStop
+    ? computeSpawnFacingLighthouse(lighthouseStop)
+    : { x: -2, z: 16.5, yaw: 0, pitch: 0 };
+
   const zonedThings: THREE.Object3D[] = [];
   for (let i = 0; i < 105; i++) {
     const zone = zoneCenters[i % 3];
@@ -149,7 +170,7 @@ export function createIslandWorld(
     const z = zone.z + Math.cos(angle) * radius;
     // G7 2026-10-26：出生點附近的樹沒被排除過，近到擋住進島第一眼該看清楚的
     // 港口燈塔跟路（真實座標驗過，21 號樹離出生點只有 1.79 單位）。
-    if (isSceneryExcluded(x, z, content.stops)) continue;
+    if (isSceneryExcluded(x, z, content.stops, spawnPoint)) continue;
     const tree = new THREE.Group();
     tree.position.set(x, 0.42, z);
     tree.userData.zone = zoneOf(x, z);
@@ -324,7 +345,7 @@ export function createIslandWorld(
     return item;
   };
   const player = sprite('/lab-island/sprites/adventurer.png', 1.8, 2.3);
-  player.position.set(-2, 1.5, 16.5);
+  player.position.set(spawnPoint.x, 1.5, spawnPoint.z);
   const xiaoling = sprite('/lab-island/sprites/xiaoling.png', 0.9, 1.1);
   const XL_FIRST = new THREE.Vector3(0.45, 0.55, 1);
   const babies = content.babies.map((baby) => {
@@ -346,7 +367,11 @@ export function createIslandWorld(
   const raycaster = new THREE.Raycaster();
   const pointerNdc = new THREE.Vector2(0, 0);
   let mode: ViewMode = 'first';
-  let pitch = -0.05;
+  // #3780 P0-2：出生時仰角不再是寫死的 -0.05（往下看一點）——燈塔太高，
+  // 不仰頭的話塔尖本來就不可能進視野（見 spawnPoint.test.ts 那條「不加
+  // 仰角塞不進視野」的對照）。`spawnPoint.pitch` 用燈塔的真實高度／相機
+  // FOV 算出來，見 spawnPoint.ts。
+  let pitch = spawnPoint.pitch;
   let dragY = 0;
   let hovered: number | null = null;
   let nextStop: number | null = 0;
@@ -376,7 +401,7 @@ export function createIslandWorld(
   let completed: number[] = [];
   let keyDirection = { x: 0, z: 0 };
   let stickDirection = { x: 0, z: 0 };
-  let yaw = 0;
+  let yaw = spawnPoint.yaw; // #3780 P0-2：一上岸就面向燈塔，不用自己轉頭找
   let dragX = 0;
   let jumping = 0;
   let verticalSpeed = 0;
@@ -479,7 +504,9 @@ export function createIslandWorld(
         const moveZ = (right.z * dx + forward.z * -dz) / Math.max(1, length) * dt * 5.2;
         const nextX = player.position.x + moveX;
         const nextZ = player.position.z + moveZ;
-        const buildingCollision = content.stops.some((stop) => Math.hypot(nextX - stop.x, nextZ - stop.z) < 1.55);
+        // #3780 P0-2：原本寫死 1.55，比建築地基半徑 1.65 還小，玩家／鏡頭會被
+        // 放行到建築實體內部，近平面貼著材質，整片畫面變成建築的顏色。
+        const buildingCollision = content.stops.some((stop) => Math.hypot(nextX - stop.x, nextZ - stop.z) < MIN_CAMERA_BUILDING_DISTANCE);
         const hillCollision = hillPositions.some(([x, z, r]) => Math.hypot(nextX - x, nextZ - z) < r * 0.7);
         if (walkable(nextX, nextZ) && !buildingCollision && !hillCollision) {
           player.position.x = nextX;
@@ -502,13 +529,15 @@ export function createIslandWorld(
       player.material.rotation = pose.tilt;
       xiaoling.material.rotation = Math.sin(elapsed * 2.2) * 0.07;
       xiaoling.position.set(player.position.x + 0.67, player.position.y + 0.85 + Math.sin(elapsed * 3) * 0.14, player.position.z + 0.12);
-      let closest: number | null = null;
-      let best = 3.25;
-      content.stops.forEach((stop, index) => {
-        if (stop.zone > unlockedZone) return;
-        const d = Math.hypot(player.position.x - stop.x, player.position.z - stop.z);
-        if (d < best) { best = d; closest = index; }
-      });
+      // #3780 P0-2：原本全島共用一個寫死的 3.25——燈塔是全島唯一的地標級
+      // 高塔，出生距離要拉開才看得到整座塔，所以它需要自己的觸發半徑
+      // （比其他矮站大很多）。第一版用「距離 ÷ 自己的半徑」這個比例值比
+      // 大小——審查員真瀏覽器＋全平台 179 課實算抓到：燈塔半徑大超過兩倍
+      // 時，玩家站在旁邊小站的門口（對那一站已經近到不能再近），比例值
+      // 卻可能是「燈塔比較近」，9.9% 的燈塔—其他站配對會被搶走。正確做法
+      // 抽成 `selectNearestStation`（見 spawnPoint.ts）：先用各站自己的
+      // 半徑獨立判斷「有沒有進範圍」，有進範圍的候選裡才比真正的距離。
+      let closest = selectNearestStation(content.stops, player.position, unlockedZone);
       if (introPlaying) closest = null;
       if (closest !== near) { near = closest; events.onNear(closest); }
       babies.forEach((baby, index) => {
@@ -622,7 +651,9 @@ export function createIslandWorld(
     setStick(x: number, z: number) { stickDirection = { x, z }; },
     setPaused(value: boolean) { paused = value; },
     jump() { if (jumping === 0) verticalSpeed = 5.5; },
-    playIntro() { introStart = elapsed; mode = 'first'; pitch = -0.05; },
+    // #3780 P0-2：playIntro 是「一上岸、開場鏡頭飛到主角面前」那一刻——跟
+    // 出生時同一個仰角（spawnPoint.pitch），不是寫死的 -0.05。
+    playIntro() { introStart = elapsed; mode = 'first'; pitch = spawnPoint.pitch; },
     getPosition() { return { x: player.position.x, z: player.position.z }; },
     dispose() {
       cancelAnimationFrame(frame);

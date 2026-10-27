@@ -11,6 +11,7 @@ import { createIslandWorld } from './island/createIslandWorld';
 import { parseIslandReturnMessage, shouldMarkVisitedOnReturn } from './island/storyMode';
 import IslandListMode from './island/IslandListMode';
 import { createIslandAudio, readMuted, writeMuted, type IslandAudio } from './island/islandAudio';
+import { isCoarsePointerDevice, isFinePointerDevice } from './island/inputMode';
 
 interface LessonData {
   title: string;
@@ -48,6 +49,16 @@ export default function ReadingIslandLab() {
   const moduleRef = useRef(module);
   moduleRef.current = module;
   const [joystick, setJoystick] = useState({ x: 0, y: 0 });
+  // #3780 P0-1（playtest 2026-10-26）：原本用 `md:hidden` 的螢幕寬度斷點判斷
+  // 「是不是手機」——iPad（820px 寬）被歸類成桌機，搖桿被藏起來，畫面卻顯示
+  // 鍵盤操作提示「WASD / 方向鍵移動」，孩子在 iPad 上完全走不動。改成在
+  // mount 時只判斷一次「輸入方式」（觸控 vs 滑鼠鍵盤），不隨螢幕寬度變。
+  const [isTouchInput] = useState(() => isCoarsePointerDevice());
+  // #3780 P0-1 退件（審查員）：觸控 Chromebook 這種混合裝置 `isTouchInput`
+  // 會是 true（確實有觸控螢幕），但同時也接了滑鼠／觸控板，鍵盤照樣能用，
+  // 只是沒有提示告訴學生。`isFineInput` 獨立判斷「有沒有精準輸入裝置」，
+  // 跟 isTouchInput 不是互斥——混合裝置兩個提示都要顯示。
+  const [isFineInput] = useState(() => isFinePointerDevice());
   const [position, setPosition] = useState({ x: -3, z: 15 });
   const stickOrigin = useRef<{ x: number; y: number } | null>(null);
   const hintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -350,12 +361,44 @@ export default function ReadingIslandLab() {
       {/* 桌機/iPad 版「下一站」提示：維持原本獨立置中位置，不受手機版那層
           flex-col 影響。*/}
       {guide && <div role="status" className="absolute left-1/2 top-20 z-30 hidden -translate-x-1/2 animate-bounce rounded-2xl border-2 border-amber-200 bg-gradient-to-r from-[#f7d48a] to-[#ffe9b8] px-6 py-3 text-base font-black text-[#3b3018] shadow-[0_0_40px_rgba(255,200,90,0.7)] md:block">{guide}</div>}
-      <div className="absolute bottom-4 left-4 z-10 hidden rounded-xl border border-white/60 bg-[#f9f5e9]/90 px-4 py-2 text-xs font-semibold shadow-lg md:block">WASD / 方向鍵移動　·　空白鍵跳　·　拖曳旋轉視角</div>
-      <div className="absolute bottom-5 left-5 z-10 flex items-end gap-4 md:hidden">
-        <div role="group" aria-label="虛擬搖桿" className="relative grid h-28 w-28 touch-none place-items-center rounded-full border-4 border-white/70 bg-[#e9ede5]/65 shadow-2xl" onPointerDown={(event) => { stickOrigin.current = { x: event.clientX, y: event.clientY }; event.currentTarget.setPointerCapture(event.pointerId); }} onPointerMove={onStickMove} onPointerUp={releaseStick} onPointerCancel={releaseStick}>
-          <div className="h-12 w-12 rounded-full border-2 border-white bg-[#517c79] shadow-lg" style={{ transform: `translate(${joystick.x * 36}px, ${joystick.y * 36}px)` }} />
+      {/* #3780 P0-1（退件後第三版，審查員 2026-10-26）：原本用 `md:hidden` /
+          `md:block`（螢幕寬度）二選一，第一版改成用 `isTouchInput`（輸入方式）
+          二選一，第二版把兩個提示＋搖桿收進同一個 flex-col（解決了「兩個
+          提示疊在一起」）——但 flex-col 本身沒有寬度上限，混合裝置在手機
+          390px 寬時 WASD 那行長文字撐到 324px 寬，跟右下角「展開上帝視角」
+          橫向重疊 3601px²。team-lead 明令不要再猜 `max-w-[calc(...)]` 這種
+          像素數字（同一個檔案第四次犯）——改成讓兩邊共用同一條 flex row：
+          操作提示給 `min-w-0 flex-1`（flex item 預設 `min-width:auto` 不會
+          縮小到比內容窄，沒有 `min-w-0` 就無法觸發文字換行；`flex-1` 讓它
+          只佔「扣掉展開上帝視角按鈕之後」的剩餘寬度），展開上帝視角給
+          `shrink-0`（固定寬度不被擠壓），`justify-between` 把兩邊推到各自
+          的邊——不管文字多長，可用寬度有限，瀏覽器自己換行，兩邊各自佔
+          各自的空間，不會疊。*/}
+      <div className="absolute inset-x-4 bottom-4 z-20 flex items-end justify-between gap-3">
+        <div className="flex min-w-0 flex-1 flex-col items-start gap-2">
+          {/* #3780 e2e panel-overlap 退件修正：`aria-label="操作提示"` 原本
+              貼在整個外層容器（連搖桿/跳都包在裡面），panel-overlap 測試把
+              它當一塊面板去跟「虛擬搖桿」「跳」比對 boundingBox，量到的
+              「重疊」其實是父子包含關係，不是真的視覺衝突——縮小到只包文字
+              提示本身，才是測試真正該比對的那塊。*/}
+          <div aria-label="操作提示" className="flex flex-col items-start gap-2">
+            {(!isTouchInput || isFineInput) && (
+              <div className="rounded-xl border border-white/60 bg-[#f9f5e9]/90 px-4 py-2 text-xs font-semibold shadow-lg">WASD / 方向鍵移動　·　空白鍵跳　·　拖曳旋轉視角</div>
+            )}
+            {isTouchInput && (
+              <div className="rounded-xl border border-white/60 bg-[#f9f5e9]/90 px-4 py-2 text-xs font-semibold shadow-lg">用搖桿走、拖曳轉頭</div>
+            )}
+          </div>
+          {isTouchInput && (
+            <div className="flex items-end gap-4">
+              <div role="group" aria-label="虛擬搖桿" className="relative grid h-28 w-28 touch-none place-items-center rounded-full border-4 border-white/70 bg-[#e9ede5]/65 shadow-2xl" onPointerDown={(event) => { stickOrigin.current = { x: event.clientX, y: event.clientY }; event.currentTarget.setPointerCapture(event.pointerId); }} onPointerMove={onStickMove} onPointerUp={releaseStick} onPointerCancel={releaseStick}>
+                <div className="h-12 w-12 rounded-full border-2 border-white bg-[#517c79] shadow-lg" style={{ transform: `translate(${joystick.x * 36}px, ${joystick.y * 36}px)` }} />
+              </div>
+              <button type="button" onClick={() => worldRef.current?.jump()} className="mb-2 rounded-full border-2 border-white bg-[#f7da9d] px-4 py-3 text-sm font-bold shadow-lg">跳</button>
+            </div>
+          )}
         </div>
-        <button type="button" onClick={() => worldRef.current?.jump()} className="mb-2 rounded-full border-2 border-white bg-[#f7da9d] px-4 py-3 text-sm font-bold shadow-lg">跳</button>
+        <button type="button" onClick={() => setMode(mode === 'first' ? 'god' : 'first')} className="shrink-0 rounded-full border-2 border-white bg-[#233e4b]/90 px-4 py-2 text-sm font-bold text-[#fff1d0] shadow-lg transition hover:scale-105 active:scale-95">{mode === 'first' ? '展開上帝視角' : '回到第一人稱'}</button>
       </div>
       {near !== null && module === null && opening < 0 && (
         <div className="absolute bottom-5 left-1/2 z-20 w-[min(92vw,440px)] -translate-x-1/2 rounded-2xl border-2 border-white bg-[#fff9e9]/95 p-4 text-center shadow-2xl md:bottom-9">
@@ -368,7 +411,6 @@ export default function ReadingIslandLab() {
           <button type="button" disabled={door !== null} onClick={() => openModule(near)} className="rounded-xl bg-[#32796e] px-8 py-2 font-bold text-white shadow-md disabled:cursor-not-allowed disabled:opacity-50">進入</button>
         </div>
       )}
-      <button type="button" onClick={() => setMode(mode === 'first' ? 'god' : 'first')} className="absolute bottom-24 right-4 z-20 rounded-full md:bottom-20 border-2 border-white bg-[#233e4b]/90 px-4 py-2 text-sm font-bold text-[#fff1d0] shadow-lg transition hover:scale-105 active:scale-95 md:right-7">{mode === 'first' ? '展開上帝視角' : '回到第一人稱'}</button>
       {/* 聲音：開場／旁白期間的特例位置（team-lead 2026-10-26 二次審查訂正）。
           ⚠️ 第一版把這段時間的「聲音」整個拿掉，被退回——z-[70] 不是順手加的，
           是上一輪審查特地要求的：冷開場「建議開啟聲音」之後、旁白播放期間

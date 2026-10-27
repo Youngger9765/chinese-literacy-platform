@@ -52,6 +52,11 @@ function panelsOf(page) {
     { name: '劇情說明卡/按鈕', locator: page.getByText(/第一幕|第二幕|第三幕/) },
     { name: '文字寶貝欄', locator: page.getByLabel('文字寶寶') },
     { name: '工具列（清單模式/聲音）', locator: page.getByLabel('工具列') },
+    // #3780 P0-1 退件（審查員 2026-10-26）：觸控 Chromebook 這種混合裝置
+    // 同時有「WASD 提示」跟「用搖桿走」提示、搖桿、跳——四個擠在同一個
+    // `操作提示` flex-col 容器裡，這支測試要確認改成 flex-col 之後真的
+    // 不會疊，不是靠猜座標碰運氣。
+    { name: '操作提示（WASD/搖桿文字說明）', locator: page.getByLabel('操作提示') },
     { name: '虛擬搖桿', locator: page.getByRole('group', { name: /虛擬搖桿/ }) },
     { name: '跳', locator: page.getByRole('button', { name: /^跳$/ }) },
     { name: '展開上帝視角', locator: page.getByRole('button', { name: /展開上帝視角|回到第一人稱/ }) },
@@ -117,6 +122,107 @@ for (const vp of VIEWPORTS) {
     });
   });
 }
+
+// 混合裝置（觸控 Chromebook）：#3780 P0-1 退件案例。
+//
+// ⚠️ 修正（實測推翻了這裡原本的假設）：原本以為 Playwright 的
+// `hasTouch: true`（不加 `isMobile`）會讓瀏覽器同時回報
+// `(any-pointer: coarse)` 跟 `(any-pointer: fine)` 皆為 true——實際對著
+// 部署好的 preview 跑過，`hasTouch: true` 底下 `(any-pointer: fine)` 量到
+// 是 false（WASD 提示沒出現，只有搖桿提示），不是我原本寫的「兩者皆真」。
+// Chromium 真實的「螢幕觸控 + 接了滑鼠/觸控板」混合裝置在 Playwright 標準
+// context 選項裡沒有對應的模擬旋鈕，所以改用 `addInitScript` 直接覆寫
+// `matchMedia`，讓產品程式碼（`isCoarsePointerDevice`/`isFinePointerDevice`）
+// 讀到的值就是混合裝置會讀到的值——這樣測的是「程式碼收到這兩個訊號時的
+// 行為」，不是「能不能騙過瀏覽器引擎本身」，跟元件層 vitest 測試模擬的是
+// 同一件事，只是這裡用真瀏覽器驗證真正的版面（CSS 換行/寬度）。
+//
+// WASD 提示、搖桿提示、搖桿、跳、展開上帝視角 五個會同時出現在畫面上，
+// 是這支測試檔案裡唯一會讓全部五個操作提示面板同時存在的情境。
+//
+// 第二版退件案例（審查員 2026-10-26 實測）就出在 390px 寬這組：操作提示
+// 那個 flex-col 沒有寬度上限，WASD 那行長文字撐到 324px 寬，橫向蓋過右下角
+// 「展開上帝視角」（交集 3601px²）——1280px 寬的桌機尺寸可用空間夠，測不出
+// 這個問題，所以兩種寬度都要測，不能只測桌機那組。
+const HYBRID_VIEWPORTS = [
+  { label: '1280x800（桌機尺寸，可用寬度夠）', width: 1280, height: 800 },
+  { label: '390x844（手機尺寸，第二版退件的實際案例）', width: 390, height: 844 },
+];
+
+/**
+ * #3780 P0-1 審查員（2026-10-26）：之前只committed 了「兩者皆真」這一組
+ * matchMedia 覆寫，審查員點出「只有觸控／只有滑鼠」這兩組單獨驗證從沒
+ * 留在 repo 裡——我口頭說有在 preview 上手動跑過，但那不算證據，等於
+ * 沒驗證。抽成共用的 `overridePointerCapabilities`，三種組合都各自留一
+ * 支會一直跑的 e2e，不再只靠口頭宣稱。
+ */
+async function overridePointerCapabilities(page: import('@playwright/test').Page, { coarse, fine }: { coarse: boolean; fine: boolean }) {
+  await page.addInitScript((ov) => {
+    const originalMatchMedia = window.matchMedia.bind(window);
+    window.matchMedia = (query: string) => {
+      if (query === '(pointer: coarse)' || query === '(any-pointer: coarse)') {
+        return { ...originalMatchMedia(query), matches: ov.coarse } as MediaQueryList;
+      }
+      if (query === '(any-pointer: fine)') {
+        return { ...originalMatchMedia(query), matches: ov.fine } as MediaQueryList;
+      }
+      return originalMatchMedia(query);
+    };
+    Object.defineProperty(window.navigator, 'maxTouchPoints', { get: () => (ov.coarse ? 5 : 0), configurable: true });
+  }, { coarse, fine });
+}
+
+for (const vp of HYBRID_VIEWPORTS) {
+  test.describe(`喝采島 HUD 面板不互相蓋住 — 混合裝置（觸控 Chromebook，20011，${vp.label}）`, () => {
+    test.use({ viewport: { width: vp.width, height: vp.height }, hasTouch: true });
+
+    test.beforeEach(async ({ page }) => { await overridePointerCapabilities(page, { coarse: true, fine: true }); });
+
+    test('WASD 提示、搖桿提示、搖桿、跳、展開上帝視角 同時出現也不互相疊住', async ({ page }) => {
+      await loginAsStudent(page);
+      await enterIslandMainView(page, '20011');
+      const panels = panelsOf(page);
+      const hint = panels.find((p) => p.name === '操作提示（WASD/搖桿文字說明）')!;
+      const hintText = await hint.locator.innerText();
+      expect(hintText, '混合裝置下 WASD 提示要出現').toContain('WASD');
+      expect(hintText, '混合裝置下搖桿提示要出現').toContain('搖桿');
+      const result = await findOverlappingPanels(page, panels);
+      expect(result.passed, describePanelOverlaps(result)).toBe(true);
+    });
+  });
+}
+
+test.describe('喝采島操作提示 — 只有觸控（1280x800，20011）→ 只顯示搖桿，不顯示 WASD', () => {
+  test.use({ viewport: { width: 1280, height: 800 }, hasTouch: true });
+  test.beforeEach(async ({ page }) => { await overridePointerCapabilities(page, { coarse: true, fine: false }); });
+
+  test('有搖桿、無 WASD 提示', async ({ page }) => {
+    await loginAsStudent(page);
+    await enterIslandMainView(page, '20011');
+    const panels = panelsOf(page);
+    const hint = panels.find((p) => p.name === '操作提示（WASD/搖桿文字說明）')!;
+    const hintText = await hint.locator.innerText();
+    expect(hintText, '只有觸控下要顯示搖桿提示').toContain('搖桿');
+    expect(hintText, '只有觸控下不該出現 WASD').not.toContain('WASD');
+    expect(await page.getByRole('group', { name: /虛擬搖桿/ }).count(), '只有觸控下搖桿要存在').toBeGreaterThan(0);
+  });
+});
+
+test.describe('喝采島操作提示 — 只有滑鼠（1280x800，20011）→ 只顯示 WASD，不顯示搖桿', () => {
+  test.use({ viewport: { width: 1280, height: 800 } });
+  test.beforeEach(async ({ page }) => { await overridePointerCapabilities(page, { coarse: false, fine: true }); });
+
+  test('有 WASD 提示、無搖桿', async ({ page }) => {
+    await loginAsStudent(page);
+    await enterIslandMainView(page, '20011');
+    const panels = panelsOf(page);
+    const hint = panels.find((p) => p.name === '操作提示（WASD/搖桿文字說明）')!;
+    const hintText = await hint.locator.innerText();
+    expect(hintText, '只有滑鼠下要顯示 WASD 提示').toContain('WASD');
+    expect(hintText, '只有滑鼠下不該出現搖桿提示文字').not.toContain('搖桿');
+    expect(await page.getByRole('group', { name: /虛擬搖桿/ }).count(), '只有滑鼠下搖桿不該存在').toBe(0);
+  });
+});
 
 // 壓力測試：全平台 179 課裡標題最長的一課（20012，26 字，範本模式產生的島，
 // 不是手刻的 20011）。只在手機測——這個重疊問題本來就是窄螢幕才會發生，
