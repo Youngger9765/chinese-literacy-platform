@@ -321,10 +321,6 @@ export function createIslandWorld(
   // 都用這個固定點；找不到合法點就是 null，這時鏡頭只轉頭、不移動
   // （見下面 `eye` 的計算）。
   let celebrationViewpoint: CelebrationViewpoint | null = null;
-  // 暫時性除錯開關——只為了驗收「同一鏡頭位置，光暈開 vs 關」兩張對照
-  // 用，現在覆蓋的是整棟建築的發光強度（原本只覆蓋單一窗戶材質）。
-  // 驗收截圖拍完就會在下一批被要求移除，不是正式功能。
-  let debugGlowOverride: number | null = null;
   // 沿途景色：每一區有自己的天色與霧色（港口海藍 → 山谷翠綠 → 高地金黃）
   const zoneSky = [new THREE.Color('#bcdde6'), new THREE.Color('#cfe6c8'), new THREE.Color('#f1ddb0')];
   const skyNow = new THREE.Color('#bcdde6');
@@ -665,8 +661,7 @@ export function createIslandWorld(
     perBuildingMaterials.forEach((mats, index) => {
       const baseGlow = progressState.completed.includes(index) ? steadyCompletedGlow(elapsed) : 0;
       const celebratingThis = celebration && index === celebration.index;
-      const boosted = celebratingThis ? celebrationGlowBoost(celebration.profile, elapsed) : baseGlow;
-      const intensity = celebratingThis && debugGlowOverride !== null ? debugGlowOverride : boosted;
+      const intensity = celebratingThis ? celebrationGlowBoost(celebration.profile, elapsed) : baseGlow;
       applyBuildingGlow(mats, resolveCelebrationGlow(intensity));
     });
     renderer.render(scene, camera);
@@ -754,12 +749,6 @@ export function createIslandWorld(
       disposeObjectTree(scene);
       renderer.dispose();
       container.removeChild(renderer.domElement);
-    },
-    // 暫時性除錯開關——只為了驗收「同一鏡頭位置，光暈開 vs 關」兩張對照
-    // 用，現在覆蓋的是整棟建築的發光強度（原本只覆蓋單一窗戶材質）。
-    // 驗收截圖拍完就會在下一批被要求移除，不是正式功能。
-    __debugSetGlowOverride(value: number | null) {
-      debugGlowOverride = value;
     },
   };
 }
