@@ -327,3 +327,150 @@ export function findCelebrationViewpoint(input: FindCelebrationViewpointInput): 
   }
   return null;
 }
+
+/**
+ * `travelTo()`（清單模式／點擊建築直接「走過去」）的終點——#3780 P0-3
+ * 五度審查訂正（2026-10-27，team-lead 用合法的 `travelTo()` API 走回已
+ * 完成站驗收截圖時抓到）：原本 `createIslandWorld.ts` 裡這段邏輯是「沿玩家
+ * 目前位置→建築中心這條直線走，`dist < 2.9` 就停」，完全沒有檢查路徑或
+ * 終點有沒有撞進別的建築／山丘——跟 P0-3 三度審查訂正修過的「慶祝鏡頭沿
+ * 直線推」是同一類 bug（假設玩家跟建築之間是空的），只是這次換了個入口
+ * （`travelTo` 而不是慶祝鏡頭）。真瀏覽器截圖抓到：用清單模式從島上別處
+ * 直接「前往」一個已完成的站，鏡頭最後卡在建築的柱子之間，屋頂/捲軸懸在
+ * 頭頂——不是「撞進建築」就是「撞進途中的山丘後停在那附近」。
+ *
+ * 正解（終點）：終點改用跟出生點／慶祝觀景點同一套檢查
+ * （`findCelebrationViewpoint`——在建築四周找一個不撞進別的建築、不撞進
+ * 山丘、不出島的合法立足點），不要另外發明一套。這支是薄包裝，不重複
+ * 邏輯，只是把回傳值從 `CelebrationViewpoint`（多一個 `extraHeight`，是
+ * 「站在地面上、墊高取景」的固定值，跟下面「飛行途中」的高度曲線是兩回
+ * 事）降成 `travelTo` 真正需要的 `{x, z}`。找不到合法點時回傳 `null`，
+ * 呼叫端的規則是退回原始建築座標當 fallback（終點驗證失敗的殘留風險，
+ * 好過完全不讓玩家移動；路線本身仍然走下面的拱形飛行，不會因為終點沒
+ * 驗證過就連路線的安全都放棄）。
+ *
+ * 二度退件（team-lead 2026-10-27）：終點合法，但沿地面走過去的路徑完全
+ * 沒檢查——真瀏覽器截圖+ 179 課 fixture 實算：33.8% 的「前往」路徑中途會
+ * 穿過別的建築、36.6% 會穿過山丘；而且終點是繞著目標建築找的，抵達時
+ * 鏡頭朝向沒有特別處理，跟「終點→建築」的夾角平均差 32°、10.5% 甚至背對
+ * 超過 90°。「沿地面走」這個移動方式本身就無法同時保證路徑安全——地面上
+ * 任何兩點之間的直線都可能穿過中間的建築/山丘，除非也去檢查路徑。
+ *
+ * 正解（路徑＋朝向，三度訂正）：不要在地面上走，改成「飛」。第一版拱形
+ * 飛行（斜線爬升／斜線下降，中段才到全高）被退回——爬升/下降那兩段是
+ * 「邊橫移邊爬升／邊橫移邊下降」，真實幾何量過 41 處：終點旁邊剛好站著
+ * 第三棟建築時，下降那一小段還是會貼著它的輪廓擦過去（跟「合法終點只
+ * 保證離其他建築 ≥`MIN_CAMERA_BUILDING_DISTANCE`」這個較鬆的保證衝突）。
+ *
+ * 改成「三段直角」：① 在起點原地垂直升到 `ARC_FLIGHT_PEAK_HEIGHT`
+ * ② 在這個高度水平移動到終點正上方 ③ 在終點原地垂直降落。起點（玩家
+ * 目前位置）跟終點（`findTravelToDestination` 驗證過的合法立足點）兩個
+ * 都已經是「地面上合法」的座標，**垂直**升降的水平座標完全不變、就釘在
+ * 那個已驗證的點上——不管那個點旁邊貼著哪棟建築，垂直移動不可能撞進
+ * 任何東西（撞進去的前提是水平座標同時變化，掃過別的東西的輪廓）。
+ * 只有「水平巡航」那一段會改變水平座標，而那一段全程都在
+ * `ARC_FLIGHT_PEAK_HEIGHT`，比全島最高建築還高，不會撞進任何東西。這樣
+ * 一來測試完全不需要「終點旁邊的建築先排除」這種例外——起點/終點本身
+ * 合法就夠了，不用再管它們旁邊貼著什麼。
+ *
+ * 落地時的朝向直接設成面向目標建築（跟 `computeSpawnFacingLighthouse`
+ * 的 yaw 算法同一條公式），不是沿著飛行方向推算出來的角度——那兩個經常
+ * 不一樣，因為終點是繞著建築找的合法立足點，不一定剛好落在「玩家出發
+ * 點→建築」那條線上。
+ */
+export function findTravelToDestination(input: FindCelebrationViewpointInput): { x: number; z: number } | null {
+  const viewpoint = findCelebrationViewpoint(input);
+  return viewpoint ? { x: viewpoint.x, z: viewpoint.z } : null;
+}
+
+/** 飛行時的巡航高度——比全島最高建築（燈塔塔尖）再高 1.5，整段水平巡航
+ * 的實際高度都遠遠超過任何建築／山丘的頂端（燈塔 7.64／其餘建築
+ * 2.55–6.37／山丘最高 3.4，全部用 `buildStationGroup` 的真實幾何量出來，
+ * 不是猜的，見 `__tests__/spawnPoint.allLessons.test.ts`）。 */
+export const ARC_FLIGHT_PEAK_HEIGHT = LIGHTHOUSE_ROOF_TOP_Y + 1.5;
+
+/** 垂直升降各佔整段飛行時間的比例——起點/終點本身已經是地面合法的點，
+ * 垂直移動的那一小段時間不需要很長，大部分時間留給水平巡航。 */
+const ARC_FLIGHT_ASCEND_FRACTION = 0.2;
+const ARC_FLIGHT_DESCEND_FRACTION = 0.2;
+
+export type ArcFlightPhase = 'ascend' | 'cruise' | 'descend';
+
+export interface ArcFlightPosition {
+  readonly x: number;
+  readonly z: number;
+  readonly extraHeight: number;
+  readonly phase: ArcFlightPhase;
+}
+
+function smoothstep(t: number): number {
+  const p = Math.max(0, Math.min(1, t));
+  return p * p * (3 - 2 * p);
+}
+
+/**
+ * 三段式飛行在任一進度 0..1 的位置——① 升段（`phase: 'ascend'`）水平座標
+ * 完全等於 `start`，只有 `extraHeight` 從 0 平滑升到 `peakHeight`
+ * ② 巡航段（`phase: 'cruise'`）`extraHeight` 恆等於 `peakHeight`，水平
+ * 座標從 `start` 內插到 `end` ③ 降段（`phase: 'descend'`）水平座標完全
+ * 等於 `end`，`extraHeight` 從 `peakHeight` 平滑降到 0。三段之間用
+ * smoothstep 銜接速度，不是瞬間切換（避免看起來像卡格），但**水平座標**
+ * 在升/降兩段是硬性釘死在端點，不摻雜任何水平內插——這是跟第一版拱形
+ * 飛行唯一的本質差異，也是這版不需要排除終點旁邊建築的原因。
+ */
+export function arcFlightPosition(
+  start: { x: number; z: number },
+  end: { x: number; z: number },
+  progress: number,
+  peakHeight: number = ARC_FLIGHT_PEAK_HEIGHT,
+): ArcFlightPosition {
+  const p = Math.max(0, Math.min(1, progress));
+  const ascendEnd = ARC_FLIGHT_ASCEND_FRACTION;
+  const cruiseEnd = 1 - ARC_FLIGHT_DESCEND_FRACTION;
+
+  if (p <= ascendEnd) {
+    const local = ascendEnd > 0 ? p / ascendEnd : 1;
+    return { x: start.x, z: start.z, extraHeight: smoothstep(local) * peakHeight, phase: 'ascend' };
+  }
+  if (p >= cruiseEnd) {
+    const local = ARC_FLIGHT_DESCEND_FRACTION > 0 ? (1 - p) / ARC_FLIGHT_DESCEND_FRACTION : 0;
+    return { x: end.x, z: end.z, extraHeight: smoothstep(local) * peakHeight, phase: 'descend' };
+  }
+  const cruiseSpan = cruiseEnd - ascendEnd;
+  const local = cruiseSpan > 0 ? (p - ascendEnd) / cruiseSpan : 1;
+  return {
+    x: start.x + (end.x - start.x) * local,
+    z: start.z + (end.z - start.z) * local,
+    extraHeight: peakHeight,
+    phase: 'cruise',
+  };
+}
+
+/**
+ * 抵達時該面向哪裡——直接面向目標建築，不是沿著飛行方向延伸出去的角度。
+ * 這兩個經常不一樣：飛行路線是「玩家出發點→驗證過的合法立足點」這條
+ * 直線，但合法立足點是繞著建築一圈找出來的（見 `findCelebrationViewpoint`
+ * 的 12 個候選角度），不一定剛好落在那條直線的延伸方向上——二度退件就是
+ * 栽在這裡：原本沒有算這個，抵達時鏡頭朝向跟「終點→建築」平均差了 32°。
+ * 跟 `computeSpawnFacingLighthouse` 的 yaw 算法同一條公式。
+ */
+export function arcFlightArrivalYaw(end: { x: number; z: number }, target: { x: number; z: number }): number {
+  return Math.atan2(-(target.x - end.x), -(target.z - end.z));
+}
+
+/**
+ * 飛行途中要不要鎖住 WASD／搖桿輸入——#3780 P0-3 七度審查訂正：真瀏覽器
+ * +179 課實算抓到，原本只有「玩家手動移動時打斷飛行」這條規則，代表按
+ * 下方向鍵的那一幀，`createIslandWorld.ts` 會把當幀算出來的墊高值整個
+ * 蓋掉、直接把飛行狀態清掉——高度瞬間歸零，鏡頭掉在飛到一半的半空中，
+ * 約三成會落在建築或山丘裡。跟開場鏡頭播放中鎖住移動是同一個精神：
+ * 飛行中輸入完全不生效，必須飛完才交還控制，不是「移動會打斷飛行」。
+ *
+ * 抽成這支純函式單獨測，是因為 `createIslandWorld.ts` 本身要真的建立
+ * `THREE.WebGLRenderer` 才能跑，沒辦法直接測它的 per-frame 迴圈；這支
+ * 鎖的是實際接進那個迴圈的同一條判斷式（`let length = isMovementLocked(...)
+ * ? 0 : Math.hypot(dx, dz)`），不是另外發明一套。
+ */
+export function isMovementLocked(introPlaying: boolean, flying: boolean): boolean {
+  return introPlaying || flying;
+}

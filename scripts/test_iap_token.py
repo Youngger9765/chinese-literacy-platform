@@ -333,6 +333,99 @@ class IapHeader(unittest.TestCase):
             self.assertNotIn("Authorization", headers)
 
 
+class _RecordingAdapter:
+    """A requests transport adapter that never touches the network: it just
+    records the headers each outgoing request actually carried and returns
+    an empty 200. Lets the session tests below run a real `requests.Session`
+    end to end (header merge, auth hook, prepare) without a server.
+    """
+
+    def __init__(self):
+        self.sent_headers: list[dict[str, str]] = []
+
+    def send(self, request, **_kwargs):
+        import requests
+
+        self.sent_headers.append(dict(request.headers))
+        resp = requests.Response()
+        resp.status_code = 200
+        resp.request = request
+        resp.url = request.url
+        resp._content = b""
+        return resp
+
+    def close(self):
+        pass
+
+
+class InstallIapAuthOnLongLivedSession(unittest.TestCase):
+    """#3731, the caller half: the TTL cache in get_iap_token() only helps
+    if the caller asks again per request. locustfile.py used to do
+    `self.client.headers.update(iap_header())` once in on_start, freezing
+    the first token into the session for the user's whole lifetime -- so a
+    load test running past the JWT's 1h exp would start getting 401s even
+    with the cache re-minting correctly underneath. install_iap_auth() must
+    make every request on the session re-ask for the header.
+    """
+
+    def setUp(self):
+        import requests
+
+        iap_token.get_iap_token.cache_clear()
+        self._env_audience_backup = os.environ.pop("IAP_AUDIENCE", None)
+        self._env_creds_backup = os.environ.pop("GOOGLE_APPLICATION_CREDENTIALS", None)
+        self._clock = 1_000_000.0
+        self._monotonic_patch = mock.patch.object(iap_token, "_monotonic", lambda: self._clock)
+        self._monotonic_patch.start()
+        self.session = requests.Session()
+        self.adapter = _RecordingAdapter()
+        self.session.mount("https://", self.adapter)
+
+    def tearDown(self):
+        self._monotonic_patch.stop()
+        self.session.close()
+        iap_token.get_iap_token.cache_clear()
+        os.environ.pop("IAP_AUDIENCE", None)
+        if self._env_audience_backup is not None:
+            os.environ["IAP_AUDIENCE"] = self._env_audience_backup
+        if self._env_creds_backup is not None:
+            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = self._env_creds_backup
+
+    def test_a_request_sent_after_the_refresh_margin_carries_the_re_minted_token(self):
+        os.environ["IAP_AUDIENCE"] = "https://svc.example.com"
+        with mock.patch.object(
+            iap_token, "_mint_via_iam_credentials", side_effect=["tok-1", "tok-2"]
+        ):
+            iap_token.install_iap_auth(self.session)
+            self.session.get("https://svc.example.com/api/health")
+            self._clock += 2701  # 45:01 in -- the cache re-mints from here on
+            self.session.get("https://svc.example.com/api/health")
+        self.assertEqual(self.adapter.sent_headers[0]["Proxy-Authorization"], "Bearer tok-1")
+        self.assertEqual(self.adapter.sent_headers[1]["Proxy-Authorization"], "Bearer tok-2")
+
+    def test_per_request_app_authorization_header_is_left_alone(self):
+        # Positive control for the "doesn't collide" half: locust tasks pass
+        # the app's own JWT per request as `Authorization`; installing IAP
+        # auth must add Proxy-Authorization alongside it, not replace it.
+        os.environ["IAP_AUDIENCE"] = "https://svc.example.com"
+        with mock.patch.object(iap_token, "_mint_via_iam_credentials", return_value="tok-1"):
+            iap_token.install_iap_auth(self.session)
+            self.session.get(
+                "https://svc.example.com/api/me", headers={"Authorization": "Bearer app-jwt"}
+            )
+        sent = self.adapter.sent_headers[0]
+        self.assertEqual(sent["Authorization"], "Bearer app-jwt")
+        self.assertEqual(sent["Proxy-Authorization"], "Bearer tok-1")
+
+    def test_iap_off_sends_no_proxy_authorization_and_never_tries_to_sign(self):
+        # The state for the whole repo today: no IAP_AUDIENCE -> zero change.
+        with mock.patch.object(iap_token, "_mint") as mint:
+            iap_token.install_iap_auth(self.session)
+            self.session.get("https://svc.example.com/api/health")
+        self.assertNotIn("Proxy-Authorization", self.adapter.sent_headers[0])
+        mint.assert_not_called()
+
+
 class UrlopenWithIap(unittest.TestCase):
     def test_no_token_calls_plain_urlopen(self):
         with mock.patch.object(iap_token, "iap_header", return_value={}), \
@@ -367,6 +460,56 @@ class Cli(unittest.TestCase):
              mock.patch("builtins.print") as fake_print:
             iap_token.main(["iap_token.py", "https://example.com"])
             fake_print.assert_called_once_with("abc")
+
+
+class LocustfileWiresIapPerRequest(unittest.TestCase):
+    """#3731 的修法真正落在 locustfile：每個 HttpUser 都要掛 install_iap_auth。
+
+    library 的測試證明 install_iap_auth 本身會每次重問，但 locustfile 改回
+    `self.client.headers.update(iap_header())` 時 library 測試照樣全綠——
+    這支才鎖得住「壓測跑超過 1 小時開始 401」那個真正的 bug。
+    """
+
+    def setUp(self):
+        import ast
+        path = os.path.join(os.path.dirname(__file__), "..", "tests", "load-testing", "locustfile.py")
+        with open(path, encoding="utf-8") as fh:
+            self.source = fh.read()
+        self.tree = ast.parse(self.source)
+
+    def _http_users(self):
+        import ast
+        return [
+            node for node in ast.walk(self.tree)
+            if isinstance(node, ast.ClassDef)
+            and any(getattr(base, "id", None) == "HttpUser" for base in node.bases)
+        ]
+
+    def test_every_http_user_installs_per_request_iap_auth(self):
+        import ast
+        users = self._http_users()
+        self.assertGreater(len(users), 0, "locustfile 裡找不到任何 HttpUser，量具壞了")
+        for cls in users:
+            on_start = next(
+                (n for n in cls.body if isinstance(n, ast.FunctionDef) and n.name == "on_start"), None
+            )
+            self.assertIsNotNone(on_start, f"{cls.name} 沒有 on_start")
+            calls = [
+                n for n in ast.walk(on_start)
+                if isinstance(n, ast.Call) and getattr(n.func, "id", None) == "install_iap_auth"
+            ]
+            self.assertTrue(calls, f"{cls.name}.on_start 沒有 install_iap_auth(self.client)")
+
+    def test_no_session_pins_a_one_time_iap_header(self):
+        # 只看真正的呼叫（AST），檔頭註解裡把舊寫法當反例寫出來不算
+        import ast
+        pinned = [
+            n for n in ast.walk(self.tree)
+            if isinstance(n, ast.Call)
+            and getattr(n.func, "attr", None) == "update"
+            and any(isinstance(arg, ast.Call) and getattr(arg.func, "id", None) == "iap_header" for arg in n.args)
+        ]
+        self.assertEqual(pinned, [], "有 session 用 headers.update(iap_header()) 把第一張 token 釘死")
 
 
 if __name__ == "__main__":

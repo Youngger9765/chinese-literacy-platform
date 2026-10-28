@@ -152,10 +152,51 @@ export function useProgressSync({
   }, [dbSessionId, token]);
 
   // ── Flush helper ──────────────────────────────────────────────────────────
-  // Set after doSave is defined; lets a rejected save resend itself once (#3694).
-  const retrySaveRef = useRef<(data: StepProgressData, isRetry: boolean) => void>(() => {});
+  // Issue #3785 (recurrence of #3694/#3707): a step's "下一關" click fires TWO
+  // immediate flushes back to back in the SAME tick — one plain progress-data
+  // save, one that carries the just-finished step (see e.g.
+  // KeypointsTablePage.handleNext). Both used to call doSave() synchronously,
+  // both reading the SAME lastServerVersionRef (neither had resolved yet to
+  // bump it) — a self-inflicted race between two saves from this SAME hook
+  // instance. The loser got a 409 and was resent once at the fresh version,
+  // but if that lone retry also lost a race (e.g. against keypoints-table's
+  // own slow submit-grading debounce save), the data was dropped silently —
+  // no further retry, and no pending debounce timer left for the
+  // beforeunload/pagehide beacon to pick up either.
+  //
+  // Fix: never let two saves FROM THIS HOOK talk to the server concurrently.
+  // `saveQueueRef.inFlight` gates it; a save request that arrives while one
+  // is already in flight is queued as `pending` (overwriting any earlier
+  // pending snapshot — progress only ever grows, so the latest snapshot is
+  // always a superset) and sent right after the in-flight one fully settles
+  // (including its own retry, if any), at the by-then-correct version.
+  //
+  // Known narrow limitation this does NOT cover (PR review, #3785): a save
+  // left sitting in `pending` is only ever sent from the in-flight save's own
+  // `.finally()` below — neither the unmount-cleanup effect nor the
+  // beforeunload/pagehide `flushBeacon` (bottom of this file) know to flush
+  // it. If the tab closes in the sub-second window between a save being
+  // queued and the in-flight one settling, the queued save is lost. This is
+  // layered on top of a pre-existing gap — `flushBeacon` already never covers
+  // ANY flushProgress()-sourced save, queued or not, single or concurrent
+  // (its guard only fires for a pending *debounce* timer, which
+  // flushProgress always clears) — but queuing does mean a save that used to
+  // at least get dispatched immediately (with some non-zero chance of
+  // finishing before teardown) now provably waits. Accepted as-is: the window
+  // is a double-flush landing inside a sub-second unload race, and fixing the
+  // beacon's blind spot for flushProgress saves in general is a separate,
+  // pre-existing problem, not something to grow here.
+  const saveQueueRef = useRef<{ inFlight: boolean; pending: StepProgressData | null }>({
+    inFlight: false,
+    pending: null,
+  });
+  // Declared before doSave (and kept current by the effect right after it) so
+  // doSave can dequeue-and-resend itself without a use-before-define — same
+  // indirection #3694 already used for the single retry (formerly
+  // `retrySaveRef`), now also covering unmount cleanup's own use of this ref.
+  const doSaveRef = useRef<(data: StepProgressData) => void>(() => {});
   const doSave = useCallback(
-    (data: StepProgressData, isRetry = false) => {
+    (data: StepProgressData) => {
       if (!token || dbSessionId === null) return;
       // Issue #3682 fix A (production root cause) — never PUT before the
       // initial GET has resolved and been merged into the caller's state.
@@ -168,56 +209,95 @@ export function useProgressSync({
       // correctly re-hydrated by onProgressLoaded, and the next genuine
       // save (post-load) will carry that merged state as its base.
       if (!hasLoadedOnceRef.current) return;
-      const withVersion: StepProgressData = {
-        ...data,
-        version: lastServerVersionRef.current,
+
+      // Every call entering here is a fresh (non-retry) attempt — retries are
+      // handled internally by `attempt()` below via a direct recursive call,
+      // NOT by re-entering doSave, specifically so they never queue behind
+      // themselves and so `.finally()` (and the queue slot it releases) waits
+      // for the retry too. Don't "simplify" the retry to call doSave(d) again
+      // — that would reopen the exact race this fix closes (see point 1 in
+      // the #3785 PR review: doSave's return type is `void`, so chaining
+      // through it would let `.finally()` release the slot before the retry
+      // settles).
+      if (saveQueueRef.current.inFlight) {
+        saveQueueRef.current.pending = data;
+        return;
+      }
+      saveQueueRef.current.inFlight = true;
+
+      // Sends one attempt; on a stale-version rejection, resends ONCE more
+      // at the server-reported version (chained via `return`, so the caller
+      // below only sees this whole thing as "settled" once any retry has
+      // also resolved — that's what keeps the queue slot held long enough).
+      // Relies on saveStepProgress being an `async function` (always returns
+      // a Promise, even on a synchronous throw) so attempt() can never throw
+      // before `.finally()` below attaches — if that ever changes, inFlight
+      // could wedge `true` forever.
+      const attempt = (d: StepProgressData, retrying: boolean): Promise<void> => {
+        const withVersion: StepProgressData = { ...d, version: lastServerVersionRef.current };
+        return saveStepProgress(token, dbSessionId, withVersion)
+          .then((res) => {
+            // Track the new server version for the next save
+            if (res.step_progress) {
+              lastServerVersionRef.current = readStoredVersion(res.step_progress);
+              onProgressSavedRef.current?.(res.step_progress);
+            }
+            // Issue #3024 — surface mid-session XP/badge awards for a
+            // newly-completed step. Absent on old responses / GET-shaped
+            // payloads, so this is opt-in and backward compatible.
+            const xpAwarded = res.xp_awarded ?? 0;
+            const badgesUnlocked = res.badges_unlocked ?? [];
+            if (xpAwarded > 0 || badgesUnlocked.length > 0) {
+              onXpAwardedRef.current?.({ xpAwarded, badgesUnlocked });
+            }
+            // Issue #3780 接島上 — surface word-baby rewards the same way,
+            // absent on old responses / GET-shaped payloads (backward compat).
+            // Merged forward into `attempt()` (#3785's queue-serialized save
+            // path) — this used to be a second, now-duplicate inline call to
+            // saveStepProgress sitting directly in doSave; that whole branch
+            // is gone, attempt() is the only place a save actually happens.
+            const wordBabyRewards = res.word_baby_rewards ?? [];
+            if (wordBabyRewards.length > 0) {
+              onWordBabyRewardedRef.current?.(wordBabyRewards);
+            }
+          })
+          .catch((err) => {
+            if (err instanceof StaleVersionError) {
+              // Refresh from server; next save will use the newer version
+              lastServerVersionRef.current = err.storedVersion;
+              loadStepProgress(token, dbSessionId)
+                .then((res) => {
+                  if (res.step_progress) onProgressLoadedRef.current?.(res.step_progress);
+                })
+                .catch(() => {});
+              // Issue #3694: the rejected save may be the only one carrying a
+              // step the student just finished. The server only ever adds
+              // completed steps, so resending it at the new version cannot
+              // erase anything. One retry only, so two tabs can't ping-pong.
+              if (!retrying) return attempt(d, true);
+            }
+            // Other errors, or an already-retried stale version: non-fatal —
+            // localStorage already has the data, and (for the retry-exhausted
+            // stale-version case) onProgressLoaded above just re-hydrated
+            // local state from the server without losing this step, per the
+            // union merge in mergeLoadedStepProgress.
+          });
       };
-      saveStepProgress(token, dbSessionId, withVersion)
-        .then((res) => {
-          // Track the new server version for the next save
-          if (res.step_progress) {
-            lastServerVersionRef.current = readStoredVersion(res.step_progress);
-            onProgressSavedRef.current?.(res.step_progress);
-          }
-          // Issue #3024 — surface mid-session XP/badge awards for a
-          // newly-completed step. Absent on old responses / GET-shaped
-          // payloads, so this is opt-in and backward compatible.
-          const xpAwarded = res.xp_awarded ?? 0;
-          const badgesUnlocked = res.badges_unlocked ?? [];
-          if (xpAwarded > 0 || badgesUnlocked.length > 0) {
-            onXpAwardedRef.current?.({ xpAwarded, badgesUnlocked });
-          }
-          // Issue #3780 接島上 — surface word-baby rewards the same way,
-          // absent on old responses / GET-shaped payloads (backward compat).
-          const wordBabyRewards = res.word_baby_rewards ?? [];
-          if (wordBabyRewards.length > 0) {
-            onWordBabyRewardedRef.current?.(wordBabyRewards);
-          }
-        })
-        .catch((err) => {
-          if (err instanceof StaleVersionError) {
-            // Refresh from server; next save will use the newer version
-            lastServerVersionRef.current = err.storedVersion;
-            // Issue #3694: the rejected save may be the only one carrying a step
-            // the student just finished. The server only ever adds completed
-            // steps, so resending it at the new version cannot erase anything.
-            // One retry only, so two tabs can't ping-pong.
-            if (!isRetry) retrySaveRef.current(data, true);
-            loadStepProgress(token, dbSessionId)
-              .then((res) => {
-                if (res.step_progress) onProgressLoadedRef.current?.(res.step_progress);
-              })
-              .catch(() => {});
-          }
-          // Other errors: non-fatal — localStorage already has the data
-        });
+
+      attempt(data, false).finally(() => {
+        saveQueueRef.current.inFlight = false;
+        const next = saveQueueRef.current.pending;
+        if (next) {
+          saveQueueRef.current.pending = null;
+          doSaveRef.current(next);
+        }
+      });
     },
     [token, dbSessionId],
   );
 
-  // Keep a ref to the latest doSave so unmount cleanup always uses the current version
-  const doSaveRef = useRef(doSave);
-  useEffect(() => { retrySaveRef.current = doSave; }, [doSave]);
+  // Keep doSaveRef pointed at the latest doSave so unmount cleanup and
+  // doSave's own queue-drain always use the current version.
   useEffect(() => { doSaveRef.current = doSave; }, [doSave]);
 
   // ── Debounced sync ────────────────────────────────────────────────────────

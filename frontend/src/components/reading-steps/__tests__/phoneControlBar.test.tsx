@@ -20,6 +20,16 @@ describe('phone control bar', () => {
     for (const b of screen.getAllByRole('button')) expect(b.className).toMatch(/\bwhitespace-nowrap\b/);
   });
 
+  it('the compact size used on 讀全文-做記號 (#3397) keeps the same guards', () => {
+    render(<TtsSpeedPicker size="sm" />);
+    const group = screen.getByRole('group', { name: '朗讀速度' });
+    expect(group.className).toMatch(/\bshrink-0\b/);
+    for (const b of screen.getAllByRole('button')) {
+      expect(b.className).toMatch(/\bwhitespace-nowrap\b/);
+      expect(b.className).toMatch(/\bh-7\b/);
+    }
+  });
+
   it('idle 重點朗讀: picker takes its own row on phones, buttons keep one line', () => {
     render(
       <KeyPassageReadingControls

@@ -27,6 +27,7 @@ import {
   findCelebrationViewpoint,
   CELEBRATION_VIEW_DISTANCE,
   CELEBRATION_EXTRA_HEIGHT,
+  isMovementLocked,
 } from '../spawnPoint';
 
 describe('碰撞不變量（不穿牆）', () => {
@@ -245,5 +246,27 @@ describe('findCelebrationViewpoint（慶祝期間找一個不穿牆的觀景點�
     // island radius - 1 = 5，比 CELEBRATION_VIEW_DISTANCE(5.5) 還小，
     // 理論上所有候選都會超出島嶼範圍
     expect(viewpoint).toBeNull();
+  });
+});
+
+/**
+ * #3780 P0-3 七度審查訂正：飛行途中鎖住輸入——真瀏覽器+179 課實算抓到，
+ * 原本「手動移動打斷飛行」會讓高度在按下方向鍵那一幀瞬間歸零，約三成
+ * 落在建築或山丘裡。`createIslandWorld.ts` 的 per-frame 迴圈接的就是這支
+ * 函式的回傳值（`let length = isMovementLocked(introPlaying, flying) ? 0
+ * : Math.hypot(dx, dz)`），鎖住的不只是「移動」，連帶鎖住下面判斷
+ * `travelFlight = null` 的那個分支（已經拿掉，現在移動完全不會打斷飛行）。
+ */
+describe('isMovementLocked — 飛行/開場鏡頭期間鎖住輸入', () => {
+  it('🔒 正在飛行時（即使沒有播開場鏡頭）要鎖住輸入——這是這次退件的真實 bug', () => {
+    expect(isMovementLocked(false, true)).toBe(true);
+  });
+
+  it('開場鏡頭播放中（即使沒有在飛行）要鎖住輸入——既有行為，不能因為這次改動被拆掉', () => {
+    expect(isMovementLocked(true, false)).toBe(true);
+  });
+
+  it('兩者都不成立時不該鎖住輸入，否則玩家永遠不能動', () => {
+    expect(isMovementLocked(false, false)).toBe(false);
   });
 });

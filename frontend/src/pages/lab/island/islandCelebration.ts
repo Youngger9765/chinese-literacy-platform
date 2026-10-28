@@ -173,18 +173,44 @@ export function resolveCelebrationTrigger(
 }
 
 /**
- * 慶祝期間讓正在慶祝那棟建築的窗戶材質（`glowMaterials[index]`，emissive
- * 顏色已經是暖黃色 `0xffd277`，平常「已完成」的穩定發光是
- * `2.2 + sin(elapsed*3)*0.3`）額外加亮加強——不然「它亮了」這件事只靠
- * 鏡頭轉過去跟一道白色光柱表示，跟平常走近任何一個已完成的站沒有視覺
- * 差異（team-lead/Young 2026-10-27 真瀏覽器截圖退件）。heavy tier 比
- * light tier 明顯更亮、脈動幅度也更大，跟 halo／粒子的分級邏輯一致
- * （見 `CELEBRATION_PROFILES`）。
+ * 慶祝期間讓正在慶祝那棟建築整棟的材質（見 islandBuildingShapes.ts 的
+ * `buildStationGroup`/`applyBuildingGlow`，四度審查訂正之後不再只有單一
+ * 窗戶）額外加亮加強——不然「它亮了」這件事只靠鏡頭轉過去跟一道白色光柱
+ * 表示，跟平常走近任何一個已完成的站沒有視覺差異（team-lead/Young
+ * 2026-10-27 真瀏覽器截圖退件）。heavy tier 比 light tier 明顯更亮、脈動
+ * 幅度也更大，跟 halo／粒子的分級邏輯一致（見 `CELEBRATION_PROFILES`）。
+ *
+ * ⚠️ 2026-10-27 二度調校：原本這裡（跟 `windowMat` 時代的強度沿用下來）
+ * 是 heavy=6.5±1.2、light=3.5±0.6——這個量級配合整棟材質都被蓋上同一個
+ * emissive 之後，在 ACESFilmicToneMapping 下會把柱子/屋頂/捲軸全部過曝
+ * 成一片沒有細節的白色剪影，看起來像渲染壞掉而不是「點亮」（team-lead
+ * 看真瀏覽器截圖退件）。調低一個數量級，讓材質原本的顏色與明暗層次還
+ * 看得出來，只疊一層暖色高光——用「凍結鏡頭＋逐步調強度量亮度」的方式
+ * 校出來的：heavy 0.5±0.09 讓建築區域裁切亮度比關閉時高約 +37（目標
+ * +25~+45 區間中段），light 再降一級到 0.27±0.05（約 +26~+27，比 heavy
+ * 明顯弱一截）。
  */
 export function celebrationGlowBoost(profile: CelebrationProfile, elapsed: number): number {
-  const base = profile.tier === 'heavy' ? 6.5 : 3.5;
-  const pulseAmp = profile.tier === 'heavy' ? 1.2 : 0.6;
+  const base = profile.tier === 'heavy' ? 0.5 : 0.27;
+  const pulseAmp = profile.tier === 'heavy' ? 0.09 : 0.05;
   return base + Math.sin(elapsed * 6) * pulseAmp;
+}
+
+/**
+ * 「已完成、但現在沒有在慶祝」的穩定發光——跟 tier 無關，所有已完成的站
+ * 都套這一條。原本是 `2.2 + sin(elapsed*3)*0.3`，是舊 `windowMat` 時代
+ * 定的值；四度審查訂正把整棟材質都接上同一套發光機制之後，這個量級一樣
+ * 會把建築過曝成白色剪影——而且這是**持續性**狀態（玩家整段遊戲期間
+ * 隨時會看到已完成的站），曝光時間比短暫的慶祝長得多，更需要調低。跟
+ * `celebrationGlowBoost` 用同一個比例尺縮小（約原本的 1/13），讓「已完成」
+ * 看起來是一圈淡淡的暖色提示，不是主要的視覺焦點——那是 heavy/light 慶祝
+ * 的角色。抽成具名函式（不是寫在 `createIslandWorld.ts` 的 per-frame
+ * 迴圈裡的字面數字），這樣下面 `celebrationGlowBoost` 的「慶祝一定要比
+ * 穩定發光亮」這條 🔒 回歸鎖才能直接引用它的真實上界，不用在測試裡複製
+ * 一份可能會漂移的數字。
+ */
+export function steadyCompletedGlow(elapsed: number): number {
+  return 0.17 + Math.sin(elapsed * 3) * 0.02;
 }
 
 /** 完成/慶祝時整棟建築共用的暖色——跟原本 `windowMat` 的 emissive 色號一致。 */

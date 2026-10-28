@@ -50,6 +50,10 @@ import {
   nearTriggerRadiusForStep,
   selectNearestStation,
   findCelebrationViewpoint,
+  findTravelToDestination,
+  arcFlightPosition,
+  arcFlightArrivalYaw,
+  ARC_FLIGHT_PEAK_HEIGHT,
   LIGHTHOUSE_ROOF_TOP_Y,
   LIGHTHOUSE_TOWER_BASE_Y,
   MIN_CAMERA_BUILDING_DISTANCE,
@@ -82,6 +86,14 @@ function isWalkableAtSpawn(x: number, z: number): boolean {
 function isInsideAnyHill(x: number, z: number): boolean {
   return hillPositions.some(([hx, hz, r]) => Math.hypot(x - hx, z - hz) < r * 0.7);
 }
+
+/** 山丘最高的那一座頂點世界座標 Y——跟 `createIslandWorld.ts` 蓋山丘那段
+ * 同一個公式（`ConeGeometry(r, 2.3 + i%3, 10)` 擺在 local y=1.25，頂點 =
+ * 1.25 + 高度/2），從真實 `hillPositions` 陣列算出來，不是猜的；遠比
+ * `LIGHTHOUSE_ROOF_TOP_Y`（全島最高建築）矮，⑩ 檢查「飛行途中經過山丘
+ * 上方」時用這個當門檻，不能沿用建築的門檻——那樣會在飛行還沒爬升到
+ * 「比最高建築還高」、但其實早就高過山丘的那段路程裡製造假警報。 */
+const MAX_HILL_APEX_Y = Math.max(...hillPositions.map((_, i) => 1.25 + (2.3 + (i % 3)) / 2));
 
 describe('spawnPoint — 全平台 179 課回歸鎖（#3780 P0-2）', () => {
   it('fixture 真的涵蓋 179 課，不是空的或漏抓的', () => {
@@ -230,6 +242,115 @@ describe('spawnPoint — 全平台 179 課回歸鎖（#3780 P0-2）', () => {
           expect(isInsideAnyHill(viewpoint.x, viewpoint.z), `第 ${id} 課「${title}」：「${target.name}」的觀景點穿進了山丘碰撞圈`).toBe(false);
           const withinIsland = Math.hypot(viewpoint.x - zoneCenter.x, viewpoint.z - zoneCenter.z) < zoneCenter.radius - 1;
           expect(withinIsland, `第 ${id} 課「${title}」：「${target.name}」的觀景點超出島嶼範圍`).toBe(true);
+        });
+      });
+
+      it('⑨ travelTo（清單模式／點擊建築直接前往）每一組「從某站出發、前往另一站」都找得到合法終點——#3780 P0-3 五度審查訂正，鎖住「沿玩家目前位置→建築直線走、固定距離停」那個真實 bug（真瀏覽器截圖抓到鏡頭卡進柱子之間、屋頂懸在頭頂）', () => {
+        // 跟 ⑧ 不同：⑧ 只測「玩家在出生點」這一個情境；這裡要測的是
+        // travelTo 的真實使用情境——玩家可能人在島上任何一站，因為點了別
+        // 的建築或切清單模式「前往」才觸發，所以用「每一站當出發點」×
+        // 「每一站當目標」做完整 N×N 掃描，不是只測一個固定的玩家位置。
+        stops.forEach((playerStop, playerIndex) => {
+          stops.forEach((target, targetIndex) => {
+            if (playerIndex === targetIndex) return;
+            const otherBuildings = stops.filter((_, i) => i !== targetIndex).map((s) => ({ x: s.x, z: s.z }));
+            const zoneCenter = zoneCenters[target.zone];
+            const destination = findTravelToDestination({
+              target: { x: target.x, z: target.z },
+              player: { x: playerStop.x, z: playerStop.z },
+              otherBuildings,
+              hills: hillPositions,
+              zoneCenter,
+            });
+            expect(destination, `第 ${id} 課「${title}」：從「${playerStop.name}」前往「${target.name}」找不到合法終點`).not.toBeNull();
+            if (!destination) return;
+
+            for (const other of otherBuildings) {
+              const d = Math.hypot(destination.x - other.x, destination.z - other.z);
+              expect(d, `第 ${id} 課「${title}」：前往「${target.name}」的終點撞進了別的建築`).toBeGreaterThanOrEqual(MIN_CAMERA_BUILDING_DISTANCE);
+            }
+            expect(isInsideAnyHill(destination.x, destination.z), `第 ${id} 課「${title}」：前往「${target.name}」的終點撞進了山丘碰撞圈`).toBe(false);
+            const withinIsland = Math.hypot(destination.x - zoneCenter.x, destination.z - zoneCenter.z) < zoneCenter.radius - 1;
+            expect(withinIsland, `第 ${id} 課「${title}」：前往「${target.name}」的終點超出島嶼範圍`).toBe(true);
+          });
+        });
+      });
+
+      it('⑩ 三段式飛行——垂直升/降段水平座標完全釘在合法端點，水平巡航段全程在峰值高度——#3780 P0-3 七度審查訂正，取代「斜線爬升/下降」那版（真實幾何量到 41 處終點旁第三棟建築被擦到）', () => {
+        // 跟 ⑨ 不同：⑨ 只驗終點合不合法，這裡要驗「飛過去的沿途」每一刻
+        // 的位置到底對不對。跟上一版（斜線拱形）不同的地方：不用再排除
+        // 「終點旁邊的建築」——升/降段水平座標完全不變（釘死在 start／
+        // destination，兩個都已經由 ⑨ 證明過地面合法），不可能撞進任何
+        // 東西；巡航段全程在 `ARC_FLIGHT_PEAK_HEIGHT`（比全島最高建築還高，
+        // 見下面的一次性斷言），不用逐點對照建築/山丘座標。
+        stops.forEach((playerStop, playerIndex) => {
+          stops.forEach((target, targetIndex) => {
+            if (playerIndex === targetIndex) return;
+            const otherBuildings = stops.filter((_, i) => i !== targetIndex).map((s) => ({ x: s.x, z: s.z }));
+            const zoneCenter = zoneCenters[target.zone];
+            const destination = findTravelToDestination({
+              target: { x: target.x, z: target.z },
+              player: { x: playerStop.x, z: playerStop.z },
+              otherBuildings,
+              hills: hillPositions,
+              zoneCenter,
+            });
+            if (!destination) return; // ⑨ 已經鎖過「找不到終點」這件事本身，這裡只關心找得到時的路徑
+
+            const start = { x: playerStop.x, z: playerStop.z };
+            for (let s = 0; s <= 20; s++) {
+              const progress = s / 20;
+              const pos = arcFlightPosition(start, destination, progress);
+              const label = `第 ${id} 課「${title}」：從「${playerStop.name}」飛往「${target.name}」，進度 ${progress.toFixed(2)}（${pos.phase}）`;
+
+              if (pos.phase === 'ascend') {
+                expect(pos.x, `${label}：升段水平座標 x 應該釘在出發點`).toBe(start.x);
+                expect(pos.z, `${label}：升段水平座標 z 應該釘在出發點`).toBe(start.z);
+              } else if (pos.phase === 'descend') {
+                expect(pos.x, `${label}：降段水平座標 x 應該釘在終點`).toBe(destination.x);
+                expect(pos.z, `${label}：降段水平座標 z 應該釘在終點`).toBe(destination.z);
+              } else {
+                expect(pos.extraHeight, `${label}：巡航段應該全程在峰值高度`).toBe(ARC_FLIGHT_PEAK_HEIGHT);
+              }
+            }
+          });
+        });
+      });
+
+      it('⑩-2 巡航高度本身確實高於全島最高建築／最高山丘（一次性斷言，不是每課都要重算這個常數關係）', () => {
+        expect(ARC_FLIGHT_PEAK_HEIGHT, '巡航高度應該高於全島最高建築（燈塔塔尖）').toBeGreaterThan(LIGHTHOUSE_ROOF_TOP_Y);
+        expect(ARC_FLIGHT_PEAK_HEIGHT, '巡航高度應該高於全島最高山丘').toBeGreaterThan(MAX_HILL_APEX_Y);
+      });
+
+      it('⑪ 拱形飛行抵達時鏡頭朝向正確面向目標建築（夾角 < 5°）——#3780 P0-3 六度審查訂正，鎖住「抵達朝向沒處理，平均差 32°、10.5% 背對超過 90°」那個真實 bug', () => {
+        stops.forEach((playerStop, playerIndex) => {
+          stops.forEach((target, targetIndex) => {
+            if (playerIndex === targetIndex) return;
+            const otherBuildings = stops.filter((_, i) => i !== targetIndex).map((s) => ({ x: s.x, z: s.z }));
+            const destination = findTravelToDestination({
+              target: { x: target.x, z: target.z },
+              player: { x: playerStop.x, z: playerStop.z },
+              otherBuildings,
+              hills: hillPositions,
+              zoneCenter: zoneCenters[target.zone],
+            });
+            if (!destination) return;
+
+            const yaw = arcFlightArrivalYaw(destination, { x: target.x, z: target.z });
+            // 跟 createIslandWorld.ts 實際算鏡頭方向用的同一條公式（見
+            // animate() 裡 `forward = new THREE.Vector3(-Math.sin(yaw), 0, -Math.cos(yaw))`）
+            // 獨立換算一次，不是直接複述 arcFlightArrivalYaw 內部用的
+            // atan2 算式本身——這樣才驗得到「這個 yaw 套進相機方向公式
+            // 之後，實際指向的方向真的對準建築」，不是同義反覆。
+            const forwardX = -Math.sin(yaw);
+            const forwardZ = -Math.cos(yaw);
+            const toTargetX = target.x - destination.x;
+            const toTargetZ = target.z - destination.z;
+            const toTargetLen = Math.hypot(toTargetX, toTargetZ) || 1;
+            const dot = (forwardX * toTargetX + forwardZ * toTargetZ) / toTargetLen; // forward 已經是單位向量
+            const angleDeg = (Math.acos(Math.max(-1, Math.min(1, dot))) * 180) / Math.PI;
+            expect(angleDeg, `第 ${id} 課「${title}」：從「${playerStop.name}」飛往「${target.name}」，抵達朝向跟建築方向夾角 ${angleDeg.toFixed(1)}°`).toBeLessThan(5);
+          });
         });
       });
 

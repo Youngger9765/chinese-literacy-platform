@@ -81,13 +81,26 @@ const StudentOurClassPage: React.FC = () => {
   if (offline) return <div className="p-6 text-on-surface-variant">目前無法連線，請檢查網路後重新整理。</div>;
   if (error) return <div className="p-6 text-error">{error}</div>;
 
-  // 無賽季 state
+  // 無賽季 state — #3778 (game-academy audit r2 P2-3): this was the one
+  // empty/entry state in the whole game-academy visual pass that never got
+  // an illustration (PK/escape-room/live-quiz/team-arena all did, round 3).
+  // Reuses the existing 跨班賽季 guide character art the game-hub card
+  // already shows for this mode, rather than generating a new asset.
   if (seasons.length === 0) {
     return (
       <div className="p-6 max-w-xl mx-auto">
         <h1 className="text-xl font-bold text-on-surface mb-1">我們班</h1>
         <p className="text-sm text-on-surface-variant mb-2">和別班比幾週，平常讀課文就累積</p>
-        <p className="text-on-surface-variant">老師還沒有開啟跨班賽季，等老師邀請跨班比賽後就會出現在這裡。</p>
+        <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-[#6D7B8F] to-[#4A5568] px-5 py-6 text-center shadow-sm">
+          <img
+            src="/story-assets/league-tang/guide-changan-greet.png"
+            alt=""
+            aria-hidden="true"
+            className="mx-auto h-24 w-24 object-contain drop-shadow-md"
+          />
+          <p className="mt-3 text-sm text-white/90">老師還沒有開啟跨班賽季</p>
+          <p className="mt-1 text-xs text-white/80">等老師邀請跨班比賽後就會出現在這裡</p>
+        </div>
       </div>
     );
   }

@@ -555,6 +555,26 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
 
   const containerRef = useRef<HTMLDivElement>(null);
   const toolbarRef = useRef<HTMLDivElement>(null);
+
+  /**
+   * #3397 — 全文播放鍵現在是標題下方一顆小按鈕，會跟著課文捲走。
+   * 播放中學生往下讀，暫停／停止必須還按得到（#2941 當初搬到底部就是為了這個），
+   * 所以那顆捲出畫面且正在播時，右下角浮出一個迷你播放器。
+   * 沒有 IntersectionObserver 的環境（jsdom）一律當作看得到 —— 不浮出比浮出安全。
+   */
+  const inlinePlayerRef = useRef<HTMLDivElement>(null);
+  const [inlinePlayerVisible, setInlinePlayerVisible] = useState(true);
+  useEffect(() => {
+    const el = inlinePlayerRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+    const io = new IntersectionObserver(
+      ([entry]) => setInlinePlayerVisible(entry.isIntersecting),
+      // root = 課文捲動區，不是 viewport：整頁不捲，捲的是這個 div。
+      { root: containerRef.current, threshold: 0 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
   const annotationElementRefs = useRef(new Map<string, HTMLSpanElement>());
   const [focusedAnnotationId, setFocusedAnnotationId] = useState<string | null>(null);
 
@@ -1025,25 +1045,6 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
             />
           )}
 
-          {/* Whole-lesson player — 訪客（掃 QR 進來的）專用位置。
-              #2941 把登入學生的播放鍵搬到底部動作列，跟「完成標記」並排：
-              放在文章上方的話，學生一往下讀就把它捲出畫面，讀到第二段想聽
-              就得先捲回頂端。訪客頁留在這裡，因為 `GuestReadingPage` 沒有
-              底部 `StepFooterNav`，那條固定動作列會浮在半空中；訪客也沒有
-              「完成標記」可並排（#2649：不能標記，但要能聽）。 */}
-          {hideAnnotation && (
-            <div className="flex justify-center pt-4">
-              <ReadingPlayer
-                isPlaying={reader.isPlaying}
-                isPaused={reader.isPaused}
-                onPlay={reader.play}
-                onPause={reader.pause}
-                onResume={reader.resume}
-                onStop={reader.stop}
-              />
-            </div>
-          )}
-
           {/* Legend pills + counts + undo/clear
               #3134：這一列必須跟著捲動固定在上方。標記模式開啟後，學生往下讀就
               再也按不到「關閉標記／復原／清除全部」—— 那是模式這個設計自己造成的
@@ -1138,6 +1139,27 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
             >
               {zhuyinTitle}
             </h1>
+            {/* Whole-lesson player（#3397）。
+                原本在底部動作列、跟「完成標記」等大並排（#2941）。mentor 回饋：
+                這一步的主題是「做記號」，最顯眼的位置放播放全文＋速度列偏離主題。
+                搬到標題下方並縮成 sm：
+                  - #3141 每段段號旁已有喇叭，「讀到第二段想聽」不必再捲回頂端，
+                    #2941 搬到底部的主要理由已經被涵蓋；
+                  - 播放中捲走時由下方的浮動迷你播放器接手暫停／停止。
+                登入學生與 QR 訪客（#2649：不能標記，但要能聽）共用同一個位置。 */}
+            <div ref={inlinePlayerRef} className="flex justify-center mt-4">
+              <ReadingPlayer
+                size="sm"
+                isPlaying={reader.isPlaying}
+                isPaused={reader.isPaused}
+                isLoading={reader.isLoading}
+                onPlay={reader.play}
+                onPause={reader.pause}
+                onResume={reader.resume}
+                onStop={reader.stop}
+                className="flex-wrap justify-center"
+              />
+            </div>
           </div>
 
           {/* Article paragraphs.
@@ -1319,23 +1341,11 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
       {!hideAnnotation && (
         <>
           {/* ── Fixed bottom CTA — gradient fade ─────────────────────────── */}
-          {/* #2941: 播放全文跟完成標記並排在這裡。兩顆都是這一步隨時要按得到的
-              動作，而底部這條是唯一永遠在畫面上的地方。 */}
+          {/* #3397: 這條只留主 CTA。播放全文搬到標題下方（理由見那裡的註解）。 */}
       <StepActionBar layout="row">
-          <ReadingPlayer
-            size="lg"
-            isPlaying={reader.isPlaying}
-            isPaused={reader.isPaused}
-            onPlay={reader.play}
-            onPause={reader.pause}
-            onResume={reader.resume}
-            onStop={reader.stop}
-          />
           <button
             type="button"
             onClick={() => onFinish(summary)}
-            /* w-44 / h-14 跟播放全文那顆一模一樣（`ReadingPlayer` size="lg"）——
-               owner 2026-08-26：「兩個按鈕的大小要一樣並且置中」。 */
             className="w-44 h-14 flex items-center justify-center gap-2 rounded-full font-headline font-bold text-xl text-white whitespace-nowrap shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all"
             style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
           >
@@ -1344,6 +1354,30 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
           </button>
       </StepActionBar>
         </>
+      )}
+
+      {/* #3397: 浮動迷你播放器 —— 只在「正在播（或暫停中）且標題下那顆已捲出畫面」
+          時出現，閒置時不佔任何位置。
+          位置：登入學生要讓開底部那條動作列（bottom-16 導航 + 完成標記，頂端約
+          152px），桌機還要讓開右側 w-56 的「我的記號」面板；訪客頁兩者都沒有。 */}
+      {(reader.isPlaying || reader.isPaused) && !inlinePlayerVisible && (
+        <div
+          data-testid="floating-reading-player"
+          className={`fixed z-30 rounded-full bg-surface-container-lowest/95 backdrop-blur-sm shadow-editorial border border-outline-variant/30 p-1 ${
+            hideAnnotation ? 'right-4 bottom-6' : 'right-4 md:right-60 bottom-40'
+          }`}
+        >
+          <ReadingPlayer
+            size="sm"
+            showSpeed={false}
+            isPlaying={reader.isPlaying}
+            isPaused={reader.isPaused}
+            onPlay={reader.play}
+            onPause={reader.pause}
+            onResume={reader.resume}
+            onStop={reader.stop}
+          />
+        </div>
       )}
 
       {/* Background decoration */}
