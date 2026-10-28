@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { introProgress, characterPose } from './islandMotion';
 import type { IslandBaby, IslandStop } from './islandTemplate';
 import { isSceneryExcluded } from './islandTemplate';
-import { MIN_CAMERA_BUILDING_DISTANCE, computeSpawnFacingLighthouse, selectNearestStation, findCelebrationViewpoint, type CelebrationViewpoint } from './spawnPoint';
+import { MIN_CAMERA_BUILDING_DISTANCE, computeSpawnFacingLighthouse, selectNearestStation, findCelebrationViewpoint, findTravelToDestination, arcFlightPosition, arcFlightArrivalYaw, isMovementLocked, type CelebrationViewpoint } from './spawnPoint';
 import { startCelebration, advanceOnTurnConverged, isHoldComplete, diffProgress, resolveCelebrationTrigger, celebrationGlowBoost, steadyCompletedGlow, resolveCelebrationGlow, INITIAL_PROGRESS_DIFF_STATE, type CelebrationState, type ProgressDiffState } from './islandCelebration';
 import { buildStationGroup, applyBuildingGlow, disposeObjectTree, type BuildingMaterialSlot } from './islandBuildingShapes';
 
@@ -305,7 +305,25 @@ export function createIslandWorld(
   let nextStop: number | null = 0;
   let guideUntil = 0;
   let turnTo: number | null = null;
-  let travelTarget: number | null = null;
+  // #3780 P0-3 五度/六度審查訂正：travelTo（清單模式／點擊建築「前往」）
+  // 不再是「沿地面走到固定距離」——那個做法完全沒檢查路徑，真瀏覽器截圖
+  // +179 課 fixture 實算：33.8% 的路徑中途穿過別的建築、36.6% 穿過山丘，
+  // 而且抵達時鏡頭朝向沒處理（平均差 32°，10.5% 背對超過 90°）。改成拱形
+  // 飛行：鏡頭沿一條路線從玩家目前位置飛到驗證過的終點，中段墊高到比
+  // 全島最高建築還高（見 spawnPoint.ts 的 `arcFlightPosition`／
+  // `ARC_FLIGHT_PEAK_HEIGHT`），整段飛行途中的高度都不可能撞進任何建築／
+  // 山丘；落地朝向直接設成面向目標建築（`arcFlightArrivalYaw`），不是沿
+  // 飛行方向推算的角度——那兩個經常不一樣，終點是繞著建築找的合法立足
+  // 點，不一定落在「出發點→建築」那條線的延伸方向上。
+  interface TravelFlight {
+    readonly index: number;
+    readonly start: { x: number; z: number };
+    readonly end: { x: number; z: number };
+    readonly target: { x: number; z: number };
+    readonly startedAt: number;
+    readonly duration: number;
+  }
+  let travelFlight: TravelFlight | null = null;
   // #3780 P0-3：回島先面向剛完成的站，停留夠了才轉向下一站。三段式狀態
   // 機（'turning' 轉去剛完成的站 → 'turnTo 收斂' → 'holding' 才開始算
   // 停留秒數）本身是不碰 three.js/WebGL 的純函式，見 islandCelebration.ts
@@ -431,29 +449,40 @@ export function createIslandWorld(
       const dz = keyDirection.z + stickDirection.z;
       // 開場鏡頭還在飛的時候鎖住移動，免得學生在鏡頭外走到別站
       const introPlaying = introStart >= 0;
-      let length = introPlaying ? 0 : Math.hypot(dx, dz);
-      if (introPlaying) travelTarget = null;
+      // #3780 P0-3 七度審查訂正：飛行途中鎖住輸入，跟 introPlaying 同一個
+      // 做法——原本只有 `length > 0.08` 才會打斷飛行，但那代表玩家按
+      // WASD／拖搖桿的那一幀，`length` 會蓋掉下面飛行區塊算出來的值、
+      // `travelFlight` 被設成 null，高度瞬間歸零，鏡頭直接掉在飛到一半的
+      // 半空中——真瀏覽器+ 179 課實算約三成會落在建築或山丘裡。現在飛行中
+      // `length` 一律視為 0（跟 introPlaying 一樣鎖住），不會進到下面手動
+      // 移動的分支，飛行本身也不會被打斷，必須飛完才交還控制。
+      const flying = travelFlight !== null;
+      let length = isMovementLocked(introPlaying, flying) ? 0 : Math.hypot(dx, dz);
+      if (introPlaying) travelFlight = null;
       if (length > 0.08 && mode === 'god') events.onWantFirstPerson?.();
-      if (length > 0.08) travelTarget = null;
-      if (travelTarget !== null && mode === 'first') {
-        const goal = content.stops[travelTarget];
-        const gx = goal.x - player.position.x;
-        const gz = goal.z - player.position.z;
-        const dist = Math.hypot(gx, gz);
-        if (dist < 2.9) {
-          const arrived = travelTarget;
-          travelTarget = null;
+      // 這一刻算出來的墊高值會在下面 `mode === 'first'` 的 `eye` 計算裡用到。
+      let flightExtraHeight = 0;
+      if (travelFlight && mode === 'first') {
+        const progress = (elapsed - travelFlight.startedAt) / travelFlight.duration;
+        if (progress >= 1) {
+          player.position.x = travelFlight.end.x;
+          player.position.z = travelFlight.end.z;
+          yaw = arcFlightArrivalYaw(travelFlight.end, travelFlight.target);
+          const arrived = travelFlight.index;
+          travelFlight = null;
+          events.onMove(player.position.x, player.position.z);
           events.onArrive?.(arrived);
         } else {
-          yaw += Math.atan2(Math.sin(Math.atan2(-gx, -gz) - yaw), Math.cos(Math.atan2(-gx, -gz) - yaw)) * Math.min(1, dt * 3);
-          const step = Math.min(dist - 2.8, dt * 6.5);
-          player.position.x += (gx / dist) * step;
-          player.position.z += (gz / dist) * step;
+          const pos = arcFlightPosition(travelFlight.start, travelFlight.end, progress);
+          player.position.x = pos.x;
+          player.position.z = pos.z;
+          flightExtraHeight = pos.extraHeight;
+          yaw = arcFlightArrivalYaw({ x: pos.x, z: pos.z }, travelFlight.target);
           events.onMove(player.position.x, player.position.z);
           length = 1;
         }
       }
-      if (length > 0.08 && travelTarget === null) {
+      if (length > 0.08 && travelFlight === null) {
         const forward = new THREE.Vector3(-Math.sin(yaw), 0, -Math.cos(yaw));
         const right = new THREE.Vector3(Math.cos(yaw), 0, -Math.sin(yaw));
         const moveX = (right.x * dx + forward.x * -dz) / Math.max(1, length) * dt * 5.2;
@@ -528,7 +557,10 @@ export function createIslandWorld(
         const usingViewpoint = celebration !== null && celebrationViewpoint !== null;
         const eyeX = usingViewpoint ? celebrationViewpoint!.x : player.position.x;
         const eyeZ = usingViewpoint ? celebrationViewpoint!.z : player.position.z;
-        const eyeExtraHeight = usingViewpoint ? celebrationViewpoint!.extraHeight : 0;
+        // 慶祝觀景點跟拱形飛行是兩種不同情境互斥的墊高來源（不會同時發生
+        // ——慶祝時 travelFlight 必定是 null，飛行途中也不會進入慶祝），
+        // 直接相加即可，不用另外判斷優先序。
+        const eyeExtraHeight = (usingViewpoint ? celebrationViewpoint!.extraHeight : 0) + flightExtraHeight;
         const eye = new THREE.Vector3(eyeX, 1.75 + eyeExtraHeight + jumping + (length > 0.08 ? Math.sin(elapsed * 11) * 0.05 : 0), eyeZ);
         const look = new THREE.Vector3(-Math.sin(yaw) * Math.cos(pitch), Math.sin(pitch), -Math.cos(yaw) * Math.cos(pitch));
         const intro = introStart >= 0 ? introProgress(elapsed - introStart, INTRO_SECONDS) : 1;
@@ -722,7 +754,32 @@ export function createIslandWorld(
       }
     },
     setMode(next: ViewMode) { mode = next; if (next === 'first') pitch = -0.05; },
-    travelTo(index: number) { travelTarget = index; mode = 'first'; pitch = -0.05; },
+    // #3780 P0-3 六度審查訂正：終點驗證過合法（跟慶祝鏡頭同一套檢查，見
+    // findTravelToDestination），但沿地面走過去的「路徑」本身完全沒檢查
+    // ——真瀏覽器截圖 + 179 課 fixture 實算，33.8% 的路徑中途穿過別的建築、
+    // 36.6% 穿過山丘，而且抵達時鏡頭朝向沒處理（平均差 32°，10.5% 背對超
+    // 過 90°）。改成拱形飛行：記下出發點（玩家目前位置）跟終點，animate()
+    // 裡每一幀用 `arcFlightPosition` 算當下該在哪、墊高多少；飛行總秒數
+    // 依距離落在 0.8–1.5 秒之間，找不到合法終點（理論上很少見）就直接飛
+    // 向建築原始座標，接受那個殘留風險，但路徑本身的安全不受影響——拱形
+    // 飛行的高度保證不管飛向哪個水平座標都不會撞進任何東西。
+    travelTo(index: number) {
+      const target = content.stops[index];
+      const destination = findTravelToDestination({
+        target: { x: target.x, z: target.z },
+        player: { x: player.position.x, z: player.position.z },
+        otherBuildings: content.stops.filter((_, i) => i !== index).map((s) => ({ x: s.x, z: s.z })),
+        hills: hillPositions,
+        zoneCenter: zoneCenters[target.zone],
+      });
+      const start = { x: player.position.x, z: player.position.z };
+      const end = destination ?? { x: target.x, z: target.z };
+      const dist = Math.hypot(end.x - start.x, end.z - start.z);
+      const duration = Math.min(1.5, Math.max(0.8, dist / 15));
+      travelFlight = { index, start, end, target: { x: target.x, z: target.z }, startedAt: elapsed, duration };
+      mode = 'first';
+      pitch = -0.05;
+    },
     setStick(x: number, z: number) { stickDirection = { x, z }; },
     setPaused(value: boolean) { paused = value; },
     jump() { if (jumping === 0) verticalSpeed = 5.5; },
