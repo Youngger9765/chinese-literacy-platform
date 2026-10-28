@@ -160,9 +160,14 @@
 > ⚠️ **2026-10-26 後續更新**：產品負責人決定文字寶貝要做成完整的「養成系統」，由另一個
 > agent 在 `docs/design/word-babies/` 設計中（本 PRD 不碰那個目錄）。上面這份 2026-10-26
 > 當天的碎片散落規則是那次決定當下的紀錄，**不保證是最終方案**，實際規則以
-> `docs/design/word-babies/` 的設計文件為準。D（這一輪）**明確不做**寶貝的顯示與收集邏輯
-> ——我的群島頁的寶貝欄位這次留空或顯示「即將開放」，島上既有的 6 隻寶貝欄位（§5.4 舊規則，
+> `docs/design/word-babies/` 的設計文件為準。D（這一輪）原本**明確不做**寶貝的顯示與收集邏輯
+> ——我的群島頁的寶貝欄位當時規劃留空或顯示「即將開放」，島上既有的 6 隻寶貝欄位（§5.4 舊規則，
 > 尚未換掉）這次也不動，等 word-babies 設計定案後再接。
+>
+> ⚠️ **2026-10-28 後續更新**：`docs/design/word-babies/` 的養成系統已做完，我的群島頁與
+> 遊戲區「島嶼探索」卡的寶貝欄位**改成接真實資料**（`GET /learning/students/{id}/word-babies`
+> 的 `babies_owned_count`／`babies_total_species`），不再是上面寫的「留空或顯示即將開放」。
+> 見 §10 變更紀錄。
 
 ### 5.5 開場內容
 
@@ -210,7 +215,7 @@ API」的解法是讓**已經在算這個 session 的同一個迴圈**順手查�
 
 | 項目 | 內容 |
 |---|---|
-| D1 遊戲區「島嶼探索」卡 | 加進 `frontend/src/pages/student/StudentGameHubPage.tsx` 的「自己玩」分區（跟既有卡片同一套 hero 圖＋漸層風格），文案：「已佔領 N 座島」；文字寶貝那一欄這次顯示「即將開放」（見 §5.4 後續更新），點擊導去 `/student/archipelago` |
+| D1 遊戲區「島嶼探索」卡 | 加進 `frontend/src/pages/student/StudentGameHubPage.tsx` 的「自己玩」分區（跟既有卡片同一套 hero 圖＋漸層風格），文案：「已佔領 N 座島、文字寶貝 M 隻」（2026-10-28：word-babies 系統做完後改接真實資料，不再是「即將開放」，見 §5.4 後續更新），點擊導去 `/student/archipelago` |
 | D3 我的群島頁 | 新路由 `/student/archipelago`（`frontend/src/pages/student/StudentArchipelagoPage.tsx`）。**只打兩支 API，各打一次**：① `GET /api/stories?page_size=300`（全部課程清單，斷言 `stories.length === total`）② `GET /api/learning/students/{me.id}/progress`（這支已有 `steps_completed`／`has_session`／`is_occupied`）。用 `story_slug` 對照兩份清單；`/progress` 的 `texts[]` 沒有的課 = 未佔領，顯示為「尚未探索」 |
 | 港口燈塔改看 `has_session` | `ReadingIslandLab.tsx` 的 `refreshProgress()` 現在只用 `fetchLearningSessions`＋`loadStepProgress`，`matching.length > 0` 這個既有判斷本身就等同 `has_session`——不需要换成打新端點，只要把這個既有訊號接到 `doneIndexes` 對 `lesson-intro` 那一站的判定，滿足 PRD §6「進度持久」驗收條件（換裝置/清瀏覽器，港口燈塔仍是亮的） |
 
@@ -259,7 +264,7 @@ API」的解法是讓**已經在算這個 session 的同一個迴圈**順手查�
 - Given 群島頁某課顯示「探索中 x/y 站」，Then x／y 跟學生在島上實際看到的亮燈數／總站數完全一致（前後端共用同一套判斷規則、測試鎖同一組案例，§5.6）
 - Given 學生只完成課程簡介（lesson-intro）那一關，When 換一個全新瀏覽器登入同帳號進同一座島，Then 港口燈塔仍是亮的（讀 `has_session`，不是只讀瀏覽器 `visited`）
 - Given 遊戲區「自己玩」區，Then 有「島嶼探索」卡，顯示已佔領島數，點擊導去我的群島頁
-- Given 文字寶貝欄位，Then 顯示「即將開放」，不嘗試顯示任何寶貝資料（§5.4 後續更新）
+- Given 文字寶貝欄位，Then 顯示真實的已擁有隻數／總隻數（`babies_owned_count`／`babies_total_species`），點擊導去 `/lab/word-babies`（2026-10-28：word-babies 系統做完後改接真資料，不再是「即將開放」，見 §5.4 後續更新）
 
 **D2 後端（`GET /learning/students/{student_id}/progress`，§5.6）**
 - Given 學生查自己的進度，Then 200，`texts[]` 每筆都帶 `steps_completed`（陣列）與
@@ -316,3 +321,4 @@ API」的解法是讓**已經在算這個 session 的同一個迴圈**順手查�
 | 2026-10-26 | D 進度端點再加 `is_occupied` 欄位（§5.6）；D1 遊戲區島嶼探索卡＋D3 我的群島頁＋港口燈塔改看 `has_session` 的路由與資料來源定案（§5.7）；文字寶貝這輪不做顯示/收集（改由另一個 agent 在 `docs/design/word-babies/` 設計養成系統） | 工頭判斷：查證發現故事模式完全不會觸發舊的 `session.status=completed` 流程、且 `/api/stories` 清單不含 `step_sequence`，純前端無法在不加欄位／不對每課各打一次 API 的前提下算出「佔領」，所以在同一個已審查過的端點、同一個迴圈，用既有記憶體查詢（`get_lesson_by_id`，零額外查詢成本）多算一個欄位；產品負責人同日另行決定文字寶貝改做養成系統，D 範圍明確排除 |
 | 2026-10-26 | 產品負責人同意 `is_occupied` 的做法；加碼要求同一個端點再回 `stations_total`／`stations_done`（給群島頁顯示「探索中 x/y 站」），且前後端判斷「這站算不算完成」要共用同一套規則、各自測試鎖同一組案例（§5.6） | 產品負責人：「這種事由工頭判斷」確認既有端點加欄位的做法；另要求加碼欄位與前後端規則一致性，避免兩邊數字兜不起來 |
 | 2026-10-26 | 兩位試玩專家（兒童 UX／遊戲樂趣）＋產品負責人實玩後定出 P0/P1/P2 優先序（§4.1.1），**P0 四項插隊在 D 之前做**：iPad 觸控版面誤判、出生點與鏡頭穿牆、點亮回饋沒入鏡且沒分級、畫面漏出開發者除錯字 | 試玩截圖在 `scratchpad`（`playtest-kid/`／`playtest-fun/`／`myplay/`）；產品負責人明令「先做完 P0 再繼續 D」 |
+| 2026-10-28 | 文字寶貝養成系統（§5.4 提到的「另一個 agent」設計的部分）已做完，我的群島頁與遊戲區「島嶼探索」卡的寶貝欄位改成接真實資料（`GET /learning/students/{id}/word-babies` 的 `babies_owned_count`／`babies_total_species`），不再顯示「即將開放」佔位文字；§5.4／§5.7／§6 原文同步改掉，不留自相矛盾 | team-lead 2026-10-28 code review 要求：寵物欄改接真資料後補記變更紀錄，並把 PRD 本文三處「即將開放」一併改到跟現況一致 |

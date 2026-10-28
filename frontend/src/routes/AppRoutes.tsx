@@ -75,6 +75,7 @@ const StudentOurClassPage = lazy(() => import('../pages/student/StudentOurClassP
 // 跨班賽季/課堂搶答/班級內 PK (teacher) into one hub page each. Old routes above
 // are untouched.
 const StudentGameHubPage = lazy(() => import('../pages/student/StudentGameHubPage'));
+const StudentArchipelagoPage = lazy(() => import('../pages/student/StudentArchipelagoPage'));
 const TeacherGameHubPage = lazy(() => import('../pages/teacher/TeacherGameHubPage'));
 const TeacherSessionReportPage = lazy(() => import('../pages/teacher/TeacherSessionReportPage'));
 const ProjectHubPage = lazy(() => import('../pages/ProjectHubPage'));
@@ -370,6 +371,17 @@ const AppRoutes: React.FC = () => (
           <ProtectedRoute>
             <AppShell>
               <StudentGameHubPage />
+            </AppShell>
+          </ProtectedRoute>
+        }
+      />
+      {/* 我的群島頁 (#3780 D3) — 遊戲區「島嶼探索」卡的目的地。 */}
+      <Route
+        path="/student/archipelago"
+        element={
+          <ProtectedRoute>
+            <AppShell>
+              <StudentArchipelagoPage />
             </AppShell>
           </ProtectedRoute>
         }
