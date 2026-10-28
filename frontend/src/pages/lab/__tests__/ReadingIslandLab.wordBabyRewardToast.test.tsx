@@ -74,6 +74,10 @@ async function enterIsland() {
   // vite.config.ts). This assertion only needs "mount finished creating the
   // 3D world", not "this is the first-ever call across the whole file".
   await waitFor(() => expect(createIslandWorld).toHaveBeenCalled());
+  // 世界建好不代表冷開場按鈕已經畫出來——CI 全套一起跑機器忙時，這一拍
+  // 常常還沒到，直接點會 `Unable to fire a "click" event`。等按鈕本身出現
+  // 再換假時鐘（換了之後 waitFor 的輪詢就不會動了）。
+  await waitFor(() => expect(byAriaLabel('點一下，進入喝采島')).toBeTruthy());
 
   vi.useFakeTimers();
   const coldOpenBtn = byAriaLabel('點一下，進入喝采島');

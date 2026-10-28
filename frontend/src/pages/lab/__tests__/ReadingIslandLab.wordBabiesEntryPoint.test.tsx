@@ -63,6 +63,7 @@ async function enterIsland() {
   render(<ReadingIslandLab />);
   await waitFor(() => expect(createIslandWorld).toHaveBeenCalledTimes(1));
 
+  await waitFor(() => expect(byAriaLabel('點一下，進入喝采島')).toBeTruthy()); // 按鈕畫出來才換假時鐘（CI 忙時這拍會晚到）
   vi.useFakeTimers();
   const coldOpenBtn = byAriaLabel('點一下，進入喝采島');
   act(() => { fireEvent.click(coldOpenBtn!); });

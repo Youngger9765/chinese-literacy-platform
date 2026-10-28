@@ -98,8 +98,8 @@ describe('<StudentGameHubPage> — classroom-flag locking, 跨班賽季/課堂�
     );
     render(<StudentGameHubPage />);
     await waitFor(() => expect(fetchMyEnrolledClassrooms).toHaveBeenCalled());
-    expect(screen.getByRole('button', { name: /跨班賽季/ })).not.toBeDisabled();
-    expect(screen.getByRole('button', { name: /課堂搶答/ })).not.toBeDisabled();
+    await waitFor(() => expect(screen.getByRole('button', { name: /跨班賽季/ })).not.toBeDisabled());
+    await waitFor(() => expect(screen.getByRole('button', { name: /課堂搶答/ })).not.toBeDisabled());
   });
 
   it('mixed: league on in one classroom, live_quiz on in another — ANY-classroom rule unlocks both independently', async () => {
@@ -108,8 +108,8 @@ describe('<StudentGameHubPage> — classroom-flag locking, 跨班賽季/課堂�
     );
     render(<StudentGameHubPage />);
     await waitFor(() => expect(fetchMyEnrolledClassrooms).toHaveBeenCalled());
-    expect(screen.getByRole('button', { name: /跨班賽季/ })).not.toBeDisabled();
-    expect(screen.getByRole('button', { name: /課堂搶答/ })).not.toBeDisabled();
+    await waitFor(() => expect(screen.getByRole('button', { name: /跨班賽季/ })).not.toBeDisabled());
+    await waitFor(() => expect(screen.getByRole('button', { name: /課堂搶答/ })).not.toBeDisabled());
   });
 
   it('mixed: only league on — 課堂搶答 stays locked', async () => {
@@ -118,7 +118,7 @@ describe('<StudentGameHubPage> — classroom-flag locking, 跨班賽季/課堂�
     );
     render(<StudentGameHubPage />);
     await waitFor(() => expect(fetchMyEnrolledClassrooms).toHaveBeenCalled());
-    expect(screen.getByRole('button', { name: /跨班賽季/ })).not.toBeDisabled();
+    await waitFor(() => expect(screen.getByRole('button', { name: /跨班賽季/ })).not.toBeDisabled());
     expect(screen.getByRole('button', { name: /課堂搶答/ })).toBeDisabled();
   });
 });

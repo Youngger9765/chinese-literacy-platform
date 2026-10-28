@@ -119,6 +119,7 @@ async function renderAndFinishOpening() {
   // 讓 refreshProgress() 的 setCompleted 真正落地（這一步仍是 real timers）。
   await act(async () => { await Promise.resolve(); await Promise.resolve(); });
 
+  await waitFor(() => expect(byAriaLabel('點一下，進入喝采島')).toBeTruthy()); // 按鈕畫出來才換假時鐘（CI 忙時這拍會晚到）
   vi.useFakeTimers();
   const coldOpenBtn = byAriaLabel('點一下，進入喝采島');
   expect(coldOpenBtn).toBeTruthy();
@@ -153,6 +154,7 @@ describe('ReadingIslandLab — 結尾慶祝只在「這次 session 剛完成」�
     render(<ReadingIslandLab />);
     await waitFor(() => expect(createIslandWorld).toHaveBeenCalledTimes(1));
 
+    await waitFor(() => expect(byAriaLabel('點一下，進入喝采島')).toBeTruthy()); // 按鈕畫出來才換假時鐘（CI 忙時這拍會晚到）
     vi.useFakeTimers();
     const coldOpenBtn = byAriaLabel('點一下，進入喝采島');
     expect(coldOpenBtn).toBeTruthy();
