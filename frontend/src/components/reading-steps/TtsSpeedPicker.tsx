@@ -26,11 +26,20 @@ interface Props {
    * 預設尺寸跟主按鈕一樣大會搶走注意力（mentor 回饋）。
    */
   size?: 'md' | 'sm';
+  /**
+   * #3397（第二階段）—— owner 追加需求：播放全文／速度再搬進跟 QR 全文同一條
+   * 工具列。那條列已經有 ❓不懂／💛重要／復原／清除全部，慢/稍慢/正常三顆攤開
+   * 在 390px 寬會把其他按鈕擠到換行甚至溢出。收成一顆按鈕，顯示目前的速度，
+   * 點開才展開完整選項；選了自動收回。只有讀全文-做記號的工具列會傳這個，
+   * 預設 `false` 保留每一個既有呼叫端的原樣（重點朗讀的 AI 朗讀列、其餘單測）。
+   */
+  compact?: boolean;
 }
 
-const TtsSpeedPicker: React.FC<Props> = ({ className, onChange, size = 'md' }) => {
+const TtsSpeedPicker: React.FC<Props> = ({ className, onChange, size = 'md', compact = false }) => {
   const sm = size === 'sm';
   const [rate, setRate] = useState<number>(() => getTtsPlaybackRate());
+  const [open, setOpen] = useState(false);
 
   const pick = (value: number) => {
     setTtsPlaybackRate(value);
@@ -40,7 +49,32 @@ const TtsSpeedPicker: React.FC<Props> = ({ className, onChange, size = 'md' }) =
     const applied = getTtsPlaybackRate();
     setRate(applied);
     onChange?.(applied);
+    // Picking a rate is the natural "I'm done" signal — collapse back so the
+    // toolbar doesn't stay wide after the student made their choice.
+    if (compact) setOpen(false);
   };
+
+  if (compact && !open) {
+    const current =
+      TTS_RATE_OPTIONS.find((opt) => opt.value === rate) ?? TTS_RATE_OPTIONS[TTS_RATE_OPTIONS.length - 1];
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        // 這是 disclosure（展開同一列的兄弟按鈕），不是 popup（獨立浮層、有
+        // 自己的鍵盤模型）。code review 抓到：`aria-haspopup` 會讓螢幕報讀器
+        // 錯誤預告使用者「會跳出選單」，只留 `aria-expanded` 才對應實際行為。
+        aria-expanded={false}
+        aria-label="朗讀速度"
+        className={`flex shrink-0 items-center gap-1 h-8 px-2.5 whitespace-nowrap rounded-full border border-outline-variant/40 bg-surface-container-lowest text-sm font-headline text-on-surface-variant transition-all active:scale-[0.98] ${className ?? ''}`}
+      >
+        <span className="material-symbols-outlined text-sm" aria-hidden="true">
+          speed
+        </span>
+        <span>{current.label}</span>
+      </button>
+    );
+  }
 
   return (
     <div
@@ -77,6 +111,18 @@ const TtsSpeedPicker: React.FC<Props> = ({ className, onChange, size = 'md' }) =
           </button>
         );
       })}
+      {compact && (
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          aria-label="收起朗讀速度選單"
+          className={`${sm ? 'h-7 w-7' : 'h-9 w-9'} flex items-center justify-center rounded-full text-on-surface-variant transition-all hover:bg-surface-container-low active:scale-[0.98]`}
+        >
+          <span className="material-symbols-outlined text-sm" aria-hidden="true">
+            close
+          </span>
+        </button>
+      )}
     </div>
   );
 };
