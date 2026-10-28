@@ -68,6 +68,9 @@ backend/demo-reading-output/
 backend/data/curriculum_qa/keypoints_manifest.smoke.json
 backend/data/curriculum_qa/snapshots.smoke/
 frontend/scripts/*.cjs
+# #3780 PRD §C：全平台 179 課「每一課都能用」真機 sweep，team-lead 明令要
+# commit 進 repo 當常駐工具（不是一次性除錯稿），破例保留。
+!frontend/scripts/island-playability-sweep.cjs
 
 # 學習單原始 docx 一律不進 git（本 repo 是 PUBLIC，內容住 GCS private bucket）
 # 見 #3276、backend/data/worksheets/GCS_MAPPING.md。
