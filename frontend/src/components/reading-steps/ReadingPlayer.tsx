@@ -47,6 +47,12 @@ export interface ReadingPlayerProps {
    * from a caller that already renders its own picker.
    */
   showSpeed?: boolean;
+  /**
+   * #3397（第二階段）：這顆現在跟 ❓不懂／💛重要／QR 全文 擠在同一條工具列，
+   * 慢/稍慢/正常三顆攤開的 TtsSpeedPicker 會把 390px 寬的列擠到換行甚至溢出。
+   * 收成一顆按鈕、點了才展開。只有這個工具列會用；預設 false 保留舊行為。
+   */
+  compactSpeed?: boolean;
 }
 
 const BTN_BASE =
@@ -88,6 +94,7 @@ const ReadingPlayer: React.FC<ReadingPlayerProps> = ({
   isLoading = false,
   className = '',
   size = 'md',
+  compactSpeed = false,
 }) => {
   const BTN = `${BTN_BASE} ${BTN_SIZE[size]}`;
   const ICON = `material-symbols-outlined ${size === 'sm' ? 'text-base' : 'text-xl'}`;
@@ -163,7 +170,9 @@ const ReadingPlayer: React.FC<ReadingPlayerProps> = ({
       {/* #3023: only while idle -- changing the rate mid-utterance needs the
           audio restarted to take effect, and restarting under the student is
           worse than making them choose before they press play. */}
-      {showSpeed && !isActive && <TtsSpeedPicker size={size === 'sm' ? 'sm' : 'md'} />}
+      {showSpeed && !isActive && (
+        <TtsSpeedPicker size={size === 'sm' ? 'sm' : 'md'} compact={compactSpeed} />
+      )}
     </div>
   );
 };
