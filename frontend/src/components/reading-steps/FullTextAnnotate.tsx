@@ -555,6 +555,11 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
 
   const containerRef = useRef<HTMLDivElement>(null);
   const toolbarRef = useRef<HTMLDivElement>(null);
+
+  // #3397（第二階段）：播放全文／速度已經搬進上方那條 sticky 工具列
+  // （❓不懂／💛重要／復原／清除全部／QR 全文），不再是跟著課文捲走的
+  // 標題下方按鈕 —— 工具列本身 `sticky top-0`，播放中捲動時暫停／停止
+  // 永遠按得到，不需要另一個「捲出畫面才浮出來」的迷你播放器。
   const annotationElementRefs = useRef(new Map<string, HTMLSpanElement>());
   const [focusedAnnotationId, setFocusedAnnotationId] = useState<string | null>(null);
 
@@ -1025,30 +1030,14 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
             />
           )}
 
-          {/* Whole-lesson player — 訪客（掃 QR 進來的）專用位置。
-              #2941 把登入學生的播放鍵搬到底部動作列，跟「完成標記」並排：
-              放在文章上方的話，學生一往下讀就把它捲出畫面，讀到第二段想聽
-              就得先捲回頂端。訪客頁留在這裡，因為 `GuestReadingPage` 沒有
-              底部 `StepFooterNav`，那條固定動作列會浮在半空中；訪客也沒有
-              「完成標記」可並排（#2649：不能標記，但要能聽）。 */}
-          {hideAnnotation && (
-            <div className="flex justify-center pt-4">
-              <ReadingPlayer
-                isPlaying={reader.isPlaying}
-                isPaused={reader.isPaused}
-                onPlay={reader.play}
-                onPause={reader.pause}
-                onResume={reader.resume}
-                onStop={reader.stop}
-              />
-            </div>
-          )}
-
           {/* Legend pills + counts + undo/clear
               #3134：這一列必須跟著捲動固定在上方。標記模式開啟後，學生往下讀就
               再也按不到「關閉標記／復原／清除全部」—— 那是模式這個設計自己造成的
               死角，不是既有問題。加半透明底與模糊，避免課文從下面透出來。 */}
-          <div className="sticky top-0 z-20 flex flex-wrap justify-center items-center gap-3 pt-4 pb-4 mb-6 px-4 bg-surface/85 backdrop-blur-sm border-b border-outline-variant/20">
+          <div
+            data-testid="full-text-toolbar"
+            className="sticky top-0 z-20 flex flex-wrap justify-center items-center gap-3 pt-4 pb-4 mb-6 px-4 bg-surface/85 backdrop-blur-sm border-b border-outline-variant/20"
+          >
             {/* #3134 — 原本只是顯示數量的標籤，現在同時是模式開關。
                 按下去課文進入標記模式，直接拖曳即可標記，不必長按選字
                 （長按會叫出 iOS 的編輯選單，蓋住畫面）。 */}
@@ -1104,6 +1093,23 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
             >
               清除全部
             </button>
+            {/* #3397（第二階段）—— owner 追加需求：播放全文／速度再往上收，
+                跟 QR 全文同一列、同等小尺寸。這一步的主角是「做記號」，
+                底部動作列只留「完成標記」（見下方），播放鍵退到這裡當配角。
+                登入學生與 QR 訪客（#2649：不能標記，但要能聽）共用同一顆。
+                `compactSpeed`：工具列已經有五六個 pill，慢/稍慢/正常三顆攤開
+                在 390px 寬會逼其他按鈕換行甚至蓋住課文，收成一顆按鈕點開。 */}
+            <ReadingPlayer
+              size="sm"
+              compactSpeed
+              isPlaying={reader.isPlaying}
+              isPaused={reader.isPaused}
+              isLoading={reader.isLoading}
+              onPlay={reader.play}
+              onPause={reader.pause}
+              onResume={reader.resume}
+              onStop={reader.stop}
+            />
             {/* #2886: the QR for THIS page, so a teacher can hand it out in
                 class without opening the admin panel. 有課文就有碼 —— 判準是
                 資料不是年級（#3011），見 docs/requirements/reading-demo-audio-qr.md R1。*/}
@@ -1319,23 +1325,11 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
       {!hideAnnotation && (
         <>
           {/* ── Fixed bottom CTA — gradient fade ─────────────────────────── */}
-          {/* #2941: 播放全文跟完成標記並排在這裡。兩顆都是這一步隨時要按得到的
-              動作，而底部這條是唯一永遠在畫面上的地方。 */}
+          {/* #3397: 這條只留主 CTA。播放全文／速度在上方工具列（理由見那裡的註解）。 */}
       <StepActionBar layout="row">
-          <ReadingPlayer
-            size="lg"
-            isPlaying={reader.isPlaying}
-            isPaused={reader.isPaused}
-            onPlay={reader.play}
-            onPause={reader.pause}
-            onResume={reader.resume}
-            onStop={reader.stop}
-          />
           <button
             type="button"
             onClick={() => onFinish(summary)}
-            /* w-44 / h-14 跟播放全文那顆一模一樣（`ReadingPlayer` size="lg"）——
-               owner 2026-08-26：「兩個按鈕的大小要一樣並且置中」。 */
             className="w-44 h-14 flex items-center justify-center gap-2 rounded-full font-headline font-bold text-xl text-white whitespace-nowrap shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all"
             style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
           >
