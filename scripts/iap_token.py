@@ -53,6 +53,7 @@ JWT 的 `exp` 最多 1 小時，但快取本身**不是**簽好就用到天荒�
 Usage (library)：
     from scripts.iap_token import iap_header, urlopen_with_iap
     headers = {**base_headers, **iap_header()}
+    install_iap_auth(session)   # 長命的 requests/locust session：每個 request 重問一次
 
 Usage (CLI)：
     python3 scripts/iap_token.py <audience>   # 印出 bare token 或什麼都不印
@@ -229,6 +230,34 @@ def iap_header(audience: str | None = None) -> dict[str, str]:
     """回傳 `{'Proxy-Authorization': 'Bearer <token>'}` 或 `{}`（不丟例外）。"""
     token = get_iap_token(audience)
     return {"Proxy-Authorization": f"Bearer {token}"} if token else {}
+
+
+class _IapRequestsAuth:
+    """`requests` 的 auth hook：每一個 request 送出前才去要 header。
+
+    requests 只要求 auth 是「吃 PreparedRequest、回 PreparedRequest」的
+    callable，不用繼承 `requests.auth.AuthBase`——這支不 import requests，
+    沒裝 requests 的呼叫端照樣能 import 這個模組。
+    """
+
+    def __init__(self, audience: str | None = None):
+        self._audience = audience
+
+    def __call__(self, request):
+        request.headers.update(iap_header(self._audience))
+        return request
+
+
+def install_iap_auth(session, audience: str | None = None) -> None:
+    """讓一個長命的 `requests.Session`（含 locust 的 `HttpSession`）每個
+    request 都重新跟 `get_iap_token()` 要 header（#3731）。
+
+    不要寫成 `session.headers.update(iap_header())`：那樣只在呼叫當下
+    要一次，第一張 token 會被釘死在 session 上一路用到結束，底下快取再
+    怎麼重簽都送不出去——跑超過 1 小時的壓測就會從那之後開始一片 401。
+    IAP 沒開（沒設 audience）時每個 request 都只是拿到 `{}`，零行為改變。
+    """
+    session.auth = _IapRequestsAuth(audience)
 
 
 def urlopen_with_iap(
