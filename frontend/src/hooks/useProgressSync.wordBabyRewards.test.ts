@@ -123,4 +123,69 @@ describe('useProgressSync — onWordBabyRewarded (#3780 接島上)', () => {
     });
     // No assertion needed beyond "didn't throw" — this locks backward compat.
   });
+
+  /**
+   * code-reviewer finding (merge-conflict review, 2026-10-28): the island
+   * branch's #3785 fix (useProgressSync.concurrentFlush.test.ts) serializes
+   * doSave() — a second flushProgress() while one is already in flight gets
+   * queued and sent after the first settles, at the fresh version — instead
+   * of racing both at the stale version. This branch's word_baby_rewards
+   * handling had to be merged into that queue's own attempt() closure
+   * (see useProgressSync.ts doSave/attempt). Neither test file exercised the
+   * intersection: a queue-drained call whose OWN response carries rewards.
+   * Team-lead specifically asked this be checked — this is the permanent
+   * lock for it (reviewer verified the underlying behavior with a throwaway
+   * mutation-tested version of this test first; this is that test, kept).
+   */
+  it('a queued second save (fired while the first is still in flight) surfaces ITS OWN response\'s rewards exactly once, not the first call\'s and not twice', async () => {
+    let resolveFirst!: (v: unknown) => void;
+    saveStepProgressMock.mockImplementationOnce(
+      () => new Promise((resolve) => { resolveFirst = resolve; }),
+    );
+    saveStepProgressMock.mockResolvedValueOnce({
+      session_id: 1,
+      step_progress: { current_step: 'y', steps_completed: ['key-passage-reading'], step_data: {}, version: 2 },
+      word_baby_rewards: [
+        { id: 30, station: 'key-passage-reading', fragment_awarded: true, fragment_flavor: '朗讀表達', encounter_result: 'none', encounter_baby_id: null },
+      ],
+    });
+
+    const onWordBabyRewarded = vi.fn();
+    const { result } = renderHook(() =>
+      useProgressSync({ token: 't', dbSessionId: 1, onWordBabyRewarded }),
+    );
+    await settleInitialLoad();
+
+    act(() => {
+      // Call A — carries a reward in its (not-yet-resolved) response.
+      result.current.flushProgress({ current_step: 'x', steps_completed: ['vocab-definition'], step_data: {} });
+      // Call B — fired synchronously right after, same tick: must queue
+      // behind A, not race it.
+      result.current.flushProgress({ current_step: 'y', steps_completed: ['vocab-definition', 'key-passage-reading'], step_data: {} });
+    });
+
+    // A's PUT is still unresolved — B must not have gone out yet, and
+    // nothing should have been announced yet either.
+    expect(saveStepProgressMock).toHaveBeenCalledTimes(1);
+    expect(onWordBabyRewarded).not.toHaveBeenCalled();
+
+    await act(async () => {
+      // A resolves with NO reward of its own.
+      resolveFirst({
+        session_id: 1,
+        step_progress: { current_step: 'x', steps_completed: ['vocab-definition'], step_data: {}, version: 1 },
+        word_baby_rewards: [],
+      });
+      for (let i = 0; i < 6; i++) await Promise.resolve();
+    });
+
+    // B has now gone out and resolved (its mock is queued above) — its
+    // reward must have fired exactly once, carrying its own id (30), not
+    // fired for A's empty response and not fired twice.
+    expect(saveStepProgressMock).toHaveBeenCalledTimes(2);
+    expect(onWordBabyRewarded).toHaveBeenCalledTimes(1);
+    expect(onWordBabyRewarded).toHaveBeenCalledWith([
+      { id: 30, station: 'key-passage-reading', fragment_awarded: true, fragment_flavor: '朗讀表達', encounter_result: 'none', encounter_baby_id: null },
+    ]);
+  });
 });
