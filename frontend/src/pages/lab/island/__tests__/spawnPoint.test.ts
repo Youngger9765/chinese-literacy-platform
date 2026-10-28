@@ -23,8 +23,11 @@ import {
   MAX_TOWER_WIDTH_FRACTION,
   SPAWN_DISTANCE_FROM_LIGHTHOUSE,
   SPAWN_PITCH,
+  EYE_HEIGHT,
+  TOWER_TOP_SAFE_MARGIN_FRACTION,
   computeSpawnFacingLighthouse,
   requiredDistanceForTowerWidthInView,
+  requiredDistanceForTowerTopMargin,
   isHeightFullyInView,
   isBaseInLowerHalf,
   nearTriggerRadiusForStep,
@@ -83,6 +86,30 @@ describe('nearTriggerRadiusForStep — 依建築分級，不是全島共用一�
     for (const step of ['full-text-annotate', 'key-passage-reading', 'vocab-definition', 'report', 'comprehension']) {
       expect(nearTriggerRadiusForStep(step), `${step} 的觸發半徑不該變`).toBe(NEAR_TRIGGER_RADIUS);
     }
+  });
+
+  /**
+   * #3780 P0-3 十度審查真實複審發現：塔尖安全邊把直式手機的出生距離拉到
+   * 10.13，但 `LIGHTHOUSE_NEAR_TRIGGER_RADIUS` 是固定常數 7.5（只對應桌機
+   * 的基準距離 7），兩者沒有連動——直式手機一上岸會落在觸發半徑**外**，
+   * 「進入」卡不會跳出來，必須走近才會觸發，跟桌機版的「一上岸直接進入」
+   * 體驗不一致。`nearTriggerRadiusForStep` 必須接受同一個 `aspect`，算出
+   * 跟 `computeSpawnFacingLighthouse` 同一套有效距離，觸發半徑才會自動跟著
+   * 出生距離變寬，不會脫鉤。
+   */
+  it('🔒 直式手機寬高比下，燈塔觸發半徑要自動跟著拉開的出生距離變寬——不然一上岸會落在觸發半徑外，進入卡不會跳出來', () => {
+    const aspect = 390 / 844;
+    const lighthouse = { x: 0, z: 0 };
+    const spawn = computeSpawnFacingLighthouse(lighthouse, undefined, aspect);
+    const distanceToLighthouse = Math.hypot(spawn.x - lighthouse.x, spawn.z - lighthouse.z);
+    expect(
+      distanceToLighthouse,
+      '出生距離要落在（同一寬高比算出來的）燈塔觸發半徑內，一上岸才會直接跳出進入卡',
+    ).toBeLessThan(nearTriggerRadiusForStep('lesson-intro', aspect));
+  });
+
+  it('不傳 aspect 時維持原本桌機行為（LIGHTHOUSE_NEAR_TRIGGER_RADIUS=7.5），既有呼叫端不會被這次改動影響', () => {
+    expect(nearTriggerRadiusForStep('lesson-intro')).toBe(LIGHTHOUSE_NEAR_TRIGGER_RADIUS);
   });
 });
 
@@ -184,6 +211,59 @@ describe('requiredDistanceForTowerWidthInView', () => {
     const frameWidth = 2 * distance * Math.tan(hFovRad / 2);
     const towerWidthFraction = (LIGHTHOUSE_TOWER_RADIUS * 2) / frameWidth;
     expect(towerWidthFraction).toBeCloseTo(MAX_TOWER_WIDTH_FRACTION, 5);
+  });
+});
+
+/**
+ * #3780 P0-3 十度審查訂正：真瀏覽器 390×844 實測（headless+swiftshader，
+ * 走真實登入/進島流程）發現垂直框架本身是過關的（`isHeightFullyInView`
+ * 回 true），但 HUD 標題卡在手機版走正常文件流（不像桌機版
+ * `md:absolute` 固定在角落），量到實際佔掉畫面頂端 17.18%
+ * （`header.getBoundingClientRect()` 量出 bottom=145px/844px）——塔尖
+ * 技術上在視野內，但視覺上被蓋在標題卡底下。
+ */
+describe('requiredDistanceForTowerTopMargin', () => {
+  it('留的安全邊越大，需要的距離越遠', () => {
+    const smallMargin = requiredDistanceForTowerTopMargin(SPAWN_PITCH, 0.1);
+    const largeMargin = requiredDistanceForTowerTopMargin(SPAWN_PITCH, 0.3);
+    expect(largeMargin).toBeGreaterThan(smallMargin);
+  });
+
+  it('🔒 算出來的距離，套回去獨立驗證塔尖的畫面位置確實落在安全邊以下——不是只看距離變大，要驗證它真的達到目的', () => {
+    const marginFraction = 0.25;
+    const distance = requiredDistanceForTowerTopMargin(SPAWN_PITCH, marginFraction);
+    const vFovRad = (CAMERA_VERTICAL_FOV_DEG * Math.PI) / 180;
+    const halfFovRad = vFovRad / 2;
+    const angleToTop = Math.atan2(LIGHTHOUSE_ROOF_TOP_Y - EYE_HEIGHT, distance) - SPAWN_PITCH;
+    const screenYFractionFromTop = (1 - Math.tan(angleToTop) / Math.tan(halfFovRad)) / 2;
+    expect(screenYFractionFromTop).toBeCloseTo(marginFraction, 5);
+  });
+
+  it('🔒 真機量到的標題卡佔比（17.18%，390×844 實測）要落在這個安全邊（25%）以內，不然這個常數訂得不夠——這是這次退件在修的真實 bug', () => {
+    const MEASURED_HEADER_BOTTOM_FRACTION = 145 / 844; // header.getBoundingClientRect() 實測
+    expect(TOWER_TOP_SAFE_MARGIN_FRACTION, '安全邊必須大於真機量到的標題卡佔比，不然塔尖還是會被蓋住').toBeGreaterThan(MEASURED_HEADER_BOTTOM_FRACTION);
+  });
+});
+
+describe('computeSpawnFacingLighthouse — 塔尖安全邊只在手機直式比例生效', () => {
+  it('🔒 直式手機寬高比（390/844）算出來的距離要能讓塔尖落在安全邊以下——這是這次退件在修的真實 bug（HUD 標題卡蓋住塔尖）', () => {
+    const lighthouse = { x: 0, z: 0 };
+    const spawn = computeSpawnFacingLighthouse(lighthouse, undefined, 390 / 844);
+    const distance = Math.hypot(spawn.x - lighthouse.x, spawn.z - lighthouse.z);
+    const vFovRad = (CAMERA_VERTICAL_FOV_DEG * Math.PI) / 180;
+    const halfFovRad = vFovRad / 2;
+    const angleToTop = Math.atan2(LIGHTHOUSE_ROOF_TOP_Y - EYE_HEIGHT, distance) - spawn.pitch;
+    const screenYFractionFromTop = (1 - Math.tan(angleToTop) / Math.tan(halfFovRad)) / 2;
+    expect(screenYFractionFromTop, `塔尖落在畫面頂端 ${(screenYFractionFromTop * 100).toFixed(1)}%，應該 >= 安全邊 ${(TOWER_TOP_SAFE_MARGIN_FRACTION * 100).toFixed(1)}%`).toBeGreaterThanOrEqual(TOWER_TOP_SAFE_MARGIN_FRACTION - 1e-9);
+  });
+
+  it('寬螢幕（16:9）不該套用塔尖安全邊——桌機版標題卡固定在角落，不會擋到塔尖，距離維持原本的補償結果', () => {
+    const lighthouse = { x: 0, z: 0 };
+    const withoutTopMargin = computeSpawnFacingLighthouse(lighthouse, undefined, 16 / 9);
+    const dist = Math.hypot(withoutTopMargin.x - lighthouse.x, withoutTopMargin.z - lighthouse.z);
+    // 16:9 的寬度補償距離本來就 <= SPAWN_DISTANCE_FROM_LIGHTHOUSE，不該因為
+    // 塔尖安全邊又被拉遠。
+    expect(dist).toBeCloseTo(SPAWN_DISTANCE_FROM_LIGHTHOUSE, 5);
   });
 });
 

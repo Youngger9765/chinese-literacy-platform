@@ -139,23 +139,6 @@ export const SPAWN_DISTANCE_FROM_LIGHTHOUSE = 7;
 export const SPAWN_PITCH = (15 * Math.PI) / 180;
 
 /**
- * 燈塔專屬的「發現新去處」觸發半徑——出生距離本身就要落在這個半徑內
- * （留一點餘裕，不卡在臨界值），一上岸直接觸發進入卡。其他（矮很多的）
- * 建築不受影響，繼續用共用的 `NEAR_TRIGGER_RADIUS`。
- */
-export const LIGHTHOUSE_NEAR_TRIGGER_RADIUS = SPAWN_DISTANCE_FROM_LIGHTHOUSE + 0.5;
-
-/**
- * 依建築類型決定「發現新去處」的觸發半徑——資料表驅動（跟
- * `islandCelebration.ts` 的 `celebrationProfileForStep()` 同一個做法），
- * 不要在呼叫端寫 `step === 'lesson-intro' ? A : B` 這種判斷式，新增建築
- * 類型時容易漏改。
- */
-export function nearTriggerRadiusForStep(step: string): number {
-  return step.split('#')[0] === 'lesson-intro' ? LIGHTHOUSE_NEAR_TRIGGER_RADIUS : NEAR_TRIGGER_RADIUS;
-}
-
-/**
  * 預設寬高比——刻意取一個比任何真實裝置都寬的值，純粹是為了讓沒有傳
  * 真實寬高比的舊呼叫端（含既有測試）維持原本固定 `SPAWN_DISTANCE_FROM_LIGHTHOUSE`
  * 的行為不變。呼叫端要吃到下面的直式螢幕補償，必須傳真實的
@@ -164,14 +147,46 @@ export function nearTriggerRadiusForStep(step: string): number {
 const DEFAULT_SPAWN_ASPECT = 4;
 
 /**
- * 燈塔塔身寬度（直徑）不能超過畫面寬度的這個比例——#3780 P0-3 九度審查
+ * 燈塔專屬的「發現新去處」觸發半徑——出生距離本身就要落在這個半徑內
+ * （留一點餘裕，不卡在臨界值），一上岸直接觸發進入卡。其他（矮很多的）
+ * 建築不受影響，繼續用共用的 `NEAR_TRIGGER_RADIUS`。
+ *
+ * 這是桌機基準寬高比（`DEFAULT_SPAWN_ASPECT`）算出來的值，只給不傳
+ * `aspect` 的舊呼叫端當常數引用——真正會被用到的半徑一律走下面
+ * `nearTriggerRadiusForStep(step, aspect)`，不要在別處重新硬寫這個數字。
+ */
+export const LIGHTHOUSE_NEAR_TRIGGER_RADIUS = SPAWN_DISTANCE_FROM_LIGHTHOUSE + 0.5;
+
+/**
+ * 依建築類型決定「發現新去處」的觸發半徑——資料表驅動（跟
+ * `islandCelebration.ts` 的 `celebrationProfileForStep()` 同一個做法），
+ * 不要在呼叫端寫 `step === 'lesson-intro' ? A : B` 這種判斷式，新增建築
+ * 類型時容易漏改。
+ *
+ * #3780 P0-3 十度審查真實複審發現：加了塔尖安全邊之後，直式手機的出生
+ * 距離可以拉到 10.13（遠超過原本寫死的 `LIGHTHOUSE_NEAR_TRIGGER_RADIUS`
+ * =7.5），兩者沒有連動的話，直式手機一上岸會落在觸發半徑外，「進入」卡
+ * 不會自動跳出來——必須走近才會觸發，跟桌機版的體驗不一致。所以燈塔的
+ * 觸發半徑現在用跟 `computeSpawnFacingLighthouse` 同一套「有效距離」公式
+ * 現場算（傳同一個 `aspect`），永遠保證「出生距離 < 觸發半徑」，不會脫鉤
+ * ——不傳 `aspect` 時用 `DEFAULT_SPAWN_ASPECT`，算出來剛好等於原本的
+ * `LIGHTHOUSE_NEAR_TRIGGER_RADIUS`，既有呼叫端行為不變。
+ */
+export function nearTriggerRadiusForStep(step: string, aspect: number = DEFAULT_SPAWN_ASPECT): number {
+  if (step.split('#')[0] !== 'lesson-intro') return NEAR_TRIGGER_RADIUS;
+  return effectiveLighthouseSpawnDistance(aspect) + 0.5;
+}
+
+/**
+ * 燈塔塔身寬度（直徑）不能超過畫面寬度的這個比例——#3780 P0-3 十度審查
  * 訂正：手機直式（寬高比 <1）畫面很窄，three.js 的垂直 FOV 固定不隨寬高比
  * 變（見 `CAMERA_VERTICAL_FOV_DEG` 的註解），但水平 FOV 會隨著寬高比變窄
  * （`hFov = 2·atan(tan(vFov/2)·aspect)`）——同樣的出生距離，畫面越窄，
  * 塔身佔掉的畫面比例就越高。390×844（aspect≈0.462）在原本固定的距離 7
- * 底下算出來塔身會佔約 66% 的畫面寬度，超過這裡定的上限。
+ * 底下算出來塔身會佔約 66% 的畫面寬度，超過這裡定的上限。原本定 0.6，
+ * team-lead 真機截圖量到仍偏緊（目測「60% 多」），收到 0.55 多留一點餘裕。
  */
-export const MAX_TOWER_WIDTH_FRACTION = 0.6;
+export const MAX_TOWER_WIDTH_FRACTION = 0.55;
 
 /**
  * 給定寬高比，要讓燈塔塔身的視覺寬度不超過 `maxWidthFraction`，出生距離
@@ -191,6 +206,42 @@ export function requiredDistanceForTowerWidthInView(
 }
 
 /**
+ * 塔尖跟畫面頂端要留的安全邊——#3780 P0-3 十度審查訂正：真瀏覽器 390×844
+ * 實測（headless + swiftshader，走真實登入/進島流程，不是用猜的）——
+ * container 尺寸本身跟 390×844 完全吻合（排除了「headless 視窗寬高比跟
+ * container 不一致」這個假設），問題出在別處：垂直框架本身用純數學驗過是
+ * 過關的（`isHeightFullyInView` 回 true），但 HUD 標題卡在手機版是正常文件
+ * 流（`relative`，不像桌機版 `md:absolute` 那樣脫離文件流、固定在角落），
+ * 量到實際佔掉畫面頂端 17.18%（`header.getBoundingClientRect()` 量出
+ * bottom=145px / 844px），而按原本的距離/仰角算出來塔尖落在畫面頂端僅
+ * 12.1% 的位置——塔尖技術上「在視野內」，但視覺上被蓋在標題卡底下。
+ * 這個安全邊預留 25%（比實測卡片佔比 17.18% 多出約 8 個百分點的緩衝），
+ * 只在手機版的版面行為（`aspect < 1`，標題卡在正常文件流）才需要，桌機
+ * 版標題卡本來就固定在角落不會擋到塔尖，不需要這個額外距離。
+ */
+export const TOWER_TOP_SAFE_MARGIN_FRACTION = 0.25;
+
+/**
+ * 要讓塔尖落在畫面頂端往下至少 `marginFraction` 的位置（不是技術上「還在
+ * 視野內」就好，是要真的留出視覺安全邊），出生距離至少要多遠。螢幕座標
+ * 跟角度的轉換用標準透視投影：畫面頂端往下的比例 = (1 - tan(夾角)/tan(半
+ * FOV)) / 2，照這個反推允許的最大夾角，再用跟 `isHeightFullyInView` 一樣
+ * 的 `atan2` 關係反推距離。
+ */
+export function requiredDistanceForTowerTopMargin(
+  pitchRad: number = SPAWN_PITCH,
+  marginFraction: number = TOWER_TOP_SAFE_MARGIN_FRACTION,
+  topY: number = LIGHTHOUSE_ROOF_TOP_Y,
+  eyeHeight: number = EYE_HEIGHT,
+  vFovDeg: number = CAMERA_VERTICAL_FOV_DEG,
+): number {
+  const halfFovRad = (vFovDeg * Math.PI) / 180 / 2;
+  const maxTanAngle = (1 - 2 * marginFraction) * Math.tan(halfFovRad);
+  const maxAngleToTop = Math.atan(maxTanAngle);
+  return (topY - eyeHeight) / Math.tan(maxAngleToTop + pitchRad);
+}
+
+/**
  * 出生點：面向港口燈塔（lesson-intro 站），從正南方接近（跟 20011 原本
  * 出生點 `{x:-2,z:16.5}` 相對燈塔 `{x:-3,z:11}` 的方向大致一致，原本就
  * 幾乎是正南，這裡取整成剛好正南，算式比較乾淨：x 跟燈塔相同，一上岸
@@ -200,18 +251,36 @@ export function requiredDistanceForTowerWidthInView(
  * `pitch` 固定回傳 `SPAWN_PITCH`——燈塔的視覺尺寸對全平台每一課都一樣
  * （同一套程序化建築造型），不是每課各自算一次。
  *
- * `distance` 現在是「下限」不是精確值——九度審查訂正加了 `aspect` 參數，
- * 寬高比窄到需要更遠的距離才能讓塔身寬度不超過六成時，會自動取較大的
- * 那個值（見 `requiredDistanceForTowerWidthInView`）。拉遠距離只會讓垂直
- * 方向的夾角更小（`isHeightFullyInView`／`isBaseInLowerHalf` 兩個既有
- * 約束只會更寬裕，不會變緊），兩組約束之間沒有衝突。
+ * `distance` 現在是「下限」不是精確值——九度/十度審查訂正加了 `aspect`
+ * 參數：寬高比窄到需要更遠的距離才能讓塔身寬度不超過上限時，或寬高比
+ * 窄到手機版 HUD 標題卡的版面行為會蓋住塔尖時，會自動取三者中最大的那個
+ * 值。塔尖安全邊只在 `aspect < 1`（手機直式比例）才納入計算——桌機版
+ * 標題卡固定在角落，不會擋到塔尖，不需要為了這個把桌機的距離也拉遠。
+ * 拉遠距離只會讓垂直方向的夾角更小（`isHeightFullyInView`／
+ * `isBaseInLowerHalf` 兩個既有約束只會更寬裕，不會變緊），三組約束之間
+ * 沒有衝突。
  */
+/**
+ * 「有效出生距離」的單一算式來源——`computeSpawnFacingLighthouse`（出生點
+ * 座標用）跟 `nearTriggerRadiusForStep`（燈塔觸發半徑用）都呼叫這支，
+ * 不要各自複製一份候選值邏輯，否則兩邊會慢慢長出不一致（#3780 P0-3 十度
+ * 審查就是這樣炸的：出生距離拉開了，觸發半徑沒跟著拉，兩者脫鉤）。
+ */
+function effectiveLighthouseSpawnDistance(
+  aspect: number,
+  baselineDistance: number = SPAWN_DISTANCE_FROM_LIGHTHOUSE,
+): number {
+  const candidates = [baselineDistance, requiredDistanceForTowerWidthInView(aspect)];
+  if (aspect < 1) candidates.push(requiredDistanceForTowerTopMargin(SPAWN_PITCH));
+  return Math.max(...candidates);
+}
+
 export function computeSpawnFacingLighthouse(
   lighthouse: { x: number; z: number },
   distance: number = SPAWN_DISTANCE_FROM_LIGHTHOUSE,
   aspect: number = DEFAULT_SPAWN_ASPECT,
 ): { x: number; z: number; yaw: number; pitch: number } {
-  const effectiveDistance = Math.max(distance, requiredDistanceForTowerWidthInView(aspect));
+  const effectiveDistance = effectiveLighthouseSpawnDistance(aspect, distance);
   const x = lighthouse.x;
   const z = lighthouse.z + effectiveDistance;
   const toLighthouseX = lighthouse.x - x;
@@ -252,12 +321,13 @@ export function selectNearestStation<T extends NearStationCandidate>(
   stops: readonly T[],
   player: { x: number; z: number },
   unlockedZone: number,
+  aspect: number = DEFAULT_SPAWN_ASPECT,
 ): number | null {
   let closest: number | null = null;
   let bestDist = Infinity;
   stops.forEach((stop, index) => {
     if (stop.zone > unlockedZone) return;
-    const threshold = nearTriggerRadiusForStep(stop.step);
+    const threshold = nearTriggerRadiusForStep(stop.step, aspect);
     const d = Math.hypot(player.x - stop.x, player.z - stop.z);
     if (d < threshold && d < bestDist) {
       bestDist = d;

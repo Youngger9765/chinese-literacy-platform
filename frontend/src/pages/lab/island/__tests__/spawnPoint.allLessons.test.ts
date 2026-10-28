@@ -61,6 +61,8 @@ import {
   MAX_TOWER_WIDTH_FRACTION,
   MIN_CAMERA_BUILDING_DISTANCE,
   NEAR_TRIGGER_RADIUS,
+  EYE_HEIGHT,
+  TOWER_TOP_SAFE_MARGIN_FRACTION,
 } from '../spawnPoint';
 import { hillPositions, zoneCenters } from '../createIslandWorld';
 import fixture from './fixtures/all-lessons-step-sequence.json';
@@ -140,7 +142,7 @@ describe('spawnPoint — 全平台 179 課回歸鎖（#3780 P0-2）', () => {
         }), '塔底（入口代理）要落在視野中心以下').toBe(true);
       });
 
-      it('②-2 直式手機螢幕（390×844）出生時：塔底到塔尖仍落在垂直視野內、塔身寬度不超過畫面六成、出生點仍然合法——#3780 P0-3 九度審查訂正', () => {
+      it('②-2 直式手機螢幕（390×844）出生時：塔底到塔尖仍落在垂直視野內、塔身寬度不超過畫面五成五、塔尖落在安全邊以下（不被 HUD 標題卡蓋住）、出生點仍然合法——#3780 P0-3 十度審查訂正', () => {
         const PORTRAIT_ASPECT = 390 / 844;
         const lighthouse = stops.find((s) => s.step === 'lesson-intro') ?? stops[0];
         const spawn = computeSpawnFacingLighthouse(lighthouse, undefined, PORTRAIT_ASPECT);
@@ -167,7 +169,23 @@ describe('spawnPoint — 全平台 179 課回歸鎖（#3780 P0-2）', () => {
         const hFovRad = 2 * Math.atan(Math.tan(vFovRad / 2) * PORTRAIT_ASPECT);
         const frameHalfWidthAtDistance = distance * Math.tan(hFovRad / 2);
         const towerWidthFraction = (LIGHTHOUSE_TOWER_RADIUS * 2) / (frameHalfWidthAtDistance * 2);
-        expect(towerWidthFraction, `第 ${id} 課「${title}」：直式螢幕下塔身寬度佔畫面 ${(towerWidthFraction * 100).toFixed(1)}%，超過六成上限`).toBeLessThanOrEqual(MAX_TOWER_WIDTH_FRACTION);
+        expect(towerWidthFraction, `第 ${id} 課「${title}」：直式螢幕下塔身寬度佔畫面 ${(towerWidthFraction * 100).toFixed(1)}%，超過五成五上限`).toBeLessThanOrEqual(MAX_TOWER_WIDTH_FRACTION + 1e-9);
+
+        // 塔尖的畫面位置：十度審查訂正修的真實 bug——團隊真機 390 寬實測，
+        // 塔尖技術上在視野內（上面兩條都過），但手機版 HUD 標題卡是正常文件
+        // 流（不像桌機版固定在角落），視覺上蓋住了塔尖。獨立重新用透視投影
+        // 公式算一次塔尖的畫面 Y 位置（不是重用 `requiredDistanceForTowerTopMargin`
+        // 本身，否則等於拿同一條算式驗自己），確認它落在安全邊以下。
+        const halfVFovRad = vFovRad / 2;
+        const angleToTop = Math.atan2(LIGHTHOUSE_ROOF_TOP_Y - EYE_HEIGHT, distance) - spawn.pitch;
+        const tipScreenYFractionFromTop = (1 - Math.tan(angleToTop) / Math.tan(halfVFovRad)) / 2;
+        expect(tipScreenYFractionFromTop, `第 ${id} 課「${title}」：塔尖落在畫面頂端 ${(tipScreenYFractionFromTop * 100).toFixed(1)}%，應該 >= 安全邊 ${(TOWER_TOP_SAFE_MARGIN_FRACTION * 100).toFixed(1)}%（不然會被 HUD 標題卡蓋住）`).toBeGreaterThanOrEqual(TOWER_TOP_SAFE_MARGIN_FRACTION - 1e-9);
+
+        // #3780 P0-3 十度審查真實複審發現：拉遠的出生距離必須仍落在（同一
+        // 寬高比算出來的）燈塔觸發半徑內，不然直式手機一上岸不會自動跳出
+        // 進入卡，要走近才觸發——跟桌機版體驗不一致。用真正會在引擎裡被
+        // 呼叫的那支函式（帶 aspect），不是對著一個寫死的常數比。
+        expect(distance, `第 ${id} 課「${title}」：直式螢幕下出生距離要落在燈塔觸發半徑內，否則一上岸不會自動跳出進入卡`).toBeLessThan(nearTriggerRadiusForStep(lighthouse.step, PORTRAIT_ASPECT));
 
         // 拉遠距離改變了出生點座標，碰撞/可行走這幾件事要在新座標上重驗
         // 一次，不能只信「原本的距離 7 驗過了」。

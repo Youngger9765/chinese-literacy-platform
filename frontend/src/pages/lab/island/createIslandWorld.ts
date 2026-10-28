@@ -544,7 +544,11 @@ export function createIslandWorld(
       // 卻可能是「燈塔比較近」，9.9% 的燈塔—其他站配對會被搶走。正確做法
       // 抽成 `selectNearestStation`（見 spawnPoint.ts）：先用各站自己的
       // 半徑獨立判斷「有沒有進範圍」，有進範圍的候選裡才比真正的距離。
-      let closest = selectNearestStation(content.stops, player.position, unlockedZone);
+      // #3780 P0-3 十度審查訂正：傳 `containerAspect` 進去——燈塔的觸發
+      // 半徑現在跟出生距離用同一套公式算，直式手機拉開的出生距離才會讓
+      // 觸發半徑自動跟著變寬，不會脫鉤（見 spawnPoint.ts
+      // `nearTriggerRadiusForStep` 的註解）。
+      let closest = selectNearestStation(content.stops, player.position, unlockedZone, containerAspect);
       if (introPlaying) closest = null;
       if (closest !== near) { near = closest; events.onNear(closest); }
       babies.forEach((baby, index) => {
