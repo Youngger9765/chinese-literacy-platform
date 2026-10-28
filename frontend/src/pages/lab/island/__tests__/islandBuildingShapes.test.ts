@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import * as THREE from 'three';
-import { buildStationGroup, applyBuildingGlow, disposeObjectTree, ALL_STATION_STEP_TYPES } from '../islandBuildingShapes';
+import { buildStationGroup, applyBuildingGlow, disposeObjectTree, buildingTopY, ALL_STATION_STEP_TYPES } from '../islandBuildingShapes';
 import { resolveCelebrationGlow, celebrationGlowBoost, CELEBRATION_PROFILES } from '../islandCelebration';
 
 /**
@@ -130,5 +130,32 @@ describe('disposeObjectTree — 離開島頁要釋放每一塊 clone 出來的�
     expect(geoSpy).toHaveBeenCalledTimes(1);
     expect(textureSpy, 'sprite 的貼圖應該被 dispose').toHaveBeenCalledTimes(1);
     expect(spriteMatSpy, 'sprite 的材質本身應該被 dispose').toHaveBeenCalledTimes(1);
+  });
+});
+
+/**
+ * #3780 P0-3 八度審查訂正：`spawnPoint.ts` 的 `isLabelOccluded`（鏡頭→
+ * 名牌遮擋判斷）需要每種建築型態的真實頂端高度，用真正建出來的
+ * `THREE.Box3` 量，不是手 key 一份可能跟真實幾何漂移的數字表。
+ */
+describe('buildingTopY — 用真實幾何量出來的建築頂端高度', () => {
+  it('每種型態的高度都是正常範圍內的正數（不是 0、NaN、或離譜的巨大值）', () => {
+    ALL_STATION_STEP_TYPES.forEach((step) => {
+      const topY = buildingTopY(step);
+      expect(topY, `step=${step} 應該是正數`).toBeGreaterThan(0);
+      expect(topY, `step=${step} 高度不該離譜（> 15 代表量錯了，可能把光束這種特效也算進去）`).toBeLessThan(15);
+    });
+  });
+
+  it('港口燈塔（lesson-intro）應該是全島最高的建築型態——跟 ARC_FLIGHT_PEAK_HEIGHT/LIGHTHOUSE_ROOF_TOP_Y 的既有假設一致', () => {
+    const lighthouseTopY = buildingTopY('lesson-intro');
+    ALL_STATION_STEP_TYPES.forEach((step) => {
+      if (step === 'lesson-intro') return;
+      expect(lighthouseTopY, `lesson-intro 應該比 ${step} 高`).toBeGreaterThan(buildingTopY(step));
+    });
+  });
+
+  it('同一個型態呼叫兩次要回傳一樣的值（有快取，不是每次重算出不同的浮點誤差）', () => {
+    expect(buildingTopY('full-text-annotate')).toBe(buildingTopY('full-text-annotate'));
   });
 });

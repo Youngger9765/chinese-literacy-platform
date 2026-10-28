@@ -54,8 +54,11 @@ import {
   arcFlightPosition,
   arcFlightArrivalYaw,
   ARC_FLIGHT_PEAK_HEIGHT,
+  CAMERA_VERTICAL_FOV_DEG,
   LIGHTHOUSE_ROOF_TOP_Y,
   LIGHTHOUSE_TOWER_BASE_Y,
+  LIGHTHOUSE_TOWER_RADIUS,
+  MAX_TOWER_WIDTH_FRACTION,
   MIN_CAMERA_BUILDING_DISTANCE,
   NEAR_TRIGGER_RADIUS,
 } from '../spawnPoint';
@@ -135,6 +138,45 @@ describe('spawnPoint — 全平台 179 課回歸鎖（#3780 P0-2）', () => {
           pitchRad: spawn.pitch,
           baseY: LIGHTHOUSE_TOWER_BASE_Y,
         }), '塔底（入口代理）要落在視野中心以下').toBe(true);
+      });
+
+      it('②-2 直式手機螢幕（390×844）出生時：塔底到塔尖仍落在垂直視野內、塔身寬度不超過畫面六成、出生點仍然合法——#3780 P0-3 九度審查訂正', () => {
+        const PORTRAIT_ASPECT = 390 / 844;
+        const lighthouse = stops.find((s) => s.step === 'lesson-intro') ?? stops[0];
+        const spawn = computeSpawnFacingLighthouse(lighthouse, undefined, PORTRAIT_ASPECT);
+        const distance = Math.hypot(spawn.x - lighthouse.x, spawn.z - lighthouse.z);
+
+        // 垂直框架：寬高比窄不影響垂直 FOV，這條理論上本來就該過，這裡
+        // 用真的算式重新驗證，不是只信理論。
+        expect(isHeightFullyInView({
+          distance,
+          pitchRad: spawn.pitch,
+          topY: LIGHTHOUSE_ROOF_TOP_Y,
+          baseY: LIGHTHOUSE_TOWER_BASE_Y,
+        }), '直式螢幕下塔底到塔尖仍要整個落在視野內').toBe(true);
+        expect(isBaseInLowerHalf({
+          distance,
+          pitchRad: spawn.pitch,
+          baseY: LIGHTHOUSE_TOWER_BASE_Y,
+        }), '直式螢幕下塔底仍要落在視野中心以下').toBe(true);
+
+        // 水平框架：這才是這批真正修的東西——獨立重新算一次水平 FOV 跟塔身
+        // 佔比，不直接引用 `requiredDistanceForTowerWidthInView`（否則等於
+        // 拿同一條算式驗自己，測不出東西）。
+        const vFovRad = (CAMERA_VERTICAL_FOV_DEG * Math.PI) / 180;
+        const hFovRad = 2 * Math.atan(Math.tan(vFovRad / 2) * PORTRAIT_ASPECT);
+        const frameHalfWidthAtDistance = distance * Math.tan(hFovRad / 2);
+        const towerWidthFraction = (LIGHTHOUSE_TOWER_RADIUS * 2) / (frameHalfWidthAtDistance * 2);
+        expect(towerWidthFraction, `第 ${id} 課「${title}」：直式螢幕下塔身寬度佔畫面 ${(towerWidthFraction * 100).toFixed(1)}%，超過六成上限`).toBeLessThanOrEqual(MAX_TOWER_WIDTH_FRACTION);
+
+        // 拉遠距離改變了出生點座標，碰撞/可行走這幾件事要在新座標上重驗
+        // 一次，不能只信「原本的距離 7 驗過了」。
+        expect(isWalkableAtSpawn(spawn.x, spawn.z), '直式螢幕下出生點仍要在可行走範圍內').toBe(true);
+        for (const stop of stops) {
+          const d = Math.hypot(spawn.x - stop.x, spawn.z - stop.z);
+          expect(d, `直式螢幕下出生點不能卡進「${stop.name}」的碰撞圈`).toBeGreaterThanOrEqual(MIN_CAMERA_BUILDING_DISTANCE);
+        }
+        expect(isInsideAnyHill(spawn.x, spawn.z), '直式螢幕下出生點不能卡進任何山丘的碰撞圈').toBe(false);
       });
 
       it('③ 一上岸就落在燈塔自己的觸發半徑內，直接跳出進入卡', () => {

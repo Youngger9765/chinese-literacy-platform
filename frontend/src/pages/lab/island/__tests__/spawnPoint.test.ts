@@ -18,9 +18,13 @@ import {
   LIGHTHOUSE_NEAR_TRIGGER_RADIUS,
   LIGHTHOUSE_TOWER_BASE_Y,
   LIGHTHOUSE_ROOF_TOP_Y,
+  LIGHTHOUSE_TOWER_RADIUS,
+  CAMERA_VERTICAL_FOV_DEG,
+  MAX_TOWER_WIDTH_FRACTION,
   SPAWN_DISTANCE_FROM_LIGHTHOUSE,
   SPAWN_PITCH,
   computeSpawnFacingLighthouse,
+  requiredDistanceForTowerWidthInView,
   isHeightFullyInView,
   isBaseInLowerHalf,
   nearTriggerRadiusForStep,
@@ -28,6 +32,8 @@ import {
   CELEBRATION_VIEW_DISTANCE,
   CELEBRATION_EXTRA_HEIGHT,
   isMovementLocked,
+  isLabelOccluded,
+  type LabelOcclusionObstacle,
 } from '../spawnPoint';
 
 describe('碰撞不變量（不穿牆）', () => {
@@ -140,6 +146,44 @@ describe('computeSpawnFacingLighthouse', () => {
     const lighthouse = { x: 0, z: 0 };
     const spawn = computeSpawnFacingLighthouse(lighthouse, 10);
     expect(Math.hypot(spawn.x - lighthouse.x, spawn.z - lighthouse.z)).toBeCloseTo(10, 5);
+  });
+
+  it('不傳寬高比（舊呼叫端）要維持固定 7 的距離，不能因為加了寬高比補償就悄悄改變預設行為', () => {
+    const lighthouse = { x: 0, z: 0 };
+    const spawn = computeSpawnFacingLighthouse(lighthouse);
+    expect(Math.hypot(spawn.x - lighthouse.x, spawn.z - lighthouse.z)).toBeCloseTo(SPAWN_DISTANCE_FROM_LIGHTHOUSE, 5);
+  });
+
+  it('🔒 直式手機寬高比（390/844）要把距離拉遠到超過原本固定的 7——這是這次退件在修的真實 bug（塔身佔了直式畫面 66% 寬）', () => {
+    const lighthouse = { x: 0, z: 0 };
+    const spawn = computeSpawnFacingLighthouse(lighthouse, undefined, 390 / 844);
+    const dist = Math.hypot(spawn.x - lighthouse.x, spawn.z - lighthouse.z);
+    expect(dist).toBeGreaterThan(SPAWN_DISTANCE_FROM_LIGHTHOUSE);
+  });
+
+  it('寬螢幕（桌機常見 16:9）寬高比不該觸發補償——距離維持原本的 7', () => {
+    const lighthouse = { x: 0, z: 0 };
+    const spawn = computeSpawnFacingLighthouse(lighthouse, undefined, 16 / 9);
+    const dist = Math.hypot(spawn.x - lighthouse.x, spawn.z - lighthouse.z);
+    expect(dist).toBeCloseTo(SPAWN_DISTANCE_FROM_LIGHTHOUSE, 5);
+  });
+});
+
+describe('requiredDistanceForTowerWidthInView', () => {
+  it('寬高比越窄，需要的距離越遠——水平 FOV 跟著寬高比變窄，同樣距離下塔身佔比會變大', () => {
+    const narrow = requiredDistanceForTowerWidthInView(390 / 844);
+    const wide = requiredDistanceForTowerWidthInView(16 / 9);
+    expect(narrow).toBeGreaterThan(wide);
+  });
+
+  it('🔒 390×844 算出來的距離，套回去驗證塔身寬度確實不超過 MAX_TOWER_WIDTH_FRACTION——不是只看距離變大了，要驗證它真的達到目的', () => {
+    const aspect = 390 / 844;
+    const distance = requiredDistanceForTowerWidthInView(aspect);
+    const vFovRad = (CAMERA_VERTICAL_FOV_DEG * Math.PI) / 180;
+    const hFovRad = 2 * Math.atan(Math.tan(vFovRad / 2) * aspect);
+    const frameWidth = 2 * distance * Math.tan(hFovRad / 2);
+    const towerWidthFraction = (LIGHTHOUSE_TOWER_RADIUS * 2) / frameWidth;
+    expect(towerWidthFraction).toBeCloseTo(MAX_TOWER_WIDTH_FRACTION, 5);
   });
 });
 
@@ -268,5 +312,47 @@ describe('isMovementLocked — 飛行/開場鏡頭期間鎖住輸入', () => {
 
   it('兩者都不成立時不該鎖住輸入，否則玩家永遠不能動', () => {
     expect(isMovementLocked(false, false)).toBe(false);
+  });
+});
+
+/**
+ * #3780 P0-3 八度審查訂正：3D 站牌是 `depthTest: false`，永遠畫在最
+ * 上層——即使物理上被別棟建築擋住，字牌還是會穿模浮在前景建築上
+ * （team-lead 2026-10-27 截圖抓到：「回音劇場」浮在港口燈塔前面）。
+ */
+describe('isLabelOccluded — 鏡頭→名牌視線被別棟建築擋住', () => {
+  const tallObstacle: LabelOcclusionObstacle = { x: 0, z: 5, radius: 2, baseY: 0, topY: 5 };
+
+  it('🔒 障礙物剛好卡在鏡頭跟名牌中間、高度也夠高——要判定被擋住（這次退件的真實 bug）', () => {
+    const camera = { x: 0, y: 2, z: 0 };
+    const label = { x: 0, y: 2, z: 10 };
+    expect(isLabelOccluded(camera, label, [tallObstacle])).toBe(true);
+  });
+
+  it('障礙物在視線旁邊（水平距離遠超過半徑）——不該被判定擋住', () => {
+    const camera = { x: 0, y: 2, z: 0 };
+    const label = { x: 0, y: 2, z: 10 };
+    const sideObstacle: LabelOcclusionObstacle = { x: 10, z: 5, radius: 2, baseY: 0, topY: 5 };
+    expect(isLabelOccluded(camera, label, [sideObstacle])).toBe(false);
+  });
+
+  it('障礙物水平位置卡在視線上，但矮到視線其實是從它上空通過——不該被判定擋住', () => {
+    const camera = { x: 0, y: 2, z: 0 };
+    const label = { x: 0, y: 2, z: 10 };
+    const shortObstacle: LabelOcclusionObstacle = { x: 0, z: 5, radius: 2, baseY: 0, topY: 1 };
+    expect(isLabelOccluded(camera, label, [shortObstacle])).toBe(false);
+  });
+
+  it('多個障礙物裡只要有一個真的擋住，整體就要判定被擋住，不是全部都要擋到才算', () => {
+    const camera = { x: 0, y: 2, z: 0 };
+    const label = { x: 0, y: 2, z: 10 };
+    const sideObstacle: LabelOcclusionObstacle = { x: 10, z: 5, radius: 2, baseY: 0, topY: 5 };
+    expect(isLabelOccluded(camera, label, [sideObstacle, tallObstacle])).toBe(true);
+  });
+
+  it('沒有任何障礙物時一定不被擋住', () => {
+    const camera = { x: 0, y: 2, z: 0 };
+    const label = { x: 0, y: 2, z: 10 };
+    expect(isLabelOccluded(camera, label, [])).toBe(false);
   });
 });

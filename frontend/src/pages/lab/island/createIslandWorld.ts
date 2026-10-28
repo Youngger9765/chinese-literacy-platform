@@ -2,9 +2,9 @@ import * as THREE from 'three';
 import { introProgress, characterPose } from './islandMotion';
 import type { IslandBaby, IslandStop } from './islandTemplate';
 import { isSceneryExcluded } from './islandTemplate';
-import { MIN_CAMERA_BUILDING_DISTANCE, computeSpawnFacingLighthouse, selectNearestStation, findCelebrationViewpoint, findTravelToDestination, arcFlightPosition, arcFlightArrivalYaw, isMovementLocked, type CelebrationViewpoint } from './spawnPoint';
+import { MIN_CAMERA_BUILDING_DISTANCE, BUILDING_BASE_RADIUS, computeSpawnFacingLighthouse, selectNearestStation, findCelebrationViewpoint, findTravelToDestination, arcFlightPosition, arcFlightArrivalYaw, isMovementLocked, isLabelOccluded, type CelebrationViewpoint, type LabelOcclusionObstacle } from './spawnPoint';
 import { startCelebration, advanceOnTurnConverged, isHoldComplete, diffProgress, resolveCelebrationTrigger, celebrationGlowBoost, steadyCompletedGlow, resolveCelebrationGlow, INITIAL_PROGRESS_DIFF_STATE, type CelebrationState, type ProgressDiffState } from './islandCelebration';
-import { buildStationGroup, applyBuildingGlow, disposeObjectTree, type BuildingMaterialSlot } from './islandBuildingShapes';
+import { buildStationGroup, applyBuildingGlow, disposeObjectTree, buildingTopY, type BuildingMaterialSlot } from './islandBuildingShapes';
 
 interface WorldEvents {
   onNear: (index: number | null) => void;
@@ -165,9 +165,16 @@ export function createIslandWorld(
   // ——不再是寫死的座標，算式見 spawnPoint.ts 的理由。找不到 lesson-intro
   // （理論上不該發生，step_sequence 幾乎都以它開頭）就退回 stops[0]，
   // 真的一站都沒有才退回原本的寫死座標，不讓整座島在這裡直接炸掉。
+  // #3780 P0-3 九度審查訂正：傳真實的容器寬高比進去——手機直式畫面很窄，
+  // 固定距離 7 會讓塔身佔掉太多畫面寬度，`computeSpawnFacingLighthouse`
+  // 會依寬高比自動把距離拉遠到塔身寬度不超過六成（見 spawnPoint.ts）。
+  // `clientHeight` 理論上這時候已經是真實版面（container 在呼叫這個函式
+  // 之前就已經掛進 DOM），萬一量到 0（極端情況，例如還沒 layout）就退回
+  // 桌機常見寬高比，不要讓距離算式除以 0。
+  const containerAspect = container.clientHeight > 0 ? container.clientWidth / container.clientHeight : 16 / 9;
   const lighthouseStop = content.stops.find((stop) => stop.step === 'lesson-intro') ?? content.stops[0];
   const spawnPoint = lighthouseStop
-    ? computeSpawnFacingLighthouse(lighthouseStop)
+    ? computeSpawnFacingLighthouse(lighthouseStop, undefined, containerAspect)
     : { x: -2, z: 16.5, yaw: 0, pitch: 0 };
 
   const zonedThings: THREE.Object3D[] = [];
@@ -210,6 +217,10 @@ export function createIslandWorld(
   // 所有材質」，之後要加亮／復原直接對這個陣列呼叫 `applyBuildingGlow`，
   // 不管這一棟內部用了哪些具名變數、走哪個 `step` 分支。
   const perBuildingMaterials: BuildingMaterialSlot[][] = [];
+  // #3780 P0-3 八度審查訂正：3D 站牌（下面的 `sign`）要存起來，per-frame
+  // 迴圈才能逐一對每棟建築算「鏡頭→這塊牌子的視線有沒有被別棟建築擋住」
+  // ，見 animate() 裡的 `signs.forEach(...)`。
+  const signs: THREE.Sprite[] = [];
   content.stops.forEach((stop, i) => {
     const built = buildStationGroup(stop, sand);
     const root = built.root;
@@ -240,10 +251,13 @@ export function createIslandWorld(
       ctx.fillText(stop.name, 256, 53);
     }
     const texture = new THREE.CanvasTexture(signCanvas);
-    const sign = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, depthTest: false }));
+    // `transparent: true`：原本沒加，opacity 的漸變在這個材質上不會有
+    // 任何視覺效果（遮擋判斷靠淡出，不是硬切 visible，需要真的能混合）。
+    const sign = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, depthTest: false, transparent: true }));
     sign.scale.set(3.3, 0.65, 1);
     sign.position.set(0, stop.step === 'lesson-intro' ? 7.8 : stop.step === 'report' ? 6.2 : 4.5, 0);
     root.add(sign);
+    signs.push(sign);
   });
   // #3780 P0-3 四度審查訂正：底部光暈環在慶祝時除了既有的脈動（見下面
   // animate() 裡的 pulseAmp），底座本身也要放大，當「整棟建築發光」之外
@@ -442,6 +456,11 @@ export function createIslandWorld(
         celebrationViewpoint = null;
         nextStop = goTo;
         turnTo = goTo;
+        // #3780 P0-3 九度審查訂正：慶祝期間鏡頭推到觀景點、拖曳過上下
+        // 視角的話，結束後 pitch 會停在那個殘留值，不是回到正常遊玩時的
+        // 角度。慶祝一結束就重設回出生時的仰角（跟 playIntro() 用同一個
+        // 基準），不要讓拖曳的痕跡一直帶著走。
+        pitch = spawnPoint.pitch;
         events.onCelebrationEnd?.(finishedIndex, goTo);
       }
       keyDirection = { x: Number(keys.has('d') || keys.has('arrowright')) - Number(keys.has('a') || keys.has('arrowleft')), z: Number(keys.has('s') || keys.has('arrowdown')) - Number(keys.has('w') || keys.has('arrowup')) };
@@ -468,6 +487,9 @@ export function createIslandWorld(
           player.position.x = travelFlight.end.x;
           player.position.z = travelFlight.end.z;
           yaw = arcFlightArrivalYaw(travelFlight.end, travelFlight.target);
+          // #3780 P0-3 九度審查訂正：跟慶祝結束同一個做法——落地後把 pitch
+          // 重設回出生仰角，不要讓飛行前殘留的拖曳上下視角一直帶著走。
+          pitch = spawnPoint.pitch;
           const arrived = travelFlight.index;
           travelFlight = null;
           events.onMove(player.position.x, player.position.z);
@@ -625,6 +647,30 @@ export function createIslandWorld(
         halo.scale.setScalar(haloBaseScale[index] + (on ? 0.12 * Math.sin(elapsed * 6) : 0.04 * Math.sin(elapsed * 2)));
       }
       buildingGroups[index].scale.setScalar(1 + (index === hovered ? 0.035 : 0));
+    });
+    // #3780 P0-3 八度審查訂正：3D 站牌是 `depthTest: false`，永遠畫在
+    // 最上層——即使物理上被別棟建築擋住，字牌還是會穿模浮在前景建築上
+    // （team-lead 2026-10-27 截圖抓到：「回音劇場」浮在港口燈塔前面）。
+    // `isLabelOccluded`（spawnPoint.ts）判斷鏡頭→這塊牌子的視線有沒有被
+    // 「別棟」建築擋住（只排除自己，不排除任何東西都不排除），用淡出
+    // （opacity 平滑趨近 0/1）取代硬切 visible，不要瞬間消失/出現。
+    const buildingObstacles: LabelOcclusionObstacle[] = content.stops.map((stop) => ({
+      x: stop.x,
+      z: stop.z,
+      radius: BUILDING_BASE_RADIUS,
+      baseY: 0.42,
+      topY: buildingTopY(stop.step),
+    }));
+    signs.forEach((sign, index) => {
+      const stop = content.stops[index];
+      const labelWorld = { x: stop.x, y: 0.42 + sign.position.y, z: stop.z };
+      const occluded = isLabelOccluded(
+        { x: camera.position.x, y: camera.position.y, z: camera.position.z },
+        labelWorld,
+        buildingObstacles.filter((_, i) => i !== index),
+      );
+      const mat = sign.material as THREE.SpriteMaterial;
+      mat.opacity += ((occluded ? 0 : 1) - mat.opacity) * Math.min(1, dt * 10);
     });
     // #3780 P0-3：慶祝粒子——從剛完成那一站的地基往上、往外飄散，停留期
     // 結束前淡出；數量跟擴散範圍依 tier 而定（heavy 比 light 多更大）。

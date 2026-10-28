@@ -156,6 +156,41 @@ export function nearTriggerRadiusForStep(step: string): number {
 }
 
 /**
+ * 預設寬高比——刻意取一個比任何真實裝置都寬的值，純粹是為了讓沒有傳
+ * 真實寬高比的舊呼叫端（含既有測試）維持原本固定 `SPAWN_DISTANCE_FROM_LIGHTHOUSE`
+ * 的行為不變。呼叫端要吃到下面的直式螢幕補償，必須傳真實的
+ * `container.clientWidth / container.clientHeight`。
+ */
+const DEFAULT_SPAWN_ASPECT = 4;
+
+/**
+ * 燈塔塔身寬度（直徑）不能超過畫面寬度的這個比例——#3780 P0-3 九度審查
+ * 訂正：手機直式（寬高比 <1）畫面很窄，three.js 的垂直 FOV 固定不隨寬高比
+ * 變（見 `CAMERA_VERTICAL_FOV_DEG` 的註解），但水平 FOV 會隨著寬高比變窄
+ * （`hFov = 2·atan(tan(vFov/2)·aspect)`）——同樣的出生距離，畫面越窄，
+ * 塔身佔掉的畫面比例就越高。390×844（aspect≈0.462）在原本固定的距離 7
+ * 底下算出來塔身會佔約 66% 的畫面寬度，超過這裡定的上限。
+ */
+export const MAX_TOWER_WIDTH_FRACTION = 0.6;
+
+/**
+ * 給定寬高比，要讓燈塔塔身的視覺寬度不超過 `maxWidthFraction`，出生距離
+ * 至少要多遠。不是鎖死某個距離數字，是鎖「這個幾何關係」——改塔身半徑或
+ * 相機 FOV，呼叫端量出來的合格距離會自動跟著變，跟 `isHeightFullyInView`
+ * 同一個設計精神。
+ */
+export function requiredDistanceForTowerWidthInView(
+  aspect: number,
+  maxWidthFraction: number = MAX_TOWER_WIDTH_FRACTION,
+  towerRadius: number = LIGHTHOUSE_TOWER_RADIUS,
+  vFovDeg: number = CAMERA_VERTICAL_FOV_DEG,
+): number {
+  const vFovRad = (vFovDeg * Math.PI) / 180;
+  const hFovRad = 2 * Math.atan(Math.tan(vFovRad / 2) * aspect);
+  return towerRadius / (maxWidthFraction * Math.tan(hFovRad / 2));
+}
+
+/**
  * 出生點：面向港口燈塔（lesson-intro 站），從正南方接近（跟 20011 原本
  * 出生點 `{x:-2,z:16.5}` 相對燈塔 `{x:-3,z:11}` 的方向大致一致，原本就
  * 幾乎是正南，這裡取整成剛好正南，算式比較乾淨：x 跟燈塔相同，一上岸
@@ -164,13 +199,21 @@ export function nearTriggerRadiusForStep(step: string): number {
  *
  * `pitch` 固定回傳 `SPAWN_PITCH`——燈塔的視覺尺寸對全平台每一課都一樣
  * （同一套程序化建築造型），不是每課各自算一次。
+ *
+ * `distance` 現在是「下限」不是精確值——九度審查訂正加了 `aspect` 參數，
+ * 寬高比窄到需要更遠的距離才能讓塔身寬度不超過六成時，會自動取較大的
+ * 那個值（見 `requiredDistanceForTowerWidthInView`）。拉遠距離只會讓垂直
+ * 方向的夾角更小（`isHeightFullyInView`／`isBaseInLowerHalf` 兩個既有
+ * 約束只會更寬裕，不會變緊），兩組約束之間沒有衝突。
  */
 export function computeSpawnFacingLighthouse(
   lighthouse: { x: number; z: number },
   distance: number = SPAWN_DISTANCE_FROM_LIGHTHOUSE,
+  aspect: number = DEFAULT_SPAWN_ASPECT,
 ): { x: number; z: number; yaw: number; pitch: number } {
+  const effectiveDistance = Math.max(distance, requiredDistanceForTowerWidthInView(aspect));
   const x = lighthouse.x;
-  const z = lighthouse.z + distance;
+  const z = lighthouse.z + effectiveDistance;
   const toLighthouseX = lighthouse.x - x;
   const toLighthouseZ = lighthouse.z - z;
   const yaw = Math.atan2(-toLighthouseX, -toLighthouseZ);
@@ -473,4 +516,57 @@ export function arcFlightArrivalYaw(end: { x: number; z: number }, target: { x: 
  */
 export function isMovementLocked(introPlaying: boolean, flying: boolean): boolean {
   return introPlaying || flying;
+}
+
+/**
+ * 「遮擋這塊名牌的那棟建築」——`BuildingMaterialSlot`／`BuildingMaterialSlot[]`
+ * 跟三.js 無關，純粹是幾何描述。半徑統一用 `BUILDING_BASE_RADIUS`（建築
+ * 共用的地基圓柱半徑）當近似——不是每棟建築的真實水平輪廓都剛好是這個
+ * 數字（例如挑戰擂台的圓形高台比較寬），但這是刻意的簡化：遮擋判斷寧可
+ * 偏保守一點用小一點的半徑（少擋到幾種極端案例），也不要用一個誇大的
+ * 半徑把一堆明明看得到名牌的情況也判成被擋住——真正的高度（`topY`）才是
+ * 這次退件的主因，半徑先用現成的共用常數，不在這批另外量一份新的。
+ */
+export interface LabelOcclusionObstacle {
+  readonly x: number;
+  readonly z: number;
+  readonly radius: number;
+  readonly baseY: number;
+  readonly topY: number;
+}
+
+/**
+ * 鏡頭→名牌這條視線，有沒有被某棟建築的實體擋住——#3780 P0-3 八度審查
+ * 訂正：3D 站牌材質是 `depthTest: false`（永遠畫在最上層，不管真實深度
+ * 關係），所以即使物理上被別棟建築擋住，畫面上仍然看得到字牌穿模浮在
+ * 前景建築上（team-lead 2026-10-27 截圖抓到：「回音劇場」浮在港口燈塔
+ * 前面）。把視線投影到水平面算「障礙物離這條線最近的距離」跟「視線走到
+ * 那個最近點時的內插比例」，再用那個比例內插鏡頭／名牌的高度差，算出
+ * 視線經過障礙物正上方那一刻的實際高度——這個高度有沒有落在障礙物的
+ * `[baseY, topY]` 之間，才是真正決定「擋住了沒」的關鍵（純水平距離夠近
+ * 但視線其實是從障礙物上空飛過去，不該判定被擋）。
+ *
+ * 只對建築實體呼叫這支（`obstacles` 不含光暈環／燈塔光束——那兩個是
+ * `MeshBasicMaterial` 的視覺特效，見 `islandBuildingShapes.ts` 的
+ * `buildingTopY` 篩選材質類型用的同一條規則）。
+ */
+export function isLabelOccluded(
+  camera: { x: number; y: number; z: number },
+  label: { x: number; y: number; z: number },
+  obstacles: readonly LabelOcclusionObstacle[],
+): boolean {
+  const abx = label.x - camera.x;
+  const abz = label.z - camera.z;
+  const lenSq = abx * abx + abz * abz;
+  for (const obstacle of obstacles) {
+    let t = lenSq === 0 ? 0 : ((obstacle.x - camera.x) * abx + (obstacle.z - camera.z) * abz) / lenSq;
+    t = Math.max(0, Math.min(1, t));
+    const closestX = camera.x + abx * t;
+    const closestZ = camera.z + abz * t;
+    const horizDist = Math.hypot(obstacle.x - closestX, obstacle.z - closestZ);
+    if (horizDist >= obstacle.radius) continue;
+    const heightAtClosest = camera.y + (label.y - camera.y) * t;
+    if (heightAtClosest >= obstacle.baseY && heightAtClosest <= obstacle.topY) return true;
+  }
+  return false;
 }

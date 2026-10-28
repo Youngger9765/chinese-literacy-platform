@@ -293,3 +293,41 @@ export const ALL_STATION_STEP_TYPES: readonly string[] = [
   'classical-self-challenge',
   'report',
 ];
+
+/**
+ * 每種建築型態的真實頂端世界座標 Y——#3780 P0-3 八度審查訂正：鏡頭→名牌
+ * 的遮擋判斷（`spawnPoint.ts` 的 `isLabelOccluded`）需要知道「這棟建築
+ * 的實體有多高」才能正確判斷它會不會擋住別棟建築的 3D 站牌。直接用
+ * `buildStationGroup()` 真的建一棟出來量 `THREE.Box3`，只累計
+ * `MeshStandardMaterial` 的網格（排除光暈環／燈塔光束——那兩個是
+ * `MeshBasicMaterial` 的視覺特效，不是建築實體的一部分，見
+ * `buildStationGroup` 判斷材質類型用的同一條規則），不是手key一份可能
+ * 跟真實幾何漂移的數字表。每種型態算一次就快取起來，不是每次呼叫都重建
+ * 一次 three.js 物件樹。
+ */
+const topYCache = new Map<string, number>();
+
+export function buildingTopY(step: string): number {
+  const type = step.split('#')[0];
+  const cached = topYCache.get(type);
+  if (cached !== undefined) return cached;
+
+  const built = buildStationGroup({ name: '', step: type }, new THREE.MeshStandardMaterial({ color: 0xd9c397 }));
+  built.root.updateMatrixWorld(true);
+  const box = new THREE.Box3();
+  built.root.traverse((obj) => {
+    if (!(obj instanceof THREE.Mesh)) return;
+    const isSolid = Array.isArray(obj.material)
+      ? obj.material.some((mat) => mat instanceof THREE.MeshStandardMaterial)
+      : obj.material instanceof THREE.MeshStandardMaterial;
+    if (!isSolid) return; // 光暈環／燈塔光束是 MeshBasicMaterial，跳過
+    box.expandByObject(obj);
+  });
+  // `root` 本身的世界 y 偏移（createIslandWorld.ts 的 `root.position.set(stop.x, 0.42, stop.z)`）
+  // 這裡建造時沒有套用（`buildStationGroup` 回傳的 `root` 還沒被呼叫端
+  // position.set 過），所以 box.max.y 已經是「以 root 自己的原點」為準的
+  // local 高度，要手動加回那個 0.42 才是實際世界座標。
+  const topY = box.max.y + 0.42;
+  topYCache.set(type, topY);
+  return topY;
+}
