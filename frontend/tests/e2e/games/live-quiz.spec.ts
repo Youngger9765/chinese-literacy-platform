@@ -162,14 +162,24 @@ test.describe('課堂搶答 live_quiz', () => {
           if (await btn.count() && !(await btn.isDisabled())) await btn.click({ timeout: 2000 }).catch(() => {});
         }
       }
+      // Same race as the student-button fix above (#3710/#3735), on the
+      // host's own controls: the poll can land a 'question' -> 'reveal' or
+      // 'reveal' -> next-'question' transition between this count() check
+      // and the click's actionability wait, unmounting this exact button —
+      // an unbounded click then waits forever for text that won't reappear
+      // until a LATER loop iteration reaches it, deadlocking this whole
+      // for-loop (reproduced on CI: stuck on this exact line for the full
+      // 300s budget while the page had already moved on to the next round's
+      // question screen). Bound + swallow, same as line 162, and let the
+      // next iteration's fresh count() decide what to do.
       const revealBtn = page.getByRole('button', { name: '揭曉答案' });
       if (await revealBtn.count()) {
-        await revealBtn.click();
+        await revealBtn.click({ timeout: 2000 }).catch(() => {});
         await page.waitForTimeout(800);
       }
       const nextBtn = page.getByRole('button', { name: /下一題|查看頒獎台/ });
       if (await nextBtn.count()) {
-        await nextBtn.click();
+        await nextBtn.click({ timeout: 2000 }).catch(() => {});
         await page.waitForTimeout(800);
       }
       if (await page.getByRole('heading', { level: 1 }).count()) {
