@@ -1,0 +1,91 @@
+{
+  "_comment": "#3780 D — 前後端共用的『這站算不算完成』測試案例。前端（islandTemplate.ts 的 isStationDone/countStationsDone）跟後端（learning_progress.py 的 _is_island_occupied 家族）各自讀這份檔案，斷言算出來的 stations_done 完全一致。案例 1、2 是從部署中的 preview 真實資料截取（並非虛構），確認規則真的處理得了實際出現過的資料形狀。",
+  "rule": "lesson-intro 看 has_session；其餘站先比對 step_sequence 裡那個完整字串（含錨點）是否在 steps_completed 裡，命中就算完成；沒命中時，只有當這個站的型態（# 前綴）在整份 step_sequence 裡只出現一次，才退而接受 steps_completed 裡出現『不帶錨點的型態字串』也算完成——這個退讓只在沒有『哪一輪』疑慮時才成立，多篇課文同型態出現兩次以上就不適用，否則會把 A 輪的完成誤判成 B 輪也完成。",
+  "cases": [
+    {
+      "name": "single_text_anchor_mismatch_from_real_20011_data",
+      "note": "截自 preview 真實資料（student_id=4, session_id=681, story_slug=20011）。steps_completed 裡 'knowledge-station' 沒帶錨點，但 step_sequence 裡對應的是 'knowledge-station#uxwy3'——型態只出現一次，靠退讓規則仍判定完成。'report' 跟 'full-text-annotate#dcavv' 兩種寫法（有無錨點）都出現在真實資料裡，各自直接命中。",
+      "step_sequence": [
+        "lesson-intro", "full-text-annotate#dcavv", "key-passage-reading#arfe7",
+        "vocab-definition#jryea", "vocab-application#jp34n", "keypoints-table#wtm6h",
+        "comprehension#4axkq", "vocab-review#rdcd7", "knowledge-station#uxwy3", "report"
+      ],
+      "steps_completed": ["report", "knowledge-station", "full-text-annotate#dcavv"],
+      "has_session": true,
+      "expected_done_indexes": [0, 1, 8, 9],
+      "expected_stations_done": 4,
+      "expected_stations_total": 10,
+      "expected_is_occupied": false
+    },
+    {
+      "name": "multi_text_distinct_rounds_from_real_20029_data",
+      "note": "截自真實課文 20029（牧羊少年的逆轉勝，兩篇課文）。'full-text-annotate' 這個型態出現兩次（#fqwda 跟 #n3qxn，分屬不同輪），steps_completed 只有第一輪的完整字串——不能讓『型態只出現一次』的退讓規則誤判第二輪也完成，必須只認完整字串命中。",
+      "step_sequence": [
+        "lesson-intro", "full-text-annotate#fqwda", "key-passage-reading#tfewt",
+        "vocab-definition#d3aqn", "vocab-application#r9jxj", "keypoints-table#n3q4d",
+        "comprehension#7cfa6", "full-text-annotate#n3qxn", "knowledge-station#9npfp",
+        "key-passage-reading#d9d7p", "vocab-definition#vycpf", "vocab-application#r49ht",
+        "keypoints-table#huac7", "comprehension#xvud3", "spotlight#mw3dn",
+        "comprehension#6je7j", "vocab-review#vfd96", "report"
+      ],
+      "steps_completed": ["full-text-annotate#fqwda"],
+      "has_session": true,
+      "expected_done_indexes": [0, 1],
+      "expected_stations_done": 2,
+      "expected_stations_total": 18,
+      "expected_is_occupied": false
+    },
+    {
+      "name": "multi_text_bare_type_in_steps_completed_must_not_leak_to_other_round",
+      "note": "專門驗退讓規則的邊界：假設 steps_completed 裡混進一筆沒帶錨點的 'full-text-annotate'（跟案例 1 的 knowledge-station 同一種寫法），但這堂課的 'full-text-annotate' 型態在 step_sequence 裡出現兩次（分屬不同輪）——退讓規則必須整個不適用（occurrences!=1），兩個索引都不能被這筆模糊資料誤判成完成。這條專門防止『拿掉型態出現次數檢查』這種退化實作矇混過關。",
+      "step_sequence": ["lesson-intro", "full-text-annotate#fqwda", "full-text-annotate#n3qxn"],
+      "steps_completed": ["full-text-annotate"],
+      "has_session": true,
+      "expected_done_indexes": [0],
+      "expected_stations_done": 1,
+      "expected_stations_total": 3,
+      "expected_is_occupied": false
+    },
+    {
+      "name": "all_stations_done_including_intro_via_has_session",
+      "note": "全部站都完成，lesson-intro 靠 has_session 判定（平台設計上永遠不會寫進 steps_completed）。",
+      "step_sequence": [
+        "lesson-intro", "full-text-annotate#dcavv", "key-passage-reading#arfe7",
+        "vocab-definition#jryea", "vocab-application#jp34n", "keypoints-table#wtm6h",
+        "comprehension#4axkq", "vocab-review#rdcd7", "knowledge-station#uxwy3", "report"
+      ],
+      "steps_completed": [
+        "full-text-annotate#dcavv", "key-passage-reading#arfe7", "vocab-definition#jryea",
+        "vocab-application#jp34n", "keypoints-table#wtm6h", "comprehension#4axkq",
+        "vocab-review#rdcd7", "knowledge-station#uxwy3", "report"
+      ],
+      "has_session": true,
+      "expected_done_indexes": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+      "expected_stations_done": 10,
+      "expected_stations_total": 10,
+      "expected_is_occupied": true
+    },
+    {
+      "name": "has_session_false_lesson_intro_not_done",
+      "note": "没有 session 存在（理論上不該出現——這個端點本來就只處理已有 session 的課——但函式本身要能正確處理 has_session=false，不是只假設它恆為 true）。",
+      "step_sequence": ["lesson-intro", "full-text-annotate#dcavv"],
+      "steps_completed": ["full-text-annotate#dcavv"],
+      "has_session": false,
+      "expected_done_indexes": [1],
+      "expected_stations_done": 1,
+      "expected_stations_total": 2,
+      "expected_is_occupied": false
+    },
+    {
+      "name": "unknown_lesson_no_step_sequence",
+      "note": "查無這堂課（get_lesson_by_id 回 None，或前端 stepSequence 是空陣列）——fail-closed，不炸錯、不誤判成完成。",
+      "step_sequence": [],
+      "steps_completed": [],
+      "has_session": true,
+      "expected_done_indexes": [],
+      "expected_stations_done": 0,
+      "expected_stations_total": 0,
+      "expected_is_occupied": false
+    }
+  ]
+}

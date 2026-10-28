@@ -71,9 +71,17 @@ interface IntroProps {
   onBack?: () => void;
   /** 喝采島故事模式：一次一關，不顯示快速跳轉的步驟清單 */
   storyMode?: boolean;
+  /**
+   * #3780 P0-3：故事模式下「開始學習」孩子看不出來這代表「點亮燈塔」，
+   * 跟島上的視覺語言脫節——在島上這一關的建築就是燈塔，做完這一關＝
+   * 點亮它。文字由呼叫端（`IntroPage.tsx`）傳入，不在這個一般閱讀步驟
+   * 元件裡硬編「燈塔」這種島嶼專屬詞彙。只有 `storyMode` 為 true 時才會
+   * 採用，一般圖書館模式永遠維持「開始學習」，就算呼叫端不小心傳了也不變。
+   */
+  storyModeCtaLabel?: string;
 }
 
-const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack, storyMode = false }) => {
+const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack, storyMode = false, storyModeCtaLabel }) => {
   const [showUploadedModal, setShowUploadedModal] = useState(false);
   const [priorUpload, setPriorUpload] = useState<OmoPriorUploadResponse | null>(null);
   const { zhuyinActive, processZhuyin } = useZhuyin();
@@ -471,7 +479,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack, storyMode 
           onClick={onStartReading}
           className="w-full sm:flex-1 min-h-[56px] rounded-2xl font-bold text-lg bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
         >
-          開始學習
+          {storyMode && storyModeCtaLabel ? storyModeCtaLabel : '開始學習'}
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
           </svg>

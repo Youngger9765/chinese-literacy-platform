@@ -515,3 +515,120 @@ class TestStudentProgressIslandFields:
             headers={"Authorization": f"Bearer {requester['token']}"},
         )
         assert resp.status_code == 403
+
+
+class TestStudentProgressIsOccupied:
+    """#3780 D（PRD §5.6）—— `is_occupied`：這堂課在喝采島上是不是「佔領」了
+    （§5.3：所有站都完成）。用真實課文 20011 測，它的 step_sequence 是：
+    ['lesson-intro', 'full-text-annotate#dcavv', 'key-passage-reading#arfe7',
+     'vocab-definition#jryea', 'vocab-application#jp34n', 'keypoints-table#wtm6h',
+     'comprehension#4axkq', 'vocab-review#rdcd7', 'knowledge-station#uxwy3', 'report']
+    （10 站，`lesson-intro` 無錨點、其餘 8 站有錨點、`report` 無錨點）。"""
+
+    ALL_20011_STEPS_EXCEPT_INTRO = [
+        "full-text-annotate#dcavv", "key-passage-reading#arfe7", "vocab-definition#jryea",
+        "vocab-application#jp34n", "keypoints-table#wtm6h", "comprehension#4axkq",
+        "vocab-review#rdcd7", "knowledge-station#uxwy3", "report",
+    ]
+
+    def test_false_when_not_all_stations_done(self, client):
+        """少一站（report）沒做——不該是 true。"""
+        student = _register_user(client, "island_occ_partial")
+        db = TestingSessionLocal()
+        db.add(LearningSession(
+            student_id=student["id"],
+            story_slug="20011",
+            status="in_progress",
+            step_progress={"steps_completed": self.ALL_20011_STEPS_EXCEPT_INTRO[:-1]},
+        ))
+        db.commit()
+        db.close()
+
+        resp = client.get(
+            f"/api/learning/students/{student['id']}/progress",
+            headers={"Authorization": f"Bearer {student['token']}"},
+        )
+        assert resp.status_code == 200, resp.text
+        assert resp.json()["texts"][0]["is_occupied"] is False
+
+    def test_true_when_all_stations_done_including_intro_via_has_session(self, client):
+        """其餘 9 站都做完、`lesson-intro` 本身永遠不會進 steps_completed
+        （PRD §5.2）——只要這個 session 存在（`has_session`）就該算
+        `lesson-intro` 完成，整堂課變成 `is_occupied: true`。"""
+        student = _register_user(client, "island_occ_full")
+        db = TestingSessionLocal()
+        db.add(LearningSession(
+            student_id=student["id"],
+            story_slug="20011",
+            status="in_progress",
+            step_progress={"steps_completed": self.ALL_20011_STEPS_EXCEPT_INTRO},
+        ))
+        db.commit()
+        db.close()
+
+        resp = client.get(
+            f"/api/learning/students/{student['id']}/progress",
+            headers={"Authorization": f"Bearer {student['token']}"},
+        )
+        assert resp.status_code == 200, resp.text
+        text = resp.json()["texts"][0]
+        assert text["has_session"] is True
+        assert text["is_occupied"] is True
+
+    def test_false_for_unknown_lesson_no_crash(self, client):
+        """`story_slug` 不是純數字（`int(slug)` 丟 `ValueError`）——
+        fail-closed 回 `is_occupied=False`／`stations_done=0`／
+        `stations_total=0`，不是炸錯整支 API、也不是誤判成 true。"""
+        student = _register_user(client, "island_occ_unknown")
+        db = TestingSessionLocal()
+        db.add(LearningSession(
+            student_id=student["id"],
+            story_slug="this-slug-does-not-exist-999",
+            status="in_progress",
+        ))
+        db.commit()
+        db.close()
+
+        resp = client.get(
+            f"/api/learning/students/{student['id']}/progress",
+            headers={"Authorization": f"Bearer {student['token']}"},
+        )
+        assert resp.status_code == 200, resp.text
+        text = resp.json()["texts"][0]
+        assert text["is_occupied"] is False
+        assert text["stations_done"] == 0
+        assert text["stations_total"] == 0
+
+    def test_bad_slug_does_not_poison_other_courses_in_same_response(self, client):
+        """一筆壞資料（非數字 `story_slug`）不該讓**同一個回應裡其他課**的
+        `is_occupied`／`stations_done`／`stations_total` 也跟著壞掉或讓
+        整支 API 500——每一筆 `texts[]` 各自獨立計算。"""
+        student = _register_user(client, "island_occ_mixed")
+        db = TestingSessionLocal()
+        db.add(LearningSession(
+            student_id=student["id"],
+            story_slug="not-a-number",
+            status="in_progress",
+        ))
+        db.add(LearningSession(
+            student_id=student["id"],
+            story_slug="20011",
+            status="in_progress",
+            step_progress={"steps_completed": ["full-text-annotate#dcavv"]},
+        ))
+        db.commit()
+        db.close()
+
+        resp = client.get(
+            f"/api/learning/students/{student['id']}/progress",
+            headers={"Authorization": f"Bearer {student['token']}"},
+        )
+        assert resp.status_code == 200, resp.text
+        by_slug = {t["story_slug"]: t for t in resp.json()["texts"]}
+        assert by_slug["not-a-number"]["is_occupied"] is False
+        assert by_slug["not-a-number"]["stations_total"] == 0
+        # 20011 真實有 10 站，這筆資料完全沒受「壞資料」那筆影響。
+        # lesson-intro 靠 has_session 自動算一站 + full-text-annotate#dcavv
+        # 命中一站 = 2 站。
+        assert by_slug["20011"]["stations_total"] == 10
+        assert by_slug["20011"]["stations_done"] == 2

@@ -240,6 +240,48 @@ describe('spawnPoint — 全平台 179 課回歸鎖（#3780 P0-2）', () => {
         });
       });
 
+      /**
+       * ⑤-2 直式手機寬高比版——#3780 P0-3 十度審查訂正：十度審查為了修塔尖
+       * 被 HUD 標題卡蓋住的問題，把 `nearTriggerRadiusForStep` 改成會依
+       * `aspect` 動態變寬（燈塔的觸發半徑現在跟出生距離同一套公式，見
+       * spawnPoint.ts 的 `effectiveLighthouseSpawnDistance`）。協調者在審查
+       * 時提出疑慮：⑤ 原本只用預設（桌機）寬高比呼叫 `selectNearestStation`，
+       * 手機直式下燈塔半徑變大（390×844 下約 10.63，比桌機基準 7.5 寬
+       * 42%），有沒有可能因為半徑變寬而重新引入退件三輪的「燈塔搶站」？
+       * 經查證：協調者在隔離 worktree 用真實 179 課 fixture 手動掃過一輪
+       * （332 組同區配對全數 0 搶，並用「退回舊比例演算法」的對照組確認
+       * 掃描方法本身有牙），結論是 `selectNearestStation` 的「先各自半徑
+       * 篩、篩完比真實距離」設計本來就對閾值變大免疫——只要玩家站在某站
+       * 門口（距離極小），除非燈塔本身更近，閾值大小不影響結果。這支把
+       * 那次手動驗證收進永久回歸鎖，不是重新發現問題，是把協調者口頭
+       * 確認過的事變成會自動執行、自動抓到未來回歸的測試。
+       */
+      it('⑤-2 直式手機寬高比（390×844，燈塔觸發半徑因十度審查變寬）下，玩家站在其他站的門口仍然選到那一站，不是燈塔——協調者 2026-10-28 審查時提出的疑慮，查證屬實後收進永久測試', () => {
+        const PORTRAIT_ASPECT = 390 / 844;
+        const lighthouseIndex = stops.findIndex((s) => s.step === 'lesson-intro');
+        if (lighthouseIndex < 0) return;
+        const lighthouse = stops[lighthouseIndex];
+        // 先確認這一課的燈塔半徑真的因為直式寬高比變寬了（不是測一個沒有
+        // 實際發生的情境——半徑沒變寬的話，這支測試就測不到協調者的疑慮）。
+        const desktopRadius = nearTriggerRadiusForStep(lighthouse.step);
+        const portraitRadius = nearTriggerRadiusForStep(lighthouse.step, PORTRAIT_ASPECT);
+        expect(portraitRadius, `第 ${id} 課「${title}」：直式寬高比下燈塔觸發半徑應該比桌機寬（不然這支測試沒測到協調者的疑慮）`).toBeGreaterThan(desktopRadius);
+
+        stops.forEach((other, otherIndex) => {
+          if (otherIndex === lighthouseIndex) return;
+          if (other.zone !== lighthouse.zone) return;
+          const dx = lighthouse.x - other.x;
+          const dz = lighthouse.z - other.z;
+          const dist = Math.hypot(dx, dz) || 1;
+          const player = {
+            x: other.x + (dx / dist) * MIN_CAMERA_BUILDING_DISTANCE,
+            z: other.z + (dz / dist) * MIN_CAMERA_BUILDING_DISTANCE,
+          };
+          const selected = selectNearestStation(stops, player, lighthouse.zone, PORTRAIT_ASPECT);
+          expect(selected, `第 ${id} 課「${title}」：直式寬高比下站在「${other.name}」門口卻選到別的站（index ${selected}，應為 ${otherIndex}「${other.name}」）——燈塔變寬的觸發半徑搶走了這一站`).toBe(otherIndex);
+        });
+      });
+
       it('⑥ 正向對照：玩家站在燈塔自己的出生點，選到的是燈塔本身（防止「把 lesson-intro 排除在候選外」這種 bug 也全綠）', () => {
         const lighthouseIndex = stops.findIndex((s) => s.step === 'lesson-intro');
         if (lighthouseIndex < 0) return;

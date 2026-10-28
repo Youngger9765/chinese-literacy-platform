@@ -50,4 +50,21 @@ describe('Intro in island story mode', () => {
     expect(screen.getAllByRole('button', { name: /跳轉到第/ }).length).toBeGreaterThan(0);
     expect(screen.getByRole('button', { name: '返回圖書館' })).toBeTruthy();
   });
+
+  /**
+   * #3780 P0-3（playtest 2026-10-26）：故事模式下「開始學習」孩子不知道
+   * 這代表「點亮燈塔」，跟島上的視覺語言脫節。`IntroPage.tsx` 在故事模式
+   * 會傳 `storyModeCtaLabel`，這支測試鎖「傳了就要用，沒傳就是舊行為」。
+   */
+  it('shows the lighthouse-lit-up CTA when storyModeCtaLabel is given in story mode', () => {
+    render(<Intro story={story} onStartReading={vi.fn()} storyMode storyModeCtaLabel="讀完了，點亮燈塔" />);
+    expect(screen.getByRole('button', { name: '讀完了，點亮燈塔' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /^開始學習/ })).toBeNull();
+  });
+
+  it('does not use storyModeCtaLabel outside of story mode even if a caller passes one by mistake', () => {
+    render(<Intro story={story} onStartReading={vi.fn()} onBack={vi.fn()} storyModeCtaLabel="讀完了，點亮燈塔" />);
+    expect(screen.getByRole('button', { name: /開始學習/ })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: '讀完了，點亮燈塔' })).toBeNull();
+  });
 });

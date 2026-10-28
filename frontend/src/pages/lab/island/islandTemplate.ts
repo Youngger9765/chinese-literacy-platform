@@ -184,3 +184,47 @@ export function actInfoForZone(
     stationNames: stops.filter((s) => s.zone === unlockedZone).map((s) => s.name).join('、'),
   };
 }
+
+/**
+ * #3780 D（PRD §5.6）：`step_sequence[index]` 這一站算不算完成——跟後端
+ * `learning_progress.py` 的 `_is_island_occupied` 共用同一套規則，兩邊都
+ * 讀 `fixtures/island-station-completion.json` 鎖同一組案例，數字不能對
+ * 不起來。
+ *
+ * `lesson-intro` 看 `hasSession`（平台設計上永遠不會寫進 `stepsCompleted`，
+ * §5.2）。其餘站先比對 `step_sequence` 裡那個完整字串（含錨點，例如
+ * `full-text-annotate#dcavv`）是否整個出現在 `stepsCompleted`——命中就算
+ * 完成。沒命中時，**只有這個型態在整份 `stepSequence` 裡只出現一次**，才
+ * 退而接受 `stepsCompleted` 裡出現「不帶錨點的型態字串」也算完成（真實
+ * preview 資料截到的情況：`knowledge-station#uxwy3` 這站，伺服器卻存成
+ * 沒帶錨點的 `knowledge-station`）。這個退讓只有在沒有「哪一輪」疑慮時
+ * 才安全——多篇課文同型態出現兩次以上（例如兩輪各自的
+ * `full-text-annotate#A`／`full-text-annotate#B`）不能套用，否則會把
+ * A 輪完成誤判成 B 輪也完成。
+ */
+export function isStationDone(
+  stepSequence: ReadonlyArray<string>,
+  index: number,
+  stepsCompleted: ReadonlyArray<string>,
+  hasSession: boolean,
+): boolean {
+  const entry = stepSequence[index];
+  if (!entry) return false;
+  const type = entry.split('#')[0];
+  if (type === 'lesson-intro') return hasSession;
+  if (stepsCompleted.includes(entry)) return true;
+  const occurrences = stepSequence.filter((s) => s.split('#')[0] === type).length;
+  return occurrences === 1 && stepsCompleted.includes(type);
+}
+
+/** 整份 `stepSequence` 裡完成了幾站——我的群島頁「探索中 x/y 站」的 x。 */
+export function countStationsDone(
+  stepSequence: ReadonlyArray<string>,
+  stepsCompleted: ReadonlyArray<string>,
+  hasSession: boolean,
+): number {
+  return stepSequence.reduce(
+    (count, _entry, index) => count + (isStationDone(stepSequence, index, stepsCompleted, hasSession) ? 1 : 0),
+    0,
+  );
+}
