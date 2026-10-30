@@ -10,7 +10,7 @@
  *   ② 同樣的方塊搬到連線旁邊（不擋路）→ 應該回傳沒有遮擋
  */
 import { describe, it, expect } from 'vitest';
-import { isNameplateOccluded, type OccluderBox } from '../createArchipelagoWorld';
+import { isNameplateOccluded, isRectOutOfBounds, type OccluderBox } from '../createArchipelagoWorld';
 
 describe('isNameplateOccluded — 純函式，吃包圍盒不吃 Raycaster/Scene', () => {
   const cameraPos = { x: 0, y: 5, z: 10 };
@@ -69,5 +69,33 @@ describe('isNameplateOccluded — 純函式，吃包圍盒不吃 Raycaster/Scene
       { slug: 'other-island', min: { x: 0, y: 0, z: 0 }, max: { x: 10, y: 10, z: 10 } },
     ]);
     expect(occluded).toBe(false);
+  });
+});
+
+describe('isRectOutOfBounds — 名牌卡片超出畫布邊界判斷（team-lead 2026-10-31 審查發現）', () => {
+  const canvas = { left: 0, right: 1000, top: 0, bottom: 800 };
+
+  it('完全在畫布內的卡片 → 沒有超出', () => {
+    expect(isRectOutOfBounds({ left: 100, right: 300, top: 100, bottom: 150 }, canvas)).toBe(false);
+  });
+
+  it('卡片右緣超出畫布右邊界 → 判定超出', () => {
+    expect(isRectOutOfBounds({ left: 950, right: 1100, top: 100, bottom: 150 }, canvas)).toBe(true);
+  });
+
+  it('卡片左緣超出畫布左邊界（負座標）→ 判定超出', () => {
+    expect(isRectOutOfBounds({ left: -50, right: 100, top: 100, bottom: 150 }, canvas)).toBe(true);
+  });
+
+  it('卡片上緣超出畫布上邊界 → 判定超出', () => {
+    expect(isRectOutOfBounds({ left: 100, right: 300, top: -20, bottom: 150 }, canvas)).toBe(true);
+  });
+
+  it('卡片下緣超出畫布下邊界 → 判定超出', () => {
+    expect(isRectOutOfBounds({ left: 100, right: 300, top: 700, bottom: 850 }, canvas)).toBe(true);
+  });
+
+  it('卡片剛好貼齊邊界（不超過）→ 沒有超出，邊界情況不誤判', () => {
+    expect(isRectOutOfBounds({ left: 0, right: 1000, top: 0, bottom: 800 }, canvas)).toBe(false);
   });
 });

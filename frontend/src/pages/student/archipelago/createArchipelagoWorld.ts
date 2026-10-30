@@ -199,6 +199,26 @@ export interface ClusterBoundingCircle {
   radius: number;
 }
 
+export interface RectLike {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+}
+
+/**
+ * 名牌卡片本身有沒有超出畫布邊界（team-lead 2026-10-31 審查發現：
+ * `silhouette-history3.png` 的 36 島大群裡，名牌卡片整張伸出畫布邊界，
+ * 蓋到旁邊的 UI 側欄）。`CSS2DRenderer` 只負責把 DOM 元素擺在 3D 投影到
+ * 的螢幕座標，完全不知道畫布邊界在哪——名牌卡片自然會被擺出畫布外。
+ * 純函式，吃兩個矩形（名牌卡片的 `getBoundingClientRect()`／畫布的
+ * `getBoundingClientRect()`），可以直接用合成矩形測，不必在真實佈局裡
+ * 找一張剛好跑出邊界的名牌。
+ */
+export function isRectOutOfBounds(rect: RectLike, container: RectLike): boolean {
+  return rect.left < container.left || rect.right > container.right || rect.top < container.top || rect.bottom > container.bottom;
+}
+
 /**
  * 開場鏡頭構圖（team-lead 2026-10-31 明令：「開場鏡頭要能框住整群，傳送門
  * 廣場放在畫面正中央，不要像現在只截到一角」）——根因查到：鏡頭一直固定
@@ -825,14 +845,23 @@ export function createArchipelagoWorld(
           }
         }
       }
+      // 2026-10-31 team-lead 審查新發現：名牌卡片會整張伸出畫布邊界，蓋到
+      // 旁邊的 UI 面板（截圖 `silhouette-history3.png` 實測，36 島的大群
+      // 尤其明顯）。跟遮擋用同一套「接近隱藏」處理——卡片本身超出畫布就
+      // 不該佔用可見名額，不是「半透明蓋在 UI 上」這種更糟的視覺結果。
+      const outOfBounds = new Set<string>();
+      for (const p of projected) {
+        if (isRectOutOfBounds(rects.get(p.slug)!, rect)) outOfBounds.add(p.slug);
+      }
       for (const p of projected) {
         const { object } = nameplates.get(p.slug)!;
         // 遮擋跟重疊是兩種不同程度的淡出（美術指導書 §7 原文分別寫
         // 「隱藏」跟「淡化到 35%——不是完全隱藏」，不是同一個數字）：被
         // 建築整個擋住要接近完全隱藏；只是跟別的名牌重疊、較遠那個仍要
-        // 維持淡淡的可讀性，不能跟遮擋用同一個值。遮擋優先於重疊——已經
-        // 完全隱藏的名牌不該又被重疊規則拉回 35% 變成半透明穿模。
-        object.element.style.opacity = p.occluded ? '0.05' : overlapped.has(p.slug) ? '0.35' : '1';
+        // 維持淡淡的可讀性，不能跟遮擋用同一個值。遮擋／超出畫布優先於
+        // 重疊——已經接近隱藏的名牌不該又被重疊規則拉回 35% 變成半透明
+        // 穿模或蓋在 UI 面板上。
+        object.element.style.opacity = p.occluded || outOfBounds.has(p.slug) ? '0.05' : overlapped.has(p.slug) ? '0.35' : '1';
       }
     }
 
