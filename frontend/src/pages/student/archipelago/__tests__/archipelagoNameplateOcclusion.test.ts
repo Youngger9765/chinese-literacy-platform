@@ -10,7 +10,7 @@
  *   ② 同樣的方塊搬到連線旁邊（不擋路）→ 應該回傳沒有遮擋
  */
 import { describe, it, expect } from 'vitest';
-import { isNameplateOccluded, isRectOutOfBounds, type OccluderBox } from '../createArchipelagoWorld';
+import { isNameplateOccluded, isRectOutOfBounds, shouldShowFullNameplate, type OccluderBox } from '../createArchipelagoWorld';
 
 describe('isNameplateOccluded — 純函式，吃包圍盒不吃 Raycaster/Scene', () => {
   const cameraPos = { x: 0, y: 5, z: 10 };
@@ -97,5 +97,27 @@ describe('isRectOutOfBounds — 名牌卡片超出畫布邊界判斷（team-lead
 
   it('卡片剛好貼齊邊界（不超過）→ 沒有超出，邊界情況不誤判', () => {
     expect(isRectOutOfBounds({ left: 0, right: 1000, top: 0, bottom: 800 }, canvas)).toBe(false);
+  });
+});
+
+describe('shouldShowFullNameplate — 名牌卡片 vs 狀態色小圓點（PRD §3.2 2026-10-31 team-lead 訂正）', () => {
+  it('已佔領——即使不在最近名額內、沒有 hover，仍然常駐顯示課名', () => {
+    expect(shouldShowFullNameplate('occupied', false, false)).toBe(true);
+  });
+
+  it('探索中（in_progress）——即使不在最近名額內、沒有 hover，仍然常駐顯示課名', () => {
+    expect(shouldShowFullNameplate('in_progress', false, false)).toBe(true);
+  });
+
+  it('🔒 未開始（not_started）且不在最近名額內、沒有 hover——退化成小圓點（這是真正會被「36 島全常駐擠成一團」卡到的情況，真實 demo 資料測不到這條，因為 demo 帳號幾乎每座島都已經是 in_progress）', () => {
+    expect(shouldShowFullNameplate('not_started', false, false)).toBe(false);
+  });
+
+  it('未開始但在鏡頭焦點最近名額內——顯示課名', () => {
+    expect(shouldShowFullNameplate('not_started', true, false)).toBe(true);
+  });
+
+  it('未開始但正在被 hover——顯示課名', () => {
+    expect(shouldShowFullNameplate('not_started', false, true)).toBe(true);
   });
 });

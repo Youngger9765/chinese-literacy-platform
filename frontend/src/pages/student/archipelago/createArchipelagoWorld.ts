@@ -220,6 +220,19 @@ export function isRectOutOfBounds(rect: RectLike, container: RectLike): boolean 
 }
 
 /**
+ * 名牌該顯示課名卡片還是退化成狀態色小圓點（PRD §3.2 2026-10-31
+ * team-lead 訂正：「已佔領、探索中、鏡頭焦點最近 8 座常駐顯示課名；其餘
+ * 島顯示狀態色小圓點，hover／點一下展開名牌」）。純函式，吃狀態/是否在
+ * 最近名額內/是否正在 hover，不碰 Three.js 或 DOM——可以直接用合成輸入
+ * 測，不必在真實佈局裡湊一個「剛好大多數島都是 not_started」的資料
+ * （2026-10-31 實測：demo 學生帳號幾乎每座島都已經是 in_progress，36 島
+ * 的群用真實資料測這個函式會全部回傳 true，完全驗不到 false 分支）。
+ */
+export function shouldShowFullNameplate(status: IslandStatus, isClosest: boolean, isHovered: boolean): boolean {
+  return status !== 'not_started' || isClosest || isHovered;
+}
+
+/**
  * 開場鏡頭構圖（team-lead 2026-10-31 明令：「開場鏡頭要能框住整群，傳送門
  * 廣場放在畫面正中央，不要像現在只截到一角」）——根因查到：鏡頭一直固定
  * `lookAt (0,0,0)`（世界原點），但傳送門廣場的實際質心**不是**世界原點
@@ -495,7 +508,11 @@ export function createArchipelagoWorld(
   // `t = 1 - exp(-rate*dt)` 跨幀率安全的指數平滑，不是固定 lerp 係數）。
   const hoverLift = new Map<string, number>();
   // 每座島的名牌（CSS2DObject）與它對應的 DOM 元素，換群時一併清掉。
-  const nameplates = new Map<string, { object: CSS2DObject; el: HTMLDivElement; worldPos: THREE.Vector3 }>();
+  const nameplates = new Map<string, { object: CSS2DObject; el: HTMLDivElement; worldPos: THREE.Vector3; status: IslandStatus; cardText: string; dotColor: string }>();
+  /** 名牌常駐顯示上限（PRD §3.2 2026-10-31 team-lead 訂正：「36 島大群全部
+   *  常駐會擠成一團」）——已佔領／探索中一定常駐，其餘只有鏡頭焦點最近
+   *  N 座才顯示課名，其餘退化成狀態色小圓點，hover／點一下才展開。 */
+  const CLOSEST_NAMEPLATES_VISIBLE = 8;
   let nameplateFrameCounter = 0;
 
   /**
@@ -627,28 +644,30 @@ export function createArchipelagoWorld(
       const worldBox = new THREE.Box3().setFromObject(islandObj);
       occluderBoxes.push({ slug: island.storySlug, min: worldBox.min.clone(), max: worldBox.max.clone() });
 
-      // 名牌（美術指導書 §7）：常駐顯示，不是只有 hover 才出現——
-      // 「PRD §3.2 明寫不能整群看不到名字」。樣式向 `theme.nameplate` 要。
+      // 名牌（美術指導書 §7 + PRD §3.2 2026-10-31 team-lead 訂正）：已佔領／
+      // 探索中／鏡頭焦點最近 8 座常駐顯示課名卡片，其餘退化成狀態色小圓點
+      // （還是有東西看得到，不是「整群看不到名字」，只是不是每座都展開課
+      // 名文字），hover／點一下展開——哪些島落在「最近 8 座」裡每幀都會變
+      // （鏡頭會動），所以卡片/圓點的切換邏輯在 `animate()` 裡，這裡只建
+      // 一次 DOM 元素、算好兩種模式各自要用的文字/顏色存起來。
       const el = document.createElement('div');
-      el.textContent = island.title;
-      el.style.background = theme.nameplate.background;
-      el.style.border = `1px solid ${theme.nameplate.border}`;
-      el.style.color = theme.nameplate.text;
-      el.style.borderRadius = '10px';
-      el.style.padding = '4px 8px';
-      el.style.fontSize = '13px';
-      el.style.fontWeight = '600';
-      el.style.whiteSpace = 'nowrap';
-      el.style.boxShadow = '0 2px 6px rgba(0,0,0,0.15)';
+      const cardText = island.status === 'occupied'
+        ? `✓ ${island.title}`
+        : island.status === 'in_progress'
+          ? `${island.title}（${island.stationsDone}/${island.stationsTotal}）`
+          : island.title;
+      const dotColor = island.status === 'occupied'
+        ? theme.palette.occupied
+        : island.status === 'in_progress'
+          ? theme.palette.inProgress
+          : theme.palette.unexplored;
       el.style.transition = 'opacity 150ms, transform 150ms';
-      if (island.status === 'occupied') el.textContent = `✓ ${island.title}`;
-      else if (island.status === 'in_progress') el.textContent = `${island.title}（${island.stationsDone}/${island.stationsTotal}）`;
       const labelObject = new CSS2DObject(el);
       // 固定偏移在島基準點上方（美術指導書 §7：取現有地標類別裡最高的那個
       // 高度再加餘裕，群島只有 4 種地標形狀，用固定值即可，省掉逐類別查表）。
       labelObject.position.set(0, 1.6, 0);
       islandObj.add(labelObject);
-      nameplates.set(island.storySlug, { object: labelObject, el, worldPos: new THREE.Vector3() });
+      nameplates.set(island.storySlug, { object: labelObject, el, worldPos: new THREE.Vector3(), status: island.status, cardText, dotColor });
 
       // 連接物（PRD §3.2：相鄰互通，材料隨機）——下面統一跑 `layout.connections`
       // 建立，這裡不逐一連前一座，見下方迴圈。
@@ -822,6 +841,43 @@ export function createArchipelagoWorld(
         const occluded = isNameplateOccluded(camera.position, worldPos, slug, occluderBoxes);
         const ndc = worldPos.clone().project(camera);
         projected.push({ slug, x: ndc.x * halfW, y: -ndc.y * halfH, distance: distToLabel, occluded });
+      }
+      // PRD §3.2 2026-10-31 team-lead 訂正：「鏡頭焦點最近 8 座」會隨鏡頭
+      // 移動每幀改變，所以每次都要重排——已佔領／探索中不受這個名額限制
+      // （狀態本身就該一直看得到），其餘跟 hover 中的那座另外判斷。決定卡片
+      // 或圓點模式要在算重疊（下面那輪）**之前**做，`getBoundingClientRect()`
+      // 讀到的大小才會是這一幀真正要顯示的大小，不是上一幀殘留的。
+      const closestSlugs = [...projected].sort((a, b) => a.distance - b.distance).slice(0, CLOSEST_NAMEPLATES_VISIBLE).map((p) => p.slug);
+      const closestSet = new Set(closestSlugs);
+      for (const p of projected) {
+        const entry = nameplates.get(p.slug)!;
+        const showFull = shouldShowFullNameplate(entry.status, closestSet.has(p.slug), p.slug === hoveredSlug);
+        if (showFull) {
+          entry.el.textContent = entry.cardText;
+          entry.el.style.background = theme.nameplate.background;
+          entry.el.style.border = `1px solid ${theme.nameplate.border}`;
+          entry.el.style.color = theme.nameplate.text;
+          entry.el.style.borderRadius = '10px';
+          entry.el.style.padding = '4px 8px';
+          entry.el.style.width = '';
+          entry.el.style.height = '';
+          entry.el.style.fontSize = '13px';
+          entry.el.style.fontWeight = '600';
+          entry.el.style.whiteSpace = 'nowrap';
+          entry.el.style.boxShadow = '0 2px 6px rgba(0,0,0,0.15)';
+        } else {
+          // 狀態色小圓點——沒展開課名，但「每座島都看得到標記」（PRD §7
+          // 訂正原文）仍然成立，不是真的什麼都沒有。
+          entry.el.textContent = '';
+          entry.el.style.background = entry.dotColor;
+          entry.el.style.border = '1px solid rgba(255,255,255,0.6)';
+          entry.el.style.color = 'transparent';
+          entry.el.style.borderRadius = '50%';
+          entry.el.style.padding = '0';
+          entry.el.style.width = '10px';
+          entry.el.style.height = '10px';
+          entry.el.style.boxShadow = '0 1px 3px rgba(0,0,0,0.25)';
+        }
       }
       // 第二輪：重疊判斷（美術指導書 §7：「離鏡頭較近那個維持不透明，較遠
       // 那個淡化到 35% 透明度——不是完全隱藏」）。用名牌 DOM 卡片真實的
