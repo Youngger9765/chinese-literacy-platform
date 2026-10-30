@@ -58,6 +58,7 @@ vi.mock('../island/islandAudio', () => ({
 }));
 
 import ReadingIslandLab from '../ReadingIslandLab';
+import { markRewardIdsSeen } from '../island/storyMode';
 
 function byText(text: string): HTMLButtonElement | undefined {
   return Array.from(document.querySelectorAll('button')).find((b) => b.textContent === text);
@@ -338,6 +339,59 @@ describe('ReadingIslandLab — 過關掉碎片/遇到寶貝的小提示', () => 
     });
 
     expect(document.body.textContent).not.toContain('你遇到了新朋友：咕嚕龍！');
+    expect(document.body.textContent).not.toContain('你拾獲了一片「語文基礎」碎片！');
+
+    vi.useRealTimers();
+  });
+
+  /**
+   * #3794 二次訂正（code-reviewer 2026-10-30 finding，1af86d25 blocker）：
+   * 這筆跟 `useStepProgressPersistence.wordBabyRewardToast.test.ts` 裡對稱
+   * 的那條合起來，才是完整的跨頁排重——那邊鎖的是「學習頁不會重複跳」，
+   * 這邊鎖的是反過來：**學習頁已經先顯示過**（#3794 即時回饋，模擬
+   * `onWordBabyRewarded` 已經呼叫過 `markRewardIdsSeen`）的 id，回到島上
+   * 之後這條（`refreshProgress` GET 路徑）不會再跳第二次。兩邊呼叫的是
+   * 同一組 `readSeenRewardIds`／`markRewardIdsSeen`（sessionStorage，同一
+   * 分頁內同源 iframe 本來就共用），所以才鎖得住「跨學習頁和島嶼頁」。
+   */
+  it('學習頁已經當場顯示過這筆獎勵（模擬 #3794 即時回饋先跳了）→ 回島後 refreshProgress 不會再跳一次', async () => {
+    vi.mocked(fetchLearningSessions).mockResolvedValue({
+      items: [{ id: 1, story_slug: '20011' } as never],
+      total: 1,
+    });
+    vi.mocked(loadStepProgress).mockResolvedValue({
+      session_id: 1,
+      step_progress: { current_step: 'x', steps_completed: [], step_data: {}, version: 1 },
+      word_baby_rewards: [],
+    });
+
+    await enterIsland(); // 掛載時還沒有任何獎勵
+
+    // 模擬學習頁的即時回饋（useStepProgressPersistence 的 onWordBabyRewarded）
+    // 在這筆存檔回來的當下就已經顯示過、並標記成已看過——用的是這個元件
+    // 的 user id（1）跟 storyId（'20011'，見本檔開頭 useParams mock），跟
+    // 真實情境下兩邊共用同一把 key 一致。
+    markRewardIdsSeen(1, '20011', [30]);
+
+    vi.mocked(loadStepProgress).mockResolvedValue({
+      session_id: 1,
+      step_progress: { current_step: 'x', steps_completed: ['vocab-definition'], step_data: {}, version: 1 },
+      word_baby_rewards: [
+        { id: 30, station: 'vocab-definition', fragment_awarded: true, fragment_flavor: '語文基礎', encounter_result: 'none', encounter_baby_id: null },
+      ],
+    });
+
+    act(() => { worldConfigs[worldConfigs.length - 1]!.onArrive(0); });
+    act(() => { fireEvent.click(byText('進入')!); });
+    act(() => { vi.advanceTimersByTime(1700); });
+    await act(async () => {
+      window.dispatchEvent(new MessageEvent('message', {
+        origin: window.location.origin,
+        data: { type: 'island-step-done', step: 'vocab-definition' },
+      }));
+      await Promise.resolve(); await Promise.resolve(); await Promise.resolve();
+    });
+
     expect(document.body.textContent).not.toContain('你拾獲了一片「語文基礎」碎片！');
 
     vi.useRealTimers();

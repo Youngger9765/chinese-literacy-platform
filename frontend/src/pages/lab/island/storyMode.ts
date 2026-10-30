@@ -89,6 +89,41 @@ export function parseWordBabyRewardMessage(data: unknown): WordBabyRewardMessage
 }
 
 /**
+ * 文字寶貝獎勵「只提示一次」的排重（#3794 PRD §5，二次訂正）：原本只有
+ * ReadingIslandLab.tsx 自己的 `postMessage` 路徑跟 `refreshProgress` GET
+ * 路徑共用這份排重，所以「島嶼頁內部」不會重複跳；但 #3794 新加的「學習頁
+ * 本身當場跳提示」（`useStepProgressPersistence.ts` 的 `onWordBabyRewarded`）
+ * 原本沒有接上同一份排重，導致同一筆獎勵在故事模式下可能先在學習頁跳一次
+ * （PUT /progress 回應回來時），回島後 `refreshProgress(true)` 又跳第二次
+ * （code-reviewer 2026-10-30 finding，1af86d25 blocker）。
+ *
+ * 抽成這裡而不是留在 ReadingIslandLab.tsx：sessionStorage 依「同一分頁的
+ * top-level browsing context」共用，不分 origin 下的哪個 frame——學習頁被嵌在
+ * 島的 iframe 裡時（同源）跟島嶼頁本身讀寫的是同一份 sessionStorage，所以
+ * 兩條路徑只要呼叫同一組函式、用同一個 key 公式，先到的那條標記後，另一條
+ * 自然就會把它濾掉，不需要任何跨 frame 的訊息往返。
+ */
+function seenRewardStorageKey(userId: string | number | null | undefined, storyId: string | undefined): string {
+  return `reading-island-seen-rewards:${userId ?? 'guest'}:${storyId}`;
+}
+
+export function readSeenRewardIds(userId: string | number | null | undefined, storyId: string | undefined): Set<number> {
+  try {
+    return new Set(JSON.parse(sessionStorage.getItem(seenRewardStorageKey(userId, storyId)) ?? '[]') as number[]);
+  } catch {
+    return new Set();
+  }
+}
+
+export function markRewardIdsSeen(userId: string | number | null | undefined, storyId: string | undefined, ids: number[]): void {
+  if (ids.length === 0) return;
+  const key = seenRewardStorageKey(userId, storyId);
+  const seen = readSeenRewardIds(userId, storyId);
+  ids.forEach((id) => seen.add(id));
+  try { sessionStorage.setItem(key, JSON.stringify([...seen])); } catch { /* 存不了就算了，頂多下次重複跳一次 */ }
+}
+
+/**
  * 回到島上時要不要把這一站記成「做過」。
  * - 學習頁回報做完（finished）一律記：課程簡介在平台設計上不會進 steps_completed，
  *   只靠伺服器進度判定，第一區永遠集不滿，後面的霧永遠不散

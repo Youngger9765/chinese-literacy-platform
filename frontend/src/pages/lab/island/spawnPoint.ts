@@ -24,6 +24,12 @@
  *     那麼遠（那樣會太遠，觸發卡跳出的時候塔反而显得很小）。
  */
 
+// #3794 二次訂正：`walkAlongPathPosition`／`projectOntoPath`（檔案最後面）
+// 要沿既有石板路走，座標來自這裡——跟 createIslandWorld.ts 渲染石板用的
+// 是同一份常數（見 `islandTemplate.ts` 該常數旁的說明），三.js-free 這點
+// 跟本檔一致，不是另開一份複製。
+import { ZONE_PATHS } from './islandTemplate';
+
 /** 建築共用的地基圓柱半徑，跟 createIslandWorld.ts 的地基圓柱同一個值。 */
 export const BUILDING_BASE_RADIUS = 1.65;
 
@@ -589,6 +595,24 @@ export function isMovementLocked(introPlaying: boolean, flying: boolean): boolea
 }
 
 /**
+ * #3794（PRD 2026-10-30-island-v2-rpg-pets-story-prd.md §2，Young 硬規定）：
+ * 「不做跟學習無關的操作」——上帝視角是唯一模式，WASD／空白鍵／Shift
+ * 不准移動角色、不准跳躍、不准旋轉鏡頭。角色只能靠點建築自動走過去。
+ *
+ * `createIslandWorld.ts` 裡三個會被 WASD/空白鍵/拖曳觸碰到的地方
+ * （鍵盤移動、空白鍵跳躍、拖曳旋轉視角）都呼叫這一支共用的判斷，不是
+ * 各自寫一遍 `mode === 'first'`——這樣任何一處手滑漏改都會跟其他兩處
+ * 用同一支測過的函式，不會悄悄分岔出不一致的行為。
+ *
+ * 抽成純函式單獨測的理由跟 `isMovementLocked` 一樣：`createIslandWorld.ts`
+ * 本身要真的建立 `THREE.WebGLRenderer` 才能跑（在 jsdom 下會直接拋錯，
+ * 無法直接對整支引擎下斷言），這支鎖的是實際接進引擎的同一條判斷式。
+ */
+export function isManualControlEnabled(mode: 'first' | 'god'): boolean {
+  return mode === 'first';
+}
+
+/**
  * 「遮擋這塊名牌的那棟建築」——`BuildingMaterialSlot`／`BuildingMaterialSlot[]`
  * 跟三.js 無關，純粹是幾何描述。半徑統一用 `BUILDING_BASE_RADIUS`（建築
  * 共用的地基圓柱半徑）當近似——不是每棟建築的真實水平輪廓都剛好是這個
@@ -639,4 +663,199 @@ export function isLabelOccluded(
     if (heightAtClosest >= obstacle.baseY && heightAtClosest <= obstacle.topY) return true;
   }
   return false;
+}
+
+/**
+ * #3794 二次訂正（team-lead 2026-10-30 退件）：`arcFlightPosition`（上面）
+ * 是第一人稱時代「鏡頭飛過去」的做法——水平座標直接內插、墊高到比全島
+ * 最高建築還高，刻意繞過碰撞檢查。上帝視角要的是反過來的東西：Young 的
+ * 規格（PRD §2）寫「看得到人在移動」「沿著路徑從一棟建築走到另一棟」，
+ * 畫面上要有角色、沿既有石板路走，鏡頭不准飛、只能固定俯角/高度小幅
+ * 平移跟著走（鏡頭那段已經是對的，見 createIslandWorld.ts 的上帝視角
+ * 分支——問題只在驅動 `player.position` 的這段邏輯）。
+ *
+ * 把三段 `ZONE_PATHS` 接成一條連續路網：後一段的第一個點等於前一段的
+ * 最後一個點（三個區域的路本來就首尾相連，見 `islandTemplate.ts` 的座標），
+ * 去重後變成一條可以用「沿路走了多遠（弧長）」當座標系統的折線。
+ */
+function concatenatedPath(): ReadonlyArray<readonly [number, number]> {
+  const out: Array<readonly [number, number]> = [...ZONE_PATHS[0]];
+  for (let i = 1; i < ZONE_PATHS.length; i++) out.push(...ZONE_PATHS[i].slice(1));
+  return out;
+}
+
+/** 整座島的連續路網（三段 ZONE_PATHS 接起來，去重）。 */
+export const FULL_ISLAND_PATH: ReadonlyArray<readonly [number, number]> = concatenatedPath();
+
+function cumulativePathLengths(path: ReadonlyArray<readonly [number, number]>): number[] {
+  const lens = [0];
+  for (let i = 1; i < path.length; i++) {
+    const [x0, z0] = path[i - 1];
+    const [x1, z1] = path[i];
+    lens.push(lens[i - 1] + Math.hypot(x1 - x0, z1 - z0));
+  }
+  return lens;
+}
+
+export interface PathProjection {
+  /** 沿整條路網走的距離（世界單位的弧長，不是 0..1 比例）。 */
+  readonly distance: number;
+  readonly x: number;
+  readonly z: number;
+}
+
+/**
+ * 把任意世界座標投影到路網上最近的一點——逐段找「這個點垂直投影落在這段
+ * 線段上的哪裡」，取全部線段裡距離最近的一個。建築站點是從路徑旁側偏移
+ * 擺放的（`islandTemplate.ts` 的 `buildStopsFromSequence`），不會剛好落在
+ * 路網上，這支就是在回答「這棟建築離路網最近的那個點，沿路走了多遠」。
+ */
+export function projectOntoPath(
+  point: { x: number; z: number },
+  path: ReadonlyArray<readonly [number, number]> = FULL_ISLAND_PATH,
+): PathProjection {
+  const lens = cumulativePathLengths(path);
+  let best: PathProjection = { distance: 0, x: path[0][0], z: path[0][1] };
+  let bestDistSq = Infinity;
+  for (let i = 0; i < path.length - 1; i++) {
+    const [x0, z0] = path[i];
+    const [x1, z1] = path[i + 1];
+    const dx = x1 - x0;
+    const dz = z1 - z0;
+    const segLenSq = dx * dx + dz * dz || 1;
+    let t = ((point.x - x0) * dx + (point.z - z0) * dz) / segLenSq;
+    t = Math.max(0, Math.min(1, t));
+    const px = x0 + dx * t;
+    const pz = z0 + dz * t;
+    const distSq = (point.x - px) ** 2 + (point.z - pz) ** 2;
+    if (distSq < bestDistSq) {
+      bestDistSq = distSq;
+      best = { distance: lens[i] + Math.hypot(dx, dz) * t, x: px, z: pz };
+    }
+  }
+  return best;
+}
+
+/** `projectOntoPath` 的反函式：給一個沿路網走的弧長，回傳世界座標。 */
+export function pointAtPathDistance(
+  distance: number,
+  path: ReadonlyArray<readonly [number, number]> = FULL_ISLAND_PATH,
+): { x: number; z: number } {
+  const lens = cumulativePathLengths(path);
+  const total = lens[lens.length - 1];
+  const d = Math.max(0, Math.min(total, distance));
+  for (let i = 0; i < path.length - 1; i++) {
+    if (d <= lens[i + 1] || i === path.length - 2) {
+      const segLen = lens[i + 1] - lens[i] || 1;
+      const local = (d - lens[i]) / segLen;
+      const [x0, z0] = path[i];
+      const [x1, z1] = path[i + 1];
+      return { x: x0 + (x1 - x0) * local, z: z0 + (z1 - z0) * local };
+    }
+  }
+  const [x, z] = path[path.length - 1];
+  return { x, z };
+}
+
+export type PathWalkPhase = 'onto-path' | 'along-path' | 'to-door';
+
+export interface PathWalkPosition {
+  readonly x: number;
+  readonly z: number;
+  readonly phase: PathWalkPhase;
+}
+
+/**
+ * 三段式走路（跟上面 `arcFlightPosition` 的三段式飛行同一個精神，差別是
+ * 這裡沒有垂直墊高，三段全部貼地）：① 從目前位置走到路網上最近的點
+ * （`onto-path`——通常是離開剛才那棟建築門口）② 沿路網走到目標建築最近
+ * 路網點（`along-path`——這段才是畫面上「看得到人沿著石板路走」的主體）
+ * ③ 從路網點走到目標建築門口（`to-door`）。三段依各自實際弧長比例分配
+ * `progress`（不是三等分），路程短的站不會因為固定三等分而走得忽快忽慢。
+ */
+export function walkAlongPathPosition(
+  start: { x: number; z: number },
+  end: { x: number; z: number },
+  progress: number,
+  path: ReadonlyArray<readonly [number, number]> = FULL_ISLAND_PATH,
+): PathWalkPosition {
+  const p = Math.max(0, Math.min(1, progress));
+  const startProj = projectOntoPath(start, path);
+  const endProj = projectOntoPath(end, path);
+  const legOn = Math.hypot(start.x - startProj.x, start.z - startProj.z);
+  const legAlong = Math.abs(endProj.distance - startProj.distance);
+  const legOff = Math.hypot(end.x - endProj.x, end.z - endProj.z);
+  const total = legOn + legAlong + legOff || 1;
+  const travelled = p * total;
+
+  if (travelled <= legOn) {
+    const local = legOn > 0 ? travelled / legOn : 1;
+    return { x: start.x + (startProj.x - start.x) * local, z: start.z + (startProj.z - start.z) * local, phase: 'onto-path' };
+  }
+  if (travelled <= legOn + legAlong) {
+    const dir = endProj.distance >= startProj.distance ? 1 : -1;
+    const pt = pointAtPathDistance(startProj.distance + dir * (travelled - legOn), path);
+    return { x: pt.x, z: pt.z, phase: 'along-path' };
+  }
+  const local = legOff > 0 ? (travelled - legOn - legAlong) / legOff : 1;
+  return { x: endProj.x + (end.x - endProj.x) * local, z: endProj.z + (end.z - endProj.z) * local, phase: 'to-door' };
+}
+
+/**
+ * 走完這段路大概要幾秒——跟既有 WASD 行走同一個速度常數（`createIslandWorld.ts`
+ * 手動移動那段的 `dt * 5.2`），這樣「用走的」跟「點了自動走過去」感覺起來
+ * 速度一致，不會一個很快一個很慢。
+ */
+const WALK_SPEED_UNITS_PER_SECOND = 5.2;
+const MIN_WALK_DURATION_SECONDS = 0.9;
+
+export function walkDurationSeconds(
+  start: { x: number; z: number },
+  end: { x: number; z: number },
+  path: ReadonlyArray<readonly [number, number]> = FULL_ISLAND_PATH,
+): number {
+  const startProj = projectOntoPath(start, path);
+  const endProj = projectOntoPath(end, path);
+  const legOn = Math.hypot(start.x - startProj.x, start.z - startProj.z);
+  const legAlong = Math.abs(endProj.distance - startProj.distance);
+  const legOff = Math.hypot(end.x - endProj.x, end.z - endProj.z);
+  return Math.max(MIN_WALK_DURATION_SECONDS, (legOn + legAlong + legOff) / WALK_SPEED_UNITS_PER_SECOND);
+}
+
+/**
+ * #3794 二次訂正（team-lead 2026-10-30，PRD §2「鏡頭角度固定，不能自由
+ * 旋轉翻轉」）：上帝視角鏡頭斜俯視、帶一點透視，角度跟距離是常數、永遠
+ * 不讀 `yaw`/`pitch` 這類會被拖曳改動的輸入，只跟著玩家的 x/z 水平位移
+ * ——這支抽成純函式而不是留在 createIslandWorld.ts 的 per-frame 迴圈裡，
+ * 是為了能直接鎖住「角色在路上移動時，鏡頭的俯角與高度都不會變」這個
+ * 不變量：同樣常數、不同的 `playerPos`，回傳的 y 分量必須恆等，x/z 分量
+ * 必須恰好跟著 `playerPos` 平移同樣的量，不能有任何別的因素（例如飛行中
+ * 的墊高）混進來。FOV 查證依據見 `.claude/skills/archipelago-module/
+ * SKILL.md` §6.5-A（窄 FOV 透視、俯角 30–40°，比舊版自己估的 55°/
+ * 沿用第一人稱 57° FOV 更接近查到的依據）。
+ */
+export const GOD_CAMERA_FOV_DEG = 30;
+export const GOD_CAMERA_PITCH = (35 * Math.PI) / 180; // 35°，落在查到的 30–40° 區間中段
+export const GOD_CAMERA_DISTANCE = 30;
+export const GOD_CAMERA_YAW = Math.PI / 4; // 固定觀看方向，呼應設計文件「對角線構圖」建議
+
+export interface Vec3Like {
+  readonly x: number;
+  readonly y: number;
+  readonly z: number;
+}
+
+/**
+ * 上帝視角鏡頭該在哪——純粹跟著玩家水平位移，y 分量恆等於同一個常數
+ * （`GOD_CAMERA_DISTANCE * sin(GOD_CAMERA_PITCH)`），不受任何移動狀態
+ * （行走／自動走路／慶祝）影響。呼叫端（`createIslandWorld.ts`）仍然要自己
+ * 對這個「目標位置」做 `camera.position.lerp(desired, ...)`——平滑跟隨的
+ * lerp 本身需要 `camera` 現在的位置，這支只負責算「現在應該往哪裡趨近」。
+ */
+export function godCameraDesiredPosition(playerPos: { x: number; z: number }): Vec3Like {
+  return {
+    x: playerPos.x + Math.sin(GOD_CAMERA_YAW) * GOD_CAMERA_DISTANCE * Math.cos(GOD_CAMERA_PITCH),
+    y: GOD_CAMERA_DISTANCE * Math.sin(GOD_CAMERA_PITCH),
+    z: playerPos.z + Math.cos(GOD_CAMERA_YAW) * GOD_CAMERA_DISTANCE * Math.cos(GOD_CAMERA_PITCH),
+  };
 }

@@ -38,10 +38,18 @@ vi.mock('./useProgressSync', () => ({
 const storyMode = { on: false };
 const notify = vi.fn();
 
-vi.mock('../pages/lab/island/storyMode', () => ({
-  isIslandStoryMode: () => storyMode.on,
-  notifyIslandWordBabyReward: (rewards: WordBabyReward[]) => notify(rewards),
-}));
+// #3794 二次訂正：保留 `readSeenRewardIds`／`markRewardIdsSeen` 的真正實作
+// （見 useStepProgressPersistence.wordBabyRewardToast.test.ts 同樣的說明）
+// ——這支的職責只是驗證「有沒有轉發給島嶼」的接線，不是排重邏輯本身，
+// 但完全 mock 掉這兩個函式會讓新加的排重檢查呼叫到 `undefined` 而炸掉。
+vi.mock('../pages/lab/island/storyMode', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../pages/lab/island/storyMode')>();
+  return {
+    ...actual,
+    isIslandStoryMode: () => storyMode.on,
+    notifyIslandWordBabyReward: (rewards: WordBabyReward[]) => notify(rewards),
+  };
+});
 
 import { useStepProgressPersistence } from './useStepProgressPersistence';
 

@@ -8,11 +8,10 @@ import { BABIES_20011, OPENING_20011, STOPS_20011 } from './island/islandData';
 import { buildStopsFromSequence, buildOpeningForTitle, buildBabiesForVocabulary, actInfoForZone } from './island/islandTemplate';
 import type { IslandBaby, IslandStop } from './island/islandTemplate';
 import { createIslandWorld } from './island/createIslandWorld';
-import { parseIslandReturnMessage, parseWordBabyRewardMessage, shouldMarkVisitedOnReturn } from './island/storyMode';
+import { markRewardIdsSeen, parseIslandReturnMessage, parseWordBabyRewardMessage, readSeenRewardIds, shouldMarkVisitedOnReturn } from './island/storyMode';
 import { firstWordBabyRewardHint } from './island/wordBabyRewardHint';
 import IslandListMode from './island/IslandListMode';
 import { createIslandAudio, readMuted, writeMuted, type IslandAudio } from './island/islandAudio';
-import { isCoarsePointerDevice, isFinePointerDevice } from './island/inputMode';
 
 interface LessonData {
   title: string;
@@ -83,42 +82,26 @@ export default function ReadingIslandLab() {
   const [module, setModule] = useState<number | null>(null);
   const moduleRef = useRef(module);
   moduleRef.current = module;
-  const [joystick, setJoystick] = useState({ x: 0, y: 0 });
-  // #3780 P0-1（playtest 2026-10-26）：原本用 `md:hidden` 的螢幕寬度斷點判斷
-  // 「是不是手機」——iPad（820px 寬）被歸類成桌機，搖桿被藏起來，畫面卻顯示
-  // 鍵盤操作提示「WASD / 方向鍵移動」，孩子在 iPad 上完全走不動。改成在
-  // mount 時只判斷一次「輸入方式」（觸控 vs 滑鼠鍵盤），不隨螢幕寬度變。
-  const [isTouchInput] = useState(() => isCoarsePointerDevice());
-  // #3780 P0-1 退件（審查員）：觸控 Chromebook 這種混合裝置 `isTouchInput`
-  // 會是 true（確實有觸控螢幕），但同時也接了滑鼠／觸控板，鍵盤照樣能用，
-  // 只是沒有提示告訴學生。`isFineInput` 獨立判斷「有沒有精準輸入裝置」，
-  // 跟 isTouchInput 不是互斥——混合裝置兩個提示都要顯示。
-  const [isFineInput] = useState(() => isFinePointerDevice());
+  // #3794（Young 硬規定，PRD §2）：WASD／搖桿／跳整組操作拿掉，原本只服務
+  // 這組 UI 的 `joystick`/`isTouchInput`/`isFineInput`/`stickOrigin` 一併
+  // 清掉——不是這幾個狀態本身有問題，是它們的唯一用途（操作提示文字＋
+  // 虛擬搖桿）已經不存在了，留著只會變成沒人知道還有沒有用的死狀態。
   const [position, setPosition] = useState({ x: -3, z: 15 });
-  const stickOrigin = useRef<{ x: number; y: number } | null>(null);
   const hintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   // #3780 P0-3：「下一站」導引文字現在由 engine 的 onCelebrationEnd 觸發
   // （停留在剛完成站之後才顯示），不是 React state 變化就立刻顯示，
   // 所以清除計時器要自己存，沒有對應的 useEffect 可以掛 cleanup。
   const guideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const storageKey = `reading-island-visited:${user?.id ?? 'guest'}:${storyId}`;
-  // #3780 接島上：記住「已經顯示過提示」的文字寶貝獎勵 id（StudentStation
-  // RewardLog 主鍵），讓 refreshProgress 的拉取路徑跟 WORD_BABY_REWARD
-  // postMessage 的加速路徑共用同一份排重——不管哪條先顯示，另一條都不會
-  // 再跳一次同一筆。跟 storageKey（visited）同一種 per-student-per-story
-  // sessionStorage scoping，關掉分頁/清快取就重置，可接受（同樣的設計
-  // 已用在 visited 上）。
-  const seenRewardsKey = `reading-island-seen-rewards:${user?.id ?? 'guest'}:${storyId}`;
-  const readSeenRewardIds = useCallback((): Set<number> => {
-    try { return new Set(JSON.parse(sessionStorage.getItem(seenRewardsKey) ?? '[]') as number[]); }
-    catch { return new Set(); }
-  }, [seenRewardsKey]);
-  const markRewardIdsSeen = useCallback((ids: number[]) => {
-    if (ids.length === 0) return;
-    const seen = readSeenRewardIds();
-    ids.forEach((id) => seen.add(id));
-    try { sessionStorage.setItem(seenRewardsKey, JSON.stringify([...seen])); } catch { /* 存不了就算了，頂多下次重複跳一次 */ }
-  }, [seenRewardsKey, readSeenRewardIds]);
+  // #3780 接島上、#3794 二次訂正（code-reviewer 2026-10-30 finding）：記住
+  // 「已經顯示過提示」的文字寶貝獎勵 id（StudentStation RewardLog 主鍵）
+  // 改成呼叫 `storyMode.ts` 的共用函式，不再各自存一份——原本只有這個
+  // 元件自己的 `refreshProgress` 拉取路徑跟 `WORD_BABY_REWARD` postMessage
+  // 加速路徑共用排重，#3794 新加的「學習頁本身當場跳提示」
+  // （`useStepProgressPersistence.ts`）原本沒接上，導致同一筆獎勵在故事
+  // 模式下學習頁跳一次、回島後又跳第二次。三條路徑現在都呼叫同一組
+  // `readSeenRewardIds`／`markRewardIdsSeen`（sessionStorage key 公式
+  // 不變，仍是 per-student-per-story scoping，關掉分頁/清快取就重置）。
   const showWordBabyHint = useCallback((hint: string) => {
     // 獎勵提示優先於迷霧提示（同一個畫面插槽，見 onFogEdge 那側的說明）。
     if (hintTimer.current) clearTimeout(hintTimer.current);
@@ -154,7 +137,14 @@ export default function ReadingIslandLab() {
   // （team-lead 2026-10-26 截圖抓到：全島亮完還是顯示「第一幕」）。
   const actInfo = actInfoForZone(unlockedZone, STOPS);
   const nextIndex = STOPS.findIndex((_, index) => !doneIndexes.includes(index));
-  const [mode, setMode] = useState<'first' | 'god'>('first');
+  // #3794（Young 硬規定，PRD §2）：上帝視角是唯一模式，介面上沒有切換入口
+  // ——預設值改成 'god'；`setMode` 還留著是因為 `createIslandWorld.ts` 的
+  // 開場鏡頭飛行內部會暫時用到 'first'、播完自動切回來（見該檔案
+  // `playIntro`/`introStart = -1` 處的說明），這個 state 本身要繼續存在
+  // 才能把引擎回報的狀態同步到 `useEffect(() => worldRef.current
+  // ?.setMode(mode), [mode])`，但沒有任何使用者可觸發的路徑會把它設回
+  // 'first'。
+  const [mode, setMode] = useState<'first' | 'god'>('god');
   const [listMode, setListMode] = useState(false);
   const [showActInfo, setShowActInfo] = useState(false); // 手機版「第一幕」卡片收合狀態
   const [hovered, setHovered] = useState<number | null>(null);
@@ -201,18 +191,18 @@ export default function ReadingIslandLab() {
       const allRewards = snapshots.flatMap((snapshot) => snapshot.word_baby_rewards ?? []);
       const uniqueRewards = [...new Map(allRewards.map((reward) => [reward.id, reward])).values()];
       if (announceNewRewards) {
-        const seen = readSeenRewardIds();
+        const seen = readSeenRewardIds(user?.id, storyId);
         const unseen = uniqueRewards.filter((reward) => !seen.has(reward.id));
         const hint = firstWordBabyRewardHint(unseen);
         if (hint) showWordBabyHint(hint);
       }
-      markRewardIdsSeen(uniqueRewards.map((reward) => reward.id));
+      markRewardIdsSeen(user?.id, storyId, uniqueRewards.map((reward) => reward.id));
 
       return true;
     } catch {
       return false;
     }
-  }, [token, storyId, readSeenRewardIds, markRewardIdsSeen, showWordBabyHint]);
+  }, [token, storyId, user?.id, showWordBabyHint]);
 
   useEffect(() => { void refreshProgress(); }, [refreshProgress]);
 
@@ -229,8 +219,13 @@ export default function ReadingIslandLab() {
       },
       onMove: (x, z) => setPosition({ x, z }),
       onHover: setHovered,
-      onPick: (index) => { setMode('first'); worldRef.current?.travelTo(index); },
-      onWantFirstPerson: () => setMode('first'),
+      // #3794：原本點建築會先切到第一人稱再飛過去（`setMode('first')`）
+      // ——上帝視角現在是唯一模式，拱形飛行全程留在上帝視角鏡頭裡，點擊
+      // 不再需要、也不應該切模式。`onWantFirstPerson` 整個拿掉：引擎那邊
+      // 已經不會再呼叫它（WASD/搖桿在上帝視角下不觸發任何東西），這裡
+      // 同步拿掉對應的 handler，介面上不留任何會把 `mode` 設回 'first'
+      // 的路徑。
+      onPick: (index) => { worldRef.current?.travelTo(index); },
       onArrive: (index) => setNear(index),
       // #3780 P0-3：鏡頭正要轉去面向剛完成的站，這時播鐘聲——跟「燈正在
       // 亮起來」同一刻，不是等轉到下一站才響。
@@ -399,25 +394,16 @@ export default function ReadingIslandLab() {
       if (parsed) void returnRef.current(parsed.finished);
       const rewards = parseWordBabyRewardMessage(event.data);
       if (rewards) {
-        const seen = readSeenRewardIds();
+        const seen = readSeenRewardIds(user?.id, storyId);
         const unseen = rewards.filter((r) => !seen.has(r.id));
         const hint = firstWordBabyRewardHint(unseen);
         if (hint) showWordBabyHint(hint);
-        markRewardIdsSeen(rewards.map((r) => r.id));
+        markRewardIdsSeen(user?.id, storyId, rewards.map((r) => r.id));
       }
     };
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
-  }, [readSeenRewardIds, markRewardIdsSeen, showWordBabyHint]);
-  const onStickMove = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (!stickOrigin.current) return;
-    const x = Math.max(-1, Math.min(1, (event.clientX - stickOrigin.current.x) / 46));
-    const y = Math.max(-1, Math.min(1, (event.clientY - stickOrigin.current.y) / 46));
-    setJoystick({ x, y });
-    worldRef.current?.setStick(x, y);
-  };
-  const releaseStick = () => { stickOrigin.current = null; setJoystick({ x: 0, y: 0 }); worldRef.current?.setStick(0, 0); };
-
+  }, [user?.id, storyId, showWordBabyHint]);
   if (!student) return <main className="grid min-h-screen place-items-center bg-slate-900 text-white">請使用學生帳號進入喝采島</main>;
   if (!lesson || STOPS.length === 0) return <main className="grid min-h-screen place-items-center bg-slate-900 text-white">載入中…</main>;
   return (
@@ -518,45 +504,11 @@ export default function ReadingIslandLab() {
       {/* 桌機/iPad 版「下一站」提示：維持原本獨立置中位置，不受手機版那層
           flex-col 影響。*/}
       {guide && <div role="status" className="absolute left-1/2 top-20 z-30 hidden -translate-x-1/2 animate-bounce rounded-2xl border-2 border-amber-200 bg-gradient-to-r from-[#f7d48a] to-[#ffe9b8] px-6 py-3 text-base font-black text-[#3b3018] shadow-[0_0_40px_rgba(255,200,90,0.7)] md:block">{guide}</div>}
-      {/* #3780 P0-1（退件後第三版，審查員 2026-10-26）：原本用 `md:hidden` /
-          `md:block`（螢幕寬度）二選一，第一版改成用 `isTouchInput`（輸入方式）
-          二選一，第二版把兩個提示＋搖桿收進同一個 flex-col（解決了「兩個
-          提示疊在一起」）——但 flex-col 本身沒有寬度上限，混合裝置在手機
-          390px 寬時 WASD 那行長文字撐到 324px 寬，跟右下角「展開上帝視角」
-          橫向重疊 3601px²。team-lead 明令不要再猜 `max-w-[calc(...)]` 這種
-          像素數字（同一個檔案第四次犯）——改成讓兩邊共用同一條 flex row：
-          操作提示給 `min-w-0 flex-1`（flex item 預設 `min-width:auto` 不會
-          縮小到比內容窄，沒有 `min-w-0` 就無法觸發文字換行；`flex-1` 讓它
-          只佔「扣掉展開上帝視角按鈕之後」的剩餘寬度），展開上帝視角給
-          `shrink-0`（固定寬度不被擠壓），`justify-between` 把兩邊推到各自
-          的邊——不管文字多長，可用寬度有限，瀏覽器自己換行，兩邊各自佔
-          各自的空間，不會疊。*/}
-      <div className="absolute inset-x-4 bottom-4 z-20 flex items-end justify-between gap-3">
-        <div className="flex min-w-0 flex-1 flex-col items-start gap-2">
-          {/* #3780 e2e panel-overlap 退件修正：`aria-label="操作提示"` 原本
-              貼在整個外層容器（連搖桿/跳都包在裡面），panel-overlap 測試把
-              它當一塊面板去跟「虛擬搖桿」「跳」比對 boundingBox，量到的
-              「重疊」其實是父子包含關係，不是真的視覺衝突——縮小到只包文字
-              提示本身，才是測試真正該比對的那塊。*/}
-          <div aria-label="操作提示" className="flex flex-col items-start gap-2">
-            {(!isTouchInput || isFineInput) && (
-              <div className="rounded-xl border border-white/60 bg-[#f9f5e9]/90 px-4 py-2 text-xs font-semibold shadow-lg">WASD / 方向鍵移動　·　空白鍵跳　·　拖曳旋轉視角</div>
-            )}
-            {isTouchInput && (
-              <div className="rounded-xl border border-white/60 bg-[#f9f5e9]/90 px-4 py-2 text-xs font-semibold shadow-lg">用搖桿走、拖曳轉頭</div>
-            )}
-          </div>
-          {isTouchInput && (
-            <div className="flex items-end gap-4">
-              <div role="group" aria-label="虛擬搖桿" className="relative grid h-28 w-28 touch-none place-items-center rounded-full border-4 border-white/70 bg-[#e9ede5]/65 shadow-2xl" onPointerDown={(event) => { stickOrigin.current = { x: event.clientX, y: event.clientY }; event.currentTarget.setPointerCapture(event.pointerId); }} onPointerMove={onStickMove} onPointerUp={releaseStick} onPointerCancel={releaseStick}>
-                <div className="h-12 w-12 rounded-full border-2 border-white bg-[#517c79] shadow-lg" style={{ transform: `translate(${joystick.x * 36}px, ${joystick.y * 36}px)` }} />
-              </div>
-              <button type="button" onClick={() => worldRef.current?.jump()} className="mb-2 rounded-full border-2 border-white bg-[#f7da9d] px-4 py-3 text-sm font-bold shadow-lg">跳</button>
-            </div>
-          )}
-        </div>
-        <button type="button" onClick={() => setMode(mode === 'first' ? 'god' : 'first')} className="shrink-0 rounded-full border-2 border-white bg-[#233e4b]/90 px-4 py-2 text-sm font-bold text-[#fff1d0] shadow-lg transition hover:scale-105 active:scale-95">{mode === 'first' ? '展開上帝視角' : '回到第一人稱'}</button>
-      </div>
+      {/* #3794（Young 硬規定，PRD §2）：WASD／搖桿／跳／切視角整組操作
+          UI 拿掉——上帝視角是唯一模式，唯一的互動是滑鼠移上去／點擊建築，
+          不需要任何操作提示文字或虛擬搖桿；原本這裡的 `isTouchInput`
+          /`isFineInput`/`stickOrigin`/`joystick` 一併清掉（只服務這塊
+          已經拿掉的 UI，不是給別處用的共用狀態）。*/}
       {near !== null && module === null && opening < 0 && !celebrating && (
         <div className="absolute bottom-5 left-1/2 z-20 w-[min(92vw,440px)] -translate-x-1/2 rounded-2xl border-2 border-white bg-[#fff9e9]/95 p-4 text-center shadow-2xl md:bottom-9">
           <div className="text-xs font-bold tracking-widest text-[#b7794e]">發現新去處</div>
@@ -564,8 +516,15 @@ export default function ReadingIslandLab() {
           <p className="my-2 text-sm">{doneIndexes.includes(near) ? '已經點亮了，想再聽一次也可以' : STOPS[near].line}</p>
           {/* disabled 是 UI 層的防呆，真正擋重複開站的是 openModule 自己
               的 doorRef/moduleRef 檢查——兩層都做：這顆按鈕本來就不該讓人
-              以為點了有用（team-lead 2026-10-26 明令）。*/}
-          <button type="button" disabled={door !== null} onClick={() => openModule(near)} className="rounded-xl bg-[#32796e] px-8 py-2 font-bold text-white shadow-md disabled:cursor-not-allowed disabled:opacity-50">進入</button>
+              以為點了有用（team-lead 2026-10-26 明令）。
+              #3794：旁邊加「先不要」——PRD §2「按『先不要』就留在原地」。
+              原本靠「走開」讓 near 自然變回 null，但角色現在只能靠點建築
+              移動，沒有「走開」這回事了，一定要有一顆明確的按鈕可以關掉
+              這張卡、留在原地。*/}
+          <div className="flex items-center justify-center gap-3">
+            <button type="button" disabled={door !== null} onClick={() => openModule(near)} className="rounded-xl bg-[#32796e] px-8 py-2 font-bold text-white shadow-md disabled:cursor-not-allowed disabled:opacity-50">進入</button>
+            <button type="button" onClick={() => setNear(null)} className="rounded-xl border border-[#b7794e]/40 px-6 py-2 font-bold text-[#6b5a3e]">先不要</button>
+          </div>
         </div>
       )}
       {/* 聲音：開場／旁白期間的特例位置（team-lead 2026-10-26 二次審查訂正）。

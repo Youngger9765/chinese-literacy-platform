@@ -3,7 +3,7 @@
  * 課程簡介（港口燈塔）在平台設計上永遠不會進 steps_completed，
  * 只靠伺服器進度判定的話第一區永遠集不滿、後面的霧永遠不散。
  */
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import {
   shouldMarkVisitedOnReturn,
   notifyIslandStepAborted,
@@ -12,6 +12,8 @@ import {
   notifyIslandWordBabyReward,
   parseWordBabyRewardMessage,
   WORD_BABY_REWARD,
+  readSeenRewardIds,
+  markRewardIdsSeen,
 } from '../storyMode';
 
 describe('shouldMarkVisitedOnReturn', () => {
@@ -120,5 +122,54 @@ describe('parseWordBabyRewardMessage', () => {
 
   it('malformed rewards field (not an array) → null, does not crash the listener', () => {
     expect(parseWordBabyRewardMessage({ type: 'word-baby-reward', rewards: 'not-an-array' })).toBeNull();
+  });
+});
+
+/**
+ * #3794 二次訂正（code-reviewer 2026-10-30 finding，1af86d25 blocker）：
+ * 同一筆文字寶貝獎勵只該提示一次，不管是在學習頁本身（新加的即時回饋）
+ * 先看到，還是回島後（`refreshProgress`／postMessage 兩條舊路徑）先看到。
+ * 這支鎖的是「排重本身」——下面 `ReadingIslandLab.wordBabyRewardToast`／
+ * `useStepProgressPersistence.wordBabyRewardToast` 兩邊的整合測試鎖的是
+ * 「真的接上了這支」，兩層缺一不可（只鎖整合會漏掉排重邏輯本身的 edge
+ * case，只鎖這支會漏掉「忘記呼叫」這種接線缺陷）。
+ */
+describe('readSeenRewardIds / markRewardIdsSeen — 文字寶貝獎勵「只提示一次」的排重', () => {
+  beforeEach(() => { sessionStorage.clear(); });
+
+  it('還沒標記過任何 id → 回傳空集合', () => {
+    expect(readSeenRewardIds('u1', 's1').size).toBe(0);
+  });
+
+  it('標記過的 id 之後讀得到，而且不影響別的使用者/課文組合（key 有隔離）', () => {
+    markRewardIdsSeen('u1', 's1', [10, 11]);
+    expect(readSeenRewardIds('u1', 's1')).toEqual(new Set([10, 11]));
+    // 同一個學生、不同課文 → 看不到剛剛那兩筆（不是全域共用一個 bucket）
+    expect(readSeenRewardIds('u1', 's2').size).toBe(0);
+    // 同一課文、不同學生 → 一樣看不到
+    expect(readSeenRewardIds('u2', 's1').size).toBe(0);
+  });
+
+  it('多次呼叫 markRewardIdsSeen 會累加，不會把前一批洗掉', () => {
+    markRewardIdsSeen('u1', 's1', [1]);
+    markRewardIdsSeen('u1', 's1', [2, 3]);
+    expect(readSeenRewardIds('u1', 's1')).toEqual(new Set([1, 2, 3]));
+  });
+
+  it('傳空陣列是 no-op（不會寫入、也不會把既有紀錄洗掉）', () => {
+    markRewardIdsSeen('u1', 's1', [1]);
+    markRewardIdsSeen('u1', 's1', []);
+    expect(readSeenRewardIds('u1', 's1')).toEqual(new Set([1]));
+  });
+
+  it('userId 缺省時退回共用的 "guest" bucket（跟原本元件內的寫法一致）', () => {
+    markRewardIdsSeen(undefined, 's1', [1]);
+    expect(readSeenRewardIds(undefined, 's1')).toEqual(new Set([1]));
+    expect(readSeenRewardIds('guest', 's1')).toEqual(new Set([1]));
+  });
+
+  it('sessionStorage 壞掉（讀出非 JSON）時不丟例外，當成空集合', () => {
+    sessionStorage.setItem('reading-island-seen-rewards:u1:s1', 'not json');
+    expect(readSeenRewardIds('u1', 's1').size).toBe(0);
   });
 });

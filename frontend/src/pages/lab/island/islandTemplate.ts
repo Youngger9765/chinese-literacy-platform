@@ -56,11 +56,18 @@ export function zoneForIndex(index: number, total: number): number {
 
 /**
  * 三條沿路曲線的控制點，跟 createIslandWorld.ts 畫路徑用的是同一份座標。
- * 兩邊刻意各自維護一份常數、不共用 import：這裡要維持零依賴（不 import three.js）
- * 才能在純 node 環境快速跑單元測試；createIslandWorld.ts 那份要留在 three.js
- * 環境組 CatmullRomCurve3。改地形座標時兩邊要一起改。
+ * 跟 createIslandWorld.ts 刻意各自維護一份常數、不共用 import：這裡要維持
+ * 零依賴（不 import three.js）才能在純 node 環境快速跑單元測試；
+ * createIslandWorld.ts 那份要留在 three.js 環境組 CatmullRomCurve3（視覺
+ * 用的平滑曲線）。改地形座標時兩邊要一起改。
+ *
+ * #3794 二次訂正（team-lead 2026-10-30 退件：角色要沿石板路走，不是鏡頭
+ * 飛過去）：`spawnPoint.ts` 的 `walkAlongPathPosition`／`projectOntoPath`
+ * 匯入這份常數算「角色沿路走到門口」——那邊同樣是三.js-free 的純函式，
+ * 跟這裡同一種環境限制，不是另開一份複製；只有 createIslandWorld.ts 的
+ * three.js 渲染那份才獨立維護。
  */
-const ZONE_PATHS: ReadonlyArray<ReadonlyArray<readonly [number, number]>> = [
+export const ZONE_PATHS: ReadonlyArray<ReadonlyArray<readonly [number, number]>> = [
   [[-3, 12], [-5, 9], [-9, 5], [-5, 1], [0, 0], [3, 2]],
   [[3, 2], [4, -2], [7, -3], [12, -4], [8, -7], [5, -10], [10, -13], [17, -12]],
   [[17, -12], [20, -16], [23, -20], [18, -22], [14, -24], [9, -23], [2, -22], [12, -29], [22, -32]],

@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { introProgress, characterPose } from './islandMotion';
 import type { IslandBaby, IslandStop } from './islandTemplate';
 import { isSceneryExcluded } from './islandTemplate';
-import { MIN_CAMERA_BUILDING_DISTANCE, BUILDING_BASE_RADIUS, computeSpawnFacingLighthouse, selectNearestStation, findCelebrationViewpoint, findTravelToDestination, arcFlightPosition, arcFlightArrivalYaw, isMovementLocked, isLabelOccluded, type CelebrationViewpoint, type LabelOcclusionObstacle } from './spawnPoint';
+import { MIN_CAMERA_BUILDING_DISTANCE, BUILDING_BASE_RADIUS, computeSpawnFacingLighthouse, selectNearestStation, findCelebrationViewpoint, findTravelToDestination, arcFlightPosition, arcFlightArrivalYaw, walkAlongPathPosition, walkDurationSeconds, godCameraDesiredPosition, GOD_CAMERA_FOV_DEG, isMovementLocked, isManualControlEnabled, isLabelOccluded, type CelebrationViewpoint, type LabelOcclusionObstacle } from './spawnPoint';
 import { startCelebration, advanceOnTurnConverged, isHoldComplete, diffProgress, resolveCelebrationTrigger, celebrationGlowBoost, steadyCompletedGlow, resolveCelebrationGlow, INITIAL_PROGRESS_DIFF_STATE, type CelebrationState, type ProgressDiffState } from './islandCelebration';
 import { buildStationGroup, applyBuildingGlow, disposeObjectTree, buildingTopY, type BuildingMaterialSlot } from './islandBuildingShapes';
 
@@ -308,7 +308,11 @@ export function createIslandWorld(
   });
   const raycaster = new THREE.Raycaster();
   const pointerNdc = new THREE.Vector2(0, 0);
-  let mode: ViewMode = 'first';
+  // #3794（Young 硬規定，PRD §2）：上帝視角是唯一模式，預設值從 'first'
+  // 改成 'god'——`playIntro()` 呼叫時會暫時切到 'first' 播開場鏡頭飛行
+  // （見該函式與 `introStart = -1` 處的說明），播完自動切回來；'first'
+  // 的程式碼保留，只是沒有任何使用者可觸發的路徑會把 `mode` 停留在那裡。
+  let mode: ViewMode = 'god';
   // #3780 P0-2：出生時仰角不再是寫死的 -0.05（往下看一點）——燈塔太高，
   // 不仰頭的話塔尖本來就不可能進視野（見 spawnPoint.test.ts 那條「不加
   // 仰角塞不進視野」的對照）。`spawnPoint.pitch` 用燈塔的真實高度／相機
@@ -337,7 +341,21 @@ export function createIslandWorld(
     readonly startedAt: number;
     readonly duration: number;
   }
+  // #3794 三次訂正（team-lead 2026-10-30 退件）：`travelTo()` 不再設定
+  // `travelFlight`（上面這組型別/狀態保留給已經沒有入口的第一人稱拱形
+  // 飛行，見下面 per-frame 迴圈裡 `mode === 'first'` 那段的說明），改設
+  // 這組同形狀但走既有石板路的新狀態——跟 `TravelFlight` 刻意同構，差別
+  // 只在沒有 `extraHeight` 這個墊高概念（全程貼地）。
   let travelFlight: TravelFlight | null = null;
+  interface PathWalk {
+    readonly index: number;
+    readonly start: { x: number; z: number };
+    readonly end: { x: number; z: number };
+    readonly target: { x: number; z: number };
+    readonly startedAt: number;
+    readonly duration: number;
+  }
+  let pathWalk: PathWalk | null = null;
   // #3780 P0-3：回島先面向剛完成的站，停留夠了才轉向下一站。三段式狀態
   // 機（'turning' 轉去剛完成的站 → 'turnTo 收斂' → 'holding' 才開始算
   // 停留秒數）本身是不碰 three.js/WebGL 的純函式，見 islandCelebration.ts
@@ -385,6 +403,28 @@ export function createIslandWorld(
   // 開場鏡頭：從海上空推近到主角眼前（-1 = 沒在播）
   let introStart = -1;
   const INTRO_SECONDS = 3.2;
+  // #3794（PRD 2026-10-30-island-v2-rpg-pets-story-prd.md §2）：上帝視角
+  // 是唯一模式的固定斜俯視鏡頭參數——角度依
+  // docs/design/island-v2/design.md §1.2（查過任天堂官方 Iwata Asks 對
+  // 經典薩爾達「俯視＋斜角」鏡頭的說明），距離/方向是這裡新定的，不是
+  // 文件裡的數字（文件寫的是給「新增第三種視角」的草案，那個架構已經被
+  // Young 否決，但角度本身的查證依據仍然成立，沿用）。固定、不可拖曳
+  // 旋轉——跟隨玩家位置但不跟隨玩家朝向，這樣「鏡頭不能自由旋轉」才是
+  // 真的不能旋轉，不會因為角色轉向而跟著轉。
+  // #3794 二次訂正（`.claude/skills/archipelago-module/SKILL.md` §6.5，
+  // Young 要求「找專門論述寫進 skill」後補的查證）：角度跟 FOV 改用那份
+  // 查證結果，不是第一版自己估的 55°/沿用第一人稱 57° FOV——窄 FOV（透視
+  // 變形小，接近 dimetric 的觀看方式）+ 較淺的俯角才是查到的依據（見
+  // SKILL §6.5-A：Radek Koncewicz／Wikipedia isometric video game
+  // graphics，FOV 建議 25–35°、俯角 30–40°）。距離跟著拉遠到 30，抵銷
+  // FOV 變窄造成的構圖變化（FOV 越窄，同樣距離看起來越像用望遠鏡頭貼近
+  // 拍，必須退遠一點才會得到接近原本的取景範圍）。
+  //
+  // #3794 三次訂正（team-lead 2026-10-30 退件）：常數本體跟「鏡頭該在
+  // 哪」的算式一起搬去 `spawnPoint.ts`（`GOD_CAMERA_*`／
+  // `godCameraDesiredPosition`）——抽成純函式才鎖得住「角色走路時鏡頭的
+  // 俯角與高度不變」這個不變量，這裡只剩 `GOD_CAMERA_FOV_DEG` 還會被直接
+  // 引用（切 `camera.fov` 用），從 import 拿。
   let last = performance.now();
   let frame = 0;
   let near: number | null = null;
@@ -394,7 +434,11 @@ export function createIslandWorld(
   const keydown = (event: KeyboardEvent) => {
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'w', 'a', 's', 'd'].includes(event.key)) event.preventDefault();
     keys.add(event.key.toLowerCase());
-    if (event.key === ' ' && jumping === 0) verticalSpeed = 5.5;
+    // #3794（Young 硬規定）：空白鍵跳躍只在第一人稱模式有意義——上帝視角
+    // 是唯一模式、永遠不會是 'first'，這裡加上判斷讓空白鍵真的不做任何事
+    // （`keys.add` 本身無害，真正會移動角色的是下面被 `mode === 'first'`
+    // 擋住的那段，但跳躍是獨立的 `verticalSpeed` 機制，要分開擋）。
+    if (event.key === ' ' && jumping === 0 && isManualControlEnabled(mode)) verticalSpeed = 5.5;
   };
   const keyup = (event: KeyboardEvent) => keys.delete(event.key.toLowerCase());
   let downAt = { x: 0, y: 0 };
@@ -414,8 +458,14 @@ export function createIslandWorld(
     const rect = renderer.domElement.getBoundingClientRect();
     pointerNdc.set(((event.clientX - rect.left) / rect.width) * 2 - 1, -((event.clientY - rect.top) / rect.height) * 2 + 1);
     if (!renderer.domElement.hasPointerCapture(event.pointerId)) return;
-    yaw -= (event.clientX - dragX) * 0.005;
-    if (mode === 'first') pitch = Math.max(-0.9, Math.min(0.7, pitch - (event.clientY - dragY) * 0.004));
+    // #3794：上帝視角鏡頭角度固定、不能自由旋轉（Young 硬規定）——拖曳
+    // 改變 `yaw`／`pitch` 只在第一人稱模式有意義（現在已經切不進去了，
+    // 這段保留但不會被呼叫到的理由跟其他 `mode === 'first'` 分支一樣：
+    // 程式碼留著、介面上沒有入口）。
+    if (isManualControlEnabled(mode)) {
+      yaw -= (event.clientX - dragX) * 0.005;
+      pitch = Math.max(-0.9, Math.min(0.7, pitch - (event.clientY - dragY) * 0.004));
+    }
     dragX = event.clientX;
     dragY = event.clientY;
     turnTo = null;
@@ -477,10 +527,23 @@ export function createIslandWorld(
       // 移動的分支，飛行本身也不會被打斷，必須飛完才交還控制。
       const flying = travelFlight !== null;
       let length = isMovementLocked(introPlaying, flying) ? 0 : Math.hypot(dx, dz);
-      if (introPlaying) travelFlight = null;
-      if (length > 0.08 && mode === 'god') events.onWantFirstPerson?.();
-      // 這一刻算出來的墊高值會在下面 `mode === 'first'` 的 `eye` 計算裡用到。
+      if (introPlaying) { travelFlight = null; pathWalk = null; }
+      // #3794（PRD 2026-10-30-island-v2-rpg-pets-story-prd.md §2，Young
+      // 2026-10-30 硬規定）：上帝視角是唯一視角，WASD/搖桿不准做任何事，
+      // 當然也不准切回第一人稱——原本這裡 `mode === 'god'` 時按方向鍵會
+      // 呼叫 `onWantFirstPerson` 切回第一人稱，那條路徑整個拿掉。
+      //
+      // 這一刻算出來的墊高值會在下面的 `eye` 計算裡用到（只有第一人稱的
+      // 拱形飛行會用到，上帝視角的 `pathWalk` 全程貼地，沒有墊高概念）。
       let flightExtraHeight = 0;
+      // #3794 二次訂正（team-lead 2026-10-30 退件）：第一版在這裡拿掉了
+      // `mode === 'first'` 這個條件，讓拱形飛行（鏡頭沿一條墊高到比全島
+      // 最高建築還高的弧線飛過去）直接套用在上帝視角——結果變成「鏡頭在
+      // 飛、畫面上完全沒有看得到的人在走路」，跟 PRD §2「看得到人在移動」
+      // 「沿著路徑從一棟建築走到另一棟」的規格相反。拱形飛行本來就是為了
+      // 第一人稱（你看不到自己的身體，鏡頭本身就是「你」）設計的效果，現在
+      // 把條件改回來、讓它繼續只服務第一人稱——跟其他 `mode === 'first'`
+      // 分支一樣，程式碼留著、沒有入口切得進去，永遠不會真的執行。
       if (travelFlight && mode === 'first') {
         const progress = (elapsed - travelFlight.startedAt) / travelFlight.duration;
         if (progress >= 1) {
@@ -504,7 +567,39 @@ export function createIslandWorld(
           length = 1;
         }
       }
-      if (length > 0.08 && travelFlight === null) {
+      // #3794 二次訂正：取代上面那段（現在已經是沒有入口的死碼）——點建築
+      // 之後角色沿既有石板路走到門口，不是鏡頭飛過去。全程貼地（不墊高、
+      // 不用 `flightExtraHeight`），`player.position` 的 x/z 用
+      // `walkAlongPathPosition` 逐步推進，鏡頭（上帝視角分支的
+      // `godCameraDesiredPosition`）只讀 `player.position`、不讀這裡的任何
+      // 狀態，所以鏡頭俯角/高度在整段行走過程中保持不變，只有水平位置
+      // lerp 跟著角色走。
+      if (pathWalk) {
+        const progress = (elapsed - pathWalk.startedAt) / pathWalk.duration;
+        if (progress >= 1) {
+          player.position.x = pathWalk.end.x;
+          player.position.z = pathWalk.end.z;
+          yaw = arcFlightArrivalYaw(pathWalk.end, pathWalk.target);
+          pitch = spawnPoint.pitch;
+          const arrived = pathWalk.index;
+          pathWalk = null;
+          events.onMove(player.position.x, player.position.z);
+          events.onArrive?.(arrived);
+        } else {
+          const pos = walkAlongPathPosition(pathWalk.start, pathWalk.end, progress);
+          player.position.x = pos.x;
+          player.position.z = pos.z;
+          yaw = arcFlightArrivalYaw({ x: pos.x, z: pos.z }, pathWalk.target);
+          events.onMove(player.position.x, player.position.z);
+          length = 1; // 走路動畫（擺動/彈跳）要播起來，跟舊拱形飛行同一招
+        }
+      }
+      // #3794（Young 硬規定，PRD §2 第一條）：WASD／搖桿不准移動角色——
+      // 角色只能靠點建築自動走過去。`mode === 'first'` 現在永遠是 false
+      // （沒有任何入口切得進去），這個條件讓手動移動整塊變成不會執行的
+      // 死碼，不是刪掉整段邏輯（第一人稱的程式碼保留，只是介面上沒有
+      // 入口——跟其他 `mode === 'first'` 分支同一個做法）。
+      if (length > 0.08 && travelFlight === null && pathWalk === null && isManualControlEnabled(mode)) {
         const forward = new THREE.Vector3(-Math.sin(yaw), 0, -Math.cos(yaw));
         const right = new THREE.Vector3(Math.cos(yaw), 0, -Math.sin(yaw));
         const moveX = (right.x * dx + forward.x * -dz) / Math.max(1, length) * dt * 5.2;
@@ -573,6 +668,15 @@ export function createIslandWorld(
         celebration = advanceOnTurnConverged(celebration, elapsed);
       }
       if (mode === 'first') {
+        // #3794 二次訂正：FOV 跟著模式走——第一人稱／開場鏡頭沿用原本已
+        // 審過的 57°，不因為上帝視角要改用窄 FOV 而被牽動。比較用字面值
+        // 而非常數，是因為 57 從建立 camera（第 72 行）那一刻就是這個模式
+        // 的既定值，這裡只是「確保沒被上帝視角改動過」的自我修正，不是
+        // 另外定義一個新常數。
+        if (camera.fov !== 57) {
+          camera.fov = 57;
+          camera.updateProjectionMatrix();
+        }
         player.visible = false;
         // 慶祝期間、找得到合法觀景點時，鏡頭用那個點（不是 player.position）
         // ——`celebrationViewpoint` 在 setProgress() 開始慶祝那一刻就算好、
@@ -598,6 +702,10 @@ export function createIslandWorld(
           camera.lookAt(target);
         } else {
           introStart = -1;
+          // #3794：開場鏡頭飛行播完，交還控制權——這裡切回 'god'（唯一的
+          // 互動模式），下一幀就會走新的上帝視角跟隨鏡頭公式，不會卡在
+          // 第一人稱視角裡沒有任何入口切出去。
+          mode = 'god';
           camera.position.lerp(eye, Math.min(1, dt * 14));
           camera.lookAt(camera.position.clone().add(look));
         }
@@ -608,15 +716,27 @@ export function createIslandWorld(
         const xiaolingForward = celebration ? 3.1 : 2.4;
         xiaoling.position.copy(camera.position).add(new THREE.Vector3(Math.cos(yaw) * xiaolingLateral - Math.sin(yaw) * xiaolingForward, -0.55 + Math.sin(elapsed * 3) * 0.08, -Math.sin(yaw) * xiaolingLateral - Math.cos(yaw) * xiaolingForward));
       } else {
+        // #3794 二次訂正（`.claude/skills/archipelago-module/SKILL.md`
+        // §6.5 查證）：上帝視角用自己專屬的窄 FOV，不沿用第一人稱的
+        // 57°——窄 FOV 透視變形小，才做得出「斜俯視帶一點透視、像
+        // dimetric 但非正交」的效果；跟 GOD_CAMERA_PITCH／DISTANCE 一樣
+        // 用同一個判斷點切換，不是常駐設定在建立 camera 那一行（那一行
+        // 要留給第一人稱／開場鏡頭沿用）。
+        if (camera.fov !== GOD_CAMERA_FOV_DEG) {
+          camera.fov = GOD_CAMERA_FOV_DEG;
+          camera.updateProjectionMatrix();
+        }
         player.visible = true;
         xiaoling.scale.set(0.9, 1.1, 1);
-        const open = zoneCenters.filter((_, index) => index <= unlockedZone);
-        const cx = open.reduce((sum, zone) => sum + zone.x, 0) / open.length;
-        const cz = open.reduce((sum, zone) => sum + zone.z, 0) / open.length;
-        const span = 22 + unlockedZone * 9;
-        const desired = new THREE.Vector3(cx + Math.sin(yaw) * span * 0.55, span, cz + Math.cos(yaw) * span * 0.55);
-        camera.position.lerp(desired, Math.min(1, dt * 3));
-        camera.lookAt(cx, 0, cz);
+        // #3794 三次訂正：取代舊的「以已解鎖區域平均中心為準、可拖曳旋轉」
+        // 上帝視角——新設計跟隨玩家實際位置（看得到人沿既有石板路走，見
+        // 上面 `pathWalk` 那段），角度/方向固定（純函式
+        // `godCameraDesiredPosition` 只讀 `player.position`，不讀 yaw／
+        // pitch／飛行狀態任何輸入），滿足「鏡頭不能自由旋轉」，也保證角色
+        // 移動時鏡頭俯角與高度不會跟著變，只有水平 lerp 跟隨。
+        const target = godCameraDesiredPosition(player.position);
+        camera.position.lerp(new THREE.Vector3(target.x, target.y, target.z), Math.min(1, dt * 3));
+        camera.lookAt(player.position.x, 0.6, player.position.z);
       }
     }
     zonedThings.forEach((thing) => { thing.visible = (thing.userData.zone as number) <= unlockedZone; });
@@ -805,14 +925,18 @@ export function createIslandWorld(
     },
     setMode(next: ViewMode) { mode = next; if (next === 'first') pitch = -0.05; },
     // #3780 P0-3 六度審查訂正：終點驗證過合法（跟慶祝鏡頭同一套檢查，見
-    // findTravelToDestination），但沿地面走過去的「路徑」本身完全沒檢查
-    // ——真瀏覽器截圖 + 179 課 fixture 實算，33.8% 的路徑中途穿過別的建築、
-    // 36.6% 穿過山丘，而且抵達時鏡頭朝向沒處理（平均差 32°，10.5% 背對超
-    // 過 90°）。改成拱形飛行：記下出發點（玩家目前位置）跟終點，animate()
-    // 裡每一幀用 `arcFlightPosition` 算當下該在哪、墊高多少；飛行總秒數
-    // 依距離落在 0.8–1.5 秒之間，找不到合法終點（理論上很少見）就直接飛
-    // 向建築原始座標，接受那個殘留風險，但路徑本身的安全不受影響——拱形
-    // 飛行的高度保證不管飛向哪個水平座標都不會撞進任何東西。
+    // findTravelToDestination）。
+    //
+    // #3794 三次訂正（team-lead 2026-10-30 退件）：原本這裡接著設
+    // `travelFlight`，讓鏡頭沿拱形飛行（墊高到比全島最高建築還高）飛過去
+    // ——那是只服務第一人稱（你看不到自己的身體，鏡頭本身就是「你」）的
+    // 設計，套用在上帝視角會變成「鏡頭在飛、看不到人在走」，跟 PRD §2
+    // 規格相反。改成設 `pathWalk`：全程貼地，沿既有石板路走到門口（見
+    // animate() 迴圈裡 `pathWalk` 那段用 `walkAlongPathPosition` 算當下
+    // 該在哪），總秒數跟既有 WASD 行走同一個速度常數換算
+    // （`walkDurationSeconds`），不是固定 0.8–1.5 秒區間——這樣走一段短路
+    // 跟走一段長路的速度感覺一致，不會因為距離夾在同一個秒數區間裡忽快
+    // 忽慢。
     travelTo(index: number) {
       const target = content.stops[index];
       const destination = findTravelToDestination({
@@ -824,17 +948,21 @@ export function createIslandWorld(
       });
       const start = { x: player.position.x, z: player.position.z };
       const end = destination ?? { x: target.x, z: target.z };
-      const dist = Math.hypot(end.x - start.x, end.z - start.z);
-      const duration = Math.min(1.5, Math.max(0.8, dist / 15));
-      travelFlight = { index, start, end, target: { x: target.x, z: target.z }, startedAt: elapsed, duration };
-      mode = 'first';
-      pitch = -0.05;
+      pathWalk = { index, start, end, target: { x: target.x, z: target.z }, startedAt: elapsed, duration: walkDurationSeconds(start, end) };
     },
     setStick(x: number, z: number) { stickDirection = { x, z }; },
     setPaused(value: boolean) { paused = value; },
-    jump() { if (jumping === 0) verticalSpeed = 5.5; },
+    // #3794：跳躍是純第一人稱的機制，上帝視角模式下是 no-op（防呆——介面
+    // 上已經拿掉跳躍按鈕，這裡是第二層保護，不靠單一地方沒漏接）。
+    jump() { if (jumping === 0 && isManualControlEnabled(mode)) verticalSpeed = 5.5; },
     // #3780 P0-2：playIntro 是「一上岸、開場鏡頭飛到主角面前」那一刻——跟
     // 出生時同一個仰角（spawnPoint.pitch），不是寫死的 -0.05。
+    // #3794：開場這段鏡頭飛行本身借用第一人稱的運鏡公式（見 animate() 裡
+    // `mode === 'first'` 分支的 `intro < 1` 那段），玩家這時完全沒有輸入
+    // 控制權（`introPlaying` 鎖住所有移動），用完即丟——真正會动的只有
+    // 鏡頭本身，不是角色位置，所以沿用第一人稱分支的程式碼安全；動畫播完
+    // 那一刻（`introStart = -1` 處）會切回 'god'，交還控制權時已經是正確
+    // 的上帝視角鏡頭，不會卡在第一人稱公式裡。
     playIntro() { introStart = elapsed; mode = 'first'; pitch = spawnPoint.pitch; },
     getPosition() { return { x: player.position.x, z: player.position.z }; },
     dispose() {

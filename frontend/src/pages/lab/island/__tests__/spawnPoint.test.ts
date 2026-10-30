@@ -35,8 +35,17 @@ import {
   CELEBRATION_VIEW_DISTANCE,
   CELEBRATION_EXTRA_HEIGHT,
   isMovementLocked,
+  isManualControlEnabled,
   isLabelOccluded,
   type LabelOcclusionObstacle,
+  FULL_ISLAND_PATH,
+  projectOntoPath,
+  pointAtPathDistance,
+  walkAlongPathPosition,
+  walkDurationSeconds,
+  GOD_CAMERA_PITCH,
+  GOD_CAMERA_DISTANCE,
+  godCameraDesiredPosition,
 } from '../spawnPoint';
 
 describe('碰撞不變量（不穿牆）', () => {
@@ -396,6 +405,22 @@ describe('isMovementLocked — 飛行/開場鏡頭期間鎖住輸入', () => {
 });
 
 /**
+ * #3794（PRD 2026-10-30-island-v2-rpg-pets-story-prd.md §9 2b，Young 硬
+ * 規定）：「按 WASD、空白鍵、Shift，角色位置不變」。上帝視角是唯一模式，
+ * 這支鎖的是 `createIslandWorld.ts` 裡三個會被按鍵/拖曳觸碰到的地方
+ * （鍵盤移動、空白鍵跳躍、拖曳旋轉視角）實際呼叫的同一條判斷式。
+ */
+describe('isManualControlEnabled — #3794 上帝視角是唯一模式，WASD/空白鍵/拖曳都不該生效', () => {
+  it('god 模式（唯一可從介面進入的模式）→ 手動控制不啟用', () => {
+    expect(isManualControlEnabled('god')).toBe(false);
+  });
+
+  it('first 模式（程式碼留著但沒有任何入口切得進去）→ 手動控制啟用，不是整個功能被刪掉', () => {
+    expect(isManualControlEnabled('first')).toBe(true);
+  });
+});
+
+/**
  * #3780 P0-3 八度審查訂正：3D 站牌是 `depthTest: false`，永遠畫在最
  * 上層——即使物理上被別棟建築擋住，字牌還是會穿模浮在前景建築上
  * （team-lead 2026-10-27 截圖抓到：「回音劇場」浮在港口燈塔前面）。
@@ -434,5 +459,160 @@ describe('isLabelOccluded — 鏡頭→名牌視線被別棟建築擋住', () =>
     const camera = { x: 0, y: 2, z: 0 };
     const label = { x: 0, y: 2, z: 10 };
     expect(isLabelOccluded(camera, label, [])).toBe(false);
+  });
+});
+
+/**
+ * #3794 三次訂正（team-lead 2026-10-30 退件）：點建築之後，看得見的角色
+ * 要沿著既有石板路走到門口，不是鏡頭沿拱形飛過去。用一條簡單的合成直線
+ * 路徑（不用真實 `FULL_ISLAND_PATH`，座標好手算、斷言好驗）測 `project
+ * OntoPath`／`pointAtPathDistance`，`FULL_ISLAND_PATH` 本身只驗證「三段
+ * 真的接起來、首尾去重」。
+ */
+describe('projectOntoPath / pointAtPathDistance — 把世界座標投影到路網上、互逆', () => {
+  const straightPath: ReadonlyArray<readonly [number, number]> = [[0, 0], [10, 0]];
+
+  it('點剛好在路上 → 距離就是它在那條線上的位置，座標不變', () => {
+    expect(projectOntoPath({ x: 4, z: 0 }, straightPath)).toEqual({ distance: 4, x: 4, z: 0 });
+  });
+
+  it('點偏離路徑 → 投影到最近的垂直落點，距離是沿路走到那個落點的弧長', () => {
+    expect(projectOntoPath({ x: 5, z: 3 }, straightPath)).toEqual({ distance: 5, x: 5, z: 0 });
+  });
+
+  it('點落在路徑起點之前 → 夾在起點，距離 0（不會算出負距離）', () => {
+    expect(projectOntoPath({ x: -5, z: 0 }, straightPath)).toEqual({ distance: 0, x: 0, z: 0 });
+  });
+
+  it('點落在路徑終點之後 → 夾在終點，距離等於整條路的長度', () => {
+    expect(projectOntoPath({ x: 15, z: 0 }, straightPath)).toEqual({ distance: 10, x: 10, z: 0 });
+  });
+
+  it('多段折線（L 形）：投影到第二段要把第一段的長度算進累計距離裡', () => {
+    const lShape: ReadonlyArray<readonly [number, number]> = [[0, 0], [10, 0], [10, 10]];
+    expect(projectOntoPath({ x: 10, z: 4 }, lShape)).toEqual({ distance: 14, x: 10, z: 4 });
+  });
+
+  it('pointAtPathDistance 是 projectOntoPath 的反函式：路上任一點投影回去再查距離，要拿回同一個點', () => {
+    const p = pointAtPathDistance(7, straightPath);
+    expect(p).toEqual({ x: 7, z: 0 });
+    expect(projectOntoPath(p, straightPath)).toEqual({ distance: 7, x: 7, z: 0 });
+  });
+
+  it('距離超出路徑總長或是負的 → 夾在兩端，不會算出路徑外的點', () => {
+    expect(pointAtPathDistance(-5, straightPath)).toEqual({ x: 0, z: 0 });
+    expect(pointAtPathDistance(999, straightPath)).toEqual({ x: 10, z: 0 });
+  });
+});
+
+describe('FULL_ISLAND_PATH — 三段 ZONE_PATHS 接成一條連續路網', () => {
+  it('首尾相連的交界點只出現一次（去重），不是三段直接串接留著重複點', () => {
+    // 三段 ZONE_PATHS 各自的點數分別是 6/8/9；交界處重複兩次，去重後應該
+    // 是 6 + (8-1) + (9-1) = 21，不是 6+8+9=23。
+    expect(FULL_ISLAND_PATH.length).toBe(21);
+  });
+
+  it('第一個點是第一段的起點，最後一個點是最後一段的終點', () => {
+    expect(FULL_ISLAND_PATH[0]).toEqual([-3, 12]);
+    expect(FULL_ISLAND_PATH[FULL_ISLAND_PATH.length - 1]).toEqual([22, -32]);
+  });
+});
+
+/**
+ * `walkAlongPathPosition` 三段式（上路／沿路／下路）——跟 `arcFlightPosition`
+ * 的三段式飛行同一個精神，差別是這裡全程貼地、沒有墊高。
+ */
+describe('walkAlongPathPosition — 角色沿路走到門口（取代拱形飛行）', () => {
+  const straightPath: ReadonlyArray<readonly [number, number]> = [[0, 0], [10, 0]];
+  // start 偏離路徑 3 個單位、end 偏離 4 個單位：legOn=3, legAlong=10, legOff=4, total=17
+  const start = { x: 0, z: -3 };
+  const end = { x: 10, z: 4 };
+
+  it('progress=0 → 完全等於出發點（還沒開始走）', () => {
+    const pos = walkAlongPathPosition(start, end, 0, straightPath);
+    expect(pos.x).toBeCloseTo(start.x, 5);
+    expect(pos.z).toBeCloseTo(start.z, 5);
+    expect(pos.phase).toBe('onto-path');
+  });
+
+  it('progress=1 → 完全等於終點（走到門口了）', () => {
+    const pos = walkAlongPathPosition(start, end, 1, straightPath);
+    expect(pos.x).toBeCloseTo(end.x, 5);
+    expect(pos.z).toBeCloseTo(end.z, 5);
+    expect(pos.phase).toBe('to-door');
+  });
+
+  it('走到一半（progress=0.5）→ 人在路網上，z 座標等於路徑本身的 z（0），不是在空中飛的墊高軌跡', () => {
+    // total=17, 一半=8.5；legOn(3) 之後進入 along-path 段（legOn+legAlong=13），
+    // 8.5 落在這段裡，應該穩穩站在 z=0 的路徑上。
+    const pos = walkAlongPathPosition(start, end, 0.5, straightPath);
+    expect(pos.phase).toBe('along-path');
+    expect(pos.z).toBeCloseTo(0, 5);
+    expect(pos.x).toBeGreaterThan(0);
+    expect(pos.x).toBeLessThan(10);
+  });
+
+  it('逐步前進（0→1 取 6 個樣本）：x 座標必須單調不減——不會中途跳回去或瞬移', () => {
+    const samples = [0, 0.2, 0.4, 0.6, 0.8, 1].map((p) => walkAlongPathPosition(start, end, p, straightPath));
+    for (let i = 1; i < samples.length; i++) {
+      expect(samples[i].x).toBeGreaterThanOrEqual(samples[i - 1].x - 1e-9);
+    }
+  });
+
+  it('start 跟 end 投影到路網上同一點（legAlong=0）時，直接從上路切到下路，不會除以 0 或卡住', () => {
+    const samePoint = { x: 5, z: -2 };
+    const nearby = { x: 5, z: 3 };
+    const pos = walkAlongPathPosition(samePoint, nearby, 0.5, straightPath);
+    expect(Number.isFinite(pos.x)).toBe(true);
+    expect(Number.isFinite(pos.z)).toBe(true);
+  });
+});
+
+describe('walkDurationSeconds — 跟既有 WASD 行走同一個速度常數換算', () => {
+  const straightPath: ReadonlyArray<readonly [number, number]> = [[0, 0], [10, 0]];
+
+  it('路程越長，秒數越長（不是固定區間，長短路要有感覺上的速度差）', () => {
+    const near = walkDurationSeconds({ x: 0, z: -1 }, { x: 2, z: 1 }, straightPath);
+    const far = walkDurationSeconds({ x: 0, z: -1 }, { x: 9, z: 1 }, straightPath);
+    expect(far).toBeGreaterThan(near);
+  });
+
+  it('距離很短時有最小秒數下限，不會瞬移成 0 秒', () => {
+    const tiny = walkDurationSeconds({ x: 5, z: -0.01 }, { x: 5, z: 0.01 }, straightPath);
+    expect(tiny).toBeGreaterThanOrEqual(0.9);
+  });
+});
+
+/**
+ * #3794 三次訂正：鏡頭「俯角與高度保持不變」這個硬規定，直接鎖在純函式
+ * 層——不管玩家走到路徑上的哪個點，`godCameraDesiredPosition` 算出來的
+ * y 分量必須是同一個數字；x/z 只能跟著玩家水平位移，不能有別的輸入
+ * （yaw／pitch／飛行墊高）混進來。
+ */
+describe('godCameraDesiredPosition — 上帝視角鏡頭只跟水平位置走，俯角/高度恆定', () => {
+  it('兩個不同的玩家位置，算出來的鏡頭高度（y）必須完全相同', () => {
+    const a = godCameraDesiredPosition({ x: 0, z: 0 });
+    const b = godCameraDesiredPosition({ x: 37, z: -12 });
+    expect(a.y).toBe(b.y);
+    expect(a.y).toBe(GOD_CAMERA_DISTANCE * Math.sin(GOD_CAMERA_PITCH));
+  });
+
+  it('玩家水平位移多少，鏡頭的目標位置就跟著位移同樣的量（x/z 是平移，不是重新計算角度）', () => {
+    const a = godCameraDesiredPosition({ x: 0, z: 0 });
+    const b = godCameraDesiredPosition({ x: 5, z: -3 });
+    expect(b.x - a.x).toBeCloseTo(5, 5);
+    expect(b.z - a.z).toBeCloseTo(-3, 5);
+  });
+
+  it('整段模擬角色沿路走（0→1 取 5 個樣本）：鏡頭高度在整段移動過程中恆定——這是退件要求鎖的那個不變量', () => {
+    const straightPath: ReadonlyArray<readonly [number, number]> = [[0, 0], [10, 0]];
+    const start = { x: 0, z: -3 };
+    const end = { x: 10, z: 4 };
+    const heights = [0, 0.25, 0.5, 0.75, 1].map((p) => {
+      const pos = walkAlongPathPosition(start, end, p, straightPath);
+      return godCameraDesiredPosition(pos).y;
+    });
+    const [first, ...rest] = heights;
+    for (const h of rest) expect(h).toBe(first);
   });
 });

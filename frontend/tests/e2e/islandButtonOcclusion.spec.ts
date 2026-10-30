@@ -20,6 +20,12 @@ import { findOccludedButtons, describeViolations } from './utils/noButtonOcclusi
  * 「跳」與「展開上帝視角」被(當時)旁白全螢幕遮罩蓋住判定——改成只檢查
  * 畫面狀態真正該能點的名單後，桌機/iPad 綠、手機紅在聲音疊搖桿／聲音疊
  * 繼續，這才是 team-lead 真正要抓的那兩個問題，紅得乾淨。
+ *
+ * #3794 二次訂正（Young 硬規定：上帝視角是唯一模式，拿掉第一人稱/搖桿/
+ * 跳）：「主畫面」那條原本名單裡的「展開上帝視角」「跳」「虛擬搖桿」三個
+ * 按鈕的入口已經整組拿掉（介面上不再提供），不是這支測試本身過時——留著
+ * 會變成永遠量不到元素、永遠綠但沒在測任何東西的裝飾測試。名單縮成現在
+ * 介面上真的還在的兩個：清單模式／聲音。
  */
 
 const FE = process.env.PLAYWRIGHT_BASE_URL || 'https://lingoleap-staging.web.app';
@@ -93,7 +99,7 @@ for (const vp of VIEWPORTS) {
       }
     });
 
-    test('主畫面：清單模式／聲音／展開上帝視角／跳／搖桿 互不遮擋', async ({ page }) => {
+    test('主畫面：清單模式／聲音 互不遮擋', async ({ page }) => {
       await loginAsStudent(page);
       await page.goto(`${FE}/lab/island/${STORY_ID}`, { waitUntil: 'networkidle' });
       await page.waitForTimeout(1500);
@@ -119,9 +125,6 @@ for (const vp of VIEWPORTS) {
       const mainTargets = [
         page.getByRole('button', { name: /切換清單模式/ }),
         page.getByRole('button', { name: /聲音/ }),
-        page.getByRole('button', { name: /展開上帝視角|回到第一人稱/ }),
-        page.getByRole('button', { name: /^跳$/ }),
-        page.getByRole('group', { name: /虛擬搖桿/ }),
       ];
       const result = await findOccludedButtons(page, mainTargets);
       expect(result.passed, `主畫面（${vp.label}）：\n${describeViolations(result)}`).toBe(true);

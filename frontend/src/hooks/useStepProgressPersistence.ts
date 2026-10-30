@@ -4,8 +4,8 @@ import type { AuthUser } from '../services/authApi';
 import { clearActiveSession, saveActiveSession } from '../services/api';
 import { filterRequiredAssignmentSteps, resolveActiveSteps, stepIdMatchesCompleted, STEP_PATH_TO_NUMBER } from '../config/stepConfig';
 import { useProgressSync } from './useProgressSync';
-import { isIslandStoryMode, notifyIslandWordBabyReward } from '../pages/lab/island/storyMode';
-import type { StepProgressData } from '../services/learningApi';
+import { isIslandStoryMode, markRewardIdsSeen, notifyIslandWordBabyReward, readSeenRewardIds } from '../pages/lab/island/storyMode';
+import type { StepProgressData, WordBabyRewardItem } from '../services/learningApi';
 import type {
   ComprehensionResult,
   KeyPassageReadingResult,
@@ -78,6 +78,20 @@ interface UseStepProgressPersistenceReturn {
   midSessionBadgeUnlocks: string[];
   /** Dismiss the current mid-session badge unlock toast (Issue #3024). */
   dismissMidSessionBadgeUnlocks: () => void;
+  /** Pre-existing gap fixed in passing (#3794)：原本就被 `return` 回傳、
+   *  也被 `LearningLayout.tsx` 讀取，但這份型別宣告漏列，tsc 其實早就該
+   *  報錯——這次剛好在同一個介面加欄位，順手補上，不是這次新增的行為。 */
+  isProgressLoading: boolean;
+  /**
+   * #3794（PRD 2026-10-30-island-v2-rpg-pets-story-prd.md §5「即時回饋」）：
+   * 做完一站當下、不管有沒有嵌在島的 iframe 裡，都要在學習頁本身跳出
+   * 「拾獲碎片／遇到寶貝」提示——不靠 `isIslandStoryMode()` 門檻（那條只
+   * 通知島嶼頁，regular /learn 完全沒有效果）。由 LearningLayout 渲染成
+   * 一個跟 BadgeUnlockToast 同樣位置的 WordBabyRewardToast。
+   */
+  midSessionWordBabyRewards: WordBabyRewardItem[];
+  /** 關掉目前顯示中的寶貝獎勵提示（#3794）。 */
+  dismissMidSessionWordBabyRewards: () => void;
 }
 
 /**
@@ -227,6 +241,17 @@ export function useStepProgressPersistence({
     setMidSessionBadgeUnlocks([]);
   }, []);
 
+  // #3794（PRD 2026-10-30-island-v2-rpg-pets-story-prd.md §5「即時回饋」）：
+  // 做完一站當下就在學習頁本身跳出提示，不等回島才看到。跟上面那段
+  // `isIslandStoryMode()` 門檻的 postMessage 刻意分開、不互相依賴——那條
+  // 是「通知島嶼頁」，這條是「通知這一頁自己」，不管這頁是不是嵌在島的
+  // iframe 裡都要更新（直接從圖書館進入、沒有島這層外殼時，學生更需要
+  // 當場看到，不能只靠 postMessage 那條只在島模式才有人聽的路徑）。
+  const [midSessionWordBabyRewards, setMidSessionWordBabyRewards] = useState<WordBabyRewardItem[]>([]);
+  const dismissMidSessionWordBabyRewards = useCallback(() => {
+    setMidSessionWordBabyRewards([]);
+  }, []);
+
   const { syncProgress, flushProgress, isProgressLoading } = useProgressSync({
     token: token ?? null,
     dbSessionId,
@@ -243,6 +268,29 @@ export function useStepProgressPersistence({
     onWordBabyRewarded: (rewards) => {
       if (isIslandStoryMode()) {
         notifyIslandWordBabyReward(rewards);
+      }
+      // #3794 二次訂正（code-reviewer 2026-10-30 finding，1af86d25
+      // blocker）：這裡原本不受上面的 `isIslandStoryMode()` 門檻限制（見
+      // 上面宣告處的說明），但也完全沒有跟 `ReadingIslandLab.tsx` 共用的
+      // 「同一筆獎勵只提示一次」排重接上——故事模式下學習頁跳一次、回島後
+      // `refreshProgress(true)` 又跳第二次。現在改成跟那邊共用同一組
+      // `readSeenRewardIds`／`markRewardIdsSeen`（sessionStorage，同一分頁
+      // 內同源 iframe 本來就共用）：先濾掉已經顯示過的，只把真正沒看過的
+      // 放進這一頁的提示佇列，並在「決定要顯示」的這一刻立刻標記已看過
+      // ——不管接下來是這裡先顯示、還是回島後 `refreshProgress` 先顯示，
+      // 先到的那條標記之後，另一條都會把它濾掉。
+      //
+      // 誠實的已知限制：故事模式下 `ISLAND_STEP_DONE` 會同步拆掉這個
+      // iframe，這則提示多半來不及渲染出來就被摧毀——學生實際上仍然是
+      // 回島後才看到。這段排重保證的是「不會跳兩次」，不是「島模式下這裡
+      // 也會看到」。
+      if (rewards.length > 0) {
+        const seen = readSeenRewardIds(user?.id, storyId);
+        const unseen = rewards.filter((r) => !seen.has(r.id));
+        if (unseen.length > 0) {
+          setMidSessionWordBabyRewards((prev) => [...prev, ...unseen]);
+          markRewardIdsSeen(user?.id, storyId, unseen.map((r) => r.id));
+        }
       }
     },
     // The server only ever adds completed steps, so after each save its list is
@@ -578,5 +626,7 @@ export function useStepProgressPersistence({
     isProgressLoading,
     midSessionBadgeUnlocks,
     dismissMidSessionBadgeUnlocks,
+    midSessionWordBabyRewards,
+    dismissMidSessionWordBabyRewards,
   };
 }
