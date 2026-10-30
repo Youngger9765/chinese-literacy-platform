@@ -150,12 +150,18 @@ export function createArchipelagoWorld(
   // mapping 不生效，`threejs-postprocessing` 反模式第一條）。參數是數字
   // 不是顏色常數，不違反契約測試④（只擋 hex 色碼跟主題字眼）。
   // ---------------------------------------------------------------------
+  // `UnrealBloomPass`／`SSAOPass` 都吃「目前畫面的實際像素尺寸」去配置內部
+  // render target——不是什麼都能先丟一個佔位值之後再說。這裡先用容器掛載
+  // 當下量得到的尺寸（還沒掛上 DOM 前可能是 0，退回一個合理預設），下面
+  // `resize()` 每次呼叫都會用真正的尺寸呼叫兩者的 `setSize()` 校正一次。
+  const initialWidth = container.clientWidth || 1280;
+  const initialHeight = container.clientHeight || 900;
   const composer = new EffectComposer(renderer);
   const renderPass = new RenderPass(scene, camera);
   composer.addPass(renderPass);
-  const bloomPass = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.35, 0.4, 0.82);
+  const bloomPass = new UnrealBloomPass(new THREE.Vector2(initialWidth, initialHeight), 0.35, 0.4, 0.82);
   composer.addPass(bloomPass);
-  const ssaoPass = new SSAOPass(scene, camera, 1, 1);
+  const ssaoPass = new SSAOPass(scene, camera, initialWidth, initialHeight);
   ssaoPass.kernelRadius = 10;
   ssaoPass.minDistance = 0.003;
   ssaoPass.maxDistance = 0.05;
@@ -432,7 +438,17 @@ export function createArchipelagoWorld(
     // 效能診斷（美術指導書 §10：「跑過 renderer 診斷，不是看起來還行」）——
     // 換群渲染一幀之後印出 draw call/三角面/幾何數，QA 時從瀏覽器 console
     // 讀，不是另外架一套量測工具。
+    //
+    // `renderer.info.autoReset` 預設 true 時每次 `render()` 呼叫**都會自動
+    // 重置計數器**（`threejs-performance` skill 明寫的坑）——`composer.render()`
+    // 內部是好幾個 pass 各自呼叫一次 `renderer.render()`（RenderPass 畫
+    // 場景、Bloom 內部多個 pass、SSAO、最後 OutputPass 畫一個全螢幕四邊形），
+    // 不關掉 autoReset 的話，讀到的數字只會是**最後一個 pass**（OutputPass，
+    // 固定 1 個 draw call、2 個三角形）的數字，不是整個場景真正的渲染量，
+    // 不管 island 多少、`triangles`／`drawCalls` 永遠接近 1——這正是第一版
+    // 在真預覽站量到「1 個 draw call」這個明顯錯誤數字的根因。
     requestAnimationFrame(() => {
+      renderer.info.autoReset = false;
       renderer.info.reset();
       composer.render();
       console.log('[archipelago perf]', {
@@ -442,6 +458,7 @@ export function createArchipelagoWorld(
         geometries: renderer.info.memory.geometries,
         textures: renderer.info.memory.textures,
       });
+      renderer.info.autoReset = true;
     });
   }
 
