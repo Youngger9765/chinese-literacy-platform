@@ -5,7 +5,7 @@ import { fetchStory } from '../../services/api';
 import { fetchLearningSessions, loadStepProgress } from '../../services/learningApi';
 import { stepPath } from '../../config/stepPath';
 import { BABIES_20011, OPENING_20011, STOPS_20011 } from './island/islandData';
-import { buildStopsFromSequence, buildOpeningForTitle, buildBabiesForVocabulary, actInfoForZone } from './island/islandTemplate';
+import { buildStopsFromSequence, buildOpeningForStory, buildStoryProgressionLines, buildStoryEndingLine, storyTypeForLesson, buildBabiesForVocabulary, actInfoForZone } from './island/islandTemplate';
 import type { IslandBaby, IslandStop } from './island/islandTemplate';
 import { createIslandWorld } from './island/createIslandWorld';
 import { markRewardIdsSeen, parseIslandReturnMessage, parseWordBabyRewardMessage, readSeenRewardIds, shouldMarkVisitedOnReturn } from './island/storyMode';
@@ -17,6 +17,12 @@ interface LessonData {
   title: string;
   stepSequence?: string[];
   vocabulary?: Array<{ word: string }>;
+  /** #3799 批次 2：劇情指派規則（design.md §6.2）要用的三個欄位——只有
+   *  範本模式（非 20011 手刻）才會用到，20011 維持自己的手工 OPENING_20011
+   *  劇情，不套用這套模板系統。 */
+  grade?: string;
+  category?: string;
+  genre?: string;
 }
 
 type World = ReturnType<typeof createIslandWorld>;
@@ -116,9 +122,17 @@ export default function ReadingIslandLab() {
     () => (isHandmade ? STOPS_20011 : buildStopsFromSequence(sequence)),
     [isHandmade, sequence],
   );
+  // #3799 批次 2（design.md §6.2）：20011 維持自己的手工劇情
+  // （OPENING_20011），不套這套模板——其餘 178 課依 grade/category/genre
+  // 決定性指派到五種骨架之一。`storyType` 同時餵給開場白、完成站的推進
+  // 旁白、結局句三處，確保同一課全程是同一種劇情，不會中途變卦。
+  const storyType = useMemo(
+    () => storyTypeForLesson(lesson?.grade ?? '', lesson?.category ?? '', lesson?.genre ?? ''),
+    [lesson?.grade, lesson?.category, lesson?.genre],
+  );
   const OPENING = useMemo(
-    () => (isHandmade ? OPENING_20011 : buildOpeningForTitle(lesson?.title ?? '')),
-    [isHandmade, lesson?.title],
+    () => (isHandmade ? OPENING_20011 : buildOpeningForStory(lesson?.title ?? '', storyType)),
+    [isHandmade, lesson?.title, storyType],
   );
   const BABIES = useMemo<IslandBaby[]>(
     () => (isHandmade ? BABIES_20011 : buildBabiesForVocabulary(lesson?.vocabulary)),
@@ -167,7 +181,7 @@ export default function ReadingIslandLab() {
     if (!storyId || !student) return;
     let alive = true;
     fetchStory(storyId).then((story) => {
-      if (alive) setLesson({ title: story.title, stepSequence: story.stepSequence, vocabulary: story.vocabulary });
+      if (alive) setLesson({ title: story.title, stepSequence: story.stepSequence, vocabulary: story.vocabulary, grade: story.grade, category: story.category, genre: story.genre });
     }).catch(() => { if (alive) setError('課文載入失敗，請稍後再試'); });
     return () => { alive = false; };
   }, [storyId, student]);
@@ -233,7 +247,7 @@ export default function ReadingIslandLab() {
       // #3780 P0-3：停留期結束、鏡頭真的要轉去下一站了，才顯示「下一站」
       // 導引文字跟 sparkle 音效——原本這兩個是 doneIndexes 一變就立刻觸發
       // （見下面已移除的分支），鏡頭都還沒轉過去，字就先跳出來了。
-      onCelebrationEnd: (_index, nextStopIndex) => {
+      onCelebrationEnd: (finishedIndex, nextStopIndex) => {
         // 轉向下一站需要一點時間收斂（見 createIslandWorld.ts 的 turnTo
         // 插值，`Math.min(1, dt * 2.2)` 這個收斂速度），轉完才讓卡片恢復，
         // 避免卡片還停留在剛完成那站的文案、但畫面已經轉到別處的矛盾。
@@ -243,7 +257,11 @@ export default function ReadingIslandLab() {
         const currentDone = doneIndexesRef.current;
         const zoneOpened = currentStops.every((stop, i) => stop.zone !== currentStops[nextStopIndex].zone || !currentDone.includes(i));
         audioRef.current?.cue('sparkle');
-        setGuide(`${zoneOpened ? '迷霧散開了！' : ''}跟著金色光柱，下一站：${currentStops[nextStopIndex].name}`);
+        // #3799 批次 2：剛完成那一站的推進旁白接在既有「下一站」導引前面，
+        // 共用同一個 guide 插槽，不另外疊一個新的 UI 元件。20011 手工劇情
+        // 沒有這套模板，isHandmade 時維持原本只有「下一站」導引的行為。
+        const progressionLine = isHandmade ? '' : (buildStoryProgressionLines(storyType, currentStops)[finishedIndex] ?? '');
+        setGuide(`${progressionLine ? `${progressionLine}　` : ''}${zoneOpened ? '迷霧散開了！' : ''}跟著金色光柱，下一站：${currentStops[nextStopIndex].name}`);
         if (guideTimer.current) clearTimeout(guideTimer.current);
         guideTimer.current = setTimeout(() => setGuide(''), 7000);
       },
@@ -266,7 +284,7 @@ export default function ReadingIslandLab() {
     // 雖然這時候已經真的掛上 DOM，但再也沒有人去建立 3D 世界——整頁看起來正常、
     // 沒有任何錯誤，只是畫布永遠是空的。資料來得快（fetchStory 命中快取/熱啟動）
     // 時這個 race 不會發生，所以不是每次都能重現。
-  }, [student, STOPS, BABIES, lesson]);
+  }, [student, STOPS, BABIES, lesson, isHandmade, storyType]);
 
   useEffect(() => { worldRef.current?.setProgress(unlockedZone, doneIndexes); }, [unlockedZone, doneIndexes]);
   useEffect(() => { worldRef.current?.setMode(mode); }, [mode]);
@@ -555,7 +573,11 @@ export default function ReadingIslandLab() {
           （`createIslandWorld.ts` 裡每棟建築自己的 Sprite 牌子）正上方，
           兩塊文字疊在一起——跟上面「發現新去處」卡片用的是同一條
           `celebrating` state，加上同一個條件即可。 */}
-      {hovered !== null && opening < 0 && module === null && !titleReveal && !celebrating && <div className="pointer-events-none absolute left-1/2 top-[38%] z-20 -translate-x-1/2 animate-pulse rounded-full border-2 border-amber-200 bg-[#233e4b]/90 px-5 py-2 text-lg font-black text-[#ffe9b8] shadow-[0_0_30px_rgba(255,214,120,0.6)]">{STOPS[hovered].name}{doneIndexes.includes(hovered) ? ' ✓' : hovered === nextIndex ? ' · 下一站' : ''}</div>}
+      {/* #3799 批次 2（team-lead 2026-10-30：「390 寬……名牌字級提高」）：
+          base 用比桌機大一級的字級，`md:` 覆蓋回原本桌機已經驗過的大小
+          ——這個檔案其餘響應式寫法都是同一個「手機優先，桌機用 md: 蓋回去」
+          的慣例（例如下面 aside 的 `md:flex`），不要另外引一個 max-md: 變體。 */}
+      {hovered !== null && opening < 0 && module === null && !titleReveal && !celebrating && <div className="pointer-events-none absolute left-1/2 top-[38%] z-20 -translate-x-1/2 animate-pulse rounded-full border-2 border-amber-200 bg-[#233e4b]/90 px-5 py-2 text-xl font-black text-[#ffe9b8] shadow-[0_0_30px_rgba(255,214,120,0.6)] md:text-lg">{STOPS[hovered].name}{doneIndexes.includes(hovered) ? ' ✓' : hovered === nextIndex ? ' · 下一站' : ''}</div>}
       {/* 結尾慶祝（#3780 §3「全島亮完→結尾」）——審查員 2026-10-26 二次審查
           訂正：原本沿用 `guide` 那個 top-20 置中位置常駐顯示，手機版左欄
           （標題卡＋劇情說明＋工具列）量到實際高度會長到 y≈263，跟 top-20
@@ -574,7 +596,10 @@ export default function ReadingIslandLab() {
           )}
           <div className="relative w-full max-w-sm rounded-3xl border-2 border-amber-200 bg-gradient-to-r from-[#f7d48a] to-[#ffe9b8] p-6 text-center shadow-[0_0_60px_rgba(255,200,90,0.8)]">
             <p className="text-lg font-black text-[#3b3018]">整座島都亮起來了！</p>
-            <p className="mt-1 text-xs font-semibold text-[#6b5a2e]">{lesson?.title ?? '這篇課文'}，你全部讀完了</p>
+            {/* #3799 批次 2：20011 維持原本的通用句子（它的劇情是手工 OPENING_20011
+                自己的敘事，不套這套結局模板）；其餘課用劇情對應的結局句，
+                已經包含課名，不再額外重複一次《課名》。 */}
+            <p className="mt-1 text-xs font-semibold text-[#6b5a2e]">{isHandmade ? `${lesson?.title ?? '這篇課文'}，你全部讀完了` : buildStoryEndingLine(lesson?.title ?? '這篇課文', storyType)}</p>
             <div className="mt-4 flex flex-col gap-2">
               <button type="button" onClick={() => navigate('/game-hub')} className="rounded-full bg-[#244653] px-6 py-3 text-sm font-bold text-white shadow-md active:scale-95">回遊戲區</button>
               <button type="button" onClick={() => setFinaleOpen(false)} className="rounded-full border border-[#244653]/50 px-6 py-2 text-sm font-bold text-[#244653] active:scale-95">留在島上看看</button>

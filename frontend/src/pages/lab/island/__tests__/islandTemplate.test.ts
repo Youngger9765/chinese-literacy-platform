@@ -9,13 +9,17 @@
 import { describe, it, expect } from 'vitest';
 import {
   buildStopsFromSequence,
-  buildOpeningForTitle,
   buildBabiesForVocabulary,
   zoneForIndex,
   STEP_BUILDING_META,
   PLAYER_SPAWN,
   isSceneryExcluded,
   actInfoForZone,
+  storyTypeForLesson,
+  buildOpeningForStory,
+  buildStoryProgressionLines,
+  buildStoryEndingLine,
+  type StoryType,
 } from '../islandTemplate';
 
 describe('zoneForIndex — 把 N 個站分成三區，跟 20011 手刻的 3/3/4 比例一致', () => {
@@ -113,24 +117,104 @@ describe('buildStopsFromSequence — 從後端 step_sequence 產生站點清單'
   });
 });
 
-describe('buildOpeningForTitle — 從課名產生開場白（不帶這課的劇情細節）', () => {
-  it('每一行都有說話者跟台詞，且台詞提到課名', () => {
-    const lines = buildOpeningForTitle('不量田');
+/**
+ * #3799 批次 2：劇情指派規則（design.md §6.2）。179 課全部覆蓋＋分布數字
+ * 跟 design.md 一致的回歸鎖在 `islandTemplate.allLessons.story.test.ts`
+ * （用真實 179 課 fixture 跑）；這裡只測規則本身的優先序與邊界案例。
+ */
+describe('storyTypeForLesson — 劇情指派規則（design.md §6.2，優先序分層）', () => {
+  it('① grade 是文言文 → 尋寶（優先於 category）', () => {
+    expect(storyTypeForLesson('文言文', 'Fable', '記敘文')).toBe('treasure');
+  });
+
+  it('② grade 是品格教育 → 修復（優先於 category）', () => {
+    expect(storyTypeForLesson('品格教育', 'Science', '說明文')).toBe('repair');
+  });
+
+  it('③ 一般年級 + category=Science → 偵探', () => {
+    expect(storyTypeForLesson('4', 'Science', '說明文')).toBe('detective');
+  });
+
+  it('③ 一般年級 + category=Fable → 魔王', () => {
+    expect(storyTypeForLesson('4', 'Fable', '記敘文')).toBe('boss');
+  });
+
+  it('③ 一般年級 + category=History → 比賽', () => {
+    expect(storyTypeForLesson('5', 'History', '記敘文')).toBe('competition');
+  });
+
+  it('③ 一般年級 + category=Daily → 尋寶', () => {
+    expect(storyTypeForLesson('5', 'Daily', '記敘文')).toBe('treasure');
+  });
+
+  it('category 與 genre 皆空值 → fallback 比賽', () => {
+    expect(storyTypeForLesson('5', '', '')).toBe('competition');
+  });
+
+  it('決定性：同一組輸入兩次產生結果一樣', () => {
+    expect(storyTypeForLesson('4', 'Fable', '記敘文')).toBe(storyTypeForLesson('4', 'Fable', '記敘文'));
+  });
+});
+
+const ALL_STORY_TYPES: StoryType[] = ['repair', 'boss', 'treasure', 'detective', 'competition'];
+
+describe('buildOpeningForStory — 從課名＋劇情類型產生開場白', () => {
+  it.each(ALL_STORY_TYPES)('%s：每一行都有說話者跟台詞，且台詞提到課名、「小翎」要出現', (storyType) => {
+    const lines = buildOpeningForStory('不量田', storyType);
     expect(lines.length).toBeGreaterThanOrEqual(3);
     lines.forEach(([speaker, line]) => {
       expect(speaker.length).toBeGreaterThan(0);
       expect(line.length).toBeGreaterThan(0);
     });
     expect(lines.some(([, line]) => line.includes('不量田'))).toBe(true);
-  });
-
-  it('決定性：同一個標題兩次產生結果一樣', () => {
-    expect(buildOpeningForTitle('陸公買硯')).toEqual(buildOpeningForTitle('陸公買硯'));
-  });
-
-  it('固定嚮導角色「小翎」要出現（跨課一致的角色，不是每課重新發明）', () => {
-    const lines = buildOpeningForTitle('不量田');
     expect(lines.some(([speaker]) => speaker === '小翎')).toBe(true);
+  });
+
+  it('決定性：同一個標題＋劇情類型兩次產生結果一樣', () => {
+    expect(buildOpeningForStory('陸公買硯', 'detective')).toEqual(buildOpeningForStory('陸公買硯', 'detective'));
+  });
+
+  it('五種劇情類型對同一個課名產生的內容彼此不同——不是只套殼、劇情骨架真的有差異', () => {
+    const results = ALL_STORY_TYPES.map((t) => JSON.stringify(buildOpeningForStory('陸公買硯', t)));
+    expect(new Set(results).size).toBe(ALL_STORY_TYPES.length);
+  });
+});
+
+describe('buildStoryProgressionLines — 推進旁白，長度要恰好等於站數', () => {
+  const stops = [
+    { name: '港口燈塔', line: '燈要亮，先聽完這篇在說什麼' },
+    { name: '書卷長廊', line: '把不懂或重要的詞語做記號，沿路都看一遍' },
+    { name: '回音劇場', line: '把指定的那一段，念到順順為止' },
+  ];
+
+  it.each(ALL_STORY_TYPES)('%s：長度恰好等於站數，每一句都非空、提到該站的說明', (storyType) => {
+    const lines = buildStoryProgressionLines(storyType, stops);
+    expect(lines).toHaveLength(stops.length);
+    lines.forEach((line, i) => {
+      expect(line.length).toBeGreaterThan(0);
+      expect(line).toContain(stops[i].line);
+    });
+  });
+
+  it('0 站的課（理論邊界，不該發生但不能炸）→ 回傳空陣列，不是拋例外', () => {
+    expect(buildStoryProgressionLines('repair', [])).toEqual([]);
+  });
+
+  it('決定性：同一組輸入兩次產生結果一樣', () => {
+    expect(buildStoryProgressionLines('boss', stops)).toEqual(buildStoryProgressionLines('boss', stops));
+  });
+});
+
+describe('buildStoryEndingLine — 結局句', () => {
+  it.each(ALL_STORY_TYPES)('%s：非空字串，提到課名', (storyType) => {
+    const line = buildStoryEndingLine('不量田', storyType);
+    expect(line.length).toBeGreaterThan(0);
+    expect(line).toContain('不量田');
+  });
+
+  it('五種劇情類型對同一個課名產生的結局句彼此不同', () => {
+    const results = ALL_STORY_TYPES.map((t) => buildStoryEndingLine('陸公買硯', t));
+    expect(new Set(results).size).toBe(ALL_STORY_TYPES.length);
   });
 });
 

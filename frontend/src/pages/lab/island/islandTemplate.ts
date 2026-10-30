@@ -118,17 +118,111 @@ export function buildStopsFromSequence(sequence: string[]): IslandStop[] {
 }
 
 /**
- * 從課名決定性產生開場白。固定嚮導角色「小翎」跨課一致（跟 20011 同一個角色，
- * 對應 `/lab-island/sprites/xiaoling.png`），內容只帶課名、不帶劇情細節
- * （劇情細節只有 20011 的手工覆寫才有）。
+ * #3799（design.md §6「劇情模板」，2026-10-30 批次 2）：179 課每課都配一種
+ * 劇情骨架，取代「每座島長得差不多」的通用開場白。五種劇情見 design.md
+ * §6.1，本檔只做純資料＋模板，不碰 3D 場景造型（室內場館、劇情專屬裝飾
+ * 是後面批次的事）。
  */
-export function buildOpeningForTitle(title: string): [string, string][] {
-  return [
-    ['旁白', `這座島，收著《${title}》這篇課文裡的字`],
-    ['小翎', '你……會讀字嗎？'],
-    ['小翎', '它們是字變的，可是忘了自己是誰'],
-    ['小翎', `照順序走過去，把《${title}》讀完，燈就會一個一個亮起來`],
-  ];
+export type StoryType = 'repair' | 'boss' | 'treasure' | 'detective' | 'competition';
+
+/**
+ * 劇情指派規則（design.md §6.2，逐條對應，不要改順序——優先序本身是設計
+ * 決定，不是巧合）：
+ *   ① grade === '文言文'（12 課）→ 尋寶
+ *   ② grade === '品格教育'（15 課）→ 修復
+ *   ③ 其餘 152 課依 category：Science→偵探／Fable→魔王／History→比賽／
+ *      Daily→尋寶／category 與 genre 皆空值（4 課）→ 比賽（fallback）
+ * 回歸鎖（179 課全部覆蓋、分布數字跟 design.md 一致）在
+ * `__tests__/islandTemplate.allLessons.story.test.ts`，用真實 179 課
+ * fixture 跑，不是只測幾個手選案例。
+ */
+export function storyTypeForLesson(grade: string, category: string, genre: string): StoryType {
+  if (grade === '文言文') return 'treasure';
+  if (grade === '品格教育') return 'repair';
+  if (category === 'Science') return 'detective';
+  if (category === 'Fable') return 'boss';
+  if (category === 'History') return 'competition';
+  if (category === 'Daily') return 'treasure';
+  // #3799：design.md 把這個 fallback 描述成「category 與 genre 皆空值」，
+  // 但這裡刻意不額外檢查 genre、只以「category 不是上面任何已知值」為條件
+  // ——179 課真實資料裡，category 空值的 4 課 genre 也剛好都是空值（已用
+  // 真實 fixture 驗證過，見上面提到的回歸鎖），但往前看，fallback 的意圖
+  // 本來就是「這課沒有已知的 category 可以歸類」，用 category 本身當判斷
+  // 條件更直接，也不會因為某天 genre 開始有值、category 卻還是空值而漏接。
+  return 'competition';
+}
+
+const STORY_OPENING_TEMPLATES: Record<StoryType, (title: string) => [string, string][]> = {
+  repair: (title) => [
+    ['旁白', `《${title}》這座島上，有一座鐘樓出現了裂痕，鐘聲變得又沙啞又微弱`],
+    ['小翎', '好久沒有人把這篇課文裡的事，好好練習一遍了'],
+    ['小翎', `照順序把《${title}》讀完，鐘樓才會一點一點修好`],
+  ],
+  boss: (title) => [
+    ['旁白', `《${title}》這座島的深處，籠罩著一團看不清楚的迷霧巨影`],
+    ['小翎', '它看起來有點嚇人，但其實只是還沒被看懂的東西'],
+    ['小翎', `照順序把《${title}》讀完，巨影就會漸漸透出光、變得清楚`],
+  ],
+  treasure: (title) => [
+    ['旁白', `《${title}》這座島上，藏著一捲古老卷軸，寫著「智慧藏在這座島上」`],
+    ['小翎', '要湊齊勳章，才找得到完整的寶物'],
+    ['小翎', `照順序把《${title}》讀完，一站一枚勳章，拼出藏寶的全貌`],
+  ],
+  detective: (title) => [
+    ['旁白', `《${title}》這座島上發生了一樁怪案，需要你來查清楚`],
+    ['小翎', '案情的線索，就藏在課文裡'],
+    ['小翎', `照順序把《${title}》讀完，把線索一條一條釘上看板`],
+  ],
+  competition: (title) => [
+    ['旁白', `《${title}》這座島今年要辦一場比賽，有人猶豫了很久，最後還是報名了`],
+    ['小翎', '結果不是重點，全力以赴才是'],
+    ['小翎', `照順序把《${title}》讀完，陪他一起走到賽場`],
+  ],
+};
+
+/**
+ * 從課名＋劇情類型決定性產生開場白——取代原本只帶課名、不分劇情的
+ * `buildOpeningForTitle`（#3799 批次 2，design.md §6.4「擴充成
+ * buildOpeningForStory」）。固定嚮導角色「小翎」跨課跨劇情一致（跟
+ * 20011 同一個角色，對應 `/lab-island/sprites/xiaoling.png`）。
+ */
+export function buildOpeningForStory(title: string, storyType: StoryType): [string, string][] {
+  return STORY_OPENING_TEMPLATES[storyType](title);
+}
+
+const STORY_PROGRESSION_TEMPLATES: Record<StoryType, (station: { name: string; line: string }) => string> = {
+  repair: (s) => `完成了「${s.name}」，鐘樓的裂痕修補了一點——你剛剛練習的是：${s.line}`,
+  boss: (s) => `完成了「${s.name}」，巨影又透出了一點光——你剛剛看懂的是：${s.line}`,
+  treasure: (s) => `完成了「${s.name}」，拾獲一枚智慧勳章——你剛剛做到的是：${s.line}`,
+  detective: (s) => `完成了「${s.name}」，案情看板多釘上一條線索——你剛剛找到的是：${s.line}`,
+  competition: (s) => `完成了「${s.name}」，又累積了一枚訓練勳章——你剛剛練習的是：${s.line}`,
+};
+
+/**
+ * 每完成一站的推進旁白——跟 `stops` 一一對應（`.map()` 保證長度恆等於站數，
+ * 這是 design.md 批次 2 驗收「推進文字數量等於該課站數」這條的實作依據，
+ * 不是巧合）。內容重用既有 `STEP_BUILDING_META`/`buildStopsFromSequence`
+ * 已經算好的每站一句話說明（`stop.line`），不需要為 179 課另外手寫。
+ */
+export function buildStoryProgressionLines(
+  storyType: StoryType,
+  stops: ReadonlyArray<{ name: string; line: string }>,
+): string[] {
+  const template = STORY_PROGRESSION_TEMPLATES[storyType];
+  return stops.map((stop) => template(stop));
+}
+
+const STORY_ENDING_TEMPLATES: Record<StoryType, (title: string) => string> = {
+  repair: (title) => `鐘樓完全修好了，敲響的瞬間全島都聽到了——你讀完了《${title}》，也把這件事練好了`,
+  boss: (title) => `迷霧散開了，巨影原來只是你自己——你讀完了《${title}》，也看懂了它想告訴你的事`,
+  treasure: (title) => `所有勳章拼成了完整的寶物，翻開第一頁——你讀完了《${title}》，也找到了藏在裡面的智慧`,
+  detective: (title) => `案情看板串起了全部線索，真相大白——你讀完了《${title}》，當了一回很棒的偵探`,
+  competition: (title) => `比賽結束了，結果不是重點——你讀完了《${title}》，全力以赴走到了終點`,
+};
+
+/** 全島亮完那一刻的結局句——課名＋劇情類型決定性產生，同樣不需要逐課手寫。 */
+export function buildStoryEndingLine(title: string, storyType: StoryType): string {
+  return STORY_ENDING_TEMPLATES[storyType](title);
 }
 
 /**

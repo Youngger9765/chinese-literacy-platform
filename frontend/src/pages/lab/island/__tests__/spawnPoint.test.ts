@@ -49,6 +49,8 @@ import {
   cardStationFor,
   godCameraDesiredPosition,
   godCameraDistanceForAspect,
+  godCameraLookTarget,
+  tapToleranceForAspect,
 } from '../spawnPoint';
 
 describe('碰撞不變量（不穿牆）', () => {
@@ -653,6 +655,72 @@ describe('godCameraDistanceForAspect — 窄螢幕的構圖補償，不是鎖死
     const desktop = godCameraDesiredPosition({ x: 0, z: 0 }, DESKTOP_ASPECT);
     const phone = godCameraDesiredPosition({ x: 0, z: 0 }, PHONE_ASPECT);
     expect(phone.y).toBeGreaterThan(desktop.y);
+  });
+
+  /**
+   * #3799 Batch 2B（team-lead 真機截圖抓到：390 寬下方留了一大片海）。
+   * 根因：上面「距離隨寬高比變遠」這件事本身沒錯，但只用水平視野角反推距離時，
+   * 垂直視野角是固定的，距離被拉遠多少，垂直可視高度就跟著膨脹多少——
+   * 在極窄寬高比下，垂直可視高度會遠大於島的實際範圍，變成「下面一大片空」。
+   * 這條鎖垂直膨脹上限：距離不可超過桌機距離的 1.6 倍，不管寬高比多窄。
+   */
+  it('🔒 極窄寬高比不會讓距離無上限拉遠——垂直膨脹要有上限，否則下方留白過多', () => {
+    const veryNarrow = godCameraDistanceForAspect(0.1);
+    expect(veryNarrow).toBeLessThanOrEqual(GOD_CAMERA_DISTANCE * 1.6 + 1e-9);
+  });
+
+  it('手機直式寬高比（390/844）實際會撞到垂直膨脹上限（不是理論上不會發生）', () => {
+    const phoneDistance = godCameraDistanceForAspect(PHONE_ASPECT);
+    expect(phoneDistance).toBeCloseTo(GOD_CAMERA_DISTANCE * 1.6, 5);
+  });
+});
+
+/**
+ * #3799 Batch 2B：鏡頭看的點往島內偏一點，減少窄螢幕下方的留白。
+ * 只在窄螢幕（aspect < 1）生效，寬螢幕維持原本「看玩家本人」的構圖
+ * ——那個構圖已經用真瀏覽器截圖驗過，不能被這個新增的偏移意外改動。
+ */
+describe('godCameraLookTarget — 窄螢幕鏡頭看的點往島內偏一點', () => {
+  it('桌機寬螢幕：看的點就是玩家本人，不做任何偏移', () => {
+    const target = godCameraLookTarget({ x: 3, z: -5 }, DESKTOP_ASPECT);
+    expect(target).toEqual({ x: 3, y: 0.6, z: -5 });
+  });
+
+  it('手機窄螢幕：看的點偏離玩家本人位置，不是直接盯著玩家腳下', () => {
+    const playerPos = { x: 3, z: -5 };
+    const target = godCameraLookTarget(playerPos, PHONE_ASPECT);
+    expect(target).not.toEqual({ x: playerPos.x, y: 0.6, z: playerPos.z });
+  });
+
+  it('決定性：同一組輸入兩次產生一樣的結果', () => {
+    const a = godCameraLookTarget({ x: 1, z: 2 }, PHONE_ASPECT);
+    const b = godCameraLookTarget({ x: 1, z: 2 }, PHONE_ASPECT);
+    expect(a).toEqual(b);
+  });
+
+  it('玩家水平位移多少，窄螢幕的看點也跟著位移同樣的量——仍然「跟著角色」，不是釘死在世界某個固定點', () => {
+    const a = godCameraLookTarget({ x: 0, z: 0 }, PHONE_ASPECT);
+    const b = godCameraLookTarget({ x: 5, z: -3 }, PHONE_ASPECT);
+    expect(b.x - a.x).toBeCloseTo(5, 5);
+    expect(b.z - a.z).toBeCloseTo(-3, 5);
+  });
+});
+
+/**
+ * #3799 Batch 2B：建築可點範圍在窄螢幕要加大（team-lead 真機觀察：
+ * 名牌太小，小朋友不好點）。容許誤差只在窄螢幕放寬，寬螢幕維持接近精準點擊。
+ */
+describe('tapToleranceForAspect — 建築可點範圍，窄螢幕比桌機寬容', () => {
+  it('桌機寬螢幕：容許誤差小，維持接近精準點擊', () => {
+    expect(tapToleranceForAspect(DESKTOP_ASPECT)).toBeLessThan(0.05);
+  });
+
+  it('手機窄螢幕：容許誤差明顯比桌機大，小朋友不用點得很準', () => {
+    expect(tapToleranceForAspect(PHONE_ASPECT)).toBeGreaterThan(tapToleranceForAspect(DESKTOP_ASPECT));
+  });
+
+  it('決定性：同一個寬高比兩次呼叫結果一樣', () => {
+    expect(tapToleranceForAspect(PHONE_ASPECT)).toBe(tapToleranceForAspect(PHONE_ASPECT));
   });
 });
 

@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { introProgress, characterPose } from './islandMotion';
 import type { IslandBaby, IslandStop } from './islandTemplate';
 import { isSceneryExcluded } from './islandTemplate';
-import { MIN_CAMERA_BUILDING_DISTANCE, BUILDING_BASE_RADIUS, computeSpawnFacingLighthouse, selectNearestStation, findCelebrationViewpoint, findTravelToDestination, arcFlightPosition, arcFlightArrivalYaw, walkAlongPathPosition, walkDurationSeconds, godCameraDesiredPosition, GOD_CAMERA_FOV_DEG, GOD_VIEW_FOG_DENSITY, isMovementLocked, isManualControlEnabled, cardStationFor, isLabelOccluded, type CelebrationViewpoint, type LabelOcclusionObstacle } from './spawnPoint';
+import { MIN_CAMERA_BUILDING_DISTANCE, BUILDING_BASE_RADIUS, computeSpawnFacingLighthouse, selectNearestStation, findCelebrationViewpoint, findTravelToDestination, arcFlightPosition, arcFlightArrivalYaw, walkAlongPathPosition, walkDurationSeconds, godCameraDesiredPosition, godCameraLookTarget, tapToleranceForAspect, GOD_CAMERA_FOV_DEG, GOD_VIEW_FOG_DENSITY, isMovementLocked, isManualControlEnabled, cardStationFor, isLabelOccluded, type CelebrationViewpoint, type LabelOcclusionObstacle } from './spawnPoint';
 import { startCelebration, advanceOnTurnConverged, isHoldComplete, diffProgress, resolveCelebrationTrigger, celebrationGlowBoost, steadyCompletedGlow, resolveCelebrationGlow, INITIAL_PROGRESS_DIFF_STATE, type CelebrationState, type ProgressDiffState } from './islandCelebration';
 import { buildStationGroup, applyBuildingGlow, disposeObjectTree, buildingTopY, type BuildingMaterialSlot } from './islandBuildingShapes';
 
@@ -444,6 +444,26 @@ export function createIslandWorld(
   const keyup = (event: KeyboardEvent) => keys.delete(event.key.toLowerCase());
   let downAt = { x: 0, y: 0 };
   const pointerdown = (event: PointerEvent) => { dragX = event.clientX; dragY = event.clientY; downAt = { x: event.clientX, y: event.clientY }; renderer.domElement.setPointerCapture(event.pointerId); };
+  // #3799 批次 2（team-lead 2026-10-30：「390 寬把建築的可點範圍加大」）：
+  // 窄螢幕下，raycast 精準沒命中時，退而找「螢幕上投影位置離點擊點最近、
+  // 而且在容許誤差內」的可見建築——容許誤差依寬高比放大（見
+  // `tapToleranceForAspect`），小朋友的手指比滑鼠游標粗很多，精準 raycast
+  // 對觸控不公平。只在這個 fallback 用得到，不影響桌機既有的精準點擊。
+  const nearestVisibleBuildingWithinTolerance = (ndc: THREE.Vector2): number | null => {
+    const tolerance = tapToleranceForAspect(camera.aspect);
+    let best: number | null = null;
+    let bestDist = Infinity;
+    for (const group of buildingGroups) {
+      if (!group.visible) continue;
+      const projected = group.position.clone().project(camera);
+      const dist = Math.hypot(projected.x - ndc.x, projected.y - ndc.y);
+      if (dist < tolerance && dist < bestDist) {
+        bestDist = dist;
+        best = group.userData.index as number;
+      }
+    }
+    return best;
+  };
   const pointerup = (event: PointerEvent) => {
     if (mode !== 'god' || Math.hypot(event.clientX - downAt.x, event.clientY - downAt.y) > 6) return;
     // 放開滑鼠當下就判斷點到哪棟，不等下一個畫面（否則快點時會落空）
@@ -453,6 +473,7 @@ export function createIslandWorld(
     const hitNow = raycaster.intersectObjects(buildingGroups.filter((group) => group.visible), true)[0];
     let picked: number | null = null;
     if (hitNow) { let o: THREE.Object3D | null = hitNow.object; while (o && o.userData.index === undefined) o = o.parent; picked = (o?.userData.index as number | undefined) ?? null; }
+    if (picked === null) picked = nearestVisibleBuildingWithinTolerance(ndc);
     if (picked !== null) events.onPick?.(picked);
   };
   const pointermove = (event: PointerEvent) => {
@@ -748,7 +769,11 @@ export function createIslandWorld(
         // `camera.aspect`（resize() 已經即時維護），讓窄螢幕自動拉遠一點。
         const target = godCameraDesiredPosition(player.position, camera.aspect);
         camera.position.lerp(new THREE.Vector3(target.x, target.y, target.z), Math.min(1, dt * 3));
-        camera.lookAt(player.position.x, 0.6, player.position.z);
+        // #3799 批次 2：窄螢幕下看的點往島內部偏一點（見 godCameraLookTarget
+        // 的說明），減少畫面下緣的外海留白；寬螢幕維持原本「直接看著玩家
+        // 腳下」的構圖，已經用真瀏覽器截圖驗過不需要這個補償。
+        const lookTarget = godCameraLookTarget(player.position, camera.aspect);
+        camera.lookAt(lookTarget.x, lookTarget.y, lookTarget.z);
       }
     }
     zonedThings.forEach((thing) => { thing.visible = (thing.userData.zone as number) <= unlockedZone; });

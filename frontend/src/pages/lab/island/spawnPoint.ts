@@ -873,11 +873,24 @@ export interface Vec3Like {
  */
 const GOD_VIEW_TARGET_WORLD_RADIUS = 14; // 世界單位：直式手機也至少框得到出生區幾棟建築（#3794 四次訂正，原 9 太近）
 
+/**
+ * #3799 批次 2 構圖訂正（team-lead 2026-10-30 真機截圖抓到：390 寬「下方
+ * 留了一大片海」）：純用水平視野補償距離，在極窄寬高比下會把距離拉到
+ * 100+（390/844 算出來逼近 113），垂直方向（FOV 固定 30°，不像水平會
+ * 變窄）因此框進遠超過需要的世界範圍——島只佔畫面一小塊，下面一大截變成
+ * 鏡頭跟島之間的外海。這個上限不是另一個鎖死的數字：它是「垂直視野最多
+ * 比桌機已經驗過的構圖多拉開幾倍」這個幾何關係換算回來的距離上限，水平
+ * 補償在這個上限之內才生效，超過的話寧可犧牲一點水平範圍，換取垂直構圖
+ * 不要有過多留白。
+ */
+const MAX_VERTICAL_STRETCH = 1.6;
+
 export function godCameraDistanceForAspect(aspect: number): number {
   const vFovRad = (GOD_CAMERA_FOV_DEG * Math.PI) / 180;
   const hFovRad = 2 * Math.atan(Math.tan(vFovRad / 2) * aspect);
-  const minDistance = GOD_VIEW_TARGET_WORLD_RADIUS / Math.tan(hFovRad / 2);
-  return Math.max(GOD_CAMERA_DISTANCE, minDistance);
+  const minDistanceForWidth = GOD_VIEW_TARGET_WORLD_RADIUS / Math.tan(hFovRad / 2);
+  const maxDistanceForVerticalCap = GOD_CAMERA_DISTANCE * MAX_VERTICAL_STRETCH;
+  return Math.max(GOD_CAMERA_DISTANCE, Math.min(minDistanceForWidth, maxDistanceForVerticalCap));
 }
 
 /** 上帝視角鏡頭在「看的那一點」所框到的畫面高度（世界單位）。用來鎖「鏡頭不能
@@ -897,6 +910,42 @@ export function godCameraDesiredPosition(playerPos: { x: number; z: number }, as
     y: distance * Math.sin(GOD_CAMERA_PITCH),
     z: playerPos.z + Math.cos(GOD_CAMERA_YAW) * distance * Math.cos(GOD_CAMERA_PITCH),
   };
+}
+
+/**
+ * #3799 批次 2（team-lead 2026-10-30：「鏡頭看的點要往島的中心偏一點（但
+ * 仍跟著角色）」）：鏡頭的位置（`godCameraDesiredPosition`）跟鏡頭看的點
+ * 是兩件事——鏡頭固定從「玩家 + 鏡頭方向那一側」拉遠的位置看過去，直接
+ * 看著玩家腳下時，鏡頭跟玩家之間那段距離（在窄螢幕拉得特別遠）大部分是
+ * 外海，恰好落在畫面下緣，就是「下方一大片海」的來源。把看的點沿著
+ * 「鏡頭→玩家」方向再往前推一點（往島內部，遠離鏡頭的方向），讓構圖的
+ * 焦點落在玩家前方更深入島內的地方，畫面下緣的外海留白會跟著縮小。只在
+ * 窄螢幕（aspect < 1）套用——寬螢幕的構圖已經用真瀏覽器截圖驗過沒有這個
+ * 問題，不要因為加了這個補償意外改變桌機構圖。仍然「跟著角色」：補償量
+ * 是相對玩家目前位置的固定位移，角色走到哪，看的點就跟著位移到哪。
+ */
+const GOD_LOOK_AHEAD_BIAS = 6; // 世界單位，小於一個 zone 的半徑量級，不會把焦點推出島外
+
+export function godCameraLookTarget(playerPos: { x: number; z: number }, aspect: number): Vec3Like {
+  const bias = aspect < 1 ? GOD_LOOK_AHEAD_BIAS : 0;
+  return {
+    x: playerPos.x - Math.sin(GOD_CAMERA_YAW) * bias,
+    y: 0.6,
+    z: playerPos.z - Math.cos(GOD_CAMERA_YAW) * bias,
+  };
+}
+
+/**
+ * #3799 批次 2（team-lead 2026-10-30：「390 寬把建築的可點範圍加大」）：
+ * 建築的可點範圍（NDC 容許誤差）——小朋友的手指比滑鼠游標粗很多，窄螢幕
+ * （手機）給更寬的容許誤差；寬螢幕（桌機，滑鼠精準度高）維持接近原本的
+ * 精準 raycast，不要意外讓桌機點擊誤觸旁邊的建築。
+ */
+const TAP_TOLERANCE_NDC_WIDE = 0.03;
+const TAP_TOLERANCE_NDC_NARROW = 0.12;
+
+export function tapToleranceForAspect(aspect: number): number {
+  return aspect < 1 ? TAP_TOLERANCE_NDC_NARROW : TAP_TOLERANCE_NDC_WIDE;
 }
 
 
