@@ -14,10 +14,16 @@
  * - 分群方式切換（依文體／依類別）會重新分群
  * - API 失敗時顯示錯誤訊息，不是白屏
  *
- * jsdom 沒有真的 WebGL，`createArchipelagoWorld` 在這個環境下必定回傳
- * `null`（`renderer.getContext()` 拿不到真的 context）——這正好讓元件走
- * PRD §6 的「WebGL 建不起來自動降級清單模式」那條路徑，省了額外 mock
- * three.js 的麻煩，也順便驗證了這條降級路徑本身沒有壞掉。
+ * `createArchipelagoWorld` 整支 mock 掉（見下面 `createArchipelagoWorldMock`），
+ * 不靠「jsdom 沒有真的 WebGL所以會自然回傳 null」這個環境細節——那個假設
+ * 曾經不成立過（這支檔案舊版的文件註解就是這樣寫的，但實測這幾支測試
+ * 全程走的是 3D 模式分支，不是 WebGL 降級分支，代表某個環境組合下
+ * `createArchipelagoWorld` 並沒有乖乖回傳 null）。明確 mock 掉才能：
+ * ① 不管環境怎麼變都是決定性的 ② 真的攔到 `loadCluster()` 收到的參數，
+ * 驗證 category 有沒有在送進 3D 世界前正規化（code review 2026-10-30
+ * blocker 1 的回歸鎖——舊版只驗了 `normalizeCategory()` 這個純函式本身，
+ * 從沒驗過 call site 真的呼叫了它）。WebGL 降級分支本身另外用
+ * `createArchipelagoWorldMock.mockReturnValueOnce(null)` 測。
  */
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
@@ -53,6 +59,23 @@ vi.mock('../../../services/progressApi', () => ({
 const fetchMyWordBabiesMock = vi.fn();
 vi.mock('../../../services/wordBabyApi', () => ({
   fetchMyWordBabies: (...args: unknown[]) => fetchMyWordBabiesMock(...args),
+}));
+
+// code review 2026-10-30 blocker 1 的回歸鎖：jsdom 沒有真的 WebGL，
+// `createArchipelagoWorld` 在上面那支「不 mock」的測試裡必定回傳 `null`，
+// `loadCluster()` 永遠不會真的被呼叫——意思是「category 有沒有正規化」
+// 這個事實從來沒有被任何測試真正驗到過，只驗過 `normalizeCategory()`
+// 這個純函式本身對不對。這裡額外 mock 掉 `createArchipelagoWorld`，讓它
+// 回傳一個假世界物件，才能真的攔到 `loadCluster()` 收到的參數，驗證
+// call site 真的做了正規化，不是只驗了被呼叫的函式本身。
+const loadClusterMock = vi.fn();
+const createArchipelagoWorldMock = vi.fn(() => ({
+  loadCluster: loadClusterMock,
+  dispose: vi.fn(),
+  focusOnIsland: vi.fn(),
+}));
+vi.mock('../archipelago/createArchipelagoWorld', () => ({
+  createArchipelagoWorld: () => createArchipelagoWorldMock(),
 }));
 
 import StudentArchipelagoPage from '../StudentArchipelagoPage';
@@ -98,6 +121,8 @@ describe('StudentArchipelagoPage', () => {
     fetchStoriesMock.mockReset().mockResolvedValue(STORIES_RES);
     getStudentProgressMock.mockReset().mockResolvedValue(PROGRESS_RES);
     fetchMyWordBabiesMock.mockReset().mockResolvedValue(BABIES_RES);
+    loadClusterMock.mockReset();
+    createArchipelagoWorldMock.mockClear();
   });
 
   it('只打三支 API 各一次（不逐課打）', async () => {
@@ -246,5 +271,33 @@ describe('StudentArchipelagoPage', () => {
 
     expect(errorSpy).not.toHaveBeenCalled();
     errorSpy.mockRestore();
+  });
+
+  /**
+   * code review 2026-10-30 blocker 1 的回歸鎖：直接攔 `loadCluster()`
+   * 收到的參數，驗證 call site 真的把 `/api/stories` 的原始類別碼
+   * （Fable/History）正規化成中文標籤（寓言故事/歷史人文）才送進 3D
+   * 世界——不是只驗 `normalizeCategory()` 這個純函式本身對不對。
+   */
+  it('送進 3D 世界的 category 是正規化過的中文標籤，不是 /api/stories 的原始類別碼', async () => {
+    render(<StudentArchipelagoPage />);
+    await waitFor(() => expect(loadClusterMock).toHaveBeenCalled());
+
+    const [worldIslands] = loadClusterMock.mock.calls[0];
+    const categories = (worldIslands as Array<{ storySlug: string; category: string }>)
+      .map((i: { storySlug: string; category: string }) => i.category);
+
+    expect(categories).not.toContain('Fable');
+    expect(categories).not.toContain('History');
+    expect(categories.every((c) => ['自然科學', '寓言故事', '歷史人文', '生活', '其他'].includes(c))).toBe(true);
+  });
+
+  it('WebGL 建不起來（createArchipelagoWorld 回傳 null）時自動降級清單模式，不是白屏', async () => {
+    createArchipelagoWorldMock.mockReturnValueOnce(null);
+    render(<StudentArchipelagoPage />);
+
+    await waitFor(() => expect(screen.getByText('這台裝置目前無法顯示 3D 地圖，已自動切換成清單模式')).toBeTruthy());
+    // 降級分支用的是卡片清單（IslandCard），不是 3D 模式的站點清單 <ul>。
+    expect(screen.queryByLabelText('群島 3D 地圖')).toBeNull();
   });
 });

@@ -13,8 +13,10 @@
  * 捲動）。截圖對照：改動前 `before-archipelago-1280.png`/`-390.png`。
  *
  * 合併/篩選/分群/蜂巢座標的純函式邏輯都在 archipelagoDomain.ts／
- * archipelago/archipelagoClusters.ts（各自獨立測試），這個檔案只負責
- * fetch API＋render＋串 3D 世界（`createArchipelagoWorld.ts`）。
+ * archipelago/core/archipelagoClusters.ts（各自獨立測試，模組重構
+ * 2026-10-30 移進 core/ 骨架層——見 `.claude/skills/archipelago-module/
+ * SKILL.md`），這個檔案只負責 fetch API＋render＋串 3D 世界
+ * （`createArchipelagoWorld.ts`）。
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -38,13 +40,27 @@ import {
   type ClusterMode,
   type Cluster,
   type RecentProgressEntry,
-} from './archipelago/archipelagoClusters';
+} from './archipelago/core/archipelagoClusters';
 import {
   createArchipelagoWorld,
   type ArchipelagoWorld,
   type ArchipelagoWorldIsland,
   type ArchipelagoWorldPortal,
 } from './archipelago/createArchipelagoWorld';
+import { THEMES, DEFAULT_THEME_ID } from './archipelago/themes';
+
+/** 偏好存在哪個 localStorage key——PRD §8.5「記在學生偏好（前端
+ *  localStorage，不加後端）」。 */
+const THEME_STORAGE_KEY = 'archipelago-theme';
+
+function readStoredThemeId(): string {
+  try {
+    const stored = localStorage.getItem(THEME_STORAGE_KEY);
+    return stored && stored in THEMES ? stored : DEFAULT_THEME_ID;
+  } catch {
+    return DEFAULT_THEME_ID; // localStorage 在部分隱私模式下會拋錯，fail-closed 退回預設主題
+  }
+}
 
 const STATUS_BADGE_CLASS: Record<ArchipelagoIsland['status'], string> = {
   occupied: 'bg-amber-100 text-amber-700 border-amber-300',
@@ -98,9 +114,12 @@ const ArchipelagoSidePanel: React.FC<{
   onToggleListMode: () => void;
   babyCount: { owned: number; total: number } | null;
   onOpenWordBabies: () => void;
+  themeId: string;
+  onChangeTheme: (id: string) => void;
 }> = ({
   cluster, occupiedInCluster, clusterMode, onChangeMode, allClusters, onJumpCluster,
   search, onSearch, onSelectIsland, selectedSlug, onToggleListMode, babyCount, onOpenWordBabies,
+  themeId, onChangeTheme,
 }) => {
   const visibleStories = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -125,6 +144,21 @@ const ArchipelagoSidePanel: React.FC<{
         >
           {allClusters.map((c) => (
             <option key={c.key} value={c.key}>{c.label}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* PRD §8.5：骨架不變、換長相——學生自己選皮膚，記在 localStorage。 */}
+      <div className="flex items-center gap-2">
+        <label htmlFor="archipelago-theme-select" className="text-xs font-semibold text-gray-400">主題皮膚</label>
+        <select
+          id="archipelago-theme-select"
+          value={themeId}
+          onChange={(e) => onChangeTheme(e.target.value)}
+          className="flex-1 rounded-lg border border-gray-200 px-2 py-1.5 text-sm"
+        >
+          {Object.values(THEMES).map((t) => (
+            <option key={t.id} value={t.id}>{t.name}</option>
           ))}
         </select>
       </div>
@@ -224,13 +258,32 @@ const StudentArchipelagoPage: React.FC = () => {
   const [listMode, setListMode] = useState(false);
   const [webglFailed, setWebglFailed] = useState(false);
   const [transitioning, setTransitioning] = useState(false);
+  // PRD §8.5「學生可在 HUD 切換主題，記在學生偏好」——讀一次 localStorage
+  // 當初始值，切換時寫回去（見下面 `changeTheme`）。
+  const [themeId, setThemeId] = useState<string>(readStoredThemeId);
 
   // 舊版（D3）年級卡片清單篩選——清單模式切換過去時沿用。
   const [legacyGradeFilter, setLegacyGradeFilter] = useState<string | null>(null);
   const [legacySearch, setLegacySearch] = useState('');
 
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  // 這裡故意不用 `useRef`——真的發生過的 bug（2026-10-30 模組重構時在真
+  // 預覽站撞到，確認跟這次重構無關、本來就壞著）：這個容器 div 包在
+  // `islands === null` 的載入早退裡，掛載時第一次 commit 一定是「載入中」
+  // 那段文字，容器 div 根本還沒進 DOM；世界建立的 effect 依賴陣列是
+  // `[listMode, webglFailed, themeId]`，資料載入完成後重新渲染出容器 div
+  // 時，這三個值都沒變，React 判定依賴沒變就跳過重跑 effect——容器 div
+  // 事後才出現，`createArchipelagoWorld` 卻永遠不會被用正確的容器呼叫
+  // 第二次。結果是空的 3D 容器、沒有畫布、也不會走 WebGL 降級（因為
+  // `webglFailed` 從沒被設成 true，根本沒跑到那段判斷）。真預覽站截圖
+  // 證實：容器 `childElementCount === 0`。
+  // 改用 state 版的 callback ref：容器 DOM 節點真的掛上去那一刻
+  // `containerEl` 從 `null` 變成真的節點，這個變化本身就會讓依賴它的
+  // effect 重新跑一次——不需要再去猜「資料載入完成」要不要算進依賴。
+  const [containerEl, setContainerEl] = useState<HTMLDivElement | null>(null);
   const worldRef = useRef<ArchipelagoWorld | null>(null);
+  // 見下面世界建立 effect 裡的說明——純粹當「世界剛被(重新)建立」的訊號，
+  // 值本身沒有意義，只用來讓下一個 effect 知道要重新檢查 `worldRef.current`。
+  const [worldVersion, setWorldVersion] = useState(0);
 
   useEffect(() => {
     if (!token || !user) return;
@@ -338,30 +391,52 @@ const StudentArchipelagoPage: React.FC = () => {
     }, { replace: true });
   }, [setSearchParams]);
 
+  const changeTheme = useCallback((id: string) => {
+    if (!(id in THEMES)) return;
+    setThemeId(id);
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, id);
+    } catch {
+      // 部分隱私模式下 setItem 會拋錯——偏好記不住就算了，不影響當次切換
+    }
+  }, []);
+
   // ---------------------------------------------------------------------
-  // 3D 世界：建立一次、換群時呼叫 loadCluster；WebGL 建不起來自動降級
-  // 清單模式（PRD §6），不顯示錯誤頁。
+  // 3D 世界：建立一次、換群或換主題時重建（模組重構 2026-10-30：主題在
+  // `createArchipelagoWorld()` 建立時就定死，換皮膚目前走「整個世界重建」
+  // 而不是「同一個世界熱替換皮膚」——跟 listMode/webglFailed 一樣觸發整個
+  // effect 重跑）；WebGL 建不起來自動降級清單模式（PRD §6），不顯示錯誤頁。
+  // `containerEl` 在依賴陣列裡——見上面 `useState<HTMLDivElement | null>`
+  // 宣告處的說明，這是修一個真的發生過的 bug（容器掛載太晚，舊版用
+  // `useRef` 永遠抓不到第二次掛載），不是多餘的依賴。
   // ---------------------------------------------------------------------
   useEffect(() => {
     if (listMode || webglFailed) return;
-    const container = containerRef.current;
-    if (!container) return;
-    const world = createArchipelagoWorld(container, {
+    if (!containerEl) return;
+    const world = createArchipelagoWorld(containerEl, {
       onSelectIsland: (slug) => setSelectedSlug(slug),
       onSelectPortal: (key) => jumpToCluster(key),
-    });
+    }, THEMES[themeId] ?? THEMES[DEFAULT_THEME_ID]);
     if (!world) { setWebglFailed(true); return; }
     worldRef.current = world;
+    // `worldRef` 是純 ref，改它不會讓任何依賴它的 effect 重跑——下面那個
+    // 「把當前群餵進世界」的 effect 依賴的是 `[currentCluster, portals,
+    // themeId]`，完全不知道「世界剛剛才真的建好」這件事。用一個會觸發
+    // 重新渲染的 state 當訊號，下面的 effect 把它加進依賴陣列，世界建好
+    // 的當下才會真的去呼叫一次 `loadCluster()`（不然跟上面 `containerEl`
+    // 同一種 bug：world 已經存在，卻永遠沒有任何東西載入進去）。
+    setWorldVersion((v) => v + 1);
     return () => { world.dispose(); worldRef.current = null; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [listMode, webglFailed]);
+  }, [listMode, webglFailed, themeId, containerEl]);
 
   useEffect(() => {
     if (!worldRef.current || !currentCluster) return;
     // code review 2026-10-30 blocker：`s.category` 是 `/api/stories` 的原始
-    // 類別碼（Science/Fable/History/Daily），`createArchipelagoWorld.ts` 的
-    // `landmarkShapeFor()` 比對的是正規化過的中文標籤——沒過這一層全部島
-    // 都會掉進 default 造型（長得一樣），必須在這裡正規化一次才送進 3D 世界。
+    // 類別碼（Science/Fable/History/Daily），主題（`themes/ocean.ts` 等）的
+    // `landmarks` 登錄表比對的是正規化過的中文標籤——沒過這一層全部島都會
+    // 掉進 `landmarks.default` 造型（長得一樣），必須在這裡正規化一次才
+    // 送進 3D 世界。
     const worldIslands: ArchipelagoWorldIsland[] = currentCluster.stories.map((s) => ({
       storySlug: s.storySlug, title: s.title, category: normalizeCategory(s.category), status: s.status,
       stationsDone: s.stationsDone, stationsTotal: s.stationsTotal,
@@ -372,7 +447,15 @@ const StudentArchipelagoPage: React.FC = () => {
       total: p.stories.length,
     }));
     worldRef.current.loadCluster(worldIslands, worldPortals);
-  }, [currentCluster, portals]);
+    // `themeId`／`worldVersion` 都在 deps 裡：換主題或容器剛掛載時，上一個
+    // effect 會整個重建 `worldRef.current`（新世界還沒載入任何群）——但
+    // `worldRef` 是純 ref，光改它不會讓這支 effect 重跑，必須靠
+    // `worldVersion` 這個 state 訊號才會真的重新檢查一次
+    // `worldRef.current` 並呼叫 `loadCluster()`（2026-10-30 在真預覽站
+    // 撞到的 bug：少了這個訊號，容器修好之後世界雖然建起來了，卻永遠
+    // 沒有任何一群被載入，畫面還是空的——見 `containerEl` 那個 state
+    // 修法旁的說明，這是同一類問題）。
+  }, [currentCluster, portals, themeId, worldVersion]);
 
   const selectedIsland = useMemo(
     () => currentCluster?.stories.find((s) => s.storySlug === selectedSlug) ?? null,
@@ -468,12 +551,14 @@ const StudentArchipelagoPage: React.FC = () => {
       onToggleListMode={() => setListMode(true)}
       babyCount={babyCount}
       onOpenWordBabies={() => navigate('/lab/word-babies')}
+      themeId={themeId}
+      onChangeTheme={changeTheme}
     />
   );
 
   return (
     <div className="relative h-full w-full overflow-hidden bg-[#bbd6dc]">
-      <div ref={containerRef} className="absolute inset-0 [&_canvas]:h-full [&_canvas]:w-full" aria-label="群島 3D 地圖" />
+      <div ref={setContainerEl} className="absolute inset-0 [&_canvas]:h-full [&_canvas]:w-full" aria-label="群島 3D 地圖" />
 
       {transitioning && (
         <>
