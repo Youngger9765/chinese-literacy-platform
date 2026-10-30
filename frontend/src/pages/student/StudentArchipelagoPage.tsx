@@ -560,6 +560,18 @@ const StudentArchipelagoPage: React.FC = () => {
     <div className="relative h-full w-full overflow-hidden bg-[#bbd6dc]">
       <div ref={setContainerEl} className="absolute inset-0 [&_canvas]:h-full [&_canvas]:w-full" aria-label="群島 3D 地圖" />
 
+      {/* 暈影（美術指導書 §2.4：「不要用 render pass，直接照單課島的做法疊
+          CSS」——`ReadingIslandLab.tsx` 已經有這個零成本技巧，群島頁面原本
+          完全沒有這一層。色值依主題調整：海島沿用單課島同一組青色系，
+          天空島換成偏暖紫色系跟雲海主題呼應，不是兩個主題共用同一組色。 */}
+      <div
+        className={`pointer-events-none absolute inset-0 ${
+          themeId === 'sky'
+            ? 'bg-gradient-to-b from-[#e3d9f5]/30 via-transparent to-[#2a2140]/25'
+            : 'bg-gradient-to-b from-[#d1e4e3]/30 via-transparent to-[#0e3440]/25'
+        }`}
+      />
+
       {transitioning && (
         <>
           <style>{'@keyframes archipelagoPortalFlash{0%{opacity:0}30%{opacity:1}100%{opacity:0}}'}</style>

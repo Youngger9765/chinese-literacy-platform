@@ -83,6 +83,62 @@ const PORTAL_DISTANCE_FROM_HUB = 3.0;
  *  頻率，照做。 */
 const NAMEPLATE_THROTTLE_FRAMES = 3;
 
+/**
+ * 霧密度（美術指導書 §2.2 白屏事故訂正，2026-10-31，team-lead 算出根因）：
+ * 原本的 `density = 2.2 / maxRadius` 是「先決定密度，再看它產生出來的
+ * 霧化係數」，小群時密度太高，讓整片場景的霧化係數趨近 1，全部變成霧色
+ * （霧色是淺色系，於是畫面整片洗白）。
+ *
+ * 反過來想：先決定「最遠那座島該有多少霧化係數」（`targetFogFactor`，
+ * 預設 0.35——看得到島、有空氣感，但不是完全看不見也不是幾乎沒有霧），
+ * 再用 `FogExp2` 的公式 `factor = 1 - exp(-(density×distance)²)` 反推
+ * 密度：`density = sqrt(-ln(1-factor)) / distance`。
+ *
+ * `FARTHEST_DISTANCE_MULTIPLIER`：這裡的「最遠距離」指的是**鏡頭到場景
+ * 最遠點**的距離，不是群自己的半徑（`maxDist`）——鏡頭本身就在
+ * `orbitRadius = maxDist × 1.7` 外（見 `loadCluster()` 的鏡頭自動縮放），
+ * 場景最遠的點又可能在鏡頭對側再加上一個 `maxDist`，所以用
+ * `(1.7 + 1) × maxDist = 2.7 × maxDist` 當「最遠距離」的估計值。
+ */
+export const FARTHEST_DISTANCE_MULTIPLIER = 2.7;
+
+/** `FogExp2` 本身的霧化係數公式，獨立拆出來是因為「反推密度」跟「驗證
+ *  反推對不對」要用同一個公式，不要兩邊各寫一次、公式打錯一邊測試也測
+ *  不出來。 */
+export function archipelagoFogFactorAt(density: number, distance: number): number {
+  return 1 - Math.exp(-((density * distance) ** 2));
+}
+
+export function archipelagoFogDensity(maxDist: number, targetFogFactor = 0.35): number {
+  const farthestDistance = Math.max(1, maxDist) * FARTHEST_DISTANCE_MULTIPLIER;
+  return Math.sqrt(-Math.log(1 - targetFogFactor)) / farthestDistance;
+}
+
+/**
+ * 畫質分級（PRD 效能要求：iPad／390 手機都要 ≥30fps，2026-10-31 補）。
+ * SSAO 是新加的後製 pass 裡最貴的一個（每像素都要額外取樣深度/法線緩衝
+ * 做環境光遮蔽），窄螢幕（手機）預設關掉，只留 bloom／暈影；pixelRatio
+ * 上限也跟著降，減少 fill-rate 負擔。門檻直接沿用 PRD §6 既有的「手機
+ * （< 640 寬）」門檻（右側面板在這個寬度改成底部抽屜），不是另外發明一個
+ * 跟畫面其他地方不一致的數字。
+ *
+ * iPad（常見寬度 768/1024）落在寬螢幕分級——團隊長特別點名 iPad 也要
+ * ≥30fps，但 iPad 的 GPU 效能足夠負擔 SSAO，不需要跟手機一起降級；真的
+ * 量到 iPad 上 SSAO 導致掉幀的話，再把門檻或判斷式改成也看
+ * `navigator.hardwareConcurrency`/UA 之類的裝置能力訊號，不是這裡先猜。
+ */
+export const NARROW_WIDTH_THRESHOLD = 640;
+
+export interface ArchipelagoQualityTier {
+  ssaoEnabled: boolean;
+  pixelRatioCap: number;
+}
+
+export function qualityTierForWidth(width: number): ArchipelagoQualityTier {
+  if (width < NARROW_WIDTH_THRESHOLD) return { ssaoEnabled: false, pixelRatioCap: 1.25 };
+  return { ssaoEnabled: true, pixelRatioCap: 1.7 };
+}
+
 /** WebGL 無法建立時回傳 `null`（PRD §6：自動降級到清單模式，不是顯示錯誤
  *  頁），呼叫端用這個判斷要不要 render 3D 容器。
  *
@@ -102,7 +158,12 @@ export function createArchipelagoWorld(
   }
   if (!renderer.getContext()) return null;
 
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.7));
+  // 畫質分級（PRD 效能要求：iPad／390 手機都要 ≥30fps）——窄螢幕關 SSAO、
+  // 降 pixelRatio 上限，純函式見 `qualityTierForWidth()` 的說明。容器這時
+  // 可能還沒掛載完成、量到 0，退回桌機尺寸（寬螢幕分級，不會誤判成手機
+  // 關掉 SSAO）；真正的尺寸在 `resize()` 第一次呼叫時就會量到。
+  const qualityTier = qualityTierForWidth(container.clientWidth || 1280);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, qualityTier.pixelRatioCap));
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -173,7 +234,10 @@ export function createArchipelagoWorld(
   ssaoPass.kernelRadius = 10;
   ssaoPass.minDistance = 0.003;
   ssaoPass.maxDistance = 0.05;
-  composer.addPass(ssaoPass);
+  // 窄螢幕／低階裝置預設關掉 SSAO（`qualityTier`，PRD 效能要求），保留
+  // bloom＋暈影（暈影是 CSS 疊層，不在這條 composer 鏈裡，見呼叫端的 DOM
+  // class）——SSAO 是這條鏈裡最貴的 pass（每像素額外取樣深度/法線緩衝）。
+  if (qualityTier.ssaoEnabled) composer.addPass(ssaoPass);
   const outputPass = new OutputPass();
   composer.addPass(outputPass);
 
@@ -299,6 +363,38 @@ export function createArchipelagoWorld(
   let nameplateFrameCounter = 0;
 
   /**
+   * 骨架層統一打開陰影收發——美術指導書第 84 行只點名「陰影相機 frustum
+   * 要對齊群的範圍」，但 frustum 調對之後仍量不到對比改善（見 git log
+   * 2026-10-31 的訂正紀錄），一路查下去才發現每個主題的每一棟建築／每座
+   * 島都沒有 `castShadow`/`receiveShadow`——只有 `hub` 的地基一個物件有設
+   * （兩個主題各自在 `theme.hub()` 裡手動設了一次，島本身跟島上的地標完全
+   * 沒有）。這不是某個主題個別漏設，是骨架從一開始就沒有統一打開——所以
+   * 放在骨架這層一次打開，不要每個主題各自記得設一次。
+   */
+  /**
+   * `receiveShadow` 幾乎零成本（只是主渲染通道裡多取樣一張陰影貼圖），但
+   * `castShadow` 會讓那個物件多進一次陰影貼圖的繪製通道——每座島的草叢／
+   * 石頭／踏腳石／吉祥物／hover 外框全部打開 `castShadow` 一次量了 390 寬
+   * 的 fps：30.48 → 23.7（2026-10-31 實測，-22%），20 島的群一次多出上百個
+   * 投影物件。骨架不該知道哪個物件是「草叢」哪個是「地標建築」（§3.2 契約
+   * 測試①禁止骨架認得主題字眼），但骨架可以用**幾何本身的高度**當代理：
+   * 地標建築／城牆岩層明顯比草叢／踏腳石／薄環高，用 bounding box 的
+   * Y 範圍決定要不要投影，而不必知道那個物件實際是什麼。
+   */
+  const CAST_SHADOW_MIN_HEIGHT = 0.6; // 世界單位——蓋過地標/岩層，篩掉草叢/踏腳石/hover 外框
+  function enableShadows(object: THREE.Object3D): void {
+    object.traverse((child) => {
+      if (!(child as THREE.Mesh).isMesh) return;
+      const mesh = child as THREE.Mesh;
+      mesh.receiveShadow = true; // 幾乎零成本，全部打開
+      if (!mesh.geometry.boundingBox) mesh.geometry.computeBoundingBox();
+      const box = mesh.geometry.boundingBox;
+      const height = box ? (box.max.y - box.min.y) * mesh.scale.y : 0;
+      mesh.castShadow = height >= CAST_SHADOW_MIN_HEIGHT;
+    });
+  }
+
+  /**
    * 載入一群——換群時先釋放上一群（`disposeObjectTree`），位置由
    * `layoutArchipelago()`（純函式，已獨立測試）決定，這裡只負責把純座標轉成
    * 真的 three.js 物件，長相全部向 `theme` 要。
@@ -342,6 +438,7 @@ export function createArchipelagoWorld(
     const plazaPos = layout.plaza.center;
     const hub = theme.hub(ctx);
     hub.position.set(plazaPos.x, 0, plazaPos.z);
+    enableShadows(hub);
     group.add(hub);
 
     const angleStep = (Math.PI * 2) / Math.max(1, portals.length);
@@ -384,6 +481,7 @@ export function createArchipelagoWorld(
       theme.statusLook[island.status](islandObj, ctx);
       islandObj.position.set(pos.x, 0, pos.z);
       islandObj.userData.storySlug = island.storySlug;
+      enableShadows(islandObj);
       group.add(islandObj);
       pickableIslands.push(islandObj);
       islandPositions.set(island.storySlug, new THREE.Vector3(pos.x, 0, pos.z));
@@ -438,10 +536,32 @@ export function createArchipelagoWorld(
     // 動態霧密度（美術指導書 §2.2：`density ≈ 2.2 / maxRadius`，群越大霧
     // 越淡，固定密度在小群太濃、大群幾乎看不見——這是量過的公式，不是
     // 改成「看起來還行」的數字）。
-    (scene.fog as THREE.FogExp2).density = Math.min(0.04, 2.2 / Math.max(6, maxDist));
+    // 動態霧密度（美術指導書 §2.2 白屏事故訂正，2026-10-31）——見
+    // `archipelagoFogDensity()` 的說明：反推密度讓「鏡頭到最遠點」的霧化
+    // 係數落在 0.35 附近，不是直接套一個固定公式產生出不受控的密度。
+    (scene.fog as THREE.FogExp2).density = archipelagoFogDensity(maxDist);
 
     // SSAO pass 的取樣範圍要對齊這次場景的尺度，不然小群太濃、大群太淡。
     ssaoPass.kernelRadius = Math.max(4, Math.min(16, maxDist * 0.3));
+
+    // 陰影相機 frustum 要對齊這次群的範圍（美術指導書第 84 行：「固定 2048
+    // 貼圖，未依群大小調整範圍……frustum 沒對齊場景範圍，陰影要嘛太鬆要嘛
+    // 被裁掉」）。DirectionalLight 的陰影相機預設是 ±5 單位的正交投影框——
+    // 一個 20 島群的 maxDist 常常是幾十個單位，等於絕大多數島落在這個框
+    // 外面，連陰影都不會畫出來。這是 luminance.contrast 量測長期偏低（天空
+    // 島 54-58，低於 visual-scorecard.md 門檻 60）的根因：沒有接觸陰影，
+    // 畫面就沒有暗部，整片只剩下材質本色在壓光後的亮部，怎麼調材質顏色
+    // 都補不回這段暗部。
+    // 半徑抓 maxDist 的 1.3 倍（涵蓋整群半徑 + 島本身的實體範圍），不是只
+    // 貼齊群的幾何中心點，否則邊緣島的島面本身仍可能被裁到框外。
+    const shadowHalfExtent = maxDist * 1.3;
+    sun.shadow.camera.left = -shadowHalfExtent;
+    sun.shadow.camera.right = shadowHalfExtent;
+    sun.shadow.camera.top = shadowHalfExtent;
+    sun.shadow.camera.bottom = -shadowHalfExtent;
+    sun.shadow.camera.near = 0.5;
+    sun.shadow.camera.far = shadowHalfExtent * 4; // 留足太陽方向上的深度範圍
+    sun.shadow.camera.updateProjectionMatrix(); // 手動改 left/right/top/bottom 後必須呼叫，否則矩陣不會重算
 
     // 效能診斷（美術指導書 §10：「跑過 renderer 診斷，不是看起來還行」）——
     // 換群渲染一幀之後印出 draw call/三角面/幾何數，QA 時從瀏覽器 console
@@ -521,22 +641,60 @@ export function createArchipelagoWorld(
     // （皮膚在建物件時掛上去，骨架完全不用知道「旗子」這個概念存在），
     // `composer.render()` 內部仍然會呼叫每個物件的 `onBeforeRender`。
 
-    // 名牌：位置跟著 3D 物件（CSS2DRenderer 自動處理），遮擋判斷節流到
-    // 每 3 幀一次（美術指導書 §7）。
+    // 名牌：位置跟著 3D 物件（CSS2DRenderer 自動處理），遮擋跟重疊判斷都
+    // 節流到每 3 幀一次（美術指導書 §7）。
     nameplateFrameCounter = (nameplateFrameCounter + 1) % NAMEPLATE_THROTTLE_FRAMES;
     if (nameplateFrameCounter === 0) {
+      const rect = renderer.domElement.getBoundingClientRect();
+      const halfW = rect.width / 2 || 1;
+      const halfH = rect.height / 2 || 1;
+      // 第一輪：算遮擋（被別棟建築擋住）＋順便投影出每個名牌的螢幕座標跟
+      // 到鏡頭的距離，給第二輪的重疊判斷用，不用再重算一次世界座標。
+      const projected: { slug: string; x: number; y: number; distance: number; occluded: boolean }[] = [];
       for (const [slug, { object, worldPos }] of nameplates) {
         object.getWorldPosition(worldPos);
         const dir = worldPos.clone().sub(camera.position);
         const distToLabel = dir.length();
         raycaster.set(camera.position, dir.normalize());
         const hits = raycaster.intersectObjects(pickableIslands, true);
-        const blocked = hits.length > 0 && hits[0].distance < distToLabel - 0.3 && (() => {
+        const occluded = hits.length > 0 && hits[0].distance < distToLabel - 0.3 && (() => {
           let o: THREE.Object3D | null = hits[0].object;
           while (o && !o.userData.storySlug) o = o.parent;
           return o?.userData.storySlug !== slug;
         })();
-        object.element.style.opacity = blocked ? '0.35' : '1';
+        const ndc = worldPos.clone().project(camera);
+        projected.push({ slug, x: ndc.x * halfW, y: -ndc.y * halfH, distance: distToLabel, occluded });
+      }
+      // 第二輪：重疊判斷（美術指導書 §7：「離鏡頭較近那個維持不透明，較遠
+      // 那個淡化到 35% 透明度——不是完全隱藏」）。用名牌 DOM 卡片真實的
+      // `getBoundingClientRect()` 做矩形相交判斷，不是猜一個固定半徑的圓
+      // ——課名長短差很多（「這是什麼」四個字 vs 一整句標題），固定半徑在
+      // 短標題會誤判重疊、在長標題又抓不到真的重疊，兩種都錯過。節流已經
+      // 壓到每 3 幀一次，這裡多一次 reflow 讀取不是效能熱點。
+      const overlapped = new Set<string>();
+      const rects = new Map<string, DOMRect>();
+      for (const p of projected) rects.set(p.slug, nameplates.get(p.slug)!.el.getBoundingClientRect());
+      for (let i = 0; i < projected.length; i++) {
+        for (let j = i + 1; j < projected.length; j++) {
+          const a = projected[i];
+          const b = projected[j];
+          const ra = rects.get(a.slug)!;
+          const rb = rects.get(b.slug)!;
+          const intersects = ra.left < rb.right && ra.right > rb.left && ra.top < rb.bottom && ra.bottom > rb.top;
+          if (intersects) {
+            const farther = a.distance > b.distance ? a : b;
+            overlapped.add(farther.slug);
+          }
+        }
+      }
+      for (const p of projected) {
+        const { object } = nameplates.get(p.slug)!;
+        // 遮擋跟重疊是兩種不同程度的淡出（美術指導書 §7 原文分別寫
+        // 「隱藏」跟「淡化到 35%——不是完全隱藏」，不是同一個數字）：被
+        // 建築整個擋住要接近完全隱藏；只是跟別的名牌重疊、較遠那個仍要
+        // 維持淡淡的可讀性，不能跟遮擋用同一個值。遮擋優先於重疊——已經
+        // 完全隱藏的名牌不該又被重疊規則拉回 35% 變成半透明穿模。
+        object.element.style.opacity = p.occluded ? '0.05' : overlapped.has(p.slug) ? '0.35' : '1';
       }
     }
 

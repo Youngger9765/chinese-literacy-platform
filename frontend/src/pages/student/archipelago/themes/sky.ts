@@ -173,6 +173,12 @@ export const skyTheme: ArchipelagoTheme = {
   ground: (ctx) => {
     const group = new THREE.Group();
     group.add(buildGradientSkyDome(ctx, 'sky', '#eaf2ff', '#f6ecf5', '#ffe9d6'));
+    // 2026-10-31 訂正：曾經一度改成漸層貼圖「補對比」，但美術指導書
+    // 第 65 行雲海那一列寫得很明確——「維持底色，雲朵改兩階」，雲海本身
+    // 要維持單一平塗色，要動的是下面的雲朵亮暗面（已經做了）。拿掉貼圖
+    // 改回規格原本要求的平塗色；真正的對比不足根因是陰影相機 frustum
+    // 沒跟著群的範圍縮放（見 createArchipelagoWorld.ts 的 shadowHalfExtent
+    // 訂正），不是雲海材質本身。
     const cloudSea = new THREE.Mesh(
       ctx.geometry('sky-cloudsea-plane', () => new THREE.PlaneGeometry(400, 400)),
       ctx.material('sky-cloudsea', () => new THREE.MeshStandardMaterial({ color: 0xeaf0fb, roughness: 0.95, transparent: true, opacity: 0.92 })),

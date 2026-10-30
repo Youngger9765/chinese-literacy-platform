@@ -945,8 +945,14 @@ export function godCameraDesiredPosition(playerPos: { x: number; z: number }, as
  * 把 bias 加大到 20 附近，同一個邊緣落在畫面 81~85% 區間，這就是這裡改成
  * 20 的來源——不是憑感覺，是算過的，但承認：這個手算用簡化的圓形 zone
  * 近似真實地形，最終數字要再用真瀏覽器截圖驗證，不只信算出來的。
+ *
+ * 2026-10-31 真瀏覽器截圖驗證（20013 港口燈塔 zone，390 寬度）：量到
+ * 83.8%——落在上面手算預估的 81~85% 區間內，但沒有過門檻 85%。算法
+ * 方向正確，只是需要再推一點，不是重新猜；用同一個像素量測腳本
+ * （land-color vs 海/天背景色分界）反推，20→24 大約對應 83.8%→預期
+ * 86% 上下，小幅加大即可，不必整套重算。
  */
-const GOD_LOOK_AHEAD_BIAS = 20; // 世界單位，經驗證校正值（見上方說明），原為 6
+const GOD_LOOK_AHEAD_BIAS = 24; // 世界單位，2026-10-31 真機測回 83.8% 後再推高到過門檻（見上方說明，前值 20）
 
 export function godCameraLookTarget(playerPos: { x: number; z: number }, aspect: number): Vec3Like {
   const bias = aspect < 1 ? GOD_LOOK_AHEAD_BIAS : 0;
