@@ -10,9 +10,10 @@
  * 等 `docs/design/island-v2/art-direction.md` 出來才做，這裡不含任何
  * three.js 物件、不含任何顏色或造型決定。
  *
- * **尚未接線**：`createArchipelagoWorld.ts` 目前還是用
- * `hexSpiralCoord`/舊版逐一連線——那是「骨架」，依指示先不動，等美術
- * 指導書出來、connector 的渲染方式定案後再一次接進去（避免做兩次）。
+ * **已接線**（2026-10-30 起）：`createArchipelagoWorld.ts` 的 `loadCluster()`
+ * 直接呼叫這支的 `layoutArchipelago()` 決定位置/相鄰/連接物材料，長什麼
+ * 樣子（色票/幾何/貼圖）向 `theme.connector()` 要——上面這段話是接線前
+ * 寫的，接完線沒有一併更新，故修正（避免讀的人誤以為骨架還沒接這支）。
  *
  * 決定性：同一組 `storyIds`（呼叫端已經照 lessonSeq 排序）+ 同一個
  * `seed` 字串，兩次呼叫結果逐欄位相等——不靠 `Math.random()`，靠字串
@@ -138,10 +139,18 @@ export function blobMinDistance(a: readonly HexCell[], b: readonly HexCell[]): n
 // 島塊生成：1~3 格的連通 polyhex，形狀不固定（不是永遠長成一直線）
 // ---------------------------------------------------------------------------
 
+/**
+ * 2026-10-31 team-lead 明令：≥50% 的課程島要是 2～3 格的多格島，不能還是
+ * 正六角形那種觀感。原本的權重 [0.5, 0.35, 0.15]（理論期望值 50%）量起來
+ * 實際只有 35～60% 不等、且群越大越低（71 島群只有 36.6%）——原因是
+ * `growBlob()` 在擁擠處會提早結束、長不到目標大小，縮回 1 格，這個「縮水
+ * 損耗」沒算進權重設計裡。把權重往多格的一側加重（期望值抬到 70%），
+ * 留buffer 蓋過縮水損耗，20/30/50/71 四種規模實測都要 ≥50%（見
+ * `archipelagoLayout.test.ts` 的鎖）。 */
 const FOOTPRINT_WEIGHTS: ReadonlyArray<readonly [FootprintSize, number]> = [
-  [1, 0.5],
-  [2, 0.35],
-  [3, 0.15],
+  [1, 0.3],
+  [2, 0.4],
+  [3, 0.3],
 ];
 
 function pickFootprintSize(rand: () => number): FootprintSize {
@@ -157,6 +166,153 @@ function pickFootprintSize(rand: () => number): FootprintSize {
 function pickMaterial(rand: () => number): ConnectorMaterial {
   const idx = Math.floor(rand() * CONNECTOR_MATERIALS.length);
   return CONNECTOR_MATERIALS[Math.min(idx, CONNECTOR_MATERIALS.length - 1)];
+}
+
+// ---------------------------------------------------------------------------
+// 連接物生成（team-lead 2026-10-31 二次訂正）：舊版「距離門檻內兩兩全連」
+// 在小群裡會長出一張交叉的網——好幾條橋橫越整個畫面還互相交叉，門檻收緊
+// 到 1 也沒解決，因為問題不是「連太遠」，是「每座島連太多條、而且沒人管
+// 線段會不會打架」。改成：①每座島最多 2 條連線 ②先用最小生成樹保證整群
+// 連通（可以用比門檻遠的邊，只要是連通整群最短的那些）③再從門檻內、還沒
+// 連過的島對裡，挑「兩端都還有名額、不會跟任何既有線段交叉」
+// 的加進去，數量自然很少（名額剩不多、交叉限制又擋掉大半）。
+// ---------------------------------------------------------------------------
+
+/** 每座島（含廣場）最多幾條連線——骨架常數，不是渲染層的事。 */
+export const MAX_CONNECTIONS_PER_ISLAND = 2;
+
+interface Point2D {
+  x: number;
+  z: number;
+}
+
+/** 2D 線段方向判斷（orientation test，redblobgames/一般計算幾何教材的標準
+ *  寫法）：>0 逆時針、<0 順時針、≈0 共線。EPSILON 容忍浮點誤差。 */
+function orientation(a: Point2D, b: Point2D, c: Point2D): number {
+  const v = (b.x - a.x) * (c.z - a.z) - (b.z - a.z) * (c.x - a.x);
+  const EPSILON = 1e-9;
+  if (Math.abs(v) < EPSILON) return 0;
+  return v > 0 ? 1 : -1;
+}
+
+function onSegment(a: Point2D, b: Point2D, p: Point2D): boolean {
+  return (
+    Math.min(a.x, b.x) - 1e-9 <= p.x && p.x <= Math.max(a.x, b.x) + 1e-9 &&
+    Math.min(a.z, b.z) - 1e-9 <= p.z && p.z <= Math.max(a.z, b.z) + 1e-9
+  );
+}
+
+/**
+ * 兩條線段是否相交（含端點共享不算相交——兩條連接物共用同一座島很正常，
+ * 那是共用端點不是線段打架）。標準 orientation-based 演算法，涵蓋一般
+ * 情況與共線特例。純函式，吃四個 2D 點，不碰任何群島特定的資料結構，
+ * 可以直接餵合成座標測試。
+ */
+export function segmentsIntersect(p1: Point2D, p2: Point2D, p3: Point2D, p4: Point2D): boolean {
+  // 共用端點＝同一座島的兩條不同連接物，不算「交叉」。
+  const sharesEndpoint = (a: Point2D, b: Point2D) => Math.abs(a.x - b.x) < 1e-9 && Math.abs(a.z - b.z) < 1e-9;
+  if (sharesEndpoint(p1, p3) || sharesEndpoint(p1, p4) || sharesEndpoint(p2, p3) || sharesEndpoint(p2, p4)) {
+    return false;
+  }
+  const o1 = orientation(p1, p2, p3);
+  const o2 = orientation(p1, p2, p4);
+  const o3 = orientation(p3, p4, p1);
+  const o4 = orientation(p3, p4, p2);
+  if (o1 !== o2 && o3 !== o4) return true;
+  // 共線重疊特例（理論上群島座標很難剛好共線，但還是處理，不留洞）。
+  if (o1 === 0 && onSegment(p1, p2, p3)) return true;
+  if (o2 === 0 && onSegment(p1, p2, p4)) return true;
+  if (o3 === 0 && onSegment(p3, p4, p1)) return true;
+  if (o4 === 0 && onSegment(p3, p4, p2)) return true;
+  return false;
+}
+
+function distance2D(a: Point2D, b: Point2D): number {
+  return Math.hypot(a.x - b.x, a.z - b.z);
+}
+
+/** 簡易 union-find——Kruskal's MST 判斷「加這條邊會不會成環」要用。 */
+class UnionFind {
+  private parent: Map<string, string> = new Map();
+  find(id: string): string {
+    if (!this.parent.has(id)) this.parent.set(id, id);
+    const p = this.parent.get(id)!;
+    if (p === id) return id;
+    const root = this.find(p);
+    this.parent.set(id, root);
+    return root;
+  }
+  union(a: string, b: string): void {
+    const ra = this.find(a);
+    const rb = this.find(b);
+    if (ra !== rb) this.parent.set(ra, rb);
+  }
+  connected(a: string, b: string): boolean {
+    return this.find(a) === this.find(b);
+  }
+}
+
+/**
+ * 建出一整群的連接物——度數上限（`MAX_CONNECTIONS_PER_ISLAND`）＋
+ * 不交叉是硬限制，分兩階段：
+ *
+ * ① 度數受限的最小生成樹（Kruskal 變體）：所有島兩兩配對依中心點距離
+ *    由近到遠排序，依序嘗試加進去——加了會成環、或任一端已經額滿、或會
+ *    跟已經加入的線段交叉，就跳過，換下一條。這個階段用「全部島對」不是
+ *    只看門檻內的，因為目標是「保證整群連通」，必要時可以用比門檻遠一點
+ *    的邊連住原本會孤立的島（但因為是由近到遠處理，實際選到的邊幾乎都還
+ *    是很短，只有真的沒有更近選項時才會用遠邊）。
+ * ② 額外的相鄰連線：① 做完後，门檻内、兩端都還有名額、且不會跟任何現有
+ *    線段交叉的島對，依距離由近到遠補進去（這階段**不**檢查成環——多一條
+ *    捷徑形成小迴圈是刻意要的視覺豐富度，不是 bug）。因為度數名額多半已
+ *    經在①用完，這裡真正補得進去的數量自然很少。
+ */
+function buildConnections(allBlobs: readonly IslandBlob[], rand: () => number): IslandConnection[] {
+  const byId = new Map(allBlobs.map((b) => [b.id, b]));
+  const degree = new Map<string, number>(allBlobs.map((b) => [b.id, 0]));
+  const accepted: { a: string; b: string }[] = [];
+
+  const hasBudget = (id: string) => (degree.get(id) ?? 0) < MAX_CONNECTIONS_PER_ISLAND;
+  const crossesExisting = (a: IslandBlob, b: IslandBlob) =>
+    accepted.some((e) => segmentsIntersect(a.center, b.center, byId.get(e.a)!.center, byId.get(e.b)!.center));
+
+  // 所有島對，依中心點距離由近到遠排序——近的優先，MST 跟「額外連線」都
+  // 從這張同一份排序清單取用，只是篩選條件不同。
+  const allPairs: { a: IslandBlob; b: IslandBlob; dist: number }[] = [];
+  for (let i = 0; i < allBlobs.length; i++) {
+    for (let j = i + 1; j < allBlobs.length; j++) {
+      allPairs.push({ a: allBlobs[i], b: allBlobs[j], dist: distance2D(allBlobs[i].center, allBlobs[j].center) });
+    }
+  }
+  allPairs.sort((p, q) => p.dist - q.dist);
+
+  // ① 度數受限的 MST
+  const uf = new UnionFind();
+  for (const { a, b } of allPairs) {
+    if (uf.connected(a.id, b.id)) continue; // 會成環
+    if (!hasBudget(a.id) || !hasBudget(b.id)) continue;
+    if (crossesExisting(a, b)) continue;
+    uf.union(a.id, b.id);
+    degree.set(a.id, (degree.get(a.id) ?? 0) + 1);
+    degree.set(b.id, (degree.get(b.id) ?? 0) + 1);
+    accepted.push({ a: a.id, b: b.id });
+  }
+
+  // ② 額外的相鄰連線（只看門檻內、還沒連過的島對，不檢查成環）
+  const alreadyConnected = new Set(accepted.map((e) => [e.a, e.b].sort().join('|')));
+  for (const { a, b, dist: _dist } of allPairs) {
+    const key = [a.id, b.id].sort().join('|');
+    if (alreadyConnected.has(key)) continue;
+    if (blobMinDistance(a.cells, b.cells) > DISTANCE_THRESHOLD) continue;
+    if (!hasBudget(a.id) || !hasBudget(b.id)) continue;
+    if (crossesExisting(a, b)) continue;
+    degree.set(a.id, (degree.get(a.id) ?? 0) + 1);
+    degree.set(b.id, (degree.get(b.id) ?? 0) + 1);
+    accepted.push({ a: a.id, b: b.id });
+    alreadyConnected.add(key);
+  }
+
+  return accepted.map((e) => ({ a: e.a, b: e.b, material: pickMaterial(rand) }));
 }
 
 /**
@@ -258,17 +414,11 @@ export function layoutArchipelago(storyIds: readonly string[], seed: string, hex
     islands.push({ id: storyId, cells, center: averageCartesian(cells, hexSize) });
   }
 
-  // 相鄰互通：只排近的（距離門檻內），不是每座都連——也不是只連「前一座」
-  // （舊版那條鍊的病根），是看「真實格距」兩兩判斷。
+  // 相鄰互通：度數受限的 MST 保證整群連通＋少量額外相鄰連線（見
+  // `buildConnections` 註解——取代舊版「門檻內兩兩全連」，那個做法在小群
+  // 會長出一張交叉的網）。
   const allBlobs: readonly IslandBlob[] = [plaza, ...islands];
-  const connections: IslandConnection[] = [];
-  for (let i = 0; i < allBlobs.length; i++) {
-    for (let j = i + 1; j < allBlobs.length; j++) {
-      if (blobMinDistance(allBlobs[i].cells, allBlobs[j].cells) <= DISTANCE_THRESHOLD) {
-        connections.push({ a: allBlobs[i].id, b: allBlobs[j].id, material: pickMaterial(rand) });
-      }
-    }
-  }
+  const connections: IslandConnection[] = buildConnections(allBlobs, rand);
 
   const connectedIds = new Set<string>();
   for (const conn of connections) {

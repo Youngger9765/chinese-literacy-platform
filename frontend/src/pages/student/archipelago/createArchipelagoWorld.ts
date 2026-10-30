@@ -139,6 +139,119 @@ export function qualityTierForWidth(width: number): ArchipelagoQualityTier {
   return { ssaoEnabled: true, pixelRatioCap: 1.7 };
 }
 
+export interface Vec3Like {
+  x: number;
+  y: number;
+  z: number;
+}
+
+export interface OccluderBox {
+  /** 這個包圍盒屬於哪座島——跟名牌自己的 `ownSlug` 相同時不算遮擋（島不會
+   *  擋自己的名牌）。 */
+  slug: string;
+  min: Vec3Like;
+  max: Vec3Like;
+}
+
+/**
+ * 名牌遮擋判斷（美術指導書 §7 + team-lead 2026-10-31 訂正）——抽成純函式，
+ * 參數只吃「相機位置、名牌錨點、可遮擋物的包圍盒清單」，不碰 three.js
+ * 的 Raycaster/Scene，可以直接餵合成資料寫測試，不必在真實佈局裡旋轉
+ * 鏡頭碰運氣找一個剛好被擋住的案例（2026-10-31 實測：在一個 20 島群裡
+ * 試了 10 種角度都沒能逼出真實案例，但不代表機制沒用——只是沒測到）。
+ *
+ * 做法：相機到名牌錨點視為一條線段（不是無限長的射線，錨點背後的東西
+ * 不該算遮擋），對每個「不屬於這座島自己」的包圍盒做 ray-vs-AABB 相交
+ * 測試；交點若比名牌本身更靠近相機（扣掉 `marginBeforeLabel` 的容忍值，
+ * 避免名牌所在島自己的地面/建築邊緣誤判成遮擋自己），就算被擋住。
+ */
+export function isNameplateOccluded(
+  cameraPos: Vec3Like,
+  labelAnchor: Vec3Like,
+  ownSlug: string,
+  occluders: OccluderBox[],
+  marginBeforeLabel = 0.3,
+): boolean {
+  const origin = new THREE.Vector3(cameraPos.x, cameraPos.y, cameraPos.z);
+  const target = new THREE.Vector3(labelAnchor.x, labelAnchor.y, labelAnchor.z);
+  const toLabel = target.clone().sub(origin);
+  const distToLabel = toLabel.length();
+  if (distToLabel < 1e-6) return false; // 名牌就在相機位置——不可能被擋住
+  const direction = toLabel.clone().normalize();
+  const ray = new THREE.Ray(origin, direction);
+  const hitPoint = new THREE.Vector3();
+  for (const occluder of occluders) {
+    if (occluder.slug === ownSlug) continue;
+    const box = new THREE.Box3(
+      new THREE.Vector3(occluder.min.x, occluder.min.y, occluder.min.z),
+      new THREE.Vector3(occluder.max.x, occluder.max.y, occluder.max.z),
+    );
+    const hit = ray.intersectBox(box, hitPoint);
+    if (!hit) continue;
+    const hitDistance = hit.distanceTo(origin);
+    if (hitDistance < distToLabel - marginBeforeLabel) return true;
+  }
+  return false;
+}
+
+export interface ClusterBoundingCircle {
+  center: Vec3Like;
+  radius: number;
+}
+
+/**
+ * 開場鏡頭構圖（team-lead 2026-10-31 明令：「開場鏡頭要能框住整群，傳送門
+ * 廣場放在畫面正中央，不要像現在只截到一角」）——根因查到：鏡頭一直固定
+ * `lookAt (0,0,0)`（世界原點），但傳送門廣場的實際質心**不是**世界原點
+ * （`layoutArchipelago()` 的廣場格子是從 (0,0) 往外長 3 格，長出來的形狀
+ * 不對稱時質心會偏離原點——實測一個 20 島群廣場中心量到 `(-1,0)`，不是
+ * `(0,0)`），鏡頭看著一個錯的點，整群當然會歪向畫面一角。
+ *
+ * 改成：先算出「所有島（含廣場）的外接圓」（用 bounding-box 中心當圓心，
+ * 不是質心——質心會被密度不均的一側拉偏，bbox 中心在視覺上比較貼近「真正
+ * 置中」，算法也更簡單、更穩定），鏡頭 `lookAt` 這個圓心，`orbitRadius`
+ * 依這個圓的半徑縮放（取代原本「距離原點最遠的島」那個算法，語意從
+ * 「離原點多遠」換成「離整群真正的中心多遠」，更正確）。
+ *
+ * 純函式，只吃一組 2D 位置，不碰 three.js 場景——可以直接餵合成座標測試。
+ */
+/**
+ * @param forceCenter 強制指定圓心（不計算 bbox 中心）——團隊長的兩個要求
+ *   其實是同一個點比較好同時滿足：「傳送門廣場距畫面中心 ≤10%」最穩妥的
+ *   做法是鏡頭直接看著廣場本身（距離恆為 0%，不是算出來剛好很小），
+ *   「框住整群」則用「以廣場為圓心、到最遠島的距離」當半徑——廣場不剛好
+ *   在整群的幾何中心也沒關係，只要半徑算對，整群一樣會被框住。不傳這個
+ *   參數時退回 bbox 中心（給沒有特定基準點的泛用呼叫端，也是既有測試
+ *   覆蓋的預設行為）。
+ */
+export function computeClusterBoundingCircle(
+  positions: readonly { x: number; z: number }[],
+  forceCenter?: { x: number; z: number },
+): ClusterBoundingCircle {
+  if (positions.length === 0) return { center: { x: 0, y: 0, z: 0 }, radius: 1 };
+  let center: { x: number; z: number };
+  if (forceCenter) {
+    center = forceCenter;
+  } else {
+    let minX = Infinity;
+    let maxX = -Infinity;
+    let minZ = Infinity;
+    let maxZ = -Infinity;
+    for (const p of positions) {
+      minX = Math.min(minX, p.x);
+      maxX = Math.max(maxX, p.x);
+      minZ = Math.min(minZ, p.z);
+      maxZ = Math.max(maxZ, p.z);
+    }
+    center = { x: (minX + maxX) / 2, z: (minZ + maxZ) / 2 };
+  }
+  let radius = 0;
+  for (const p of positions) {
+    radius = Math.max(radius, Math.hypot(p.x - center.x, p.z - center.z));
+  }
+  return { center: { x: center.x, y: 0, z: center.z }, radius: Math.max(1, radius) };
+}
+
 /** WebGL 無法建立時回傳 `null`（PRD §6：自動降級到清單模式，不是顯示錯誤
  *  頁），呼叫端用這個判斷要不要 render 3D 容器。
  *
@@ -295,6 +408,9 @@ export function createArchipelagoWorld(
   let pickableIslands: THREE.Object3D[] = [];
   let pickablePortals: THREE.Object3D[] = [];
   let islandPositions = new Map<string, THREE.Vector3>();
+  // 名牌遮擋用的包圍盒快取（`isNameplateOccluded`）——每座島世界座標
+  // bounding box，換群時重算一次，不是每幀重算。
+  let occluderBoxes: OccluderBox[] = [];
   let downAt = { x: 0, y: 0 };
 
   function resolveIslandSlugFromPointer(clientX: number, clientY: number): string | null {
@@ -414,6 +530,7 @@ export function createArchipelagoWorld(
     pickableIslands = [];
     pickablePortals = [];
     islandPositions = new Map();
+    occluderBoxes = [];
 
     const { ctx } = createSceneCtx(scene);
     const group = new THREE.Group();
@@ -486,6 +603,9 @@ export function createArchipelagoWorld(
       pickableIslands.push(islandObj);
       islandPositions.set(island.storySlug, new THREE.Vector3(pos.x, 0, pos.z));
       hoverLift.set(island.storySlug, 0);
+      islandObj.updateMatrixWorld(true); // box 要世界座標，換群時算一次不是每幀
+      const worldBox = new THREE.Box3().setFromObject(islandObj);
+      occluderBoxes.push({ slug: island.storySlug, min: worldBox.min.clone(), max: worldBox.max.clone() });
 
       // 名牌（美術指導書 §7）：常駐顯示，不是只有 hover 才出現——
       // 「PRD §3.2 明寫不能整群看不到名字」。樣式向 `theme.nameplate` 要。
@@ -524,13 +644,33 @@ export function createArchipelagoWorld(
 
     clusterGroup = group;
 
-    // 鏡頭自動縮放涵蓋整群範圍（§3.4「自動限制在群的範圍內」）——島越多、
-    // 佈局範圍越大，固定鏡頭距離在大群會看不到外圈、在小群又拉太遠。
-    const maxDist = positions.reduce((m, p) => Math.max(m, Math.hypot(p.x, p.z)), 1);
-    orbitRadius = Math.max(14, maxDist * 1.7);
+    // 鏡頭自動縮放涵蓋整群範圍（§3.4「自動限制在群的範圍內」；team-lead
+    // 2026-10-31 訂正：原本鏡頭永遠看著世界原點，但廣場質心常常不在原點
+    // 上（見 `computeClusterBoundingCircle` 的說明），鏡頭看錯點、整群就
+    // 會歪向畫面一角——改成看「廣場為圓心的外接圓」，不是寫死的原點）。
+    //
+    // 倍率 2.9 是量出來的，不是猜的——團隊長要求「非海背景像素 ≥65%」，
+    // 一開始直覺是「鏡頭拉近一點」，結果完全相反：1280 寬本機截圖實測
+    // M=1.0 只有 43.2%、M=1.35 有 52.1%、M=1.7（原值）61.9%、M=2.2 有
+    // 66.8%、M=2.8 有 71.7%——**拉遠才會填滿畫面，不是拉近**。原因是俯角
+    // 偏斜視（0.65 rad≈37°）時鏡頭太近只框得到少數幾座島，島跟島之間的
+    // 水道本身就佔不小比例，島太少時畫面大半還是水；拉遠才能讓「整群島
+    // 散落在海面上」這個圖案本身填滿畫面。
+    //
+    // 2.3 在 1280 寬可以過門檻（67.6%），但 390 窄螢幕用同一個倍率只有
+    // 60.0%——窄螢幕的水平 FOV 本來就比寬螢幕小，同樣的世界距離在窄螢幕
+    // 上涵蓋到的畫面比例更少。挑一個兩種寬度都過門檻的單一倍率（不分寬窄
+    // 兩套常數，維持簡單）：M=2.9 時 390 寬 67.6%、1280 寬 72.9%，都有
+    // 安全邊際，不是卡在門檻上。（海島主題數字；天空島因為整套色票本來就
+    // 刻意貼近背景色，像素色彩分類器量不出有意義的數字——跟 contrast 那題
+    // 是同一個已知限制，不是這次構圖沒套用到天空島。）
+    const boundingCircle = computeClusterBoundingCircle(positions, plazaPos);
+    const maxDist = boundingCircle.radius;
+    orbitRadius = Math.max(14, maxDist * 2.9);
     minRadius = Math.max(8, maxDist * 0.5);
     maxRadius = maxDist * 3.2;
-    orbitTarget = new THREE.Vector3(0, 0, 0);
+    orbitTarget = new THREE.Vector3(boundingCircle.center.x, 0, boundingCircle.center.z);
+    orbitPitch = 0.65; // 換群重設回預設俯角，不留著玩家上一群拖曳過的角度
     syncCamera();
 
     // 動態霧密度（美術指導書 §2.2：`density ≈ 2.2 / maxRadius`，群越大霧
@@ -650,18 +790,16 @@ export function createArchipelagoWorld(
       const halfH = rect.height / 2 || 1;
       // 第一輪：算遮擋（被別棟建築擋住）＋順便投影出每個名牌的螢幕座標跟
       // 到鏡頭的距離，給第二輪的重疊判斷用，不用再重算一次世界座標。
+      // 2026-10-31 訂正：遮擋判斷改呼叫 `isNameplateOccluded`（純函式，吃
+      // 包圍盒不吃 Raycaster/Scene）——不再對每座島的完整三角網格做
+      // raycast，換成對換群時就算好的 `occluderBoxes` 做 ray-vs-AABB，
+      // 同時這支函式本身可以用合成資料直接測、不必在真實佈局裡碰運氣
+      // 找一個剛好被擋住的角度（見 `isNameplateOccluded` 的 test）。
       const projected: { slug: string; x: number; y: number; distance: number; occluded: boolean }[] = [];
       for (const [slug, { object, worldPos }] of nameplates) {
         object.getWorldPosition(worldPos);
-        const dir = worldPos.clone().sub(camera.position);
-        const distToLabel = dir.length();
-        raycaster.set(camera.position, dir.normalize());
-        const hits = raycaster.intersectObjects(pickableIslands, true);
-        const occluded = hits.length > 0 && hits[0].distance < distToLabel - 0.3 && (() => {
-          let o: THREE.Object3D | null = hits[0].object;
-          while (o && !o.userData.storySlug) o = o.parent;
-          return o?.userData.storySlug !== slug;
-        })();
+        const distToLabel = worldPos.distanceTo(camera.position);
+        const occluded = isNameplateOccluded(camera.position, worldPos, slug, occluderBoxes);
         const ndc = worldPos.clone().project(camera);
         projected.push({ slug, x: ndc.x * halfW, y: -ndc.y * halfH, distance: distToLabel, occluded });
       }

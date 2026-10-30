@@ -96,12 +96,16 @@ function centroidOf(points: readonly Point2D[]): Point2D {
 }
 
 /**
- * 外框頂點依固定種子做半徑擾動（美術指導書 §3.1：
- * `cornerRadius = ISLAND_RADIUS × (0.86 + seededRandom(slug, cornerIndex) × 0.22)`）
- * ——相對這塊 polyhex 自己的質心內外推，不是相對世界原點，這樣島的輪廓
- * 擾動不會因為島在群島裡的位置不同而跑掉。
+ * 外框頂點依固定種子做半徑擾動（美術指導書 §3.1 原值
+ * `cornerRadius = ISLAND_RADIUS × (0.86 + seededRandom(slug, cornerIndex) × 0.22)`，
+ * 即 factor∈[0.86,1.08]——相對 1.0 的偏移量只有 -14%～+8%，兩邊都不到
+ * team-lead 2026-10-31 要求的「擾動幅度 ≥ 六角半徑的 15%」，難怪輪廓看
+ * 起來還是很像正六邊形。改成 factor∈[0.85,1.15]，相對 1.0 對稱地各偏移
+ * 15%，兩個方向都踩到門檻，不是只有其中一邊）——相對這塊 polyhex 自己的
+ * 質心內外推，不是相對世界原點，這樣島的輪廓擾動不會因為島在群島裡的
+ * 位置不同而跑掉。
  */
-export function jitterBoundary(points: readonly Point2D[], seed: string, jitterRange = 0.22, jitterBase = 0.86): Point2D[] {
+export function jitterBoundary(points: readonly Point2D[], seed: string, jitterRange = 0.3, jitterBase = 0.85): Point2D[] {
   const centroid = centroidOf(points);
   return points.map((p, i) => {
     const factor = jitterBase + seededValue(`${seed}:coastline:${i}`) * jitterRange;

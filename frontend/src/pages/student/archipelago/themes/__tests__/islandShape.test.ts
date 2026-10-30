@@ -112,7 +112,7 @@ describe('jitterBoundary — 固定種子擾動頂點半徑，質心不變、點
     expect(a).not.toEqual(b);
   });
 
-  it('🔒 每個頂點都有被真的移動過（不是原樣複製），但移動幅度在合理範圍內（相對質心的距離變化不超過 ±22%）', () => {
+  it('🔒 每個頂點都有被真的移動過（不是原樣複製），但移動幅度在合理範圍內（相對質心的距離變化不超過 [0.85,1.15]，2026-10-31 team-lead 訂正，原本是 [0.86,1.08]）', () => {
     const jittered = jitterBoundary(base, 'island-20011');
     expect(jittered).toHaveLength(base.length);
     let movedCount = 0;
@@ -121,10 +121,30 @@ describe('jitterBoundary — 固定種子擾動頂點半徑，質心不變、點
       const dJit = Math.hypot(jittered[i].x, jittered[i].z);
       if (Math.abs(dOrig - dJit) > 1e-6) movedCount++;
       const ratio = dJit / dOrig;
-      expect(ratio).toBeGreaterThanOrEqual(0.86 - 1e-6);
-      expect(ratio).toBeLessThanOrEqual(0.86 + 0.22 + 1e-6);
+      expect(ratio).toBeGreaterThanOrEqual(0.85 - 1e-6);
+      expect(ratio).toBeLessThanOrEqual(1.15 + 1e-6);
     }
     expect(movedCount).toBeGreaterThan(0);
+  });
+
+  it('🔒 team-lead 2026-10-31 明令：擾動幅度要 ≥ 六角半徑的 15%——對足夠多的頂點取樣，偏移量兩個方向都要真的摸到 15% 這個量級，不是理論上限摸不到的空話', () => {
+    // 用很多不同的種子（頂點索引當種子的一部分）取樣，確認「縮到 ≤0.85」
+    // 跟「漲到 ≥1.15」這兩種情況都真的會出現，不是擾動範圍雖然名目上到
+    // 15% 但隨機數分布剛好從來沒摸到邊界。
+    let sawShrinkAtLeast15Pct = false;
+    let sawGrowAtLeast15Pct = false;
+    for (let i = 0; i < 200; i++) {
+      const jittered = jitterBoundary(base, `amplitude-sample-${i}`);
+      for (let v = 0; v < jittered.length; v++) {
+        const dOrig = Math.hypot(base[v].x, base[v].z);
+        const dJit = Math.hypot(jittered[v].x, jittered[v].z);
+        const ratio = dJit / dOrig;
+        if (ratio <= 0.851) sawShrinkAtLeast15Pct = true;
+        if (ratio >= 1.149) sawGrowAtLeast15Pct = true;
+      }
+    }
+    expect(sawShrinkAtLeast15Pct, '200 次取樣裡應該出現至少一次縮到 ≤85%（-15%）的頂點').toBe(true);
+    expect(sawGrowAtLeast15Pct, '200 次取樣裡應該出現至少一次漲到 ≥115%（+15%）的頂點').toBe(true);
   });
 
   it('點數不變，輸出順序跟輸入順序一致（每個索引對應同一個原始頂點，不是打亂重排）', () => {

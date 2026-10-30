@@ -18,6 +18,8 @@ import {
   blobMinDistance,
   DISTANCE_THRESHOLD,
   CONNECTOR_MATERIALS,
+  MAX_CONNECTIONS_PER_ISLAND,
+  segmentsIntersect,
   type HexCell,
 } from '../archipelagoLayout';
 import { groupIntoClusters, type ClusterStory } from '../archipelagoClusters';
@@ -67,6 +69,16 @@ describe('layoutArchipelago — 每座島是 1～3 格的連通 polyhex，互不
     }
   });
 
+  it('🔒 team-lead 2026-10-31 明令：≥50% 的課程島是 2～3 格的多格島（舊權重 [0.5,0.35,0.15] 理論期望值剛好 50%，但 growBlob 擁擠時會縮水，實測量到 35～60% 不等、群越大越低——權重已調整，這裡鎖住 4 種規模都要 ≥50%，不是只驗一種剛好過的規模）', () => {
+    for (const n of [20, 30, 50, 71]) {
+      const sampleIds = Array.from({ length: n }, (_, i) => `multi-cell-${n}-${i}`);
+      const sample = layoutArchipelago(sampleIds, `multicell-lock-${n}`);
+      const multiCellCount = sample.islands.filter((isl) => isl.cells.length >= 2).length;
+      const ratio = multiCellCount / n;
+      expect(ratio, `n=${n} 群多格島比例 ${(ratio * 100).toFixed(1)}% 低於 50%`).toBeGreaterThanOrEqual(0.5);
+    }
+  });
+
   it('🔒 沒有任何兩座島共用同一個六角格（含廣場）——這是「互不重疊」的正式定義', () => {
     const seen = new Map<string, string>();
     for (const blob of [result.plaza, ...result.islands]) {
@@ -111,33 +123,104 @@ describe('blobMinDistance — 兩塊 polyhex 之間最短格距（純數學，�
   });
 });
 
-describe('layoutArchipelago — 連接只出現在距離門檻內（相鄰才互通）', () => {
+describe('layoutArchipelago — 連接：度數受限的 MST 保證連通 + 少量門檻內額外連線（team-lead 2026-10-31 三次訂正）', () => {
+  // 2026-10-31 訂正：舊版「每條連接都必須 ≤ 門檻」的假設已經不成立——
+  // team-lead 的新設計是「先用 MST 保證整群連通，必要時允許極少數超過
+  // 門檻的邊，再補門檻內的額外連線」，這是刻意的行為改變，不是退步
+  // （改變理由：舊版「門檻內兩兩全連」在小群會長出一張交叉的網，好幾條
+  // 橋橫越整個畫面還互相交叉）。這個 describe 底下驗的是新契約：
+  // ①絕大多數連線仍在門檻內 ②MST 階段允許少量超過門檻的邊，但不能氾濫
+  // ③最重要的目標達成——isolatedIds 應該是空的（MST 真的保證了連通）。
   const ids = Array.from({ length: 20 }, (_, i) => `story-${i}`);
   const result = layoutArchipelago(ids, 'threshold-check');
   const allBlobs = [result.plaza, ...result.islands];
   const blobById = new Map(allBlobs.map((b) => [b.id, b]));
 
-  it('每一條連接的兩端，blobMinDistance 都 ≤ DISTANCE_THRESHOLD', () => {
+  it('MST 真的保證整群連通：20 座島的群裡 isolatedIds 應該是空的', () => {
+    expect(result.isolatedIds).toEqual([]);
+  });
+
+  it('絕大多數連線仍落在門檻內——只有 MST 為了連通性必要時才超過，不是氾濫', () => {
+    const overThreshold = result.connections.filter(
+      (conn) => blobMinDistance(blobById.get(conn.a)!.cells, blobById.get(conn.b)!.cells) > DISTANCE_THRESHOLD,
+    );
+    const ratio = overThreshold.length / result.connections.length;
+    expect(ratio, `超過門檻的連線比例 ${ratio} 太高，MST 不該變成氾濫使用長邊`).toBeLessThan(0.5);
+  });
+
+  it('🔒 正向對照：確實存在超過門檻的連線（證明上一條測試不是因為「剛好沒有長邊」而通過，MST 真的有在用長邊保連通）', () => {
+    const hasOverThreshold = result.connections.some(
+      (conn) => blobMinDistance(blobById.get(conn.a)!.cells, blobById.get(conn.b)!.cells) > DISTANCE_THRESHOLD,
+    );
+    expect(hasOverThreshold, '20 座島的群應該至少有一條 MST 連通用的長邊，不然這條測試量不到東西').toBe(true);
+  });
+});
+
+describe('layoutArchipelago — 每座島最多 MAX_CONNECTIONS_PER_ISLAND 條連線（team-lead 2026-10-31 明令）', () => {
+  it('30 座島的群裡，沒有任何一座（含廣場）連線數超過上限', () => {
+    const ids = Array.from({ length: 30 }, (_, i) => `story-${i}`);
+    const result = layoutArchipelago(ids, 'degree-cap-check');
+    const allBlobs = [result.plaza, ...result.islands];
+    const degree = new Map<string, number>(allBlobs.map((b) => [b.id, 0]));
     for (const conn of result.connections) {
-      const dist = blobMinDistance(blobById.get(conn.a)!.cells, blobById.get(conn.b)!.cells);
-      expect(dist, `連接 ${conn.a}-${conn.b} 距離 ${dist} 超過門檻 ${DISTANCE_THRESHOLD}`).toBeLessThanOrEqual(DISTANCE_THRESHOLD);
+      degree.set(conn.a, (degree.get(conn.a) ?? 0) + 1);
+      degree.set(conn.b, (degree.get(conn.b) ?? 0) + 1);
+    }
+    for (const [id, count] of degree) {
+      expect(count, `${id} 有 ${count} 條連線，超過上限 ${MAX_CONNECTIONS_PER_ISLAND}`).toBeLessThanOrEqual(MAX_CONNECTIONS_PER_ISLAND);
     }
   });
 
-  it('🔒 正向對照：真的存在距離 > 門檻、而且沒有被連接的島對（證明門檻真的有在擋，不是全部都連）', () => {
-    const connectedPairKeys = new Set(result.connections.map((c) => [c.a, c.b].sort().join('|')));
-    let foundFarUnconnectedPair = false;
-    for (let i = 0; i < allBlobs.length && !foundFarUnconnectedPair; i++) {
-      for (let j = i + 1; j < allBlobs.length; j++) {
-        const dist = blobMinDistance(allBlobs[i].cells, allBlobs[j].cells);
-        const key = [allBlobs[i].id, allBlobs[j].id].sort().join('|');
-        if (dist > DISTANCE_THRESHOLD && !connectedPairKeys.has(key)) {
-          foundFarUnconnectedPair = true;
-          break;
-        }
+  it('🔒 正向對照：真的有島用滿 2 條名額（證明上限不是形同虛設，是真的常被用到）', () => {
+    const ids = Array.from({ length: 30 }, (_, i) => `story-${i}`);
+    const result = layoutArchipelago(ids, 'degree-cap-check');
+    const allBlobs = [result.plaza, ...result.islands];
+    const degree = new Map<string, number>(allBlobs.map((b) => [b.id, 0]));
+    for (const conn of result.connections) {
+      degree.set(conn.a, (degree.get(conn.a) ?? 0) + 1);
+      degree.set(conn.b, (degree.get(conn.b) ?? 0) + 1);
+    }
+    const anyAtCap = Array.from(degree.values()).some((c) => c === MAX_CONNECTIONS_PER_ISLAND);
+    expect(anyAtCap, '30 座島的群應該至少有一座用滿 2 條連線名額').toBe(true);
+  });
+});
+
+describe('layoutArchipelago — 連接物線段互不交叉（team-lead 2026-10-31 明令：橋不能互相交叉）', () => {
+  it('50 座島的群裡，任兩條連接線段都不相交（共用端點不算交叉）', () => {
+    const ids = Array.from({ length: 50 }, (_, i) => `story-${i}`);
+    const result = layoutArchipelago(ids, 'crossing-check');
+    const allBlobs = [result.plaza, ...result.islands];
+    const blobById = new Map(allBlobs.map((b) => [b.id, b]));
+    const conns = result.connections;
+    let crossingCount = 0;
+    for (let i = 0; i < conns.length; i++) {
+      for (let j = i + 1; j < conns.length; j++) {
+        const a = blobById.get(conns[i].a)!.center;
+        const b = blobById.get(conns[i].b)!.center;
+        const c = blobById.get(conns[j].a)!.center;
+        const d = blobById.get(conns[j].b)!.center;
+        if (segmentsIntersect(a, b, c, d)) crossingCount++;
       }
     }
-    expect(foundFarUnconnectedPair, '20 座島的群裡應該要有距離很遠、沒被連接的島對，不然門檻形同虛設').toBe(true);
+    expect(crossingCount, `找到 ${crossingCount} 組交叉的連接線段`).toBe(0);
+  });
+});
+
+describe('segmentsIntersect — 純幾何函式，合成座標直接測', () => {
+  it('明確交叉的兩條線段（一個 X 形）回傳 true', () => {
+    const result = segmentsIntersect({ x: 0, z: 0 }, { x: 10, z: 10 }, { x: 0, z: 10 }, { x: 10, z: 0 });
+    expect(result).toBe(true);
+  });
+
+  it('平行不相交的兩條線段回傳 false', () => {
+    const result = segmentsIntersect({ x: 0, z: 0 }, { x: 10, z: 0 }, { x: 0, z: 5 }, { x: 10, z: 5 });
+    expect(result).toBe(false);
+  });
+
+  it('共用端點不算交叉（兩條連接物接在同一座島上是正常的）', () => {
+    const shared = { x: 5, z: 5 };
+    const result = segmentsIntersect(shared, { x: 0, z: 0 }, shared, { x: 10, z: 10 });
+    expect(result).toBe(false);
   });
 });
 

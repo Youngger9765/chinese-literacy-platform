@@ -16,6 +16,7 @@ import { buildBoardwalk, buildSteppingStones, buildRopeBridge, buildShoal, build
 import { buildFlag } from './flags';
 import { buildHoverOutline, buildGrassClusters, buildRock, buildPathStones, buildMascot } from './decorations';
 import { buildRisingParticles } from './portalParticles';
+import { buildLandmarkFromStationShape } from './landmarkBuildings';
 
 const PLAZA_RADIUS = 2.1;
 /** Hover 亮邊外殼的顏色（美術指導書 §8，沿用 accent 金色，跟「金色=完成/
@@ -40,30 +41,11 @@ const CONNECTOR_PALETTE: ConnectorPalette = {
   hull: 0x80634d,
 };
 
-function roofMaterialKeyFor(category: string): string {
-  switch (category) {
-    case '自然科學': return 'ocean-roof-science';
-    case '寓言故事': return 'ocean-roof-fable';
-    case '歷史人文': return 'ocean-roof-history';
-    case '生活': return 'ocean-roof-daily';
-    default: return 'ocean-roof-other';
-  }
-}
-
-function roofMaterial(ctx: SceneCtx, category: string): THREE.Material {
-  const colorByCategory: Record<string, number> = {
-    自然科學: 0x6fa8c9, 寓言故事: 0x6b8e4e, 歷史人文: 0xa66d52, 生活: 0xcf9a5d,
-  };
-  const color = colorByCategory[category] ?? 0x9a8fae;
-  const key = roofMaterialKeyFor(category);
-  const roughness = category === '自然科學' ? 0.4 : 0.75;
-  const metalness = category === '自然科學' ? 0.2 : 0;
-  return ctx.material(key, () => new THREE.MeshStandardMaterial({ color, roughness, metalness }));
-}
-
+// 2026-10-31：roofMaterialKeyFor/roofMaterial/creamMaterial/woodMaterial
+// 原本只給四個「柱子＋小物件」簡化版地標用——換成 `buildLandmarkFromStationShape`
+// 之後這幾個材質輔助函式沒有任何呼叫端了，拿掉（lint 沒標是因為這個專案
+// 的設定沒開 no-unused-vars 的函式宣告檢查，不代表真的還有人在用）。
 const sandMaterial = (ctx: SceneCtx) => ctx.material('ocean-sand', () => new THREE.MeshStandardMaterial({ color: 0xd9c397, roughness: 0.85 }));
-const creamMaterial = (ctx: SceneCtx) => ctx.material('ocean-cream', () => new THREE.MeshStandardMaterial({ color: 0xf1dfb6, roughness: 0.8 }));
-const woodMaterial = (ctx: SceneCtx) => ctx.material('ocean-wood', () => new THREE.MeshStandardMaterial({ color: 0x80634d, roughness: 0.85 }));
 const goldMaterial = (ctx: SceneCtx) => ctx.material('ocean-gold', () => new THREE.MeshStandardMaterial({ color: 0xe7bb6b, roughness: 0.5, metalness: 0.2 }));
 
 /**
@@ -73,114 +55,48 @@ const goldMaterial = (ctx: SceneCtx) => ctx.material('ocean-gold', () => new THR
  * 一側）。全部類別都加一個迷你人物站在地標旁。
  */
 function offsetDirectionFor(cell: CellInfo): { x: number; z: number } {
-  if (cell.cellOffsets.length <= 1) return { x: 0.15, z: 0 };
+  const approxRadius = cell.cellRadius * 0.68;
+  const offsetMagnitude = approxRadius * 0.15;
+  if (cell.cellOffsets.length <= 1) return { x: offsetMagnitude, z: 0 };
   let x = 0;
   let z = 0;
   for (const o of cell.cellOffsets) { x += o.x; z += o.z; }
   const len = Math.hypot(x, z) || 1;
-  return { x: (x / len) * 0.15, z: (z / len) * 0.15 };
+  return { x: (x / len) * offsetMagnitude, z: (z / len) * offsetMagnitude };
 }
 
-const scienceLandmark: LandmarkFactory = (ctx, cell) => {
-  const group = new THREE.Group();
-  const roof = roofMaterial(ctx, cell.category);
-  const dome = new THREE.Mesh(ctx.geometry('ocean-dome', () => new THREE.SphereGeometry(0.42, 10, 8, 0, Math.PI * 2, 0, Math.PI / 2)), roof);
-  dome.position.set(0, 0.7, 0);
-  group.add(dome);
-  const tower = new THREE.Mesh(ctx.geometry('ocean-dome-tower', () => new THREE.CylinderGeometry(0.28, 0.32, 0.55, 8)), sandMaterial(ctx));
-  tower.position.set(0, 0.42, 0);
-  group.add(tower);
-  // 美術指導書 §4：「加一顆小型浮動儀器球，遠距離也能靠有東西在發光/浮動
-  // 辨識出科學類」（兩套主題統一都加）。
-  const orb = new THREE.Mesh(
-    ctx.geometry('ocean-science-orb-geo', () => new THREE.SphereGeometry(0.1, 8, 6)),
-    ctx.material('ocean-science-orb-mat', () => new THREE.MeshStandardMaterial({ color: 0xcdeaff, roughness: 0.15, metalness: 0.3, emissive: 0x335577, emissiveIntensity: 0.3 })),
-  );
-  orb.position.set(0, 1.15, 0);
-  group.add(orb);
-  const dir = offsetDirectionFor(cell);
-  group.position.set(dir.x, 0, dir.z);
-  return group;
+// 2026-10-31 team-lead 明令：「改成直接用單課島的 15 種建築造型
+// （islandBuildingShapes），不要再用『柱子＋小物件』的簡化版。依類別各挑
+// 一種，縮放到建築底座寬度約等於島半徑的 0.9」——下面四個類別各選一種，
+// 彼此剪影差異夠大（高塔水晶／成排小樹／雙層攢尖頂／屋頂加煙囪），單看
+// 輪廓就能分四類，不需要再額外堆砌小道具湊細節（那些 15 種造型本身已經
+// 比原本的簡化版豐富很多）。
+const STATION_SHAPE_BY_CATEGORY: Record<string, string> = {
+  自然科學: 'spotlight', // 聚光閣：石塔＋發光水晶，呼應「有東西在發光/浮動」的科學類辨識需求
+  寓言故事: 'vocab-review', // 成排小樹苗造型（icosahedron 樹冠＋木柱），呼應「一小片林」
+  歷史人文: 'classical-text', // 原文閣：雙層攢尖頂小閣樓，最貼近「亭」的剪影
+  default: 'vocab-application', // 有屋頂、煙囪、木棧板的房子造型，貼近「生活/其他」
 };
 
-const fableLandmark: LandmarkFactory = (ctx, cell) => {
+function buildCategoryLandmark(ctx: SceneCtx, cell: CellInfo): THREE.Group {
   const group = new THREE.Group();
-  const roof = roofMaterial(ctx, cell.category);
-  const trunk = new THREE.Mesh(ctx.geometry('ocean-tree-trunk', () => new THREE.CylinderGeometry(0.14, 0.18, 0.6, 6)), woodMaterial(ctx));
-  trunk.position.set(0, 0.6, 0);
-  group.add(trunk);
-  const leaves = new THREE.Mesh(ctx.geometry('ocean-tree-leaves', () => new THREE.ConeGeometry(0.48, 0.7, 7)), roof);
-  leaves.position.set(0, 1.1, 0);
-  group.add(leaves);
-  // 美術指導書 §4：「一棵孤樹→一小片林」，加 2 棵縮小樹苗圍繞。
-  for (const [sx, sz, scale] of [[0.32, 0.18, 0.5], [-0.28, 0.26, 0.7]] as const) {
-    const sapling = new THREE.Group();
-    const sTrunk = new THREE.Mesh(ctx.geometry('ocean-sapling-trunk', () => new THREE.CylinderGeometry(0.06, 0.08, 0.3, 6)), woodMaterial(ctx));
-    sTrunk.position.y = 0.15;
-    sapling.add(sTrunk);
-    const sLeaves = new THREE.Mesh(ctx.geometry('ocean-sapling-leaves', () => new THREE.ConeGeometry(0.22, 0.32, 6)), roof);
-    sLeaves.position.y = 0.42;
-    sapling.add(sLeaves);
-    sapling.scale.setScalar(scale);
-    sapling.position.set(sx, 0, sz);
-    group.add(sapling);
+  const approxRadius = cell.cellRadius * 0.68;
+  const stepType = STATION_SHAPE_BY_CATEGORY[cell.category] ?? STATION_SHAPE_BY_CATEGORY.default;
+  const building = buildLandmarkFromStationShape(ctx, stepType, approxRadius * 0.9, 'ocean');
+  group.add(building);
+  // 歷史人文維持置中（美術指導書 §1.1：「亭子本身講究對稱，符合建築語彙」），
+  // 其餘類別偏心擺放朝連接物方向，讓剪影在接近時先被看到。
+  if (cell.category !== '歷史人文') {
+    const dir = offsetDirectionFor(cell);
+    group.position.set(dir.x, 0, dir.z);
   }
-  const dir = offsetDirectionFor(cell);
-  group.position.set(dir.x, 0, dir.z);
   return group;
-};
+}
 
-const historyLandmark: LandmarkFactory = (ctx, cell) => {
-  const group = new THREE.Group();
-  const roof = roofMaterial(ctx, cell.category);
-  const sand = sandMaterial(ctx);
-  const wood = woodMaterial(ctx);
-  const platform = new THREE.Mesh(ctx.geometry('ocean-pavilion-platform', () => new THREE.BoxGeometry(0.7, 0.14, 0.7)), sand);
-  platform.position.set(0, 0.42, 0);
-  group.add(platform);
-  for (const [px, pz] of [[-0.28, -0.28], [0.28, -0.28], [-0.28, 0.28], [0.28, 0.28]] as const) {
-    const pillar = new THREE.Mesh(ctx.geometry('ocean-pavilion-pillar', () => new THREE.CylinderGeometry(0.05, 0.05, 0.4, 6)), wood);
-    pillar.position.set(px, 0.62, pz);
-    group.add(pillar);
-  }
-  const roofMesh = new THREE.Mesh(ctx.geometry('ocean-pavilion-roof', () => new THREE.ConeGeometry(0.55, 0.3, 4)), roof);
-  roofMesh.position.set(0, 0.95, 0);
-  roofMesh.rotation.y = Math.PI / 4;
-  group.add(roofMesh);
-  // 美術指導書 §4：「面向連接物的一側加兩級石階，暗示這裡有正式的入口」。
-  const dir = offsetDirectionFor(cell);
-  for (let i = 0; i < 2; i++) {
-    const step = new THREE.Mesh(ctx.geometry('ocean-pavilion-step', () => new THREE.BoxGeometry(0.3, 0.06, 0.12)), sand);
-    step.position.set(dir.x * (3 + i), 0.35 - i * 0.06, dir.z * (3 + i) + 0.4 + i * 0.12);
-    group.add(step);
-  }
-  group.position.set(dir.x, 0, dir.z);
-  return group;
-};
-
-const defaultLandmark: LandmarkFactory = (ctx, cell) => {
-  const group = new THREE.Group();
-  const roof = roofMaterial(ctx, cell.category);
-  // 美術指導書 §1.1：生活/預設（屋）牆色改用 cream（跟 `islandBuildingShapes.ts`
-  // 既有的 `cream` 常數同色），不是繼續用沙色——沙色留給地面/沙灘。
-  const house = new THREE.Mesh(ctx.geometry('ocean-house-body', () => new THREE.BoxGeometry(0.55, 0.42, 0.5)), creamMaterial(ctx));
-  house.position.set(0, 0.5, 0);
-  group.add(house);
-  const roofMesh = new THREE.Mesh(ctx.geometry('ocean-house-roof', () => new THREE.ConeGeometry(0.46, 0.4, 4)), roof);
-  roofMesh.position.set(0, 0.92, 0);
-  roofMesh.rotation.y = Math.PI / 4;
-  group.add(roofMesh);
-  // 美術指導書 §4：「加一條簡易曬衣繩或小籬笆，暗示有人住在這裡」。
-  const fenceMat = woodMaterial(ctx);
-  for (const fx of [-0.35, -0.12, 0.12, 0.35]) {
-    const post = new THREE.Mesh(ctx.geometry('ocean-fence-post', () => new THREE.CylinderGeometry(0.02, 0.02, 0.16, 5)), fenceMat);
-    post.position.set(fx, 0.37, 0.32);
-    group.add(post);
-  }
-  const dir = offsetDirectionFor(cell);
-  group.position.set(dir.x, 0, dir.z);
-  return group;
-};
+const scienceLandmark: LandmarkFactory = (ctx, cell) => buildCategoryLandmark(ctx, cell);
+const fableLandmark: LandmarkFactory = (ctx, cell) => buildCategoryLandmark(ctx, cell);
+const historyLandmark: LandmarkFactory = (ctx, cell) => buildCategoryLandmark(ctx, cell);
+const defaultLandmark: LandmarkFactory = (ctx, cell) => buildCategoryLandmark(ctx, cell);
 
 export const oceanTheme: ArchipelagoTheme = {
   id: 'ocean',
