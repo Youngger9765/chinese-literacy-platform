@@ -41,7 +41,7 @@ export interface CellInfo {
 }
 
 /** 傳送門目的地的摘要——皮膚畫「這座門」要知道的最小子集。 */
-export interface ClusterInfo {
+export interface PortalTargetInfo {
   key: string;
   label: string;
   occupiedCount: number;
@@ -55,7 +55,7 @@ export interface ClusterInfo {
 // WebGL context），驗證「dispose 之後數量回到 0」。
 
 export type LandmarkFactory = (ctx: SceneCtx, cell: CellInfo) => THREE.Object3D;
-export type PortalFactory = (ctx: SceneCtx, target: ClusterInfo) => THREE.Object3D;
+export type PortalFactory = (ctx: SceneCtx, target: PortalTargetInfo) => THREE.Object3D;
 
 export interface ArchipelagoTheme {
   id: string;

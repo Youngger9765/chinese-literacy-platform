@@ -23,4 +23,4 @@ export {
   type RecentProgressEntry,
 } from './archipelagoClusters';
 
-export { GROUPINGS, type GroupingStrategy, type ClusterInfo } from './groupings';
+export { GROUPINGS, type GroupingStrategy, type ClusterSummary } from './groupings';

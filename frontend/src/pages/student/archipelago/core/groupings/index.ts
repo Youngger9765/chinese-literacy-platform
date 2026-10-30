@@ -16,4 +16,4 @@ export const GROUPINGS: Record<string, GroupingStrategy> = {
   category: categoryGrouping,
 };
 
-export type { GroupingStrategy, ClusterInfo } from './types';
+export type { GroupingStrategy, ClusterSummary } from './types';

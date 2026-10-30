@@ -14,7 +14,7 @@ import type { ClusterStory, ClusterMode } from '../archipelagoClusters';
 /** `GroupingStrategy.clusters()` 回傳的群摘要——跟 `Cluster<T>` 的差別是
  *  這裡不帶完整課程陣列，只帶「這群長什麼樣子」給皮膚層（傳送門門牌、
  *  HUD 群摘要）用，不需要知道群內每一課的細節。 */
-export interface ClusterInfo {
+export interface ClusterSummary {
   key: string;
   label: string;
   storyCount: number;
@@ -27,5 +27,5 @@ export interface GroupingStrategy {
    *  同一個 key）。 */
   clusterOf: (story: ClusterStory) => string;
   /** 把一批課程分成群摘要陣列——群的順序即顯示順序。 */
-  clusters: (stories: ClusterStory[]) => ClusterInfo[];
+  clusters: (stories: ClusterStory[]) => ClusterSummary[];
 }

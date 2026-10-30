@@ -22,6 +22,13 @@ export interface SceneCtxHandle {
   disposeAll: () => void;
   geometryCount: () => number;
   materialCount: () => number;
+  /** 測試用（`__tests__/moduleContracts.test.ts` 的走訪檢查）：目前登記過
+   *  的全部幾何/材質實例，拿來跟真的建出來的物件樹逐一比對，確認主題
+   *  沒有繞過 `ctx.geometry`/`ctx.material` 另外 `new` 出沒登記的資源——
+   *  只數「登記過幾個、dispose 呼叫了幾次」測不出「有沒有東西根本沒
+   *  登記」，那種資源從頭到尾不在任何計數裡。 */
+  registeredGeometries: () => Set<THREE.BufferGeometry>;
+  registeredMaterials: () => Set<THREE.Material>;
 }
 
 export function createSceneCtx(scene: THREE.Scene): SceneCtxHandle {
@@ -50,5 +57,7 @@ export function createSceneCtx(scene: THREE.Scene): SceneCtxHandle {
     },
     geometryCount: () => geometries.size,
     materialCount: () => materials.size,
+    registeredGeometries: () => new Set(geometries.values()),
+    registeredMaterials: () => new Set(materials.values()),
   };
 }

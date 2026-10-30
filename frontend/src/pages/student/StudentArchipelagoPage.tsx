@@ -13,10 +13,10 @@
  * 捲動）。截圖對照：改動前 `before-archipelago-1280.png`/`-390.png`。
  *
  * 合併/篩選/分群/蜂巢座標的純函式邏輯都在 archipelagoDomain.ts／
- * archipelago/core/archipelagoClusters.ts（各自獨立測試，模組重構
- * 2026-10-30 移進 core/ 骨架層——見 `.claude/skills/archipelago-module/
- * SKILL.md`），這個檔案只負責 fetch API＋render＋串 3D 世界
- * （`createArchipelagoWorld.ts`）。
+ * archipelago/core/（骨架層公開介面見 `core/index.ts`，不要越過它直接
+ * import `core/archipelagoClusters.ts`——見 `.claude/skills/
+ * archipelago-module/SKILL.md`），這個檔案只負責 fetch API＋render＋串
+ * 3D 世界（`createArchipelagoWorld.ts`）。
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -40,7 +40,7 @@ import {
   type ClusterMode,
   type Cluster,
   type RecentProgressEntry,
-} from './archipelago/core/archipelagoClusters';
+} from './archipelago/core';
 import {
   createArchipelagoWorld,
   type ArchipelagoWorld,

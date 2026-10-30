@@ -165,18 +165,18 @@ export const skyTheme: ArchipelagoTheme = {
     base.receiveShadow = true;
     return base;
   },
-  portal: () => {
+  portal: (ctx) => {
     // 星門——發光圓環，不是海島的木框門。
     const group = new THREE.Group();
     const ring = new THREE.Mesh(
-      new THREE.TorusGeometry(0.55, 0.07, 8, 20),
-      new THREE.MeshStandardMaterial({ color: 0xe6d8ff, emissive: 0x8866cc, emissiveIntensity: 0.6, roughness: 0.3 }),
+      ctx.geometry('sky-portal-ring', () => new THREE.TorusGeometry(0.55, 0.07, 8, 20)),
+      ctx.material('sky-portal-ring-mat', () => new THREE.MeshStandardMaterial({ color: 0xe6d8ff, emissive: 0x8866cc, emissiveIntensity: 0.6, roughness: 0.3 })),
     );
     ring.position.y = 0.85;
     group.add(ring);
     const glowDisc = new THREE.Mesh(
-      new THREE.CircleGeometry(0.48, 20),
-      new THREE.MeshBasicMaterial({ color: 0xcfe0ff, transparent: true, opacity: 0.5 }),
+      ctx.geometry('sky-portal-glow', () => new THREE.CircleGeometry(0.48, 20)),
+      ctx.material('sky-portal-glow-mat', () => new THREE.MeshBasicMaterial({ color: 0xcfe0ff, transparent: true, opacity: 0.5 })),
     );
     glowDisc.position.y = 0.85;
     group.add(glowDisc);
@@ -203,22 +203,22 @@ export const skyTheme: ArchipelagoTheme = {
     default: defaultLandmark,
   },
   statusLook: {
-    occupied: (obj) => {
+    occupied: (obj, ctx) => {
       const sparkle = new THREE.PointLight(0xe6d8ff, 1, 2.4);
       sparkle.position.set(0, 1, 0);
       obj.add(sparkle);
       const banner = new THREE.Mesh(
-        new THREE.PlaneGeometry(0.2, 0.3),
-        new THREE.MeshStandardMaterial({ color: 0xd9a8ea, emissive: 0x6633aa, emissiveIntensity: 0.4 }),
+        ctx.geometry('sky-banner', () => new THREE.PlaneGeometry(0.2, 0.3)),
+        ctx.material('sky-banner-mat', () => new THREE.MeshStandardMaterial({ color: 0xd9a8ea, emissive: 0x6633aa, emissiveIntensity: 0.4 })),
       );
       banner.position.set(0.5, 1.0, 0.25);
       obj.add(banner);
     },
     in_progress: () => {},
-    not_started: (obj) => {
+    not_started: (obj, ctx) => {
       const mist = new THREE.Mesh(
-        new THREE.CylinderGeometry(ISLAND_RADIUS * 1.1, ISLAND_RADIUS * 1.1, 0.5, 8),
-        new THREE.MeshBasicMaterial({ color: 0xc9bfe0, transparent: true, opacity: 0.4 }),
+        ctx.geometry('sky-mist', () => new THREE.CylinderGeometry(ISLAND_RADIUS * 1.1, ISLAND_RADIUS * 1.1, 0.5, 8)),
+        ctx.material('sky-mist-mat', () => new THREE.MeshBasicMaterial({ color: 0xc9bfe0, transparent: true, opacity: 0.4 })),
       );
       mist.position.y = 0.6;
       obj.add(mist);

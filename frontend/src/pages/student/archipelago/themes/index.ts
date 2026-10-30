@@ -20,7 +20,7 @@ export type {
   ArchipelagoTheme,
   SceneCtx,
   CellInfo,
-  ClusterInfo,
+  PortalTargetInfo,
   LandmarkFactory,
   PortalFactory,
 } from './types';

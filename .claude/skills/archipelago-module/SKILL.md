@@ -60,7 +60,7 @@ interface ArchipelagoTheme {
   ground: (ctx: SceneCtx) => THREE.Object3D;          // 底面：海、雲海、星空、深海
   island: (ctx: SceneCtx, cell: CellInfo) => THREE.Object3D; // 一座完整課程島（含地基＋地標，狀態另外疊）
   hub: (ctx: SceneCtx) => THREE.Object3D;             // 中央傳送門廣場
-  portal: (ctx: SceneCtx, target: ClusterInfo) => THREE.Object3D;
+  portal: (ctx: SceneCtx, target: PortalTargetInfo) => THREE.Object3D;
   connector: (ctx: SceneCtx, a: { x: number; z: number }, b: { x: number; z: number }) => THREE.Object3D | null;
   // 訂正②：連接物只吃兩個端點座標，不吃完整 CellInfo——沒有任何連接物樣式
   // （棧橋/光束/海流）需要知道對面那座島的類別/狀態，硬塞完整物件只會讓廣場→
@@ -85,6 +85,12 @@ interface ArchipelagoTheme {
   規模（單群最多 71 座島）這不是效能問題；InstancedMesh 是給數百上千個實例才重要。若以後
   島數量級上升，要另外設計（例如讓主題只提供「地基幾何」而不是整座島）。
 - 能用 InstancedMesh 的地方仍然優先用；做法查 `threejs-geometry`、`threejs-performance`
+- 訂正④（2026-10-30 review 指出）：`PortalTargetInfo`（上面 `portal()` 的參數）原本跟
+  `GroupingStrategy.clusters()` 的回傳型別同名都叫 `ClusterInfo`，但兩者形狀不一樣——
+  `PortalTargetInfo` 是「畫一座門需要的資訊」（含 `occupiedCount`/`total`），下面 §2.2 的
+  是「分群結果摘要」（只有 `key`/`label`/`storyCount`）。同名不同形狀容易在兩個模組間
+  互相傳錯卻被 TypeScript 結構化型別放行，已改名區分：皮膚層的是 `PortalTargetInfo`
+  （`themes/types.ts`），骨架層分群的是 `ClusterSummary`（`core/groupings/types.ts`）。
 
 ### 2.2 `GroupingStrategy`（分群契約）
 
@@ -93,14 +99,22 @@ interface GroupingStrategy {
   id: 'grade' | 'genre' | 'category' | string;
   label: string;                                   // 年級、文體、類別
   clusterOf: (story: ArchipelagoStory) => string;  // 一課屬於哪一群，必須唯一
-  clusters: (stories: ArchipelagoStory[]) => ClusterInfo[]; // 群的順序、名稱
+  clusters: (stories: ArchipelagoStory[]) => ClusterSummary[]; // 群的順序、名稱
 }
 ```
 
 ## 3. 契約測試（加新東西時一定要過，`__tests__/moduleContracts.test.ts`）
 
-- 每個 `THEMES` 裡的主題：§2.1 每一項都有提供；`statusLook` 三種狀態都有；`landmarks.default` 一定有
-- 每個主題都能在假的 `SceneCtx` 上建出一個群，且 `dispose` 之後登記的幾何與材質數回到 0
+- 每個 `THEMES` 裡的主題：§2.1 每一項都有提供；`statusLook` 三種狀態都有；`landmarks.default`
+  一定有；三個有名字的類別（自然科學/寓言故事/歷史人文）各自掛了**不是** `landmarks.default`
+  本身的函式（防止漏寫一個類別卻悄悄落到 default、畫面看起來正常但其實沒有專屬地標）
+- **走訪檢查**（2026-10-30 訂正——原本只驗 dispose 後計數回零，那是 `disposeAll()` 自己
+  `.clear()` 兩個 Map 的直接結果，跟主題有沒有繞過 ctx 另外 `new` 完全無關，sky.ts 曾經
+  繞過 ctx 三處卻沒被抓到）：把每個主題建出來的整棵物件樹（ground/hub/portal/connector/
+  每個類別×每個狀態的 island）走一遍，逐一比對每個 mesh 的 geometry/material 是否都在
+  `createSceneCtx()` 回傳的 `registeredGeometries()`/`registeredMaterials()` 清單裡；
+  繞過 ctx 直接 `new` 的資源不在清單裡，一定會被抓到。另外保留 dispose-後-計數-歸零 +
+  spy `dispose()` 呼叫次數的測試，驗證資源真的有被釋放（不是另一回事的同義反覆）
 - 每個 `GROUPINGS` 分群方式：所有群加總 = 課程總數，每課剛好一群（用 `__tests__/fixtures/all-stories.json` 179 課）
 - 場景程式原始碼裡不准出現主題字眼（掃 `createArchipelagoWorld.ts`，命中「ocean|sea|cloud|coral|0x[0-9a-f]{6}」就紅）
 
@@ -149,3 +163,12 @@ interface GroupingStrategy {
   預覽站截圖證實容器 `childElementCount === 0`，只有空白底色跟右側清單）。
   改用 `useState` 版 callback ref（`containerEl`）+ 一個 `worldVersion`
   訊號讓「世界剛建好」這件事能真正觸發下一個 effect 重跑。
+- **2026-10-30 review 二輪訂正**：① 契約測試②改走訪整棵物件樹（見 §3），
+  抓到 sky.ts 的 `portal()`／`statusLook.occupied`／`statusLook.not_started`
+  三處繞過 ctx 直接 `new` 幾何/材質，已改成全部走 `ctx.geometry`/
+  `ctx.material` ② 補回「三個有名字的類別各自有專屬地標（不是悄悄落到
+  default）」的斷言 ③ `core/index.ts` 原本沒有任何呼叫端使用——改成
+  `StudentArchipelagoPage.tsx` 真的從它 import（不再越過它直接 import
+  `core/archipelagoClusters.ts`），讓它變成骨架層真正的公開介面而不是
+  擺好看的檔案；`ClusterInfo` 兩份不同形狀的定義已改名區分（見 §2.1
+  訂正④）。
