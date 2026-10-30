@@ -14,6 +14,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { THEMES } from '../themes';
 import { createSceneCtx } from '../core/sceneCtx';
 import { GROUPINGS } from '../core/groupings';
+import { CONNECTOR_MATERIALS } from '../core/archipelagoLayout';
 import type { CellInfo, PortalTargetInfo } from '../themes/types';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -29,6 +30,16 @@ const SAMPLE_CELL: CellInfo = {
   stationsDone: 0,
   stationsTotal: 9,
   position: { x: 0, z: 0 },
+  // #3799 美術指導書 §3.1（2026-10-31）：不規則群島的島是 1~3 格 polyhex，
+  // 這裡給一個 2 格的樣本（不是 1 格）——只測 1 格會漏測「多格聯集外框」
+  // 這條路徑，跟契約測試①特別驗三個類別各自有專屬地標是同一種「不只測
+  // 最簡單情況」的紀律。
+  cellCount: 2,
+  // 真正相鄰的一對六角格偏移（跟 `core/archipelagoClusters.ts` 的
+  // `axialToCartesian({q:1,r:0}, 3.6)` 算出來的值一致，不是隨手編的座標）。
+  cellOffsets: [{ x: 0, z: 0 }, { x: 5.4, z: 3.1177 }],
+  cellRadius: 3.6,
+  seed: '20011',
 };
 const SAMPLE_PORTAL_TARGET: PortalTargetInfo = { key: 'genre-說明文', label: '說明文群島', occupiedCount: 2, total: 10 };
 const CATEGORIES = ['自然科學', '寓言故事', '歷史人文', '生活', '其他'];
@@ -47,6 +58,14 @@ describe('① 每個主題：§2.1 每一項都提供、statusLook 三態齊全�
       expect(theme.lighting.hemisphereSky).toBeTruthy();
       expect(theme.lighting.hemisphereGround).toBeTruthy();
       expect(theme.lighting.sunDirection).toHaveLength(3);
+      // #3799 美術指導書 §2.1（2026-10-31 新增）：背光／輪廓光——現況只有
+      // 主光＋半球光，建築輪廓跟天空背景融在一起分不開。
+      expect(theme.lighting.rimColor, 'lighting.rimColor').toBeTruthy();
+      expect(typeof theme.lighting.rimIntensity).toBe('number');
+      // #3799 美術指導書 §7（2026-10-31 新增）：名牌卡片配色。
+      for (const key of ['background', 'border', 'text'] as const) {
+        expect(theme.nameplate[key], `nameplate.${key}`).toBeTruthy();
+      }
       expect(typeof theme.ground).toBe('function');
       expect(typeof theme.island).toBe('function');
       expect(typeof theme.hub).toBe('function');
@@ -94,8 +113,12 @@ function buildFullClusterTree(theme: (typeof THEMES)[string], ctx: ReturnType<ty
       group.add(islandObj);
     }
   }
-  const connector = theme.connector(ctx, { x: 0, z: 0 }, { x: 3, z: 3 });
-  if (connector) group.add(connector);
+  // #3799 美術指導書 §5（2026-10-31）：五種連接材料，只測一種會漏測另外
+  // 四種的幾何/材質有沒有正確走 ctx 登記——逐一建過一遍。
+  for (const material of CONNECTOR_MATERIALS) {
+    const connector = theme.connector(ctx, { x: 0, z: 0 }, { x: 3, z: 3 }, material);
+    if (connector) group.add(connector);
+  }
   return group;
 }
 

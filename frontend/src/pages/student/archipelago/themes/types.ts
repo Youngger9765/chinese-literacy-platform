@@ -24,11 +24,21 @@
 import * as THREE from 'three';
 import type { IslandStatus } from '../core/islandStatus';
 import type { SceneCtx } from '../core/sceneCtx';
+import type { ConnectorMaterial } from '../core/archipelagoLayout';
 
 export type { SceneCtx };
+export type { ConnectorMaterial };
 
-/** 一座課程島在蜂巢佈局裡的身分與位置——皮膚畫「這座島」要知道的最小
- *  子集，不含 three.js 物件本身（那是皮膚自己建的）。 */
+/** 一座課程島在不規則群島佈局裡的身分與位置——皮膚畫「這座島」要知道的
+ *  最小子集，不含 three.js 物件本身（那是皮膚自己建的）。
+ *
+ * `cellOffsets`／`seed`（美術指導書 §3.1 二度訂正，2026-10-31）：不規則
+ * 群島的島是 1~3 格六角格黏成的 polyhex（`core/archipelagoLayout.ts`），
+ * 每座島的外框不再是單一正六邊形——皮膚要知道「這座島由哪幾格組成」才
+ * 畫得出真正的不規則海岸線，不是繼續畫一個正六邊形假裝不規則。
+ * `cellOffsets` 是每一格中心相對 `position`（island 群的中心）的世界座標
+ * 偏移；`seed` 給皮膚做「同一群重開一樣」的海岸線頂點擾動（固定種子，
+ * 直接用 `storySlug` 即可，不需要另外傳一個隨機數）。 */
 export interface CellInfo {
   storySlug: string;
   title: string;
@@ -38,6 +48,20 @@ export interface CellInfo {
   stationsDone: number;
   stationsTotal: number;
   position: { x: number; z: number };
+  /** 這座島由幾格六角格組成（1~3），皮膚可以依格數決定小景豐富度（格數
+   *  越多，島越大，能放的樹／小人越多）。 */
+  cellCount: number;
+  /** 每一格六角格中心，相對 `position` 的世界座標偏移——用來算不規則
+   *  海岸線的聯集外框（`themes/islandShape.ts`）。單一格的島這裡只有
+   *  一個元素 `{x:0,z:0}`。 */
+  cellOffsets: ReadonlyArray<{ x: number; z: number }>;
+  /** 每一格六角格的「中心到角」半徑——傳這個而不是讓皮膚自己 import
+   *  `createArchipelagoWorld.ts` 的 `HEX_SIZE`：骨架常數只能透過函式參數
+   *  流向皮膚（既有慣例，`cell.position`／`cell.cellOffsets` 都是這樣），
+   *  不能反過來讓皮膚 import 骨架的檔案。數值上等於 `HEX_SIZE`，這樣用
+   *  `cellOffsets` 算出來的多格外框才會剛好緊貼、不留縫。 */
+  cellRadius: number;
+  seed: string;
 }
 
 /** 傳送門目的地的摘要——皮膚畫「這座門」要知道的最小子集。 */
@@ -79,6 +103,23 @@ export interface ArchipelagoTheme {
     hemisphereGround: string;
     ambient: number;
     sunDirection: [number, number, number];
+    /** 背光／輪廓光（美術指導書 §2.1，2026-10-31 新增）——現況只有一顆
+     *  主光＋半球光，建築輪廓跟天空背景融在一起分不開。跟 `sunDirection`
+     *  相對方向的一顆冷/暖色補光，純粹是「有沒有第三顆燈」的差異，不是
+     *  色票常數，所以骨架可以直接 `new THREE.DirectionalLight(theme.lighting.rimColor, theme.lighting.rimIntensity)`
+     *  不用知道這顆燈該是什麼顏色。 */
+    rimColor: string;
+    rimIntensity: number;
+  };
+  /** 名牌卡片配色（美術指導書 §7）——CSS2D 白底／暖白底小卡，兩個主題目前
+   *  用非常接近的配色（都走「暖白底＋暖黑字」），但做成主題欄位而不是骨架
+   *  常數，是因為配色屬於「長什麼樣子」，不該讓骨架自己決定（SKILL §1
+   *  鐵律）；以後某個主題想要完全不同的名牌風格（例如星際主題用深色卡）
+   *  不需要改骨架介面。 */
+  nameplate: {
+    background: string;
+    border: string;
+    text: string;
   };
   /** 底面：海面／深海／星空／雲海／大地。 */
   ground: (ctx: SceneCtx) => THREE.Object3D;
@@ -90,7 +131,11 @@ export interface ArchipelagoTheme {
   /** 中央傳送門廣場（不含門本身，門由 `portal()` 個別建）。 */
   hub: (ctx: SceneCtx) => THREE.Object3D;
   portal: PortalFactory;
-  connector: (ctx: SceneCtx, a: { x: number; z: number }, b: { x: number; z: number }) => THREE.Object3D | null;
+  /** `material`（美術指導書 §5，2026-10-31 新增）：PRD §3.2 二次訂正「連接
+   *  材料隨意，五選一」——`core/archipelagoLayout.ts` 的 `layoutArchipelago()`
+   *  已經決定好每一對相鄰島該用哪一種材料（固定種子，不是渲染端自己選），
+   *  皮膚只管「這個材料字串該畫成什麼樣子」。 */
+  connector: (ctx: SceneCtx, a: { x: number; z: number }, b: { x: number; z: number }, material: ConnectorMaterial) => THREE.Object3D | null;
   /** 依課程類別換地標——key 是 `normalizeCategory()` 的輸出
    *  （自然科學/寓言故事/歷史人文/生活/其他），`default` 一定要有
    *  （查不到類別時的 fail-closed 造型）。 */

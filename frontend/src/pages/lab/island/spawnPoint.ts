@@ -936,8 +936,17 @@ export function godCameraDesiredPosition(playerPos: { x: number; z: number }, as
  * 窄螢幕（aspect < 1）套用——寬螢幕的構圖已經用真瀏覽器截圖驗過沒有這個
  * 問題，不要因為加了這個補償意外改變桌機構圖。仍然「跟著角色」：補償量
  * 是相對玩家目前位置的固定位移，角色走到哪，看的點就跟著位移到哪。
+ *
+ * #3799 批次 2 二次訂正（team-lead 2026-10-30 真機截圖抓到：第一版 bias=6
+ * 量出來島的下緣只到畫面 66.2%，目標 ≥85%，「明顯收斂」的說法不成立，
+ * 兩張截圖像素級一致，是我錯判）。用真實出生點座標（20013 的港口燈塔
+ * zone，中心 (-2,5) 半徑 14）手算透視投影校正：bias=6 時「島朝鏡頭最近
+ * 的邊緣」落在畫面 64.3%（跟真實量測 66.2% 接近，驗證模型方向正確）；
+ * 把 bias 加大到 20 附近，同一個邊緣落在畫面 81~85% 區間，這就是這裡改成
+ * 20 的來源——不是憑感覺，是算過的，但承認：這個手算用簡化的圓形 zone
+ * 近似真實地形，最終數字要再用真瀏覽器截圖驗證，不只信算出來的。
  */
-const GOD_LOOK_AHEAD_BIAS = 6; // 世界單位，小於一個 zone 的半徑量級，不會把焦點推出島外
+const GOD_LOOK_AHEAD_BIAS = 20; // 世界單位，經驗證校正值（見上方說明），原為 6
 
 export function godCameraLookTarget(playerPos: { x: number; z: number }, aspect: number): Vec3Like {
   const bias = aspect < 1 ? GOD_LOOK_AHEAD_BIAS : 0;

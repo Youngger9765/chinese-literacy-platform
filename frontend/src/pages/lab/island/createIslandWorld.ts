@@ -88,6 +88,9 @@ export function createIslandWorld(
   const cliff = material(0x69706b);
   const wood = material(0x80634d);
   const copper = material(0xa66d52);
+  // #3799 美術指導書追加需求（2026-10-31）：已完成的站頂上插旗，跟發光
+  // 是兩件不同的回饋（發光留著，旗子額外加）。
+  const flagCloth = material(0xe0564c, { emissive: 0xe0564c, emissiveIntensity: 0.12 });
   const water = material(0x4596ac, { metalness: 0.2, roughness: 0.32 });
   const add = (parent: THREE.Object3D, geometry: THREE.BufferGeometry, mat: THREE.Material, x = 0, y = 0, z = 0) => {
     const mesh = new THREE.Mesh(geometry, mat);
@@ -221,6 +224,26 @@ export function createIslandWorld(
   // 迴圈才能逐一對每棟建築算「鏡頭→這塊牌子的視線有沒有被別棟建築擋住」
   // ，見 animate() 裡的 `signs.forEach(...)`。
   const signs: THREE.Sprite[] = [];
+  // #3799 美術指導書追加需求（team-lead 2026-10-31：「單課島：已完成的站
+  // 頂上也要插旗，名牌上加勾勾，不能只靠現有的整棟發光」）——名牌文字要
+  // 在「變成已完成」那一刻重畫加勾勾，存一份 canvas 參考才能事後重畫
+  // （`CanvasTexture` 改 canvas 內容後要 `texture.needsUpdate = true`）。
+  const signCanvases: HTMLCanvasElement[] = [];
+  function drawSignCanvas(canvas: HTMLCanvasElement, name: string, checked: boolean): void {
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.clearRect(0, 0, 512, 100);
+    ctx.fillStyle = '#304a4e';
+    ctx.fillRect(0, 0, 512, 100);
+    ctx.strokeStyle = '#e7c783';
+    ctx.lineWidth = 8;
+    ctx.strokeRect(8, 8, 496, 84);
+    ctx.fillStyle = '#fff3d2';
+    ctx.font = 'bold 51px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(checked ? `✓ ${name}` : name, 256, 53);
+  }
   content.stops.forEach((stop, i) => {
     const built = buildStationGroup(stop, sand);
     const root = built.root;
@@ -237,28 +260,40 @@ export function createIslandWorld(
     const signCanvas = document.createElement('canvas');
     signCanvas.width = 512;
     signCanvas.height = 100;
-    const ctx = signCanvas.getContext('2d');
-    if (ctx) {
-      ctx.fillStyle = '#304a4e';
-      ctx.fillRect(0, 0, 512, 100);
-      ctx.strokeStyle = '#e7c783';
-      ctx.lineWidth = 8;
-      ctx.strokeRect(8, 8, 496, 84);
-      ctx.fillStyle = '#fff3d2';
-      ctx.font = 'bold 51px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(stop.name, 256, 53);
-    }
+    drawSignCanvas(signCanvas, stop.name, false);
+    signCanvases.push(signCanvas);
     const texture = new THREE.CanvasTexture(signCanvas);
     // `transparent: true`：原本沒加，opacity 的漸變在這個材質上不會有
     // 任何視覺效果（遮擋判斷靠淡出，不是硬切 visible，需要真的能混合）。
-    const sign = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, depthTest: false, transparent: true }));
+    // `fog: false`（team-lead 2026-10-30 真機截圖抓到：名牌文字糊成淡灰
+    // 藍色，讀不出來）——`SpriteMaterial` 預設 `fog: true`，鏡頭在上帝
+    // 視角拉得很遠時（窄螢幕甚至更遠），名牌會跟著場景霧氣被洗向霧色，
+    // 深色底＋奶油字的對比就這樣被吃掉。文字牌是給人讀的資訊，不是遠景
+    // 氣氛元素，關掉霧讓它永遠維持設計時的原色，不因為距離而褪色。
+    const sign = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, depthTest: false, transparent: true, fog: false }));
     sign.scale.set(3.3, 0.65, 1);
     sign.position.set(0, stop.step === 'lesson-intro' ? 7.8 : stop.step === 'report' ? 6.2 : 4.5, 0);
     root.add(sign);
     signs.push(sign);
   });
+
+  // #3799 美術指導書追加需求（2026-10-31）：已完成的站插旗＋名牌打勾，
+  // 只需要做一次（不是每幀），`flaggedIndexes` 記住哪些站已經插過，
+  // `setProgress()` 每次呼叫時只處理「新完成、還沒插旗」的那幾個。
+  const flaggedIndexes = new Set<number>();
+  function flagCompletedStation(index: number): void {
+    if (flaggedIndexes.has(index)) return;
+    flaggedIndexes.add(index);
+    const stop = content.stops[index];
+    const topY = buildingTopY(stop.step);
+    const pole = cylinder(buildingGroups[index], 0.025, 0.025, 0.5, wood, 0.4, topY + 0.25, 0.25, 6);
+    pole.castShadow = false;
+    const flag = box(buildingGroups[index], 0.24, 0.16, 0.02, flagCloth, 0.52, topY + 0.42, 0.25);
+    flag.castShadow = false;
+    drawSignCanvas(signCanvases[index], stop.name, true);
+    (signs[index].material as THREE.SpriteMaterial).map!.needsUpdate = true;
+  }
+
   // #3780 P0-3 四度審查訂正：底部光暈環在慶祝時除了既有的脈動（見下面
   // animate() 裡的 pulseAmp），底座本身也要放大，當「整棟建築發光」之外
   // 的第二層回饋——原本脈動是繞著 1 倍振幅擺動，放大感很弱。這裡另外存一條
@@ -917,6 +952,9 @@ export function createIslandWorld(
   frame = requestAnimationFrame(animate);
   return {
     setProgress(nextZone: number, done: number[]) {
+      // #3799 美術指導書追加需求（2026-10-31）：已完成的站插旗＋名牌打勾
+      // ——不能只靠整棟發光，發光留著，這是額外加的視覺回饋。
+      for (const index of done) flagCompletedStation(index);
       // #3780 P0-3：原本「有新完成就直接轉向下一站」——鏡頭轉走的那一刻，
       // 剛點亮的站已經不在畫面裡了。改成先轉過去面向剛完成的那一站，停留
       // `celebrationProfileForStep()` 算出來的秒數（依這一站的份量分輕重），
