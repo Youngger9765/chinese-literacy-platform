@@ -893,6 +893,19 @@ export function godCameraDistanceForAspect(aspect: number): number {
   return Math.max(GOD_CAMERA_DISTANCE, Math.min(minDistanceForWidth, maxDistanceForVerticalCap));
 }
 
+/**
+ * #3799 批次 2（team-lead 2026-10-30：「角色和建築名牌太小，小朋友不好點」）：
+ * 名牌（3D 精靈貼圖）跟玩家角色的世界座標縮放是寫死的常數，螢幕上的視覺
+ * 大小會隨著鏡頭距離縮放（這是透視投影的本質，不是貼圖解析度問題）——
+ * 窄螢幕為了塞下同樣的水平範圍被迫把鏡頭拉遠（見 `godCameraDistanceForAspect`），
+ * 同樣的世界縮放因此在螢幕上看起來更小，這才是「名牌太小看不清楚」的
+ * 真正根因。這個倍率跟距離同步放大，讓視覺大小維持跟桌機已驗證過的構圖
+ * 一致——桌機距離不變，倍率就是 1，不會意外改變已經截圖驗過的桌機畫面。
+ */
+export function spriteScaleForAspect(aspect: number): number {
+  return godCameraDistanceForAspect(aspect) / GOD_CAMERA_DISTANCE;
+}
+
 /** 上帝視角鏡頭在「看的那一點」所框到的畫面高度（世界單位）。用來鎖「鏡頭不能
  *  近到變成第三人稱近景」：畫面高度越大，角色佔畫面比例越小。 */
 export function godFrameHeightAtTarget(aspect: number): number {

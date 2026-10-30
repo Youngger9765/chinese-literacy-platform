@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { introProgress, characterPose } from './islandMotion';
 import type { IslandBaby, IslandStop } from './islandTemplate';
 import { isSceneryExcluded } from './islandTemplate';
-import { MIN_CAMERA_BUILDING_DISTANCE, BUILDING_BASE_RADIUS, computeSpawnFacingLighthouse, selectNearestStation, findCelebrationViewpoint, findTravelToDestination, arcFlightPosition, arcFlightArrivalYaw, walkAlongPathPosition, walkDurationSeconds, godCameraDesiredPosition, godCameraLookTarget, tapToleranceForAspect, GOD_CAMERA_FOV_DEG, GOD_VIEW_FOG_DENSITY, isMovementLocked, isManualControlEnabled, cardStationFor, isLabelOccluded, type CelebrationViewpoint, type LabelOcclusionObstacle } from './spawnPoint';
+import { MIN_CAMERA_BUILDING_DISTANCE, BUILDING_BASE_RADIUS, computeSpawnFacingLighthouse, selectNearestStation, findCelebrationViewpoint, findTravelToDestination, arcFlightPosition, arcFlightArrivalYaw, walkAlongPathPosition, walkDurationSeconds, godCameraDesiredPosition, godCameraLookTarget, tapToleranceForAspect, spriteScaleForAspect, GOD_CAMERA_FOV_DEG, GOD_VIEW_FOG_DENSITY, isMovementLocked, isManualControlEnabled, cardStationFor, isLabelOccluded, type CelebrationViewpoint, type LabelOcclusionObstacle } from './spawnPoint';
 import { startCelebration, advanceOnTurnConverged, isHoldComplete, diffProgress, resolveCelebrationTrigger, celebrationGlowBoost, steadyCompletedGlow, resolveCelebrationGlow, INITIAL_PROGRESS_DIFF_STATE, type CelebrationState, type ProgressDiffState } from './islandCelebration';
 import { buildStationGroup, applyBuildingGlow, disposeObjectTree, buildingTopY, type BuildingMaterialSlot } from './islandBuildingShapes';
 
@@ -650,7 +650,11 @@ export function createIslandWorld(
       player.position.y = 1.55 + jumping + (length > 0.08 ? Math.sin(elapsed * 13) * 0.07 : 0);
       // 人物微動作：站著呼吸、走路擺動、落地壓扁
       const pose = characterPose({ elapsed, moving: length > 0.08 && jumping === 0, sinceLanded: elapsed - landedAt });
-      player.scale.set(1.8 * pose.scaleX, 2.3 * pose.scaleY, 1);
+      // #3799 批次 2（team-lead：「角色...太小」）：窄螢幕鏡頭被迫拉遠時，
+      // 角色的世界座標縮放在螢幕上會跟著透視縮小——見 spriteScaleForAspect
+      // 的說明。桌機倍率是 1，不影響既有已驗證的構圖。
+      const charScale = spriteScaleForAspect(camera.aspect);
+      player.scale.set(1.8 * charScale * pose.scaleX, 2.3 * charScale * pose.scaleY, 1);
       player.material.rotation = pose.tilt;
       xiaoling.material.rotation = Math.sin(elapsed * 2.2) * 0.07;
       xiaoling.position.set(player.position.x + 0.67, player.position.y + 0.85 + Math.sin(elapsed * 3) * 0.14, player.position.z + 0.12);
@@ -822,6 +826,10 @@ export function createIslandWorld(
       baseY: 0.42,
       topY: buildingTopY(stop.step),
     }));
+    // #3799 批次 2（team-lead：「建築名牌太小」）：名牌是固定世界座標縮放的
+    // 3D 精靈貼圖，窄螢幕鏡頭被迫拉遠時會跟著透視縮小——見
+    // spriteScaleForAspect 的說明。桌機倍率是 1，不影響既有構圖。
+    const signScale = spriteScaleForAspect(camera.aspect);
     signs.forEach((sign, index) => {
       const stop = content.stops[index];
       const labelWorld = { x: stop.x, y: 0.42 + sign.position.y, z: stop.z };
@@ -832,6 +840,7 @@ export function createIslandWorld(
       );
       const mat = sign.material as THREE.SpriteMaterial;
       mat.opacity += ((occluded ? 0 : 1) - mat.opacity) * Math.min(1, dt * 10);
+      sign.scale.set(3.3 * signScale, 0.65 * signScale, 1);
     });
     // #3780 P0-3：慶祝粒子——從剛完成那一站的地基往上、往外飄散，停留期
     // 結束前淡出；數量跟擴散範圍依 tier 而定（heavy 比 light 多更大）。

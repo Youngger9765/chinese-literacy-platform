@@ -51,6 +51,7 @@ import {
   godCameraDistanceForAspect,
   godCameraLookTarget,
   tapToleranceForAspect,
+  spriteScaleForAspect,
 } from '../spawnPoint';
 
 describe('碰撞不變量（不穿牆）', () => {
@@ -710,6 +711,33 @@ describe('godCameraLookTarget — 窄螢幕鏡頭看的點往島內偏一點', (
  * #3799 Batch 2B：建築可點範圍在窄螢幕要加大（team-lead 真機觀察：
  * 名牌太小，小朋友不好點）。容許誤差只在窄螢幕放寬，寬螢幕維持接近精準點擊。
  */
+/**
+ * #3799 Batch 2B 補一條（team-lead 2026-10-30「角色和建築名牌太小」這句原本
+ * 只被我誤解成「hover 時的 DOM 標籤字級」——那個標籤只在 hover 才出現，
+ * 觸控裝置根本沒有 hover 狀態，桌機以外的使用者永遠看不到。真正隨時可見
+ * 的名牌是 3D 精靈貼圖（`sign`），它的世界座標縮放是固定常數，窄螢幕鏡頭
+ * 被迫拉遠時，同樣的世界縮放在螢幕上的視覺大小會跟著透視縮小——這才是
+ * 「太小」的真正根因。`spriteScaleForAspect` 鎖「這個倍率跟距離同步放大，
+ * 桌機維持 1 倍不變」。
+ */
+describe('spriteScaleForAspect — 名牌／角色貼圖的視覺大小跟著鏡頭距離等比例放大', () => {
+  it('桌機寬螢幕：倍率是 1，不放大——已經截圖驗過的桌機視覺大小不該被這個補償意外改變', () => {
+    expect(spriteScaleForAspect(DESKTOP_ASPECT)).toBe(1);
+  });
+
+  it('手機窄螢幕：倍率明顯大於 1，抵銷鏡頭拉遠造成的透視縮小', () => {
+    expect(spriteScaleForAspect(PHONE_ASPECT)).toBeGreaterThan(1);
+  });
+
+  it('倍率剛好等於距離的放大比例（鏡頭拉遠多少，貼圖就該放大多少，視覺大小才會不變）', () => {
+    expect(spriteScaleForAspect(PHONE_ASPECT)).toBeCloseTo(1.6, 5);
+  });
+
+  it('決定性：同一個寬高比兩次呼叫結果一樣', () => {
+    expect(spriteScaleForAspect(PHONE_ASPECT)).toBe(spriteScaleForAspect(PHONE_ASPECT));
+  });
+});
+
 describe('tapToleranceForAspect — 建築可點範圍，窄螢幕比桌機寬容', () => {
   it('桌機寬螢幕：容許誤差小，維持接近精準點擊', () => {
     expect(tapToleranceForAspect(DESKTOP_ASPECT)).toBeLessThan(0.05);
