@@ -24,3 +24,22 @@ export {
 } from './archipelagoClusters';
 
 export { GROUPINGS, type GroupingStrategy, type ClusterSummary } from './groupings';
+
+/**
+ * 不規則群島版面邏輯（#3780 PRD §3.2 二次訂正，2026-10-31）——目前只有
+ * 純函式＋測試，**尚未接進 `createArchipelagoWorld.ts`**（team-lead
+ * 2026-10-31 授權：顏色/材質/造型細節等美術指導書出來再接，避免做兩次）。
+ * 先透過這個 barrel 匯出，接線時呼叫端不用改 import 路徑。
+ */
+export {
+  layoutArchipelago,
+  blobMinDistance,
+  CONNECTOR_MATERIALS,
+  DISTANCE_THRESHOLD,
+  type FootprintSize,
+  type ConnectorMaterial,
+  type HexCell,
+  type IslandBlob,
+  type IslandConnection,
+  type ArchipelagoLayoutResult,
+} from './archipelagoLayout';
