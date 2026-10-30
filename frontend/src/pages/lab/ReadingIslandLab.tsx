@@ -28,6 +28,21 @@ const MOTES = Array.from({ length: 18 }, (_, i) => ({ x: (i * 37) % 100, d: 7 + 
 export default function ReadingIslandLab() {
   const { storyId = '' } = useParams();
   const navigate = useNavigate();
+  // #3780 群島模式（docs/prd/2026-10-30-archipelago-clusters-prd.md §9）：從
+  // 群島頁點島進來時帶 `?from=archipelago&group=...&cluster=...`（見
+  // archipelago/StudentArchipelagoPage.tsx 的 goToSingleIsland）。這裡只在
+  // 進頁當下讀一次，故意不用 react-router 的 `useSearchParams`——這個檔案
+  // 現有 10 支測試都 mock 了 `useParams/useNavigate` 卻沒 mock
+  // `useSearchParams`，改用 hook 會讓它們全部要跟著補 mock，徒增跟這個
+  // 小改動不相關的改動面；直接讀 `window.location.search` 零波及。
+  const archipelagoReturn = useMemo(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('from') !== 'archipelago') return null;
+    return {
+      group: params.get('group') ?? 'grade',
+      cluster: params.get('cluster') ?? '',
+    };
+  }, []);
   const { token, user } = useAuth();
   const canvasRef = useRef<HTMLDivElement>(null);
   const worldRef = useRef<World | null>(null);
@@ -461,6 +476,19 @@ export default function ReadingIslandLab() {
         </div>
         {opening < 0 && (
           <div aria-label="工具列" className="relative z-20 flex flex-col items-start gap-2 md:absolute md:left-7 md:bottom-28">
+            {/* #3780 §9「單課島加『回群島』，帶回原 group/cluster」——只在
+                從群島頁點進來時出現（原生從遊戲區卡片進島不受影響）。帶的是
+                進頁當下記下的 group/cluster，不是寫死的值，回去會落在玩家
+                原本所在的那一群，不是永遠退回年級群島。 */}
+            {archipelagoReturn && (
+              <button
+                type="button"
+                onClick={() => navigate(`/student/archipelago?group=${archipelagoReturn.group}&cluster=${encodeURIComponent(archipelagoReturn.cluster)}`)}
+                className="rounded-full border-2 border-white bg-[#244653]/90 px-4 py-2 text-sm font-bold text-[#fff1d0] shadow-lg transition hover:scale-105 active:scale-95"
+              >
+                回群島
+              </button>
+            )}
             {module === null && door === null && !listMode && (
               <button type="button" aria-label="切換清單模式" onClick={() => setListMode(true)} className="rounded-full border-2 border-white bg-[#233e4b]/90 px-4 py-2 text-sm font-bold text-[#fff1d0] shadow-lg transition hover:scale-105 active:scale-95">清單模式</button>
             )}

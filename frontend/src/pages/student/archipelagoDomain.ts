@@ -27,12 +27,26 @@ export interface ArchipelagoStory {
   id: string;
   title: string;
   grade: string;
+  /** #3780 群島模式（docs/prd/2026-10-30-archipelago-clusters-prd.md）：
+   *  依文體／類別分群要用，原始值（未正規化），正規化規則見
+   *  `archipelago/archipelagoClusters.ts` 的 `normalizeGenre`/`normalizeCategory`
+   *  ——兩邊刻意分開，這裡只負責「資料長什麼樣」，正規化規則只活在一處。
+   *  Optional（不是後端缺這兩欄，是既有呼叫端/測試只建構
+   *  `{id,title,grade}` 這個子集——見 `buildArchipelago()` 用 `?? ''` 補
+   *  預設值，不強迫既有呼叫端跟著改）。 */
+  genre?: string;
+  category?: string;
+  /** 蜂巢螺旋排列順序，見 types.ts `Story.lessonSeq` 的說明。 */
+  lessonSeq?: number;
 }
 
 export interface ArchipelagoIsland {
   storySlug: string;
   title: string;
   grade: string;
+  genre: string;
+  category: string;
+  lessonSeq?: number;
   status: IslandStatus;
   stationsDone: number;
   stationsTotal: number;
@@ -62,6 +76,9 @@ export function buildArchipelago(
       storySlug: s.id,
       title: s.title,
       grade: s.grade,
+      genre: s.genre ?? '',
+      category: s.category ?? '',
+      lessonSeq: s.lessonSeq,
       status: islandStatus(p),
       stationsDone: p?.stations_done ?? 0,
       stationsTotal: p?.stations_total ?? 0,

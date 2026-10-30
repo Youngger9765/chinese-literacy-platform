@@ -90,6 +90,8 @@ interface ApiStoryListItem {
   grade_code: string;
   genre: string;
   category: string;
+  /** #3780 群島模式用——課程排序，見 types.ts Story.lessonSeq 的說明。 */
+  lesson_seq?: number;
   char_count: number;
   // 印在學習單正文上的課文層內容（#3277）。這幾欄從 #2736 起就在 yml 裡，
   // 但服務端沒宣告 → 送不出去 → 前端也就沒人接。兩邊一起補。
@@ -211,6 +213,7 @@ function apiListItemToStory(item: ApiStoryListItem): Story {
     intro: item.intro,
     grade: item.grade,
     genre: item.genre,
+    lessonSeq: item.lesson_seq,
     readingStrategy: item.reading_strategy ?? undefined,
     readingStrategyExplained: item.reading_strategy_explained ?? undefined,
     charCount: item.char_count,

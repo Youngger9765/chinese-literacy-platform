@@ -1,23 +1,23 @@
 /**
- * StudentArchipelagoPage — `/student/archipelago` (#3780 D3).
+ * StudentArchipelagoPage — `/student/archipelago` (#3780 D3 → 群島模式，
+ * docs/prd/2026-10-30-archipelago-clusters-prd.md).
  *
- * 我的群島頁：列出全部課程的「島」，顯示佔領狀態與站數進度，可依年級篩選、
- * 搜尋課名，點一座島進 `/lab/island/:storyId`。頁面上方顯示文字寶貝數，
- * 連到 `/lab/word-babies`。
+ * 179 課不全部互聯——依分群方式（年級／文體／類別）分成大群，一群一張
+ * 3D 地圖（中央傳送門廣場＋課程島蜂巢螺旋排列），群與群之間用傳送門往來。
+ * 清單模式（原本 D3 的卡片清單）保留成一個可切換的檢視，也是 WebGL 建不
+ * 起來時的自動降級目標（PRD §6）。
  *
- * PRD §5.7：只打兩支 API，各打一次——`fetchStories()`（全部課程清單，內部
- * 已經是 `page_size=300` 一次拿完，見 services/api.ts）跟 `getStudentProgress()`
- * （`is_occupied`/`stations_done`/`stations_total` 已由伺服器算好，§5.6）。
- * 文字寶貝數另外加一支 `fetchMyWordBabies`（PRD 寫這份文件時文字寶貝養成
- * 系統還沒做，§5.4 原本要求留空／「即將開放」——team-lead 2026-10-28 現在
- * 明確要求顯示真實寶貝數並連到 /lab/word-babies，這份系統這次 session 已經
- * 做完，所以用真數字，不是當初 PRD 寫的佔位文字）。
+ * 這個頁面是在 `<AppShell>` 的 `<main>`（`flex-1 overflow-y-auto`，不是
+ * 裸的整個瀏覽器視窗）裡渲染——根容器用 `h-full` 填滿那個 slot，不是
+ * `h-[100dvh]`（那樣會比 AppShell 分配到的高度還高，在側欄旁邊擠出多一層
+ * 捲動）。截圖對照：改動前 `before-archipelago-1280.png`/`-390.png`。
  *
- * 合併/篩選/文案的純函式邏輯都在 archipelagoDomain.ts（已獨立測試），這個
- * 檔案只負責 fetch 三支 API 一次＋render。
+ * 合併/篩選/分群/蜂巢座標的純函式邏輯都在 archipelagoDomain.ts／
+ * archipelago/archipelagoClusters.ts（各自獨立測試），這個檔案只負責
+ * fetch API＋render＋串 3D 世界（`createArchipelagoWorld.ts`）。
  */
-import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { fetchStories } from '../../services/api';
 import { getStudentProgress } from '../../services/progressApi';
@@ -27,16 +27,42 @@ import {
   buildArchipelago,
   filterArchipelago,
   islandStatusLabel,
-  splitGradeOptions,
   storiesPageMismatchMessage,
   type ArchipelagoIsland,
 } from './archipelagoDomain';
+import {
+  groupIntoClusters,
+  portalsFor,
+  defaultClusterKey,
+  normalizeCategory,
+  type ClusterMode,
+  type Cluster,
+  type RecentProgressEntry,
+} from './archipelago/archipelagoClusters';
+import {
+  createArchipelagoWorld,
+  type ArchipelagoWorld,
+  type ArchipelagoWorldIsland,
+  type ArchipelagoWorldPortal,
+} from './archipelago/createArchipelagoWorld';
 
 const STATUS_BADGE_CLASS: Record<ArchipelagoIsland['status'], string> = {
   occupied: 'bg-amber-100 text-amber-700 border-amber-300',
   in_progress: 'bg-sky-100 text-sky-700 border-sky-300',
   not_started: 'bg-gray-100 text-gray-500 border-gray-200',
 };
+
+const CLUSTER_MODE_LABEL: Record<ClusterMode, string> = {
+  grade: '年級',
+  genre: '文體',
+  category: '類別',
+};
+
+/** `groupIntoClusters` 的 `ClusterStory` 約束用 `id` 當身分欄位（跟
+ *  `ArchipelagoStory` 的命名對齊），`ArchipelagoIsland` 用的是
+ *  `storySlug`——這個型別只是補一個 `id` 別名，分群純函式本身不需要為了
+ *  兩種呼叫端改欄位名稱。 */
+type ClusterIsland = ArchipelagoIsland & { id: string };
 
 const IslandCard: React.FC<{ island: ArchipelagoIsland; onOpen: () => void }> = ({ island, onOpen }) => (
   <button
@@ -56,16 +82,155 @@ const IslandCard: React.FC<{ island: ArchipelagoIsland; onOpen: () => void }> = 
   </button>
 );
 
+/** 群島右側面板（桌機固定側欄／手機底部抽屜共用這個內容）——HUD、搜尋、
+ *  站點清單。PRD §3.4/§6。 */
+const ArchipelagoSidePanel: React.FC<{
+  cluster: Cluster<ClusterIsland>;
+  occupiedInCluster: number;
+  clusterMode: ClusterMode;
+  onChangeMode: (mode: ClusterMode) => void;
+  allClusters: Cluster<ClusterIsland>[];
+  onJumpCluster: (key: string) => void;
+  search: string;
+  onSearch: (q: string) => void;
+  onSelectIsland: (slug: string) => void;
+  selectedSlug: string | null;
+  onToggleListMode: () => void;
+  babyCount: { owned: number; total: number } | null;
+  onOpenWordBabies: () => void;
+}> = ({
+  cluster, occupiedInCluster, clusterMode, onChangeMode, allClusters, onJumpCluster,
+  search, onSearch, onSelectIsland, selectedSlug, onToggleListMode, babyCount, onOpenWordBabies,
+}) => {
+  const visibleStories = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return cluster.stories;
+    return cluster.stories.filter((s) => s.title.toLowerCase().includes(q));
+  }, [cluster.stories, search]);
+
+  return (
+    <div className="flex h-full flex-col gap-3 overflow-y-auto p-4">
+      <div>
+        <h2 className="text-lg font-black text-gray-900">{cluster.label}</h2>
+        <p className="text-sm text-gray-500">已佔領 {occupiedInCluster} / {cluster.stories.length}</p>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <label htmlFor="archipelago-group-select" className="text-xs font-semibold text-gray-400">群島導覽</label>
+        <select
+          id="archipelago-group-select"
+          value={cluster.key}
+          onChange={(e) => onJumpCluster(e.target.value)}
+          className="flex-1 rounded-lg border border-gray-200 px-2 py-1.5 text-sm"
+        >
+          {allClusters.map((c) => (
+            <option key={c.key} value={c.key}>{c.label}</option>
+          ))}
+        </select>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="分群方式">
+        {(['grade', 'genre', 'category'] as ClusterMode[]).map((mode) => (
+          <button
+            key={mode}
+            type="button"
+            onClick={() => onChangeMode(mode)}
+            aria-pressed={clusterMode === mode}
+            className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-all ${
+              clusterMode === mode ? 'bg-accent text-white' : 'border border-gray-200 bg-white text-gray-600 hover:border-accent'
+            }`}
+          >
+            依{CLUSTER_MODE_LABEL[mode]}
+          </button>
+        ))}
+        <button
+          type="button"
+          onClick={onToggleListMode}
+          className="ml-auto rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-600 transition-all hover:border-accent"
+        >
+          清單模式
+        </button>
+      </div>
+
+      <input
+        type="text"
+        value={search}
+        onChange={(e) => onSearch(e.target.value)}
+        placeholder="搜尋課名…"
+        aria-label="搜尋課名"
+        className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-accent focus:outline-none"
+      />
+
+      <ul className="flex flex-col gap-1.5" aria-label={`${cluster.label}站點清單`}>
+        {visibleStories.map((island) => (
+          <li key={island.storySlug}>
+            <button
+              type="button"
+              onClick={() => onSelectIsland(island.storySlug)}
+              aria-label={`${island.title}（${islandStatusLabel(island)}）`}
+              className={`flex w-full items-center gap-2 rounded-lg border px-3 py-2 text-left text-sm transition-all ${
+                selectedSlug === island.storySlug ? 'border-accent bg-accent/10' : 'border-gray-100 bg-white hover:border-accent/50'
+              }`}
+            >
+              <span
+                className={`h-2.5 w-2.5 shrink-0 rounded-full ${
+                  island.status === 'occupied' ? 'bg-amber-500' : island.status === 'in_progress' ? 'bg-sky-500' : 'bg-gray-300'
+                }`}
+                aria-hidden="true"
+              />
+              <span className="flex-1 truncate font-medium text-gray-800">{island.title}</span>
+            </button>
+          </li>
+        ))}
+        {visibleStories.length === 0 && <li className="py-6 text-center text-sm text-gray-400">找不到符合的課</li>}
+      </ul>
+
+      <button
+        type="button"
+        onClick={onOpenWordBabies}
+        className="mt-auto flex w-full items-center justify-between rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-left transition-all hover:border-amber-400"
+      >
+        <span className="text-sm font-bold text-amber-800">
+          {babyCount ? `文字寶貝 ${babyCount.owned}/${babyCount.total} 隻` : '文字寶貝載入中…'}
+        </span>
+        <span className="text-xs font-semibold text-amber-600 underline">看我的寶貝 →</span>
+      </button>
+    </div>
+  );
+};
+
 const StudentArchipelagoPage: React.FC = () => {
   const { token, user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [islands, setIslands] = useState<ArchipelagoIsland[] | null>(null);
-  const [grades, setGrades] = useState<string[]>([]);
+  const [recentProgress, setRecentProgress] = useState<RecentProgressEntry[]>([]);
   const [babyCount, setBabyCount] = useState<{ owned: number; total: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [selectedGrade, setSelectedGrade] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
+
+  // code review 2026-10-30 blocker：`?group=` 原本從頭到尾沒被讀——寫死
+  // 'grade' 會讓「回群島」帶回來的 `group=genre&cluster=說明文` 落在錯的群
+  // （用 grade 模式分群，不會有一群的 key 剛好等於「說明文」，於是掉回
+  // defaultClusterKey 的年級 fallback）。初始值要從網址讀，驗不是三種合法
+  // 值之一就退回 'grade'，不信任網址內容。
+  const [clusterMode, setClusterMode] = useState<ClusterMode>(() => {
+    const fromUrl = searchParams.get('group');
+    return fromUrl === 'grade' || fromUrl === 'genre' || fromUrl === 'category' ? fromUrl : 'grade';
+  });
+  const [clusterKey, setClusterKey] = useState<string | null>(searchParams.get('cluster'));
+  const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
+  const [listMode, setListMode] = useState(false);
+  const [webglFailed, setWebglFailed] = useState(false);
+  const [transitioning, setTransitioning] = useState(false);
+
+  // 舊版（D3）年級卡片清單篩選——清單模式切換過去時沿用。
+  const [legacyGradeFilter, setLegacyGradeFilter] = useState<string | null>(null);
+  const [legacySearch, setLegacySearch] = useState('');
+
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const worldRef = useRef<ArchipelagoWorld | null>(null);
 
   useEffect(() => {
     if (!token || !user) return;
@@ -78,13 +243,13 @@ const StudentArchipelagoPage: React.FC = () => {
           fetchMyWordBabies(user.id, token),
         ]);
         if (!alive) return;
-        // PRD §6（§5.7）：page_size=300 理論上一次拿滿全部課程；分頁漏課不會
-        // 報錯，只會讓群島看起來「少了幾座」，所以用斷言式檢查主動印警告。
         const mismatch = storiesPageMismatchMessage(storiesRes.stories.length, storiesRes.total);
         if (mismatch) console.error(mismatch);
-        const stories = storiesRes.stories.map((s) => ({ id: s.id, title: s.title, grade: s.grade ?? '' }));
+        const stories = storiesRes.stories.map((s) => ({
+          id: s.id, title: s.title, grade: s.grade ?? '', genre: s.genre, category: s.category, lessonSeq: s.lessonSeq,
+        }));
         setIslands(buildArchipelago(stories, progressRes.texts));
-        setGrades(storiesRes.grades);
+        setRecentProgress(progressRes.texts.map((t) => ({ storySlug: t.story_slug, hasSession: t.has_session, startedAt: t.started_at })));
         setBabyCount({ owned: babiesRes.babies_owned_count, total: babiesRes.babies_total_species });
       } catch {
         if (alive) setError('載入群島資料失敗，請重新整理再試一次');
@@ -93,118 +258,255 @@ const StudentArchipelagoPage: React.FC = () => {
     return () => { alive = false; };
   }, [token, user]);
 
-  const filtered = useMemo(
-    () => (islands ? filterArchipelago(islands, { grade: selectedGrade ?? undefined, search: searchQuery }) : []),
-    [islands, selectedGrade, searchQuery],
+  const clusters = useMemo(
+    () => (islands ? groupIntoClusters(islands.map((i) => ({ ...i, id: i.storySlug })), clusterMode) : []),
+    [islands, clusterMode],
   );
 
-  // 年級跟「文言文／品格教育」這類特殊主題分開顯示（code review 2026-10-28：
-  // 混在同一排四年級會看不懂差別）。
-  const { grades: gradeOptions, themes: themeOptions } = useMemo(() => splitGradeOptions(grades), [grades]);
+  // PRD §5：網址 ?cluster= 有值以網址為準；沒有值時落在最近學過的那一課
+  // 所在的群，完全沒有紀錄則第 4 級。只在「這次還沒決定過」時算一次，不要
+  // 每次 clusters 重算（例如切換分群方式）就把使用者手動選的群蓋掉。
+  const resolvedInitialKey = useRef(false);
+  useEffect(() => {
+    if (resolvedInitialKey.current || clusters.length === 0) return;
+    const fromUrl = searchParams.get('cluster');
+    const resolvedKey = fromUrl && clusters.some((c) => c.key === fromUrl)
+      ? fromUrl
+      : defaultClusterKey(recentProgress, clusters, clusterMode);
+    setClusterKey(resolvedKey);
+    // code review 2026-10-30 blocker 2 的另一半：落點解完也要寫回網址，
+    // 不然切了分群方式重新整理、或分享網址給別人，`cluster=` 停在舊值
+    // （甚至是舊分群方式底下的 key，在新分群方式裡查不到）。
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set('cluster', resolvedKey);
+      next.set('group', clusterMode);
+      return next;
+    }, { replace: true });
+    resolvedInitialKey.current = true;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clusters]);
+
+  const currentCluster = useMemo(
+    () => clusters.find((c) => c.key === clusterKey) ?? clusters[0] ?? null,
+    [clusters, clusterKey],
+  );
+  const portals = useMemo(
+    () => (currentCluster ? portalsFor(clusters, currentCluster.key) : []),
+    [clusters, currentCluster],
+  );
+  const occupiedInCluster = useMemo(
+    () => currentCluster?.stories.filter((s) => s.status === 'occupied').length ?? 0,
+    [currentCluster],
+  );
+
+  const jumpToCluster = useCallback((key: string) => {
+    const target = clusters.find((c) => c.key === key);
+    if (!target) return;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    setSelectedSlug(null);
+    const applyKey = () => {
+      setClusterKey(key);
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev);
+        next.set('cluster', key);
+        next.set('group', clusterMode);
+        return next;
+      }, { replace: true });
+    };
+    if (reduceMotion) { applyKey(); return; }
+    // 傳送過場：白光 0.6 秒（PRD §4）。
+    setTransitioning(true);
+    window.setTimeout(() => {
+      applyKey();
+      window.setTimeout(() => setTransitioning(false), 300);
+    }, 300);
+  }, [clusters, clusterMode, setSearchParams]);
+
+  const changeMode = useCallback((mode: ClusterMode) => {
+    setClusterMode(mode);
+    setClusterKey(null); // 分群方式變了，舊 key 不一定存在於新分群——下面的 effect 會重新決定落點
+    resolvedInitialKey.current = false;
+    // code review 2026-10-30 blocker 2：切分群方式原本沒寫回網址，重新整理
+    // 會跳回年級。先把 `group=` 寫回去；`cluster=` 等上面那個 effect 重新
+    // 解完落點後會一併寫入（這裡先寫是讓「切完立刻重新整理」至少不會回到
+    // 舊分群方式，不必等那個 effect 跑完）。
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set('group', mode);
+      return next;
+    }, { replace: true });
+  }, [setSearchParams]);
+
+  // ---------------------------------------------------------------------
+  // 3D 世界：建立一次、換群時呼叫 loadCluster；WebGL 建不起來自動降級
+  // 清單模式（PRD §6），不顯示錯誤頁。
+  // ---------------------------------------------------------------------
+  useEffect(() => {
+    if (listMode || webglFailed) return;
+    const container = containerRef.current;
+    if (!container) return;
+    const world = createArchipelagoWorld(container, {
+      onSelectIsland: (slug) => setSelectedSlug(slug),
+      onSelectPortal: (key) => jumpToCluster(key),
+    });
+    if (!world) { setWebglFailed(true); return; }
+    worldRef.current = world;
+    return () => { world.dispose(); worldRef.current = null; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [listMode, webglFailed]);
+
+  useEffect(() => {
+    if (!worldRef.current || !currentCluster) return;
+    // code review 2026-10-30 blocker：`s.category` 是 `/api/stories` 的原始
+    // 類別碼（Science/Fable/History/Daily），`createArchipelagoWorld.ts` 的
+    // `landmarkShapeFor()` 比對的是正規化過的中文標籤——沒過這一層全部島
+    // 都會掉進 default 造型（長得一樣），必須在這裡正規化一次才送進 3D 世界。
+    const worldIslands: ArchipelagoWorldIsland[] = currentCluster.stories.map((s) => ({
+      storySlug: s.storySlug, title: s.title, category: normalizeCategory(s.category), status: s.status,
+      stationsDone: s.stationsDone, stationsTotal: s.stationsTotal,
+    }));
+    const worldPortals: ArchipelagoWorldPortal[] = portals.map((p) => ({
+      key: p.key, label: p.label,
+      occupiedCount: p.stories.filter((s) => s.status === 'occupied').length,
+      total: p.stories.length,
+    }));
+    worldRef.current.loadCluster(worldIslands, worldPortals);
+  }, [currentCluster, portals]);
+
+  const selectedIsland = useMemo(
+    () => currentCluster?.stories.find((s) => s.storySlug === selectedSlug) ?? null,
+    [currentCluster, selectedSlug],
+  );
+
+  const goToSingleIsland = useCallback((slug: string) => {
+    if (!currentCluster) return;
+    navigate(`/lab/island/${slug}?from=archipelago&group=${clusterMode}&cluster=${encodeURIComponent(currentCluster.key)}`);
+  }, [navigate, currentCluster, clusterMode]);
+
+  // ---------------------------------------------------------------------
+  // 清單模式（D3 舊版卡片清單）——WebGL 降級／手動切換都走這條。
+  // ---------------------------------------------------------------------
+  const legacyFiltered = useMemo(
+    () => (islands ? filterArchipelago(islands, { grade: legacyGradeFilter ?? undefined, search: legacySearch }) : []),
+    [islands, legacyGradeFilter, legacySearch],
+  );
+  const legacyGrades = useMemo(() => [...new Set((islands ?? []).map((i) => i.grade))], [islands]);
+
+  if (error) {
+    return (
+      <div className="mx-auto max-w-4xl p-6">
+        <div className="rounded-lg bg-red-50 py-4 text-center text-red-600"><p>{error}</p></div>
+      </div>
+    );
+  }
+
+  if (islands === null || !currentCluster) {
+    return <p className="py-16 text-center text-gray-400">載入中…</p>;
+  }
+
+  if (listMode || webglFailed) {
+    return (
+      <div className="mx-auto max-w-4xl space-y-6 p-4 sm:p-6">
+        <header className="flex items-center justify-between gap-2">
+          <div>
+            <h1 className="text-2xl font-black text-gray-900">我的群島</h1>
+            <p className="text-sm text-gray-500">每一課都是一座島，讀完全部站點就能佔領它</p>
+          </div>
+          {!webglFailed && (
+            <button type="button" onClick={() => setListMode(false)} className="shrink-0 rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-600 hover:border-accent">
+              回 3D 地圖
+            </button>
+          )}
+        </header>
+        {webglFailed && <p className="text-sm text-amber-600">這台裝置目前無法顯示 3D 地圖，已自動切換成清單模式</p>}
+
+        <button
+          type="button"
+          onClick={() => navigate('/lab/word-babies')}
+          className="flex w-full items-center justify-between rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-left transition-all hover:border-amber-400"
+        >
+          <span className="text-base font-bold text-amber-800">
+            {babyCount ? `文字寶貝 ${babyCount.owned}/${babyCount.total} 隻` : '文字寶貝載入中…'}
+          </span>
+          <span className="text-sm font-semibold text-amber-600 underline">看我的寶貝 →</span>
+        </button>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <button type="button" onClick={() => setLegacyGradeFilter(null)} className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-all ${legacyGradeFilter === null ? 'bg-accent text-white' : 'border border-gray-200 bg-white text-gray-600 hover:border-accent'}`}>全部年級</button>
+          {legacyGrades.map((grade) => (
+            <button key={grade} type="button" onClick={() => setLegacyGradeFilter(grade)} className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-all ${legacyGradeFilter === grade ? 'bg-accent text-white' : 'border border-gray-200 bg-white text-gray-600 hover:border-accent'}`}>{gradeLabel(grade)}</button>
+          ))}
+        </div>
+        <input type="text" value={legacySearch} onChange={(e) => setLegacySearch(e.target.value)} placeholder="搜尋課名…" className="w-full max-w-md rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-accent focus:outline-none" />
+
+        {legacyFiltered.length === 0 ? (
+          <p className="py-8 text-center text-gray-400">找不到符合的課，換個關鍵字或年級看看</p>
+        ) : (
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {legacyFiltered.map((island) => (
+              <IslandCard key={island.storySlug} island={island} onOpen={() => navigate(`/lab/island/${island.storySlug}`)} />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  const sidePanel = (
+    <ArchipelagoSidePanel
+      cluster={currentCluster}
+      occupiedInCluster={occupiedInCluster}
+      clusterMode={clusterMode}
+      onChangeMode={changeMode}
+      allClusters={clusters}
+      onJumpCluster={jumpToCluster}
+      search={search}
+      onSearch={setSearch}
+      onSelectIsland={(slug) => { setSelectedSlug(slug); worldRef.current?.focusOnIsland(slug); }}
+      selectedSlug={selectedSlug}
+      onToggleListMode={() => setListMode(true)}
+      babyCount={babyCount}
+      onOpenWordBabies={() => navigate('/lab/word-babies')}
+    />
+  );
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 p-4 sm:p-6">
-      <header className="space-y-1">
-        <h1 className="text-2xl font-black text-gray-900">我的群島</h1>
-        <p className="text-sm text-gray-500">每一課都是一座島，讀完全部站點就能佔領它</p>
-      </header>
+    <div className="relative h-full w-full overflow-hidden bg-[#bbd6dc]">
+      <div ref={containerRef} className="absolute inset-0 [&_canvas]:h-full [&_canvas]:w-full" aria-label="群島 3D 地圖" />
 
-      {/* 文字寶貝數 + 連到 /lab/word-babies（team-lead 2026-10-28 要求） */}
-      <button
-        type="button"
-        onClick={() => navigate('/lab/word-babies')}
-        className="flex w-full items-center justify-between rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-left transition-all hover:border-amber-400"
-      >
-        <span className="text-base font-bold text-amber-800">
-          {babyCount ? `文字寶貝 ${babyCount.owned}/${babyCount.total} 隻` : '文字寶貝載入中…'}
-        </span>
-        <span className="text-sm font-semibold text-amber-600 underline">看我的寶貝 →</span>
-      </button>
-
-      {error && (
-        <div className="rounded-lg bg-red-50 py-4 text-center text-red-600">
-          <p>{error}</p>
-        </div>
-      )}
-
-      {!error && islands === null && (
-        <p className="py-8 text-center text-gray-400">載入中…</p>
-      )}
-
-      {islands !== null && (
+      {transitioning && (
         <>
-          <div className="space-y-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setSelectedGrade(null)}
-                className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-all ${
-                  selectedGrade === null ? 'bg-accent text-white' : 'border border-gray-200 bg-white text-gray-600 hover:border-accent'
-                }`}
-              >
-                全部年級
-              </button>
-              {gradeOptions.map((grade) => (
-                <button
-                  key={grade}
-                  type="button"
-                  onClick={() => setSelectedGrade(grade)}
-                  className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-all ${
-                    selectedGrade === grade ? 'bg-accent text-white' : 'border border-gray-200 bg-white text-gray-600 hover:border-accent'
-                  }`}
-                >
-                  {gradeLabel(grade)}
-                </button>
-              ))}
-            </div>
-
-            {/* 「文言文」「品格教育」不是年級，用不同顏色＋「主題」標籤分開
-                一排，四年級一眼看得出跟上面的年級不是同一種東西 */}
-            {themeOptions.length > 0 && (
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-xs font-semibold text-gray-400">主題</span>
-                {themeOptions.map((theme) => (
-                  <button
-                    key={theme}
-                    type="button"
-                    onClick={() => setSelectedGrade(theme)}
-                    className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-all ${
-                      selectedGrade === theme
-                        ? 'bg-purple-600 text-white'
-                        : 'border border-purple-200 bg-purple-50 text-purple-700 hover:border-purple-400'
-                    }`}
-                  >
-                    {theme}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="max-w-md">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="搜尋課名…"
-              className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-accent focus:outline-none"
-            />
-          </div>
-
-          {filtered.length === 0 ? (
-            <p className="py-8 text-center text-gray-400">找不到符合的課，換個關鍵字或年級看看</p>
-          ) : (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {filtered.map((island) => (
-                <IslandCard
-                  key={island.storySlug}
-                  island={island}
-                  onOpen={() => navigate(`/lab/island/${island.storySlug}`)}
-                />
-              ))}
-            </div>
-          )}
+          <style>{'@keyframes archipelagoPortalFlash{0%{opacity:0}30%{opacity:1}100%{opacity:0}}'}</style>
+          <div className="pointer-events-none absolute inset-0 z-40 animate-[archipelagoPortalFlash_0.6s_ease-in-out] bg-white" />
         </>
+      )}
+
+      {/* 桌機固定側欄；手機（<640）底部抽屜（PRD §6） */}
+      <div className="absolute right-0 top-0 z-20 hidden h-full w-80 border-l border-white/40 bg-white/95 shadow-xl backdrop-blur sm:block">
+        {sidePanel}
+      </div>
+      <details className="absolute bottom-0 left-0 right-0 z-20 block max-h-[70%] rounded-t-2xl border-t border-white/40 bg-white/95 shadow-xl backdrop-blur sm:hidden">
+        <summary className="cursor-pointer px-4 py-3 text-sm font-bold text-gray-700">{currentCluster.label}・已佔領 {occupiedInCluster}/{currentCluster.stories.length}（點展開選單）</summary>
+        <div className="max-h-[55vh] overflow-y-auto">{sidePanel}</div>
+      </details>
+
+      {selectedIsland && (
+        <div className="absolute left-4 top-4 z-30 w-72 rounded-2xl border border-gray-200 bg-white p-4 shadow-xl">
+          <button type="button" onClick={() => setSelectedSlug(null)} aria-label="關閉島卡" className="float-right text-gray-400 hover:text-gray-600">✕</button>
+          <h3 className="text-base font-black text-gray-900">{selectedIsland.title}</h3>
+          <p className="mt-1 text-xs text-gray-500">{gradeLabel(selectedIsland.grade)}・{selectedIsland.genre || '未分類'}</p>
+          <span className={`mt-2 inline-flex items-center rounded-full border px-3 py-1 text-sm font-bold ${STATUS_BADGE_CLASS[selectedIsland.status]}`}>
+            {islandStatusLabel(selectedIsland)}
+          </span>
+          <button
+            type="button"
+            onClick={() => goToSingleIsland(selectedIsland.storySlug)}
+            className="mt-3 w-full rounded-xl bg-accent px-4 py-2.5 text-sm font-bold text-white hover:bg-accent-hover"
+          >
+            登島
+          </button>
+        </div>
       )}
     </div>
   );
