@@ -214,7 +214,7 @@ export function buildStoryProgressionLines(
 
 const STORY_ENDING_TEMPLATES: Record<StoryType, (title: string) => string> = {
   repair: (title) => `鐘樓完全修好了，敲響的瞬間全島都聽到了——你讀完了《${title}》，也把這件事練好了`,
-  boss: (title) => `迷霧散開了，巨影原來只是你自己——你讀完了《${title}》，也看懂了它想告訴你的事`,
+  boss: (title) => `迷霧散開了，巨影原來只是一個還沒被看懂的故事——你讀完了《${title}》，也看懂了它想告訴你的事`,
   treasure: (title) => `所有勳章拼成了完整的寶物，翻開第一頁——你讀完了《${title}》，也找到了藏在裡面的智慧`,
   detective: (title) => `案情看板串起了全部線索，真相大白——你讀完了《${title}》，當了一回很棒的偵探`,
   competition: (title) => `比賽結束了，結果不是重點——你讀完了《${title}》，全力以赴走到了終點`,
