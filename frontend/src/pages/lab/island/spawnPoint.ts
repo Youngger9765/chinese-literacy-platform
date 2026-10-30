@@ -835,8 +835,13 @@ export function walkDurationSeconds(
  * 沿用第一人稱 57° FOV 更接近查到的依據）。
  */
 export const GOD_CAMERA_FOV_DEG = 30;
-export const GOD_CAMERA_PITCH = (35 * Math.PI) / 180; // 35°，落在查到的 30–40° 區間中段
-export const GOD_CAMERA_DISTANCE = 30;
+// #3794 四次訂正（team-lead 2026-10-30，第三輪退件「鏡頭太近，只看得到燈塔一角」）：
+// 島的站點散佈約 32×48 世界單位（islandTemplate.ts ZONE_PATHS），距離 30＋窄 FOV
+// 只框得到約 16 單位寬，等於第三人稱近景。拉到 55、俯角 45°（仍在 §6.5-A 查到的
+// 斜俯視區間上緣），畫面高度約 29 單位，角色（約 1.8 單位高）佔畫面約 1/16，
+// 像微縮模型裡的小人，一次看得到好幾棟建築。鎖在 `godFrameHeightAtTarget` 的測試裡。
+export const GOD_CAMERA_PITCH = (45 * Math.PI) / 180;
+export const GOD_CAMERA_DISTANCE = 55;
 export const GOD_CAMERA_YAW = Math.PI / 4; // 固定觀看方向，呼應設計文件「對角線構圖」建議
 
 export interface Vec3Like {
@@ -852,10 +857,54 @@ export interface Vec3Like {
  * 對這個「目標位置」做 `camera.position.lerp(desired, ...)`——平滑跟隨的
  * lerp 本身需要 `camera` 現在的位置，這支只負責算「現在應該往哪裡趨近」。
  */
-export function godCameraDesiredPosition(playerPos: { x: number; z: number }): Vec3Like {
+/**
+ * #3794 三次訂正補充（自己用真機截圖抓到，team-lead 還沒看過）：直式手機
+ * （390×844，寬高比≈0.46）用固定 `GOD_CAMERA_DISTANCE=30` 截圖時，連
+ * 出生點旁邊的港口燈塔都被切到畫面外——跟 `spawnPoint.ts` 檔頭那組燈塔
+ * 出生距離常數同一個根因：three.js 的 `fov` 是垂直視野角，不隨寬高比變
+ * （見 `CAMERA_VERTICAL_FOV_DEG` 的註解），但水平視野角會隨寬高比變窄
+ * （`hFov = 2·atan(tan(vFov/2)·aspect)`），窄螢幕同樣的距離看得到的世界
+ * 寬度小很多。跟 `requiredDistanceForTowerWidthInView`（出生鏡頭）同一個
+ * 設計精神：不鎖死某個距離數字，鎖「這個幾何關係」——給一個「想看到的世界
+ * 半徑」（涵蓋 zone 0 幾棟建築＋一點邊界），算出在這個寬高比下要讓這個
+ * 半徑落在畫面寬度內，至少要多遠；桌機寬螢幕算出來的最小距離小於 30，
+ * `Math.max` 會讓它維持原本已經用真瀏覽器截圖驗過沒問題的 30，不會因為
+ * 加了這個補償而意外改變桌機的構圖。
+ */
+const GOD_VIEW_TARGET_WORLD_RADIUS = 14; // 世界單位：直式手機也至少框得到出生區幾棟建築（#3794 四次訂正，原 9 太近）
+
+export function godCameraDistanceForAspect(aspect: number): number {
+  const vFovRad = (GOD_CAMERA_FOV_DEG * Math.PI) / 180;
+  const hFovRad = 2 * Math.atan(Math.tan(vFovRad / 2) * aspect);
+  const minDistance = GOD_VIEW_TARGET_WORLD_RADIUS / Math.tan(hFovRad / 2);
+  return Math.max(GOD_CAMERA_DISTANCE, minDistance);
+}
+
+/** 上帝視角鏡頭在「看的那一點」所框到的畫面高度（世界單位）。用來鎖「鏡頭不能
+ *  近到變成第三人稱近景」：畫面高度越大，角色佔畫面比例越小。 */
+export function godFrameHeightAtTarget(aspect: number): number {
+  const d = godCameraDistanceForAspect(aspect);
+  return 2 * d * Math.tan(((GOD_CAMERA_FOV_DEG * Math.PI) / 180) / 2);
+}
+
+/** 上帝視角的霧要比第一人稱淡——鏡頭拉遠之後，同樣的霧密度會把遠處建築洗白。 */
+export const GOD_VIEW_FOG_DENSITY = 0.005;
+
+export function godCameraDesiredPosition(playerPos: { x: number; z: number }, aspect: number): Vec3Like {
+  const distance = godCameraDistanceForAspect(aspect);
   return {
-    x: playerPos.x + Math.sin(GOD_CAMERA_YAW) * GOD_CAMERA_DISTANCE * Math.cos(GOD_CAMERA_PITCH),
-    y: GOD_CAMERA_DISTANCE * Math.sin(GOD_CAMERA_PITCH),
-    z: playerPos.z + Math.cos(GOD_CAMERA_YAW) * GOD_CAMERA_DISTANCE * Math.cos(GOD_CAMERA_PITCH),
+    x: playerPos.x + Math.sin(GOD_CAMERA_YAW) * distance * Math.cos(GOD_CAMERA_PITCH),
+    y: distance * Math.sin(GOD_CAMERA_PITCH),
+    z: playerPos.z + Math.cos(GOD_CAMERA_YAW) * distance * Math.cos(GOD_CAMERA_PITCH),
   };
+}
+
+
+/**
+ * #3794 四次訂正：說明卡要顯示哪一站。上帝視角只認「點建築、走到門口」
+ * （walkArrival），不靠靠近自動跳卡；第一人稱（已無入口，保留給既有分支）
+ * 維持原本的靠近判定（nearest）。
+ */
+export function cardStationFor(mode: 'first' | 'god', walkArrival: number | null, nearest: number | null): number | null {
+  return mode === 'god' ? walkArrival : nearest;
 }

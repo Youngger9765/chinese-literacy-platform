@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { introProgress, characterPose } from './islandMotion';
 import type { IslandBaby, IslandStop } from './islandTemplate';
 import { isSceneryExcluded } from './islandTemplate';
-import { MIN_CAMERA_BUILDING_DISTANCE, BUILDING_BASE_RADIUS, computeSpawnFacingLighthouse, selectNearestStation, findCelebrationViewpoint, findTravelToDestination, arcFlightPosition, arcFlightArrivalYaw, walkAlongPathPosition, walkDurationSeconds, godCameraDesiredPosition, GOD_CAMERA_FOV_DEG, isMovementLocked, isManualControlEnabled, isLabelOccluded, type CelebrationViewpoint, type LabelOcclusionObstacle } from './spawnPoint';
+import { MIN_CAMERA_BUILDING_DISTANCE, BUILDING_BASE_RADIUS, computeSpawnFacingLighthouse, selectNearestStation, findCelebrationViewpoint, findTravelToDestination, arcFlightPosition, arcFlightArrivalYaw, walkAlongPathPosition, walkDurationSeconds, godCameraDesiredPosition, GOD_CAMERA_FOV_DEG, GOD_VIEW_FOG_DENSITY, isMovementLocked, isManualControlEnabled, cardStationFor, isLabelOccluded, type CelebrationViewpoint, type LabelOcclusionObstacle } from './spawnPoint';
 import { startCelebration, advanceOnTurnConverged, isHoldComplete, diffProgress, resolveCelebrationTrigger, celebrationGlowBoost, steadyCompletedGlow, resolveCelebrationGlow, INITIAL_PROGRESS_DIFF_STATE, type CelebrationState, type ProgressDiffState } from './islandCelebration';
 import { buildStationGroup, applyBuildingGlow, disposeObjectTree, buildingTopY, type BuildingMaterialSlot } from './islandBuildingShapes';
 
@@ -356,6 +356,7 @@ export function createIslandWorld(
     readonly duration: number;
   }
   let pathWalk: PathWalk | null = null;
+  let godWalkArrival: number | null = null;
   // #3780 P0-3：回島先面向剛完成的站，停留夠了才轉向下一站。三段式狀態
   // 機（'turning' 轉去剛完成的站 → 'turnTo 收斂' → 'holding' 才開始算
   // 停留秒數）本身是不碰 three.js/WebGL 的純函式，見 islandCelebration.ts
@@ -583,6 +584,7 @@ export function createIslandWorld(
           pitch = spawnPoint.pitch;
           const arrived = pathWalk.index;
           pathWalk = null;
+          godWalkArrival = arrived;
           events.onMove(player.position.x, player.position.z);
           events.onArrive?.(arrived);
         } else {
@@ -645,6 +647,11 @@ export function createIslandWorld(
       // `nearTriggerRadiusForStep` 的註解）。
       let closest = selectNearestStation(content.stops, player.position, unlockedZone, containerAspect);
       if (introPlaying) closest = null;
+      // #3794 四次訂正（Young 2026-10-30 PRD §2「點下去 → 走到門口 → 才顯示說明卡」，
+      // 取代 #3780「出生點必定落在燈塔觸發半徑內、一上岸就跳卡」的舊設計）：
+      // 上帝視角下說明卡只認「點建築、走到門口」這一條路，不靠靠近自動跳；
+      // 剛上岸、還沒點過任何建築時 godWalkArrival 是 null，不跳卡。
+      closest = cardStationFor(mode, godWalkArrival, closest);
       if (closest !== near) { near = closest; events.onNear(closest); }
       babies.forEach((baby, index) => {
         const data = content.babies[index];
@@ -677,6 +684,7 @@ export function createIslandWorld(
           camera.fov = 57;
           camera.updateProjectionMatrix();
         }
+        (scene.fog as THREE.FogExp2).density = 0.012;
         player.visible = false;
         // 慶祝期間、找得到合法觀景點時，鏡頭用那個點（不是 player.position）
         // ——`celebrationViewpoint` 在 setProgress() 開始慶祝那一刻就算好、
@@ -726,6 +734,7 @@ export function createIslandWorld(
           camera.fov = GOD_CAMERA_FOV_DEG;
           camera.updateProjectionMatrix();
         }
+        (scene.fog as THREE.FogExp2).density = GOD_VIEW_FOG_DENSITY;
         player.visible = true;
         xiaoling.scale.set(0.9, 1.1, 1);
         // #3794 三次訂正：取代舊的「以已解鎖區域平均中心為準、可拖曳旋轉」
@@ -734,7 +743,10 @@ export function createIslandWorld(
         // `godCameraDesiredPosition` 只讀 `player.position`，不讀 yaw／
         // pitch／飛行狀態任何輸入），滿足「鏡頭不能自由旋轉」，也保證角色
         // 移動時鏡頭俯角與高度不會跟著變，只有水平 lerp 跟隨。
-        const target = godCameraDesiredPosition(player.position);
+        // #3794 三次訂正補充：直式手機寬高比窄，固定距離會把鄰近建築切到
+        // 畫面外（見 godCameraDistanceForAspect 的說明）——傳真實的
+        // `camera.aspect`（resize() 已經即時維護），讓窄螢幕自動拉遠一點。
+        const target = godCameraDesiredPosition(player.position, camera.aspect);
         camera.position.lerp(new THREE.Vector3(target.x, target.y, target.z), Math.min(1, dt * 3));
         camera.lookAt(player.position.x, 0.6, player.position.z);
       }
@@ -948,6 +960,7 @@ export function createIslandWorld(
       });
       const start = { x: player.position.x, z: player.position.z };
       const end = destination ?? { x: target.x, z: target.z };
+      godWalkArrival = null;
       pathWalk = { index, start, end, target: { x: target.x, z: target.z }, startedAt: elapsed, duration: walkDurationSeconds(start, end) };
     },
     setStick(x: number, z: number) { stickDirection = { x, z }; },

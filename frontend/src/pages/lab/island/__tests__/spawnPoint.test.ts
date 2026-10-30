@@ -45,7 +45,10 @@ import {
   walkDurationSeconds,
   GOD_CAMERA_PITCH,
   GOD_CAMERA_DISTANCE,
+  godFrameHeightAtTarget,
+  cardStationFor,
   godCameraDesiredPosition,
+  godCameraDistanceForAspect,
 } from '../spawnPoint';
 
 describe('碰撞不變量（不穿牆）', () => {
@@ -583,23 +586,28 @@ describe('walkDurationSeconds — 跟既有 WASD 行走同一個速度常數換�
   });
 });
 
+/** 桌機（1280×900）跟手機直式（390×844）的真實寬高比，測試用這兩個，
+ *  不要用 1 這種不會真的出現的寬高比假設行為。 */
+const DESKTOP_ASPECT = 1280 / 900;
+const PHONE_ASPECT = 390 / 844;
+
 /**
  * #3794 三次訂正：鏡頭「俯角與高度保持不變」這個硬規定，直接鎖在純函式
  * 層——不管玩家走到路徑上的哪個點，`godCameraDesiredPosition` 算出來的
  * y 分量必須是同一個數字；x/z 只能跟著玩家水平位移，不能有別的輸入
  * （yaw／pitch／飛行墊高）混進來。
  */
-describe('godCameraDesiredPosition — 上帝視角鏡頭只跟水平位置走，俯角/高度恆定', () => {
+describe('godCameraDesiredPosition — 上帝視角鏡頭只跟水平位置走，俯角/高度恆定（同一個寬高比底下）', () => {
   it('兩個不同的玩家位置，算出來的鏡頭高度（y）必須完全相同', () => {
-    const a = godCameraDesiredPosition({ x: 0, z: 0 });
-    const b = godCameraDesiredPosition({ x: 37, z: -12 });
+    const a = godCameraDesiredPosition({ x: 0, z: 0 }, DESKTOP_ASPECT);
+    const b = godCameraDesiredPosition({ x: 37, z: -12 }, DESKTOP_ASPECT);
     expect(a.y).toBe(b.y);
     expect(a.y).toBe(GOD_CAMERA_DISTANCE * Math.sin(GOD_CAMERA_PITCH));
   });
 
   it('玩家水平位移多少，鏡頭的目標位置就跟著位移同樣的量（x/z 是平移，不是重新計算角度）', () => {
-    const a = godCameraDesiredPosition({ x: 0, z: 0 });
-    const b = godCameraDesiredPosition({ x: 5, z: -3 });
+    const a = godCameraDesiredPosition({ x: 0, z: 0 }, DESKTOP_ASPECT);
+    const b = godCameraDesiredPosition({ x: 5, z: -3 }, DESKTOP_ASPECT);
     expect(b.x - a.x).toBeCloseTo(5, 5);
     expect(b.z - a.z).toBeCloseTo(-3, 5);
   });
@@ -610,9 +618,69 @@ describe('godCameraDesiredPosition — 上帝視角鏡頭只跟水平位置走�
     const end = { x: 10, z: 4 };
     const heights = [0, 0.25, 0.5, 0.75, 1].map((p) => {
       const pos = walkAlongPathPosition(start, end, p, straightPath);
-      return godCameraDesiredPosition(pos).y;
+      return godCameraDesiredPosition(pos, DESKTOP_ASPECT).y;
     });
     const [first, ...rest] = heights;
     for (const h of rest) expect(h).toBe(first);
+  });
+});
+
+/**
+ * #3794 三次訂正補充（自己用真機截圖抓到，不是退件指出的）：桌機寬螢幕
+ * 下固定距離 30 已經用真瀏覽器截圖驗過構圖正確，但直式手機（寬高比遠小於
+ * 1）用同一個距離時，連出生點旁邊的港口燈塔都被切到畫面外——跟
+ * `requiredDistanceForTowerWidthInView`（出生鏡頭）同一個根因：three.js
+ * 的 fov 是垂直視野角，水平視野角隨寬高比變窄。
+ */
+describe('godCameraDistanceForAspect — 窄螢幕的構圖補償，不是鎖死距離數字', () => {
+  it('桌機寬螢幕：算出來的最小距離小於原本的 30，維持原值（已經用真瀏覽器截圖驗過的構圖不會被這個補償意外改變）', () => {
+    expect(godCameraDistanceForAspect(DESKTOP_ASPECT)).toBe(GOD_CAMERA_DISTANCE);
+  });
+
+  it('手機直式窄螢幕：距離必須明顯大於桌機，才能把同樣的世界範圍塞進更窄的水平視野', () => {
+    const desktopDistance = godCameraDistanceForAspect(DESKTOP_ASPECT);
+    const phoneDistance = godCameraDistanceForAspect(PHONE_ASPECT);
+    expect(phoneDistance).toBeGreaterThan(desktopDistance);
+  });
+
+  it('寬高比越窄，需要的距離越遠——不是只有兩個寫死的檔位，是連續的幾何關係', () => {
+    const squarish = godCameraDistanceForAspect(1);
+    const veryNarrow = godCameraDistanceForAspect(0.3);
+    expect(veryNarrow).toBeGreaterThan(squarish);
+  });
+
+  it('godCameraDesiredPosition 傳手機寬高比時，鏡頭高度／距離真的跟著拉遠，不是只有水平分量變', () => {
+    const desktop = godCameraDesiredPosition({ x: 0, z: 0 }, DESKTOP_ASPECT);
+    const phone = godCameraDesiredPosition({ x: 0, z: 0 }, PHONE_ASPECT);
+    expect(phone.y).toBeGreaterThan(desktop.y);
+  });
+});
+
+
+/**
+ * #3794 四次訂正（team-lead 2026-10-30 第三輪退件：鏡頭太近，只看得到燈塔一角）。
+ * 鎖「畫面高度夠大、角色像小人」：角色約 1.8 單位高，要佔畫面高度 1/10 以下。
+ */
+describe('上帝視角構圖：不能近到變成第三人稱近景', () => {
+  const CHARACTER_HEIGHT = 1.8;
+  it('桌機：畫面高度至少 25 單位，角色佔畫面不超過 1/10', () => {
+    const h = godFrameHeightAtTarget(1280 / 900);
+    expect(h).toBeGreaterThanOrEqual(25);
+    expect(CHARACTER_HEIGHT / h).toBeLessThanOrEqual(0.1);
+  });
+  it('直式手機：畫面高度不比桌機小（窄螢幕會再拉遠）', () => {
+    expect(godFrameHeightAtTarget(390 / 844)).toBeGreaterThanOrEqual(godFrameHeightAtTarget(1280 / 900));
+  });
+});
+
+describe('說明卡只在點建築走到門口後出現（Young PRD §2，取代上岸自動跳卡）', () => {
+  it('上帝視角剛上岸：就算出生點靠著燈塔（nearest=0），也不跳卡', () => {
+    expect(cardStationFor('god', null, 0)).toBeNull();
+  });
+  it('上帝視角點了第 3 站並走到：跳第 3 站的卡', () => {
+    expect(cardStationFor('god', 3, 0)).toBe(3);
+  });
+  it('第一人稱分支維持原本靠近判定', () => {
+    expect(cardStationFor('first', null, 0)).toBe(0);
   });
 });
