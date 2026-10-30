@@ -159,7 +159,15 @@ export function createArchipelagoWorld(
   const composer = new EffectComposer(renderer);
   const renderPass = new RenderPass(scene, camera);
   composer.addPass(renderPass);
-  const bloomPass = new UnrealBloomPass(new THREE.Vector2(initialWidth, initialHeight), 0.35, 0.4, 0.82);
+  // 螢幕截圖驗收抓到：修完 1×1 解析度 bug 之後畫面還是整片洗白——根因是
+  // §1 色票的天空穹頂（`gradientSky.ts`）本身是淺色系暖白/粉彩（`MeshBasicMaterial`
+  // 不受光照，亮度就是色票本身），這些顏色的線性亮度本來就逼近或超過
+  // 0.82 這個 threshold（算過：`#f7ecd0` 線性亮度約 0.84），於是**整片天空
+  // 都被判定成「夠亮該發光」**，疊加 bloom 之後進一步被推向全白——threshold
+  // 調高到 0.95（只留真正接近純白／高強度 emissive 的東西才發光）、
+  // strength 腰斬到 0.15（指導書要的是「只讓金色飾條/水晶/占領光暈發光」，
+  // 不是整場景發光，見下面原本保留的註解）。
+  const bloomPass = new UnrealBloomPass(new THREE.Vector2(initialWidth, initialHeight), 0.15, 0.4, 0.95);
   composer.addPass(bloomPass);
   const ssaoPass = new SSAOPass(scene, camera, initialWidth, initialHeight);
   ssaoPass.kernelRadius = 10;
