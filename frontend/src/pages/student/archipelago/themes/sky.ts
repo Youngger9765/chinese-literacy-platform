@@ -10,8 +10,8 @@
 import * as THREE from 'three';
 import type { ArchipelagoTheme, SceneCtx, CellInfo, LandmarkFactory, ConnectorMaterial } from './types';
 import { unionBoundary, jitterBoundary, scaleBoundaryToward, extrudeBoundary } from './islandShape';
-import { buildGradientSkyDome } from './gradientSky';
-import { buildRadialGradientTexture } from './proceduralTextures';
+import { buildRadialGradientTexture, buildRadialFadeAlphaTexture } from './proceduralTextures';
+import { requiredGroundRadius } from '../core/groundRadius';
 import { buildBoardwalk, buildSteppingStones, buildRopeBridge, buildShoal, buildFerry, type ConnectorPalette } from './connectors';
 import { buildFlag } from './flags';
 import { buildHoverOutline, buildGrassClusters, buildRock, buildPathStones, buildMascot } from './decorations';
@@ -94,6 +94,11 @@ export const skyTheme: ArchipelagoTheme = {
     occupied: '#d9a8ea',
     inProgress: '#aebde0',
     unexplored: '#8c92a8',
+    // team-lead 2026-10-31 三次訂正：拿掉天空穹頂，CSS 漸層接手——頂色沿用
+    // 原本穹頂最上緣的淺天藍（`#eaf2ff`），底色＝雲海色（跟下面雲海材質
+    // `0xeaf0fb` 同一色，雲海跟地平線本該是同一個顏色）。
+    skyTop: '#eaf2ff',
+    horizon: '#eaf0fb',
   },
   lighting: {
     // 2026-10-31 team-lead：天空島暗部壓低以達 contrast≥60——通透夢幻的
@@ -113,18 +118,25 @@ export const skyTheme: ArchipelagoTheme = {
     border: '#e4d9bd',
     text: '#3a2f22',
   },
-  ground: (ctx) => {
+  ground: (ctx, maxRadius) => {
     const group = new THREE.Group();
-    group.add(buildGradientSkyDome(ctx, 'sky', '#eaf2ff', '#f6ecf5', '#ffe9d6'));
-    // 2026-10-31 訂正：曾經一度改成漸層貼圖「補對比」，但美術指導書
-    // 第 65 行雲海那一列寫得很明確——「維持底色，雲朵改兩階」，雲海本身
-    // 要維持單一平塗色，要動的是下面的雲朵亮暗面（已經做了）。拿掉貼圖
-    // 改回規格原本要求的平塗色；真正的對比不足根因是陰影相機 frustum
-    // 沒跟著群的範圍縮放（見 createArchipelagoWorld.ts 的 shadowHalfExtent
-    // 訂正），不是雲海材質本身。
+    // team-lead 2026-10-31 三次訂正：拿掉天空穹頂＋方形平面改圓形徑向
+    // 淡出（跟 `ocean.ts` 同一輪、同一組理由——方形在背景看得到很硬的
+    // 直線邊緣）。半徑放大到 6×maxRadius，外圈 30% 用
+    // `buildRadialFadeAlphaTexture` 淡到全透明，融進 CSS 漸層背景，不再
+    // 靠霧或穹頂硬撐。半徑改用 `requiredGroundRadius()`（2026-10-31 二次
+    // 退回重做：固定 6×maxRadius 卡在理論門檻上，見 `ocean.ts` 同一處的
+    // 完整說明，天空島同一個根因同一個修法）。
+    const cloudSeaRadius = requiredGroundRadius(maxRadius);
     const cloudSea = new THREE.Mesh(
-      ctx.geometry('sky-cloudsea-plane', () => new THREE.PlaneGeometry(400, 400)),
-      ctx.material('sky-cloudsea', () => new THREE.MeshStandardMaterial({ color: 0xeaf0fb, roughness: 0.95, transparent: true, opacity: 0.92 })),
+      ctx.geometry('sky-cloudsea-plane', () => new THREE.CircleGeometry(cloudSeaRadius, 96)),
+      ctx.material('sky-cloudsea', () => new THREE.MeshStandardMaterial({
+        color: 0xeaf0fb,
+        roughness: 0.95,
+        alphaMap: buildRadialFadeAlphaTexture(0.7, 512),
+        transparent: true,
+        opacity: 0.92,
+      })),
     );
     cloudSea.rotation.x = -Math.PI / 2;
     cloudSea.position.y = -1.6;
@@ -132,16 +144,17 @@ export const skyTheme: ArchipelagoTheme = {
     const brightMat = ctx.material('sky-cloud-puff-bright', () => new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1, transparent: true, opacity: 0.85 }));
     const darkMat = ctx.material('sky-cloud-puff-dark', () => new THREE.MeshStandardMaterial({ color: 0xc7d3ea, roughness: 1, transparent: true, opacity: 0.85 }));
     const puffGeometry = ctx.geometry('sky-cloud-puff-geo', () => new THREE.SphereGeometry(2.2, 8, 6));
+    const puffRingRadius = Math.max(10, maxRadius * 1.8);
     for (let i = 0; i < 10; i++) {
       // 美術指導書 §1.2：雲朵改兩階（亮面/暗面），不是純白球——半數用暗面
       // 材質疊在亮面下方，做出「有受光面」的感覺，零額外幾何成本。
       const angle = (i / 10) * Math.PI * 2;
       const bright = new THREE.Mesh(puffGeometry, brightMat);
-      bright.position.set(Math.cos(angle) * 36, -0.8, Math.sin(angle) * 36);
+      bright.position.set(Math.cos(angle) * puffRingRadius, -0.8, Math.sin(angle) * puffRingRadius);
       bright.scale.set(1, 0.3, 1);
       group.add(bright);
       const dark = new THREE.Mesh(puffGeometry, darkMat);
-      dark.position.set(Math.cos(angle) * 36, -1.3, Math.sin(angle) * 36);
+      dark.position.set(Math.cos(angle) * puffRingRadius, -1.3, Math.sin(angle) * puffRingRadius);
       dark.scale.set(0.9, 0.22, 0.9);
       group.add(dark);
     }

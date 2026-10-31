@@ -10,8 +10,8 @@
 import * as THREE from 'three';
 import type { ArchipelagoTheme, SceneCtx, CellInfo, LandmarkFactory, ConnectorMaterial } from './types';
 import { unionBoundary, jitterBoundary, scaleBoundaryToward, extrudeBoundary } from './islandShape';
-import { buildGradientSkyDome } from './gradientSky';
-import { buildRadialGradientTexture } from './proceduralTextures';
+import { buildRadialGradientTexture, buildRadialFadeAlphaTexture } from './proceduralTextures';
+import { requiredGroundRadius } from '../core/groundRadius';
 import { buildBoardwalk, buildSteppingStones, buildRopeBridge, buildShoal, buildFerry, type ConnectorPalette } from './connectors';
 import { buildFlag } from './flags';
 import { buildHoverOutline, buildGrassClusters, buildRock, buildPathStones, buildMascot } from './decorations';
@@ -108,6 +108,12 @@ export const oceanTheme: ArchipelagoTheme = {
     occupied: '#5fa06a',
     inProgress: '#8bab7e',
     unexplored: '#b9b9ad',
+    // team-lead 2026-10-31 三次訂正：拿掉天空穹頂，CSS 漸層接手——頂色沿用
+    // 原本穹頂最上緣的淺天藍（`#cde8ea`），底色＝海面近岸色（跟下面
+    // `buildRadialGradientTexture('#6cc3c9', …)` 內圈同一色，近岸水色跟地
+    // 平線本該是同一個顏色，不是兩套各自決定的數字）。
+    skyTop: '#cde8ea',
+    horizon: '#6cc3c9',
   },
   lighting: {
     hemisphereSky: '#fff7dc',
@@ -124,13 +130,29 @@ export const oceanTheme: ArchipelagoTheme = {
     border: '#e4d9bd',
     text: '#3a2f22',
   },
-  ground: (ctx) => {
+  ground: (ctx, maxRadius) => {
     const group = new THREE.Group();
-    group.add(buildGradientSkyDome(ctx, 'ocean', '#cde8ea', '#eaf1df', '#f7ecd0'));
     const seaTexture = buildRadialGradientTexture('#6cc3c9', '#1d5068', 512);
+    // team-lead 2026-10-31 三次訂正：方形平面在背景看得到很硬的直線邊緣，
+    // 比原本的霧還醜——改用 CircleGeometry（本身沒有直角邊）＋外圈 30%
+    // 徑向透明淡出（`buildRadialFadeAlphaTexture`），讓海面的視覺邊界
+    // 整個消失在背景（CSS 漸層）裡，不再靠霧硬撐出一塊「看起來有邊」的
+    // 平面。半徑改用 `requiredGroundRadius()`（2026-10-31 二次退回重做）——
+    // 舊版固定 `6×maxRadius` 剛好卡在「鏡頭最上緣視線打到地面平面」的理論
+    // 門檻上（兩個真實群實測只有 0~2% 誤差空間，幾乎沒有安全邊際），於是
+    // 畫面最上緣仍看得到一道弧形邊緣。`requiredGroundRadius()` 直接從鏡頭
+    // 俯仰角/FOV 反推「不會露出邊緣」所需的最小半徑，並內建安全邊際，不是
+    // 再猜一個「看起來比較大」的倍數。
+    const seaRadius = requiredGroundRadius(maxRadius);
     const sea = new THREE.Mesh(
-      ctx.geometry('ocean-sea-plane', () => new THREE.PlaneGeometry(400, 400)),
-      ctx.material('ocean-sea', () => new THREE.MeshStandardMaterial({ map: seaTexture, metalness: 0.2, roughness: 0.32 })),
+      ctx.geometry('ocean-sea-plane', () => new THREE.CircleGeometry(seaRadius, 96)),
+      ctx.material('ocean-sea', () => new THREE.MeshStandardMaterial({
+        map: seaTexture,
+        alphaMap: buildRadialFadeAlphaTexture(0.7, 512),
+        transparent: true,
+        metalness: 0.2,
+        roughness: 0.32,
+      })),
     );
     sea.rotation.x = -Math.PI / 2;
     sea.position.y = -1.6;

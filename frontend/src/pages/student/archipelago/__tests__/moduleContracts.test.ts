@@ -50,7 +50,7 @@ describe('① 每個主題：§2.1 每一項都提供、statusLook 三態齊全�
     it(`${id}（${theme.name}）`, () => {
       expect(theme.id).toBe(id);
       expect(theme.name).toBeTruthy();
-      for (const key of ['background', 'fog', 'accent', 'occupied', 'inProgress', 'unexplored'] as const) {
+      for (const key of ['background', 'fog', 'accent', 'occupied', 'inProgress', 'unexplored', 'skyTop', 'horizon'] as const) {
         expect(theme.palette[key], `palette.${key}`).toBeTruthy();
       }
       expect(typeof theme.lighting.sunIntensity).toBe('number');
@@ -102,7 +102,7 @@ describe('① 每個主題：§2.1 每一項都提供、statusLook 三態齊全�
  *  長得不一樣的，不然「樹裡有沒有繞過 ctx」驗的範圍會對不齊。 */
 function buildFullClusterTree(theme: (typeof THEMES)[string], ctx: ReturnType<typeof createSceneCtx>['ctx']): THREE.Group {
   const group = new THREE.Group();
-  group.add(theme.ground(ctx));
+  group.add(theme.ground(ctx, 30)); // 任意一個合理的群半徑，契約測試只驗「建得出來、ctx 都有登記」，不驗實際尺寸數字
   group.add(theme.hub(ctx));
   group.add(theme.portal(ctx, SAMPLE_PORTAL_TARGET));
   for (const category of CATEGORIES) {

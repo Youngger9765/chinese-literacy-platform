@@ -28,3 +28,32 @@ export function buildRadialGradientTexture(innerColor: string, outerColor: strin
   texture.wrapT = THREE.ClampToEdgeWrapping;
   return texture;
 }
+
+/**
+ * 徑向透明淡出貼圖（team-lead 2026-10-31 三次訂正：「海面改用
+ * CircleGeometry，外圈 30% 做徑向透明淡出……邊緣要融進背景，畫面上不能
+ * 看到任何直線邊緣」）——當 `material.alphaMap` 用：three.js 吃 alphaMap
+ * 的紅色channel當透明度，白＝完全不透明、黑＝完全透明，所以畫灰階（不是
+ * 顏色）的徑向漸層：中心到 `fadeStartFraction` 之前全白（完全不透明），
+ * 從那裡開始線性淡到邊緣全黑（完全透明）。**不設定 `colorSpace`**——
+ * alphaMap 讀的是灰階數值本身，不是要顯示的顏色，套用 sRGB 轉換反而會讓
+ * 淡出曲線不是線性的。
+ */
+export function buildRadialFadeAlphaTexture(fadeStartFraction = 0.7, size = 512): THREE.CanvasTexture {
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  if (ctx) {
+    const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+    gradient.addColorStop(0, '#ffffff');
+    gradient.addColorStop(Math.min(0.999, Math.max(0, fadeStartFraction)), '#ffffff');
+    gradient.addColorStop(1, '#000000');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, size, size);
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = THREE.ClampToEdgeWrapping;
+  texture.wrapT = THREE.ClampToEdgeWrapping;
+  return texture;
+}

@@ -91,6 +91,14 @@ export interface ArchipelagoTheme {
     occupied: string;
     inProgress: string;
     unexplored: string;
+    /** 天空穹頂拿掉後（team-lead 2026-10-31 三次訂正：renderer 透明清除＋
+     *  CSS 漸層接手背景），這兩個色碼是 CSS 漸層唯二的輸入——`skyTop` 是
+     *  3D 容器背景漸層的最上緣（淺天色），`horizon` 是漸層最下緣（近岸海色
+     *  ／雲海色）。`horizon` 同時也是 `scene.fog` 的顏色（骨架會直接讀這
+     *  個欄位，不再讀 `fog`），讓遠處的島視覺上融進地平線本身的顏色，而
+     *  不是融進一塊跟背景無關的灰色。 */
+    skyTop: string;
+    horizon: string;
   };
   lighting: {
     sunColor: string;
@@ -121,8 +129,13 @@ export interface ArchipelagoTheme {
     border: string;
     text: string;
   };
-  /** 底面：海面／深海／星空／雲海／大地。 */
-  ground: (ctx: SceneCtx) => THREE.Object3D;
+  /** 底面：海面／深海／星空／雲海／大地。`maxRadius` 是這一群的外接圓半徑
+   *  （`computeClusterBoundingCircle` 算出來的，骨架在建 ground 之前就先
+   *  算好——team-lead 2026-10-31 退回重做：「把群的半徑透過 ctx 傳給
+   *  theme.ground，海面或雲海平面的半徑縮成 4×maxRadius」，固定 400×400
+   *  平面在大群時遠端被霧吃成一片死白，縮小平面讓「平面外側交給天空球」
+   *  接手，不靠霧硬撐整個視野）。 */
+  ground: (ctx: SceneCtx, maxRadius: number) => THREE.Object3D;
   /** 一座完整的課程島——含地基造型＋依類別地標＋依狀態的長相
    *  （旗子/發光/薄霧），`status` 由骨架呼叫 `statusLook` 疊加，這支只
    *  負責「島本身＋地標」。位置由呼叫端用 `cell.position` 自行

@@ -10,6 +10,7 @@ import { axialToCartesian, type ClusterMode } from './core/archipelagoClusters';
 import { layoutArchipelago, type IslandBlob, type HexCell } from './core/archipelagoLayout';
 import { createSceneCtx } from './core/sceneCtx';
 import type { IslandStatus } from './core/islandStatus';
+import { requiredGroundRadius } from './core/groundRadius';
 import type { ArchipelagoTheme, CellInfo } from './themes/types';
 
 /**
@@ -233,6 +234,58 @@ export function shouldShowFullNameplate(status: IslandStatus, isClosest: boolean
 }
 
 /**
+ * 名牌優先序分數（team-lead 2026-10-31 二次訂正：「排序：hover > 已佔領 >
+ * 鏡頭最近 > 探索中。這條規則不管狀態都要套用」）——分數只決定「兩張卡片
+ * 重疊時誰留下」，跟 `shouldShowFullNameplate`（誰一開始夠不夠格顯示卡片）
+ * 是兩個獨立的判斷，不要混在一起：這支只在「已經確定要顯示卡片」的候選
+ * 之間排序。嚴格分級（不是加總）——hover 最高、已佔領次之、在最近名額
+ * 內再次之、其餘（探索中等）墊底，符合團隊長原文的「>」序列。
+ */
+export function nameplatePriorityScore(status: IslandStatus, isClosest: boolean, isHovered: boolean): number {
+  if (isHovered) return 3;
+  if (status === 'occupied') return 2;
+  if (isClosest) return 1;
+  return 0;
+}
+
+export interface ScoredNameplateRect {
+  slug: string;
+  rect: RectLike;
+  score: number;
+}
+
+function rectsOverlap(a: RectLike, b: RectLike): boolean {
+  return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+}
+
+/**
+ * 重疊解決（team-lead 2026-10-31 退回重做明確要求：「補合成資料測試，
+ * 輸入是三張彼此相交的矩形加上分數，鎖住『分數低的那張變圓點』、『重疊數
+ * 為 0』，再做 mutation 驗證」）——純函式，吃一組「矩形＋分數」，回傳該
+ * 退化成圓點的 slug 集合。
+ *
+ * 演算法是標準的「依優先序貪婪挑選」（interval scheduling 的 2D 版本），
+ * **不是**原本那種「逐一兩兩比較、比較到的那一對裡分數低的那個退讓」——
+ * 舊寫法處理 3 張互相牽連的矩形時無法保證最終重疊數是 0（A-B 重疊、B-C
+ * 重疊、但 A-C 不重疊時，依陣列順序逐對處理可能漏掉需要退讓的那個）。
+ * 貪婪法則有數學上的保證：分數由高到低排序，依序把「目前還沒跟已保留
+ * 的任何一張衝突」的矩形留下，衝突就退化——保留下來的每一張都已經跟
+ * *所有*更早保留（=更高分）的矩形比較過不衝突，所以保留集合裡任兩張
+ * 保證不重疊，不是「大部分時候不重疊」。
+ */
+export function resolveNameplateOverlaps(candidates: readonly ScoredNameplateRect[]): Set<string> {
+  const sorted = [...candidates].sort((a, b) => b.score - a.score);
+  const kept: ScoredNameplateRect[] = [];
+  const demoted = new Set<string>();
+  for (const candidate of sorted) {
+    const conflicts = kept.some((k) => rectsOverlap(candidate.rect, k.rect));
+    if (conflicts) demoted.add(candidate.slug);
+    else kept.push(candidate);
+  }
+  return demoted;
+}
+
+/**
  * 開場鏡頭構圖（team-lead 2026-10-31 明令：「開場鏡頭要能框住整群，傳送門
  * 廣場放在畫面正中央，不要像現在只截到一角」）——根因查到：鏡頭一直固定
  * `lookAt (0,0,0)`（世界原點），但傳送門廣場的實際質心**不是**世界原點
@@ -298,11 +351,16 @@ export function createArchipelagoWorld(
 ): ArchipelagoWorld | null {
   let renderer: THREE.WebGLRenderer;
   try {
-    renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    // alpha:true + 透明清除色（team-lead 2026-10-31 三次訂正）：天空穹頂
+    // 整顆拿掉，canvas 本身變透明，背景交給 3D 容器的 CSS 漸層（呼叫端
+    // `StudentArchipelagoPage.tsx`）——`setClearColor` 的顏色參數在 alpha=0
+    // 時完全不影響畫面（沒有東西會用它的 RGB），傳 0 只是「反正用不到」。
+    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
   } catch {
     return null;
   }
   if (!renderer.getContext()) return null;
+  renderer.setClearColor(0, 0);
 
   // 畫質分級（PRD 效能要求：iPad／390 手機都要 ≥30fps）——窄螢幕關 SSAO、
   // 降 pixelRatio 上限，純函式見 `qualityTierForWidth()` 的說明。容器這時
@@ -331,8 +389,13 @@ export function createArchipelagoWorld(
   container.appendChild(labelRenderer.domElement);
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(theme.palette.background);
-  scene.fog = new THREE.FogExp2(theme.palette.fog, 0.01); // loadCluster() 會依群大小覆寫密度（§2.2）
+  // `scene.background` 刻意不設（維持 `null`）——設了會蓋過
+  // renderer 的透明清除色，CSS 漸層就會被 WebGL 畫面擋住看不見。
+  // 霧色改用 `horizon`（不是 `fog`）：team-lead 2026-10-31 三次訂正要求
+  // 「霧的顏色要等於 horizon 色，遠處的島才會融進地平線，而不是融進一塊
+  // 灰色」——`horizon` 同時也是 CSS 漸層最下緣的顏色，三者（霧／地平線／
+  // 漸層底色）本來就該是同一個數字，不是各自決定。
+  scene.fog = new THREE.FogExp2(theme.palette.horizon, 0.01); // loadCluster() 會依群大小覆寫密度（§2.2）
   const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 300);
 
   const ambient = new THREE.HemisphereLight(theme.lighting.hemisphereSky, theme.lighting.hemisphereGround, theme.lighting.ambient);
@@ -508,7 +571,8 @@ export function createArchipelagoWorld(
   // `t = 1 - exp(-rate*dt)` 跨幀率安全的指數平滑，不是固定 lerp 係數）。
   const hoverLift = new Map<string, number>();
   // 每座島的名牌（CSS2DObject）與它對應的 DOM 元素，換群時一併清掉。
-  const nameplates = new Map<string, { object: CSS2DObject; el: HTMLDivElement; worldPos: THREE.Vector3; status: IslandStatus; cardText: string; dotColor: string }>();
+  interface NameplateEntry { object: CSS2DObject; el: HTMLDivElement; worldPos: THREE.Vector3; status: IslandStatus; cardText: string; dotColor: string }
+  const nameplates = new Map<string, NameplateEntry>();
   /** 名牌常駐顯示上限（PRD §3.2 2026-10-31 team-lead 訂正：「36 島大群全部
    *  常駐會擠成一團」）——已佔領／探索中一定常駐，其餘只有鏡頭焦點最近
    *  N 座才顯示課名，其餘退化成狀態色小圓點，hover／點一下才展開。 */
@@ -573,14 +637,36 @@ export function createArchipelagoWorld(
     const group = new THREE.Group();
     scene.add(group);
 
-    const groundObj = theme.ground(ctx);
-    group.add(groundObj);
-
     // #3799 PRD §3.2 二次訂正：不規則群島佈局——位置／相鄰互通／連接材料
     // 全部由 layoutArchipelago() 決定。種子＝這一群的課程 id 依序接起來，
     // 保證「同一群每次打開長一樣」。
     const seed = islands.map((i) => i.storySlug).join(',');
     const layout = layoutArchipelago(islands.map((i) => i.storySlug), seed, HEX_SIZE);
+
+    // team-lead 2026-10-31 退回重做：「平面外側交給天空球……海面或雲海平面
+    // 的半徑縮成 4×maxRadius」——`theme.ground()` 要知道這一群有多大才能
+    // 把平面縮到對的尺寸，所以 `boundingCircle`/`maxRadius` 要提前到
+    // `theme.ground(ctx)` 呼叫之前算好（原本是在整座島都建完之後才算，
+    // 這裡只需要 `layout.plaza.center`／`layout.islands[].center` 就夠，
+    // 不需要等三維物件建完）。下面建島迴圈裡還會建一次一模一樣的
+    // `positions` 陣列（純粹是歷史留下的寫法，兩邊算出來的點集合完全
+    // 一致），之後鏡頭構圖那段直接重用這裡算好的 `boundingCircle`，不要
+    // 重算第二次。
+    const earlyPositions: { x: number; z: number }[] = [layout.plaza.center, ...layout.islands.map((b) => b.center)];
+    const boundingCircle = computeClusterBoundingCircle(earlyPositions, layout.plaza.center);
+    const groundObj = theme.ground(ctx, boundingCircle.radius);
+    // 地面（天空穹頂＋海面/雲海）要跟著群的中心擺，不是永遠釘在世界原點
+    // （team-lead 2026-10-31 退回重做「畫面上方還有一層白霧」查到的真正
+    // 根因）——穹頂是半球，以它自己的局部原點為中心；鏡頭看的是
+    // `boundingCircle.center`（廣場位置，常常偏離世界原點，前面
+    // `computeClusterBoundingCircle` 的說明有實測過 `(-1,0)` 的例子），穹頂
+    // 卻一直蓋在 (0,0,0)——群的中心離原點夠遠時，鏡頭往上看的方向會「看
+    // 偏」穹頂，看到的其實是半球外、什麼都沒蓋到的 `scene.background`
+    // 純色（純色沒有漸層，不管怎麼調穹頂/霧/暈影的顏色都量不出標準差，
+    // 這解釋了為什麼先前三次嘗試——縮小海面、調深穹頂頂色、拿掉暈影——
+    // 畫面上緣的像素標準差完全沒有變化：根本沒蓋到穹頂本身）。
+    groundObj.position.set(boundingCircle.center.x, 0, boundingCircle.center.z);
+    group.add(groundObj);
 
     function cellOffsetsForBlob(blob: IslandBlob): { x: number; z: number }[] {
       return blob.cells.map((cell) => {
@@ -703,13 +789,23 @@ export function createArchipelagoWorld(
     // 安全邊際，不是卡在門檻上。（海島主題數字；天空島因為整套色票本來就
     // 刻意貼近背景色，像素色彩分類器量不出有意義的數字——跟 contrast 那題
     // 是同一個已知限制，不是這次構圖沒套用到天空島。）
-    const boundingCircle = computeClusterBoundingCircle(positions, plazaPos);
+    //
+    // `boundingCircle` 重用上面建 `theme.ground()` 之前算好的那份，不要
+    // 重算第二次（`positions`/`plazaPos` 這裡跟那裡是同一組點、同一個圓心，
+    // 算兩次只會浪費一次迴圈，數字不會不一樣）。
     const maxDist = boundingCircle.radius;
     orbitRadius = Math.max(14, maxDist * 2.9);
     minRadius = Math.max(8, maxDist * 0.5);
     maxRadius = maxDist * 3.2;
     orbitTarget = new THREE.Vector3(boundingCircle.center.x, 0, boundingCircle.center.z);
     orbitPitch = 0.65; // 換群重設回預設俯角，不留著玩家上一群拖曳過的角度
+    // 遠裁切面要跟著地面圓盤的安全半徑縮放（2026-10-31 二次退回重做）——
+    // `theme.ground()` 現在用 `requiredGroundRadius()` 把地面圓盤做得比
+    // 固定 300 的遠裁切面還大（大群時），地面會被遠裁切面本身切掉一截，
+    // 切口一樣是一條硬邊，跟原本那條邊緣是同一種症狀換了個位置。遠裁切面
+    // 固定留在地面半徑的 1.15 倍之外，地面本身才有機會完整顯示。
+    camera.far = Math.max(300, requiredGroundRadius(maxDist) * 1.15);
+    camera.updateProjectionMatrix();
     syncCamera();
 
     // 動態霧密度（美術指導書 §2.2：`density ≈ 2.2 / maxRadius`，群越大霧
@@ -718,7 +814,10 @@ export function createArchipelagoWorld(
     // 動態霧密度（美術指導書 §2.2 白屏事故訂正，2026-10-31）——見
     // `archipelagoFogDensity()` 的說明：反推密度讓「鏡頭到最遠點」的霧化
     // 係數落在 0.35 附近，不是直接套一個固定公式產生出不受控的密度。
-    (scene.fog as THREE.FogExp2).density = archipelagoFogDensity(maxDist);
+    // team-lead 2026-10-31 退回重做：霧化目標從 0.35 降到 0.2——0.35 在
+    // 36 島這種大群（maxRadius 本身就大）會讓遠處島跟海面幾乎整片泛白，
+    // 層次感被壓平；降到 0.2 讓遠處保留更多本身的顏色，只留淡淡的空氣感。
+    (scene.fog as THREE.FogExp2).density = archipelagoFogDensity(maxDist, 0.2);
 
     // SSAO pass 的取樣範圍要對齊這次場景的尺度，不然小群太濃、大群太淡。
     ssaoPass.kernelRadius = Math.max(4, Math.min(16, maxDist * 0.3));
@@ -849,75 +948,74 @@ export function createArchipelagoWorld(
       // 讀到的大小才會是這一幀真正要顯示的大小，不是上一幀殘留的。
       const closestSlugs = [...projected].sort((a, b) => a.distance - b.distance).slice(0, CLOSEST_NAMEPLATES_VISIBLE).map((p) => p.slug);
       const closestSet = new Set(closestSlugs);
+      const applyCardStyle = (entry: NameplateEntry) => {
+        entry.el.textContent = entry.cardText;
+        entry.el.style.background = theme.nameplate.background;
+        entry.el.style.border = `1px solid ${theme.nameplate.border}`;
+        entry.el.style.color = theme.nameplate.text;
+        entry.el.style.borderRadius = '10px';
+        entry.el.style.padding = '4px 8px';
+        entry.el.style.width = '';
+        entry.el.style.height = '';
+        entry.el.style.fontSize = '13px';
+        entry.el.style.fontWeight = '600';
+        entry.el.style.whiteSpace = 'nowrap';
+        entry.el.style.boxShadow = '0 2px 6px rgba(0,0,0,0.15)';
+      };
+      const applyDotStyle = (entry: NameplateEntry) => {
+        // 狀態色小圓點——沒展開課名，但「每座島都看得到標記」（PRD §7
+        // 訂正原文）仍然成立，不是真的什麼都沒有。
+        entry.el.textContent = '';
+        entry.el.style.background = entry.dotColor;
+        entry.el.style.border = '1px solid rgba(255,255,255,0.6)';
+        entry.el.style.color = 'transparent';
+        entry.el.style.borderRadius = '50%';
+        entry.el.style.padding = '0';
+        entry.el.style.width = '10px';
+        entry.el.style.height = '10px';
+        entry.el.style.boxShadow = '0 1px 3px rgba(0,0,0,0.25)';
+      };
+      const intendedFull = new Set<string>();
       for (const p of projected) {
         const entry = nameplates.get(p.slug)!;
         const showFull = shouldShowFullNameplate(entry.status, closestSet.has(p.slug), p.slug === hoveredSlug);
-        if (showFull) {
-          entry.el.textContent = entry.cardText;
-          entry.el.style.background = theme.nameplate.background;
-          entry.el.style.border = `1px solid ${theme.nameplate.border}`;
-          entry.el.style.color = theme.nameplate.text;
-          entry.el.style.borderRadius = '10px';
-          entry.el.style.padding = '4px 8px';
-          entry.el.style.width = '';
-          entry.el.style.height = '';
-          entry.el.style.fontSize = '13px';
-          entry.el.style.fontWeight = '600';
-          entry.el.style.whiteSpace = 'nowrap';
-          entry.el.style.boxShadow = '0 2px 6px rgba(0,0,0,0.15)';
-        } else {
-          // 狀態色小圓點——沒展開課名，但「每座島都看得到標記」（PRD §7
-          // 訂正原文）仍然成立，不是真的什麼都沒有。
-          entry.el.textContent = '';
-          entry.el.style.background = entry.dotColor;
-          entry.el.style.border = '1px solid rgba(255,255,255,0.6)';
-          entry.el.style.color = 'transparent';
-          entry.el.style.borderRadius = '50%';
-          entry.el.style.padding = '0';
-          entry.el.style.width = '10px';
-          entry.el.style.height = '10px';
-          entry.el.style.boxShadow = '0 1px 3px rgba(0,0,0,0.25)';
-        }
+        if (showFull) { intendedFull.add(p.slug); applyCardStyle(entry); } else { applyDotStyle(entry); }
       }
-      // 第二輪：重疊判斷（美術指導書 §7：「離鏡頭較近那個維持不透明，較遠
-      // 那個淡化到 35% 透明度——不是完全隱藏」）。用名牌 DOM 卡片真實的
-      // `getBoundingClientRect()` 做矩形相交判斷，不是猜一個固定半徑的圓
-      // ——課名長短差很多（「這是什麼」四個字 vs 一整句標題），固定半徑在
-      // 短標題會誤判重疊、在長標題又抓不到真的重疊，兩種都錯過。節流已經
-      // 壓到每 3 幀一次，這裡多一次 reflow 讀取不是效能熱點。
-      const overlapped = new Set<string>();
+      // 第二輪：重疊判斷——2026-10-31 team-lead 兩次訂正：①「較遠那個淡化
+      // 到 35% 透明度」在名牌改成「密度上限＋圓點」之後語意衝突（半透明
+      // 卡片還是佔用螢幕空間、還是會打架，不是真的解決擁擠），改成退化成
+      // 圓點；②退回重做：原本逐對比較、比到的那一對裡「較遠」的退讓，
+      // 在 3 張互相牽連（A-B 重疊、B-C 重疊、A-C 不重疊）時無法保證重疊數
+      // 真的是 0。改呼叫 `resolveNameplateOverlaps`（貪婪演算法，數學上
+      // 保證保留集合裡任兩張不重疊，見該函式註解），排序依據是
+      // `nameplatePriorityScore`（hover > 已佔領 > 最近名額 > 其餘）。只把
+      // 「原本該顯示卡片」的名牌送進去比——圓點本身很小，不需要牽扯進來。
       const rects = new Map<string, DOMRect>();
       for (const p of projected) rects.set(p.slug, nameplates.get(p.slug)!.el.getBoundingClientRect());
-      for (let i = 0; i < projected.length; i++) {
-        for (let j = i + 1; j < projected.length; j++) {
-          const a = projected[i];
-          const b = projected[j];
-          const ra = rects.get(a.slug)!;
-          const rb = rects.get(b.slug)!;
-          const intersects = ra.left < rb.right && ra.right > rb.left && ra.top < rb.bottom && ra.bottom > rb.top;
-          if (intersects) {
-            const farther = a.distance > b.distance ? a : b;
-            overlapped.add(farther.slug);
-          }
-        }
-      }
+      const scoredCandidates: ScoredNameplateRect[] = [...intendedFull].map((slug) => {
+        const entry = nameplates.get(slug)!;
+        return { slug, rect: rects.get(slug)!, score: nameplatePriorityScore(entry.status, closestSet.has(slug), slug === hoveredSlug) };
+      });
+      const demotedToDot = resolveNameplateOverlaps(scoredCandidates);
+      for (const slug of demotedToDot) applyDotStyle(nameplates.get(slug)!);
       // 2026-10-31 team-lead 審查新發現：名牌卡片會整張伸出畫布邊界，蓋到
       // 旁邊的 UI 面板（截圖 `silhouette-history3.png` 實測，36 島的大群
       // 尤其明顯）。跟遮擋用同一套「接近隱藏」處理——卡片本身超出畫布就
       // 不該佔用可見名額，不是「半透明蓋在 UI 上」這種更糟的視覺結果。
+      // 降級成圓點的名牌不用再檢查這條——圓點比卡片小很多，原本會超出
+      // 邊界的卡片縮成圓點後多半已經不超出了，重新量一次 rect 才準。
       const outOfBounds = new Set<string>();
       for (const p of projected) {
-        if (isRectOutOfBounds(rects.get(p.slug)!, rect)) outOfBounds.add(p.slug);
+        if (demotedToDot.has(p.slug)) continue;
+        const freshRect = nameplates.get(p.slug)!.el.getBoundingClientRect();
+        if (isRectOutOfBounds(freshRect, rect)) outOfBounds.add(p.slug);
       }
       for (const p of projected) {
         const { object } = nameplates.get(p.slug)!;
-        // 遮擋跟重疊是兩種不同程度的淡出（美術指導書 §7 原文分別寫
-        // 「隱藏」跟「淡化到 35%——不是完全隱藏」，不是同一個數字）：被
-        // 建築整個擋住要接近完全隱藏；只是跟別的名牌重疊、較遠那個仍要
-        // 維持淡淡的可讀性，不能跟遮擋用同一個值。遮擋／超出畫布優先於
-        // 重疊——已經接近隱藏的名牌不該又被重疊規則拉回 35% 變成半透明
-        // 穿模或蓋在 UI 面板上。
-        object.element.style.opacity = p.occluded || outOfBounds.has(p.slug) ? '0.05' : overlapped.has(p.slug) ? '0.35' : '1';
+        // 遮擋跟「超出畫布」都是接近隱藏（PRD §7 原文：被建築整個擋住要
+        // 接近完全隱藏）；重疊已經在上面改成「退化成圓點」解決，不再需要
+        // 額外的半透明狀態。
+        object.element.style.opacity = p.occluded || outOfBounds.has(p.slug) ? '0.05' : '1';
       }
     }
 

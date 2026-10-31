@@ -536,6 +536,13 @@ const StudentArchipelagoPage: React.FC = () => {
     );
   }
 
+  // team-lead 2026-10-31 三次訂正：天空穹頂整顆拿掉，3D canvas 改透明
+  // （`createArchipelagoWorld.ts` 的 `alpha:true`／`setClearColor(0,0)`），
+  // 背景改由這層 CSS 漸層負責——上緣 `skyTop`（淺天色）、下緣 `horizon`
+  // （近岸海色／雲海色，跟 `scene.fog` 同一個顏色），這樣畫面最上緣一定
+  // 有漸層，不用再管穹頂幾何有沒有剛好蓋到鏡頭看得到的角度。
+  const currentTheme = THEMES[themeId] ?? THEMES[DEFAULT_THEME_ID];
+
   const sidePanel = (
     <ArchipelagoSidePanel
       cluster={currentCluster}
@@ -558,7 +565,23 @@ const StudentArchipelagoPage: React.FC = () => {
 
   return (
     <div className="relative h-full w-full overflow-hidden bg-[#bbd6dc]">
-      <div ref={setContainerEl} className="absolute inset-0 [&_canvas]:h-full [&_canvas]:w-full" aria-label="群島 3D 地圖" />
+      {/* team-lead 2026-10-31 審查訂正：名牌卡片會蓋到右側固定面板上
+          （`isRectOutOfBounds` 比對的是這個容器自己的 `getBoundingClientRect()`，
+          原本這個容器是 `inset-0` 滿版，寬度涵蓋到側欄底下那塊，名牌投影
+          落在那塊區域時「相對容器」沒有超出，但視覺上被側欄蓋住——根因
+          不是名牌判斷邏輯錯，是容器本身的寬度量錯了。側欄 `w-80`（320px）
+          只在 `sm:` 以上才顯示（`hidden sm:block`），所以容器也對齊同一個
+          中斷點縮窄，手機版（側欄換底部抽屜）維持滿版不受影響；容器窄了
+          之後，WebGL canvas／CSS2DRenderer 都靠 `container.clientWidth`
+          自動跟著變窄（見 `createArchipelagoWorld.ts` 的 `resize()`），
+          `isRectOutOfBounds` 比對的畫布邊界就真的是視覺上看得到的範圍，
+          不需要骨架額外知道側欄的存在。 */}
+      <div
+        ref={setContainerEl}
+        className="absolute inset-0 sm:right-80 [&_canvas]:h-full [&_canvas]:w-full"
+        style={{ background: `linear-gradient(to bottom, ${currentTheme.palette.skyTop}, ${currentTheme.palette.horizon})` }}
+        aria-label="群島 3D 地圖"
+      />
 
       {/* 暈影（美術指導書 §2.4：「不要用 render pass，直接照單課島的做法疊
           CSS」——`ReadingIslandLab.tsx` 已經有這個零成本技巧，群島頁面原本
