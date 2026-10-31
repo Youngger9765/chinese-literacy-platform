@@ -32,6 +32,7 @@ from sqlalchemy.orm import Session
 from . import reading_baby_config, reading_baby_quality
 from ..models.reading_baby import StudentIndicatorEvidence
 from ..models.school import Classroom, ClassroomStudent
+from ..models.user import User
 
 logger = logging.getLogger(__name__)
 
@@ -433,6 +434,7 @@ class EvidenceDetailItem:
     lesson_uid: str
     lesson_title: str | None
     station: str
+    station_label: str | None
     quality_passed: bool
     quality_score: float | None
     items_total: int | None
@@ -461,6 +463,7 @@ def get_indicator_evidence_detail(
                 lesson_uid=row.lesson_uid,
                 lesson_title=lesson_meta.get("title") if lesson_meta else None,
                 station=row.station,
+                station_label=_station_label(row.station),
                 quality_passed=row.quality_passed,
                 quality_score=row.quality_score,
                 items_total=row.items_total,
@@ -472,6 +475,13 @@ def get_indicator_evidence_detail(
             )
         )
     return items
+
+
+def student_names(db: Session, student_ids: list[int]) -> dict[int, str]:
+    """老師端顯示用：student_id → 姓名（一次查詢）。"""
+    if not student_ids:
+        return {}
+    return {row.id: row.name for row in db.query(User.id, User.name).filter(User.id.in_(student_ids)).all()}
 
 
 def student_is_in_classroom(db: Session, *, classroom_id: int, student_id: int) -> bool:

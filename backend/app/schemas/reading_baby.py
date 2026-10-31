@@ -64,10 +64,26 @@ class IndicatorCellResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class HeatmapStudentResponse(BaseModel):
+    student_id: int
+    name: str
+
+
+class HeatmapIndicatorResponse(BaseModel):
+    code: str
+    text: str | None = None
+
+
 class ClassroomIndicatorHeatmapResponse(BaseModel):
     classroom_id: int
     indicator_codes: list[str]
     student_ids: list[int]
+    students: list[HeatmapStudentResponse] = Field(
+        default_factory=list, description="跟 student_ids 同順序，附姓名（#3780 第三階段）"
+    )
+    indicators: list[HeatmapIndicatorResponse] = Field(
+        default_factory=list, description="跟 indicator_codes 同順序，附 108 課綱原文"
+    )
     cells: list[IndicatorCellResponse]
     note: str = Field(
         default="課綱對照為草稿，待老師審核",
@@ -79,6 +95,7 @@ class EvidenceDetailResponse(BaseModel):
     lesson_uid: str
     lesson_title: str | None
     station: str
+    station_label: str | None = None
     quality_passed: bool
     quality_score: float | None
     items_total: int | None
@@ -93,5 +110,8 @@ class EvidenceDetailResponse(BaseModel):
 
 class IndicatorEvidenceDetailResponse(BaseModel):
     student_id: int
+    student_name: str | None = None
     indicator_code: str
+    indicator_text: str | None = None
+    note: str = "課綱對照為草稿，待老師審核"
     evidence: list[EvidenceDetailResponse]

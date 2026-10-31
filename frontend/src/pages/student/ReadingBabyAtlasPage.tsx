@@ -2,9 +2,9 @@
  * ReadingBabyAtlasPage — `/student/reading-babies`（#3780 reading-babies
  * PRD §3「圖鑑頁：179 格」，取代 v1 WordBabiesLab 的唯一寶貝圖鑑入口）。
  *
- * 179 格依教授課程地圖家族分組（readingBabyProfessorFamilies.ts）——後端
- * `/reading-babies` 回傳的 `ability_family` 目前還是舊的 11 家族（A-K），
- * 這裡改用前端這份覆寫對照，詳見該檔頭的「已知落差」說明。
+ * 179 格依教授課程地圖家族分組——直接讀 API 回的 `ability_family`（#3780
+ * 第三階段起後端已改成教授家族，跟寶貝卡同一個欄位）；
+ * readingBabyProfessorFamilies.ts 只拿來決定家族的顯示順序。
  *
  * 每格顯示：階段（基礎／中階／進階）、碎片數、還沒遇見的狀態（灰階、
  * `aria-disabled`、點了不會導頁）。全部通過時改顯示「這一課你都學會了」
@@ -17,7 +17,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { fetchReadingBabyAtlas, type ReadingBabyLessonGrowth } from '../../services/readingBabyApi';
-import { professorFamilyFor, PROFESSOR_FAMILY_ORDER, PROFESSOR_FAMILY_NAMES } from '../../data/readingBabyProfessorFamilies';
+import { PROFESSOR_FAMILY_ORDER } from '../../data/readingBabyProfessorFamilies';
+import ReadingBabyAvatar from '../../components/readingBaby/ReadingBabyAvatar';
 
 const STAGE_LABEL: Record<ReadingBabyLessonGrowth['stage'], string> = {
   not_encountered: '還沒遇見',
@@ -41,12 +42,13 @@ const ReadingBabyCell: React.FC<{ baby: ReadingBabyLessonGrowth; onOpen: () => v
       data-testid={`reading-baby-cell-${baby.lesson_uid}`}
       aria-disabled={unseen}
       onClick={() => { if (!unseen) onOpen(); }}
-      className={`flex flex-col items-start gap-1.5 rounded-2xl border p-3 text-left shadow-sm transition-all ${
+      className={`flex flex-col items-center gap-1.5 rounded-2xl border p-3 text-center shadow-sm transition-all ${
         unseen
           ? 'cursor-default border-gray-100 bg-gray-50 opacity-60'
           : 'border-gray-200 bg-white hover:-translate-y-0.5 hover:border-accent hover:shadow-md'
       }`}
     >
+      <ReadingBabyAvatar lessonUid={baby.lesson_uid} stage={baby.stage} name={baby.title} size={84} />
       <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-bold ${STAGE_BADGE_CLASS[baby.stage]}`}>
         {STAGE_LABEL[baby.stage]}
       </span>
@@ -93,18 +95,22 @@ const ReadingBabyAtlasPage: React.FC = () => {
 
   const grouped = useMemo(() => {
     if (!babies) return [];
-    const byFamily = new Map<string, ReadingBabyLessonGrowth[]>();
+    const byFamily = new Map<string, { name: string; babies: ReadingBabyLessonGrowth[] }>();
     for (const baby of babies) {
-      const family = professorFamilyFor(baby.lesson_uid)?.family ?? 'AI00';
-      if (!byFamily.has(family)) byFamily.set(family, []);
-      byFamily.get(family)!.push(baby);
+      const family = baby.ability_family ?? 'AI00';
+      if (!byFamily.has(family)) byFamily.set(family, { name: baby.ability_family_name ?? family, babies: [] });
+      byFamily.get(family)!.babies.push(baby);
     }
-    return PROFESSOR_FAMILY_ORDER
-      .filter((code) => byFamily.has(code))
-      .map((code) => ({
+    const rank = (code: string) => {
+      const i = PROFESSOR_FAMILY_ORDER.indexOf(code);
+      return i === -1 ? PROFESSOR_FAMILY_ORDER.length : i;
+    };
+    return Array.from(byFamily.entries())
+      .sort(([a], [b]) => rank(a) - rank(b) || a.localeCompare(b))
+      .map(([code, group]) => ({
         code,
-        name: PROFESSOR_FAMILY_NAMES[code] ?? code,
-        babies: byFamily.get(code)!.sort((a, b) => a.lesson_uid.localeCompare(b.lesson_uid)),
+        name: group.name,
+        babies: group.babies.sort((a, b) => a.lesson_uid.localeCompare(b.lesson_uid)),
       }));
   }, [babies]);
 

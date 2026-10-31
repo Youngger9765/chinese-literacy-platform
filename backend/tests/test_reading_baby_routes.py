@@ -249,3 +249,54 @@ class TestTeacherDrilldown:
             f"{world['student'].id}/{indicator_code}"
         )
         assert resp.status_code == 403
+
+
+class TestTeacherHeatmapLabels:
+    """#3780 第三階段：老師端畫面要顯示學生姓名與課綱原文，不能只給 id／代碼。"""
+
+    def test_heatmap_lists_student_names_in_roster_order(self, client, world):
+        _as_user(world["teacher"])
+        resp = client.get(f"/api/teacher/classrooms/{world['classroom'].id}/reading-baby-indicators")
+        assert resp.status_code == 200, resp.text
+        body = resp.json()
+        assert body["students"] == [{"student_id": world["student"].id, "name": "Student"}]
+        assert [s["student_id"] for s in body["students"]] == body["student_ids"]
+
+    def test_heatmap_indicators_carry_curriculum_text(self, client, world):
+        reading_baby_service.record_station_evidence(
+            world["db"],
+            student_id=world["student"].id,
+            lesson_uid=_SAMPLE_LESSON_UID,
+            station="spotlight",
+            step_payload={"firstTryResults": {"score": 5, "total": 5}},
+        )
+        world["db"].commit()
+        indicator_code = _SAMPLE_LESSON_META["stations"]["spotlight"]["indicator_code"]
+
+        _as_user(world["teacher"])
+        body = client.get(
+            f"/api/teacher/classrooms/{world['classroom'].id}/reading-baby-indicators"
+        ).json()
+        assert [i["code"] for i in body["indicators"]] == body["indicator_codes"]
+        entry = next(i for i in body["indicators"] if i["code"] == indicator_code)
+        assert entry["text"] == reading_baby_config.get_indicator_text(indicator_code)
+        assert entry["text"]
+
+    def test_drilldown_names_the_station_and_indicator_text(self, client, world):
+        indicator_code = _SAMPLE_LESSON_META["stations"]["spotlight"]["indicator_code"]
+        reading_baby_service.record_station_evidence(
+            world["db"],
+            student_id=world["student"].id,
+            lesson_uid=_SAMPLE_LESSON_UID,
+            station="spotlight",
+            step_payload={"firstTryResults": {"score": 2, "total": 5}},
+        )
+        world["db"].commit()
+        _as_user(world["teacher"])
+        body = client.get(
+            f"/api/teacher/classrooms/{world['classroom'].id}/reading-baby-indicators/"
+            f"{world['student'].id}/{indicator_code}"
+        ).json()
+        assert body["student_name"] == "Student"
+        assert body["indicator_text"] == reading_baby_config.get_indicator_text(indicator_code)
+        assert body["evidence"][0]["station_label"]

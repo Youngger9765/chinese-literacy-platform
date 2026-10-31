@@ -29,8 +29,8 @@ import ReadingBabyCardPage from '../ReadingBabyCardPage';
 const CARD_IN_PROGRESS = {
   lesson_uid: 'L0001',
   title: '十秒的背後',
-  ability_family: 'D',
-  ability_family_name: '寫作鑑賞力',
+  ability_family: 'F08',
+  ability_family_name: '寫作手法',
   stage: 'intermediate' as const,
   assessable_total: 5,
   assessable_passed: 3,
@@ -62,6 +62,25 @@ describe('ReadingBabyCardPage', () => {
     await waitFor(() => expect(screen.getByText('十秒的背後')).toBeInTheDocument());
     // L0001's primary indicator code from readingBabyLessonSkills.json is 5-Ⅱ-5
     expect(screen.getByText(/5-Ⅱ-5/)).toBeInTheDocument();
+  });
+
+  it('draws the baby itself and says which stage it is in (#3780 phase 3)', async () => {
+    fetchReadingBabyCardMock.mockResolvedValue(CARD_IN_PROGRESS);
+    render(<ReadingBabyCardPage />);
+
+    expect(await screen.findByRole('img', { name: '十秒的背後的閱讀寶貝（中階）' })).toBeInTheDocument();
+    const steps = screen.getByRole('list', { name: '寶貝的三個階段' });
+    const items = Array.from(steps.querySelectorAll('li'));
+    expect(items.map((li) => li.textContent)).toEqual(['基礎', '中階', '進階']);
+    expect(items[1]).toHaveAttribute('aria-current', 'step');
+    expect(items[0]).not.toHaveAttribute('aria-current');
+  });
+
+  it('shows the professor family from the API as the primary ability', async () => {
+    fetchReadingBabyCardMock.mockResolvedValue(CARD_IN_PROGRESS);
+    render(<ReadingBabyCardPage />);
+
+    await waitFor(() => expect(screen.getByText(/主要能力：寫作手法/)).toBeInTheDocument());
   });
 
   it('lists the skills for this lesson', async () => {

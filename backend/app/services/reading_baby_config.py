@@ -43,6 +43,11 @@ def get_lesson_indicator(lesson_uid: str) -> dict | None:
     return lessons_by_uid().get(lesson_uid)
 
 
+def get_indicator_text(code: str) -> str | None:
+    """課綱代碼 → 108 課綱原文（老師端欄頭／鑽取頁用）；查不到回 None。"""
+    return load_lesson_indicators().get("indicator_texts", {}).get(code)
+
+
 def get_mapping_version() -> str:
     return load_lesson_indicators().get("mapping_version", "unknown")
 

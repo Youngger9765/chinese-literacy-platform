@@ -18,7 +18,7 @@ from ...auth.dependencies import get_current_user
 from ...database import get_db
 from ...models.user import User
 from ...schemas.reading_baby import ClassroomIndicatorHeatmapResponse, IndicatorEvidenceDetailResponse
-from ...services import reading_baby_service
+from ...services import reading_baby_config, reading_baby_service
 
 router = APIRouter(tags=["teacher"])
 
@@ -44,10 +44,16 @@ def get_classroom_reading_baby_heatmap(
 ):
     _require_teacher_owns_classroom(classroom_id, current_user, db)
     result = reading_baby_service.compute_classroom_indicator_heatmap(db, classroom_id=classroom_id)
+    names = reading_baby_service.student_names(db, result.student_ids)
     return ClassroomIndicatorHeatmapResponse(
         classroom_id=result.classroom_id,
         indicator_codes=result.indicator_codes,
         student_ids=result.student_ids,
+        students=[{"student_id": sid, "name": names.get(sid, f"學生 {sid}")} for sid in result.student_ids],
+        indicators=[
+            {"code": code, "text": reading_baby_config.get_indicator_text(code)}
+            for code in result.indicator_codes
+        ],
         cells=result.cells,
     )
 
@@ -71,5 +77,9 @@ def get_classroom_reading_baby_indicator_detail(
         db, student_id=student_id, indicator_code=indicator_code
     )
     return IndicatorEvidenceDetailResponse(
-        student_id=student_id, indicator_code=indicator_code, evidence=evidence
+        student_id=student_id,
+        student_name=reading_baby_service.student_names(db, [student_id]).get(student_id),
+        indicator_code=indicator_code,
+        indicator_text=reading_baby_config.get_indicator_text(indicator_code),
+        evidence=evidence,
     )

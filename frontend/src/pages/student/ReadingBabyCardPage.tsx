@@ -19,6 +19,9 @@ import { useAuth } from '../../contexts/AuthContext';
 import { fetchReadingBabyCard, type ReadingBabyCardResponse } from '../../services/readingBabyApi';
 import { lessonSkillsFor } from '../../data/readingBabyLessonSkills';
 import { storyIdForLesson } from '../../data/readingBabyStoryIds';
+import ReadingBabyAvatar, { STAGE_NAME } from '../../components/readingBaby/ReadingBabyAvatar';
+
+const STAGES = ['basic', 'intermediate', 'advanced'] as const;
 
 const ReadingBabyCardPage: React.FC = () => {
   const { lessonUid = '' } = useParams();
@@ -72,14 +75,44 @@ const ReadingBabyCardPage: React.FC = () => {
         ← 回圖鑑
       </button>
 
-      <header>
-        <h1 className="text-xl font-black text-gray-900">{card.title ?? card.lesson_uid}</h1>
-        <p className="text-sm font-bold text-gray-700">
-          主要能力：{card.ability_family_name ?? '未分類'}
-          {skillsData?.primaryIndicatorCode && (
-            <span className="ml-1 text-xs font-normal text-gray-400">（{skillsData.primaryIndicatorCode}）</span>
-          )}
-        </p>
+      <header className="flex flex-col items-center gap-3 rounded-3xl bg-gradient-to-b from-amber-50 to-white px-4 pb-4 pt-5 text-center sm:flex-row sm:items-center sm:text-left">
+        <ReadingBabyAvatar
+          lessonUid={card.lesson_uid}
+          stage={card.stage}
+          name={card.title}
+          size={160}
+          className="shrink-0"
+        />
+        <div className="min-w-0 space-y-2">
+          <h1 className="text-xl font-black text-gray-900">{card.title ?? card.lesson_uid}</h1>
+          <p className="text-sm font-bold text-gray-700">
+            主要能力：{card.ability_family_name ?? '未分類'}
+            {skillsData?.primaryIndicatorCode && (
+              <span className="ml-1 text-xs font-normal text-gray-400">（{skillsData.primaryIndicatorCode}）</span>
+            )}
+          </p>
+          <ol aria-label="寶貝的三個階段" className="flex items-center justify-center gap-1.5 sm:justify-start">
+            {STAGES.map((stage, i) => {
+              const current = card.stage === stage;
+              const reached = STAGES.indexOf(card.stage as (typeof STAGES)[number]) >= i;
+              return (
+                <li
+                  key={stage}
+                  aria-current={current ? 'step' : undefined}
+                  className={`rounded-full border px-3 py-1 text-xs font-bold ${
+                    current
+                      ? 'border-amber-400 bg-amber-400 text-white'
+                      : reached
+                        ? 'border-amber-200 bg-amber-50 text-amber-700'
+                        : 'border-gray-200 bg-white text-gray-400'
+                  }`}
+                >
+                  {STAGE_NAME[stage]}
+                </li>
+              );
+            })}
+          </ol>
+        </div>
       </header>
 
       {skillsData && skillsData.skills.length > 0 && (

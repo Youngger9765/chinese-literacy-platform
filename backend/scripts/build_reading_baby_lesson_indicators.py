@@ -24,6 +24,8 @@ ability_id_rule）：
        （如 `report`）的站，不產出（沒有可追蹤的指標代碼，不量）
      - `signal` 欄位可能帶括號備註（如 `"completion（逐格正確率是否落庫待確認）"`），
        只取括號前的乾淨字串當 `signal_type`
+  3. `ability_family`：陳淑麗教授課程地圖家族（見 `_professor_family`），
+     不再用 AI 分的舊 11 家族
 """
 from __future__ import annotations
 
@@ -76,6 +78,34 @@ def _resolve_station_ability(lesson: dict, station: str, station_indicator_map: 
     return {"indicator_code": ability_id, "signal_type": signal_type}
 
 
+# 沒有教授節點的課（2026-10-31 實查 L0095、L0106）落入的兜底桶——名稱要明說
+# 還沒審核，不能假裝它是教授的家族。前端 readingBabyProfessorFamilies.json 用同一組值。
+FALLBACK_FAMILY = ("AI00", "AI 推論（尚無教授節點，待審核）")
+
+
+def _professor_family(lesson: dict) -> tuple[str, str]:
+    """規則 3（#3780 第三階段）：能力家族＝陳淑麗教授課程地圖的家族，取該課
+    `professor_node` 裡 `primary: true` 的節點；沒有 primary 時取第一個節點；
+    完全沒有節點 → FALLBACK_FAMILY。取代舊的 AI 分 11 家族（A-K），讓寶貝卡與
+    圖鑑用同一套分類。"""
+    nodes = lesson.get("professor_node") or []
+    if not nodes:
+        return FALLBACK_FAMILY
+    primary = next((n for n in nodes if n.get("primary")), nodes[0])
+    return primary["family"], primary["family_name"]
+
+
+def _indicator_texts(doc: dict) -> dict[str, str]:
+    """課綱學習表現代碼 → 原文（老師端欄頭顯示用）。`indicators` 與 `node_codes`
+    兩份都是同一份 108 課綱原文，合併後 indicators 優先。"""
+    texts: dict[str, str] = {}
+    for source_key in ("node_codes", "indicators"):
+        for code, entry in (doc.get(source_key) or {}).items():
+            if isinstance(entry, dict) and entry.get("text"):
+                texts[code] = entry["text"]
+    return dict(sorted(texts.items()))
+
+
 def build(source_path: Path = SOURCE_PATH) -> dict:
     doc = json.loads(source_path.read_text(encoding="utf-8"))
     station_indicator_map = doc["station_indicator_map"]
@@ -89,6 +119,7 @@ def build(source_path: Path = SOURCE_PATH) -> dict:
             if resolved is not None:
                 stations_out[station] = resolved
 
+        family_code, family_name = _professor_family(lesson)
         lessons_out[lesson_uid] = {
             "lesson_uid": lesson_uid,
             "title": lesson.get("title"),
@@ -96,8 +127,8 @@ def build(source_path: Path = SOURCE_PATH) -> dict:
             "grade": lesson.get("grade"),
             "effective_grade": _effective_grade(lesson),
             "stage": lesson["stage"],
-            "ability_family": lesson.get("ability_family"),
-            "ability_family_name": lesson.get("ability_family_name"),
+            "ability_family": family_code,
+            "ability_family_name": family_name,
             "primary_indicator_code": lesson["primary_indicator"]["code"],
             "assessable_stations": lesson.get("assessable_stations", []),
             "stations": stations_out,
@@ -111,6 +142,7 @@ def build(source_path: Path = SOURCE_PATH) -> dict:
             "source_schema_version": doc.get("schema_version"),
         },
         "mapping_version": doc.get("schema_version", "unknown"),
+        "indicator_texts": _indicator_texts(doc),
         "lessons": lessons_out,
     }
 

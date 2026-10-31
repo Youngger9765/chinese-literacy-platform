@@ -27,8 +27,8 @@ import ReadingBabyAtlasPage from '../ReadingBabyAtlasPage';
 const BABY_L0001 = {
   lesson_uid: 'L0001',
   title: '十秒的背後',
-  ability_family: 'D',
-  ability_family_name: '寫作鑑賞力',
+  ability_family: 'F08',
+  ability_family_name: '寫作手法',
   stage: 'intermediate' as const,
   assessable_total: 5,
   assessable_passed: 3,
@@ -41,8 +41,8 @@ const BABY_L0001 = {
 const BABY_L0002_UNSEEN = {
   lesson_uid: 'L0002',
   title: '未遇見的課',
-  ability_family: 'A',
-  ability_family_name: '推論力',
+  ability_family: 'F02',
+  ability_family_name: '推論',
   stage: 'not_encountered' as const,
   assessable_total: 4,
   assessable_passed: 0,
@@ -89,16 +89,30 @@ describe('ReadingBabyAtlasPage', () => {
     expect(screen.getByText(/碎片收藏 3 片/)).toBeInTheDocument();
   });
 
-  it('groups lessons by professor family (F08 寫作手法 for L0001), not the backend ability_family', async () => {
+  it('groups lessons by the ability_family the API returns (same source as the card)', async () => {
+    // #3780 phase 3: backend now returns the professor family, so the atlas and
+    // the card read the same field. A deliberately different family here proves
+    // the atlas is not grouping from a second, frontend-only table.
     fetchReadingBabyAtlasMock.mockResolvedValue({
-      student_id: 4, total_lessons: 179, total_fragments: 3, babies: [BABY_L0001],
+      student_id: 4, total_lessons: 179, total_fragments: 3,
+      babies: [{ ...BABY_L0001, ability_family: 'F02', ability_family_name: '推論' }],
     });
     render(<ReadingBabyAtlasPage />);
 
-    // L0001's professor family is F08 寫作手法 (readingBabyProfessorFamilies.json),
-    // NOT its ability_family_name "寫作鑑賞力" from the (old 11-family) API response.
-    await waitFor(() => expect(screen.getByText('寫作手法')).toBeInTheDocument());
-    expect(screen.queryByText('寫作鑑賞力')).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.getByRole('heading', { name: '推論' })).toBeInTheDocument());
+    expect(screen.queryByRole('heading', { name: '寫作手法' })).not.toBeInTheDocument();
+  });
+
+  it('draws each baby in its cell: encountered at its stage, unseen as a silhouette', async () => {
+    fetchReadingBabyAtlasMock.mockResolvedValue({
+      student_id: 4, total_lessons: 179, total_fragments: 3, babies: [BABY_L0001, BABY_L0002_UNSEEN],
+    });
+    render(<ReadingBabyAtlasPage />);
+
+    const seen = await screen.findByTestId('reading-baby-cell-L0001');
+    expect(seen.querySelector('svg[role="img"]')?.getAttribute('aria-label')).toMatch(/閱讀寶貝（(基礎|中階|進階)）/);
+    const unseen = screen.getByTestId('reading-baby-cell-L0002');
+    expect(unseen.querySelector('svg[role="img"]')?.getAttribute('aria-label')).toBe('還沒遇見的閱讀寶貝');
   });
 
   it('renders an unseen (not_encountered) lesson distinctly and does not navigate when clicked', async () => {

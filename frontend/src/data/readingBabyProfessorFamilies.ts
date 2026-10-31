@@ -10,10 +10,11 @@
  * 的「12 家族」跟資料本身對不上——本檔忠實呈現資料裡的 15 組（14 個教授
  * 家族 + 1 個 AI00 兜底桶），不是硬湊成 12 組。
  *
- * ⚠️ 後端目前的 `/reading-babies` API 回應仍只有舊的 11 個 ability_family
- * （A-K，見 backend/app/data/reading_baby/lesson_indicators.json），**後端
- * 欄位待改**——這份對照表是前端這一側暫時的覆寫，等後端把
- * `ability_family` 換成教授家族後就可以整個刪掉這個檔案，改讀 API 回應。
+ * #3780 第三階段起，後端 `lesson_indicators.json` 的 `ability_family` 已改成
+ * 同一套教授家族（`backend/scripts/build_reading_baby_lesson_indicators.py`
+ * `_professor_family`），API 直接回教授家族。這份檔案現在只負責「家族顯示
+ * 順序」與「家族中文名」對照；179 課逐課前後端一致由
+ * `backend/tests/test_reading_baby_professor_family.py` 鎖住。
  *
  * 產生方式：ad-hoc python 腳本讀
  * docs/design/reading-babies/lesson-indicators.json 的 professor_node，見
