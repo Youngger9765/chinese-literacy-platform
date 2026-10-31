@@ -478,7 +478,18 @@ export function createArchipelagoWorld(
   let dragging = false;
   let dragStartX = 0;
   let dragStartY = 0;
-  const onPointerDown = (e: PointerEvent) => { dragging = true; dragStartX = e.clientX; dragStartY = e.clientY; renderer.domElement.setPointerCapture(e.pointerId); };
+  // team-lead 2026-10-31 八次訂正：headless 實測滑過四座島，canvas 游標
+  // 一直是 `auto`——整個群島畫面從沒設定過任何 cursor 樣式。預設先給
+  // `grab`（可拖曳旋轉的暗示），拖曳中換 `grabbing`，`onHoverMove`（下面）
+  // 滑到島上會再蓋成 `pointer`。
+  renderer.domElement.style.cursor = 'grab';
+  const onPointerDown = (e: PointerEvent) => {
+    dragging = true;
+    dragStartX = e.clientX;
+    dragStartY = e.clientY;
+    renderer.domElement.setPointerCapture(e.pointerId);
+    renderer.domElement.style.cursor = 'grabbing';
+  };
   const onPointerMove = (e: PointerEvent) => {
     if (!dragging) return;
     orbitYaw -= (e.clientX - dragStartX) * 0.006;
@@ -487,7 +498,12 @@ export function createArchipelagoWorld(
     dragStartY = e.clientY;
     syncCamera();
   };
-  const onPointerUp = () => { dragging = false; };
+  const onPointerUp = () => {
+    dragging = false;
+    // 放開當下未必還在島上——下一個 `onHoverMove` 會立刻依實際游標位置
+    // 覆寫成 `pointer`（如果還壓在島上）或維持 `grab`，這裡先退回預設值。
+    renderer.domElement.style.cursor = 'grab';
+  };
   const onWheel = (e: WheelEvent) => { e.preventDefault(); orbitRadius = Math.max(minRadius, Math.min(maxRadius, orbitRadius + e.deltaY * 0.03)); syncCamera(); };
   renderer.domElement.addEventListener('pointerdown', onPointerDown);
   renderer.domElement.addEventListener('pointermove', onPointerMove);
@@ -560,9 +576,26 @@ export function createArchipelagoWorld(
 
   const onHoverMove = (e: PointerEvent) => {
     if (isCoarsePointer) return; // 觸控裝置沒有 hover，狀態由點擊事件自己管
-    if (!events.onHoverIsland) return;
     const slug = resolveIslandSlugFromPointer(e.clientX, e.clientY);
-    if (slug !== hoveredSlug) { hoveredSlug = slug; events.onHoverIsland(slug); }
+    // team-lead 2026-10-31 八次訂正：根因是這裡原本整段被
+    // `if (!events.onHoverIsland) return` 擋住——`StudentArchipelagoPage.tsx`
+    // 從來沒有傳這個選填的回呼，於是連骨架**自己內部**的 `hoveredSlug`
+    // 都從來沒被更新過，上浮／亮邊／名牌強調（都只讀這個閉包變數，不是讀
+    // `events.onHoverIsland` 本身）整串跟著死掉。`onHoverIsland` 應該只是
+    // 「額外通知呼叫端」的選填管道，不該變成「3D 場景自己的 hover 視覺
+    // 回饋要不要生效」的開關——拆開：`hoveredSlug` 永遠更新（視覺回饋永遠
+    // 生效），只有要不要呼叫外部回呼才需要 `events.onHoverIsland` 存在。
+    if (dragging) {
+      // 拖曳中不切換游標樣式（`onPointerDown` 已經鎖成 `grabbing`），但
+      // `hoveredSlug` 還是要更新——不然放開滑鼠那一刻的視覺回饋會對不上
+      // 游標實際停留的位置。
+    } else {
+      renderer.domElement.style.cursor = slug ? 'pointer' : 'grab';
+    }
+    if (slug !== hoveredSlug) {
+      hoveredSlug = slug;
+      events.onHoverIsland?.(slug);
+    }
   };
   renderer.domElement.addEventListener('pointermove', onHoverMove);
 

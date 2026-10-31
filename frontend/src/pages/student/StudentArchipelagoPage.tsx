@@ -111,6 +111,7 @@ const ArchipelagoSidePanel: React.FC<{
   onSearch: (q: string) => void;
   onSelectIsland: (slug: string) => void;
   selectedSlug: string | null;
+  hoveredSlug: string | null;
   onToggleListMode: () => void;
   babyCount: { owned: number; total: number } | null;
   onOpenWordBabies: () => void;
@@ -118,7 +119,7 @@ const ArchipelagoSidePanel: React.FC<{
   onChangeTheme: (id: string) => void;
 }> = ({
   cluster, occupiedInCluster, clusterMode, onChangeMode, allClusters, onJumpCluster,
-  search, onSearch, onSelectIsland, selectedSlug, onToggleListMode, babyCount, onOpenWordBabies,
+  search, onSearch, onSelectIsland, selectedSlug, hoveredSlug, onToggleListMode, babyCount, onOpenWordBabies,
   themeId, onChangeTheme,
 }) => {
   const visibleStories = useMemo(() => {
@@ -202,8 +203,16 @@ const ArchipelagoSidePanel: React.FC<{
               type="button"
               onClick={() => onSelectIsland(island.storySlug)}
               aria-label={`${island.title}（${islandStatusLabel(island)}）`}
+              // 2026-10-31 八次訂正：3D 畫面滑到島上要有看得到的回饋——
+              // `selectedSlug` 已經有自己的強調樣式，`hoveredSlug` 另外用一個
+              // 比較淡的樣式區分「滑過」跟「選取」，兩者不衝突（已選取的那筆
+              // 滑過去時維持選取樣式優先，不會被 hover 樣式蓋掉）。
               className={`flex w-full items-center gap-2 rounded-lg border px-3 py-2 text-left text-sm transition-all ${
-                selectedSlug === island.storySlug ? 'border-accent bg-accent/10' : 'border-gray-100 bg-white hover:border-accent/50'
+                selectedSlug === island.storySlug
+                  ? 'border-accent bg-accent/10'
+                  : hoveredSlug === island.storySlug
+                    ? 'border-accent/50 bg-accent/5'
+                    : 'border-gray-100 bg-white hover:border-accent/50'
               }`}
             >
               <span
@@ -254,6 +263,14 @@ const StudentArchipelagoPage: React.FC = () => {
   });
   const [clusterKey, setClusterKey] = useState<string | null>(searchParams.get('cluster'));
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
+  // 2026-10-31 八次訂正：團隊長在預覽站 headless 實測「滑到島上完全沒有
+  // 反應」——根因是這個頁面從來沒有把 `onHoverIsland` 傳給
+  // `createArchipelagoWorld`，骨架那邊 `if (!events.onHoverIsland) return`
+  // 直接把整段 hover 處理擋掉（已經在骨架那邊拆開，視覺回饋改成不依賴這個
+  // 選填回呼也會生效；這裡仍然要傳，一是讓側欄清單也能同步 hover 高亮
+  // ——見 `ArchipelagoSidePanel` 的 `hoveredSlug` prop，二是這樣「頁面接線
+  // 這一層」才測得到：mock `createArchipelagoWorld` 斷言真的有傳這個回呼）。
+  const [hoveredSlug, setHoveredSlug] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [listMode, setListMode] = useState(false);
   const [webglFailed, setWebglFailed] = useState(false);
@@ -416,6 +433,7 @@ const StudentArchipelagoPage: React.FC = () => {
     const world = createArchipelagoWorld(containerEl, {
       onSelectIsland: (slug) => setSelectedSlug(slug),
       onSelectPortal: (key) => jumpToCluster(key),
+      onHoverIsland: (slug) => setHoveredSlug(slug),
     }, THEMES[themeId] ?? THEMES[DEFAULT_THEME_ID]);
     if (!world) { setWebglFailed(true); return; }
     worldRef.current = world;
@@ -555,6 +573,7 @@ const StudentArchipelagoPage: React.FC = () => {
       onSearch={setSearch}
       onSelectIsland={(slug) => { setSelectedSlug(slug); worldRef.current?.focusOnIsland(slug); }}
       selectedSlug={selectedSlug}
+      hoveredSlug={hoveredSlug}
       onToggleListMode={() => setListMode(true)}
       babyCount={babyCount}
       onOpenWordBabies={() => navigate('/lab/word-babies')}

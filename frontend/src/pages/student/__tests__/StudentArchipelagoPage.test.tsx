@@ -69,13 +69,22 @@ vi.mock('../../../services/wordBabyApi', () => ({
 // 回傳一個假世界物件，才能真的攔到 `loadCluster()` 收到的參數，驗證
 // call site 真的做了正規化，不是只驗了被呼叫的函式本身。
 const loadClusterMock = vi.fn();
-const createArchipelagoWorldMock = vi.fn(() => ({
+type MockWorldEvents = { onSelectIsland: (slug: string) => void; onSelectPortal: (key: string) => void; onHoverIsland?: (slug: string | null) => void };
+const createArchipelagoWorldMock = vi.fn((_container?: unknown, _events?: MockWorldEvents, _theme?: unknown) => ({
   loadCluster: loadClusterMock,
   dispose: vi.fn(),
   focusOnIsland: vi.fn(),
 }));
+// 2026-10-31 八次訂正（team-lead headless 實測「滑到島上完全沒反應」）：
+// 舊版這個 mock 完全丟掉呼叫端傳進來的參數（`() => createArchipelagoWorldMock()`），
+// 連「頁面到底有沒有傳 `onHoverIsland`」這個事實都測不到——根因本來就是
+// `StudentArchipelagoPage.tsx` 從沒傳過這個回呼，但舊版測試的 mock 寫法
+// 讓這件事永遠不可能被任何測試抓到。改成讓真正的 `container`/`events`/
+// `theme` 參數流進 spy，才測得到「有沒有傳」跟「傳的回呼呼叫後畫面有沒有
+// 反應」。
 vi.mock('../archipelago/createArchipelagoWorld', () => ({
-  createArchipelagoWorld: () => createArchipelagoWorldMock(),
+  createArchipelagoWorld: (container: unknown, events: MockWorldEvents, theme: unknown) =>
+    createArchipelagoWorldMock(container, events, theme),
 }));
 
 import StudentArchipelagoPage from '../StudentArchipelagoPage';
@@ -290,6 +299,35 @@ describe('StudentArchipelagoPage', () => {
     expect(categories).not.toContain('Fable');
     expect(categories).not.toContain('History');
     expect(categories.every((c) => ['自然科學', '寓言故事', '歷史人文', '生活', '其他'].includes(c))).toBe(true);
+  });
+
+  /**
+   * team-lead 2026-10-31 八次訂正（headless 在預覽站實測：滑到四座島，
+   * canvas 游標全程是 `auto`，查出根因是這個頁面從沒把 `onHoverIsland`
+   * 傳給 `createArchipelagoWorld`，骨架那邊 `if (!events.onHoverIsland)
+   * return` 直接把整段 hover 處理擋掉）——這支鎖在「頁面接線」這一層：
+   * ① 真的有傳 `onHoverIsland`（不是 `undefined`，純函式測試測不到這個
+   * 事實，因為純函式不知道呼叫端有沒有傳參數）② 呼叫它之後，側欄清單裡
+   * 對應的那一項要出現 hover 高亮樣式（`ArchipelagoSidePanel` 的
+   * `hoveredSlug` prop）——這是目前這個 mock 測不到 3D 畫面本身視覺回饋
+   * （上浮/亮邊/名牌）的前提下，唯一同時可觀察、可斷言的頁面層級效果。
+   */
+  it('有傳 onHoverIsland 給 createArchipelagoWorld，呼叫後側欄對應站點出現 hover 高亮', async () => {
+    render(<StudentArchipelagoPage />);
+    await waitFor(() => expect(screen.getAllByText('贏得喝采的輸家')[0]).toBeTruthy());
+
+    expect(createArchipelagoWorldMock).toHaveBeenCalled();
+    const events = createArchipelagoWorldMock.mock.calls[0][1]!;
+    expect(typeof events.onHoverIsland).toBe('function');
+
+    const button = screen.getAllByLabelText('贏得喝采的輸家（已佔領）')[0];
+    expect(button).not.toHaveClass('bg-accent/5'); // hover 前：沒有高亮
+
+    act(() => { events.onHoverIsland!('20011'); });
+    await waitFor(() => expect(button).toHaveClass('bg-accent/5'));
+
+    act(() => { events.onHoverIsland!(null); });
+    await waitFor(() => expect(button).not.toHaveClass('bg-accent/5'));
   });
 
   it('WebGL 建不起來（createArchipelagoWorld 回傳 null）時自動降級清單模式，不是白屏', async () => {
