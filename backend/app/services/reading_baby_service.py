@@ -99,7 +99,7 @@ def record_station_evidence(
     - 這一課不在 179 課課綱對照裡（例如測試用的假 lesson）
     - 這個站這一課不量（不在 `lesson_indicators.json` 的 `stations` 裡，
       例如 `report`／`vocab-review`）
-    - 這一格已經通過過了（冪等，見 `has_passed_evidence`）
+    - 這一格已經記錄過了（冪等，見 `has_passed_evidence`／`has_any_evidence`）
     - 重試 `max_attempts` 次仍寫入失敗（記一次 WARNING）
     """
     lesson_meta = reading_baby_config.get_lesson_indicator(lesson_uid)

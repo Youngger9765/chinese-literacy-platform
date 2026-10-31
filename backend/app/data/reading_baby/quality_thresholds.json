@@ -8,7 +8,7 @@
     "cpm_min": 120,
     "accuracy_min_pct": 90,
     "source": "backend/app/schemas/assignment.py DEFAULT_TARGET_CPM=120／DEFAULT_TARGET_ACCURACY=90.0（#3333 實測：臺師大 Brain & Learning Lab 二年級以上下限，落在本平台學生中位數 144 之下；正確率門檻非瓶頸）",
-    "teacher_override_note": "老師對該課設了 reading_targets（teacher_reading_progress.py）時應優先用老師的 target_cpm；第一階段後端核心先讀教師目標、沒有才退回預設值，見 reading_baby_quality.py"
+    "teacher_override_note": "reading_baby_quality.determine_quality() 已經有 teacher_target_cpm 參數、record_station_evidence() 也會原樣轉傳——這是刻意預留的擴充點，但第一階段的掛點（learning_step_progress._record_reading_baby_evidence）還沒有去查 ReadingTarget 表、一律傳 None，所以目前實際行為是『永遠用這裡的預設 120』，還沒真的讀到老師設定的目標速度。查表併進掛點是後續階段的工作，不是這裡宣稱的『先讀教師目標』"
   },
   "first_try_accuracy": {
     "grade_bands": [
