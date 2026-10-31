@@ -9,7 +9,7 @@
  */
 import * as THREE from 'three';
 import type { ArchipelagoTheme, SceneCtx, CellInfo, LandmarkFactory, ConnectorMaterial } from './types';
-import { unionBoundary, jitterBoundary, scaleBoundaryToward, extrudeBoundary } from './islandShape';
+import { unionBoundary, jitterBoundary, subdivideBoundary, smoothBoundaryLoop, scaleBoundaryToward, extrudeBoundary } from './islandShape';
 import { buildRadialGradientTexture, buildRadialFadeAlphaTexture } from './proceduralTextures';
 import { requiredGroundRadius } from '../core/groundRadius';
 import { buildBoardwalk, buildSteppingStones, buildRopeBridge, buildShoal, buildFerry, type ConnectorPalette } from './connectors';
@@ -128,12 +128,14 @@ export const skyTheme: ArchipelagoTheme = {
     // 退回重做：固定 6×maxRadius 卡在理論門檻上，見 `ocean.ts` 同一處的
     // 完整說明，天空島同一個根因同一個修法）。
     const cloudSeaRadius = requiredGroundRadius(maxRadius);
+    // team-lead 2026-10-31 四次訂正：淡出起點 0.7→0.55，同 `ocean.ts` 同一處
+    // 完整說明（光圈太亮，淡出帶要佔更大比例的半徑才夠漸進）。
     const cloudSea = new THREE.Mesh(
       ctx.geometry('sky-cloudsea-plane', () => new THREE.CircleGeometry(cloudSeaRadius, 96)),
       ctx.material('sky-cloudsea', () => new THREE.MeshStandardMaterial({
         color: 0xeaf0fb,
         roughness: 0.95,
-        alphaMap: buildRadialFadeAlphaTexture(0.7, 512),
+        alphaMap: buildRadialFadeAlphaTexture(0.55, 512),
         transparent: true,
         opacity: 0.92,
       })),
@@ -164,7 +166,9 @@ export const skyTheme: ArchipelagoTheme = {
     const group = new THREE.Group();
     const cellCenters = cell.cellOffsets;
     const baseBoundary = unionBoundary(cellCenters, cell.cellRadius * 0.68);
-    const boundary = jitterBoundary(baseBoundary, cell.seed);
+    // 同 `ocean.ts` 同一輪、同一個根因（見那邊完整說明）。
+    const subdivided = subdivideBoundary(baseBoundary, 4);
+    const boundary = smoothBoundaryLoop(jitterBoundary(subdivided, cell.seed));
     const geoKey = `${cell.seed}:${cellCenters.length}`;
 
     // 三層：草層換成浮空岩頂層（狀態色），中層／底層換「岩石斷層」語言

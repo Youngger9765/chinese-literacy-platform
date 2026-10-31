@@ -30,13 +30,20 @@
 import * as THREE from 'three';
 
 /** 同 `createArchipelagoWorld.ts` 鏡頭構圖段 `orbitRadius = Math.max(14,
- *  maxDist * 2.9)`——這裡刻意不 import 那個檔案的常數（會讓皮膚間接依賴
- *  骨架檔案），改成兩邊都標註「這個數字要對齊」的獨立常數。 */
-const ORBIT_RADIUS_MULTIPLIER = 2.9;
+ *  maxDist * 2.4)`——這裡刻意不 import 那個檔案的常數（會讓皮膚間接依賴
+ *  骨架檔案），改成兩邊都標註「這個數字要對齊」的獨立常數。2026-10-31
+ *  五次訂正：倍率隨鏡頭構圖從 2.9 調整到 2.4（配合俯仰角調陡衝「島群佔
+ *  畫面 ≥70%」），這裡要同步改，否則地面圓盤的安全邊際會算在一個已經不是
+ *  實際運作的倍率上。 */
+const ORBIT_RADIUS_MULTIPLIER = 2.4;
 const ORBIT_RADIUS_FLOOR = 14;
-/** 同 `createArchipelagoWorld.ts` 的 `orbitPitch = 0.65`（換群重設回的
- *  預設俯角）。 */
-const ORBIT_PITCH = 0.65;
+/** 同 `createArchipelagoWorld.ts` 的 `orbitPitch = 1.05`（換群重設回的
+ *  預設俯角）。2026-10-31 五次訂正：俯仰角從 0.65 調陡到 1.05（見
+ *  `createArchipelagoWorld.ts` 鏡頭構圖段的完整說明），兩邊要同步——陡角度
+ *  下「畫面最上緣視線」打到地面平面的距離本來就比較短，這裡沿用舊常數
+ *  不會算錯方向（只會多留一點不必要的安全邊際），但為了跟實際運作的鏡頭
+ *  參數對齊，還是同步更新。 */
+const ORBIT_PITCH = 1.05;
 /** 同 `createArchipelagoWorld.ts` 相機建構時的垂直 FOV（度）。 */
 const CAMERA_FOV_DEGREES = 50;
 /** 同 `ocean.ts`/`sky.ts` 的 `sea.position.y`/`cloudSea.position.y`。 */
@@ -59,7 +66,7 @@ export function requiredGroundRadius(maxRadius: number, safetyMargin = 1.5): num
   const horizontalDistCameraToTarget = orbitRadius * Math.cos(ORBIT_PITCH);
   if (topRayAngle <= 0) {
     // 理論上在目前的俯仰角/FOV 組合下恆不會發生（pitch 比半 FOV 大，
-    // 0.65 rad > 0.4363 rad）——防呆：真的變成「最上緣視線本身朝上」就
+    // 1.05 rad > 0.4363 rad）——防呆：真的變成「最上緣視線本身朝上」就
     // 代表地面平面物理上不可能把整個視野填滿，退回一個保守但有限的值，
     // 不要除以零或產生負值。
     return (horizontalDistCameraToTarget + cameraHeightAbovePlane) * safetyMargin * 10;

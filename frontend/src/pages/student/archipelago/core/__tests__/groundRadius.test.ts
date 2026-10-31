@@ -2,33 +2,36 @@
  * core/__tests__/groundRadius.test.ts — 鎖住「地面圓盤半徑不夠大，畫面
  * 最上緣露出邊緣」這個退回重做的 bug（team-lead 2026-10-31）。
  *
- * 兩筆真實群的數字（實測，不是編的）：
- * - 28 島群（`group=grade&cluster=5`）：`maxRadius≈33.26`，理論最小需要
- *   半徑≈199.8，舊版 `6×maxRadius=199.53`——少了 0.27，露邊緣。
- * - 36 島群（`group=category&cluster=歷史人文`）：`maxRadius≈54.57`，
- *   理論最小需要半徑≈323.1，舊版 `6×maxRadius=327.4`——只多 4.3，幾乎
- *   沒有安全邊際。
+ * ⚠️ 2026-10-31 五次訂正：原本這裡拿「舊版 `6×maxRadius`」當比較基準，
+ * 但那個 `6` 是針對**舊俯仰角 0.65 rad** 校準的門檻值——構圖那輪訂正把
+ * 俯仰角調陡到 1.05 rad 之後，陡角度下視線打到地面的距離本來就短很多，
+ * 新函式在新相機參數下算出來的安全半徑（maxRadius=33.26 時≈91，
+ * maxRadius=54.57 時≈148）遠小於那個已經過時的 `6×` 數字——這不是退步，
+ * 是「舊基準線本身只對舊相機角度有意義」。改成跟函式自己的
+ * `safetyMargin=1` 情況比（也就是「理論最小值」本身），這樣不管以後
+ * 相機俯仰角/縮放倍率再怎麼調，這條鎖都還是在驗證「真的有安全邊際」這件
+ * 事，不會因為構圖再訂正一次又變成要手動改的魔術數字。
  *
- * 這支鎖兩件事：① 新函式在這兩個真實 maxRadius 上回傳的半徑都要明顯大於
- * 舊版 `6×maxRadius`（有真正的安全邊際，不是又卡在門檻上）② mutation：
- * 把 `safetyMargin` 的乘法拿掉會讓這支紅。
+ * 這支鎖兩件事：① 新函式在真實 maxRadius 上回傳的半徑都要明顯大於「不留
+ * 安全邊際」(`safetyMargin=1`) 時的理論最小值 ② mutation：把 `safetyMargin`
+ * 的乘法拿掉會讓這支紅。
  */
 import { describe, it, expect } from 'vitest';
 import { requiredGroundRadius } from '../groundRadius';
 
 describe('requiredGroundRadius — 地面圓盤安全半徑', () => {
-  it('28 島群（maxRadius≈33.26）：新半徑明顯大於舊版 6×maxRadius=199.53', () => {
+  it('28 島群（maxRadius≈33.26）：預設安全邊際下的半徑明顯大於「理論最小值」（safetyMargin=1）', () => {
     const maxRadius = 33.26;
-    const oldRadius = maxRadius * 6;
-    const newRadius = requiredGroundRadius(maxRadius);
-    expect(newRadius).toBeGreaterThan(oldRadius * 1.3); // 至少多 30% 安全邊際，不是又卡在門檻上
+    const theoreticalMin = requiredGroundRadius(maxRadius, 1);
+    const withMargin = requiredGroundRadius(maxRadius);
+    expect(withMargin).toBeGreaterThan(theoreticalMin * 1.3); // 預設 1.5 倍margin，至少要比沒邊際時多 30%
   });
 
-  it('36 島群（maxRadius≈54.57）：新半徑明顯大於舊版 6×maxRadius=327.4', () => {
+  it('36 島群（maxRadius≈54.57）：同上', () => {
     const maxRadius = 54.57;
-    const oldRadius = maxRadius * 6;
-    const newRadius = requiredGroundRadius(maxRadius);
-    expect(newRadius).toBeGreaterThan(oldRadius * 1.3);
+    const theoreticalMin = requiredGroundRadius(maxRadius, 1);
+    const withMargin = requiredGroundRadius(maxRadius);
+    expect(withMargin).toBeGreaterThan(theoreticalMin * 1.3);
   });
 
   it('半徑隨 maxRadius 遞增（群越大，地面要越大）', () => {

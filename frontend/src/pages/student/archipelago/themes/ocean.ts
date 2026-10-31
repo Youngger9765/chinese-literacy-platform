@@ -9,7 +9,7 @@
  */
 import * as THREE from 'three';
 import type { ArchipelagoTheme, SceneCtx, CellInfo, LandmarkFactory, ConnectorMaterial } from './types';
-import { unionBoundary, jitterBoundary, scaleBoundaryToward, extrudeBoundary } from './islandShape';
+import { unionBoundary, jitterBoundary, subdivideBoundary, smoothBoundaryLoop, scaleBoundaryToward, extrudeBoundary } from './islandShape';
 import { buildRadialGradientTexture, buildRadialFadeAlphaTexture } from './proceduralTextures';
 import { requiredGroundRadius } from '../core/groundRadius';
 import { buildBoardwalk, buildSteppingStones, buildRopeBridge, buildShoal, buildFerry, type ConnectorPalette } from './connectors';
@@ -144,11 +144,16 @@ export const oceanTheme: ArchipelagoTheme = {
     // 俯仰角/FOV 反推「不會露出邊緣」所需的最小半徑，並內建安全邊際，不是
     // 再猜一個「看起來比較大」的倍數。
     const seaRadius = requiredGroundRadius(maxRadius);
+    // team-lead 2026-10-31 四次訂正：淡出起點從 0.7 往內移到 0.55——畫面
+    // 最上緣那圈「青色亮弧」太亮像一道光圈，根因是淡出帶只佔半徑的外圈
+    // 30%，相對整個圓盤的面積太窄，淡出速度不夠快，邊界附近還殘留太多
+    // 不透明的飽和色才會看起來像一圈「光圈」。淡出起點提前到 0.55（淡出
+    // 帶變成外圈 45%），同樣的半徑範圍內色彩衰減得更早、更漸進。
     const sea = new THREE.Mesh(
       ctx.geometry('ocean-sea-plane', () => new THREE.CircleGeometry(seaRadius, 96)),
       ctx.material('ocean-sea', () => new THREE.MeshStandardMaterial({
         map: seaTexture,
-        alphaMap: buildRadialFadeAlphaTexture(0.7, 512),
+        alphaMap: buildRadialFadeAlphaTexture(0.55, 512),
         transparent: true,
         metalness: 0.2,
         roughness: 0.32,
@@ -163,7 +168,15 @@ export const oceanTheme: ArchipelagoTheme = {
     const group = new THREE.Group();
     const cellCenters = cell.cellOffsets;
     const baseBoundary = unionBoundary(cellCenters, cell.cellRadius * 0.68); // 0.68：既有 ISLAND_RADIUS/HEX_SIZE 的比例（1.3/3.6≈0.36 是舊版留白，這裡吃掉一半留白讓多格島填得更滿，仍保留跟鄰島的水道）
-    const boundary = jitterBoundary(baseBoundary, cell.seed);
+    // team-lead 2026-10-31 三次退回重做：「多格島比例到了，但擾動感不夠」
+    // ——先插點把邊上的頂點變多（`subdivideBoundary`），`jitterBoundary`
+    // 才有足夠多獨立頂點可以蜿蜒，讀起來才像海岸線而不是角被挪動的六邊形。
+    // 四次訂正再加碼：插點數 3→4、擾動幅度 ±15%→±25%（`jitterBoundary`
+    // 新預設值）、插點+擾動後再跑一輪 `smoothBoundaryLoop`——純獨立隨機點
+    // 在這個密度下會變成高頻鋸齒，遠看會被抗鋸齒抹平，平滑一輪把鋸齒揉成
+    // 幾個看得出來的海灣/岬角大彎折。
+    const subdivided = subdivideBoundary(baseBoundary, 4);
+    const boundary = smoothBoundaryLoop(jitterBoundary(subdivided, cell.seed));
 
     // 三層側壁（美術指導書 §3.2）：草/狀態色頂層、壤土層、岩石層（底部收窄）。
     const geoKey = `${cell.seed}:${cellCenters.length}`;

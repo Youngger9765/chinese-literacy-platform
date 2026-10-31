@@ -6,7 +6,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import * as THREE from 'three';
-import { unionBoundary, jitterBoundary, scaleBoundaryToward, boundaryToShape, extrudeBoundary, type Point2D } from '../islandShape';
+import { unionBoundary, jitterBoundary, subdivideBoundary, smoothBoundaryLoop, scaleBoundaryToward, boundaryToShape, extrudeBoundary, type Point2D } from '../islandShape';
 import { axialToCartesian, type AxialCoord } from '../../core/archipelagoClusters';
 
 const HEX_DIRECTIONS: readonly AxialCoord[] = [
@@ -97,6 +97,44 @@ describe('unionBoundary — 三格互相相鄰（三角形黏成一塊）：外�
   });
 });
 
+describe('subdivideBoundary — 每邊插點，讓海岸線有更多獨立頂點可以蜿蜒', () => {
+  const base = unionBoundary([{ x: 0, z: 0 }], RADIUS); // 正六邊形，6 個頂點
+
+  it('每邊切 3 段：頂點數變成原本的 3 倍（6 邊 × 3 段 = 18 點）', () => {
+    const subdivided = subdivideBoundary(base, 3);
+    expect(subdivided).toHaveLength(18);
+  });
+
+  it('插入的點精準落在原始邊上（面積跟原始多邊形一致，沒有把形狀撐大或縮小）', () => {
+    const subdivided = subdivideBoundary(base, 3);
+    expect(shoelaceArea(subdivided)).toBeCloseTo(shoelaceArea(base), 6);
+  });
+
+  it('原始的 6 個角都還在輸出裡（插點不會把角本身弄丟或移動）', () => {
+    const subdivided = subdivideBoundary(base, 4);
+    for (const corner of base) {
+      const found = subdivided.some((p) => Math.abs(p.x - corner.x) < 1e-9 && Math.abs(p.z - corner.z) < 1e-9);
+      expect(found, `角 (${corner.x},${corner.z}) 應該還在插點後的輸出裡`).toBe(true);
+    }
+  });
+
+  it('segmentsPerEdge=1（或更小）原樣回傳，不插點', () => {
+    expect(subdivideBoundary(base, 1)).toEqual(base);
+    expect(subdivideBoundary(base, 0)).toEqual(base);
+  });
+
+  it('決定性：同樣輸入算兩次結果一樣', () => {
+    expect(subdivideBoundary(base, 3)).toEqual(subdivideBoundary(base, 3));
+  });
+
+  it('插點 + 擾動合起來：擾動後的頂點數遠多於原始角數，海岸線不再只是「角被挪動的六邊形」', () => {
+    const subdivided = subdivideBoundary(base, 3);
+    const jittered = jitterBoundary(subdivided, 'island-20011');
+    expect(jittered.length).toBeGreaterThan(base.length);
+    expect(jittered).toHaveLength(subdivided.length);
+  });
+});
+
 describe('jitterBoundary — 固定種子擾動頂點半徑，質心不變、點數不變', () => {
   const base = unionBoundary([{ x: 0, z: 0 }], RADIUS);
 
@@ -112,7 +150,7 @@ describe('jitterBoundary — 固定種子擾動頂點半徑，質心不變、點
     expect(a).not.toEqual(b);
   });
 
-  it('🔒 每個頂點都有被真的移動過（不是原樣複製），但移動幅度在合理範圍內（相對質心的距離變化不超過 [0.85,1.15]，2026-10-31 team-lead 訂正，原本是 [0.86,1.08]）', () => {
+  it('🔒 每個頂點都有被真的移動過（不是原樣複製），但移動幅度在合理範圍內（相對質心的距離變化不超過 [0.75,1.25]，2026-10-31 四次訂正：「海岸線擾動要做到 ≥15%，而且要看得出來」，光摸到 15% 門檻還是不夠明顯，加大到 ±25%，原本是 [0.85,1.15]）', () => {
     const jittered = jitterBoundary(base, 'island-20011');
     expect(jittered).toHaveLength(base.length);
     let movedCount = 0;
@@ -121,8 +159,8 @@ describe('jitterBoundary — 固定種子擾動頂點半徑，質心不變、點
       const dJit = Math.hypot(jittered[i].x, jittered[i].z);
       if (Math.abs(dOrig - dJit) > 1e-6) movedCount++;
       const ratio = dJit / dOrig;
-      expect(ratio).toBeGreaterThanOrEqual(0.85 - 1e-6);
-      expect(ratio).toBeLessThanOrEqual(1.15 + 1e-6);
+      expect(ratio).toBeGreaterThanOrEqual(0.75 - 1e-6);
+      expect(ratio).toBeLessThanOrEqual(1.25 + 1e-6);
     }
     expect(movedCount).toBeGreaterThan(0);
   });
@@ -150,6 +188,45 @@ describe('jitterBoundary — 固定種子擾動頂點半徑，質心不變、點
   it('點數不變，輸出順序跟輸入順序一致（每個索引對應同一個原始頂點，不是打亂重排）', () => {
     const jittered = jitterBoundary(base, 'island-20011');
     expect(jittered).toHaveLength(base.length);
+  });
+});
+
+describe('smoothBoundaryLoop — 相鄰點加權平均，壓低高頻鋸齒但保留整體彎折', () => {
+  const base = unionBoundary([{ x: 0, z: 0 }], RADIUS);
+  const subdivided = subdivideBoundary(base, 4);
+  const jittered = jitterBoundary(subdivided, 'island-20011');
+
+  it('點數不變，是封閉迴圈（頭尾不用額外處理，演算法本身用模運算接起來）', () => {
+    const smoothed = smoothBoundaryLoop(jittered);
+    expect(smoothed).toHaveLength(jittered.length);
+  });
+
+  it('決定性：同樣輸入算兩次結果一樣', () => {
+    expect(smoothBoundaryLoop(jittered)).toEqual(smoothBoundaryLoop(jittered));
+  });
+
+  it('🔒 平滑後的每個點都往鄰居方向移動過（跟平滑前不是逐點相等），證明真的在做加權平均不是原樣複製', () => {
+    const smoothed = smoothBoundaryLoop(jittered);
+    let movedCount = 0;
+    for (let i = 0; i < jittered.length; i++) {
+      if (Math.abs(smoothed[i].x - jittered[i].x) > 1e-9 || Math.abs(smoothed[i].z - jittered[i].z) > 1e-9) movedCount++;
+    }
+    expect(movedCount).toBeGreaterThan(0);
+  });
+
+  it('🔒 平滑會壓低高頻鋸齒的尖峰：點數少於 3 的輸入原樣回傳（沒有鄰居可以平均）', () => {
+    expect(smoothBoundaryLoop([{ x: 0, z: 0 }, { x: 1, z: 1 }])).toEqual([{ x: 0, z: 0 }, { x: 1, z: 1 }]);
+  });
+
+  it('多跑幾輪 passes，形狀會更平滑（面積通常會因為角被磨平而縮小，不會不合理地暴增）', () => {
+    const once = smoothBoundaryLoop(jittered, 1);
+    const twice = smoothBoundaryLoop(jittered, 3);
+    const areaJittered = shoelaceArea(jittered);
+    const areaOnce = shoelaceArea(once);
+    const areaTwice = shoelaceArea(twice);
+    // 磨平尖角通常讓面積單調縮小（不會變成比原本更尖凸），多跑幾輪縮更多
+    expect(areaOnce).toBeLessThanOrEqual(areaJittered + 1e-6);
+    expect(areaTwice).toBeLessThanOrEqual(areaOnce + 1e-6);
   });
 });
 

@@ -456,7 +456,7 @@ export function createArchipelagoWorld(
   // ---------------------------------------------------------------------
   let orbitRadius = 22;
   let orbitYaw = 0.5;
-  let orbitPitch = 0.65; // 俯角，0=水平 PI/2=正上方
+  let orbitPitch = 1.05; // 俯角，0=水平 PI/2=正上方
   let orbitTarget = new THREE.Vector3(0, 0, 0);
   let minRadius = 10;
   let maxRadius = 60;
@@ -747,7 +747,11 @@ export function createArchipelagoWorld(
         : island.status === 'in_progress'
           ? theme.palette.inProgress
           : theme.palette.unexplored;
-      el.style.transition = 'opacity 150ms, transform 150ms';
+      // 2026-10-31 四次訂正：opacity 不再是「隱藏/半隱藏」的手段（見下面
+      // 名牌狀態機那段說明），固定是 1，拿掉 opacity 的 transition——留著
+      // transform 的平滑移動，但不要讓一個永遠不變的屬性還掛著轉場設定
+      // （沒有任何壞處，但會讓人誤以為 opacity 還在被動畫控制）。
+      el.style.transition = 'transform 150ms';
       const labelObject = new CSS2DObject(el);
       // 固定偏移在島基準點上方（美術指導書 §7：取現有地標類別裡最高的那個
       // 高度再加餘裕，群島只有 4 種地標形狀，用固定值即可，省掉逐類別查表）。
@@ -774,31 +778,34 @@ export function createArchipelagoWorld(
     // 上（見 `computeClusterBoundingCircle` 的說明），鏡頭看錯點、整群就
     // 會歪向畫面一角——改成看「廣場為圓心的外接圓」，不是寫死的原點）。
     //
-    // 倍率 2.9 是量出來的，不是猜的——團隊長要求「非海背景像素 ≥65%」，
-    // 一開始直覺是「鏡頭拉近一點」，結果完全相反：1280 寬本機截圖實測
-    // M=1.0 只有 43.2%、M=1.35 有 52.1%、M=1.7（原值）61.9%、M=2.2 有
-    // 66.8%、M=2.8 有 71.7%——**拉遠才會填滿畫面，不是拉近**。原因是俯角
-    // 偏斜視（0.65 rad≈37°）時鏡頭太近只框得到少數幾座島，島跟島之間的
-    // 水道本身就佔不小比例，島太少時畫面大半還是水；拉遠才能讓「整群島
-    // 散落在海面上」這個圖案本身填滿畫面。
+    // **俯仰角/縮放倍率第五次訂正（2026-10-31）**：團隊長新驗收標準從
+    // 「非海背景像素 ≥65%」提高到「島群佔畫面 ≥70%」，且明確指出「畫面上方
+    // 大約 1/3 是空的海，島群擠在中段」——舊版 `orbitPitch=0.65 rad`
+    // （≈37°）+ `orbitRadius=maxDist×2.9` 組合下，量「畫面垂直方向有內容
+    // 的那段跨度」只有 46~62%，不管怎麼拉遠都卡在這附近（拉遠只改變「島
+    // 填滿畫面的密度」，不會改變「俯仰角決定的地平線在畫面垂直位置上落在
+    // 哪一行」，那才是「上方留白」的真正成因）。
     //
-    // 2.3 在 1280 寬可以過門檻（67.6%），但 390 窄螢幕用同一個倍率只有
-    // 60.0%——窄螢幕的水平 FOV 本來就比寬螢幕小，同樣的世界距離在窄螢幕
-    // 上涵蓋到的畫面比例更少。挑一個兩種寬度都過門檻的單一倍率（不分寬窄
-    // 兩套常數，維持簡單）：M=2.9 時 390 寬 67.6%、1280 寬 72.9%，都有
-    // 安全邊際，不是卡在門檻上。（海島主題數字；天空島因為整套色票本來就
-    // 刻意貼近背景色，像素色彩分類器量不出有意義的數字——跟 contrast 那題
-    // 是同一個已知限制，不是這次構圖沒套用到天空島。）
+    // 改法：俯仰角直接調陡（0.65→1.05 rad≈60°，更接近正上方俯瞰），地平線
+    // 在畫面上的位置本身就會往上移、留白自然變少；陡角度下「鏡頭太近只框
+    // 到少數島」的副作用也比淺角度輕微（陡角度時島跟島之間的水道在畫面上
+    // 的視覺占比本來就比斜視角小），所以同時可以把縮放倍率從 2.9 拉近到
+    // 2.4。本機截圖實測（`scratchpad/qa-matrix/composition-pitch105-r24-*.png`，
+    // 量法：逐行找「這一行有沒有非海背景色的像素」，算有內容的那段行數
+    // 跨佔整個畫布高度的比例）：1280 寬 76.0%、390 寬 77.2%，兩種寬度都
+    // 穩穩超過 70% 門檻。（海島主題數字；天空島因為整套色票本來就刻意貼近
+    // 背景色，像素色彩分類器量不出有意義的數字——跟 contrast 那題是同一個
+    // 已知限制，不是這次構圖沒套用到天空島。）
     //
     // `boundingCircle` 重用上面建 `theme.ground()` 之前算好的那份，不要
     // 重算第二次（`positions`/`plazaPos` 這裡跟那裡是同一組點、同一個圓心，
     // 算兩次只會浪費一次迴圈，數字不會不一樣）。
     const maxDist = boundingCircle.radius;
-    orbitRadius = Math.max(14, maxDist * 2.9);
+    orbitRadius = Math.max(14, maxDist * 2.4);
     minRadius = Math.max(8, maxDist * 0.5);
     maxRadius = maxDist * 3.2;
     orbitTarget = new THREE.Vector3(boundingCircle.center.x, 0, boundingCircle.center.z);
-    orbitPitch = 0.65; // 換群重設回預設俯角，不留著玩家上一群拖曳過的角度
+    orbitPitch = 1.05; // 換群重設回預設俯角，不留著玩家上一群拖曳過的角度
     // 遠裁切面要跟著地面圓盤的安全半徑縮放（2026-10-31 二次退回重做）——
     // `theme.ground()` 現在用 `requiredGroundRadius()` 把地面圓盤做得比
     // 固定 300 的遠裁切面還大（大群時），地面會被遠裁切面本身切掉一截，
@@ -1010,12 +1017,38 @@ export function createArchipelagoWorld(
         const freshRect = nameplates.get(p.slug)!.el.getBoundingClientRect();
         if (isRectOutOfBounds(freshRect, rect)) outOfBounds.add(p.slug);
       }
+      // team-lead 2026-10-31 四次訂正：「畫面上還有好幾張大約 30% 透明度
+      // 的名牌…看起來很髒…不要用 0.35 或 0.05 這種中間值」——根因是前面
+      // 兩輪（卡片/圓點選擇、重疊退讓）都處理完了名牌「該長什麼樣子」，
+      // 卻在最後這一步又疊加一層獨立的 opacity 控制（1 或 0.05），兩套
+      // 機制各自動、互不知道對方已經做了什麼決定。`style.transition =
+      // 'opacity 150ms'`（上面名牌建立時設的）會讓每一幀 `opacity:
+      // 1→0.05` 或 `0.05→1` 的切換在轉場中途被截到，螢幕上就會看到卡片
+      // 卡在某個中間透明度——那不是算出來的目標值，是動畫被打斷的瞬間值。
+      //
+      // 改法：遮擋／超出畫布都不再用 opacity 當隱藏手段，而是跟「重疊退讓」
+      // 共用同一套「卡片 vs 圓點 vs 完全隱藏」的狀態機——遮擋＝退化成圓點
+      // （PRD §7：每座島都看得到標記，被擋住的也一樣要有個點）；超出畫布
+      // ＝整個隱藏。opacity 固定是 1，沒有過渡用的中間值可以被截到。
+      //
+      // 隱藏用 `visibility:hidden` 不用 `display:none`——`display:none` 會把
+      // 元素整個踢出排版，`getBoundingClientRect()` 之後讀到的是全零
+      // `{0,0,0,0}`，而 `isRectOutOfBounds` 拿一個全零矩形去跟從 (0,0) 起算
+      // 的畫布邊界比，剛好每個條件都不成立、判成「沒有超出」——下一幀會
+      // 把它判回「該顯示」，造成每幀顯示/隱藏來回閃爍。`visibility:hidden`
+      // 元素還留在排版裡，矩形仍然反映它真正的投影位置，隔一幀照樣讀得到
+      // 正確的「還是超出畫布」。
       for (const p of projected) {
-        const { object } = nameplates.get(p.slug)!;
-        // 遮擋跟「超出畫布」都是接近隱藏（PRD §7 原文：被建築整個擋住要
-        // 接近完全隱藏）；重疊已經在上面改成「退化成圓點」解決，不再需要
-        // 額外的半透明狀態。
-        object.element.style.opacity = p.occluded || outOfBounds.has(p.slug) ? '0.05' : '1';
+        const entry = nameplates.get(p.slug)!;
+        entry.el.style.opacity = '1';
+        if (p.occluded) {
+          entry.el.style.visibility = 'visible';
+          applyDotStyle(entry);
+        } else if (outOfBounds.has(p.slug)) {
+          entry.el.style.visibility = 'hidden';
+        } else {
+          entry.el.style.visibility = 'visible';
+        }
       }
     }
 
