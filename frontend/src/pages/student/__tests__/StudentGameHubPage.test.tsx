@@ -98,8 +98,8 @@ describe('<StudentGameHubPage> — classroom-flag locking, 跨班賽季/課堂�
     );
     render(<StudentGameHubPage />);
     await waitFor(() => expect(fetchMyEnrolledClassrooms).toHaveBeenCalled());
-    expect(screen.getByRole('button', { name: /跨班賽季/ })).not.toBeDisabled();
-    expect(screen.getByRole('button', { name: /課堂搶答/ })).not.toBeDisabled();
+    await waitFor(() => expect(screen.getByRole('button', { name: /跨班賽季/ })).not.toBeDisabled());
+    await waitFor(() => expect(screen.getByRole('button', { name: /課堂搶答/ })).not.toBeDisabled());
   });
 
   it('mixed: league on in one classroom, live_quiz on in another — ANY-classroom rule unlocks both independently', async () => {
@@ -108,8 +108,8 @@ describe('<StudentGameHubPage> — classroom-flag locking, 跨班賽季/課堂�
     );
     render(<StudentGameHubPage />);
     await waitFor(() => expect(fetchMyEnrolledClassrooms).toHaveBeenCalled());
-    expect(screen.getByRole('button', { name: /跨班賽季/ })).not.toBeDisabled();
-    expect(screen.getByRole('button', { name: /課堂搶答/ })).not.toBeDisabled();
+    await waitFor(() => expect(screen.getByRole('button', { name: /跨班賽季/ })).not.toBeDisabled());
+    await waitFor(() => expect(screen.getByRole('button', { name: /課堂搶答/ })).not.toBeDisabled());
   });
 
   it('mixed: only league on — 課堂搶答 stays locked', async () => {
@@ -118,7 +118,7 @@ describe('<StudentGameHubPage> — classroom-flag locking, 跨班賽季/課堂�
     );
     render(<StudentGameHubPage />);
     await waitFor(() => expect(fetchMyEnrolledClassrooms).toHaveBeenCalled());
-    expect(screen.getByRole('button', { name: /跨班賽季/ })).not.toBeDisabled();
+    await waitFor(() => expect(screen.getByRole('button', { name: /跨班賽季/ })).not.toBeDisabled());
     expect(screen.getByRole('button', { name: /課堂搶答/ })).toBeDisabled();
   });
 });
@@ -204,7 +204,7 @@ describe('<StudentGameHubPage> — 自己玩／跟班上一起玩 sections (#375
     render(<StudentGameHubPage />);
     await waitFor(() => expect(fetchMyEnrolledClassrooms).toHaveBeenCalled());
 
-    expect(screen.getAllByText('隨時可玩')).toHaveLength(2); // PK 對戰、迷城密室
+    expect(screen.getAllByText('隨時可玩')).toHaveLength(3); // PK 對戰、迷城密室、島嶼探索 (#3780 D1)
     expect(screen.getByText('找同學一起')).toBeTruthy(); // 多人對抗賽
     expect(screen.getAllByText('需要老師開始')).toHaveLength(2); // 課堂搶答、跨班賽季 (unlocked here)
   });

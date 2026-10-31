@@ -6,8 +6,9 @@ import ErrorHeatmapTab from '../ErrorHeatmapTab';
 import StudentProgressTab from '../StudentProgressTab';
 import TodayOverviewTab from './TodayOverviewTab';
 import StudentsPanel from './StudentsPanel';
+import ReadingBabyIndicatorsPanel from './ReadingBabyIndicatorsPanel';
 
-type DataView = 'today' | 'students' | 'at-risk' | 'error-heatmap' | 'analytics' | 'learning';
+type DataView = 'today' | 'students' | 'at-risk' | 'error-heatmap' | 'ability' | 'analytics' | 'learning';
 
 interface ClassDataTabProps {
   classroomId: number;
@@ -23,6 +24,7 @@ const DATA_VIEWS: { key: DataView; label: string }[] = [
   { key: 'students', label: '學生總表' },
   { key: 'at-risk', label: '早期介入' },
   { key: 'error-heatmap', label: '錯字熱力圖' },
+  { key: 'ability', label: '能力指標' },
   { key: 'analytics', label: '學習分析' },
   { key: 'learning', label: '詳細學習紀錄' },
 ];
@@ -70,6 +72,8 @@ const ClassDataTab: React.FC<ClassDataTabProps> = ({
         return <AtRiskStudents classroomId={classroomId} />;
       case 'error-heatmap':
         return <ErrorHeatmapTab classroomId={classroomId} />;
+      case 'ability':
+        return <ReadingBabyIndicatorsPanel classroomId={classroomId} />;
       case 'analytics':
         return (
           <div className="divide-y divide-gray-100">

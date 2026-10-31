@@ -1,0 +1,1084 @@
+{
+  "_meta": {
+    "name": "閱讀寶貝造型公式輸入（前端專用）",
+    "generated_from": "docs/design/reading-babies/lesson-indicators.json",
+    "generated_by": "scripts/build_reading_baby_appearance_inputs.py",
+    "rule": "game-design.md §1.3：劇情類型 × 年級 × 招牌小物；劇情類型規則在 islandTemplate.storyTypeForLesson"
+  },
+  "lessons": {
+    "L0001": {
+      "grade": "4",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F08"
+    },
+    "L0002": {
+      "grade": "4",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F01"
+    },
+    "L0003": {
+      "grade": "4",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F01"
+    },
+    "L0004": {
+      "grade": "4",
+      "category": "Fable",
+      "genre": "抒情文",
+      "family": "F14"
+    },
+    "L0005": {
+      "grade": "4",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F02"
+    },
+    "L0006": {
+      "grade": "4",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F02"
+    },
+    "L0007": {
+      "grade": "4",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F02"
+    },
+    "L0008": {
+      "grade": "4",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F14"
+    },
+    "L0009": {
+      "grade": "4",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F14"
+    },
+    "L0010": {
+      "grade": "4",
+      "category": "Daily",
+      "genre": "應用文",
+      "family": "F14"
+    },
+    "L0011": {
+      "grade": "4",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F14"
+    },
+    "L0012": {
+      "grade": "4",
+      "category": "Daily",
+      "genre": "應用文",
+      "family": "F14"
+    },
+    "L0013": {
+      "grade": "4",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F02"
+    },
+    "L0014": {
+      "grade": "4",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F02"
+    },
+    "L0015": {
+      "grade": "4",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F02"
+    },
+    "L0016": {
+      "grade": "4",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F02"
+    },
+    "L0017": {
+      "grade": "4",
+      "category": "Fable",
+      "genre": "抒情文",
+      "family": "F14"
+    },
+    "L0018": {
+      "grade": "4",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F07"
+    },
+    "L0019": {
+      "grade": "4",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F07"
+    },
+    "L0020": {
+      "grade": "4",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F05"
+    },
+    "L0021": {
+      "grade": "5",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F02"
+    },
+    "L0022": {
+      "grade": "5",
+      "category": "Fable",
+      "genre": "抒情文",
+      "family": "F14"
+    },
+    "L0023": {
+      "grade": "5",
+      "category": "Daily",
+      "genre": "應用文",
+      "family": "F02"
+    },
+    "L0024": {
+      "grade": "5",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F02"
+    },
+    "L0025": {
+      "grade": "5",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F02"
+    },
+    "L0026": {
+      "grade": "5",
+      "category": "Fable",
+      "genre": "抒情文",
+      "family": "F14"
+    },
+    "L0027": {
+      "grade": "5",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F03"
+    },
+    "L0028": {
+      "grade": "5",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F03"
+    },
+    "L0029": {
+      "grade": "5",
+      "category": "",
+      "genre": "",
+      "family": "F11"
+    },
+    "L0030": {
+      "grade": "5",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F01"
+    },
+    "L0031": {
+      "grade": "5",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F02"
+    },
+    "L0032": {
+      "grade": "5",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F01"
+    },
+    "L0033": {
+      "grade": "5",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F01"
+    },
+    "L0034": {
+      "grade": "5",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F01"
+    },
+    "L0035": {
+      "grade": "5",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F01"
+    },
+    "L0036": {
+      "grade": "5",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F01"
+    },
+    "L0037": {
+      "grade": "5",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F01"
+    },
+    "L0038": {
+      "grade": "5",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F05"
+    },
+    "L0039": {
+      "grade": "5",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F14"
+    },
+    "L0040": {
+      "grade": "5",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F14"
+    },
+    "L0041": {
+      "grade": "5",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F02"
+    },
+    "L0042": {
+      "grade": "5",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F02"
+    },
+    "L0043": {
+      "grade": "5",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F02"
+    },
+    "L0044": {
+      "grade": "5",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F05"
+    },
+    "L0045": {
+      "grade": "5",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F06"
+    },
+    "L0046": {
+      "grade": "5",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F06"
+    },
+    "L0047": {
+      "grade": "5",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F06"
+    },
+    "L0048": {
+      "grade": "5",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F06"
+    },
+    "L0049": {
+      "grade": "6",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F02"
+    },
+    "L0050": {
+      "grade": "6",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F01"
+    },
+    "L0051": {
+      "grade": "6",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F01"
+    },
+    "L0052": {
+      "grade": "6",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F02"
+    },
+    "L0053": {
+      "grade": "6",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F02"
+    },
+    "L0054": {
+      "grade": "6",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F01"
+    },
+    "L0055": {
+      "grade": "6",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F01"
+    },
+    "L0056": {
+      "grade": "6",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F14"
+    },
+    "L0057": {
+      "grade": "6",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F01"
+    },
+    "L0058": {
+      "grade": "6",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F01"
+    },
+    "L0059": {
+      "grade": "6",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F14"
+    },
+    "L0060": {
+      "grade": "6",
+      "category": "History",
+      "genre": "議論文",
+      "family": "F02"
+    },
+    "L0061": {
+      "grade": "6",
+      "category": "History",
+      "genre": "議論文",
+      "family": "F08"
+    },
+    "L0062": {
+      "grade": "6",
+      "category": "Fable",
+      "genre": "抒情文",
+      "family": "F14"
+    },
+    "L0063": {
+      "grade": "6",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F11"
+    },
+    "L0064": {
+      "grade": "6",
+      "category": "Fable",
+      "genre": "抒情文",
+      "family": "F14"
+    },
+    "L0065": {
+      "grade": "6",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F08"
+    },
+    "L0066": {
+      "grade": "6",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F08"
+    },
+    "L0067": {
+      "grade": "6",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F04"
+    },
+    "L0068": {
+      "grade": "6",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F04"
+    },
+    "L0069": {
+      "grade": "6",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F02"
+    },
+    "L0070": {
+      "grade": "6",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F05"
+    },
+    "L0071": {
+      "grade": "6",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F03"
+    },
+    "L0072": {
+      "grade": "6",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F08"
+    },
+    "L0073": {
+      "grade": "6",
+      "category": "Fable",
+      "genre": "抒情文",
+      "family": "F08"
+    },
+    "L0074": {
+      "grade": "6",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F01"
+    },
+    "L0075": {
+      "grade": "6",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F01"
+    },
+    "L0076": {
+      "grade": "6",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F14"
+    },
+    "L0077": {
+      "grade": "7",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F02"
+    },
+    "L0078": {
+      "grade": "7",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F10"
+    },
+    "L0079": {
+      "grade": "7",
+      "category": "Daily",
+      "genre": "應用文",
+      "family": "F01"
+    },
+    "L0080": {
+      "grade": "7",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F03"
+    },
+    "L0081": {
+      "grade": "7",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F03"
+    },
+    "L0082": {
+      "grade": "7",
+      "category": "History",
+      "genre": "議論文",
+      "family": "F03"
+    },
+    "L0083": {
+      "grade": "7",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F03"
+    },
+    "L0084": {
+      "grade": "7",
+      "category": "Fable",
+      "genre": "抒情文",
+      "family": "F08"
+    },
+    "L0085": {
+      "grade": "7",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F04"
+    },
+    "L0086": {
+      "grade": "7",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F04"
+    },
+    "L0087": {
+      "grade": "7",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F04"
+    },
+    "L0088": {
+      "grade": "7",
+      "category": "History",
+      "genre": "議論文",
+      "family": "F02"
+    },
+    "L0089": {
+      "grade": "7",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F04"
+    },
+    "L0090": {
+      "grade": "7",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F03"
+    },
+    "L0091": {
+      "grade": "7",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F03"
+    },
+    "L0092": {
+      "grade": "7",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F10"
+    },
+    "L0093": {
+      "grade": "7",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F09"
+    },
+    "L0094": {
+      "grade": "7",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F02"
+    },
+    "L0095": {
+      "grade": "7",
+      "category": "Daily",
+      "genre": "應用文",
+      "family": "AI00"
+    },
+    "L0096": {
+      "grade": "7",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F12"
+    },
+    "L0097": {
+      "grade": "7",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F14"
+    },
+    "L0098": {
+      "grade": "7",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F14"
+    },
+    "L0099": {
+      "grade": "7",
+      "category": "History",
+      "genre": "議論文",
+      "family": "F02"
+    },
+    "L0100": {
+      "grade": "7",
+      "category": "History",
+      "genre": "議論文",
+      "family": "F02"
+    },
+    "L0101": {
+      "grade": "7",
+      "category": "",
+      "genre": "",
+      "family": "F02"
+    },
+    "L0102": {
+      "grade": "7",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F10"
+    },
+    "L0103": {
+      "grade": "7",
+      "category": "",
+      "genre": "",
+      "family": "F01"
+    },
+    "L0104": {
+      "grade": "7",
+      "category": "",
+      "genre": "",
+      "family": "F01"
+    },
+    "L0105": {
+      "grade": "7",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F03"
+    },
+    "L0106": {
+      "grade": "7",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "AI00"
+    },
+    "L0107": {
+      "grade": "8",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F02"
+    },
+    "L0108": {
+      "grade": "8",
+      "category": "History",
+      "genre": "議論文",
+      "family": "F02"
+    },
+    "L0109": {
+      "grade": "8",
+      "category": "History",
+      "genre": "議論文",
+      "family": "F02"
+    },
+    "L0110": {
+      "grade": "8",
+      "category": "Fable",
+      "genre": "記敘抒情文",
+      "family": "F02"
+    },
+    "L0111": {
+      "grade": "8",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F03"
+    },
+    "L0112": {
+      "grade": "8",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F05"
+    },
+    "L0113": {
+      "grade": "8",
+      "category": "History",
+      "genre": "論說文",
+      "family": "F02"
+    },
+    "L0114": {
+      "grade": "8",
+      "category": "History",
+      "genre": "論說文",
+      "family": "F02"
+    },
+    "L0115": {
+      "grade": "8",
+      "category": "History",
+      "genre": "議論文",
+      "family": "F02"
+    },
+    "L0116": {
+      "grade": "8",
+      "category": "History",
+      "genre": "議論文",
+      "family": "F08"
+    },
+    "L0117": {
+      "grade": "8",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F02"
+    },
+    "L0118": {
+      "grade": "8",
+      "category": "Fable",
+      "genre": "記敘說理文",
+      "family": "F08"
+    },
+    "L0119": {
+      "grade": "8",
+      "category": "Fable",
+      "genre": "抒情文",
+      "family": "F08"
+    },
+    "L0120": {
+      "grade": "8",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F09"
+    },
+    "L0121": {
+      "grade": "8",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F14"
+    },
+    "L0122": {
+      "grade": "8",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F02"
+    },
+    "L0123": {
+      "grade": "8",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F08"
+    },
+    "L0124": {
+      "grade": "8",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F02"
+    },
+    "L0125": {
+      "grade": "8",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F02"
+    },
+    "L0126": {
+      "grade": "8",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F02"
+    },
+    "L0127": {
+      "grade": "8",
+      "category": "History",
+      "genre": "議論文",
+      "family": "F08"
+    },
+    "L0128": {
+      "grade": "8",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F02"
+    },
+    "L0129": {
+      "grade": "8",
+      "category": "History",
+      "genre": "議論文",
+      "family": "F02"
+    },
+    "L0130": {
+      "grade": "9",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F02"
+    },
+    "L0131": {
+      "grade": "9",
+      "category": "History",
+      "genre": "議論文",
+      "family": "F02"
+    },
+    "L0132": {
+      "grade": "9",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F09"
+    },
+    "L0133": {
+      "grade": "9",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F02"
+    },
+    "L0134": {
+      "grade": "9",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F02"
+    },
+    "L0135": {
+      "grade": "9",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F03"
+    },
+    "L0136": {
+      "grade": "9",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F03"
+    },
+    "L0137": {
+      "grade": "9",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F11"
+    },
+    "L0138": {
+      "grade": "9",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F14"
+    },
+    "L0139": {
+      "grade": "9",
+      "category": "Fable",
+      "genre": "記敘文/科學故事",
+      "family": "F01"
+    },
+    "L0140": {
+      "grade": "9",
+      "category": "Fable",
+      "genre": "記敘說理文",
+      "family": "F08"
+    },
+    "L0141": {
+      "grade": "9",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F01"
+    },
+    "L0142": {
+      "grade": "9",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F14"
+    },
+    "L0143": {
+      "grade": "9",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F01"
+    },
+    "L0144": {
+      "grade": "9",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F11"
+    },
+    "L0145": {
+      "grade": "9",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F08"
+    },
+    "L0146": {
+      "grade": "9",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F02"
+    },
+    "L0147": {
+      "grade": "9",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F09"
+    },
+    "L0148": {
+      "grade": "9",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F09"
+    },
+    "L0149": {
+      "grade": "9",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F03"
+    },
+    "L0150": {
+      "grade": "9",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F03"
+    },
+    "L0151": {
+      "grade": "9",
+      "category": "Science",
+      "genre": "說明文",
+      "family": "F10"
+    },
+    "L0152": {
+      "grade": "9",
+      "category": "History",
+      "genre": "議論文",
+      "family": "F02"
+    },
+    "L0153": {
+      "grade": "文言文",
+      "category": "History",
+      "genre": "文言文",
+      "family": "F13"
+    },
+    "L0154": {
+      "grade": "文言文",
+      "category": "History",
+      "genre": "文言文",
+      "family": "F13"
+    },
+    "L0155": {
+      "grade": "文言文",
+      "category": "History",
+      "genre": "文言文",
+      "family": "F13"
+    },
+    "L0156": {
+      "grade": "文言文",
+      "category": "",
+      "genre": "",
+      "family": "F13"
+    },
+    "L0157": {
+      "grade": "文言文",
+      "category": "History",
+      "genre": "文言文",
+      "family": "F13"
+    },
+    "L0158": {
+      "grade": "文言文",
+      "category": "History",
+      "genre": "文言文",
+      "family": "F13"
+    },
+    "L0159": {
+      "grade": "文言文",
+      "category": "History",
+      "genre": "文言文",
+      "family": "F13"
+    },
+    "L0160": {
+      "grade": "文言文",
+      "category": "History",
+      "genre": "文言文",
+      "family": "F13"
+    },
+    "L0161": {
+      "grade": "文言文",
+      "category": "History",
+      "genre": "文言文",
+      "family": "F13"
+    },
+    "L0162": {
+      "grade": "文言文",
+      "category": "History",
+      "genre": "文言文",
+      "family": "F13"
+    },
+    "L0163": {
+      "grade": "文言文",
+      "category": "History",
+      "genre": "文言文",
+      "family": "F13"
+    },
+    "L0164": {
+      "grade": "文言文",
+      "category": "History",
+      "genre": "文言文",
+      "family": "F13"
+    },
+    "L0165": {
+      "grade": "品格教育",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F14"
+    },
+    "L0166": {
+      "grade": "品格教育",
+      "category": "History",
+      "genre": "議論文",
+      "family": "F14"
+    },
+    "L0167": {
+      "grade": "品格教育",
+      "category": "History",
+      "genre": "議論文",
+      "family": "F14"
+    },
+    "L0168": {
+      "grade": "品格教育",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F14"
+    },
+    "L0169": {
+      "grade": "品格教育",
+      "category": "History",
+      "genre": "議論文",
+      "family": "F14"
+    },
+    "L0170": {
+      "grade": "品格教育",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F14"
+    },
+    "L0171": {
+      "grade": "品格教育",
+      "category": "History",
+      "genre": "議論文",
+      "family": "F14"
+    },
+    "L0172": {
+      "grade": "品格教育",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F14"
+    },
+    "L0173": {
+      "grade": "品格教育",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F14"
+    },
+    "L0174": {
+      "grade": "品格教育",
+      "category": "Fable",
+      "genre": "記敘文",
+      "family": "F14"
+    },
+    "L0175": {
+      "grade": "品格教育",
+      "category": "History",
+      "genre": "議論文",
+      "family": "F14"
+    },
+    "L0176": {
+      "grade": "品格教育",
+      "category": "History",
+      "genre": "議論文",
+      "family": "F14"
+    },
+    "L0177": {
+      "grade": "品格教育",
+      "category": "History",
+      "genre": "議論文",
+      "family": "F14"
+    },
+    "L0178": {
+      "grade": "品格教育",
+      "category": "History",
+      "genre": "議論文",
+      "family": "F14"
+    },
+    "L0179": {
+      "grade": "品格教育",
+      "category": "History",
+      "genre": "議論文",
+      "family": "F14"
+    }
+  }
+}

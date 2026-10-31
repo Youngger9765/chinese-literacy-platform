@@ -1,0 +1,47 @@
+{
+  "_meta": {
+    "name": "閱讀寶貝 quality_passed 判定門檻（#3780 第一階段）",
+    "note": "依據 docs/design/reading-babies/ability-indicators.md §3；2026-10-31 工頭補充後改用學習扶助科技化評量通過標準分三段，不用沒有依據的單一 60%。都是推論，上線前要用真實資料再校一次。",
+    "thresholds_version": "draft-2026-10-31-v2"
+  },
+  "reading_fluency": {
+    "cpm_min": 120,
+    "accuracy_min_pct": 90,
+    "source": "backend/app/schemas/assignment.py DEFAULT_TARGET_CPM=120／DEFAULT_TARGET_ACCURACY=90.0（#3333 實測：臺師大 Brain & Learning Lab 二年級以上下限，落在本平台學生中位數 144 之下；正確率門檻非瓶頸）",
+    "teacher_override_note": "reading_baby_quality.determine_quality() 已經有 teacher_target_cpm 參數、record_station_evidence() 也會原樣轉傳——這是刻意預留的擴充點，但第一階段的掛點（learning_step_progress._record_reading_baby_evidence）還沒有去查 ReadingTarget 表、一律傳 None，所以目前實際行為是『永遠用這裡的預設 120』，還沒真的讀到老師設定的目標速度。查表併進掛點是後續階段的工作，不是這裡宣稱的『先讀教師目標』"
+  },
+  "first_try_accuracy": {
+    "grade_bands": [
+      {
+        "label": "四年級以下",
+        "max_grade": 4,
+        "threshold_pct": 80
+      },
+      {
+        "label": "五、六年級",
+        "min_grade": 5,
+        "max_grade": 6,
+        "threshold_pct": 72
+      },
+      {
+        "label": "七年級以上",
+        "min_grade": 7,
+        "threshold_pct": 60
+      }
+    ],
+    "min_items_for_partial_pass": 3,
+    "min_items_note": "題數 <3 時改成全部首答正確，避免題目太少、猜對一題就過（推論，ability-indicators.md §3）",
+    "source": "exam.tcte.edu.tw 學習扶助科技化評量通過標準（pass_standard，更新日期 2019-08-19，/Users/young/.claude/skills/tw-learning-support/data/assessment_system.json 第 55 行附近）：四年級以下 80%、五六年級 72%、七年級以上 60%，官方原文逐字抄錄",
+    "note": "學習扶助的通過標準是篩選測驗/成長測驗的年級門檻，不是為本平台選擇題訂的——這裡借用當作單站 quality_passed 的門檻，是推論沿用，上線前要用本平台真實作答資料重新校準，不能當成學習扶助官方標準的延伸"
+  },
+  "completion": {
+    "quality_passed": false,
+    "note": "沒有對錯可判的站（重點表、做記號、文言配對、自我挑戰、知識補給站、課程簡介）只記參與，quality_passed 永遠 false，不計入老師端『達成/未達』，只用於顯示『有做過』"
+  },
+  "teacher_aggregate": {
+    "min_items_total_for_sufficient_data": 3,
+    "source": "ability-indicators.md §3「老師端的樣本下限（推論）」：跨課彙整時，同一指標累積首答題數 <3 題標「資料不足」，不給達成也不給未達成",
+    "min_lessons_passed_for_transferable": 2,
+    "transferable_note": "本實作把『帶得走』操作化為『同一 indicator_code 在 ≥2 個不同課passed』，取 ability-indicators.md §5.2（同一指標視角）而非 §4 第 2 點的家族視角，因為老師端熱力表的欄位本身就是 indicator_code，兩種定義同一份文件互相衝突，這裡選跟欄位語意一致的那個，並在此註明是工頭的操作化選擇，不是另一位專家的原意"
+  }
+}

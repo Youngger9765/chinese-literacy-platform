@@ -218,6 +218,21 @@ class StepProgressSaveRequest(BaseModel):
     )
 
 
+class ReadingBabyGrowthEvent(BaseModel):
+    """一個站這次 save 真的新寫入的閱讀寶貝成長證據（#3780 第一階段，
+    取代 v1 的 `WordBabyRewardItem`）。
+
+    只會出現「這次呼叫真的寫入」的站——冪等重跑（特別是每次 save 都會
+    重新嘗試一次的 lesson-intro）不會重複出現，見
+    `reading_baby_service.record_station_evidence` 的 docstring。"""
+    station: str
+    #: 課綱學習表現代碼（如 "5-Ⅲ-6"），不是能力家族字母。
+    ability_id: str
+    #: 這次是不是「做得好」——completion 型態的站（沒有對錯可判）永遠是
+    #: False，只代表「有參與」（game-design.md §2）。
+    quality_passed: bool
+
+
 class StepProgressResponse(BaseModel):
     """Response for GET/PUT /api/learning/sessions/{id}/progress."""
     session_id: int
@@ -230,5 +245,9 @@ class StepProgressResponse(BaseModel):
     #: Badge keys newly unlocked by THIS save (Issue #3024). Empty for GET
     #: responses and for saves that unlocked nothing.
     badges_unlocked: list[str] = Field(default_factory=list)
+    #: Reading-baby growth events genuinely recorded by THIS save (Issue #3780
+    #: 第一階段，取代 v1 的 `word_baby_rewards`). Always [] for GET responses
+    #: and for saves that recorded nothing new.
+    reading_baby_events: list[ReadingBabyGrowthEvent] = Field(default_factory=list)
 
     model_config = {"from_attributes": True}

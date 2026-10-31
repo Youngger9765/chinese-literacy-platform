@@ -1,0 +1,20 @@
+{
+  "_meta": {
+    "name": "三階進化的站權重表（#3780 第一階段）",
+    "note": "依據 game-design.md §3.2／§5：三階進化門檻用「可評量站的加權通過比例」，不是單純次數比例，採納 Duolingo 審查 §2.1 的教訓（把純次數改成依份量加權，避免挑簡單站湊比例）。份量重的站（朗讀、閱讀理解、聚光燈）權重 1，份量輕的（單一字詞辨識）0.5。權重表放設定檔，上線前用真實資料校。",
+    "default_weight": 1.0,
+    "default_weight_note": "assessable_stations 只會出現 lesson-indicators.json 已覆蓋的 5 種站（見下表）；未來若多出新的可評量站，查不到時用這個預設值，不讓計算中斷"
+  },
+  "station_weight": {
+    "key-passage-reading": 1.0,
+    "comprehension": 1.0,
+    "spotlight": 1.0,
+    "vocab-definition": 0.5,
+    "vocab-application": 0.5
+  },
+  "evolution_thresholds": {
+    "intermediate_ratio": 0.5,
+    "advanced_ratio": 1.0,
+    "source": "game-design.md §3.2：中階 >=50%（建議值）、進階 =100%（全部通過）"
+  }
+}

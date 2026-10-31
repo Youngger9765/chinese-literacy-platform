@@ -548,6 +548,19 @@ export interface StepProgressData {
   assignment_ready_for_submit?: boolean;
 }
 
+/** One station's reading-baby growth event genuinely recorded by THIS save
+ * (Issue #3780 reading-babies phase 2). Mirrors backend
+ * `ReadingBabyGrowthEvent` (schemas/session.py) — replaces v1's
+ * `WordBabyRewardItem` (no stable numeric id: `station` is itself the
+ * idempotency key, see storyMode.ts's dedupe functions). */
+export interface ReadingBabyGrowthEvent {
+  station: string;
+  /** 課綱學習表現代碼（如 "5-Ⅲ-6"），不是能力家族字母。 */
+  ability_id: string;
+  /** 這次是不是「做得好」——completion 型態的站永遠是 false，只代表「有參與」。 */
+  quality_passed: boolean;
+}
+
 export interface StepProgressResponse {
   session_id: number;
   step_progress: StepProgressData | null;
@@ -555,6 +568,10 @@ export interface StepProgressResponse {
   xp_awarded?: number;
   /** Badge keys newly unlocked by THIS save (Issue #3024). Absent/[] = none. */
   badges_unlocked?: string[];
+  /** Reading-baby growth events genuinely recorded by THIS save (Issue #3780
+   * reading-babies phase 2, 取代 v1 的 `word_baby_rewards`).
+   * Absent/[] = nothing new. */
+  reading_baby_events?: ReadingBabyGrowthEvent[];
 }
 
 /**
