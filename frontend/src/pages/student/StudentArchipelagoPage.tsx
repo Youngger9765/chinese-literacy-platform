@@ -324,10 +324,14 @@ const StudentArchipelagoPage: React.FC = () => {
     let alive = true;
     (async () => {
       try {
-        const [storiesRes, progressRes, babiesRes] = await Promise.all([
+        // #3780 閱讀寶貝 Phase 1：v1 文字寶貝後端已下線
+        // （`GET .../word-babies` 現在回 404），這支呼叫只剩角落一個
+        // 次要徽章在用，不該讓它的失敗拖垮整個群島地圖——跟
+        // fetchStories／getStudentProgress 這兩支「沒有就沒頁面」的
+        // 核心資料分開 catch，失敗就讓徽章保持「載入中…」而不是整頁錯誤。
+        const [storiesRes, progressRes] = await Promise.all([
           fetchStories(token),
           getStudentProgress(token, user.id),
-          fetchMyWordBabies(user.id, token),
         ]);
         if (!alive) return;
         const mismatch = storiesPageMismatchMessage(storiesRes.stories.length, storiesRes.total);
@@ -337,9 +341,14 @@ const StudentArchipelagoPage: React.FC = () => {
         }));
         setIslands(buildArchipelago(stories, progressRes.texts));
         setRecentProgress(progressRes.texts.map((t) => ({ storySlug: t.story_slug, hasSession: t.has_session, startedAt: t.started_at })));
-        setBabyCount({ owned: babiesRes.babies_owned_count, total: babiesRes.babies_total_species });
       } catch {
         if (alive) setError('載入群島資料失敗，請重新整理再試一次');
+      }
+      try {
+        const babiesRes = await fetchMyWordBabies(user.id, token);
+        if (alive) setBabyCount({ owned: babiesRes.babies_owned_count, total: babiesRes.babies_total_species });
+      } catch {
+        // v1 已下線時這裡會 404——badge 停在「載入中…」即可，不設整頁 error。
       }
     })();
     return () => { alive = false; };

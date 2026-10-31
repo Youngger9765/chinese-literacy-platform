@@ -298,6 +298,22 @@ describe('StudentArchipelagoPage', () => {
   });
 
   /**
+   * #3780 閱讀寶貝 Phase 1 後端上線的回歸鎖：v1 文字寶貝後端路由已被刪除
+   * （`GET /api/learning/students/{id}/word-babies` 現在回 404），
+   * `fetchMyWordBabies` 原本跟 `fetchStories`／`getStudentProgress` 綁在
+   * 同一個 `Promise.all` 裡，三支任何一支失敗都會讓整頁掉進「載入群島資料
+   * 失敗」的錯誤畫面——文字寶貝只是群島頁角落一個次要徽章，不該讓它的
+   * 失敗拖垮島嶼地圖本身（真實環境：這是 `/student/archipelago`，從
+   * 遊戲區「島嶼探索」卡點進來的正式頁面，不是 lab 頁）。
+   */
+  it('文字寶貝 API 失敗（v1 已下線）時，群島地圖仍正常顯示，不掉進整頁錯誤', async () => {
+    fetchMyWordBabiesMock.mockRejectedValue(new Error('404: word-babies route removed'));
+    render(<StudentArchipelagoPage />);
+    await waitFor(() => expect(screen.getAllByText('從〈螞蟻與蟋蟀〉看生命的多樣性')[0]).toBeTruthy());
+    expect(screen.queryByText(/載入群島資料失敗/)).toBeNull();
+  });
+
+  /**
    * PRD §6（D1／D3 前端，§5.7）：「Given /api/stories?page_size=300 回來，
    * Then 斷言回傳 stories.length === total」（code review 2026-10-28 要求補上）。
    */
