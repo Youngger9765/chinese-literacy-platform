@@ -5,11 +5,12 @@
  * 這支測試鎖的是元件層的接線，不是分群/蜂巢座標數學（那些在
  * `archipelago/__tests__/archipelagoClusters.test.ts` 用真實 179 課資料
  * mutation-tested 過）：
- * - 只打 fetchStories／getStudentProgress／fetchMyWordBabies 各一次
+ * - 只打 fetchStories／getStudentProgress／fetchReadingBabyAtlas 各一次
  * - 已佔領／探索中／尚未探索三種狀態在右側站點清單正確顯示
  * - 點一座島 → 出現島卡 → 按「登島」→ 帶 `from=archipelago&group=&cluster=`
  *   導去 `/lab/island/:storyId`（PRD §3.4/§8-4）
- * - 文字寶貝數顯示、點擊導去 /lab/word-babies
+ * - 閱讀寶貝數顯示、點擊導去 /student/reading-babies（#3780 reading-babies
+ *   phase 2，取代 v1 文字寶貝 /lab/word-babies）
  * - 搜尋課名能縮小站點清單
  * - 分群方式切換（依文體／依類別）會重新分群
  * - API 失敗時顯示錯誤訊息，不是白屏
@@ -64,9 +65,9 @@ vi.mock('../../../services/progressApi', () => ({
   getStudentProgress: (...args: unknown[]) => getStudentProgressMock(...args),
 }));
 
-const fetchMyWordBabiesMock = vi.fn();
-vi.mock('../../../services/wordBabyApi', () => ({
-  fetchMyWordBabies: (...args: unknown[]) => fetchMyWordBabiesMock(...args),
+const fetchReadingBabyAtlasMock = vi.fn();
+vi.mock('../../../services/readingBabyApi', () => ({
+  fetchReadingBabyAtlas: (...args: unknown[]) => fetchReadingBabyAtlasMock(...args),
 }));
 
 // code review 2026-10-30 blocker 1 的回歸鎖：jsdom 沒有真的 WebGL，
@@ -128,7 +129,17 @@ const PROGRESS_RES = {
   ],
 };
 
-const BABIES_RES = { babies: [], babies_owned_count: 3, babies_total_species: 100, wallet: {}, fragments_in_wallet: 0 };
+const ATLAS_RES = {
+  student_id: 7,
+  total_lessons: 100,
+  total_fragments: 9,
+  babies: [
+    { lesson_uid: 'L0001', title: 'a', ability_family: 'A', ability_family_name: 'x', stage: 'basic', assessable_total: 1, assessable_passed: 0, progress_ratio: 0, fragments_count: 0, next_step: null, all_cleared: false },
+    { lesson_uid: 'L0002', title: 'b', ability_family: 'A', ability_family_name: 'x', stage: 'intermediate', assessable_total: 1, assessable_passed: 1, progress_ratio: 1, fragments_count: 0, next_step: null, all_cleared: false },
+    { lesson_uid: 'L0003', title: 'c', ability_family: 'A', ability_family_name: 'x', stage: 'advanced', assessable_total: 1, assessable_passed: 1, progress_ratio: 1, fragments_count: 0, next_step: null, all_cleared: true },
+    { lesson_uid: 'L0004', title: 'd', ability_family: 'A', ability_family_name: 'x', stage: 'not_encountered', assessable_total: 1, assessable_passed: 0, progress_ratio: 0, fragments_count: 0, next_step: null, all_cleared: false },
+  ],
+};
 
 describe('StudentArchipelagoPage', () => {
   beforeEach(() => {
@@ -137,7 +148,7 @@ describe('StudentArchipelagoPage', () => {
     setSearchParamsMock.mockReset();
     fetchStoriesMock.mockReset().mockResolvedValue(STORIES_RES);
     getStudentProgressMock.mockReset().mockResolvedValue(PROGRESS_RES);
-    fetchMyWordBabiesMock.mockReset().mockResolvedValue(BABIES_RES);
+    fetchReadingBabyAtlasMock.mockReset().mockResolvedValue(ATLAS_RES);
     loadClusterMock.mockReset();
     createArchipelagoWorldMock.mockClear();
   });
@@ -151,7 +162,8 @@ describe('StudentArchipelagoPage', () => {
     expect(fetchStoriesMock).toHaveBeenCalledTimes(1);
     expect(getStudentProgressMock).toHaveBeenCalledTimes(1);
     expect(getStudentProgressMock).toHaveBeenCalledWith('tok', 7);
-    expect(fetchMyWordBabiesMock).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(fetchReadingBabyAtlasMock).toHaveBeenCalledTimes(1));
+    expect(fetchReadingBabyAtlasMock).toHaveBeenCalledWith(7, 'tok');
   });
 
   it('預設落在最近學過那一課所在的群（2026-10-31：預設分群方式是學習表現，20082 最近一次學習，落在它的學習表現群）', async () => {
@@ -203,12 +215,30 @@ describe('StudentArchipelagoPage', () => {
     expect(screen.getAllByLabelText('某篇文言文故事（尚未探索）')[0]).toBeTruthy();
   });
 
-  it('頁面上顯示文字寶貝數，點擊導去 /lab/word-babies', async () => {
+  it('頁面上顯示閱讀寶貝已遇見數與碎片數，點擊導去 /student/reading-babies', async () => {
     render(<StudentArchipelagoPage />);
-    await waitFor(() => expect(screen.getAllByText(/文字寶貝 3\/100 隻/)[0]).toBeTruthy());
+    await waitFor(() => expect(screen.getAllByText(/閱讀寶貝 已遇見 3\/100 隻 · 碎片 9 片/)[0]).toBeTruthy());
 
-    act(() => { fireEvent.click(screen.getAllByText(/文字寶貝 3\/100 隻/)[0]); });
-    expect(navigate).toHaveBeenCalledWith('/lab/word-babies');
+    act(() => { fireEvent.click(screen.getAllByText(/閱讀寶貝 已遇見 3\/100 隻/)[0]); });
+    expect(navigate).toHaveBeenCalledWith('/student/reading-babies');
+  });
+
+  /**
+   * PRD #3780「要修的實際缺陷」：v1 卡死在「文字寶貝載入中…」永遠不會
+   * 恢復。改版後讀取失敗要顯示可重試的訊息，且點了重試真的會再打一次
+   * API 並在成功後更新畫面。
+   */
+  it('閱讀寶貝讀取失敗時顯示可重試訊息，點擊重試成功後更新畫面', async () => {
+    fetchReadingBabyAtlasMock.mockRejectedValueOnce(new Error('network'));
+    render(<StudentArchipelagoPage />);
+
+    const retryButtons = await screen.findAllByText(/閱讀寶貝載入失敗/);
+    expect(screen.queryByText(/閱讀寶貝載入中/)).toBeNull(); // 不准永遠停在載入中
+
+    fetchReadingBabyAtlasMock.mockResolvedValueOnce(ATLAS_RES);
+    act(() => { fireEvent.click(retryButtons[0]); });
+
+    await waitFor(() => expect(screen.getAllByText(/閱讀寶貝 已遇見 3\/100 隻/)[0]).toBeTruthy());
   });
 
   it('搜尋課名只留符合的課在清單裡', async () => {
@@ -298,16 +328,16 @@ describe('StudentArchipelagoPage', () => {
   });
 
   /**
-   * #3780 閱讀寶貝 Phase 1 後端上線的回歸鎖：v1 文字寶貝後端路由已被刪除
-   * （`GET /api/learning/students/{id}/word-babies` 現在回 404），
-   * `fetchMyWordBabies` 原本跟 `fetchStories`／`getStudentProgress` 綁在
-   * 同一個 `Promise.all` 裡，三支任何一支失敗都會讓整頁掉進「載入群島資料
-   * 失敗」的錯誤畫面——文字寶貝只是群島頁角落一個次要徽章，不該讓它的
-   * 失敗拖垮島嶼地圖本身（真實環境：這是 `/student/archipelago`，從
-   * 遊戲區「島嶼探索」卡點進來的正式頁面，不是 lab 頁）。
+   * 原本 v1 文字寶貝時代的回歸鎖（PR 1e3adfc2a）：`fetchMyWordBabies` 跟
+   * `fetchStories`／`getStudentProgress` 綁在同一個 `Promise.all` 裡，任何
+   * 一支失敗都會讓整頁掉進「載入群島資料失敗」的錯誤畫面。改版後
+   * `fetchReadingBabyAtlas` 已經是獨立的 effect（不在同一個 Promise.all
+   * 裡），這支繼續鎖住「閱讀寶貝徽章失敗不拖垮整個群島地圖」這個不變量
+   * （真實環境：這是 `/student/archipelago`，從遊戲區「島嶼探索」卡點進來
+   * 的正式頁面，不是 lab 頁）。
    */
-  it('文字寶貝 API 失敗（v1 已下線）時，群島地圖仍正常顯示，不掉進整頁錯誤', async () => {
-    fetchMyWordBabiesMock.mockRejectedValue(new Error('404: word-babies route removed'));
+  it('閱讀寶貝 API 失敗時，群島地圖仍正常顯示，不掉進整頁錯誤', async () => {
+    fetchReadingBabyAtlasMock.mockRejectedValue(new Error('network'));
     render(<StudentArchipelagoPage />);
     await waitFor(() => expect(screen.getAllByText('從〈螞蟻與蟋蟀〉看生命的多樣性')[0]).toBeTruthy());
     expect(screen.queryByText(/載入群島資料失敗/)).toBeNull();

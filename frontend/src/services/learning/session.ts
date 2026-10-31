@@ -548,17 +548,17 @@ export interface StepProgressData {
   assignment_ready_for_submit?: boolean;
 }
 
-/** One station's word-baby reward genuinely granted by THIS save (Issue
- * #3780 接島上). Mirrors backend WordBabyRewardItem (session.py). */
-export interface WordBabyRewardItem {
-  /** StudentStationRewardLog's primary key — used by the island to dedupe
-   * "already shown" rewards via sessionStorage (接島上二次修正). */
-  id: number;
+/** One station's reading-baby growth event genuinely recorded by THIS save
+ * (Issue #3780 reading-babies phase 2). Mirrors backend
+ * `ReadingBabyGrowthEvent` (schemas/session.py) — replaces v1's
+ * `WordBabyRewardItem` (no stable numeric id: `station` is itself the
+ * idempotency key, see storyMode.ts's dedupe functions). */
+export interface ReadingBabyGrowthEvent {
   station: string;
-  fragment_awarded: boolean;
-  fragment_flavor: string | null;
-  encounter_result: 'none' | 'caught' | 'duplicate';
-  encounter_baby_id: string | null;
+  /** 課綱學習表現代碼（如 "5-Ⅲ-6"），不是能力家族字母。 */
+  ability_id: string;
+  /** 這次是不是「做得好」——completion 型態的站永遠是 false，只代表「有參與」。 */
+  quality_passed: boolean;
 }
 
 export interface StepProgressResponse {
@@ -568,9 +568,10 @@ export interface StepProgressResponse {
   xp_awarded?: number;
   /** Badge keys newly unlocked by THIS save (Issue #3024). Absent/[] = none. */
   badges_unlocked?: string[];
-  /** Word-baby rewards genuinely granted by THIS save (Issue #3780 接島上).
+  /** Reading-baby growth events genuinely recorded by THIS save (Issue #3780
+   * reading-babies phase 2, 取代 v1 的 `word_baby_rewards`).
    * Absent/[] = nothing new. */
-  word_baby_rewards?: WordBabyRewardItem[];
+  reading_baby_events?: ReadingBabyGrowthEvent[];
 }
 
 /**

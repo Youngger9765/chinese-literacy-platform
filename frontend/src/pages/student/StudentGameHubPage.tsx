@@ -40,7 +40,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { fetchMyEnrolledClassrooms, computeStudentGameFlags } from '../../services/learning/session';
 import { getStudentProgress } from '../../services/progressApi';
-import { fetchMyWordBabies } from '../../services/wordBabyApi';
+import { fetchReadingBabyAtlas } from '../../services/readingBabyApi';
 import { occupiedCountFromProgress } from './archipelagoDomain';
 import { GAME_MODES, type GameModeKey } from '../../data/gameModes';
 
@@ -185,8 +185,12 @@ const GameHubCardButton: React.FC<{ card: GameHubCard; onOpen: () => void; size:
 
 /** #3780 D1：「島嶼探索」卡，視覺上刻意跟 `GameHubCardButton` 共用同一套
  * class（hero 滿版圖＋下方白底文字區＋「隨時可玩」徽章），但資料是動態的
- * （已佔領島數、文字寶貝數），不是靜態 tagline，所以沒有重用那個元件本身
- * （它的 props 綁死在 `GAME_MODES` 註冊表的型別上）。 */
+ * （已佔領島數、閱讀寶貝已遇見數），不是靜態 tagline，所以沒有重用那個
+ * 元件本身（它的 props 綁死在 `GAME_MODES` 註冊表的型別上）。
+ * 2026-10-31 reading-babies phase 2：文字寶貝 v1 整套刪除，這裡改讀閱讀
+ * 寶貝圖鑑的「已遇見」數——跟群島頁角落徽章同一份資料來源
+ * （`fetchReadingBabyAtlas`），只是文案簡短一點，點進去仍是先到群島
+ * （真正的寶貝入口在群島頁與單課島頁，不在這張卡自己）。 */
 const IslandExplorationCard: React.FC<{
   occupied: number | null;
   babyCount: { owned: number; total: number } | null;
@@ -205,7 +209,7 @@ const IslandExplorationCard: React.FC<{
       <span className="text-lg font-bold text-gray-900">島嶼探索</span>
       <span className="text-sm text-gray-500">
         {occupied === null ? '已佔領島嶼載入中…' : `已佔領 ${occupied} 座島`}
-        {'、文字寶貝 '}
+        {'、閱讀寶貝已遇見 '}
         {babyCount === null ? '載入中…' : `${babyCount.owned} 隻`}
       </span>
       <span className="mt-1 w-fit rounded-full bg-accent-bg px-2 py-0.5 text-[11px] font-medium text-accent">
@@ -227,11 +231,20 @@ const StudentGameHubPage: React.FC = () => {
     getStudentProgress(token, user.id)
       .then((res) => { if (alive) setOccupied(occupiedCountFromProgress(res.texts)); })
       .catch(() => { /* best-effort — card shows a loading label if this fails */ });
-    fetchMyWordBabies(user.id, token)
-      .then((res) => { if (alive) setBabyCount({ owned: res.babies_owned_count, total: res.babies_total_species }); })
-      .catch(() => { /* best-effort */ });
+    fetchReadingBabyAtlas(user.id, token)
+      .then((res) => {
+        if (!alive) return;
+        const owned = res.babies.filter((b) => b.stage !== 'not_encountered').length;
+        setBabyCount({ owned, total: res.total_lessons });
+      })
+      .catch(() => { /* best-effort — card shows a loading label if this fails */ });
     return () => { alive = false; };
-  }, [token, user]);
+    // user?.id（不是整個 user 物件）——2026-10-31 reading-babies phase 2 code
+    // review finding：這支 effect 原本是 `[token, user]`，跟其他呼叫端
+    // （ReadingBabyAtlasPage／StudentArchipelagoPage）同一批修正的無限 fetch
+    // 迴圈風險是同一類，這裡順手一起補上。
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, user?.id]);
   // Default false (locked) until the real enrollment data loads — same
   // fail-safe default Sidebar.tsx used pre-consolidation (#3607): a
   // feature the student can't use is never flashed as unlocked before

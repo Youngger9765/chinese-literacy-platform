@@ -3,7 +3,8 @@
  *
  * 鎖住的驗收條件：
  * - 卡片顯示「已佔領 N 座島」，N 跟我的群島頁用同一個規則（is_occupied 計數）
- * - 卡片顯示「文字寶貝 M 隻」
+ * - 卡片顯示「閱讀寶貝已遇見 M 隻」（#3780 reading-babies phase 2，取代 v1
+ *   文字寶貝）
  * - 點擊導去 /student/archipelago
  * - 資料還沒回來時顯示 loading 字樣，不是空白或崩潰
  */
@@ -31,10 +32,19 @@ vi.mock('../../../services/progressApi', () => ({
   getStudentProgress: (...args: unknown[]) => getStudentProgressMock(...args),
 }));
 
-const fetchMyWordBabiesMock = vi.fn();
-vi.mock('../../../services/wordBabyApi', () => ({
-  fetchMyWordBabies: (...args: unknown[]) => fetchMyWordBabiesMock(...args),
+const fetchReadingBabyAtlasMock = vi.fn();
+vi.mock('../../../services/readingBabyApi', () => ({
+  fetchReadingBabyAtlas: (...args: unknown[]) => fetchReadingBabyAtlasMock(...args),
 }));
+
+function atlasWithOwned(owned: number, total: number) {
+  const babies = Array.from({ length: total }, (_, i) => ({
+    lesson_uid: `L${i}`, title: `lesson ${i}`, ability_family: 'A', ability_family_name: 'x',
+    stage: i < owned ? 'basic' as const : 'not_encountered' as const,
+    assessable_total: 1, assessable_passed: 0, progress_ratio: 0, fragments_count: 0, next_step: null, all_cleared: false,
+  }));
+  return { student_id: 9, total_lessons: total, total_fragments: 0, babies };
+}
 
 import StudentGameHubPage from '../StudentGameHubPage';
 
@@ -52,22 +62,22 @@ function progressWithOccupied(occupiedCountVal: number, totalTexts: number) {
 beforeEach(() => {
   mockNavigate.mockReset();
   getStudentProgressMock.mockReset();
-  fetchMyWordBabiesMock.mockReset();
+  fetchReadingBabyAtlasMock.mockReset();
 });
 
 describe('StudentGameHubPage — 島嶼探索卡 (#3780 D1)', () => {
-  it('顯示已佔領島數（跟 is_occupied 計數一致）與文字寶貝數', async () => {
+  it('顯示已佔領島數（跟 is_occupied 計數一致）與閱讀寶貝已遇見數', async () => {
     getStudentProgressMock.mockResolvedValue(progressWithOccupied(2, 5));
-    fetchMyWordBabiesMock.mockResolvedValue({ babies: [], babies_owned_count: 4, babies_total_species: 100, wallet: {}, fragments_in_wallet: 0 });
+    fetchReadingBabyAtlasMock.mockResolvedValue(atlasWithOwned(4, 100));
 
     render(<StudentGameHubPage />);
     await waitFor(() => expect(screen.getByText(/已佔領 2 座島/)).toBeTruthy());
-    expect(screen.getByText(/文字寶貝 4 隻/)).toBeTruthy();
+    expect(screen.getByText(/閱讀寶貝已遇見 4 隻/)).toBeTruthy();
   });
 
   it('點擊卡片導去 /student/archipelago', async () => {
     getStudentProgressMock.mockResolvedValue(progressWithOccupied(0, 3));
-    fetchMyWordBabiesMock.mockResolvedValue({ babies: [], babies_owned_count: 0, babies_total_species: 100, wallet: {}, fragments_in_wallet: 0 });
+    fetchReadingBabyAtlasMock.mockResolvedValue(atlasWithOwned(0, 100));
 
     render(<StudentGameHubPage />);
     await waitFor(() => expect(screen.getByRole('button', { name: '島嶼探索' })).toBeTruthy());
@@ -78,7 +88,7 @@ describe('StudentGameHubPage — 島嶼探索卡 (#3780 D1)', () => {
 
   it('資料還沒回來時顯示 loading 字樣，不是空白或崩潰', () => {
     getStudentProgressMock.mockReturnValue(new Promise(() => {})); // never resolves
-    fetchMyWordBabiesMock.mockReturnValue(new Promise(() => {}));
+    fetchReadingBabyAtlasMock.mockReturnValue(new Promise(() => {}));
 
     render(<StudentGameHubPage />);
     expect(screen.getByText(/已佔領島嶼載入中|載入中/)).toBeTruthy();
@@ -86,10 +96,10 @@ describe('StudentGameHubPage — 島嶼探索卡 (#3780 D1)', () => {
 
   it('0 座島、0 隻寶貝（全新學生）顯示 0，不是空白或 undefined', async () => {
     getStudentProgressMock.mockResolvedValue(progressWithOccupied(0, 0));
-    fetchMyWordBabiesMock.mockResolvedValue({ babies: [], babies_owned_count: 0, babies_total_species: 100, wallet: {}, fragments_in_wallet: 0 });
+    fetchReadingBabyAtlasMock.mockResolvedValue(atlasWithOwned(0, 100));
 
     render(<StudentGameHubPage />);
     await waitFor(() => expect(screen.getByText(/已佔領 0 座島/)).toBeTruthy());
-    expect(screen.getByText(/文字寶貝 0 隻/)).toBeTruthy();
+    expect(screen.getByText(/閱讀寶貝已遇見 0 隻/)).toBeTruthy();
   });
 });

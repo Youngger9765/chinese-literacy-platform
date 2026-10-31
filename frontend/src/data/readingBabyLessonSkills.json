@@ -1,0 +1,3684 @@
+{
+  "_meta": {
+    "name": "閱讀寶貝寶貝卡靜態課綱資料（前端專用精簡版）",
+    "generated_from": "docs/design/reading-babies/lesson-indicators.json 的 primary_indicator 與 skills 欄位",
+    "generated_by": "ad-hoc python one-liner during #3780 reading-babies Phase 2 frontend work (2026-10-31)",
+    "note": "後端 /reading-babies 卡片 API（LessonGrowthResponse）目前沒有回傳主要指標代碼或逐技能清單，只有聚合後的 assessable_total/assessable_passed——這份檔案是前端這一側暫時從設計文件抽出的靜態課綱 metadata，不隨學生進度變動（後端欄位待補：若未來 API 直接回傳這些欄位，這個檔案可以整個刪除）。"
+  },
+  "lessons": {
+    "L0001": {
+      "primary_indicator_code": "5-Ⅱ-5",
+      "primary_indicator_text": "認識記敘、抒情、說明及應用文本的特徵。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅱ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅱ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅱ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0002": {
+      "primary_indicator_code": "5-Ⅱ-6",
+      "primary_indicator_text": "運用適合學習階段的摘要策略，擷取大意。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅱ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅱ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "綜合理解",
+          "indicator": "5-Ⅱ-3",
+          "station": "comprehension"
+        }
+      ]
+    },
+    "L0003": {
+      "primary_indicator_code": "5-Ⅱ-6",
+      "primary_indicator_text": "運用適合學習階段的摘要策略，擷取大意。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅱ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅱ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "綜合理解",
+          "indicator": "5-Ⅱ-3",
+          "station": "comprehension"
+        }
+      ]
+    },
+    "L0004": {
+      "primary_indicator_code": "5-Ⅱ-11",
+      "primary_indicator_text": "閱讀多元文本，以認識議題。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅱ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅱ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅱ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0005": {
+      "primary_indicator_code": "5-Ⅱ-8",
+      "primary_indicator_text": "運用預測、推論、提問等策略，增進對文本的理解。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅱ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅱ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅱ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0006": {
+      "primary_indicator_code": "5-Ⅱ-8",
+      "primary_indicator_text": "運用預測、推論、提問等策略，增進對文本的理解。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅱ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅱ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅱ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0007": {
+      "primary_indicator_code": "5-Ⅱ-8",
+      "primary_indicator_text": "運用預測、推論、提問等策略，增進對文本的理解。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅱ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅱ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅱ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0008": {
+      "primary_indicator_code": "5-Ⅱ-11",
+      "primary_indicator_text": "閱讀多元文本，以認識議題。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅱ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅱ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅱ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0009": {
+      "primary_indicator_code": "5-Ⅱ-11",
+      "primary_indicator_text": "閱讀多元文本，以認識議題。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅱ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅱ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅱ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0010": {
+      "primary_indicator_code": "5-Ⅱ-11",
+      "primary_indicator_text": "閱讀多元文本，以認識議題。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅱ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅱ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅱ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0011": {
+      "primary_indicator_code": "5-Ⅱ-8",
+      "primary_indicator_text": "運用預測、推論、提問等策略，增進對文本的理解。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅱ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅱ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅱ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0012": {
+      "primary_indicator_code": "5-Ⅱ-11",
+      "primary_indicator_text": "閱讀多元文本，以認識議題。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅱ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅱ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅱ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0013": {
+      "primary_indicator_code": "5-Ⅱ-8",
+      "primary_indicator_text": "運用預測、推論、提問等策略，增進對文本的理解。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅱ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅱ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅱ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0014": {
+      "primary_indicator_code": "5-Ⅱ-8",
+      "primary_indicator_text": "運用預測、推論、提問等策略，增進對文本的理解。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅱ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅱ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅱ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0015": {
+      "primary_indicator_code": "5-Ⅱ-8",
+      "primary_indicator_text": "運用預測、推論、提問等策略，增進對文本的理解。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅱ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅱ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅱ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0016": {
+      "primary_indicator_code": "5-Ⅱ-8",
+      "primary_indicator_text": "運用預測、推論、提問等策略，增進對文本的理解。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅱ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅱ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅱ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0017": {
+      "primary_indicator_code": "5-Ⅱ-11",
+      "primary_indicator_text": "閱讀多元文本，以認識議題。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅱ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅱ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅱ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0018": {
+      "primary_indicator_code": "5-Ⅱ-4",
+      "primary_indicator_text": "掌握句子和段落的意義與主要概念。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅱ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅱ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅱ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0019": {
+      "primary_indicator_code": "5-Ⅱ-4",
+      "primary_indicator_text": "掌握句子和段落的意義與主要概念。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅱ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅱ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅱ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0020": {
+      "primary_indicator_code": "5-Ⅱ-9",
+      "primary_indicator_text": "覺察自己的閱讀理解情況，適時調整策略。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅱ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅱ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅱ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0021": {
+      "primary_indicator_code": "5-Ⅲ-8",
+      "primary_indicator_text": "運用自我提問、推論等策略，推論文本隱含的因果訊息或觀點。",
+      "skills": [
+        {
+          "skill": "綜合理解",
+          "indicator": "5-Ⅲ-3",
+          "station": "comprehension"
+        },
+        {
+          "skill": "聆聽示範",
+          "indicator": "1-Ⅲ-4",
+          "station": "lesson-intro"
+        }
+      ]
+    },
+    "L0022": {
+      "primary_indicator_code": "5-Ⅲ-11",
+      "primary_indicator_text": "大量閱讀多元文本，辨識文本中議題的訊息或觀點。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅲ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0023": {
+      "primary_indicator_code": "5-Ⅲ-8",
+      "primary_indicator_text": "運用自我提問、推論等策略，推論文本隱含的因果訊息或觀點。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅲ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0024": {
+      "primary_indicator_code": "5-Ⅲ-7",
+      "primary_indicator_text": "連結相關的知識和經驗，提出自己的觀點，評述文本的內容。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅲ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0025": {
+      "primary_indicator_code": "5-Ⅲ-8",
+      "primary_indicator_text": "運用自我提問、推論等策略，推論文本隱含的因果訊息或觀點。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅲ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0026": {
+      "primary_indicator_code": "5-Ⅲ-11",
+      "primary_indicator_text": "大量閱讀多元文本，辨識文本中議題的訊息或觀點。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅲ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0027": {
+      "primary_indicator_code": "5-Ⅲ-12",
+      "primary_indicator_text": "運用圖書館(室)、科技與網路，進行資料蒐集、解讀與判斷，提升多元文本的閱讀和應用能力。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅲ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0028": {
+      "primary_indicator_code": "5-Ⅲ-12",
+      "primary_indicator_text": "運用圖書館(室)、科技與網路，進行資料蒐集、解讀與判斷，提升多元文本的閱讀和應用能力。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅲ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0029": {
+      "primary_indicator_code": "5-Ⅲ-11",
+      "primary_indicator_text": "大量閱讀多元文本，辨識文本中議題的訊息或觀點。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅲ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0030": {
+      "primary_indicator_code": "5-Ⅲ-6",
+      "primary_indicator_text": "熟習適合學習階段的摘要策略，擷取大意。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "綜合理解",
+          "indicator": "5-Ⅲ-3",
+          "station": "comprehension"
+        }
+      ]
+    },
+    "L0031": {
+      "primary_indicator_code": "5-Ⅲ-8",
+      "primary_indicator_text": "運用自我提問、推論等策略，推論文本隱含的因果訊息或觀點。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅲ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0032": {
+      "primary_indicator_code": "5-Ⅲ-6",
+      "primary_indicator_text": "熟習適合學習階段的摘要策略，擷取大意。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "綜合理解",
+          "indicator": "5-Ⅲ-3",
+          "station": "comprehension"
+        }
+      ]
+    },
+    "L0033": {
+      "primary_indicator_code": "5-Ⅲ-6",
+      "primary_indicator_text": "熟習適合學習階段的摘要策略，擷取大意。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "綜合理解",
+          "indicator": "5-Ⅲ-3",
+          "station": "comprehension"
+        }
+      ]
+    },
+    "L0034": {
+      "primary_indicator_code": "5-Ⅲ-11",
+      "primary_indicator_text": "大量閱讀多元文本，辨識文本中議題的訊息或觀點。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅲ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0035": {
+      "primary_indicator_code": "5-Ⅲ-6",
+      "primary_indicator_text": "熟習適合學習階段的摘要策略，擷取大意。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "綜合理解",
+          "indicator": "5-Ⅲ-3",
+          "station": "comprehension"
+        }
+      ]
+    },
+    "L0036": {
+      "primary_indicator_code": "5-Ⅲ-6",
+      "primary_indicator_text": "熟習適合學習階段的摘要策略，擷取大意。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "綜合理解",
+          "indicator": "5-Ⅲ-3",
+          "station": "comprehension"
+        }
+      ]
+    },
+    "L0037": {
+      "primary_indicator_code": "5-Ⅲ-6",
+      "primary_indicator_text": "熟習適合學習階段的摘要策略，擷取大意。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "綜合理解",
+          "indicator": "5-Ⅲ-3",
+          "station": "comprehension"
+        }
+      ]
+    },
+    "L0038": {
+      "primary_indicator_code": "5-Ⅲ-6",
+      "primary_indicator_text": "熟習適合學習階段的摘要策略，擷取大意。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "綜合理解",
+          "indicator": "5-Ⅲ-3",
+          "station": "comprehension"
+        }
+      ]
+    },
+    "L0039": {
+      "primary_indicator_code": "5-Ⅲ-11",
+      "primary_indicator_text": "大量閱讀多元文本，辨識文本中議題的訊息或觀點。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅲ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0040": {
+      "primary_indicator_code": "5-Ⅲ-11",
+      "primary_indicator_text": "大量閱讀多元文本，辨識文本中議題的訊息或觀點。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅲ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0041": {
+      "primary_indicator_code": "5-Ⅲ-8",
+      "primary_indicator_text": "運用自我提問、推論等策略，推論文本隱含的因果訊息或觀點。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅲ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0042": {
+      "primary_indicator_code": "5-Ⅲ-8",
+      "primary_indicator_text": "運用自我提問、推論等策略，推論文本隱含的因果訊息或觀點。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅲ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0043": {
+      "primary_indicator_code": "5-Ⅲ-8",
+      "primary_indicator_text": "運用自我提問、推論等策略，推論文本隱含的因果訊息或觀點。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅲ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0044": {
+      "primary_indicator_code": "5-Ⅲ-9",
+      "primary_indicator_text": "因應不同的目的，運用不同的閱讀策略。",
+      "skills": [
+        {
+          "skill": "聆聽示範",
+          "indicator": "1-Ⅲ-4",
+          "station": "lesson-intro"
+        }
+      ]
+    },
+    "L0045": {
+      "primary_indicator_code": "4-Ⅲ-2",
+      "primary_indicator_text": "認識文字的字形結構，運用字的部件了解文字的字音與字義。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅲ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0046": {
+      "primary_indicator_code": "4-Ⅲ-2",
+      "primary_indicator_text": "認識文字的字形結構，運用字的部件了解文字的字音與字義。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅲ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0047": {
+      "primary_indicator_code": "4-Ⅲ-2",
+      "primary_indicator_text": "認識文字的字形結構，運用字的部件了解文字的字音與字義。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅲ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0048": {
+      "primary_indicator_code": "4-Ⅲ-2",
+      "primary_indicator_text": "認識文字的字形結構，運用字的部件了解文字的字音與字義。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅲ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0049": {
+      "primary_indicator_code": "5-Ⅲ-8",
+      "primary_indicator_text": "運用自我提問、推論等策略，推論文本隱含的因果訊息或觀點。",
+      "skills": [
+        {
+          "skill": "綜合理解",
+          "indicator": "5-Ⅲ-3",
+          "station": "comprehension"
+        },
+        {
+          "skill": "聆聽示範",
+          "indicator": "1-Ⅲ-4",
+          "station": "lesson-intro"
+        }
+      ]
+    },
+    "L0050": {
+      "primary_indicator_code": "5-Ⅲ-6",
+      "primary_indicator_text": "熟習適合學習階段的摘要策略，擷取大意。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "綜合理解",
+          "indicator": "5-Ⅲ-3",
+          "station": "comprehension"
+        }
+      ]
+    },
+    "L0051": {
+      "primary_indicator_code": "5-Ⅲ-6",
+      "primary_indicator_text": "熟習適合學習階段的摘要策略，擷取大意。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "綜合理解",
+          "indicator": "5-Ⅲ-3",
+          "station": "comprehension"
+        }
+      ]
+    },
+    "L0052": {
+      "primary_indicator_code": "5-Ⅲ-8",
+      "primary_indicator_text": "運用自我提問、推論等策略，推論文本隱含的因果訊息或觀點。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅲ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0053": {
+      "primary_indicator_code": "5-Ⅲ-8",
+      "primary_indicator_text": "運用自我提問、推論等策略，推論文本隱含的因果訊息或觀點。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅲ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0054": {
+      "primary_indicator_code": "5-Ⅲ-6",
+      "primary_indicator_text": "熟習適合學習階段的摘要策略，擷取大意。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "綜合理解",
+          "indicator": "5-Ⅲ-3",
+          "station": "comprehension"
+        }
+      ]
+    },
+    "L0055": {
+      "primary_indicator_code": "5-Ⅲ-6",
+      "primary_indicator_text": "熟習適合學習階段的摘要策略，擷取大意。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "綜合理解",
+          "indicator": "5-Ⅲ-3",
+          "station": "comprehension"
+        }
+      ]
+    },
+    "L0056": {
+      "primary_indicator_code": "5-Ⅲ-11",
+      "primary_indicator_text": "大量閱讀多元文本，辨識文本中議題的訊息或觀點。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅲ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0057": {
+      "primary_indicator_code": "5-Ⅲ-6",
+      "primary_indicator_text": "熟習適合學習階段的摘要策略，擷取大意。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "綜合理解",
+          "indicator": "5-Ⅲ-3",
+          "station": "comprehension"
+        }
+      ]
+    },
+    "L0058": {
+      "primary_indicator_code": "5-Ⅲ-6",
+      "primary_indicator_text": "熟習適合學習階段的摘要策略，擷取大意。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "綜合理解",
+          "indicator": "5-Ⅲ-3",
+          "station": "comprehension"
+        }
+      ]
+    },
+    "L0059": {
+      "primary_indicator_code": "5-Ⅲ-11",
+      "primary_indicator_text": "大量閱讀多元文本，辨識文本中議題的訊息或觀點。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅲ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0060": {
+      "primary_indicator_code": "5-Ⅲ-8",
+      "primary_indicator_text": "運用自我提問、推論等策略，推論文本隱含的因果訊息或觀點。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅲ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0061": {
+      "primary_indicator_code": "5-Ⅲ-7",
+      "primary_indicator_text": "連結相關的知識和經驗，提出自己的觀點，評述文本的內容。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅲ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0062": {
+      "primary_indicator_code": "5-Ⅲ-11",
+      "primary_indicator_text": "大量閱讀多元文本，辨識文本中議題的訊息或觀點。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅲ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0063": {
+      "primary_indicator_code": "5-Ⅲ-7",
+      "primary_indicator_text": "連結相關的知識和經驗，提出自己的觀點，評述文本的內容。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅲ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0064": {
+      "primary_indicator_code": "5-Ⅲ-11",
+      "primary_indicator_text": "大量閱讀多元文本，辨識文本中議題的訊息或觀點。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅲ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0065": {
+      "primary_indicator_code": "5-Ⅲ-7",
+      "primary_indicator_text": "連結相關的知識和經驗，提出自己的觀點，評述文本的內容。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅲ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0066": {
+      "primary_indicator_code": "5-Ⅲ-6",
+      "primary_indicator_text": "熟習適合學習階段的摘要策略，擷取大意。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "綜合理解",
+          "indicator": "5-Ⅲ-3",
+          "station": "comprehension"
+        }
+      ]
+    },
+    "L0067": {
+      "primary_indicator_code": "5-Ⅲ-8",
+      "primary_indicator_text": "運用自我提問、推論等策略，推論文本隱含的因果訊息或觀點。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅲ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0068": {
+      "primary_indicator_code": "5-Ⅲ-8",
+      "primary_indicator_text": "運用自我提問、推論等策略，推論文本隱含的因果訊息或觀點。",
+      "skills": [
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅲ-6",
+          "station": "keypoints-table"
+        },
+        {
+          "skill": "綜合理解",
+          "indicator": "5-Ⅲ-3",
+          "station": "comprehension"
+        }
+      ]
+    },
+    "L0069": {
+      "primary_indicator_code": "5-Ⅲ-11",
+      "primary_indicator_text": "大量閱讀多元文本，辨識文本中議題的訊息或觀點。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅲ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0070": {
+      "primary_indicator_code": "5-Ⅲ-9",
+      "primary_indicator_text": "因應不同的目的，運用不同的閱讀策略。",
+      "skills": [
+        {
+          "skill": "聆聽示範",
+          "indicator": "1-Ⅲ-4",
+          "station": "lesson-intro"
+        }
+      ]
+    },
+    "L0071": {
+      "primary_indicator_code": "5-Ⅲ-12",
+      "primary_indicator_text": "運用圖書館(室)、科技與網路，進行資料蒐集、解讀與判斷，提升多元文本的閱讀和應用能力。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅲ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0072": {
+      "primary_indicator_code": "5-Ⅲ-7",
+      "primary_indicator_text": "連結相關的知識和經驗，提出自己的觀點，評述文本的內容。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅲ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0073": {
+      "primary_indicator_code": "5-Ⅲ-7",
+      "primary_indicator_text": "連結相關的知識和經驗，提出自己的觀點，評述文本的內容。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅲ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0074": {
+      "primary_indicator_code": "5-Ⅲ-6",
+      "primary_indicator_text": "熟習適合學習階段的摘要策略，擷取大意。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "綜合理解",
+          "indicator": "5-Ⅲ-3",
+          "station": "comprehension"
+        }
+      ]
+    },
+    "L0075": {
+      "primary_indicator_code": "5-Ⅲ-6",
+      "primary_indicator_text": "熟習適合學習階段的摘要策略，擷取大意。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "綜合理解",
+          "indicator": "5-Ⅲ-3",
+          "station": "comprehension"
+        }
+      ]
+    },
+    "L0076": {
+      "primary_indicator_code": "5-Ⅲ-11",
+      "primary_indicator_text": "大量閱讀多元文本，辨識文本中議題的訊息或觀點。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅲ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅲ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅲ-6",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0077": {
+      "primary_indicator_code": "5-Ⅳ-4",
+      "primary_indicator_text": "應用閱讀策略增進學習效能，整合跨領域知識轉化為解決問題的能力。",
+      "skills": [
+        {
+          "skill": "綜合理解",
+          "indicator": "5-Ⅳ-2",
+          "station": "comprehension"
+        },
+        {
+          "skill": "聆聽示範",
+          "indicator": "1-Ⅳ-4",
+          "station": "lesson-intro"
+        }
+      ]
+    },
+    "L0078": {
+      "primary_indicator_code": "5-Ⅳ-6",
+      "primary_indicator_text": "運用圖書館(室)、科技工具，蒐集資訊、組織材料，擴充閱讀視野。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0079": {
+      "primary_indicator_code": "5-Ⅳ-4",
+      "primary_indicator_text": "應用閱讀策略增進學習效能，整合跨領域知識轉化為解決問題的能力。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0080": {
+      "primary_indicator_code": "5-Ⅳ-6",
+      "primary_indicator_text": "運用圖書館(室)、科技工具，蒐集資訊、組織材料，擴充閱讀視野。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0081": {
+      "primary_indicator_code": "5-Ⅳ-6",
+      "primary_indicator_text": "運用圖書館(室)、科技工具，蒐集資訊、組織材料，擴充閱讀視野。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0082": {
+      "primary_indicator_code": "5-Ⅳ-6",
+      "primary_indicator_text": "運用圖書館(室)、科技工具，蒐集資訊、組織材料，擴充閱讀視野。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0083": {
+      "primary_indicator_code": "5-Ⅳ-6",
+      "primary_indicator_text": "運用圖書館(室)、科技工具，蒐集資訊、組織材料，擴充閱讀視野。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0084": {
+      "primary_indicator_code": "5-Ⅳ-3",
+      "primary_indicator_text": "理解各類文本內容、形式和寫作特色。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0085": {
+      "primary_indicator_code": "5-Ⅳ-2",
+      "primary_indicator_text": "理解各類文本的句子、段落與主要概念，指出寫作的目的與觀點。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "延伸閱讀",
+          "indicator": "5-Ⅳ-6",
+          "station": "knowledge-station"
+        }
+      ]
+    },
+    "L0086": {
+      "primary_indicator_code": "5-Ⅳ-4",
+      "primary_indicator_text": "應用閱讀策略增進學習效能，整合跨領域知識轉化為解決問題的能力。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0087": {
+      "primary_indicator_code": "5-Ⅳ-4",
+      "primary_indicator_text": "應用閱讀策略增進學習效能，整合跨領域知識轉化為解決問題的能力。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0088": {
+      "primary_indicator_code": "5-Ⅳ-2",
+      "primary_indicator_text": "理解各類文本的句子、段落與主要概念，指出寫作的目的與觀點。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "延伸閱讀",
+          "indicator": "5-Ⅳ-6",
+          "station": "knowledge-station"
+        }
+      ]
+    },
+    "L0089": {
+      "primary_indicator_code": "5-Ⅳ-4",
+      "primary_indicator_text": "應用閱讀策略增進學習效能，整合跨領域知識轉化為解決問題的能力。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0090": {
+      "primary_indicator_code": "5-Ⅳ-6",
+      "primary_indicator_text": "運用圖書館(室)、科技工具，蒐集資訊、組織材料，擴充閱讀視野。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0091": {
+      "primary_indicator_code": "5-Ⅳ-6",
+      "primary_indicator_text": "運用圖書館(室)、科技工具，蒐集資訊、組織材料，擴充閱讀視野。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0092": {
+      "primary_indicator_code": "5-Ⅳ-6",
+      "primary_indicator_text": "運用圖書館(室)、科技工具，蒐集資訊、組織材料，擴充閱讀視野。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0093": {
+      "primary_indicator_code": "5-Ⅳ-4",
+      "primary_indicator_text": "應用閱讀策略增進學習效能，整合跨領域知識轉化為解決問題的能力。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0094": {
+      "primary_indicator_code": "5-Ⅳ-4",
+      "primary_indicator_text": "應用閱讀策略增進學習效能，整合跨領域知識轉化為解決問題的能力。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0095": {
+      "primary_indicator_code": "5-Ⅳ-4",
+      "primary_indicator_text": "應用閱讀策略增進學習效能，整合跨領域知識轉化為解決問題的能力。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0096": {
+      "primary_indicator_code": "5-Ⅳ-5",
+      "primary_indicator_text": "大量閱讀多元文本，理解議題內涵及其與個人生活、社會結構的關聯性。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0097": {
+      "primary_indicator_code": "5-Ⅳ-5",
+      "primary_indicator_text": "大量閱讀多元文本，理解議題內涵及其與個人生活、社會結構的關聯性。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0098": {
+      "primary_indicator_code": "5-Ⅳ-5",
+      "primary_indicator_text": "大量閱讀多元文本，理解議題內涵及其與個人生活、社會結構的關聯性。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0099": {
+      "primary_indicator_code": "5-Ⅳ-4",
+      "primary_indicator_text": "應用閱讀策略增進學習效能，整合跨領域知識轉化為解決問題的能力。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "綜合理解",
+          "indicator": "5-Ⅳ-2",
+          "station": "comprehension"
+        }
+      ]
+    },
+    "L0100": {
+      "primary_indicator_code": "5-Ⅳ-4",
+      "primary_indicator_text": "應用閱讀策略增進學習效能，整合跨領域知識轉化為解決問題的能力。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0101": {
+      "primary_indicator_code": "5-Ⅳ-4",
+      "primary_indicator_text": "應用閱讀策略增進學習效能，整合跨領域知識轉化為解決問題的能力。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "綜合理解",
+          "indicator": "5-Ⅳ-2",
+          "station": "comprehension"
+        }
+      ]
+    },
+    "L0102": {
+      "primary_indicator_code": "5-Ⅳ-6",
+      "primary_indicator_text": "運用圖書館(室)、科技工具，蒐集資訊、組織材料，擴充閱讀視野。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0103": {
+      "primary_indicator_code": "5-Ⅳ-2",
+      "primary_indicator_text": "理解各類文本的句子、段落與主要概念，指出寫作的目的與觀點。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "延伸閱讀",
+          "indicator": "5-Ⅳ-6",
+          "station": "knowledge-station"
+        }
+      ]
+    },
+    "L0104": {
+      "primary_indicator_code": "5-Ⅳ-2",
+      "primary_indicator_text": "理解各類文本的句子、段落與主要概念，指出寫作的目的與觀點。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "延伸閱讀",
+          "indicator": "5-Ⅳ-6",
+          "station": "knowledge-station"
+        }
+      ]
+    },
+    "L0105": {
+      "primary_indicator_code": "5-Ⅳ-2",
+      "primary_indicator_text": "理解各類文本的句子、段落與主要概念，指出寫作的目的與觀點。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "延伸閱讀",
+          "indicator": "5-Ⅳ-6",
+          "station": "knowledge-station"
+        }
+      ]
+    },
+    "L0106": {
+      "primary_indicator_code": "5-Ⅳ-4",
+      "primary_indicator_text": "應用閱讀策略增進學習效能，整合跨領域知識轉化為解決問題的能力。",
+      "skills": [
+        {
+          "skill": "聆聽示範",
+          "indicator": "1-Ⅳ-4",
+          "station": "lesson-intro"
+        }
+      ]
+    },
+    "L0107": {
+      "primary_indicator_code": "5-Ⅳ-4",
+      "primary_indicator_text": "應用閱讀策略增進學習效能，整合跨領域知識轉化為解決問題的能力。",
+      "skills": [
+        {
+          "skill": "綜合理解",
+          "indicator": "5-Ⅳ-2",
+          "station": "comprehension"
+        },
+        {
+          "skill": "聆聽示範",
+          "indicator": "1-Ⅳ-4",
+          "station": "lesson-intro"
+        }
+      ]
+    },
+    "L0108": {
+      "primary_indicator_code": "5-Ⅳ-4",
+      "primary_indicator_text": "應用閱讀策略增進學習效能，整合跨領域知識轉化為解決問題的能力。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0109": {
+      "primary_indicator_code": "5-Ⅳ-4",
+      "primary_indicator_text": "應用閱讀策略增進學習效能，整合跨領域知識轉化為解決問題的能力。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0110": {
+      "primary_indicator_code": "5-Ⅳ-4",
+      "primary_indicator_text": "應用閱讀策略增進學習效能，整合跨領域知識轉化為解決問題的能力。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0111": {
+      "primary_indicator_code": "5-Ⅳ-4",
+      "primary_indicator_text": "應用閱讀策略增進學習效能，整合跨領域知識轉化為解決問題的能力。",
+      "skills": [
+        {
+          "skill": "綜合理解",
+          "indicator": "5-Ⅳ-2",
+          "station": "comprehension"
+        },
+        {
+          "skill": "延伸閱讀",
+          "indicator": "5-Ⅳ-6",
+          "station": "knowledge-station"
+        },
+        {
+          "skill": "聆聽示範",
+          "indicator": "1-Ⅳ-4",
+          "station": "lesson-intro"
+        }
+      ]
+    },
+    "L0112": {
+      "primary_indicator_code": "5-Ⅳ-4",
+      "primary_indicator_text": "應用閱讀策略增進學習效能，整合跨領域知識轉化為解決問題的能力。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0113": {
+      "primary_indicator_code": "5-Ⅳ-2",
+      "primary_indicator_text": "理解各類文本的句子、段落與主要概念，指出寫作的目的與觀點。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "延伸閱讀",
+          "indicator": "5-Ⅳ-6",
+          "station": "knowledge-station"
+        }
+      ]
+    },
+    "L0114": {
+      "primary_indicator_code": "5-Ⅳ-2",
+      "primary_indicator_text": "理解各類文本的句子、段落與主要概念，指出寫作的目的與觀點。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "延伸閱讀",
+          "indicator": "5-Ⅳ-6",
+          "station": "knowledge-station"
+        }
+      ]
+    },
+    "L0115": {
+      "primary_indicator_code": "5-Ⅳ-2",
+      "primary_indicator_text": "理解各類文本的句子、段落與主要概念，指出寫作的目的與觀點。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "延伸閱讀",
+          "indicator": "5-Ⅳ-6",
+          "station": "knowledge-station"
+        }
+      ]
+    },
+    "L0116": {
+      "primary_indicator_code": "5-Ⅳ-3",
+      "primary_indicator_text": "理解各類文本內容、形式和寫作特色。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0117": {
+      "primary_indicator_code": "5-Ⅳ-4",
+      "primary_indicator_text": "應用閱讀策略增進學習效能，整合跨領域知識轉化為解決問題的能力。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0118": {
+      "primary_indicator_code": "5-Ⅳ-3",
+      "primary_indicator_text": "理解各類文本內容、形式和寫作特色。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0119": {
+      "primary_indicator_code": "5-Ⅳ-3",
+      "primary_indicator_text": "理解各類文本內容、形式和寫作特色。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0120": {
+      "primary_indicator_code": "5-Ⅳ-4",
+      "primary_indicator_text": "應用閱讀策略增進學習效能，整合跨領域知識轉化為解決問題的能力。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0121": {
+      "primary_indicator_code": "5-Ⅳ-5",
+      "primary_indicator_text": "大量閱讀多元文本，理解議題內涵及其與個人生活、社會結構的關聯性。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0122": {
+      "primary_indicator_code": "5-Ⅳ-4",
+      "primary_indicator_text": "應用閱讀策略增進學習效能，整合跨領域知識轉化為解決問題的能力。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0123": {
+      "primary_indicator_code": "5-Ⅳ-3",
+      "primary_indicator_text": "理解各類文本內容、形式和寫作特色。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0124": {
+      "primary_indicator_code": "5-Ⅳ-4",
+      "primary_indicator_text": "應用閱讀策略增進學習效能，整合跨領域知識轉化為解決問題的能力。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0125": {
+      "primary_indicator_code": "5-Ⅳ-4",
+      "primary_indicator_text": "應用閱讀策略增進學習效能，整合跨領域知識轉化為解決問題的能力。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0126": {
+      "primary_indicator_code": "5-Ⅳ-4",
+      "primary_indicator_text": "應用閱讀策略增進學習效能，整合跨領域知識轉化為解決問題的能力。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0127": {
+      "primary_indicator_code": "5-Ⅳ-3",
+      "primary_indicator_text": "理解各類文本內容、形式和寫作特色。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0128": {
+      "primary_indicator_code": "5-Ⅳ-4",
+      "primary_indicator_text": "應用閱讀策略增進學習效能，整合跨領域知識轉化為解決問題的能力。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0129": {
+      "primary_indicator_code": "5-Ⅳ-4",
+      "primary_indicator_text": "應用閱讀策略增進學習效能，整合跨領域知識轉化為解決問題的能力。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0130": {
+      "primary_indicator_code": "5-Ⅳ-4",
+      "primary_indicator_text": "應用閱讀策略增進學習效能，整合跨領域知識轉化為解決問題的能力。",
+      "skills": [
+        {
+          "skill": "綜合理解",
+          "indicator": "5-Ⅳ-2",
+          "station": "comprehension"
+        },
+        {
+          "skill": "聆聽示範",
+          "indicator": "1-Ⅳ-4",
+          "station": "lesson-intro"
+        }
+      ]
+    },
+    "L0131": {
+      "primary_indicator_code": "5-Ⅳ-3",
+      "primary_indicator_text": "理解各類文本內容、形式和寫作特色。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0132": {
+      "primary_indicator_code": "5-Ⅳ-4",
+      "primary_indicator_text": "應用閱讀策略增進學習效能，整合跨領域知識轉化為解決問題的能力。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0133": {
+      "primary_indicator_code": "5-Ⅳ-6",
+      "primary_indicator_text": "運用圖書館(室)、科技工具，蒐集資訊、組織材料，擴充閱讀視野。",
+      "skills": [
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        },
+        {
+          "skill": "聆聽示範",
+          "indicator": "1-Ⅳ-4",
+          "station": "lesson-intro"
+        }
+      ]
+    },
+    "L0134": {
+      "primary_indicator_code": "5-Ⅳ-6",
+      "primary_indicator_text": "運用圖書館(室)、科技工具，蒐集資訊、組織材料，擴充閱讀視野。",
+      "skills": [
+        {
+          "skill": "綜合理解",
+          "indicator": "5-Ⅳ-2",
+          "station": "comprehension"
+        },
+        {
+          "skill": "聆聽示範",
+          "indicator": "1-Ⅳ-4",
+          "station": "lesson-intro"
+        }
+      ]
+    },
+    "L0135": {
+      "primary_indicator_code": "5-Ⅳ-6",
+      "primary_indicator_text": "運用圖書館(室)、科技工具，蒐集資訊、組織材料，擴充閱讀視野。",
+      "skills": [
+        {
+          "skill": "綜合理解",
+          "indicator": "5-Ⅳ-2",
+          "station": "comprehension"
+        },
+        {
+          "skill": "聆聽示範",
+          "indicator": "1-Ⅳ-4",
+          "station": "lesson-intro"
+        }
+      ]
+    },
+    "L0136": {
+      "primary_indicator_code": "5-Ⅳ-6",
+      "primary_indicator_text": "運用圖書館(室)、科技工具，蒐集資訊、組織材料，擴充閱讀視野。",
+      "skills": [
+        {
+          "skill": "綜合理解",
+          "indicator": "5-Ⅳ-2",
+          "station": "comprehension"
+        },
+        {
+          "skill": "聆聽示範",
+          "indicator": "1-Ⅳ-4",
+          "station": "lesson-intro"
+        }
+      ]
+    },
+    "L0137": {
+      "primary_indicator_code": "5-Ⅳ-2",
+      "primary_indicator_text": "理解各類文本的句子、段落與主要概念，指出寫作的目的與觀點。",
+      "skills": [
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "延伸閱讀",
+          "indicator": "5-Ⅳ-6",
+          "station": "knowledge-station"
+        },
+        {
+          "skill": "聆聽示範",
+          "indicator": "1-Ⅳ-4",
+          "station": "lesson-intro"
+        }
+      ]
+    },
+    "L0138": {
+      "primary_indicator_code": "5-Ⅳ-5",
+      "primary_indicator_text": "大量閱讀多元文本，理解議題內涵及其與個人生活、社會結構的關聯性。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0139": {
+      "primary_indicator_code": "5-Ⅳ-2",
+      "primary_indicator_text": "理解各類文本的句子、段落與主要概念，指出寫作的目的與觀點。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "延伸閱讀",
+          "indicator": "5-Ⅳ-6",
+          "station": "knowledge-station"
+        }
+      ]
+    },
+    "L0140": {
+      "primary_indicator_code": "5-Ⅳ-3",
+      "primary_indicator_text": "理解各類文本內容、形式和寫作特色。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "綜合理解",
+          "indicator": "5-Ⅳ-2",
+          "station": "comprehension"
+        }
+      ]
+    },
+    "L0141": {
+      "primary_indicator_code": "5-Ⅳ-2",
+      "primary_indicator_text": "理解各類文本的句子、段落與主要概念，指出寫作的目的與觀點。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "延伸閱讀",
+          "indicator": "5-Ⅳ-6",
+          "station": "knowledge-station"
+        }
+      ]
+    },
+    "L0142": {
+      "primary_indicator_code": "5-Ⅳ-5",
+      "primary_indicator_text": "大量閱讀多元文本，理解議題內涵及其與個人生活、社會結構的關聯性。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0143": {
+      "primary_indicator_code": "5-Ⅳ-3",
+      "primary_indicator_text": "理解各類文本內容、形式和寫作特色。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0144": {
+      "primary_indicator_code": "5-Ⅳ-2",
+      "primary_indicator_text": "理解各類文本的句子、段落與主要概念，指出寫作的目的與觀點。",
+      "skills": [
+        {
+          "skill": "詞義理解",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-definition"
+        },
+        {
+          "skill": "延伸閱讀",
+          "indicator": "5-Ⅳ-6",
+          "station": "knowledge-station"
+        },
+        {
+          "skill": "聆聽示範",
+          "indicator": "1-Ⅳ-4",
+          "station": "lesson-intro"
+        }
+      ]
+    },
+    "L0145": {
+      "primary_indicator_code": "5-Ⅳ-3",
+      "primary_indicator_text": "理解各類文本內容、形式和寫作特色。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0146": {
+      "primary_indicator_code": "5-Ⅳ-4",
+      "primary_indicator_text": "應用閱讀策略增進學習效能，整合跨領域知識轉化為解決問題的能力。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0147": {
+      "primary_indicator_code": "5-Ⅳ-4",
+      "primary_indicator_text": "應用閱讀策略增進學習效能，整合跨領域知識轉化為解決問題的能力。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "綜合理解",
+          "indicator": "5-Ⅳ-2",
+          "station": "comprehension"
+        }
+      ]
+    },
+    "L0148": {
+      "primary_indicator_code": "5-Ⅳ-4",
+      "primary_indicator_text": "應用閱讀策略增進學習效能，整合跨領域知識轉化為解決問題的能力。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "綜合理解",
+          "indicator": "5-Ⅳ-2",
+          "station": "comprehension"
+        }
+      ]
+    },
+    "L0149": {
+      "primary_indicator_code": "5-Ⅳ-6",
+      "primary_indicator_text": "運用圖書館(室)、科技工具，蒐集資訊、組織材料，擴充閱讀視野。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0150": {
+      "primary_indicator_code": "5-Ⅳ-6",
+      "primary_indicator_text": "運用圖書館(室)、科技工具，蒐集資訊、組織材料，擴充閱讀視野。",
+      "skills": [
+        {
+          "skill": "綜合理解",
+          "indicator": "5-Ⅳ-2",
+          "station": "comprehension"
+        },
+        {
+          "skill": "聆聽示範",
+          "indicator": "1-Ⅳ-4",
+          "station": "lesson-intro"
+        }
+      ]
+    },
+    "L0151": {
+      "primary_indicator_code": "5-Ⅳ-6",
+      "primary_indicator_text": "運用圖書館(室)、科技工具，蒐集資訊、組織材料，擴充閱讀視野。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0152": {
+      "primary_indicator_code": "5-Ⅳ-6",
+      "primary_indicator_text": "運用圖書館(室)、科技工具，蒐集資訊、組織材料，擴充閱讀視野。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0153": {
+      "primary_indicator_code": "5-Ⅳ-3",
+      "primary_indicator_text": "理解各類文本內容、形式和寫作特色。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        },
+        {
+          "skill": "文白詞語對應",
+          "indicator": "4-Ⅳ-3",
+          "station": "classical-word-matching"
+        }
+      ]
+    },
+    "L0154": {
+      "primary_indicator_code": "5-Ⅳ-3",
+      "primary_indicator_text": "理解各類文本內容、形式和寫作特色。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        },
+        {
+          "skill": "文白詞語對應",
+          "indicator": "4-Ⅳ-3",
+          "station": "classical-word-matching"
+        }
+      ]
+    },
+    "L0155": {
+      "primary_indicator_code": "5-Ⅳ-3",
+      "primary_indicator_text": "理解各類文本內容、形式和寫作特色。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        },
+        {
+          "skill": "文白詞語對應",
+          "indicator": "4-Ⅳ-3",
+          "station": "classical-word-matching"
+        }
+      ]
+    },
+    "L0156": {
+      "primary_indicator_code": "5-Ⅳ-6",
+      "primary_indicator_text": "運用圖書館(室)、科技工具，蒐集資訊、組織材料，擴充閱讀視野。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0157": {
+      "primary_indicator_code": "5-Ⅳ-3",
+      "primary_indicator_text": "理解各類文本內容、形式和寫作特色。",
+      "skills": [
+        {
+          "skill": "綜合理解",
+          "indicator": "5-Ⅳ-2",
+          "station": "comprehension"
+        },
+        {
+          "skill": "聆聽示範",
+          "indicator": "1-Ⅳ-4",
+          "station": "lesson-intro"
+        }
+      ]
+    },
+    "L0158": {
+      "primary_indicator_code": "5-Ⅳ-3",
+      "primary_indicator_text": "理解各類文本內容、形式和寫作特色。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        },
+        {
+          "skill": "文白詞語對應",
+          "indicator": "4-Ⅳ-3",
+          "station": "classical-word-matching"
+        }
+      ]
+    },
+    "L0159": {
+      "primary_indicator_code": "5-Ⅳ-3",
+      "primary_indicator_text": "理解各類文本內容、形式和寫作特色。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        },
+        {
+          "skill": "文白詞語對應",
+          "indicator": "4-Ⅳ-3",
+          "station": "classical-word-matching"
+        }
+      ]
+    },
+    "L0160": {
+      "primary_indicator_code": "5-Ⅳ-3",
+      "primary_indicator_text": "理解各類文本內容、形式和寫作特色。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        },
+        {
+          "skill": "文白詞語對應",
+          "indicator": "4-Ⅳ-3",
+          "station": "classical-word-matching"
+        }
+      ]
+    },
+    "L0161": {
+      "primary_indicator_code": "5-Ⅳ-3",
+      "primary_indicator_text": "理解各類文本內容、形式和寫作特色。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        },
+        {
+          "skill": "文白詞語對應",
+          "indicator": "4-Ⅳ-3",
+          "station": "classical-word-matching"
+        }
+      ]
+    },
+    "L0162": {
+      "primary_indicator_code": "5-Ⅳ-3",
+      "primary_indicator_text": "理解各類文本內容、形式和寫作特色。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        },
+        {
+          "skill": "文白詞語對應",
+          "indicator": "4-Ⅳ-3",
+          "station": "classical-word-matching"
+        }
+      ]
+    },
+    "L0163": {
+      "primary_indicator_code": "4-Ⅳ-3",
+      "primary_indicator_text": "能運用字典或辭典了解一字多音及一字多義的現象。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        },
+        {
+          "skill": "聆聽示範",
+          "indicator": "1-Ⅳ-4",
+          "station": "lesson-intro"
+        }
+      ]
+    },
+    "L0164": {
+      "primary_indicator_code": "4-Ⅳ-3",
+      "primary_indicator_text": "能運用字典或辭典了解一字多音及一字多義的現象。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        },
+        {
+          "skill": "聆聽示範",
+          "indicator": "1-Ⅳ-4",
+          "station": "lesson-intro"
+        }
+      ]
+    },
+    "L0165": {
+      "primary_indicator_code": "5-Ⅳ-5",
+      "primary_indicator_text": "大量閱讀多元文本，理解議題內涵及其與個人生活、社會結構的關聯性。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0166": {
+      "primary_indicator_code": "5-Ⅳ-5",
+      "primary_indicator_text": "大量閱讀多元文本，理解議題內涵及其與個人生活、社會結構的關聯性。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0167": {
+      "primary_indicator_code": "5-Ⅳ-5",
+      "primary_indicator_text": "大量閱讀多元文本，理解議題內涵及其與個人生活、社會結構的關聯性。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0168": {
+      "primary_indicator_code": "5-Ⅳ-5",
+      "primary_indicator_text": "大量閱讀多元文本，理解議題內涵及其與個人生活、社會結構的關聯性。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0169": {
+      "primary_indicator_code": "5-Ⅳ-5",
+      "primary_indicator_text": "大量閱讀多元文本，理解議題內涵及其與個人生活、社會結構的關聯性。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0170": {
+      "primary_indicator_code": "5-Ⅳ-5",
+      "primary_indicator_text": "大量閱讀多元文本，理解議題內涵及其與個人生活、社會結構的關聯性。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0171": {
+      "primary_indicator_code": "5-Ⅳ-5",
+      "primary_indicator_text": "大量閱讀多元文本，理解議題內涵及其與個人生活、社會結構的關聯性。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0172": {
+      "primary_indicator_code": "5-Ⅳ-5",
+      "primary_indicator_text": "大量閱讀多元文本，理解議題內涵及其與個人生活、社會結構的關聯性。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0173": {
+      "primary_indicator_code": "5-Ⅳ-5",
+      "primary_indicator_text": "大量閱讀多元文本，理解議題內涵及其與個人生活、社會結構的關聯性。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0174": {
+      "primary_indicator_code": "5-Ⅳ-5",
+      "primary_indicator_text": "大量閱讀多元文本，理解議題內涵及其與個人生活、社會結構的關聯性。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0175": {
+      "primary_indicator_code": "5-Ⅳ-5",
+      "primary_indicator_text": "大量閱讀多元文本，理解議題內涵及其與個人生活、社會結構的關聯性。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0176": {
+      "primary_indicator_code": "5-Ⅳ-5",
+      "primary_indicator_text": "大量閱讀多元文本，理解議題內涵及其與個人生活、社會結構的關聯性。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0177": {
+      "primary_indicator_code": "5-Ⅳ-5",
+      "primary_indicator_text": "大量閱讀多元文本，理解議題內涵及其與個人生活、社會結構的關聯性。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0178": {
+      "primary_indicator_code": "5-Ⅳ-5",
+      "primary_indicator_text": "大量閱讀多元文本，理解議題內涵及其與個人生活、社會結構的關聯性。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    },
+    "L0179": {
+      "primary_indicator_code": "5-Ⅳ-5",
+      "primary_indicator_text": "大量閱讀多元文本，理解議題內涵及其與個人生活、社會結構的關聯性。",
+      "skills": [
+        {
+          "skill": "朗讀流暢",
+          "indicator": "5-Ⅳ-1",
+          "station": "key-passage-reading"
+        },
+        {
+          "skill": "詞語運用",
+          "indicator": "4-Ⅳ-3",
+          "station": "vocab-application"
+        },
+        {
+          "skill": "結構與摘要",
+          "indicator": "5-Ⅳ-2",
+          "station": "keypoints-table"
+        }
+      ]
+    }
+  }
+}

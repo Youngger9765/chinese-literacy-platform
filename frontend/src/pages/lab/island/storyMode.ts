@@ -53,49 +53,55 @@ export function parseIslandReturnMessage(data: unknown): { finished: boolean } |
 }
 
 /**
- * 文字寶貝的碎片/遭遇獎勵提示（#3780 接島上）：跟 ISLAND_STEP_DONE 刻意分開
- * 的第三個訊號——不是把 rewards 塞進同一則訊息，是因為 notifyIslandStepDone
- * 在 useLearningStepNavigation.ts 同步呼叫（這一關做完的當下），獎勵資料卻
+ * 閱讀寶貝的「寶貝長大了」成長提示（#3780 reading-babies phase 2，取代 v1
+ * 的 WORD_BABY_REWARD）：跟 ISLAND_STEP_DONE 刻意分開的第三個訊號——不是把
+ * growth events 塞進同一則訊息，是因為 notifyIslandStepDone 在
+ * useLearningStepNavigation.ts 同步呼叫（這一關做完的當下），成長資料卻
  * 來自 useProgressSync 的 PUT /progress 回應（非同步、還有 5 秒 debounce），
  * 兩者天生不同步；合成一則訊息會逼著改動已經很敏感的「做完立刻回島」導覽
  * 時機。島側（ReadingIslandLab）收到這則獨立訊息時，不論回島動畫走到哪，
- * 都可以把這次 save 真的新發放的獎勵排進提示佇列。
+ * 都可以把這次 save 真的新記錄的成長事件排進提示佇列。
+ *
+ * 跟 v1 的關鍵差異：v1 的獎勵有 `id`（StudentStationRewardLog 主鍵）當排重
+ * 的天然唯一鍵；閱讀寶貝的 `StudentIndicatorEvidence`
+ * （backend/app/schemas/session.py `ReadingBabyGrowthEvent`）沒有回傳 id，
+ * 但 `(lesson_uid, station)` 本身就是冪等鍵——同一站一旦
+ * `quality_passed=true` 就不會再寫第二筆（reading_baby_service.py
+ * `record_station_evidence` 的 docstring）——所以 `station` 字串本身就是
+ * 安全的排重鍵，不需要額外的數字 id。
  */
-export const WORD_BABY_REWARD = 'word-baby-reward';
+export const READING_BABY_GROWTH = 'reading-baby-growth';
 
-export interface WordBabyRewardMessagePayload {
-  id: number;
+export interface ReadingBabyGrowthMessagePayload {
   station: string;
-  fragment_awarded: boolean;
-  fragment_flavor: string | null;
-  encounter_result: 'none' | 'caught' | 'duplicate';
-  encounter_baby_id: string | null;
+  ability_id: string;
+  quality_passed: boolean;
 }
 
-export function notifyIslandWordBabyReward(rewards: WordBabyRewardMessagePayload[]): void {
+export function notifyIslandReadingBabyGrowth(events: ReadingBabyGrowthMessagePayload[]): void {
   try {
-    window.top?.postMessage({ type: WORD_BABY_REWARD, rewards }, window.location.origin);
+    window.top?.postMessage({ type: READING_BABY_GROWTH, events }, window.location.origin);
   } catch {
     /* 不在島上就什麼都不做 */
   }
 }
 
-export function parseWordBabyRewardMessage(data: unknown): WordBabyRewardMessagePayload[] | null {
+export function parseReadingBabyGrowthMessage(data: unknown): ReadingBabyGrowthMessagePayload[] | null {
   if (typeof data !== 'object' || data === null) return null;
-  const { type, rewards } = data as { type?: unknown; rewards?: unknown };
-  if (type !== WORD_BABY_REWARD) return null;
-  if (!Array.isArray(rewards)) return null;
-  return rewards as WordBabyRewardMessagePayload[];
+  const { type, events } = data as { type?: unknown; events?: unknown };
+  if (type !== READING_BABY_GROWTH) return null;
+  if (!Array.isArray(events)) return null;
+  return events as ReadingBabyGrowthMessagePayload[];
 }
 
 /**
- * 文字寶貝獎勵「只提示一次」的排重（#3794 PRD §5，二次訂正）：原本只有
- * ReadingIslandLab.tsx 自己的 `postMessage` 路徑跟 `refreshProgress` GET
- * 路徑共用這份排重，所以「島嶼頁內部」不會重複跳；但 #3794 新加的「學習頁
- * 本身當場跳提示」（`useStepProgressPersistence.ts` 的 `onWordBabyRewarded`）
- * 原本沒有接上同一份排重，導致同一筆獎勵在故事模式下可能先在學習頁跳一次
- * （PUT /progress 回應回來時），回島後 `refreshProgress(true)` 又跳第二次
- * （code-reviewer 2026-10-30 finding，1af86d25 blocker）。
+ * 閱讀寶貝成長提示「只提示一次」的排重（沿用 v1 #3794 PRD §5 二次訂正的
+ * 精神）：原本只有 ReadingIslandLab.tsx 自己的 `postMessage` 路徑跟
+ * `refreshProgress` GET 路徑共用這份排重，所以「島嶼頁內部」不會重複跳；
+ * `useStepProgressPersistence.ts` 的 `onReadingBabyGrowth`（學習頁本身當場
+ * 跳提示）也要接上同一份排重，避免同一站的成長事件在故事模式下先在學習頁
+ * 跳一次（PUT /progress 回應回來時），回島後 `refreshProgress(true)` 又跳
+ * 第二次。
  *
  * 抽成這裡而不是留在 ReadingIslandLab.tsx：sessionStorage 依「同一分頁的
  * top-level browsing context」共用，不分 origin 下的哪個 frame——學習頁被嵌在
@@ -103,23 +109,23 @@ export function parseWordBabyRewardMessage(data: unknown): WordBabyRewardMessage
  * 兩條路徑只要呼叫同一組函式、用同一個 key 公式，先到的那條標記後，另一條
  * 自然就會把它濾掉，不需要任何跨 frame 的訊息往返。
  */
-function seenRewardStorageKey(userId: string | number | null | undefined, storyId: string | undefined): string {
+function seenGrowthStorageKey(userId: string | number | null | undefined, storyId: string | undefined): string {
   return `reading-island-seen-rewards:${userId ?? 'guest'}:${storyId}`;
 }
 
-export function readSeenRewardIds(userId: string | number | null | undefined, storyId: string | undefined): Set<number> {
+export function readSeenGrowthStations(userId: string | number | null | undefined, storyId: string | undefined): Set<string> {
   try {
-    return new Set(JSON.parse(sessionStorage.getItem(seenRewardStorageKey(userId, storyId)) ?? '[]') as number[]);
+    return new Set(JSON.parse(sessionStorage.getItem(seenGrowthStorageKey(userId, storyId)) ?? '[]') as string[]);
   } catch {
     return new Set();
   }
 }
 
-export function markRewardIdsSeen(userId: string | number | null | undefined, storyId: string | undefined, ids: number[]): void {
-  if (ids.length === 0) return;
-  const key = seenRewardStorageKey(userId, storyId);
-  const seen = readSeenRewardIds(userId, storyId);
-  ids.forEach((id) => seen.add(id));
+export function markGrowthStationsSeen(userId: string | number | null | undefined, storyId: string | undefined, stations: string[]): void {
+  if (stations.length === 0) return;
+  const key = seenGrowthStorageKey(userId, storyId);
+  const seen = readSeenGrowthStations(userId, storyId);
+  stations.forEach((station) => seen.add(station));
   try { sessionStorage.setItem(key, JSON.stringify([...seen])); } catch { /* 存不了就算了，頂多下次重複跳一次 */ }
 }
 

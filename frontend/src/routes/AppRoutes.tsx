@@ -76,6 +76,10 @@ const StudentOurClassPage = lazy(() => import('../pages/student/StudentOurClassP
 // are untouched.
 const StudentGameHubPage = lazy(() => import('../pages/student/StudentGameHubPage'));
 const StudentArchipelagoPage = lazy(() => import('../pages/student/StudentArchipelagoPage'));
+// 閱讀寶貝 (#3780 reading-babies phase 2) — 取代 v1 文字寶貝（WordBabiesLab／
+// /lab/word-babies），全站只留這一套寶貝系統（game-design.md §5）。
+const ReadingBabyAtlasPage = lazy(() => import('../pages/student/ReadingBabyAtlasPage'));
+const ReadingBabyCardPage = lazy(() => import('../pages/student/ReadingBabyCardPage'));
 const TeacherGameHubPage = lazy(() => import('../pages/teacher/TeacherGameHubPage'));
 const TeacherSessionReportPage = lazy(() => import('../pages/teacher/TeacherSessionReportPage'));
 const ProjectHubPage = lazy(() => import('../pages/ProjectHubPage'));
@@ -113,7 +117,6 @@ const TermsOfService = lazy(() => import('../pages/app/TermsOfService'));
 // Dev-only local demo harness for AI-extracted lesson_content (public, no API/DB).
 const DevLessonPage = lazy(() => import('../pages/dev/DevLessonPage'));
 const ReadingIslandLab = lazy(() => import('../pages/lab/ReadingIslandLab'));
-const WordBabiesLab = lazy(() => import('../pages/lab/WordBabiesLab'));
 
 
 // ---------------------------------------------------------------------------
@@ -123,7 +126,6 @@ const AppRoutes: React.FC = () => (
     <StudentClassroomGuard>
     <Routes>
       <Route path="/lab/island/:storyId" element={<ProtectedRoute><ReadingIslandLab /></ProtectedRoute>} />
-      <Route path="/lab/word-babies" element={<ProtectedRoute><WordBabiesLab /></ProtectedRoute>} />
       {/* Issue #457: students without classroom see this page when gating is enabled */}
       <Route
         path="/no-teacher"
@@ -382,6 +384,28 @@ const AppRoutes: React.FC = () => (
           <ProtectedRoute>
             <AppShell>
               <StudentArchipelagoPage />
+            </AppShell>
+          </ProtectedRoute>
+        }
+      />
+      {/* 閱讀寶貝 (#3780 reading-babies phase 2) — 全站唯一寶貝入口／圖鑑，
+          取代 v1 的 /lab/word-babies。 */}
+      <Route
+        path="/student/reading-babies"
+        element={
+          <ProtectedRoute>
+            <AppShell>
+              <ReadingBabyAtlasPage />
+            </AppShell>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/student/reading-babies/:lessonUid"
+        element={
+          <ProtectedRoute>
+            <AppShell>
+              <ReadingBabyCardPage />
             </AppShell>
           </ProtectedRoute>
         }

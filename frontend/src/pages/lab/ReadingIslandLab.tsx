@@ -8,10 +8,12 @@ import { BABIES_20011, OPENING_20011, STOPS_20011 } from './island/islandData';
 import { buildStopsFromSequence, buildOpeningForStory, buildStoryProgressionLines, buildStoryEndingLine, storyTypeForLesson, buildBabiesForVocabulary, actInfoForZone } from './island/islandTemplate';
 import type { IslandBaby, IslandStop } from './island/islandTemplate';
 import { createIslandWorld } from './island/createIslandWorld';
-import { markRewardIdsSeen, parseIslandReturnMessage, parseWordBabyRewardMessage, readSeenRewardIds, shouldMarkVisitedOnReturn } from './island/storyMode';
-import { firstWordBabyRewardHint } from './island/wordBabyRewardHint';
+import { markGrowthStationsSeen, parseIslandReturnMessage, parseReadingBabyGrowthMessage, readSeenGrowthStations, shouldMarkVisitedOnReturn } from './island/storyMode';
+import { firstReadingBabyGrowthHint, stageEvolutionHintText } from './island/readingBabyGrowthHint';
 import IslandListMode from './island/IslandListMode';
 import { createIslandAudio, readMuted, writeMuted, type IslandAudio } from './island/islandAudio';
+import { fetchReadingBabyCard } from '../../services/readingBabyApi';
+import { lessonUidForStoryId } from '../../data/readingBabyStoryIds';
 
 interface LessonData {
   title: string;
@@ -29,6 +31,12 @@ type World = ReturnType<typeof createIslandWorld>;
 
 // 開場插畫上慢慢往上飄的光點（位置、速度、起始時間錯開，看起來不像同一批）
 const MOTES = Array.from({ length: 18 }, (_, i) => ({ x: (i * 37) % 100, d: 7 + (i % 5) * 1.6, delay: -((i * 1.3) % 9) }));
+
+// game-design.md §3.3：中階/進階的提示要比單次成長的「小」停留更久——模組
+// 層級常數（不是每次 render 都重新宣告的物件字面量），避免
+// showReadingBabyGrowthHint 的 useCallback 因為依賴一個「看起來每次都不同」
+// 的物件而被 eslint-plugin-react-hooks 要求加進 deps。
+const READING_BABY_HINT_DURATION_MS = { small: 4000, medium: 5000, large: 7000 } as const;
 
 export default function ReadingIslandLab() {
   const { storyId = '' } = useParams();
@@ -63,14 +71,24 @@ export default function ReadingIslandLab() {
   // 正常的「物理位置最近站」顯示邏輯。
   const [celebrating, setCelebrating] = useState(false);
   const [fogHint, setFogHint] = useState(false);
-  // #3780 接島上：過關回島的「這站掉了碎片／遇到寶貝」小提示。宣告放在這裡
-  // （跟 fogHint 同一批 state）而不是靠近它實際被設定的訊息監聽器那段，是
-  // 因為 onFogEdge（下面 createIslandWorld 的 effect）需要讀 wordBabyHintRef
-  // 判斷要不要讓位——宣告順序錯會是 no-use-before-define（#2279 TDZ 同類
-  // 問題：eslint 這條規則不是裝飾用的，改這個檔案前先讀 CLAUDE.md 那段）。
-  const [wordBabyHint, setWordBabyHint] = useState<string | null>(null);
-  const wordBabyHintRef = useRef<string | null>(null);
-  useEffect(() => { wordBabyHintRef.current = wordBabyHint; }, [wordBabyHint]);
+  // #3780 reading-babies phase 2：過關回島的「寶貝長大了」小提示。宣告放在
+  // 這裡（跟 fogHint 同一批 state）而不是靠近它實際被設定的訊息監聽器那段，
+  // 是因為 onFogEdge（下面 createIslandWorld 的 effect）需要讀
+  // readingBabyGrowthHintRef 判斷要不要讓位——宣告順序錯會是
+  // no-use-before-define（#2279 TDZ 同類問題：eslint 這條規則不是裝飾用
+  // 的，改這個檔案前先讀 CLAUDE.md 那段）。
+  const [readingBabyGrowthHint, setReadingBabyGrowthHint] = useState<string | null>(null);
+  const readingBabyGrowthHintRef = useRef<string | null>(null);
+  useEffect(() => { readingBabyGrowthHintRef.current = readingBabyGrowthHint; }, [readingBabyGrowthHint]);
+  // #3780 reading-babies phase 2「一鍵直達」(game-design.md §4.2)：從寶貝卡
+  // 按「一鍵直達」導過來時帶 `?focusStation=<station>`，進島之後世界一建好
+  // 就呼叫既有的 `world.travelTo()` 走過去——不是新發明一套傳送邏輯，是
+  // ReadingIslandLab 自己清單模式／點擊建築已經在用的同一支函式
+  // （見下面 `onPick: (index) => worldRef.current?.travelTo(index)`）。只讀
+  // 一次（跟 archipelagoReturn 同樣理由：這個檔案現有測試都 mock
+  // useParams/useNavigate，沒 mock useSearchParams）。
+  const focusStation = useMemo(() => new URLSearchParams(window.location.search).get('focusStation'), []);
+  const focusStationAppliedRef = useRef(false);
   const [opening, setOpening] = useState(0);
   // 冷開場：先一個暗畫面，學生點一下才出聲（瀏覽器規定），聲音先到、畫面晚 0.45 秒進來
   const [coldOpen, setColdOpen] = useState(true);
@@ -99,22 +117,66 @@ export default function ReadingIslandLab() {
   // 所以清除計時器要自己存，沒有對應的 useEffect 可以掛 cleanup。
   const guideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const storageKey = `reading-island-visited:${user?.id ?? 'guest'}:${storyId}`;
-  // #3780 接島上、#3794 二次訂正（code-reviewer 2026-10-30 finding）：記住
-  // 「已經顯示過提示」的文字寶貝獎勵 id（StudentStation RewardLog 主鍵）
-  // 改成呼叫 `storyMode.ts` 的共用函式，不再各自存一份——原本只有這個
-  // 元件自己的 `refreshProgress` 拉取路徑跟 `WORD_BABY_REWARD` postMessage
-  // 加速路徑共用排重，#3794 新加的「學習頁本身當場跳提示」
-  // （`useStepProgressPersistence.ts`）原本沒接上，導致同一筆獎勵在故事
-  // 模式下學習頁跳一次、回島後又跳第二次。三條路徑現在都呼叫同一組
-  // `readSeenRewardIds`／`markRewardIdsSeen`（sessionStorage key 公式
-  // 不變，仍是 per-student-per-story scoping，關掉分頁/清快取就重置）。
-  const showWordBabyHint = useCallback((hint: string) => {
-    // 獎勵提示優先於迷霧提示（同一個畫面插槽，見 onFogEdge 那側的說明）。
+  // #3780 reading-babies phase 2：記住「已經顯示過提示」的成長事件
+  // （`station` 本身就是冪等鍵，見 storyMode.ts）呼叫 `storyMode.ts` 的共用
+  // 函式，不再各自存一份——這個元件自己的 `refreshProgress` 拉取路徑跟
+  // `READING_BABY_GROWTH` postMessage 加速路徑、以及
+  // `useStepProgressPersistence.ts` 的「學習頁本身當場跳提示」，三條路徑
+  // 都呼叫同一組 `readSeenGrowthStations`／`markGrowthStationsSeen`
+  // （sessionStorage key 公式不變，仍是 per-student-per-story scoping，
+  // 關掉分頁/清快取就重置）。
+  // game-design.md §3.3：進化到中階/進階的回饋要比單次成長的「小」更顯眼——
+  // `level` 決定停留時間跟視覺樣式（見下方渲染區塊），預設 'small' 維持
+  // 既有行為不變。
+  const [readingBabyGrowthLevel, setReadingBabyGrowthLevel] = useState<'small' | 'medium' | 'large'>('small');
+  const showReadingBabyGrowthHint = useCallback((hint: string, level: 'small' | 'medium' | 'large' = 'small') => {
+    // 成長提示優先於迷霧提示（同一個畫面插槽，見 onFogEdge 那側的說明）。
     if (hintTimer.current) clearTimeout(hintTimer.current);
     setFogHint(false);
-    setWordBabyHint(hint);
-    window.setTimeout(() => setWordBabyHint(null), 4000);
+    setReadingBabyGrowthLevel(level);
+    setReadingBabyGrowthHint(hint);
+    window.setTimeout(() => setReadingBabyGrowthHint(null), READING_BABY_HINT_DURATION_MS[level]);
   }, []);
+  // #3780 reading-babies phase 2「一鍵直達」已經需要 lesson_uid（見下方
+  // focusStation），這裡進化分級回饋也需要同一個反查——只算一次。
+  const lessonUid = useMemo(() => lessonUidForStoryId(storyId), [storyId]);
+  // 進化分級回饋只在「這次跟上次看到的 stage 不一樣」才觸發，避免掛載時
+  // 的第一次讀取（只是建立基準）或沒跨過門檻的重複讀取也跳出慶祝——
+  // sessionStorage 這裡故意不經過 storyMode.ts 的排重函式，因為那組管的是
+  // 「同一站的小提示只顯示一次」，這裡管的是完全不同的東西（「這一課的
+  // stage 有沒有變」），用自己獨立的 key 不借用那組語意。
+  const lastStageKeyRef = useRef(`reading-island-last-stage:${user?.id ?? 'guest'}:${lessonUid ?? storyId}`);
+  useEffect(() => {
+    lastStageKeyRef.current = `reading-island-last-stage:${user?.id ?? 'guest'}:${lessonUid ?? storyId}`;
+  }, [user?.id, lessonUid, storyId]);
+  /**
+   * 查這一課目前的 stage，如果比上次看到的「跨過門檻」（basic→intermediate
+   * 或 intermediate/basic→advanced），回傳對應分級回饋文案；沒跨過、查不到
+   * lesson_uid、或 API 失敗（這一課不在 179 課對照裡、網路問題）都回傳
+   * null——呼叫端在這種情況下維持原本的小提示，不讓這個加強功能變成新的
+   * 失敗點（game-design.md 全文的「正向強化，沒有懲罰分支」精神，查詢失敗
+   * 本身也不該讓學生什麼提示都看不到）。
+   */
+  const checkStageEvolution = useCallback(async (): Promise<{ hint: string; level: 'medium' | 'large' } | null> => {
+    if (!lessonUid || !token || !user) return null;
+    try {
+      const card = await fetchReadingBabyCard(user.id, lessonUid, token);
+      const key = lastStageKeyRef.current;
+      const lastStage = sessionStorage.getItem(key);
+      sessionStorage.setItem(key, card.stage);
+      if (lastStage === null) return null; // 第一次讀取：只建立基準，不慶祝
+      if (card.stage === lastStage) return null; // 沒跨過門檻
+      const hint = stageEvolutionHintText(card.stage);
+      if (!hint) return null;
+      return { hint, level: card.stage === 'advanced' ? 'large' : 'medium' };
+    } catch {
+      return null; // best-effort：查詢失敗不影響既有的小提示
+    }
+    // user?.id（不是整個 user 物件）——同一類無限迴圈風險，見
+    // ReadingBabyAtlasPage.tsx 的說明；這支剛好也是這次 code review 才抓到
+    // 自己犯了同一個錯。
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lessonUid, token, user?.id]);
   const student = user?.roles.some((role) => role.role_name === 'student') ?? false;
   const sequence = useMemo(() => lesson?.stepSequence ?? [], [lesson]);
   const isHandmade = storyId === '20011';
@@ -196,27 +258,38 @@ export default function ReadingIslandLab() {
       const steps = [...new Set(snapshots.flatMap((snapshot) => snapshot.step_progress?.steps_completed ?? []))];
       setCompleted(steps);
 
-      // #3780 接島上二次修正：這是獎勵提示真正的正確性來源（見上面
-      // showWordBabyHint 那段的說明）——`loadStepProgress` 的 GET 回應現在
-      // 帶著「這一課目前全部」的 word_baby_rewards，不依賴任何 postMessage
-      // 時序。`announceNewRewards=false`（掛載時的第一次呼叫）只建立「已
-      // 經看過」的基準，不跳提示——不然學生第一次打開頁面就會把過去累積
-      // 的所有獎勵一次跳出來。只有 returnToIsland 傳 `true` 才會真的顯示。
-      const allRewards = snapshots.flatMap((snapshot) => snapshot.word_baby_rewards ?? []);
-      const uniqueRewards = [...new Map(allRewards.map((reward) => [reward.id, reward])).values()];
+      // #3780 reading-babies phase 2：這是成長提示真正的正確性來源（見上面
+      // showReadingBabyGrowthHint 那段的說明）——`loadStepProgress` 的 GET
+      // 回應現在帶著「這一課目前全部」的 reading_baby_events，不依賴任何
+      // postMessage 時序。`announceNewRewards=false`（掛載時的第一次呼叫）
+      // 只建立「已經看過」的基準，不跳提示——不然學生第一次打開頁面就會把
+      // 過去累積的所有成長事件一次跳出來。只有 returnToIsland 傳 `true`
+      // 才會真的顯示。`station` 本身就是去重鍵（同一站冪等，見
+      // storyMode.ts），不需要像 v1 那樣用數字 id 去重。
+      const allEvents = snapshots.flatMap((snapshot) => snapshot.reading_baby_events ?? []);
+      const uniqueEvents = [...new Map(allEvents.map((event) => [event.station, event])).values()];
+      // game-design.md §3.3：查這一課目前的 stage 有沒有跨過中階/進階門檻
+      // ——**每次都呼叫**（不只 announceNewRewards=true 時），因為第一次
+      // （掛載時）就是用來建立「上次看到的 stage」這個基準，沒有基準就永遠
+      // 判斷不出「這次是不是真的跨過了」。
+      const evolution = await checkStageEvolution();
       if (announceNewRewards) {
-        const seen = readSeenRewardIds(user?.id, storyId);
-        const unseen = uniqueRewards.filter((reward) => !seen.has(reward.id));
-        const hint = firstWordBabyRewardHint(unseen);
-        if (hint) showWordBabyHint(hint);
+        const seen = readSeenGrowthStations(user?.id, storyId);
+        const unseen = uniqueEvents.filter((event) => !seen.has(event.station));
+        const hint = firstReadingBabyGrowthHint(unseen);
+        if (evolution) {
+          showReadingBabyGrowthHint(evolution.hint, evolution.level);
+        } else if (hint) {
+          showReadingBabyGrowthHint(hint);
+        }
       }
-      markRewardIdsSeen(user?.id, storyId, uniqueRewards.map((reward) => reward.id));
+      markGrowthStationsSeen(user?.id, storyId, uniqueEvents.map((event) => event.station));
 
       return true;
     } catch {
       return false;
     }
-  }, [token, storyId, user?.id, showWordBabyHint]);
+  }, [token, storyId, user?.id, showReadingBabyGrowthHint, checkStageEvolution]);
 
   useEffect(() => { void refreshProgress(); }, [refreshProgress]);
 
@@ -226,7 +299,7 @@ export default function ReadingIslandLab() {
     const world = createIslandWorld(host, {
       onNear: setNear,
       onFogEdge: () => {
-        if (wordBabyHintRef.current) return; // 獎勵提示優先，迷霧提示讓位
+        if (readingBabyGrowthHintRef.current) return; // 成長提示優先，迷霧提示讓位
         setFogHint(true);
         if (hintTimer.current) clearTimeout(hintTimer.current);
         hintTimer.current = setTimeout(() => setFogHint(false), 2500);
@@ -267,6 +340,18 @@ export default function ReadingIslandLab() {
       },
     }, { stops: STOPS, babies: BABIES });
     worldRef.current = world;
+    // #3780 reading-babies phase 2「一鍵直達」(game-design.md §4.2)：帶
+    // `?focusStation=<station>` 進來時，世界剛建好就直接走過去——跟清單
+    // 模式點擊建築用的是同一支 `world.travelTo()`，只是觸發來源從使用者
+    // 點擊換成網址參數。只套用一次（focusStationAppliedRef），避免
+    // STOPS/lesson 之類的依賴變動讓世界重建時又把玩家拉回那一站。
+    if (focusStation && !focusStationAppliedRef.current) {
+      const idx = STOPS.findIndex((stop) => stop.step === focusStation);
+      if (idx >= 0) {
+        focusStationAppliedRef.current = true;
+        world.travelTo(idx);
+      }
+    }
     return () => {
       world.dispose();
       worldRef.current = null;
@@ -284,7 +369,7 @@ export default function ReadingIslandLab() {
     // 雖然這時候已經真的掛上 DOM，但再也沒有人去建立 3D 世界——整頁看起來正常、
     // 沒有任何錯誤，只是畫布永遠是空的。資料來得快（fetchStory 命中快取/熱啟動）
     // 時這個 race 不會發生，所以不是每次都能重現。
-  }, [student, STOPS, BABIES, lesson, isHandmade, storyType]);
+  }, [student, STOPS, BABIES, lesson, isHandmade, storyType, focusStation]);
 
   useEffect(() => { worldRef.current?.setProgress(unlockedZone, doneIndexes); }, [unlockedZone, doneIndexes]);
   useEffect(() => { worldRef.current?.setMode(mode); }, [mode]);
@@ -391,37 +476,39 @@ export default function ReadingIslandLab() {
   // 故事模式：關卡做完由學習頁通知，直接帶回島上（不往下一關走）
   const returnRef = useRef(returnToIsland);
   returnRef.current = returnToIsland;
-  // #3780 接島上：過關回島的「這站掉了碎片／遇到寶貝」小提示。
+  // #3780 reading-babies phase 2：過關回島的「寶貝長大了」小提示。
   //
   // **正確性來源是 returnToIsland 裡的 refreshProgress(true)（向後端「拉」
-  // 這一課目前的獎勵紀錄），不是這裡的 WORD_BABY_REWARD postMessage**
-  // （team-lead 2026-10-28 二次修正，code-reviewer 2026-10-27 finding）：
-  // ISLAND_STEP_DONE 會同步觸發 setModule(null) 拆掉裝著學習頁的 iframe，
-  // 連同它尚未完成的 PUT /progress 一起摧毀，而 word_baby_rewards 正是那個
-  // PUT 回應才有的資料——真實網路延遲下這個訊息幾乎必然比 PUT 先到，曾經
-  // 試過「延後拆 iframe 等訊息」的寬限期做法，但那是在猜網路速度（慢網路
-  // 一樣會輸、而且每次回島都平白拖長）。改成不依賴任何訊息時序：這裡的
-  // postMessage 監聽**保留當加速**（同一個分頁、網路夠快時可能先到，讓提示
-  // 提早一點點出現），但即使完全收不到這則訊息，回島後的 GET 拉取一樣會
-  // 顯示它——兩條路徑共用 markRewardIdsSeen／readSeenRewardIds 排重，先到
-  // 的那條顯示了，另一條就不會再顯示一次。
+  // 這一課目前的成長紀錄），不是這裡的 READING_BABY_GROWTH postMessage**
+  // （沿用 v1 時代 team-lead 2026-10-28 二次修正、code-reviewer 2026-10-27
+  // finding 的同一個理由）：ISLAND_STEP_DONE 會同步觸發 setModule(null)
+  // 拆掉裝著學習頁的 iframe，連同它尚未完成的 PUT /progress 一起摧毀，而
+  // reading_baby_events 正是那個 PUT 回應才有的資料——真實網路延遲下這個
+  // 訊息幾乎必然比 PUT 先到，曾經試過「延後拆 iframe 等訊息」的寬限期做
+  // 法，但那是在猜網路速度（慢網路一樣會輸、而且每次回島都平白拖長）。
+  // 改成不依賴任何訊息時序：這裡的 postMessage 監聽**保留當加速**（同一個
+  // 分頁、網路夠快時可能先到，讓提示提早一點點出現），但即使完全收不到
+  // 這則訊息，回島後的 GET 拉取一樣會顯示它——兩條路徑共用
+  // markGrowthStationsSeen／readSeenGrowthStations 排重，先到的那條顯示
+  // 了，另一條就不會再顯示一次。
   useEffect(() => {
     const onMessage = (event: MessageEvent) => {
       if (event.origin !== window.location.origin) return;
       const parsed = parseIslandReturnMessage(event.data);
       if (parsed) void returnRef.current(parsed.finished);
-      const rewards = parseWordBabyRewardMessage(event.data);
-      if (rewards) {
-        const seen = readSeenRewardIds(user?.id, storyId);
-        const unseen = rewards.filter((r) => !seen.has(r.id));
-        const hint = firstWordBabyRewardHint(unseen);
-        if (hint) showWordBabyHint(hint);
-        markRewardIdsSeen(user?.id, storyId, rewards.map((r) => r.id));
+      const events = parseReadingBabyGrowthMessage(event.data);
+      if (events) {
+        const passed = events.filter((e) => e.quality_passed);
+        const seen = readSeenGrowthStations(user?.id, storyId);
+        const unseen = passed.filter((e) => !seen.has(e.station));
+        const hint = firstReadingBabyGrowthHint(unseen);
+        if (hint) showReadingBabyGrowthHint(hint);
+        markGrowthStationsSeen(user?.id, storyId, passed.map((e) => e.station));
       }
     };
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
-  }, [user?.id, storyId, showWordBabyHint]);
+  }, [user?.id, storyId, showReadingBabyGrowthHint]);
   if (!student) return <main className="grid min-h-screen place-items-center bg-slate-900 text-white">請使用學生帳號進入喝采島</main>;
   if (!lesson || STOPS.length === 0) return <main className="grid min-h-screen place-items-center bg-slate-900 text-white">載入中…</main>;
   return (
@@ -432,13 +519,22 @@ export default function ReadingIslandLab() {
           的「畫面正中下方」插槽，不是自己另外猜一個位置——那個位置已經被
           islandPanelOverlap.spec.ts 證明在 3 種尺寸下都跟標題卡/面板/工具列
           不衝突（390px 手機版實測過：頂部 top-4 會撞上標題卡，改這裡才乾淨）。*/}
-      {wordBabyHint && (
+      {readingBabyGrowthHint && (
         <div
           role="status"
           aria-live="polite"
-          className="pointer-events-none absolute bottom-40 left-1/2 z-20 -translate-x-1/2 rounded-full border border-white/70 bg-[#244653]/95 px-5 py-2 text-sm font-bold text-[#fff1d0] shadow-xl"
+          // game-design.md §3.3：中階/進階的視覺份量要比單次成長的「小」更
+          // 重——同一個插槽，用邊框顏色/字級/發光區分三級，不疊加新的 UI
+          // 元件（避免擠壓既有版面，尤其手機窄螢幕）。
+          className={`pointer-events-none absolute bottom-40 left-1/2 z-20 -translate-x-1/2 rounded-full border px-5 py-2 font-bold shadow-xl ${
+            readingBabyGrowthLevel === 'large'
+              ? 'border-amber-300 bg-[#3a2a0f]/95 text-base text-[#ffe9a8] shadow-amber-400/40'
+              : readingBabyGrowthLevel === 'medium'
+                ? 'border-sky-200 bg-[#1d3b4a]/95 text-sm text-[#d7f3ff]'
+                : 'border-white/70 bg-[#244653]/95 text-sm text-[#fff1d0]'
+          }`}
         >
-          {wordBabyHint}
+          {readingBabyGrowthHint}
         </div>
       )}
       {/* 標題卡 + 工具列（清單模式/聲音）共用一個 flex-col 容器——team-lead
@@ -497,12 +593,13 @@ export default function ReadingIslandLab() {
               <button type="button" aria-label="切換清單模式" onClick={() => setListMode(true)} className="rounded-full border-2 border-white bg-[#233e4b]/90 px-4 py-2 text-sm font-bold text-[#fff1d0] shadow-lg transition hover:scale-105 active:scale-95">清單模式</button>
             )}
             <button type="button" onClick={toggleMuted} className="rounded-full border-2 border-white bg-[#233e4b]/85 px-3 py-1.5 text-xs font-bold text-[#fff1d0] shadow-lg" aria-pressed={muted}>{muted ? '聲音：關' : '聲音：開'}</button>
-            {/* #3780 手機入口（team-lead 2026-10-28）：「文字寶寶」面板的
-                斷點是 md:flex（768px+），768px 以下這裡是唯一入口——跟工具列
-                其他兩顆按鈕共用同一個 flex-col，自動排在它們下面，不疊到
-                搖桿／跳／上帝視角（那些都在畫面另一側，見 islandPanelOverlap
+            {/* #3780 手機入口（原「文字寶寶」面板 2026-10-28 的說明延續，
+                2026-10-31 改點閱讀寶貝圖鑑）：「文字寶寶」面板的斷點是
+                md:flex（768px+），768px 以下這裡是唯一入口——跟工具列其他
+                兩顆按鈕共用同一個 flex-col，自動排在它們下面，不疊到搖桿／
+                跳／上帝視角（那些都在畫面另一側，見 islandPanelOverlap
                 .spec.ts 的面板清單）。*/}
-            <button type="button" onClick={() => navigate('/lab/word-babies')} className="rounded-full bg-[#244653] px-3 py-1.5 text-xs font-bold text-white shadow-lg md:hidden">我的寶貝</button>
+            <button type="button" onClick={() => navigate('/student/reading-babies')} className="rounded-full bg-[#244653] px-3 py-1.5 text-xs font-bold text-white shadow-lg md:hidden">閱讀寶貝</button>
           </div>
         )}
         {/* 「下一站」/「迷霧散開了」提示——第三次訂正（審查員 2026-10-26）：
@@ -618,16 +715,15 @@ export default function ReadingIslandLab() {
       <aside className="absolute right-4 top-28 z-10 hidden w-28 flex-col gap-1 rounded-2xl border border-white/60 bg-[#f8f3e5]/85 p-2 text-center shadow-lg md:flex" aria-label="文字寶寶">
         <p className="text-[11px] font-black">文字寶寶</p>
         {BABIES.map((baby) => <div key={baby.name} className="flex items-center gap-1 text-[10px] font-semibold"><img src={`/lab-island/sprites/${baby.art}`} alt="" className={`h-7 w-7 object-contain ${completed.some((step) => step.startsWith('vocab-definition') || step.startsWith('vocab-review')) ? '' : 'grayscale opacity-60'}`} /><span>{baby.name}</span></div>)}
-        {/* #3780 接島上（team-lead 2026-10-26）：真正的文字寶貝養成頁
-            （過關拿碎片、餵食、圖鑑）是獨立一支系統，跟這個面板裡的裝飾性
-            字詞寶寶圖示無關——這裡只加一個入口連過去，不把兩者的資料混在
-            一起。 */}
+        {/* #3780 reading-babies phase 2：真正的閱讀寶貝圖鑑（依能力指標
+            成長、碎片收藏）是獨立一支系統，跟這個面板裡的裝飾性字詞寶寶
+            圖示無關——這裡只加一個入口連過去，不把兩者的資料混在一起。 */}
         <button
           type="button"
-          onClick={() => navigate('/lab/word-babies')}
+          onClick={() => navigate('/student/reading-babies')}
           className="mt-1 rounded-full bg-[#244653] px-2 py-1 text-[10px] font-bold text-white active:scale-95"
         >
-          我的寶貝
+          閱讀寶貝
         </button>
       </aside>
       {coldOpen && (

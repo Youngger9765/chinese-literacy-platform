@@ -25,7 +25,7 @@ import {
   loadStepProgress,
   StaleVersionError,
   StepProgressData,
-  WordBabyRewardItem,
+  ReadingBabyGrowthEvent,
 } from '../services/learningApi';
 
 const DEBOUNCE_MS = 5_000;
@@ -50,13 +50,13 @@ export interface UseProgressSyncOptions {
    */
   onXpAwarded?: (result: { xpAwarded: number; badgesUnlocked: string[] }) => void;
   /**
-   * Issue #3780 接島上 — called after a successful save when the backend
-   * granted one or more word-baby rewards (fragment drop / baby encounter)
-   * for a newly-completed step mid-session. NOT called for saves whose
-   * `word_baby_rewards` is absent or empty (the common case), nor for the
+   * Issue #3780 reading-babies phase 2 — called after a successful save when
+   * the backend recorded one or more reading-baby growth events for a
+   * newly-completed step mid-session. NOT called for saves whose
+   * `reading_baby_events` is absent or empty (the common case), nor for the
    * initial GET load. Mirrors onXpAwarded's wiring exactly (#3024).
    */
-  onWordBabyRewarded?: (rewards: WordBabyRewardItem[]) => void;
+  onReadingBabyGrowth?: (events: ReadingBabyGrowthEvent[]) => void;
 }
 
 export interface UseProgressSyncReturn {
@@ -82,7 +82,7 @@ export function useProgressSync({
   onProgressLoaded,
   onProgressSaved,
   onXpAwarded,
-  onWordBabyRewarded,
+  onReadingBabyGrowth,
 }: UseProgressSyncOptions): UseProgressSyncReturn {
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const latestDataRef = useRef<StepProgressData | null>(null);
@@ -115,8 +115,8 @@ export function useProgressSync({
   useEffect(() => { onProgressSavedRef.current = onProgressSaved; }, [onProgressSaved]);
   const onXpAwardedRef = useRef(onXpAwarded);
   useEffect(() => { onXpAwardedRef.current = onXpAwarded; }, [onXpAwarded]);
-  const onWordBabyRewardedRef = useRef(onWordBabyRewarded);
-  useEffect(() => { onWordBabyRewardedRef.current = onWordBabyRewarded; }, [onWordBabyRewarded]);
+  const onReadingBabyGrowthRef = useRef(onReadingBabyGrowth);
+  useEffect(() => { onReadingBabyGrowthRef.current = onReadingBabyGrowth; }, [onReadingBabyGrowth]);
 
   const readStoredVersion = (data: StepProgressData | null | undefined): number => {
     const v = data?.version;
@@ -250,15 +250,16 @@ export function useProgressSync({
             if (xpAwarded > 0 || badgesUnlocked.length > 0) {
               onXpAwardedRef.current?.({ xpAwarded, badgesUnlocked });
             }
-            // Issue #3780 接島上 — surface word-baby rewards the same way,
-            // absent on old responses / GET-shaped payloads (backward compat).
-            // Merged forward into `attempt()` (#3785's queue-serialized save
-            // path) — this used to be a second, now-duplicate inline call to
-            // saveStepProgress sitting directly in doSave; that whole branch
-            // is gone, attempt() is the only place a save actually happens.
-            const wordBabyRewards = res.word_baby_rewards ?? [];
-            if (wordBabyRewards.length > 0) {
-              onWordBabyRewardedRef.current?.(wordBabyRewards);
+            // Issue #3780 reading-babies phase 2 — surface reading-baby
+            // growth events the same way, absent on old responses / GET-shaped
+            // payloads (backward compat). Merged forward into `attempt()`
+            // (#3785's queue-serialized save path) — this used to be a
+            // second, now-duplicate inline call to saveStepProgress sitting
+            // directly in doSave; that whole branch is gone, attempt() is
+            // the only place a save actually happens.
+            const readingBabyEvents = res.reading_baby_events ?? [];
+            if (readingBabyEvents.length > 0) {
+              onReadingBabyGrowthRef.current?.(readingBabyEvents);
             }
           })
           .catch((err) => {

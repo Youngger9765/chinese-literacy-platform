@@ -21,7 +21,7 @@ import { useIdleTimer } from '../hooks/useIdleTimer';
 import type { StepProgressData } from '../services/learningApi';
 import SessionTimeoutWarning from '../components/SessionTimeoutWarning';
 import BadgeUnlockToast from '../components/gamification/BadgeUnlockToast';
-import WordBabyRewardToast from '../components/gamification/WordBabyRewardToast';
+import ReadingBabyGrowthToast from '../components/gamification/ReadingBabyGrowthToast';
 import { isToolboxMode } from '../services/learningStorageScope';
 
 // Extracted hooks (Issue #1906 — deep split of the god component)
@@ -259,8 +259,8 @@ const LearningLayout: React.FC = () => {
     isProgressLoading,
     midSessionBadgeUnlocks,
     dismissMidSessionBadgeUnlocks,
-    midSessionWordBabyRewards,
-    dismissMidSessionWordBabyRewards,
+    midSessionReadingBabyGrowth,
+    dismissMidSessionReadingBabyGrowth,
   } = stepPersistence;
 
   // ── Hook 3: step navigation (all handleFinish* callbacks) ────────────────
@@ -522,12 +522,13 @@ const LearningLayout: React.FC = () => {
         badgeKeys={midSessionBadgeUnlocks}
         onDismiss={dismissMidSessionBadgeUnlocks}
       />
-      {/* #3794（PRD 2026-10-30-island-v2-rpg-pets-story-prd.md §5）—— 做完
-          一站當下就在這一頁跳出碎片／寶貝提示，不等回島才看到；跟上面
-          BadgeUnlockToast 同一層級，不管學生在哪一步都看得到。 */}
-      <WordBabyRewardToast
-        rewards={midSessionWordBabyRewards}
-        onDismiss={dismissMidSessionWordBabyRewards}
+      {/* #3780 reading-babies phase 2（game-design.md §3.3「當頁成長
+          提示」）—— 做完一站當下就在這一頁跳出「寶貝長大了」提示，不等
+          回島才看到；跟上面 BadgeUnlockToast 同一層級，不管學生在哪一步
+          都看得到。 */}
+      <ReadingBabyGrowthToast
+        events={midSessionReadingBabyGrowth}
+        onDismiss={dismissMidSessionReadingBabyGrowth}
       />
     </>
   );

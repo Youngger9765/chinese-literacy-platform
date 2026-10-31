@@ -23,7 +23,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { fetchStories } from '../../services/api';
 import { getStudentProgress } from '../../services/progressApi';
-import { fetchMyWordBabies } from '../../services/wordBabyApi';
+import { fetchReadingBabyAtlas } from '../../services/readingBabyApi';
 import { gradeLabel } from '../../utils/gradeLabel';
 import {
   buildArchipelago,
@@ -121,14 +121,16 @@ const ArchipelagoSidePanel: React.FC<{
   selectedSlug: string | null;
   hoveredSlug: string | null;
   onToggleListMode: () => void;
-  babyCount: { owned: number; total: number } | null;
-  onOpenWordBabies: () => void;
+  babyCount: { owned: number; total: number; fragments: number } | null;
+  babyError: boolean;
+  onOpenReadingBabies: () => void;
+  onRetryBabyCount: () => void;
   themeId: string;
   onChangeTheme: (id: string) => void;
 }> = ({
   cluster, occupiedInCluster, clusterMode, onChangeMode, allClusters, onJumpCluster,
-  search, onSearch, onSelectIsland, selectedSlug, hoveredSlug, onToggleListMode, babyCount, onOpenWordBabies,
-  themeId, onChangeTheme,
+  search, onSearch, onSelectIsland, selectedSlug, hoveredSlug, onToggleListMode, babyCount, babyError,
+  onOpenReadingBabies, onRetryBabyCount, themeId, onChangeTheme,
 }) => {
   const visibleStories = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -240,16 +242,30 @@ const ArchipelagoSidePanel: React.FC<{
         {visibleStories.length === 0 && <li className="py-6 text-center text-sm text-gray-400">找不到符合的課</li>}
       </ul>
 
-      <button
-        type="button"
-        onClick={onOpenWordBabies}
-        className="mt-auto flex w-full items-center justify-between rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-left transition-all hover:border-amber-400"
-      >
-        <span className="text-sm font-bold text-amber-800">
-          {babyCount ? `文字寶貝 ${babyCount.owned}/${babyCount.total} 隻` : '文字寶貝載入中…'}
-        </span>
-        <span className="text-xs font-semibold text-amber-600 underline">看我的寶貝 →</span>
-      </button>
+      {/* #3780 reading-babies phase 2：全站唯一寶貝入口（取代 v1 文字寶貝，
+          game-design.md §5）。讀取失敗時顯示可重試的訊息，不准一直停在
+          「載入中」（PRD #3780「要修的實際缺陷」就是這裡原本會卡死）。 */}
+      {babyError ? (
+        <button
+          type="button"
+          onClick={onRetryBabyCount}
+          className="mt-auto flex w-full items-center justify-between rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-left transition-all hover:border-red-400"
+        >
+          <span className="text-sm font-bold text-red-700">閱讀寶貝載入失敗</span>
+          <span className="text-xs font-semibold text-red-600 underline">點此重試 →</span>
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={onOpenReadingBabies}
+          className="mt-auto flex w-full items-center justify-between rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-left transition-all hover:border-amber-400"
+        >
+          <span className="text-sm font-bold text-amber-800">
+            {babyCount ? `閱讀寶貝 已遇見 ${babyCount.owned}/${babyCount.total} 隻 · 碎片 ${babyCount.fragments} 片` : '閱讀寶貝載入中…'}
+          </span>
+          <span className="text-xs font-semibold text-amber-600 underline">看閱讀寶貝 →</span>
+        </button>
+      )}
     </div>
   );
 };
@@ -261,7 +277,9 @@ const StudentArchipelagoPage: React.FC = () => {
 
   const [islands, setIslands] = useState<ArchipelagoIsland[] | null>(null);
   const [recentProgress, setRecentProgress] = useState<RecentProgressEntry[]>([]);
-  const [babyCount, setBabyCount] = useState<{ owned: number; total: number } | null>(null);
+  const [babyCount, setBabyCount] = useState<{ owned: number; total: number; fragments: number } | null>(null);
+  const [babyError, setBabyError] = useState(false);
+  const [babyRetryAttempt, setBabyRetryAttempt] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
   // code review 2026-10-30 blocker：`?group=` 原本從頭到尾沒被讀——寫死
@@ -324,11 +342,6 @@ const StudentArchipelagoPage: React.FC = () => {
     let alive = true;
     (async () => {
       try {
-        // #3780 閱讀寶貝 Phase 1：v1 文字寶貝後端已下線
-        // （`GET .../word-babies` 現在回 404），這支呼叫只剩角落一個
-        // 次要徽章在用，不該讓它的失敗拖垮整個群島地圖——跟
-        // fetchStories／getStudentProgress 這兩支「沒有就沒頁面」的
-        // 核心資料分開 catch，失敗就讓徽章保持「載入中…」而不是整頁錯誤。
         const [storiesRes, progressRes] = await Promise.all([
           fetchStories(token),
           getStudentProgress(token, user.id),
@@ -344,15 +357,35 @@ const StudentArchipelagoPage: React.FC = () => {
       } catch {
         if (alive) setError('載入群島資料失敗，請重新整理再試一次');
       }
+    })();
+    return () => { alive = false; };
+    // user?.id（不是整個 user 物件）——見 ReadingBabyAtlasPage.tsx 同樣的
+    // 無限迴圈風險說明。
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, user?.id]);
+
+  // #3780 reading-babies phase 2：閱讀寶貝角落徽章——跟上面那段「沒有就沒
+  // 頁面」的核心資料分開一個 effect，失敗不拖垮整個群島地圖，但也**不准
+  // 一直停在「載入中」**（這正是 PRD #3780 列出的那個真實缺陷：v1 下線後
+  // 這裡會永遠 404、badge 卡死）——改成顯示「載入失敗，點此重試」，
+  // `babyRetryAttempt` 當依賴讓使用者可以手動重試。
+  useEffect(() => {
+    if (!token || !user) return;
+    let alive = true;
+    (async () => {
       try {
-        const babiesRes = await fetchMyWordBabies(user.id, token);
-        if (alive) setBabyCount({ owned: babiesRes.babies_owned_count, total: babiesRes.babies_total_species });
+        const atlas = await fetchReadingBabyAtlas(user.id, token);
+        if (!alive) return;
+        const owned = atlas.babies.filter((b) => b.stage !== 'not_encountered').length;
+        setBabyCount({ owned, total: atlas.total_lessons, fragments: atlas.total_fragments });
+        setBabyError(false);
       } catch {
-        // v1 已下線時這裡會 404——badge 停在「載入中…」即可，不設整頁 error。
+        if (alive) setBabyError(true);
       }
     })();
     return () => { alive = false; };
-  }, [token, user]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, user?.id, babyRetryAttempt]);
 
   const clusters = useMemo(
     () => (islands ? groupIntoClusters(islands.map((i) => ({ ...i, id: i.storySlug })), clusterMode) : []),
@@ -548,16 +581,27 @@ const StudentArchipelagoPage: React.FC = () => {
         </header>
         {webglFailed && <p className="text-sm text-amber-600">這台裝置目前無法顯示 3D 地圖，已自動切換成清單模式</p>}
 
-        <button
-          type="button"
-          onClick={() => navigate('/lab/word-babies')}
-          className="flex w-full items-center justify-between rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-left transition-all hover:border-amber-400"
-        >
-          <span className="text-base font-bold text-amber-800">
-            {babyCount ? `文字寶貝 ${babyCount.owned}/${babyCount.total} 隻` : '文字寶貝載入中…'}
-          </span>
-          <span className="text-sm font-semibold text-amber-600 underline">看我的寶貝 →</span>
-        </button>
+        {babyError ? (
+          <button
+            type="button"
+            onClick={() => setBabyRetryAttempt((a) => a + 1)}
+            className="flex w-full items-center justify-between rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-left transition-all hover:border-red-400"
+          >
+            <span className="text-base font-bold text-red-700">閱讀寶貝載入失敗</span>
+            <span className="text-sm font-semibold text-red-600 underline">點此重試 →</span>
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => navigate('/student/reading-babies')}
+            className="flex w-full items-center justify-between rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-left transition-all hover:border-amber-400"
+          >
+            <span className="text-base font-bold text-amber-800">
+              {babyCount ? `閱讀寶貝 已遇見 ${babyCount.owned}/${babyCount.total} 隻 · 碎片 ${babyCount.fragments} 片` : '閱讀寶貝載入中…'}
+            </span>
+            <span className="text-sm font-semibold text-amber-600 underline">看閱讀寶貝 →</span>
+          </button>
+        )}
 
         <div className="flex flex-wrap items-center gap-2">
           <button type="button" onClick={() => setLegacyGradeFilter(null)} className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-all ${legacyGradeFilter === null ? 'bg-accent text-white' : 'border border-gray-200 bg-white text-gray-600 hover:border-accent'}`}>全部年級</button>
@@ -602,7 +646,9 @@ const StudentArchipelagoPage: React.FC = () => {
       hoveredSlug={hoveredSlug}
       onToggleListMode={() => setListMode(true)}
       babyCount={babyCount}
-      onOpenWordBabies={() => navigate('/lab/word-babies')}
+      babyError={babyError}
+      onOpenReadingBabies={() => navigate('/student/reading-babies')}
+      onRetryBabyCount={() => setBabyRetryAttempt((a) => a + 1)}
       themeId={themeId}
       onChangeTheme={changeTheme}
     />

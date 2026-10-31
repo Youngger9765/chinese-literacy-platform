@@ -1,18 +1,17 @@
 /**
- * #3780 手機/平板入口（team-lead 2026-10-28）：「文字寶寶」面板原本是
- * `lg:flex`（1024px+），跟這個檔案其餘所有響應式元素用的 `md:`（768px）
- * 二分法不一致——結果 768–1023px 之間（iPad 直向 820px 正好落在這段）
- * 兩邊都看不到入口：面板還沒出現（< lg），手機版工具列又已經收起（≥ md）。
+ * #3780 reading-babies phase 2：喝采島 HUD 的「文字寶寶」面板跟手機版工具列
+ * 都要有一個「閱讀寶貝」入口連到 `/student/reading-babies`（取代 v1 的
+ * 「我的寶貝」→ `/lab/word-babies`，見 game-design.md §5.3；替換 2026-10-31
+ * 刪除的 ReadingIslandLab.wordBabiesEntryPoint.test.tsx /
+ * .mobileWordBabiesEntryPoint.test.tsx）。
  *
- * 修法：①「文字寶寶」面板斷點從 `lg:flex` 改成 `md:flex`，關掉 iPad 那段
- * 落差 ②工具列（清單模式/聲音）裡加一顆 `md:hidden` 的「我的寶貝」按鈕，
- * 給 768px 以下的手機用——兩個斷點合起來保證任何寬度都至少有一個入口。
+ * 這支鎖：① 桌機/平板的「文字寶寶」面板跟手機版工具列裡都有一個「閱讀
+ * 寶貝」按鈕（不是裝飾性死連結）② 點下去 navigate('/student/reading-babies')
+ * ③ 不再出現任何「我的寶貝」字樣或 /lab/word-babies 路徑。
  *
  * jsdom 不會真的套用 CSS media query（兩顆按鈕在 jsdom 裡都會被渲染出
  * 來，只是靠 class name 決定哪個斷點顯示），所以這支測試驗的是「結構
- * 正確」（存在、文字對、點擊會 navigate），真正的「哪個寬度看得到哪顆」
- * 用真瀏覽器截圖驗證過（819→1440 三種寬度各看到剛好一顆，見 G7 審查
- * 紀錄），不是這支單元測試的職責。
+ * 正確」，真正的「哪個寬度看得到哪顆」用真瀏覽器截圖驗證（G7 審查）。
  */
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
@@ -34,6 +33,13 @@ vi.mock('../../../services/learningApi', () => ({
   loadStepProgress: vi.fn().mockResolvedValue({ session_id: 1, step_progress: null }),
 }));
 vi.mock('../../../config/stepPath', () => ({ stepPath: () => '/learn/20011/lesson-intro' }));
+// #3780 reading-babies phase 2「進化分級回饋」(ReadingIslandLab.stageEvolution.test.tsx
+// 才是真正測這個行為的檔案)：這支測試不關心寶貝進化，但 refreshProgress 現在
+// 一定會呼叫 fetchReadingBabyCard 建立 stage 基準——不 mock 掉會打到真實網路
+// （jsdom 沒有網路，會 hang/reject，拖慢或弄壞這支測試跟它完全無關的斷言）。
+vi.mock('../../../services/readingBabyApi', () => ({
+  fetchReadingBabyCard: () => Promise.reject(new Error('not mocked in this test file')),
+}));
 
 const { createIslandWorld } = vi.hoisted(() => ({
   createIslandWorld: vi.fn((host: HTMLElement) => {
@@ -82,27 +88,53 @@ async function enterIsland() {
   act(() => { vi.advanceTimersByTime(3600); });
 }
 
-describe('ReadingIslandLab — 工具列裡的手機版「我的寶貝」入口（768px 以下用）', () => {
-  it('工具列（清單模式/聲音旁邊）有一顆「我的寶貝」按鈕，帶 md:hidden（只在手機寬度顯示）', async () => {
+describe('ReadingIslandLab — 文字寶寶面板有「閱讀寶貝」入口連到 /student/reading-babies', () => {
+  it('面板裡有「閱讀寶貝」按鈕，不再是「我的寶貝」', async () => {
+    await enterIsland();
+
+    const panel = document.querySelector('[aria-label="文字寶寶"]');
+    expect(panel).toBeTruthy();
+    const entryButton = Array.from(panel!.querySelectorAll('button')).find((b) => b.textContent?.includes('閱讀寶貝'));
+    expect(entryButton).toBeTruthy();
+    expect(Array.from(panel!.querySelectorAll('button')).find((b) => b.textContent?.includes('我的寶貝'))).toBeFalsy();
+
+    vi.useRealTimers();
+  });
+
+  it('點擊「閱讀寶貝」會導到 /student/reading-babies，不是舊的 /lab/word-babies', async () => {
+    await enterIsland();
+
+    const panel = document.querySelector('[aria-label="文字寶寶"]')!;
+    const entryButton = Array.from(panel.querySelectorAll('button')).find((b) => b.textContent?.includes('閱讀寶貝'))!;
+    act(() => { fireEvent.click(entryButton); });
+
+    expect(navigate).toHaveBeenCalledWith('/student/reading-babies');
+
+    vi.useRealTimers();
+  });
+});
+
+describe('ReadingIslandLab — 工具列裡的手機版「閱讀寶貝」入口（768px 以下用）', () => {
+  it('工具列（清單模式/聲音旁邊）有一顆「閱讀寶貝」按鈕，帶 md:hidden（只在手機寬度顯示）', async () => {
     await enterIsland();
 
     const toolbar = document.querySelector('[aria-label="工具列"]');
     expect(toolbar, '工具列容器應該存在').toBeTruthy();
-    const entryButton = Array.from(toolbar!.querySelectorAll('button')).find((b) => b.textContent === '我的寶貝');
-    expect(entryButton, '工具列裡應該有一顆「我的寶貝」按鈕').toBeTruthy();
+    const entryButton = Array.from(toolbar!.querySelectorAll('button')).find((b) => b.textContent === '閱讀寶貝');
+    expect(entryButton, '工具列裡應該有一顆「閱讀寶貝」按鈕').toBeTruthy();
     expect(entryButton!.className).toContain('md:hidden');
 
     vi.useRealTimers();
   });
 
-  it('點擊工具列裡的「我的寶貝」會導到 /lab/word-babies', async () => {
+  it('點擊工具列裡的「閱讀寶貝」會導到 /student/reading-babies', async () => {
     await enterIsland();
 
     const toolbar = document.querySelector('[aria-label="工具列"]')!;
-    const entryButton = Array.from(toolbar.querySelectorAll('button')).find((b) => b.textContent === '我的寶貝')!;
+    const entryButton = Array.from(toolbar.querySelectorAll('button')).find((b) => b.textContent === '閱讀寶貝')!;
     act(() => { fireEvent.click(entryButton); });
 
-    expect(navigate).toHaveBeenCalledWith('/lab/word-babies');
+    expect(navigate).toHaveBeenCalledWith('/student/reading-babies');
 
     vi.useRealTimers();
   });

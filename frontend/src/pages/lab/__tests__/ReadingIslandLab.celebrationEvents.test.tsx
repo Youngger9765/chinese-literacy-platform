@@ -32,6 +32,13 @@ vi.mock('../../../services/learningApi', () => ({
   loadStepProgress: vi.fn(),
 }));
 vi.mock('../../../config/stepPath', () => ({ stepPath: () => '/learn/20011/lesson-intro' }));
+// #3780 reading-babies phase 2「進化分級回饋」(ReadingIslandLab.stageEvolution.test.tsx
+// 才是真正測這個行為的檔案)：這支測試不關心寶貝進化，但 refreshProgress 現在
+// 一定會呼叫 fetchReadingBabyCard 建立 stage 基準——不 mock 掉會打到真實網路
+// （jsdom 沒有網路，會 hang/reject，拖慢或弄壞這支測試跟它完全無關的斷言）。
+vi.mock('../../../services/readingBabyApi', () => ({
+  fetchReadingBabyCard: () => Promise.reject(new Error('not mocked in this test file')),
+}));
 
 const { createIslandWorld, worldConfigs } = vi.hoisted(() => ({
   worldConfigs: [] as Array<{
