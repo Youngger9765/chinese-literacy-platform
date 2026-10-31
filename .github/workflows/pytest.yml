@@ -43,6 +43,9 @@ jobs:
               - 'frontend/src/pages/pk/resolvePkGrade.ts'
               - 'frontend/src/components/league/__tests__/fixtures/builtinStoryPacks.json'
               - 'frontend/src/data/wordBabiesCatalog.json'
+              # #3780 第三階段：test_reading_baby_professor_family 鎖住前後端家族一致
+              - 'frontend/src/data/readingBabyProfessorFamilies.json'
+              - 'frontend/src/data/readingBabyAppearanceInputs.json'
               - 'frontend/scripts/eval/tts-alignment.eval.ts'
               # #3750：test_demo_seed_cleanup_3750 鎖住兩支 e2e 用固定 prefix 灌示範學生
               - 'frontend/tests/e2e/demo-path.spec.ts'
