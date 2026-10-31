@@ -211,8 +211,10 @@ describe('③ 每個 GROUPINGS 分群方式：群加總 = 課程總數，每課�
     });
   }
 
-  it('三種分群策略都存在（grade/genre/category）', () => {
-    expect(Object.keys(GROUPINGS).sort()).toEqual(['category', 'genre', 'grade']);
+  it('六種分群策略都存在（grade/genre/category ＋ 108 課綱三層 performance/content/competency，2026-10-31 #3780 後續）', () => {
+    expect(Object.keys(GROUPINGS).sort()).toEqual([
+      'category', 'competency', 'content', 'genre', 'grade', 'performance',
+    ]);
   });
 });
 

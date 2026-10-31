@@ -69,10 +69,18 @@ const STATUS_BADGE_CLASS: Record<ArchipelagoIsland['status'], string> = {
 };
 
 const CLUSTER_MODE_LABEL: Record<ClusterMode, string> = {
+  performance: '學習表現',
+  content: '學習內容',
+  competency: '核心素養',
   grade: '年級',
   genre: '文體',
   category: '類別',
 };
+
+/** HUD 切換按鈕的顯示順序——108 課綱三層（2026-10-31 新預設）排前面，
+ *  年級／文體／類別保留在後面當可切換選項（Young 2026-10-31：「那你島嶼
+ *  就要依照學習能力三層做分群」）。網址 `?group=` 合法值同一份清單。 */
+const CLUSTER_MODES_IN_UI_ORDER: ClusterMode[] = ['performance', 'content', 'competency', 'grade', 'genre', 'category'];
 
 /** `groupIntoClusters` 的 `ClusterStory` 約束用 `id` 當身分欄位（跟
  *  `ArchipelagoStory` 的命名對齊），`ArchipelagoIsland` 用的是
@@ -165,7 +173,7 @@ const ArchipelagoSidePanel: React.FC<{
       </div>
 
       <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="分群方式">
-        {(['grade', 'genre', 'category'] as ClusterMode[]).map((mode) => (
+        {CLUSTER_MODES_IN_UI_ORDER.map((mode) => (
           <button
             key={mode}
             type="button"
@@ -186,6 +194,10 @@ const ArchipelagoSidePanel: React.FC<{
           清單模式
         </button>
       </div>
+      {/* 108 課綱三層（學習表現／學習內容／核心素養）是 AI 草稿，老師還沒
+          審過——`.claude/skills/lesson-curriculum-mapping/SKILL.md` §紅線：
+          「對外、給老師報告、進遊戲判定都要寫『草稿』」，不藏起來。 */}
+      <p className="text-xs text-gray-400">課綱分類為草稿，待老師審核</p>
 
       <input
         type="text"
@@ -255,11 +267,16 @@ const StudentArchipelagoPage: React.FC = () => {
   // code review 2026-10-30 blocker：`?group=` 原本從頭到尾沒被讀——寫死
   // 'grade' 會讓「回群島」帶回來的 `group=genre&cluster=說明文` 落在錯的群
   // （用 grade 模式分群，不會有一群的 key 剛好等於「說明文」，於是掉回
-  // defaultClusterKey 的年級 fallback）。初始值要從網址讀，驗不是三種合法
-  // 值之一就退回 'grade'，不信任網址內容。
+  // defaultClusterKey 的年級 fallback）。初始值要從網址讀，驗不是合法值
+  // 之一就退回預設，不信任網址內容。
+  // 2026-10-31：預設分群改成「學習表現」（108 課綱三層，Young：「那你島嶼
+  // 就要依照學習能力三層做分群」）——年級／文體／類別仍是可切換選項，只是
+  // 不再是預設落點。
   const [clusterMode, setClusterMode] = useState<ClusterMode>(() => {
     const fromUrl = searchParams.get('group');
-    return fromUrl === 'grade' || fromUrl === 'genre' || fromUrl === 'category' ? fromUrl : 'grade';
+    return (CLUSTER_MODES_IN_UI_ORDER as string[]).includes(fromUrl ?? '')
+      ? (fromUrl as ClusterMode)
+      : 'performance';
   });
   const [clusterKey, setClusterKey] = useState<string | null>(searchParams.get('cluster'));
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null);

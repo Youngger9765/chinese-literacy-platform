@@ -156,6 +156,111 @@ describe('groupIntoClusters — §8.5/§8.8：三種分群方式加總 = total�
   });
 });
 
+describe('groupIntoClusters — 108 課綱三層分群（performance/content/competency，2026-10-31 #3780 後續）', () => {
+  it.each(['performance', 'content', 'competency'] as const)('分群方式=%s：加總=total、每課只出現一次', (mode) => {
+    const clusters = groupIntoClusters(fixture.stories, mode);
+    const totalInClusters = clusters.reduce((sum, c) => sum + c.stories.length, 0);
+    expect(totalInClusters, `分群方式 ${mode} 加總應該等於 total`).toBe(fixture.total);
+
+    const seen = new Set<string>();
+    for (const cluster of clusters) {
+      for (const story of cluster.stories) {
+        expect(seen.has(story.id), `課 ${story.id} 在分群方式 ${mode} 下出現了超過一次`).toBe(false);
+        seen.add(story.id);
+      }
+    }
+    expect(seen.size, `分群方式 ${mode} 下每課應該剛好出現一次`).toBe(fixture.total);
+  });
+
+  it.each(['grade', 'genre', 'category', 'performance', 'content', 'competency'] as const)(
+    '🔒 併群規則：分群方式=%s 底下沒有任何一群少於 4 座島（PRD §2.2）',
+    (mode) => {
+      const clusters = groupIntoClusters(fixture.stories, mode);
+      const tooSmall = clusters.filter((c) => c.stories.length < 4);
+      expect(tooSmall, `太小的群：${tooSmall.map((c) => `${c.key}(${c.stories.length})`).join(', ')}`).toHaveLength(0);
+    },
+  );
+
+  it('依學習表現分群：19 個代碼中少於 4 課的全部併入同學習階段「綜合」群，共 14 群', () => {
+    const clusters = groupIntoClusters(fixture.stories, 'performance');
+    const byKey = new Map(clusters.map((c) => [c.key, c.stories.length]));
+    // 標準代碼（count>=4，各自維持一群）
+    expect(byKey.get('5-Ⅳ-4')).toBe(31);
+    expect(byKey.get('5-Ⅳ-5')).toBe(21);
+    expect(byKey.get('5-Ⅳ-3')).toBe(19);
+    expect(byKey.get('5-Ⅳ-6')).toBe(18);
+    expect(byKey.get('5-Ⅲ-6')).toBe(16);
+    expect(byKey.get('5-Ⅲ-8')).toBe(13);
+    expect(byKey.get('5-Ⅲ-11')).toBe(12);
+    expect(byKey.get('5-Ⅳ-2')).toBe(12);
+    expect(byKey.get('5-Ⅱ-8')).toBe(8);
+    expect(byKey.get('5-Ⅱ-11')).toBe(6);
+    expect(byKey.get('5-Ⅲ-7')).toBe(6);
+    expect(byKey.get('4-Ⅲ-2')).toBe(4);
+    // 🔒 併群：5-Ⅱ-6(2)+5-Ⅱ-4(2)+5-Ⅱ-5(1)+5-Ⅱ-9(1) = 6，併入第Ⅱ階段綜合群
+    // （拿掉併群表會讓這幾個代碼變成各自獨立的 1~2 課小群，下面那條
+    //  「沒有群少於 4」的測試會先紅——這條則是直接驗證合併後的正確數字）
+    expect(byKey.get('Ⅱ-綜合')).toBe(6);
+    // 🔒 併群：5-Ⅲ-12(3)+5-Ⅲ-9(2) 併入綜合群仍只有 5，再加上 Ⅳ 階段唯一的
+    // 小群 4-Ⅳ-3(2) 一起跨階段合併成「第Ⅲ／Ⅳ階段・綜合」= 7
+    // （只併同階段的話 Ⅳ 階段會只剩一個 2 課的綜合群，仍然 <4）
+    expect(byKey.get('Ⅲ／Ⅳ-綜合')).toBe(7);
+    // 併群後的原始小代碼不應該再以自己的代碼當 key 出現
+    for (const mergedAway of ['5-Ⅱ-6', '5-Ⅱ-4', '5-Ⅱ-5', '5-Ⅱ-9', '5-Ⅲ-12', '5-Ⅲ-9', '4-Ⅳ-3']) {
+      expect(byKey.has(mergedAway), `${mergedAway} 應該已經被併群，不該再單獨出現`).toBe(false);
+    }
+    expect(clusters.length).toBe(14);
+  });
+
+  it('依學習內容分群：6 個前綴（Ab/Ad/Ba/Bc/Bd/Cb），全部 >=4 課不需併群', () => {
+    const clusters = groupIntoClusters(fixture.stories, 'content');
+    const byKey = new Map(clusters.map((c) => [c.key, c.stories.length]));
+    expect(byKey.get('Ad')).toBe(86);
+    expect(byKey.get('Cb')).toBe(36);
+    expect(byKey.get('Bc')).toBe(21);
+    expect(byKey.get('Ab')).toBe(19);
+    expect(byKey.get('Ba')).toBe(9);
+    expect(byKey.get('Bd')).toBe(8);
+    expect(clusters.length).toBe(6);
+  });
+
+  it('依核心素養分群：C2(1 課) 併入同面（社會參與）的 C1，共 5 群', () => {
+    const clusters = groupIntoClusters(fixture.stories, 'competency');
+    const byKey = new Map(clusters.map((c) => [c.key, c.stories.length]));
+    expect(byKey.get('A2')).toBe(73);
+    // 🔒 併群：C1(36)+C2(1) = 37
+    expect(byKey.get('C1+C2')).toBe(37);
+    expect(byKey.get('B3')).toBe(25);
+    expect(byKey.get('B2')).toBe(23);
+    expect(byKey.get('B1')).toBe(21);
+    expect(byKey.has('C2'), 'C2 應該已經併進 C1+C2，不該單獨出現').toBe(false);
+    expect(clusters.length).toBe(5);
+  });
+
+  it('未對到課綱資料的課（curriculum lookup 查無）：三種模式都歸「其他」，不會從結果中消失', () => {
+    const unknownStory = { id: '99999999', grade: '4', genre: '記敘文', category: 'Fable', lessonSeq: 1 };
+    const stories = [...fixture.stories, unknownStory];
+    for (const mode of ['performance', 'content', 'competency'] as const) {
+      const clusters = groupIntoClusters(stories, mode);
+      const total = clusters.reduce((sum, c) => sum + c.stories.length, 0);
+      expect(total, `分群方式 ${mode} 應包含這筆查無資料的課`).toBe(stories.length);
+      const other = clusters.find((c) => c.key === '其他');
+      expect(other, `分群方式 ${mode} 應該有「其他」群收住查無資料的課`).toBeTruthy();
+      expect(other!.stories.some((s) => s.id === '99999999')).toBe(true);
+    }
+  });
+
+  it('clusterLabel：三層分群給學生看得懂的中文名稱，代碼放在括號裡（不是只顯示代碼）', () => {
+    expect(clusterLabel('Ad', 'content')).toBe('篇章：段落與結構（Ad）');
+    expect(clusterLabel('5-Ⅲ-8', 'performance')).toContain('5-Ⅲ-8');
+    expect(clusterLabel('5-Ⅲ-8', 'performance')).not.toBe('5-Ⅲ-8'); // 不是裸代碼
+    expect(clusterLabel('Ⅱ-綜合', 'performance')).toBe('第Ⅱ階段・綜合');
+    expect(clusterLabel('Ⅲ／Ⅳ-綜合', 'performance')).toBe('第Ⅲ／Ⅳ階段・綜合');
+    expect(clusterLabel('C1+C2', 'competency')).toContain('C1');
+    expect(clusterLabel('A2', 'competency')).not.toBe('A2');
+  });
+});
+
 describe('portalsFor — 傳送門清單：當前分群方式的其他每一群各一座門', () => {
   it('年級模式下，在第 5 級群島會看到另外 7 座門（不含自己）', () => {
     const clusters = groupIntoClusters(fixture.stories, 'grade');

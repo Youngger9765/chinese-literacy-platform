@@ -14,6 +14,14 @@
  * - 分群方式切換（依文體／依類別）會重新分群
  * - API 失敗時顯示錯誤訊息，不是白屏
  *
+ * 2026-10-31（#3780 後續，依 108 課綱學習能力三層分群）：預設分群方式從
+ * 'grade' 改成 'performance'，`defaultClusterKey()` 仍然是「最近一次學習
+ * 的那一課所在的群」——測試用的兩個真實 story id（20011/20082）在
+ * `lessonCurriculum.json`（AI 草稿）底下的學習表現代碼不同（5-Ⅱ-8 vs
+ * 5-Ⅳ-6），所以預設落點只會看到 20082，不會像舊版 grade 分群那樣兩課都在
+ * 同一群。需要同時看到兩課、或驗證 grade 模式特有行為的測試，先點「依年級」
+ * 切回舊分群方式再操作。
+ *
  * `createArchipelagoWorld` 整支 mock 掉（見下面 `createArchipelagoWorldMock`），
  * 不靠「jsdom 沒有真的 WebGL所以會自然回傳 null」這個環境細節——那個假設
  * 曾經不成立過（這支檔案舊版的文件註解就是這樣寫的，但實測這幾支測試
@@ -136,7 +144,9 @@ describe('StudentArchipelagoPage', () => {
 
   it('只打三支 API 各一次（不逐課打）', async () => {
     render(<StudentArchipelagoPage />);
-    await waitFor(() => expect(screen.getAllByText('贏得喝采的輸家')[0]).toBeTruthy());
+    // 2026-10-31：預設分群方式是 performance，20082 一定在預設落點（最近
+    // 一次學習紀錄），20011 不一定——用保證會出現的那一課當掛載完成訊號。
+    await waitFor(() => expect(screen.getAllByText('從〈螞蟻與蟋蟀〉看生命的多樣性')[0]).toBeTruthy());
 
     expect(fetchStoriesMock).toHaveBeenCalledTimes(1);
     expect(getStudentProgressMock).toHaveBeenCalledTimes(1);
@@ -144,26 +154,45 @@ describe('StudentArchipelagoPage', () => {
     expect(fetchMyWordBabiesMock).toHaveBeenCalledTimes(1);
   });
 
-  it('預設落在最近學過那一課所在的群（20011/20082 都是 4 年級，兩課裡最近的是 20082）——右側清單顯示第 4 級群島的課，不是別群', async () => {
+  it('預設落在最近學過那一課所在的群（2026-10-31：預設分群方式是學習表現，20082 最近一次學習，落在它的學習表現群）', async () => {
     render(<StudentArchipelagoPage />);
-    await waitFor(() => expect(screen.getAllByText('贏得喝采的輸家')[0]).toBeTruthy());
+    await waitFor(() => expect(screen.getAllByText('從〈螞蟻與蟋蟀〉看生命的多樣性')[0]).toBeTruthy());
 
-    expect(screen.getAllByText('第 4 級群島')[0]).toBeTruthy();
-    expect(screen.getAllByText('從〈螞蟻與蟋蟀〉看生命的多樣性')[0]).toBeTruthy();
-    // 文言文那課屬於另一群，預設落點不該把它也列出來
+    // 20082 的學習表現代碼是 5-Ⅳ-6（lessonCurriculum.json AI 草稿）。
+    expect(screen.getAllByText('資訊蒐集與組織（5-Ⅳ-6）')[0]).toBeTruthy();
+    // 20011 學習表現代碼是 5-Ⅱ-8，不同群，不該出現在預設落點清單裡。
+    expect(screen.queryAllByText('贏得喝采的輸家')[0] ?? null).toBeNull();
+    // 20200 查無課綱資料（不在 179 課真實清單裡），歸「其他」群，也不該出現。
     expect(screen.queryAllByText('某篇文言文故事')[0] ?? null).toBeNull();
   });
 
-  it('站點清單用 aria-label 標示每一課的狀態：已佔領／探索中 x/y／（文言文那課沒碰過，但它在別群，清單裡看不到）', async () => {
+  it('依年級分群（切換選項）：預設落在最近學過那一課所在的群——20011/20082 都是 4 年級，兩課裡最近的是 20082，右側清單顯示第 4 級群島的課，不是別群', async () => {
     render(<StudentArchipelagoPage />);
-    await waitFor(() => expect(screen.getAllByText('贏得喝采的輸家')[0]).toBeTruthy());
+    await waitFor(() => expect(screen.getAllByText('從〈螞蟻與蟋蟀〉看生命的多樣性')[0]).toBeTruthy());
 
-    expect(screen.getAllByLabelText('贏得喝采的輸家（已佔領）')[0]).toBeTruthy();
-    expect(screen.getAllByLabelText('從〈螞蟻與蟋蟀〉看生命的多樣性（探索中 4/10 站）')[0]).toBeTruthy();
+    act(() => { fireEvent.click(screen.getAllByRole('button', { name: '依年級' })[0]); });
+
+    await waitFor(() => expect(screen.getAllByText('第 4 級群島')[0]).toBeTruthy());
+    expect(screen.getAllByText('贏得喝采的輸家')[0]).toBeTruthy();
+    expect(screen.getAllByText('從〈螞蟻與蟋蟀〉看生命的多樣性')[0]).toBeTruthy();
+    // 文言文那課屬於另一群，不該把它也列出來
+    expect(screen.queryAllByText('某篇文言文故事')[0] ?? null).toBeNull();
   });
 
-  it('切到「古文群島」能看到尚未探索的那一課', async () => {
+  it('站點清單用 aria-label 標示每一課的狀態：已佔領／探索中 x/y（切到依年級，讓兩課同群才能一起看到）', async () => {
     render(<StudentArchipelagoPage />);
+    await waitFor(() => expect(screen.getAllByText('從〈螞蟻與蟋蟀〉看生命的多樣性')[0]).toBeTruthy());
+    expect(screen.getAllByLabelText('從〈螞蟻與蟋蟀〉看生命的多樣性（探索中 4/10 站）')[0]).toBeTruthy();
+
+    act(() => { fireEvent.click(screen.getAllByRole('button', { name: '依年級' })[0]); });
+    await waitFor(() => expect(screen.getAllByLabelText('贏得喝采的輸家（已佔領）')[0]).toBeTruthy());
+  });
+
+  it('切到「古文群島」能看到尚未探索的那一課（先切回依年級，古文群島是年級分群才有的群）', async () => {
+    render(<StudentArchipelagoPage />);
+    await waitFor(() => expect(screen.getAllByText('從〈螞蟻與蟋蟀〉看生命的多樣性')[0]).toBeTruthy());
+
+    act(() => { fireEvent.click(screen.getAllByRole('button', { name: '依年級' })[0]); });
     await waitFor(() => expect(screen.getAllByText('贏得喝采的輸家')[0]).toBeTruthy());
 
     act(() => {
@@ -184,6 +213,11 @@ describe('StudentArchipelagoPage', () => {
 
   it('搜尋課名只留符合的課在清單裡', async () => {
     render(<StudentArchipelagoPage />);
+    await waitFor(() => expect(screen.getAllByText('從〈螞蟻與蟋蟀〉看生命的多樣性')[0]).toBeTruthy());
+
+    // 切到依年級，讓 20011／20082 同群，搜尋才有「縮小清單」的意義可驗
+    // （兩課的學習表現代碼不同群，預設分群下清單本來就只有 20082 一課）。
+    act(() => { fireEvent.click(screen.getAllByRole('button', { name: '依年級' })[0]); });
     await waitFor(() => expect(screen.getAllByText('贏得喝采的輸家')[0]).toBeTruthy());
 
     act(() => { fireEvent.change(screen.getAllByPlaceholderText('搜尋課名…')[0], { target: { value: '螞蟻' } }); });
@@ -194,7 +228,7 @@ describe('StudentArchipelagoPage', () => {
 
   it('搜尋沒有任何課符合時顯示提示文字，不是空白或錯誤', async () => {
     render(<StudentArchipelagoPage />);
-    await waitFor(() => expect(screen.getAllByText('贏得喝采的輸家')[0]).toBeTruthy());
+    await waitFor(() => expect(screen.getAllByText('從〈螞蟻與蟋蟀〉看生命的多樣性')[0]).toBeTruthy());
 
     act(() => { fireEvent.change(screen.getAllByPlaceholderText('搜尋課名…')[0], { target: { value: '不存在的關鍵字xyz' } }); });
 
@@ -203,7 +237,11 @@ describe('StudentArchipelagoPage', () => {
 
   it('點一座島出現島卡，按「登島」導去 /lab/island/:storyId 並帶上 from/group/cluster（PRD §3.4/§8-4）', async () => {
     render(<StudentArchipelagoPage />);
-    await waitFor(() => expect(screen.getAllByText('贏得喝采的輸家')[0]).toBeTruthy());
+    await waitFor(() => expect(screen.getAllByText('從〈螞蟻與蟋蟀〉看生命的多樣性')[0]).toBeTruthy());
+
+    // 20011 的學習表現群跟預設落點不同，先切回依年級才能看到它。
+    act(() => { fireEvent.click(screen.getAllByRole('button', { name: '依年級' })[0]); });
+    await waitFor(() => expect(screen.getAllByLabelText('贏得喝采的輸家（已佔領）')[0]).toBeTruthy());
 
     act(() => { fireEvent.click(screen.getAllByLabelText('贏得喝采的輸家（已佔領）')[0]); });
     await waitFor(() => expect(screen.getByRole('button', { name: '登島' })).toBeTruthy());
@@ -214,7 +252,7 @@ describe('StudentArchipelagoPage', () => {
 
   it('依文體分群：切換後清單依文體重新分組，同一課只出現在一群', async () => {
     render(<StudentArchipelagoPage />);
-    await waitFor(() => expect(screen.getAllByText('贏得喝采的輸家')[0]).toBeTruthy());
+    await waitFor(() => expect(screen.getAllByText('從〈螞蟻與蟋蟀〉看生命的多樣性')[0]).toBeTruthy());
 
     act(() => { fireEvent.click(screen.getAllByRole('button', { name: '依文體' })[0]); });
 
@@ -246,7 +284,7 @@ describe('StudentArchipelagoPage', () => {
 
   it('切換分群方式（依文體）後，網址的 group 參數要更新成 genre，重新整理不會跳回年級', async () => {
     render(<StudentArchipelagoPage />);
-    await waitFor(() => expect(screen.getAllByText('贏得喝采的輸家')[0]).toBeTruthy());
+    await waitFor(() => expect(screen.getAllByText('從〈螞蟻與蟋蟀〉看生命的多樣性')[0]).toBeTruthy());
 
     act(() => { fireEvent.click(screen.getAllByRole('button', { name: '依文體' })[0]); });
 
@@ -267,7 +305,7 @@ describe('StudentArchipelagoPage', () => {
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     fetchStoriesMock.mockResolvedValue({ ...STORIES_RES, total: 999 });
     render(<StudentArchipelagoPage />);
-    await waitFor(() => expect(screen.getAllByText('贏得喝采的輸家')[0]).toBeTruthy());
+    await waitFor(() => expect(screen.getAllByText('從〈螞蟻與蟋蟀〉看生命的多樣性')[0]).toBeTruthy());
 
     expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('999'));
     errorSpy.mockRestore();
@@ -276,7 +314,7 @@ describe('StudentArchipelagoPage', () => {
   it('stories.length 跟 total 相等時完全不印 console.error', async () => {
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     render(<StudentArchipelagoPage />);
-    await waitFor(() => expect(screen.getAllByText('贏得喝采的輸家')[0]).toBeTruthy());
+    await waitFor(() => expect(screen.getAllByText('從〈螞蟻與蟋蟀〉看生命的多樣性')[0]).toBeTruthy());
 
     expect(errorSpy).not.toHaveBeenCalled();
     errorSpy.mockRestore();
@@ -314,16 +352,17 @@ describe('StudentArchipelagoPage', () => {
    */
   it('有傳 onHoverIsland 給 createArchipelagoWorld，呼叫後側欄對應站點出現 hover 高亮', async () => {
     render(<StudentArchipelagoPage />);
-    await waitFor(() => expect(screen.getAllByText('贏得喝采的輸家')[0]).toBeTruthy());
+    // 2026-10-31：預設分群是學習表現，20082 保證在預設落點裡（20011 不在）。
+    await waitFor(() => expect(screen.getAllByText('從〈螞蟻與蟋蟀〉看生命的多樣性')[0]).toBeTruthy());
 
     expect(createArchipelagoWorldMock).toHaveBeenCalled();
     const events = createArchipelagoWorldMock.mock.calls[0][1]!;
     expect(typeof events.onHoverIsland).toBe('function');
 
-    const button = screen.getAllByLabelText('贏得喝采的輸家（已佔領）')[0];
+    const button = screen.getAllByLabelText('從〈螞蟻與蟋蟀〉看生命的多樣性（探索中 4/10 站）')[0];
     expect(button).not.toHaveClass('bg-accent/5'); // hover 前：沒有高亮
 
-    act(() => { events.onHoverIsland!('20011'); });
+    act(() => { events.onHoverIsland!('20082'); });
     await waitFor(() => expect(button).toHaveClass('bg-accent/5'));
 
     act(() => { events.onHoverIsland!(null); });

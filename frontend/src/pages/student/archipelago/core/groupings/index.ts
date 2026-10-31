@@ -8,12 +8,18 @@
 import { gradeGrouping } from './grade';
 import { genreGrouping } from './genre';
 import { categoryGrouping } from './category';
+import { performanceGrouping } from './performance';
+import { contentGrouping } from './content';
+import { competencyGrouping } from './competency';
 import type { GroupingStrategy } from './types';
 
 export const GROUPINGS: Record<string, GroupingStrategy> = {
   grade: gradeGrouping,
   genre: genreGrouping,
   category: categoryGrouping,
+  performance: performanceGrouping,
+  content: contentGrouping,
+  competency: competencyGrouping,
 };
 
 export type { GroupingStrategy, ClusterSummary } from './types';
