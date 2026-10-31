@@ -435,6 +435,7 @@ class EvidenceDetailItem:
     lesson_title: str | None
     station: str
     station_label: str | None
+    signal_type: str
     quality_passed: bool
     quality_score: float | None
     items_total: int | None
@@ -464,6 +465,7 @@ def get_indicator_evidence_detail(
                 lesson_title=lesson_meta.get("title") if lesson_meta else None,
                 station=row.station,
                 station_label=_station_label(row.station),
+                signal_type=row.signal_type,
                 quality_passed=row.quality_passed,
                 quality_score=row.quality_score,
                 items_total=row.items_total,

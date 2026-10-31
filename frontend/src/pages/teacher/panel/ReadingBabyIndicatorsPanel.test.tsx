@@ -46,7 +46,7 @@ const DETAIL = {
   note: '課綱對照為草稿，待老師審核',
   evidence: [
     {
-      lesson_uid: 'L0042', lesson_title: '大象的旅行', station: 'spotlight', station_label: '聚光閣',
+      lesson_uid: 'L0042', lesson_title: '大象的旅行', station: 'spotlight', station_label: '聚光閣', signal_type: 'first_try_accuracy',
       quality_passed: false, quality_score: 0.33, items_total: 3, items_first_try_correct: 1,
       cpm: null, accuracy: null,
       source_ref: { session_id: 5, raw_step_data: { mcAnswers: [
@@ -55,7 +55,7 @@ const DETAIL = {
       created_at: '2026-10-30T08:00:00',
     },
     {
-      lesson_uid: 'L0043', lesson_title: '朗讀課', station: 'key-passage-reading', station_label: '朗讀台',
+      lesson_uid: 'L0043', lesson_title: '朗讀課', station: 'key-passage-reading', station_label: '朗讀台', signal_type: 'reading_fluency',
       quality_passed: true, quality_score: 1, items_total: null, items_first_try_correct: null,
       cpm: 132, accuracy: 95, source_ref: { session_id: 6 }, created_at: '2026-10-29T08:00:00',
     },
@@ -131,6 +131,31 @@ describe('ReadingBabyIndicatorsPanel', () => {
     ]);
     expect(screen.getByText(/每分鐘 132 字/)).toBeInTheDocument();
     expect(screen.getByText('課綱對照為草稿，待老師審核')).toBeInTheDocument();
+  });
+
+  it('screen 3: a station with no right/wrong is shown as participation, not as failed', async () => {
+    heatmapMock.mockResolvedValue(HEATMAP);
+    detailMock.mockResolvedValue({
+      ...DETAIL,
+      evidence: [{
+        lesson_uid: 'L0001', lesson_title: '十秒的背後', station: 'lesson-intro', station_label: '港口燈塔',
+        signal_type: 'completion', quality_passed: false, quality_score: null, items_total: null, items_first_try_correct: null,
+        cpm: null, accuracy: null, source_ref: { session_id: 1 }, created_at: '2026-10-31T08:00:00',
+      }, {
+        // 計分站但後端讀不到作答格式（fail-closed）：沒有題數也沒有速度，仍要顯示沒做到
+        lesson_uid: 'L0002', lesson_title: '讀不到格式的課', station: 'comprehension', station_label: '解謎屋',
+        signal_type: 'first_try_accuracy', quality_passed: false, quality_score: null, items_total: null,
+        items_first_try_correct: null, cpm: null, accuracy: null, source_ref: null, created_at: '2026-10-31T09:00:00',
+      }],
+    });
+    render(<ReadingBabyIndicatorsPanel classroomId={7} />);
+    fireEvent.click(await screen.findByRole('button', { name: '李小華 5-Ⅲ-6 未達' }));
+    const row = (await screen.findByText('十秒的背後')).closest('li')!;
+    expect(row).toHaveTextContent('只記參與');
+    expect(row).not.toHaveTextContent('還沒做到');
+    const scored = screen.getByText('讀不到格式的課').closest('li')!;
+    expect(scored).toHaveTextContent('還沒做到');
+    expect(scored).not.toHaveTextContent('只記參與');
   });
 
   it('clicking a heatmap cell goes straight to screen 3; back returns to the heatmap', async () => {

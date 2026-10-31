@@ -39,6 +39,8 @@ export interface IndicatorEvidenceItem {
   lesson_title: string | null;
   station: string;
   station_label: string | null;
+  /** completion＝沒有對錯，只記參與（老師端不可顯示成「沒做到」）。 */
+  signal_type: 'first_try_accuracy' | 'reading_fluency' | 'completion' | string | null;
   quality_passed: boolean;
   quality_score: number | null;
   items_total: number | null;

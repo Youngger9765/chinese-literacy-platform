@@ -99,7 +99,7 @@ const DraftNotice: React.FC = () => (
 );
 
 const StatusChip: React.FC<{ status: IndicatorStatus }> = ({ status }) => (
-  <span className={`inline-block rounded-md px-2 py-1 text-sm font-medium ${STATUS_CLASS[status]}`}>
+  <span className={`inline-block whitespace-nowrap rounded-md px-2 py-1 text-sm font-medium ${STATUS_CLASS[status]}`}>
     {status === 'not_assigned' ? '—' : STATUS_LABEL[status]}
   </span>
 );
@@ -219,7 +219,7 @@ const StudentView: React.FC<{
       <div className="overflow-x-auto">
         <table aria-label={`${name}的能力指標`} className="min-w-full text-sm">
           <thead>
-            <tr className="border-b border-gray-200 text-left text-gray-500">
+            <tr className="whitespace-nowrap border-b border-gray-200 text-left text-gray-500">
               <th className="py-2 pr-3 font-medium">指標</th>
               <th className="py-2 pr-3 font-medium">狀態</th>
               <th className="py-2 pr-3 font-medium whitespace-nowrap">做得好的課</th>
@@ -230,8 +230,8 @@ const StudentView: React.FC<{
           <tbody>
             {cells.map((c) => (
               <tr key={c.indicator_code} className="border-b border-gray-100">
-                <td className="py-2 pr-3">
-                  <span className="font-medium text-gray-900">{c.indicator_code}</span>
+                <td className="min-w-[180px] py-2 pr-3">
+                  <span className="whitespace-nowrap font-medium text-gray-900">{c.indicator_code}</span>
                   <span className="block text-xs text-gray-500">{textOf(c.indicator_code)}</span>
                 </td>
                 <td className="py-2 pr-3"><StatusChip status={c.status} /></td>
@@ -260,6 +260,10 @@ const EvidenceRow: React.FC<{ item: IndicatorEvidenceItem }> = ({ item }) => {
   const title = item.lesson_title ?? item.lesson_uid;
   const perItem = firstTryItems(item.source_ref);
   let measure: string;
+  // completion 站沒有對錯，只記參與，不能顯示成「還沒做到」——那會讓老師以為
+  // 學生做錯了。用後端存的 signal_type 判斷，不用「沒有題數」推測：計分站讀不到
+  // 作答格式時（fail-closed）也是沒有題數，那種要照實顯示「還沒做到」。
+  const participationOnly = item.signal_type === 'completion';
   if (item.items_total != null && item.items_first_try_correct != null && item.items_total > 0) {
     const pct = Math.round((item.items_first_try_correct / item.items_total) * 100);
     measure = `首答 ${item.items_first_try_correct}/${item.items_total}（${pct}%）`;
@@ -276,9 +280,13 @@ const EvidenceRow: React.FC<{ item: IndicatorEvidenceItem }> = ({ item }) => {
         <span className="text-sm text-gray-500">{formatDate(item.created_at)}</span>
         <span className="text-sm text-gray-700">{item.station_label ?? item.station}</span>
         <span className="text-sm text-gray-700">{measure}</span>
-        <span className={`text-sm font-medium ${item.quality_passed ? 'text-emerald-700' : 'text-orange-700'}`}>
-          {item.quality_passed ? '做得好' : '還沒做到'}
-        </span>
+        {participationOnly ? (
+          <span className="text-sm font-medium text-sky-700">只記參與</span>
+        ) : (
+          <span className={`text-sm font-medium ${item.quality_passed ? 'text-emerald-700' : 'text-orange-700'}`}>
+            {item.quality_passed ? '做得好' : '還沒做到'}
+          </span>
+        )}
       </div>
       {perItem.length > 0 && (
         <ul aria-label={`${title} 逐題首答`} className="mt-2 flex flex-wrap gap-2 text-sm">

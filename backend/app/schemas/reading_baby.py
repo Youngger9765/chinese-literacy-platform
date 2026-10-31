@@ -96,6 +96,9 @@ class EvidenceDetailResponse(BaseModel):
     lesson_title: str | None
     station: str
     station_label: str | None = None
+    signal_type: str | None = Field(
+        default=None, description="first_try_accuracy／reading_fluency／completion——completion 沒有對錯，只記參與"
+    )
     quality_passed: bool
     quality_score: float | None
     items_total: int | None

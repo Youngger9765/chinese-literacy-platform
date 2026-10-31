@@ -300,3 +300,4 @@ class TestTeacherHeatmapLabels:
         assert body["student_name"] == "Student"
         assert body["indicator_text"] == reading_baby_config.get_indicator_text(indicator_code)
         assert body["evidence"][0]["station_label"]
+        assert body["evidence"][0]["signal_type"] == "first_try_accuracy"
