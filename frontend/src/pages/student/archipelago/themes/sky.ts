@@ -11,7 +11,7 @@ import * as THREE from 'three';
 import type { ArchipelagoTheme, SceneCtx, CellInfo, LandmarkFactory, ConnectorMaterial } from './types';
 import { unionBoundary, jitterBoundary, subdivideBoundary, smoothBoundaryLoop, scaleBoundaryToward, extrudeBoundary } from './islandShape';
 import { buildRadialGradientTexture, buildRadialFadeAlphaTexture } from './proceduralTextures';
-import { requiredGroundRadius } from '../core/groundRadius';
+import { requiredGroundRadius, groundFadeStartFraction } from '../core/groundRadius';
 import { buildBoardwalk, buildSteppingStones, buildRopeBridge, buildShoal, buildFerry, type ConnectorPalette } from './connectors';
 import { buildFlag } from './flags';
 import { buildHoverOutline, buildGrassClusters, buildRock, buildPathStones, buildMascot } from './decorations';
@@ -66,11 +66,15 @@ const STATION_SHAPE_BY_CATEGORY: Record<string, string> = {
   default: 'vocab-application',
 };
 
+// 同 `ocean.ts` 同一處完整說明：俯仰角降到 50° 之後地標要整體放大 1.5 倍
+// 才看得出上面有建築。
+const LANDMARK_SCALE_BOOST = 1.5;
+
 function buildCategoryLandmark(ctx: SceneCtx, cell: CellInfo): THREE.Group {
   const group = new THREE.Group();
   const approxRadius = cell.cellRadius * 0.68;
   const stepType = STATION_SHAPE_BY_CATEGORY[cell.category] ?? STATION_SHAPE_BY_CATEGORY.default;
-  const building = buildLandmarkFromStationShape(ctx, stepType, approxRadius * 0.9, 'sky');
+  const building = buildLandmarkFromStationShape(ctx, stepType, approxRadius * 0.9 * LANDMARK_SCALE_BOOST, 'sky');
   group.add(building);
   if (cell.category !== '歷史人文') {
     const dir = offsetDirectionFor(cell);
@@ -128,14 +132,15 @@ export const skyTheme: ArchipelagoTheme = {
     // 退回重做：固定 6×maxRadius 卡在理論門檻上，見 `ocean.ts` 同一處的
     // 完整說明，天空島同一個根因同一個修法）。
     const cloudSeaRadius = requiredGroundRadius(maxRadius);
-    // team-lead 2026-10-31 四次訂正：淡出起點 0.7→0.55，同 `ocean.ts` 同一處
-    // 完整說明（光圈太亮，淡出帶要佔更大比例的半徑才夠漸進）。
+    // team-lead 2026-10-31 六次訂正：淡出起點改用 `groundFadeStartFraction()`
+    // 動態算出，不寫死數字，同 `ocean.ts` 同一處完整說明。
+    const fadeStart = groundFadeStartFraction(maxRadius);
     const cloudSea = new THREE.Mesh(
       ctx.geometry('sky-cloudsea-plane', () => new THREE.CircleGeometry(cloudSeaRadius, 96)),
       ctx.material('sky-cloudsea', () => new THREE.MeshStandardMaterial({
         color: 0xeaf0fb,
         roughness: 0.95,
-        alphaMap: buildRadialFadeAlphaTexture(0.55, 512),
+        alphaMap: buildRadialFadeAlphaTexture(fadeStart, 512),
         transparent: true,
         opacity: 0.92,
       })),

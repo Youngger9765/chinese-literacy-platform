@@ -37,13 +37,11 @@ import * as THREE from 'three';
  *  實際運作的倍率上。 */
 const ORBIT_RADIUS_MULTIPLIER = 2.4;
 const ORBIT_RADIUS_FLOOR = 14;
-/** 同 `createArchipelagoWorld.ts` 的 `orbitPitch = 1.05`（換群重設回的
- *  預設俯角）。2026-10-31 五次訂正：俯仰角從 0.65 調陡到 1.05（見
- *  `createArchipelagoWorld.ts` 鏡頭構圖段的完整說明），兩邊要同步——陡角度
- *  下「畫面最上緣視線」打到地面平面的距離本來就比較短，這裡沿用舊常數
- *  不會算錯方向（只會多留一點不必要的安全邊際），但為了跟實際運作的鏡頭
- *  參數對齊，還是同步更新。 */
-const ORBIT_PITCH = 1.05;
+/** 同 `createArchipelagoWorld.ts` 的 `orbitPitch = 0.8727`（換群重設回的
+ *  預設俯角，≈50°）。2026-10-31 七次訂正：俯仰角從 1.05（60°）降到
+ *  0.8727（50°）讓建築露出側面（見 `createArchipelagoWorld.ts` 鏡頭構圖
+ *  段的完整說明），兩邊要同步。 */
+const ORBIT_PITCH = 0.8727;
 /** 同 `createArchipelagoWorld.ts` 相機建構時的垂直 FOV（度）。 */
 const CAMERA_FOV_DEGREES = 50;
 /** 同 `ocean.ts`/`sky.ts` 的 `sea.position.y`/`cloudSea.position.y`。 */
@@ -52,13 +50,18 @@ const GROUND_PLANE_Y = -1.6;
  *  數字量感上就夠，不必再算一次公式）。 */
 const MIN_RADIUS = 60;
 
+/** `requiredGroundRadius()`／`groundFadeStartFraction()` 共用的預設安全
+ *  邊際——兩支函式的「倍率」要是同一個數字，`groundFadeStartFraction()`
+ *  才是真的在描述「這顆被放大過的圓盤上，最上緣視線落在哪裡」。 */
+const DEFAULT_SAFETY_MARGIN = 1.5;
+
 /**
  * @param maxRadius 這一群的外接圓半徑（`boundingCircle.radius`）
  * @param safetyMargin 理論最小半徑之上再留的安全邊際倍率——理論值剛好是
  *   門檻，鏡頭角度／長寬比／三角函式近似值的任何一點點落差都會讓邊緣露出
  *   來（這正是這次退回重做的根因）。
  */
-export function requiredGroundRadius(maxRadius: number, safetyMargin = 1.5): number {
+export function requiredGroundRadius(maxRadius: number, safetyMargin = DEFAULT_SAFETY_MARGIN): number {
   const orbitRadius = Math.max(ORBIT_RADIUS_FLOOR, maxRadius * ORBIT_RADIUS_MULTIPLIER);
   const halfVFov = THREE.MathUtils.degToRad(CAMERA_FOV_DEGREES / 2);
   const topRayAngle = ORBIT_PITCH - halfVFov; // 畫面最上緣那條視線，相對水平面再往下多少角度
@@ -66,7 +69,7 @@ export function requiredGroundRadius(maxRadius: number, safetyMargin = 1.5): num
   const horizontalDistCameraToTarget = orbitRadius * Math.cos(ORBIT_PITCH);
   if (topRayAngle <= 0) {
     // 理論上在目前的俯仰角/FOV 組合下恆不會發生（pitch 比半 FOV 大，
-    // 1.05 rad > 0.4363 rad）——防呆：真的變成「最上緣視線本身朝上」就
+    // 0.8727 rad > 0.4363 rad）——防呆：真的變成「最上緣視線本身朝上」就
     // 代表地面平面物理上不可能把整個視野填滿，退回一個保守但有限的值，
     // 不要除以零或產生負值。
     return (horizontalDistCameraToTarget + cameraHeightAbovePlane) * safetyMargin * 10;
@@ -74,4 +77,42 @@ export function requiredGroundRadius(maxRadius: number, safetyMargin = 1.5): num
   const topRayHorizontalReach = cameraHeightAbovePlane / Math.tan(topRayAngle);
   const needed = topRayHorizontalReach - horizontalDistCameraToTarget;
   return Math.max(MIN_RADIUS, needed * safetyMargin);
+}
+
+/**
+ * 海面/雲海徑向透明淡出的起點（team-lead 2026-10-31 六次訂正：「不要寫死
+ * 0.75，用相機幾何算出『畫面最上緣視線落在半徑的幾%』，淡出起點設為那個
+ * 值再加 0.05，寫成純函式」）——上一輪把淡出起點從 0.7 手動調到 0.55，
+ * 結果構圖那輪把俯仰角／縮放倍率都改了，畫面最上緣視線落點的比例也跟著
+ * 變，0.55 立刻變成「淡出帶跟可見範圍重疊」(落點變亮、像一圈光圈)。手動
+ * 數字每次構圖再訂正一次就要跟著手動調一次，容易忘記同步；改成純函式，
+ * 以後構圖再怎麼調，這裡都會自動算出正確的起點。
+ *
+ * 推導：`requiredGroundRadius(maxRadius, 1)` 是「不留安全邊際」的理論最小
+ * 半徑，也就是畫面最上緣視線打到地面平面的真實距離；
+ * `requiredGroundRadius(maxRadius, safetyMargin)` 是圓盤實際蓋出來的半徑
+ * （比理論值大 `safetyMargin` 倍）。兩者的比值，就是「畫面最上緣視線」
+ * 落在這顆實際圓盤的半徑幾 %——淡出起點要落在這個比例**之外**（半徑更大
+ * 的地方），最上緣視線才會落在淡出開始之前的全不透明區，不會被淡出帶的
+ * 透明度稀釋而偏亮。额外加 `marginBuffer`（預設 0.05）留一點緩衝，不要
+ * 剛好卡在理論邊界上（跟 `requiredGroundRadius()` 本身要留安全邊際是
+ * 同一個理由）。
+ *
+ * 不直接用 `1/safetyMargin` 這個代數捷徑，而是真的呼叫兩次
+ * `requiredGroundRadius()` 取比值——這樣當 `maxRadius` 小到讓 `MIN_RADIUS`
+ * 下限在任一次呼叫生效時（極小群），比值仍然反映函式實際回傳的半徑，不會
+ * 因為走了捷徑而跟實際圓盤大小脫勾。
+ */
+export function groundFadeStartFraction(
+  maxRadius: number,
+  safetyMargin = DEFAULT_SAFETY_MARGIN,
+  marginBuffer = 0.05,
+): number {
+  const topRayLandingRadius = requiredGroundRadius(maxRadius, 1);
+  const actualRadius = requiredGroundRadius(maxRadius, safetyMargin);
+  const rawFraction = topRayLandingRadius / actualRadius;
+  // 防呆上限：fraction 逼近或超過 1 會讓淡出帶寬度變 0 或負值（整圈瞬間
+  // 全透明，等於邊緣消失變成另一種硬邊）——理論上 `safetyMargin > 1` 時
+  // 恆不會發生，但不要讓一個未來的極端輸入悄悄產生壞資料。
+  return Math.min(0.95, rawFraction + marginBuffer);
 }

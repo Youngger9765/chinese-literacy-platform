@@ -38,9 +38,14 @@ let landmarkInstanceCounter = 0;
  * ——那支也服務單課島第一人稱近看場景，近看時金綠交錯的樹冠、跟房子同色
  * 的廟頂屋簷都是合理的細節，不該為了群島總覽的辨識度犧牲掉。 */
 const OVERVIEW_RECOLOR_BY_STEP: Record<string, { from: number; to: number }[]> = {
-  // 樹群（寓言故事）：金綠交錯的樹冠統一染成飽和綠，讀起來才是「一叢樹」
-  // 而不是「幾個雜色小點」。
-  'vocab-review': [{ from: 0xe7bb6b, to: 0x5a9e5f }],
+  // 樹群（寓言故事）：金綠交錯的樹冠統一染色——team-lead 2026-10-31 七次
+  // 訂正截圖抓到「贏得喝采的輸家」「正太與小豬」這兩座寓言故事島幾乎看不
+  // 到樹（整座島像空的）：第一版染的 `0x5a9e5f` 跟島面「已佔領」狀態色
+  // `0x5fa06a`、「探索中」狀態色 `0x8bab7e`（`ocean.ts` 的 `STATUS_COLOR`）
+  // 幾乎是同一色階，樹冠直接融進島面的顏色裡，變成從正上方完全看不出來
+  // 的保護色。改成深很多的墨綠 `0x2f6b3a`，跟三種島面狀態色（含淺灰的
+  // 「尚未探索」）都有足夠亮度/色相落差。
+  'vocab-review': [{ from: 0xe7bb6b, to: 0x2f6b3a }],
   // 雙層廟頂（歷史人文）：下層屋頂原本跟 `vocab-application`（房子）共用
   // 同一個 `copper`，染成暖紅色區隔開，讓「廟」讀起來跟「房子」不同色。
   'classical-text': [{ from: 0xa66d52, to: 0xb5453f }],

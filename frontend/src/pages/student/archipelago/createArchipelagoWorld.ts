@@ -456,7 +456,7 @@ export function createArchipelagoWorld(
   // ---------------------------------------------------------------------
   let orbitRadius = 22;
   let orbitYaw = 0.5;
-  let orbitPitch = 1.05; // 俯角，0=水平 PI/2=正上方
+  let orbitPitch = 0.8727; // 俯角，0=水平 PI/2=正上方（≈50°）
   let orbitTarget = new THREE.Vector3(0, 0, 0);
   let minRadius = 10;
   let maxRadius = 60;
@@ -753,9 +753,26 @@ export function createArchipelagoWorld(
       // （沒有任何壞處，但會讓人誤以為 opacity 還在被動畫控制）。
       el.style.transition = 'transform 150ms';
       const labelObject = new CSS2DObject(el);
-      // 固定偏移在島基準點上方（美術指導書 §7：取現有地標類別裡最高的那個
-      // 高度再加餘裕，群島只有 4 種地標形狀，用固定值即可，省掉逐類別查表）。
-      labelObject.position.set(0, 1.6, 0);
+      // 名牌偏移改成「這座島實際蓋出來的最高點」動態算（team-lead 2026-10-31
+      // 七次訂正截圖抓到「誤會」「美好的一天」——debug 追出來這兩座剛好都是
+      // 樹群造型（寓言故事類），樹群是四種地標裡最矮的一種，原本整組島共用
+      // 一個「取最高地標類別校準」的固定偏移（先是 1.6，後改 1.6×1.5=2.4）
+      // ——對矮的樹群來說，CSS2DObject 預設置中錨點，固定偏移值離樹冠太
+      // 近，卡片整張蓋住矮建築；對高的塔／廟頂又偏移過頭，名牌離建築本體
+      // 遠得不自然。改成直接讀 `worldBox`（剛好在這上面幾行已經為了
+      // occluder 算過，同一個島不用算第二次）的 `max.y` 再加一點緩衝——
+      // 矮建築的名牌自動貼得近且穩穩在頂端之上，高建築的名牌也不會飄太遠，
+      // 不用為每種地標類型各自校準一個魔術數字，以後新增地標類型也自動
+      // 適用。
+      //
+      // 緩衝從 0.3 加大到 1.0：實測發現同一個世界座標緩衝量，畫面**前景**
+      // （鏡頭近側、螢幕下半部）的島得到的螢幕空間淨空比**遠景**（螢幕上半
+      // 部，貼近地平線）小很多——鏡頭俯仰角固定時，前景那段視線更接近垂直
+      // 朝下，同樣的世界高度差只換到很少的螢幕像素位移；遠景視線趨近水平，
+      // 同樣的高度差換到的螢幕位移大得多。「誤會」「美好的一天」剛好都在
+      // 這次構圖的前景位置，0.3 不夠，加大到 1.0 讓前景島也有感的淨空（代價
+      // 是遠景島的名牌會稍微浮高一點，不是問題——那邊本來淨空就綽綽有餘）。
+      labelObject.position.set(0, worldBox.max.y + 2.0, 0);
       islandObj.add(labelObject);
       nameplates.set(island.storySlug, { object: labelObject, el, worldPos: new THREE.Vector3(), status: island.status, cardText, dotColor });
 
@@ -805,7 +822,7 @@ export function createArchipelagoWorld(
     minRadius = Math.max(8, maxDist * 0.5);
     maxRadius = maxDist * 3.2;
     orbitTarget = new THREE.Vector3(boundingCircle.center.x, 0, boundingCircle.center.z);
-    orbitPitch = 1.05; // 換群重設回預設俯角，不留著玩家上一群拖曳過的角度
+    orbitPitch = 0.8727; // 換群重設回預設俯角，不留著玩家上一群拖曳過的角度
     // 遠裁切面要跟著地面圓盤的安全半徑縮放（2026-10-31 二次退回重做）——
     // `theme.ground()` 現在用 `requiredGroundRadius()` 把地面圓盤做得比
     // 固定 300 的遠裁切面還大（大群時），地面會被遠裁切面本身切掉一截，

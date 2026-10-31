@@ -11,7 +11,7 @@ import * as THREE from 'three';
 import type { ArchipelagoTheme, SceneCtx, CellInfo, LandmarkFactory, ConnectorMaterial } from './types';
 import { unionBoundary, jitterBoundary, subdivideBoundary, smoothBoundaryLoop, scaleBoundaryToward, extrudeBoundary } from './islandShape';
 import { buildRadialGradientTexture, buildRadialFadeAlphaTexture } from './proceduralTextures';
-import { requiredGroundRadius } from '../core/groundRadius';
+import { requiredGroundRadius, groundFadeStartFraction } from '../core/groundRadius';
 import { buildBoardwalk, buildSteppingStones, buildRopeBridge, buildShoal, buildFerry, type ConnectorPalette } from './connectors';
 import { buildFlag } from './flags';
 import { buildHoverOutline, buildGrassClusters, buildRock, buildPathStones, buildMascot } from './decorations';
@@ -78,11 +78,21 @@ const STATION_SHAPE_BY_CATEGORY: Record<string, string> = {
   default: 'vocab-application', // 有屋頂、煙囪、木棧板的房子造型，貼近「生活/其他」
 };
 
+// team-lead 2026-10-31 七次訂正：俯仰角降到 50° 讓建築露出側面之後，地標
+// 本身還是太小——「正太與小豬：武僧的養成之路」在陡角度下目測只剩一塊
+// 屋頂。`buildLandmarkFromStationShape` 的 Y 軸已經有 `heightBoost`
+// 單獨放大，這裡再把傳進去的 `targetBaseWidth` 整體乘 1.5——因為
+// Y 軸縮放 = `scale * heightBoost`，`scale` 本身就是從 `targetBaseWidth`
+// 算出來的，放大 `targetBaseWidth` 會連 X/Y/Z 三軸等比例放大，不用另外
+// 再調 `heightBoost`，整棟建築（含屋頂/塔尖/樹冠）均勻變大 1.5 倍，不是
+// 只有某個軸被拉長變形。
+const LANDMARK_SCALE_BOOST = 1.5;
+
 function buildCategoryLandmark(ctx: SceneCtx, cell: CellInfo): THREE.Group {
   const group = new THREE.Group();
   const approxRadius = cell.cellRadius * 0.68;
   const stepType = STATION_SHAPE_BY_CATEGORY[cell.category] ?? STATION_SHAPE_BY_CATEGORY.default;
-  const building = buildLandmarkFromStationShape(ctx, stepType, approxRadius * 0.9, 'ocean');
+  const building = buildLandmarkFromStationShape(ctx, stepType, approxRadius * 0.9 * LANDMARK_SCALE_BOOST, 'ocean');
   group.add(building);
   // 歷史人文維持置中（美術指導書 §1.1：「亭子本身講究對稱，符合建築語彙」），
   // 其餘類別偏心擺放朝連接物方向，讓剪影在接近時先被看到。
@@ -144,16 +154,18 @@ export const oceanTheme: ArchipelagoTheme = {
     // 俯仰角/FOV 反推「不會露出邊緣」所需的最小半徑，並內建安全邊際，不是
     // 再猜一個「看起來比較大」的倍數。
     const seaRadius = requiredGroundRadius(maxRadius);
-    // team-lead 2026-10-31 四次訂正：淡出起點從 0.7 往內移到 0.55——畫面
-    // 最上緣那圈「青色亮弧」太亮像一道光圈，根因是淡出帶只佔半徑的外圈
-    // 30%，相對整個圓盤的面積太窄，淡出速度不夠快，邊界附近還殘留太多
-    // 不透明的飽和色才會看起來像一圈「光圈」。淡出起點提前到 0.55（淡出
-    // 帶變成外圈 45%），同樣的半徑範圍內色彩衰減得更早、更漸進。
+    // team-lead 2026-10-31 六次訂正：淡出起點不再寫死數字——上一輪手動調成
+    // 0.55，構圖那輪一改俯仰角/縮放倍率，畫面最上緣視線落點的比例也跟著
+    // 變，0.55 就變成「落在淡出帶裡面」，邊緣反而被淡出的透明度稀釋變亮
+    // （一圈光圈）。`groundFadeStartFraction()` 直接用相機幾何算出「最上緣
+    // 視線落在這顆圓盤半徑的幾 %」再加緩衝，不管構圖以後再怎麼調，這裡都
+    // 會自動跟著算對，不用每次構圖訂正都手動回來改這一行。
+    const fadeStart = groundFadeStartFraction(maxRadius);
     const sea = new THREE.Mesh(
       ctx.geometry('ocean-sea-plane', () => new THREE.CircleGeometry(seaRadius, 96)),
       ctx.material('ocean-sea', () => new THREE.MeshStandardMaterial({
         map: seaTexture,
-        alphaMap: buildRadialFadeAlphaTexture(0.55, 512),
+        alphaMap: buildRadialFadeAlphaTexture(fadeStart, 512),
         transparent: true,
         metalness: 0.2,
         roughness: 0.32,

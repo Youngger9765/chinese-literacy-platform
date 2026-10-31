@@ -17,7 +17,7 @@
  * 的乘法拿掉會讓這支紅。
  */
 import { describe, it, expect } from 'vitest';
-import { requiredGroundRadius } from '../groundRadius';
+import { requiredGroundRadius, groundFadeStartFraction } from '../groundRadius';
 
 describe('requiredGroundRadius — 地面圓盤安全半徑', () => {
   it('28 島群（maxRadius≈33.26）：預設安全邊際下的半徑明顯大於「理論最小值」（safetyMargin=1）', () => {
@@ -48,5 +48,42 @@ describe('requiredGroundRadius — 地面圓盤安全半徑', () => {
     const base = requiredGroundRadius(40, 1.5);
     const bigger = requiredGroundRadius(40, 3);
     expect(bigger).toBeGreaterThan(base * 1.9); // 大約兩倍（浮點數給一點容忍）
+  });
+});
+
+describe('groundFadeStartFraction — 淡出起點（team-lead 2026-10-31 六次訂正：不要寫死數字，算出來）', () => {
+  it('🔒 跟「理論最小半徑 / 實際圓盤半徑」的比值一致，再加上 marginBuffer', () => {
+    const maxRadius = 40;
+    const safetyMargin = 1.5;
+    const marginBuffer = 0.05;
+    const theoreticalMin = requiredGroundRadius(maxRadius, 1);
+    const actual = requiredGroundRadius(maxRadius, safetyMargin);
+    const expected = theoreticalMin / actual + marginBuffer;
+    expect(groundFadeStartFraction(maxRadius, safetyMargin, marginBuffer)).toBeCloseTo(expected, 6);
+  });
+
+  it('不吃 maxRadius 的影響（只要沒踩到 MIN_RADIUS 下限，比值只跟 safetyMargin 有關）——驗兩個不同的真實群算出同一個起點', () => {
+    const a = groundFadeStartFraction(33.26);
+    const b = groundFadeStartFraction(54.57);
+    expect(a).toBeCloseTo(b, 6);
+  });
+
+  it('safetyMargin 越大，淡出起點比例越小（圓盤相對留的安全邊際越大，最上緣視線落點佔的比例越小）', () => {
+    const tighter = groundFadeStartFraction(40, 1.2);
+    const looser = groundFadeStartFraction(40, 3);
+    expect(looser).toBeLessThan(tighter);
+  });
+
+  it('預設參數（safetyMargin=1.5）算出來的起點比上一輪手動設的 0.55 更靠外——這正是上一輪「0.55 太靠內變亮」那個 bug 的數值證明', () => {
+    const fraction = groundFadeStartFraction(40);
+    expect(fraction).toBeGreaterThan(0.55);
+  });
+
+  it('有上限防呆，不會因為極端輸入逼近或超過 1（淡出帶寬度不會變 0 或負值）', () => {
+    expect(groundFadeStartFraction(40, 1.001)).toBeLessThanOrEqual(0.95);
+  });
+
+  it('決定性：同樣輸入算兩次結果一樣', () => {
+    expect(groundFadeStartFraction(40)).toBe(groundFadeStartFraction(40));
   });
 });
