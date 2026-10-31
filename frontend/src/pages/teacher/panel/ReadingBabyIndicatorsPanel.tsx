@@ -219,34 +219,31 @@ const StudentView: React.FC<{
       <div className="overflow-x-auto">
         <table aria-label={`${name}的能力指標`} className="min-w-full text-sm">
           <thead>
-            <tr className="whitespace-nowrap border-b border-gray-200 text-left text-gray-500">
+            <tr className="border-b border-gray-200 text-left text-gray-500">
               <th className="py-2 pr-3 font-medium">指標</th>
               <th className="py-2 pr-3 font-medium">狀態</th>
-              <th className="py-2 pr-3 font-medium whitespace-nowrap">做得好的課</th>
-              <th className="py-2 pr-3 font-medium whitespace-nowrap">累積題數</th>
-              <th className="py-2 font-medium"><span className="sr-only">證據</span></th>
+              <th className="py-2 pr-3 font-medium">做得好的課</th>
+              <th className="hidden py-2 pr-3 font-medium whitespace-nowrap sm:table-cell">累積題數</th>
             </tr>
           </thead>
           <tbody>
             {cells.map((c) => (
               <tr key={c.indicator_code} className="border-b border-gray-100">
-                <td className="min-w-[180px] py-2 pr-3">
+                <td className="py-2 pr-3 align-top">
                   <span className="whitespace-nowrap font-medium text-gray-900">{c.indicator_code}</span>
                   <span className="block text-xs text-gray-500">{textOf(c.indicator_code)}</span>
-                </td>
-                <td className="py-2 pr-3"><StatusChip status={c.status} /></td>
-                <td className="py-2 pr-3 text-gray-700">{c.passed_lesson_count} 課</td>
-                <td className="py-2 pr-3 text-gray-700">{c.total_items}</td>
-                <td className="py-2">
                   <button
                     type="button"
                     aria-label={`看 ${c.indicator_code} 的證據`}
                     onClick={() => onOpen(c.indicator_code)}
-                    className="whitespace-nowrap rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-accent hover:bg-accent-bg cursor-pointer"
+                    className="mt-1.5 whitespace-nowrap rounded-lg border border-gray-200 px-3 py-1 text-sm text-accent hover:bg-accent-bg cursor-pointer"
                   >
                     看證據 →
                   </button>
                 </td>
+                <td className="py-2 pr-3 align-top"><StatusChip status={c.status} /></td>
+                <td className="whitespace-nowrap py-2 pr-3 align-top text-gray-700">{c.passed_lesson_count} 課</td>
+                <td className="hidden py-2 pr-3 align-top text-gray-700 sm:table-cell">{c.total_items}</td>
               </tr>
             ))}
           </tbody>
