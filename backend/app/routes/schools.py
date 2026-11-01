@@ -35,6 +35,21 @@ def _get_school_or_404(school_id: int, db: Session) -> School:
     return school
 
 
+def _user_is_school_member(user: User, school_id: int) -> bool:
+    """Return True if the user has an active school-scoped UserRole for this school.
+
+    (#3800) Ordinary teachers/students are provisioned with
+    UserRole(scope_type="school", scope_id=str(school_id)) — NOT an
+    organization-scoped role — so get_user_org_ids() alone always excludes
+    them. Mirrors the established pattern in routes/semesters.py
+    (_require_school_read_access / _user_is_school_member).
+    """
+    return any(
+        ur.is_active and ur.scope_type == "school" and ur.scope_id == str(school_id)
+        for ur in user.user_roles
+    )
+
+
 _SCHOOL_JOIN_CODE_LENGTH = 8
 _SCHOOL_JOIN_CODE_CHARS = string.ascii_uppercase + string.digits
 _SCHOOL_JOIN_CODE_MAX_RETRIES = 10
@@ -146,10 +161,20 @@ def get_school(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Get school detail."""
+    """Get school detail.
+
+    (#3800) system_admin sees all; org_admin/org_owner sees schools in their
+    org; everyone else (ordinary teacher/student) must be an active member
+    of THIS school (school-scoped UserRole) — previously only the org-scoped
+    check ran, so every ordinary teacher got 403 on their own school.
+    """
     school = _get_school_or_404(school_id, db)
     org_ids = get_user_org_ids(current_user)
-    if org_ids is not None and school.organization_id not in org_ids:
+    if (
+        org_ids is not None
+        and school.organization_id not in org_ids
+        and not _user_is_school_member(current_user, school_id)
+    ):
         raise HTTPException(status_code=403, detail="Not authorized for this school")
     return _school_to_response(school)
 
