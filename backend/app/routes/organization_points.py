@@ -14,7 +14,7 @@ from ..auth.dependencies import get_current_user
 from ..auth.policies import is_system_admin
 from ..database import get_db
 from ..models.points_log import OrganizationPointsLog
-from ..models.user import Role, User, UserRole
+from ..models.user import User
 from ..routes.organizations_crud import _get_org_or_404
 from ..schemas.organization import PointsLogListResponse, PointsLogResponse
 
@@ -30,28 +30,16 @@ def get_points_logs(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """List points usage logs for an organization."""
+    """List points usage logs for an organization.
+
+    (#3804) system_admin-only. The org_owner/org_admin-of-this-org bypass is
+    retired along with the org tenancy tier — this is now an internal
+    billing report, not something a customer-facing org_admin role reaches.
+    """
     org = _get_org_or_404(org_id, db)
 
-    # Permission: system_admin (global bypass), or org_owner/org_admin scoped to
-    # THIS org. Use is_system_admin (not is_admin) so an org_admin of another org
-    # can't bypass org scoping; the fallback below re-admits org_admin/org_owner of
-    # this specific org (regression guard — previously only org_owner was allowed).
     if not is_system_admin(current_user.id, db):
-        has_org_role = (
-            db.query(UserRole)
-            .join(Role, UserRole.role_id == Role.id)
-            .filter(
-                UserRole.user_id == current_user.id,
-                UserRole.is_active == True,  # noqa: E712
-                Role.name.in_(["org_owner", "org_admin"]),
-                UserRole.scope_type == "organization",
-                UserRole.scope_id == str(org.id),
-            )
-            .first()
-        )
-        if not has_org_role:
-            raise HTTPException(status_code=403, detail="Not authorized for this organization")
+        raise HTTPException(status_code=403, detail="Not authorized for this organization")
 
     base_query = db.query(OrganizationPointsLog).filter(
         OrganizationPointsLog.organization_id == org_id

@@ -5,7 +5,9 @@ import string
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session, joinedload
 
-from ..auth.dependencies import get_current_user, get_user_org_ids, require_role
+from ..auth.authz import can
+from ..auth.dependencies import get_current_user, require_role
+from ..auth.policies import is_system_admin
 from ..database import get_db
 from ..models.organization import Organization
 from ..models.school import Classroom, School
@@ -33,21 +35,6 @@ def _get_school_or_404(school_id: int, db: Session) -> School:
     if school is None:
         raise HTTPException(status_code=404, detail="School not found")
     return school
-
-
-def _user_is_school_member(user: User, school_id: int) -> bool:
-    """Return True if the user has an active school-scoped UserRole for this school.
-
-    (#3800) Ordinary teachers/students are provisioned with
-    UserRole(scope_type="school", scope_id=str(school_id)) — NOT an
-    organization-scoped role — so get_user_org_ids() alone always excludes
-    them. Mirrors the established pattern in routes/semesters.py
-    (_require_school_read_access / _user_is_school_member).
-    """
-    return any(
-        ur.is_active and ur.scope_type == "school" and ur.scope_id == str(school_id)
-        for ur in user.user_roles
-    )
 
 
 _SCHOOL_JOIN_CODE_LENGTH = 8
@@ -89,11 +76,17 @@ def _school_to_response(school: School) -> SchoolResponse:
 @router.post("/schools", status_code=201, response_model=SchoolResponse)
 def create_school(
     payload: SchoolCreateRequest,
-    current_user: User = require_role("system_admin", "org_admin"),
+    current_user: User = require_role("system_admin"),
     db: Session = Depends(get_db),
 ):
-    """Create a new school."""
-    # Verify organization exists if provided
+    """Create a new school.
+
+    (#3804) school is now a system_admin-maintained reference directory, not
+    something an org_admin creates "inside their org" — the org tenancy
+    bypass is retired. organization_id is still accepted (Organization stays
+    as a dormant billing concept, see PRD #3804 §1.2) and validated to exist
+    if given, but it no longer participates in who may call this endpoint.
+    """
     if payload.organization_id is not None:
         org = (
             db.query(Organization)
@@ -102,17 +95,6 @@ def create_school(
         )
         if org is None:
             raise HTTPException(status_code=404, detail="Organization not found")
-
-    # (#2470 create_school): org_admin may only create schools inside their own org.
-    # system_admin (org_ids is None) may create anywhere, incl. an orphan school.
-    org_ids = get_user_org_ids(current_user)
-    if org_ids is not None and (
-        payload.organization_id is None or payload.organization_id not in org_ids
-    ):
-        raise HTTPException(
-            status_code=403,
-            detail="Not authorized to create a school in this organization",
-        )
 
     # Sanitize admin-provided text fields
     safe_name, _ = sanitize_ai_input(payload.name, user_id=str(current_user.id))
@@ -142,11 +124,25 @@ def list_schools(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """List all schools."""
+    """List schools.
+
+    (#3804) system_admin sees the whole directory; everyone else sees only
+    the schools they hold an active school-scoped role in. Opening the full
+    directory to every authenticated caller (so e.g. registration can search
+    it) is Phase 2 work gated on the MOE school-code import — see PRD #3804
+    §4.2/§4.3. Until then this stays membership-scoped, which also avoids
+    widening exposure of School.join_code to non-members.
+    """
     query = db.query(School)
-    org_ids = get_user_org_ids(current_user)
-    if org_ids is not None:  # None = system_admin, sees all
-        query = query.filter(School.organization_id.in_(org_ids))
+    if not is_system_admin(current_user.id, db):
+        member_school_ids = {
+            int(ur.scope_id)
+            for ur in current_user.user_roles
+            if ur.is_active and ur.scope_type == "school" and ur.scope_id and ur.scope_id.isdigit()
+        }
+        if not member_school_ids:
+            return SchoolListResponse(items=[], total=0)
+        query = query.filter(School.id.in_(member_school_ids))
     total = query.count()
     items = query.order_by(School.created_at.desc()).offset(offset).limit(limit).all()
     return SchoolListResponse(
@@ -163,18 +159,12 @@ def get_school(
 ):
     """Get school detail.
 
-    (#3800) system_admin sees all; org_admin/org_owner sees schools in their
-    org; everyone else (ordinary teacher/student) must be an active member
-    of THIS school (school-scoped UserRole) — previously only the org-scoped
-    check ran, so every ordinary teacher got 403 on their own school.
+    (#3804) system_admin, or an active member of THIS school. The org_admin
+    cross-tenant bypass from before #3800/#3802 is retired — org no longer
+    grants reach into a school's data under the school-as-label model.
     """
     school = _get_school_or_404(school_id, db)
-    org_ids = get_user_org_ids(current_user)
-    if (
-        org_ids is not None
-        and school.organization_id not in org_ids
-        and not _user_is_school_member(current_user, school_id)
-    ):
+    if not can(current_user, "view", "school", school_id, db):
         raise HTTPException(status_code=403, detail="Not authorized for this school")
     return _school_to_response(school)
 
@@ -183,14 +173,15 @@ def get_school(
 def update_school(
     school_id: int,
     payload: SchoolUpdateRequest,
-    current_user: User = require_role("system_admin", "org_admin"),
+    current_user: User = require_role("system_admin"),
     db: Session = Depends(get_db),
 ):
-    """Update school fields."""
+    """Update school fields.
+
+    (#3804) system_admin-only — the shared directory has no "owning org"
+    anymore, so there is no org_admin to additionally authorize.
+    """
     school = _get_school_or_404(school_id, db)
-    org_ids = get_user_org_ids(current_user)
-    if org_ids is not None and school.organization_id not in org_ids:
-        raise HTTPException(status_code=403, detail="Not authorized for this school")
 
     update_data = payload.model_dump(exclude_unset=True)
     # Sanitize text fields in update payload
@@ -214,18 +205,12 @@ def update_school(
 @router.post("/schools/{school_id}/regenerate-code", response_model=SchoolResponse)
 def regenerate_school_code(
     school_id: int,
-    current_user: User = require_role("system_admin", "org_admin"),
+    current_user: User = require_role("system_admin"),
     db: Session = Depends(get_db),
 ):
-    """Regenerate the join code for a school. Requires admin.
-
-    (#2470 NEW-5: org_admin must be scoped to the school's org, mirroring
-    update_school — previously any org_admin could reset any school's join code.)
-    """
+    """Regenerate the join code for a school. system_admin-only (#3804: the
+    org_admin-of-the-school's-org bypass from #2470 NEW-5 is retired)."""
     school = _get_school_or_404(school_id, db)
-    org_ids = get_user_org_ids(current_user)
-    if org_ids is not None and school.organization_id not in org_ids:
-        raise HTTPException(status_code=403, detail="Not authorized for this school")
     school.join_code = _generate_school_join_code(db)
     db.commit()
     db.refresh(school)
@@ -248,14 +233,16 @@ def list_school_classrooms(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """List all classrooms belonging to a school (admin view).
+    """List all classrooms belonging to a school.
 
-    Scoped like get_school: system_admin sees any; org_admin only within their org.
-    (#2470 NEW-1: previously any authenticated user could enumerate a school.)
+    (#3804) system_admin, or an active member of THIS school (any role — the
+    old org_admin-of-the-school's-org bypass is retired, and the previous
+    org-only check 403'd every ordinary teacher reading their OWN school,
+    since get_user_org_ids() returns [] rather than None for them — see PRD
+    #3804 §1.2.A).
     """
-    school = _get_school_or_404(school_id, db)
-    org_ids = get_user_org_ids(current_user)
-    if org_ids is not None and school.organization_id not in org_ids:
+    _get_school_or_404(school_id, db)
+    if not can(current_user, "view", "school_roster", school_id, db):
         raise HTTPException(status_code=403, detail="Not authorized for this school")
 
     classrooms = (
@@ -295,13 +282,14 @@ def list_school_members(
 ):
     """List all users who have a role scoped to this school.
 
-    Scoped like get_school: system_admin sees any; org_admin only within their org.
-    (#2470 NEW-1: previously any authenticated user could read a school's member
-    roster incl. email — cross-tenant PII exposure.)
+    (#3804) system_admin, or an active member of THIS school. The old
+    org_admin-of-the-school's-org bypass is retired; the previous org-only
+    check also 403'd every ordinary teacher reading their OWN school's
+    roster (see PRD #3804 §1.2.A — same get_user_org_ids() bug as #3800,
+    just a different endpoint it was never backported to).
     """
-    school = _get_school_or_404(school_id, db)
-    org_ids = get_user_org_ids(current_user)
-    if org_ids is not None and school.organization_id not in org_ids:
+    _get_school_or_404(school_id, db)
+    if not can(current_user, "view", "school_roster", school_id, db):
         raise HTTPException(status_code=403, detail="Not authorized for this school")
 
     rows = (

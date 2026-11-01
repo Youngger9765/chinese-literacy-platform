@@ -1,8 +1,12 @@
 """#3530 — two admin routes with no test at all:
 
 * DELETE /organizations/{id}: system_admin only, refuses while schools remain.
-* GET /schools/{id}/classrooms: system_admin, or an org_admin of *that school's* org.
-  A teacher of the school and an org_admin of another org must be refused.
+* GET /schools/{id}/classrooms: system_admin, or a teacher of *that school*.
+
+(#3804) Updated for the school-as-label model: org_admin no longer has any
+bypass here (neither of its own org nor another's) — the school's own
+teacher now gets through instead, since school membership is what grants
+access, not org administration.
 """
 
 import os
@@ -99,8 +103,10 @@ def test_system_admin_deletes_empty_org_but_not_one_with_schools(w):
     assert not w["org_exists"](w["org_empty"])
 
 
-@pytest.mark.parametrize("who,ok", [("admin", True), ("oa", True), ("ob", False), ("teacher", False)])
-def test_school_classroom_list_is_scoped_to_the_schools_org(w, who, ok):
+@pytest.mark.parametrize("who,ok", [("admin", True), ("oa", False), ("ob", False), ("teacher", True)])
+def test_school_classroom_list_is_scoped_to_school_membership(w, who, ok):
+    """(#3804) org_admin of the school's own org ("oa") is now denied — only
+    system_admin and the school's own teacher ("teacher") get through."""
     r = w["call"](w[who], "GET", f"/api/schools/{w['school']}/classrooms")
     if ok:
         assert r.status_code == 200 and [c["name"] for c in r.json()] == ["c"], r.text
