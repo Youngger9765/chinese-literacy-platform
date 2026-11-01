@@ -117,19 +117,53 @@ Organization（org_owner / org_admin 可跨校管理）
 
 → **請 Young 選 A 或 B**。選 A 可以併入本 PR（不需要 migration，風險低，複用既有端點模式）；選 B 則排到下一輪。
 
-### 4.2 學校名錄（教育部代碼）
+### 4.2 學校名錄（教育部代碼）—— 2026-11-01 Young 核准施作（獨立 issue，另開分支）
 
-草案欄位（加在 `School` 表，全部 `nullable=True` 以不影響既有列）：
+Young 2026-11-01 口頭核准：「匯入教育部學校名錄、加上學校代碼……現在就做」。
+這段不再是草案，是**已實作**的紀錄（實作分支 `feat/issue-3804-moe-school-directory`，
+與 §1–§3 的 authz 收斂分開提 PR，避免兩件事互相卡）。
+
+**資料來源**（官方，data.gov.tw 政府資料開放平臺，教育部統計處）：
+
+| 名錄 | 資料集頁 | CSV 下載網址 | 學年度 |
+|---|---|---|---|
+| 國民小學名錄 | https://data.gov.tw/dataset/6087 | https://stats.moe.gov.tw/files/school/115/e1_new.csv | 115（單一學年檔） |
+| 國民中學名錄 | https://data.gov.tw/dataset/6088 | https://stats.moe.gov.tw/files/opendata/j1_new.csv | 104–115（多學年合一檔，匯入時篩 115） |
+| 一般高級中等學校名錄 | https://data.gov.tw/dataset/6089 | https://stats.moe.gov.tw/files/school/115/high.csv | 115（單一學年檔） |
+
+下載日期 2026-11-01，原始檔存放於 `backend/data/moe_schools/`（含來源與資料怪癖說明的
+README）。高職（技術型高中的職業類科）的獨立名錄本輪未拉，列為已知缺口，不是悄悄漏掉。
+
+**實際欄位**（加在 `School` 表，全部 `nullable=True` 以不影響既有列；比草案多兩欄，
+因為「公/私立」「國小/國中/高中」在教育部來源資料本身就有、不額外成本）：
 
 | 欄位 | 型別 | 用途 |
 |---|---|---|
-| `moe_school_code` | `String(20)`, unique, indexed | 教育部學校代碼（全國唯一） |
-| `county_code` | `String(10)` | 縣市代碼，供名錄搜尋用下拉先篩選 |
-| `county_name` | `String(50)` | 縣市中文名（顯示用，教育部資料集本身有提供） |
+| `moe_school_code` | `String(20)`, unique, indexed | 教育部學校代碼（全國唯一，驗證過 3855 筆 0 碰撞） |
+| `county_code` | `String(10)` | 來源「縣市名稱」欄位的中括號代碼，**原樣保留備查，不是穩定的縣市識別碼**——臺北市單獨橫跨 `[31]`–`[42]`（12 個不同代碼，對應合併前的行政區分代碼）、高雄市橫跨 `[51]`–`[61]`，所以名錄搜尋的 `county=` 篩選是比對 `county_name` 文字，不是比對這個代碼 |
+| `county_name` | `String(50)`, indexed | 縣市中文名，**存入前把「臺」正規化成「台」**（對齊既有 seed 資料 `台北市大安國小` 的慣例） |
+| `school_level` | `String(10)`, indexed | `elementary` / `junior_high` / `senior_high`，依來源檔案標記（不是從校名猜測，因為「○○國中(小)」這類合併校會誤判） |
+| `is_public` | `Boolean` | 來源「公/私立」欄位 |
 
-需要 Young 答覆：
-1. 教育部學校名錄的資料來源要用哪一份（政府資料開放平台「國民中小學校名錄」或教育部統計處）？要不要我先去抓一份公開資料集範例回報筆數與欄位，供你過目再決定要不要匯入？
-2. 匯入後，現有 `schools` 表裡「網域自動建的學校」（如 `xxx.edu.tw 學校`、`某老師的學校`）怎麼處理——保留當作「未對應到教育部代碼的舊資料」，還是要人工對應合併？
+**Young 的問題 1 答覆**：用上表三份 data.gov.tw 官方資料集（政府資料開放平台優先於
+教育部統計處原始頁面，因為前者有穩定下載網址 + 版權條款明示）。
+
+**Young 的問題 2 答覆**（現有 `schools` 表裡「網域自動建的學校」怎麼處理）：
+**本輪不動、不嘗試自動合併**。教育部名錄以 `moe_school_code` 為 upsert 鍵另外寫入，
+既有那些手動／網域建立的學校列（`moe_school_code IS NULL`）完全不碰、不刪、不改名。
+名錄搜尋 API（§4.2 下方）只在 `moe_school_code IS NOT NULL` 的列中查，
+不會把搜尋結果跟舊資料混在一起。人工比對合併留到下一輪，需要 Young 決定合併規則
+（例如同名同縣市才合併，還是要人工逐筆看）——這是個會改變既有資料的決定，不在本輪
+自動做。
+
+**學校名錄搜尋 API**：`GET /api/schools/directory/search?county=&q=`
+（新檔 `app/routes/school_directory.py`，不動既有 `schools.py`，降低跟
+`feat/issue-3804-self-serve-teacher` 分支的衝突面）。需要登入、限流、只回名錄欄位
+（不回 `join_code`）。查詢先正規化（臺→台、國民小學／國民中學展開成國小／國中、
+去掉市立／縣立／私立／公立／國立前綴、全半形與空白），再用字元級相似度做模糊比對
+（`difflib.SequenceMatcher`，含完整字串包含關係的加權），模糊比對 0 筆才呼叫 LLM
+（Vertex Gemini，`get_model_for_task()` 取模型、照 `llm-endpoint-hardening` skill
+加 rate limit／輸入長度上限／失敗不中斷搜尋只是不給建議）給拼音接近的建議。
 
 ### 4.3 註冊/轉老師時改成搜尋選校
 

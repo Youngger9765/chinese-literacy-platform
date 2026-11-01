@@ -30,6 +30,7 @@ from .routes.jobs import router as jobs_router
 from .routes.privacy import router as privacy_router
 from .routes.cleanup import router as cleanup_router
 from .routes.dictionary import router as dictionary_router
+from .routes.school_directory import router as school_directory_router
 from .routes.parents import router as parents_router
 from .routes.gamification import router as gamification_router
 from .routes.league import router as league_router
@@ -694,6 +695,7 @@ app.include_router(jobs_router, prefix="/api", tags=["admin-jobs"])
 app.include_router(privacy_router, prefix="/api", tags=["privacy"])
 app.include_router(cleanup_router, prefix="/api", tags=["admin-cleanup"])
 app.include_router(dictionary_router, prefix="/api", tags=["dictionary"])
+app.include_router(school_directory_router, prefix="/api")
 app.include_router(parents_router, prefix="/api", tags=["parents"])
 app.include_router(gamification_router, prefix="/api", tags=["gamification"])
 app.include_router(league_router, prefix="/api", tags=["league"])
