@@ -9,15 +9,12 @@ Endpoints:
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import and_, or_
 from sqlalchemy.orm import Session, joinedload
 
-from ..auth.dependencies import get_current_user, get_user_org_ids, require_role
-from ..auth.policies import is_system_admin, resolve_user_org_ids
-from ..models.school import School
+from ..auth.dependencies import get_current_user, require_role
 from ..database import get_db
 from ..models.feedback import Feedback
-from ..models.user import User, UserRole
+from ..models.user import User
 from ..schemas.feedback import (
     FeedbackCreateRequest,
     FeedbackListResponse,
@@ -72,58 +69,10 @@ def submit_feedback(
     return _feedback_to_response(feedback)
 
 
-def _get_feedback_org_scope_filter(current_user: User, db: Session):
-    """Return a SQLAlchemy filter to scope feedback to the caller's org(s).
-
-    system_admin: no filter (sees all feedback).
-    org_admin / org_owner: sees only feedback submitted by users who belong
-      to one of the caller's org scope(s).
-
-    Feedback has no direct org FK, so we join via the submitter's UserRole.
-    """
-    if is_system_admin(current_user.id, db):
-        return None  # no restriction (org_admin falls through to org-scope filter)
-
-    caller_org_ids = resolve_user_org_ids(current_user.id, db)
-    if not caller_org_ids:
-        # org_admin with no org scope → sees nothing
-        return Feedback.id.in_([])
-
-    # Submitters in the caller's org(s): via a direct org-scoped role OR a
-    # school-scoped role whose school is in the org (production model, where
-    # students/teachers are school-scoped). Use .scalar_subquery() to avoid a
-    # SAWarning when used inside .in_().
-    caller_school_ids = [
-        str(sid)
-        for (sid,) in db.query(School.id)
-        .filter(School.organization_id.in_(caller_org_ids))
-        .all()
-    ]
-    scope_predicates = [
-        and_(
-            UserRole.scope_type == "organization",
-            UserRole.scope_id.in_(list(caller_org_ids)),
-        )
-    ]
-    if caller_school_ids:
-        scope_predicates.append(
-            and_(
-                UserRole.scope_type == "school",
-                UserRole.scope_id.in_(caller_school_ids),
-            )
-        )
-    submitter_ids_subq = (
-        db.query(UserRole.user_id)
-        .filter(UserRole.is_active == True, or_(*scope_predicates))
-        .scalar_subquery()
-    )
-    return Feedback.user_id.in_(submitter_ids_subq)
-
-
 @router.get(
     "/feedback",
     response_model=FeedbackListResponse,
-    dependencies=[require_role("system_admin", "org_admin", "org_owner")],
+    dependencies=[require_role("system_admin")],
 )
 def list_feedback(
     page: int = Query(1, ge=1),
@@ -133,18 +82,12 @@ def list_feedback(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> FeedbackListResponse:
-    """List feedback entries. Admin only, paginated.
+    """List feedback entries. system_admin-only, paginated.
 
-    system_admin sees all feedback on the platform.
-    org_admin / org_owner see only feedback from users within their org(s) —
-    enforcing 個資法 §20.
+    (#3804) The org_admin/org_owner "feedback from users within my org(s)"
+    scope is retired along with the org tenancy tier.
     """
     query = db.query(Feedback)
-
-    # Org scope restriction
-    org_filter = _get_feedback_org_scope_filter(current_user, db)
-    if org_filter is not None:
-        query = query.filter(org_filter)
 
     if category:
         query = query.filter(Feedback.category == category)
@@ -173,7 +116,7 @@ def list_feedback(
 @router.patch(
     "/feedback/{feedback_id}",
     response_model=FeedbackResponse,
-    dependencies=[require_role("system_admin", "org_admin", "org_owner")],
+    dependencies=[require_role("system_admin")],
 )
 def update_feedback_status(
     feedback_id: int,
@@ -181,30 +124,14 @@ def update_feedback_status(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> FeedbackResponse:
-    """Update the status of a feedback entry. Admin only.
-
-    system_admin may update any feedback.
-    org_admin / org_owner may only update feedback from users in their org(s) —
-    enforcing 個資法 §20.
-    """
+    """Update the status of a feedback entry. system_admin-only (#3804: the
+    org_admin/org_owner "same org as submitter" bypass is retired)."""
     feedback = db.query(Feedback).filter(Feedback.id == feedback_id).first()
     if not feedback:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Feedback #{feedback_id} not found",
         )
-
-    # Scope check: org_admin may only modify feedback from their org's users.
-    # Resolve submitter org via school->org (production model). Fail closed if the
-    # caller has no org or the submitter is outside it.
-    if not is_system_admin(current_user.id, db):
-        caller_org_ids = resolve_user_org_ids(current_user.id, db)
-        submitter_org_ids = resolve_user_org_ids(feedback.user_id, db)
-        if not (caller_org_ids & submitter_org_ids):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Not authorized to modify this feedback",
-            )
 
     feedback.status = body.status  # type: ignore[assignment]
     db.commit()

@@ -283,12 +283,17 @@ def _grant_role(user_id: int, role_name: str, scope_type: str, scope_id):
 
 
 def test_idor_org_admin_cannot_read_cross_org_user(client):
+    """(#3804) GET /api/users/{id} is now system_admin-only — org_admin gets
+    403 unconditionally, whether the target is cross-org OR same-org. The
+    "positive control: same-org → 200" case is retired along with the org
+    tenancy tier (there's no "own org" special case anymore); kept only the
+    system_admin global-bypass control to prove the gate isn't fail-open."""
     u = uuid.uuid4().hex[:6]
     org_a = _create_org(f"OrgA_{u}")
     org_b = _create_org(f"OrgB_{u}")
 
     admin_a = _create_user(f"orgadmin_a_{u}@example.com")
-    same_org_user = _create_user(f"member_a_{u}@example.com")   # 同 org A → 正向控制
+    same_org_user = _create_user(f"member_a_{u}@example.com")   # 同 org A — 現在也一樣 403
     cross_org_user = _create_user(f"member_b_{u}@example.com")  # org B → IDOR 標的
     sysadmin = _create_user(f"sys_{u}@example.com")
 
@@ -300,10 +305,10 @@ def test_idor_org_admin_cannot_read_cross_org_user(client):
     tok_a = create_access_token(admin_a)
     tok_sys = create_access_token(sysadmin)
 
-    # IDOR：org_admin A 讀 org B 使用者 → 403（個資法 §20）
+    # IDOR：org_admin A 讀 org B 使用者 → 403（個資法 §20，不變）
     assert client.get(f"/api/users/{cross_org_user}", headers=_auth(tok_a)).status_code == 403
-    # 正向控制：org_admin A 讀同 org A 使用者 → 200
-    assert client.get(f"/api/users/{same_org_user}", headers=_auth(tok_a)).status_code == 200
+    # (#3804) org_admin A 讀同 org A 使用者 → 現在也是 403（system_admin-only gate）
+    assert client.get(f"/api/users/{same_org_user}", headers=_auth(tok_a)).status_code == 403
     # system_admin 全域 bypass → 讀 org B 使用者 200（確認 bypass 只限 system_admin）
     assert client.get(f"/api/users/{cross_org_user}", headers=_auth(tok_sys)).status_code == 200
 
@@ -382,6 +387,8 @@ def test_roles_list_requires_admin_not_mere_org_member(client):
     # #2470 QA (Cursor): reading another user's roles must be admin-gated, not open
     # to any same-org member. A school-scoped teacher belongs to the org (via
     # school→org) but is NOT an admin → must be denied.
+    # (#3804) org_admin is no longer an admin tier here either — self or
+    # system_admin only.
     u = uuid.uuid4().hex[:6]
     org = _create_org(f"RolesOrg_{u}")
     school = _create_school(org)
@@ -397,8 +404,8 @@ def test_roles_list_requires_admin_not_mere_org_member(client):
 
     # 一般同 org teacher 讀他人 roles → 403（非 admin）
     assert client.get(f"/api/users/{target}/roles", headers=_auth(create_access_token(teacher))).status_code == 403
-    # org_admin of the org → 200；system_admin → 200
-    assert client.get(f"/api/users/{target}/roles", headers=_auth(create_access_token(org_admin))).status_code == 200
+    # (#3804) org_admin → 現在也是 403（不再是中間層 admin）；system_admin → 200
+    assert client.get(f"/api/users/{target}/roles", headers=_auth(create_access_token(org_admin))).status_code == 403
     assert client.get(f"/api/users/{target}/roles", headers=_auth(create_access_token(sysadmin))).status_code == 200
 
 
@@ -513,6 +520,8 @@ def _create_learning_session_direct(student_id: int) -> int:
 def test_med1d_org_admin_lists_only_own_org_classrooms(client):
     # #2470 MED-1d: GET /api/classrooms must scope org_admin to their own org's
     # classrooms, not the whole platform (was is_admin → any org_admin saw all).
+    # (#3804) The org tenancy tier itself is retired — org_admin now sees NEITHER
+    # classroom (not even their own org's), since they don't own or co-teach it.
     u = uuid.uuid4().hex[:6]
     org_a = _create_org(f"L1dA_{u}")
     org_b = _create_org(f"L1dB_{u}")
@@ -529,8 +538,8 @@ def test_med1d_org_admin_lists_only_own_org_classrooms(client):
     r = client.get("/api/classrooms?limit=100", headers=_auth(create_access_token(admin_a)))
     assert r.status_code == 200, r.text
     ids = [c["id"] for c in r.json()["items"]]
-    assert cls_a in ids, "org_admin should see own org's classroom"
-    assert cls_b not in ids, "org_admin must NOT see another org's classroom (MED-1d)"
+    assert cls_a not in ids, "(#3804) org_admin no longer sees even their own org's classroom"
+    assert cls_b not in ids, "org_admin must NOT see another org's classroom (MED-1d, unchanged)"
 
 
 def test_org_admin_cannot_create_classroom_in_another_org_school(client):

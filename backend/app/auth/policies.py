@@ -99,8 +99,13 @@ def resolve_user_org_ids(user_id: int, db: Session) -> set[str]:
 def _org_admin_org_ids(user_id: int, db: Session) -> set[str]:
     """Org ids where the user holds an active org_admin/org_owner role (org-scoped).
 
-    This is "which orgs the user *administers*", NOT mere membership. Used to scope
-    the org-level bypass so an org_admin of org A cannot reach org B's resources.
+    DEPRECATED (#3804): kept only because app/routes/roles.py still calls it
+    for ONE narrow, still-valid purpose — "did system_admin grant THIS
+    specific admin role to THIS specific org" is unrelated to the retired
+    classroom/student/school cross-tenant bypass. Do not add new callers for
+    authorization bypass purposes; the school-as-label model (see PRD #3804)
+    does not recognize org_admin/org_owner as granting reach into schools,
+    classrooms, students, or other users' data.
     """
     rows = (
         db.query(UserRole.scope_id)
@@ -118,11 +123,13 @@ def _org_admin_org_ids(user_id: int, db: Session) -> set[str]:
 
 
 def _is_org_admin_of_school(user_id: int, school_id, db: Session) -> bool:
-    """True if user is org_admin/org_owner of the org that owns ``school_id``.
+    """DEPRECATED (#3804) — no longer called anywhere.
 
-    Orphan schools (organization_id IS NULL) return False on purpose — an org_admin
-    cannot claim an unscoped school via org; such access must come from ownership /
-    membership, not the org bypass.
+    Used to let org_admin/org_owner reach into a school via
+    School.organization_id. Retired along with the org tenancy tier; kept
+    only so existing characterization tests of this module don't need to
+    change, and as a documented historical reference for what the old model
+    did. Do not add new call sites.
     """
     if school_id is None:
         return False
@@ -133,30 +140,28 @@ def _is_org_admin_of_school(user_id: int, school_id, db: Session) -> bool:
 
 
 def require_classroom_owner(classroom: Classroom, user: User, db: Session) -> None:
-    """Allow classroom primary teacher, system_admin, or org_admin/org_owner OF THE
-    CLASSROOM'S ORG. Raise 403 otherwise.
+    """Allow classroom primary teacher, or system_admin. Raise 403 otherwise.
 
     Use for write operations (update, delete, assign).
     Co-teachers (assistants) are NOT allowed for write ops.
 
-    NOTE: global bypass is system_admin only; org admins are scoped to their own
-    org (via school→org) so a cross-org org_admin cannot write another org's class.
+    (#3804) The org_admin/org_owner-of-the-classroom's-org bypass is retired
+    — system_admin is the sole global exception under the school-as-label
+    model; everything else is classroom ownership.
     """
     if classroom.teacher_id == user.id:
         return
     if is_system_admin(user.id, db):
         return
-    if _is_org_admin_of_school(user.id, classroom.school_id, db):
-        return
     raise HTTPException(status_code=403, detail="Not your classroom")
 
 
 def require_classroom_member(classroom: Classroom, user: User, db: Session) -> None:
-    """Allow classroom owner, co-teachers, system_admin, or org_admin/org_owner OF
-    THE CLASSROOM'S ORG. Raise 403 otherwise.
+    """Allow classroom owner, co-teachers, or system_admin. Raise 403 otherwise.
 
     Use for read operations (view students, progress).
-    Org admins are scoped to their own org (via school→org), not a global bypass.
+
+    (#3804) The org_admin/org_owner-of-the-classroom's-org bypass is retired.
     """
     if classroom.teacher_id == user.id:
         return
@@ -172,8 +177,6 @@ def require_classroom_member(classroom: Classroom, user: User, db: Session) -> N
         return
     if is_system_admin(user.id, db):
         return
-    if _is_org_admin_of_school(user.id, classroom.school_id, db):
-        return
     raise HTTPException(status_code=403, detail="Not your classroom")
 
 
@@ -182,32 +185,14 @@ def require_student_visible_to_teacher(student_id: int, user: User, db: Session)
 
     Allowed:
     - system_admin (global), OR
-    - org_admin/org_owner of the student's org (via enrolled classroom's school→org), OR
     - the primary teacher or co-teacher of a classroom containing the student.
 
-    Org admins are scoped to their own org (not a global bypass). Raises 403 otherwise.
+    (#3804) The org_admin/org_owner-of-the-student's-org bypass is retired —
+    school/org no longer grants reach into a student's data under the
+    school-as-label model. Raises 403 otherwise.
     """
     if is_system_admin(user.id, db):
         return
-
-    # org_admin/org_owner scoped to the student's org (resolved via school→org).
-    caller_org_admin = _org_admin_org_ids(user.id, db)
-    if caller_org_admin:
-        student_orgs = {
-            str(org_id)
-            for (org_id,) in (
-                db.query(School.organization_id)
-                .join(Classroom, Classroom.school_id == School.id)
-                .join(ClassroomStudent, ClassroomStudent.classroom_id == Classroom.id)
-                .filter(
-                    ClassroomStudent.student_id == student_id,
-                    School.organization_id.isnot(None),
-                )
-                .all()
-            )
-        }
-        if caller_org_admin & student_orgs:
-            return
 
     # Check if student is in any classroom where user is primary teacher or co-teacher
     enrollment = (

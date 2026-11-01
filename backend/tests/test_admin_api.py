@@ -275,9 +275,10 @@ class TestListUsers:
         resp = client.get("/api/users", headers=auth_header(admin_user["token"]))
         assert resp.status_code == 200
 
-    def test_list_returns_200_for_org_admin(self, client, org_admin_user):
+    def test_list_returns_403_for_org_admin(self, client, org_admin_user):
+        """(#3804) list_users is system_admin-only now — org_admin gets 403."""
         resp = client.get("/api/users", headers=auth_header(org_admin_user["token"]))
-        assert resp.status_code == 200
+        assert resp.status_code == 403
 
     def test_list_returns_items_and_total(self, client, admin_user):
         resp = client.get("/api/users", headers=auth_header(admin_user["token"]))
@@ -408,12 +409,14 @@ class TestGetUserDetail:
         )
         assert resp.status_code == 403
 
-    def test_get_detail_works_for_org_admin(self, client, org_admin_user, teacher):
+    def test_get_detail_is_now_403_for_org_admin(self, client, org_admin_user, teacher):
+        """(#3804) get_user_detail is system_admin-only now — org_admin gets
+        403 even for a teacher in "their own" org."""
         resp = client.get(
             f"/api/users/{teacher['user_id']}",
             headers=auth_header(org_admin_user["token"]),
         )
-        assert resp.status_code == 200
+        assert resp.status_code == 403
 
 
 # ===========================================================================
@@ -507,7 +510,10 @@ class TestAdminClassroomAccess:
         )
         assert resp.status_code == 200
 
-    def test_org_admin_can_view_any_classroom(self, client, org_admin_user, teacher, school_id):
+    def test_org_admin_can_no_longer_view_classroom_via_org(self, client, org_admin_user, teacher, school_id):
+        """(#3804) The org_admin-of-the-school's-org bypass is retired —
+        org_admin gets 403 on a classroom they don't own or co-teach, same
+        as any other stranger."""
         create_resp = client.post(
             "/api/classrooms",
             json={"name": "Org Admin View Test", "school_id": school_id},
@@ -519,7 +525,7 @@ class TestAdminClassroomAccess:
             f"/api/classrooms/{classroom_id}",
             headers=auth_header(org_admin_user["token"]),
         )
-        assert resp.status_code == 200
+        assert resp.status_code == 403
 
     def test_non_admin_non_owner_still_gets_403(self, client, teacher, other_teacher, school_id):
         create_resp = client.post(
@@ -611,9 +617,12 @@ class TestAdminCreateClassroomForTeacher:
         assert resp.status_code == 201
         assert resp.json()["teacher_id"] == teacher["user_id"]
 
-    def test_org_admin_creates_classroom_for_teacher(
+    def test_org_admin_can_no_longer_create_classroom_for_teacher(
         self, client, org_admin_user, teacher, school_id,
     ):
+        """(#3804) Only system_admin may create a classroom on behalf of
+        another teacher now — org_admin-of-the-school's-org no longer
+        qualifies."""
         resp = client.post(
             "/api/classrooms",
             json={
@@ -623,8 +632,7 @@ class TestAdminCreateClassroomForTeacher:
             },
             headers=auth_header(org_admin_user["token"]),
         )
-        assert resp.status_code == 201
-        assert resp.json()["teacher_id"] == teacher["user_id"]
+        assert resp.status_code == 403
 
 
 # ===========================================================================

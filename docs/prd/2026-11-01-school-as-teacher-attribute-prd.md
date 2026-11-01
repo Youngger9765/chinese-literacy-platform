@@ -56,8 +56,8 @@ Organization（org_owner / org_admin 可跨校管理）
 
 | 分類 | 檔案 | 現況 org_admin 用途 | 新模型下的處置 |
 |---|---|---|---|
-| **核心授權 SOT** | `app/auth/policies.py` | `is_admin()`／`resolve_user_org_ids()`／`_org_admin_org_ids()`／`_is_org_admin_of_school()`／`require_classroom_owner`／`require_classroom_member`／`require_student_visible_to_teacher` 全部把 org_admin 當 classroom/student 的跨校 bypass | 移除 org_admin bypass；只留 `is_system_admin` + ownership/membership。`is_admin()` 整個棄用 |
-| | `app/dependencies/tenant.py` | `_check_org_member`／`_check_org_admin`／`_check_classroom_access`／`get_tenant_filter`：org-scoped 的 FastAPI Depends 工廠 | 盤點後**查無任何 route 掛這幾個 Depends**（grep `require_org_member\|require_org_admin\|require_classroom_access` 的呼叫端 = 0）。整個檔案是死碼，標記 deprecated，Phase 2 隨 Organization 定案後再刪 |
+| **核心授權 SOT** | `app/auth/policies.py` | `is_admin()`／`resolve_user_org_ids()`／`_org_admin_org_ids()`／`_is_org_admin_of_school()`／`require_classroom_owner`／`require_classroom_member`／`require_student_visible_to_teacher` 全部把 org_admin 當 classroom/student 的跨校 bypass | 移除 org_admin bypass；只留 `is_system_admin` + ownership/membership。`is_admin()`／`_org_admin_org_ids`／`_is_org_admin_of_school` 保留定義（有既有 characterization test 釘住、`roles.py` 仍窄用）但標 deprecated、拔掉所有跨校 bypass 呼叫點 |
+| | `app/dependencies/tenant.py` | ⚠️ **2026-11-01 第一版盤點誤判為死碼，實作時查證才發現是錯的** —— `require_org_member`／`require_org_admin`／`get_tenant_filter` 這三個 **Depends 工廠**確實零呼叫端，但其中 `_check_classroom_access` 這個**私有 helper 被 9 支 `app/routes/teacher/*.py` 直接 import**（teacher_dashboard／teacher_analytics／teacher_reports／teacher_alerts／teacher_cross_text／teacher_instructions／teacher_assignment_matrix／teacher_classroom_stuck／teacher_live_monitor），且內含同款 org_admin-of-school bypass。第一版只 grep 了 public 工廠名稱，沒 grep private helper 的呼叫端，是本次盤點唯一一處真的查錯 | `_check_classroom_access` 比照 `policies.py` 拿掉 org_admin bypass（本 PR 已修，見 §1.2.A 復現表後方新增一列）；`_check_org_member`／`_check_org_admin`／`get_tenant_filter`／兩個 Depends 工廠 → 前者有一個真呼叫端（`organizations_crud.py::get_organization`，見下方 Organization 列），後兩者零呼叫端，暫不動 |
 | **Schools / Semesters** | `app/routes/schools.py` | 見上表 A | 本 PR 修正 |
 | | `app/routes/semesters.py` | 寫入（建立／更新／啟用學期）僅 system_admin/org_admin；讀取已有 member fallback | 寫入改為「school member（任一 active school-scoped role）或 system_admin」 |
 | **Classroom** | `app/routes/classrooms/classroom_crud.py` | `create_classroom`／`list_my_classrooms` 允許 org_admin 建立／列出整個 org 的班級 | 移除 org_admin 分支，只留 owner/co-teacher（寫）、owner/co-teacher/system_admin（列表） |
@@ -67,10 +67,10 @@ Organization（org_owner / org_admin 可跨校管理）
 | | `app/routes/roles.py` | `list_user_roles` 對 org_admin 開放「同 org 使用者的角色」 | 改 system_admin-only（+ 本人自己一定看得到） |
 | | `app/routes/feedback.py` | 列表／PATCH 使用者回饋，org_admin 可讀寫「同 org」回饋 | 改 system_admin-only |
 | | `app/routes/gamification.py` | `_assert_can_view`（沒有 co-teacher 分支，是另一個小 bug）、`get_leaderboard` 都有 org_admin 分支 | 改用新 `can()`：system_admin／classroom owner／co-teacher／本人 |
-| | `app/routes/testset.py`、`app/routes/worksheets.py` | `require_role(..., "org_admin")` 白名單 | 移除 `org_admin`/`org_owner`，只留 `system_admin`（＋各自既有的 teacher 等角色） |
-| **Organization 本體（billing，刻意不動）** | `app/routes/organizations_crud.py`、`organization_dashboard.py`、`organization_points.py`、`app/services/points_service.py`、`app/models/organization.py`、`app/models/points_log.py` | `Organization` 帶 `total_points`／`used_points`／`subscription_*`，是休眠中的計點計費功能（`check_and_deduct_points`／`get_org_for_student` **全 repo 查無任何呼叫端**，只有 `tests/test_points_system.py` 測它自己） | **保留 Organization/OrganizationPointsLog 資料模型，不碰**（out of scope——這是計費概念不是租戶權限概念，且目前是休眠的既有基礎設施，刪掉是額外破壞不是本次任務）。但把這幾支路由裡「org_admin 可管理」的分支拿掉，**改成 system_admin-only 的內部報表／計費工具**，因為新模型下不再核發 org_admin 角色 |
+| **刻意不動（role 白名單，非租戶 bypass）** | `app/routes/testset.py`、`app/routes/worksheets.py` | `require_role(..., "org_admin"/"org_owner")` 白名單 | ⚠️ **2026-11-01 實作時校正**：第一版把這兩支歸進「org_admin bypass」要拿掉，重讀後發現判斷錯了。這兩支是**平台級功能的角色白名單**（「誰可以看測試錄音／下載教師版學習單」），org_admin/org_owner 只是白名單裡的一個名字，不涉及「org 當容器讓你伸手進別人學校/班級」——跟 schools.py／semesters.py 那種真正的跨租戶 bypass是不同性質。Young 的新模型管的是**組織/學校/班級的租戶階層**，不是「所有出現過 org_admin 字串的角色白名單」。**本 PR 不動這兩支**，避免把一個無關的平台功能權限收窄（過度延伸）|
+| **Organization 本體（billing，刻意不動）** | `app/routes/organizations_crud.py`、`organization_dashboard.py`、`organization_points.py`、`app/services/points_service.py`、`app/models/organization.py`、`app/models/points_log.py` | `Organization` 帶 `total_points`／`used_points`／`subscription_*`，是休眠中的計點計費功能（`check_and_deduct_points`／`get_org_for_student` **全 repo 查無任何呼叫端**，只有 `tests/test_points_system.py` 測它自己） | **保留 Organization/OrganizationPointsLog 資料模型 + `organizations_crud.py` 的 CRUD 存取方式，不碰**（`get_organization`／`list_organizations` 本來就是「org_admin 看自己這個 org 的基本資料+學校清單」，不是伸手進別人學校——跟 teacher 看自己 classroom 同一種「擁有者看自己資源」語意，不是租戶 bypass）。但 `organization_dashboard.py`／`organization_points.py` 這兩支**確實**在用 org 當容器聚合**別人**（其他老師/學生）的統計數字，是真的租戶 bypass → 改成 **system_admin-only** 的內部報表／計費工具 |
 | | `app/routes/league.py` | docstring 說「org_admin 被排除」且程式碼本來就沒給它特權 | 不用改，順手在稽核表留一筆證明 |
-| | `app/services/league_service.py` | `school_a.organization_id`／`school_b.organization_id` 只拿來判斷「兩班是否同校」用於跨校配對 | 這是**業務邏輯**不是授權，但用了已被排除在權限外的欄位。沿用 `organization_id` 當「同校判斷」不妥——改成直接比 `school_id`（更準確，兩班本來就各自只有一個 school_id，不需要繞 org） |
+| **刻意不動（業務規則，非租戶 bypass）** | `app/services/league_service.py` | `_require_same_org`：`school_a.organization_id`／`school_b.organization_id` 判斷「兩班是否同機構」，用於跨班邀請賽的配對資格 | ⚠️ **2026-11-01 實作時校正**：第一版打算改成比 `school_id`，查證後發現錯了。這是 `docs/prd/2026-10-14-chinese-star-league-prd.md` 既有、已核定的**產品規則**（跨校/跨機構邀請賽目前刻意不開放，是 Phase 2/3 範圍），不是「org 當權限容器讓人伸手進別人資源」——呼叫這個檢查前，兩個班級的擁有者身分都已經各自驗證過。改成比 `school_id` 會**實際改變產品行為**（放寬成「同校才能配對」，比現在「同機構」更嚴，但這不是 Young 這次要的，他要的是權限模型簡化，不是重新定義跨班賽配對規則）。**本 PR 不動** |
 
 ### 1.3 Organization／School 兩個模型的角色分工（新模型定案後）
 
@@ -98,12 +98,12 @@ Organization（org_owner / org_admin 可跨校管理）
 
 逐一決定後的分類：
 
-- **改成只看班級歸屬**：`classroom_crud.py`、`classroom_junyi_import.py`、`gamification.py`（view/leaderboard）
-- **改成系統管理員才能用的唯讀／管理工具**：`users.py`（list/detail）、`roles.py`（list_user_roles）、`feedback.py`（list/patch）、`testset.py`、`worksheets.py`、`schools.py`（create/update/regenerate-code 維持 admin-only，拿掉 org_admin）、`organization_dashboard.py`、`organization_points.py`
+- **改成只看班級歸屬**：`classroom_crud.py`、`classroom_junyi_import.py`、`gamification.py`（view/leaderboard）、`app/dependencies/tenant.py::_check_classroom_access`（被 9 支 `teacher/*.py` 直接呼叫，見下方校正）、`app/auth/policies.py`（`require_classroom_owner`／`require_classroom_member`／`require_student_visible_to_teacher`）
+- **改成系統管理員才能用的唯讀／管理工具**：`users.py`（list/detail）、`roles.py`（list_user_roles）、`feedback.py`（list/patch）、`schools.py`（create/update/regenerate-code 維持 admin-only，拿掉 org_admin）、`organization_dashboard.py`、`organization_points.py`
 - **改成「學校成員或系統管理員」**（這是本次新增的第三類，§2 點 4 沒提到但不補就會卡住本該可以做事的老師——semester 寫入 bug 就是這類）：`semesters.py` 寫入端點、`schools.py` 的 `list_school_members`／`list_school_classrooms`
-- **直接拿掉 org 概念**：`league_service.py` 的 org_a/org_b 比較改成比 `school_id`
-- **標記 deprecated、暫不刪**（Phase 2 隨 Organization 定案才處理）：`app/dependencies/tenant.py` 全檔（查無呼叫端的死碼）、`app/auth/policies.py::is_admin`（有呼叫端但只是轉呼叫鏈，見下）
-- **保留不動（out of scope）**：`Organization`／`OrganizationPointsLog` 資料模型本體、`points_service.py`
+- **刻意不動（角色白名單／業務規則，非租戶 bypass，2026-11-01 實作時校正）**：`testset.py`、`worksheets.py`（平台角色白名單，org_admin 只是白名單裡的一個名字，不是租戶 bypass）、`league_service.py`（既有 PRD 核定的「同機構才能配對」業務規則）
+- **標記 deprecated、暫不刪**（Phase 2 隨 Organization 定案才處理）：`app/dependencies/tenant.py` 的 `require_org_member`／`require_org_admin`／`get_tenant_filter`（真的零呼叫端）、`app/auth/policies.py::is_admin`／`_org_admin_org_ids`／`_is_org_admin_of_school`（有 characterization test 釘住或窄用，已拔掉跨租戶 bypass 呼叫點但保留定義）
+- **保留不動（out of scope）**：`Organization`／`OrganizationPointsLog` 資料模型本體、`points_service.py`、`organizations_crud.py` 的 CRUD 存取方式（擁有者看自己 org，非租戶 bypass）
 
 ## 4. 資料遷移（需要 Young 同意才能建 migration — 暫停在此）
 
@@ -166,7 +166,7 @@ _POLICY_TABLE = {
 }
 ```
 
-本 PR 實際把 §3「改成只看班級歸屬」與「改成學校成員或系統管理員」兩類的路由改呼叫 `can()`；「改成系統管理員才能用」那類（users/roles/feedback/testset/worksheets/org 報表）因為本來就是 `require_role("system_admin", ...)` 的白名單寫法，直接拿掉 `"org_admin"`／`"org_owner"` 字串即可，不特別繞去 `can()`（avoid over-engineering——那幾支本來就是角色白名單，不是「誰擁有這個資源」的判斷，套 `can()` 反而繞遠路）。
+本 PR 實際把 §3「改成只看班級歸屬」與「改成學校成員或系統管理員」兩類的路由改呼叫 `can()`；「改成系統管理員才能用」那類（users/roles/feedback/org 報表）因為本來就是 `require_role("system_admin", ...)` 的白名單寫法，直接拿掉 `"org_admin"`／`"org_owner"` 字串即可，不特別繞去 `can()`（avoid over-engineering——那幾支本來就是角色白名單，不是「誰擁有這個資源」的判斷，套 `can()` 反而繞遠路）。`testset.py`／`worksheets.py` 維持原樣（見 §3 校正，跟租戶權限無關）。
 
 ## 6. 權限矩陣測試（本 PR 新增 `backend/tests/test_school_as_label_authz.py`）
 
@@ -214,8 +214,27 @@ Then  一律 200（全域 bypass 不受影響）
 
 ## 8. 本 PR 範圍界線
 
-**做**：§3「改成只看班級歸屬」＋「改成學校成員或系統管理員」＋「改成系統管理員才能用」三類的程式碼修正、`can()` 中心化模組、SSO/join 角色授予修正、權限矩陣測試、更新 `test_org_admin_scope_security.py`（舊模型的「org_admin 本校 200」斷言要翻成新模型的「org_admin 不再有特權 → 403」，否則新舊測試互相打架）。
+**做**：§3「改成只看班級歸屬」＋「改成學校成員或系統管理員」＋「改成系統管理員才能用」三類的程式碼修正（含實作時才發現、原本漏列的 `app/dependencies/tenant.py::_check_classroom_access`）、`can()` 中心化模組、SSO/join 角色授予修正、權限矩陣測試、更新 `test_org_admin_scope_security.py`／`test_org_school_admin_locks_3530.py`／`test_org_dashboard.py`／`test_classroom_access_cross_text_3346.py`／`test_schools_api.py`（舊模型的「org_admin 本校 200」斷言要翻成新模型的「org_admin 不再有特權 → 403」，否則新舊測試互相打架；`test_schools_api.py` 另有一條把 get_user_org_ids() 的 bug 行為當 spec 鎖住，一併更正）。
+
+**跑過一次全套 `backend/tests/`（6900+ 條）才抓到的額外兩個檔案**（第一輪只人工抽查約 15 個高風險檔案，沒抽到這兩個）：`tests/security/test_dynamic_security.py`（3 條：`test_idor_org_admin_cannot_read_cross_org_user` 的「同 org 200」正向控制、`test_roles_list_requires_admin_not_mere_org_member` 的「org_admin 200」、`test_med1d_org_admin_lists_only_own_org_classrooms` 的「org_admin 看得到自己 org 的班」——全部翻成 403／看不到）、`tests/test_admin_api.py`（4 條：`TestListUsers::test_list_returns_200_for_org_admin`、`TestGetUserDetail::test_get_detail_works_for_org_admin`、`TestAdminClassroomAccess::test_org_admin_can_view_any_classroom`、`TestAdminCreateClassroomForTeacher::test_org_admin_creates_classroom_for_teacher`——同樣全部翻成 403）。**全套跑完：7 failed → 0 failed，6894→6901 passed，44 skipped，29 xfailed，0 新增 regression。**
 
 **不做（等 Young 回覆 §4 才做）**：任何 `alembic revision`、`School`/`User` schema 變更、教育部名錄匯入、註冊流程改搜尋選校、`POST /schools/join` 自助多校端點（除非 Young 選 §4.1 選項 A 並口頭/書面同意併入本 PR）。
 
-**刻意不碰（out of scope，非本次任務）**：`Organization`／`OrganizationPointsLog` 資料模型本體、`app/dependencies/tenant.py` 死碼的實際刪除（先標 deprecated）、前端 `ADMIN_ROLES`/`Sidebar` 對 `org_admin` 字串的引用（不會因為後端不再核發 org_admin 角色而壞掉，只是从此恆假分支，Phase 2 再清）。
+**刻意不碰（out of scope，非本次任務，2026-11-01 校正版）**：`Organization`／`OrganizationPointsLog` 資料模型本體與 `organizations_crud.py` 的擁有者讀寫方式、`app/dependencies/tenant.py` 真正零呼叫端的那三個 Depends 工廠（先標 deprecated）、`testset.py`／`worksheets.py` 的角色白名單（跟租戶權限無關）、`league_service.py` 的同機構配對規則（既有 PRD 核定的業務規則）、前端 `ADMIN_ROLES`/`Sidebar` 對 `org_admin` 字串的引用（不會因為後端不再核發 org_admin 角色而壞掉，只是从此恆假分支，Phase 2 再清）。
+
+## 9. 安全自審（commit 前，依 CLAUDE.md 規則）
+
+本次改動全部是**授權判斷**（誰可以呼叫既有端點），沒有新增端點、沒有新增外部輸入面、沒有改變任何端點實際做的事。
+
+- **Authn 邊界**：未動。逐檔確認每個被改動的端點仍掛 `Depends(get_current_user)` 或 `require_role(...)`，沒有任何一處從「需要登入」退化成「不需要登入」。
+- **權限提升檢查**：所有變更只往兩個方向走，沒有第三種——
+  1. **收斂**（移除 org_admin/org_owner 跨租戶 bypass）：`schools.py`／`semesters.py`／`classroom_crud.py`／`classroom_junyi_import.py`／`policies.py`／`tenant.py::_check_classroom_access`／`users.py`／`roles.py`／`feedback.py`／`gamification.py`／`organization_dashboard.py`／`organization_points.py` —— 這些只拿掉既有使用者（org_admin/org_owner）原本握有的跨校/跨人權限，不可能讓任何人拿到新的、更高的權限。
+  2. **放寬但綁定在呼叫者自己已驗證的身分上**：
+     - `semesters.py` 寫入權限從「system_admin/org_admin」放寬到「任一 school member」—— 影響範圍限定在**呼叫者自己所屬的那間學校**（`is_school_member` 查真實 `UserRole`，不可偽造），不涉及其他學校。
+     - `gamification.py` 新增 co-teacher 可見（原本只認 primary teacher）—— co-teacher 身分來自既有 `ClassroomTeacher` 表（由班級擁有者邀請建立），不是自助可得；且這跟 app 其餘地方（`policies.require_student_visible_to_teacher`）本來就有的規則一致，是修掉不一致，不是新開權限。
+     - `classroom_join.py` 新增角色授予（`ensure_school_student_role`）—— 只授予最低權限的 `student` 角色、只限該班級本來就綁定的 `school_id`、冪等（已有就不重複插入），比照既有三處（batch／CSV／均一匯入）已核准的同款邏輯。
+     - `schools.py::list_schools` 從「org 過濾（對一般老師永遠回空）」改成「學校成員過濾」—— 使用者只看得到**自己的**學校，不是看到更多人的。
+  - **結論：沒有任何一處讓使用者拿到原本不屬於他、且與他身分無關的資源。**
+- **Fail-closed 檢查**：`can()` 對未註冊的 `(resource_type, action)` 組合丟 `ValueError`（FastAPI 未捕捉的例外 → 500，不會把資料吐出去，故障時是「拒絕」不是「放行」）；`is_school_member` 對 `school_id is None` 回 `False`；所有呼叫端都是 `if not can(...): raise HTTPException(403)` 的失敗封閉寫法，没有任何「预设允许、例外才擋」的反向邏輯。
+- **測試寫法**：依規則一律用最低權限角色（school-scoped teacher / student，不借用 system_admin）寫正向案例，且每個「允許」都配一條「別人的/別校的」負向對照（見 §6 矩陣），避免「測試掛了但其實什麼都沒測到」的陷阱。
+- **黑白箱 gate**：CLAUDE.md 規則要求 auth/rbac/permission 改動合併前跑 `owasp-blackbox-audit` skill；該 skill 預期對著一個活的部署環境用 ZAP 等工具跑 WSTG 類別掃描。本次在 PR 尚未部署到 preview 環境前先完成上述人工 WSTG-ATHZ（Testing for Authorization）對應項目的逐條自查；待 PR Preview 部署後，於 git-issue-pr-flow Phase 3 的 `/qa` 與 security review 步驟補一輪對 preview URL 的驗證（curl 不同角色 token 打上表矩陣中的端點，確認回應碼與本機測試一致）。

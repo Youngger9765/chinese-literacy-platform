@@ -261,8 +261,14 @@ class TestDashboardSystemAdmin:
         assert len(data["school_stats"]) == 1
 
 
-class TestDashboardOrgMember:
-    def test_dashboard_org_owner(self, client):
+class TestDashboardOrgMemberNoLongerPrivileged:
+    """(#3804) The org_owner/org_admin "view my own org's dashboard" bypass
+    is retired — it aggregates teacher/student/session counts across schools
+    that are no longer "owned" by an org tier, so system_admin is now the
+    only one who can call this. These used to assert 200; they now assert
+    403, same as any other non-admin caller."""
+
+    def test_dashboard_org_owner_is_403(self, client):
         org_id = _create_org("Org Owner Test Org")
 
         owner = _register_user(client, "dash_org_owner")
@@ -272,12 +278,9 @@ class TestDashboardOrgMember:
             f"/api/organizations/{org_id}/dashboard",
             headers=auth_header(owner["token"]),
         )
-        assert resp.status_code == 200
-        data = resp.json()
-        assert data["total_schools"] == 0
-        assert data["school_stats"] == []
+        assert resp.status_code == 403, resp.text
 
-    def test_dashboard_org_admin(self, client):
+    def test_dashboard_org_admin_is_403(self, client):
         org_id = _create_org("Org Admin Test Org")
 
         org_admin = _register_user(client, "dash_org_admin")
@@ -287,8 +290,7 @@ class TestDashboardOrgMember:
             f"/api/organizations/{org_id}/dashboard",
             headers=auth_header(org_admin["token"]),
         )
-        assert resp.status_code == 200
-        assert resp.json()["total_schools"] == 0
+        assert resp.status_code == 403, resp.text
 
 
 class TestDashboardAccessControl:

@@ -1,20 +1,24 @@
 """
-Security integration tests for org_admin cross-org data isolation.
+Security integration tests for org_admin — now ZERO cross-tenant privilege (#3804).
 
-Attack scenario: A org_admin should NOT be able to read B org's
-user data, gamification records, or feedback — 個資法 §20 compliance.
+(#3804) This file used to lock the OLD three-tier model, where org_admin had
+a scoped-but-real bypass: denied cross-org, but ALLOWED within its own org
+(users list/detail, gamification, feedback). Young's 2026-11-01 decision
+retires that tier entirely — school is now just a label a teacher is
+tagged with, and permission looks only at classroom ownership/membership,
+with system_admin as the sole global exception. So "own org" no longer
+means anything special; org_admin is just another non-admin caller now.
 
 Matrix tested:
-  - A org_admin → B org user list          → 403 / empty
-  - A org_admin → B org user detail        → 403
+  - A org_admin → B org user list            → 403 (list_users is system_admin-only)
+  - A org_admin → B org user detail          → 403
   - A org_admin → B org student gamification → 403
   - A org_admin → B org classroom leaderboard → 403
-  - A org_admin → B org user feedback      → 403 / empty (via list)
-  - A org_admin → B org feedback PATCH     → 403
-  - A org_admin → A org user list          → 200 (own org allowed)
-  - A org_admin → A org student gamification → 200 (own org allowed)
-  - system_admin → any org                 → 200 (global bypass)
-  - plain teacher → other user's gamification → 403
+  - A org_admin → B org user feedback        → 403 (list_feedback is system_admin-only)
+  - A org_admin → B org feedback PATCH       → 403
+  - A org_admin → A org user list/detail/gamification/feedback → 403 (own org is NO LONGER special)
+  - system_admin → any org                   → 200 (global bypass, unchanged)
+  - plain teacher → other user's gamification → 403 (unchanged)
 
 Run with:
     cd /Users/young/project/chinese-literacy-platform/backend
@@ -271,31 +275,27 @@ class TestOrgAdminScopeIsolation:
 
     # ── User list ─────────────────────────────────────────────────────────────
 
-    def test_list_users_cross_org_returns_no_b_users(self, client, actors):
-        """A org_admin listing users must NOT see B org's students."""
+    def test_list_users_is_system_admin_only_now(self, client, actors):
+        """(#3804) list_users requires system_admin — org_admin gets 403
+        outright, whether or not the target is in "their" org."""
         _, admin_a_tok = actors["admin_a"]
-        student_b_id, _ = actors["student_b"]
         r = client.get("/api/users", headers=auth_header(admin_a_tok))
-        assert r.status_code == 200, r.text
-        ids = [u["id"] for u in r.json()["items"]]
-        assert student_b_id not in ids, (
-            f"A org_admin should not see B's student (id={student_b_id}) in /api/users"
-        )
+        assert r.status_code == 403, r.text
 
-    def test_list_users_own_org_visible(self, client, actors):
-        """A org_admin can see their own org's users."""
-        _, admin_a_tok = actors["admin_a"]
-        admin_a_id, _ = actors["admin_a"]
+    def test_list_users_system_admin_sees_everyone(self, client, actors):
+        _, sysadmin_tok = actors["sysadmin"]
         student_a_id, _ = actors["student_a"]
-        r = client.get("/api/users", headers=auth_header(admin_a_tok))
+        student_b_id, _ = actors["student_b"]
+        r = client.get("/api/users", headers=auth_header(sysadmin_tok))
         assert r.status_code == 200, r.text
         ids = [u["id"] for u in r.json()["items"]]
-        assert student_a_id in ids, "A org_admin must see their own student"
+        assert student_a_id in ids and student_b_id in ids
 
     # ── User detail ───────────────────────────────────────────────────────────
 
     def test_get_user_detail_cross_org_is_403(self, client, actors):
-        """A org_admin reading B's student detail must get 403."""
+        """A org_admin reading B's student detail must get 403 (unchanged
+        outcome — now via the system_admin-only gate, not org scoping)."""
         _, admin_a_tok = actors["admin_a"]
         student_b_id, _ = actors["student_b"]
         r = client.get(f"/api/users/{student_b_id}", headers=auth_header(admin_a_tok))
@@ -303,13 +303,14 @@ class TestOrgAdminScopeIsolation:
             f"Expected 403 when A org_admin reads B's user detail, got {r.status_code}: {r.text}"
         )
 
-    def test_get_user_detail_own_org_is_200(self, client, actors):
-        """A org_admin can read a user in their own org."""
+    def test_get_user_detail_own_org_is_now_403(self, client, actors):
+        """(#3804) org_admin reading even THEIR OWN org's student now gets
+        403 — "own org" is no longer special under the school-as-label model."""
         _, admin_a_tok = actors["admin_a"]
         student_a_id, _ = actors["student_a"]
         r = client.get(f"/api/users/{student_a_id}", headers=auth_header(admin_a_tok))
-        assert r.status_code == 200, (
-            f"A org_admin should read own student, got {r.status_code}: {r.text}"
+        assert r.status_code == 403, (
+            f"org_admin must no longer read any user, got {r.status_code}: {r.text}"
         )
 
     def test_get_user_detail_system_admin_any_org_is_200(self, client, actors):
@@ -335,16 +336,19 @@ class TestOrgAdminScopeIsolation:
             f"Expected 403 on cross-org gamification read, got {r.status_code}: {r.text}"
         )
 
-    def test_gamification_summary_own_org_is_200(self, client, actors):
-        """A org_admin can read their own student's gamification."""
+    def test_gamification_summary_own_org_is_now_403(self, client, actors):
+        """(#3804) org_admin reading a student in THEIR OWN org's
+        gamification now gets 403 too — org_admin has no classroom
+        relationship to student_a, and "same org" no longer substitutes
+        for one."""
         _, admin_a_tok = actors["admin_a"]
         student_a_id, _ = actors["student_a"]
         r = client.get(
             f"/api/gamification/summary/{student_a_id}",
             headers=auth_header(admin_a_tok),
         )
-        assert r.status_code == 200, (
-            f"A org_admin must read own student's gamification, got {r.status_code}: {r.text}"
+        assert r.status_code == 403, (
+            f"org_admin must no longer bypass via org membership, got {r.status_code}: {r.text}"
         )
 
     def test_gamification_summary_system_admin_any_is_200(self, client, actors):
@@ -405,25 +409,12 @@ class TestOrgAdminScopeIsolation:
 
     # ── Feedback: list ────────────────────────────────────────────────────────
 
-    def test_list_feedback_cross_org_not_visible(self, client, actors):
-        """A org_admin listing feedback must NOT see entries from B org's users."""
+    def test_list_feedback_is_system_admin_only_now(self, client, actors):
+        """(#3804) list_feedback requires system_admin — org_admin gets 403
+        outright now, same as listing a different org's feedback used to."""
         _, admin_a_tok = actors["admin_a"]
-        fb_b_id = actors["fb_b_id"]
         r = client.get("/api/feedback", headers=auth_header(admin_a_tok))
-        assert r.status_code == 200, r.text
-        ids = [f["id"] for f in r.json()["items"]]
-        assert fb_b_id not in ids, (
-            f"A org_admin must not see B's feedback (id={fb_b_id})"
-        )
-
-    def test_list_feedback_own_org_visible(self, client, actors):
-        """A org_admin can see feedback from their own org's users."""
-        _, admin_a_tok = actors["admin_a"]
-        fb_a_id = actors["fb_a_id"]
-        r = client.get("/api/feedback", headers=auth_header(admin_a_tok))
-        assert r.status_code == 200, r.text
-        ids = [f["id"] for f in r.json()["items"]]
-        assert fb_a_id in ids, f"A org_admin must see their org's feedback (id={fb_a_id})"
+        assert r.status_code == 403, r.text
 
     def test_list_feedback_system_admin_sees_all(self, client, actors):
         """system_admin sees all feedback including cross-org."""
@@ -437,7 +428,8 @@ class TestOrgAdminScopeIsolation:
     # ── Feedback: PATCH ───────────────────────────────────────────────────────
 
     def test_patch_feedback_cross_org_is_403(self, client, actors):
-        """A org_admin updating B's user's feedback must get 403."""
+        """A org_admin updating B's user's feedback must get 403 (unchanged
+        outcome — now via the system_admin-only gate)."""
         _, admin_a_tok = actors["admin_a"]
         fb_b_id = actors["fb_b_id"]
         r = client.patch(
@@ -449,8 +441,9 @@ class TestOrgAdminScopeIsolation:
             f"Expected 403 when A org_admin patches B's feedback, got {r.status_code}: {r.text}"
         )
 
-    def test_patch_feedback_own_org_is_200(self, client, actors):
-        """A org_admin can update feedback from their own org's users."""
+    def test_patch_feedback_own_org_is_now_403(self, client, actors):
+        """(#3804) org_admin updating feedback from THEIR OWN org's user now
+        gets 403 too — update_feedback_status is system_admin-only."""
         _, admin_a_tok = actors["admin_a"]
         fb_a_id = actors["fb_a_id"]
         r = client.patch(
@@ -458,8 +451,8 @@ class TestOrgAdminScopeIsolation:
             json={"status": "in_progress"},
             headers=auth_header(admin_a_tok),
         )
-        assert r.status_code == 200, (
-            f"A org_admin should update own org's feedback, got {r.status_code}: {r.text}"
+        assert r.status_code == 403, (
+            f"org_admin must no longer update any feedback, got {r.status_code}: {r.text}"
         )
 
     def test_patch_feedback_system_admin_any_is_200(self, client, actors):

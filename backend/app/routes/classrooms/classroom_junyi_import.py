@@ -11,7 +11,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from ...auth.dependencies import get_current_user
-from ...auth.policies import is_system_admin, _is_org_admin_of_school
+from ...auth.policies import is_system_admin
 from ...auth.rate_limiter import InMemoryRateLimiter
 from ...database import get_db
 from ...config import settings
@@ -34,6 +34,10 @@ def get_junyi_bq_client():
 
 
 def _require_school_membership(current_user: User, school_id: int, db: Session) -> School:
+    """(#3804) system_admin, or a `teacher` scoped to this school.
+
+    The org_admin-of-the-school's-org bypass is retired.
+    """
     school = db.query(School).filter(School.id == school_id).first()
     if school is None:
         raise HTTPException(status_code=404, detail="School not found")
@@ -44,7 +48,7 @@ def _require_school_membership(current_user: User, school_id: int, db: Session) 
         and ur.scope_type == "school" and ur.scope_id == str(school.id)
         for ur in current_user.user_roles
     )
-    if not (is_member or _is_org_admin_of_school(current_user.id, school.id, db)):
+    if not is_member:
         raise HTTPException(status_code=403, detail="Not authorized for this school")
     return school
 
