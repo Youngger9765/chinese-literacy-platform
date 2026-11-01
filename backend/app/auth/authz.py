@@ -29,7 +29,7 @@ from typing import Callable, Literal
 from sqlalchemy.orm import Session
 
 from .policies import is_system_admin
-from ..models.school import Classroom, ClassroomStudent, ClassroomTeacher
+from ..models.school import Classroom, ClassroomStudent, ClassroomTeacher, School
 from ..models.user import User
 
 Action = Literal["view", "manage"]
@@ -154,10 +154,41 @@ def _owns_or_co_teaches_a_classroom_at_school(user: User, school_id, db: Session
     )
 
 
+def _is_self_activated_school(school_id, db: Session) -> bool:
+    """True if this School was created by #3804 self-serve activation
+    (POST /users/me/activate-teacher creating a brand-new school on the fly)
+    rather than by an admin/import. See School.settings["created_via"]."""
+    school = db.get(School, school_id)
+    return bool(school and school.settings and school.settings.get("created_via") == "self_activation")
+
+
 def _can_view_school_roster(user: User, resource_id, db: Session) -> bool:
     """Members/classrooms rosters for a school are visible only to teachers
     who own or co-teach a classroom there — NOT to every school-scoped
-    member (see _owns_or_co_teaches_a_classroom_at_school)."""
+    member (see _owns_or_co_teaches_a_classroom_at_school).
+
+    (#3804 security review finding #5, 2026-11-01) That alone is still not
+    enough for a SELF-ACTIVATED school: "own a classroom there" is itself a
+    trivial, zero-friction action (anyone can type the same school name and
+    POST /classrooms), so gating the roster/classroom-LIST endpoints on it
+    just moves the exploit one step later rather than closing it — a
+    stranger who self-activates into "台北市立大安國小" and creates one dummy
+    classroom would otherwise unlock the full classroom list (names +
+    teacher + student counts) of everyone else who self-activated into that
+    same string. Young's point 4 (verbatim, 2026-11-01): "自助開通的老師一樣
+    只看得到自己開的班、自己班上的學生。宣告了某所學校，不代表能看到那所學校的
+    其他班。" For a self-activated school there is no institutional
+    relationship to justify a shared roster view at all, so this returns
+    False unconditionally (system_admin already bypasses in can() before
+    this runs). The ordinary "my classrooms" page is unaffected — it is
+    served by GET /classrooms, which already scopes to
+    owns-or-co-teaches regardless of school (classroom_crud.py
+    list_my_classrooms). A REAL (non-self-activated, e.g. admin-imported or
+    MOE-directory) school keeps the existing "own/co-teach at least one
+    classroom there" gate, since its members have an actual institutional
+    relationship."""
+    if _is_self_activated_school(resource_id, db):
+        return False
     return _owns_or_co_teaches_a_classroom_at_school(user, resource_id, db)
 
 
