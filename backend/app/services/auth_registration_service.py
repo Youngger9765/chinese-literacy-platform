@@ -132,7 +132,27 @@ def activate_teacher_for_schools(
             # NOT thereby become that school's admin in any permission
             # sense; `can()`'s ("school","manage") policy is hardcoded False
             # for everyone except system_admin, independent of this field.
-            school = School(name=safe_name, domain=None, admin_user_id=user.id)
+            #
+            # (#3804 security review, 2026-11-02, finding 4) `settings`
+            # records that this school was born via self-serve activation —
+            # NOT domain=None alone, which is also how plenty of pre-#3804
+            # schools (admin-created via POST /schools, test fixtures,
+            # bulk-import setups) already represent a genuinely-shared
+            # institutional school with no email-domain concept at all.
+            # Narrowing classroom_students.py's _eligible_student_ids()
+            # strictly by "domain is empty" would have also silently
+            # narrowed those long-standing, intentionally-shared schools —
+            # a real regression caught by test_classrooms_api.py /
+            # test_classroom_join_and_batch.py (15 tests) when first tried.
+            # This explicit marker scopes the new restriction to exactly
+            # the new risk (self-activation lets strangers join by name)
+            # without touching schools nobody self-activated into.
+            school = School(
+                name=safe_name,
+                domain=None,
+                admin_user_id=user.id,
+                settings={"created_via": "self_activation"},
+            )
             db.add(school)
             db.flush()
 

@@ -681,3 +681,165 @@ class TestCreatingANewSchoolGrantsNoAdminPrivilege:
             "creating a brand-new school via self-activation must not grant "
             f"PATCH /schools/{{id}} (system_admin-only): {resp.text}"
         )
+
+
+# ===========================================================================
+# 6. Security review finding (2026-11-02): self-activating into an EXISTING
+#    school must not grant the ability to SEARCH or ADD a student who
+#    belongs to a DIFFERENT teacher at that same school.
+#
+#    _eligible_student_ids() (classroom_students.py) only narrowed "students
+#    of this school" down to "students I created or already teach" when the
+#    school's domain looked like a public mail provider (#3541). A
+#    self-activated school always has domain=None -- not a public email
+#    domain, so is_public_email_domain(None) is False and the narrowing was
+#    skipped entirely, treating it like a real institutional (email-domain
+#    -verified) school where #3541 intentionally keeps sharing. A
+#    self-activated school has no such verification; declaring the same
+#    name is now trivial and open to anyone. Same root cause, same fix
+#    shape as finding 2 (roster leak), different endpoint.
+#
+#    Written with the LOWEST-privilege account (a freshly self-activated
+#    teacher), with a positive control (the same teacher's own student is
+#    both searchable and addable).
+# ===========================================================================
+
+
+class TestJoiningAnExistingSchoolDoesNotLeakItsStudents:
+    @pytest.fixture(scope="class")
+    def actors(self, client):
+        school_name = f"學生測試國小_{uuid.uuid4().hex[:6]}"
+
+        a_id, a_tok = _register_login(client, "students_a")
+        act_a = client.post(
+            "/api/users/me/activate-teacher",
+            json={"school_names": [school_name]},
+            headers=auth_header(a_tok),
+        )
+        school_id = act_a.json()["schools"][0]["id"]
+        cls_a = client.post(
+            "/api/classrooms",
+            json={"name": "StudentsA1", "school_id": school_id, "grade": 4},
+            headers=auth_header(a_tok),
+        )
+        assert cls_a.status_code == 201, cls_a.text
+        cls_a_id = cls_a.json()["id"]
+
+        b_id, b_tok = _register_login(client, "students_b")
+        act_b = client.post(
+            "/api/users/me/activate-teacher",
+            json={"school_names": [school_name]},
+            headers=auth_header(b_tok),
+        )
+        assert act_b.json()["schools"][0]["id"] == school_id, (
+            "sanity: A and B must share the same school for this test to be meaningful"
+        )
+        cls_b = client.post(
+            "/api/classrooms",
+            json={"name": "StudentsB1", "school_id": school_id, "grade": 4},
+            headers=auth_header(b_tok),
+        )
+        cls_b_id = cls_b.json()["id"]
+
+        # B's own student -- a unique, searchable name planted via batch-create,
+        # which grants a school-scoped `student` role at `school_id` (#3534/#3541
+        # wiring), exactly the real-world path.
+        unique_name = f"乙生_{uuid.uuid4().hex[:6]}"
+        batch_b = client.post(
+            f"/api/classrooms/{cls_b_id}/students/batch",
+            json={"students": [{"name": unique_name, "seat_number": "01"}]},
+            headers=auth_header(b_tok),
+        )
+        assert batch_b.status_code == 201, batch_b.text
+        b_student_id = batch_b.json()["created"][0]["user_id"]
+
+        # A's own student, for the positive control.
+        own_name = f"甲生_{uuid.uuid4().hex[:6]}"
+        batch_a = client.post(
+            f"/api/classrooms/{cls_a_id}/students/batch",
+            json={"students": [{"name": own_name, "seat_number": "01"}]},
+            headers=auth_header(a_tok),
+        )
+        assert batch_a.status_code == 201, batch_a.text
+        a_student_id = batch_a.json()["created"][0]["user_id"]
+
+        return {
+            "a_tok": a_tok, "b_tok": b_tok, "school_id": school_id,
+            "cls_a_id": cls_a_id, "cls_b_id": cls_b_id,
+            "b_student_id": b_student_id, "b_student_name": unique_name,
+            "a_student_id": a_student_id, "a_student_name": own_name,
+        }
+
+    def test_cannot_search_for_another_teachers_student_in_the_same_school(self, actors):
+        from fastapi.testclient import TestClient as _TC
+        from app.main import app as _app
+        resp = _TC(_app).post(
+            f"/api/classrooms/{actors['cls_a_id']}/students/search",
+            json={"query": actors["b_student_name"]},
+            headers=auth_header(actors["a_tok"]),
+        )
+        assert resp.status_code == 200, resp.text
+        found_ids = {r["id"] for r in resp.json()}
+        assert actors["b_student_id"] not in found_ids, (
+            f"teacher A must not be able to search up teacher B's student via shared "
+            f"school membership alone: {resp.json()}"
+        )
+
+    def test_cannot_add_another_teachers_student_to_own_classroom(self, actors):
+        from fastapi.testclient import TestClient as _TC
+        from app.main import app as _app
+        resp = _TC(_app).post(
+            f"/api/classrooms/{actors['cls_a_id']}/students",
+            json={"student_id": actors["b_student_id"]},
+            headers=auth_header(actors["a_tok"]),
+        )
+        assert resp.status_code == 404, (
+            f"teacher A must not be able to enrol teacher B's student into A's "
+            f"classroom via shared school membership alone: {resp.status_code} {resp.text}"
+        )
+
+    def test_positive_control_can_search_and_add_own_student(self, actors):
+        """A's OWN student (already enrolled in A's own classroom) must still
+        be findable and addable -- this isn't "nothing works", it's "cross
+        -teacher strangers don't leak"."""
+        from fastapi.testclient import TestClient as _TC
+        from app.main import app as _app
+        c = _TC(_app)
+
+        search = c.post(
+            f"/api/classrooms/{actors['cls_a_id']}/students/search",
+            json={"query": actors["a_student_name"]},
+            headers=auth_header(actors["a_tok"]),
+        )
+        assert search.status_code == 200, search.text
+        # a_student is already enrolled in cls_a_id so search (which excludes
+        # already-enrolled students) legitimately returns empty -- the real
+        # positive control is adding them to a SECOND classroom A owns.
+        cls_a2 = c.post(
+            "/api/classrooms",
+            json={"name": "StudentsA2", "school_id": actors["school_id"], "grade": 4},
+            headers=auth_header(actors["a_tok"]),
+        )
+        assert cls_a2.status_code == 201, cls_a2.text
+        cls_a2_id = cls_a2.json()["id"]
+
+        search2 = c.post(
+            f"/api/classrooms/{cls_a2_id}/students/search",
+            json={"query": actors["a_student_name"]},
+            headers=auth_header(actors["a_tok"]),
+        )
+        assert search2.status_code == 200, search2.text
+        assert actors["a_student_id"] in {r["id"] for r in search2.json()}, (
+            f"positive control failed: A could not find their OWN student via "
+            f"search: {search2.json()}"
+        )
+
+        add2 = c.post(
+            f"/api/classrooms/{cls_a2_id}/students",
+            json={"student_id": actors["a_student_id"]},
+            headers=auth_header(actors["a_tok"]),
+        )
+        assert add2.status_code == 201, (
+            f"positive control failed: A could not add their OWN student to "
+            f"another of A's classrooms: {add2.status_code} {add2.text}"
+        )
