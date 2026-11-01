@@ -1,13 +1,27 @@
 """#3541 — public email domains (gmail, yahoo …) are not a school.
 
-Registration grouped teachers by email domain, so every gmail teacher landed in one
-"gmail.com 學校". #3534 limited add/search to same-school students — which, for a
-public domain, means every stranger who signed up with gmail.
+Registration used to group teachers by email domain, so every gmail teacher
+landed in one "gmail.com 學校". #3534 limited add/search to same-school
+students — which, for a public domain, means every stranger who signed up
+with gmail.
 
-1. New teachers on a public domain get a private school of their own.
-2. In a school that *is* a public-domain school (the shared ones that already exist),
+#3804 (Young 2026-11-01, point 5) retired that whole email-domain-guessing
+mechanism: `assign_teacher_to_school` is gone. A teacher now names their
+school explicitly via self-serve activation (`activate_teacher_for_schools`),
+matched by exact name — see PRD §4.1.1 for the documented trade-off (two
+teachers who type the same school name land in the same school, regardless
+of their email domain; this is now the only grouping axis, by design).
+
+1. Two teachers who name DIFFERENT schools each get their own school,
+   regardless of sharing an email domain (public or institutional — domain
+   is simply no longer part of the decision).
+2. Two teachers who name the SAME school (by exact name) share it — the
+   §3541 problem does not reappear here because sharing is now something a
+   teacher does on purpose by typing a specific name, not an accident of
+   signing up with the same free-mail provider.
+3. In a school that *is* shared (the legacy case this file originally
+   existed to fix, or two teachers who intentionally named the same school),
    a teacher may only search/add students they created or already teach.
-Institutional domains keep same-school sharing.
 """
 
 import os
@@ -28,7 +42,7 @@ from app.main import app
 from app.models import Base
 from app.models.school import Classroom, ClassroomStudent, School
 from app.models.user import Role, User, UserRole
-from app.services.auth_registration_service import assign_teacher_to_school
+from app.services.auth_registration_service import activate_teacher_for_schools
 
 engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
 Session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -46,29 +60,32 @@ def db():
     Base.metadata.drop_all(bind=engine)
 
 
-def _teacher(db, email, name="t"):
+def _teacher(db, email, school_name, name="t"):
     u = User(email=email, name=name, password_hash="x", is_active=True)
     db.add(u)
     db.flush()
-    assign_teacher_to_school(db, u)
+    activate_teacher_for_schools(db, u, [school_name])
     db.commit()
     role = db.query(UserRole).join(Role).filter(UserRole.user_id == u.id, Role.name == "teacher").one()
     return u, int(role.scope_id)
 
 
-# ── 1. registration ──────────────────────────────────────────────────────────
+# ── 1. self-serve activation (#3804: no more domain guessing) ───────────────
 
 @pytest.mark.parametrize("domain", ["gmail.com", "Yahoo.com.tw", "hotmail.com", "outlook.com", "icloud.com"])
-def test_public_domain_teachers_each_get_their_own_school(db, domain):
-    _, s1 = _teacher(db, f"alice@{domain}")
-    _, s2 = _teacher(db, f"bob@{domain}")
+def test_teachers_who_name_different_schools_each_get_their_own_school(db, domain):
+    _, s1 = _teacher(db, f"alice@{domain}", "Alice 的學校")
+    _, s2 = _teacher(db, f"bob@{domain}", "Bob 的學校")
     assert s1 != s2
     assert db.get(School, s1).domain is None and db.get(School, s2).domain is None
 
 
-def test_institutional_domain_teachers_still_share_a_school(db):
-    _, s1 = _teacher(db, "alice@abc.edu.tw")
-    _, s2 = _teacher(db, "bob@abc.edu.tw")
+def test_teachers_who_name_the_same_school_share_it_regardless_of_domain(db):
+    """#3804: sharing is now opt-in (same typed name), not an accident of
+    email domain. A gmail teacher and an institutional-domain teacher who
+    both type "abc 國小" land in the SAME school -- this is intended."""
+    _, s1 = _teacher(db, "alice@gmail.com", "abc 國小")
+    _, s2 = _teacher(db, "bob@abc.edu.tw", "abc 國小")
     assert s1 == s2
 
 

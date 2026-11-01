@@ -191,12 +191,17 @@ class TestListRoles:
 
 class TestAssignRole:
     def test_assign_returns_201(self, client, admin_user, target_user):
+        # (#3804) target_user already holds a platform-scoped student role
+        # from registration -- assign a role/scope it does NOT already have
+        # (teacher/school/1), otherwise this collides with that default
+        # grant and the endpoint correctly returns 409 instead of 201.
         resp = client.post(
             "/api/roles/assign",
             json={
                 "user_id": target_user["user_id"],
-                "role_name": "student",
-                "scope_type": "platform",
+                "role_name": "teacher",
+                "scope_type": "school",
+                "scope_id": "1",
             },
             headers=auth_header(admin_user["token"]),
         )
@@ -438,22 +443,19 @@ class TestListUserRoles:
 # ===========================================================================
 
 
-class TestRegisterGrantsOnlyScopedTeacher:
-    """Registration grants one school-scoped teacher role and nothing wider.
+class TestRegisterGrantsOnlyScopedStudent:
+    """Registration grants exactly one platform-scoped student role (#3804).
 
-    These two used to assert a fresh account had zero roles. That policy is
-    gone: /auth/register is teacher self-registration (#457), and it calls
-    assign_teacher_to_school, which creates or joins the school matching the
-    email domain and grants `teacher` scoped to that school — 方大哥's spec.
-
-    The assertion worth keeping is not the count, it is the ceiling. Self
-    -registration is unauthenticated, so what matters is that it cannot hand
-    out anything beyond one school-scoped teacher role. Asserting that instead
-    keeps the guard these tests were written for and matches what the code
-    actually does.
+    #3804 (Young 2026-11-01): there is no more "register = teacher" branch.
+    Every account defaults to student, platform-scoped (no school yet --
+    joining a classroom later adds a school-scoped student role on top,
+    self-activating as a teacher adds a school-scoped teacher role on top).
+    The ceiling assertion these tests were originally written for (self
+    -registration is unauthenticated, so it must not hand out more than the
+    one role it's supposed to) still applies, just to a different role.
     """
 
-    def test_register_grants_exactly_one_school_scoped_teacher(self, client, admin_user):
+    def test_register_grants_exactly_one_platform_scoped_student(self, client, admin_user):
         user = _register_user(client, "no_auto")
 
         resp = client.get(
@@ -462,20 +464,20 @@ class TestRegisterGrantsOnlyScopedTeacher:
         )
         data = resp.json()
         assert len(data) == 1, f"registration granted more than one role: {data}"
-        assert data[0]["role_name"] == "teacher"
-        assert data[0]["scope_type"] == "school"
-        assert data[0]["scope_id"], "teacher role must be scoped to a school, not global"
+        assert data[0]["role_name"] == "student"
+        assert data[0]["scope_type"] == "platform"
+        assert not data[0]["scope_id"], "a fresh account's default student role has no school yet"
 
     def test_register_grants_nothing_wider_than_that(self, client):
         user = _register_user(client, "me_no_role")
         resp = client.get("/api/users/me", headers=auth_header(user["token"]))
         roles = resp.json()["roles"]
 
-        assert [r["role_name"] for r in roles] == ["teacher"]
-        assert all(r["scope_type"] == "school" for r in roles), roles
+        assert [r["role_name"] for r in roles] == ["student"]
+        assert all(r["scope_type"] == "platform" for r in roles), roles
         assert not any(
-            r["role_name"] in {"admin", "system_admin", "org_admin"} for r in roles
-        ), f"self-registration escalated to an admin role: {roles}"
+            r["role_name"] in {"admin", "system_admin", "org_admin", "teacher"} for r in roles
+        ), f"self-registration escalated past student: {roles}"
 
 
 # ===========================================================================

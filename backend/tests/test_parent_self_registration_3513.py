@@ -88,13 +88,17 @@ def test_parent_signup_is_refused_while_the_portal_is_off(client, monkeypatch):
     assert r.status_code == 403
 
 
-def test_teacher_signup_is_unchanged(client, monkeypatch):
-    # Positive control: the default path still makes a teacher in a school.
+def test_default_signup_is_now_a_student_not_a_teacher(client, monkeypatch):
+    """Positive control, updated for #3804 (Young 2026-11-01): the default
+    (role=None) path used to make a teacher in a domain-matched school; it
+    now defaults to a bare platform-scoped student with no school at all.
+    Self-serve teacher activation (POST /users/me/activate-teacher) is the
+    new, explicit, name-based path -- see test_self_serve_teacher_3804.py."""
     monkeypatch.setattr(settings, "parent_portal_enabled", True)
     domain = f"school{uuid.uuid4().hex[:6]}.edu.tw"
     email, r = _register(client, None, domain)
     assert r.status_code == 201, r.text
-    assert _roles(email) == ["teacher"]
+    assert _roles(email) == ["student"]
     s = Session()
-    assert s.query(School).filter(School.domain == domain).count() == 1
+    assert s.query(School).filter(School.domain == domain).count() == 0
     s.close()
