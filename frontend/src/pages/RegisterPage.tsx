@@ -198,12 +198,12 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin }) => {
             <span className="text-white font-black text-2xl">L</span>
           </div>
           <h1 className="text-2xl font-bold text-gray-900">AI 朗讀助教</h1>
-          <p className="text-gray-500 text-sm mt-1">{asParent ? '家長註冊' : '教師註冊'}</p>
+          <p className="text-gray-500 text-sm mt-1">{asParent ? '家長註冊' : '建立帳號'}</p>
         </div>
 
         {PARENT_PORTAL_ENABLED && (
           <div className="flex gap-1 rounded-xl bg-gray-100 p-1 mb-3" role="tablist" aria-label="註冊身分">
-            {([['teacher', '我是老師'], ['parent', '我是家長']] as const).map(([k, label]) => (
+            {([['teacher', '一般註冊'], ['parent', '我是家長']] as const).map(([k, label]) => (
               <button
                 key={k}
                 type="button"
@@ -223,10 +223,15 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin }) => {
           </div>
         )}
 
-        {/* Student notice */}
-        <div className="bg-amber-100 border border-amber-300 text-amber-800 text-sm rounded-lg px-4 py-3 mb-2">
-          學生帳號由老師在班級管理中建立，請聯繫你的老師取得帳號。
-        </div>
+        {/* #3804 (Young 2026-11-01): registration no longer branches into
+            teacher/student. Replaces the old (now-false) "學生帳號由老師建立"
+            amber warning — every account defaults to student and can later
+            self-activate as a teacher. See PRD §10.6. */}
+        {!asParent && (
+          <p className="text-gray-400 text-xs text-center mb-2">
+            註冊後預設是學生身分，之後可以在側邊欄「開通老師身分」。
+          </p>
+        )}
 
         {/* Form Card */}
         <form
@@ -315,7 +320,9 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin }) => {
           </button>
         </form>
 
-        {/* Google Sign-In — teacher sign-up only; a Google sign-in creates a teacher. */}
+        {/* Google Sign-In — not shown for the parent flow (unrelated to #3804;
+            a Google sign-up now defaults to student, same as email/password,
+            see sso_login_service.py::resolve_google_user). */}
         {!asParent && (
         <div className="mt-4">
           <div className="relative">

@@ -133,7 +133,7 @@ export async function register(
   const res = await fetch(`${API_BASE}/api/auth/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    // #3513: role is only sent for a parent sign-up; omitted = teacher.
+    // #3804: role is only sent for a parent sign-up; omitted = student (default).
     body: JSON.stringify(role ? { email, password, name, role } : { email, password, name }),
   });
   return handleAuthResponse<RegisterResponse>(res);
@@ -153,6 +153,30 @@ export async function getMe(token: string): Promise<AuthUser> {
     headers: { Authorization: `Bearer ${token}` },
   });
   return handleAuthResponse<AuthUser>(res);
+}
+
+/** #3804 self-serve teacher activation — PRD §10/§11. */
+export interface ActivateTeacherSchool {
+  id: number;
+  name: string;
+  is_new: boolean;
+}
+
+export interface ActivateTeacherResponse {
+  schools: ActivateTeacherSchool[];
+  roles: UserRole[];
+}
+
+export async function activateTeacher(
+  token: string,
+  schoolNames: string[],
+): Promise<ActivateTeacherResponse> {
+  const res = await fetch(`${API_BASE}/api/users/me/activate-teacher`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ school_names: schoolNames }),
+  });
+  return handleAuthResponse<ActivateTeacherResponse>(res);
 }
 
 export async function acceptTerms(token: string): Promise<AuthUser> {
