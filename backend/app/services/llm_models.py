@@ -64,6 +64,12 @@ TASK_MODELS: dict[str, tuple[str, str]] = {
     # us-central1: audio models require regional endpoint (not global).
     # thinking_budget=0 (2.5 series) applied at call site.
     "reading_transcribe": ("gemini-2.5-flash", "us-central1"),
+
+    # ── School directory (#3804 §4.2) ─────────────────────────────────────────
+    # Short, cheap, low-stakes name-suggestion task — same category as the
+    # other text/JSON generation tasks above (flash-lite parity confirmed
+    # for that whole category, not separately A/B tested for this task).
+    "school_name_suggest": ("gemini-2.5-flash-lite", "global"),
 }
 
 
