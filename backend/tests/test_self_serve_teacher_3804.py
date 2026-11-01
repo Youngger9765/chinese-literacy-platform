@@ -176,9 +176,28 @@ class TestEveryAccountDefaultsToStudent:
         assert role_names == {"student"}
 
     def test_parent_opt_in_still_works_and_grants_no_student_role(self, client, monkeypatch):
-        """#3513 parent portal is an unrelated, still-valid opt-in branch."""
-        from app.config import settings
-        monkeypatch.setattr(settings, "parent_portal_enabled", True)
+        """#3513 parent portal is an unrelated, still-valid opt-in branch.
+
+        Patches "app.routes.auth.settings.parent_portal_enabled" (the exact
+        object app.routes.auth.register() reads), not a fresh
+        `from app.config import settings` import. In the full suite,
+        test_preview_cors_3139.py calls importlib.reload(app.config) in two
+        of its tests, which replaces the `app.config.settings` module
+        attribute with a brand-new Settings() instance. Any module already
+        imported earlier in the run (routes.auth included -- it's pulled in
+        by `from app.main import app`, which happens during collection of
+        far earlier test files) keeps its OLD reference via
+        `from ..config import settings`, since `from X import Y` binds a
+        name, it does not keep a live link back to X's namespace. A fresh
+        `from app.config import settings` done afterwards therefore gets a
+        DIFFERENT object than the one routes.auth actually consults --
+        monkeypatching that fresh object is invisible to the real request.
+        Confirmed in CI (2026-11-01): 1 failure in a 6910-test run, this
+        exact test, 403 instead of 201, reproduced locally twice in a
+        full-suite run and NOT reproduced in an 82-file alphabetical slice
+        around it (consistent with this being an import-order-dependent
+        staleness, not a logic bug in the registration code itself)."""
+        monkeypatch.setattr("app.routes.auth.settings.parent_portal_enabled", True)
         _reset_rate_limiters()
         uid = uuid.uuid4().hex[:8]
         email = f"parent_optin_{uid}@test.example"
@@ -190,6 +209,21 @@ class TestEveryAccountDefaultsToStudent:
         me = client.get("/api/users/me", headers=auth_header(login.json()["access_token"]))
         role_names = {r["role_name"] for r in me.json()["roles"]}
         assert role_names == {"parent"}, "parent opt-in must not also grant a default student role"
+
+    def test_parent_opt_in_refused_while_portal_is_off(self, client, monkeypatch):
+        """Negative counterpart requested in security review (2026-11-01):
+        lock BOTH directions of the parent_portal_enabled flag, not just the
+        enabled one -- same "app.routes.auth.settings" patch target as above,
+        for the same import-staleness reason."""
+        monkeypatch.setattr("app.routes.auth.settings.parent_portal_enabled", False)
+        _reset_rate_limiters()
+        uid = uuid.uuid4().hex[:8]
+        email = f"parent_refused_{uid}@test.example"
+        r = client.post("/api/auth/register", json={
+            "email": email, "password": "Secure99!", "name": "x", "role": "parent",
+        })
+        assert r.status_code == 403, r.text
+        assert r.json()["detail"] == "家長功能目前暫時關閉，請聯繫老師或管理員。"
 
 
 class TestSsoDefaultsToStudent:
