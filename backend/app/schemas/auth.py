@@ -6,9 +6,15 @@ class RegisterRequest(BaseModel):
     # min_length removed here so auth route can return a descriptive Chinese error
     password: str = Field(..., min_length=1, max_length=128)
     name: str = Field(..., min_length=1, max_length=100)
-    # Optional role hint. "teacher" (or omitted) or "parent" (only while the parent
-    # portal is enabled, #3513) are allowed for self-registration.
-    # Students must be created by teachers via classroom management (issue #457).
+    # #3804 (Young 2026-11-01): every account defaults to student -- there is
+    # no more "role=teacher" branch. The only role this field still acts on
+    # is "parent" (opt-in, #3513, only while the parent portal is enabled).
+    # Any other value (including "teacher" or "student", for backward
+    # compatibility with old clients) is accepted but has no effect; the
+    # account is a student either way, same as omitting role entirely.
+    # Self-serve teacher activation is a separate step: see
+    # POST /users/me/activate-teacher and PRD
+    # docs/prd/2026-11-01-school-as-teacher-attribute-prd.md §10/§11.
     role: str | None = Field(None, max_length=50)
 
 

@@ -11,13 +11,20 @@ from ..auth.dependencies import get_current_user, require_role
 from ..config import settings
 from ..database import get_db
 from ..models.user import User, UserRole, Role
-from ..schemas.user import UserResponse, UserRoleResponse
+from ..schemas.user import (
+    ActivateTeacherRequest,
+    ActivateTeacherResponse,
+    SchoolActivationBrief,
+    UserResponse,
+    UserRoleResponse,
+)
 from ..schemas.user_admin import (
     UserDetailResponse,
     UserListItem,
     UserListResponse,
     UserRoleItem,
 )
+from ..services.auth_registration_service import activate_teacher_for_schools
 
 router = APIRouter(tags=["users"])
 logger = logging.getLogger(__name__)
@@ -167,6 +174,53 @@ def update_me(
         terms_accepted_at=current_user.terms_accepted_at,
         terms_version=current_user.terms_version,
         created_at=current_user.created_at,
+        roles=roles,
+    )
+
+
+# ── Self-serve teacher activation (#3804) ───────────────────────────────────
+
+
+@router.post("/users/me/activate-teacher", response_model=ActivateTeacherResponse)
+def activate_teacher(
+    payload: ActivateTeacherRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Self-serve: any logged-in account can become a teacher by naming the
+    school(s) they teach at. No approval, no domain guessing (#3804, Young
+    2026-11-01). Does not remove or affect the student role granted at
+    registration — the account simply gains a teacher role on top of it, and
+    the frontend's existing WorkspaceContext role switcher picks this up
+    automatically once there are 2+ roles.
+
+    Idempotent: naming a school the caller is already a teacher of again is a
+    no-op for that school (still returns it, with is_new=False).
+    """
+    schools_with_flag = activate_teacher_for_schools(db, current_user, payload.school_names)
+    db.commit()
+
+    user_roles = (
+        db.query(UserRole, Role)
+        .join(Role, UserRole.role_id == Role.id)
+        .filter(UserRole.user_id == current_user.id, UserRole.is_active == True)
+        .all()
+    )
+    roles = [
+        UserRoleResponse(
+            role_name=role.name,
+            role_display_name=role.display_name,
+            scope_type=ur.scope_type,
+            scope_id=ur.scope_id,
+        )
+        for ur, role in user_roles
+    ]
+
+    return ActivateTeacherResponse(
+        schools=[
+            SchoolActivationBrief(id=school.id, name=school.name, is_new=is_new)
+            for school, is_new in schools_with_flag
+        ],
         roles=roles,
     )
 

@@ -86,7 +86,7 @@ def client():
 def token(client):
     u = uuid.uuid4().hex[:8]
     email, pw = f"round_user_{u}@example.com", "SecurePass123!"
-    # ⛔ 不指定 role：帶 `role: student` 會被擋（學生帳號由老師建立）。
+    # 不指定 role：預設即學生（#3804），不需要也不會是老師。
     r = client.post("/api/auth/register", json={
         "email": email, "password": pw, "name": f"Round User {u}"})
     assert r.status_code in (200, 201), r.text

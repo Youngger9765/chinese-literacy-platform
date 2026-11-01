@@ -505,39 +505,33 @@ class TestRegisterEndpoint:
         })
         assert login_resp.status_code == 200
 
-    def test_register_student_role_rejected_with_403(self, client):
-        """Students must NOT be able to self-register.
-        /auth/register is teacher-only (issue #457)."""
+    def test_register_role_student_hint_is_accepted_now(self, client):
+        """#3804 (Young 2026-11-01): there is no more block on role="student" --
+        every account defaults to student anyway, so an explicit hint of
+        "student" is simply redundant with the default, not an error."""
         resp = client.post("/api/auth/register", json={
             "email": "student_self@example.com",
             "password": "StrongPass1!",
             "name": "Student Self",
             "role": "student",
         })
-        assert resp.status_code == 403
+        assert resp.status_code == 201
 
-    def test_register_student_role_returns_correct_message(self, client):
-        """Error message should guide the student to ask their teacher."""
+    def test_register_no_role_defaults_to_student(self, client):
+        """#3804: when no role is specified the account defaults to student,
+        not teacher. See test_self_serve_teacher_3804.py for the role-content
+        assertion; this file only re-locks the HTTP-level 201."""
         resp = client.post("/api/auth/register", json={
-            "email": "student_msg@example.com",
+            "email": "norole_student@example.com",
             "password": "StrongPass1!",
-            "name": "Student Msg",
-            "role": "student",
-        })
-        assert resp.status_code == 403
-        assert "老師" in resp.json()["detail"]
-
-    def test_register_no_role_defaults_to_teacher_allowed(self, client):
-        """When no role is specified the endpoint registers a teacher (default flow)."""
-        resp = client.post("/api/auth/register", json={
-            "email": "norole_teacher@example.com",
-            "password": "StrongPass1!",
-            "name": "No Role Teacher",
+            "name": "No Role Student",
         })
         assert resp.status_code == 201
 
-    def test_register_teacher_role_explicitly_allowed(self, client):
-        """Explicitly passing role=teacher should succeed."""
+    def test_register_teacher_role_hint_is_ignored_not_rejected(self, client):
+        """#3804: role="teacher" no longer means anything special (there is
+        no more register=teacher branch) -- it is simply ignored, same as
+        role="student" or omitting role. Registration still succeeds."""
         resp = client.post("/api/auth/register", json={
             "email": "explicit_teacher@example.com",
             "password": "StrongPass1!",
@@ -552,200 +546,140 @@ class TestRegisterEndpoint:
 # ===========================================================================
 
 
-class TestAutoSchoolCreation:
-    """Tests for per-issue #459: first teacher from a domain auto-creates a school."""
+class TestSelfServeSchoolCreation:
+    """#3804 (Young 2026-11-01) retires issue #459's auto-school-by-email-domain.
 
-    def _fresh_email(self, domain: str, prefix: str = "teacher") -> str:
-        import uuid
-        return f"{prefix}_{uuid.uuid4().hex[:6]}@{domain}"
+    Registration no longer creates or joins a school at all -- every account
+    defaults to student with no school. A school is now only created/joined
+    when the account explicitly self-activates as a teacher by NAME via
+    POST /users/me/activate-teacher (not by email domain).
 
-    def test_register_creates_school_for_new_domain(self, client):
-        """First teacher from a new domain should trigger school creation."""
-        from app.models.school import School
-        from app.database import get_db as _get_db
+    The full behavior lock for that endpoint (idempotency, case-insensitive
+    matching, admin_user_id on creation, multiple schools, the permission
+    matrix) lives in test_self_serve_teacher_3804.py -- this class only
+    re-asserts, at the DB level, the two properties the old class existed to
+    prove: different names -> different schools, same name -> one school,
+    shared across however many different email domains ask for it.
+    """
 
-        domain = f"auto-{uuid.uuid4().hex[:6]}.edu.tw"
-        email = f"first@{domain}"
-
+    def _register_and_login(self, client, label: str) -> tuple[int, str]:
+        import uuid as _uuid
+        email = f"{label}_{_uuid.uuid4().hex[:8]}@example.com"
         resp = client.post("/api/auth/register", json={
-            "email": email,
-            "password": "StrongPass1!",
-            "name": "First Teacher",
+            "email": email, "password": "StrongPass1!", "name": label,
         })
-        assert resp.status_code == 201
-
-        # Verify school was created in DB
-        db = TestingSessionLocal()
-        try:
-            school = db.query(School).filter(School.domain == domain).first()
-            assert school is not None, f"School with domain {domain} should have been created"
-            assert school.name == f"{domain} 學校"
-            assert school.domain == domain
-        finally:
-            db.close()
-
-    def test_register_assigns_teacher_role_to_new_school(self, client):
-        """Registered teacher should receive a teacher UserRole scoped to the new school."""
-        from app.models.school import School
-        from app.models.user import UserRole, Role
+        assert resp.status_code == 201, resp.text
+        token = resp.json().get("verification_token")
+        if token:
+            client.get(f"/api/auth/verify-email?token={token}")
+        login = client.post("/api/auth/login", json={"email": email, "password": "StrongPass1!"})
+        access = login.json()["access_token"]
         from app.auth.jwt import decode_token
+        return int(decode_token(access)["sub"]), access
 
-        domain = f"role-{uuid.uuid4().hex[:6]}.edu.tw"
-        email = f"roletest@{domain}"
+    def test_register_alone_creates_no_school(self, client):
+        from app.models.school import School
 
-        resp = client.post("/api/auth/register", json={
-            "email": email,
-            "password": "StrongPass1!",
-            "name": "Role Test Teacher",
-        })
-        assert resp.status_code == 201
+        before = TestingSessionLocal().query(School).count()
+        self._register_and_login(client, "no_school_on_register")
+        after = TestingSessionLocal().query(School).count()
+        assert after == before, "plain registration must not create a school (#3804)"
 
-        # Verify email and login to get a JWT (issue #460)
-        verification_token = resp.json().get("verification_token")
-        if verification_token:
-            client.get(f"/api/auth/verify-email?token={verification_token}")
-        login_resp = client.post("/api/auth/login", json={"email": email, "password": "StrongPass1!"})
-        token = login_resp.json()["access_token"]
-        user_id = int(decode_token(token)["sub"])
+    def test_self_activation_creates_a_named_school_and_grants_teacher(self, client):
+        from app.models.school import School
+        from app.models.user import Role, UserRole
+
+        user_id, token = self._register_and_login(client, "activates_self")
+        school_name = f"大安國小_{uuid.uuid4().hex[:6]}"
+        resp = client.post(
+            "/api/users/me/activate-teacher",
+            json={"school_names": [school_name]},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert resp.status_code == 200, resp.text
+        school_id = resp.json()["schools"][0]["id"]
 
         db = TestingSessionLocal()
         try:
-            school = db.query(School).filter(School.domain == domain).first()
-            assert school is not None
-
+            school = db.get(School, school_id)
+            assert school is not None and school.name == school_name
             teacher_role = db.query(Role).filter(Role.name == "teacher").first()
-            assert teacher_role is not None
-
-            user_role = (
+            role = (
                 db.query(UserRole)
                 .filter(
                     UserRole.user_id == user_id,
                     UserRole.role_id == teacher_role.id,
                     UserRole.scope_type == "school",
-                    UserRole.scope_id == str(school.id),
+                    UserRole.scope_id == str(school_id),
                 )
                 .first()
             )
-            assert user_role is not None, "Teacher should have a UserRole scoped to the school"
+            assert role is not None
         finally:
             db.close()
 
-    def test_register_second_teacher_joins_existing_school(self, client):
-        """Second teacher from same domain joins existing school, no duplicate created."""
+    def test_two_accounts_naming_the_same_school_share_it(self, client):
         from app.models.school import School
-        from app.models.user import UserRole, Role
-        from app.auth.jwt import decode_token
 
-        domain = f"shared-{uuid.uuid4().hex[:6]}.edu.tw"
+        school_name = f"同一間_{uuid.uuid4().hex[:6]}"
+        _, token_a = self._register_and_login(client, "shares_a")
+        _, token_b = self._register_and_login(client, "shares_b")
 
-        # Register first teacher
-        resp1 = client.post("/api/auth/register", json={
-            "email": f"first@{domain}",
-            "password": "StrongPass1!",
-            "name": "First Teacher",
-        })
-        assert resp1.status_code == 201
-
-        # Register second teacher with same domain
-        resp2 = client.post("/api/auth/register", json={
-            "email": f"second@{domain}",
-            "password": "StrongPass1!",
-            "name": "Second Teacher",
-        })
-        assert resp2.status_code == 201
+        resp_a = client.post(
+            "/api/users/me/activate-teacher",
+            json={"school_names": [school_name]},
+            headers={"Authorization": f"Bearer {token_a}"},
+        )
+        resp_b = client.post(
+            "/api/users/me/activate-teacher",
+            json={"school_names": [school_name]},
+            headers={"Authorization": f"Bearer {token_b}"},
+        )
+        assert resp_a.json()["schools"][0]["id"] == resp_b.json()["schools"][0]["id"]
 
         db = TestingSessionLocal()
         try:
-            # Only one school should exist for this domain
-            schools = db.query(School).filter(School.domain == domain).all()
-            assert len(schools) == 1, f"Expected 1 school for domain {domain}, got {len(schools)}"
-
-            # Both teachers should have a teacher role for that school
-            school = schools[0]
-            teacher_role = db.query(Role).filter(Role.name == "teacher").first()
-            assert teacher_role is not None
-
-            # Verify email if required, then login to get user2_id (issue #460)
-            vtoken2 = resp2.json().get("verification_token")
-            if vtoken2:
-                client.get(f"/api/auth/verify-email?token={vtoken2}")
-            login2 = client.post("/api/auth/login", json={"email": f"second@{domain}", "password": "StrongPass1!"})
-            token2 = login2.json()["access_token"]
-            user2_id = int(decode_token(token2)["sub"])
-
-            user2_role = (
-                db.query(UserRole)
-                .filter(
-                    UserRole.user_id == user2_id,
-                    UserRole.role_id == teacher_role.id,
-                    UserRole.scope_type == "school",
-                    UserRole.scope_id == str(school.id),
-                )
-                .first()
-            )
-            assert user2_role is not None, "Second teacher should also have a role in the same school"
+            assert db.query(School).filter(School.name == school_name).count() == 1
         finally:
             db.close()
 
-    def test_register_different_domains_create_separate_schools(self, client):
-        """Teachers from different domains each get their own school."""
-        from app.models.school import School
-
+    def test_two_accounts_naming_different_schools_each_get_their_own(self, client):
         unique = uuid.uuid4().hex[:6]
-        domain_a = f"school-a-{unique}.edu.tw"
-        domain_b = f"school-b-{unique}.edu.tw"
+        _, token_a = self._register_and_login(client, "diff_a")
+        _, token_b = self._register_and_login(client, "diff_b")
 
-        resp_a = client.post("/api/auth/register", json={
-            "email": f"teacher@{domain_a}",
-            "password": "StrongPass1!",
-            "name": "Teacher A",
-        })
-        resp_b = client.post("/api/auth/register", json={
-            "email": f"teacher@{domain_b}",
-            "password": "StrongPass1!",
-            "name": "Teacher B",
-        })
-        assert resp_a.status_code == 201
-        assert resp_b.status_code == 201
+        resp_a = client.post(
+            "/api/users/me/activate-teacher",
+            json={"school_names": [f"School A {unique}"]},
+            headers={"Authorization": f"Bearer {token_a}"},
+        )
+        resp_b = client.post(
+            "/api/users/me/activate-teacher",
+            json={"school_names": [f"School B {unique}"]},
+            headers={"Authorization": f"Bearer {token_b}"},
+        )
+        assert resp_a.json()["schools"][0]["id"] != resp_b.json()["schools"][0]["id"]
 
-        db = TestingSessionLocal()
-        try:
-            school_a = db.query(School).filter(School.domain == domain_a).first()
-            school_b = db.query(School).filter(School.domain == domain_b).first()
-            assert school_a is not None
-            assert school_b is not None
-            assert school_a.id != school_b.id
-        finally:
-            db.close()
-
-    def test_register_first_teacher_becomes_school_admin(self, client):
-        """The first teacher from a domain should be set as the school admin_user_id."""
+    def test_self_activating_teacher_becomes_the_new_schools_admin_user_id(self, client):
         from app.models.school import School
-        from app.auth.jwt import decode_token
 
-        domain = f"admin-{uuid.uuid4().hex[:6]}.edu.tw"
-        email = f"admin@{domain}"
-
-        resp = client.post("/api/auth/register", json={
-            "email": email,
-            "password": "StrongPass1!",
-            "name": "Admin Teacher",
-        })
-        assert resp.status_code == 201
-
-        # Verify email if required, then login to get user_id (issue #460)
-        vtoken = resp.json().get("verification_token")
-        if vtoken:
-            client.get(f"/api/auth/verify-email?token={vtoken}")
-        login_resp = client.post("/api/auth/login", json={"email": email, "password": "StrongPass1!"})
-        token = login_resp.json()["access_token"]
-        user_id = int(decode_token(token)["sub"])
+        user_id, token = self._register_and_login(client, "becomes_admin")
+        school_name = f"Admin School {uuid.uuid4().hex[:6]}"
+        resp = client.post(
+            "/api/users/me/activate-teacher",
+            json={"school_names": [school_name]},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        school_id = resp.json()["schools"][0]["id"]
 
         db = TestingSessionLocal()
         try:
-            school = db.query(School).filter(School.domain == domain).first()
-            assert school is not None
-            assert school.admin_user_id == user_id, "First teacher should be set as school admin"
+            school = db.get(School, school_id)
+            assert school.admin_user_id == user_id, (
+                "the self-activating teacher is recorded as the school's "
+                "admin_user_id (a record of who created it, not a role "
+                "grant -- same convention the retired assign_teacher_to_school used)"
+            )
         finally:
             db.close()
 
@@ -1097,17 +1031,15 @@ class TestGetMeEndpoint:
         resp = client.get("/api/users/me", headers=auth_header(registered_user["token"]))
         assert isinstance(resp.json()["roles"], list)
 
-    def test_get_me_new_teacher_has_teacher_role(self, client, registered_user):
-        """A freshly registered teacher is auto-assigned a teacher role scoped to their school (issue #459)."""
+    def test_get_me_new_account_has_platform_student_role(self, client, registered_user):
+        """#3804: a freshly registered account defaults to a platform-scoped
+        student role (not teacher, not school-scoped -- there is no school
+        yet). See test_self_serve_teacher_3804.py for the full lock."""
         resp = client.get("/api/users/me", headers=auth_header(registered_user["token"]))
         roles = resp.json()["roles"]
-        # Auto-school creation assigns exactly one teacher role
-        assert len(roles) >= 1
-        role_names = [r["role_name"] for r in roles]
-        assert "teacher" in role_names
-        # The role should be scoped to a school
-        teacher_roles = [r for r in roles if r["role_name"] == "teacher"]
-        assert teacher_roles[0]["scope_type"] == "school"
+        assert len(roles) == 1
+        assert roles[0]["role_name"] == "student"
+        assert roles[0]["scope_type"] == "platform"
 
     def test_get_me_phone_is_null_by_default(self, client, registered_user):
         resp = client.get("/api/users/me", headers=auth_header(registered_user["token"]))
@@ -1546,211 +1478,25 @@ class TestEmailVerificationFlow:
 
 
 class TestEmailDomainValidation:
-    """Tests for issue #407: schools can restrict teacher registration by email domain."""
+    """#3804 (Young 2026-11-01) retired issue #407's register-time domain
+    check. `validate_teacher_email_domain` and `assign_teacher_to_school`
+    (its only caller) are both gone -- registration no longer touches a
+    school at all, so `School.allowed_email_domains` has no bearing on
+    registration anymore. The eleven tests this class used to have each
+    asserted a 201/403 that depended on that retired check; most of them
+    still happened to return 201 (registration now always succeeds,
+    regardless of domain), which would be a vacuously-true assertion for the
+    wrong reason if kept, not a real lock. The two that asserted 403 would
+    fail outright, because nothing calls that check anymore.
 
-    def _create_school_with_allowed_domains(self, domains: list[str], base_domain: str) -> "School":
-        """Helper: create a school in DB with allowed_email_domains set."""
-        from app.models.school import School as SchoolModel
+    `allowed_email_domains` as a column still exists (read/write via
+    GET/PATCH /schools/{id}) -- only its registration-time enforcement is
+    retired. If a future PR wants it re-enforced on self-serve activation
+    (PRD #3804 §10/§11's `activate_teacher_for_schools`), write fresh tests
+    against that function instead of resurrecting these.
+    """
 
-        db = TestingSessionLocal()
-        try:
-            school = SchoolModel(
-                name=f"{base_domain} 學校",
-                domain=base_domain,
-                allowed_email_domains=domains,
-            )
-            db.add(school)
-            db.commit()
-            db.refresh(school)
-            return school
-        finally:
-            db.close()
 
-    def test_school_without_domain_restriction_accepts_any_teacher(self, client):
-        """Schools with allowed_email_domains=None accept teachers from any domain."""
-        from app.models.school import School as SchoolModel
-
-        unique = uuid.uuid4().hex[:6]
-        domain = f"norestrict-{unique}.edu.tw"
-
-        # Create school with no domain restriction
-        db = TestingSessionLocal()
-        try:
-            school = SchoolModel(
-                name=f"{domain} 學校",
-                domain=domain,
-                allowed_email_domains=None,
-            )
-            db.add(school)
-            db.commit()
-        finally:
-            db.close()
-
-        # Teacher from this domain should be accepted
-        resp = client.post("/api/auth/register", json={
-            "email": f"teacher@{domain}",
-            "password": "StrongPass1!",
-            "name": "Free Teacher",
-        })
-        assert resp.status_code == 201
-
-    def test_school_with_empty_domain_list_accepts_any_teacher(self, client):
-        """Schools with allowed_email_domains=[] accept teachers from any domain."""
-        from app.models.school import School as SchoolModel
-
-        unique = uuid.uuid4().hex[:6]
-        domain = f"emptylist-{unique}.edu.tw"
-
-        db = TestingSessionLocal()
-        try:
-            school = SchoolModel(
-                name=f"{domain} 學校",
-                domain=domain,
-                allowed_email_domains=[],
-            )
-            db.add(school)
-            db.commit()
-        finally:
-            db.close()
-
-        resp = client.post("/api/auth/register", json={
-            "email": f"teacher@{domain}",
-            "password": "StrongPass1!",
-            "name": "Any Domain Teacher",
-        })
-        assert resp.status_code == 201
-
-    def test_school_with_allowed_domains_accepts_matching_teacher(self, client):
-        """Teacher whose domain is in allowed_email_domains should register successfully."""
-        unique = uuid.uuid4().hex[:6]
-        domain = f"allowed-{unique}.edu.tw"
-        self._create_school_with_allowed_domains([domain], domain)
-
-        resp = client.post("/api/auth/register", json={
-            "email": f"teacher@{domain}",
-            "password": "StrongPass1!",
-            "name": "Matching Teacher",
-        })
-        assert resp.status_code == 201
-
-    def test_school_with_allowed_domains_rejects_non_matching_teacher(self, client):
-        """Teacher whose domain is NOT in allowed_email_domains should get 403."""
-        unique = uuid.uuid4().hex[:6]
-        base_domain = f"strict-{unique}.edu.tw"
-        allowed_domain = f"allowed-{unique}.edu.tw"
-        # School domain is base_domain, but only allows teachers from allowed_domain
-        from app.models.school import School as SchoolModel
-        db = TestingSessionLocal()
-        try:
-            school = SchoolModel(
-                name=f"{base_domain} 學校",
-                domain=base_domain,
-                allowed_email_domains=[allowed_domain],
-            )
-            db.add(school)
-            db.commit()
-        finally:
-            db.close()
-
-        # Teacher from base_domain — not in allowed list
-        resp = client.post("/api/auth/register", json={
-            "email": f"outsider@{base_domain}",
-            "password": "StrongPass1!",
-            "name": "Outsider Teacher",
-        })
-        assert resp.status_code == 403
-
-    def test_domain_rejection_returns_chinese_error_message(self, client):
-        """The 403 error message should be in Chinese and mention the domain."""
-        unique = uuid.uuid4().hex[:6]
-        base_domain = f"errmsg-{unique}.edu.tw"
-        from app.models.school import School as SchoolModel
-        db = TestingSessionLocal()
-        try:
-            school = SchoolModel(
-                name=f"{base_domain} 學校",
-                domain=base_domain,
-                allowed_email_domains=["other-allowed.edu.tw"],
-            )
-            db.add(school)
-            db.commit()
-        finally:
-            db.close()
-
-        resp = client.post("/api/auth/register", json={
-            "email": f"teacher@{base_domain}",
-            "password": "StrongPass1!",
-            "name": "Domain Error Teacher",
-        })
-        assert resp.status_code == 403
-        detail = resp.json()["detail"]
-        # Error must mention the domain and be in Chinese
-        assert base_domain in detail
-        assert "網域" in detail or "學校" in detail
-
-    def test_domain_check_is_case_insensitive(self, client):
-        """Domain comparison should be case-insensitive (UPPER in allowed list matches lower in email)."""
-        unique = uuid.uuid4().hex[:6]
-        domain = f"casetest-{unique}.edu.tw"
-        # Store allowed domain in uppercase
-        self._create_school_with_allowed_domains([domain.upper()], domain)
-
-        # Register with lowercase domain in email
-        resp = client.post("/api/auth/register", json={
-            "email": f"teacher@{domain}",
-            "password": "StrongPass1!",
-            "name": "Case Insensitive Teacher",
-        })
-        assert resp.status_code == 201
-
-    def test_school_with_multiple_allowed_domains(self, client):
-        """School with multiple allowed domains should accept teachers from any of them."""
-        unique = uuid.uuid4().hex[:6]
-        primary_domain = f"primary-{unique}.edu.tw"
-        alias_domain = f"alias-{unique}.edu.tw"
-        from app.models.school import School as SchoolModel
-        db = TestingSessionLocal()
-        try:
-            school = SchoolModel(
-                name=f"{primary_domain} 學校",
-                domain=primary_domain,
-                allowed_email_domains=[primary_domain, alias_domain],
-            )
-            db.add(school)
-            db.commit()
-        finally:
-            db.close()
-
-        # Teacher from primary domain
-        resp1 = client.post("/api/auth/register", json={
-            "email": f"t1@{primary_domain}",
-            "password": "StrongPass1!",
-            "name": "Primary Domain Teacher",
-        })
-        assert resp1.status_code == 201
-
-        # Teacher from alias domain — NOT in school.domain, but in allowed list
-        # This teacher would trigger school creation for alias_domain since it's a new domain
-        # The alias_domain school won't have restrictions, so it's accepted
-        resp2 = client.post("/api/auth/register", json={
-            "email": f"t1@{alias_domain}",
-            "password": "StrongPass1!",
-            "name": "Alias Domain Teacher",
-        })
-        # alias_domain has no school yet → creates a new unrestricted school → 201
-        assert resp2.status_code == 201
-
-    def test_new_domain_always_allowed_creates_school(self, client):
-        """A teacher with a brand-new domain always creates a new school — no restriction."""
-        unique = uuid.uuid4().hex[:6]
-        brand_new_domain = f"brandnew-{unique}.edu.tw"
-
-        resp = client.post("/api/auth/register", json={
-            "email": f"pioneer@{brand_new_domain}",
-            "password": "StrongPass1!",
-            "name": "Pioneer Teacher",
-        })
-        assert resp.status_code == 201
 
 
 # ===========================================================================
@@ -1810,15 +1556,15 @@ class TestHasClassroomLoginResponse:
             db.close()
 
     def _create_teacher_and_classroom(self, client) -> dict:
-        """Register a teacher (with email verification), then create a classroom.
+        """Register a brand-new account, self-activate it as a teacher
+        (#3804 -- no more domain-based auto school), then create a classroom.
 
         Returns dict with teacher_token, classroom_id.
         """
         import uuid as _uuid
 
         unique = _uuid.uuid4().hex[:6]
-        domain = f"hctest-{unique}.edu.tw"
-        email = f"teacher@{domain}"
+        email = f"hctest_{unique}@example.com"
 
         reg = client.post("/api/auth/register", json={
             "email": email, "password": "StrongPass1!", "name": "HC Teacher",
@@ -1831,17 +1577,22 @@ class TestHasClassroomLoginResponse:
             "email": email, "password": "StrongPass1!",
         }).json()["access_token"]
 
+        act = client.post(
+            "/api/users/me/activate-teacher",
+            json={"school_names": [f"HC Test School {unique}"]},
+            headers={"Authorization": f"Bearer {teacher_token}"},
+        )
+        assert act.status_code == 200, act.text
+        school_id = act.json()["schools"][0]["id"]
+
         # Create a classroom
-        from app.models.school import School, Classroom
+        from app.models.school import Classroom
         db = TestingSessionLocal()
         try:
-            school = db.query(School).filter(School.domain == domain).first()
-            assert school is not None
-            # Get teacher user_id from token
             from app.auth.jwt import decode_token
             teacher_id = int(decode_token(teacher_token)["sub"])
             classroom = Classroom(
-                school_id=school.id,
+                school_id=school_id,
                 teacher_id=teacher_id,
                 name="Test Class",
                 grade=3,
@@ -1868,14 +1619,16 @@ class TestHasClassroomLoginResponse:
             "Login response must include has_classroom field for student classroom gate"
         )
 
-    def test_teacher_login_has_classroom_true(self, client, registered_user):
-        """Teachers always get has_classroom=True (they are not subject to the gate)."""
+    def test_fresh_registration_has_classroom_false(self, client, registered_user):
+        """#3804: a freshly self-registered account defaults to student with
+        no classroom -- has_classroom=False, not True. There is no more
+        "registration defaults to teacher, so it's exempt from the gate"."""
         resp = client.post("/api/auth/login", json={
             "email": registered_user["email"],
             "password": registered_user["password"],
         })
         assert resp.status_code == 200
-        assert resp.json()["has_classroom"] is True
+        assert resp.json()["has_classroom"] is False
 
     def test_student_with_no_classroom_gets_has_classroom_false(self, client):
         """Student with no classroom enrollment should get has_classroom=False."""
@@ -1904,25 +1657,34 @@ class TestHasClassroomLoginResponse:
             "Student enrolled in a classroom should get has_classroom=True"
         )
 
-    def test_student_without_student_role_gets_has_classroom_true(self, client):
-        """A user with no student role (regular teacher account) gets has_classroom=True."""
-        # registered_user is a teacher — no student role assigned
+    def test_account_with_no_student_role_at_all_gets_has_classroom_true(self, client):
+        """A user with NO student role whatsoever (not even the #3804 default
+        -- e.g. a legacy/migrated account) is exempt from the gate, same as
+        before. #3804 means this scenario can no longer arise through
+        /auth/register (every fresh registration gets the default student
+        role), so it's constructed directly to keep locking the exemption
+        itself, separate from how an account normally comes to have it."""
+        from app.models.user import User as UserModel
+        from app.auth.password import hash_password as _hash
         import uuid as _uuid
-        unique = _uuid.uuid4().hex[:6]
-        domain = f"norole-{unique}.edu.tw"
-        reg = client.post("/api/auth/register", json={
-            "email": f"plain@{domain}",
-            "password": "StrongPass1!",
-            "name": "Plain User",
-        })
-        assert reg.status_code == 201
-        vtoken = reg.json().get("verification_token")
-        if vtoken:
-            client.get(f"/api/auth/verify-email?token={vtoken}")
+
+        email = f"norole_{_uuid.uuid4().hex[:8]}@example.com"
+        password = "StrongPass1!"
+        db = TestingSessionLocal()
+        try:
+            user = UserModel(
+                email=email, password_hash=_hash(password), name="No Role",
+                email_verified=True,
+            )
+            db.add(user)
+            db.commit()
+            # deliberately: zero UserRole rows at all
+        finally:
+            db.close()
 
         resp = client.post("/api/auth/login", json={
-            "email": f"plain@{domain}",
-            "password": "StrongPass1!",
+            "email": email,
+            "password": password,
         })
         assert resp.status_code == 200
         assert resp.json()["has_classroom"] is True

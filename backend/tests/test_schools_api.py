@@ -280,20 +280,32 @@ class TestListSchools:
         assert resp.status_code == 200
 
     def test_list_returns_items_and_total(self, client, user1, admin_user):
-        # (#3804) user1 is a self-registered teacher, auto-provisioned into
-        # their own domain school (assign_teacher_to_school) with a
-        # school-scoped `teacher` role. list_schools is membership-scoped —
-        # they see exactly that one school, not zero. (Before #3804 this
-        # asserted total==0, which was really the get_user_org_ids() bug —
-        # user1 has no ORGANIZATION-scoped role so the old org-only filter
-        # excluded even their own school; see PRD #3804 §1.2.A.)
+        # (#3804 Phase 2) user1 is a freshly self-registered account --
+        # platform-scoped student, no school yet. list_schools is
+        # membership-scoped, so a bare student sees zero schools.
         resp = client.get("/api/schools", headers=auth_header(user1["token"]))
         data = resp.json()
         assert "items" in data
         assert "total" in data
         assert isinstance(data["items"], list)
         assert isinstance(data["total"], int)
-        assert data["total"] == 1
+        assert data["total"] == 0
+
+        # Self-activating as a teacher for a named school (#3804) grants
+        # exactly that one school's membership -- the behavior this test
+        # originally existed to lock (membership-scoped, not zero, not
+        # "every school"; see PRD #3804 §1.2.A for the get_user_org_ids()
+        # bug this traces back to) is still real, just reached a different
+        # way than the retired email-domain auto-assignment.
+        act = client.post(
+            "/api/users/me/activate-teacher",
+            json={"school_names": [f"user1 的學校_{uuid.uuid4().hex[:6]}"]},
+            headers=auth_header(user1["token"]),
+        )
+        assert act.status_code == 200, act.text
+
+        resp2 = client.get("/api/schools", headers=auth_header(user1["token"]))
+        assert resp2.json()["total"] == 1
 
         # admin_user (system_admin) sees all schools
         resp_admin = client.get("/api/schools", headers=auth_header(admin_user["token"]))
