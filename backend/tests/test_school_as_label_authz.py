@@ -193,6 +193,15 @@ class TestOwnSchoolAccess:
 
         teacher_id, teacher_tok = _register_login(client, "own_school_teacher")
         _assign_role(teacher_id, "teacher", "school", str(school_id))
+        # (#3804 security review, 2026-11-01) A school-scoped role alone no
+        # longer grants the member roster / classroom list -- that gate now
+        # also requires owning (or co-teaching) at least one classroom at
+        # this school, per Young's own instruction point 4: "宣告了某所學校，
+        # 不代表能看到那所學校的其他班". A plain "I belong to this school"
+        # teacher gives themselves a classroom here, same as a real teacher
+        # would, so this fixture still represents "an ordinary teacher at
+        # their own school" -- not "the owner of a school-wide admin view".
+        _create_classroom(school_id, teacher_id)
 
         return {
             "teacher_tok": teacher_tok,

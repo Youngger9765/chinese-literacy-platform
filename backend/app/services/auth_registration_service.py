@@ -123,6 +123,15 @@ def activate_teacher_for_schools(
         )
         is_new = school is None
         if school is None:
+            # (#3804 security review, 2026-11-01, finding 3) admin_user_id is
+            # NOT a privilege grant — grep confirms zero authz callers read
+            # this column anywhere in the app. It is purely a "who created
+            # this record" breadcrumb, same convention the retired
+            # assign_teacher_to_school used. A self-activating teacher who
+            # happens to be the first to type a brand-new school name does
+            # NOT thereby become that school's admin in any permission
+            # sense; `can()`'s ("school","manage") policy is hardcoded False
+            # for everyone except system_admin, independent of this field.
             school = School(name=safe_name, domain=None, admin_user_id=user.id)
             db.add(school)
             db.flush()
@@ -150,7 +159,20 @@ def activate_teacher_for_schools(
                     )
                 )
             elif not existing_role.is_active:
-                existing_role.is_active = True
+                # (#3804 security review, 2026-11-01) A system_admin can
+                # revoke this exact role via DELETE /roles/assignments/{id}
+                # (soft delete, is_active=False -- routes/roles.py::
+                # revoke_role). Silently flipping it back to True here would
+                # let the teacher undo that revocation themselves just by
+                # naming the same school again -- a real privilege
+                # escalation around an admin action. Fail closed instead.
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail=(
+                        f"您在「{school.name}」的老師身分已被停用，"
+                        "請聯繫管理員處理，無法自行重新開通。"
+                    ),
+                )
 
     return schools
 

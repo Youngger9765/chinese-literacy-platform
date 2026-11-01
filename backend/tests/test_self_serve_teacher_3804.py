@@ -348,6 +348,61 @@ class TestActivateTeacherEndpoint:
         finally:
             db.close()
 
+    def test_deactivated_teacher_role_cannot_self_reactivate(self, client):
+        """Security review finding (2026-11-01): a system_admin can revoke a
+        teacher's role at a school (DELETE /roles/assignments/{id}, soft
+        delete via is_active=False -- app/routes/roles.py::revoke_role).
+        Before this fix, calling activate-teacher again with the SAME school
+        name silently flipped is_active back to True -- a real
+        self-service privilege escalation around an admin's revocation.
+        Must now 403 and leave is_active=False untouched."""
+        from app.models.user import Role, UserRole
+
+        _, token = _register_login(client, "act_revoked")
+        school_name = f"停權國小_{uuid.uuid4().hex[:6]}"
+        r1 = client.post(
+            "/api/users/me/activate-teacher",
+            json={"school_names": [school_name]},
+            headers=auth_header(token),
+        )
+        assert r1.status_code == 200, r1.text
+        school_id = r1.json()["schools"][0]["id"]
+
+        # Simulate a system_admin revoking the teacher role at this school.
+        db = TestingSessionLocal()
+        try:
+            teacher_role = db.query(Role).filter(Role.name == "teacher").first()
+            ur = (
+                db.query(UserRole)
+                .filter(
+                    UserRole.role_id == teacher_role.id,
+                    UserRole.scope_type == "school",
+                    UserRole.scope_id == str(school_id),
+                )
+                .first()
+            )
+            ur.is_active = False
+            db.commit()
+            revoked_ur_id = ur.id
+        finally:
+            db.close()
+
+        resp = client.post(
+            "/api/users/me/activate-teacher",
+            json={"school_names": [school_name]},
+            headers=auth_header(token),
+        )
+        assert resp.status_code == 403, resp.text
+
+        db = TestingSessionLocal()
+        try:
+            ur = db.query(UserRole).filter(UserRole.id == revoked_ur_id).first()
+            assert ur.is_active is False, (
+                "a revoked role must stay revoked after a failed self-reactivation attempt"
+            )
+        finally:
+            db.close()
+
     def test_activating_multiple_schools_in_one_call(self, client):
         _, token = _register_login(client, "act_multi")
         names = [f"學校A_{uuid.uuid4().hex[:5]}", f"學校B_{uuid.uuid4().hex[:5]}"]
@@ -484,3 +539,111 @@ class TestSameSchoolDoesNotGrantClassroomVisibility:
             headers=auth_header(actors["b_tok"]),
         )
         assert as_b.status_code == 403, as_b.text
+
+
+# ===========================================================================
+# 4. Security review finding (2026-11-01): self-activating into an EXISTING
+#    school must not grant visibility into that school's roster or
+#    classroom list -- declaring a school is now a trivial self-service
+#    action, so "any school member can see the school's roster/classrooms"
+#    (a Phase-1 policy, authz.py::_can_view_school_roster) becomes
+#    practically exploitable the moment anyone can join by typing a name.
+#    Written with the LOWEST-privilege account (freshly self-activated
+#    teacher with zero classrooms of their own in that school), with a
+#    positive control (the same teacher's own classroom IS visible).
+# ===========================================================================
+
+
+class TestJoiningAnExistingSchoolDoesNotLeakItsRoster:
+    @pytest.fixture(scope="class")
+    def actors(self, client):
+        school_name = f"名冊測試國小_{uuid.uuid4().hex[:6]}"
+
+        a_id, a_tok = _register_login(client, "roster_a")
+        act_a = client.post(
+            "/api/users/me/activate-teacher",
+            json={"school_names": [school_name]},
+            headers=auth_header(a_tok),
+        )
+        school_id = act_a.json()["schools"][0]["id"]
+        cls_a = client.post(
+            "/api/classrooms",
+            json={"name": "RosterA1", "school_id": school_id, "grade": 4},
+            headers=auth_header(a_tok),
+        )
+        assert cls_a.status_code == 201, cls_a.text
+
+        b_id, b_tok = _register_login(client, "roster_b")
+        act_b = client.post(
+            "/api/users/me/activate-teacher",
+            json={"school_names": [school_name]},
+            headers=auth_header(b_tok),
+        )
+        assert act_b.json()["schools"][0]["id"] == school_id, (
+            "sanity: A and B must share the same school for this test to be meaningful"
+        )
+
+        return {
+            "a_tok": a_tok, "b_tok": b_tok,
+            "school_id": school_id,
+            "classroom_a_id": cls_a.json()["id"],
+        }
+
+    def test_joining_by_name_does_not_grant_the_schools_classroom_list(self, actors):
+        resp = TestClient(app).get(
+            f"/api/schools/{actors['school_id']}/classrooms",
+            headers=auth_header(actors["b_tok"]),
+        )
+        assert resp.status_code == 403, resp.text
+
+    def test_joining_by_name_does_not_grant_the_schools_member_roster(self, actors):
+        resp = TestClient(app).get(
+            f"/api/schools/{actors['school_id']}/members",
+            headers=auth_header(actors["b_tok"]),
+        )
+        assert resp.status_code == 403, resp.text
+
+    def test_positive_control_owner_can_still_see_their_own_schools_classroom_list(self, actors):
+        """A (who owns a classroom at this school) must still be able to
+        read the classroom list -- this is not "nobody can ever see it",
+        it's "membership-by-declaration alone isn't enough"."""
+        resp = TestClient(app).get(
+            f"/api/schools/{actors['school_id']}/classrooms",
+            headers=auth_header(actors["a_tok"]),
+        )
+        assert resp.status_code == 200, resp.text
+        names = {c["name"] for c in resp.json()}
+        assert "RosterA1" in names
+
+
+# ===========================================================================
+# 5. Security review finding (2026-11-01, #3): self-activating into a BRAND
+#    NEW school does not make the activator that school's admin in any
+#    permission sense. admin_user_id is a "who created it" breadcrumb, not
+#    a grant -- can()'s ("school","manage") policy is hardcoded False for
+#    everyone except system_admin regardless of admin_user_id.
+# ===========================================================================
+
+
+class TestCreatingANewSchoolGrantsNoAdminPrivilege:
+    def test_self_activating_creator_still_cannot_manage_the_school_they_created(self, client):
+        _, token = _register_login(client, "creates_new_school")
+        school_name = f"全新學校_{uuid.uuid4().hex[:6]}"
+        act = client.post(
+            "/api/users/me/activate-teacher",
+            json={"school_names": [school_name]},
+            headers=auth_header(token),
+        )
+        assert act.status_code == 200, act.text
+        assert act.json()["schools"][0]["is_new"] is True
+        school_id = act.json()["schools"][0]["id"]
+
+        resp = client.patch(
+            f"/api/schools/{school_id}",
+            json={"name": "改名"},
+            headers=auth_header(token),
+        )
+        assert resp.status_code == 403, (
+            "creating a brand-new school via self-activation must not grant "
+            f"PATCH /schools/{{id}} (system_admin-only): {resp.text}"
+        )
