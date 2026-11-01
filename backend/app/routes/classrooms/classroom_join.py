@@ -12,6 +12,7 @@ from ...schemas.classroom import ClassroomJoinRequest, ClassroomResponse
 from .helpers import (
     classroom_to_response,
     create_submissions_for_new_student,
+    ensure_school_student_role,
     generate_join_code,
     get_classroom_or_404,
     require_owner_or_admin,
@@ -28,6 +29,14 @@ def join_classroom_by_code(
     db: Session = Depends(get_db),
 ):
     """Join a classroom using a join code. Enrolls the current user as a student.
+
+    (#3804) Also grants a school-scoped `student` UserRole if the caller
+    doesn't already hold one for this classroom's school — previously this
+    endpoint was the one path (unlike teacher-created batch/CSV/Junyi import)
+    that enrolled a ClassroomStudent without ever granting the matching
+    role, so an SSO-only account (Google/Junyi — neither grants a role on
+    account creation either) stayed invisible to every "which school is this
+    student in" query forever.
 
     IMPORTANT: This route MUST appear before /classrooms/{classroom_id}/regenerate-code
     so that FastAPI does not treat "join" as a classroom_id.
@@ -63,6 +72,8 @@ def join_classroom_by_code(
     )
     db.add(cs)
     db.flush()
+
+    ensure_school_student_role(db, current_user.id, classroom.school_id)
 
     # Back-fill submissions for active assignments the student missed (#996)
     create_submissions_for_new_student(classroom.id, current_user.id, db)

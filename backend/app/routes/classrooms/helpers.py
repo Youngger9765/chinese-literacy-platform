@@ -9,7 +9,6 @@ from sqlalchemy.orm import Session
 
 from ...auth.dependencies import get_current_user  # noqa: F401 — re-exported for convenience
 from ...auth.policies import (
-    is_admin as _is_admin_policy,
     require_classroom_member as _require_classroom_member,
     require_classroom_owner as _require_classroom_owner,
 )
@@ -72,9 +71,45 @@ def require_member_or_admin(classroom: Classroom, current_user: User, db: Sessio
     _require_classroom_member(classroom, current_user, db)
 
 
-def is_admin(user_id: int, db: Session) -> bool:
-    """Delegate to centralized policies. Kept for backwards compatibility."""
-    return _is_admin_policy(user_id, db)
+def ensure_school_student_role(
+    db: Session, user_id: int, school_id: int, granted_by: int | None = None
+) -> None:
+    """Grant an active `student` role scoped to `school_id`, if not already held.
+
+    (#3804) Mirrors the role-granting block already duplicated in
+    classroom_batch.py / classroom_csv.py / junyi_class_import_service.py for
+    teacher-created students. The one path that was missing it entirely was
+    self-service join-by-code (classroom_join.py) — a student who only ever
+    went through Google/Junyi SSO + join-by-code ended up with ZERO UserRole
+    rows, invisible to any "which school is this student in" query.
+    Idempotent: safe to call even if the role already exists.
+    """
+    student_role = db.query(Role).filter(Role.name == "student").first()
+    if student_role is None:
+        return
+    existing = (
+        db.query(UserRole)
+        .filter(
+            UserRole.user_id == user_id,
+            UserRole.role_id == student_role.id,
+            UserRole.scope_type == "school",
+            UserRole.scope_id == str(school_id),
+            UserRole.is_active == True,  # noqa: E712
+        )
+        .first()
+    )
+    if existing is not None:
+        return
+    db.add(
+        UserRole(
+            user_id=user_id,
+            role_id=student_role.id,
+            scope_type="school",
+            scope_id=str(school_id),
+            granted_by=granted_by,
+        )
+    )
+    db.flush()
 
 
 # ── Email Helpers ─────────────────────────────────────────────────────────────

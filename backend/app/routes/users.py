@@ -3,14 +3,11 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
-from sqlalchemy import and_, or_
 from sqlalchemy.orm import Session, joinedload, selectinload
 
 from ..auth.classroom_check import compute_has_classroom
 from ..auth.password_policy import compute_must_change_password
-from ..auth.dependencies import get_current_user, get_user_org_ids, require_role
-from ..auth.policies import is_system_admin, resolve_user_org_ids
-from ..models.school import School
+from ..auth.dependencies import get_current_user, require_role
 from ..config import settings
 from ..database import get_db
 from ..models.user import User, UserRole, Role
@@ -182,54 +179,16 @@ def list_users(
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
     search: str | None = Query(None),
-    current_user: User = require_role("system_admin", "org_admin"),
+    current_user: User = require_role("system_admin"),
     db: Session = Depends(get_db),
 ):
     """List users with pagination and optional search.
 
-    system_admin sees all users on the platform.
-    org_admin sees only users whose org-scoped UserRole matches
-    the caller's own org scope(s) — enforcing 個資法 §20.
+    (#3804) system_admin-only. org_admin's "see users within my org(s)" scope
+    is retired along with the org tenancy tier — there is no longer an
+    admin tier between "my own classroom's students" and system_admin.
     """
     query = db.query(User)
-
-    # Scope restriction: org_admin may only see users within their org(s).
-    # system_admin bypasses; org_admin is NOT global — it must be org-scoped.
-    if not is_system_admin(current_user.id, db):
-        caller_org_ids = resolve_user_org_ids(current_user.id, db)
-        if not caller_org_ids:
-            # org_admin with no org scope → see nothing
-            return UserListResponse(items=[], total=0)
-        # Keep users who belong to one of the caller's orgs — via a direct
-        # org-scoped role OR a school-scoped role whose school is in the org
-        # (students/teachers are school-scoped in the production model).
-        caller_school_ids = [
-            str(sid)
-            for (sid,) in db.query(School.id)
-            .filter(School.organization_id.in_(caller_org_ids))
-            .all()
-        ]
-        scope_predicates = [
-            and_(
-                UserRole.scope_type == "organization",
-                UserRole.scope_id.in_(list(caller_org_ids)),
-            )
-        ]
-        if caller_school_ids:
-            scope_predicates.append(
-                and_(
-                    UserRole.scope_type == "school",
-                    UserRole.scope_id.in_(caller_school_ids),
-                )
-            )
-        query = query.filter(
-            User.id.in_(
-                db.query(UserRole.user_id).filter(
-                    UserRole.is_active == True,
-                    or_(*scope_predicates),
-                )
-            )
-        )
 
     if search:
         pattern = f"%{search}%"
@@ -267,14 +226,13 @@ def list_users(
 @router.get("/users/{user_id}", response_model=UserDetailResponse)
 def get_user_detail(
     user_id: int,
-    current_user: User = require_role("system_admin", "org_admin"),
+    current_user: User = require_role("system_admin"),
     db: Session = Depends(get_db),
 ):
     """Get full user detail by ID.
 
-    system_admin may read any user.
-    org_admin may only read users who belong to the same org scope —
-    enforcing 個資法 §20 (cross-org reads → 403).
+    (#3804) system_admin-only. org_admin's "same org scope" cross-tenant
+    read is retired along with the org tenancy tier.
     """
     user = (
         db.query(User)
@@ -286,17 +244,6 @@ def get_user_detail(
     )
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
-
-    # Scope check for org_admin: target user must share at least one org with caller.
-    # Resolve via school->org so school-scoped targets (production model) match.
-    if not is_system_admin(current_user.id, db):
-        caller_org_ids = resolve_user_org_ids(current_user.id, db)
-        target_org_ids = resolve_user_org_ids(user.id, db)
-        if not (caller_org_ids & target_org_ids):
-            raise HTTPException(
-                status_code=403,
-                detail="Not authorized to view this user",
-            )
 
     return UserDetailResponse(
         id=user.id,
