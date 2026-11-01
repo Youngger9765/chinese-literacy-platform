@@ -122,9 +122,43 @@ def _can_manage_school(user: User, resource_id, db: Session) -> bool:
     return False
 
 
+def _owns_or_co_teaches_a_classroom_at_school(user: User, school_id, db: Session) -> bool:
+    """True if the user owns, or co-teaches, AT LEAST ONE classroom at this school.
+
+    (#3804 security review, 2026-11-01) Declaring a school via self-serve
+    activation is now a trivial, zero-friction action — ANYONE can type an
+    existing school's exact name and become an `is_school_member`. Before
+    this fix, `_can_view_school_roster` used `is_school_member` alone, which
+    meant that single step also handed over the full member roster (names +
+    emails) and the full classroom list of every teacher at that school.
+    That was tolerable when "becoming a member" required an admin's action;
+    it is not once anyone can self-activate into it. This is also more
+    consistent with this module's own stated model ("permission now only
+    looks at classroom ownership/membership" — see module docstring): a
+    bare school-scoped role with zero classrooms is a label, not ownership.
+    """
+    owns = (
+        db.query(Classroom)
+        .filter(Classroom.school_id == school_id, Classroom.teacher_id == user.id)
+        .first()
+        is not None
+    )
+    if owns:
+        return True
+    return (
+        db.query(ClassroomTeacher)
+        .join(Classroom, ClassroomTeacher.classroom_id == Classroom.id)
+        .filter(Classroom.school_id == school_id, ClassroomTeacher.teacher_id == user.id)
+        .first()
+        is not None
+    )
+
+
 def _can_view_school_roster(user: User, resource_id, db: Session) -> bool:
-    """Members/classrooms rosters for a school are visible to its own members only."""
-    return is_school_member(user, resource_id)
+    """Members/classrooms rosters for a school are visible only to teachers
+    who own or co-teach a classroom there — NOT to every school-scoped
+    member (see _owns_or_co_teaches_a_classroom_at_school)."""
+    return _owns_or_co_teaches_a_classroom_at_school(user, resource_id, db)
 
 
 def _can_manage_semester(user: User, resource_id, db: Session) -> bool:

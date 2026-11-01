@@ -36,6 +36,23 @@ def _eligible_student_ids(classroom, teacher_id: int, db: Session):
     Students of the classroom's school (#3534). If that "school" is really a public
     mail domain (legacy shared gmail.com 學校 etc.), its members are strangers to each
     other, so narrow further to students this teacher created or already teaches (#3541).
+
+    (#3804 security review, 2026-11-02, finding 4) That narrowing used to
+    fire ONLY for public-email-domain schools -- it assumed any OTHER school
+    was a verified, shared community where same-school teachers trust each
+    other. Self-serve activation (POST /users/me/activate-teacher) breaks
+    that assumption for schools born that way: anyone who types a matching
+    name becomes a "member", the same way a public-email-domain account
+    used to accidentally become one. So the narrowing must also fire for
+    schools marked `settings.created_via == "self_activation"` (see
+    auth_registration_service.py::activate_teacher_for_schools). This is
+    deliberately NOT "any school with domain=None" -- plenty of pre-#3804
+    schools (admin-created via POST /schools, CSV/bulk-import setups, test
+    fixtures) already represent a genuinely-shared institutional school
+    with domain=None and no email-domain concept, where same-school
+    teachers are SUPPOSED to see each other's enrolled students; blanket
+    -narrowing those broke 15 pre-existing tests the first time this was
+    tried. The explicit marker scopes the fix to exactly the new risk.
     """
     q = (
         db.query(UserRole.user_id)
@@ -48,7 +65,8 @@ def _eligible_student_ids(classroom, teacher_id: int, db: Session):
         )
     )
     school = db.get(School, classroom.school_id) if classroom.school_id is not None else None
-    if school is not None and is_public_email_domain(school.domain):
+    is_self_activated = bool(school and school.settings and school.settings.get("created_via") == "self_activation")
+    if school is not None and (is_self_activated or is_public_email_domain(school.domain)):
         my_classrooms = (
             db.query(Classroom.id).filter(Classroom.teacher_id == teacher_id)
             .union(db.query(ClassroomTeacher.classroom_id).filter(ClassroomTeacher.teacher_id == teacher_id))

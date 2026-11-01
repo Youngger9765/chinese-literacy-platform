@@ -109,6 +109,13 @@ def _fake_token(alg: str) -> str:
 
 
 def _register_teacher(client) -> dict:
+    """Register a brand-new account and self-activate it as a teacher (#3804).
+
+    Registration alone no longer grants a teacher role or a school (every
+    account defaults to platform-scoped student) -- these IDOR tests need an
+    actual teacher-of-a-school, so they self-activate the same way a real
+    user would, via POST /users/me/activate-teacher.
+    """
     u = uuid.uuid4().hex[:8]
     email, pw = f"t_{u}@example.com", "SecurePass123!"
     r = client.post("/api/auth/register", json={"email": email, "password": pw, "name": f"T{u}"})
@@ -118,11 +125,17 @@ def _register_teacher(client) -> dict:
         client.get(f"/api/auth/verify-email?token={vt}")
     tok = client.post("/api/auth/login", json={"email": email, "password": pw}).json()["access_token"]
     uid = client.get("/api/users/me", headers=_auth(tok)).json()["id"]
+    act = client.post(
+        "/api/users/me/activate-teacher",
+        json={"school_names": [f"IDOR 測試學校_{u}"]},
+        headers=_auth(tok),
+    )
+    assert act.status_code == 200, act.text
     return {"token": tok, "user_id": uid, "email": email, "school_id": _own_school_id(uid)}
 
 
 def _own_school_id(user_id: int):
-    """The school the user is scoped to (teachers auto-join a domain school on register)."""
+    """The school the user is scoped to (self-activated via activate-teacher)."""
     from app.models.user import UserRole
 
     db = TestingSessionLocal()

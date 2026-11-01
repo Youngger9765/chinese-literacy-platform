@@ -45,9 +45,11 @@ describe('#3513 parent entry', () => {
     expect(register).toHaveBeenCalledWith('mom@example.com', 'SecurePass123!', '王媽媽', 'parent');
   });
 
-  it('the default stays a teacher sign-up (no role sent)', async () => {
+  it('the default stays a student sign-up (no role sent) -- #3804', async () => {
     render(<MemoryRouter><RegisterPage /></MemoryRouter>);
-    expect(screen.getByText('教師註冊')).toBeTruthy();
+    // "建立帳號" appears twice (subtitle + submit button) -- the subtitle is
+    // the one proving the default is no longer "教師註冊".
+    expect(screen.getByText('建立帳號', { selector: 'p' })).toBeTruthy();
     await fill();
     await userEvent.click(screen.getByRole('button', { name: '建立帳號' }));
     expect(register).toHaveBeenCalledWith('mom@example.com', 'SecurePass123!', '王媽媽', undefined);

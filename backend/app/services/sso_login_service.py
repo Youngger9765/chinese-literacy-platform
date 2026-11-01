@@ -24,6 +24,7 @@ from sqlalchemy.orm import Session
 from ..auth.password import hash_password
 from ..config import settings
 from ..models.user import User
+from .auth_registration_service import grant_default_student_role
 from .junyi_bigquery_client import SYNTHETIC_STUDENT_EMAIL_DOMAIN
 
 logger = logging.getLogger(__name__)
@@ -126,6 +127,11 @@ def resolve_google_user(db: Session, id_info: dict) -> tuple[User, bool]:
                 email_verified=True,
             )
             db.add(user)
+            db.flush()
+            # #3804: every brand-new account defaults to student, same as
+            # email/password registration. Previously this path granted
+            # ZERO roles — see PRD #3804 §1.2.C.
+            grant_default_student_role(db, user)
             is_new_user = True
 
     return user, is_new_user
@@ -263,6 +269,9 @@ def resolve_junyi_user(db: Session, junyi_data: dict) -> tuple[User, bool]:
             email_verified=True,
         )
         db.add(user)
+        db.flush()
+        # #3804: every brand-new account defaults to student (see resolve_google_user).
+        grant_default_student_role(db, user)
         is_new_user = True
     elif user.junyi_identity_id is None:
         user.junyi_identity_id = junyi_user_id

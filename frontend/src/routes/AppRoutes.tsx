@@ -51,6 +51,7 @@ const AdminDashboard = lazy(() => import('../pages/admin/AdminDashboard'));
 
 // Student pages — infrequently accessed, split to reduce initial load
 const JoinClassroomPage = lazy(() => import('../pages/JoinClassroomPage'));
+const ActivateTeacherPage = lazy(() => import('../pages/ActivateTeacherPage'));
 const MyAssignments = lazy(() => import('../pages/student/MyAssignments'));
 const MyVocabulary = lazy(() => import('../pages/student/MyVocabulary'));
 const AchievementsPage = lazy(() => import('../pages/student/AchievementsPage'));
@@ -604,6 +605,15 @@ const AppRoutes: React.FC = () => (
         element={
           <ProtectedRoute>
             <JoinClassroomPage />
+          </ProtectedRoute>
+        }
+      />
+      {/* #3804 self-serve teacher activation (Young 2026-11-01) */}
+      <Route
+        path="/activate-teacher"
+        element={
+          <ProtectedRoute>
+            <ActivateTeacherPage />
           </ProtectedRoute>
         }
       />

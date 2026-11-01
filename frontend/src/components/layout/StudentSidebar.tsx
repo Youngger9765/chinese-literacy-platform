@@ -90,6 +90,16 @@ export function getStudentNavItems(pendingAssignmentCount = 0): NavItem[] {
       description: '跨班賽季、課堂搶答、PK 對戰、迷城密室、多人對抗賽',
     },
     { icon: '➕', label: '加入班級', path: '/join' },
+    // #3804 (Young 2026-11-01): self-serve teacher activation. Placed right
+    // after 加入班級 on purpose -- both are self-service actions that attach
+    // the account to something (a classroom / a school), same mental model,
+    // so a student is likely to notice this one too. See PRD §10.1.
+    {
+      icon: '🏫',
+      label: '開通老師身分',
+      path: '/activate-teacher',
+      description: '填寫任教學校，立即成為老師',
+    },
     { icon: '📖', label: '學習紀錄', path: '/learning-history' },
     // /help had no entry anywhere in the UI until #3142.
     { icon: '❓', label: '使用說明', path: '/help' },

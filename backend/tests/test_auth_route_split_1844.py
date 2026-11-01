@@ -128,46 +128,29 @@ def _register_teacher(client, email: str = None, domain: str = "school.edu.tw") 
 
 
 class TestRegistration:
-    """A. register blocks student self-registration + teacher school/role auto-assignment."""
+    """A. register defaults every account to student + self-serve teacher
+    activation by name (#3804, Young 2026-11-01 — supersedes the original
+    "blocks student self-reg + teacher school/role auto-assignment" docstring
+    this class had; that whole mechanism -- block_student_self_registration,
+    assign_teacher_to_school -- is retired. See PRD
+    docs/prd/2026-11-01-school-as-teacher-attribute-prd.md and the full lock
+    in tests/test_self_serve_teacher_3804.py)."""
 
-    def test_student_self_registration_blocked(self, client):
-        """Students cannot self-register — 403 with Chinese message."""
+    def test_student_role_hint_is_accepted_not_blocked(self, client):
+        """#3804: role="student" is no longer rejected -- every account
+        defaults to student anyway, so the hint is simply redundant."""
         resp = client.post("/api/auth/register", json={
             "email": _unique_email(),
             "password": "ValidPass123!",
             "name": "Student Attempt",
             "role": "student",
         })
-        assert resp.status_code == 403
-        assert "學生" in resp.json()["detail"]
+        assert resp.status_code == 201
 
-    def test_student_role_uppercase_blocked(self, client):
-        """Case-insensitive — 'Student' (title case) also blocked."""
-        resp = client.post("/api/auth/register", json={
-            "email": _unique_email(),
-            "password": "ValidPass123!",
-            "name": "Student",
-            "role": "Student",
-        })
-        assert resp.status_code == 403
-
-    def test_teacher_gets_school_auto_created(self, client):
-        """First teacher from a domain triggers school auto-creation."""
+    def test_fresh_registration_gets_platform_scoped_student_role(self, client):
+        """A fresh account has exactly one role: student, platform-scoped,
+        no school -- not a school-scoped teacher role."""
         domain = f"newschool-{secrets.token_hex(4)}.edu.tw"
-        email = _unique_email(domain)
-        result = _register_teacher(client, email=email, domain=domain)
-
-        db = TestingSessionLocal()
-        try:
-            school = db.query(School).filter(School.domain == domain).first()
-            assert school is not None, "School should be auto-created"
-            assert school.domain == domain
-        finally:
-            db.close()
-
-    def test_teacher_gets_teacher_role_assigned(self, client):
-        """Registered teacher gets UserRole(teacher) scoped to auto-created school."""
-        domain = f"roleschool-{secrets.token_hex(4)}.edu.tw"
         email = _unique_email(domain)
         _register_teacher(client, email=email, domain=domain)
 
@@ -175,33 +158,57 @@ class TestRegistration:
         try:
             user = db.query(User).filter(User.email == email).first()
             assert user is not None
-            teacher_role = db.query(Role).filter(Role.name == "teacher").first()
-            assert teacher_role is not None
-            ur = (
-                db.query(UserRole)
-                .filter(
-                    UserRole.user_id == user.id,
-                    UserRole.role_id == teacher_role.id,
-                    UserRole.scope_type == "school",
-                )
-                .first()
-            )
-            assert ur is not None, "Teacher should have school-scoped teacher role"
+            roles = db.query(UserRole).filter(UserRole.user_id == user.id, UserRole.is_active.is_(True)).all()
+            assert len(roles) == 1
+            role = db.query(Role).filter(Role.id == roles[0].role_id).first()
+            assert role.name == "student"
+            assert roles[0].scope_type == "platform"
         finally:
             db.close()
 
-    def test_second_teacher_same_domain_joins_existing_school(self, client):
-        """Second teacher from same domain joins existing school (no duplicate)."""
-        domain = f"shared-{secrets.token_hex(4)}.edu.tw"
-        email1 = _unique_email(domain)
-        email2 = _unique_email(domain)
-        _register_teacher(client, email=email1, domain=domain)
-        _register_teacher(client, email=email2, domain=domain)
+    def test_registration_creates_no_school(self, client):
+        """#3804: registration alone must not auto-create a school for the
+        registrant's email domain (the retired issue #459 behavior)."""
+        domain = f"roleschool-{secrets.token_hex(4)}.edu.tw"
+        email = _unique_email(domain)
+        _register_teacher(client, email=email, domain=domain)
 
         db = TestingSessionLocal()
         try:
-            schools = db.query(School).filter(School.domain == domain).all()
-            assert len(schools) == 1, "Only one school should exist for the domain"
+            school = db.query(School).filter(School.domain == domain).first()
+            assert school is None, "registration must not auto-create a school by domain"
+        finally:
+            db.close()
+
+    def test_self_activation_by_name_grants_school_scoped_teacher(self, client):
+        """Replaces the retired "second teacher, same domain, joins existing
+        school" lock: two accounts self-activating with the SAME school NAME
+        (not domain) share one school -- see PRD §4.1.1 for the documented
+        exact-name-match design this encodes."""
+        school_name = f"共用學校_{secrets.token_hex(4)}"
+        email1, email2 = _unique_email(), _unique_email()
+        t1 = _register_teacher(client, email=email1)
+        t2 = _register_teacher(client, email=email2)
+
+        def _activate(email: str) -> int:
+            login = client.post("/api/auth/login", json={"email": email, "password": "ValidPass123!"})
+            token = login.json()["access_token"]
+            resp = client.post(
+                "/api/users/me/activate-teacher",
+                json={"school_names": [school_name]},
+                headers={"Authorization": f"Bearer {token}"},
+            )
+            assert resp.status_code == 200, resp.text
+            return resp.json()["schools"][0]["id"]
+
+        school_id_1 = _activate(email1)
+        school_id_2 = _activate(email2)
+        assert school_id_1 == school_id_2
+
+        db = TestingSessionLocal()
+        try:
+            schools = db.query(School).filter(School.name == school_name).all()
+            assert len(schools) == 1, "activating the same name twice must not create a duplicate school"
         finally:
             db.close()
 

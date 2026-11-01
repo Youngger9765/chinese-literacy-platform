@@ -2,7 +2,7 @@
 routes/auth.py — Thin HTTP boundary for auth endpoints (#1844).
 
 Business logic extracted to focused service modules:
-- auth_registration_service: register + school auto-assignment
+- auth_registration_service: register (default-student grant, #3804) + self-serve teacher activation
 - password_reset_service: forgot/reset password
 - email_verification_service: verify email GET/POST + resend
 - sso_login_service: Google + Junyi SSO
@@ -52,10 +52,9 @@ from ..schemas.auth import (
 )
 from ..schemas.user import UserResponse
 from ..services.auth_registration_service import (
-    assign_teacher_to_school,
-    block_student_self_registration,
-    create_teacher_user,
+    create_user_account,
     enforce_password_strength,
+    grant_default_student_role,
 )
 from ..services.email_verification_service import (
     resend_verification_token,
@@ -114,11 +113,14 @@ def _ensure_parent_login_allowed(user: User, db: Session) -> None:
 
 @router.post("/register", response_model=RegisterResponse, status_code=status.HTTP_201_CREATED)
 def register(req: RegisterRequest, request: Request, db: Session = Depends(get_db)):
-    """Register a new teacher account.
+    """Register a new account.
 
-    This endpoint is for teacher self-registration only (issue #457).
-    Student accounts must be created by teachers via classroom management
-    (POST /classrooms/{id}/students or CSV upload).
+    #3804 (Young 2026-11-01): every account defaults to `student` — there is
+    no more "register = teacher" branch. A student can join classrooms
+    immediately; anyone can later self-activate as a teacher by naming their
+    school(s) via POST /api/users/me/activate-teacher. The only remaining
+    role branch at registration is the opt-in parent portal (#3513), which is
+    unrelated to the teacher/student axis this PR changes.
 
     Email verification flow (issue #460):
     - Sets email_verified=False and generates a verification token.
@@ -129,8 +131,7 @@ def register(req: RegisterRequest, request: Request, db: Session = Depends(get_d
     if not rate_limiter.check(f"register:{client_ip}", max_requests=5, window_seconds=60):
         raise HTTPException(status_code=429, detail="Too many requests. Please try again later.")
 
-    block_student_self_registration(req.role)
-    # #3513: a parent signs up as a parent — no teacher role, no school.
+    # #3513: a parent signs up as a parent — no student role, no school.
     wants_parent = (req.role or "").strip().lower() == "parent"
     if wants_parent and not settings.parent_portal_enabled:
         raise HTTPException(
@@ -146,7 +147,7 @@ def register(req: RegisterRequest, request: Request, db: Session = Depends(get_d
             detail="Email already registered",
         )
 
-    user, verification_token = create_teacher_user(
+    user, verification_token = create_user_account(
         db=db,
         email=req.email,
         password=req.password,
@@ -157,7 +158,7 @@ def register(req: RegisterRequest, request: Request, db: Session = Depends(get_d
         from .parents import _grant_parent_role
         _grant_parent_role(user, db)
     else:
-        assign_teacher_to_school(db, user)
+        grant_default_student_role(db, user)
     db.commit()
     db.refresh(user)
 
