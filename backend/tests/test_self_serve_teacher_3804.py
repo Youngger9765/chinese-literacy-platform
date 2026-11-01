@@ -637,17 +637,109 @@ class TestJoiningAnExistingSchoolDoesNotLeakItsRoster:
         )
         assert resp.status_code == 403, resp.text
 
-    def test_positive_control_owner_can_still_see_their_own_schools_classroom_list(self, actors):
-        """A (who owns a classroom at this school) must still be able to
-        read the classroom list -- this is not "nobody can ever see it",
-        it's "membership-by-declaration alone isn't enough"."""
+    def test_owner_of_a_self_activated_school_also_does_not_get_the_school_wide_list(self, actors):
+        """(Finding #5, 2026-11-01) Even A -- the teacher who OWNS a
+        classroom at this self-activated school -- gets no school-wide
+        roster view either. This is not a regression: A's own classroom is
+        still fully visible to A via GET /classrooms (classroom_crud.py
+        list_my_classrooms, scoped to owns-or-co-teaches regardless of
+        school), which is what the real "我的班級" page actually calls. The
+        admin-style /schools/{id}/classrooms list has no legitimate purpose
+        for a self-activated school -- see _can_view_school_roster."""
         resp = TestClient(app).get(
             f"/api/schools/{actors['school_id']}/classrooms",
             headers=auth_header(actors["a_tok"]),
         )
+        assert resp.status_code == 403, resp.text
+
+        my_classrooms = TestClient(app).get(
+            "/api/classrooms",
+            headers=auth_header(actors["a_tok"]),
+        )
+        assert my_classrooms.status_code == 200, my_classrooms.text
+        names = {c["name"] for c in my_classrooms.json()["items"]}
+        assert "RosterA1" in names, (
+            "A must still see their own classroom via the real "
+            f"'my classrooms' endpoint. Visible: {names}"
+        )
+
+    def test_owning_a_classroom_does_not_unlock_a_strangers_classroom_in_the_same_self_activated_school(
+        self, client, actors,
+    ):
+        """Probe for the gap a bare ownership-boolean gate would leave open:
+        once B (who shares nothing with A but typing the same school name)
+        creates their OWN classroom at that school, does the school-wide
+        list hand B A's classroom too?
+
+        Young's point 4 (verbatim): "自助開通的老師一樣只看得到自己開的班、
+        自己班上的學生。宣告了某所學校，不代表能看到那所學校的其他班。"
+        This must hold even after B legitimately owns a classroom there --
+        owning ONE classroom at a self-activated school must not be read as
+        "therefore see ALL classrooms at that school"."""
+        cls_b = client.post(
+            "/api/classrooms",
+            json={"name": "RosterB1", "school_id": actors["school_id"], "grade": 4},
+            headers=auth_header(actors["b_tok"]),
+        )
+        assert cls_b.status_code == 201, cls_b.text
+
+        resp = TestClient(app).get(
+            f"/api/schools/{actors['school_id']}/classrooms",
+            headers=auth_header(actors["b_tok"]),
+        )
+        if resp.status_code == 200:
+            names = {c["name"] for c in resp.json()}
+            assert "RosterA1" not in names, (
+                "B can see A's classroom merely by having created one of "
+                f"their own at the same self-declared school. Visible: {names}"
+            )
+        else:
+            assert resp.status_code == 403, resp.text
+        # B's own classroom remains fully visible via the real endpoint.
+        my_classrooms = TestClient(app).get(
+            "/api/classrooms",
+            headers=auth_header(actors["b_tok"]),
+        )
+        assert "RosterB1" in {c["name"] for c in my_classrooms.json()["items"]}
+
+
+class TestRealAdminCreatedSchoolRosterStillWorksForItsOwnTeachers:
+    """Positive control for Finding #5: the school-wide roster/classroom-list
+    endpoints still work as before for a REAL (non-self-activated, e.g.
+    admin-created or MOE-directory-imported) school, where "own/co-teach at
+    least one classroom there" remains the gate. Finding #5 narrows the gap
+    specifically for self-activated schools -- it must not regress the
+    admin dashboard views for institutionally-real schools."""
+
+    def test_classroom_owner_at_a_real_school_sees_the_schools_classroom_list(self, client):
+        db = TestingSessionLocal()
+        try:
+            school = School(name=f"真實學校_{uuid.uuid4().hex[:6]}", domain=None)
+            db.add(school)
+            db.commit()
+            db.refresh(school)
+            school_id = school.id
+        finally:
+            db.close()
+
+        _, token = _register_login(client, "real_school_teacher")
+        role = client.post(
+            "/api/users/me/activate-teacher",
+            json={"school_names": [school.name]},
+            headers=auth_header(token),
+        )
+        assert role.status_code == 200, role.text
+        cls = client.post(
+            "/api/classrooms",
+            json={"name": "RealSchoolClassroom", "school_id": school_id, "grade": 4},
+            headers=auth_header(token),
+        )
+        assert cls.status_code == 201, cls.text
+
+        resp = client.get(f"/api/schools/{school_id}/classrooms", headers=auth_header(token))
         assert resp.status_code == 200, resp.text
         names = {c["name"] for c in resp.json()}
-        assert "RosterA1" in names
+        assert "RealSchoolClassroom" in names
 
 
 # ===========================================================================
