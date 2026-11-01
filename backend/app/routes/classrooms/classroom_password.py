@@ -77,10 +77,21 @@ def reset_student_password(
         .all()
     )
 
+    def _is_allowed_target_role(role_name: str, scope_type: str, scope_id: str | None) -> bool:
+        if role_name != "student":
+            return False
+        # (#3804) Every account now carries a platform-scoped `student` role
+        # by default from registration (grant_default_student_role) -- that
+        # row is universal and harmless, not a sign the target also holds
+        # some other privilege, so it must not trip this gate. The gate's
+        # actual job is still enforced below: a school-scoped student role
+        # must match THIS classroom's school.
+        if scope_type == "platform":
+            return True
+        return scope_type == "school" and scope_id == str(classroom.school_id)
+
     has_disallowed_target_role = any(
-        role_name != "student"
-        or scope_type != "school"
-        or scope_id != str(classroom.school_id)
+        not _is_allowed_target_role(role_name, scope_type, scope_id)
         for role_name, scope_type, scope_id in active_target_roles
     )
     if has_disallowed_target_role:
@@ -98,7 +109,17 @@ def reset_student_password(
             detail="Student is not a verified member of this classroom's school",
         )
 
-    has_matching_student_role = bool(active_target_roles)
+    # (#3804) bool(active_target_roles) used to mean "has the school-scoped
+    # student role granted at enrollment" -- the only role a student could
+    # have. Now every account also carries the universal platform-scoped
+    # default student role, so that trivially-true check no longer proves
+    # membership in THIS school; it must look for the actual school-scoped
+    # row (allowed by _is_allowed_target_role above, so this is just finding
+    # it, not re-validating it).
+    has_matching_student_role = any(
+        scope_type == "school" and scope_id == str(classroom.school_id)
+        for _role_name, scope_type, scope_id in active_target_roles
+    )
     has_matching_student_profile = (
         user.student_profile is not None
         and user.student_profile.school_id == classroom.school_id

@@ -1,12 +1,16 @@
 """
-auth_registration_service.py — Registration flow for #1844.
+auth_registration_service.py — Registration flow for #1844, revised for #3804.
 
 Extracted from routes/auth.py. Handles:
-- Student self-registration blocking
 - Password strength enforcement
 - User creation with email verification token
-- Teacher school auto-creation/join and role assignment
-- Domain restriction enforcement
+- Default-student role grant on registration/SSO (#3804)
+- Self-serve "activate teacher" role grant by explicit school name (#3804)
+
+#3804 (Young 2026-11-01): registration no longer branches on role="teacher".
+Every new account defaults to `student`. Anyone can self-activate as a
+teacher afterwards by naming the school(s) they teach at — no more guessing
+a school from the registrant's email domain.
 
 The router in routes/auth.py calls these functions and handles
 HTTP request/response details.
@@ -16,6 +20,7 @@ import logging
 import secrets
 
 from fastapi import HTTPException, status
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from ..auth.password import hash_password
@@ -24,7 +29,6 @@ from ..models.user import User, UserRole, Role
 from ..models.school import School
 from ..services.input_sanitizer import sanitize_ai_input
 from ..utils.password_validator import validate_password_strength
-from .email_domains import is_public_email_domain
 
 logger = logging.getLogger(__name__)
 
@@ -41,116 +45,133 @@ def enforce_password_strength(password: str) -> None:
         )
 
 
-def block_student_self_registration(role: str | None) -> None:
-    """Raise 403 if the requested role is 'student'.
+def grant_default_student_role(db: Session, user: User) -> None:
+    """Grant a platform-scoped `student` role to a freshly created account.
 
-    Students are created by teachers only (issue #457).
-    This check is case-insensitive to guard against bypasses.
+    (#3804) Every account — email/password register, Google SSO, Junyi SSO —
+    defaults to student. `scope_type="platform"` (scope_id=None) because at
+    this point the user has not joined any classroom/school yet; joining a
+    classroom later adds a school-scoped student role on top of this one
+    (see classrooms/helpers.py::ensure_school_student_role), the same way a
+    platform-scoped role and a school-scoped role for the same role name can
+    coexist without conflict (scope_type differs).
+
+    Idempotent: safe to call even if the role is already granted.
     """
-    if role is not None and role.lower() == "student":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="學生帳號由老師建立，請聯繫你的老師取得帳號。",
-        )
-
-
-def validate_teacher_email_domain(school: School, email_domain: str) -> None:
-    """Raise HTTP 403 if the school has domain restrictions and the teacher's
-    domain is not in the allowed list.
-
-    Issue #407: schools may configure `allowed_email_domains` to restrict
-    which email domains teachers can use to join. Schools with no configured
-    domains (None or empty list) accept any email domain.
-
-    Args:
-        school: The existing School record the teacher is trying to join.
-        email_domain: Lowercase domain extracted from the teacher's email.
-
-    Raises:
-        HTTPException 403: if the domain is not in the allowed list.
-    """
-    allowed: list[str] | None = school.allowed_email_domains
-    if not allowed:
+    student_role = db.query(Role).filter(Role.name == "student").first()
+    if student_role is None:
+        logger.warning("grant_default_student_role: no 'student' role seeded, skipping")
         return
 
-    allowed_lower = [d.lower() for d in allowed]
-    if email_domain not in allowed_lower:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail=(
-                f"您的 Email 網域（@{email_domain}）不在此學校的允許清單中。"
-                "請聯繫學校管理員確認您的 Email 網域是否正確，或改用學校核准的 Email 地址註冊。"
-            ),
+    existing = (
+        db.query(UserRole)
+        .filter(
+            UserRole.user_id == user.id,
+            UserRole.role_id == student_role.id,
+            UserRole.scope_type == "platform",
+            UserRole.is_active == True,  # noqa: E712
         )
+        .first()
+    )
+    if existing is not None:
+        return
+
+    db.add(
+        UserRole(
+            user_id=user.id,
+            role_id=student_role.id,
+            scope_type="platform",
+            scope_id=None,
+        )
+    )
 
 
-def assign_teacher_to_school(db: Session, user: User) -> None:
-    """Auto-create a school for the teacher's email domain, or join an existing one.
+def activate_teacher_for_schools(
+    db: Session, user: User, school_names: list[str]
+) -> list[tuple[School, bool]]:
+    """Self-serve teacher activation (#3804): grant `teacher` scoped to each
+    named school, creating the school if it doesn't already exist (matched by
+    exact name, case-insensitive).
 
-    Per 方大哥's spec: if this is the first teacher from a school domain,
-    the system auto-creates the school and makes the teacher the admin.
-    Subsequent teachers with the same domain are added to the existing school.
+    Replaces the retired `assign_teacher_to_school` (which guessed a school
+    from the registrant's email domain — Young 2026-11-01: "不再看 Email 網域
+    猜學校"). The user now explicitly names every school they teach at, and
+    can call this endpoint again later to add more schools. Idempotent per
+    school: calling it twice with the same name does not duplicate the role
+    or the school.
 
-    Issue #407: if the existing school has `allowed_email_domains` configured,
-    the teacher's email domain must match; otherwise registration is rejected.
+    Args:
+        school_names: non-empty, already-trimmed school names (validation of
+            emptiness/length happens at the route/schema layer).
+
+    Returns:
+        A list of (School, is_new) in input order — is_new is True when this
+        call created the school (so the caller/frontend can say "建立新學校"
+        vs "加入既有學校", per PRD §10.2).
     """
-    domain = user.email.split("@")[-1].lower()
-
-    # A public mail domain is not a school (#3541): grouping every gmail teacher into
-    # one school let strangers see and enrol each other's students. Each gets their own.
-    if is_public_email_domain(domain):
-        school = School(name=f"{user.name or domain} 的學校", domain=None, admin_user_id=user.id)
-        db.add(school)
-        db.flush()
-    else:
-        school = db.query(School).filter(School.domain == domain).first()
-
-    if school is None:
-        school = School(
-            name=f"{domain} 學校",
-            domain=domain,
-            admin_user_id=user.id,
-        )
-        db.add(school)
-        db.flush()
-    elif school.domain is not None:
-        validate_teacher_email_domain(school, domain)
-
     teacher_role = db.query(Role).filter(Role.name == "teacher").first()
-    if teacher_role is not None:
-        existing_role = (
-            db.query(UserRole)
-            .filter(
-                UserRole.user_id == user.id,
-                UserRole.role_id == teacher_role.id,
-                UserRole.scope_type == "school",
-                UserRole.scope_id == str(school.id),
-            )
+    schools: list[tuple[School, bool]] = []
+
+    for raw_name in school_names:
+        name = raw_name.strip()
+        safe_name, _ = sanitize_ai_input(name, user_id=user.email) if name else (name, False)
+
+        school = (
+            db.query(School)
+            .filter(func.lower(School.name) == safe_name.lower())
             .first()
         )
-        if existing_role is None:
-            user_role = UserRole(
-                user_id=user.id,
-                role_id=teacher_role.id,
-                scope_type="school",
-                scope_id=str(school.id),
+        is_new = school is None
+        if school is None:
+            school = School(name=safe_name, domain=None, admin_user_id=user.id)
+            db.add(school)
+            db.flush()
+
+        schools.append((school, is_new))
+
+        if teacher_role is not None:
+            existing_role = (
+                db.query(UserRole)
+                .filter(
+                    UserRole.user_id == user.id,
+                    UserRole.role_id == teacher_role.id,
+                    UserRole.scope_type == "school",
+                    UserRole.scope_id == str(school.id),
+                )
+                .first()
             )
-            db.add(user_role)
+            if existing_role is None:
+                db.add(
+                    UserRole(
+                        user_id=user.id,
+                        role_id=teacher_role.id,
+                        scope_type="school",
+                        scope_id=str(school.id),
+                    )
+                )
+            elif not existing_role.is_active:
+                existing_role.is_active = True
+
+    return schools
 
 
-def create_teacher_user(
+def create_user_account(
     db: Session,
     email: str,
     password: str,
     name: str | None,
 ) -> tuple[User, str | None]:
-    """Create a new teacher user record and return (user, verification_token).
+    """Create a new user account and return (user, verification_token).
+
+    (#3804) Renamed from create_teacher_user — this function has never been
+    teacher-specific, it just creates a bare account; the caller decides what
+    role to grant (grant_default_student_role as of #3804).
 
     Handles:
     - Name sanitization (AI injection prevention)
     - Password hashing
     - Email verification token generation (controlled by REQUIRE_EMAIL_VERIFICATION flag)
-    - DB flush (without commit — caller commits after assigning school)
+    - DB flush (without commit — caller commits after assigning the default role)
 
     Returns:
         (user, verification_token) where verification_token is None when

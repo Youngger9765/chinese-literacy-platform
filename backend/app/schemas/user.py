@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 class UserRoleResponse(BaseModel):
@@ -44,6 +44,37 @@ class UserResponse(BaseModel):
     def compute_terms_accepted(self) -> "UserResponse":
         self.terms_accepted = self.terms_accepted_at is not None
         return self
+
+
+class ActivateTeacherRequest(BaseModel):
+    """#3804 self-serve "activate teacher" — the user names their own school(s).
+
+    No domain guessing, no approval. See PRD
+    docs/prd/2026-11-01-school-as-teacher-attribute-prd.md §10/§11.
+    """
+
+    school_names: list[str] = Field(..., min_length=1, max_length=10)
+
+    @field_validator("school_names")
+    @classmethod
+    def _names_must_be_nonblank(cls, v: list[str]) -> list[str]:
+        cleaned = [name.strip() for name in v]
+        if any(not name for name in cleaned):
+            raise ValueError("學校名稱不可空白")
+        return cleaned
+
+
+class SchoolActivationBrief(BaseModel):
+    id: int
+    name: str
+    is_new: bool
+
+    model_config = {"from_attributes": True}
+
+
+class ActivateTeacherResponse(BaseModel):
+    schools: list[SchoolActivationBrief]
+    roles: list[UserRoleResponse]
 
 
 class StudentProfileResponse(BaseModel):
