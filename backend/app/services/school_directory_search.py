@@ -19,13 +19,19 @@ from __future__ import annotations
 import difflib
 import re
 import unicodedata
+from functools import lru_cache
 
+from pypinyin import Style, pinyin
 from sqlalchemy.orm import Session
 
 from ..models.school import School
 
 FUZZY_MATCH_THRESHOLD = 0.6
 MAX_RESULTS = 20
+# Modest, bounded bonus (not a second full-weight score) -- see
+# _phonetic_tiebreak_bonus for why this exists and what it deliberately
+# does NOT claim to solve.
+_PHONETIC_BONUS_WEIGHT = 0.15
 
 _TRAD_TO_SIMP_VARIANT = {"臺": "台"}
 
@@ -65,6 +71,60 @@ def normalize_school_name(raw: str | None) -> str:
     return s
 
 
+@lru_cache(maxsize=4096)
+def _char_reading(ch: str) -> str:
+    """Tone-insensitive pinyin reading of a single Han character, cached
+    (single-character lookups repeat heavily across thousands of
+    candidates that all share common characters like 國/小/市/立)."""
+    try:
+        return pinyin(ch, style=Style.NORMAL)[0][0]
+    except Exception:
+        return ""
+
+
+def _phonetic_tiebreak_bonus(norm_query: str, norm_name: str) -> float:
+    """Small bonus when same-length strings differ only in characters that
+    share the same base pinyin reading (#3812).
+
+    Why this exists: difflib.SequenceMatcher.ratio() scores EVERY
+    single-character substitution at the same position identically,
+    regardless of which character it is. Querying "大按國小" (a typo for
+    大安國小, an4) against a directory containing a dozen real "大X國小"
+    schools (大同 tong2, 大埔 pu3, 大成 cheng2, ...) gives every single one
+    the exact same 0.75 ratio — verified empirically, not assumed. A stable
+    sort over that tie then falls back to whatever order the DB happened to
+    return candidates in, which (because the source CSVs are grouped by
+    county) looks exactly like "sorted by county" even though county is
+    never actually a sort key anywhere in this module.
+
+    This does NOT attempt to solve typo-correction linguistics in general
+    (that needs a real phonetic/keyboard-adjacency model this project
+    deliberately doesn't carry — pypinyin is already a dependency for the
+    LLM "did you mean" suggestion path, PRD §4.2, so using its tone-
+    insensitive reading here is not a new dependency). It only breaks ties
+    among otherwise-identical character-overlap scores: 按 (an4) and 安
+    (an1) share the same base reading "an" — the single most common typo
+    pattern for Han characters entered via pinyin/zhuyin IME (wrong tone,
+    right sound) — while 同/埔/成/... share no reading with 按 at all, so
+    they get no bonus and the tie is broken correctly.
+    """
+    if not norm_query or not norm_name or len(norm_query) != len(norm_name):
+        return 0.0
+
+    mismatched_positions = 0
+    phonetic_matches = 0
+    for q_char, n_char in zip(norm_query, norm_name):
+        if q_char == n_char:
+            continue
+        mismatched_positions += 1
+        if _char_reading(q_char) and _char_reading(q_char) == _char_reading(n_char):
+            phonetic_matches += 1
+
+    if mismatched_positions == 0:
+        return 0.0  # identical strings — nothing to break a tie on
+    return _PHONETIC_BONUS_WEIGHT * (phonetic_matches / mismatched_positions)
+
+
 def similarity_score(norm_query: str, norm_name: str) -> float:
     """Character-level fuzzy match score in [0, 1].
 
@@ -77,6 +137,10 @@ def similarity_score(norm_query: str, norm_name: str) -> float:
     "大安" for "大安國小") has a legitimately low raw ratio (0.67) that we
     still want to treat as a strong match — it's not noise, it's a
     strict substring relationship.
+
+    A small phonetic tiebreak bonus (#3812, see _phonetic_tiebreak_bonus) is
+    added on top — it only differentiates candidates that would otherwise
+    tie exactly, never overrides a genuinely better character-overlap match.
     """
     if not norm_query or not norm_name:
         return 0.0
@@ -84,7 +148,8 @@ def similarity_score(norm_query: str, norm_name: str) -> float:
     ratio = difflib.SequenceMatcher(None, norm_query, norm_name).ratio()
     if norm_query in norm_name or norm_name in norm_query:
         ratio = max(ratio, 0.85)
-    return ratio
+    ratio += _phonetic_tiebreak_bonus(norm_query, norm_name)
+    return min(ratio, 1.0)
 
 
 def search_school_directory(

@@ -42,6 +42,7 @@ from app.main import app
 from app.models import Base
 from app.models.school import Classroom, ClassroomStudent, School
 from app.models.user import Role, User, UserRole
+from app.schemas.user import ActivateTeacherSchoolInput
 from app.services.auth_registration_service import activate_teacher_for_schools
 
 engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
@@ -64,7 +65,7 @@ def _teacher(db, email, school_name, name="t"):
     u = User(email=email, name=name, password_hash="x", is_active=True)
     db.add(u)
     db.flush()
-    activate_teacher_for_schools(db, u, [school_name])
+    activate_teacher_for_schools(db, u, [ActivateTeacherSchoolInput(name=school_name)])
     db.commit()
     role = db.query(UserRole).join(Role).filter(UserRole.user_id == u.id, Role.name == "teacher").one()
     return u, int(role.scope_id)
