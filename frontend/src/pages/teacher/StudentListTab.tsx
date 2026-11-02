@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { BatchCreateResult, ClassroomDetailResponse, ClassroomResponse, StudentInClassroomResponse } from '../../services/classroomApi';
 import CsvUploadModal from './CsvUploadModal';
 import AddStudentsPanel from './panel/AddStudentsPanel';
-import { listMyClassrooms, moveStudent, resetStudentPassword } from '../../services/classroomApi';
+import { batchRemoveStudents, listMyClassrooms, moveStudent, resetStudentPassword } from '../../services/classroomApi';
 import {
   generateParentInviteCode,
   listStudentParentLinks,
@@ -317,6 +317,46 @@ const MoveStudentButton: React.FC<{
   );
 };
 
+// ── Batch-remove action bar (#3821) ──────────────────────────────────────────
+//
+// Fixed bar at the bottom of the screen that only appears once at least one
+// student is checked -- a confirm dialog states the count (AC2: the teacher
+// must see "N 位學生" before anything is sent), and only removes the ones
+// selected from THIS classroom. It never touches the account itself.
+const BatchActionBar: React.FC<{
+  selectedCount: number;
+  isRemoving: boolean;
+  onCancel: () => void;
+  onBatchRemove: () => void;
+}> = ({ selectedCount, isRemoving, onCancel, onBatchRemove }) => {
+  if (selectedCount === 0) return null;
+  return (
+    <div className="fixed bottom-0 left-0 right-0 z-30 bg-gray-900 text-white px-6 py-3 flex items-center justify-between shadow-lg">
+      <div className="text-sm">
+        已選取 <span className="font-semibold">{selectedCount}</span> 位學生
+      </div>
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={onCancel}
+          disabled={isRemoving}
+          className="text-sm px-3 py-1.5 rounded-md border border-gray-600 hover:bg-gray-800 disabled:opacity-50 cursor-pointer"
+        >
+          取消
+        </button>
+        <button
+          type="button"
+          onClick={onBatchRemove}
+          disabled={isRemoving}
+          className="text-sm px-3 py-1.5 rounded-md bg-red-600 hover:bg-red-700 disabled:opacity-50 cursor-pointer font-medium"
+        >
+          {isRemoving ? '移除中…' : '移除學生'}
+        </button>
+      </div>
+    </div>
+  );
+};
+
 // Students created by the teacher get a synthetic e-mail; the part before "@"
 // is the login name printed on the credential card, so show that, not the e-mail.
 const accountName = (email: string) =>
@@ -366,6 +406,49 @@ const StudentListTab: React.FC<StudentListTabProps> = ({
   // Parent portal is off unless VITE_PARENT_PORTAL_ENABLED=true; a code a parent
   // cannot enter anywhere is a dead end, so the teacher half follows the flag.
   const showParentInvite = featureFlags.PARENT_PORTAL_ENABLED;
+
+  // ── Batch-remove selection state (#3821) ──────────────────────────────────
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [isBatchRemoving, setIsBatchRemoving] = useState(false);
+  const [batchRemoveError, setBatchRemoveError] = useState('');
+
+  const toggleSelected = (studentId: number) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(studentId)) next.delete(studentId);
+      else next.add(studentId);
+      return next;
+    });
+  };
+
+  const clearSelection = () => {
+    setSelectedIds(new Set());
+    setBatchRemoveError('');
+  };
+
+  // If the parent reuses this component instance across a classroom switch
+  // (no remount), stale checked ids from the PREVIOUS classroom must not
+  // silently carry over into a batch-remove call against the new one.
+  useEffect(() => {
+    clearSelection();
+  }, [classroom.id]);
+
+  const handleBatchRemove = async () => {
+    const count = selectedIds.size;
+    if (count === 0) return;
+    if (!window.confirm(`確定要移除 ${count} 位學生嗎？`)) return;
+    setIsBatchRemoving(true);
+    setBatchRemoveError('');
+    try {
+      await batchRemoveStudents(token, classroom.id, Array.from(selectedIds));
+      clearSelection();
+      onStudentsImported();
+    } catch (err: unknown) {
+      setBatchRemoveError(err instanceof Error ? err.message : '批次移除失敗，請再試一次');
+    } finally {
+      setIsBatchRemoving(false);
+    }
+  };
 
   return (
     <>
@@ -472,6 +555,16 @@ const StudentListTab: React.FC<StudentListTabProps> = ({
         <table className="w-full text-left">
           <thead className="hidden lg:table-header-group bg-gray-50 text-sm text-gray-600">
             <tr>
+              <th scope="col" className="px-4 py-3 font-medium w-10 text-center whitespace-nowrap">
+                <input
+                  type="checkbox"
+                  aria-label="全選"
+                  checked={selectedIds.size > 0 && selectedIds.size === classroom.students.length}
+                  onChange={(e) =>
+                    setSelectedIds(e.target.checked ? new Set(classroom.students.map((s) => s.id)) : new Set())
+                  }
+                />
+              </th>
               <th scope="col" className="px-4 py-3 font-medium w-16 text-center whitespace-nowrap">座號</th>
               <th scope="col" className="px-4 py-3 font-medium whitespace-nowrap">學生姓名</th>
               <th scope="col" className="px-4 py-3 font-medium whitespace-nowrap">帳號</th>
@@ -487,6 +580,14 @@ const StudentListTab: React.FC<StudentListTabProps> = ({
               // #3424 kept: labels never break mid-word (whitespace-nowrap); on phones
               // each row stacks into a card instead of a squeezed table row.
               <tr key={s.id} className="flex flex-wrap items-center gap-x-3 gap-y-1.5 px-4 py-3 lg:table-row lg:p-0">
+                <td className="lg:px-4 lg:py-3 text-center">
+                  <input
+                    type="checkbox"
+                    aria-label={`選取 ${s.name}`}
+                    checked={selectedIds.has(s.id)}
+                    onChange={() => toggleSelected(s.id)}
+                  />
+                </td>
                 <td className="hidden lg:table-cell px-4 py-3 text-center text-gray-500">{i + 1}</td>
                 <td className="lg:px-4 lg:py-3 min-w-0 basis-full lg:basis-auto">
                   <p className="text-base font-medium text-gray-900">{s.name}</p>
@@ -543,6 +644,15 @@ const StudentListTab: React.FC<StudentListTabProps> = ({
           </tbody>
         </table>
       )}
+      {batchRemoveError && (
+        <p className="text-red-600 text-sm px-4 py-2">{batchRemoveError}</p>
+      )}
+      <BatchActionBar
+        selectedCount={selectedIds.size}
+        isRemoving={isBatchRemoving}
+        onCancel={clearSelection}
+        onBatchRemove={handleBatchRemove}
+      />
     </>
   );
 };
