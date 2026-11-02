@@ -85,7 +85,8 @@ export function getStudentNavItems(pendingAssignmentCount = 0): NavItem[] {
       icon: '🏫',
       label: '開通老師身分',
       path: '/activate-teacher',
-      description: '填寫任教學校，立即成為老師',
+      // main has no NavItem.description (added on staging by the game-area
+      // work), so the sidebar subtitle ships with that later release.
     },
     { icon: '📖', label: '學習紀錄', path: '/learning-history' },
     // /help had no entry anywhere in the UI until #3142.

@@ -81,6 +81,23 @@ def setup_db():
     Base.metadata.drop_all(bind=engine)
 
 
+@pytest.fixture(scope="class", autouse=True)
+def _reassert_db_override_per_class():
+    # Other modules' fixtures also write app.dependency_overrides[get_db]; when
+    # test ordering interleaves them (seen on the main-branch CI run: "no such
+    # table: users"), our class-scoped setup fixtures would talk to someone
+    # else's empty engine. Autouse runs before same-scope non-autouse
+    # fixtures, so re-pin our override at the start of every class.
+    app.dependency_overrides[get_db] = _override_get_db
+    yield
+
+
+@pytest.fixture(autouse=True)
+def _reassert_db_override_per_test():
+    app.dependency_overrides[get_db] = _override_get_db
+    yield
+
+
 @pytest.fixture(scope="module")
 def client():
     with TestClient(app) as c:
