@@ -348,6 +348,40 @@ def test_creator_teacher_resets_batch_created_student_200_and_new_password_works
     assert old_login_resp.status_code in (401, 403)
 
 
+def test_creator_whose_teacher_role_was_deactivated_cannot_reset_403(client):
+    """Security-review follow-up (#3818): the creator gate alone
+    (created_by_teacher_id == current_user.id) is not sufficient --
+    require_classroom_member only checks classroom.teacher_id /
+    ClassroomTeacher membership, which does NOT verify the caller's
+    teacher role is still active. A teacher whose role was deactivated
+    (e.g. account disabled by an admin, or they left the school) but who
+    is still classroom.teacher_id must still be denied, even for a
+    student they themselves created."""
+    teacher = _register_user(client, "resetpw_deactivated_creator")
+    school_id = _create_school_for_teacher(teacher["user_id"])
+    classroom_id = _create_classroom(client, teacher, school_id)
+    student = _batch_create_student(client, teacher, classroom_id, name="Deactivated Creator Target")
+
+    _deactivate_teacher_roles(teacher["user_id"])
+
+    resp = _reset_password(client, teacher, classroom_id, student["user_id"])
+    assert resp.status_code == 403, resp.text
+
+
+def test_creator_with_active_teacher_role_can_reset_200(client):
+    """Positive control for the test above: the same creator, with their
+    teacher role still active, can reset the password they're entitled to
+    reset. Proves the restored school-teacher-role check doesn't also
+    block the legitimate case."""
+    teacher = _register_user(client, "resetpw_active_creator")
+    school_id = _create_school_for_teacher(teacher["user_id"])
+    classroom_id = _create_classroom(client, teacher, school_id)
+    student = _batch_create_student(client, teacher, classroom_id, name="Active Creator Target")
+
+    resp = _reset_password(client, teacher, classroom_id, student["user_id"])
+    assert resp.status_code == 200, resp.text
+
+
 def test_other_teacher_cannot_reset_password_403(client):
     owner = _register_user(client, "resetpw_owner2")
     other = _register_user(client, "resetpw_other_teacher")

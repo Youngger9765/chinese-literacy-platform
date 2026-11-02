@@ -68,14 +68,24 @@ API 只看這個關聯（不看班級關係），轉移用 `update_bond`，每�
 | 自我註冊（Email／Google／均一 SSO 首次登入） | ❌ 永遠是 `NULL` |
 | 系統管理員角色指派（`/roles/assignments`） | ❌ 不動 |
 
-### 權限收斂
+### 權限收斂（兩道獨立檢查，缺一不可 — 2026-11-02 安全複審後修正）
 
-`reset_student_password` 原本的「呼叫者必須在這個學校持有 active 的
-`teacher` 角色」檢查，改成「呼叫者必須是 `user.created_by_teacher_id`
-本人，或是 system_admin」。原本允許協同老師重設的行為**刻意取消**：均一的
-模型裡密碼教師是唯一的，協同老師不算。其餘既有的防呆檢查（目標帳號必須是
-這個班、這個學校的學生，不能是老師／管理員帳號，必須已加入班級等）全部保留
-不變，這次只收斂「誰可以按下重設鍵」這一層。
+`reset_student_password` 最初版本把「呼叫者必須在這個學校持有 active 的
+`teacher` 角色」整條拿掉，只留「呼叫者必須是 `user.created_by_teacher_id`
+本人」。安全複審標出中風險：`require_classroom_member` 只查
+`classroom.teacher_id` / `ClassroomTeacher` 是否有這個人，**不驗證那個人
+現在是不是還持有有效的 `teacher` 角色** —— 老師的身分被管理員停用、或已
+離開那間學校之後，只要當初是他建的帳號，原始版本仍然會放行。
+
+修正後兩道檢查都要過（system_admin 例外）：
+1. **原本就有的檢查保留**：呼叫者必須在這個班級的學校持有 active 的
+   `teacher` 角色。
+2. **本次新增**：呼叫者必須是 `user.created_by_teacher_id` 本人。
+
+原本允許協同老師重設的行為仍然**刻意取消**：均一的模型裡密碼教師是唯一的，
+協同老師不算——即使協同老師的 teacher 角色是 active 的，只要他不是
+`created_by_teacher_id`，一樣擋。其餘既有的防呆檢查（目標帳號必須是這個班、
+這個學校的學生，不能是老師／管理員帳號，必須已加入班級等）全部保留不變。
 
 ## 驗收條件（Given / When / Then）
 

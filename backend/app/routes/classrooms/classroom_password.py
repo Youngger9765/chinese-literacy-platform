@@ -51,16 +51,41 @@ def reset_student_password(
     if user is None:
         raise HTTPException(status_code=404, detail="Student not found")
 
-    # (#3818) "Password teacher" gate: holding a teacher role at this
-    # classroom's school (checked above via require_classroom_member) is
-    # membership, not authority to reset a password. Only the teacher who
-    # actually created THIS account (batch-create / CSV upload / Junyi class
-    # import) may reset it -- not any co-teacher who also teaches the
-    # classroom. Accounts nobody is recorded as having created
-    # (created_by_teacher_id is NULL: self-registration via email/Google/
-    # Junyi SSO, or legacy data) can never be reset by a teacher; fail
-    # closed, the student uses forgot-password instead.
+    # (#3818) Two independent gates, both required (defense in depth) unless
+    # the caller is system_admin:
+    #
+    # 1. Caller must CURRENTLY hold an active `teacher` role at this
+    #    classroom's school. require_classroom_member above only checked
+    #    classroom.teacher_id / ClassroomTeacher membership, which does NOT
+    #    verify the role is still active -- a teacher whose account was
+    #    deactivated (role revoked) but who is still classroom.teacher_id
+    #    would otherwise still pass. This is the pre-#3818 check, restored
+    #    after a security review flagged its removal as a regression.
+    # 2. Caller must be the student's recorded password teacher -- the
+    #    teacher who actually created THIS account (batch-create / CSV
+    #    upload / Junyi class import), not any co-teacher who merely also
+    #    teaches the classroom. Accounts nobody is recorded as having
+    #    created (created_by_teacher_id is NULL: self-registration via
+    #    email/Google/Junyi SSO, or legacy data) can never be reset by a
+    #    teacher; fail closed, the student uses forgot-password instead.
     if not is_system_admin(current_user.id, db):
+        caller_has_school_teacher_role = (
+            db.query(UserRole)
+            .join(Role)
+            .filter(
+                UserRole.user_id == current_user.id,
+                UserRole.is_active.is_(True),
+                Role.name == "teacher",
+                UserRole.scope_type == "school",
+                UserRole.scope_id == str(classroom.school_id),
+            )
+            .first()
+        )
+        if caller_has_school_teacher_role is None:
+            raise HTTPException(
+                status_code=403,
+                detail="Caller does not hold teacher authority at this classroom's school",
+            )
         if user.created_by_teacher_id != current_user.id:
             raise HTTPException(
                 status_code=403,
