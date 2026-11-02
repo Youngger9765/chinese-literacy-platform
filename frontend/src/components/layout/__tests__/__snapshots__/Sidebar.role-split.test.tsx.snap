@@ -298,18 +298,9 @@ exports[`StudentSidebar — role=student nav items > snapshot — collapsed=fals
       🏫
     </span>
     <span
-      class="flex flex-col items-start min-w-0 text-left"
+      class="text-sm truncate"
     >
-      <span
-        class="text-sm truncate"
-      >
-        開通老師身分
-      </span>
-      <span
-        class="text-[11px] font-normal text-gray-400 truncate w-full"
-      >
-        填寫任教學校，立即成為老師
-      </span>
+      開通老師身分
     </span>
   </button>
   <button

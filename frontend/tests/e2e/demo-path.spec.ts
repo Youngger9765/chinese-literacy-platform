@@ -55,9 +55,16 @@ test.describe('5/1 Demo path on staging', () => {
     });
     expect(loginRes.ok()).toBeTruthy();
     const { access_token } = await loginRes.json();
+    // #3750 — fixed prefix, NOT Date.now(). seed_demo_students is idempotent
+    // per email, so a unique prefix every run bought this smoke test nothing
+    // except a brand-new permanent enrollment in the shared staging
+    // classroom (classroom_id: 1). Repeated runs of this spec (and
+    // full-qa.spec.ts, same pattern) over ~4.5 months grew that classroom's
+    // roster to 1,928 — see issue #3750 for the chain to the
+    // "全班 1,698 人已參與" bug that caused.
     const seedRes = await request.post(`${BACKEND}/api/admin/seed/demo-students`, {
       headers: { Authorization: `Bearer ${access_token}` },
-      data: { classroom_id: 1, count: 1, prefix: 'e2e' + Date.now().toString().slice(-6) }
+      data: { classroom_id: 1, count: 1, prefix: 'e2e-demopath-smoke' }
     });
     expect(seedRes.ok()).toBeTruthy();
     const body = await seedRes.json();

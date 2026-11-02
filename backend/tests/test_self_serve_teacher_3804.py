@@ -81,20 +81,28 @@ def setup_db():
     Base.metadata.drop_all(bind=engine)
 
 
-@pytest.fixture(scope="class", autouse=True)
-def _reassert_db_override_per_class():
-    # Other modules' fixtures also write app.dependency_overrides[get_db]; when
-    # test ordering interleaves them (seen on the main-branch CI run: "no such
-    # table: users"), our class-scoped setup fixtures would talk to someone
-    # else's empty engine. Autouse runs before same-scope non-autouse
-    # fixtures, so re-pin our override at the start of every class.
+def _pin_only_our_overrides():
+    # Other modules leave entries in app.dependency_overrides (get_db and
+    # auth dependencies). On main's CI ordering that made these tests talk to
+    # an empty engine ("no such table: users") and, after re-pinning get_db
+    # alone, to a leaked auth override (two "different" teachers resolved to
+    # the same user, so cross-teacher checks passed wrongly). This module
+    # tests real auth end to end, so it must run with only its own override.
+    app.dependency_overrides.clear()
     app.dependency_overrides[get_db] = _override_get_db
+
+
+@pytest.fixture(scope="class", autouse=True)
+def _pin_overrides_per_class():
+    # Autouse runs before same-scope non-autouse fixtures (the class-scoped
+    # `actors` setups), so they see the right DB and real auth.
+    _pin_only_our_overrides()
     yield
 
 
 @pytest.fixture(autouse=True)
-def _reassert_db_override_per_test():
-    app.dependency_overrides[get_db] = _override_get_db
+def _pin_overrides_per_test():
+    _pin_only_our_overrides()
     yield
 
 
