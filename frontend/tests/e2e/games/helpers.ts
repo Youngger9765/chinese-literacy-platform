@@ -103,13 +103,31 @@ export interface QaTeacher {
 
 /** Register a brand-new teacher via the app's own self-registration
  * endpoint (POST /api/auth/register) — exactly what a real teacher
- * signing up would call. */
+ * signing up would call — then self-activate as a teacher (#3804/#3812).
+ *
+ * The `role: 'teacher'` hint on /register is a no-op since #3804/#3806
+ * (2026-11-01): every account defaults to student, and teacher status is
+ * granted separately via POST /users/me/activate-teacher. This helper
+ * predates that redesign and was never updated — it silently stopped
+ * producing any school-scoped role the moment #3806 deployed to staging,
+ * which the `frontend/**` path filter on this very workflow then hid from
+ * every backend-only PR (#3808/#3809/#3810/#3811) in between, since none
+ * of them re-triggered Playwright. Found via the exact "teacher ... has no
+ * school scope" failure this helper's own caller (createClassroomForTeacher,
+ * below) throws — 24 occurrences across this suite's specs. `school_names`
+ * here (not `schools`/`moe_school_code`) is deliberate: this is the manual
+ * "not in the directory" path, which both the pre- and post-#3812 backend
+ * accept, so this helper keeps working regardless of which schema version
+ * is live on staging at the moment it runs. */
 export async function registerTeacher(request: APIRequestContext, label: string): Promise<QaTeacher> {
   const tag = uniqueTag();
   const email = `qa-${label}-${tag}@${QA_DOMAIN}`;
   const password = randomPassword();
   await apiPost(request, '/api/auth/register', null, { email, password, name: `QA ${label} 老師`, role: 'teacher' });
   const token = await apiLogin(request, email, password);
+  await apiPost(request, '/api/users/me/activate-teacher', token, {
+    school_names: [`QA 自動化學校_${tag}`],
+  });
   const me = await apiGet(request, '/api/users/me', token);
   return { email, password, token, userId: me.id as number };
 }

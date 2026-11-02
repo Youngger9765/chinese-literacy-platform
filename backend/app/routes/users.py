@@ -14,6 +14,7 @@ from ..models.user import User, UserRole, Role
 from ..schemas.user import (
     ActivateTeacherRequest,
     ActivateTeacherResponse,
+    ActivateTeacherSchoolInput,
     SchoolActivationBrief,
     UserResponse,
     UserRoleResponse,
@@ -197,7 +198,14 @@ def activate_teacher(
     Idempotent: naming a school the caller is already a teacher of again is a
     no-op for that school (still returns it, with is_new=False).
     """
-    schools_with_flag = activate_teacher_for_schools(db, current_user, payload.school_names)
+    # #3812: merge the two request shapes into one list before resolving —
+    # a bare `school_names` entry is equivalent to {"name": ...} (the
+    # manual/legacy path), never a directory code. See schemas/user.py
+    # ActivateTeacherRequest docstring for why both fields exist.
+    schools_input = list(payload.schools) + [
+        ActivateTeacherSchoolInput(name=name) for name in payload.school_names
+    ]
+    schools_with_flag = activate_teacher_for_schools(db, current_user, schools_input)
     db.commit()
 
     user_roles = (

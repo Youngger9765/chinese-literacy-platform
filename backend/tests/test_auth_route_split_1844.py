@@ -195,7 +195,7 @@ class TestRegistration:
             token = login.json()["access_token"]
             resp = client.post(
                 "/api/users/me/activate-teacher",
-                json={"school_names": [school_name]},
+                json={"schools": [{"name": n} for n in ([school_name])]},
                 headers={"Authorization": f"Bearer {token}"},
             )
             assert resp.status_code == 200, resp.text
