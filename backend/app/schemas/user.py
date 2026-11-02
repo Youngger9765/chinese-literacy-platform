@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, model_validator
 
 
 class UserRoleResponse(BaseModel):
@@ -46,22 +46,47 @@ class UserResponse(BaseModel):
         return self
 
 
-class ActivateTeacherRequest(BaseModel):
-    """#3804 self-serve "activate teacher" — the user names their own school(s).
+class ActivateTeacherSchoolInput(BaseModel):
+    """One school selection in an activate-teacher request (#3812).
 
-    No domain guessing, no approval. See PRD
-    docs/prd/2026-11-01-school-as-teacher-attribute-prd.md §10/§11.
+    Exactly one of the two must be set:
+    - moe_school_code: the caller picked a result from the directory search
+      (GET /api/schools/directory/search) — binds directly to that School
+      row by its unique MOE code, no name matching at all. This is the
+      primary path once the directory exists: name matching is how a single
+      typo splits one real school into two rows.
+    - name: the "找不到我的學校" manual fallback, for a school genuinely not
+      in the MOE directory. Same match-by-exact-name-or-create behavior as
+      before #3812, except a newly-created school from this path is flagged
+      pending_review (see activate_teacher_for_schools) since it was never
+      cross-checked against the official directory.
     """
 
-    school_names: list[str] = Field(..., min_length=1, max_length=10)
+    moe_school_code: str | None = Field(None, min_length=1, max_length=20)
+    name: str | None = Field(None, max_length=200)
 
-    @field_validator("school_names")
-    @classmethod
-    def _names_must_be_nonblank(cls, v: list[str]) -> list[str]:
-        cleaned = [name.strip() for name in v]
-        if any(not name for name in cleaned):
-            raise ValueError("學校名稱不可空白")
-        return cleaned
+    @model_validator(mode="after")
+    def _exactly_one_of_code_or_name(self) -> "ActivateTeacherSchoolInput":
+        has_code = bool(self.moe_school_code and self.moe_school_code.strip())
+        has_name = bool(self.name and self.name.strip())
+        if has_code == has_name:  # both set, or neither set
+            raise ValueError("每個學校欄位需要恰好提供 moe_school_code 或 name 其中一個")
+        if self.name:
+            self.name = self.name.strip()
+        if self.moe_school_code:
+            self.moe_school_code = self.moe_school_code.strip()
+        return self
+
+
+class ActivateTeacherRequest(BaseModel):
+    """#3804 self-serve "activate teacher" — the user names (or picks from
+    the directory) their own school(s).
+
+    No approval. See PRD docs/prd/2026-11-01-school-as-teacher-attribute-prd.md
+    §10/§11 (original design) and §4.4 (directory-code binding, #3812).
+    """
+
+    schools: list[ActivateTeacherSchoolInput] = Field(..., min_length=1, max_length=10)
 
 
 class SchoolActivationBrief(BaseModel):

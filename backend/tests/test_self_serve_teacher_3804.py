@@ -303,14 +303,14 @@ class TestSsoDefaultsToStudent:
 
 class TestActivateTeacherEndpoint:
     def test_requires_auth(self, client):
-        resp = client.post("/api/users/me/activate-teacher", json={"school_names": ["某國小"]})
+        resp = client.post("/api/users/me/activate-teacher", json={"schools": [{"name": n} for n in (["某國小"])]})
         assert resp.status_code == 401
 
     def test_empty_list_is_422(self, client):
         _, token = _register_login(client, "act_empty")
         resp = client.post(
             "/api/users/me/activate-teacher",
-            json={"school_names": []},
+            json={"schools": [{"name": n} for n in ([])]},
             headers=auth_header(token),
         )
         assert resp.status_code == 422
@@ -319,7 +319,7 @@ class TestActivateTeacherEndpoint:
         _, token = _register_login(client, "act_blank")
         resp = client.post(
             "/api/users/me/activate-teacher",
-            json={"school_names": ["   "]},
+            json={"schools": [{"name": n} for n in (["   "])]},
             headers=auth_header(token),
         )
         assert resp.status_code == 422
@@ -328,7 +328,7 @@ class TestActivateTeacherEndpoint:
         _, token = _register_login(client, "act_toomany")
         resp = client.post(
             "/api/users/me/activate-teacher",
-            json={"school_names": [f"學校{i}" for i in range(11)]},
+            json={"schools": [{"name": n} for n in ([f"學校{i}" for i in range(11)])]},
             headers=auth_header(token),
         )
         assert resp.status_code == 422
@@ -338,7 +338,7 @@ class TestActivateTeacherEndpoint:
         school_name = f"大安國小_{uuid.uuid4().hex[:6]}"
         resp = client.post(
             "/api/users/me/activate-teacher",
-            json={"school_names": [school_name]},
+            json={"schools": [{"name": n} for n in ([school_name])]},
             headers=auth_header(token),
         )
         assert resp.status_code == 200, resp.text
@@ -361,14 +361,14 @@ class TestActivateTeacherEndpoint:
         school_name = f"重複國小_{uuid.uuid4().hex[:6]}"
         r1 = client.post(
             "/api/users/me/activate-teacher",
-            json={"school_names": [school_name]},
+            json={"schools": [{"name": n} for n in ([school_name])]},
             headers=auth_header(token),
         )
         school_id = r1.json()["schools"][0]["id"]
 
         r2 = client.post(
             "/api/users/me/activate-teacher",
-            json={"school_names": [school_name]},
+            json={"schools": [{"name": n} for n in ([school_name])]},
             headers=auth_header(token),
         )
         assert r2.status_code == 200
@@ -396,7 +396,7 @@ class TestActivateTeacherEndpoint:
         school_name = f"停權國小_{uuid.uuid4().hex[:6]}"
         r1 = client.post(
             "/api/users/me/activate-teacher",
-            json={"school_names": [school_name]},
+            json={"schools": [{"name": n} for n in ([school_name])]},
             headers=auth_header(token),
         )
         assert r1.status_code == 200, r1.text
@@ -423,7 +423,7 @@ class TestActivateTeacherEndpoint:
 
         resp = client.post(
             "/api/users/me/activate-teacher",
-            json={"school_names": [school_name]},
+            json={"schools": [{"name": n} for n in ([school_name])]},
             headers=auth_header(token),
         )
         assert resp.status_code == 403, resp.text
@@ -442,7 +442,7 @@ class TestActivateTeacherEndpoint:
         names = [f"學校A_{uuid.uuid4().hex[:5]}", f"學校B_{uuid.uuid4().hex[:5]}"]
         resp = client.post(
             "/api/users/me/activate-teacher",
-            json={"school_names": names},
+            json={"schools": [{"name": n} for n in (names)]},
             headers=auth_header(token),
         )
         assert resp.status_code == 200
@@ -456,12 +456,12 @@ class TestActivateTeacherEndpoint:
 
         r_a = client.post(
             "/api/users/me/activate-teacher",
-            json={"school_names": [base]},
+            json={"schools": [{"name": n} for n in ([base])]},
             headers=auth_header(token_a),
         )
         r_b = client.post(
             "/api/users/me/activate-teacher",
-            json={"school_names": [f"  {base.upper()}  "]},
+            json={"schools": [{"name": n} for n in ([f"  {base.upper()}  "])]},
             headers=auth_header(token_b),
         )
         assert r_a.json()["schools"][0]["id"] == r_b.json()["schools"][0]["id"], (
@@ -486,7 +486,7 @@ class TestSameSchoolDoesNotGrantClassroomVisibility:
         a_id, a_tok = _register_login(client, "sameschool_a")
         client.post(
             "/api/users/me/activate-teacher",
-            json={"school_names": [school_name]},
+            json={"schools": [{"name": n} for n in ([school_name])]},
             headers=auth_header(a_tok),
         )
         # school_id must come from /users/me after activation, not guessed.
@@ -502,7 +502,7 @@ class TestSameSchoolDoesNotGrantClassroomVisibility:
         b_id, b_tok = _register_login(client, "sameschool_b")
         act_b = client.post(
             "/api/users/me/activate-teacher",
-            json={"school_names": [school_name]},
+            json={"schools": [{"name": n} for n in ([school_name])]},
             headers=auth_header(b_tok),
         )
         assert act_b.json()["schools"][0]["id"] == int(school_id), (
@@ -596,7 +596,7 @@ class TestJoiningAnExistingSchoolDoesNotLeakItsRoster:
         a_id, a_tok = _register_login(client, "roster_a")
         act_a = client.post(
             "/api/users/me/activate-teacher",
-            json={"school_names": [school_name]},
+            json={"schools": [{"name": n} for n in ([school_name])]},
             headers=auth_header(a_tok),
         )
         school_id = act_a.json()["schools"][0]["id"]
@@ -610,7 +610,7 @@ class TestJoiningAnExistingSchoolDoesNotLeakItsRoster:
         b_id, b_tok = _register_login(client, "roster_b")
         act_b = client.post(
             "/api/users/me/activate-teacher",
-            json={"school_names": [school_name]},
+            json={"schools": [{"name": n} for n in ([school_name])]},
             headers=auth_header(b_tok),
         )
         assert act_b.json()["schools"][0]["id"] == school_id, (
@@ -725,7 +725,7 @@ class TestRealAdminCreatedSchoolRosterStillWorksForItsOwnTeachers:
         _, token = _register_login(client, "real_school_teacher")
         role = client.post(
             "/api/users/me/activate-teacher",
-            json={"school_names": [school.name]},
+            json={"schools": [{"name": n} for n in ([school.name])]},
             headers=auth_header(token),
         )
         assert role.status_code == 200, role.text
@@ -757,7 +757,7 @@ class TestCreatingANewSchoolGrantsNoAdminPrivilege:
         school_name = f"全新學校_{uuid.uuid4().hex[:6]}"
         act = client.post(
             "/api/users/me/activate-teacher",
-            json={"school_names": [school_name]},
+            json={"schools": [{"name": n} for n in ([school_name])]},
             headers=auth_header(token),
         )
         assert act.status_code == 200, act.text
@@ -805,7 +805,7 @@ class TestJoiningAnExistingSchoolDoesNotLeakItsStudents:
         a_id, a_tok = _register_login(client, "students_a")
         act_a = client.post(
             "/api/users/me/activate-teacher",
-            json={"school_names": [school_name]},
+            json={"schools": [{"name": n} for n in ([school_name])]},
             headers=auth_header(a_tok),
         )
         school_id = act_a.json()["schools"][0]["id"]
@@ -820,7 +820,7 @@ class TestJoiningAnExistingSchoolDoesNotLeakItsStudents:
         b_id, b_tok = _register_login(client, "students_b")
         act_b = client.post(
             "/api/users/me/activate-teacher",
-            json={"school_names": [school_name]},
+            json={"schools": [{"name": n} for n in ([school_name])]},
             headers=auth_header(b_tok),
         )
         assert act_b.json()["schools"][0]["id"] == school_id, (

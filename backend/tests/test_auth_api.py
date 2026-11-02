@@ -593,7 +593,7 @@ class TestSelfServeSchoolCreation:
         school_name = f"大安國小_{uuid.uuid4().hex[:6]}"
         resp = client.post(
             "/api/users/me/activate-teacher",
-            json={"school_names": [school_name]},
+            json={"schools": [{"name": n} for n in ([school_name])]},
             headers={"Authorization": f"Bearer {token}"},
         )
         assert resp.status_code == 200, resp.text
@@ -627,12 +627,12 @@ class TestSelfServeSchoolCreation:
 
         resp_a = client.post(
             "/api/users/me/activate-teacher",
-            json={"school_names": [school_name]},
+            json={"schools": [{"name": n} for n in ([school_name])]},
             headers={"Authorization": f"Bearer {token_a}"},
         )
         resp_b = client.post(
             "/api/users/me/activate-teacher",
-            json={"school_names": [school_name]},
+            json={"schools": [{"name": n} for n in ([school_name])]},
             headers={"Authorization": f"Bearer {token_b}"},
         )
         assert resp_a.json()["schools"][0]["id"] == resp_b.json()["schools"][0]["id"]
@@ -650,12 +650,12 @@ class TestSelfServeSchoolCreation:
 
         resp_a = client.post(
             "/api/users/me/activate-teacher",
-            json={"school_names": [f"School A {unique}"]},
+            json={"schools": [{"name": n} for n in ([f"School A {unique}"])]},
             headers={"Authorization": f"Bearer {token_a}"},
         )
         resp_b = client.post(
             "/api/users/me/activate-teacher",
-            json={"school_names": [f"School B {unique}"]},
+            json={"schools": [{"name": n} for n in ([f"School B {unique}"])]},
             headers={"Authorization": f"Bearer {token_b}"},
         )
         assert resp_a.json()["schools"][0]["id"] != resp_b.json()["schools"][0]["id"]
@@ -667,7 +667,7 @@ class TestSelfServeSchoolCreation:
         school_name = f"Admin School {uuid.uuid4().hex[:6]}"
         resp = client.post(
             "/api/users/me/activate-teacher",
-            json={"school_names": [school_name]},
+            json={"schools": [{"name": n} for n in ([school_name])]},
             headers={"Authorization": f"Bearer {token}"},
         )
         school_id = resp.json()["schools"][0]["id"]
@@ -1579,7 +1579,7 @@ class TestHasClassroomLoginResponse:
 
         act = client.post(
             "/api/users/me/activate-teacher",
-            json={"school_names": [f"HC Test School {unique}"]},
+            json={"schools": [{"name": n} for n in ([f"HC Test School {unique}"])]},
             headers={"Authorization": f"Bearer {teacher_token}"},
         )
         assert act.status_code == 200, act.text

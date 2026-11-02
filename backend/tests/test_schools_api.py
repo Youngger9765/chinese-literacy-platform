@@ -299,7 +299,7 @@ class TestListSchools:
         # way than the retired email-domain auto-assignment.
         act = client.post(
             "/api/users/me/activate-teacher",
-            json={"school_names": [f"user1 的學校_{uuid.uuid4().hex[:6]}"]},
+            json={"schools": [{"name": n} for n in ([f"user1 的學校_{uuid.uuid4().hex[:6]}"])]},
             headers=auth_header(user1["token"]),
         )
         assert act.status_code == 200, act.text

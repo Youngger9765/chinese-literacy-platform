@@ -197,7 +197,7 @@ def activate_teacher(
     Idempotent: naming a school the caller is already a teacher of again is a
     no-op for that school (still returns it, with is_new=False).
     """
-    schools_with_flag = activate_teacher_for_schools(db, current_user, payload.school_names)
+    schools_with_flag = activate_teacher_for_schools(db, current_user, payload.schools)
     db.commit()
 
     user_roles = (
