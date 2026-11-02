@@ -92,6 +92,15 @@ async function setup(): Promise<Account> {
   await api('POST', '/api/auth/register', { email: t.email, password: t.pw, name: 'QA回歸檢查老師', role: 'teacher' });
   const tt = await login(t.email, t.pw);
   await api('POST', '/api/auth/accept-terms', {}, tt);
+  // #3804/#3806 (2026-11-01) made the `role: 'teacher'` register() hint a
+  // no-op -- every account defaults to student, teacher status now comes
+  // only from POST /users/me/activate-teacher. This file predates that
+  // redesign and was never updated, so `me.roles` below always came back
+  // empty and `school_id: Number(undefined)` -> null 422'd every run,
+  // undetected because e2e-tests.yml only triggers on frontend/** changes
+  // and no backend-only PR since #3806 re-ran it (same root cause as
+  // games/helpers.ts::registerTeacher, fixed in #3812 for that file).
+  await api('POST', '/api/users/me/activate-teacher', { school_names: [`QA回歸檢查學校_${ts}`] }, tt);
   const me = (await api('GET', '/api/users/me', null, tt)) as { roles: Array<{ scope_id?: string }> };
   const school = me.roles.find((r) => r.scope_id)?.scope_id;
   const c = (await api('POST', '/api/classrooms', { name: `QA回歸檢查-${ts}-請勿使用`, school_id: Number(school), grade: 4 }, tt)) as { id: number };
