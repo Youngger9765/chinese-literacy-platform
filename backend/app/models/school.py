@@ -54,7 +54,7 @@ class School(Base):
     # "elementary" | "junior_high" | "senior_high" — tagged from which MOE
     # source file the row came from, not guessed from the name (a name like
     # "○○國中(小)" would be ambiguous to parse).
-    school_level: Mapped[str | None] = mapped_column(String(10), nullable=True, index=True)
+    school_level: Mapped[str | None] = mapped_column(String(20), nullable=True, index=True)
     is_public: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
     # Allowed email domains for teacher registration (issue #407).
     # If set to a non-empty list, only teachers whose email domain appears in this list
