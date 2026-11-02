@@ -1,8 +1,15 @@
 """add status/accepted_at to classroom_teachers + backfill assistant->editor
 
 Revision ID: co01te02viewer03
-Revises: b2c3d4moe02
+Revises: c3d4pwteach1
 Create Date: 2026-11-02 00:00:00.000000
+
+Rechained 2026-11-03 onto c3d4pwteach1 (the password-teacher migration,
+#3818/#3822): both this migration and c3d4pwteach1 originally forked off
+b2c3d4moe02 independently and landed as sibling alembic heads once
+c3d4pwteach1 merged to staging first -- re-pointing down_revision here
+collapses them back to a single head (this migration's own content is
+unchanged).
 
 Issue #3820: co-teachers gain a "viewer" (read-only) role alongside the
 existing full-access role (renamed assistant -> editor), plus an invitation
@@ -23,7 +30,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision: str = "co01te02viewer03"
-down_revision: Union[str, None] = "b2c3d4moe02"
+down_revision: Union[str, None] = "c3d4pwteach1"
 branch_labels = None
 depends_on = None
 
