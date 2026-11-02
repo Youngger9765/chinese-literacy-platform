@@ -13,6 +13,8 @@ from ...auth.policies import is_system_admin
 from ...models.user import Role, User, UserRole
 from ...schemas.classroom import (
     ClassroomStudentAddRequest,
+    ClassroomStudentMoveRequest,
+    ClassroomStudentMoveResponse,
     StudentInClassroomResponse,
     StudentSearchRequest,
     StudentSearchResult,
@@ -185,6 +187,98 @@ def remove_student_from_classroom(
     db.commit()
     logger.info("Removed student %d from classroom %d", student_id, classroom_id)
     return None
+
+
+@router.post(
+    "/classrooms/{from_classroom_id}/students/{student_id}/move",
+    response_model=ClassroomStudentMoveResponse,
+)
+def move_student_between_classrooms(
+    from_classroom_id: int,
+    student_id: int,
+    payload: ClassroomStudentMoveRequest,
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Move a student from one of the teacher's classrooms to another (#3819).
+
+    One operation = remove-from-source + add-to-destination, done in a single
+    transaction, so the student is never visibly "deleted" mid-flight. Learning
+    history (AssignmentSubmission, LearningSession, ...) is untouched — it hangs
+    off student_id/assignment_id, not classroom enrollment.
+    """
+    from_classroom = get_classroom_or_404(from_classroom_id, db)
+    require_owner_or_admin(from_classroom, current_user, db)
+
+    to_classroom = get_classroom_or_404(payload.to_classroom_id, db)
+    require_owner_or_admin(to_classroom, current_user, db)
+
+    # Restricting to the same school keeps this endpoint from entangling with
+    # the eligible-student-by-school checks the add-student endpoint enforces —
+    # a cross-school move would need to re-run that eligibility logic, which is
+    # out of scope here (#3819 PRD explicitly excludes cross-school moves).
+    if to_classroom.school_id != from_classroom.school_id:
+        raise HTTPException(
+            status_code=400,
+            detail="不支援跨校換班，目的班級必須和原班級同一所學校",
+        )
+
+    source_enrollment = (
+        db.query(ClassroomStudent)
+        .filter(
+            ClassroomStudent.classroom_id == from_classroom_id,
+            ClassroomStudent.student_id == student_id,
+        )
+        .first()
+    )
+    if source_enrollment is None:
+        raise HTTPException(status_code=404, detail="Student not in source classroom")
+
+    existing_in_destination = (
+        db.query(ClassroomStudent)
+        .filter(
+            ClassroomStudent.classroom_id == payload.to_classroom_id,
+            ClassroomStudent.student_id == student_id,
+        )
+        .first()
+    )
+    if existing_in_destination is not None:
+        raise HTTPException(status_code=409, detail="Student already in destination classroom")
+
+    db.delete(source_enrollment)
+    db.flush()
+
+    new_enrollment = ClassroomStudent(
+        classroom_id=payload.to_classroom_id,
+        student_id=student_id,
+    )
+    db.add(new_enrollment)
+    db.flush()
+
+    # Back-fill submissions for the destination's active whole-class assignments,
+    # same as any other new enrollment (#996).
+    create_submissions_for_new_student(payload.to_classroom_id, student_id, db)
+
+    audit_log_endpoint(
+        request=request,
+        action=AuditAction.MOVE_STUDENT,
+        user_id=current_user.id,
+        target_student_id=student_id,
+    )
+
+    db.commit()
+    db.refresh(new_enrollment)
+    logger.info(
+        "Moved student %d from classroom %d to classroom %d",
+        student_id, from_classroom_id, payload.to_classroom_id,
+    )
+    return ClassroomStudentMoveResponse(
+        student_id=student_id,
+        from_classroom_id=from_classroom_id,
+        to_classroom_id=payload.to_classroom_id,
+        enrolled_at=new_enrollment.enrolled_at,
+    )
 
 
 @router.get(
