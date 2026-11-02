@@ -358,7 +358,7 @@ def get_classroom_detail(
     if classroom is None:
         raise HTTPException(status_code=404, detail="Classroom not found")
     require_member_or_admin(classroom, current_user, db)
-    return classroom_to_detail_response(classroom, db)
+    return classroom_to_detail_response(classroom, db, current_user)
 
 
 @router.patch("/classrooms/{classroom_id}", response_model=ClassroomResponse)

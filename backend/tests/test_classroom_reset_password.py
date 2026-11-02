@@ -27,7 +27,7 @@ from app.main import app
 from app.models import Base
 from app.models.organization import Organization
 from app.models.school import ClassroomStudent, ClassroomTeacher, School
-from app.models.user import Role, StudentProfile, User, UserRole
+from app.models.user import Role, User, UserRole
 from app.services.password_reset_service import generate_password_reset_token
 
 
@@ -275,13 +275,53 @@ def _reset_password(client, caller: dict, classroom_id: int, student_id: int):
     )
 
 
-def test_owner_resets_enrolled_student_password_returns_200_and_new_password_works(client):
+def _batch_create_student(
+    client, teacher: dict, classroom_id: int, *, name: str = "Batch Student", seat: str | None = None
+) -> dict:
+    """Create a student the way a teacher actually does in production (#3818):
+    through the real batch-create endpoint, which is the one code path that
+    stamps ``created_by_teacher_id`` on the new account. Returns the created
+    student's id/username/password so callers can verify login afterwards."""
+    seat_number = seat or uuid.uuid4().hex[:6]
+    resp = client.post(
+        f"/api/classrooms/{classroom_id}/students/batch",
+        json={"students": [{"name": name, "seat_number": seat_number}]},
+        headers=auth_header(teacher["token"]),
+    )
+    assert resp.status_code == 201, resp.text
+    body = resp.json()
+    assert body["errors"] == [], body["errors"]
+    created = body["created"][0]
+    return {
+        "user_id": created["user_id"],
+        "username": created["username"],
+        "password": created["password"],
+    }
+
+
+def _set_created_by_teacher(student_user_id: int, teacher_user_id: int | None) -> None:
+    """Directly stamp created_by_teacher_id (#3818), for edge-case fixtures where
+    we need the creator-gate to PASS so a *different* defense-in-depth check
+    (disallowed target role, roleless target, cross-school, ...) is the one
+    actually being exercised by the test."""
+    db = TestingSessionLocal()
+    try:
+        user = db.query(User).filter(User.id == student_user_id).first()
+        assert user is not None
+        user.created_by_teacher_id = teacher_user_id
+        db.commit()
+    finally:
+        db.close()
+
+
+def test_creator_teacher_resets_batch_created_student_200_and_new_password_works(client):
+    """AC1 (#3818): the teacher who *created* the account (via batch-create,
+    the production path that stamps created_by_teacher_id) is the password
+    teacher and can reset it."""
     teacher = _register_user(client, "resetpw_owner")
-    student = _register_user(client, "resetpw_student")
     school_id = _create_school_for_teacher(teacher["user_id"])
-    _assign_role(student["user_id"], "student", scope_type="school", scope_id=str(school_id))
     classroom_id = _create_classroom(client, teacher, school_id)
-    _enroll_student(client, teacher, classroom_id, student["user_id"])
+    student = _batch_create_student(client, teacher, classroom_id, name="Creator Reset Target")
 
     resp = _reset_password(client, teacher, classroom_id, student["user_id"])
     assert resp.status_code == 200, resp.text
@@ -289,11 +329,13 @@ def test_owner_resets_enrolled_student_password_returns_200_and_new_password_wor
     assert "password" in body and len(body["password"]) >= 6
     assert "username" in body or "email" in body
 
+    synthetic_email = f"{student['username'].lower()}@student.lingoleap.local"
+
     # Positive control: the new password actually works.
     _reset_rate_limiters()
     login_resp = client.post(
         "/api/auth/login",
-        json={"email": student["email"], "password": body["password"]},
+        json={"email": synthetic_email, "password": body["password"]},
     )
     assert login_resp.status_code == 200, login_resp.text
 
@@ -301,7 +343,7 @@ def test_owner_resets_enrolled_student_password_returns_200_and_new_password_wor
     _reset_rate_limiters()
     old_login_resp = client.post(
         "/api/auth/login",
-        json={"email": student["email"], "password": "TestOnlyPassword123!"},
+        json={"email": synthetic_email, "password": student["password"]},
     )
     assert old_login_resp.status_code in (401, 403)
 
@@ -402,26 +444,18 @@ def test_side_effects_verified_by_direct_db_reread(client):
     hash actually changed and password_changed was flipped to False — not
     inferred from the HTTP response alone."""
     teacher = _register_user(client, "resetpw_owner8")
-    student = _register_user(client, "resetpw_student8")
     school_id = _create_school_for_teacher(teacher["user_id"])
-    _assign_role(student["user_id"], "student", scope_type="school", scope_id=str(school_id))
     classroom_id = _create_classroom(client, teacher, school_id)
-    _enroll_student(client, teacher, classroom_id, student["user_id"])
+    student = _batch_create_student(client, teacher, classroom_id, name="DB Reread Target")
 
-    # Give the student a StudentProfile with password_changed already True,
-    # simulating a student who already changed their password once — the
-    # reset must flip it back to False to force a change on next login.
+    # Flip password_changed to True first, simulating a student who already
+    # changed their password once — the reset must flip it back to False to
+    # force a change on next login.
     db = TestingSessionLocal()
     try:
-        profile = StudentProfile(
-            user_id=student["user_id"],
-            school_id=school_id,
-            student_number=f"S{student['user_id']}",
-            password_changed=True,
-        )
-        db.add(profile)
-        db.commit()
         before = db.query(User).filter(User.id == student["user_id"]).first()
+        before.student_profile.password_changed = True
+        db.commit()
         hash_before = before.password_hash
     finally:
         db.close()
@@ -442,17 +476,24 @@ def test_side_effects_verified_by_direct_db_reread(client):
 
 
 def test_profileless_student_gets_password_changed_enforced(client):
+    """Edge case: a teacher-created student whose StudentProfile row is
+    missing (data drift) must still get a profile created with
+    password_changed=False on reset — the batch-create path always creates
+    one, so this directly deletes it to simulate the drift while keeping
+    created_by_teacher_id intact."""
     teacher = _register_user(client, "resetpw_profileless_owner")
-    student = _register_user(client, "resetpw_profileless_student")
     school_id = _create_school_for_teacher(teacher["user_id"])
-    _assign_role(student["user_id"], "student", scope_type="school", scope_id=str(school_id))
     classroom_id = _create_classroom(client, teacher, school_id)
-    _enroll_student(client, teacher, classroom_id, student["user_id"])
+    student = _batch_create_student(client, teacher, classroom_id, name="Profileless Target")
 
     db = TestingSessionLocal()
     try:
         before = db.query(User).filter(User.id == student["user_id"]).first()
         assert before is not None
+        assert before.student_profile is not None
+        db.delete(before.student_profile)
+        db.commit()
+        before = db.query(User).filter(User.id == student["user_id"]).first()
         assert before.student_profile is None
     finally:
         db.close()
@@ -472,11 +513,9 @@ def test_profileless_student_gets_password_changed_enforced(client):
 
 def test_teacher_reset_invalidates_outstanding_recovery_token(client):
     teacher = _register_user(client, "resetpw_recovery_owner")
-    student = _register_user(client, "resetpw_recovery_student")
     school_id = _create_school_for_teacher(teacher["user_id"])
-    _assign_role(student["user_id"], "student", scope_type="school", scope_id=str(school_id))
     classroom_id = _create_classroom(client, teacher, school_id)
-    _enroll_student(client, teacher, classroom_id, student["user_id"])
+    student = _batch_create_student(client, teacher, classroom_id, name="Recovery Token Target")
 
     db = TestingSessionLocal()
     try:
@@ -503,11 +542,9 @@ def test_teacher_reset_invalidates_outstanding_recovery_token(client):
 
 def test_password_never_appears_in_logs(client, caplog):
     teacher = _register_user(client, "resetpw_owner6")
-    student = _register_user(client, "resetpw_student6")
     school_id = _create_school_for_teacher(teacher["user_id"])
-    _assign_role(student["user_id"], "student", scope_type="school", scope_id=str(school_id))
     classroom_id = _create_classroom(client, teacher, school_id)
-    _enroll_student(client, teacher, classroom_id, student["user_id"])
+    student = _batch_create_student(client, teacher, classroom_id, name="Log Leak Target")
 
     with caplog.at_level(logging.DEBUG):
         resp = _reset_password(client, teacher, classroom_id, student["user_id"])
@@ -521,11 +558,15 @@ def test_password_never_appears_in_logs(client, caplog):
 
 
 def test_cannot_reset_password_of_a_teacher_account_403(client):
+    """Defense-in-depth: even if `owner` is the recorded password teacher for
+    this account (e.g. it was created via batch-create and later promoted),
+    a target holding an active teacher role must still be denied."""
     owner = _register_user(client, "resetpw_privileged_owner")
     teacher_target = _register_user(client, "resetpw_privileged_teacher")
     owner_school_id = _create_school_for_teacher(owner["user_id"])
     _deactivate_all_roles(teacher_target["user_id"])
     _assign_role(teacher_target["user_id"], "teacher", scope_type="school", scope_id=str(owner_school_id))
+    _set_created_by_teacher(teacher_target["user_id"], owner["user_id"])
     classroom_id = _create_classroom(client, owner, owner_school_id)
 
     db = TestingSessionLocal()
@@ -545,10 +586,13 @@ def test_cannot_reset_password_of_a_teacher_account_403(client):
 
 
 def test_cannot_reset_password_of_an_admin_account_403(client):
+    """Defense-in-depth: same as the teacher-target case above, but for a
+    target holding an active system_admin role."""
     owner = _register_user(client, "resetpw_privileged_owner2")
     admin_target = _register_user(client, "resetpw_privileged_admin")
     _deactivate_teacher_roles(admin_target["user_id"])
     _assign_role(admin_target["user_id"], "system_admin", scope_type="platform")
+    _set_created_by_teacher(admin_target["user_id"], owner["user_id"])
     owner_school_id = _create_school_for_teacher(owner["user_id"])
     classroom_id = _create_classroom(client, owner, owner_school_id)
 
@@ -568,15 +612,18 @@ def test_cannot_reset_password_of_an_admin_account_403(client):
     assert resp.status_code == 403, resp.text
 
 
-def test_co_teacher_can_reset_password_200(client):
+def test_co_teacher_who_is_not_creator_cannot_reset_password_403(client):
+    """AC2 (#3818): a co-teacher on the same classroom is a classroom member
+    (so they CAN see the student in the roster) but is not the account's
+    password teacher -- the old behavior (co-teachers could reset any
+    enrolled student's password) is the exact over-broad gate this issue
+    closes, so this must now be denied."""
     owner = _register_user(client, "resetpw_coteacher_owner")
     co_teacher = _register_user(client, "resetpw_coteacher")
-    student = _register_user(client, "resetpw_coteacher_student")
     school_id = _create_school_for_teacher(owner["user_id"])
     _assign_role(co_teacher["user_id"], "teacher", scope_type="school", scope_id=str(school_id))
-    _assign_role(student["user_id"], "student", scope_type="school", scope_id=str(school_id))
     classroom_id = _create_classroom(client, owner, school_id)
-    _enroll_student(client, owner, classroom_id, student["user_id"])
+    student = _batch_create_student(client, owner, classroom_id, name="Coteacher Denied Target")
 
     db = TestingSessionLocal()
     try:
@@ -592,18 +639,21 @@ def test_co_teacher_can_reset_password_200(client):
         db.close()
 
     resp = _reset_password(client, co_teacher, classroom_id, student["user_id"])
-    assert resp.status_code == 200, resp.text
+    assert resp.status_code == 403, resp.text
 
 
 def test_gate_matches_get_classroom_detail_semantics(client):
+    """Classroom-membership (owner/co-teacher/admin) still gates *visibility*
+    of the student (viewing classroom detail) -- that part of
+    require_classroom_member is unchanged. But visibility is no longer
+    sufficient for *resetting* the password: that additionally requires
+    being the recorded password teacher (#3818)."""
     owner = _register_user(client, "resetpw_gate_owner")
     co_teacher = _register_user(client, "resetpw_gate_coteacher")
-    student = _register_user(client, "resetpw_gate_student")
     school_id = _create_school_for_teacher(owner["user_id"])
     _assign_role(co_teacher["user_id"], "teacher", scope_type="school", scope_id=str(school_id))
-    _assign_role(student["user_id"], "student", scope_type="school", scope_id=str(school_id))
     classroom_id = _create_classroom(client, owner, school_id)
-    _enroll_student(client, owner, classroom_id, student["user_id"])
+    student = _batch_create_student(client, owner, classroom_id, name="Detail Gate Target")
 
     db = TestingSessionLocal()
     try:
@@ -624,7 +674,7 @@ def test_gate_matches_get_classroom_detail_semantics(client):
     reset_resp = _reset_password(client, co_teacher, classroom_id, student["user_id"])
 
     assert detail_resp.status_code == 200, detail_resp.text
-    assert reset_resp.status_code == 200, reset_resp.text
+    assert reset_resp.status_code == 403, reset_resp.text
 
 
 def test_cross_school_student_cannot_have_password_reset_403(client):
@@ -657,7 +707,12 @@ def test_cross_school_student_cannot_have_password_reset_403(client):
         db.close()
 
 
-def test_no_determinable_school_affiliation_still_allows_reset(client):
+def test_self_registered_student_added_by_id_without_profile_denied_403(client):
+    """AC3 (#3818), enrollment-by-id variant: a self-registered account (no
+    StudentProfile, no determinable creator) that a teacher merely *adds* to
+    their classroom by user id is NOT the same as the teacher having created
+    it. Before this fix this was allowed (the exact over-broad gate #3818
+    closes); it must now be denied."""
     owner = _register_user(client, "resetpw_no_profile_owner")
     student = _register_user(client, "resetpw_no_profile_student")
     school_id = _create_school_for_teacher(owner["user_id"])
@@ -670,17 +725,23 @@ def test_no_determinable_school_affiliation_still_allows_reset(client):
         student_before = db.query(User).filter(User.id == student["user_id"]).first()
         assert student_before is not None
         assert student_before.student_profile is None
+        assert student_before.created_by_teacher_id is None
     finally:
         db.close()
 
     resp = _reset_password(client, owner, classroom_id, student["user_id"])
-    assert resp.status_code == 200, resp.text
+    assert resp.status_code == 403, resp.text
 
 
 def test_roleless_sso_style_student_now_denied_403(client):
+    """Defense-in-depth: created_by_teacher_id is force-set here so the
+    creator gate passes and the roleless-target fail-closed check underneath
+    it is the one actually exercised (otherwise this would be a vacuous
+    pass -- denied for the wrong reason)."""
     owner = _register_user(client, "resetpw_roleless_owner")
     roleless_student = _register_user(client, "resetpw_roleless_sso_student")
     _deactivate_all_roles(roleless_student["user_id"])
+    _set_created_by_teacher(roleless_student["user_id"], owner["user_id"])
     school_id = _create_school_for_teacher(owner["user_id"])
     classroom_id = _create_classroom(client, owner, school_id)
     _enroll_directly(classroom_id, roleless_student["user_id"])
@@ -708,10 +769,19 @@ def test_roleless_sso_style_student_now_denied_403(client):
     assert resp.status_code == 403, resp.text
 
 
-def test_roleless_target_with_mismatching_school_role_still_denied_403(client):
+def test_target_with_teacher_role_at_another_school_still_denied_403(client):
+    """Defense-in-depth: same force-set rationale as the roleless test above.
+
+    Despite the name this inherited (#3818 only added the force-set line),
+    `target` here is NOT roleless -- it holds an active `teacher` role at a
+    DIFFERENT school. That trips the earlier non-student-target-role check
+    (same layer as test_cannot_reset_password_of_a_teacher_account_403), not
+    a cross-school *student*-role check. Still correctly denies 403; the
+    name now says what it actually exercises."""
     owner = _register_user(client, "resetpw_roleless_cross_school_owner")
     target = _register_user(client, "resetpw_roleless_cross_school_target")
     _deactivate_all_roles(target["user_id"])
+    _set_created_by_teacher(target["user_id"], owner["user_id"])
     classroom_school_id = _create_school_for_teacher(owner["user_id"])
     other_school_id = _create_org_and_school(f"org-{uuid.uuid4().hex[:8]}")
     _assign_role(target["user_id"], "teacher", scope_type="school", scope_id=str(other_school_id))
@@ -776,3 +846,73 @@ def test_caller_teacher_role_scoped_to_different_school_denied_403(client):
 
     resp = _reset_password(client, owner, classroom_id, student["user_id"])
     assert resp.status_code == 403, resp.text
+
+
+def test_self_registered_student_joined_by_code_cannot_have_password_reset_403(client):
+    """AC3 (#3818) -- this is the exact scenario in the bug report: a
+    self-registered account (Email/Google/Junyi-SSO; here simulated by
+    registering then granting the student role the way an admin or a Junyi
+    SSO first-login would, with no created_by_teacher_id ever recorded)
+    self-enrolls through the real join-code endpoint. The classroom's
+    teacher must NOT be able to reset this student's password."""
+    teacher = _register_user(client, "resetpw_joincode_teacher")
+    student = _register_user(client, "resetpw_joincode_student")
+    school_id = _create_school_for_teacher(teacher["user_id"])
+    _assign_role(student["user_id"], "student", scope_type="school", scope_id=str(school_id))
+    classroom_id = _create_classroom(client, teacher, school_id)
+
+    classroom_detail = client.get(
+        f"/api/classrooms/{classroom_id}", headers=auth_header(teacher["token"])
+    )
+    assert classroom_detail.status_code == 200, classroom_detail.text
+    join_code = classroom_detail.json()["join_code"]
+    assert join_code
+
+    join_resp = client.post(
+        "/api/classrooms/join",
+        json={"join_code": join_code},
+        headers=auth_header(student["token"]),
+    )
+    assert join_resp.status_code == 200, join_resp.text
+
+    db = TestingSessionLocal()
+    try:
+        student_row = db.query(User).filter(User.id == student["user_id"]).first()
+        assert student_row is not None
+        assert student_row.created_by_teacher_id is None
+    finally:
+        db.close()
+
+    resp = _reset_password(client, teacher, classroom_id, student["user_id"])
+    assert resp.status_code == 403, resp.text
+
+
+def test_self_registered_student_forgot_password_flow_still_works(client):
+    """AC4 (#3818): self-registered accounts are unaffected by the new
+    creator gate -- they still reset their own password through the normal
+    forgot-password -> reset-password flow (no teacher involved at all)."""
+    student = _register_user(client, "resetpw_selfreg_forgot")
+
+    _reset_rate_limiters()
+    forgot_resp = client.post(
+        "/api/auth/forgot-password",
+        json={"identifier": student["email"]},
+    )
+    assert forgot_resp.status_code == 200, forgot_resp.text
+    reset_token = forgot_resp.json().get("reset_token")
+    assert reset_token and reset_token != "account-not-found", forgot_resp.text
+
+    _reset_rate_limiters()
+    new_password = "NewSelfSetPassword456!"
+    reset_resp = client.post(
+        "/api/auth/reset-password",
+        json={"token": reset_token, "new_password": new_password},
+    )
+    assert reset_resp.status_code == 200, reset_resp.text
+
+    _reset_rate_limiters()
+    login_resp = client.post(
+        "/api/auth/login",
+        json={"email": student["email"], "password": new_password},
+    )
+    assert login_resp.status_code == 200, login_resp.text
