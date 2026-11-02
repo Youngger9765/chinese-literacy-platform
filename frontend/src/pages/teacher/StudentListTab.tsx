@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import type { BatchCreateResult, ClassroomDetailResponse, StudentInClassroomResponse } from '../../services/classroomApi';
+import type { BatchCreateResult, ClassroomDetailResponse, ClassroomResponse, StudentInClassroomResponse } from '../../services/classroomApi';
 import CsvUploadModal from './CsvUploadModal';
 import AddStudentsPanel from './panel/AddStudentsPanel';
-import { resetStudentPassword } from '../../services/classroomApi';
+import { listMyClassrooms, moveStudent, resetStudentPassword } from '../../services/classroomApi';
 import {
   generateParentInviteCode,
   listStudentParentLinks,
@@ -193,6 +193,124 @@ const ResetPasswordButton: React.FC<{
         className="text-sm px-2.5 py-1 rounded-md border border-amber-300 text-amber-700 hover:bg-amber-50 disabled:opacity-50 transition-colors cursor-pointer"
       >
         {isResetting ? '重設中…' : '重設密碼'}
+      </button>
+      {error && <span className="text-xs text-red-500">{error}</span>}
+    </div>
+  );
+};
+
+// ── Per-student "move to another of my classrooms" button (#3819) ───────────
+//
+//換班 = remove-from-here + add-to-there in one backend call, so the student
+// is never visibly deleted mid-flight. The candidate list is lazily fetched
+// (only when the teacher opens the picker) and scoped to classrooms in the
+// SAME school, excluding the current one -- matching the backend's own
+// same-school guard, so a choice that would 400 never even appears.
+const MoveStudentButton: React.FC<{
+  token: string;
+  classroom: ClassroomDetailResponse;
+  studentId: number;
+  studentName: string;
+  onMoved: () => void;
+}> = ({ token, classroom, studentId, studentName, onMoved }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [candidates, setCandidates] = useState<ClassroomResponse[] | null>(null);
+  const [targetId, setTargetId] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [isMoving, setIsMoving] = useState(false);
+  const [error, setError] = useState('');
+
+  const open = async () => {
+    setIsOpen(true);
+    setError('');
+    if (candidates !== null) return;
+    setIsLoading(true);
+    try {
+      const result = await listMyClassrooms(token, { limit: 100 });
+      setCandidates(
+        result.items.filter((c) => c.school_id === classroom.school_id && c.id !== classroom.id),
+      );
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : '讀取班級清單失敗');
+      setCandidates([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const close = () => {
+    setIsOpen(false);
+    setTargetId('');
+    setError('');
+  };
+
+  const handleMove = async () => {
+    if (!targetId) return;
+    const target = candidates?.find((c) => String(c.id) === targetId);
+    if (!target) return;
+    if (!window.confirm(`確定把「${studentName}」從目前班級換到「${target.name}」嗎？`)) return;
+    setIsMoving(true);
+    setError('');
+    try {
+      await moveStudent(token, classroom.id, studentId, target.id);
+      close();
+      onMoved();
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : '換班失敗，請再試一次');
+    } finally {
+      setIsMoving(false);
+    }
+  };
+
+  if (!isOpen) {
+    return (
+      <button
+        type="button"
+        onClick={open}
+        className="text-sm text-gray-400 hover:text-indigo-600 transition-colors cursor-pointer whitespace-nowrap px-1 py-1 -m-1"
+      >
+        換班
+      </button>
+    );
+  }
+
+  return (
+    <div className="flex flex-col items-start gap-1 text-sm">
+      {isLoading && <span className="text-gray-500">讀取班級中…</span>}
+      {!isLoading && candidates !== null && candidates.length === 0 && (
+        <span className="text-gray-500">沒有其他可換入的班級</span>
+      )}
+      {!isLoading && candidates !== null && candidates.length > 0 && (
+        <div className="flex items-center gap-2">
+          <select
+            aria-label={`把 ${studentName} 換到哪個班級`}
+            value={targetId}
+            onChange={(e) => setTargetId(e.target.value)}
+            className="h-8 px-2 rounded-md border border-gray-300 text-sm"
+          >
+            <option value="">選擇班級…</option>
+            {candidates.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            onClick={handleMove}
+            disabled={!targetId || isMoving}
+            className="text-sm text-indigo-600 font-medium hover:text-indigo-800 disabled:opacity-50 cursor-pointer whitespace-nowrap"
+          >
+            {isMoving ? '換班中…' : '確認換班'}
+          </button>
+        </div>
+      )}
+      <button
+        type="button"
+        onClick={close}
+        className="text-xs text-gray-500 hover:text-gray-700 cursor-pointer"
+      >
+        取消
       </button>
       {error && <span className="text-xs text-red-500">{error}</span>}
     </div>
@@ -392,14 +510,23 @@ const StudentListTab: React.FC<StudentListTabProps> = ({
                 </td>
                 <td className="lg:px-4 lg:py-3 lg:text-right whitespace-nowrap ml-auto lg:ml-0">
                   <span className="sr-only">加入於 {formatDate(s.enrolled_at)}</span>
-                  {removingStudentId === s.id ? (
-                    <span className="inline-flex gap-2 whitespace-nowrap">
-                      <button onClick={() => onRemoveStudent(s)} className="text-sm text-red-600 font-medium hover:text-red-800 transition-colors cursor-pointer whitespace-nowrap">確認移除</button>
-                      <button onClick={() => setRemovingStudentId(null)} className="text-sm text-gray-500 hover:text-gray-700 transition-colors cursor-pointer whitespace-nowrap">取消</button>
-                    </span>
-                  ) : (
-                    <button onClick={() => onRemoveStudent(s)} className="text-sm text-gray-400 hover:text-red-600 transition-colors cursor-pointer whitespace-nowrap px-1 py-1 -m-1">移除</button>
-                  )}
+                  <span className="inline-flex items-center gap-2 whitespace-nowrap">
+                    <MoveStudentButton
+                      token={token}
+                      classroom={classroom}
+                      studentId={s.id}
+                      studentName={s.name}
+                      onMoved={onStudentsImported}
+                    />
+                    {removingStudentId === s.id ? (
+                      <span className="inline-flex gap-2 whitespace-nowrap">
+                        <button onClick={() => onRemoveStudent(s)} className="text-sm text-red-600 font-medium hover:text-red-800 transition-colors cursor-pointer whitespace-nowrap">確認移除</button>
+                        <button onClick={() => setRemovingStudentId(null)} className="text-sm text-gray-500 hover:text-gray-700 transition-colors cursor-pointer whitespace-nowrap">取消</button>
+                      </span>
+                    ) : (
+                      <button onClick={() => onRemoveStudent(s)} className="text-sm text-gray-400 hover:text-red-600 transition-colors cursor-pointer whitespace-nowrap px-1 py-1 -m-1">移除</button>
+                    )}
+                  </span>
                 </td>
               </tr>
             ))}

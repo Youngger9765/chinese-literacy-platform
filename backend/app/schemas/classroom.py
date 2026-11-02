@@ -61,6 +61,22 @@ class ClassroomStudentAddRequest(BaseModel):
     student_id: int
 
 
+# ── Move Student Between Classrooms (#3819) ─────────────────────────────────
+
+
+class ClassroomStudentMoveRequest(BaseModel):
+    to_classroom_id: int
+
+
+class ClassroomStudentMoveResponse(BaseModel):
+    student_id: int
+    from_classroom_id: int
+    to_classroom_id: int
+    enrolled_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
 class ClassroomJoinRequest(BaseModel):
     join_code: str = Field(..., min_length=1, max_length=8)
 

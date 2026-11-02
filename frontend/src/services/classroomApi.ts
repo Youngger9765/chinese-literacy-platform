@@ -211,6 +211,32 @@ export async function removeStudent(
   return handleResponse<{ message: string }>(res);
 }
 
+// --- Move student between two of the caller's own classrooms (#3819) ---
+
+export interface MoveStudentResult {
+  student_id: number;
+  from_classroom_id: number;
+  to_classroom_id: number;
+  enrolled_at: string;
+}
+
+export async function moveStudent(
+  token: string,
+  fromClassroomId: number,
+  studentId: number,
+  toClassroomId: number,
+): Promise<MoveStudentResult> {
+  const res = await fetch(
+    `${API_BASE}/api/classrooms/${fromClassroomId}/students/${studentId}/move`,
+    {
+      method: 'POST',
+      headers: authHeaders(token),
+      body: JSON.stringify({ to_classroom_id: toClassroomId }),
+    },
+  );
+  return handleResponse<MoveStudentResult>(res);
+}
+
 // --- Delete classroom ---
 
 export async function deleteClassroom(token: string, classroomId: number): Promise<void> {
