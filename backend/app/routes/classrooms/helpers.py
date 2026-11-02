@@ -276,6 +276,7 @@ def classroom_to_detail_response(
                 current_user is not None
                 and (caller_is_admin or cs.student.created_by_teacher_id == current_user.id)
             ),
+            seat_number=cs.seat_number,
         )
         for cs in classroom.classroom_students
     ]

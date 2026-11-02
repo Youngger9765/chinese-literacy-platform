@@ -3,6 +3,7 @@ import logging
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy import or_
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
 from ...auth.dependencies import get_current_user
@@ -17,6 +18,8 @@ from ...schemas.classroom import (
     ClassroomStudentAddRequest,
     ClassroomStudentMoveRequest,
     ClassroomStudentMoveResponse,
+    ClassroomStudentRenameRequest,
+    ClassroomStudentSeatRequest,
     StudentInClassroomResponse,
     StudentSearchRequest,
     StudentSearchResult,
@@ -208,6 +211,141 @@ def remove_student_from_classroom(
     return None
 
 
+def _get_enrollment_or_404(classroom_id: int, student_id: int, db: Session) -> ClassroomStudent:
+    cs = (
+        db.query(ClassroomStudent)
+        .filter(
+            ClassroomStudent.classroom_id == classroom_id,
+            ClassroomStudent.student_id == student_id,
+        )
+        .first()
+    )
+    if cs is None:
+        raise HTTPException(status_code=404, detail="Student not in classroom")
+    return cs
+
+
+@router.patch(
+    "/classrooms/{classroom_id}/students/{student_id}/name",
+    response_model=StudentInClassroomResponse,
+)
+def rename_student(
+    classroom_id: int,
+    student_id: int,
+    payload: ClassroomStudentRenameRequest,
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Teacher-edit a student's display name (#3826).
+
+    Updates ``User.name`` -- the same field shown everywhere on the
+    platform (there is no separate per-classroom nickname) -- NOT the
+    login username/email, so the account the family was given on the
+    credential card keeps working.
+    """
+    classroom = get_classroom_or_404(classroom_id, db)
+    require_owner_or_admin(classroom, current_user, db)
+
+    cs = _get_enrollment_or_404(classroom_id, student_id, db)
+
+    cs.student.name = payload.name
+    audit_log_endpoint(
+        request=request,
+        action=AuditAction.RENAME_STUDENT,
+        user_id=current_user.id,
+        target_student_id=student_id,
+    )
+    db.commit()
+    db.refresh(cs)
+    db.refresh(cs.student)
+    logger.info("Renamed student %d in classroom %d", student_id, classroom_id)
+    return StudentInClassroomResponse(
+        id=cs.student.id,
+        name=cs.student.name,
+        email=cs.student.email,
+        enrolled_at=cs.enrolled_at,
+        seat_number=cs.seat_number,
+    )
+
+
+@router.patch(
+    "/classrooms/{classroom_id}/students/{student_id}/seat",
+    response_model=StudentInClassroomResponse,
+)
+def set_student_seat_number(
+    classroom_id: int,
+    student_id: int,
+    payload: ClassroomStudentSeatRequest,
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Teacher-edit a student's seat number within THIS classroom (#3826).
+
+    Scoped to the enrollment row (ClassroomStudent), not the student
+    account, so a seat number never carries over when a student moves
+    classrooms (#3819) or is re-enrolled after a batch-remove (#3821).
+    ``seat_number: null`` clears it -- the roster then falls back to
+    displaying the row's array index, same as every pre-#3826 row.
+    """
+    classroom = get_classroom_or_404(classroom_id, db)
+    require_owner_or_admin(classroom, current_user, db)
+
+    cs = _get_enrollment_or_404(classroom_id, student_id, db)
+
+    if payload.seat_number is not None:
+        conflict = (
+            db.query(ClassroomStudent)
+            .filter(
+                ClassroomStudent.classroom_id == classroom_id,
+                ClassroomStudent.seat_number == payload.seat_number,
+                ClassroomStudent.id != cs.id,
+            )
+            .first()
+        )
+        if conflict is not None:
+            raise HTTPException(
+                status_code=409,
+                detail=f"座號 {payload.seat_number} 在這個班級已經有人使用",
+            )
+
+    cs.seat_number = payload.seat_number
+    audit_log_endpoint(
+        request=request,
+        action=AuditAction.SET_SEAT_NUMBER,
+        user_id=current_user.id,
+        target_student_id=student_id,
+    )
+    try:
+        db.commit()
+    except IntegrityError:
+        # Belt-and-suspenders against the rare race between the SELECT-based
+        # conflict check above and this commit (two concurrent requests
+        # both picking the same free seat_number): the app-level check is
+        # the normal path, the DB's UniqueConstraint is the actual source of
+        # truth and raises here instead of silently corrupting data -- turn
+        # it into the same 409 a non-racing duplicate request would get,
+        # not an unhandled 500.
+        db.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail=f"座號 {payload.seat_number} 在這個班級已經有人使用",
+        )
+    db.refresh(cs)
+    logger.info(
+        "Set seat_number=%s for student %d in classroom %d",
+        payload.seat_number, student_id, classroom_id,
+    )
+    return StudentInClassroomResponse(
+        id=cs.student.id,
+        name=cs.student.name,
+        email=cs.student.email,
+        enrolled_at=cs.enrolled_at,
+        seat_number=cs.seat_number,
+    )
+
+
 @router.post(
     "/classrooms/{from_classroom_id}/students/{student_id}/move",
     response_model=ClassroomStudentMoveResponse,
@@ -396,6 +534,7 @@ def list_classroom_students(
             name=cs.student.name,
             email=cs.student.email,
             enrolled_at=cs.enrolled_at,
+            seat_number=cs.seat_number,
         )
         for cs in enrollments
     ]

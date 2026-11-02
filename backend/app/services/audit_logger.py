@@ -46,6 +46,8 @@ class AuditAction(str, Enum):
     RESET_STUDENT_PASSWORD = "reset_student_password"
     MOVE_STUDENT = "move_student"
     BATCH_REMOVE_STUDENTS = "batch_remove_students"
+    RENAME_STUDENT = "rename_student"
+    SET_SEAT_NUMBER = "set_seat_number"
 
 
 def audit_log(

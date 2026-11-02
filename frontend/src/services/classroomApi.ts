@@ -40,6 +40,9 @@ export interface StudentInClassroomResponse {
    * field keep compiling; treat missing/false identically -- fail closed,
    * don't show the button. */
   can_reset_password?: boolean;
+  /** #3826: per-classroom-enrollment seat number. null/undefined means "not
+   * assigned yet" -- the frontend falls back to the row's array index. */
+  seat_number?: number | null;
 }
 
 export interface ResetPasswordResult {
@@ -265,6 +268,44 @@ export async function batchRemoveStudents(
     },
   );
   return handleResponse<BatchRemoveStudentsResult>(res);
+}
+
+// --- Rename student / seat number (#3826) ---
+// Both edit the SAME enrollment row/account surfaced via StudentInClassroomResponse,
+// never the login username/email.
+
+export async function renameStudent(
+  token: string,
+  classroomId: number,
+  studentId: number,
+  name: string,
+): Promise<StudentInClassroomResponse> {
+  const res = await fetch(
+    `${API_BASE}/api/classrooms/${classroomId}/students/${studentId}/name`,
+    {
+      method: 'PATCH',
+      headers: authHeaders(token),
+      body: JSON.stringify({ name }),
+    },
+  );
+  return handleResponse<StudentInClassroomResponse>(res);
+}
+
+export async function setStudentSeatNumber(
+  token: string,
+  classroomId: number,
+  studentId: number,
+  seatNumber: number | null,
+): Promise<StudentInClassroomResponse> {
+  const res = await fetch(
+    `${API_BASE}/api/classrooms/${classroomId}/students/${studentId}/seat`,
+    {
+      method: 'PATCH',
+      headers: authHeaders(token),
+      body: JSON.stringify({ seat_number: seatNumber }),
+    },
+  );
+  return handleResponse<StudentInClassroomResponse>(res);
 }
 
 // --- Delete classroom ---
