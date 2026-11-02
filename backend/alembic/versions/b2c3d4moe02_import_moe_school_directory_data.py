@@ -55,6 +55,14 @@ def upgrade() -> None:
 
     from app.services.moe_school_import import import_moe_schools, load_moe_school_rows
 
+    # a1b2c3moe01 created school_level as VARCHAR(10), but "junior_high" and
+    # "senior_high" are 11 chars; Postgres rejected the import on staging
+    # (2026-11-02). Widen before inserting. Idempotent: widening is a no-op
+    # if already VARCHAR(20).
+    # SQLite (tests) cannot ALTER a column type and does not enforce VARCHAR length.
+    if op.get_bind().dialect.name != "sqlite":
+        op.alter_column("schools", "school_level", type_=sa.String(20), existing_nullable=True)
+
     bind = op.get_bind()
     session = Session(bind=bind)
     try:
