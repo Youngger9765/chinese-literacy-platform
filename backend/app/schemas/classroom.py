@@ -44,6 +44,10 @@ class StudentInClassroomResponse(BaseModel):
     name: str
     email: str
     enrolled_at: datetime
+    # #3818: true only for the account's recorded password teacher (or a
+    # system_admin) -- drives whether the frontend shows the reset-password
+    # button for this row at all.
+    can_reset_password: bool = False
 
     model_config = {"from_attributes": True}
 

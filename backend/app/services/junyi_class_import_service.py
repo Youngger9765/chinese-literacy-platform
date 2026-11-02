@@ -176,6 +176,12 @@ def import_junyi_classes(
                     name=(row.display_name or "").strip() or f"均一學生 {counter}",
                     junyi_identity_id=identity_id,
                     email_verified=True,
+                    # #3818: this branch is the one place that actually
+                    # CREATES the account (the `student is not None` branch
+                    # above reuses an existing account -- possibly one the
+                    # student already self-registered via Junyi SSO, which
+                    # must NOT be attributed to this importing teacher).
+                    created_by_teacher_id=teacher.id,
                 )
                 try:
                     with db.begin_nested():
