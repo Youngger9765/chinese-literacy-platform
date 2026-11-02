@@ -84,9 +84,35 @@ class ActivateTeacherRequest(BaseModel):
 
     No approval. See PRD docs/prd/2026-11-01-school-as-teacher-attribute-prd.md
     §10/§11 (original design) and §4.4 (directory-code binding, #3812).
+
+    `school_names` (#3804's original flat string list) is kept, NOT removed,
+    for backward compatibility (#3812 CI finding 2026-11-02): a rolling
+    deploy can briefly have an old frontend still sending it against a new
+    backend, and several existing regression locks (tests/security/
+    test_dynamic_security.py's IDOR tests, the Playwright game-feature E2E
+    helpers) call this endpoint directly with that shape and are themselves
+    the compatibility guarantee, not something to migrate. Both fields may
+    be sent in the same request; the route combines them before calling
+    activate_teacher_for_schools. At least one of the two must contain an
+    entry.
     """
 
-    schools: list[ActivateTeacherSchoolInput] = Field(..., min_length=1, max_length=10)
+    schools: list[ActivateTeacherSchoolInput] = Field(default_factory=list, max_length=10)
+    school_names: list[str] = Field(default_factory=list, max_length=10)
+
+    @model_validator(mode="after")
+    def _at_least_one_school_total(self) -> "ActivateTeacherRequest":
+        cleaned = [name.strip() for name in self.school_names]
+        if any(not name for name in cleaned):
+            raise ValueError("學校名稱不可空白")
+        self.school_names = cleaned
+
+        total = len(self.schools) + len(self.school_names)
+        if total == 0:
+            raise ValueError("至少需要一所學校")
+        if total > 10:
+            raise ValueError("一次最多開通 10 所學校")
+        return self
 
 
 class SchoolActivationBrief(BaseModel):

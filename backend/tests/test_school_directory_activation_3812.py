@@ -271,6 +271,50 @@ class TestActivateWithMoeSchoolCode:
 
 
 # ===========================================================================
+# 1b. Backward compatibility: the pre-#3812 `school_names` field must keep
+#     working (CI found this the hard way: 3 security regression locks in
+#     tests/security/test_dynamic_security.py and the Playwright game E2E
+#     helpers all still send `school_names`, which this app's own rolling
+#     deploy can also momentarily send if the frontend lags the backend).
+#     "不要改名" -- Young: accept BOTH shapes, don't force every caller to
+#     migrate in lockstep.
+# ===========================================================================
+
+
+class TestLegacySchoolNamesFieldStillWorks:
+    def test_school_names_only_still_activates_by_name_matching(self, client):
+        _, token = _register_login(client, "legacy_caller")
+        unique_name = f"舊呼叫方學校_{uuid.uuid4().hex[:6]}"
+        resp = client.post(
+            "/api/users/me/activate-teacher",
+            json={"school_names": [unique_name]},
+            headers=auth_header(token),
+        )
+        assert resp.status_code == 200, resp.text
+        assert resp.json()["schools"][0]["name"] == unique_name
+
+    def test_neither_schools_nor_school_names_is_rejected(self, client):
+        _, token = _register_login(client, "legacy_empty")
+        resp = client.post(
+            "/api/users/me/activate-teacher",
+            json={},
+            headers=auth_header(token),
+        )
+        assert resp.status_code == 422, resp.text
+
+    def test_schools_and_school_names_can_both_be_sent_in_one_request(self, client):
+        _, token = _register_login(client, "legacy_mixed")
+        legacy_name = f"舊混合請求學校_{uuid.uuid4().hex[:6]}"
+        resp = client.post(
+            "/api/users/me/activate-teacher",
+            json={"schools": [{"moe_school_code": "333602"}], "school_names": [legacy_name]},
+            headers=auth_header(token),
+        )
+        assert resp.status_code == 200, resp.text
+        assert len(resp.json()["schools"]) == 2
+
+
+# ===========================================================================
 # 2. Manual fallback ("找不到我的學校") -- stored as to-be-confirmed, not a
 #    formal school. Young (verbatim): "依 PRD 存成待確認的學校，不要直接新建
 #    正式學校。"
