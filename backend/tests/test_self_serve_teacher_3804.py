@@ -736,10 +736,15 @@ class TestRealAdminCreatedSchoolRosterStillWorksForItsOwnTeachers:
         )
         assert cls.status_code == 201, cls.text
 
+        # 2026-11-02 staging repro: at a real/MOE school, owning one classroom
+        # is something any stranger can do, so it no longer unlocks the
+        # school-wide list. Only system_admin / the school's admin_user_id do.
         resp = client.get(f"/api/schools/{school_id}/classrooms", headers=auth_header(token))
-        assert resp.status_code == 200, resp.text
-        names = {c["name"] for c in resp.json()}
-        assert "RealSchoolClassroom" in names
+        assert resp.status_code == 403, resp.text
+        # Their own classroom is still visible through the normal list.
+        own = client.get("/api/classrooms", headers=auth_header(token))
+        assert own.status_code == 200, own.text
+        assert "RealSchoolClassroom" in own.text
 
 
 # ===========================================================================

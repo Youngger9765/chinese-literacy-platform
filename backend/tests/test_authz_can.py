@@ -194,8 +194,20 @@ def test_non_admin_cannot_manage_school_directory(world, db):
     assert can(world["teacher_a"], "manage", "school", world["school_a"].id, db) is False
 
 
-def test_school_member_can_view_roster(world, db):
-    assert can(world["teacher_a"], "view", "school_roster", world["school_a"].id, db) is True
+def test_classroom_owner_cannot_view_whole_school_roster(world, db):
+    # #3804 (2026-11-02, staging repro): any account can self-activate into a
+    # MOE directory school and create one classroom there, so "owns a
+    # classroom at the school" is not a trust signal. Young 2026-11-01:
+    # 「宣告了某所學校，不代表能看到那所學校的其他班」. Teachers see their own
+    # classrooms via GET /classrooms; the school-wide roster is admin-only.
+    assert can(world["teacher_a"], "view", "school_roster", world["school_a"].id, db) is False
+
+
+def test_school_admin_user_can_view_roster(world, db):
+    school = world["school_a"]
+    school.admin_user_id = world["teacher_b"].id
+    db.commit()
+    assert can(world["teacher_b"], "view", "school_roster", school.id, db) is True
 
 
 def test_non_member_cannot_view_roster(world, db):
