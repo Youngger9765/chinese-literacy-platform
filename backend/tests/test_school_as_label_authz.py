@@ -218,9 +218,9 @@ class TestOwnSchoolAccess:
         r = client.get(f"/api/schools/{actors['other_school_id']}", headers=auth_header(actors["teacher_tok"]))
         assert r.status_code == 403, r.text
 
-    def test_list_school_members_own_is_200(self, client, actors):
+    def test_list_school_members_own_is_403_for_plain_teacher(self, client, actors):
         r = client.get(f"/api/schools/{actors['school_id']}/members", headers=auth_header(actors["teacher_tok"]))
-        assert r.status_code == 200, r.text
+        assert r.status_code == 403, r.text  # #3804: roster is admin-only now
 
     def test_list_school_members_other_is_403(self, client, actors):
         r = client.get(
@@ -229,12 +229,12 @@ class TestOwnSchoolAccess:
         )
         assert r.status_code == 403, r.text
 
-    def test_list_school_classrooms_own_is_200(self, client, actors):
+    def test_list_school_classrooms_own_is_403_for_plain_teacher(self, client, actors):
         r = client.get(
             f"/api/schools/{actors['school_id']}/classrooms",
             headers=auth_header(actors["teacher_tok"]),
         )
-        assert r.status_code == 200, r.text
+        assert r.status_code == 403, r.text  # #3804: roster is admin-only now
 
     def test_list_school_classrooms_other_is_403(self, client, actors):
         r = client.get(
