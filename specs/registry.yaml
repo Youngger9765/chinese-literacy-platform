@@ -98,7 +98,7 @@ modules:
   related_issues:
   - 1844
   - 2058
-  last_reviewed: 2026-06-02
+  last_reviewed: 2026-11-01
   owner: young
   intent: specs/modules/auth-flows/INTENT.md
 - spec_id: comprehension.grading.schema_and_fail_closed

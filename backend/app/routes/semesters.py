@@ -7,10 +7,12 @@ Endpoints:
   PATCH  /schools/{school_id}/semesters/{id}      — update semester
   POST   /schools/{school_id}/semesters/{id}/activate  — activate semester
 
-Access:
-  - system_admin and org_admin can manage any school's semesters.
-  - school_admin / teacher can read their own school's semesters.
-  - Write operations require system_admin, org_admin, or school_admin.
+Access (#3804 — school-as-label model):
+  - system_admin can manage any school's semesters.
+  - Any active member of the school (any role — there is no dedicated
+    "school admin" role in active use; principal/director are defined but
+    never checked anywhere else either) can read AND write its semesters.
+    The old org_admin-of-the-school's-org bypass is retired.
 """
 
 import logging
@@ -20,7 +22,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, field_validator, model_validator
 from sqlalchemy.orm import Session
 
-from ..auth.dependencies import get_current_user, get_user_org_ids
+from ..auth.authz import can
+from ..auth.dependencies import get_current_user
 from ..database import get_db
 from ..models.school import School
 from ..models.semester import Semester
@@ -101,39 +104,23 @@ def _get_school_or_404(school_id: int, db: Session) -> School:
     return school
 
 
-def _user_is_school_member(user: User, school_id: int) -> bool:
-    return any(
-        ur.is_active and ur.scope_type == "school" and ur.scope_id == str(school_id)
-        for ur in user.user_roles
-    )
-
-
 def _require_school_write_access(school: School, current_user: User, db: Session) -> None:
-    """Allow system_admin (global) or org_admin/org_owner OF THIS school's org.
+    """Allow system_admin, or any active member of this school (#3804).
 
-    (#2470 NEW-4: previously any org_admin — even of another org — could write.)
+    Previously this required system_admin or an org_admin/org_owner of the
+    school's org — so an ordinary teacher could never create/update/activate
+    a semester for their OWN school (see PRD #3804 §1.2.A). The org_admin
+    bypass is retired along with the org tenancy tier; any school member may
+    now manage the shared term calendar.
     """
-    org_ids = get_user_org_ids(current_user)
-    if org_ids is None:  # system_admin sees/does all
-        return
-    if school.organization_id is not None and school.organization_id in org_ids:
-        return
-    raise HTTPException(status_code=403, detail="Insufficient permissions")
+    if not can(current_user, "manage", "semester", school.id, db):
+        raise HTTPException(status_code=403, detail="Insufficient permissions")
 
 
-def _require_school_read_access(school: School, current_user: User) -> None:
-    """Allow system_admin, org_admin/org_owner of the org, OR a member of the school.
-
-    (#2470 NEW-4: reads were open to any authenticated user across schools.)
-    """
-    org_ids = get_user_org_ids(current_user)
-    if org_ids is None:  # system_admin
-        return
-    if school.organization_id is not None and school.organization_id in org_ids:
-        return
-    if _user_is_school_member(current_user, school.id):
-        return
-    raise HTTPException(status_code=403, detail="Not authorized for this school")
+def _require_school_read_access(school: School, current_user: User, db: Session) -> None:
+    """Allow system_admin, or a member of the school (#3804: org_admin bypass retired)."""
+    if not can(current_user, "view", "school_roster", school.id, db):
+        raise HTTPException(status_code=403, detail="Not authorized for this school")
 
 
 def _semester_to_response(s: Semester) -> SemesterResponse:
@@ -166,7 +153,7 @@ def list_school_semesters(
 ):
     """Return all semesters for a school, newest first."""
     school = _get_school_or_404(school_id, db)
-    _require_school_read_access(school, current_user)
+    _require_school_read_access(school, current_user, db)
     semesters = list_semesters(school_id, db)
     return [_semester_to_response(s) for s in semesters]
 
@@ -220,7 +207,7 @@ def get_school_active_semester(
 ):
     """Return the currently active semester, or null if none."""
     school = _get_school_or_404(school_id, db)
-    _require_school_read_access(school, current_user)
+    _require_school_read_access(school, current_user, db)
     semester = get_active_semester(school_id, db)
     if semester is None:
         return None

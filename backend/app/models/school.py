@@ -37,6 +37,25 @@ class School(Base):
     )
     join_code: Mapped[str | None] = mapped_column(String(20), unique=True, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    # MOE school directory import (#3804 §4.2). All nullable — pre-existing
+    # domain-auto-created / manually-created schools keep moe_school_code=NULL
+    # forever unless someone explicitly maps them later (out of scope this
+    # round, see PRD §4.2 "Young 的問題 2 答覆"). NULL != NULL under the
+    # unique index, so many legacy rows can coexist with it.
+    moe_school_code: Mapped[str | None] = mapped_column(
+        String(20), unique=True, nullable=True, index=True
+    )
+    # Raw bracketed code from the source "縣市名稱" column, kept for
+    # provenance only — NOT a stable county key (臺北市 alone spans
+    # [31]-[42], 高雄市 spans [51]-[61]; see backend/data/moe_schools/README.md).
+    # Directory search filters on county_name text, not this field.
+    county_code: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    county_name: Mapped[str | None] = mapped_column(String(50), nullable=True, index=True)
+    # "elementary" | "junior_high" | "senior_high" — tagged from which MOE
+    # source file the row came from, not guessed from the name (a name like
+    # "○○國中(小)" would be ambiguous to parse).
+    school_level: Mapped[str | None] = mapped_column(String(20), nullable=True, index=True)
+    is_public: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
     # Allowed email domains for teacher registration (issue #407).
     # If set to a non-empty list, only teachers whose email domain appears in this list
     # may join this school.  Stored as JSON list of lowercase domain strings,

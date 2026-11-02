@@ -186,7 +186,7 @@ def _get(db, key: str) -> User:
 
 
 class TestClassroomAccessAllowed:
-    @pytest.mark.parametrize("key", ["owner", "co_teacher", "org_admin", "org_owner", "sysadmin"])
+    @pytest.mark.parametrize("key", ["owner", "co_teacher", "sysadmin"])
     def test_allowed(self, db, key):
         classroom = _check_classroom_access(_get(db, key), C["a"], db)
         assert classroom.id == C["a"]
@@ -198,14 +198,21 @@ class TestClassroomAccessAllowed:
     def test_other_co_teacher_can_access_own_class(self, db):
         assert _check_classroom_access(_get(db, "other_co_teacher"), C["b"], db).id == C["b"]
 
-    def test_other_org_admin_can_access_own_org_class(self, db):
-        assert _check_classroom_access(_get(db, "other_org_admin"), C["b"], db).id == C["b"]
+    def test_other_org_admin_of_own_org_cannot_access_its_class(self, db):
+        """(#3804) The org_admin-of-the-school's-org bypass is retired — being
+        admin of the SAME org that owns this classroom no longer grants
+        access. This used to be the "allowed" control case."""
+        with pytest.raises(HTTPException) as exc:
+            _check_classroom_access(_get(db, "other_org_admin"), C["b"], db)
+        assert exc.value.status_code == 403
 
 
 class TestClassroomAccessDenied:
     @pytest.mark.parametrize("key", [
         "other_teacher",       # a teacher — of a different class
         "other_co_teacher",    # a co-teacher — of a different class
+        "org_admin",           # (#3804) org_admin of the class's OWN org — no longer a bypass
+        "org_owner",           # (#3804) org_owner of the class's OWN org — no longer a bypass
         "other_org_admin",     # an org admin — of a different org
         "revoked_org_admin",   # right org, role is_active=False
         "org_member",          # right org, role is not an admin role

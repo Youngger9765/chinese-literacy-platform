@@ -154,3 +154,57 @@ def _no_outbound_network(request):
         yield
     finally:
         socket.socket.connect = real_connect
+
+
+# ── 測試不准寫入正式的例句快取檔（Issue #3803）──────────────────────────────
+# app.services.example_sentence_cache 模組層的 `_cache_path` 預設指向
+# backend/data/example_sentence_cache.json —— 那是隨部署上線的正式資料檔。
+# 任何測試打中 /learning/sentence-practice/example-sentences 的 cache miss
+# 路徑、又沒有把 get_cached/set_cached 整組 mock 掉（例如
+# tests/test_sentence_practice.py::TestExampleSentences::
+# test_example_sentences_returns_two_sentences），set_cached 就會把 AI mock
+# 回的假例句寫進這個正式檔。
+#
+# 每個測試一律先把 `_cache_path` 轉到這次測試自己的 tmp 檔，測試本身與它呼叫
+# 到的任何路由都只碰得到這個 tmp 檔。不做 teardown 復原——下一個測試的
+# setup 會在它開始前就再轉一次，正式路徑沒有曝光的空檔。
+@pytest.fixture(autouse=True)
+def _isolated_example_sentence_cache(tmp_path):
+    from app.services import example_sentence_cache as _esc
+
+    _esc._reset(path=str(tmp_path / "example_sentence_cache_test.json"))
+    yield
+
+
+# ── 正式的例句快取檔跑完整套測試後內容不能變（Issue #3803）─────────────────
+# backend/data/example_sentence_cache.json 會隨部署上線。它是
+# app.services.example_sentence_cache 模組層 `_cache_path` 的預設值，任何
+# 測試只要打中 cache miss 又沒有把 get_cached/set_cached 導去別的路徑，就會
+# 把假例句寫進這個正式檔 —— 跑完 `git status` 看得到它被改，有人
+# `git add -A` 就會把測試資料部署上線。
+#
+# 這是 session 範圍的回歸鎖：記住套件開跑前的 hash，全部測試跑完再比一次。
+# 任何測試（含未來新增的）只要讓這個檔案變動，這裡就會跑完整套後才失敗——
+# 不靠記得幫每一支新測試都做隔離。
+@pytest.fixture(scope="session", autouse=True)
+def _example_sentence_cache_file_untouched():
+    import hashlib
+
+    from app.services import example_sentence_cache as _esc
+
+    cache_path = _esc.DEFAULT_CACHE_PATH
+
+    def _hash():
+        if not os.path.exists(cache_path):
+            return None
+        with open(cache_path, "rb") as f:
+            return hashlib.sha256(f.read()).hexdigest()
+
+    before = _hash()
+    yield
+    after = _hash()
+    assert after == before, (
+        "backend/data/example_sentence_cache.json changed during the test "
+        f"run (sha256 before={before}, after={after}). This file ships with "
+        "deploys — tests must never write to it (Issue #3803)."
+    )

@@ -162,6 +162,27 @@ def _make_admin(client, user_data: dict) -> dict:
     return user_data
 
 
+def _make_school_member(client, user_data: dict, school_id: int, role_name: str = "teacher") -> dict:
+    """Assign a school-scoped role (e.g. teacher) to a user via DB.
+
+    Mirrors how real teacher accounts are provisioned (#3800 regression lock):
+    UserRole(scope_type="school", scope_id=str(school_id)) — NOT an
+    "organization"-scoped role, so this must not rely on get_user_org_ids().
+    """
+    db = TestingSessionLocal()
+    role = db.query(Role).filter(Role.name == role_name).first()
+    user_role = UserRole(
+        user_id=user_data["user_id"],
+        role_id=role.id,
+        scope_type="school",
+        scope_id=str(school_id),
+    )
+    db.add(user_role)
+    db.commit()
+    db.close()
+    return user_data
+
+
 @pytest.fixture(scope="module")
 def user1(client):
     return _register_user(client, "school_user")
@@ -259,7 +280,9 @@ class TestListSchools:
         assert resp.status_code == 200
 
     def test_list_returns_items_and_total(self, client, user1, admin_user):
-        # user1 has no org scope — sees empty list (correct scoping behaviour)
+        # (#3804 Phase 2) user1 is a freshly self-registered account --
+        # platform-scoped student, no school yet. list_schools is
+        # membership-scoped, so a bare student sees zero schools.
         resp = client.get("/api/schools", headers=auth_header(user1["token"]))
         data = resp.json()
         assert "items" in data
@@ -267,6 +290,22 @@ class TestListSchools:
         assert isinstance(data["items"], list)
         assert isinstance(data["total"], int)
         assert data["total"] == 0
+
+        # Self-activating as a teacher for a named school (#3804) grants
+        # exactly that one school's membership -- the behavior this test
+        # originally existed to lock (membership-scoped, not zero, not
+        # "every school"; see PRD #3804 §1.2.A for the get_user_org_ids()
+        # bug this traces back to) is still real, just reached a different
+        # way than the retired email-domain auto-assignment.
+        act = client.post(
+            "/api/users/me/activate-teacher",
+            json={"schools": [{"name": n} for n in ([f"user1 的學校_{uuid.uuid4().hex[:6]}"])]},
+            headers=auth_header(user1["token"]),
+        )
+        assert act.status_code == 200, act.text
+
+        resp2 = client.get("/api/schools", headers=auth_header(user1["token"]))
+        assert resp2.json()["total"] == 1
 
         # admin_user (system_admin) sees all schools
         resp_admin = client.get("/api/schools", headers=auth_header(admin_user["token"]))
@@ -320,6 +359,53 @@ class TestGetSchool:
     def test_get_requires_auth(self, client):
         resp = client.get("/api/schools/1")
         assert resp.status_code == 401
+
+    def test_teacher_can_read_own_school(self, client, admin_user, user1):
+        """Regression lock for #3800.
+
+        A teacher with an active school-scoped UserRole (scope_type="school",
+        scope_id=str(school.id)) — NOT an organization-scoped role — must be
+        able to GET their own school's detail. Before the fix, get_school()
+        only consulted get_user_org_ids() (organization-scoped roles only),
+        so every ordinary teacher got 403 on their own school.
+        """
+        create_resp = client.post(
+            "/api/schools",
+            json={"name": "Teacher's Own School"},
+            headers=auth_header(admin_user["token"]),
+        )
+        school_id = create_resp.json()["id"]
+
+        teacher = _make_school_member(client, user1, school_id, role_name="teacher")
+
+        resp = client.get(
+            f"/api/schools/{school_id}",
+            headers=auth_header(teacher["token"]),
+        )
+        assert resp.status_code == 200
+        assert resp.json()["id"] == school_id
+
+    def test_teacher_cannot_read_other_school(self, client, admin_user, user1):
+        """Positive control for test_teacher_can_read_own_school: school
+        membership must not grant access to a DIFFERENT school."""
+        own_school = client.post(
+            "/api/schools",
+            json={"name": "Teacher's Own School 2"},
+            headers=auth_header(admin_user["token"]),
+        ).json()
+        other_school = client.post(
+            "/api/schools",
+            json={"name": "A Different School"},
+            headers=auth_header(admin_user["token"]),
+        ).json()
+
+        teacher = _make_school_member(client, user1, own_school["id"], role_name="teacher")
+
+        resp = client.get(
+            f"/api/schools/{other_school['id']}",
+            headers=auth_header(teacher["token"]),
+        )
+        assert resp.status_code == 403
 
 
 # ===========================================================================

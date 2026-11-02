@@ -30,22 +30,18 @@ def get_organization_dashboard(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Return aggregate statistics for an organization."""
+    """Return aggregate statistics for an organization.
+
+    (#3804) system_admin-only. Organization stays as a dormant billing
+    concept (see PRD #3804 §1.2), but its dashboard aggregates teacher/
+    student/session counts across schools that are no longer "owned" by
+    org_admin/org_owner under the school-as-label model — there is no one
+    left to administratively own this view except system_admin.
+    """
     org = _get_org_or_404(org_id, db)
 
-    # Permission check: system_admin (global), or org_owner/org_admin of THIS org.
-    # Use is_system_admin (not is_admin) so org_admin can't bypass org scoping.
     if not is_system_admin(current_user.id, db):
-        has_org_role = any(
-            ur.is_active
-            and ur.scope_type == "organization"
-            and ur.scope_id == str(org.id)
-            and ur.role
-            and ur.role.name in ("org_owner", "org_admin")
-            for ur in current_user.user_roles
-        )
-        if not has_org_role:
-            raise HTTPException(status_code=403, detail="Insufficient permissions")
+        raise HTTPException(status_code=403, detail="Insufficient permissions")
 
     schools = (
         db.query(School)

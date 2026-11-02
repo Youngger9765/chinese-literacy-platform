@@ -77,6 +77,17 @@ export function getStudentNavItems(pendingAssignmentCount = 0): NavItem[] {
     { icon: '🏆', label: '我們班', path: '/student/our-class' },
     { icon: '🎮', label: '課堂搶答', path: '/live' },
     { icon: '➕', label: '加入班級', path: '/join' },
+    // #3804 (Young 2026-11-01): self-serve teacher activation. Placed right
+    // after 加入班級 on purpose -- both are self-service actions that attach
+    // the account to something (a classroom / a school), same mental model,
+    // so a student is likely to notice this one too. See PRD §10.1.
+    {
+      icon: '🏫',
+      label: '開通老師身分',
+      path: '/activate-teacher',
+      // main has no NavItem.description (added on staging by the game-area
+      // work), so the sidebar subtitle ships with that later release.
+    },
     { icon: '📖', label: '學習紀錄', path: '/learning-history' },
     // /help had no entry anywhere in the UI until #3142.
     { icon: '❓', label: '使用說明', path: '/help' },

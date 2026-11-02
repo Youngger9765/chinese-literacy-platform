@@ -3,24 +3,29 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
-from sqlalchemy import and_, or_
 from sqlalchemy.orm import Session, joinedload, selectinload
 
 from ..auth.classroom_check import compute_has_classroom
 from ..auth.password_policy import compute_must_change_password
-from ..auth.dependencies import get_current_user, get_user_org_ids, require_role
-from ..auth.policies import is_system_admin, resolve_user_org_ids
-from ..models.school import School
+from ..auth.dependencies import get_current_user, require_role
 from ..config import settings
 from ..database import get_db
 from ..models.user import User, UserRole, Role
-from ..schemas.user import UserResponse, UserRoleResponse
+from ..schemas.user import (
+    ActivateTeacherRequest,
+    ActivateTeacherResponse,
+    ActivateTeacherSchoolInput,
+    SchoolActivationBrief,
+    UserResponse,
+    UserRoleResponse,
+)
 from ..schemas.user_admin import (
     UserDetailResponse,
     UserListItem,
     UserListResponse,
     UserRoleItem,
 )
+from ..services.auth_registration_service import activate_teacher_for_schools
 
 router = APIRouter(tags=["users"])
 logger = logging.getLogger(__name__)
@@ -174,6 +179,60 @@ def update_me(
     )
 
 
+# ── Self-serve teacher activation (#3804) ───────────────────────────────────
+
+
+@router.post("/users/me/activate-teacher", response_model=ActivateTeacherResponse)
+def activate_teacher(
+    payload: ActivateTeacherRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Self-serve: any logged-in account can become a teacher by naming the
+    school(s) they teach at. No approval, no domain guessing (#3804, Young
+    2026-11-01). Does not remove or affect the student role granted at
+    registration — the account simply gains a teacher role on top of it, and
+    the frontend's existing WorkspaceContext role switcher picks this up
+    automatically once there are 2+ roles.
+
+    Idempotent: naming a school the caller is already a teacher of again is a
+    no-op for that school (still returns it, with is_new=False).
+    """
+    # #3812: merge the two request shapes into one list before resolving —
+    # a bare `school_names` entry is equivalent to {"name": ...} (the
+    # manual/legacy path), never a directory code. See schemas/user.py
+    # ActivateTeacherRequest docstring for why both fields exist.
+    schools_input = list(payload.schools) + [
+        ActivateTeacherSchoolInput(name=name) for name in payload.school_names
+    ]
+    schools_with_flag = activate_teacher_for_schools(db, current_user, schools_input)
+    db.commit()
+
+    user_roles = (
+        db.query(UserRole, Role)
+        .join(Role, UserRole.role_id == Role.id)
+        .filter(UserRole.user_id == current_user.id, UserRole.is_active == True)
+        .all()
+    )
+    roles = [
+        UserRoleResponse(
+            role_name=role.name,
+            role_display_name=role.display_name,
+            scope_type=ur.scope_type,
+            scope_id=ur.scope_id,
+        )
+        for ur, role in user_roles
+    ]
+
+    return ActivateTeacherResponse(
+        schools=[
+            SchoolActivationBrief(id=school.id, name=school.name, is_new=is_new)
+            for school, is_new in schools_with_flag
+        ],
+        roles=roles,
+    )
+
+
 # ── Admin user management endpoints ─────────────────────────────────────────
 
 
@@ -182,54 +241,16 @@ def list_users(
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
     search: str | None = Query(None),
-    current_user: User = require_role("system_admin", "org_admin"),
+    current_user: User = require_role("system_admin"),
     db: Session = Depends(get_db),
 ):
     """List users with pagination and optional search.
 
-    system_admin sees all users on the platform.
-    org_admin sees only users whose org-scoped UserRole matches
-    the caller's own org scope(s) — enforcing 個資法 §20.
+    (#3804) system_admin-only. org_admin's "see users within my org(s)" scope
+    is retired along with the org tenancy tier — there is no longer an
+    admin tier between "my own classroom's students" and system_admin.
     """
     query = db.query(User)
-
-    # Scope restriction: org_admin may only see users within their org(s).
-    # system_admin bypasses; org_admin is NOT global — it must be org-scoped.
-    if not is_system_admin(current_user.id, db):
-        caller_org_ids = resolve_user_org_ids(current_user.id, db)
-        if not caller_org_ids:
-            # org_admin with no org scope → see nothing
-            return UserListResponse(items=[], total=0)
-        # Keep users who belong to one of the caller's orgs — via a direct
-        # org-scoped role OR a school-scoped role whose school is in the org
-        # (students/teachers are school-scoped in the production model).
-        caller_school_ids = [
-            str(sid)
-            for (sid,) in db.query(School.id)
-            .filter(School.organization_id.in_(caller_org_ids))
-            .all()
-        ]
-        scope_predicates = [
-            and_(
-                UserRole.scope_type == "organization",
-                UserRole.scope_id.in_(list(caller_org_ids)),
-            )
-        ]
-        if caller_school_ids:
-            scope_predicates.append(
-                and_(
-                    UserRole.scope_type == "school",
-                    UserRole.scope_id.in_(caller_school_ids),
-                )
-            )
-        query = query.filter(
-            User.id.in_(
-                db.query(UserRole.user_id).filter(
-                    UserRole.is_active == True,
-                    or_(*scope_predicates),
-                )
-            )
-        )
 
     if search:
         pattern = f"%{search}%"
@@ -267,14 +288,13 @@ def list_users(
 @router.get("/users/{user_id}", response_model=UserDetailResponse)
 def get_user_detail(
     user_id: int,
-    current_user: User = require_role("system_admin", "org_admin"),
+    current_user: User = require_role("system_admin"),
     db: Session = Depends(get_db),
 ):
     """Get full user detail by ID.
 
-    system_admin may read any user.
-    org_admin may only read users who belong to the same org scope —
-    enforcing 個資法 §20 (cross-org reads → 403).
+    (#3804) system_admin-only. org_admin's "same org scope" cross-tenant
+    read is retired along with the org tenancy tier.
     """
     user = (
         db.query(User)
@@ -286,17 +306,6 @@ def get_user_detail(
     )
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
-
-    # Scope check for org_admin: target user must share at least one org with caller.
-    # Resolve via school->org so school-scoped targets (production model) match.
-    if not is_system_admin(current_user.id, db):
-        caller_org_ids = resolve_user_org_ids(current_user.id, db)
-        target_org_ids = resolve_user_org_ids(user.id, db)
-        if not (caller_org_ids & target_org_ids):
-            raise HTTPException(
-                status_code=403,
-                detail="Not authorized to view this user",
-            )
 
     return UserDetailResponse(
         id=user.id,

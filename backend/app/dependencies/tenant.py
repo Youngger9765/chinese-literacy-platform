@@ -35,7 +35,7 @@ from sqlalchemy.orm import Session
 
 from ..auth.dependencies import get_current_user
 from ..database import get_db
-from ..models.school import Classroom, ClassroomTeacher, School
+from ..models.school import Classroom, ClassroomTeacher
 from ..models.user import User
 
 logger = logging.getLogger(__name__)
@@ -168,8 +168,15 @@ def _check_classroom_access(user: User, classroom_id: int, db: Session) -> Class
     Access is granted if any of the following is true:
     - User is system_admin
     - User is the classroom's teacher (teacher_id == user.id)
-    - User is org_admin/org_owner AND the classroom's school belongs
-      to the same org as the user
+    - User is a co-teacher (ClassroomTeacher record)
+
+    (#3804) The org_admin/org_owner-of-the-school's-org bypass is retired —
+    school/org no longer grants reach into a classroom under the
+    school-as-label model. This function is imported directly by 9
+    teacher/*.py routes (teacher_dashboard, teacher_analytics,
+    teacher_reports, teacher_alerts, teacher_cross_text,
+    teacher_instructions, teacher_assignment_matrix,
+    teacher_classroom_stuck, teacher_live_monitor) — NOT dead code.
 
     Args:
         user: The current authenticated user.
@@ -210,24 +217,6 @@ def _check_classroom_access(user: User, classroom_id: int, db: Session) -> Class
     )
     if co_teacher:
         return classroom
-
-    # org_admin/org_owner can access classrooms in their org
-    user_org_admin_ids = {
-        ur.scope_id
-        for ur in user.user_roles
-        if (
-            ur.is_active
-            and ur.scope_type == "organization"
-            and ur.role
-            and ur.role.name in _ORG_ADMIN_ROLES
-        )
-    }
-
-    if user_org_admin_ids:
-        # Fetch the school to check its organization
-        school = db.query(School).filter(School.id == classroom.school_id).first()
-        if school and school.organization_id in user_org_admin_ids:
-            return classroom
 
     raise HTTPException(
         status_code=status.HTTP_403_FORBIDDEN,

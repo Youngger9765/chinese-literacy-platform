@@ -133,7 +133,7 @@ export async function register(
   const res = await fetch(`${API_BASE}/api/auth/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    // #3513: role is only sent for a parent sign-up; omitted = teacher.
+    // #3804: role is only sent for a parent sign-up; omitted = student (default).
     body: JSON.stringify(role ? { email, password, name, role } : { email, password, name }),
   });
   return handleAuthResponse<RegisterResponse>(res);
@@ -153,6 +153,73 @@ export async function getMe(token: string): Promise<AuthUser> {
     headers: { Authorization: `Bearer ${token}` },
   });
   return handleAuthResponse<AuthUser>(res);
+}
+
+/** #3804 self-serve teacher activation — PRD §10/§11, extended §4.4 (#3812). */
+export interface ActivateTeacherSchool {
+  id: number;
+  name: string;
+  is_new: boolean;
+}
+
+export interface ActivateTeacherResponse {
+  schools: ActivateTeacherSchool[];
+  roles: UserRole[];
+}
+
+/** One school selection submitted to activate-teacher (#3812 §4.4) —
+ * exactly one of the two must be set. See ActivateTeacherSchoolSelection in
+ * ActivateTeacherPage.tsx for the richer UI-side row state this is built from. */
+export interface ActivateTeacherSchoolInput {
+  moe_school_code?: string;
+  name?: string;
+}
+
+export async function activateTeacher(
+  token: string,
+  schools: ActivateTeacherSchoolInput[],
+): Promise<ActivateTeacherResponse> {
+  const res = await fetch(`${API_BASE}/api/users/me/activate-teacher`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ schools }),
+  });
+  return handleAuthResponse<ActivateTeacherResponse>(res);
+}
+
+/** #3812 §4.4 — GET /api/schools/directory/search result shapes. */
+export interface SchoolDirectoryItem {
+  id: number;
+  moe_school_code: string;
+  name: string;
+  county_name: string | null;
+  school_level: string | null;
+  is_public: boolean | null;
+}
+
+export interface SchoolNameSuggestion {
+  school_name: string;
+  reason: string;
+}
+
+export interface SchoolDirectorySearchResponse {
+  items: SchoolDirectoryItem[];
+  total: number;
+  suggestions: SchoolNameSuggestion[] | null;
+}
+
+export async function searchSchoolDirectory(
+  token: string,
+  county: string,
+  q: string,
+): Promise<SchoolDirectorySearchResponse> {
+  const params = new URLSearchParams();
+  if (county) params.set('county', county);
+  if (q) params.set('q', q);
+  const res = await fetch(`${API_BASE}/api/schools/directory/search?${params.toString()}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return handleAuthResponse<SchoolDirectorySearchResponse>(res);
 }
 
 export async function acceptTerms(token: string): Promise<AuthUser> {
