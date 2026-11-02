@@ -187,9 +187,21 @@ def _can_view_school_roster(user: User, resource_id, db: Session) -> bool:
     MOE-directory) school keeps the existing "own/co-teach at least one
     classroom there" gate, since its members have an actual institutional
     relationship."""
+    # (#3804, 2026-11-02 staging repro) The "own/co-teach a classroom there"
+    # gate is not enough for MOE directory schools either: anyone can pick
+    # 大安國小 from the directory, self-activate, create one dummy classroom
+    # and then read every other teacher's classrooms and members at that
+    # school. Teachers already see their own classrooms via GET /classrooms,
+    # and no page calls these school-wide endpoints, so the roster is now
+    # visible only to the school's designated admin (system_admin already
+    # bypasses in can()). Self-activation never sets admin_user_id.
+    # Self-activation DOES set admin_user_id for the first person to type a new
+    # school name, so that admin is not trustworthy either: a self-activated
+    # school keeps no shared roster at all (finding #5).
     if _is_self_activated_school(resource_id, db):
         return False
-    return _owns_or_co_teaches_a_classroom_at_school(user, resource_id, db)
+    school = db.query(School).filter(School.id == resource_id).first()
+    return bool(school and school.admin_user_id and school.admin_user_id == user.id)
 
 
 def _can_manage_semester(user: User, resource_id, db: Session) -> bool:

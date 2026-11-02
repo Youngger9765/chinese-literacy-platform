@@ -103,7 +103,7 @@ def test_system_admin_deletes_empty_org_but_not_one_with_schools(w):
     assert not w["org_exists"](w["org_empty"])
 
 
-@pytest.mark.parametrize("who,ok", [("admin", True), ("oa", False), ("ob", False), ("teacher", True)])
+@pytest.mark.parametrize("who,ok", [("admin", True), ("oa", False), ("ob", False), ("teacher", False)])
 def test_school_classroom_list_is_scoped_to_school_membership(w, who, ok):
     """(#3804) org_admin of the school's own org ("oa") is now denied — only
     system_admin and the school's own teacher ("teacher") get through."""
