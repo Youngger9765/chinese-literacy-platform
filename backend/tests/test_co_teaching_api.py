@@ -1,14 +1,18 @@
 """
-Tests for the co-teaching API (Issue #244).
+Tests for the co-teaching API (Issue #244, extended for #3820).
 
 Covers:
-- GET    /api/classrooms/{id}/teachers          (list teachers)
-- POST   /api/classrooms/{id}/teachers          (invite co-teacher)
-- DELETE /api/classrooms/{id}/teachers/{tid}    (remove co-teacher)
+- GET    /api/classrooms/{id}/teachers                 (list teachers)
+- POST   /api/classrooms/{id}/teachers                 (invite co-teacher, role required)
+- POST   /api/classrooms/{id}/teachers/{tid}/accept     (accept a pending invite)
+- DELETE /api/classrooms/{id}/teachers/{tid}            (remove/reject/revoke/leave)
 
 Permission scenarios:
 - Owner can invite and remove
-- Co-teacher can view list and leave
+- A pending invite grants NO access until accepted
+- Once accepted, an 'editor' co-teacher can view and write; a 'viewer'
+  co-teacher can view but not write (see test_co_teacher_viewer_role.py for
+  the full write-endpoint boundary matrix)
 - Stranger cannot access
 
 Uses SQLite in-memory DB.
@@ -203,16 +207,35 @@ def _h(token):
     return {"Authorization": f"Bearer {token}"}
 
 
-def _fresh_co_teacher(client, owner_token, classroom_id) -> str:
+def _fresh_co_teacher(client, owner_token, classroom_id, role: str = "editor") -> str:
+    """Register+invite+accept a brand-new co-teacher, returning their token.
+
+    Accepting immediately mirrors what a real invitee does after an invite —
+    most callers of this helper want to assert on *accepted* co-teacher
+    access, not on the pending state itself (see
+    test_pending_co_teacher_has_no_access for that).
+    """
     suffix = uuid.uuid4().hex[:8]
-    email = f"readonly_{suffix}@test.com"
-    token = _register(client, "Read Only Co Teacher", email)
+    email = f"{role}_{suffix}@test.com"
+    token = _register(client, f"{role.title()} Co Teacher", email)
+    me = client.get("/api/users/me", headers=_h(token))
+    assert me.status_code == 200, me.text
+    teacher_id = me.json()["id"]
+
     invite = client.post(
         f"/api/classrooms/{classroom_id}/teachers",
-        json={"email": email},
+        json={"email": email, "role": role},
         headers=_h(owner_token),
     )
     assert invite.status_code == 201, invite.text
+    assert invite.json()["status"] == "pending"
+
+    accept = client.post(
+        f"/api/classrooms/{classroom_id}/teachers/{teacher_id}/accept",
+        headers=_h(token),
+    )
+    assert accept.status_code == 200, accept.text
+    assert accept.json()["status"] == "accepted"
     return token
 
 
@@ -284,65 +307,154 @@ def test_stranger_cannot_list_teachers(client, stranger_token, classroom_id):
 
 
 def test_invite_co_teacher(client, owner_token, classroom_id):
-    """Owner can invite a co-teacher by email."""
+    """Owner can invite a co-teacher by email, specifying a role. Starts pending."""
     r = client.post(
         f"/api/classrooms/{classroom_id}/teachers",
-        json={"email": "coteacher@test.com"},
+        json={"email": "coteacher@test.com", "role": "editor"},
         headers=_h(owner_token),
     )
     assert r.status_code == 201
     data = r.json()
-    assert data["role"] == "assistant"
+    assert data["role"] == "editor"
+    assert data["status"] == "pending"
+    assert data["accepted_at"] is None
     assert data["classroom_id"] == classroom_id
 
 
+def test_invite_requires_role(client, owner_token, classroom_id):
+    """role is a required field -- #3820 invites must say editor or viewer."""
+    r = client.post(
+        f"/api/classrooms/{classroom_id}/teachers",
+        json={"email": "stranger@test.com"},
+        headers=_h(owner_token),
+    )
+    assert r.status_code == 422
+
+
 def test_list_teachers_after_invite(client, owner_token, classroom_id):
-    """After invite, list should have 2 teachers."""
+    """After invite, list should have 2 teachers (one still pending)."""
     r = client.get(f"/api/classrooms/{classroom_id}/teachers", headers=_h(owner_token))
     assert r.status_code == 200
     assert len(r.json()) == 2
 
 
+def test_pending_co_teacher_has_no_access(client, co_teacher_token, classroom_id):
+    """A pending invite grants NO access until accepted -- #3820 core invariant."""
+    r = client.get(f"/api/classrooms/{classroom_id}/teachers", headers=_h(co_teacher_token))
+    assert r.status_code == 403
+
+    r = client.get(f"/api/classrooms/{classroom_id}", headers=_h(co_teacher_token))
+    assert r.status_code == 403
+
+    r = client.get("/api/classrooms", headers=_h(co_teacher_token))
+    assert r.status_code == 200
+    ids = [c["id"] for c in r.json()["items"]]
+    assert classroom_id not in ids, "pending invite must not surface in the dashboard list"
+
+
+def test_pending_invitation_appears_in_my_invitations(client, co_teacher_token, classroom_id):
+    """The invitee can discover their pending invite via the dedicated endpoint."""
+    me = client.get("/api/users/me", headers=_h(co_teacher_token))
+    my_id = me.json()["id"]
+
+    r = client.get("/api/co-teaching/invitations", headers=_h(co_teacher_token))
+    assert r.status_code == 200
+    invites = r.json()
+    match = next(i for i in invites if i["classroom_id"] == classroom_id and i["role"] == "editor")
+    # teacher_id must be the invitee's own user id -- it's what the accept/
+    # DELETE endpoints key off in their URL path, NOT the ClassroomTeacher
+    # row's own id (classroom_teacher_id is a distinct, informational field).
+    assert match["teacher_id"] == my_id
+
+
+def test_other_user_cannot_accept_someone_elses_invitation(client, stranger_token, owner_id, classroom_id):
+    """Only the invitee can accept their own invitation."""
+    r = client.post(
+        f"/api/classrooms/{classroom_id}/teachers/{owner_id}/accept",
+        headers=_h(stranger_token),
+    )
+    assert r.status_code == 403
+
+
+def test_co_teacher_accepts_invitation(client, co_teacher_token, classroom_id):
+    """Invitee accepts -- status flips to accepted and they gain access."""
+    me = client.get("/api/users/me", headers=_h(co_teacher_token))
+    teacher_id = me.json()["id"]
+
+    r = client.post(
+        f"/api/classrooms/{classroom_id}/teachers/{teacher_id}/accept",
+        headers=_h(co_teacher_token),
+    )
+    assert r.status_code == 200, r.text
+    assert r.json()["status"] == "accepted"
+    assert r.json()["accepted_at"] is not None
+
+
+def test_accept_already_accepted_invitation_returns_409(client, co_teacher_token, classroom_id):
+    """Accepting a non-pending invitation (already accepted by the previous test) 409s."""
+    me = client.get("/api/users/me", headers=_h(co_teacher_token))
+    teacher_id = me.json()["id"]
+
+    r = client.post(
+        f"/api/classrooms/{classroom_id}/teachers/{teacher_id}/accept",
+        headers=_h(co_teacher_token),
+    )
+    assert r.status_code == 409
+
+
 def test_co_teacher_can_list_teachers(client, co_teacher_token, classroom_id):
-    """Co-teacher can view the teacher list."""
+    """Once accepted, co-teacher can view the teacher list."""
     r = client.get(f"/api/classrooms/{classroom_id}/teachers", headers=_h(co_teacher_token))
     assert r.status_code == 200
 
 
 def test_co_teacher_can_view_classroom(client, co_teacher_token, classroom_id):
-    """Co-teacher can GET classroom detail."""
+    """Once accepted, co-teacher can GET classroom detail."""
     r = client.get(f"/api/classrooms/{classroom_id}", headers=_h(co_teacher_token))
     assert r.status_code == 200
 
 
 def test_co_teacher_sees_classroom_in_dashboard(client, co_teacher_token, classroom_id):
-    """Co-teacher should see the classroom in GET /classrooms list."""
+    """Once accepted, co-teacher should see the classroom in GET /classrooms list."""
     r = client.get("/api/classrooms", headers=_h(co_teacher_token))
     assert r.status_code == 200
     ids = [c["id"] for c in r.json()["items"]]
     assert classroom_id in ids
 
 
-def test_co_teacher_cannot_create_assignment(client, owner_token):
-    """Co-teacher can read the classroom but cannot create assignments."""
+def test_viewer_cannot_create_assignment(client, owner_token):
+    """Viewer co-teacher can read the classroom but cannot create assignments (#3820)."""
     classroom_id = _create_boundary_classroom(client, owner_token)
-    token = _fresh_co_teacher(client, owner_token, classroom_id)
+    token = _fresh_co_teacher(client, owner_token, classroom_id, role="viewer")
 
     read = client.get(f"/api/classrooms/{classroom_id}", headers=_h(token))
     assert read.status_code == 200
 
     r = client.post(
         f"/api/classrooms/{classroom_id}/assignments",
-        json={"story_id": "20001", "title": "Co-teacher should be read-only"},
+        json={"story_id": "20001", "title": "Viewer should be read-only"},
         headers=_h(token),
     )
     assert r.status_code == 403, r.text
 
 
-def test_co_teacher_cannot_add_student(client, owner_token):
-    """Co-teacher can read the classroom but cannot add students."""
+def test_editor_can_create_assignment(client, owner_token):
+    """Positive control: editor co-teacher CAN create assignments (#3820)."""
     classroom_id = _create_boundary_classroom(client, owner_token)
-    token = _fresh_co_teacher(client, owner_token, classroom_id)
+    token = _fresh_co_teacher(client, owner_token, classroom_id, role="editor")
+
+    r = client.post(
+        f"/api/classrooms/{classroom_id}/assignments",
+        json={"story_id": "20001", "title": "Editor can create assignments"},
+        headers=_h(token),
+    )
+    assert r.status_code == 201, r.text
+
+
+def test_viewer_cannot_add_student(client, owner_token):
+    """Viewer co-teacher can read the classroom but cannot add students (#3820)."""
+    classroom_id = _create_boundary_classroom(client, owner_token)
+    token = _fresh_co_teacher(client, owner_token, classroom_id, role="viewer")
     student = _fresh_student(client)
 
     read = client.get(f"/api/classrooms/{classroom_id}", headers=_h(token))
@@ -356,10 +468,24 @@ def test_co_teacher_cannot_add_student(client, owner_token):
     assert r.status_code == 403, r.text
 
 
-def test_co_teacher_cannot_grade_submission(client, owner_token):
-    """Co-teacher can read the classroom but cannot grade submissions."""
+def test_editor_can_add_student(client, owner_token):
+    """Positive control: editor co-teacher CAN add students (#3820)."""
     classroom_id = _create_boundary_classroom(client, owner_token)
-    token = _fresh_co_teacher(client, owner_token, classroom_id)
+    token = _fresh_co_teacher(client, owner_token, classroom_id, role="editor")
+    student = _fresh_student(client)
+
+    r = client.post(
+        f"/api/classrooms/{classroom_id}/students",
+        json={"student_id": student["user_id"]},
+        headers=_h(token),
+    )
+    assert r.status_code == 201, r.text
+
+
+def test_viewer_cannot_grade_submission(client, owner_token):
+    """Viewer co-teacher can read the classroom but cannot grade submissions (#3820)."""
+    classroom_id = _create_boundary_classroom(client, owner_token)
+    token = _fresh_co_teacher(client, owner_token, classroom_id, role="viewer")
     student = _fresh_student(client)
     add = client.post(
         f"/api/classrooms/{classroom_id}/students",
@@ -375,27 +501,102 @@ def test_co_teacher_cannot_grade_submission(client, owner_token):
 
     r = client.patch(
         f"/api/assignments/{assignment_id}/submissions/{submission_id}",
-        json={"score": 88, "teacher_feedback": "Co-teacher grading must be denied"},
+        json={"score": 88, "teacher_feedback": "Viewer grading must be denied"},
         headers=_h(token),
     )
     assert r.status_code == 403, r.text
 
 
+def test_editor_can_grade_submission(client, owner_token):
+    """Positive control: editor co-teacher CAN grade submissions (#3820)."""
+    classroom_id = _create_boundary_classroom(client, owner_token)
+    token = _fresh_co_teacher(client, owner_token, classroom_id, role="editor")
+    student = _fresh_student(client)
+    add = client.post(
+        f"/api/classrooms/{classroom_id}/students",
+        json={"student_id": student["user_id"]},
+        headers=_h(owner_token),
+    )
+    assert add.status_code == 201, add.text
+    assignment_id = _create_assignment(client, owner_token, classroom_id)
+    submission_id = _first_submission_id(assignment_id)
+
+    r = client.patch(
+        f"/api/assignments/{assignment_id}/submissions/{submission_id}",
+        json={"score": 91, "teacher_feedback": "Editor grading is allowed"},
+        headers=_h(token),
+    )
+    assert r.status_code == 200, r.text
+
+
 def test_co_teacher_cannot_invite_others(client, co_teacher_token, classroom_id):
-    """Co-teacher cannot invite another teacher."""
+    """Co-teacher (any role) cannot invite another teacher -- owner-only (#3820 req #4)."""
     r = client.post(
         f"/api/classrooms/{classroom_id}/teachers",
-        json={"email": "stranger@test.com"},
+        json={"email": "stranger@test.com", "role": "editor"},
         headers=_h(co_teacher_token),
     )
     assert r.status_code == 403
 
 
+def test_co_teacher_cannot_change_role(client, co_teacher_token, classroom_id, owner_id):
+    """Co-teacher cannot change another co-teacher's role -- owner-only (#3820 req #4)."""
+    r = client.patch(
+        f"/api/classrooms/{classroom_id}/teachers/{owner_id}",
+        json={"role": "viewer"},
+        headers=_h(co_teacher_token),
+    )
+    assert r.status_code == 403
+
+
+def test_owner_cannot_change_own_role(client, owner_token, classroom_id, owner_id):
+    """The owner's 'primary' row cannot be retargeted through this endpoint."""
+    r = client.patch(
+        f"/api/classrooms/{classroom_id}/teachers/{owner_id}",
+        json={"role": "viewer"},
+        headers=_h(owner_token),
+    )
+    assert r.status_code == 400
+
+
+def test_owner_can_change_co_teacher_role(client, owner_token):
+    """Owner can change an accepted co-teacher's role editor<->viewer (#3820 req #4).
+
+    Uses its own boundary classroom -- this test leaves a co-teacher row
+    behind by design (to prove the role change held), and must not pollute
+    the shared `classroom_id` fixture that the end-of-file cleanup tests
+    (test_owner_can_remove_co_teacher / test_list_after_removal_has_one_teacher)
+    count rows against.
+    """
+    classroom_id = _create_boundary_classroom(client, owner_token)
+    token = _fresh_co_teacher(client, owner_token, classroom_id, role="editor")
+    me = client.get("/api/users/me", headers=_h(token))
+    teacher_id = me.json()["id"]
+
+    r = client.patch(
+        f"/api/classrooms/{classroom_id}/teachers/{teacher_id}",
+        json={"role": "viewer"},
+        headers=_h(owner_token),
+    )
+    assert r.status_code == 200, r.text
+    assert r.json()["role"] == "viewer"
+    assert r.json()["status"] == "accepted", "role change must not disturb acceptance status"
+
+    # Now actually blocked from a write, proving the role change took effect
+    student = _fresh_student(client)
+    write = client.post(
+        f"/api/classrooms/{classroom_id}/students",
+        json={"student_id": student["user_id"]},
+        headers=_h(token),
+    )
+    assert write.status_code == 403, write.text
+
+
 def test_duplicate_invite_returns_409(client, owner_token, classroom_id):
-    """Inviting same teacher twice returns 409."""
+    """Inviting the same already-accepted teacher again returns 409."""
     r = client.post(
         f"/api/classrooms/{classroom_id}/teachers",
-        json={"email": "coteacher@test.com"},
+        json={"email": "coteacher@test.com", "role": "editor"},
         headers=_h(owner_token),
     )
     assert r.status_code == 409
@@ -405,7 +606,7 @@ def test_invite_nonexistent_email_returns_404(client, owner_token, classroom_id)
     """Inviting unknown email returns 404."""
     r = client.post(
         f"/api/classrooms/{classroom_id}/teachers",
-        json={"email": "nobody@nowhere.com"},
+        json={"email": "nobody@nowhere.com", "role": "editor"},
         headers=_h(owner_token),
     )
     assert r.status_code == 404
@@ -420,12 +621,58 @@ def test_cannot_remove_owner_via_co_teaching_endpoint(client, owner_token, class
     assert r.status_code == 400
 
 
+def test_owner_can_revoke_pending_invitation(client, owner_token, classroom_id):
+    """Owner can revoke (DELETE) a still-pending invite -- same endpoint as removal."""
+    suffix = uuid.uuid4().hex[:8]
+    email = f"revoke_me_{suffix}@test.com"
+    _register(client, "Revoke Me", email)
+    invite = client.post(
+        f"/api/classrooms/{classroom_id}/teachers",
+        json={"email": email, "role": "viewer"},
+        headers=_h(owner_token),
+    )
+    assert invite.status_code == 201, invite.text
+    teacher_id = invite.json()["teacher_id"]
+
+    r = client.delete(
+        f"/api/classrooms/{classroom_id}/teachers/{teacher_id}",
+        headers=_h(owner_token),
+    )
+    assert r.status_code == 204
+
+
+def test_invitee_can_reject_pending_invitation(client, owner_token, classroom_id):
+    """The invitee can reject (DELETE their own row) while it's still pending."""
+    suffix = uuid.uuid4().hex[:8]
+    email = f"reject_me_{suffix}@test.com"
+    token = _register(client, "Reject Me", email)
+    me = client.get("/api/users/me", headers=_h(token))
+    teacher_id = me.json()["id"]
+
+    invite = client.post(
+        f"/api/classrooms/{classroom_id}/teachers",
+        json={"email": email, "role": "viewer"},
+        headers=_h(owner_token),
+    )
+    assert invite.status_code == 201, invite.text
+
+    r = client.delete(
+        f"/api/classrooms/{classroom_id}/teachers/{teacher_id}",
+        headers=_h(token),
+    )
+    assert r.status_code == 204
+
+    # Rejected invite no longer shows up as a pending invitation
+    pending = client.get("/api/co-teaching/invitations", headers=_h(token))
+    assert all(i["classroom_id"] != classroom_id for i in pending.json())
+
+
 def test_owner_can_remove_co_teacher(client, owner_token, classroom_id):
-    """Owner can remove a co-teacher."""
+    """Owner can remove an accepted co-teacher."""
     r = client.get(f"/api/classrooms/{classroom_id}/teachers", headers=_h(owner_token))
     teachers = r.json()
-    assistant = next(t for t in teachers if t["role"] == "assistant")
-    co_teacher_id = assistant["teacher_id"]
+    editor = next(t for t in teachers if t["role"] == "editor")
+    co_teacher_id = editor["teacher_id"]
 
     r = client.delete(
         f"/api/classrooms/{classroom_id}/teachers/{co_teacher_id}",

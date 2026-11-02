@@ -18,7 +18,7 @@ from .helpers import (
     check_email_domain,
     create_submissions_for_new_student,
     get_classroom_or_404,
-    require_owner_or_admin,
+    require_editor_or_admin,
 )
 
 router = APIRouter(tags=["classrooms"])
@@ -108,8 +108,9 @@ async def upload_csv_students(
     """
     from ...models.school import School
 
+    # Owner, accepted 'editor'-role co-teacher, or system_admin (#3820).
     classroom = get_classroom_or_404(classroom_id, db)
-    require_owner_or_admin(classroom, current_user, db)
+    require_editor_or_admin(classroom, current_user, db)
 
     if not classroom.join_code:
         raise HTTPException(

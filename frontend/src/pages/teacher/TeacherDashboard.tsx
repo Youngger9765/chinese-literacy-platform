@@ -13,6 +13,7 @@ import {
   BatchCreateResult,
 } from '../../services/classroomApi';
 import { parseRoster } from './panel/AddStudentsPanel';
+import PendingInvitationsBanner from './PendingInvitationsBanner';
 import SchoolSwitcher from '../../components/teacher/SchoolSwitcher';
 import { Skeleton, SkeletonText } from '../../components/ui/Skeleton';
 import LoadingIndicator from '../../components/ui/LoadingIndicator';
@@ -236,6 +237,9 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
             </button>
           </div>
         </div>
+
+        {/* #3820: pending co-teaching invitations addressed to this teacher */}
+        <PendingInvitationsBanner />
 
         {/* Fix #1545: Reports intent banner — shown when navigating from "查看報告" quick-action */}
         {isReportsIntent && (

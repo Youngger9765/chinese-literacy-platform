@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from ...auth.dependencies import get_current_user
 from ...auth.password import hash_password
-from ...auth.policies import is_system_admin, require_classroom_member
+from ...auth.policies import is_system_admin, require_classroom_editor
 from ...database import get_db
 from ...models.school import ClassroomStudent
 from ...models.user import Role, StudentProfile, User, UserRole
@@ -28,13 +28,21 @@ def reset_student_password(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> ResetPasswordResponse:
-    """Reset an enrolled student's password for an authorized classroom member."""
+    """Reset an enrolled student's password.
+
+    Owner, accepted 'editor'-role co-teacher, or system_admin (#3820). A
+    'viewer'-role co-teacher cannot reset a student's password -- this used
+    to be gated at the plain member level (any co-teacher, co-teacher resets
+    being an explicit product requirement), which is now split: resets stay
+    allowed for editors, but are blocked for the new read-only viewer role.
+    """
     classroom = get_classroom_or_404(classroom_id, db)
-    # Matches get_classroom_detail's owner/co-teacher/admin gate: this only
-    # governs whether the caller can see this student at all (classroom
-    # roster visibility). It is NOT sufficient authority to reset a
-    # password -- see the password-teacher gate below.
-    require_classroom_member(classroom, current_user, db)
+    # Gate 1 of 2: owner, accepted 'editor'-role co-teacher, or system_admin
+    # (#3820) -- a 'viewer'-role co-teacher is blocked here. This only
+    # governs whether the caller can act on this classroom at all; it is
+    # NOT sufficient authority to reset a password -- see the
+    # password-teacher gate below (#3818, gate 2 of 2).
+    require_classroom_editor(classroom, current_user, db)
 
     enrollment = (
         db.query(ClassroomStudent)

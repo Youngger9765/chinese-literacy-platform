@@ -33,7 +33,7 @@ from ...models.user import User
 from ...schemas.classroom import ClassroomFeatureSettingsRequest, ClassroomFeatureSettingsResponse
 from ...services.pk import classroom_features
 from ...services.pk.engine import get_classroom_pk_activity
-from .helpers import get_classroom_or_404, require_owner_or_admin
+from .helpers import get_classroom_or_404, require_editor_or_admin, require_member_or_admin
 
 router = APIRouter(tags=["classrooms"])
 
@@ -44,8 +44,12 @@ def get_pk_activity(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    """Read-only aggregate view. Owner, any accepted co-teacher (editor or
+    viewer), or system_admin (#3820) -- this is a report, same gate as the
+    assignment list/detail endpoints.
+    """
     classroom = get_classroom_or_404(classroom_id, db)
-    require_owner_or_admin(classroom, current_user, db)
+    require_member_or_admin(classroom, current_user, db)
     return get_classroom_pk_activity(db, classroom_id)
 
 
@@ -56,9 +60,9 @@ def update_pk_settings(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Teacher-only. Only the classroom owner/admin can flip any of the
-    three switches — same guard as ``PATCH /classrooms/{id}``
-    (classroom_crud.update_classroom).
+    """Owner, accepted 'editor'-role co-teacher, or system_admin (#3820) can
+    flip any of the three switches — same guard as ``PATCH /classrooms/{id}``
+    (classroom_crud.update_classroom). A 'viewer'-role co-teacher cannot.
 
     Merges into the existing ``feature_settings`` dict rather than
     overwriting it wholesale, so flipping one switch never clobbers the
@@ -74,7 +78,7 @@ def update_pk_settings(
     layer alone to stay in sync with it.
     """
     classroom = get_classroom_or_404(classroom_id, db)
-    require_owner_or_admin(classroom, current_user, db)
+    require_editor_or_admin(classroom, current_user, db)
 
     provided = payload.model_dump(exclude_unset=True, exclude_none=True)
     cleaned = classroom_features.validate_feature_settings_patch(provided)

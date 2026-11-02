@@ -20,6 +20,7 @@ from fastapi import HTTPException
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from ...auth.policies import require_classroom_editor
 from ...models.live_quiz import (
     GAME_LIFETIME_HOURS,
     MAX_PLAYERS_PER_GAME,
@@ -27,7 +28,7 @@ from ...models.live_quiz import (
     LiveQuizGame,
     LiveQuizPlayer,
 )
-from ...models.school import Classroom, ClassroomStudent, ClassroomTeacher
+from ...models.school import Classroom, ClassroomStudent
 from ...models.user import User
 from ...services.lesson_uid_loader import load_lesson
 from ..game_core.display_name import resolve_display_name
@@ -93,20 +94,17 @@ def _require_live_quiz_enabled(db: Session, classroom: Classroom) -> None:
 
 
 def _require_classroom_owned_by(db: Session, classroom_id: int, teacher: User) -> Classroom:
+    """Owner, accepted 'editor'-role co-teacher, or system_admin (#3820).
+
+    Previously any co-teacher regardless of role/acceptance status passed
+    this check; starting/managing a live-quiz session is a write operation,
+    so a 'viewer'-role (or still-pending) co-teacher must be denied, same as
+    every other classroom write gate.
+    """
     classroom = db.query(Classroom).filter(Classroom.id == classroom_id).first()
     if classroom is None:
         raise HTTPException(status_code=404, detail="Classroom not found")
-    if classroom.teacher_id != teacher.id:
-        is_co_teacher = (
-            db.query(ClassroomTeacher)
-            .filter(
-                ClassroomTeacher.classroom_id == classroom_id,
-                ClassroomTeacher.teacher_id == teacher.id,
-            )
-            .first()
-        )
-        if is_co_teacher is None:
-            raise HTTPException(status_code=403, detail="Not your classroom")
+    require_classroom_editor(classroom, teacher, db)
     return classroom
 
 
