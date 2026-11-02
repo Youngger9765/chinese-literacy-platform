@@ -33,6 +33,13 @@ export interface StudentInClassroomResponse {
   name: string;
   email: string;
   enrolled_at: string;
+  /** #3818: true only for the account's recorded password teacher (the
+   * teacher who created it via batch-create / CSV / Junyi import), or a
+   * system_admin. Drives whether the reset-password button is shown.
+   * Optional (not required) so existing test fixtures that predate this
+   * field keep compiling; treat missing/false identically -- fail closed,
+   * don't show the button. */
+  can_reset_password?: boolean;
 }
 
 export interface ResetPasswordResult {

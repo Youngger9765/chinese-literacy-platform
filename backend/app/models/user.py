@@ -40,6 +40,19 @@ class User(Base):
     terms_accepted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     terms_version: Mapped[str | None] = mapped_column(String(20), nullable=True)
     privacy_accepted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    # "Password teacher" (#3818, mirrors Junyi's ParentChildPair.created_by):
+    # the teacher who created THIS account via batch-create / CSV upload /
+    # Junyi class import (new-student branch only). Set once, at creation
+    # time, and never reassigned afterwards — it is NOT the same signal as
+    # UserRole.granted_by, which can be (re)written long after the account
+    # already existed (role added to an existing self-registered account).
+    # NULL means "nobody recorded creating this account" (self-registration,
+    # Junyi SSO first login, or legacy data) and is fail-closed: no teacher
+    # may reset this account's password, only the account owner via the
+    # normal forgot-password flow.
+    created_by_teacher_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id"), nullable=True, index=True
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

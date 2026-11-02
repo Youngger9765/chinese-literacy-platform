@@ -501,12 +501,22 @@ const StudentListTab: React.FC<StudentListTabProps> = ({
                   </td>
                 )}
                 <td className="lg:px-4 lg:py-3 whitespace-nowrap">
-                  <ResetPasswordButton
-                    token={token}
-                    classroomId={classroom.id}
-                    studentId={s.id}
-                    studentName={s.name}
-                  />
+                  {/* #3818: only the account's password teacher (the teacher
+                      who created it) sees the reset button -- a self-registered
+                      account nobody is recorded as having created shows the
+                      self-serve hint instead. */}
+                  {s.can_reset_password ? (
+                    <ResetPasswordButton
+                      token={token}
+                      classroomId={classroom.id}
+                      studentId={s.id}
+                      studentName={s.name}
+                    />
+                  ) : (
+                    <span className="text-xs text-gray-400 whitespace-nowrap">
+                      請學生自己用忘記密碼重設
+                    </span>
+                  )}
                 </td>
                 <td className="lg:px-4 lg:py-3 lg:text-right whitespace-nowrap ml-auto lg:ml-0">
                   <span className="sr-only">加入於 {formatDate(s.enrolled_at)}</span>

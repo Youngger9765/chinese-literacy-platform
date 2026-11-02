@@ -195,6 +195,7 @@ async def upload_csv_students(
                 password_hash=hash_password(password),
                 name=name,
                 is_active=True,
+                created_by_teacher_id=current_user.id,
             )
             db.add(user)
             db.flush()
