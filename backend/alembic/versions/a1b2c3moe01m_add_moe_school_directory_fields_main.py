@@ -1,4 +1,11 @@
-"""add MOE school directory fields to schools (#3804 §4.2)
+"""
+MAIN-BRANCH COPY (2026-11-02): prod got #3804 before the game-mode
+migrations (988d8bc90428 etc.), so this copy chains off main's head with a
+distinct revision id. staging keeps a1b2c3moe01 (down=988d8bc90428). When
+staging is later merged to main, alembic will see two heads; add a merge
+revision. Both copies are idempotent (IF NOT EXISTS / column checks), so
+the staging copy is a no-op on prod.
+add MOE school directory fields to schools (#3804 §4.2)
 
 Revision ID: a1b2c3moe01
 Revises: 988d8bc90428
@@ -26,8 +33,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = "a1b2c3moe01"
-down_revision: Union[str, None] = "988d8bc90428"
+revision: str = "a1b2c3moe01m"
+down_revision: Union[str, None] = "6151124daac8"
 branch_labels = None
 depends_on = None
 
