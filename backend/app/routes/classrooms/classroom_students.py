@@ -27,6 +27,7 @@ from .helpers import (
     get_classroom_or_404,
     require_editor_or_admin,
     require_member_or_admin,
+    require_owner_or_admin,
 )
 
 router = APIRouter(tags=["classrooms"])
