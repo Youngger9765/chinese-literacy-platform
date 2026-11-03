@@ -1,7 +1,7 @@
 """add classroom_students.seat_number, per-classroom unique (#3826)
 
 Revision ID: d4e5seatnum1
-Revises: c3d4pwteach1
+Revises: co01te02viewer03
 Create Date: 2026-11-03 00:00:00.000000
 
 Why this migration exists: teachers have no way to assign/edit a student's
@@ -53,7 +53,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision: str = "d4e5seatnum1"
-down_revision: Union[str, None] = "c3d4pwteach1"
+down_revision: Union[str, None] = "co01te02viewer03"
 branch_labels = None
 depends_on = None
 
