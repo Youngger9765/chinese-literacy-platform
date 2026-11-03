@@ -106,8 +106,8 @@ def setup_db():
     C["a"], C["b"] = class_a.id, class_b.id
 
     db.add_all([
-        ClassroomTeacher(classroom_id=class_a.id, teacher_id=co_teacher.id, role="assistant"),
-        ClassroomTeacher(classroom_id=class_b.id, teacher_id=other_co_teacher.id, role="assistant"),
+        ClassroomTeacher(classroom_id=class_a.id, teacher_id=co_teacher.id, role="editor"),
+        ClassroomTeacher(classroom_id=class_b.id, teacher_id=other_co_teacher.id, role="editor"),
         ClassroomStudent(classroom_id=class_a.id, student_id=stuck_student.id),
         ClassroomStudent(classroom_id=class_a.id, student_id=fine_student.id),
         ClassroomStudent(classroom_id=class_b.id, student_id=other_student.id),

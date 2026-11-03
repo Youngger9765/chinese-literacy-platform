@@ -25,6 +25,7 @@ from ...services.audit_logger import AuditAction, audit_log_endpoint
 from .helpers import (
     create_submissions_for_new_student,
     get_classroom_or_404,
+    require_editor_or_admin,
     require_member_or_admin,
     require_owner_or_admin,
 )
@@ -73,7 +74,17 @@ def _eligible_student_ids(classroom, teacher_id: int, db: Session):
     if school is not None and (is_self_activated or is_public_email_domain(school.domain)):
         my_classrooms = (
             db.query(Classroom.id).filter(Classroom.teacher_id == teacher_id)
-            .union(db.query(ClassroomTeacher.classroom_id).filter(ClassroomTeacher.teacher_id == teacher_id))
+            .union(
+                db.query(ClassroomTeacher.classroom_id).filter(
+                    ClassroomTeacher.teacher_id == teacher_id,
+                    # #3820: a still-pending co-teaching invite must not widen
+                    # this teacher's "classrooms I already teach" set -- that
+                    # would let a merely-invited (not yet accepted) teacher
+                    # pull another classroom's students into their own
+                    # search/add-student flow before they've accepted anything.
+                    ClassroomTeacher.status == "accepted",
+                )
+            )
         )
         taught = db.query(ClassroomStudent.student_id).filter(ClassroomStudent.classroom_id.in_(my_classrooms))
         q = q.filter(or_(UserRole.granted_by == teacher_id, UserRole.user_id.in_(taught)))
@@ -102,9 +113,12 @@ def add_student_to_classroom(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Add a student to a classroom by user ID. Only the classroom's teacher can do this."""
+    """Add a student to a classroom by user ID.
+
+    Owner, accepted 'editor'-role co-teacher, or system_admin (#3820).
+    """
     classroom = get_classroom_or_404(classroom_id, db)
-    require_owner_or_admin(classroom, current_user, db)
+    require_editor_or_admin(classroom, current_user, db)
 
     student = db.query(User).filter(User.id == payload.student_id).first()
     # Only a student of this classroom's school (#3534). Without this, any user id —
@@ -164,9 +178,12 @@ def remove_student_from_classroom(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Remove a student from a classroom. Only the classroom's teacher can do this."""
+    """Remove a student from a classroom.
+
+    Owner, accepted 'editor'-role co-teacher, or system_admin (#3820).
+    """
     classroom = get_classroom_or_404(classroom_id, db)
-    require_owner_or_admin(classroom, current_user, db)
+    require_editor_or_admin(classroom, current_user, db)
 
     cs = (
         db.query(ClassroomStudent)
@@ -397,12 +414,14 @@ def search_students_for_classroom(
     """Search for users by name or email who are NOT already in this classroom.
 
     Returns up to 10 matching results. Used by the 'add existing student' UI.
-    Requires classroom owner or admin.
+    Owner, accepted 'editor'-role co-teacher, or system_admin (#3820) --
+    gated the same as actually adding the student, since this search exists
+    only to feed that action.
     """
     from sqlalchemy import or_
 
     classroom = get_classroom_or_404(classroom_id, db)
-    require_owner_or_admin(classroom, current_user, db)
+    require_editor_or_admin(classroom, current_user, db)
 
     enrolled_ids_select = (
         db.query(ClassroomStudent.student_id)

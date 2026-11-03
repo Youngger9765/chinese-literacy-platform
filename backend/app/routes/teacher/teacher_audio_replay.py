@@ -3,9 +3,15 @@
 Allows teachers to listen to their students' reading recordings.
 
 Security model (IDOR parity with student endpoint in learning_audio_replay.py):
-- Every endpoint first resolves the Assignment → verifies teacher ownership via
-  _require_assignment_owner_or_admin (reuses the existing classroom-ownership
-  helper, same pattern as delete / grade / update endpoints).
+- Every endpoint first resolves the Assignment → verifies classroom access via
+  _require_assignment_editor_or_admin (owner, accepted 'editor'-role
+  co-teacher, or system_admin, #3820). Deliberately NOT widened to
+  'viewer'-role co-teachers along with the other reads this PR downgraded
+  (assignment list/detail, PK activity) -- a student's raw voice recording
+  is more sensitive than aggregate progress/scores, and the PRD's "viewer
+  can see 作業和報表" requirement doesn't clearly cover it, so this one stays
+  at the same access level 'editor' already had before this PR (full parity
+  with the pre-existing owner-only gate, not an expansion).
 - Submission is then verified to belong to that assignment.
 - ReadingAttemptHistory is verified to belong to that submission's session.
 - Signed URL (10-min v4) is generated ONLY after all ownership checks pass.
@@ -27,7 +33,7 @@ from ...models.assignment import Assignment, AssignmentSubmission
 from ...models.session import LearningSession, ReadingAttemptHistory
 from ...models.user import User
 from ...routes.auth import get_current_user
-from ...routes.assignments import _require_assignment_owner_or_admin
+from ...routes.assignments import _require_assignment_editor_or_admin
 from ...services.audio_upload_service import generate_audio_signed_url
 
 logger = logging.getLogger(__name__)
@@ -52,9 +58,9 @@ def get_submission_audio_signed_url(
 
     Ownership checks (in order):
     1. Assignment must exist → 404 otherwise.
-    2. Caller must be the classroom owner or admin → 403 otherwise.
-       (delegates to _require_assignment_owner_or_admin — same guard used by
-       DELETE /assignments/{id} and PATCH /assignments/{id}.)
+    2. Caller must be the owner, an accepted 'editor'-role co-teacher, or
+       admin → 403 otherwise (delegates to _require_assignment_editor_or_admin
+       — a 'viewer'-role co-teacher is NOT allowed here, see module docstring).
     3. Submission must belong to this assignment → 404 otherwise.
     4. Submission must have an audio_gcs_path recorded → 404 otherwise.
 
@@ -67,7 +73,7 @@ def get_submission_audio_signed_url(
         raise HTTPException(status_code=404, detail="Assignment not found")
 
     # Raises 403 if caller is not the classroom owner/co-teacher or admin.
-    _require_assignment_owner_or_admin(assignment, current_user, db)
+    _require_assignment_editor_or_admin(assignment, current_user, db)
 
     # ── 2. Resolve submission → assert belongs to this assignment ─────────────
     submission = (
@@ -138,7 +144,7 @@ def list_submission_attempts(
     if assignment is None:
         raise HTTPException(status_code=404, detail="Assignment not found")
 
-    _require_assignment_owner_or_admin(assignment, current_user, db)
+    _require_assignment_editor_or_admin(assignment, current_user, db)
 
     # ── 2. Submission → assert belongs to this assignment ───────────────────
     submission = (
@@ -204,7 +210,7 @@ def get_attempt_audio_signed_url(
     if assignment is None:
         raise HTTPException(status_code=404, detail="Assignment not found")
 
-    _require_assignment_owner_or_admin(assignment, current_user, db)
+    _require_assignment_editor_or_admin(assignment, current_user, db)
 
     # ── 2. Submission → assert belongs to this assignment ───────────────────
     submission = (

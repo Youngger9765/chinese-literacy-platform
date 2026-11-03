@@ -23,7 +23,7 @@ from app.database import get_db
 from app.main import app
 from app.models import Base
 from app.models.assignment import Assignment, AssignmentSubmission
-from app.models.school import Classroom, ClassroomStudent, School
+from app.models.school import Classroom, ClassroomStudent, ClassroomTeacher, School
 from app.models.session import LearningSession, ReadingAttemptHistory
 from app.models.user import Role, User, UserRole
 from app.routes.teacher import teacher_audio_replay
@@ -75,6 +75,22 @@ def world(monkeypatch):
     kid_a, kid_b = user("kid_a", "student"), user("kid_b", "student")
     A = assignment_with_recording(t_a, kid_a, "A")
     B = assignment_with_recording(t_b, kid_b, "B")
+
+    # #3820: co-teachers of A's classroom, accepted at each role, to prove
+    # audio replay deliberately stayed at editor-level (NOT widened to
+    # viewer -- a child's raw recording is more sensitive than the
+    # assignment list/detail reads this PR did widen; see
+    # teacher_audio_replay.py's module docstring for the rationale).
+    editor_a = user("editor_a", "teacher")
+    viewer_a = user("viewer_a", "teacher")
+    db.add(ClassroomTeacher(
+        classroom_id=A[0].classroom_id, teacher_id=editor_a.id,
+        role="editor", status="accepted",
+    ))
+    db.add(ClassroomTeacher(
+        classroom_id=A[0].classroom_id, teacher_id=viewer_a.id,
+        role="viewer", status="accepted",
+    ))
     db.commit()
 
     def _get_db():
@@ -91,7 +107,10 @@ def world(monkeypatch):
         app.dependency_overrides[get_current_user] = lambda: as_user
         return client.get(path)
 
-    yield {"get": get, "t_a": t_a, "t_b": t_b, "kid_a": kid_a, "A": A, "B": B}
+    yield {
+        "get": get, "t_a": t_a, "t_b": t_b, "kid_a": kid_a, "A": A, "B": B,
+        "editor_a": editor_a, "viewer_a": viewer_a,
+    }
     app.dependency_overrides.clear()
     db.close()
     Base.metadata.drop_all(bind=engine)
@@ -123,6 +142,25 @@ def test_other_teacher_and_the_student_are_refused(world, who, which):
     # Another class's teacher, and the child themself (the student side has its own route).
     r = world["get"](world[who], _paths(*world["A"])[which])
     assert r.status_code == 403, (who, which, r.status_code)
+
+
+@pytest.mark.parametrize("which", ["submission_audio", "attempt_list", "attempt_audio"])
+def test_viewer_role_coteacher_cannot_hear_a_students_recording(world, which):
+    """#3820: a 'viewer'-role co-teacher is read-only everywhere EXCEPT here --
+    a child's raw voice recording stays at the same bar it had before this PR
+    (owner-equivalent only), not the broader 'any accepted co-teacher' bar
+    this PR gave assignment list/detail and PK activity."""
+    r = world["get"](world["viewer_a"], _paths(*world["A"])[which])
+    assert r.status_code == 403, (which, r.status_code)
+
+
+@pytest.mark.parametrize("which", ["submission_audio", "attempt_list", "attempt_audio"])
+def test_editor_role_coteacher_can_hear_a_students_recording(world, which):
+    """Positive control for the test above: an 'editor'-role co-teacher has
+    always had owner-equivalent write access (#3820 formalizes the old
+    'assistant' role as 'editor'), so they can still reach this endpoint."""
+    r = world["get"](world["editor_a"], _paths(*world["A"])[which])
+    assert r.status_code == 200, r.text
 
 
 @pytest.mark.parametrize("which", ["submission_audio", "attempt_list", "attempt_audio"])

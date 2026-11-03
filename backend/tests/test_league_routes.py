@@ -195,7 +195,7 @@ class TestInvitationAuthzMatrix:
         owner_token, owner_id = _register(client, name="Owner2")
         classroom = _make_classroom(db, school, owner_id)
         assistant_token, assistant_id = _register(client, name="Assistant1")
-        db.add(ClassroomTeacher(classroom_id=classroom.id, teacher_id=assistant_id, role="assistant"))
+        db.add(ClassroomTeacher(classroom_id=classroom.id, teacher_id=assistant_id, role="editor"))
         db.commit()
 
         r = client.post(

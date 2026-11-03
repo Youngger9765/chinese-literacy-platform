@@ -457,7 +457,10 @@ export async function uploadCsvStudents(
   return handleResponse<CsvUploadResult>(res);
 }
 
-// --- Co-teaching API ---
+// --- Co-teaching API (#3820: editor/viewer roles + invite accept/reject) ---
+
+export type CoTeacherRole = 'editor' | 'viewer';
+export type CoTeacherStatus = 'pending' | 'accepted';
 
 export interface ClassroomTeacherResponse {
   id: number;
@@ -465,7 +468,19 @@ export interface ClassroomTeacherResponse {
   teacher_id: number;
   teacher_name: string;
   teacher_email: string;
-  role: 'primary' | 'assistant';
+  role: 'primary' | CoTeacherRole;
+  status: CoTeacherStatus;
+  invited_at: string;
+  accepted_at: string | null;
+}
+
+export interface PendingInvitationResponse {
+  classroom_teacher_id: number; // ClassroomTeacher.id -- informational only
+  classroom_id: number;
+  teacher_id: number; // the invitee's own user id -- use this in accept/reject URLs
+  classroom_name: string;
+  role: CoTeacherRole;
+  invited_by_name: string;
   invited_at: string;
 }
 
@@ -483,15 +498,63 @@ export async function inviteCoTeacher(
   token: string,
   classroomId: number,
   email: string,
+  role: CoTeacherRole,
 ): Promise<ClassroomTeacherResponse> {
   const res = await fetch(`${API_BASE}/api/classrooms/${classroomId}/teachers`, {
     method: 'POST',
     headers: authHeaders(token),
-    body: JSON.stringify({ email }),
+    body: JSON.stringify({ email, role }),
   });
   return handleResponse<ClassroomTeacherResponse>(res);
 }
 
+export async function updateCoTeacherRole(
+  token: string,
+  classroomId: number,
+  teacherId: number,
+  role: CoTeacherRole,
+): Promise<ClassroomTeacherResponse> {
+  const res = await fetch(
+    `${API_BASE}/api/classrooms/${classroomId}/teachers/${teacherId}`,
+    {
+      method: 'PATCH',
+      headers: authHeaders(token),
+      body: JSON.stringify({ role }),
+    },
+  );
+  return handleResponse<ClassroomTeacherResponse>(res);
+}
+
+export async function acceptCoTeacherInvitation(
+  token: string,
+  classroomId: number,
+  teacherId: number,
+): Promise<ClassroomTeacherResponse> {
+  const res = await fetch(
+    `${API_BASE}/api/classrooms/${classroomId}/teachers/${teacherId}/accept`,
+    {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  );
+  return handleResponse<ClassroomTeacherResponse>(res);
+}
+
+/** Pending invitations addressed to the current user, across all classrooms.
+ * A pending invitee has no read access to the classroom itself yet (#3820),
+ * so this is the only way the UI can show them their own invite. */
+export async function listMyPendingInvitations(
+  token: string,
+): Promise<PendingInvitationResponse[]> {
+  const res = await fetch(`${API_BASE}/api/co-teaching/invitations`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return handleResponse<PendingInvitationResponse[]>(res);
+}
+
+/** Removes a co-teacher. Also doubles as: reject (invitee, while pending),
+ * revoke (owner, while pending), and leave (invitee, once accepted) -- all
+ * the same DELETE endpoint, just invoked by a different actor/state. */
 export async function removeCoTeacher(
   token: string,
   classroomId: number,

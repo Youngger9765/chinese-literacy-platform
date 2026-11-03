@@ -16,8 +16,16 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import Base
 
-# Valid roles for ClassroomTeacher junction table
-ClassroomTeacherRole = Literal["primary", "assistant"]
+# Valid roles for ClassroomTeacher junction table.
+# "assistant" is the legacy value (pre-#3820); existing rows are backfilled to
+# "editor" by migration co01te02viewer03. Keep accepting it nowhere in new code.
+ClassroomTeacherRole = Literal["primary", "editor", "viewer"]
+
+# Invitation lifecycle for a co-teaching relationship. There is no persisted
+# "rejected" state — rejecting an invite is the invitee DELETE-ing their own
+# still-pending row (same action as leaving), mirroring 均一's "reject = remove
+# self from the pending list" pattern (#3820 PRD §3).
+ClassroomTeacherStatus = Literal["pending", "accepted"]
 
 
 class School(Base):
@@ -141,8 +149,14 @@ class ClassroomTeacher(Base):
     """Junction table: many teachers per classroom.
 
     The primary teacher (owner) is always the one stored in Classroom.teacher_id.
-    This table tracks additional co-teachers with role='primary' (owner) or 'assistant'.
-    On classroom creation the owner is automatically inserted with role='primary'.
+    This table tracks additional co-teachers with role='primary' (owner),
+    'editor' (full read/write parity with owner except co-teacher management
+    and classroom deletion), or 'viewer' (read-only; #3820).
+
+    ``status`` is the invitation lifecycle: a row starts 'pending' when invited
+    and only counts as classroom membership (read access, let alone write)
+    once it is 'accepted' by the invitee. There is no persisted 'rejected'
+    state -- rejecting / revoking / leaving are all a DELETE of the row.
     """
 
     __tablename__ = "classroom_teachers"
@@ -153,8 +167,15 @@ class ClassroomTeacher(Base):
         ForeignKey("classrooms.id", ondelete="CASCADE"), nullable=False, index=True
     )
     teacher_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
-    # "primary" = owner (Classroom.teacher_id), "assistant" = co-teacher
-    role: Mapped[str] = mapped_column(String(20), nullable=False, default="assistant")
+    # "primary" = owner, "editor" = full read/write co-teacher, "viewer" = read-only
+    role: Mapped[str] = mapped_column(String(20), nullable=False, default="editor")
+    # "pending" until the invitee accepts, then "accepted". See class docstring.
+    status: Mapped[str] = mapped_column(
+        String(20), nullable=False, default="accepted", server_default="accepted"
+    )
+    accepted_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
     invited_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     invited_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False

@@ -15,6 +15,7 @@ vi.mock('../../../contexts/AuthContext', () => ({
 vi.mock('../../../services/classroomApi', () => ({
   listClassroomTeachers: vi.fn(() => Promise.resolve([])),
   inviteCoTeacher: vi.fn(),
+  updateCoTeacherRole: vi.fn(),
   removeCoTeacher: vi.fn(),
   ClassroomApiError: class ClassroomApiError extends Error {
     status: number;

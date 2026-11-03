@@ -82,7 +82,7 @@ def make_classroom(
 
 
 def add_co_teacher(db, classroom: Classroom, teacher: User) -> None:
-    db.add(ClassroomTeacher(classroom_id=classroom.id, teacher_id=teacher.id, role="assistant"))
+    db.add(ClassroomTeacher(classroom_id=classroom.id, teacher_id=teacher.id, role="editor"))
     db.flush()
 
 

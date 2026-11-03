@@ -5,6 +5,13 @@ These tests LOCK IN the current permission model BEFORE any refactoring.
 They must ALL PASS on unmodified code. Run them again after migration to
 confirm no regression.
 
+Updated for #3820 (editor/viewer roles + pending/accepted invitation
+lifecycle): invite now requires a `role` field and starts 'pending', so the
+shared fixture accepts each invite immediately to preserve the "already a
+member" characterization these tests lock in. The underlying permission
+model characterized here (owner invites/removes, co-teacher can view+leave,
+stranger denied) is unchanged by #3820 for the 'editor' role.
+
 Routes tested:
   GET    /api/classrooms/{classroom_id}/teachers
   POST   /api/classrooms/{classroom_id}/teachers
@@ -222,23 +229,36 @@ def setup_module():
         _state["classroom_id"] = classroom["id"]
         _state["owner_id"]     = classroom["teacher_id"]
 
-        # Invite coteacher so they're a member for list/remove tests
+        # Invite coteacher so they're a member for list/remove tests.
+        # (#3820) invite now requires a role and starts 'pending' -- accept
+        # immediately so this fixture's downstream tests see the same
+        # "already a member" state they characterized before #3820.
         ir = client.post(
             f"/api/classrooms/{classroom['id']}/teachers",
-            json={"email": "cotest_coteacher@test.com"},
+            json={"email": "cotest_coteacher@test.com", "role": "editor"},
             headers=_h(_state["owner_token"]),
         )
         assert ir.status_code == 201, f"invite coteacher failed: {ir.text}"
         _state["coteacher_id"] = ir.json()["teacher_id"]
+        acc = client.post(
+            f"/api/classrooms/{classroom['id']}/teachers/{_state['coteacher_id']}/accept",
+            headers=_h(_state["coteacher_token"]),
+        )
+        assert acc.status_code == 200, f"accept coteacher failed: {acc.text}"
 
         # Invite leave_teacher so they can self-remove later
         lr2 = client.post(
             f"/api/classrooms/{classroom['id']}/teachers",
-            json={"email": "cotest_leave@test.com"},
+            json={"email": "cotest_leave@test.com", "role": "editor"},
             headers=_h(_state["owner_token"]),
         )
         assert lr2.status_code == 201, lr2.text
         _state["leave_teacher_id"] = lr2.json()["teacher_id"]
+        acc2 = client.post(
+            f"/api/classrooms/{classroom['id']}/teachers/{_state['leave_teacher_id']}/accept",
+            headers=_h(_state["leave_token"]),
+        )
+        assert acc2.status_code == 200, f"accept leave_teacher failed: {acc2.text}"
 
         yield
 
@@ -306,15 +326,16 @@ def test_list_teachers_bad_classroom_404(client):
 # ---------------------------------------------------------------------------
 
 def test_invite_owner_201(client):
-    """Owner can invite a new teacher → 201."""
+    """Owner can invite a new teacher → 201, starts pending (#3820)."""
     r = client.post(
         f"/api/classrooms/{_state['classroom_id']}/teachers",
-        json={"email": "cotest_extra@test.com"},
+        json={"email": "cotest_extra@test.com", "role": "editor"},
         headers=_h(_state["owner_token"]),
     )
     assert r.status_code == 201
     body = r.json()
-    assert body["role"] == "assistant"
+    assert body["role"] == "editor"
+    assert body["status"] == "pending"
     _state["extra_teacher_id"] = body["teacher_id"]
 
 
@@ -322,7 +343,7 @@ def test_invite_stranger_403(client):
     """Non-owner stranger cannot invite → 403."""
     r = client.post(
         f"/api/classrooms/{_state['classroom_id']}/teachers",
-        json={"email": "cotest_extra@test.com"},
+        json={"email": "cotest_extra@test.com", "role": "editor"},
         headers=_h(_state["stranger_token"]),
     )
     assert r.status_code == 403
@@ -332,7 +353,7 @@ def test_invite_duplicate_409(client):
     """Inviting already-a-member teacher → 409 Conflict."""
     r = client.post(
         f"/api/classrooms/{_state['classroom_id']}/teachers",
-        json={"email": "cotest_coteacher@test.com"},
+        json={"email": "cotest_coteacher@test.com", "role": "editor"},
         headers=_h(_state["owner_token"]),
     )
     assert r.status_code == 409
@@ -342,7 +363,7 @@ def test_invite_nonexistent_user_404(client):
     """Inviting email that has no account → 404."""
     r = client.post(
         f"/api/classrooms/{_state['classroom_id']}/teachers",
-        json={"email": "nobody@nowhere.com"},
+        json={"email": "nobody@nowhere.com", "role": "editor"},
         headers=_h(_state["owner_token"]),
     )
     assert r.status_code == 404
@@ -352,7 +373,7 @@ def test_invite_owner_self_409(client):
     """Inviting the classroom owner themselves → 409 (already owner)."""
     r = client.post(
         f"/api/classrooms/{_state['classroom_id']}/teachers",
-        json={"email": "cotest_owner@test.com"},
+        json={"email": "cotest_owner@test.com", "role": "editor"},
         headers=_h(_state["owner_token"]),
     )
     assert r.status_code == 409

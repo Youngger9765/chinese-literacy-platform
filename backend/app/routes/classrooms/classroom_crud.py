@@ -32,6 +32,7 @@ from .helpers import (
     classroom_to_response,
     generate_join_code,
     get_classroom_or_404,
+    require_editor_or_admin,
     require_member_or_admin,
     require_owner_or_admin,
 )
@@ -146,7 +147,12 @@ def list_my_classrooms(
     else:
         co_teacher_classroom_ids = (
             db.query(ClassroomTeacher.classroom_id)
-            .filter(ClassroomTeacher.teacher_id == current_user.id)
+            .filter(
+                ClassroomTeacher.teacher_id == current_user.id,
+                # #3820: a still-pending invite must not surface the classroom
+                # in the dashboard list before the invitee accepts it.
+                ClassroomTeacher.status == "accepted",
+            )
             .scalar_subquery()
         )
         query = db.query(Classroom).filter(
@@ -368,9 +374,13 @@ def update_classroom(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Update classroom fields (name, grade, is_active). Only the teacher can update."""
+    """Update classroom fields (name, grade, is_active).
+
+    Owner, accepted 'editor'-role co-teacher, or system_admin (#3820). A
+    'viewer'-role co-teacher is not allowed to change classroom settings.
+    """
     classroom = get_classroom_or_404(classroom_id, db)
-    require_owner_or_admin(classroom, current_user, db)
+    require_editor_or_admin(classroom, current_user, db)
 
     update_data = payload.model_dump(exclude_unset=True)
     # Sanitize text fields in update payload

@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from ...auth.dependencies import get_current_user  # noqa: F401 — re-exported for convenience
 from ...auth.policies import (
     is_system_admin,
+    require_classroom_editor as _require_classroom_editor,
     require_classroom_member as _require_classroom_member,
     require_classroom_owner as _require_classroom_owner,
 )
@@ -71,6 +72,17 @@ def require_owner_or_admin(classroom: Classroom, current_user: User, db: Session
 def require_member_or_admin(classroom: Classroom, current_user: User, db: Session) -> None:
     """Delegate to centralized policies. Kept for backwards compatibility."""
     _require_classroom_member(classroom, current_user, db)
+
+
+def require_editor_or_admin(classroom: Classroom, current_user: User, db: Session) -> None:
+    """Owner, accepted 'editor'-role co-teacher, or system_admin (#3820).
+
+    Use for day-to-day classroom write ops (students, settings, assignments)
+    that a 'viewer'-role co-teacher must NOT be able to do. Owner-exclusive
+    ops (delete classroom, manage co-teachers) must keep using
+    ``require_owner_or_admin`` instead.
+    """
+    _require_classroom_editor(classroom, current_user, db)
 
 
 def ensure_school_student_role(

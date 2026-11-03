@@ -23,7 +23,7 @@ from .helpers import (
     check_email_domain,
     create_submissions_for_new_student,
     get_classroom_or_404,
-    require_owner_or_admin,
+    require_editor_or_admin,
 )
 
 router = APIRouter(tags=["classrooms"])
@@ -44,12 +44,12 @@ def batch_create_students(
     """Batch-create student accounts and enroll them in a classroom.
 
     For each student, generates a unique email and random password.
-    Requires classroom owner or admin.
+    Owner, accepted 'editor'-role co-teacher, or system_admin (#3820).
     """
     from ...models.school import School
 
     classroom = get_classroom_or_404(classroom_id, db)
-    require_owner_or_admin(classroom, current_user, db)
+    require_editor_or_admin(classroom, current_user, db)
 
     if not classroom.join_code:
         raise HTTPException(
