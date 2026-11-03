@@ -244,6 +244,29 @@ export async function moveStudent(
   return handleResponse<MoveStudentResult>(res);
 }
 
+// --- Batch-remove students from a classroom (#3821) ---
+
+export interface BatchRemoveStudentsResult {
+  removed_count: number;
+  not_found_ids: number[];
+}
+
+export async function batchRemoveStudents(
+  token: string,
+  classroomId: number,
+  studentIds: number[],
+): Promise<BatchRemoveStudentsResult> {
+  const res = await fetch(
+    `${API_BASE}/api/classrooms/${classroomId}/students/batch-remove`,
+    {
+      method: 'POST',
+      headers: authHeaders(token),
+      body: JSON.stringify({ student_ids: studentIds }),
+    },
+  );
+  return handleResponse<BatchRemoveStudentsResult>(res);
+}
+
 // --- Delete classroom ---
 
 export async function deleteClassroom(token: string, classroomId: number): Promise<void> {

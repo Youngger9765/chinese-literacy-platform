@@ -12,6 +12,8 @@ from ...services.email_domains import is_public_email_domain
 from ...auth.policies import is_system_admin
 from ...models.user import Role, User, UserRole
 from ...schemas.classroom import (
+    ClassroomBatchRemoveRequest,
+    ClassroomBatchRemoveResponse,
     ClassroomStudentAddRequest,
     ClassroomStudentMoveRequest,
     ClassroomStudentMoveResponse,
@@ -278,6 +280,68 @@ def move_student_between_classrooms(
         from_classroom_id=from_classroom_id,
         to_classroom_id=payload.to_classroom_id,
         enrolled_at=new_enrollment.enrolled_at,
+    )
+
+
+@router.post(
+    "/classrooms/{classroom_id}/students/batch-remove",
+    response_model=ClassroomBatchRemoveResponse,
+)
+def batch_remove_students_from_classroom(
+    classroom_id: int,
+    payload: ClassroomBatchRemoveRequest,
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Remove several students from a classroom in one call (#3821).
+
+    Only unenrolls them from THIS classroom -- the account, their other
+    classroom memberships, and their learning history are all untouched.
+    Unknown/not-enrolled ids are reported back in not_found_ids instead of
+    failing the whole batch, so one stale checkbox selection can't block
+    removing the rest.
+    """
+    classroom = get_classroom_or_404(classroom_id, db)
+    require_owner_or_admin(classroom, current_user, db)
+
+    # De-dupe while preserving a stable order for the not_found_ids report.
+    seen: set[int] = set()
+    student_ids: list[int] = []
+    for sid in payload.student_ids:
+        if sid not in seen:
+            seen.add(sid)
+            student_ids.append(sid)
+
+    enrolled = (
+        db.query(ClassroomStudent)
+        .filter(
+            ClassroomStudent.classroom_id == classroom_id,
+            ClassroomStudent.student_id.in_(student_ids),
+        )
+        .all()
+    )
+    found_student_ids = {cs.student_id for cs in enrolled}
+    not_found_ids = [sid for sid in student_ids if sid not in found_student_ids]
+
+    for cs in enrolled:
+        db.delete(cs)
+
+    audit_log_endpoint(
+        request=request,
+        action=AuditAction.BATCH_REMOVE_STUDENTS,
+        user_id=current_user.id,
+        target_student_id=None,
+    )
+
+    db.commit()
+    logger.info(
+        "Batch-removed %d students from classroom %d (%d not found)",
+        len(enrolled), classroom_id, len(not_found_ids),
+    )
+    return ClassroomBatchRemoveResponse(
+        removed_count=len(enrolled),
+        not_found_ids=not_found_ids,
     )
 
 

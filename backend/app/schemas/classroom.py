@@ -77,6 +77,18 @@ class ClassroomStudentMoveResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
+# ── Batch Remove Students (#3821) ───────────────────────────────────────────
+
+
+class ClassroomBatchRemoveRequest(BaseModel):
+    student_ids: list[int] = Field(..., min_length=1, max_length=100)
+
+
+class ClassroomBatchRemoveResponse(BaseModel):
+    removed_count: int
+    not_found_ids: list[int]
+
+
 class ClassroomJoinRequest(BaseModel):
     join_code: str = Field(..., min_length=1, max_length=8)
 
