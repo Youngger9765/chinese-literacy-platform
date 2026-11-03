@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import type { BatchCreateResult, ClassroomDetailResponse, ClassroomResponse, StudentInClassroomResponse } from '../../services/classroomApi';
 import CsvUploadModal from './CsvUploadModal';
 import AddStudentsPanel from './panel/AddStudentsPanel';
-import { batchRemoveStudents, listMyClassrooms, moveStudent, resetStudentPassword } from '../../services/classroomApi';
+import { batchRemoveStudents, listMyClassrooms, moveStudent, renameStudent, resetStudentPassword, setStudentSeatNumber } from '../../services/classroomApi';
 import {
   generateParentInviteCode,
   listStudentParentLinks,
@@ -357,6 +357,184 @@ const BatchActionBar: React.FC<{
   );
 };
 
+// ── Inline-edit display name (#3826) ─────────────────────────────────────────
+//
+// Pencil-icon style (均一 StudentRow.jsx concept, not its code): click the
+// pencil -> autofocused input -> Enter confirms (PATCH), Escape cancels. This
+// edits User.name, the SAME field shown everywhere on the platform -- it is
+// NOT the login username/email, which stays untouched.
+const EditableNameCell: React.FC<{
+  token: string;
+  classroomId: number;
+  studentId: number;
+  name: string;
+  onRenamed: () => void;
+}> = ({ token, classroomId, studentId, name, onRenamed }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [draft, setDraft] = useState(name);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  const startEdit = () => {
+    setDraft(name);
+    setError('');
+    setIsEditing(true);
+  };
+
+  const cancel = () => {
+    setIsEditing(false);
+    setDraft(name);
+    setError('');
+  };
+
+  const confirm = async () => {
+    const trimmed = draft.trim();
+    if (!trimmed || trimmed === name) {
+      setIsEditing(false);
+      return;
+    }
+    setIsSaving(true);
+    setError('');
+    try {
+      await renameStudent(token, classroomId, studentId, trimmed);
+      setIsEditing(false);
+      onRenamed();
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : '改名失敗，請再試一次');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  if (!isEditing) {
+    return (
+      <div className="flex items-center gap-1.5">
+        <p className="text-base font-medium text-gray-900">{name}</p>
+        <button
+          type="button"
+          onClick={startEdit}
+          aria-label={`編輯 ${name} 的顯示名稱`}
+          className="text-gray-300 hover:text-indigo-600 transition-colors cursor-pointer text-xs"
+        >
+          ✎
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-1">
+      <input
+        type="text"
+        value={draft}
+        aria-label={`${name} 顯示名稱輸入框`}
+        autoFocus
+        disabled={isSaving}
+        onChange={(e) => setDraft(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') confirm();
+          if (e.key === 'Escape') cancel();
+        }}
+        className="h-8 px-2 rounded-md border border-indigo-300 text-sm w-32"
+      />
+      {error && <span className="text-xs text-red-500">{error}</span>}
+    </div>
+  );
+};
+
+// ── Inline-edit seat number (#3826) ──────────────────────────────────────────
+//
+// Scoped to THIS classroom's enrollment row -- NOT the string baked into the
+// login username at account-creation time. null clears it, falling back to
+// the row's array index (same display as every pre-#3826 row).
+const EditableSeatCell: React.FC<{
+  token: string;
+  classroomId: number;
+  studentId: number;
+  studentName: string;
+  seatNumber: number | null | undefined;
+  rowIndex: number;
+  onSeatChanged: () => void;
+}> = ({ token, classroomId, studentId, studentName, seatNumber, rowIndex, onSeatChanged }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [draft, setDraft] = useState(seatNumber != null ? String(seatNumber) : '');
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  const startEdit = () => {
+    setDraft(seatNumber != null ? String(seatNumber) : '');
+    setError('');
+    setIsEditing(true);
+  };
+
+  const cancel = () => {
+    setIsEditing(false);
+    setDraft(seatNumber != null ? String(seatNumber) : '');
+    setError('');
+  };
+
+  const confirm = async () => {
+    const trimmed = draft.trim();
+    const next = trimmed === '' ? null : Number(trimmed);
+    if (next !== null && (!Number.isInteger(next) || next < 1)) {
+      setError('座號必須是正整數');
+      return;
+    }
+    if (next === (seatNumber ?? null)) {
+      setIsEditing(false);
+      return;
+    }
+    setIsSaving(true);
+    setError('');
+    try {
+      await setStudentSeatNumber(token, classroomId, studentId, next);
+      setIsEditing(false);
+      onSeatChanged();
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : '設定座號失敗，請再試一次');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  if (!isEditing) {
+    return (
+      <div className="flex items-center justify-center gap-1">
+        <span>{seatNumber ?? rowIndex + 1}</span>
+        <button
+          type="button"
+          onClick={startEdit}
+          aria-label={`編輯 ${studentName} 的座號`}
+          className="text-gray-300 hover:text-indigo-600 transition-colors cursor-pointer text-xs"
+        >
+          ✎
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col items-center gap-1">
+      <input
+        type="number"
+        value={draft}
+        aria-label={`${studentName} 座號輸入框`}
+        autoFocus
+        disabled={isSaving}
+        min={1}
+        max={999}
+        onChange={(e) => setDraft(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') confirm();
+          if (e.key === 'Escape') cancel();
+        }}
+        className="h-8 w-16 px-2 rounded-md border border-indigo-300 text-sm text-center"
+      />
+      {error && <span className="text-xs text-red-500 whitespace-normal max-w-[8rem]">{error}</span>}
+    </div>
+  );
+};
+
 // Students created by the teacher get a synthetic e-mail; the part before "@"
 // is the login name printed on the credential card, so show that, not the e-mail.
 const accountName = (email: string) =>
@@ -588,9 +766,25 @@ const StudentListTab: React.FC<StudentListTabProps> = ({
                     onChange={() => toggleSelected(s.id)}
                   />
                 </td>
-                <td className="hidden lg:table-cell px-4 py-3 text-center text-gray-500">{i + 1}</td>
+                                <td className="hidden lg:table-cell px-4 py-3 text-center text-gray-500">
+                  <EditableSeatCell
+                    token={token}
+                    classroomId={classroom.id}
+                    studentId={s.id}
+                    studentName={s.name}
+                    seatNumber={s.seat_number}
+                    rowIndex={i}
+                    onSeatChanged={onStudentsImported}
+                  />
+                </td>
                 <td className="lg:px-4 lg:py-3 min-w-0 basis-full lg:basis-auto">
-                  <p className="text-base font-medium text-gray-900">{s.name}</p>
+                  <EditableNameCell
+                    token={token}
+                    classroomId={classroom.id}
+                    studentId={s.id}
+                    name={s.name}
+                    onRenamed={onStudentsImported}
+                  />
                 </td>
                 <td className="lg:px-4 lg:py-3 text-sm text-gray-500 font-mono whitespace-nowrap">{accountName(s.email)}</td>
                 {showParentInvite && (

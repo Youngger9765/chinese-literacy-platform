@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class ClassroomCreateRequest(BaseModel):
@@ -89,6 +89,29 @@ class ClassroomBatchRemoveResponse(BaseModel):
     not_found_ids: list[int]
 
 
+# ── Rename Student / Seat Number (#3826) ────────────────────────────────────
+
+
+class ClassroomStudentRenameRequest(BaseModel):
+    # Trimmed, non-empty, same max length as User.name's column (String(100)).
+    name: str = Field(..., min_length=1, max_length=100)
+
+    @field_validator("name")
+    @classmethod
+    def _reject_whitespace_only(cls, v: str) -> str:
+        stripped = v.strip()
+        if not stripped:
+            raise ValueError("name must not be empty or whitespace-only")
+        return stripped
+
+
+class ClassroomStudentSeatRequest(BaseModel):
+    # None clears the seat (student goes back to falling back on array-index
+    # display). ge=1 matches the PRD's "座號範圍驗證" AC -- 0 and negative
+    # numbers are rejected before they ever reach the DB.
+    seat_number: int | None = Field(None, ge=1, le=999)
+
+
 class ClassroomJoinRequest(BaseModel):
     join_code: str = Field(..., min_length=1, max_length=8)
 
@@ -117,6 +140,11 @@ class StudentInClassroomResponse(BaseModel):
     # system_admin) -- drives whether the frontend shows the reset-password
     # button for this row at all.
     can_reset_password: bool = False
+    # #3826: per-classroom-enrollment seat number. None means "not assigned
+    # yet" -- the frontend falls back to displaying the row's array index
+    # when this is None, so existing rosters look unchanged until a teacher
+    # explicitly sets one.
+    seat_number: int | None = None
 
     model_config = {"from_attributes": True}
 

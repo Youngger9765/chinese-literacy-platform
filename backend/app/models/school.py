@@ -131,7 +131,16 @@ class Classroom(Base):
 
 class ClassroomStudent(Base):
     __tablename__ = "classroom_students"
-    __table_args__ = (UniqueConstraint("classroom_id", "student_id"),)
+    __table_args__ = (
+        UniqueConstraint("classroom_id", "student_id"),
+        # Standard SQL unique constraints allow any number of NULLs to
+        # coexist (Postgres follows this), so students who haven't been
+        # assigned a seat yet (seat_number IS NULL, the default for every
+        # pre-#3826 row and every newly-moved/re-enrolled row) never
+        # collide with each other -- only two NON-NULL seats in the SAME
+        # classroom can conflict (#3826).
+        UniqueConstraint("classroom_id", "seat_number", name="uq_classroom_students_seat"),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     classroom_id: Mapped[int] = mapped_column(ForeignKey("classrooms.id"), nullable=False, index=True)
@@ -139,6 +148,12 @@ class ClassroomStudent(Base):
     enrolled_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
+    # Per-classroom seat number (#3826) -- deliberately NOT the string baked
+    # into the login username at account-creation time (classroom_batch.py /
+    # classroom_csv.py); this is a pure display/sort attribute scoped to THIS
+    # enrollment row, so moving classrooms (#3819) or batch-removing (#3821)
+    # never carries a stale seat number into a new classroom.
+    seat_number: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     # Relationships
     classroom: Mapped["Classroom"] = relationship("Classroom", back_populates="classroom_students")

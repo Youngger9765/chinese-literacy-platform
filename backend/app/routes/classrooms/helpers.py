@@ -85,6 +85,130 @@ def require_editor_or_admin(classroom: Classroom, current_user: User, db: Sessio
     _require_classroom_editor(classroom, current_user, db)
 
 
+def require_renameable_student_target(
+    classroom: Classroom, student_id: int, current_user: User, db: Session
+) -> User:
+    """Shared "may this teacher touch this student ACCOUNT" gate (#3818,
+    extended #3826 after a security review of the rename endpoint).
+
+    Classroom membership alone (owner OR co-teacher, via
+    require_member_or_admin/require_owner_or_admin) only proves the caller
+    can see this student's classroom-local data -- a roster-visibility
+    check. It is NOT sufficient authority to mutate something shared
+    platform-wide: a password reset changes the login credential, and a
+    rename changes ``User.name``, which is visible to every other teacher
+    who also happens to teach this same student, not just classroom-local
+    like a seat number or enrollment. Both therefore require this SAME,
+    stricter chain (originally written for password-reset in #3818; #3826
+    extracted it here verbatim rather than re-deriving a second version
+    that could silently drift from the password-teacher rule):
+
+    1. Caller must CURRENTLY hold an active ``teacher`` role at this
+       classroom's school (not just historically be classroom.teacher_id).
+    2. Caller must be the account's recorded creator
+       (``created_by_teacher_id``) -- not any co-teacher who merely also
+       teaches the classroom. Self-registered accounts
+       (created_by_teacher_id is NULL: email/Google/Junyi SSO, or legacy
+       data) can never be touched by a teacher; fail closed.
+    3. The target's active roles must be consistent with "a student at
+       this classroom's school" -- never a non-student account.
+    4. The target's school (via role or StudentProfile) must match this
+       classroom's school.
+
+    system_admin bypasses gates 1-2 but NOT 3-4 (an admin still can't be
+    tricked into touching a non-student / wrong-school account via this
+    path).
+
+    Returns the target ``User`` row on success. Raises 404 if the id
+    doesn't resolve to any user, 403 for any gate failure.
+    """
+    user = db.query(User).filter(User.id == student_id).first()
+    if user is None:
+        raise HTTPException(status_code=404, detail="Student not found")
+
+    if not is_system_admin(current_user.id, db):
+        caller_has_school_teacher_role = (
+            db.query(UserRole)
+            .join(Role)
+            .filter(
+                UserRole.user_id == current_user.id,
+                UserRole.is_active.is_(True),
+                Role.name == "teacher",
+                UserRole.scope_type == "school",
+                UserRole.scope_id == str(classroom.school_id),
+            )
+            .first()
+        )
+        if caller_has_school_teacher_role is None:
+            raise HTTPException(
+                status_code=403,
+                detail="Caller does not hold teacher authority at this classroom's school",
+            )
+        if user.created_by_teacher_id != current_user.id:
+            raise HTTPException(
+                status_code=403,
+                detail="Only the student's password teacher (the teacher who created "
+                       "this account) may modify it",
+            )
+
+    active_target_roles = (
+        db.query(Role.name, UserRole.scope_type, UserRole.scope_id)
+        .join(Role)
+        .filter(
+            UserRole.user_id == student_id,
+            UserRole.is_active.is_(True),
+        )
+        .all()
+    )
+
+    def _is_allowed_target_role(role_name: str, scope_type: str, scope_id: str | None) -> bool:
+        if role_name != "student":
+            return False
+        # (#3804) Every account now carries a platform-scoped `student` role
+        # by default from registration -- harmless, not a sign the target
+        # also holds some other privilege. The gate's actual job is still
+        # enforced below: a school-scoped student role must match THIS
+        # classroom's school.
+        if scope_type == "platform":
+            return True
+        return scope_type == "school" and scope_id == str(classroom.school_id)
+
+    has_disallowed_target_role = any(
+        not _is_allowed_target_role(role_name, scope_type, scope_id)
+        for role_name, scope_type, scope_id in active_target_roles
+    )
+    if has_disallowed_target_role:
+        raise HTTPException(
+            status_code=403,
+            detail="Cannot modify a non-student account",
+        )
+
+    if (
+        user.student_profile is not None
+        and user.student_profile.school_id != classroom.school_id
+    ):
+        raise HTTPException(
+            status_code=403,
+            detail="Student is not a verified member of this classroom's school",
+        )
+
+    has_matching_student_role = any(
+        scope_type == "school" and scope_id == str(classroom.school_id)
+        for _role_name, scope_type, scope_id in active_target_roles
+    )
+    has_matching_student_profile = (
+        user.student_profile is not None
+        and user.student_profile.school_id == classroom.school_id
+    )
+    if not has_matching_student_role and not has_matching_student_profile:
+        raise HTTPException(
+            status_code=403,
+            detail="Student is not a verified member of this classroom's school",
+        )
+
+    return user
+
+
 def ensure_school_student_role(
     db: Session, user_id: int, school_id: int, granted_by: int | None = None
 ) -> None:
@@ -276,6 +400,7 @@ def classroom_to_detail_response(
                 current_user is not None
                 and (caller_is_admin or cs.student.created_by_teacher_id == current_user.id)
             ),
+            seat_number=cs.seat_number,
         )
         for cs in classroom.classroom_students
     ]

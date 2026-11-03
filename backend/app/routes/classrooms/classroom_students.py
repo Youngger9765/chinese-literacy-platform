@@ -3,13 +3,14 @@ import logging
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy import or_
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
 from ...auth.dependencies import get_current_user
 from ...database import get_db
 from ...models.school import Classroom, ClassroomStudent, ClassroomTeacher, School
 from ...services.email_domains import is_public_email_domain
-from ...auth.policies import is_system_admin
+from ...auth.policies import is_system_admin, require_classroom_member
 from ...models.user import Role, User, UserRole
 from ...schemas.classroom import (
     ClassroomBatchRemoveRequest,
@@ -17,6 +18,8 @@ from ...schemas.classroom import (
     ClassroomStudentAddRequest,
     ClassroomStudentMoveRequest,
     ClassroomStudentMoveResponse,
+    ClassroomStudentRenameRequest,
+    ClassroomStudentSeatRequest,
     StudentInClassroomResponse,
     StudentSearchRequest,
     StudentSearchResult,
@@ -28,6 +31,7 @@ from .helpers import (
     require_editor_or_admin,
     require_member_or_admin,
     require_owner_or_admin,
+    require_renameable_student_target,
 )
 
 router = APIRouter(tags=["classrooms"])
@@ -206,6 +210,163 @@ def remove_student_from_classroom(
     db.commit()
     logger.info("Removed student %d from classroom %d", student_id, classroom_id)
     return None
+
+
+def _get_enrollment_or_404(classroom_id: int, student_id: int, db: Session) -> ClassroomStudent:
+    cs = (
+        db.query(ClassroomStudent)
+        .filter(
+            ClassroomStudent.classroom_id == classroom_id,
+            ClassroomStudent.student_id == student_id,
+        )
+        .first()
+    )
+    if cs is None:
+        raise HTTPException(status_code=404, detail="Student not in classroom")
+    return cs
+
+
+@router.patch(
+    "/classrooms/{classroom_id}/students/{student_id}/name",
+    response_model=StudentInClassroomResponse,
+)
+def rename_student(
+    classroom_id: int,
+    student_id: int,
+    payload: ClassroomStudentRenameRequest,
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Teacher-edit a student's display name (#3826).
+
+    Updates ``User.name`` -- the same field shown everywhere on the
+    platform (there is no separate per-classroom nickname) -- NOT the
+    login username/email, so the account the family was given on the
+    credential card keeps working.
+
+    (2026-11-02 security review) Classroom membership alone is NOT
+    sufficient authority here: ``User.name`` is visible platform-wide, to
+    every other teacher who also teaches this same student -- not scoped
+    to this classroom like a seat number or enrollment. So this calls the
+    SAME stricter gate as password-reset (#3818):
+    require_renameable_student_target, which additionally requires the
+    caller be the account's recorded creator (created_by_teacher_id) and
+    the target be a verified student of this classroom's school. A
+    classroom owner/co-teacher who merely also teaches a self-registered
+    student (created_by_teacher_id is NULL) gets 403, same as they would
+    trying to reset that student's password.
+    """
+    classroom = get_classroom_or_404(classroom_id, db)
+    # Visibility gate only (matches reset_student_password's structure) --
+    # require_renameable_student_target below is the real authority check.
+    require_classroom_member(classroom, current_user, db)
+
+    cs = _get_enrollment_or_404(classroom_id, student_id, db)
+    user = require_renameable_student_target(classroom, student_id, current_user, db)
+
+    user.name = payload.name
+    db.commit()
+    # Audit only after a successful commit -- a 403 from the gate above (or
+    # any future failure between mutation and commit) must never log
+    # "renamed" for something that didn't actually happen.
+    audit_log_endpoint(
+        request=request,
+        action=AuditAction.RENAME_STUDENT,
+        user_id=current_user.id,
+        target_student_id=student_id,
+    )
+    db.refresh(cs)
+    db.refresh(user)
+    logger.info("Renamed student %d in classroom %d", student_id, classroom_id)
+    return StudentInClassroomResponse(
+        id=user.id,
+        name=user.name,
+        email=user.email,
+        enrolled_at=cs.enrolled_at,
+        seat_number=cs.seat_number,
+    )
+
+
+@router.patch(
+    "/classrooms/{classroom_id}/students/{student_id}/seat",
+    response_model=StudentInClassroomResponse,
+)
+def set_student_seat_number(
+    classroom_id: int,
+    student_id: int,
+    payload: ClassroomStudentSeatRequest,
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Teacher-edit a student's seat number within THIS classroom (#3826).
+
+    Scoped to the enrollment row (ClassroomStudent), not the student
+    account, so a seat number never carries over when a student moves
+    classrooms (#3819) or is re-enrolled after a batch-remove (#3821).
+    ``seat_number: null`` clears it -- the roster then falls back to
+    displaying the row's array index, same as every pre-#3826 row.
+    """
+    classroom = get_classroom_or_404(classroom_id, db)
+    require_owner_or_admin(classroom, current_user, db)
+
+    cs = _get_enrollment_or_404(classroom_id, student_id, db)
+
+    if payload.seat_number is not None:
+        conflict = (
+            db.query(ClassroomStudent)
+            .filter(
+                ClassroomStudent.classroom_id == classroom_id,
+                ClassroomStudent.seat_number == payload.seat_number,
+                ClassroomStudent.id != cs.id,
+            )
+            .first()
+        )
+        if conflict is not None:
+            raise HTTPException(
+                status_code=409,
+                detail=f"座號 {payload.seat_number} 在這個班級已經有人使用",
+            )
+
+    cs.seat_number = payload.seat_number
+    try:
+        db.commit()
+    except IntegrityError:
+        # Belt-and-suspenders against the rare race between the SELECT-based
+        # conflict check above and this commit (two concurrent requests
+        # both picking the same free seat_number): the app-level check is
+        # the normal path, the DB's UniqueConstraint is the actual source of
+        # truth and raises here instead of silently corrupting data -- turn
+        # it into the same 409 a non-racing duplicate request would get,
+        # not an unhandled 500. Audit is NOT written -- it's only logged
+        # after a commit that actually succeeded, below.
+        db.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail=f"座號 {payload.seat_number} 在這個班級已經有人使用",
+        )
+    # Audit only after a successful commit -- the 409 raised above (whether
+    # from the pre-check or this race-condition backstop) must never log
+    # "set seat number" for a change that was rolled back / never applied.
+    audit_log_endpoint(
+        request=request,
+        action=AuditAction.SET_SEAT_NUMBER,
+        user_id=current_user.id,
+        target_student_id=student_id,
+    )
+    db.refresh(cs)
+    logger.info(
+        "Set seat_number=%s for student %d in classroom %d",
+        payload.seat_number, student_id, classroom_id,
+    )
+    return StudentInClassroomResponse(
+        id=cs.student.id,
+        name=cs.student.name,
+        email=cs.student.email,
+        enrolled_at=cs.enrolled_at,
+        seat_number=cs.seat_number,
+    )
 
 
 @router.post(
@@ -396,6 +557,7 @@ def list_classroom_students(
             name=cs.student.name,
             email=cs.student.email,
             enrolled_at=cs.enrolled_at,
+            seat_number=cs.seat_number,
         )
         for cs in enrollments
     ]
