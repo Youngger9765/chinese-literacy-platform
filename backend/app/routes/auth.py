@@ -34,6 +34,8 @@ from ..database import get_db
 from ..models.user import User, UserRole, Role
 from ..schemas.auth import (
     ChangePasswordRequest,
+    ClaimAccountRequest,
+    ClaimAccountResponse,
     ForgotPasswordRequest,
     ForgotPasswordResponse,
     GoogleLoginRequest,
@@ -51,6 +53,8 @@ from ..schemas.auth import (
     VerifyEmailResponse,
 )
 from ..schemas.user import UserResponse
+from ..services.account_claim_service import request_claim
+from ..services.audit_logger import AuditAction, audit_log_endpoint
 from ..services.auth_registration_service import (
     create_user_account,
     enforce_password_strength,
@@ -282,6 +286,100 @@ def change_password(
 
     db.commit()
     return {"message": "Password updated successfully"}
+
+
+@router.post("/claim-account", response_model=ClaimAccountResponse)
+def claim_own_account(
+    req: ClaimAccountRequest,
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """#3824 — the current user REQUESTS that their own teacher-created
+    ("child") account be claimed as a regular account.
+
+    This does NOT immediately take effect (security review finding H1,
+    2026-11-03 redesign per Young's explicit direction: approval-gated, not
+    email-verification-gated — see account_claim_service.request_claim()'s
+    module docstring for the full history). It only reserves the desired new
+    email in `pending_email`. created_by_teacher_id is only cleared when the
+    account's recorded creator (the "password teacher") explicitly approves
+    the request via POST /classrooms/{id}/students/{student_id}/approve-claim
+    — a classroom-scoped teacher action, same authorization gate as #3818's
+    reset-password. Until approved (or rejected), the original creator can
+    still reset this account's password, which also revokes the pending
+    request (see classroom_password.py).
+
+    This means someone who merely knows the account's current password
+    (e.g. read a printed credential card) can, at most, FILE a request — they
+    cannot complete the handover themselves under any circumstance, closing
+    H1 completely (the previous email-verification-token design only
+    downgraded it: whoever also controlled the new email could still finish
+    it alone).
+
+    Rate-limited (security review findings M1/M2): this endpoint re-verifies
+    current_password and queries the global email space, both of which are
+    weaker-than-ideal oracles for someone who already holds one valid
+    teacher-created account's credentials; the per-IP and per-account caps
+    bound how many guesses that gets them per minute, same pattern as
+    /auth/login's two-bucket limiter.
+
+    Operates ONLY on `current_user` — there is no student_id in the request.
+    See docs/prd/2026-11-02-child-handover-prd.md for the full design
+    rationale (chosen over Junyi's two-account merge) and the authorization
+    argument (why no additional role/classroom check is needed for THIS
+    endpoint specifically — the approve/reject endpoints are where the real
+    authorization work happens now).
+    """
+    client_ip = real_client_ip(request)
+    if not rate_limiter.check(f"claim-account:{client_ip}", max_requests=20, window_seconds=60):
+        raise HTTPException(status_code=429, detail="Too many requests. Please try again later.")
+    if not rate_limiter.check(f"claim-account:acct:{current_user.id}", max_requests=5, window_seconds=60):
+        raise HTTPException(status_code=429, detail="Too many requests. Please try again later.")
+
+    old_email = current_user.email
+    old_teacher_id = current_user.created_by_teacher_id
+
+    try:
+        request_claim(
+            db,
+            current_user,
+            current_password=req.current_password,
+            new_email=req.new_email,
+            new_password=req.new_password,
+        )
+    except HTTPException as exc:
+        # Security review finding L1: log failed attempts too (not just
+        # successes) — an investigator looking at one account's audit trail
+        # should be able to tell "someone tried this and got the password
+        # wrong" apart from silence.
+        audit_log_endpoint(
+            request=request,
+            action=AuditAction.CLAIM_ACCOUNT_REQUESTED,
+            user_id=current_user.id,
+            target_student_id=current_user.id,
+            extra={"result": "rejected", "status_code": exc.status_code},
+        )
+        raise
+
+    audit_log_endpoint(
+        request=request,
+        action=AuditAction.CLAIM_ACCOUNT_REQUESTED,
+        user_id=current_user.id,
+        target_student_id=current_user.id,
+        extra={
+            "result": "pending",
+            "old_email": old_email,
+            "pending_email": req.new_email,
+            "teacher_id": old_teacher_id,
+        },
+    )
+
+    return ClaimAccountResponse(
+        message="過戶申請已送出，等待老師核准。老師會在班級名單看到這筆申請並決定核准或拒絕；"
+                "在老師核准前，原建立老師仍可重設此帳號密碼（等同撤銷本次申請），"
+                "這個帳號的登入方式也維持原樣。",
+    )
 
 
 # ---------------------------------------------------------------------------

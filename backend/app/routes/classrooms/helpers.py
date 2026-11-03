@@ -388,6 +388,12 @@ def classroom_to_detail_response(
     only for the account's recorded password teacher (created_by_teacher_id)
     or a system_admin. Optional (defaults every row to False) so other
     callers of this helper that don't have a request-scoped user don't break.
+
+    #3824: ``pending_claim_email`` uses the SAME gate (only the password
+    teacher or a system_admin sees it) -- it is the requested email of a
+    filed-but-not-yet-approved account-claim request, surfaced here so a
+    teacher can see what they'd be approving before calling
+    approve-claim/reject-claim (classroom_password.py).
     """
     caller_is_admin = current_user is not None and is_system_admin(current_user.id, db)
     students = [
@@ -401,6 +407,12 @@ def classroom_to_detail_response(
                 and (caller_is_admin or cs.student.created_by_teacher_id == current_user.id)
             ),
             seat_number=cs.seat_number,
+            pending_claim_email=(
+                cs.student.pending_email
+                if current_user is not None
+                and (caller_is_admin or cs.student.created_by_teacher_id == current_user.id)
+                else None
+            ),
         )
         for cs in classroom.classroom_students
     ]

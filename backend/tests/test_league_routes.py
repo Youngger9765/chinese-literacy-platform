@@ -714,7 +714,15 @@ class TestAuthzMatrixAllEndpoints:
         classroom_b = _make_classroom(db, school, owner_b_id)
         classroom_c = _make_classroom(db, school, owner_c_id)
 
-        start = NOW + timedelta(minutes=10)
+        # Computed at CALL time, not import time (unlike the module-level
+        # `NOW` the rest of this file uses with a safe +1-day default
+        # buffer): this class's own +10min window is tight enough that it
+        # flaked once the full "Backend Tests" CI suite started taking
+        # >10min to reach this file (#3832) -- `league_service`'s expiry
+        # check compares against the REAL current time at accept()-call
+        # time, so a `start` frozen at collection time stops being "10
+        # minutes from now" by the time this class's tests actually run.
+        start = datetime.now(timezone.utc) + timedelta(minutes=10)
         end = start + timedelta(days=2)
 
         # Invitation 1: accepted (A invites, B accepts) — board / season-list

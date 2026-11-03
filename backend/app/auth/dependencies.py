@@ -13,6 +13,21 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login", auto_error=Fals
 # reach -- GET /users/me (so the frontend can render gate state) and the
 # change-password endpoint itself (the only escape hatch). Everything else
 # behind get_current_user is blocked with 403 while this is true.
+#
+# #3824 security review finding H1: claim-account (child-account handover)
+# was ADDED here in an earlier version of this change and then REMOVED —
+# do not re-add it. Letting an account whose teacher-issued password has
+# never been changed go straight to claiming (new email + new password +
+# eventually stripping the original creator's recovery authority) in one
+# shot was exactly the amplifier that turned "someone read the printed
+# credential card" into "permanent, instant account theft, unrecoverable
+# even by the teacher". Forcing change-password first costs the real owner
+# nothing (it is one extra, already-required step) and forces a would-be
+# claimant to prove they can authenticate normally before anything
+# irreversible-adjacent becomes reachable. account_claim_service.
+# request_claim() also checks student_profile.password_changed itself
+# (defense-in-depth, same two-independent-gates pattern #3818 used), but
+# that check existing is not a reason to re-add this exemption.
 _PASSWORD_CHANGE_EXEMPT: set[tuple[str, str]] = {
     ("POST", "/api/auth/change-password"),
     ("GET", "/api/users/me"),
