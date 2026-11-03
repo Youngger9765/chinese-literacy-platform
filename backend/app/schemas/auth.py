@@ -30,13 +30,19 @@ class ChangePasswordRequest(BaseModel):
 
 
 class ClaimAccountRequest(BaseModel):
-    """#3824 — a teacher-created ("child") account claiming itself as a
+    """#3824 — a teacher-created ("child") account REQUESTING to become a
     regular, self-owned account. Operates only on the caller's own account
     (no student_id field): the caller must already be authenticated AS this
     account, which requires knowing its current username/password to begin
     with. current_password is required again as defense-in-depth for this
-    high-impact, irreversible action (same pattern as ChangePasswordRequest),
-    even though the JWT already proves a recent login."""
+    high-impact action (same pattern as ChangePasswordRequest), even though
+    the JWT already proves a recent login.
+
+    This only files a request — see account_claim_service.request_claim()'s
+    module docstring. The account is not transferred until the recorded
+    creator (password teacher) approves it via a classroom-scoped endpoint
+    (routes/classrooms/classroom_password.py), so knowing this account's
+    password is never sufficient on its own to complete a handover."""
 
     current_password: str
     new_email: EmailStr
@@ -48,8 +54,6 @@ class ClaimAccountRequest(BaseModel):
 
 class ClaimAccountResponse(BaseModel):
     message: str
-    # Dev-mode only, mirrors RegisterResponse.verification_token.
-    verification_token: str | None = None
 
 
 class TokenResponse(BaseModel):

@@ -1,45 +1,50 @@
 """
-account_claim_service.py — Child-account handover for #3824 (two-phase).
+account_claim_service.py — Child-account handover for #3824, approval-gated.
 
 A teacher-created ("child") account (#3818: created_by_teacher_id set by
-batch-create / CSV upload / Junyi class import's new-student branch) claims
-itself as a regular, self-owned account: binds a real email + a password the
-student alone knows, and -- once the new email is verified -- permanently
-clears created_by_teacher_id.
+batch-create / CSV upload / Junyi class import's new-student branch) FILES A
+REQUEST to become a regular, self-owned account: verifies current_password,
+sets a new password immediately, and reserves the desired new email in
+`pending_email` — WITHOUT touching created_by_teacher_id or `email`.
 
-## Why two phases (security review finding H1, 2026-11-03)
+## Design history (why this is approval-gated, not email-verification-gated)
 
-The first version of this feature cleared created_by_teacher_id the instant
-`request_claim()` succeeded. That is a PERMANENT, IRREVERSIBLE transfer of
-recovery authority gated on nothing but "knows the current_password" -- which
-for a teacher-created account is the printed credential card. Before #3824
-existed, a classmate who read someone else's card could log in, but the
-teacher could still reset the password to recover the account. The
-single-phase design made that recovery impossible: whoever claimed it first,
-permanently owns it, and only system_admin can intervene.
+v1 (single-phase): request_claim() cleared created_by_teacher_id the instant
+it succeeded. A security review (H1) found this let anyone who merely knew a
+teacher-issued card password permanently strip the real creator's recovery
+authority in one call.
 
-Two phases close that hole without abandoning the feature:
+v2 (email-verification two-phase): completion moved to redeeming an emailed
+verification token, so created_by_teacher_id stayed set until someone proved
+control of the new email's mailbox. A SECOND review pass found this only
+DOWNGRADES H1, not closes it: an attacker who sets new_email to an address
+they themselves control can file the request AND redeem their own token
+within about a minute, with no notification mechanism giving the real
+creator any reason to look. (It also turned out to be moot in practice today
+— `settings.is_dev` is False in staging/production, so no environment
+currently has real email sending wired up, meaning phase 2 could not
+actually be completed anywhere persistent — but that is an accident of what
+isn't built yet, not a property of the design.)
 
-  Phase 1 (`request_claim`, this module): verifies current_password, then
-  stores the desired new email in `pending_email` and issues a verification
-  token. `created_by_teacher_id` is NOT touched -- the original creator can
-  still reset this account's password for the whole pending window (and
-  doing so clears the pending claim too, see classroom_password.py).
+v3 (this version, Young's explicit direction, 2026-11-03): completion
+requires an explicit approval action by the account's recorded creator (the
+"password teacher"), via POST /classrooms/{id}/students/{student_id}/
+approve-claim (classroom_password.py) — the same classroom-scoped
+authorization gate #3818 already uses for reset-password. This mirrors
+Junyi's own model (a child account's creator — parent or teacher — controls
+it, not an emailed link) and closes H1 completely: whoever merely knows the
+current password can FILE a request, but nothing they do by themselves can
+EVER complete it. Completion requires a second, independent party (the
+specific teacher on record) to take an explicit action.
 
-  Phase 2 (`complete_pending_claim`, in email_verification_service.py):
-  redeeming the verification token writes `pending_email` into the live
-  `email` column and ONLY THEN clears `created_by_teacher_id`.
-
-This means completing a hostile claim now requires actually controlling the
-mailbox at the new email address -- not just having once seen a printed
-password -- and gives the real owner/teacher a window to notice and recover
-via an ordinary password reset before that happens. It is not perfect
-account-theft prevention (someone who also controls the new email from the
-first request can still complete it quickly), but it converts "permanent,
-silent, instant theft" into "theft with a recovery window and an audit
-trail", which is the standard this codebase holds similar irreversible
-actions to (see classroom_password.py's own two-gate design after #3818's
-own security review).
+Everything this module does is therefore request-filing only:
+- Verifies current_password, enforces new_password strength, checks
+  new_email isn't already live or pending elsewhere.
+- Sets the new password immediately (same as change-password) and reserves
+  pending_email.
+- Does NOT generate any verification token, does NOT touch `email` or
+  created_by_teacher_id — both wait for classroom_password.py's
+  approve_account_claim() / reject_account_claim().
 
 Router (routes/auth.py) calls request_claim() and handles HTTP request/
 response shaping + audit logging, matching the "thin HTTP boundary, business
@@ -48,7 +53,6 @@ password-reset.
 """
 
 import logging
-import secrets
 
 from fastapi import HTTPException, status
 from sqlalchemy import or_
@@ -60,8 +64,6 @@ from ..services.auth_registration_service import enforce_password_strength
 
 logger = logging.getLogger(__name__)
 
-EMAIL_VERIFICATION_TOKEN_BYTES = 32
-
 
 def request_claim(
     db: Session,
@@ -70,12 +72,12 @@ def request_claim(
     current_password: str,
     new_email: str,
     new_password: str,
-) -> str:
-    """Phase 1: request that the CALLER's own teacher-created account be
+) -> None:
+    """File a request that the CALLER's own teacher-created account be
     claimed as a regular account. Does NOT clear created_by_teacher_id or
-    write to `email` -- see module docstring for why. Operates only on
-    `current_user`; there is no student_id parameter, by design (see PRD
-    "誰能做這件事").
+    write to `email` -- see module docstring for why (approval-gated, not
+    self-service). Operates only on `current_user`; there is no student_id
+    parameter, by design (see PRD "誰能做這件事").
 
     Check order matters here (security review finding M1): the new-password
     strength check runs BEFORE the email-collision check, and
@@ -90,10 +92,6 @@ def request_claim(
 
     Raises HTTPException on every rejection path; callers (routes/auth.py)
     do not need to translate return values into status codes.
-
-    Returns:
-        The email-verification token (dev-mode exposure is the route's
-        concern, not this service's).
     """
     # AC5: this is a transition for a specific kind of account (one somebody
     # else is recorded as having created) -- not a generic "set my email"
@@ -112,10 +110,9 @@ def request_claim(
     # routes/auth.py's get_current_user dependency already blocks EVERY
     # endpoint except change-password/me for an account whose teacher-issued
     # password has never been changed (#3438) -- claim-account is
-    # deliberately NOT in that exemption list (removed from it as part of
-    # this fix), so in the normal request path this branch is unreachable.
-    # It stays here so a future accidental re-exemption of this route still
-    # cannot skip this requirement.
+    # deliberately NOT in that exemption list, so in the normal request path
+    # this branch is unreachable. It stays here so a future accidental
+    # re-exemption of this route still cannot skip this requirement.
     if current_user.student_profile and not current_user.student_profile.password_changed:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -137,13 +134,13 @@ def request_claim(
     # function docstring for why the order matters.
     enforce_password_strength(new_password)
 
-    # AC4 / L2 (race, narrow half): reject if another account already holds
-    # this email live, OR already has it reserved as ITS pending claim
-    # target. A genuine simultaneous race on the same target email is still
-    # possible (two requests both pass this SELECT before either commits);
-    # the authoritative guard is the UNIQUE constraint on `users.email`,
-    # enforced when phase 2 actually writes to it (see
-    # email_verification_service.complete_pending_claim, which catches
+    # AC4: reject if another account already holds this email live, OR
+    # already has it reserved as ITS pending claim target. A genuine
+    # simultaneous race on the same target email is still possible (two
+    # requests both pass this SELECT before either commits); the
+    # authoritative guard is the UNIQUE constraint on `users.email`, enforced
+    # when a teacher actually APPROVES one of the two requests and writes to
+    # it (see classroom_password.approve_account_claim(), which catches
     # IntegrityError there). This check exists to fail fast with a clear 409
     # in the common (non-racing) case.
     existing = (
@@ -160,26 +157,23 @@ def request_claim(
             detail="此 Email 已被其他帳號使用或已被申請過戶",
         )
 
-    verification_token = secrets.token_hex(EMAIL_VERIFICATION_TOKEN_BYTES)
-
     current_user.password_hash = hash_password(new_password)
     current_user.pending_email = new_email
-    current_user.email_verification_token = verification_token
     if current_user.student_profile:
         # #3438: the student just set a password only they know -- same as
         # change-password, this must flip to True or get_current_user's
         # must-change-password gate would keep blocking every OTHER
         # endpoint for this account on its very next request. Note this is
-        # independent of the pending-claim mechanism above: the new
-        # PASSWORD takes effect immediately (phase 1), only the new EMAIL +
-        # created_by_teacher_id wait for verification (phase 2).
+        # independent of the approval mechanism above: the new PASSWORD
+        # takes effect immediately (same as change-password always has),
+        # only the new EMAIL + created_by_teacher_id wait for a teacher's
+        # explicit approve-claim call.
         current_user.student_profile.password_changed = True
 
     db.commit()
 
     logger.info(
-        "Account %d requested a claim (child-account handover, #3824, pending verification)",
+        "Account %d requested a claim (child-account handover, #3824, "
+        "pending teacher approval)",
         current_user.id,
     )
-
-    return verification_token

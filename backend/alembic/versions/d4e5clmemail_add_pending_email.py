@@ -1,7 +1,7 @@
 """add users.pending_email, the two-phase account-claim handshake (#3824)
 
 Revision ID: d4e5clmemail
-Revises: c3d4pwteach1
+Revises: d4e5seatnum1
 Create Date: 2026-11-03 00:00:00.000000
 
 Why this migration exists: #3824 lets a student holding a teacher-created
@@ -13,11 +13,15 @@ PERMANENTLY strip the real creator's recovery authority in one request --
 before #3824 a stolen card was recoverable (the teacher could still reset
 it); the single-phase design made it not recoverable. This column makes the
 handover two-phase: the new email is held here, not written to `users.email`,
-until its verification token is redeemed (proving control of a mailbox, not
-just knowledge of the old password). `created_by_teacher_id` stays set for
-the whole pending window, so the original creator can still reset the
-password (which also clears this column, revoking the in-flight claim -- see
-classroom_password.py). See docs/prd/2026-11-02-child-handover-prd.md.
+until the account's recorded password teacher (or system_admin) explicitly
+approves the request (classroom_password.py's approve-claim endpoint) --
+an earlier email-token-redemption design was rejected by a second review
+pass (it only downgraded H1: an attacker who controls new_email could file
+and redeem alone, with no teacher notification). `created_by_teacher_id`
+stays set for the whole pending window, so the original creator can still
+reset the password (which also clears this column, revoking the in-flight
+claim -- see classroom_password.py). See
+docs/prd/2026-11-02-child-handover-prd.md.
 
 Idempotent DDL: checks information_schema.columns before ADD COLUMN and
 wraps CREATE INDEX in IF NOT EXISTS -- safe to re-run on a shared
@@ -37,7 +41,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision: str = "d4e5clmemail"
-down_revision: Union[str, None] = "c3d4pwteach1"
+down_revision: Union[str, None] = "d4e5seatnum1"
 branch_labels = None
 depends_on = None
 

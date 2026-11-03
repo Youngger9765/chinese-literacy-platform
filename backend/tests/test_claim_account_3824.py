@@ -1,27 +1,43 @@
 """
 Tests for a student claiming their teacher-created ("child") account as their
-own (#3824 — child-account handover), TWO-PHASE design.
+own (#3824 — child-account handover), APPROVAL-GATED design.
 
-History: the first version of this feature cleared created_by_teacher_id the
-instant a single claim-account call succeeded. A security review (finding
-H1) found that let anyone who merely knew the account's printed card
-password (e.g. a classmate who saw it) PERMANENTLY strip the real creator's
-recovery authority in one shot — before #3824 existed a stolen card was
-recoverable (the teacher could still reset it); the single-phase design made
-it not. This suite now exercises the two-phase replacement:
+Design history (why this is approval-gated, not email-verification-gated):
+v1 (single-phase) cleared created_by_teacher_id the instant one call
+succeeded — a security review (H1) found anyone who merely knew a teacher-
+issued card password could permanently strip the real creator's recovery
+authority in one shot. v2 (email-verification two-phase) moved completion to
+redeeming an emailed token — a SECOND review pass found this only
+DOWNGRADES H1: an attacker who sets new_email to an address they control can
+file the request and redeem their own token within about a minute, with no
+teacher notification. v3 (this suite, Young's explicit direction,
+2026-11-03) requires an EXPLICIT APPROVAL by the account's recorded creator
+(the "password teacher") before anything transfers — mirrors Junyi's own
+model (the creator controls the child account) and closes H1 completely:
+whoever merely knows the current password can FILE a request, but nothing
+they do by themselves can ever complete it.
 
-  Phase 1 (POST /auth/claim-account): requests the handover. Sets a NEW
-  password immediately, but only RESERVES the new email (`pending_email`)
-  and does NOT touch `created_by_teacher_id` — the original teacher can
-  still reset the password during this window, which also revokes the
-  pending request (see test_teacher_reset_during_pending_window_*).
+  Request  (POST /auth/claim-account): verifies current_password, sets a new
+  password immediately, reserves the desired new email in `pending_email`.
+  Does NOT touch `email` or `created_by_teacher_id`.
 
-  Phase 2 (GET/POST /auth/verify-email): redeeming the token actually writes
-  the new email and clears created_by_teacher_id. This is the moment that
-  matters for authorization — not phase 1.
+  Approve  (POST /classrooms/{id}/students/{sid}/approve-claim): ONLY the
+  recorded password teacher (or system_admin) may call this. Writes
+  `pending_email` into `email`, clears `created_by_teacher_id`.
+
+  Reject   (POST /classrooms/{id}/students/{sid}/reject-claim): same gate.
+  Clears `pending_email`; created_by_teacher_id is untouched.
+
+  A teacher's ordinary password reset also clears any pending request
+  (revocation), since the password the requester proved they knew is no
+  longer valid.
 
 Mirrors the fixture style of tests/test_classroom_reset_password.py (#3818),
-which this feature builds directly on top of.
+which this feature builds directly on top of (reset-password and approve/
+reject-claim share the exact same authorization gate: require_classroom_editor
++ helpers.require_renameable_student_target — consolidated there during the
+#3828 rebase so this suite doesn't carry a second, independently-drifting
+copy of the same check).
 
 Run with:
     cd /Users/young/project/chinese-literacy-platform/backend
@@ -47,7 +63,7 @@ from app.main import app
 from app.models import Base
 from app.models.assignment import Assignment, AssignmentSubmission
 from app.models.organization import Organization
-from app.models.school import ClassroomStudent, School
+from app.models.school import Classroom, ClassroomStudent, ClassroomTeacher, School
 from app.models.user import Role, User, UserRole
 
 
@@ -271,8 +287,18 @@ def _claim_account(client, caller_token: str, *, current_password: str, new_emai
     )
 
 
-def _verify_email(client, token: str):
-    return client.get(f"/api/auth/verify-email?token={token}")
+def _approve_claim(client, teacher: dict, classroom_id: int, student_id: int):
+    return client.post(
+        f"/api/classrooms/{classroom_id}/students/{student_id}/approve-claim",
+        headers=auth_header(teacher["token"]),
+    )
+
+
+def _reject_claim(client, teacher: dict, classroom_id: int, student_id: int):
+    return client.post(
+        f"/api/classrooms/{classroom_id}/students/{student_id}/reject-claim",
+        headers=auth_header(teacher["token"]),
+    )
 
 
 def _reset_password(client, caller: dict, classroom_id: int, student_id: int):
@@ -299,7 +325,7 @@ def _setup_student_ready_to_claim(client, *, name: str) -> dict:
     prerequisite for reaching claim-account at all (security review finding
     H1: claim-account is deliberately NOT exempt from that gate). Returns the
     student dict with an updated 'password' reflecting the post-change value
-    and a live 'token'."""
+    and a live 'token', plus the owning teacher/classroom."""
     teacher = _register_user(client, f"handover_{name}_teacher")
     school_id = _create_school_for_teacher(teacher["user_id"])
     classroom_id = _create_classroom(client, teacher, school_id)
@@ -322,88 +348,269 @@ def _setup_student_ready_to_claim(client, *, name: str) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# Phase 1 (request) — pending state, nothing irreversible yet.
+# Request only reserves a pending state — nothing irreversible yet.
 # ---------------------------------------------------------------------------
 
 
-def test_phase1_request_sets_pending_state_not_final(client):
-    ctx = _setup_student_ready_to_claim(client, name="phase1")
+def test_request_sets_pending_state_not_final(client):
+    ctx = _setup_student_ready_to_claim(client, name="request")
     new_email = f"realstudent_{uuid.uuid4().hex[:8]}@example.com"
 
     resp = _claim_account(
         client, ctx["token"], current_password=ctx["password"], new_email=new_email, new_password="FinalOwn456!"
     )
     assert resp.status_code == 200, resp.text
-    assert resp.json().get("verification_token"), resp.text
 
     after = _get_db_user(ctx["user_id"])
-    assert after.email == ctx["email"], "live email must NOT change in phase 1"
+    assert after.email == ctx["email"], "live email must NOT change on request"
     assert after.pending_email == new_email
     assert after.created_by_teacher_id == ctx["teacher"]["user_id"], (
-        "creator authority must survive phase 1 -- that is the whole point of H1's fix"
+        "creator authority must survive the request -- that is the whole point of H1's fix"
     )
 
-    # The NEW password already works (password changes immediately)...
+    # The NEW password already works at the OLD email (password changes
+    # immediately, same as change-password always has)...
     new_pw_token = _login(client, ctx["email"], "FinalOwn456!")
     assert new_pw_token
-    # ...but the NEW email does not resolve to anything yet.
+    # ...but the NEW email does not resolve to anything yet -- nothing
+    # transfers on request alone.
     _reset_rate_limiters()
     bad_login = client.post("/api/auth/login", json={"email": new_email, "password": "FinalOwn456!"})
     assert bad_login.status_code in (401, 403)
 
 
-def test_phase2_verification_finalizes_the_claim(client):
-    ctx = _setup_student_ready_to_claim(client, name="phase2")
-    new_email = f"realstudent_{uuid.uuid4().hex[:8]}@example.com"
+# ---------------------------------------------------------------------------
+# Coordinator's required test #1 — stolen credentials can file a request,
+# but cannot complete the handover by themselves under ANY circumstance.
+# ---------------------------------------------------------------------------
 
+
+def test_stolen_credentials_cannot_transfer_the_account(client):
+    """This is the core H1 regression lock. Someone who merely knows the
+    account's current password (e.g. read a printed credential card) can
+    file a request -- but the account must still belong to the creator
+    afterwards, and the "attacker" (who is logged in as the student, not a
+    teacher) cannot themselves complete it: they hold no teacher role at
+    all, so approve-claim is unreachable to them."""
+    ctx = _setup_student_ready_to_claim(client, name="stolen")
+    stolen_new_email = f"attacker_controlled_{uuid.uuid4().hex[:8]}@example.com"
+
+    resp = _claim_account(
+        client,
+        ctx["token"],  # the "attacker" is using the student's own (stolen) session
+        current_password=ctx["password"],
+        new_email=stolen_new_email,
+        new_password="StolenCardClaim456!",
+    )
+    assert resp.status_code == 200, resp.text  # filing a request is allowed...
+
+    after = _get_db_user(ctx["user_id"])
+    assert after.email == ctx["email"], "the account must NOT be transferred by the request alone"
+    assert after.created_by_teacher_id == ctx["teacher"]["user_id"], (
+        "the real creator must still own this account after a mere request"
+    )
+
+    # The "attacker" cannot self-approve: they have no teacher role, so this
+    # is rejected before even reaching the creator-identity check.
+    self_approve = client.post(
+        f"/api/classrooms/{ctx['classroom_id']}/students/{ctx['user_id']}/approve-claim",
+        headers=auth_header(ctx["token"]),
+    )
+    assert self_approve.status_code == 403, self_approve.text
+
+    # And the account is still exactly as it was: new email never took effect.
+    still_after = _get_db_user(ctx["user_id"])
+    assert still_after.email == ctx["email"]
+    assert still_after.pending_email == stolen_new_email  # request still sitting there, unapproved
+    assert still_after.created_by_teacher_id == ctx["teacher"]["user_id"]
+
+
+# ---------------------------------------------------------------------------
+# Coordinator's required test #2 — a teacher who did NOT create this account
+# cannot approve (or reject) the claim.
+# ---------------------------------------------------------------------------
+
+
+def _get_classroom_school_id(classroom_id: int) -> int:
+    db = TestingSessionLocal()
+    try:
+        classroom = db.query(Classroom).filter(Classroom.id == classroom_id).first()
+        assert classroom is not None
+        return classroom.school_id
+    finally:
+        db.close()
+
+
+def _add_co_teacher(classroom_id: int, teacher_id: int) -> None:
+    """Enroll `teacher_id` as an 'editor'-role co-teacher on an EXISTING
+    classroom via the real ClassroomTeacher membership row -- this is what
+    makes require_classroom_editor (the OUTER, classroom-access gate) pass
+    for them, so a test using this actually exercises
+    require_renameable_student_target (the INNER, creator-specific gate)
+    instead of vacuously passing at the outer gate. role="editor" (not the
+    weaker role string this fixture used pre-#3828-rebase) matches both
+    #3818's own test_co_teacher_who_is_not_creator_cannot_reset_password_403
+    fixture AND the post-rebase outer gate (require_classroom_editor,
+    upgraded from require_classroom_member so approve/reject-claim stay
+    "the exact same gate" as reset-password, #3820) -- caught by mutation
+    testing: the first version of this test used a teacher from an
+    unrelated classroom/school, which the outer gate alone already rejects,
+    so removing the inner creator-check entirely did NOT turn it red."""
+    db = TestingSessionLocal()
+    try:
+        db.add(ClassroomTeacher(classroom_id=classroom_id, teacher_id=teacher_id, role="editor"))
+        db.commit()
+    finally:
+        db.close()
+
+
+def test_non_creator_teacher_cannot_approve_403(client):
+    """AC2-equivalent (#3818's own pattern): a co-teacher on the SAME
+    classroom (so require_classroom_member passes, they can see the
+    student) is still not the account's password teacher, and must be
+    denied by _require_password_teacher specifically."""
+    ctx = _setup_student_ready_to_claim(client, name="non_creator")
+    co_teacher = _register_user(client, "handover_coteacher")
+    classroom_school_id = _get_classroom_school_id(ctx["classroom_id"])
+    _assign_role(co_teacher["user_id"], "teacher", scope_type="school", scope_id=str(classroom_school_id))
+    _add_co_teacher(ctx["classroom_id"], co_teacher["user_id"])
+
+    claim_resp = _claim_account(
+        client,
+        ctx["token"],
+        current_password=ctx["password"],
+        new_email=f"realstudent_{uuid.uuid4().hex[:8]}@example.com",
+        new_password="FinalOwn456!",
+    )
+    assert claim_resp.status_code == 200, claim_resp.text
+
+    resp = _approve_claim(client, co_teacher, ctx["classroom_id"], ctx["user_id"])
+    assert resp.status_code == 403, resp.text
+
+    after = _get_db_user(ctx["user_id"])
+    assert after.created_by_teacher_id == ctx["teacher"]["user_id"]
+    assert after.pending_email is not None, "an unauthorized approve attempt must not consume the request"
+
+
+def test_non_creator_teacher_cannot_reject_403(client):
+    ctx = _setup_student_ready_to_claim(client, name="non_creator_reject")
+    co_teacher = _register_user(client, "handover_coteacher_reject")
+    classroom_school_id = _get_classroom_school_id(ctx["classroom_id"])
+    _assign_role(co_teacher["user_id"], "teacher", scope_type="school", scope_id=str(classroom_school_id))
+    _add_co_teacher(ctx["classroom_id"], co_teacher["user_id"])
+
+    claim_resp = _claim_account(
+        client,
+        ctx["token"],
+        current_password=ctx["password"],
+        new_email=f"realstudent_{uuid.uuid4().hex[:8]}@example.com",
+        new_password="FinalOwn456!",
+    )
+    assert claim_resp.status_code == 200, claim_resp.text
+
+    resp = _reject_claim(client, co_teacher, ctx["classroom_id"], ctx["user_id"])
+    assert resp.status_code == 403, resp.text
+
+    after = _get_db_user(ctx["user_id"])
+    assert after.pending_email is not None
+
+
+# ---------------------------------------------------------------------------
+# Coordinator's required test #3 — creator approves, student logs in with
+# their own email, and the creator can no longer reset the password.
+# ---------------------------------------------------------------------------
+
+
+def test_creator_approves_student_logs_in_then_creator_reset_403(client):
+    ctx = _setup_student_ready_to_claim(client, name="approve_flow")
+    new_email = f"realstudent_{uuid.uuid4().hex[:8]}@example.com"
     claim_resp = _claim_account(
         client, ctx["token"], current_password=ctx["password"], new_email=new_email, new_password="FinalOwn456!"
     )
     assert claim_resp.status_code == 200, claim_resp.text
-    token = claim_resp.json()["verification_token"]
 
-    verify_resp = _verify_email(client, token)
-    assert verify_resp.status_code == 200, verify_resp.text
+    approve_resp = _approve_claim(client, ctx["teacher"], ctx["classroom_id"], ctx["user_id"])
+    assert approve_resp.status_code == 200, approve_resp.text
+    assert approve_resp.json()["email"] == new_email
 
     after = _get_db_user(ctx["user_id"])
     assert after.email == new_email
     assert after.pending_email is None
     assert after.created_by_teacher_id is None, "this is the moment authority actually transfers"
 
-    # Positive control: new credentials log in; old email no longer does.
+    # Student logs in with their own new credentials.
     final_login = _login(client, new_email, "FinalOwn456!")
     assert final_login
+    # Old (synthetic) email no longer resolves to this account.
     _reset_rate_limiters()
     old_login = client.post("/api/auth/login", json={"email": ctx["email"], "password": "FinalOwn456!"})
     assert old_login.status_code in (401, 403)
 
-
-# ---------------------------------------------------------------------------
-# H1 — the core security fix. A reset by the original creator during the
-# pending window both succeeds AND revokes the in-flight claim.
-# ---------------------------------------------------------------------------
+    # The original creator can no longer reset this account's password.
+    reset_resp = _reset_password(client, ctx["teacher"], ctx["classroom_id"], ctx["user_id"])
+    assert reset_resp.status_code == 403, reset_resp.text
 
 
-def test_teacher_can_still_reset_password_during_pending_window_200(client):
-    """This is the exact acceptance criterion the security review gave for
-    H1: claim moves the account to PENDING, not CLAIMED — the original
-    creator's reset must still work (200) while a claim is pending, where
-    the single-phase design would have already returned 403."""
-    ctx = _setup_student_ready_to_claim(client, name="pending_reset")
+def test_creator_rejects_claim_account_unchanged(client):
+    ctx = _setup_student_ready_to_claim(client, name="reject_flow")
     claim_resp = _claim_account(
         client,
         ctx["token"],
         current_password=ctx["password"],
-        new_email=f"attacker_controlled_{uuid.uuid4().hex[:8]}@example.com",
-        new_password="StolenCardClaim456!",
+        new_email=f"realstudent_{uuid.uuid4().hex[:8]}@example.com",
+        new_password="FinalOwn456!",
     )
     assert claim_resp.status_code == 200, claim_resp.text
 
+    reject_resp = _reject_claim(client, ctx["teacher"], ctx["classroom_id"], ctx["user_id"])
+    assert reject_resp.status_code == 200, reject_resp.text
+
+    after = _get_db_user(ctx["user_id"])
+    assert after.pending_email is None
+    assert after.email == ctx["email"]
+    assert after.created_by_teacher_id == ctx["teacher"]["user_id"], "rejection keeps the creator's authority intact"
+
+    # Creator can still reset (never lost authority).
     reset_resp = _reset_password(client, ctx["teacher"], ctx["classroom_id"], ctx["user_id"])
     assert reset_resp.status_code == 200, reset_resp.text
 
 
-def test_teacher_reset_during_pending_window_revokes_the_claim(client):
+def test_approve_without_pending_request_404(client):
+    ctx = _setup_student_ready_to_claim(client, name="no_pending_approve")
+    resp = _approve_claim(client, ctx["teacher"], ctx["classroom_id"], ctx["user_id"])
+    assert resp.status_code == 404, resp.text
+
+
+def test_reject_without_pending_request_404(client):
+    ctx = _setup_student_ready_to_claim(client, name="no_pending_reject")
+    resp = _reject_claim(client, ctx["teacher"], ctx["classroom_id"], ctx["user_id"])
+    assert resp.status_code == 404, resp.text
+
+
+def test_system_admin_can_approve_claim_200(client):
+    ctx = _setup_student_ready_to_claim(client, name="admin_approve")
+    system_admin = _register_user(client, "handover_system_admin")
+    _assign_role(system_admin["user_id"], "system_admin", scope_type="platform")
+
+    claim_resp = _claim_account(
+        client,
+        ctx["token"],
+        current_password=ctx["password"],
+        new_email=f"realstudent_{uuid.uuid4().hex[:8]}@example.com",
+        new_password="FinalOwn456!",
+    )
+    assert claim_resp.status_code == 200, claim_resp.text
+
+    resp = _approve_claim(client, system_admin, ctx["classroom_id"], ctx["user_id"])
+    assert resp.status_code == 200, resp.text
+
+
+# ---------------------------------------------------------------------------
+# A teacher reset during the pending window revokes the request.
+# ---------------------------------------------------------------------------
+
+
+def test_teacher_reset_during_pending_window_revokes_the_request(client):
     ctx = _setup_student_ready_to_claim(client, name="revoke")
     claim_resp = _claim_account(
         client,
@@ -413,44 +620,22 @@ def test_teacher_reset_during_pending_window_revokes_the_claim(client):
         new_password="StolenCardClaim456!",
     )
     assert claim_resp.status_code == 200, claim_resp.text
-    stolen_token = claim_resp.json()["verification_token"]
 
     reset_resp = _reset_password(client, ctx["teacher"], ctx["classroom_id"], ctx["user_id"])
     assert reset_resp.status_code == 200, reset_resp.text
 
     after_reset = _get_db_user(ctx["user_id"])
-    assert after_reset.pending_email is None, "reset must clear the pending claim"
-    assert after_reset.created_by_teacher_id == ctx["teacher"]["user_id"], "teacher keeps authority"
+    assert after_reset.pending_email is None, "reset must clear the pending request"
+    assert after_reset.created_by_teacher_id == ctx["teacher"]["user_id"]
 
-    # The token the claimant was holding must now be dead -- they cannot
-    # resurrect their claim just because they still have the old token.
-    verify_resp = _verify_email(client, stolen_token)
-    assert verify_resp.status_code == 400, verify_resp.text
-
-    # And confirm the teacher is STILL the password teacher going forward
-    # (a second, fresh reset also succeeds).
-    second_reset = _reset_password(client, ctx["teacher"], ctx["classroom_id"], ctx["user_id"])
-    assert second_reset.status_code == 200, second_reset.text
-
-
-def test_after_full_completion_original_creator_cannot_reset_403(client):
-    ctx = _setup_student_ready_to_claim(client, name="post_claim")
-    new_email = f"realstudent_{uuid.uuid4().hex[:8]}@example.com"
-    claim_resp = _claim_account(
-        client, ctx["token"], current_password=ctx["password"], new_email=new_email, new_password="FinalOwn456!"
-    )
-    assert claim_resp.status_code == 200, claim_resp.text
-    verify_resp = _verify_email(client, claim_resp.json()["verification_token"])
-    assert verify_resp.status_code == 200, verify_resp.text
-
-    reset_resp = _reset_password(client, ctx["teacher"], ctx["classroom_id"], ctx["user_id"])
-    assert reset_resp.status_code == 403, reset_resp.text
+    # There is nothing left to approve.
+    approve_resp = _approve_claim(client, ctx["teacher"], ctx["classroom_id"], ctx["user_id"])
+    assert approve_resp.status_code == 404, approve_resp.text
 
 
 # ---------------------------------------------------------------------------
 # H1, second half — claim-account must be unreachable before the forced
-# first password change (#3438), closing the "do everything in one shot off
-# a card you merely read" amplifier.
+# first password change (#3438).
 # ---------------------------------------------------------------------------
 
 
@@ -590,8 +775,8 @@ def test_self_registered_account_claim_400(client):
 
 
 # ---------------------------------------------------------------------------
-# AC6 — claiming (through full completion) does not move or break any
-# user_id-linked data.
+# Coordinator's required test #4 — claiming (through approval) does not move
+# or break any user_id-linked data.
 # ---------------------------------------------------------------------------
 
 
@@ -645,8 +830,8 @@ def test_claim_preserves_classroom_membership_and_assignment_submissions(client)
         client, token, current_password=first_own_password, new_email=new_email, new_password="FinalOwn456!"
     )
     assert claim_resp.status_code == 200, claim_resp.text
-    verify_resp = _verify_email(client, claim_resp.json()["verification_token"])
-    assert verify_resp.status_code == 200, verify_resp.text
+    approve_resp = _approve_claim(client, teacher, classroom_id, student["user_id"])
+    assert approve_resp.status_code == 200, approve_resp.text
 
     db = TestingSessionLocal()
     try:
@@ -666,12 +851,13 @@ def test_claim_preserves_classroom_membership_and_assignment_submissions(client)
 
 
 # ---------------------------------------------------------------------------
-# AC7 / L1 — audit trail covers request (success + failure) and completion.
+# AC7 / L1 — audit trail covers request (success + failure), approval, and
+# rejection/revocation.
 # ---------------------------------------------------------------------------
 
 
-def test_phase1_success_and_failure_both_emit_audit_log(client, caplog):
-    ctx = _setup_student_ready_to_claim(client, name="audit_phase1")
+def test_request_success_and_failure_both_emit_audit_log(client, caplog):
+    ctx = _setup_student_ready_to_claim(client, name="audit_request")
 
     with caplog.at_level(logging.INFO, logger="audit"):
         wrong_resp = _claim_account(
@@ -699,8 +885,8 @@ def test_phase1_success_and_failure_both_emit_audit_log(client, caplog):
     ), audit_messages
 
 
-def test_phase2_completion_emits_audit_log(client, caplog):
-    ctx = _setup_student_ready_to_claim(client, name="audit_phase2")
+def test_approve_emits_audit_log(client, caplog):
+    ctx = _setup_student_ready_to_claim(client, name="audit_approve")
     claim_resp = _claim_account(
         client,
         ctx["token"],
@@ -711,17 +897,39 @@ def test_phase2_completion_emits_audit_log(client, caplog):
     assert claim_resp.status_code == 200, claim_resp.text
 
     with caplog.at_level(logging.INFO, logger="audit"):
-        verify_resp = _verify_email(client, claim_resp.json()["verification_token"])
-    assert verify_resp.status_code == 200, verify_resp.text
+        approve_resp = _approve_claim(client, ctx["teacher"], ctx["classroom_id"], ctx["user_id"])
+    assert approve_resp.status_code == 200, approve_resp.text
 
     audit_messages = [r.getMessage() for r in caplog.records if r.name == "audit"]
     assert any(
-        '"claim_account_completed"' in msg and f'"user_id": {ctx["user_id"]}' in msg
+        '"claim_account_completed"' in msg and f'"target_student_id": {ctx["user_id"]}' in msg
         for msg in audit_messages
     ), audit_messages
 
 
-def test_revocation_emits_audit_log(client, caplog):
+def test_reject_emits_audit_log(client, caplog):
+    ctx = _setup_student_ready_to_claim(client, name="audit_reject")
+    claim_resp = _claim_account(
+        client,
+        ctx["token"],
+        current_password=ctx["password"],
+        new_email=f"realstudent_{uuid.uuid4().hex[:8]}@example.com",
+        new_password="FinalOwn456!",
+    )
+    assert claim_resp.status_code == 200, claim_resp.text
+
+    with caplog.at_level(logging.INFO, logger="audit"):
+        reject_resp = _reject_claim(client, ctx["teacher"], ctx["classroom_id"], ctx["user_id"])
+    assert reject_resp.status_code == 200, reject_resp.text
+
+    audit_messages = [r.getMessage() for r in caplog.records if r.name == "audit"]
+    assert any(
+        '"claim_account_revoked"' in msg and '"rejected_by_creator"' in msg
+        for msg in audit_messages
+    ), audit_messages
+
+
+def test_revocation_via_reset_emits_audit_log(client, caplog):
     ctx = _setup_student_ready_to_claim(client, name="audit_revoke")
     claim_resp = _claim_account(
         client,
@@ -737,7 +945,10 @@ def test_revocation_emits_audit_log(client, caplog):
     assert reset_resp.status_code == 200, reset_resp.text
 
     audit_messages = [r.getMessage() for r in caplog.records if r.name == "audit"]
-    assert any('"claim_account_revoked"' in msg for msg in audit_messages), audit_messages
+    assert any(
+        '"claim_account_revoked"' in msg and '"password_reset_by_creator"' in msg
+        for msg in audit_messages
+    ), audit_messages
 
 
 # ---------------------------------------------------------------------------
@@ -783,12 +994,12 @@ def test_claim_account_is_rate_limited_per_account(client):
 
 
 # ---------------------------------------------------------------------------
-# L2 — a genuine race on the same target email at verification time (not the
+# L2 — a genuine race on the same target email at approval time (not the
 # common case phase 1 already rejects) fails closed with 409, not a bare 500.
 # ---------------------------------------------------------------------------
 
 
-def test_verification_race_on_same_email_returns_409_not_500(client):
+def test_approve_race_on_same_email_returns_409_not_500(client):
     ctx_a = _setup_student_ready_to_claim(client, name="race_a")
     ctx_b = _setup_student_ready_to_claim(client, name="race_b")
     contested_email = f"raced_{uuid.uuid4().hex[:8]}@example.com"
@@ -797,27 +1008,24 @@ def test_verification_race_on_same_email_returns_409_not_500(client):
         client, ctx_a["token"], current_password=ctx_a["password"], new_email=contested_email, new_password="FinalOwn456!"
     )
     assert claim_a.status_code == 200, claim_a.text
-    token_a = claim_a.json()["verification_token"]
 
     # Force B into the SAME pending state directly at the DB layer, bypassing
-    # phase 1's own uniqueness check -- this is what a genuine race (two
+    # the request-time uniqueness check -- this is what a genuine race (two
     # requests both reading the DB before either commits) would produce.
     db = TestingSessionLocal()
     try:
         user_b = db.query(User).filter(User.id == ctx_b["user_id"]).first()
         assert user_b is not None
         user_b.pending_email = contested_email
-        user_b.email_verification_token = "forced-race-token-" + uuid.uuid4().hex
         db.commit()
-        token_b = user_b.email_verification_token
     finally:
         db.close()
 
-    verify_a = _verify_email(client, token_a)
-    assert verify_a.status_code == 200, verify_a.text
+    approve_a = _approve_claim(client, ctx_a["teacher"], ctx_a["classroom_id"], ctx_a["user_id"])
+    assert approve_a.status_code == 200, approve_a.text
 
-    verify_b = _verify_email(client, token_b)
-    assert verify_b.status_code == 409, verify_b.text
+    approve_b = _approve_claim(client, ctx_b["teacher"], ctx_b["classroom_id"], ctx_b["user_id"])
+    assert approve_b.status_code == 409, approve_b.text
 
     after_b = _get_db_user(ctx_b["user_id"])
     assert after_b.created_by_teacher_id == ctx_b["teacher"]["user_id"], (
@@ -839,4 +1047,10 @@ def test_requires_auth_401(client):
             "new_password": "FinalOwn456!",
         },
     )
+    assert resp.status_code == 401
+
+
+def test_approve_requires_auth_401(client):
+    ctx = _setup_student_ready_to_claim(client, name="approve_auth")
+    resp = client.post(f"/api/classrooms/{ctx['classroom_id']}/students/{ctx['user_id']}/approve-claim")
     assert resp.status_code == 401

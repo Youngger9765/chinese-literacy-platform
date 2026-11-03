@@ -145,6 +145,12 @@ class StudentInClassroomResponse(BaseModel):
     # when this is None, so existing rosters look unchanged until a teacher
     # explicitly sets one.
     seat_number: int | None = None
+    # #3824: non-None only when this student has filed a pending account-
+    # claim request AND the current caller is its password teacher (or a
+    # system_admin) -- same visibility gate as can_reset_password. Carries
+    # the REQUESTED email so the teacher can see what they'd be approving
+    # before they act, not just that a request exists.
+    pending_claim_email: str | None = None
 
     model_config = {"from_attributes": True}
 
@@ -221,6 +227,27 @@ class ResetPasswordResponse(BaseModel):
     username: str
     email: str
     password: str
+
+
+# ── Child-Account Handover approval (#3824) ─────────────────────────────────
+# A teacher-created student files a claim request (POST /auth/claim-account)
+# that only RESERVES a new email (users.pending_email); it does not transfer
+# the account. The account's recorded creator (the "password teacher", same
+# authorization gate as ResetPasswordResponse above) approves or rejects it
+# here, classroom-scoped exactly like reset-password. Security review finding
+# H1 (full writeup: docs/prd/2026-11-02-child-handover-prd.md): gating
+# completion on an explicit teacher action -- not an emailed verification
+# token -- closes the hole where whoever merely read a printed card password
+# could complete a hostile handover alone.
+
+
+class ApproveAccountClaimResponse(BaseModel):
+    message: str
+    email: str
+
+
+class RejectAccountClaimResponse(BaseModel):
+    message: str
 
 
 # ── Student Search ──────────────────────────────────────────────────────────

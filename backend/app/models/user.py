@@ -54,21 +54,26 @@ class User(Base):
     # could PERMANENTLY strip the real creator's recovery authority in one
     # shot -- before #3824 a stolen card was recoverable (the teacher could
     # still reset it), after the original (single-phase) #3824 design it was
-    # not. Fixed by making the handover two-phase (see pending_email below):
-    # this field is only cleared when the NEW email is actually verified
-    # (proving control of a mailbox, not just knowledge of the old
-    # password), and is UNCHANGED -- the teacher can still reset -- for the
-    # whole pending window. A password reset during that window also clears
-    # any pending claim (see classroom_password.py), so "reset the password"
-    # doubles as "revoke the in-flight handover".
+    # not. v2 tried making it two-phase gated on email-token redemption, but
+    # a second review found that only DOWNGRADES H1 (an attacker who sets
+    # new_email to an address they control can file AND redeem alone, with
+    # no teacher notification). v3 (shipped): this field is only cleared by
+    # an explicit APPROVAL from the account's recorded creator (or
+    # system_admin) via classrooms/classroom_password.py's approve-claim
+    # endpoint -- see pending_email below. UNCHANGED for the whole pending
+    # window otherwise, so the teacher can still reset the password (which
+    # also clears any pending claim -- "reset the password" doubles as
+    # "revoke the in-flight handover").
     created_by_teacher_id: Mapped[int | None] = mapped_column(
         ForeignKey("users.id"), nullable=True, index=True
     )
     # #3824: the real email a claim-account request wants to bind, held here
-    # (NOT written to `email` yet) until its verification token is redeemed.
-    # NULL = no pending claim. See created_by_teacher_id's docstring above
-    # for why this two-step indirection exists, and
-    # services/account_claim_service.py / services/email_verification_service.py
+    # (NOT written to `email` yet) until the account's recorded password
+    # teacher (or system_admin) explicitly approves the request. NULL = no
+    # pending claim. See created_by_teacher_id's docstring above for why
+    # this two-step indirection exists, and
+    # services/account_claim_service.py (phase 1, file the request) /
+    # routes/classrooms/classroom_password.py (phase 2, approve/reject)
     # for where each half of the handshake lives.
     pending_email: Mapped[str | None] = mapped_column(
         String(254), nullable=True, index=True
