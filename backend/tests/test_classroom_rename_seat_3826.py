@@ -20,8 +20,10 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, event
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
+from unittest.mock import patch
 
 from app.main import app
 from app.database import get_db
@@ -159,6 +161,29 @@ def _add_student(client, teacher_token, classroom_id, student_id):
     assert resp.status_code == 201, resp.text
 
 
+def _batch_create_student(client, teacher, classroom_id, *, name="Batch Student"):
+    """Create a student the way a teacher actually does in production
+    (#3818): through the real batch-create endpoint, the one code path
+    that stamps created_by_teacher_id AND enrolls the student in
+    classroom_id. Unlike _register_student + _add_student (which leaves
+    created_by_teacher_id NULL -- equivalent to a self-registered account),
+    this is what "the teacher who created this account" means for the
+    rename ownership gate (#3826, mirrors #3818's password-teacher rule).
+    Do NOT call _add_student afterwards -- this already enrolls."""
+    import uuid
+    seat_number = uuid.uuid4().hex[:6]
+    resp = client.post(
+        f"/api/classrooms/{classroom_id}/students/batch",
+        json={"students": [{"name": name, "seat_number": seat_number}]},
+        headers=auth_header(teacher["token"]),
+    )
+    assert resp.status_code == 201, resp.text
+    body = resp.json()
+    assert body["errors"] == [], body["errors"]
+    created = body["created"][0]
+    return {"user_id": created["user_id"], "username": created["username"], "password": created["password"]}
+
+
 @pytest.fixture
 def teacher(client):
     return _register_teacher(client, "rs_teacher")
@@ -170,10 +195,19 @@ def other_teacher(client):
 
 
 class TestRenameStudent:
-    def test_rename_updates_name_and_leaves_login_untouched(self, client, teacher):
+    def test_rename_creator_teacher_succeeds_and_leaves_login_untouched(self, client, teacher):
+        """AC1 + ownership gate (2026-11-02 security review): the teacher
+        who created this account (batch-create, mirrors #3818's
+        password-teacher rule) CAN rename it; login (username/email) stays
+        untouched -- this is the positive control for the 403 test below."""
         classroom_id = _create_classroom(client, teacher["token"], "Rename A")
-        s1 = _register_student(client, "rs_s1")
-        _add_student(client, teacher["token"], classroom_id, s1["user_id"])
+        s1 = _batch_create_student(client, teacher, classroom_id, name="Rename Target")
+
+        db = TestingSessionLocal()
+        try:
+            original_email = db.query(User).filter(User.id == s1["user_id"]).first().email
+        finally:
+            db.close()
 
         resp = client.patch(
             f"/api/classrooms/{classroom_id}/students/{s1['user_id']}/name",
@@ -187,13 +221,74 @@ class TestRenameStudent:
         try:
             user = db.query(User).filter(User.id == s1["user_id"]).first()
             assert user.name == "新名字"
-            assert user.email == s1["email"]  # login untouched
+            assert user.email == original_email  # login untouched
+            assert user.username is not None  # login untouched
         finally:
             db.close()
 
         roster = client.get(f"/api/classrooms/{classroom_id}/students", headers=auth_header(teacher["token"])).json()
         renamed = next(s for s in roster if s["id"] == s1["user_id"])
         assert renamed["name"] == "新名字"
+
+    def test_rename_rejects_self_registered_student_as_403(self, client, teacher):
+        """Security review (2026-11-02): classroom ownership alone is NOT
+        enough to rename -- a student who just self-registered/self-joined
+        via join code (created_by_teacher_id is NULL) must be rejected,
+        same as the password-teacher rule (#3818). Renaming touches
+        User.name, which is visible platform-wide to every other teacher
+        who also teaches this student -- not scoped to this classroom like
+        a seat number."""
+        classroom_id = _create_classroom(client, teacher["token"], "Rename F")
+        s1 = _register_student(client, "rs_selfreg_s1")
+        _add_student(client, teacher["token"], classroom_id, s1["user_id"])
+
+        resp = client.patch(
+            f"/api/classrooms/{classroom_id}/students/{s1['user_id']}/name",
+            json={"name": "不該被改"},
+            headers=auth_header(teacher["token"]),
+        )
+        assert resp.status_code == 403, resp.text
+
+        db = TestingSessionLocal()
+        try:
+            user = db.query(User).filter(User.id == s1["user_id"]).first()
+            assert user.name == s1["name"]  # unchanged
+        finally:
+            db.close()
+
+    def test_rename_success_writes_audit_once(self, client, teacher):
+        """Positive control for the audit-ordering tests below -- proves
+        the mock target is correct, so "not called" elsewhere isn't
+        vacuously true because the patch path is wrong."""
+        classroom_id = _create_classroom(client, teacher["token"], "Rename G")
+        s1 = _batch_create_student(client, teacher, classroom_id, name="Audit OK Target")
+
+        with patch("app.routes.classrooms.classroom_students.audit_log_endpoint") as mock_audit:
+            resp = client.patch(
+                f"/api/classrooms/{classroom_id}/students/{s1['user_id']}/name",
+                json={"name": "稽核應該記一筆"},
+                headers=auth_header(teacher["token"]),
+            )
+            assert resp.status_code == 200, resp.text
+            mock_audit.assert_called_once()
+
+    def test_rename_403_does_not_write_audit(self, client, teacher):
+        """Audit-ordering fix (2026-11-02): a rejected rename (self-
+        registered student, ownership gate fails) must never log
+        "renamed" -- the mutation and the audit call both happen after
+        every permission gate passes, not before."""
+        classroom_id = _create_classroom(client, teacher["token"], "Rename H")
+        s1 = _register_student(client, "rs_auditreject_s1")
+        _add_student(client, teacher["token"], classroom_id, s1["user_id"])
+
+        with patch("app.routes.classrooms.classroom_students.audit_log_endpoint") as mock_audit:
+            resp = client.patch(
+                f"/api/classrooms/{classroom_id}/students/{s1['user_id']}/name",
+                json={"name": "被拒絕的改名"},
+                headers=auth_header(teacher["token"]),
+            )
+            assert resp.status_code == 403, resp.text
+            mock_audit.assert_not_called()
 
     def test_rename_rejects_empty_or_too_long(self, client, teacher):
         classroom_id = _create_classroom(client, teacher["token"], "Rename B")
@@ -401,3 +496,71 @@ class TestSeatNumber:
             json={"seat_number": 1},
         )
         assert resp.status_code == 401
+
+    def test_seat_success_writes_audit_once(self, client, teacher):
+        """Positive control for the two audit-ordering tests below -- proves
+        the mock target is correct, so "not called" isn't vacuously true
+        because the patch path is wrong."""
+        classroom_id = _create_classroom(client, teacher["token"], "Seat I")
+        s1 = _register_student(client, "rs_auditok_s1")
+        _add_student(client, teacher["token"], classroom_id, s1["user_id"])
+
+        with patch("app.routes.classrooms.classroom_students.audit_log_endpoint") as mock_audit:
+            resp = client.patch(
+                f"/api/classrooms/{classroom_id}/students/{s1['user_id']}/seat",
+                json={"seat_number": 9},
+                headers=auth_header(teacher["token"]),
+            )
+            assert resp.status_code == 200, resp.text
+            mock_audit.assert_called_once()
+
+    def test_seat_duplicate_409_does_not_write_audit(self, client, teacher):
+        classroom_id = _create_classroom(client, teacher["token"], "Seat J")
+        s1 = _register_student(client, "rs_auditdup_s1")
+        s2 = _register_student(client, "rs_auditdup_s2")
+        _add_student(client, teacher["token"], classroom_id, s1["user_id"])
+        _add_student(client, teacher["token"], classroom_id, s2["user_id"])
+
+        resp = client.patch(
+            f"/api/classrooms/{classroom_id}/students/{s2['user_id']}/seat",
+            json={"seat_number": 2},
+            headers=auth_header(teacher["token"]),
+        )
+        assert resp.status_code == 200, resp.text
+
+        with patch("app.routes.classrooms.classroom_students.audit_log_endpoint") as mock_audit:
+            resp = client.patch(
+                f"/api/classrooms/{classroom_id}/students/{s1['user_id']}/seat",
+                json={"seat_number": 2},
+                headers=auth_header(teacher["token"]),
+            )
+            assert resp.status_code == 409, resp.text
+            mock_audit.assert_not_called()
+
+    def test_seat_integrity_error_race_409_does_not_write_audit(self, client, teacher):
+        """Audit-ordering fix (2026-11-02 security review): the DB-level
+        IntegrityError backstop (for the rare concurrent-request race the
+        app-level pre-check can miss) must ALSO not log a false "success"
+        audit entry. Simulated via a mocked Session.commit -- a true
+        concurrent race isn't practically reproducible against the
+        synchronous SQLite TestClient used here, but the branch itself
+        (commit raises -> rollback -> 409) is identical either way. This
+        test is red on the pre-fix code: there, audit_log_endpoint was
+        called unconditionally BEFORE the try/commit block, so it fires
+        even when commit then raises."""
+        classroom_id = _create_classroom(client, teacher["token"], "Seat K")
+        s1 = _register_student(client, "rs_auditrace_s1")
+        _add_student(client, teacher["token"], classroom_id, s1["user_id"])
+
+        with patch("app.routes.classrooms.classroom_students.audit_log_endpoint") as mock_audit, \
+             patch(
+                 "app.routes.classrooms.classroom_students.Session.commit",
+                 side_effect=IntegrityError("stmt", {}, Exception("duplicate key")),
+             ):
+            resp = client.patch(
+                f"/api/classrooms/{classroom_id}/students/{s1['user_id']}/seat",
+                json={"seat_number": 4},
+                headers=auth_header(teacher["token"]),
+            )
+            assert resp.status_code == 409, resp.text
+            mock_audit.assert_not_called()
