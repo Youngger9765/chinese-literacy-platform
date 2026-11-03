@@ -34,6 +34,8 @@ from ..database import get_db
 from ..models.user import User, UserRole, Role
 from ..schemas.auth import (
     ChangePasswordRequest,
+    ClaimAccountRequest,
+    ClaimAccountResponse,
     ForgotPasswordRequest,
     ForgotPasswordResponse,
     GoogleLoginRequest,
@@ -51,6 +53,8 @@ from ..schemas.auth import (
     VerifyEmailResponse,
 )
 from ..schemas.user import UserResponse
+from ..services.account_claim_service import request_claim
+from ..services.audit_logger import AuditAction, audit_log_endpoint
 from ..services.auth_registration_service import (
     create_user_account,
     enforce_password_strength,
@@ -284,6 +288,88 @@ def change_password(
     return {"message": "Password updated successfully"}
 
 
+@router.post("/claim-account", response_model=ClaimAccountResponse)
+def claim_own_account(
+    req: ClaimAccountRequest,
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """#3824 — phase 1 of 2: the current user REQUESTS that their own
+    teacher-created ("child") account be claimed as a regular account.
+
+    This does NOT immediately take effect — see account_claim_service.
+    request_claim()'s module docstring for the full two-phase rationale
+    (security review finding H1). created_by_teacher_id is only cleared when
+    the returned verification token is redeemed via
+    GET/POST /auth/verify-email, which only the owner of `new_email` can do.
+    Until then the original creator can still reset this account's password
+    (which also revokes this pending request — see classroom_password.py).
+
+    Rate-limited (security review findings M1/M2): this endpoint re-verifies
+    current_password and queries the global email space, both of which are
+    weaker-than-ideal oracles for someone who already holds one valid
+    teacher-created account's credentials; the per-IP and per-account caps
+    bound how many guesses that gets them per minute, same pattern as
+    /auth/login's two-bucket limiter.
+
+    Operates ONLY on `current_user` — there is no student_id in the request.
+    See docs/prd/2026-11-02-child-handover-prd.md for the full design
+    rationale (chosen over Junyi's two-account merge) and the authorization
+    argument (why no additional role/classroom check is needed here).
+    """
+    client_ip = real_client_ip(request)
+    if not rate_limiter.check(f"claim-account:{client_ip}", max_requests=20, window_seconds=60):
+        raise HTTPException(status_code=429, detail="Too many requests. Please try again later.")
+    if not rate_limiter.check(f"claim-account:acct:{current_user.id}", max_requests=5, window_seconds=60):
+        raise HTTPException(status_code=429, detail="Too many requests. Please try again later.")
+
+    old_email = current_user.email
+    old_teacher_id = current_user.created_by_teacher_id
+
+    try:
+        verification_token = request_claim(
+            db,
+            current_user,
+            current_password=req.current_password,
+            new_email=req.new_email,
+            new_password=req.new_password,
+        )
+    except HTTPException as exc:
+        # Security review finding L1: log failed attempts too (not just
+        # successes) — an investigator looking at one account's audit trail
+        # should be able to tell "someone tried this and got the password
+        # wrong" apart from silence.
+        audit_log_endpoint(
+            request=request,
+            action=AuditAction.CLAIM_ACCOUNT_REQUESTED,
+            user_id=current_user.id,
+            target_student_id=current_user.id,
+            extra={"result": "rejected", "status_code": exc.status_code},
+        )
+        raise
+
+    audit_log_endpoint(
+        request=request,
+        action=AuditAction.CLAIM_ACCOUNT_REQUESTED,
+        user_id=current_user.id,
+        target_student_id=current_user.id,
+        extra={
+            "result": "pending",
+            "old_email": old_email,
+            "pending_email": req.new_email,
+            "teacher_id": old_teacher_id,
+        },
+    )
+
+    return ClaimAccountResponse(
+        message="過戶申請已送出！請至新的 Email 完成驗證以完成過戶"
+                + ("（測試模式下驗證 token 直接回傳）" if settings.is_dev else "")
+                + "。在完成驗證前，原建立老師仍可重設此帳號密碼（等同撤銷本次申請）。",
+        verification_token=verification_token if settings.is_dev else None,
+    )
+
+
 # ---------------------------------------------------------------------------
 # Password Reset
 # ---------------------------------------------------------------------------
@@ -331,24 +417,45 @@ def reset_password(req: ResetPasswordRequest, db: Session = Depends(get_db)):
 # ---------------------------------------------------------------------------
 
 
+def _verify_email_and_audit(db: Session, token: str, request: Request) -> str:
+    """Shared body for both verify-email routes: redeem the token, and if
+    that happened to complete a #3824 pending account claim (phase 2), emit
+    the CLAIM_ACCOUNT_COMPLETED audit entry — this is the one moment
+    created_by_teacher_id actually clears, so it is the moment that matters
+    for the audit trail (see account_claim_service.py's module docstring)."""
+    result = verify_email_by_token(db, token)
+    if result.claim_completed:
+        audit_log_endpoint(
+            request=request,
+            action=AuditAction.CLAIM_ACCOUNT_COMPLETED,
+            user_id=result.claimed_user_id,
+            target_student_id=result.claimed_user_id,
+            extra={
+                "previous_teacher_id": result.previous_teacher_id,
+                "final_email": result.final_email,
+            },
+        )
+    return result.message
+
+
 @router.get("/verify-email", response_model=VerifyEmailResponse)
-def verify_email_get(token: str, db: Session = Depends(get_db)):
+def verify_email_get(token: str, request: Request, db: Session = Depends(get_db)):
     """Verify email address using a token from the verification link.
 
     GET /auth/verify-email?token=xxx
-    Issue #460.
+    Issue #460. #3824: also completes a pending account claim, if any.
     """
-    message = verify_email_by_token(db, token)
+    message = _verify_email_and_audit(db, token, request)
     return VerifyEmailResponse(message=message)
 
 
 @router.post("/verify-email", response_model=VerifyEmailResponse)
-def verify_email(req: VerifyEmailRequest, db: Session = Depends(get_db)):
+def verify_email(req: VerifyEmailRequest, request: Request, db: Session = Depends(get_db)):
     """Verify email address using a verification token (POST variant for API clients).
 
-    Issue #460.
+    Issue #460. #3824: also completes a pending account claim, if any.
     """
-    message = verify_email_by_token(db, req.token)
+    message = _verify_email_and_audit(db, req.token, request)
     return VerifyEmailResponse(message=message)
 
 

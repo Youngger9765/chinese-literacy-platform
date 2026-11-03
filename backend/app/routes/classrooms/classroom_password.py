@@ -67,6 +67,21 @@ def reset_student_password(
     # shared platform-wide, not classroom-local).
     user = require_renameable_student_target(classroom, student_id, current_user, db)
 
+    # (#3824 security review finding H1) A teacher reset also REVOKES any
+    # pending child-account-claim handover (see account_claim_service.py):
+    # whoever requested the claim proved they knew the OLD password, which
+    # this reset just invalidated, so their in-flight request to bind a new
+    # email + eventually strip this teacher's reset authority must not be
+    # allowed to complete later via a verification token issued under the
+    # old credential. This is the recovery path the two-phase design exists
+    # for: the real owner (or the teacher, on their behalf) notices the
+    # account looks wrong and resets it DURING the pending window, before
+    # the claimant redeems their verification token.
+    had_pending_claim = user.pending_email is not None
+    if had_pending_claim:
+        user.pending_email = None
+        user.email_verification_token = None
+
     password = "".join(
         secrets.choice(string.ascii_uppercase + string.digits) for _ in range(8)
     )
@@ -92,6 +107,14 @@ def reset_student_password(
         user_id=current_user.id,
         target_student_id=student_id,
     )
+    if had_pending_claim:
+        audit_log_endpoint(
+            request=request,
+            action=AuditAction.CLAIM_ACCOUNT_REVOKED,
+            user_id=current_user.id,
+            target_student_id=student_id,
+            extra={"reason": "password_reset_by_creator"},
+        )
 
     return ResetPasswordResponse(
         username=user.username or user.email,

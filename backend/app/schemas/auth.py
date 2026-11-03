@@ -29,6 +29,29 @@ class ChangePasswordRequest(BaseModel):
     new_password: str = Field(..., min_length=1, max_length=128)
 
 
+class ClaimAccountRequest(BaseModel):
+    """#3824 — a teacher-created ("child") account claiming itself as a
+    regular, self-owned account. Operates only on the caller's own account
+    (no student_id field): the caller must already be authenticated AS this
+    account, which requires knowing its current username/password to begin
+    with. current_password is required again as defense-in-depth for this
+    high-impact, irreversible action (same pattern as ChangePasswordRequest),
+    even though the JWT already proves a recent login."""
+
+    current_password: str
+    new_email: EmailStr
+    # min_length removed here so the route can return a descriptive Chinese
+    # error via enforce_password_strength, same as RegisterRequest/
+    # ChangePasswordRequest.
+    new_password: str = Field(..., min_length=1, max_length=128)
+
+
+class ClaimAccountResponse(BaseModel):
+    message: str
+    # Dev-mode only, mirrors RegisterResponse.verification_token.
+    verification_token: str | None = None
+
+
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"

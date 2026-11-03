@@ -42,16 +42,36 @@ class User(Base):
     privacy_accepted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     # "Password teacher" (#3818, mirrors Junyi's ParentChildPair.created_by):
     # the teacher who created THIS account via batch-create / CSV upload /
-    # Junyi class import (new-student branch only). Set once, at creation
-    # time, and never reassigned afterwards — it is NOT the same signal as
-    # UserRole.granted_by, which can be (re)written long after the account
-    # already existed (role added to an existing self-registered account).
+    # Junyi class import (new-student branch only). Set at creation time.
     # NULL means "nobody recorded creating this account" (self-registration,
     # Junyi SSO first login, or legacy data) and is fail-closed: no teacher
     # may reset this account's password, only the account owner via the
     # normal forgot-password flow.
+    #
+    # #3824 (child-account handover) security review finding H1: a single
+    # claim-account call used to clear this immediately, so whoever merely
+    # knew the account's printed card password (e.g. a classmate who saw it)
+    # could PERMANENTLY strip the real creator's recovery authority in one
+    # shot -- before #3824 a stolen card was recoverable (the teacher could
+    # still reset it), after the original (single-phase) #3824 design it was
+    # not. Fixed by making the handover two-phase (see pending_email below):
+    # this field is only cleared when the NEW email is actually verified
+    # (proving control of a mailbox, not just knowledge of the old
+    # password), and is UNCHANGED -- the teacher can still reset -- for the
+    # whole pending window. A password reset during that window also clears
+    # any pending claim (see classroom_password.py), so "reset the password"
+    # doubles as "revoke the in-flight handover".
     created_by_teacher_id: Mapped[int | None] = mapped_column(
         ForeignKey("users.id"), nullable=True, index=True
+    )
+    # #3824: the real email a claim-account request wants to bind, held here
+    # (NOT written to `email` yet) until its verification token is redeemed.
+    # NULL = no pending claim. See created_by_teacher_id's docstring above
+    # for why this two-step indirection exists, and
+    # services/account_claim_service.py / services/email_verification_service.py
+    # for where each half of the handshake lives.
+    pending_email: Mapped[str | None] = mapped_column(
+        String(254), nullable=True, index=True
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
