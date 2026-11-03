@@ -441,11 +441,11 @@ def _get_classroom_school_id(classroom_id: int) -> int:
         db.close()
 
 
-def _add_co_teacher(classroom_id: int, teacher_id: int) -> None:
-    """Enroll `teacher_id` as an 'editor'-role co-teacher on an EXISTING
-    classroom via the real ClassroomTeacher membership row -- this is what
+def _add_co_teacher(classroom_id: int, teacher_id: int, *, role: str = "editor") -> None:
+    """Enroll `teacher_id` as a co-teacher on an EXISTING classroom via the
+    real ClassroomTeacher membership row -- default role="editor" is what
     makes require_classroom_editor (the OUTER, classroom-access gate) pass
-    for them, so a test using this actually exercises
+    for them, so a test using the default actually exercises
     require_renameable_student_target (the INNER, creator-specific gate)
     instead of vacuously passing at the outer gate. role="editor" (not the
     weaker role string this fixture used pre-#3828-rebase) matches both
@@ -455,20 +455,25 @@ def _add_co_teacher(classroom_id: int, teacher_id: int) -> None:
     "the exact same gate" as reset-password, #3820) -- caught by mutation
     testing: the first version of this test used a teacher from an
     unrelated classroom/school, which the outer gate alone already rejects,
-    so removing the inner creator-check entirely did NOT turn it red."""
+    so removing the inner creator-check entirely did NOT turn it red.
+    role="viewer" is for the OPPOSITE case: confirming the outer gate itself
+    still blocks a read-only co-teacher (independent security review,
+    2026-11-03, point 2 — same role #3820 already locks for reset-password,
+    but approve/reject-claim had never been exercised against it)."""
     db = TestingSessionLocal()
     try:
-        db.add(ClassroomTeacher(classroom_id=classroom_id, teacher_id=teacher_id, role="editor"))
+        db.add(ClassroomTeacher(classroom_id=classroom_id, teacher_id=teacher_id, role=role))
         db.commit()
     finally:
         db.close()
 
 
 def test_non_creator_teacher_cannot_approve_403(client):
-    """AC2-equivalent (#3818's own pattern): a co-teacher on the SAME
-    classroom (so require_classroom_member passes, they can see the
-    student) is still not the account's password teacher, and must be
-    denied by _require_password_teacher specifically."""
+    """AC2-equivalent (#3818's own pattern): an 'editor'-role co-teacher on
+    the SAME classroom (so require_classroom_editor, the OUTER gate,
+    passes) is still not the account's password teacher, and must be
+    denied by require_renameable_student_target (the INNER gate)
+    specifically."""
     ctx = _setup_student_ready_to_claim(client, name="non_creator")
     co_teacher = _register_user(client, "handover_coteacher")
     classroom_school_id = _get_classroom_school_id(ctx["classroom_id"])
@@ -513,6 +518,144 @@ def test_non_creator_teacher_cannot_reject_403(client):
 
     after = _get_db_user(ctx["user_id"])
     assert after.pending_email is not None
+
+
+def test_viewer_coteacher_cannot_approve_403(client):
+    """Independent security review (2026-11-03, point 2): a 'viewer'-role
+    (#3820, read-only) co-teacher must be denied at the OUTER gate
+    (require_classroom_editor) -- never mind the inner creator-check, they
+    shouldn't even get that far. Distinct from
+    test_non_creator_teacher_cannot_approve_403 above, which deliberately
+    uses role="editor" so THAT test exercises the inner gate instead."""
+    ctx = _setup_student_ready_to_claim(client, name="viewer_coteacher")
+    viewer = _register_user(client, "handover_viewer")
+    classroom_school_id = _get_classroom_school_id(ctx["classroom_id"])
+    _assign_role(viewer["user_id"], "teacher", scope_type="school", scope_id=str(classroom_school_id))
+    _add_co_teacher(ctx["classroom_id"], viewer["user_id"], role="viewer")
+
+    claim_resp = _claim_account(
+        client,
+        ctx["token"],
+        current_password=ctx["password"],
+        new_email=f"realstudent_{uuid.uuid4().hex[:8]}@example.com",
+        new_password="FinalOwn456!",
+    )
+    assert claim_resp.status_code == 200, claim_resp.text
+
+    resp = _approve_claim(client, viewer, ctx["classroom_id"], ctx["user_id"])
+    assert resp.status_code == 403, resp.text
+
+    after = _get_db_user(ctx["user_id"])
+    assert after.created_by_teacher_id == ctx["teacher"]["user_id"]
+    assert after.pending_email is not None
+
+
+def test_viewer_coteacher_cannot_reject_403(client):
+    """Same as test_viewer_coteacher_cannot_approve_403, for reject-claim."""
+    ctx = _setup_student_ready_to_claim(client, name="viewer_coteacher_reject")
+    viewer = _register_user(client, "handover_viewer_reject")
+    classroom_school_id = _get_classroom_school_id(ctx["classroom_id"])
+    _assign_role(viewer["user_id"], "teacher", scope_type="school", scope_id=str(classroom_school_id))
+    _add_co_teacher(ctx["classroom_id"], viewer["user_id"], role="viewer")
+
+    claim_resp = _claim_account(
+        client,
+        ctx["token"],
+        current_password=ctx["password"],
+        new_email=f"realstudent_{uuid.uuid4().hex[:8]}@example.com",
+        new_password="FinalOwn456!",
+    )
+    assert claim_resp.status_code == 200, claim_resp.text
+
+    resp = _reject_claim(client, viewer, ctx["classroom_id"], ctx["user_id"])
+    assert resp.status_code == 403, resp.text
+
+    after = _get_db_user(ctx["user_id"])
+    assert after.pending_email is not None
+
+
+def test_creator_with_revoked_teacher_role_cannot_approve_403(client):
+    """Independent security review (2026-11-03, point 1): the account's
+    recorded creator (created_by_teacher_id) whose school-scoped `teacher`
+    UserRole was deactivated (is_active=False — e.g. offboarded) must still
+    be denied. require_renameable_student_target's first check is "caller
+    CURRENTLY holds an active teacher role at this classroom's school" --
+    this is the fail-closed case that check exists for: knowing you WERE
+    the creator is not enough if the role itself was revoked."""
+    ctx = _setup_student_ready_to_claim(client, name="revoked_creator")
+
+    claim_resp = _claim_account(
+        client,
+        ctx["token"],
+        current_password=ctx["password"],
+        new_email=f"realstudent_{uuid.uuid4().hex[:8]}@example.com",
+        new_password="FinalOwn456!",
+    )
+    assert claim_resp.status_code == 200, claim_resp.text
+
+    db = TestingSessionLocal()
+    try:
+        role = db.query(Role).filter(Role.name == "teacher").first()
+        ur = (
+            db.query(UserRole)
+            .filter(
+                UserRole.user_id == ctx["teacher"]["user_id"],
+                UserRole.role_id == role.id,
+                UserRole.scope_type == "school",
+            )
+            .first()
+        )
+        assert ur is not None
+        ur.is_active = False
+        db.commit()
+    finally:
+        db.close()
+
+    resp = _approve_claim(client, ctx["teacher"], ctx["classroom_id"], ctx["user_id"])
+    assert resp.status_code == 403, resp.text
+
+    after = _get_db_user(ctx["user_id"])
+    assert after.created_by_teacher_id == ctx["teacher"]["user_id"]
+    assert after.pending_email is not None, (
+        "an unauthorized approve attempt (revoked role) must not consume the request"
+    )
+
+
+def test_approve_404_when_student_not_in_this_classroom(client):
+    """Independent security review (2026-11-03, point 3): the real creator
+    teacher, correctly authenticated, must NOT be able to approve a claim
+    by supplying the WRONG classroom_id in the URL (one they also happen to
+    be an editor of, but the target student isn't enrolled in). Mirrors
+    #3826's own test_rename_404_when_student_not_in_this_classroom --
+    _require_enrolled (classroom_password.py) must reject this before the
+    creator-check even runs, so a URL-level classroom/student mismatch can
+    never be used to approve a claim for a student in a DIFFERENT
+    classroom the caller happens to also have editor access to."""
+    ctx = _setup_student_ready_to_claim(client, name="wrong_classroom")
+
+    claim_resp = _claim_account(
+        client,
+        ctx["token"],
+        current_password=ctx["password"],
+        new_email=f"realstudent_{uuid.uuid4().hex[:8]}@example.com",
+        new_password="FinalOwn456!",
+    )
+    assert claim_resp.status_code == 200, claim_resp.text
+
+    # A second classroom, owned by the SAME creator teacher, that the
+    # target student is NOT enrolled in.
+    other_classroom_id = _create_classroom(
+        client, ctx["teacher"], _get_classroom_school_id(ctx["classroom_id"]), name="Unrelated Classroom"
+    )
+
+    resp = _approve_claim(client, ctx["teacher"], other_classroom_id, ctx["user_id"])
+    assert resp.status_code == 404, resp.text
+
+    after = _get_db_user(ctx["user_id"])
+    assert after.created_by_teacher_id == ctx["teacher"]["user_id"]
+    assert after.pending_email is not None, (
+        "a wrong-classroom approve attempt must not consume the request"
+    )
 
 
 # ---------------------------------------------------------------------------

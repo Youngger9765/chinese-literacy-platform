@@ -47,7 +47,8 @@ v2 的設計與分析過程見 git history（`docs/prd/2026-11-02-child-handover
 | `POST /classrooms/{id}/students/{student_id}/reject-claim` | 同上 | **拒絕**：清空 `pending_email`，`created_by_teacher_id` 不動（老師保留完整權限） |
 
 `approve-claim` / `reject-claim` 跟 #3818 的 `reset-password` **共用同一道授權檢查**
-（`classroom_password.py::_require_password_teacher`，重構出來的共用函式）：
+（`helpers.py::require_renameable_student_target`，#3828 rebase 時與 reset-password／
+rename_student 整併成的共用函式）：
 呼叫者必須在這個班級的學校持有 active 的 `teacher` 角色，**且**必須是這個學生的
 `created_by_teacher_id` 本人（system_admin 可略過兩項）。這是刻意的設計：
 「誰能救回這個帳號的密碼」跟「誰能核准／拒絕把這個帳號永久交出去」必須是同一個人。
@@ -103,7 +104,7 @@ When B 呼叫 `approve-claim` 或 `reject-claim`
 Then 回應 403；S 的 `pending_email` 與 `created_by_teacher_id` 都不變
 （此為 mutation-test 驗證過的鎖——第一版測試誤用了「完全不相關班級的老師」，
 會被外層 `require_classroom_member` 擋下而非這條檢查本身，是vacuous pass；
-修正後改用「同班協同老師」確保真正測到 `_require_password_teacher`）
+修正後改用「同班協同老師」確保真正測到 `require_renameable_student_target`）
 
 **AC4 — 建立者核准後，學生用新帳密登入，原建立者重設密碼回 403**
 Given S 已送出申請（pending）
@@ -258,7 +259,7 @@ class ApproveAccountClaimResponse(BaseModel):
 ```
 
 1. `require_classroom_member`（外層：呼叫者是否看得到這個學生）
-2. `_require_password_teacher`（內層：呼叫者是否為 `created_by_teacher_id` 本人或
+2. `require_renameable_student_target`（內層：呼叫者是否為 `created_by_teacher_id` 本人或
    system_admin —— 與 reset-password 共用的同一個函式）
 3. `user.pending_email is None` → 404（沒有待核准的申請）
 4. 寫入 `email = pending_email`、清空 `pending_email`、清空
@@ -325,7 +326,7 @@ heads` 確認仍是單一 head）：idempotent `ADD COLUMN pending_email VARCHAR
 申請人填的 email、也不依賴任何尚未建置的寄信基礎設施。測試
 `test_stolen_credentials_cannot_transfer_the_account` /
 `test_non_creator_teacher_cannot_approve_403` 鎖住這個結論，並經過 mutation testing
-驗證（移除 `_require_password_teacher` 呼叫會讓對應測試真的變紅）。
+驗證（移除 `require_renameable_student_target` 呼叫會讓對應測試真的變紅）。
 
 **M1（已修）**：密碼強度檢查移到 email 查重之前。
 **M2（已修）**：IP 20 次／分、帳號 5 次／分兩個限流桶。
