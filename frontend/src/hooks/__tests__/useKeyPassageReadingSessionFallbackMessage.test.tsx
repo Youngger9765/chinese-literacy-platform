@@ -8,6 +8,11 @@
  *
  *    我第一版的這支測試在檔案裡自己複製了一份分支邏輯，mutation 不咬 —— 那是裝飾品。
  *    這一版 render 真的 `useKeyPassageReadingSession`，只把錄音器與後端呼叫換成替身。
+ *
+ * #3856：這支測試的前提是「Gemini 連得到但失敗」（too_short/decode/timeout），所以
+ *    必須明確 mock AI 功能旗標為開啟 —— 否則 jsdom 裡真的 `useAiFeaturesEnabled()`
+ *    會 fetch 不到 `/api/features`、fail-closed 回 false，新加的「AI 關閉就跳過
+ *    transcribeReading」分支會搶先把這裡的案例全部短路掉。
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
@@ -33,6 +38,9 @@ vi.mock('../../services/learning/session', () => ({
   saveReadingAudio: vi.fn(async () => ({ ok: true, attempt_id: 1 })),
 }));
 vi.mock('../../contexts/AuthContext', () => ({ useAuth: () => ({ token: 'tok' }) }));
+// #3856 — this file's scenarios all assume Gemini was reachable (it returned
+// a fallback reason), so AI must be "on" from the flag's point of view.
+vi.mock('../useAiFeaturesEnabled', () => ({ useAiFeaturesEnabled: () => true }));
 
 // 有別的模組在呼叫 navigator.mediaDevices.getUserMedia（不是我替身掉的錄音器）。
 // 給一個 stub —— 這一條要鎖的是「reason 有沒有被傳進去」，不是瀏覽器取得麥克風。

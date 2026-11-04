@@ -24,6 +24,11 @@ export interface SavedResult {
   cpm: number;
   durationMs: number;
   errorBreakdown: { correct: number; wrong: number; missing: number; extra: number };
+  /** #3856 — see useKeyPassageReadingSession.ts SavedResult.aiDisabled. Must
+   *  survive rehydration from localStorage/DB, otherwise re-opening this step
+   *  after the AI switch comes back on shows a fabricated 0% score instead of
+   *  the honest "AI grading was off" notice it was actually completed with. */
+  aiDisabled?: boolean;
 }
 
 interface UseKeyPassageReadingResultPersistenceProps {
@@ -80,6 +85,7 @@ export function useKeyPassageReadingResultPersistence({
         cpm: initialResult.cpm ?? 0,
         durationMs: initialResult.durationMs ?? 0,
         errorBreakdown: initialResult.errorBreakdown ?? { correct: 0, wrong: 0, missing: 0, extra: 0 },
+        aiDisabled: initialResult.aiDisabled,
       };
     }
     return null;
