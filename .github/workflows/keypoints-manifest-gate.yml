@@ -74,10 +74,12 @@ jobs:
         with:
           python-version: '3.11'
           cache: pip
-          cache-dependency-path: backend/requirements.txt
+          cache-dependency-path: backend/requirements.lock
 
+      # Installs from the hash-pinned lock, not requirements.txt's open ranges —
+      # CI tests the exact same artifact the Dockerfile ships (#3849).
       - name: Install dependencies
-        run: pip install -r backend/requirements.txt
+        run: pip install --require-hashes -r backend/requirements.lock
 
       - name: Manifest matches runtime (no private schema)
         run: python scripts/keypoints_manifest_verify.py
