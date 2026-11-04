@@ -76,6 +76,17 @@ jobs:
               #    而這裡的 vitest 鎖不會跑 —— 兩邊原本不對稱。
               - 'frontend/tests/**'
               - 'frontend/playwright.config.ts'
+              # #3850: the security-headers lock (test-security-headers.sh)
+              # reads firebase.json and renders frontend/docker/render-nginx-
+              # conf.sh, and test-render-nginx-conf.sh's own existing lock
+              # reads only the latter — same "lock built but not wired" shape
+              # every entry above this one already had to learn the hard way.
+              # Without these three paths, a PR that edits firebase.json's
+              # `headers`, the nginx generator, or frontend/index.html's CSP
+              # meta tag would not trigger this workflow at all.
+              - 'firebase.json'
+              - 'frontend/docker/**'
+              - 'frontend/index.html'
               - '.github/workflows/frontend-checks.yml'
 
   frontend-checks:
@@ -100,6 +111,18 @@ jobs:
       - name: Lint (ESLint — errors block PR, warnings pass)
         working-directory: frontend
         run: npm run lint
+
+      # Nginx config generator regression locks (#3733, #3850). Both are
+      # plain POSIX shell + python3 (no node/npm dependency) and were never
+      # wired into any workflow before this — #3733's own lock sat dormant
+      # since it shipped, which is the exact "built but not wired" anti-
+      # pattern called out repeatedly elsewhere in this file (#3177, #3188,
+      # #3195, #3242). Run from repo root (not `frontend/`) since both
+      # scripts resolve firebase.json via `$(dirname "$0")/../..`.
+      - name: "Nginx config + security headers regression locks (#3733, #3850)"
+        run: |
+          sh frontend/docker/test-render-nginx-conf.sh
+          sh frontend/docker/test-security-headers.sh
 
       # #3195 型別檢查棘輪：出貨程式碼的 tsc 錯誤數只准降不准升。
       #
