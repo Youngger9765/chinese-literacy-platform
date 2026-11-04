@@ -168,6 +168,27 @@ describe('ActivateTeacherPage (#3804, #3812)', () => {
       expect(screen.getByLabelText('學校 1 名稱搜尋')).toHaveValue('大安國小');
     });
 
+    it('the suggestions box does not float over the submit button (#3817 — it must push content down, not overlay it)', async () => {
+      vi.mocked(authApi.searchSchoolDirectory).mockResolvedValueOnce({
+        items: [],
+        total: 0,
+        suggestions: [{ school_name: '大安國小', reason: '讀音相近' }],
+      });
+      render(<ActivateTeacherPage />);
+
+      fireEvent.change(screen.getByLabelText('學校 1 縣市'), { target: { value: '台北市' } });
+      fireEvent.change(screen.getByLabelText('學校 1 名稱搜尋'), { target: { value: '大按國校' } });
+      vi.advanceTimersByTime(400);
+
+      const label = await screen.findByText(/您是不是要找/);
+      const suggestionBox = label.closest('div');
+      // `position: absolute` is what let the box float on top of the
+      // "開通老師身分" submit button below it regardless of its own
+      // height. A normal-flow box can only ever push later siblings
+      // down, never cover them.
+      expect(suggestionBox?.className.split(/\s+/)).not.toContain('absolute');
+    });
+
     it('submitting with no school selected shows an inline error and does not call the API', async () => {
       render(<ActivateTeacherPage />);
       fireEvent.click(screen.getByRole('button', { name: '開通老師身分' }));

@@ -70,3 +70,25 @@ class TestSuggestSchoolNames:
             await suggest_school_names("某查詢字串")
         _args, kwargs = mock_llm.call_args
         assert kwargs["task"] == "school_name_suggest"
+
+    async def test_includes_the_selected_county_in_the_prompt_when_given(self):
+        """#3817 — when the caller already selected a county, the LLM
+        should be told, so its first guess is more likely to stay in that
+        county. (The actual correctness guarantee is the deterministic
+        DB filter in the route, not this prompt wording — see its test.)"""
+        mock_llm = AsyncMock(return_value={"suggestions": []})
+        with patch("app.services.moe_school_suggest.generate_structured_response", new=mock_llm):
+            await suggest_school_names("大按國xiao", county="台北市")
+        _args, kwargs = mock_llm.call_args
+        contents = kwargs["contents"]
+        prompt_text = contents[0].parts[0].text
+        assert "台北市" in prompt_text
+
+    async def test_omits_county_from_the_prompt_when_not_given(self):
+        mock_llm = AsyncMock(return_value={"suggestions": []})
+        with patch("app.services.moe_school_suggest.generate_structured_response", new=mock_llm):
+            await suggest_school_names("某查詢字串")
+        _args, kwargs = mock_llm.call_args
+        contents = kwargs["contents"]
+        prompt_text = contents[0].parts[0].text
+        assert "縣市" not in prompt_text

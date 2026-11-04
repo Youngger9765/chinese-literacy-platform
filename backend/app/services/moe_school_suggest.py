@@ -59,17 +59,29 @@ _SYSTEM_PROMPT = """你是台灣國民中小學學校名錄的查詢助手。
 """
 
 
-async def suggest_school_names(query: str) -> list[dict]:
+async def suggest_school_names(query: str, county: str | None = None) -> list[dict]:
     """Return up to 5 {school_name, reason} suggestions, or [] on any
-    failure (oversized input, LLM error, malformed response)."""
+    failure (oversized input, LLM error, malformed response).
+
+    `county` (#3817) is an optional hint telling the LLM which county the
+    caller already selected, so its first guess is more likely to be
+    correct. This is a quality improvement only — it is NOT the
+    correctness guarantee against a cross-county suggestion. The caller
+    (app/routes/school_directory.py) deterministically filters the
+    returned suggestions against the real directory for that county
+    afterwards, because an LLM can still ignore this hint.
+    """
     if not query or len(query) > MAX_QUERY_CHARS:
         return []
 
     try:
+        user_text = f"使用者輸入：{query}"
+        if county:
+            user_text += f"\n使用者已選擇的縣市：{county}（請只建議這個縣市的學校）"
         contents = [
             genai_types.Content(
                 role="user",
-                parts=[genai_types.Part(text=f"使用者輸入：{query}")],
+                parts=[genai_types.Part(text=user_text)],
             )
         ]
         result = await generate_structured_response(

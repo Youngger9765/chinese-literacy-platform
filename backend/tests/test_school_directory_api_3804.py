@@ -77,6 +77,16 @@ def setup_db():
                 school_level="elementary",
                 is_public=True,
             ),
+            # #3817 — a county-exclusive school (only in 桃園市, no 台北市
+            # counterpart) used to prove the suggestion fallback respects
+            # the selected county instead of suggesting it for a 台北市 search.
+            School(
+                name="八德國小",
+                moe_school_code="064701",
+                county_name="桃園市",
+                school_level="elementary",
+                is_public=True,
+            ),
             # Non-MOE school — must never be returned by the directory search
             School(name="某老師自建學校"),
         ]
@@ -215,6 +225,64 @@ class TestSchoolDirectorySearchSuggestions:
         assert resp.status_code == 200
         assert resp.json()["suggestions"] is None
         mock_suggest.assert_not_called()
+
+
+class TestSchoolDirectorySearchSuggestionsRespectSelectedCounty:
+    """#3817 — a 台北市-scoped search showed "臺中市大安區大安國民小學" as an
+    AI suggestion in production: the LLM fallback had no idea a county was
+    even selected, so it could (and did) suggest a real school from a
+    completely different county. The fix must hold even when the LLM
+    ignores the county hint in its prompt, so this locks the ROUTE-level
+    deterministic filter against the directory, not the prompt wording."""
+
+    def test_suggestion_outside_the_selected_county_is_filtered_out(self, client, teacher_user):
+        # 八德國小 only exists in 桃園市 (seeded above). If the LLM
+        # "suggests" it for a 台北市-scoped search, the route must drop it:
+        # it is not a valid answer to "a school in 台北市".
+        mock_suggestions = [{"school_name": "八德國小", "reason": "字形相近"}]
+        with patch(
+            "app.routes.school_directory.suggest_school_names",
+            new=AsyncMock(return_value=mock_suggestions),
+        ):
+            resp = client.get(
+                "/api/schools/directory/search?q=完全查不到的校名字串3&county=台北市",
+                headers=auth_header(teacher_user["token"]),
+            )
+        assert resp.status_code == 200
+        assert resp.json()["suggestions"] == []
+
+    def test_suggestion_inside_the_selected_county_is_kept(self, client, teacher_user):
+        # 大安國小 exists in BOTH 台北市 and 桃園市 (seeded above) -- a
+        # suggestion of it for a 台北市-scoped search is valid and must
+        # survive the county filter untouched (positive control for the
+        # test above: the filter narrows, it does not silently empty
+        # everything).
+        mock_suggestions = [{"school_name": "大安國小", "reason": "字形相近"}]
+        with patch(
+            "app.routes.school_directory.suggest_school_names",
+            new=AsyncMock(return_value=mock_suggestions),
+        ):
+            resp = client.get(
+                "/api/schools/directory/search?q=完全查不到的校名字串4&county=台北市",
+                headers=auth_header(teacher_user["token"]),
+            )
+        assert resp.status_code == 200
+        assert resp.json()["suggestions"] == mock_suggestions
+
+    def test_no_county_selected_keeps_all_suggestions_unfiltered(self, client, teacher_user):
+        # Without a county there is nothing to narrow suggestions against --
+        # behavior must be unchanged from before #3817.
+        mock_suggestions = [{"school_name": "八德國小", "reason": "字形相近"}]
+        with patch(
+            "app.routes.school_directory.suggest_school_names",
+            new=AsyncMock(return_value=mock_suggestions),
+        ):
+            resp = client.get(
+                "/api/schools/directory/search?q=完全查不到的校名字串5",
+                headers=auth_header(teacher_user["token"]),
+            )
+        assert resp.status_code == 200
+        assert resp.json()["suggestions"] == mock_suggestions
 
 
 class TestSchoolDirectorySearchInputValidation:
