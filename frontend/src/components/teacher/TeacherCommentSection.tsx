@@ -12,6 +12,7 @@ import {
   generateAIComment,
   saveTeacherComment,
 } from '../../services/teacherApi';
+import { useAiFeaturesEnabled } from '../../hooks/useAiFeaturesEnabled';
 
 interface TeacherCommentSectionProps {
   studentId: number;
@@ -37,10 +38,16 @@ const TeacherCommentSection: React.FC<TeacherCommentSectionProps> = ({
   const [aiLoading, setAiLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  // #3838 — AI kill switch (security incident response). Backend already
+  // fails closed (503) when disabled, but we skip the call entirely here so
+  // this doesn't silently eat an error and leave the teacher staring at a
+  // permanent loading spinner.
+  const aiFeaturesEnabled = useAiFeaturesEnabled();
 
   // Auto-generate AI comment if none exists
   useEffect(() => {
     if (initialAiComment) return;
+    if (!aiFeaturesEnabled) return;
     setAiLoading(true);
     generateAIComment(token, studentId, sessionId)
       .then((res) => {
@@ -51,9 +58,10 @@ const TeacherCommentSection: React.FC<TeacherCommentSectionProps> = ({
       })
       .catch(() => {})
       .finally(() => setAiLoading(false));
-  }, [token, studentId, sessionId, initialAiComment, initialTeacherComment]);
+  }, [token, studentId, sessionId, initialAiComment, initialTeacherComment, aiFeaturesEnabled]);
 
   const handleRegenerate = useCallback(async () => {
+    if (!aiFeaturesEnabled) return;
     setAiLoading(true);
     try {
       // Force regeneration by calling the endpoint (it's idempotent with cache,
@@ -65,7 +73,7 @@ const TeacherCommentSection: React.FC<TeacherCommentSectionProps> = ({
     } finally {
       setAiLoading(false);
     }
-  }, [token, studentId, sessionId]);
+  }, [token, studentId, sessionId, aiFeaturesEnabled]);
 
   const handleSave = useCallback(async () => {
     setSaving(true);
@@ -87,22 +95,26 @@ const TeacherCommentSection: React.FC<TeacherCommentSectionProps> = ({
         給 {studentName} 的評語
       </h3>
 
-      {/* AI suggested comment */}
-      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+      {/* AI suggested comment — hidden behind the #3838 kill switch */}
+      <div data-testid="ai-comment-box" className="bg-blue-50 border border-blue-200 rounded-xl p-4">
         <div className="flex items-center justify-between mb-2">
           <span className="text-xs font-semibold text-blue-600 uppercase tracking-wide">
             AI 建議評語
           </span>
-          <button
-            type="button"
-            onClick={handleRegenerate}
-            disabled={aiLoading}
-            className="text-xs text-blue-500 hover:text-blue-700 disabled:opacity-50"
-          >
-            {aiLoading ? '產生中...' : '重新產生'}
-          </button>
+          {aiFeaturesEnabled && (
+            <button
+              type="button"
+              onClick={handleRegenerate}
+              disabled={aiLoading}
+              className="text-xs text-blue-500 hover:text-blue-700 disabled:opacity-50"
+            >
+              {aiLoading ? '產生中...' : '重新產生'}
+            </button>
+          )}
         </div>
-        {aiLoading && !aiComment ? (
+        {!aiFeaturesEnabled ? (
+          <p className="text-sm text-gray-500 italic">AI 功能暫時關閉</p>
+        ) : aiLoading && !aiComment ? (
           <div className="animate-pulse h-16 bg-blue-100 rounded" />
         ) : (
           <p className="text-sm text-blue-900 leading-relaxed whitespace-pre-wrap">

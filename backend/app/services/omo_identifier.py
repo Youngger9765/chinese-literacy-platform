@@ -24,6 +24,7 @@ import json
 import logging
 
 from .ai_base import _repair_json, GeminiContentFilterError
+from .ai_feature_flag import assert_ai_enabled
 from .llm_models import get_model_for_task
 from .omo_lesson_catalog import (
     LessonCandidate,
@@ -59,7 +60,14 @@ async def identify_lesson_from_image(image_bytes: bytes, mime_type: str = "image
 
     Raises:
         RuntimeError: After 3 consecutive errors (circuit breaker).
+        AIFeaturesDisabledError: if AI_FEATURES_ENABLED is not "true" (#3838
+        kill switch). Raised here, before the try/except below, so it is
+        NOT caught by the `except Exception` circuit-breaker handler —
+        a disabled flag must surface immediately as a clear refusal, not
+        count toward the breaker or be mistaken for a transient AI error.
     """
+    assert_ai_enabled("omo_identifier")
+
     global _consecutive_errors
 
     lessons = _load_omo_lessons()

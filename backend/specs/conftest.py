@@ -59,3 +59,16 @@ def _create_all_with_sqlite_patches(*args, **kwargs):
 Base.metadata.create_all = _create_all_with_sqlite_patches
 
 
+# ── #3838 AI kill switch — default ON for the spec suite ───────────────────
+# See tests/conftest.py for the full rationale (same fixture, kept in sync):
+# production defaults to OFF, specs default to ON so existing AI-path specs
+# keep exercising the code they were written to test. Specs that want to
+# test the kill switch itself use their own monkeypatch.setenv/delenv.
+import pytest  # noqa: E402
+
+
+@pytest.fixture(autouse=True)
+def _ai_features_enabled_by_default(monkeypatch):
+    monkeypatch.setenv("AI_FEATURES_ENABLED", "true")
+
+

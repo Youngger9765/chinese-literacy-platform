@@ -17,6 +17,10 @@ import {
   type ExampleSentence,
   type ExampleSentenceSource,
 } from '../../services/learningApi';
+import { useAiFeaturesEnabled } from '../../hooks/useAiFeaturesEnabled';
+
+/** Shown in place of a real AI error when the #3838 kill switch is off. */
+const AI_DISABLED_MESSAGE = 'AI 功能暫時關閉';
 
 // ── Types ─────────────────────────────────────────────────────────────────
 
@@ -181,6 +185,12 @@ export function useSentencePracticeState({
   token,
   saveStepProgressPatch,
 }: UseSentencePracticeStateOpts): SentencePracticeStateResult {
+  // #3838 — AI kill switch (security incident response). Both calls this
+  // hook makes (example sentences + validation) are AI generation with no
+  // non-AI fallback. Checked client-side so the error shown is "AI 功能暫時
+  // 關閉" rather than the generic "載入失敗/評估失敗" a 503 would otherwise
+  // produce through the existing catch blocks below.
+  const aiFeaturesEnabled = useAiFeaturesEnabled();
   const [saved] = useState<SavedProgress | null>(() => loadSaved(storyId));
 
   const [currentWordIndex, setCurrentWordIndex] = useState<number>(() => {
@@ -282,6 +292,13 @@ export function useSentencePracticeState({
       loadedWordsRef.current.add(currentWord);
       return;
     }
+    if (!aiFeaturesEnabled) {
+      setWordStates(prev => ({
+        ...prev,
+        [currentWord]: { ...prev[currentWord], examplesLoading: false, examplesError: AI_DISABLED_MESSAGE },
+      }));
+      return;
+    }
     loadedWordsRef.current.add(currentWord);
     setWordStates(prev => ({
       ...prev,
@@ -302,7 +319,7 @@ export function useSentencePracticeState({
         [currentWord]: { ...prev[currentWord], examplesLoading: false, examplesError: '例句載入失敗，請稍後再試。' },
       }));
     }
-  }, [currentWord, currentState.exampleSentences, storyTitle, token]);
+  }, [currentWord, currentState.exampleSentences, storyTitle, token, aiFeaturesEnabled]);
 
   const updateSentenceText = useCallback((sentenceIndex: 0 | 1, text: string) => {
     setWordStates(prev => {
@@ -318,6 +335,15 @@ export function useSentencePracticeState({
     stopRefs[sentenceIndex].current?.();
     const sentence = currentState.sentences[sentenceIndex];
     if (!sentence.text.trim()) return;
+    if (!aiFeaturesEnabled) {
+      setWordStates(prev => {
+        const state = prev[currentWord];
+        const updated: [SentenceEntry, SentenceEntry] = [{ ...state.sentences[0] }, { ...state.sentences[1] }];
+        updated[sentenceIndex] = { ...updated[sentenceIndex], status: 'incorrect', feedback: AI_DISABLED_MESSAGE, suggestion: '' };
+        return { ...prev, [currentWord]: { ...state, sentences: updated } };
+      });
+      return;
+    }
     setWordStates(prev => {
       const state = prev[currentWord];
       const updated: [SentenceEntry, SentenceEntry] = [{ ...state.sentences[0] }, { ...state.sentences[1] }];
@@ -346,7 +372,7 @@ export function useSentencePracticeState({
         return { ...prev, [currentWord]: { ...state, sentences: updated } };
       });
     }
-  }, [currentWord, currentState, storyTitle, token]);
+  }, [currentWord, currentState, storyTitle, token, aiFeaturesEnabled]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>, idx: 0 | 1) => {
     const nativeEvent = e.nativeEvent as KeyboardEvent;

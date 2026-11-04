@@ -25,6 +25,7 @@ from ...auth.rate_limiter import make_ai_rate_limit_dependency
 from ...database import get_db
 from ...models.omo_upload import OmoUpload, OmoUploadAttempt
 from ...models.user import User
+from ...services.ai_feature_flag import require_ai_enabled
 from ...services.omo_jobs import _run_identification
 from ...services.omo_pdf_split import PdfSplitError, expand_pdf_files
 from ...services.omo_responses import (
@@ -102,7 +103,10 @@ def list_omo_lessons(
     "/omo/upload",
     response_model=OmoUploadResponse,
     status_code=201,
-    dependencies=[Depends(make_ai_rate_limit_dependency(max_requests=10, window_seconds=60))],
+    dependencies=[
+        Depends(require_ai_enabled),
+        Depends(make_ai_rate_limit_dependency(max_requests=10, window_seconds=60)),
+    ],
 )
 async def upload_worksheet(
     background_tasks: BackgroundTasks,
@@ -135,6 +139,13 @@ async def upload_worksheet(
     Hint path (#1637): if ``lesson_code_hint`` is supplied, identification
     completes synchronously in the background task without any AI call
     (confidence=1.0, ~0 latency vs 6-24 s for Gemini).
+
+    Guarded by require_ai_enabled (#3838 kill switch) even though the hint
+    path above skips AI — grading (the next step after identification)
+    always calls Gemini to OCR the handwritten answers, with no non-AI
+    fallback, so a hint-only upload would always end up stuck in "grading
+    failed" while disabled. Blocking the whole upload keeps the failure
+    mode obvious (503 immediately) instead of partial progress that stalls.
     """
     # ── Read all file bytes (required for async UploadFile) ──────────────────
     files_data: list[tuple[bytes, str]] = []
@@ -234,7 +245,10 @@ async def upload_worksheet(
     "/omo/{upload_id}/attempt",
     response_model=OmoAttemptResponse,
     status_code=201,
-    dependencies=[Depends(make_ai_rate_limit_dependency(max_requests=10, window_seconds=60))],
+    dependencies=[
+        Depends(require_ai_enabled),
+        Depends(make_ai_rate_limit_dependency(max_requests=10, window_seconds=60)),
+    ],
 )
 async def add_attempt(
     upload_id: int,

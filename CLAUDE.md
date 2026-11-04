@@ -111,9 +111,9 @@ PR Preview          Staging         Production
 
 - `backend/**` 變更 → rebuild + deploy backend
 - `frontend/**` 變更 → rebuild + deploy frontend
-- CI/CD 用的 service account 憑證存在 GitHub secret，名稱 `GCP_SA_KEY`
-  <!-- 不寫成 `Secret: <名稱>` —— 那個形狀會被 pre-commit 的 generic_secret 偵測器
-       當成「secret 後面跟著一個值」而擋下 commit。這裡只有名稱，沒有值。 -->
+- CI/CD 走 **Workload Identity Federation**（keyless，#3838）：`google-github-actions/auth@v2`
+  用 `workload_identity_provider` + `service_account`（`github-actions@lingoleap-dev.iam.gserviceaccount.com`）
+  換 short-lived token，沒有長期 JSON key 可外洩。舊的長期憑證 GitHub secret 已停用/刪除。
 
 ### Artifact Registry Image Cleanup（4 層防護）
 
