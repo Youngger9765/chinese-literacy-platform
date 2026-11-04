@@ -24,6 +24,7 @@ import SelfAssessment, { type AssessmentRating } from './key-passage-reading/Sel
 import KeyPassageReadingControls, { type ControlState } from './key-passage-reading/KeyPassageReadingControls';
 import KeyPassageReadingScoreCard from './key-passage-reading/KeyPassageReadingScoreCard';
 import KeyPassageReadingFeedbackPanel from './key-passage-reading/KeyPassageReadingFeedbackPanel';
+import AiDisabledResultNotice from './key-passage-reading/AiDisabledResultNotice';
 import { readingPassagesOf } from './key-passage-reading/readingPassages';
 import LessonQrButton from '../qr/LessonQrButton';
 import { hasKeyPassage } from '../qr/lessonQr';
@@ -271,6 +272,7 @@ const KeyPassageReading: React.FC<KeyPassageReadingProps> = ({
           cpm: result.cpm,
           durationMs: result.durationMs,
           errorBreakdown: result.errorBreakdown,
+          aiDisabled: result.aiDisabled,
         },
         self_rating: selfRating,
         transcript: streamingTranscript,
@@ -373,6 +375,7 @@ const KeyPassageReading: React.FC<KeyPassageReadingProps> = ({
       cpm: result.cpm,
       durationMs: result.durationMs,
       errorBreakdown: result.errorBreakdown,
+      aiDisabled: result.aiDisabled,
     });
   }, [result, storageKey, streamingTranscript, onFinish]);
 
@@ -520,60 +523,73 @@ const KeyPassageReading: React.FC<KeyPassageReadingProps> = ({
           {/* ── 右欄：AI 判斷結果（Issue #2502）──────────────────────── */}
           {result && (
             <div ref={resultRef} className="space-y-6 mt-4">
-              {/* Stars + encouragement + transcript + audio (Issue #1960 — KeyPassageReadingScoreCard) */}
-              <KeyPassageReadingScoreCard
-                result={result}
-                streamingTranscript={streamingTranscript}
-                audioUrl={audioRecorder.audioUrl ?? persistedAudioUrl}
-              />
+              {/* #3856 — AI kill switch (#3838): this attempt has no real Gemini
+                  score (matchRate/cpm are 0 placeholders). Show an honest notice
+                  instead of the AI score panels, which would otherwise render a
+                  fabricated 0%/低星等 as if Gemini had actually graded it. */}
+              {result.aiDisabled ? (
+                <AiDisabledResultNotice />
+              ) : (
+                <>
+                  {/* Stars + encouragement + transcript + audio (Issue #1960 — KeyPassageReadingScoreCard) */}
+                  <KeyPassageReadingScoreCard
+                    result={result}
+                    streamingTranscript={streamingTranscript}
+                    audioUrl={audioRecorder.audioUrl ?? persistedAudioUrl}
+                  />
 
-              {/* 朗讀結果 (Issue #1960 — same style as ParagraphReading ParagraphCard) */}
-              <KeyPassageReadingFeedbackPanel
-                diffTokens={result.diffTokens}
-                targetText={fullText}
-                paragraphs={readingContent}
-              />
+                  {/* 朗讀結果 (Issue #1960 — same style as ParagraphReading ParagraphCard) */}
+                  <KeyPassageReadingFeedbackPanel
+                    diffTokens={result.diffTokens}
+                    targetText={fullText}
+                    paragraphs={readingContent}
+                  />
 
-              {/* ── Issue #2266: In-memory audio replay button ──────────── */}
-              {audioRecorder.audioBlob && (
-                <div className="flex justify-center mt-2 mb-1">
-                  <button
-                    type="button"
-                    onClick={handleReplayAudio}
-                    disabled={isPlayingReplay}
-                    className="flex items-center gap-2 px-4 py-2 rounded-full border border-accent/40 text-sm font-medium text-accent hover:bg-accent/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    aria-label="聽我的朗讀錄音"
-                  >
-                    <span>{isPlayingReplay ? '▶ 播放中…' : '▶ 聽錄音'}</span>
-                  </button>
-                </div>
+                  {/* ── Issue #2266: In-memory audio replay button ──────────── */}
+                  {audioRecorder.audioBlob && (
+                    <div className="flex justify-center mt-2 mb-1">
+                      <button
+                        type="button"
+                        onClick={handleReplayAudio}
+                        disabled={isPlayingReplay}
+                        className="flex items-center gap-2 px-4 py-2 rounded-full border border-accent/40 text-sm font-medium text-accent hover:bg-accent/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        aria-label="聽我的朗讀錄音"
+                      >
+                        <span>{isPlayingReplay ? '▶ 播放中…' : '▶ 聽錄音'}</span>
+                      </button>
+                    </div>
+                  )}
+
+                  {/* 正確率 + 語速 metrics card (Issue #1505) */}
+                  <ReadingMetricsCard
+                    accuracy={Math.round(result.matchRate * 100)}
+                    cpm={result.cpm || 0}
+                    history={dedicatedHistory}
+                  />
+                </>
               )}
-
-              {/* 正確率 + 語速 metrics card (Issue #1505) */}
-              <ReadingMetricsCard
-                accuracy={Math.round(result.matchRate * 100)}
-                cpm={result.cpm || 0}
-                history={dedicatedHistory}
-              />
 
               {/* ── Issue #1386: Self-assessment + 4-attempt progress chart ──
                   #1633: dedicatedHistory may not yet contain the in-flight
                   current attempt (save runs in parallel with the UI render),
                   so use max(history.length, 1) — first render after submit is
-                  always 「第 1 次」 at minimum. */}
+                  always 「第 1 次」 at minimum.
+                  #3856: when aiDisabled, there is no AI rating/insight to
+                  compare against — omit both so <SelfAssessment> only shows
+                  the self-rating buttons, no fabricated AI comparison. */}
               <SelfAssessment
                 onSelect={(rating) => {
                   setSelfRating(rating);
                   setShowComparison(true);
                 }}
                 selectedRating={selfRating}
-                aiRating={aiRating}
-                aiInsight={aiFluencyInsight}
+                aiRating={result.aiDisabled ? undefined : aiRating}
+                aiInsight={result.aiDisabled ? undefined : aiFluencyInsight}
                 showComparison={showComparison}
                 attemptNumber={Math.max(dedicatedHistory.length, 1)}
               />
 
-              {fullReadingAttempts.length > 0 && (
+              {!result.aiDisabled && fullReadingAttempts.length > 0 && (
                 <FluencyProgressChart
                   attempts={fullReadingAttempts}
                   benchmark={parsedBenchmark}

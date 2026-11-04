@@ -746,6 +746,9 @@ export interface KeyPassageReadingResult {
   errorBreakdown?: { correct: number; wrong: number; missing: number; extra: number };
   diffTokens?: DiffToken[];
   transcript?: string;
+  /** #3856 — true when completed without Gemini grading because the AI kill
+   *  switch (#3838) was off; matchRate/cpm are 0 placeholders, not a score. */
+  aiDisabled?: boolean;
 }
 
 export interface LearningSession {
