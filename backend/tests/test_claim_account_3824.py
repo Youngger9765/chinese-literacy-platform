@@ -896,6 +896,104 @@ def test_new_email_already_pending_for_someone_else_409(client):
 
 
 # ---------------------------------------------------------------------------
+# #3833 — a forgotten pending_email must not squat an email target forever.
+#
+# There is no dedicated "pending_email filed at" column (adding one needs a
+# migration, out of scope for this low-priority issue). `updated_at` is
+# reused instead: request_claim() is exactly the write that sets BOTH the
+# new password hash AND pending_email together in the same transaction, so
+# updated_at faithfully captures "when this claim was filed" at that moment.
+# See account_claim_service.PENDING_EMAIL_EXPIRY_DAYS for the accepted
+# limitation (logging in again also bumps updated_at).
+# ---------------------------------------------------------------------------
+
+
+def _age_pending_claim(user_id: int, days_old: int) -> None:
+    """Back-date a user row's updated_at via a raw UPDATE, bypassing the
+    ORM's onupdate=func.now() (which would just overwrite a value set
+    through the ORM on the next flush)."""
+    from datetime import datetime, timedelta, timezone
+
+    from sqlalchemy import update
+
+    db = TestingSessionLocal()
+    try:
+        db.execute(
+            update(User)
+            .where(User.id == user_id)
+            .values(updated_at=datetime.now(timezone.utc) - timedelta(days=days_old))
+        )
+        db.commit()
+    finally:
+        db.close()
+
+
+def test_stale_pending_claim_is_auto_expired_and_does_not_block_a_new_claim(client):
+    """A's claim on `contested_email` is 20 days stale (past the 14-day
+    expiry) with no teacher action ever taken on it. B filing the same
+    target email must succeed -- A's forgotten claim is treated as if it
+    was never filed -- instead of permanently squatting the email."""
+    ctx_a = _setup_student_ready_to_claim(client, name="stale_conflict_a")
+    ctx_b = _setup_student_ready_to_claim(client, name="stale_conflict_b")
+    contested_email = f"stale_contested_{uuid.uuid4().hex[:8]}@example.com"
+
+    first = _claim_account(
+        client, ctx_a["token"], current_password=ctx_a["password"], new_email=contested_email, new_password="FinalOwn456!"
+    )
+    assert first.status_code == 200, first.text
+    _age_pending_claim(ctx_a["user_id"], days_old=20)
+
+    second = _claim_account(
+        client, ctx_b["token"], current_password=ctx_b["password"], new_email=contested_email, new_password="FinalOwn456!"
+    )
+    assert second.status_code == 200, second.text
+
+    stale_a = _get_db_user(ctx_a["user_id"])
+    assert stale_a.pending_email is None, (
+        "the stale claim must be cleared (treated as unfiled), not merely "
+        "skipped for the collision check"
+    )
+    fresh_b = _get_db_user(ctx_b["user_id"])
+    assert fresh_b.pending_email == contested_email
+
+
+def test_recent_pending_claim_still_blocks_even_though_an_older_one_would_expire(client):
+    """Positive control for the test above: a claim that is NOT yet stale
+    (13 days, just under the 14-day threshold) still blocks a collision --
+    proves the fix narrows the block to genuinely stale claims, it does not
+    quietly disable the collision check altogether."""
+    ctx_a = _setup_student_ready_to_claim(client, name="recent_conflict_a")
+    ctx_b = _setup_student_ready_to_claim(client, name="recent_conflict_b")
+    contested_email = f"recent_contested_{uuid.uuid4().hex[:8]}@example.com"
+
+    first = _claim_account(
+        client, ctx_a["token"], current_password=ctx_a["password"], new_email=contested_email, new_password="FinalOwn456!"
+    )
+    assert first.status_code == 200, first.text
+    _age_pending_claim(ctx_a["user_id"], days_old=13)
+
+    second = _claim_account(
+        client, ctx_b["token"], current_password=ctx_b["password"], new_email=contested_email, new_password="FinalOwn456!"
+    )
+    assert second.status_code == 409, second.text
+
+
+def test_a_stale_claim_on_a_live_email_still_blocks_live_emails_never_expire(client):
+    """A LIVE email (another account's actual `email`, not a pending
+    target) must never be treated as expirable, no matter how old that
+    account's `updated_at` is -- expiry only ever applies to a PENDING
+    claim, never to someone's real, already-owned address."""
+    other = _register_user(client, "handover_live_email_old")
+    _age_pending_claim(other["user_id"], days_old=999)
+    ctx = _setup_student_ready_to_claim(client, name="live_email_vs_stale")
+
+    resp = _claim_account(
+        client, ctx["token"], current_password=ctx["password"], new_email=other["email"], new_password="FinalOwn456!"
+    )
+    assert resp.status_code == 409, resp.text
+
+
+# ---------------------------------------------------------------------------
 # AC5 — an account that is not a teacher-created child account in the first
 # place cannot "claim" itself.
 # ---------------------------------------------------------------------------

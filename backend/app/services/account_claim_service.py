@@ -53,6 +53,7 @@ password-reset.
 """
 
 import logging
+from datetime import datetime, timedelta, timezone
 
 from fastapi import HTTPException, status
 from sqlalchemy import or_
@@ -63,6 +64,43 @@ from ..models.user import User
 from ..services.auth_registration_service import enforce_password_strength
 
 logger = logging.getLogger(__name__)
+
+# #3833 — a forgotten claim must not squat its target email forever (a
+# teacher who never approves/rejects would otherwise let `pending_email`
+# block that address indefinitely for everyone else).
+#
+# There is no dedicated "pending_email filed at" column — adding one needs
+# a migration, out of scope for this low-priority issue (the issue itself:
+# "不急，排進一般待辦即可"). `updated_at` is reused instead: request_claim()
+# below is exactly the write that sets BOTH the new password hash AND
+# pending_email together, in the same transaction, so updated_at faithfully
+# captures "when this claim was filed" at that moment.
+#
+# Known, accepted limitation: `updated_at` is whole-row, not column-scoped.
+# If the account logs in again while the claim is still pending,
+# last_login_at's own write (routes/auth.py) also bumps updated_at via
+# SQLAlchemy's onupdate=func.now(), silently extending the apparent filing
+# time. This can only ever make expiry MORE conservative (a still-active
+# account's claim takes longer to be treated as stale), never less safe --
+# it will not auto-expire a claim the account holder is actively using, but
+# it will reliably free up an email that is both pending AND genuinely
+# dormant, which is the actual complaint in #3833. A dedicated column would
+# close this gap precisely; that is future work if it turns out to matter
+# in practice.
+PENDING_EMAIL_EXPIRY_DAYS = 14
+
+
+def _is_pending_claim_stale(user: User) -> bool:
+    """True if `user.pending_email` is set and old enough to be treated as
+    forgotten. Never true for an account with no pending claim at all."""
+    if user.pending_email is None:
+        return False
+    filed_at = user.updated_at
+    if filed_at is None:
+        return False
+    if filed_at.tzinfo is None:
+        filed_at = filed_at.replace(tzinfo=timezone.utc)
+    return datetime.now(timezone.utc) - filed_at > timedelta(days=PENDING_EMAIL_EXPIRY_DAYS)
 
 
 def request_claim(
@@ -152,10 +190,25 @@ def request_claim(
         .first()
     )
     if existing is not None:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="此 Email 已被其他帳號使用或已被申請過戶",
-        )
+        # #3833: a STALE pending claim (never approved or rejected) is
+        # auto-expired here and does not block -- this is the only place
+        # the conflict actually matters, so it is also the only place that
+        # needs to know about expiry. A LIVE email (existing.email ==
+        # new_email) never expires, no matter how old that row is -- expiry
+        # only ever applies to a pending claim target.
+        if existing.email != new_email and existing.pending_email == new_email and _is_pending_claim_stale(existing):
+            existing.pending_email = None
+            logger.info(
+                "Account %d's pending claim on %r auto-expired (#3833, >%d days "
+                "stale) to let account %d claim it instead",
+                existing.id, new_email, PENDING_EMAIL_EXPIRY_DAYS, current_user.id,
+            )
+            db.commit()
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="此 Email 已被其他帳號使用或已被申請過戶",
+            )
 
     current_user.password_hash = hash_password(new_password)
     current_user.pending_email = new_email
