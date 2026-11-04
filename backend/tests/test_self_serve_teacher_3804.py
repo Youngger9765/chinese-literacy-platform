@@ -515,21 +515,28 @@ class TestSameSchoolDoesNotGrantClassroomVisibility:
             "classroom_a_id": cls_a.json()["id"],
         }
 
-    def test_declaring_same_school_does_not_grant_viewing_someone_elses_classroom(self, actors):
-        """Given test from PRD §10.7 — the negative assertion."""
-        from app.main import app as _app
-        client = TestClient(_app)
+    def test_declaring_same_school_does_not_grant_viewing_someone_elses_classroom(self, client, actors):
+        """Given test from PRD §10.7 — the negative assertion.
+
+        #3816: this used to mint its own `TestClient(_app)` instead of
+        reusing the module's `client` fixture. A short-lived, never-entered
+        TestClient does not run ASGI lifespan, and — empirically confirmed
+        by reproducing the exact CI failure in a container matching CI's
+        Python/OS — its teardown timing is not deterministic enough to rely
+        on for a dependency_overrides-based test DB swap under a full-suite
+        run: the request would occasionally land on a stale app state and
+        raise "no such table: users" for a table that very much exists on
+        the module's own engine. Every call in this class now goes through
+        the single, properly entered `client` fixture instead."""
         resp = client.get(
             f"/api/classrooms/{actors['classroom_a_id']}",
             headers=auth_header(actors["b_tok"]),
         )
         assert resp.status_code == 403, resp.text
 
-    def test_positive_control_same_teacher_can_create_and_manage_own_classroom_in_that_school(self, actors):
+    def test_positive_control_same_teacher_can_create_and_manage_own_classroom_in_that_school(self, client, actors):
         """Positive control (PRD §10.7): B is not broken wholesale -- B can
         open and manage their OWN classroom in the same declared school."""
-        from app.main import app as _app
-        client = TestClient(_app)
         resp = client.post(
             "/api/classrooms",
             json={"name": "B1", "school_id": actors["school_id"], "grade": 4},
@@ -545,14 +552,11 @@ class TestSameSchoolDoesNotGrantClassroomVisibility:
         )
         assert manage.status_code == 200, manage.text
 
-    def test_declaring_same_school_does_not_grant_viewing_someone_elses_students(self, actors):
+    def test_declaring_same_school_does_not_grant_viewing_someone_elses_students(self, client, actors):
         """Third assertion from PRD §10.7: can(user,"view","student",...) is
         also unaffected by the shared school declaration. Uses the dedicated
         student-resource policy endpoint (gamification summary), not the
         classroom-detail endpoint already covered above."""
-        from app.main import app as _app
-        client = TestClient(_app)
-
         batch = client.post(
             f"/api/classrooms/{actors['classroom_a_id']}/students/batch",
             json={"students": [{"name": "小明", "seat_number": "01"}]},
@@ -623,21 +627,24 @@ class TestJoiningAnExistingSchoolDoesNotLeakItsRoster:
             "classroom_a_id": cls_a.json()["id"],
         }
 
-    def test_joining_by_name_does_not_grant_the_schools_classroom_list(self, actors):
-        resp = TestClient(app).get(
+    def test_joining_by_name_does_not_grant_the_schools_classroom_list(self, client, actors):
+        # #3816: reuse the module's `client` fixture instead of minting a
+        # fresh `TestClient(app)` per call -- see the note on
+        # test_declaring_same_school_does_not_grant_viewing_someone_elses_classroom.
+        resp = client.get(
             f"/api/schools/{actors['school_id']}/classrooms",
             headers=auth_header(actors["b_tok"]),
         )
         assert resp.status_code == 403, resp.text
 
-    def test_joining_by_name_does_not_grant_the_schools_member_roster(self, actors):
-        resp = TestClient(app).get(
+    def test_joining_by_name_does_not_grant_the_schools_member_roster(self, client, actors):
+        resp = client.get(
             f"/api/schools/{actors['school_id']}/members",
             headers=auth_header(actors["b_tok"]),
         )
         assert resp.status_code == 403, resp.text
 
-    def test_owner_of_a_self_activated_school_also_does_not_get_the_school_wide_list(self, actors):
+    def test_owner_of_a_self_activated_school_also_does_not_get_the_school_wide_list(self, client, actors):
         """(Finding #5, 2026-11-01) Even A -- the teacher who OWNS a
         classroom at this self-activated school -- gets no school-wide
         roster view either. This is not a regression: A's own classroom is
@@ -646,13 +653,13 @@ class TestJoiningAnExistingSchoolDoesNotLeakItsRoster:
         school), which is what the real "我的班級" page actually calls. The
         admin-style /schools/{id}/classrooms list has no legitimate purpose
         for a self-activated school -- see _can_view_school_roster."""
-        resp = TestClient(app).get(
+        resp = client.get(
             f"/api/schools/{actors['school_id']}/classrooms",
             headers=auth_header(actors["a_tok"]),
         )
         assert resp.status_code == 403, resp.text
 
-        my_classrooms = TestClient(app).get(
+        my_classrooms = client.get(
             "/api/classrooms",
             headers=auth_header(actors["a_tok"]),
         )
@@ -683,7 +690,7 @@ class TestJoiningAnExistingSchoolDoesNotLeakItsRoster:
         )
         assert cls_b.status_code == 201, cls_b.text
 
-        resp = TestClient(app).get(
+        resp = client.get(
             f"/api/schools/{actors['school_id']}/classrooms",
             headers=auth_header(actors["b_tok"]),
         )
@@ -696,7 +703,7 @@ class TestJoiningAnExistingSchoolDoesNotLeakItsRoster:
         else:
             assert resp.status_code == 403, resp.text
         # B's own classroom remains fully visible via the real endpoint.
-        my_classrooms = TestClient(app).get(
+        my_classrooms = client.get(
             "/api/classrooms",
             headers=auth_header(actors["b_tok"]),
         )
@@ -867,10 +874,11 @@ class TestJoiningAnExistingSchoolDoesNotLeakItsStudents:
             "a_student_id": a_student_id, "a_student_name": own_name,
         }
 
-    def test_cannot_search_for_another_teachers_student_in_the_same_school(self, actors):
-        from fastapi.testclient import TestClient as _TC
-        from app.main import app as _app
-        resp = _TC(_app).post(
+    def test_cannot_search_for_another_teachers_student_in_the_same_school(self, client, actors):
+        # #3816: reuse the module's `client` fixture instead of minting a
+        # fresh TestClient per call -- see the note on
+        # test_declaring_same_school_does_not_grant_viewing_someone_elses_classroom.
+        resp = client.post(
             f"/api/classrooms/{actors['cls_a_id']}/students/search",
             json={"query": actors["b_student_name"]},
             headers=auth_header(actors["a_tok"]),
@@ -882,10 +890,8 @@ class TestJoiningAnExistingSchoolDoesNotLeakItsStudents:
             f"school membership alone: {resp.json()}"
         )
 
-    def test_cannot_add_another_teachers_student_to_own_classroom(self, actors):
-        from fastapi.testclient import TestClient as _TC
-        from app.main import app as _app
-        resp = _TC(_app).post(
+    def test_cannot_add_another_teachers_student_to_own_classroom(self, client, actors):
+        resp = client.post(
             f"/api/classrooms/{actors['cls_a_id']}/students",
             json={"student_id": actors["b_student_id"]},
             headers=auth_header(actors["a_tok"]),
@@ -895,13 +901,11 @@ class TestJoiningAnExistingSchoolDoesNotLeakItsStudents:
             f"classroom via shared school membership alone: {resp.status_code} {resp.text}"
         )
 
-    def test_positive_control_can_search_and_add_own_student(self, actors):
+    def test_positive_control_can_search_and_add_own_student(self, client, actors):
         """A's OWN student (already enrolled in A's own classroom) must still
         be findable and addable -- this isn't "nothing works", it's "cross
         -teacher strangers don't leak"."""
-        from fastapi.testclient import TestClient as _TC
-        from app.main import app as _app
-        c = _TC(_app)
+        c = client
 
         search = c.post(
             f"/api/classrooms/{actors['cls_a_id']}/students/search",
@@ -1030,10 +1034,11 @@ class TestPendingCoTeachingInviteDoesNotLeakTheOtherClassroomsStudents:
             "owner_student_id": owner_student_id, "owner_student_name": unique_name,
         }
 
-    def test_pending_invitee_cannot_search_for_the_other_classrooms_student(self, actors):
-        from fastapi.testclient import TestClient as _TC
-        from app.main import app as _app
-        resp = _TC(_app).post(
+    def test_pending_invitee_cannot_search_for_the_other_classrooms_student(self, client, actors):
+        # #3816: reuse the module's `client` fixture instead of minting a
+        # fresh TestClient per call -- see the note on
+        # test_declaring_same_school_does_not_grant_viewing_someone_elses_classroom.
+        resp = client.post(
             f"/api/classrooms/{actors['cls_invitee_id']}/students/search",
             json={"query": actors["owner_student_name"]},
             headers=auth_header(actors["invitee_tok"]),
@@ -1045,10 +1050,8 @@ class TestPendingCoTeachingInviteDoesNotLeakTheOtherClassroomsStudents:
             f"invitee search up the other classroom's student: {resp.json()}"
         )
 
-    def test_pending_invitee_cannot_add_the_other_classrooms_student(self, actors):
-        from fastapi.testclient import TestClient as _TC
-        from app.main import app as _app
-        resp = _TC(_app).post(
+    def test_pending_invitee_cannot_add_the_other_classrooms_student(self, client, actors):
+        resp = client.post(
             f"/api/classrooms/{actors['cls_invitee_id']}/students",
             json={"student_id": actors["owner_student_id"]},
             headers=auth_header(actors["invitee_tok"]),
@@ -1059,16 +1062,14 @@ class TestPendingCoTeachingInviteDoesNotLeakTheOtherClassroomsStudents:
             f"classroom: {resp.status_code} {resp.text}"
         )
 
-    def test_positive_control_accepting_the_invite_then_unlocks_it(self, actors):
+    def test_positive_control_accepting_the_invite_then_unlocks_it(self, client, actors):
         """Not "nothing ever works" -- once the invite is ACCEPTED, the
         invitee legitimately co-teaches cls_owner_id, so the owner's
         classroom's roster becoming reachable from the invitee's search is
         the correct, intended behavior (#3820: accepted editor/viewer can
         both read). This also proves the two tests above failed for the
         right reason (pending-ness), not because search/add are broken."""
-        from fastapi.testclient import TestClient as _TC
-        from app.main import app as _app
-        c = _TC(_app)
+        c = client
 
         me_invitee = c.get("/api/users/me", headers=auth_header(actors["invitee_tok"]))
         invitee_id = me_invitee.json()["id"]
