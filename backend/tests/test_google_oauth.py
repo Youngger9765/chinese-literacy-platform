@@ -197,6 +197,66 @@ class TestGoogleLoginExistingEmailUser:
         assert count == 1
 
 
+class TestGoogleLoginDoesNotHijackUnverifiedLocalAccount:
+    """#3830 finding 2 — resolve_google_user only checked GOOGLE's
+    email_verified, never our own local `User.email_verified`.
+
+    Attack: attacker registers victim@example.com via POST /auth/register
+    (no proof of ownership required there -- email_verified defaults to
+    False), knows the password because THEY set it. Victim later signs in
+    with Google using that real email, which Google happily confirms as
+    verified (it's really theirs). Before the fix, the lookup-by-email path
+    linked `google_id` straight onto the attacker's unverified row with no
+    further check -- the victim's Google login would have silently handed
+    them into an account the attacker already controls the password for.
+
+    These two tests are the lowest-privilege case there is (an attacker's
+    OWN self-registered row, zero other permissions) with the positive
+    control immediately above (`TestGoogleLoginExistingEmailUser`, which
+    seeds `email_verified=True` and must keep linking normally) proving the
+    local email_verified flag -- not something else -- is what the fix
+    gates on.
+    """
+
+    def _create_unverified_existing_user(self):
+        db = TestingSessionLocal()
+        user = User(
+            email=FAKE_ID_INFO["email"],
+            password_hash=hash_password("AttackerChosenPassword123!"),
+            name="Attacker-Controlled Row",
+            email_verified=False,
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+        db.close()
+        return user
+
+    def test_google_login_is_refused_for_an_unverified_local_account(self, client, monkeypatch):
+        self._create_unverified_existing_user()
+        patch_google(monkeypatch)
+
+        with patch("google.oauth2.id_token.verify_oauth2_token", side_effect=mock_verify):
+            response = client.post("/api/auth/google", json={"credential": FAKE_CREDENTIAL})
+
+        assert response.status_code == 409, response.text
+
+    def test_the_unverified_account_is_not_silently_linked_to_the_google_id(self, client, monkeypatch):
+        self._create_unverified_existing_user()
+        patch_google(monkeypatch)
+
+        with patch("google.oauth2.id_token.verify_oauth2_token", side_effect=mock_verify):
+            client.post("/api/auth/google", json={"credential": FAKE_CREDENTIAL})
+
+        db = TestingSessionLocal()
+        user = db.query(User).filter(User.email == FAKE_ID_INFO["email"]).first()
+        db.close()
+        assert user.google_id is None
+        # the attacker's row must also still be unverified -- the refusal
+        # must not accidentally flip it to verified as a side effect.
+        assert user.email_verified is False
+
+
 class TestGoogleLoginReturningUser:
     """User already has google_id — should login directly."""
 
