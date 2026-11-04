@@ -5,6 +5,10 @@ on:
     - cron: '0 0 * * 0'  # Every Sunday midnight UTC
   workflow_dispatch:  # Manual trigger
 
+permissions:
+  contents: read
+  id-token: write
+
 env:
   PROJECT_ID: lingoleap-dev
   REGION: asia-east1
@@ -17,7 +21,8 @@ jobs:
     steps:
       - uses: google-github-actions/auth@v2
         with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
+          workload_identity_provider: projects/958347263320/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+          service_account: github-actions@lingoleap-dev.iam.gserviceaccount.com
 
       - uses: google-github-actions/setup-gcloud@v2
 
@@ -106,7 +111,8 @@ jobs:
     steps:
       - uses: google-github-actions/auth@v2
         with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
+          workload_identity_provider: projects/958347263320/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+          service_account: github-actions@lingoleap-dev.iam.gserviceaccount.com
 
       - uses: google-github-actions/setup-gcloud@v2
 
@@ -161,8 +167,10 @@ jobs:
       - name: Summary
         if: always()
         run: |
-          echo "## Weekly Cleanup Complete" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- **AR Images**: kept latest 3 per package per environment, deleted untagged" >> $GITHUB_STEP_SUMMARY
-          echo "- **Cloud Run Revisions**: kept latest 5 per service" >> $GITHUB_STEP_SUMMARY
-          echo "- **Services**: lingoleap-backend, lingoleap-frontend, lingoleap-backend-staging, lingoleap-frontend-staging" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "## Weekly Cleanup Complete"
+            echo ""
+            echo "- **AR Images**: kept latest 3 per package per environment, deleted untagged"
+            echo "- **Cloud Run Revisions**: kept latest 5 per service"
+            echo "- **Services**: lingoleap-backend, lingoleap-frontend, lingoleap-backend-staging, lingoleap-frontend-staging"
+          } >> "$GITHUB_STEP_SUMMARY"
