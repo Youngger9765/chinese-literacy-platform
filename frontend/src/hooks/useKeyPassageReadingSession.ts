@@ -22,6 +22,7 @@ import { saveReadingHistory } from '../services/readingHistoryApi';
 import { transcribeReading, saveReadingAudio } from '../services/learning/session';
 import { validateRecording } from '../utils/recordingValidation';
 import { transcribeFallbackMessage } from './transcribeFallbackMessage';
+import { useAiFeaturesEnabled } from './useAiFeaturesEnabled';
 
 // Issue #2362: SILENT_PEAK_THRESHOLD and SILENT_MIN_DURATION_MS are now the
 // single source of truth in recordingValidation.ts — imported via validateRecording().
@@ -74,6 +75,15 @@ export interface SavedResult {
   cpm: number;
   durationMs: number;
   errorBreakdown: { correct: number; wrong: number; missing: number; extra: number };
+  /**
+   * #3856 — true when this attempt was completed WITHOUT Gemini grading
+   * because the AI kill switch (#3838, `AI_FEATURES_ENABLED`) was off.
+   * `matchRate`/`cpm`/`errorBreakdown` are meaningless placeholders (0 /
+   * empty) in this case — callers must check this flag before rendering
+   * them as a real score, and must not write them to reading-history
+   * analytics (a 0 would look like a real failed attempt forever).
+   */
+  aiDisabled?: boolean;
 }
 
 interface UseKeyPassageReadingSessionProps {
@@ -121,6 +131,11 @@ export function useKeyPassageReadingSession({
   onResultReady,
   onAudioSaved,
 }: UseKeyPassageReadingSessionProps): UseKeyPassageReadingSessionReturn {
+  // #3856 — frontend mirror of the AI_FEATURES_ENABLED kill switch (#3838).
+  // `key-passage-reading` is a REQUIRED step; unlike optional AI tools that
+  // simply hide their entry point when this is false, this step must still
+  // be completable (see submitReading's aiFeaturesEnabled branch below).
+  const aiFeaturesEnabled = useAiFeaturesEnabled();
   const [isPreparing, setIsPreparing] = useState(false);
   const [isSessionActive, setIsSessionActive] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
@@ -232,6 +247,36 @@ export function useKeyPassageReadingSession({
       return;
     }
 
+    /* #3856 — AI kill switch (#3838): `/reading/transcribe` fails closed with
+     * HTTP 503 while AI_FEATURES_ENABLED is off, and the generic fallback
+     * message ("剛剛出了點小狀況，再按一次完成試試看") implies retrying will
+     * help — it never will while the switch stays off. Worse, this is a
+     * REQUIRED step (`key-passage-reading` is not in the optional-tools
+     * list), and completion is gated entirely on a `result` that only Gemini
+     * success used to set — so a student could never finish the lesson.
+     * Skip the Gemini call entirely (same "check before calling" pattern
+     * `useSentencePracticeState.ts` already uses for its optional AI calls)
+     * and let the student complete this step via self-assessment alone,
+     * with an honest `aiDisabled` flag so the UI never shows a fabricated
+     * 0% / 0 cpm score as if Gemini had actually graded it.
+     */
+    if (!aiFeaturesEnabled) {
+      const newResult: SavedResult = {
+        matchRate: 0,
+        feedback: '',
+        diffTokens: [],
+        cpm: 0,
+        durationMs,
+        errorBreakdown: { correct: 0, wrong: 0, missing: 0, extra: 0 },
+        aiDisabled: true,
+      };
+      onResultReady(newResult, '');
+      // Deliberately skip saveReadingHistory: cpm/accuracy are meaningless
+      // placeholders here, and writing them would permanently pollute the
+      // student's long-term fluency chart with a fake failed attempt.
+      return;
+    }
+
     /* --- Gemini audio transcription (Issue #2131 / #2156 / #2266) ---
      * NOTE: Real audio E2E requires a microphone — cannot be tested headless.
      *       The transcribeReading() wrapper is unit-tested with mocks (vitest). */
@@ -324,7 +369,7 @@ export function useKeyPassageReadingSession({
       // No token — cannot reach Gemini.
       setMicError('未偵測到語音，請重試。');
     }
-  }, [fullText, stopSession, token, storyId, dbSessionId, onResultReady, onAudioSaved, audioRecorder.stopAndGetBlob, audioRecorder.getPeakVolume]);
+  }, [fullText, stopSession, token, storyId, dbSessionId, onResultReady, onAudioSaved, audioRecorder.stopAndGetBlob, audioRecorder.getPeakVolume, aiFeaturesEnabled]);
 
   return {
     isSessionActive,
