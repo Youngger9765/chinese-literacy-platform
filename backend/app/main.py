@@ -15,6 +15,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.security.utils import get_authorization_scheme_param
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 
@@ -829,8 +830,18 @@ class PreviewModeWriteGuardMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next) -> Response:
         if request.method not in self.SAFE_METHODS:
             auth_header = request.headers.get("authorization", "")
-            if auth_header.startswith("Bearer "):
-                token = auth_header[len("Bearer "):]
+            # #3830 — a hand-rolled `.startswith("Bearer ")` check is
+            # case-sensitive, but FastAPI's OAuth2PasswordBearer (what
+            # get_current_user actually authenticates with) parses the
+            # scheme via get_authorization_scheme_param, which is NOT.
+            # A `bearer <token>` (lowercase) header authenticated fine but
+            # was invisible to this middleware, letting a preview token
+            # sent with a lowercase scheme bypass the write guard entirely.
+            # Use the same parser FastAPI uses, normalized, so this
+            # middleware and the thing it's guarding always agree on what
+            # counts as a bearer token.
+            scheme, token = get_authorization_scheme_param(auth_header)
+            if scheme.lower() == "bearer" and token:
                 try:
                     payload = decode_token(token)
                 except Exception:
