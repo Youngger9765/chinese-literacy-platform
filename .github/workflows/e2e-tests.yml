@@ -22,6 +22,10 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
 
+permissions:
+  contents: read
+  id-token: write
+
 concurrency:
   group: e2e-${{ github.event.pull_request.head.ref }}
   cancel-in-progress: true
@@ -81,7 +85,8 @@ jobs:
       - id: auth
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
+          workload_identity_provider: projects/958347263320/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+          service_account: github-actions@lingoleap-dev.iam.gserviceaccount.com
 
       - uses: google-github-actions/setup-gcloud@v2
 
