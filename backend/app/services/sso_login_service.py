@@ -112,6 +112,28 @@ def resolve_google_user(db: Session, id_info: dict) -> tuple[User, bool]:
             User.email == email, User.is_active == True
         ).first()
         if user is not None:
+            # #3830 finding 2: Google having verified the email is NOT
+            # enough to trust that THIS local row is the real owner. An
+            # attacker can self-register the victim's email via
+            # POST /auth/register (no proof of ownership required there,
+            # so email_verified defaults to False) and set any password
+            # they want. If the real owner later signs in with Google,
+            # Google will correctly report email_verified=True for their
+            # own email -- but linking google_id onto the attacker's row
+            # at that point would hand the victim into an account the
+            # attacker already knows the password for. Only link when OUR
+            # OWN email_verified is already True (set by our own
+            # email-verification flow, or by an earlier Google/Junyi SSO
+            # login) -- i.e. a row we have independently confirmed the
+            # bearer of that email controls.
+            if not user.email_verified:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail=(
+                        "這個 Email 已被註冊但尚未驗證，請先用密碼登入並完成"
+                        "Email 驗證，才能改用 Google 登入。"
+                    ),
+                )
             user.google_id = google_sub
             if picture and not user.avatar_url:
                 user.avatar_url = picture

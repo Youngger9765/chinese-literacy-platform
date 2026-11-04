@@ -326,6 +326,49 @@ class TestBlockedResponseStillPassesThroughOtherMiddleware:
         assert resp.headers.get("x-frame-options") == "DENY"
 
 
+class TestLowercaseBearerSchemeIsNotAWayAroundTheGuard:
+    """#3830 finding 1 — the guard's own `auth_header.startswith("Bearer ")`
+    check is case-sensitive, but FastAPI's OAuth2PasswordBearer (used by
+    get_current_user, see app/auth/dependencies.py) parses the scheme via
+    `get_authorization_scheme_param`, which is NOT case-sensitive. So a
+    `bearer <token>` (lowercase) header is accepted as authentication by
+    get_current_user but was invisible to this middleware — a preview
+    token sent with a lowercase scheme would sail straight through and
+    write into the real student's records.
+
+    Written with the lowest-privilege identity (the previewed student,
+    same as every other test in this module), with the positive control
+    immediately below: the exact same lowercase-scheme header, MINUS the
+    preview claim, must still succeed -- isolating "lowercase scheme" from
+    "scheme parsing broke something else".
+    """
+
+    def _lowercase_bearer_header(self, token: str) -> dict:
+        return {"Authorization": f"bearer {token}"}
+
+    def test_lowercase_bearer_preview_token_is_still_blocked(self, client):
+        resp = client.post(
+            "/api/learning/mcq-attempt",
+            json={
+                "lesson_id": "1",
+                "question_id": "q1",
+                "choice": "A",
+                "is_correct": True,
+            },
+            headers=self._lowercase_bearer_header(_state["preview_token"]),
+        )
+        assert resp.status_code == 403, resp.text
+        assert "唯讀" in resp.json()["detail"]
+
+    def test_positive_control_lowercase_bearer_normal_token_still_writes(self, client):
+        resp = client.patch(
+            f"/api/learning/sessions/{_state['session_id']}",
+            json={"accuracy": 91.0},
+            headers=self._lowercase_bearer_header(_state["student_own_token"]),
+        )
+        assert resp.status_code == 200, resp.text
+
+
 class TestInvalidTokenIsNotTreatedAsPreview:
     def test_garbage_token_falls_through_to_normal_401_not_preview_403(self, client):
         """A malformed/undecodable bearer must NOT be swallowed by the
