@@ -155,8 +155,12 @@ Cloud Run env vars 管理，**不要 commit secrets 到 git**。
 ```bash
 # 本地開發
 cd frontend && npm install && npm run dev    # localhost:3000
-cd backend && pip install -r requirements.txt && uvicorn app.main:app --reload  # localhost:8000
+cd backend && pip install --require-hashes -r requirements.lock && uvicorn app.main:app --reload  # localhost:8000
 ```
+
+> ⚠️ 裝本機環境也用 `requirements.lock`，不要用 `requirements.txt`（#3849）——後者是開放版本範圍，
+> 直接裝它等於本機暴露在「今天 PyPI 上最新符合範圍」的風險下，跟 Dockerfile 原本要關的洞一樣。
+> 改了 `requirements.txt` 要加新套件/調整範圍 → 見 `backend/README.md` 重新產生 lock。
 
 ## QA / 測試登入（重要 — 不要再說「卡登入牆/要帳號」）
 
