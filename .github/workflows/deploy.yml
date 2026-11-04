@@ -208,6 +208,7 @@ jobs:
             --image "${{ env.REGISTRY }}/frontend:prod-${{ github.sha }}" \
             --platform managed \
             --region ${{ env.REGION }} \
+            --service-account lingoleap-frontend-run@lingoleap-dev.iam.gserviceaccount.com \
             --project ${{ env.PROJECT_ID }} \
             --port 8080 \
             --memory=512Mi \
