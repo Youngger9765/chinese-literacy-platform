@@ -126,15 +126,22 @@ PR Preview          Staging         Production
 
 ### 手動部署
 
-```bash
-# Backend
-gcloud builds submit --tag asia-east1-docker.pkg.dev/lingoleap-dev/lingoleap/backend:vX.Y.Z --project lingoleap-dev ./backend
-gcloud run deploy lingoleap-backend --image asia-east1-docker.pkg.dev/lingoleap-dev/lingoleap/backend:vX.Y.Z --platform managed --region asia-east1 --project lingoleap-dev
+> ⚠️ **不要再用 `gcloud builds submit`**（2026-11-04 起會失敗）。資安事件後拿掉了預設運算帳號的
+> `roles/editor`，雲端打包（Cloud Build）用的正是那個帳號，實測回
+> `403 ... does not have storage.objects.get`。這是刻意的權限收斂，不要為了讓它能跑把權限加回去。
 
-# Frontend
-gcloud builds submit --tag asia-east1-docker.pkg.dev/lingoleap-dev/lingoleap/frontend:vX.Y.Z --project lingoleap-dev ./frontend
-gcloud run deploy lingoleap-frontend --image asia-east1-docker.pkg.dev/lingoleap-dev/lingoleap/frontend:vX.Y.Z --platform managed --region asia-east1 --project lingoleap-dev --port 8080
+**首選：手動觸發 GitHub 上的部署流程**（用 WIF 免金鑰登入、部署帳號只有最小權限，跟自動部署完全同一條路）
+
+```bash
+gh workflow run staging-deploy.yml --repo Youngger9765/chinese-literacy-platform --ref staging   # 測試站
+gh workflow run deploy.yml         --repo Youngger9765/chinese-literacy-platform --ref main      # 正式站
 ```
+
+只改 `.github/workflows/*` 的合併**不會**自動觸發部署，要用上面這兩行手動跑。
+
+**備案（GitHub Actions 故障時）**：在本機用 docker 打包推送，再 `gcloud run deploy`。
+build 參數、`--service-account`、env 以 `.github/workflows/deploy.yml` 為準，不要憑記憶填；
+Mac 要加 `--platform linux/amd64`，前端記得正式站 `VITE_SHOW_DEMO_LOGIN=false`。
 
 ### 環境變數
 
