@@ -13,6 +13,13 @@
 #      both the SPA-only path and the existing #3719 same-origin-proxy path
 #      -- nobody should be able to add a new env-var-gated feature here and
 #      accidentally perturb output for everyone who isn't using it.
+#      ⚠️ #3850 updated EXPECTED_SPA below on purpose: that PR added
+#      `add_header` security-header lines to every build's `location /`,
+#      intentionally changing output for everyone (not an env-var-gated
+#      feature). The invariant this check still protects is "nothing ELSE in
+#      the SPA-only path drifts" — see frontend/docker/test-security-headers.sh
+#      for the headers-specific lock (presence, values, AND that they stay
+#      out of the proxy locations below).
 #   2. When BACKEND_INVOKER_SIDECAR_PORT IS set, the generated config
 #      actually contains the auth_request wiring (not just "doesn't crash").
 #
@@ -80,7 +87,19 @@ check_cmd_not() {
 OUT_SPA="$WORKDIR/spa.conf"
 ( unset BACKEND_INTERNAL_URL BACKEND_INVOKER_SIDECAR_PORT 2>/dev/null || true
   run_render "$OUT_SPA" )
-EXPECTED_SPA='server { listen 8080; absolute_redirect off; location / { root /usr/share/nginx/html; try_files $uri $uri/ /index.html; } }'
+EXPECTED_SPA='server {
+  listen 8080;
+  absolute_redirect off;
+  location / {
+    root /usr/share/nginx/html;
+    try_files $uri $uri/ /index.html;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header Content-Security-Policy "frame-ancestors '"'"'self'"'"'" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+  }
+}'
 ACTUAL_SPA=$(cat "$OUT_SPA")
 check_cmd "SPA-only output unchanged when nothing is configured" \
   test "$ACTUAL_SPA" = "$EXPECTED_SPA"

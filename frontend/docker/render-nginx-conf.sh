@@ -59,9 +59,45 @@ set -eu
 
 OUT=/etc/nginx/conf.d/default.conf
 
+# #3850 — security headers for the page responses this container serves
+# directly (both the SPA-only `location /` below and, further down, the
+# invoker-configured build's `location /` and `location /assets/`).
+#
+# SAMEORIGIN / frame-ancestors 'self', NOT DENY / 'none': this app's own
+# admin QA tooling (StoryStructureLabPage.tsx, spotlight-qa/app.js,
+# keypoints-qa/app.js, presentation/reading-pipeline.html) embeds this same
+# app's own /learn/* pages in a same-origin iframe for live preview. DENY/
+# 'none' block ALL framing, same-origin included, which would break those.
+#
+# Deliberately NOT added to the proxy locations further down (/api/,
+# @assets_backend, /q/, the invoker-auth sidecar locations): those routes
+# are answered by backend/app/main.py's own SecurityHeadersMiddleware, which
+# sets a WIDER frame-ancestors for /assets/* specifically
+# (`frame-ancestors 'self' https://*.run.app` — see that file's #2486
+# comment, needed because the worksheet PDF iframe is genuinely cross-origin
+# on Cloud-Run-direct deployments). nginx's `add_header` does not replace an
+# existing response header of the same name, it adds a second one, and
+# browsers enforce the INTERSECTION of multiple CSP headers — adding a
+# same-origin-only frame-ancestors on those routes would silently re-narrow
+# that back down to 'self' only and reproduce the exact bug #2486 fixed.
+# Locked by frontend/docker/test-security-headers.sh.
+SECURITY_HEADERS='    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header Content-Security-Policy "frame-ancestors '"'"'self'"'"'" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;'
+
 if [ -z "${BACKEND_INTERNAL_URL:-}" ]; then
-  cat > "$OUT" <<'NGINXCONF'
-server { listen 8080; absolute_redirect off; location / { root /usr/share/nginx/html; try_files $uri $uri/ /index.html; } }
+  cat > "$OUT" <<NGINXCONF
+server {
+  listen 8080;
+  absolute_redirect off;
+  location / {
+    root /usr/share/nginx/html;
+    try_files \$uri \$uri/ /index.html;
+${SECURITY_HEADERS}
+  }
+}
 NGINXCONF
   exit 0
 fi
@@ -199,6 +235,7 @@ ${SIDECAR_LOCATIONS}
   # nginx — serve the local file if it exists, only fall through to the
   # backend (the named location below) when it doesn't.
   location /assets/ {
+${SECURITY_HEADERS}
     try_files \$uri @assets_backend;
   }
   location @assets_backend {${AUTH_REQUEST_LINES}
@@ -220,6 +257,7 @@ ${SIDECAR_LOCATIONS}
   }
 
   location / {
+${SECURITY_HEADERS}
     try_files \$uri \$uri/ /index.html;
   }
 }
