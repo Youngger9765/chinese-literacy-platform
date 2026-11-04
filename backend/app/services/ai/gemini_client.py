@@ -11,6 +11,7 @@ import logging
 from google import genai
 from google.genai import types as genai_types
 
+from ..ai_feature_flag import assert_ai_enabled
 from ..ai_usage_tracker import capture_usage, last_usage
 from ..llm_models import get_model_for_task
 from .base import (
@@ -95,7 +96,17 @@ def _get_client() -> genai.Client:
 
     Uses global location for non-OMO tasks. For task-specific routing use
     _get_client_for_task() which respects TASK_MODELS config.
+
+    This is the single chokepoint every text/JSON generation call in
+    LingoLeap goes through (directly or via generate_structured_response
+    below), which is why the AI kill switch (#3838) is gated here rather
+    than at each of the ~10 call sites — a new caller that reuses this
+    function inherits the gate for free. The four call sites that build
+    their own google.genai.Client instead of using this factory
+    (omo_identifier, omo_grader, reading_transcription_service,
+    tts/providers/gemini) are gated individually in their own modules.
     """
+    assert_ai_enabled("gemini")
     return genai.Client(vertexai=True, project="lingoleap-dev", location="global")
 
 
@@ -110,7 +121,13 @@ def _get_client_for_task(task: str) -> tuple[genai.Client, str]:
 
     Returns:
         Tuple of (genai.Client, model_name_str).
+
+    Raises:
+        AIFeaturesDisabledError: if AI_FEATURES_ENABLED is not "true" (#3838
+        kill switch). Raised before get_model_for_task / genai.Client so no
+        network call is ever attempted while disabled.
     """
+    assert_ai_enabled(task)
     model, location = get_model_for_task(task)
     client = genai.Client(vertexai=True, project="lingoleap-dev", location=location)
     return client, model

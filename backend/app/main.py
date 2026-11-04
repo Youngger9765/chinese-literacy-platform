@@ -35,7 +35,9 @@ from .routes.school_directory import router as school_directory_router
 from .routes.parents import router as parents_router
 from .routes.gamification import router as gamification_router
 from .routes.league import router as league_router
+from .routes.features import router as features_router
 from .routes.health import router as health_router
+from .services.ai_feature_flag import AIFeaturesDisabledError, DISABLED_MESSAGE_ZH
 from .routes.semesters import router as semesters_router
 from .routes.co_teaching import router as co_teaching_router
 from .routes.tts import router as tts_router
@@ -906,6 +908,23 @@ app = FastAPI(
     redoc_url="/redoc" if _is_dev else None,
 )
 
+
+# #3838 — AI kill switch global backstop. Most AI routes already turn any
+# exception from the service layer into a 503 themselves (and several routes
+# additionally depend on require_ai_enabled as a decorator-level dependency
+# for an immediate, pre-handler 503 — see ai_feature_flag.py). This handler
+# is the safety net for the rest: any call site reachable from a route that
+# doesn't already catch its own exceptions still gets a clean 503 instead of
+# bubbling up as an unhandled 500. The response body intentionally uses the
+# short constant message (not str(exc), which includes the feature name) so
+# every AI-disabled response looks identical regardless of which layer
+# caught it — the feature name is still in the server log for debugging.
+@app.exception_handler(AIFeaturesDisabledError)
+async def _ai_features_disabled_handler(request: Request, exc: AIFeaturesDisabledError) -> JSONResponse:
+    logger.info("AI feature disabled, request blocked: %s %s (%s)", request.method, request.url.path, exc)
+    return JSONResponse(status_code=503, content={"detail": DISABLED_MESSAGE_ZH})
+
+
 # Starlette's add_middleware() does user_middleware.insert(0, ...): each call
 # pushes to the FRONT of the list, which — after build_middleware_stack()
 # reverses it to compose the onion — means the middleware added LAST ends up
@@ -987,6 +1006,7 @@ app.include_router(parents_router, prefix="/api", tags=["parents"])
 app.include_router(gamification_router, prefix="/api", tags=["gamification"])
 app.include_router(league_router, prefix="/api", tags=["league"])
 app.include_router(health_router)
+app.include_router(features_router)
 app.include_router(semesters_router, prefix="/api", tags=["semesters"])
 app.include_router(co_teaching_router, prefix="/api", tags=["co-teaching"])
 app.include_router(tts_router)
