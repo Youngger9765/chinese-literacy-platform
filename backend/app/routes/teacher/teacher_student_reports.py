@@ -9,6 +9,7 @@ from ...auth.dependencies import get_current_user
 from ...auth.rate_limiter import ai_limit_5_per_min
 from ...database import get_db
 from ...models.user import User
+from ...services.ai_feature_flag import require_ai_enabled
 from ...services.audit_logger import AuditAction, audit_log_endpoint
 from ...services.input_sanitizer import sanitize_ai_input
 from .teacher_schemas import (
@@ -114,7 +115,7 @@ def save_teacher_comment(
 @router.post(
     "/teacher/students/{student_id}/sessions/{session_id}/generate-ai-comment",
     response_model=AICommentResponse,
-    dependencies=[Depends(ai_limit_5_per_min)],
+    dependencies=[Depends(require_ai_enabled), Depends(ai_limit_5_per_min)],
 )
 async def generate_session_ai_comment(
     student_id: int,
@@ -125,6 +126,12 @@ async def generate_session_ai_comment(
     """Generate AI comment for a session. Returns cached version if already generated.
 
     Rate limited: 5 requests per minute per user/IP (Issue #1254).
+
+    Guarded by require_ai_enabled (#3838 kill switch): generate_teacher_comment
+    swallows all exceptions internally and returns "" on any AI failure, which
+    would silently hide a disabled flag behind an empty comment instead of a
+    clear 503. This also hides the cached-comment read path while AI is off —
+    an acceptable, conservative trade during an active security incident.
     """
     from ...services.ai_generation import generate_teacher_comment
 

@@ -30,6 +30,7 @@ from ...auth.dependencies import get_current_user
 from ...auth.rate_limiter import ai_limit_10_per_min
 from ...database import get_db
 from ...models.user import User
+from ...services.ai_feature_flag import require_ai_enabled
 from ...services.ai_service import validate_strategy_answer
 from ...services.ai_usage_tracker import last_usage, log_ai_usage
 
@@ -56,7 +57,7 @@ class ValidateStrategyResponse(BaseModel):
 @router.post(
     "/learning/strategy-practice/validate",
     response_model=ValidateStrategyResponse,
-    dependencies=[Depends(ai_limit_10_per_min)],
+    dependencies=[Depends(require_ai_enabled), Depends(ai_limit_10_per_min)],
 )
 async def validate_strategy(
     payload: ValidateStrategyRequest,
@@ -67,6 +68,13 @@ async def validate_strategy(
 
     Lenient grading (七八成對 = 正向回饋). Returns encouraging feedback plus a
     gentle hint when off-track. Rate limited: 10 requests per minute per user.
+
+    Guarded by require_ai_enabled (#3838 kill switch): the handler below is
+    intentionally fail-OPEN on AI errors (returns is_correct=True so a flaky
+    model never blocks a non-gating practice step) — exactly the kind of
+    silent degrade the kill switch must not hide behind. Gating at the route
+    level forces a visible 503 instead of a cheerful fake pass while AI is
+    deliberately off.
     Fail-OPEN (intentional, non-gating): never blocks the student on an AI outage
     — safe only because is_correct is not persisted as a score here.
     """

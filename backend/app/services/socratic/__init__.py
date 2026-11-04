@@ -11,6 +11,7 @@ from google.genai import types as genai_types
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
+from ..ai_feature_flag import assert_ai_enabled
 from ..ai_service import generate_structured_response
 from ..input_sanitizer import sanitize_ai_input
 from .models import SessionState
@@ -160,6 +161,16 @@ class SocraticAgent:
                 logger.warning("Failed to restore session from DB turns (will start fresh): %s", e)
 
         # 3. Fresh start — only Gemini call that's actually needed
+        #
+        # #3838 kill switch: checked here, OUTSIDE the try/except below, so a
+        # disabled flag raises uncaught (propagates to the route's
+        # `except RuntimeError -> 503`) instead of being swallowed by that
+        # except's "AI service error in start_session" canned-question
+        # fallback. Steps 1/2 above (resume from memory/DB) already returned
+        # before this point, so resuming an existing conversation is
+        # unaffected — only a genuinely NEW session is gated.
+        assert_ai_enabled("socratic_question")
+
         state = SessionState(
             session_id=session_id,
             story_title=story_title,
@@ -273,6 +284,14 @@ class SocraticAgent:
         db_session_id: int | None = None,
     ) -> AgentResponse:
         """Process a student's answer, evaluate understanding, return next question."""
+        # #3838 kill switch: every call here makes a fresh Gemini call (no
+        # resume path like start_session has). Checked before the circuit
+        # breaker's own except block gets a chance to run — on a transient
+        # real AI error the breaker tolerates 2 failures before raising, but
+        # a deliberately disabled flag must surface as an immediate, every-
+        # time refusal, not something that "recovers" after enough retries.
+        assert_ai_enabled("socratic_process_answer")
+
         # Rate limiting check
         if _store.check_rate_limit(session_id):
             raise ValueError("Rate limit exceeded. Please wait before sending another answer.")

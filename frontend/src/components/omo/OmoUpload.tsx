@@ -28,6 +28,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { uploadOmoImages } from '../../services/omoApi';
 import OmoUploadPagePreview from './OmoUploadPagePreview';
 import OmoCameraScanner from './OmoCameraScanner';
+import { useAiFeaturesEnabled } from '../../hooks/useAiFeaturesEnabled';
 
 const MAX_FILES = 5;
 const MAX_FILE_BYTES = 10 * 1024 * 1024;     // 10 MB per image (pre-resize)
@@ -187,6 +188,13 @@ const OmoUpload: React.FC<OmoUploadProps> = ({
   const [error, setError] = useState<string | null>(null);
   // #2089 item 4: in-browser scanner overlay (live camera inside the page).
   const [scannerOpen, setScannerOpen] = useState(false);
+  // #3838 — AI kill switch (security incident response). OMO identification
+  // AND grading both require Gemini with no non-AI fallback, so the whole
+  // upload flow is gated — see POST /api/omo/upload's docstring for why a
+  // hint-only upload still gets blocked (grading downstream needs AI either
+  // way). Viewing past results (onShowHistory) stays available — it's a
+  // read of already-graded data, not a new AI call.
+  const aiFeaturesEnabled = useAiFeaturesEnabled();
 
   const galleryInputRef = useRef<HTMLInputElement>(null);
 
@@ -373,6 +381,37 @@ const OmoUpload: React.FC<OmoUploadProps> = ({
   };
 
   // ── Render ──────────────────────────────────────────────────────────────
+
+  // #3838 — AI 功能暫時關閉：整個上傳流程都不開放，只留「查看批改記錄」
+  // （那是讀已經批改過的舊資料，不會呼叫 AI）。
+  if (!aiFeaturesEnabled) {
+    return (
+      <div className="flex flex-col items-center gap-6 px-4 py-8 max-w-md mx-auto">
+        <div className="text-center">
+          <div className="text-5xl mb-3" aria-hidden="true">🛠️</div>
+          <h1 className="text-xl font-bold text-gray-900">AI 功能暫時關閉</h1>
+          <p className="mt-1 text-sm text-gray-500">
+            學習單上傳批改暫停服務中，請稍後再試
+          </p>
+        </div>
+        {onShowHistory && (
+          <button
+            type="button"
+            onClick={onShowHistory}
+            className="w-full flex items-center justify-center gap-2 py-2.5 px-6
+              text-gray-600 hover:text-gray-900 hover:bg-gray-100 active:bg-gray-200
+              text-sm font-medium rounded-xl
+              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2
+              transition-colors"
+          >
+            <span aria-hidden="true">📋</span>
+            查看批改記錄
+          </button>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col items-center gap-6 px-4 py-8 max-w-md mx-auto">
       {/* Header */}
