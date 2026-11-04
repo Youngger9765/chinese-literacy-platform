@@ -5,6 +5,7 @@ import os
 import subprocess
 
 from .. import TTSError
+from ...ai_feature_flag import assert_ai_enabled
 
 logger = logging.getLogger(__name__)
 
@@ -60,6 +61,17 @@ def _pcm_to_mp3(pcm_data: bytes, sample_rate: int = 24000) -> bytes:
 
 
 def _synthesize_gemini(text: str) -> bytes:
+    """Synthesize speech via Gemini TTS.
+
+    Only reached when TTS_PROVIDER=gemini31 (not the default — see
+    tts/__init__.py; the deployed default is "azure"). Gated behind
+    AI_FEATURES_ENABLED (#3838 kill switch) regardless: Gemini TTS is a
+    generative model call like any other Vertex AI usage, unlike the Azure
+    and Google Cloud TTS providers, which are speech synthesis (no
+    generative model, not part of this incident's scope) and stay enabled.
+    """
+    assert_ai_enabled("tts_gemini")
+
     try:
         import google.genai as genai
         from google.genai import types as genai_types

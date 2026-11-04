@@ -29,6 +29,7 @@ import time
 from dataclasses import dataclass
 from typing import Optional
 
+from .ai_feature_flag import assert_ai_enabled
 from .llm_models import get_model_for_task
 from .omo_question_schema import _build_question_schema, _build_grading_prompt
 from .omo_scoring import _score_answer, _validate_student_answer, _LOW_CONFIDENCE_THRESHOLD
@@ -115,7 +116,14 @@ async def grade_worksheet_images(
 
     Raises:
         RuntimeError: If circuit breaker threshold is reached (3 consecutive errors).
+        AIFeaturesDisabledError: if AI_FEATURES_ENABLED is not "true" (#3838
+        kill switch). Raised before the breaker check and before the
+        google-genai import below, so a disabled flag never falls through
+        to the local-dev mock-grades path (that would be a silently faked
+        AI answer, not a clear refusal) and the breaker is not touched.
     """
+    assert_ai_enabled("omo_grader")
+
     if _breaker_is_open():
         retry_in = max(0.0, _circuit_open_until - time.monotonic())
         raise RuntimeError(

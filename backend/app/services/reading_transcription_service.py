@@ -42,6 +42,8 @@ import subprocess
 import tempfile
 import os
 
+from .ai_feature_flag import assert_ai_enabled
+
 logger = logging.getLogger(__name__)
 
 # Module-level re-exports from gemini_client so test patches can target this module.
@@ -415,7 +417,19 @@ async def transcribe_reading_audio(
              "reason": "<too_short|silent|empty|truncated|decode|timeout|safety|hallucination|error>"}
             Caller must show a `reason`-specific message (#3299) — never auto-pass.
             There is no Web Speech transcript to fall back to (#2266).
+
+    Raises:
+        AIFeaturesDisabledError: if AI_FEATURES_ENABLED is not "true" (#3838
+        kill switch). This is a deliberate deviation from the "never raises"
+        contract above: a disabled flag must be a loud, visible refusal, not
+        folded into the same {"method": "fallback"} shape a genuinely failed
+        transcription uses (those need different user-facing messages).
+        The route has no try/except around this call, so the exception
+        reaches main.py's AIFeaturesDisabledError handler and the client
+        sees a 503, not a 200 with method="fallback".
     """
+    assert_ai_enabled("reading_transcribe")
+
     from google import genai  # noqa: PLC0415 — lazy import; not available in test envs
     from google.genai import types as genai_types  # noqa: PLC0415
 
