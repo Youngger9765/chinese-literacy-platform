@@ -121,6 +121,7 @@ jobs:
             --image "${{ env.REGISTRY }}/backend:issue-${{ env.ISSUE_NUM }}-${{ github.sha }}" \
             --platform managed \
             --region ${{ env.REGION }} \
+            --service-account lingoleap-preview-run@lingoleap-dev.iam.gserviceaccount.com \
             --project ${{ env.PROJECT_ID }} \
             --allow-unauthenticated \
             --memory=1Gi \
@@ -210,6 +211,7 @@ jobs:
             --image "${{ env.REGISTRY }}/frontend:issue-${{ env.ISSUE_NUM }}-${{ github.sha }}" \
             --platform managed \
             --region ${{ env.REGION }} \
+            --service-account lingoleap-frontend-run@lingoleap-dev.iam.gserviceaccount.com \
             --project ${{ env.PROJECT_ID }} \
             --allow-unauthenticated \
             --port 8080 \

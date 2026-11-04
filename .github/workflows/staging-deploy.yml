@@ -245,6 +245,7 @@ jobs:
             --image "${{ env.REGISTRY }}/frontend:staging-${{ github.sha }}" \
             --platform managed \
             --region ${{ env.REGION }} \
+            --service-account lingoleap-frontend-run@lingoleap-dev.iam.gserviceaccount.com \
             --project ${{ env.PROJECT_ID }} \
             --allow-unauthenticated \
             --port 8080 \
