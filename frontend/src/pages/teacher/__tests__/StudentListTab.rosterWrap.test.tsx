@@ -33,7 +33,15 @@ const classroom: ClassroomDetailResponse = {
   created_at: '2026-10-12T00:00:00Z',
   student_count: 1,
   students: [
-    { id: 11, name: '王小華', email: 'd30sqw1@student.lingoleap.local', enrolled_at: '2026-10-12T00:00:00Z' },
+    {
+      id: 11,
+      name: '王小華',
+      email: 'd30sqw1@student.lingoleap.local',
+      enrolled_at: '2026-10-12T00:00:00Z',
+      // #3818: this fixture tests button *layout*, not authorization -- it
+      // needs the button visible to assert on its wrapping/spacing classes.
+      can_reset_password: true,
+    },
   ],
 };
 

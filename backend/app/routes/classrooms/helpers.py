@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from ...auth.dependencies import get_current_user  # noqa: F401 — re-exported for convenience
 from ...auth.policies import (
+    is_system_admin,
     require_classroom_member as _require_classroom_member,
     require_classroom_owner as _require_classroom_owner,
 )
@@ -236,14 +237,27 @@ def classroom_to_response(classroom: Classroom, db: Session) -> ClassroomRespons
     )
 
 
-def classroom_to_detail_response(classroom: Classroom) -> ClassroomDetailResponse:
-    """Convert a Classroom ORM object to a ClassroomDetailResponse with students."""
+def classroom_to_detail_response(
+    classroom: Classroom, db: Session, current_user: User | None = None
+) -> ClassroomDetailResponse:
+    """Convert a Classroom ORM object to a ClassroomDetailResponse with students.
+
+    ``current_user`` drives ``can_reset_password`` per student (#3818): true
+    only for the account's recorded password teacher (created_by_teacher_id)
+    or a system_admin. Optional (defaults every row to False) so other
+    callers of this helper that don't have a request-scoped user don't break.
+    """
+    caller_is_admin = current_user is not None and is_system_admin(current_user.id, db)
     students = [
         StudentInClassroomResponse(
             id=cs.student.id,
             name=cs.student.name,
             email=cs.student.email,
             enrolled_at=cs.enrolled_at,
+            can_reset_password=(
+                current_user is not None
+                and (caller_is_admin or cs.student.created_by_teacher_id == current_user.id)
+            ),
         )
         for cs in classroom.classroom_students
     ]

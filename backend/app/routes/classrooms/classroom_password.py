@@ -30,9 +30,44 @@ def reset_student_password(
 ) -> ResetPasswordResponse:
     """Reset an enrolled student's password for an authorized classroom member."""
     classroom = get_classroom_or_404(classroom_id, db)
-    # Matches get_classroom_detail's owner/co-teacher/admin gate, not owner-only mutation gates, because co-teacher resets are an explicit product requirement.
+    # Matches get_classroom_detail's owner/co-teacher/admin gate: this only
+    # governs whether the caller can see this student at all (classroom
+    # roster visibility). It is NOT sufficient authority to reset a
+    # password -- see the password-teacher gate below.
     require_classroom_member(classroom, current_user, db)
 
+    enrollment = (
+        db.query(ClassroomStudent)
+        .filter(
+            ClassroomStudent.classroom_id == classroom_id,
+            ClassroomStudent.student_id == student_id,
+        )
+        .first()
+    )
+    if enrollment is None:
+        raise HTTPException(status_code=404, detail="Student not enrolled in this classroom")
+
+    user = db.query(User).filter(User.id == student_id).first()
+    if user is None:
+        raise HTTPException(status_code=404, detail="Student not found")
+
+    # (#3818) Two independent gates, both required (defense in depth) unless
+    # the caller is system_admin:
+    #
+    # 1. Caller must CURRENTLY hold an active `teacher` role at this
+    #    classroom's school. require_classroom_member above only checked
+    #    classroom.teacher_id / ClassroomTeacher membership, which does NOT
+    #    verify the role is still active -- a teacher whose account was
+    #    deactivated (role revoked) but who is still classroom.teacher_id
+    #    would otherwise still pass. This is the pre-#3818 check, restored
+    #    after a security review flagged its removal as a regression.
+    # 2. Caller must be the student's recorded password teacher -- the
+    #    teacher who actually created THIS account (batch-create / CSV
+    #    upload / Junyi class import), not any co-teacher who merely also
+    #    teaches the classroom. Accounts nobody is recorded as having
+    #    created (created_by_teacher_id is NULL: self-registration via
+    #    email/Google/Junyi SSO, or legacy data) can never be reset by a
+    #    teacher; fail closed, the student uses forgot-password instead.
     if not is_system_admin(current_user.id, db):
         caller_has_school_teacher_role = (
             db.query(UserRole)
@@ -51,21 +86,12 @@ def reset_student_password(
                 status_code=403,
                 detail="Caller does not hold teacher authority at this classroom's school",
             )
-
-    enrollment = (
-        db.query(ClassroomStudent)
-        .filter(
-            ClassroomStudent.classroom_id == classroom_id,
-            ClassroomStudent.student_id == student_id,
-        )
-        .first()
-    )
-    if enrollment is None:
-        raise HTTPException(status_code=404, detail="Student not enrolled in this classroom")
-
-    user = db.query(User).filter(User.id == student_id).first()
-    if user is None:
-        raise HTTPException(status_code=404, detail="Student not found")
+        if user.created_by_teacher_id != current_user.id:
+            raise HTTPException(
+                status_code=403,
+                detail="Only the student's password teacher (the teacher who created "
+                       "this account) may reset it",
+            )
 
     active_target_roles = (
         db.query(Role.name, UserRole.scope_type, UserRole.scope_id)
