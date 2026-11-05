@@ -212,7 +212,17 @@ jobs:
             # the subcommands the git-issue-pr-flow SOP needs. `pytest` and
             # the project's own pinned CI script stay -- they run fixed,
             # repo-defined test suites, not attacker-controlled code.
-            --allowedTools "Read,Grep,Glob,Edit,Write,Bash(git worktree:*),Bash(git checkout:*),Bash(git branch:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(git status:*),Bash(git diff:*),Bash(git log:*),Bash(git fetch:*),Bash(git rev-parse:*),Bash(gh issue:*),Bash(gh pr:*),Bash(pytest:*),Bash(ls:*),Bash(cat:*),Bash(mkdir:*),Bash(bash specs/run-ci.sh:*)"
+            # #3893 fast-follow: `Bash(cat:*)` removed too -- it was
+            # redundant with the `Read` tool this job already has (same
+            # legitimate use, file inspection) but strictly more dangerous:
+            # `cat` has no path/extension discrimination at all, so it is
+            # one fewer avenue for an injected instruction to dump a
+            # sensitive file (e.g. `/proc/self/environ`) verbatim into a
+            # public comment. Whether the `Read` tool itself is scoped to
+            # the git workspace is NOT verified (see #3893) -- this removal
+            # is a real but partial mitigation, not a claim that file-read
+            # exfiltration is fully closed.
+            --allowedTools "Read,Grep,Glob,Edit,Write,Bash(git worktree:*),Bash(git checkout:*),Bash(git branch:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(git status:*),Bash(git diff:*),Bash(git log:*),Bash(git fetch:*),Bash(git rev-parse:*),Bash(gh issue:*),Bash(gh pr:*),Bash(pytest:*),Bash(ls:*),Bash(mkdir:*),Bash(bash specs/run-ci.sh:*)"
 
       # timeout 或錯誤把 job 砍掉時 agent 是斷頭的，來不及留言 ——
       # 這個 step 補上「我被中止了」的紀錄，接手的人才有脈絡（#3055 規則）。
