@@ -1089,3 +1089,73 @@ class TestPendingCoTeachingInviteDoesNotLeakTheOtherClassroomsStudents:
             f"positive control failed: once ACCEPTED, the invitee should be "
             f"able to find the co-taught classroom's student: {search.json()}"
         )
+
+
+# ===========================================================================
+# 9. Claude Security finding find_01RzZ2bXyjs6SrNmD7KkKy91 (high), part 3 of
+#    its recommendation -- create_classroom's only gate is is_school_member,
+#    which counts ANY school-scoped role, including a plain `student`
+#    (e.g. granted automatically on join-by-code, or on self-activation of
+#    a `student` row). A student (or any school-scoped non-teacher) could
+#    therefore create a classroom at that school and, via the chain the
+#    rest of this finding covers, enrol and reset the password of other
+#    students there. Fixed in classroom_crud.py::create_classroom to
+#    require a school-scoped `teacher` role specifically (or system_admin).
+# ===========================================================================
+
+
+class TestCreateClassroomRequiresATeacherRoleAtTheSchool:
+    @pytest.fixture(scope="class")
+    def school_id(self):
+        session = TestingSessionLocal()
+        school = School(name=f"建班權限測試國小_{uuid.uuid4().hex[:6]}")
+        session.add(school)
+        session.commit()
+        sid = school.id
+        session.close()
+        return sid
+
+    def _grant_school_scoped_role(self, user_id: int, role_name: str, school_id: int) -> None:
+        session = TestingSessionLocal()
+        try:
+            role = session.query(Role).filter(Role.name == role_name).first()
+            session.add(
+                UserRole(
+                    user_id=user_id,
+                    role_id=role.id,
+                    scope_type="school",
+                    scope_id=str(school_id),
+                )
+            )
+            session.commit()
+        finally:
+            session.close()
+
+    def test_a_student_scoped_to_the_school_cannot_create_a_classroom_there(self, client, school_id):
+        student_id, student_tok = _register_login(client, "create_cls_student")
+        self._grant_school_scoped_role(student_id, "student", school_id)
+
+        resp = client.post(
+            "/api/classrooms",
+            json={"name": "ShouldNotExist", "school_id": school_id, "grade": 4},
+            headers=auth_header(student_tok),
+        )
+        assert resp.status_code == 403, (
+            f"a school-scoped STUDENT must not be able to create a classroom "
+            f"at that school: {resp.status_code} {resp.text}"
+        )
+
+    def test_positive_control_a_teacher_scoped_to_the_school_can_create_a_classroom(self, client, school_id):
+        teacher_id, teacher_tok = _register_login(client, "create_cls_teacher")
+        self._grant_school_scoped_role(teacher_id, "teacher", school_id)
+
+        resp = client.post(
+            "/api/classrooms",
+            json={"name": "ShouldExist", "school_id": school_id, "grade": 4},
+            headers=auth_header(teacher_tok),
+        )
+        assert resp.status_code == 201, (
+            f"positive control failed: a school-scoped TEACHER must still be "
+            f"able to create a classroom at that school: "
+            f"{resp.status_code} {resp.text}"
+        )

@@ -6,7 +6,7 @@ from fastapi import HTTPException
 from sqlalchemy import func, or_
 from sqlalchemy.orm import Session, joinedload
 
-from ...auth.authz import is_school_member
+from ...auth.authz import is_school_teacher
 from ...auth.dependencies import get_current_user
 from ...auth.rate_limiter import InMemoryRateLimiter
 from ...auth.policies import is_system_admin
@@ -68,9 +68,18 @@ def create_classroom(
     # incl. orphan/domain schools). Closes "any teacher creates in any
     # school" (cross-school create-pollution). The common attack sets
     # teacher_id == self, so this must NOT live only in the delegation branch below.
+    #
+    # (Claude Security find_01RzZ2bXyjs6SrNmD7KkKy91, part 3) `is_school_member`
+    # counts ANY school-scoped role, including a plain `student` (granted
+    # automatically on classroom join-by-code, or via self-activation of a
+    # student row). A student could otherwise create a classroom at that
+    # school and, via the rest of this finding's chain, enrol and reset the
+    # password of other students there. Classroom creation specifically
+    # needs `is_school_teacher` (school-scoped `teacher` role) — not the
+    # broader membership check.
     caller_is_sysadmin = is_system_admin(current_user.id, db)
     if not caller_is_sysadmin:
-        if not is_school_member(current_user, school.id):
+        if not is_school_teacher(current_user, school.id, db):
             raise HTTPException(
                 status_code=403,
                 detail="Not authorized to create a classroom in this school",

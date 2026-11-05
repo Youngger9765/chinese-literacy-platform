@@ -30,7 +30,7 @@ from sqlalchemy.orm import Session
 
 from .policies import is_system_admin
 from ..models.school import Classroom, ClassroomStudent, ClassroomTeacher, School
-from ..models.user import User
+from ..models.user import Role, User, UserRole
 
 Action = Literal["view", "manage"]
 ResourceType = Literal["classroom", "school", "school_roster", "student", "semester"]
@@ -52,6 +52,34 @@ def is_school_member(user: User, school_id, db: Session | None = None) -> bool:
     return any(
         ur.is_active and ur.scope_type == "school" and ur.scope_id == school_id_str
         for ur in user.user_roles
+    )
+
+
+def is_school_teacher(user: User, school_id, db: Session) -> bool:
+    """True if the user holds an active, school-scoped `teacher` role here.
+
+    Claude Security find_01RzZ2bXyjs6SrNmD7KkKy91 (high), recommendation
+    part 3: create_classroom used to gate on bare `is_school_member`, which
+    counts ANY school-scoped role — including `student` (granted
+    automatically on classroom join-by-code, or via self-activation of a
+    student row). Classroom creation specifically needs this narrower
+    check; `is_school_member` stays as-is for the places that genuinely
+    only care about "any standing at this school".
+    """
+    if school_id is None:
+        return False
+    return (
+        db.query(UserRole.id)
+        .join(Role, UserRole.role_id == Role.id)
+        .filter(
+            UserRole.user_id == user.id,
+            UserRole.is_active == True,  # noqa: E712
+            Role.name == "teacher",
+            UserRole.scope_type == "school",
+            UserRole.scope_id == str(school_id),
+        )
+        .first()
+        is not None
     )
 
 
