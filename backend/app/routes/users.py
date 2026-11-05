@@ -226,7 +226,23 @@ def activate_teacher(
 
     return ActivateTeacherResponse(
         schools=[
-            SchoolActivationBrief(id=school.id, name=school.name, is_new=is_new)
+            SchoolActivationBrief(
+                id=school.id,
+                name=school.name,
+                is_new=is_new,
+                # Same condition as auth_registration_service.py's
+                # activate_teacher_for_schools -- kept in sync there, not
+                # re-derived from is_new alone (see that function's
+                # comment for why a self-activation-born school is
+                # trusted even when this call didn't create it).
+                role_active=bool(
+                    is_new
+                    or (
+                        school.settings
+                        and school.settings.get("created_via") == "self_activation"
+                    )
+                ),
+            )
             for school, is_new in schools_with_flag
         ],
         roles=roles,

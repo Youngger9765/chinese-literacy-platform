@@ -716,7 +716,16 @@ class TestRealAdminCreatedSchoolRosterStillWorksForItsOwnTeachers:
     admin-created or MOE-directory-imported) school, where "own/co-teach at
     least one classroom there" remains the gate. Finding #5 narrows the gap
     specifically for self-activated schools -- it must not regress the
-    admin dashboard views for institutionally-real schools."""
+    admin dashboard views for institutionally-real schools.
+
+    2026-11-05 (find_01RzZ2bXyjs6SrNmD7KkKy91, coordinator decision): a
+    teacher self-activating into a school that already existed before this
+    call -- and was never self-activation-born -- now gets an INACTIVE
+    role (pending a system_admin's confirmation), not an active one. This
+    test now exercises that pending state explicitly (the negative half,
+    new) before simulating the admin confirming it (a direct DB flip --
+    no approval endpoint exists yet) and re-asserting the original
+    positive-control behavior below."""
 
     def test_classroom_owner_at_a_real_school_sees_the_schools_classroom_list(self, client):
         db = TestingSessionLocal()
@@ -736,6 +745,32 @@ class TestRealAdminCreatedSchoolRosterStillWorksForItsOwnTeachers:
             headers=auth_header(token),
         )
         assert role.status_code == 200, role.text
+        # NEW: a genuinely pre-existing (non-self-activation-born) school
+        # grants the role inactive -- surfaced in the response, and
+        # confirmed by the classroom-create call being refused.
+        assert role.json()["schools"][0]["role_active"] is False, role.text
+        pending = client.post(
+            "/api/classrooms",
+            json={"name": "RealSchoolClassroom", "school_id": school_id, "grade": 4},
+            headers=auth_header(token),
+        )
+        assert pending.status_code == 403, pending.text
+
+        # A system_admin confirms the role (no dedicated endpoint yet --
+        # direct DB action, same as how a revoke is done today in reverse).
+        db = TestingSessionLocal()
+        try:
+            ur = (
+                db.query(UserRole)
+                .filter(UserRole.scope_type == "school", UserRole.scope_id == str(school_id))
+                .first()
+            )
+            assert ur is not None, "the pending role row must exist, just inactive"
+            ur.is_active = True
+            db.commit()
+        finally:
+            db.close()
+
         cls = client.post(
             "/api/classrooms",
             json={"name": "RealSchoolClassroom", "school_id": school_id, "grade": 4},
@@ -1158,4 +1193,92 @@ class TestCreateClassroomRequiresATeacherRoleAtTheSchool:
             f"positive control failed: a school-scoped TEACHER must still be "
             f"able to create a classroom at that school: "
             f"{resp.status_code} {resp.text}"
+        )
+
+
+# ===========================================================================
+# 6. Security review finding (2026-11-05, find_01RzZ2bXyjs6SrNmD7KkKy91,
+#    coordinator decision): self-activation into a GENUINELY pre-existing
+#    school (MOE-imported / admin-created) must not grant an immediately-
+#    trusted teacher role. Self-activation into a school that is itself
+#    self-activation-born (whether brand new, or created moments earlier
+#    by a DIFFERENT self-activating teacher) is unaffected -- that is the
+#    normal multi-teacher-per-self-created-school case, and the narrower
+#    cross-teacher visibility for it already lives in
+#    _eligible_student_ids (see Finding #4 tests above).
+# ===========================================================================
+
+
+class TestActivationIntoAPreExistingSchoolNeedsConfirmation:
+    def test_self_activating_into_an_admin_created_school_grants_an_inactive_role(self, client):
+        db = TestingSessionLocal()
+        try:
+            school = School(name=f"教育局建檔學校_{uuid.uuid4().hex[:6]}", domain=None)
+            db.add(school)
+            db.commit()
+            db.refresh(school)
+            school_id = school.id
+        finally:
+            db.close()
+
+        _, token = _register_login(client, "pending_confirm_teacher")
+        resp = client.post(
+            "/api/users/me/activate-teacher",
+            json={"schools": [{"name": school.name}]},
+            headers=auth_header(token),
+        )
+        assert resp.status_code == 200, resp.text
+        assert resp.json()["schools"][0]["role_active"] is False, (
+            "a genuinely pre-existing school must grant an INACTIVE role, "
+            "not an immediately-trusted one"
+        )
+        # the inactive role does not show up in /users/me's active roles
+        me = client.get("/api/users/me", headers=auth_header(token)).json()
+        assert not any(
+            r["role_name"] == "teacher" and r["scope_id"] == str(school_id)
+            for r in me["roles"]
+        ), "an inactive role must not appear as an active teacher role"
+
+    def test_positive_control_self_activating_a_brand_new_school_is_still_active(self, client):
+        """Negative control for the test above: a genuinely NEW school
+        (this call itself creates it) must still be trusted immediately --
+        proves the check above isn't vacuously true for every school."""
+        _, token = _register_login(client, "fresh_school_teacher")
+        school_name = f"全新自建學校_{uuid.uuid4().hex[:6]}"
+        resp = client.post(
+            "/api/users/me/activate-teacher",
+            json={"schools": [{"name": school_name}]},
+            headers=auth_header(token),
+        )
+        assert resp.status_code == 200, resp.text
+        assert resp.json()["schools"][0]["role_active"] is True
+
+    def test_a_second_teacher_joining_the_same_self_created_school_is_still_active(self, client):
+        """The multi-teacher-per-self-created-school case this fix must
+        NOT break: teacher B joining a school teacher A self-created
+        moments earlier is not "a pre-existing school" in the sense this
+        finding means -- it's the normal case."""
+        school_name = f"共用自建學校_{uuid.uuid4().hex[:6]}"
+        _, token_a = _register_login(client, "shared_new_school_a")
+        first = client.post(
+            "/api/users/me/activate-teacher",
+            json={"schools": [{"name": school_name}]},
+            headers=auth_header(token_a),
+        )
+        assert first.json()["schools"][0]["role_active"] is True
+
+        _, token_b = _register_login(client, "shared_new_school_b")
+        second = client.post(
+            "/api/users/me/activate-teacher",
+            json={"schools": [{"name": school_name}]},
+            headers=auth_header(token_b),
+        )
+        assert second.status_code == 200, second.text
+        assert second.json()["schools"][0]["is_new"] is False, (
+            "sanity: B must be joining the SAME (now-existing) school A just created"
+        )
+        assert second.json()["schools"][0]["role_active"] is True, (
+            "joining a self-activation-born school (even one someone else "
+            "just created) is the normal multi-teacher case, not the gap "
+            "this finding closes -- must stay immediately active"
         )
