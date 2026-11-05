@@ -54,9 +54,51 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/tts", tags=["tts"])
 
 
-class TTSRequest(BaseModel):
-    text: str = Field(..., min_length=1, max_length=5000, description="Plain text to synthesise (zh-TW)")
+# Claude Security findings find_01DDnWGZx4ibbNQwCuMKQSgW (medium, CWE-770)
+# + find_014TkDM4cNsqXZB2ViMmYtmr (medium, CWE-770), 2026-11-06: 5000 chars
+# was never a real content bound, just an arbitrary ceiling copied from a
+# sibling endpoint's LLM-prompt-budget reasoning (this endpoint hasn't
+# called an LLM since #2266). Measured from the live lesson catalog
+# (179 lessons): longest full lesson text is 1671 chars, longest real
+# sentence ~176 chars. Paragraph-level (/synthesize, /regenerate) gets a
+# ~50% headroom cap over the real max; sentence-level (/synthesize-sentence)
+# gets its own, much tighter schema.
+TTS_PARAGRAPH_MAX_LEN = 2500
+TTS_SENTENCE_MAX_LEN = 400
 
+# Anonymous callers get the tighter sentence-level bound on BOTH endpoints,
+# not the paragraph one -- a QR-code visitor still hears every real lesson
+# sentence/paragraph (none exceed this), but can no longer drive a 2500-char
+# synthesis call per request. At the existing 30 req/min per-IP rate limit
+# this caps worst-case anonymous spend at 30 * 400 = 12,000 chars/min/instance,
+# versus the 30 * 5000 = 150,000 chars/min/instance the finding measured --
+# a >12x reduction. This does NOT implement the finding's stronger
+# recommendation (reject non-canonical-lesson text outright, or a global
+# cross-instance spend cap / kill switch) -- see #3895 for why that's
+# tracked separately rather than claimed done here.
+ANONYMOUS_TTS_MAX_LEN = TTS_SENTENCE_MAX_LEN
+
+
+class TTSRequest(BaseModel):
+    text: str = Field(..., min_length=1, max_length=TTS_PARAGRAPH_MAX_LEN, description="Plain text to synthesise (zh-TW)")
+
+
+class TTSSentenceRequest(BaseModel):
+    text: str = Field(..., min_length=1, max_length=TTS_SENTENCE_MAX_LEN, description="Plain sentence text to synthesise (zh-TW)")
+
+
+def _enforce_anonymous_length_cap(user: "User | None", text: str) -> None:
+    """find_01DDnWGZx4ibbNQwCuMKQSgW: an anonymous caller may only request
+    the tighter, sentence-level length even on the paragraph endpoint --
+    only an authenticated user can ask for a full 2500-char paragraph."""
+    if user is None and len(text) > ANONYMOUS_TTS_MAX_LEN:
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                f"匿名請求的文字長度不可超過 {ANONYMOUS_TTS_MAX_LEN} 字元，"
+                "請登入後再試，或縮短文字內容。"
+            ),
+        )
 
 
 def _who(user: "User | None") -> str:
@@ -90,8 +132,12 @@ async def synthesize(
 ) -> Response:
     """Synthesise *text* to MP3 audio using Azure TTS (primary) or Cloud TTS (fallback).
 
-    Requires authentication (any active user).  Anonymous requests are rejected
-    with 401 to prevent bill-washing attacks on the Azure/GCP TTS quota.
+    Anonymous requests ARE allowed (QR-code visitors need to hear the same
+    audio a signed-in student does — see _rate_limit_key's docstring), but
+    capped to ANONYMOUS_TTS_MAX_LEN (not the full TTS_PARAGRAPH_MAX_LEN an
+    authenticated caller gets). This docstring previously claimed anonymous
+    calls get a 401, which was never true (find_01DDnWGZx4ibbNQwCuMKQSgW,
+    recommendation 3) — corrected 2026-11-06.
 
     Rate limiting (Issue #1808):
     - Cache check happens FIRST — a cache hit returns immediately without
@@ -106,11 +152,13 @@ async def synthesize(
 
     Returns:
         200  audio/mpeg — MP3 bytes ready for the browser <audio> element.
-        401  application/json — not authenticated.
+        422  application/json — anonymous request's text exceeds ANONYMOUS_TTS_MAX_LEN.
         429  application/json — rate limit exceeded; Retry-After header present.
         503  application/json — TTS unavailable; client should fall back
              to Web Speech API.
     """
+    _enforce_anonymous_length_cap(current_user, req.text)
+
     # Fix #3: Check L1 cache BEFORE rate limit — cached audio returns immediately
     # without burning the user's TTS quota (Issue #1808).
     #
@@ -157,14 +205,18 @@ async def synthesize(
 
 @router.post("/synthesize-sentence")
 async def synthesize_sentence_endpoint(
-    req: TTSRequest,
+    req: TTSSentenceRequest,
     request: Request,
     current_user: User | None = Depends(get_optional_user),
 ) -> Response:
     """Synthesise a single sentence to MP3 audio (Issue #667).
 
-    Requires authentication (any active user).  Anonymous requests are rejected
-    with 401 to prevent bill-washing attacks via the pre-generated sentence cache.
+    Anonymous requests ARE allowed, same policy as /synthesize — this
+    docstring previously claimed a 401, which was never true
+    (find_01DDnWGZx4ibbNQwCuMKQSgW, recommendation 3), corrected 2026-11-06.
+    Already schema-capped to TTS_SENTENCE_MAX_LEN for everyone (sentence-level
+    endpoint, no paragraph-level cap needed here), so there is no additional
+    anonymous-specific length check to apply on top.
 
     Applies the same cache-before-rate-limit and user_id-keyed rate limiting
     as /synthesize (Issue #1808 fix).
@@ -175,7 +227,6 @@ async def synthesize_sentence_endpoint(
 
     Returns:
         200  audio/mpeg — MP3 bytes ready for the browser <audio> element.
-        401  application/json — not authenticated.
         429  application/json — rate limit exceeded; Retry-After header present.
         503  application/json — TTS unavailable.
     """
