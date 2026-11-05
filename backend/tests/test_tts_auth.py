@@ -238,6 +238,44 @@ class TestSynthesizeAuth:
         assert resp.content == FAKE_AUDIO
 
 
+class TestSynthesizeAnonymousLengthCap:
+    """find_01DDnWGZx4ibbNQwCuMKQSgW (medium, CWE-770): an anonymous caller
+    on /synthesize used to be able to request the full 5000-char ceiling
+    (now TTS_PARAGRAPH_MAX_LEN=2500). Anonymous callers get the tighter
+    ANONYMOUS_TTS_MAX_LEN (400) instead -- only an authenticated caller may
+    ask for a full paragraph-length synthesis."""
+
+    def test_anonymous_request_over_the_anonymous_cap_is_refused(self, client):
+        from app.routes.tts import ANONYMOUS_TTS_MAX_LEN
+
+        long_text = "測" * (ANONYMOUS_TTS_MAX_LEN + 1)
+        with _patch_tts():
+            resp = client.post("/api/tts/synthesize", json={"text": long_text})
+        assert resp.status_code == 422, f"Expected 422, got {resp.status_code}: {resp.text}"
+
+    def test_anonymous_request_at_the_anonymous_cap_still_works(self, client):
+        from app.routes.tts import ANONYMOUS_TTS_MAX_LEN
+
+        exact_text = "測" * ANONYMOUS_TTS_MAX_LEN
+        with _patch_tts():
+            resp = client.post("/api/tts/synthesize", json={"text": exact_text})
+        assert resp.status_code == 200, f"Expected 200, got {resp.status_code}: {resp.text}"
+
+    def test_authenticated_request_over_the_anonymous_cap_but_under_paragraph_cap_still_works(self, client, regular_user):
+        """The whole point of the distinction: an authenticated caller gets
+        up to the paragraph-level cap, not just the sentence-level one."""
+        from app.routes.tts import ANONYMOUS_TTS_MAX_LEN
+
+        text_above_anon_cap = "測" * (ANONYMOUS_TTS_MAX_LEN + 100)
+        with _patch_tts():
+            resp = client.post(
+                "/api/tts/synthesize",
+                json={"text": text_above_anon_cap},
+                headers={"Authorization": f"Bearer {regular_user['token']}"},
+            )
+        assert resp.status_code == 200, f"Expected 200, got {resp.status_code}: {resp.text}"
+
+
 # ===========================================================================
 # Tests: POST /api/tts/synthesize-sentence
 # ===========================================================================
@@ -261,6 +299,23 @@ class TestSynthesizeSentenceAuth:
             )
         assert resp.status_code == 200, f"Expected 200, got {resp.status_code}: {resp.text}"
         assert resp.content == FAKE_AUDIO
+
+    def test_text_over_sentence_cap_is_refused_even_for_authenticated_callers(self, client, regular_user):
+        """find_014TkDM4cNsqXZB2ViMmYtmr: /synthesize-sentence is
+        sentence-scoped for EVERYONE (real max measured sentence length is
+        ~176 chars) -- the schema itself (TTSSentenceRequest, max 400)
+        enforces this regardless of auth, unlike /synthesize's
+        auth-dependent anonymous cap."""
+        from app.routes.tts import TTS_SENTENCE_MAX_LEN
+
+        too_long = "測" * (TTS_SENTENCE_MAX_LEN + 1)
+        with _patch_tts():
+            resp = client.post(
+                "/api/tts/synthesize-sentence",
+                json={"text": too_long},
+                headers={"Authorization": f"Bearer {regular_user['token']}"},
+            )
+        assert resp.status_code == 422, f"Expected 422, got {resp.status_code}: {resp.text}"
 
 
 # ===========================================================================

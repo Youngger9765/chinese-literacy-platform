@@ -275,7 +275,16 @@ class TestGCSSentinel:
 # ---------------------------------------------------------------------------
 
 class TestTTSPydanticValidation:
-    """TTSRequest model must reject empty text and text >5000 chars."""
+    """TTSRequest model must reject empty text and text over the real bound.
+
+    2026-11-06 (find_01DDnWGZx4ibbNQwCuMKQSgW, find_014TkDM4cNsqXZB2ViMmYtmr):
+    5000 was never a real content bound -- see app/routes/tts.py's
+    TTS_PARAGRAPH_MAX_LEN/ANONYMOUS_TTS_MAX_LEN docstring for the actual
+    numbers and why. This test class's client has no Authorization header,
+    so it exercises the tighter ANONYMOUS_TTS_MAX_LEN (400), not the
+    paragraph-level schema max (2500) an authenticated caller gets --
+    see test_tts_auth.py::TestSynthesizeAnonymousLengthCap for that boundary.
+    """
 
     def _make_app(self):
         return _make_tts_test_app()
@@ -301,26 +310,34 @@ class TestTTSPydanticValidation:
             response = client.post("/api/tts/synthesize", json={"text": "   "})
         assert response.status_code != 422, response.text
 
-    def test_over_5000_chars_rejected(self):
+    def test_over_anonymous_cap_chars_rejected(self):
+        """Was "over 5000 chars" -- updated 2026-11-06 (find_01DDnWGZx4ibbNQwCuMKQSgW):
+        this test's client has no Authorization header, so the real
+        enforced boundary it exercises is ANONYMOUS_TTS_MAX_LEN (400), not
+        the old 5000 ceiling, which was never a real content bound."""
         from fastapi.testclient import TestClient
+        from app.routes.tts import ANONYMOUS_TTS_MAX_LEN
+
         client = TestClient(self._make_app())
-        long_text = "你" * 5001
+        long_text = "你" * (ANONYMOUS_TTS_MAX_LEN + 1)
         response = client.post("/api/tts/synthesize", json={"text": long_text})
         assert response.status_code == 422
 
-    def test_exactly_5000_chars_accepted(self):
-        """5000 is the boundary: accepted here, rejected one over.
-
-        Was synthesising 5000 characters for real on every run — the boundary
-        is a Pydantic max_length, so the audio was never the point.
+    def test_exactly_anonymous_cap_chars_accepted(self):
+        """Was "exactly 5000 chars accepted" -- updated 2026-11-06. The
+        boundary this (anonymous) client actually exercises is
+        ANONYMOUS_TTS_MAX_LEN, not the paragraph-level schema max an
+        authenticated caller gets (see test_tts_auth.py for that one).
         """
         from fastapi.testclient import TestClient
-        text_5000 = "你" * 5000
+        from app.routes.tts import ANONYMOUS_TTS_MAX_LEN
+
+        text_at_cap = "你" * ANONYMOUS_TTS_MAX_LEN
         with patch("app.routes.tts.synthesize_speech", return_value=b"AUDIO"):
             client = TestClient(self._make_app())
-            response = client.post("/api/tts/synthesize", json={"text": text_5000})
+            response = client.post("/api/tts/synthesize", json={"text": text_at_cap})
         assert response.status_code != 422, (
-            f"5000 chars is at the limit and must pass validation: {response.text[:200]}"
+            f"{ANONYMOUS_TTS_MAX_LEN} chars is at the anonymous limit and must pass validation: {response.text[:200]}"
         )
 
     @patch("app.services.tts_service._gcs_get", return_value=None)
