@@ -703,3 +703,100 @@ class TestSSOLogin:
             resp = client.post("/api/auth/junyi", json={"code": "any-code"})
 
         assert resp.status_code == 503
+
+
+class TestJunyiLoginDoesNotHijackUnverifiedLocalAccount:
+    """Claude Security finding find_01QPThD8PxG5bL5WspBtA6GH (CRITICAL) — CWE-290.
+
+    resolve_junyi_user's "link by email" branch had NO email_verified check
+    at all (unlike the Google path, which the #3830 fix already gates on our
+    own local User.email_verified — see
+    TestGoogleLoginDoesNotHijackUnverifiedLocalAccount in test_google_oauth.py).
+
+    Attack: an anonymous attacker gets a Junyi Academy account whose email
+    equals the victim's LingoLeap address (Junyi's API exposes no
+    verified-email flag for us to check), or simply self-registers
+    victim@example.com via POST /auth/register first (no proof of ownership
+    required there, email_verified defaults to False). Either way, the
+    lookup-by-email branch in resolve_junyi_user linked junyi_identity_id
+    onto that row with no further check and returned an access_token for
+    it — full account takeover, including of teacher/system_admin accounts.
+
+    Mirrors the Google fix exactly: only link when the existing LOCAL row's
+    email_verified is already True (a state we ourselves verified, via our
+    own email-verification flow or an earlier Google/Junyi login) — never on
+    the strength of the Junyi-asserted email alone.
+
+    Positive control: test_junyi_login_links_existing_email_no_duplicate
+    (above) creates its user with email_verified=True and must keep linking
+    normally — proving email_verified, not something else, is what gates
+    this.
+    """
+
+    def _create_unverified_user_in_db(self, email: str) -> None:
+        db = TestingSessionLocal()
+        try:
+            user = User(
+                email=email,
+                password_hash=hash_password("AttackerChosenPassword123!"),
+                name="Attacker-Controlled Row",
+                email_verified=False,
+            )
+            db.add(user)
+            db.commit()
+        finally:
+            db.close()
+
+    def _get_user(self, email: str):
+        db = TestingSessionLocal()
+        try:
+            return db.query(User).filter(User.email == email).first()
+        finally:
+            db.close()
+
+    def test_junyi_login_is_refused_for_an_unverified_local_account(self, client):
+        email = _unique_email("junyi-hijack.org")
+        self._create_unverified_user_in_db(email)
+
+        junyi_user_id = f"junyi_uid_{secrets.token_hex(8)}"
+        fake_junyi_payload = {
+            "data": {
+                "userId": junyi_user_id,
+                "userEmail": email,
+                "userDisplayName": "Victim Display Name",
+            }
+        }
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = fake_junyi_payload
+
+        with patch("app.services.sso_login_service.httpx.post", return_value=mock_resp):
+            resp = client.post("/api/auth/junyi", json={"code": "fake-junyi-code"})
+
+        assert resp.status_code == 409, resp.text
+        assert "access_token" not in resp.json()
+
+    def test_the_unverified_account_is_not_silently_linked_to_the_junyi_id(self, client):
+        email = _unique_email("junyi-hijack.org")
+        self._create_unverified_user_in_db(email)
+
+        junyi_user_id = f"junyi_uid_{secrets.token_hex(8)}"
+        fake_junyi_payload = {
+            "data": {
+                "userId": junyi_user_id,
+                "userEmail": email,
+                "userDisplayName": "Victim Display Name",
+            }
+        }
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = fake_junyi_payload
+
+        with patch("app.services.sso_login_service.httpx.post", return_value=mock_resp):
+            client.post("/api/auth/junyi", json={"code": "fake-junyi-code"})
+
+        user = self._get_user(email)
+        assert user is not None
+        assert user.junyi_identity_id is None
+        # the refusal must not have a side effect of flipping verification
+        assert user.email_verified is False
