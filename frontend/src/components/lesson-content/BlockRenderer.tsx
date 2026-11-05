@@ -1,11 +1,12 @@
 /**
- * BlockRenderer — switch on `block.type` (5 branches). One code path for every block;
+ * BlockRenderer — switch on `block.type` (6 branches). One code path for every block;
  * 一般課文 vs 圖文課文 is a layout hint (lessonLayout.ts), not a second renderer.
  *
  *   paragraph        → ParagraphBlockView (numbered line + 注音)
  *   figure           → FigureBlockView (delegates FigureCard + buildImageSrc)
  *   table            → TableBlockView (fast path TableBody / raw grid fallback)
  *   parallel_passage → ParallelPassageBlockView (two-column presentation)
+ *   generic          → GenericBlockView (read-only floor for content not yet typed)
  *   exercise         → ExerciseBlockView (EDD 收口: kind → widget → grade())
  */
 import React from 'react';
@@ -14,10 +15,12 @@ import ParagraphBlockView from './blocks/ParagraphBlockView';
 import FigureBlockView from './blocks/FigureBlockView';
 import TableBlockView from './blocks/TableBlockView';
 import ParallelPassageBlockView from './blocks/ParallelPassageBlockView';
+import GenericBlockView from './blocks/GenericBlockView';
 import ExerciseBlockView from './ExerciseBlockView';
 
 type TableBlock = Block & { type: 'table' };
 type ParallelPassageBlock = Block & { type: 'parallel_passage' };
+type GenericBlock = Block & { type: 'generic' };
 
 interface Props {
   block: Block;
@@ -67,6 +70,8 @@ const BlockRenderer: React.FC<Props> = ({
       return <TableBlockView block={block as TableBlock} />;
     case 'parallel_passage':
       return <ParallelPassageBlockView block={block as ParallelPassageBlock} />;
+    case 'generic':
+      return <GenericBlockView block={block as GenericBlock} />;
     case 'exercise': {
       // #2505 review #5 — loader sets needsReview=true when the spotlight's declared
       // identity mismatches the display lesson's authoritative _parsed twin (the

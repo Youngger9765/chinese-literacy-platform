@@ -108,8 +108,8 @@ def _step_verdict(step: Any, needs_review: bool) -> str:
     """Gap 4: per-step round-trip verdict for a guided_steps / graphic_text_integration
     step. Per-step grader is DERIVED from step.type (no schema enum):
     select→exact, multi_select→set, free_text→soft. Returns 'ok' | 'soft' | 'fail'."""
-    if step.type == "free_text":
-        return "soft"
+    if step.type == "free_text" or getattr(step, "no_correct_answer", False):
+        return "soft"  # rubric-graded, or 沒有標準答案 (answering is the whole task)
     # select / multi_select — a machine step
     if step.answer is None:
         # a missing machine answer is only tolerable if the block is flagged for review
