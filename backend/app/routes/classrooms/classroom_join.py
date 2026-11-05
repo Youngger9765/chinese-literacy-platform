@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from ...auth.dependencies import get_current_user
+from ...auth.rate_limiter import InMemoryRateLimiter
 from ...database import get_db
 from ...models.school import Classroom, ClassroomStudent
 from ...models.user import User
@@ -20,6 +21,18 @@ from .helpers import (
 
 router = APIRouter(tags=["classrooms"])
 logger = logging.getLogger(__name__)
+
+# Claude Security find_01XaGHNpuEXRirwAcCzCeYyh (low, CWE-307): the only
+# throttle in front of this endpoint used to be the global, shared,
+# per-IP/per-instance write limiter (90/min) -- nowhere near tight enough
+# against a ~31-bit code space where ANY live classroom is a hit. Mirrors
+# the read-only /classrooms/join-preview twin's existing 10/min-per-account
+# limiter (same module constant values), so a guessing account is refused
+# after a few misses regardless of how it distributes requests across IPs
+# or instances this one process can see.
+JOIN_MAX_REQUESTS = 10
+JOIN_WINDOW_SECONDS = 60
+join_rate_limiter = InMemoryRateLimiter()
 
 
 @router.post("/classrooms/join", status_code=200, response_model=ClassroomResponse)
@@ -42,6 +55,18 @@ def join_classroom_by_code(
     so that FastAPI does not treat "join" as a classroom_id.
     """
     from ...models.school import School
+
+    rl_info = join_rate_limiter.check_with_info(
+        f"classroom_join:user:{current_user.id}",
+        JOIN_MAX_REQUESTS,
+        JOIN_WINDOW_SECONDS,
+    )
+    if not rl_info.allowed:
+        raise HTTPException(
+            status_code=429,
+            detail="Too many join attempts. Please wait before retrying.",
+            headers={"Retry-After": str(rl_info.retry_after)},
+        )
 
     classroom = (
         db.query(Classroom)

@@ -115,6 +115,20 @@ def pytest_runtest_setup(item):
         _join_rate_limiter.reset()
     except (ImportError, AttributeError):
         pass
+    try:
+        # Claude Security find_01XaGHNpuEXRirwAcCzCeYyh — same #3171 shape:
+        # module-level singleton, keyed on a raw integer user id that a
+        # fresh test-file's own isolated DB will happily reassign to an
+        # unrelated user. Confirmed by hand: without this reset,
+        # test_classroom_join_and_batch.py::test_join_case_insensitive
+        # failed with 429 only when run after
+        # test_join_preview_rate_limit_3081.py's new guessing-account test
+        # in the same pytest session, because both files' autoincrement
+        # ids started from 1 and happened to collide.
+        from app.routes.classrooms.classroom_join import join_rate_limiter
+        join_rate_limiter.reset()
+    except (ImportError, AttributeError):
+        pass
 
 
 # ── 測試不准打真的 GCS ──────────────────────────────────────────────────────
