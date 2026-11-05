@@ -18,7 +18,16 @@ MAX_READING_SECONDS = 30
 
 
 class LiveQuizCreateRequest(BaseModel):
-    lesson_uids: list[str] = Field(min_length=1)
+    # Claude Security find_01FFb5nYvsmyHEYT1koY8wTB (high, CWE-770): an
+    # unbounded list let an attacker send thousands of aliased spellings of
+    # one real lesson (e.g. "L0001/v3/..", "L0001/v3/../v3/.."), each one a
+    # new permanent entry in lesson_uid_loader's unbounded lru_cache. This
+    # cap (there are ~175 real lessons total; no legitimate quiz draws from
+    # more than a small fraction of them) is the boundary-level half of the
+    # fix; engine._load_lessons validates each uid against available_uids()
+    # for the other half (rejecting path-traversal aliases outright, not
+    # just capping how many of them get through).
+    lesson_uids: list[str] = Field(min_length=1, max_length=50)
     source_modules: list[str] | None = None
     round_type: str = "choice"
     # UI/UX review §12: "設定頁預設只露...題數（預設 10）、秒數（預設 30）".
