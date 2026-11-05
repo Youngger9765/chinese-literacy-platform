@@ -211,6 +211,12 @@ def request_claim(
             )
 
     current_user.password_hash = hash_password(new_password)
+    # Claude Security find_016vZk1d3wRKkhjQMTUbGU6Y (low): the new password
+    # takes effect immediately (same as change-password always has), so
+    # any token issued before it must stop working too -- see
+    # auth/dependencies.py's get_current_user, which compares this against
+    # each token's `iat`.
+    current_user.password_changed_at = datetime.now(timezone.utc)
     current_user.pending_email = new_email
     if current_user.student_profile:
         # #3438: the student just set a password only they know -- same as

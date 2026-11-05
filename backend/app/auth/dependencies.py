@@ -1,3 +1,5 @@
+from datetime import timezone
+
 from fastapi import Depends, HTTPException, Header, Request, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session, joinedload
@@ -88,6 +90,48 @@ def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User not found or inactive",
         )
+
+    # Claude Security find_016vZk1d3wRKkhjQMTUbGU6Y (low, CWE-613): a
+    # stolen token used to keep working for its full (up to 8h) lifetime
+    # even after the victim changed their password or a teacher reset it --
+    # nothing here ever compared the token against the account's
+    # credential history. password_changed_at is NULL for an account that
+    # has never had a recorded password change, so this is a pure
+    # tightening: every token issued before this feature existed, or for
+    # an account whose password has never changed, is completely
+    # unaffected. `iat` is encoded as a Unix timestamp by PyJWT regardless
+    # of the datetime passed into create_access_token.
+    if user.password_changed_at is not None:
+        token_iat = payload.get("iat")
+        if token_iat is not None:
+            # SQLite (used by the test suite) silently drops tz info on a
+            # DateTime(timezone=True) column regardless of what was
+            # written -- Postgres (prod/staging) does not have this
+            # problem, but the comparison must be robust either way: this
+            # column is only ever written via datetime.now(timezone.utc),
+            # so a naive value read back is always UTC.
+            password_changed_at = user.password_changed_at
+            if password_changed_at.tzinfo is None:
+                password_changed_at = password_changed_at.replace(tzinfo=timezone.utc)
+            # Compare at whole-second granularity on BOTH sides. PyJWT
+            # encodes `iat` as an integer Unix timestamp (microseconds
+            # truncated), while password_changed_at keeps full DB
+            # precision -- comparing at mismatched precision made the
+            # result depend on which side's sub-second remainder happened
+            # to be larger, flipping unpredictably for two events in the
+            # same wall-clock second (e.g. "change password, then
+            # immediately log in again"). `<=` (not `<`): a token from
+            # the SAME second as the change is rejected, fail-closed --
+            # the realistic cost is "log in once more", the alternative
+            # (`<`) could fail-open and accept a same-second STALE token
+            # too, which is the actual security property this exists for.
+            if token_iat <= int(password_changed_at.timestamp()):
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Token invalid: password has changed since this token was issued",
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
+
     if compute_must_change_password(user):
         if (request.method, request.url.path) not in _PASSWORD_CHANGE_EXEMPT:
             raise HTTPException(

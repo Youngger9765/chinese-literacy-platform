@@ -102,4 +102,8 @@ def apply_password_reset(db: Session, user: User, new_password: str) -> None:
     user.password_hash = hash_password(new_password)
     user.password_reset_token = None
     user.password_reset_expires = None
+    # Claude Security find_016vZk1d3wRKkhjQMTUbGU6Y (low): invalidate any
+    # token issued before this reset -- see auth/dependencies.py's
+    # get_current_user, which compares this against each token's `iat`.
+    user.password_changed_at = datetime.now(timezone.utc)
     db.commit()

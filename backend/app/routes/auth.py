@@ -280,6 +280,10 @@ def change_password(
     enforce_password_strength(req.new_password)
 
     current_user.password_hash = hash_password(req.new_password)
+    # Claude Security find_016vZk1d3wRKkhjQMTUbGU6Y (low): any token issued
+    # before this moment must stop working -- see auth/dependencies.py's
+    # get_current_user, which compares this against each token's `iat`.
+    current_user.password_changed_at = datetime.now(timezone.utc)
 
     if current_user.student_profile:
         current_user.student_profile.password_changed = True

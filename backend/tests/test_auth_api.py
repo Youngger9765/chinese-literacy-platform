@@ -981,6 +981,78 @@ class TestChangePasswordEndpoint:
         assert resp.status_code == 422
 
 
+class TestTokenInvalidatedAfterPasswordChange:
+    """Claude Security find_016vZk1d3wRKkhjQMTUbGU6Y (low, CWE-613): an
+    attacker holding a stolen bearer token used to keep full access for the
+    rest of its (up to 8h) lifetime even after the victim changed their
+    password. Written with the account's OWN old token (the realistic
+    "stolen token" shape), not a forged one."""
+
+    def test_old_token_is_rejected_after_change_password(self, client, registered_user):
+        old_token = registered_user["token"]
+
+        resp = client.post(
+            "/api/auth/change-password",
+            json={
+                "old_password": registered_user["password"],
+                "new_password": "NewSecurePass456!",
+            },
+            headers=auth_header(old_token),
+        )
+        assert resp.status_code == 200, resp.text
+
+        reused = client.get("/api/users/me", headers=auth_header(old_token))
+        assert reused.status_code == 401, (
+            "the pre-password-change token must be rejected -- it is "
+            "exactly the token an attacker who stole it before the "
+            "change would still be holding"
+        )
+
+    def test_a_freshly_issued_token_after_the_change_still_works(self, client, registered_user):
+        """Positive control: the fix must not lock out the real user --
+        a token minted by logging in AFTER the password change must work.
+
+        The comparison is `<=` at whole-second granularity (see
+        dependencies.py's comment) -- a login landing in the SAME
+        wall-clock second as the password change is deliberately, safely
+        rejected too (fail-closed on the ambiguous tie). A brief sleep
+        here makes this test assert the real, intended behavior (a
+        genuinely LATER login works) deterministically, instead of
+        depending on whether two back-to-back HTTP calls happen to land
+        in the same integer second.
+        """
+        import time
+
+        client.post(
+            "/api/auth/change-password",
+            json={
+                "old_password": registered_user["password"],
+                "new_password": "NewSecurePass456!",
+            },
+            headers=auth_header(registered_user["token"]),
+        )
+        time.sleep(1.1)
+
+        login_resp = client.post("/api/auth/login", json={
+            "email": registered_user["email"],
+            "password": "NewSecurePass456!",
+        })
+        assert login_resp.status_code == 200
+        new_token = login_resp.json()["access_token"]
+
+        resp = client.get("/api/users/me", headers=auth_header(new_token))
+        assert resp.status_code == 200, resp.text
+
+    def test_an_account_that_never_changed_its_password_is_unaffected(self, client, registered_user):
+        """Negative control: password_changed_at is NULL for an account
+        that has never changed its password -- its token must keep
+        working exactly as before this fix (no false-positive rejection)."""
+        resp = client.get(
+            "/api/users/me", headers=auth_header(registered_user["token"])
+        )
+        assert resp.status_code == 200, resp.text
+
+
 # ===========================================================================
 # Integration tests — GET /api/users/me
 # ===========================================================================

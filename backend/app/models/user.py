@@ -78,6 +78,16 @@ class User(Base):
     pending_email: Mapped[str | None] = mapped_column(
         String(254), nullable=True, index=True
     )
+    # Claude Security find_016vZk1d3wRKkhjQMTUbGU6Y (low, CWE-613): NULL
+    # means "no password change recorded yet" -- every token issued before
+    # this column existed, or for an account that has never changed its
+    # password, keeps working exactly as before. Set to now() by
+    # change_password / apply_password_reset / the teacher-reset path
+    # whenever password_hash is touched; get_current_user then rejects any
+    # token whose `iat` predates this timestamp. See auth/dependencies.py.
+    password_changed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

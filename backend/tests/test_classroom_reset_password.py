@@ -375,6 +375,40 @@ def test_creator_teacher_resets_batch_created_student_200_and_new_password_works
     assert old_login_resp.status_code in (401, 403)
 
 
+def test_teacher_reset_invalidates_the_students_outstanding_bearer_token(client):
+    """Claude Security find_016vZk1d3wRKkhjQMTUbGU6Y (low, CWE-613): a
+    teacher-initiated reset must invalidate the student's already-issued
+    bearer token too, not just their password -- otherwise a session an
+    attacker already had open (e.g. a shared classroom tablet, exactly
+    this finding's own example) survives the reset the teacher just did
+    specifically to shut that access down."""
+    teacher = _register_user(client, "resetpw_token_owner")
+    school_id = _create_school_for_teacher(teacher["user_id"])
+    classroom_id = _create_classroom(client, teacher, school_id)
+    student = _batch_create_student(client, teacher, classroom_id, name="Token Invalidation Target")
+
+    synthetic_email = f"{student['username'].lower()}@student.lingoleap.local"
+    _reset_rate_limiters()
+    student_login = client.post(
+        "/api/auth/login",
+        json={"email": synthetic_email, "password": student["password"]},
+    )
+    assert student_login.status_code == 200, student_login.text
+    old_student_token = student_login.json()["access_token"]
+
+    resp = _reset_password(client, teacher, classroom_id, student["user_id"])
+    assert resp.status_code == 200, resp.text
+
+    reused = client.get(
+        "/api/users/me",
+        headers={"Authorization": f"Bearer {old_student_token}"},
+    )
+    assert reused.status_code == 401, (
+        "the student's pre-reset bearer token must be rejected after the "
+        "teacher resets their password"
+    )
+
+
 def test_creator_whose_teacher_role_was_deactivated_cannot_reset_403(client):
     """Security-review follow-up (#3818): the creator gate alone
     (created_by_teacher_id == current_user.id) is not sufficient --
