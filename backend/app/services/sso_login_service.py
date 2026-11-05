@@ -258,7 +258,24 @@ def resolve_junyi_user(db: Session, junyi_data: dict) -> tuple[User, bool]:
             User.id != user.id,
         ).first()
         if email_taken_by_someone_else is None:
+            # Claude Security find_01V63cq32bEPy1KsaqoRTp8v (high, CWE-345),
+            # 2026-11-06: this promotion writes an email Junyi ASSERTS (not
+            # proven -- Junyi's token exchange carries no verified-email
+            # flag, same root cause as #3891/#3892) onto a row whose
+            # email_verified was True for an entirely different reason --
+            # it was imported by junyi_class_import_service as a synthetic
+            # student placeholder, not independently confirmed for THIS
+            # new address. Leaving email_verified=True let a later Google
+            # sign-in for the same address link onto this row purely
+            # because the flag was already set: resolve_google_user's link
+            # gate trusts email_verified without knowing WHY it's true.
+            # Reset it here so a promoted address has to earn that trust
+            # again -- the row stays fully reachable via Junyi SSO
+            # (matched by junyi_identity_id, which never checks
+            # email_verified), only a later Google-login link for the same
+            # email now correctly needs its own verification first.
             user.email = junyi_email
+            user.email_verified = False
         else:
             logger.warning(
                 "junyi_login: cannot promote synthetic email for user %d -- "
