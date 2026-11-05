@@ -217,6 +217,12 @@ def tiny_lessons(monkeypatch):
         return None
 
     monkeypatch.setattr(live_quiz_engine, "load_lesson", _fake_load_lesson)
+    # Claude Security find_01FFb5nYvsmyHEYT1koY8wTB: _load_lessons now checks
+    # the uid against available_uids() before ever calling load_lesson (real
+    # fix: reject path-traversal aliases outright, not just whatever
+    # load_lesson happens to resolve). This fixture's fake lessons aren't on
+    # disk, so available_uids() needs the same patch load_lesson gets here.
+    monkeypatch.setattr(live_quiz_engine, "available_uids", lambda: ("FAKE2", "FAKE3"))
 
 
 def _create_game(client, teacher, lesson_uids=(LESSON_A,), **overrides):

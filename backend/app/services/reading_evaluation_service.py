@@ -31,6 +31,7 @@ Safety invariant (unchanged from Issue #454):
   Fallback NEVER inflates scores (mirrors understood=False principle).
 """
 
+import asyncio
 import logging
 from typing import Literal
 
@@ -383,7 +384,19 @@ async def evaluate_reading_with_ai(
     # Deterministic DP aligner — single source of truth for scoring.
     # This is the same aligner that was previously used only for CPM.
     # See _build_fallback_result for the full implementation.
-    result = _build_fallback_result(spoken_text, target_text)
+    #
+    # Claude Security find_01Xm1Ywih4cjY6KTUnUGfbXo (high, CWE-407):
+    # _build_fallback_result (and correct_homophones inside it) run TWO
+    # O(len(spoken) * len(target)) pure-Python DP passes. This used to run
+    # inline on the only uvicorn event loop -- a crafted request (up to the
+    # schema's old 10000/2000-char caps) built a ~20M-cell table, allocated
+    # ~800MB and took seconds to tens of seconds, stalling every OTHER
+    # in-flight request on the instance (concurrency 8) for its duration.
+    # The length caps in ReadingEvaluateRequest are now realistic (real
+    # passages are ~600-700 chars), and the call itself is offloaded to a
+    # worker thread so even a request at the new, smaller cap cannot block
+    # other requests while it runs.
+    result = await asyncio.to_thread(_build_fallback_result, spoken_text, target_text)
 
     # Inject CPM (correct chars per minute) from duration_ms
     cpm = _cpm_from_correct_count(result["stats"]["correct_count"], duration_ms)
