@@ -89,7 +89,7 @@ jobs:
         with:
           python-version: '3.11'
           cache: 'pip'
-          cache-dependency-path: backend/requirements.txt
+          cache-dependency-path: backend/requirements.lock
 
       - name: Install pip-audit
         run: pip install pip-audit
@@ -112,9 +112,16 @@ jobs:
 
           IGNORE_FLAGS="${{ steps.allowlist.outputs.pip_ignore }}"
 
-          # Run pip-audit against requirements.txt only (no installed packages scope creep)
+          # Scan requirements.lock (the hash-pinned, exact-version file that actually
+          # ships, #3849), not requirements.txt. Auditing the open `>=` ranges in
+          # requirements.txt would resolve against whatever is newest-and-still-in-range
+          # on PyPI *today* — not the frozen set the Dockerfile installs — so once the
+          # lock exists, scanning the ranges silently stops checking what's deployed.
+          # --require-hashes keeps the audited artifact tied to the pinned hash, same
+          # guarantee as the Dockerfile install.
           if pip-audit \
-            --requirement backend/requirements.txt \
+            --requirement backend/requirements.lock \
+            --require-hashes \
             --format json \
             --output /tmp/pip-audit.json \
             $IGNORE_FLAGS; then
@@ -131,7 +138,7 @@ jobs:
             jq -r '.[] | select(.vulns | length > 0) | "- **\(.name)** \(.version): " + (.vulns | map(.id) | join(", "))' /tmp/pip-audit.json 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
 
             echo "pip-audit FAILED: $VULN_COUNT vulnerabilities found"
-            echo "Run 'pip-audit -r backend/requirements.txt' locally and fix or add CVE IDs to allowlist"
+            echo "Run 'pip-audit -r backend/requirements.lock --require-hashes' locally, bump + regenerate the lock (backend/README.md), or add CVE IDs to allowlist"
             exit $EXIT_CODE
           fi
 
