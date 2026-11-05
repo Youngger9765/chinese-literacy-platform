@@ -969,3 +969,218 @@ class TestJoiningAnExistingSchoolDoesNotLeakItsStudents:
             f"positive control failed: A could not add their OWN student to "
             f"another of A's classrooms: {add2.status_code} {add2.text}"
         )
+
+
+# ===========================================================================
+# 7. Security review finding (2026-11-02, via code-reviewer on #3820): a
+#    merely-PENDING (not yet accepted) co-teaching invite must not count as
+#    "a classroom I already teach" for _eligible_student_ids()'s narrowing.
+#
+#    _eligible_student_ids()'s `my_classrooms` union queried ClassroomTeacher
+#    by teacher_id alone, with no status filter -- so being invited (but not
+#    having accepted) as a co-teacher of classroom C let that invitee pull
+#    C's enrolled students into their OWN, unrelated classroom's search/add
+#    flow, for self-activated/public-email-domain schools where finding 6
+#    above already narrows who counts as "sharing" a student. #3820 added
+#    status='pending'|'accepted' precisely so a pending invite grants zero
+#    access anywhere; this was the one place in that PR's sweep that missed
+#    the filter. Fixed in classroom_students.py::_eligible_student_ids.
+# ===========================================================================
+
+
+class TestPendingCoTeachingInviteDoesNotLeakTheOtherClassroomsStudents:
+    @pytest.fixture(scope="class")
+    def actors(self, client):
+        school_name = f"待確認邀請測試國小_{uuid.uuid4().hex[:6]}"
+
+        owner_id, owner_tok = _register_login(client, "pending_leak_owner")
+        act_owner = client.post(
+            "/api/users/me/activate-teacher",
+            json={"schools": [{"name": school_name}]},
+            headers=auth_header(owner_tok),
+        )
+        school_id = act_owner.json()["schools"][0]["id"]
+        cls_owner = client.post(
+            "/api/classrooms",
+            json={"name": "PendingLeakOwnerClass", "school_id": school_id, "grade": 4},
+            headers=auth_header(owner_tok),
+        )
+        assert cls_owner.status_code == 201, cls_owner.text
+        cls_owner_id = cls_owner.json()["id"]
+
+        # Owner's own student -- the one a pending invite must NOT leak.
+        unique_name = f"待洩漏學生_{uuid.uuid4().hex[:6]}"
+        batch = client.post(
+            f"/api/classrooms/{cls_owner_id}/students/batch",
+            json={"students": [{"name": unique_name, "seat_number": "01"}]},
+            headers=auth_header(owner_tok),
+        )
+        assert batch.status_code == 201, batch.text
+        owner_student_id = batch.json()["created"][0]["user_id"]
+
+        # Invitee: shares the same self-activated school, owns their own
+        # separate classroom, and is invited (but has NOT accepted) as a
+        # co-teacher of the owner's classroom.
+        invitee_id, invitee_tok = _register_login(client, "pending_leak_invitee")
+        act_invitee = client.post(
+            "/api/users/me/activate-teacher",
+            json={"schools": [{"name": school_name}]},
+            headers=auth_header(invitee_tok),
+        )
+        assert act_invitee.json()["schools"][0]["id"] == school_id, (
+            "sanity: owner and invitee must share the same self-activated school"
+        )
+        cls_invitee = client.post(
+            "/api/classrooms",
+            json={"name": "PendingLeakInviteeClass", "school_id": school_id, "grade": 4},
+            headers=auth_header(invitee_tok),
+        )
+        assert cls_invitee.status_code == 201, cls_invitee.text
+        cls_invitee_id = cls_invitee.json()["id"]
+
+        # The invite endpoint looks up by email; read it back via /me rather
+        # than reconstructing _register_login's internal format by guessing.
+        me_invitee = client.get("/api/users/me", headers=auth_header(invitee_tok))
+        invitee_email = me_invitee.json()["email"]
+        invite = client.post(
+            f"/api/classrooms/{cls_owner_id}/teachers",
+            json={"email": invitee_email, "role": "viewer"},
+            headers=auth_header(owner_tok),
+        )
+        assert invite.status_code == 201, invite.text
+        assert invite.json()["status"] == "pending", (
+            "test setup requires the invite to still be pending (NOT accepted) "
+            "-- that's the exact condition this leak only reproduces under"
+        )
+
+        return {
+            "owner_tok": owner_tok, "invitee_tok": invitee_tok, "school_id": school_id,
+            "cls_owner_id": cls_owner_id, "cls_invitee_id": cls_invitee_id,
+            "owner_student_id": owner_student_id, "owner_student_name": unique_name,
+        }
+
+    def test_pending_invitee_cannot_search_for_the_other_classrooms_student(self, client, actors):
+        # #3816: reuse the module's `client` fixture instead of minting a
+        # fresh TestClient per call -- see the note on
+        # test_declaring_same_school_does_not_grant_viewing_someone_elses_classroom.
+        resp = client.post(
+            f"/api/classrooms/{actors['cls_invitee_id']}/students/search",
+            json={"query": actors["owner_student_name"]},
+            headers=auth_header(actors["invitee_tok"]),
+        )
+        assert resp.status_code == 200, resp.text
+        found_ids = {r["id"] for r in resp.json()}
+        assert actors["owner_student_id"] not in found_ids, (
+            f"a still-PENDING (not accepted) co-teaching invite must not let the "
+            f"invitee search up the other classroom's student: {resp.json()}"
+        )
+
+    def test_pending_invitee_cannot_add_the_other_classrooms_student(self, client, actors):
+        resp = client.post(
+            f"/api/classrooms/{actors['cls_invitee_id']}/students",
+            json={"student_id": actors["owner_student_id"]},
+            headers=auth_header(actors["invitee_tok"]),
+        )
+        assert resp.status_code == 404, (
+            f"a still-PENDING (not accepted) co-teaching invite must not let the "
+            f"invitee enrol the other classroom's student into their own "
+            f"classroom: {resp.status_code} {resp.text}"
+        )
+
+    def test_positive_control_accepting_the_invite_then_unlocks_it(self, client, actors):
+        """Not "nothing ever works" -- once the invite is ACCEPTED, the
+        invitee legitimately co-teaches cls_owner_id, so the owner's
+        classroom's roster becoming reachable from the invitee's search is
+        the correct, intended behavior (#3820: accepted editor/viewer can
+        both read). This also proves the two tests above failed for the
+        right reason (pending-ness), not because search/add are broken."""
+        c = client
+
+        me_invitee = c.get("/api/users/me", headers=auth_header(actors["invitee_tok"]))
+        invitee_id = me_invitee.json()["id"]
+        accept = c.post(
+            f"/api/classrooms/{actors['cls_owner_id']}/teachers/{invitee_id}/accept",
+            headers=auth_header(actors["invitee_tok"]),
+        )
+        assert accept.status_code == 200, accept.text
+
+        search = c.post(
+            f"/api/classrooms/{actors['cls_invitee_id']}/students/search",
+            json={"query": actors["owner_student_name"]},
+            headers=auth_header(actors["invitee_tok"]),
+        )
+        assert search.status_code == 200, search.text
+        assert actors["owner_student_id"] in {r["id"] for r in search.json()}, (
+            f"positive control failed: once ACCEPTED, the invitee should be "
+            f"able to find the co-taught classroom's student: {search.json()}"
+        )
+
+
+# ===========================================================================
+# 9. Claude Security finding find_01RzZ2bXyjs6SrNmD7KkKy91 (high), part 3 of
+#    its recommendation -- create_classroom's only gate is is_school_member,
+#    which counts ANY school-scoped role, including a plain `student`
+#    (e.g. granted automatically on join-by-code, or on self-activation of
+#    a `student` row). A student (or any school-scoped non-teacher) could
+#    therefore create a classroom at that school and, via the chain the
+#    rest of this finding covers, enrol and reset the password of other
+#    students there. Fixed in classroom_crud.py::create_classroom to
+#    require a school-scoped `teacher` role specifically (or system_admin).
+# ===========================================================================
+
+
+class TestCreateClassroomRequiresATeacherRoleAtTheSchool:
+    @pytest.fixture(scope="class")
+    def school_id(self):
+        session = TestingSessionLocal()
+        school = School(name=f"建班權限測試國小_{uuid.uuid4().hex[:6]}")
+        session.add(school)
+        session.commit()
+        sid = school.id
+        session.close()
+        return sid
+
+    def _grant_school_scoped_role(self, user_id: int, role_name: str, school_id: int) -> None:
+        session = TestingSessionLocal()
+        try:
+            role = session.query(Role).filter(Role.name == role_name).first()
+            session.add(
+                UserRole(
+                    user_id=user_id,
+                    role_id=role.id,
+                    scope_type="school",
+                    scope_id=str(school_id),
+                )
+            )
+            session.commit()
+        finally:
+            session.close()
+
+    def test_a_student_scoped_to_the_school_cannot_create_a_classroom_there(self, client, school_id):
+        student_id, student_tok = _register_login(client, "create_cls_student")
+        self._grant_school_scoped_role(student_id, "student", school_id)
+
+        resp = client.post(
+            "/api/classrooms",
+            json={"name": "ShouldNotExist", "school_id": school_id, "grade": 4},
+            headers=auth_header(student_tok),
+        )
+        assert resp.status_code == 403, (
+            f"a school-scoped STUDENT must not be able to create a classroom "
+            f"at that school: {resp.status_code} {resp.text}"
+        )
+
+    def test_positive_control_a_teacher_scoped_to_the_school_can_create_a_classroom(self, client, school_id):
+        teacher_id, teacher_tok = _register_login(client, "create_cls_teacher")
+        self._grant_school_scoped_role(teacher_id, "teacher", school_id)
+
+        resp = client.post(
+            "/api/classrooms",
+            json={"name": "ShouldExist", "school_id": school_id, "grade": 4},
+            headers=auth_header(teacher_tok),
+        )
+        assert resp.status_code == 201, (
+            f"positive control failed: a school-scoped TEACHER must still be "
+            f"able to create a classroom at that school: "
+            f"{resp.status_code} {resp.text}"
+        )

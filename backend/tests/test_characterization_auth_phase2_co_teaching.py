@@ -211,6 +211,15 @@ def setup_module():
         # The owner has to belong to the school before it can create there.
         _make_school_member("cotest_owner@test.com", school_id)
 
+        # (Claude Security find_01NKQLkX94VWRwpkBgYmc54s) invite_co_teacher
+        # now also requires the invitee to already hold a school-scoped
+        # teacher role at THIS school -- these three are all invited below,
+        # so they all need it, same as the real self-activation path every
+        # genuine co-teacher goes through in production.
+        _make_school_member("cotest_coteacher@test.com", school_id)
+        _make_school_member("cotest_extra@test.com", school_id)
+        _make_school_member("cotest_leave@test.com", school_id)
+
         # Create classroom as owner
         cr = client.post(
             "/api/classrooms",

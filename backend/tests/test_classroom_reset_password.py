@@ -26,7 +26,7 @@ from app.database import get_db
 from app.main import app
 from app.models import Base
 from app.models.organization import Organization
-from app.models.school import ClassroomStudent, ClassroomTeacher, School
+from app.models.school import Classroom, ClassroomStudent, ClassroomTeacher, School
 from app.models.user import Role, User, UserRole
 from app.services.password_reset_service import generate_password_reset_token
 
@@ -253,6 +253,33 @@ def _enroll_student(client, teacher: dict, classroom_id: int, student_id: int) -
     assert resp.status_code in (200, 201), resp.text
 
 
+def _create_classroom_direct(teacher_id: int, school_id: int, name: str = "Reset PW Test Direct") -> int:
+    """Create a classroom by DB row, bypassing POST /api/classrooms.
+
+    (Claude Security find_01RzZ2bXyjs6SrNmD7KkKy91, part 3) create_classroom
+    now requires is_school_teacher, not just is_school_member -- a student
+    -only or wrong-school-teacher caller can no longer create a classroom
+    through the endpoint. Two tests below deliberately set up exactly such a
+    caller to prove reset_student_password ALSO denies them independently
+    (defense in depth), so their classroom has to come from a direct DB
+    insert now, same as _enroll_directly's existing pattern for the
+    analogous student-side case.
+    """
+    db = TestingSessionLocal()
+    try:
+        classroom = Classroom(
+            school_id=school_id,
+            teacher_id=teacher_id,
+            name=f"{name} {uuid.uuid4().hex[:6]}",
+        )
+        db.add(classroom)
+        db.commit()
+        db.refresh(classroom)
+        return classroom.id
+    finally:
+        db.close()
+
+
 def _enroll_directly(classroom_id: int, student_id: int) -> None:
     """Enroll by DB row, bypassing the add-student endpoint.
 
@@ -415,7 +442,7 @@ def test_student_only_owner_cannot_reset_enrolled_victims_password_403(client):
     victim_school_id = _create_school_for_teacher(victim["user_id"])
     _assign_role(caller["user_id"], "student", scope_type="school", scope_id=str(caller_school_id))
     _assign_role(victim["user_id"], "student", scope_type="school", scope_id=str(victim_school_id))
-    classroom_id = _create_classroom(client, caller, caller_school_id)
+    classroom_id = _create_classroom_direct(caller["user_id"], caller_school_id)
     _enroll_directly(classroom_id, victim["user_id"])
 
     db = TestingSessionLocal()
@@ -867,16 +894,17 @@ def test_caller_teacher_role_scoped_to_different_school_denied_403(client):
     _deactivate_all_roles(owner["user_id"])
     school_a_id = _create_org_and_school(f"org-{uuid.uuid4().hex[:8]}")
     school_b_id = _create_org_and_school(f"org-{uuid.uuid4().hex[:8]}")
-    # Caller has standing to CREATE a classroom at School A (any active
-    # school-scoped role satisfies create_classroom's is_school_member check
-    # -- a pre-existing architectural gap, see
-    # test_student_only_owner_cannot_reset_enrolled_victims_password_403),
-    # but their only TEACHER role is at School B, a different school.
+    # Caller's only TEACHER role is at School B, a different school than
+    # the classroom (School A) -- create_classroom now requires
+    # is_school_teacher (Claude Security find_01RzZ2bXyjs6SrNmD7KkKy91 part
+    # 3), so a caller with no teacher standing at School A can no longer
+    # create the classroom through the endpoint; built directly instead,
+    # same as the analogous case above.
     _assign_role(owner["user_id"], "student", scope_type="school", scope_id=str(school_a_id))
     _assign_role(owner["user_id"], "teacher", scope_type="school", scope_id=str(school_b_id))
     _assign_role(student["user_id"], "student", scope_type="school", scope_id=str(school_a_id))
-    classroom_id = _create_classroom(client, owner, school_a_id)
-    _enroll_student(client, owner, classroom_id, student["user_id"])
+    classroom_id = _create_classroom_direct(owner["user_id"], school_a_id)
+    _enroll_directly(classroom_id, student["user_id"])
 
     resp = _reset_password(client, owner, classroom_id, student["user_id"])
     assert resp.status_code == 403, resp.text
