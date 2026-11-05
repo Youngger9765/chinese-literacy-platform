@@ -20,11 +20,19 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-      id-token: write
+      # Claude Security finding "PR-review agent can be prompt-injected by
+      # fork PR diff to leak runner secrets publicly" (high), recommendation
+      # part 2: this job carried id-token: write with nothing in the
+      # workflow that calls Google Cloud -- a successful prompt injection
+      # from a fork PR's diff (untrusted, attacker-controlled text this job
+      # reads via `gh pr diff`) could exchange that OIDC token for the
+      # prod-deploy identity, since the WIF provider accepted any token
+      # from this repository. Dropped entirely.
     steps:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 1
+          persist-credentials: false  # don't leave a token'd git config lying around for the agent's own shell to find
 
       - name: Claude Review
         uses: anthropics/claude-code-action@v1
