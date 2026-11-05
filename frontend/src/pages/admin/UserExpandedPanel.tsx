@@ -11,6 +11,7 @@ import { UserListItem } from '../../services/userApi';
 import {
   getUserRoles,
   revokeRole,
+  activateRole,
   UserRoleDetailResponse,
   RoleApiError,
 } from '../../services/roleApi';
@@ -35,6 +36,7 @@ const UserExpandedPanel: React.FC<UserExpandedPanelProps> = ({ user, onRolesChan
   // Inline revoke confirm
   const [revokeConfirmId, setRevokeConfirmId] = useState<number | null>(null);
   const [isRevoking, setIsRevoking] = useState(false);
+  const [activatingId, setActivatingId] = useState<number | null>(null);
 
   const loadRoleDetails = useCallback(async () => {
     if (!token) return;
@@ -71,6 +73,25 @@ const UserExpandedPanel: React.FC<UserExpandedPanelProps> = ({ user, onRolesChan
       setRolesError(msg);
     } finally {
       setIsRevoking(false);
+    }
+  };
+
+  // Claude Security find_01RzZ2bXyjs6SrNmD7KkKy91 (high), 2026-11-05:
+  // admin-confirmation counterpart to handleRevoke -- the real path that
+  // closes the "a teacher's self-activated-at-a-pre-existing-school role
+  // is pending forever" gap.
+  const handleActivate = async (assignmentId: number) => {
+    if (!token) return;
+    setActivatingId(assignmentId);
+    try {
+      await activateRole(token, assignmentId);
+      await loadRoleDetails();
+      onRolesChanged();
+    } catch (err) {
+      const msg = err instanceof RoleApiError ? err.message : '啟用角色失敗';
+      setRolesError(msg);
+    } finally {
+      setActivatingId(null);
     }
   };
 
@@ -127,7 +148,16 @@ const UserExpandedPanel: React.FC<UserExpandedPanelProps> = ({ user, onRolesChan
                   </div>
 
                   {/* Inline revoke confirm */}
-                  <div className="shrink-0 ml-2">
+                  <div className="shrink-0 ml-2 flex items-center gap-2">
+                    {!rd.is_active && (
+                      <button
+                        onClick={() => handleActivate(rd.id)}
+                        disabled={activatingId === rd.id}
+                        className="text-xs text-green-600 hover:text-green-800 font-medium cursor-pointer disabled:opacity-50"
+                      >
+                        {activatingId === rd.id ? '啟用中...' : '啟用'}
+                      </button>
+                    )}
                     {revokeConfirmId === rd.id ? (
                       <div className="flex items-center gap-1">
                         <button

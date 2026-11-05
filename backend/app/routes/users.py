@@ -226,8 +226,21 @@ def activate_teacher(
 
     return ActivateTeacherResponse(
         schools=[
-            SchoolActivationBrief(id=school.id, name=school.name, is_new=is_new)
-            for school, is_new in schools_with_flag
+            SchoolActivationBrief(
+                id=school.id,
+                name=school.name,
+                is_new=is_new,
+                # The real, authoritative state -- computed inside
+                # activate_teacher_for_schools, which knows whether this
+                # was a new grant, an idempotent re-call on an already-
+                # active row, or a still-pending one. NOT re-derived here
+                # from is_new alone (that under-reports an already-active
+                # role on a repeat call -- caught by this project's own
+                # regression test, test_an_existing_active_role_at_a_
+                # pre_existing_school_is_never_downgraded).
+                role_active=role_active,
+            )
+            for school, is_new, role_active in schools_with_flag
         ],
         roles=roles,
     )

@@ -119,6 +119,14 @@ class SchoolActivationBrief(BaseModel):
     id: int
     name: str
     is_new: bool
+    # Claude Security find_01RzZ2bXyjs6SrNmD7KkKy91 (high), 2026-11-05:
+    # True exactly when is_new is True (a school this call just created)
+    # -- a teacher role at a PRE-EXISTING school is granted inactive and
+    # needs a system_admin to confirm it before it does anything. Surfaced
+    # explicitly (not left for the frontend to infer from is_new) so a
+    # future change to the activation policy can't silently desync the
+    # two without this field visibly lying.
+    role_active: bool
 
     model_config = {"from_attributes": True}
 

@@ -168,7 +168,7 @@ def _resolve_school_by_manual_name(db: Session, user: User, raw_name: str) -> tu
 
 def activate_teacher_for_schools(
     db: Session, user: User, schools_input: list[ActivateTeacherSchoolInput]
-) -> list[tuple[School, bool]]:
+) -> list[tuple[School, bool, bool]]:
     """Self-serve teacher activation (#3804, extended #3812): grant
     `teacher` scoped to each selected school.
 
@@ -186,12 +186,21 @@ def activate_teacher_for_schools(
     school.
 
     Returns:
-        A list of (School, is_new) in input order — is_new is True only for
-        a brand-new manually-created school (a directory row picked by code
-        is never "new" here; it was imported, not created by this call).
+        A list of (School, is_new, role_active) in input order.
+        - is_new: True only for a brand-new manually-created school (a
+          directory row picked by code is never "new" here; it was
+          imported, not created by this call).
+        - role_active: whether the caller's teacher role at this school
+          is ACTUALLY active right now (find_01RzZ2bXyjs6SrNmD7KkKy91,
+          high, 2026-11-05) -- reflects the real row state, not just
+          whether THIS call would have created an active one, so a
+          repeat/idempotent call on an already-active row (e.g. a real
+          teacher an admin granted directly, re-declaring the same
+          school) correctly reports True, not a guess re-derived from
+          is_new alone.
     """
     teacher_role = db.query(Role).filter(Role.name == "teacher").first()
-    schools: list[tuple[School, bool]] = []
+    schools: list[tuple[School, bool, bool]] = []
 
     for item in schools_input:
         if item.moe_school_code:
@@ -199,7 +208,7 @@ def activate_teacher_for_schools(
         else:
             school, is_new = _resolve_school_by_manual_name(db, user, item.name)
 
-        schools.append((school, is_new))
+        role_active = False  # overwritten below whenever teacher_role exists
 
         if teacher_role is not None:
             existing_role = (
@@ -213,29 +222,102 @@ def activate_teacher_for_schools(
                 .first()
             )
             if existing_role is None:
+                # Claude Security find_01RzZ2bXyjs6SrNmD7KkKy91 (high),
+                # coordinator decision 2026-11-05 -- supersedes this
+                # function's own 2026-11-02 PRD §4.2 stance (see
+                # _resolve_school_by_manual_name's docstring) that matching
+                # an existing row should never be treated differently from
+                # creating one. It now is, specifically for how much trust
+                # the resulting TEACHER ROLE gets (not for the school row
+                # itself, which still isn't retroactively flagged):
+                #
+                # Trust immediately (is_active=True) when the school is
+                # self-activation-born -- `is_new` (this call just created
+                # it) OR an EARLIER self-activation already created it
+                # (settings.created_via == "self_activation", the same
+                # flag classroom_students.py::_eligible_student_ids already
+                # keys on). Multiple teachers joining the same self-created
+                # school shortly after each other is the normal multi-
+                # teacher-per-school case, not the threat this finding
+                # names -- that narrowing already lives downstream in
+                # _eligible_student_ids (a self-activated colleague still
+                # can't see another self-activated colleague's students).
+                #
+                # Require confirmation (is_active=False) only for a
+                # GENUINELY pre-existing school -- MOE-directory-imported
+                # or admin-created (settings is None / no created_via
+                # marker) -- which is exactly what the finding's own threat
+                # model names ("an existing school imported from the MOE
+                # directory or created by an admin is an open target").
+                # Those schools may already have real teachers and students
+                # who trust "anyone with a school-scoped teacher role here
+                # is a colleague" -- is_school_teacher()/create_classroom
+                # and _eligible_student_ids/search+enrol all gate on
+                # UserRole.is_active, so an inactive row here means the
+                # caller is registered (idempotent re-calls, discoverable
+                # by an admin) but cannot create a classroom, search for,
+                # or enrol that school's students until a system_admin
+                # activates it (no approval endpoint exists yet for this
+                # specific pending state -- an admin can flip is_active via
+                # direct DB access or a future dedicated endpoint; tracked
+                # as follow-up product work, not blocking this security
+                # fix).
+                is_self_activation_school = bool(
+                    school.settings
+                    and school.settings.get("created_via") == "self_activation"
+                )
+                role_active = is_new or is_self_activation_school
                 db.add(
                     UserRole(
                         user_id=user.id,
                         role_id=teacher_role.id,
                         scope_type="school",
                         scope_id=str(school.id),
+                        is_active=role_active,
                     )
                 )
+            elif existing_role.is_active:
+                # Idempotent re-declaration of a school where the caller
+                # ALREADY holds an active role (however it was granted --
+                # self-activation or a direct admin assign). Must report
+                # the real, unchanged state, not re-derive a guess from
+                # is_new/is_self_activation_school, which would wrongly
+                # report False for a real admin-granted teacher at a
+                # pre-existing school simply re-declaring it.
+                role_active = True
             elif not existing_role.is_active:
-                # (#3804 security review, 2026-11-01) A system_admin can
-                # revoke this exact role via DELETE /roles/assignments/{id}
-                # (soft delete, is_active=False -- routes/roles.py::
-                # revoke_role). Silently flipping it back to True here would
-                # let the teacher undo that revocation themselves just by
-                # naming the same school again -- a real privilege
-                # escalation around an admin action. Fail closed instead.
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail=(
-                        f"您在「{school.name}」的老師身分已被停用，"
-                        "請聯繫管理員處理，無法自行重新開通。"
-                    ),
+                # An existing inactive row is ambiguous on its own -- it
+                # could be #3804's original "admin revoked it" case, or
+                # this fix's new "pending confirmation, never active"
+                # case. Distinguish using the SAME signal the creation
+                # branch above just used: a fresh grant at a self-
+                # activation-type school is ALWAYS created active, so an
+                # inactive row there could only have gotten that way by
+                # being revoked after the fact -- fail closed, same as
+                # #3804 always did (re-naming the school must not let the
+                # teacher undo an admin's revocation). An inactive row at
+                # a GENUINELY pre-existing (non-self-activation) school
+                # is this fix's normal, expected pending state --
+                # a repeat call must stay idempotent (200, still inactive,
+                # still can't act on it) rather than erroring, since the
+                # row's state does not change either way.
+                is_self_activation_school = bool(
+                    school.settings
+                    and school.settings.get("created_via") == "self_activation"
                 )
+                if is_self_activation_school:
+                    raise HTTPException(
+                        status_code=status.HTTP_403_FORBIDDEN,
+                        detail=(
+                            f"您在「{school.name}」的老師身分已被停用，"
+                            "請聯繫管理員處理，無法自行重新開通。"
+                        ),
+                    )
+                # else: pending confirmation at a pre-existing school --
+                # fall through, idempotent no-op, row stays inactive
+                # (role_active stays at its False default).
+
+        schools.append((school, is_new, role_active))
 
     return schools
 
