@@ -73,6 +73,20 @@ TASK_MODELS: dict[str, tuple[str, str]] = {
 }
 
 
+# Tasks that are conversational / open-ended chat (the Socratic comprehension
+# dialogue), as opposed to scoring/grading/generation inside a fixed learning
+# step. Gated by AI_CHATBOT_ENABLED in addition to the general
+# AI_FEATURES_ENABLED kill switch — see #3861 (scope correction to the #3838
+# security-incident kill switch: only chatbot AI should stay off by default,
+# everything else should work normally once AI_FEATURES_ENABLED is on).
+# Single source of truth consumed by app.services.ai.gemini_client so any
+# caller routing through TASK_MODELS inherits the right gate automatically.
+CHATBOT_TASKS: frozenset[str] = frozenset({
+    "socratic_question",
+    "socratic_agent_process",
+})
+
+
 def get_model_for_task(task: str) -> tuple[str, str]:
     """Return (model_name, location) for the given task.
 
