@@ -230,20 +230,17 @@ def activate_teacher(
                 id=school.id,
                 name=school.name,
                 is_new=is_new,
-                # Same condition as auth_registration_service.py's
-                # activate_teacher_for_schools -- kept in sync there, not
-                # re-derived from is_new alone (see that function's
-                # comment for why a self-activation-born school is
-                # trusted even when this call didn't create it).
-                role_active=bool(
-                    is_new
-                    or (
-                        school.settings
-                        and school.settings.get("created_via") == "self_activation"
-                    )
-                ),
+                # The real, authoritative state -- computed inside
+                # activate_teacher_for_schools, which knows whether this
+                # was a new grant, an idempotent re-call on an already-
+                # active row, or a still-pending one. NOT re-derived here
+                # from is_new alone (that under-reports an already-active
+                # role on a repeat call -- caught by this project's own
+                # regression test, test_an_existing_active_role_at_a_
+                # pre_existing_school_is_never_downgraded).
+                role_active=role_active,
             )
-            for school, is_new in schools_with_flag
+            for school, is_new, role_active in schools_with_flag
         ],
         roles=roles,
     )

@@ -160,6 +160,13 @@ export interface ActivateTeacherSchool {
   id: number;
   name: string;
   is_new: boolean;
+  /** Claude Security find_01RzZ2bXyjs6SrNmD7KkKy91 (high), 2026-11-05:
+   * false for a genuinely pre-existing (MOE-imported/admin-created)
+   * school — the teacher role exists but is pending a system_admin's
+   * confirmation and cannot yet create a classroom or see any student
+   * at that school. True for a self-activation-born school (brand new
+   * or an earlier self-activation's), which stays immediately usable. */
+  role_active: boolean;
 }
 
 export interface ActivateTeacherResponse {

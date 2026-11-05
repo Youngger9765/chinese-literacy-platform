@@ -351,13 +351,19 @@ class TestRevokeRole:
             headers=auth_header(admin_user["token"]),
         )
 
-        # Check user's active roles -- 'parent' should not appear
+        # Claude Security find_01RzZ2bXyjs6SrNmD7KkKy91 (high), 2026-11-05:
+        # GET /users/{id}/roles now returns inactive roles too (an admin
+        # needs to SEE a pending/revoked row to act on it via the new
+        # activate endpoint) -- the revoked role still appears, just
+        # marked is_active=False, instead of disappearing entirely.
         roles_resp = client.get(
             f"/api/users/{user['user_id']}/roles",
             headers=auth_header(admin_user["token"]),
         )
-        role_names = [r["role_name"] for r in roles_resp.json()]
-        assert "parent" not in role_names
+        parent_role = next(
+            r for r in roles_resp.json() if r["role_name"] == "parent"
+        )
+        assert parent_role["is_active"] is False
 
     def test_revoke_nonexistent_returns_404(self, client, admin_user):
         resp = client.delete(
@@ -370,6 +376,112 @@ class TestRevokeRole:
     def test_revoke_requires_auth(self, client):
         resp = client.delete("/api/roles/assignments/1")
         assert resp.status_code == 401
+
+
+# ===========================================================================
+# POST /api/roles/assignments/{id}/activate
+# Claude Security find_01RzZ2bXyjs6SrNmD7KkKy91 (high), 2026-11-05: the
+# admin-confirmation path for a role granted inactive (a teacher self-
+# activating at a genuinely pre-existing school). Without this endpoint,
+# such a role was pending forever.
+# ===========================================================================
+
+
+class TestActivateRole:
+    def test_activate_makes_an_inactive_role_active(self, client, admin_user):
+        user = _register_user(client, "activate_check")
+        assign_resp = client.post(
+            "/api/roles/assign",
+            json={
+                "user_id": user["user_id"],
+                "role_name": "parent",
+                "scope_type": "school",
+                "scope_id": "3",
+            },
+            headers=auth_header(admin_user["token"]),
+        )
+        assignment_id = assign_resp.json()["id"]
+        # revoke it first so there's something genuinely inactive to activate
+        client.delete(
+            f"/api/roles/assignments/{assignment_id}",
+            headers=auth_header(admin_user["token"]),
+        )
+
+        resp = client.post(
+            f"/api/roles/assignments/{assignment_id}/activate",
+            headers=auth_header(admin_user["token"]),
+        )
+        assert resp.status_code == 200, resp.text
+        assert resp.json()["is_active"] is True
+
+        roles_resp = client.get(
+            f"/api/users/{user['user_id']}/roles",
+            headers=auth_header(admin_user["token"]),
+        )
+        parent_role = next(
+            r for r in roles_resp.json() if r["role_name"] == "parent"
+        )
+        assert parent_role["is_active"] is True
+
+    def test_activate_an_already_active_role_is_an_idempotent_no_op(self, client, admin_user):
+        user = _register_user(client, "activate_idempotent")
+        assign_resp = client.post(
+            "/api/roles/assign",
+            json={
+                "user_id": user["user_id"],
+                "role_name": "parent",
+                "scope_type": "school",
+                "scope_id": "4",
+            },
+            headers=auth_header(admin_user["token"]),
+        )
+        assignment_id = assign_resp.json()["id"]
+
+        resp = client.post(
+            f"/api/roles/assignments/{assignment_id}/activate",
+            headers=auth_header(admin_user["token"]),
+        )
+        assert resp.status_code == 200, resp.text
+        assert resp.json()["is_active"] is True
+
+    def test_activate_nonexistent_returns_404(self, client, admin_user):
+        resp = client.post(
+            "/api/roles/assignments/99999/activate",
+            headers=auth_header(admin_user["token"]),
+        )
+        assert resp.status_code == 404
+        assert resp.json()["detail"] == "Role assignment not found"
+
+    def test_activate_requires_auth(self, client):
+        resp = client.post("/api/roles/assignments/1/activate")
+        assert resp.status_code == 401
+
+    def test_activate_requires_system_admin_not_just_any_teacher(self, client, admin_user):
+        """Negative control: a non-admin teacher must not be able to
+        self-activate-confirm by calling the admin endpoint directly."""
+        user = _register_user(client, "activate_non_admin_target")
+        assign_resp = client.post(
+            "/api/roles/assign",
+            json={
+                "user_id": user["user_id"],
+                "role_name": "parent",
+                "scope_type": "school",
+                "scope_id": "5",
+            },
+            headers=auth_header(admin_user["token"]),
+        )
+        assignment_id = assign_resp.json()["id"]
+        client.delete(
+            f"/api/roles/assignments/{assignment_id}",
+            headers=auth_header(admin_user["token"]),
+        )
+
+        non_admin = _register_user(client, "activate_not_an_admin")
+        resp = client.post(
+            f"/api/roles/assignments/{assignment_id}/activate",
+            headers=auth_header(non_admin["token"]),
+        )
+        assert resp.status_code == 403
 
 
 # ===========================================================================

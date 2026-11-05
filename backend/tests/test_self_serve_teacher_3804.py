@@ -1282,3 +1282,72 @@ class TestActivationIntoAPreExistingSchoolNeedsConfirmation:
             "just created) is the normal multi-teacher case, not the gap "
             "this finding closes -- must stay immediately active"
         )
+
+    def test_an_existing_active_role_at_a_pre_existing_school_is_never_downgraded(self, client):
+        """Coordinator-required check (c), 2026-11-05: a REAL teacher who
+        already holds an active role at a pre-existing school (e.g. an
+        admin granted it directly, bypassing self-activation) must be
+        completely unaffected by this fix. Re-calling activate-teacher
+        for the same school (idempotent re-declaration, which the
+        frontend may legitimately do) must leave an already-active role
+        active -- never silently downgrade it to pending."""
+        from app.models.user import Role, UserRole
+
+        db = TestingSessionLocal()
+        try:
+            school = School(name=f"既有真老師學校_{uuid.uuid4().hex[:6]}", domain=None)
+            db.add(school)
+            db.commit()
+            db.refresh(school)
+            school_id = school.id
+        finally:
+            db.close()
+
+        _, token = _register_login(client, "already_real_teacher")
+        user_id = client.get("/api/users/me", headers=auth_header(token)).json()["id"]
+
+        # Simulate an admin directly granting an ACTIVE teacher role here
+        # (the realistic "already a real teacher" case this fix must not
+        # touch) -- NOT via self-activation, which is exactly the point:
+        # this role's activeness has nothing to do with this fix's logic.
+        db = TestingSessionLocal()
+        try:
+            teacher_role = db.query(Role).filter(Role.name == "teacher").first()
+            db.add(UserRole(
+                user_id=user_id, role_id=teacher_role.id,
+                scope_type="school", scope_id=str(school_id),
+            ))
+            db.commit()
+        finally:
+            db.close()
+
+        # Re-declare the same school via self-activation (idempotent path)
+        resp = client.post(
+            "/api/users/me/activate-teacher",
+            json={"schools": [{"name": school.name}]},
+            headers=auth_header(token),
+        )
+        assert resp.status_code == 200, resp.text
+        assert resp.json()["schools"][0]["role_active"] is True, (
+            "an already-active role must stay active and be reported as "
+            "such -- not silently downgraded by this fix"
+        )
+
+        db = TestingSessionLocal()
+        try:
+            ur = (
+                db.query(UserRole)
+                .filter(UserRole.user_id == user_id, UserRole.scope_type == "school", UserRole.scope_id == str(school_id))
+                .first()
+            )
+            assert ur.is_active is True, "the row itself must still be active in the DB"
+        finally:
+            db.close()
+
+        # And the teacher can still actually use it (create_classroom works)
+        cls = client.post(
+            "/api/classrooms",
+            json={"name": "Already Real Teacher Classroom", "school_id": school_id, "grade": 4},
+            headers=auth_header(token),
+        )
+        assert cls.status_code == 201, cls.text

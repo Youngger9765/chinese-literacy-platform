@@ -79,7 +79,9 @@ const ActivateTeacherPage: React.FC = () => {
   const [rows, setRows] = useState<SchoolRow[]>([emptyRow()]);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [successSchools, setSuccessSchools] = useState<string[] | null>(null);
+  const [successSchools, setSuccessSchools] = useState<
+    { name: string; role_active: boolean }[] | null
+  >(null);
 
   const debounceTimers = useRef<Array<ReturnType<typeof setTimeout> | null>>([null]);
   const searchSeq = useRef<number[]>([0]);
@@ -196,9 +198,19 @@ const ActivateTeacherPage: React.FC = () => {
     try {
       const result = await activateTeacher(token, payload);
       await refreshUser();
-      setSuccessSchools(result.schools.map((s) => s.name));
+      setSuccessSchools(
+        result.schools.map((s) => ({ name: s.name, role_active: s.role_active }))
+      );
       setActiveView('teacher');
-      setTimeout(() => navigate('/teacher-home'), 1500);
+      // Claude Security find_01RzZ2bXyjs6SrNmD7KkKy91 (high), 2026-11-05:
+      // only auto-navigate to the teacher dashboard when at least one
+      // school is actually usable (role_active). A fully-pending result
+      // (every school still awaiting admin confirmation) stays on this
+      // screen so the "等待學校管理員確認" message is the thing the
+      // teacher sees next, not a confusing 403 on teacher-home.
+      if (result.schools.some((s) => s.role_active)) {
+        setTimeout(() => navigate('/teacher-home'), 1500);
+      }
     } catch (err) {
       if (err instanceof AuthError) {
         setError(err.message || '開通失敗，請稍後再試');
@@ -211,18 +223,55 @@ const ActivateTeacherPage: React.FC = () => {
   };
 
   if (successSchools) {
+    const activeSchools = successSchools.filter((s) => s.role_active);
+    const pendingSchools = successSchools.filter((s) => !s.role_active);
+    const anyActive = activeSchools.length > 0;
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-amber-50 px-4">
         <div className="w-full max-w-sm text-center">
           <div className="inline-flex items-center justify-center w-14 h-14 bg-accent rounded-2xl mb-4 text-3xl">
-            🎉
+            {anyActive ? '🎉' : '⏳'}
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">開通成功！</h1>
-          <p className="text-gray-500 text-sm mt-2">你現在也是老師了</p>
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 mt-6 text-sm text-gray-700">
-            {successSchools.join('、')}
-          </div>
-          <p className="text-xs text-gray-400 mt-4">正在前往老師首頁...</p>
+          <h1 className="text-2xl font-bold text-gray-900">
+            {anyActive ? '開通成功！' : '已送出開通申請'}
+          </h1>
+          <p className="text-gray-500 text-sm mt-2">
+            {anyActive ? '你現在也是老師了' : '等待學校管理員確認'}
+          </p>
+          {activeSchools.length > 0 && (
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 mt-6 text-sm text-gray-700">
+              {activeSchools.map((s) => s.name).join('、')}
+            </div>
+          )}
+          {/* Claude Security find_01RzZ2bXyjs6SrNmD7KkKy91 (high), 2026-11-05:
+              a genuinely pre-existing (MOE-imported/admin-created) school
+              grants the role inactive, pending a system_admin's
+              confirmation. The teacher must see THIS, not a silent
+              "success" followed by a confusing 403 the next time they try
+              to create a classroom or see a student. */}
+          {pendingSchools.length > 0 && (
+            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mt-4 text-sm text-amber-800 text-left">
+              <p className="font-medium mb-1">
+                以下學校已經存在資料，需要學校管理員確認您的身分後才能使用：
+              </p>
+              <p>{pendingSchools.map((s) => s.name).join('、')}</p>
+              <p className="text-xs text-amber-700 mt-2">
+                請聯繫學校管理員協助確認，確認後即可建立班級與查看學生。
+              </p>
+            </div>
+          )}
+          <p className="text-xs text-gray-400 mt-4">
+            {anyActive ? '正在前往老師首頁...' : '您可以先返回首頁，確認後再回來使用老師功能。'}
+          </p>
+          {!anyActive && (
+            <button
+              type="button"
+              onClick={() => navigate('/')}
+              className="mt-4 text-sm text-accent underline"
+            >
+              返回首頁
+            </button>
+          )}
         </div>
       </div>
     );

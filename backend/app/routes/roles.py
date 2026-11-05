@@ -156,16 +156,66 @@ def revoke_role(
     return None
 
 
+@router.post(
+    "/roles/assignments/{assignment_id}/activate",
+    status_code=200,
+    response_model=UserRoleDetailResponse,
+)
+def activate_role(
+    assignment_id: int,
+    current_user: User = require_role("system_admin"),
+    db: Session = Depends(get_db),
+):
+    """Activate a role assignment (the admin-confirmation counterpart to
+    revoke_role above).
+
+    Claude Security find_01RzZ2bXyjs6SrNmD7KkKy91 (high), 2026-11-05: a
+    teacher self-activating at a genuinely pre-existing (MOE-imported or
+    admin-created) school now gets a role with is_active=False, pending
+    exactly this confirmation -- see auth_registration_service.py::
+    activate_teacher_for_schools. Without this endpoint, that teacher had
+    no way to ever become usable: "an admin can flip is_active via direct
+    DB access" was a real gap, not a real path. This closes it.
+
+    Idempotent: activating an already-active row is a no-op success, not
+    an error -- an admin re-clicking "confirm" twice must not surprise
+    them with a 4xx.
+    """
+    user_role = db.query(UserRole).filter(UserRole.id == assignment_id).first()
+    if user_role is None:
+        raise HTTPException(status_code=404, detail="Role assignment not found")
+
+    if not user_role.is_active:
+        user_role.is_active = True
+        db.commit()
+        logger.info(
+            "Activated role assignment %d by user %d",
+            assignment_id, current_user.id,
+        )
+
+    role = db.query(Role).filter(Role.id == user_role.role_id).first()
+    return _user_role_to_response(user_role, role)
+
+
 @router.get("/users/{user_id}/roles", response_model=list[UserRoleDetailResponse])
 def list_user_roles(
     user_id: int,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """List all active roles for a specific user.
+    """List all roles (active AND inactive/pending) for a specific user.
 
     (#3804) Self, or system_admin. The org_admin/org_owner "same org"
     cross-tenant read is retired along with the org tenancy tier.
+
+    Claude Security find_01RzZ2bXyjs6SrNmD7KkKy91 (high), 2026-11-05: used
+    to filter to is_active==True only, which meant a system_admin had no
+    way to even SEE a teacher's pending (self-activated-at-a-pre-existing-
+    school) role to find its `id` for POST /roles/assignments/{id}/
+    activate -- nor could the teacher themselves confirm, via their own
+    account, that the pending grant genuinely exists and isn't lost.
+    `is_active` is already in the response schema, so callers can tell
+    pending from active without any new field.
     """
     if current_user.id != user_id and not is_system_admin(current_user.id, db):
         raise HTTPException(status_code=403, detail="Not authorized")
@@ -178,7 +228,7 @@ def list_user_roles(
     user_roles = (
         db.query(UserRole, Role)
         .join(Role, UserRole.role_id == Role.id)
-        .filter(UserRole.user_id == user_id, UserRole.is_active == True)
+        .filter(UserRole.user_id == user_id)
         .all()
     )
     return [_user_role_to_response(ur, role) for ur, role in user_roles]

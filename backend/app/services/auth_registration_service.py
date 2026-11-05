@@ -168,7 +168,7 @@ def _resolve_school_by_manual_name(db: Session, user: User, raw_name: str) -> tu
 
 def activate_teacher_for_schools(
     db: Session, user: User, schools_input: list[ActivateTeacherSchoolInput]
-) -> list[tuple[School, bool]]:
+) -> list[tuple[School, bool, bool]]:
     """Self-serve teacher activation (#3804, extended #3812): grant
     `teacher` scoped to each selected school.
 
@@ -186,12 +186,21 @@ def activate_teacher_for_schools(
     school.
 
     Returns:
-        A list of (School, is_new) in input order — is_new is True only for
-        a brand-new manually-created school (a directory row picked by code
-        is never "new" here; it was imported, not created by this call).
+        A list of (School, is_new, role_active) in input order.
+        - is_new: True only for a brand-new manually-created school (a
+          directory row picked by code is never "new" here; it was
+          imported, not created by this call).
+        - role_active: whether the caller's teacher role at this school
+          is ACTUALLY active right now (find_01RzZ2bXyjs6SrNmD7KkKy91,
+          high, 2026-11-05) -- reflects the real row state, not just
+          whether THIS call would have created an active one, so a
+          repeat/idempotent call on an already-active row (e.g. a real
+          teacher an admin granted directly, re-declaring the same
+          school) correctly reports True, not a guess re-derived from
+          is_new alone.
     """
     teacher_role = db.query(Role).filter(Role.name == "teacher").first()
-    schools: list[tuple[School, bool]] = []
+    schools: list[tuple[School, bool, bool]] = []
 
     for item in schools_input:
         if item.moe_school_code:
@@ -199,7 +208,7 @@ def activate_teacher_for_schools(
         else:
             school, is_new = _resolve_school_by_manual_name(db, user, item.name)
 
-        schools.append((school, is_new))
+        role_active = False  # overwritten below whenever teacher_role exists
 
         if teacher_role is not None:
             existing_role = (
@@ -257,15 +266,25 @@ def activate_teacher_for_schools(
                     school.settings
                     and school.settings.get("created_via") == "self_activation"
                 )
+                role_active = is_new or is_self_activation_school
                 db.add(
                     UserRole(
                         user_id=user.id,
                         role_id=teacher_role.id,
                         scope_type="school",
                         scope_id=str(school.id),
-                        is_active=is_new or is_self_activation_school,
+                        is_active=role_active,
                     )
                 )
+            elif existing_role.is_active:
+                # Idempotent re-declaration of a school where the caller
+                # ALREADY holds an active role (however it was granted --
+                # self-activation or a direct admin assign). Must report
+                # the real, unchanged state, not re-derive a guess from
+                # is_new/is_self_activation_school, which would wrongly
+                # report False for a real admin-granted teacher at a
+                # pre-existing school simply re-declaring it.
+                role_active = True
             elif not existing_role.is_active:
                 # An existing inactive row is ambiguous on its own -- it
                 # could be #3804's original "admin revoked it" case, or
@@ -295,7 +314,10 @@ def activate_teacher_for_schools(
                         ),
                     )
                 # else: pending confirmation at a pre-existing school --
-                # fall through, idempotent no-op, row stays inactive.
+                # fall through, idempotent no-op, row stays inactive
+                # (role_active stays at its False default).
+
+        schools.append((school, is_new, role_active))
 
     return schools
 
