@@ -23,6 +23,7 @@ import secrets
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 import pytest
+from fastapi import HTTPException
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
@@ -800,3 +801,107 @@ class TestJunyiLoginDoesNotHijackUnverifiedLocalAccount:
         assert user.junyi_identity_id is None
         # the refusal must not have a side effect of flipping verification
         assert user.email_verified is False
+
+
+class TestJunyiNewAccountIsNotPreVerified:
+    """Claude Security find_01QPThD8PxG5bL5WspBtA6GH (critical), recommendation
+    part 2: Junyi's token exchange returns userId/userEmail/userDisplayName
+    with no verified-email assertion -- unlike Google's id_token, which
+    carries a real, cryptographically-verified email claim. A brand-new
+    account created purely from a Junyi login must therefore NOT be marked
+    email_verified=True, or an attacker with a Junyi identity asserting
+    someone else's (never-registered) email could silently pre-create a
+    "verified" row under that email, onto which the real owner's later,
+    genuinely-verified Google login would then be linked by
+    resolve_google_user's own email_verified gate (#3830).
+    """
+
+    def _get_user(self, email: str):
+        db = TestingSessionLocal()
+        try:
+            return db.query(User).filter(User.email == email).first()
+        finally:
+            db.close()
+
+    def test_brand_new_junyi_account_is_not_pre_verified(self, client):
+        email = f"junyi_unverified_{secrets.token_hex(6)}@student.junyi.org"
+        junyi_user_id = f"junyi_uid_{secrets.token_hex(8)}"
+        fake_junyi_payload = {
+            "data": {
+                "userId": junyi_user_id,
+                "userEmail": email,
+                "userDisplayName": "Brand New Junyi User",
+            }
+        }
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = fake_junyi_payload
+
+        with patch("app.services.sso_login_service.httpx.post", return_value=mock_resp):
+            resp = client.post("/api/auth/junyi", json={"code": "fake-junyi-code"})
+
+        assert resp.status_code == 200
+        assert resp.json().get("is_new_user") is True
+
+        user = self._get_user(email)
+        assert user is not None
+        assert user.email_verified is False, (
+            "a brand-new account created purely from an unverified Junyi "
+            "email claim must not read as verified"
+        )
+
+    def test_a_later_real_google_login_for_that_email_is_not_silently_linked(self, client):
+        """End-to-end: the attack the finding describes, proven closed.
+
+        1. Attacker's Junyi identity asserts victim@example.com, which has
+           never been registered on this platform -> a new, UNverified row
+           is created (previous test).
+        2. The real victim later does a genuine Google login with that
+           same, Google-verified email. Before this fix, step 1's row was
+           email_verified=True, so resolve_google_user's own #3830 gate
+           would have linked the victim's Google identity straight onto
+           the attacker-controlled row -- the attacker's `junyi_identity_id`
+           stays on an account the victim now believes is theirs. After
+           this fix, the row is unverified, so the Google login is refused
+           (409) instead of silently merging the victim into it.
+        """
+        from app.services.sso_login_service import resolve_google_user
+
+        email = f"junyi_then_google_{secrets.token_hex(6)}@example.com"
+        junyi_user_id = f"junyi_uid_{secrets.token_hex(8)}"
+        fake_junyi_payload = {
+            "data": {
+                "userId": junyi_user_id,
+                "userEmail": email,
+                "userDisplayName": "Attacker-Controlled Via Junyi",
+            }
+        }
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = fake_junyi_payload
+        with patch("app.services.sso_login_service.httpx.post", return_value=mock_resp):
+            client.post("/api/auth/junyi", json={"code": "fake-junyi-code"})
+
+        pre_link_user = self._get_user(email)
+        assert pre_link_user is not None
+        assert pre_link_user.junyi_identity_id == junyi_user_id
+
+        db = TestingSessionLocal()
+        try:
+            with pytest.raises(HTTPException) as exc_info:
+                resolve_google_user(
+                    db,
+                    {
+                        "email": email,
+                        "email_verified": True,  # Google really did verify this
+                        "sub": f"google_sub_{secrets.token_hex(8)}",
+                        "name": "Real Victim",
+                    },
+                )
+            assert exc_info.value.status_code == 409
+        finally:
+            db.close()
+
+        # the attacker's Junyi identity must still be the only thing linked
+        after = self._get_user(email)
+        assert after.junyi_identity_id == junyi_user_id

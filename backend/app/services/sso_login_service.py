@@ -229,8 +229,11 @@ def resolve_junyi_user(db: Session, junyi_data: dict) -> tuple[User, bool]:
 
     Flow:
     1. Lookup by junyi_identity_id (returning user).
-    2. Lookup by email (link existing account) → set junyi_identity_id.
-    3. Create new account (student, email_verified=True, unusable password).
+    2. Lookup by email (link existing account) → set junyi_identity_id,
+       only when the existing account's email_verified is already True.
+    3. Create new account (student, email_verified=False -- Junyi's token
+       exchange asserts no proof of email ownership, unlike Google's
+       id_token -- unusable password).
 
     Returns:
         (user, is_new_user)
@@ -310,7 +313,24 @@ def resolve_junyi_user(db: Session, junyi_data: dict) -> tuple[User, bool]:
             password_hash=unusable_hash,
             name=junyi_display_name,
             junyi_identity_id=junyi_user_id,
-            email_verified=True,
+            # Claude Security find_01QPThD8PxG5bL5WspBtA6GH (critical),
+            # recommendation part 2: unlike resolve_google_user's new-account
+            # path (Google's id_token carries a real, cryptographically
+            # verified email claim), Junyi's token exchange returns only
+            # userId/userEmail/userDisplayName -- no verified-email
+            # assertion at all. Marking this True meant a brand-new account
+            # created from a Junyi identity asserting someone ELSE's email
+            # (an email the real owner never registered) would read as
+            # "verified", and resolve_google_user's own email_verified gate
+            # (just above/#3830) would then happily link the real owner's
+            # later, genuinely-verified Google login onto this attacker-
+            # controlled row. False here means: if the real owner later
+            # does anything that checks email_verified (Google linking,
+            # the co-teacher invite gate), they get a clear 409 instead of
+            # being silently merged into an account they don't control.
+            # Does not block this user's own continued Junyi SSO login
+            # (matched by junyi_identity_id, not by this flag).
+            email_verified=False,
         )
         db.add(user)
         db.flush()
