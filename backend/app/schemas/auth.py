@@ -133,3 +133,10 @@ class JunyiLoginResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     is_new_user: bool = False
+
+
+class LinkJunyiResponse(BaseModel):
+    """find_01TR6DK93L6FNmgCd2aDRV3a: result of POST /auth/link-junyi --
+    linking a Junyi identity onto the caller's OWN, already-authenticated
+    account (not a login response; no new token is issued)."""
+    message: str = "均一帳號已連結。"

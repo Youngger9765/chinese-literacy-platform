@@ -42,6 +42,7 @@ from ..schemas.auth import (
     GoogleLoginResponse,
     JunyiLoginRequest,
     JunyiLoginResponse,
+    LinkJunyiResponse,
     LoginRequest,
     RegisterRequest,
     RegisterResponse,
@@ -72,6 +73,7 @@ from ..services.password_reset_service import (
 )
 from ..services.sso_login_service import (
     exchange_junyi_code,
+    link_junyi_identity_to_authenticated_user,
     resolve_google_user,
     resolve_junyi_user,
     verify_google_id_token,
@@ -549,7 +551,10 @@ def junyi_login(req: JunyiLoginRequest, request: Request, db: Session = Depends(
     Flow (mirrors jutor.ai reference implementation):
     1. Exchange the one-time code with Junyi's /api/v2/auth/code endpoint.
     2. If a user with matching junyi_identity_id exists -> login.
-    3. Else if a user with matching email exists -> link junyi_identity_id + login.
+    3. Else if a user with matching email already exists -> 409 (find_01TR6DK93L6FNmgCd2aDRV3a,
+       2026-11-06: an existing account is never auto-linked by email claim
+       alone -- Junyi does not assert verified ownership of that email. Use
+       POST /auth/link-junyi instead, authenticated as that account.
     4. Else -> create a new user account (student role, email_verified=True).
 
     The code is single-use with a 600s TTL (enforced by Junyi's backend).
@@ -575,3 +580,39 @@ def junyi_login(req: JunyiLoginRequest, request: Request, db: Session = Depends(
         is_new_user,
     )
     return JunyiLoginResponse(access_token=token, is_new_user=is_new_user)
+
+
+@router.post("/link-junyi", response_model=LinkJunyiResponse)
+def link_junyi(
+    req: JunyiLoginRequest,
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Link a Junyi identity onto the CALLER's own, already-authenticated
+    account (find_01TR6DK93L6FNmgCd2aDRV3a, 2026-11-06).
+
+    POST /auth/junyi no longer auto-links an existing account by email
+    match -- Junyi's token exchange does not assert verified ownership of
+    the email it reports, so an account match by email alone is not proof
+    the Junyi caller is that account's real owner. This endpoint is the
+    real path for a user who wants Junyi as an additional login method for
+    an account they already hold: they must already be logged in via their
+    original method (password or Google) to call it, so there is no
+    email-ownership trust problem here -- `current_user` is not derived
+    from Junyi's claim at all, it comes from the caller's own Bearer token.
+    """
+    client_ip = real_client_ip(request)
+    if not rate_limiter.check(f"link-junyi:{client_ip}", max_requests=20, window_seconds=60):
+        raise HTTPException(status_code=429, detail="Too many requests. Please try again later.")
+
+    junyi_data = exchange_junyi_code(req.code)
+    link_junyi_identity_to_authenticated_user(db, current_user, junyi_data)
+    db.commit()
+
+    logger.info(
+        "link_junyi: user_id=%s junyi_identity_id=%s",
+        current_user.id,
+        junyi_data["userId"],
+    )
+    return LinkJunyiResponse()

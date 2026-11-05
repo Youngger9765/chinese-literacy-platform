@@ -267,35 +267,40 @@ def resolve_junyi_user(db: Session, junyi_data: dict) -> tuple[User, bool]:
             )
 
     if user is None and junyi_email:
-        # 2. Existing account — link junyi_identity_id
+        # 2. An existing account with this email — never auto-link it here.
+        #
+        # Claude Security find_01TR6DK93L6FNmgCd2aDRV3a (critical, CWE-290),
+        # 2026-11-06 fast-follow to find_01QPThD8PxG5bL5WspBtA6GH (#3867):
+        # that first fix only gated this branch on the LOCAL row's
+        # email_verified, which blocked the attack for an unverified victim
+        # row but left it wide open for a VERIFIED one. Junyi's token
+        # exchange exposes no verified-email flag for us to check at all
+        # (unlike Google's id_token, which does, and which the #3830 fix
+        # correctly trusts) -- there is no signal here that distinguishes
+        # "the real account holder, logging in via Junyi for the first
+        # time" from "an attacker who got a Junyi identity carrying the
+        # victim's email". Gating on the local row's OWN verified state
+        # does not help either way, since it says nothing about who the
+        # JUNYI caller is.
+        #
+        # So: Junyi login never links onto an EXISTING account by email
+        # match, full stop. A user who wants to add Junyi as a login method
+        # for an account they already hold does so explicitly, while
+        # authenticated as that account, via POST /auth/link-junyi -- which
+        # has no email-ownership trust problem because the caller already
+        # holds a valid session for the account being linked.
         candidate = db.query(User).filter(
             User.email == junyi_email,
             User.is_active == True,
         ).first()
         if candidate is not None:
-            # Claude Security find_01QPThD8PxG5bL5WspBtA6GH (critical) /
-            # mirrors the #3830 Google fix just above in this file.
-            # Junyi's token exchange exposes no verified-email flag for us
-            # to check, so the email alone is not proof the caller owns it
-            # -- an attacker could get a Junyi identity carrying the
-            # victim's email, or simply self-register that email via
-            # POST /auth/register first (no proof of ownership required
-            # there; email_verified defaults to False). Only link when OUR
-            # OWN email_verified is already True (set by our own
-            # email-verification flow, or an earlier Google/Junyi login) --
-            # i.e. a row we have independently confirmed the bearer of that
-            # email controls. Otherwise this Junyi login would hand the
-            # attacker a token for an account they don't own.
-            if not candidate.email_verified:
-                raise HTTPException(
-                    status_code=status.HTTP_409_CONFLICT,
-                    detail=(
-                        "這個 Email 已被註冊但尚未驗證，請先用密碼登入並完成"
-                        "Email 驗證，才能改用均一帳號登入。"
-                    ),
-                )
-            candidate.junyi_identity_id = junyi_user_id
-            user = candidate
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=(
+                    "這個 Email 已有帳號，請使用原本的登入方式（密碼或 Google）登入，"
+                    "再於「帳號設定」中連結均一帳號。"
+                ),
+            )
 
     if user is None:
         # 3. New account
@@ -321,3 +326,41 @@ def resolve_junyi_user(db: Session, junyi_data: dict) -> tuple[User, bool]:
         user.junyi_identity_id = junyi_user_id
 
     return user, is_new_user
+
+
+def link_junyi_identity_to_authenticated_user(db: Session, current_user: User, junyi_data: dict) -> User:
+    """Link a Junyi identity onto the CALLER's own, already-authenticated account.
+
+    Companion fix to find_01TR6DK93L6FNmgCd2aDRV3a: resolve_junyi_user no
+    longer auto-links an existing account by email match at login time
+    (Junyi's email claim is not proof of ownership). This is the real path
+    instead -- the caller already holds a valid session for `current_user`
+    (normal password or Google login), so there is no email-ownership trust
+    problem: we are not granting access based on a claim, we are adding a
+    login method to an account the caller has already proven they control.
+
+    Raises:
+        HTTPException 409: this Junyi identity is already linked to a
+            DIFFERENT active account (never silently re-point it -- that
+            would let whoever controls that Junyi identity hijack a second
+            account merely by linking it a second time).
+    """
+    junyi_user_id: str = junyi_data["userId"]
+
+    existing_owner = (
+        db.query(User)
+        .filter(
+            User.junyi_identity_id == junyi_user_id,
+            User.is_active == True,
+            User.id != current_user.id,
+        )
+        .first()
+    )
+    if existing_owner is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="這個均一帳號已經連結到另一個 LingoLeap 帳號，無法重複連結。",
+        )
+
+    current_user.junyi_identity_id = junyi_user_id
+    return current_user
