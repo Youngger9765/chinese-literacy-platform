@@ -103,3 +103,21 @@ export async function getUserRoles(
   });
   return handleResponse<UserRoleDetailResponse[]>(res);
 }
+
+/** Claude Security find_01RzZ2bXyjs6SrNmD7KkKy91 (high), 2026-11-05: the
+ * admin-confirmation counterpart to revokeRole -- activates a role
+ * assignment that was granted inactive (e.g. a teacher self-activating
+ * at a genuinely pre-existing school). */
+export async function activateRole(
+  token: string,
+  assignmentId: number,
+): Promise<UserRoleDetailResponse> {
+  const res = await fetch(
+    `${API_BASE}/api/roles/assignments/${assignmentId}/activate`,
+    {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  );
+  return handleResponse<UserRoleDetailResponse>(res);
+}
