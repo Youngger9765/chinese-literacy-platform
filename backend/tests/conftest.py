@@ -45,20 +45,25 @@ Base.metadata.create_all = _create_all_with_sqlite_patches
 _apply_sqlite_metadata_patches()
 
 
-# ── #3838 AI kill switch — default ON for the test suite ───────────────────
-# Production defaults to OFF (AI_FEATURES_ENABLED absent = disabled, see
-# app/services/ai_feature_flag.py) — a security-incident response so Vertex
-# AI is never called unless an operator explicitly opts back in. Tests
-# default to ON so the many existing test files that mock
-# generate_structured_response / genai.Client and assert on the AI code
-# path's *behaviour* keep exercising that code, instead of getting a
-# blanket 503 from a kill switch they were never written to know about.
-# Tests that specifically exercise the kill switch itself
-# (test_ai_killswitch_3838.py) override this per-test with their own
-# monkeypatch.setenv/delenv, which takes precedence within that test.
+# ── #3838/#3861 AI kill switches — default ON for the test suite ───────────
+# Production default for AI_FEATURES_ENABLED is now ON (absent = enabled,
+# see app/services/ai_feature_flag.py) since #3861 corrected #3838's
+# blanket kill switch to only affect the chatbot surface. But
+# AI_CHATBOT_ENABLED still defaults OFF in production. Tests default BOTH
+# to ON so the many existing test files that mock
+# generate_structured_response / genai.Client / socratic_agent and assert
+# on the AI code path's *behaviour* — including the Socratic comprehension
+# dialogue — keep exercising that code, instead of getting a blanket 503
+# from a kill switch they were never written to know about.
+# Tests that specifically exercise either kill switch
+# (test_ai_killswitch_3838.py, which also covers the #3861 scope correction)
+# override this
+# per-test with their own monkeypatch.setenv/delenv, which takes precedence
+# within that test.
 @pytest.fixture(autouse=True)
 def _ai_features_enabled_by_default(monkeypatch):
     monkeypatch.setenv("AI_FEATURES_ENABLED", "true")
+    monkeypatch.setenv("AI_CHATBOT_ENABLED", "true")
 
 
 def pytest_runtest_setup(item):
