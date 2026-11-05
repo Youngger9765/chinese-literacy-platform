@@ -180,7 +180,23 @@ def load_lesson(uid: str, version: Optional[str] = None) -> Optional[dict]:
     `version=None` takes the highest version directory. Fail-closed: a missing
     `lesson.yml` means the directory is half-written and is treated as absent
     rather than served empty.
+
+    Claude Security find_01FFb5nYvsmyHEYT1koY8wTB (high), recommendation
+    part 2: this function used to build `LESSONS_ROOT / uid` and trust
+    whatever `.is_dir()` said, with `lru_cache(maxsize=None)` keyed on the
+    raw, un-normalised `uid` string. A path-traversal-style alias like
+    "L0001/v3/.." still resolves (at the filesystem level) to the real
+    "L0001" directory, so it passed the is_dir() check and was cached
+    FOREVER under that new, distinct string -- every caller of this
+    function (live_quiz/engine.py, game_core/scope.py, team_arena/engine.py)
+    inherited an effectively unbounded cache keyed on attacker-chosen
+    strings, even after #3879 added validation at the live_quiz call site
+    specifically. Rejecting anything not an exact, known uid here closes
+    the surface for every current and future caller in one place, and
+    bounds this cache's key space to the size of the real lesson corpus.
     """
+    if uid not in available_uids():
+        return None
     uid_dir = LESSONS_ROOT / uid
     if not uid_dir.is_dir():
         return None
