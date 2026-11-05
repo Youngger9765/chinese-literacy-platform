@@ -1,5 +1,11 @@
 name: Claude PR Review
 
+# ⛔ DISABLED 2026-11-06: prompt-injection to secret exfiltration; re-enable
+# only after a sandboxed redesign. See docs/security/L1-CHECKLIST.md.
+# (Workflow disabled via GitHub's own "disable workflow" switch --
+# `gh workflow list --all` shows `disabled_manually` -- not by the `on:`
+# trigger below. Do not re-enable as a side effect of editing this file.)
+
 on:
   issue_comment:
     types: [created]
