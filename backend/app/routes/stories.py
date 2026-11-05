@@ -4,6 +4,7 @@ No database dependency for platform content.
 """
 
 import copy
+from collections import OrderedDict
 from typing import Any
 import re
 import time
@@ -31,11 +32,32 @@ from ..schemas.story import StoryListItem, StoryDetail, StoryListResponse, Story
 # ---------------------------------------------------------------------------
 # Simple TTL cache for story structure results (avoids redundant Gemini calls)
 # v2 cache key prefix — invalidates old non-interactive cache entries (#1082)
+#
+# Claude Security find_0143q5urPhQLE871jkbgHpRy (high, CWE-770): this cache
+# used to be keyed on the raw `story_id` path segment + raw `p` query value.
+# `normalize_story_slug` maps many different strings to the same lesson
+# (extra leading zeros/L's, full-width digits, any prefix ending in "L1"...),
+# and `p` was never checked against the lesson's actual repeat-round keys --
+# an unrecognised `p` silently fell back to the base table but still minted
+# a brand-new, permanent cache entry. A logged-in attacker (self-registration
+# is open and auto-verified) could mint unlimited entries from one lesson and
+# OOM the instance. Two independent fixes, both required:
+#   1. The key is now built ONLY from the canonical numeric lesson id (what
+#      `normalize_story_slug` already resolves to) and a `p` that's been
+#      checked against `story["repeat_rounds"]` -- an unknown `p` collapses
+#      to the same key as no `p` at all, matching what it actually returns.
+#      See `_canonical_structure_cache_key`.
+#   2. The cache is now a bounded LRU (OrderedDict, `move_to_end` on every
+#      hit/write), capped at `_CACHE_MAX_ENTRIES`. The real keyspace is
+#      small and fixed (number of lessons × repeat rounds, currently well
+#      under 1,000), so the cap only ever bites an attacker trying to grow
+#      it past what legitimate traffic could ever produce.
 # ---------------------------------------------------------------------------
 
-_structure_cache: dict[str, tuple[float, object]] = {}
+_structure_cache: "OrderedDict[str, tuple[float, object]]" = OrderedDict()
 _CACHE_TTL = 86400  # 24 hours
 _CACHE_VERSION = "v4"  # label_blanks + checkbox via cell_to_structure_fields
+_CACHE_MAX_ENTRIES = 2000  # generous multiple of the real lesson×round keyspace
 
 _BLANK_RE = re.compile(r"【([^】]*)】")
 
@@ -49,15 +71,38 @@ def _cache_key(story_id: str) -> str:
     return f"{_CACHE_VERSION}:{story_id}"
 
 
+def _canonical_structure_cache_key(numeric_id: int, story: dict, p: str | None) -> str:
+    """Canonical cache key: numeric lesson id + a `p` validated against this
+    lesson's actual repeat-round keys. An unrecognised `p` collapses to the
+    same key as no `p` at all -- it falls back to the same base table either
+    way, so it must not mint a distinct cache entry."""
+    if not p:
+        return str(numeric_id)
+    from app.services.tts.lesson_mapping import _article_slug  # noqa: PLC0415
+
+    article = _article_slug(story, p)
+    if article in (story.get("repeat_rounds") or {}):
+        return f"{numeric_id}:{article}"
+    return str(numeric_id)
+
+
 def _get_cached_structure(story_id: str):
-    entry = _structure_cache.get(_cache_key(story_id))
+    key = _cache_key(story_id)
+    entry = _structure_cache.get(key)
     if entry and time.time() - entry[0] < _CACHE_TTL:
+        _structure_cache.move_to_end(key)
         return entry[1]
+    if entry is not None:
+        del _structure_cache[key]
     return None
 
 
 def _set_cached_structure(story_id: str, result):
-    _structure_cache[_cache_key(story_id)] = (time.time(), result)
+    key = _cache_key(story_id)
+    _structure_cache[key] = (time.time(), result)
+    _structure_cache.move_to_end(key)
+    while len(_structure_cache) > _CACHE_MAX_ENTRIES:
+        _structure_cache.popitem(last=False)
 
 
 # ---------------------------------------------------------------------------
@@ -784,7 +829,7 @@ async def get_story_structure(
         round_table = ((story.get("repeat_rounds") or {}).get(article) or {}).get(
             "story_structure_table"
         )
-    cache_key = f"{story_id}:{p}" if p else story_id
+    cache_key = _canonical_structure_cache_key(numeric_id, story, p)
 
     # ── YAML-first: use pre-stored structure data if available (#1377, #1398, #2205) ──
     # Priority 1: story_structure_table — DOCX/keypoints ground truth (preserves layout)
@@ -911,8 +956,9 @@ async def grade_story_structure_endpoint(
     if not story:
         raise HTTPException(status_code=404, detail="Story not found")
 
-    # 批改要對**這一篇**的答案（#2930）；快取 key 與 GET 那支一致。
-    cache_key = f"{story_id}:{p}" if p else story_id
+    # 批改要對**這一篇**的答案（#2930）；快取 key 與 GET 那支一致（必須用
+    # 同一個 _canonical_structure_cache_key，否則這支永遠查不到 GET 存的）。
+    cache_key = _canonical_structure_cache_key(numeric_id, story, p)
     cached = _get_cached_structure(cache_key)
     if cached is None:
         raise HTTPException(

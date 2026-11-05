@@ -67,6 +67,10 @@ def _fake_lesson(n: int) -> dict:
 
 def test_recompute_matches_stored_scores_across_a_full_game(monkeypatch):
     monkeypatch.setattr(live_quiz_engine, "load_lesson", lambda uid: _fake_lesson(4) if uid == "FAKE4" else None)
+    # Claude Security find_01FFb5nYvsmyHEYT1koY8wTB: _load_lessons checks
+    # available_uids() before calling load_lesson -- see the matching patch
+    # in test_live_quiz_engine.py's tiny_lessons fixture for why.
+    monkeypatch.setattr(live_quiz_engine, "available_uids", lambda: ("FAKE4",))
 
     db = SessionLocalTest()
     try:

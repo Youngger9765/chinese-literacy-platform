@@ -30,7 +30,7 @@ from ...models.live_quiz import (
 )
 from ...models.school import Classroom, ClassroomStudent
 from ...models.user import User
-from ...services.lesson_uid_loader import load_lesson
+from ...services.lesson_uid_loader import available_uids, load_lesson
 from ..game_core.display_name import resolve_display_name
 from ..pk import classroom_features
 from . import reading_pace as reading_pace_presets
@@ -75,8 +75,26 @@ def _aware(dt: datetime | None) -> datetime | None:
 
 
 def _load_lessons(lesson_uids: list[str]) -> list[dict]:
+    """Claude Security find_01FFb5nYvsmyHEYT1koY8wTB (high, CWE-770): every
+    client-supplied uid used to be passed unchanged straight to
+    `load_lesson`, which is `lru_cache(maxsize=None)` keyed on the raw
+    string -- pathlib keeps `..` segments, so "L0001/v3/.." and
+    "L0001/v3/../v3/.." both resolve to the same real lesson but mint two
+    distinct, permanent cache entries (and each pulls in ~14 more via
+    `_read_yaml`'s own unbounded cache). An attacker sending thousands of
+    such aliases of one real lesson could OOM the instance.
+
+    Every uid must be one of the real, known lesson ids before it ever
+    reaches `load_lesson` -- the schema-level `max_length=50` on
+    `lesson_uids` (LiveQuizCreateRequest) bounds how many get tried per
+    request; this bounds WHICH strings are allowed through at all, closing
+    the alias/cache-poisoning vector even within that cap.
+    """
+    known_uids = set(available_uids())
     lessons = []
     for uid in lesson_uids:
+        if uid not in known_uids:
+            raise HTTPException(status_code=400, detail=f"Unknown lesson: {uid}")
         lesson = load_lesson(uid)
         if lesson is None:
             raise HTTPException(status_code=400, detail=f"Unknown lesson: {uid}")

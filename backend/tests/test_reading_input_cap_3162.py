@@ -19,13 +19,19 @@ from pydantic import ValidationError
 
 from app.routes.learning.learning_reading import ReadingEvaluateRequest
 
-CAP = 10000
+# Claude Security find_01Xm1Ywih4cjY6KTUnUGfbXo (high, CWE-407): 10000 was
+# copied from a sibling endpoint's LLM-prompt-budget reasoning, but this
+# endpoint runs a pure-Python O(n·m) Levenshtein DP aligner locally (no LLM
+# call) -- a 10000-char request built a ~20M-cell table that could stall or
+# OOM the instance. Lowered to 1000 (still ~60% headroom over the real
+# 621-char max) as part of that fix.
+CAP = 1000
 
 
 def test_normal_length_still_accepted():
     """正向對照：真實用量遠低於上限，不可擋到學生。
 
-    全庫最長的重點朗讀段是 621 字，所以 10000 離真實用量很遠。
+    全庫最長的重點朗讀段是 621 字，所以 1000 離真實用量還有餘裕。
     """
     r = ReadingEvaluateRequest(spoken_text="床前明月光" * 20, target_text="疑是地上霜" * 20)
     assert len(r.target_text) == 100
