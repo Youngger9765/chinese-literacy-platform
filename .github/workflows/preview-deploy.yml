@@ -53,8 +53,11 @@ jobs:
   deploy-preview:
     name: Deploy PR Preview
     needs: detect-changes
-    runs-on: ubuntu-24.04  # 這個 job 會裝 Playwright，26.04 不支援
+    runs-on: ubuntu-latest
     if: github.event.action != 'closed' && github.event.pull_request.head.ref != 'staging'
+    outputs:
+      frontend_url: ${{ steps.preview-urls.outputs.frontend_url }}
+      backend_url: ${{ steps.preview-urls.outputs.backend_url }}
 
     steps:
       - name: Checkout code
@@ -381,22 +384,6 @@ jobs:
       #
       # PR 只跑一課（五課走完整條路太慢，慢到會讓人想關掉這道門），
       # staging 維持五課全跑 —— 兩個環境跑不同的量，不是抽樣代替全檢。
-      - name: 學生走得完嗎（multi-text journey on preview）
-        if: always() && steps.preview-urls.outputs.frontend_url != 'N/A' && steps.preview-urls.outputs.frontend_url != '' && steps.preview-urls.outputs.backend_url != 'N/A' && steps.preview-urls.outputs.backend_url != ''
-        working-directory: frontend
-        env:
-          PLAYWRIGHT_BASE_URL: ${{ steps.preview-urls.outputs.frontend_url }}
-          E2E_BACKEND_URL: ${{ steps.preview-urls.outputs.backend_url }}
-          E2E_ONLY_LESSONS: "20063"      # G6-L22，三篇，Hans 回報的那一課
-          E2E_EXPECT_DEPLOYED: "1"
-          # #3719 — IAP 準備：見「Warm backend」步驟的同一段說明。
-          IAP_AUDIENCE: ${{ secrets.IAP_AUDIENCE }}
-        run: |
-          npm ci
-          npx playwright install chromium --with-deps
-          npx playwright test tests/e2e/multiTextJourney.spec.ts \
-            --reporter=github --timeout=300000
-
       - name: Comment PR with preview URLs
         uses: actions/github-script@v8
         with:
@@ -443,6 +430,51 @@ jobs:
                 body: body
               });
             }
+
+  e2e-preview-check:
+    name: 學生走得完嗎（multi-text journey on preview）
+    needs: deploy-preview
+    runs-on: ubuntu-24.04  # 這個 job 會裝 Playwright，26.04 不支援
+    if: >-
+      always() &&
+      needs.deploy-preview.outputs.frontend_url != 'N/A' &&
+      needs.deploy-preview.outputs.frontend_url != '' &&
+      needs.deploy-preview.outputs.backend_url != 'N/A' &&
+      needs.deploy-preview.outputs.backend_url != ''
+    # Reorder (coordinator decision, 2026-11-05): this job runs npm ci +
+    # `npx playwright install --with-deps` -- untrusted, lockfile-resolved
+    # third-party code -- directly on the bare runner. It used to be the
+    # LAST step of `deploy-preview`, which ran `google-github-actions/
+    # auth@v2` as one of its FIRST steps: every PR's dependency install ran
+    # on a runner that had already held live GCP credentials for the
+    # entire job. This job needs only the already-deployed preview's plain
+    # HTTP URLs (from deploy-preview's job outputs) -- it has no
+    # `google-github-actions/auth` step at all, so there is no GCP
+    # credential in this job's environment for any installed/test code to
+    # reach. tests/test_workflow_path_filters_spec.py's new
+    # test_no_untrusted_install_shares_a_job_with_gcp_auth asserts this
+    # structurally for every job in this file (and deploy.yml/
+    # staging-deploy.yml), not just by convention.
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: 學生走得完嗎（multi-text journey on preview）
+        working-directory: frontend
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ needs.deploy-preview.outputs.frontend_url }}
+          E2E_BACKEND_URL: ${{ needs.deploy-preview.outputs.backend_url }}
+          E2E_ONLY_LESSONS: "20063"      # G6-L22，三篇，Hans 回報的那一課
+          E2E_EXPECT_DEPLOYED: "1"
+          # #3719 — IAP 準備：見「Warm backend」步驟的同一段說明。
+          IAP_AUDIENCE: ${{ secrets.IAP_AUDIENCE }}
+        run: |
+          npm ci
+          npx playwright install chromium --with-deps
+          npx playwright test tests/e2e/multiTextJourney.spec.ts \
+            --reporter=github --timeout=300000
 
   cleanup-preview:
     name: Cleanup PR Preview
