@@ -122,6 +122,43 @@ def test_missing_lesson_yml_is_absent_not_empty(tree):
     assert L.load_all() == []
 
 
+def test_path_traversal_alias_is_rejected(tree):
+    """Claude Security find_01FFb5nYvsmyHEYT1koY8wTB (high): a uid string
+    like "L0001/v2/.." resolves at the filesystem level to the real
+    "L0001" directory and used to pass the bare is_dir() check, getting
+    cached FOREVER under that new, attacker-chosen string -- an unbounded
+    set of such aliases for one real lesson could exhaust process memory.
+    Only an exact, known uid may load.
+    """
+    _write(tree, "L0001", "v2")
+    assert L.load_lesson("L0001/v2/..") is None
+    assert L.load_lesson("./L0001") is None
+    assert L.load_lesson("L0001/") is None
+    # the real uid, unmodified, still works
+    assert L.load_lesson("L0001") is not None
+
+
+def test_path_traversal_alias_never_reaches_the_expensive_file_reads(tree):
+    """The real resource at risk is _read_yaml's cache (~14 files per
+    lesson), not load_lesson's own cache -- lru_cache memoizes a rejected
+    alias's `None` just as cheaply as a hit, so that counter alone proves
+    nothing. What must hold is: a rejected alias never triggers a single
+    YAML read, so an unbounded set of aliases for one real lesson costs
+    O(1) file reads total, not O(aliases)."""
+    _write(tree, "L0001", "v2")
+    assert L._read_yaml.cache_info().currsize == 0
+
+    for alias in ("L0001/v2/..", "L0001/v2/../v2/..", "./L0001", "L0001//"):
+        assert L.load_lesson(alias) is None
+    assert L._read_yaml.cache_info().currsize == 0, (
+        "a rejected alias must short-circuit before any file is read"
+    )
+
+    # the real uid, by contrast, does the real work exactly once
+    L.load_lesson("L0001")
+    assert L._read_yaml.cache_info().currsize > 0
+
+
 def test_dir_without_any_version_is_ignored(tree):
     (tree / "L0009").mkdir()
     L.reset_cache()
