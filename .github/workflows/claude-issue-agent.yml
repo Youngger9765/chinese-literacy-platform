@@ -44,12 +44,21 @@ jobs:
       contents: write
       pull-requests: write
       issues: write
-      id-token: write
+      # Claude Security finding "Issue-agent prompt injection yields code
+      # execution with write token and WIF identity" (critical): this job
+      # reads untrusted, attacker-writable text (any public GitHub user can
+      # open an issue) as its working brief. id-token: write let a
+      # successful prompt injection exchange an OIDC token for whatever SA
+      # the WIF pool trusts for this repository -- nothing in this workflow
+      # actually calls Google Cloud, so there is no legitimate use for it.
+      # Dropped entirely (this workflow is currently disabled pending the
+      # broader review; re-enabling it must not silently restore this).
     steps:
       - uses: actions/checkout@v6
         with:
           ref: staging          # 開發基準是 staging（branch rules）
           fetch-depth: 50
+          persist-credentials: false  # don't leave a write-token'd git config lying around for the agent's own shell to find
 
       - name: Claude work on issue
         uses: anthropics/claude-code-action@v1
@@ -191,7 +200,19 @@ jobs:
             - 修改 .github/workflows/ 下既有的 deploy/cleanup workflow
             - 把「還沒驗」講成「好了」—— 測試輸出才算證據
           claude_args: |
-            --allowedTools "Read,Grep,Glob,Edit,Write,Bash(git:*),Bash(gh issue:*),Bash(gh pr:*),Bash(gh api:*),Bash(npm:*),Bash(npx:*),Bash(python:*),Bash(python3:*),Bash(pytest:*),Bash(pip:*),Bash(ls:*),Bash(cat:*),Bash(mkdir:*),Bash(bash specs/run-ci.sh:*)"
+            # Claude Security finding "Issue-agent prompt injection yields
+            # code execution with write token and WIF identity" (critical),
+            # recommendation part 1: general-purpose interpreters and
+            # package runners (python/python3/npm/npx/pip) and `gh api`
+            # (arbitrary GitHub API calls) are removed -- a successful
+            # prompt injection from issue text turned any of these into
+            # arbitrary code execution / network egress on a runner that
+            # held a write token. `git` is narrowed from `git:*` (every
+            # subcommand, including `git config`/`git remote`) to exactly
+            # the subcommands the git-issue-pr-flow SOP needs. `pytest` and
+            # the project's own pinned CI script stay -- they run fixed,
+            # repo-defined test suites, not attacker-controlled code.
+            --allowedTools "Read,Grep,Glob,Edit,Write,Bash(git worktree:*),Bash(git checkout:*),Bash(git branch:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(git status:*),Bash(git diff:*),Bash(git log:*),Bash(git fetch:*),Bash(git rev-parse:*),Bash(gh issue:*),Bash(gh pr:*),Bash(pytest:*),Bash(ls:*),Bash(cat:*),Bash(mkdir:*),Bash(bash specs/run-ci.sh:*)"
 
       # timeout 或錯誤把 job 砍掉時 agent 是斷頭的，來不及留言 ——
       # 這個 step 補上「我被中止了」的紀錄，接手的人才有脈絡（#3055 規則）。

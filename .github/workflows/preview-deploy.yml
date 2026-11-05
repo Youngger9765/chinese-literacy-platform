@@ -65,8 +65,19 @@ jobs:
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
+          # Claude Security find_01WStrhArZsNRHeb92RWHZRE (high, CWE-250):
+          # this job used to authenticate as github-actions@lingoleap-dev --
+          # the SAME identity deploy.yml uses for PRODUCTION. Any PR from a
+          # collaborator (push access only, no review required to open a
+          # PR) ran on a runner holding full prod-deploy privileges before
+          # any of its own steps -- including dependency lifecycle scripts
+          # and Playwright. A scoped SA, limited to lingoleap-*-issue-*
+          # Cloud Run services and the preview/frontend runtime SAs only
+          # (no actAs on the prod runtime SA, no access to prod secrets),
+          # closes that: compromising a PR preview no longer gets you
+          # production.
           workload_identity_provider: projects/958347263320/locations/global/workloadIdentityPools/github-pool/providers/github-provider
-          service_account: github-actions@lingoleap-dev.iam.gserviceaccount.com
+          service_account: lingoleap-preview-deploy@lingoleap-dev.iam.gserviceaccount.com
 
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
@@ -431,14 +442,41 @@ jobs:
   cleanup-preview:
     name: Cleanup PR Preview
     runs-on: ubuntu-latest
-    if: github.event.action == 'closed'
+    # Claude Security find_015L4kr9sXTB5dd7YJcUM2JV (medium, CWE-862): this
+    # job runs on `pull_request_target: closed`, which fires (with secrets,
+    # in the base-repo context) even for a FORK PR. It derives which
+    # preview to delete purely from the CLOSING PR's own branch name, with
+    # no check that this PR is the one that actually created that preview
+    # -- any GitHub user could fork, push a branch named after someone
+    # else's open issue, open a PR and close it, deleting that issue's live
+    # preview and disrupting QA in progress. Restricting to same-repo PRs
+    # closes the "any GitHub user" attack: only a collaborator with push
+    # access to THIS repo can open a non-fork PR at all.
+    if: github.event.action == 'closed' && github.event.pull_request.head.repo.full_name == github.repository
 
     steps:
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
+          # Claude Security find_01WStrhArZsNRHeb92RWHZRE (high, CWE-250):
+          # same reasoning as deploy-preview above -- this job is reachable
+          # by any collaborator (same-repo PR, no review required to open
+          # one) and used to run as the prod-deploy identity.
+          #
+          # ⚠️ KNOWN GAP (flagged to the human maintainer, not silently
+          # worked around): the scoped lingoleap-preview-deploy@ SA does
+          # NOT yet have artifactregistry delete permission on the
+          # `lingoleap` repo, only push/write. The Cloud Run service
+          # deletion steps below work fine under it; the "Delete preview
+          # images from Artifact Registry" step will fail with a
+          # permission error until that's granted. This is an accepted,
+          # visible trade-off for this PR -- untagged images are still
+          # reclaimed within 7 days by the L1 Artifact Registry cleanup
+          # policy, and the weekly preview-cleanup.yml job (schedule/
+          # workflow_dispatch only, not reachable by an arbitrary PR
+          # close) still has the broader credential as a backstop.
           workload_identity_provider: projects/958347263320/locations/global/workloadIdentityPools/github-pool/providers/github-provider
-          service_account: github-actions@lingoleap-dev.iam.gserviceaccount.com
+          service_account: lingoleap-preview-deploy@lingoleap-dev.iam.gserviceaccount.com
 
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
