@@ -11,9 +11,9 @@ import logging
 from google import genai
 from google.genai import types as genai_types
 
-from ..ai_feature_flag import assert_ai_enabled
+from ..ai_feature_flag import assert_ai_enabled, assert_chatbot_enabled
 from ..ai_usage_tracker import capture_usage, last_usage
-from ..llm_models import get_model_for_task
+from ..llm_models import CHATBOT_TASKS, get_model_for_task
 from .base import (
     CONTENT_FILTER_FRIENDLY_MSG,  # noqa: F401 — re-exported for callers
     GEMINI_TIMEOUT,
@@ -123,11 +123,20 @@ def _get_client_for_task(task: str) -> tuple[genai.Client, str]:
         Tuple of (genai.Client, model_name_str).
 
     Raises:
-        AIFeaturesDisabledError: if AI_FEATURES_ENABLED is not "true" (#3838
-        kill switch). Raised before get_model_for_task / genai.Client so no
-        network call is ever attempted while disabled.
+        AIFeaturesDisabledError: if the general AI gate (AI_FEATURES_ENABLED,
+        #3838) is off for any task, or — for a task in CHATBOT_TASKS (the
+        Socratic comprehension dialogue) — if the chatbot gate
+        (AI_CHATBOT_ENABLED, #3861) is also off. Raised before
+        get_model_for_task / genai.Client so no network call is ever
+        attempted while disabled. This is the central chokepoint: any
+        caller that reaches a chatbot task through TASK_MODELS is gated
+        here even if it bypasses the service-level checks in
+        app.services.socratic.
     """
-    assert_ai_enabled(task)
+    if task in CHATBOT_TASKS:
+        assert_chatbot_enabled(task)
+    else:
+        assert_ai_enabled(task)
     model, location = get_model_for_task(task)
     client = genai.Client(vertexai=True, project="lingoleap-dev", location=location)
     return client, model
