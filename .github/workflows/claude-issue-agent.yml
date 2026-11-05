@@ -1,5 +1,12 @@
 name: Claude Issue Agent
 
+# ⛔ DISABLED 2026-11-06: prompt-injection to secret exfiltration; re-enable
+# only after a sandboxed redesign. See docs/security/L1-CHECKLIST.md.
+# (Workflow disabled via GitHub's own "disable workflow" switch --
+# `gh workflow list --all` shows `disabled_manually` -- not by the `on:`
+# triggers below, which are otherwise normal. Do not re-enable as a side
+# effect of editing this file; re-enabling is a separate, later decision.)
+
 # Issue 裡 @claude → 自動開工（#3055）。
 #
 # 分工邊界：PR 上的 @claude 歸 claude-pr-review.yml；這支只接「issue」
@@ -89,8 +96,15 @@ jobs:
             echo "Any comment from a non-collaborator has been dropped, not shown with a warning --"
             echo "it is simply absent from this file.)"
             echo
+            # Coordinator review 2026-11-06: the title was being included
+            # unfiltered even though an issue's TITLE is exactly as
+            # attacker-writable as its body when a non-collaborator opened
+            # it (a trusted commenter later writing "@claude" on that same
+            # issue doesn't make the ORIGINAL title trusted). Gate it on the
+            # same author_association check as the body, not a separate
+            # unconditional line.
             gh api "repos/$REPO/issues/$ISSUE_NUMBER" \
-              --jq '"## Issue title\n" + .title + "\n\n## Issue body (author: " + .user.login + ", association: " + .author_association + ")\n" + (if (["OWNER","MEMBER","COLLABORATOR"] | contains([.author_association])) then .body else "(dropped: author is not a trusted collaborator)" end)'
+              --jq '(["OWNER","MEMBER","COLLABORATOR"] | contains([.author_association])) as $trusted | "## Issue title (author: " + .user.login + ", association: " + .author_association + ")\n" + (if $trusted then .title else "(dropped: author is not a trusted collaborator)" end) + "\n\n## Issue body\n" + (if $trusted then .body else "(dropped: author is not a trusted collaborator)" end)'
             echo
             echo "## Comments (trusted authors only)"
             gh api "repos/$REPO/issues/$ISSUE_NUMBER/comments" --paginate \
@@ -284,7 +298,18 @@ jobs:
             # exfiltration is fully closed. This workflow remains
             # disabled_manually; re-enabling it is a separate, later
             # decision, not implied by this hardening pass.
-            --allowedTools "Read,Grep,Glob,Edit,Write,Bash(git worktree:*),Bash(git checkout:*),Bash(git branch:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(git status:*),Bash(git diff:*),Bash(git log:*),Bash(git fetch:*),Bash(git rev-parse:*),Bash(gh issue comment:*),Bash(gh pr:*),Bash(ls:*),Bash(mkdir:*)"
+            # Coordinator review 2026-11-06: `Bash(gh pr:*)` was too broad --
+            # narrowed to the two subcommands the SOP text actually uses
+            # (`gh pr create --draft ...`, `gh pr view <N> --json ...`).
+            # Note (see docs/security/L1-CHECKLIST.md): narrowing this
+            # allow-list further does NOT close the deeper Write+git issue
+            # the coordinator identified (a direct file write to
+            # .git/hooks/* or .git/config can trigger arbitrary code on the
+            # next otherwise-ordinary git invocation, independent of which
+            # Bash commands are allow-listed) -- that needs a sandboxed
+            # redesign, not a patch, which is why both workflows stay
+            # disabled_manually regardless of this narrowing.
+            --allowedTools "Read,Grep,Glob,Edit,Write,Bash(git worktree:*),Bash(git checkout:*),Bash(git branch:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(git status:*),Bash(git diff:*),Bash(git log:*),Bash(git fetch:*),Bash(git rev-parse:*),Bash(gh issue comment:*),Bash(gh pr create:*),Bash(gh pr view:*),Bash(ls:*),Bash(mkdir:*)"
 
       # timeout 或錯誤把 job 砍掉時 agent 是斷頭的，來不及留言 ——
       # 這個 step 補上「我被中止了」的紀錄，接手的人才有脈絡（#3055 規則）。
