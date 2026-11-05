@@ -1,0 +1,944 @@
+{
+  "_meta": {
+    "name": "閱讀寶貝圖鑑分組——教授課程地圖家族（前端專用精簡版）",
+    "generated_from": "docs/design/reading-babies/lesson-indicators.json 的 professor_node 欄位（每課取 primary:true 的節點；沒有 primary 節點的課落入 AI00 桶）",
+    "generated_by": "ad-hoc python one-liner during #3780 reading-babies Phase 2 frontend work (2026-10-31)",
+    "note": "PRD 2026-10-31-reading-babies-prd.md §3 寫『教授的 12 家族』，但 professor_node 實際逐課取 primary 後數出 14 個不同家族代碼（F01-F14）+ 2 課完全沒有 professor_node（落入 AI00 桶）——12 這個數字跟資料對不上，待 Young 或教授審核表確認正確家族數。後端 API 目前回傳的 ability_family 仍是舊的 11 家族（A-K，island-v2 §3.1），本檔是前端這一側暫時的覆寫對照，不是後端欄位的替代品。",
+    "families_found": 15,
+    "lessons_without_professor_node": [
+      "L0095",
+      "L0106"
+    ]
+  },
+  "families": {
+    "F01": "摘要與概括",
+    "F02": "推論",
+    "F03": "圖表與資訊整合",
+    "F04": "自我提問",
+    "F05": "主動調整閱讀",
+    "F06": "詞彙推測",
+    "F07": "認識句型",
+    "F08": "寫作手法",
+    "F09": "科學推理",
+    "F10": "媒體素養與識讀",
+    "F11": "多文本閱讀",
+    "F12": "讀後反思與回應",
+    "F13": "文言文閱讀",
+    "F14": "品格／學習／生涯能力",
+    "AI00": "AI 推論（尚無教授節點，待審核）"
+  },
+  "family_order": [
+    "F01",
+    "F02",
+    "F03",
+    "F04",
+    "F05",
+    "F06",
+    "F07",
+    "F08",
+    "F09",
+    "F10",
+    "F11",
+    "F12",
+    "F13",
+    "F14",
+    "AI00"
+  ],
+  "lessons": {
+    "L0001": {
+      "family": "F08",
+      "family_name": "寫作手法",
+      "source": "professor_node"
+    },
+    "L0002": {
+      "family": "F01",
+      "family_name": "摘要與概括",
+      "source": "professor_node"
+    },
+    "L0003": {
+      "family": "F01",
+      "family_name": "摘要與概括",
+      "source": "professor_node"
+    },
+    "L0004": {
+      "family": "F14",
+      "family_name": "品格／學習／生涯能力",
+      "source": "professor_node"
+    },
+    "L0005": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0006": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0007": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0008": {
+      "family": "F14",
+      "family_name": "品格／學習／生涯能力",
+      "source": "professor_node"
+    },
+    "L0009": {
+      "family": "F14",
+      "family_name": "品格／學習／生涯能力",
+      "source": "professor_node"
+    },
+    "L0010": {
+      "family": "F14",
+      "family_name": "品格／學習／生涯能力",
+      "source": "professor_node"
+    },
+    "L0011": {
+      "family": "F14",
+      "family_name": "品格／學習／生涯能力",
+      "source": "professor_node"
+    },
+    "L0012": {
+      "family": "F14",
+      "family_name": "品格／學習／生涯能力",
+      "source": "professor_node"
+    },
+    "L0013": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0014": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0015": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0016": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0017": {
+      "family": "F14",
+      "family_name": "品格／學習／生涯能力",
+      "source": "professor_node"
+    },
+    "L0018": {
+      "family": "F07",
+      "family_name": "認識句型",
+      "source": "professor_node"
+    },
+    "L0019": {
+      "family": "F07",
+      "family_name": "認識句型",
+      "source": "professor_node"
+    },
+    "L0020": {
+      "family": "F05",
+      "family_name": "主動調整閱讀",
+      "source": "professor_node"
+    },
+    "L0021": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0022": {
+      "family": "F14",
+      "family_name": "品格／學習／生涯能力",
+      "source": "professor_node"
+    },
+    "L0023": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0024": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0025": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0026": {
+      "family": "F14",
+      "family_name": "品格／學習／生涯能力",
+      "source": "professor_node"
+    },
+    "L0027": {
+      "family": "F03",
+      "family_name": "圖表與資訊整合",
+      "source": "professor_node"
+    },
+    "L0028": {
+      "family": "F03",
+      "family_name": "圖表與資訊整合",
+      "source": "professor_node"
+    },
+    "L0029": {
+      "family": "F11",
+      "family_name": "多文本閱讀",
+      "source": "professor_node"
+    },
+    "L0030": {
+      "family": "F01",
+      "family_name": "摘要與概括",
+      "source": "professor_node"
+    },
+    "L0031": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0032": {
+      "family": "F01",
+      "family_name": "摘要與概括",
+      "source": "professor_node"
+    },
+    "L0033": {
+      "family": "F01",
+      "family_name": "摘要與概括",
+      "source": "professor_node"
+    },
+    "L0034": {
+      "family": "F01",
+      "family_name": "摘要與概括",
+      "source": "professor_node"
+    },
+    "L0035": {
+      "family": "F01",
+      "family_name": "摘要與概括",
+      "source": "professor_node"
+    },
+    "L0036": {
+      "family": "F01",
+      "family_name": "摘要與概括",
+      "source": "professor_node"
+    },
+    "L0037": {
+      "family": "F01",
+      "family_name": "摘要與概括",
+      "source": "professor_node"
+    },
+    "L0038": {
+      "family": "F05",
+      "family_name": "主動調整閱讀",
+      "source": "professor_node"
+    },
+    "L0039": {
+      "family": "F14",
+      "family_name": "品格／學習／生涯能力",
+      "source": "professor_node"
+    },
+    "L0040": {
+      "family": "F14",
+      "family_name": "品格／學習／生涯能力",
+      "source": "professor_node"
+    },
+    "L0041": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0042": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0043": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0044": {
+      "family": "F05",
+      "family_name": "主動調整閱讀",
+      "source": "professor_node"
+    },
+    "L0045": {
+      "family": "F06",
+      "family_name": "詞彙推測",
+      "source": "professor_node"
+    },
+    "L0046": {
+      "family": "F06",
+      "family_name": "詞彙推測",
+      "source": "professor_node"
+    },
+    "L0047": {
+      "family": "F06",
+      "family_name": "詞彙推測",
+      "source": "professor_node"
+    },
+    "L0048": {
+      "family": "F06",
+      "family_name": "詞彙推測",
+      "source": "professor_node"
+    },
+    "L0049": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0050": {
+      "family": "F01",
+      "family_name": "摘要與概括",
+      "source": "professor_node"
+    },
+    "L0051": {
+      "family": "F01",
+      "family_name": "摘要與概括",
+      "source": "professor_node"
+    },
+    "L0052": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0053": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0054": {
+      "family": "F01",
+      "family_name": "摘要與概括",
+      "source": "professor_node"
+    },
+    "L0055": {
+      "family": "F01",
+      "family_name": "摘要與概括",
+      "source": "professor_node"
+    },
+    "L0056": {
+      "family": "F14",
+      "family_name": "品格／學習／生涯能力",
+      "source": "professor_node"
+    },
+    "L0057": {
+      "family": "F01",
+      "family_name": "摘要與概括",
+      "source": "professor_node"
+    },
+    "L0058": {
+      "family": "F01",
+      "family_name": "摘要與概括",
+      "source": "professor_node"
+    },
+    "L0059": {
+      "family": "F14",
+      "family_name": "品格／學習／生涯能力",
+      "source": "professor_node"
+    },
+    "L0060": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0061": {
+      "family": "F08",
+      "family_name": "寫作手法",
+      "source": "professor_node"
+    },
+    "L0062": {
+      "family": "F14",
+      "family_name": "品格／學習／生涯能力",
+      "source": "professor_node"
+    },
+    "L0063": {
+      "family": "F11",
+      "family_name": "多文本閱讀",
+      "source": "professor_node"
+    },
+    "L0064": {
+      "family": "F14",
+      "family_name": "品格／學習／生涯能力",
+      "source": "professor_node"
+    },
+    "L0065": {
+      "family": "F08",
+      "family_name": "寫作手法",
+      "source": "professor_node"
+    },
+    "L0066": {
+      "family": "F08",
+      "family_name": "寫作手法",
+      "source": "professor_node"
+    },
+    "L0067": {
+      "family": "F04",
+      "family_name": "自我提問",
+      "source": "professor_node"
+    },
+    "L0068": {
+      "family": "F04",
+      "family_name": "自我提問",
+      "source": "professor_node"
+    },
+    "L0069": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0070": {
+      "family": "F05",
+      "family_name": "主動調整閱讀",
+      "source": "professor_node"
+    },
+    "L0071": {
+      "family": "F03",
+      "family_name": "圖表與資訊整合",
+      "source": "professor_node"
+    },
+    "L0072": {
+      "family": "F08",
+      "family_name": "寫作手法",
+      "source": "professor_node"
+    },
+    "L0073": {
+      "family": "F08",
+      "family_name": "寫作手法",
+      "source": "professor_node"
+    },
+    "L0074": {
+      "family": "F01",
+      "family_name": "摘要與概括",
+      "source": "professor_node"
+    },
+    "L0075": {
+      "family": "F01",
+      "family_name": "摘要與概括",
+      "source": "professor_node"
+    },
+    "L0076": {
+      "family": "F14",
+      "family_name": "品格／學習／生涯能力",
+      "source": "professor_node"
+    },
+    "L0077": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0078": {
+      "family": "F10",
+      "family_name": "媒體素養與識讀",
+      "source": "professor_node"
+    },
+    "L0079": {
+      "family": "F01",
+      "family_name": "摘要與概括",
+      "source": "professor_node"
+    },
+    "L0080": {
+      "family": "F03",
+      "family_name": "圖表與資訊整合",
+      "source": "professor_node"
+    },
+    "L0081": {
+      "family": "F03",
+      "family_name": "圖表與資訊整合",
+      "source": "professor_node"
+    },
+    "L0082": {
+      "family": "F03",
+      "family_name": "圖表與資訊整合",
+      "source": "professor_node"
+    },
+    "L0083": {
+      "family": "F03",
+      "family_name": "圖表與資訊整合",
+      "source": "professor_node"
+    },
+    "L0084": {
+      "family": "F08",
+      "family_name": "寫作手法",
+      "source": "professor_node"
+    },
+    "L0085": {
+      "family": "F04",
+      "family_name": "自我提問",
+      "source": "professor_node"
+    },
+    "L0086": {
+      "family": "F04",
+      "family_name": "自我提問",
+      "source": "professor_node"
+    },
+    "L0087": {
+      "family": "F04",
+      "family_name": "自我提問",
+      "source": "professor_node"
+    },
+    "L0088": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0089": {
+      "family": "F04",
+      "family_name": "自我提問",
+      "source": "professor_node"
+    },
+    "L0090": {
+      "family": "F03",
+      "family_name": "圖表與資訊整合",
+      "source": "professor_node"
+    },
+    "L0091": {
+      "family": "F03",
+      "family_name": "圖表與資訊整合",
+      "source": "professor_node"
+    },
+    "L0092": {
+      "family": "F10",
+      "family_name": "媒體素養與識讀",
+      "source": "professor_node"
+    },
+    "L0093": {
+      "family": "F09",
+      "family_name": "科學推理",
+      "source": "professor_node"
+    },
+    "L0094": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0095": {
+      "family": "AI00",
+      "family_name": "AI 推論（尚無教授節點，待審核）",
+      "source": "ability_family_fallback"
+    },
+    "L0096": {
+      "family": "F12",
+      "family_name": "讀後反思與回應",
+      "source": "professor_node"
+    },
+    "L0097": {
+      "family": "F14",
+      "family_name": "品格／學習／生涯能力",
+      "source": "professor_node"
+    },
+    "L0098": {
+      "family": "F14",
+      "family_name": "品格／學習／生涯能力",
+      "source": "professor_node"
+    },
+    "L0099": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0100": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0101": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0102": {
+      "family": "F10",
+      "family_name": "媒體素養與識讀",
+      "source": "professor_node"
+    },
+    "L0103": {
+      "family": "F01",
+      "family_name": "摘要與概括",
+      "source": "professor_node"
+    },
+    "L0104": {
+      "family": "F01",
+      "family_name": "摘要與概括",
+      "source": "professor_node"
+    },
+    "L0105": {
+      "family": "F03",
+      "family_name": "圖表與資訊整合",
+      "source": "professor_node"
+    },
+    "L0106": {
+      "family": "AI00",
+      "family_name": "AI 推論（尚無教授節點，待審核）",
+      "source": "ability_family_fallback"
+    },
+    "L0107": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0108": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0109": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0110": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0111": {
+      "family": "F03",
+      "family_name": "圖表與資訊整合",
+      "source": "professor_node"
+    },
+    "L0112": {
+      "family": "F05",
+      "family_name": "主動調整閱讀",
+      "source": "professor_node"
+    },
+    "L0113": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0114": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0115": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0116": {
+      "family": "F08",
+      "family_name": "寫作手法",
+      "source": "professor_node"
+    },
+    "L0117": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0118": {
+      "family": "F08",
+      "family_name": "寫作手法",
+      "source": "professor_node"
+    },
+    "L0119": {
+      "family": "F08",
+      "family_name": "寫作手法",
+      "source": "professor_node"
+    },
+    "L0120": {
+      "family": "F09",
+      "family_name": "科學推理",
+      "source": "professor_node"
+    },
+    "L0121": {
+      "family": "F14",
+      "family_name": "品格／學習／生涯能力",
+      "source": "professor_node"
+    },
+    "L0122": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0123": {
+      "family": "F08",
+      "family_name": "寫作手法",
+      "source": "professor_node"
+    },
+    "L0124": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0125": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0126": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0127": {
+      "family": "F08",
+      "family_name": "寫作手法",
+      "source": "professor_node"
+    },
+    "L0128": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0129": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0130": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0131": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0132": {
+      "family": "F09",
+      "family_name": "科學推理",
+      "source": "professor_node"
+    },
+    "L0133": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0134": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0135": {
+      "family": "F03",
+      "family_name": "圖表與資訊整合",
+      "source": "professor_node"
+    },
+    "L0136": {
+      "family": "F03",
+      "family_name": "圖表與資訊整合",
+      "source": "professor_node"
+    },
+    "L0137": {
+      "family": "F11",
+      "family_name": "多文本閱讀",
+      "source": "professor_node"
+    },
+    "L0138": {
+      "family": "F14",
+      "family_name": "品格／學習／生涯能力",
+      "source": "professor_node"
+    },
+    "L0139": {
+      "family": "F01",
+      "family_name": "摘要與概括",
+      "source": "professor_node"
+    },
+    "L0140": {
+      "family": "F08",
+      "family_name": "寫作手法",
+      "source": "professor_node"
+    },
+    "L0141": {
+      "family": "F01",
+      "family_name": "摘要與概括",
+      "source": "professor_node"
+    },
+    "L0142": {
+      "family": "F14",
+      "family_name": "品格／學習／生涯能力",
+      "source": "professor_node"
+    },
+    "L0143": {
+      "family": "F01",
+      "family_name": "摘要與概括",
+      "source": "professor_node"
+    },
+    "L0144": {
+      "family": "F11",
+      "family_name": "多文本閱讀",
+      "source": "professor_node"
+    },
+    "L0145": {
+      "family": "F08",
+      "family_name": "寫作手法",
+      "source": "professor_node"
+    },
+    "L0146": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0147": {
+      "family": "F09",
+      "family_name": "科學推理",
+      "source": "professor_node"
+    },
+    "L0148": {
+      "family": "F09",
+      "family_name": "科學推理",
+      "source": "professor_node"
+    },
+    "L0149": {
+      "family": "F03",
+      "family_name": "圖表與資訊整合",
+      "source": "professor_node"
+    },
+    "L0150": {
+      "family": "F03",
+      "family_name": "圖表與資訊整合",
+      "source": "professor_node"
+    },
+    "L0151": {
+      "family": "F10",
+      "family_name": "媒體素養與識讀",
+      "source": "professor_node"
+    },
+    "L0152": {
+      "family": "F02",
+      "family_name": "推論",
+      "source": "professor_node"
+    },
+    "L0153": {
+      "family": "F13",
+      "family_name": "文言文閱讀",
+      "source": "professor_node"
+    },
+    "L0154": {
+      "family": "F13",
+      "family_name": "文言文閱讀",
+      "source": "professor_node"
+    },
+    "L0155": {
+      "family": "F13",
+      "family_name": "文言文閱讀",
+      "source": "professor_node"
+    },
+    "L0156": {
+      "family": "F13",
+      "family_name": "文言文閱讀",
+      "source": "professor_node"
+    },
+    "L0157": {
+      "family": "F13",
+      "family_name": "文言文閱讀",
+      "source": "professor_node"
+    },
+    "L0158": {
+      "family": "F13",
+      "family_name": "文言文閱讀",
+      "source": "professor_node"
+    },
+    "L0159": {
+      "family": "F13",
+      "family_name": "文言文閱讀",
+      "source": "professor_node"
+    },
+    "L0160": {
+      "family": "F13",
+      "family_name": "文言文閱讀",
+      "source": "professor_node"
+    },
+    "L0161": {
+      "family": "F13",
+      "family_name": "文言文閱讀",
+      "source": "professor_node"
+    },
+    "L0162": {
+      "family": "F13",
+      "family_name": "文言文閱讀",
+      "source": "professor_node"
+    },
+    "L0163": {
+      "family": "F13",
+      "family_name": "文言文閱讀",
+      "source": "professor_node"
+    },
+    "L0164": {
+      "family": "F13",
+      "family_name": "文言文閱讀",
+      "source": "professor_node"
+    },
+    "L0165": {
+      "family": "F14",
+      "family_name": "品格／學習／生涯能力",
+      "source": "professor_node"
+    },
+    "L0166": {
+      "family": "F14",
+      "family_name": "品格／學習／生涯能力",
+      "source": "professor_node"
+    },
+    "L0167": {
+      "family": "F14",
+      "family_name": "品格／學習／生涯能力",
+      "source": "professor_node"
+    },
+    "L0168": {
+      "family": "F14",
+      "family_name": "品格／學習／生涯能力",
+      "source": "professor_node"
+    },
+    "L0169": {
+      "family": "F14",
+      "family_name": "品格／學習／生涯能力",
+      "source": "professor_node"
+    },
+    "L0170": {
+      "family": "F14",
+      "family_name": "品格／學習／生涯能力",
+      "source": "professor_node"
+    },
+    "L0171": {
+      "family": "F14",
+      "family_name": "品格／學習／生涯能力",
+      "source": "professor_node"
+    },
+    "L0172": {
+      "family": "F14",
+      "family_name": "品格／學習／生涯能力",
+      "source": "professor_node"
+    },
+    "L0173": {
+      "family": "F14",
+      "family_name": "品格／學習／生涯能力",
+      "source": "professor_node"
+    },
+    "L0174": {
+      "family": "F14",
+      "family_name": "品格／學習／生涯能力",
+      "source": "professor_node"
+    },
+    "L0175": {
+      "family": "F14",
+      "family_name": "品格／學習／生涯能力",
+      "source": "professor_node"
+    },
+    "L0176": {
+      "family": "F14",
+      "family_name": "品格／學習／生涯能力",
+      "source": "professor_node"
+    },
+    "L0177": {
+      "family": "F14",
+      "family_name": "品格／學習／生涯能力",
+      "source": "professor_node"
+    },
+    "L0178": {
+      "family": "F14",
+      "family_name": "品格／學習／生涯能力",
+      "source": "professor_node"
+    },
+    "L0179": {
+      "family": "F14",
+      "family_name": "品格／學習／生涯能力",
+      "source": "professor_node"
+    }
+  }
+}

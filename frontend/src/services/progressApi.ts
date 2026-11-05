@@ -198,6 +198,14 @@ export interface TextProgressItem {
   started_at: string;
   completed_at: string | null;
   next_step: NextStepRec;
+  // #3780 D2（PRD §5.6）— 給喝采島範本模式用，不經過上面舊 6 步模型。
+  steps_completed: string[];
+  has_session: boolean;
+  // #3780 D（PRD §5.6）— 伺服器算好的「這堂課在喝采島上佔領了沒」，不是
+  // 前端自己猜（前端沒有 step_sequence，猜不出一堂課總共幾站）。
+  is_occupied: boolean;
+  stations_done: number;
+  stations_total: number;
 }
 
 export interface StudentProgressResponse {

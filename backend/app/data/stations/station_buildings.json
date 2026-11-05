@@ -1,0 +1,24 @@
+{
+  "_meta": {
+    "name": "站 → 建築名稱對照",
+    "note": "從 app/data/word_babies/fragments.json 的 station_flavor_map 抽出（#3780 第一階段，game-design.md §5.2 要求：這份對照是中性資料，不是文字寶貝 v1 的專屬資產，v1 整套刪除後這份要留著給閱讀寶貝的寶貝卡引導〔§4.2〕沿用）。",
+    "source": "backend/app/data/word_babies/fragments.json station_flavor_map（2026-10-26 建立，2026-10-31 抽出）"
+  },
+  "station_building": {
+    "lesson-intro": "港口燈塔",
+    "key-passage-reading": "回音劇場",
+    "full-text-annotate": "書卷長廊",
+    "report": "星空瞭望台",
+    "vocab-definition": "字源館",
+    "vocab-review": "精靈牧場",
+    "vocab-application": "工匠作坊",
+    "knowledge-station": "樹屋補給站",
+    "keypoints-table": "地圖塔",
+    "comprehension": "謎題神殿",
+    "spotlight": "聚光閣",
+    "classical-text": "原文閣",
+    "classical-sentence-matching": "對句碑林",
+    "classical-word-matching": "字牌亭",
+    "classical-self-challenge": "挑戰擂台"
+  }
+}

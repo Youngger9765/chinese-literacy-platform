@@ -21,6 +21,7 @@ import { useIdleTimer } from '../hooks/useIdleTimer';
 import type { StepProgressData } from '../services/learningApi';
 import SessionTimeoutWarning from '../components/SessionTimeoutWarning';
 import BadgeUnlockToast from '../components/gamification/BadgeUnlockToast';
+import ReadingBabyGrowthToast from '../components/gamification/ReadingBabyGrowthToast';
 import { isToolboxMode } from '../services/learningStorageScope';
 
 // Extracted hooks (Issue #1906 — deep split of the god component)
@@ -258,6 +259,8 @@ const LearningLayout: React.FC = () => {
     isProgressLoading,
     midSessionBadgeUnlocks,
     dismissMidSessionBadgeUnlocks,
+    midSessionReadingBabyGrowth,
+    dismissMidSessionReadingBabyGrowth,
   } = stepPersistence;
 
   // ── Hook 3: step navigation (all handleFinish* callbacks) ────────────────
@@ -518,6 +521,14 @@ const LearningLayout: React.FC = () => {
       <BadgeUnlockToast
         badgeKeys={midSessionBadgeUnlocks}
         onDismiss={dismissMidSessionBadgeUnlocks}
+      />
+      {/* #3780 reading-babies phase 2（game-design.md §3.3「當頁成長
+          提示」）—— 做完一站當下就在這一頁跳出「寶貝長大了」提示，不等
+          回島才看到；跟上面 BadgeUnlockToast 同一層級，不管學生在哪一步
+          都看得到。 */}
+      <ReadingBabyGrowthToast
+        events={midSessionReadingBabyGrowth}
+        onDismiss={dismissMidSessionReadingBabyGrowth}
       />
     </>
   );

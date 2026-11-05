@@ -1,0 +1,2950 @@
+{
+  "_meta": {
+    "source": "GET /api/stories?page_size=300 + GET /api/stories/{id} per lesson",
+    "backend": "https://lingoleap-backend-issue-3780-oja2sffiya-de.a.run.app",
+    "backend_sha": "034e649ac6779ecaaa31943aedb5a69876652ebf",
+    "fetched_at": "2026-10-26T22:50Z",
+    "note": "#3780 P0-2 退件 Q3 审查员：179 課裡 133 課至少有一對建築間距 < 4.0，最窄 3.963（工匠作坊/地圖塔）。這份 fixture 是 spawnPoint.allLessons.test.ts 的資料來源，用來鎖「出生點可行走＋建築間距走得過去」這兩件事，避免 MIN_CAMERA_BUILDING_DISTANCE 改動造成回歸。"
+  },
+  "lessons": [
+    {
+      "id": 20011,
+      "title": "贏得喝采的輸家",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#dcavv",
+        "key-passage-reading#arfe7",
+        "vocab-definition#jryea",
+        "vocab-application#jp34n",
+        "keypoints-table#wtm6h",
+        "comprehension#4axkq",
+        "vocab-review#rdcd7",
+        "knowledge-station#uxwy3",
+        "report"
+      ]
+    },
+    {
+      "id": 20013,
+      "title": "正太與小豬：武僧的養成之路",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#7fy99",
+        "key-passage-reading#mrfyn",
+        "vocab-definition#yhc3d",
+        "vocab-application#afauu",
+        "keypoints-table#aryuy",
+        "spotlight#ek9x3",
+        "comprehension#rua7w",
+        "vocab-review#7pyjc",
+        "knowledge-station#namw6",
+        "report"
+      ]
+    },
+    {
+      "id": 20014,
+      "title": "最美的畫面",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#uc7mr",
+        "key-passage-reading#yvpjd",
+        "vocab-definition#c9fyn",
+        "vocab-application#exenc",
+        "keypoints-table#aqy3t",
+        "spotlight#mr9ej",
+        "comprehension#rjr3f",
+        "vocab-review#nu7yr",
+        "knowledge-station#nrkd7",
+        "report"
+      ]
+    },
+    {
+      "id": 20015,
+      "title": "穿越極限的跑者",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#kfjyw",
+        "key-passage-reading#vuu63",
+        "vocab-definition#vaf3q",
+        "vocab-application#dtaf4",
+        "keypoints-table#wm67h",
+        "spotlight#naqyp",
+        "comprehension#pqm7v",
+        "vocab-review#jcvma",
+        "knowledge-station#qc3m9",
+        "report"
+      ]
+    },
+    {
+      "id": 20016,
+      "title": "這是什麼「意思」？",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#n3tjn",
+        "key-passage-reading#4uj4q",
+        "vocab-definition#kax3d",
+        "vocab-application#fkwue",
+        "keypoints-table#c69qn",
+        "spotlight#ytnak",
+        "comprehension#4jmfr",
+        "vocab-review#qtedc",
+        "knowledge-station#x79cn",
+        "report"
+      ]
+    },
+    {
+      "id": 20017,
+      "title": "感情小日記1──是友情還是愛情？",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#qeqwt",
+        "key-passage-reading#h6xnk",
+        "vocab-definition#64nww",
+        "vocab-application#6pkat",
+        "keypoints-table#vhkqd",
+        "spotlight#yqcxe",
+        "comprehension#pjhxh",
+        "vocab-review#99vy3",
+        "knowledge-station#yxcht",
+        "report"
+      ]
+    },
+    {
+      "id": 20018,
+      "title": "長高的祕密",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#j4dyf",
+        "key-passage-reading#tpxtj",
+        "vocab-definition#6mnax",
+        "vocab-application#r6eny",
+        "keypoints-table#fpwnq",
+        "spotlight#4qk73",
+        "comprehension#yfqcd",
+        "vocab-review#3ucmw",
+        "knowledge-station#t4jqe",
+        "report"
+      ]
+    },
+    {
+      "id": 20019,
+      "title": "運動科學",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#3hhtn",
+        "key-passage-reading#kddmm",
+        "vocab-definition#4wfjt",
+        "vocab-application#vhr76",
+        "keypoints-table#tdp9c",
+        "spotlight#wyrhm",
+        "comprehension#utfjw",
+        "vocab-review#fkvx4",
+        "knowledge-station#vaqxf",
+        "report"
+      ]
+    },
+    {
+      "id": 20020,
+      "title": "跟著「但是」轉個彎",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#6xkpp",
+        "key-passage-reading#m47w4",
+        "vocab-definition#pfh7r",
+        "vocab-application#rhmnh",
+        "keypoints-table#x9rjc",
+        "spotlight#cax34",
+        "comprehension#myyy7",
+        "vocab-review#fqc7x",
+        "report"
+      ]
+    },
+    {
+      "id": 20001,
+      "title": "十秒的背後",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#mcyjp",
+        "key-passage-reading#mpjwh",
+        "vocab-definition#athdw",
+        "vocab-application#m94d7",
+        "keypoints-table#3vhut",
+        "spotlight#fyq9q",
+        "comprehension#9u9ny",
+        "vocab-review#q6nak",
+        "knowledge-station#cutwp",
+        "report"
+      ]
+    },
+    {
+      "id": 20002,
+      "title": "動物的生存妙招",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#wfrxc",
+        "key-passage-reading#hwteq",
+        "vocab-definition#yqrv7",
+        "vocab-application#47nhx",
+        "spotlight#pwmhu",
+        "keypoints-table#6wymq",
+        "comprehension#3fkwm",
+        "vocab-review#xxrhq",
+        "knowledge-station#3rje9",
+        "report"
+      ]
+    },
+    {
+      "id": 20003,
+      "title": "大自然的氣象小幫手",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#mcda3",
+        "key-passage-reading#fxqh6",
+        "vocab-definition#7uv7y",
+        "vocab-application#a6tya",
+        "spotlight#n3pj7",
+        "keypoints-table#4pxwq",
+        "comprehension#y9n4q",
+        "vocab-review#pqm6e",
+        "knowledge-station#pvuvp",
+        "report"
+      ]
+    },
+    {
+      "id": 20004,
+      "title": "感情小日記2──喜歡是什麼？",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#dmhc3",
+        "key-passage-reading#6yxve",
+        "vocab-definition#jr7e4",
+        "vocab-application#9kr3v",
+        "keypoints-table#uvx7m",
+        "spotlight#fy9hr",
+        "comprehension#unvfu",
+        "vocab-review#upvfm",
+        "knowledge-station#j9t4t",
+        "report"
+      ]
+    },
+    {
+      "id": 20005,
+      "title": "美好的一天",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#aaymn",
+        "key-passage-reading#hkx6e",
+        "vocab-definition#9taw4",
+        "vocab-application#udaun",
+        "spotlight#huh97",
+        "keypoints-table#6ptxv",
+        "comprehension#q4xww",
+        "vocab-review#wuye4",
+        "report"
+      ]
+    },
+    {
+      "id": 20006,
+      "title": "誤會",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#3ttr7",
+        "key-passage-reading#md99x",
+        "vocab-definition#vjf9t",
+        "vocab-application#4fwf4",
+        "spotlight#4q7nt",
+        "keypoints-table#9aynd",
+        "comprehension#whh73",
+        "vocab-review#r4797",
+        "report"
+      ]
+    },
+    {
+      "id": 20007,
+      "title": "黃絲帶",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#c9h66",
+        "key-passage-reading#cwcnf",
+        "vocab-definition#ttj4p",
+        "vocab-application#3pckv",
+        "spotlight#urq4w",
+        "keypoints-table#n6pew",
+        "comprehension#nxt4d",
+        "vocab-review#ajkap",
+        "report"
+      ]
+    },
+    {
+      "id": 20008,
+      "title": "第一百碗麵",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#h9yhy",
+        "key-passage-reading#3adk9",
+        "vocab-definition#9ud9u",
+        "vocab-application#xnkx7",
+        "keypoints-table#t3jvd",
+        "spotlight#jmw99",
+        "comprehension#7j6y3",
+        "vocab-review#twecn",
+        "knowledge-station#7xuqm",
+        "report"
+      ]
+    },
+    {
+      "id": 20009,
+      "title": "白牙的最後一戰",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#xxwkf",
+        "key-passage-reading#mn7ju",
+        "vocab-definition#qn4re",
+        "vocab-application#7t96j",
+        "keypoints-table#du96p",
+        "spotlight#rhvkr",
+        "comprehension#dm4qv",
+        "vocab-review#jucmy",
+        "knowledge-station#yhapy",
+        "report"
+      ]
+    },
+    {
+      "id": 20010,
+      "title": "把球打好，就夠了嗎？──阿耀與健豪學長的通信（一）",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#ajk7q",
+        "key-passage-reading#wkmdr",
+        "vocab-definition#6w6kf",
+        "vocab-application#twnct",
+        "keypoints-table#3rk4j",
+        "spotlight#ndpr3",
+        "comprehension#xkwrh",
+        "vocab-review#pyu9y",
+        "knowledge-station#xhwph",
+        "report"
+      ]
+    },
+    {
+      "id": 20012,
+      "title": "想讀書，該從哪裡著手？──阿耀與健豪學長的通信（二）",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#rxfxx",
+        "key-passage-reading#ju7a4",
+        "vocab-definition#4edj4",
+        "vocab-application#xwtec",
+        "keypoints-table#ddqxh",
+        "spotlight#awedj",
+        "comprehension#xw94c",
+        "vocab-review#jkf4j",
+        "knowledge-station#ept3w",
+        "report"
+      ]
+    },
+    {
+      "id": 20021,
+      "title": "正太與小豬：武僧的養成之路",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#ke6jr",
+        "comprehension#p3679",
+        "report"
+      ]
+    },
+    {
+      "id": 20031,
+      "title": "奧運銀牌背後的自我鍛鍊",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#3khu6",
+        "key-passage-reading#x4n4w",
+        "vocab-definition#eftxy",
+        "vocab-application#ykwwq",
+        "keypoints-table#mhev3",
+        "spotlight#vepac",
+        "comprehension#76hak",
+        "vocab-review#jqnv6",
+        "knowledge-station#nvku7",
+        "report"
+      ]
+    },
+    {
+      "id": 20041,
+      "title": "周天成的一天──頂尖選手的養成",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#wjtnp",
+        "key-passage-reading#ujtjf",
+        "vocab-definition#9nmpq",
+        "vocab-application#4jkrw",
+        "keypoints-table#kxnre",
+        "spotlight#va64t",
+        "comprehension#remjm",
+        "vocab-review#6etae",
+        "knowledge-station#kt3ue",
+        "report"
+      ]
+    },
+    {
+      "id": 20042,
+      "title": "「拳」力出擊──陳念琴",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#tvt77",
+        "key-passage-reading#mdjjy",
+        "vocab-definition#pkcxf",
+        "vocab-application#xmjff",
+        "keypoints-table#d4uct",
+        "spotlight#3cv9c",
+        "comprehension#6aen3",
+        "vocab-review#d3f7j",
+        "knowledge-station#cyxfv",
+        "report"
+      ]
+    },
+    {
+      "id": 20043,
+      "title": "從童工到大學教授之路",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#nraty",
+        "key-passage-reading#aqhhj",
+        "vocab-definition#dafdq",
+        "vocab-application#6mqnr",
+        "keypoints-table#he7ac",
+        "spotlight#vypjt",
+        "comprehension#hkakq",
+        "vocab-review#6ae6h",
+        "knowledge-station#vm6me",
+        "report"
+      ]
+    },
+    {
+      "id": 20044,
+      "title": "文字路上的閱讀號誌",
+      "step_sequence": [
+        "lesson-intro",
+        "spotlight#t9rat",
+        "report"
+      ]
+    },
+    {
+      "id": 20045,
+      "title": "兵來將擋，水來土掩",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#urk49",
+        "key-passage-reading#ejvcp",
+        "vocab-definition#rhc73",
+        "vocab-application#whhad",
+        "keypoints-table#jpt7f",
+        "spotlight#f4up3",
+        "comprehension#xfa3f",
+        "vocab-review#chu9q",
+        "knowledge-station#xhcrf",
+        "report"
+      ]
+    },
+    {
+      "id": 20046,
+      "title": "以植物為師的科學",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#vcn7j",
+        "key-passage-reading#ny7wv",
+        "spotlight#7tu3d",
+        "vocab-definition#equ7q",
+        "vocab-application#7kxcr",
+        "keypoints-table#apuhm",
+        "comprehension#99ajv",
+        "vocab-review#x4pkm",
+        "knowledge-station#r7hew",
+        "report"
+      ]
+    },
+    {
+      "id": 20047,
+      "title": "工地大嫂",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#4mq6a",
+        "key-passage-reading#cptv3",
+        "spotlight#kc47r",
+        "vocab-definition#cp6uh",
+        "vocab-application#76kh3",
+        "keypoints-table#x6ctd",
+        "comprehension#fjveu",
+        "vocab-review#jccwr",
+        "knowledge-station#avcvy",
+        "report"
+      ]
+    },
+    {
+      "id": 20048,
+      "title": "災難預言準不準？",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#jehhy",
+        "key-passage-reading#audn6",
+        "vocab-definition#udvav",
+        "spotlight#dxx43",
+        "vocab-application#vadp4",
+        "keypoints-table#9w3ye",
+        "comprehension#a3hyx",
+        "vocab-review#3ch3y",
+        "knowledge-station#tj6dq",
+        "report"
+      ]
+    },
+    {
+      "id": 20022,
+      "title": "感情小日記3──吃醋的滋味",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#7m4my",
+        "key-passage-reading#4dekv",
+        "vocab-definition#yhaxd",
+        "vocab-application#k3f3c",
+        "keypoints-table#vq3fc",
+        "spotlight#wqwyp",
+        "comprehension#vr7kk",
+        "vocab-review#f693e",
+        "knowledge-station#jj4ea",
+        "report"
+      ]
+    },
+    {
+      "id": 20023,
+      "title": "比運氣更重要的事：《長腿叔叔》的啟發",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#tqvdk",
+        "key-passage-reading#n3jva",
+        "vocab-definition#4dq3d",
+        "vocab-application#hddnv",
+        "keypoints-table#nqxcy",
+        "spotlight#xw9rt",
+        "comprehension#mde47",
+        "vocab-review#dhm36",
+        "knowledge-station#dptew",
+        "report"
+      ]
+    },
+    {
+      "id": 20024,
+      "title": "堅持到底的棒球人生──周思齊(前篇)",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#eak94",
+        "key-passage-reading#y73mk",
+        "vocab-definition#qecvu",
+        "vocab-application#j6hv6",
+        "keypoints-table#3uu7d",
+        "spotlight#4cxjh",
+        "comprehension#xjadj",
+        "vocab-review#947ry",
+        "knowledge-station#uquqe",
+        "report"
+      ]
+    },
+    {
+      "id": 20025,
+      "title": "堅持到底的棒球人生──周思齊(後篇)",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#9tmnd",
+        "key-passage-reading#jppcc",
+        "vocab-definition#w9tnp",
+        "vocab-application#6kpfj",
+        "keypoints-table#jyajr",
+        "spotlight#dmt7v",
+        "comprehension#kehf6",
+        "vocab-review#9d6cp",
+        "knowledge-station#6vyae",
+        "report"
+      ]
+    },
+    {
+      "id": 20026,
+      "title": "感情小日記4──我被告白了",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#jetyv",
+        "key-passage-reading#d9wqa",
+        "vocab-definition#9qpn3",
+        "vocab-application#9myxh",
+        "keypoints-table#vrar9",
+        "spotlight#t93wh",
+        "comprehension#kwc3p",
+        "vocab-review#eva4c",
+        "knowledge-station#f4kcw",
+        "report"
+      ]
+    },
+    {
+      "id": 20027,
+      "title": "救援大隊的好幫手",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#dkkew",
+        "key-passage-reading#yy4tx",
+        "vocab-definition#mam36",
+        "vocab-application#awd7j",
+        "keypoints-table#papux",
+        "spotlight#jvwar",
+        "comprehension#yyvve",
+        "vocab-review#drk4r",
+        "knowledge-station#p7cvk",
+        "report"
+      ]
+    },
+    {
+      "id": 20028,
+      "title": "掃雷英雄馬嘎瓦",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#977nw",
+        "key-passage-reading#pckcm",
+        "vocab-definition#x97ak",
+        "vocab-application#hmcf6",
+        "keypoints-table#hj9xc",
+        "spotlight#rjyaa",
+        "comprehension#rnxx6",
+        "vocab-review#qxx9u",
+        "knowledge-station#qhv7a",
+        "report"
+      ]
+    },
+    {
+      "id": 20029,
+      "title": "牧羊少年的逆轉勝",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#fqwda",
+        "key-passage-reading#tfewt",
+        "vocab-definition#d3aqn",
+        "vocab-application#r9jxj",
+        "keypoints-table#n3q4d",
+        "comprehension#7cfa6",
+        "full-text-annotate#n3qxn",
+        "knowledge-station#9npfp",
+        "key-passage-reading#d9d7p",
+        "vocab-definition#vycpf",
+        "vocab-application#r49ht",
+        "keypoints-table#huac7",
+        "comprehension#xvud3",
+        "spotlight#mw3dn",
+        "comprehension#6je7j",
+        "vocab-review#vfd96",
+        "report"
+      ]
+    },
+    {
+      "id": 20030,
+      "title": "六塊肌、六塊雞",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#eqqyy",
+        "key-passage-reading#jr6ja",
+        "vocab-definition#vn3f6",
+        "vocab-application#effh3",
+        "keypoints-table#xk6rk",
+        "spotlight#nmpur",
+        "comprehension#3h3jv",
+        "vocab-review#7mau9",
+        "knowledge-station#vf9y7",
+        "report"
+      ]
+    },
+    {
+      "id": 20032,
+      "title": "小丑醫生",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#qjn4x",
+        "key-passage-reading#pucxn",
+        "vocab-definition#69a43",
+        "vocab-application#afpdq",
+        "spotlight#amy6n",
+        "keypoints-table#wqpup",
+        "comprehension#udrax",
+        "vocab-review#kfkd4",
+        "knowledge-station#dvnvx",
+        "report"
+      ]
+    },
+    {
+      "id": 20033,
+      "title": "垃圾食物的誘惑與代價",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#p7q67",
+        "key-passage-reading#phwnx",
+        "vocab-definition#khr4c",
+        "vocab-application#97rxt",
+        "keypoints-table#qh9ep",
+        "spotlight#edtdu",
+        "comprehension#jfyjf",
+        "vocab-review#j3qhq",
+        "knowledge-station#nc77e",
+        "report"
+      ]
+    },
+    {
+      "id": 20034,
+      "title": "抗拒指尖上的誘惑",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#6t6cy",
+        "key-passage-reading#j7xqu",
+        "vocab-definition#yhwrq",
+        "vocab-application#77y3q",
+        "keypoints-table#ppqcq",
+        "spotlight#fy63a",
+        "comprehension#uc6ud",
+        "vocab-review#nftaj",
+        "knowledge-station#66dwt",
+        "report"
+      ]
+    },
+    {
+      "id": 20035,
+      "title": "信件的力量──寫信馬拉松",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#vc3at",
+        "key-passage-reading#apnaa",
+        "vocab-definition#r6hce",
+        "vocab-application#kxqrc",
+        "keypoints-table#767q4",
+        "spotlight#73ee7",
+        "comprehension#tdet9",
+        "vocab-review#99vhy",
+        "knowledge-station#emrtc",
+        "report"
+      ]
+    },
+    {
+      "id": 20036,
+      "title": "臺灣棒球先驅──來自花蓮的能高團",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#dt9cv",
+        "key-passage-reading#cua4c",
+        "vocab-definition#ddnyj",
+        "vocab-application#mjmum",
+        "spotlight#6p9mj",
+        "keypoints-table#ujxxu",
+        "comprehension#nmmjf",
+        "vocab-review#vnw39",
+        "knowledge-station#9mh9c",
+        "report"
+      ]
+    },
+    {
+      "id": 20037,
+      "title": "小兵立大功：雞鳴狗盜的故事",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#fv7cm",
+        "key-passage-reading#6ynfe",
+        "vocab-definition#arm7k",
+        "vocab-application#udv6d",
+        "spotlight#at3r4",
+        "keypoints-table#j6v9q",
+        "comprehension#v7kn7",
+        "vocab-review#9qnmy",
+        "knowledge-station#muhf3",
+        "report"
+      ]
+    },
+    {
+      "id": 20038,
+      "title": "魚來了，叮咚叮咚請開門",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#jmh6a",
+        "key-passage-reading#qt9uh",
+        "vocab-definition#tuytm",
+        "vocab-application#newmx",
+        "spotlight#eyjjj",
+        "keypoints-table#3kayv",
+        "comprehension#nnyhm",
+        "vocab-review#cf7dq",
+        "knowledge-station#tm9ry",
+        "report"
+      ]
+    },
+    {
+      "id": 20039,
+      "title": "我有一個棒球夢",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#phhwe",
+        "key-passage-reading#e7umc",
+        "vocab-definition#pwvwj",
+        "vocab-application#3y3kq",
+        "keypoints-table#3a94d",
+        "spotlight#7me4e",
+        "comprehension#fee43",
+        "vocab-review#m3rha",
+        "knowledge-station#4qau6",
+        "report"
+      ]
+    },
+    {
+      "id": 20040,
+      "title": "我的電競夢：從熬夜打遊戲到拿下全國冠軍",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#h6kd6",
+        "key-passage-reading#3ma4h",
+        "vocab-definition#j4ndx",
+        "vocab-application#ujkda",
+        "keypoints-table#j6n4a",
+        "spotlight#pxhn3",
+        "comprehension#edf97",
+        "vocab-review#cercr",
+        "knowledge-station#c3vye",
+        "report"
+      ]
+    },
+    {
+      "id": 20049,
+      "title": "正太與小豬：武僧的養成之路",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#vdrxk",
+        "comprehension#jpj3n",
+        "report"
+      ]
+    },
+    {
+      "id": 20060,
+      "title": "心理出狀況，是壞事導致的嗎",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#tw9hj",
+        "key-passage-reading#6reqf",
+        "vocab-definition#qadkj",
+        "vocab-application#794ax",
+        "keypoints-table#de7fd",
+        "spotlight#4qd4a",
+        "comprehension#uhuxu",
+        "vocab-review#mwwnu",
+        "knowledge-station#4tcxe",
+        "report"
+      ]
+    },
+    {
+      "id": 20069,
+      "title": "一件班服，一場思辨討論",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#v9cjw",
+        "key-passage-reading#yumur",
+        "vocab-definition#7up4v",
+        "vocab-application#4ekaa",
+        "spotlight#73ycf",
+        "keypoints-table#73dcy",
+        "comprehension#3ywp6",
+        "vocab-review#jyfk6",
+        "report"
+      ]
+    },
+    {
+      "id": 20070,
+      "title": "文章中的「關鍵少數」",
+      "step_sequence": [
+        "lesson-intro",
+        "spotlight#nch9f",
+        "report"
+      ]
+    },
+    {
+      "id": 20071,
+      "title": "數字記憶的奧秘",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#mkn9y",
+        "key-passage-reading#9rncr",
+        "vocab-definition#quxaa",
+        "vocab-application#v9npn",
+        "keypoints-table#76mkq",
+        "spotlight#thktn",
+        "comprehension#dvfyt",
+        "vocab-review#wjetk",
+        "knowledge-station#nf7xf",
+        "report"
+      ]
+    },
+    {
+      "id": 20072,
+      "title": "重複朗讀的重要性：柳丁和文旦的比喻",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#yk4tc",
+        "key-passage-reading#vfmem",
+        "vocab-definition#mvdem",
+        "vocab-application#4vvd7",
+        "keypoints-table#naqxp",
+        "spotlight#ahphx",
+        "comprehension#t4v33",
+        "vocab-review#ptuh6",
+        "knowledge-station#d9yqw",
+        "report"
+      ]
+    },
+    {
+      "id": 20073,
+      "title": "與小學說再見",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#4ye9x",
+        "key-passage-reading#wtaem",
+        "vocab-definition#7c667",
+        "vocab-application#9yyqf",
+        "keypoints-table#k3rqq",
+        "spotlight#aerhq",
+        "comprehension#yru3m",
+        "vocab-review#n76kq",
+        "knowledge-station#4jxtm",
+        "report"
+      ]
+    },
+    {
+      "id": 20074,
+      "title": "老鷹紅豆的故事",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#a4qjf",
+        "key-passage-reading#fedv9",
+        "vocab-definition#y6rve",
+        "vocab-application#aawe4",
+        "spotlight#nuf9t",
+        "keypoints-table#ump6p",
+        "comprehension#y6xnt",
+        "vocab-review#4kpmt",
+        "knowledge-station#xahyn",
+        "report"
+      ]
+    },
+    {
+      "id": 20075,
+      "title": "白鯨救援：一場人與自然的協奏曲",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#tvf6u",
+        "knowledge-station#amxfk",
+        "key-passage-reading#4jkpq",
+        "vocab-definition#jnemx",
+        "vocab-application#kqu6u",
+        "spotlight#xprv7",
+        "comprehension#d7vhw",
+        "vocab-review#q767k",
+        "report"
+      ]
+    },
+    {
+      "id": 20076,
+      "title": "給神明發會診單",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#qw9tk",
+        "key-passage-reading#6ye9h",
+        "vocab-definition#dkwyh",
+        "vocab-application#ucjma",
+        "keypoints-table#vvuku",
+        "spotlight#tvffq",
+        "comprehension#ux3dt",
+        "vocab-review#mym4k",
+        "knowledge-station#34pt9",
+        "report"
+      ]
+    },
+    {
+      "id": 20050,
+      "title": "荷蘭東印度公司：全世界第一張股票的誕生",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#cwrfr",
+        "key-passage-reading#teqca",
+        "vocab-definition#emxhj",
+        "vocab-application#vwfa4",
+        "spotlight#7rdtn",
+        "comprehension#kvuvw",
+        "vocab-review#vvhud",
+        "knowledge-station#tfqeh",
+        "report"
+      ]
+    },
+    {
+      "id": 20051,
+      "title": "奇蹟行動",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#f9369",
+        "key-passage-reading#ty6c7",
+        "vocab-definition#rqdqc",
+        "vocab-application#mr64j",
+        "keypoints-table#da9xe",
+        "spotlight#qy37x",
+        "comprehension#7pruu",
+        "vocab-review#qwawc",
+        "knowledge-station#ja36v",
+        "report"
+      ]
+    },
+    {
+      "id": 20052,
+      "title": "小藍鯨之死",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#jhjte",
+        "key-passage-reading#kjcx3",
+        "vocab-definition#xe7vm",
+        "vocab-application#uqexw",
+        "keypoints-table#e7jjd",
+        "spotlight#nhuxq",
+        "comprehension#kc3ad",
+        "vocab-review#4h6p9",
+        "knowledge-station#6pwwk",
+        "report"
+      ]
+    },
+    {
+      "id": 20053,
+      "title": "昆蟲會思考嗎？",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#3np3k",
+        "key-passage-reading#phva7",
+        "vocab-definition#teufj",
+        "vocab-application#cafcc",
+        "keypoints-table#ynk3y",
+        "spotlight#tqxau",
+        "comprehension#rwwrh",
+        "vocab-review#4x9cm",
+        "knowledge-station#ah47p",
+        "report"
+      ]
+    },
+    {
+      "id": 20054,
+      "title": "動物談情說愛的方式",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#a3pdu",
+        "key-passage-reading#uyr7q",
+        "vocab-definition#4nf67",
+        "vocab-application#qdw3u",
+        "spotlight#ahtye",
+        "comprehension#eu6aq",
+        "vocab-review#6dw9u",
+        "knowledge-station#uaeej",
+        "report"
+      ]
+    },
+    {
+      "id": 20055,
+      "title": "愛冒險逞強的雄性動物",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#9pfan",
+        "key-passage-reading#j3e3w",
+        "vocab-definition#kxfm7",
+        "vocab-application#9uu6x",
+        "keypoints-table#3dv69",
+        "spotlight#q6jw7",
+        "comprehension#xkmah",
+        "vocab-review#fqahx",
+        "knowledge-station#uh6ea",
+        "report"
+      ]
+    },
+    {
+      "id": 20056,
+      "title": "把手上的餅吃香一點",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#wprr6",
+        "key-passage-reading#adykq",
+        "vocab-definition#ycvhe",
+        "vocab-application#94pxt",
+        "keypoints-table#4dm36",
+        "spotlight#vva3q",
+        "comprehension#jrk66",
+        "vocab-review#uxrkf",
+        "knowledge-station#me9ct",
+        "report"
+      ]
+    },
+    {
+      "id": 20057,
+      "title": "祝你好眠",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#tvrxr",
+        "key-passage-reading#7rxjq",
+        "vocab-definition#33fna",
+        "vocab-application#wefrr",
+        "keypoints-table#3vp7r",
+        "spotlight#qhcac",
+        "comprehension#ddfvx",
+        "vocab-review#rw7dy",
+        "knowledge-station#af4ya",
+        "report"
+      ]
+    },
+    {
+      "id": 20058,
+      "title": "末日種子庫",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#wmhmv",
+        "key-passage-reading#4xtq7",
+        "vocab-definition#tt7ju",
+        "vocab-application#ump7k",
+        "spotlight#fajxm",
+        "keypoints-table#7nc34",
+        "comprehension#cneff",
+        "vocab-review#drdye",
+        "knowledge-station#dm94q",
+        "report"
+      ]
+    },
+    {
+      "id": 20059,
+      "title": "紅領帶",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#e3rx7",
+        "key-passage-reading#jm3ww",
+        "vocab-definition#nj33y",
+        "vocab-application#3kh7n",
+        "keypoints-table#emqht",
+        "spotlight#r7apr",
+        "comprehension#ac9qh",
+        "vocab-review#q7qn3",
+        "knowledge-station#da74x",
+        "report"
+      ]
+    },
+    {
+      "id": 20061,
+      "title": "因人而異，才有真正的公平",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#k3ckp",
+        "key-passage-reading#vq7ww",
+        "vocab-definition#6emy9",
+        "vocab-application#tak6e",
+        "spotlight#ddxh7",
+        "keypoints-table#kqv9h",
+        "comprehension#7ryx6",
+        "vocab-review#6p7un",
+        "report"
+      ]
+    },
+    {
+      "id": 20062,
+      "title": "感情小日記5──我該告白嗎？",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#ww4d9",
+        "key-passage-reading#jak3k",
+        "vocab-definition#c6qyc",
+        "vocab-application#cjwcc",
+        "keypoints-table#eyxax",
+        "spotlight#tyudy",
+        "comprehension#yhuc9",
+        "vocab-review#jy7tt",
+        "knowledge-station#ayufn",
+        "report"
+      ]
+    },
+    {
+      "id": 20063,
+      "title": "物以稀為貴：從「供給」和「需求」談物價波動",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#p3kud",
+        "key-passage-reading#yprak",
+        "vocab-definition#mc9mf",
+        "vocab-application#4fq9w",
+        "keypoints-table#dydnq",
+        "full-text-annotate#4uee3",
+        "key-passage-reading#9a7x4",
+        "vocab-definition#3944x",
+        "vocab-application#3q3cd",
+        "keypoints-table#6xvh6",
+        "full-text-annotate#7wavn",
+        "key-passage-reading#ajy9w",
+        "vocab-definition#arpnw",
+        "vocab-application#6x4t9",
+        "keypoints-table#6pyvc",
+        "spotlight#fpctd",
+        "comprehension#9a3ve",
+        "vocab-review#9ahm4",
+        "knowledge-station#xf7e3",
+        "report"
+      ]
+    },
+    {
+      "id": 20064,
+      "title": "感情小日記6──我失戀了",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#4fwdm",
+        "key-passage-reading#3yw7u",
+        "vocab-definition#777qc",
+        "vocab-application#nyjxv",
+        "keypoints-table#vq97q",
+        "spotlight#rmvu6",
+        "comprehension#pmqew",
+        "vocab-review#cxape",
+        "knowledge-station#7jtnn",
+        "report"
+      ]
+    },
+    {
+      "id": 20065,
+      "title": "運動傷害，怎麼辦？",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#7qpra",
+        "key-passage-reading#mqxtx",
+        "vocab-definition#peejk",
+        "vocab-application#v3k6h",
+        "keypoints-table#4vkvu",
+        "spotlight#d7dec",
+        "comprehension#cwthx",
+        "vocab-review#cnhuv",
+        "knowledge-station#6xphw",
+        "report"
+      ]
+    },
+    {
+      "id": 20066,
+      "title": "古代畫家心中的仙境",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#my7tn",
+        "key-passage-reading#vye47",
+        "vocab-definition#r3t9q",
+        "vocab-application#umc94",
+        "spotlight#tfey4",
+        "keypoints-table#jtywk",
+        "comprehension#hxktk",
+        "vocab-review#e9vaq",
+        "knowledge-station#7yah9",
+        "report"
+      ]
+    },
+    {
+      "id": 20067,
+      "title": "森林大軍的守護者",
+      "step_sequence": [
+        "lesson-intro",
+        "spotlight#pqrwq",
+        "full-text-annotate#dhqrv",
+        "key-passage-reading#3nau9",
+        "vocab-definition#umjej",
+        "vocab-application#jrtuw",
+        "keypoints-table#t4qhk",
+        "comprehension#eyxrw",
+        "vocab-review#uq6nw",
+        "knowledge-station#tn7fe",
+        "report"
+      ]
+    },
+    {
+      "id": 20068,
+      "title": "植物獵人",
+      "step_sequence": [
+        "lesson-intro",
+        "spotlight#u4whf",
+        "keypoints-table#xa37k",
+        "vocab-definition#nfq49",
+        "vocab-application#wf7we",
+        "comprehension#ejdkk",
+        "vocab-review#adc93",
+        "knowledge-station#7u7q7",
+        "report"
+      ]
+    },
+    {
+      "id": 20077,
+      "title": "正太與小豬：武僧的養成之路",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#6cp4h",
+        "comprehension#jrwp4",
+        "report"
+      ]
+    },
+    {
+      "id": 20088,
+      "title": "塑膠，好用不好甩",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#y4x3j",
+        "key-passage-reading#6nfav",
+        "vocab-definition#a77en",
+        "vocab-application#hncmd",
+        "spotlight#9fr63",
+        "comprehension#djpjt",
+        "vocab-review#jhqtu",
+        "knowledge-station#eaeuj",
+        "report"
+      ]
+    },
+    {
+      "id": 20099,
+      "title": "AI什麼都會，我們還要學什麼？",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#e9tc4",
+        "key-passage-reading#6jvyf",
+        "vocab-definition#yjdd6",
+        "vocab-application#cj3r6",
+        "spotlight#mchxe",
+        "comprehension#y9rte",
+        "vocab-review#awcuc",
+        "knowledge-station#ynctm",
+        "report"
+      ]
+    },
+    {
+      "id": 20100,
+      "title": "你以為的浪漫，可能是跟騷",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#rcmdx",
+        "key-passage-reading#9jqxw",
+        "vocab-definition#p4yyu",
+        "vocab-application#hdhut",
+        "spotlight#7cdpn",
+        "keypoints-table#drn94",
+        "comprehension#4nyuv",
+        "vocab-review#qmxt9",
+        "knowledge-station#yntf4",
+        "report"
+      ]
+    },
+    {
+      "id": 20101,
+      "title": "小米酒的祝福",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#ffk64",
+        "key-passage-reading#cw744",
+        "vocab-definition#xyutt",
+        "vocab-application#w7hq4",
+        "spotlight#uqfxj",
+        "comprehension#cjdtp",
+        "vocab-review#7d9d6",
+        "knowledge-station#p7aky",
+        "report"
+      ]
+    },
+    {
+      "id": 20102,
+      "title": "網紅的電子煙實驗：偽科學的陷阱",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#eujnf",
+        "key-passage-reading#7nadf",
+        "vocab-definition#mmkv3",
+        "vocab-application#4af4y",
+        "spotlight#c79vd",
+        "keypoints-table#tunxf",
+        "comprehension#3vdy9",
+        "vocab-review#46t3h",
+        "knowledge-station#m4pqv",
+        "report"
+      ]
+    },
+    {
+      "id": 20103,
+      "title": "果醬男孩",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#uwr7r",
+        "key-passage-reading#dxjyx",
+        "vocab-definition#exjkq",
+        "vocab-application#y6ff7",
+        "spotlight#4uaq3",
+        "keypoints-table#9m93y",
+        "comprehension#twc7y",
+        "vocab-review#t6j9k",
+        "knowledge-station#4kx74",
+        "report"
+      ]
+    },
+    {
+      "id": 20104,
+      "title": "當全世界都在笑你，你可以怎麼做？",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#nperf",
+        "key-passage-reading#k9fef",
+        "vocab-definition#ahp9e",
+        "vocab-application#rdytj",
+        "spotlight#r49yu",
+        "comprehension#xqqem",
+        "vocab-review#yrkmh",
+        "knowledge-station#vx9vt",
+        "report"
+      ]
+    },
+    {
+      "id": 20105,
+      "title": "黑猩猩的守護者",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#qqppu",
+        "key-passage-reading#6mwkt",
+        "vocab-definition#v4uqj",
+        "vocab-application#7ffj3",
+        "spotlight#xrdd7",
+        "comprehension#ratrj",
+        "vocab-review#xextp",
+        "knowledge-station#ccn6q",
+        "report"
+      ]
+    },
+    {
+      "id": 20106,
+      "title": "帶著「血拼清單」閱讀",
+      "step_sequence": [
+        "lesson-intro",
+        "spotlight#twdxu",
+        "report"
+      ]
+    },
+    {
+      "id": 20078,
+      "title": "別上「誘餌式標題」的鉤",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#3ynpe",
+        "key-passage-reading#hqnw3",
+        "vocab-definition#rjaxe",
+        "vocab-application#644uq",
+        "keypoints-table#xkm6e",
+        "spotlight#ekedk",
+        "comprehension#crryd",
+        "vocab-review#3wkpr",
+        "knowledge-station#7jdvt",
+        "report"
+      ]
+    },
+    {
+      "id": 20079,
+      "title": "一封向醫師求助的信",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#xxra4",
+        "key-passage-reading#qh7t4",
+        "vocab-definition#mtdue",
+        "vocab-application#qk4x6",
+        "keypoints-table#ruu94",
+        "spotlight#aj7dx",
+        "comprehension#6uqne",
+        "vocab-review#kteaq",
+        "knowledge-station#fkhxj",
+        "report"
+      ]
+    },
+    {
+      "id": 20080,
+      "title": "澳洲奧運金牌的X機密",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#cmwwv",
+        "key-passage-reading#nkj9j",
+        "vocab-definition#3f7dy",
+        "vocab-application#njx4y",
+        "keypoints-table#y4mpx",
+        "spotlight#ht6vu",
+        "comprehension#yjaxn",
+        "vocab-review#ryvat",
+        "knowledge-station#ca9kv",
+        "report"
+      ]
+    },
+    {
+      "id": 20081,
+      "title": "女性太空人登月",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#v3nth",
+        "key-passage-reading#jwhh3",
+        "vocab-definition#had9j",
+        "vocab-application#j9trt",
+        "keypoints-table#ynwpe",
+        "spotlight#jnqfm",
+        "comprehension#nw6j9",
+        "vocab-review#6ctfq",
+        "knowledge-station#dvqkn",
+        "report"
+      ]
+    },
+    {
+      "id": 20082,
+      "title": "從〈螞蟻與蟋蟀〉看生命的多樣性",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#67fkn",
+        "key-passage-reading#hna4h",
+        "vocab-definition#kvat6",
+        "vocab-application#66ydn",
+        "keypoints-table#duhpt",
+        "spotlight#wkec4",
+        "comprehension#kcfv7",
+        "vocab-review#vpajk",
+        "knowledge-station#dxunp",
+        "report"
+      ]
+    },
+    {
+      "id": 20083,
+      "title": "爺爺奶奶來了以後",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#xmaax",
+        "key-passage-reading#7uv63",
+        "vocab-definition#u4e76",
+        "vocab-application#ywvwj",
+        "keypoints-table#96j93",
+        "spotlight#ncrrj",
+        "comprehension#qdeqy",
+        "vocab-review#v3eam",
+        "knowledge-station#jv9tj",
+        "report"
+      ]
+    },
+    {
+      "id": 20084,
+      "title": "長大後，我才讀懂〈夏夜〉",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#nypwh",
+        "key-passage-reading#fff44",
+        "vocab-definition#yadqd",
+        "vocab-application#yayjq",
+        "keypoints-table#n6ejy",
+        "spotlight#4x9c6",
+        "comprehension#99apd",
+        "vocab-review#rr64f",
+        "knowledge-station#e7pky",
+        "report"
+      ]
+    },
+    {
+      "id": 20085,
+      "title": "大自然的氣象小幫手",
+      "step_sequence": [
+        "lesson-intro",
+        "spotlight#ux3nd",
+        "full-text-annotate#ttk9y",
+        "key-passage-reading#eekyd",
+        "vocab-definition#w6t9u",
+        "vocab-application#fw4na",
+        "keypoints-table#7uwux",
+        "comprehension#c3k3q",
+        "vocab-review#vf4wj",
+        "knowledge-station#xfmvj",
+        "report"
+      ]
+    },
+    {
+      "id": 20086,
+      "title": "正太與小豬",
+      "step_sequence": [
+        "lesson-intro",
+        "spotlight#rm7xp",
+        "full-text-annotate#rdyd6",
+        "key-passage-reading#peed4",
+        "vocab-definition#3mh4c",
+        "vocab-application#mwacq",
+        "keypoints-table#73q69",
+        "comprehension#7rxu4",
+        "vocab-review#dmt9x",
+        "knowledge-station#c36xt",
+        "report"
+      ]
+    },
+    {
+      "id": 20087,
+      "title": "把手上的餅吃香一點",
+      "step_sequence": [
+        "lesson-intro",
+        "spotlight#e636a",
+        "full-text-annotate#rpcyh",
+        "key-passage-reading#haxwv",
+        "vocab-definition#caeff",
+        "vocab-application#yp4d3",
+        "keypoints-table#xepeu",
+        "comprehension#6696v",
+        "vocab-review#jxnrm",
+        "knowledge-station#wq7tw",
+        "report"
+      ]
+    },
+    {
+      "id": 20089,
+      "title": "「背影」讀書會",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#f7mav",
+        "key-passage-reading#uf6ny",
+        "vocab-definition#mrraw",
+        "vocab-application#nktnf",
+        "spotlight#ye7nq",
+        "keypoints-table#t6ffy",
+        "comprehension#qthyf",
+        "vocab-review#yfctk",
+        "knowledge-station#4and6",
+        "report"
+      ]
+    },
+    {
+      "id": 20090,
+      "title": "奧運性別平等這條路",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#4x996",
+        "key-passage-reading#6pvew",
+        "vocab-definition#cfu9e",
+        "vocab-application#thkh9",
+        "spotlight#w7mdd",
+        "keypoints-table#a374n",
+        "comprehension#f6khx",
+        "vocab-review#y7ycx",
+        "knowledge-station#ppcmr",
+        "report"
+      ]
+    },
+    {
+      "id": 20091,
+      "title": "你看見時代的灰犀牛了嗎？談人口負成長",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#yvw4a",
+        "key-passage-reading#64w9q",
+        "vocab-definition#cynrm",
+        "vocab-application#evx9d",
+        "keypoints-table#ra6u4",
+        "spotlight#evkjj",
+        "comprehension#prtrk",
+        "vocab-review#v7tcc",
+        "knowledge-station#rue9w",
+        "report"
+      ]
+    },
+    {
+      "id": 20092,
+      "title": "信眾與教主",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#ymrp3",
+        "key-passage-reading#4det3",
+        "vocab-definition#fph4f",
+        "vocab-application#dhfam",
+        "keypoints-table#kw3av",
+        "comprehension#qqnxe",
+        "vocab-review#qu643",
+        "knowledge-station#mcpuv",
+        "spotlight#k3h74",
+        "report"
+      ]
+    },
+    {
+      "id": 20093,
+      "title": "用科學方法伸張正義的神探",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#ch7x6",
+        "key-passage-reading#fuvjp",
+        "vocab-definition#er9aj",
+        "vocab-application#tkv4p",
+        "keypoints-table#e6v4p",
+        "spotlight#kvtpw",
+        "comprehension#uaw3f",
+        "vocab-review#mxj9k",
+        "knowledge-station#rcfmx",
+        "report"
+      ]
+    },
+    {
+      "id": 20094,
+      "title": "看到了嗎？然後呢？",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#qxvp9",
+        "key-passage-reading#dhjfd",
+        "vocab-definition#rd77m",
+        "vocab-application#y4dch",
+        "keypoints-table#kpkaq",
+        "spotlight#4prtq",
+        "comprehension#4vvq3",
+        "vocab-review#9mur6",
+        "knowledge-station#9m9tu",
+        "report"
+      ]
+    },
+    {
+      "id": 20095,
+      "title": "科學怪人（弗蘭肯斯坦：現代普羅米修斯）",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#9yvqf",
+        "key-passage-reading#yqvaj",
+        "vocab-definition#a6fvj",
+        "vocab-application#tennj",
+        "keypoints-table#ej7eu",
+        "spotlight#ufnre",
+        "comprehension#cdpnx",
+        "vocab-review#euvka",
+        "knowledge-station#cfyf4",
+        "report"
+      ]
+    },
+    {
+      "id": 20096,
+      "title": "吐瓦魯：逐漸被淹沒的島國",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#rnuuy",
+        "key-passage-reading#unxym",
+        "vocab-definition#makmd",
+        "vocab-application#ecmq3",
+        "keypoints-table#qmetw",
+        "spotlight#vemm6",
+        "comprehension#ekfaj",
+        "vocab-review#fuccv",
+        "knowledge-station#twp9v",
+        "report"
+      ]
+    },
+    {
+      "id": 20097,
+      "title": "綠色賽事",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#pa39q",
+        "key-passage-reading#jj9ka",
+        "vocab-definition#rjjke",
+        "vocab-application#wn7nn",
+        "keypoints-table#uqpay",
+        "spotlight#e64w9",
+        "comprehension#yfrcj",
+        "vocab-review#pu66w",
+        "knowledge-station#th3pt",
+        "report"
+      ]
+    },
+    {
+      "id": 20098,
+      "title": "隱藏在日常對話中的微歧視",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#phue3",
+        "key-passage-reading#wkrwk",
+        "vocab-definition#wrdah",
+        "vocab-application#paxpv",
+        "keypoints-table#tp4c9",
+        "spotlight#4q7r4",
+        "comprehension#rjenw",
+        "vocab-review#7urwa",
+        "knowledge-station#ykaxr",
+        "report"
+      ]
+    },
+    {
+      "id": 20107,
+      "title": "正太與小豬：武僧的養成之路",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#6ra7e",
+        "comprehension#j63x3",
+        "report"
+      ]
+    },
+    {
+      "id": 20117,
+      "title": "讓你口中的甜蜜成為遠方農民的希望",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#ueunt",
+        "key-passage-reading#thc6j",
+        "vocab-definition#arnap",
+        "vocab-application#xw4uc",
+        "spotlight#cv7qq",
+        "keypoints-table#mrqhh",
+        "comprehension#mnh47",
+        "vocab-review#atjey",
+        "knowledge-station#dv47v",
+        "report"
+      ]
+    },
+    {
+      "id": 20122,
+      "title": "隱形的征服者",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#4q3rm",
+        "key-passage-reading#xv9ny",
+        "vocab-definition#uq7mq",
+        "vocab-application#df9th",
+        "keypoints-table#7tkjc",
+        "spotlight#cdum4",
+        "comprehension#xyfrx",
+        "vocab-review#ta7qj",
+        "knowledge-station#c7apn",
+        "report"
+      ]
+    },
+    {
+      "id": 20123,
+      "title": "爸爸的恩人們",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#yvden",
+        "key-passage-reading#9wmep",
+        "vocab-definition#vwfym",
+        "vocab-application#te97q",
+        "keypoints-table#r3c97",
+        "spotlight#k6jm9",
+        "comprehension#eph7t",
+        "vocab-review#4kd96",
+        "knowledge-station#j6vkr",
+        "report"
+      ]
+    },
+    {
+      "id": 20124,
+      "title": "新奇！「植物肉」你聽過嗎？",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#u7rhq",
+        "key-passage-reading#upmvk",
+        "vocab-definition#nthfn",
+        "vocab-application#mjfcx",
+        "keypoints-table#rycdh",
+        "spotlight#eyfky",
+        "comprehension#9trky",
+        "vocab-review#jk99m",
+        "knowledge-station#vh6ee",
+        "report"
+      ]
+    },
+    {
+      "id": 20125,
+      "title": "好心沒好報的玻璃娃娃爭議事件",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#4etxq",
+        "key-passage-reading#rxqnp",
+        "vocab-definition#vx94u",
+        "vocab-application#3rfxh",
+        "keypoints-table#xtqhy",
+        "spotlight#py6qd",
+        "comprehension#vvnak",
+        "vocab-review#3eraw",
+        "knowledge-station#jp4ek",
+        "report"
+      ]
+    },
+    {
+      "id": 20126,
+      "title": "戲院、賭場、檳榔攤：在時代夾縫中成長的我",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#hxeve",
+        "key-passage-reading#jwycp",
+        "vocab-definition#rcjwe",
+        "vocab-application#ccdqn",
+        "keypoints-table#t7r6y",
+        "spotlight#m9hhk",
+        "comprehension#j3uuy",
+        "vocab-review#mnqdh",
+        "knowledge-station#a3etw",
+        "report"
+      ]
+    },
+    {
+      "id": 20127,
+      "title": "當壞事已不可逆轉：集中營裡的一門課",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#xead6",
+        "key-passage-reading#7k3hv",
+        "vocab-definition#uvvdq",
+        "vocab-application#xjkcr",
+        "keypoints-table#qj3wq",
+        "spotlight#ktrkm",
+        "comprehension#t994d",
+        "vocab-review#7xtqm",
+        "knowledge-station#7uvc4",
+        "report"
+      ]
+    },
+    {
+      "id": 20128,
+      "title": "讓黑猩猩被看見的人",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#m6nw9",
+        "key-passage-reading#ck7p9",
+        "vocab-definition#hfcqy",
+        "vocab-application#7emua",
+        "keypoints-table#qcv6y",
+        "spotlight#ru34h",
+        "comprehension#yhpne",
+        "vocab-review#xqf9k",
+        "knowledge-station#7qjh9",
+        "report"
+      ]
+    },
+    {
+      "id": 20129,
+      "title": "「按讚」背後的真相",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#uc6qm",
+        "key-passage-reading#knxr3",
+        "vocab-definition#jwxvj",
+        "vocab-application#4w7yp",
+        "spotlight#rjp63",
+        "keypoints-table#j4wcn",
+        "comprehension#ufwra",
+        "vocab-review#huka6",
+        "knowledge-station#a6qy9",
+        "report"
+      ]
+    },
+    {
+      "id": 20108,
+      "title": "虎襲事件的真相：誰才是受害者？",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#xv76d",
+        "key-passage-reading#eunmy",
+        "vocab-definition#tjvny",
+        "vocab-application#tcy4f",
+        "spotlight#cudea",
+        "keypoints-table#6aw7a",
+        "comprehension#cp6n7",
+        "vocab-review#dcn44",
+        "knowledge-station#qfekr",
+        "report"
+      ]
+    },
+    {
+      "id": 20109,
+      "title": "球場上的另類指揮家",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#ptwcu",
+        "key-passage-reading#jfpu3",
+        "vocab-definition#kqdhf",
+        "vocab-application#9q7x6",
+        "spotlight#h3xcq",
+        "keypoints-table#uuvm3",
+        "comprehension#9mxte",
+        "vocab-review#m444e",
+        "knowledge-station#q36tv",
+        "report"
+      ]
+    },
+    {
+      "id": 20110,
+      "title": "我的阿嬤",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#uw6dr",
+        "key-passage-reading#jx79c",
+        "vocab-definition#nxwxd",
+        "vocab-application#9u7wd",
+        "keypoints-table#rcwjp",
+        "spotlight#e6ny9",
+        "comprehension#w6pnt",
+        "vocab-review#ptjv4",
+        "knowledge-station#c37fq",
+        "report"
+      ]
+    },
+    {
+      "id": 20111,
+      "title": "雨林裡的奇蹟藥物",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#33uhx",
+        "spotlight#qedhr",
+        "full-text-annotate#r4d9j",
+        "spotlight#jj4jh",
+        "knowledge-station#amhwp",
+        "comprehension#6tr3f",
+        "report"
+      ]
+    },
+    {
+      "id": 20112,
+      "title": "未來的農夫",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#heaup",
+        "spotlight#mnfjr",
+        "key-passage-reading#hk7wa",
+        "vocab-definition#fpeh3",
+        "vocab-application#parcv",
+        "keypoints-table#pq6fr",
+        "comprehension#ny6m6",
+        "vocab-review#caf4m",
+        "knowledge-station#xt3vv",
+        "report"
+      ]
+    },
+    {
+      "id": 20113,
+      "title": "我能不能選擇告別方式？",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#3mx6k",
+        "key-passage-reading#wcxwp",
+        "vocab-definition#7u3xy",
+        "vocab-application#vcy4x",
+        "spotlight#9uvt7",
+        "keypoints-table#rfqnx",
+        "comprehension#xuqaa",
+        "vocab-review#47vuh",
+        "knowledge-station#pwfdn",
+        "report"
+      ]
+    },
+    {
+      "id": 20114,
+      "title": "石虎保育：遷移與否的兩難",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#69exm",
+        "key-passage-reading#vrpan",
+        "vocab-definition#mheyy",
+        "vocab-application#dv9pe",
+        "spotlight#fpjyu",
+        "keypoints-table#javxj",
+        "comprehension#9xvhh",
+        "vocab-review#h7ckv",
+        "knowledge-station#ketjw",
+        "report"
+      ]
+    },
+    {
+      "id": 20115,
+      "title": "核能的兩難抉擇",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#mr3he",
+        "key-passage-reading#634yc",
+        "vocab-definition#d3vcn",
+        "vocab-application#mhtac",
+        "spotlight#hpwpr",
+        "keypoints-table#7mtmn",
+        "comprehension#hanvw",
+        "vocab-review#rkfe9",
+        "knowledge-station#c4mem",
+        "report"
+      ]
+    },
+    {
+      "id": 20116,
+      "title": "塞翁失馬，焉知非福",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#dcjhu",
+        "key-passage-reading#3uy4q",
+        "vocab-definition#qn6wc",
+        "vocab-application#kmre4",
+        "keypoints-table#qwa93",
+        "spotlight#mpyx9",
+        "comprehension#3fyuy",
+        "vocab-review#knur3",
+        "knowledge-station#ynemd",
+        "report"
+      ]
+    },
+    {
+      "id": 20118,
+      "title": "懸崖邊的那顆草莓",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#puwmm",
+        "key-passage-reading#k6d9j",
+        "vocab-definition#ft9km",
+        "vocab-application#kjvmn",
+        "keypoints-table#fnwmm",
+        "spotlight#kujyf",
+        "comprehension#cvdxx",
+        "vocab-review#ncrvt",
+        "knowledge-station#cjtmj",
+        "report"
+      ]
+    },
+    {
+      "id": 20119,
+      "title": "致台東：一封過客的情書",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#d4jfj",
+        "key-passage-reading#4khjh",
+        "vocab-definition#wfjq3",
+        "vocab-application#nyjan",
+        "keypoints-table#anrq7",
+        "spotlight#dq999",
+        "comprehension#cvwh4",
+        "vocab-review#36haf",
+        "knowledge-station#aea34",
+        "report"
+      ]
+    },
+    {
+      "id": 20120,
+      "title": "靈異與科學",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#7c3ah",
+        "key-passage-reading#rqjxq",
+        "vocab-definition#vkrfk",
+        "vocab-application#9yrvt",
+        "keypoints-table#q4vtk",
+        "spotlight#umahh",
+        "comprehension#uywvw",
+        "vocab-review#w97ur",
+        "knowledge-station#thph7",
+        "report"
+      ]
+    },
+    {
+      "id": 20121,
+      "title": "＃MeToo運動與我們的權利",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#a6hyh",
+        "key-passage-reading#tt49h",
+        "vocab-definition#49yt6",
+        "vocab-application#pxtem",
+        "keypoints-table#yu4nw",
+        "spotlight#xja77",
+        "comprehension#mmnuv",
+        "vocab-review#wpjhn",
+        "knowledge-station#4pj3t",
+        "report"
+      ]
+    },
+    {
+      "id": 20130,
+      "title": "正太與小豬：武僧的養成之路",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#9n3wf",
+        "comprehension#vfkqr",
+        "report"
+      ]
+    },
+    {
+      "id": 20140,
+      "title": "「認命」是強者的選項",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#43ftn",
+        "key-passage-reading#tfepx",
+        "vocab-definition#3wetu",
+        "vocab-application#qnwhh",
+        "spotlight#kmjyn",
+        "comprehension#ekyhh",
+        "vocab-review#ehvn9",
+        "knowledge-station#heexq",
+        "report"
+      ]
+    },
+    {
+      "id": 20145,
+      "title": "看不見的故事，推動看得見的世界",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#uy3fm",
+        "key-passage-reading#x96ca",
+        "vocab-definition#y7uew",
+        "vocab-application#pk73c",
+        "keypoints-table#mn3k4",
+        "spotlight#qacnp",
+        "comprehension#x6fnn",
+        "vocab-review#kwnrq",
+        "knowledge-station#mhedt",
+        "report"
+      ]
+    },
+    {
+      "id": 20146,
+      "title": "語言的足跡：從臺北萬華到南太平洋的航海之路",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#9h66d",
+        "key-passage-reading#v4fqq",
+        "vocab-definition#yx7jt",
+        "vocab-application#e7mnc",
+        "spotlight#jtvwc",
+        "keypoints-table#eh9k4",
+        "comprehension#fy3au",
+        "vocab-review#uj7pr",
+        "knowledge-station#nteuc",
+        "report"
+      ]
+    },
+    {
+      "id": 20147,
+      "title": "構樹：南島祖先「出臺灣說」的植物證據",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#ptm4r",
+        "key-passage-reading#tnt4y",
+        "vocab-definition#rv3rx",
+        "vocab-application#n6cd3",
+        "spotlight#rxrdj",
+        "comprehension#huqmq",
+        "vocab-review#nnktr",
+        "knowledge-station#v3mcn",
+        "report"
+      ]
+    },
+    {
+      "id": 20148,
+      "title": "科學辦案：破解蝴蝶蘭的花期密碼",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#nnmyv",
+        "key-passage-reading#puq6q",
+        "vocab-definition#pw3uu",
+        "vocab-application#fuhne",
+        "spotlight#uhfnw",
+        "comprehension#3r7t3",
+        "vocab-review#64dak",
+        "knowledge-station#tn94k",
+        "report"
+      ]
+    },
+    {
+      "id": 20149,
+      "title": "從基因來的特別禮物",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#c9fmq",
+        "key-passage-reading#ufavh",
+        "vocab-definition#3mhxj",
+        "vocab-application#3t4pt",
+        "keypoints-table#ty9rd",
+        "spotlight#kxwav",
+        "comprehension#x6uwx",
+        "vocab-review#kuc3d",
+        "knowledge-station#qnp6a",
+        "report"
+      ]
+    },
+    {
+      "id": 20150,
+      "title": "臺灣學生的閱讀力：美麗與哀愁",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#wppq9",
+        "spotlight#c97yq",
+        "comprehension#afk6r",
+        "report"
+      ]
+    },
+    {
+      "id": 20151,
+      "title": "盡信書不如無書：從一件殺人案談起",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#n3hxj",
+        "key-passage-reading#qvryf",
+        "vocab-definition#fuema",
+        "vocab-application#ttu4r",
+        "keypoints-table#thce4",
+        "spotlight#fvrr4",
+        "comprehension#uacp3",
+        "vocab-review#vxqmd",
+        "knowledge-station#3rxmp",
+        "report"
+      ]
+    },
+    {
+      "id": 20152,
+      "title": "帝國家書：一個普通家庭的生與死",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#6e7r9",
+        "key-passage-reading#e9kvt",
+        "vocab-definition#kjar3",
+        "vocab-application#6nurh",
+        "keypoints-table#jrwna",
+        "spotlight#xuwwe",
+        "comprehension#ekj4d",
+        "vocab-review#7kuat",
+        "knowledge-station#a7qxr",
+        "report"
+      ]
+    },
+    {
+      "id": 20131,
+      "title": "國高中數學當然可以使用計算機",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#9kedu",
+        "key-passage-reading#uk6wd",
+        "vocab-definition#chjku",
+        "vocab-application#nkv4w",
+        "keypoints-table#dnwud",
+        "spotlight#vnyte",
+        "comprehension#fdmnp",
+        "vocab-review#v6hak",
+        "knowledge-station#ep69r",
+        "report"
+      ]
+    },
+    {
+      "id": 20132,
+      "title": "預防近視？多點戶外活動就對了！",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#ue3q9",
+        "key-passage-reading#dku67",
+        "vocab-definition#yrx7m",
+        "vocab-application#7jrcq",
+        "keypoints-table#we7j6",
+        "spotlight#p67fm",
+        "comprehension#tdfcq",
+        "vocab-review#vekcn",
+        "knowledge-station#3pywj",
+        "report"
+      ]
+    },
+    {
+      "id": 20133,
+      "title": "看不見的兇手：以實驗破解肉湯腐敗之謎",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#99uef",
+        "knowledge-station#cumxd",
+        "spotlight#n3mex",
+        "keypoints-table#jxh3p",
+        "comprehension#hcmkh",
+        "report"
+      ]
+    },
+    {
+      "id": 20134,
+      "title": "從四張圖看地球暖化",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#76aw6",
+        "spotlight#7rrtx",
+        "knowledge-station#ecdhf",
+        "comprehension#nrfew",
+        "report"
+      ]
+    },
+    {
+      "id": 20135,
+      "title": "都是八哥，為什麼命運不一樣？",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#k3kau",
+        "knowledge-station#cjvr6",
+        "spotlight#afd9j",
+        "comprehension#4fajv",
+        "report"
+      ]
+    },
+    {
+      "id": 20136,
+      "title": "會考圖文題實戰",
+      "step_sequence": [
+        "lesson-intro",
+        "comprehension#ncvcp",
+        "report"
+      ]
+    },
+    {
+      "id": 20137,
+      "title": "未解之謎──石頭的祕密",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#ut67x",
+        "full-text-annotate#ppwdu",
+        "vocab-definition#afkuc",
+        "vocab-application#v7xu3",
+        "keypoints-table#66etm",
+        "comprehension#m7fne",
+        "vocab-review#fu7fr",
+        "knowledge-station#6333n",
+        "report"
+      ]
+    },
+    {
+      "id": 20138,
+      "title": "樂觀者勝：向NBA球員學習「詮釋失敗」的智慧",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#v77k6",
+        "key-passage-reading#c3rt9",
+        "vocab-definition#4xrk4",
+        "vocab-application#dj7wr",
+        "keypoints-table#nxc6k",
+        "spotlight#up7cx",
+        "comprehension#jxj76",
+        "vocab-review#mc33e",
+        "knowledge-station#fdaan",
+        "report"
+      ]
+    },
+    {
+      "id": 20139,
+      "title": "長喙天蛾見前人所未見",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#4dcq9",
+        "key-passage-reading#cffhh",
+        "vocab-definition#d3acm",
+        "vocab-application#tkaj7",
+        "spotlight#qqucm",
+        "keypoints-table#cankk",
+        "comprehension#fnmnx",
+        "vocab-review#uman4",
+        "knowledge-station#avkat",
+        "report"
+      ]
+    },
+    {
+      "id": 20141,
+      "title": "臺灣的太空之眼",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#q4jk9",
+        "key-passage-reading#nywp7",
+        "vocab-definition#wwvcq",
+        "vocab-application#4xcrv",
+        "spotlight#pe3rp",
+        "keypoints-table#cujck",
+        "comprehension#6fwve",
+        "vocab-review#3kvnn",
+        "knowledge-station#au399",
+        "report"
+      ]
+    },
+    {
+      "id": 20142,
+      "title": "焚而不毀的倫敦",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#v7krr",
+        "key-passage-reading#6amwa",
+        "vocab-definition#rykpp",
+        "vocab-application#y7kxy",
+        "keypoints-table#xdqjh",
+        "spotlight#q9d3y",
+        "comprehension#4pxj6",
+        "vocab-review#v4hkp",
+        "knowledge-station#kx9np",
+        "report"
+      ]
+    },
+    {
+      "id": 20143,
+      "title": "高地訓練有助於運動表現嗎？",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#6mpre",
+        "key-passage-reading#96jnp",
+        "vocab-definition#6hx3d",
+        "vocab-application#upfj7",
+        "keypoints-table#yvp6r",
+        "spotlight#p4kj9",
+        "comprehension#mjvdr",
+        "vocab-review#3q43q",
+        "knowledge-station#49cux",
+        "report"
+      ]
+    },
+    {
+      "id": 20144,
+      "title": "馬拉松王者──基普喬吉",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#wdnd7",
+        "vocab-definition#3rp4q",
+        "keypoints-table#337rq",
+        "comprehension#3dufp",
+        "full-text-annotate#dvxj6",
+        "vocab-definition#wpr7x",
+        "keypoints-table#hdp9w",
+        "comprehension#mpwdc",
+        "full-text-annotate#4ymn7",
+        "vocab-definition#y4xxx",
+        "keypoints-table#vvk4v",
+        "comprehension#9w4yp",
+        "spotlight#7xwy3",
+        "vocab-review#cmp6q",
+        "knowledge-station#7ccvr",
+        "report"
+      ]
+    },
+    {
+      "id": 20156,
+      "title": "這是假新聞嗎？--以「鞭虎救弟記」為例",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#4vamf",
+        "key-passage-reading#n9a7a",
+        "vocab-definition#j4nch",
+        "vocab-application#7dnd4",
+        "keypoints-table#ex6td",
+        "spotlight#79nar",
+        "comprehension#xyexp",
+        "vocab-review#h4997",
+        "knowledge-station#xa44p",
+        "report"
+      ]
+    },
+    {
+      "id": 20157,
+      "title": "文言文怎麼讀？以鞭虎救弟記為例",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#nvrme",
+        "spotlight#na3kk",
+        "comprehension#vxhd9",
+        "report"
+      ]
+    },
+    {
+      "id": 20158,
+      "title": "不量田",
+      "step_sequence": [
+        "lesson-intro",
+        "classical-text",
+        "key-passage-reading",
+        "classical-sentence-matching",
+        "classical-word-matching",
+        "keypoints-table",
+        "spotlight",
+        "comprehension",
+        "classical-self-challenge",
+        "report"
+      ]
+    },
+    {
+      "id": 20159,
+      "title": "陸公買硯",
+      "step_sequence": [
+        "lesson-intro",
+        "classical-text",
+        "key-passage-reading",
+        "classical-sentence-matching",
+        "classical-word-matching",
+        "keypoints-table",
+        "spotlight",
+        "comprehension",
+        "classical-self-challenge",
+        "report"
+      ]
+    },
+    {
+      "id": 20160,
+      "title": "重義的荀巨伯",
+      "step_sequence": [
+        "lesson-intro",
+        "classical-text",
+        "key-passage-reading",
+        "classical-sentence-matching",
+        "classical-word-matching",
+        "keypoints-table",
+        "spotlight",
+        "comprehension",
+        "classical-self-challenge",
+        "report"
+      ]
+    },
+    {
+      "id": 20161,
+      "title": "江乙媽媽告御狀",
+      "step_sequence": [
+        "lesson-intro",
+        "classical-text",
+        "key-passage-reading",
+        "classical-sentence-matching",
+        "classical-word-matching",
+        "keypoints-table",
+        "spotlight",
+        "comprehension",
+        "classical-self-challenge",
+        "report"
+      ]
+    },
+    {
+      "id": 20162,
+      "title": "相隔千里的約定",
+      "step_sequence": [
+        "lesson-intro",
+        "classical-text",
+        "key-passage-reading",
+        "classical-sentence-matching",
+        "classical-word-matching",
+        "keypoints-table",
+        "spotlight",
+        "comprehension",
+        "classical-self-challenge",
+        "report"
+      ]
+    },
+    {
+      "id": 20163,
+      "title": "愛讀書的顧寧人",
+      "step_sequence": [
+        "lesson-intro",
+        "classical-text",
+        "key-passage-reading",
+        "classical-sentence-matching",
+        "classical-word-matching",
+        "keypoints-table",
+        "spotlight",
+        "comprehension",
+        "classical-self-challenge",
+        "report"
+      ]
+    },
+    {
+      "id": 20164,
+      "title": "從天才跌為凡人的神童",
+      "step_sequence": [
+        "lesson-intro",
+        "classical-text",
+        "key-passage-reading",
+        "classical-sentence-matching",
+        "classical-word-matching",
+        "keypoints-table",
+        "spotlight",
+        "comprehension",
+        "classical-self-challenge",
+        "report"
+      ]
+    },
+    {
+      "id": 20153,
+      "title": "荒野救亡記",
+      "step_sequence": [
+        "lesson-intro",
+        "classical-text",
+        "key-passage-reading",
+        "classical-sentence-matching",
+        "classical-word-matching",
+        "keypoints-table",
+        "spotlight",
+        "comprehension",
+        "classical-self-challenge",
+        "report"
+      ]
+    },
+    {
+      "id": 20154,
+      "title": "祁黃羊的思路解密",
+      "step_sequence": [
+        "lesson-intro",
+        "classical-text",
+        "key-passage-reading",
+        "classical-sentence-matching",
+        "classical-word-matching",
+        "keypoints-table",
+        "spotlight",
+        "comprehension",
+        "classical-self-challenge",
+        "report"
+      ]
+    },
+    {
+      "id": 20155,
+      "title": "不流血的戰爭",
+      "step_sequence": [
+        "lesson-intro",
+        "classical-text",
+        "key-passage-reading",
+        "classical-sentence-matching",
+        "classical-word-matching",
+        "keypoints-table",
+        "spotlight",
+        "comprehension",
+        "classical-self-challenge",
+        "report"
+      ]
+    },
+    {
+      "id": 20167,
+      "title": "心，也要一起練",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#9jcxw",
+        "key-passage-reading#dkhf7",
+        "vocab-definition#v34ww",
+        "vocab-application#6ak9v",
+        "keypoints-table#c3r97",
+        "spotlight#xcrwa",
+        "comprehension#rarna",
+        "vocab-review#ujdrh",
+        "knowledge-station#3rhhu",
+        "report"
+      ]
+    },
+    {
+      "id": 20168,
+      "title": "成為身體的最佳夥伴",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#pmxkq",
+        "key-passage-reading#6d67k",
+        "vocab-definition#dkyx3",
+        "vocab-application#m9k4k",
+        "keypoints-table#axepd",
+        "spotlight#dhjaq",
+        "comprehension#dr3uy",
+        "vocab-review#6my44",
+        "knowledge-station#uuvee",
+        "report"
+      ]
+    },
+    {
+      "id": 20169,
+      "title": "身體，謝謝你",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#9ja7n",
+        "key-passage-reading#wyvrp",
+        "vocab-definition#vn4u4",
+        "vocab-application#wcr3f",
+        "keypoints-table#vpafw",
+        "spotlight#9nvwu",
+        "comprehension#7q93j",
+        "vocab-review#x6c9w",
+        "knowledge-station#y6fww",
+        "report"
+      ]
+    },
+    {
+      "id": 20170,
+      "title": "專注當下：關掉內心的批評噪音",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#3vey6",
+        "key-passage-reading#pexde",
+        "vocab-definition#xwu37",
+        "vocab-application#wxmwv",
+        "keypoints-table#fhfa4",
+        "spotlight#dnxdt",
+        "comprehension#9xcrt",
+        "vocab-review#jjqjh",
+        "knowledge-station#9vae3",
+        "report"
+      ]
+    },
+    {
+      "id": 20171,
+      "title": "從白熊到藍海豚：學習與念頭和平相處",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#envdq",
+        "key-passage-reading#p7jef",
+        "vocab-definition#mca6n",
+        "vocab-application#7ahj9",
+        "keypoints-table#a7ma3",
+        "spotlight#wvqw9",
+        "comprehension#pqkvq",
+        "vocab-review#ajwv9",
+        "knowledge-station#4uqpv",
+        "report"
+      ]
+    },
+    {
+      "id": 20172,
+      "title": "不是想太多，只是好在乎",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#ampvv",
+        "key-passage-reading#pfqpp",
+        "vocab-definition#tfnme",
+        "vocab-application#mfdv3",
+        "keypoints-table#jq6vt",
+        "spotlight#jk9f3",
+        "comprehension#krvkp",
+        "vocab-review#xdmkq",
+        "knowledge-station#7euxw",
+        "report"
+      ]
+    },
+    {
+      "id": 20173,
+      "title": "讓「想很多」助你一臂之力",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#wwejy",
+        "key-passage-reading#nva4u",
+        "vocab-definition#6r3x7",
+        "vocab-application#xywhm",
+        "keypoints-table#9tu7e",
+        "spotlight#7pyaf",
+        "comprehension#34pme",
+        "vocab-review#3cxtf",
+        "knowledge-station#cn7f3",
+        "report"
+      ]
+    },
+    {
+      "id": 20174,
+      "title": "面對「失敗」，不只有一種可能",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#vw6jj",
+        "key-passage-reading#uvmjm",
+        "vocab-definition#fchhd",
+        "vocab-application#m3f4y",
+        "keypoints-table#3uahj",
+        "spotlight#6pr3w",
+        "comprehension#7xekn",
+        "vocab-review#66rq7",
+        "knowledge-station#6p6kx",
+        "report"
+      ]
+    },
+    {
+      "id": 20175,
+      "title": "成長型思維：翻轉失敗的關鍵",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#66nax",
+        "key-passage-reading#wrh93",
+        "vocab-definition#vvnrx",
+        "vocab-application#tpmqy",
+        "keypoints-table#hrm7j",
+        "spotlight#mpuqp",
+        "comprehension#qpeh4",
+        "vocab-review#k3thh",
+        "knowledge-station#xquyk",
+        "report"
+      ]
+    },
+    {
+      "id": 20165,
+      "title": "下一球，我相信你",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#p9d6j",
+        "key-passage-reading#cuq4n",
+        "vocab-definition#ff3jp",
+        "vocab-application#7w3ch",
+        "keypoints-table#funm7",
+        "spotlight#uuq3h",
+        "comprehension#rqkxw",
+        "vocab-review#ah64u",
+        "knowledge-station#ajmew",
+        "report"
+      ]
+    },
+    {
+      "id": 20166,
+      "title": "因為相信，所以能向前",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#pvqer",
+        "key-passage-reading#p7nhm",
+        "vocab-definition#xu67m",
+        "vocab-application#dyvrx",
+        "keypoints-table#hdu4j",
+        "spotlight#ymyec",
+        "comprehension#6aaq3",
+        "vocab-review#yvx9m",
+        "knowledge-station#ht6rv",
+        "report"
+      ]
+    },
+    {
+      "id": 20176,
+      "title": "一起變強，會更好",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#9qjnx",
+        "key-passage-reading#ww3ve",
+        "vocab-definition#me4mw",
+        "vocab-application#477kn",
+        "keypoints-table#den3v",
+        "spotlight#jac7c",
+        "comprehension#7fv3n",
+        "vocab-review#durwa",
+        "knowledge-station#vmcyw",
+        "report"
+      ]
+    },
+    {
+      "id": 20177,
+      "title": "別讓一句話決定你是誰",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#np49y",
+        "key-passage-reading#qj9j4",
+        "vocab-definition#dx76p",
+        "vocab-application#rqheq",
+        "keypoints-table#fq3vr",
+        "spotlight#7q3wr",
+        "comprehension#y7vfp",
+        "vocab-review#tnm6d",
+        "knowledge-station#mumpn",
+        "report"
+      ]
+    },
+    {
+      "id": 20178,
+      "title": "在看不見成長的日子中",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#h4jud",
+        "key-passage-reading#cqhpp",
+        "vocab-definition#q793t",
+        "vocab-application#cjj6d",
+        "keypoints-table#km664",
+        "spotlight#fufx6",
+        "comprehension#adhep",
+        "vocab-review#decex",
+        "knowledge-station#th6tk",
+        "report"
+      ]
+    },
+    {
+      "id": 20179,
+      "title": "練過的心，陪你走更遠",
+      "step_sequence": [
+        "lesson-intro",
+        "full-text-annotate#apkxt",
+        "key-passage-reading#dxxwe",
+        "vocab-definition#wjc9c",
+        "vocab-application#nh639",
+        "keypoints-table#rx7uu",
+        "spotlight#ufjck",
+        "comprehension#vmk3a",
+        "vocab-review#unpja",
+        "knowledge-station#autqw",
+        "report"
+      ]
+    }
+  ]
+}

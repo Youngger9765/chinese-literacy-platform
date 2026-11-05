@@ -19,6 +19,9 @@ from ...models.session import LearningSession
 from ...models.user import User
 from ...schemas.session import StepProgressResponse, StepProgressSaveRequest, parse_step_progress
 from ...services.assignment_session_service import maybe_auto_submit_assignment_session
+from ...services.lesson_loader import get_lesson_by_id
+from ...services.reading_baby_service import record_station_evidence
+from ...utils.slug import normalize_story_slug
 # DEPRECATED (#1182): _STEP_KEY_TO_NUM / _MAX_STEP_NUM / _normalize_step_key were used
 # to sync the integer current_step column. Sync removed; imports no longer needed here.
 
@@ -145,6 +148,30 @@ def save_step_progress(
         newly_reported=payload.steps_completed,
     )
 
+    # Issue #3780 第一階段 — 閱讀寶貝：同一個「每個 step 完成都會流經這裡」的
+    # 位置順便寫一筆能力指標證據，取代文字寶貝 v1 的 `_award_word_baby_rewards`
+    # （v1 整套刪除，見 docs/design/reading-babies/game-design.md §5）。道理跟
+    # 上面的 XP 一樣（同一個 transaction，不另開端點、不另外加前端呼叫）。
+    #
+    # 沿用 v1 已經驗證過的兩個教訓：
+    #   (1) 逐站獨立 SAVEPOINT——一站判定失敗不能牽連同一次存檔裡其他已經成功
+    #       寫入的站（code-reviewer finding，2026-10-26 第二輪）
+    #   (2) `record_station_evidence` 本身的冪等保證已經處理「這格通過過沒」，
+    #       這裡只單純呼叫它，不重複判斷
+    # classroom_id 在這個掛點不嘗試解析——一個 session 跟「教學現場的哪個班級」
+    # 沒有穩定的 1:1 關係（可能是自學、可能是被指派到多個班級的其中一個）。
+    # 寫 None（自學語意）不影響老師端熱力表：`compute_classroom_indicator_heatmap`
+    # 是用班級名冊 join 學生 id 去查，不是用這裡寫的 classroom_id 篩選
+    # （見 reading_baby_service.py 的 docstring）。
+    reading_baby_events = _record_reading_baby_evidence(
+        db,
+        student_id=current_user.id,
+        session=session,
+        step_data=merged_step_data,
+        previously_completed=previously_completed,
+        newly_reported=payload.steps_completed,
+    )
+
     db.commit()
     db.refresh(session)
     logger.info(
@@ -167,6 +194,7 @@ def save_step_progress(
         step_progress=session.step_progress,
         xp_awarded=xp_awarded,
         badges_unlocked=badges_unlocked,
+        reading_baby_events=reading_baby_events,
     )
 
 
@@ -227,6 +255,139 @@ def _award_step_complete_xp(
     # gamification_service.py).
     newly_unlocked = check_and_award_badges(db, student_id, session_id=session_id)
     return xp_awarded, newly_unlocked
+
+
+# ── 閱讀寶貝：能力指標證據紀錄觸發點（Issue #3780 第一階段） ─────────────
+
+#: 跟 XP 用同一條排除理由：'report' 是結果頁掛載時自動標完成的，不是學生真的
+#: 做了什麼——如果讓它也能記成長，等於「打開結果頁」這個被動動作就能拿到，
+#: 違反 PRD §2「學得會 > 看得下去 > 好看」的優先序。另外 `station_indicator_map`
+#: 裡 "report" 本來就是 `signal: none`，`record_station_evidence` 查不到這個站
+#: 會自己回 None——這裡的排除清單是第二道防線，講清楚「為什麼」，不是唯一防線。
+_READING_BABY_EXCLUDED_STEP_IDS = frozenset({"report"})
+
+
+def _record_reading_baby_evidence(
+    db: Session,
+    *,
+    student_id: int,
+    session: "LearningSession",
+    step_data: dict[str, Any],
+    previously_completed: list[str],
+    newly_reported: list[str],
+) -> list[dict]:
+    """完成一個站（steps_completed 新增一個 step_id）時，寫一筆能力指標證據——
+    取代文字寶貝 v1 的 `_award_word_baby_rewards`（v1 整套刪除，見
+    docs/design/reading-babies/game-design.md §5）。跟 `_award_step_complete_xp`
+    共用同一個「每個 step 完成都會流經這裡」的位置（issue #3024 的先例已經
+    證實這裡是唯一入口，不需要新端點）。
+
+    **回傳值**：這次呼叫真的新寫入的成長事件清單，每筆
+    `{"station", "ability_id", "quality_passed"}`，給呼叫端填進
+    `StepProgressResponse.reading_baby_events`，讓島上 HUD 能顯示「這一站
+    成長了」的小提示（game-design.md §3.3）。**冪等靠
+    `reading_baby_service.record_station_evidence` 自己的兩道檢查**——計分型
+    態的站用 `has_passed_evidence`（一旦通過就不再重記），completion 型態的
+    站用 `has_any_evidence`（存在過一筆就不再重記，因為它永遠不會通過）；
+    同一格之後再呼叫一律回 `None`，不會重複出現在這個清單裡。
+
+    **lesson-intro 的特例**（game-design.md §1.1）：這個步驟設計上永遠不會
+    出現在 `steps_completed`（課程簡介頁不會回報「完成」），定義為「進入
+    這一課即是遇見」。這裡的處理方式跟 v1 一樣：**只要這一課有任何一次
+    step_progress 儲存**，就嘗試記一次 lesson-intro 的證據——
+    `record_station_evidence` 本身冪等，「每次儲存都嘗試」是安全的。
+
+    **逐站獨立 SAVEPOINT**（沿用 v1 已驗證過的教訓，code-reviewer 2026-10-26
+    第二輪 finding）：一次存檔可能同時涵蓋好幾個新完成的站。如果整個迴圈包在
+    同一層 SAVEPOINT 裡，其中一站判定時炸掉會連其他站**已經成功**的判定一起
+    回滾——而這些站已經寫進 steps_completed，以後不會再被當成「新完成」重新
+    嘗試，成長紀錄就永久遺失了。這裡每一站各自一層 SAVEPOINT：一站出錯只
+    回滾那一站自己的部分寫入，記 log 後繼續下一站，不影響其他站、也不影響
+    外層已經準備要存的 step_progress／XP（PRD §9「寫入失敗不能讓學生的
+    成長悄悄消失」的具體落地）。
+
+    **站必須真的在這一課裡才量**：靠 `reading_baby_config.get_lesson_indicator
+    (lesson_uid)["stations"]` 本身就是逐課精算出來的對照（見
+    `scripts/build_reading_baby_lesson_indicators.py`），不是一份跨課共用的
+    扁平白名單——對沒有這個站的課回報該站，`record_station_evidence` 查
+    不到對應的 `ability_id` 會直接回 `None`，等於沿用 v1「站必須真的在這一課
+    的 step_sequence 裡」那條安全防線，只是防線現在長在設定檔的資料結構
+    裡，不需要另外比對一次。
+    """
+    lesson = _resolve_lesson(session)
+    if lesson is None:
+        return []  # 找不到對應的內容樹課程（如測試用的假 slug），不嘗試記錄
+    lesson_uid = lesson.get("lesson_uid")
+    if lesson_uid is None:
+        return []
+
+    events: list[dict] = []
+
+    def _try_record(step_id: str) -> None:
+        station = step_id.split("#", 1)[0]
+        step_payload = step_data.get(step_id)
+        if step_payload is None:
+            step_payload = step_data.get(station)
+        try:
+            # `record_station_evidence` 已經自己管理寫入的 SAVEPOINT／重試
+            # （見 reading_baby_service.py），這裡的 try/except 是給它內部
+            # 也攔不到的例外（例如判定邏輯本身炸掉）當最後一道防線，不重複
+            # 包一層 begin_nested()。
+            row = record_station_evidence(
+                db,
+                student_id=student_id,
+                lesson_uid=lesson_uid,
+                station=station,
+                session_id=session.id,
+                step_payload=step_payload if isinstance(step_payload, dict) else None,
+            )
+        except Exception:
+            logger.exception(
+                "reading-baby evidence recording failed for station %s (lesson %s, user %d) — "
+                "skipped, other stations in this save are unaffected, step-progress + XP unaffected",
+                station, lesson_uid, student_id,
+            )
+            return
+        if row is None:
+            return  # 不量這個站／已經通過過／寫入失敗（見 record_station_evidence）
+        events.append({
+            "station": station,
+            "ability_id": row.indicator_code,
+            "quality_passed": row.quality_passed,
+        })
+
+    # lesson-intro：每次儲存都嘗試記一次，冪等保證不會重複出現在 events 裡。
+    _try_record("lesson-intro")
+
+    already = set(previously_completed)
+    newly_completed = [
+        step_id for step_id in newly_reported
+        if step_id not in already and step_id not in _READING_BABY_EXCLUDED_STEP_IDS
+    ]
+    for step_id in newly_completed:
+        _try_record(step_id)
+
+    return events
+
+
+def _resolve_lesson(session: "LearningSession") -> dict | None:
+    """session.story_slug_derived（如 "6"）→ 內容樹的完整 lesson dict（含
+    "lesson_uid" 跟 "step_sequence"）。
+
+    這是兩個不同的編號系統（#3780 探路時發現）：`story_slug` 是這個平台
+    session/路由用的編號，`lesson_uid` 是 `backend/data/lessons/` 內容樹的
+    課程 id，閱讀寶貝的設定檔（`app/data/reading_baby/lesson_indicators.json`）
+    全部用後者。回傳完整 dict（不只 lesson_uid 字串）是因為呼叫端還需要
+    `step_sequence`（沿用 v1 時代 security review 的既有理由，2026-10-27）。
+    """
+    slug = session.story_slug_derived
+    if not slug:
+        return None
+    try:
+        lesson_id = int(normalize_story_slug(slug))
+    except (ValueError, TypeError):
+        return None
+    return get_lesson_by_id(lesson_id)
 
 
 # ── Bug C fix helpers ─────────────────────────────────────────────────────────
@@ -318,4 +479,48 @@ def get_step_progress(
     (frontend should fall back to localStorage in that case).
     """
     session = get_owned_session(session_id, current_user, db)
-    return StepProgressResponse(session_id=session.id, step_progress=session.step_progress)
+    reading_baby_events = _load_reading_baby_events_for_lesson(db, student_id=current_user.id, session=session)
+    return StepProgressResponse(
+        session_id=session.id,
+        step_progress=session.step_progress,
+        reading_baby_events=reading_baby_events,
+    )
+
+
+def _load_reading_baby_events_for_lesson(
+    db: Session, *, student_id: int, session: "LearningSession"
+) -> list[dict]:
+    """讀出這個學生、這一課**目前已經存在**的全部閱讀寶貝成長證據（取代 v1
+    的 `_load_word_baby_rewards_for_lesson`，同一個理由延續下來）。
+
+    這不是 `_record_reading_baby_evidence` 的重複——那支是 PUT handler 專用的
+    「判定 + 寫入」，這支純粹是 SELECT，沒有冪等或 SAVEPOINT 的顧慮。
+
+    **為什麼回傳「這一課全部」而不是「這次 save 新增的」**（v1 時代已經驗證
+    過的理由，原樣沿用）：原本的設計讓島靠 PUT 回應的欄位（透過 postMessage
+    推給島）顯示提示，但 ISLAND_STEP_DONE 會同步拆掉裝著學習頁的 iframe，
+    而那個 PUT 的回應常常還沒回來——真實網路延遲下提示幾乎不會顯示。改成
+    回島後由島自己向這個 GET 端點「拉」，不依賴任何訊息時序；GET 本來就會
+    在回島時被 `refreshProgress()` 呼叫。
+    """
+    lesson = _resolve_lesson(session)
+    if lesson is None:
+        return []
+    lesson_uid = lesson.get("lesson_uid")
+    if lesson_uid is None:
+        return []
+    from ...models.reading_baby import StudentIndicatorEvidence
+
+    rows = (
+        db.query(StudentIndicatorEvidence)
+        .filter_by(student_id=student_id, lesson_uid=lesson_uid)
+        .all()
+    )
+    return [
+        {
+            "station": row.station,
+            "ability_id": row.indicator_code,
+            "quality_passed": row.quality_passed,
+        }
+        for row in rows
+    ]

@@ -314,6 +314,10 @@ export interface Story {
   intro?: StoryIntro;
   grade?: string;               // "4".."9" / 文言文 / 品格教育
   genre?: string;               // 記敘文/說明文/議論文
+  /** #3780 群島模式：後端課程排序（例如 20011 的 lesson_seq=4010）。用來
+   *  決定蜂巢螺旋由內而外的順序，不是跟 `id`（lesson_number）同一件事——
+   *  同一年級內兩者順序不保證一致，見 archipelagoClusters.ts。 */
+  lessonSeq?: number;
   readingStrategy?: string;     // 策略「名稱」，13 字左右的標籤
   /** #2898：批次預生成的 2-3 句白話說明。策略名稱只是標籤，學生看不出要練什麼。 */
   readingStrategyExplained?: string;

@@ -22,6 +22,7 @@
  *   </StepErrorBoundary>
  */
 import React, { Component, ErrorInfo } from 'react';
+import { isIslandStoryMode, notifyIslandStepAborted } from '../pages/lab/island/storyMode';
 
 // ---------------------------------------------------------------------------
 // Error ID helper (copied from ErrorBoundary.tsx — kept local to avoid coupling)
@@ -197,6 +198,12 @@ const StepErrorUI: React.FC<{
   onSkip?: () => void;
 }> = ({ stepLabel, errorId, error, onReset, onSkip }) => {
   const [copied, setCopied] = React.useState(false);
+  // 喝采島故事模式：壞掉的站不能用「跳過此步驟」把學生帶去別的 step（那正是
+  // PRD §2「一次一關」要擋的逃脫路徑，只是觸發條件換成頁面壞掉）。改顯示
+  // 「回到島上」，送 ISLAND_STEP_ABORTED（不是 ISLAND_STEP_DONE）——壞掉沒做完
+  // 的站不算完成，不能沿用「做完」那個訊號去點燈。即使這個 StepRoute 沒有
+  // onSkip（文言文專屬 step 沒有 nextPath），故事模式下也要有路可退。
+  const storyMode = isIslandStoryMode();
 
   const handleCopy = async () => {
     try {
@@ -256,7 +263,14 @@ const StepErrorUI: React.FC<{
           >
             重試
           </button>
-          {onSkip && (
+          {storyMode ? (
+            <button
+              onClick={notifyIslandStepAborted}
+              className="px-5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition-colors"
+            >
+              回到島上
+            </button>
+          ) : onSkip && (
             <button
               onClick={onSkip}
               className="px-5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition-colors"

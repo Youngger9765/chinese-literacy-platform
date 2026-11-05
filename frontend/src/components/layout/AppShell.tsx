@@ -30,6 +30,7 @@ import DevSkipButton from '../ui/DevSkipButton';
 import StepFooterNav from '../reading-steps/StepFooterNav';
 import { OnboardingWrapper } from '../../pages/app/InlinePages';
 import { isToolboxMode, setToolboxMode } from '../../services/learningStorageScope';
+import { isIslandStoryMode } from '../../pages/lab/island/storyMode';
 import { stepNeighbours } from '../../config/stepNeighbours';
 
 /** The authenticated app shell with sidebar only (header removed 2026-04-18). */
@@ -464,6 +465,8 @@ const ImmersiveTopBar: React.FC = () => {
  */
 export const LearningAppShell: React.FC = () => {
   const { zhuyinActive } = useZhuyin();
+  // 喝采島故事模式：一次只做一關，不顯示關卡列與上下步
+  const storyMode = isIslandStoryMode();
   return (
     <div
       /*
@@ -484,7 +487,7 @@ export const LearningAppShell: React.FC = () => {
       </a>
 
       {/* Minimal immersive top bar — glassmorphic, no distractions */}
-      <ImmersiveTopBar />
+      {!storyMode && <ImmersiveTopBar />}
 
       {/* Learning content fills the rest of the screen */}
       <main
@@ -498,10 +501,10 @@ export const LearningAppShell: React.FC = () => {
       </main>
 
       {/* Persistent bottom nav bar — in-place next/prev step without scroll-to-top (Issue #2082) */}
-      <StepFooterNav />
+      {!storyMode && <StepFooterNav />}
 
       {/* Dev-only: skip to next step button — fixed bottom-right on ALL learning steps */}
-      <DevSkipButton />
+      {!storyMode && <DevSkipButton />}
     </div>
   );
 };

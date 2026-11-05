@@ -9,6 +9,7 @@ import { resolveActiveSteps } from '../../config/stepConfig';
 import StepReportCards from '../../components/report/StepReportCards';
 import { useReportProgress } from '../../components/report/useReportProgress';
 import { buildStepReportCards, marksFromAnnotations } from '../../components/report/reportCardsModel';
+import { isIslandStoryMode } from '../lab/island/storyMode';
 
 /**
  * 報告頁（#3399）：每一關一張卡片，完成打綠勾，點開看分數與作答。
@@ -135,7 +136,12 @@ const ReportPage: React.FC = () => {
     setXpResult(null);
   }, []);
 
-  if (hasActiveAssignment && !isAssignmentReadyForSubmit) {
+  // 喝采島故事模式：這塊「作業尚未完成」警示（含「繼續未完成關卡」／「返回班級作業」
+  // 兩個無守衛的 navigate）在島上語意本身就錯——學生是在自由探索，不是在交作業，
+  // 而且 sessionStorage 的 activeAssignmentId 可能是從「我的作業」SPA 導航過來島上時
+  // 殘留的（没有整頁重載清掉），讓這塊畫面在故事模式裡被意外觸發。故事模式一律跳過，
+  // 落到下面正常的報告卡片畫面（那裡已經用 isIslandStoryMode() 擋掉快速跳轉按鈕）。
+  if (hasActiveAssignment && !isAssignmentReadyForSubmit && !isIslandStoryMode()) {
     return (
       <div className="flex-1 overflow-y-auto p-8 max-w-3xl mx-auto w-full">
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6">
@@ -182,7 +188,11 @@ const ReportPage: React.FC = () => {
         <StepReportCards
           storyTitle={selectedStory?.title}
           cards={cards}
-          onGoToStep={(stepId) => navigate(stepPath(storyId!, stepId))}
+          // 喝采島故事模式：「前往這一關」會把 iframe 導去別的 step，等於繞過
+          // 「做完一關回島、一次一關」的規則（PRD §6「沒有…快速跳轉步驟」）。
+          // zone 內站與站之間沒有強制順序，學生可能先走到 report 再回頭做
+          // 其他站，所以這裡不能假設報告頁一定全部完成才看得到。
+          onGoToStep={isIslandStoryMode() ? undefined : (stepId) => navigate(stepPath(storyId!, stepId))}
         />
       )}
 

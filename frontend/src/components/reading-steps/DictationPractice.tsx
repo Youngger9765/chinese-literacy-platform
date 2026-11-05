@@ -25,7 +25,8 @@ interface WordResult {
 interface DictationPracticeProps {
   story: Story;
   onFinish: (result: DictationResult) => void;
-  onBack: () => void;
+  /** 喝采島故事模式下由呼叫端傳 undefined，按鈕不渲染（見 DictationPage.tsx）。 */
+  onBack?: () => void;
   /** Rehydrate from previously saved step_progress.step_data['dictation']. */
   initialProgress?: DictationStepData;
   /** Persist incremental progress to LearningSession.step_progress (Issue #1549). */
@@ -346,12 +347,14 @@ const DictationPractice: React.FC<DictationPracticeProps> = ({
 
         {/* Bottom actions */}
         <div className="flex-shrink-0 bg-white border-t border-gray-200 px-6 py-4 flex items-center justify-between">
-          <button
-            onClick={onBack}
-            className="px-4 py-2.5 rounded-full text-sm text-gray-600 hover:text-gray-800 transition-colors"
-          >
-            返回
-          </button>
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="px-4 py-2.5 rounded-full text-sm text-gray-600 hover:text-gray-800 transition-colors"
+            >
+              返回
+            </button>
+          )}
           <button
             onClick={handleStartPractice}
             className="px-6 py-2.5 rounded-full font-bold text-sm bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95 flex items-center gap-2"

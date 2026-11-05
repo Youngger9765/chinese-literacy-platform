@@ -39,6 +39,9 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { fetchMyEnrolledClassrooms, computeStudentGameFlags } from '../../services/learning/session';
+import { getStudentProgress } from '../../services/progressApi';
+import { fetchReadingBabyAtlas } from '../../services/readingBabyApi';
+import { occupiedCountFromProgress } from './archipelagoDomain';
 import { GAME_MODES, type GameModeKey } from '../../data/gameModes';
 
 /** #3761: one illustrated hero image per mode + a matching gradient
@@ -75,6 +78,13 @@ const TAGLINE: Record<GameModeKey, string> = {
 };
 
 const LOCKED_TEXT = '老師尚未開啟';
+
+/** #3780 D1（PRD §5.7）：「島嶼探索」卡——跟 GAME_MODES 其他卡同一套 hero
+ * 圖＋漸層視覺風格，但不是「遊戲模式」（沒有教室開關、沒有後端 modes.py
+ * 對應項），所以不塞進那個註冊表，走自己獨立的卡片。hero 圖沿用喝采島
+ * 冷開場既有插畫（`op1.jpg`，不是新生成的美術），深夜海面配色自成一組
+ * 漸層，跟其他五張卡（紫/深紫/紅/青橘/灰）不撞色。*/
+const ISLAND_HERO = { src: '/lab-island/opening/op1.jpg', gradient: 'from-[#1B3A5C] to-[#0B1E33]' };
 
 /** #3756: which of the two hub sections each mode belongs in, plus the
  * one-line "start condition" badge shown on every card of that mode
@@ -173,9 +183,68 @@ const GameHubCardButton: React.FC<{ card: GameHubCard; onOpen: () => void; size:
   );
 };
 
+/** #3780 D1：「島嶼探索」卡，視覺上刻意跟 `GameHubCardButton` 共用同一套
+ * class（hero 滿版圖＋下方白底文字區＋「隨時可玩」徽章），但資料是動態的
+ * （已佔領島數、閱讀寶貝已遇見數），不是靜態 tagline，所以沒有重用那個
+ * 元件本身（它的 props 綁死在 `GAME_MODES` 註冊表的型別上）。
+ * 2026-10-31 reading-babies phase 2：文字寶貝 v1 整套刪除，這裡改讀閱讀
+ * 寶貝圖鑑的「已遇見」數——跟群島頁角落徽章同一份資料來源
+ * （`fetchReadingBabyAtlas`），只是文案簡短一點，點進去仍是先到群島
+ * （真正的寶貝入口在群島頁與單課島頁，不在這張卡自己）。 */
+const IslandExplorationCard: React.FC<{
+  occupied: number | null;
+  babyCount: { owned: number; total: number } | null;
+  onOpen: () => void;
+}> = ({ occupied, babyCount, onOpen }) => (
+  <button
+    type="button"
+    onClick={onOpen}
+    aria-label="島嶼探索"
+    className="group flex flex-col overflow-hidden rounded-3xl border border-gray-200 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg"
+  >
+    <div className={`relative flex h-48 items-end justify-center bg-gradient-to-br ${ISLAND_HERO.gradient} sm:h-56`}>
+      <img src={ISLAND_HERO.src} alt="" aria-hidden="true" className="h-full w-full object-cover" />
+    </div>
+    <div className="flex flex-1 flex-col gap-1 bg-white px-4 py-3">
+      <span className="text-lg font-bold text-gray-900">島嶼探索</span>
+      <span className="text-sm text-gray-500">
+        {occupied === null ? '已佔領島嶼載入中…' : `已佔領 ${occupied} 座島`}
+        {'、閱讀寶貝已遇見 '}
+        {babyCount === null ? '載入中…' : `${babyCount.owned} 隻`}
+      </span>
+      <span className="mt-1 w-fit rounded-full bg-accent-bg px-2 py-0.5 text-[11px] font-medium text-accent">
+        隨時可玩
+      </span>
+    </div>
+  </button>
+);
+
 const StudentGameHubPage: React.FC = () => {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const navigate = useNavigate();
+  const [occupied, setOccupied] = useState<number | null>(null);
+  const [babyCount, setBabyCount] = useState<{ owned: number; total: number } | null>(null);
+
+  useEffect(() => {
+    if (!token || !user) return;
+    let alive = true;
+    getStudentProgress(token, user.id)
+      .then((res) => { if (alive) setOccupied(occupiedCountFromProgress(res.texts)); })
+      .catch(() => { /* best-effort — card shows a loading label if this fails */ });
+    fetchReadingBabyAtlas(user.id, token)
+      .then((res) => {
+        if (!alive) return;
+        const owned = res.babies.filter((b) => b.stage !== 'not_encountered').length;
+        setBabyCount({ owned, total: res.total_lessons });
+      })
+      .catch(() => { /* best-effort — card shows a loading label if this fails */ });
+    return () => { alive = false; };
+    // user?.id（不是整個 user 物件）——2026-10-31 reading-babies phase 2 code
+    // review finding：這支 effect 原本是 `[token, user]`，跟其他呼叫端
+    // （ReadingBabyAtlasPage／StudentArchipelagoPage）同一批修正的無限 fetch
+    // 迴圈風險是同一類，這裡順手一起補上。
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, user?.id]);
   // Default false (locked) until the real enrollment data loads — same
   // fail-safe default Sidebar.tsx used pre-consolidation (#3607): a
   // feature the student can't use is never flashed as unlocked before
@@ -248,6 +317,11 @@ const StudentGameHubPage: React.FC = () => {
               onOpen={() => card.path && navigate(card.path)}
             />
           ))}
+          <IslandExplorationCard
+            occupied={occupied}
+            babyCount={babyCount}
+            onOpen={() => navigate('/student/archipelago')}
+          />
         </div>
       </section>
 

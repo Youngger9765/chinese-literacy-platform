@@ -1,0 +1,904 @@
+{
+  "generatedAt": "2026-10-31T06:35:51Z",
+  "source": "docs/design/reading-babies/lesson-indicators.json",
+  "status": "ai_draft_unreviewed",
+  "note": "課綱分類為 AI 草稿，待老師審核（見 .claude/skills/lesson-curriculum-mapping/SKILL.md）",
+  "totalLessons": 179,
+  "byStoryId": {
+    "20001": {
+      "performanceCode": "5-Ⅱ-5",
+      "contentPrefix": "Ba",
+      "competencyCode": "B3"
+    },
+    "20002": {
+      "performanceCode": "5-Ⅱ-6",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20003": {
+      "performanceCode": "5-Ⅱ-6",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20004": {
+      "performanceCode": "5-Ⅱ-11",
+      "contentPrefix": "Cb",
+      "competencyCode": "C1"
+    },
+    "20005": {
+      "performanceCode": "5-Ⅱ-8",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20006": {
+      "performanceCode": "5-Ⅱ-8",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20007": {
+      "performanceCode": "5-Ⅱ-8",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20008": {
+      "performanceCode": "5-Ⅱ-11",
+      "contentPrefix": "Cb",
+      "competencyCode": "C1"
+    },
+    "20009": {
+      "performanceCode": "5-Ⅱ-11",
+      "contentPrefix": "Cb",
+      "competencyCode": "C1"
+    },
+    "20010": {
+      "performanceCode": "5-Ⅱ-11",
+      "contentPrefix": "Cb",
+      "competencyCode": "C1"
+    },
+    "20011": {
+      "performanceCode": "5-Ⅱ-8",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20012": {
+      "performanceCode": "5-Ⅱ-11",
+      "contentPrefix": "Cb",
+      "competencyCode": "C1"
+    },
+    "20013": {
+      "performanceCode": "5-Ⅱ-8",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20014": {
+      "performanceCode": "5-Ⅱ-8",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20015": {
+      "performanceCode": "5-Ⅱ-8",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20016": {
+      "performanceCode": "5-Ⅱ-8",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20017": {
+      "performanceCode": "5-Ⅱ-11",
+      "contentPrefix": "Cb",
+      "competencyCode": "C1"
+    },
+    "20018": {
+      "performanceCode": "5-Ⅱ-4",
+      "contentPrefix": "Ab",
+      "competencyCode": "B1"
+    },
+    "20019": {
+      "performanceCode": "5-Ⅱ-4",
+      "contentPrefix": "Ab",
+      "competencyCode": "B1"
+    },
+    "20020": {
+      "performanceCode": "5-Ⅱ-9",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20021": {
+      "performanceCode": "5-Ⅲ-8",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20022": {
+      "performanceCode": "5-Ⅲ-11",
+      "contentPrefix": "Cb",
+      "competencyCode": "C1"
+    },
+    "20023": {
+      "performanceCode": "5-Ⅲ-8",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20024": {
+      "performanceCode": "5-Ⅲ-7",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20025": {
+      "performanceCode": "5-Ⅲ-8",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20026": {
+      "performanceCode": "5-Ⅲ-11",
+      "contentPrefix": "Cb",
+      "competencyCode": "C1"
+    },
+    "20027": {
+      "performanceCode": "5-Ⅲ-12",
+      "contentPrefix": "Bc",
+      "competencyCode": "B2"
+    },
+    "20028": {
+      "performanceCode": "5-Ⅲ-12",
+      "contentPrefix": "Bc",
+      "competencyCode": "B2"
+    },
+    "20029": {
+      "performanceCode": "5-Ⅲ-11",
+      "contentPrefix": "Cb",
+      "competencyCode": "C1"
+    },
+    "20030": {
+      "performanceCode": "5-Ⅲ-6",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20031": {
+      "performanceCode": "5-Ⅲ-8",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20032": {
+      "performanceCode": "5-Ⅲ-6",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20033": {
+      "performanceCode": "5-Ⅲ-6",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20034": {
+      "performanceCode": "5-Ⅲ-11",
+      "contentPrefix": "Cb",
+      "competencyCode": "C1"
+    },
+    "20035": {
+      "performanceCode": "5-Ⅲ-6",
+      "contentPrefix": "Ab",
+      "competencyCode": "B1"
+    },
+    "20036": {
+      "performanceCode": "5-Ⅲ-6",
+      "contentPrefix": "Ab",
+      "competencyCode": "B1"
+    },
+    "20037": {
+      "performanceCode": "5-Ⅲ-6",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20038": {
+      "performanceCode": "5-Ⅲ-6",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20039": {
+      "performanceCode": "5-Ⅲ-11",
+      "contentPrefix": "Cb",
+      "competencyCode": "C1"
+    },
+    "20040": {
+      "performanceCode": "5-Ⅲ-11",
+      "contentPrefix": "Cb",
+      "competencyCode": "C1"
+    },
+    "20041": {
+      "performanceCode": "5-Ⅲ-8",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20042": {
+      "performanceCode": "5-Ⅲ-8",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20043": {
+      "performanceCode": "5-Ⅲ-8",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20044": {
+      "performanceCode": "5-Ⅲ-9",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20045": {
+      "performanceCode": "4-Ⅲ-2",
+      "contentPrefix": "Ab",
+      "competencyCode": "B1"
+    },
+    "20046": {
+      "performanceCode": "4-Ⅲ-2",
+      "contentPrefix": "Ab",
+      "competencyCode": "B1"
+    },
+    "20047": {
+      "performanceCode": "4-Ⅲ-2",
+      "contentPrefix": "Ab",
+      "competencyCode": "B1"
+    },
+    "20048": {
+      "performanceCode": "4-Ⅲ-2",
+      "contentPrefix": "Ab",
+      "competencyCode": "B1"
+    },
+    "20049": {
+      "performanceCode": "5-Ⅲ-8",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20050": {
+      "performanceCode": "5-Ⅲ-6",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20051": {
+      "performanceCode": "5-Ⅲ-6",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20052": {
+      "performanceCode": "5-Ⅲ-8",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20053": {
+      "performanceCode": "5-Ⅲ-8",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20054": {
+      "performanceCode": "5-Ⅲ-6",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20055": {
+      "performanceCode": "5-Ⅲ-6",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20056": {
+      "performanceCode": "5-Ⅲ-11",
+      "contentPrefix": "Cb",
+      "competencyCode": "C1"
+    },
+    "20057": {
+      "performanceCode": "5-Ⅲ-6",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20058": {
+      "performanceCode": "5-Ⅲ-6",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20059": {
+      "performanceCode": "5-Ⅲ-11",
+      "contentPrefix": "Cb",
+      "competencyCode": "C1"
+    },
+    "20060": {
+      "performanceCode": "5-Ⅲ-8",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20061": {
+      "performanceCode": "5-Ⅲ-7",
+      "contentPrefix": "Ad",
+      "competencyCode": "B3"
+    },
+    "20062": {
+      "performanceCode": "5-Ⅲ-11",
+      "contentPrefix": "Cb",
+      "competencyCode": "C1"
+    },
+    "20063": {
+      "performanceCode": "5-Ⅲ-7",
+      "contentPrefix": "Ad",
+      "competencyCode": "B3"
+    },
+    "20064": {
+      "performanceCode": "5-Ⅲ-11",
+      "contentPrefix": "Cb",
+      "competencyCode": "C1"
+    },
+    "20065": {
+      "performanceCode": "5-Ⅲ-7",
+      "contentPrefix": "Ad",
+      "competencyCode": "B3"
+    },
+    "20066": {
+      "performanceCode": "5-Ⅲ-6",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20067": {
+      "performanceCode": "5-Ⅲ-8",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20068": {
+      "performanceCode": "5-Ⅲ-8",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20069": {
+      "performanceCode": "5-Ⅲ-11",
+      "contentPrefix": "Ad",
+      "competencyCode": "C2"
+    },
+    "20070": {
+      "performanceCode": "5-Ⅲ-9",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20071": {
+      "performanceCode": "5-Ⅲ-12",
+      "contentPrefix": "Bc",
+      "competencyCode": "B2"
+    },
+    "20072": {
+      "performanceCode": "5-Ⅲ-7",
+      "contentPrefix": "Ad",
+      "competencyCode": "B3"
+    },
+    "20073": {
+      "performanceCode": "5-Ⅲ-7",
+      "contentPrefix": "Ad",
+      "competencyCode": "B3"
+    },
+    "20074": {
+      "performanceCode": "5-Ⅲ-6",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20075": {
+      "performanceCode": "5-Ⅲ-6",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20076": {
+      "performanceCode": "5-Ⅲ-11",
+      "contentPrefix": "Cb",
+      "competencyCode": "C1"
+    },
+    "20077": {
+      "performanceCode": "5-Ⅳ-4",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20078": {
+      "performanceCode": "5-Ⅳ-6",
+      "contentPrefix": "Bd",
+      "competencyCode": "B2"
+    },
+    "20079": {
+      "performanceCode": "5-Ⅳ-4",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20080": {
+      "performanceCode": "5-Ⅳ-6",
+      "contentPrefix": "Bc",
+      "competencyCode": "B2"
+    },
+    "20081": {
+      "performanceCode": "5-Ⅳ-6",
+      "contentPrefix": "Bc",
+      "competencyCode": "B2"
+    },
+    "20082": {
+      "performanceCode": "5-Ⅳ-6",
+      "contentPrefix": "Bc",
+      "competencyCode": "B2"
+    },
+    "20083": {
+      "performanceCode": "5-Ⅳ-6",
+      "contentPrefix": "Bc",
+      "competencyCode": "B2"
+    },
+    "20084": {
+      "performanceCode": "5-Ⅳ-3",
+      "contentPrefix": "Ba",
+      "competencyCode": "B3"
+    },
+    "20085": {
+      "performanceCode": "5-Ⅳ-2",
+      "contentPrefix": "Ad",
+      "competencyCode": "B1"
+    },
+    "20086": {
+      "performanceCode": "5-Ⅳ-4",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20087": {
+      "performanceCode": "5-Ⅳ-4",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20088": {
+      "performanceCode": "5-Ⅳ-2",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20089": {
+      "performanceCode": "5-Ⅳ-4",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20090": {
+      "performanceCode": "5-Ⅳ-6",
+      "contentPrefix": "Bc",
+      "competencyCode": "B2"
+    },
+    "20091": {
+      "performanceCode": "5-Ⅳ-6",
+      "contentPrefix": "Bc",
+      "competencyCode": "B2"
+    },
+    "20092": {
+      "performanceCode": "5-Ⅳ-6",
+      "contentPrefix": "Bd",
+      "competencyCode": "B2"
+    },
+    "20093": {
+      "performanceCode": "5-Ⅳ-4",
+      "contentPrefix": "Bc",
+      "competencyCode": "A2"
+    },
+    "20094": {
+      "performanceCode": "5-Ⅳ-4",
+      "contentPrefix": "Bc",
+      "competencyCode": "A2"
+    },
+    "20095": {
+      "performanceCode": "5-Ⅳ-4",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20096": {
+      "performanceCode": "5-Ⅳ-5",
+      "contentPrefix": "Cb",
+      "competencyCode": "C1"
+    },
+    "20097": {
+      "performanceCode": "5-Ⅳ-5",
+      "contentPrefix": "Bd",
+      "competencyCode": "B2"
+    },
+    "20098": {
+      "performanceCode": "5-Ⅳ-5",
+      "contentPrefix": "Cb",
+      "competencyCode": "C1"
+    },
+    "20099": {
+      "performanceCode": "5-Ⅳ-4",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20100": {
+      "performanceCode": "5-Ⅳ-4",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20101": {
+      "performanceCode": "5-Ⅳ-4",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20102": {
+      "performanceCode": "5-Ⅳ-6",
+      "contentPrefix": "Bd",
+      "competencyCode": "B2"
+    },
+    "20103": {
+      "performanceCode": "5-Ⅳ-2",
+      "contentPrefix": "Ad",
+      "competencyCode": "B1"
+    },
+    "20104": {
+      "performanceCode": "5-Ⅳ-2",
+      "contentPrefix": "Ad",
+      "competencyCode": "B1"
+    },
+    "20105": {
+      "performanceCode": "5-Ⅳ-2",
+      "contentPrefix": "Ad",
+      "competencyCode": "B1"
+    },
+    "20106": {
+      "performanceCode": "5-Ⅳ-4",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20107": {
+      "performanceCode": "5-Ⅳ-4",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20108": {
+      "performanceCode": "5-Ⅳ-4",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20109": {
+      "performanceCode": "5-Ⅳ-4",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20110": {
+      "performanceCode": "5-Ⅳ-4",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20111": {
+      "performanceCode": "5-Ⅳ-4",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20112": {
+      "performanceCode": "5-Ⅳ-4",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20113": {
+      "performanceCode": "5-Ⅳ-2",
+      "contentPrefix": "Ad",
+      "competencyCode": "B1"
+    },
+    "20114": {
+      "performanceCode": "5-Ⅳ-2",
+      "contentPrefix": "Ad",
+      "competencyCode": "B1"
+    },
+    "20115": {
+      "performanceCode": "5-Ⅳ-2",
+      "contentPrefix": "Ad",
+      "competencyCode": "B1"
+    },
+    "20116": {
+      "performanceCode": "5-Ⅳ-3",
+      "contentPrefix": "Ba",
+      "competencyCode": "B3"
+    },
+    "20117": {
+      "performanceCode": "5-Ⅳ-4",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20118": {
+      "performanceCode": "5-Ⅳ-3",
+      "contentPrefix": "Ba",
+      "competencyCode": "B3"
+    },
+    "20119": {
+      "performanceCode": "5-Ⅳ-3",
+      "contentPrefix": "Ba",
+      "competencyCode": "B3"
+    },
+    "20120": {
+      "performanceCode": "5-Ⅳ-4",
+      "contentPrefix": "Bc",
+      "competencyCode": "A2"
+    },
+    "20121": {
+      "performanceCode": "5-Ⅳ-5",
+      "contentPrefix": "Bd",
+      "competencyCode": "B2"
+    },
+    "20122": {
+      "performanceCode": "5-Ⅳ-4",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20123": {
+      "performanceCode": "5-Ⅳ-3",
+      "contentPrefix": "Ba",
+      "competencyCode": "B3"
+    },
+    "20124": {
+      "performanceCode": "5-Ⅳ-4",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20125": {
+      "performanceCode": "5-Ⅳ-4",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20126": {
+      "performanceCode": "5-Ⅳ-4",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20127": {
+      "performanceCode": "5-Ⅳ-3",
+      "contentPrefix": "Ba",
+      "competencyCode": "B3"
+    },
+    "20128": {
+      "performanceCode": "5-Ⅳ-4",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20129": {
+      "performanceCode": "5-Ⅳ-4",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20130": {
+      "performanceCode": "5-Ⅳ-4",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20131": {
+      "performanceCode": "5-Ⅳ-3",
+      "contentPrefix": "Ad",
+      "competencyCode": "B1"
+    },
+    "20132": {
+      "performanceCode": "5-Ⅳ-4",
+      "contentPrefix": "Bc",
+      "competencyCode": "A2"
+    },
+    "20133": {
+      "performanceCode": "5-Ⅳ-6",
+      "contentPrefix": "Bc",
+      "competencyCode": "B2"
+    },
+    "20134": {
+      "performanceCode": "5-Ⅳ-6",
+      "contentPrefix": "Bc",
+      "competencyCode": "B2"
+    },
+    "20135": {
+      "performanceCode": "5-Ⅳ-6",
+      "contentPrefix": "Bc",
+      "competencyCode": "B2"
+    },
+    "20136": {
+      "performanceCode": "5-Ⅳ-6",
+      "contentPrefix": "Bc",
+      "competencyCode": "B2"
+    },
+    "20137": {
+      "performanceCode": "5-Ⅳ-2",
+      "contentPrefix": "Ad",
+      "competencyCode": "B1"
+    },
+    "20138": {
+      "performanceCode": "5-Ⅳ-5",
+      "contentPrefix": "Cb",
+      "competencyCode": "C1"
+    },
+    "20139": {
+      "performanceCode": "5-Ⅳ-2",
+      "contentPrefix": "Ad",
+      "competencyCode": "B1"
+    },
+    "20140": {
+      "performanceCode": "5-Ⅳ-3",
+      "contentPrefix": "Ba",
+      "competencyCode": "B3"
+    },
+    "20141": {
+      "performanceCode": "5-Ⅳ-2",
+      "contentPrefix": "Ad",
+      "competencyCode": "B1"
+    },
+    "20142": {
+      "performanceCode": "5-Ⅳ-5",
+      "contentPrefix": "Cb",
+      "competencyCode": "C1"
+    },
+    "20143": {
+      "performanceCode": "5-Ⅳ-3",
+      "contentPrefix": "Ad",
+      "competencyCode": "B1"
+    },
+    "20144": {
+      "performanceCode": "5-Ⅳ-2",
+      "contentPrefix": "Ad",
+      "competencyCode": "B1"
+    },
+    "20145": {
+      "performanceCode": "5-Ⅳ-3",
+      "contentPrefix": "Ba",
+      "competencyCode": "B3"
+    },
+    "20146": {
+      "performanceCode": "5-Ⅳ-4",
+      "contentPrefix": "Ad",
+      "competencyCode": "A2"
+    },
+    "20147": {
+      "performanceCode": "5-Ⅳ-4",
+      "contentPrefix": "Bc",
+      "competencyCode": "A2"
+    },
+    "20148": {
+      "performanceCode": "5-Ⅳ-4",
+      "contentPrefix": "Bc",
+      "competencyCode": "A2"
+    },
+    "20149": {
+      "performanceCode": "5-Ⅳ-6",
+      "contentPrefix": "Bc",
+      "competencyCode": "B2"
+    },
+    "20150": {
+      "performanceCode": "5-Ⅳ-6",
+      "contentPrefix": "Bc",
+      "competencyCode": "B2"
+    },
+    "20151": {
+      "performanceCode": "5-Ⅳ-6",
+      "contentPrefix": "Bd",
+      "competencyCode": "B2"
+    },
+    "20152": {
+      "performanceCode": "5-Ⅳ-6",
+      "contentPrefix": "Bd",
+      "competencyCode": "B2"
+    },
+    "20153": {
+      "performanceCode": "5-Ⅳ-3",
+      "contentPrefix": "Ab",
+      "competencyCode": "B3"
+    },
+    "20154": {
+      "performanceCode": "5-Ⅳ-3",
+      "contentPrefix": "Ab",
+      "competencyCode": "B3"
+    },
+    "20155": {
+      "performanceCode": "5-Ⅳ-3",
+      "contentPrefix": "Ab",
+      "competencyCode": "B3"
+    },
+    "20156": {
+      "performanceCode": "5-Ⅳ-6",
+      "contentPrefix": "Bd",
+      "competencyCode": "B2"
+    },
+    "20157": {
+      "performanceCode": "5-Ⅳ-3",
+      "contentPrefix": "Ab",
+      "competencyCode": "B3"
+    },
+    "20158": {
+      "performanceCode": "5-Ⅳ-3",
+      "contentPrefix": "Ab",
+      "competencyCode": "B3"
+    },
+    "20159": {
+      "performanceCode": "5-Ⅳ-3",
+      "contentPrefix": "Ab",
+      "competencyCode": "B3"
+    },
+    "20160": {
+      "performanceCode": "5-Ⅳ-3",
+      "contentPrefix": "Ab",
+      "competencyCode": "B3"
+    },
+    "20161": {
+      "performanceCode": "5-Ⅳ-3",
+      "contentPrefix": "Ab",
+      "competencyCode": "B3"
+    },
+    "20162": {
+      "performanceCode": "5-Ⅳ-3",
+      "contentPrefix": "Ab",
+      "competencyCode": "B3"
+    },
+    "20163": {
+      "performanceCode": "4-Ⅳ-3",
+      "contentPrefix": "Ab",
+      "competencyCode": "B3"
+    },
+    "20164": {
+      "performanceCode": "4-Ⅳ-3",
+      "contentPrefix": "Ab",
+      "competencyCode": "B3"
+    },
+    "20165": {
+      "performanceCode": "5-Ⅳ-5",
+      "contentPrefix": "Cb",
+      "competencyCode": "C1"
+    },
+    "20166": {
+      "performanceCode": "5-Ⅳ-5",
+      "contentPrefix": "Cb",
+      "competencyCode": "C1"
+    },
+    "20167": {
+      "performanceCode": "5-Ⅳ-5",
+      "contentPrefix": "Cb",
+      "competencyCode": "C1"
+    },
+    "20168": {
+      "performanceCode": "5-Ⅳ-5",
+      "contentPrefix": "Cb",
+      "competencyCode": "C1"
+    },
+    "20169": {
+      "performanceCode": "5-Ⅳ-5",
+      "contentPrefix": "Cb",
+      "competencyCode": "C1"
+    },
+    "20170": {
+      "performanceCode": "5-Ⅳ-5",
+      "contentPrefix": "Cb",
+      "competencyCode": "C1"
+    },
+    "20171": {
+      "performanceCode": "5-Ⅳ-5",
+      "contentPrefix": "Cb",
+      "competencyCode": "C1"
+    },
+    "20172": {
+      "performanceCode": "5-Ⅳ-5",
+      "contentPrefix": "Cb",
+      "competencyCode": "C1"
+    },
+    "20173": {
+      "performanceCode": "5-Ⅳ-5",
+      "contentPrefix": "Cb",
+      "competencyCode": "C1"
+    },
+    "20174": {
+      "performanceCode": "5-Ⅳ-5",
+      "contentPrefix": "Cb",
+      "competencyCode": "C1"
+    },
+    "20175": {
+      "performanceCode": "5-Ⅳ-5",
+      "contentPrefix": "Cb",
+      "competencyCode": "C1"
+    },
+    "20176": {
+      "performanceCode": "5-Ⅳ-5",
+      "contentPrefix": "Cb",
+      "competencyCode": "C1"
+    },
+    "20177": {
+      "performanceCode": "5-Ⅳ-5",
+      "contentPrefix": "Cb",
+      "competencyCode": "C1"
+    },
+    "20178": {
+      "performanceCode": "5-Ⅳ-5",
+      "contentPrefix": "Cb",
+      "competencyCode": "C1"
+    },
+    "20179": {
+      "performanceCode": "5-Ⅳ-5",
+      "contentPrefix": "Cb",
+      "competencyCode": "C1"
+    }
+  }
+}
