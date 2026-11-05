@@ -22,6 +22,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 
+from ..auth.authz import is_school_teacher
 from ..auth.dependencies import get_current_user
 from ..auth.policies import (
     require_classroom_member,
@@ -166,6 +167,37 @@ def invite_co_teacher(
         raise HTTPException(
             status_code=409,
             detail="This teacher is already the classroom owner",
+        )
+
+    # Claude Security find_01NKQLkX94VWRwpkBgYmc54s (high, CWE-287): an
+    # anonymous attacker can register a colleague's email before the real
+    # colleague does (registration is open, rejects only an exact-duplicate
+    # address) and then sit on it until a classroom owner invites that
+    # address, believing it to be the real colleague. Two independent
+    # gates, both required:
+    #
+    # 1. The invitee's own account must be email_verified. (Residual gap,
+    #    documented honestly: self-registration currently sets
+    #    email_verified=True unconditionally -- settings.
+    #    require_email_verification defaults to False and this repo has no
+    #    outbound-email integration to deliver a real verification link.
+    #    This gate becomes fully load-bearing the moment that ships; it is
+    #    still correct to enforce now so nothing has to change here later.)
+    if not invitee.email_verified:
+        raise HTTPException(
+            status_code=409,
+            detail="This teacher's email has not been verified yet.",
+        )
+
+    # 2. The invitee must already hold an active, school-scoped `teacher`
+    #    role at THIS classroom's school -- not merely any active account.
+    #    This is what actually narrows the real-world attack today: the
+    #    attacker must separately self-activate as teacher specifically at
+    #    the victim's school to get past it, not just hold any account.
+    if not is_school_teacher(invitee, classroom.school_id, db):
+        raise HTTPException(
+            status_code=403,
+            detail="This user does not hold a teacher role at this classroom's school",
         )
 
     # Check for duplicate invite (pending or already-accepted — either way
