@@ -110,6 +110,10 @@ export interface KeyPassageReadingResult {
   accuracy?: number;
   errorBreakdown?: Record<string, unknown>;
   audioUrl?: string;
+  /** #3856 — persisted so reopening this step after AI comes back on still
+   *  shows the honest "AI grading was off" notice for this past attempt,
+   *  instead of reinterpreting its 0-value matchRate/cpm as a real score. */
+  aiDisabled?: boolean;
 }
 
 export interface KeyPassageReadingStepData {
