@@ -164,3 +164,51 @@ def test_join_preview_rate_limits_repeated_authenticated_code_probes(client, sch
     )
     assert allowed_resp.status_code == 200
     assert allowed_resp.json()["name"] == "Join Preview RL Target"
+
+
+def test_join_endpoint_rate_limits_repeated_code_guesses(client, school_id):
+    """Claude Security find_01XaGHNpuEXRirwAcCzCeYyh (low, CWE-307): the
+    ENROLLING endpoint (not just its read-only /join-preview twin) must
+    also refuse a guessing account after a few misses -- it is the one
+    that actually matters, since a hit on it enrolls the attacker as a
+    classmate of minors and lets them read the class roster/leaderboard.
+    """
+    teacher = _register_user(client, "join_rl_teacher", school_id, teacher=True)
+    attacker = _register_user(client, "join_rl_attacker", school_id)
+
+    create_resp = client.post(
+        "/api/classrooms",
+        json={"name": "Join RL Target", "school_id": school_id},
+        headers=auth_header(teacher["token"]),
+    )
+    assert create_resp.status_code == 201
+    join_code = create_resp.json()["join_code"]
+
+    for i in range(10):
+        resp = client.post(
+            "/api/classrooms/join",
+            json={"join_code": f"MISS{i:02d}"},
+            headers=auth_header(attacker["token"]),
+        )
+        assert resp.status_code == 404
+
+    blocked_resp = client.post(
+        "/api/classrooms/join",
+        json={"join_code": join_code},
+        headers=auth_header(attacker["token"]),
+    )
+    assert blocked_resp.status_code == 429, (
+        "an account that has just burned 10 misses in the last minute must "
+        "be refused even on a guess that would otherwise be a real hit -- "
+        "this is the actual security property, not merely that 429s exist"
+    )
+
+    # a different, non-guessing account is unaffected
+    legit_student = _register_user(client, "join_rl_legit", school_id)
+    allowed_resp = client.post(
+        "/api/classrooms/join",
+        json={"join_code": join_code},
+        headers=auth_header(legit_student["token"]),
+    )
+    assert allowed_resp.status_code == 200
+    assert allowed_resp.json()["name"] == "Join RL Target"
