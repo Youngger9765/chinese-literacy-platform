@@ -66,18 +66,23 @@ jobs:
         uses: google-github-actions/auth@v2
         with:
           # Claude Security find_01WStrhArZsNRHeb92RWHZRE (high, CWE-250):
-          # this job used to authenticate as github-actions@lingoleap-dev --
-          # the SAME identity deploy.yml uses for PRODUCTION. Any PR from a
-          # collaborator (push access only, no review required to open a
-          # PR) ran on a runner holding full prod-deploy privileges before
-          # any of its own steps -- including dependency lifecycle scripts
-          # and Playwright. A scoped SA, limited to lingoleap-*-issue-*
-          # Cloud Run services and the preview/frontend runtime SAs only
-          # (no actAs on the prod runtime SA, no access to prod secrets),
-          # closes that: compromising a PR preview no longer gets you
-          # production.
+          # this job authenticates as github-actions@lingoleap-dev -- the
+          # SAME identity deploy.yml uses for PRODUCTION. A least-privilege
+          # lingoleap-preview-deploy@ SA was tried here and reverted: a
+          # project-level conditional run.admin binding scoped by
+          # resource.name does not reliably gate Cloud Run's admin-plane
+          # calls (confirmed failing identically across two condition
+          # formats and after IAM propagation), and the only workable
+          # per-resource-binding alternative needs run.services.setIamPolicy,
+          # which cannot be scoped to a not-yet-created service -- granting
+          # it project-wide would let this SA grant itself run.admin on
+          # prod, which is worse than the status quo. A proposal using
+          # resource tags + an IAM deny policy against prod's two services
+          # is under review separately; until it lands, this job keeps the
+          # broader identity and the mitigations below (same-repo-only
+          # cleanup, hardened agent workflows) are the active defenses.
           workload_identity_provider: projects/958347263320/locations/global/workloadIdentityPools/github-pool/providers/github-provider
-          service_account: lingoleap-preview-deploy@lingoleap-dev.iam.gserviceaccount.com
+          service_account: github-actions@lingoleap-dev.iam.gserviceaccount.com
 
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
@@ -461,22 +466,12 @@ jobs:
           # Claude Security find_01WStrhArZsNRHeb92RWHZRE (high, CWE-250):
           # same reasoning as deploy-preview above -- this job is reachable
           # by any collaborator (same-repo PR, no review required to open
-          # one) and used to run as the prod-deploy identity.
-          #
-          # ⚠️ KNOWN GAP (flagged to the human maintainer, not silently
-          # worked around): the scoped lingoleap-preview-deploy@ SA does
-          # NOT yet have artifactregistry delete permission on the
-          # `lingoleap` repo, only push/write. The Cloud Run service
-          # deletion steps below work fine under it; the "Delete preview
-          # images from Artifact Registry" step will fail with a
-          # permission error until that's granted. This is an accepted,
-          # visible trade-off for this PR -- untagged images are still
-          # reclaimed within 7 days by the L1 Artifact Registry cleanup
-          # policy, and the weekly preview-cleanup.yml job (schedule/
-          # workflow_dispatch only, not reachable by an arbitrary PR
-          # close) still has the broader credential as a backstop.
+          # one) and used to run as the prod-deploy identity. A least-
+          # privilege SA switch was tried and reverted here too, same
+          # reasoning as deploy-preview above; the same-repo-only `if:`
+          # guard on this job (below) is the active defense for now.
           workload_identity_provider: projects/958347263320/locations/global/workloadIdentityPools/github-pool/providers/github-provider
-          service_account: lingoleap-preview-deploy@lingoleap-dev.iam.gserviceaccount.com
+          service_account: github-actions@lingoleap-dev.iam.gserviceaccount.com
 
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
