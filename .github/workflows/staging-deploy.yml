@@ -255,6 +255,14 @@ jobs:
         working-directory: frontend
         run: npm ci
 
+      # find_01WStrhArZsNRHeb92RWHZRE (high): this global npm install used to
+      # run AFTER "Authenticate to Google Cloud" below -- untrusted,
+      # lockfile/registry-resolved third-party code executing on a runner
+      # that already held live GCP credentials for the rest of this job.
+      # Moved before auth; it has no dependency on it (global CLI install).
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools@13
+
       - name: Build frontend for Firebase (relative API paths + demo creds)
         working-directory: frontend
         env:
@@ -273,9 +281,6 @@ jobs:
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
-
-      - name: Install Firebase CLI
-        run: npm install -g firebase-tools@13
 
       - name: Deploy to Firebase Hosting (staging + dev)
         run: |

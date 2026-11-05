@@ -1,10 +1,17 @@
 name: PR Preview Deploy
 
+# Claude Security CodeQL critical alert, 2026-11-05: `cleanup-preview`
+# (the only job here that ran on `pull_request_target: closed`) moved to
+# its own file, preview-cleanup-on-close.yml -- see that file's header
+# comment for why. This file now ONLY has the `pull_request` trigger, so
+# it never gets secrets for a fork PR and CodeQL's "checkout of untrusted
+# code in a privileged context" pattern (a pull_request_target trigger
+# co-located with a PR-head-sha checkout, which deploy-preview and
+# e2e-preview-check both do, for understandable reasons -- they need the
+# PR's own code to build and test) no longer applies to this file at all.
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-  pull_request_target:
-    types: [closed]
 
 permissions:
   contents: read
@@ -39,8 +46,11 @@ jobs:
   deploy-preview:
     name: Deploy PR Preview
     needs: detect-changes
-    runs-on: ubuntu-24.04  # 這個 job 會裝 Playwright，26.04 不支援
+    runs-on: ubuntu-latest
     if: github.event.action != 'closed' && github.event.pull_request.head.ref != 'staging'
+    outputs:
+      frontend_url: ${{ steps.preview-urls.outputs.frontend_url }}
+      backend_url: ${{ steps.preview-urls.outputs.backend_url }}
 
     steps:
       - name: Checkout code
@@ -51,6 +61,22 @@ jobs:
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
+          # Claude Security find_01WStrhArZsNRHeb92RWHZRE (high, CWE-250):
+          # this job authenticates as github-actions@lingoleap-dev -- the
+          # SAME identity deploy.yml uses for PRODUCTION. A least-privilege
+          # lingoleap-preview-deploy@ SA was tried here and reverted: a
+          # project-level conditional run.admin binding scoped by
+          # resource.name does not reliably gate Cloud Run's admin-plane
+          # calls (confirmed failing identically across two condition
+          # formats and after IAM propagation), and the only workable
+          # per-resource-binding alternative needs run.services.setIamPolicy,
+          # which cannot be scoped to a not-yet-created service -- granting
+          # it project-wide would let this SA grant itself run.admin on
+          # prod, which is worse than the status quo. A proposal using
+          # resource tags + an IAM deny policy against prod's two services
+          # is under review separately; until it lands, this job keeps the
+          # broader identity and the mitigations below (same-repo-only
+          # cleanup, hardened agent workflows) are the active defenses.
           workload_identity_provider: projects/958347263320/locations/global/workloadIdentityPools/github-pool/providers/github-provider
           service_account: github-actions@lingoleap-dev.iam.gserviceaccount.com
 
@@ -303,20 +329,6 @@ jobs:
       #
       # PR 只跑一課（五課走完整條路太慢，慢到會讓人想關掉這道門），
       # staging 維持五課全跑 —— 兩個環境跑不同的量，不是抽樣代替全檢。
-      - name: 學生走得完嗎（multi-text journey on preview）
-        if: always() && steps.preview-urls.outputs.frontend_url != 'N/A' && steps.preview-urls.outputs.frontend_url != '' && steps.preview-urls.outputs.backend_url != 'N/A' && steps.preview-urls.outputs.backend_url != ''
-        working-directory: frontend
-        env:
-          PLAYWRIGHT_BASE_URL: ${{ steps.preview-urls.outputs.frontend_url }}
-          E2E_BACKEND_URL: ${{ steps.preview-urls.outputs.backend_url }}
-          E2E_ONLY_LESSONS: "20063"      # G6-L22，三篇，Hans 回報的那一課
-          E2E_EXPECT_DEPLOYED: "1"
-        run: |
-          npm ci
-          npx playwright install chromium --with-deps
-          npx playwright test tests/e2e/multiTextJourney.spec.ts \
-            --reporter=github --timeout=300000
-
       - name: Comment PR with preview URLs
         uses: actions/github-script@v8
         with:
@@ -364,109 +376,48 @@ jobs:
               });
             }
 
-  cleanup-preview:
-    name: Cleanup PR Preview
-    runs-on: ubuntu-latest
-    if: github.event.action == 'closed'
-
+  e2e-preview-check:
+    name: 學生走得完嗎（multi-text journey on preview）
+    needs: deploy-preview
+    runs-on: ubuntu-24.04  # 這個 job 會裝 Playwright，26.04 不支援
+    if: >-
+      always() &&
+      needs.deploy-preview.outputs.frontend_url != 'N/A' &&
+      needs.deploy-preview.outputs.frontend_url != '' &&
+      needs.deploy-preview.outputs.backend_url != 'N/A' &&
+      needs.deploy-preview.outputs.backend_url != ''
+    # Reorder (coordinator decision, 2026-11-05): this job runs npm ci +
+    # `npx playwright install --with-deps` -- untrusted, lockfile-resolved
+    # third-party code -- directly on the bare runner. It used to be the
+    # LAST step of `deploy-preview`, which ran `google-github-actions/
+    # auth@v2` as one of its FIRST steps: every PR's dependency install ran
+    # on a runner that had already held live GCP credentials for the
+    # entire job. This job needs only the already-deployed preview's plain
+    # HTTP URLs (from deploy-preview's job outputs) -- it has no
+    # `google-github-actions/auth` step at all, so there is no GCP
+    # credential in this job's environment for any installed/test code to
+    # reach. tests/test_workflow_path_filters_spec.py's new
+    # test_no_untrusted_install_shares_a_job_with_gcp_auth asserts this
+    # structurally for every job in this file (and deploy.yml/
+    # staging-deploy.yml), not just by convention.
     steps:
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
+      - name: Checkout code
+        uses: actions/checkout@v6
         with:
-          workload_identity_provider: projects/958347263320/locations/global/workloadIdentityPools/github-pool/providers/github-provider
-          service_account: github-actions@lingoleap-dev.iam.gserviceaccount.com
+          ref: ${{ github.event.pull_request.head.sha }}
 
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
-
-      - name: Extract issue number from branch
-        id: issue
-        # branch 名走 env 不直接內插 —— 它是 PR 作者可控的字串，
-        # 直接塞進 shell 等於讓外人往這支 workflow 注入指令
+      - name: 學生走得完嗎（multi-text journey on preview）
+        working-directory: frontend
         env:
-          HEAD_REF: ${{ github.event.pull_request.head.ref }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PLAYWRIGHT_BASE_URL: ${{ needs.deploy-preview.outputs.frontend_url }}
+          E2E_BACKEND_URL: ${{ needs.deploy-preview.outputs.backend_url }}
+          E2E_ONLY_LESSONS: "20063"      # G6-L22，三篇，Hans 回報的那一課
+          E2E_EXPECT_DEPLOYED: "1"
+          # #3719 — IAP 準備：見「Warm backend」步驟的同一段說明。
+          IAP_AUDIENCE: ${{ secrets.IAP_AUDIENCE }}
         run: |
-          BRANCH="$HEAD_REF"
-          ISSUE_NUM=$(echo "$BRANCH" | grep -oE 'issue-[0-9]+' | grep -oE '[0-9]+' || echo "")
-          if [ -z "$ISSUE_NUM" ]; then
-            ISSUE_NUM="$PR_NUMBER"
-          fi
-          echo "num=${ISSUE_NUM}" >> "$GITHUB_OUTPUT"
+          npm ci
+          npx playwright install chromium --with-deps
+          npx playwright test tests/e2e/multiTextJourney.spec.ts \
+            --reporter=github --timeout=300000
 
-      - name: Set service names
-        env:
-          ISSUE_NUM_IN: ${{ steps.issue.outputs.num }}
-        run: |
-          ISSUE_NUM="$ISSUE_NUM_IN"
-          {
-            echo "BACKEND_SERVICE=lingoleap-backend-issue-${ISSUE_NUM}"
-            echo "FRONTEND_SERVICE=lingoleap-frontend-issue-${ISSUE_NUM}"
-          } >> "$GITHUB_ENV"
-
-      - name: Delete preview backend
-        run: |
-          if gcloud run services describe ${{ env.BACKEND_SERVICE }} --region=${{ env.REGION }} --project=${{ env.PROJECT_ID }} 2>/dev/null; then
-            gcloud run services delete ${{ env.BACKEND_SERVICE }} \
-              --region=${{ env.REGION }} \
-              --project=${{ env.PROJECT_ID }} \
-              --quiet
-            echo "Deleted preview backend: ${{ env.BACKEND_SERVICE }}"
-          else
-            echo "Preview backend ${{ env.BACKEND_SERVICE }} not found, skipping"
-          fi
-
-      - name: Delete preview frontend
-        run: |
-          if gcloud run services describe ${{ env.FRONTEND_SERVICE }} --region=${{ env.REGION }} --project=${{ env.PROJECT_ID }} 2>/dev/null; then
-            gcloud run services delete ${{ env.FRONTEND_SERVICE }} \
-              --region=${{ env.REGION }} \
-              --project=${{ env.PROJECT_ID }} \
-              --quiet
-            echo "Deleted preview frontend: ${{ env.FRONTEND_SERVICE }}"
-          else
-            echo "Preview frontend ${{ env.FRONTEND_SERVICE }} not found, skipping"
-          fi
-
-      - name: Delete preview images from Artifact Registry
-        run: |
-          ISSUE_NUM=${{ steps.issue.outputs.num }}
-          for PACKAGE in backend frontend; do
-            echo "=== Cleaning ${PACKAGE} issue-${ISSUE_NUM} images ==="
-            DIGESTS=$(gcloud artifacts docker images list \
-              "${{ env.REGISTRY }}/${PACKAGE}" \
-              --include-tags \
-              --filter="tags:issue-${ISSUE_NUM}-" \
-              --sort-by="~CREATE_TIME" \
-              --format="value(version)" 2>/dev/null || true)
-
-            if [ -z "$DIGESTS" ]; then
-              echo "No images found, skipping"
-              continue
-            fi
-
-            echo "$DIGESTS" | while read -r DIGEST; do
-              [ -z "$DIGEST" ] && continue
-              echo "DELETE: ${DIGEST:0:20}..."
-              gcloud artifacts docker images delete \
-                "${{ env.REGISTRY }}/${PACKAGE}@${DIGEST}" \
-                --delete-tags --quiet 2>/dev/null || true
-            done
-          done
-
-      - name: Comment PR about cleanup
-        uses: actions/github-script@v8
-        with:
-          script: |
-            const prNumber = context.payload.pull_request.number;
-
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: prNumber,
-              body: `## Preview Cleanup Complete
-
-              The preview environments for this PR have been deleted.
-
-              **Deleted at:** ${new Date().toISOString()}`
-            });
