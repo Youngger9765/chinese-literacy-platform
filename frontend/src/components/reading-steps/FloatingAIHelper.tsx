@@ -4,6 +4,11 @@
  * Replaces the removed AI dialogue tab from ComprehensionChat.
  * Students can ask questions about the lesson text via this floating helper.
  * Uses the existing /api/comprehension/chat endpoint for AI responses.
+ *
+ * This IS the chatbot / "ask the AI" conversational entry point (#3861):
+ * gated by useAiChatbotEnabled() so it hides itself whenever the backend's
+ * chatbot-only flag is off — independent of (and in addition to) the
+ * pre-existing FLOATING_AI_HELPER_ENABLED product toggle below.
  */
 import React, { useCallback, useRef, useState, useEffect } from 'react';
 import {
@@ -12,6 +17,7 @@ import {
   fetchDialogueHistory,
 } from '../../services/learningApi';
 import { useAuth } from '../../contexts/AuthContext';
+import { useAiChatbotEnabled } from '../../hooks/useAiFeaturesEnabled';
 import VoiceInputButton from '../ui/VoiceInputButton';
 
 interface FloatingAIHelperProps {
@@ -26,6 +32,8 @@ type HelperMessage =
 
 // #1707: Young 5/19 — hide AI helper globally until UX is reworked.
 // Flip back to true to re-enable everywhere without touching call sites.
+// Even if this is flipped back on, useAiChatbotEnabled() below still gates
+// it behind the server-side AI_CHATBOT_ENABLED flag (#3861).
 const FLOATING_AI_HELPER_ENABLED = false;
 
 const FloatingAIHelper: React.FC<FloatingAIHelperProps> = ({
@@ -34,6 +42,7 @@ const FloatingAIHelper: React.FC<FloatingAIHelperProps> = ({
   dbSessionId,
 }) => {
   const { token } = useAuth();
+  const aiChatbotEnabled = useAiChatbotEnabled();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<HelperMessage[]>([]);
   const [inputText, setInputText] = useState('');
@@ -127,7 +136,7 @@ const FloatingAIHelper: React.FC<FloatingAIHelperProps> = ({
     }
   };
 
-  if (!FLOATING_AI_HELPER_ENABLED) return null;
+  if (!FLOATING_AI_HELPER_ENABLED || !aiChatbotEnabled) return null;
 
   return (
     <>

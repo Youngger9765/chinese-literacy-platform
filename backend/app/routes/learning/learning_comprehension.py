@@ -15,7 +15,7 @@ from ...database import get_db
 from ...models.session import DialogueTurn, LearningSession
 from ...models.teacher_instruction import TeacherInstruction
 from ...models.user import User
-from ...services.ai_feature_flag import require_ai_enabled
+from ...services.ai_feature_flag import require_chatbot_enabled
 from ...services.ai_service import generate_socratic_question
 from ...services.ai_usage_tracker import last_usage, log_ai_usage
 from ...services.input_sanitizer import sanitize_ai_input
@@ -42,7 +42,7 @@ class ComprehensionResponse(BaseModel):
 @router.post(
     "/comprehension/question",
     response_model=ComprehensionResponse,
-    dependencies=[Depends(require_ai_enabled), Depends(ai_limit_10_per_min)],
+    dependencies=[Depends(require_chatbot_enabled), Depends(ai_limit_10_per_min)],
 )
 async def get_comprehension_question(
     payload: ComprehensionRequest,
@@ -58,12 +58,12 @@ async def get_comprehension_question(
     the next AI question. Call this after each student answer (and on initial
     load with an empty conversation to get the first question).
 
-    Guarded by require_ai_enabled (#3838 kill switch) as a decorator-level
-    dependency: the handler body below has a broad `except Exception` that
-    degrades to a canned fallback question on ANY AI failure — exactly the
-    silent-fake-answer shape the kill switch must not produce. Gating at the
-    route level means a disabled flag returns 503 before that except clause
-    can run at all.
+    Guarded by require_chatbot_enabled (#3838/#3861 chatbot kill switch) as a
+    decorator-level dependency: the handler body below has a broad
+    `except Exception` that degrades to a canned fallback question on ANY AI
+    failure — exactly the silent-fake-answer shape the kill switch must not
+    produce. Gating at the route level means a disabled flag returns 503
+    before that except clause can run at all.
     """
     # Sanitize user-provided text before sending to AI
     safe_story_title, _ = sanitize_ai_input(payload.story_title, user_id=str(current_user.id))
@@ -167,7 +167,7 @@ class ComprehensionChatResponse(BaseModel):
 @router.post(
     "/comprehension/chat",
     response_model=ComprehensionChatResponse,
-    dependencies=[Depends(ai_limit_10_per_min)],
+    dependencies=[Depends(require_chatbot_enabled), Depends(ai_limit_10_per_min)],
 )
 async def comprehension_chat(
     payload: ComprehensionChatRequest,
@@ -186,6 +186,12 @@ async def comprehension_chat(
     When the session is restored from memory or DB (after refresh / Cloud Run restart),
     the response includes resumed=true and conversation_history so the frontend can
     display the prior conversation without a Gemini call.
+
+    Guarded by require_chatbot_enabled (#3838/#3861 chatbot kill switch) as a
+    decorator-level dependency, in addition to the service-level
+    assert_chatbot_enabled calls inside socratic_agent.start_session /
+    process_answer — a disabled flag now 503s before the IDOR ownership
+    check and input sanitization below run at all.
     """
     # Sanitize user-provided text before sending to AI
     safe_story_title, _ = sanitize_ai_input(payload.story_title, user_id=str(current_user.id))
