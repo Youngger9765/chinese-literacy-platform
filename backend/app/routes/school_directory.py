@@ -36,7 +36,7 @@ router = APIRouter(tags=["school-directory"])
 # Rate limit: 30 req/min per authenticated user (plain DB query, no AI on
 # the hot path — only the rare 0-match fallback below calls an LLM, and
 # that has its own, tighter, separate budget).
-_search_rl = make_general_rate_limit_dependency(max_requests=30, window_seconds=60)
+_search_rl = make_general_rate_limit_dependency(max_requests=30, window_seconds=60, name="school-directory-search")
 
 # Separate, tighter budget for the LLM suggestion fallback specifically
 # (llm-endpoint-hardening Rule 1: rate-limit is the last check before the

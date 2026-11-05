@@ -101,15 +101,39 @@ general_rate_limiter = InMemoryRateLimiter()
 def real_ip_from_xff(xff: str, peer: str | None = None) -> str:
     """Return the real client IP behind the Cloud Run / GCP load balancer.
 
-    (#2470 HIGH-1a) GCP appends [real-client-ip, load-balancer-ip] to any
-    client-supplied X-Forwarded-For, so the trustworthy client IP is the
-    SECOND-from-right. Entries to the left are attacker-controlled (a client can
-    prepend anything) and MUST NOT be used for rate-limiting / security — taking
-    the leftmost let an attacker rotate a fake IP to bypass per-IP limits.
+    Claude Security find_016GfbjuPFtSeUVkfhAUcLPp (high, CWE-348): this used
+    to always take the SECOND-from-right entry, on the assumption that GCP
+    always appends exactly two trusted hops ([real-client-ip,
+    load-balancer-ip], as happens when the request arrives via the Firebase
+    Hosting rewrite). That assumption is false for the OTHER real, reachable
+    production path: the backend is also public on its own direct
+    `*.run.app` URL (no ingress restriction, and it's what VITE_API_URL
+    points at), where Cloud Run appends only ONE trusted hop -- the actual
+    client IP it observed. On that path, parts[-2] is an attacker-chosen
+    value from the client's own X-Forwarded-For header, letting them rotate
+    it per-request to defeat every per-IP rate limit (login, registration,
+    anonymous TTS spend, the global limiter).
+
+    We cannot safely tell which of the two paths a given request came in on
+    from request data alone (the Host header is itself attacker-settable on
+    a direct request). So this now ALWAYS takes the LAST entry instead --
+    the one Cloud Run itself appends based on the actual TCP peer it saw,
+    never from client-supplied header content, on every reachable path.
+    This is exactly correct on the direct `*.run.app` path. On the
+    Firebase-fronted path it resolves to Firebase's own serving IP rather
+    than the original end-user's IP -- a real precision loss (many distinct
+    users behind that path now share one rate-limit identity), but not a
+    new vulnerability: that shared IP is still not attacker-controlled, so
+    rate limits still function (just coarser), whereas the old code's
+    "precision" on that path depended on an assumption that was already
+    false and spoofable on the other path.
+
+    The precision loss on the Firebase path is a known, accepted trade-off
+    until the direct `*.run.app` URL's ingress is restricted at the
+    infrastructure level (tracked separately -- an IAM/ingress change
+    outside what application code can enforce).
     """
     parts = [p.strip() for p in (xff or "").split(",") if p.strip()]
-    if len(parts) >= 2:
-        return parts[-2]
     if parts:
         return parts[-1]
     return peer or "unknown"
@@ -321,17 +345,41 @@ def make_ai_rate_limit_dependency(max_requests: int = 10, window_seconds: int = 
     return _dependency
 
 
-def make_general_rate_limit_dependency(max_requests: int = 100, window_seconds: int = 60):
-    """Return a FastAPI dependency that enforces a general API rate limit per IP.
+def make_general_rate_limit_dependency(max_requests: int = 100, window_seconds: int = 60, *, name: str):
+    """Return a FastAPI dependency that enforces a general API rate limit.
+
+    Claude Security find_01Mro5omduiXVs3dmVTHdpJn (medium, CWE-770): this
+    used to key on `request.client.host` alone -- on Cloud Run that is
+    always the platform's own proxy address, the SAME value for every
+    request reaching an instance, so every caller of every endpoint using
+    this factory shared ONE counter. One client flooding any of the three
+    endpoints this backs (dictionary, school-directory search,
+    mcq-attempt) could 429 every other user of ALL THREE on that instance.
+    `mcq_attempt`'s dependency also ran before authentication (declared at
+    the route-decorator level), so even an anonymous caller could do it.
+
+    Fixed:
+      - `name` (now required) namespaces the key per call site, so the
+        three endpoints no longer share one bucket.
+      - Keys via get_client_key(), the same helper make_ai_rate_limit_
+        dependency already uses: the authenticated user id when
+        request.state.user_id is set (populated by main.py's logging
+        middleware from a SIGNATURE-VERIFIED JWT, for every request,
+        before any route dependency runs -- so this works regardless of
+        where get_current_user sits in the route's own dependency order,
+        including mcq_attempt's route-decorator-level placement, with no
+        extra DB query). Anonymous callers fall back to real_client_ip(),
+        not the raw, shared Cloud Run proxy address.
 
     Args:
         max_requests: Maximum allowed requests within the time window.
         window_seconds: Sliding window size in seconds.
+        name: Short, unique identifier for this call site (e.g. "dictionary",
+            "school-directory-search", "mcq-attempt") -- required so
+            distinct endpoints never share a bucket.
     """
     def _dependency(request: Request) -> None:
-        client = request.client
-        ip = client.host if client else "unknown"
-        key = f"general:ip:{ip}"
+        key = f"general:{name}:{get_client_key(request)}"
         if not general_rate_limiter.check(key, max_requests, window_seconds):
             raise HTTPException(
                 status_code=429,
@@ -349,8 +397,11 @@ def make_general_rate_limit_dependency(max_requests: int = 100, window_seconds: 
 ai_limit_10_per_min = make_ai_rate_limit_dependency(max_requests=10, window_seconds=60)
 # Strict AI endpoints (e.g. full-reading): 5 requests / minute per user
 ai_limit_5_per_min = make_ai_rate_limit_dependency(max_requests=5, window_seconds=60)
-# General API: 100 requests / minute per IP
-general_limit_100_per_min = make_general_rate_limit_dependency(max_requests=100, window_seconds=60)
+# General API: 100 requests / minute, keyed by user id when authenticated
+# (mcq-attempt is reachable anonymously -- see make_general_rate_limit_dependency).
+general_limit_100_per_min = make_general_rate_limit_dependency(
+    max_requests=100, window_seconds=60, name="mcq-attempt"
+)
 
 
 # ---------------------------------------------------------------------------

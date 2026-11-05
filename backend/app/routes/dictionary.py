@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=["dictionary"])
 
 # Rate limit: 60 req/min per authenticated user (generous; results are cached in DB)
-_dict_rl = make_general_rate_limit_dependency(max_requests=60, window_seconds=60)
+_dict_rl = make_general_rate_limit_dependency(max_requests=60, window_seconds=60, name="dictionary")
 
 
 class DefinitionEntry(BaseModel):
