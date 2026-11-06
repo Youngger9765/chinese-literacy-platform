@@ -388,6 +388,18 @@ class TestSemesterService:
 # ── HTTP API tests ─────────────────────────────────────────────────────────────
 
 
+def _future_date_str(days_from_today: int) -> str:
+    """find_01DygBxNaTFMHa8cgm2yhHRm recommendation 2, 2026-11-06: the
+    route now rejects an end_date already in the past, so fixtures that
+    need a VALID (acceptable) semester can no longer use calendar-literal
+    dates that eventually rot into the past as real time passes -- several
+    of this file's "2025-09-01"/"2026-01-31" literals did exactly that.
+    Tests that deliberately want an invalid/past date keep using literals;
+    only the ones asserting success (or asserting 403 for a reason OTHER
+    than the date) switch to this."""
+    return (date.today() + timedelta(days=days_from_today)).isoformat()
+
+
 class TestSemesterAPI:
     def test_list_semesters_returns_200(self, client, admin, school_id):
         resp = client.get(
@@ -406,8 +418,8 @@ class TestSemesterAPI:
             f"/api/schools/{school_id}/semesters",
             json={
                 "name": "114上學期",
-                "start_date": "2025-09-01",
-                "end_date": "2026-01-31",
+                "start_date": _future_date_str(1),
+                "end_date": _future_date_str(150),
                 "grace_days": 7,
                 "is_active": False,
             },
@@ -420,12 +432,13 @@ class TestSemesterAPI:
         assert "expires_at_date" in data
 
     def test_create_semester_returns_correct_expires_at_date(self, client, admin, school_id):
+        end_date = date.today() + timedelta(days=150)
         resp = client.post(
             f"/api/schools/{school_id}/semesters",
             json={
                 "name": "114上學期-expiry-check",
-                "start_date": "2025-09-01",
-                "end_date": "2026-01-31",
+                "start_date": _future_date_str(1),
+                "end_date": end_date.isoformat(),
                 "grace_days": 7,
                 "is_active": False,
             },
@@ -433,16 +446,25 @@ class TestSemesterAPI:
         )
         assert resp.status_code == 201
         data = resp.json()
-        # end_date + 7 days = 2026-02-07
-        assert data["expires_at_date"] == "2026-02-07"
+        assert data["expires_at_date"] == (end_date + timedelta(days=7)).isoformat()
 
     def test_create_semester_teacher_forbidden(self, client, teacher, school_id):
+        """Renamed in intent, not in name, 2026-11-06: `teacher` here is a
+        plain registered account with NO relationship to `school_id`
+        whatsoever (see the fixture — _register_user grants no school
+        role at all). This still correctly 403s under the tightened
+        find_01DygBxNaTFMHa8cgm2yhHRm authz (no relationship at all is a
+        fortiori not a verified management one), but it does NOT cover the
+        actual vulnerability the finding describes — see
+        TestSemesterManagementAuthzTightened below for a caller who
+        self-activates INTO the school (which used to pass the old
+        is_school_member check and must now still 403)."""
         resp = client.post(
             f"/api/schools/{school_id}/semesters",
             json={
                 "name": "Forbidden Semester",
-                "start_date": "2025-09-01",
-                "end_date": "2026-01-31",
+                "start_date": _future_date_str(1),
+                "end_date": _future_date_str(150),
             },
             headers=auth_header(teacher["token"]),
         )
@@ -478,8 +500,8 @@ class TestSemesterAPI:
             f"/api/schools/{school2_id}/semesters",
             json={
                 "name": "First Active",
-                "start_date": "2024-09-01",
-                "end_date": "2025-01-31",
+                "start_date": _future_date_str(1),
+                "end_date": _future_date_str(150),
                 "is_active": True,
             },
             headers=auth_header(admin["token"]),
@@ -492,8 +514,8 @@ class TestSemesterAPI:
             f"/api/schools/{school2_id}/semesters",
             json={
                 "name": "Second Active",
-                "start_date": "2025-02-01",
-                "end_date": "2025-06-30",
+                "start_date": _future_date_str(151),
+                "end_date": _future_date_str(300),
                 "is_active": True,
             },
             headers=auth_header(admin["token"]),
@@ -621,3 +643,130 @@ class TestSemesterAPI:
             headers=auth_header(admin["token"]),
         )
         assert resp.status_code == 404
+
+
+class TestSemesterManagementAuthzTightened:
+    """find_01DygBxNaTFMHa8cgm2yhHRm (medium, CWE-863), 2026-11-06.
+
+    The actual attack: _can_manage_semester used to be bare
+    is_school_member, and self-serve activation makes school membership a
+    trivial, zero-friction action. A caller who self-activates AS TEACHER
+    into a school used to pass that check and could create/activate a
+    semester with a past end_date, mass-expiring every OTHER teacher's
+    classroom texts there. test_create_semester_teacher_forbidden above
+    doesn't cover this — that caller has NO relationship to the school at
+    all, which was never the exploitable case.
+    """
+
+    def _register_and_login(self, client, suffix: str) -> dict:
+        return _register_user(client, suffix)
+
+    def test_self_activated_teacher_cannot_manage_a_real_schools_semester(self, client, school_id):
+        """`school_id` fixture is a real (non-self-activated) school with no
+        admin_user_id set -- exactly the "institutional school, no verified
+        management relationship" case the finding's recommendation names.
+
+        Grants the school-scoped teacher role directly via the DB (ACTIVE)
+        rather than through POST /users/me/activate-teacher: that endpoint
+        now has its OWN, separately-shipped defense (#3889/#3890) that
+        grants an INACTIVE role when self-activating into a genuinely
+        pre-existing school pending admin confirmation -- which would
+        incidentally also make this test 403 (is_school_member already
+        filters on is_active) without ever exercising THIS fix
+        (_can_manage_semester) at all. Testing the authz check in
+        isolation needs the role to actually be active, as it would be for
+        a caller the #3889 gate legitimately approved, or a membership
+        granted before that gate existed.
+        """
+        attacker = self._register_and_login(client, "sem_attacker")
+        db = TestingSessionLocal()
+        teacher_role = db.query(Role).filter(Role.name == "teacher").first()
+        db.add(UserRole(
+            user_id=attacker["user_id"],
+            role_id=teacher_role.id,
+            scope_type="school",
+            scope_id=str(school_id),
+            is_active=True,
+        ))
+        db.commit()
+        db.close()
+
+        resp = client.post(
+            f"/api/schools/{school_id}/semesters",
+            json={
+                "name": "Attacker Semester",
+                "start_date": _future_date_str(1),
+                "end_date": _future_date_str(150),
+                "is_active": True,
+            },
+            headers=auth_header(attacker["token"]),
+        )
+        assert resp.status_code == 403, resp.text
+
+    def test_school_admin_user_id_holder_can_manage_the_semester(self, client):
+        """Positive control: the fix criteria says a verified management
+        relationship (school.admin_user_id == caller) must still work --
+        this isn't a blanket lockout, system_admin-only despite appearances
+        in the other tests (those just never set admin_user_id)."""
+        designated_admin = self._register_and_login(client, "sem_designated_admin")
+        db = TestingSessionLocal()
+        school = School(name=f"Admin-Owned School {uuid.uuid4().hex[:8]}", admin_user_id=designated_admin["user_id"])
+        db.add(school)
+        db.commit()
+        db.refresh(school)
+        real_school_id = school.id
+        db.close()
+
+        resp = client.post(
+            f"/api/schools/{real_school_id}/semesters",
+            json={
+                "name": "Legit Semester",
+                "start_date": _future_date_str(1),
+                "end_date": _future_date_str(150),
+            },
+            headers=auth_header(designated_admin["token"]),
+        )
+        assert resp.status_code == 201, resp.text
+
+    def test_create_semester_with_past_end_date_rejected(self, client, admin, school_id):
+        resp = client.post(
+            f"/api/schools/{school_id}/semesters",
+            json={
+                "name": "Already Expired",
+                "start_date": (date.today() - timedelta(days=200)).isoformat(),
+                "end_date": (date.today() - timedelta(days=1)).isoformat(),
+                "is_active": True,
+            },
+            headers=auth_header(admin["token"]),
+        )
+        assert resp.status_code == 422, resp.text
+
+    def test_activate_semester_with_past_end_date_rejected(self, client, admin, school_id):
+        # Create it inactive first with a valid future date...
+        create_resp = client.post(
+            f"/api/schools/{school_id}/semesters",
+            json={
+                "name": "Will Be Backdated",
+                "start_date": _future_date_str(1),
+                "end_date": _future_date_str(10),
+                "is_active": False,
+            },
+            headers=auth_header(admin["token"]),
+        )
+        assert create_resp.status_code == 201
+        semester_id = create_resp.json()["id"]
+
+        # ...then backdate it directly via the DB (simulating drift / a
+        # previously-valid semester whose end_date has since passed) and
+        # confirm /activate refuses it rather than mass-expiring on activation.
+        db = TestingSessionLocal()
+        semester = db.query(Semester).filter(Semester.id == semester_id).first()
+        semester.end_date = date.today() - timedelta(days=1)
+        db.commit()
+        db.close()
+
+        activate_resp = client.post(
+            f"/api/schools/{school_id}/semesters/{semester_id}/activate",
+            headers=auth_header(admin["token"]),
+        )
+        assert activate_resp.status_code == 422, activate_resp.text
