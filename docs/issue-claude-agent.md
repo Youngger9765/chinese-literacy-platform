@@ -99,3 +99,5 @@
 - PR 上的 @claude 歸 `claude-pr-review.yml`，兩支條件互斥
 - 認證共用 `CLAUDE_CODE_OAUTH_TOKEN` secret
 - issue 事件讀 **main** 的 workflow 定義 —— 改這支要上 main 才生效
+
+<!-- canary: harmless doc touch for claude-pr-review.yml live test, will be reverted/closed -->
