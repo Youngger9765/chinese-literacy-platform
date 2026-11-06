@@ -1,5 +1,6 @@
 import secrets
 import string
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.exc import IntegrityError
@@ -99,6 +100,14 @@ def reset_student_password(
     user.password_hash = hash_password(password)
     user.password_reset_token = None
     user.password_reset_expires = None
+    # Claude Security find_016vZk1d3wRKkhjQMTUbGU6Y (low): invalidate any
+    # token issued before this teacher reset -- see auth/dependencies.py's
+    # get_current_user, which compares this against each token's `iat`.
+    # Floored to the whole second (coordinator review 2026-11-06, see
+    # routes/auth.py's change_password for why) so a token minted in the
+    # same second as this reset -- e.g. the student logging in right after
+    # the teacher resets it -- is still accepted.
+    user.password_changed_at = datetime.now(timezone.utc).replace(microsecond=0)
     if user.student_profile:
         user.student_profile.password_changed = False
     else:

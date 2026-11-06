@@ -226,6 +226,20 @@ def login(req: LoginRequest, request: Request, db: Session = Depends(get_db)):
             detail="Invalid email or password",
         )
 
+    # Critic review 2026-11-06: captured here, BEFORE the db.commit() below
+    # -- not read from `user.password_changed_at` after it. SQLAlchemy's
+    # default expire_on_commit=True means any attribute read after a
+    # commit triggers a fresh SELECT, and verify_password above only
+    # proves the password matched the hash as of THIS read, not as of
+    # whatever a concurrent request commits in between. Reading the floor
+    # post-commit would let a login that raced a legitimate, unrelated
+    # password change inherit THAT change's (newer) password_changed_at as
+    # its own pwc_floor -- exactly the stale-token property
+    # find_016vZk1d3wRKkhjQMTUbGU6Y exists to close, reopened via a race
+    # instead of a timestamp comparison. Capturing it here ties the floor
+    # to the exact row version verify_password actually checked.
+    password_changed_at_at_login = user.password_changed_at
+
     _ensure_parent_login_allowed(user, db)
 
     if settings.require_email_verification and not user.email_verified:
@@ -241,7 +255,18 @@ def login(req: LoginRequest, request: Request, db: Session = Depends(get_db)):
 
     has_classroom = compute_has_classroom(db, user.id)
 
-    token = create_access_token(user.id)
+    # find_016vZk1d3wRKkhjQMTUbGU6Y: verify_password above just confirmed
+    # this is the account's CURRENT password -- a token minted here can
+    # never be older than password_changed_at (the current hash and
+    # password_changed_at are always written together), so this login is
+    # never the stale-token case that check exists for. Tagging it with
+    # password_change_floor sidesteps the same whole-second `iat`
+    # ambiguity get_current_user's `<=` would otherwise hit for a login
+    # that happens to land in the same wall-clock second as a password
+    # change moments earlier (teacher reset -> student logs in; self
+    # change-password -> explicit re-login) -- see create_access_token's
+    # docstring for why this can't be expressed via `iat` itself.
+    token = create_access_token(user.id, password_change_floor=password_changed_at_at_login)
     return TokenResponse(
         access_token=token,
         must_change_password=must_change,
@@ -282,12 +307,50 @@ def change_password(
     enforce_password_strength(req.new_password)
 
     current_user.password_hash = hash_password(req.new_password)
+    # Claude Security find_016vZk1d3wRKkhjQMTUbGU6Y (low): any token issued
+    # before this moment must stop working -- see auth/dependencies.py's
+    # get_current_user, which compares this against each token's `iat`.
+    # Floored to the whole second: PyJWT's `iat` is always whole-second
+    # resolution, so comparing it against a sub-second-precision value adds
+    # nothing but an off-by-a-fraction-of-a-second footgun.
+    #
+    # `changed_at` is kept as a local variable (not re-read from
+    # `current_user.password_changed_at` after db.commit() below) on
+    # purpose: SQLAlchemy's default expire-on-commit means that attribute
+    # access after commit() triggers a fresh SELECT, and this column comes
+    # back from SQLite as a NAIVE datetime (tzinfo stripped -- see
+    # get_current_user's own comment on this). `datetime.timestamp()` on a
+    # naive value is interpreted as LOCAL time, not UTC -- on this
+    # machine's TZ (UTC+8) that silently shifted `password_change_floor`
+    # below by exactly 8 hours, confirmed by direct inspection of the
+    # token's decoded claims vs the DB row. Keeping the original
+    # tz-aware value sidesteps the round trip entirely.
+    changed_at = datetime.now(timezone.utc).replace(microsecond=0)
+    current_user.password_changed_at = changed_at
 
     if current_user.student_profile:
         current_user.student_profile.password_changed = True
 
     db.commit()
-    return {"message": "Password updated successfully"}
+
+    # #3438 AC ("no new login should be required") vs the invalidation
+    # check in get_current_user are in genuine tension: the token
+    # authenticating THIS request was, by definition, minted before (or at
+    # best in the same second as) password_changed_at. get_current_user
+    # fail-closes on "same second" (`<=`) -- correct for every OTHER token,
+    # but it means the caller's OWN token, and even a token reissued a few
+    # milliseconds later in THIS response, cannot be relied on to clear it
+    # via `iat` alone (and minting it with `iat` pushed into the future
+    # does not work either -- PyJWT's decode() independently rejects a
+    # token whose `iat` is in the future). `password_change_floor` marks
+    # this token as reissued for exactly this change via an explicit
+    # claim instead -- see create_access_token's docstring and
+    # get_current_user's `pwc_floor` check. The frontend adopts it before
+    # its next call (AuthContext.updateToken) -- no explicit re-login /
+    # re-entering credentials required, which is what the AC actually
+    # asks for.
+    fresh_token = create_access_token(current_user.id, password_change_floor=changed_at)
+    return {"message": "Password updated successfully", "access_token": fresh_token}
 
 
 @router.post("/claim-account", response_model=ClaimAccountResponse)
@@ -494,7 +557,11 @@ def google_login(req: GoogleLoginRequest, request: Request, db: Session = Depend
     db.commit()
     db.refresh(user)
 
-    token = create_access_token(user.id)
+    # find_016vZk1d3wRKkhjQMTUbGU6Y: same reasoning as /auth/login's own
+    # create_access_token call -- a token minted during a request that
+    # just successfully authenticated this exact account cannot predate
+    # whatever password_changed_at is already on file for it.
+    token = create_access_token(user.id, password_change_floor=user.password_changed_at)
     return GoogleLoginResponse(access_token=token, is_new_user=is_new_user)
 
 
@@ -572,7 +639,9 @@ def junyi_login(req: JunyiLoginRequest, request: Request, db: Session = Depends(
     db.commit()
     db.refresh(user)
 
-    token = create_access_token(user.id)
+    # find_016vZk1d3wRKkhjQMTUbGU6Y: same reasoning as /auth/login's own
+    # create_access_token call.
+    token = create_access_token(user.id, password_change_floor=user.password_changed_at)
     logger.info(
         "junyi_login: user_id=%s junyi_identity_id=%s is_new=%s",
         user.id,
