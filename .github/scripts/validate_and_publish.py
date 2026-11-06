@@ -218,6 +218,41 @@ def safe_push(repo_dir: str, repo: str, branch: str, bot_email: str, github_toke
     return run(push_args, cwd=repo_dir)
 
 
+NO_SUMMARY_MESSAGE = (
+    "⚠️ 這一輪沒有產生任何摘要（agent 可能提早結束、判定不需要處理，或執行中出錯），"
+    "請工程師查看 run log 確認原因。"
+)
+
+
+def parse_agent_report(report_bytes: str | None) -> dict:
+    """Parse the agent job's self-reported report.json into a dict.
+
+    Pulled out of main() (2026-11, after a live canary run) so the three
+    "something went wrong with the report file" paths -- missing file,
+    invalid JSON, valid JSON that isn't an object (e.g. the agent wrote
+    `{}` because it never got far enough to write findings_summary, or
+    refused the whole task) -- are independently testable without having
+    to drive the rest of main()'s subprocess/git side effects.
+
+    Every fallback message says *why* there's nothing to show, instead of
+    the old bare "(no summary)", which a live canary (issue #3917, run
+    42294117055) showed up as the entire visible comment body with zero
+    explanation of what happened.
+    """
+    if report_bytes is None:
+        return {"findings_summary": "agent did not produce a report file, please check run log"}
+    try:
+        report = json.loads(report_bytes)
+    except json.JSONDecodeError:
+        return {"findings_summary": "agent report was not valid JSON, original content skipped, please check run log"}
+    if not isinstance(report, dict):
+        # agent wrote valid JSON that wasn't an object (a list, a bare
+        # string, a number, null) -- `.get()` below would crash on any
+        # of those. Should-fix, 2026-11 round-2 review.
+        return {"findings_summary": "agent report JSON was not an object, original content skipped, please check run log"}
+    return report
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--repo", required=True)
@@ -232,20 +267,9 @@ def main() -> int:
 
     report_path = Path(args.report)
     report_bytes = report_path.read_text(encoding="utf-8") if report_path.exists() else None
-    if report_bytes is None:
-        report = {"findings_summary": "agent did not produce a report file, please check run log"}
-    else:
-        try:
-            report = json.loads(report_bytes)
-        except json.JSONDecodeError:
-            report = {"findings_summary": "agent report was not valid JSON, original content skipped, please check run log"}
-        if not isinstance(report, dict):
-            # agent wrote valid JSON that wasn't an object (a list, a bare
-            # string, a number, null) -- `.get()` below would crash on any
-            # of those. Should-fix, 2026-11 round-2 review.
-            report = {"findings_summary": "agent report JSON was not an object, original content skipped, please check run log"}
+    report = parse_agent_report(report_bytes)
 
-    findings_summary = str(report.get("findings_summary") or "(no summary)")
+    findings_summary = str(report.get("findings_summary") or NO_SUMMARY_MESSAGE)
     needs_engineer = bool(report.get("needs_engineer"))
     acceptance_steps = str(report.get("acceptance_steps") or "open the preview URL below and confirm the original issue is fixed")
     pr_title_raw = str(report.get("pr_title") or f"fix: automated change (Fixes #{args.issue})")
