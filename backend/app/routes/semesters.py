@@ -7,12 +7,19 @@ Endpoints:
   PATCH  /schools/{school_id}/semesters/{id}      — update semester
   POST   /schools/{school_id}/semesters/{id}/activate  — activate semester
 
-Access (#3804 — school-as-label model):
+Access:
   - system_admin can manage any school's semesters.
-  - Any active member of the school (any role — there is no dedicated
-    "school admin" role in active use; principal/director are defined but
-    never checked anywhere else either) can read AND write its semesters.
-    The old org_admin-of-the-school's-org bypass is retired.
+  - Read (list/get-active): any active member of the school (#3804 —
+    school-as-label model; the old org_admin-of-the-school's-org bypass
+    is retired).
+  - Write (create/update/activate): find_01DygBxNaTFMHa8cgm2yhHRm
+    (medium, CWE-863), 2026-11-06 — tightened from "any member" to a
+    verified management relationship, since self-serve school membership
+    is a trivial, zero-friction action and this is a write with a much
+    bigger blast radius than the read above (see _can_manage_semester's
+    own docstring in authz.py for the exact rule). A self-activated
+    school has NO member who can write its semesters today; a real
+    school requires school.admin_user_id == the caller.
 """
 
 import logging
@@ -79,6 +86,20 @@ class SemesterCreateRequest(BaseModel):
             raise ValueError("end_date must be after start_date")
         return self
 
+    @field_validator("end_date")
+    @classmethod
+    def end_date_not_in_the_past(cls, v: date) -> date:
+        """Claude Security find_01DygBxNaTFMHa8cgm2yhHRm (medium, CWE-863),
+        recommendation 2: a semester created with is_active=True and an
+        already-past end_date immediately stamps expires_at on every
+        unstamped ClassroomText at the school (see _propagate_expires_at),
+        which a later cleanup run soft-deletes -- an instant mass-expiry,
+        regardless of who is authorized to manage the semester. Reject it
+        at the schema level, independent of the authz fix above."""
+        if v < date.today():
+            raise ValueError("end_date must not be in the past")
+        return v
+
     @field_validator("grace_days")
     @classmethod
     def grace_days_non_negative(cls, v: int) -> int:
@@ -105,13 +126,12 @@ def _get_school_or_404(school_id: int, db: Session) -> School:
 
 
 def _require_school_write_access(school: School, current_user: User, db: Session) -> None:
-    """Allow system_admin, or any active member of this school (#3804).
-
-    Previously this required system_admin or an org_admin/org_owner of the
-    school's org — so an ordinary teacher could never create/update/activate
-    a semester for their OWN school (see PRD #3804 §1.2.A). The org_admin
-    bypass is retired along with the org tenancy tier; any school member may
-    now manage the shared term calendar.
+    """Allow system_admin, or a verified management relationship to this
+    school -- see authz.py's _can_manage_semester docstring for the exact
+    rule (tightened 2026-11-06, find_01DygBxNaTFMHa8cgm2yhHRm). This is
+    stricter than bare school membership (which _require_school_read_access
+    below still uses) because this gate protects WRITE endpoints that can
+    mass-expire every other teacher's classroom texts at the school.
     """
     if not can(current_user, "manage", "semester", school.id, db):
         raise HTTPException(status_code=403, detail="Insufficient permissions")
@@ -245,6 +265,12 @@ def update_school_semester(
     if new_end <= new_start:
         raise HTTPException(status_code=422, detail="end_date must be after start_date")
 
+    # find_01DygBxNaTFMHa8cgm2yhHRm recommendation 2: same past-date reject
+    # as SemesterCreateRequest -- a PATCH can set end_date into the past on
+    # an ALREADY-active semester just as easily as a fresh create can.
+    if new_end < date.today():
+        raise HTTPException(status_code=422, detail="end_date must not be in the past")
+
     for field, value in update_data.items():
         setattr(semester, field, value)
 
@@ -280,6 +306,18 @@ def activate_school_semester(
     ).first()
     if semester is None:
         raise HTTPException(status_code=404, detail="Semester not found")
+
+    # find_01DygBxNaTFMHa8cgm2yhHRm recommendation 2: activating a semester
+    # whose end_date is already in the past immediately propagates
+    # expires_at to every unstamped ClassroomText at the school -- reject
+    # it here too, since a semester's end_date could have been in the
+    # future at creation time and drifted into the past before someone
+    # calls activate (or been set in the past via a since-reverted bug).
+    if semester.end_date < date.today():
+        raise HTTPException(
+            status_code=422,
+            detail="Cannot activate a semester whose end_date is already in the past",
+        )
 
     activated = activate_semester(semester_id, db)
     logger.info(
