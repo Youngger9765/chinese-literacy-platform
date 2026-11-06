@@ -45,19 +45,51 @@ from claude_agent_lib import DEFAULT_BOT_LOGINS, build_issue_context  # noqa: E4
 MAX_ROUNDS = 3
 
 
-def _gh_issue_view(repo: str, issue: str) -> dict:
-    fields = "number,title,body,authorAssociation,author,comments,url"
-    result = subprocess.run(
-        ["gh", "issue", "view", issue, "--repo", repo, "--json", fields],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
+def _gh_api(args: list[str]) -> str:
+    result = subprocess.run(["gh", "api", *args], capture_output=True, text=True, check=False)
     if result.returncode != 0:
-        raise RuntimeError(
-            f"gh issue view failed (exit {result.returncode}): {result.stderr.strip()}"
-        )
-    return json.loads(result.stdout)
+        raise RuntimeError(f"gh api {' '.join(args)} failed (exit {result.returncode}): {result.stderr.strip()}")
+    return result.stdout
+
+
+def _gh_issue_view(repo: str, issue: str) -> dict:
+    """Fetch the issue + its comments via the REST API, NOT `gh issue view
+    --json`.
+
+    Bug fixed here (2026-11 canary run #42254697746): `gh issue view --json`
+    does not support `authorAssociation` as a top-level field at all --
+    `gh issue view --help`'s own JSON FIELDS list doesn't include it, and
+    requesting it makes the ENTIRE command fail with
+    `Unknown JSON field: "authorAssociation"`. That made every run of this
+    script fail closed (skip=true) -- the agent never ran once, which is
+    why the first canary "proved nothing" (the thing being tested never
+    executed). `gh issue view --json comments` happens to return a
+    per-comment `authorAssociation` (GraphQL-backed), but the ISSUE's own
+    top-level author association isn't exposed via that command at all.
+
+    The REST API doesn't have this gap: `GET /repos/{o}/{r}/issues/{n}`
+    returns `author_association` directly on the issue object, and
+    `GET .../issues/{n}/comments` returns the same field on each comment.
+    Verified directly against this repo's real issue #3917 before relying
+    on it here.
+    """
+    issue_data = json.loads(_gh_api([f"repos/{repo}/issues/{issue}"]))
+    comments_data = json.loads(_gh_api([f"repos/{repo}/issues/{issue}/comments", "--paginate"]) or "[]")
+
+    return {
+        "title": issue_data.get("title") or "",
+        "body": issue_data.get("body") or "",
+        "authorAssociation": issue_data.get("author_association"),
+        "url": issue_data.get("html_url") or "",
+        "comments": [
+            {
+                "body": c.get("body") or "",
+                "authorAssociation": c.get("author_association"),
+                "author": {"login": (c.get("user") or {}).get("login")},
+            }
+            for c in comments_data
+        ],
+    }
 
 
 def render_context_markdown(issue_number: str, issue_url: str, ctx, round_count: int) -> str:
