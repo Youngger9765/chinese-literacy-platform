@@ -126,6 +126,13 @@ jobs:
           # 所以就算 agent 內部用得到這個 token，範圍也碰不到任何寫入。
           github_token: ${{ github.token }}
           settings: .claude-pr-review/settings.json
+          # TEMPORARY diagnostic (#3893): a benign, non-injected canary PR
+          # still produced permission_denials_count=5 and no review.md at
+          # all. Need the actual per-tool-call denial reason, which the
+          # action hides by default. Remove this once the root cause is
+          # fixed and re-verified -- public Actions logs otherwise show
+          # more of the run than necessary for day-to-day operation.
+          show_full_output: true
           prompt: |
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.issue.number }}
