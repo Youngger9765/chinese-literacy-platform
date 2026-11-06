@@ -256,6 +256,56 @@ def test_protected_paths_handles_empty_list():
     assert lib.protected_path_violations([]) == []
 
 
+def test_protected_paths_catch_agent_config_at_repo_root():
+    """Claude Security finding find_01DYS1ZqNpdcAmH7VSV1YkJA: a merged PR
+    that edits .claude/**, CLAUDE.md, AGENTS.md, or .mcp.json would be a
+    durable, self-perpetuating compromise -- every subsequent agent run in
+    this repo (including this very agent's own next run) inherits
+    whatever got planted there."""
+    hits = lib.protected_path_violations(
+        [
+            ".claude/settings.json",
+            ".claude/hooks/pre-commit.sh",
+            "CLAUDE.md",
+            "AGENTS.md",
+            ".mcp.json",
+        ]
+    )
+    assert len(hits) == 5
+
+
+def test_protected_paths_catch_agent_config_at_any_depth():
+    """Same risk, nested: an agent whose cwd ends up under some
+    subdirectory would pick up a nested .claude/settings.json or
+    CLAUDE.md just as live as a root-level one."""
+    hits = lib.protected_path_violations(
+        [
+            "backend/.claude/settings.json",
+            "some/nested/dir/.claude/hooks/evil.sh",
+            "backend/CLAUDE.md",
+            "frontend/AGENTS.md",
+            "backend/.mcp.json",
+        ]
+    )
+    assert len(hits) == 5
+
+
+def test_protected_paths_do_not_false_positive_on_similarly_named_files():
+    """Guards against an overly broad regex: a file that merely CONTAINS
+    "claude" or "agents" in its name, but isn't the protected config
+    file/directory, must not be caught (that would make the protection
+    too broad to maintain and erode trust in real hits)."""
+    hits = lib.protected_path_violations(
+        [
+            "backend/app/services/claude_helper.py",
+            "docs/AGENTS_GUIDE.md",
+            "frontend/src/ClaudeMdViewer.tsx",
+            "backend/tests/test_claude_agent_lib_security.py",
+        ]
+    )
+    assert hits == []
+
+
 # ── scan_text_for_secrets ─────────────────────────────────────────────────
 
 

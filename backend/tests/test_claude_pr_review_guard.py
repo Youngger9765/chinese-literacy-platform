@@ -138,6 +138,22 @@ def test_agent_settings_block_everything_outside_the_working_directory():
     assert perms.get("blockWritesOutsideWorkingDirectories") is True
 
 
+def test_agent_settings_deny_writes_to_agent_config_files():
+    """Claude Security finding find_01DYS1ZqNpdcAmH7VSV1YkJA: this job's
+    bare "Edit" deny already blocks editing any existing file -- but
+    Write can still CREATE or OVERWRITE .claude/**, CLAUDE.md, AGENTS.md,
+    or .mcp.json, which would steer every subsequent agent run in this
+    repo. Revert any one of these deny entries -> red."""
+    raw, _ = _load()
+    settings = _settings_json_text(raw)
+    deny = settings["permissions"]["deny"]
+
+    for path in (".claude/**", "CLAUDE.md", "AGENTS.md", ".mcp.json"):
+        assert any(d == f"Write({path})" or d == f"Write(**/{path})" for d in deny), (
+            f"missing Write({path}) deny"
+        )
+
+
 # ── no id-token, persist-credentials false ──────────────────────────────
 
 

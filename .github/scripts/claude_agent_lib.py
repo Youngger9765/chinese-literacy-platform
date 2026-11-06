@@ -53,6 +53,20 @@ PROTECTED_PATH_PATTERNS = (
     # rejection, which would otherwise surface as a generic "patch does not
     # apply cleanly" with no explanation of why.
     re.compile(r"^\.git/"),
+    # Claude Security finding find_01DYS1ZqNpdcAmH7VSV1YkJA: an agent PR
+    # that edits .claude/** (hooks, settings, skills), CLAUDE.md/AGENTS.md
+    # (the instructions that steer every future agent run in this repo --
+    # including this very agent's own next run), or .mcp.json (which MCP
+    # servers get auto-loaded, each one new code+credentials surface) would
+    # be a durable, self-perpetuating compromise: merge one such PR and
+    # every subsequent agent run inherits whatever the attacker planted.
+    # `(^|/)` matches these at ANY depth, not just repo root, since a
+    # nested `foo/.claude/settings.json` is just as live for an agent whose
+    # cwd ends up under `foo/`.
+    re.compile(r"(^|/)\.claude/"),
+    re.compile(r"(^|/)CLAUDE\.md$"),
+    re.compile(r"(^|/)AGENTS\.md$"),
+    re.compile(r"(^|/)\.mcp\.json$"),
 )
 
 # Deterministic fallback/second-layer secret scanner. Real `gitleaks` is the
