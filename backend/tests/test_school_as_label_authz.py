@@ -9,6 +9,7 @@ Run: cd backend && python -m pytest tests/test_school_as_label_authz.py -v
 import os
 import sys
 import uuid
+from datetime import date, timedelta
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
@@ -243,50 +244,71 @@ class TestOwnSchoolAccess:
         )
         assert r.status_code == 403, r.text
 
-    def test_create_semester_for_own_school_is_201(self, client, actors):
+    def test_create_semester_for_own_school_is_403_for_a_plain_teacher(self, client, actors):
+        """Was test_create_semester_for_own_school_is_201, asserting 201 --
+        find_01DygBxNaTFMHa8cgm2yhHRm (medium, CWE-863), 2026-11-06:
+        _can_manage_semester used to be bare is_school_member, so "an
+        ordinary teacher at their own school" (exactly what this fixture's
+        own comment says teacher_tok represents -- not a designated admin)
+        could manage the school's shared semester calendar, including
+        setting a past end_date that mass-expires every OTHER teacher's
+        classroom texts there. Semester management now requires a
+        verified management relationship (school.admin_user_id ==
+        caller), not just membership -- see authz.py's
+        _can_manage_semester docstring. test_authz_can.py and
+        test_semesters.py cover the positive case (a designated admin
+        succeeds)."""
         r = client.post(
             f"/api/schools/{actors['school_id']}/semesters",
-            json={"name": "114學年第一學期", "start_date": "2025-09-01", "end_date": "2026-01-31"},
-            headers=auth_header(actors["teacher_tok"]),
-        )
-        assert r.status_code == 201, r.text
-
-    def test_create_semester_for_other_school_is_403(self, client, actors):
-        r = client.post(
-            f"/api/schools/{actors['other_school_id']}/semesters",
-            json={"name": "114學年第一學期", "start_date": "2025-09-01", "end_date": "2026-01-31"},
+            json={
+                "name": "114學年第一學期",
+                "start_date": (date.today() + timedelta(days=1)).isoformat(),
+                "end_date": (date.today() + timedelta(days=150)).isoformat(),
+            },
             headers=auth_header(actors["teacher_tok"]),
         )
         assert r.status_code == 403, r.text
 
-    def test_update_semester_for_own_school_is_200(self, client, actors):
-        created = client.post(
-            f"/api/schools/{actors['school_id']}/semesters",
-            json={"name": "114學年第二學期", "start_date": "2026-02-01", "end_date": "2026-06-30"},
-            headers=auth_header(actors["teacher_tok"]),
-        )
-        assert created.status_code == 201, created.text
-        semester_id = created.json()["id"]
-        r = client.patch(
-            f"/api/schools/{actors['school_id']}/semesters/{semester_id}",
-            json={"name": "114學年第二學期（改名）"},
-            headers=auth_header(actors["teacher_tok"]),
-        )
-        assert r.status_code == 200, r.text
-
-    def test_activate_semester_for_own_school_is_200(self, client, actors):
-        created = client.post(
-            f"/api/schools/{actors['school_id']}/semesters",
-            json={"name": "115學年第一學期", "start_date": "2026-09-01", "end_date": "2027-01-31"},
-            headers=auth_header(actors["teacher_tok"]),
-        )
-        assert created.status_code == 201, created.text
-        semester_id = created.json()["id"]
+    def test_create_semester_for_other_school_is_403(self, client, actors):
         r = client.post(
-            f"/api/schools/{actors['school_id']}/semesters/{semester_id}/activate",
+            f"/api/schools/{actors['other_school_id']}/semesters",
+            json={
+                "name": "114學年第一學期",
+                "start_date": (date.today() + timedelta(days=1)).isoformat(),
+                "end_date": (date.today() + timedelta(days=150)).isoformat(),
+            },
             headers=auth_header(actors["teacher_tok"]),
         )
-        assert r.status_code == 200, r.text
+        assert r.status_code == 403, r.text
+
+    def test_update_semester_for_own_school_is_403_for_a_plain_teacher(self, client, actors):
+        """Was test_update_semester_for_own_school_is_200 -- same tightening
+        as the create test above; there is no semester to update as this
+        plain teacher in the first place since create is also 403 now."""
+        created = client.post(
+            f"/api/schools/{actors['school_id']}/semesters",
+            json={
+                "name": "114學年第二學期",
+                "start_date": (date.today() + timedelta(days=1)).isoformat(),
+                "end_date": (date.today() + timedelta(days=150)).isoformat(),
+            },
+            headers=auth_header(actors["teacher_tok"]),
+        )
+        assert created.status_code == 403, created.text
+
+    def test_activate_semester_for_own_school_is_403_for_a_plain_teacher(self, client, actors):
+        """Was test_activate_semester_for_own_school_is_200 -- same
+        tightening as the create test above."""
+        created = client.post(
+            f"/api/schools/{actors['school_id']}/semesters",
+            json={
+                "name": "115學年第一學期",
+                "start_date": (date.today() + timedelta(days=1)).isoformat(),
+                "end_date": (date.today() + timedelta(days=150)).isoformat(),
+            },
+            headers=auth_header(actors["teacher_tok"]),
+        )
+        assert created.status_code == 403, created.text
 
 
 # ---------------------------------------------------------------------------
@@ -331,7 +353,11 @@ class TestOrgAdminLosesBypass:
     def test_org_admin_cannot_write_semester_for_the_school(self, client, actors):
         r = client.post(
             f"/api/schools/{actors['school_id']}/semesters",
-            json={"name": "測試學期", "start_date": "2025-09-01", "end_date": "2026-01-31"},
+            json={
+                "name": "測試學期",
+                "start_date": (date.today() + timedelta(days=1)).isoformat(),
+                "end_date": (date.today() + timedelta(days=150)).isoformat(),
+            },
             headers=auth_header(actors["org_admin_tok"]),
         )
         assert r.status_code == 403, r.text

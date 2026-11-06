@@ -223,7 +223,26 @@ def test_org_admin_of_the_school_cannot_view_roster_without_membership(world, db
 # ---------------------------------------------------------------------------
 
 
-def test_school_member_can_manage_semester(world, db):
+def test_bare_school_member_cannot_manage_semester(world, db):
+    """Was test_school_member_can_manage_semester, asserting True -- that
+    WAS find_01DygBxNaTFMHa8cgm2yhHRm (medium, CWE-863), 2026-11-06:
+    _can_manage_semester used to be bare is_school_member, and self-serve
+    school membership is a trivial, zero-friction action (anyone can
+    self-activate into an existing school by name/MOE code). A write this
+    consequential (mass-expires every OTHER teacher's classroom texts at
+    the school once activated) needs a verified management relationship,
+    not just "has some role here" -- teacher_a has an ordinary teacher
+    role at school_a but is NOT its designated admin (school_a.admin_user_id
+    is unset), so this must now be False. See
+    test_designated_school_admin_can_manage_semester for the positive case."""
+    assert can(world["teacher_a"], "manage", "semester", world["school_a"].id, db) is False
+
+
+def test_designated_school_admin_can_manage_semester(world, db):
+    """Positive control for the tightened rule: a verified management
+    relationship (school.admin_user_id == caller) still works."""
+    world["school_a"].admin_user_id = world["teacher_a"].id
+    db.commit()
     assert can(world["teacher_a"], "manage", "semester", world["school_a"].id, db) is True
 
 

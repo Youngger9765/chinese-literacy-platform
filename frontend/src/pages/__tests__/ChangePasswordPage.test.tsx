@@ -31,6 +31,7 @@ vi.mock('react-router-dom', async () => {
 
 const clearMustChangePassword = vi.fn();
 const refreshUser = vi.fn().mockResolvedValue(undefined);
+const updateToken = vi.fn();
 
 vi.mock('../../contexts/AuthContext', () => ({
   useAuth: () => ({
@@ -39,6 +40,7 @@ vi.mock('../../contexts/AuthContext', () => ({
     loginPassword: null, // simulates a reload — nothing remembered from login()
     clearMustChangePassword,
     refreshUser,
+    updateToken,
   }),
 }));
 
@@ -69,7 +71,7 @@ describe('#3438 ChangePasswordPage works after a reload (no loginPassword in mem
   });
 
   it('submits with the self-entered current password, not a remembered loginPassword', async () => {
-    vi.mocked(authApi.changePassword).mockResolvedValue(undefined);
+    vi.mocked(authApi.changePassword).mockResolvedValue({ message: 'ok', access_token: 'tok2' });
     renderPage();
 
     fireEvent.change(screen.getByLabelText('目前密碼'), { target: { value: 'MyCurrentPw1' } });
@@ -82,6 +84,42 @@ describe('#3438 ChangePasswordPage works after a reload (no loginPassword in mem
     );
     await waitFor(() => expect(refreshUser).toHaveBeenCalled());
     await waitFor(() => expect(navigate).toHaveBeenCalledWith('/', { replace: true }));
+  });
+
+  it('⭐ #3438 vs find_016vZk1d3wRKkhjQMTUbGU6Y: adopts the fresh access_token BEFORE calling refreshUser — the old token is not guaranteed to survive this exact request', async () => {
+    const callOrder: string[] = [];
+    vi.mocked(authApi.changePassword).mockImplementation(async () => {
+      callOrder.push('changePassword');
+      return { message: 'ok', access_token: 'tok2' };
+    });
+    refreshUser.mockImplementation(async () => {
+      callOrder.push('refreshUser');
+    });
+    updateToken.mockImplementation(() => {
+      callOrder.push('updateToken');
+    });
+    renderPage();
+
+    fireEvent.change(screen.getByLabelText('目前密碼'), { target: { value: 'MyCurrentPw1' } });
+    fireEvent.change(screen.getByLabelText('新密碼'), { target: { value: 'BrandNewPassword456' } });
+    fireEvent.change(screen.getByLabelText('確認新密碼'), { target: { value: 'BrandNewPassword456' } });
+    fireEvent.click(screen.getByRole('button', { name: /設定新密碼/ }));
+
+    await waitFor(() => expect(updateToken).toHaveBeenCalledWith('tok2'));
+    expect(callOrder).toEqual(['changePassword', 'updateToken', 'refreshUser']);
+  });
+
+  it('does not throw if changePassword resolves without an access_token (defensive)', async () => {
+    vi.mocked(authApi.changePassword).mockResolvedValue({ message: 'ok' });
+    renderPage();
+
+    fireEvent.change(screen.getByLabelText('目前密碼'), { target: { value: 'MyCurrentPw1' } });
+    fireEvent.change(screen.getByLabelText('新密碼'), { target: { value: 'BrandNewPassword456' } });
+    fireEvent.change(screen.getByLabelText('確認新密碼'), { target: { value: 'BrandNewPassword456' } });
+    fireEvent.click(screen.getByRole('button', { name: /設定新密碼/ }));
+
+    await waitFor(() => expect(navigate).toHaveBeenCalledWith('/', { replace: true }));
+    expect(updateToken).not.toHaveBeenCalled();
   });
 
   it('rejects empty current-password before calling the API', async () => {

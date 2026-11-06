@@ -6,7 +6,7 @@ Dialogue history and scoring are in learning_comprehension_score.py.
 import logging
 import time
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from sqlalchemy.orm import Session
 
 from ...auth.dependencies import get_current_user
@@ -129,19 +129,46 @@ def _fallback_question(conversation: list[ConversationTurn]) -> str:
 # ── Step 3b: Socratic Comprehension Chat (with evaluation) ───────────────────
 
 class ComprehensionChatRequest(BaseModel):
-    session_id: str
+    # Claude Security find_018AtiqbKoZV9Tfdco1x8ezD (medium, CWE-770),
+    # 2026-11-06, recommendation 1: start_session copies every one of these
+    # fields into a SessionState kept in the process-wide SessionStore for
+    # 30 minutes, keyed on the client-chosen session_id. Only story_title/
+    # story_text were bounded (2000 chars, via sanitize_ai_input) -- the
+    # rest had no server-enforced limit, so an authenticated caller could
+    # grow a single session to tens of MB (e.g. a mispronounced_words list
+    # of a million short strings). Precondition: AI_CHATBOT_ENABLED=true
+    # (off in the current production deploy; require_chatbot_enabled
+    # already gates the store/DB write per the finding's own item 3) --
+    # these bounds are schema-level and apply regardless, so they're ready
+    # before the flag is ever flipped on.
+    session_id: str = Field(..., max_length=100)
     story_title: str
     story_text: str
     student_answer: str | None = Field(None, max_length=500)  # None = start session
     # Optional reading results from LiveTutor (Issue #17)
-    mispronounced_words: list[str] | None = None
+    mispronounced_words: list[str] | None = Field(None, max_length=200)
     accuracy: float | None = Field(None, ge=0, le=100)
     cpm: float | None = Field(None, gt=0)
     # Optional DB learning session ID — when provided, dialogue turns are persisted (Issue #242)
     db_session_id: int | None = None
     # Genre-aware Socratic (#615)
-    genre: str | None = None
-    reading_strategy: str | None = None
+    genre: str | None = Field(None, max_length=50)
+    reading_strategy: str | None = Field(None, max_length=50)
+
+    @field_validator("mispronounced_words")
+    @classmethod
+    def mispronounced_words_items_bounded(cls, v: list[str] | None) -> list[str] | None:
+        """Field(max_length=200) on a list bounds the ITEM COUNT (pydantic
+        v2 semantics) -- it says nothing about how long any single item
+        can be. A real mispronounced word is a handful of CJK characters;
+        cap generously above that so a single oversized string in the list
+        can't substitute for a long list."""
+        if v is None:
+            return v
+        for word in v:
+            if len(word) > 50:
+                raise ValueError("each mispronounced_words entry must be at most 50 characters")
+        return v
 
 
 class ConversationHistoryItem(BaseModel):

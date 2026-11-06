@@ -333,6 +333,40 @@ class TestPasswordReset:
         })
         assert resp.status_code == 400
 
+    def test_reset_password_invalidates_tokens_issued_before_it(self, client):
+        """Claude Security find_016vZk1d3wRKkhjQMTUbGU6Y (low, CWE-613):
+        the forgot-password/reset-password self-service flow must
+        invalidate pre-existing bearer tokens too, same as change-password
+        -- not just the reset-token-in-the-URL (that one was already
+        proven single-use by test_reset_password_token_cannot_be_reused
+        above; this is about the SEPARATE, already-issued login token)."""
+        email = _unique_email()
+        _register_teacher(client, email=email)
+
+        login_resp = client.post("/api/auth/login", json={
+            "email": email, "password": "ValidPass123!",
+        })
+        assert login_resp.status_code == 200
+        old_login_token = login_resp.json()["access_token"]
+
+        fp_resp = client.post("/api/auth/forgot-password", json={"identifier": email})
+        reset_token = fp_resp.json().get("reset_token")
+        if reset_token is None or reset_token == "account-not-found":
+            pytest.skip("reset_token not returned in this env (non-dev mode)")
+
+        reset_resp = client.post("/api/auth/reset-password", json={
+            "token": reset_token,
+            "new_password": "NewValidPass456!",
+        })
+        assert reset_resp.status_code == 200
+
+        reused = client.get(
+            "/api/users/me", headers={"Authorization": f"Bearer {old_login_token}"}
+        )
+        assert reused.status_code == 401, (
+            "a token minted before the reset must be rejected after it"
+        )
+
 
 # ===========================================================================
 # C. Email Verification

@@ -30,7 +30,7 @@ from sqlalchemy.orm import Session
 
 from .policies import is_system_admin
 from ..models.school import Classroom, ClassroomStudent, ClassroomTeacher, School
-from ..models.user import User
+from ..models.user import Role, User, UserRole
 
 Action = Literal["view", "manage"]
 ResourceType = Literal["classroom", "school", "school_roster", "student", "semester"]
@@ -52,6 +52,34 @@ def is_school_member(user: User, school_id, db: Session | None = None) -> bool:
     return any(
         ur.is_active and ur.scope_type == "school" and ur.scope_id == school_id_str
         for ur in user.user_roles
+    )
+
+
+def is_school_teacher(user: User, school_id, db: Session) -> bool:
+    """True if the user holds an active, school-scoped `teacher` role here.
+
+    Claude Security find_01RzZ2bXyjs6SrNmD7KkKy91 (high), recommendation
+    part 3: create_classroom used to gate on bare `is_school_member`, which
+    counts ANY school-scoped role — including `student` (granted
+    automatically on classroom join-by-code, or via self-activation of a
+    student row). Classroom creation specifically needs this narrower
+    check; `is_school_member` stays as-is for the places that genuinely
+    only care about "any standing at this school".
+    """
+    if school_id is None:
+        return False
+    return (
+        db.query(UserRole.id)
+        .join(Role, UserRole.role_id == Role.id)
+        .filter(
+            UserRole.user_id == user.id,
+            UserRole.is_active == True,  # noqa: E712
+            Role.name == "teacher",
+            UserRole.scope_type == "school",
+            UserRole.scope_id == str(school_id),
+        )
+        .first()
+        is not None
     )
 
 
@@ -205,13 +233,41 @@ def _can_view_school_roster(user: User, resource_id, db: Session) -> bool:
 
 
 def _can_manage_semester(user: User, resource_id, db: Session) -> bool:
-    """Any active member of the school may create/update/activate its semesters.
+    """Only a verified management relationship to the school may
+    create/update/activate its semesters -- NOT bare school membership.
 
-    There is no dedicated "school admin" role in active use (principal/director
-    are defined but never checked anywhere) — under the school-as-label model,
-    any teacher tagged to the school may manage its shared term calendar.
+    Claude Security find_01DygBxNaTFMHa8cgm2yhHRm (medium, CWE-863),
+    2026-11-06: this used to be `is_school_member(user, resource_id)`, and
+    self-serve activation makes school membership a trivial, zero-friction
+    action -- anyone can type an existing school's name or MOE code and
+    become a member (find_01DygBxNaTFMHa8cgm2yhHRm's attack path even works
+    through a school-scoped `student` role, which `is_school_member` also
+    counts). Managing a semester is a WRITE with a much bigger blast radius
+    than the read this guards elsewhere: activating one with a past
+    end_date stamps `expires_at` on every OTHER teacher's `ClassroomText`
+    at that school, which a later cleanup run soft-deletes.
+
+    Mirrors `_can_view_school_roster`'s existing pattern exactly (same
+    precedent, not new policy) rather than inventing a separate bar: a
+    self-activated school has no verified management relationship at all
+    (system_admin already bypasses in `can()` before this runs); a real
+    (MOE-directory or admin-created) school requires
+    `school.admin_user_id == user.id`.
+
+    There is no dedicated "school admin" ASSIGNMENT flow in active use
+    (principal/director roles are defined but never checked anywhere, and
+    `admin_user_id` is set today only as a "who created this record"
+    breadcrumb -- see `_resolve_school_by_manual_name`'s own comment that
+    it is NOT a privilege grant elsewhere). This is therefore a real
+    behavior change for whichever legitimate teachers currently rely on
+    self-activation alone to manage their school's term calendar --
+    documented, not hidden, in #3899; staying on staging until that's
+    confirmed acceptable or a real school-admin-designation flow exists.
     """
-    return is_school_member(user, resource_id)
+    if _is_self_activated_school(resource_id, db):
+        return False
+    school = db.query(School).filter(School.id == resource_id).first()
+    return bool(school and school.admin_user_id and school.admin_user_id == user.id)
 
 
 def _can_view_student(user: User, resource_id, db: Session) -> bool:

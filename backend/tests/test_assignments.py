@@ -33,6 +33,7 @@ from app.database import get_db
 from app.models import Base
 from app.models.user import Role, UserRole
 from app.models.school import School
+from app.models.text import Text, VisibilityLevel, TextStatus
 
 
 # ---------------------------------------------------------------------------
@@ -601,6 +602,121 @@ class TestCreateAssignment:
             },
         )
         assert resp.status_code == 401
+
+
+class TestCreateAssignmentTextIdOwnership:
+    """find_01R1DvNtpsfkF7VRavGjLZmn (medium, CWE-639), 2026-11-06:
+    create_assignment_with_submissions used to load a DB Text by
+    caller-supplied text_id with no ownership/visibility check, then fork
+    it into a new row owned by the CALLER for any non-platform text --
+    any teacher could name another teacher's private text_id and read its
+    full content via the resulting fork at GET /api/teacher/my-texts/
+    {fork_id}. texts.id is sequential, so every private text is
+    enumerable.
+    """
+
+    def _make_private_text(self, owner_user_id: int, title: str = "Other Teacher's Private Text") -> int:
+        db = TestingSessionLocal()
+        try:
+            text = Text(
+                title=title,
+                paragraphs=["機密段落一", "機密段落二"],
+                full_text="機密段落一機密段落二",
+                char_count=10,
+                grade=5,
+                grade_code="G5-1",
+                genre="記敘文",
+                text_type="單",
+                category="課文",
+                visibility=VisibilityLevel.private,
+                status=TextStatus.published,
+                teacher_id=owner_user_id,
+                created_by_id=owner_user_id,
+            )
+            db.add(text)
+            db.commit()
+            db.refresh(text)
+            return text.id
+        finally:
+            db.close()
+
+    def _make_platform_text(self, title: str = "Platform Curated Text") -> int:
+        db = TestingSessionLocal()
+        try:
+            text = Text(
+                title=title,
+                paragraphs=["公開段落一"],
+                full_text="公開段落一",
+                char_count=5,
+                grade=5,
+                grade_code="G5-1",
+                genre="記敘文",
+                text_type="單",
+                category="課文",
+                visibility=VisibilityLevel.platform,
+                status=TextStatus.published,
+                teacher_id=None,
+            )
+            db.add(text)
+            db.commit()
+            db.refresh(text)
+            return text.id
+        finally:
+            db.close()
+
+    def test_cannot_assign_another_teachers_private_text(
+        self, client, teacher, other_teacher, classroom_with_students
+    ):
+        victim_text_id = self._make_private_text(other_teacher["user_id"])
+
+        resp = client.post(
+            f"/api/classrooms/{classroom_with_students}/assignments",
+            json={
+                "classroom_id": classroom_with_students,
+                "text_id": victim_text_id,
+                "title": "Stolen Assignment",
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assert resp.status_code == 422, resp.text
+
+        # No fork of the victim's text was created under the attacker
+        db = TestingSessionLocal()
+        try:
+            forks = db.query(Text).filter(Text.forked_from_id == victim_text_id).all()
+            assert forks == [], "no fork should have been created from the rejected text_id"
+        finally:
+            db.close()
+
+    def test_can_assign_own_private_text(self, client, teacher, classroom_with_students):
+        own_text_id = self._make_private_text(teacher["user_id"], title="My Own Private Text")
+
+        resp = client.post(
+            f"/api/classrooms/{classroom_with_students}/assignments",
+            json={
+                "classroom_id": classroom_with_students,
+                "text_id": own_text_id,
+                "title": "Legit Assignment",
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assert resp.status_code == 201, resp.text
+
+    def test_can_assign_a_platform_text_regardless_of_teacher_id(
+        self, client, teacher, classroom_with_students
+    ):
+        platform_text_id = self._make_platform_text()
+
+        resp = client.post(
+            f"/api/classrooms/{classroom_with_students}/assignments",
+            json={
+                "classroom_id": classroom_with_students,
+                "text_id": platform_text_id,
+                "title": "Platform Text Assignment",
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assert resp.status_code == 201, resp.text
 
 
 # ====================================================================# GET /api/classrooms/{id}/assignments — List assignments

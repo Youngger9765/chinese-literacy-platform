@@ -230,11 +230,26 @@ export async function acceptTerms(token: string): Promise<AuthUser> {
   return handleAuthResponse<AuthUser>(res);
 }
 
+export interface ChangePasswordResponse {
+  message: string;
+  /**
+   * A fresh token minted after the password change takes effect. The
+   * caller's OLD token is -- by design (Claude Security
+   * find_016vZk1d3wRKkhjQMTUbGU6Y) -- not guaranteed to keep working past
+   * this point: password_changed_at is compared against each token's
+   * `iat`, and the hash operations this very request just did can by
+   * themselves push the wall clock across a whole-second boundary. Callers
+   * should start using this token immediately instead of continuing to
+   * reuse the one they authenticated this request with.
+   */
+  access_token?: string;
+}
+
 export async function changePassword(
   oldPassword: string,
   newPassword: string,
   token: string,
-): Promise<void> {
+): Promise<ChangePasswordResponse> {
   const res = await fetch(`${API_BASE}/api/auth/change-password`, {
     method: 'POST',
     headers: {
@@ -256,6 +271,7 @@ export async function changePassword(
     }
     throw new AuthError(message, res.status);
   }
+  return res.json();
 }
 
 export interface ForgotPasswordResponse {

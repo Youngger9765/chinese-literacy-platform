@@ -1,0 +1,157 @@
+name: Cleanup PR Preview On Close
+
+# Claude Security CodeQL alert (critical), find_01WStrhArZsNRHeb92RWHZRE /
+# find_015L4kr9sXTB5dd7YJcUM2JV follow-up, 2026-11-05: this job used to live
+# in preview-deploy.yml alongside jobs that `actions/checkout` the PR's own
+# head sha. CodeQL's "checkout of untrusted code in a privileged context"
+# query flags ANY job in a workflow file whose `on:` block includes
+# `pull_request_target` as a pwn-request risk the moment that SAME FILE also
+# checks out `github.event.pull_request.head.sha` anywhere -- regardless of
+# which job does the checkout, and regardless of that job's own `if:` gate
+# (conditional-expression reasoning that deep is outside what the query
+# proves). This job never needed to be in that file at all: it has NO
+# checkout step (confirmed below -- derives everything it needs from
+# github.event.pull_request.{head.ref,number}, passed through `env:`, never
+# interpolated into shell directly), so splitting it into its own file with
+# ONLY the pull_request_target trigger removes the pattern structurally --
+# not by reasoning about it, by removing the thing CodeQL's query keys on
+# (a `pull_request_target` trigger co-located with a PR-ref checkout) from
+# existing in the same file at all.
+on:
+  pull_request_target:
+    types: [closed]
+
+permissions:
+  contents: read
+  pull-requests: write
+  id-token: write
+
+env:
+  PROJECT_ID: lingoleap-dev
+  REGION: asia-east1
+  REGISTRY: asia-east1-docker.pkg.dev/lingoleap-dev/lingoleap
+
+jobs:
+  cleanup-preview:
+    name: Cleanup PR Preview
+    runs-on: ubuntu-latest
+    # Claude Security find_015L4kr9sXTB5dd7YJcUM2JV (medium, CWE-862): this
+    # job runs on `pull_request_target: closed`, which fires (with secrets,
+    # in the base-repo context) even for a FORK PR. It derives which
+    # preview to delete purely from the CLOSING PR's own branch name, with
+    # no check that this PR is the one that actually created that preview
+    # -- any GitHub user could fork, push a branch named after someone
+    # else's open issue, open a PR and close it, deleting that issue's live
+    # preview and disrupting QA in progress. Restricting to same-repo PRs
+    # closes the "any GitHub user" attack: only a collaborator with push
+    # access to THIS repo can open a non-fork PR at all.
+    if: github.event.action == 'closed' && github.event.pull_request.head.repo.full_name == github.repository
+
+    steps:
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          # Claude Security find_01WStrhArZsNRHeb92RWHZRE (high, CWE-250):
+          # same reasoning as preview-deploy.yml's deploy-preview job --
+          # this job is reachable by any collaborator (same-repo PR, no
+          # review required to open one) and used to run as the prod-
+          # deploy identity. A least-privilege SA switch was tried and
+          # reverted here too; the same-repo-only `if:` guard above is the
+          # active defense for now.
+          workload_identity_provider: projects/958347263320/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+          service_account: github-actions@lingoleap-dev.iam.gserviceaccount.com
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Extract issue number from branch
+        id: issue
+        # branch 名走 env 不直接內插 —— 它是 PR 作者可控的字串，
+        # 直接塞進 shell 等於讓外人往這支 workflow 注入指令
+        env:
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          BRANCH="$HEAD_REF"
+          ISSUE_NUM=$(echo "$BRANCH" | grep -oE 'issue-[0-9]+' | grep -oE '[0-9]+' || echo "")
+          if [ -z "$ISSUE_NUM" ]; then
+            ISSUE_NUM="$PR_NUMBER"
+          fi
+          echo "num=${ISSUE_NUM}" >> "$GITHUB_OUTPUT"
+
+      - name: Set service names
+        env:
+          ISSUE_NUM_IN: ${{ steps.issue.outputs.num }}
+        run: |
+          ISSUE_NUM="$ISSUE_NUM_IN"
+          {
+            echo "BACKEND_SERVICE=lingoleap-backend-issue-${ISSUE_NUM}"
+            echo "FRONTEND_SERVICE=lingoleap-frontend-issue-${ISSUE_NUM}"
+          } >> "$GITHUB_ENV"
+
+      - name: Delete preview backend
+        run: |
+          if gcloud run services describe ${{ env.BACKEND_SERVICE }} --region=${{ env.REGION }} --project=${{ env.PROJECT_ID }} 2>/dev/null; then
+            gcloud run services delete ${{ env.BACKEND_SERVICE }} \
+              --region=${{ env.REGION }} \
+              --project=${{ env.PROJECT_ID }} \
+              --quiet
+            echo "Deleted preview backend: ${{ env.BACKEND_SERVICE }}"
+          else
+            echo "Preview backend ${{ env.BACKEND_SERVICE }} not found, skipping"
+          fi
+
+      - name: Delete preview frontend
+        run: |
+          if gcloud run services describe ${{ env.FRONTEND_SERVICE }} --region=${{ env.REGION }} --project=${{ env.PROJECT_ID }} 2>/dev/null; then
+            gcloud run services delete ${{ env.FRONTEND_SERVICE }} \
+              --region=${{ env.REGION }} \
+              --project=${{ env.PROJECT_ID }} \
+              --quiet
+            echo "Deleted preview frontend: ${{ env.FRONTEND_SERVICE }}"
+          else
+            echo "Preview frontend ${{ env.FRONTEND_SERVICE }} not found, skipping"
+          fi
+
+      - name: Delete preview images from Artifact Registry
+        run: |
+          ISSUE_NUM=${{ steps.issue.outputs.num }}
+          for PACKAGE in backend frontend; do
+            echo "=== Cleaning ${PACKAGE} issue-${ISSUE_NUM} images ==="
+            DIGESTS=$(gcloud artifacts docker images list \
+              "${{ env.REGISTRY }}/${PACKAGE}" \
+              --include-tags \
+              --filter="tags:issue-${ISSUE_NUM}-" \
+              --sort-by="~CREATE_TIME" \
+              --format="value(version)" 2>/dev/null || true)
+
+            if [ -z "$DIGESTS" ]; then
+              echo "No images found, skipping"
+              continue
+            fi
+
+            echo "$DIGESTS" | while read -r DIGEST; do
+              [ -z "$DIGEST" ] && continue
+              echo "DELETE: ${DIGEST:0:20}..."
+              gcloud artifacts docker images delete \
+                "${{ env.REGISTRY }}/${PACKAGE}@${DIGEST}" \
+                --delete-tags --quiet 2>/dev/null || true
+            done
+          done
+
+      - name: Comment PR about cleanup
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const prNumber = context.payload.pull_request.number;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: `## Preview Cleanup Complete
+
+              The preview environments for this PR have been deleted.
+
+              **Deleted at:** ${new Date().toISOString()}`
+            });

@@ -347,10 +347,18 @@ class ReadingEvaluateRequest(BaseModel):
     # 「10 次/分鐘」的實際上限是 30 —— 一個已登入帳號可以持續灌大 payload 進 Gemini，
     # 那同時是花錢面與未消毒的注入面。
     #
-    # 10000 對齊 comprehension 的 story_text，理由相同：那是「一篇課文的量級」。
-    # 全庫最長的重點段是 621 字，所以這個上限離真實用量很遠，不會擋到學生。
-    spoken_text: str = Field(..., max_length=10000, description="STT 轉錄結果")
-    target_text: str = Field(..., max_length=10000, description="課文原文")
+    # Claude Security find_01Xm1Ywih4cjY6KTUnUGfbXo (high, CWE-407): the
+    # 10000 cap above was copied from comprehension's story_text for a
+    # DIFFERENT reason (LLM prompt budget) — but this endpoint no longer
+    # calls an LLM at all (#2266 moved scoring to a pure-Python O(n·m)
+    # Levenshtein DP aligner, see reading_evaluation_service.py). The whole
+    # corpus's longest passage is 621 characters, so a 10000-char request
+    # builds a ~20M-cell DP table (two passes) for no legitimate reason —
+    # one crafted request could stall or OOM the instance for everyone on
+    # it. 1000 keeps ~60% headroom over the real max while capping the
+    # worst-case table at ~1M cells, two orders of magnitude smaller.
+    spoken_text: str = Field(..., max_length=1000, description="STT 轉錄結果")
+    target_text: str = Field(..., max_length=1000, description="課文原文")
     duration_ms: int | None = Field(None, description="朗讀時長（毫秒，選填）")
     # #3218：注音改成查逐課對照表。舊版前端不會送這個欄位 → 走下面的 fallback，
     # 行為與這次改動之前完全一樣。pattern 是白名單，路徑穿越在 service 層再擋一次。

@@ -232,7 +232,7 @@ class TestRateLimiterFactories:
         assert callable(dep)
 
     def test_make_general_rate_limit_dependency_returns_callable(self):
-        dep = make_general_rate_limit_dependency(max_requests=100, window_seconds=60)
+        dep = make_general_rate_limit_dependency(max_requests=100, window_seconds=60, name="t")
         assert callable(dep)
 
     def test_ai_limit_10_per_min_is_callable(self):
@@ -245,11 +245,17 @@ class TestRateLimiterFactories:
         assert callable(general_limit_100_per_min)
 
     def _make_mock_request(self, ip: str = "127.0.0.1", user_id=None) -> Request:
-        """Build a minimal mock Request object for dependency testing."""
+        """Build a minimal mock Request object for dependency testing.
+
+        No x-forwarded-for header (an empty dict, not a MagicMock) so
+        real_client_ip() falls back to request.client.host, same as a
+        direct connection with no proxy in front of it in a test.
+        """
         mock_request = MagicMock(spec=Request)
         mock_client = MagicMock()
         mock_client.host = ip
         mock_request.client = mock_client
+        mock_request.headers = {}
         mock_request.state = MagicMock()
         mock_request.state.user_id = user_id
         return mock_request
@@ -284,7 +290,7 @@ class TestRateLimiterFactories:
 
     def test_general_dependency_allows_within_limit(self):
         general_rate_limiter.reset()
-        dep = make_general_rate_limit_dependency(max_requests=5, window_seconds=60)
+        dep = make_general_rate_limit_dependency(max_requests=5, window_seconds=60, name="t-allow")
         req = self._make_mock_request(ip="10.0.1.1")
         for _ in range(5):
             dep(request=req)  # Should not raise
@@ -292,7 +298,7 @@ class TestRateLimiterFactories:
     def test_general_dependency_raises_429_when_exceeded(self):
         from fastapi import HTTPException
         general_rate_limiter.reset()
-        dep = make_general_rate_limit_dependency(max_requests=5, window_seconds=60)
+        dep = make_general_rate_limit_dependency(max_requests=5, window_seconds=60, name="t-exceed")
         req = self._make_mock_request(ip="10.0.1.2")
         for _ in range(5):
             dep(request=req)
@@ -315,6 +321,80 @@ class TestRateLimiterFactories:
         with pytest.raises(HTTPException) as exc_info:
             dep(request=req3)
         assert exc_info.value.status_code == 429
+
+
+class TestGeneralRateLimitPerEndpointAndUser:
+    """Claude Security find_01Mro5omduiXVs3dmVTHdpJn (medium, CWE-770):
+    make_general_rate_limit_dependency used to key on request.client.host
+    alone -- on Cloud Run that's the platform's shared proxy address, the
+    SAME for every request to an instance, so dictionary (60/min),
+    school-directory-search (30/min) and mcq-attempt (100/min) all shared
+    ONE counter. One client flooding any of the three could 429 every
+    other user of ALL THREE on that instance."""
+
+    def _make_mock_request(self, ip: str = "127.0.0.1", user_id=None) -> Request:
+        mock_request = MagicMock(spec=Request)
+        mock_client = MagicMock()
+        mock_client.host = ip
+        mock_request.client = mock_client
+        mock_request.headers = {}
+        mock_request.state = MagicMock()
+        mock_request.state.user_id = user_id
+        return mock_request
+
+    def test_two_endpoints_with_different_names_do_not_share_a_bucket(self):
+        """The real attack this finding reports: exhausting one endpoint's
+        limit must not 429 a DIFFERENT endpoint for the same caller."""
+        from fastapi import HTTPException
+        general_rate_limiter.reset()
+        dict_dep = make_general_rate_limit_dependency(max_requests=2, window_seconds=60, name="dictionary")
+        search_dep = make_general_rate_limit_dependency(max_requests=2, window_seconds=60, name="school-directory-search")
+        req = self._make_mock_request(ip="203.0.113.50")
+
+        for _ in range(2):
+            dict_dep(request=req)
+        with pytest.raises(HTTPException):
+            dict_dep(request=req)  # dictionary's own bucket is now exhausted
+
+        # The SAME caller, SAME IP, hitting a DIFFERENT endpoint must still
+        # have its own full allowance -- this is what "shared bucket" broke.
+        for _ in range(2):
+            search_dep(request=req)  # must not raise
+
+    def test_authenticated_user_is_keyed_by_user_id_not_ip(self):
+        """Two different source IPs, same authenticated user -> one bucket
+        (consistent identity even behind NAT/roaming); this also proves
+        the key no longer depends on the spoofable/shared proxy address."""
+        from fastapi import HTTPException
+        general_rate_limiter.reset()
+        dep = make_general_rate_limit_dependency(max_requests=2, window_seconds=60, name="t-user")
+        req1 = self._make_mock_request(ip="198.51.100.1", user_id=777)
+        req2 = self._make_mock_request(ip="198.51.100.2", user_id=777)
+        dep(request=req1)
+        dep(request=req2)
+        req3 = self._make_mock_request(ip="198.51.100.3", user_id=777)
+        with pytest.raises(HTTPException) as exc_info:
+            dep(request=req3)
+        assert exc_info.value.status_code == 429
+
+    def test_two_different_users_on_the_same_shared_ip_do_not_share_a_bucket(self):
+        """Mirror case: two DIFFERENT authenticated users happening to share
+        an apparent IP (e.g. behind the same Cloud Run instance / NAT)
+        must each get their own full allowance."""
+        from fastapi import HTTPException
+        general_rate_limiter.reset()
+        dep = make_general_rate_limit_dependency(max_requests=2, window_seconds=60, name="t-multiuser")
+        same_ip = "10.1.1.1"
+        user_a_req = self._make_mock_request(ip=same_ip, user_id=101)
+        user_b_req = self._make_mock_request(ip=same_ip, user_id=202)
+
+        for _ in range(2):
+            dep(request=user_a_req)
+        with pytest.raises(HTTPException):
+            dep(request=user_a_req)
+
+        for _ in range(2):
+            dep(request=user_b_req)  # user B's own, separate allowance
 
 
 # ===========================================================================
@@ -712,25 +792,52 @@ class TestGlobalRateLimitMiddleware:
 
 
 class TestRealClientIpXFF:
-    """#2470 HIGH-1a: real client IP must come from the GCP-appended second-from-right
-    X-Forwarded-For entry, never the client-controlled leftmost one — else an attacker
-    rotates a fake leftmost IP to bypass per-IP rate limits."""
+    """Claude Security find_016GfbjuPFtSeUVkfhAUcLPp (high, CWE-348): the
+    old "always second-from-right" rule assumed GCP always appends exactly
+    two trusted hops -- true only via the Firebase Hosting rewrite path,
+    FALSE on the backend's other real, reachable production entry point:
+    its own direct `*.run.app` URL (no ingress restriction; this is what
+    VITE_API_URL points at), where Cloud Run appends only ONE trusted hop.
+    On that path the old rule trusted an attacker-chosen value, letting
+    them rotate it per-request to bypass every per-IP rate limit. Fixed:
+    always take the LAST entry -- what Cloud Run itself appended based on
+    the real TCP peer, on every reachable path (never client-supplied)."""
 
-    def test_takes_second_from_right(self):
+    def test_the_real_attack_direct_url_one_hop_rotating_leftmost_no_longer_works(self):
+        """The actual exploit this finding reports: on the direct
+        *.run.app path, Cloud Run appends exactly ONE entry (the real
+        client). A two-entry XFF here is [attacker-chosen, real-client] --
+        rotating the attacker-chosen prefix must no longer change the
+        result, because the fix no longer reads that position at all."""
         from app.auth.rate_limiter import real_ip_from_xff
-        # GCP appends [real-client, load-balancer]; client prepended a spoof
-        assert real_ip_from_xff("1.1.1.1, 5.5.5.5, 9.9.9.9") == "5.5.5.5"
+        a = real_ip_from_xff("10.0.0.1, 198.51.100.9")
+        b = real_ip_from_xff("10.0.0.2, 198.51.100.9")
+        c = real_ip_from_xff("anything-the-attacker-wants, 198.51.100.9")
+        assert a == b == c == "198.51.100.9"
+
+    def test_takes_the_last_entry_not_second_from_right(self):
+        from app.auth.rate_limiter import real_ip_from_xff
+        assert real_ip_from_xff("1.1.1.1, 5.5.5.5, 9.9.9.9") == "9.9.9.9"
 
     def test_rotating_leftmost_does_not_change_result(self):
         from app.auth.rate_limiter import real_ip_from_xff
         a = real_ip_from_xff("11.11.11.11, 5.5.5.5, 9.9.9.9")
         b = real_ip_from_xff("22.22.22.22, 5.5.5.5, 9.9.9.9")
-        assert a == b == "5.5.5.5"  # bypass attempt (rotate spoof) has no effect
+        assert a == b == "9.9.9.9"  # bypass attempt (rotate spoof) has no effect
 
-    def test_no_spoof_prefix(self):
+    def test_rotating_the_second_to_last_entry_also_has_no_effect(self):
+        """The old code's own blind spot: on the 1-hop path an attacker
+        controls everything except the true last entry, including what
+        USED TO be read as "second from right". Confirm that position is
+        no longer trusted either."""
         from app.auth.rate_limiter import real_ip_from_xff
-        # No client-supplied prefix: GCP set [real-client, lb]
-        assert real_ip_from_xff("5.5.5.5, 9.9.9.9") == "5.5.5.5"
+        a = real_ip_from_xff("1.1.1.1, 5.5.5.5, 9.9.9.9")
+        b = real_ip_from_xff("1.1.1.1, 6.6.6.6, 9.9.9.9")
+        assert a == b == "9.9.9.9"
+
+    def test_single_entry(self):
+        from app.auth.rate_limiter import real_ip_from_xff
+        assert real_ip_from_xff("5.5.5.5") == "5.5.5.5"
 
     def test_empty_falls_back_to_peer(self):
         from app.auth.rate_limiter import real_ip_from_xff

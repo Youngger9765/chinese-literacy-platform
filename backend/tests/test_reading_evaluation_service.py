@@ -437,3 +437,65 @@ async def test_hallucination_prefix_blocks_cpm():
     )
     assert result["hallucination_blocked"] is True
     assert result["cpm"] is None, "a blocked read must not report a reading speed"
+
+
+class TestDoesNotBlockTheEventLoop:
+    """Claude Security find_01Xm1Ywih4cjY6KTUnUGfbXo (high, CWE-407):
+    evaluate_reading_with_ai used to call the O(n·m) Levenshtein aligner
+    inline on the event loop. One slow call stalled every other coroutine
+    on the same loop for its duration -- including other requests being
+    served by the same worker. Fixed by offloading _build_fallback_result
+    to a worker thread (asyncio.to_thread).
+
+    This test proves it the only way that actually distinguishes "runs on
+    a thread" from "runs inline": a cheap, concurrently-scheduled coroutine
+    must keep making progress (incrementing a counter on a short sleep)
+    *while* the expensive call is in flight, not just finish quickly
+    afterward (which inline execution would also look like, if the input
+    were small enough)."""
+
+    @pytest.mark.asyncio
+    async def test_a_concurrent_light_task_keeps_ticking_during_a_large_evaluate_call(self):
+        import asyncio
+        import time
+
+        ticks: list[float] = []
+
+        async def ticker():
+            # If the event loop is blocked by evaluate_reading_with_ai, this
+            # coroutine cannot run at all until the blocking call returns --
+            # so it would record zero ticks during that window.
+            for _ in range(50):
+                ticks.append(time.monotonic())
+                await asyncio.sleep(0.005)
+
+        # 900 chars (near the new 1000-char schema cap) on both sides, all
+        # distinct characters so the DP table does real work, not an
+        # early-exit fast path.
+        spoken = "".join(chr(0x4E00 + (i % 2000)) for i in range(900))
+        target = "".join(chr(0x6000 + (i % 2000)) for i in range(900))
+
+        ticker_task = asyncio.create_task(ticker())
+        eval_start = time.monotonic()
+        await evaluate_reading_with_ai(spoken_text=spoken, target_text=target, duration_ms=30_000)
+        eval_elapsed = time.monotonic() - eval_start
+        await ticker_task
+
+        ticks_during_eval = [t for t in ticks if t <= eval_start + eval_elapsed]
+        assert len(ticks_during_eval) > 0, (
+            "the ticker recorded zero progress while evaluate_reading_with_ai "
+            "was running -- the event loop was blocked (not offloaded to a thread)"
+        )
+
+    @pytest.mark.asyncio
+    async def test_large_input_at_the_schema_cap_still_returns_correct_results(self):
+        """Not just 'doesn't block' -- the threaded call must still produce
+        the same correct result an inline call would."""
+        result = await evaluate_reading_with_ai(
+            spoken_text=MENGCHANGJUN_LINE,
+            target_text=MENGCHANGJUN_LINE,
+            duration_ms=60_000,
+        )
+        assert result["match_rate"] == 1.0
+        assert result["stats"]["wrong_count"] == 0
+        assert result["evaluation_method"] == "deterministic"

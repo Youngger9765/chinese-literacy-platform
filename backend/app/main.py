@@ -750,4 +750,6 @@ app.include_router(worksheets_router)
 
 @app.get("/")
 def root():
+    # #3881: no-op touch to force this PR's preview-deploy to actually run
+    # (not just skip), so the reverted-SA deploy path gets a real test.
     return {"status": "ok", "service": "lingoleap-api"}

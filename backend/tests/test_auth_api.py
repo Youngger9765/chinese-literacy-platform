@@ -981,6 +981,237 @@ class TestChangePasswordEndpoint:
         assert resp.status_code == 422
 
 
+class TestTokenInvalidatedAfterPasswordChange:
+    """Claude Security find_016vZk1d3wRKkhjQMTUbGU6Y (low, CWE-613): an
+    attacker holding a stolen bearer token used to keep full access for the
+    rest of its (up to 8h) lifetime even after the victim changed their
+    password. Written with the account's OWN old token (the realistic
+    "stolen token" shape), not a forged one."""
+
+    def test_old_token_is_rejected_after_change_password(self, client, registered_user):
+        """The comparison is `<=` at whole-second granularity (reverted
+        back from a brief same-day `<` experiment -- see dependencies.py's
+        comment and test_a_token_from_the_same_second_as_the_change_
+        still_works below for the full history of why). A brief sleep here
+        puts old_token's `iat` in a provably earlier second than the
+        change -- without it, a fast test run risks both landing in the
+        same wall-clock second, which would make this assertion flaky for
+        a reason that has nothing to do with the behavior under test (the
+        fixture's own token is virtually always from "just now", not from
+        meaningfully before the change, unless we force the gap)."""
+        import time
+
+        old_token = registered_user["token"]
+        time.sleep(1.1)
+
+        resp = client.post(
+            "/api/auth/change-password",
+            json={
+                "old_password": registered_user["password"],
+                "new_password": "NewSecurePass456!",
+            },
+            headers=auth_header(old_token),
+        )
+        assert resp.status_code == 200, resp.text
+
+        reused = client.get("/api/users/me", headers=auth_header(old_token))
+        assert reused.status_code == 401, (
+            "the pre-password-change token must be rejected -- it is "
+            "exactly the token an attacker who stole it before the "
+            "change would still be holding"
+        )
+
+    def test_login_pwc_floor_unaffected_by_a_concurrent_password_change_race(
+        self, client, registered_user
+    ):
+        """Critic review 2026-11-06 (adversarial review of #3901's fix):
+        login()'s `user.password_changed_at` must be captured BEFORE its
+        own `db.commit()` (for last_login_at), not read after it.
+
+        SQLAlchemy's default expire_on_commit=True means any ORM attribute
+        read after a commit triggers a fresh SELECT. verify_password only
+        proves the submitted password matched the hash AS OF the initial
+        query -- it says nothing about what a DIFFERENT, concurrent
+        transaction commits in between. Reading the pwc_floor value AFTER
+        login()'s commit would let a login that raced a legitimate,
+        unrelated password change inherit THAT change's (newer)
+        password_changed_at as its own floor claim -- a token that only
+        ever proved knowledge of the OLD password would end up carrying
+        proof-of-currency for the NEW one, surviving exactly the
+        invalidation find_016vZk1d3wRKkhjQMTUbGU6Y exists to enforce.
+
+        Simulated deterministically: patch Session.commit so the FIRST
+        commit inside the login() call under test (its last_login_at
+        write) triggers a separate session to advance password_changed_at,
+        before returning control to login(). The token's pwc_floor must
+        reflect the value true at verify-time, not the raced value.
+        """
+        from unittest.mock import patch
+        from sqlalchemy.orm import Session as OrmSession
+
+        db = TestingSessionLocal()
+        try:
+            user = db.query(User).filter(User.email == registered_user["email"]).first()
+            assert user is not None
+            pre_race_changed_at = datetime.now(timezone.utc).replace(microsecond=0) - timedelta(hours=1)
+            user.password_changed_at = pre_race_changed_at
+            db.commit()
+        finally:
+            db.close()
+
+        raced_changed_at = datetime.now(timezone.utc).replace(microsecond=0)
+        original_commit = OrmSession.commit
+        state = {"fired": False}
+
+        def racing_commit(self_session):
+            if not state["fired"]:
+                state["fired"] = True
+                race_db = TestingSessionLocal()
+                try:
+                    u = race_db.query(User).filter(User.email == registered_user["email"]).first()
+                    u.password_changed_at = raced_changed_at
+                    race_db.commit()
+                finally:
+                    race_db.close()
+            return original_commit(self_session)
+
+        with patch.object(OrmSession, "commit", racing_commit):
+            login_resp = client.post(
+                "/api/auth/login",
+                json={"email": registered_user["email"], "password": registered_user["password"]},
+            )
+        assert login_resp.status_code == 200, login_resp.text
+        token = login_resp.json()["access_token"]
+        claims = jwt.decode(token, options={"verify_signature": False})
+
+        assert claims.get("pwc_floor") == int(pre_race_changed_at.timestamp()), (
+            f"pwc_floor must reflect the password_changed_at that was true when "
+            f"verify_password ran ({int(pre_race_changed_at.timestamp())}), not a "
+            f"value a concurrent request committed afterward "
+            f"({int(raced_changed_at.timestamp())}); got {claims.get('pwc_floor')}"
+        )
+
+    def test_a_freshly_issued_token_after_the_change_still_works(self, client, registered_user):
+        """Positive control: the fix must not lock out the real user --
+        a token minted by logging in AFTER the password change must work.
+
+        A brief sleep here makes this test assert a genuinely LATER login
+        deterministically (iat in a strictly later second than
+        password_changed_at), instead of depending on whether two
+        back-to-back HTTP calls happen to land in the same integer second
+        -- which, under the `<=` comparison this check uses (see
+        dependencies.py), is treated as ambiguous and rejected fail-closed.
+        A real login that happens to land in that same second is a
+        separate, narrower problem than this test -- see
+        test_a_token_from_the_same_second_as_the_change_still_works for
+        the one flow (self-authenticated password mutation) that actually
+        needs same-second reuse to work, and how it's solved without
+        loosening this comparison.
+        """
+        import time
+
+        client.post(
+            "/api/auth/change-password",
+            json={
+                "old_password": registered_user["password"],
+                "new_password": "NewSecurePass456!",
+            },
+            headers=auth_header(registered_user["token"]),
+        )
+        time.sleep(1.1)
+
+        login_resp = client.post("/api/auth/login", json={
+            "email": registered_user["email"],
+            "password": "NewSecurePass456!",
+        })
+        assert login_resp.status_code == 200
+        new_token = login_resp.json()["access_token"]
+
+        resp = client.get("/api/users/me", headers=auth_header(new_token))
+        assert resp.status_code == 200, resp.text
+
+    def test_a_token_from_the_same_second_as_the_change_still_works_when_reissued(
+        self, client, registered_user
+    ):
+        """History (2026-11-06, same day, two rounds):
+
+        Round 1 briefly loosened the comparison from `<=` to `<` so a
+        token minted in the SAME wall-clock second as the change would be
+        accepted -- motivated by a real flow (claim-account authenticates
+        with the caller's own pre-claim token, routinely minted in the
+        same second as an earlier step). That broke a DIFFERENT real
+        property: test_reset_password_invalidates_tokens_issued_before_it
+        (test_auth_route_split_1844.py) and
+        test_teacher_reset_invalidates_the_students_outstanding_bearer_token
+        (test_classroom_reset_password.py) both construct a genuinely
+        older token that happens to share a second with a LATER,
+        unrelated change, and confirmed `<` let it back in.
+
+        Root cause: `iat` is whole-second resolution by the JWT spec
+        itself -- a comparison at that granularity cannot tell "minted a
+        few ms before this second's boundary" from "minted a few ms
+        after" for ANY same-second token. Round 2 reverted to `<=`
+        (fail-closed: ambiguous means rejected).
+
+        Round 3: the obvious-looking fix for the self-reuse flow --
+        mint the replacement token with `iat` pushed one second past
+        password_changed_at -- does NOT work: PyJWT's decode()
+        independently rejects a token whose `iat` is in the future
+        (ImmatureSignatureError), confirmed empirically. So the
+        password-mutating endpoint instead marks its own replacement
+        token with an explicit `pwc_floor` claim (app/auth/jwt.py's
+        create_access_token, `password_change_floor` param) that
+        get_current_user trusts for THIS specific change only (see its
+        `pwc_floor` check) -- no timing assumption at all.
+
+        This test exercises that mechanism directly: a token minted the
+        ORDINARY way (no `pwc_floor`) in the same second as the change is
+        correctly REJECTED (the fail-closed default for the ambiguous
+        case) -- only the token explicitly marked via
+        `password_change_floor` is accepted.
+        """
+        from datetime import datetime, timezone
+
+        db = TestingSessionLocal()
+        try:
+            user = db.query(User).filter(User.email == registered_user["email"]).first()
+            assert user is not None
+            changed_at = datetime.now(timezone.utc).replace(microsecond=0)
+            user.password_changed_at = changed_at
+            db.commit()
+            db.refresh(user)
+            user_id = user.id
+        finally:
+            db.close()
+
+        ordinary_same_second_token = create_access_token(user_id)
+        ordinary_resp = client.get(
+            "/api/users/me", headers=auth_header(ordinary_same_second_token)
+        )
+        assert ordinary_resp.status_code == 401, (
+            "an ordinarily-minted token sharing a second with the change is "
+            "the ambiguous case this check fails closed on -- it must NOT "
+            "be let through just because ties could occasionally go the "
+            "other way"
+        )
+
+        reissued_token = create_access_token(user_id, password_change_floor=changed_at)
+        reissued_resp = client.get("/api/users/me", headers=auth_header(reissued_token))
+        assert reissued_resp.status_code == 200, (
+            f"a token explicitly marked via password_change_floor must be "
+            f"accepted, got: {reissued_resp.text}"
+        )
+
+    def test_an_account_that_never_changed_its_password_is_unaffected(self, client, registered_user):
+        """Negative control: password_changed_at is NULL for an account
+        that has never changed its password -- its token must keep
+        working exactly as before this fix (no false-positive rejection)."""
+        resp = client.get(
+            "/api/users/me", headers=auth_header(registered_user["token"])
+        )
+        assert resp.status_code == 200, resp.text
+
+
 # ===========================================================================
 # Integration tests — GET /api/users/me
 # ===========================================================================
