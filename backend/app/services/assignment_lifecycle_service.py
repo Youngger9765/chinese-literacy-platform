@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session, joinedload
 from ..models.assignment import Assignment, AssignmentSubmission
 from ..models.school import Classroom, ClassroomStudent, ClassroomText
 from ..models.session import CharacterError, DialogueTurn, LearningSession
-from ..models.text import Text
+from ..models.text import Text, VisibilityLevel
 from ..models.user import User
 from ..schemas.assignment import (
     AssignmentCreateRequest,
@@ -282,6 +282,26 @@ def create_assignment_with_submissions(
         # --- DB text path (with copy strategy) ---
         text = db.query(Text).filter(Text.id == payload.text_id).first()
         if text is None:
+            raise ValueError("Invalid text_id: text not found")
+
+        # Claude Security find_01R1DvNtpsfkF7VRavGjLZmn (medium, CWE-639),
+        # 2026-11-06: this used to load ANY text by id with no check on who
+        # owns it, then fork it into a new row OWNED BY THE CALLER
+        # (resolve_text_for_assignment -> fork_text_for_assignment for any
+        # non-platform text). texts.id is a sequential integer, so any
+        # teacher (including a self-activated one, no approval required)
+        # could enumerate and read every other teacher's private text's
+        # full content via the resulting fork at GET /api/teacher/my-texts/
+        # {fork_id} -- defeating the per-author scoping those routes
+        # otherwise enforce. A platform-curated text has no "owner" in the
+        # same sense (VisibilityLevel.platform, teacher_id is typically
+        # None) and is meant to be assignable by any teacher, same as the
+        # story_id (YAML) path above -- only the non-platform, per-teacher
+        # texts need the ownership check. Same error shape (ValueError ->
+        # 422) as "text not found" above, which also avoids confirming to
+        # an attacker whether a given id exists versus belongs to someone
+        # else.
+        if text.visibility != VisibilityLevel.platform and text.teacher_id != teacher_id:
             raise ValueError("Invalid text_id: text not found")
 
         # Apply copy strategy: fork mutable texts
