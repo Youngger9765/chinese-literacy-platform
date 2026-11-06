@@ -333,7 +333,25 @@ class TestBackendEnforcement:
 
     def test_same_token_regains_access_immediately_after_change(self, client):
         """#3438 explicit AC: live data, not a stale claim baked into the
-        token -- no new login should be required.
+        token -- no new LOGIN (re-entering credentials) should be required.
+
+        Coordinator review 2026-11-06, confirmed RED under the original
+        implementation: literally reusing the PRE-change token here is
+        flaky by construction, not by test hygiene -- the token
+        authenticating the change-password call is always minted at-or-
+        before password_changed_at, and the verify_password + hash_password
+        bcrypt work that call does can by itself cross a whole-second
+        boundary (measured locally: 3 of 5 isolated runs failed with the
+        same-second grace window alone). No purely time-based window can be
+        both wide enough to always absorb that and narrow enough to still
+        mean anything for a genuinely different/stolen token.
+
+        The actual fix: change-password additively returns a fresh
+        access_token in its response. "No new login" means no new
+        POST /auth/login with credentials -- adopting the token the
+        change-password response itself hands back is exactly what the
+        frontend now does (AuthContext.updateToken, called before
+        refreshUser) and is not a new login.
         """
         student = _create_pending_student(client, "gate_recover")
 
@@ -349,15 +367,18 @@ class TestBackendEnforcement:
             headers=auth_header(student["token"]),
         )
         assert change_resp.status_code == 200, change_resp.text
+        fresh_token = change_resp.json().get("access_token")
+        assert fresh_token, "change-password must return a fresh access_token (#3438 vs find_016vZk1d3wRKkhjQMTUbGU6Y)"
 
-        # SAME token, no new /auth/login call.
+        # The token change-password just handed back -- NOT a new
+        # /auth/login call -- regains access immediately.
         after = client.post(
             "/api/auth/complete-onboarding",
-            headers=auth_header(student["token"]),
+            headers=auth_header(fresh_token),
         )
         assert after.status_code == 200, after.text
 
-        me_after = client.get("/api/users/me", headers=auth_header(student["token"]))
+        me_after = client.get("/api/users/me", headers=auth_header(fresh_token))
         assert me_after.json()["must_change_password"] is False
 
 
@@ -383,3 +404,4 @@ class TestNonStudentsNeverGated:
             headers=auth_header(admin["token"]),
         )
         assert resp.status_code == 200, resp.text
+

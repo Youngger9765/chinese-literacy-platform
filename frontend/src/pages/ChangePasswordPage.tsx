@@ -6,7 +6,7 @@ import PasswordStrengthIndicator from '../components/PasswordStrengthIndicator';
 
 const ChangePasswordPage: React.FC = () => {
   const navigate = useNavigate();
-  const { token, mustChangePassword, clearMustChangePassword, refreshUser } = useAuth();
+  const { token, mustChangePassword, clearMustChangePassword, refreshUser, updateToken } = useAuth();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -71,7 +71,16 @@ const ChangePasswordPage: React.FC = () => {
 
     setIsSubmitting(true);
     try {
-      await changePassword(currentPassword, newPassword, token);
+      const result = await changePassword(currentPassword, newPassword, token);
+      // #3438 vs find_016vZk1d3wRKkhjQMTUbGU6Y: the token used to
+      // authenticate THIS request is not guaranteed to still work on the
+      // very next request (password invalidation compares by
+      // whole-second), so adopt the fresh one the backend just minted
+      // BEFORE calling refreshUser() -- otherwise refreshUser's own
+      // /users/me call can itself race the same boundary.
+      if (result.access_token) {
+        updateToken(result.access_token);
+      }
       await refreshUser();
       clearMustChangePassword();
       navigate('/', { replace: true });
