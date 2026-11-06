@@ -3,7 +3,16 @@ set -e
 
 if [ "$RUN_MIGRATIONS" = "true" ]; then
     echo "Running database migrations..."
-    if ! alembic upgrade head 2>&1; then
+    # #3912: every instance runs this on startup (every deploy, every
+    # scale-up) -- without serializing, two instances starting at the same
+    # moment both run `alembic upgrade head` against the same DB and race
+    # the identical DDL (2026-11-05 11:33: one instance's ADD COLUMN lost
+    # to another's, DuplicateColumn). migrate_with_lock.py holds a Postgres
+    # session-scoped advisory lock around the real `alembic upgrade head`
+    # call -- the loser blocks until the winner commits and releases, then
+    # runs `alembic upgrade head` itself, which alembic itself makes a
+    # no-op once alembic_version already reads head.
+    if ! python3 scripts/migrate_with_lock.py 2>&1; then
         echo "alembic upgrade head failed."
 
         # #1477: silent truncate of alembic_version is ONLY safe on the shared
@@ -33,7 +42,7 @@ except Exception as e:
     # Non-fatal: alembic stamp head will attempt an upsert anyway
 PYEOF
             alembic stamp head
-            if ! alembic upgrade head 2>&1; then
+            if ! python3 scripts/migrate_with_lock.py 2>&1; then
                 echo "ERROR: alembic upgrade head still failing after re-stamp. Aborting."
                 exit 1
             fi
