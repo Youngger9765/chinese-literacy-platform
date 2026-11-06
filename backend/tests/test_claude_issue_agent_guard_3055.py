@@ -448,8 +448,20 @@ def test_capture_artifact_step_is_plain_git_with_quotepath_disabled():
         "that generates the patch text -- that's the one whose OUTPUT a "
         "non-ASCII filename needs to survive into unescaped"
     )
-    # must exclude the ephemeral context/report dir from what gets captured
-    assert ":!.claude-issue-agent" in run_text
+    # The ephemeral context/report dir must be excluded from what gets
+    # captured -- via .gitignore (see test_gitignore_excludes_ephemeral_dirs),
+    # NOT via an explicit `git add -- . ':!.claude-issue-agent'` pathspec.
+    # Live canary run #42286478174 proved that exact combination is broken:
+    # once a path is gitignored, `git add` hard-refuses (exit 1) the moment
+    # any pathspec -- even a negative/exclude one -- names it at all. Plain
+    # `git add -A` needs no exclusion pathspec; a gitignored directory is
+    # already left out of its expansion with no error.
+    assert ":!.claude-issue-agent" not in run_text, (
+        "this exact pathspec form reliably exits 1 once the path is "
+        "gitignored (verified locally and in run #42286478174) -- use "
+        "plain `git add -A` and rely on .gitignore instead"
+    )
+    assert "git -c core.quotepath=false add -A" in run_text
     # and it must not invoke any custom .py script -- nothing for the agent
     # to have poisoned that this step would then execute
     assert ".py" not in run_text
@@ -504,3 +516,61 @@ def test_report_non_dict_json_does_not_crash():
 def test_closing_keyword_neutralization_is_applied_to_agent_pr_text():
     script = (SCRIPTS_DIR / "validate_and_publish.py").read_text(encoding="utf-8")
     assert "neutralize_closing_keywords(str(report.get(\"pr_body_extra\")" in script
+
+
+# ── live canary run #42286478174: `git add` + gitignored exclusion pathspec ──
+
+
+def test_git_add_dash_a_handles_a_gitignored_ephemeral_dir_without_erroring(tmp_path):
+    """Reproduces the actual bug (not just a string check): once a path is
+    listed in .gitignore, `git add -- . ':!<that path>'` hard-refuses with
+    exit 1 ("The following paths are ignored by one of your .gitignore
+    files") the moment the pathspec machinery resolves a pattern that
+    NAMES an ignored path -- even as a negative/exclude pattern. This is
+    exactly what made the "Capture agent diff" step fail in run
+    #42286478174, right after the agent itself had run successfully.
+    `git add -A` needs no exclusion pathspec at all; a gitignored
+    directory is already left out of its expansion, no error."""
+    import subprocess
+
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    subprocess.run(["git", "init", "-q", "."], cwd=repo, check=True)
+    subprocess.run(["git", "config", "user.email", "t@t.com"], cwd=repo, check=True)
+    subprocess.run(["git", "config", "user.name", "t"], cwd=repo, check=True)
+    (repo / ".gitignore").write_text(".claude-issue-agent/\n", encoding="utf-8")
+    subprocess.run(["git", "add", ".gitignore"], cwd=repo, check=True)
+    subprocess.run(["git", "commit", "-qm", "init"], cwd=repo, check=True)
+
+    (repo / ".claude-issue-agent").mkdir()
+    (repo / ".claude-issue-agent" / "report.json").write_text("{}", encoding="utf-8")
+    (repo / "newfile.txt").write_text("hello\n", encoding="utf-8")
+
+    # The OLD, broken form: must reproduce the real failure (red without the fix)
+    broken = subprocess.run(
+        ["git", "-c", "core.quotepath=false", "add", "--", ".", ":!.claude-issue-agent"],
+        cwd=repo,
+    )
+    assert broken.returncode != 0, (
+        "if this now exits 0, git's own behavior changed and the YAML "
+        "comment's claim needs re-verifying -- don't just delete this test"
+    )
+
+    # The FIX: plain `git add -A`, relying on .gitignore alone
+    fixed = subprocess.run(["git", "-c", "core.quotepath=false", "add", "-A"], cwd=repo)
+    assert fixed.returncode == 0
+
+    staged = subprocess.run(
+        ["git", "diff", "--cached", "--name-only"], cwd=repo, capture_output=True, text=True
+    )
+    staged_files = staged.stdout.split()
+    assert staged_files == ["newfile.txt"]
+    assert ".claude-issue-agent/report.json" not in staged_files
+
+
+def test_gitignore_excludes_ephemeral_dirs():
+    """The .gitignore entry is what actually does the excluding now (not a
+    pathspec on the `git add` line) -- assert it's still there."""
+    gitignore = (Path(__file__).resolve().parents[2] / ".gitignore").read_text(encoding="utf-8")
+    assert ".claude-issue-agent/" in gitignore
+    assert ".claude-pr-review/" in gitignore
