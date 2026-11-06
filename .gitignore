@@ -76,3 +76,10 @@ frontend/scripts/*.cjs
 *.docx
 !backend/tests/fixtures/synthetic_worksheet.docx
 qa-shots/
+
+# Ephemeral scratch dirs the claude-issue-agent / claude-pr-review workflows
+# write context + report files into at run time (never committed — the
+# trusted publish steps explicitly exclude them from `git add` too; this is
+# belt-and-suspenders for anyone running the scripts locally).
+.claude-issue-agent/
+.claude-pr-review/
