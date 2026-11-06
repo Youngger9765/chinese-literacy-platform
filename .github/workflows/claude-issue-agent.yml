@@ -299,7 +299,21 @@ jobs:
           # UTF-8 in the patch header, not a C-escaped quoted string --
           # otherwise the publish job's path-based checks can't recognize
           # it (2026-11 review, blocker).
-          git -c core.quotepath=false add -- . ':!.claude-issue-agent'
+          #
+          # Plain `git add -A` here, NOT an explicit negative pathspec
+          # excluding the ephemeral dir by name (live-canary bug, run
+          # #42286478174): that directory is already in .gitignore, and
+          # git hard-refuses (exit 1, "The following paths are ignored by
+          # one of your .gitignore files") the moment ANY pathspec names
+          # an ignored path at all -- even one whose purpose is to exclude
+          # it. `git add -A` needs no such pathspec: a gitignored
+          # directory is already left out of `-A`'s expansion with no
+          # error, which is exactly what made the whole "agent" job fail
+          # here -- the agent itself had run successfully, this step
+          # failed right after it. Verified locally and regression-locked
+          # in the backend test suite
+          # (test_git_add_dash_a_handles_a_gitignored_ephemeral_dir_without_erroring).
+          git -c core.quotepath=false add -A
           git -c core.quotepath=false diff --cached --binary > /tmp/claude-artifact/agent.patch
           if [ -f .claude-issue-agent/report.json ]; then
             cp .claude-issue-agent/report.json /tmp/claude-artifact/report.json
