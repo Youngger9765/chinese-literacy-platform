@@ -260,7 +260,12 @@ def main() -> int:
         "\n".join([findings_summary, acceptance_steps, pr_title_raw, pr_body_extra])
     )
     if agent_text_hits:
-        print(f"REFUSED: agent-authored text failed secret scan: {agent_text_hits}", file=sys.stderr)
+        # Count, not the hit list -- see the comment in
+        # publish_pr_review_comment.py's equivalent print for why
+        # (CodeQL py/clear-text-logging-sensitive-data; these are
+        # human-readable pattern labels, never the matched secret text,
+        # but the count is all a human needs from the log either way).
+        print(f"REFUSED: agent-authored text failed secret scan ({len(agent_text_hits)} pattern(s) matched)", file=sys.stderr)
         post_comment(
             args.repo, args.issue,
             f"{BOT_PREFIX}\n\n{SECRET_REDACTED_NOTICE}\n\n這一輪的其他部分也不會發佈。",
@@ -315,7 +320,7 @@ def main() -> int:
             f"{SECRET_REDACTED_NOTICE}\n"
         )
         post_comment(args.repo, args.issue, body)
-        print(f"REFUSED: secret scan hit on patch: {diff_hits}", file=sys.stderr)
+        print(f"REFUSED: secret scan hit on patch ({len(diff_hits)} pattern(s) matched)", file=sys.stderr)
         return 4
 
     run(["git", "checkout", "-B", args.branch_name], cwd=args.repo_dir, check=True)

@@ -81,7 +81,14 @@ def main() -> int:
             "請工程師查看 run log 確認。"
         )
         _post(args.repo, args.pr, body)
-        print(f"REFUSED: secret scan hit: {hits}", file=sys.stderr)
+        # Log a count, not the hit list itself -- CodeQL's clear-text-logging
+        # query (py/clear-text-logging-sensitive-data) flags any value
+        # derived from a secret-scan function reaching a log sink, even
+        # though these are just human-readable pattern LABELS ("GitHub
+        # token", "AWS access key"), never the matched secret text itself.
+        # The count is all a human needs from the run log; it also breaks
+        # the taint chain CodeQL is (correctly, in general) suspicious of.
+        print(f"REFUSED: secret scan hit ({len(hits)} pattern(s) matched)", file=sys.stderr)
         return 4
 
     truncated_note = ""
