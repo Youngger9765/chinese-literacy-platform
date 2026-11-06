@@ -29,7 +29,7 @@ from app.main import app
 from app.database import get_db
 from app.models import Base
 from app.models.school import School, Classroom, ClassroomStudent
-from app.models.user import User
+from app.models.user import Role, User, UserRole
 from app.auth.password import hash_password
 from app.auth.jwt import decode_token
 
@@ -126,9 +126,43 @@ def setup_db():
     db.add(ClassroomStudent(classroom_id=classroom.id, student_id=student.id))
     db.commit()
 
+    # find_014THSjuvhjxDwpKystW3dXv (medium, CWE-863): a second "victim"
+    # who IS enrolled in teacher_a's classroom (same as the plain student
+    # above) but has ALSO self-activated as a teacher since -- the actual
+    # attack this closes. Enrolled via the same ClassroomStudent mechanism,
+    # so the OLD code's enrolment-only check would have let teacher_a mint
+    # a preview token for them too.
+    teacher_role = Role(name="teacher", display_name="Teacher", scope_level="school")
+    db.add(teacher_role)
+    db.commit()
+    db.refresh(teacher_role)
+
+    enrolled_teacher_victim = User(
+        email="preview_enrolled_teacher_victim@example.com",
+        username="preview_enrolled_teacher_victim",
+        password_hash=hash_password("Password1!"),
+        name="後來變老師的小明",
+        is_active=True,
+        email_verified=True,
+    )
+    db.add(enrolled_teacher_victim)
+    db.commit()
+    db.refresh(enrolled_teacher_victim)
+
+    db.add(ClassroomStudent(classroom_id=classroom.id, student_id=enrolled_teacher_victim.id))
+    db.add(UserRole(
+        user_id=enrolled_teacher_victim.id,
+        role_id=teacher_role.id,
+        scope_type="school",
+        scope_id=str(school.id),
+        is_active=True,
+    ))
+    db.commit()
+
     _state["teacher_a_email"] = teacher_a.email
     _state["teacher_b_email"] = teacher_b.email
     _state["student_id"] = student.id
+    _state["enrolled_teacher_victim_id"] = enrolled_teacher_victim.id
     _state["student_name"] = student.name
 
     app.dependency_overrides[get_db] = _override_get_db
@@ -177,6 +211,22 @@ class TestMintPreviewToken:
         payload = decode_token(body["preview_token"])
         assert payload["sub"] == str(_state["student_id"])
         assert payload["preview"] is True
+
+    def test_cannot_mint_preview_token_for_an_enrolled_target_who_is_also_a_teacher(self, client):
+        """find_014THSjuvhjxDwpKystW3dXv: enrolment is NOT proof the
+        target's identity is safe to loan -- this target is enrolled in
+        teacher_a's classroom (same mechanism as the legitimate plain
+        student) but has also self-activated as a teacher. Minting a
+        preview token for them would hand the caller a 20-minute login as
+        a teacher, reading whatever classrooms/rosters THAT teacher has
+        access to -- not just the narrow student-facing surface this
+        feature is meant for."""
+        token = _login(client, _state["teacher_a_email"])
+        resp = client.post(
+            f"/api/teacher/students/{_state['enrolled_teacher_victim_id']}/preview-token",
+            headers=auth_header(token),
+        )
+        assert resp.status_code == 403, resp.text
 
     def test_unrelated_teacher_cannot_mint_preview_token(self, client):
         """Least-privilege rejection: a real teacher who does not teach this

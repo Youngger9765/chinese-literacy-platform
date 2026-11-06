@@ -32,8 +32,8 @@ from sqlalchemy.orm import Session
 from ...auth.dependencies import get_current_user
 from ...auth.jwt import PREVIEW_TOKEN_EXPIRE_MINUTES, create_preview_access_token
 from ...database import get_db
-from ...models.school import Classroom, ClassroomStudent
-from ...models.user import User
+from ...models.school import Classroom, ClassroomStudent, ClassroomTeacher
+from ...models.user import Role, User, UserRole
 
 router = APIRouter(tags=["teacher"])
 logger = logging.getLogger(__name__)
@@ -44,6 +44,52 @@ class PreviewTokenResponse(BaseModel):
     student_id: int
     student_name: str
     expires_in_minutes: int
+
+
+def _is_student_only_account(target_id: int, db: Session) -> bool:
+    """find_014THSjuvhjxDwpKystW3dXv (medium, CWE-863), recommendation 1:
+    a preview token loans the TARGET's full role set to whoever mints it
+    (get_current_user resolves `sub` to the complete User, preview claims
+    are not read by anything except the write-blocking middleware). An
+    enrolled ClassroomStudent row alone is not proof the target is
+    student-only -- the target may have self-activated as a teacher or
+    admin AFTER being enrolled (roles are never retroactively revoked),
+    or may be a teacher/parent/admin an owner enrolled via join code or
+    POST /classrooms/{id}/students.
+
+    True only if EVERY active role the target holds is named "student"
+    AND they own or co-teach no classroom at all (belt-and-suspenders:
+    ownership/co-teaching should always imply a teacher role too, but
+    this does not rely on that invariant holding forever).
+    """
+    non_student_role = (
+        db.query(UserRole.id)
+        .join(Role, UserRole.role_id == Role.id)
+        .filter(
+            UserRole.user_id == target_id,
+            UserRole.is_active == True,  # noqa: E712
+            Role.name != "student",
+        )
+        .first()
+    )
+    if non_student_role is not None:
+        return False
+
+    owns_a_classroom = (
+        db.query(Classroom.id).filter(Classroom.teacher_id == target_id).first()
+    )
+    if owns_a_classroom is not None:
+        return False
+
+    co_teaches_a_classroom = (
+        db.query(ClassroomTeacher.id)
+        .filter(ClassroomTeacher.teacher_id == target_id)
+        .first()
+    )
+    if co_teaches_a_classroom is not None:
+        return False
+
+    return True
 
 
 def _verify_teacher_of_student(student_id: int, current_user: User, db: Session) -> None:
@@ -65,6 +111,15 @@ def _verify_teacher_of_student(student_id: int, current_user: User, db: Session)
     )
     if not teacher_access:
         raise HTTPException(status_code=403, detail="Not a teacher of this student")
+
+    # find_014THSjuvhjxDwpKystW3dXv: enrolment alone is not proof the
+    # target is a student whose identity may be safely loaned -- see
+    # _is_student_only_account's docstring.
+    if not _is_student_only_account(student_id, db):
+        raise HTTPException(
+            status_code=403,
+            detail="This account is not a plain student and cannot be previewed",
+        )
 
 
 @router.post(
