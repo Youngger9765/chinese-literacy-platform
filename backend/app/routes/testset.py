@@ -205,7 +205,10 @@ async def testset_upload(
     return {"ok": True, "path": audio_path}
 
 
-@router.get("/testset/progress")
+@router.get(
+    "/testset/progress",
+    dependencies=[Depends(make_ai_rate_limit_dependency(max_requests=10, window_seconds=60))],
+)
 def testset_progress(name: str = "", lesson: str = ""):
     """錄音頁進度查詢（公開，server-truth）：某貢獻者某課是否已上傳 correct/error。
 
@@ -214,6 +217,21 @@ def testset_progress(name: str = "", lesson: str = ""):
     標記），且可在「我的進度」直接聽取自己上傳的錄音。
     隱私 tradeoff：URL 以「名字 + 課」查得，知道名字者可聽該人錄音；符合 #2287
     「公開上傳、隱私只做標配」設計，且 URL 10 分鐘過期。
+
+    Claude Security find_01TL9kSA8F5UJPZqyxSyYd5y (medium, CWE-639),
+    2026-11-06: this exposure is real and the code above already documents
+    it as a deliberate v1 tradeoff -- but the finding's suggested fix (a
+    per-contributor secret token stored client-side) would contradict the
+    "survives device switch / cache clear" design goal stated above (a
+    localStorage token doesn't survive either). Not breaking that
+    documented, intentional design unilaterally -- see #3907. What IS a
+    safe, non-breaking improvement: a dedicated per-route-path rate limit
+    (make_ai_rate_limit_dependency keys by request path, so this budget is
+    independent of /testset/batch-eval's and of the shared global /api/*
+    limiter) raises the cost of enumerating many nicknames in a burst. It
+    does not close the exposure for a patient, low-rate attacker who
+    already knows one specific nickname -- that remains an accepted risk
+    pending a product decision (#3907), not silently fixed here.
     """
     empty = {"ok": False, "correct": False, "error": False, "correct_url": None, "error_url": None}
     if not name.strip() or not _LESSON_ID_RE.match(lesson.strip()):
