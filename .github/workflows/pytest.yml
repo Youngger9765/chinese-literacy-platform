@@ -63,8 +63,14 @@ jobs:
               - '.claude/skills/**'
               # ⭐ #3055 issue-agent 的安全結構鎖住在 backend/tests，但被鎖的
               #    對象是這個 workflow 檔本身 —— 只改 yml 的 PR 不跑 pytest
-              #    ＝ 有人拆掉 gate/放回 curl 時鎖是睡著的。
+              #    ＝ 有人拆掉 gate/放回 curl 時鎖是睡著的。2026-11 安全重設計
+              #    把同一個道理套到 claude-pr-review.yml 跟兩支 workflow 共用
+              #    的 .github/scripts/**（claude_agent_lib.py 的 HTML 剝除／
+              #    受保護路徑／secret 掃描全在這裡）—— 三者任一沒被點名，
+              #    只改它的 PR 就會讓對應的鎖睡著。
               - '.github/workflows/claude-issue-agent.yml'
+              - '.github/workflows/claude-pr-review.yml'
+              - '.github/scripts/**'
               # ⭐ 注音的真值住在前端：出貨字型是讀音的唯一權威，
               #    poyin_db 是規則表，fixture 是從字型抽出來的對照。
               #    test_font_readings_match_shipped_font_3177.py 三個都讀 ——
