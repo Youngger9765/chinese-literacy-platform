@@ -105,5 +105,9 @@ def apply_password_reset(db: Session, user: User, new_password: str) -> None:
     # Claude Security find_016vZk1d3wRKkhjQMTUbGU6Y (low): invalidate any
     # token issued before this reset -- see auth/dependencies.py's
     # get_current_user, which compares this against each token's `iat`.
-    user.password_changed_at = datetime.now(timezone.utc)
+    # Floored to the whole second (coordinator review 2026-11-06, see
+    # routes/auth.py's change_password for why) so a token minted in the
+    # same second as this reset -- e.g. logging in immediately after -- is
+    # still accepted.
+    user.password_changed_at = datetime.now(timezone.utc).replace(microsecond=0)
     db.commit()

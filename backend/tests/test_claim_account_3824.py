@@ -325,7 +325,18 @@ def _setup_student_ready_to_claim(client, *, name: str) -> dict:
     prerequisite for reaching claim-account at all (security review finding
     H1: claim-account is deliberately NOT exempt from that gate). Returns the
     student dict with an updated 'password' reflecting the post-change value
-    and a live 'token', plus the owning teacher/classroom."""
+    and a live 'token', plus the owning teacher/classroom.
+
+    Re-logs in AFTER the password change (find_016vZk1d3wRKkhjQMTUbGU6Y,
+    2026-11-06): the pre-change login token is now correctly invalidated by
+    get_current_user once password_changed_at is set -- reusing it for the
+    caller's own subsequent claim-account call would be relying on exactly
+    the bug this feature exists to close (a token staying valid across a
+    password change it does not know about). The bcrypt hashing in login +
+    change-password routinely pushes them into different whole seconds, so
+    this is not even the "same instant" edge case -- the old token is
+    genuinely, correctly stale by the time this fixture returns.
+    """
     teacher = _register_user(client, f"handover_{name}_teacher")
     school_id = _create_school_for_teacher(teacher["user_id"])
     classroom_id = _create_classroom(client, teacher, school_id)
@@ -338,10 +349,12 @@ def _setup_student_ready_to_claim(client, *, name: str) -> dict:
     )
     assert change_resp.status_code == 200, change_resp.text
 
+    fresh_token = _login(client, student["email"], first_own_password)
+
     return {
         **student,
         "password": first_own_password,
-        "token": token,
+        "token": fresh_token,
         "teacher": teacher,
         "classroom_id": classroom_id,
     }
@@ -412,9 +425,19 @@ def test_stolen_credentials_cannot_transfer_the_account(client):
 
     # The "attacker" cannot self-approve: they have no teacher role, so this
     # is rejected before even reaching the creator-identity check.
+    #
+    # find_016vZk1d3wRKkhjQMTUbGU6Y (2026-11-06): request_claim changes the
+    # PASSWORD immediately (only the email is queued as pending_email), so
+    # ctx["token"] -- minted before that call -- is now itself correctly
+    # stale per this fix. Re-login with the credentials the "attacker"
+    # actually possesses (the account's current password, which is now the
+    # one they just set) to isolate what this test means to check: the
+    # ROLE rejection, not an incidental token-staleness rejection that
+    # would mask it.
+    attacker_fresh_token = _login(client, ctx["email"], "StolenCardClaim456!")
     self_approve = client.post(
         f"/api/classrooms/{ctx['classroom_id']}/students/{ctx['user_id']}/approve-claim",
-        headers=auth_header(ctx["token"]),
+        headers=auth_header(attacker_fresh_token),
     )
     assert self_approve.status_code == 403, self_approve.text
 
@@ -1046,6 +1069,11 @@ def test_claim_preserves_classroom_membership_and_assignment_submissions(client)
     token = _login(client, student["email"], student["password"])
     first_own_password = "FirstOwnPassword123!"
     assert _change_password(client, token, old_password=student["password"], new_password=first_own_password).status_code == 200
+    # find_016vZk1d3wRKkhjQMTUbGU6Y (2026-11-06): the pre-change token is
+    # now correctly stale after change-password sets password_changed_at --
+    # re-login for the token this test reuses below (same fix as
+    # _setup_student_ready_to_claim's own re-login).
+    token = _login(client, student["email"], first_own_password)
 
     db = TestingSessionLocal()
     try:

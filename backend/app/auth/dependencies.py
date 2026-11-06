@@ -102,30 +102,61 @@ def get_current_user(
     # unaffected. `iat` is encoded as a Unix timestamp by PyJWT regardless
     # of the datetime passed into create_access_token.
     if user.password_changed_at is not None:
-        token_iat = payload.get("iat")
-        if token_iat is not None:
-            # SQLite (used by the test suite) silently drops tz info on a
-            # DateTime(timezone=True) column regardless of what was
-            # written -- Postgres (prod/staging) does not have this
-            # problem, but the comparison must be robust either way: this
-            # column is only ever written via datetime.now(timezone.utc),
-            # so a naive value read back is always UTC.
-            password_changed_at = user.password_changed_at
-            if password_changed_at.tzinfo is None:
-                password_changed_at = password_changed_at.replace(tzinfo=timezone.utc)
-            # Compare at whole-second granularity on BOTH sides. PyJWT
-            # encodes `iat` as an integer Unix timestamp (microseconds
-            # truncated), while password_changed_at keeps full DB
-            # precision -- comparing at mismatched precision made the
-            # result depend on which side's sub-second remainder happened
-            # to be larger, flipping unpredictably for two events in the
-            # same wall-clock second (e.g. "change password, then
-            # immediately log in again"). `<=` (not `<`): a token from
-            # the SAME second as the change is rejected, fail-closed --
-            # the realistic cost is "log in once more", the alternative
-            # (`<`) could fail-open and accept a same-second STALE token
-            # too, which is the actual security property this exists for.
-            if token_iat <= int(password_changed_at.timestamp()):
+        # SQLite (used by the test suite) silently drops tz info on a
+        # DateTime(timezone=True) column regardless of what was written --
+        # Postgres (prod/staging) does not have this problem, but the
+        # comparison must be robust either way: this column is only ever
+        # written via datetime.now(timezone.utc).replace(microsecond=0)
+        # (see each password-change call site), so a naive value read back
+        # is always UTC and already floored to the whole second.
+        password_changed_at = user.password_changed_at
+        if password_changed_at.tzinfo is None:
+            password_changed_at = password_changed_at.replace(tzinfo=timezone.utc)
+        password_changed_at_ts = int(password_changed_at.timestamp())
+
+        # Coordinator review 2026-11-06, round 1: this was briefly changed
+        # from `<=` to `<` ("accept a token from the SAME second as the
+        # change") to fix a real flow broken by the original fail-closed
+        # `<=` -- e.g. claim-account authenticates with the caller's OWN
+        # pre-claim token, routinely minted in the same wall-clock second
+        # as an earlier step that also touched password_changed_at.
+        #
+        # Round 2 (same day): `<` was reverted back to `<=`. `iat` is a
+        # PyJWT-encoded Unix timestamp -- ALWAYS whole-second resolution,
+        # by the JWT spec itself, not a choice made in this codebase. That
+        # means no timestamp-based comparison, at any granularity we pick,
+        # can be both: (a) safe -- never accept an actually-older,
+        # potentially-stolen token that happens to share a wall-clock
+        # second with the change, and (b) permissive -- never reject an
+        # actually-newer, legitimate token that happens to share that same
+        # second. `<` bought (b) by giving up (a):
+        # test_reset_password_invalidates_tokens_issued_before_it and
+        # test_teacher_reset_invalidates_the_students_outstanding_bearer_
+        # token both construct exactly that older-but-same-second token
+        # and confirmed `<` lets it back in -- a real regression of the
+        # property this check exists for, not a test artifact.
+        #
+        # Round 3: an explicit `pwc_floor` claim (set only by
+        # routes/auth.py's change_password when it reissues a replacement
+        # token in its own response) sidesteps the whole-second ambiguity
+        # instead of trying to out-guess it with `iat`. It also rules out
+        # the obvious-looking alternative of minting that replacement
+        # token with `iat` pushed past the floor: PyJWT's decode()
+        # independently rejects a token whose `iat` is in the future
+        # (ImmatureSignatureError), so there is no `iat` value that can
+        # both pass decode() and definitively beat this comparison. A
+        # token carrying `pwc_floor >= password_changed_at` is trusted
+        # regardless of its own `iat` -- but ONLY against the change it
+        # names: a later, different password change makes `pwc_floor`
+        # stale again, and this check falls through to the normal `iat`
+        # comparison for it, same as any other token.
+        pwc_floor = payload.get("pwc_floor")
+        reissued_for_this_change = (
+            isinstance(pwc_floor, int) and pwc_floor >= password_changed_at_ts
+        )
+        if not reissued_for_this_change:
+            token_iat = payload.get("iat")
+            if token_iat is not None and token_iat <= password_changed_at_ts:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Token invalid: password has changed since this token was issued",

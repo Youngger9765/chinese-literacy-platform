@@ -216,7 +216,27 @@ def request_claim(
     # any token issued before it must stop working too -- see
     # auth/dependencies.py's get_current_user, which compares this against
     # each token's `iat`.
-    current_user.password_changed_at = datetime.now(timezone.utc)
+    #
+    # Coordinator review 2026-11-06: floored to the whole second (see
+    # routes/auth.py's change_password for the full why -- `iat` is always
+    # whole-second resolution regardless). The caller authenticates THIS
+    # very request with their own pre-claim token, which was very often
+    # minted in the same wall-clock second as an earlier setup step that
+    # also touched password_changed_at (e.g. a teacher resetting the
+    # student's password, then the student logging in to claim their
+    # account). get_current_user fails closed (`<=`) on that ambiguous
+    # same-second case -- unlike change_password, this endpoint does not
+    # currently reissue a replacement token in its own response (no
+    # frontend consumes claim-account yet), so a caller authenticated with
+    # a same-second token would see its OWN call accepted (checked before
+    # this write runs) but its NEXT call rejected. Whoever wires up a
+    # frontend for this should give claim_own_account the same
+    # password_change_floor reissuance routes/auth.py's change_password
+    # has -- see get_current_user's `pwc_floor` check and
+    # create_access_token's docstring, or just have the client re-login
+    # (works today: /auth/login tags its token with password_change_floor
+    # too).
+    current_user.password_changed_at = datetime.now(timezone.utc).replace(microsecond=0)
     current_user.pending_email = new_email
     if current_user.student_profile:
         # #3438: the student just set a password only they know -- same as

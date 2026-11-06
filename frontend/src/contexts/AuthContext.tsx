@@ -28,6 +28,16 @@ interface AuthContextValue {
   /** Re-fetch user data from /api/users/me and update the context. */
   refreshUser: () => Promise<void>;
   acceptTerms: () => Promise<void>;
+  /**
+   * Adopt a token minted by an endpoint OTHER than login (e.g.
+   * change-password's response, #3438 vs find_016vZk1d3wRKkhjQMTUbGU6Y).
+   * Must be called BEFORE refreshUser()/getMe() so those reads use the new
+   * token -- the one the caller authenticated with may already be stale by
+   * the time this returns (password_changed_at is set to "now", and the
+   * bcrypt work this kind of request does can itself cross a
+   * whole-second boundary).
+   */
+  updateToken: (newToken: string) => void;
   loginWithGoogle: (credential: string) => Promise<{ isNewUser: boolean }>;
   /** Exchange a Junyi SSO one-time code for a LingoLeap session (issue #1198). */
   loginWithJunyi: (code: string) => Promise<{ isNewUser: boolean }>;
@@ -321,6 +331,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
+  const updateToken = useCallback((newToken: string) => {
+    authToken.set(newToken);
+    setToken(newToken);
+  }, []);
+
   const acceptTerms = useCallback(async () => {
     if (!token) throw new Error('Not authenticated');
     const updatedUser = await apiAcceptTerms(token);
@@ -350,6 +365,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     logout,
     clearMustChangePassword,
     refreshUser,
+    updateToken,
     acceptTerms,
     loginWithGoogle,
     loginWithJunyi,
