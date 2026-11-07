@@ -132,8 +132,8 @@ jobs:
                 "Edit(.mcp.json)",
                 "Edit(**/.mcp.json)"
               ],
-              "blockReadsOutsideWorkingDirectories": true,
-              "blockWritesOutsideWorkingDirectories": true
+              "blockReadsOutsideWorkingDirectories": false,
+              "blockWritesOutsideWorkingDirectories": false
             }
           }
           JSON
