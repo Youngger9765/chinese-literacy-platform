@@ -6,6 +6,7 @@ import json
 import logging
 import re
 import time
+from typing import Annotated
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
@@ -45,11 +46,26 @@ _LEGACY_ANALYSIS_KEYS = frozenset({
 })
 
 
+#: Claude Security find_01PwpCG52Y6icR2mYDXZxqWm (medium): error_chars had
+#: no cap on list length or item length, and the whole list is joined
+#: straight into the Gemini prompt (ai_reading.py's error_chars_str) --
+#: a client could inflate a single request to ~1M billed input tokens.
+#: Each item represents ONE wrong character (or a short word/phrase) a
+#: student misread while reading a lesson passage of at most a few
+#: hundred characters; 20 chars per item and 500 items both give a very
+#: generous margin over any real reading-passage shape while remaining
+#: orders of magnitude below "megabytes of text".
+ERROR_CHAR_ITEM_MAX_LENGTH = 20
+MAX_ERROR_CHARS = 500
+
+
 class AIAnalysisRequest(BaseModel):
     story_title: str = Field(..., max_length=200)
     accuracy: float = Field(..., ge=0, le=100)
     cpm: float = Field(..., ge=0)
-    error_chars: list[str] = Field(default_factory=list)
+    error_chars: list[Annotated[str, Field(max_length=ERROR_CHAR_ITEM_MAX_LENGTH)]] = Field(
+        default_factory=list, max_length=MAX_ERROR_CHARS
+    )
     total_characters: int = Field(..., ge=0)
     # Optional enrichment fields — Issue #415: comprehensive AI analysis
     comprehension_score: float | None = Field(None, ge=0, le=100)

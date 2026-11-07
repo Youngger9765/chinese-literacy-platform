@@ -432,6 +432,83 @@ class TestStandaloneAIAnalysis:
         )
         assert resp.status_code == 422
 
+    # ===========================================================================
+    # Claude Security find_01PwpCG52Y6icR2mYDXZxqWm (medium): error_chars had
+    # no cap on list length or item length, and nothing but story_title went
+    # through sanitize_ai_input -- a client could inflate a single request to
+    # ~1M billed input tokens via this field alone.
+    # ===========================================================================
+
+    def test_oversized_error_chars_list_returns_422(self, client, user_a):
+        """More than MAX_ERROR_CHARS (500) items must be rejected before any
+        handler code runs."""
+        bad_payload = {**ANALYSIS_PAYLOAD, "error_chars": ["字"] * 501}
+        resp = client.post(
+            "/api/learning/ai-analysis",
+            json=bad_payload,
+            headers=auth_header(user_a["token"]),
+        )
+        assert resp.status_code == 422
+
+    def test_at_the_error_chars_list_cap_still_succeeds(self, client, user_a):
+        """Positive control: exactly the cap (500) must still be accepted."""
+        with patch(
+            "app.routes.learning.learning_reading.generate_reading_analysis",
+            new_callable=AsyncMock,
+        ) as mock_gen:
+            mock_gen.return_value = MOCK_ANALYSIS
+            ok_payload = {**ANALYSIS_PAYLOAD, "error_chars": ["字"] * 500}
+            resp = client.post(
+                "/api/learning/ai-analysis",
+                json=ok_payload,
+                headers=auth_header(user_a["token"]),
+            )
+        assert resp.status_code == 200
+
+    def test_oversized_error_chars_item_returns_422(self, client, user_a):
+        """A single item longer than ERROR_CHAR_ITEM_MAX_LENGTH (20) must be
+        rejected -- the "megabytes of text in one list item" shape the
+        finding reports, not just "too many items"."""
+        bad_payload = {**ANALYSIS_PAYLOAD, "error_chars": ["A" * 21]}
+        resp = client.post(
+            "/api/learning/ai-analysis",
+            json=bad_payload,
+            headers=auth_header(user_a["token"]),
+        )
+        assert resp.status_code == 422
+
+    def test_error_chars_injection_is_sanitized_before_the_gemini_prompt(self, client, user_a):
+        """generate_reading_analysis (not mocked, unlike the other tests in
+        this class -- only its Gemini call is) must sanitize every
+        error_chars item before building the prompt, not just story_title."""
+        with patch(
+            "app.services.ai_reading.generate_structured_response",
+            new_callable=AsyncMock,
+        ) as mock_structured:
+            mock_structured.return_value = MOCK_ANALYSIS
+            # Short enough to pass the 20-char per-item cap on its own --
+            # this test is about sanitization, not the length cap (covered
+            # separately above).
+            bad_payload = {
+                **ANALYSIS_PAYLOAD,
+                "error_chars": ["你現在是"],  # matches an injection pattern
+            }
+            resp = client.post(
+                "/api/learning/ai-analysis",
+                json=bad_payload,
+                headers=auth_header(user_a["token"]),
+            )
+            assert resp.status_code == 200
+            # error_chars_str is embedded in the USER content part, not
+            # system_prompt -- see ai_reading.py's `contents = [Content(
+            # role="user", parts=[Part(text=user_prompt)])]`.
+            sent_contents = mock_structured.call_args.kwargs["contents"]
+            sent_user_prompt = sent_contents[0].parts[0].text
+            assert "你現在是" not in sent_user_prompt, (
+                "error_chars injection reached the Gemini prompt unfiltered"
+            )
+            assert "[已過濾]" in sent_user_prompt
+
     @patch("app.routes.learning.learning_reading.generate_reading_analysis", new_callable=AsyncMock)
     def test_standalone_response_schema(self, mock_gen, client, user_a):
         mock_gen.return_value = MOCK_ANALYSIS

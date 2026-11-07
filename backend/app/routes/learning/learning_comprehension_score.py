@@ -84,10 +84,18 @@ def get_dialogue_history(
 
 # ── Comprehension Scoring (Issue #243) ────────────────────────────────────────
 
+#: A real session targets 5 understood questions (REQUIRED_UNDERSTOOD in
+#: services/socratic/__init__.py), i.e. ~10 turns (question + answer) at
+#: most a little more with retries/clarification. 40 gives a 4x margin
+#: over that for any legitimate session shape while still being nowhere
+#: near "attacker sends thousands of turns" (find_01AS6qqjWCjVEXLM2gfFuGyT).
+MAX_DIALOGUE_TURNS = 40
+
+
 class ComprehensionScoreRequest(BaseModel):
     story_title: str
     story_text: str = Field(..., max_length=10000)
-    dialogue_turns: list[ConversationTurn] = Field(..., min_length=1)
+    dialogue_turns: list[ConversationTurn] = Field(..., min_length=1, max_length=MAX_DIALOGUE_TURNS)
 
 
 @router.post(
@@ -140,13 +148,14 @@ async def score_comprehension(
         "summary": safe_story_text[:500],  # Use first 500 chars as summary
     }
 
-    # Build dialogue turns list — sanitize student turns
-    dialogue_turns = []
-    for t in payload.dialogue_turns:
-        turn = t.model_dump()
-        if turn.get("role") == "student" and turn.get("text"):
-            turn["text"], _ = sanitize_ai_input(turn["text"], user_id=str(current_user.id))
-        dialogue_turns.append(turn)
+    # Build dialogue turns list. Sanitization happens inside
+    # evaluate_comprehension (sanitize_dialogue_turns, services/
+    # input_sanitizer.py) -- see that function's own docstring for
+    # find_01AS6qqjWCjVEXLM2gfFuGyT, the actual fix for this finding.
+    # (This used to ALSO sanitize here, duplicating that call with the same
+    # role=="student"-only bug -- removed rather than fixed twice over, so
+    # there is one place, not two, that decides what "sanitized" means.)
+    dialogue_turns = [t.model_dump() for t in payload.dialogue_turns]
 
     start_time = time.monotonic()
     try:

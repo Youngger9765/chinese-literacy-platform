@@ -12,6 +12,7 @@ from .ai_base import (
     generate_structured_response,
     TUTOR_PERSONA,
 )
+from .input_sanitizer import sanitize_ai_input
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +53,16 @@ async def generate_reading_analysis(session_data: dict) -> dict:
     dictation_correct: int | None = session_data.get("dictation_correct_count")
     dictation_total: int | None = session_data.get("dictation_total_count")
 
-    error_chars_str = "、".join(error_chars) if error_chars else "無"
+    # Claude Security find_01PwpCG52Y6icR2mYDXZxqWm (medium): only
+    # story_title went through sanitize_ai_input before this function --
+    # error_chars reached the prompt completely unfiltered. The caller
+    # (learning_reading.py's AIAnalysisRequest) now also caps list length
+    # and per-item length at the schema layer, but this function is the
+    # one place both the session-scoped and the deprecated standalone
+    # route funnel through, so it is also the one place that sanitizes
+    # every item regardless of caller.
+    safe_error_chars = [sanitize_ai_input(c, user_id=None)[0] for c in error_chars if c]
+    error_chars_str = "、".join(safe_error_chars) if safe_error_chars else "無"
 
     system_prompt = (
         f"{TUTOR_PERSONA}\n\n"
