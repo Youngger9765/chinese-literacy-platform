@@ -70,6 +70,54 @@ def test_trigger_gate_is_a_named_maintainer_allowlist():
         assert login in cond
 
 
+def test_debug_dispatch_trigger_cannot_be_reached_by_a_pr_comment():
+    """#3893 diagnostic follow-up: `show_full_output: true` on the Claude
+    Review step would leak a full agent transcript in PUBLIC Actions logs
+    on a fork PR's attacker-authored comment, if it were gated on
+    anything a commenter's text could influence. It must only be true
+    when `github.event_name == 'workflow_dispatch'` -- a trigger that
+    requires write access to this repo through the GitHub UI/API and can
+    never be reached by commenting @claude on any PR, including a
+    malicious one. Revert the event_name check (e.g. to `true`, or to a
+    check on comment body content) -> red."""
+    raw, doc = _load()
+    # NOTE: PyYAML's `safe_load` parses the bare `on:` key as the boolean
+    # `True` (YAML 1.1 keyword coercion), not the string "on" -- so this
+    # checks the raw text for the trigger block instead of `doc["on"]`.
+    assert "workflow_dispatch:" in raw, (
+        "workflow_dispatch trigger missing -- debug path can't be invoked safely"
+    )
+
+    agent_step = None
+    for step in _review_job(doc)["steps"]:
+        if "claude-code-action" in str(step.get("uses", "")):
+            agent_step = step
+            break
+    assert agent_step is not None
+
+    show_full_output = str(agent_step["with"].get("show_full_output", ""))
+    assert show_full_output == "${{ github.event_name == 'workflow_dispatch' }}", (
+        f"show_full_output must be gated on event_name == 'workflow_dispatch' "
+        f"exactly, got: {show_full_output!r}"
+    )
+    # The literal string check above also catches a gate that's merely
+    # ADDITIONALLY satisfied by workflow_dispatch (e.g. `== 'workflow_dispatch'
+    # || contains(...)`) -- any extra clause ORed in would reopen exactly
+    # the leak this test exists to prevent.
+
+
+def test_review_job_trigger_cannot_be_satisfied_by_comment_text_alone():
+    """A fork PR's comment body is attacker-controlled text. The
+    workflow_dispatch branch of the trigger `if:` must be a bare
+    `github.event_name == 'workflow_dispatch'` check -- not something an
+    issue_comment event's payload (login, body, association) could ever
+    make true, which would defeat the write-access boundary dispatch
+    provides."""
+    _, doc = _load()
+    cond = _review_job(doc)["if"]
+    assert "github.event_name == 'workflow_dispatch'" in cond
+
+
 # ── find_01QFjr9CLgAJwsZv8m59RjLN: no Bash, no posting tool at all ──────
 
 
@@ -139,18 +187,34 @@ def test_agent_settings_block_everything_outside_the_working_directory():
 
 
 def test_agent_settings_deny_writes_to_agent_config_files():
-    """Claude Security finding find_01DYS1ZqNpdcAmH7VSV1YkJA: this job's
-    bare "Edit" deny already blocks editing any existing file -- but
-    Write can still CREATE or OVERWRITE .claude/**, CLAUDE.md, AGENTS.md,
-    or .mcp.json, which would steer every subsequent agent run in this
-    repo. Revert any one of these deny entries -> red."""
+    """Claude Security finding find_01DYS1ZqNpdcAmH7VSV1YkJA: a Write to
+    .claude/**, CLAUDE.md, AGENTS.md, or .mcp.json would be a durable,
+    self-perpetuating compromise -- every subsequent agent run in this
+    repo (including this agent's own next run) inherits whatever got
+    planted there.
+
+    MUST use `Edit(path)`, not `Write(path)`: per Claude Code's own docs
+    (https://code.claude.com/docs/en/permissions#writepath-globpath-and-greppath-rules-dont-match),
+    `Write(path)` rules are silently ignored -- Claude Code checks file
+    permissions against `Edit(path)` and `Read(path)` rules only, and a
+    `Write` call is checked against `Edit(path)`. Verified empirically
+    (local `claude -p` run): a bare `Edit` deny plus `Edit(protected/**)`
+    blocked a `Write` call to `protected/hack.txt` while a `Write` to
+    `normal.txt` elsewhere still succeeded -- confirming Edit(path) really
+    does govern Write's path matching, and a same-shaped Write(path) deny
+    does nothing at all. The original version of this fix used
+    Write(path) and would have shipped a no-op protection; this test
+    exists so that mistake can't silently recur."""
     raw, _ = _load()
     settings = _settings_json_text(raw)
     deny = settings["permissions"]["deny"]
 
     for path in (".claude/**", "CLAUDE.md", "AGENTS.md", ".mcp.json"):
-        assert any(d == f"Write({path})" or d == f"Write(**/{path})" for d in deny), (
-            f"missing Write({path}) deny"
+        assert any(d == f"Edit({path})" or d == f"Edit(**/{path})" for d in deny), (
+            f"missing Edit({path}) deny"
+        )
+        assert not any(d == f"Write({path})" or d == f"Write(**/{path})" for d in deny), (
+            f"Write({path}) deny is a documented no-op -- use Edit({path}) instead"
         )
 
 
