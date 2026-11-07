@@ -165,21 +165,13 @@ jobs:
                 "Read(/${{ runner.temp }}/**)",
                 "Edit(/${{ runner.temp }}/**)",
                 "Edit(.claude/**)",
-                "Write(.claude/**)",
                 "Edit(**/.claude/**)",
-                "Write(**/.claude/**)",
                 "Edit(CLAUDE.md)",
-                "Write(CLAUDE.md)",
                 "Edit(**/CLAUDE.md)",
-                "Write(**/CLAUDE.md)",
                 "Edit(AGENTS.md)",
-                "Write(AGENTS.md)",
                 "Edit(**/AGENTS.md)",
-                "Write(**/AGENTS.md)",
                 "Edit(.mcp.json)",
-                "Write(.mcp.json)",
-                "Edit(**/.mcp.json)",
-                "Write(**/.mcp.json)"
+                "Edit(**/.mcp.json)"
               ],
               "blockReadsOutsideWorkingDirectories": true,
               "blockWritesOutsideWorkingDirectories": true
