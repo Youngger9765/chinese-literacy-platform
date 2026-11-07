@@ -219,19 +219,25 @@ def _apply_clamping(result: dict) -> dict:
 async def evaluate_comprehension(
     dialogue_turns: list[dict],
     story_context: dict,
+    user_id: str | None = None,
 ) -> dict:
     """Evaluate student comprehension across 3 levels based on Socratic dialogue.
 
     Args:
         dialogue_turns: List of {"role": "ai"|"student", "text": str} dicts.
         story_context: {"title": str, "summary": str} with story metadata.
+        user_id: Caller's user id, threaded through to
+            sanitize_dialogue_turns so a detected injection attempt logs
+            WHO sent it (push-review add-on, same day as
+            find_01AS6qqjWCjVEXLM2gfFuGyT: this was always `None` here --
+            score_comprehension had no way to pass it in).
 
     Returns:
         Dict with comprehension_score, literal_score, inferential_score,
         evaluative_score, and feedback dict.
     """
     # Sanitize student turns before including them in the AI prompt (Issue #270)
-    safe_turns = sanitize_dialogue_turns(dialogue_turns)
+    safe_turns = sanitize_dialogue_turns(dialogue_turns, user_id=user_id)
     formatted_dialogue = "\n".join(
         f"{'AI老師' if t['role'] == 'ai' else '學生'}: {t['text']}"
         for t in safe_turns
