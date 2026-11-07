@@ -291,7 +291,32 @@ def change_password(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Change the current user's password."""
+    """Change the current user's password.
+
+    Claude Security find_01UFJZQJppyp8QgR9xSrXZGn (medium, CWE-307): the
+    caller already holds a valid bearer token here (unlike login, which
+    authenticates the request), so a stolen token turns this endpoint into
+    a faster password-guessing oracle than login itself. The only existing
+    guard was GlobalRateLimitMiddleware's 90/min write budget -- which for
+    an authenticated request (this route is always authenticated) is
+    itself keyed on `global:user:{user_id}:write` (see that middleware),
+    not IP. The real gap this closes is narrower than "more IPs = more
+    guesses": `InMemoryRateLimiter` doesn't share state across Cloud Run
+    instances (its own class docstring says so), so the 90/min budget was
+    really ~90/min PER INSTANCE for this one account -- a loose,
+    accidental multiplier, not a deliberate account-scoped cap, and
+    nothing close to login's deliberate 10/min account bucket, which
+    simply didn't exist here at all. Keyed on `current_user.id` (the
+    caller is already authenticated, so the account is known -- unlike
+    login, which must derive it from the request body before verifying
+    anything), checked BEFORE verify_password so a guess never gets
+    evaluated once the cap is hit (the finding's own fix criteria).
+    """
+    if not rate_limiter.check(
+        f"change-password:acct:{current_user.id}", max_requests=10, window_seconds=60
+    ):
+        raise HTTPException(status_code=429, detail="Too many requests. Please try again later.")
+
     if not verify_password(req.old_password, current_user.password_hash):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
