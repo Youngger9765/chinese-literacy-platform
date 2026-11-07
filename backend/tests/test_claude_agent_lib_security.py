@@ -283,7 +283,7 @@ def test_protected_paths_catch_agent_config_at_any_depth():
             "backend/.claude/settings.json",
             "some/nested/dir/.claude/hooks/evil.sh",
             "backend/CLAUDE.md",
-            "frontend/AGENTS.md",
+            "web/AGENTS.md",
             "backend/.mcp.json",
         ]
     )
@@ -299,7 +299,7 @@ def test_protected_paths_do_not_false_positive_on_similarly_named_files():
         [
             "backend/app/services/claude_helper.py",
             "docs/AGENTS_GUIDE.md",
-            "frontend/src/ClaudeMdViewer.tsx",
+            "src/components/ClaudeMdViewer.tsx",
             "backend/tests/test_claude_agent_lib_security.py",
         ]
     )
