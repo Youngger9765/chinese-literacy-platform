@@ -158,6 +158,34 @@ def test_agent_settings_deny_git_proc_home_and_runner_temp():
     )
 
 
+def test_agent_settings_deny_writes_to_agent_config_files():
+    """Claude Security finding find_01DYS1ZqNpdcAmH7VSV1YkJA: this agent
+    job HAS Edit+Write. Without an explicit deny, the agent could rewrite
+    .claude/**, CLAUDE.md, AGENTS.md, or .mcp.json -- which would steer
+    every subsequent agent run in this repo, including this one's own
+    next run. Revert any one of these deny entries -> red.
+
+    MUST use `Edit(path)`, not `Write(path)`: per Claude Code's own docs
+    (https://code.claude.com/docs/en/permissions#writepath-globpath-and-greppath-rules-dont-match),
+    `Write(path)` rules are silently ignored -- a `Write` call is checked
+    against `Edit(path)` rules, not a same-shaped `Write(path)` rule.
+    Verified empirically (local `claude -p` run): a bare `Edit` deny plus
+    `Edit(protected/**)` blocked a `Write` call to `protected/hack.txt`
+    while a `Write` elsewhere still succeeded. The first version of this
+    fix used Write(path) and would have shipped a no-op protection."""
+    raw, _ = _load()
+    settings = __import__("json").loads(_settings_json_text(raw))
+    deny = settings["permissions"]["deny"]
+
+    for path in (".claude/**", "CLAUDE.md", "AGENTS.md", ".mcp.json"):
+        assert any(d == f"Edit({path})" or d == f"Edit(**/{path})" for d in deny), (
+            f"missing Edit({path}) deny"
+        )
+        assert not any(d == f"Write({path})" or d == f"Write(**/{path})" for d in deny), (
+            f"Write({path}) deny is a documented no-op -- use Edit({path}) instead"
+        )
+
+
 def test_agent_settings_block_everything_outside_the_working_directory():
     """blockReads/WritesOutsideWorkingDirectories is the official, documented
     mechanism that blocks file-tool access outside the checkout IN EVERY
