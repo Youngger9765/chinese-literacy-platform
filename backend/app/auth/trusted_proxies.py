@@ -23,6 +23,28 @@ future entry here turns out to be broader than intended, a multi-hop
 forged chain still cannot reach past the single genuine Cloud-Run-
 appended entry. The two narrowings are independent defenses, not
 substitutes for each other.
+
+Second coordinator review, same day, MEDIUM: ``66.249.64.0/19`` is ALSO
+Googlebot's published crawl range, not Firebase-Hosting-exclusive --
+treating membership in it as proof of "this hop is Firebase Hosting" is
+not strictly true. Accepted as a residual risk rather than reverted,
+because the entry this module is asked about is ``parts[-1]`` --
+Cloud Run's own platform layer appends that value from the TCP peer it
+actually saw; it is not client-suppliable. For this prefix to produce a
+wrong trust decision, a request would have to arrive at Cloud Run with a
+genuine TCP connection sourced from inside 66.249.64.0/19 (crawlers do
+not let a caller set a custom X-Forwarded-For, so this is not a
+request-smuggling vector by itself) -- and even then, authenticated
+traffic is keyed per-user in ``GlobalRateLimitMiddleware`` regardless of
+which IP this function returns, so the residual exposure is limited to
+anonymous-request rate-limit keying, not authn/authz. Stronger options
+for later, not implemented here: (a) restrict Cloud Run ingress to
+internal-and-cloud-load-balancing only, so nothing reaches this code
+path except through Firebase Hosting's actual egress; (b) have the
+front end (Firebase Hosting rewrite) inject a shared-secret header and
+verify it here with ``hmac.compare_digest`` instead of trusting an IP
+range at all. Do not widen this allowlist beyond the one empirically
+observed prefix without new log evidence.
 """
 
 from __future__ import annotations

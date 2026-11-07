@@ -159,6 +159,21 @@ def real_ip_from_xff(xff: str, peer: str | None = None) -> str:
     function ultimately feeds -- only still matters for anonymous traffic,
     where a coarser (shared, but never attacker-chosen) identity is an
     accepted tradeoff, not the primary defense.
+
+    Known residual risk (coordinator review, same day): the one vendored
+    prefix (`66.249.64.0/19`) is Google's published Googlebot crawl range,
+    not a Firebase-Hosting-exclusive address -- naming membership in it
+    "this hop is Firebase Hosting" is a necessary-but-not-sufficient
+    proxy, not a proof. Accepted because `parts[-1]` is Cloud Run's own
+    honest append of the real TCP peer, not client-suppliable, and
+    crawlers cannot be made to send a custom X-Forwarded-For -- so
+    exploiting this would require an actual TCP connection to Cloud Run
+    sourced from inside that range, and even then only affects anonymous
+    rate-limit keying (see above), never authn/authz. Stronger options
+    for later, not implemented here: restrict Cloud Run ingress so only
+    Firebase Hosting's traffic ever reaches this code path, or have the
+    front end inject a shared-secret header verified with
+    `hmac.compare_digest` instead of trusting an IP range at all.
     """
     parts = [p.strip() for p in (xff or "").split(",") if p.strip()]
     if not parts:
