@@ -1024,11 +1024,10 @@ class TestGlobalRateLimitMiddlewarePerUserKey:
         anon_resp = client.get("/api/stories")
         assert anon_resp.status_code == 429
 
-        with patch.object(settings, "jwt_secret_key", "test-secret-for-per-user-key-test"):
-            token = self._token_for(4242)
-            auth_resp = client.get(
-                "/api/stories", headers={"Authorization": f"Bearer {token}"}
-            )
+        token = self._token_for(4242)
+        auth_resp = client.get(
+            "/api/stories", headers={"Authorization": f"Bearer {token}"}
+        )
         assert auth_resp.status_code != 429
 
     def test_two_authenticated_users_get_independent_buckets(self, client):
@@ -1036,19 +1035,18 @@ class TestGlobalRateLimitMiddlewarePerUserKey:
         both requests arrive from the identical TestClient IP."""
         from app.main import GlobalRateLimitMiddleware
 
-        with patch.object(settings, "jwt_secret_key", "test-secret-for-per-user-key-test-2"):
-            token_a = self._token_for(111)
-            token_b = self._token_for(222)
+        token_a = self._token_for(111)
+        token_b = self._token_for(222)
 
-            for _ in range(GlobalRateLimitMiddleware.READ_LIMIT):
-                general_rate_limiter.check_with_info(
-                    "global:user:111:read",
-                    GlobalRateLimitMiddleware.READ_LIMIT,
-                    GlobalRateLimitMiddleware.WINDOW,
-                )
+        for _ in range(GlobalRateLimitMiddleware.READ_LIMIT):
+            general_rate_limiter.check_with_info(
+                "global:user:111:read",
+                GlobalRateLimitMiddleware.READ_LIMIT,
+                GlobalRateLimitMiddleware.WINDOW,
+            )
 
-            resp_a = client.get("/api/stories", headers={"Authorization": f"Bearer {token_a}"})
-            resp_b = client.get("/api/stories", headers={"Authorization": f"Bearer {token_b}"})
+        resp_a = client.get("/api/stories", headers={"Authorization": f"Bearer {token_a}"})
+        resp_b = client.get("/api/stories", headers={"Authorization": f"Bearer {token_b}"})
 
         assert resp_a.status_code == 429
         assert resp_b.status_code != 429
@@ -1060,15 +1058,14 @@ class TestGlobalRateLimitMiddlewarePerUserKey:
         not just additionally checked)."""
         from app.main import GlobalRateLimitMiddleware
 
-        with patch.object(settings, "jwt_secret_key", "test-secret-for-per-user-key-test-3"):
-            token = self._token_for(333)
-            for _ in range(GlobalRateLimitMiddleware.READ_LIMIT):
-                general_rate_limiter.check_with_info(
-                    "global:user:333:read",
-                    GlobalRateLimitMiddleware.READ_LIMIT,
-                    GlobalRateLimitMiddleware.WINDOW,
-                )
-            auth_resp = client.get("/api/stories", headers={"Authorization": f"Bearer {token}"})
+        token = self._token_for(333)
+        for _ in range(GlobalRateLimitMiddleware.READ_LIMIT):
+            general_rate_limiter.check_with_info(
+                "global:user:333:read",
+                GlobalRateLimitMiddleware.READ_LIMIT,
+                GlobalRateLimitMiddleware.WINDOW,
+            )
+        auth_resp = client.get("/api/stories", headers={"Authorization": f"Bearer {token}"})
         assert auth_resp.status_code == 429
 
         # Same TestClient IP, no auth header -- must be unaffected.
