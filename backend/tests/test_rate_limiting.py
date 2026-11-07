@@ -21,6 +21,7 @@ Run with:
 
 import sys
 import os
+import time
 import uuid
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -31,9 +32,10 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
-from unittest.mock import AsyncMock, patch, MagicMock
+from unittest.mock import AsyncMock, patch, MagicMock, ANY
 
 from app.main import app
+from app.config import settings
 from app.database import get_db
 from app.models import Base
 from app.models.user import Role, User
@@ -791,6 +793,273 @@ class TestGlobalRateLimitMiddleware:
         assert GlobalRateLimitMiddleware.WINDOW == 60
 
 
+class TestGlobalRateLimitMiddlewarePerUserKey:
+    """Claude Security find_01RtSp6b2GvNCj76v7dhrLmg (high) bullet 2, issue
+    #3929: an anonymous flood sharing one IP-keyed bucket (Firebase
+    Hosting's egress, a classroom NAT, a mobile carrier) must not be able
+    to 429 a logged-in user. GlobalRateLimitMiddleware now keys an
+    authenticated request on `request.state.user_id` -- set earlier in the
+    middleware chain by RequestLoggingMiddleware from a signature-verified
+    JWT, same mechanism get_client_key() already relies on elsewhere in
+    this module -- instead of IP. These tests go through TestClient (real
+    HTTP + the real middleware stack), not the key format directly, so a
+    bug in the actual wiring (wrong scope key, wrong middleware order)
+    would be caught here even if the string format were right."""
+
+    def _token_for(self, user_id: int) -> str:
+        from app.auth.jwt import create_access_token
+        return create_access_token(user_id)
+
+    def test_authenticated_user_unaffected_by_exhausted_anonymous_ip_bucket(self, client):
+        """The exact scenario the finding reports: flood the shared
+        anonymous IP bucket (what every Firebase-hosted visitor collapses
+        into), then confirm a logged-in user's own request still succeeds."""
+        from app.main import GlobalRateLimitMiddleware
+
+        anonymous_ip = "testclient"  # TestClient's fixed request.client.host
+        for _ in range(GlobalRateLimitMiddleware.READ_LIMIT):
+            general_rate_limiter.check_with_info(
+                f"global:ip:{anonymous_ip}:read",
+                GlobalRateLimitMiddleware.READ_LIMIT,
+                GlobalRateLimitMiddleware.WINDOW,
+            )
+        # Confirm the anonymous bucket really is exhausted before asserting
+        # the authenticated path is unaffected by it (positive control).
+        anon_resp = client.get("/api/stories")
+        assert anon_resp.status_code == 429
+
+        with patch.object(settings, "jwt_secret_key", "test-secret-for-per-user-key-test"):
+            token = self._token_for(4242)
+            auth_resp = client.get(
+                "/api/stories", headers={"Authorization": f"Bearer {token}"}
+            )
+        assert auth_resp.status_code != 429
+
+    def test_two_authenticated_users_get_independent_buckets(self, client):
+        """Exhausting user A's own bucket must not 429 user B, even though
+        both requests arrive from the identical TestClient IP."""
+        from app.main import GlobalRateLimitMiddleware
+
+        with patch.object(settings, "jwt_secret_key", "test-secret-for-per-user-key-test-2"):
+            token_a = self._token_for(111)
+            token_b = self._token_for(222)
+
+            for _ in range(GlobalRateLimitMiddleware.READ_LIMIT):
+                general_rate_limiter.check_with_info(
+                    "global:user:111:read",
+                    GlobalRateLimitMiddleware.READ_LIMIT,
+                    GlobalRateLimitMiddleware.WINDOW,
+                )
+
+            resp_a = client.get("/api/stories", headers={"Authorization": f"Bearer {token_a}"})
+            resp_b = client.get("/api/stories", headers={"Authorization": f"Bearer {token_b}"})
+
+        assert resp_a.status_code == 429
+        assert resp_b.status_code != 429
+
+    def test_authenticated_request_does_not_touch_the_ip_bucket(self, client):
+        """An authenticated request must key on the user, not the IP -- so
+        exhausting an authenticated user's bucket leaves the SAME IP's
+        anonymous bucket untouched (proves the key is genuinely swapped,
+        not just additionally checked)."""
+        from app.main import GlobalRateLimitMiddleware
+
+        with patch.object(settings, "jwt_secret_key", "test-secret-for-per-user-key-test-3"):
+            token = self._token_for(333)
+            for _ in range(GlobalRateLimitMiddleware.READ_LIMIT):
+                general_rate_limiter.check_with_info(
+                    "global:user:333:read",
+                    GlobalRateLimitMiddleware.READ_LIMIT,
+                    GlobalRateLimitMiddleware.WINDOW,
+                )
+            auth_resp = client.get("/api/stories", headers={"Authorization": f"Bearer {token}"})
+        assert auth_resp.status_code == 429
+
+        # Same TestClient IP, no auth header -- must be unaffected.
+        anon_resp = client.get("/api/stories")
+        assert anon_resp.status_code != 429
+
+
+class TestGlobalRateLimitMiddlewareTrustedProxyWiring:
+    """#3740 — the unit tests in TestTrustedProxyClientIp exercise
+    trusted_proxy_client_ip() as a pure function; none of them go through
+    GlobalRateLimitMiddleware's actual ASGI header extraction in main.py
+    (byte-string header names, .decode(), argument order into the function).
+    A real bug there -- e.g. swapping x_frontend_identity and x_client_ip
+    positionally, or reading the wrong byte-string key -- would pass every
+    test in TestTrustedProxyClientIp unchanged. These tests close that gap
+    by sending real HTTP headers through TestClient and asserting which
+    bucket actually got exhausted (flagged as a real, if narrow, test gap
+    by critic review before this was added)."""
+
+    FRONTEND_SA = "frontend-sa@lingoleap-dev.iam.gserviceaccount.com"
+    BACKEND_AUDIENCE = "https://lingoleap-backend-958347263320.asia-east1.run.app"
+
+    @pytest.fixture(autouse=True)
+    def _clear_verified_identity_cache(self):
+        from app.auth.rate_limiter import _verified_identity_cache
+        _verified_identity_cache.clear()
+        yield
+        _verified_identity_cache.clear()
+
+    def _patch_verify(self, token: str, email: str):
+        def _verify(tok, request, audience):
+            if tok != token or audience != self.BACKEND_AUDIENCE:
+                raise ValueError("unknown token or wrong audience")
+            return {"email": email, "email_verified": True, "exp": time.time() + 3600}
+        return patch("google.oauth2.id_token.verify_oauth2_token", side_effect=_verify)
+
+    def test_valid_identity_keys_the_bucket_by_x_client_ip_not_xff(self, client):
+        """With a valid frontend identity, exhausting the X-Client-IP-derived
+        bucket (not the XFF-derived one) must be what makes the real request
+        429 -- proving main.py actually wires X-Client-IP through when
+        trusted, not just that the pure function would."""
+        from app.main import GlobalRateLimitMiddleware
+
+        client_ip = "198.51.100.77"  # what nginx derived for the real end user
+        nginx_xff = "203.0.113.9, 10.0.0.5"  # nginx's own hop -- must be ignored here
+        token = "genuine-token-for-frontend-sa-1"
+
+        for _ in range(GlobalRateLimitMiddleware.READ_LIMIT):
+            general_rate_limiter.check_with_info(
+                f"global:ip:{client_ip}:read",
+                GlobalRateLimitMiddleware.READ_LIMIT,
+                GlobalRateLimitMiddleware.WINDOW,
+            )
+
+        with patch.object(settings, "frontend_proxy_sa", self.FRONTEND_SA), \
+                patch.object(settings, "backend_audience", self.BACKEND_AUDIENCE), \
+                self._patch_verify(token, self.FRONTEND_SA):
+            resp = client.get(
+                "/api/stories",
+                headers={
+                    "X-Forwarded-For": nginx_xff,
+                    "X-Frontend-Identity": token,
+                    "X-Client-IP": client_ip,
+                },
+            )
+        assert resp.status_code == 429
+
+    def test_valid_identity_does_not_exhaust_the_xff_derived_bucket(self, client):
+        """Mirror of the above: exhausting the XFF-derived bucket must NOT
+        429 a request carrying a valid identity + a different X-Client-IP --
+        if main.py ignored X-Client-IP and used XFF anyway, this would 429
+        when it shouldn't."""
+        from app.main import GlobalRateLimitMiddleware
+
+        client_ip = "198.51.100.78"
+        nginx_xff = "203.0.113.9, 10.0.0.5"
+        xff_derived_ip = "10.0.0.5"  # what real_ip_from_xff(nginx_xff) resolves to
+        token = "genuine-token-for-frontend-sa-2"
+
+        for _ in range(GlobalRateLimitMiddleware.READ_LIMIT):
+            general_rate_limiter.check_with_info(
+                f"global:ip:{xff_derived_ip}:read",
+                GlobalRateLimitMiddleware.READ_LIMIT,
+                GlobalRateLimitMiddleware.WINDOW,
+            )
+
+        with patch.object(settings, "frontend_proxy_sa", self.FRONTEND_SA), \
+                patch.object(settings, "backend_audience", self.BACKEND_AUDIENCE), \
+                self._patch_verify(token, self.FRONTEND_SA):
+            resp = client.get(
+                "/api/stories",
+                headers={
+                    "X-Forwarded-For": nginx_xff,
+                    "X-Frontend-Identity": token,
+                    "X-Client-IP": client_ip,
+                },
+            )
+        assert resp.status_code != 429
+
+    def test_missing_identity_keys_the_bucket_by_xff_not_x_client_ip(self, client):
+        """No X-Frontend-Identity at all (direct/CI traffic shape):
+        exhausting the X-Client-IP-named bucket must have no effect -- the
+        real request should still succeed, because without identity the
+        header is never consulted."""
+        from app.main import GlobalRateLimitMiddleware
+
+        spoofed_client_ip = "9.9.9.9"
+        xff = "1.1.1.1, 5.5.5.5, 2.2.2.2"
+        xff_derived_ip = "2.2.2.2"  # last entry, after the real_ip_from_xff fix
+
+        for _ in range(GlobalRateLimitMiddleware.READ_LIMIT):
+            general_rate_limiter.check_with_info(
+                f"global:ip:{spoofed_client_ip}:read",
+                GlobalRateLimitMiddleware.READ_LIMIT,
+                GlobalRateLimitMiddleware.WINDOW,
+            )
+
+        with patch.object(settings, "frontend_proxy_sa", self.FRONTEND_SA), \
+                patch.object(settings, "backend_audience", self.BACKEND_AUDIENCE):
+            resp = client.get(
+                "/api/stories",
+                headers={
+                    "X-Forwarded-For": xff,
+                    "X-Client-IP": spoofed_client_ip,
+                },
+            )
+        assert resp.status_code != 429
+
+        # And exhausting the ACTUAL xff-derived bucket does 429 it.
+        for _ in range(GlobalRateLimitMiddleware.READ_LIMIT):
+            general_rate_limiter.check_with_info(
+                f"global:ip:{xff_derived_ip}:read",
+                GlobalRateLimitMiddleware.READ_LIMIT,
+                GlobalRateLimitMiddleware.WINDOW,
+            )
+        with patch.object(settings, "frontend_proxy_sa", self.FRONTEND_SA), \
+                patch.object(settings, "backend_audience", self.BACKEND_AUDIENCE):
+            resp = client.get(
+                "/api/stories",
+                headers={
+                    "X-Forwarded-For": xff,
+                    "X-Client-IP": spoofed_client_ip,
+                },
+            )
+        assert resp.status_code == 429
+
+    def test_forged_x_frontend_identity_on_a_direct_call_is_rejected(self, client):
+        """End-to-end version of the core #3740 follow-up fix: a raw
+        request straight to backend (no real proxy involved) that sets
+        X-Frontend-Identity itself, claiming the frontend SA's email in a
+        JWT-shaped but unsigned token, must NOT get its X-Client-IP
+        trusted -- real HTTP path, no mock standing in for
+        verify_oauth2_token's rejection (nothing in this test patches it
+        to succeed, so the REAL function runs against a token it did not
+        itself mint; it must reject it on its own)."""
+        from app.main import GlobalRateLimitMiddleware
+        import base64
+        import json
+
+        xff_derived_ip = "2.2.2.2"  # last entry, after the real_ip_from_xff fix
+        header_b64 = base64.urlsafe_b64encode(b'{"alg":"RS256"}').rstrip(b"=").decode()
+        claims = {"email": self.FRONTEND_SA, "email_verified": True, "aud": self.BACKEND_AUDIENCE}
+        payload_b64 = base64.urlsafe_b64encode(json.dumps(claims).encode()).rstrip(b"=").decode()
+        forged_token = f"{header_b64}.{payload_b64}.not-a-real-signature"
+
+        for _ in range(GlobalRateLimitMiddleware.READ_LIMIT):
+            general_rate_limiter.check_with_info(
+                f"global:ip:{xff_derived_ip}:read",
+                GlobalRateLimitMiddleware.READ_LIMIT,
+                GlobalRateLimitMiddleware.WINDOW,
+            )
+
+        with patch.object(settings, "frontend_proxy_sa", self.FRONTEND_SA), \
+                patch.object(settings, "backend_audience", self.BACKEND_AUDIENCE):
+            resp = client.get(
+                "/api/stories",
+                headers={
+                    "X-Forwarded-For": "1.1.1.1, 5.5.5.5, 2.2.2.2",
+                    "X-Frontend-Identity": forged_token,
+                    "X-Client-IP": "9.9.9.9",  # attacker's own forged IP
+                },
+            )
+        # Rejected by the real (unmocked) verify_oauth2_token -> falls back
+        # to the XFF rule -> hits the bucket we already exhausted above.
+        assert resp.status_code == 429
+
+
 class TestRealClientIpXFF:
     """Claude Security find_016GfbjuPFtSeUVkfhAUcLPp (high, CWE-348): the
     old "always second-from-right" rule assumed GCP always appends exactly
@@ -843,6 +1112,682 @@ class TestRealClientIpXFF:
         from app.auth.rate_limiter import real_ip_from_xff
         assert real_ip_from_xff("", "10.0.0.1") == "10.0.0.1"
         assert real_ip_from_xff("") == "unknown"
+
+
+class TestTrustedHopXFF:
+    """Claude Security find_01RtSp6b2GvNCj76v7dhrLmg (high, CWE-799, issue
+    #3929): "always take the last entry" (the fix for the PREVIOUS finding,
+    find_016GfbjuPFtSeUVkfhAUcLPp) traded spoofability for a different bug.
+    The last entry is always genuine on both paths -- Cloud Run itself
+    appends it from the real TCP peer -- but on
+    lingoleap-prod.web.app/lingoleap-staging.web.app that peer is FIREBASE
+    HOSTING'S OWN serving address, not the end user, so every distinct
+    visitor through that hostname shared one rate-limit bucket.
+
+    Fix: strip AT MOST ONE trusted (Google-operated) hop from the right
+    instead of always reading a fixed position (coordinator review,
+    2026-11-07: an unbounded walk was the first version of this fix, but
+    it let a forged chain of multiple trusted-looking entries expose an
+    attacker-controlled one further back -- see
+    test_an_apps_script_looking_hop_chain_does_not_walk_further_back).
+    `66.249.82.130` below is not a made-up example -- it is one of 5 real
+    `httpRequest.remoteIp` values Cloud Run's own platform logs recorded
+    across 5 separate probe requests sent through
+    `lingoleap-staging.web.app` at staggered times on 2026-11-07 (verified
+    via `gcloud logging read`; see google_trusted_proxy_ranges.json for
+    all 5). The direct-path probe sent at the same time, including one
+    with a forged `X-Forwarded-For: 8.8.8.8, 1.2.3.4` prefix, logged
+    `remoteIp: 150.117.242.93` -- confirming Cloud Run's own platform-level
+    peer is never influenced by a client-supplied XFF value, and giving a
+    real (non-Google) address to use as "the real client" in these tests."""
+
+    # Real values observed via `gcloud logging read` against
+    # lingoleap-backend-staging, 2026-11-07 (see class docstring).
+    REAL_FIREBASE_EGRESS_OBSERVED = "66.249.82.130"  # is_trusted_hop() -> True
+    REAL_CLIENT_OBSERVED = "150.117.242.93"           # is_trusted_hop() -> False
+
+    def test_firebase_hosting_path_keys_on_the_real_client(self):
+        """The exact shape find_01RtSp6b2GvNCj76v7dhrLmg reports: XFF is
+        `<real client>, <Firebase's own observed address>`. Must resolve to
+        the real client, not the shared Firebase address."""
+        from app.auth.rate_limiter import real_ip_from_xff
+        xff = f"203.0.113.42, {self.REAL_FIREBASE_EGRESS_OBSERVED}"
+        assert real_ip_from_xff(xff) == "203.0.113.42"
+
+    def test_two_different_users_via_firebase_get_distinct_keys(self):
+        """Direct requirement from the finding's fix criteria: "Test that
+        two different users via lingoleap-prod.web.app get distinct
+        keys."."""
+        from app.auth.rate_limiter import real_ip_from_xff
+        a = real_ip_from_xff(f"203.0.113.5, {self.REAL_FIREBASE_EGRESS_OBSERVED}")
+        b = real_ip_from_xff(f"203.0.113.9, {self.REAL_FIREBASE_EGRESS_OBSERVED}")
+        assert a == "203.0.113.5"
+        assert b == "203.0.113.9"
+        assert a != b
+
+    def test_forged_multi_hop_xff_on_direct_url_keys_on_the_real_peer(self):
+        """Coordinator-requested test, 2026-11-07: a forged chain with
+        SEVERAL entries that look like trusted hops, ending in the one
+        genuine (Cloud-Run-appended, non-spoofable) entry, must still
+        resolve to that genuine entry -- an attacker calling the direct
+        *.run.app URL controls everything except the final position."""
+        from app.auth.rate_limiter import real_ip_from_xff
+        xff = f"66.249.65.1, 66.249.70.2, 8.8.8.8, {self.REAL_CLIENT_OBSERVED}"
+        assert real_ip_from_xff(xff) == self.REAL_CLIENT_OBSERVED
+
+    def test_direct_url_unaffected_when_last_entry_is_not_a_trusted_hop(self):
+        """Negative control -- the direct-path shape (no Firebase hop at
+        all) must behave exactly like it did under the old "always take
+        last" rule, since there is nothing to strip."""
+        from app.auth.rate_limiter import real_ip_from_xff
+        assert real_ip_from_xff(f"1.1.1.1, {self.REAL_CLIENT_OBSERVED}") == self.REAL_CLIENT_OBSERVED
+
+    def test_an_apps_script_looking_hop_chain_does_not_walk_further_back(self):
+        """Coordinator-requested test, 2026-11-07: even when BOTH of the
+        last two entries fall inside the trusted allowlist (simulating an
+        attacker who can reach this backend from a second Google-operated
+        vantage point, e.g. Google Apps Script, that happens to share the
+        same published range as Firebase Hosting's observed egress), only
+        the single genuine last entry is ever stepped over. The one before
+        it is trusted as "the real client" (exactly the Firebase Hosting
+        case -- this IS a real trusted hop, just not the one this function
+        keeps looking behind), but resolution must NOT continue past it to
+        the attacker-controlled entry one position further back."""
+        from app.auth.rate_limiter import real_ip_from_xff
+        attacker_controlled = "198.51.100.7"
+        second_trusted_looking_hop = "66.249.65.5"  # also inside 66.249.64.0/19
+        genuine_last_entry = self.REAL_FIREBASE_EGRESS_OBSERVED
+        xff = f"{attacker_controlled}, {second_trusted_looking_hop}, {genuine_last_entry}"
+        result = real_ip_from_xff(xff)
+        assert result == second_trusted_looking_hop
+        assert result != attacker_controlled
+
+    def test_single_trusted_entry_returns_itself_not_unknown(self):
+        """Edge case: a single-entry XFF that happens to be inside the
+        trusted range never trips an index-out-of-range -- there is no
+        earlier entry to step back to, so it returns itself."""
+        from app.auth.rate_limiter import real_ip_from_xff
+        assert real_ip_from_xff(self.REAL_FIREBASE_EGRESS_OBSERVED) == self.REAL_FIREBASE_EGRESS_OBSERVED
+
+
+class TestIsTrustedHop:
+    """Unit tests for the vendored Google-range membership check itself,
+    independent of real_ip_from_xff's stripping logic. The trusted range is
+    now a single, narrowly-scoped prefix (66.249.64.0/19) anchored to real
+    observed Firebase Hosting egress traffic -- see
+    google_trusted_proxy_ranges.json for the 5 `gcloud logging read`
+    observations this is derived from."""
+
+    def test_real_observed_firebase_egress_is_trusted(self):
+        """All 5 addresses Cloud Run's own platform logs recorded across 5
+        separate lingoleap-staging.web.app probes, 2026-11-07."""
+        from app.auth.trusted_proxies import is_trusted_hop
+        for ip in (
+            "66.249.82.130",
+            "66.249.82.197",
+            "66.249.82.65",
+            "66.249.82.13",
+            "66.249.82.103",
+        ):
+            assert is_trusted_hop(ip) is True, ip
+
+    def test_ordinary_residential_and_rfc5737_addresses_are_not_trusted(self):
+        from app.auth.trusted_proxies import is_trusted_hop
+        assert is_trusted_hop("198.51.100.9") is False
+        assert is_trusted_hop("1.2.3.4") is False
+        assert is_trusted_hop("150.117.242.93") is False  # the real observed client IP
+
+    def test_google_public_dns_is_no_longer_trusted(self):
+        """2026-11-07 narrowing: the allowlist used to be Google's entire
+        non-customer-rentable network (94 prefixes), which included
+        8.8.8.0/24 (Google Public DNS) -- a range nowhere near Firebase
+        Hosting's actual serving layer, but one a sufficiently determined
+        attacker (e.g. from Google Apps Script or other first-party Google
+        infrastructure) could plausibly reach a request from. Narrowed to
+        the one prefix actually observed. 8.8.8.8 must NOT be trusted."""
+        from app.auth.trusted_proxies import is_trusted_hop
+        assert is_trusted_hop("8.8.8.8") is False
+        assert is_trusted_hop("8.8.4.4") is False
+
+    def test_a_google_cloud_customer_range_is_not_trusted(self):
+        """The whole point of anchoring to goog.json's published boundary
+        (not cloud.json, the customer-rentable range): an attacker renting
+        their own GCE VM and attacking the direct *.run.app URL from it
+        must NOT get treated as a trusted hop, or the anti-spoofing
+        property this fix depends on breaks for exactly that attacker.
+        34.65.0.0/16 is a real cloud.json-only prefix, nowhere near the
+        single 66.249.64.0/19 prefix now vendored."""
+        from app.auth.trusted_proxies import is_trusted_hop
+        assert is_trusted_hop("34.65.1.1") is False
+
+    def test_malformed_and_empty_input_fail_closed(self):
+        from app.auth.trusted_proxies import is_trusted_hop
+        assert is_trusted_hop("") is False
+        assert is_trusted_hop("not-an-ip") is False
+        assert is_trusted_hop("999.999.999.999") is False
+
+    def test_no_ipv6_ranges_are_vendored_yet(self):
+        """2026-11-07 narrowing dropped the (unobserved) IPv6 entries along
+        with the broader IPv4 set -- nothing has ever actually been
+        observed arriving over IPv6, so nothing is trusted there yet."""
+        from app.auth.trusted_proxies import is_trusted_hop
+        assert is_trusted_hop("2001:4860::1") is False
+        assert is_trusted_hop("2001:db8::1") is False
+
+
+# ===========================================================================
+# #3740 — real client IP behind the same-origin proxy, without letting an
+# attacker forge X-Client-IP on a direct call (backend stays reachable both
+# ways: via the frontend's proxy AND directly, e.g. CI/health-checks).
+# ===========================================================================
+
+
+class TestTrustedProxyClientIp:
+    """trusted_proxy_client_ip must only trust X-Client-IP when THIS
+    backend has itself cryptographically verified X-Frontend-Identity as a
+    genuine, unexpired, correctly-audienced Google ID token for the
+    configured frontend service account -- never on the header's mere
+    presence, and never on an unverified JWT payload alone.
+
+    #3740 follow-up (security review): the original version of this class
+    tested a design that decoded X-Serverless-Authorization's JWT payload
+    WITHOUT verifying its signature, reasoning Cloud Run's own platform
+    had already done so. That's only true while this backend requires
+    Cloud Run invoker auth; while it still allows unauthenticated access
+    (true today), nothing stops a caller from setting that header directly
+    with a forged, unsigned payload. These tests now mock
+    google.oauth2.id_token.verify_oauth2_token (the same function
+    app/services/sso_login_service.py already uses for real end-user
+    Google Sign-In) to simulate what REAL verification would do: only a
+    token present in a test's `valid` map is treated as genuinely
+    Google-signed, and only when called with the audience that token was
+    actually minted for -- anything else raises ValueError, exactly like
+    the real function does for a bad signature, expired token, or
+    audience mismatch.
+    """
+
+    FRONTEND_SA = "frontend-sa@lingoleap-dev.iam.gserviceaccount.com"
+    OTHER_SA = "someone-else-sa@lingoleap-dev.iam.gserviceaccount.com"
+    BACKEND_AUDIENCE = "https://lingoleap-backend-958347263320.asia-east1.run.app"
+    OTHER_AUDIENCE = "https://some-other-service-958347263320.asia-east1.run.app"
+
+    @pytest.fixture(autouse=True)
+    def _clear_verified_identity_cache(self):
+        """The positive-verification cache is module-level and keyed by raw
+        token string -- without clearing it, an earlier test's genuinely
+        cached (token -> email) entry would silently make a later test
+        that reuses the same token string skip verification entirely,
+        hiding exactly the bugs these tests exist to catch."""
+        from app.auth.rate_limiter import _verified_identity_cache
+        _verified_identity_cache.clear()
+        yield
+        _verified_identity_cache.clear()
+
+    @staticmethod
+    def _far_future_exp() -> int:
+        return int(time.time()) + 3600
+
+    @staticmethod
+    def _mock_verify(valid: dict) -> object:
+        """Build a side_effect for google.oauth2.id_token.verify_oauth2_token.
+
+        `valid` maps token string -> (audience_it_was_minted_for, claims
+        dict to return). A token not in `valid` raises ValueError (as real
+        verification would for anything not actually signed by Google); a
+        token that IS in `valid` but called with a different audience than
+        it was minted for ALSO raises (as real verification would for a
+        genuine token being replayed against the wrong service).
+        """
+        def _verify(token, request, audience):
+            entry = valid.get(token)
+            if entry is None:
+                raise ValueError("Could not verify token signature.")
+            minted_audience, claims = entry
+            if audience != minted_audience:
+                raise ValueError(
+                    f"Token has audience {minted_audience!r}, expected {audience!r}."
+                )
+            return dict(claims)
+        return _verify
+
+    def _patch_verify(self, valid: dict):
+        return patch(
+            "google.oauth2.id_token.verify_oauth2_token",
+            side_effect=self._mock_verify(valid),
+        )
+
+    def test_direct_request_no_identity_header_uses_xff_rule(self):
+        # The "direct request" case: no X-Frontend-Identity at all (e.g.
+        # CI or a health check hitting backend's public URL directly).
+        from app.auth.rate_limiter import trusted_proxy_client_ip
+        with self._patch_verify({}) as mock_verify:
+            ip = trusted_proxy_client_ip(
+                xff="1.1.1.1, 5.5.5.5, 9.9.9.9",
+                peer=None,
+                x_frontend_identity="",
+                x_client_ip="",
+                frontend_proxy_sa=self.FRONTEND_SA,
+                backend_audience=self.BACKEND_AUDIENCE,
+            )
+        assert ip == "9.9.9.9"  # same as real_ip_from_xff's last-entry rule
+        mock_verify.assert_not_called()  # nothing to verify -- no network/CPU wasted
+
+    def test_proxied_request_with_valid_frontend_identity_uses_x_client_ip(self):
+        from app.auth.rate_limiter import trusted_proxy_client_ip
+        token = "genuinely-google-signed-token-for-frontend-sa"
+        with self._patch_verify({
+            token: (self.BACKEND_AUDIENCE, {
+                "email": self.FRONTEND_SA,
+                "email_verified": True,
+                "exp": self._far_future_exp(),
+            }),
+        }):
+            ip = trusted_proxy_client_ip(
+                xff="203.0.113.9, 10.0.0.1",  # nginx's own hop -- NOT the real user
+                peer=None,
+                x_frontend_identity=token,
+                x_client_ip="198.51.100.42",  # the real end-user IP nginx derived
+                frontend_proxy_sa=self.FRONTEND_SA,
+                backend_audience=self.BACKEND_AUDIENCE,
+            )
+        assert ip == "198.51.100.42"
+
+    def test_spoofed_x_client_ip_without_identity_is_ignored(self):
+        # No X-Frontend-Identity at all, but X-Client-IP IS present (an
+        # attacker hitting backend directly and just setting the header
+        # themselves, hoping it's trusted outright).
+        from app.auth.rate_limiter import trusted_proxy_client_ip
+        with self._patch_verify({}):
+            ip = trusted_proxy_client_ip(
+                xff="1.1.1.1, 5.5.5.5, 9.9.9.9",
+                peer=None,
+                x_frontend_identity="",
+                x_client_ip="9.9.9.9",  # attacker-forged, must be ignored
+                frontend_proxy_sa=self.FRONTEND_SA,
+                backend_audience=self.BACKEND_AUDIENCE,
+            )
+        assert ip == "9.9.9.9"  # XFF rule, X-Client-IP never consulted
+
+    def test_forged_unsigned_token_with_the_right_email_is_rejected(self):
+        """The #3740 follow-up's whole reason for existing: a JWT-SHAPED
+        string whose payload claims email=FRONTEND_SA, but that was never
+        actually signed by Google, must be rejected -- not trusted just
+        because its payload happens to say the right thing. This is the
+        exact attack the old X-Serverless-Authorization-payload-decode
+        design was vulnerable to while the backend allows unauthenticated
+        access. Mutation-check target: skipping the verify_oauth2_token
+        call entirely (trusting the payload outright) makes this test go
+        green for the wrong reason -- i.e. red without the real call."""
+        from app.auth.rate_limiter import trusted_proxy_client_ip
+        import base64
+        import json
+
+        header = base64.urlsafe_b64encode(b'{"alg":"RS256"}').rstrip(b"=").decode()
+        claims = {"email": self.FRONTEND_SA, "email_verified": True, "aud": self.BACKEND_AUDIENCE}
+        payload = base64.urlsafe_b64encode(json.dumps(claims).encode()).rstrip(b"=").decode()
+        forged_token = f"{header}.{payload}.not-a-real-google-signature"
+
+        # Nothing in `valid` -- simulates real verification rejecting a
+        # token that isn't actually Google-signed, no matter what its
+        # (attacker-controlled, unverified) payload claims.
+        with self._patch_verify({}):
+            ip = trusted_proxy_client_ip(
+                xff="1.1.1.1, 5.5.5.5, 9.9.9.9",
+                peer=None,
+                x_frontend_identity=forged_token,
+                x_client_ip="198.51.100.42",
+                frontend_proxy_sa=self.FRONTEND_SA,
+                backend_audience=self.BACKEND_AUDIENCE,
+            )
+        assert ip == "9.9.9.9"  # rejected -- falls back to the XFF rule
+
+    def test_valid_token_wrong_audience_is_rejected(self):
+        """A genuinely Google-signed token for the frontend SA -- but
+        minted for a DIFFERENT Cloud Run service -- must not be trusted
+        here. Simulates either a replay attack (a token captured
+        elsewhere) or a misconfiguration (BACKEND_AUDIENCE not matching
+        what the sidecar actually requests)."""
+        from app.auth.rate_limiter import trusted_proxy_client_ip
+        token = "genuine-token-minted-for-a-different-service"
+        with self._patch_verify({
+            token: (self.OTHER_AUDIENCE, {
+                "email": self.FRONTEND_SA,
+                "email_verified": True,
+                "exp": self._far_future_exp(),
+            }),
+        }):
+            ip = trusted_proxy_client_ip(
+                xff="1.1.1.1, 5.5.5.5, 9.9.9.9",
+                peer=None,
+                x_frontend_identity=token,
+                x_client_ip="198.51.100.42",
+                frontend_proxy_sa=self.FRONTEND_SA,
+                backend_audience=self.BACKEND_AUDIENCE,  # NOT self.OTHER_AUDIENCE
+            )
+        assert ip == "9.9.9.9"  # wrong audience -- falls back to the XFF rule
+
+    def test_verify_oauth2_token_is_actually_called_with_the_configured_audience(self):
+        """Wiring-level assertion, independent of the mock's own pass/fail
+        behavior: _verify_frontend_identity must pass backend_audience
+        through to verify_oauth2_token's `audience` argument, not drop it
+        or pass None. Mutation-caught: dropping the audience argument
+        entirely makes verify_oauth2_token (real signature: token, request,
+        audience=None) silently skip its own audience check -- and because
+        the resulting TypeError from this test's mock (which requires 3
+        args) gets swallowed by the broad `except Exception`, the ABOVE
+        test (test_valid_token_wrong_audience_is_rejected) still passes
+        for the wrong reason (a crash that happens to also look like
+        rejection). This test closes that gap by asserting the actual
+        call arguments directly, regardless of whether verification
+        happens to succeed or fail.
+        """
+        from app.auth.rate_limiter import trusted_proxy_client_ip
+        token = "genuine-token-for-frontend-sa"
+        with self._patch_verify({
+            token: (self.BACKEND_AUDIENCE, {
+                "email": self.FRONTEND_SA,
+                "email_verified": True,
+                "exp": self._far_future_exp(),
+            }),
+        }) as mock_verify:
+            trusted_proxy_client_ip(
+                xff="1.1.1.1, 5.5.5.5, 9.9.9.9",
+                peer=None,
+                x_frontend_identity=token,
+                x_client_ip="198.51.100.42",
+                frontend_proxy_sa=self.FRONTEND_SA,
+                backend_audience=self.BACKEND_AUDIENCE,
+            )
+        mock_verify.assert_called_once_with(token, ANY, self.BACKEND_AUDIENCE)
+
+    def test_identity_of_a_different_service_account_is_ignored(self):
+        # A real, genuinely-verified identity -- just not the configured
+        # frontend one. Must NOT be trusted for X-Client-IP.
+        from app.auth.rate_limiter import trusted_proxy_client_ip
+        token = "genuine-token-for-some-other-service-account"
+        with self._patch_verify({
+            token: (self.BACKEND_AUDIENCE, {
+                "email": self.OTHER_SA,
+                "email_verified": True,
+                "exp": self._far_future_exp(),
+            }),
+        }):
+            ip = trusted_proxy_client_ip(
+                xff="1.1.1.1, 5.5.5.5, 9.9.9.9",
+                peer=None,
+                x_frontend_identity=token,
+                x_client_ip="198.51.100.42",
+                frontend_proxy_sa=self.FRONTEND_SA,
+                backend_audience=self.BACKEND_AUDIENCE,
+            )
+        assert ip == "9.9.9.9"  # falls back to XFF rule, not the other SA's claim
+
+    def test_email_not_verified_is_ignored(self):
+        # A genuinely Google-signed token for the right SA, but Google
+        # itself marks the email as unverified -- treat the same as no
+        # email at all (mirrors sso_login_service.py's own standard for
+        # real end-user Google Sign-In tokens).
+        from app.auth.rate_limiter import trusted_proxy_client_ip
+        token = "genuine-token-email-not-verified"
+        with self._patch_verify({
+            token: (self.BACKEND_AUDIENCE, {
+                "email": self.FRONTEND_SA,
+                "email_verified": False,
+                "exp": self._far_future_exp(),
+            }),
+        }):
+            ip = trusted_proxy_client_ip(
+                xff="1.1.1.1, 5.5.5.5, 9.9.9.9",
+                peer=None,
+                x_frontend_identity=token,
+                x_client_ip="198.51.100.42",
+                frontend_proxy_sa=self.FRONTEND_SA,
+                backend_audience=self.BACKEND_AUDIENCE,
+            )
+        assert ip == "9.9.9.9"
+
+    def test_missing_email_claim_is_ignored(self):
+        from app.auth.rate_limiter import trusted_proxy_client_ip
+        token = "genuine-token-no-email-claim"
+        with self._patch_verify({
+            token: (self.BACKEND_AUDIENCE, {
+                "email_verified": True,
+                "exp": self._far_future_exp(),
+                # no "email" key at all
+            }),
+        }):
+            ip = trusted_proxy_client_ip(
+                xff="1.1.1.1, 5.5.5.5, 9.9.9.9",
+                peer=None,
+                x_frontend_identity=token,
+                x_client_ip="198.51.100.42",
+                frontend_proxy_sa=self.FRONTEND_SA,
+                backend_audience=self.BACKEND_AUDIENCE,
+            )
+        assert ip == "9.9.9.9"
+
+    def test_empty_frontend_proxy_sa_config_never_trusts_anything(self):
+        # Zero-behavior-change invariant: until FRONTEND_PROXY_SA is
+        # actually configured, X-Client-IP must never be trusted even if
+        # everything else lines up perfectly. Short-circuits before ever
+        # calling verify_oauth2_token.
+        from app.auth.rate_limiter import trusted_proxy_client_ip
+        token = "genuine-token-for-frontend-sa"
+        with self._patch_verify({
+            token: (self.BACKEND_AUDIENCE, {
+                "email": self.FRONTEND_SA,
+                "email_verified": True,
+                "exp": self._far_future_exp(),
+            }),
+        }) as mock_verify:
+            ip = trusted_proxy_client_ip(
+                xff="1.1.1.1, 5.5.5.5, 9.9.9.9",
+                peer=None,
+                x_frontend_identity=token,
+                x_client_ip="198.51.100.42",
+                frontend_proxy_sa="",  # not configured
+                backend_audience=self.BACKEND_AUDIENCE,
+            )
+        assert ip == "9.9.9.9"
+        mock_verify.assert_not_called()
+
+    def test_empty_backend_audience_config_never_trusts_anything(self):
+        # Same zero-behavior-change invariant for the other half of the
+        # config: BACKEND_AUDIENCE must also be set, or nothing is ever
+        # verified. Catches accidentally gating on only one of the two
+        # settings.
+        from app.auth.rate_limiter import trusted_proxy_client_ip
+        token = "genuine-token-for-frontend-sa"
+        with self._patch_verify({
+            token: (self.BACKEND_AUDIENCE, {
+                "email": self.FRONTEND_SA,
+                "email_verified": True,
+                "exp": self._far_future_exp(),
+            }),
+        }) as mock_verify:
+            ip = trusted_proxy_client_ip(
+                xff="1.1.1.1, 5.5.5.5, 9.9.9.9",
+                peer=None,
+                x_frontend_identity=token,
+                x_client_ip="198.51.100.42",
+                frontend_proxy_sa=self.FRONTEND_SA,
+                backend_audience="",  # not configured
+            )
+        assert ip == "9.9.9.9"
+        mock_verify.assert_not_called()
+
+    def test_malformed_token_does_not_crash_and_falls_back_to_xff(self):
+        from app.auth.rate_limiter import trusted_proxy_client_ip
+        with self._patch_verify({}):
+            ip = trusted_proxy_client_ip(
+                xff="1.1.1.1, 5.5.5.5, 9.9.9.9",
+                peer=None,
+                x_frontend_identity="not-a-real-jwt-at-all",
+                x_client_ip="198.51.100.42",
+                frontend_proxy_sa=self.FRONTEND_SA,
+                backend_audience=self.BACKEND_AUDIENCE,
+            )
+        assert ip == "9.9.9.9"
+
+    def test_missing_x_client_ip_header_falls_back_even_with_valid_identity(self):
+        # Valid frontend identity but no X-Client-IP in the request at
+        # all (e.g. an older frontend build before this was wired up) --
+        # must not crash, must fall back cleanly.
+        from app.auth.rate_limiter import trusted_proxy_client_ip
+        token = "genuine-token-for-frontend-sa"
+        with self._patch_verify({
+            token: (self.BACKEND_AUDIENCE, {
+                "email": self.FRONTEND_SA,
+                "email_verified": True,
+                "exp": self._far_future_exp(),
+            }),
+        }):
+            ip = trusted_proxy_client_ip(
+                xff="1.1.1.1, 5.5.5.5, 9.9.9.9",
+                peer=None,
+                x_frontend_identity=token,
+                x_client_ip="",
+                frontend_proxy_sa=self.FRONTEND_SA,
+                backend_audience=self.BACKEND_AUDIENCE,
+            )
+        assert ip == "9.9.9.9"
+
+    def test_email_containing_the_frontend_sa_as_a_substring_is_not_enough(self):
+        # The comparison must be EXACT equality, not "contains" -- an
+        # attacker who can get Google to issue them a token for a service
+        # account whose email happens to contain the configured frontend
+        # SA as a substring (e.g. a lookalike project, or the frontend SA
+        # name embedded in a longer attacker-controlled string) must not
+        # be trusted.
+        from app.auth.rate_limiter import trusted_proxy_client_ip
+        lookalike_email = self.FRONTEND_SA + ".evil-attacker.example.com"
+        token = "genuine-token-for-lookalike-email"
+        with self._patch_verify({
+            token: (self.BACKEND_AUDIENCE, {
+                "email": lookalike_email,
+                "email_verified": True,
+                "exp": self._far_future_exp(),
+            }),
+        }):
+            ip = trusted_proxy_client_ip(
+                xff="1.1.1.1, 5.5.5.5, 9.9.9.9",
+                peer=None,
+                x_frontend_identity=token,
+                x_client_ip="198.51.100.42",
+                frontend_proxy_sa=self.FRONTEND_SA,
+                backend_audience=self.BACKEND_AUDIENCE,
+            )
+        assert ip == "9.9.9.9"
+
+    def test_second_call_with_the_same_token_is_served_from_cache(self):
+        """#3740 follow-up: the sidecar reuses the same token across many
+        requests within its TTL, so verify_oauth2_token should only run
+        ONCE per distinct (still-valid) token, not once per request --
+        otherwise every proxied request pays a real cryptographic
+        verification (and, on a cold cert cache, a network round trip)."""
+        from app.auth.rate_limiter import trusted_proxy_client_ip
+        token = "genuine-token-reused-across-requests"
+        with self._patch_verify({
+            token: (self.BACKEND_AUDIENCE, {
+                "email": self.FRONTEND_SA,
+                "email_verified": True,
+                "exp": self._far_future_exp(),
+            }),
+        }) as mock_verify:
+            for _ in range(5):
+                ip = trusted_proxy_client_ip(
+                    xff="1.1.1.1, 5.5.5.5, 9.9.9.9",
+                    peer=None,
+                    x_frontend_identity=token,
+                    x_client_ip="198.51.100.42",
+                    frontend_proxy_sa=self.FRONTEND_SA,
+                    backend_audience=self.BACKEND_AUDIENCE,
+                )
+                assert ip == "198.51.100.42"
+        mock_verify.assert_called_once()
+
+    def test_cache_entry_past_its_own_exp_is_re_verified(self):
+        """The cache must respect the token's OWN exp, not cache forever --
+        a cached entry whose exp has already passed must trigger a fresh
+        verify_oauth2_token call (which, for a token that's genuinely
+        expired by then, the real function would reject on its own)."""
+        from app.auth.rate_limiter import trusted_proxy_client_ip, _verified_identity_cache
+        token = "genuine-token-about-to-expire"
+        # already past exp
+        _verified_identity_cache[token] = (self.FRONTEND_SA, self.BACKEND_AUDIENCE, time.time() - 1)
+
+        with self._patch_verify({
+            token: (self.BACKEND_AUDIENCE, {
+                "email": self.FRONTEND_SA,
+                "email_verified": True,
+                "exp": self._far_future_exp(),
+            }),
+        }) as mock_verify:
+            ip = trusted_proxy_client_ip(
+                xff="1.1.1.1, 5.5.5.5, 9.9.9.9",
+                peer=None,
+                x_frontend_identity=token,
+                x_client_ip="198.51.100.42",
+                frontend_proxy_sa=self.FRONTEND_SA,
+                backend_audience=self.BACKEND_AUDIENCE,
+            )
+        assert ip == "198.51.100.42"
+        mock_verify.assert_called_once()  # re-verified, not served from the stale entry
+
+    def test_cache_entry_for_a_different_audience_is_not_reused(self):
+        """Independent-review follow-up: a cache hit must re-check the
+        audience it was originally verified against, not just the email +
+        exp. Without this, reconfiguring BACKEND_AUDIENCE mid-token-
+        lifetime could keep trusting a still-unexpired entry that was only
+        ever verified against the OLD audience -- this token's signature
+        was never checked against the new one."""
+        from app.auth.rate_limiter import trusted_proxy_client_ip, _verified_identity_cache
+        token = "genuine-token-verified-for-a-different-audience"
+        # Manually seed a still-valid-looking cache entry for the SAME
+        # token but a DIFFERENT audience than the one this call will use.
+        _verified_identity_cache[token] = (self.FRONTEND_SA, self.OTHER_AUDIENCE, self._far_future_exp())
+
+        # Nothing in `valid` for self.BACKEND_AUDIENCE -- if the cache hit
+        # were (wrongly) accepted without re-checking audience, this test
+        # would never even reach verify_oauth2_token and would pass for
+        # the wrong reason; asserting it WAS called proves the cache miss
+        # happened and real (here: failing) verification ran instead.
+        with self._patch_verify({}) as mock_verify:
+            ip = trusted_proxy_client_ip(
+                xff="1.1.1.1, 5.5.5.5, 9.9.9.9",
+                peer=None,
+                x_frontend_identity=token,
+                x_client_ip="198.51.100.42",
+                frontend_proxy_sa=self.FRONTEND_SA,
+                backend_audience=self.BACKEND_AUDIENCE,
+            )
+        assert ip == "9.9.9.9"  # not trusted -- stale cross-audience cache entry ignored
+        mock_verify.assert_called_once_with(token, ANY, self.BACKEND_AUDIENCE)
+
+    def test_non_string_email_claim_is_ignored(self):
+        """Defensive type-check: a verified token whose `email` claim is
+        present but not a string (malformed/unexpected claims shape) must
+        not crash and must not be trusted -- `isinstance(email, str)`
+        already guards this in the implementation; this test locks that
+        behavior rather than leaving it unverified."""
+        from app.auth.rate_limiter import trusted_proxy_client_ip
+        token = "genuine-token-non-string-email"
+        with self._patch_verify({
+            token: (self.BACKEND_AUDIENCE, {
+                "email": 12345,  # not a string
+                "email_verified": True,
+                "exp": self._far_future_exp(),
+            }),
+        }):
+            ip = trusted_proxy_client_ip(
+                xff="1.1.1.1, 5.5.5.5, 9.9.9.9",
+                peer=None,
+                x_frontend_identity=token,
+                x_client_ip="198.51.100.42",
+                frontend_proxy_sa=self.FRONTEND_SA,
+                backend_audience=self.BACKEND_AUDIENCE,
+            )
+        assert ip == "9.9.9.9"
 
 
 # ===========================================================================
