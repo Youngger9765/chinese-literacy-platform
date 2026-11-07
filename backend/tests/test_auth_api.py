@@ -1948,3 +1948,127 @@ class TestClassroomLoginBurst:
         ]
         assert statuses.count(429) == 0, statuses
         assert statuses.count(200) == 30, statuses
+
+
+class TestChangePasswordRateLimit:
+    """find_01UFJZQJppyp8QgR9xSrXZGn (medium, CWE-307): a stolen bearer
+    token (e.g. a shared classroom device left logged in) let an attacker
+    script POST /api/auth/change-password with guessed old_password values
+    and read 401-vs-200 as a password-guessing oracle -- the route never
+    called rate_limiter.check() at all, so only GlobalRateLimitMiddleware's
+    90/min-per-IP write budget applied, and that grows with the number of
+    attacker IPs / Cloud Run instances. login caps one ACCOUNT at 10
+    guesses/min regardless of how many IPs it comes from; change-password
+    had no equivalent.
+
+    Fix: the same per-account (user id, not email -- the caller is already
+    authenticated) bucket login uses, checked BEFORE verify_password is
+    called (fail criteria: "further attempts are refused without
+    evaluating the password").
+    """
+
+    def test_change_password_account_rate_limit_exceeded(self, client, registered_user):
+        """Sending more than 10 wrong-old-password guesses in a minute on
+        the SAME account must return 429 on the 11th, even though each
+        request can carry the SAME token (account-keyed, not IP-keyed)."""
+        from app.routes.auth import rate_limiter
+        rate_limiter.reset()
+
+        for i in range(10):
+            resp = client.post(
+                "/api/auth/change-password",
+                json={
+                    "old_password": f"WrongGuess{i}!",
+                    "new_password": "NewSecurePass456!",
+                },
+                headers=auth_header(registered_user["token"]),
+            )
+            assert resp.status_code == 401, f"Request {i+1} unexpected status {resp.status_code}: {resp.text}"
+
+        # 11th guess on the same account must be refused by the rate
+        # limiter itself -- not a coincidental 401 from a bad guess.
+        resp = client.post(
+            "/api/auth/change-password",
+            json={
+                "old_password": "YetAnotherWrongGuess!",
+                "new_password": "NewSecurePass456!",
+            },
+            headers=auth_header(registered_user["token"]),
+        )
+        assert resp.status_code == 429
+        assert resp.json()["detail"] == "Too many requests. Please try again later."
+
+    def test_change_password_rate_limit_is_per_account_not_per_ip(self, client, registered_user):
+        """Two DIFFERENT accounts guessing concurrently from the same IP
+        (the attacker's own machine, or a shared classroom IP) must not
+        throttle each other -- the cap is per victim account, mirroring
+        login's per-account bucket (TestClassroomLoginBurst's sibling
+        case, just for change-password instead of login)."""
+        import uuid
+        from app.routes.auth import rate_limiter
+        rate_limiter.reset()
+
+        email2 = f"ratelimit2_{uuid.uuid4().hex[:8]}@example.com"
+        password2 = "SecurePass123!"
+        reg = client.post("/api/auth/register", json={
+            "email": email2, "password": password2, "name": "Rate Limit Victim 2",
+        })
+        assert reg.status_code == 201, reg.text
+        vtoken = reg.json().get("verification_token")
+        if vtoken:
+            client.get(f"/api/auth/verify-email?token={vtoken}")
+        token2 = client.post("/api/auth/login", json={"email": email2, "password": password2}).json()["access_token"]
+
+        # Exhaust account 1's bucket.
+        for _ in range(10):
+            client.post(
+                "/api/auth/change-password",
+                json={"old_password": "WrongGuess!", "new_password": "NewSecurePass456!"},
+                headers=auth_header(registered_user["token"]),
+            )
+        exhausted = client.post(
+            "/api/auth/change-password",
+            json={"old_password": "WrongGuess!", "new_password": "NewSecurePass456!"},
+            headers=auth_header(registered_user["token"]),
+        )
+        assert exhausted.status_code == 429
+
+        # Account 2, same process (same IP in TestClient), must still get
+        # a real answer -- not swept up by account 1's exhausted bucket.
+        resp = client.post(
+            "/api/auth/change-password",
+            json={"old_password": "StillWrongGuess!", "new_password": "NewSecurePass456!"},
+            headers=auth_header(token2),
+        )
+        assert resp.status_code == 401, (
+            f"account 2 must not be throttled by account 1's guesses -- got {resp.status_code}: {resp.text}"
+        )
+
+    def test_change_password_rate_limit_refuses_without_evaluating_password(self, client, registered_user):
+        """Fix criteria (verbatim from the finding): 'Once the cap is
+        reached, further attempts are refused without evaluating the
+        password.' Prove this by exhausting the bucket, THEN sending the
+        actual CORRECT old_password -- it must still 429, not 200. If the
+        rate-limit check were a no-op or placed after verify_password,
+        this would incorrectly succeed."""
+        from app.routes.auth import rate_limiter
+        rate_limiter.reset()
+
+        for _ in range(10):
+            client.post(
+                "/api/auth/change-password",
+                json={"old_password": "WrongGuess!", "new_password": "NewSecurePass456!"},
+                headers=auth_header(registered_user["token"]),
+            )
+
+        resp = client.post(
+            "/api/auth/change-password",
+            json={
+                "old_password": registered_user["password"],  # the REAL password
+                "new_password": "NewSecurePass456!",
+            },
+            headers=auth_header(registered_user["token"]),
+        )
+        assert resp.status_code == 429, (
+            f"the correct old_password must still be refused once the account bucket is exhausted -- got {resp.status_code}: {resp.text}"
+        )
