@@ -1003,8 +1003,17 @@ class TestGlobalRateLimitMiddlewarePerUserKey:
     would be caught here even if the string format were right."""
 
     def _token_for(self, user_id: int) -> str:
-        from app.auth.jwt import create_access_token
-        return create_access_token(user_id)
+        # Sign with the exact secret the running middleware verifies with.
+        # Other test modules importlib.reload(app.config / app.main) with a
+        # different JWT_SECRET_KEY, so app.auth.jwt's import-time settings can
+        # disagree with app.main's; minting via create_access_token then
+        # yields a token the middleware rejects, and the request silently
+        # falls back to the IP bucket (seen only in full-suite order).
+        import jwt as pyjwt
+        import app.main as main_module
+        return pyjwt.encode(
+            {"sub": str(user_id)}, main_module.settings.jwt_secret_key, algorithm="HS256"
+        )
 
     def test_authenticated_user_unaffected_by_exhausted_anonymous_ip_bucket(self, client):
         """The exact scenario the finding reports: flood the shared
