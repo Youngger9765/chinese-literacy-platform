@@ -103,23 +103,39 @@ def sanitize_dialogue_turns(
     user_id: str | None = None,
 ) -> list[dict]:
     """
-    Sanitize student turns in a dialogue list.
+    Sanitize every turn in a dialogue list before it reaches an AI prompt.
 
-    AI turns are trusted (server-generated) and are returned unchanged.
-    Only turns with role == "student" are sanitized.
+    Claude Security find_01AS6qqjWCjVEXLM2gfFuGyT (medium): this used to
+    sanitize only turns with role == "student", on the assumption that an
+    "ai" turn must be server-generated and therefore already safe -- "AI
+    turns are trusted (server-generated)". That assumption does not hold
+    for every caller: `score_comprehension`
+    (routes/learning/learning_comprehension_score.py) builds this list
+    directly from a client-supplied request body
+    (`ComprehensionScoreRequest.dialogue_turns`), where the CLIENT picks
+    every turn's `role`. A turn labelled "ai" there is not server
+    history -- it is attacker-controlled text that used to skip
+    sanitization (and the length cap `sanitize_ai_input` enforces)
+    entirely, letting it reach the Gemini prompt unfiltered and at
+    unbounded length. Every turn is now sanitized the same way regardless
+    of its label; a genuinely server-generated "ai" turn with no
+    injection patterns and no excess length comes back byte-identical, so
+    this is not a behavior change for the trusted case, only a closed gap
+    for the untrusted one.
 
     Args:
         turns: List of {"role": "ai"|"student", "text": str} dicts.
         user_id: Optional user identifier for logging.
 
     Returns:
-        New list of turns with student turns sanitized.
-        The original list and its dicts are never mutated.
+        New list of turns, every one sanitized. The original list and its
+        dicts are never mutated.
     """
     result = []
     for turn in turns:
-        if turn.get("role") == "student":
-            sanitized_text, _ = sanitize_ai_input(turn["text"], user_id=user_id)
+        text = turn.get("text")
+        if text:
+            sanitized_text, _ = sanitize_ai_input(text, user_id=user_id)
             result.append({**turn, "text": sanitized_text})
         else:
             result.append(turn)

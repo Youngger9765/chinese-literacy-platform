@@ -47,10 +47,18 @@ owner: young
 - LLM special tokens `[INST]` `<|system|>` `<|begin_of_text|>`
 - Jailbreak 關鍵字：`jailbreak` / `DAN` / `developer mode` / `越獄` / `啟用開發者模式`
 
-### I-3: AI turns 不被過濾
+### I-3: 每個 turn 都過濾，`role` 不是信任邊界（2026-11 修正，find_01AS6qqjWCjVEXLM2gfFuGyT）
 
-`sanitize_dialogue_turns(turns)` 只過濾 `role == "student"` 的 turn。
-`role == "ai"` 的 turn 原封不動回傳（伺服器自產，可信任）。
+`sanitize_dialogue_turns(turns)` 現在對**每一個** turn 都過濾，不分 `role`。
+
+這條不變式在 2026-06-02 原本寫的是「只過濾 `role == "student"`，`ai` 原封不動——
+伺服器自產，可信任」。那個假設對某些呼叫者不成立：`score_comprehension`
+（`routes/learning/learning_comprehension_score.py`）直接從**客戶端送來的
+request body** 組這個 list，`role` 是客戶端自己填的欄位。攻擊者把一個 turn
+標成 `"ai"` 就能跳過過濾與長度上限，不受限地打進 Gemini prompt。
+
+對真正伺服器產生、沒有注入模式、長度在上限內的 AI turn，輸出仍然逐字不變——
+這不是對可信任情境的行為改變，只是把不可信情境的洞補起來。
 
 ### I-4: 空字串安全
 
@@ -70,7 +78,8 @@ owner: young
 
 - ❌ 讓 injection 模式通過只記 log 不替換 — 攻擊者可以靠記錯位置的 log 來繞
 - ❌ 刪除命中 substring（可能斷字）— 應替換為 `[已過濾]`
-- ❌ 過濾 AI turns — AI turns 是 server-generated，過濾是誤傷
+- ❌ 只靠 `role` 欄位判斷要不要過濾某個 turn — `role` 在部分呼叫路徑是客戶端自己填的，
+  不是信任邊界（find_01AS6qqjWCjVEXLM2gfFuGyT）；要過濾就對每個 turn 都做
 - ❌ 把 MAX_INPUT_LENGTH 設超過 10000 而不更新 Gemini max_output_tokens — token stuffing
 - ❌ 在 sanitize 之前做任何 AI 呼叫 — 要先 sanitize 再 call AI
 
