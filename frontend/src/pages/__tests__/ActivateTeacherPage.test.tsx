@@ -120,7 +120,7 @@ describe('ActivateTeacherPage (#3804, #3812)', () => {
         suggestions: null,
       });
       vi.mocked(authApi.activateTeacher).mockResolvedValueOnce({
-        schools: [{ id: 1, name: '市立大安國小', is_new: false }],
+        schools: [{ id: 1, name: '市立大安國小', is_new: false, role_active: true }],
         roles: [],
       });
       render(<ActivateTeacherPage />);
@@ -188,7 +188,7 @@ describe('ActivateTeacherPage (#3804, #3812)', () => {
 
     it('submitting a manually-typed name sends it as `name`, not a code', async () => {
       vi.mocked(authApi.activateTeacher).mockResolvedValueOnce({
-        schools: [{ id: 2, name: '某個不在名錄裡的學校', is_new: true }],
+        schools: [{ id: 2, name: '某個不在名錄裡的學校', is_new: true, role_active: true }],
         roles: [],
       });
       render(<ActivateTeacherPage />);
@@ -224,7 +224,7 @@ describe('ActivateTeacherPage (#3804, #3812)', () => {
       suggestions: null,
     });
     vi.mocked(authApi.activateTeacher).mockResolvedValueOnce({
-      schools: [{ id: 1, name: '市立大安國小', is_new: false }],
+      schools: [{ id: 1, name: '市立大安國小', is_new: false, role_active: true }],
       roles: [],
     });
     render(<ActivateTeacherPage />);
@@ -235,6 +235,72 @@ describe('ActivateTeacherPage (#3804, #3812)', () => {
     await waitFor(() => expect(refreshUserMock).toHaveBeenCalled());
     expect(setActiveViewMock).toHaveBeenCalledWith('teacher');
     expect(screen.getByText('開通成功！')).toBeTruthy();
+
+    vi.advanceTimersByTime(1600);
+    await waitFor(() => {
+      expect(navigateMock).toHaveBeenCalledWith('/teacher-home');
+    });
+    vi.useRealTimers();
+  });
+
+  // Claude Security find_01RzZ2bXyjs6SrNmD7KkKy91 (high), 2026-11-05: a
+  // genuinely pre-existing school grants an INACTIVE role -- the teacher
+  // must see a clear "waiting for admin" message here, not the success
+  // screen, and must NOT be auto-navigated to teacher-home (which would
+  // immediately 403 trying to use that school).
+  it('a pending (inactive) school shows the waiting-for-admin message and does not auto-navigate', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.mocked(authApi.searchSchoolDirectory).mockResolvedValue({
+      items: [DA_AN_TAIPEI],
+      total: 1,
+      suggestions: null,
+    });
+    vi.mocked(authApi.activateTeacher).mockResolvedValueOnce({
+      schools: [{ id: 1, name: '市立大安國小', is_new: false, role_active: false }],
+      roles: [],
+    });
+    render(<ActivateTeacherPage />);
+
+    await searchAndSelect('大按', '市立大安國小');
+    fireEvent.click(screen.getByRole('button', { name: '開通老師身分' }));
+
+    await waitFor(() => expect(refreshUserMock).toHaveBeenCalled());
+    expect(screen.getByText('已送出開通申請')).toBeTruthy();
+    expect(screen.getByText('等待學校管理員確認')).toBeTruthy();
+    expect(screen.queryByText('開通成功！')).toBeNull();
+
+    vi.advanceTimersByTime(3000);
+    expect(navigateMock).not.toHaveBeenCalledWith('/teacher-home');
+    vi.useRealTimers();
+  });
+
+  it('a mix of one active and one pending school shows both sections and still navigates', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.mocked(authApi.activateTeacher).mockResolvedValueOnce({
+      schools: [
+        { id: 1, name: '剛自建的學校', is_new: true, role_active: true },
+        { id: 2, name: '教育局建檔學校', is_new: false, role_active: false },
+      ],
+      roles: [],
+    });
+    render(<ActivateTeacherPage />);
+
+    fireEvent.click(screen.getByText('找不到我的學校'));
+    fireEvent.change(screen.getByLabelText('學校 1 名稱（手動輸入）'), {
+      target: { value: '剛自建的學校' },
+    });
+    fireEvent.click(screen.getByText('+ 再加一所學校'));
+    fireEvent.click(screen.getByText('找不到我的學校', { selector: 'button' }) ??
+      screen.getAllByText('找不到我的學校')[1]);
+    fireEvent.change(screen.getByLabelText('學校 2 名稱（手動輸入）'), {
+      target: { value: '教育局建檔學校' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: '開通老師身分' }));
+
+    await waitFor(() => expect(refreshUserMock).toHaveBeenCalled());
+    expect(screen.getByText('開通成功！')).toBeTruthy();
+    expect(screen.getByText('剛自建的學校')).toBeTruthy();
+    expect(screen.getByText(/教育局建檔學校/)).toBeTruthy();
 
     vi.advanceTimersByTime(1600);
     await waitFor(() => {
