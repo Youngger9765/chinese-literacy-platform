@@ -793,6 +793,93 @@ class TestGlobalRateLimitMiddleware:
         assert GlobalRateLimitMiddleware.WINDOW == 60
 
 
+class TestGlobalRateLimitMiddlewarePerUserKey:
+    """Claude Security find_01RtSp6b2GvNCj76v7dhrLmg (high) bullet 2, issue
+    #3929: an anonymous flood sharing one IP-keyed bucket (Firebase
+    Hosting's egress, a classroom NAT, a mobile carrier) must not be able
+    to 429 a logged-in user. GlobalRateLimitMiddleware now keys an
+    authenticated request on `request.state.user_id` -- set earlier in the
+    middleware chain by RequestLoggingMiddleware from a signature-verified
+    JWT, same mechanism get_client_key() already relies on elsewhere in
+    this module -- instead of IP. These tests go through TestClient (real
+    HTTP + the real middleware stack), not the key format directly, so a
+    bug in the actual wiring (wrong scope key, wrong middleware order)
+    would be caught here even if the string format were right."""
+
+    def _token_for(self, user_id: int) -> str:
+        from app.auth.jwt import create_access_token
+        return create_access_token(user_id)
+
+    def test_authenticated_user_unaffected_by_exhausted_anonymous_ip_bucket(self, client):
+        """The exact scenario the finding reports: flood the shared
+        anonymous IP bucket (what every Firebase-hosted visitor collapses
+        into), then confirm a logged-in user's own request still succeeds."""
+        from app.main import GlobalRateLimitMiddleware
+
+        anonymous_ip = "testclient"  # TestClient's fixed request.client.host
+        for _ in range(GlobalRateLimitMiddleware.READ_LIMIT):
+            general_rate_limiter.check_with_info(
+                f"global:ip:{anonymous_ip}:read",
+                GlobalRateLimitMiddleware.READ_LIMIT,
+                GlobalRateLimitMiddleware.WINDOW,
+            )
+        # Confirm the anonymous bucket really is exhausted before asserting
+        # the authenticated path is unaffected by it (positive control).
+        anon_resp = client.get("/api/stories")
+        assert anon_resp.status_code == 429
+
+        with patch.object(settings, "jwt_secret_key", "test-secret-for-per-user-key-test"):
+            token = self._token_for(4242)
+            auth_resp = client.get(
+                "/api/stories", headers={"Authorization": f"Bearer {token}"}
+            )
+        assert auth_resp.status_code != 429
+
+    def test_two_authenticated_users_get_independent_buckets(self, client):
+        """Exhausting user A's own bucket must not 429 user B, even though
+        both requests arrive from the identical TestClient IP."""
+        from app.main import GlobalRateLimitMiddleware
+
+        with patch.object(settings, "jwt_secret_key", "test-secret-for-per-user-key-test-2"):
+            token_a = self._token_for(111)
+            token_b = self._token_for(222)
+
+            for _ in range(GlobalRateLimitMiddleware.READ_LIMIT):
+                general_rate_limiter.check_with_info(
+                    "global:user:111:read",
+                    GlobalRateLimitMiddleware.READ_LIMIT,
+                    GlobalRateLimitMiddleware.WINDOW,
+                )
+
+            resp_a = client.get("/api/stories", headers={"Authorization": f"Bearer {token_a}"})
+            resp_b = client.get("/api/stories", headers={"Authorization": f"Bearer {token_b}"})
+
+        assert resp_a.status_code == 429
+        assert resp_b.status_code != 429
+
+    def test_authenticated_request_does_not_touch_the_ip_bucket(self, client):
+        """An authenticated request must key on the user, not the IP -- so
+        exhausting an authenticated user's bucket leaves the SAME IP's
+        anonymous bucket untouched (proves the key is genuinely swapped,
+        not just additionally checked)."""
+        from app.main import GlobalRateLimitMiddleware
+
+        with patch.object(settings, "jwt_secret_key", "test-secret-for-per-user-key-test-3"):
+            token = self._token_for(333)
+            for _ in range(GlobalRateLimitMiddleware.READ_LIMIT):
+                general_rate_limiter.check_with_info(
+                    "global:user:333:read",
+                    GlobalRateLimitMiddleware.READ_LIMIT,
+                    GlobalRateLimitMiddleware.WINDOW,
+                )
+            auth_resp = client.get("/api/stories", headers={"Authorization": f"Bearer {token}"})
+        assert auth_resp.status_code == 429
+
+        # Same TestClient IP, no auth header -- must be unaffected.
+        anon_resp = client.get("/api/stories")
+        assert anon_resp.status_code != 429
+
+
 class TestGlobalRateLimitMiddlewareTrustedProxyWiring:
     """#3740 — the unit tests in TestTrustedProxyClientIp exercise
     trusted_proxy_client_ip() as a pure function; none of them go through
@@ -1025,6 +1112,134 @@ class TestRealClientIpXFF:
         from app.auth.rate_limiter import real_ip_from_xff
         assert real_ip_from_xff("", "10.0.0.1") == "10.0.0.1"
         assert real_ip_from_xff("") == "unknown"
+
+
+class TestTrustedHopXFF:
+    """Claude Security find_01RtSp6b2GvNCj76v7dhrLmg (high, CWE-799, issue
+    #3929): "always take the last entry" (the fix for the PREVIOUS finding,
+    find_016GfbjuPFtSeUVkfhAUcLPp) traded spoofability for a different bug.
+    The last entry is always genuine on both paths -- Cloud Run itself
+    appends it from the real TCP peer -- but on
+    lingoleap-prod.web.app/lingoleap-staging.web.app that peer is FIREBASE
+    HOSTING'S OWN serving address, not the end user, so every distinct
+    visitor through that hostname shared one rate-limit bucket.
+
+    Fix: strip trusted (Google-operated) hops from the right instead of
+    always reading a fixed position. `66.249.82.130` below is not a made-up
+    example -- it is the real `httpRequest.remoteIp` Cloud Run's own
+    platform logs recorded for a probe request sent through
+    `lingoleap-staging.web.app` on 2026-11-07 (verified via `gcloud logging
+    read`, cross-checked against `is_trusted_hop()`: True). The direct-path
+    probe sent at the same time, including one with a forged
+    `X-Forwarded-For: 8.8.8.8, 1.2.3.4` prefix, both logged
+    `remoteIp: 150.117.242.93` -- confirming Cloud Run's own platform-level
+    peer is never influenced by a client-supplied XFF value, and giving a
+    second real (non-Google) address to use as "the real client" in these
+    tests."""
+
+    # Real values observed via `gcloud logging read` against
+    # lingoleap-backend-staging, 2026-11-07 (see class docstring).
+    REAL_FIREBASE_EGRESS_OBSERVED = "66.249.82.130"  # is_trusted_hop() -> True
+    REAL_CLIENT_OBSERVED = "150.117.242.93"           # is_trusted_hop() -> False
+
+    def test_firebase_hosting_path_resolves_to_real_client_not_firebase_egress(self):
+        """The exact shape find_01RtSp6b2GvNCj76v7dhrLmg reports: XFF is
+        `<real client>, <Firebase's own observed address>`. Must resolve to
+        the real client, not the shared Firebase address."""
+        from app.auth.rate_limiter import real_ip_from_xff
+        xff = f"203.0.113.42, {self.REAL_FIREBASE_EGRESS_OBSERVED}"
+        assert real_ip_from_xff(xff) == "203.0.113.42"
+
+    def test_two_different_users_via_firebase_get_distinct_keys(self):
+        """Direct requirement from the finding's fix criteria: "Test that
+        two different users via lingoleap-prod.web.app get distinct
+        keys."."""
+        from app.auth.rate_limiter import real_ip_from_xff
+        a = real_ip_from_xff(f"203.0.113.5, {self.REAL_FIREBASE_EGRESS_OBSERVED}")
+        b = real_ip_from_xff(f"203.0.113.9, {self.REAL_FIREBASE_EGRESS_OBSERVED}")
+        assert a == "203.0.113.5"
+        assert b == "203.0.113.9"
+        assert a != b
+
+    def test_forged_google_looking_prefix_on_direct_url_cannot_spoof(self):
+        """Direct requirement from the finding's fix criteria: "Test that a
+        request with a forged X-Forwarded-For prefix on the direct URL
+        still keys on its real peer." An attacker calling the direct
+        *.run.app URL can put ANYTHING in their own XFF header, including
+        an address that LOOKS like a trusted Google hop -- but Cloud Run
+        still appends their own real peer as the final, genuine entry, and
+        resolution never even looks past that final entry unless IT is
+        trusted. A forged entry earlier in the chain is never reached."""
+        from app.auth.rate_limiter import real_ip_from_xff
+        xff = f"8.8.8.8, {self.REAL_CLIENT_OBSERVED}"
+        assert real_ip_from_xff(xff) == self.REAL_CLIENT_OBSERVED
+
+    def test_direct_url_unaffected_when_last_entry_is_not_a_trusted_hop(self):
+        """Negative control -- the direct-path shape (no Firebase hop at
+        all) must behave exactly like it did under the old "always take
+        last" rule, since there is nothing to strip."""
+        from app.auth.rate_limiter import real_ip_from_xff
+        assert real_ip_from_xff(f"1.1.1.1, {self.REAL_CLIENT_OBSERVED}") == self.REAL_CLIENT_OBSERVED
+
+    def test_strips_multiple_consecutive_trusted_hops(self):
+        """Defense in depth: if more than one Google-operated hop is ever
+        stacked (not today's topology, but the loop should not special-case
+        "exactly one"), stripping continues past all of them."""
+        from app.auth.rate_limiter import real_ip_from_xff
+        xff = "198.51.100.7, 8.8.8.8, 8.8.4.4"  # two trailing Google (goog.json) entries
+        assert real_ip_from_xff(xff) == "198.51.100.7"
+
+    def test_single_trusted_entry_returns_itself_not_unknown(self):
+        """Edge case: a single-entry XFF that happens to be a Google
+        address never trips an index-out-of-range -- the loop never pops
+        past index 0."""
+        from app.auth.rate_limiter import real_ip_from_xff
+        assert real_ip_from_xff("8.8.8.8") == "8.8.8.8"
+
+
+class TestIsTrustedHop:
+    """Unit tests for the vendored Google-range membership check itself,
+    independent of real_ip_from_xff's stripping logic."""
+
+    def test_google_public_dns_is_trusted(self):
+        from app.auth.trusted_proxies import is_trusted_hop
+        assert is_trusted_hop("8.8.8.8") is True
+        assert is_trusted_hop("8.8.4.4") is True
+
+    def test_real_observed_firebase_egress_is_trusted(self):
+        """66.249.82.130 is the real httpRequest.remoteIp Cloud Run logged
+        for a lingoleap-staging.web.app probe, 2026-11-07 -- see
+        TestTrustedHopXFF's class docstring."""
+        from app.auth.trusted_proxies import is_trusted_hop
+        assert is_trusted_hop("66.249.82.130") is True
+
+    def test_ordinary_residential_and_rfc5737_addresses_are_not_trusted(self):
+        from app.auth.trusted_proxies import is_trusted_hop
+        assert is_trusted_hop("198.51.100.9") is False
+        assert is_trusted_hop("1.2.3.4") is False
+        assert is_trusted_hop("150.117.242.93") is False  # the real observed client IP
+
+    def test_a_google_cloud_customer_range_is_not_trusted(self):
+        """The whole point of vendoring goog.json (Google's OWN network)
+        instead of cloud.json (customer-rentable GCP ranges, 1056 IPv4
+        prefixes, only 7 overlap with goog.json -- verified 2026-11-07): an
+        attacker renting their own GCE VM and attacking the direct
+        *.run.app URL from it must NOT get treated as a trusted hop, or the
+        anti-spoofing property this fix depends on breaks for exactly that
+        attacker. 34.65.0.0/16 is a real cloud.json-only prefix."""
+        from app.auth.trusted_proxies import is_trusted_hop
+        assert is_trusted_hop("34.65.1.1") is False
+
+    def test_malformed_and_empty_input_fail_closed(self):
+        from app.auth.trusted_proxies import is_trusted_hop
+        assert is_trusted_hop("") is False
+        assert is_trusted_hop("not-an-ip") is False
+        assert is_trusted_hop("999.999.999.999") is False
+
+    def test_ipv6_google_range_is_trusted(self):
+        from app.auth.trusted_proxies import is_trusted_hop
+        assert is_trusted_hop("2001:4860::1") is True
+        assert is_trusted_hop("2001:db8::1") is False  # RFC 3849 documentation range
 
 
 # ===========================================================================
