@@ -271,6 +271,128 @@ class TestActivateWithMoeSchoolCode:
 
 
 # ===========================================================================
+# 1a. Claude Security find_019JwPDXdBingpryA61iCoJR (high) / issue #3931:
+#     "Self-activated teacher at a directory or admin-created school can
+#     enrol and read any student there." The admin-created-school half of
+#     this chain already has a regression test
+#     (test_self_serve_teacher_3804.py::
+#     test_self_activating_into_an_admin_created_school_grants_an_inactive_
+#     role). The MOE-DIRECTORY-BY-CODE half -- the other attack vector the
+#     finding names -- had none: every test in TestActivateWithMoeSchoolCode
+#     above checks `is_new is False` but never `role_active`, so a
+#     regression in the code-path specifically (as opposed to the
+#     name-matching path find_01RzZ2bXyjs6SrNmD7KkKy91's fix actually
+#     touches) would have shipped silently. Closing that gap here, plus the
+#     end-to-end chain the finding's own fix criteria names explicitly:
+#     "Enrolling such a student returns 404 [and] that account also cannot
+#     read the student's sessions or mint a preview token for them" --
+#     verified by confirming the chain is dead at its FIRST step
+#     (create_classroom), since every other step in the finding's chain
+#     requires a classroom this account cannot create.
+# ===========================================================================
+
+
+class TestMoeDirectorySelfActivationGrantsNoRealAccess:
+    def test_activating_by_code_into_a_directory_school_grants_an_inactive_role(self, client):
+        """The MOE-directory-by-code counterpart to
+        test_self_activating_into_an_admin_created_school_grants_an_inactive_role
+        -- same property, the other of the finding's two named attack
+        vectors, and the one path within activate_teacher_for_schools that
+        test_activating_with_a_code_binds_to_that_exact_directory_row never
+        actually checked `role_active` for."""
+        _, token = _register_login(client, "moe_code_pending_confirm")
+        resp = client.post(
+            "/api/users/me/activate-teacher",
+            json={"schools": [{"moe_school_code": "333602"}]},  # 市立大安國小, 台北市 -- genuinely pre-existing, not self-activation-born
+            headers=auth_header(token),
+        )
+        assert resp.status_code == 200, resp.text
+        data = resp.json()["schools"][0]
+        assert data["is_new"] is False, "sanity: this must be the pre-seeded directory row, not a new one"
+        assert data["role_active"] is False, (
+            "self-activating by MOE code into a genuinely pre-existing directory "
+            "school must grant an INACTIVE role -- an active one here is exactly "
+            "find_019JwPDXdBingpryA61iCoJR's attack vector"
+        )
+
+        me = client.get("/api/users/me", headers=auth_header(token)).json()
+        school_id = data["id"]
+        assert not any(
+            r["role_name"] == "teacher" and r["scope_id"] == str(school_id)
+            for r in me["roles"]
+        ), "an inactive role must not appear as an active teacher role in /users/me"
+
+    def test_self_activated_moe_directory_teacher_cannot_create_a_classroom_there(self, client):
+        """End-to-end: find_019JwPDXdBingpryA61iCoJR's whole attack chain
+        (self-activate -> create a classroom -> search/enrol/read students)
+        starts with creating a classroom. With an inactive role,
+        is_school_teacher() returns False and create_classroom's own gate
+        (classroom_crud.py, Claude Security find_01RzZ2bXyjs6SrNmD7KkKy91
+        part 3) refuses it -- every later step in the finding's chain
+        (search_students_for_classroom, add_student_to_classroom,
+        require_student_visible_to_teacher, teacher_preview's preview-token
+        mint) is unreachable without a classroom id this account owns, so
+        closing this one step closes the whole chain."""
+        _, token = _register_login(client, "moe_code_attacker")
+        activate = client.post(
+            "/api/users/me/activate-teacher",
+            json={"schools": [{"moe_school_code": "034651"}]},  # 市立大安國小, 桃園市
+            headers=auth_header(token),
+        )
+        assert activate.status_code == 200, activate.text
+        school_id = activate.json()["schools"][0]["id"]
+        assert activate.json()["schools"][0]["role_active"] is False  # positive control for the gate below
+
+        resp = client.post(
+            "/api/classrooms",
+            json={"name": "滲透測試班級", "school_id": school_id, "grade": 4},
+            headers=auth_header(token),
+        )
+        assert resp.status_code == 403, (
+            f"an inactive, self-activated-by-code teacher role must not be able to "
+            f"create a classroom at that school -- got {resp.status_code}: {resp.text}"
+        )
+
+    def test_positive_control_an_active_teacher_at_the_same_directory_school_can_create_a_classroom(self, client):
+        """Negative control for the test above: the 403 is specific to the
+        inactive-role attacker, not e.g. a missing fixture or a broken
+        route -- a REAL teacher at the identical directory school (admin-
+        granted, bypassing self-activation) must still succeed."""
+        from app.models.user import Role, UserRole
+
+        _, token = _register_login(client, "moe_code_real_teacher")
+        user_id = client.get("/api/users/me", headers=auth_header(token)).json()["id"]
+
+        db = TestingSessionLocal()
+        try:
+            school = db.query(School).filter(School.moe_school_code == "333602").first()
+            teacher_role = db.query(Role).filter(Role.name == "teacher").first()
+            db.add(
+                UserRole(
+                    user_id=user_id,
+                    role_id=teacher_role.id,
+                    scope_type="school",
+                    scope_id=str(school.id),
+                    is_active=True,
+                )
+            )
+            db.commit()
+            school_id = school.id
+        finally:
+            db.close()
+
+        resp = client.post(
+            "/api/classrooms",
+            json={"name": "真老師的班級", "school_id": school_id, "grade": 4},
+            headers=auth_header(token),
+        )
+        assert resp.status_code == 201, (
+            f"a genuinely active teacher role at this same school must be able to "
+            f"create a classroom -- got {resp.status_code}: {resp.text}"
+        )
+
+
+# ===========================================================================
 # 1b. Backward compatibility: the pre-#3812 `school_names` field must keep
 #     working (CI found this the hard way: 3 security regression locks in
 #     tests/security/test_dynamic_security.py and the Playwright game E2E
