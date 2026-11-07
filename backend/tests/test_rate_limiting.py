@@ -1124,25 +1124,29 @@ class TestTrustedHopXFF:
     HOSTING'S OWN serving address, not the end user, so every distinct
     visitor through that hostname shared one rate-limit bucket.
 
-    Fix: strip trusted (Google-operated) hops from the right instead of
-    always reading a fixed position. `66.249.82.130` below is not a made-up
-    example -- it is the real `httpRequest.remoteIp` Cloud Run's own
-    platform logs recorded for a probe request sent through
-    `lingoleap-staging.web.app` on 2026-11-07 (verified via `gcloud logging
-    read`, cross-checked against `is_trusted_hop()`: True). The direct-path
-    probe sent at the same time, including one with a forged
-    `X-Forwarded-For: 8.8.8.8, 1.2.3.4` prefix, both logged
+    Fix: strip AT MOST ONE trusted (Google-operated) hop from the right
+    instead of always reading a fixed position (coordinator review,
+    2026-11-07: an unbounded walk was the first version of this fix, but
+    it let a forged chain of multiple trusted-looking entries expose an
+    attacker-controlled one further back -- see
+    test_an_apps_script_looking_hop_chain_does_not_walk_further_back).
+    `66.249.82.130` below is not a made-up example -- it is one of 5 real
+    `httpRequest.remoteIp` values Cloud Run's own platform logs recorded
+    across 5 separate probe requests sent through
+    `lingoleap-staging.web.app` at staggered times on 2026-11-07 (verified
+    via `gcloud logging read`; see google_trusted_proxy_ranges.json for
+    all 5). The direct-path probe sent at the same time, including one
+    with a forged `X-Forwarded-For: 8.8.8.8, 1.2.3.4` prefix, logged
     `remoteIp: 150.117.242.93` -- confirming Cloud Run's own platform-level
     peer is never influenced by a client-supplied XFF value, and giving a
-    second real (non-Google) address to use as "the real client" in these
-    tests."""
+    real (non-Google) address to use as "the real client" in these tests."""
 
     # Real values observed via `gcloud logging read` against
     # lingoleap-backend-staging, 2026-11-07 (see class docstring).
     REAL_FIREBASE_EGRESS_OBSERVED = "66.249.82.130"  # is_trusted_hop() -> True
     REAL_CLIENT_OBSERVED = "150.117.242.93"           # is_trusted_hop() -> False
 
-    def test_firebase_hosting_path_resolves_to_real_client_not_firebase_egress(self):
+    def test_firebase_hosting_path_keys_on_the_real_client(self):
         """The exact shape find_01RtSp6b2GvNCj76v7dhrLmg reports: XFF is
         `<real client>, <Firebase's own observed address>`. Must resolve to
         the real client, not the shared Firebase address."""
@@ -1161,17 +1165,14 @@ class TestTrustedHopXFF:
         assert b == "203.0.113.9"
         assert a != b
 
-    def test_forged_google_looking_prefix_on_direct_url_cannot_spoof(self):
-        """Direct requirement from the finding's fix criteria: "Test that a
-        request with a forged X-Forwarded-For prefix on the direct URL
-        still keys on its real peer." An attacker calling the direct
-        *.run.app URL can put ANYTHING in their own XFF header, including
-        an address that LOOKS like a trusted Google hop -- but Cloud Run
-        still appends their own real peer as the final, genuine entry, and
-        resolution never even looks past that final entry unless IT is
-        trusted. A forged entry earlier in the chain is never reached."""
+    def test_forged_multi_hop_xff_on_direct_url_keys_on_the_real_peer(self):
+        """Coordinator-requested test, 2026-11-07: a forged chain with
+        SEVERAL entries that look like trusted hops, ending in the one
+        genuine (Cloud-Run-appended, non-spoofable) entry, must still
+        resolve to that genuine entry -- an attacker calling the direct
+        *.run.app URL controls everything except the final position."""
         from app.auth.rate_limiter import real_ip_from_xff
-        xff = f"8.8.8.8, {self.REAL_CLIENT_OBSERVED}"
+        xff = f"66.249.65.1, 66.249.70.2, 8.8.8.8, {self.REAL_CLIENT_OBSERVED}"
         assert real_ip_from_xff(xff) == self.REAL_CLIENT_OBSERVED
 
     def test_direct_url_unaffected_when_last_entry_is_not_a_trusted_hop(self):
@@ -1181,37 +1182,54 @@ class TestTrustedHopXFF:
         from app.auth.rate_limiter import real_ip_from_xff
         assert real_ip_from_xff(f"1.1.1.1, {self.REAL_CLIENT_OBSERVED}") == self.REAL_CLIENT_OBSERVED
 
-    def test_strips_multiple_consecutive_trusted_hops(self):
-        """Defense in depth: if more than one Google-operated hop is ever
-        stacked (not today's topology, but the loop should not special-case
-        "exactly one"), stripping continues past all of them."""
+    def test_an_apps_script_looking_hop_chain_does_not_walk_further_back(self):
+        """Coordinator-requested test, 2026-11-07: even when BOTH of the
+        last two entries fall inside the trusted allowlist (simulating an
+        attacker who can reach this backend from a second Google-operated
+        vantage point, e.g. Google Apps Script, that happens to share the
+        same published range as Firebase Hosting's observed egress), only
+        the single genuine last entry is ever stepped over. The one before
+        it is trusted as "the real client" (exactly the Firebase Hosting
+        case -- this IS a real trusted hop, just not the one this function
+        keeps looking behind), but resolution must NOT continue past it to
+        the attacker-controlled entry one position further back."""
         from app.auth.rate_limiter import real_ip_from_xff
-        xff = "198.51.100.7, 8.8.8.8, 8.8.4.4"  # two trailing Google (goog.json) entries
-        assert real_ip_from_xff(xff) == "198.51.100.7"
+        attacker_controlled = "198.51.100.7"
+        second_trusted_looking_hop = "66.249.65.5"  # also inside 66.249.64.0/19
+        genuine_last_entry = self.REAL_FIREBASE_EGRESS_OBSERVED
+        xff = f"{attacker_controlled}, {second_trusted_looking_hop}, {genuine_last_entry}"
+        result = real_ip_from_xff(xff)
+        assert result == second_trusted_looking_hop
+        assert result != attacker_controlled
 
     def test_single_trusted_entry_returns_itself_not_unknown(self):
-        """Edge case: a single-entry XFF that happens to be a Google
-        address never trips an index-out-of-range -- the loop never pops
-        past index 0."""
+        """Edge case: a single-entry XFF that happens to be inside the
+        trusted range never trips an index-out-of-range -- there is no
+        earlier entry to step back to, so it returns itself."""
         from app.auth.rate_limiter import real_ip_from_xff
-        assert real_ip_from_xff("8.8.8.8") == "8.8.8.8"
+        assert real_ip_from_xff(self.REAL_FIREBASE_EGRESS_OBSERVED) == self.REAL_FIREBASE_EGRESS_OBSERVED
 
 
 class TestIsTrustedHop:
     """Unit tests for the vendored Google-range membership check itself,
-    independent of real_ip_from_xff's stripping logic."""
-
-    def test_google_public_dns_is_trusted(self):
-        from app.auth.trusted_proxies import is_trusted_hop
-        assert is_trusted_hop("8.8.8.8") is True
-        assert is_trusted_hop("8.8.4.4") is True
+    independent of real_ip_from_xff's stripping logic. The trusted range is
+    now a single, narrowly-scoped prefix (66.249.64.0/19) anchored to real
+    observed Firebase Hosting egress traffic -- see
+    google_trusted_proxy_ranges.json for the 5 `gcloud logging read`
+    observations this is derived from."""
 
     def test_real_observed_firebase_egress_is_trusted(self):
-        """66.249.82.130 is the real httpRequest.remoteIp Cloud Run logged
-        for a lingoleap-staging.web.app probe, 2026-11-07 -- see
-        TestTrustedHopXFF's class docstring."""
+        """All 5 addresses Cloud Run's own platform logs recorded across 5
+        separate lingoleap-staging.web.app probes, 2026-11-07."""
         from app.auth.trusted_proxies import is_trusted_hop
-        assert is_trusted_hop("66.249.82.130") is True
+        for ip in (
+            "66.249.82.130",
+            "66.249.82.197",
+            "66.249.82.65",
+            "66.249.82.13",
+            "66.249.82.103",
+        ):
+            assert is_trusted_hop(ip) is True, ip
 
     def test_ordinary_residential_and_rfc5737_addresses_are_not_trusted(self):
         from app.auth.trusted_proxies import is_trusted_hop
@@ -1219,14 +1237,26 @@ class TestIsTrustedHop:
         assert is_trusted_hop("1.2.3.4") is False
         assert is_trusted_hop("150.117.242.93") is False  # the real observed client IP
 
+    def test_google_public_dns_is_no_longer_trusted(self):
+        """2026-11-07 narrowing: the allowlist used to be Google's entire
+        non-customer-rentable network (94 prefixes), which included
+        8.8.8.0/24 (Google Public DNS) -- a range nowhere near Firebase
+        Hosting's actual serving layer, but one a sufficiently determined
+        attacker (e.g. from Google Apps Script or other first-party Google
+        infrastructure) could plausibly reach a request from. Narrowed to
+        the one prefix actually observed. 8.8.8.8 must NOT be trusted."""
+        from app.auth.trusted_proxies import is_trusted_hop
+        assert is_trusted_hop("8.8.8.8") is False
+        assert is_trusted_hop("8.8.4.4") is False
+
     def test_a_google_cloud_customer_range_is_not_trusted(self):
-        """The whole point of vendoring goog.json (Google's OWN network)
-        instead of cloud.json (customer-rentable GCP ranges, 1056 IPv4
-        prefixes, only 7 overlap with goog.json -- verified 2026-11-07): an
-        attacker renting their own GCE VM and attacking the direct
-        *.run.app URL from it must NOT get treated as a trusted hop, or the
-        anti-spoofing property this fix depends on breaks for exactly that
-        attacker. 34.65.0.0/16 is a real cloud.json-only prefix."""
+        """The whole point of anchoring to goog.json's published boundary
+        (not cloud.json, the customer-rentable range): an attacker renting
+        their own GCE VM and attacking the direct *.run.app URL from it
+        must NOT get treated as a trusted hop, or the anti-spoofing
+        property this fix depends on breaks for exactly that attacker.
+        34.65.0.0/16 is a real cloud.json-only prefix, nowhere near the
+        single 66.249.64.0/19 prefix now vendored."""
         from app.auth.trusted_proxies import is_trusted_hop
         assert is_trusted_hop("34.65.1.1") is False
 
@@ -1236,10 +1266,13 @@ class TestIsTrustedHop:
         assert is_trusted_hop("not-an-ip") is False
         assert is_trusted_hop("999.999.999.999") is False
 
-    def test_ipv6_google_range_is_trusted(self):
+    def test_no_ipv6_ranges_are_vendored_yet(self):
+        """2026-11-07 narrowing dropped the (unobserved) IPv6 entries along
+        with the broader IPv4 set -- nothing has ever actually been
+        observed arriving over IPv6, so nothing is trusted there yet."""
         from app.auth.trusted_proxies import is_trusted_hop
-        assert is_trusted_hop("2001:4860::1") is True
-        assert is_trusted_hop("2001:db8::1") is False  # RFC 3849 documentation range
+        assert is_trusted_hop("2001:4860::1") is False
+        assert is_trusted_hop("2001:db8::1") is False
 
 
 # ===========================================================================

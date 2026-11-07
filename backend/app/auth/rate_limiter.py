@@ -122,37 +122,56 @@ def real_ip_from_xff(xff: str, peer: str | None = None) -> str:
     shared rate-limit identity (90 writes/min or 300 reads/min for ALL of
     them combined, not each).
 
-    Fix: trusted-hop stripping, not a fixed index. The last entry is always
-    genuine (Cloud Run never lets a client override it). If that address
-    belongs to Google's own first-party network -- `is_trusted_hop()`,
-    backed by a vendored snapshot of `goog.json`, which is Google's own
-    infrastructure and is DISJOINT from the much larger, customer-rentable
-    `cloud.json` ranges -- the request arrived through a Google-operated
-    hop (Firebase Hosting), so the real client is the entry BEFORE it
-    (which Firebase Hosting itself set, not something the browser could
-    forge). Keep stripping from the right for as long as the next entry is
-    also a trusted hop (defense in depth for any future extra Google-
-    operated layer), then return the first untrusted entry found. If the
-    last entry is NOT a Google address, there was no such hop: the request
-    hit Cloud Run directly, and that last entry already IS the real
-    client -- nothing the attacker put earlier in the header is ever read.
-    This also means a client-supplied prefix on the direct `*.run.app` path
-    still cannot influence the result: resolution never looks past the
-    first untrusted entry from the right.
+    Fix: trusted-hop stripping, not a fixed index -- but bounded to AT MOST
+    ONE hop (coordinator review, 2026-11-07, after the first version of
+    this fix walked an unbounded number of trusted hops from the right).
+    The real topology has exactly one Google-operated hop in front of this
+    backend (Firebase Hosting); an unbounded walk only existed to be
+    "future-proof" against a second hypothetical layer that does not exist
+    today, and it bought real risk for no real benefit: IS_TRUSTED_HOP's
+    allowlist, even narrowed to a single observed prefix (see
+    `google_trusted_proxy_ranges.json`), is still a network an attacker
+    could plausibly reach from (e.g. Google Apps Script, a Google-hosted
+    crawler, or any other first-party Google service that is not Cloud
+    Run's own ingress). If TWO consecutive entries both happened to look
+    trusted -- one genuine (Cloud Run's real append) and one an attacker
+    pre-pended from such a vantage point -- an unbounded walk would strip
+    BOTH and exposed a THIRD, attacker-controlled entry as "the real
+    client". Stopping after one hop means that can never happen: at most
+    the single genuine Cloud-Run-appended entry is ever discarded.
+
+    The last entry is always genuine (Cloud Run never lets a client
+    override it). If it belongs to the trusted allowlist, the request
+    arrived through that one known Google-operated hop, so the real client
+    is the entry immediately before it (which that hop itself set, not
+    something the browser could forge) -- look no further back than that,
+    even if more entries remain. If the last entry is NOT in the
+    allowlist, there was no such hop: the request hit Cloud Run directly,
+    and that last entry already IS the real client -- nothing the
+    attacker put earlier in the header is ever read. Either way, a
+    client-supplied prefix on the direct `*.run.app` path cannot influence
+    the result: resolution reads at most the last two entries, never more.
+
+    This is a coarsening, not the only defense: `GlobalRateLimitMiddleware`
+    additionally keys authenticated traffic on `request.state.user_id`
+    (see that class), which is the actual fix for "every visitor shares
+    one bucket" for any logged-in user. IP-based keying -- what this
+    function ultimately feeds -- only still matters for anonymous traffic,
+    where a coarser (shared, but never attacker-chosen) identity is an
+    accepted tradeoff, not the primary defense.
     """
     parts = [p.strip() for p in (xff or "").split(",") if p.strip()]
     if not parts:
         return peer or "unknown"
+    if len(parts) == 1:
+        return parts[0]
 
-    # Walk in from the right while each entry is a Google-operated hop.
-    # idx starts at the last (always-genuine) entry and moves left past
-    # every trusted one; it stops at the first untrusted entry -- that is
-    # the real client, whether that took zero hops (direct path) or one
-    # (Firebase Hosting).
-    idx = len(parts) - 1
-    while idx > 0 and is_trusted_hop(parts[idx]):
-        idx -= 1
-    return parts[idx]
+    # The last entry is always Cloud Run's own genuine append. Step back
+    # over it ONLY if it is a known trusted hop -- never more than this one
+    # position, regardless of what the entries further left look like.
+    if is_trusted_hop(parts[-1]):
+        return parts[-2]
+    return parts[-1]
 
 
 def real_client_ip(request: Request) -> str:

@@ -1,35 +1,28 @@
 """Trusted-hop membership test for X-Forwarded-For resolution.
 
 find_01RtSp6b2GvNCj76v7dhrLmg (high, CWE-799). See
-``google_trusted_proxy_ranges.json`` for the full rationale -- short
-version: Cloud Run's own ingress always appends the TRUE TCP peer it saw
-as the LAST X-Forwarded-For entry, never a client-supplied value. On
-``lingoleap-prod.web.app`` / ``lingoleap-staging.web.app`` that peer is
-Firebase Hosting's own serving address (Firebase Hosting is itself a
-Google first-party service), not the end user. This module answers "is
-this address one of Google's own, so the entry before it -- not this one
--- is the real client" using a vendored allowlist derived from Google's
-own announced network (``goog.json``) with every prefix that overlaps
-Google Cloud's customer-rentable range (``cloud.json``) removed -- see the
-ranges file's own ``_comment`` for why that subtraction is necessary
-(``goog.json`` alone is NOT disjoint from ``cloud.json``).
+``google_trusted_proxy_ranges.json`` for the full rationale and the actual
+log evidence -- short version: Cloud Run's own ingress always appends the
+TRUE TCP peer it saw as the LAST X-Forwarded-For entry, never a
+client-supplied value. On ``lingoleap-prod.web.app`` /
+``lingoleap-staging.web.app`` that peer is Firebase Hosting's own serving
+address, not the end user. This module answers "is this address the one
+Firebase Hosting's serving layer actually uses, so the entry before it --
+not this one -- is the real client".
 
-Known, accepted residual risk (independent review, 2026-11-07): this
-allowlist is still "all of Google's non-customer-rentable network", not
-specifically "Firebase Hosting's serving range" -- no narrower published
-list exists. If an attacker's own real IP (as Cloud Run sees it directly,
-on the unrestricted *.run.app path) happens to fall inside some OTHER
-Google-operated, non-customer block in this list (e.g. Google corporate
-infrastructure, Googlebot's crawl range), their genuine last XFF entry
-would be treated as a trusted hop and stripping would continue into an
-earlier, client-supplied entry -- reopening spoofability for that narrow,
-high-barrier population (requires actually controlling a host inside
-Google's own infrastructure, not just renting a GCP VM, which this file
-already excludes). Accepted the same way the previous "Firebase-path
-coarsening" tradeoff was: it closes a far larger, trivially-exploitable-
-by-anyone bug (every visitor through Firebase Hosting sharing one bucket)
-at the cost of a narrower, much harder one. Revisit if Google ever
-publishes a Firebase-Hosting-specific egress range.
+Coordinator review, 2026-11-07, narrowed this twice from the first
+version: (1) the allowlist used to be Google's entire non-customer-
+rentable network (94 prefixes derived from ``goog.json`` minus
+``cloud.json``) -- too broad, since it included ranges an attacker could
+plausibly send requests from that are NOT Firebase Hosting (e.g. Google
+Apps Script egress, general Google corporate infrastructure). It is now
+exactly ONE prefix, anchored to real observed traffic (see the ranges
+file). (2) ``real_ip_from_xff`` itself (not this module) now steps back at
+most ONE hop regardless of what this allowlist contains, so even if a
+future entry here turns out to be broader than intended, a multi-hop
+forged chain still cannot reach past the single genuine Cloud-Run-
+appended entry. The two narrowings are independent defenses, not
+substitutes for each other.
 """
 
 from __future__ import annotations
