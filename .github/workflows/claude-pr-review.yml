@@ -42,19 +42,33 @@ name: Claude PR Review
 on:
   issue_comment:
     types: [created]
+  workflow_dispatch:
+    # Manual-only debug trigger (#3893): `workflow_dispatch` can ONLY be
+    # invoked by someone with write access to this repo through the
+    # GitHub UI/API, never by commenting on a PR. That's what makes the
+    # `show_full_output: true` below safe here but NOT safe on the normal
+    # `issue_comment` path: a fork PR's attacker-authored comment can
+    # never reach this trigger, so the full agent transcript (which could
+    # include anything a malicious diff caused the agent to read) never
+    # lands in a public Actions log on a run anyone else controls.
+    inputs:
+      pr_number:
+        description: "PR number to review (manual debug trigger only)"
+        required: true
 
 jobs:
   review:
-    # Only trigger when someone comments @claude on a PR
     if: >-
-      github.event.issue.pull_request &&
-      contains(github.event.comment.body, '@claude') &&
-      (
-        github.event.comment.user.login == 'Youngger9765' ||
-        github.event.comment.user.login == 'if-else-master' ||
-        github.event.comment.user.login == 'stgst' ||
-        github.event.comment.user.login == 'Shinjou'
-      )
+      (github.event_name == 'issue_comment' &&
+       github.event.issue.pull_request &&
+       contains(github.event.comment.body, '@claude') &&
+       (
+         github.event.comment.user.login == 'Youngger9765' ||
+         github.event.comment.user.login == 'if-else-master' ||
+         github.event.comment.user.login == 'stgst' ||
+         github.event.comment.user.login == 'Shinjou'
+       )) ||
+      github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -86,7 +100,7 @@ jobs:
           mkdir -p .claude-pr-review
           python3 .github/scripts/fetch_pr_review_context.py \
             --repo "${{ github.repository }}" \
-            --pr "${{ github.event.issue.number }}" \
+            --pr "${{ github.event.inputs.pr_number || github.event.issue.number }}" \
             --out .claude-pr-review/diff-context.md
 
       - name: Write agent permission settings (no Bash, workspace-only, no secrets paths)
@@ -109,14 +123,14 @@ jobs:
                 "Edit(~/**)",
                 "Read(/${{ runner.temp }}/**)",
                 "Edit(/${{ runner.temp }}/**)",
-                "Write(.claude/**)",
-                "Write(**/.claude/**)",
-                "Write(CLAUDE.md)",
-                "Write(**/CLAUDE.md)",
-                "Write(AGENTS.md)",
-                "Write(**/AGENTS.md)",
-                "Write(.mcp.json)",
-                "Write(**/.mcp.json)"
+                "Edit(.claude/**)",
+                "Edit(**/.claude/**)",
+                "Edit(CLAUDE.md)",
+                "Edit(**/CLAUDE.md)",
+                "Edit(AGENTS.md)",
+                "Edit(**/AGENTS.md)",
+                "Edit(.mcp.json)",
+                "Edit(**/.mcp.json)"
               ],
               "blockReadsOutsideWorkingDirectories": true,
               "blockWritesOutsideWorkingDirectories": true
@@ -134,9 +148,15 @@ jobs:
           # 所以就算 agent 內部用得到這個 token，範圍也碰不到任何寫入。
           github_token: ${{ github.token }}
           settings: .claude-pr-review/settings.json
+          # Only true on a manual workflow_dispatch run -- see the trigger
+          # comment above for why that's the one path an attacker-authored
+          # PR comment can never reach. On the normal issue_comment path
+          # this is always false, so a fork PR never gets a verbose
+          # transcript in the public Actions log.
+          show_full_output: ${{ github.event_name == 'workflow_dispatch' }}
           prompt: |
             REPO: ${{ github.repository }}
-            PR NUMBER: ${{ github.event.issue.number }}
+            PR NUMBER: ${{ github.event.inputs.pr_number || github.event.issue.number }}
 
             你是 LingoLeap 專案的 code reviewer。用中文留言。
 
@@ -179,7 +199,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: claude-pr-review-${{ github.event.issue.number }}-artifact
+          name: claude-pr-review-${{ github.event.inputs.pr_number || github.event.issue.number }}-artifact
           path: .claude-pr-review/review.md
           retention-days: 1
           if-no-files-found: ignore
@@ -206,7 +226,7 @@ jobs:
       - name: Download review artifact
         uses: actions/download-artifact@v4
         with:
-          name: claude-pr-review-${{ github.event.issue.number }}-artifact
+          name: claude-pr-review-${{ github.event.inputs.pr_number || github.event.issue.number }}-artifact
           # Downloaded OUTSIDE $GITHUB_WORKSPACE on purpose (2026-11
           # round-2 review, blocker): actions/checkout runs `git clean
           # -ffdx` before checking out, which would silently delete this
@@ -246,5 +266,5 @@ jobs:
         run: |
           python3 .github/scripts/publish_pr_review_comment.py \
             --repo "${{ github.repository }}" \
-            --pr "${{ github.event.issue.number }}" \
+            --pr "${{ github.event.inputs.pr_number || github.event.issue.number }}" \
             --review-file /tmp/claude-pr-review/review.md
