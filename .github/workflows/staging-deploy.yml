@@ -5,6 +5,22 @@ on:
     branches: [staging]
   workflow_dispatch:
 
+# find_01YP72Td7XmwD2J4TU5nTMgd / find_01GSz5fbgsPuuK3ieTGopD8B: `id-token:
+# write` used to sit here, so EVERY job inherited it, including jobs that
+# run `npm ci` / `vite build` / third-party installs. That is an ambient
+# permission the moment the job starts (ACTIONS_ID_TOKEN_REQUEST_URL/TOKEN
+# are already in the environment), not something that only exists once
+# google-github-actions/auth runs -- so moving an install step before auth
+# never removed the exposure. `id-token: write` now lives ONLY as a
+# per-job override on the jobs that actually call
+# google-github-actions/auth@v2 (deploy-backend, deploy-frontend,
+# deploy-frontend-firebase, smoke-test, cleanup-images). GitHub Actions
+# does not merge a job-level permissions block with this one; it replaces
+# it for that job, and a job with no block of its own still inherits this
+# one unchanged.
+permissions:
+  contents: read
+
 # Serialize concurrent deploys. Back-to-back merges to staging would
 # race each other on Cloud Run revision/traffic. With this group,
 # new runs queue behind the in-flight one.
@@ -18,6 +34,32 @@ env:
   REGISTRY: asia-east1-docker.pkg.dev/lingoleap-dev/lingoleap
   BACKEND_SERVICE: lingoleap-backend-staging
   FRONTEND_SERVICE: lingoleap-frontend-staging
+  # #3719 — IAP 準備：同 preview-deploy.yml 的同名開關，預設 false。
+  # 唯一的 on/off 開關只有這一行；真的要在 staging 上測 IAP 前，先讀
+  # docs/iap-runbook.md。
+  IAP_ENABLED: 'false'
+  # #3728/#3740 — 同源代理（frontend nginx 轉送 /api、/assets、/q 去
+  # backend）的 build-time 開關，預設 false：關掉時這個 job 建出來的
+  # image 跟 #3741 revert 之後的 staging 完全一樣（VITE_API_URL 指到
+  # backend 絕對網址，沒有 BACKEND_INTERNAL_URL / 沒有
+  # BACKEND_INVOKER_SIDECAR_PORT，nginx 不會轉送任何東西）——這是刻意
+  # 的，不是疏漏：#3728 曾經在沒有這個開關的情況下對每個 staging/preview
+  # build 無條件打開代理，讓 backend 的限流器把代理那一跳的 IP 當成每個
+  # 使用者的 IP，所有人共用同一個 300 次配額（#3740 postmortem）。
+  #
+  # ⚠️ 只打開這一行還不夠：render-nginx-conf.sh 在只有代理、沒有 sidecar
+  # 的狀態下**會讓這個 build 直接失敗**（#3740 新增的 fail-closed 檢查，
+  # 刻意設計成「半套設定」連 image 都建不出來，而不是建出一個會重現同一
+  # 個 bug 的 image）。要真的打開代理，backend 還必須：
+  #   (1) 已設定 FRONTEND_PROXY_SA + BACKEND_AUDIENCE（見
+  #       backend/app/config.py）
+  #   (2) 這個 job 的 frontend deploy 步驟已經改成多容器部署，把
+  #       scripts/run_invoker_token.py --serve 的 sidecar 跟 frontend
+  #       一起上（目前這個 workflow **還沒有**這一步 —— 只在拋棄式 canary
+  #       上手動驗證過，見 docs/iap-runbook.md）
+  # 這三件事沒有一起做，打開這個開關不會讓代理可用，只會讓 build 直接
+  # 壞掉（安全失敗，不是悄悄重現 regression）。
+  SAME_ORIGIN_PROXY_ENABLED: 'false'
 
 jobs:
   detect-changes:
@@ -45,13 +87,17 @@ jobs:
     needs: detect-changes
     if: needs.detect-changes.outputs.backend == 'true' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v6
 
       - id: auth
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
+          workload_identity_provider: projects/958347263320/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+          service_account: github-actions@lingoleap-dev.iam.gserviceaccount.com
 
       - uses: google-github-actions/setup-gcloud@v2
 
@@ -106,14 +152,29 @@ jobs:
             --region ${{ env.REGION }} \
             --project ${{ env.PROJECT_ID }}
 
-      - name: Verify backend health
+      # #3719 — IAP 準備：預設關，改上面 env.IAP_ENABLED 才會跑。
+      - name: （IAP_ENABLED 時）替 staging backend 開 IAP
+        if: env.IAP_ENABLED == 'true'
         run: |
+          gcloud beta run services update ${{ env.BACKEND_SERVICE }} \
+            --iap \
+            --region ${{ env.REGION }} \
+            --project ${{ env.PROJECT_ID }}
+
+      - name: Verify backend health
+        env:
+          IAP_AUDIENCE: ${{ secrets.IAP_AUDIENCE }}
+        run: |
+          source scripts/lib/iap-token.sh
+          IAP_AUTH_ARGS=()
+          IAP_TOKEN="$(iap_token "${IAP_AUDIENCE:-}")"
+          [ -n "${IAP_TOKEN}" ] && IAP_AUTH_ARGS=(-H "Proxy-Authorization: Bearer ${IAP_TOKEN}")
           URL=$(gcloud run services describe ${{ env.BACKEND_SERVICE }} \
             --region ${{ env.REGION }} \
             --project ${{ env.PROJECT_ID }} \
             --format='value(status.url)')
           for i in 1 2 3 4 5; do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL/")
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${IAP_AUTH_ARGS[@]+${IAP_AUTH_ARGS[@]}}" "$URL/")
             echo "Attempt $i: Backend health = $STATUS"
             [ "$STATUS" = "200" ] && exit 0
             sleep 10
@@ -127,13 +188,17 @@ jobs:
       always() &&
       (needs.detect-changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v6
 
       - id: auth
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
+          workload_identity_provider: projects/958347263320/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+          service_account: github-actions@lingoleap-dev.iam.gserviceaccount.com
 
       - uses: google-github-actions/setup-gcloud@v2
 
@@ -158,8 +223,26 @@ jobs:
           DEMO_STUDENT_EMAIL: ${{ secrets.DEMO_STUDENT_EMAIL }}
           DEMO_STUDENT_PW: ${{ secrets.DEMO_STUDENT_PW }}
         run: |
+          # #3719/#3728/#3740 — SAME_ORIGIN_PROXY_ENABLED=false (default,
+          # see the env: block above for the full why): build EXACTLY like
+          # today/post-#3741-revert — VITE_API_URL points straight at
+          # backend's absolute URL, no BACKEND_INTERNAL_URL,
+          # no BACKEND_INVOKER_SIDECAR_PORT, nginx never proxies anything.
+          # =true: VITE_API_URL stays empty (relative /api/* -- apiConfig.ts
+          # uses `??`, empty string isn't treated as undefined, same trick
+          # the Firebase Hosting job below already relies on).
+          # BACKEND_INTERNAL_URL tells this frontend's own nginx where to
+          # forward same-origin /api, /assets, /q (see
+          # frontend/docker/render-nginx-conf.sh). BACKEND_INVOKER_SIDECAR_PORT
+          # must travel with it or the build fails outright (fail-closed
+          # guard, see the env: block comment for why that's intentional).
+          if [ "${{ env.SAME_ORIGIN_PROXY_ENABLED }}" = "true" ]; then
+            PROXY_BUILD_ARGS=(--build-arg VITE_API_URL= --build-arg "BACKEND_INTERNAL_URL=${{ steps.backend-url.outputs.url }}" --build-arg BACKEND_INVOKER_SIDECAR_PORT=8081)
+          else
+            PROXY_BUILD_ARGS=(--build-arg "VITE_API_URL=${{ steps.backend-url.outputs.url }}")
+          fi
           docker build \
-            --build-arg VITE_API_URL=${{ steps.backend-url.outputs.url }} \
+            "${PROXY_BUILD_ARGS[@]}" \
             --build-arg VITE_SHOW_DEMO_LOGIN=true \
             --build-arg VITE_PARENT_PORTAL_ENABLED=true \
             --build-arg "VITE_DEMO_ADMIN_EMAIL=${DEMO_ADMIN_EMAIL}" \
@@ -197,14 +280,29 @@ jobs:
             --region ${{ env.REGION }} \
             --project ${{ env.PROJECT_ID }}
 
-      - name: Verify frontend health
+      # #3719 — IAP 準備：同上，預設關。
+      - name: （IAP_ENABLED 時）替 staging frontend 開 IAP
+        if: env.IAP_ENABLED == 'true'
         run: |
+          gcloud beta run services update ${{ env.FRONTEND_SERVICE }} \
+            --iap \
+            --region ${{ env.REGION }} \
+            --project ${{ env.PROJECT_ID }}
+
+      - name: Verify frontend health
+        env:
+          IAP_AUDIENCE: ${{ secrets.IAP_AUDIENCE }}
+        run: |
+          source scripts/lib/iap-token.sh
+          IAP_AUTH_ARGS=()
+          IAP_TOKEN="$(iap_token "${IAP_AUDIENCE:-}")"
+          [ -n "${IAP_TOKEN}" ] && IAP_AUTH_ARGS=(-H "Proxy-Authorization: Bearer ${IAP_TOKEN}")
           URL=$(gcloud run services describe ${{ env.FRONTEND_SERVICE }} \
             --region ${{ env.REGION }} \
             --project ${{ env.PROJECT_ID }} \
             --format='value(status.url)')
           for i in 1 2 3 4 5; do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL/")
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${IAP_AUTH_ARGS[@]+${IAP_AUTH_ARGS[@]}}" "$URL/")
             echo "Attempt $i: Frontend health = $STATUS"
             [ "$STATUS" = "200" ] && exit 0
             sleep 10
@@ -233,15 +331,20 @@ jobs:
             echo "**Commit:** \`${{ github.sha }}\`"
           } >> "$GITHUB_STEP_SUMMARY"
 
-  deploy-frontend-firebase:
-    name: Deploy frontend to Firebase Hosting (staging + dev)
+  # find_01GSz5fbgsPuuK3ieTGopD8B (HIGH): same split as deploy.yml's prod
+  # Firebase job (find_01YP72Td7XmwD2J4TU5nTMgd) -- the install/build code
+  # and the live GCP credential must not share a job. Staging had already
+  # moved to WIF (#3840); what remained was the unpinned
+  # `npm install -g firebase-tools@13` running inside the credentialed job.
+  build-frontend-firebase:
+    name: Build frontend for Firebase Hosting (staging + dev)
     needs: [detect-changes]
     if: |
       needs.detect-changes.outputs.firebase == 'true' ||
       github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
-    env:
-      COMMIT_SHA: ${{ github.sha }}
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v6
 
@@ -254,14 +357,6 @@ jobs:
       - name: Install frontend deps
         working-directory: frontend
         run: npm ci
-
-      # find_01WStrhArZsNRHeb92RWHZRE (high): this global npm install used to
-      # run AFTER "Authenticate to Google Cloud" below -- untrusted,
-      # lockfile/registry-resolved third-party code executing on a runner
-      # that already held live GCP credentials for the rest of this job.
-      # Moved before auth; it has no dependency on it (global CLI install).
-      - name: Install Firebase CLI
-        run: npm install -g firebase-tools@13
 
       - name: Build frontend for Firebase (relative API paths + demo creds)
         working-directory: frontend
@@ -277,14 +372,55 @@ jobs:
           VITE_DEMO_STUDENT_PW: ${{ secrets.DEMO_STUDENT_PW }}
         run: npm run build
 
+      - name: Upload frontend/dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: firebase-staging-dist
+          path: frontend/dist
+          retention-days: 1
+
+  deploy-frontend-firebase:
+    name: Deploy frontend to Firebase Hosting (staging + dev)
+    needs: [detect-changes, build-frontend-firebase]
+    if: |
+      needs.detect-changes.outputs.firebase == 'true' ||
+      github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      COMMIT_SHA: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Download frontend/dist
+        uses: actions/download-artifact@v4
+        with:
+          name: firebase-staging-dist
+          path: frontend/dist
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Pinned exact version + full-tree integrity hashes (committed
+      # .github/firebase-cli/package-lock.json) -- see deploy.yml for the
+      # full rationale (find_01YP72Td7XmwD2J4TU5nTMgd /
+      # find_01GSz5fbgsPuuK3ieTGopD8B).
+      - name: Install pinned Firebase CLI
+        working-directory: .github/firebase-cli
+        run: npm ci --ignore-scripts
+
       - id: auth
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
+          workload_identity_provider: projects/958347263320/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+          service_account: github-actions@lingoleap-dev.iam.gserviceaccount.com
 
       - name: Deploy to Firebase Hosting (staging + dev)
         run: |
-          firebase deploy \
+          "$GITHUB_WORKSPACE/.github/firebase-cli/node_modules/.bin/firebase" deploy \
             --only hosting:staging,hosting:dev \
             --project lingoleap-dev \
             --non-interactive \
@@ -307,15 +443,44 @@ jobs:
     needs: [deploy-backend, deploy-frontend]
     if: always() && !cancelled() && (needs.deploy-backend.result == 'success' || needs.deploy-frontend.result == 'success')
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     env:
       STAGING_BACKEND: https://lingoleap-backend-staging-958347263320.asia-east1.run.app
     steps:
+      - uses: actions/checkout@v6
+
+      # #3719 — IAP 準備：staging 未來可能在前面加一層 IAP。IAP_AUDIENCE 沒有
+      # 任何 secret 可讀（還沒打開 IAP），所以下面每一步都跟今天完全一樣——
+      # 這一步只是把「打開時只要設一個 secret」這件事準備好。
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/958347263320/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+          service_account: github-actions@lingoleap-dev.iam.gserviceaccount.com
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Mint IAP token once for this job (masked)
+        id: iap
+        env:
+          IAP_AUDIENCE: ${{ secrets.IAP_AUDIENCE }}
+        run: |
+          source scripts/lib/iap-token.sh
+          TOKEN="$(iap_token "${IAP_AUDIENCE:-}")"
+          if [ -n "${TOKEN}" ]; then
+            echo "::add-mask::${TOKEN}"
+          fi
+          echo "IAP_TOKEN=${TOKEN}" >> "$GITHUB_ENV"
+
       - name: Wait for Cloud Run to be ready
         run: sleep 15
 
       - name: Smoke test /api/health (expect 200)
         run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${STAGING_BACKEND}/api/health")
+          IAP_AUTH_ARGS=(); [ -n "${IAP_TOKEN:-}" ] && IAP_AUTH_ARGS=(-H "Proxy-Authorization: Bearer ${IAP_TOKEN}")
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${IAP_AUTH_ARGS[@]+${IAP_AUTH_ARGS[@]}}" "${STAGING_BACKEND}/api/health")
           echo "/api/health -> $STATUS"
           if [ "$STATUS" != "200" ]; then
             echo "FAIL: /api/health returned $STATUS, expected 200"
@@ -324,7 +489,8 @@ jobs:
 
       - name: Smoke test /api/teacher/story-tags (expect 200 or 401, not 500)
         run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${STAGING_BACKEND}/api/teacher/story-tags")
+          IAP_AUTH_ARGS=(); [ -n "${IAP_TOKEN:-}" ] && IAP_AUTH_ARGS=(-H "Proxy-Authorization: Bearer ${IAP_TOKEN}")
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${IAP_AUTH_ARGS[@]+${IAP_AUTH_ARGS[@]}}" "${STAGING_BACKEND}/api/teacher/story-tags")
           echo "/api/teacher/story-tags -> $STATUS"
           if [ "$STATUS" = "500" ]; then
             echo "FAIL: /api/teacher/story-tags returned 500"
@@ -333,7 +499,8 @@ jobs:
 
       - name: Smoke test /api/schools (expect 200 or 401, not 500)
         run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${STAGING_BACKEND}/api/schools")
+          IAP_AUTH_ARGS=(); [ -n "${IAP_TOKEN:-}" ] && IAP_AUTH_ARGS=(-H "Proxy-Authorization: Bearer ${IAP_TOKEN}")
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${IAP_AUTH_ARGS[@]+${IAP_AUTH_ARGS[@]}}" "${STAGING_BACKEND}/api/schools")
           echo "/api/schools -> $STATUS"
           if [ "$STATUS" = "500" ]; then
             echo "FAIL: /api/schools returned 500"
@@ -342,7 +509,8 @@ jobs:
 
       - name: Smoke test /api/organizations (expect 200 or 401, not 500)
         run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${STAGING_BACKEND}/api/organizations")
+          IAP_AUTH_ARGS=(); [ -n "${IAP_TOKEN:-}" ] && IAP_AUTH_ARGS=(-H "Proxy-Authorization: Bearer ${IAP_TOKEN}")
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${IAP_AUTH_ARGS[@]+${IAP_AUTH_ARGS[@]}}" "${STAGING_BACKEND}/api/organizations")
           echo "/api/organizations -> $STATUS"
           if [ "$STATUS" = "500" ]; then
             echo "FAIL: /api/organizations returned 500"
@@ -370,10 +538,14 @@ jobs:
     needs: [deploy-backend, deploy-frontend]
     if: always() && !cancelled()
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: google-github-actions/auth@v2
         with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
+          workload_identity_provider: projects/958347263320/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+          service_account: github-actions@lingoleap-dev.iam.gserviceaccount.com
       - uses: google-github-actions/setup-gcloud@v2
       - name: Delete old staging images (keep latest 5)
         run: |

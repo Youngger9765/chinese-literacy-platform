@@ -1,0 +1,20 @@
+{
+  "_comment": "find_01RtSp6b2GvNCj76v7dhrLmg (high, CWE-799). Coordinator review, 2026-11-07: an earlier version of this file vendored EVERY goog.json prefix that doesn't overlap cloud.json (79 IPv4 + 15 IPv6 -- Google's full non-customer-rentable network). That was too broad: it included ranges like Google Apps Script's own egress and general Google corporate infrastructure that an attacker could plausibly send requests from, not just Firebase Hosting's actual serving layer -- treating any of those as a trusted hop would let that attacker's genuine last XFF entry get stripped, exposing an earlier, attacker-controlled entry (closed independently by also bounding real_ip_from_xff to step back at most ONE hop, but the allowlist itself should still be as narrow as the evidence supports). This file now contains ONLY the one prefix actually observed carrying Firebase Hosting's egress traffic to this backend: sent 5 probe requests through https://lingoleap-staging.web.app/api/health at staggered times on 2026-11-07 and read Cloud Run's own platform request logs via `gcloud logging read` (resource.type=cloud_run_revision, resource.labels.service_name=lingoleap-backend-staging) -- httpRequest.remoteIp was 66.249.82.130, 66.249.82.197, 66.249.82.65, 66.249.82.13, 66.249.82.103 across the 5 requests, all inside the single published goog.json prefix 66.249.64.0/19 (a well-known Google crawl/fetch range, confirmed to have zero overlap with any cloud.json customer-facing prefix). Using the full published /19 rather than an ad-hoc narrower slice of the 5 observed addresses: it is a real Google-announced boundary (not a guess), all 5 independent samples fall inside it, and Cloud Run / Firebase Hosting's own internal load balancing is expected to use more of a published block than 5 samples will ever cover. Confidence: moderate-high (5 consistent samples over time, anchored to a real published boundary) but NOT exhaustive -- re-observe before trusting this further if Firebase Hosting's infrastructure ever changes, and escalate to restricting Cloud Run ingress at the infra level (tracked separately, outside what this application-layer file can do) if a future observation falls outside this range.",
+  "method": "single prefix empirically observed via gcloud logging read against the real staging Firebase Hosting path, narrowed to the containing published goog.json CIDR",
+  "sources": [
+    "gcloud logging read (resource.labels.service_name=lingoleap-backend-staging), 2026-11-07",
+    "https://www.gstatic.com/ipranges/goog.json"
+  ],
+  "observed_remote_ips": [
+    "66.249.82.130",
+    "66.249.82.197",
+    "66.249.82.65",
+    "66.249.82.13",
+    "66.249.82.103"
+  ],
+  "fetched_at": "2026-11-07",
+  "ipv4": [
+    "66.249.64.0/19"
+  ],
+  "ipv6": []
+}
