@@ -481,7 +481,26 @@ class GlobalRateLimitMiddleware:
         # OPTIONS is handled above (#3227) and never reaches here.
         is_read = method in ("GET", "HEAD")
         limit = self.READ_LIMIT if is_read else self.WRITE_LIMIT
-        key = f"global:ip:{ip}:{'read' if is_read else 'write'}"
+
+        # find_01RtSp6b2GvNCj76v7dhrLmg (high) bullet 2: an authenticated
+        # caller gets a key scoped to THEIR verified identity, not the IP
+        # (shared or not). `scope["state"]["user_id"]` is populated by
+        # RequestLoggingMiddleware -- added to the app AFTER this
+        # middleware, which Starlette's add_middleware stack makes OUTER,
+        # so it runs FIRST on every request and this value is already set
+        # by the time this line executes -- from a signature-verified JWT
+        # (see that middleware's own comment), never from a client-supplied
+        # header this function could be tricked into trusting. A flood of
+        # anonymous requests sharing one IP-keyed bucket (Firebase Hosting,
+        # a classroom NAT, a mobile carrier) can therefore never 429 a
+        # logged-in user -- their bucket is keyed on their own account, not
+        # on whatever address their traffic happens to arrive from.
+        state = scope.get("state") or {}
+        user_id = state.get("user_id")
+        if user_id is not None:
+            key = f"global:user:{user_id}:{'read' if is_read else 'write'}"
+        else:
+            key = f"global:ip:{ip}:{'read' if is_read else 'write'}"
 
         info = general_rate_limiter.check_with_info(key, limit, self.WINDOW)
 

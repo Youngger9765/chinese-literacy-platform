@@ -23,6 +23,8 @@ from typing import NamedTuple
 
 from fastapi import Depends, HTTPException, Request
 
+from .trusted_proxies import is_trusted_hop
+
 
 class RateLimitInfo(NamedTuple):
     """Result of a rate-limit check with metadata for response headers."""
@@ -101,42 +103,90 @@ general_rate_limiter = InMemoryRateLimiter()
 def real_ip_from_xff(xff: str, peer: str | None = None) -> str:
     """Return the real client IP behind the Cloud Run / GCP load balancer.
 
-    Claude Security find_016GfbjuPFtSeUVkfhAUcLPp (high, CWE-348): this used
-    to always take the SECOND-from-right entry, on the assumption that GCP
-    always appends exactly two trusted hops ([real-client-ip,
-    load-balancer-ip], as happens when the request arrives via the Firebase
-    Hosting rewrite). That assumption is false for the OTHER real, reachable
-    production path: the backend is also public on its own direct
-    `*.run.app` URL (no ingress restriction, and it's what VITE_API_URL
-    points at), where Cloud Run appends only ONE trusted hop -- the actual
-    client IP it observed. On that path, parts[-2] is an attacker-chosen
-    value from the client's own X-Forwarded-For header, letting them rotate
-    it per-request to defeat every per-IP rate limit (login, registration,
-    anonymous TTS spend, the global limiter).
+    History
+    -------
+    find_016GfbjuPFtSeUVkfhAUcLPp (high, CWE-348): used to always take the
+    SECOND-from-right entry, assuming GCP always appends exactly two
+    trusted hops. False on the direct `*.run.app` path (no ingress
+    restriction, what VITE_API_URL points at): Cloud Run there appends only
+    ONE trusted hop, so parts[-2] was an attacker-chosen value they could
+    rotate per request to defeat every per-IP rate limit.
 
-    We cannot safely tell which of the two paths a given request came in on
-    from request data alone (the Host header is itself attacker-settable on
-    a direct request). So this now ALWAYS takes the LAST entry instead --
-    the one Cloud Run itself appends based on the actual TCP peer it saw,
-    never from client-supplied header content, on every reachable path.
-    This is exactly correct on the direct `*.run.app` path. On the
-    Firebase-fronted path it resolves to Firebase's own serving IP rather
-    than the original end-user's IP -- a real precision loss (many distinct
-    users behind that path now share one rate-limit identity), but not a
-    new vulnerability: that shared IP is still not attacker-controlled, so
-    rate limits still function (just coarser), whereas the old code's
-    "precision" on that path depended on an assumption that was already
-    false and spoofable on the other path.
+    find_01RtSp6b2GvNCj76v7dhrLmg (high, CWE-799): the fix for the above --
+    always take the LAST entry -- traded that spoofability for a different
+    bug. The LAST entry is always Cloud Run's own honest append (the real
+    TCP peer it saw, never client-supplied), but on
+    `lingoleap-prod.web.app` / `lingoleap-staging.web.app` that peer is
+    FIREBASE HOSTING'S OWN serving address, not the end user -- every
+    distinct visitor arriving through that hostname collapsed onto one
+    shared rate-limit identity (90 writes/min or 300 reads/min for ALL of
+    them combined, not each).
 
-    The precision loss on the Firebase path is a known, accepted trade-off
-    until the direct `*.run.app` URL's ingress is restricted at the
-    infrastructure level (tracked separately -- an IAM/ingress change
-    outside what application code can enforce).
+    Fix: trusted-hop stripping, not a fixed index -- but bounded to AT MOST
+    ONE hop (coordinator review, 2026-11-07, after the first version of
+    this fix walked an unbounded number of trusted hops from the right).
+    The real topology has exactly one Google-operated hop in front of this
+    backend (Firebase Hosting); an unbounded walk only existed to be
+    "future-proof" against a second hypothetical layer that does not exist
+    today, and it bought real risk for no real benefit: IS_TRUSTED_HOP's
+    allowlist, even narrowed to a single observed prefix (see
+    `google_trusted_proxy_ranges.json`), is still a network an attacker
+    could plausibly reach from (e.g. Google Apps Script, a Google-hosted
+    crawler, or any other first-party Google service that is not Cloud
+    Run's own ingress). If TWO consecutive entries both happened to look
+    trusted -- one genuine (Cloud Run's real append) and one an attacker
+    pre-pended from such a vantage point -- an unbounded walk would strip
+    BOTH and exposed a THIRD, attacker-controlled entry as "the real
+    client". Stopping after one hop means that can never happen: at most
+    the single genuine Cloud-Run-appended entry is ever discarded.
+
+    The last entry is always genuine (Cloud Run never lets a client
+    override it). If it belongs to the trusted allowlist, the request
+    arrived through that one known Google-operated hop, so the real client
+    is the entry immediately before it (which that hop itself set, not
+    something the browser could forge) -- look no further back than that,
+    even if more entries remain. If the last entry is NOT in the
+    allowlist, there was no such hop: the request hit Cloud Run directly,
+    and that last entry already IS the real client -- nothing the
+    attacker put earlier in the header is ever read. Either way, a
+    client-supplied prefix on the direct `*.run.app` path cannot influence
+    the result: resolution reads at most the last two entries, never more.
+
+    This is a coarsening, not the only defense: `GlobalRateLimitMiddleware`
+    additionally keys authenticated traffic on `request.state.user_id`
+    (see that class), which is the actual fix for "every visitor shares
+    one bucket" for any logged-in user. IP-based keying -- what this
+    function ultimately feeds -- only still matters for anonymous traffic,
+    where a coarser (shared, but never attacker-chosen) identity is an
+    accepted tradeoff, not the primary defense.
+
+    Known residual risk (coordinator review, same day): the one vendored
+    prefix (`66.249.64.0/19`) is Google's published Googlebot crawl range,
+    not a Firebase-Hosting-exclusive address -- naming membership in it
+    "this hop is Firebase Hosting" is a necessary-but-not-sufficient
+    proxy, not a proof. Accepted because `parts[-1]` is Cloud Run's own
+    honest append of the real TCP peer, not client-suppliable, and
+    crawlers cannot be made to send a custom X-Forwarded-For -- so
+    exploiting this would require an actual TCP connection to Cloud Run
+    sourced from inside that range, and even then only affects anonymous
+    rate-limit keying (see above), never authn/authz. Stronger options
+    for later, not implemented here: restrict Cloud Run ingress so only
+    Firebase Hosting's traffic ever reaches this code path, or have the
+    front end inject a shared-secret header verified with
+    `hmac.compare_digest` instead of trusting an IP range at all.
     """
     parts = [p.strip() for p in (xff or "").split(",") if p.strip()]
-    if parts:
-        return parts[-1]
-    return peer or "unknown"
+    if not parts:
+        return peer or "unknown"
+    if len(parts) == 1:
+        return parts[0]
+
+    # The last entry is always Cloud Run's own genuine append. Step back
+    # over it ONLY if it is a known trusted hop -- never more than this one
+    # position, regardless of what the entries further left look like.
+    if is_trusted_hop(parts[-1]):
+        return parts[-2]
+    return parts[-1]
 
 
 def real_client_ip(request: Request) -> str:
