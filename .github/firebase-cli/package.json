@@ -1,0 +1,9 @@
+{
+  "name": "lingoleap-firebase-cli",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Pinned Firebase CLI for deploy.yml / staging-deploy.yml's deploy-frontend-firebase job. Claude Security find_01YP72Td7XmwD2J4TU5nTMgd (CRITICAL) / find_01GSz5fbgsPuuK3ieTGopD8B (HIGH): a plain `npm install -g firebase-tools@13` resolves a floating range at run time with no version or integrity recorded anywhere, then runs with a live GCP credential. This package.json + its committed package-lock.json pin the exact version and the full dependency tree's integrity hashes, so a newly published firebase-tools release (or a compromised transitive dependency) can't change what the credentialed deploy step executes without a reviewed repository change. Installed in CI with `npm ci --ignore-scripts` (verified locally: firebase-tools needs no install-time lifecycle scripts to run `firebase deploy --only hosting:*`).",
+  "dependencies": {
+    "firebase-tools": "13.35.1"
+  }
+}
