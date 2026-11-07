@@ -162,6 +162,7 @@ async def score_comprehension(
         result = await evaluate_comprehension(
             dialogue_turns=dialogue_turns,
             story_context=story_context,
+            user_id=str(current_user.id),
         )
     except Exception as e:
         logger.error("Comprehension scoring error: %s", e)

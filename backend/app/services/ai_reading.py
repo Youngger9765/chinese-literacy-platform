@@ -21,7 +21,7 @@ __all__ = [
 ]
 
 
-async def generate_reading_analysis(session_data: dict) -> dict:
+async def generate_reading_analysis(session_data: dict, user_id: str | None = None) -> dict:
     """Generate personalised reading diagnosis and improvement suggestions.
 
     Uses Gemini to analyse student reading performance and return
@@ -35,6 +35,11 @@ async def generate_reading_analysis(session_data: dict) -> dict:
             Optional (Issue #415): comprehension_score (float 0-100),
                       vocab_practiced_count (int), vocab_total_count (int),
                       dictation_correct_count (int), dictation_total_count (int).
+        user_id: Caller's user id, threaded through to sanitize_ai_input so
+            a detected injection attempt in error_chars logs WHO sent it
+            (push-review add-on, same day as find_01PwpCG52Y6icR2mYDXZxqWm:
+            this was hardcoded `user_id=None` below, unconditionally, for
+            every caller).
 
     Returns:
         Dict with keys: analysis_summary, strengths, areas_for_improvement,
@@ -61,7 +66,7 @@ async def generate_reading_analysis(session_data: dict) -> dict:
     # one place both the session-scoped and the deprecated standalone
     # route funnel through, so it is also the one place that sanitizes
     # every item regardless of caller.
-    safe_error_chars = [sanitize_ai_input(c, user_id=None)[0] for c in error_chars if c]
+    safe_error_chars = [sanitize_ai_input(c, user_id=user_id)[0] for c in error_chars if c]
     error_chars_str = "、".join(safe_error_chars) if safe_error_chars else "無"
 
     system_prompt = (

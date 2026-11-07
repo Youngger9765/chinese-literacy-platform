@@ -199,7 +199,7 @@ async def get_ai_analysis(
             "vocab_total_count": payload.vocab_total_count,
             "dictation_correct_count": payload.dictation_correct_count,
             "dictation_total_count": payload.dictation_total_count,
-        })
+        }, user_id=str(current_user.id))
     except GeminiContentFilterError:
         ai_success = False
         ai_error_type = "ContentFilter"
@@ -301,7 +301,7 @@ async def get_ai_analysis_standalone(
             "vocab_total_count": payload.vocab_total_count,
             "dictation_correct_count": payload.dictation_correct_count,
             "dictation_total_count": payload.dictation_total_count,
-        })
+        }, user_id=str(current_user.id))
     except GeminiContentFilterError:
         ai_success = False
         ai_error_type = "ContentFilter"

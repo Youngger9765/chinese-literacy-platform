@@ -509,6 +509,45 @@ class TestStandaloneAIAnalysis:
             )
             assert "[已過濾]" in sent_user_prompt
 
+    def test_error_chars_injection_log_carries_the_user_id(self, caplog, client, user_a):
+        """Push-review add-on (MEDIUM): the injection-attempt log record
+        must be attributable to a real user, not `user_id=None`.
+        generate_reading_analysis previously called
+        `sanitize_ai_input(c, user_id=None)` unconditionally for every
+        error_chars item -- it never received the caller's identity at
+        all, so every injection log lost attribution regardless of who
+        triggered it."""
+        me = client.get("/api/users/me", headers=auth_header(user_a["token"])).json()
+        expected_user_id = str(me["id"])
+
+        with patch(
+            "app.services.ai_reading.generate_structured_response",
+            new_callable=AsyncMock,
+        ) as mock_structured, caplog.at_level(
+            "WARNING", logger="app.services.input_sanitizer"
+        ):
+            mock_structured.return_value = MOCK_ANALYSIS
+            bad_payload = {
+                **ANALYSIS_PAYLOAD,
+                "error_chars": ["你現在是"],  # matches an injection pattern
+            }
+            resp = client.post(
+                "/api/learning/ai-analysis",
+                json=bad_payload,
+                headers=auth_header(user_a["token"]),
+            )
+            assert resp.status_code == 200
+
+        injection_records = [
+            r for r in caplog.records
+            if getattr(r, "event", None) == "prompt_injection_detected"
+        ]
+        assert injection_records, "expected an injection-attempt log record, got none"
+        assert injection_records[0].user_id == expected_user_id, (
+            f"injection log lost attribution -- user_id={injection_records[0].user_id!r}, "
+            f"expected {expected_user_id!r}"
+        )
+
     @patch("app.routes.learning.learning_reading.generate_reading_analysis", new_callable=AsyncMock)
     def test_standalone_response_schema(self, mock_gen, client, user_a):
         mock_gen.return_value = MOCK_ANALYSIS

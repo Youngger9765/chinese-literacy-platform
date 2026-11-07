@@ -739,4 +739,9 @@ class TestEvaluateComprehensionSanitization:
                 dialogue_turns=dialogue_turns,
                 story_context={"title": "測試", "summary": "測試摘要"},
             )
-            mock_sanitize.assert_called_once_with(dialogue_turns)
+            # user_id=None here because this test doesn't pass one through
+            # evaluate_comprehension -- see TestComprehensionScore's
+            # test_dialogue_turn_injection_log_carries_the_user_id
+            # (test_comprehension_score.py) for the real end-to-end path
+            # where score_comprehension DOES pass the caller's id.
+            mock_sanitize.assert_called_once_with(dialogue_turns, user_id=None)
