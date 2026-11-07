@@ -5,9 +5,21 @@ on:
     branches: [staging]
   workflow_dispatch:
 
+# find_01YP72Td7XmwD2J4TU5nTMgd / find_01GSz5fbgsPuuK3ieTGopD8B: `id-token:
+# write` used to sit here, so EVERY job inherited it, including jobs that
+# run `npm ci` / `vite build` / third-party installs. That is an ambient
+# permission the moment the job starts (ACTIONS_ID_TOKEN_REQUEST_URL/TOKEN
+# are already in the environment), not something that only exists once
+# google-github-actions/auth runs -- so moving an install step before auth
+# never removed the exposure. `id-token: write` now lives ONLY as a
+# per-job override on the jobs that actually call
+# google-github-actions/auth@v2 (deploy-backend, deploy-frontend,
+# deploy-frontend-firebase, smoke-test, cleanup-images). GitHub Actions
+# does not merge a job-level permissions block with this one; it replaces
+# it for that job, and a job with no block of its own still inherits this
+# one unchanged.
 permissions:
   contents: read
-  id-token: write
 
 # Serialize concurrent deploys. Back-to-back merges to staging would
 # race each other on Cloud Run revision/traffic. With this group,
@@ -75,6 +87,9 @@ jobs:
     needs: detect-changes
     if: needs.detect-changes.outputs.backend == 'true' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v6
 
@@ -173,6 +188,9 @@ jobs:
       always() &&
       (needs.detect-changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v6
 
@@ -313,15 +331,20 @@ jobs:
             echo "**Commit:** \`${{ github.sha }}\`"
           } >> "$GITHUB_STEP_SUMMARY"
 
-  deploy-frontend-firebase:
-    name: Deploy frontend to Firebase Hosting (staging + dev)
+  # find_01GSz5fbgsPuuK3ieTGopD8B (HIGH): same split as deploy.yml's prod
+  # Firebase job (find_01YP72Td7XmwD2J4TU5nTMgd) -- the install/build code
+  # and the live GCP credential must not share a job. Staging had already
+  # moved to WIF (#3840); what remained was the unpinned
+  # `npm install -g firebase-tools@13` running inside the credentialed job.
+  build-frontend-firebase:
+    name: Build frontend for Firebase Hosting (staging + dev)
     needs: [detect-changes]
     if: |
       needs.detect-changes.outputs.firebase == 'true' ||
       github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
-    env:
-      COMMIT_SHA: ${{ github.sha }}
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v6
 
@@ -334,14 +357,6 @@ jobs:
       - name: Install frontend deps
         working-directory: frontend
         run: npm ci
-
-      # find_01WStrhArZsNRHeb92RWHZRE (high): this global npm install used to
-      # run AFTER "Authenticate to Google Cloud" below -- untrusted,
-      # lockfile/registry-resolved third-party code executing on a runner
-      # that already held live GCP credentials for the rest of this job.
-      # Moved before auth; it has no dependency on it (global CLI install).
-      - name: Install Firebase CLI
-        run: npm install -g firebase-tools@13
 
       - name: Build frontend for Firebase (relative API paths + demo creds)
         working-directory: frontend
@@ -357,6 +372,46 @@ jobs:
           VITE_DEMO_STUDENT_PW: ${{ secrets.DEMO_STUDENT_PW }}
         run: npm run build
 
+      - name: Upload frontend/dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: firebase-staging-dist
+          path: frontend/dist
+          retention-days: 1
+
+  deploy-frontend-firebase:
+    name: Deploy frontend to Firebase Hosting (staging + dev)
+    needs: [detect-changes, build-frontend-firebase]
+    if: |
+      needs.detect-changes.outputs.firebase == 'true' ||
+      github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      COMMIT_SHA: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Download frontend/dist
+        uses: actions/download-artifact@v4
+        with:
+          name: firebase-staging-dist
+          path: frontend/dist
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Pinned exact version + full-tree integrity hashes (committed
+      # .github/firebase-cli/package-lock.json) -- see deploy.yml for the
+      # full rationale (find_01YP72Td7XmwD2J4TU5nTMgd /
+      # find_01GSz5fbgsPuuK3ieTGopD8B).
+      - name: Install pinned Firebase CLI
+        working-directory: .github/firebase-cli
+        run: npm ci --ignore-scripts
+
       - id: auth
         uses: google-github-actions/auth@v2
         with:
@@ -365,7 +420,7 @@ jobs:
 
       - name: Deploy to Firebase Hosting (staging + dev)
         run: |
-          firebase deploy \
+          "$GITHUB_WORKSPACE/.github/firebase-cli/node_modules/.bin/firebase" deploy \
             --only hosting:staging,hosting:dev \
             --project lingoleap-dev \
             --non-interactive \
@@ -388,6 +443,9 @@ jobs:
     needs: [deploy-backend, deploy-frontend]
     if: always() && !cancelled() && (needs.deploy-backend.result == 'success' || needs.deploy-frontend.result == 'success')
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     env:
       STAGING_BACKEND: https://lingoleap-backend-staging-958347263320.asia-east1.run.app
     steps:
@@ -480,6 +538,9 @@ jobs:
     needs: [deploy-backend, deploy-frontend]
     if: always() && !cancelled()
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: google-github-actions/auth@v2
         with:

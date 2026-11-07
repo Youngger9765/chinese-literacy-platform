@@ -13,10 +13,23 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+# find_015p35fzCRJqG7UACGpxSxQp (HIGH): `pull-requests: write` and
+# `id-token: write` used to sit here, so `e2e-preview-check` and
+# `detect-changes` inherited both even though neither needs either --
+# `e2e-preview-check` runs `npm ci` + `playwright install` + a lockfile-
+# resolved dependency's install script could mint an OIDC token for the
+# prod deploy service account directly, with no `auth@v2` step required in
+# that job at all. Both scopes now live ONLY as per-job overrides on
+# `deploy-preview`, the one job that actually authenticates to GCP and
+# posts the preview-URL PR comment. GitHub Actions does not merge a
+# job-level permissions block with this one; it replaces it for that job,
+# and a job with no block of its own still inherits this one unchanged --
+# so `detect-changes` / `e2e-preview-check` get `contents: read` and
+# nothing else, with no edit needed to them for that alone (they still get
+# an explicit block below, naming the restriction instead of leaving it
+# implicit).
 permissions:
   contents: read
-  pull-requests: write
-  id-token: write
 
 env:
   PROJECT_ID: lingoleap-dev
@@ -41,6 +54,8 @@ jobs:
   detect-changes:
     runs-on: ubuntu-latest
     if: github.event.action != 'closed'
+    permissions:
+      contents: read
     outputs:
       backend: ${{ steps.filter.outputs.backend }}
       frontend: ${{ steps.filter.outputs.frontend }}
@@ -62,6 +77,10 @@ jobs:
     needs: detect-changes
     runs-on: ubuntu-latest
     if: github.event.action != 'closed' && github.event.pull_request.head.ref != 'staging'
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
     outputs:
       frontend_url: ${{ steps.preview-urls.outputs.frontend_url }}
       backend_url: ${{ steps.preview-urls.outputs.backend_url }}
@@ -455,13 +474,20 @@ jobs:
     # auth@v2` as one of its FIRST steps: every PR's dependency install ran
     # on a runner that had already held live GCP credentials for the
     # entire job. This job needs only the already-deployed preview's plain
-    # HTTP URLs (from deploy-preview's job outputs) -- it has no
-    # `google-github-actions/auth` step at all, so there is no GCP
-    # credential in this job's environment for any installed/test code to
-    # reach. tests/test_workflow_path_filters_spec.py's new
-    # test_no_untrusted_install_shares_a_job_with_gcp_auth asserts this
-    # structurally for every job in this file (and deploy.yml/
-    # staging-deploy.yml), not just by convention.
+    # HTTP URLs (from deploy-preview's job outputs).
+    #
+    # find_015p35fzCRJqG7UACGpxSxQp (HIGH): reordering + having no
+    # `google-github-actions/auth` step in THIS job was not actually
+    # enough on its own -- `id-token: write` is an ambient permission a
+    # job either has or doesn't for its whole runtime, regardless of
+    # whether anything in it calls `auth@v2`. This job declares its own
+    # `permissions:` below (contents: read only) so it can never inherit
+    # `id-token: write` from the workflow level. backend/specs/
+    # test_workflow_gcp_cred_exposure_spec.py asserts this structurally
+    # (effective permissions, not step order) for every job in this file
+    # and deploy.yml/staging-deploy.yml.
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
