@@ -22,6 +22,14 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
 
+# #3966: least-privilege GITHUB_TOKEN — this workflow only checks out code,
+# runs lint/vitest, and reads diffs (dorny/paths-filter). It never posts PR
+# comments, writes commit statuses, pushes branches, or needs id-token:write
+# (no google-github-actions/auth here), so contents:read is enough for
+# every job.
+permissions:
+  contents: read
+
 concurrency:
   group: frontend-checks-${{ github.event.pull_request.head.ref }}
   cancel-in-progress: true
