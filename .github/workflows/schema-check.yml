@@ -25,6 +25,11 @@ on:
       - staging
       - main
 
+# #3966: least-privilege GITHUB_TOKEN — just checks out code and diffs the
+# DB schema/migrations; no PR comments, no pushes, no id-token:write needed.
+permissions:
+  contents: read
+
 jobs:
   detect-changes:
     # 草稿 PR 不跑（見檔頭）
