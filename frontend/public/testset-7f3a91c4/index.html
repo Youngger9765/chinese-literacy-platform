@@ -43,7 +43,15 @@ function apiBase(){
 }
 var API=apiBase();
 
-function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+// #3961: esc() is used inside an href="..." attribute below. It used to
+// escape only & < > -- missing the " that terminates the attribute it's
+// used in. s.id reaching that call site happens to already be
+// encodeURIComponent()'d (neutralizing a literal " today), but esc() is a
+// general-purpose helper also reused for plain text (s.title, error
+// messages) -- the missing quote-escaping is a real gap in the sanitizer
+// itself, not just an unused code path. Matches the already-correct esc()
+// in the sibling collect-status-9f2a7c4e.html in this same directory.
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 
 async function loadLessons(){
   var el=document.getElementById('lessonList');
