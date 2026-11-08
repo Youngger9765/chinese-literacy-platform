@@ -1,4 +1,12 @@
-FROM python:3.11-slim
+# Pinned to a digest, not a floating tag (#3853): the base image + the
+# pip/setuptools/wheel it ships pre-installed + the Debian base all float on
+# whatever Docker Hub serves for `python:3.11-slim` on build day otherwise.
+# requirements.lock (#3849) already hash-pins every PyPI package; this closes
+# the same category of gap one layer down. Digest resolved via
+# `docker buildx imagetools inspect python:3.11-slim` (multi-arch index
+# digest, so the right linux/amd64 manifest is still picked at build time) —
+# tag at time of pinning: 3.11.18-slim-trixie (2026-11-05).
+FROM python:3.11-slim@sha256:07d4824036af339fa1b6ef769cc99d9c10a141769538b52b3b597c84f7a7b535
 RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 # requirements.txt is the human-edited source (version ranges); requirements.lock is the
