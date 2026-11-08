@@ -29,6 +29,12 @@ on:
           - TeacherDashboardUser
           - MixedWorkloadUser
 
+# #3966: least-privilege GITHUB_TOKEN — manual-only (workflow_dispatch), just
+# checks out code and runs Locust against staging; no PR comments, no
+# pushes, no id-token:write needed.
+permissions:
+  contents: read
+
 jobs:
   load-test:
     name: "Locust (${{ inputs.scenario }}, ${{ inputs.users }} users, ${{ inputs.run_time }})"

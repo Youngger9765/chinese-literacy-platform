@@ -35,6 +35,11 @@ jobs:
     # 草稿 PR 不跑（見檔頭）
     if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
+    # #3966: only checks out code + diffs paths — doesn't need the
+    # id-token:write the e2e job below needs for GCP auth, so this job
+    # explicitly scopes down to just contents:read.
+    permissions:
+      contents: read
     outputs:
       relevant: ${{ steps.filter.outputs.relevant }}
     steps:
@@ -54,6 +59,12 @@ jobs:
     if: needs.detect-changes.outputs.relevant == 'true'
     name: Playwright E2E Tests
     runs-on: ubuntu-24.04  # Playwright 不支援 ubuntu-latest 現在指向的 26.04
+    # #3966: explicit per-job permissions — id-token:write is for the
+    # google-github-actions/auth WIF step below (checking staging health /
+    # GCP access), contents:read for checkout.
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
       - name: Checkout code
