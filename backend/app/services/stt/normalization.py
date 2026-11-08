@@ -98,14 +98,37 @@ def normalize_punctuation_to_chinese(text: str) -> str:
     )
 
 
+def _drop_bracket_groups(text: str, open_ch: str, close_ch: str) -> str:
+    """Linear-time equivalent of re.sub(r"<open>[^<close>]*<close>", "", text).
+
+    The regex form backtracks once per unmatched opener (O(n^2), CodeQL
+    py/polynomial-redos #22/#23). Each opener is paired with the next closer;
+    with no closer left, the rest is kept verbatim -- same as the regex.
+    """
+    out = []
+    i = 0
+    n = len(text)
+    while i < n:
+        if text[i] == open_ch:
+            j = text.find(close_ch, i + 1)
+            if j == -1:
+                out.append(text[i:])
+                break
+            i = j + 1
+        else:
+            out.append(text[i])
+            i += 1
+    return "".join(out)
+
+
 def _strip_decorative_symbols(text: str) -> str:
     t = re.sub(r"~+", "", text)
     t = t.replace("…", "").replace("...", "").replace("．．．", "")
     t = t.replace("——", "").replace("—", "").replace("－", "").replace("-", "")
     for ch in "「」『』《》[]【】\"'\u201c\u201d\u2018\u2019":
         t = t.replace(ch, "")
-    t = re.sub(r"（[^）]*）", "", t)
-    t = re.sub(r"\([^)]*\)", "", t)
+    t = _drop_bracket_groups(t, "（", "）")
+    t = _drop_bracket_groups(t, "(", ")")
     return t
 
 
