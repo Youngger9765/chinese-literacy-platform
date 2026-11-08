@@ -20,20 +20,6 @@ _MANIFEST = _QA_ROOT / "keypoints_manifest.json"
 _LESSON_ID_RE = re.compile(r"^\w+-L\d+$")
 
 
-def _safe_lesson_dir(root: Path, lesson_id: str) -> Path | None:
-    """Resolve `root / lesson_id`, rejecting anything that doesn't match the
-    known lesson_id shape, or that would resolve outside `root` (second,
-    defense-in-depth layer in case a validated-looking value is still a
-    symlink/escape)."""
-    if not _LESSON_ID_RE.fullmatch(lesson_id):
-        return None
-    resolved_root = root.resolve()
-    candidate = (root / lesson_id).resolve()
-    if candidate != resolved_root and resolved_root not in candidate.parents:
-        return None
-    return candidate
-
-
 def load_keypoints_manifest() -> dict[str, Any]:
     if not _MANIFEST.exists():
         return {
@@ -54,20 +40,25 @@ def get_lesson_entry(lesson_id: str) -> dict[str, Any] | None:
 
 
 def read_preview_html(lesson_id: str) -> str | None:
-    lesson_dir = _safe_lesson_dir(_QA_ROOT / "previews", lesson_id)
-    if lesson_dir is None:
+    # #3955: validate BEFORE any path is built from `lesson_id` — a value
+    # that doesn't match the known shape never touches the filesystem at all.
+    if not _LESSON_ID_RE.fullmatch(lesson_id):
         return None
-    path = lesson_dir / "original.html"
-    if not path.is_file() or lesson_dir not in path.resolve().parents:
+    root = (_QA_ROOT / "previews").resolve()
+    path = (root / lesson_id / "original.html").resolve()
+    # Second, defense-in-depth layer: even a regex-valid lesson_id must
+    # resolve to a real path still contained under `root` (guards against a
+    # validated-looking value that's still a symlink/escape).
+    if not path.is_relative_to(root) or not path.is_file():
         return None
     return path.read_text(encoding="utf-8")
 
 
 def read_snapshot_json(lesson_id: str, name: str) -> dict[str, Any] | None:
-    lesson_dir = _safe_lesson_dir(_QA_ROOT / "snapshots", lesson_id)
-    if lesson_dir is None:
+    if not _LESSON_ID_RE.fullmatch(lesson_id):
         return None
-    path = lesson_dir / name
-    if not path.is_file() or lesson_dir not in path.resolve().parents:
+    root = (_QA_ROOT / "snapshots").resolve()
+    path = (root / lesson_id / name).resolve()
+    if not path.is_relative_to(root) or not path.is_file():
         return None
     return json.loads(path.read_text(encoding="utf-8"))
