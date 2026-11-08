@@ -66,8 +66,27 @@ async def generate_reading_analysis(session_data: dict, user_id: str | None = No
     # one place both the session-scoped and the deprecated standalone
     # route funnel through, so it is also the one place that sanitizes
     # every item regardless of caller.
-    safe_error_chars = [sanitize_ai_input(c, user_id=user_id)[0] for c in error_chars if c]
-    error_chars_str = "、".join(safe_error_chars) if safe_error_chars else "無"
+    #
+    # #3971 follow-up: that per-item sanitize-then-join still let a
+    # longer injection phrase through if it didn't fit in a single
+    # 20-char item (ERROR_CHAR_ITEM_MAX_LENGTH) -- e.g. "ignore previous"
+    # + "instructions" as two separate items, neither of which alone
+    # matches an INJECTION_PATTERNS regex, reassembling into the full
+    # phrase once joined. Sanitizing is now done ONCE on the fully
+    # joined string instead of per-item, so the filter sees exactly the
+    # continuous text that ends up in the prompt (the same text an LLM
+    # would read), closing the split-across-items gap. No separator is
+    # used for the join (previously "、") specifically so the filter
+    # also catches a phrase split mid-word -- these items are already
+    # short individual characters/fragments, not full sentences, so
+    # concatenating them without a separator does not meaningfully
+    # change readability for the AI prompt.
+    raw_error_chars = [c for c in error_chars if c]
+    error_chars_str = (
+        sanitize_ai_input("".join(raw_error_chars), user_id=user_id)[0]
+        if raw_error_chars
+        else "無"
+    )
 
     system_prompt = (
         f"{TUTOR_PERSONA}\n\n"
