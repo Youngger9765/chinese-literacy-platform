@@ -59,6 +59,17 @@ def _load_prompt_uncached(strategy_type: str | None) -> dict[str, Any]:
     if not norm:
         norm = _DEFAULT_TYPE
 
+    # #3957: `strategy_type` arrives from an authenticated-but-untrusted
+    # request body (any logged-in student — McqRescueStartRequest.strategy_type
+    # is only length-capped, no format/allowlist check) and used to flow
+    # straight into a filesystem path. Validate against the real strategy
+    # directories on disk BEFORE constructing any path — anything that isn't
+    # a known strategy name (e.g. a traversal string) falls straight through
+    # to the default fallback below, the same as an unknown-but-benign value
+    # always did, instead of ever touching the filesystem with attacker input.
+    if norm != _DEFAULT_TYPE and norm not in list_available_strategies():
+        norm = _DEFAULT_TYPE
+
     # Try specific strategy first
     specific = _PROMPTS_DIR / norm / _PROMPT_FILENAME
     if specific.exists():
