@@ -78,3 +78,28 @@ class TestNormalizeForComparisonRealisticLengthsUnaffected:
         assert normalize_for_comparison("你好，世界！") == "你好世界"
         assert normalize_for_comparison("（如慢跑、游泳）課文內容") == "課文內容"
         assert normalize_for_comparison("這是2026年") == "這是二千零二十六年"
+
+
+class TestDropBracketGroupsMatchesRegex:
+    """The linear helper must give exactly what the old regexes gave."""
+
+    def test_equivalent_to_regex_on_random_inputs(self):
+        import random
+        import re
+
+        from app.services.stt.normalization import _drop_bracket_groups
+
+        rng = random.Random(3963)
+        alphabet = "ab（）()字 "
+        for _ in range(5000):
+            s = "".join(rng.choice(alphabet) for _ in range(rng.randint(0, 30)))
+            assert _drop_bracket_groups(s, "（", "）") == re.sub(r"（[^）]*）", "", s), s
+            assert _drop_bracket_groups(s, "(", ")") == re.sub(r"\([^)]*\)", "", s), s
+
+    def test_unmatched_openers_are_linear(self):
+        from app.services.stt.normalization import _drop_bracket_groups
+
+        s = "(" * 200_000
+        t0 = time.perf_counter()
+        assert _drop_bracket_groups(s, "(", ")") == s
+        assert time.perf_counter() - t0 < 1.0
