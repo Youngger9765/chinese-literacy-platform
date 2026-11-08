@@ -7,6 +7,19 @@ Parity with frontend textDiff.ts normalizeForComparison pipeline.
 
 import re
 
+# #3963 (CodeQL py/polynomial-redos, high, alerts #22-#23): `_strip_decorative_symbols`'s
+# `re.sub(r"\uFF08[^\uFF09]*\uFF09", "", t)` / `re.sub(r"\([^)]*\)", "", t)` are the same
+# negated-class bracket-stripping shape as the sibling fix in
+# reading_transcription_service.py's `_GATE_PAREN` -- already "safe" in the
+# sense CodeQL generally wants (no nested/ambiguous quantifiers), but on an
+# adversarial run of unmatched "\uFF08"/"(" the engine still backtracks once per
+# start offset (O(n\u00B2) worst case). Input here is STT transcription output /
+# text being compared for reading-fluency scoring (normalize_for_comparison,
+# used across stt_service.py, reading_evaluation_service.py, stt/algorithm.py,
+# stt/evaluate.py) -- no explicit length cap existed at this layer before.
+# Same cap value as the sibling fix, for one defensible shared policy.
+_NORMALIZE_MAX_INPUT_CHARS = 5000
+
 _BOPOMOFO_RE = re.compile(r"[\u3100-\u312F\u31A0-\u31BF\u02CA\u02C7\u02CB\u02D9]")
 # Use unicode escapes for curly quotes — raw-string ""'' breaks the character class.
 _PUNCTUATION_RE = re.compile(
@@ -103,6 +116,10 @@ def normalize_chinese_number_variants(text: str) -> str:
 
 def normalize_for_comparison(text: str) -> str:
     """Strip punctuation, bopomofo, whitespace; convert numerals for alignment."""
+    # #3963: bound _strip_decorative_symbols's regex cost before it runs --
+    # see _NORMALIZE_MAX_INPUT_CHARS above. Real STT transcripts / lesson
+    # passages are far below this, so this never fires on legitimate input.
+    text = text[:_NORMALIZE_MAX_INPUT_CHARS]
     pipeline = normalize_fullwidth_digits(normalize_punctuation_to_chinese(text))
     pipeline = _strip_decorative_symbols(pipeline)
     pipeline = normalize_chinese_number_variants(normalize_numbers(pipeline))
