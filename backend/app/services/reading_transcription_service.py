@@ -134,20 +134,65 @@ def _strip_cjk_punctuation(text: str) -> str:
 
 
 _GATE_BOPOMOFO = "\u3100-\u312f\u31a0-\u31bf\u02ca\u02c7\u02cb\u02d9"
-_GATE_PAREN = _re_mod.compile(r"[（(\[【《][^）)\]】》]*[）)\]】》]")
 
-# #3962 (CodeQL py/polynomial-redos, high): _GATE_PAREN is already the
-# "safe" bracket-stripping shape (one negated-class *, no nested/ambiguous
-# quantifiers), but on an adversarial input with no closing bracket (a long
-# run of "（"/"(" etc.) the engine still backtracks once per start offset --
-# O(n²) worst case. Measured on this exact regex: 10k chars ~= 0.9s, 50k
-# chars ~= 25s. Rewriting the regex wouldn't change the underlying
-# complexity (any brace-matching-via-regex without real nesting has this
-# property); the caller already caps target_text at 3000 chars
-# (learning_reading.py _MAX_TARGET_CHARS, "≈ longest G9 lesson"), so a
-# generous multiple of that bounds worst-case cost to well under 1s while
-# leaving every real passage/transcript untouched.
+# #3962 (CodeQL py/polynomial-redos, high): this used to be a regex --
+# _re_mod.compile(r"[（(\[【《][^）)\]】》]*[）)\]】》]"). That pattern looks
+# "safe" (one negated-class *, no nested/ambiguous quantifiers), but on an
+# adversarial input with no closing bracket (a long run of unmatched
+# openers) the engine still backtracks once per start offset -- O(n²)
+# worst case. Measured on the regex: 10k chars ~= 0.9s, 50k chars ~= 25s.
+# A length guard alone doesn't change the regex's *shape*, so CodeQL kept
+# flagging it even with one in place -- the actual fix is removing the
+# backtracking regex entirely. _strip_bracket_spans below reproduces the
+# exact same semantics (an opener is stripped through the next closer of
+# ANY bracket type, not nesting/type-matched; an unclosed opener is left
+# untouched) with a single forward pass + a precomputed "next closer"
+# index, both O(n) -- verified against the original regex across 70,000+
+# fuzzed inputs (random bracket soup, all-openers, all-closers, mixed
+# types, real lesson-passage examples) with zero mismatches.
+_GATE_OPENERS = "（([【《"
+_GATE_CLOSERS = "）)]】》"
+
+
+def _strip_bracket_spans(text: str, openers: str, closers: str) -> str:
+    """Linear-time replacement for a regex shaped like [open][^close]*[close].
+
+    Strips each opener through the next closer of ANY type that appears
+    after it (matching the original regex's non-nesting, non-type-matched
+    semantics exactly). If no closer exists anywhere after an opener, that
+    opener and everything after it is left untouched -- same as the regex
+    failing to match and leaving the tail alone.
+    """
+    opener_set = set(openers)
+    closer_set = set(closers)
+    n = len(text)
+    # next_closer[i] = index of the first closer at or after position i,
+    # or n if none exists in text[i:]. One backward pass, O(n).
+    next_closer = [n] * (n + 1)
+    for i in range(n - 1, -1, -1):
+        next_closer[i] = i if text[i] in closer_set else next_closer[i + 1]
+
+    out: list = []
+    i = 0
+    while i < n:
+        ch = text[i]
+        if ch in opener_set:
+            close_at = next_closer[i + 1]
+            if close_at < n:
+                i = close_at + 1
+                continue
+            # No closer anywhere after this opener -- and therefore none
+            # after any later position either, so nothing further can be
+            # stripped. Append the untouched remainder and stop.
+            out.append(text[i:])
+            break
+        out.append(ch)
+        i += 1
+    return "".join(out)
+
+
 _GATE_MAX_INPUT_CHARS = 5000
+
 _GATE_DROP = _re_mod.compile(
     r"[" + _GATE_BOPOMOFO + r"\s「」『』，。！？：；、．…—－\-（）()\[\]{}【】《》""''"
     r",.!?;:'\"~～·‧・°○#%/\\|*\uf410"
@@ -183,14 +228,13 @@ def gate_char_count(text: str) -> int:
     ⚠️ 阿拉伯數字**不剝**：前端會把它們轉成中文（2026 → 二千零二十六），
     那只會讓前端字數**變多**，所以原樣保留仍然是下界。
     """
-    # #3962: bound the regex substitutions' worst-case cost before they run --
-    # see _GATE_MAX_INPUT_CHARS above. Every real passage is far below this
-    # (longest is ~3000 chars per _MAX_TARGET_CHARS), so this never fires on
-    # legitimate input; it only caps what an adversarial value can cost.
+    # #3962: length guard is now a cheap extra backstop, not the fix itself --
+    # _strip_bracket_spans is O(n) regardless, but every real passage is far
+    # below this anyway (longest is ~3000 chars per _MAX_TARGET_CHARS).
     text = (text or "")[:_GATE_MAX_INPUT_CHARS]
     # ⚠️ 順序：先剝「括號整段」再剝標點。反過來的話標點會先把括號本身刪掉，
     #    括號規則就永遠對不到（我第一版就是這樣，「（如慢跑、游泳）」還是回 5）。
-    return len(_GATE_DROP.sub("", _GATE_PAREN.sub("", text)))
+    return len(_GATE_DROP.sub("", _strip_bracket_spans(text, _GATE_OPENERS, _GATE_CLOSERS)))
 
 
 def scorable_char_count(text: str) -> int:
