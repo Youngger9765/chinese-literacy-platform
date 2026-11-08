@@ -24,6 +24,7 @@ in mcq_rescue_agent.py.
 
 from __future__ import annotations
 
+import os
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -41,7 +42,28 @@ class StrategyPromptError(RuntimeError):
     """Raised when no prompt yaml can be resolved (default missing)."""
 
 
-def _read_yaml(path: Path) -> dict[str, Any]:
+def _safe_prompt_path(norm: str) -> str | None:
+    """Join `norm` under `_PROMPTS_DIR` and return the path only if it's
+    actually contained there — otherwise None.
+
+    #3957 follow-up: the `norm not in list_available_strategies()` allowlist
+    check below closes the real vulnerability, but CodeQL's
+    `py/path-injection` sanitizer model doesn't recognize an
+    allowlist-membership check as a barrier — it specifically recognizes
+    `os.path.normpath()` (moves the value to a "normalized" state) followed
+    by `str.startswith(base)` (the containment check), the same idiom used
+    in curriculum_qa_service.py's `_safe_join` (#3955). `os.sep` is
+    appended to the base to rule out a sibling-prefix collision (e.g.
+    ".../strategy_prompts" wrongly "containing" ".../strategy_prompts-evil").
+    """
+    base = os.path.normpath(str(_PROMPTS_DIR))
+    candidate = os.path.normpath(os.path.join(base, norm, _PROMPT_FILENAME))
+    if not candidate.startswith(base + os.sep):
+        return None
+    return candidate
+
+
+def _read_yaml(path: Path | str) -> dict[str, Any]:
     """Read a yaml file, return parsed dict. Raises if file is empty/invalid."""
     with open(path, "r", encoding="utf-8") as f:
         data = yaml.safe_load(f)
@@ -71,13 +93,13 @@ def _load_prompt_uncached(strategy_type: str | None) -> dict[str, Any]:
         norm = _DEFAULT_TYPE
 
     # Try specific strategy first
-    specific = _PROMPTS_DIR / norm / _PROMPT_FILENAME
-    if specific.exists():
+    specific = _safe_prompt_path(norm)
+    if specific is not None and os.path.exists(specific):
         return _read_yaml(specific)
 
     # Fallback to default
-    default = _PROMPTS_DIR / _DEFAULT_TYPE / _PROMPT_FILENAME
-    if default.exists():
+    default = _safe_prompt_path(_DEFAULT_TYPE)
+    if default is not None and os.path.exists(default):
         return _read_yaml(default)
 
     raise StrategyPromptError(
