@@ -610,6 +610,21 @@ var LESSON_DATA = {
   'G7-L30': { rawDocx: 'private/curriculum-source/2026-05-01/（gitignored）', yamlPath: 'backend/data/lessons/G7-L30*.yml → spotlight key', strategy: 'table_text', blockCount: 52, note: '代表截圖' }
 };
 
+/* #3960: escape before building innerHTML -- lessonId / data-blocks keys &
+   values / LESSON_DATA fields all end up concatenated raw into HTML below.
+   Today every value here is hardcoded in this same static file (not fetched
+   from any API, not user input), so there's no reachable attacker today --
+   but it's still a real gap: a crafted data-lesson/data-blocks attribute
+   containing "<script>" or an attribute-breakout payload would execute as
+   markup, not render as text, the moment this pattern gets copied to a page
+   that pulls any of this from a non-static source. Same esc() shape already
+   used correctly in spotlight-pipeline-board.html / keypoints-pipeline-board.html. */
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
+}
+
 document.querySelectorAll('.course-cell').forEach(function(cell) {
   cell.addEventListener('click', function() {
     var lessonId = cell.getAttribute('data-lesson');
@@ -618,20 +633,20 @@ document.querySelectorAll('.course-cell').forEach(function(cell) {
     var blocks = {};
     try { blocks = JSON.parse(blocksRaw); } catch(e) {}
     var blockRows = Object.entries(blocks).map(function(kv) {
-      return '<tr><td><code>' + kv[0] + '</code></td><td>' + kv[1] + '</td></tr>';
+      return '<tr><td><code>' + esc(kv[0]) + '</code></td><td>' + esc(kv[1]) + '</td></tr>';
     }).join('');
     var isFullSample = lessonId === 'G6-L22';
     document.getElementById('modal-content').innerHTML =
-      '<h2 style="color:var(--purple);margin:0 0 4px">' + lessonId + '</h2>' +
-      '<div style="font-size:.82rem;color:var(--muted);margin-bottom:14px">策略類型：' + (d.strategy||'') + ' · ' + (d.blockCount||'') + ' blocks' +
+      '<h2 style="color:var(--purple);margin:0 0 4px">' + esc(lessonId) + '</h2>' +
+      '<div style="font-size:.82rem;color:var(--muted);margin-bottom:14px">策略類型：' + esc(d.strategy||'') + ' · ' + esc(d.blockCount||'') + ' blocks' +
         (isFullSample ? ' · <b>完整範本課</b>' : ' · 代表截圖') + '</div>' +
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">' +
         '<div>' +
           '<h4 style="color:var(--ink);margin:0 0 6px;font-size:.9rem">① raw DOCX 來源</h4>' +
-          '<div style="font-size:.8rem;background:#f9f6f0;border-radius:6px;padding:10px;color:var(--muted)">' + (d.rawDocx||'—') + '</div>' +
+          '<div style="font-size:.8rem;background:#f9f6f0;border-radius:6px;padding:10px;color:var(--muted)">' + esc(d.rawDocx||'—') + '</div>' +
           '<h4 style="color:var(--ink);margin:12px 0 6px;font-size:.9rem">② extract schema（block 結構摘要）</h4>' +
           '<table style="width:100%;font-size:.78rem"><thead><tr><th>block type</th><th>數量</th></tr></thead><tbody>' + blockRows + '</tbody></table>' +
-          '<div style="font-size:.75rem;color:var(--muted);margin-top:4px">' + (d.yamlPath||'') + '</div>' +
+          '<div style="font-size:.75rem;color:var(--muted);margin-top:4px">' + esc(d.yamlPath||'') + '</div>' +
         '</div>' +
         '<div>' +
           '<h4 style="color:var(--ink);margin:0 0 6px;font-size:.9rem">③ 真實前端 UI</h4>' +
