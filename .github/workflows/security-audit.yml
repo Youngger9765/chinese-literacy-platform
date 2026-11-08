@@ -150,6 +150,41 @@ jobs:
           path: /tmp/pip-audit.json
           retention-days: 30
 
+      # #3854: requirements.lock (#3849) is hash-pinned, so it never moves on
+      # its own — no more free ride on routine security patches. The weekly
+      # schedule run above already re-audits it; on PR/push a failure is
+      # already visible in the check UI, but a scheduled run's failure is
+      # easy to miss unless someone checks the Actions tab. File (or update)
+      # a tracking issue so it surfaces where issues are actually triaged.
+      - name: File/update tracking issue for scheduled pip-audit failures
+        if: failure() && github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          BODY_FILE=$(mktemp)
+          VULN_COUNT=$(jq '[.[] | .vulns | length] | add // 0' /tmp/pip-audit.json 2>/dev/null || echo "unknown")
+          {
+            echo "Weekly scheduled pip-audit (security-audit.yml, cron) found vulnerabilities in \`backend/requirements.lock\`."
+            echo ""
+            echo "**Run**: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            echo ""
+            echo "**Vulnerable packages ($VULN_COUNT):**"
+            jq -r '.[] | select(.vulns | length > 0) | "- **\(.name)** \(.version): " + (.vulns | map(.id) | join(", "))' /tmp/pip-audit.json 2>/dev/null
+            echo ""
+            echo "Run \`pip-audit -r backend/requirements.lock --require-hashes\` locally, bump the affected package(s) in \`requirements.txt\`, and regenerate the lock (see \`backend/README.md\`) — or add known-safe CVE IDs to \`.security-audit-allowlist.json\`."
+          } > "$BODY_FILE"
+
+          EXISTING=$(gh issue list --repo "${{ github.repository }}" --label security --state open \
+            --search "\"Scheduled pip-audit found vulnerabilities\" in:title" --json number --jq '.[0].number // empty')
+          if [ -n "$EXISTING" ]; then
+            gh issue comment "$EXISTING" --repo "${{ github.repository }}" --body-file "$BODY_FILE"
+          else
+            gh issue create --repo "${{ github.repository }}" \
+              --title "security: scheduled pip-audit found vulnerabilities in requirements.lock" \
+              --label security \
+              --body-file "$BODY_FILE"
+          fi
+
   audit-summary:
     name: Audit summary
     needs: [npm-audit, pip-audit]
