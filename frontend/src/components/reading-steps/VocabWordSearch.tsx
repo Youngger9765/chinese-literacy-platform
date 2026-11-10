@@ -119,9 +119,11 @@ interface OnboardingCoachProps {
 }
 
 function OnboardingCoach({ onDismiss, onDemo }: OnboardingCoachProps) {
-  const instruction = IS_TOUCH_DEVICE
-    ? '用手指在方格上滑過，橫的、直的、斜的都可以圈'
-    : '用滑鼠在方格上拖曳，橫的、直的、斜的都可以圈';
+  // UI-6: used to branch on IS_TOUCH_DEVICE ("用滑鼠...拖曳" vs "用手指...滑過"),
+  // but a resized-viewport QA pass (no real touch emulation) always landed on
+  // the mouse wording even at phone width — and plenty of real phones/tablets
+  // support both a finger and a mouse/trackpad anyway. One neutral sentence.
+  const instruction = '在方格上拖曳（手指或滑鼠皆可），橫的、直的、斜的都可以圈';
   return (
     <StepCoachCard title="語詞複習怎麼玩？" onDemo={onDemo} onDismiss={onDismiss}>
       {instruction}。右邊列出要找的語詞，全部找到就完成
@@ -434,14 +436,18 @@ export default function VocabWordSearch({
         <h2 className="text-lg font-bold text-on-surface">語詞複習</h2>
         {!showCoach ? (
           <div className="flex items-center justify-center gap-3 mt-0.5">
+            {/* Quoted literal (not bare JSX text) on purpose — #2863's
+                static-analysis lock scans for quoted instruction strings
+                mentioning 斜 (diagonal), so the wording stays provably in
+                sync with what the drag gesture actually supports. */}
             <p className="text-sm text-on-surface-variant">
-              {IS_TOUCH_DEVICE ? '橫、直、斜滑過圈出語詞' : '橫、直、斜拖曳圈出語詞'}
+              {'橫、直、斜拖曳圈出語詞'}
             </p>
             <StepCoachHelpButton onClick={() => setShowCoach(true)} />
           </div>
         ) : (
           <p className="text-sm text-on-surface-variant mt-0.5">
-            橫、直、斜拖曳圈出語詞
+            {'橫、直、斜拖曳圈出語詞'}
           </p>
         )}
       </div>
@@ -480,12 +486,13 @@ export default function VocabWordSearch({
         )}
         {demo?.step === 'start-drag' && (
           <DemoBubble>
-            {IS_TOUCH_DEVICE ? '② 按住方格上的第一個字' : '② 按住方格上的第一個字'}
+            ② 按住方格上的第一個字
           </DemoBubble>
         )}
         {demo?.step === 'dragging' && (
           <DemoBubble>
-            {IS_TOUCH_DEVICE ? '③ 手指滑過，橫直斜圈出語詞' : '③ 拖曳圈出整個語詞（橫、直、斜）'}
+            {/* Quoted literal — see #2863 comment above. */}
+            {'③ 拖曳圈出整個語詞（橫、直、斜）'}
           </DemoBubble>
         )}
         {demo?.step === 'success' && (

@@ -18,6 +18,7 @@ import {
   type StructureInteractionProfile,
 } from './storyStructureProfile';
 import StepCoachCard, { StepCoachHelpButton } from '../learning/StepCoachCard';
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -556,7 +557,7 @@ const InlineWorksheetContent: React.FC<InlineWorksheetContentProps> = ({
     return nodes;
   }, [text, rowIdx, subIdx, answers, setAnswer, submitted, gradeResults]);
 
-  return <span className="text-sm leading-relaxed whitespace-pre-line">{parts}</span>;
+  return <span className="text-sm leading-relaxed whitespace-pre-line break-words">{parts}</span>;
 };
 
 
@@ -891,7 +892,7 @@ const InlineChoiceContent: React.FC<InlineChoiceContentProps> = ({
     return nodes;
   }, [text, blanks, rowIdx, subIdx, answers, setAnswer, submitted, gradeResults]);
 
-  return <span className="text-sm leading-relaxed whitespace-pre-line">{parts}</span>;
+  return <span className="text-sm leading-relaxed whitespace-pre-line break-words">{parts}</span>;
 };
 
 // ── Worksheet HTML table ─────────────────────────────────────────────────────
@@ -974,11 +975,46 @@ const WorksheetTable: React.FC<WorksheetTableProps> = ({
       );
     }
     if (cell) return renderCellContent(cell, rowIdx, subIdx);
-    return <span className="text-sm leading-relaxed whitespace-pre-line">{value}</span>;
+    return <span className="text-sm leading-relaxed whitespace-pre-line break-words">{value}</span>;
   };
 
+  // UI-3 (#390px keypoints-table overflow) vs #3696/#3698 (iPad split-panel
+  // squeeze) pull in opposite directions on the SAME <table>:
+  //   - #3698 wants a min-w-[28rem] FLOOR + horizontal scroll, so a narrow
+  //     *split-panel* container (iPad portrait/landscape, ~246-435px) never
+  //     crushes CheckboxCell's option pills to one character per line.
+  //   - This fix wants the opposite on a true single-column PHONE viewport
+  //     (390px): no horizontal scroll at all — wrap instead, because a
+  //     fixed-width scroll floor is exactly what cut the row text off
+  //     mid-word at the screen edge with no visible scroll cue.
+  // Scope the table-fixed + <colgroup> treatment to narrow phones only
+  // (useIsMobile(640), under Tailwind's `sm` breakpoint) so #3698's
+  // tablet/desktop floor-and-scroll behaviour is untouched.
+  const isNarrowPhone = useIsMobile(640);
+
   return (
-    <table className="w-full min-w-[28rem] border-collapse border border-black text-sm bg-white">
+    <table
+      className={
+        isNarrowPhone
+          ? 'w-full table-fixed border-collapse border border-black text-sm bg-white'
+          : 'w-full min-w-[28rem] border-collapse border border-black text-sm bg-white'
+      }
+    >
+      {isNarrowPhone && (
+        // `table-fixed` only reads column widths off the FIRST row (or a
+        // <colgroup>) — and our first row is the title (`colSpan=3`), which
+        // carries no per-column width. So this carries the three logical
+        // columns: section label (pair rows' own label, e.g. 主角/主題/球風,
+        // or the rowSpan'd group label, e.g. 事例) · item label
+        // (背景/經過/結果, short & narrow) · value (the long free-fill/
+        // choice content — gets the rest). Percentages echo what table-auto
+        // was already settling on for this content (~13/16/71).
+        <colgroup>
+          <col className="w-[16%]" />
+          <col className="w-[16%]" />
+          <col />
+        </colgroup>
+      )}
       <tbody>
         {title && (
           <tr>
