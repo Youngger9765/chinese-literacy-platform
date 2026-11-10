@@ -61,15 +61,49 @@ export function getAccountCountValidation(count: number): FieldValidation {
   return { valid: true, msg: '' };
 }
 
+/**
+ * Cryptographically-random index in [0, max) with NO modulo bias.
+ *
+ * `Math.random()` is not a CSPRNG -- it's seedable/predictable in some
+ * engines, and this function backs the DEFAULT shared password every
+ * batch-by-prefix dialog offers the teacher (security review finding,
+ * #3991 follow-up). `crypto.getRandomValues` is the Web Crypto CSPRNG,
+ * available globally in every browser this app targets and in the jsdom
+ * test environment.
+ *
+ * `x % max` alone is biased whenever 256 isn't a multiple of `max` (every
+ * alphabet here: 25 and 34) -- low byte values would come up slightly more
+ * often. Rejection sampling removes the bias: draw a byte, and if it falls
+ * in the "leftover" tail that doesn't divide evenly into `max`-sized
+ * buckets, throw it away and draw again. `max` must be <= 256 for this to
+ * terminate -- true for every caller in this module.
+ */
+function secureRandomIndex(max: number): number {
+  const range = 256 - (256 % max);
+  const buf = new Uint8Array(1);
+  let x = range; // start >= range so the loop always draws at least once
+  while (x >= range) {
+    crypto.getRandomValues(buf);
+    x = buf[0];
+  }
+  return x % max;
+}
+
 /** Random lowercase alnum code for the default prefix/password, same
  * character set Junyi uses (drops `l`/`1` -- visually ambiguous with
- * `1`/`o`). First char always a letter so the default always validates. */
+ * `1`/`o`). First char always a letter so the default always validates.
+ * Kept short (Junyi's own default is 5) -- a batch-created account's
+ * password is meant to be read off a printed card and typed by a child,
+ * so "longer is more secure" isn't the right tradeoff here; the backend
+ * (`BatchStudentByPrefixRequest`) still enforces its own minimum length
+ * (>=5) independent of whatever length the frontend happens to default
+ * to or the teacher edits it to. */
 export function generateRandomCode(length: number): string {
   const CHARACTERS = 'abcdefghijkmnopqrstuvwxyz023456789';
   const ALPHABET = CHARACTERS.slice(0, 25); // pure-letters prefix of CHARACTERS
-  let result = ALPHABET.charAt(Math.floor(Math.random() * ALPHABET.length));
+  let result = ALPHABET.charAt(secureRandomIndex(ALPHABET.length));
   while (result.length < length) {
-    result += CHARACTERS.charAt(Math.floor(Math.random() * CHARACTERS.length));
+    result += CHARACTERS.charAt(secureRandomIndex(CHARACTERS.length));
   }
   return result;
 }

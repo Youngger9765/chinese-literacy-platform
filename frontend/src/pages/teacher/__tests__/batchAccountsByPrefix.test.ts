@@ -1,11 +1,19 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   MAX_ACCOUNT_COUNT,
+  generateRandomCode,
   getAccountCountValidation,
   getPrefixValidation,
   getSharedPasswordValidation,
   previewAccountsByPrefix,
 } from '../batchAccountsByPrefix';
+
+// Mirrors the module's own private alphabet constants -- kept in sync
+// deliberately rather than exported, so these tests assert on the real
+// observable contract (what characters a caller can see), not an
+// implementation detail re-imported from the module under test.
+const CHARACTERS = 'abcdefghijkmnopqrstuvwxyz023456789';
+const ALPHABET = CHARACTERS.slice(0, 25);
 
 describe('getPrefixValidation', () => {
   it('accepts a normal letters-only prefix', () => {
@@ -115,5 +123,64 @@ describe('previewAccountsByPrefix', () => {
 
   it('returns empty when count exceeds the cap', () => {
     expect(previewAccountsByPrefix('abc', 'pw1234', MAX_ACCOUNT_COUNT + 1)).toEqual([]);
+  });
+});
+
+// Security review follow-up (#3991): generateRandomCode backs the DEFAULT
+// shared password the batch-by-prefix dialog offers the teacher. It must
+// use a CSPRNG (crypto.getRandomValues), not Math.random(), and must not
+// be biased by a naive `% max` on top of it.
+describe('generateRandomCode', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('calls crypto.getRandomValues -- not Math.random', () => {
+    const spy = vi.spyOn(crypto, 'getRandomValues');
+    generateRandomCode(5);
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it('produces only allowed characters (a-z minus l, digits minus 1) at the expected length', () => {
+    for (let i = 0; i < 50; i += 1) {
+      const code = generateRandomCode(5);
+      expect(code).toHaveLength(5);
+      for (const ch of code) {
+        expect(CHARACTERS.includes(ch)).toBe(true);
+      }
+    }
+  });
+
+  it('always starts with a letter, never a digit', () => {
+    for (let i = 0; i < 50; i += 1) {
+      const code = generateRandomCode(5);
+      expect(ALPHABET.includes(code[0])).toBe(true);
+    }
+  });
+
+  it('kept kid-typeable: default length stays short (5), not 10+', () => {
+    // Pins the length this module's one real caller (TeacherDashboard's
+    // generateRandomCode(5) default-suggestion effect) asks for, so a
+    // future "longer = more secure" edit doesn't silently land here.
+    expect(generateRandomCode(5)).toHaveLength(5);
+  });
+
+  it('rejection sampling: a biased-tail draw is discarded and re-drawn, not reused', () => {
+    // secureRandomIndex(25)'s range is 250 (256 - 256 % 25). A drawn byte
+    // of 250 falls in the rejected tail and MUST be thrown away; the next
+    // draw (5) is accepted -> index 5 % 25 = 5 -> ALPHABET[5] = 'f'. If the
+    // implementation regressed to a naive `byte % 25` (biased, no
+    // rejection), the first draw (250 % 25 = 0 -> 'a') would be used
+    // directly and only ONE draw would happen.
+    const sequence = [250, 5];
+    let call = 0;
+    vi.spyOn(crypto, 'getRandomValues').mockImplementation((buf) => {
+      (buf as Uint8Array)[0] = sequence[call];
+      call += 1;
+      return buf;
+    });
+    const code = generateRandomCode(1);
+    expect(code).toBe('f');
+    expect(call).toBe(2);
   });
 });
