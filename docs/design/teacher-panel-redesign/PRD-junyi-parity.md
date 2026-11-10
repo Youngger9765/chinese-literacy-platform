@@ -120,3 +120,23 @@ Young 明令：§5 標成「刻意不做」的配色／彈窗細節／圖例／�
   `kist-curriculum/benchmarks/junyi-teacher-ui/lingoleap-staging-2026-11-10b/`（private repo）
 - staging 真實登入（教師 李老師）走一遍：建班（teal 彈窗）→ 班級設定（teal 圖示/按鈕、ⓘ 提示）→
   指派任務分頁（任務文案、藍色建立鈕、鋼藍分頁、橘色側欄選中）
+
+## 7. 2026-11-11 第三輪（#3992）— §6 item 4 的「明確未做」收尾 + 剩餘靛藍
+
+§6 item 4 記錄「均一的新增座號圖示按鈕……今天沒做，記在這裡等下一張票」—— 本票把它做掉，
+同時補上 §6 刻意只換部分元件時沒掃到的三個殘留靛藍：
+
+| # | 項目 | 狀態 | 細節 |
+|---|---|---|---|
+| 1 | 新增座號批次指定彈窗 | ✅ 完成 | 後端 `seat_number` 欄位與單筆 PATCH（#3826）已上線、**不需要 migration**；新增批次 `PATCH /classrooms/{id}/students/seats`（一次交易內清空再指定，避免對調座號時撞到 unique constraint）。前端 `SeatNumberDialog.tsx`：上下移調順序（不用拖曳套件）、＋ 插入空號、即時換算座號、儲存走批次 API；接在「新增學生」旁的圖示按鈕列。學生名單表改依座號排序（無座號排最後）|
+| 2 | `TeacherDashboard.tsx` 右上角「建立班級」（頁首＋空狀態按鈕與圖示） | ✅ 完成 | 靛藍 `bg-accent` → 均一 teal `#19A696`，跟同頁彈窗內的 radio/確定鈕（#3989 已換）一致 |
+| 3 | `ClassListSidebar.tsx` 左側「建立班級」按鈕 | ✅ 完成 | 同上換 teal；該元件的「目前班級」選中項目（灰底＋橘色 accent）#3989 已經換過，這次沒動 |
+| 4 | 全站共用 `NavButton`（班級管理／作業管理／遊戲區／使用說明，教師工作區主導覽選中狀態） | ✅ 完成 | 新增 `variant="teacher"`（只有 `TeacherSidebar` 傳入），選中樣式換成跟 `ClassListSidebar` 一致的灰底＋橘色 `#FFA500` 右側 accent。`StudentSidebar`／`AdminSidebar`／`MobileTabBar` 沒有傳這個 prop，維持靛藍 |
+
+### 驗收（本次新增）
+- 後端 12 條新 pytest（批次座號 API）＋既有 `test_classroom_rename_seat_3826.py`（19 條）全綠
+- `npm run lint && npm run test` 全綠（含 7 條新 `SeatNumberDialog.test.tsx`，mutation 驗過有牙）
+- 1280／390 寬，班級設定（新增座號彈窗）＋班級管理（建立班級按鈕）改前改後截圖，存
+  `kist-curriculum/benchmarks/junyi-teacher-ui/lingoleap-staging-2026-11-11/`（private repo）
+- staging 真實登入（教師 李老師）：班級設定開新增座號彈窗 → 自動編號 → 儲存 → 名單依座號排序；
+  班級管理頁看到 teal 建立班級按鈕；左側主導覽選中項目看到橘色 accent
