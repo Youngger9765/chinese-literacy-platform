@@ -458,6 +458,37 @@ export async function batchCreateStudents(
   return handleResponse<BatchCreateResult>(res);
 }
 
+// --- Batch create students by account prefix (Junyi-parity, #3991) ---
+//
+// Teacher picks ONE account-name prefix + ONE shared initial password +
+// a count, instead of naming each student -- the system creates
+// `{prefix}01`..`{prefix}NN` and shares the same password. Returns the
+// SAME shape as batchCreateStudents so callers (TeacherDashboard's
+// 建立新班級 flow, ClassroomDetail's credential-card display) don't need
+// a second result type.
+
+export interface BatchByPrefixInput {
+  prefix: string;
+  password: string;
+  count: number;
+}
+
+export async function batchCreateStudentsByPrefix(
+  token: string,
+  classroomId: number,
+  input: BatchByPrefixInput,
+): Promise<BatchCreateResult> {
+  const res = await fetch(
+    `${API_BASE}/api/classrooms/${classroomId}/students/batch-by-prefix`,
+    {
+      method: 'POST',
+      headers: authHeaders(token),
+      body: JSON.stringify(input),
+    },
+  );
+  return handleResponse<BatchCreateResult>(res);
+}
+
 // --- CSV Upload ---
 
 export interface CsvUploadError {
