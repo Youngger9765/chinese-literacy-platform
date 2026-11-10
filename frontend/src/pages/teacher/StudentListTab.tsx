@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { BatchCreateResult, ClassroomDetailResponse, ClassroomResponse, StudentInClassroomResponse } from '../../services/classroomApi';
 import CsvUploadModal from './CsvUploadModal';
 import AddStudentsPanel from './panel/AddStudentsPanel';
@@ -505,7 +505,7 @@ const EditableSeatCell: React.FC<{
           type="button"
           onClick={startEdit}
           aria-label={`編輯 ${studentName} 的座號`}
-          className="text-gray-300 hover:text-indigo-600 transition-colors cursor-pointer text-xs"
+          className="text-gray-300 hover:text-[#19A696] transition-colors cursor-pointer text-xs"
         >
           ✎
         </button>
@@ -528,7 +528,7 @@ const EditableSeatCell: React.FC<{
           if (e.key === 'Enter') confirm();
           if (e.key === 'Escape') cancel();
         }}
-        className="h-8 w-16 px-2 rounded-md border border-indigo-300 text-sm text-center"
+        className="h-8 w-16 px-2 rounded-md border border-[#19A696]/50 text-sm text-center"
       />
       {error && <span className="text-xs text-red-500 whitespace-normal max-w-[8rem]">{error}</span>}
     </div>
@@ -584,6 +584,22 @@ const StudentListTab: React.FC<StudentListTabProps> = ({
   // Parent portal is off unless VITE_PARENT_PORTAL_ENABLED=true; a code a parent
   // cannot enter anywhere is a dead end, so the teacher half follows the flag.
   const showParentInvite = featureFlags.PARENT_PORTAL_ENABLED;
+
+  // #3992: Junyi-parity -- the roster is shown in 座號 order (students with
+  // no seat number yet sort after every seated student, keeping their
+  // original relative order among themselves via a stable sort so the list
+  // doesn't jump around every re-render for rows that tie on "no seat").
+  const sortedStudents = useMemo(() => {
+    return classroom.students
+      .map((s, originalIndex) => ({ s, originalIndex }))
+      .sort((a, b) => {
+        const aSeat = a.s.seat_number ?? Infinity;
+        const bSeat = b.s.seat_number ?? Infinity;
+        if (aSeat !== bSeat) return aSeat - bSeat;
+        return a.originalIndex - b.originalIndex;
+      })
+      .map(({ s }) => s);
+  }, [classroom.students]);
 
   // ── Batch-remove selection state (#3821) ──────────────────────────────────
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
@@ -766,7 +782,7 @@ const StudentListTab: React.FC<StudentListTabProps> = ({
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {classroom.students.map((s, i) => (
+            {sortedStudents.map((s, i) => (
               // #3424 kept: labels never break mid-word (whitespace-nowrap); on phones
               // each row stacks into a card instead of a squeezed table row.
               <tr key={s.id} className="flex flex-wrap items-center gap-x-3 gap-y-1.5 px-4 py-3 lg:table-row lg:p-0">

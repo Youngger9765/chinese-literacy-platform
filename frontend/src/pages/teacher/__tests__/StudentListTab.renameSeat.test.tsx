@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import StudentListTab from '../StudentListTab';
 import type { ClassroomDetailResponse } from '../../../services/classroomApi';
 
@@ -126,17 +126,20 @@ describe('StudentListTab — 管理座號 (#3826)', () => {
     vi.restoreAllMocks();
   });
 
-  it('falls back to row index when seat_number is null', () => {
+  it('sorts by seat number (nulls last) and falls back to list position when seat_number is null (#3992)', () => {
     render(<StudentListTab {...baseProps} />);
-    // Row 1 (王小一) has seat_number: null -> displays array index "1"
-    expect(screen.getByText('1')).toBeInTheDocument();
-  });
-
-  it('shows the persisted seat number when set', () => {
-    render(<StudentListTab {...baseProps} />);
-    // Row 2 (王小二) has seat_number: 5 -> displays "5", not index "2"
-    expect(screen.getByText('5')).toBeInTheDocument();
-    expect(screen.queryByText('2')).toBeNull();
+    // 王小二 has seat_number 5, 王小一 has no seat yet -- the roster is
+    // shown in 座號 order (#3992), so 王小二 renders FIRST despite being
+    // added to the classroom second. 王小一's fallback display is its own
+    // position in that sorted list (2), not its original array index (1).
+    // rows[0] is the (CSS-hidden-on-mobile, but still in the DOM) <thead>
+    // header row -- jsdom doesn't evaluate the Tailwind `hidden` utility's
+    // actual computed style, so it still comes back from getAllByRole.
+    const rows = screen.getAllByRole('row');
+    expect(within(rows[1]).getByText('王小二')).toBeInTheDocument();
+    expect(within(rows[1]).getByText('5')).toBeInTheDocument();
+    expect(within(rows[2]).getByText('王小一')).toBeInTheDocument();
+    expect(within(rows[2]).getByText('2')).toBeInTheDocument();
   });
 
   it('clicking the seat pencil icon opens a number input', () => {

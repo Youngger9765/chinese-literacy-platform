@@ -54,6 +54,10 @@ interface ClassroomHeaderCardProps {
   // Junyi-parity: 新增學生 opens the add-students modal owned by the page
   onAddStudents?: () => void;
 
+  // #3992: 新增座號 opens the batch seat-number dialog owned by the page,
+  // same pattern as onAddStudents above.
+  onOpenSeatDialog?: () => void;
+
   // Util
   formatDate: (dateStr: string) => string;
 }
@@ -87,6 +91,7 @@ const ClassroomHeaderCard: React.FC<ClassroomHeaderCardProps> = ({
   onHideRegenConfirm,
   onRegenerateCode,
   onAddStudents,
+  onOpenSeatDialog,
   formatDate,
 }) => {
 
@@ -249,6 +254,18 @@ const ClassroomHeaderCard: React.FC<ClassroomHeaderCardProps> = ({
                       app's indigo accent — scoped to this one icon only. */}
                   <span aria-hidden="true" className="w-7 h-7 rounded-full bg-[#19A696] text-white text-xl leading-7 text-center">＋</span>
                   <span className="text-xs whitespace-nowrap">新增學生</span>
+                </button>
+              )}
+              {onOpenSeatDialog && (
+                <button
+                  type="button"
+                  onClick={onOpenSeatDialog}
+                  className="sm:w-20 h-[72px] flex flex-col items-center justify-center gap-1 rounded-lg border border-gray-200 bg-white shadow-sm hover:bg-[#19A696]/10 text-gray-700 cursor-pointer"
+                >
+                  {/* Issue #3992: same Junyi teal as 新增學生 above -- both
+                      are "roster setup" actions in the same icon family. */}
+                  <span aria-hidden="true" className="w-7 h-7 rounded-full bg-[#19A696] text-white text-base leading-7 text-center font-semibold">01</span>
+                  <span className="text-xs whitespace-nowrap">新增座號</span>
                 </button>
               )}
               <button

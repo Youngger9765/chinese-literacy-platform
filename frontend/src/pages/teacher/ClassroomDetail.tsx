@@ -30,6 +30,7 @@ import ClassroomHeaderCard from './ClassroomHeaderCard';
 import ClassroomPkSettingsPanel from './ClassroomPkSettingsPanel';
 import ClassroomTabs, { TabKey, resolveInitialView, resolveTabKey } from './ClassroomTabs';
 import StudentListTab from './StudentListTab';
+import SeatNumberDialog from './SeatNumberDialog';
 import ClassSwitcher from './panel/ClassSwitcher';
 import ClassListSidebar from './panel/ClassListSidebar';
 
@@ -63,6 +64,8 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack, 
   const selectedAssignmentId = assignmentParam ? Number(assignmentParam) || null : null;
   // Junyi-parity: the roster table is always shown; adding students opens a modal.
   const [isAddStudentsOpen, setIsAddStudentsOpen] = useState(Boolean(initialAddResult));
+  // #3992: Junyi-parity "新增座號" batch dialog, same open/close pattern as above.
+  const [isSeatDialogOpen, setIsSeatDialogOpen] = useState(false);
   const studentParam = searchParams.get('student');
   const selectedStudentId = studentParam ? Number(studentParam) || null : null;
   const rawTab = searchParams.get('tab');
@@ -392,8 +395,20 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack, 
         onHideRegenConfirm={() => setShowRegenConfirm(false)}
         onRegenerateCode={handleRegenerateCode}
         onAddStudents={() => setIsAddStudentsOpen(true)}
+        onOpenSeatDialog={() => setIsSeatDialogOpen(true)}
         formatDate={formatDate}
       />
+
+      {token && (
+        <SeatNumberDialog
+          isOpen={isSeatDialogOpen}
+          token={token}
+          classroomId={classroom.id}
+          students={classroom.students}
+          onClose={() => setIsSeatDialogOpen(false)}
+          onSaved={loadClassroom}
+        />
+      )}
 
       {token && (
         <ClassroomPkSettingsPanel

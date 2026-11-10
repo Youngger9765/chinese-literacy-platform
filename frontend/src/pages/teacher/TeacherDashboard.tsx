@@ -281,9 +281,13 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
             {/* School switcher — only shown when teacher belongs to multiple schools */}
             <SchoolSwitcher />
+            {/* Issue #3992: Junyi teal (#19A696) -- same token already used
+                for every other step of this same "建立班級" flow (the
+                in-modal radio/confirm buttons, #3989), just the trigger
+                button itself hadn't been switched yet. */}
             <button
               onClick={() => setShowCreateForm(true)}
-              className="bg-accent hover:bg-accent-hover text-white px-5 py-2.5 rounded-lg font-medium text-sm transition-colors whitespace-nowrap"
+              className="bg-[#19A696] hover:bg-[#15897B] text-white px-5 py-2.5 rounded-lg font-medium text-sm transition-colors whitespace-nowrap"
             >
               建立班級
             </button>
@@ -737,8 +741,10 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
         {/* Empty state — no classrooms at all */}
         {!isLoading && !error && classrooms.length === 0 && (
           <div className="text-center py-16">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-accent-bg rounded-2xl mb-4">
-              <svg className="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {/* Issue #3992: same teal as the header's 建立班級 button above --
+                this empty state is the same action, just a second entry point. */}
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-[#19A696]/10 rounded-2xl mb-4">
+              <svg className="w-8 h-8 text-[#19A696]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
               </svg>
             </div>
@@ -746,7 +752,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
             <p className="text-sm text-gray-500 mb-4">建立你的第一個班級，開始管理學生</p>
             <button
               onClick={() => setShowCreateForm(true)}
-              className="bg-accent hover:bg-accent-hover text-white px-5 py-2.5 rounded-lg font-medium text-sm transition-colors"
+              className="bg-[#19A696] hover:bg-[#15897B] text-white px-5 py-2.5 rounded-lg font-medium text-sm transition-colors"
             >
               建立班級
             </button>

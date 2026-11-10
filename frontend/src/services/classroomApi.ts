@@ -308,6 +308,37 @@ export async function setStudentSeatNumber(
   return handleResponse<StudentInClassroomResponse>(res);
 }
 
+// --- Batch seat-number assignment (#3992, Junyi-parity "新增座號" dialog) ---
+// Deliberately NOT N sequential setStudentSeatNumber calls -- swapping or
+// rotating seats that are already taken can transiently collide with the
+// backend's unique constraint mid-sequence even though the FINAL layout has
+// no duplicates. The backend applies the whole batch in one transaction.
+
+export interface SeatAssignment {
+  student_id: number;
+  seat_number: number | null;
+}
+
+export interface BatchSetSeatNumbersResult {
+  updated: StudentInClassroomResponse[];
+}
+
+export async function batchSetSeatNumbers(
+  token: string,
+  classroomId: number,
+  assignments: SeatAssignment[],
+): Promise<BatchSetSeatNumbersResult> {
+  const res = await fetch(
+    `${API_BASE}/api/classrooms/${classroomId}/students/seats`,
+    {
+      method: 'PATCH',
+      headers: authHeaders(token),
+      body: JSON.stringify({ assignments }),
+    },
+  );
+  return handleResponse<BatchSetSeatNumbersResult>(res);
+}
+
 // --- Delete classroom ---
 
 export async function deleteClassroom(token: string, classroomId: number): Promise<void> {
