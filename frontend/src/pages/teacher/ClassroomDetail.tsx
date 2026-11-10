@@ -431,10 +431,14 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack, 
       </section>
 
       <div className="flex justify-end">
+        {/* Issue #3989: this is the same button Junyi renders at the bottom
+            of 班級設定 (d1-class.png measured it at #25AA9B — Junyi's teal,
+            same family as the create-class modal's #19A696) — not the app's
+            indigo accent. Scoped to this one button. */}
         <button
           type="button"
           onClick={() => setActiveTab('assignments')}
-          className="h-11 px-6 rounded-lg bg-accent hover:bg-accent-hover text-white text-base font-medium transition-colors cursor-pointer"
+          className="h-11 px-6 rounded-lg bg-[#19A696] hover:bg-[#15897B] text-white text-base font-medium transition-colors cursor-pointer"
         >
           指派任務
         </button>

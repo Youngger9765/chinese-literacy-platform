@@ -1,7 +1,7 @@
 /**
  * 逐大題全班統計 (#3367)
  *
- * 老師回饋：每個作業要能橫向展開，看到每一大題是否完成、正確率、錯誤率。
+ * 老師回饋：每個任務要能橫向展開，看到每一大題是否完成、正確率、錯誤率。
  * 後端已依正確率由低到高排好，最弱的一項標紅，老師一眼知道全班卡在哪。
  */
 import React from 'react';
@@ -17,7 +17,7 @@ const AssignmentItemStats: React.FC<AssignmentItemStatsProps> = ({ data }) => {
   if (data.submitted_count === 0) {
     return (
       <div className="rounded-xl border border-gray-200 p-5 text-gray-500">
-        還沒有學生交這份作業，交了之後這裡會顯示每一大題的全班正確率
+        還沒有學生交這份任務，交了之後這裡會顯示每一大題的全班正確率
       </div>
     );
   }
@@ -27,7 +27,7 @@ const AssignmentItemStats: React.FC<AssignmentItemStatsProps> = ({ data }) => {
   if (data.items.every((i) => i.completed === 0)) {
     return (
       <div className="rounded-xl border border-gray-200 p-5 text-gray-600">
-        已交 {data.submitted_count} 人，但這份作業沒有記錄到分項成績（朗讀、理解、生字）
+        已交 {data.submitted_count} 人，但這份任務沒有記錄到分項成績（朗讀、理解、生字）
       </div>
     );
   }

@@ -72,7 +72,7 @@ export function useAssignments(classroomId: number, onChanged?: () => void) {
       if (err instanceof AssignmentApiError) {
         setError(err.message);
       } else {
-        setError('無法載入作業列表');
+        setError('無法載入任務列表');
       }
     } finally {
       setIsLoading(false);
@@ -200,7 +200,7 @@ export function useAssignments(classroomId: number, onChanged?: () => void) {
       if (err instanceof AssignmentApiError) {
         setCreateError(err.message);
       } else {
-        setCreateError('建立作業失敗');
+        setCreateError('建立任務失敗');
       }
     } finally {
       setIsCreating(false);
@@ -242,7 +242,7 @@ export function useAssignments(classroomId: number, onChanged?: () => void) {
       if (err instanceof AssignmentApiError) {
         setError(err.message);
       } else {
-        setError('刪除作業失敗');
+        setError('刪除任務失敗');
       }
     } finally {
       setDeletingId(null);

@@ -50,8 +50,8 @@ describe('AssignmentMatrixGrid (#3367)', () => {
 
   it('with no assignments yet, says what to do and still lists the students (Junyi parity)', () => {
     render(<AssignmentMatrixGrid data={{ ...data, assignments: [], cells: [] }} onOpenAssignment={vi.fn()} />);
-    expect(screen.getByText(/按「建立作業」選一課派給學生/)).toBeInTheDocument();
-    const table = screen.getByRole('table', { name: '班級作業總表' });
+    expect(screen.getByText(/按「建立任務」選一課派給學生/)).toBeInTheDocument();
+    const table = screen.getByRole('table', { name: '班級任務總表' });
     for (const s of data.students) expect(within(table).getByText(s.name)).toBeInTheDocument();
   });
 
@@ -150,7 +150,7 @@ describe('CellBadge never wraps', () => {
 // Hans (#3448 C5/C6 manual QA): a student who joins a class AFTER a 全班
 // assignment went out still receives it — 未指派 only means the teacher
 // picked specific students and this one wasn't on the list. The old wording
-// ("派作業時還不在班上" / "作業派出後才加入班級") implied join timing decides
+// ("派任務時還不在班上" / "任務派出後才加入班級") implied join timing decides
 // 未指派, which is wrong and misled Hans during manual QA.
 describe('未指派 tooltip does not blame join timing (#3496)', () => {
   it('MatrixLegend explains 未指派 without mentioning when the student joined', () => {

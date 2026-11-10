@@ -1,7 +1,7 @@
 /**
  * 學生分頁 (#3376)
  *
- * 一張簡單的名單：每位學生交了幾份、平均幾分。點名字 → 這位學生每份作業的
+ * 一張簡單的名單：每位學生交了幾份、平均幾分。點名字 → 這位學生每份任務的
  * 狀態、分數、三個部分、唸錯的字（老師回饋：「看不到他們究竟錯了哪些」）。
  * 刻意只放老師每天會看的東西；完整學習曲線、標籤、指導紀錄在「更多 → 詳細學習紀錄」。
  */
@@ -70,7 +70,7 @@ export function StudentDetail({
     setError('');
     getStudentAssignments(token, classroomId, studentId)
       .then(setData)
-      .catch(() => setError('無法載入這位學生的作業'));
+      .catch(() => setError('無法載入這位學生的任務'));
   }, [token, classroomId, studentId]);
 
   // Self-practice sessions (not linked to any assignment) — matrix/assignment
@@ -114,10 +114,10 @@ export function StudentDetail({
         <>
           <h3 className="text-xl font-bold text-gray-900">{data.student_name}</h3>
           {rows.length === 0 ? (
-            <p className="text-gray-500">這個班級還沒有指派作業</p>
+            <p className="text-gray-500">這個班級還沒有指派任務</p>
           ) : (
             <>
-            <ul className="sm:hidden space-y-3" aria-label="這位學生的作業（手機）">
+            <ul className="sm:hidden space-y-3" aria-label="這位學生的任務（手機）">
               {rows.map((r) => (
                 <li key={r.assignment_id} className="rounded-xl border border-gray-200 p-4 space-y-2">
                   <div className="flex items-start justify-between gap-2">
@@ -138,10 +138,10 @@ export function StudentDetail({
                 </li>
               ))}
             </ul>
-            <table className="hidden sm:table w-full text-left" aria-label="這位學生的作業">
+            <table className="hidden sm:table w-full text-left" aria-label="這位學生的任務">
               <thead>
                 <tr className="text-sm text-gray-500 border-b border-gray-200">
-                  <th className="py-2 font-medium">作業</th>
+                  <th className="py-2 font-medium">任務</th>
                   <th className="py-2 font-medium">狀態</th>
                   {!noParts && <th className="py-2 font-medium text-right">朗讀</th>}
                   {!noParts && <th className="py-2 font-medium text-right">理解</th>}
@@ -180,10 +180,10 @@ export function StudentDetail({
           )}
           {noParts ? (
             <p className="text-sm text-gray-600">
-              這些作業沒有記錄到朗讀、理解、生字的分項成績——點「作答紀錄」看他目前做到哪裡、答了什麼
+              這些任務沒有記錄到朗讀、理解、生字的分項成績——點「作答紀錄」看他目前做到哪裡、答了什麼
             </p>
           ) : (
-            <p className="text-sm text-gray-500">「—」代表這份作業沒有記錄到那一部分</p>
+            <p className="text-sm text-gray-500">「—」代表這份任務沒有記錄到那一部分</p>
           )}
           {selfPracticeSessions.length > 0 && (
             <div className="space-y-2 pt-2">

@@ -31,7 +31,7 @@ export const AssignmentInlineEdit: React.FC<AssignmentInlineEditProps> = ({
   const fields = (
     <div className={variant === 'desktop' ? 'grid grid-cols-1 sm:grid-cols-3 gap-3' : 'space-y-3'}>
       <div>
-        <label className="block text-xs font-medium text-gray-600 mb-1">作業標題</label>
+        <label className="block text-xs font-medium text-gray-600 mb-1">任務標題</label>
         <input
           type="text"
           value={editTitle}
@@ -46,7 +46,7 @@ export const AssignmentInlineEdit: React.FC<AssignmentInlineEditProps> = ({
           type="text"
           value={editDescription}
           onChange={(event) => setEditDescription(event.target.value)}
-          placeholder="作業說明（選填）"
+          placeholder="任務說明（選填）"
           className="w-full h-9 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
         />
       </div>
@@ -63,7 +63,7 @@ export const AssignmentInlineEdit: React.FC<AssignmentInlineEditProps> = ({
   return (
     <div className={variant === 'mobile' ? 'mt-2 bg-blue-50 border border-blue-100 rounded-lg p-3' : ''}>
       <div className="flex items-center justify-between mb-2">
-        <span className="text-sm font-medium text-gray-800">編輯作業</span>
+        <span className="text-sm font-medium text-gray-800">編輯任務</span>
         <button onClick={onCancel} className="text-xs text-gray-500 hover:text-gray-700 cursor-pointer">
           取消
         </button>

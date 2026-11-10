@@ -1,5 +1,5 @@
 /**
- * 派給誰 (#3378，照均一)：全班或勾選部分學生；也可以同一份作業一次派給我的其他班。
+ * 派給誰 (#3378，照均一)：全班或勾選部分學生；也可以同一份任務一次派給我的其他班。
  */
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../../contexts/AuthContext';

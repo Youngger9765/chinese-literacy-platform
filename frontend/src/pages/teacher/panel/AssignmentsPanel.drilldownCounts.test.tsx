@@ -63,7 +63,7 @@ describe('AssignmentsPanel — download one assignment as CSV', () => {
       cells: [{ student_id: 1, assignment_id: 10, state: 'completed', score: 90, current_step: null }],
     } as never);
     render(<AssignmentsPanel classroomId={9} selectedAssignmentId={10} onSelectAssignment={vi.fn()} onOpenStudent={vi.fn()} />);
-    const btn = await screen.findByRole('button', { name: /下載這份作業成績/ });
+    const btn = await screen.findByRole('button', { name: /下載這份任務成績/ });
     btn.click();
     expect(created.length).toBe(1);
     URL.createObjectURL = origCreate;

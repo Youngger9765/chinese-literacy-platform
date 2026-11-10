@@ -129,7 +129,7 @@ function MarkCompleteAction({
     <div className="mt-1">
       <button
         onClick={() => setConfirming(true)}
-        title={`將 ${studentName} 的這份作業標記為已完成`}
+        title={`將 ${studentName} 的這份任務標記為已完成`}
         className="px-1.5 py-0.5 rounded border border-amber-300 text-amber-700 text-[11px] hover:bg-amber-50 cursor-pointer transition-colors"
       >
         標記完成
@@ -145,7 +145,7 @@ function TeacherMarkedBadge() {
   return (
     <span
       className="ml-1 inline-block px-1 py-0.5 rounded bg-gray-100 text-gray-500 text-[10px] align-middle"
-      title="這份作業由老師標記完成"
+      title="這份任務由老師標記完成"
     >
       老師標記
     </span>

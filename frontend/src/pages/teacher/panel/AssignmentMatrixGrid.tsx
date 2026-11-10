@@ -1,7 +1,7 @@
 /**
- * 班級作業總表 — 學生 × 老師出的全部作業 (#3367)
+ * 班級任務總表 — 學生 × 老師出的全部任務 (#3367)
  *
- * 老師回饋：矩陣只看老師出的作業、一張表看懂每次上課的完成度。
+ * 老師回饋：矩陣只看老師出的任務、一張表看懂每次上課的完成度。
  * 每一格只有四種狀態，沒有分數就不顯示數字（#3359 的假 0 分就是從這裡來的）。
  */
 import React from 'react';
@@ -96,7 +96,7 @@ export function isOverdue(dueDate: string | null, now: Date = new Date()): boole
 }
 
 /**
- * One legend, rendered next to 建立作業 (Junyi puts it top-right). Uses the
+ * One legend, rendered next to 建立任務 (Junyi puts it top-right). Uses the
  * same badges as the cells: a second legend with different swatches used to
  * sit under the table and the two disagreed (green 已交 vs grey 已交 chips).
  */
@@ -109,7 +109,7 @@ export function MatrixLegend() {
       <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded border border-dashed border-amber-400 text-amber-700 text-xs">進行中</span></span>
       <span className="flex items-center gap-1.5"><span className="text-gray-400">未開始</span></span>
       <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded bg-red-50 text-red-600 border border-red-200 text-xs font-medium">逾期未交</span></span>
-      <span className="flex items-center gap-1.5" title="這份作業只指派給部分學生，這位學生不在名單內（跟幾時加入班級無關，全班作業不管何時加入都會收到）"><span className="px-2 py-0.5 rounded text-xs text-gray-400 bg-gray-100">未指派</span></span>
+      <span className="flex items-center gap-1.5" title="這份任務只指派給部分學生，這位學生不在名單內（跟幾時加入班級無關，全班任務不管何時加入都會收到）"><span className="px-2 py-0.5 rounded text-xs text-gray-400 bg-gray-100">未指派</span></span>
     </div>
   );
 }
@@ -119,7 +119,7 @@ export function CellBadge({ cell, overdue = false }: { cell: Cell | undefined; o
     return (
       <span
         className="inline-block whitespace-nowrap shrink-0 px-2 py-0.5 rounded text-xs text-gray-400 bg-[repeating-linear-gradient(45deg,#f3f4f6,#f3f4f6_4px,#e5e7eb_4px,#e5e7eb_8px)]"
-        title="這位學生不在這份作業的指派名單內（老師指派的是部分學生，不是全班；跟幾時加入班級無關）"
+        title="這位學生不在這份任務的指派名單內（老師指派的是部分學生，不是全班；跟幾時加入班級無關）"
       >
         未指派
       </span>
@@ -169,10 +169,10 @@ const AssignmentMatrixGrid: React.FC<AssignmentMatrixGridProps> = ({ data, onOpe
       <div className="space-y-3">
         <p className="flex items-center gap-2 rounded-lg bg-sky-50 text-sky-900 px-4 py-3 text-base">
           <span aria-hidden="true" className="w-5 h-5 shrink-0 rounded-full border-2 border-sky-500 text-sky-600 text-xs font-bold leading-4 text-center">i</span>
-          按「建立作業」選一課派給學生，開始建立這個班的第一份作業
+          按「建立任務」選一課派給學生，開始建立這個班的第一份任務
         </p>
         <div className="inline-block border border-gray-200 rounded-xl overflow-hidden">
-          <table className="text-base" aria-label="班級作業總表">
+          <table className="text-base" aria-label="班級任務總表">
             <thead>
               <tr>
                 <th className="bg-gray-50 px-6 py-3 text-left font-medium text-gray-600 border-b border-gray-200">學生</th>
@@ -199,9 +199,9 @@ const AssignmentMatrixGrid: React.FC<AssignmentMatrixGridProps> = ({ data, onOpe
 
   return (
     <div>
-      {assignments.length > 1 && <p className="sm:hidden text-sm text-gray-500 mb-1">← 左右滑動看更多作業 →</p>}
+      {assignments.length > 1 && <p className="sm:hidden text-sm text-gray-500 mb-1">← 左右滑動看更多任務 →</p>}
       <div className="overflow-auto max-h-[70vh] border border-gray-200 rounded-xl">
-        <table className="min-w-full text-sm border-separate border-spacing-0" aria-label="班級作業總表">
+        <table className="min-w-full text-sm border-separate border-spacing-0" aria-label="班級任務總表">
           <thead>
             <tr>
               <th className="sticky top-0 left-0 z-20 bg-gray-50 px-4 py-3 text-left font-medium text-gray-600 border-b border-r border-gray-200">

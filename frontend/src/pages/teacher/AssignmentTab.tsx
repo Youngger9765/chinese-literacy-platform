@@ -197,8 +197,8 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId, onChanged, o
                 <button
                   onClick={() => handleOpenEdit(assignment)}
                   className="p-1 rounded text-gray-400 hover:text-accent hover:bg-accent-bg transition-colors cursor-pointer"
-                  title="編輯作業"
-                  aria-label="編輯作業"
+                  title="編輯任務"
+                  aria-label="編輯任務"
                 >
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -207,7 +207,7 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId, onChanged, o
                 <button
                   onClick={() => setConfirmDeleteId(assignment.id)}
                   className="p-1 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
-                  title="刪除作業"
+                  title="刪除任務"
                 >
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -285,7 +285,7 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId, onChanged, o
 
       <div className="p-5 border-b border-gray-100 flex items-center justify-between">
         <span className="text-sm text-gray-500">
-          共 {assignments.length} 份作業
+          共 {assignments.length} 份任務
         </span>
         {!showCreateForm && (
           <button
@@ -295,7 +295,7 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId, onChanged, o
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
-            建立作業
+            建立任務
           </button>
         )}
       </div>
@@ -378,11 +378,11 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId, onChanged, o
                   />
                 </svg>
               </div>
-              <p className="text-sm font-medium text-gray-700 mb-1">尚未建立作業</p>
-              <p className="text-xs text-gray-500">點選「建立作業」為班級指派學習任務</p>
+              <p className="text-sm font-medium text-gray-700 mb-1">尚未建立任務</p>
+              <p className="text-xs text-gray-500">點選「建立任務」為班級指派學習任務</p>
             </>
           ) : (
-            <p className="text-sm text-gray-500">此分類下沒有作業</p>
+            <p className="text-sm text-gray-500">此分類下沒有任務</p>
           )}
         </div>
       ) : (
@@ -423,7 +423,7 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId, onChanged, o
               <thead>
                 <tr className="border-b border-gray-100 text-left text-gray-500">
                   <th className="pb-2 font-medium w-6"></th>
-                  <th className="pb-2 font-medium">作業名稱</th>
+                  <th className="pb-2 font-medium">任務名稱</th>
                   <th className="pb-2 font-medium">課文</th>
                   <th className="pb-2 font-medium whitespace-nowrap">截止日期</th>
                   <th className="pb-2 font-medium text-center whitespace-nowrap">完成率</th>
