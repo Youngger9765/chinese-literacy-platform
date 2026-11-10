@@ -1,3 +1,4 @@
+import re
 from datetime import datetime
 
 from pydantic import BaseModel, Field, field_validator
@@ -221,6 +222,48 @@ class BatchStudentCreateResponse(BaseModel):
     created: list[CreatedStudentInfo]
     errors: list[BatchStudentError]
     warnings: list[str] = []
+
+
+# ── Batch Student Creation by Account Prefix (Junyi-parity, #3991) ─────────
+#
+# Mirrors Junyi's 「不確定學生有沒有帳號：幫學生創建均一帳號」 flow
+# (create-studentlist-modal/utils/accountUtils.js getAccountValidation /
+# getPasswordValidation / getCountValidation): the teacher doesn't name
+# each student up front -- they pick ONE account-name prefix and ONE
+# shared initial password, and the system creates `count` sequentially
+# numbered accounts (`{prefix}01`..`{prefix}NN`) that all start with that
+# same password. This is a different shape from BatchStudentCreateRequest
+# above (one name + seat_number per student, a random per-student
+# password) -- see classroom_batch.py's two routes.
+
+_PREFIX_PATTERN = re.compile(r"^[A-Za-z][A-Za-z0-9]{2,19}$")
+_SHARED_PASSWORD_PATTERN = re.compile(r"^[A-Za-z][A-Za-z0-9]{4,63}$")
+
+
+class BatchStudentByPrefixRequest(BaseModel):
+    prefix: str = Field(..., min_length=3, max_length=20)
+    password: str = Field(..., min_length=5, max_length=64)
+    # Matches Junyi's own cap (accountUtils.js getCountValidation: "單次
+    # 新增數量上限為 50").
+    count: int = Field(..., ge=1, le=50)
+
+    @field_validator("prefix")
+    @classmethod
+    def _validate_prefix(cls, v: str) -> str:
+        if not _PREFIX_PATTERN.match(v):
+            raise ValueError(
+                "帳號前綴需以英文字母開頭，僅能包含英文字母與數字，長度 3-20"
+            )
+        return v
+
+    @field_validator("password")
+    @classmethod
+    def _validate_password(cls, v: str) -> str:
+        if not _SHARED_PASSWORD_PATTERN.match(v):
+            raise ValueError(
+                "密碼需以英文字母開頭，僅能包含英文字母與數字，長度至少 5"
+            )
+        return v
 
 
 class ResetPasswordResponse(BaseModel):
