@@ -730,6 +730,18 @@ const StudentListTab: React.FC<StudentListTabProps> = ({
           </button>
         </div>
       ) : (
+        // Issue #3985: on desktop (lg:table-row, a real table — not the
+        // mobile flex-wrap cards below) the 6 columns (座號/學生姓名/帳號/
+        // 家長邀請碼/重設密碼/操作) can need more width than this section has
+        // once the persistent ClassListSidebar (#3401) takes ~208px at the
+        // xl breakpoint — confirmed on staging at 1280px, where 操作 (換班/
+        // 移除) rendered past the table's right edge and the ancestor
+        // `overflow-hidden` "學生名單" section clipped it, same failure mode
+        // as the mobile bug above, different width. `overflow-x-auto` here
+        // gives the table a horizontal scrollbar on its own axis instead of
+        // silently losing a column — the table never needed this section's
+        // own `overflow-hidden` (that's there to clip the border-radius).
+        <div className="overflow-x-auto">
         <table className="w-full text-left">
           <thead className="hidden lg:table-header-group bg-gray-50 text-sm text-gray-600">
             <tr>
@@ -813,9 +825,20 @@ const StudentListTab: React.FC<StudentListTabProps> = ({
                     </span>
                   )}
                 </td>
-                <td className="lg:px-4 lg:py-3 lg:text-right whitespace-nowrap ml-auto lg:ml-0">
+                {/* Issue #3985: this used to be `whitespace-nowrap ml-auto lg:ml-0` —
+                    on a 390px phone, `ml-auto` anchors the cell to the right edge of
+                    whatever space is left on its flex-wrap line, and `whitespace-nowrap`
+                    stops its own content from wrapping. When the remaining space on
+                    that line was narrower than "換班 移除" together, the cell rendered
+                    partly past the row's right edge, and the ancestor `overflow-hidden`
+                    section (ClassroomDetail's 學生名單 wrapper) clipped it — reachable
+                    nowhere on a phone. `basis-full` guarantees this cell always gets
+                    its own full-width line on mobile, the same pattern the name cell
+                    (above) already uses, so there's no line to share and nothing to
+                    clip. Desktop (`lg:`) is unchanged. */}
+                <td className="basis-full lg:basis-auto mt-1 lg:mt-0 lg:px-4 lg:py-3 lg:text-right lg:whitespace-nowrap lg:ml-0">
                   <span className="sr-only">加入於 {formatDate(s.enrolled_at)}</span>
-                  <span className="inline-flex items-center gap-2 whitespace-nowrap">
+                  <span className="inline-flex flex-wrap items-center gap-2">
                     <MoveStudentButton
                       token={token}
                       classroom={classroom}
@@ -837,6 +860,7 @@ const StudentListTab: React.FC<StudentListTabProps> = ({
             ))}
           </tbody>
         </table>
+        </div>
       )}
       {batchRemoveError && (
         <p className="text-red-600 text-sm px-4 py-2">{batchRemoveError}</p>
