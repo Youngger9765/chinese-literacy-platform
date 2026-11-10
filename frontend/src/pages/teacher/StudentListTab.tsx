@@ -3,6 +3,7 @@ import type { BatchCreateResult, ClassroomDetailResponse, ClassroomResponse, Stu
 import CsvUploadModal from './CsvUploadModal';
 import AddStudentsPanel from './panel/AddStudentsPanel';
 import { batchRemoveStudents, listMyClassrooms, moveStudent, renameStudent, resetStudentPassword, setStudentSeatNumber } from '../../services/classroomApi';
+import { sortStudentsBySeat } from './sortStudentsBySeat';
 import {
   generateParentInviteCode,
   listStudentParentLinks,
@@ -585,21 +586,12 @@ const StudentListTab: React.FC<StudentListTabProps> = ({
   // cannot enter anywhere is a dead end, so the teacher half follows the flag.
   const showParentInvite = featureFlags.PARENT_PORTAL_ENABLED;
 
-  // #3992: Junyi-parity -- the roster is shown in 座號 order (students with
-  // no seat number yet sort after every seated student, keeping their
-  // original relative order among themselves via a stable sort so the list
-  // doesn't jump around every re-render for rows that tie on "no seat").
-  const sortedStudents = useMemo(() => {
-    return classroom.students
-      .map((s, originalIndex) => ({ s, originalIndex }))
-      .sort((a, b) => {
-        const aSeat = a.s.seat_number ?? Infinity;
-        const bSeat = b.s.seat_number ?? Infinity;
-        if (aSeat !== bSeat) return aSeat - bSeat;
-        return a.originalIndex - b.originalIndex;
-      })
-      .map(({ s }) => s);
-  }, [classroom.students]);
+  // #3992: Junyi-parity -- the roster is shown in 座號 order. Shared with
+  // the SeatNumberDialog (owned by ClassroomDetail, one level up) via
+  // sortStudentsBySeat so both show the SAME order -- see that module's
+  // docstring for why (reopening the dialog used to silently reset to
+  // enrollment order).
+  const sortedStudents = useMemo(() => sortStudentsBySeat(classroom.students), [classroom.students]);
 
   // ── Batch-remove selection state (#3821) ──────────────────────────────────
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());

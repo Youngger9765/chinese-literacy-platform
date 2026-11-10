@@ -31,6 +31,7 @@ import ClassroomPkSettingsPanel from './ClassroomPkSettingsPanel';
 import ClassroomTabs, { TabKey, resolveInitialView, resolveTabKey } from './ClassroomTabs';
 import StudentListTab from './StudentListTab';
 import SeatNumberDialog from './SeatNumberDialog';
+import { sortStudentsBySeat } from './sortStudentsBySeat';
 import ClassSwitcher from './panel/ClassSwitcher';
 import ClassListSidebar from './panel/ClassListSidebar';
 
@@ -404,7 +405,7 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack, 
           isOpen={isSeatDialogOpen}
           token={token}
           classroomId={classroom.id}
-          students={classroom.students}
+          students={sortStudentsBySeat(classroom.students)}
           onClose={() => setIsSeatDialogOpen(false)}
           onSaved={loadClassroom}
         />
