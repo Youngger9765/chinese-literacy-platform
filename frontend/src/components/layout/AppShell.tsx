@@ -58,7 +58,17 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
   }, [refreshPendingCount]);
 
   return (
-    <div className="h-screen flex bg-surface text-on-surface font-sans overflow-hidden">
+    // Issue #3985: the teacher workspace used to inherit the student-facing
+    // kaishu default (font-sans == cwTeXKai, kept for 陳淑麗教授's low-vision
+    // reading requirement). Junyi's teacher UI is a plain sans stack, and a
+    // teacher squinting at a 楷書 roster/assignment table was never the point
+    // of that font choice. Scoped to activeView === 'teacher' only — student
+    // and admin views keep font-sans untouched.
+    <div
+      className={`h-screen flex bg-surface text-on-surface overflow-hidden ${
+        activeView === 'teacher' ? 'font-teacher-ui' : 'font-sans'
+      }`}
+    >
       {/* Skip-to-content link — visually hidden until focused (WCAG 2.4.1) */}
       <a
         href="#main-content"

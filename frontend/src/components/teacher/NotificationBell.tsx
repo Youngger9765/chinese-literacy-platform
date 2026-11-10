@@ -40,6 +40,20 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ onNavigateToStudent
   const [filterType, setFilterType] = useState<string>('all');
   const panelRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  // Issue #3985: the bell lives in the sidebar footer, just above 登出 — close
+  // to the bottom of the viewport on most screens. `top-full` + a fixed
+  // `max-h-[80vh]` assumed there was always 80vh of room *below* the button,
+  // which is false here: with the button at e.g. y=790 on a 900px-tall
+  // viewport, the panel's own box is the right height but starts so low that
+  // almost all of it renders past the bottom of the screen, where the app
+  // shell's `overflow-hidden` (no page scroll, by design) clips it — not a
+  // "list doesn't scroll" bug, a "box opened mostly off-screen" bug. Compute
+  // the actual space above/below the button when opening and pick a side +
+  // a max-height that actually fits, instead of assuming 80vh is always below.
+  const [panelPlacement, setPanelPlacement] = useState<{ openUp: boolean; maxHeightPx: number }>({
+    openUp: false,
+    maxHeightPx: 480,
+  });
 
   const fetchNotifications = useCallback(async () => {
     if (!token) return;
@@ -76,8 +90,23 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ onNavigateToStudent
   }, [isOpen]);
 
   const handleOpen = async () => {
+    const opening = !isOpen;
+    if (opening && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      const margin = 16;
+      const spaceBelow = window.innerHeight - rect.bottom - margin;
+      const spaceAbove = rect.top - margin;
+      // Only flip up when below is genuinely cramped (< 240px — not enough for
+      // even the header + a couple of rows) and above actually has more room;
+      // otherwise keep the normal drop-down so this doesn't change behaviour
+      // for the common case where the bell has plenty of room underneath it.
+      const openUp = spaceBelow < 240 && spaceAbove > spaceBelow;
+      const available = openUp ? spaceAbove : spaceBelow;
+      const maxHeightPx = Math.min(Math.max(available, 200), window.innerHeight * 0.8);
+      setPanelPlacement({ openUp, maxHeightPx });
+    }
     setIsOpen((prev) => !prev);
-    if (!isOpen) {
+    if (opening) {
       await fetchNotifications();
     }
   };
@@ -166,7 +195,14 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ onNavigateToStudent
           // bell also rendered inside the teacher mobile "更多" drawer.
           // `max-w-[calc(100vw-2rem)]` caps it to the viewport minus a 1rem
           // margin on each side everywhere this component is used.
-          className="absolute right-0 top-full mt-2 w-96 max-w-[calc(100vw-2rem)] bg-white rounded-xl shadow-xl border border-gray-200 z-50 flex flex-col max-h-[80vh]"
+          // #3985: `top-full`/`bottom-full` and the max-height both come from
+          // panelPlacement (computed in handleOpen from the button's actual
+          // position) instead of a blanket `top-full mt-2 max-h-[80vh]` that
+          // assumed 80% of the viewport was always free below the button.
+          className={`absolute right-0 w-96 max-w-[calc(100vw-2rem)] bg-white rounded-xl shadow-xl border border-gray-200 z-50 flex flex-col ${
+            panelPlacement.openUp ? 'bottom-full mb-2' : 'top-full mt-2'
+          }`}
+          style={{ maxHeight: `${panelPlacement.maxHeightPx}px` }}
         >
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">

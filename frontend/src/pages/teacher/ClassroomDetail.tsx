@@ -469,6 +469,32 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack, 
               <BackButton />
               <ClassSwitcher currentId={classroomId} onSwitch={switchClassroom} />
             </div>
+            {/*
+             * Issue #3985 (P3/P4 of PRD-junyi-parity.md): Junyi shows 班級代碼＋複製
+             * on every classroom sub-page, not just 班級設定. We only had it on the
+             * settings tab (inside ClassroomHeaderCard below) — switch to 指派任務 or
+             * 班級數據 and the code a teacher needs to hand out just disappears.
+             * Settings tab already renders the full header card with the code, so
+             * this compact chip is hidden there to avoid showing it twice.
+             */}
+            {activeTab !== 'settings' && (
+              <div className="flex flex-wrap items-center gap-2 text-sm">
+                <span className="text-gray-700 whitespace-nowrap">
+                  班級代碼：
+                  <span className="font-mono font-bold tracking-wider text-accent select-all">
+                    {classroom.join_code ?? '—'}
+                  </span>
+                </span>
+                <button
+                  type="button"
+                  onClick={handleCopyJoinCode}
+                  disabled={!classroom.join_code}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md border border-gray-300 text-gray-700 text-sm hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
+                >
+                  {isCopied ? <span className="text-emerald-600">已複製</span> : '複製代碼'}
+                </button>
+              </div>
+            )}
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
                 {error}
