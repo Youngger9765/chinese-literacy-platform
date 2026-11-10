@@ -1,11 +1,11 @@
 /**
- * 作業分頁 (#3367，#3376 簡化)
+ * 任務分頁 (#3367，#3376 簡化)
  *
  * 一張總表就好（Young 2026-10-10：介面請簡單）：
- *   - 班級作業總表：學生 × 老師出的作業。點作業名稱 → 逐大題全班統計；點學生 → 這位學生的作業
- *   - 下方收合：建立與管理作業（正式作業＋自學課文庫，原本分開的「作業管理」「課文管理」）
+ *   - 班級任務總表：學生 × 老師出的任務。點任務名稱 → 逐大題全班統計；點學生 → 這位學生的任務
+ *   - 下方收合：建立與管理任務（正式任務＋自學課文庫，原本分開的「任務管理」「課文管理」）
  *
- * 現場回饋「指派課文後只出現在這一頁、不會變成作業」——指派課文其實是放進
+ * 現場回饋「指派課文後只出現在這一頁、不會變成任務」——指派課文其實是放進
  * 學生的自學圖書館，所以這裡明確標示「已在自學圖書館上架」。
  */
 import React, { useCallback, useEffect, useState } from 'react';
@@ -47,7 +47,7 @@ function AssignmentDrilldown({
   // Opening a student here keeps you inside this assignment (codex screen audit #6).
   const [studentId, setStudentId] = useState<number | null>(null);
   const assignment = matrix.assignments.find((a) => a.id === assignmentId);
-  const title = distinctTitles(matrix.assignments).get(assignmentId) ?? '作業';
+  const title = distinctTitles(matrix.assignments).get(assignmentId) ?? '任務';
   const cells = matrix.cells.filter((c) => c.assignment_id === assignmentId);
   const submitted = cells.filter((c) => c.state === 'completed').length;
   const assigned = cells.filter((c) => c.state !== 'not_assigned').length;
@@ -76,7 +76,7 @@ function AssignmentDrilldown({
   return (
     <div className="space-y-5">
       <button type="button" onClick={onBack} className="text-sm text-gray-500 hover:text-gray-800 cursor-pointer">
-        ← 回班級作業總表
+        ← 回班級任務總表
       </button>
       <div>
         <div className="flex flex-wrap items-start justify-between gap-3">
@@ -91,7 +91,7 @@ function AssignmentDrilldown({
             }
             className="inline-flex items-center gap-1.5 h-10 px-4 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 cursor-pointer whitespace-nowrap"
           >
-            下載這份作業成績（CSV）
+            下載這份任務成績（CSV）
           </button>
         </div>
         <p className="text-gray-500 mt-1">{submitted} / {assigned} 人已交</p>
@@ -149,7 +149,7 @@ const AssignmentsPanel: React.FC<AssignmentsPanelProps> = ({ classroomId, select
     try {
       setMatrix(await getAssignmentMatrix(token, classroomId));
     } catch {
-      setError('無法載入班級作業總表');
+      setError('無法載入班級任務總表');
     }
   }, [token, classroomId]);
 
@@ -175,12 +175,15 @@ const AssignmentsPanel: React.FC<AssignmentsPanelProps> = ({ classroomId, select
       {/* Junyi-parity toolbar: 建立 / 管理 on the left, status legend on the right */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap gap-2">
+          {/* Issue #3989: Junyi's 建立任務 button is blue (#4990E2 — the same
+              link/primary-action blue defined in Junyi's commonMuiTheme.js),
+              not the app's indigo accent. Scoped to this one button. */}
           <button
             type="button"
             onClick={handleCreateClick}
-            className="inline-flex items-center gap-2 h-11 px-5 rounded-lg bg-accent hover:bg-accent-hover text-white text-base font-semibold transition-colors cursor-pointer"
+            className="inline-flex items-center gap-2 h-11 px-5 rounded-lg bg-[#4990E2] hover:bg-[#2F7FD1] text-white text-base font-semibold transition-colors cursor-pointer"
           >
-            建立作業
+            建立任務
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
@@ -191,7 +194,7 @@ const AssignmentsPanel: React.FC<AssignmentsPanelProps> = ({ classroomId, select
             aria-expanded={showManage}
             className="inline-flex items-center h-11 px-5 rounded-lg border border-gray-300 text-gray-700 text-base font-medium hover:bg-gray-50 transition-colors cursor-pointer"
           >
-            管理作業
+            管理任務
           </button>
         </div>
         {matrix && matrix.assignments.length > 0 && (
@@ -200,9 +203,9 @@ const AssignmentsPanel: React.FC<AssignmentsPanelProps> = ({ classroomId, select
       </div>
 
       {showManage && (
-        <section className="rounded-xl border border-gray-200" aria-label="建立與管理作業">
+        <section className="rounded-xl border border-gray-200" aria-label="建立與管理任務">
           <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
-            <h3 className="font-semibold text-gray-800 text-lg">建立與管理作業</h3>
+            <h3 className="font-semibold text-gray-800 text-lg">建立與管理任務</h3>
             <button
               type="button"
               onClick={() => setShowManage(false)}
@@ -212,8 +215,8 @@ const AssignmentsPanel: React.FC<AssignmentsPanelProps> = ({ classroomId, select
             </button>
           </div>
           <div className="p-4 space-y-6">
-            <section aria-label="正式作業">
-              <h3 className="font-semibold text-gray-800 mb-2">正式作業（會進下面的總表）</h3>
+            <section aria-label="正式任務">
+              <h3 className="font-semibold text-gray-800 mb-2">正式任務（會進下面的總表）</h3>
               <AssignmentTab classroomId={classroomId} onChanged={load} openSignal={createSignal} />
             </section>
             <section aria-label="自學課文庫">

@@ -36,12 +36,17 @@ const ClassListSidebar: React.FC<ClassListSidebarProps> = ({ currentId, onSwitch
 
   const renderClassroom = (classroom: ClassroomResponse, isInactive = false) => {
     const isCurrent = classroom.id === currentId;
+    // Issue #3989: Junyi's current-class highlight (crop_d1_sidebar_active.png)
+    // is a plain light-gray row with an orange (#FFA500) right accent bar and
+    // dark (not brand-colored) text — not our indigo accent-bg/text pairing.
+    // Scoped to this one list; every other active-state indicator in the app
+    // keeps the indigo brand accent.
     const className = isInactive
       ? `w-full text-left px-4 py-3 text-base font-normal transition-colors cursor-pointer break-words ${
           isCurrent ? 'bg-gray-50 text-gray-400' : 'text-gray-400 hover:bg-gray-50'
         }`
       : `w-full text-left px-4 py-3 text-base font-medium transition-colors cursor-pointer break-words border-r-4 ${
-          isCurrent ? 'bg-accent-bg text-accent border-accent' : 'text-gray-700 hover:bg-gray-50 border-transparent'
+          isCurrent ? 'bg-gray-100 text-gray-900 border-[#FFA500]' : 'text-gray-700 hover:bg-gray-50 border-transparent'
         }`;
 
     return (

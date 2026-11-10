@@ -63,7 +63,7 @@ export const AssignmentCreateForm: React.FC<AssignmentCreateFormProps> = ({
   return (
   <div className="p-5 border-b border-gray-100 bg-gray-50/50">
     <div className="flex items-center justify-between mb-3">
-      <h4 className="text-sm font-bold text-gray-900">建立新作業</h4>
+      <h4 className="text-sm font-bold text-gray-900">建立新任務</h4>
       <button
         onClick={onClose}
         className="text-sm text-gray-500 hover:text-gray-700 cursor-pointer"
@@ -126,7 +126,7 @@ export const AssignmentCreateForm: React.FC<AssignmentCreateFormProps> = ({
 
           <div>
             <label htmlFor="assign-title" className="block text-sm font-medium text-gray-700 mb-1">
-              作業標題（選填）
+              任務標題（選填）
             </label>
             <input
               id="assign-title"
@@ -146,7 +146,7 @@ export const AssignmentCreateForm: React.FC<AssignmentCreateFormProps> = ({
               id="assign-desc"
               value={formDescription}
               onChange={(event) => setFormDescription(event.target.value)}
-              placeholder="作業說明或提示"
+              placeholder="任務說明或提示"
               rows={2}
               className="w-full px-3 py-2 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors resize-none"
             />
@@ -180,7 +180,7 @@ export const AssignmentCreateForm: React.FC<AssignmentCreateFormProps> = ({
               className="h-4 w-4 rounded border-gray-300 text-accent focus:ring-accent"
             />
             <label htmlFor="assign-skip-completed" className="text-sm text-gray-700 cursor-pointer select-none">
-              跳過已完成步驟（學生重做作業時自動略過上次完成的環節）
+              跳過已完成步驟（學生重做任務時自動略過上次完成的環節）
             </label>
           </div>
         </div>

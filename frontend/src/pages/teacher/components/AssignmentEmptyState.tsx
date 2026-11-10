@@ -18,11 +18,11 @@ export const AssignmentEmptyState: React.FC<AssignmentEmptyStateProps> = ({ hasA
             />
           </svg>
         </div>
-        <p className="text-sm font-medium text-gray-700 mb-1">尚未建立作業</p>
-        <p className="text-xs text-gray-500">點選「建立作業」為班級指派學習任務</p>
+        <p className="text-sm font-medium text-gray-700 mb-1">尚未建立任務</p>
+        <p className="text-xs text-gray-500">點選「建立任務」為班級指派學習任務</p>
       </>
     ) : (
-      <p className="text-sm text-gray-500">此分類下沒有作業</p>
+      <p className="text-sm text-gray-500">此分類下沒有任務</p>
     )}
   </div>
 );

@@ -293,7 +293,10 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
             aria-labelledby="create-classroom-title"
             className="fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/40 p-3 sm:p-6 overflow-y-auto"
           >
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl my-auto p-5 sm:p-7">
+          {/* Issue #3989: radius/width tuned to Junyi's create-class modal
+              (measured on the reference screenshot: ~900px wide at a 1280px
+              viewport, crisper ~8-12px corners than our previous rounded-2xl). */}
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl my-auto p-5 sm:p-8">
             <h2 id="create-classroom-title" className="text-xl font-bold text-gray-900 mb-5">建立新班級</h2>
 
             {createError && (
@@ -346,17 +349,21 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
             )}
 
             {/* The Junyi option (#3406) only renders once the probe confirmed the
-                feature is available on this env, so it never opens an empty panel. */}
+                feature is available on this env, so it never opens an empty panel.
+                Issue #3989: radio accent + panel bg tuned to Junyi's teal
+                (stepperModalPalette.primary #19A696, same token the Junyi
+                create-class modal's confirm button uses — see commonMuiTheme.js
+                in the Junyi frontend repo). */}
             <fieldset className="mb-5">
               <legend className="text-base text-gray-700 mb-2">請選擇加入學生的方式</legend>
-              <div className="rounded-xl bg-gray-50 border border-gray-200 p-4 space-y-3">
+              <div className="rounded-xl bg-gray-100 border border-gray-200 p-4 space-y-3">
                 <label className="flex items-start gap-3 cursor-pointer">
                   <input
                     type="radio"
                     name="creation-method"
                     checked={creationMethod === 'create'}
                     onChange={() => setCreationMethod('create')}
-                    className="mt-1 w-5 h-5 accent-accent"
+                    className="mt-1 w-5 h-5 accent-[#19A696]"
                   />
                   <span className="text-base text-gray-900">還沒有帳號：幫學生建立帳號</span>
                 </label>
@@ -366,7 +373,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
                     name="creation-method"
                     checked={creationMethod === 'join'}
                     onChange={() => setCreationMethod('join')}
-                    className="mt-1 w-5 h-5 accent-accent"
+                    className="mt-1 w-5 h-5 accent-[#19A696]"
                   />
                   <span className="text-base text-gray-900">學生已有帳號（含均一帳號）：建好後給學生班級代碼加入</span>
                 </label>
@@ -377,7 +384,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
                       name="creation-method"
                       checked={creationMethod === 'junyi'}
                       onChange={() => setCreationMethod('junyi')}
-                      className="mt-1 w-5 h-5 accent-accent"
+                      className="mt-1 w-5 h-5 accent-[#19A696]"
                     />
                     <span className="text-base text-gray-900">匯入均一班級學生：直接帶入我在均一的班級與學生</span>
                   </label>
@@ -442,7 +449,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
                   <button
                     type="submit"
                     disabled={isCreating || !newName.trim()}
-                    className="h-11 bg-accent hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 rounded-lg font-medium text-base transition-colors"
+                    className="h-11 bg-[#19A696] hover:bg-[#15897B] disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 rounded-lg font-medium text-base transition-colors"
                   >
                     {isCreating
                       ? '建立中...'
