@@ -15,6 +15,7 @@ import { useAdminTreeState } from './hooks/useAdminTreeState';
 import AdminTreeNode from './components/AdminTreeNode';
 import AdminTreeActions from './components/AdminTreeActions';
 import { CollapseIcon, StoriesIcon, TtsAuditIcon } from './components/AdminTreeIcons';
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
@@ -48,7 +49,18 @@ interface AdminTreeSidebarProps {
 
 const AdminTreeSidebar: React.FC<AdminTreeSidebarProps> = ({ selectedNode, onSelectNode, refreshTrigger }) => {
   const { token } = useAuth();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  // UI-1 (#390px admin tree squeeze): the tree used to default open at a fixed
+  // 256px no matter the viewport, so on a phone it ate ~2/3 of the screen and
+  // left the content tables ~130px wide. Default it collapsed when the page
+  // first mounts on a narrow screen — desktop/tablet (jsdom default 1024px in
+  // tests too) keep the old "open by default" behaviour untouched.
+  const [isCollapsed, setIsCollapsed] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth < 768 : false,
+  );
+  // Reactive (not just initial-mount) — also drives whether an expanded tree
+  // renders inline (desktop, pushes content over) or as an overlay drawer
+  // (mobile, floats above the content instead of squeezing it).
+  const isMobile = useIsMobile();
 
   const {
     orgs,
@@ -189,9 +201,26 @@ const AdminTreeSidebar: React.FC<AdminTreeSidebarProps> = ({ selectedNode, onSel
   }
 
   // ── Full sidebar ────────────────────────────────────────────────────────
+  // On mobile, an *expanded* tree floats as a drawer over the content (fixed
+  // + backdrop) instead of sharing the flex row with it — otherwise opening
+  // it back up would still squeeze the tables down to ~130px.
 
   return (
-    <div className="w-64 bg-white border-r border-gray-200 flex flex-col shrink-0 overflow-hidden">
+    <>
+      {isMobile && (
+        <div
+          className="fixed inset-0 z-30 bg-black/30"
+          onClick={() => setIsCollapsed(true)}
+          aria-hidden="true"
+        />
+      )}
+      <div
+        className={
+          isMobile
+            ? 'fixed inset-y-0 left-0 z-40 w-64 max-w-[80vw] bg-white border-r border-gray-200 flex flex-col overflow-hidden shadow-xl'
+            : 'w-64 bg-white border-r border-gray-200 flex flex-col shrink-0 overflow-hidden'
+        }
+      >
       {/* Sidebar header */}
       <div className="h-11 px-3 flex items-center justify-between border-b border-gray-100 shrink-0">
         <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
@@ -271,7 +300,8 @@ const AdminTreeSidebar: React.FC<AdminTreeSidebarProps> = ({ selectedNode, onSel
 
       {/* Bottom fixed: management links */}
       <AdminTreeActions selectedNode={selectedNode} onSelectNode={onSelectNode} />
-    </div>
+      </div>
+    </>
   );
 };
 
