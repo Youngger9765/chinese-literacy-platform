@@ -29,6 +29,13 @@
   background-color: #F4F4F4;
 }
 
+/* Junyi parity: the sidebar logo tile and user avatar were the last two
+   LingoLeap-purple (bg-accent) elements left in the teacher workspace.
+   Scoped to .font-teacher-ui so student/admin views keep the purple brand. */
+.font-teacher-ui .teacher-brand-mark {
+  background-color: #19A696;
+}
+
 /* When zhuyin is active, force BpmfZihiSerif (字嗨宋體) as the primary font on
    ALL elements inside the learning shell. This overrides Tailwind font-family
    utilities (font-headline, font-body, font-sans) which would otherwise take

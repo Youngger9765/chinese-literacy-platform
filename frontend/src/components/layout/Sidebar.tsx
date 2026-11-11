@@ -399,7 +399,7 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
             className="flex items-center gap-2 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
           >
             <div
-              className="bg-accent w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+              className="teacher-brand-mark bg-accent w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
               aria-hidden="true"
             >
               <span className="text-white font-bold text-sm">L</span>
@@ -428,7 +428,7 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
           <div className={`shrink-0 border-b border-gray-100 py-3 ${collapsed ? 'px-2 flex justify-center' : 'px-3'}`}>
             <div className={`flex items-center gap-2 ${collapsed ? 'flex-col' : ''}`}>
               <div
-                className="w-8 h-8 rounded-full bg-accent text-white flex items-center justify-center shrink-0 text-sm font-semibold"
+                className="teacher-brand-mark w-8 h-8 rounded-full bg-accent text-white flex items-center justify-center shrink-0 text-sm font-semibold"
                 aria-hidden="true"
               >
                 {user.name?.charAt(0) ?? '?'}
