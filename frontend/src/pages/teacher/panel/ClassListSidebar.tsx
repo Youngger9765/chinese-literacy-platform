@@ -67,10 +67,14 @@ const ClassListSidebar: React.FC<ClassListSidebarProps> = ({ currentId, onSwitch
   return (
     <nav aria-label="我的班級" className="py-4">
       <div className="px-4 pb-4 border-b border-gray-200">
+        {/* Issue #3992: same Junyi teal (#19A696) as every other step of this
+            same 建立班級 flow (TeacherDashboard's header/empty-state buttons,
+            the in-modal radio/confirm buttons, #3989) -- this sidebar entry
+            point was the one still left on the app's indigo accent. */}
         <button
           type="button"
           onClick={() => navigate('/teacher', { state: { intent: 'create' } })}
-          className="w-full inline-flex items-center justify-center gap-1.5 h-11 rounded-lg bg-accent hover:bg-accent-hover text-white text-base font-medium transition-colors cursor-pointer"
+          className="w-full inline-flex items-center justify-center gap-1.5 h-11 rounded-lg bg-[#19A696] hover:bg-[#15897B] text-white text-base font-medium transition-colors cursor-pointer"
         >
           <span aria-hidden="true" className="text-lg leading-none">＋</span>
           建立班級

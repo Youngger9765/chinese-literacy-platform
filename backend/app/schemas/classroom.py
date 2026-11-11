@@ -113,6 +113,19 @@ class ClassroomStudentSeatRequest(BaseModel):
     seat_number: int | None = Field(None, ge=1, le=999)
 
 
+class ClassroomStudentSeatAssignment(BaseModel):
+    student_id: int
+    seat_number: int | None = Field(None, ge=1, le=999)
+
+
+class ClassroomStudentSeatsBatchRequest(BaseModel):
+    # #3992 -- the Junyi-parity "新增座號" dialog renumbers the whole roster
+    # in one request. A real teacher's class tops out well under 100, but
+    # cap at 200 so a malformed/huge payload can't be used to run an
+    # unbounded loop server-side.
+    assignments: list[ClassroomStudentSeatAssignment] = Field(..., min_length=1, max_length=200)
+
+
 class ClassroomJoinRequest(BaseModel):
     join_code: str = Field(..., min_length=1, max_length=8)
 
@@ -154,6 +167,10 @@ class StudentInClassroomResponse(BaseModel):
     pending_claim_email: str | None = None
 
     model_config = {"from_attributes": True}
+
+
+class ClassroomStudentSeatsBatchResponse(BaseModel):
+    updated: list[StudentInClassroomResponse]
 
 
 class ClassroomResponse(BaseModel):

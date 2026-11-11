@@ -20,6 +20,8 @@ from ...schemas.classroom import (
     ClassroomStudentMoveResponse,
     ClassroomStudentRenameRequest,
     ClassroomStudentSeatRequest,
+    ClassroomStudentSeatsBatchRequest,
+    ClassroomStudentSeatsBatchResponse,
     StudentInClassroomResponse,
     StudentSearchRequest,
     StudentSearchResult,
@@ -366,6 +368,130 @@ def set_student_seat_number(
         email=cs.student.email,
         enrolled_at=cs.enrolled_at,
         seat_number=cs.seat_number,
+    )
+
+
+@router.patch(
+    "/classrooms/{classroom_id}/students/seats",
+    response_model=ClassroomStudentSeatsBatchResponse,
+)
+def set_student_seat_numbers_batch(
+    classroom_id: int,
+    payload: ClassroomStudentSeatsBatchRequest,
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Batch-assign seat numbers for the Junyi-parity "新增座號" dialog (#3992).
+
+    Doing this as N sequential single-row PATCH calls
+    (set_student_seat_number above, #3826) is unsafe whenever the new
+    arrangement swaps or rotates seats that are already taken: applying
+    them one HTTP call at a time can transiently collide with
+    ``uq_classroom_students_seat`` even though the FINAL state has no
+    duplicates at all (the classic "swap two values under a uniqueness
+    constraint" problem). This endpoint clears every row named in the
+    payload first, then applies the new numbers, all inside ONE
+    transaction -- so a 409 can only ever come from a genuine conflict
+    with a student who is NOT part of this batch (and therefore keeps
+    whatever seat they already hold).
+    """
+    classroom = get_classroom_or_404(classroom_id, db)
+    require_owner_or_admin(classroom, current_user, db)
+
+    # Payload-internal duplicates are a client bug, not a DB conflict --
+    # 422, not 409 (409 is reserved for "conflicts with something already
+    # committed"). Checked before touching the DB at all.
+    seat_numbers = [a.seat_number for a in payload.assignments if a.seat_number is not None]
+    if len(seat_numbers) != len(set(seat_numbers)):
+        raise HTTPException(status_code=422, detail="同一次要求裡有重複的座號")
+    student_ids = [a.student_id for a in payload.assignments]
+    if len(student_ids) != len(set(student_ids)):
+        raise HTTPException(status_code=422, detail="同一次要求裡有重複的學生")
+
+    enrollments = (
+        db.query(ClassroomStudent)
+        .filter(
+            ClassroomStudent.classroom_id == classroom_id,
+            ClassroomStudent.student_id.in_(student_ids),
+        )
+        .all()
+    )
+    by_student_id = {cs.student_id: cs for cs in enrollments}
+    missing = [sid for sid in student_ids if sid not in by_student_id]
+    if missing:
+        raise HTTPException(status_code=404, detail=f"學生 {missing} 不在這個班級")
+
+    # Clear every affected row FIRST (flush, not commit) so the unique
+    # constraint can only ever fire against a student OUTSIDE this batch --
+    # never against another row in the same request that hasn't been
+    # written yet. `db.flush()` (not relying on session autoflush) makes
+    # the clear visible to the conflict SELECTs below regardless of the
+    # session's autoflush setting.
+    for cs in enrollments:
+        cs.seat_number = None
+    db.flush()
+
+    conflicts: list[int] = []
+    for assignment in payload.assignments:
+        cs = by_student_id[assignment.student_id]
+        if assignment.seat_number is not None:
+            conflict = (
+                db.query(ClassroomStudent)
+                .filter(
+                    ClassroomStudent.classroom_id == classroom_id,
+                    ClassroomStudent.seat_number == assignment.seat_number,
+                    ClassroomStudent.id != cs.id,
+                )
+                .first()
+            )
+            if conflict is not None:
+                conflicts.append(assignment.seat_number)
+                continue
+        cs.seat_number = assignment.seat_number
+
+    if conflicts:
+        db.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail=f"座號 {conflicts} 在這個班級已經有人使用",
+        )
+
+    try:
+        db.commit()
+    except IntegrityError:
+        # Belt-and-suspenders against a concurrent request racing the same
+        # seat numbers -- same reasoning as the single-row endpoint above.
+        db.rollback()
+        raise HTTPException(status_code=409, detail="座號設定衝突，請重新整理後再試一次")
+
+    # Audit only after a successful commit, and once for the whole batch --
+    # a 404/422/409 above must never log a change that didn't actually
+    # happen. No single target_student_id applies to a batch (mirrors
+    # list_classroom_students's target_student_id=None above).
+    audit_log_endpoint(
+        request=request,
+        action=AuditAction.SET_SEAT_NUMBER,
+        user_id=current_user.id,
+        target_student_id=None,
+    )
+    for cs in enrollments:
+        db.refresh(cs)
+    logger.info(
+        "Batch-set seat numbers for %d students in classroom %d",
+        len(enrollments), classroom_id,
+    )
+    return ClassroomStudentSeatsBatchResponse(
+        updated=[
+            StudentInClassroomResponse(
+                id=cs.student.id,
+                name=cs.student.name,
+                email=cs.student.email,
+                enrolled_at=cs.enrolled_at,
+                seat_number=cs.seat_number,
+            )
+            for cs in enrollments
+        ]
     )
 
 

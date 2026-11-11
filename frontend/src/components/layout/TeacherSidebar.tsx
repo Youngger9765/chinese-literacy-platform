@@ -31,6 +31,7 @@ export const TeacherSidebar: React.FC<TeacherSidebarProps> = ({
           collapsed={collapsed}
           active={isActive(pathname, item.path)}
           onClick={() => onNavigate(item.path)}
+          variant="teacher"
         />
       ))}
     </nav>
