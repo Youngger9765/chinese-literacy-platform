@@ -1,0 +1,67 @@
+# Junyi security baseline rule 20: pin third-party code + cooldown for
+# non-security updates.
+#
+# `cooldown.default-days: 7` delays a version-update PR until the new release
+# has been out for 7 days (gives the upstream community time to catch
+# regressions/compromises before we pull it in). Per GitHub's own docs, the
+# cooldown option only applies to *version* updates — security updates
+# (vulnerability fixes) are never delayed and open immediately regardless of
+# this setting:
+# https://docs.github.com/en/code-security/dependabot/working-with-dependabot/dependabot-options-reference#cooldown-
+#
+# `groups` batches minor/patch bumps into a single PR per ecosystem so they
+# don't flood the issue tracker; major bumps (which can be breaking) still
+# get their own PR for individual review.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7
+    groups:
+      actions-minor-patch:
+        applies-to: "version-updates"
+        update-types:
+          - "minor"
+          - "patch"
+
+  - package-ecosystem: "npm"
+    directory: "/frontend"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7
+    groups:
+      frontend-minor-patch:
+        applies-to: "version-updates"
+        update-types:
+          - "minor"
+          - "patch"
+
+  - package-ecosystem: "npm"
+    directory: "/.github/firebase-cli"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7
+    groups:
+      firebase-cli-minor-patch:
+        applies-to: "version-updates"
+        update-types:
+          - "minor"
+          - "patch"
+
+  - package-ecosystem: "pip"
+    directory: "/backend"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7
+    groups:
+      backend-minor-patch:
+        applies-to: "version-updates"
+        update-types:
+          - "minor"
+          - "patch"

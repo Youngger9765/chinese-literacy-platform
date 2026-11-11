@@ -69,8 +69,8 @@ jobs:
       frontend: ${{ steps.filter.outputs.frontend }}
       firebase: ${{ steps.filter.outputs.firebase }}
     steps:
-      - uses: actions/checkout@v6
-      - uses: dorny/paths-filter@v4
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
         id: filter
         with:
           filters: |
@@ -91,15 +91,15 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
       - id: auth
-        uses: google-github-actions/auth@v2
+        uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed # v2.1.13
         with:
           workload_identity_provider: projects/958347263320/locations/global/workloadIdentityPools/github-pool/providers/github-provider
           service_account: github-actions@lingoleap-dev.iam.gserviceaccount.com
 
-      - uses: google-github-actions/setup-gcloud@v2
+      - uses: google-github-actions/setup-gcloud@e427ad8a34f8676edf47cf7d7925499adf3eb74f # v2.2.1
 
       - name: Configure Docker for Artifact Registry
         run: gcloud auth configure-docker asia-east1-docker.pkg.dev
@@ -192,15 +192,15 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
       - id: auth
-        uses: google-github-actions/auth@v2
+        uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed # v2.1.13
         with:
           workload_identity_provider: projects/958347263320/locations/global/workloadIdentityPools/github-pool/providers/github-provider
           service_account: github-actions@lingoleap-dev.iam.gserviceaccount.com
 
-      - uses: google-github-actions/setup-gcloud@v2
+      - uses: google-github-actions/setup-gcloud@e427ad8a34f8676edf47cf7d7925499adf3eb74f # v2.2.1
 
       - name: Configure Docker for Artifact Registry
         run: gcloud auth configure-docker asia-east1-docker.pkg.dev
@@ -346,9 +346,9 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: '20'
           cache: 'npm'
@@ -373,7 +373,7 @@ jobs:
         run: npm run build
 
       - name: Upload frontend/dist
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: firebase-staging-dist
           path: frontend/dist
@@ -392,15 +392,15 @@ jobs:
     env:
       COMMIT_SHA: ${{ github.sha }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
       - name: Download frontend/dist
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: firebase-staging-dist
           path: frontend/dist
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: '20'
 
@@ -413,7 +413,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - id: auth
-        uses: google-github-actions/auth@v2
+        uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed # v2.1.13
         with:
           workload_identity_provider: projects/958347263320/locations/global/workloadIdentityPools/github-pool/providers/github-provider
           service_account: github-actions@lingoleap-dev.iam.gserviceaccount.com
@@ -449,18 +449,18 @@ jobs:
     env:
       STAGING_BACKEND: https://lingoleap-backend-staging-958347263320.asia-east1.run.app
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
       # #3719 — IAP 準備：staging 未來可能在前面加一層 IAP。IAP_AUDIENCE 沒有
       # 任何 secret 可讀（還沒打開 IAP），所以下面每一步都跟今天完全一樣——
       # 這一步只是把「打開時只要設一個 secret」這件事準備好。
       - id: auth
-        uses: google-github-actions/auth@v2
+        uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed # v2.1.13
         with:
           workload_identity_provider: projects/958347263320/locations/global/workloadIdentityPools/github-pool/providers/github-provider
           service_account: github-actions@lingoleap-dev.iam.gserviceaccount.com
 
-      - uses: google-github-actions/setup-gcloud@v2
+      - uses: google-github-actions/setup-gcloud@e427ad8a34f8676edf47cf7d7925499adf3eb74f # v2.2.1
 
       - name: Mint IAP token once for this job (masked)
         id: iap
@@ -542,11 +542,11 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: google-github-actions/auth@v2
+      - uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed # v2.1.13
         with:
           workload_identity_provider: projects/958347263320/locations/global/workloadIdentityPools/github-pool/providers/github-provider
           service_account: github-actions@lingoleap-dev.iam.gserviceaccount.com
-      - uses: google-github-actions/setup-gcloud@v2
+      - uses: google-github-actions/setup-gcloud@e427ad8a34f8676edf47cf7d7925499adf3eb74f # v2.2.1
       - name: Delete old staging images (keep latest 5)
         run: |
           # Cleanup is best-effort. Historical registry has 1000+ images;
@@ -600,7 +600,7 @@ jobs:
       issues: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
       - name: Comment on referenced issues
         continue-on-error: true
