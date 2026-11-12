@@ -127,6 +127,18 @@ jobs:
       # requests per instance so reading-recording transcodes spread across
       # instances (see deploy.yml). Staging keeps min 0 (idle = 0 cost) and the
       # db-f1-micro DB (25 connections): pool 2+0 per instance, 8 x 2 = 16.
+      #
+      # #3999 (Junyi security baseline rule 7): DATABASE_URL moved off the
+      # bulk env-vars string (where it was a literal value from the
+      # `secrets.STAGING_DATABASE_URL` GitHub Actions secret) onto a
+      # dedicated secrets flag pointed at a Secret Manager secret
+      # (`lingoleap-database-url-staging:latest`, project `lingoleap-dev`) --
+      # the runtime service account used just above already has
+      # `secretAccessor` on it. Same gcloud CLI reference as deploy.yml: the
+      # bulk env-vars flag and the dedicated secrets flag are independent
+      # "at most one of" groups, so combining them in one deploy invocation
+      # is supported, and since DATABASE_URL now appears in only one of
+      # them there is no same-key conflict.
       - name: Deploy backend to Cloud Run (Staging)
         run: |
           gcloud run deploy ${{ env.BACKEND_SERVICE }} \
@@ -143,7 +155,8 @@ jobs:
             --timeout=300s \
             --add-cloudsql-instances=lingoleap-dev:asia-east1:lingoleap-staging-db \
             --service-account=lingoleap-junyi-bq@lingoleap-dev.iam.gserviceaccount.com \
-            --set-env-vars="^::^ALLOWED_ORIGINS=https://lingoleap-frontend-staging-958347263320.asia-east1.run.app,https://lingoleap-frontend-958347263320.asia-east1.run.app,https://lingoleap-staging.web.app,https://lingoleap-dev.web.app::DATABASE_URL=${{ secrets.STAGING_DATABASE_URL }}::RUN_MIGRATIONS=true::AZURE_SPEECH_KEY=${{ secrets.AZURE_SPEECH_KEY }}::AZURE_SPEECH_REGION=eastus::TTS_PROVIDER=azure::ENVIRONMENT=staging::JWT_SECRET_KEY=${{ secrets.STAGING_JWT_SECRET_KEY }}::GCS_OMO_BUCKET=lingoleap-omo-uploads-staging::READING_AUDIO_GCS_BUCKET=lingoleap-reading-audio-staging::BUILD_SHA=${{ github.sha }}::JUNYI_CLASS_IMPORT_ENABLED=true::JUNYI_BQ_MODE=real::PARENT_PORTAL_ENABLED=true::DB_POOL_SIZE=2::DB_MAX_OVERFLOW=0::ASYNC_THREAD_WORKERS=32::AI_FEATURES_ENABLED=true"
+            --set-env-vars="^::^ALLOWED_ORIGINS=https://lingoleap-frontend-staging-958347263320.asia-east1.run.app,https://lingoleap-frontend-958347263320.asia-east1.run.app,https://lingoleap-staging.web.app,https://lingoleap-dev.web.app::RUN_MIGRATIONS=true::AZURE_SPEECH_KEY=${{ secrets.AZURE_SPEECH_KEY }}::AZURE_SPEECH_REGION=eastus::TTS_PROVIDER=azure::ENVIRONMENT=staging::JWT_SECRET_KEY=${{ secrets.STAGING_JWT_SECRET_KEY }}::GCS_OMO_BUCKET=lingoleap-omo-uploads-staging::READING_AUDIO_GCS_BUCKET=lingoleap-reading-audio-staging::BUILD_SHA=${{ github.sha }}::JUNYI_CLASS_IMPORT_ENABLED=true::JUNYI_BQ_MODE=real::PARENT_PORTAL_ENABLED=true::DB_POOL_SIZE=2::DB_MAX_OVERFLOW=0::ASYNC_THREAD_WORKERS=32::AI_FEATURES_ENABLED=true" \
+            --update-secrets="DATABASE_URL=lingoleap-database-url-staging:latest"
 
       - name: Promote backend traffic to latest revision (Fixes #1449)
         run: |

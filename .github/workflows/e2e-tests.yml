@@ -110,8 +110,10 @@ jobs:
       #       `e2eBackendEnv3242.test.ts` 盯著不要退回去。
       #
       #    ② 「per-PR preview 的 DB 是空的、demo 帳號不存在」→ 不是這樣。
-      #       preview 後端吃的是**共用**的 `secrets.PREVIEW_DATABASE_URL`
-      #       （沒有為每個 PR 另建 DB），而 `preview-deploy.yml` 只設
+      #       preview 後端吃的是**共用**的 preview DB（#3999 起 DATABASE_URL
+      #       從 Secret Manager 的 `lingoleap-database-url-preview` 取值，
+      #       不再是 GitHub Actions secret；沒有為每個 PR 另建 DB），而
+      #       `preview-deploy.yml` 只設
       #       `ENVIRONMENT=preview`、**沒有**設 `ENABLE_TEST_SEED=false`
       #       （`seed.py` 預設 true，只有 production 會跳過 seeding）。
       #       對 PR #3223 的 preview 後端實測（帶負向對照）：
