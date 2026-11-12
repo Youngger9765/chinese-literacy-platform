@@ -99,7 +99,7 @@ const SchoolSwitcher: React.FC = () => {
           disabled={isLoading || options.length === 0}
           aria-label="切換目前學校"
           className="h-9 pl-8 pr-8 rounded-lg border border-gray-300 text-gray-900 bg-white text-sm
-                     focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent
+                     focus:outline-none focus:ring-2 focus:ring-[#19A696]/40 focus:border-[#19A696]
                      transition-colors appearance-none disabled:opacity-60 disabled:cursor-not-allowed
                      min-w-[140px]"
         >

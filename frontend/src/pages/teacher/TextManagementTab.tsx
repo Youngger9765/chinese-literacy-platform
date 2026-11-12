@@ -223,7 +223,10 @@ const TextManagementTab: React.FC<TextManagementTabProps> = ({ classroomId }) =>
         {!showAssignSelector && (
           <button
             onClick={handleOpenAssignSelector}
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-accent hover:bg-accent-hover text-white text-sm font-medium transition-colors cursor-pointer"
+            /* Issue #4005: Junyi blue (#4990E2), same assign-action token as
+               AssignmentsPanel.tsx's 建立任務 button (#3989) — not the app's
+               indigo accent. */
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#4990E2] hover:bg-[#2F7FD1] text-white text-sm font-medium transition-colors cursor-pointer"
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.5v15m7.5-7.5h-15" />
@@ -285,7 +288,7 @@ const TextManagementTab: React.FC<TextManagementTabProps> = ({ classroomId }) =>
                   <button
                     onClick={() => handleAssign(story.id)}
                     disabled={assigningTextId === story.id}
-                    className="px-3 py-1 rounded-md bg-accent hover:bg-accent-hover text-white text-xs font-medium transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+                    className="px-3 py-1 rounded-md bg-[#4990E2] hover:bg-[#2F7FD1] text-white text-xs font-medium transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
                   >
                     {assigningTextId === story.id ? '指派中...' : '指派'}
                   </button>
@@ -306,8 +309,8 @@ const TextManagementTab: React.FC<TextManagementTabProps> = ({ classroomId }) =>
       {/* Assigned text list */}
       {assignedTexts.length === 0 ? (
         <div className="p-8 text-center">
-          <div className="inline-flex items-center justify-center w-12 h-12 bg-accent-bg rounded-xl mb-3">
-            <svg className="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="inline-flex items-center justify-center w-12 h-12 bg-[#19A696]/10 rounded-xl mb-3">
+            <svg className="w-6 h-6 text-[#19A696]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
             </svg>
           </div>
@@ -344,7 +347,7 @@ const TextManagementTab: React.FC<TextManagementTabProps> = ({ classroomId }) =>
                       取人，老師不在裡面，所以試做資料進不了統計。 */}
                   <a
                     href={`/learn/${text.text_id}/lesson-intro`}
-                    className="px-2 py-0.5 rounded text-xs font-medium text-accent hover:bg-accent-bg transition-colors cursor-pointer shrink-0"
+                    className="px-2 py-0.5 rounded text-xs font-medium text-[#19A696] hover:bg-[#19A696]/10 transition-colors cursor-pointer shrink-0"
                     title="以你自己的帳號實際操作這一課"
                   >
                     我來試做

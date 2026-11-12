@@ -119,7 +119,7 @@ function AssignmentDrilldown({
         <ul>
           {matrix.students.map((s) => (
             <li key={s.id} className="flex items-center justify-between px-4 py-2.5 border-b border-gray-100 last:border-b-0">
-              <button type="button" onClick={() => setStudentId(s.id)} className="text-gray-900 hover:text-accent hover:underline cursor-pointer">
+              <button type="button" onClick={() => setStudentId(s.id)} className="text-gray-900 hover:text-[#19A696] hover:underline cursor-pointer">
                 {s.name}
               </button>
               <CellBadge cell={cells.find((c) => c.student_id === s.id)} overdue={isOverdue(assignment?.due_date ?? null)} />

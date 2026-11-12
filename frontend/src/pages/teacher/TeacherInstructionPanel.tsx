@@ -178,7 +178,7 @@ const TeacherInstructionPanel: React.FC<TeacherInstructionPanelProps> = ({
               <select
                 value={newType}
                 onChange={(e) => setNewType(e.target.value)}
-                className="px-2.5 py-1.5 text-sm border border-gray-200 rounded-lg bg-white focus:ring-2 focus:ring-accent/30 focus:border-accent outline-none"
+                className="px-2.5 py-1.5 text-sm border border-gray-200 rounded-lg bg-white focus:ring-2 focus:ring-[#19A696]/30 focus:border-[#19A696] outline-none"
               >
                 {INSTRUCTION_TYPES.map((t) => (
                   <option key={t.value} value={t.value}>
@@ -193,7 +193,7 @@ const TeacherInstructionPanel: React.FC<TeacherInstructionPanelProps> = ({
                   placeholder="輸入教學指示，例如：這個學生有閱讀障礙，請放慢速度..."
                   maxLength={500}
                   rows={2}
-                  className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-accent/30 focus:border-accent outline-none"
+                  className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-[#19A696]/30 focus:border-[#19A696] outline-none"
                 />
                 <span className="absolute bottom-1.5 right-2 text-[10px] text-gray-300">
                   {newContent.length}/500
@@ -204,7 +204,7 @@ const TeacherInstructionPanel: React.FC<TeacherInstructionPanelProps> = ({
               <button
                 onClick={handleCreate}
                 disabled={isSubmitting || !newContent.trim()}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg bg-accent text-white hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg bg-[#19A696] text-white hover:bg-[#19A696]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -249,7 +249,7 @@ const TeacherInstructionPanel: React.FC<TeacherInstructionPanelProps> = ({
                           <select
                             value={editType}
                             onChange={(e) => setEditType(e.target.value)}
-                            className="px-2 py-1 text-sm border border-gray-200 rounded-lg bg-white focus:ring-2 focus:ring-accent/30 outline-none"
+                            className="px-2 py-1 text-sm border border-gray-200 rounded-lg bg-white focus:ring-2 focus:ring-[#19A696]/30 outline-none"
                           >
                             {INSTRUCTION_TYPES.map((t) => (
                               <option key={t.value} value={t.value}>
@@ -263,7 +263,7 @@ const TeacherInstructionPanel: React.FC<TeacherInstructionPanelProps> = ({
                           onChange={(e) => setEditContent(e.target.value)}
                           maxLength={500}
                           rows={2}
-                          className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-accent/30 outline-none"
+                          className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-[#19A696]/30 outline-none"
                         />
                         <div className="flex gap-2 justify-end">
                           <button
@@ -275,7 +275,7 @@ const TeacherInstructionPanel: React.FC<TeacherInstructionPanelProps> = ({
                           <button
                             onClick={() => handleUpdate(instr.id)}
                             disabled={!editContent.trim()}
-                            className="px-2.5 py-1 text-xs font-medium rounded-lg bg-accent text-white hover:bg-accent/90 disabled:opacity-50 transition-colors"
+                            className="px-2.5 py-1 text-xs font-medium rounded-lg bg-[#19A696] text-white hover:bg-[#19A696]/90 disabled:opacity-50 transition-colors"
                           >
                             儲存
                           </button>

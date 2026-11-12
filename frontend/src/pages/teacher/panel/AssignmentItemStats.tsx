@@ -55,7 +55,7 @@ const AssignmentItemStats: React.FC<AssignmentItemStatsProps> = ({ data }) => {
               </span>
               <div className="h-2.5 rounded-full bg-gray-100 overflow-hidden" aria-hidden="true">
                 <div
-                  className={`h-full rounded-full ${weakest ? 'bg-red-500' : 'bg-accent'}`}
+                  className={`h-full rounded-full ${weakest ? 'bg-red-500' : 'bg-[#19A696]'}`}
                   style={{ width: `${item.correct_rate ?? 0}%` }}
                 />
               </div>

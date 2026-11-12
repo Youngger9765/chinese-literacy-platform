@@ -135,7 +135,7 @@ const TeacherCommentSection: React.FC<TeacherCommentSectionProps> = ({
           rows={4}
           maxLength={2000}
           placeholder="編輯或補充評語..."
-          className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-900 bg-white focus:border-accent focus:ring-1 focus:ring-accent resize-y"
+          className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-900 bg-white focus:border-[#19A696] focus:ring-1 focus:ring-[#19A696] resize-y"
         />
         <div className="flex items-center justify-between mt-2">
           <span className="text-xs text-gray-400">

@@ -43,7 +43,7 @@ export const AssignmentExpandedPanel: React.FC<AssignmentExpandedPanelProps> = (
       />
     ) : isLoadingDetail ? (
       <div className="flex items-center gap-2 py-4 justify-center">
-        <div className="w-4 h-4 border-2 border-gray-300 border-t-accent rounded-full animate-spin" />
+        <div className="w-4 h-4 border-2 border-gray-300 border-t-[#19A696] rounded-full animate-spin" />
         <span className="text-xs text-gray-500">載入中...</span>
       </div>
     ) : (
