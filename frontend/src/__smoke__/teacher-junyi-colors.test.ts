@@ -43,10 +43,20 @@ const SRC_ROOT = path.resolve(__dirname, '..');
 const RAW_ACCENT_TOKEN =
   /\b(border-t|border-l|border-r|border-b|border|bg|text|ring|from|to|divide|decoration|outline|caret)-accent(-bg-subtle|-bg|-hover|-light)?(\/\d+)?\b/;
 
+// The same indigo pasted in as a raw value (`text-[#564ABF]`, inline style
+// `rgb(86, 74, 191)`) — the fix itself uses bracket hex, so a revert would
+// most likely come back in this shape, which RAW_ACCENT_TOKEN can't see.
+const RAW_PURPLE_LITERAL = /#564abf\b|rgba?\(\s*86\s*,?\s+74\s*,?\s+191\b/i;
+
 const TEACHER_ONLY_DIRS = [
   'pages/teacher',
   'components/teacher',
 ];
+
+// Files outside the teacher folders that are only rendered by teacher pages
+// (verified by grepping importers in PR #4021 review). EnergyBar is shared
+// with student pages and is locked by its `tone` prop default instead.
+const TEACHER_ONLY_FILES = ['components/ui/ZhTWDatePicker.tsx'];
 
 // Relative to SRC_ROOT. Directories/files intentionally excluded — see the
 // file header for why each one is safe to leave alone.
@@ -75,7 +85,7 @@ function listTsxFiles(dir: string): string[] {
 }
 
 describe('teacher workspace stays off the LingoLeap indigo accent (#4005)', () => {
-  const files = TEACHER_ONLY_DIRS.flatMap(listTsxFiles);
+  const files = [...TEACHER_ONLY_DIRS.flatMap(listTsxFiles), ...TEACHER_ONLY_FILES];
 
   it('found a non-trivial number of teacher-only files to scan', () => {
     // Guards against the scan silently matching zero files (e.g. a renamed
@@ -88,7 +98,7 @@ describe('teacher workspace stays off the LingoLeap indigo accent (#4005)', () =
     const lines = content.split('\n');
     const offenders: string[] = [];
     lines.forEach((line, idx) => {
-      const m = line.match(RAW_ACCENT_TOKEN);
+      const m = line.match(RAW_ACCENT_TOKEN) ?? line.match(RAW_PURPLE_LITERAL);
       if (m) {
         offenders.push(`  line ${idx + 1}: ${m[0]} -- ${line.trim().slice(0, 100)}`);
       }
