@@ -159,6 +159,17 @@ jobs:
             ./backend
           docker push "${{ env.REGISTRY }}/backend:issue-${{ env.ISSUE_NUM }}-${{ github.sha }}"
 
+      # #3999 (Junyi security baseline rule 7): DATABASE_URL moved off the
+      # bulk env-vars string (where it was a literal value from the
+      # `secrets.PREVIEW_DATABASE_URL` GitHub Actions secret) onto a
+      # dedicated secrets flag pointed at a Secret Manager secret
+      # (`lingoleap-database-url-preview:latest`, project `lingoleap-dev`) --
+      # the runtime service account used just above already has
+      # `secretAccessor` on it. Same gcloud CLI reference as deploy.yml: the
+      # bulk env-vars flag and the dedicated secrets flag are independent
+      # "at most one of" groups, so combining them in one deploy invocation
+      # is supported, and since DATABASE_URL now appears in only one of
+      # them there is no same-key conflict.
       - name: Deploy backend preview
         if: needs.detect-changes.outputs.backend == 'true' || github.event.action == 'opened'
         run: |
@@ -175,7 +186,8 @@ jobs:
             --max-instances=1 \
             --timeout=300s \
             --add-cloudsql-instances=lingoleap-dev:asia-east1:lingoleap-preview-db \
-            --set-env-vars="^::^ALLOWED_ORIGINS=https://placeholder.run.app::DATABASE_URL=${{ secrets.PREVIEW_DATABASE_URL }}::RUN_MIGRATIONS=true::ENVIRONMENT=preview::JWT_SECRET_KEY=${{ secrets.PREVIEW_JWT_SECRET_KEY }}::GCS_OMO_BUCKET=lingoleap-omo-uploads-preview::AZURE_SPEECH_KEY=${{ secrets.AZURE_SPEECH_KEY }}::AZURE_SPEECH_REGION=eastus::TTS_PROVIDER=azure::BUILD_SHA=${{ github.event.pull_request.head.sha }}"
+            --set-env-vars="^::^ALLOWED_ORIGINS=https://placeholder.run.app::RUN_MIGRATIONS=true::ENVIRONMENT=preview::JWT_SECRET_KEY=${{ secrets.PREVIEW_JWT_SECRET_KEY }}::GCS_OMO_BUCKET=lingoleap-omo-uploads-preview::AZURE_SPEECH_KEY=${{ secrets.AZURE_SPEECH_KEY }}::AZURE_SPEECH_REGION=eastus::TTS_PROVIDER=azure::BUILD_SHA=${{ github.event.pull_request.head.sha }}" \
+            --update-secrets="DATABASE_URL=lingoleap-database-url-preview:latest"
 
       # #3719 — IAP 準備：預設關（IAP_ENABLED=false），這一步整個 skip，
       # 跟今天行為一致。只有刻意把上面 env.IAP_ENABLED 改成 'true' 開 PR
@@ -319,16 +331,24 @@ jobs:
           echo "backend_url=${BACKEND_URL}" >> "$GITHUB_OUTPUT"
           echo "preview URLs → frontend=${FRONTEND_URL} backend=${BACKEND_URL}"
 
-      - name: Update backend CORS + refresh DATABASE_URL from GH secret
+      # #3999 (Junyi security baseline rule 7): the refresh used to re-pass
+      # `secrets.PREVIEW_DATABASE_URL` (a GitHub Actions secret, literal
+      # value) via --update-env-vars on every run, so a rotated GH secret
+      # would propagate to this long-lived preview service without a
+      # manual rebuild. That job is now done by --update-secrets instead,
+      # pointed at Secret Manager's `:latest` -- every run re-resolves
+      # "latest" and creates a new revision if the resolved secret version
+      # changed, which is the same "refresh on every run" behavior, just
+      # sourced from Secret Manager instead of a GitHub Actions secret.
+      - name: Update backend CORS + refresh DATABASE_URL from Secret Manager
         # Skip when backend preview service doesn't exist (frontend-only PR after
         # prior backend cleanup) — otherwise `gcloud run services update` fails.
-        # DATABASE_URL is re-injected on every run so GH secret rotations propagate
-        # to long-lived preview services without needing manual service rebuild
-        # (Fixes #1396).
+        # ALLOWED_ORIGINS is re-injected on every run because the preview
+        # frontend's URL/issue number can change between runs; DATABASE_URL is
+        # re-pointed at :latest on every run for the reason above (Fixes #1396).
         if: always() && steps.preview-urls.outputs.frontend_url != 'N/A' && steps.preview-urls.outputs.frontend_url != '' && steps.preview-urls.outputs.backend_url != 'N/A' && steps.preview-urls.outputs.backend_url != ''
         env:
           FRONTEND_URL: ${{ steps.preview-urls.outputs.frontend_url }}
-          DATABASE_URL_SECRET: ${{ secrets.PREVIEW_DATABASE_URL }}
         run: |
           STAGING_URL="https://lingoleap-frontend-staging-958347263320.asia-east1.run.app"
           FIREBASE_URL="https://lingoleap-dev.web.app"
@@ -345,7 +365,8 @@ jobs:
           OUT=$(gcloud run services update ${{ env.BACKEND_SERVICE }} \
             --region ${{ env.REGION }} \
             --project ${{ env.PROJECT_ID }} \
-            --update-env-vars "^::^ALLOWED_ORIGINS=${FRONTEND_URL},${ALT_URL},${STAGING_URL},${FIREBASE_URL}::DATABASE_URL=${DATABASE_URL_SECRET}" 2>&1)
+            --update-env-vars "^::^ALLOWED_ORIGINS=${FRONTEND_URL},${ALT_URL},${STAGING_URL},${FIREBASE_URL}" \
+            --update-secrets="DATABASE_URL=lingoleap-database-url-preview:latest" 2>&1)
           RC=$?
           set -e
           echo "$OUT"
@@ -404,8 +425,10 @@ jobs:
       # 只有真的一步一步走完才會遇到。
       #
       # ⚠️ e2e-tests.yml 裡寫著「per-PR preview 的 DB 是空的、demo 帳號不存在」——
-      #    那句已經過時。preview 後端吃的是共用的 secrets.PREVIEW_DATABASE_URL，
-      #    而 preview 前端 build 時帶了 VITE_SHOW_DEMO_LOGIN=true 與三個帳號。
+      #    那句已經過時。preview 後端吃的是共用的 preview DB（#3999 起 DATABASE_URL
+      #    從 Secret Manager 的 lingoleap-database-url-preview 取值，不再是
+      #    GitHub Actions secret），而 preview 前端 build 時帶了
+      #    VITE_SHOW_DEMO_LOGIN=true 與三個帳號。
       #    2026-08-28 在 PR #2965 的 preview 上實測：一鍵登入 → /library，pageerror 0。
       #
       # PR 只跑一課（五課走完整條路太慢，慢到會讓人想關掉這道門），
