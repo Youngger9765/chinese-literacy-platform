@@ -118,7 +118,7 @@ jobs:
       #    驗不到**選擇邏輯本身變了**（processor 改了而 poyin_db 沒改）——
       #    而那正是只有 oracle 抓得到的那一類，也是 #3218 這整套架構的起因。
       - name: Set up Node (for Gate 11's oracle)
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '20'
 
