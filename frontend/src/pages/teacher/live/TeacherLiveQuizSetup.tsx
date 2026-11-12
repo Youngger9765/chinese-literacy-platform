@@ -10,7 +10,12 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { fetchStories, fetchStory } from '../../../services/api';
 import type { Story } from '../../../types';
 import { gradeLabel } from '../../../utils/gradeLabel';
-import { listMyClassrooms, type ClassroomResponse } from '../../../services/classroomApi';
+import {
+  listMyClassrooms,
+  updateClassroomFeatureSettings,
+  ClassroomApiError,
+  type ClassroomResponse,
+} from '../../../services/classroomApi';
 import { createLiveQuizGame, LiveQuizApiError } from '../../../services/liveQuizApi';
 
 const QUESTION_TYPES: { key: string; label: string }[] = [
@@ -26,6 +31,15 @@ const COUNT_OPTIONS: { key: 'all' | 10 | 15 | 20; label: string }[] = [
   { key: 15, label: '15 題' },
   { key: 20, label: '20 題' },
   { key: 'all', label: '全部' },
+];
+// issue #3631 P0 #1: "選項出現時間依題目長度...老師可選 慢／標準／快" —
+// replaces the old raw-seconds input. The actual per-question seconds are
+// computed server-side from each round's own stem length
+// (reading_pace.compute_reading_seconds).
+const READING_PACE_OPTIONS: { key: 'slow' | 'standard' | 'fast'; label: string }[] = [
+  { key: 'slow', label: '慢' },
+  { key: 'standard', label: '標準' },
+  { key: 'fast', label: '快' },
 ];
 
 interface Props {
@@ -45,13 +59,18 @@ const TeacherLiveQuizSetup: React.FC<Props> = ({ onCreated }) => {
   const [seconds, setSeconds] = useState(30);
   const [countMode, setCountMode] = useState<'all' | 10 | 15 | 20>(10);
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [readingSeconds, setReadingSeconds] = useState(4);
+  const [readingPace, setReadingPace] = useState<'slow' | 'standard' | 'fast'>('standard');
   const [shuffle, setShuffle] = useState(false);
   const [showLeaderboardAfterEach, setShowLeaderboardAfterEach] = useState(true);
   const [practiceMode, setPracticeMode] = useState(false);
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  // issue #3607: 課堂搶答 is OFF by default per classroom when targeting
+  // one — "不指定班級" (classroomId === '') is never gated, only a chosen
+  // classroom can be disabled.
+  const [enablingLiveQuiz, setEnablingLiveQuiz] = useState(false);
+  const selectedClassroom = classroomId === '' ? null : classrooms.find((c) => c.id === classroomId) ?? null;
 
   useEffect(() => {
     fetchStories(token ?? undefined)
@@ -73,6 +92,21 @@ const TeacherLiveQuizSetup: React.FC<Props> = ({ onCreated }) => {
     () => (gradeFilter ? stories.filter((s) => s.grade === gradeFilter) : stories),
     [stories, gradeFilter],
   );
+
+  const handleEnableLiveQuiz = async () => {
+    if (!token || selectedClassroom == null || enablingLiveQuiz) return;
+    setEnablingLiveQuiz(true);
+    try {
+      const result = await updateClassroomFeatureSettings(token, selectedClassroom.id, { live_quiz: true });
+      setClassrooms((prev) =>
+        prev.map((c) => (c.id === selectedClassroom.id ? { ...c, live_quiz: result.live_quiz } : c)),
+      );
+    } catch (err) {
+      setError(err instanceof ClassroomApiError ? err.message : '開啟課堂搶答失敗，請稍後再試');
+    } finally {
+      setEnablingLiveQuiz(false);
+    }
+  };
 
   const toggleStory = (id: string) => {
     setSelectedIds((prev) => {
@@ -121,7 +155,7 @@ const TeacherLiveQuizSetup: React.FC<Props> = ({ onCreated }) => {
         lesson_uids: lessonUids,
         source_modules: [...types],
         seconds,
-        reading_seconds: readingSeconds,
+        reading_pace: readingPace,
         question_count_mode: countMode,
         classroom_id: classroomId === '' ? null : classroomId,
         shuffle,
@@ -139,7 +173,8 @@ const TeacherLiveQuizSetup: React.FC<Props> = ({ onCreated }) => {
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
       <h1 className="text-2xl font-bold text-on-surface mb-1">班級經營</h1>
-      <p className="text-sm text-on-surface-variant mb-6">課堂搶答 — 選課文、設定題目，開場讓學生用手機加入</p>
+      <p className="text-sm text-on-surface-variant mb-1">課堂搶答 · 現在全班一起玩，約 10 分鐘</p>
+      <p className="text-sm text-on-surface-variant mb-6">選課文、設定題目，開場讓學生用手機加入</p>
 
       {error && (
         <div className="mb-4 rounded-lg bg-error/10 px-4 py-3 text-sm text-error" role="alert">
@@ -161,6 +196,23 @@ const TeacherLiveQuizSetup: React.FC<Props> = ({ onCreated }) => {
             </option>
           ))}
         </select>
+
+        {/* issue #3607: 課堂搶答 OFF for the selected classroom — the page
+            stays usable ("不指定班級" still works), but a clear one-click
+            prompt shows instead of letting the teacher submit into a 403. */}
+        {selectedClassroom && !selectedClassroom.live_quiz && (
+          <div className="mt-2 flex items-center justify-between gap-3 rounded-lg bg-accent-bg px-3 py-2 text-sm">
+            <span className="text-accent">老師還沒為「{selectedClassroom.name}」開放課堂搶答</span>
+            <button
+              type="button"
+              onClick={handleEnableLiveQuiz}
+              disabled={enablingLiveQuiz}
+              className="shrink-0 rounded-lg bg-accent px-3 py-1 text-xs font-semibold text-white disabled:opacity-50"
+            >
+              {enablingLiveQuiz ? '開啟中…' : '一鍵開啟'}
+            </button>
+          </div>
+        )}
       </section>
 
       <section className="mb-6">
@@ -258,16 +310,24 @@ const TeacherLiveQuizSetup: React.FC<Props> = ({ onCreated }) => {
           <div className="mt-3 space-y-3 rounded-lg border border-surface-dim bg-surface-container-low p-4">
             <div>
               <label className="mb-1 block text-xs font-medium text-on-surface-variant">
-                讀題時間（秒，0 = 不停留直接顯示選項）
+                讀題速度（先只顯示題幹，選項延後出現；依題目長度自動調整秒數）
               </label>
-              <input
-                type="number"
-                min={0}
-                max={30}
-                value={readingSeconds}
-                onChange={(e) => setReadingSeconds(Math.max(0, Math.min(30, Number(e.target.value))))}
-                className="w-24 rounded-lg border border-surface-dim bg-white px-3 py-1.5 text-sm"
-              />
+              <div className="flex gap-2">
+                {READING_PACE_OPTIONS.map((p) => (
+                  <button
+                    key={p.key}
+                    type="button"
+                    onClick={() => setReadingPace(p.key)}
+                    className={`rounded-full border px-4 py-1.5 text-sm transition-colors ${
+                      readingPace === p.key
+                        ? 'border-accent bg-accent-bg text-accent font-medium'
+                        : 'border-surface-dim text-on-surface-variant'
+                    }`}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
             </div>
             <label className="flex items-center gap-2 text-sm">
               <input type="checkbox" checked={shuffle} onChange={(e) => setShuffle(e.target.checked)} className="h-4 w-4 accent-accent" />

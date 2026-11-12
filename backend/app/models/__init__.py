@@ -39,3 +39,7 @@ from .league import (  # noqa: F401
     LeagueTeamRosterMember,
 )
 from .live_quiz import LiveQuizGame, LiveQuizPlayer, LiveQuizAnswer  # noqa: F401
+from .pk import PkQueue, PkMatch, PkRating  # noqa: F401
+from .escape_room import EscapeRoomRun  # noqa: F401
+from .story_pack import StoryPackRow  # noqa: F401
+from .team_arena import TeamArenaSession, TeamArenaMember, TeamArenaAnswer  # noqa: F401

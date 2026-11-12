@@ -27,8 +27,11 @@ import {
   BatchCreateResult,
 } from '../../services/classroomApi';
 import ClassroomHeaderCard from './ClassroomHeaderCard';
+import ClassroomPkSettingsPanel from './ClassroomPkSettingsPanel';
 import ClassroomTabs, { TabKey, resolveInitialView, resolveTabKey } from './ClassroomTabs';
 import StudentListTab from './StudentListTab';
+import SeatNumberDialog from './SeatNumberDialog';
+import { sortStudentsBySeat } from './sortStudentsBySeat';
 import ClassSwitcher from './panel/ClassSwitcher';
 import ClassListSidebar from './panel/ClassListSidebar';
 
@@ -62,6 +65,8 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack, 
   const selectedAssignmentId = assignmentParam ? Number(assignmentParam) || null : null;
   // Junyi-parity: the roster table is always shown; adding students opens a modal.
   const [isAddStudentsOpen, setIsAddStudentsOpen] = useState(Boolean(initialAddResult));
+  // #3992: Junyi-parity "新增座號" batch dialog, same open/close pattern as above.
+  const [isSeatDialogOpen, setIsSeatDialogOpen] = useState(false);
   const studentParam = searchParams.get('student');
   const selectedStudentId = studentParam ? Number(studentParam) || null : null;
   const rawTab = searchParams.get('tab');
@@ -391,8 +396,33 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack, 
         onHideRegenConfirm={() => setShowRegenConfirm(false)}
         onRegenerateCode={handleRegenerateCode}
         onAddStudents={() => setIsAddStudentsOpen(true)}
+        onOpenSeatDialog={() => setIsSeatDialogOpen(true)}
         formatDate={formatDate}
       />
+
+      {token && (
+        <SeatNumberDialog
+          isOpen={isSeatDialogOpen}
+          token={token}
+          classroomId={classroom.id}
+          students={sortStudentsBySeat(classroom.students)}
+          onClose={() => setIsSeatDialogOpen(false)}
+          onSaved={loadClassroom}
+        />
+      )}
+
+      {token && (
+        <ClassroomPkSettingsPanel
+          token={token}
+          classroomId={classroom.id}
+          pkHuman={classroom.pk_human}
+          league={classroom.league}
+          liveQuiz={classroom.live_quiz}
+          onChanged={(next) =>
+            setClassroom((prev) => (prev ? { ...prev, ...next } : prev))
+          }
+        />
+      )}
 
       <section className="rounded-xl border border-gray-200 overflow-hidden" aria-label="學生名單">
             <StudentListTab
@@ -417,10 +447,14 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack, 
       </section>
 
       <div className="flex justify-end">
+        {/* Issue #3989: this is the same button Junyi renders at the bottom
+            of 班級設定 (d1-class.png measured it at #25AA9B — Junyi's teal,
+            same family as the create-class modal's #19A696) — not the app's
+            indigo accent. Scoped to this one button. */}
         <button
           type="button"
           onClick={() => setActiveTab('assignments')}
-          className="h-11 px-6 rounded-lg bg-accent hover:bg-accent-hover text-white text-base font-medium transition-colors cursor-pointer"
+          className="h-11 px-6 rounded-lg bg-[#19A696] hover:bg-[#15897B] text-white text-base font-medium transition-colors cursor-pointer"
         >
           指派任務
         </button>
@@ -455,6 +489,32 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack, 
               <BackButton />
               <ClassSwitcher currentId={classroomId} onSwitch={switchClassroom} />
             </div>
+            {/*
+             * Issue #3985 (P3/P4 of PRD-junyi-parity.md): Junyi shows 班級代碼＋複製
+             * on every classroom sub-page, not just 班級設定. We only had it on the
+             * settings tab (inside ClassroomHeaderCard below) — switch to 指派任務 or
+             * 班級數據 and the code a teacher needs to hand out just disappears.
+             * Settings tab already renders the full header card with the code, so
+             * this compact chip is hidden there to avoid showing it twice.
+             */}
+            {activeTab !== 'settings' && (
+              <div className="flex flex-wrap items-center gap-2 text-sm">
+                <span className="text-gray-700 whitespace-nowrap">
+                  班級代碼：
+                  <span className="font-mono font-bold tracking-wider text-accent select-all">
+                    {classroom.join_code ?? '—'}
+                  </span>
+                </span>
+                <button
+                  type="button"
+                  onClick={handleCopyJoinCode}
+                  disabled={!classroom.join_code}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md border border-gray-300 text-gray-700 text-sm hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
+                >
+                  {isCopied ? <span className="text-emerald-600">已複製</span> : '複製代碼'}
+                </button>
+              </div>
+            )}
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
                 {error}

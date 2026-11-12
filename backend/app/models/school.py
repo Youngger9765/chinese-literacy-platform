@@ -16,8 +16,16 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import Base
 
-# Valid roles for ClassroomTeacher junction table
-ClassroomTeacherRole = Literal["primary", "assistant"]
+# Valid roles for ClassroomTeacher junction table.
+# "assistant" is the legacy value (pre-#3820); existing rows are backfilled to
+# "editor" by migration co01te02viewer03. Keep accepting it nowhere in new code.
+ClassroomTeacherRole = Literal["primary", "editor", "viewer"]
+
+# Invitation lifecycle for a co-teaching relationship. There is no persisted
+# "rejected" state — rejecting an invite is the invitee DELETE-ing their own
+# still-pending row (same action as leaving), mirroring 均一's "reject = remove
+# self from the pending list" pattern (#3820 PRD §3).
+ClassroomTeacherStatus = Literal["pending", "accepted"]
 
 
 class School(Base):
@@ -96,6 +104,16 @@ class Classroom(Base):
     grade: Mapped[int | None] = mapped_column(Integer, nullable=True)
     join_code: Mapped[str | None] = mapped_column(String(8), unique=True, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    # Issue #3586 (PK mode): per-classroom feature toggles the teacher
+    # controls, e.g. {"pk_human": true}. One JSON blob instead of one
+    # column per feature so a future class-level toggle never needs
+    # another migration -- read it through
+    # services/pk/classroom_features.get_classroom_feature(), which
+    # supplies the default for any key not present (an empty '{}' class
+    # is NOT the same as "everything off"; each key has its own default).
+    feature_settings: Mapped[dict] = mapped_column(
+        JSON, nullable=False, server_default=text("'{}'")
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
@@ -113,7 +131,16 @@ class Classroom(Base):
 
 class ClassroomStudent(Base):
     __tablename__ = "classroom_students"
-    __table_args__ = (UniqueConstraint("classroom_id", "student_id"),)
+    __table_args__ = (
+        UniqueConstraint("classroom_id", "student_id"),
+        # Standard SQL unique constraints allow any number of NULLs to
+        # coexist (Postgres follows this), so students who haven't been
+        # assigned a seat yet (seat_number IS NULL, the default for every
+        # pre-#3826 row and every newly-moved/re-enrolled row) never
+        # collide with each other -- only two NON-NULL seats in the SAME
+        # classroom can conflict (#3826).
+        UniqueConstraint("classroom_id", "seat_number", name="uq_classroom_students_seat"),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     classroom_id: Mapped[int] = mapped_column(ForeignKey("classrooms.id"), nullable=False, index=True)
@@ -121,6 +148,12 @@ class ClassroomStudent(Base):
     enrolled_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
+    # Per-classroom seat number (#3826) -- deliberately NOT the string baked
+    # into the login username at account-creation time (classroom_batch.py /
+    # classroom_csv.py); this is a pure display/sort attribute scoped to THIS
+    # enrollment row, so moving classrooms (#3819) or batch-removing (#3821)
+    # never carries a stale seat number into a new classroom.
+    seat_number: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     # Relationships
     classroom: Mapped["Classroom"] = relationship("Classroom", back_populates="classroom_students")
@@ -131,8 +164,14 @@ class ClassroomTeacher(Base):
     """Junction table: many teachers per classroom.
 
     The primary teacher (owner) is always the one stored in Classroom.teacher_id.
-    This table tracks additional co-teachers with role='primary' (owner) or 'assistant'.
-    On classroom creation the owner is automatically inserted with role='primary'.
+    This table tracks additional co-teachers with role='primary' (owner),
+    'editor' (full read/write parity with owner except co-teacher management
+    and classroom deletion), or 'viewer' (read-only; #3820).
+
+    ``status`` is the invitation lifecycle: a row starts 'pending' when invited
+    and only counts as classroom membership (read access, let alone write)
+    once it is 'accepted' by the invitee. There is no persisted 'rejected'
+    state -- rejecting / revoking / leaving are all a DELETE of the row.
     """
 
     __tablename__ = "classroom_teachers"
@@ -143,8 +182,15 @@ class ClassroomTeacher(Base):
         ForeignKey("classrooms.id", ondelete="CASCADE"), nullable=False, index=True
     )
     teacher_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
-    # "primary" = owner (Classroom.teacher_id), "assistant" = co-teacher
-    role: Mapped[str] = mapped_column(String(20), nullable=False, default="assistant")
+    # "primary" = owner, "editor" = full read/write co-teacher, "viewer" = read-only
+    role: Mapped[str] = mapped_column(String(20), nullable=False, default="editor")
+    # "pending" until the invitee accepts, then "accepted". See class docstring.
+    status: Mapped[str] = mapped_column(
+        String(20), nullable=False, default="accepted", server_default="accepted"
+    )
+    accepted_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
     invited_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     invited_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False

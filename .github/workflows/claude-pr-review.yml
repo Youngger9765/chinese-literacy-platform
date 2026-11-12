@@ -83,7 +83,7 @@ jobs:
       # high）：這個 job 從不呼叫 Google Cloud，沒有任何合法理由需要
       # 用 id-token 去換 WIF 身分。整組拿掉。
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           fetch-depth: 1
           persist-credentials: false  # 不留 token'd git config 給任何一步撿到
@@ -140,7 +140,7 @@ jobs:
 
       - name: Claude Review
         id: agent
-        uses: anthropics/claude-code-action@v1
+        uses: anthropics/claude-code-action@4fa93a88de49bbef68b10eb15aabedf28ca0e1ed # v1.0.271
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           # 沒有 id-token 時 action 預設 GitHub App 認證要用它才能啟動；
@@ -197,7 +197,7 @@ jobs:
 
       - name: Upload review artifact for the publish job
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: claude-pr-review-${{ github.event.inputs.pr_number || github.event.issue.number }}-artifact
           path: .claude-pr-review/review.md
@@ -224,7 +224,7 @@ jobs:
       # 覆寫既有檔案）從來沒有機會碰過這裡的任何東西。
     steps:
       - name: Download review artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: claude-pr-review-${{ github.event.inputs.pr_number || github.event.issue.number }}-artifact
           # Downloaded OUTSIDE $GITHUB_WORKSPACE on purpose (2026-11
@@ -236,7 +236,7 @@ jobs:
           path: /tmp/claude-pr-review
         continue-on-error: true  # review job may have produced nothing at all
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           fetch-depth: 1
           persist-credentials: false

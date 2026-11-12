@@ -53,6 +53,7 @@ from ..services.assignment_responses import (
     build_assignment_response,
 )
 from ..services.assignment_session_service import (
+    mark_submission_complete_by_teacher,
     restart_assignment_session,
     start_assignment_session,
     start_assignment_to_response,
@@ -61,7 +62,11 @@ from ..services.assignment_session_service import (
 )
 from ..services.notification_service import send_assignment_submitted_notification
 from ..schemas.session import parse_step_progress
-from .classrooms import _get_classroom_or_404, _require_owner_or_admin
+from .classrooms import (
+    _get_classroom_or_404,
+    _require_editor_or_admin,
+    _require_member_or_admin,
+)
 
 router = APIRouter(tags=["assignments"])
 logger = logging.getLogger(__name__)
@@ -93,16 +98,33 @@ def _assignment_to_response(
 # ── Auth helpers ──────────────────────────────────────────────────────────────
 
 
-def _require_assignment_owner_or_admin(
-    assignment: Assignment, current_user: User, db: Session
-) -> None:
-    """Check that current_user owns the assignment's classroom, or is admin."""
+def _get_assignment_classroom_or_404(assignment: Assignment, db: Session) -> Classroom:
     classroom = (
         db.query(Classroom).filter(Classroom.id == assignment.classroom_id).first()
     )
     if classroom is None:
         raise HTTPException(status_code=404, detail="Classroom not found")
-    _require_owner_or_admin(classroom, current_user, db)
+    return classroom
+
+
+def _require_assignment_editor_or_admin(
+    assignment: Assignment, current_user: User, db: Session
+) -> None:
+    """Grade/update/delete an assignment: owner, accepted 'editor'-role
+    co-teacher, or system_admin (#3820). A 'viewer'-role co-teacher is denied.
+    """
+    classroom = _get_assignment_classroom_or_404(assignment, db)
+    _require_editor_or_admin(classroom, current_user, db)
+
+
+def _require_assignment_viewer_or_admin(
+    assignment: Assignment, current_user: User, db: Session
+) -> None:
+    """Read an assignment's detail/submissions: owner, any accepted
+    co-teacher (editor or viewer), or system_admin (#3820).
+    """
+    classroom = _get_assignment_classroom_or_404(assignment, db)
+    _require_member_or_admin(classroom, current_user, db)
 
 
 def _has_role(user_id: int, role_name: str, db: Session) -> bool:
@@ -288,8 +310,9 @@ def create_assignment(
             detail="classroom_id in request body must match classroom_id in path",
         )
 
+    # Owner, accepted 'editor'-role co-teacher, or system_admin (#3820).
     classroom = _get_classroom_or_404(classroom_id, db)
-    _require_owner_or_admin(classroom, current_user, db)
+    _require_editor_or_admin(classroom, current_user, db)
 
     if payload.student_ids is not None:
         # Only students of this class can be given its assignment (#3378).
@@ -334,9 +357,12 @@ def list_classroom_assignments(
 
     joinedload(Assignment.text) avoids N+1 queries when _resolve_title_for_assignment
     accesses assignment.text for text_id-based assignments.
+
+    Owner, any accepted co-teacher (editor or viewer), or system_admin (#3820)
+    -- this is a read, so a 'viewer'-role co-teacher can see it too.
     """
     classroom = _get_classroom_or_404(classroom_id, db)
-    _require_owner_or_admin(classroom, current_user, db)
+    _require_member_or_admin(classroom, current_user, db)
 
     assignments, precomputed = list_classroom_assignments_with_counts(
         classroom_id,
@@ -362,12 +388,16 @@ def get_assignment_detail(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Get assignment detail with all submissions."""
+    """Get assignment detail with all submissions.
+
+    Owner, any accepted co-teacher (editor or viewer), or system_admin
+    (#3820) -- this is a read.
+    """
     assignment = db.query(Assignment).filter(Assignment.id == assignment_id).first()
     if assignment is None:
         raise HTTPException(status_code=404, detail="Assignment not found")
 
-    _require_assignment_owner_or_admin(assignment, current_user, db)
+    _require_assignment_viewer_or_admin(assignment, current_user, db)
 
     # Build base response
     base = _assignment_to_response(assignment, db)
@@ -388,12 +418,12 @@ def get_assignment_detail(
     submission_responses = []
     for sub in submissions:
         # student already loaded via joinedload — no extra query
-        submission_responses.append(submission_to_response(sub, db, student=sub.student))
+        submission_responses.append(submission_to_response(sub, assignment, db, student=sub.student))
 
     return AssignmentDetailResponse(
         **base.model_dump(),
         submissions=submission_responses,
-        submissions_by_student=assignment_attempt_groups_to_response(submissions, db),
+        submissions_by_student=assignment_attempt_groups_to_response(assignment, submissions, db),
     )
 
 
@@ -407,12 +437,15 @@ def update_assignment(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Update assignment fields (title, description, due_date, is_active, reading goals)."""
+    """Update assignment fields (title, description, due_date, is_active, reading goals).
+
+    Owner, accepted 'editor'-role co-teacher, or system_admin (#3820).
+    """
     assignment = db.query(Assignment).filter(Assignment.id == assignment_id).first()
     if assignment is None:
         raise HTTPException(status_code=404, detail="Assignment not found")
 
-    _require_assignment_owner_or_admin(assignment, current_user, db)
+    _require_assignment_editor_or_admin(assignment, current_user, db)
 
     assignment = update_assignment_fields(assignment, payload, current_user.id, db)
     return _assignment_to_response(assignment, db)
@@ -432,12 +465,15 @@ def grade_submission(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Grade a student submission. Teacher sets score and marks as 'graded'."""
+    """Grade a student submission. Teacher sets score and marks as 'graded'.
+
+    Owner, accepted 'editor'-role co-teacher, or system_admin (#3820).
+    """
     assignment = db.query(Assignment).filter(Assignment.id == assignment_id).first()
     if assignment is None:
         raise HTTPException(status_code=404, detail="Assignment not found")
 
-    _require_assignment_owner_or_admin(assignment, current_user, db)
+    _require_assignment_editor_or_admin(assignment, current_user, db)
 
     submission = (
         db.query(AssignmentSubmission)
@@ -453,7 +489,63 @@ def grade_submission(
     submission = grade_assignment_submission(submission, payload, current_user.id, db)
 
     student = db.query(User).filter(User.id == submission.student_id).first()
-    return submission_to_response(submission, db, student=student)
+    return submission_to_response(submission, assignment, db, student=student)
+
+
+# ── Teacher Mark-Complete Endpoint (Issue #NEW) ───────────────────────────────
+
+
+@router.post(
+    "/assignments/{assignment_id}/submissions/{submission_id}/mark-complete",
+    response_model=SubmissionResponse,
+)
+def mark_submission_complete(
+    assignment_id: int,
+    submission_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Teacher override for a submission a broken step could never clear.
+
+    A student whose lesson gets stuck on a broken step (#3682's reported
+    case) can never satisfy every required step server-side
+    (assignment_queries.is_assignment_ready_for_submit), so the assignment
+    sits "in_progress" forever even once the teacher has looked at the
+    student's recorded progress
+    (/teacher/students/{id}/sessions/{id}/report) and judged the work done.
+    This lets the owning teacher force-submit it — see
+    assignment_session_service.mark_submission_complete_by_teacher for what
+    that reuses and what it records.
+
+    Owner, accepted 'editor'-role co-teacher, or system_admin (#3820).
+    """
+    assignment = db.query(Assignment).filter(Assignment.id == assignment_id).first()
+    if assignment is None:
+        raise HTTPException(status_code=404, detail="Assignment not found")
+
+    _require_assignment_editor_or_admin(assignment, current_user, db)
+
+    submission = (
+        db.query(AssignmentSubmission)
+        .filter(
+            AssignmentSubmission.id == submission_id,
+            AssignmentSubmission.assignment_id == assignment_id,
+        )
+        .first()
+    )
+    if submission is None:
+        raise HTTPException(status_code=404, detail="Submission not found")
+
+    if submission.status in ("submitted", "graded"):
+        raise HTTPException(status_code=400, detail="此學生已經完成，無需再標記")
+
+    if submission.session_id is None:
+        raise HTTPException(status_code=400, detail="這位學生尚未開始作答，無法標記完成")
+
+    submission = mark_submission_complete_by_teacher(assignment, submission, current_user, db)
+
+    student = db.query(User).filter(User.id == submission.student_id).first()
+    return submission_to_response(submission, assignment, db, student=student)
 
 
 # ── Teacher Delete Endpoint ───────────────────────────────────────────────────
@@ -470,14 +562,14 @@ def delete_assignment(
 ):
     """Delete an assignment and all its submissions (cascade).
 
-    Only the classroom owner or a system admin can delete an assignment.
+    Owner, accepted 'editor'-role co-teacher, or system_admin (#3820).
     Returns 204 No Content on success.
     """
     assignment = db.query(Assignment).filter(Assignment.id == assignment_id).first()
     if assignment is None:
         raise HTTPException(status_code=404, detail="Assignment not found")
 
-    _require_assignment_owner_or_admin(assignment, current_user, db)
+    _require_assignment_editor_or_admin(assignment, current_user, db)
     classroom_id = assignment.classroom_id
     try:
         linked_session_count = delete_assignment_with_cleanup(assignment, db)

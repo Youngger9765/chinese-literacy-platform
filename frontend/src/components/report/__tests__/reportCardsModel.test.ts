@@ -78,6 +78,20 @@ describe('buildStepReportCards', () => {
     const card = byId(buildStepReportCards(steps, [], {}, null), 'full-text-annotate');
     expect(card.details).toEqual([{ kind: 'note', text: '記號載入中…' }]);
   });
+
+  // #3749 — 老師端（TeacherSessionReportPage）沒有教師專屬的 annotations
+  // 端點，所以沒有能力提供記號資料。傳 undefined 必須乾脆地「這一關沒有記號
+  // 細節」，不可以誤判成 null 的「載入中」（會卡住看起來永遠讀不完）或空陣列
+  // 的「還沒有做記號」（學生可能其實有做記號，只是老師端讀不到）。
+  it('omits mark detail entirely when the caller has no way to load marks (teacher view)', () => {
+    const card = byId(
+      buildStepReportCards(steps, ['full-text-annotate'], {}, undefined),
+      'full-text-annotate',
+    );
+    expect(card.completed).toBe(true);
+    expect(card.summary).toBeNull();
+    expect(card.details).toEqual([]);
+  });
 });
 
 describe('lessons whose step ids carry a #slug', () => {

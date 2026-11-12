@@ -437,7 +437,10 @@ const KeyPassageReading: React.FC<KeyPassageReadingProps> = ({
       )}
 
       {/* ── Single-column centered layout ─────────────────────────────── */}
-      <div className="flex-1 overflow-y-auto pb-48 custom-scrollbar">
+      {/* UI-4: pb-48 → pb-56 — extra clearance so the fixed bottom controls
+          (AI朗讀/開始朗讀, or the speed picker row above them) never sit over
+          the passage's last line. */}
+      <div className="flex-1 overflow-y-auto pb-56 custom-scrollbar">
         <div className={`mx-auto px-6 md:px-16 pt-4 ${result ? 'max-w-6xl' : 'max-w-4xl'}`}>
 
           {/* I4 (Issue #2156): Gemini fallback alert banner — 置於雙欄之上（全寬） */}

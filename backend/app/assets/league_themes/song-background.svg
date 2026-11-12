@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 160" width="400" height="160">
+  <g fill="none" stroke="#C84B4B" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" opacity="0.42">
+    <path d="M0 14H400"/>
+    <path d="M27 14V27M82 14V23M137 14V29M192 14V24M247 14V29M302 14V22M357 14V27"/>
+  </g>
+  <g fill="#C84B4B" fill-opacity="0.14" stroke="#C84B4B" stroke-width="1.1" stroke-linejoin="round" opacity="0.68">
+    <path d="M18 29L23 24H31L36 29V43L31 48H23L18 43Z"/>
+    <path d="M23 48V53M31 48V53M21 53H33" fill="none"/>
+    <path d="M74 25L79 20H87L92 25V39L87 44H79L74 39Z"/>
+    <path d="M79 44V49M87 44V49M77 49H89" fill="none"/>
+    <path d="M127 31L133 25H141L147 31V47L141 53H133L127 47Z"/>
+    <path d="M133 53V59M141 53V59M131 59H143" fill="none"/>
+    <path d="M184 26L189 21H197L202 26V40L197 45H189L184 40Z"/>
+    <path d="M189 45V50M197 45V50M187 50H199" fill="none"/>
+    <path d="M238 31L244 25H252L258 31V47L252 53H244L238 47Z"/>
+    <path d="M244 53V59M252 53V59M242 59H254" fill="none"/>
+  </g>
+  <g fill="#A63D52" fill-opacity="0.16" stroke="#A63D52" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" opacity="0.72">
+    <path d="M270 160V145H280V132H290V118H300V103H310V88H320V72H330V57H340V42H350V57H360V72H370V88H380V103H390V160Z" fill="none"/>
+    <path d="M293 118H397L389 111H301Z"/>
+    <path d="M287 103H393L384 96H296Z"/>
+    <path d="M281 88H387L378 81H290Z"/>
+    <path d="M294 78H374L367 71H301Z"/>
+    <path d="M304 63H364L358 57H310Z"/>
+    <path d="M330 42L340 31L350 42Z"/>
+    <path d="M303 118V160M324 103V160M346 88V160M368 103V160M389 118V160"/>
+    <path d="M310 126H318V139H310ZM332 111H340V124H332ZM354 96H362V109H354ZM376 111H384V124H376Z" fill="#C84B4B" fill-opacity="0.25"/>
+    <path d="M266 145C278 139 285 139 297 145M288 132C300 126 309 126 321 132M310 118C322 112 332 112 344 118" fill="none"/>
+  </g>
+  <g fill="none" stroke="#C84B4B" stroke-width="1" stroke-linecap="round" opacity="0.34">
+    <path d="M4 145C32 136 54 138 76 148C98 157 119 155 141 145C164 134 189 136 211 147C230 156 251 156 270 148"/>
+    <circle cx="61" cy="139" r="2.5" fill="#C84B4B" fill-opacity="0.35" stroke="none"/>
+    <circle cx="214" cy="145" r="2" fill="#C84B4B" fill-opacity="0.35" stroke="none"/>
+  </g>
+</svg>

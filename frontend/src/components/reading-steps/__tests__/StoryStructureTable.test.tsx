@@ -267,6 +267,37 @@ describe('StoryStructureTable', () => {
     expect(sectionCell?.style.writingMode).toBe('vertical-rl');
   });
 
+  it('文章重點表在窄螢幕保留最小寬度', async () => {
+    mockFetchSuccess({
+      layout: 'worksheet_table',
+      title: '文章重點表',
+      worksheet_rows: [
+        {
+          kind: 'section_block',
+          section: '主角',
+          items: [{ label: '問題1', value: '小明' }],
+        },
+      ],
+      rows: [
+        {
+          label: '主角',
+          value: '',
+          interactive_type: 'display',
+          sub_rows: [{ label: '問題1', value: '小明', interactive_type: 'display' }],
+        },
+      ],
+    });
+
+    const { container } = render(
+      <StoryStructureTable storyId="lesson-ipad" showCoach={false} />
+    );
+
+    await waitFor(() => expect(screen.getByText('主角')).toBeTruthy());
+    const tableEl = container.querySelector('table');
+    expect(tableEl).toBeTruthy();
+    expect(tableEl?.className).toContain('min-w-[28rem]');
+  });
+
   it('re-fetches when storyId prop changes', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,

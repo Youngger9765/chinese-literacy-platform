@@ -38,6 +38,51 @@ def test_first_sso_login_promotes_synthetic_email_to_real_one(db):
     assert is_new is False
 
 
+class TestPromotionResetsEmailVerified:
+    """find_01V63cq32bEPy1KsaqoRTp8v (high, CWE-345): the promoted email is
+    Junyi's CLAIM, not proof of ownership (same root cause as #3891/#3892's
+    finding). Leaving email_verified=True on the row after promotion let a
+    later Google sign-in for that same address trust it and link onto the
+    row — full account takeover, attacker keeps access via Junyi SSO.
+    """
+
+    def test_promotion_resets_email_verified_to_false(self, db):
+        original = _user(db, "junyi-abc123@student.lingoleap.local", "jid-promo-1")
+        assert original.email_verified is True  # the import's starting state
+
+        user, _ = resolve_junyi_user(db, _payload())
+
+        assert user.id == original.id
+        assert user.email == "real@example-junyi.invalid"
+        assert user.email_verified is False, (
+            "a promoted-but-unproven email must not keep the row's prior "
+            "email_verified=True — that flag was true for a different "
+            "reason (synthetic-placeholder import), not for this address"
+        )
+
+    def test_a_later_google_login_for_the_promoted_email_does_not_silently_link(self, db):
+        """The actual attack this closes: resolve_google_user's link gate
+        checks the EXISTING row's email_verified before linking onto it.
+        After promotion resets that flag, a real victim's later Google
+        sign-in for the same address must be refused (409), not silently
+        linked onto the attacker-controlled row."""
+        from app.services.sso_login_service import resolve_google_user
+        from fastapi import HTTPException
+
+        _user(db, "junyi-abc123@student.lingoleap.local", "jid-promo-1")
+        resolve_junyi_user(db, _payload())  # attacker promotes the email
+
+        victim_id_info = {
+            "sub": "google-sub-victim",
+            "email": "real@example-junyi.invalid",
+            "email_verified": True,  # Google itself verified it -- the LOCAL row is what's in question
+            "name": "真正的本人",
+        }
+        with pytest.raises(HTTPException) as exc_info:
+            resolve_google_user(db, victim_id_info)
+        assert exc_info.value.status_code == 409
+
+
 def test_promotion_skipped_if_real_email_already_taken_by_someone_else(db):
     original = _user(db, "junyi-abc123@student.lingoleap.local", "jid-promo-1")
     other = _user(db, "real@example-junyi.invalid", None)

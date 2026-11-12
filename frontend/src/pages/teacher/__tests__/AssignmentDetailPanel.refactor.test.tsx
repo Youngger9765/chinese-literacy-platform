@@ -68,6 +68,10 @@ function makeSubmission(overrides: Partial<SubmissionResponse> = {}): Submission
     reading_error_chars: [],
     teacher_feedback: null,
     session_id: null,
+    required_step_count: 0,
+    completed_step_count: 0,
+    missing_step_ids: [],
+    marked_complete_by_teacher: false,
     ...overrides,
   };
 }
@@ -84,6 +88,10 @@ function makeAttempt(overrides: Partial<AttemptResponse> = {}): AttemptResponse 
     reading_error_chars: [],
     teacher_feedback: null,
     session_id: null,
+    required_step_count: 0,
+    completed_step_count: 0,
+    missing_step_ids: [],
+    marked_complete_by_teacher: false,
     ...overrides,
   };
 }

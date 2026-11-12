@@ -3,9 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Content-Security-Policy: browser-level fallback.
-         The primary CSP is set by SecurityHeadersMiddleware in backend/app/main.py.
-         This meta tag covers direct frontend hosting (Firebase Hosting / CDN). -->
+    <!-- Content-Security-Policy: this <meta> tag is the ONLY place script-src /
+         style-src / connect-src / frame-src etc. are enforced for the actual
+         frontend PAGE response (index.html and every SPA route it serves).
+         backend/app/main.py's SecurityHeadersMiddleware does NOT cover this —
+         that middleware only ever runs on responses FROM the backend FastAPI
+         app itself (/api/*, /assets/* when proxied there, /q/*). It never sees
+         this page's response, on EITHER hosting path (Firebase Hosting's
+         prod/staging/dev, or this repo's own nginx in the Cloud Run frontend
+         image) — confirmed by curl against both coming back with none of its
+         headers (#3850). Fixed a stale version of this comment that claimed
+         otherwise. -->
     <!-- #2486: frame-src no longer needs storage.googleapis.com — the worksheet
          PDF iframe now loads through our own /assets/* proxy. That proxy is
          same-origin on the Firebase Hosting build, but on the Cloud-Run-direct
@@ -17,10 +25,21 @@
     <!-- Note: frame-ancestors is intentionally omitted from this meta tag.
          Per CSP spec, frame-ancestors is a navigation directive and is ignored
          when delivered via <meta> elements (causes browser console warnings).
-         Anti-clickjacking is enforced via HTTP headers in SecurityHeadersMiddleware:
-           Content-Security-Policy: frame-ancestors 'none'
-           X-Frame-Options: DENY
-         See: https://www.w3.org/TR/CSP3/#frame-ancestors-and-frame-options -->
+         See: https://www.w3.org/TR/CSP3/#frame-ancestors-and-frame-options
+         Anti-clickjacking for THIS page is instead enforced via real HTTP
+         response headers, set directly on the two paths that actually serve
+         this page — firebase.json's `headers` config (Firebase Hosting) and
+         frontend/docker/render-nginx-conf.sh (the Cloud Run frontend's own
+         nginx) — NOT by backend/app/main.py's SecurityHeadersMiddleware (see
+         the comment above this one). Those two headers are:
+           X-Frame-Options: SAMEORIGIN
+           Content-Security-Policy: frame-ancestors 'self'
+         SAMEORIGIN / 'self', not DENY / 'none': this app's own admin QA
+         tooling (StoryStructureLabPage.tsx, spotlight-qa/app.js,
+         keypoints-qa/app.js) embeds this app's own /learn/* pages in a
+         same-origin iframe for live preview — DENY/'none' block ALL framing,
+         same-origin included, and would break that. Locked by
+         frontend/docker/test-security-headers.sh (#3850). -->
     <title>AI 朗讀助教 — 國語文閱讀學習平台</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=cwTeXYen&family=cwTeXKai&family=Noto+Serif+TC:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">

@@ -3,16 +3,25 @@ import logging
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy import or_
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
 from ...auth.dependencies import get_current_user
 from ...database import get_db
 from ...models.school import Classroom, ClassroomStudent, ClassroomTeacher, School
 from ...services.email_domains import is_public_email_domain
-from ...auth.policies import is_system_admin
+from ...auth.policies import is_system_admin, require_classroom_member
 from ...models.user import Role, User, UserRole
 from ...schemas.classroom import (
+    ClassroomBatchRemoveRequest,
+    ClassroomBatchRemoveResponse,
     ClassroomStudentAddRequest,
+    ClassroomStudentMoveRequest,
+    ClassroomStudentMoveResponse,
+    ClassroomStudentRenameRequest,
+    ClassroomStudentSeatRequest,
+    ClassroomStudentSeatsBatchRequest,
+    ClassroomStudentSeatsBatchResponse,
     StudentInClassroomResponse,
     StudentSearchRequest,
     StudentSearchResult,
@@ -21,8 +30,10 @@ from ...services.audit_logger import AuditAction, audit_log_endpoint
 from .helpers import (
     create_submissions_for_new_student,
     get_classroom_or_404,
+    require_editor_or_admin,
     require_member_or_admin,
     require_owner_or_admin,
+    require_renameable_student_target,
 )
 
 router = APIRouter(tags=["classrooms"])
@@ -69,7 +80,17 @@ def _eligible_student_ids(classroom, teacher_id: int, db: Session):
     if school is not None and (is_self_activated or is_public_email_domain(school.domain)):
         my_classrooms = (
             db.query(Classroom.id).filter(Classroom.teacher_id == teacher_id)
-            .union(db.query(ClassroomTeacher.classroom_id).filter(ClassroomTeacher.teacher_id == teacher_id))
+            .union(
+                db.query(ClassroomTeacher.classroom_id).filter(
+                    ClassroomTeacher.teacher_id == teacher_id,
+                    # #3820: a still-pending co-teaching invite must not widen
+                    # this teacher's "classrooms I already teach" set -- that
+                    # would let a merely-invited (not yet accepted) teacher
+                    # pull another classroom's students into their own
+                    # search/add-student flow before they've accepted anything.
+                    ClassroomTeacher.status == "accepted",
+                )
+            )
         )
         taught = db.query(ClassroomStudent.student_id).filter(ClassroomStudent.classroom_id.in_(my_classrooms))
         q = q.filter(or_(UserRole.granted_by == teacher_id, UserRole.user_id.in_(taught)))
@@ -98,9 +119,12 @@ def add_student_to_classroom(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Add a student to a classroom by user ID. Only the classroom's teacher can do this."""
+    """Add a student to a classroom by user ID.
+
+    Owner, accepted 'editor'-role co-teacher, or system_admin (#3820).
+    """
     classroom = get_classroom_or_404(classroom_id, db)
-    require_owner_or_admin(classroom, current_user, db)
+    require_editor_or_admin(classroom, current_user, db)
 
     student = db.query(User).filter(User.id == payload.student_id).first()
     # Only a student of this classroom's school (#3534). Without this, any user id —
@@ -160,9 +184,12 @@ def remove_student_from_classroom(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Remove a student from a classroom. Only the classroom's teacher can do this."""
+    """Remove a student from a classroom.
+
+    Owner, accepted 'editor'-role co-teacher, or system_admin (#3820).
+    """
     classroom = get_classroom_or_404(classroom_id, db)
-    require_owner_or_admin(classroom, current_user, db)
+    require_editor_or_admin(classroom, current_user, db)
 
     cs = (
         db.query(ClassroomStudent)
@@ -185,6 +212,441 @@ def remove_student_from_classroom(
     db.commit()
     logger.info("Removed student %d from classroom %d", student_id, classroom_id)
     return None
+
+
+def _get_enrollment_or_404(classroom_id: int, student_id: int, db: Session) -> ClassroomStudent:
+    cs = (
+        db.query(ClassroomStudent)
+        .filter(
+            ClassroomStudent.classroom_id == classroom_id,
+            ClassroomStudent.student_id == student_id,
+        )
+        .first()
+    )
+    if cs is None:
+        raise HTTPException(status_code=404, detail="Student not in classroom")
+    return cs
+
+
+@router.patch(
+    "/classrooms/{classroom_id}/students/{student_id}/name",
+    response_model=StudentInClassroomResponse,
+)
+def rename_student(
+    classroom_id: int,
+    student_id: int,
+    payload: ClassroomStudentRenameRequest,
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Teacher-edit a student's display name (#3826).
+
+    Updates ``User.name`` -- the same field shown everywhere on the
+    platform (there is no separate per-classroom nickname) -- NOT the
+    login username/email, so the account the family was given on the
+    credential card keeps working.
+
+    (2026-11-02 security review) Classroom membership alone is NOT
+    sufficient authority here: ``User.name`` is visible platform-wide, to
+    every other teacher who also teaches this same student -- not scoped
+    to this classroom like a seat number or enrollment. So this calls the
+    SAME stricter gate as password-reset (#3818):
+    require_renameable_student_target, which additionally requires the
+    caller be the account's recorded creator (created_by_teacher_id) and
+    the target be a verified student of this classroom's school. A
+    classroom owner/co-teacher who merely also teaches a self-registered
+    student (created_by_teacher_id is NULL) gets 403, same as they would
+    trying to reset that student's password.
+    """
+    classroom = get_classroom_or_404(classroom_id, db)
+    # Visibility gate only (matches reset_student_password's structure) --
+    # require_renameable_student_target below is the real authority check.
+    require_classroom_member(classroom, current_user, db)
+
+    cs = _get_enrollment_or_404(classroom_id, student_id, db)
+    user = require_renameable_student_target(classroom, student_id, current_user, db)
+
+    user.name = payload.name
+    db.commit()
+    # Audit only after a successful commit -- a 403 from the gate above (or
+    # any future failure between mutation and commit) must never log
+    # "renamed" for something that didn't actually happen.
+    audit_log_endpoint(
+        request=request,
+        action=AuditAction.RENAME_STUDENT,
+        user_id=current_user.id,
+        target_student_id=student_id,
+    )
+    db.refresh(cs)
+    db.refresh(user)
+    logger.info("Renamed student %d in classroom %d", student_id, classroom_id)
+    return StudentInClassroomResponse(
+        id=user.id,
+        name=user.name,
+        email=user.email,
+        enrolled_at=cs.enrolled_at,
+        seat_number=cs.seat_number,
+    )
+
+
+@router.patch(
+    "/classrooms/{classroom_id}/students/{student_id}/seat",
+    response_model=StudentInClassroomResponse,
+)
+def set_student_seat_number(
+    classroom_id: int,
+    student_id: int,
+    payload: ClassroomStudentSeatRequest,
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Teacher-edit a student's seat number within THIS classroom (#3826).
+
+    Scoped to the enrollment row (ClassroomStudent), not the student
+    account, so a seat number never carries over when a student moves
+    classrooms (#3819) or is re-enrolled after a batch-remove (#3821).
+    ``seat_number: null`` clears it -- the roster then falls back to
+    displaying the row's array index, same as every pre-#3826 row.
+    """
+    classroom = get_classroom_or_404(classroom_id, db)
+    require_owner_or_admin(classroom, current_user, db)
+
+    cs = _get_enrollment_or_404(classroom_id, student_id, db)
+
+    if payload.seat_number is not None:
+        conflict = (
+            db.query(ClassroomStudent)
+            .filter(
+                ClassroomStudent.classroom_id == classroom_id,
+                ClassroomStudent.seat_number == payload.seat_number,
+                ClassroomStudent.id != cs.id,
+            )
+            .first()
+        )
+        if conflict is not None:
+            raise HTTPException(
+                status_code=409,
+                detail=f"座號 {payload.seat_number} 在這個班級已經有人使用",
+            )
+
+    cs.seat_number = payload.seat_number
+    try:
+        db.commit()
+    except IntegrityError:
+        # Belt-and-suspenders against the rare race between the SELECT-based
+        # conflict check above and this commit (two concurrent requests
+        # both picking the same free seat_number): the app-level check is
+        # the normal path, the DB's UniqueConstraint is the actual source of
+        # truth and raises here instead of silently corrupting data -- turn
+        # it into the same 409 a non-racing duplicate request would get,
+        # not an unhandled 500. Audit is NOT written -- it's only logged
+        # after a commit that actually succeeded, below.
+        db.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail=f"座號 {payload.seat_number} 在這個班級已經有人使用",
+        )
+    # Audit only after a successful commit -- the 409 raised above (whether
+    # from the pre-check or this race-condition backstop) must never log
+    # "set seat number" for a change that was rolled back / never applied.
+    audit_log_endpoint(
+        request=request,
+        action=AuditAction.SET_SEAT_NUMBER,
+        user_id=current_user.id,
+        target_student_id=student_id,
+    )
+    db.refresh(cs)
+    logger.info(
+        "Set seat_number=%s for student %d in classroom %d",
+        payload.seat_number, student_id, classroom_id,
+    )
+    return StudentInClassroomResponse(
+        id=cs.student.id,
+        name=cs.student.name,
+        email=cs.student.email,
+        enrolled_at=cs.enrolled_at,
+        seat_number=cs.seat_number,
+    )
+
+
+@router.patch(
+    "/classrooms/{classroom_id}/students/seats",
+    response_model=ClassroomStudentSeatsBatchResponse,
+)
+def set_student_seat_numbers_batch(
+    classroom_id: int,
+    payload: ClassroomStudentSeatsBatchRequest,
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Batch-assign seat numbers for the Junyi-parity "新增座號" dialog (#3992).
+
+    Doing this as N sequential single-row PATCH calls
+    (set_student_seat_number above, #3826) is unsafe whenever the new
+    arrangement swaps or rotates seats that are already taken: applying
+    them one HTTP call at a time can transiently collide with
+    ``uq_classroom_students_seat`` even though the FINAL state has no
+    duplicates at all (the classic "swap two values under a uniqueness
+    constraint" problem). This endpoint clears every row named in the
+    payload first, then applies the new numbers, all inside ONE
+    transaction -- so a 409 can only ever come from a genuine conflict
+    with a student who is NOT part of this batch (and therefore keeps
+    whatever seat they already hold).
+    """
+    classroom = get_classroom_or_404(classroom_id, db)
+    require_owner_or_admin(classroom, current_user, db)
+
+    # Payload-internal duplicates are a client bug, not a DB conflict --
+    # 422, not 409 (409 is reserved for "conflicts with something already
+    # committed"). Checked before touching the DB at all.
+    seat_numbers = [a.seat_number for a in payload.assignments if a.seat_number is not None]
+    if len(seat_numbers) != len(set(seat_numbers)):
+        raise HTTPException(status_code=422, detail="同一次要求裡有重複的座號")
+    student_ids = [a.student_id for a in payload.assignments]
+    if len(student_ids) != len(set(student_ids)):
+        raise HTTPException(status_code=422, detail="同一次要求裡有重複的學生")
+
+    enrollments = (
+        db.query(ClassroomStudent)
+        .filter(
+            ClassroomStudent.classroom_id == classroom_id,
+            ClassroomStudent.student_id.in_(student_ids),
+        )
+        .all()
+    )
+    by_student_id = {cs.student_id: cs for cs in enrollments}
+    missing = [sid for sid in student_ids if sid not in by_student_id]
+    if missing:
+        raise HTTPException(status_code=404, detail=f"學生 {missing} 不在這個班級")
+
+    # Clear every affected row FIRST (flush, not commit) so the unique
+    # constraint can only ever fire against a student OUTSIDE this batch --
+    # never against another row in the same request that hasn't been
+    # written yet. `db.flush()` (not relying on session autoflush) makes
+    # the clear visible to the conflict SELECTs below regardless of the
+    # session's autoflush setting.
+    for cs in enrollments:
+        cs.seat_number = None
+    db.flush()
+
+    conflicts: list[int] = []
+    for assignment in payload.assignments:
+        cs = by_student_id[assignment.student_id]
+        if assignment.seat_number is not None:
+            conflict = (
+                db.query(ClassroomStudent)
+                .filter(
+                    ClassroomStudent.classroom_id == classroom_id,
+                    ClassroomStudent.seat_number == assignment.seat_number,
+                    ClassroomStudent.id != cs.id,
+                )
+                .first()
+            )
+            if conflict is not None:
+                conflicts.append(assignment.seat_number)
+                continue
+        cs.seat_number = assignment.seat_number
+
+    if conflicts:
+        db.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail=f"座號 {conflicts} 在這個班級已經有人使用",
+        )
+
+    try:
+        db.commit()
+    except IntegrityError:
+        # Belt-and-suspenders against a concurrent request racing the same
+        # seat numbers -- same reasoning as the single-row endpoint above.
+        db.rollback()
+        raise HTTPException(status_code=409, detail="座號設定衝突，請重新整理後再試一次")
+
+    # Audit only after a successful commit, and once for the whole batch --
+    # a 404/422/409 above must never log a change that didn't actually
+    # happen. No single target_student_id applies to a batch (mirrors
+    # list_classroom_students's target_student_id=None above).
+    audit_log_endpoint(
+        request=request,
+        action=AuditAction.SET_SEAT_NUMBER,
+        user_id=current_user.id,
+        target_student_id=None,
+    )
+    for cs in enrollments:
+        db.refresh(cs)
+    logger.info(
+        "Batch-set seat numbers for %d students in classroom %d",
+        len(enrollments), classroom_id,
+    )
+    return ClassroomStudentSeatsBatchResponse(
+        updated=[
+            StudentInClassroomResponse(
+                id=cs.student.id,
+                name=cs.student.name,
+                email=cs.student.email,
+                enrolled_at=cs.enrolled_at,
+                seat_number=cs.seat_number,
+            )
+            for cs in enrollments
+        ]
+    )
+
+
+@router.post(
+    "/classrooms/{from_classroom_id}/students/{student_id}/move",
+    response_model=ClassroomStudentMoveResponse,
+)
+def move_student_between_classrooms(
+    from_classroom_id: int,
+    student_id: int,
+    payload: ClassroomStudentMoveRequest,
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Move a student from one of the teacher's classrooms to another (#3819).
+
+    One operation = remove-from-source + add-to-destination, done in a single
+    transaction, so the student is never visibly "deleted" mid-flight. Learning
+    history (AssignmentSubmission, LearningSession, ...) is untouched — it hangs
+    off student_id/assignment_id, not classroom enrollment.
+    """
+    from_classroom = get_classroom_or_404(from_classroom_id, db)
+    require_owner_or_admin(from_classroom, current_user, db)
+
+    to_classroom = get_classroom_or_404(payload.to_classroom_id, db)
+    require_owner_or_admin(to_classroom, current_user, db)
+
+    # Restricting to the same school keeps this endpoint from entangling with
+    # the eligible-student-by-school checks the add-student endpoint enforces —
+    # a cross-school move would need to re-run that eligibility logic, which is
+    # out of scope here (#3819 PRD explicitly excludes cross-school moves).
+    if to_classroom.school_id != from_classroom.school_id:
+        raise HTTPException(
+            status_code=400,
+            detail="不支援跨校換班，目的班級必須和原班級同一所學校",
+        )
+
+    source_enrollment = (
+        db.query(ClassroomStudent)
+        .filter(
+            ClassroomStudent.classroom_id == from_classroom_id,
+            ClassroomStudent.student_id == student_id,
+        )
+        .first()
+    )
+    if source_enrollment is None:
+        raise HTTPException(status_code=404, detail="Student not in source classroom")
+
+    existing_in_destination = (
+        db.query(ClassroomStudent)
+        .filter(
+            ClassroomStudent.classroom_id == payload.to_classroom_id,
+            ClassroomStudent.student_id == student_id,
+        )
+        .first()
+    )
+    if existing_in_destination is not None:
+        raise HTTPException(status_code=409, detail="Student already in destination classroom")
+
+    db.delete(source_enrollment)
+    db.flush()
+
+    new_enrollment = ClassroomStudent(
+        classroom_id=payload.to_classroom_id,
+        student_id=student_id,
+    )
+    db.add(new_enrollment)
+    db.flush()
+
+    # Back-fill submissions for the destination's active whole-class assignments,
+    # same as any other new enrollment (#996).
+    create_submissions_for_new_student(payload.to_classroom_id, student_id, db)
+
+    audit_log_endpoint(
+        request=request,
+        action=AuditAction.MOVE_STUDENT,
+        user_id=current_user.id,
+        target_student_id=student_id,
+    )
+
+    db.commit()
+    db.refresh(new_enrollment)
+    logger.info(
+        "Moved student %d from classroom %d to classroom %d",
+        student_id, from_classroom_id, payload.to_classroom_id,
+    )
+    return ClassroomStudentMoveResponse(
+        student_id=student_id,
+        from_classroom_id=from_classroom_id,
+        to_classroom_id=payload.to_classroom_id,
+        enrolled_at=new_enrollment.enrolled_at,
+    )
+
+
+@router.post(
+    "/classrooms/{classroom_id}/students/batch-remove",
+    response_model=ClassroomBatchRemoveResponse,
+)
+def batch_remove_students_from_classroom(
+    classroom_id: int,
+    payload: ClassroomBatchRemoveRequest,
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Remove several students from a classroom in one call (#3821).
+
+    Only unenrolls them from THIS classroom -- the account, their other
+    classroom memberships, and their learning history are all untouched.
+    Unknown/not-enrolled ids are reported back in not_found_ids instead of
+    failing the whole batch, so one stale checkbox selection can't block
+    removing the rest.
+    """
+    classroom = get_classroom_or_404(classroom_id, db)
+    require_owner_or_admin(classroom, current_user, db)
+
+    # De-dupe while preserving a stable order for the not_found_ids report.
+    seen: set[int] = set()
+    student_ids: list[int] = []
+    for sid in payload.student_ids:
+        if sid not in seen:
+            seen.add(sid)
+            student_ids.append(sid)
+
+    enrolled = (
+        db.query(ClassroomStudent)
+        .filter(
+            ClassroomStudent.classroom_id == classroom_id,
+            ClassroomStudent.student_id.in_(student_ids),
+        )
+        .all()
+    )
+    found_student_ids = {cs.student_id for cs in enrolled}
+    not_found_ids = [sid for sid in student_ids if sid not in found_student_ids]
+
+    for cs in enrolled:
+        db.delete(cs)
+
+    audit_log_endpoint(
+        request=request,
+        action=AuditAction.BATCH_REMOVE_STUDENTS,
+        user_id=current_user.id,
+        target_student_id=None,
+    )
+
+    db.commit()
+    logger.info(
+        "Batch-removed %d students from classroom %d (%d not found)",
+        len(enrolled), classroom_id, len(not_found_ids),
+    )
+    return ClassroomBatchRemoveResponse(
+        removed_count=len(enrolled),
+        not_found_ids=not_found_ids,
+    )
 
 
 @router.get(
@@ -221,6 +683,7 @@ def list_classroom_students(
             name=cs.student.name,
             email=cs.student.email,
             enrolled_at=cs.enrolled_at,
+            seat_number=cs.seat_number,
         )
         for cs in enrollments
     ]
@@ -239,12 +702,14 @@ def search_students_for_classroom(
     """Search for users by name or email who are NOT already in this classroom.
 
     Returns up to 10 matching results. Used by the 'add existing student' UI.
-    Requires classroom owner or admin.
+    Owner, accepted 'editor'-role co-teacher, or system_admin (#3820) --
+    gated the same as actually adding the student, since this search exists
+    only to feed that action.
     """
     from sqlalchemy import or_
 
     classroom = get_classroom_or_404(classroom_id, db)
-    require_owner_or_admin(classroom, current_user, db)
+    require_editor_or_admin(classroom, current_user, db)
 
     enrolled_ids_select = (
         db.query(ClassroomStudent.student_id)

@@ -726,7 +726,7 @@ def test_co_teacher_who_is_not_creator_cannot_reset_password_403(client):
             ClassroomTeacher(
                 classroom_id=classroom_id,
                 teacher_id=co_teacher["user_id"],
-                role="assistant",
+                role="editor",  # #3820: editor has reset-password parity with the old assistant role
             )
         )
         db.commit()
@@ -756,7 +756,7 @@ def test_gate_matches_get_classroom_detail_semantics(client):
             ClassroomTeacher(
                 classroom_id=classroom_id,
                 teacher_id=co_teacher["user_id"],
-                role="assistant",
+                role="editor",  # #3820: editor has reset-password parity with the old assistant role
             )
         )
         db.commit()

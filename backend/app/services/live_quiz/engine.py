@@ -20,6 +20,7 @@ from fastapi import HTTPException
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from ...auth.policies import require_classroom_editor
 from ...models.live_quiz import (
     GAME_LIFETIME_HOURS,
     MAX_PLAYERS_PER_GAME,
@@ -27,20 +28,31 @@ from ...models.live_quiz import (
     LiveQuizGame,
     LiveQuizPlayer,
 )
-from ...models.school import Classroom, ClassroomStudent, ClassroomTeacher
+from ...models.school import Classroom, ClassroomStudent
 from ...models.user import User
 from ...services.lesson_uid_loader import available_uids, load_lesson
+from ..game_core.display_name import resolve_display_name
+from ..pk import classroom_features
+from . import reading_pace as reading_pace_presets
 from . import recompute
 from .codes import generate_live_quiz_code
 from .round_types import ROUND_TYPES
-from .round_types.choice import DEFAULT_READING_SECONDS
 
 DEFAULT_SOURCE_MODULES = ("comprehension", "vocab_definitions", "vocab_application", "zhuyin")
 VALID_QUESTION_COUNT_MODES = ("all", 10, 15, 20)
+# This bound applies ONLY to the explicit, manual `reading_seconds` override
+# (below) — the pace-based per-item computation has its own, separate bound
+# (`reading_pace.MAX_READING_SECONDS`, currently 20) baked into
+# `reading_pace.compute_reading_seconds` itself.
 MAX_READING_SECONDS = 30
 # Presence (UI/UX review #6): a player's last_seen_at within this window
 # counts as "online" in the host's roster view.
 ONLINE_WINDOW_SECONDS = 10
+# issue #3631 P0 #4: a player sees their own exact rank only in the top N;
+# 2026-10-15's PRD §13 "學生手機不顯示名次" is overridden by this for
+# per-question feedback (2026-10-18, Young) — see build_state's
+# `_player_rank_info` docstring.
+TOP_RANK_SHOWN_TO_PLAYER = 5
 
 
 def _now() -> datetime:
@@ -90,21 +102,27 @@ def _load_lessons(lesson_uids: list[str]) -> list[dict]:
     return lessons
 
 
+def _require_live_quiz_enabled(db: Session, classroom: Classroom) -> None:
+    """issue #3607: 課堂搶答 is OFF by default per classroom. Only applies
+    when a game IS targeted at a classroom — a classless (code/QR-only)
+    game has no classroom to gate against and is never blocked (PRD: "code-
+    based join for games not tied to a class keeps working")."""
+    if not classroom_features.get_classroom_feature(classroom, "live_quiz", db=db):
+        raise HTTPException(status_code=403, detail="老師還沒開放課堂搶答")
+
+
 def _require_classroom_owned_by(db: Session, classroom_id: int, teacher: User) -> Classroom:
+    """Owner, accepted 'editor'-role co-teacher, or system_admin (#3820).
+
+    Previously any co-teacher regardless of role/acceptance status passed
+    this check; starting/managing a live-quiz session is a write operation,
+    so a 'viewer'-role (or still-pending) co-teacher must be denied, same as
+    every other classroom write gate.
+    """
     classroom = db.query(Classroom).filter(Classroom.id == classroom_id).first()
     if classroom is None:
         raise HTTPException(status_code=404, detail="Classroom not found")
-    if classroom.teacher_id != teacher.id:
-        is_co_teacher = (
-            db.query(ClassroomTeacher)
-            .filter(
-                ClassroomTeacher.classroom_id == classroom_id,
-                ClassroomTeacher.teacher_id == teacher.id,
-            )
-            .first()
-        )
-        if is_co_teacher is None:
-            raise HTTPException(status_code=403, detail="Not your classroom")
+    require_classroom_editor(classroom, teacher, db)
     return classroom
 
 
@@ -121,7 +139,13 @@ def create_game(
     round_type: str = "choice",
     question_count_mode="all",
     seconds: int = 30,
-    reading_seconds: int = DEFAULT_READING_SECONDS,
+    # issue #3631 P0 #1: these two are mutually exclusive. `reading_seconds`
+    # (manual override, kept for backward compat / PK-style internal callers)
+    # takes precedence when given; otherwise `reading_pace` selects a
+    # 慢/標準/快 preset and each round's reading_seconds is computed from
+    # ITS OWN stem length (see round_types/choice.generate_rounds).
+    reading_seconds: int | None = None,
+    reading_pace: str = reading_pace_presets.DEFAULT_PACE,
     classroom_id: int | None = None,
     shuffle: bool = False,
     show_leaderboard_after_each: bool = True,
@@ -140,11 +164,18 @@ def create_game(
         str(m) for m in VALID_QUESTION_COUNT_MODES
     }:
         raise HTTPException(status_code=400, detail=f"Invalid question_count_mode: {question_count_mode}")
-    if not (0 <= reading_seconds <= MAX_READING_SECONDS):
-        raise HTTPException(status_code=400, detail=f"reading_seconds must be 0-{MAX_READING_SECONDS}")
+    if reading_seconds is not None:
+        if not (0 <= reading_seconds <= MAX_READING_SECONDS):
+            raise HTTPException(status_code=400, detail=f"reading_seconds must be 0-{MAX_READING_SECONDS}")
+    elif reading_pace not in reading_pace_presets.VALID_PACES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"reading_pace must be one of {reading_pace_presets.VALID_PACES}",
+        )
 
     if classroom_id is not None:
-        _require_classroom_owned_by(db, classroom_id, host)
+        classroom = _require_classroom_owned_by(db, classroom_id, host)
+        _require_live_quiz_enabled(db, classroom)
 
     lessons = _load_lessons(lesson_uids)
 
@@ -153,7 +184,6 @@ def create_game(
 
     settings = {
         "seconds": int(seconds),
-        "reading_seconds": int(reading_seconds),
         "question_count_mode": question_count_mode if question_count_mode == "all" else int(question_count_mode),
         "shuffle": bool(shuffle),
         "show_leaderboard_after_each": bool(show_leaderboard_after_each),
@@ -172,6 +202,14 @@ def create_game(
         "lesson_uids": list(lesson_uids),
         "round_type": round_type,
     }
+    # issue #3631 P0 #1: mutually exclusive — explicit override wins when
+    # given (0 seconds disables the reading phase entirely for every round);
+    # otherwise the chosen pace preset drives round_types/choice's per-item
+    # computation. Exactly one of the two keys is ever present.
+    if reading_seconds is not None:
+        settings["reading_seconds"] = int(reading_seconds)
+    else:
+        settings["reading_pace"] = reading_pace
 
     round_module = ROUND_TYPES[round_type]
     rounds, question_count_fallback = round_module.generate_rounds(lessons, settings, rng)
@@ -313,12 +351,31 @@ def join_game(db: Session, code: str, user: User) -> LiveQuizPlayer:
 
     existing = get_player_for_user(db, game, user)
     if existing is not None:
+        # Already a player (e.g. the join call is re-sent / retried) —
+        # idempotent return, same as before issue #3607. A teacher
+        # disabling live_quiz mid-game must not retroactively evict
+        # someone already admitted; the gate below only applies to
+        # genuinely NEW joins.
         return existing
 
-    # issue #3708: a game tied to a classroom only admits students enrolled
-    # in that classroom; any authenticated student who learned the 6-digit
-    # code could join before. Classless code/QR games stay open.
+    # issue #3607: a classless game (classroom_id is None) is pure code/QR
+    # join and is never gated. A class-tied game is re-checked HERE (not
+    # just at creation time) because the teacher may have turned
+    # live_quiz off for that classroom AFTER the game was created.
     if game.classroom_id is not None:
+        classroom = db.query(Classroom).filter(Classroom.id == game.classroom_id).first()
+        if classroom is not None:
+            _require_live_quiz_enabled(db, classroom)
+        # Enrollment is checked even when the classroom row is gone (main hotfix
+        # #3708): a missing classroom must not turn a class-tied game into an open one.
+        # issue #3708: the feature-enabled check above only asks "is
+        # 課堂搶答 turned on for this classroom" — it never asked "is
+        # THIS user actually a member of this classroom". Any
+        # authenticated student who learned/guessed the 6-digit code
+        # could join a class-tied game they were never enrolled in.
+        # Host/co-teacher rules are untouched — this only gates the
+        # student join path, and only for games tied to a classroom
+        # (classless code/QR games stay ungated per #3607 above).
         is_enrolled = (
             db.query(ClassroomStudent)
             .filter(
@@ -336,14 +393,19 @@ def join_game(db: Session, code: str, user: User) -> LiveQuizPlayer:
     if len(game.players) >= MAX_PLAYERS_PER_GAME:
         raise HTTPException(status_code=409, detail="This game is full")
 
-    # A nameless profile must never fall back to the student's email: the name
-    # is projected to the whole class (leaderboard, podium). Use a non-PII
-    # placeholder by join order instead, same as staging (#3630).
-    anonymous_display_name = f"學生{len(game.players) + 1}"
+    # #3630 security review: a player with no profile `name` previously fell
+    # back to `user.email` as the displayed name, which is then shown on the
+    # leaderboard and the (projected, product-launch) podium — leaking a
+    # student's email address to the whole class/room. Fall back to a
+    # non-PII placeholder instead (issue #3663 round 3 #3672: shared
+    # `game_core.display_name` helper, same "學生N" policy team_arena and
+    # now pk use): "學生" + this join's 1-indexed position in the game
+    # (computed from the already-loaded `game.players` list above, before
+    # this player is added), e.g. "學生1", "學生2". Never user.email.
     player = LiveQuizPlayer(
         game_id=game.id,
         user_id=user.id,
-        display_name=user.name or anonymous_display_name,
+        display_name=resolve_display_name(user.name, len(game.players) + 1),
         joined_at_round_index=game.current_round_index,
     )
     db.add(player)
@@ -531,6 +593,59 @@ def _compute_leaderboard(game: LiveQuizGame, limit: int | None = None) -> list[d
         for i, p in enumerate(ranked)
     ]
     return entries[:limit] if limit else entries
+
+
+def _rank_with_scores(game: LiveQuizGame, score_for: dict[int, int]) -> dict[int, int]:
+    """player_id -> 1-based rank, given an arbitrary score per player.
+
+    Same tie-break as `_compute_leaderboard` (score desc, joined_at asc, id
+    asc) so "a player's rank" means the same thing everywhere in this
+    module, whether computed from `total_score` (the real leaderboard) or
+    from the synthetic "score excluding this round" `_player_rank_info`
+    below builds.
+    """
+    ranked = sorted(
+        game.players,
+        key=lambda p: (-score_for.get(p.id, p.total_score), p.joined_at, p.id),
+    )
+    return {p.id: i + 1 for i, p in enumerate(ranked)}
+
+
+def _player_rank_info(db: Session, game: LiveQuizGame, player: LiveQuizPlayer, idx: int) -> dict:
+    """issue #3631 P0 #4 (2026-10-18, Young — overrides PRD §13's "players
+    never see rank/score"): "前五名顯示自己名次；第六名以後顯示「這題前進／
+    後退了幾名」，不顯示「第 N 名」".
+
+    "Before this round" is derived, not stored: `total_score` already is
+    the cumulative sum of every round's points including this one, so
+    subtracting THIS round's own points back out recovers each player's
+    standing as it was immediately before this round started — no separate
+    per-round rank history column needed (and none was added; this stays
+    entirely inside `settings`/existing tables, no migration).
+
+    This never returns the full ranked list — only this ONE player's own
+    number (`rank`) or signed delta (`rank_delta`) — so it cannot leak
+    anyone else's name or score; the full `leaderboard` array stays
+    host-only exactly as before (see `build_state`'s `leaderboard` gate,
+    unrelated to this and unchanged by it).
+    """
+    points_this_round = dict(
+        db.query(LiveQuizAnswer.player_id, LiveQuizAnswer.points)
+        .filter(LiveQuizAnswer.game_id == game.id, LiveQuizAnswer.round_index == idx)
+        .all()
+    )
+    scores_after = {p.id: p.total_score for p in game.players}
+    scores_before = {
+        p.id: p.total_score - points_this_round.get(p.id, 0) for p in game.players
+    }
+    rank_after = _rank_with_scores(game, scores_after)[player.id]
+    if rank_after <= TOP_RANK_SHOWN_TO_PLAYER:
+        return {"rank": rank_after}
+    rank_before = _rank_with_scores(game, scores_before)[player.id]
+    # Positive = moved toward rank 1 ("前進"); negative = moved away
+    # ("後退"); 0 = unchanged (e.g. round 0, where every player's
+    # "before" score is 0 and the tie-break alone decided the baseline).
+    return {"rank_delta": rank_before - rank_after}
 
 
 # ---------------------------------------------------------------------------
@@ -769,6 +884,7 @@ def build_state(db: Session, game: LiveQuizGame, user: User, after_version: int 
     round_view = None
     answered_count = None
     correct_count = None
+    option_counts = None
     if 0 <= idx < rounds_total:
         round_def = game.rounds_snapshot[idx]
         payload = round_def["payload"]
@@ -783,6 +899,14 @@ def build_state(db: Session, game: LiveQuizGame, user: User, after_version: int 
             )
             answered_count = len(round_answers)
             correct_count = sum(1 for a in round_answers if a.is_correct)  # host-only, see below
+            if game.status == "reveal":
+                # PRD §4 step 4: how many players picked each option. Host-only and
+                # only after reveal — during the question it would hint the crowd.
+                option_counts = {o["key"]: 0 for o in payload.get("options", [])}
+                for a in round_answers:
+                    key = (a.submission or {}).get("choice_key")
+                    if key in option_counts:
+                        option_counts[key] += 1
 
     practice_mode = bool(game.settings.get("practice_mode"))
 
@@ -831,9 +955,13 @@ def build_state(db: Session, game: LiveQuizGame, user: User, after_version: int 
             # simply didn't answer in time); both cases share this None.
             your_player["last_answer_correct"] = my_answer.is_correct if my_answer else None
             if not practice_mode:
-                # Immediate per-question feedback, not a comparative ranking
-                # — §13 only forbids rank/total_score, not this.
+                # issue #3631 P0 #4: this round's own points + running total
+                # + (top 5 only) exact rank, else a signed "advanced/
+                # retreated N places" delta — see _player_rank_info.
+                # practice_mode hides all of this, same gate as before.
                 your_player["last_answer_points"] = my_answer.points if my_answer else 0
+                your_player["total_score"] = player.total_score
+                your_player.update(_player_rank_info(db, game, player, idx))
 
     state = {
         "code": game.code,
@@ -871,6 +999,8 @@ def build_state(db: Session, game: LiveQuizGame, user: User, after_version: int 
         # right before their own answer is revealed.
         if correct_count is not None:
             state["correct_count"] = correct_count
+        if option_counts is not None:
+            state["option_counts"] = option_counts
     if leaderboard is not None:
         state["leaderboard"] = leaderboard
     if your_player is not None:
@@ -891,11 +1021,26 @@ def find_open_invite_for_student(db: Session, user: User) -> dict | None:
     ]
     if not classroom_ids:
         return None
+
+    # issue #3607: "class-based join without code" is this discovery query
+    # itself — a classroom with live_quiz off must not surface a game here
+    # at all, which is what makes the student-home banner disappear (there
+    # is no separate banner-visibility flag; the banner simply renders
+    # nothing when this returns None). Explicit-value-wins + legacy-usage
+    # fallback both come from the shared accessor, same as everywhere else.
+    enabled_classroom_ids = [
+        c.id
+        for c in db.query(Classroom).filter(Classroom.id.in_(classroom_ids)).all()
+        if classroom_features.get_classroom_feature(c, "live_quiz", db=db)
+    ]
+    if not enabled_classroom_ids:
+        return None
+
     now = _now()
     game = (
         db.query(LiveQuizGame)
         .filter(
-            LiveQuizGame.classroom_id.in_(classroom_ids),
+            LiveQuizGame.classroom_id.in_(enabled_classroom_ids),
             # UI/UX review #3: late join works at any point before the game
             # ends, so the invite banner should keep inviting stragglers
             # through "question"/"reveal", not just "lobby".

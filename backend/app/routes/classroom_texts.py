@@ -15,7 +15,7 @@ from ..models.school import Classroom, ClassroomStudent, ClassroomText
 from ..models.user import User
 from ..services.lesson_loader import get_lesson_by_id
 from ..utils.slug import normalize_story_slug
-from .classrooms import _get_classroom_or_404, _require_owner_or_admin
+from .classrooms import _get_classroom_or_404, _require_editor_or_admin, _require_owner_or_admin
 
 router = APIRouter(tags=["classroom-texts"])
 logger = logging.getLogger(__name__)
@@ -56,9 +56,12 @@ def assign_text_to_classroom(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Assign a platform story (text) to a classroom."""
+    """Assign a platform story (text) to a classroom.
+
+    Owner, accepted 'editor'-role co-teacher, or system_admin (#3820).
+    """
     classroom = _get_classroom_or_404(classroom_id, db)
-    _require_owner_or_admin(classroom, current_user, db)
+    _require_editor_or_admin(classroom, current_user, db)
 
     # Require copyright confirmation
     if not payload.copyright_confirmed:
@@ -225,9 +228,12 @@ def unassign_text_from_classroom(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Remove a text assignment from a classroom."""
+    """Remove a text assignment from a classroom.
+
+    Owner, accepted 'editor'-role co-teacher, or system_admin (#3820).
+    """
     classroom = _get_classroom_or_404(classroom_id, db)
-    _require_owner_or_admin(classroom, current_user, db)
+    _require_editor_or_admin(classroom, current_user, db)
 
     ct = (
         db.query(ClassroomText)

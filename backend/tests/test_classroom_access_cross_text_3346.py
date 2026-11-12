@@ -135,8 +135,8 @@ def setup_db():
     r_sys = _role(db, "system_admin", "platform")
 
     db.add_all([
-        ClassroomTeacher(classroom_id=class_a.id, teacher_id=co_teacher.id, role="assistant"),
-        ClassroomTeacher(classroom_id=class_b.id, teacher_id=other_co_teacher.id, role="assistant"),
+        ClassroomTeacher(classroom_id=class_a.id, teacher_id=co_teacher.id, role="editor"),
+        ClassroomTeacher(classroom_id=class_b.id, teacher_id=other_co_teacher.id, role="editor"),
         ClassroomStudent(classroom_id=class_a.id, student_id=student.id),
         ClassroomStudent(classroom_id=class_b.id, student_id=other_student.id),
         UserRole(user_id=org_admin.id, role_id=r_org_admin.id, scope_type="organization", scope_id=org_a.id),

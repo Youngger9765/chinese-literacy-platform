@@ -24,10 +24,10 @@ jobs:
     outputs:
       relevant: ${{ steps.filter.outputs.relevant }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0          # paths-filter 要完整歷史才能算 diff
-      - uses: dorny/paths-filter@v4
+      - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
         id: filter
         with:
           filters: |
@@ -45,8 +45,17 @@ jobs:
               - 'frontend/src/hooks/useCurrentStepId.test.tsx'
               - 'frontend/src/hooks/useTtsPlayback.test.ts'
               - 'frontend/src/utils/textDiff.accentTolerance.test.ts'
+              - 'frontend/src/pages/pk/resolvePkGrade.ts'
+              - 'frontend/src/components/league/__tests__/fixtures/builtinStoryPacks.json'
               - 'frontend/src/App.tsx'
               - 'frontend/scripts/eval/tts-alignment.eval.ts'
+              # #3750：test_demo_seed_cleanup_3750 鎖住兩支 e2e 用固定 prefix 灌示範學生
+              - 'frontend/tests/e2e/demo-path.spec.ts'
+              - 'frontend/tests/e2e/full-qa.spec.ts'
+              # 要求/必做關卡清單的兩種算法必須一致 —— 這支是跑真前端程式碼的
+              # runner（test_required_steps_parity_3695.py），不是重寫，改它
+              # 等於直接改驗收答案。
+              - 'frontend/scripts/requiredAssignmentSteps.ts'
               # 產生器也要觸發 —— 只改它的 PR 若不跑鎖，「下次會再錯一次」的鎖就沒插電
               # 抽取器與普查也要觸發 —— 改它們的 PR 若不跑 gate，等於鎖建了沒插電
               - 'scripts/split_lesson_modules.py'
@@ -104,10 +113,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: '3.11'
           cache: 'pip'
@@ -119,6 +128,31 @@ jobs:
         run: |
           cd backend
           pip install --require-hashes -r requirements.lock
+
+      # test_required_steps_parity_3695.py calls the REAL frontend
+      # filterRequiredAssignmentSteps/resolveActiveSteps (stepConfig.ts) via
+      # an esbuild-bundled runner (frontend/scripts/requiredAssignmentSteps.ts),
+      # the same pattern spec-check.yml already uses for Gate 11's zhuyin
+      # oracle. That runner's bundle has zero external require (verified —
+      # only node:fs + a same-repo relative import), so a bare esbuild binary
+      # is enough; no `npm ci` in frontend/ needed.
+      #
+      # ⛔ Do not silently skip this in CI if esbuild is missing — the test
+      # itself fails loud (not skip) when CI is set and esbuild isn't found,
+      # same "CI 裡不准降級" rule as Gate 11 (see test_required_steps_parity_3695.py's
+      # esbuild_or_skip fixture). Removing this step reintroduces exactly the
+      # failure mode that rule exists to prevent.
+      - name: Set up Node (for the required-steps parity runner)
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '20'
+
+      - name: Install esbuild only (pinned to the lockfile)
+        run: |
+          VER=$(node -p "require('./frontend/package-lock.json').packages['node_modules/esbuild'].version")
+          echo "esbuild $VER（從 package-lock 讀，不寫死）"
+          npm install -g --no-audit --no-fund "esbuild@$VER"
+          esbuild --version
 
       - name: Install ffmpeg + poppler (transcode / silence gate / PDF fingerprint gate)
         # poppler-utils 給 ⑤ 的每頁文字指紋用（pdftotext / pdfinfo）。

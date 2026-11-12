@@ -35,7 +35,7 @@ from app.config import settings
 from app.database import get_db
 from app.main import app
 from app.models import Base
-from app.models.school import Classroom, School
+from app.models.school import Classroom, ClassroomStudent, School
 from app.models.session import LearningSession
 from app.models.user import Role, User, UserRole
 
@@ -229,9 +229,113 @@ class TestAdminSeed:
         assert _seeded_user_count() == 0
 
     def test_system_admin_can_seed(self, client, monkeypatch):
-        # positive control — runs last in this class (file order)
+        # positive control — runs last in this class (file order). Leaves
+        # classroom C["a"] with 2 enrolled @testdata.lingoleap.dev accounts,
+        # which TestAdminSeedCleanup below reuses as its fixture data.
         monkeypatch.setattr(settings, "enable_test_seed", True)
         r = _seed(client, "sysadmin", count=2)
         assert r.status_code == 200, r.text
         assert r.json()["students_created"] == 2
         assert _seeded_user_count() == 2
+
+
+# ---------------------------------------------------------------------------
+# DELETE /api/admin/seed/demo-students (#3750)
+#
+# Same gap the module docstring warns about for the POST route: before this
+# class, `dependencies=[require_role("system_admin")]` on the new DELETE
+# route (backend/app/routes/admin_seed.py) had zero HTTP-layer regression
+# protection — all 10 tests in test_demo_seed_cleanup_3750.py call
+# cleanup_demo_students() directly as a Python function, bypassing
+# FastAPI/auth entirely. Silently removing or widening the role dependency
+# on this route is strictly more dangerous than on POST: it deletes rows.
+# ---------------------------------------------------------------------------
+
+
+def _cleanup(client, as_key: str, classroom_id: int | None = None, dry_run: bool = True):
+    return client.delete(
+        "/api/admin/seed/demo-students",
+        headers=_auth(client, as_key),
+        params={
+            "classroom_id": C["a"] if classroom_id is None else classroom_id,
+            "dry_run": "true" if dry_run else "false",
+        },
+    )
+
+
+def _testdata_enrollment_count(classroom_id: int) -> int:
+    db = TestingSessionLocal()
+    try:
+        return (
+            db.query(ClassroomStudent)
+            .join(User, User.id == ClassroomStudent.student_id)
+            .filter(
+                ClassroomStudent.classroom_id == classroom_id,
+                User.email.like("%@testdata.lingoleap.dev"),
+            )
+            .count()
+        )
+    finally:
+        db.close()
+
+
+class TestAdminSeedCleanup:
+    """Runs after TestAdminSeed's positive control, which already enrolled 2
+    @testdata.lingoleap.dev accounts into classroom C["a"] — this class reuses
+    that as its fixture data, both for the denial checks' "assert nothing
+    changed" assertions and the final destructive positive control."""
+
+    @pytest.mark.parametrize("as_key", DENIED)
+    def test_non_system_admin_is_403_and_deletes_nothing(self, client, as_key, monkeypatch):
+        monkeypatch.setattr(settings, "enable_test_seed", True)
+        before = _testdata_enrollment_count(C["a"])
+        assert before > 0, "setup assumption: TestAdminSeed already enrolled testdata accounts"
+        r = _cleanup(client, as_key, dry_run=False)
+        assert r.status_code == 403, r.text
+        assert _testdata_enrollment_count(C["a"]) == before
+
+    def test_unauthenticated_is_401(self, client, monkeypatch):
+        monkeypatch.setattr(settings, "enable_test_seed", True)
+        before = _testdata_enrollment_count(C["a"])
+        r = client.delete(
+            "/api/admin/seed/demo-students",
+            params={"classroom_id": C["a"], "dry_run": "false"},
+        )
+        assert r.status_code == 401
+        assert _testdata_enrollment_count(C["a"]) == before
+
+    def test_system_admin_is_refused_when_flag_off(self, client, monkeypatch):
+        monkeypatch.setattr(settings, "enable_test_seed", False)
+        before = _testdata_enrollment_count(C["a"])
+        r = _cleanup(client, "sysadmin", dry_run=False)
+        assert r.status_code == 403, r.text
+        assert "ENABLE_TEST_SEED" in r.json()["detail"]
+        assert _testdata_enrollment_count(C["a"]) == before
+
+    def test_system_admin_unknown_classroom_is_404(self, client, monkeypatch):
+        monkeypatch.setattr(settings, "enable_test_seed", True)
+        r = _cleanup(client, "sysadmin", classroom_id=999999, dry_run=False)
+        assert r.status_code == 404
+
+    def test_system_admin_dry_run_previews_without_deleting(self, client, monkeypatch):
+        monkeypatch.setattr(settings, "enable_test_seed", True)
+        before = _testdata_enrollment_count(C["a"])
+        assert before > 0
+        r = _cleanup(client, "sysadmin", dry_run=True)
+        assert r.status_code == 200, r.text
+        body = r.json()
+        assert body["dry_run"] is True
+        assert body["classroom_students_removed"] == before
+        assert _testdata_enrollment_count(C["a"]) == before  # preview only, nothing deleted
+
+    def test_system_admin_can_delete(self, client, monkeypatch):
+        # positive control — runs last in this class; actually deletes.
+        monkeypatch.setattr(settings, "enable_test_seed", True)
+        before = _testdata_enrollment_count(C["a"])
+        assert before > 0
+        r = _cleanup(client, "sysadmin", dry_run=False)
+        assert r.status_code == 200, r.text
+        body = r.json()
+        assert body["dry_run"] is False
+        assert body["classroom_students_removed"] == before
+        assert _testdata_enrollment_count(C["a"]) == 0

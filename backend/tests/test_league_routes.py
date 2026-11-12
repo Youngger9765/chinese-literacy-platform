@@ -124,9 +124,19 @@ def _make_school(db, org: Organization | None) -> School:
     return school
 
 
-def _make_classroom(db, school: School, teacher_id: int, *, grade: int = 5) -> Classroom:
+def _make_classroom(
+    db, school: School, teacher_id: int, *, grade: int = 5, feature_settings: dict | None = None
+) -> Classroom:
+    # issue #3607: league is OFF by default per classroom (same as
+    # pk_human before it) — this file's existing tests are about the
+    # invitation authz/privacy matrix, not the feature gate itself (that
+    # gets its own dedicated class below), so every classroom created
+    # through this shared helper opts in explicitly by default, mirroring
+    # how test_pk_routes.py's module-level rooms pre-enable pk_human.
+    # `feature_settings` lets TestLeagueFeatureGate override this per room.
     classroom = Classroom(
-        school_id=school.id, teacher_id=teacher_id, name=f"班級-{uuid.uuid4().hex[:6]}", grade=grade
+        school_id=school.id, teacher_id=teacher_id, name=f"班級-{uuid.uuid4().hex[:6]}", grade=grade,
+        feature_settings=feature_settings if feature_settings is not None else {"league": True},
     )
     db.add(classroom)
     db.commit()
@@ -185,7 +195,7 @@ class TestInvitationAuthzMatrix:
         owner_token, owner_id = _register(client, name="Owner2")
         classroom = _make_classroom(db, school, owner_id)
         assistant_token, assistant_id = _register(client, name="Assistant1")
-        db.add(ClassroomTeacher(classroom_id=classroom.id, teacher_id=assistant_id, role="assistant"))
+        db.add(ClassroomTeacher(classroom_id=classroom.id, teacher_id=assistant_id, role="editor"))
         db.commit()
 
         r = client.post(
@@ -494,7 +504,19 @@ class TestPrivacyContract:
         )
         assert r.status_code == 200, r.text
         dumped = r.text
-        banned_keys = ["student_id", "\"name\"", "email", "teacher_id", "teacher_name"]
+        # 2026-10-16 (#3594): the bare `"name"` key used to be banned outright
+        # as a belt-and-suspenders catch for a person's name ever landing
+        # under a generically-named key. The board response now legitimately
+        # carries a `theme` object (season storyline content — chest/badge
+        # display names, e.g. `"chest":{"name":"絲路寶箱",...}`), which is
+        # copy, not PII, and would false-positive on a bare `"name"` scan.
+        # The REAL protection is unchanged: no endpoint in this file emits a
+        # bare `"name"` key for a PERSON (people's names are always under
+        # `student_name`/`teacher_name`, both still explicitly banned below),
+        # and the value-leak + id-leak assertions further down in this test
+        # independently verify no actual PII value/id made it into the
+        # response regardless of which key it would have been under.
+        banned_keys = ["student_id", "\"student_name\"", "email", "teacher_id", "\"teacher_name\""]
         for k in banned_keys:
             assert k not in dumped, f"found banned field {k!r}"
         for value in (
@@ -692,7 +714,15 @@ class TestAuthzMatrixAllEndpoints:
         classroom_b = _make_classroom(db, school, owner_b_id)
         classroom_c = _make_classroom(db, school, owner_c_id)
 
-        start = NOW + timedelta(minutes=10)
+        # Computed at CALL time, not import time (unlike the module-level
+        # `NOW` the rest of this file uses with a safe +1-day default
+        # buffer): this class's own +10min window is tight enough that it
+        # flaked once the full "Backend Tests" CI suite started taking
+        # >10min to reach this file (#3832) -- `league_service`'s expiry
+        # check compares against the REAL current time at accept()-call
+        # time, so a `start` frozen at collection time stops being "10
+        # minutes from now" by the time this class's tests actually run.
+        start = datetime.now(timezone.utc) + timedelta(minutes=10)
         end = start + timedelta(days=2)
 
         # Invitation 1: accepted (A invites, B accepts) — board / season-list
@@ -842,3 +872,138 @@ class TestAuthzMatrixAllEndpoints:
             headers=_h(ctx["owner_a_token"]),
         )
         assert allow.status_code == 200, allow.text
+
+
+# ---------------------------------------------------------------------------
+# issue #3607 — 跨班賽季 (league) is OFF by default per classroom; a teacher
+# must explicitly enable it before creating an invitation or accepting one.
+# Each negative case below pairs with a positive control (an otherwise
+# identical classroom with league enabled succeeds) — a 403 proves nothing
+# if the route would 403 everyone (rules/testing-strategy.md).
+# ---------------------------------------------------------------------------
+
+class TestLeagueFeatureGate:
+    def test_create_invitation_is_blocked_when_league_is_off(self, client, db):
+        org = _make_org(db)
+        school = _make_school(db, org)
+        owner_token, owner_id = _register(client, name="GateOwner1")
+        classroom = _make_classroom(db, school, owner_id, feature_settings={"league": False})
+
+        r = client.post(
+            "/api/league/invitations", json=_invite_payload(classroom.id), headers=_h(owner_token)
+        )
+        assert r.status_code == 403, r.text
+        assert "開放" in r.json()["detail"]
+
+    def test_create_invitation_is_blocked_on_a_brand_new_classroom_with_empty_settings(self, client, db):
+        """A classroom that never had feature_settings touched at all
+        (== {}) must behave the same as explicit league=False — the
+        default is OFF, not an implicit "nothing decided yet == on"."""
+        org = _make_org(db)
+        school = _make_school(db, org)
+        owner_token, owner_id = _register(client, name="GateOwner2")
+        classroom = _make_classroom(db, school, owner_id, feature_settings={})
+
+        r = client.post(
+            "/api/league/invitations", json=_invite_payload(classroom.id), headers=_h(owner_token)
+        )
+        assert r.status_code == 403, r.text
+
+    def test_create_invitation_succeeds_when_league_is_on(self, client, db):
+        """Positive control for the two tests above."""
+        org = _make_org(db)
+        school = _make_school(db, org)
+        owner_token, owner_id = _register(client, name="GateOwner3")
+        classroom = _make_classroom(db, school, owner_id, feature_settings={"league": True})
+
+        r = client.post(
+            "/api/league/invitations", json=_invite_payload(classroom.id), headers=_h(owner_token)
+        )
+        assert r.status_code == 201, r.text
+
+    def test_accept_invitation_is_blocked_when_invitee_league_is_off(self, client, db):
+        org = _make_org(db)
+        school = _make_school(db, org)
+        owner_a_token, owner_a_id = _register(client, name="GateOwnerA1")
+        owner_b_token, owner_b_id = _register(client, name="GateOwnerB1")
+        classroom_a = _make_classroom(db, school, owner_a_id, feature_settings={"league": True})
+        classroom_b = _make_classroom(db, school, owner_b_id, feature_settings={"league": False})
+
+        created = client.post(
+            "/api/league/invitations", json=_invite_payload(classroom_a.id), headers=_h(owner_a_token)
+        ).json()
+
+        r = client.post(
+            f"/api/league/invitations/{created['code']}/accept",
+            json={"invitee_classroom_id": classroom_b.id, "invitee_team_grade": 5},
+            headers=_h(owner_b_token),
+        )
+        assert r.status_code == 403, r.text
+        assert "開放" in r.json()["detail"]
+
+    def test_accept_invitation_succeeds_when_invitee_league_is_on(self, client, db):
+        """Positive control for the test above."""
+        org = _make_org(db)
+        school = _make_school(db, org)
+        owner_a_token, owner_a_id = _register(client, name="GateOwnerA2")
+        owner_b_token, owner_b_id = _register(client, name="GateOwnerB2")
+        classroom_a = _make_classroom(db, school, owner_a_id, feature_settings={"league": True})
+        classroom_b = _make_classroom(db, school, owner_b_id, feature_settings={"league": True})
+
+        created = client.post(
+            "/api/league/invitations", json=_invite_payload(classroom_a.id), headers=_h(owner_a_token)
+        ).json()
+
+        r = client.post(
+            f"/api/league/invitations/{created['code']}/accept",
+            json={"invitee_classroom_id": classroom_b.id, "invitee_team_grade": 5},
+            headers=_h(owner_b_token),
+        )
+        assert r.status_code == 200, r.text
+
+    def test_a_classroom_with_real_league_history_but_no_key_is_treated_as_on(self, client, db):
+        """Backward compat (#3607): prod already has classrooms using
+        league before this toggle existed — a classroom with a real,
+        already-registered LeagueTeam and no explicit `league` key in
+        feature_settings must still be able to create a NEW invitation."""
+        org = _make_org(db)
+        school = _make_school(db, org)
+        owner_token, owner_id = _register(client, name="GateOwnerHist1")
+        classroom = _make_classroom(db, school, owner_id, feature_settings={})
+
+        season = LeagueSeason(
+            kind="invitational", name="legacy season",
+            game_start=NOW - timedelta(days=30), game_end=NOW - timedelta(days=23),
+            weights_snapshot={}, created_by=owner_id,
+        )
+        db.add(season)
+        db.flush()
+        db.add(LeagueTeam(season_id=season.id, classroom_id=classroom.id, grade=5, registered_by=owner_id))
+        db.commit()
+
+        r = client.post(
+            "/api/league/invitations", json=_invite_payload(classroom.id), headers=_h(owner_token)
+        )
+        assert r.status_code == 201, r.text
+
+    def test_explicit_false_wins_even_with_real_league_history(self, client, db):
+        """The teacher's explicit off beats their own class's history."""
+        org = _make_org(db)
+        school = _make_school(db, org)
+        owner_token, owner_id = _register(client, name="GateOwnerHist2")
+        classroom = _make_classroom(db, school, owner_id, feature_settings={"league": False})
+
+        season = LeagueSeason(
+            kind="invitational", name="legacy season 2",
+            game_start=NOW - timedelta(days=30), game_end=NOW - timedelta(days=23),
+            weights_snapshot={}, created_by=owner_id,
+        )
+        db.add(season)
+        db.flush()
+        db.add(LeagueTeam(season_id=season.id, classroom_id=classroom.id, grade=5, registered_by=owner_id))
+        db.commit()
+
+        r = client.post(
+            "/api/league/invitations", json=_invite_payload(classroom.id), headers=_h(owner_token)
+        )
+        assert r.status_code == 403, r.text

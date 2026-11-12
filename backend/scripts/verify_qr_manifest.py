@@ -32,7 +32,6 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-import urllib.request
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -44,6 +43,7 @@ from scripts.reading_delivery_rules import (  # noqa: E402
     PASSAGE_ONLY_GRADES as _PASSAGE_ONLY_GRADES,
     grade_num as _grade_num,
 )
+from scripts._iap_token_bridge import urlopen_with_iap as _urlopen_with_iap  # noqa: E402
 
 STAGING_API = "https://lingoleap-backend-staging-958347263320.asia-east1.run.app"
 
@@ -161,7 +161,9 @@ def reconcile(lessons: list[dict], yml_passages: dict) -> ReconcileResult:
 def fetch_lessons(api_base: str) -> list[dict]:
     """Fetch the anonymous story list; keep only the fields the QA needs."""
     url = f"{api_base.rstrip('/')}/api/stories?page_size=300"
-    with urllib.request.urlopen(url, timeout=60) as resp:  # noqa: S310
+    # #3719: adds a Proxy-Authorization header when IAP_AUDIENCE is configured
+    # (IAP-prep); with IAP off (today) this is exactly the old urlopen call.
+    with _urlopen_with_iap(url, timeout=60) as resp:
         data = json.loads(resp.read().decode("utf-8"))
     stories = data["stories"]
     if len(stories) != data["total"]:

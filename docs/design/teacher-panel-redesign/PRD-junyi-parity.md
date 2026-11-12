@@ -62,3 +62,81 @@ Young 2026-10-13：「老師介面好好檢查，UIUX 去跟均一比較，務�
 ## 4. 驗收
 每頁 1280／390 截圖存進 `kist-curriculum/benchmarks/junyi-teacher-ui/lingoleap-<日期>/`，與均一同頁並排比對；
 既有前端測試（lint、vitest）全綠；正式站真實操作走一遍：建班→加學生→指派→看數據。
+
+## 5. 2026-11-10 復查（#3985）— 哪些已經做掉、哪些還留著、為什麼
+
+距離本 PRD 第一版（2026-10-13）與其後的 #3367／#3384／#3401／#3424／#3378，已經做掉的部分：
+- P1 版面骨架：`ClassroomTabs` 滿版分頁列 + `ClassListSidebar` 常駐「我的班級」欄 + `建立班級` 按鈕 — 已上線，逐頁並排比對已接近
+- P2 學生表置頂、加學生收進彈窗、「指派任務」收尾按鈕、圖示按鈕列、班級功能設定（真人PK／跨班賽季／課堂搶答三個開關，比 Junyi 多）— 已上線
+- P3 作業總表（學生 × 全部作業矩陣、逐大題統計、狀態圖例 `MatrixLegend`、建立/管理作業按鈕）— 已上線，比本 PRD 原案更完整
+- P5 建立班級單一彈窗 + 加入學生方式三選一（含匯入均一班級）— 已上線（#3378）
+
+今天重新用均一的 `d1-class.png`／`d2-assign.png` 跟 staging 逐像素比對，找到三個仍然沒對齊、且今天可以直接關掉的落差：
+
+1. **字型**（最大的視覺落差）：`body` 的 computed `font-family` 量到是 `cwTeXKai`（楷書，給學生閱讀用），均一後台是無襯線字。根因是 Tailwind `fontFamily.sans` 被專案改成 `cwTeXKai` 當全站預設，老師頁面多半沒有自己設字型、所以繼承到這個預設。
+   **做法**：`AppShell.tsx` 的根 div 依 `activeView === 'teacher'` 切換成新的 `.font-teacher-ui` class（`index.css` 新增，`Noto Sans TC, PingFang TC, Microsoft JhengHei, Arial, sans-serif`），**只影響繼承字型的元素**，已經自帶 `font-ui`／`font-headline`／`font-body` 的元件（如 Sidebar 品牌字）不受影響。學生／管理員視角完全不動。
+2. **指派任務／班級數據分頁看不到班級代碼**：均一每個子頁都看得到「班級代碼＋複製」，我們只有「班級設定」分頁看得到（在 `ClassroomHeaderCard` 裡）。切到別的分頁，老師手上正要唸給學生的代碼就不見了。
+   **做法**：`ClassroomDetail.tsx` 的 `topSlot` 在 `activeTab !== 'settings'` 時多顯示一條「班級代碼：XXXX ＋複製代碼」（跟 `ClassroomHeaderCard` 同一顆 `handleCopyJoinCode`/`isCopied`，沒有重新发明）。
+3. **手機版操作按鈕被裁切**（今天新發現，不在原始比對清單裡，是工頭在 review 時指出的）：`/teacher/classroom/:id` 390px 寬時，學生列每一列「換班」「移除」兩顆按鈕被父層 `overflow-hidden`（`ClassroomDetail.tsx` 的「學生名單」`<section>`）裁掉，摸不到。根因是該 `<td>` 用 `ml-auto` 把自己推到 flex-wrap 行的最右端、同時 `whitespace-nowrap` 不准內容換行——當那一行剩下的空間比「換班＋移除」加起來還窄，這顆 `<td>` 就會畫出行的右邊界之外。
+   **做法**：比照同一列已經在用的 name 欄位（`basis-full lg:basis-auto`）模式，讓操作欄在手機版永遠獨佔一整行，不用跟別的欄位搶空間；桌機（`lg:`）版面不變。
+
+### 刻意不做（決策記錄，不是漏做）
+
+- **不重建均一的全站頂部導覽列**（科目／年級／開學／搜尋／支持均一／教學管理／學習主頁…）。LingoLeap 是單一科目產品，沒有「科目」「年級範圍選擇」這類多科目平台才需要的導覽概念；硬套一排對我們使用者沒有意義的選單，不是「長得像均一」要達到的效果，是為了像而像。班級層級的導覽（滿版分頁列＋常駐班級欄）已經對齊「全域導覽＋子頁左欄」這個均一的軸線，這才是真正影響老師操作流程的部分。
+- **不改全站 accent 色票**去貼均一的配色（均一是偏藍灰的分頁選中色＋多種 per-feature 強調色；我們現在全站一致用 indigo）。重新上色的影響面跨學生／老師／管理員三個視角的每一顆按鈕、每一張卡片，而這次任務的目標是「老師的建班／加學生／派作業流程長得像、用起來一樣」，不是「配色一致」。風險（可能連帶改壞沒有逐一驗證過的畫面）與效益（美觀比對）不成比例，决定跳過。
+- **建立班級的「一步選加入學生方式」彈窗已經是均一式單一流程**（#3378 做的：班級名稱 + 三選一 radio + 送出即建好），不是本票的落差，不重做。
+
+### 驗收（本次新增）
+
+- `npm run lint && npm run test` 全綠
+- 1280／390 寬，建班／班級設定／指派任務三個流程改前改後截圖，存
+  `kist-curriculum/benchmarks/junyi-teacher-ui/lingoleap-staging-2026-11-10/`（private repo）
+- staging 真實登入（教師 李老師）：建班 → 班級設定看到代碼（不變）→ 切到指派任務分頁仍看得到代碼（新）→
+  390 寬確認「換班」「移除」兩顆按鈕看得到、點得到
+
+## 6. 2026-11-10 第二輪（#3989）— §5 的「刻意不做」逐項收斂
+
+Young 明令：§5 標成「刻意不做」的配色／彈窗細節／圖例／文案，全部要補完，
+不是永久放棄。只保留三個仍然合理的例外：分組（需要 migration）、任何需要 migration 的項目、
+均一全站頂部導覽列（科目／年級／開學——LingoLeap 單一科目，這個導覽概念不存在）。
+
+色票來源：均一 `legacy/common-components-package/styles/commonMuiTheme.js`
+（`stepperModalPalette.primary = #19A696`、全站連結藍 `#4990E2`）＋ 對
+`kist-curriculum/benchmarks/junyi-teacher-ui/junyi-2026-10-10/` 的 d1/d2 截圖做像素取樣
+（分頁選中底色 `#7C9AAD`、側欄選中橘色 accent `#FFA500`、圖例黃 `#FFFF99`／綠 `#99CC66`／紅 `#EF5350`）。
+
+| # | 項目 | 狀態 | 細節 |
+|---|---|---|---|
+| 1 | 頁面背景改白色（不是楷書學生頁的米色 #fbf6ee） | ✅ 完成 | `index.css` 新增 `.font-teacher-ui.bg-surface { background-color: #F4F4F4 }`——跟均一量到的頁面底色一致。只套在 `AppShell.tsx` 那顆同時帶 `.font-teacher-ui` 的根 div（只有 `activeView === 'teacher'` 時才有這個 class），不影響 `TeacherLiveQuiz*`（遊戲模式，不在本次三流程內）等別處仍用米色 `bg-surface` 的地方 |
+| 2 | 配色對齊均一 token | ✅ 完成（範圍說明見下） | 建立班級彈窗 radio／確定鈕＝均一 teal `#19A696`；「新增學生」圖示圓圈、班級設定頁底部「指派任務」鈕＝同一個 teal；指派任務頁「建立任務」鈕＝均一藍 `#4990E2`；分頁選中底色＝均一鋼藍 `#7C9AAD`；「我的班級」側欄選中項＝灰底＋橘色（`#FFA500`）右側 accent（取代原本的靛藍）。**刻意沒動**：app 全站的 `--color-accent`（靛藍）本身——這次只換了列出的這幾個元件，不是整個色票，風險與「老師流程長得像均一」這個目標成比例 |
+| 3 | 建立班級彈窗（圓角／陰影／寬度／標題／radio／按鈕／第二步班級代碼） | ✅ 完成（細節如下） | 圓角 `rounded-2xl`→`rounded-xl`、寬度 `max-w-3xl`→`max-w-4xl`（量到均一在 1280 寬時彈窗約 900px，`max-w-4xl`=896px 最接近）、padding 加大；radio 與確定鈕改 teal；radio 底色 `bg-gray-50`→`bg-gray-100`。**沒有「第二步」畫面**——均一的 c3-after-create.png 其實是同一個彈窗的 loading 狀態（按鈕變成 spinner），不是另一個步驟；真正的「班級代碼顯示」在建立完成後導到的班級頁（見項目 4），已經有。**刻意保留**：年級下拉選單——均一這個彈窗完全沒有年級欄位，但 LingoLeap 的課文本來就按年級分級，拿掉對老師是倒退，不是對齊；跟「分組」不同，這不需要 migration，是純功能保留的決定 |
+| 4 | 班級設定（統計格／圖示按鈕／學生表／鉛筆／代碼顯示） | ✅ 大致完成，1 項明確列為未做 | 統計格（人數/年級/狀態）、學生表頭/列樣式（`bg-gray-50`/`font-medium`/`px-4 py-3`，量出來跟均一已經很接近，沒再調）、鉛筆就地改名——這三項在 #3380/#3401/#3424 已經做掉，這次沒改。新增：班級代碼旁加一個 ⓘ 提示圖示（hover 顯示說明，原本那行字還留著，觸控裝置才看得到）；「新增學生」圖示圓圈改 teal。**明確未做**：均一的「新增座號」圖示按鈕——LingoLeap 後端其實已經有 `seat_number` 欄位與 API（不需要 migration），但要做成均一那樣的「批次指定座號」彈窗是一個新 UI 流程，不是純配色/樣式調整；今天沒做，記在這裡等下一張票，不是漏做 |
+| 5 | 指派任務（下拉＋代碼／圖例／按鈕／任務類型選單／文案） | ✅ 文案與按鈕完成，2 項列為刻意不做 | 「建立作業」「管理作業」等指派任務分頁下所有可見文案改成「任務」（含巢狀的「建立與管理任務」「正式任務」子元件），範圍限定在指派任務分頁的元件樹（`AssignmentsPanel`/`AssignmentMatrixGrid`/`AssignmentTab`/`AssignmentCreateForm`/`AssignmentCard`/`AssignmentInlineEdit`/`AssignmentSubmissionTable`/`AssignmentItemStats`/`StudentDetail`），**不**動班級數據分頁共用的 `StudentsPanel`／`ClassDataTab`／`TodayOverviewTab`（那些是別的分頁，文案沿用「作業」）。建立任務鈕改均一藍。**刻意不做**：① 桌機寬度（≥1280px）同時顯示「選擇班級」下拉——均一在這個寬度下拉與左側「我的班級」欄同時存在，但那是重覆資訊；LingoLeap 現有架構（≥1280px 用側欄切班、<1280px 用下拉切班＋代碼列一直都在）已經達到同樣的效果，不重複加下拉 ② 「建立任務」下拉選單列任務類型（均一點下去是 任務技能／診斷評量／評量卷／自組卷…六種）——均一那是 Khan Academy 式多類型技能任務系統，LingoLeap 只有一種「指派課文」，加一個只有一個選項的下拉選單是為了像而像，而且與 Young 2026-10-10「介面請簡單」的明確指示（見 `AssignmentsPanel.tsx` docstring）方向相反，所以沒做 |
+| 6 | 分頁／側欄樣式（選中狀態顏色／字重／字級） | ✅ 完成 | `ClassroomTabs` 分頁選中改均一鋼藍 `#7C9AAD`（字級/字重原本就已經是 `text-xl font-medium`，≥20px，沒再調）；`ClassListSidebar` 選中項目改灰底＋橘色右側 accent（原本是靛藍 `bg-accent-bg`/`border-accent`） |
+
+### 驗收（本次新增）
+- `npm run lint && npm run test` 全綠（`npx vitest run` 全專案）
+- 1280／390 寬，建班／班級設定／指派任務三流程改前改後截圖，存
+  `kist-curriculum/benchmarks/junyi-teacher-ui/lingoleap-staging-2026-11-10b/`（private repo）
+- staging 真實登入（教師 李老師）走一遍：建班（teal 彈窗）→ 班級設定（teal 圖示/按鈕、ⓘ 提示）→
+  指派任務分頁（任務文案、藍色建立鈕、鋼藍分頁、橘色側欄選中）
+
+## 7. 2026-11-11 第三輪（#3992）— §6 item 4 的「明確未做」收尾 + 剩餘靛藍
+
+§6 item 4 記錄「均一的新增座號圖示按鈕……今天沒做，記在這裡等下一張票」—— 本票把它做掉，
+同時補上 §6 刻意只換部分元件時沒掃到的三個殘留靛藍：
+
+| # | 項目 | 狀態 | 細節 |
+|---|---|---|---|
+| 1 | 新增座號批次指定彈窗 | ✅ 完成 | 後端 `seat_number` 欄位與單筆 PATCH（#3826）已上線、**不需要 migration**；新增批次 `PATCH /classrooms/{id}/students/seats`（一次交易內清空再指定，避免對調座號時撞到 unique constraint）。前端 `SeatNumberDialog.tsx`：上下移調順序（不用拖曳套件）、＋ 插入空號、即時換算座號、儲存走批次 API；接在「新增學生」旁的圖示按鈕列。學生名單表改依座號排序（無座號排最後）|
+| 2 | `TeacherDashboard.tsx` 右上角「建立班級」（頁首＋空狀態按鈕與圖示） | ✅ 完成 | 靛藍 `bg-accent` → 均一 teal `#19A696`，跟同頁彈窗內的 radio/確定鈕（#3989 已換）一致 |
+| 3 | `ClassListSidebar.tsx` 左側「建立班級」按鈕 | ✅ 完成 | 同上換 teal；該元件的「目前班級」選中項目（灰底＋橘色 accent）#3989 已經換過，這次沒動 |
+| 4 | 全站共用 `NavButton`（班級管理／作業管理／遊戲區／使用說明，教師工作區主導覽選中狀態） | ✅ 完成 | 新增 `variant="teacher"`（只有 `TeacherSidebar` 傳入），選中樣式換成跟 `ClassListSidebar` 一致的灰底＋橘色 `#FFA500` 右側 accent。`StudentSidebar`／`AdminSidebar`／`MobileTabBar` 沒有傳這個 prop，維持靛藍 |
+
+### 驗收（本次新增）
+- 後端 12 條新 pytest（批次座號 API）＋既有 `test_classroom_rename_seat_3826.py`（19 條）全綠
+- `npm run lint && npm run test` 全綠（含 7 條新 `SeatNumberDialog.test.tsx`，mutation 驗過有牙）
+- 1280／390 寬，班級設定（新增座號彈窗）＋班級管理（建立班級按鈕）改前改後截圖，存
+  `kist-curriculum/benchmarks/junyi-teacher-ui/lingoleap-staging-2026-11-11/`（private repo）
+- staging 真實登入（教師 李老師）：班級設定開新增座號彈窗 → 自動編號 → 儲存 → 名單依座號排序；
+  班級管理頁看到 teal 建立班級按鈕；左側主導覽選中項目看到橘色 accent

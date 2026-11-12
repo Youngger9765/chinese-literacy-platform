@@ -68,7 +68,10 @@ const KnowledgeStation: React.FC<KnowledgeStationProps> = ({ story, onFinish }) 
   return (
     <div className="flex-1 flex flex-col bg-surface overflow-hidden">
       {/* Content */}
-      <div className="flex-1 overflow-y-auto pb-48">
+      {/* UI-4: pb-48 → pb-56 — a video embedded near the end (影片2) could
+          sit right at the edge of the fixed 下一關 button's fade zone;
+          give it more breathing room. */}
+      <div className="flex-1 overflow-y-auto pb-56">
         <div className="max-w-3xl mx-auto px-6 md:px-16 py-8 space-y-6 w-full">
           <div className="text-center">
             <h2 className="text-xl font-headline font-bold text-on-surface mb-2">知識補給站</h2>

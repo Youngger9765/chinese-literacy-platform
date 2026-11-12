@@ -146,7 +146,7 @@ const LeagueTile: React.FC<{ studentId: number; token: string }> = ({ studentId,
   if (seasons.length === 0) {
     return (
       <div className="rounded-xl p-3 bg-white border border-gray-200 text-sm text-gray-500">
-        🏆 班級賽：目前沒有進行中的班級賽季
+        🏆 跨班賽季：目前沒有進行中的跨班賽季
       </div>
     );
   }
@@ -242,7 +242,7 @@ const ChildProgressPanel: React.FC<{ child: LinkedChild; token: string }> = ({
         />
       </div>
 
-      {/* 班級賽 tile — one extra tile, no rank (PRD §10 UIUX) */}
+      {/* 跨班賽季 tile — one extra tile, no rank (PRD §10 UIUX) */}
       <LeagueTile studentId={child.student_id} token={token} />
 
       {data.total_sessions === 0 && (

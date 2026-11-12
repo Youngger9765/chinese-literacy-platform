@@ -72,6 +72,11 @@ const TeacherMyTextsPage = lazy(() => import('../pages/teacher/TeacherMyTextsPag
 const TeacherAssignmentsPage = lazy(() => import('../pages/teacher/TeacherAssignmentsPage'));
 const TeacherLeaguePage = lazy(() => import('../pages/teacher/TeacherLeaguePage'));
 const StudentOurClassPage = lazy(() => import('../pages/student/StudentOurClassPage'));
+// 遊戲區 (#3633) — consolidates 跨班賽季/課堂搶答/PK 對戰/迷城密室 (student) and
+// 跨班賽季/課堂搶答/班級內 PK (teacher) into one hub page each. Old routes above
+// are untouched.
+const StudentGameHubPage = lazy(() => import('../pages/student/StudentGameHubPage'));
+const TeacherGameHubPage = lazy(() => import('../pages/teacher/TeacherGameHubPage'));
 const TeacherSessionReportPage = lazy(() => import('../pages/teacher/TeacherSessionReportPage'));
 const ProjectHubPage = lazy(() => import('../pages/ProjectHubPage'));
 
@@ -81,6 +86,17 @@ const TeacherLiveQuizHost = lazy(() => import('../pages/teacher/live/TeacherLive
 const TeacherLiveQuizHistory = lazy(() => import('../pages/teacher/live/TeacherLiveQuizHistory'));
 const StudentLiveQuizJoin = lazy(() => import('../pages/live/StudentLiveQuizJoin'));
 const StudentLiveQuizPlay = lazy(() => import('../pages/live/StudentLiveQuizPlay'));
+const StudentPkEntry = lazy(() => import('../pages/pk/StudentPkEntry'));
+const StudentPkQueueWait = lazy(() => import('../pages/pk/StudentPkQueueWait'));
+const StudentPkOpponentSelect = lazy(() => import('../pages/pk/StudentPkOpponentSelect'));
+const StudentPkMatch = lazy(() => import('../pages/pk/StudentPkMatch'));
+const StudentEscapeRoomEntry = lazy(() => import('../pages/escape-room/StudentEscapeRoomEntry'));
+const StudentEscapeRoomRun = lazy(() => import('../pages/escape-room/StudentEscapeRoomRun'));
+// 多人對抗賽 (team_arena, #3632) — v2: any student hosts/joins, same
+// fullscreen-no-AppShell precedent as live_quiz above. No teacher entry
+// (PRD §0 v2 rule B: "老師端入口移除") — /teacher/team-arena is gone.
+const StudentTeamArenaJoin = lazy(() => import('../pages/team-arena/StudentTeamArenaJoin'));
+const StudentTeamArenaPlay = lazy(() => import('../pages/team-arena/StudentTeamArenaPlay'));
 
 // OMO (Online-Merge-Offline) paper worksheet upload (Issue #1343)
 const OmoPage = lazy(() => import('../pages/omo/OmoPage'));
@@ -343,6 +359,28 @@ const AppRoutes: React.FC = () => (
           </ProtectedRoute>
         }
       />
+      {/* 遊戲區 (#3633) — replaces the scattered sidebar entries above with
+          one hub: a card each for 跨班賽季/課堂搶答/PK 對戰/迷城密室. */}
+      <Route
+        path="/game-hub"
+        element={
+          <ProtectedRoute>
+            <AppShell>
+              <StudentGameHubPage />
+            </AppShell>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/teacher/game-hub"
+        element={
+          <ProtectedRoute>
+            <AppShell>
+              <TeacherGameHubPage />
+            </AppShell>
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/admin/*"
         element={
@@ -492,6 +530,73 @@ const AppRoutes: React.FC = () => (
         element={
           <ProtectedRoute>
             <StudentLiveQuizPlay />
+          </ProtectedRoute>
+        }
+      />
+      {/* PK 對戰（雙人 PK 模式, #3586）— full-screen like the live-quiz flow
+          above, no AppShell (PRD §3.3: "PK 對戰全程...走全螢幕遊戲版面"). */}
+      <Route
+        path="/pk"
+        element={
+          <ProtectedRoute>
+            <StudentPkEntry />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/pk/queue/:queueId"
+        element={
+          <ProtectedRoute>
+            <StudentPkQueueWait />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/pk/opponents"
+        element={
+          <ProtectedRoute>
+            <StudentPkOpponentSelect />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/pk/match/:matchId"
+        element={
+          <ProtectedRoute>
+            <StudentPkMatch />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/escape-room"
+        element={
+          <ProtectedRoute>
+            <StudentEscapeRoomEntry />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/escape-room/run/:runId"
+        element={
+          <ProtectedRoute>
+            <StudentEscapeRoomRun />
+          </ProtectedRoute>
+        }
+      />
+      {/* 多人對抗賽 (#3632) — same fullscreen precedent as /live above. */}
+      <Route
+        path="/team-arena"
+        element={
+          <ProtectedRoute>
+            <StudentTeamArenaJoin />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/team-arena/:code"
+        element={
+          <ProtectedRoute>
+            <StudentTeamArenaPlay />
           </ProtectedRoute>
         }
       />

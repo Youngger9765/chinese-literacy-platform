@@ -25,6 +25,9 @@ from ..models.league import LeagueSeason, LeagueTeam, LeagueTeamRosterMember
 from ..models.school import Classroom, ClassroomStudent
 from ..models.user import User
 from ..services import league_service as svc
+from ..services import story_pack_service as theme_svc
+from ..services.pk import classroom_features
+from ..services.story_pack_store import get_story_pack_store
 from .classrooms import _get_classroom_or_404
 
 router = APIRouter(prefix="/league", tags=["league"])
@@ -37,6 +40,21 @@ def _require_owner_strict(classroom: Classroom, user: User, db: Session) -> None
     if is_system_admin(user.id, db):
         return
     raise HTTPException(status_code=403, detail="僅班級擁有者可以執行此操作")
+
+
+def _require_league_enabled(classroom: Classroom, db: Session) -> None:
+    """issue #3607: 跨班賽季 is OFF by default per classroom — creating an
+    invitation FOR a classroom, or accepting one INTO a classroom, both
+    require that classroom to have `league` turned on. Placed in the route
+    layer (not league_service.py) deliberately: this module's own docstring
+    already draws that boundary ("Authorization... lives in
+    routes/league.py"), and keeping it here means every direct-service-call
+    test in test_league_service.py is untouched by this gate — only the
+    HTTP surface (what a teacher's UI actually calls) is gated, matching
+    how `_require_owner_strict` above is enforced.
+    """
+    if not classroom_features.get_classroom_feature(classroom, "league", db=db):
+        raise HTTPException(status_code=403, detail="老師還沒開放跨班賽季")
 
 
 def _handle_league_error(exc: svc.LeagueError) -> HTTPException:
@@ -131,6 +149,7 @@ def create_invitation(
 ) -> InvitationResponse:
     classroom = _get_classroom_or_404(payload.inviter_classroom_id, db)
     _require_owner_strict(classroom, current_user, db)
+    _require_league_enabled(classroom, db)
     try:
         invitation = svc.create_invitation(
             db,
@@ -183,6 +202,7 @@ def accept_invitation(
 ) -> InvitationResponse:
     classroom = _get_classroom_or_404(payload.invitee_classroom_id, db)
     _require_owner_strict(classroom, current_user, db)
+    _require_league_enabled(classroom, db)
     try:
         invitation = svc.accept_invitation(
             db,
@@ -283,7 +303,19 @@ def get_season_board(
     season = _get_season_or_404(season_id, db)
     _require_season_member(season, current_user, db)
     board = svc.get_season_board_cached(db, season)
-    return {"season_id": season.id, "season_name": season.name, "board": board}
+    # Additive-only (PRD §13.5): `theme` is a new field, old clients that
+    # don't read it are unaffected. Falls back through season override →
+    # platform active default → shipped builtin default (see
+    # story_pack_store.resolve_pack_for_season). Field stays named "theme"
+    # here for backward compat with the already-shipped frontend, even
+    # though the backing store is the generic story_pack module now.
+    theme = theme_svc.get_pack_for_season(get_story_pack_store(db), season)
+    return {
+        "season_id": season.id,
+        "season_name": season.name,
+        "board": board,
+        "theme": theme.model_dump(),
+    }
 
 
 @router.get("/seasons/{season_id}/my-summary")
@@ -294,9 +326,12 @@ def get_my_season_summary(
 ) -> dict:
     season = _get_season_or_404(season_id, db)
     try:
-        return svc.get_my_team_summary(db, current_user, season)
+        summary = svc.get_my_team_summary(db, current_user, season)
     except svc.LeagueError as exc:
         raise _handle_league_error(exc)
+    theme = theme_svc.get_pack_for_season(get_story_pack_store(db), season)
+    summary["theme"] = theme.model_dump()
+    return summary
 
 
 @router.get("/seasons/{season_id}/teams/{team_id}/roster")
@@ -307,7 +342,7 @@ def get_team_roster_progress(
     db: Session = Depends(get_db),
 ) -> list[dict]:
     """Teacher-only (that team's owning classroom): per-student participation,
-    尚未參與 first, for the ClassroomTabs "班級賽" progress tab (PRD §10)."""
+    尚未參與 first, for the ClassroomTabs "跨班賽季" progress tab (PRD §10)."""
     season = _get_season_or_404(season_id, db)
     team = db.query(LeagueTeam).filter(LeagueTeam.id == team_id, LeagueTeam.season_id == season_id).first()
     if team is None:
@@ -385,11 +420,13 @@ def get_my_history(
             raise HTTPException(status_code=404, detail="Student not found")
 
     seasons = svc.list_my_seasons(db, subject)
+    store = get_story_pack_store(db)
     history = []
     for season in seasons:
         try:
             summary = svc.get_my_team_summary(db, subject, season)
         except svc.LeagueError:
             continue
+        summary["theme"] = theme_svc.get_pack_for_season(store, season).model_dump()
         history.append(summary)
     return history

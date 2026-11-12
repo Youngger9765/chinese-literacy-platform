@@ -111,7 +111,9 @@ def _named_paths(text, prefix):
 
 def test_every_backend_test_named_in_ci_exists():
     wf = (_REPO / ".github" / "workflows" / "pytest.yml").read_text(encoding="utf-8")
-    named = [p for p in _named_paths(wf, r"tests/") if "*" not in p]
+    # (?<!frontend/): pytest.yml also lists frontend files whose change must
+    # trigger the backend suite (#3750's e2e specs); those are not backend tests.
+    named = [p for p in _named_paths(wf, r"(?<!frontend/)tests/") if "*" not in p]
     missing = [p for p in named if not (_REPO / "backend" / p).exists()]
     assert named, "pytest.yml 裡一個具名測試都沒抓到 —— 解析壞了"
     assert len(named) >= 40, f"只抓到 {len(named)} 支，解析可能壞了"

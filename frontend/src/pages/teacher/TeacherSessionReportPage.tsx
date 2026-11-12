@@ -1,14 +1,23 @@
 /**
  * TeacherSessionReportPage — teacher view of a student's learning session report.
  *
- * Reuses AssessmentReport (read-only) and adds TeacherCommentSection for
- * AI-generated + teacher-editable feedback.
+ * #3749：報告區塊改用跟學生端（SessionHistoryReportPage / ReportPage）同一套
+ * 「關卡完成卡片」（StepReportCards + reportCardsModel.ts），拿掉 AssessmentReport。
+ * TeacherCommentSection（AI/老師評語）、SpotlightStrategyRecord、
+ * VocabApplicationRecord、「作答紀錄」（StepRecordsView）這些老師專屬或已經在
+ * 做同一件事（逐題明細）的區塊不動。
+ *
+ * ⚠️ 記號（讀全文-做記號）在這裡沒有資料：annotation_entries 的擁有權檢查只認
+ * 學生本人（learning_annotations.py 的 get_owned_session），後端沒有教師專屬的
+ * annotations 端點，所以卡片的「做記號」細節在老師端直接略過
+ * （buildStepReportCards 的第 4 個參數傳 undefined，見 reportCardsModel.ts）——
+ * 不是假裝「沒有做記號」，是老實地不顯示那段細節。
  *
  * Route: /teacher/students/:studentId/sessions/:sessionId/report
  * Issue #993
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { fetchStory } from '../../services/api';
@@ -16,17 +25,7 @@ import {
   fetchTeacherSessionReport,
   type TeacherSessionReport,
 } from '../../services/teacherApi';
-import type {
-  LearningSession,
-  ReadingAttempt,
-  ComprehensionResult,
-  VocabResult,
-  KeyPassageReadingResult,
-  DiffToken,
-  Story,
-} from '../../types';
-import type { ComprehensionScoreResult } from '../../services/learningApi';
-import AssessmentReport from '../../components/reading-steps/AssessmentReport';
+import type { Story } from '../../types';
 import TeacherCommentSection from '../../components/teacher/TeacherCommentSection';
 import PageLoader from '../../components/ui/PageLoader';
 import { SpotlightStrategyRecord } from '../student/session-history/SpotlightStrategyRecord';
@@ -35,111 +34,9 @@ import { StepRecordsView } from '../student/session-history/StepRecordsView';
 import { buildComprehensionScores } from '../student/session-history/helpers';
 import { getTeacherStudentDialogue } from '../../services/teacherApi';
 import type { SessionDetailResponse } from '../../services/learningApi';
-
-// ---------------------------------------------------------------------------
-// Helpers — map raw backend dicts to frontend types
-// (Same as SessionHistoryReportPage — shared mapping logic)
-// ---------------------------------------------------------------------------
-
-function toReadingAttempt(raw: Record<string, unknown> | null, storyId: string): ReadingAttempt | null {
-  if (!raw) return null;
-  return {
-    storyId,
-    accuracy: typeof raw.accuracy === 'number' ? raw.accuracy : 0,
-    fluency: typeof raw.fluency === 'number' ? raw.fluency : 0,
-    cpm: typeof raw.cpm === 'number' ? raw.cpm : 0,
-    mispronouncedWords: Array.isArray(raw.mispronounced_words)
-      ? (raw.mispronounced_words as string[])
-      : [],
-    transcription: typeof raw.transcription === 'string' ? raw.transcription : '',
-    timestamp: typeof raw.timestamp === 'number' ? raw.timestamp : Date.now(),
-    lineBreakdown: undefined,
-  };
-}
-
-function toComprehensionResult(raw: Record<string, unknown> | null): ComprehensionResult | null {
-  if (!raw) return null;
-  return {
-    understoodCount: typeof raw.understood_count === 'number' ? raw.understood_count : 0,
-    requiredCount: typeof raw.required_count === 'number' ? raw.required_count : 0,
-    isComplete: raw.is_complete === true,
-    conversationLength: typeof raw.conversation_length === 'number' ? raw.conversation_length : 0,
-  };
-}
-
-function toVocabResult(raw: Record<string, unknown> | null): VocabResult | null {
-  if (!raw) return null;
-  const words = Array.isArray(raw.practiced_words)
-    ? (raw.practiced_words as string[])
-    : Array.isArray(raw.practiced_chars)
-      ? (raw.practiced_chars as string[])
-      : [];
-  const total = typeof raw.total_words === 'number'
-    ? raw.total_words
-    : typeof raw.total_chars === 'number'
-      ? raw.total_chars
-      : 0;
-  return { practicedWords: words, totalWords: total };
-}
-
-function toKeyPassageReadingResult(raw: Record<string, unknown> | null): KeyPassageReadingResult | null {
-  if (!raw) return null;
-  return {
-    matchRate: typeof raw.match_rate === 'number' ? raw.match_rate : 0,
-    feedback: typeof raw.feedback === 'string' ? raw.feedback : '',
-    cpm: typeof raw.cpm === 'number' ? raw.cpm : undefined,
-    durationMs: typeof raw.duration_ms === 'number' ? raw.duration_ms : undefined,
-    errorBreakdown:
-      raw.error_breakdown && typeof raw.error_breakdown === 'object'
-        ? (raw.error_breakdown as { correct: number; wrong: number; missing: number; extra: number })
-        : undefined,
-    diffTokens: Array.isArray(raw.diff_tokens)
-      ? (raw.diff_tokens as DiffToken[])
-      : undefined,
-    transcript: typeof raw.transcript === 'string' ? raw.transcript : undefined,
-  };
-}
-
-function buildSession(detail: TeacherSessionReport): LearningSession {
-  const storyId = detail.story_slug ?? '';
-  return {
-    storyId,
-    startedAt: new Date(detail.started_at).getTime(),
-    introCompleted: true,
-    readingAttempt: toReadingAttempt(detail.reading_result, storyId),
-    comprehensionResult: toComprehensionResult(detail.comprehension_result),
-    vocabResult: toVocabResult(detail.vocab_result),
-    dictationResult: null,
-    fullReadingResult: toKeyPassageReadingResult(detail.full_reading_result),
-  };
-}
-
-function buildScores(detail: TeacherSessionReport): ComprehensionScoreResult | null {
-  if (detail.comprehension_score == null) return null;
-
-  // comprehension_feedback is stored in the DB as a JSON string (Issue #1245 item 4)
-  let feedbackObj: { literal?: string; inferential?: string; evaluative?: string; overall?: string } = {};
-  if (detail.comprehension_feedback) {
-    try {
-      feedbackObj = JSON.parse(detail.comprehension_feedback);
-    } catch {
-      feedbackObj = { overall: detail.comprehension_feedback };
-    }
-  }
-
-  return {
-    comprehension_score: detail.comprehension_score,
-    literal_score: detail.literal_score ?? 0,
-    inferential_score: detail.inferential_score ?? 0,
-    evaluative_score: detail.evaluative_score ?? 0,
-    feedback: {
-      literal: feedbackObj.literal ?? '',
-      inferential: feedbackObj.inferential ?? '',
-      evaluative: feedbackObj.evaluative ?? '',
-      overall: feedbackObj.overall ?? '',
-    },
-  };
-}
+import { resolveActiveSteps } from '../../config/stepConfig';
+import StepReportCards from '../../components/report/StepReportCards';
+import { buildStepReportCards } from '../../components/report/reportCardsModel';
 
 // ---------------------------------------------------------------------------
 // Page
@@ -151,9 +48,7 @@ const TeacherSessionReportPage: React.FC = () => {
   const navigate = useNavigate();
 
   const [report, setReport] = useState<TeacherSessionReport | null>(null);
-  const [session, setSession] = useState<LearningSession | null>(null);
   const [story, setStory] = useState<Story | null>(null);
-  const [scores, setScores] = useState<ComprehensionScoreResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -173,8 +68,6 @@ const TeacherSessionReportPage: React.FC = () => {
     fetchTeacherSessionReport(token, sid, sessId)
       .then(async (detail) => {
         setReport(detail);
-        setSession(buildSession(detail));
-        setScores(buildScores(detail));
 
         if (detail.story_slug) {
           try {
@@ -190,6 +83,17 @@ const TeacherSessionReportPage: React.FC = () => {
       })
       .finally(() => setIsLoading(false));
   }, [token, studentId, sessionId]);
+
+  const cards = useMemo(
+    () =>
+      buildStepReportCards(
+        resolveActiveSteps(story?.stepSequence),
+        report?.step_progress?.steps_completed,
+        report?.step_progress?.step_data,
+        undefined,
+      ),
+    [story, report],
+  );
 
   if (isLoading) return <PageLoader />;
 
@@ -271,7 +175,7 @@ const TeacherSessionReportPage: React.FC = () => {
         </div>
       )}
 
-      {/* Reuse student AssessmentReport (read-only) or show empty message.
+      {/* #3749：關卡完成卡片，跟學生端同一套元件。
           Use is_complete from backend (#1911) — same criterion as the progress table
           (status == 'completed'). Avoids false "尚未完成" when result JSONB fields
           are null but the session is actually complete. */}
@@ -280,15 +184,7 @@ const TeacherSessionReportPage: React.FC = () => {
           <p className="text-sm text-gray-500">學生尚未完成此課文的學習，暫無報告資料</p>
         </div>
       ) : (
-        <AssessmentReport
-          session={session}
-          story={story}
-          onRetry={() => navigate(-1)}
-          dbSessionId={sessionId ? Number(sessionId) : null}
-          token={token}
-          comprehensionScores={scores}
-          readOnly
-        />
+        report && <StepReportCards storyTitle={story?.title ?? report.story_title ?? undefined} cards={cards} />
       )}
 
       {/* #3220 第二期：這裡原本是 #1549 留下的 `JSON.stringify(step_progress)`

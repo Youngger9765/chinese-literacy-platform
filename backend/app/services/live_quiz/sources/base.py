@@ -61,6 +61,12 @@ class QuizItem:
     # character within `stem` — so `stem` itself can stay PLAIN TEXT (never
     # zhuyin-annotated) and the frontend bolds/underlines that one index.
     extra: dict | None = None
+    # issue #3631 P0 #2: "揭曉時「看解析」按鈕 — 題庫有解析文字的題目才出現".
+    # Only `comprehension` ever sets this (its source yml's own `explanation`
+    # field, present on ~50/180 lessons' questions) — every other adapter
+    # leaves it None, and `to_payload` below omits the key entirely in that
+    # case so the frontend can treat "key absent" as "no button to show".
+    explanation: str | None = None
 
     def __post_init__(self) -> None:
         if not (2 <= len(self.options) <= 4):
@@ -98,6 +104,8 @@ class QuizItem:
         }
         if self.extra:
             payload["extra"] = self.extra
+        if self.explanation:
+            payload["explanation"] = self.explanation
         return payload
 
 

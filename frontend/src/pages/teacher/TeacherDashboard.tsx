@@ -8,11 +8,20 @@ import {
   createClassroom,
   listJunyiImportableClasses,
   batchCreateStudents,
+  batchCreateStudentsByPrefix,
   ClassroomResponse,
   ClassroomApiError,
   BatchCreateResult,
 } from '../../services/classroomApi';
 import { parseRoster } from './panel/AddStudentsPanel';
+import {
+  generateRandomCode,
+  getAccountCountValidation,
+  getPrefixValidation,
+  getSharedPasswordValidation,
+  previewAccountsByPrefix,
+} from './batchAccountsByPrefix';
+import PendingInvitationsBanner from './PendingInvitationsBanner';
 import SchoolSwitcher from '../../components/teacher/SchoolSwitcher';
 import { Skeleton, SkeletonText } from '../../components/ui/Skeleton';
 import LoadingIndicator from '../../components/ui/LoadingIndicator';
@@ -54,6 +63,14 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
   //   create: 幫學生建立帳號（貼名單或填人數）／ join: 學生已有帳號（建好後給班級代碼）／ junyi: 匯入均一班級
   const [creationMethod, setCreationMethod] = useState<'create' | 'join' | 'junyi'>('create');
   const [rosterText, setRosterText] = useState('');
+  // Issue #3991 (Junyi-parity): within 「還沒有帳號：幫學生建立帳號」, the
+  // DEFAULT is now Junyi's own flow (帳號前綴 + 共用密碼 + 數量), not the
+  // name/seat-number roster textarea. The roster path is kept, switchable
+  // via a small toggle, for teachers who prefer naming each student.
+  const [prefixMode, setPrefixMode] = useState(true);
+  const [accountPrefix, setAccountPrefix] = useState('');
+  const [sharedPassword, setSharedPassword] = useState('');
+  const [accountCount, setAccountCount] = useState('');
   const [newName, setNewName] = useState('');
   const [newGrade, setNewGrade] = useState('');
   const [isCreating, setIsCreating] = useState(false);
@@ -139,6 +156,17 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
     };
   }, [showCreateForm, token, teacherSchoolId]);
 
+  // Issue #3991: a fresh, ready-to-use random prefix/password suggestion
+  // every time the dialog opens (Junyi does the same -- the teacher can
+  // keep either default or edit it). The count field intentionally stays
+  // empty until the teacher types a number -- same as Junyi, and what
+  // keeps "確定建立班級" (no accounts) the default submit outcome.
+  useEffect(() => {
+    if (!showCreateForm) return;
+    setAccountPrefix(generateRandomCode(5));
+    setSharedPassword(generateRandomCode(5));
+  }, [showCreateForm]);
+
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!token || !newName.trim()) return;
@@ -161,19 +189,44 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
       // Students typed into the dialog are created right away, so one 建立
       // gives a class with accounts. Their passwords come back only once, so
       // the result travels to the class page, which opens on it.
-      const roster = creationMethod === 'create' ? parseRoster(rosterText, 1) : [];
       let createdStudents: BatchCreateResult | undefined;
-      if (roster.length > 0) {
-        try {
-          createdStudents = await batchCreateStudents(token, created.id, roster);
-        } catch {
-          showToast('班級已建立，但學生帳號沒有建成功，請在班級頁按「新增學生」再試一次', 'error');
+      if (creationMethod === 'create' && prefixMode) {
+        // Junyi-parity (#3991): prefix + shared password + count -> one
+        // call creates {prefix}01..{prefix}NN, all sharing the same
+        // password. Empty count (the default, untouched state) means "no
+        // accounts yet" -- same as an empty roster textarea.
+        const count = parseInt(accountCount, 10);
+        if (
+          accountCount.trim() !== '' &&
+          getPrefixValidation(accountPrefix).valid &&
+          getSharedPasswordValidation(sharedPassword).valid &&
+          getAccountCountValidation(count).valid
+        ) {
+          try {
+            createdStudents = await batchCreateStudentsByPrefix(token, created.id, {
+              prefix: accountPrefix,
+              password: sharedPassword,
+              count,
+            });
+          } catch {
+            showToast('班級已建立，但學生帳號沒有建成功，請在班級頁按「新增學生」再試一次', 'error');
+          }
+        }
+      } else if (creationMethod === 'create') {
+        const roster = parseRoster(rosterText, 1);
+        if (roster.length > 0) {
+          try {
+            createdStudents = await batchCreateStudents(token, created.id, roster);
+          } catch {
+            showToast('班級已建立，但學生帳號沒有建成功，請在班級頁按「新增學生」再試一次', 'error');
+          }
         }
       }
       showToast(`班級「${created.name}」建立成功！`, 'success');
       setNewName('');
       setNewGrade('');
       setRosterText('');
+      setAccountCount('');
       setShowCreateForm(false);
       // 均一模式 (#3378): a new class goes straight to "add students".
       // #3411: pass the classroom we already have so ClassroomDetail can
@@ -228,14 +281,21 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
             {/* School switcher — only shown when teacher belongs to multiple schools */}
             <SchoolSwitcher />
+            {/* Issue #3992: Junyi teal (#19A696) -- same token already used
+                for every other step of this same "建立班級" flow (the
+                in-modal radio/confirm buttons, #3989), just the trigger
+                button itself hadn't been switched yet. */}
             <button
               onClick={() => setShowCreateForm(true)}
-              className="bg-accent hover:bg-accent-hover text-white px-5 py-2.5 rounded-lg font-medium text-sm transition-colors whitespace-nowrap"
+              className="bg-[#19A696] hover:bg-[#15897B] text-white px-5 py-2.5 rounded-lg font-medium text-sm transition-colors whitespace-nowrap"
             >
               建立班級
             </button>
           </div>
         </div>
+
+        {/* #3820: pending co-teaching invitations addressed to this teacher */}
+        <PendingInvitationsBanner />
 
         {/* Fix #1545: Reports intent banner — shown when navigating from "查看報告" quick-action */}
         {isReportsIntent && (
@@ -289,7 +349,10 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
             aria-labelledby="create-classroom-title"
             className="fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/40 p-3 sm:p-6 overflow-y-auto"
           >
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl my-auto p-5 sm:p-7">
+          {/* Issue #3989: radius/width tuned to Junyi's create-class modal
+              (measured on the reference screenshot: ~900px wide at a 1280px
+              viewport, crisper ~8-12px corners than our previous rounded-2xl). */}
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl my-auto p-5 sm:p-8">
             <h2 id="create-classroom-title" className="text-xl font-bold text-gray-900 mb-5">建立新班級</h2>
 
             {createError && (
@@ -342,17 +405,21 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
             )}
 
             {/* The Junyi option (#3406) only renders once the probe confirmed the
-                feature is available on this env, so it never opens an empty panel. */}
+                feature is available on this env, so it never opens an empty panel.
+                Issue #3989: radio accent + panel bg tuned to Junyi's teal
+                (stepperModalPalette.primary #19A696, same token the Junyi
+                create-class modal's confirm button uses — see commonMuiTheme.js
+                in the Junyi frontend repo). */}
             <fieldset className="mb-5">
               <legend className="text-base text-gray-700 mb-2">請選擇加入學生的方式</legend>
-              <div className="rounded-xl bg-gray-50 border border-gray-200 p-4 space-y-3">
+              <div className="rounded-xl bg-gray-100 border border-gray-200 p-4 space-y-3">
                 <label className="flex items-start gap-3 cursor-pointer">
                   <input
                     type="radio"
                     name="creation-method"
                     checked={creationMethod === 'create'}
                     onChange={() => setCreationMethod('create')}
-                    className="mt-1 w-5 h-5 accent-accent"
+                    className="mt-1 w-5 h-5 accent-[#19A696]"
                   />
                   <span className="text-base text-gray-900">還沒有帳號：幫學生建立帳號</span>
                 </label>
@@ -362,7 +429,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
                     name="creation-method"
                     checked={creationMethod === 'join'}
                     onChange={() => setCreationMethod('join')}
-                    className="mt-1 w-5 h-5 accent-accent"
+                    className="mt-1 w-5 h-5 accent-[#19A696]"
                   />
                   <span className="text-base text-gray-900">學生已有帳號（含均一帳號）：建好後給學生班級代碼加入</span>
                 </label>
@@ -373,7 +440,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
                       name="creation-method"
                       checked={creationMethod === 'junyi'}
                       onChange={() => setCreationMethod('junyi')}
-                      className="mt-1 w-5 h-5 accent-accent"
+                      className="mt-1 w-5 h-5 accent-[#19A696]"
                     />
                     <span className="text-base text-gray-900">匯入均一班級學生：直接帶入我在均一的班級與學生</span>
                   </label>
@@ -398,7 +465,116 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
               )
             ) : (
               <form onSubmit={handleCreate} className="space-y-4">
-                {creationMethod === 'create' && (
+                {creationMethod === 'create' && prefixMode && (
+                  <div className="space-y-3">
+                    <p className="text-base font-semibold text-gray-800">幫學生建立帳號與密碼</p>
+                    <p className="text-sm text-gray-600">
+                      格式為{' '}
+                      <span className="text-[#19A696] font-medium">英文＋數字</span>
+                      ，帳號建議以「學校縮寫＋學年度＋班級」命名，密碼則
+                      <span className="text-[#19A696] font-medium">先由老師自行幫學生設定</span>
+                      。輸入班上所需要的帳號數量，即可創建多位學生帳號
+                    </p>
+                    <div className="flex flex-wrap gap-4">
+                      <div className="flex-1 min-w-[160px]">
+                        <label htmlFor="batch-prefix-account" className="block text-sm font-medium text-gray-700 mb-1">
+                          帳號名稱
+                        </label>
+                        <input
+                          id="batch-prefix-account"
+                          type="text"
+                          aria-label="帳號前綴"
+                          value={accountPrefix}
+                          onChange={(e) => setAccountPrefix(e.target.value.trim())}
+                          className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white text-base focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
+                        />
+                        <p className={`mt-1 text-xs ${getPrefixValidation(accountPrefix).valid ? 'text-gray-500' : 'text-red-600'}`}>
+                          {getPrefixValidation(accountPrefix).valid
+                            ? `範例：五年三班 1 號可取 ${accountPrefix || 'abc'}01`
+                            : getPrefixValidation(accountPrefix).msg}
+                        </p>
+                      </div>
+                      <div className="flex-1 min-w-[160px]">
+                        <label htmlFor="batch-prefix-password" className="block text-sm font-medium text-gray-700 mb-1">
+                          密碼
+                        </label>
+                        <input
+                          id="batch-prefix-password"
+                          type="text"
+                          aria-label="共用密碼"
+                          value={sharedPassword}
+                          onChange={(e) => setSharedPassword(e.target.value.trim())}
+                          className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white text-base focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
+                        />
+                        <p className={`mt-1 text-xs ${getSharedPasswordValidation(sharedPassword).valid ? 'text-gray-500' : 'text-red-600'}`}>
+                          {getSharedPasswordValidation(sharedPassword).msg || '可輸入自訂密碼'}
+                        </p>
+                      </div>
+                      <div className="flex-1 min-w-[160px]">
+                        <label htmlFor="batch-prefix-count" className="block text-sm font-medium text-gray-700 mb-1">
+                          請輸入帳號數量
+                        </label>
+                        <input
+                          id="batch-prefix-count"
+                          type="number"
+                          min={1}
+                          max={50}
+                          aria-label="帳號數量"
+                          value={accountCount}
+                          onChange={(e) => setAccountCount(e.target.value)}
+                          placeholder="例：28"
+                          className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-base focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
+                        />
+                        <p className={`mt-1 text-xs ${
+                          accountCount.trim() === '' || getAccountCountValidation(parseInt(accountCount, 10)).valid
+                            ? 'text-gray-500'
+                            : 'text-red-600'
+                        }`}
+                        >
+                          {accountCount.trim() === ''
+                            ? '可以先空著，之後在班級頁按「新增學生」'
+                            : getAccountCountValidation(parseInt(accountCount, 10)).msg || '單次最多 50 個帳號'}
+                        </p>
+                      </div>
+                    </div>
+                    {(() => {
+                      const preview = previewAccountsByPrefix(
+                        accountPrefix,
+                        sharedPassword,
+                        parseInt(accountCount, 10),
+                      );
+                      if (preview.length === 0) return null;
+                      return (
+                        <div className="max-h-40 overflow-y-auto rounded-lg border border-gray-200">
+                          <table className="w-full text-sm">
+                            <thead className="bg-gray-50 sticky top-0">
+                              <tr>
+                                <th className="text-left font-medium text-gray-600 px-3 py-1.5">帳號</th>
+                                <th className="text-left font-medium text-gray-600 px-3 py-1.5">密碼</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {preview.map((row) => (
+                                <tr key={row.identifier} className="odd:bg-[#19A696]/5">
+                                  <td className="px-3 py-1 font-mono text-gray-800">{row.identifier}</td>
+                                  <td className="px-3 py-1 font-mono text-gray-800">{row.password}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      );
+                    })()}
+                    <button
+                      type="button"
+                      onClick={() => setPrefixMode(false)}
+                      className="text-sm text-gray-500 underline hover:text-gray-700"
+                    >
+                      改用姓名／座號名單建立
+                    </button>
+                  </div>
+                )}
+                {creationMethod === 'create' && !prefixMode && (
                   <div className="space-y-2">
                     <label htmlFor="create-roster" className="block text-base font-semibold text-gray-800">
                       幫學生建立帳號與密碼
@@ -414,6 +590,13 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
                       placeholder={'1 王小明\n2 林雨萱\n3 陳柏宇'}
                       className="w-full px-3 py-2 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-base focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
                     />
+                    <button
+                      type="button"
+                      onClick={() => setPrefixMode(true)}
+                      className="text-sm text-gray-500 underline hover:text-gray-700"
+                    >
+                      改用帳號前綴批次建立（均一模式）
+                    </button>
                   </div>
                 )}
                 {creationMethod === 'join' && (
@@ -430,22 +613,43 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
                       setNewName('');
                       setNewGrade('');
                       setRosterText('');
+                      setAccountCount('');
+                      setPrefixMode(true);
                     }}
                     className="h-11 px-5 rounded-lg border border-gray-300 text-gray-700 text-base font-medium hover:bg-gray-50 transition-colors"
                   >
                     取消
                   </button>
-                  <button
-                    type="submit"
-                    disabled={isCreating || !newName.trim()}
-                    className="h-11 bg-accent hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 rounded-lg font-medium text-base transition-colors"
-                  >
-                    {isCreating
-                      ? '建立中...'
-                      : creationMethod === 'create' && parseRoster(rosterText, 1).length > 0
-                        ? `建立班級和 ${parseRoster(rosterText, 1).length} 個學生帳號`
-                        : '確定建立班級'}
-                  </button>
+                  {(() => {
+                    const prefixCountNum = parseInt(accountCount, 10);
+                    const hasCountIntent = accountCount.trim() !== '';
+                    const prefixPreviewCount = prefixMode
+                      ? previewAccountsByPrefix(accountPrefix, sharedPassword, prefixCountNum).length
+                      : 0;
+                    const rosterCount = !prefixMode ? parseRoster(rosterText, 1).length : 0;
+                    const pendingAccountsCount = creationMethod === 'create'
+                      ? (prefixMode ? prefixPreviewCount : rosterCount)
+                      : 0;
+                    // Teacher typed a count but prefix/password/count don't
+                    // all validate -- block submission rather than silently
+                    // creating the classroom with zero accounts (which
+                    // would look like a no-op to the teacher).
+                    const prefixFormInvalid = creationMethod === 'create'
+                      && prefixMode && hasCountIntent && prefixPreviewCount === 0;
+                    return (
+                      <button
+                        type="submit"
+                        disabled={isCreating || !newName.trim() || prefixFormInvalid}
+                        className="h-11 bg-[#19A696] hover:bg-[#15897B] disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 rounded-lg font-medium text-base transition-colors"
+                      >
+                        {isCreating
+                          ? '建立中...'
+                          : pendingAccountsCount > 0
+                            ? `建立班級和 ${pendingAccountsCount} 個學生帳號`
+                            : '確定建立班級'}
+                      </button>
+                    );
+                  })()}
                 </div>
               </form>
             )}
@@ -537,8 +741,10 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
         {/* Empty state — no classrooms at all */}
         {!isLoading && !error && classrooms.length === 0 && (
           <div className="text-center py-16">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-accent-bg rounded-2xl mb-4">
-              <svg className="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {/* Issue #3992: same teal as the header's 建立班級 button above --
+                this empty state is the same action, just a second entry point. */}
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-[#19A696]/10 rounded-2xl mb-4">
+              <svg className="w-8 h-8 text-[#19A696]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
               </svg>
             </div>
@@ -546,7 +752,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
             <p className="text-sm text-gray-500 mb-4">建立你的第一個班級，開始管理學生</p>
             <button
               onClick={() => setShowCreateForm(true)}
-              className="bg-accent hover:bg-accent-hover text-white px-5 py-2.5 rounded-lg font-medium text-sm transition-colors"
+              className="bg-[#19A696] hover:bg-[#15897B] text-white px-5 py-2.5 rounded-lg font-medium text-sm transition-colors"
             >
               建立班級
             </button>

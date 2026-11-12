@@ -27,6 +27,8 @@ interface OptionGridProps {
   selectedKey?: string | null;
   onSelect?: (key: string) => void;
   disabled?: boolean;
+  /** Host reveal only: how many players picked each option (PRD §4 step 4). */
+  counts?: Record<string, number>;
 }
 
 const OptionGrid: React.FC<OptionGridProps> = ({
@@ -36,7 +38,9 @@ const OptionGrid: React.FC<OptionGridProps> = ({
   selectedKey,
   onSelect,
   disabled,
+  counts,
 }) => {
+  const maxCount = counts ? Math.max(1, ...Object.values(counts)) : 1;
   const singleColumn = mode === 'host' && options.some((o) => o.text.length > 30);
   const gridClass =
     options.length <= 1
@@ -96,6 +100,18 @@ const OptionGrid: React.FC<OptionGridProps> = ({
                 style={{ fontSize: 'clamp(32px, 8px + 1.875vw, 44px)' }}
               >
                 {opt.text}
+              </span>
+            )}
+            {mode === 'host' && counts && (
+              <span className="ml-auto flex shrink-0 items-center gap-3 pl-4">
+                <span
+                  aria-hidden="true"
+                  className="h-3 rounded-full bg-white/80"
+                  style={{ width: `${Math.round((80 * (counts[opt.key] ?? 0)) / maxCount)}px` }}
+                />
+                <span data-testid="option-count" className="text-2xl font-bold tabular-nums">
+                  {counts[opt.key] ?? 0} 人
+                </span>
               </span>
             )}
             {revealed && (isCorrect || isWrongSelected) && (

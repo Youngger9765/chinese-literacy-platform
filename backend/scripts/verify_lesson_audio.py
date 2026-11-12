@@ -41,7 +41,6 @@ import os
 import subprocess
 import sys
 import tempfile
-import urllib.request
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
@@ -54,6 +53,7 @@ from app.services.tts.pauses import (  # noqa: E402
     TARGET_PAUSE_MS,
     find_silences,
 )
+from scripts._iap_token_bridge import urlopen_with_iap as _urlopen_with_iap  # noqa: E402
 
 DEFAULT_API = os.environ.get(
     "LESSON_AUDIO_API",
@@ -84,7 +84,9 @@ def _decode(mp3: bytes) -> array.array:
 
 
 def _paragraphs(api: str, lesson_id: int) -> list[str]:
-    with urllib.request.urlopen(f"{api}/api/tts/mapping/{lesson_id}", timeout=60) as r:
+    # #3719: adds a Proxy-Authorization header when IAP_AUDIENCE is configured
+    # (IAP-prep); with IAP off (today) this is exactly the old urlopen call.
+    with _urlopen_with_iap(f"{api}/api/tts/mapping/{lesson_id}", timeout=60) as r:
         mapping = json.load(r)
     return ["".join(s["text"] for s in p["sentences"]) for p in mapping["paragraphs"]]
 

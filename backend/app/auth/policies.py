@@ -142,8 +142,10 @@ def _is_org_admin_of_school(user_id: int, school_id, db: Session) -> bool:
 def require_classroom_owner(classroom: Classroom, user: User, db: Session) -> None:
     """Allow classroom primary teacher, or system_admin. Raise 403 otherwise.
 
-    Use for write operations (update, delete, assign).
-    Co-teachers (assistants) are NOT allowed for write ops.
+    Use for OWNER-EXCLUSIVE write operations only: delete classroom, manage
+    co-teachers (invite/role-change/remove). Co-teachers of ANY role
+    (editor/viewer) are NOT allowed here -- for the broader set of day-to-day
+    write operations editors ARE allowed to do, use ``require_classroom_editor``.
 
     (#3804) The org_admin/org_owner-of-the-classroom's-org bypass is retired
     — system_admin is the sole global exception under the school-as-label
@@ -157,11 +159,15 @@ def require_classroom_owner(classroom: Classroom, user: User, db: Session) -> No
 
 
 def require_classroom_member(classroom: Classroom, user: User, db: Session) -> None:
-    """Allow classroom owner, co-teachers, or system_admin. Raise 403 otherwise.
+    """Allow classroom owner, ACCEPTED co-teachers (any role), or system_admin.
+    Raise 403 otherwise.
 
-    Use for read operations (view students, progress).
+    Use for read operations (view students, progress, assignments, reports).
 
     (#3804) The org_admin/org_owner-of-the-classroom's-org bypass is retired.
+    (#3820) A co-teacher with status='pending' has not accepted the invitation
+    yet and therefore is NOT a member -- this is the single invariant that
+    keeps an un-accepted invite from leaking any read access anywhere.
     """
     if classroom.teacher_id == user.id:
         return
@@ -170,6 +176,37 @@ def require_classroom_member(classroom: Classroom, user: User, db: Session) -> N
         .filter(
             ClassroomTeacher.classroom_id == classroom.id,
             ClassroomTeacher.teacher_id == user.id,
+            ClassroomTeacher.status == "accepted",
+        )
+        .first()
+    )
+    if ct:
+        return
+    if is_system_admin(user.id, db):
+        return
+    raise HTTPException(status_code=403, detail="Not your classroom")
+
+
+def require_classroom_editor(classroom: Classroom, user: User, db: Session) -> None:
+    """Allow classroom owner, ACCEPTED 'editor'-role co-teachers, or system_admin.
+    Raise 403 otherwise.
+
+    Use for write operations that are NOT owner-exclusive: add/remove student,
+    classroom settings, assign homework, reset password, etc. (#3820). A
+    'viewer'-role or still-'pending' co-teacher is rejected.
+
+    Owner-exclusive operations (delete classroom, manage co-teachers
+    themselves) must keep using ``require_classroom_owner`` instead.
+    """
+    if classroom.teacher_id == user.id:
+        return
+    ct = (
+        db.query(ClassroomTeacher)
+        .filter(
+            ClassroomTeacher.classroom_id == classroom.id,
+            ClassroomTeacher.teacher_id == user.id,
+            ClassroomTeacher.status == "accepted",
+            ClassroomTeacher.role == "editor",
         )
         .first()
     )
@@ -206,6 +243,7 @@ def require_student_visible_to_teacher(student_id: int, user: User, db: Session)
                 .filter(
                     ClassroomTeacher.classroom_id == ClassroomStudent.classroom_id,
                     ClassroomTeacher.teacher_id == user.id,
+                    ClassroomTeacher.status == "accepted",
                 )
                 .correlate(ClassroomStudent)
                 .exists()

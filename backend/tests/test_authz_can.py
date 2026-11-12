@@ -103,7 +103,7 @@ def world(db):
     classroom_a = Classroom(school_id=school_a.id, teacher_id=teacher_a.id, name="班級 A", is_active=True)
     db.add(classroom_a)
     db.flush()
-    db.add(ClassroomTeacher(classroom_id=classroom_a.id, teacher_id=co_teacher.id, role="assistant"))
+    db.add(ClassroomTeacher(classroom_id=classroom_a.id, teacher_id=co_teacher.id, role="editor"))
     db.add(ClassroomStudent(classroom_id=classroom_a.id, student_id=student_a.id))
     db.commit()
 

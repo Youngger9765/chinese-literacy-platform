@@ -11,6 +11,20 @@ logger = logging.getLogger(__name__)
 _TTS_CACHE: dict[str, bytes] = {}
 CACHE_MAX_ENTRIES = 500
 
+# Claude Security finding find_014TkDM4cNsqXZB2ViMmYtmr (medium, CWE-770),
+# 2026-11-06: CACHE_MAX_ENTRIES alone bounds *count*, not *bytes* -- an
+# attacker sending distinct maximal-length texts (even after the
+# TTS_PARAGRAPH_MAX_LEN=2500 cap in routes/tts.py) could still fill the
+# process with a handful of multi-MB MP3 clips and OOM a 1Gi Cloud Run
+# instance well before hitting 500 entries. 150 MiB keeps worst-case L1
+# resident memory well under the instance's headroom (its baseline use
+# already runs over 512 MiB per the finding's own measurement) while being
+# generous for the real workload: actual lesson sentences/paragraphs are
+# far smaller than the worst-case length cap, so normal traffic never gets
+# near this budget.
+CACHE_MAX_BYTES = 150 * 1024 * 1024
+_cache_total_bytes = 0
+
 TTS_GCS_BUCKET = os.environ.get("TTS_GCS_BUCKET", "lingoleap-tts-cache")
 # 設定的主要 provider。`_gcs_put` 用它判斷「這段音訊是不是 primary 產出的」——
 # 不是的話就不寫共用快取（見該函式的說明）。
@@ -115,11 +129,36 @@ def _l1_key(key: str, provider: str) -> str:
 
 
 def _l1_put(key: str, audio_bytes: bytes, provider: str) -> None:
+    global _cache_total_bytes
     l1_key = _l1_key(key, provider)
+
+    # Replacing an existing entry: back out its old byte count first so the
+    # running total doesn't double-count it.
+    existing = _TTS_CACHE.get(l1_key)
+    if existing is not None:
+        _cache_total_bytes -= len(existing)
+
     if l1_key not in _TTS_CACHE and len(_TTS_CACHE) >= CACHE_MAX_ENTRIES:
         oldest_key = next(iter(_TTS_CACHE))
+        _cache_total_bytes -= len(_TTS_CACHE[oldest_key])
         del _TTS_CACHE[oldest_key]
+
     _TTS_CACHE[l1_key] = audio_bytes
+    _cache_total_bytes += len(audio_bytes)
+
+    # Byte-budget eviction (find_014TkDM4cNsqXZB2ViMmYtmr): entry-count alone
+    # doesn't stop a handful of oversized clips from blowing the instance's
+    # memory well before 500 entries. Evict oldest-first (same FIFO order as
+    # the count-based eviction above) until back under budget. A single
+    # clip larger than the whole budget still gets cached (eviction can't
+    # make room for something bigger than the budget itself), but
+    # TTS_PARAGRAPH_MAX_LEN already bounds how large any one clip can be.
+    while _cache_total_bytes > CACHE_MAX_BYTES and len(_TTS_CACHE) > 1:
+        oldest_key = next(iter(_TTS_CACHE))
+        if oldest_key == l1_key:
+            break
+        _cache_total_bytes -= len(_TTS_CACHE[oldest_key])
+        del _TTS_CACHE[oldest_key]
 
 
 def get_cached_tts(text: str, provider: str) -> Optional[bytes]:

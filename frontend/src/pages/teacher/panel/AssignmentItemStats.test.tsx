@@ -24,7 +24,7 @@ describe('AssignmentItemStats (#3367)', () => {
 
   it('explains the empty state instead of showing zeros', () => {
     render(<AssignmentItemStats data={{ assignment_id: 1, submitted_count: 0, assigned_count: 10, items }} />);
-    expect(screen.getByText(/還沒有學生交這份作業/)).toBeInTheDocument();
+    expect(screen.getByText(/還沒有學生交這份任務/)).toBeInTheDocument();
     expect(screen.queryByText('0%')).not.toBeInTheDocument();
   });
 

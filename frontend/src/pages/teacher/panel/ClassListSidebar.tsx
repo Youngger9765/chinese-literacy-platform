@@ -36,12 +36,17 @@ const ClassListSidebar: React.FC<ClassListSidebarProps> = ({ currentId, onSwitch
 
   const renderClassroom = (classroom: ClassroomResponse, isInactive = false) => {
     const isCurrent = classroom.id === currentId;
+    // Issue #3989: Junyi's current-class highlight (crop_d1_sidebar_active.png)
+    // is a plain light-gray row with an orange (#FFA500) right accent bar and
+    // dark (not brand-colored) text — not our indigo accent-bg/text pairing.
+    // Scoped to this one list; every other active-state indicator in the app
+    // keeps the indigo brand accent.
     const className = isInactive
       ? `w-full text-left px-4 py-3 text-base font-normal transition-colors cursor-pointer break-words ${
           isCurrent ? 'bg-gray-50 text-gray-400' : 'text-gray-400 hover:bg-gray-50'
         }`
       : `w-full text-left px-4 py-3 text-base font-medium transition-colors cursor-pointer break-words border-r-4 ${
-          isCurrent ? 'bg-accent-bg text-accent border-accent' : 'text-gray-700 hover:bg-gray-50 border-transparent'
+          isCurrent ? 'bg-gray-100 text-gray-900 border-[#FFA500]' : 'text-gray-700 hover:bg-gray-50 border-transparent'
         }`;
 
     return (
@@ -62,10 +67,14 @@ const ClassListSidebar: React.FC<ClassListSidebarProps> = ({ currentId, onSwitch
   return (
     <nav aria-label="我的班級" className="py-4">
       <div className="px-4 pb-4 border-b border-gray-200">
+        {/* Issue #3992: same Junyi teal (#19A696) as every other step of this
+            same 建立班級 flow (TeacherDashboard's header/empty-state buttons,
+            the in-modal radio/confirm buttons, #3989) -- this sidebar entry
+            point was the one still left on the app's indigo accent. */}
         <button
           type="button"
           onClick={() => navigate('/teacher', { state: { intent: 'create' } })}
-          className="w-full inline-flex items-center justify-center gap-1.5 h-11 rounded-lg bg-accent hover:bg-accent-hover text-white text-base font-medium transition-colors cursor-pointer"
+          className="w-full inline-flex items-center justify-center gap-1.5 h-11 rounded-lg bg-[#19A696] hover:bg-[#15897B] text-white text-base font-medium transition-colors cursor-pointer"
         >
           <span aria-hidden="true" className="text-lg leading-none">＋</span>
           建立班級
