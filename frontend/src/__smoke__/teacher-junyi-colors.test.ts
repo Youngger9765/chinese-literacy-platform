@@ -106,3 +106,18 @@ describe('teacher workspace stays off the LingoLeap indigo accent (#4005)', () =
     expect(offenders, `${relPath} still references the indigo accent:\n${offenders.join('\n')}`).toEqual([]);
   });
 });
+
+// Sidebar.tsx is shared by every role, so it can't be swept like the teacher
+// folders. Its mobile nav active states carry teacher-nav-active-* hooks that
+// index.css recolors only under .font-teacher-ui; lock both halves.
+describe('shared Sidebar mobile nav uses Junyi colors in teacher views', () => {
+  const sidebar = fs.readFileSync(path.join(SRC_ROOT, 'components/layout/Sidebar.tsx'), 'utf-8');
+  const css = fs.readFileSync(path.join(SRC_ROOT, 'index.css'), 'utf-8');
+  it.each(['teacher-nav-active-text', 'teacher-nav-active-solid', 'teacher-nav-active-soft'])(
+    '%s is applied in Sidebar and recolored under .font-teacher-ui',
+    (hook) => {
+      expect(sidebar).toContain(hook);
+      expect(css).toMatch(new RegExp(`\\.font-teacher-ui \\.${hook}\\s*\\{[^}]*#19A696`));
+    },
+  );
+});

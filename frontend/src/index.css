@@ -36,6 +36,13 @@
   background-color: #19A696;
 }
 
+/* Mobile bottom nav / drawer (Sidebar.tsx is shared by every role): the
+   active item is the last LingoLeap-purple element left in teacher views
+   at phone width. Recolor only under .font-teacher-ui. */
+.font-teacher-ui .teacher-nav-active-text { color: #19A696; }
+.font-teacher-ui .teacher-nav-active-solid { background-color: #19A696; color: #fff; }
+.font-teacher-ui .teacher-nav-active-soft { background-color: #E8F6F4; color: #19A696; }
+
 /* When zhuyin is active, force BpmfZihiSerif (字嗨宋體) as the primary font on
    ALL elements inside the learning shell. This overrides Tailwind font-family
    utilities (font-headline, font-body, font-sans) which would otherwise take
