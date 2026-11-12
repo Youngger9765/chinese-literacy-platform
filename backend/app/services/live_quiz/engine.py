@@ -366,25 +366,27 @@ def join_game(db: Session, code: str, user: User) -> LiveQuizPlayer:
         classroom = db.query(Classroom).filter(Classroom.id == game.classroom_id).first()
         if classroom is not None:
             _require_live_quiz_enabled(db, classroom)
-            # issue #3708: the feature-enabled check above only asks "is
-            # 課堂搶答 turned on for this classroom" — it never asked "is
-            # THIS user actually a member of this classroom". Any
-            # authenticated student who learned/guessed the 6-digit code
-            # could join a class-tied game they were never enrolled in.
-            # Host/co-teacher rules are untouched — this only gates the
-            # student join path, and only for games tied to a classroom
-            # (classless code/QR games stay ungated per #3607 above).
-            is_enrolled = (
-                db.query(ClassroomStudent)
-                .filter(
-                    ClassroomStudent.classroom_id == game.classroom_id,
-                    ClassroomStudent.student_id == user.id,
-                )
-                .first()
-                is not None
+        # Enrollment is checked even when the classroom row is gone (main hotfix
+        # #3708): a missing classroom must not turn a class-tied game into an open one.
+        # issue #3708: the feature-enabled check above only asks "is
+        # 課堂搶答 turned on for this classroom" — it never asked "is
+        # THIS user actually a member of this classroom". Any
+        # authenticated student who learned/guessed the 6-digit code
+        # could join a class-tied game they were never enrolled in.
+        # Host/co-teacher rules are untouched — this only gates the
+        # student join path, and only for games tied to a classroom
+        # (classless code/QR games stay ungated per #3607 above).
+        is_enrolled = (
+            db.query(ClassroomStudent)
+            .filter(
+                ClassroomStudent.classroom_id == game.classroom_id,
+                ClassroomStudent.student_id == user.id,
             )
-            if not is_enrolled:
-                raise HTTPException(status_code=403, detail="你不是這個班級的學生，無法加入")
+            .first()
+            is not None
+        )
+        if not is_enrolled:
+            raise HTTPException(status_code=403, detail="你不是這個班級的學生，無法加入")
 
     if game.status == "ended":
         raise HTTPException(status_code=409, detail="This game has ended")

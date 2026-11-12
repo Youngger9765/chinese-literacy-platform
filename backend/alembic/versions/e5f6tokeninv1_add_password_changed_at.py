@@ -1,8 +1,17 @@
 """add users.password_changed_at, token invalidation on password change (find_016vZk1d3wRKkhjQMTUbGU6Y)
 
 Revision ID: e5f6tokeninv1
-Revises: d4e5clmemail
+Revises: c3d4pwteach1m
 Create Date: 2026-11-05 00:00:00.000000
+
+Retargeted 2026-11-06 for the hotfix-to-prod cherry-pick: this migration
+was originally chained onto `d4e5clmemail` (#3824 claim-account's
+pending_email column) on staging. #3824 is staging-only (Hans-pending,
+not shipped to main) and is deliberately excluded from this prod hotfix
+batch, so `d4e5clmemail` does not exist on main's migration chain.
+`down_revision` is retargeted to `c3d4pwteach1m` (main's actual head at
+cherry-pick time) -- this column has no functional dependency on
+pending_email; the chain link was purely sequential ordering on staging.
 
 Why this migration exists: Claude Security finding find_016vZk1d3wRKkhjQMTUbGU6Y
 (low, CWE-613) -- an attacker holding a stolen bearer token keeps full
@@ -34,7 +43,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision: str = "e5f6tokeninv1"
-down_revision: Union[str, None] = "d4e5clmemail"
+down_revision: Union[str, None] = "c3d4pwteach1m"
 branch_labels = None
 depends_on = None
 

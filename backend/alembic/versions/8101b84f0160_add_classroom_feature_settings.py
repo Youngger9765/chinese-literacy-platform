@@ -25,6 +25,11 @@ depends_on = None
 
 
 def upgrade() -> None:
+    # Idempotent (2026-11-12 staging->main release rechain): the staging DB
+    # already has this column and re-runs this revision.
+    existing = {c["name"] for c in sa.inspect(op.get_bind()).get_columns("classrooms")}
+    if "feature_settings" in existing:
+        return
     op.add_column(
         "classrooms",
         sa.Column(

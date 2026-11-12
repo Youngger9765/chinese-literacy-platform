@@ -1,7 +1,7 @@
 """add status/accepted_at to classroom_teachers + backfill assistant->editor
 
 Revision ID: co01te02viewer03
-Revises: c3d4pwteach1
+Revises: 988d8bc90428
 Create Date: 2026-11-02 00:00:00.000000
 
 Rechained 2026-11-03 onto c3d4pwteach1 (the password-teacher migration,
@@ -10,6 +10,11 @@ b2c3d4moe02 independently and landed as sibling alembic heads once
 c3d4pwteach1 merged to staging first -- re-pointing down_revision here
 collapses them back to a single head (this migration's own content is
 unchanged).
+
+Re-parented again 2026-11-12 (staging -> main release) onto 988d8bc90428:
+c3d4pwteach1 was the staging-only twin of main's c3d4pwteach1m and is gone;
+this revision now runs after e5f6tokeninv1. upgrade() is idempotent because
+the staging DB already applied it under the old chain and re-runs it.
 
 Issue #3820: co-teachers gain a "viewer" (read-only) role alongside the
 existing full-access role (renamed assistant -> editor), plus an invitation
@@ -30,35 +35,43 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision: str = "co01te02viewer03"
-down_revision: Union[str, None] = "c3d4pwteach1"
+down_revision: Union[str, None] = "988d8bc90428"
 branch_labels = None
 depends_on = None
 
 
 def upgrade() -> None:
-    op.add_column(
-        "classroom_teachers",
-        sa.Column(
-            "status", sa.String(length=20), nullable=False, server_default="accepted"
-        ),
-    )
-    op.add_column(
-        "classroom_teachers",
-        sa.Column("accepted_at", sa.DateTime(timezone=True), nullable=True),
-    )
-
     conn = op.get_bind()
+    existing = {c["name"] for c in sa.inspect(conn).get_columns("classroom_teachers")}
+    added_accepted_at = False
+    if "status" not in existing:
+        op.add_column(
+            "classroom_teachers",
+            sa.Column(
+                "status", sa.String(length=20), nullable=False, server_default="accepted"
+            ),
+        )
+    if "accepted_at" not in existing:
+        op.add_column(
+            "classroom_teachers",
+            sa.Column("accepted_at", sa.DateTime(timezone=True), nullable=True),
+        )
+        added_accepted_at = True
+
     # Pre-existing co-teachers were never run through an invitation flow --
     # they were active the instant they were created. Preserve that behavior
-    # (role vocabulary rename only; nobody's access changes).
+    # (role vocabulary rename only; nobody's access changes). Safe to repeat.
     conn.execute(sa.text("UPDATE classroom_teachers SET role = 'editor' WHERE role = 'assistant'"))
     # Every row is already accepted (server_default above); backfill the
     # approximate acceptance timestamp from invited_at for audit purposes.
-    conn.execute(
-        sa.text(
-            "UPDATE classroom_teachers SET accepted_at = invited_at WHERE status = 'accepted'"
+    # Only on first application: a re-run (staging DB, 2026-11-12 rechain)
+    # must not overwrite real accepted_at values written since.
+    if added_accepted_at:
+        conn.execute(
+            sa.text(
+                "UPDATE classroom_teachers SET accepted_at = invited_at WHERE status = 'accepted'"
+            )
         )
-    )
 
 
 def downgrade() -> None:

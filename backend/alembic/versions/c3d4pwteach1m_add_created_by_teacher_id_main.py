@@ -1,8 +1,14 @@
 """add users.created_by_teacher_id, the password-teacher gate (#3818)
 
-Revision ID: c3d4pwteach1
-Revises: b2c3d4moe02
+Revision ID: c3d4pwteach1m
+Revises: b2c3d4moe02m
 Create Date: 2026-11-02 00:00:00.000000
+
+Note: `m`-suffixed like the MOE migrations before it — main and staging have
+diverged alembic chains (main is missing ~142 staging-only commits), so this
+revision id and down_revision are renamed from staging's c3d4pwteach1 /
+b2c3d4moe02 to chain onto main's actual current head (b2c3d4moe02m) instead.
+Same DDL as staging's c3d4pwteach1, just re-parented. See hotfix #3865.
 
 Why this migration exists: teachers could reset the password of ANY student
 enrolled in their classroom, even students they never created (self-
@@ -40,8 +46,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = "c3d4pwteach1"
-down_revision: Union[str, None] = "b2c3d4moe02"
+revision: str = "c3d4pwteach1m"
+down_revision: Union[str, None] = "b2c3d4moe02m"
 branch_labels = None
 depends_on = None
 
