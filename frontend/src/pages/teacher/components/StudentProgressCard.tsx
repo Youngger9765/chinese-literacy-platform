@@ -68,7 +68,7 @@ export const StudentProgressCard: React.FC<StudentProgressCardProps> = ({
             onPreview(student);
           }}
           disabled={isPreviewLoading}
-          className="inline-flex items-center justify-center px-2.5 py-1 rounded-md text-xs font-medium text-accent bg-accent-bg border border-accent/30 hover:bg-accent-bg/70 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="inline-flex items-center justify-center px-2.5 py-1 rounded-md text-xs font-medium text-[#19A696] bg-[#19A696]/10 border border-[#19A696]/30 hover:bg-[#19A696]/70 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           title="看系統建議這位學生接下來練哪幾課"
         >
           {isPreviewLoading ? '載入中…' : '推薦練習'}
@@ -103,7 +103,7 @@ export const StudentProgressCard: React.FC<StudentProgressCardProps> = ({
         <span className="text-xs text-gray-400">練習次數</span>
         <p>
           <span className={`inline-block min-w-[2rem] px-2 py-0.5 rounded-full text-xs font-medium ${
-            student.total_sessions > 0 ? 'bg-accent-bg text-accent' : 'bg-gray-100 text-gray-500'
+            student.total_sessions > 0 ? 'bg-[#19A696]/10 text-[#19A696]' : 'bg-gray-100 text-gray-500'
           }`}>{student.total_sessions}</span>
         </p>
       </div>

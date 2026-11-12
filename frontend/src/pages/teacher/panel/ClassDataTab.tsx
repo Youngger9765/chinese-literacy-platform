@@ -103,7 +103,7 @@ const ClassDataTab: React.FC<ClassDataTabProps> = ({
             aria-current={view === item.key ? 'page' : undefined}
             onClick={() => changeView(item.key)}
             className={`shrink-0 rounded-lg px-3 py-2 text-left text-sm transition-colors cursor-pointer ${
-              view === item.key ? 'bg-accent-bg text-accent font-medium' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+              view === item.key ? 'bg-[#19A696]/10 text-[#19A696] font-medium' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
             }`}
           >
             {item.label}

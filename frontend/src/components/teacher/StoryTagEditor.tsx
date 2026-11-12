@@ -166,7 +166,7 @@ const StoryTagEditor: React.FC<StoryTagEditorProps> = ({
 
         {isLoading ? (
           <div className="flex items-center justify-center py-8">
-            <div className="w-6 h-6 border-2 border-gray-300 border-t-accent rounded-full animate-spin" />
+            <div className="w-6 h-6 border-2 border-gray-300 border-t-[#19A696] rounded-full animate-spin" />
           </div>
         ) : (
           <>
@@ -247,12 +247,12 @@ const StoryTagEditor: React.FC<StoryTagEditorProps> = ({
                     onKeyDown={handleTagInputKeyDown}
                     placeholder="輸入標籤後按 Enter 或點「新增」"
                     maxLength={MAX_TAG_LENGTH}
-                    className="flex-1 text-sm px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
+                    className="flex-1 text-sm px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#19A696] focus:border-transparent"
                   />
                   <button
                     onClick={handleAddTag}
                     disabled={!tagInput.trim()}
-                    className="px-3 py-2 text-sm rounded-lg bg-accent text-white font-medium hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
+                    className="px-3 py-2 text-sm rounded-lg bg-[#19A696] text-white font-medium hover:bg-[#15897B] disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
                   >
                     新增
                   </button>
@@ -285,7 +285,7 @@ const StoryTagEditor: React.FC<StoryTagEditorProps> = ({
                 <button
                   onClick={handleSave}
                   disabled={isSaving}
-                  className="px-4 py-2 text-sm rounded-lg bg-accent text-white font-medium hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="px-4 py-2 text-sm rounded-lg bg-[#19A696] text-white font-medium hover:bg-[#15897B] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {isSaving ? '儲存中...' : '儲存'}
                 </button>

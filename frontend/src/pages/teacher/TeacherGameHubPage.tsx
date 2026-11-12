@@ -63,7 +63,7 @@ const TeacherGameHubPage: React.FC = () => {
             key={mode.key}
             type="button"
             onClick={() => mode.teacherHubRoute && navigate(mode.teacherHubRoute)}
-            className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-4 text-left transition-colors hover:border-accent hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+            className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-4 text-left transition-colors hover:border-[#19A696] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#19A696] focus-visible:ring-offset-1"
           >
             <span className="text-2xl shrink-0" aria-hidden="true">{mode.teacherHubEmoji}</span>
             <span className="min-w-0">

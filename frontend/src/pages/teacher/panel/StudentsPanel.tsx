@@ -30,7 +30,7 @@ function AnswerRecordLink({ studentId, sessionId }: { studentId: number; session
   return (
     <Link
       to={`/teacher/students/${studentId}/sessions/${sessionId}/report`}
-      className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs font-medium text-accent border border-accent/30 hover:bg-accent-bg transition-colors whitespace-nowrap"
+      className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs font-medium text-[#19A696] border border-[#19A696]/30 hover:bg-[#19A696]/10 transition-colors whitespace-nowrap"
       title="查看這位學生目前答過的內容"
     >
       作答紀錄
@@ -204,7 +204,7 @@ export function StudentDetail({
                     </div>
                     <Link
                       to={`/teacher/students/${studentId}/sessions/${s.id}/report`}
-                      className="shrink-0 inline-flex items-center gap-0.5 px-2 py-1 rounded text-xs font-medium text-accent border border-accent/30 hover:bg-accent-bg transition-colors"
+                      className="shrink-0 inline-flex items-center gap-0.5 px-2 py-1 rounded text-xs font-medium text-[#19A696] border border-[#19A696]/30 hover:bg-[#19A696]/10 transition-colors"
                     >
                       查看報告
                     </Link>
@@ -267,7 +267,7 @@ const StudentsPanel: React.FC<StudentsPanelProps> = ({ classroomId, selectedStud
             <ul className="sm:hidden space-y-3" aria-label="學生名單（手機）">
               {students.map((s) => (
                 <li key={s.id} className="rounded-xl border border-gray-200 p-4 space-y-2">
-                  <button type="button" onClick={() => onSelectStudent(s.id)} className="font-semibold text-accent hover:underline cursor-pointer">
+                  <button type="button" onClick={() => onSelectStudent(s.id)} className="font-semibold text-[#19A696] hover:underline cursor-pointer">
                     {s.name}
                   </button>
                   <div className="grid grid-cols-2 gap-2 text-sm">
@@ -289,7 +289,7 @@ const StudentsPanel: React.FC<StudentsPanelProps> = ({ classroomId, selectedStud
                 {students.map((s) => (
                   <tr key={s.id} className="border-b border-gray-100">
                     <td className="py-3">
-                      <button type="button" onClick={() => onSelectStudent(s.id)} className="font-semibold text-accent hover:underline cursor-pointer">
+                      <button type="button" onClick={() => onSelectStudent(s.id)} className="font-semibold text-[#19A696] hover:underline cursor-pointer">
                         {s.name}
                       </button>
                     </td>

@@ -106,13 +106,13 @@ const LeagueProgressTab: React.FC<LeagueProgressTabProps> = ({ classroomId }) =>
       )}
 
       {boardRow && (
-        <div className="rounded-2xl bg-gradient-to-br from-accent to-accent/80 p-4 shadow-sm">
+        <div className="rounded-2xl bg-gradient-to-br from-[#19A696] to-[#19A696]/80 p-4 shadow-sm">
           <EnergyBar
             label="班級平均"
             points={boardRow.average_points}
             threshold={boardRow.badge_threshold}
             badgeEarned={boardRow.team_badge_earned}
-            tone="accent"
+            tone="teacher"
           />
           <p className="mt-2 text-[11px] text-white/80">
             {chestHintText(chestName, boardRow.treasure_chest_eligible, boardRow.treasure_chest_participants_needed)}

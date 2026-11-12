@@ -324,13 +324,13 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="搜尋班級名稱..."
-                className="w-full h-10 pl-9 pr-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+                className="w-full h-10 pl-9 pr-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-[#19A696]/40 focus:border-[#19A696] transition-colors"
               />
             </div>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as 'name' | 'grade' | 'students')}
-              className="h-10 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+              className="h-10 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#19A696]/40 focus:border-[#19A696] transition-colors"
             >
               <option value="name">依名稱排序</option>
               <option value="grade">依年級排序</option>
@@ -375,7 +375,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
                     placeholder="例：五年甲班"
                     required
                     autoFocus
-                    className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-base focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+                    className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-base focus:outline-none focus:ring-2 focus:ring-[#19A696]/40 focus:border-[#19A696] transition-colors"
                   />
                 </div>
                 <div>
@@ -386,7 +386,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
                     id="classroom-grade"
                     value={newGrade}
                     onChange={(e) => setNewGrade(e.target.value)}
-                    className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white text-base focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+                    className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white text-base focus:outline-none focus:ring-2 focus:ring-[#19A696]/40 focus:border-[#19A696] transition-colors"
                   >
                     <option value="">未指定</option>
                     <optgroup label="國小">
@@ -486,7 +486,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
                           aria-label="帳號前綴"
                           value={accountPrefix}
                           onChange={(e) => setAccountPrefix(e.target.value.trim())}
-                          className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white text-base focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
+                          className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white text-base focus:outline-none focus:ring-2 focus:ring-[#19A696]/40 focus:border-[#19A696]"
                         />
                         <p className={`mt-1 text-xs ${getPrefixValidation(accountPrefix).valid ? 'text-gray-500' : 'text-red-600'}`}>
                           {getPrefixValidation(accountPrefix).valid
@@ -504,7 +504,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
                           aria-label="共用密碼"
                           value={sharedPassword}
                           onChange={(e) => setSharedPassword(e.target.value.trim())}
-                          className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white text-base focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
+                          className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white text-base focus:outline-none focus:ring-2 focus:ring-[#19A696]/40 focus:border-[#19A696]"
                         />
                         <p className={`mt-1 text-xs ${getSharedPasswordValidation(sharedPassword).valid ? 'text-gray-500' : 'text-red-600'}`}>
                           {getSharedPasswordValidation(sharedPassword).msg || '可輸入自訂密碼'}
@@ -523,7 +523,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
                           value={accountCount}
                           onChange={(e) => setAccountCount(e.target.value)}
                           placeholder="例：28"
-                          className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-base focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
+                          className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-base focus:outline-none focus:ring-2 focus:ring-[#19A696]/40 focus:border-[#19A696]"
                         />
                         <p className={`mt-1 text-xs ${
                           accountCount.trim() === '' || getAccountCountValidation(parseInt(accountCount, 10)).valid
@@ -588,7 +588,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
                       onChange={(e) => setRosterText(e.target.value)}
                       rows={5}
                       placeholder={'1 王小明\n2 林雨萱\n3 陳柏宇'}
-                      className="w-full px-3 py-2 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-base focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
+                      className="w-full px-3 py-2 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-base focus:outline-none focus:ring-2 focus:ring-[#19A696]/40 focus:border-[#19A696]"
                     />
                     <button
                       type="button"
@@ -709,7 +709,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
                   className="bg-white rounded-2xl shadow-card p-5 text-left hover:shadow-md transition-all group cursor-pointer"
                 >
                   <div className="flex items-start justify-between mb-3">
-                    <h3 className="font-bold text-gray-900 group-hover:text-accent transition-colors">
+                    <h3 className="font-bold text-gray-900 group-hover:text-[#19A696] transition-colors">
                       {cr.name}
                     </h3>
                     <div className="flex gap-1 flex-wrap justify-end">

@@ -111,7 +111,7 @@ export const AssignmentCreateForm: React.FC<AssignmentCreateFormProps> = ({
                 value={selectedStoryId}
                 onChange={(event) => setSelectedStoryId(event.target.value)}
                 required
-                className="w-full h-10 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+                className="w-full h-10 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#19A696]/40 focus:border-[#19A696] transition-colors"
               >
                 <option value="">選擇課文</option>
                 {stories.map((story) => (
@@ -134,7 +134,7 @@ export const AssignmentCreateForm: React.FC<AssignmentCreateFormProps> = ({
               value={formTitle}
               onChange={(event) => setFormTitle(event.target.value)}
               placeholder="留空則使用課文標題"
-              className="w-full h-10 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+              className="w-full h-10 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-[#19A696]/40 focus:border-[#19A696] transition-colors"
             />
           </div>
 
@@ -148,7 +148,7 @@ export const AssignmentCreateForm: React.FC<AssignmentCreateFormProps> = ({
               onChange={(event) => setFormDescription(event.target.value)}
               placeholder="任務說明或提示"
               rows={2}
-              className="w-full px-3 py-2 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors resize-none"
+              className="w-full px-3 py-2 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-[#19A696]/40 focus:border-[#19A696] transition-colors resize-none"
             />
           </div>
         </div>
@@ -177,7 +177,7 @@ export const AssignmentCreateForm: React.FC<AssignmentCreateFormProps> = ({
               type="checkbox"
               checked={formSkipCompleted}
               onChange={(event) => setFormSkipCompleted(event.target.checked)}
-              className="h-4 w-4 rounded border-gray-300 text-accent focus:ring-accent"
+              className="h-4 w-4 rounded border-gray-300 accent-[#19A696] focus:ring-[#19A696]"
             />
             <label htmlFor="assign-skip-completed" className="text-sm text-gray-700 cursor-pointer select-none">
               跳過已完成步驟（學生重做任務時自動略過上次完成的環節）
@@ -212,7 +212,10 @@ export const AssignmentCreateForm: React.FC<AssignmentCreateFormProps> = ({
         <button
           type="submit"
           disabled={isCreating || !selectedStoryId}
-          className="bg-accent hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-white px-5 py-2 rounded-lg font-medium text-sm transition-colors cursor-pointer"
+          /* Issue #4005: Junyi blue (#4990E2), same assign-action token as
+             the 建立任務 buttons that open this form — not the app's indigo
+             accent. */
+          className="bg-[#4990E2] hover:bg-[#2F7FD1] disabled:opacity-50 disabled:cursor-not-allowed text-white px-5 py-2 rounded-lg font-medium text-sm transition-colors cursor-pointer"
         >
           {isCreating ? '建立中...' : '確認建立'}
         </button>

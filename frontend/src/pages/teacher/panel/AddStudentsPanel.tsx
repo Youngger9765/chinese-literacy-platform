@@ -111,7 +111,7 @@ const AddStudentsPanel: React.FC<AddStudentsPanelProps> = ({
       aria-selected={mode === m}
       onClick={() => setMode(m)}
       className={`flex-1 px-3 py-2.5 rounded-lg text-base font-medium cursor-pointer ${
-        mode === m ? 'bg-white shadow text-accent' : 'text-gray-600'
+        mode === m ? 'bg-white shadow text-[#19A696]' : 'text-gray-600'
       }`}
     >
       {label}
@@ -142,7 +142,7 @@ const AddStudentsPanel: React.FC<AddStudentsPanelProps> = ({
             onChange={(e) => setText(e.target.value)}
             rows={6}
             placeholder={'1 王小明\n2 林雨萱\n3 陳柏宇'}
-            className="w-full px-3 py-2 rounded-lg border border-gray-300 text-base focus:outline-none focus:ring-2 focus:ring-accent/40"
+            className="w-full px-3 py-2 rounded-lg border border-gray-300 text-base focus:outline-none focus:ring-2 focus:ring-[#19A696]/40"
           />
           {dupes.length > 0 && (
             <p role="status" className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
@@ -154,7 +154,7 @@ const AddStudentsPanel: React.FC<AddStudentsPanelProps> = ({
               type="button"
               onClick={create}
               disabled={busy || parsed.length === 0}
-              className="h-11 px-5 rounded-lg bg-accent text-white font-semibold disabled:opacity-50 cursor-pointer"
+              className="h-11 px-5 rounded-lg bg-[#19A696] text-white font-semibold disabled:opacity-50 cursor-pointer"
             >
               {busy ? '建立中…' : `建立 ${parsed.length} 個學生帳號`}
             </button>
@@ -182,7 +182,7 @@ const AddStudentsPanel: React.FC<AddStudentsPanelProps> = ({
               <button
                 type="button"
                 onClick={() => openCredentialCards(classroomName, result.created)}
-                className="h-11 px-5 rounded-lg bg-white border border-accent text-accent font-semibold cursor-pointer"
+                className="h-11 px-5 rounded-lg bg-white border border-[#19A696] text-[#19A696] font-semibold cursor-pointer"
               >
                 列印帳密卡
               </button>
@@ -197,7 +197,7 @@ const AddStudentsPanel: React.FC<AddStudentsPanelProps> = ({
           {joinCode && (
             <p className="text-gray-700">
               請學生登入（可用均一帳號）後輸入班級代碼{' '}
-              <span className="font-mono text-2xl font-bold tracking-widest text-accent align-middle">{joinCode}</span>
+              <span className="font-mono text-2xl font-bold tracking-widest text-[#19A696] align-middle">{joinCode}</span>
             </p>
           )}
           <div>
