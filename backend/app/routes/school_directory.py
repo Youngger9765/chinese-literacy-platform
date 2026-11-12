@@ -23,10 +23,11 @@ from sqlalchemy.orm import Session
 from ..auth.dependencies import get_current_user
 from ..auth.rate_limiter import ai_rate_limiter, get_client_key, make_general_rate_limit_dependency
 from ..database import get_db
+from ..models.school import School
 from ..models.user import User
 from ..schemas.school import SchoolDirectoryItem, SchoolDirectorySearchResponse, SchoolNameSuggestion
 from ..services.moe_school_suggest import suggest_school_names
-from ..services.school_directory_search import search_school_directory
+from ..services.school_directory_search import normalize_school_name, search_school_directory
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +43,32 @@ _search_rl = make_general_rate_limit_dependency(max_requests=30, window_seconds=
 # expensive call — this only runs when fuzzy matching already found 0
 # results, so it never competes with the cheap path above for budget).
 _SUGGEST_MAX_PER_MINUTE = 5
+
+
+def _filter_suggestions_to_county(
+    db: Session, county: str, suggestions: list[SchoolNameSuggestion]
+) -> list[SchoolNameSuggestion]:
+    """#3817 — the LLM "did you mean" fallback has no idea a county was
+    even selected (it only ever sees the raw query string), so it can
+    suggest a real school from a completely different county (the reported
+    bug: a 台北市-scoped search suggested a 臺中市 school).
+
+    This is a deterministic, DB-backed filter applied AFTER the LLM call —
+    it holds even if the LLM ignores a county hint in its prompt, which a
+    prompt-only fix cannot guarantee (EDD: LLM output is not reliable
+    enough on its own to be the lock; a prompt-wording fix would still
+    deserve to exist for quality, but correctness must come from here).
+    """
+    if not suggestions:
+        return suggestions
+    norm_county = normalize_school_name(county)
+    valid_names = {
+        normalize_school_name(name)
+        for (name,) in db.query(School.name)
+        .filter(School.moe_school_code.isnot(None), School.county_name == norm_county)
+        .all()
+    }
+    return [s for s in suggestions if normalize_school_name(s.school_name) in valid_names]
 
 
 @router.get("/schools/directory/search", response_model=SchoolDirectorySearchResponse)
@@ -67,8 +94,10 @@ async def search_school_directory_route(
     if q and q.strip() and not items:
         rl_key = f"ai:{get_client_key(request)}"
         if ai_rate_limiter.check(rl_key, max_requests=_SUGGEST_MAX_PER_MINUTE, window_seconds=60):
-            raw_suggestions = await suggest_school_names(q)
+            raw_suggestions = await suggest_school_names(q, county=county)
             suggestions = [SchoolNameSuggestion(**s) for s in raw_suggestions]
+            if county:
+                suggestions = _filter_suggestions_to_county(db, county, suggestions)
         else:
             logger.info("school_name_suggest rate-limited for key=%s", rl_key)
             suggestions = []

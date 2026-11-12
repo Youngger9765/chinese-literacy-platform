@@ -51,6 +51,25 @@ class TestComprehensionAdapter:
     def test_no_comprehension_module_returns_empty(self):
         assert comprehension.generate_items("L0001", _lesson()) == []
 
+    def test_explanation_text_passes_through_when_present(self):
+        """issue #3631 P0 #2: 揭曉畫面的「看解析」按鈕只在題庫有解析文字時出現
+        — this is the one source module that has it (50/180 comprehension
+        yml files carry an `explanation` key per question)."""
+        lesson = _lesson(comprehension={"questions": [
+            {"index": 1, "stem": "第一題？", "answer": "A",
+             "options": {"A": "甲", "B": "乙"},
+             "explanation": "甲才是正確答案，因為課文第二段明講。"},
+        ]})
+        items = comprehension.generate_items("L0001", lesson)
+        assert items[0].explanation == "甲才是正確答案，因為課文第二段明講。"
+
+    def test_explanation_is_none_when_absent(self):
+        lesson = _lesson(comprehension={"questions": [
+            {"index": 1, "stem": "第一題？", "answer": "A", "options": {"A": "甲", "B": "乙"}},
+        ]})
+        items = comprehension.generate_items("L0001", lesson)
+        assert items[0].explanation is None
+
 
 class TestVocabDefinitionsAdapter:
     def test_distractors_come_from_same_lesson_bank_only(self):

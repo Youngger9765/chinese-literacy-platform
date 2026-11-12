@@ -1,6 +1,7 @@
 /**
  * SessionHistoryReportPage — shows a historical session in two tabs:
- *   1. 學習報告 — overall AssessmentReport (existing)
+ *   1. 學習報告 — 關卡完成卡片（StepReportCards，#3749；在學習流程裡的
+ *      ReportPage.tsx 用的是同一套元件與邏輯 — reportCardsModel.ts + useReportProgress）
  *   2. 作答紀錄 — per-step answer records (reading errors, dialogue Q&A, vocab, full-reading diff)
  *
  * Route: /sessions/:sessionId/report
@@ -8,9 +9,15 @@
  *
  * Refactored (Issue #1958): split into focused sub-components under ./session-history/.
  * Named exports here keep existing import paths working for tests and consumers.
+ *
+ * #3749：「學習報告」分頁原本是 AssessmentReport（朗讀六環節診斷、AI 理解度評分、
+ * 折線圖……）。#3399 把學習流程內的報告步驟換成「關卡完成卡片」之後，刻意把這個
+ * 歷史紀錄頁留在舊格式 —— 但學生從「學習歷史」點進來看到的，應該跟剛完成學習時
+ * 看到的是同一種格式，不然會覺得「怎麼還是舊的」。「作答紀錄」分頁不動：那是
+ * 逐題明細（對話紀錄、朗讀 diff），跟卡片頁的「完成與否 + 分數摘要」是不同用途。
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { fetchStory } from '../../services/api';
@@ -19,11 +26,15 @@ import {
   type SessionDetailResponse,
   type ComprehensionScoreResult,
 } from '../../services/learningApi';
-import type { LearningSession, Story } from '../../types';
-import AssessmentReport from '../../components/reading-steps/AssessmentReport';
+import type { Story } from '../../types';
 import PageLoader from '../../components/ui/PageLoader';
+import { resolveActiveSteps } from '../../config/stepConfig';
+import { stepPath } from '../../config/stepPath';
+import StepReportCards from '../../components/report/StepReportCards';
+import { useReportProgress } from '../../components/report/useReportProgress';
+import { buildStepReportCards, marksFromAnnotations } from '../../components/report/reportCardsModel';
 
-import { buildLearningSession, buildComprehensionScores } from './session-history/helpers';
+import { buildComprehensionScores } from './session-history/helpers';
 import { StepRecordsView as _StepRecordsView } from './session-history/StepRecordsView';
 
 // ---------------------------------------------------------------------------
@@ -48,13 +59,14 @@ const SessionHistoryReportPage: React.FC = () => {
   const navigate = useNavigate();
 
   const [detail, setDetail] = useState<SessionDetailResponse | null>(null);
-  const [session, setSession] = useState<LearningSession | null>(null);
   const [story, setStory] = useState<Story | null>(null);
   const [comprehensionScores, setComprehensionScores] =
     useState<ComprehensionScoreResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState<PageTab>('report');
+
+  const dbSessionId = sessionId ? Number(sessionId) : null;
 
   useEffect(() => {
     if (!token || !sessionId) return;
@@ -71,7 +83,6 @@ const SessionHistoryReportPage: React.FC = () => {
     fetchSessionReport(token, id)
       .then(async (d) => {
         setDetail(d);
-        setSession(buildLearningSession(d));
         setComprehensionScores(buildComprehensionScores(d));
 
         if (d.story_slug) {
@@ -87,6 +98,26 @@ const SessionHistoryReportPage: React.FC = () => {
       })
       .finally(() => setIsLoading(false));
   }, [token, sessionId]);
+
+  // #3749 — 關卡卡片的進度與記號直接讀 DB（跟學習流程內的 ReportPage.tsx 同一套）。
+  // 沒有可以退回用的本機 state（這是歷史紀錄頁，不是進行中的 session），
+  // fallback 傳 null：真的讀失敗時卡片會顯示「尚未完成」而不是編造的資料。
+  // carryForwardMarks 傳 false：這裡看的是清單裡點進來的某一筆指定紀錄，同一課
+  // 其他 session 可能是更早或更晚、不相干的另一次嘗試，不該把別次的記號顯示成
+  // 這一筆的（carry-forward 是為了 ReportPage.tsx 重新整理時的同一次嘗試設計的，
+  // 見 useReportProgress.ts 檔頭說明）。
+  const report = useReportProgress(dbSessionId, token, detail?.story_slug ?? undefined, null, false);
+
+  const cards = useMemo(
+    () =>
+      buildStepReportCards(
+        resolveActiveSteps(story?.stepSequence),
+        report.progress?.steps_completed,
+        report.progress?.step_data,
+        report.annotations ? marksFromAnnotations(report.annotations, story?.content) : null,
+      ),
+    [story, report.progress, report.annotations],
+  );
 
   if (isLoading) return <PageLoader />;
 
@@ -108,6 +139,7 @@ const SessionHistoryReportPage: React.FC = () => {
 
   const teacherReviewedAt = detail?.teacher_reviewed_at ?? null;
   const teacherComment = detail?.teacher_comment ?? null;
+  const storyId = story?.id;
 
   return (
     <div className="flex-1 overflow-y-auto">
@@ -164,14 +196,15 @@ const SessionHistoryReportPage: React.FC = () => {
 
         {/* Tab content */}
         {activeTab === 'report' ? (
-          <AssessmentReport
-            session={session}
-            story={story}
-            onRetry={() => navigate('/learning-history')}
-            dbSessionId={sessionId ? Number(sessionId) : null}
-            token={token}
-            comprehensionScores={comprehensionScores}
-          />
+          report.loading && dbSessionId ? (
+            <p className="py-16 text-center text-gray-500" role="status">載入學習成果…</p>
+          ) : (
+            <StepReportCards
+              storyTitle={story?.title}
+              cards={cards}
+              onGoToStep={storyId ? (stepId) => navigate(stepPath(storyId, stepId)) : undefined}
+            />
+          )
         ) : (
           detail && (
             <_StepRecordsView

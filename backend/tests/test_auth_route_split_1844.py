@@ -628,8 +628,18 @@ class TestSSOLogin:
 
     # --- Junyi SSO ---
 
-    def test_junyi_login_links_existing_email_no_duplicate(self, client):
-        """Junyi SSO: existing email user gets junyi_identity_id linked, not duplicated."""
+    def test_junyi_login_no_longer_links_an_existing_email_match_login_time(self, client):
+        """Junyi SSO: an existing account is never auto-linked by email match.
+
+        Retired positive control (find_01TR6DK93L6FNmgCd2aDRV3a, critical,
+        2026-11-06): this test used to assert that a Junyi login carrying an
+        existing user's email got silently linked and handed an
+        access_token -- that WAS the bug (CWE-290 account takeover), not a
+        feature worth protecting. See
+        TestJunyiLoginDoesNotHijackAVerifiedLocalAccountEither for the
+        attack this closes. Linking an existing account to Junyi now
+        requires the authenticated POST /auth/link-junyi path instead.
+        """
         email = _unique_email("junyi.org")
         self._create_user_in_db(email)
 
@@ -650,11 +660,10 @@ class TestSSOLogin:
         with patch("app.services.sso_login_service.httpx.post", return_value=mock_resp):
             resp = client.post("/api/auth/junyi", json={"code": "fake-junyi-code"})
 
-        assert resp.status_code == 200
-        data = resp.json()
-        assert "access_token" in data
-        assert data.get("is_new_user") is False
+        assert resp.status_code == 409, resp.text
+        assert "access_token" not in resp.json()
 
+        # still exactly one row -- refused, not duplicated either
         count = self._count_users_by_email(email)
         assert count == 1, f"Expected 1 user, got {count}"
 
@@ -833,8 +842,189 @@ class TestJunyiLoginDoesNotHijackUnverifiedLocalAccount:
         user = self._get_user(email)
         assert user is not None
         assert user.junyi_identity_id is None
-        # the refusal must not have a side effect of flipping verification
-        assert user.email_verified is False
+
+
+class TestJunyiLoginDoesNotHijackAVerifiedLocalAccountEither:
+    """Claude Security finding find_01TR6DK93L6FNmgCd2aDRV3a (CRITICAL) — CWE-290.
+
+    The #3867/#3868 fix above only closed the gap for an UNVERIFIED local
+    account (email_verified=False). It left the identical hijack open for a
+    VERIFIED one: step 2 of resolve_junyi_user still links junyi_identity_id
+    onto ANY active user matched by Junyi's asserted userEmail, with no
+    check that the Junyi CALLER actually owns that email — Junyi's token
+    exchange exposes no verified-email flag for us to check at all (unlike
+    Google's id_token, which does, and which the #3830 fix correctly trusts).
+
+    Attack: an anonymous attacker who can get (or register) a Junyi identity
+    carrying a victim's email gets a full session as that victim, even when
+    the victim's LingoLeap row is already verified (self-verified via our
+    own flow, or Google-created where email_verified defaults True) — a
+    teacher or system_admin victim means full account takeover: classroom
+    rosters, student PII, admin routes.
+
+    Old (now-retired) positive control: test_junyi_login_links_existing_email_no_duplicate
+    used to assert this exact linking succeeded for a verified row — that
+    was the bug, not a feature. It now asserts the refusal instead (see
+    below) and no longer serves as a positive control for anything.
+
+    Fix: Junyi login never links onto an EXISTING account by email match
+    alone, regardless of local email_verified — only a brand-new account
+    (no existing row for that email) is created. An already-logged-in user
+    can deliberately link their own Junyi identity via the new authenticated
+    POST /api/auth/link-junyi endpoint instead (no email-ownership trust
+    issue there: the caller already holds a valid session for that account).
+    """
+
+    def _create_verified_user_in_db(self, email: str) -> int:
+        db = TestingSessionLocal()
+        try:
+            user = User(
+                email=email,
+                password_hash=hash_password("VictimChosenPassword123!"),
+                name="Verified Victim Row",
+                email_verified=True,
+            )
+            db.add(user)
+            db.commit()
+            db.refresh(user)
+            return user.id
+        finally:
+            db.close()
+
+    def _get_user(self, email: str):
+        db = TestingSessionLocal()
+        try:
+            return db.query(User).filter(User.email == email).first()
+        finally:
+            db.close()
+
+    def test_junyi_login_is_refused_for_a_verified_local_account_matched_only_by_email(self, client):
+        email = _unique_email("junyi-verified-hijack.org")
+        self._create_verified_user_in_db(email)
+
+        attacker_junyi_user_id = f"junyi_uid_attacker_{secrets.token_hex(8)}"
+        fake_junyi_payload = {
+            "data": {
+                "userId": attacker_junyi_user_id,
+                "userEmail": email,
+                "userDisplayName": "Attacker-Controlled Junyi Identity",
+            }
+        }
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = fake_junyi_payload
+
+        with patch("app.services.sso_login_service.httpx.post", return_value=mock_resp):
+            resp = client.post("/api/auth/junyi", json={"code": "fake-junyi-code"})
+
+        assert resp.status_code == 409, resp.text
+        assert "access_token" not in resp.json()
+
+    def test_the_verified_account_is_not_silently_linked_to_the_attackers_junyi_id(self, client):
+        email = _unique_email("junyi-verified-hijack.org")
+        self._create_verified_user_in_db(email)
+
+        attacker_junyi_user_id = f"junyi_uid_attacker_{secrets.token_hex(8)}"
+        fake_junyi_payload = {
+            "data": {
+                "userId": attacker_junyi_user_id,
+                "userEmail": email,
+                "userDisplayName": "Attacker-Controlled Junyi Identity",
+            }
+        }
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = fake_junyi_payload
+
+        with patch("app.services.sso_login_service.httpx.post", return_value=mock_resp):
+            client.post("/api/auth/junyi", json={"code": "fake-junyi-code"})
+
+        user = self._get_user(email)
+        assert user is not None
+        assert user.junyi_identity_id is None
+        # the refusal must not have the side effect of un-verifying the
+        # victim's row either -- it was created verified and must stay so.
+        assert user.email_verified is True
+
+
+class TestLinkJunyiRequiresAuthentication:
+    """POST /auth/link-junyi (find_01TR6DK93L6FNmgCd2aDRV3a's real path): a
+    logged-in user can deliberately link their own Junyi identity. No
+    email-ownership trust issue, because `current_user` comes from the
+    caller's own Bearer token, never from Junyi's claim."""
+
+    def _login(self, client, email: str) -> str:
+        resp = client.post("/api/auth/login", json={"email": email, "password": "ValidPass123!"})
+        assert resp.status_code == 200, resp.text
+        return resp.json()["access_token"]
+
+    def _get_user(self, email: str):
+        db = TestingSessionLocal()
+        try:
+            return db.query(User).filter(User.email == email).first()
+        finally:
+            db.close()
+
+    def _fake_junyi_exchange(self, junyi_user_id: str):
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = {
+            "data": {"userId": junyi_user_id, "userEmail": "", "userDisplayName": ""}
+        }
+        return patch("app.services.sso_login_service.httpx.post", return_value=mock_resp)
+
+    def test_unauthenticated_call_is_rejected(self, client):
+        with self._fake_junyi_exchange(f"junyi_uid_{secrets.token_hex(8)}"):
+            resp = client.post("/api/auth/link-junyi", json={"code": "fake-junyi-code"})
+        assert resp.status_code in (401, 403)
+
+    def test_logged_in_user_can_link_their_own_junyi_identity(self, client):
+        email = _unique_email("link-junyi.org")
+        reg = _register_teacher(client, email=email)
+        token = self._login(client, email)
+
+        junyi_user_id = f"junyi_uid_{secrets.token_hex(8)}"
+        with self._fake_junyi_exchange(junyi_user_id):
+            resp = client.post(
+                "/api/auth/link-junyi",
+                json={"code": "fake-junyi-code"},
+                headers={"Authorization": f"Bearer {token}"},
+            )
+
+        assert resp.status_code == 200, resp.text
+        user = self._get_user(email)
+        assert user.junyi_identity_id == junyi_user_id
+
+    def test_cannot_link_a_junyi_identity_already_claimed_by_another_account(self, client):
+        victim_email = _unique_email("link-junyi.org")
+        attacker_email = _unique_email("link-junyi.org")
+        _register_teacher(client, email=victim_email)
+        _register_teacher(client, email=attacker_email)
+
+        junyi_user_id = f"junyi_uid_{secrets.token_hex(8)}"
+
+        # victim links it first
+        victim_token = self._login(client, victim_email)
+        with self._fake_junyi_exchange(junyi_user_id):
+            resp = client.post(
+                "/api/auth/link-junyi",
+                json={"code": "victim-code"},
+                headers={"Authorization": f"Bearer {victim_token}"},
+            )
+        assert resp.status_code == 200, resp.text
+
+        # attacker tries to claim the SAME junyi identity for their own account
+        attacker_token = self._login(client, attacker_email)
+        with self._fake_junyi_exchange(junyi_user_id):
+            resp = client.post(
+                "/api/auth/link-junyi",
+                json={"code": "attacker-code"},
+                headers={"Authorization": f"Bearer {attacker_token}"},
+            )
+        assert resp.status_code == 409, resp.text
+
+        attacker = self._get_user(attacker_email)
+        assert attacker.junyi_identity_id is None, "attacker must not steal the victim's junyi identity"
 
 
 class TestJunyiNewAccountIsNotPreVerified:

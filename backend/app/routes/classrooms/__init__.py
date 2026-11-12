@@ -18,6 +18,8 @@ from fastapi import APIRouter
 # co_teaching, teacher) import by old underscore-prefixed names.
 from .helpers import get_classroom_or_404 as _get_classroom_or_404  # noqa: F401
 from .helpers import require_owner_or_admin as _require_owner_or_admin  # noqa: F401
+from .helpers import require_editor_or_admin as _require_editor_or_admin  # noqa: F401
+from .helpers import require_member_or_admin as _require_member_or_admin  # noqa: F401
 
 from .classroom_batch import router as _batch_router
 from .classroom_crud import router as _crud_router
@@ -25,6 +27,7 @@ from .classroom_csv import router as _csv_router
 from .classroom_join import router as _join_router
 from .classroom_password import router as _password_router
 from .classroom_junyi_import import router as _junyi_import_router
+from .classroom_pk_activity import router as _pk_activity_router
 from .classroom_students import router as _students_router
 
 router = APIRouter(tags=["classrooms"])
@@ -45,3 +48,4 @@ router.include_router(_batch_router)
 router.include_router(_csv_router)
 router.include_router(_password_router)
 router.include_router(_junyi_import_router)
+router.include_router(_pk_activity_router)

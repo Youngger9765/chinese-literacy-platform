@@ -2,6 +2,40 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Issue #3985 — Junyi parity: the teacher workspace (AppShell root div gets
+   .font-teacher-ui instead of .font-sans when activeView === 'teacher') uses
+   a plain UI sans stack instead of the student-facing kaishu default
+   (cwTeXKai). This is a base/inherited font-family, not !important — it only
+   changes elements that don't already set their own font-* utility (e.g. the
+   app shell's own Sidebar/NotificationBell explicitly use font-ui and are
+   untouched). Placed after `@tailwind utilities` so it wins by source order
+   over the `.font-sans` utility at equal specificity. Never applies under
+   [data-zhuyin-active] (teacher pages don't set that attribute). */
+.font-teacher-ui {
+  font-family: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', Arial, sans-serif;
+}
+
+/* Issue #3989 — Junyi parity round 2: the page background measured on
+   Junyi's teacher workspace is a plain light gray (#F4F4F4), not the
+   student-facing cream `bg-surface` (#FBF6EE, kept for 陳淑麗教授's reading
+   material). `.font-teacher-ui` and `.bg-surface` land on the exact same
+   AppShell root div (see AppShell.tsx) only when activeView === 'teacher',
+   so this combined-class selector overrides just that one element — it
+   does NOT touch `bg-surface` used elsewhere in the teacher subtree (e.g.
+   TeacherLiveQuiz* game-mode screens intentionally keep the cream surface;
+   they're out of this PRD's three flows). Specificity (two classes) beats
+   the plain `.bg-surface` utility regardless of source order. */
+.font-teacher-ui.bg-surface {
+  background-color: #F4F4F4;
+}
+
+/* Junyi parity: the sidebar logo tile and user avatar were the last two
+   LingoLeap-purple (bg-accent) elements left in the teacher workspace.
+   Scoped to .font-teacher-ui so student/admin views keep the purple brand. */
+.font-teacher-ui .teacher-brand-mark {
+  background-color: #19A696;
+}
+
 /* When zhuyin is active, force BpmfZihiSerif (字嗨宋體) as the primary font on
    ALL elements inside the learning shell. This overrides Tailwind font-family
    utilities (font-headline, font-body, font-sans) which would otherwise take

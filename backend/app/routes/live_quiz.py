@@ -59,6 +59,7 @@ def create_game(
         question_count_mode=payload.question_count_mode,
         seconds=payload.seconds,
         reading_seconds=payload.reading_seconds,
+        reading_pace=payload.reading_pace,
         classroom_id=payload.classroom_id,
         shuffle=payload.shuffle,
         show_leaderboard_after_each=payload.show_leaderboard_after_each,

@@ -1,7 +1,7 @@
 /**
  * 學生分頁 (#3376)
  *
- * 一張簡單的名單：每位學生交了幾份、平均幾分。點名字 → 這位學生每份作業的
+ * 一張簡單的名單：每位學生交了幾份、平均幾分。點名字 → 這位學生每份任務的
  * 狀態、分數、三個部分、唸錯的字（老師回饋：「看不到他們究竟錯了哪些」）。
  * 刻意只放老師每天會看的東西；完整學習曲線、標籤、指導紀錄在「更多 → 詳細學習紀錄」。
  */
@@ -11,8 +11,10 @@ import { useAuth } from '../../../contexts/AuthContext';
 import {
   AssignmentMatrixResponse,
   StudentAssignmentsResponse,
+  StudentSession,
   getAssignmentMatrix,
   getStudentAssignments,
+  getStudentSessions,
 } from '../../../services/teacherApi';
 import { CellBadge, distinctTitles, isOverdue } from './AssignmentMatrixGrid';
 
@@ -68,8 +70,23 @@ export function StudentDetail({
     setError('');
     getStudentAssignments(token, classroomId, studentId)
       .then(setData)
-      .catch(() => setError('無法載入這位學生的作業'));
+      .catch(() => setError('無法載入這位學生的任務'));
   }, [token, classroomId, studentId]);
+
+  // Self-practice sessions (not linked to any assignment) — matrix/assignment
+  // screens have no path to this data at all otherwise. Fetched separately
+  // from `data` (assignment rows) since it's a different endpoint/shape; the
+  // dedup against assignment-linked session ids happens below, once both are
+  // loaded.
+  const [sessions, setSessions] = useState<StudentSession[] | null>(null);
+
+  useEffect(() => {
+    if (!token) return;
+    setSessions(null);
+    getStudentSessions(token, studentId)
+      .then(setSessions)
+      .catch(() => setSessions([]));
+  }, [token, studentId]);
 
   return (
     <div className="space-y-4">
@@ -84,14 +101,23 @@ export function StudentDetail({
           .map((r) => ({ ...r, title: titles.get(r.assignment_id) ?? r.title }));
         // Every part empty for every row: one sentence instead of columns of dashes (codex screen audit #1).
         const noParts = rows.every((r) => r.reading_accuracy === null && r.comprehension === null && r.vocab === null && r.error_chars.length === 0);
+        // Self-practice = a session NOT already linked to one of this
+        // student's assignment rows. Hidden when viewing a single assignment
+        // (onlyAssignmentId) since that's a narrower, assignment-only context.
+        const assignmentSessionIds = new Set(
+          data.rows.map((r) => r.session_id).filter((id): id is number => id !== null),
+        );
+        const selfPracticeSessions = !onlyAssignmentId
+          ? (sessions ?? []).filter((s) => !assignmentSessionIds.has(s.id))
+          : [];
         return (
         <>
           <h3 className="text-xl font-bold text-gray-900">{data.student_name}</h3>
           {rows.length === 0 ? (
-            <p className="text-gray-500">這個班級還沒有指派作業</p>
+            <p className="text-gray-500">這個班級還沒有指派任務</p>
           ) : (
             <>
-            <ul className="sm:hidden space-y-3" aria-label="這位學生的作業（手機）">
+            <ul className="sm:hidden space-y-3" aria-label="這位學生的任務（手機）">
               {rows.map((r) => (
                 <li key={r.assignment_id} className="rounded-xl border border-gray-200 p-4 space-y-2">
                   <div className="flex items-start justify-between gap-2">
@@ -112,10 +138,10 @@ export function StudentDetail({
                 </li>
               ))}
             </ul>
-            <table className="hidden sm:table w-full text-left" aria-label="這位學生的作業">
+            <table className="hidden sm:table w-full text-left" aria-label="這位學生的任務">
               <thead>
                 <tr className="text-sm text-gray-500 border-b border-gray-200">
-                  <th className="py-2 font-medium">作業</th>
+                  <th className="py-2 font-medium">任務</th>
                   <th className="py-2 font-medium">狀態</th>
                   {!noParts && <th className="py-2 font-medium text-right">朗讀</th>}
                   {!noParts && <th className="py-2 font-medium text-right">理解</th>}
@@ -154,10 +180,38 @@ export function StudentDetail({
           )}
           {noParts ? (
             <p className="text-sm text-gray-600">
-              這些作業沒有記錄到朗讀、理解、生字的分項成績——點「作答紀錄」看他目前做到哪裡、答了什麼
+              這些任務沒有記錄到朗讀、理解、生字的分項成績——點「作答紀錄」看他目前做到哪裡、答了什麼
             </p>
           ) : (
-            <p className="text-sm text-gray-500">「—」代表這份作業沒有記錄到那一部分</p>
+            <p className="text-sm text-gray-500">「—」代表這份任務沒有記錄到那一部分</p>
+          )}
+          {selfPracticeSessions.length > 0 && (
+            <div className="space-y-2 pt-2">
+              <h4 className="text-base font-semibold text-gray-900">自主練習</h4>
+              <ul className="space-y-2" aria-label="自主練習紀錄">
+                {selfPracticeSessions.map((s) => (
+                  <li
+                    key={s.id}
+                    className="rounded-xl border border-gray-200 p-3 flex items-center justify-between gap-3"
+                  >
+                    <div className="min-w-0">
+                      <p className="font-medium text-gray-900 truncate">{s.story_title ?? '（未知課文）'}</p>
+                      <p className="text-xs text-gray-500">
+                        {s.status === 'completed'
+                          ? `已完成${s.overall_score !== null ? ` · ${Math.round(s.overall_score)} 分` : ''}`
+                          : '進行中'}
+                      </p>
+                    </div>
+                    <Link
+                      to={`/teacher/students/${studentId}/sessions/${s.id}/report`}
+                      className="shrink-0 inline-flex items-center gap-0.5 px-2 py-1 rounded text-xs font-medium text-accent border border-accent/30 hover:bg-accent-bg transition-colors"
+                    >
+                      查看報告
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
         </>
         );

@@ -992,7 +992,11 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
         {/* ── Scrollable article area ───────────────────────────────────── */}
         <div
           ref={containerRef}
-          className="flex-1 overflow-y-auto relative pb-44"
+          // UI-4: pb-44 left too little clearance under StepActionBar's
+          // fade+button zone on some viewport/content combos — the last
+          // line could still sit under the floating "完成標記" button.
+          // Bumped for a safer margin (#UI polish).
+          className="flex-1 overflow-y-auto relative pb-56"
           {...(markMode ? { 'data-mark-surface': markMode } : {})}
           onMouseUp={hideAnnotation ? undefined : (markMode ? handleMarkEnd : handleMouseUp)}
           onTouchEnd={hideAnnotation ? undefined : (markMode ? handleMarkEnd : handleTouchEnd)}

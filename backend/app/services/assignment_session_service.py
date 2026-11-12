@@ -9,6 +9,7 @@ from sqlalchemy.orm.attributes import flag_modified
 from ..models.assignment import Assignment, AssignmentSubmission
 from ..models.school import Classroom
 from ..models.session import LearningSession
+from ..models.user import User
 from ..schemas.assignment import (
     DEFAULT_TARGET_ACCURACY,
     DEFAULT_TARGET_CPM,
@@ -416,6 +417,74 @@ def maybe_auto_submit_assignment_session(
     )
     if not is_assignment_ready_for_submit(assignment, completed_step_ids):
         return None
+
+    return submit_assignment_session(assignment, submission, db)
+
+
+def mark_submission_complete_by_teacher(
+    assignment: Assignment,
+    submission: AssignmentSubmission,
+    teacher: User,
+    db: Session,
+) -> AssignmentSubmission:
+    """Teacher override for a submission a broken step could never clear.
+
+    maybe_auto_submit_assignment_session only submits once the session's OWN
+    stored steps_completed satisfies every one of this assignment's required
+    steps (assignment_queries.is_assignment_ready_for_submit) — by design,
+    since a client-forged "ready" flag must never bypass that check (#3695
+    integrity follow-up). But that same correctness means a student who got
+    legitimately stuck (a step itself was broken — #3682's reported
+    production case) can never auto-submit either: the assignment sits
+    "in_progress" forever even once the teacher has looked at the student's
+    recorded progress (/teacher/students/{id}/sessions/{id}/report) and
+    judged the work done, with no way to resolve it.
+
+    This gives the teacher an explicit override. It reuses the SAME submit
+    path (submit_assignment_session) a student's own manual submit and the
+    auto-submit gate both use — so scoring / session-status sync behave
+    identically — it just skips the required-step check entirely, since the
+    teacher (not the step-completion gate) is now the one judging
+    completion.
+
+    Records who did it and when in the linked LearningSession's
+    step_progress.__meta — the existing extensible-metadata convention (see
+    learning_step_progress.save_step_progress's own "__meta": existing_meta
+    pattern) — rather than a schema change, so SubmissionResponse /
+    AttemptResponse can expose marked_complete_by_teacher as a derived flag
+    without a migration.
+
+    Known limitation: this does an unlocked read-modify-write of the whole
+    step_progress JSON (unlike save_step_progress's payload.version check).
+    A concurrent in-flight student autosave landing between this function's
+    read and write would be silently overwritten. The window is narrow (this
+    is a manual, infrequent teacher action) and the submission's score column
+    is unaffected (score lives on AssignmentSubmission, not in this JSON) --
+    acceptable for now, but a future caller that needs stronger guarantees
+    here should add the same version check save_step_progress uses.
+    """
+    learning_session = (
+        db.query(LearningSession).filter(LearningSession.id == submission.session_id).first()
+    )
+    if learning_session is not None:
+        stored = parse_step_progress(
+            learning_session.step_progress,
+            session_id=learning_session.id,
+            context="mark_submission_complete_by_teacher",
+        )
+        progress = (
+            stored.model_dump(by_alias=True)
+            if stored is not None
+            else {"current_step": None, "steps_completed": [], "step_data": {}, "version": 0, "__meta": {}}
+        )
+        meta = dict(progress.get("__meta") or {})
+        meta["teacher_marked_complete"] = {
+            "by_user_id": teacher.id,
+            "by_name": teacher.name,
+            "at": datetime.now(tz=timezone.utc).isoformat(),
+        }
+        progress["__meta"] = meta
+        learning_session.step_progress = progress
 
     return submit_assignment_session(assignment, submission, db)
 

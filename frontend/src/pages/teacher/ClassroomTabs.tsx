@@ -16,7 +16,7 @@ export const TABS: { key: TabKey; label: string }[] = [
   { key: 'settings', label: '班級設定' },
   { key: 'assignments', label: '指派任務' },
   { key: 'data', label: '班級數據' },
-  { key: 'league', label: '班級賽' },
+  { key: 'league', label: '跨班賽季' },
 ];
 
 const ALL_KEYS = new Set<string>(TABS.map((tab) => tab.key));
@@ -78,10 +78,17 @@ interface ClassroomTabsProps {
 
 // Junyi-parity: three equal full-width cells; the selected one is a solid filled
 // block (not an underline) so the current section is obvious from across a room.
+//
+// Issue #3989: the selected cell's color is Junyi's own tab-bar steel-blue
+// (#7C9AAD, measured on the reference screenshot d1-class.png — it is not
+// Junyi's brand teal/blue, just this one chrome element), not our app-wide
+// `--color-accent` indigo. Scoped to this one nav bar only — every other
+// button/link across the app (student, admin, and the rest of the teacher
+// UI) keeps the indigo brand accent untouched.
 const tabClass = (active: boolean) =>
   `flex-1 min-w-0 py-3 sm:py-3.5 text-base sm:text-xl font-medium text-center border-b-4 transition-colors cursor-pointer whitespace-nowrap ${
     active
-      ? 'bg-accent text-white border-accent-hover'
+      ? 'bg-[#7C9AAD] text-white border-[#5C7A8D]'
       : 'bg-white text-gray-500 border-gray-200 hover:text-gray-800 hover:bg-gray-50'
   }`;
 

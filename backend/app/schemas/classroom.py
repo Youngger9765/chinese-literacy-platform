@@ -1,6 +1,7 @@
+import re
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class ClassroomCreateRequest(BaseModel):
@@ -16,8 +17,113 @@ class ClassroomUpdateRequest(BaseModel):
     is_active: bool | None = None
 
 
+class ClassroomFeatureSettingsRequest(BaseModel):
+    """PATCH /classrooms/{id}/pk-settings body — issue #3586 §7.4, extended
+    by issue #3607 to cover 跨班賽季 (league) and 課堂搶答 (live_quiz) on
+    the same endpoint (route path kept as `/pk-settings` for backward
+    compat with existing callers; it now covers three toggles, not one).
+
+    Every field is Optional and the route only writes the ones actually
+    present in the request body (`exclude_unset`) — so a single switch's
+    PATCH call (e.g. `{"league": true}`) never touches the other two keys,
+    the same merge-not-overwrite guarantee `validate_feature_settings_patch`
+    + the route's merge-into-existing-dict logic already gave `pk_human`
+    alone. Three typed fields (not a free-form dict) so the public API
+    stays OpenAPI-typed, even though the underlying storage
+    (`classrooms.feature_settings`) is a schemaless JSON column for
+    forward-compat — see app/services/pk/classroom_features.py. There is
+    deliberately no `pk_ai` field: Young 2026-10-16 "AI PK 跟班級無關" —
+    挑戰文學家 is never gated by classroom settings, so there is nothing
+    here to toggle for it.
+    """
+
+    pk_human: bool | None = None
+    league: bool | None = None
+    live_quiz: bool | None = None
+
+
+# Backward-compat alias — issue #3586 named this ClassroomPkSettingsRequest
+# when it only had one field; issue #3607 generalized it to three. Nothing
+# in this codebase imports the old name anymore, but keeping the alias
+# costs nothing and avoids an import break for any out-of-tree caller.
+ClassroomPkSettingsRequest = ClassroomFeatureSettingsRequest
+
+
+class ClassroomFeatureSettingsResponse(BaseModel):
+    pk_human: bool
+    league: bool
+    live_quiz: bool
+
+
+ClassroomPkSettingsResponse = ClassroomFeatureSettingsResponse
+
+
 class ClassroomStudentAddRequest(BaseModel):
     student_id: int
+
+
+# ── Move Student Between Classrooms (#3819) ─────────────────────────────────
+
+
+class ClassroomStudentMoveRequest(BaseModel):
+    to_classroom_id: int
+
+
+class ClassroomStudentMoveResponse(BaseModel):
+    student_id: int
+    from_classroom_id: int
+    to_classroom_id: int
+    enrolled_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+# ── Batch Remove Students (#3821) ───────────────────────────────────────────
+
+
+class ClassroomBatchRemoveRequest(BaseModel):
+    student_ids: list[int] = Field(..., min_length=1, max_length=100)
+
+
+class ClassroomBatchRemoveResponse(BaseModel):
+    removed_count: int
+    not_found_ids: list[int]
+
+
+# ── Rename Student / Seat Number (#3826) ────────────────────────────────────
+
+
+class ClassroomStudentRenameRequest(BaseModel):
+    # Trimmed, non-empty, same max length as User.name's column (String(100)).
+    name: str = Field(..., min_length=1, max_length=100)
+
+    @field_validator("name")
+    @classmethod
+    def _reject_whitespace_only(cls, v: str) -> str:
+        stripped = v.strip()
+        if not stripped:
+            raise ValueError("name must not be empty or whitespace-only")
+        return stripped
+
+
+class ClassroomStudentSeatRequest(BaseModel):
+    # None clears the seat (student goes back to falling back on array-index
+    # display). ge=1 matches the PRD's "座號範圍驗證" AC -- 0 and negative
+    # numbers are rejected before they ever reach the DB.
+    seat_number: int | None = Field(None, ge=1, le=999)
+
+
+class ClassroomStudentSeatAssignment(BaseModel):
+    student_id: int
+    seat_number: int | None = Field(None, ge=1, le=999)
+
+
+class ClassroomStudentSeatsBatchRequest(BaseModel):
+    # #3992 -- the Junyi-parity "新增座號" dialog renumbers the whole roster
+    # in one request. A real teacher's class tops out well under 100, but
+    # cap at 200 so a malformed/huge payload can't be used to run an
+    # unbounded loop server-side.
+    assignments: list[ClassroomStudentSeatAssignment] = Field(..., min_length=1, max_length=200)
 
 
 class ClassroomJoinRequest(BaseModel):
@@ -48,8 +154,23 @@ class StudentInClassroomResponse(BaseModel):
     # system_admin) -- drives whether the frontend shows the reset-password
     # button for this row at all.
     can_reset_password: bool = False
+    # #3826: per-classroom-enrollment seat number. None means "not assigned
+    # yet" -- the frontend falls back to displaying the row's array index
+    # when this is None, so existing rosters look unchanged until a teacher
+    # explicitly sets one.
+    seat_number: int | None = None
+    # #3824: non-None only when this student has filed a pending account-
+    # claim request AND the current caller is its password teacher (or a
+    # system_admin) -- same visibility gate as can_reset_password. Carries
+    # the REQUESTED email so the teacher can see what they'd be approving
+    # before they act, not just that a request exists.
+    pending_claim_email: str | None = None
 
     model_config = {"from_attributes": True}
+
+
+class ClassroomStudentSeatsBatchResponse(BaseModel):
+    updated: list[StudentInClassroomResponse]
 
 
 class ClassroomResponse(BaseModel):
@@ -62,6 +183,19 @@ class ClassroomResponse(BaseModel):
     is_active: bool
     created_at: datetime
     student_count: int
+    # Issue #3586 §7.4 — 真人 PK 班級開關，teacher-visible, default False.
+    # Populated via services/pk/classroom_features.get_classroom_feature(),
+    # never read directly off the raw `feature_settings` column (that's the
+    # whole point of the typed accessor: a brand-new class with
+    # feature_settings == {} must report False here, not omit the field).
+    pk_human: bool = False
+    # Issue #3607 — 跨班賽季／課堂搶答班級開關，same accessor, same
+    # default-False-until-set rule. Unlike pk_human, an absent key here can
+    # resolve to True via the accessor's legacy-usage backward-compat rule
+    # (a classroom that was already using the feature before the toggle
+    # existed) — see services/pk/classroom_features.py.
+    league: bool = False
+    live_quiz: bool = False
 
     model_config = {"from_attributes": True}
 
@@ -107,10 +241,73 @@ class BatchStudentCreateResponse(BaseModel):
     warnings: list[str] = []
 
 
+# ── Batch Student Creation by Account Prefix (Junyi-parity, #3991) ─────────
+#
+# Mirrors Junyi's 「不確定學生有沒有帳號：幫學生創建均一帳號」 flow
+# (create-studentlist-modal/utils/accountUtils.js getAccountValidation /
+# getPasswordValidation / getCountValidation): the teacher doesn't name
+# each student up front -- they pick ONE account-name prefix and ONE
+# shared initial password, and the system creates `count` sequentially
+# numbered accounts (`{prefix}01`..`{prefix}NN`) that all start with that
+# same password. This is a different shape from BatchStudentCreateRequest
+# above (one name + seat_number per student, a random per-student
+# password) -- see classroom_batch.py's two routes.
+
+_PREFIX_PATTERN = re.compile(r"^[A-Za-z][A-Za-z0-9]{2,19}$")
+_SHARED_PASSWORD_PATTERN = re.compile(r"^[A-Za-z][A-Za-z0-9]{4,63}$")
+
+
+class BatchStudentByPrefixRequest(BaseModel):
+    prefix: str = Field(..., min_length=3, max_length=20)
+    password: str = Field(..., min_length=5, max_length=64)
+    # Matches Junyi's own cap (accountUtils.js getCountValidation: "單次
+    # 新增數量上限為 50").
+    count: int = Field(..., ge=1, le=50)
+
+    @field_validator("prefix")
+    @classmethod
+    def _validate_prefix(cls, v: str) -> str:
+        if not _PREFIX_PATTERN.match(v):
+            raise ValueError(
+                "帳號前綴需以英文字母開頭，僅能包含英文字母與數字，長度 3-20"
+            )
+        return v
+
+    @field_validator("password")
+    @classmethod
+    def _validate_password(cls, v: str) -> str:
+        if not _SHARED_PASSWORD_PATTERN.match(v):
+            raise ValueError(
+                "密碼需以英文字母開頭，僅能包含英文字母與數字，長度至少 5"
+            )
+        return v
+
+
 class ResetPasswordResponse(BaseModel):
     username: str
     email: str
     password: str
+
+
+# ── Child-Account Handover approval (#3824) ─────────────────────────────────
+# A teacher-created student files a claim request (POST /auth/claim-account)
+# that only RESERVES a new email (users.pending_email); it does not transfer
+# the account. The account's recorded creator (the "password teacher", same
+# authorization gate as ResetPasswordResponse above) approves or rejects it
+# here, classroom-scoped exactly like reset-password. Security review finding
+# H1 (full writeup: docs/prd/2026-11-02-child-handover-prd.md): gating
+# completion on an explicit teacher action -- not an emailed verification
+# token -- closes the hole where whoever merely read a printed card password
+# could complete a hostile handover alone.
+
+
+class ApproveAccountClaimResponse(BaseModel):
+    message: str
+    email: str
+
+
+class RejectAccountClaimResponse(BaseModel):
+    message: str
 
 
 # ── Student Search ──────────────────────────────────────────────────────────
@@ -152,6 +349,17 @@ class StudentEnrolledClassroom(BaseModel):
     teacher_name: str
     is_active: bool
     enrolled_at: datetime
+    # Issue #3586 §7.4 — whether THIS classroom has 真人 PK turned on. The
+    # frontend's "show 找同學 PK or not" decision is "ANY enrolled classroom
+    # has pk_human=True" (StudentPkEntry.tsx), computed client-side over the
+    # list this field appears in — not a separate aggregate endpoint.
+    pk_human: bool = False
+    # Issue #3607 — same per-classroom-then-ANY pattern as pk_human above,
+    # for 跨班賽季 (league) and 課堂搶答 (live_quiz): the sidebar entries for
+    # those two features are hidden unless ANY enrolled classroom has the
+    # corresponding flag on (see components/layout/StudentSidebar.tsx).
+    league: bool = False
+    live_quiz: bool = False
 
     model_config = {"from_attributes": True}
 
@@ -159,6 +367,14 @@ class StudentEnrolledClassroom(BaseModel):
 class StudentEnrolledClassroomsResponse(BaseModel):
     classrooms: list[StudentEnrolledClassroom]
     total: int
+    # Issue #3602 B1: the student's own profile grade
+    # (``StudentProfile.grade``, None if the user has no profile row at
+    # all), independent of any classroom. AI PK (挑戰文學家) must work
+    # "regardless of class" (Young 2026-10-16) — a classroom with no grade
+    # set (or no classroom at all) must not block it, so the frontend needs
+    # a grade signal that doesn't depend on classroom data quality. See
+    # frontend/src/pages/pk/resolvePkGrade.ts for the full fallback order.
+    student_grade: int | None = None
 
 
 # ── Junyi Class/Student Import (issue #3380) ──────────────────────────────────

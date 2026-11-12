@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { getIapProxyAuthHeader } from './utils/iapAuth';
 
 /**
  * 一課多篇：從第 1 步逐步按完成標記走完，每一步都要是**那一篇**的內容（#2930）。
@@ -81,7 +82,9 @@ test(`從第 1 步逐步走完，每一步都是自己那一篇 — ${LABEL}`, a
   let detail: Record<string, unknown> = {};
   let fetchErr = '';
   try {
-    const res = await fetch(`${BE}/api/stories/${LESSON}`);
+    // #3719: plain Node `fetch` doesn't inherit playwright.config.ts's
+    // extraHTTPHeaders (that only covers the page/request fixtures).
+    const res = await fetch(`${BE}/api/stories/${LESSON}`, { headers: getIapProxyAuthHeader() });
     if (!res.ok) fetchErr = `HTTP ${res.status}`;
     else detail = await res.json();
   } catch (e) {

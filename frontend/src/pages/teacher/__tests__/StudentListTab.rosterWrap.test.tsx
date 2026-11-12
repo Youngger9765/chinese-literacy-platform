@@ -89,7 +89,14 @@ describe('StudentListTab — roster row wrap safety (#3424)', () => {
     const removeCell = screen.getByRole('button', { name: '移除' }).closest('td')!;
     const resetCell = screen.getByRole('button', { name: '重設密碼' }).closest('td')!;
     expect(removeCell).not.toBe(resetCell);
-    expect(removeCell.className).toMatch(/\bml-auto\b/);
+    // #3985: `ml-auto` (pin to the right edge of whatever's left on the flex
+    // line) is what let this cell render partly off a 390px screen, clipped
+    // by the ancestor `overflow-hidden` wrapper — reachable nowhere. 移除 is
+    // kept separate from 重設密碼 now via `basis-full`: this cell always gets
+    // its own full-width line on mobile instead of sharing one with its
+    // neighbour, so there's no line to squeeze onto and nothing to clip.
+    expect(removeCell.className).toMatch(/\bbasis-full\b/);
+    expect(removeCell.className).not.toMatch(/\bml-auto\b/);
   });
 
   it('新增學生 form is not inline; it opens in a dialog when asked', () => {

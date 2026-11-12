@@ -18,6 +18,14 @@ export interface ClassroomResponse {
   is_active: boolean;
   created_at: string;
   student_count: number;
+  /** 真人 PK（同學配對對戰）班級開關 — issue #3586 §7.4，預設 false。
+   * AI PK（挑戰文學家）沒有對應欄位：永遠開放，不受班級設定影響。 */
+  pk_human: boolean;
+  /** 跨班賽季（league）班級開關 — issue #3607，預設 false。向下相容：已有
+   * 歷史使用紀錄（真的建立過隊伍／賽季）的班級即使沒有這個 key 也會是 true。 */
+  league: boolean;
+  /** 課堂搶答（live_quiz）班級開關 — issue #3607，預設 false，向下相容規則同上。 */
+  live_quiz: boolean;
 }
 
 export interface StudentInClassroomResponse {
@@ -32,6 +40,9 @@ export interface StudentInClassroomResponse {
    * field keep compiling; treat missing/false identically -- fail closed,
    * don't show the button. */
   can_reset_password?: boolean;
+  /** #3826: per-classroom-enrollment seat number. null/undefined means "not
+   * assigned yet" -- the frontend falls back to the row's array index. */
+  seat_number?: number | null;
 }
 
 export interface ResetPasswordResult {
@@ -143,6 +154,45 @@ export async function updateClassroom(
   return handleResponse<ClassroomResponse>(res);
 }
 
+export interface ClassroomFeatureSettingsResponse {
+  pk_human: boolean;
+  league: boolean;
+  live_quiz: boolean;
+}
+
+/** @deprecated kept for any stray caller — prefer ClassroomFeatureSettingsResponse. */
+export type ClassroomPkSettingsResponse = ClassroomFeatureSettingsResponse;
+
+/** PATCH /classrooms/{id}/pk-settings — issue #3586 §7.4, extended by issue
+ * #3607 to carry all three per-classroom feature switches on one endpoint
+ * (route path kept as `/pk-settings` for backward compat). Teacher-only
+ * (owner/co-teacher with edit rights); server re-checks ownership itself,
+ * this is just the HTTP call. Only the keys actually present in `data` are
+ * written server-side (merge, not overwrite) — omit a key to leave it
+ * untouched rather than passing its current value back. */
+export async function updateClassroomFeatureSettings(
+  token: string,
+  classroomId: number,
+  data: { pk_human?: boolean; league?: boolean; live_quiz?: boolean },
+): Promise<ClassroomFeatureSettingsResponse> {
+  const res = await fetch(`${API_BASE}/api/classrooms/${classroomId}/pk-settings`, {
+    method: 'PATCH',
+    headers: authHeaders(token),
+    body: JSON.stringify(data),
+  });
+  return handleResponse<ClassroomFeatureSettingsResponse>(res);
+}
+
+/** @deprecated use updateClassroomFeatureSettings — kept so any stray
+ * caller of the single-switch form keeps working. */
+export async function updateClassroomPkSettings(
+  token: string,
+  classroomId: number,
+  pkHuman: boolean,
+): Promise<ClassroomPkSettingsResponse> {
+  return updateClassroomFeatureSettings(token, classroomId, { pk_human: pkHuman });
+}
+
 export async function addStudent(
   token: string,
   classroomId: number,
@@ -169,6 +219,124 @@ export async function removeStudent(
     },
   );
   return handleResponse<{ message: string }>(res);
+}
+
+// --- Move student between two of the caller's own classrooms (#3819) ---
+
+export interface MoveStudentResult {
+  student_id: number;
+  from_classroom_id: number;
+  to_classroom_id: number;
+  enrolled_at: string;
+}
+
+export async function moveStudent(
+  token: string,
+  fromClassroomId: number,
+  studentId: number,
+  toClassroomId: number,
+): Promise<MoveStudentResult> {
+  const res = await fetch(
+    `${API_BASE}/api/classrooms/${fromClassroomId}/students/${studentId}/move`,
+    {
+      method: 'POST',
+      headers: authHeaders(token),
+      body: JSON.stringify({ to_classroom_id: toClassroomId }),
+    },
+  );
+  return handleResponse<MoveStudentResult>(res);
+}
+
+// --- Batch-remove students from a classroom (#3821) ---
+
+export interface BatchRemoveStudentsResult {
+  removed_count: number;
+  not_found_ids: number[];
+}
+
+export async function batchRemoveStudents(
+  token: string,
+  classroomId: number,
+  studentIds: number[],
+): Promise<BatchRemoveStudentsResult> {
+  const res = await fetch(
+    `${API_BASE}/api/classrooms/${classroomId}/students/batch-remove`,
+    {
+      method: 'POST',
+      headers: authHeaders(token),
+      body: JSON.stringify({ student_ids: studentIds }),
+    },
+  );
+  return handleResponse<BatchRemoveStudentsResult>(res);
+}
+
+// --- Rename student / seat number (#3826) ---
+// Both edit the SAME enrollment row/account surfaced via StudentInClassroomResponse,
+// never the login username/email.
+
+export async function renameStudent(
+  token: string,
+  classroomId: number,
+  studentId: number,
+  name: string,
+): Promise<StudentInClassroomResponse> {
+  const res = await fetch(
+    `${API_BASE}/api/classrooms/${classroomId}/students/${studentId}/name`,
+    {
+      method: 'PATCH',
+      headers: authHeaders(token),
+      body: JSON.stringify({ name }),
+    },
+  );
+  return handleResponse<StudentInClassroomResponse>(res);
+}
+
+export async function setStudentSeatNumber(
+  token: string,
+  classroomId: number,
+  studentId: number,
+  seatNumber: number | null,
+): Promise<StudentInClassroomResponse> {
+  const res = await fetch(
+    `${API_BASE}/api/classrooms/${classroomId}/students/${studentId}/seat`,
+    {
+      method: 'PATCH',
+      headers: authHeaders(token),
+      body: JSON.stringify({ seat_number: seatNumber }),
+    },
+  );
+  return handleResponse<StudentInClassroomResponse>(res);
+}
+
+// --- Batch seat-number assignment (#3992, Junyi-parity "新增座號" dialog) ---
+// Deliberately NOT N sequential setStudentSeatNumber calls -- swapping or
+// rotating seats that are already taken can transiently collide with the
+// backend's unique constraint mid-sequence even though the FINAL layout has
+// no duplicates. The backend applies the whole batch in one transaction.
+
+export interface SeatAssignment {
+  student_id: number;
+  seat_number: number | null;
+}
+
+export interface BatchSetSeatNumbersResult {
+  updated: StudentInClassroomResponse[];
+}
+
+export async function batchSetSeatNumbers(
+  token: string,
+  classroomId: number,
+  assignments: SeatAssignment[],
+): Promise<BatchSetSeatNumbersResult> {
+  const res = await fetch(
+    `${API_BASE}/api/classrooms/${classroomId}/students/seats`,
+    {
+      method: 'PATCH',
+      headers: authHeaders(token),
+      body: JSON.stringify({ assignments }),
+    },
+  );
+  return handleResponse<BatchSetSeatNumbersResult>(res);
 }
 
 // --- Delete classroom ---
@@ -321,6 +489,37 @@ export async function batchCreateStudents(
   return handleResponse<BatchCreateResult>(res);
 }
 
+// --- Batch create students by account prefix (Junyi-parity, #3991) ---
+//
+// Teacher picks ONE account-name prefix + ONE shared initial password +
+// a count, instead of naming each student -- the system creates
+// `{prefix}01`..`{prefix}NN` and shares the same password. Returns the
+// SAME shape as batchCreateStudents so callers (TeacherDashboard's
+// 建立新班級 flow, ClassroomDetail's credential-card display) don't need
+// a second result type.
+
+export interface BatchByPrefixInput {
+  prefix: string;
+  password: string;
+  count: number;
+}
+
+export async function batchCreateStudentsByPrefix(
+  token: string,
+  classroomId: number,
+  input: BatchByPrefixInput,
+): Promise<BatchCreateResult> {
+  const res = await fetch(
+    `${API_BASE}/api/classrooms/${classroomId}/students/batch-by-prefix`,
+    {
+      method: 'POST',
+      headers: authHeaders(token),
+      body: JSON.stringify(input),
+    },
+  );
+  return handleResponse<BatchCreateResult>(res);
+}
+
 // --- CSV Upload ---
 
 export interface CsvUploadError {
@@ -361,7 +560,10 @@ export async function uploadCsvStudents(
   return handleResponse<CsvUploadResult>(res);
 }
 
-// --- Co-teaching API ---
+// --- Co-teaching API (#3820: editor/viewer roles + invite accept/reject) ---
+
+export type CoTeacherRole = 'editor' | 'viewer';
+export type CoTeacherStatus = 'pending' | 'accepted';
 
 export interface ClassroomTeacherResponse {
   id: number;
@@ -369,7 +571,19 @@ export interface ClassroomTeacherResponse {
   teacher_id: number;
   teacher_name: string;
   teacher_email: string;
-  role: 'primary' | 'assistant';
+  role: 'primary' | CoTeacherRole;
+  status: CoTeacherStatus;
+  invited_at: string;
+  accepted_at: string | null;
+}
+
+export interface PendingInvitationResponse {
+  classroom_teacher_id: number; // ClassroomTeacher.id -- informational only
+  classroom_id: number;
+  teacher_id: number; // the invitee's own user id -- use this in accept/reject URLs
+  classroom_name: string;
+  role: CoTeacherRole;
+  invited_by_name: string;
   invited_at: string;
 }
 
@@ -387,15 +601,63 @@ export async function inviteCoTeacher(
   token: string,
   classroomId: number,
   email: string,
+  role: CoTeacherRole,
 ): Promise<ClassroomTeacherResponse> {
   const res = await fetch(`${API_BASE}/api/classrooms/${classroomId}/teachers`, {
     method: 'POST',
     headers: authHeaders(token),
-    body: JSON.stringify({ email }),
+    body: JSON.stringify({ email, role }),
   });
   return handleResponse<ClassroomTeacherResponse>(res);
 }
 
+export async function updateCoTeacherRole(
+  token: string,
+  classroomId: number,
+  teacherId: number,
+  role: CoTeacherRole,
+): Promise<ClassroomTeacherResponse> {
+  const res = await fetch(
+    `${API_BASE}/api/classrooms/${classroomId}/teachers/${teacherId}`,
+    {
+      method: 'PATCH',
+      headers: authHeaders(token),
+      body: JSON.stringify({ role }),
+    },
+  );
+  return handleResponse<ClassroomTeacherResponse>(res);
+}
+
+export async function acceptCoTeacherInvitation(
+  token: string,
+  classroomId: number,
+  teacherId: number,
+): Promise<ClassroomTeacherResponse> {
+  const res = await fetch(
+    `${API_BASE}/api/classrooms/${classroomId}/teachers/${teacherId}/accept`,
+    {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  );
+  return handleResponse<ClassroomTeacherResponse>(res);
+}
+
+/** Pending invitations addressed to the current user, across all classrooms.
+ * A pending invitee has no read access to the classroom itself yet (#3820),
+ * so this is the only way the UI can show them their own invite. */
+export async function listMyPendingInvitations(
+  token: string,
+): Promise<PendingInvitationResponse[]> {
+  const res = await fetch(`${API_BASE}/api/co-teaching/invitations`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return handleResponse<PendingInvitationResponse[]>(res);
+}
+
+/** Removes a co-teacher. Also doubles as: reject (invitee, while pending),
+ * revoke (owner, while pending), and leave (invitee, once accepted) -- all
+ * the same DELETE endpoint, just invoked by a different actor/state. */
 export async function removeCoTeacher(
   token: string,
   classroomId: number,

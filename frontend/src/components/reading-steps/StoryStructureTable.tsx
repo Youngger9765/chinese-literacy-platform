@@ -18,6 +18,7 @@ import {
   type StructureInteractionProfile,
 } from './storyStructureProfile';
 import StepCoachCard, { StepCoachHelpButton } from '../learning/StepCoachCard';
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -312,21 +313,52 @@ function classifyInteractive(value: string): InteractiveType {
   return countBlanks(value) > 0 ? 'fill_blank' : 'display';
 }
 
-function resolveGradeIndex(
+/**
+ * Maps each `worksheet_rows[i]` to its matching index in `rows` (the grading
+ * array) — without assuming the label text on a worksheet row is unique.
+ *
+ * `rows` and `worksheet_rows` are built server-side from the same source list,
+ * in the same order, one `rows` entry per non-title group and one
+ * `worksheet_rows` entry per non-title 'pair'/'section_block' group
+ * (`backend/app/routes/stories.py` `_merge_parsed_to_structure_rows` /
+ * `_build_worksheet_rows`). So the Nth worksheet row carrying a given
+ * (label, has-sub-rows) shape always corresponds to the Nth `rows` entry with
+ * that same shape — even when two unrelated worksheet rows happen to share
+ * identical label text. That happens for real: a "tail" sentence re-uses its
+ * parent row's label (`keypoints_to_structure.py`), and a matrix-layout table
+ * repeats a column-less category label (e.g. 「感受」「原因」) once per
+ * unrelated paragraph.
+ *
+ * The previous implementation did `rows.findIndex(r => r.label === label)`
+ * per worksheet row, independently, with no memory of earlier matches — so
+ * it always returned the FIRST occurrence, and every repeat of that label
+ * silently bound to the first occurrence's answer key. Typing into one box
+ * then live-updated every other box carrying the same label (2026-10-16
+ * field report: typing in the first blank of a multi-blank 文章重點表 made
+ * later blanks show the same text).
+ */
+function buildWorksheetRowIndexMap(
   rows: StructureRow[],
-  wsRow: WorksheetRow,
-  itemIdx?: number,
-): { rowIdx: number; subIdx?: number } {
-  if (wsRow.kind === 'pair') {
-    const rowIdx = rows.findIndex(
-      (r) => r.label === wsRow.label && !(r.sub_rows && r.sub_rows.length > 0),
-    );
-    return { rowIdx };
-  }
-  const rowIdx = rows.findIndex(
-    (r) => r.label === wsRow.section && !!(r.sub_rows && r.sub_rows.length > 0),
-  );
-  return { rowIdx, subIdx: itemIdx };
+  worksheetRows: WorksheetRow[],
+): number[] {
+  const consumedCount = new Map<string, number>();
+  return worksheetRows.map((wsRow) => {
+    const isSection = wsRow.kind !== 'pair';
+    const label = isSection ? wsRow.section : wsRow.label;
+    const occurrenceKey = `${isSection ? 1 : 0}:${label}`;
+    const skip = consumedCount.get(occurrenceKey) ?? 0;
+    consumedCount.set(occurrenceKey, skip + 1);
+
+    let seen = 0;
+    for (let i = 0; i < rows.length; i += 1) {
+      const row = rows[i];
+      const hasSubRows = !!(row.sub_rows && row.sub_rows.length > 0);
+      if (row.label !== label || hasSubRows !== isSection) continue;
+      if (seen === skip) return i;
+      seen += 1;
+    }
+    return -1;
+  });
 }
 
 function getLabelAccent(label: string): {
@@ -525,7 +557,7 @@ const InlineWorksheetContent: React.FC<InlineWorksheetContentProps> = ({
     return nodes;
   }, [text, rowIdx, subIdx, answers, setAnswer, submitted, gradeResults]);
 
-  return <span className="text-sm leading-relaxed whitespace-pre-line">{parts}</span>;
+  return <span className="text-sm leading-relaxed whitespace-pre-line break-words">{parts}</span>;
 };
 
 
@@ -860,7 +892,7 @@ const InlineChoiceContent: React.FC<InlineChoiceContentProps> = ({
     return nodes;
   }, [text, blanks, rowIdx, subIdx, answers, setAnswer, submitted, gradeResults]);
 
-  return <span className="text-sm leading-relaxed whitespace-pre-line">{parts}</span>;
+  return <span className="text-sm leading-relaxed whitespace-pre-line break-words">{parts}</span>;
 };
 
 // ── Worksheet HTML table ─────────────────────────────────────────────────────
@@ -888,6 +920,14 @@ const WorksheetTable: React.FC<WorksheetTableProps> = ({
 }) => {
   const { title, worksheet_rows = [], rows } = structure;
   const cellBorder = 'border border-black px-2 py-2 align-top';
+
+  // See `buildWorksheetRowIndexMap` — one entry per `worksheet_rows[i]`,
+  // computed once so that a repeated label resolves to successive `rows`
+  // entries instead of every repeat colliding on the first match.
+  const rowIndexMap = useMemo(
+    () => buildWorksheetRowIndexMap(rows, worksheet_rows),
+    [rows, worksheet_rows],
+  );
 
   const renderValueCell = (
     value: string,
@@ -935,11 +975,46 @@ const WorksheetTable: React.FC<WorksheetTableProps> = ({
       );
     }
     if (cell) return renderCellContent(cell, rowIdx, subIdx);
-    return <span className="text-sm leading-relaxed whitespace-pre-line">{value}</span>;
+    return <span className="text-sm leading-relaxed whitespace-pre-line break-words">{value}</span>;
   };
 
+  // UI-3 (#390px keypoints-table overflow) vs #3696/#3698 (iPad split-panel
+  // squeeze) pull in opposite directions on the SAME <table>:
+  //   - #3698 wants a min-w-[28rem] FLOOR + horizontal scroll, so a narrow
+  //     *split-panel* container (iPad portrait/landscape, ~246-435px) never
+  //     crushes CheckboxCell's option pills to one character per line.
+  //   - This fix wants the opposite on a true single-column PHONE viewport
+  //     (390px): no horizontal scroll at all — wrap instead, because a
+  //     fixed-width scroll floor is exactly what cut the row text off
+  //     mid-word at the screen edge with no visible scroll cue.
+  // Scope the table-fixed + <colgroup> treatment to narrow phones only
+  // (useIsMobile(640), under Tailwind's `sm` breakpoint) so #3698's
+  // tablet/desktop floor-and-scroll behaviour is untouched.
+  const isNarrowPhone = useIsMobile(640);
+
   return (
-    <table className="w-full border-collapse border border-black text-sm bg-white">
+    <table
+      className={
+        isNarrowPhone
+          ? 'w-full table-fixed border-collapse border border-black text-sm bg-white'
+          : 'w-full min-w-[28rem] border-collapse border border-black text-sm bg-white'
+      }
+    >
+      {isNarrowPhone && (
+        // `table-fixed` only reads column widths off the FIRST row (or a
+        // <colgroup>) — and our first row is the title (`colSpan=3`), which
+        // carries no per-column width. So this carries the three logical
+        // columns: section label (pair rows' own label, e.g. 主角/主題/球風,
+        // or the rowSpan'd group label, e.g. 事例) · item label
+        // (背景/經過/結果, short & narrow) · value (the long free-fill/
+        // choice content — gets the rest). Percentages echo what table-auto
+        // was already settling on for this content (~13/16/71).
+        <colgroup>
+          <col className="w-[16%]" />
+          <col className="w-[16%]" />
+          <col />
+        </colgroup>
+      )}
       <tbody>
         {title && (
           <tr>
@@ -953,7 +1028,7 @@ const WorksheetTable: React.FC<WorksheetTableProps> = ({
         )}
         {worksheet_rows.map((wsRow, wsIdx) => {
           if (wsRow.kind === 'pair') {
-            const { rowIdx } = resolveGradeIndex(rows, wsRow);
+            const rowIdx = rowIndexMap[wsIdx] ?? -1;
             const row = rows[rowIdx];
             return (
               <tr key={`pair-${wsIdx}`}>
@@ -984,7 +1059,8 @@ const WorksheetTable: React.FC<WorksheetTableProps> = ({
           return chunks.flatMap((chunk, chunkIdx) =>
             chunk.map((item, itemIdx) => {
               const globalItemIdx = chunkIdx * SECTION_CHUNK_SIZE + itemIdx;
-              const { rowIdx, subIdx } = resolveGradeIndex(rows, wsRow, globalItemIdx);
+              const rowIdx = rowIndexMap[wsIdx] ?? -1;
+              const subIdx = globalItemIdx;
               const subRow = rowIdx >= 0 ? rows[rowIdx]?.sub_rows?.[subIdx ?? 0] : undefined;
               const showSection = itemIdx === 0;
               const sectionLabel =

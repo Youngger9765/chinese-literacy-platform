@@ -16,7 +16,7 @@ from .helpers import (
     ensure_school_student_role,
     generate_join_code,
     get_classroom_or_404,
-    require_owner_or_admin,
+    require_editor_or_admin,
 )
 
 router = APIRouter(tags=["classrooms"])
@@ -121,9 +121,12 @@ def regenerate_classroom_code(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Regenerate the join code for a classroom. Requires owner or admin."""
+    """Regenerate the join code for a classroom.
+
+    Owner, accepted 'editor'-role co-teacher, or system_admin (#3820).
+    """
     classroom = get_classroom_or_404(classroom_id, db)
-    require_owner_or_admin(classroom, current_user, db)
+    require_editor_or_admin(classroom, current_user, db)
 
     classroom.join_code = generate_join_code(db)
     db.commit()

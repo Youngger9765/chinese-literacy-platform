@@ -90,6 +90,14 @@ def pytest_runtest_setup(item):
         _junyi_import_rate_limiter.reset()
     except (ImportError, AttributeError):
         pass
+    try:
+        # #3991: batch-by-prefix endpoint's dedicated bucket -- same #3171
+        # shape (module-level singleton keyed on an integer user id that a
+        # fresh test file's isolated DB happily reassigns to someone else).
+        from app.routes.classrooms.classroom_batch import _batch_prefix_rate_limiter
+        _batch_prefix_rate_limiter.reset()
+    except (ImportError, AttributeError):
+        pass
     # #3171: ai_rate_limiter / tts_rate_limiter 原本漏在這裡之外。
     #
     # ai_rate_limiter 是模組層全域，key 是 `ai:{get_client_key(request)}`，而在

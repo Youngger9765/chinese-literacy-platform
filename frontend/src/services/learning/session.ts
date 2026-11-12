@@ -462,11 +462,47 @@ export interface StudentEnrolledClassroom {
   teacher_name: string;
   is_active: boolean;
   enrolled_at: string;
+  /** 這個班級是否開放真人 PK — issue #3586 §7.4, default false. AI PK
+   * (挑戰文學家) has no equivalent field: it is never gated by classroom. */
+  pk_human: boolean;
+  /** 這個班級是否開放跨班賽季 — issue #3607, default false (backward-compat:
+   * a classroom with real league history and no explicit key reports true). */
+  league: boolean;
+  /** 這個班級是否開放課堂搶答 — issue #3607, same default/backward-compat rule. */
+  live_quiz: boolean;
 }
 
 export interface StudentEnrolledClassroomsResponse {
   classrooms: StudentEnrolledClassroom[];
   total: number;
+  /** Issue #3602 B1 — the student's own profile grade, independent of any
+   * classroom. Used as a fallback when resolving AI PK's question scope
+   * (see pages/pk/resolvePkGrade.ts) so a classroom with no grade set (or
+   * no classroom at all) never has to block 挑戰文學家. */
+  student_grade: number | null;
+}
+
+/**
+ * computeStudentGameFlags — issue #3633 game-hub consolidation.
+ *
+ * The single "ANY enrolled classroom has it on" rule for 跨班賽季 (league)
+ * and 課堂搶答 (live_quiz). This used to be computed inline inside
+ * Sidebar.tsx's own fetch effect (issue #3607); it now lives here so
+ * StudentGameHubPage (the hub page that replaced the three separate
+ * sidebar entries) reuses the exact same rule instead of re-deriving it.
+ *
+ * PK 對戰 (pk_human)、迷城密室、and 多人對抗賽 (issue #3632 v2) are
+ * intentionally absent: none of the three is ever classroom-gated (AI PK:
+ * Young 2026-10-16 "AI PK 跟班級無關"; 迷城密室: issue #3633 "不受班級開關
+ * 限制"; 多人對抗賽 v2: "拿掉班級開關").
+ */
+export function computeStudentGameFlags(
+  classrooms: StudentEnrolledClassroom[],
+): { league: boolean; liveQuiz: boolean } {
+  return {
+    league: classrooms.some((c) => c.league),
+    liveQuiz: classrooms.some((c) => c.live_quiz),
+  };
 }
 
 export async function fetchMyEnrolledClassrooms(

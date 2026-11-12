@@ -54,6 +54,10 @@ interface ClassroomHeaderCardProps {
   // Junyi-parity: 新增學生 opens the add-students modal owned by the page
   onAddStudents?: () => void;
 
+  // #3992: 新增座號 opens the batch seat-number dialog owned by the page,
+  // same pattern as onAddStudents above.
+  onOpenSeatDialog?: () => void;
+
   // Util
   formatDate: (dateStr: string) => string;
 }
@@ -87,6 +91,7 @@ const ClassroomHeaderCard: React.FC<ClassroomHeaderCardProps> = ({
   onHideRegenConfirm,
   onRegenerateCode,
   onAddStudents,
+  onOpenSeatDialog,
   formatDate,
 }) => {
 
@@ -186,6 +191,18 @@ const ClassroomHeaderCard: React.FC<ClassroomHeaderCardProps> = ({
                   {classroom.join_code ?? '—'}
                 </span>
               </span>
+              {/* Issue #3989: Junyi shows an inline ⓘ next to the code
+                  (d1-class.png "班級代碼: QQJYY ⓘ") instead of a separate
+                  paragraph below. The paragraph stays too (own line, always
+                  visible — a hover-only tooltip loses that on touch devices);
+                  this just adds the same at-a-glance affordance Junyi has. */}
+              <span
+                aria-hidden="true"
+                title="學生登入後在首頁「加入班級」輸入班級代碼，就會加入這個班"
+                className="inline-flex w-4 h-4 items-center justify-center rounded-full border border-gray-400 text-gray-500 text-[11px] leading-none cursor-help shrink-0"
+              >
+                i
+              </span>
               <button
                 onClick={onCopyJoinCode}
                 disabled={!classroom.join_code}
@@ -230,10 +247,25 @@ const ClassroomHeaderCard: React.FC<ClassroomHeaderCardProps> = ({
                 <button
                   type="button"
                   onClick={onAddStudents}
-                  className="sm:w-20 h-[72px] flex flex-col items-center justify-center gap-1 rounded-lg border border-gray-200 bg-white shadow-sm hover:bg-accent-bg text-gray-700 cursor-pointer"
+                  className="sm:w-20 h-[72px] flex flex-col items-center justify-center gap-1 rounded-lg border border-gray-200 bg-white shadow-sm hover:bg-[#19A696]/10 text-gray-700 cursor-pointer"
                 >
-                  <span aria-hidden="true" className="w-7 h-7 rounded-full bg-accent text-white text-xl leading-7 text-center">＋</span>
+                  {/* Issue #3989: icon badge is Junyi's teal (#19A696, same
+                      token as the 新增學生 icon on d1-class.png), not the
+                      app's indigo accent — scoped to this one icon only. */}
+                  <span aria-hidden="true" className="w-7 h-7 rounded-full bg-[#19A696] text-white text-xl leading-7 text-center">＋</span>
                   <span className="text-xs whitespace-nowrap">新增學生</span>
+                </button>
+              )}
+              {onOpenSeatDialog && (
+                <button
+                  type="button"
+                  onClick={onOpenSeatDialog}
+                  className="sm:w-20 h-[72px] flex flex-col items-center justify-center gap-1 rounded-lg border border-gray-200 bg-white shadow-sm hover:bg-[#19A696]/10 text-gray-700 cursor-pointer"
+                >
+                  {/* Issue #3992: same Junyi teal as 新增學生 above -- both
+                      are "roster setup" actions in the same icon family. */}
+                  <span aria-hidden="true" className="w-7 h-7 rounded-full bg-[#19A696] text-white text-base leading-7 text-center font-semibold">01</span>
+                  <span className="text-xs whitespace-nowrap">新增座號</span>
                 </button>
               )}
               <button

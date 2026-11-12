@@ -20,9 +20,13 @@ from ..schemas.assignment import (
     SubmissionResponse,
 )
 from ..models.session import ReadingAttemptHistory
+from ..schemas.session import parse_step_progress
 from ..services.assignment_responses import extract_reading_metrics
 from ..services.assignment_copy_strategy import resolve_text_for_assignment
-from ..services.assignment_queries import resolve_title_for_assignment
+from ..services.assignment_queries import (
+    compute_step_completion_for_submission,
+    resolve_title_for_assignment,
+)
 from ..services.audio_upload_service import delete_gcs_blobs_for_paths
 from ..services.input_sanitizer import sanitize_ai_input
 from ..services.lesson_loader import get_lesson_by_id
@@ -35,8 +39,54 @@ from ..utils.slug import normalize_story_slug
 logger = logging.getLogger(__name__)
 
 
+def _step_progress_fields(assignment: Assignment, sub: AssignmentSubmission) -> dict:
+    """completed/required step counts + missing step ids + whether a teacher
+    force-completed this submission (Issue #NEW).
+
+    Mirrors extract_reading_metrics' Issue #1767 N+1-avoidance pattern: reads
+    sub.session only if it is already present in the instance's loaded-attrs
+    dict (eager-loaded by the caller's joinedload), never issuing an extra
+    per-row query itself.
+    """
+    completed_ids: list[str] = []
+    marked_by_teacher = False
+    if sub.session_id is not None:
+        # sub.session is either already eager-loaded (Issue #1767 pattern —
+        # no extra query) or triggers exactly one lazy-load query here; both
+        # are fine, this just must not issue a SEPARATE query per row on top
+        # of what extract_reading_metrics already does for the same sub.
+        session = sub.session
+        if session is not None:
+            stored = parse_step_progress(
+                session.step_progress,
+                session_id=session.id,
+                context="assignment_lifecycle_service._step_progress_fields",
+            )
+            if stored is not None:
+                # NOT stripped/filtered: maybe_auto_submit_assignment_session
+                # (assignment_session_service.py) passes
+                # stored_progress.steps_completed RAW to the same
+                # compute_step_completion_for_submission -- any transform here
+                # that function doesn't also apply would make the teacher's
+                # missing-step view diverge from what actually decides
+                # auto-submit (the exact bug this feature exists to prevent).
+                completed_ids = stored.steps_completed
+                marked_by_teacher = bool(stored.meta.get("teacher_marked_complete"))
+
+    completed_count, required_count, missing_ids = compute_step_completion_for_submission(
+        assignment, completed_ids,
+    )
+    return {
+        "required_step_count": required_count,
+        "completed_step_count": completed_count,
+        "missing_step_ids": missing_ids,
+        "marked_complete_by_teacher": marked_by_teacher,
+    }
+
+
 def submission_to_response(
     submission: AssignmentSubmission,
+    assignment: Assignment,
     db: Session,
     *,
     student: User | None = None,
@@ -44,6 +94,7 @@ def submission_to_response(
     if student is None:
         student = db.query(User).filter(User.id == submission.student_id).first()
     r_accuracy, r_cpm, r_error_chars = extract_reading_metrics(submission, db)
+    step_fields = _step_progress_fields(assignment, submission)
     return SubmissionResponse(
         id=submission.id,
         assignment_id=submission.assignment_id,
@@ -60,10 +111,12 @@ def submission_to_response(
         # Issue #3682: present as soon as the student has started, not only
         # once they submit — see SubmissionResponse.session_id docstring.
         session_id=submission.session_id,
+        **step_fields,
     )
 
 
 def assignment_attempt_groups_to_response(
+    assignment: Assignment,
     submissions: list[AssignmentSubmission],
     db: Session,
 ) -> list[StudentAttemptGroup]:
@@ -81,6 +134,7 @@ def assignment_attempt_groups_to_response(
         attempt_list: list[AttemptResponse] = []
         for sub in subs_sorted:
             r_acc, r_cpm, r_err = extract_reading_metrics(sub, db)
+            step_fields = _step_progress_fields(assignment, sub)
             attempt_list.append(
                 AttemptResponse(
                     id=sub.id,
@@ -93,6 +147,7 @@ def assignment_attempt_groups_to_response(
                     reading_error_chars=r_err,
                     teacher_feedback=sub.teacher_feedback,
                     session_id=sub.session_id,  # Issue #3682
+                    **step_fields,
                 )
             )
         groups.append(

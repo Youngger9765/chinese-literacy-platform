@@ -45,15 +45,23 @@ from .routes.tts_audit import router as tts_audit_router
 from .routes.admin_sessions import router as admin_sessions_router
 from .routes.library import router as library_router
 from .routes.admin_seed import router as admin_seed_router
+from .routes.admin_iap_allowlist import router as admin_iap_allowlist_router
 from .routes.omo import router as omo_router
 from .routes.curriculum_qa import router as curriculum_qa_router
 from .routes.admin_story_structure_lab import router as admin_story_structure_lab_router
+from .routes.admin_story_packs import router as admin_story_packs_router
 from .routes.assets import router as assets_router
 from .routes.worksheets import router as worksheets_router
 from .routes.live_quiz import router as live_quiz_router
+from .routes.pk import router as pk_router
+from .routes.escape_room import router as escape_room_router
+from .routes.team_arena import router as team_arena_router
 from .utils.logging_config import setup_logging
-from .auth.rate_limiter import general_rate_limiter, real_ip_from_xff
+from .auth.rate_limiter import general_rate_limiter, trusted_proxy_client_ip
 from .services.live_quiz.engine import is_authenticated_member_by_code
+from .services.pk.matchmaking import is_authenticated_queue_owner as pk_is_authenticated_queue_owner
+from .services.pk.engine import is_authenticated_match_participant as pk_is_authenticated_match_participant
+from .services.team_arena.engine import is_authenticated_session_member as team_arena_is_authenticated_member
 from .services.seed import seed_default_data, repair_pii_accounts
 
 # Initialise structured logging before anything else
@@ -330,6 +338,141 @@ class _LiveQuizMemberCache:
 _live_quiz_member_cache = _LiveQuizMemberCache()
 
 
+class _PkIdMemberCache:
+    """Same shape as ``_LiveQuizMemberCache`` (positive-only, TTL, bounded)
+    but keyed by a raw integer id (``pk_queue.id`` or ``pk_matches.id``)
+    instead of a 6-char code — PRD §12's "比照 live_quiz 已經驗證過的兩招"
+    recommendation, applied to PK's queue-poll and match-state/-answer
+    paths (see GlobalRateLimitMiddleware below)."""
+
+    TTL = 60.0
+    MAX = 20000
+
+    def __init__(self):
+        self._d: dict[tuple[int, int], float] = {}
+        self._lock = threading.Lock()
+
+    def get(self, resource_id: int, user_id: int) -> bool:
+        with self._lock:
+            exp = self._d.get((resource_id, user_id))
+            if exp is None:
+                return False
+            if exp < time.monotonic():
+                del self._d[(resource_id, user_id)]
+                return False
+            return True
+
+    def put(self, resource_id: int, user_id: int) -> None:
+        with self._lock:
+            if len(self._d) >= self.MAX:
+                self._d.clear()
+            self._d[(resource_id, user_id)] = time.monotonic() + self.TTL
+
+    def clear(self) -> None:
+        with self._lock:
+            self._d.clear()
+
+
+_pk_queue_member_cache = _PkIdMemberCache()
+_pk_match_member_cache = _PkIdMemberCache()
+
+
+class _TeamArenaCodeMemberCache(_LiveQuizMemberCache):
+    """Same (code, user_id) -> bool shape as `_LiveQuizMemberCache` — team_arena
+    addresses a session by CODE like live_quiz does (not a numeric id like
+    PK), so this reuses that shape by inheritance rather than copy-pasting
+    the identical body a third time. Still its own cache INSTANCE (below),
+    not shared storage with live_quiz's games."""
+
+
+_team_arena_member_cache = _TeamArenaCodeMemberCache()
+
+
+class _TeamArenaNegativeMemberCache:
+    """Short-TTL cache for CONFIRMED-NOT-a-member lookups on team_arena's
+    exemption path — unlike `_TeamArenaCodeMemberCache` (positive-only,
+    60s TTL, by design: a non-member always stays under the per-IP limit
+    either way, so there was never a correctness reason to cache a
+    negative), this exists purely to blunt a sustained AUTHENTICATED
+    attacker forcing a DB query on every single request by hammering
+    made-up/garbage-but-well-formed codes (automated security review,
+    post-push, #3632). A short TTL (5s, much shorter than the positive
+    cache's 60s) is enough to cut repeated-request DB load without
+    meaningfully helping a real non-member evade the per-IP limiter —
+    they fall through to it identically whether this is cached or not.
+
+    Known, accepted limitation (critic review): this cache is never
+    invalidated on `join_session` — a student polling `/state` in the
+    instant BEFORE their own join call lands could get cached here as
+    "not a member" for up to 5s after they actually join, during which
+    their polls lose the rate-limit EXEMPTION (not access: the route's
+    own, uncached membership check is unaffected) and simply fall under
+    the normal per-IP budget for up to 5s. Self-healing, bounded, and
+    only matters under rare tight join/poll timing — not worth a cache-
+    invalidation hook for this.
+    """
+
+    TTL = 5.0
+    MAX = 20000
+
+    def __init__(self):
+        self._d: dict[tuple[str, int], float] = {}
+        self._lock = threading.Lock()
+
+    def get(self, code: str, user_id: int) -> bool:
+        with self._lock:
+            exp = self._d.get((code, user_id))
+            if exp is None:
+                return False
+            if exp < time.monotonic():
+                del self._d[(code, user_id)]
+                return False
+            return True
+
+    def put(self, code: str, user_id: int) -> None:
+        with self._lock:
+            if len(self._d) >= self.MAX:
+                self._d.clear()
+            self._d[(code, user_id)] = time.monotonic() + self.TTL
+
+    def clear(self) -> None:
+        with self._lock:
+            self._d.clear()
+
+
+_team_arena_negative_member_cache = _TeamArenaNegativeMemberCache()
+
+
+def _lookup_pk_queue_member(queue_id: int, user_id: int) -> bool:
+    from .database import SessionLocal as _SessionLocal
+
+    db = _SessionLocal()
+    try:
+        return pk_is_authenticated_queue_owner(db, queue_id, user_id)
+    finally:
+        db.close()
+
+
+def _lookup_pk_match_member(match_id: int, user_id: int) -> bool:
+    from .database import SessionLocal as _SessionLocal
+
+    db = _SessionLocal()
+    try:
+        return pk_is_authenticated_match_participant(db, match_id, user_id)
+    finally:
+        db.close()
+
+
+def _lookup_team_arena_member(code: str, user_id: int) -> bool:
+    from .database import SessionLocal as _SessionLocal
+
+    db = _SessionLocal()
+    try:
+        return team_arena_is_authenticated_member(db, code, user_id)
+    finally:
+        db.close()
+
+
 def _lookup_live_quiz_member(code: str, user_id: int) -> bool:
     # Lazy import (not a top-level binding): looked up fresh on every call so
     # tests can monkeypatch `app.database.SessionLocal` to their own engine.
@@ -359,6 +502,27 @@ class GlobalRateLimitMiddleware:
     # /api/live-quiz/games/{code}/state|answer — see the membership-gated
     # exemption below (#3551 external review #3).
     _LIVE_QUIZ_RATE_EXEMPT_RE = re.compile(r"^/api/live-quiz/games/([^/]+)/(state|answer)$")
+    # /api/pk/queue/{id}/poll and /api/pk/matches/{id}/(state|answer) — PRD
+    # §12's "另開一條 PK 專屬的豁免規則" (see the membership-gated exemption
+    # block below, mirroring _LIVE_QUIZ_RATE_EXEMPT_RE's pattern).
+    _PK_QUEUE_RATE_EXEMPT_RE = re.compile(r"^/api/pk/queue/(\d+)/poll$")
+    _PK_MATCH_RATE_EXEMPT_RE = re.compile(r"^/api/pk/matches/(\d+)/(?:state|answer)$")
+    # /api/team-arena/sessions/{code}/state|answer — same reasoning as the
+    # live-quiz block (PRD §7 "限流" row: "state／answer 不算入同位址限流，
+    # 改成『每場次、每人』上限＋加入時驗證成員身分"), same code-keyed shape
+    # as live_quiz (not a numeric id like PK).
+    _TEAM_ARENA_RATE_EXEMPT_RE = re.compile(r"^/api/team-arena/sessions/([^/]+)/(?:state|answer)$")
+    # Automated security review (post-push, #3632): a well-formed team_arena
+    # code is currently always exactly 6 chars from engine.py's
+    # `_CODE_CHARS` alphabet (A-Z0-9 minus the confusable 0/1/I/O —
+    # `_CODE_LENGTH = 6`). This regex is deliberately a looser SUPERSET
+    # (any-length-4-8, full A-Z0-9 incl. the excluded confusables) rather
+    # than pinning those exact constants — a real code always matches it,
+    # and it stays correct even if the generator's length/alphabet ever
+    # changes, at the cost of not rejecting every conceivable garbage
+    # string (it doesn't need to: it only needs to reject the vast
+    # majority cheaply before ever touching the DB).
+    _TEAM_ARENA_CODE_FORMAT_RE = re.compile(r"^[A-Z0-9]{4,8}$")
     # /join is not membership-gated (you are not a member yet) but has its own
     # per-user limit (10/min, routes/live_quiz.py). 10 classes in one school
     # share one NAT IP: 300 joins in a minute exhausted the per-IP write budget
@@ -471,12 +635,124 @@ class GlobalRateLimitMiddleware:
             # Unauthenticated or non-member: fall through to normal per-IP
             # limiting below, same as any other /api/* request.
 
-        # Extract the real client IP (#2470 HIGH-1a): take the GCP-appended
-        # second-from-right XFF entry, not the client-controlled leftmost one.
+        # PK polling (PRD §12, same reasoning/shape as the live-quiz block
+        # above): a classroom's worth of students simultaneously waiting in
+        # the matchmaking queue or mid-battle would otherwise share one
+        # classroom-NAT IP's per-IP budget. Exempt only when the caller is
+        # BOTH authenticated AND the owner/a participant of THIS resource —
+        # a stranger polling someone else's queue_id/match_id still pays
+        # the per-IP limit.
+        pk_queue_match = self._PK_QUEUE_RATE_EXEMPT_RE.match(path)
+        pk_match_match = self._PK_MATCH_RATE_EXEMPT_RE.match(path) if not pk_queue_match else None
+        if pk_queue_match or pk_match_match:
+            state = scope.get("state") or {}
+            raw_user_id = state.get("user_id")
+            if raw_user_id is not None:
+                try:
+                    user_id = int(raw_user_id)
+                    if pk_queue_match:
+                        resource_id = int(pk_queue_match.group(1))
+                        cache, lookup_fn = _pk_queue_member_cache, _lookup_pk_queue_member
+                    else:
+                        resource_id = int(pk_match_match.group(1))
+                        cache, lookup_fn = _pk_match_member_cache, _lookup_pk_match_member
+                    member = cache.get(resource_id, user_id)
+                    if not member:
+                        member = await anyio.to_thread.run_sync(lookup_fn, resource_id, user_id)
+                        if member:
+                            cache.put(resource_id, user_id)
+                except Exception:
+                    logger.warning(
+                        "pk rate-limit membership check failed; falling back to per-IP limiting",
+                        exc_info=True,
+                    )
+                    member = False
+                if member:
+                    await self.app(scope, receive, send)
+                    return
+            # Unauthenticated or non-member: fall through to normal per-IP
+            # limiting below, same as any other /api/* request.
+
+        # Team-arena polling (PRD §7 "限流", same reasoning/shape as the
+        # live-quiz block above): a classroom's worth of students sharing
+        # one NAT IP, each polling /state ~1/s across potentially several
+        # concurrent matches in one session, would blow straight through
+        # the per-IP read budget on its own. Exempt only when the caller is
+        # BOTH authenticated AND the teacher/a joined member of THIS
+        # session (is_authenticated_session_member — includes lobby-only
+        # roster members, not just post-team-formation TeamArenaMember
+        # rows, since the busiest pre-game polling window is exactly the
+        # lobby wait before teams are assigned).
+        team_arena_match = self._TEAM_ARENA_RATE_EXEMPT_RE.match(path)
+        if team_arena_match:
+            state = scope.get("state") or {}
+            raw_user_id = state.get("user_id")
+            if raw_user_id is not None:
+                try:
+                    user_id = int(raw_user_id)
+                    # Normalize to uppercase ONCE here — used consistently
+                    # as both the cache key and the DB query argument (the
+                    # DB query itself also upper()s, but keying the cache
+                    # on the raw, possibly-lowercase path segment would let
+                    # "ab12cd" and "AB12CD" miss each other for no reason).
+                    code = team_arena_match.group(1).upper()
+                    if not self._TEAM_ARENA_CODE_FORMAT_RE.match(code):
+                        # Malformed shape can never be a real session code
+                        # — skip the DB entirely (automated security
+                        # review, post-push: don't let an authenticated
+                        # attacker force a query per request just by
+                        # hammering garbage).
+                        member = False
+                    elif _team_arena_negative_member_cache.get(code, user_id):
+                        member = False
+                    else:
+                        member = _team_arena_member_cache.get(code, user_id)
+                        if not member:
+                            member = await anyio.to_thread.run_sync(
+                                _lookup_team_arena_member, code, user_id
+                            )
+                            if member:
+                                _team_arena_member_cache.put(code, user_id)
+                            else:
+                                _team_arena_negative_member_cache.put(code, user_id)
+                except Exception:
+                    logger.warning(
+                        "team-arena rate-limit membership check failed; falling back to per-IP limiting",
+                        exc_info=True,
+                    )
+                    member = False
+                if member:
+                    await self.app(scope, receive, send)
+                    return
+            # Unauthenticated or non-member: fall through to normal per-IP
+            # limiting below, same as any other /api/* request.
+
+        # Extract the real client IP (#2470 HIGH-1a, #3740): take the
+        # GCP-appended second-from-right XFF entry -- UNLESS this backend
+        # has itself cryptographically verified this request as coming
+        # from the frontend's own service account (the same-origin proxy
+        # hop, via X-Frontend-Identity), in which case trust the
+        # X-Client-IP the frontend derived instead. See
+        # trusted_proxy_client_ip's docstring for why (#3740 postmortem:
+        # the proxy hop broke the plain XFF rule, collapsing every user
+        # behind it into one shared bucket) and why X-Frontend-Identity
+        # gets verified here rather than trusting Cloud Run's own
+        # X-Serverless-Authorization unconditionally (follow-up security
+        # review: that trust was conditional on an auth mode this backend
+        # doesn't control from this call site).
         headers_raw = dict(scope.get("headers", []))
         forwarded_for = headers_raw.get(b"x-forwarded-for", b"").decode()
+        frontend_identity = headers_raw.get(b"x-frontend-identity", b"").decode()
+        client_ip_header = headers_raw.get(b"x-client-ip", b"").decode()
         client = scope.get("client")
-        ip = real_ip_from_xff(forwarded_for, client[0] if client else None)
+        ip = trusted_proxy_client_ip(
+            forwarded_for,
+            client[0] if client else None,
+            frontend_identity,
+            client_ip_header,
+            settings.frontend_proxy_sa,
+            settings.backend_audience,
+        )
         method = scope.get("method", "GET").upper()
         # OPTIONS is handled above (#3227) and never reaches here.
         is_read = method in ("GET", "HEAD")
@@ -757,12 +1033,17 @@ app.include_router(tts_audit_router)
 app.include_router(admin_sessions_router, prefix="/api", tags=["admin-sessions"])
 app.include_router(library_router, prefix="/api", tags=["library"])
 app.include_router(admin_seed_router, prefix="/api", tags=["admin-seed"])
+app.include_router(admin_iap_allowlist_router, prefix="/api", tags=["admin-iap-allowlist"])
 app.include_router(omo_router, prefix="/api", tags=["omo"])
 app.include_router(curriculum_qa_router, prefix="/api", tags=["curriculum-qa"])
 app.include_router(admin_story_structure_lab_router, prefix="/api", tags=["admin-story-structure-lab"])
+app.include_router(admin_story_packs_router, prefix="/api", tags=["admin-story-packs"])
 # No /api prefix — matches the Firebase Hosting `/assets/**` rewrite target (#2486).
 app.include_router(assets_router)
 app.include_router(live_quiz_router, prefix="/api", tags=["live-quiz"])
+app.include_router(pk_router, prefix="/api", tags=["pk"])
+app.include_router(escape_room_router, prefix="/api", tags=["escape-room"])
+app.include_router(team_arena_router, prefix="/api", tags=["team-arena"])
 # Role-gated worksheet download (#3276) — separate from the public assets proxy above.
 app.include_router(worksheets_router)
 

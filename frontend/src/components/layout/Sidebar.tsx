@@ -26,7 +26,7 @@ import { useZhuyin } from '../../context/ZhuyinContext';
 import { hasRole } from '../../services/authApi';
 import NotificationBell from '../teacher/NotificationBell';
 import ZhuyinToggle from '../ui/ZhuyinToggle';
-import { SIDEBAR_STORAGE_KEY } from './sidebarUtils';
+import { SIDEBAR_STORAGE_KEY, isActive } from './sidebarUtils';
 import { StudentSidebar, getStudentNavItems, studentToolsItems } from './StudentSidebar';
 import { TeacherSidebar, getTeacherNavItems } from './TeacherSidebar';
 import { AdminSidebar, getAdminExtraItems } from './AdminSidebar';
@@ -63,16 +63,6 @@ interface MobileTabBarProps {
    * auth/fetching — Sidebar decides whether to render it.
    */
   notificationSlot?: React.ReactNode;
-}
-
-function isActiveLocal(pathname: string, path: string): boolean {
-  if (path === '/student' || path === '/teacher-home') {
-    return pathname === path;
-  }
-  if (path === '/teacher') {
-    return pathname === '/teacher' || /^\/teacher\/classroom\/\d+/.test(pathname);
-  }
-  return pathname === path || pathname.startsWith(`${path}/`);
 }
 
 const MobileTabBar: React.FC<MobileTabBarProps> = ({
@@ -113,11 +103,11 @@ const MobileTabBar: React.FC<MobileTabBarProps> = ({
             type="button"
             onClick={() => onNavigate(item.path)}
             aria-label={item.label}
-            aria-current={isActiveLocal(pathname, item.path) ? 'page' : undefined}
+            aria-current={isActive(pathname, item.path) ? 'page' : undefined}
             className={`
               flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors
               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent
-              ${isActiveLocal(pathname, item.path) ? 'text-accent' : 'text-gray-500'}
+              ${isActive(pathname, item.path) ? 'text-accent' : 'text-gray-500'}
             `}
           >
             <span className="text-xl relative" aria-hidden="true">
@@ -211,7 +201,7 @@ const MobileTabBar: React.FC<MobileTabBarProps> = ({
                     className={`
                       flex flex-col items-center gap-1 p-3 rounded-xl text-sm font-medium transition-colors
                       focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent
-                      ${isActiveLocal(pathname, item.path)
+                      ${isActive(pathname, item.path)
                         ? 'bg-accent-bg text-accent'
                         : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
                       }
@@ -336,7 +326,9 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
   // ---------------------------------------------------------------------------
 
   const mobileStudentItems: NavItem[] =
-    activeView === 'student' ? getStudentNavItems(pendingAssignmentCount) : [];
+    activeView === 'student'
+      ? getStudentNavItems(pendingAssignmentCount)
+      : [];
 
   const mobileTeacherItems: NavItem[] =
     activeView === 'teacher' || activeView === 'admin' ? getTeacherNavItems() : [];
@@ -407,7 +399,7 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
             className="flex items-center gap-2 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
           >
             <div
-              className="bg-accent w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+              className="teacher-brand-mark bg-accent w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
               aria-hidden="true"
             >
               <span className="text-white font-bold text-sm">L</span>
@@ -436,7 +428,7 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
           <div className={`shrink-0 border-b border-gray-100 py-3 ${collapsed ? 'px-2 flex justify-center' : 'px-3'}`}>
             <div className={`flex items-center gap-2 ${collapsed ? 'flex-col' : ''}`}>
               <div
-                className="w-8 h-8 rounded-full bg-accent text-white flex items-center justify-center shrink-0 text-sm font-semibold"
+                className="teacher-brand-mark w-8 h-8 rounded-full bg-accent text-white flex items-center justify-center shrink-0 text-sm font-semibold"
                 aria-hidden="true"
               >
                 {user.name?.charAt(0) ?? '?'}

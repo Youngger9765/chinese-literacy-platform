@@ -395,7 +395,16 @@ const ActivateTeacherPage: React.FC = () => {
                     {row.results.length === 0 &&
                       row.suggestions !== null &&
                       row.suggestions.length > 0 && (
-                        <div className="absolute z-10 mt-1 w-full bg-amber-50 border border-amber-200 rounded-lg shadow-lg px-3 py-2">
+                        // #3817: this box used to be `absolute`, which let it
+                        // float on top of whatever came after it in the form
+                        // (the "開通老師身分" submit button) whenever it grew
+                        // tall enough -- an absolutely-positioned element is
+                        // removed from document flow, so its height never
+                        // pushes later siblings down. A normal-flow block can
+                        // only ever push content below it down, never cover
+                        // it, so that failure mode becomes structurally
+                        // impossible here.
+                        <div className="mt-1 w-full bg-amber-50 border border-amber-200 rounded-lg shadow-lg px-3 py-2">
                           <p className="text-xs text-amber-700 mb-1">您是不是要找：</p>
                           <div className="flex flex-wrap gap-2">
                             {row.suggestions.map((s) => (

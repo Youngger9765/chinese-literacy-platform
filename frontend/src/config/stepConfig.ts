@@ -455,6 +455,28 @@ export function filterRequiredAssignmentSteps(steps: StepConfig[]): StepConfig[]
 }
 
 /**
+ * Human-readable label for a step id, for the teacher-facing missing-steps
+ * display ("完成 X/Y 關，缺：A、B、C" on the assignment management screen).
+ *
+ * Unlike AssignmentMatrixGrid.tsx's local `stepLabel` helper (which indexes
+ * STEP_REGISTRY by the raw id), this strips a round-keyed suffix
+ * (`base#slug`, #2916/#2930) before lookup — a multi-part lesson's required
+ * steps are composite ids like `key-passage-reading#4uee3`, and a teacher's
+ * missing-step list silently reading "缺：" (blank) for every multi-round
+ * lesson would defeat the whole point of showing it.
+ *
+ * Falls back to the raw id (not null) when nothing matches, so a future
+ * step id this function doesn't yet know about still shows SOMETHING
+ * instead of an empty gap in the list.
+ */
+export function stepIdToLabel(stepId: string): string {
+  const resolved = resolveStepId(stepId);
+  const hash = resolved.indexOf('#');
+  const base = hash < 0 ? resolved : resolved.slice(0, hash);
+  return STEP_REGISTRY[base]?.label ?? stepId;
+}
+
+/**
  * #3682 fix C (part 3, backward-compat) — does `completed` satisfy `requiredId`?
  *
  * Exact match always satisfies. Beyond that, a BARE entry in `completed`

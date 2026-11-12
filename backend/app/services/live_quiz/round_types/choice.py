@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import random
 
+from .. import reading_pace
 from ..sources import SOURCE_ADAPTERS
 from ..sources.base import QuizItem, _option_to_dict, warn_skipped_once
 
@@ -17,9 +18,15 @@ NAME = "choice"
 # PRD §4 老師端選題: 每題秒數 20/30/45/60.
 ALLOWED_SECONDS = (20, 30, 45, 60)
 DEFAULT_SECONDS = 30
-# UI/UX review 2026-10-15 #2: "reading phase" — stem shown alone before the
-# answer window opens. 0 means no delay (the old behaviour).
-DEFAULT_READING_SECONDS = 4
+# issue #3631 P0 #1: kept only as the fallback for the OLD meaning of this
+# constant (a single fixed delay) — no caller reads it for that purpose any
+# more. `generate_rounds` below now computes `reading_seconds` PER ITEM from
+# the item's own stem length via `reading_pace.compute_reading_seconds`
+# (teacher picks a 慢/標準/快 preset, not a raw second count). The one
+# exception is an explicit `settings["reading_seconds"]` override — PK uses
+# this to force `0` (no reading phase at all) for every item regardless of
+# length; see `app/services/pk/rounds.py`.
+DEFAULT_READING_SECONDS = reading_pace.MIN_READING_SECONDS
 _KEYS = ("A", "B", "C", "D")
 
 # Bumped only if the scoring FORMULA below changes — lets a recompute/audit
@@ -103,10 +110,23 @@ def generate_rounds(lessons: list[dict], settings: dict, rng: random.Random) -> 
     """Build frozen round snapshot entries for a brand-new game.
 
     ``settings`` keys used here: ``source_modules`` (list[str]),
-    ``seconds`` (int), ``reading_seconds`` (int), ``question_count_mode``
-    ("all" | 10 | 15 | 20), ``shuffle`` (bool, round ORDER — not to be
-    confused with the per-item display-position shuffle below, which
-    always happens).
+    ``seconds`` (int), ``question_count_mode`` ("all" | 10 | 15 | 20),
+    ``shuffle`` (bool, round ORDER — not to be confused with the per-item
+    display-position shuffle below, which always happens).
+
+    issue #3631 P0 #1 — reading time, two mutually exclusive settings keys:
+      ``reading_seconds`` (int, explicit) — if present, EVERY round gets
+        exactly this value regardless of its own stem length. This is the
+        escape hatch `app/services/pk/rounds.py` uses to force `0` (no
+        reading phase at all); nothing in live_quiz's own public API sets
+        this any more, but the mechanism stays so PK (and any future
+        internal caller) never has to go through a pace preset.
+      ``reading_pace`` (str, "slow"|"standard"|"fast", default "standard")
+        — used only when ``reading_seconds`` is absent. Each round's
+        reading_seconds is computed from ITS OWN stem length via
+        ``reading_pace.compute_reading_seconds`` — a long comprehension
+        question and a two-character zhuyin stem in the SAME game get
+        different reading windows.
 
     Returns ``(rounds, question_count_fallback)``. UI/UX review 2026-10-15
     #8: if the selected lessons/types produce FEWER items than the
@@ -117,7 +137,8 @@ def generate_rounds(lessons: list[dict], settings: dict, rng: random.Random) -> 
     """
     source_modules = settings.get("source_modules") or list(SOURCE_ADAPTERS.keys())
     seconds = settings.get("seconds", DEFAULT_SECONDS)
-    reading_seconds = settings.get("reading_seconds", DEFAULT_READING_SECONDS)
+    explicit_reading_seconds = settings.get("reading_seconds")
+    pace = settings.get("reading_pace", reading_pace.DEFAULT_PACE)
     count_mode = settings.get("question_count_mode", "all")
 
     pool = _collect_items(lessons, source_modules, rng)
@@ -141,7 +162,19 @@ def generate_rounds(lessons: list[dict], settings: dict, rng: random.Random) -> 
         payload["options"] = options
         payload["correct_key"] = correct_key
         payload["scoring_version"] = SCORING_RULE_VERSION
-        payload["reading_seconds"] = reading_seconds
+        if explicit_reading_seconds is not None:
+            payload["reading_seconds"] = int(explicit_reading_seconds)
+        else:
+            # Critic review note (2026-10-18): this reuses
+            # `scorable_char_count`, whose own docstring says it is "NOT
+            # fine as a scoring input" — that caveat is about using it to
+            # grade a reading, not about counting roughly how many
+            # characters a stem has. `reading_pace.compute_reading_seconds`
+            # already documents this as an ESTIMATE (no first-party
+            # measurement of students' silent recognition speed exists),
+            # and the MIN/MAX clamp keeps a bad estimate from ever reaching
+            # an absurd value either way.
+            payload["reading_seconds"] = reading_pace.compute_reading_seconds(item.stem, pace)
         rounds.append({"round_index": i, "round_type": NAME, "payload": payload})
     return rounds, fallback_used
 
@@ -181,6 +214,16 @@ def player_view(payload: dict, revealed: bool, show_options: bool = True) -> dic
     ``options`` — the server enforces "stem alone for N seconds" rather than
     trusting the client's local countdown, the same fail-closed posture as
     hiding ``correct_key`` pre-reveal.
+
+    Critic review note (2026-10-18): the ``payload.get("reading_seconds",
+    DEFAULT_READING_SECONDS)`` fallback a few lines below is intentionally
+    dead in practice — ``generate_rounds`` always sets ``reading_seconds``
+    on every payload it builds (explicit override or pace-computed), so
+    this only matters for a hand-built payload in a test. It is NOT an
+    oversight that ``DEFAULT_READING_SECONDS`` now aliases
+    ``reading_pace.MIN_READING_SECONDS`` (2, was the literal ``4`` before
+    #3631) — it is just "the lowest sane value" as a safety net, not a
+    meaningful default any real caller relies on.
     """
     view = {
         "item_id": payload.get("item_id"),
@@ -199,4 +242,10 @@ def player_view(payload: dict, revealed: bool, show_options: bool = True) -> dic
         view["extra"] = payload["extra"]
     if revealed:
         view["correct_key"] = payload.get("correct_key")
+        # issue #3631 P0 #2: "看解析" — same gate as correct_key (no point
+        # showing a rationale for an answer the caller can't see yet), and
+        # omitted (not null) when this question has no explanation text so
+        # the frontend can treat "key present" as "there is a button to show".
+        if payload.get("explanation"):
+            view["explanation"] = payload["explanation"]
     return view

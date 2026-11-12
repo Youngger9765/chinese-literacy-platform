@@ -18,7 +18,7 @@ from ...schemas.teacher_instruction import (
     InstructionUpdate,
 )
 from ...services.input_sanitizer import sanitize_ai_input
-from ..classrooms import _get_classroom_or_404, _require_owner_or_admin
+from ..classrooms import _get_classroom_or_404, _require_editor_or_admin
 
 router = APIRouter(tags=["teacher"])
 logger = logging.getLogger(__name__)
@@ -35,7 +35,10 @@ def create_student_instruction(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Create a special instruction for a student. Teacher must own the classroom."""
+    """Create a special instruction for a student.
+
+    Owner, accepted 'editor'-role co-teacher, or system_admin (#3820).
+    """
     # Validate instruction_type
     if payload.instruction_type not in VALID_INSTRUCTION_TYPES:
         raise HTTPException(
@@ -45,7 +48,7 @@ def create_student_instruction(
 
     # Verify teacher owns the classroom
     classroom = _get_classroom_or_404(payload.classroom_id, db)
-    _require_owner_or_admin(classroom, current_user, db)
+    _require_editor_or_admin(classroom, current_user, db)
 
     # Verify student is enrolled in this classroom
     enrollment = (

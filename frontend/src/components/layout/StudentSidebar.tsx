@@ -68,14 +68,27 @@ export const StudentSidebar: React.FC<StudentSidebarProps> = ({
  * These used to be written out twice, once here and once inline in the
  * component. Adding an entry to one copy and not the other is invisible:
  * the sidebar gains it, the mobile tab bar silently does not (#3142).
+ *
+ * issue #3633: 我們班 (跨班賽季)／課堂搶答／PK 對戰 used to be three separate
+ * entries here, each individually gated by classroom flags (#3607). They
+ * now collapse into a single, always-visible 「遊戲區」 entry — the
+ * per-mode locking moved to StudentGameHubPage's own cards (same
+ * computeStudentGameFlags rule, see services/learning/session.ts), so this
+ * list no longer needs feature-flag parameters at all. 迷城密室 — which had
+ * a working page since #3599 but NO sidebar entry anywhere, the bug this
+ * issue fixes — only exists as a card inside the hub, not here.
  */
 export function getStudentNavItems(pendingAssignmentCount = 0): NavItem[] {
   return [
     { icon: '🏠', label: '主頁', path: '/student' },
     { icon: '📚', label: '圖書館', path: '/library' },
     { icon: '🏫', label: '班級作業', path: '/assignments', badge: pendingAssignmentCount },
-    { icon: '🏆', label: '我們班', path: '/student/our-class' },
-    { icon: '🎮', label: '課堂搶答', path: '/live' },
+    {
+      icon: '🎮',
+      label: '遊戲區',
+      path: '/game-hub',
+      description: '跨班賽季、課堂搶答、PK 對戰、迷城密室、多人對抗賽',
+    },
     { icon: '➕', label: '加入班級', path: '/join' },
     // #3804 (Young 2026-11-01): self-serve teacher activation. Placed right
     // after 加入班級 on purpose -- both are self-service actions that attach
@@ -85,8 +98,7 @@ export function getStudentNavItems(pendingAssignmentCount = 0): NavItem[] {
       icon: '🏫',
       label: '開通老師身分',
       path: '/activate-teacher',
-      // main has no NavItem.description (added on staging by the game-area
-      // work), so the sidebar subtitle ships with that later release.
+      description: '填寫任教學校，立即成為老師',
     },
     { icon: '📖', label: '學習紀錄', path: '/learning-history' },
     // /help had no entry anywhere in the UI until #3142.

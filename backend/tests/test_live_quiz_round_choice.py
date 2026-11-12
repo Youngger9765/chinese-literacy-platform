@@ -4,19 +4,36 @@ the answer-safe player view, and the per-game display-position shuffle
 source material's own answer letter)."""
 import random
 
+from app.services.live_quiz import reading_pace
 from app.services.live_quiz.round_types import choice
 
 
-def _lessons_fixture():
+def _lessons_fixture(explanation=None):
+    question = {"index": 1, "stem": "第一題？", "answer": "A",
+                "options": {"A": "甲", "B": "乙", "C": "丙", "D": "丁"}}
+    if explanation is not None:
+        question["explanation"] = explanation
     lesson = {
         "title": "測試課文",
         "version_id": "v3",
-        "comprehension": {
-            "questions": [
-                {"index": 1, "stem": "第一題？", "answer": "A",
-                 "options": {"A": "甲", "B": "乙", "C": "丙", "D": "丁"}},
-            ]
-        },
+        "comprehension": {"questions": [question]},
+    }
+    return [{"lesson_uid": "L0001", "lesson": lesson}]
+
+
+def _long_stem_lessons_fixture():
+    """A second, much longer stem than ``_lessons_fixture`` — used to prove
+    reading_seconds is now computed PER ITEM from its own length, not one
+    fixed value for the whole game (issue #3631 P0 #1)."""
+    lesson = {
+        "title": "測試課文",
+        "version_id": "v3",
+        "comprehension": {"questions": [
+            {"index": 1, "stem": "短", "answer": "A", "options": {"A": "甲", "B": "乙"}},
+            {"index": 2,
+             "stem": "這是一句明顯長很多的題目敘述文字，用來確認比較長的題目會拿到比較長的讀題時間。",
+             "answer": "A", "options": {"A": "甲", "B": "乙"}},
+        ]},
     }
     return [{"lesson_uid": "L0001", "lesson": lesson}]
 
@@ -62,14 +79,63 @@ class TestGenerateRounds:
         assert len(rounds) == 2  # used everything available, did not error
         assert fallback is True
 
-    def test_reading_seconds_default_and_override_land_in_payload(self):
+    def test_reading_seconds_defaults_to_standard_pace_computed_from_stem(self):
+        """issue #3631 P0 #1: no explicit override -> computed from the
+        item's own stem length at the default ("standard") pace, not the
+        old fixed ``DEFAULT_READING_SECONDS`` constant."""
         settings = {"source_modules": ["comprehension"], "seconds": 30, "question_count_mode": "all"}
         rounds, _fallback = choice.generate_rounds(_lessons_fixture(), settings, random.Random(1))
-        assert rounds[0]["payload"]["reading_seconds"] == choice.DEFAULT_READING_SECONDS
+        stem = rounds[0]["payload"]["stem"]
+        assert rounds[0]["payload"]["reading_seconds"] == reading_pace.compute_reading_seconds(
+            stem, reading_pace.DEFAULT_PACE
+        )
 
-        settings_custom = dict(settings, reading_seconds=0)
-        rounds2, _fallback2 = choice.generate_rounds(_lessons_fixture(), settings_custom, random.Random(1))
-        assert rounds2[0]["payload"]["reading_seconds"] == 0
+    def test_explicit_reading_seconds_override_still_works_for_every_item(self):
+        """PK reuses this function directly with an explicit
+        ``reading_seconds=0`` (no reading phase at all) — that escape hatch
+        must keep working unchanged after #3631 (see
+        ``app/services/pk/rounds.py``'s own docstring)."""
+        settings = {"source_modules": ["comprehension"], "seconds": 30,
+                    "question_count_mode": "all", "reading_seconds": 0}
+        rounds, _fallback = choice.generate_rounds(_long_stem_lessons_fixture(), settings, random.Random(1))
+        assert all(r["payload"]["reading_seconds"] == 0 for r in rounds)
+
+    def test_longer_stem_gets_more_reading_time_than_a_shorter_one_in_the_same_game(self):
+        settings = {"source_modules": ["comprehension"], "seconds": 30, "question_count_mode": "all"}
+        rounds, _fallback = choice.generate_rounds(_long_stem_lessons_fixture(), settings, random.Random(1))
+        by_stem = {r["payload"]["stem"]: r["payload"]["reading_seconds"] for r in rounds}
+        assert by_stem["短"] < by_stem["這是一句明顯長很多的題目敘述文字，用來確認比較長的題目會拿到比較長的讀題時間。"]
+
+    def test_explicit_reading_seconds_wins_when_both_are_given(self):
+        """Critic review note (2026-10-19): if a caller somehow sends both
+        keys, the explicit numeric override must win — the pace preset is
+        only a fallback for "no explicit value given", never a tie-break."""
+        settings = {"source_modules": ["comprehension"], "seconds": 30,
+                    "question_count_mode": "all", "reading_seconds": 7, "reading_pace": "fast"}
+        rounds, _fallback = choice.generate_rounds(_long_stem_lessons_fixture(), settings, random.Random(1))
+        assert all(r["payload"]["reading_seconds"] == 7 for r in rounds)
+
+    def test_reading_pace_setting_selects_the_preset(self):
+        settings_slow = {"source_modules": ["comprehension"], "seconds": 30,
+                          "question_count_mode": "all", "reading_pace": "slow"}
+        settings_fast = dict(settings_slow, reading_pace="fast")
+        rounds_slow, _ = choice.generate_rounds(_long_stem_lessons_fixture(), settings_slow, random.Random(1))
+        rounds_fast, _ = choice.generate_rounds(_long_stem_lessons_fixture(), settings_fast, random.Random(1))
+        slow_seconds = next(r["payload"]["reading_seconds"] for r in rounds_slow if r["payload"]["stem"] == "短")
+        fast_seconds = next(r["payload"]["reading_seconds"] for r in rounds_fast if r["payload"]["stem"] == "短")
+        assert slow_seconds >= fast_seconds
+
+    def test_explanation_lands_in_payload_when_present(self):
+        settings = {"source_modules": ["comprehension"], "seconds": 30, "question_count_mode": "all"}
+        rounds, _fallback = choice.generate_rounds(
+            _lessons_fixture(explanation="甲才是正確答案。"), settings, random.Random(1)
+        )
+        assert rounds[0]["payload"]["explanation"] == "甲才是正確答案。"
+
+    def test_explanation_key_absent_when_source_has_none(self):
+        settings = {"source_modules": ["comprehension"], "seconds": 30, "question_count_mode": "all"}
+        rounds, _fallback = choice.generate_rounds(_lessons_fixture(), settings, random.Random(1))
+        assert "explanation" not in rounds[0]["payload"]
 
     def test_display_position_shuffle_breaks_source_letter_correlation(self):
         """Over many seeds, the round's correct_key should NOT always equal
@@ -157,3 +223,27 @@ class TestPlayerView:
                    "correct_key": "A", "seconds": 30, "extra": {"target_index": 1}}
         view = choice.player_view(payload, revealed=False, show_options=False)
         assert view["extra"] == {"target_index": 1}
+
+    def test_explanation_hidden_before_reveal(self):
+        """issue #3631 P0 #2: 看解析 only makes sense once the answer is
+        already shown — same gate as correct_key, not a separate leak."""
+        payload = {"source_module": "comprehension", "lesson_uid": "L1", "lesson_title": "t",
+                   "stem": "s", "options": [{"key": "A", "text": "a"}], "correct_key": "A", "seconds": 30,
+                   "explanation": "因為……"}
+        view = choice.player_view(payload, revealed=False)
+        assert "explanation" not in view
+
+    def test_explanation_shown_after_reveal_when_present(self):
+        payload = {"source_module": "comprehension", "lesson_uid": "L1", "lesson_title": "t",
+                   "stem": "s", "options": [{"key": "A", "text": "a"}], "correct_key": "A", "seconds": 30,
+                   "explanation": "因為……"}
+        view = choice.player_view(payload, revealed=True)
+        assert view["explanation"] == "因為……"
+
+    def test_explanation_key_absent_after_reveal_when_not_present(self):
+        """No explanation text for this question -> frontend must not render
+        a 看解析 button pointing at nothing."""
+        payload = {"source_module": "comprehension", "lesson_uid": "L1", "lesson_title": "t",
+                   "stem": "s", "options": [{"key": "A", "text": "a"}], "correct_key": "A", "seconds": 30}
+        view = choice.player_view(payload, revealed=True)
+        assert "explanation" not in view

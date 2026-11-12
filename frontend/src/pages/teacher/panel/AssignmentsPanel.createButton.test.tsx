@@ -44,21 +44,21 @@ describe('AssignmentsPanel — 建立任務 button at the top (#3401)', () => {
     );
     await waitFor(() => expect(teacherApi.getAssignmentMatrix).toHaveBeenCalled());
 
-    const topButton = await screen.findByRole('button', { name: '建立作業' });
+    const topButton = await screen.findByRole('button', { name: '建立任務' });
     expect(topButton).toBeInTheDocument();
 
-    // Junyi-parity toolbar: 建立作業 then 管理作業, both above the matrix.
-    const manageButton = screen.getByRole('button', { name: '管理作業' });
+    // Junyi-parity toolbar: 建立任務 then 管理任務, both above the matrix.
+    const manageButton = screen.getByRole('button', { name: '管理任務' });
     expect(
       topButton.compareDocumentPosition(manageButton) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
-    const matrix = await screen.findByRole('table', { name: '班級作業總表' });
+    const matrix = await screen.findByRole('table', { name: '班級任務總表' });
     expect(
       manageButton.compareDocumentPosition(matrix) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
   });
 
-  it('clicking it expands 建立與管理作業 and opens the create-assignment form directly', async () => {
+  it('clicking it expands 建立與管理任務 and opens the create-assignment form directly', async () => {
     render(
       <AssignmentsPanel
         classroomId={9}
@@ -72,12 +72,12 @@ describe('AssignmentsPanel — 建立任務 button at the top (#3401)', () => {
     // The manage section starts collapsed, so the create form is not visible yet.
     expect(screen.queryByText('選擇課文')).not.toBeInTheDocument();
 
-    await userEvent.click(screen.getByRole('button', { name: '建立作業' }));
+    await userEvent.click(screen.getByRole('button', { name: '建立任務' }));
 
     // Opens the manage section...
-    expect(screen.getByRole('button', { name: '管理作業' })).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByRole('button', { name: '管理任務' })).toHaveAttribute('aria-expanded', 'true');
     // ...and opens the existing create-assignment form (AssignmentCreateForm renders a
-    // "選擇課文" field) without the user having to click "建立作業" a second time.
+    // "選擇課文" field) without the user having to click "建立任務" a second time.
     await waitFor(() => expect(screen.getByText('選擇課文')).toBeInTheDocument());
   });
 
@@ -91,10 +91,10 @@ describe('AssignmentsPanel — 建立任務 button at the top (#3401)', () => {
       />,
     );
     await waitFor(() => expect(teacherApi.getAssignmentMatrix).toHaveBeenCalled());
-    await userEvent.click(screen.getByRole('button', { name: '建立作業' }));
+    await userEvent.click(screen.getByRole('button', { name: '建立任務' }));
     await waitFor(() => expect(screen.getByText('選擇課文')).toBeInTheDocument());
 
-    await userEvent.click(screen.getByRole('button', { name: '建立作業' }));
+    await userEvent.click(screen.getByRole('button', { name: '建立任務' }));
     expect(screen.getByText('選擇課文')).toBeInTheDocument();
   });
 });

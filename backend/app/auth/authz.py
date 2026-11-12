@@ -88,11 +88,14 @@ def _is_classroom_owner(user: User, classroom: Classroom) -> bool:
 
 
 def _is_classroom_co_teacher(user: User, classroom_id: int, db: Session) -> bool:
+    """True for an ACCEPTED co-teacher (either role). A still-'pending'
+    invitation grants no access (#3820)."""
     return (
         db.query(ClassroomTeacher)
         .filter(
             ClassroomTeacher.classroom_id == classroom_id,
             ClassroomTeacher.teacher_id == user.id,
+            ClassroomTeacher.status == "accepted",
         )
         .first()
         is not None
@@ -176,7 +179,12 @@ def _owns_or_co_teaches_a_classroom_at_school(user: User, school_id, db: Session
     return (
         db.query(ClassroomTeacher)
         .join(Classroom, ClassroomTeacher.classroom_id == Classroom.id)
-        .filter(Classroom.school_id == school_id, ClassroomTeacher.teacher_id == user.id)
+        .filter(
+            Classroom.school_id == school_id,
+            ClassroomTeacher.teacher_id == user.id,
+            # #3820: a still-'pending' invitation does not count as co-teaching.
+            ClassroomTeacher.status == "accepted",
+        )
         .first()
         is not None
     )
@@ -271,7 +279,8 @@ def _can_manage_semester(user: User, resource_id, db: Session) -> bool:
 
 
 def _can_view_student(user: User, resource_id, db: Session) -> bool:
-    """Self, or a teacher (owner/co-teacher) of a classroom containing the student."""
+    """Self, or a teacher (owner/ACCEPTED co-teacher) of a classroom containing
+    the student. A still-'pending' invitation grants no access (#3820)."""
     student_id = resource_id
     if user.id == student_id:
         return True
@@ -286,6 +295,7 @@ def _can_view_student(user: User, resource_id, db: Session) -> bool:
                 .filter(
                     ClassroomTeacher.classroom_id == ClassroomStudent.classroom_id,
                     ClassroomTeacher.teacher_id == user.id,
+                    ClassroomTeacher.status == "accepted",
                 )
                 .correlate(ClassroomStudent)
                 .exists()

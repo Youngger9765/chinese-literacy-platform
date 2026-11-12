@@ -1,9 +1,10 @@
 import { API_BASE } from './apiConfig';
+import type { LeagueTheme } from '../types/leagueTheme';
 /**
  * League API service — cross-class invitational seasons, class-average
  * boards, personal "my team" summary, and 讀家記憶 history.
  *
- * See docs/prd/2026-10-14-chinese-star-league-prd.md §7/§10/§11.
+ * See docs/prd/2026-10-14-chinese-star-league-prd.md §7/§10/§11/§13.
  * Follows the same pattern as semesterApi.ts.
  */
 
@@ -29,6 +30,12 @@ export interface LeagueBoardRow {
   average_points: number;
   team_badge_earned: boolean;
   treasure_chest_eligible: boolean;
+  /** Frozen per-season threshold (PRD §5 weights are versioned/frozen —
+   * never hardcode 120 on the frontend). Added 2026-10-16 UI redesign. */
+  badge_threshold: number;
+  /** 0 once `treasure_chest_eligible` is true. Added 2026-10-16 so the
+   * "還差 N 人解鎖寶箱" hint doesn't need the ratio recomputed client-side. */
+  treasure_chest_participants_needed: number;
   rank: number;
 }
 
@@ -36,6 +43,13 @@ export interface LeagueSeasonBoard {
   season_id: number;
   season_name: string;
   board: LeagueBoardRow[];
+  /** Added 2026-10-16 (#3594) — the resolved storyline/chest/badge content
+   * for this season (season override -> platform active default ->
+   * shipped builtin default). Render code should still fall back to
+   * `leagueTheme.ts`'s DEFAULT_THEME_FALLBACK if this is ever missing
+   * (older cached response), not assume it's always present at runtime
+   * even though the real backend contract always sends it. */
+  theme: LeagueTheme;
 }
 
 export interface LeagueMySummary {
@@ -48,6 +62,13 @@ export interface LeagueMySummary {
   class_badge_earned: boolean;
   participant_count: number;
   roster_size: number;
+  /** Added 2026-10-16 UI redesign — see LeagueBoardRow for why this must
+   * come from the response, not a hardcoded constant. */
+  badge_threshold: number;
+  treasure_chest_eligible: boolean;
+  treasure_chest_participants_needed: number;
+  /** Added 2026-10-16 (#3594) — see LeagueSeasonBoard.theme. */
+  theme: LeagueTheme;
 }
 
 export interface LeagueClassroomSeason {

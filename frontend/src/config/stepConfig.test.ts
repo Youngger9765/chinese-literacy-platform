@@ -3,6 +3,7 @@ import {
   stepSequenceFromManifest,
   resolveActiveSteps,
   filterRequiredAssignmentSteps,
+  stepIdToLabel,
   STEP_REGISTRY,
   KNOWN_UNMAPPED_WORKSHEET_TYPES,
 } from './stepConfig';
@@ -203,5 +204,31 @@ describe('filterRequiredAssignmentSteps', () => {
       'vocab-review',
       'knowledge-station',
     ]);
+  });
+});
+
+describe('stepIdToLabel — missing-step labels for the teacher assignment screen', () => {
+  it('resolves a plain step id to its registry label', () => {
+    expect(stepIdToLabel('spotlight')).toBe('閱讀聚光燈');
+    expect(stepIdToLabel('vocab-review')).toBe('語詞複習');
+  });
+
+  it('strips a round-keyed suffix (`base#slug`) before lookup (#2916/#2930 shape)', () => {
+    // A real multi-part lesson's own step_sequence carries ids like
+    // `key-passage-reading#4uee3`. The existing `stepLabel` helper in
+    // AssignmentMatrixGrid.tsx indexes STEP_REGISTRY by the RAW id (so it
+    // silently returns null for these) — this one must not repeat that,
+    // since a teacher's missing-step list reading "缺：" (blank) instead of
+    // "缺：重點朗讀" for every multi-part lesson would be useless.
+    expect(stepIdToLabel('key-passage-reading#4uee3')).toBe('重點朗讀');
+    expect(stepIdToLabel('comprehension#9u9ny')).toBe('閱讀理解');
+  });
+
+  it('resolves a legacy alias id (pre-#2526 naming) via resolveStepId', () => {
+    expect(stepIdToLabel('full-reading')).toBe('重點朗讀'); // alias -> key-passage-reading
+  });
+
+  it('falls back to the raw id when no registry entry matches, instead of throwing', () => {
+    expect(stepIdToLabel('totally-unknown-step')).toBe('totally-unknown-step');
   });
 });

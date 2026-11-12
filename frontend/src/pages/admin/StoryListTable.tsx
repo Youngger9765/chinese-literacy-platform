@@ -56,8 +56,18 @@ const StoryListTable: React.FC<StoryListTableProps> = ({
     {
       key: 'title',
       header: '標題',
+      // UI-7: the six metadata columns (編號/年級/文體/段落數/字數/操作) carry
+      // fixed Tailwind widths that already add up to ~500px — on a narrower
+      // desktop (1024px, admin tree sidebar eating another ~230px) that left
+      // almost nothing for this one, so every title wrapped 3-4 lines tall.
+      // Cap + truncate it instead (full title still reachable via the
+      // native title="" tooltip on hover) rather than fighting the other
+      // six columns for space.
+      className: 'max-w-[160px] md:max-w-[220px] xl:max-w-xs',
       render: (story) => (
-        <span className="font-medium text-gray-900">{story.title}</span>
+        <span className="block truncate font-medium text-gray-900" title={story.title}>
+          {story.title}
+        </span>
       ),
     },
     {

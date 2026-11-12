@@ -206,12 +206,15 @@ def _check_classroom_access(user: User, classroom_id: int, db: Session) -> Class
     if classroom.teacher_id == user.id:
         return classroom
 
-    # Co-teachers (assistants) have read access
+    # Co-teachers (editor or viewer role) have read access -- but only once
+    # they've accepted the invitation (#3820). A still-'pending' invite must
+    # not leak read access through this path.
     co_teacher = (
         db.query(ClassroomTeacher)
         .filter(
             ClassroomTeacher.classroom_id == classroom_id,
             ClassroomTeacher.teacher_id == user.id,
+            ClassroomTeacher.status == "accepted",
         )
         .first()
     )

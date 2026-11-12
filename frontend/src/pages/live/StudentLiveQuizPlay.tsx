@@ -5,19 +5,34 @@
  * `/live` → confirm → navigate-here path — joining is idempotent
  * server-side either way). Phases: waiting in lobby / reading (stem only,
  * "看大螢幕讀題") / answering (shapes only, no option text) / reveal
- * (✓／✗ + points, never rank) / ended (答對題數 + 進步, never rank).
+ * (✓／✗ + this round's points + running total; top 5 see their own rank,
+ * 6th place or lower see a signed "前進/後退 N 名" delta instead — never
+ * a literal "第 N 名" outside the top 5, see issue #3631 P0 #4) / ended
+ * (答對題數 + 進步 vs last game).
+ *
+ * #3761 (game-academy audit + Young, round 3): the lobby phase used to be
+ * two lines of centered text and nothing else ("幾乎全空白，沒有返回/退出
+ * 方式"). It's now `LiveQuizWaitingRoom` — hero visual, my name/avatar
+ * card, an anonymous "同學牆" sized to `players_count` (see that
+ * component's docstring for why it's anonymous, not named), icon-based
+ * "怎麼玩" steps, and a "離開" button that confirms before navigating away
+ * (same `window.confirm` pattern `TeacherLiveQuizHost.tsx` already uses).
  */
 import React, { useEffect, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLiveQuizPoll } from '../../components/live-quiz/useLiveQuizPoll';
+import { useLiveQuizRoundSound } from '../../components/live-quiz/useLiveQuizRoundSound';
 import OptionGrid from '../../components/live-quiz/OptionGrid';
 import CountdownBar from '../../components/live-quiz/CountdownBar';
+import LiveQuizWaitingRoom from '../../components/live-quiz/LiveQuizWaitingRoom';
+import GameResultActions from '../../components/game/GameResultActions';
 import { joinLiveQuizGame, submitLiveQuizAnswer, isValidLiveQuizCode, LiveQuizApiError } from '../../services/liveQuizApi';
 
 const StudentLiveQuizPlay: React.FC = () => {
   const { code } = useParams<{ code: string }>();
   const { token, user } = useAuth();
+  const navigate = useNavigate();
   const [joinError, setJoinError] = useState('');
   const [joined, setJoined] = useState(false);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
@@ -25,6 +40,8 @@ const StudentLiveQuizPlay: React.FC = () => {
   const lastAnsweredRoundRef = useRef<number | null>(null);
 
   const { state, error: pollError } = useLiveQuizPoll(joined && token ? token : null, joined ? (code ?? null) : null);
+  // issue #3631 P0 #6 — called unconditionally before any early return.
+  const { muted, toggleMuted } = useLiveQuizRoundSound(state);
 
   useEffect(() => {
     if (!token || !code) return;
@@ -103,6 +120,19 @@ const StudentLiveQuizPlay: React.FC = () => {
 
   return (
     <div className="flex min-h-screen flex-col bg-surface px-5 py-6">
+      {/* issue #3631 P0 #6 — same shared mute toggle/storage as the host's
+          projector screen and the #3630 podium (liveQuizRoundSound.ts). */}
+      {state.status !== 'ended' && (
+        <button
+          type="button"
+          onClick={toggleMuted}
+          aria-pressed={muted}
+          aria-label={muted ? '開啟音效' : '關閉音效'}
+          className="fixed right-3 top-3 z-40 rounded-full border border-surface-dim bg-white/90 px-2.5 py-1 text-sm shadow"
+        >
+          {muted ? '🔇' : '🔊'}
+        </button>
+      )}
       {pollError && (
         <div className="mb-3 rounded-lg bg-surface-container-low px-3 py-2 text-center text-xs text-on-surface-variant">
           連線中斷，正在重新連線…（你的作答會在重新連線後送出）
@@ -110,10 +140,15 @@ const StudentLiveQuizPlay: React.FC = () => {
       )}
 
       {state.status === 'lobby' && (
-        <div className="flex flex-1 flex-col items-center justify-center text-center">
-          <p className="text-lg font-medium text-on-surface">等待老師開始…</p>
-          <p className="mt-1 text-sm text-on-surface-variant">你好，{user?.name ?? '同學'}</p>
-        </div>
+        <LiveQuizWaitingRoom
+          myName={user?.name ?? '同學'}
+          playersCount={state.players_count}
+          onLeave={() => {
+            if (window.confirm('確定要離開嗎？離開後需要重新輸入代碼才能加入。')) {
+              navigate('/game-hub');
+            }
+          }}
+        />
       )}
 
       {state.status === 'question' && round && (
@@ -164,6 +199,26 @@ const StudentLiveQuizPlay: React.FC = () => {
               <p className="mt-3 text-xl font-bold text-on-surface">答錯了</p>
             </>
           )}
+          {/* issue #3631 P0 #4: running total always shown (unless practice
+              mode, where the backend omits these fields entirely); top 5
+              see their actual rank, everyone else sees a signed
+              前進/後退 delta instead — never "第 N 名" outside the top 5. */}
+          {yourPlayer.total_score != null && (
+            <p className="mt-4 text-sm text-on-surface-variant">總分 {yourPlayer.total_score} 分</p>
+          )}
+          {yourPlayer.rank != null ? (
+            <p className="mt-1 text-sm font-medium text-accent">目前第 {yourPlayer.rank} 名</p>
+          ) : (
+            yourPlayer.rank_delta != null && (
+              <p className="mt-1 text-sm font-medium text-accent">
+                {yourPlayer.rank_delta > 0
+                  ? `這題前進了 ${yourPlayer.rank_delta} 名`
+                  : yourPlayer.rank_delta < 0
+                    ? `這題後退了 ${Math.abs(yourPlayer.rank_delta)} 名`
+                    : '名次不變'}
+              </p>
+            )
+          )}
         </div>
       )}
 
@@ -183,6 +238,10 @@ const StudentLiveQuizPlay: React.FC = () => {
                   : null}
             </p>
           )}
+          {/* #3771 (game-academy audit r2 P0-2): this screen had ZERO
+              interactive elements. No "再玩一場" here — a student never
+              starts their own round, the teacher does. */}
+          <GameResultActions onBackToHub={() => navigate('/game-hub')} />
         </div>
       )}
     </div>

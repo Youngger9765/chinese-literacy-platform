@@ -4,6 +4,8 @@ Assignment query helpers — title / slug resolution utilities.
 Extracted from routes/assignments.py (Issue #1771) as a pure-refactor step.
 Zero behavior change; all public names are re-exported from the routes file.
 """
+from typing import Iterable
+
 from sqlalchemy.orm import Session
 
 from ..models.text import Text
@@ -196,3 +198,29 @@ def is_assignment_ready_for_submit(
     return all(
         is_required_step_satisfied(rid, completed, required_ids) for rid in required_ids
     )
+
+
+def compute_step_completion_for_submission(
+    assignment: Assignment,
+    completed_step_ids: Iterable[str],
+) -> tuple[int, int, list[str]]:
+    """This assignment's (completed_count, required_count, missing_step_ids)
+    given a student's own recorded steps_completed.
+
+    Teacher-facing surface: a teacher looking at a stuck/in_progress
+    submission previously had no way to tell WHY it never auto-submitted —
+    not which steps were missing, not whether it was even close. This
+    reuses compute_required_step_ids_for_assignment / is_required_step_satisfied
+    — the EXACT SAME notion of "required" and "satisfied" the auto-submit
+    gate (is_assignment_ready_for_submit, used by
+    maybe_auto_submit_assignment_session) checks — so a teacher's
+    "完成 X/Y 關，缺：..." display can never show a different answer than
+    the one that actually decides submission.
+    """
+    required_ids = compute_required_step_ids_for_assignment(assignment)
+    completed = set(completed_step_ids)
+    missing_ids = [
+        rid for rid in required_ids
+        if not is_required_step_satisfied(rid, completed, required_ids)
+    ]
+    return len(required_ids) - len(missing_ids), len(required_ids), missing_ids

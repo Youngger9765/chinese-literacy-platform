@@ -35,6 +35,20 @@ env:
   PROJECT_ID: lingoleap-dev
   REGION: asia-east1
   REGISTRY: asia-east1-docker.pkg.dev/lingoleap-dev/lingoleap
+  # #3719 — IAP 準備：預設 false，等於今天的行為（兩個 preview 服務都還是
+  # --allow-unauthenticated）。要真的在 preview 上測 IAP 時，改這一行
+  # 成 'true' 開一個 PR 就會套用，不必再去改 gcloud 指令本身——
+  # 真正的 on/off 開關只有這一行。驗證方法與限制見
+  # docs/iap-runbook.md。目前仍然是 false，staging 與日常 preview
+  # 完全不受影響。
+  IAP_ENABLED: 'false'
+  # #3728/#3740 — 同源代理 build-time 開關，預設 false：關掉時這個 job
+  # 建出來的 preview image 跟 #3741 revert 之後完全一樣（VITE_API_URL
+  # 指到 backend 絕對網址，無 BACKEND_INTERNAL_URL、無
+  # BACKEND_INVOKER_SIDECAR_PORT）。同一個理由、同一段完整說明見
+  # staging-deploy.yml 這個開關旁的註解——這裡不重複貼一次，兩邊要改
+  # 一起改。
+  SAME_ORIGIN_PROXY_ENABLED: 'false'
 
 jobs:
   detect-changes:
@@ -46,10 +60,10 @@ jobs:
       backend: ${{ steps.filter.outputs.backend }}
       frontend: ${{ steps.filter.outputs.frontend }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           ref: ${{ github.event.pull_request.head.sha }}
-      - uses: dorny/paths-filter@v4
+      - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
         id: filter
         with:
           filters: |
@@ -73,12 +87,12 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
+        uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed # v2.1.13
         with:
           # Claude Security find_01WStrhArZsNRHeb92RWHZRE (high, CWE-250):
           # this job authenticates as github-actions@lingoleap-dev -- the
@@ -100,7 +114,7 @@ jobs:
           service_account: github-actions@lingoleap-dev.iam.gserviceaccount.com
 
       - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
+        uses: google-github-actions/setup-gcloud@e427ad8a34f8676edf47cf7d7925499adf3eb74f # v2.2.1
 
       - name: Configure Docker for Artifact Registry
         run: gcloud auth configure-docker asia-east1-docker.pkg.dev
@@ -145,6 +159,17 @@ jobs:
             ./backend
           docker push "${{ env.REGISTRY }}/backend:issue-${{ env.ISSUE_NUM }}-${{ github.sha }}"
 
+      # #3999 (Junyi security baseline rule 7): DATABASE_URL moved off the
+      # bulk env-vars string (where it was a literal value from the
+      # `secrets.PREVIEW_DATABASE_URL` GitHub Actions secret) onto a
+      # dedicated secrets flag pointed at a Secret Manager secret
+      # (`lingoleap-database-url-preview:latest`, project `lingoleap-dev`) --
+      # the runtime service account used just above already has
+      # `secretAccessor` on it. Same gcloud CLI reference as deploy.yml: the
+      # bulk env-vars flag and the dedicated secrets flag are independent
+      # "at most one of" groups, so combining them in one deploy invocation
+      # is supported, and since DATABASE_URL now appears in only one of
+      # them there is no same-key conflict.
       - name: Deploy backend preview
         if: needs.detect-changes.outputs.backend == 'true' || github.event.action == 'opened'
         run: |
@@ -161,7 +186,20 @@ jobs:
             --max-instances=1 \
             --timeout=300s \
             --add-cloudsql-instances=lingoleap-dev:asia-east1:lingoleap-preview-db \
-            --set-env-vars="^::^ALLOWED_ORIGINS=https://placeholder.run.app::DATABASE_URL=${{ secrets.PREVIEW_DATABASE_URL }}::RUN_MIGRATIONS=true::ENVIRONMENT=preview::JWT_SECRET_KEY=${{ secrets.PREVIEW_JWT_SECRET_KEY }}::GCS_OMO_BUCKET=lingoleap-omo-uploads-preview::AZURE_SPEECH_KEY=${{ secrets.AZURE_SPEECH_KEY }}::AZURE_SPEECH_REGION=eastus::TTS_PROVIDER=azure::BUILD_SHA=${{ github.event.pull_request.head.sha }}"
+            --set-env-vars="^::^ALLOWED_ORIGINS=https://placeholder.run.app::RUN_MIGRATIONS=true::ENVIRONMENT=preview::JWT_SECRET_KEY=${{ secrets.PREVIEW_JWT_SECRET_KEY }}::GCS_OMO_BUCKET=lingoleap-omo-uploads-preview::AZURE_SPEECH_KEY=${{ secrets.AZURE_SPEECH_KEY }}::AZURE_SPEECH_REGION=eastus::TTS_PROVIDER=azure::BUILD_SHA=${{ github.event.pull_request.head.sha }}" \
+            --update-secrets="DATABASE_URL=lingoleap-database-url-preview:latest"
+
+      # #3719 — IAP 準備：預設關（IAP_ENABLED=false），這一步整個 skip，
+      # 跟今天行為一致。只有刻意把上面 env.IAP_ENABLED 改成 'true' 開 PR
+      # 才會執行。用 `gcloud beta run services update --iap`——Cloud Run
+      # 原生 IAP 整合，不是 HTTPS LB 那一套，不需要額外的 LB/NEG 資源。
+      - name: （IAP_ENABLED 時）替 backend preview 開 IAP
+        if: env.IAP_ENABLED == 'true' && (needs.detect-changes.outputs.backend == 'true' || github.event.action == 'opened')
+        run: |
+          gcloud beta run services update ${{ env.BACKEND_SERVICE }} \
+            --iap \
+            --region ${{ env.REGION }} \
+            --project ${{ env.PROJECT_ID }}
 
       - name: Get backend preview URL
         id: backend-url
@@ -191,8 +229,27 @@ jobs:
           DEMO_STUDENT_EMAIL: ${{ secrets.DEMO_STUDENT_EMAIL }}
           DEMO_STUDENT_PW: ${{ secrets.DEMO_STUDENT_PW }}
         run: |
+          # #3719/#3728/#3740 — SAME_ORIGIN_PROXY_ENABLED=false (default,
+          # full why in staging-deploy.yml's copy of this switch): build
+          # EXACTLY like today/post-#3741-revert — VITE_API_URL points
+          # straight at the resolved backend URL, no BACKEND_INTERNAL_URL,
+          # no BACKEND_INVOKER_SIDECAR_PORT, nginx never proxies anything.
+          # =true: VITE_API_URL stays empty (relative /api/*, apiConfig.ts's
+          # `??` doesn't treat empty string as undefined). BACKEND_INTERNAL_URL
+          # tells this preview frontend's own nginx where to forward
+          # same-origin /api, /assets, /q (see
+          # frontend/docker/render-nginx-conf.sh) -- same URL as resolved
+          # above, so a preview with no backend of its own falls back to
+          # shared staging either way, matching today's behavior.
+          # BACKEND_INVOKER_SIDECAR_PORT must travel with it or the build
+          # fails outright (fail-closed guard, intentional).
+          if [ "${{ env.SAME_ORIGIN_PROXY_ENABLED }}" = "true" ]; then
+            PROXY_BUILD_ARGS=(--build-arg VITE_API_URL= --build-arg "BACKEND_INTERNAL_URL=${{ steps.backend-url.outputs.url }}" --build-arg BACKEND_INVOKER_SIDECAR_PORT=8081)
+          else
+            PROXY_BUILD_ARGS=(--build-arg "VITE_API_URL=${{ steps.backend-url.outputs.url }}")
+          fi
           docker build \
-            --build-arg VITE_API_URL=${{ steps.backend-url.outputs.url }} \
+            "${PROXY_BUILD_ARGS[@]}" \
             --build-arg VITE_SHOW_DEMO_LOGIN=true \
             --build-arg "VITE_DEMO_ADMIN_EMAIL=${DEMO_ADMIN_EMAIL}" \
             --build-arg "VITE_DEMO_ADMIN_PW=${DEMO_ADMIN_PW}" \
@@ -220,6 +277,15 @@ jobs:
             --min-instances=0 \
             --max-instances=1 \
             --timeout=300s
+
+      # #3719 — IAP 準備：同上，預設關、改 env.IAP_ENABLED 才會跑。
+      - name: （IAP_ENABLED 時）替 frontend preview 開 IAP
+        if: env.IAP_ENABLED == 'true' && (needs.detect-changes.outputs.frontend == 'true' || github.event.action == 'opened')
+        run: |
+          gcloud beta run services update ${{ env.FRONTEND_SERVICE }} \
+            --iap \
+            --region ${{ env.REGION }} \
+            --project ${{ env.PROJECT_ID }}
 
       # 部署失敗時 gcloud 只說「container failed to start and listen on PORT」——
       # 真正的原因在容器自己的 log 裡，而那要有 gcloud 憑證才讀得到。
@@ -265,16 +331,24 @@ jobs:
           echo "backend_url=${BACKEND_URL}" >> "$GITHUB_OUTPUT"
           echo "preview URLs → frontend=${FRONTEND_URL} backend=${BACKEND_URL}"
 
-      - name: Update backend CORS + refresh DATABASE_URL from GH secret
+      # #3999 (Junyi security baseline rule 7): the refresh used to re-pass
+      # `secrets.PREVIEW_DATABASE_URL` (a GitHub Actions secret, literal
+      # value) via --update-env-vars on every run, so a rotated GH secret
+      # would propagate to this long-lived preview service without a
+      # manual rebuild. That job is now done by --update-secrets instead,
+      # pointed at Secret Manager's `:latest` -- every run re-resolves
+      # "latest" and creates a new revision if the resolved secret version
+      # changed, which is the same "refresh on every run" behavior, just
+      # sourced from Secret Manager instead of a GitHub Actions secret.
+      - name: Update backend CORS + refresh DATABASE_URL from Secret Manager
         # Skip when backend preview service doesn't exist (frontend-only PR after
         # prior backend cleanup) — otherwise `gcloud run services update` fails.
-        # DATABASE_URL is re-injected on every run so GH secret rotations propagate
-        # to long-lived preview services without needing manual service rebuild
-        # (Fixes #1396).
+        # ALLOWED_ORIGINS is re-injected on every run because the preview
+        # frontend's URL/issue number can change between runs; DATABASE_URL is
+        # re-pointed at :latest on every run for the reason above (Fixes #1396).
         if: always() && steps.preview-urls.outputs.frontend_url != 'N/A' && steps.preview-urls.outputs.frontend_url != '' && steps.preview-urls.outputs.backend_url != 'N/A' && steps.preview-urls.outputs.backend_url != ''
         env:
           FRONTEND_URL: ${{ steps.preview-urls.outputs.frontend_url }}
-          DATABASE_URL_SECRET: ${{ secrets.PREVIEW_DATABASE_URL }}
         run: |
           STAGING_URL="https://lingoleap-frontend-staging-958347263320.asia-east1.run.app"
           FIREBASE_URL="https://lingoleap-dev.web.app"
@@ -291,7 +365,8 @@ jobs:
           OUT=$(gcloud run services update ${{ env.BACKEND_SERVICE }} \
             --region ${{ env.REGION }} \
             --project ${{ env.PROJECT_ID }} \
-            --update-env-vars "^::^ALLOWED_ORIGINS=${FRONTEND_URL},${ALT_URL},${STAGING_URL},${FIREBASE_URL}::DATABASE_URL=${DATABASE_URL_SECRET}" 2>&1)
+            --update-env-vars "^::^ALLOWED_ORIGINS=${FRONTEND_URL},${ALT_URL},${STAGING_URL},${FIREBASE_URL}" \
+            --update-secrets="DATABASE_URL=lingoleap-database-url-preview:latest" 2>&1)
           RC=$?
           set -e
           echo "$OUT"
@@ -309,7 +384,14 @@ jobs:
         env:
           BACKEND_URL: ${{ steps.preview-urls.outputs.backend_url }}
           FRONTEND_URL: ${{ steps.preview-urls.outputs.frontend_url }}
+          # #3719 — IAP 準備：preview 未來可能在前面加一層 IAP。沒有任何
+          # secret 可讀時（還沒打開 IAP）下面是空陣列，跟今天完全一樣。
+          IAP_AUDIENCE: ${{ secrets.IAP_AUDIENCE }}
         run: |
+          source scripts/lib/iap-token.sh
+          IAP_AUTH_ARGS=()
+          IAP_TOKEN="$(iap_token "${IAP_AUDIENCE:-}")"
+          [ -n "${IAP_TOKEN}" ] && IAP_AUTH_ARGS=(-H "Proxy-Authorization: Bearer ${IAP_TOKEN}")
           # CORS env update creates a new Cloud Run revision which is cold.
           # Browsers hitting a cold revision see 5xx without CORS headers,
           # surfacing as spurious "blocked by CORS policy" console errors.
@@ -320,7 +402,7 @@ jobs:
           #    for the first fetch(), ensuring the API route + CORS middleware
           #    are both JIT-loaded before the real user request arrives.
           for i in 1 2 3; do
-            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$BACKEND_URL/" || echo timeout)
+            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "${IAP_AUTH_ARGS[@]+${IAP_AUTH_ARGS[@]}}" "$BACKEND_URL/" || echo timeout)
             echo "Warmup root attempt $i: HTTP $code"
             case "$code" in timeout|000) sleep 2 ;; *) break ;; esac
           done
@@ -330,6 +412,7 @@ jobs:
               -H "Origin: $FRONTEND_URL" \
               -H "Access-Control-Request-Method: GET" \
               -H "Access-Control-Request-Headers: authorization,content-type" \
+              "${IAP_AUTH_ARGS[@]+${IAP_AUTH_ARGS[@]}}" \
               "${BACKEND_URL}${path}" || echo timeout)
             echo "Preflight $path: HTTP $code"
           done
@@ -342,14 +425,16 @@ jobs:
       # 只有真的一步一步走完才會遇到。
       #
       # ⚠️ e2e-tests.yml 裡寫著「per-PR preview 的 DB 是空的、demo 帳號不存在」——
-      #    那句已經過時。preview 後端吃的是共用的 secrets.PREVIEW_DATABASE_URL，
-      #    而 preview 前端 build 時帶了 VITE_SHOW_DEMO_LOGIN=true 與三個帳號。
+      #    那句已經過時。preview 後端吃的是共用的 preview DB（#3999 起 DATABASE_URL
+      #    從 Secret Manager 的 lingoleap-database-url-preview 取值，不再是
+      #    GitHub Actions secret），而 preview 前端 build 時帶了
+      #    VITE_SHOW_DEMO_LOGIN=true 與三個帳號。
       #    2026-08-28 在 PR #2965 的 preview 上實測：一鍵登入 → /library，pageerror 0。
       #
       # PR 只跑一課（五課走完整條路太慢，慢到會讓人想關掉這道門），
       # staging 維持五課全跑 —— 兩個環境跑不同的量，不是抽樣代替全檢。
       - name: Comment PR with preview URLs
-        uses: actions/github-script@v8
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             const prNumber = context.payload.pull_request.number;
@@ -428,7 +513,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           ref: ${{ github.event.pull_request.head.sha }}
 

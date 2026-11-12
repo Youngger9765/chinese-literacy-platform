@@ -58,7 +58,17 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
   }, [refreshPendingCount]);
 
   return (
-    <div className="h-screen flex bg-surface text-on-surface font-sans overflow-hidden">
+    // Issue #3985: the teacher workspace used to inherit the student-facing
+    // kaishu default (font-sans == cwTeXKai, kept for 陳淑麗教授's low-vision
+    // reading requirement). Junyi's teacher UI is a plain sans stack, and a
+    // teacher squinting at a 楷書 roster/assignment table was never the point
+    // of that font choice. Scoped to activeView === 'teacher' only — student
+    // and admin views keep font-sans untouched.
+    <div
+      className={`h-screen flex bg-surface text-on-surface overflow-hidden ${
+        activeView === 'teacher' ? 'font-teacher-ui' : 'font-sans'
+      }`}
+    >
       {/* Skip-to-content link — visually hidden until focused (WCAG 2.4.1) */}
       <a
         href="#main-content"
@@ -209,9 +219,14 @@ const StepDots: React.FC<StepDotsProps> = ({
       // Fade the dots themselves at an edge that still has more steps past it.
       // A mask rather than a coloured overlay: the header is translucent
       // ("glass"), so any solid-colour gradient showed as a stripe.
+      //
+      // UI-2: 24px only faded a sliver of the last dot — at actual phone size
+      // (not zoomed in) it read as "nothing", so a 214-of-406px cut-off step
+      // row still looked like there was no more content. Widened to 40px so
+      // the cue is visible at native size, not just under a loupe.
       style={fades.left || fades.right ? {
-        maskImage: `linear-gradient(to right, ${fades.left ? 'transparent' : '#000'} 0, #000 24px, #000 calc(100% - 24px), ${fades.right ? 'transparent' : '#000'} 100%)`,
-        WebkitMaskImage: `linear-gradient(to right, ${fades.left ? 'transparent' : '#000'} 0, #000 24px, #000 calc(100% - 24px), ${fades.right ? 'transparent' : '#000'} 100%)`,
+        maskImage: `linear-gradient(to right, ${fades.left ? 'transparent' : '#000'} 0, #000 40px, #000 calc(100% - 40px), ${fades.right ? 'transparent' : '#000'} 100%)`,
+        WebkitMaskImage: `linear-gradient(to right, ${fades.left ? 'transparent' : '#000'} 0, #000 40px, #000 calc(100% - 40px), ${fades.right ? 'transparent' : '#000'} 100%)`,
       } : undefined}
     >
       <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 flex-nowrap justify-center min-w-max px-0.5">
@@ -253,7 +268,12 @@ const StepDots: React.FC<StepDotsProps> = ({
             <button
               type="button"
               onClick={() => onStepClick(step)}
-              className={`${sizeClass} relative before:absolute before:-inset-1 before:content-[''] rounded-full text-xs sm:text-sm md:text-base font-bold flex items-center justify-center transition-all hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${dotClass}`}
+              // UI-5: -inset-1 (4px/side) only grew the 28px dot's tap area to
+              // 36×36 — still short of the ≥40×40 a11y-recommended minimum.
+              // -inset-1.5 (6px/side) gets exactly to 40×40 without the
+              // invisible hit areas eating much more into the 6px gap between
+              // dots than they already did.
+              className={`${sizeClass} relative before:absolute before:-inset-1.5 before:content-[''] rounded-full text-xs sm:text-sm md:text-base font-bold flex items-center justify-center transition-all hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${dotClass}`}
               aria-label={ann?.a11yLabel ?? `${i + 1}. ${step.label}`}
               aria-current={isActive ? 'step' : undefined}
               title={ann?.partNo ? `${step.label}（第 ${ann.partNo} 篇）` : step.label}

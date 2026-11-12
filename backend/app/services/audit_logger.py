@@ -28,7 +28,7 @@ import json
 import logging
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Optional
+from typing import Any, Optional
 
 from fastapi import Request
 
@@ -44,6 +44,22 @@ class AuditAction(str, Enum):
     EXPORT_REPORT = "export_report"
     DELETE_STUDENT = "delete_student"
     RESET_STUDENT_PASSWORD = "reset_student_password"
+    MOVE_STUDENT = "move_student"
+    BATCH_REMOVE_STUDENTS = "batch_remove_students"
+    RENAME_STUDENT = "rename_student"
+    SET_SEAT_NUMBER = "set_seat_number"
+    # #3824 (child-account handover), two separate actions so the audit
+    # trail distinguishes "a claim was requested" (phase 1 -- the account is
+    # now PENDING, created_by_teacher_id is still set) from "a claim was
+    # completed" (phase 2 -- the new email was verified, created_by_teacher_id
+    # just got cleared). See account_claim_service.py / email_verification_
+    # service.py. Security review finding L1: every outcome of phase 1 is
+    # logged, including a wrong-password attempt (see `extra={"result": ...}`
+    # on the route's try/except), so an investigator can tell a legitimate
+    # handover apart from a credential-theft attempt against this account.
+    CLAIM_ACCOUNT_REQUESTED = "claim_account_requested"
+    CLAIM_ACCOUNT_COMPLETED = "claim_account_completed"
+    CLAIM_ACCOUNT_REVOKED = "claim_account_revoked"
 
 
 def audit_log(
@@ -54,6 +70,7 @@ def audit_log(
     ip_address: str,
     endpoint: str,
     method: str,
+    extra: Optional[dict[str, Any]] = None,
 ) -> None:
     """Emit a structured JSON audit log record.
 
@@ -69,6 +86,10 @@ def audit_log(
         ip_address: Client IP address from request.client.host.
         endpoint: URL path (e.g. "/api/teacher/students/42").
         method: HTTP method (e.g. "GET").
+        extra: Optional action-specific detail (#3824 L1: e.g. old/new email,
+            the teacher id being displaced, success/failure reason). Merged
+            under a "detail" key so it never collides with the fixed fields
+            above. NEVER put a plaintext password or token in here.
     """
     payload = {
         "audit": True,
@@ -80,6 +101,8 @@ def audit_log(
         "endpoint": endpoint,
         "method": method,
     }
+    if extra:
+        payload["detail"] = extra
     _audit_logger.info(json.dumps(payload, ensure_ascii=False))
 
 
@@ -89,6 +112,7 @@ def audit_log_endpoint(
     action: AuditAction,
     user_id: int,
     target_student_id: Optional[int] = None,
+    extra: Optional[dict[str, Any]] = None,
 ) -> None:
     """Convenience wrapper that extracts IP, endpoint, and method from a Request.
 
@@ -97,6 +121,7 @@ def audit_log_endpoint(
         action: The AuditAction describing what was done.
         user_id: The authenticated user performing the action.
         target_student_id: The student whose data was accessed (optional).
+        extra: Optional action-specific detail, see audit_log().
     """
     ip_address = "unknown"
     if request.client:
@@ -109,4 +134,5 @@ def audit_log_endpoint(
         ip_address=ip_address,
         endpoint=str(request.url.path),
         method=request.method,
+        extra=extra,
     )
