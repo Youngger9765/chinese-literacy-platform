@@ -34,6 +34,37 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 
+def get_session_for_update(db: Session, session_id: int) -> LearningSession | None:
+    """Fetch a LearningSession with a `SELECT ... FOR UPDATE` row lock.
+
+    Issue #4042: called by gamification.py::on_session_complete BEFORE
+    process_session_completion touches any XP/badge table. The sibling
+    lock is app/routes/learning/_helpers.py::get_owned_session(...,
+    for_update=True), taken by PUT /learning/sessions/{id}/progress for
+    the exact same reason -- the two routes settle the same session's
+    gamification state within ~1s of each other when a student finishes
+    their last step, and used to deadlock in Postgres on
+    learning_sessions + student_badges (2026-11-06T05:05, two
+    DeadlockDetected ~1s apart, both on session_id=1244, each killing
+    one of the two HTTP requests with a 500). Taking this lock FIRST, in
+    both routes, means the second request simply waits for the first to
+    fully commit (releasing every lock it holds) instead of the two
+    interleaving into an AB-BA cycle.
+
+    No-op on SQLite (this backend's test-suite dialect -- SQLAlchemy
+    silently drops FOR UPDATE for dialects that don't support it);
+    honored on Postgres (production). Returns None if the session does
+    not exist -- callers raise 404 themselves, matching the pre-#4042
+    plain `.first()` lookup's contract.
+    """
+    return (
+        db.query(LearningSession)
+        .filter(LearningSession.id == session_id)
+        .with_for_update()
+        .first()
+    )
+
+
 def _get_total_xp(db: Session, student_id: int) -> int:
     """Return the student's cumulative XP using a DB-side aggregate."""
     result = (
@@ -68,20 +99,65 @@ def _get_unlocked_badge_keys(db: Session, student_id: int) -> set[str]:
 
 
 def _award_badge(db: Session, student_id: int, badge_key: str) -> StudentBadge | None:
-    """Award a badge if not already unlocked. Returns the new row or None."""
-    existing = (
-        db.query(StudentBadge)
-        .filter(
-            StudentBadge.student_id == student_id,
-            StudentBadge.badge_key == badge_key,
-        )
-        .first()
+    """Award a badge if not already unlocked. Returns the new row or None.
+
+    Issue #4042: this used to be a plain check-then-insert (SELECT "does
+    this exist?", then `db.add()` if not). Two different HTTP routes
+    settle the same session's gamification state nearly simultaneously
+    when a student finishes the last step --
+    `PUT /learning/sessions/{id}/progress` (mid-session step-complete
+    check, learning_step_progress.py) and
+    `POST /gamification/session-complete` (the full settlement, this
+    module's process_session_completion). Both independently decide a
+    badge is "not unlocked yet" before either commits, then both try to
+    INSERT the same (student_id, badge_key) row. In production this
+    showed up as a plain `IntegrityError: duplicate key`
+    (2026-10-26, 2026-11-02) and, when the same race also overlapped a
+    concurrent UPDATE of the session's own `learning_sessions` row, as a
+    full Postgres `DeadlockDetected` that killed one of the two HTTP
+    requests with a 500 (2026-11-06).
+    #4042 also adds a `SELECT ... FOR UPDATE` on the session row at the
+    top of both call paths (see learning_step_progress.save_step_progress
+    and gamification.on_session_complete) so the two requests serialize
+    before either touches XP/badge tables at all -- that's what prevents
+    the deadlock's lock-ordering cycle. This function's job is narrower:
+    make the award itself atomic, so even without that serialization (a
+    retried request, a future caller) a race here is a no-op, never a
+    raised exception.
+
+    `INSERT ... ON CONFLICT (student_id, badge_key) DO NOTHING ...
+    RETURNING` replaces the check-then-insert with one atomic statement:
+    whichever of two concurrent inserters loses only ever sees "no row
+    returned", never a constraint violation.
+    """
+    # The test suite runs on SQLite (backend/tests/conftest.py patches
+    # Postgres-only column types to SQLite equivalents); production runs
+    # Postgres. Both dialects support ON CONFLICT DO NOTHING + RETURNING,
+    # but each needs its own dialect-specific `insert()` construct --
+    # there is no dialect-agnostic `Insert.on_conflict_do_nothing()`.
+    if db.get_bind().dialect.name == "postgresql":
+        from sqlalchemy.dialects.postgresql import insert as _insert
+    else:
+        from sqlalchemy.dialects.sqlite import insert as _insert
+
+    stmt = (
+        _insert(StudentBadge)
+        .values(student_id=student_id, badge_key=badge_key)
+        .on_conflict_do_nothing(index_elements=["student_id", "badge_key"])
+        .returning(StudentBadge.id, StudentBadge.unlocked_at)
     )
-    if existing:
-        return None
-    badge = StudentBadge(student_id=student_id, badge_key=badge_key)
-    db.add(badge)
+    row = db.execute(stmt).first()
+    if row is None:
+        return None  # already unlocked -- by this call or a concurrent one
     logger.info("Badge unlocked: student=%d badge=%s", student_id, badge_key)
+    # Transient, not added to the session -- the only caller
+    # (check_and_award_badges' _try()) only checks truthiness and reads
+    # the badge_key string, never this object's attributes. Carrying
+    # .id/.unlocked_at here anyway costs nothing and documents what the
+    # RETURNING clause actually gave back. Not added to the session:
+    # that would re-attempt an INSERT for a row the DB already has on
+    # the next flush.
+    badge = StudentBadge(id=row.id, student_id=student_id, badge_key=badge_key, unlocked_at=row.unlocked_at)
     return badge
 
 
