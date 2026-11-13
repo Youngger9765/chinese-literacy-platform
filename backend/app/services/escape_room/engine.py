@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import random
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
@@ -160,9 +160,16 @@ def _maybe_expire(db: Session, run: EscapeRoomRun) -> None:
     started_at = run.started_at
     if started_at.tzinfo is None:
         started_at = started_at.replace(tzinfo=timezone.utc)
-    if (_now() - started_at).total_seconds() > RUN_TIME_BUDGET_SECONDS:
+    deadline = started_at + timedelta(seconds=RUN_TIME_BUDGET_SECONDS)
+    if _now() > deadline:
         run.result = "not_this_time"
-        run.completed_at = _now()
+        # #4051: settle AT THE DEADLINE itself, not whenever someone
+        # happened to poll/open this abandoned run. `completed_at` feeds a
+        # "duration" the student sees in "我的挑戰紀錄" — stamping it with
+        # `_now()` made that duration grow with however long the run sat
+        # unopened (one case showed 29209 分 45 秒 = days later, not the
+        # 10-minute budget it actually ran for).
+        run.completed_at = deadline
         _set_last_event(run, "not_this_time")
         _persist(db, run)
 
@@ -343,6 +350,22 @@ def _apply_chamber_answer(run: EscapeRoomRun, chamber: dict, correct: bool) -> N
             # sitting at `start_run`'s timestamp, which could make the gate
             # question look instantly expired the moment it appeared.
             run.gate_snapshot["started_at"] = _iso_now()
+        else:
+            # #4051: this chamber answer is the exact moment the NEXT
+            # chamber first becomes reachable — same reasoning as the gate
+            # branch directly above, just one step earlier in the
+            # sequence. `_current_chamber` now finds that next chamber
+            # (this one's own `unlocked` was just set True above), whose
+            # `started_at` was otherwise still sitting at `start_run`'s
+            # original timestamp. Once more than its own time budget had
+            # already elapsed since the whole run began, its first
+            # question read as already-expired the instant it appeared —
+            # a correct answer there got silently swallowed by an
+            # auto-resolve-as-wrong that ran before the real answer was
+            # even considered.
+            next_chamber = _current_chamber(run)
+            if next_chamber is not None:
+                next_chamber[1]["started_at"] = _iso_now()
     chamber["started_at"] = _iso_now()
 
 
@@ -382,7 +405,11 @@ def _apply_rescue_answer(run: EscapeRoomRun, teammate: dict, correct: bool) -> N
         teammate["frozen"] = False
         teammate["frozen_at"] = None
         run.mist_distance = min(100, run.mist_distance + _MIST_STEP)
-        _set_last_event(run, "rescue")
+        # #4051: "救回隊友後訊息仍是「有人被迷霧碰到了，快救他！」" — that's
+        # the "someone just got frozen, go rescue them" copy (`"rescue"`,
+        # still correctly used by `_freeze_teammate`'s caller below). A
+        # SUCCESSFUL rescue is the opposite moment and needs its own key.
+        _set_last_event(run, "rescued")
         _refresh_blocked_question_timer(run)
     else:
         # #3754: a wrong guess already carried no penalty — a timed-out
@@ -510,6 +537,13 @@ def list_history(db: Session, user: User) -> list[dict]:
         .limit(_HISTORY_LIMIT)
         .all()
     )
+    # #4051: "其他舊局永遠顯示「進行中」" — unlike `get_run_state`/
+    # `_ensure_in_progress`, this read path never ran the lazy settle, so a
+    # run that timed out and was simply never reopened sat as "in_progress"
+    # forever in this very list. `_maybe_expire` no-ops for anything not
+    # still "in_progress", so calling it on every row here is safe.
+    for run in runs:
+        _maybe_expire(db, run)
     out = []
     for run in runs:
         duration_seconds = None
