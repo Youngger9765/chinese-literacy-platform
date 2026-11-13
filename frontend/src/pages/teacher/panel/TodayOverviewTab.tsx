@@ -213,7 +213,7 @@ const TodayOverviewTab: React.FC<TodayOverviewTabProps> = ({ classroomId, onOpen
                   <td className="py-3 text-gray-700 hidden sm:table-cell">{formatDue(r)}</td>
                   <td className="py-3 tabular-nums">{r.submitted} / {r.assigned}</td>
                   <td className="py-3 text-right">
-                    <button type="button" onClick={() => onOpenAssignment(r.id)} className="text-[#19A696] font-medium hover:underline cursor-pointer">
+                    <button type="button" onClick={() => onOpenAssignment(r.id)} className="text-[#11806F] font-medium hover:underline cursor-pointer">
                       查看
                     </button>
                   </td>

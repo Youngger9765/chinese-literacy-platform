@@ -252,7 +252,7 @@ const StoryTagEditor: React.FC<StoryTagEditorProps> = ({
                   <button
                     onClick={handleAddTag}
                     disabled={!tagInput.trim()}
-                    className="px-3 py-2 text-sm rounded-lg bg-[#19A696] text-white font-medium hover:bg-[#15897B] disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
+                    className="px-3 py-2 text-sm rounded-lg bg-[#11806F] text-white font-medium hover:bg-[#0E7366] disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
                   >
                     新增
                   </button>
@@ -285,7 +285,7 @@ const StoryTagEditor: React.FC<StoryTagEditorProps> = ({
                 <button
                   onClick={handleSave}
                   disabled={isSaving}
-                  className="px-4 py-2 text-sm rounded-lg bg-[#19A696] text-white font-medium hover:bg-[#15897B] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="px-4 py-2 text-sm rounded-lg bg-[#11806F] text-white font-medium hover:bg-[#0E7366] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {isSaving ? '儲存中...' : '儲存'}
                 </button>

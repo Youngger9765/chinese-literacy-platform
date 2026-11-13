@@ -222,7 +222,7 @@ const SeatNumberDialog: React.FC<SeatNumberDialogProps> = ({
             type="button"
             onClick={handleSave}
             disabled={isSaving}
-            className="h-10 px-5 rounded-lg bg-[#19A696] hover:bg-[#15897B] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium transition-colors cursor-pointer"
+            className="h-10 px-5 rounded-lg bg-[#11806F] hover:bg-[#0E7366] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium transition-colors cursor-pointer"
           >
             {isSaving ? '儲存中...' : '儲存座號'}
           </button>

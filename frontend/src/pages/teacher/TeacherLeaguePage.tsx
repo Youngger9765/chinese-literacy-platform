@@ -90,7 +90,7 @@ const inputClass =
   'w-full border border-surface-dim bg-surface-container-lowest rounded-xl px-3 py-2.5 text-on-surface focus:outline-none focus:ring-2 focus:ring-[#19A696]/40 focus:border-[#19A696] transition-shadow';
 
 const primaryButtonClass =
-  'bg-[#19A696] hover:bg-[#15897B] text-white rounded-xl px-5 py-2.5 text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-sm';
+  'bg-[#11806F] hover:bg-[#0E7366] text-white rounded-xl px-5 py-2.5 text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-sm';
 
 const secondaryButtonClass =
   'bg-surface-container text-on-surface rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-surface-container-high transition-colors';
@@ -378,12 +378,12 @@ const TeacherLeaguePage: React.FC = () => {
             "create new invitation" path until the teacher turns it on. */}
         {selectedClassroom && !selectedClassroom.league && (
           <div className="flex items-center justify-between gap-3 rounded-xl bg-[#19A696]/10 px-4 py-3 text-sm">
-            <span className="text-[#19A696]">老師還沒為「{selectedClassroom.name}」開放跨班賽季</span>
+            <span className="text-[#11806F]">老師還沒為「{selectedClassroom.name}」開放跨班賽季</span>
             <button
               type="button"
               onClick={handleEnableLeague}
               disabled={enablingLeague}
-              className="shrink-0 rounded-lg bg-[#19A696] px-4 py-1.5 font-semibold text-white disabled:opacity-50"
+              className="shrink-0 rounded-lg bg-[#11806F] px-4 py-1.5 font-semibold text-white disabled:opacity-50"
             >
               {enablingLeague ? '開啟中…' : '一鍵開啟'}
             </button>
@@ -435,7 +435,7 @@ const TeacherLeaguePage: React.FC = () => {
             <button
               type="button"
               className={`flex-1 rounded-xl py-2 text-sm font-bold transition-colors ${
-                joinMode === 'create' ? 'bg-[#19A696] text-white' : 'bg-surface-container text-on-surface-variant'
+                joinMode === 'create' ? 'bg-[#11806F] text-white' : 'bg-surface-container text-on-surface-variant'
               }`}
               onClick={() => setJoinMode('create')}
             >
@@ -444,7 +444,7 @@ const TeacherLeaguePage: React.FC = () => {
             <button
               type="button"
               className={`flex-1 rounded-xl py-2 text-sm font-bold transition-colors ${
-                joinMode === 'join' ? 'bg-[#19A696] text-white' : 'bg-surface-container text-on-surface-variant'
+                joinMode === 'join' ? 'bg-[#11806F] text-white' : 'bg-surface-container text-on-surface-variant'
               }`}
               onClick={() => setJoinMode('join')}
             >
@@ -459,7 +459,7 @@ const TeacherLeaguePage: React.FC = () => {
                 <p className="text-3xl font-mono font-black tracking-[0.3em] text-[#19A696]">{createdCode}</p>
                 <button
                   type="button"
-                  className="mt-3 text-sm text-[#19A696] underline font-medium"
+                  className="mt-3 text-sm text-[#11806F] underline font-medium"
                   onClick={() => {
                     setCreatedCode(null);
                     setInviteStep(1);
@@ -472,10 +472,10 @@ const TeacherLeaguePage: React.FC = () => {
               <div className="space-y-4">
                 {/* Step indicator */}
                 <div className="flex items-center gap-2 text-xs text-on-surface-variant">
-                  <span className={`w-5 h-5 rounded-full flex items-center justify-center font-bold ${inviteStep === 1 ? 'bg-[#19A696] text-white' : 'bg-[#19A696]/10 text-[#19A696]'}`}>1</span>
+                  <span className={`w-5 h-5 rounded-full flex items-center justify-center font-bold ${inviteStep === 1 ? 'bg-[#11806F] text-white' : 'bg-[#19A696]/10 text-[#11806F]'}`}>1</span>
                   設定年級
                   <span className="flex-1 border-t border-surface-dim mx-1" />
-                  <span className={`w-5 h-5 rounded-full flex items-center justify-center font-bold ${inviteStep === 2 ? 'bg-[#19A696] text-white' : 'bg-surface-container text-on-surface-variant'}`}>2</span>
+                  <span className={`w-5 h-5 rounded-full flex items-center justify-center font-bold ${inviteStep === 2 ? 'bg-[#11806F] text-white' : 'bg-surface-container text-on-surface-variant'}`}>2</span>
                   設定比賽時間
                 </div>
 
@@ -630,7 +630,7 @@ const TeacherLeaguePage: React.FC = () => {
                   </div>
                   <button
                     type="button"
-                    className="text-sm text-[#19A696] underline mt-1 font-medium"
+                    className="text-sm text-[#11806F] underline mt-1 font-medium"
                     onClick={() => toggleBoard(s.season_id)}
                   >
                     {boards[s.season_id] ? '收起排行榜' : '查看班級平均榜'}

@@ -216,7 +216,7 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ onNavigateToStudent
               <button
                 onClick={handleMarkAllRead}
                 disabled={isLoading}
-                className="text-xs text-[#19A696] hover:text-[#15897B] font-medium disabled:opacity-50 transition-colors"
+                className="text-xs text-[#11806F] hover:text-[#0E7366] font-medium disabled:opacity-50 transition-colors"
               >
                 全部標為已讀
               </button>
@@ -237,7 +237,7 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ onNavigateToStudent
                 onClick={() => setFilterType(tab.key)}
                 className={`text-xs px-2.5 py-1 rounded-full whitespace-nowrap font-medium transition-colors ${
                   filterType === tab.key
-                    ? 'bg-[#19A696] text-white'
+                    ? 'bg-[#11806F] text-white'
                     : 'text-gray-500 hover:bg-gray-100'
                 }`}
               >
@@ -328,7 +328,7 @@ const NotificationRow: React.FC<NotificationRowProps> = ({ item, onMarkRead, onN
           <button
             onClick={() => onNavigate(item)}
             title="查看學生"
-            className="p-1 rounded text-gray-400 hover:text-[#19A696] hover:bg-[#19A696]/10 transition-colors"
+            className="p-1 rounded text-gray-400 hover:text-[#11806F] hover:bg-[#19A696]/10 transition-colors"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path

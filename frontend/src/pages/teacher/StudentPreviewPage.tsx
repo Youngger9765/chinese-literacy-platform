@@ -70,7 +70,7 @@ const StudentPreviewPage: React.FC = () => {
         <button
           type="button"
           onClick={() => navigate('/teacher-home')}
-          className="mt-4 text-[#19A696] underline"
+          className="mt-4 text-[#11806F] underline"
         >
           回教師首頁
         </button>
@@ -131,7 +131,7 @@ const StudentPreviewPage: React.FC = () => {
                   className="flex flex-col gap-2 rounded-xl border border-gray-200 p-4"
                 >
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="rounded-full bg-[#19A696] px-2 py-0.5 text-xs font-medium text-white">
+                    <span className="rounded-full bg-[#11806F] px-2 py-0.5 text-xs font-medium text-white">
                       {gradeLabel(String(rec.grade))}
                     </span>
                     <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">

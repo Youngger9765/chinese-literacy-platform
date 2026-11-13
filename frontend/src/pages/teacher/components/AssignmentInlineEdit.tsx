@@ -84,7 +84,7 @@ export const AssignmentInlineEdit: React.FC<AssignmentInlineEditProps> = ({
         <button
           onClick={onSave}
           disabled={isSavingEdit}
-          className="px-4 py-1.5 rounded-lg bg-[#19A696] hover:bg-[#15897B] disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-medium transition-colors cursor-pointer"
+          className="px-4 py-1.5 rounded-lg bg-[#11806F] hover:bg-[#0E7366] disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-medium transition-colors cursor-pointer"
         >
           {isSavingEdit ? '儲存中...' : '儲存'}
         </button>

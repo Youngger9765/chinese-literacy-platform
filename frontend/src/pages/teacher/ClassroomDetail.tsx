@@ -454,7 +454,7 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack, 
         <button
           type="button"
           onClick={() => setActiveTab('assignments')}
-          className="h-11 px-6 rounded-lg bg-[#19A696] hover:bg-[#15897B] text-white text-base font-medium transition-colors cursor-pointer"
+          className="h-11 px-6 rounded-lg bg-[#11806F] hover:bg-[#0E7366] text-white text-base font-medium transition-colors cursor-pointer"
         >
           指派任務
         </button>

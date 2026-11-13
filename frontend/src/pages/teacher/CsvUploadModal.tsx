@@ -203,7 +203,7 @@ const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
               {/* Template download */}
               <button
                 onClick={() => downloadCsvTemplate(token)}
-                className="text-sm text-[#19A696] hover:text-[#15897B] underline underline-offset-2 transition-colors cursor-pointer"
+                className="text-sm text-[#11806F] hover:text-[#0E7366] underline underline-offset-2 transition-colors cursor-pointer"
               >
                 下載範本 CSV
               </button>
@@ -226,7 +226,7 @@ const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
                   className="block w-full cursor-pointer p-6 text-center"
                 >
                   <svg
-                    className={`mx-auto w-8 h-8 mb-2 ${isDragOver ? 'text-[#19A696]' : 'text-gray-400'}`}
+                    className={`mx-auto w-8 h-8 mb-2 ${isDragOver ? 'text-[#11806F]' : 'text-gray-400'}`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -261,7 +261,7 @@ const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
                 </svg>
                 <span>
                   <span className="font-medium">{selectedFile.name}</span>
-                  {' '}— 共 <span className="font-medium text-[#19A696]">{totalRows}</span> 位學生
+                  {' '}— 共 <span className="font-medium text-[#11806F]">{totalRows}</span> 位學生
                 </span>
               </div>
 
@@ -397,7 +397,7 @@ const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
               <button
                 onClick={handleUpload}
                 disabled={isUploading || totalRows === 0}
-                className="bg-[#19A696] hover:bg-[#15897B] disabled:opacity-50 disabled:cursor-not-allowed text-white px-5 py-2 rounded-lg font-medium text-sm transition-colors cursor-pointer"
+                className="bg-[#11806F] hover:bg-[#0E7366] disabled:opacity-50 disabled:cursor-not-allowed text-white px-5 py-2 rounded-lg font-medium text-sm transition-colors cursor-pointer"
               >
                 {isUploading ? '匯入中...' : `確認匯入 ${totalRows} 位學生`}
               </button>
@@ -424,7 +424,7 @@ const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
               )}
               <button
                 onClick={handleDone}
-                className="bg-[#19A696] hover:bg-[#15897B] text-white px-5 py-2 rounded-lg font-medium text-sm transition-colors cursor-pointer"
+                className="bg-[#11806F] hover:bg-[#0E7366] text-white px-5 py-2 rounded-lg font-medium text-sm transition-colors cursor-pointer"
               >
                 完成
               </button>
