@@ -84,8 +84,10 @@ fields_not_extracted:
       #   詞條總數 3559（粗估，遞迴數所有非空清單項）
       # 量法：backend/data/lessons/L*/v3/ 全量，2026-09-02。
       #
-      # ⚠️ 那 25 課是「原稿本來就沒有語詞表」還是「抽取漏了」，尚未逐課覆核。
-      # 這一格只保證計數正確，不代表成因已排查。
+      # 2026-11-13 已逐課覆核（#4035）：那 25 課逐份對原稿 DOCX 查過，
+      # 14 課原稿沒有「語詞我最棒」，11 課是文言文課型（語詞改由文白詞語比對承接），
+      # 0 課是抽取漏掉。逐課證據見 docs/qa/2026-11-13-missing-layers-audit.md，
+      # 宣告見下方 modules_absent_from_source.reverified_2026_11_13。
     fill_in_blank:
       count: 153
       of: 179
@@ -605,6 +607,31 @@ modules_absent_from_source:
     6 課「知識補給站」0 次，對照組 2/2 課各 2 次；key_reading 4 課「念順順」0 次，對照組 2/2 課各 2 次。三組對照都命中，所以那些 0 是真的 0，不是查法壞掉。
   how_to_reverify: python3 - <<PY / 開 lesson.yml 取 source.drive_path → 到 private/curriculum-source/ 找同名 docx → unzip -p word/document.xml
     去標籤數關鍵字。⚠️ 一定要同時跑一個「已知有該模組」的課當正向對照，否則 0 可能是查法壞掉。
+  reverified_2026_11_13:
+    issue: 4035
+    scope: 本區塊裡 vocab_definitions / vocab_review / vocab_application / keypoints / resources / key_reading 六層的 146 個（課，層）缺口，45 課。comprehension / spotlight / full_text_annotate 三層不在這次範圍
+    method: >-
+      逐課（不是抽樣）開 lesson.yml 的 source.drive_path 對應的原稿 DOCX，讀 word/document.xml 全部 <w:t>（含文字方塊），
+      數大題名加上該大題固定的指示語。指示語是必要的：L0029、L0063、L0137、L0144 的大題名不在文字層，只剩指示語。
+    signatures:
+      vocab_definitions: [語詞我最棒]
+      vocab_application: [語詞應用, 語詞代號]
+      vocab_review: [詞語複習, 圈出格子]
+      keypoints: [文章重點表, 重點表, 文章重點整理]
+      resources: [知識補給站, http, youtu, 影片]
+      key_reading: [念順順, 朗讀計時, 朗讀原文]
+    positive_control: 同一套字樣對「有這層檔案」的課全數命中：vocab_definitions 154/154、vocab_application 153/153、vocab_review 154/154、keypoints 154/154、resources 152/152、key_reading 161/161
+    nonzero_hits_explained:
+      L0070_resources: 「影片」2 次都在課文與選項內文，不是知識補給站
+      L0161_vocab_application: 「語詞代號」2 次是「輕練習」，印在文言文聚光燈大題內，已在 spotlight.deqve.yml
+    verdicts:
+      source_has_none: 113
+      by_design: 33
+      extraction_miss: 0
+    by_design_rule: 文言文課型（catalog_slot 文-*）的三個語詞層 —— 語詞教學由 word_matching（文白詞語比對／古今對照表）、sentence_matching、modern_translation、classical_text 承接，見各課 by_design_modules
+    keypoints_note: L0050、L0054、L0075、L0088、L0099、L0101、L0104、L0105、L0140、L0147、L0148 沒有獨立的文章重點表大題，找重點／文章結構的任務印在「閱讀聚光燈」大題裡，已由 spotlight 承接
+    boundary: 查的是文字層。整個大題（含指示語）都是一張圖的話這個查法看不到；正向對照 100% 代表現有原稿沒有這種情況
+    report: docs/qa/2026-11-13-missing-layers-audit.md
   groups:
     classical_course: 文言文課型：有 classical_text / sentence_matching 等專屬大題，本來就沒有語詞應用那套
     orientation_course: 每個年級開學的同一份「正太與小豬」定向課：sections_present 只有兩節
@@ -914,6 +941,15 @@ modules_absent_from_source:
     - vocab_application
     - vocab_definitions
     - vocab_review
+    by_design_modules:
+    - vocab_application
+    - vocab_definitions
+    - vocab_review
+    served_by:
+    - word_matching
+    - sentence_matching
+    - modern_translation
+    - classical_text
   - lesson_uid: L0154
     catalog_slot: 文-L11
     title: 祁黃羊的思路解密
@@ -924,6 +960,15 @@ modules_absent_from_source:
     - vocab_application
     - vocab_definitions
     - vocab_review
+    by_design_modules:
+    - vocab_application
+    - vocab_definitions
+    - vocab_review
+    served_by:
+    - word_matching
+    - sentence_matching
+    - modern_translation
+    - classical_text
   - lesson_uid: L0155
     catalog_slot: 文-L12
     title: 不流血的戰爭
@@ -934,6 +979,15 @@ modules_absent_from_source:
     - vocab_application
     - vocab_definitions
     - vocab_review
+    by_design_modules:
+    - vocab_application
+    - vocab_definitions
+    - vocab_review
+    served_by:
+    - word_matching
+    - sentence_matching
+    - modern_translation
+    - classical_text
   - lesson_uid: L0157
     catalog_slot: 文-L2
     title: 文言文怎麼讀？以鞭虎救弟記為例
@@ -945,6 +999,12 @@ modules_absent_from_source:
     - vocab_application
     - vocab_definitions
     - vocab_review
+    by_design_modules:
+    - vocab_application
+    - vocab_definitions
+    - vocab_review
+    served_by:
+    - word_matching
   - lesson_uid: L0158
     catalog_slot: 文-L3
     title: 不量田
@@ -955,6 +1015,15 @@ modules_absent_from_source:
     - vocab_application
     - vocab_definitions
     - vocab_review
+    by_design_modules:
+    - vocab_application
+    - vocab_definitions
+    - vocab_review
+    served_by:
+    - word_matching
+    - sentence_matching
+    - modern_translation
+    - classical_text
   - lesson_uid: L0159
     catalog_slot: 文-L4
     title: 陸公買硯
@@ -965,6 +1034,15 @@ modules_absent_from_source:
     - vocab_application
     - vocab_definitions
     - vocab_review
+    by_design_modules:
+    - vocab_application
+    - vocab_definitions
+    - vocab_review
+    served_by:
+    - word_matching
+    - sentence_matching
+    - modern_translation
+    - classical_text
   - lesson_uid: L0160
     catalog_slot: 文-L5
     title: 重義的荀巨伯
@@ -975,6 +1053,15 @@ modules_absent_from_source:
     - vocab_application
     - vocab_definitions
     - vocab_review
+    by_design_modules:
+    - vocab_application
+    - vocab_definitions
+    - vocab_review
+    served_by:
+    - word_matching
+    - sentence_matching
+    - modern_translation
+    - classical_text
   - lesson_uid: L0161
     catalog_slot: 文-L6
     title: 江乙媽媽告御狀
@@ -985,6 +1072,15 @@ modules_absent_from_source:
     - vocab_application
     - vocab_definitions
     - vocab_review
+    by_design_modules:
+    - vocab_application
+    - vocab_definitions
+    - vocab_review
+    served_by:
+    - word_matching
+    - sentence_matching
+    - modern_translation
+    - classical_text
   - lesson_uid: L0162
     catalog_slot: 文-L7
     title: 相隔千里的約定
@@ -995,6 +1091,15 @@ modules_absent_from_source:
     - vocab_application
     - vocab_definitions
     - vocab_review
+    by_design_modules:
+    - vocab_application
+    - vocab_definitions
+    - vocab_review
+    served_by:
+    - word_matching
+    - sentence_matching
+    - modern_translation
+    - classical_text
   - lesson_uid: L0163
     catalog_slot: 文-L8
     title: 愛讀書的顧寧人
@@ -1005,6 +1110,15 @@ modules_absent_from_source:
     - vocab_application
     - vocab_definitions
     - vocab_review
+    by_design_modules:
+    - vocab_application
+    - vocab_definitions
+    - vocab_review
+    served_by:
+    - word_matching
+    - sentence_matching
+    - modern_translation
+    - classical_text
   - lesson_uid: L0164
     catalog_slot: 文-L9
     title: 從天才跌為凡人的神童
@@ -1015,3 +1129,12 @@ modules_absent_from_source:
     - vocab_application
     - vocab_definitions
     - vocab_review
+    by_design_modules:
+    - vocab_application
+    - vocab_definitions
+    - vocab_review
+    served_by:
+    - word_matching
+    - sentence_matching
+    - modern_translation
+    - classical_text
