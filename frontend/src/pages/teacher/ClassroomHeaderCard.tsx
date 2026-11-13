@@ -156,7 +156,7 @@ const ClassroomHeaderCard: React.FC<ClassroomHeaderCardProps> = ({
             <button
               type="submit"
               disabled={isSaving || !editName.trim()}
-              className="bg-[#19A696] hover:bg-[#15897B] disabled:opacity-50 disabled:cursor-not-allowed text-white px-5 py-2 rounded-lg font-medium text-sm transition-colors"
+              className="bg-[#11806F] hover:bg-[#0E7366] disabled:opacity-50 disabled:cursor-not-allowed text-white px-5 py-2 rounded-lg font-medium text-sm transition-colors"
             >
               {isSaving ? '儲存中...' : '儲存'}
             </button>
@@ -255,7 +255,7 @@ const ClassroomHeaderCard: React.FC<ClassroomHeaderCardProps> = ({
                   {/* Issue #3989: icon badge is Junyi's teal (#19A696, same
                       token as the 新增學生 icon on d1-class.png), not the
                       app's indigo accent — scoped to this one icon only. */}
-                  <span aria-hidden="true" className="w-7 h-7 rounded-full bg-[#19A696] text-white text-xl leading-7 text-center">＋</span>
+                  <span aria-hidden="true" className="w-7 h-7 rounded-full bg-[#11806F] text-white text-xl leading-7 text-center">＋</span>
                   <span className="text-xs whitespace-nowrap">新增學生</span>
                 </button>
               )}
@@ -267,7 +267,7 @@ const ClassroomHeaderCard: React.FC<ClassroomHeaderCardProps> = ({
                 >
                   {/* Issue #3992: same Junyi teal as 新增學生 above -- both
                       are "roster setup" actions in the same icon family. */}
-                  <span aria-hidden="true" className="w-7 h-7 rounded-full bg-[#19A696] text-white text-base leading-7 text-center font-semibold">01</span>
+                  <span aria-hidden="true" className="w-7 h-7 rounded-full bg-[#11806F] text-white text-base leading-7 text-center font-semibold">01</span>
                   <span className="text-xs whitespace-nowrap">新增座號</span>
                 </button>
               )}

@@ -37,7 +37,7 @@ function AnswerRecordLink({ studentId, sessionId }: { studentId: number; session
   return (
     <Link
       to={`/teacher/students/${studentId}/sessions/${sessionId}/report`}
-      className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border border-[#19A696]/30 text-[#19A696] text-xs hover:bg-[#19A696]/10 transition-colors whitespace-nowrap"
+      className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border border-[#19A696]/30 text-[#11806F] text-xs hover:bg-[#19A696]/10 transition-colors whitespace-nowrap"
       title="查看這位學生目前答過的內容"
     >
       作答紀錄
@@ -110,7 +110,7 @@ function MarkCompleteAction({
         <button
           onClick={handleConfirm}
           disabled={saving}
-          className="px-1.5 py-0.5 rounded bg-[#19A696] text-white text-[11px] font-medium hover:bg-[#15897B] disabled:opacity-50 cursor-pointer transition-colors"
+          className="px-1.5 py-0.5 rounded bg-[#11806F] text-white text-[11px] font-medium hover:bg-[#0E7366] disabled:opacity-50 cursor-pointer transition-colors"
         >
           {saving ? '...' : '確定標記'}
         </button>
@@ -296,7 +296,7 @@ const AssignmentSubmissionTable: React.FC<Props> = ({
               <button
                 onClick={() => onSaveGrade(sub)}
                 disabled={savingId === sub.id}
-                className="px-2 py-0.5 rounded bg-[#19A696] text-white text-xs font-medium hover:bg-[#15897B] disabled:opacity-50 cursor-pointer transition-colors"
+                className="px-2 py-0.5 rounded bg-[#11806F] text-white text-xs font-medium hover:bg-[#0E7366] disabled:opacity-50 cursor-pointer transition-colors"
               >
                 {savingId === sub.id ? '...' : '儲存'}
               </button>
@@ -530,7 +530,7 @@ const AssignmentSubmissionTable: React.FC<Props> = ({
                   <button
                     onClick={() => onSaveGrade(latestAsSub)}
                     disabled={savingId === latest.id}
-                    className="px-2 py-0.5 rounded bg-[#19A696] text-white text-xs font-medium hover:bg-[#15897B] disabled:opacity-50 cursor-pointer transition-colors"
+                    className="px-2 py-0.5 rounded bg-[#11806F] text-white text-xs font-medium hover:bg-[#0E7366] disabled:opacity-50 cursor-pointer transition-colors"
                   >
                     {savingId === latest.id ? '...' : '儲存'}
                   </button>
@@ -675,7 +675,7 @@ const AssignmentSubmissionTable: React.FC<Props> = ({
                 <button
                   onClick={() => onSaveGrade(sub)}
                   disabled={savingId === sub.id}
-                  className="px-2 py-0.5 rounded bg-[#19A696] text-white text-xs font-medium hover:bg-[#15897B] disabled:opacity-50 cursor-pointer transition-colors"
+                  className="px-2 py-0.5 rounded bg-[#11806F] text-white text-xs font-medium hover:bg-[#0E7366] disabled:opacity-50 cursor-pointer transition-colors"
                 >
                   {savingId === sub.id ? '...' : '儲存'}
                 </button>

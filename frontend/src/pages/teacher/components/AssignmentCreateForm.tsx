@@ -215,7 +215,7 @@ export const AssignmentCreateForm: React.FC<AssignmentCreateFormProps> = ({
           /* Issue #4005: Junyi blue (#4990E2), same assign-action token as
              the 建立任務 buttons that open this form — not the app's indigo
              accent. */
-          className="bg-[#4990E2] hover:bg-[#2F7FD1] disabled:opacity-50 disabled:cursor-not-allowed text-white px-5 py-2 rounded-lg font-medium text-sm transition-colors cursor-pointer"
+          className="bg-[#2A73C2] hover:bg-[#2668B0] disabled:opacity-50 disabled:cursor-not-allowed text-white px-5 py-2 rounded-lg font-medium text-sm transition-colors cursor-pointer"
         >
           {isCreating ? '建立中...' : '確認建立'}
         </button>

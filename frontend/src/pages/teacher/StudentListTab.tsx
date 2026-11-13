@@ -506,7 +506,7 @@ const EditableSeatCell: React.FC<{
           type="button"
           onClick={startEdit}
           aria-label={`編輯 ${studentName} 的座號`}
-          className="text-gray-300 hover:text-[#19A696] transition-colors cursor-pointer text-xs"
+          className="text-gray-300 hover:text-[#11806F] transition-colors cursor-pointer text-xs"
         >
           ✎
         </button>
@@ -700,7 +700,7 @@ const StudentListTab: React.FC<StudentListTabProps> = ({
               <button
                 type="submit"
                 disabled={isAddingStudent || !studentIdInput.trim()}
-                className="h-10 bg-[#19A696] hover:bg-[#15897B] disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 rounded-lg font-medium text-sm transition-colors shrink-0"
+                className="h-10 bg-[#11806F] hover:bg-[#0E7366] disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 rounded-lg font-medium text-sm transition-colors shrink-0"
               >
                 {isAddingStudent ? '新增中...' : '新增'}
               </button>
@@ -732,7 +732,7 @@ const StudentListTab: React.FC<StudentListTabProps> = ({
           <button
             type="button"
             onClick={onOpenAddStudents}
-            className="h-11 px-6 rounded-lg bg-[#19A696] hover:bg-[#15897B] text-white text-base font-medium cursor-pointer"
+            className="h-11 px-6 rounded-lg bg-[#11806F] hover:bg-[#0E7366] text-white text-base font-medium cursor-pointer"
           >
             ＋ 新增學生
           </button>

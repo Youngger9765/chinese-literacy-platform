@@ -204,7 +204,7 @@ const TeacherInstructionPanel: React.FC<TeacherInstructionPanelProps> = ({
               <button
                 onClick={handleCreate}
                 disabled={isSubmitting || !newContent.trim()}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg bg-[#19A696] text-white hover:bg-[#19A696]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg bg-[#11806F] text-white hover:bg-[#0E7366] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -275,7 +275,7 @@ const TeacherInstructionPanel: React.FC<TeacherInstructionPanelProps> = ({
                           <button
                             onClick={() => handleUpdate(instr.id)}
                             disabled={!editContent.trim()}
-                            className="px-2.5 py-1 text-xs font-medium rounded-lg bg-[#19A696] text-white hover:bg-[#19A696]/90 disabled:opacity-50 transition-colors"
+                            className="px-2.5 py-1 text-xs font-medium rounded-lg bg-[#11806F] text-white hover:bg-[#0E7366] disabled:opacity-50 transition-colors"
                           >
                             儲存
                           </button>

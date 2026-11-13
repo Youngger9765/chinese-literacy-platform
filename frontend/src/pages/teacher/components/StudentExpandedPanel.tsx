@@ -190,7 +190,7 @@ export const StudentExpandedPanel: React.FC<StudentExpandedPanelProps> = ({
                   <Link
                     to={`/teacher/students/${studentId}/sessions/${session.id}/report`}
                     onClick={(event) => event.stopPropagation()}
-                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium text-[#19A696] border border-[#19A696]/30 hover:bg-[#19A696]/10 transition-colors"
+                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium text-[#11806F] border border-[#19A696]/30 hover:bg-[#19A696]/10 transition-colors"
                     title="查看學習報告"
                   >
                     <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -206,7 +206,7 @@ export const StudentExpandedPanel: React.FC<StudentExpandedPanelProps> = ({
                       event.stopPropagation();
                       onViewDialogue(studentId, session.id, session.story_title, studentName);
                     }}
-                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium text-[#19A696] border border-[#19A696]/30 hover:bg-[#19A696]/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium text-[#11806F] border border-[#19A696]/30 hover:bg-[#19A696]/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     title="查看蘇格拉底對話記錄"
                   >
                     {loadingDialogueSessionId === session.id ? (
@@ -291,7 +291,7 @@ export const StudentExpandedPanel: React.FC<StudentExpandedPanelProps> = ({
                   <td className="py-1.5 text-center">
                     <Link
                       to={`/teacher/students/${studentId}/sessions/${session.id}/report`}
-                      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium text-[#19A696] border border-[#19A696]/30 hover:bg-[#19A696]/10 transition-colors"
+                      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium text-[#11806F] border border-[#19A696]/30 hover:bg-[#19A696]/10 transition-colors"
                       title="查看學習報告"
                     >
                       {reviewedAt ? '✓ 報告' : '報告'}
@@ -305,7 +305,7 @@ export const StudentExpandedPanel: React.FC<StudentExpandedPanelProps> = ({
                         event.stopPropagation();
                         onViewDialogue(studentId, session.id, session.story_title, studentName);
                       }}
-                      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium text-[#19A696] border border-[#19A696]/30 hover:bg-[#19A696]/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#19A696]"
+                      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium text-[#11806F] border border-[#19A696]/30 hover:bg-[#19A696]/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#19A696]"
                       title="查看蘇格拉底對話記錄"
                     >
                       {loadingDialogueSessionId === session.id ? (

@@ -126,7 +126,7 @@ const TeacherAssignmentsPage: React.FC = () => {
             <button
               type="button"
               onClick={() => navigate('/teacher')}
-              className="mt-2 text-[#19A696] hover:underline cursor-pointer"
+              className="mt-2 text-[#11806F] hover:underline cursor-pointer"
             >
               前往班級管理
             </button>

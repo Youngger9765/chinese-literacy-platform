@@ -111,7 +111,7 @@ const AddStudentsPanel: React.FC<AddStudentsPanelProps> = ({
       aria-selected={mode === m}
       onClick={() => setMode(m)}
       className={`flex-1 px-3 py-2.5 rounded-lg text-base font-medium cursor-pointer ${
-        mode === m ? 'bg-white shadow text-[#19A696]' : 'text-gray-600'
+        mode === m ? 'bg-white shadow text-[#11806F]' : 'text-gray-600'
       }`}
     >
       {label}
@@ -154,7 +154,7 @@ const AddStudentsPanel: React.FC<AddStudentsPanelProps> = ({
               type="button"
               onClick={create}
               disabled={busy || parsed.length === 0}
-              className="h-11 px-5 rounded-lg bg-[#19A696] text-white font-semibold disabled:opacity-50 cursor-pointer"
+              className="h-11 px-5 rounded-lg bg-[#11806F] text-white font-semibold disabled:opacity-50 cursor-pointer"
             >
               {busy ? '建立中…' : `建立 ${parsed.length} 個學生帳號`}
             </button>
@@ -182,7 +182,7 @@ const AddStudentsPanel: React.FC<AddStudentsPanelProps> = ({
               <button
                 type="button"
                 onClick={() => openCredentialCards(classroomName, result.created)}
-                className="h-11 px-5 rounded-lg bg-white border border-[#19A696] text-[#19A696] font-semibold cursor-pointer"
+                className="h-11 px-5 rounded-lg bg-white border border-[#19A696] text-[#11806F] font-semibold cursor-pointer"
               >
                 列印帳密卡
               </button>

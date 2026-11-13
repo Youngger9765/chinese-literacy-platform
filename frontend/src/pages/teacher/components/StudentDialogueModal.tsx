@@ -14,12 +14,12 @@ const DialogueTurnRow: React.FC<{ turn: TeacherDialogueTurn }> = ({ turn }) => {
   if (turn.role === 'ai') {
     return (
       <div className="flex gap-2.5">
-        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-[#19A696] flex items-center justify-center mt-0.5">
+        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-[#11806F] flex items-center justify-center mt-0.5">
           <span className="text-white text-[9px] font-bold">AI</span>
         </div>
         <div className="flex-1 max-w-[85%]">
           {turn.phase && (
-            <span className="inline-block mb-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#19A696]/10 text-[#19A696]">
+            <span className="inline-block mb-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#19A696]/10 text-[#11806F]">
               {PHASE_LABEL[turn.phase] ?? turn.phase}
             </span>
           )}
@@ -41,7 +41,7 @@ const DialogueTurnRow: React.FC<{ turn: TeacherDialogueTurn }> = ({ turn }) => {
           </svg>
         </div>
         <div className="max-w-[85%]">
-          <div className="bg-[#19A696] rounded-2xl rounded-tr-sm px-3.5 py-2.5">
+          <div className="bg-[#11806F] rounded-2xl rounded-tr-sm px-3.5 py-2.5">
             <p className="text-sm text-white leading-relaxed">{turn.text}</p>
           </div>
         </div>

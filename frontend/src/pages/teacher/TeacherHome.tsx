@@ -303,7 +303,7 @@ const TeacherHome: React.FC = () => {
             <button
               type="button"
               onClick={() => navigate('/teacher')}
-              className="text-sm text-[#19A696] hover:text-[#15897B] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#19A696] focus-visible:ring-offset-1 rounded"
+              className="text-sm text-[#11806F] hover:text-[#0E7366] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#19A696] focus-visible:ring-offset-1 rounded"
             >
               查看全部 →
             </button>

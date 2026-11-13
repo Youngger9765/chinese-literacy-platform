@@ -214,7 +214,7 @@ const AssignmentMatrixGrid: React.FC<AssignmentMatrixGridProps> = ({ data, onOpe
                     onClick={() => onOpenAssignment(a.id)}
                     /* Issue #4005: Junyi teal (#19A696), not the app's indigo
                        accent — a navigational link, not an assign CTA. */
-                    className="font-semibold text-[#19A696] hover:underline cursor-pointer"
+                    className="font-semibold text-[#11806F] hover:underline cursor-pointer"
                   >
                     {titles.get(a.id)}
                   </button>
@@ -236,7 +236,7 @@ const AssignmentMatrixGrid: React.FC<AssignmentMatrixGridProps> = ({ data, onOpe
               <tr key={s.id}>
                 <th scope="row" className="sticky left-0 z-10 bg-white px-4 py-2.5 text-left font-medium text-gray-900 border-b border-r border-gray-100 whitespace-nowrap">
                   {onOpenStudent ? (
-                    <button type="button" onClick={() => onOpenStudent(s.id)} className="text-gray-900 hover:text-[#19A696] hover:underline cursor-pointer">
+                    <button type="button" onClick={() => onOpenStudent(s.id)} className="text-gray-900 hover:text-[#11806F] hover:underline cursor-pointer">
                       {studentLabel(s, dupNames)}
                     </button>
                   ) : (

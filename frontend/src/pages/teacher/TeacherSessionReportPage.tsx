@@ -104,7 +104,7 @@ const TeacherSessionReportPage: React.FC = () => {
           <p className="text-red-600 text-sm">{error}</p>
           <button
             onClick={() => navigate(-1)}
-            className="px-4 py-2 rounded-lg bg-[#19A696] hover:bg-[#15897B] text-white text-sm font-medium transition-colors cursor-pointer"
+            className="px-4 py-2 rounded-lg bg-[#11806F] hover:bg-[#0E7366] text-white text-sm font-medium transition-colors cursor-pointer"
           >
             返回
           </button>
