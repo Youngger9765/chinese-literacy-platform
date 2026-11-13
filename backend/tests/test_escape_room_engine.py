@@ -163,6 +163,10 @@ def test_rescue_correct_frees_teammate_wrong_does_not_punish(run_factory, db_ses
     right = svc.use_rescue(db_session, run, user, "A")
     assert right["mist_distance"] > before
     assert not next(t for t in run.teammates_state if t["slug"] == frozen["slug"])["frozen"]
+    # #4051: a SUCCESSFUL rescue must not still show the "someone needs
+    # rescuing" copy — that's the opposite moment.
+    assert right["mist_message"] == svc.DEFAULT_DIALOGUE["rescued"]
+    assert right["mist_message"] != svc.DEFAULT_DIALOGUE["rescue"]
 
 
 def test_gate_requires_chambers_and_all_teammates(run_factory, db_session):
@@ -223,6 +227,48 @@ def test_expired_run_becomes_not_this_time_and_rejects_writes(run_factory, db_se
         assert exc.value.status_code == 409
 
 
+def test_stale_run_settles_at_the_deadline_not_whenever_it_was_opened(run_factory, db_session, clock):
+    """#4051 "逾時舊局要等有人打開才結算，完成時間記成打開那一刻（第 61 局
+    顯示用時 29209 分 45 秒）" — `_maybe_expire` stamped `completed_at` with
+    whatever moment someone happened to poll/open an abandoned run, not the
+    deadline the run actually timed out at. A run nobody reopens for days
+    must still settle with a BOUNDED duration (exactly the run's own time
+    budget), not one inflated by however long it sat unopened.
+    """
+    run, user = run_factory()
+    run.started_at = clock.now - timedelta(minutes=11)
+    db_session.commit()
+
+    clock.advance(days=3)  # nobody opens it for days
+    state = svc.get_run_state(db_session, run)
+
+    assert state["status"] == "not_this_time"
+    assert run.completed_at is not None
+    duration = run.completed_at - run.started_at
+    assert duration == timedelta(seconds=svc.RUN_TIME_BUDGET_SECONDS), (
+        f"settled duration must equal the run's own time budget "
+        f"({svc.RUN_TIME_BUDGET_SECONDS}s), got {duration} — opening it 3 days "
+        f"late must not inflate the recorded duration"
+    )
+
+
+def test_list_history_settles_stale_in_progress_runs(run_factory, db_session, clock):
+    """#4051 "其他舊局永遠顯示「進行中」" — `list_history` never ran the lazy
+    settle `get_run_state`/`_ensure_in_progress` already do, so a run that
+    timed out and was simply never reopened sat as "in_progress" forever in
+    the student's own "我的挑戰紀錄" list.
+    """
+    run, user = run_factory()
+    run.started_at = clock.now - timedelta(minutes=11)  # already past the time budget
+    db_session.commit()
+
+    history = svc.list_history(db_session, user)
+
+    entry = next(item for item in history if item["run_id"] == run.id)
+    assert entry["result"] == "not_this_time"
+    assert entry["duration_seconds"] == svc.RUN_TIME_BUDGET_SECONDS
+
+
 def test_state_has_the_complete_frontend_contract(run_factory, db_session):
     run, _ = run_factory()
     state = svc.get_run_state(db_session, run)
@@ -269,6 +315,19 @@ def test_run_ownership_and_result_copy_are_safe(run_factory, db_session):
     messages.append(svc.get_run_result(run)["message"])
     text = str(messages)
     assert all(term not in text for term in ("失敗", "你輸了", "GAME OVER"))
+
+
+def test_not_this_time_message_is_distinct_from_the_frontend_headline(run_factory, db_session):
+    """#4051 "沒來得及結局頁同一句話出現兩次" — `StudentEscapeRoomRun.tsx`'s
+    result screen hardcodes its own headline for a non-escape ending
+    ('這次沒來得及，再試一次？') and shows `result.message` right under it.
+    This backend message must not be the SAME literal string, or the page
+    prints the identical sentence twice."""
+    run, user = run_factory()
+    run.result = "not_this_time"
+    db_session.commit()
+    result = svc.get_run_result(run)
+    assert result["message"] != "這次沒來得及，再試一次？"
 
 
 def test_escaped_skin_is_derived_from_completed_runs(run_factory, db_session):
@@ -433,6 +492,50 @@ class TestQuestionTimeout:
         assert state["status"] == "in_progress"
         assert run.gate_snapshot["answered"] is False  # not auto-resolved before the student even saw it
         assert state["gate_question"] is not None
+
+    def test_chamber_clock_starts_when_the_next_chamber_first_becomes_reachable(self, run_factory, db_session, clock):
+        """#4051 "第 2～4 座機關第 1 題一出現就被判超時" — unlocking chamber N
+        must start chamber N+1's own clock, mirroring the gate's own fix
+        directly above (`test_gate_clock_starts_when_it_first_becomes_
+        reachable`). Before this, `_apply_chamber_answer` only ever reset
+        the CURRENT chamber's `started_at` — the next chamber's stayed
+        sitting at `start_run`'s original timestamp, so once more than 30s
+        had elapsed since the whole run began (easily true after even one
+        chamber's worth of reading + answering), chamber N+1's first
+        question read as already-expired the instant it became reachable:
+        a correct answer there got silently swallowed by an auto-resolve-
+        as-wrong that ran (and was overwritten) before the real answer was
+        even considered — a student who answered correctly still saw the
+        mist close in instead of retreat.
+        """
+        run, user = run_factory()
+        clock.advance(seconds=31)  # long past any one question's own 30s budget
+
+        # First-ever interaction on this run. Chamber 0's own q0 is itself
+        # already expired by this same elapsed time (a pre-existing,
+        # correct per-question timeout — nothing could have reset a clock
+        # before the student's very first click) — exercising that path
+        # here is incidental scaffolding to reach an unlocked chamber 0,
+        # not what this test asserts on.
+        svc.answer_chamber(db_session, run, user, 0, "A")
+        assert run.chambers_snapshot[0]["unlocked"] is True
+
+        # No further clock advance: chamber 1 has JUST become reachable.
+        mist_before = run.mist_distance
+        state = svc.answer_chamber(db_session, run, user, 1, "A")
+
+        assert run.chambers_snapshot[1]["current_question"] == 1, (
+            "chamber 1's FIRST question must be the one just answered for "
+            "real — a silent auto-expire-then-real-answer pair would have "
+            "already skipped past it to current_question=2 (unlocking the "
+            "chamber after only one real click, having never actually "
+            "shown its first question)"
+        )
+        assert state["mist_distance"] == mist_before + 10, (
+            "a correct answer to chamber 1's first question must score a "
+            "real win (mist +10), not a wash from an auto-expired wrong "
+            "answer immediately overwritten by this real one (net 0)"
+        )
 
 
 # ---------------------------------------------------------------------------
