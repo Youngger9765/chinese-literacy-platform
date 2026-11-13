@@ -23,12 +23,25 @@ export interface MarkedWord {
   paragraphIndex: number;
 }
 
-/** 一題的作答對照（你的答案 vs 正確答案）。 */
+/** 一題的作答對照（你的答案 vs 正確答案）。`correct` 一律是「第一次就答對」。 */
 export interface AnswerRow {
   label: string;
   correct: boolean;
+  /** 題目本身（例如詞語的解釋），有的話顯示在標號下面。 */
+  prompt?: string | null;
   studentAnswer?: string | null;
   correctAnswer?: string | null;
+  /**
+   * 第一次答錯之後，後來有沒有改對（#4028）。true = 已訂正、false = 還沒訂正、
+   * null/undefined = 這一關沒有記下（不顯示）。
+   */
+  corrected?: boolean | null;
+}
+
+/** 詞語理解用的詞語表（story.vocabulary 的形狀）。 */
+export interface VocabWord {
+  word: string;
+  definition?: string;
 }
 
 /** 卡片點開後的細節區塊。 */
@@ -154,6 +167,32 @@ interface BuildCtx {
   completed: boolean;
   /** null = 載入中；undefined = 這一關沒有記號可顯示（多篇課的第 2 篇之後）。 */
   marks: MarkedWord[] | null | undefined;
+  /** 這一關（這一輪）的詞語表；拿不到時是 undefined，細節就只列對錯不列詞語。 */
+  vocabulary?: VocabWord[];
+}
+
+/**
+ * 詞語理解的一個模式（選擇題 / 拖拉配對）→ 每題的作答列（#4028）。
+ * 跟關卡頁的錯題回顧同一套讀法（VocabDefinitionMatch.StageCompletedPlaceholder）：
+ * 對錯看 firstTryCorrect（只寫一次），學生選的看 firstTryAnsweredWordIdx ——
+ * answeredWordIdx 是「最後一次」，重做之後一定是對的。
+ */
+function vocabMatchRows(list: unknown, vocab: VocabWord[] | undefined, prefix: string): AnswerRow[] {
+  if (!Array.isArray(list)) return [];
+  return list.filter(isObj).map((a, i) => {
+    const defIndex = num(a.defIndex);
+    const item = defIndex !== null ? vocab?.[defIndex] : undefined;
+    const firstOk = (a.firstTryCorrect ?? a.correct) === true;
+    const pickIdx = num(a.firstTryAnsweredWordIdx) ?? num(a.answeredWordIdx);
+    return {
+      label: `${prefix}第 ${i + 1} 題`,
+      correct: firstOk,
+      prompt: item?.definition ?? null,
+      studentAnswer: !firstOk && pickIdx !== null ? vocab?.[pickIdx]?.word ?? null : null,
+      correctAnswer: item?.word ?? null,
+      corrected: firstOk ? null : a.correct === true,
+    };
+  });
 }
 
 type Builder = (ctx: BuildCtx) => { summary: string | null; details: DetailBlock[] };
@@ -205,15 +244,38 @@ const BUILDERS: Record<string, Builder> = {
     };
   },
 
-  'vocab-definition': ({ data }) => {
-    const r = isObj(data.result) ? data.result : {};
-    const n = num(r.matchedCount);
-    const t = num(r.totalCount);
-    if (n === null || t === null) return { summary: null, details: [] };
-    return {
-      summary: correctOf(n, t),
-      details: [{ kind: 'stats', items: [{ label: '答對', value: `${n} / ${t} 題` }] }],
-    };
+  'vocab-definition': ({ data, vocabulary }) => {
+    // #4028：以前讀 result.matchedCount —— 那是「訂正完」的數字，重做錯題之後永遠是
+    // 全對（本機實測：第一次錯了一半，報告寫「答對 22/22」）。改用每題的第一次作答。
+    const mc = vocabMatchRows(data.mcAnswers, vocabulary, '選擇題 ');
+    const dd = vocabMatchRows(data.dragDropAnswers, vocabulary, '配對 ');
+    const rows = [...mc, ...dd];
+    if (!rows.length) {
+      // 舊資料只有 result：照舊顯示，但標明那是訂正後的結果。
+      const r = isObj(data.result) ? data.result : {};
+      const n = num(r.matchedCount);
+      const t = num(r.totalCount);
+      if (n === null || t === null) return { summary: null, details: [] };
+      return {
+        summary: correctOf(n, t),
+        details: [{ kind: 'stats', items: [{ label: '答對（含訂正）', value: `${n} / ${t} 題` }] }],
+      };
+    }
+    const first = rows.filter((r) => r.correct).length;
+    const wrong = rows.length - first;
+    const fixed = rows.filter((r) => r.corrected === true).length;
+    const details: DetailBlock[] = [
+      {
+        kind: 'stats',
+        items: [
+          { label: '第一次就答對', value: `${first} / ${rows.length} 題` },
+          { label: '答錯後訂正', value: `${fixed} / ${wrong} 題` },
+        ],
+      },
+    ];
+    if (mc.length) details.push({ kind: 'answers', title: '選擇題', rows: mc });
+    if (dd.length) details.push({ kind: 'answers', title: '拖拉配對', rows: dd });
+    return { summary: correctOf(first, rows.length), details };
   },
 
   'vocab-application': ({ data }) => {
@@ -261,7 +323,14 @@ const BUILDERS: Record<string, Builder> = {
   comprehension: ({ data }) => {
     const n = num(data.mcqScore) ?? num(data.mcq_score);
     const t = num(data.mcqTotal) ?? num(data.mcq_total);
-    const rows = firstTryRows(data.firstTry);
+    // #4028：feedback 是「最新一次」的對錯 —— 第一次錯、後來改對就是已訂正。
+    const latest = isObj(data.feedback) ? data.feedback : {};
+    const records = Array.isArray(data.firstTry) ? data.firstTry.filter(isObj) : [];
+    const rows = firstTryRows(records).map((r, i) => {
+      const id = str(records[i]?.id);
+      const now = id ? latest[id] : undefined;
+      return r.correct || (now !== true && now !== false) ? r : { ...r, corrected: now === true };
+    });
     const details: DetailBlock[] = [];
     if (n !== null && t !== null) details.push({ kind: 'stats', items: [{ label: '第一次就答對', value: `${n} / ${t} 題` }] });
     if (rows.length) details.push({ kind: 'answers', title: '作答紀錄', rows });
@@ -291,6 +360,16 @@ export interface ProgressOrigin {
   carriedAt?: string | null;
   /** step_progress.__meta.carried_from.session_id */
   carriedSessionId?: number | null;
+}
+
+export interface ReportCardOptions {
+  /** 哪些勾是這次的、哪些是上次帶過來的（#4028）。不給 = 全部當這次的。 */
+  origin?: ProgressOrigin;
+  /**
+   * 某一關（完整 step id，含 `#slug`）的詞語表，詞語理解的細節要用它把作答還原成詞語。
+   * 呼叫端通常是 `(id) => storyForStep(story, id)?.vocabulary`。
+   */
+  vocabularyFor?: (stepId: string) => VocabWord[] | undefined;
 }
 
 /** 從 DB 回來的 step_progress 取出 ProgressOrigin；形狀不對的一律當沒有。 */
@@ -334,16 +413,17 @@ export function stepsDoneThisSession(progress: unknown): string[] {
  *                       沒有能力提供記號資料（例如老師端：後端沒有教師專屬的
  *                       annotations 端點，見 TeacherSessionReportPage）—— 卡片
  *                       會略過記號細節，不會誤報「還沒有做記號」或卡在「載入中」。
- * @param origin         哪些勾是這次的、哪些是上次帶過來的（#4028）。不給 = 全部當這次的
- *                       （#4028 以前的行為；沒有繼承紀錄的 session 本來就是如此）。
+ * @param opts           origin：哪些勾是這次的、哪些是上次帶過來的（#4028），不給 = 全部當
+ *                       這次的；vocabularyFor：每一關的詞語表（詞語理解的作答細節）。
  */
 export function buildStepReportCards(
   steps: StepConfig[],
   stepsCompleted: string[] | null | undefined,
   stepData: Record<string, unknown> | null | undefined,
   marks: MarkedWord[] | null | undefined,
-  origin: ProgressOrigin = {},
+  opts: ReportCardOptions = {},
 ): StepReportCard[] {
+  const origin = opts.origin ?? {};
   const done = new Set((stepsCompleted ?? []).map(normalizeStepKey));
   const data = normalizeStepData(stepData);
   // #4028：這次完成 = 這個 session 自己記下完成的 ∪ 累計清單裡不是從上一次帶過來的。
@@ -399,7 +479,9 @@ export function buildStepReportCards(
       const status: CardStatus = completedNow ? 'this' : everCompleted ? 'previous' : 'none';
       const builder = BUILDERS[baseId];
       const stepMarks = s.id === firstAnnotateId ? marks : undefined;
-      const built = builder ? builder({ data: entry, completed: completedNow, marks: stepMarks }) : { summary: null, details: [] };
+      const built = builder
+        ? builder({ data: entry, completed: completedNow, marks: stepMarks, vocabulary: opts.vocabularyFor?.(s.id) })
+        : { summary: null, details: [] };
       return {
         stepId: s.id,
         baseId,

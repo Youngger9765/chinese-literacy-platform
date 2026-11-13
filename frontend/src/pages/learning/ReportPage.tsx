@@ -9,6 +9,7 @@ import { resolveActiveSteps } from '../../config/stepConfig';
 import StepReportCards from '../../components/report/StepReportCards';
 import { useReportProgress } from '../../components/report/useReportProgress';
 import { buildStepReportCards, marksFromAnnotations, progressOrigin } from '../../components/report/reportCardsModel';
+import { storyForStep } from '../../services/api';
 
 /**
  * 報告頁（#3399）：每一關一張卡片，完成打綠勾，點開看分數與作答。
@@ -120,9 +121,12 @@ const ReportPage: React.FC = () => {
         report.progress?.steps_completed ?? session?.completedSteps,
         report.progress?.step_data,
         report.annotations ? marksFromAnnotations(report.annotations, selectedStory?.content) : null,
-        progressOrigin(report.progress),
+        {
+          origin: progressOrigin(report.progress),
+          vocabularyFor: (id) => storyForStep(selectedStory, id)?.vocabulary,
+        },
       ),
-    [selectedStory?.stepSequence, selectedStory?.content, report.progress, report.annotations, session?.completedSteps],
+    [selectedStory, report.progress, report.annotations, session?.completedSteps],
   );
 
   // Clear active session from localStorage when report is reached.

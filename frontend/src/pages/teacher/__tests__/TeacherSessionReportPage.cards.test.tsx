@@ -25,6 +25,7 @@ vi.mock('../../../services/teacherApi', () => ({
 
 const mockFetchStory = vi.fn();
 vi.mock('../../../services/api', () => ({
+  storyForStep: (s: unknown) => s,
   fetchStory: (...a: unknown[]) => mockFetchStory(...a),
 }));
 

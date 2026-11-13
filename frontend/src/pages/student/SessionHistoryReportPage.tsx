@@ -20,7 +20,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { fetchStory } from '../../services/api';
+import { fetchStory, storyForStep } from '../../services/api';
 import {
   fetchSessionReport,
   type SessionDetailResponse,
@@ -115,7 +115,7 @@ const SessionHistoryReportPage: React.FC = () => {
         report.progress?.steps_completed,
         report.progress?.step_data,
         report.annotations ? marksFromAnnotations(report.annotations, story?.content) : null,
-        progressOrigin(report.progress),
+        { origin: progressOrigin(report.progress), vocabularyFor: (id) => storyForStep(story, id)?.vocabulary },
       ),
     [story, report.progress, report.annotations],
   );

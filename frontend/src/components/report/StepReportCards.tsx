@@ -103,14 +103,26 @@ const AnswerList: React.FC<{ title: string; rows: AnswerRow[] }> = ({ title, row
         >
           <div className="flex items-center justify-between gap-2">
             <span className="font-medium text-on-surface">{r.label}</span>
-            <span className={`text-xs font-bold ${r.correct ? 'text-emerald-700' : 'text-amber-700'}`}>
-              {r.correct ? '✓ 答對' : '✗ 再想想'}
+            <span className="flex items-center gap-1.5">
+              {!r.correct && r.corrected != null && (
+                <span
+                  className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                    r.corrected ? 'bg-emerald-100 text-emerald-800' : 'bg-surface-container-high text-on-surface-variant'
+                  }`}
+                >
+                  {r.corrected ? '已訂正' : '還沒訂正'}
+                </span>
+              )}
+              <span className={`text-xs font-bold ${r.correct ? 'text-emerald-700' : 'text-amber-700'}`}>
+                {r.correct ? '✓ 第一次就答對' : '✗ 第一次答錯'}
+              </span>
             </span>
           </div>
-          {(r.studentAnswer || r.correctAnswer) && (
+          {r.prompt && <p className="mt-1 text-on-surface">{r.prompt}</p>}
+          {!r.correct && (r.studentAnswer || r.correctAnswer) && (
             <div className="mt-1 space-y-0.5 text-on-surface-variant">
-              {r.studentAnswer && <p>你的答案：{r.studentAnswer}</p>}
-              {!r.correct && r.correctAnswer && <p>正確答案：{r.correctAnswer}</p>}
+              {r.studentAnswer && <p>你第一次選：{r.studentAnswer}</p>}
+              {r.correctAnswer && <p>正確答案：{r.correctAnswer}</p>}
             </div>
           )}
         </li>

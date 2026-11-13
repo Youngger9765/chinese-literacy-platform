@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useMemo } from 'react';
 import { useCurrentStepId } from '../hooks/useCurrentStepId';
 import { storyForStep } from '../services/api';
+import { stepProgressForStep } from './stepProgressForStep';
 import { Outlet, useParams, useNavigate, useOutletContext, useLocation } from 'react-router-dom';
 import type {
   Story,
@@ -366,6 +367,13 @@ const LearningLayout: React.FC = () => {
     [selectedStory, stepKey],
   );
 
+  // 讀的那一半（#4028）：上面補了寫入的輪次，步驟頁讀 `step_data['<base id>']` 時
+  // 也要拿到這一輪的資料，否則離開再回來進度就不見了。見 stepProgressForStep.ts。
+  const stepProgressForThisStep = useMemo(
+    () => stepProgressForStep(stepProgressState, stepKey, selectedStory?.stepSequence),
+    [stepProgressState, stepKey, selectedStory?.stepSequence],
+  );
+
   const ctx: LearningContext = useMemo(
     () => ({
       selectedStory: storyForThisStep,
@@ -402,7 +410,7 @@ const LearningLayout: React.FC = () => {
       assignmentReadingGoals,
       syncProgress,
       flushProgress,
-      stepProgressData: stepProgressState,
+      stepProgressData: stepProgressForThisStep,
       saveStepProgressPatch: saveStepProgressPatchKeyed,
       isAssignmentReadyForSubmit,
       missingAssignmentSteps,
@@ -443,8 +451,8 @@ const LearningLayout: React.FC = () => {
       assignmentReadingGoals,
       syncProgress,
       flushProgress,
-      stepProgressState,
-      saveStepProgressPatch,
+      stepProgressForThisStep,
+      saveStepProgressPatchKeyed,
       isAssignmentReadyForSubmit,
       missingAssignmentSteps,
       firstIncompleteStepPath,
