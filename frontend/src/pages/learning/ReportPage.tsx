@@ -8,7 +8,7 @@ import { reportSessionComplete } from '../../services/gamificationApi';
 import { resolveActiveSteps } from '../../config/stepConfig';
 import StepReportCards from '../../components/report/StepReportCards';
 import { useReportProgress } from '../../components/report/useReportProgress';
-import { buildStepReportCards, marksFromAnnotations } from '../../components/report/reportCardsModel';
+import { buildStepReportCards, marksFromAnnotations, progressOrigin } from '../../components/report/reportCardsModel';
 
 /**
  * 報告頁（#3399）：每一關一張卡片，完成打綠勾，點開看分數與作答。
@@ -58,12 +58,6 @@ const ReportPage: React.FC = () => {
 
   const [xpResult, setXpResult] = useState<XPAwardResult | null>(null);
   const [showXpToast, setShowXpToast] = useState(false);
-
-  // Clear active session from localStorage when report is reached
-  useEffect(() => {
-    if (hasActiveAssignment && !isAssignmentReadyForSubmit) return;
-    handleSessionComplete();
-  }, [handleSessionComplete, hasActiveAssignment, isAssignmentReadyForSubmit]);
 
   // Award XP once we have a confirmed backend session ID
   useEffect(() => {
@@ -126,9 +120,29 @@ const ReportPage: React.FC = () => {
         report.progress?.steps_completed ?? session?.completedSteps,
         report.progress?.step_data,
         report.annotations ? marksFromAnnotations(report.annotations, selectedStory?.content) : null,
+        progressOrigin(report.progress),
       ),
     [selectedStory?.stepSequence, selectedStory?.content, report.progress, report.annotations, session?.completedSteps],
   );
+
+  // Clear active session from localStorage when report is reached.
+  //
+  // #4028：自學時，只有這個 session 真的完成了關卡才標成 completed。以前一打開
+  // 報告頁就標完成（0/10 關也算），下次再進這一課就一定開新 session、再把上次的
+  // 勾整份帶過來（#2889），打勾就這樣一直累積。什麼都沒做時留著 in_progress，
+  // 下次進來沿用同一個 session（#984 dedup）。作業流程照舊：交件條件另外把關。
+  // 要等 DB 進度讀完才判斷；在看「繼承來源那一次」時，代表這次什麼都沒做。
+  const hasProgressThisSession =
+    !report.viewingPrevious && cards.some((c) => c.status === 'this' && c.baseId !== 'lesson-intro');
+  const progressReady = !(report.loading && dbSessionId);
+  useEffect(() => {
+    if (hasActiveAssignment) {
+      if (!isAssignmentReadyForSubmit) return;
+    } else if (!progressReady || !hasProgressThisSession) {
+      return;
+    }
+    handleSessionComplete();
+  }, [handleSessionComplete, hasActiveAssignment, isAssignmentReadyForSubmit, progressReady, hasProgressThisSession]);
 
   const handleDismissToast = useCallback(() => {
     setShowXpToast(false);
@@ -183,6 +197,7 @@ const ReportPage: React.FC = () => {
           storyTitle={selectedStory?.title}
           cards={cards}
           onGoToStep={(stepId) => navigate(stepPath(storyId!, stepId))}
+          previousAttempt={report.viewingPrevious ? { at: report.viewingPrevious.at } : null}
         />
       )}
 

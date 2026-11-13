@@ -5,15 +5,33 @@
  * Mentor：「不用搞很多複雜的 AI 診斷，只需要將完成的部分以區塊的方式顯現」。
  *
  * 資料全部來自 DB（step_progress + annotation_entries），邏輯在 reportCardsModel.ts。
+ *
+ * #4028：回到做過的課時，#2889 會把上次的進度帶過來。卡片分三種：
+ * 這次完成（綠勾）、上次完成（灰藍、標日期，這次還沒做）、未完成。進度條只算這次。
  */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import type { AnswerRow, DetailBlock, MarkedWord, StepReportCard } from './reportCardsModel';
+import type { AnswerRow, CardStatus, DetailBlock, MarkedWord, StepReportCard } from './reportCardsModel';
 
 interface Props {
   storyTitle?: string;
   cards: StepReportCard[];
   /** 未完成的關卡可以直接前往。 */
   onGoToStep?: (stepId: string) => void;
+  /**
+   * #4028：這次什麼都還沒做，頁面改顯示繼承來源那一次的成果時給這個。
+   * 標題會標明是哪一次，進度條改成「那次完成」，免得被當成這次做的。
+   */
+  previousAttempt?: { at: string | null } | null;
+}
+
+/** ISO → 「11/13 14:05」（台灣時間）。 */
+function dateTime(iso: string | null | undefined): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  return new Intl.DateTimeFormat('zh-TW', {
+    timeZone: 'Asia/Taipei', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false,
+  }).format(d);
 }
 
 const MARK_STYLE: Record<MarkedWord['type'], { icon: string; label: string; chip: string }> = {
@@ -21,13 +39,47 @@ const MARK_STYLE: Record<MarkedWord['type'], { icon: string; label: string; chip
   important: { icon: '💛', label: '重要', chip: 'bg-yellow-100 text-yellow-900 border-yellow-300' },
 };
 
-const CheckBadge: React.FC<{ done: boolean }> = ({ done }) =>
-  done ? (
+/** ISO → 「11/10」（台灣時間）；解析不了就回 null。 */
+export function shortDate(iso: string | null | undefined): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  return new Intl.DateTimeFormat('zh-TW', { timeZone: 'Asia/Taipei', month: 'numeric', day: 'numeric' }).format(d);
+}
+
+/**
+ * 「這次完成」的字樣。整頁在看最近一次（不是這次）的成果時改成「已完成」，
+ * 不然標題寫「那次完成」、卡片寫「這次完成」，自相矛盾（#4028）。
+ */
+const doneLabel = (viewingPrevious: boolean) => (viewingPrevious ? '已完成' : '這次完成');
+
+/** 卡片上那一行狀態文字。 */
+function statusText(card: StepReportCard, viewingPrevious: boolean): string {
+  if (card.status === 'this') return card.summary ?? doneLabel(viewingPrevious);
+  if (card.status === 'previous') {
+    const d = shortDate(card.previousAt);
+    return d ? `上次完成 · ${d}` : '上次完成';
+  }
+  return '未完成';
+}
+
+const statusLabel = (status: CardStatus, viewingPrevious: boolean) =>
+  status === 'this' ? doneLabel(viewingPrevious) : status === 'previous' ? '上次完成，這次還沒做' : '未完成';
+
+const CheckBadge: React.FC<{ status: CardStatus; viewingPrevious: boolean }> = ({ status, viewingPrevious }) =>
+  status === 'this' ? (
     <span
       className="flex items-center justify-center w-8 h-8 rounded-full bg-emerald-500 text-white shadow-sm"
-      aria-label="已完成"
+      aria-label={doneLabel(viewingPrevious)}
     >
       <span className="material-symbols-outlined text-xl" aria-hidden="true">check</span>
+    </span>
+  ) : status === 'previous' ? (
+    <span
+      className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-200 text-slate-600"
+      aria-label="上次完成"
+    >
+      <span className="material-symbols-outlined text-lg" aria-hidden="true">history</span>
     </span>
   ) : (
     <span
@@ -133,7 +185,8 @@ const DetailDialog: React.FC<{
   card: StepReportCard;
   onClose: () => void;
   onGoToStep?: (stepId: string) => void;
-}> = ({ card, onClose, onGoToStep }) => {
+  viewingPrevious: boolean;
+}> = ({ card, onClose, onGoToStep, viewingPrevious }) => {
   const closeRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     closeRef.current?.focus();
@@ -175,30 +228,42 @@ const DetailDialog: React.FC<{
 
         <p
           className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-bold ${
-            card.completed ? 'bg-emerald-50 text-emerald-700' : 'bg-surface-container-high text-on-surface-variant'
+            card.status === 'this'
+              ? 'bg-emerald-50 text-emerald-700'
+              : card.status === 'previous'
+                ? 'bg-slate-100 text-slate-700'
+                : 'bg-surface-container-high text-on-surface-variant'
           }`}
         >
           <span className="material-symbols-outlined text-base" aria-hidden="true">
-            {card.completed ? 'check_circle' : 'pending'}
+            {card.status === 'this' ? 'check_circle' : card.status === 'previous' ? 'history' : 'pending'}
           </span>
-          {card.completed ? '已完成' : '還沒完成'}
+          {card.status === 'this'
+            ? doneLabel(viewingPrevious)
+            : card.status === 'previous'
+              ? `上次完成${shortDate(card.previousAt) ? `（${shortDate(card.previousAt)}）` : ''}，這次還沒做`
+              : '還沒完成'}
         </p>
+
+        {card.status === 'previous' && card.details.length > 0 && (
+          <p className="text-xs text-on-surface-variant">以下是上次的成績。</p>
+        )}
 
         {card.details.length > 0 ? (
           card.details.map((b, i) => <Detail key={i} block={b} />)
         ) : (
           <p className="text-sm text-on-surface-variant">
-            {card.completed ? '這一關沒有分數，完成就算過關。' : '完成這一關之後，這裡會顯示你的成績。'}
+            {card.status === 'none' ? '完成這一關之後，這裡會顯示你的成績。' : '這一關沒有分數，完成就算過關。'}
           </p>
         )}
 
-        {!card.completed && onGoToStep && (
+        {card.status !== 'this' && onGoToStep && (
           <button
             type="button"
             onClick={() => onGoToStep(card.stepId)}
             className="w-full h-11 rounded-full bg-accent text-white font-bold hover:bg-accent-hover"
           >
-            前往這一關
+            {card.status === 'previous' ? '再做一次' : '前往這一關'}
           </button>
         )}
       </div>
@@ -206,9 +271,12 @@ const DetailDialog: React.FC<{
   );
 };
 
-const StepReportCards: React.FC<Props> = ({ storyTitle, cards, onGoToStep }) => {
+const StepReportCards: React.FC<Props> = ({ storyTitle, cards, onGoToStep, previousAttempt }) => {
   const [openId, setOpenId] = useState<string | null>(null);
-  const doneCount = cards.filter((c) => c.completed).length;
+  const viewingPrevious = !!previousAttempt;
+  // 進度條只算這一次完成的（#4028）。
+  const doneCount = cards.filter((c) => c.status === 'this').length;
+  const previousCount = cards.filter((c) => c.status === 'previous').length;
   const pct = cards.length ? Math.round((doneCount / cards.length) * 100) : 0;
   const open = cards.find((c) => c.stepId === openId) ?? null;
   const close = useCallback(() => setOpenId(null), []);
@@ -216,7 +284,11 @@ const StepReportCards: React.FC<Props> = ({ storyTitle, cards, onGoToStep }) => 
   return (
     <div className="space-y-6" data-testid="step-report-cards">
       <header className="rounded-3xl bg-surface-container-lowest shadow-editorial p-6">
-        <p className="text-sm text-on-surface-variant">學習成果</p>
+        <p className="text-sm text-on-surface-variant">
+          {previousAttempt
+            ? `最近一次的學習成果${dateTime(previousAttempt.at) ? `（${dateTime(previousAttempt.at)}）` : ''}`
+            : '學習成果'}
+        </p>
         <h2 className="font-headline font-bold text-2xl text-on-surface mt-1">
           {storyTitle ? `《${storyTitle}》` : '這一課'}
         </h2>
@@ -232,9 +304,21 @@ const StepReportCards: React.FC<Props> = ({ storyTitle, cards, onGoToStep }) => 
             <div className="h-full bg-emerald-500 rounded-full transition-all" style={{ width: `${pct}%` }} />
           </div>
           <span className="text-sm font-bold text-on-surface whitespace-nowrap">
-            完成 {doneCount} / {cards.length} 關
+            {previousAttempt ? '那次完成' : '這次完成'} {doneCount} / {cards.length} 關
           </span>
         </div>
+        {previousAttempt && (
+          <p className="mt-2 text-xs text-on-surface-variant" data-testid="step-report-previous-attempt">
+            這一次還沒有完成新的關卡，下面是最近一次的成果。
+          </p>
+        )}
+        {previousCount > 0 && (
+          <p className="mt-2 text-xs text-on-surface-variant" data-testid="step-report-previous-note">
+            {viewingPrevious
+              ? `另有 ${previousCount} 關是更早之前完成的。`
+              : `另有 ${previousCount} 關是上次完成的，這次還沒做。`}
+          </p>
+        )}
       </header>
 
       <ul className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -243,36 +327,39 @@ const StepReportCards: React.FC<Props> = ({ storyTitle, cards, onGoToStep }) => 
             <button
               type="button"
               onClick={() => setOpenId(c.stepId)}
-              aria-label={`${c.label}：${c.completed ? '已完成' : '未完成'}${c.summary ? `，${c.summary}` : ''}。點擊看詳細`}
+              data-status={c.status}
+              aria-label={`${c.label}：${statusLabel(c.status, viewingPrevious)}${c.status === 'this' && c.summary ? `，${c.summary}` : ''}。點擊看詳細`}
               className={`w-full h-full text-left rounded-2xl p-4 flex flex-col gap-3 transition-all active:scale-[0.98] ${
-                c.completed
+                c.status === 'this'
                   ? 'bg-surface-container-lowest border-2 border-emerald-200 shadow-sm hover:shadow-md'
-                  : 'bg-surface-container-low border-2 border-dashed border-outline-variant/60 hover:bg-surface-container'
+                  : c.status === 'previous'
+                    ? 'bg-surface-container-lowest border-2 border-slate-200 hover:shadow-sm'
+                    : 'bg-surface-container-low border-2 border-dashed border-outline-variant/60 hover:bg-surface-container'
               }`}
             >
               <div className="flex items-start justify-between">
                 <span
-                  className={`material-symbols-outlined text-2xl ${c.completed ? 'text-accent' : 'text-on-surface-variant/50'}`}
+                  className={`material-symbols-outlined text-2xl ${
+                    c.status === 'this' ? 'text-accent' : c.status === 'previous' ? 'text-slate-500' : 'text-on-surface-variant/50'
+                  }`}
                   aria-hidden="true"
                 >
                   {c.icon}
                 </span>
-                <CheckBadge done={c.completed} />
+                <CheckBadge status={c.status} viewingPrevious={viewingPrevious} />
               </div>
               <div>
-                <p className={`font-headline font-bold ${c.completed ? 'text-on-surface' : 'text-on-surface-variant'}`}>
+                <p className={`font-headline font-bold ${c.status === 'none' ? 'text-on-surface-variant' : 'text-on-surface'}`}>
                   {c.label}
                 </p>
-                <p className="text-xs mt-0.5 text-on-surface-variant">
-                  {c.completed ? c.summary ?? '已完成' : '未完成'}
-                </p>
+                <p className="text-xs mt-0.5 text-on-surface-variant">{statusText(c, viewingPrevious)}</p>
               </div>
             </button>
           </li>
         ))}
       </ul>
 
-      {open && <DetailDialog card={open} onClose={close} onGoToStep={onGoToStep} />}
+      {open && <DetailDialog card={open} onClose={close} onGoToStep={onGoToStep} viewingPrevious={viewingPrevious} />}
     </div>
   );
 };

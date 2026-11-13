@@ -88,7 +88,7 @@ describe('SessionHistoryReportPage — 學習報告分頁 (#3749)', () => {
 
     // 完成的三關（lesson-intro 因後面有進度而算完成、full-text-annotate、
     // vocab-review）都在，報告步本身不應該出現在卡片清單
-    expect(screen.getByText('完成 3 / 3 關')).toBeInTheDocument();
+    expect(screen.getByText('這次完成 3 / 3 關')).toBeInTheDocument();
   });
 
   it('跟學習流程結束時一樣能點卡片看細節（例如語詞複習找到的詞）', async () => {

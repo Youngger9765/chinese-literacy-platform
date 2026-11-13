@@ -165,7 +165,13 @@ def _sync_metadata(
     """
     progress = session.step_progress or {}
     if not isinstance(progress.get("__meta"), dict) or progress["__meta"].get("assignment_id") != assignment.id:
+        old_meta = progress.get("__meta") if isinstance(progress.get("__meta"), dict) else {}
         progress["__meta"] = {"source": "assignment", "assignment_id": assignment.id}
+        # #4028: a reused self-practice session may hold #2889 carried progress;
+        # keep the record of which ticks were inherited so the report can still
+        # tell them apart from what was done in this session.
+        if isinstance(old_meta.get("carried_from"), dict):
+            progress["__meta"]["carried_from"] = old_meta["carried_from"]
         if skipped_steps:
             progress["skipped_steps"] = skipped_steps
         session.step_progress = progress

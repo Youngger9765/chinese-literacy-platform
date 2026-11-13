@@ -29,4 +29,21 @@ describe('mergeLoadedStepProgress', () => {
     const empty = { current_step: null, steps_completed: [], step_data: {} };
     expect(mergeLoadedStepProgress(empty, olderServer)).toEqual(olderServer);
   });
+
+  // #4028 — "completed in this session" follows the same only-grows rule.
+  it('keeps this-session completions from both sides (#4028)', () => {
+    const merged = mergeLoadedStepProgress(
+      { current_step: null, steps_completed: ['a', 'b'], session_steps_completed: ['b'], step_data: {} },
+      { current_step: null, steps_completed: ['a', 'c'], session_steps_completed: ['c'], step_data: {} },
+    );
+    expect(merged.session_steps_completed?.sort()).toEqual(['b', 'c']);
+  });
+
+  it('does not invent the list for a session that never had it (#4028)', () => {
+    const merged = mergeLoadedStepProgress(
+      { current_step: null, steps_completed: [], step_data: {} },
+      { current_step: null, steps_completed: ['a'], step_data: {} },
+    );
+    expect(merged).not.toHaveProperty('session_steps_completed');
+  });
 });

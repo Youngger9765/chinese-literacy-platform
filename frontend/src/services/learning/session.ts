@@ -521,10 +521,27 @@ export async function fetchMyEnrolledClassrooms(
 // Step Progress persistence (Issue #660)
 // ---------------------------------------------------------------------------
 
+/** #4028 — where #2889 carried-forward progress came from (backend writes it). */
+export interface CarriedFrom {
+  session_id: number;
+  /** ISO time the previous session finished (or was last saved). */
+  at?: string | null;
+  /** The previous session's steps_completed at the moment it was carried over. */
+  steps_completed?: string[];
+}
+
 export interface StepProgressData {
   current_step: string | null;
   steps_completed: string[];
+  /**
+   * #4028 — the subset of steps_completed completed in THIS session, as opposed
+   * to inherited from the previous one by the #2889 carry-forward. Monotonic
+   * union on the backend, like steps_completed. Absent on sessions that predate it.
+   */
+  session_steps_completed?: string[] | null;
   step_data: Record<string, unknown>;
+  /** Backend metadata; read-only on the client (never sent back). */
+  __meta?: { carried_from?: CarriedFrom } & Record<string, unknown>;
   /** Optimistic concurrency version (#1187). Increments with each successful save. */
   version?: number;
   /**
