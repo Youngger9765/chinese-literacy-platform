@@ -12,6 +12,20 @@
  * skips the backend validator, a validator bug, a different write path),
  * the component itself must not hand the browser a <script> tag or an
  * event-handler attribute.
+ *
+ * Fast-follow (not fixed here, scope stayed to the 3 CodeQL alerts):
+ * a critic-agent review of this fix (2026-11-13) found the
+ * `afterSanitizeAttributes` hook in ArtGlyph.tsx only catches the literal
+ * `javascript:` substring — `vbscript:`, `data:text/html`, and tab/control-
+ * char-obfuscated variants still pass through. Low severity for this data
+ * flow (the backend already rejects any `url(` at write time), but if this
+ * hook's coverage is ever relied on more broadly, broaden the scheme list
+ * and strip control characters before matching. The same review also
+ * noted a second, pre-existing `dangerouslySetInnerHTML` site in
+ * `src/components/lesson-content/blocks/ParagraphBlockView.tsx` (renders
+ * zhuyin/ruby markup over curriculum lesson text, not open user input, and
+ * not one of the 3 CodeQL alerts) — worth the same hardening in a separate
+ * PR if it's ever flagged.
  */
 import React from 'react';
 import { describe, it, expect } from 'vitest';

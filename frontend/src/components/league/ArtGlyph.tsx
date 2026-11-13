@@ -25,12 +25,20 @@ import type { LeagueThemeArt } from '../../types/leagueTheme';
 // (fill/stroke/clip-path/mask/filter) are not on that list, so
 // `fill="url(javascript:alert(1))"` on an SVG element survives
 // `DOMPurify.sanitize()` untouched (confirmed by hand: see this module's
-// security self-review, 2026-11-13 — this is a documented class of gap in
-// browser-side SVG sanitizers generically, not specific to this library).
-// This hook closes it on the parsed DOM (not a second string regex pass,
-// which would just reintroduce the parsing-gap problem this file exists
-// to avoid): any attribute whose value contains a `javascript:` scheme is
-// dropped outright, on every element, regardless of attribute name.
+// security self-review, 2026-11-13).
+//
+// This hook closes that ONE specific case — the literal `javascript:`
+// substring, in any attribute, case-insensitive — it is not a general URI-
+// scheme sanitizer. A critic-agent review (2026-11-13) confirmed
+// `vbscript:`, `data:text/html`, and a tab-obfuscated `jav\tascript:` still
+// get through both `sanitize()` and this hook. That residual gap is
+// tracked, not silently accepted: see the fast-follow note in
+// `__tests__/ArtGlyph.test.tsx`. It is low severity for THIS data flow
+// specifically because the backend's `_SVG_DANGEROUS_RE`
+// (backend/app/schemas/story_pack.py) already rejects any `url\s*\(`
+// occurrence outright at write time — this hook only matters if some
+// future write path bypasses that backend validator entirely, which is
+// exactly the scenario this file's defense-in-depth is for.
 // Registered once at module load — DOMPurify hooks are global, not
 // per-call.
 DOMPurify.addHook('afterSanitizeAttributes', (node) => {
