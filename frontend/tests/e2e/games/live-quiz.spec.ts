@@ -20,7 +20,6 @@
  *     the game's classroom has the feature on.
  */
 import { test, expect } from '../fixtures/pageerror-fixture';
-import type { Locator } from '@playwright/test';
 import { getIapProxyAuthHeader } from '../utils/iapAuth';
 import {
   batchCreateStudents,
@@ -35,29 +34,6 @@ import {
 
 const MAX_ROUNDS = 150;
 
-/**
- * #4031 — `Locator.isDisabled()` takes no `timeout` option (it's a Playwright
- * "immediate state" query, not an actionable wait), so unlike every other
- * call in the round loop below it was never bounded. CI traces (4025/4029
- * release-PR runs) show the exact failure: `count()` resolves instantly,
- * then the very next `isDisabled()` on the SAME already-resolved locator
- * never returns an `after` event at all — it is still in flight when the
- * outer `test.setTimeout(300_000)` fires and Playwright cancels it
- * ("Error: locator.isDisabled: Test ended."). Because this call sits before
- * the host's own reveal/next checks in each loop iteration, one stuck call
- * freezes the ENTIRE remaining budget: the host-side `揭曉答案`/`下一題`
- * clicks that already have `{ timeout: 2000 }.catch(() => {})` bounding
- * never get a chance to run again. Race it against a short timeout and
- * treat "didn't answer in time" as disabled — the same "bound + swallow,
- * let the next iteration's fresh count() decide" policy already used for
- * every click below.
- */
-async function isDisabledBounded(locator: Locator): Promise<boolean> {
-  return Promise.race([
-    locator.isDisabled(),
-    new Promise<boolean>((resolve) => setTimeout(() => resolve(true), 2000)),
-  ]).catch(() => true);
-}
 
 test.describe('課堂搶答 live_quiz', () => {
   test('teacher hosts, two enrolled students join via the real keypad and reach the lobby', async ({ page, browser, request }) => {
@@ -184,9 +160,10 @@ test.describe('課堂搶答 live_quiz', () => {
           const btn = group.getByRole('button').first();
           // The answer window can close between the check and the click; the
           // options then unmount and an unbounded click would hang the test.
-          // #4031: `isDisabled()` itself has no bound (see isDisabledBounded
-          // above) — check it through the race wrapper, not the raw call.
-          if (await btn.count() && !(await isDisabledBounded(btn))) await btn.click({ timeout: 2000 }).catch(() => {});
+          // #4031: isDisabled() defaults to timeout 0 = wait forever; on a slow
+          // staging round it never returned and ate the whole test budget.
+          // Bound it like the click and treat "no answer in time" as disabled.
+          if (await btn.count() && !(await btn.isDisabled({ timeout: 2000 }).catch(() => true))) await btn.click({ timeout: 2000 }).catch(() => {});
         }
       }
       // Same race as the student-button fix above (#3710/#3735), on the
