@@ -30,6 +30,7 @@ let reportState: Record<string, unknown>;
 vi.mock('../../../components/report/useReportProgress', () => ({ useReportProgress: () => reportState }));
 
 import ReportPage from '../ReportPage';
+import { resolveActiveSteps } from '../../../config/stepConfig';
 
 const renderPage = () =>
   render(
@@ -72,12 +73,33 @@ describe('ReportPage marks a self-practice session completed only when something
     expect(handleSessionComplete).not.toHaveBeenCalled();
   });
 
-  it('a session where a step was completed this time is completed', async () => {
+  // 手測踩到的（本機 session 29 → 30）：做兩關、看報告、回去做第三關，就被切成新
+  // session，剛做的全部變「上次完成」。只做了一部分不能標 completed。
+  it('a session with only some steps done this time stays in progress', async () => {
     reportState = { loading: false, annotations: [], viewingPrevious: null,
       progress: { steps_completed: ['comprehension', 'spotlight'], session_steps_completed: ['spotlight'],
         step_data: {}, __meta: { carried_from: carried } } };
     renderPage();
+    await screen.findByRole('progressbar');
+    expect(handleSessionComplete).not.toHaveBeenCalled();
+  });
+
+  it('a session where every step was done this time is completed', async () => {
+    const all = resolveActiveSteps(null).map((s) => s.id).filter((id) => id !== 'lesson-intro' && id !== 'report');
+    reportState = { loading: false, annotations: [], viewingPrevious: null,
+      progress: { steps_completed: all, session_steps_completed: all, step_data: {} } };
+    renderPage();
     await waitFor(() => expect(handleSessionComplete).toHaveBeenCalled());
+  });
+
+  it('every step done, but some only last time, is not this round finished', async () => {
+    const all = resolveActiveSteps(null).map((s) => s.id).filter((id) => id !== 'lesson-intro' && id !== 'report');
+    reportState = { loading: false, annotations: [], viewingPrevious: null,
+      progress: { steps_completed: all, session_steps_completed: all.slice(1), step_data: {},
+        __meta: { carried_from: { ...carried, steps_completed: [all[0]] } } } };
+    renderPage();
+    await screen.findByRole('progressbar');
+    expect(handleSessionComplete).not.toHaveBeenCalled();
   });
 
   it('assignment flow is unchanged: completes once ready even with nothing new this session', async () => {

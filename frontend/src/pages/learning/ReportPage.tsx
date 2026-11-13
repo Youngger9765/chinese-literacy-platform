@@ -131,22 +131,30 @@ const ReportPage: React.FC = () => {
 
   // Clear active session from localStorage when report is reached.
   //
-  // #4028：自學時，只有這個 session 真的完成了關卡才標成 completed。以前一打開
-  // 報告頁就標完成（0/10 關也算），下次再進這一課就一定開新 session、再把上次的
-  // 勾整份帶過來（#2889），打勾就這樣一直累積。什麼都沒做時留著 in_progress，
-  // 下次進來沿用同一個 session（#984 dedup）。作業流程照舊：交件條件另外把關。
-  // 要等 DB 進度讀完才判斷；在看「繼承來源那一次」時，代表這次什麼都沒做。
-  const hasProgressThisSession =
-    !report.viewingPrevious && cards.some((c) => c.status === 'this' && c.baseId !== 'lesson-intro');
+  // #4028：自學時，只有「這一次把整課每一關都做完」才把 session 標成 completed。
+  //
+  // 一開始的版本是「這次有完成任何一關就標」—— 本機手測馬上踩到：做兩關、看一下
+  // 報告、回去做第三關，就被切成新 session（completed 的不會被 #984 沿用），剛做的
+  // 兩關全部變成「上次完成」，5 分鐘內切出 3 個 session。標成 completed 的意思是
+  // 「這一輪結束了」，只有整課做完才是。沒做完就留著 in_progress，下次進來（或回去
+  // 做下一關）沿用同一個 session，做過的關卡一直是這一次的。
+  //
+  // 「每一關」= 報告卡片上除了課程簡介以外的每一張（報告本身不在卡片裡），跟作業的
+  // 必做關卡同一個範圍（filterRequiredAssignmentSteps 也排除 lesson-intro / report）。
+  // 作業流程照舊：交件條件另外把關。要等 DB 進度讀完才判斷；在看「繼承來源那一次」
+  // 時代表這次什麼都沒做。
+  const requiredCards = cards.filter((c) => c.baseId !== 'lesson-intro');
+  const finishedThisSession =
+    !report.viewingPrevious && requiredCards.length > 0 && requiredCards.every((c) => c.status === 'this');
   const progressReady = !(report.loading && dbSessionId);
   useEffect(() => {
     if (hasActiveAssignment) {
       if (!isAssignmentReadyForSubmit) return;
-    } else if (!progressReady || !hasProgressThisSession) {
+    } else if (!progressReady || !finishedThisSession) {
       return;
     }
     handleSessionComplete();
-  }, [handleSessionComplete, hasActiveAssignment, isAssignmentReadyForSubmit, progressReady, hasProgressThisSession]);
+  }, [handleSessionComplete, hasActiveAssignment, isAssignmentReadyForSubmit, progressReady, finishedThisSession]);
 
   const handleDismissToast = useCallback(() => {
     setShowXpToast(false);
