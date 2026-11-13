@@ -82,9 +82,48 @@ export async function apiLogin(request: APIRequestContext, email: string, passwo
  * creating a classroom's school with an `organization_id` set, which is a
  * prerequisite for the league's same-org invite check (league_service.py
  * `_require_same_org`). Everything else (features, students, invites,
- * gameplay) runs under the teacher/student's own token. */
+ * gameplay) runs under the teacher/student's own token.
+ *
+ * Cached at module scope (Issue #4045's E2E-flakiness item): every call
+ * used to log in as `admin@test.com` fresh. That account's login hits
+ * the backend's PER-ACCOUNT rate limit (`login:acct:{key}`,
+ * `max_requests=10` per 60s window -- app/routes/auth.py), shared
+ * across every caller of this helper (currently only
+ * games/league-season.spec.ts imports adminToken()) in the SAME
+ * Playwright worker process -- this suite runs with `workers: 1`, so
+ * one process serially runs ~40 files over ~30min. Note:
+ * demo-path.spec.ts and full-qa.spec.ts also log in as
+ * `admin@test.com`, but via their own independent `request.post(...)`
+ * calls, NOT through this function -- they compete for the same
+ * account-level 60s/10-request budget but this cache does not cover
+ * their contribution to it. Two production CI failures on
+ * `games/league-season.spec.ts` (2026-11-12, runs 43243534002 and
+ * 43243563888) were exactly this: `login failed for admin@test.com: 429
+ * Too many requests`, each from this function's own 2nd/3rd call within
+ * a single test (createOrgLinkedSchool + createClassroomForTeacher x2).
+ * The admin JWT is valid for 8 hours (jwt_expire_minutes=480,
+ * config.py) -- far longer than any single test's `test.setTimeout` --
+ * so reusing one token for the whole worker process is safe. This is a
+ * deterministic reduction in redundant logins, not a retry-on-429: it
+ * removes the repeated work that was tripping the limiter in the first
+ * place.
+ */
+let _cachedAdminToken: Promise<string> | null = null;
 export async function adminToken(request: APIRequestContext): Promise<string> {
-  return apiLogin(request, 'admin@test.com', 'admin1234');
+  if (_cachedAdminToken === null) {
+    _cachedAdminToken = apiLogin(request, 'admin@test.com', 'admin1234').catch((err) => {
+      _cachedAdminToken = null; // don't cache a failed login -- let the next call retry
+      throw err;
+    });
+  }
+  return _cachedAdminToken;
+}
+
+/** Test-only: clear the module-scope cache between unit tests. Not used
+ * by any real spec -- Playwright gives each worker a fresh module
+ * instance, so production code never needs to reset this. */
+export function __resetAdminTokenCacheForTests(): void {
+  _cachedAdminToken = null;
 }
 
 export async function firstOrganizationId(request: APIRequestContext, token: string): Promise<string> {
