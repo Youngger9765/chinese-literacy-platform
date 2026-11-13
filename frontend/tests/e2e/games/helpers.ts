@@ -14,6 +14,7 @@
  * `test_seed_service.py`'s `_DEMO_EMAIL_DOMAIN`).
  */
 import type { APIRequestContext, Page } from '@playwright/test';
+import { randomInt } from 'node:crypto';
 
 export const BACKEND = process.env.E2E_BACKEND_URL
   || 'https://lingoleap-backend-staging-958347263320.asia-east1.run.app';
@@ -24,8 +25,18 @@ export const BACKEND = process.env.E2E_BACKEND_URL
 // validator rejects outright — this must be a real, non-reserved TLD.
 const QA_DOMAIN = 'qa-game-e2e.lingoleap.dev';
 
+// CodeQL js/insecure-randomness (alerts #64/#65, 2026-11-13): this feeds
+// `randomPassword()` below, which is a "security context" by CodeQL's
+// definition even though these are disposable QA fixtures on staging
+// (see module docstring). `Math.random()` is not reachable-but-harmless
+// here — this code runs in every spec that calls registerTeacher/
+// loginViaUI — so it's fixed outright rather than dismissed: Node's
+// `crypto.randomInt` is the CSPRNG-backed equivalent of
+// `Math.floor(Math.random() * 1000)` (same [0, 1000) integer range, same
+// digit-string shape once concatenated), and this file only ever runs
+// under Node (Playwright test runner), never in a browser.
 export function uniqueTag(): string {
-  return `${Date.now()}${Math.floor(Math.random() * 1000)}`;
+  return `${Date.now()}${randomInt(0, 1000)}`;
 }
 
 function randomPassword(): string {
