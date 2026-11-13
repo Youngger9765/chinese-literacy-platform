@@ -204,3 +204,16 @@ describe('shared Sidebar mobile nav uses Junyi colors in teacher views', () => {
     expect(rule![1]).not.toMatch(/#19A696\b/);
   });
 });
+
+// #4026: translucent teal hovers / gradient stops wash small teal or white
+// text below 4.5:1 (hover:bg-[#19A696]/70 under text-[#11806F] ~2.25:1;
+// to-[#11806F]/80 under white text ~3.4:1). Use solid tints instead.
+describe('teacher views avoid translucent teal fills under small text (#4026)', () => {
+  const TRANSLUCENT_TEAL = /hover:bg-\[#(19A696|11806F)\]\/([2-9]\d)|(to|from|via)-\[#(19A696|11806F)\]\/\d+/i; // pale /5–/10 tints are fine
+  const files = [...TEACHER_ONLY_DIRS.flatMap(listTsxFiles), ...TEACHER_ONLY_FILES];
+  it.each(files)('%s has no translucent teal fill', (relPath) => {
+    const lines = fs.readFileSync(path.join(SRC_ROOT, relPath), 'utf-8').split('\n');
+    const hits = lines.flatMap((l, i) => (TRANSLUCENT_TEAL.test(l) ? [`  line ${i + 1}: ${l.trim().slice(0, 100)}`] : []));
+    expect(hits, `${relPath}:\n${hits.join('\n')}`).toEqual([]);
+  });
+});
