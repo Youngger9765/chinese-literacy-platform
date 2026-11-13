@@ -128,7 +128,7 @@ const JunyiClassImportSection: React.FC<JunyiClassImportSectionProps> = ({
             <label className="flex items-center gap-2 flex-1 cursor-pointer">
               <input
                 type="checkbox"
-                className="h-4 w-4 rounded border-gray-300 text-accent focus:ring-accent"
+                className="h-4 w-4 rounded border-gray-300 text-[#19A696] focus:ring-[#19A696]"
                 disabled={cls.already_imported}
                 checked={selected.has(cls.junyi_class_id)}
                 onChange={() => toggle(cls.junyi_class_id)}
@@ -153,7 +153,7 @@ const JunyiClassImportSection: React.FC<JunyiClassImportSectionProps> = ({
         type="button"
         onClick={handleImport}
         disabled={selected.size === 0 || importing}
-        className="bg-accent hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-white px-5 py-2 rounded-lg font-medium text-sm transition-colors"
+        className="bg-[#11806F] hover:bg-[#0E7366] disabled:opacity-50 disabled:cursor-not-allowed text-white px-5 py-2 rounded-lg font-medium text-sm transition-colors"
       >
         {importing ? '匯入中...' : '匯入'}
       </button>

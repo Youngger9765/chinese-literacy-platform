@@ -454,7 +454,7 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack, 
         <button
           type="button"
           onClick={() => setActiveTab('assignments')}
-          className="h-11 px-6 rounded-lg bg-[#19A696] hover:bg-[#15897B] text-white text-base font-medium transition-colors cursor-pointer"
+          className="h-11 px-6 rounded-lg bg-[#11806F] hover:bg-[#0E7366] text-white text-base font-medium transition-colors cursor-pointer"
         >
           指派任務
         </button>
@@ -501,7 +501,7 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack, 
               <div className="flex flex-wrap items-center gap-2 text-sm">
                 <span className="text-gray-700 whitespace-nowrap">
                   班級代碼：
-                  <span className="font-mono font-bold tracking-wider text-accent select-all">
+                  <span className="font-mono font-bold tracking-wider text-gray-900 select-all">
                     {classroom.join_code ?? '—'}
                   </span>
                 </span>

@@ -74,7 +74,7 @@ const ClassListSidebar: React.FC<ClassListSidebarProps> = ({ currentId, onSwitch
         <button
           type="button"
           onClick={() => navigate('/teacher', { state: { intent: 'create' } })}
-          className="w-full inline-flex items-center justify-center gap-1.5 h-11 rounded-lg bg-[#19A696] hover:bg-[#15897B] text-white text-base font-medium transition-colors cursor-pointer"
+          className="w-full inline-flex items-center justify-center gap-1.5 h-11 rounded-lg bg-[#11806F] hover:bg-[#0E7366] text-white text-base font-medium transition-colors cursor-pointer"
         >
           <span aria-hidden="true" className="text-lg leading-none">＋</span>
           建立班級

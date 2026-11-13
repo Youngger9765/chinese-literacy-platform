@@ -70,7 +70,7 @@ const StudentPreviewPage: React.FC = () => {
         <button
           type="button"
           onClick={() => navigate('/teacher-home')}
-          className="mt-4 text-accent underline"
+          className="mt-4 text-[#11806F] underline"
         >
           回教師首頁
         </button>
@@ -105,7 +105,7 @@ const StudentPreviewPage: React.FC = () => {
       {loading && (
         <div className="rounded-xl border border-gray-200 bg-white p-6">
           <div className="flex items-center justify-center py-8">
-            <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+            <div className="w-6 h-6 border-2 border-[#19A696] border-t-transparent rounded-full animate-spin" />
           </div>
         </div>
       )}
@@ -131,7 +131,7 @@ const StudentPreviewPage: React.FC = () => {
                   className="flex flex-col gap-2 rounded-xl border border-gray-200 p-4"
                 >
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="rounded-full bg-accent px-2 py-0.5 text-xs font-medium text-white">
+                    <span className="rounded-full bg-[#11806F] px-2 py-0.5 text-xs font-medium text-white">
                       {gradeLabel(String(rec.grade))}
                     </span>
                     <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">

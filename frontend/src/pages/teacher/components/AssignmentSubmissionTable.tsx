@@ -37,7 +37,7 @@ function AnswerRecordLink({ studentId, sessionId }: { studentId: number; session
   return (
     <Link
       to={`/teacher/students/${studentId}/sessions/${sessionId}/report`}
-      className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border border-accent/30 text-accent text-xs hover:bg-accent-bg transition-colors whitespace-nowrap"
+      className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border border-[#19A696]/30 text-[#11806F] text-xs hover:bg-[#19A696]/10 transition-colors whitespace-nowrap"
       title="查看這位學生目前答過的內容"
     >
       作答紀錄
@@ -110,7 +110,7 @@ function MarkCompleteAction({
         <button
           onClick={handleConfirm}
           disabled={saving}
-          className="px-1.5 py-0.5 rounded bg-accent text-white text-[11px] font-medium hover:bg-accent-hover disabled:opacity-50 cursor-pointer transition-colors"
+          className="px-1.5 py-0.5 rounded bg-[#11806F] text-white text-[11px] font-medium hover:bg-[#0E7366] disabled:opacity-50 cursor-pointer transition-colors"
         >
           {saving ? '...' : '確定標記'}
         </button>
@@ -296,7 +296,7 @@ const AssignmentSubmissionTable: React.FC<Props> = ({
               <button
                 onClick={() => onSaveGrade(sub)}
                 disabled={savingId === sub.id}
-                className="px-2 py-0.5 rounded bg-accent text-white text-xs font-medium hover:bg-accent-hover disabled:opacity-50 cursor-pointer transition-colors"
+                className="px-2 py-0.5 rounded bg-[#11806F] text-white text-xs font-medium hover:bg-[#0E7366] disabled:opacity-50 cursor-pointer transition-colors"
               >
                 {savingId === sub.id ? '...' : '儲存'}
               </button>
@@ -348,7 +348,7 @@ const AssignmentSubmissionTable: React.FC<Props> = ({
               onChange={(e) =>
                 setGradeInput((prev) => ({ ...prev, [sub.id]: e.target.value }))
               }
-              className="w-20 h-7 px-2 rounded border border-gray-300 text-center text-sm text-gray-900 bg-white focus:outline-none focus:border-accent"
+              className="w-20 h-7 px-2 rounded border border-gray-300 text-center text-sm text-gray-900 bg-white focus:outline-none focus:border-[#19A696]"
               placeholder="0-100"
             />
           ) : (
@@ -390,7 +390,7 @@ const AssignmentSubmissionTable: React.FC<Props> = ({
             }
             placeholder="輸入個別評語（選填）"
             rows={2}
-            className="w-full mt-1 px-2 py-1.5 rounded border border-gray-300 text-xs text-gray-900 bg-white placeholder-gray-400 focus:outline-none focus:border-accent resize-none"
+            className="w-full mt-1 px-2 py-1.5 rounded border border-gray-300 text-xs text-gray-900 bg-white placeholder-gray-400 focus:outline-none focus:border-[#19A696] resize-none"
           />
         </div>
       ) : sub.teacher_feedback ? (
@@ -481,7 +481,7 @@ const AssignmentSubmissionTable: React.FC<Props> = ({
                   onChange={(e) =>
                     setGradeInput((prev) => ({ ...prev, [latest.id]: e.target.value }))
                   }
-                  className="w-16 h-6 px-1.5 rounded border border-gray-300 text-center text-xs focus:outline-none focus:border-accent"
+                  className="w-16 h-6 px-1.5 rounded border border-gray-300 text-center text-xs focus:outline-none focus:border-[#19A696]"
                   placeholder="0-100"
                 />
               ) : latest.score != null ? (
@@ -514,7 +514,7 @@ const AssignmentSubmissionTable: React.FC<Props> = ({
                   }
                   placeholder="輸入個別評語（選填）"
                   rows={2}
-                  className="w-full px-1.5 py-1 rounded border border-gray-300 text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:border-accent resize-none"
+                  className="w-full px-1.5 py-1 rounded border border-gray-300 text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#19A696] resize-none"
                 />
               ) : latest.teacher_feedback ? (
                 <span className="text-gray-600 line-clamp-2" title={latest.teacher_feedback}>
@@ -530,7 +530,7 @@ const AssignmentSubmissionTable: React.FC<Props> = ({
                   <button
                     onClick={() => onSaveGrade(latestAsSub)}
                     disabled={savingId === latest.id}
-                    className="px-2 py-0.5 rounded bg-accent text-white text-xs font-medium hover:bg-accent-hover disabled:opacity-50 cursor-pointer transition-colors"
+                    className="px-2 py-0.5 rounded bg-[#11806F] text-white text-xs font-medium hover:bg-[#0E7366] disabled:opacity-50 cursor-pointer transition-colors"
                   >
                     {savingId === latest.id ? '...' : '儲存'}
                   </button>
@@ -623,7 +623,7 @@ const AssignmentSubmissionTable: React.FC<Props> = ({
                     [sub.id]: e.target.value,
                   }))
                 }
-                className="w-16 h-6 px-1.5 rounded border border-gray-300 text-center text-xs focus:outline-none focus:border-accent"
+                className="w-16 h-6 px-1.5 rounded border border-gray-300 text-center text-xs focus:outline-none focus:border-[#19A696]"
                 placeholder="0-100"
               />
             ) : sub.score != null ? (
@@ -659,7 +659,7 @@ const AssignmentSubmissionTable: React.FC<Props> = ({
                 }
                 placeholder="輸入個別評語（選填）"
                 rows={2}
-                className="w-full px-1.5 py-1 rounded border border-gray-300 text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:border-accent resize-none"
+                className="w-full px-1.5 py-1 rounded border border-gray-300 text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#19A696] resize-none"
               />
             ) : sub.teacher_feedback ? (
               <span className="text-gray-600 line-clamp-2" title={sub.teacher_feedback}>
@@ -675,7 +675,7 @@ const AssignmentSubmissionTable: React.FC<Props> = ({
                 <button
                   onClick={() => onSaveGrade(sub)}
                   disabled={savingId === sub.id}
-                  className="px-2 py-0.5 rounded bg-accent text-white text-xs font-medium hover:bg-accent-hover disabled:opacity-50 cursor-pointer transition-colors"
+                  className="px-2 py-0.5 rounded bg-[#11806F] text-white text-xs font-medium hover:bg-[#0E7366] disabled:opacity-50 cursor-pointer transition-colors"
                 >
                   {savingId === sub.id ? '...' : '儲存'}
                 </button>

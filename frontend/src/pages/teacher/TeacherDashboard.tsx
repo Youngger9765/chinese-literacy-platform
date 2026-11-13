@@ -287,7 +287,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
                 button itself hadn't been switched yet. */}
             <button
               onClick={() => setShowCreateForm(true)}
-              className="bg-[#19A696] hover:bg-[#15897B] text-white px-5 py-2.5 rounded-lg font-medium text-sm transition-colors whitespace-nowrap"
+              className="bg-[#11806F] hover:bg-[#0E7366] text-white px-5 py-2.5 rounded-lg font-medium text-sm transition-colors whitespace-nowrap"
             >
               建立班級
             </button>
@@ -324,13 +324,13 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="搜尋班級名稱..."
-                className="w-full h-10 pl-9 pr-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+                className="w-full h-10 pl-9 pr-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-[#19A696]/40 focus:border-[#19A696] transition-colors"
               />
             </div>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as 'name' | 'grade' | 'students')}
-              className="h-10 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+              className="h-10 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#19A696]/40 focus:border-[#19A696] transition-colors"
             >
               <option value="name">依名稱排序</option>
               <option value="grade">依年級排序</option>
@@ -375,7 +375,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
                     placeholder="例：五年甲班"
                     required
                     autoFocus
-                    className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-base focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+                    className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-base focus:outline-none focus:ring-2 focus:ring-[#19A696]/40 focus:border-[#19A696] transition-colors"
                   />
                 </div>
                 <div>
@@ -386,7 +386,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
                     id="classroom-grade"
                     value={newGrade}
                     onChange={(e) => setNewGrade(e.target.value)}
-                    className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white text-base focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+                    className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white text-base focus:outline-none focus:ring-2 focus:ring-[#19A696]/40 focus:border-[#19A696] transition-colors"
                   >
                     <option value="">未指定</option>
                     <optgroup label="國小">
@@ -470,9 +470,9 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
                     <p className="text-base font-semibold text-gray-800">幫學生建立帳號與密碼</p>
                     <p className="text-sm text-gray-600">
                       格式為{' '}
-                      <span className="text-[#19A696] font-medium">英文＋數字</span>
+                      <span className="text-[#11806F] font-medium">英文＋數字</span>
                       ，帳號建議以「學校縮寫＋學年度＋班級」命名，密碼則
-                      <span className="text-[#19A696] font-medium">先由老師自行幫學生設定</span>
+                      <span className="text-[#11806F] font-medium">先由老師自行幫學生設定</span>
                       。輸入班上所需要的帳號數量，即可創建多位學生帳號
                     </p>
                     <div className="flex flex-wrap gap-4">
@@ -486,7 +486,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
                           aria-label="帳號前綴"
                           value={accountPrefix}
                           onChange={(e) => setAccountPrefix(e.target.value.trim())}
-                          className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white text-base focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
+                          className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white text-base focus:outline-none focus:ring-2 focus:ring-[#19A696]/40 focus:border-[#19A696]"
                         />
                         <p className={`mt-1 text-xs ${getPrefixValidation(accountPrefix).valid ? 'text-gray-500' : 'text-red-600'}`}>
                           {getPrefixValidation(accountPrefix).valid
@@ -504,7 +504,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
                           aria-label="共用密碼"
                           value={sharedPassword}
                           onChange={(e) => setSharedPassword(e.target.value.trim())}
-                          className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white text-base focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
+                          className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white text-base focus:outline-none focus:ring-2 focus:ring-[#19A696]/40 focus:border-[#19A696]"
                         />
                         <p className={`mt-1 text-xs ${getSharedPasswordValidation(sharedPassword).valid ? 'text-gray-500' : 'text-red-600'}`}>
                           {getSharedPasswordValidation(sharedPassword).msg || '可輸入自訂密碼'}
@@ -523,7 +523,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
                           value={accountCount}
                           onChange={(e) => setAccountCount(e.target.value)}
                           placeholder="例：28"
-                          className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-base focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
+                          className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-base focus:outline-none focus:ring-2 focus:ring-[#19A696]/40 focus:border-[#19A696]"
                         />
                         <p className={`mt-1 text-xs ${
                           accountCount.trim() === '' || getAccountCountValidation(parseInt(accountCount, 10)).valid
@@ -588,7 +588,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
                       onChange={(e) => setRosterText(e.target.value)}
                       rows={5}
                       placeholder={'1 王小明\n2 林雨萱\n3 陳柏宇'}
-                      className="w-full px-3 py-2 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-base focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
+                      className="w-full px-3 py-2 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-base focus:outline-none focus:ring-2 focus:ring-[#19A696]/40 focus:border-[#19A696]"
                     />
                     <button
                       type="button"
@@ -640,7 +640,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
                       <button
                         type="submit"
                         disabled={isCreating || !newName.trim() || prefixFormInvalid}
-                        className="h-11 bg-[#19A696] hover:bg-[#15897B] disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 rounded-lg font-medium text-base transition-colors"
+                        className="h-11 bg-[#11806F] hover:bg-[#0E7366] disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 rounded-lg font-medium text-base transition-colors"
                       >
                         {isCreating
                           ? '建立中...'
@@ -709,7 +709,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
                   className="bg-white rounded-2xl shadow-card p-5 text-left hover:shadow-md transition-all group cursor-pointer"
                 >
                   <div className="flex items-start justify-between mb-3">
-                    <h3 className="font-bold text-gray-900 group-hover:text-accent transition-colors">
+                    <h3 className="font-bold text-gray-900 group-hover:text-[#11806F] transition-colors">
                       {cr.name}
                     </h3>
                     <div className="flex gap-1 flex-wrap justify-end">
@@ -744,7 +744,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
             {/* Issue #3992: same teal as the header's 建立班級 button above --
                 this empty state is the same action, just a second entry point. */}
             <div className="inline-flex items-center justify-center w-16 h-16 bg-[#19A696]/10 rounded-2xl mb-4">
-              <svg className="w-8 h-8 text-[#19A696]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-8 h-8 text-[#11806F]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
               </svg>
             </div>
@@ -752,7 +752,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
             <p className="text-sm text-gray-500 mb-4">建立你的第一個班級，開始管理學生</p>
             <button
               onClick={() => setShowCreateForm(true)}
-              className="bg-[#19A696] hover:bg-[#15897B] text-white px-5 py-2.5 rounded-lg font-medium text-sm transition-colors"
+              className="bg-[#11806F] hover:bg-[#0E7366] text-white px-5 py-2.5 rounded-lg font-medium text-sm transition-colors"
             >
               建立班級
             </button>

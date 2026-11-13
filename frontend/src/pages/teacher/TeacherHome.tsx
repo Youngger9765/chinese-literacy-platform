@@ -120,7 +120,7 @@ const ClassroomListPreview: React.FC<ClassroomListPreviewProps> = ({ classrooms,
             type="button"
             onClick={() => onSelect(classroom.id)}
             aria-label={`前往 ${classroom.name}，共 ${classroom.student_count} 位學生`}
-            className="w-full flex items-center justify-between gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 text-left"
+            className="w-full flex items-center justify-between gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#19A696] focus-visible:ring-offset-1 text-left"
           >
             <div className="flex items-center gap-3">
               <span className="text-2xl" aria-hidden="true">🏫</span>
@@ -214,7 +214,7 @@ const TeacherHome: React.FC = () => {
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
           <div className="flex items-center gap-4">
             <div
-              className="w-14 h-14 rounded-full bg-accent flex items-center justify-center shrink-0"
+              className="w-14 h-14 rounded-full bg-[#19A696] flex items-center justify-center shrink-0"
               aria-hidden="true"
             >
               <span className="text-white text-2xl font-bold">
@@ -277,7 +277,7 @@ const TeacherHome: React.FC = () => {
                 aria-label={`${action.label}：${action.description}`}
                 className={`
                   flex items-center gap-4 p-4 rounded-xl border text-left transition-colors
-                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2
+                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#19A696] focus-visible:ring-offset-2
                   ${action.colorClass}
                 `}
               >
@@ -303,7 +303,7 @@ const TeacherHome: React.FC = () => {
             <button
               type="button"
               onClick={() => navigate('/teacher')}
-              className="text-sm text-accent hover:text-accent-hover font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 rounded"
+              className="text-sm text-[#11806F] hover:text-[#0E7366] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#19A696] focus-visible:ring-offset-1 rounded"
             >
               查看全部 →
             </button>

@@ -106,15 +106,19 @@ const LeagueProgressTab: React.FC<LeagueProgressTabProps> = ({ classroomId }) =>
       )}
 
       {boardRow && (
-        <div className="rounded-2xl bg-gradient-to-br from-accent to-accent/80 p-4 shadow-sm">
+        <div className="rounded-2xl bg-gradient-to-br from-[#11806F] to-[#11806F]/80 p-4 shadow-sm">
           <EnergyBar
             label="班級平均"
             points={boardRow.average_points}
             threshold={boardRow.badge_threshold}
             badgeEarned={boardRow.team_badge_earned}
-            tone="accent"
+            tone="teacher"
           />
-          <p className="mt-2 text-[11px] text-white/80">
+          {/* #WCAG-AA: text-white/80 on #19A696 measured 3.6:1 (fails small-text
+              4.5:1) even after the container moved to the darker #11806F — the
+              80%-opacity white erodes contrast back down. Full-opacity white
+              on #11806F clears 4.5:1 (per #11806F's own 4.84:1 vs white). */}
+          <p className="mt-2 text-[11px] text-white">
             {chestHintText(chestName, boardRow.treasure_chest_eligible, boardRow.treasure_chest_participants_needed)}
           </p>
         </div>

@@ -119,7 +119,7 @@ function AssignmentDrilldown({
         <ul>
           {matrix.students.map((s) => (
             <li key={s.id} className="flex items-center justify-between px-4 py-2.5 border-b border-gray-100 last:border-b-0">
-              <button type="button" onClick={() => setStudentId(s.id)} className="text-gray-900 hover:text-accent hover:underline cursor-pointer">
+              <button type="button" onClick={() => setStudentId(s.id)} className="text-gray-900 hover:text-[#11806F] hover:underline cursor-pointer">
                 {s.name}
               </button>
               <CellBadge cell={cells.find((c) => c.student_id === s.id)} overdue={isOverdue(assignment?.due_date ?? null)} />
@@ -181,7 +181,7 @@ const AssignmentsPanel: React.FC<AssignmentsPanelProps> = ({ classroomId, select
           <button
             type="button"
             onClick={handleCreateClick}
-            className="inline-flex items-center gap-2 h-11 px-5 rounded-lg bg-[#4990E2] hover:bg-[#2F7FD1] text-white text-base font-semibold transition-colors cursor-pointer"
+            className="inline-flex items-center gap-2 h-11 px-5 rounded-lg bg-[#2A73C2] hover:bg-[#2668B0] text-white text-base font-semibold transition-colors cursor-pointer"
           >
             建立任務
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">

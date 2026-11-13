@@ -126,7 +126,7 @@ const TeacherAssignmentsPage: React.FC = () => {
             <button
               type="button"
               onClick={() => navigate('/teacher')}
-              className="mt-2 text-accent hover:underline cursor-pointer"
+              className="mt-2 text-[#11806F] hover:underline cursor-pointer"
             >
               前往班級管理
             </button>
@@ -146,7 +146,7 @@ const TeacherAssignmentsPage: React.FC = () => {
             <select
               value={selectedId ?? ''}
               onChange={(e) => handleSelectClassroom(Number(e.target.value))}
-              className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-accent/40"
+              className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#19A696]/40"
             >
               {classrooms.map((c) => (
                 <option key={c.id} value={c.id}>

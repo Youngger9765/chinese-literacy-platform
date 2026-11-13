@@ -506,7 +506,7 @@ const EditableSeatCell: React.FC<{
           type="button"
           onClick={startEdit}
           aria-label={`編輯 ${studentName} 的座號`}
-          className="text-gray-300 hover:text-[#19A696] transition-colors cursor-pointer text-xs"
+          className="text-gray-300 hover:text-[#11806F] transition-colors cursor-pointer text-xs"
         >
           ✎
         </button>
@@ -694,13 +694,13 @@ const StudentListTab: React.FC<StudentListTabProps> = ({
                     setAddStudentError('');
                   }}
                   placeholder="輸入學生編號"
-                  className="w-full h-10 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+                  className="w-full h-10 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-[#19A696]/40 focus:border-[#19A696] transition-colors"
                 />
               </div>
               <button
                 type="submit"
                 disabled={isAddingStudent || !studentIdInput.trim()}
-                className="h-10 bg-accent hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 rounded-lg font-medium text-sm transition-colors shrink-0"
+                className="h-10 bg-[#11806F] hover:bg-[#0E7366] disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 rounded-lg font-medium text-sm transition-colors shrink-0"
               >
                 {isAddingStudent ? '新增中...' : '新增'}
               </button>
@@ -732,7 +732,7 @@ const StudentListTab: React.FC<StudentListTabProps> = ({
           <button
             type="button"
             onClick={onOpenAddStudents}
-            className="h-11 px-6 rounded-lg bg-accent hover:bg-accent-hover text-white text-base font-medium cursor-pointer"
+            className="h-11 px-6 rounded-lg bg-[#11806F] hover:bg-[#0E7366] text-white text-base font-medium cursor-pointer"
           >
             ＋ 新增學生
           </button>

@@ -153,7 +153,7 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId, onChanged, o
                 completionPct === 100
                   ? 'bg-green-100 text-green-700'
                   : completionPct > 0
-                    ? 'bg-accent-bg text-accent'
+                    ? 'bg-[#19A696]/10 text-[#11806F]'
                     : 'bg-gray-100 text-gray-500'
               }`}
             >
@@ -196,7 +196,7 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId, onChanged, o
               <div className="flex items-center gap-0.5 justify-center">
                 <button
                   onClick={() => handleOpenEdit(assignment)}
-                  className="p-1 rounded text-gray-400 hover:text-accent hover:bg-accent-bg transition-colors cursor-pointer"
+                  className="p-1 rounded text-gray-400 hover:text-[#11806F] hover:bg-[#19A696]/10 transition-colors cursor-pointer"
                   title="編輯任務"
                   aria-label="編輯任務"
                 >
@@ -290,7 +290,10 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId, onChanged, o
         {!showCreateForm && (
           <button
             onClick={handleOpenCreateForm}
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-accent hover:bg-accent-hover text-white text-sm font-medium transition-colors cursor-pointer"
+            /* Issue #4005: same Junyi blue (#4990E2) as the top-level 建立任務
+               button in AssignmentsPanel.tsx (#3989) — this nested one opens
+               the identical create-task flow, not the app's indigo accent. */
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#2A73C2] hover:bg-[#2668B0] text-white text-sm font-medium transition-colors cursor-pointer"
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.5v15m7.5-7.5h-15" />
@@ -341,9 +344,11 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId, onChanged, o
             <button
               key={tab.key}
               onClick={() => setStatusFilter(tab.key)}
+              /* Issue #4005: Junyi teal (#19A696), not the app's indigo
+                 accent — this is a status filter, not an assign CTA. */
               className={`px-3 py-1.5 rounded-t-lg text-xs font-medium transition-colors cursor-pointer border-b-2 -mb-px ${
                 statusFilter === tab.key
-                  ? 'border-accent text-accent bg-accent-bg'
+                  ? 'border-[#19A696] text-[#11806F] bg-[#19A696]/10'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
               }`}
             >
@@ -352,7 +357,7 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId, onChanged, o
                 <span
                   className={`ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full text-xs ${
                     statusFilter === tab.key
-                      ? 'bg-accent text-white'
+                      ? 'bg-[#11806F] text-white'
                       : 'bg-gray-200 text-gray-600'
                   }`}
                 >
@@ -368,8 +373,8 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId, onChanged, o
         <div className="p-8 text-center">
           {assignments.length === 0 ? (
             <>
-              <div className="inline-flex items-center justify-center w-12 h-12 bg-accent-bg rounded-xl mb-3">
-                <svg className="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="inline-flex items-center justify-center w-12 h-12 bg-[#19A696]/10 rounded-xl mb-3">
+                <svg className="w-6 h-6 text-[#11806F]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"

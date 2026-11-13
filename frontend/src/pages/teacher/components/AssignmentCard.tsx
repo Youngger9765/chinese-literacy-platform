@@ -122,7 +122,7 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({
                   completionPct === 100
                     ? 'bg-green-100 text-green-700'
                     : completionPct > 0
-                      ? 'bg-accent-bg text-accent'
+                      ? 'bg-[#19A696]/10 text-[#11806F]'
                       : 'bg-gray-100 text-gray-500'
                 }`}
               >
@@ -156,7 +156,7 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({
                   event.stopPropagation();
                   onEdit(assignment);
                 }}
-                className="p-1.5 rounded text-gray-400 hover:text-accent hover:bg-accent-bg transition-colors cursor-pointer"
+                className="p-1.5 rounded text-gray-400 hover:text-[#11806F] hover:bg-[#19A696]/10 transition-colors cursor-pointer"
                 title="編輯任務"
                 aria-label="編輯任務"
               >

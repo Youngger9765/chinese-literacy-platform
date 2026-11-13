@@ -107,7 +107,7 @@ const MobileTabBar: React.FC<MobileTabBarProps> = ({
             className={`
               flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors
               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent
-              ${isActive(pathname, item.path) ? 'text-accent' : 'text-gray-500'}
+              ${isActive(pathname, item.path) ? 'text-accent teacher-nav-active-text' : 'text-gray-500'}
             `}
           >
             <span className="text-xl relative" aria-hidden="true">
@@ -171,7 +171,7 @@ const MobileTabBar: React.FC<MobileTabBarProps> = ({
                         flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors
                         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent
                         ${v === activeView
-                          ? 'bg-accent text-white'
+                          ? 'bg-accent text-white teacher-nav-active-solid'
                           : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                         }
                       `}
@@ -202,7 +202,7 @@ const MobileTabBar: React.FC<MobileTabBarProps> = ({
                       flex flex-col items-center gap-1 p-3 rounded-xl text-sm font-medium transition-colors
                       focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent
                       ${isActive(pathname, item.path)
-                        ? 'bg-accent-bg text-accent'
+                        ? 'bg-accent-bg text-accent teacher-nav-active-soft'
                         : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
                       }
                     `}

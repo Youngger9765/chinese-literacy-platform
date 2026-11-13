@@ -31,10 +31,28 @@
 
 /* Junyi parity: the sidebar logo tile and user avatar were the last two
    LingoLeap-purple (bg-accent) elements left in the teacher workspace.
-   Scoped to .font-teacher-ui so student/admin views keep the purple brand. */
+   Scoped to .font-teacher-ui so student/admin views keep the purple brand.
+   #WCAG-AA (teacher-small-text-contrast): both usages (Sidebar.tsx's "L"
+   logo mark and the user-avatar initial) render white text at text-sm
+   (14px, non-bold) on top of this background, so the full-strength
+   #19A696 (3.03:1 vs white) fails WCAG AA's 4.5:1 small-text minimum.
+   Moved to the small-text shade #11806F (4.84:1). */
 .font-teacher-ui .teacher-brand-mark {
-  background-color: #19A696;
+  background-color: #11806F;
 }
+
+/* Mobile bottom nav / drawer (Sidebar.tsx is shared by every role): the
+   active item is the last LingoLeap-purple element left in teacher views
+   at phone width. Recolor only under .font-teacher-ui.
+   #WCAG-AA (teacher-small-text-contrast): all three are small text
+   (10px bottom-nav label / 14px drawer items), so the full-strength
+   #19A696 (3.03:1) fails WCAG AA 4.5:1 — moved to the small-text shade
+   #11806F (4.84:1). -soft's #E8F6F4 tint background is unaffected (only
+   its teal TEXT needed darkening; the tint itself isn't the object of
+   rule 1, which is about solid/white-on-color backgrounds). */
+.font-teacher-ui .teacher-nav-active-text { color: #11806F; }
+.font-teacher-ui .teacher-nav-active-solid { background-color: #11806F; color: #fff; }
+.font-teacher-ui .teacher-nav-active-soft { background-color: #E8F6F4; color: #11806F; }
 
 /* When zhuyin is active, force BpmfZihiSerif (字嗨宋體) as the primary font on
    ALL elements inside the learning shell. This overrides Tailwind font-family

@@ -16,13 +16,19 @@ interface EnergyBarProps {
   badgeEarned: boolean;
   /** 'accent' (purple, used for the inviting/left team or an individual)
    * or 'tertiary' (warm orange, used for the invited/right team) — the
-   * two existing system colors, not a new palette (PRD §12.2 decision #2). */
-  tone?: 'accent' | 'tertiary';
+   * two existing system colors, not a new palette (PRD §12.2 decision #2).
+   * 'teacher' (issue #4005) is additive: Junyi teal (#19A696) for the
+   * teacher-only single-classroom summary in LeagueProgressTab.tsx, which
+   * only ever renders one bar (no left/right comparison), so it doesn't
+   * collide with the accent/tertiary pairing used elsewhere (e.g.
+   * BattleHero.tsx, student LearningHistoryPage.tsx — both untouched). */
+  tone?: 'accent' | 'tertiary' | 'teacher';
 }
 
 const TONE_GRADIENT: Record<NonNullable<EnergyBarProps['tone']>, string> = {
   accent: 'from-accent-light to-white',
   tertiary: 'from-tertiary-container to-white',
+  teacher: 'from-[#19A696]/60 to-white',
 };
 
 const EnergyBar: React.FC<EnergyBarProps> = ({
