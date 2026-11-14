@@ -15,12 +15,12 @@ router-level `dependencies=[require_role("system_admin")]`. See
 tests/test_admin_story_packs_authz.py for the lowest-privilege-negative +
 positive-control pattern.
 
-⚠️ Persistence: see story_pack_store.py's module docstring (2026-10-16 —
-Young approved the migration). Custom pack content and per-season
-assignment are durable (`story_packs` table, `league_seasons.
-story_pack_key` FK) and shared across Cloud Run replicas; only the
-platform-wide active-default pointer remains process-local (narrower scope
-than Young's approval covered — see that docstring).
+Persistence: see story_pack_store.py's module docstring. Custom pack
+content, per-season assignment (`story_packs` table, `league_seasons.
+story_pack_key` FK), AND the platform-wide active-default pointer
+(`story_packs.is_active_default`, migration f6g7actvpack1_*.py, issue
+#4052) are all durable and shared across Cloud Run replicas — nothing in
+this router is process-local anymore.
 """
 from __future__ import annotations
 

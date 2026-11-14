@@ -233,6 +233,24 @@ class TestSystemAdminPositiveControl:
         assert rows[season_id]["name"] == "跨班邀請賽：三年甲班 vs 五年乙班"
         assert rows[season_id]["story_pack_key"] is None
 
+    def test_seasons_route_hits_the_seasons_list_not_the_key_catch_all(self, make_client):
+        """Route-order regression lock: `/{key}` (a single-segment catch-
+        all, get_pack) is registered in this file BEFORE `/seasons` — if
+        `/seasons` were ever accidentally moved after it (or a future
+        route inserted between them), FastAPI/Starlette would match
+        `/{key}` first and this request would 404 with "劇情包「seasons」
+        不存在" instead of returning the seasons list. Asserting a JSON
+        LIST (not a 404, and not a dict shaped like a single pack) with
+        zero seasons in the DB is the cheapest possible proof the right
+        route handled it — the "has real data" test above also happens to
+        prove this today, but would only fail with a confusing assertion
+        error buried in a bigger test; this one fails loudly and exactly
+        on the thing that matters if route order ever regresses."""
+        client = make_client("system_admin")
+        r = client.get("/api/admin/story-packs/seasons")
+        assert r.status_code == 200, r.text
+        assert r.json() == []
+
 
 
 class TestUpsertRejectionCarriesFieldErrors:
