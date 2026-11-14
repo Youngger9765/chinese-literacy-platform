@@ -83,22 +83,32 @@ const GuidedStepsInput: React.FC<Props> = ({
   // step.answer; free_text uses the offline local rubric (its original AI grade isn't
   // persisted). Runs ONCE — never re-locks a step the student is actively editing.
   const restoredRef = useRef(false);
+  // A value the STUDENT just typed/picked is not restored progress. Without this flag the
+  // first pick on a fresh lesson flipped `value` from {} to {0: …}, this effect took it for
+  // saved progress, and graded the step on the spot — the 確認 button vanished before the
+  // student could press it, and a wrong first guess was locked in as 「再想想看」.
+  const localEditRef = useRef(false);
   useEffect(() => {
     if (restoredRef.current) return;
     if (Object.keys(value).length === 0) return; // nothing restored YET — retry when it arrives
     restoredRef.current = true;
+    if (localEditRef.current) return; // the student's own first answer — nothing to restore
     const fb: Record<number, boolean | null> = {};
     const gr: Record<number, StrategyGradeResult> = {};
     steps.forEach((step, i) => {
       const v = value[i];
       if (v == null) return;
-      if (step.type === 'select' && typeof v === 'number') {
+      if (step.noCorrectAnswer && (typeof v === 'number' || (Array.isArray(v) && v.length > 0))) {
+        fb[i] = true;
+      } else if (step.type === 'select' && typeof v === 'number') {
         fb[i] = v === step.answer;
       } else if (step.type === 'multi_select' && Array.isArray(v)) {
         fb[i] = setEqualIndices(v as number[], step.answer);
       } else if (step.type === 'free_text' && typeof v === 'string' && v.trim()) {
         const ok = gradeRubricLocal(v, step.referenceAnswer);
-        gr[i] = { ...FALLBACK_GRADE, is_correct: ok, feedback: ok ? '答對了' : '再想想看' };
+        gr[i] = step.noCorrectAnswer
+          ? { ...FALLBACK_GRADE, is_correct: true, feedback: '已記錄你的想法' }
+          : { ...FALLBACK_GRADE, is_correct: ok, feedback: ok ? '答對了' : '再想想看' };
         fb[i] = true;
       }
     });
@@ -124,7 +134,10 @@ const GuidedStepsInput: React.FC<Props> = ({
   }, [steps]);
 
   const setStepValue = useCallback(
-    (i: number, v: unknown) => onChange({ ...value, [i]: v }),
+    (i: number, v: unknown) => {
+      localEditRef.current = true;
+      onChange({ ...value, [i]: v });
+    },
     [onChange, value],
   );
 
@@ -147,20 +160,28 @@ const GuidedStepsInput: React.FC<Props> = ({
     const step = steps[i];
     const picked = value[i];
     if (typeof picked !== 'number') return;
-    setFeedback((prev) => ({ ...prev, [i]: picked === step.answer }));
+    // 沒有標準答案：選了就算完成，不比對（step.answer 本來就是 null）
+    setFeedback((prev) => ({ ...prev, [i]: step.noCorrectAnswer ? true : picked === step.answer }));
   };
 
   const submitMultiSelect = (i: number) => {
     const step = steps[i];
     const picked = value[i];
     if (!Array.isArray(picked) || picked.length === 0) return;
-    setFeedback((prev) => ({ ...prev, [i]: setEqualIndices(picked, step.answer) }));
+    setFeedback((prev) => ({ ...prev, [i]: step.noCorrectAnswer ? true : setEqualIndices(picked, step.answer) }));
   };
 
   const submitFreeText = async (i: number) => {
     const step = steps[i];
     const text = String(value[i] ?? '').trim();
     if (!text) return;
+
+    if (step.noCorrectAnswer) {
+      // 寫的是自己的想法／經驗 —— 不送 AI 判分（它會拿課文去比，判出「不正確」）
+      setGrades((prev) => ({ ...prev, [i]: { ...FALLBACK_GRADE, is_correct: true, feedback: '已記錄你的想法' } }));
+      setFeedback((prev) => ({ ...prev, [i]: true }));
+      return;
+    }
 
     if (!token) {
       const localCorrect = gradeRubricLocal(text, step.referenceAnswer);
@@ -237,6 +258,20 @@ const GuidedStepsInput: React.FC<Props> = ({
               >
                 確認
               </button>
+            ) : step.noCorrectAnswer ? (
+              <div
+                className="rounded-lg bg-slate-50 border border-slate-200 px-4 py-2.5 flex items-center gap-3"
+                data-testid="step-recorded"
+              >
+                <p className="text-base font-medium text-slate-700">已記錄你的選擇</p>
+                <button
+                  type="button"
+                  onClick={() => retryStep(i)}
+                  className="text-sm font-medium text-violet-700 underline underline-offset-2 cursor-pointer"
+                >
+                  修改
+                </button>
+              </div>
             ) : fb === false ? (
               <div className="rounded-lg bg-amber-50 border border-amber-200 px-4 py-2.5 flex items-center gap-3">
                 <p className="text-base font-medium text-amber-800">再想想看</p>
@@ -298,6 +333,20 @@ const GuidedStepsInput: React.FC<Props> = ({
               >
                 確認
               </button>
+            ) : step.noCorrectAnswer ? (
+              <div
+                className="rounded-lg bg-slate-50 border border-slate-200 px-4 py-2.5 flex items-center gap-3"
+                data-testid="step-recorded"
+              >
+                <p className="text-base font-medium text-slate-700">已記錄你的選擇</p>
+                <button
+                  type="button"
+                  onClick={() => retryStep(i)}
+                  className="text-sm font-medium text-violet-700 underline underline-offset-2 cursor-pointer"
+                >
+                  修改
+                </button>
+              </div>
             ) : fb === false ? (
               <div className="rounded-lg bg-amber-50 border border-amber-200 px-4 py-2.5 flex items-center gap-3">
                 <p className="text-base font-medium text-amber-800">再想想看</p>

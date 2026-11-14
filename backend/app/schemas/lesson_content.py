@@ -213,6 +213,10 @@ class GuidedStep(BaseModel):
     # so a worked example is self-contained inside the spotlight rather than relying on
     # the lesson's 課文. Presentation-only; never carries the answer.
     context: Optional[str] = None
+    # 「沒有標準答案」：學生選／寫的是自己的狀況（自我覺察、個人經驗、自我檢核、規劃、分流）。
+    # 作答即完成、不判對錯。語料 83 題、26 課；以前這種題只能二選一：answer=None 會被判
+    # 「再想想看」，needs_review 會掛「此題內容可能與本課不符」—— 兩個都是錯的訊息。
+    no_correct_answer: bool = False
 
     @field_validator("answer", mode="before")
     @classmethod
@@ -255,6 +259,8 @@ class GuidedStep(BaseModel):
                     for i in self.answer
                 ):
                     raise ValueError("multi_select step answer index out of range")
+        if self.no_correct_answer and self.answer is not None:
+            raise ValueError("a no_correct_answer step must not carry an answer")
         if self.type == "free_text" and self.answer is not None:
             raise ValueError(
                 "free_text step answer must be None (reference_answer holds the model answer)"
@@ -387,6 +393,102 @@ class KeypointsTableQuestion(BaseModel):
         return self
 
 
+class TableSlot(BaseModel):
+    """One answer spot inside a table_exercise: a single pick, a multi pick, or a written
+    fill. ``answer``: choice → 0-based index, multi_choice → list of indices, text → the
+    reference fill (None = an open answer with no reference; graded as done once written).
+    ``no_correct_answer`` (自我覺察／個人經驗…) → answering completes it, no verdict."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    id: str = Field(..., min_length=1)
+    type: Literal["choice", "multi_choice", "text"]
+    options: list[str] = Field(default_factory=list)
+    answer: Union[int, list[int], str, None] = None
+    no_correct_answer: bool = False
+
+    @field_validator("answer", mode="before")
+    @classmethod
+    def _reject_bool(cls, v: object) -> object:
+        if isinstance(v, bool) or (isinstance(v, list) and any(isinstance(i, bool) for i in v)):
+            raise ValueError("table slot answer must be an index / list of indices / text, not a bool")
+        return v
+
+    @model_validator(mode="after")
+    def _check_slot(self) -> "TableSlot":
+        if self.no_correct_answer and self.answer is not None:
+            raise ValueError(f"table slot '{self.id}' is no_correct_answer but carries an answer")
+        if self.type in ("choice", "multi_choice"):
+            if len(self.options) < 2:
+                raise ValueError(f"table slot '{self.id}' needs >= 2 options")
+            if self.answer is None and not self.no_correct_answer:
+                raise ValueError(f"table slot '{self.id}' has no answer and is not no_correct_answer")
+        if self.type == "choice" and self.answer is not None:
+            if not isinstance(self.answer, int) or not (0 <= self.answer < len(self.options)):
+                raise ValueError(f"table slot '{self.id}' choice answer out of range")
+        if self.type == "multi_choice" and self.answer is not None:
+            a = self.answer
+            if not isinstance(a, list) or not a or len(set(a)) != len(a) or any(
+                not isinstance(i, int) or not (0 <= i < len(self.options)) for i in a
+            ):
+                raise ValueError(f"table slot '{self.id}' multi_choice answer must be distinct in-range indices")
+        if self.type == "text" and self.answer is not None and not isinstance(self.answer, str):
+            raise ValueError(f"table slot '{self.id}' text answer must be a string")
+        return self
+
+
+class TableExerciseCell(BaseModel):
+    """A cell of a table_exercise. ``text`` is what is printed; ``slots`` are the answer
+    spots drawn in this cell (a text slot fills the cell's empty 【　】 marks in order).
+    ``matrix_option`` makes the cell ONE option of a choice slot — the 「在正確的格子裡打勾」
+    grid, where the options are the column headers."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    text: str = ""
+    slots: list[str] = Field(default_factory=list)
+    matrix_option: Optional[int] = Field(default=None, ge=0)
+
+
+class TableExerciseQuestion(BaseModel):
+    """表格作答：學習單上「在表格裡勾選／填寫」的整張表。格子照原稿畫，作答位就地作答、
+    逐格判分 —— 不是一張不能點的表加上底下另列的題目。wrapping ExerciseBlock:
+    answer = {slot_id: answer}, answer_space=free_text, grader=rubric_ai (text slots are
+    compared leniently)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    kind: Literal["table_exercise"] = "table_exercise"
+    instruction: str = Field(..., min_length=1)
+    headers: list[str] = Field(default_factory=list)
+    rows: list[list[TableExerciseCell]] = Field(..., min_length=1)
+    slots: list[TableSlot] = Field(..., min_length=1)
+
+    @model_validator(mode="after")
+    def _check_refs(self) -> "TableExerciseQuestion":
+        ids = [s.id for s in self.slots]
+        if len(ids) != len(set(ids)):
+            raise ValueError("table_exercise slot ids must be unique")
+        by_id = {s.id: s for s in self.slots}
+        used: set[str] = set()
+        for row in self.rows:
+            for cell in row:
+                for sid in cell.slots:
+                    if sid not in by_id:
+                        raise ValueError(f"table_exercise cell references unknown slot '{sid}'")
+                    used.add(sid)
+                if cell.matrix_option is not None:
+                    if len(cell.slots) != 1:
+                        raise ValueError("a matrix_option cell must reference exactly one slot")
+                    slot = by_id[cell.slots[0]]
+                    if slot.type == "text" or cell.matrix_option >= len(slot.options):
+                        raise ValueError(f"matrix_option out of range for slot '{slot.id}'")
+        unused = set(ids) - used
+        if unused:
+            raise ValueError(f"table_exercise slots never drawn: {sorted(unused)}")
+        return self
+
+
 Question = Annotated[
     Union[
         MultipleChoiceQuestion,
@@ -396,6 +498,7 @@ Question = Annotated[
         GuidedStepsQuestion,
         GraphicTextIntegrationQuestion,
         KeypointsTableQuestion,
+        TableExerciseQuestion,
         CustomQuestion,
     ],
     Field(discriminator="kind"),
@@ -549,6 +652,44 @@ class ParallelPassageBlock(BaseModel):
     notes: list[str] = Field(default_factory=list)
 
 
+class GenericPart(BaseModel):
+    """One piece of a `generic` block: a heading, a paragraph of text, a read-only option
+    list, or a table. Nesting in the source is flattened, with ``depth`` kept for indent."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    kind: Literal["heading", "text", "options", "table"]
+    text: Optional[str] = None
+    items: list[str] = Field(default_factory=list)
+    headers: list[str] = Field(default_factory=list)
+    rows: list[list[str]] = Field(default_factory=list)
+    depth: int = Field(default=0, ge=0)
+
+    @model_validator(mode="after")
+    def _check_part(self) -> "GenericPart":
+        if self.kind in ("heading", "text") and not (self.text or "").strip():
+            raise ValueError(f"generic {self.kind} part needs text")
+        if self.kind == "options" and not self.items:
+            raise ValueError("generic options part needs items")
+        if self.kind == "table" and not (self.rows or self.headers):
+            raise ValueError("generic table part needs rows or headers")
+        return self
+
+
+class GenericBlock(BaseModel):
+    """通用只讀 block：轉換器認不得、或契約還表達不了的原稿內容，照原稿順序拆成
+    標題／文字／選項／表格畫出來。**只讀、不判分、永遠不帶答案**（答案欄、教師版註記、
+    示範答案都不會進來）。它是「學生至少看得到完整內容」的底線，不是最終形態 ——
+    `reason` 記下為什麼落到這裡，讓人知道哪些還要補成真的題目。"""
+
+    model_config = ConfigDict(extra="forbid")
+
+    id: str = Field(..., min_length=1)
+    type: Literal["generic"] = "generic"
+    reason: Optional[str] = None
+    parts: list[GenericPart] = Field(..., min_length=1)
+
+
 class ExerciseBlock(BaseModel):
     """A single exercise. THIS is where the answer-verifiability invariant lives so
     it can never be bypassed — not by any question type, not even by ``custom``."""
@@ -621,7 +762,7 @@ class ExerciseBlock(BaseModel):
 
 
 Block = Annotated[
-    Union[ParagraphBlock, FigureBlock, TableBlock, ParallelPassageBlock, ExerciseBlock],
+    Union[ParagraphBlock, FigureBlock, TableBlock, ParallelPassageBlock, GenericBlock, ExerciseBlock],
     Field(discriminator="type"),
 ]
 
@@ -682,6 +823,9 @@ __all__ = [
     "KeypointBlank",
     "KeypointRow",
     "KeypointsTableQuestion",
+    "TableSlot",
+    "TableExerciseCell",
+    "TableExerciseQuestion",
     "CustomQuestion",
     "Question",
     "ParagraphBlock",
@@ -690,6 +834,8 @@ __all__ = [
     "TableBlock",
     "ParallelRow",
     "ParallelPassageBlock",
+    "GenericPart",
+    "GenericBlock",
     "ExerciseBlock",
     "Block",
     "Lesson",
