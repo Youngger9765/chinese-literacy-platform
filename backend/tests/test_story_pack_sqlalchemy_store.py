@@ -21,6 +21,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 import pytest
 from sqlalchemy import create_engine, event
+from sqlalchemy import update as sa_update
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
@@ -80,19 +82,6 @@ def db():
         yield s
     finally:
         s.close()
-
-
-@pytest.fixture(autouse=True)
-def _reset_active_key():
-    """`get_active_key`/`set_active_key` are process-local module state (see
-    story_pack_store.py docstring) — reset between tests so they don't
-    bleed, same concern InMemoryStoryPackStore's tests already had to
-    handle via constructing a fresh instance per test."""
-    import app.services.story_pack_store as store_mod
-
-    store_mod._active_key_state["key"] = None
-    yield
-    store_mod._active_key_state["key"] = None
 
 
 def _make_user(db) -> User:
@@ -246,6 +235,12 @@ class TestSeasonAssignment:
 
 
 class TestActiveKeyPointer:
+    """Issue #4052: the platform-wide "active default" pointer used to live
+    ONLY in a process-local module dict (`_active_key_state`) — fixed by
+    migration f6g7actvpack1_*.py (`story_packs.is_active_default` + a
+    partial unique index). These tests exercise the real column, not the
+    old in-memory fallback (which no longer exists in this module at all)."""
+
     def test_defaults_to_none(self, db):
         store = SqlAlchemyStoryPackStore(db)
         assert store.get_active_key() is None
@@ -255,12 +250,31 @@ class TestActiveKeyPointer:
         store.set_active_key(SONG_PACK_KEY)
         assert store.get_active_key() == SONG_PACK_KEY
 
-    def test_shared_across_store_instances_same_process(self, db):
-        """Documents the deliberate scope: unlike pack content and season
-        assignment, the active-key pointer is process-local, not per
-        Session/request — see SqlAlchemyStoryPackStore's class docstring."""
-        SqlAlchemyStoryPackStore(db).set_active_key(TANG_PACK_KEY)
-        assert SqlAlchemyStoryPackStore(db).get_active_key() == TANG_PACK_KEY
+    def test_set_active_key_none_clears_it(self, db):
+        store = SqlAlchemyStoryPackStore(db)
+        store.set_active_key(SONG_PACK_KEY)
+        store.set_active_key(None)
+        assert store.get_active_key() is None
+
+    def test_setting_a_new_default_unsets_the_previous_one(self, db):
+        """The partial unique index (`ix_story_packs_single_active_default`)
+        allows at most one TRUE row — this proves set_active_key's
+        clear-then-set actually clears, not just that the index would
+        reject a second TRUE (that's test_only_one_row_can_be_active_* in
+        TestSingleActiveDefaultInvariant below)."""
+        store = SqlAlchemyStoryPackStore(db)
+        store.set_active_key(SONG_PACK_KEY)
+        store.set_active_key(TANG_PACK_KEY)
+
+        assert store.get_active_key() == TANG_PACK_KEY
+        song_row = db.query(StoryPackRow).filter(StoryPackRow.key == SONG_PACK_KEY).one()
+        assert song_row.is_active_default is False
+
+    def test_set_active_key_missing_key_raises_404(self, db):
+        store = SqlAlchemyStoryPackStore(db)
+        with pytest.raises(StoryPackStoreError) as exc:
+            store.set_active_key("does-not-exist")
+        assert exc.value.status_code == 404
 
     def test_delete_custom_clears_active_key_if_it_pointed_there(self, db):
         store = SqlAlchemyStoryPackStore(db)
@@ -268,6 +282,73 @@ class TestActiveKeyPointer:
         store.set_active_key("ming-voyage")
         store.delete_custom("ming-voyage")
         assert store.get_active_key() is None
+
+    def test_independent_sessions_see_the_same_default_after_one_sets_it(self, db):
+        """This is the issue's acceptance test: "a backend test proving two
+        independent sessions/app instances read the same default after one
+        sets it". `db` (store1's session) and `db2` (store2's, opened and
+        closed independently, never sharing a session or a transaction)
+        stand in for two separate Cloud Run replicas — the real production
+        topology this bug hit (staging up to 8 replicas, prod up to 12).
+
+        This exact test, run against the OLD process-local
+        `_active_key_state` dict implementation, was NOT red in a single
+        pytest process — a bare "two store instances, same process" test
+        passes even with the bug, because both instances share the same
+        Python module memory (that's what the now-removed
+        `test_shared_across_store_instances_same_process` documented). The
+        bug only manifests across OS process boundaries, which a single
+        pytest process cannot literally fork. To make this test meaningful
+        against the historical bug, it was verified by hand (see the PR
+        description's red/green evidence) against a modified old
+        implementation that reset `_active_key_state` between the two
+        sessions, simulating "a fresh replica with no shared memory" — that
+        variant returned None (red). Against the real column (this test,
+        as committed), persistence lives in Postgres/SQLite itself, so two
+        truly independent sessions agree regardless of process boundaries."""
+        store1 = SqlAlchemyStoryPackStore(db)
+        store1.set_active_key(TANG_PACK_KEY)
+
+        db2 = Session()
+        try:
+            store2 = SqlAlchemyStoryPackStore(db2)
+            assert store2.get_active_key() == TANG_PACK_KEY
+        finally:
+            db2.close()
+
+
+class TestSingleActiveDefaultInvariant:
+    """The partial unique index (`ix_story_packs_single_active_default`,
+    migration f6g7actvpack1_*.py) is a DB-level guarantee, not just
+    application discipline in `set_active_key` — these tests go around
+    the store entirely and hit the table directly to prove the index
+    itself (not just well-behaved application code) enforces it."""
+
+    def test_two_rows_cannot_both_be_marked_active_default(self, db):
+        db.execute(
+            sa_update(StoryPackRow)
+            .where(StoryPackRow.key == TANG_PACK_KEY)
+            .values(is_active_default=True)
+        )
+        db.commit()
+        # SQLite raises at statement-execution time (not deferred to
+        # commit) for an immediate UNIQUE index — wrap the execute() call
+        # itself, not just the commit.
+        with pytest.raises(IntegrityError):
+            db.execute(
+                sa_update(StoryPackRow)
+                .where(StoryPackRow.key == SONG_PACK_KEY)
+                .values(is_active_default=True)
+            )
+        db.rollback()
+
+    def test_multiple_false_rows_are_fine(self, db):
+        """Negative control for the test above — the partial index only
+        covers TRUE rows (`WHERE is_active_default`), so this must NOT
+        raise; if it did, the index would be mis-specified as a full
+        (non-partial) unique index instead."""
+        db.execute(sa_update(StoryPackRow).values(is_active_default=False))
+        db.commit()  # every builtin row is now False — must not raise
 
 
 class TestFallbackChain:

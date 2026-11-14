@@ -379,10 +379,7 @@ const StoryPackStudioPage: React.FC = () => {
 
               {selectedKey && (
                 <>
-                  <p className="mt-3 text-xs text-amber-600">
-                    ⚠️「設為平台預設」目前只存在單一伺服器記憶體中（未寫入資料庫），正式站有多台伺服器時可能要等該伺服器重新啟動才會讓所有學生看到同一個預設劇情包。要讓某個賽季的劇情包立即且穩定生效，請改用下方「指派給此賽季」——那一項已完整存入資料庫。
-                  </p>
-                  <div className="mt-2 flex items-center gap-2">
+                  <div className="mt-3 flex items-center gap-2">
                     {/* Issue #4052: a dropdown over the real seasons —
                         previously a bare number input the admin had to
                         hand-type an ID into with no way to discover what
