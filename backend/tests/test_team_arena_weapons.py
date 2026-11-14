@@ -139,7 +139,16 @@ class TestHintExcludesWorksheetSectionLabels:
         a longer real sentence under the existing scoring (tier 0 beats
         tier 0 by length, and a 5-char whole clause already clears
         MIN_CLAUSE_CHARS). A denylisted heading must be skipped as a
-        candidate entirely, not just lose on a tie-break."""
+        candidate entirely, not just lose on a tie-break.
+
+        Confirmed real, not hypothetical: 173/175 lessons' zhuyin.json
+        carry "文章重點表" as its own standalone text entry (a manifest
+        section name swept into the same table as real passage text), and
+        replaying this exact scan+rank logic without the fix across every
+        real hint the question bank can produce (24,050) found 90 of them
+        (0.37%) would literally have returned this heading — every one on
+        character 重 with reading ㄓㄨㄥˋ (重要/重點), the same reading
+        "重點表" itself carries."""
         table = {
             "文章重點表": {4: "ㄅㄧㄠˇ"},
             "請把答案寫在聯絡簿表格裡。": {9: "ㄅㄧㄠˇ"},
