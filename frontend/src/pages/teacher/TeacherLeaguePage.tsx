@@ -48,7 +48,7 @@ import {
 import BattleHero from '../../components/league/BattleHero';
 import LeagueBadgeCard from '../../components/league/LeagueBadgeCard';
 import { displayPoints } from '../../components/league/leagueVisuals';
-import { DEFAULT_THEME_FALLBACK } from '../../components/league/leagueTheme';
+import { DEFAULT_THEME_FALLBACK, leaguePageHeading } from '../../components/league/leagueTheme';
 import { findBadge } from '../../types/leagueTheme';
 
 const INVITATION_STATUS_LABEL: Record<string, string> = {
@@ -342,7 +342,7 @@ const TeacherLeaguePage: React.FC = () => {
     <div className="min-h-full bg-surface">
       <div className="p-4 md:p-6 max-w-4xl mx-auto space-y-6">
         <div>
-          <h1 className="text-xl font-bold text-on-surface">{activeTheme.title} · 跨班賽季</h1>
+          <h1 className="text-xl font-bold text-on-surface">{leaguePageHeading(activeTheme)}</h1>
           <p className="text-sm text-on-surface-variant mt-0.5">和別班比幾週，平常讀課文就累積</p>
         </div>
 

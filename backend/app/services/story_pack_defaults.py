@@ -242,7 +242,12 @@ DETECTIVE_PACK = StoryPack(
     title="少年偵探社事件簿",
     intro=[
         "兩班讀家加入了神秘的少年偵探社，準備一起解開學校裡發生的小謎團。",
-        "每答對一題，就能找到一條新線索——線索湊齊，謎底就會水落石出。",
+        # Issue #4052: scoring comes from COMPLETING reading lessons
+        # (league_scoring.py reads LearningSession.completed_at), not from
+        # answering a discrete quiz question — this line used to say "每
+        # 答對一題" which contradicted the real mechanic and the page's
+        # own subtitle ("平常讀課文就累積").
+        "每讀完一篇課文，就能找到一條新線索——線索湊齊，謎底就會水落石出。",
     ],
     faction_labels=["謎團調查隊", "線索調查隊"],
     energy_bar_label="線索",

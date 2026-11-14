@@ -5,11 +5,18 @@ boundary (see story_pack_store.py's docstring for the persistence model).
 from __future__ import annotations
 
 from pydantic import ValidationError
+from sqlalchemy.orm import Session
 
+from ..models.league import LeagueSeason
 from ..schemas.story_pack import StoryPack, StoryPackSummary
 from .story_pack_defaults import BUILTIN_PACKS
 from .story_pack_errors import translate_validation_error
 from .story_pack_store import StoryPackStore, StoryPackStoreError, resolve_pack, resolve_pack_for_season
+
+# Admin seasons dropdown (issue #4052) is capped so a platform with many
+# seasons never returns an unbounded list — newest first, most relevant to
+# an admin picking "which season to assign a pack to" right now.
+MAX_SEASONS_FOR_ASSIGNMENT = 200
 
 
 class StoryPackServiceError(Exception):
@@ -109,3 +116,29 @@ def assign_season_pack(store: StoryPackStore, season_id: int, key: str | None) -
 
 def get_pack_for_season(store: StoryPackStore, season: object) -> StoryPack:
     return resolve_pack_for_season(store, season)
+
+
+def list_seasons_for_assignment(db: Session) -> list[dict]:
+    """All `LeagueSeason` rows, newest first — issue #4052: the admin
+    assignment UI used to require hand-typing a season ID with no way to
+    discover which IDs exist. Queries `LeagueSeason` directly (not through
+    `StoryPackStore`) because this is season discovery, not pack content —
+    same deliberate, documented impurity as `get_season_story_pack_key`/
+    `set_season_story_pack_key` in story_pack_store.py."""
+    seasons = (
+        db.query(LeagueSeason)
+        .order_by(LeagueSeason.id.desc())
+        .limit(MAX_SEASONS_FOR_ASSIGNMENT)
+        .all()
+    )
+    return [
+        {
+            "id": s.id,
+            "name": s.name,
+            "kind": s.kind,
+            "game_start": s.game_start,
+            "game_end": s.game_end,
+            "story_pack_key": s.story_pack_key,
+        }
+        for s in seasons
+    ]
