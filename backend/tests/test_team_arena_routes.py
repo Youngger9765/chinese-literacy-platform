@@ -220,6 +220,78 @@ class TestEndToEndHappyPath:
         assert "sides" in result.json()
 
 
+class TestAnswerScreenCountdownFields:
+    """issue #4054: "作答畫面沒有倒數計時" — the frontend needs a server-
+    authoritative clock to render one (same idiom as live_quiz's
+    CountdownBar), which means `/state` must actually carry a turn-start
+    timestamp and the server's own clock — neither existed before this."""
+
+    def test_state_carries_turn_started_at_and_server_now(self, client):
+        host = _register(client, "ta_clock_host")
+        _enroll_with_grade(host["user_id"])
+        code = client.post(
+            "/api/team-arena/sessions",
+            json={"team_size": 2, "turns_per_player": 1, "answer_seconds": 45},
+            headers=auth_header(host["token"]),
+        ).json()["code"]
+        for suffix, side in (("1", "a"), ("2", "b"), ("3", "b")):
+            p = _register(client, f"ta_clock_{suffix}")
+            assert client.post(f"/api/team-arena/sessions/{code}/join", json={"side": side}, headers=auth_header(p["token"])).status_code == 201
+        assert client.post(f"/api/team-arena/sessions/{code}/control", json={"action": "start"}, headers=auth_header(host["token"])).status_code == 200
+
+        state = client.get(f"/api/team-arena/sessions/{code}/state", headers=auth_header(host["token"])).json()
+        # Must be real, parseable ISO timestamps — not just "present" —
+        # since the frontend feeds them straight into `new Date(...)`.
+        from datetime import datetime
+
+        assert isinstance(state.get("turn_started_at"), str), state
+        assert isinstance(state.get("server_now"), str), state
+        datetime.fromisoformat(state["turn_started_at"])
+        datetime.fromisoformat(state["server_now"])
+
+    def test_called_teammate_suggestion_screen_also_gets_answer_seconds(self, client, monkeypatch):
+        """A summoned (呼叫隊友) teammate's screen is an answer screen too —
+        it was missing `answer_seconds`, so it could never show the same
+        countdown duration the active player's screen gets."""
+        from datetime import timedelta
+
+        from app.services.team_arena import engine
+
+        host = _register(client, "ta_clock2_host")
+        _enroll_with_grade(host["user_id"])
+        code = client.post(
+            "/api/team-arena/sessions",
+            json={"team_size": 2, "turns_per_player": 1, "answer_seconds": 45},
+            headers=auth_header(host["token"]),
+        ).json()["code"]
+        mate = _register(client, "ta_clock2_mate")
+        b1 = _register(client, "ta_clock2_b1")
+        b2 = _register(client, "ta_clock2_b2")
+        for p, side in ((mate, "a"), (b1, "b"), (b2, "b")):
+            assert client.post(f"/api/team-arena/sessions/{code}/join", json={"side": side}, headers=auth_header(p["token"])).status_code == 201
+        assert client.post(f"/api/team-arena/sessions/{code}/control", json={"action": "start"}, headers=auth_header(host["token"])).status_code == 200
+
+        state = client.get(f"/api/team-arena/sessions/{code}/state", headers=auth_header(host["token"])).json()
+        assert state["own_match"]["am_i_active"], state
+        reading_seconds = state["own_match"]["current_round"]["reading_seconds"]
+
+        # Options (and 武器) only open once the reading phase elapses —
+        # same clock-fast-forward idiom as TestOptionsOpenReachesPollingClient.
+        real_now = engine._now
+        monkeypatch.setattr(engine, "_now", lambda: real_now() + timedelta(seconds=reading_seconds + 1))
+
+        # host is active for side a — ask it to open 呼叫隊友 so mate (bench)
+        # gets the "called_for_help" view.
+        call = client.post(f"/api/team-arena/sessions/{code}/weapons", json={"weapon": "call_teammate"}, headers=auth_header(host["token"]))
+        assert call.status_code == 200, call.text
+
+        mate_view = client.get(f"/api/team-arena/sessions/{code}/state", headers=auth_header(mate["token"])).json()
+        rnd = mate_view["own_match"]["current_round"]
+        assert mate_view["own_match"]["am_i_active"] is False, mate_view
+        assert rnd["called_for_help"] is True, rnd
+        assert rnd.get("answer_seconds") == 45, rnd
+
+
 class TestOptionsOpenReachesPollingClient:
     def test_after_version_poll_is_not_unchanged_once_options_open(self, client, monkeypatch):
         """Staging QA 2026-10-20: options open on the clock, which never bumped
@@ -296,9 +368,13 @@ class TestOpponentNamesAreNotExposed:
     def test_state_and_result_hide_the_other_teams_real_names(self, client):
         host = _register(client, "ta_names_host")
         _enroll_with_grade(host["user_id"])
+        # issue #4054: explicit story_pack_key so this test's expected seat
+        # label is independent of whichever pack happens to be the
+        # platform default — the opponent seat label must always match
+        # THIS match's resolved team_labels, not a hardcoded 甲/乙隊.
         code = client.post(
             "/api/team-arena/sessions",
-            json={"team_size": 2, "turns_per_player": 1, "answer_seconds": 45},
+            json={"team_size": 2, "turns_per_player": 1, "answer_seconds": 45, "story_pack_key": "myth"},
             headers=auth_header(host["token"]),
         ).json()["code"]
         mate = _register(client, "ta_names_mate")
@@ -318,16 +394,19 @@ class TestOpponentNamesAreNotExposed:
         # Own team: real names (positive control — the fix must not anonymise everyone).
         assert any("Ta_Names_Mate" in n for n in a_view["a"]), a_view
         assert any("Ta_Names_Oppa" in n for n in b_view["b"]), b_view
-        # Other team: seat labels only, no real name anywhere.
-        assert a_view["b"] == ["乙隊 1 號", "乙隊 2 號"], a_view
-        assert b_view["a"] == ["甲隊 1 號", "甲隊 2 號"], b_view
+        # Other team: seat labels only, no real name anywhere — using the
+        # "myth" pack's own team_labels (探書隊=a／尋光隊=b), the same name
+        # the lobby/play screen shows for that side (issue #4054: this used
+        # to read 甲隊/乙隊 regardless of the match's actual story pack).
+        assert a_view["b"] == ["尋光隊 1 號", "尋光隊 2 號"], a_view
+        assert b_view["a"] == ["探書隊 1 號", "探書隊 2 號"], b_view
         assert "Oppa" not in str(a_view["b"]) and "Mate" not in str(b_view["a"])
 
         assert client.post(f"/api/team-arena/sessions/{code}/control", json={"action": "start"}, headers=auth_header(host["token"])).status_code == 200
         assert client.post(f"/api/team-arena/sessions/{code}/control", json={"action": "end"}, headers=auth_header(host["token"])).status_code == 200
         ra = names(host["token"], "result", "players")
         rb = names(b1["token"], "result", "players")
-        assert ra["b"] == ["乙隊 1 號", "乙隊 2 號"] and rb["a"] == ["甲隊 1 號", "甲隊 2 號"], (ra, rb)
+        assert ra["b"] == ["尋光隊 1 號", "尋光隊 2 號"] and rb["a"] == ["探書隊 1 號", "探書隊 2 號"], (ra, rb)
         assert any("Ta_Names_Mate" in n for n in ra["a"]), ra
 
     def test_other_team_gets_no_account_ids(self, client):
