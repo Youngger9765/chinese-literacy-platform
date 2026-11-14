@@ -127,3 +127,24 @@ class TestPoliticalNeutrality:
         blob = DETECTIVE_PACK.model_dump_json()
         for term in banned_crime_terms:
             assert term not in blob, f"偵探劇劇情包含有犯罪暴力詞彙：{term}"
+
+
+class TestScoringFramingConsistency:
+    """Issue #4052: league_scoring.py awards points for COMPLETING reading
+    lessons (reads `LearningSession.completed_at`, PRD §11 — "一天內最多 5
+    篇"), never for answering a discrete quiz question. A pack's opening
+    copy must not promise "每答對一題" (every correct answer unlocks
+    something) — that contradicts both the real mechanic and the page's
+    own subtitle ("和別班比幾週，平常讀課文就累積", TeacherLeaguePage.tsx),
+    and misleads students about what actually earns progress."""
+
+    _QUIZ_QUESTION_FRAMING_TERMS = ["每答對一題", "答對一題就", "答對題目"]
+
+    def test_no_pack_frames_progress_as_answering_quiz_questions(self):
+        for pack in BUILTIN_PACKS.values():
+            blob = pack.model_dump_json()
+            for term in self._QUIZ_QUESTION_FRAMING_TERMS:
+                assert term not in blob, (
+                    f"{pack.key} 開場文案把進度講成「{term}」，"
+                    "但實際計分是讀完一篇課文就累積，不是逐題作答"
+                )

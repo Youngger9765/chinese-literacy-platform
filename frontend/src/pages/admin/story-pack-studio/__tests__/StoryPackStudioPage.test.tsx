@@ -22,6 +22,7 @@ const mockUpsertPack = vi.fn();
 const mockDeletePack = vi.fn();
 const mockSetActivePack = vi.fn();
 const mockAssignSeasonPack = vi.fn();
+const mockFetchSeasons = vi.fn();
 
 vi.mock('../../../../services/adminStoryPackApi', () => ({
   fetchPackList: (...args: unknown[]) => mockFetchPackList(...args),
@@ -32,6 +33,7 @@ vi.mock('../../../../services/adminStoryPackApi', () => ({
   deletePack: (...args: unknown[]) => mockDeletePack(...args),
   setActivePack: (...args: unknown[]) => mockSetActivePack(...args),
   assignSeasonPack: (...args: unknown[]) => mockAssignSeasonPack(...args),
+  fetchSeasons: (...args: unknown[]) => mockFetchSeasons(...args),
   AdminStoryPackApiError: class AdminStoryPackApiError extends Error {
     status: number;
     errors?: Array<{ loc: string; msg: string }>;
@@ -81,11 +83,17 @@ const VALID_PACK_BODY = {
   result_copy: { win: '勝利', lose: '再接再厲', draw: '平手' },
 };
 
+const SEASON_ROWS = [
+  { id: 42, name: '跨班邀請賽：三年甲班 vs 五年乙班', kind: 'invitational', game_start: '2026-11-01T00:00:00Z', game_end: '2026-11-14T00:00:00Z', story_pack_key: null },
+  { id: 7, name: '跨班邀請賽：四年丙班 vs 四年丁班', kind: 'invitational', game_start: '2026-10-01T00:00:00Z', game_end: '2026-10-14T00:00:00Z', story_pack_key: 'tang-dynasty' },
+];
+
 beforeEach(() => {
   vi.clearAllMocks();
   mockFetchPackList.mockResolvedValue([MYTH_SUMMARY, TANG_SUMMARY, SONG_SUMMARY, WUXIA_SUMMARY, DETECTIVE_SUMMARY, CUSTOM_SUMMARY]);
   mockFetchActivePack.mockResolvedValue({ ...VALID_PACK_BODY, key: 'myth' });
   mockValidatePackPayload.mockResolvedValue({ valid: true, errors: [] });
+  mockFetchSeasons.mockResolvedValue(SEASON_ROWS);
 });
 
 describe('StoryPackStudioPage', () => {
@@ -207,5 +215,55 @@ describe('StoryPackStudioPage', () => {
     for (const english of ['Unexpected', 'token', 'position', 'is not valid']) {
       expect(text).not.toContain(english);
     }
+  });
+
+  // Issue #4052: toasts must show the Chinese pack name, not the English
+  // slug (an admin reported seeing "tang-dynasty" instead of "大唐風雲賽").
+  it('"設為平台預設" success toast shows the Chinese pack title, not its slug', async () => {
+    mockFetchPack.mockResolvedValue({ ...VALID_PACK_BODY, key: 'tang-dynasty', title: '大唐風雲賽' });
+    mockSetActivePack.mockResolvedValue({ ...VALID_PACK_BODY, key: 'tang-dynasty' });
+    render(<StoryPackStudioPage />);
+    await waitFor(() => expect(screen.getByText('大唐風雲賽')).toBeInTheDocument());
+    fireEvent.click(screen.getAllByText('大唐風雲賽')[0]);
+    await waitFor(() => expect(screen.getByRole('button', { name: '設為平台預設' })).toBeEnabled());
+
+    fireEvent.click(screen.getByRole('button', { name: '設為平台預設' }));
+
+    await waitFor(() => expect(mockSetActivePack).toHaveBeenCalledWith('test-token', 'tang-dynasty'));
+    const toast = await screen.findByText(/已將「大唐風雲賽」設為平台預設劇情包/);
+    // The slug legitimately appears elsewhere on the page (the JSON
+    // editor's `"key": "tang-dynasty"`) — assert on the toast's own text,
+    // not the whole document, so this doesn't false-fail on that.
+    expect(toast.textContent).toBe('已將「大唐風雲賽」設為平台預設劇情包');
+  });
+
+  it('season assignment is a dropdown of existing seasons, not a free-typed number', async () => {
+    mockFetchPack.mockResolvedValue({ ...VALID_PACK_BODY, key: 'tang-dynasty', title: '大唐風雲賽' });
+    render(<StoryPackStudioPage />);
+    await waitFor(() => expect(screen.getByText('大唐風雲賽')).toBeInTheDocument());
+    fireEvent.click(screen.getAllByText('大唐風雲賽')[0]);
+
+    await waitFor(() => expect(mockFetchSeasons).toHaveBeenCalledWith('test-token'));
+    expect(screen.queryByPlaceholderText('賽季 ID')).not.toBeInTheDocument();
+    const select = await screen.findByLabelText('選擇賽季');
+    expect(select.tagName).toBe('SELECT');
+    expect(screen.getByText('跨班邀請賽：三年甲班 vs 五年乙班')).toBeInTheDocument();
+    expect(screen.getByText('跨班邀請賽：四年丙班 vs 四年丁班')).toBeInTheDocument();
+  });
+
+  it('"指派給此賽季" success toast shows the Chinese pack title, not its slug', async () => {
+    mockFetchPack.mockResolvedValue({ ...VALID_PACK_BODY, key: 'tang-dynasty', title: '大唐風雲賽' });
+    mockAssignSeasonPack.mockResolvedValue({ season_id: 42, pack: { ...VALID_PACK_BODY, key: 'tang-dynasty' } });
+    render(<StoryPackStudioPage />);
+    await waitFor(() => expect(screen.getByText('大唐風雲賽')).toBeInTheDocument());
+    fireEvent.click(screen.getAllByText('大唐風雲賽')[0]);
+
+    const select = await screen.findByLabelText('選擇賽季');
+    fireEvent.change(select, { target: { value: '42' } });
+    fireEvent.click(screen.getByRole('button', { name: '指派給此賽季' }));
+
+    await waitFor(() => expect(mockAssignSeasonPack).toHaveBeenCalledWith('test-token', 42, 'tang-dynasty'));
+    expect(screen.getByText(/已將賽季「跨班邀請賽：三年甲班 vs 五年乙班」指派為「大唐風雲賽」/)).toBeInTheDocument();
+    expect(screen.queryByText(/指派為「tang-dynasty」/)).not.toBeInTheDocument();
   });
 });

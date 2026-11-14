@@ -336,3 +336,32 @@ class TestPoliticalNeutralityValidator:
         content (same payload shape the shipped packs actually use)."""
         pack = StoryPack(**_valid_payload())
         assert pack.title == "大唐風雲賽"
+
+    def test_banned_term_with_inserted_whitespace_rejected(self):
+        """Issue #4052: an admin could dodge the guard by inserting
+        whitespace inside the banned term — 「中 國」 reads identically to
+        「中國」 to a human but used to slip past the plain substring
+        match. Whitespace must be stripped before matching."""
+        with pytest.raises(ValidationError):
+            StoryPack(**_valid_payload(title="測試中 國主題"))
+
+    def test_banned_term_simplified_chinese_rejected(self):
+        """Issue #4052: the guard must not be script-dependent — simplified
+        「中国」 must be caught exactly like traditional 「中國」, otherwise
+        switching the admin's IME to simplified is a trivial bypass."""
+        with pytest.raises(ValidationError):
+            StoryPack(**_valid_payload(title="測試中国主題"))
+
+    def test_whitespace_normalization_does_not_bridge_a_line_break(self):
+        """Code review 2026-11-14: normalizing ALL whitespace (including
+        newlines) before matching would stitch together two UNRELATED
+        sentences across a line break into a false banned-term hit — e.g.
+        a line ending in "...守護中" followed by a new line starting with
+        "國王..." never put those two characters adjacent in the admin's
+        actual text, but collapsing the newline between them would. The
+        fix must normalize spaces/tabs (catches the real "中 國" bypass)
+        without bridging real line breaks."""
+        pack = StoryPack(
+            **_valid_payload(intro=["長安城外的守護中\n國王的使者捎來消息，兩隊即刻出發。"])
+        )
+        assert "中\n國" in pack.intro[0]

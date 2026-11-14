@@ -24,6 +24,8 @@ than Young's approval covered — see that docstring).
 """
 from __future__ import annotations
 
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -69,6 +71,18 @@ class AssignSeasonPackRequest(BaseModel):
     key: str | None = None
 
 
+class SeasonForAssignment(BaseModel):
+    """One row for the admin's season-assignment dropdown (issue #4052:
+    was a free-typed number with nothing to pick from)."""
+
+    id: int
+    name: str
+    kind: str
+    game_start: datetime
+    game_end: datetime
+    story_pack_key: str | None
+
+
 @router.get("", response_model=list[StoryPackSummary])
 def list_packs(
     current_user: User = Depends(get_current_user), db: Session = Depends(get_db)
@@ -99,6 +113,18 @@ def set_active_pack(
 def validate_pack(payload: ValidatePackRequest, current_user: User = Depends(get_current_user)) -> ValidatePackResponse:
     pack, errors = svc.validate_pack_payload(payload.payload)
     return ValidatePackResponse(valid=pack is not None, errors=errors)
+
+
+# NOTE: must stay registered before the `/{key}` route below — FastAPI/
+# Starlette matches routes in registration order, and `/{key}` is a
+# single-segment catch-all that would otherwise swallow a bare GET
+# `.../story-packs/seasons` as key="seasons" (404 "劇情包「seasons」不存在")
+# before this route ever gets a chance to run.
+@router.get("/seasons", response_model=list[SeasonForAssignment])
+def list_seasons(
+    current_user: User = Depends(get_current_user), db: Session = Depends(get_db)
+) -> list[SeasonForAssignment]:
+    return svc.list_seasons_for_assignment(db)
 
 
 @router.get("/{key}")
