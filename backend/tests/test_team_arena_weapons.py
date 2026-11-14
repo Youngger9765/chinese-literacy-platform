@@ -130,6 +130,35 @@ class TestZhuyinHintEveryLesson:
         assert hints > 0, "sweep produced no hints at all — the lookup is broken, not the data"
 
 
+class TestHintExcludesWorksheetSectionLabels:
+    def test_a_structural_heading_is_never_quoted_even_when_it_would_otherwise_rank_best(self, monkeypatch):
+        """issue #4054 (staging QA): 看提示 once quoted 「文章重點表」 — a
+        worksheet SECTION HEADING, not a sentence — because that heading's
+        own text happened to carry the same curated reading for the asked
+        character, and its short, "shown in full" shape actually out-ranks
+        a longer real sentence under the existing scoring (tier 0 beats
+        tier 0 by length, and a 5-char whole clause already clears
+        MIN_CLAUSE_CHARS). A denylisted heading must be skipped as a
+        candidate entirely, not just lose on a tie-break."""
+        table = {
+            "文章重點表": {4: "ㄅㄧㄠˇ"},
+            "請把答案寫在聯絡簿表格裡。": {9: "ㄅㄧㄠˇ"},
+        }
+        monkeypatch.setattr("app.services.lesson_zhuyin.lesson_zhuyin_table", lambda uid: table)
+        payload = {
+            "source_module": "zhuyin",
+            "lesson_uid": "LX",
+            "stem": "請問這是什麼表？",
+            "extra": {"target_index": 6},
+            "options": [{"key": "A", "text": "ㄅㄧㄠˇ"}, {"key": "B", "text": "ㄅㄠˇ"}],
+            "correct_key": "A",
+        }
+        hint = svc.build_hint(payload)
+        assert hint is not None, "the real sentence candidate must still produce a hint"
+        assert "文章重點表" not in hint, hint
+        assert "聯絡簿" in hint, hint
+
+
 class TestHintPrefersReadablePhrases:
     def test_whole_short_clause_loses_to_a_longer_one(self, monkeypatch):
         """Staging 2026-10-21: hint picked 「他了」 although a longer clause
