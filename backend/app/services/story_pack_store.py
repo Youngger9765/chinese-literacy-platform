@@ -49,6 +49,8 @@ from __future__ import annotations
 import threading
 from typing import Protocol
 
+from sqlalchemy import text as sa_text
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from ..models.league import LeagueSeason
@@ -86,9 +88,10 @@ class StoryPackStore(Protocol):
 
 
 class InMemoryStoryPackStore:
-    """Process-local, thread-safe. See module docstring for why this is
-    still used for the active-key pointer in production, and fully for
-    tests that need isolation."""
+    """Process-local, thread-safe. Kept ONLY for test isolation (issue
+    #4052: it is NOT used for any production state anymore — see module
+    docstring's HISTORY section for what used to be true before the
+    `story_packs.is_active_default` column existed)."""
 
     def __init__(self) -> None:
         self._lock = threading.Lock()
@@ -257,6 +260,25 @@ class SqlAlchemyStoryPackStore:
         # platform default is a normal, supported action (BUILTIN_PACKS
         # rows exist in this same table precisely so they can be
         # referenced — see 7e0ca622e3d8_create_story_packs_table.py).
+        #
+        # Concurrency (issue #4052 code review): two admins clicking "設為
+        # 平台預設" at the same instant could both pass the clear step
+        # before either commits, so both then try to leave a row TRUE —
+        # the partial unique index (migration f6g7actvpack1) is the
+        # backstop, but an uncaught IntegrityError from that backstop would
+        # otherwise leak as a raw 500. Two layers of defense:
+        #   1. A Postgres advisory transaction lock serializes concurrent
+        #      set_active_key calls DB-wide (auto-released at commit/
+        #      rollback) — this is the actual fix for the common case.
+        #      SQLite (tests) has no equivalent and doesn't need one: a
+        #      single pytest process can't race itself this way.
+        #   2. Even if two transactions still somehow interleave, catching
+        #      IntegrityError here turns the inevitable-by-construction
+        #      loser into a friendly, actionable Chinese error instead of
+        #      an unhandled 500.
+        if self.db.bind is not None and self.db.bind.dialect.name == "postgresql":
+            self.db.execute(sa_text("SELECT pg_advisory_xact_lock(hashtext('story_packs_active_default'))"))
+
         self.db.query(StoryPackRow).filter(StoryPackRow.is_active_default.is_(True)).update(
             {StoryPackRow.is_active_default: False}
         )
@@ -265,7 +287,13 @@ class SqlAlchemyStoryPackStore:
             if row is None:
                 raise StoryPackStoreError(f"劇情包「{key}」不存在", status_code=404)
             row.is_active_default = True
-        self.db.commit()
+        try:
+            self.db.commit()
+        except IntegrityError:
+            self.db.rollback()
+            raise StoryPackStoreError(
+                "另一位管理員剛剛也在設定預設包，請重新整理後再試一次", status_code=409
+            )
 
     def get_season_story_pack_key(self, season_id: int) -> str | None:
         season = self.db.query(LeagueSeason).filter(LeagueSeason.id == season_id).first()
@@ -295,7 +323,24 @@ def resolve_pack(store: StoryPackStore, key: str | None) -> StoryPack | None:
     return store.get_custom(key)
 
 
-def resolve_pack_for_season(store: StoryPackStore, season: object) -> StoryPack:
+# Sentinel for resolve_pack_for_season's/get_pack_for_season's `active_key`
+# param — `None` is a legitimate VALUE (no platform default set), so it
+# can't double as "not supplied". Issue #4052 code review: now that
+# get_active_key() is a real DB query (was a free dict lookup), a caller
+# resolving N seasons in a loop (routes/league.py GET /my-history) must
+# query it ONCE and pass the result in, not re-query per season.
+# Single-call callers omit this entirely and keep the old behavior (query
+# the store). Exported (no leading underscore) so story_pack_service.py
+# and callers can use it to opt into the "already have it" path.
+UNSET_ACTIVE_KEY = object()
+
+
+def resolve_pack_for_season(
+    store: StoryPackStore,
+    season: object,
+    *,
+    active_key: str | None = UNSET_ACTIVE_KEY,  # type: ignore[assignment]
+) -> StoryPack:
     """The full fallback chain (PRD §13.4):
 
         1. season.story_pack_key (the real DB column)
@@ -305,6 +350,12 @@ def resolve_pack_for_season(store: StoryPackStore, season: object) -> StoryPack:
     `season` is typed as `object` (not `LeagueSeason`) deliberately — this
     works via nothing but `getattr` with a default, for callers that don't
     have a real ORM object handy.
+
+    `active_key`: pass the platform default explicitly to skip the
+    get_active_key() query entirely (see _ACTIVE_KEY_UNSET above) — for a
+    caller resolving many seasons at once. Omit it for an ordinary
+    single-season call; this method then queries the store itself,
+    exactly as before.
     """
     season_key = getattr(season, "story_pack_key", None)
     if season_key is None:
@@ -315,8 +366,8 @@ def resolve_pack_for_season(store: StoryPackStore, season: object) -> StoryPack:
     if pack is not None:
         return pack
 
-    active_key = store.get_active_key()
-    pack = resolve_pack(store, active_key)
+    resolved_active_key = store.get_active_key() if active_key is UNSET_ACTIVE_KEY else active_key
+    pack = resolve_pack(store, resolved_active_key)
     if pack is not None:
         return pack
 

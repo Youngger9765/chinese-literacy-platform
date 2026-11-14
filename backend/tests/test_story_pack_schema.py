@@ -15,8 +15,10 @@ from pydantic import ValidationError
 from app.schemas.story_pack import (
     BADGE_KEY_CLASS,
     BADGE_KEY_INDIVIDUAL,
+    BANNED_POLITICAL_TERMS,
     StoryPack,
     StoryPackArt,
+    _SIMPLIFIED_TO_TRADITIONAL,
     sanitize_svg,
     SvgValidationError,
 )
@@ -365,3 +367,41 @@ class TestPoliticalNeutralityValidator:
             **_valid_payload(intro=["長安城外的守護中\n國王的使者捎來消息，兩隊即刻出發。"])
         )
         assert "中\n國" in pack.intro[0]
+
+    def test_every_banned_term_character_with_a_simplified_variant_is_covered(self):
+        """Issue #4052 code review: drift lock between BANNED_POLITICAL_TERMS
+        (the real, live list) and _SIMPLIFIED_TO_TRADITIONAL (the matching
+        normalization table). This expectation table is written
+        independently — NOT derived from _SIMPLIFIED_TO_TRADITIONAL itself
+        — so it has real authority to catch a future mistake: if someone
+        adds a new banned term containing a character whose simplified
+        form differs (and that character is in this table), but forgets to
+        add the mapping, this test goes red. Deliberately scoped wider
+        than today's exact 7-character set (includes a few more common
+        nation/unity/political characters that could plausibly show up in
+        a future banned term) to give this guard real forward teeth, not
+        just re-prove what's already there. Scope: visible CJK character
+        substitution only — broader invisible-character normalization is
+        out of scope (Young's direction)."""
+        # traditional -> simplified, for characters where they differ.
+        # Characters not listed here are assumed identical in both scripts
+        # (true for the overwhelming majority of BANNED_POLITICAL_TERMS's
+        # current characters: 中祖民族我炎子一收大 are all unchanged).
+        known_traditional_to_simplified = {
+            "華": "华", "國": "国", "黃": "黄", "孫": "孙", "統": "统",
+            "復": "复", "戰": "战",
+            # Extra plausible-future characters in this same domain (not
+            # in BANNED_POLITICAL_TERMS today) — included so this test has
+            # teeth beyond re-deriving the current 7:
+            "臺": "台", "灣": "湾", "黨": "党", "衛": "卫", "軍": "军",
+        }
+        all_chars = {ch for term in BANNED_POLITICAL_TERMS for ch in term}
+        for traditional_char in all_chars:
+            simplified_char = known_traditional_to_simplified.get(traditional_char)
+            if simplified_char is None or simplified_char == traditional_char:
+                continue  # no simplified variant (or not in our table) -- nothing to cover
+            assert _SIMPLIFIED_TO_TRADITIONAL.get(simplified_char) == traditional_char, (
+                f"「{traditional_char}」(used in a banned term) has simplified variant "
+                f"「{simplified_char}」, but _SIMPLIFIED_TO_TRADITIONAL doesn't map it back "
+                f"correctly -- the whitespace/simplified bypass guard would miss it"
+            )

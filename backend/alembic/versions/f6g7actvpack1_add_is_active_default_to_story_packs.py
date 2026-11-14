@@ -53,6 +53,13 @@ def upgrade() -> None:
     bind = op.get_bind()
     insp = sa.inspect(bind)
 
+    # Both checks below read from this SAME inspector snapshot — fine here
+    # because `get_columns`/`get_indexes` are independent catalog reads on
+    # two different kinds of object (columns vs indexes) that this
+    # migration's own add_column() doesn't affect (a new COLUMN never
+    # changes which INDEXES currently exist). Code review 2026-11-14:
+    # 7e0ca622e3d8's analogous re-inspect was needed there because it adds
+    # a whole new TABLE mid-migration, which this migration doesn't do.
     columns = {c["name"] for c in insp.get_columns("story_packs")}
     if "is_active_default" not in columns:
         op.add_column(
@@ -71,7 +78,6 @@ def upgrade() -> None:
     # `sqlite_where` too so `Base.metadata.create_all()` (used by the
     # pytest suite, not this migration) produces an equivalent partial
     # index on SQLite — this migration itself only targets Postgres.
-    insp = sa.inspect(bind)  # re-inspect: add_column above may have just run
     existing_indexes = {ix["name"] for ix in insp.get_indexes("story_packs")}
     if _INDEX_NAME not in existing_indexes:
         op.create_index(

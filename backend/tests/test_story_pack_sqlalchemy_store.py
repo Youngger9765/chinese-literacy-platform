@@ -276,6 +276,52 @@ class TestActiveKeyPointer:
             store.set_active_key("does-not-exist")
         assert exc.value.status_code == 404
 
+    def test_concurrent_set_active_key_raises_friendly_error_not_500(self, db, monkeypatch):
+        """Issue #4052 code review: two admins clicking "設為平台預設" at the
+        same instant could both pass the clear-then-set sequence before
+        either commits, so both try to leave a row TRUE — the partial
+        unique index is the backstop, but an uncaught IntegrityError from
+        it must not leak as a raw 500. Simulated deterministically (no
+        real threads/concurrency needed) by making commit() itself raise
+        IntegrityError — exactly what the losing concurrent transaction
+        sees in production."""
+        store = SqlAlchemyStoryPackStore(db)
+
+        def _raise_integrity_error():
+            raise IntegrityError(
+                "UPDATE story_packs SET is_active_default=true ...",
+                {},
+                Exception("UNIQUE constraint failed: story_packs.is_active_default"),
+            )
+
+        monkeypatch.setattr(db, "commit", _raise_integrity_error)
+
+        with pytest.raises(StoryPackStoreError) as exc:
+            store.set_active_key(TANG_PACK_KEY)
+
+        assert exc.value.status_code == 409
+        assert "另一位管理員" in exc.value.message
+
+    def test_service_layer_turns_store_integrity_error_into_service_error(self, db, monkeypatch):
+        """Issue #4052 code review: story_pack_service.set_active_pack
+        previously did NOT catch StoryPackStoreError from
+        store.set_active_key — unlike every other service function that
+        wraps its store call. A raw StoryPackStoreError reaching the route
+        layer (admin_story_packs.py only catches StoryPackServiceError)
+        would be an unhandled 500."""
+        store = SqlAlchemyStoryPackStore(db)
+
+        def _raise_integrity_error():
+            raise IntegrityError("UPDATE story_packs ...", {}, Exception("UNIQUE constraint failed"))
+
+        monkeypatch.setattr(db, "commit", _raise_integrity_error)
+
+        with pytest.raises(svc.StoryPackServiceError) as exc:
+            svc.set_active_pack(store, TANG_PACK_KEY)
+
+        assert exc.value.status_code == 409
+        assert "另一位管理員" in exc.value.message
+
     def test_delete_custom_clears_active_key_if_it_pointed_there(self, db):
         store = SqlAlchemyStoryPackStore(db)
         store.upsert_custom(StoryPack(key="ming-voyage", **VALID_PACK_PAYLOAD))
@@ -435,3 +481,65 @@ class TestInvalidPackRejected:
             svc.upsert_custom_pack(store, {**bad_payload, "key": "bad-pack-4"})
         assert exc.value.status_code == 422
         assert store.get_custom("bad-pack-4") is None
+
+
+class TestActiveKeyNPlusOneFix:
+    """Issue #4052 code review: get_active_key() became a real DB query
+    (was a free process-dict lookup). routes/league.py's GET /my-history
+    loops over a student's seasons calling get_pack_for_season() once per
+    season — without passing the pre-fetched active_key in, that would
+    re-query get_active_key() once per season (N+1, scaling with however
+    many seasons a long-time student has accumulated). These tests count
+    actual calls to the store's get_active_key(), not just inspect code,
+    so a future regression (someone drops the `active_key=` kwarg from
+    the route's call site) would be caught here too — this is a unit-level
+    proof of the mechanism the route relies on, not a route-level
+    integration test (which would additionally require wiring a full
+    season/team/roster fixture graph unrelated to what's being proven)."""
+
+    def _counting_store(self, db) -> tuple[SqlAlchemyStoryPackStore, dict]:
+        store = SqlAlchemyStoryPackStore(db)
+        call_count = {"n": 0}
+        real_get_active_key = store.get_active_key
+
+        def _counting_get_active_key():
+            call_count["n"] += 1
+            return real_get_active_key()
+
+        store.get_active_key = _counting_get_active_key  # type: ignore[method-assign]
+        return store, call_count
+
+    def test_resolving_n_seasons_with_prefetched_active_key_queries_it_once_total(self, db):
+        store, call_count = self._counting_store(db)
+        store.set_active_key(SONG_PACK_KEY)
+        user = _make_user(db)
+        seasons = [_make_season(db, user, story_pack_key=None) for _ in range(5)]
+
+        # Mirrors routes/league.py's GET /my-history: fetch the platform
+        # default ONCE before the loop...
+        active_key = store.get_active_key()
+        assert call_count["n"] == 1
+
+        # ...then resolve every season's pack by passing that same value in
+        # — none of these 5 calls should touch get_active_key() again.
+        for season in seasons:
+            pack = svc.get_pack_for_season(store, season, active_key=active_key)
+            assert pack.key == SONG_PACK_KEY
+
+        assert call_count["n"] == 1, "get_active_key() must not be re-queried inside the loop"
+
+    def test_negative_control_omitting_active_key_queries_once_per_season(self, db):
+        """Proves the counting mechanism above has real teeth — this is
+        the OLD calling convention (the actual bug, if the route forgot to
+        pass active_key), and it SHOULD cost one query per season. If this
+        assertion ever started failing, the test above would no longer be
+        trustworthy evidence of a fix."""
+        store, call_count = self._counting_store(db)
+        store.set_active_key(SONG_PACK_KEY)
+        user = _make_user(db)
+        seasons = [_make_season(db, user, story_pack_key=None) for _ in range(5)]
+
+        for season in seasons:
+            svc.get_pack_for_season(store, season)  # active_key omitted on purpose
+
+        assert call_count["n"] == 5
