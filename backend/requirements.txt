@@ -14,7 +14,7 @@ psycopg2-binary>=2.9
 redis>=5.0
 python-dotenv>=1.0
 pypinyin>=0.51
-jieba>=0.42
+jieba>=0.42.1
 pytest>=8.0
 pytest-asyncio>=0.23
 # schema 驗證（#2865 的門與測試都用它）。原本靠別的套件間接帶進來，
