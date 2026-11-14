@@ -27,6 +27,7 @@ from ...models.pk import (
 )
 from ...models.school import ClassroomStudent
 from ...models.user import User
+from ..game_core.display_name import resolve_display_name
 from . import engine as pk_engine
 
 _INVITE_CODE_LENGTH = 6
@@ -364,6 +365,27 @@ def get_queue_for_user(db: Session, queue_id: int, user: User) -> PkQueue:
     return q
 
 
+def _opponent_name_for(db: Session, q: PkQueue) -> str | None:
+    """#4050: the VS screen only ever showed a hardcoded "同學" for a human
+    opponent — by the time this queue row flips to "matched", `q.match_id`
+    already points at a real PkMatch with both sides' user rows loaded, so
+    there's no reason not to surface the real name here. None while still
+    "waiting" (no match yet)."""
+    if q.status != "matched" or q.match_id is None:
+        return None
+    match = db.query(PkMatch).filter(PkMatch.id == q.match_id).first()
+    if match is None:
+        return None
+    is_side_a = match.side_a_user_id == q.student_id
+    opponent_user = match.side_b_user if is_side_a else match.side_a_user
+    if opponent_user is None:
+        return None  # an AI match has no opponent user row at all
+    # Side 'a' is always seat 1, side 'b' seat 2 — same fixed convention
+    # engine.py's build_match_state already uses for the "學生N" fallback.
+    opponent_seat = 2 if is_side_a else 1
+    return resolve_display_name(opponent_user.name, opponent_seat)
+
+
 def poll_queue(db: Session, q: PkQueue) -> dict:
     if q.status == "waiting":
         attempt_match(db, q)  # may flip q to "matched" as a side effect
@@ -374,4 +396,5 @@ def poll_queue(db: Session, q: PkQueue) -> dict:
         "version": q.version,
         "match_id": q.match_id,
         "suggest_ai": q.status == "waiting" and waited_seconds >= SUGGEST_AI_AFTER_SECONDS,
+        "opponent_name": _opponent_name_for(db, q),
     }

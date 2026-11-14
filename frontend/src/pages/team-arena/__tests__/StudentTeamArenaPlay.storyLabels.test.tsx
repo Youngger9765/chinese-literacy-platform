@@ -143,6 +143,11 @@ describe('StudentTeamArenaPlay uses backend story copy (#3772)', () => {
     const rb = screen.getByTestId('result-side-b');
     expect(within(ra).getByText('探書隊')).toBeTruthy();
     expect(within(rb).getByText('尋光隊')).toBeTruthy();
-    expect(screen.queryByText('平手')).toBeNull();
+    // #4054 added a separate, explicit "平手"/"<team> 獲勝" banner for
+    // clarity (own dedicated test suite) — this narrative line itself
+    // (asserted above) must still be the THEMED copy, not a bare "平手"
+    // fallback; the banner existing alongside it is the new intended
+    // behaviour, not a regression of this ticket's own concern.
+    expect(screen.getByTestId('winner-banner').textContent).toBe('平手');
   });
 });

@@ -25,7 +25,7 @@
  * different wording for at least one key on purpose (`pk_human`'s student
  * hub card is titled "PK 對戰", a combined AI+human entry point, while the
  * teacher switch that gates only the human-matchmaking half is titled
- * "真人 PK" — one shared string would change one of the two UIs' visible
+ * "班級內 PK" — one shared string would change one of the two UIs' visible
  * copy) and the teacher hub's nav buttons route to `/teacher/*`
  * management pages, not the student `hubRoute`. See
  * docs/architecture/game-modules.md for the full reasoning.
@@ -113,9 +113,12 @@ export const GAME_MODES: readonly GameModeHubMeta[] = [
     hubRoute: '/pk',
     classroomGated: true,
     teacherSwitchOrder: 0,
-    teacherSwitchTitle: '真人 PK',
+    // #4050: renamed from "真人 PK" to "班級內 PK" — TeacherSidebar.tsx's
+    // Game Hub nav description already said "班級內 PK 開關" for this exact
+    // switch, so the two names drifted apart within the SAME teacher UI.
+    teacherSwitchTitle: '班級內 PK',
     teacherSwitchDescription: '同學之間配對對戰，預設關閉',
-    teacherSwitchAriaLabel: '真人 PK 開關',
+    teacherSwitchAriaLabel: '班級內 PK 開關',
     // No teacherHub* — there is no `/teacher/pk` management page.
   },
   {

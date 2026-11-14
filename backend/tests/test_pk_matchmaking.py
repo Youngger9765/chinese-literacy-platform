@@ -281,6 +281,63 @@ class TestPollQueueSuggestAi:
         assert db_session.query(PkMatch).count() == 0
 
 
+class TestPollQueueOpponentName:
+    """#4050 wording bug: the VS screen only ever showed "同學" for a human
+    opponent, even though by the time status flips to "matched" the match
+    (and the other side's user row) already exist server-side. Every human-
+    match entry path (找同學 PK matching pool, invite creator, invite
+    redeemer) funnels through THIS one poll_queue response before
+    navigating to /pk/match/:id — see StudentPkQueueWait.tsx — so adding
+    opponent_name here covers all three at once."""
+
+    def test_waiting_poll_has_no_opponent_name_yet(self, db_session, classroom):
+        a = _enrolled_student(db_session, classroom)
+        q = svc.create_queue_entry(db_session, a, scope_type="grade_pool", scope_ref="4", classroom_id=classroom.id)
+        state = svc.poll_queue(db_session, q)
+        assert state["status"] == "waiting"
+        assert state["opponent_name"] is None
+
+    def test_matched_poll_includes_the_other_sides_real_name_for_both_sides(self, db_session, classroom):
+        a = _enrolled_student(db_session, classroom, name="小美")
+        b = _enrolled_student(db_session, classroom, name="小華")
+        qa = svc.create_queue_entry(db_session, a, scope_type="grade_pool", scope_ref="4", classroom_id=classroom.id)
+        qb = svc.create_queue_entry(db_session, b, scope_type="grade_pool", scope_ref="4", classroom_id=classroom.id)
+
+        state_b = svc.poll_queue(db_session, qb)  # b's poll triggers the match
+        assert state_b["status"] == "matched"
+        assert state_b["opponent_name"] == "小美"
+
+        db_session.refresh(qa)
+        state_a = svc.poll_queue(db_session, qa)
+        assert state_a["status"] == "matched"
+        assert state_a["opponent_name"] == "小華"
+
+    def test_invite_redeemer_sees_the_creators_name_immediately(self, db_session, classroom):
+        creator = _enrolled_student(db_session, classroom, name="小明")
+        redeemer = _enrolled_student(db_session, classroom, name="小強")
+        invite = svc.create_invite(db_session, creator, scope_type="grade_pool", scope_ref="4", classroom_id=classroom.id)
+
+        redeemer_queue, _match = svc.redeem_invite(db_session, redeemer, invite.invite_code)
+        state = svc.poll_queue(db_session, redeemer_queue)
+        assert state["status"] == "matched"
+        assert state["opponent_name"] == "小明"
+
+        db_session.refresh(invite)
+        creator_state = svc.poll_queue(db_session, invite)
+        assert creator_state["opponent_name"] == "小強"
+
+    def test_blank_name_falls_back_to_the_shared_anonymous_label(self, db_session, classroom):
+        """Same "學生N" policy every other mode uses (game_core.display_name) —
+        a blank profile name must not leak as an empty opponent_name."""
+        a = _enrolled_student(db_session, classroom, name="")
+        b = _enrolled_student(db_session, classroom, name="小華")
+        qa = svc.create_queue_entry(db_session, a, scope_type="grade_pool", scope_ref="4", classroom_id=classroom.id)
+        qb = svc.create_queue_entry(db_session, b, scope_type="grade_pool", scope_ref="4", classroom_id=classroom.id)
+
+        state_b = svc.poll_queue(db_session, qb)
+        assert state_b["opponent_name"] == "學生1"  # side 'a' is always seat 1
+
+
 class TestPkHumanFeatureGate:
     """PRD §7.4 (2026-10-16 revision): 真人 PK is OFF by default per
     classroom and must be enforced on every human-PK entry path — queueing,
