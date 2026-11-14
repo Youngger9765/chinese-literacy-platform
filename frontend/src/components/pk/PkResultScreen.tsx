@@ -46,6 +46,12 @@ const PkResultScreen: React.FC<PkResultScreenProps> = ({ result, myName, opponen
   const myCorrect = result.rounds.filter((r) => r.my_is_correct).length;
   const opponentCorrect = result.rounds.filter((r) => r.opponent_is_correct).length;
   const decidedByTime = result.outcome !== 'draw' && result.my_score === result.opponent_score;
+  // #4050: the note above said it was "決定勝負" by time without ever
+  // saying WHO was faster — staging QA: "平手說明沒講誰比較快". `outcome`
+  // already tells us who the tie-break favored (scoring.decide_winner:
+  // equal score -> faster total time wins), so just name that side.
+  const fasterSideName =
+    result.outcome === 'win' ? myName ?? '你' : opponentName ?? aiResultFigure?.name ?? '對手';
 
   const toggle = (idx: number) => {
     setExpanded((prev) => {
@@ -96,7 +102,7 @@ const PkResultScreen: React.FC<PkResultScreenProps> = ({ result, myName, opponen
       </div>
 
       {decidedByTime && (
-        <p className="mt-1 text-xs text-on-surface-variant">分數打平，由作答總時間快慢決定勝負</p>
+        <p className="mt-1 text-xs text-on-surface-variant">分數打平，{fasterSideName}作答比較快，獲勝</p>
       )}
 
       {ratingDelta != null && (
@@ -128,7 +134,13 @@ const PkResultScreen: React.FC<PkResultScreenProps> = ({ result, myName, opponen
               >
                 <span className="text-sm font-medium text-on-surface">
                   第 {r.round_index + 1} 題：
-                  {r.my_is_correct ? (
+                  {/* #4050 bug 3: no recorded choice (timed out, or a late
+                      click the server 409'd — see StudentPkMatch's own
+                      fix) must read as "時間到", not "答錯" — the student
+                      never got a chance to answer this one. */}
+                  {r.my_choice_key == null ? (
+                    <span className="ml-1 text-on-surface-variant">⏰ 時間到</span>
+                  ) : r.my_is_correct ? (
                     <span className="ml-1 text-success">✓ 答對</span>
                   ) : (
                     <span className="ml-1 text-tertiary">✗ 答錯</span>

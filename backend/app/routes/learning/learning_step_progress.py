@@ -47,7 +47,12 @@ def save_step_progress(
     Overwrites any previously stored step_progress for this session.
     Non-completed sessions only — completed sessions are read-only.
     """
-    session = get_owned_session(session_id, current_user, db)
+    # Issue #4042: for_update=True -- this handler may award step_complete
+    # XP + badges (_award_step_complete_xp below) in the same transaction
+    # as POST /gamification/session-complete settling the SAME session.
+    # Locking the row here first is what serializes the two instead of
+    # letting them deadlock on learning_sessions + student_badges.
+    session = get_owned_session(session_id, current_user, db, for_update=True)
 
     # parse_step_progress logs a WARNING when the stored value is malformed
     # instead of silently discarding it (Issue #1180).

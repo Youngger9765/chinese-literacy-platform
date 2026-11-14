@@ -5,11 +5,24 @@ boundary (see story_pack_store.py's docstring for the persistence model).
 from __future__ import annotations
 
 from pydantic import ValidationError
+from sqlalchemy.orm import Session
 
+from ..models.league import LeagueSeason
 from ..schemas.story_pack import StoryPack, StoryPackSummary
 from .story_pack_defaults import BUILTIN_PACKS
 from .story_pack_errors import translate_validation_error
-from .story_pack_store import StoryPackStore, StoryPackStoreError, resolve_pack, resolve_pack_for_season
+from .story_pack_store import (
+    UNSET_ACTIVE_KEY,
+    StoryPackStore,
+    StoryPackStoreError,
+    resolve_pack,
+    resolve_pack_for_season,
+)
+
+# Admin seasons dropdown (issue #4052) is capped so a platform with many
+# seasons never returns an unbounded list — newest first, most relevant to
+# an admin picking "which season to assign a pack to" right now.
+MAX_SEASONS_FOR_ASSIGNMENT = 200
 
 
 class StoryPackServiceError(Exception):
@@ -86,7 +99,16 @@ def set_active_pack(store: StoryPackStore, key: str) -> StoryPack:
     pack = resolve_pack(store, key)
     if pack is None:
         raise StoryPackServiceError(f"劇情包「{key}」不存在", status_code=404)
-    store.set_active_key(key)
+    try:
+        store.set_active_key(key)
+    except StoryPackStoreError as exc:
+        # Issue #4052 code review: this used to be uncaught here (unlike
+        # upsert_custom_pack/delete_custom_pack/assign_season_pack below,
+        # which all wrap their store calls) — a concurrent-write
+        # IntegrityError from set_active_key would have leaked as a raw
+        # 500 instead of the friendly StoryPackServiceError the route
+        # layer knows how to turn into a proper HTTP response.
+        raise StoryPackServiceError(exc.message, status_code=exc.status_code) from exc
     return pack
 
 
@@ -107,5 +129,40 @@ def assign_season_pack(store: StoryPackStore, season_id: int, key: str | None) -
     return resolve_pack(store, key) if key is not None else None
 
 
-def get_pack_for_season(store: StoryPackStore, season: object) -> StoryPack:
-    return resolve_pack_for_season(store, season)
+def get_pack_for_season(
+    store: StoryPackStore,
+    season: object,
+    *,
+    active_key: str | None = UNSET_ACTIVE_KEY,  # type: ignore[assignment]
+) -> StoryPack:
+    """`active_key`: pass the platform default explicitly when resolving
+    many seasons in a loop (issue #4052 code review — see
+    resolve_pack_for_season's docstring) so it's queried once, not once
+    per season. Omit for an ordinary single-season call."""
+    return resolve_pack_for_season(store, season, active_key=active_key)
+
+
+def list_seasons_for_assignment(db: Session) -> list[dict]:
+    """All `LeagueSeason` rows, newest first — issue #4052: the admin
+    assignment UI used to require hand-typing a season ID with no way to
+    discover which IDs exist. Queries `LeagueSeason` directly (not through
+    `StoryPackStore`) because this is season discovery, not pack content —
+    same deliberate, documented impurity as `get_season_story_pack_key`/
+    `set_season_story_pack_key` in story_pack_store.py."""
+    seasons = (
+        db.query(LeagueSeason)
+        .order_by(LeagueSeason.id.desc())
+        .limit(MAX_SEASONS_FOR_ASSIGNMENT)
+        .all()
+    )
+    return [
+        {
+            "id": s.id,
+            "name": s.name,
+            "kind": s.kind,
+            "game_start": s.game_start,
+            "game_end": s.game_end,
+            "story_pack_key": s.story_pack_key,
+        }
+        for s in seasons
+    ]

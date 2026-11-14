@@ -78,13 +78,44 @@ class BannedTermError(ValueError):
     pass
 
 
+# ── Normalization for banned-term matching (2026-11-14, issue #4052) ─────
+# An admin could dodge the plain substring match above by inserting
+# whitespace (「中 國」 reads identically to a human) or by typing the
+# simplified variant (「中国」). This is normalization for MATCHING only —
+# it does not change BANNED_POLITICAL_TERMS and does not alter the stored
+# value, it only widens what the existing terms catch. Only covers the
+# simplified characters that actually appear in BANNED_POLITICAL_TERMS
+# above (華/国/黃/孫/統/復/戰's simplified forms) — not a general
+# simplified->traditional converter, so it can't silently start matching
+# unrelated content.
+#
+# Only space/tab/full-width-space are collapsed — NOT newlines (code
+# review 2026-11-14: a `\s+` regex also matches `\n`, which would stitch
+# two UNRELATED sentences across a real line break into a false banned-
+# term hit, e.g. a line ending "...守護中" followed by a new line
+# starting "國王..." — those two characters were never adjacent in the
+# admin's actual text. Narrowing to literal inline whitespace still
+# catches the real bypass (「中 國」, a single inserted space) without
+# that false-positive surface.
+_SIMPLIFIED_TO_TRADITIONAL: dict[str, str] = {
+    "华": "華", "国": "國", "黄": "黃", "孙": "孫", "统": "統", "复": "復", "战": "戰",
+}
+_WHITESPACE_RE = re.compile(r"[ \t　]+")
+
+
+def _normalize_for_banned_match(value: str) -> str:
+    collapsed = _WHITESPACE_RE.sub("", value)
+    return "".join(_SIMPLIFIED_TO_TRADITIONAL.get(ch, ch) for ch in collapsed)
+
+
 # Error messages below are shown verbatim to the admin (issue 3615): Chinese
 # only, and they do NOT name the field — story_pack_service attaches the
 # Chinese field label from the error's location, so the message says only
 # WHAT is wrong.
 def _forbid_banned_terms(value: str) -> None:
+    normalized = _normalize_for_banned_match(value)
     for term in BANNED_POLITICAL_TERMS:
-        if term in value:
+        if term in normalized:
             raise BannedTermError(f"不可包含「{term}」，請改用中立的書中世界／冒險描述")
 
 

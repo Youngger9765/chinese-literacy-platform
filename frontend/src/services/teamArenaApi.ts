@@ -168,6 +168,11 @@ interface TeamArenaStateBase {
   sides: Record<TeamArenaSide, TeamArenaSidePublic>;
   own_match: TeamArenaOwnMatch | null;
   unchanged?: false;
+  /** issue #4054: server-authoritative clock for the answer countdown —
+   * ISO timestamp of when THIS turn started, paired with `server_now` for
+   * clock-skew correction (same idiom as live_quiz's CountdownBar). */
+  turn_started_at: string | null;
+  server_now: string;
 }
 
 export type TeamArenaState = TeamArenaStateBase | TeamArenaUnchangedState;

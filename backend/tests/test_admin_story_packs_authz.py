@@ -9,6 +9,7 @@ test_admin_story_structure_lab_authz.py.
 import os
 import sys
 import uuid
+from datetime import datetime, timedelta, timezone
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
@@ -22,6 +23,7 @@ from app.auth.dependencies import get_current_user
 from app.database import get_db
 from app.main import app
 from app.models import Base
+from app.models.league import LeagueSeason
 from app.models.user import Role, User, UserRole
 from app.services.story_pack_defaults import MYTH_PACK_KEY, TANG_PACK_KEY
 from app.services.story_pack_store import InMemoryStoryPackStore, get_story_pack_store
@@ -79,6 +81,7 @@ GET_PATHS = [
     "/api/admin/story-packs/active",
     f"/api/admin/story-packs/{TANG_PACK_KEY}",
     "/api/admin/story-packs/seasons/1",
+    "/api/admin/story-packs/seasons",
 ]
 
 
@@ -195,6 +198,58 @@ class TestSystemAdminPositiveControl:
         r2 = client.get("/api/admin/story-packs/seasons/123")
         assert r2.status_code == 200
         assert r2.json()["effective_pack"]["key"] == SONG_PACK_KEY
+
+    def test_system_admin_can_list_seasons_for_the_assignment_dropdown(self, make_client):
+        """Issue #4052: the admin's "指派給此賽季" UI used to be a bare
+        number input with nothing to pick from — this is the real
+        LeagueSeason table, queried directly (not through the swapped-out
+        InMemoryStoryPackStore), so it must see a season created straight
+        against the DB."""
+        db = Session()
+        user = User(email=f"{uuid.uuid4().hex}@example.com", password_hash="x", name="t")
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+        now = datetime.now(timezone.utc)
+        season = LeagueSeason(
+            kind="invitational",
+            name="跨班邀請賽：三年甲班 vs 五年乙班",
+            game_start=now,
+            game_end=now + timedelta(days=7),
+            weights_snapshot={},
+            created_by=user.id,
+        )
+        db.add(season)
+        db.commit()
+        db.refresh(season)
+        season_id = season.id
+        db.close()
+
+        client = make_client("system_admin")
+        r = client.get("/api/admin/story-packs/seasons")
+        assert r.status_code == 200
+        rows = {row["id"]: row for row in r.json()}
+        assert season_id in rows
+        assert rows[season_id]["name"] == "跨班邀請賽：三年甲班 vs 五年乙班"
+        assert rows[season_id]["story_pack_key"] is None
+
+    def test_seasons_route_hits_the_seasons_list_not_the_key_catch_all(self, make_client):
+        """Route-order regression lock: `/{key}` (a single-segment catch-
+        all, get_pack) is registered in this file BEFORE `/seasons` — if
+        `/seasons` were ever accidentally moved after it (or a future
+        route inserted between them), FastAPI/Starlette would match
+        `/{key}` first and this request would 404 with "劇情包「seasons」
+        不存在" instead of returning the seasons list. Asserting a JSON
+        LIST (not a 404, and not a dict shaped like a single pack) with
+        zero seasons in the DB is the cheapest possible proof the right
+        route handled it — the "has real data" test above also happens to
+        prove this today, but would only fail with a confusing assertion
+        error buried in a bigger test; this one fails loudly and exactly
+        on the thing that matters if route order ever regresses."""
+        client = make_client("system_admin")
+        r = client.get("/api/admin/story-packs/seasons")
+        assert r.status_code == 200, r.text
+        assert r.json() == []
 
 
 

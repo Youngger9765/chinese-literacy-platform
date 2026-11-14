@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   DEFAULT_THEME_FALLBACK,
   determineOutcome,
+  leaguePageHeading,
   pickMilestoneMessage,
   resultCopyFor,
 } from '../leagueTheme';
@@ -135,5 +136,32 @@ describe('DEFAULT_THEME_FALLBACK', () => {
     expect(DEFAULT_THEME_FALLBACK.badges).toHaveLength(2);
     expect(DEFAULT_THEME_FALLBACK.faction_labels).toHaveLength(2);
     expect(DEFAULT_THEME_FALLBACK.chest.name.length).toBeGreaterThan(0);
+  });
+});
+
+describe('leaguePageHeading', () => {
+  it('appends the page label to a real pack title', () => {
+    const theme = makeTheme({ title: '大唐盛世' });
+    expect(leaguePageHeading(theme)).toBe('大唐盛世 · 跨班賽季');
+  });
+
+  it('issue #4052: does not duplicate 跨班賽季 when the theme is the client fallback', () => {
+    // DEFAULT_THEME_FALLBACK.title IS literally "跨班賽季" — naively
+    // concatenating `${theme.title} · 跨班賽季` renders the visibly
+    // duplicated "跨班賽季 · 跨班賽季" every time a board response is
+    // still loading (TeacherLeaguePage.tsx falls back to this theme
+    // before `boards[seasonId]` resolves).
+    expect(leaguePageHeading(DEFAULT_THEME_FALLBACK)).toBe('跨班賽季');
+    expect(leaguePageHeading(DEFAULT_THEME_FALLBACK)).not.toContain('跨班賽季 · 跨班賽季');
+  });
+
+  it('code review 2026-11-14: a REAL pack whose admin-chosen key happens to be "fallback" still gets the normal heading', () => {
+    // story_pack.py's `key` field has no reserved-word check — an admin
+    // could legitimately create/upsert a custom pack at key="fallback".
+    // A string comparison (`theme.key === 'fallback'`) would have
+    // mistaken that real API response for the client sentinel and
+    // silently dropped the "· 跨班賽季" suffix for every real viewer.
+    const realPackNamedFallback = makeTheme({ key: 'fallback', title: '後備賽季包' });
+    expect(leaguePageHeading(realPackNamedFallback)).toBe('後備賽季包 · 跨班賽季');
   });
 });

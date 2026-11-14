@@ -377,3 +377,52 @@ describe('refreshTrigger prop', () => {
     });
   });
 });
+
+// ── Test 7: narrow-width default (Issue #3987 UI-1) ───────────────────────
+//
+// Before #3988 this sidebar defaulted open at a fixed 256px on every
+// viewport, so on a 390px phone it ate ~2/3 of the screen and left the
+// content tables ~130px wide. It should now default to the collapsed
+// icon rail when it first mounts under 768px, and keep the old
+// "open by default" behaviour at desktop widths (jsdom default is 1024px,
+// matching the comment in AdminTreeSidebar.tsx).
+describe('narrow-width default: starts collapsed under 768px (#3987 UI-1)', () => {
+  const ORIGINAL_INNER_WIDTH = window.innerWidth;
+
+  afterEach(() => {
+    Object.defineProperty(window, 'innerWidth', {
+      writable: true,
+      configurable: true,
+      value: ORIGINAL_INNER_WIDTH,
+    });
+  });
+
+  it('mounts collapsed (icon rail) at 390px so the tree does not eat the content', () => {
+    Object.defineProperty(window, 'innerWidth', {
+      writable: true,
+      configurable: true,
+      value: 390,
+    });
+
+    renderSidebar();
+
+    // Collapsed rail renders synchronously (no org fetch needed to decide this).
+    expect(screen.getByTitle('展開側邊欄')).toBeTruthy();
+    expect(screen.queryByText('管理架構')).toBeNull();
+  });
+
+  it('still mounts expanded at desktop width (unchanged baseline)', async () => {
+    Object.defineProperty(window, 'innerWidth', {
+      writable: true,
+      configurable: true,
+      value: 1024,
+    });
+
+    renderSidebar();
+
+    await waitFor(() => {
+      expect(screen.getByText('管理架構')).toBeTruthy();
+    });
+    expect(screen.queryByTitle('展開側邊欄')).toBeNull();
+  });
+});

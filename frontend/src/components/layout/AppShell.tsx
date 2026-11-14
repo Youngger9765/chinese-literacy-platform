@@ -166,7 +166,24 @@ export function stepperEdgeFades(scrollLeft: number, clientWidth: number, scroll
   };
 }
 
-const StepDots: React.FC<StepDotsProps> = ({
+/**
+ * UI-2 (#3987/#3988): 24px only faded a sliver of the last dot — at actual
+ * phone size (not zoomed in) it read as "nothing", so a 214-of-406px
+ * cut-off step row still looked like there was no more content. Widened to
+ * 40px so the cue is visible at native size, not just under a loupe.
+ *
+ * Pulled out of the inline `style={}` (test-support only, #3987 regression
+ * lock — byte-identical output) because jsdom's CSS parser drops any
+ * `mask-image`/`WebkitMaskImage` value that contains `calc()`, so a
+ * rendered-DOM assertion can never see this literal; a plain string
+ * assertion on the function's return value can.
+ */
+export function stepEdgeFadeMask(fades: { left: boolean; right: boolean }): string | undefined {
+  if (!fades.left && !fades.right) return undefined;
+  return `linear-gradient(to right, ${fades.left ? 'transparent' : '#000'} 0, #000 40px, #000 calc(100% - 40px), ${fades.right ? 'transparent' : '#000'} 100%)`;
+}
+
+export const StepDots: React.FC<StepDotsProps> = ({
   steps,
   annotations,
   currentStepIndex,
@@ -224,9 +241,11 @@ const StepDots: React.FC<StepDotsProps> = ({
       // (not zoomed in) it read as "nothing", so a 214-of-406px cut-off step
       // row still looked like there was no more content. Widened to 40px so
       // the cue is visible at native size, not just under a loupe.
+      // (Mask string built by stepEdgeFadeMask — see its docstring above for
+      // why that's pulled out as a pure function instead of inlined here.)
       style={fades.left || fades.right ? {
-        maskImage: `linear-gradient(to right, ${fades.left ? 'transparent' : '#000'} 0, #000 40px, #000 calc(100% - 40px), ${fades.right ? 'transparent' : '#000'} 100%)`,
-        WebkitMaskImage: `linear-gradient(to right, ${fades.left ? 'transparent' : '#000'} 0, #000 40px, #000 calc(100% - 40px), ${fades.right ? 'transparent' : '#000'} 100%)`,
+        maskImage: stepEdgeFadeMask(fades),
+        WebkitMaskImage: stepEdgeFadeMask(fades),
       } : undefined}
     >
       <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 flex-nowrap justify-center min-w-max px-0.5">

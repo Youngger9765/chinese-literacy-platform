@@ -1,9 +1,10 @@
 /**
- * issue #3607 — ClassroomPkSettingsPanel extended from one switch (真人 PK)
- * to three (真人 PK / 跨班賽季 / 課堂搶答). Each switch must only PATCH its
- * own key — a teacher toggling 跨班賽季 must never accidentally send stale
- * values for the other two switches (merge-not-overwrite is the backend's
- * job; the frontend's job is to never send a key it isn't actually toggling).
+ * issue #3607 — ClassroomPkSettingsPanel extended from one switch (真人 PK,
+ * renamed to 班級內 PK per #4050 — see that issue's wording note) to three
+ * (班級內 PK / 跨班賽季 / 課堂搶答). Each switch must only PATCH its own key
+ * — a teacher toggling 跨班賽季 must never accidentally send stale values
+ * for the other two switches (merge-not-overwrite is the backend's job;
+ * the frontend's job is to never send a key it isn't actually toggling).
  */
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
@@ -27,7 +28,7 @@ describe('ClassroomPkSettingsPanel — three switches (#3607)', () => {
         onChanged={vi.fn()}
       />,
     );
-    expect(screen.getByRole('switch', { name: '真人 PK 開關' })).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByRole('switch', { name: '班級內 PK 開關' })).toHaveAttribute('aria-checked', 'true');
     expect(screen.getByRole('switch', { name: '跨班賽季開關' })).toHaveAttribute('aria-checked', 'false');
     expect(screen.getByRole('switch', { name: '課堂搶答開關' })).toHaveAttribute('aria-checked', 'false');
   });

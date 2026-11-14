@@ -22,9 +22,11 @@ import {
   fetchActivePack,
   fetchPack,
   fetchPackList,
+  fetchSeasons,
   setActivePack,
   upsertPack,
   validatePackPayload,
+  type SeasonForAssignment,
 } from '../../../services/adminStoryPackApi';
 import BattleHero from '../../../components/league/BattleHero';
 
@@ -99,15 +101,25 @@ const StoryPackStudioPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null);
+  // Issue #4052: was a free-typed season ID with no way to discover what
+  // IDs exist — now a dropdown over `seasons` (fetched once, platform-
+  // wide, not per-pack). Kept as a string because a <select> value is
+  // always a string; parsed to a number only at submit time.
+  const [seasons, setSeasons] = useState<SeasonForAssignment[]>([]);
   const [seasonIdInput, setSeasonIdInput] = useState('');
 
   const loadList = useCallback(async () => {
     if (!token) return;
     setLoading(true);
     try {
-      const [list, active] = await Promise.all([fetchPackList(token), fetchActivePack(token)]);
+      const [list, active, seasonRows] = await Promise.all([
+        fetchPackList(token),
+        fetchActivePack(token),
+        fetchSeasons(token),
+      ]);
       setPacks(list);
       setActiveKeyState(active.key);
+      setSeasons(seasonRows);
     } catch (err) {
       setNotice({ kind: 'error', text: err instanceof Error ? err.message : '無法載入劇情包清單' });
     } finally {
@@ -218,37 +230,41 @@ const StoryPackStudioPage: React.FC = () => {
     }
   }, [token, selectedKey, loadList]);
 
-  const handleSetActive = useCallback(async () => {
-    if (!token || !selectedKey) return;
-    try {
-      await setActivePack(token, selectedKey);
-      setActiveKeyState(selectedKey);
-      setNotice({ kind: 'ok', text: `已將「${selectedKey}」設為平台預設劇情包` });
-    } catch (err) {
-      setNotice({ kind: 'error', text: err instanceof Error ? err.message : '設定失敗' });
-    }
-  }, [token, selectedKey]);
-
-  const handleAssignToSeason = useCallback(async () => {
-    if (!token || !selectedKey) return;
-    const seasonId = Number(seasonIdInput);
-    if (!Number.isInteger(seasonId) || seasonId <= 0) {
-      setNotice({ kind: 'error', text: '請輸入有效的賽季 ID' });
-      return;
-    }
-    try {
-      await assignSeasonPack(token, seasonId, selectedKey);
-      setNotice({ kind: 'ok', text: `已將賽季 #${seasonId} 指派為「${selectedKey}」` });
-    } catch (err) {
-      setNotice({ kind: 'error', text: err instanceof Error ? err.message : '指派失敗' });
-    }
-  }, [token, selectedKey, seasonIdInput]);
-
   const selectedSummary = useMemo(
     () => packs.find((p) => p.key === selectedKey) ?? null,
     [packs, selectedKey],
   );
   const isBuiltinSelected = Boolean(selectedSummary?.is_builtin);
+  // Issue #4052: toasts must show the Chinese pack name an admin
+  // recognizes, not the English slug used as the API key.
+  const selectedPackDisplayName = selectedSummary?.title || selectedKey || '';
+
+  const handleSetActive = useCallback(async () => {
+    if (!token || !selectedKey) return;
+    try {
+      await setActivePack(token, selectedKey);
+      setActiveKeyState(selectedKey);
+      setNotice({ kind: 'ok', text: `已將「${selectedPackDisplayName}」設為平台預設劇情包` });
+    } catch (err) {
+      setNotice({ kind: 'error', text: err instanceof Error ? err.message : '設定失敗' });
+    }
+  }, [token, selectedKey, selectedPackDisplayName]);
+
+  const handleAssignToSeason = useCallback(async () => {
+    if (!token || !selectedKey) return;
+    const seasonId = Number(seasonIdInput);
+    if (!Number.isInteger(seasonId) || seasonId <= 0) {
+      setNotice({ kind: 'error', text: '請選擇一個賽季' });
+      return;
+    }
+    const seasonName = seasons.find((s) => s.id === seasonId)?.name ?? `#${seasonId}`;
+    try {
+      await assignSeasonPack(token, seasonId, selectedKey);
+      setNotice({ kind: 'ok', text: `已將賽季「${seasonName}」指派為「${selectedPackDisplayName}」` });
+    } catch (err) {
+      setNotice({ kind: 'error', text: err instanceof Error ? err.message : '指派失敗' });
+    }
+  }, [token, selectedKey, seasonIdInput, seasons, selectedPackDisplayName]);
 
   return (
     <div className="flex h-full min-h-0">
@@ -363,18 +379,27 @@ const StoryPackStudioPage: React.FC = () => {
 
               {selectedKey && (
                 <>
-                  <p className="mt-3 text-xs text-amber-600">
-                    ⚠️「設為平台預設」目前只存在單一伺服器記憶體中（未寫入資料庫），正式站有多台伺服器時可能要等該伺服器重新啟動才會讓所有學生看到同一個預設劇情包。要讓某個賽季的劇情包立即且穩定生效，請改用下方「指派給此賽季」——那一項已完整存入資料庫。
-                  </p>
-                  <div className="mt-2 flex items-center gap-2">
-                    <input
-                      type="number"
-                      min={1}
-                      placeholder="賽季 ID"
+                  <div className="mt-3 flex items-center gap-2">
+                    {/* Issue #4052: a dropdown over the real seasons —
+                        previously a bare number input the admin had to
+                        hand-type an ID into with no way to discover what
+                        IDs exist. */}
+                    <label htmlFor="story-pack-season-select" className="text-sm text-gray-700">
+                      選擇賽季
+                    </label>
+                    <select
+                      id="story-pack-season-select"
                       value={seasonIdInput}
                       onChange={(e) => setSeasonIdInput(e.target.value)}
-                      className="text-sm border border-gray-200 rounded-lg px-2 py-1.5 w-32"
-                    />
+                      className="text-sm border border-gray-200 rounded-lg px-2 py-1.5 min-w-[220px]"
+                    >
+                      <option value="">請選擇賽季…</option>
+                      {seasons.map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.name}
+                        </option>
+                      ))}
+                    </select>
                     <button
                       type="button"
                       onClick={handleAssignToSeason}
@@ -387,7 +412,13 @@ const StoryPackStudioPage: React.FC = () => {
               )}
             </header>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Issue #4052: at a typical 1280px-wide desktop window the old
+                `lg:grid-cols-2` (kicks in at 1024px) squeezed each column
+                to ~550px, truncating BattleHero's title in 即時預覽. The
+                2-up layout now only kicks in above 1400px (comfortably
+                past 1280) — below that, JSON editor and live preview each
+                get the FULL content width, stacked. */}
+            <div className="grid grid-cols-1 min-[1400px]:grid-cols-2 gap-4">
               <section className="rounded-xl border border-gray-200 bg-white overflow-hidden">
                 <header className="px-4 py-2 border-b border-gray-100 bg-gray-50 text-sm font-semibold text-gray-700 flex items-center justify-between">
                   <span>劇情包內容（JSON）</span>

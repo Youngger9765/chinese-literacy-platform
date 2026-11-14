@@ -279,7 +279,7 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
                           openRecommendations(student);
                         }}
                         disabled={previewingStudentId === student.student_id}
-                        className="inline-flex items-center justify-center px-2.5 py-1 rounded-md text-xs font-medium text-[#11806F] bg-[#19A696]/10 border border-[#19A696]/30 hover:bg-[#19A696]/70 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="inline-flex items-center justify-center px-2.5 py-1 rounded-md text-xs font-medium text-[#11806F] bg-[#19A696]/10 border border-[#19A696]/30 hover:bg-[#F0FAF8] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         title="看系統建議這位學生接下來練哪幾課"
                       >
                         {previewingStudentId === student.student_id ? '載入中…' : '推薦練習'}

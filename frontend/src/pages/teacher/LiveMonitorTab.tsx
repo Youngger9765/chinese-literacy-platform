@@ -238,7 +238,7 @@ const LiveMonitorTab: React.FC<LiveMonitorTabProps> = ({ classroomId }) => {
               <button
                 onClick={() => openRecommendations(s)}
                 disabled={previewingStudentId === s.student_id}
-                className="shrink-0 inline-flex items-center justify-center px-2.5 py-1 rounded-md text-xs font-medium text-[#11806F] bg-[#19A696]/10 border border-[#19A696]/30 hover:bg-[#19A696]/70 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="shrink-0 inline-flex items-center justify-center px-2.5 py-1 rounded-md text-xs font-medium text-[#11806F] bg-[#19A696]/10 border border-[#19A696]/30 hover:bg-[#F0FAF8] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 title="看系統建議這位學生接下來練哪幾課"
               >
                 {previewingStudentId === s.student_id ? '載入中…' : '推薦練習'}
