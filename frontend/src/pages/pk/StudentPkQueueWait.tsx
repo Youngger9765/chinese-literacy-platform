@@ -48,7 +48,13 @@ const StudentPkQueueWait: React.FC = () => {
         if (cancelled) return;
         setSuggestAi(res.suggest_ai);
         if (res.status === 'matched' && res.match_id != null) {
-          navigate(`/pk/match/${res.match_id}`, { replace: true, state: { opponentType: 'player' } });
+          navigate(`/pk/match/${res.match_id}`, {
+            replace: true,
+            // #4050: carry the opponent's real name (if the backend had
+            // one to give) so the VS screen doesn't have to fall back to
+            // a hardcoded "同學".
+            state: { opponentType: 'player', opponentName: res.opponent_name ?? null },
+          });
           return;
         }
         if (res.status === 'cancelled' || res.status === 'expired') {
