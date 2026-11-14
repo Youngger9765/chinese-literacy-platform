@@ -47,9 +47,20 @@ describe('<PkHeroBanner> (#3761)', () => {
     expect(screen.getByText('打贏文學家可以解鎖他的人物卡')).toBeTruthy();
   });
 
-  it('shows the PK 對戰 title and subtitle', () => {
-    render(<PkHeroBanner />);
+  it('shows the PK 對戰 title and the 同學+文學家 subtitle when 班級內 PK is on', () => {
+    render(<PkHeroBanner pkHumanEnabled />);
     expect(screen.getByRole('heading', { name: 'PK 對戰' })).toBeTruthy();
     expect(screen.getByText('一對一，隨時挑戰同學或文學家')).toBeTruthy();
+  });
+
+  it('#4050: defaults to the 同學+文學家 subtitle when the prop is omitted (unresolved callers keep old behavior)', () => {
+    render(<PkHeroBanner />);
+    expect(screen.getByText('一對一，隨時挑戰同學或文學家')).toBeTruthy();
+  });
+
+  it('#4050: drops the 同學 promise when no enrolled classroom has 班級內 PK turned on', () => {
+    render(<PkHeroBanner pkHumanEnabled={false} />);
+    expect(screen.getByText('一對一，隨時挑戰文學家')).toBeTruthy();
+    expect(screen.queryByText('一對一，隨時挑戰同學或文學家')).toBeNull();
   });
 });

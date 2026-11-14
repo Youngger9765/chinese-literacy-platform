@@ -14,10 +14,13 @@ describe('TEACHER_SWITCH_MODES', () => {
 
   it('carries the exact pre-registry switch text for every entry', () => {
     const byKey = Object.fromEntries(TEACHER_SWITCH_MODES.map((m) => [m.key, m]));
+    // #4050: renamed from "真人 PK" to "班級內 PK" so the switch panel's own
+    // title matches TeacherSidebar.tsx's Game Hub nav description, which
+    // already said "班級內 PK 開關" — same toggle, two different names.
     expect(byKey.pk_human).toMatchObject({
-      teacherSwitchTitle: '真人 PK',
+      teacherSwitchTitle: '班級內 PK',
       teacherSwitchDescription: '同學之間配對對戰，預設關閉',
-      teacherSwitchAriaLabel: '真人 PK 開關',
+      teacherSwitchAriaLabel: '班級內 PK 開關',
     });
     expect(byKey.league).toMatchObject({
       teacherSwitchTitle: '跨班賽季',
@@ -65,7 +68,7 @@ describe('GAME_MODES — student hub (unchanged by round 3)', () => {
   it('still has 5 modes with the student-facing label/description/route round 2 pinned', () => {
     expect(GAME_MODES).toHaveLength(5);
     const pk = GAME_MODES.find((m) => m.key === 'pk_human');
-    expect(pk?.label).toBe('PK 對戰'); // student hub card title, NOT the teacher switch's "真人 PK"
+    expect(pk?.label).toBe('PK 對戰'); // student hub card title, NOT the teacher switch's "班級內 PK"
     expect(pk?.description).toBe('一對一，隨時挑戰同學或文學家');
     expect(pk?.hubRoute).toBe('/pk');
   });
