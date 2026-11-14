@@ -14,6 +14,7 @@ import secrets
 from datetime import datetime, timedelta, timezone
 
 from fastapi import HTTPException
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from ...models.pk import (
@@ -70,11 +71,46 @@ PK_FIGURE_ASSET_BASE = "/pk-art/figures"
 
 def get_or_create_rating(db: Session, student_id: int) -> PkRating:
     rating = db.query(PkRating).filter(PkRating.student_id == student_id).first()
-    if rating is None:
-        rating = PkRating(student_id=student_id, rating=RATING_DEFAULT)
-        db.add(rating)
-        db.commit()
-        db.refresh(rating)
+    if rating is not None:
+        return rating
+    try:
+        # #4050 bug 1: a brand-new student's FIRST visit to the PK page
+        # fires GET /api/pk/rating/me and GET /api/pk/opponents at once —
+        # each is its own request with its own DB session (FastAPI's
+        # `Depends(get_db)` never shares one), so both can run the SELECT
+        # above and see no row, then both try to INSERT. pk_ratings.
+        # student_id has a UNIQUE constraint (migration 3cae704f01c3), so
+        # whichever commit lands second used to raise an unhandled
+        # IntegrityError -> 500 instead of just returning the row the
+        # other request already created.
+        #
+        # A SAVEPOINT (begin_nested) — not a plain db.rollback() — on
+        # purpose: several callers (matchmaking.attempt_match/redeem_invite)
+        # hold a `FOR UPDATE SKIP LOCKED` row lock, or other unflushed
+        # work, on THIS SAME db/transaction when they reach this function
+        # (directly or via create_human_match/create_ai_match). A plain
+        # rollback() would release that lock / discard that work too; a
+        # savepoint rollback only undoes the failed INSERT below.
+        #
+        # `begin_nested()` MUST be entered before `db.add(rating)` —
+        # entering it flushes whatever is already pending as part of
+        # taking its snapshot, and a pending INSERT that fails THERE
+        # happens before the savepoint actually exists, leaving the
+        # Session needing a real top-level rollback (reproduced locally:
+        # that ordering throws PendingRollbackError on the very next
+        # query). Building + adding `rating` INSIDE the `with` block keeps
+        # the failing INSERT inside the savepoint's protected scope.
+        with db.begin_nested():
+            rating = PkRating(student_id=student_id, rating=RATING_DEFAULT)
+            db.add(rating)
+            db.flush()
+    except IntegrityError:
+        rating = db.query(PkRating).filter(PkRating.student_id == student_id).first()
+        if rating is None:
+            raise  # not actually a race — something else is wrong, surface it
+        return rating
+    db.commit()
+    db.refresh(rating)
     return rating
 
 

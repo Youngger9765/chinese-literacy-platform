@@ -9,8 +9,9 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 
 import pytest
+from sqlalchemy import text
 
-from app.models.pk import ANSWER_SECONDS, PkMatch, PkRating, REVEAL_SECONDS
+from app.models.pk import ANSWER_SECONDS, PkMatch, PkRating, RATING_DEFAULT, REVEAL_SECONDS
 from app.services.pk import engine as svc
 from league_factories import enroll_student, make_classroom, make_school, make_student, make_teacher
 
@@ -717,3 +718,139 @@ class TestAiExpression:
             svc.advance_if_needed(db_session, match2)
         state2 = svc.build_match_state(db_session, match2, b)
         assert state2["ai_expression"] == "defeat"
+
+
+# ---------------------------------------------------------------------------
+# #4050 bug 1: concurrent get_or_create_rating race on a brand-new student
+# ---------------------------------------------------------------------------
+
+class TestGetOrCreateRatingConcurrencyRace:
+    """Staging QA (#4050): a brand-new student's FIRST visit to the PK page
+    fires GET /api/pk/rating/me and GET /api/pk/opponents at (near) the
+    same time -- each is its own HTTP request with its OWN DB session
+    (FastAPI's `Depends(get_db)` never auto-commits/shares), and both land
+    in `get_or_create_rating` with no existing row for that student. Both
+    SELECTs see nothing, both try to INSERT; `pk_ratings.student_id` has a
+    UNIQUE constraint (migration 3cae704f01c3), so whichever commit lands
+    second used to raise an unhandled IntegrityError -> 500 instead of
+    just handing back the row the other request already created.
+
+    Simulated here with ONE session: the raw INSERT below (executed
+    directly against the DB connection, bypassing the ORM identity map)
+    stands in for "the other concurrent request's session already won
+    this race" -- by the time `get_or_create_rating`'s own flush runs
+    (inside its SAVEPOINT), the DB genuinely has a duplicate `student_id`
+    row, so this raises a REAL IntegrityError from SQLite's own
+    unique-constraint enforcement, not a mocked one.
+    """
+
+    def test_losing_the_race_returns_the_winners_row_instead_of_500ing(
+        self, db_session, classroom, monkeypatch
+    ):
+        student = _enrolled_student(db_session, classroom)
+
+        real_begin_nested = db_session.begin_nested
+
+        def begin_nested_after_a_concurrent_winner_sneaks_in(*a, **kw):
+            # The "other request" inserted its own rating row for this
+            # exact student FIRST, in the gap between our own SELECT
+            # (which saw nothing) and the SAVEPOINT get_or_create_rating is
+            # about to open for its own INSERT. Executed directly (not via
+            # `db.add`) so it lands before the savepoint exists, exactly
+            # like a separate session's already-committed row would.
+            db_session.execute(
+                text(
+                    "INSERT INTO pk_ratings "
+                    "(student_id, rating, matches_played, wins, losses, draws, "
+                    "created_at, updated_at) "
+                    "VALUES (:sid, :r, 0, 0, 0, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)"
+                ),
+                {"sid": student.id, "r": RATING_DEFAULT + 7},
+            )
+            monkeypatch.setattr(db_session, "begin_nested", real_begin_nested)
+            return real_begin_nested(*a, **kw)
+
+        monkeypatch.setattr(db_session, "begin_nested", begin_nested_after_a_concurrent_winner_sneaks_in)
+
+        rating = svc.get_or_create_rating(db_session, student.id)
+
+        # Got back the WINNER's row (the one the "other request" created),
+        # not a 500 and not a second duplicate row.
+        assert rating.student_id == student.id
+        assert rating.rating == RATING_DEFAULT + 7
+        assert (
+            db_session.query(PkRating).filter(PkRating.student_id == student.id).count()
+            == 1
+        )
+
+    def test_race_recovery_does_not_discard_other_pending_work_in_the_same_session(
+        self, db_session, classroom, monkeypatch
+    ):
+        """matchmaking.attempt_match/redeem_invite hold a FOR UPDATE SKIP
+        LOCKED row lock (or other unflushed work) on THIS SAME db/
+        transaction when they call get_or_create_rating (directly, or via
+        create_human_match). A plain db.rollback() recovery would release
+        that lock / discard that work too — this proves the SAVEPOINT
+        recovery does not: an unrelated, still-pending change on another
+        row survives a losing race."""
+        student = _enrolled_student(db_session, classroom)
+        other = _enrolled_student(db_session, classroom)
+
+        # Unrelated pending change on a DIFFERENT row — stands in for
+        # e.g. a locked PkQueue row's in-memory mutation, or
+        # _finalize_match having already set match.winner_user_id before
+        # calling this function.
+        other.name = "unrelated-pending-change-must-survive"
+        db_session.add(other)
+
+        real_begin_nested = db_session.begin_nested
+
+        def begin_nested_after_a_concurrent_winner_sneaks_in(*a, **kw):
+            db_session.execute(
+                text(
+                    "INSERT INTO pk_ratings "
+                    "(student_id, rating, matches_played, wins, losses, draws, "
+                    "created_at, updated_at) "
+                    "VALUES (:sid, :r, 0, 0, 0, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)"
+                ),
+                {"sid": student.id, "r": RATING_DEFAULT + 3},
+            )
+            monkeypatch.setattr(db_session, "begin_nested", real_begin_nested)
+            return real_begin_nested(*a, **kw)
+
+        monkeypatch.setattr(db_session, "begin_nested", begin_nested_after_a_concurrent_winner_sneaks_in)
+
+        svc.get_or_create_rating(db_session, student.id)
+
+        # The unrelated change on `other` must have survived — not wiped
+        # out by the race recovery — and must actually be persisted once
+        # get_or_create_rating's own final db.commit() runs.
+        db_session.expire(other)
+        reloaded = db_session.query(type(other)).filter_by(id=other.id).first()
+        assert reloaded.name == "unrelated-pending-change-must-survive"
+
+    def test_no_race_still_creates_normally(self, db_session, classroom):
+        """Positive control -- the non-racing path must still work exactly
+        as before: no existing row -> creates one at RATING_DEFAULT."""
+        student = _enrolled_student(db_session, classroom)
+        rating = svc.get_or_create_rating(db_session, student.id)
+        assert rating.rating == RATING_DEFAULT
+        assert (
+            db_session.query(PkRating).filter(PkRating.student_id == student.id).count()
+            == 1
+        )
+
+    def test_existing_rating_is_returned_without_touching_the_row(self, db_session, classroom):
+        """Positive control -- an existing row must be returned as-is, no
+        second INSERT attempt at all."""
+        student = _enrolled_student(db_session, classroom)
+        first = svc.get_or_create_rating(db_session, student.id)
+        first.rating = 1234
+        db_session.commit()
+
+        again = svc.get_or_create_rating(db_session, student.id)
+        assert again.rating == 1234
+        assert (
+            db_session.query(PkRating).filter(PkRating.student_id == student.id).count()
+            == 1
+        )

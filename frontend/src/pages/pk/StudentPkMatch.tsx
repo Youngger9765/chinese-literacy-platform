@@ -20,6 +20,7 @@ import PkFigureIntro from '../../components/pk/PkFigureIntro';
 import PkCountdownRing from '../../components/pk/PkCountdownRing';
 import PkOptionButtons from '../../components/pk/PkOptionButtons';
 import PkPlayerPanel from '../../components/pk/PkPlayerPanel';
+import PkFigurePortrait from '../../components/pk/PkFigurePortrait';
 import PkComboBadge, { computeCombo, type PkAnswerLite } from '../../components/pk/PkComboBadge';
 import PkResultScreen from '../../components/pk/PkResultScreen';
 import { resolveAiExpression } from '../../components/pk/pkExpression';
@@ -44,6 +45,11 @@ interface LocationState {
   opponentType?: 'ai' | 'player';
   tier?: number;
   firstTime?: boolean;
+  /** #4050: the human opponent's real name, when StudentPkQueueWait had
+   * one to carry over (poll_queue's opponent_name) — falls back to "同學"
+   * when absent (e.g. an older cached bundle, or the backend genuinely had
+   * no name to give). */
+  opponentName?: string | null;
 }
 
 const MAX_SCORE = 5000; // PRD §4: 5 題 x 1000 分滿分
@@ -127,7 +133,19 @@ const StudentPkMatch: React.FC = () => {
     try {
       await submitPkAnswer(token, numericMatchId, key);
     } catch (err) {
-      setSubmitError(err instanceof PkApiError ? err.message : '送出失敗，請重試');
+      // #4050 bug 3: a 409 here means the server already moved this round
+      // on without our click landing in time (engine.py submit_match_answer:
+      // "This round is already being revealed" / "This match has already
+      // ended" / "You already answered this round") — a timing race, not a
+      // real failure. The per-round reveal message below already tells the
+      // true story off `round.my_choice_key` once the next poll lands, so
+      // showing the generic "發生錯誤" banner on top of it is both redundant
+      // and (per #4050) was confusingly showing alongside "答錯了" for a
+      // question the student never got to answer. Only a genuine non-409
+      // failure (network error, 500, ...) still gets the banner.
+      if (!(err instanceof PkApiError && err.status === 409)) {
+        setSubmitError(err instanceof PkApiError ? err.message : '送出失敗，請重試');
+      }
     }
   };
 
@@ -135,7 +153,8 @@ const StudentPkMatch: React.FC = () => {
   void comboTick; // referenced only to force a re-render when the ref updates
 
   if (phase === 'vs') {
-    const opponentName = locState.opponentType === 'ai' ? aiFigure?.name ?? 'AI' : '同學';
+    const opponentName =
+      locState.opponentType === 'ai' ? aiFigure?.name ?? 'AI' : locState.opponentName ?? '同學';
     return (
       <PkVsScreen
         myName={user?.name ?? '你'}
@@ -226,6 +245,26 @@ const StudentPkMatch: React.FC = () => {
         <PkPlayerPanel side="opponent" size="compact" name={opponentName} score={state.opponent_score} maxScore={MAX_SCORE} imageUrl={opponentAvatarUrl} isAi={state.opponent_type === 'AI'} leading={state.opponent_score > state.my_score} />
       </div>
 
+      {/* #4050 bug 2: the compact row above only carries a 44px avatar —
+          too small to read the figure's expression — and left roughly
+          150px of empty space before the countdown ring / question card.
+          A large, expressive portrait (same PkFigurePortrait every other
+          PK screen renders through) now fills that space on phones for an
+          AI match. No name/score here — the compact row above already has
+          those, this is purely the "大張人像、表情隨答對答錯改變" the
+          acceptance sheet asked for. Desktop keeps the <aside> below
+          (lg:block), unaffected. */}
+      {battleAiFigure && (
+        <div className="mb-3 flex justify-center lg:hidden">
+          <PkFigurePortrait
+            tier={battleAiFigure.tier}
+            expression={battleAiExpression}
+            name={opponentName}
+            className="h-32 w-32 object-contain"
+          />
+        </div>
+      )}
+
       <div className="flex flex-1 gap-6 lg:items-start">
         <aside className="hidden w-56 shrink-0 lg:block">
           <PkPlayerPanel side="me" name={myName} score={state.my_score} maxScore={MAX_SCORE} leading={state.my_score > state.opponent_score} />
@@ -275,7 +314,17 @@ const StudentPkMatch: React.FC = () => {
           {submitError && <p className="text-sm text-error">{submitError}</p>}
           {revealing && (
             <p className="text-sm text-on-surface-variant">
-              {round.my_choice_key === round.correct_key ? '答對了！' : '答錯了，下一題加油！'}
+              {/* #4050 bug 3: no recorded answer (never clicked in time, OR
+                  clicked too late and the server 409'd it — either way
+                  `my_choice_key` stays null through the backfilled no-
+                  answer entry, see engine.py advance_if_needed) must read
+                  as "時間到", never "答錯了" — the student didn't get a
+                  question wrong, they ran out of time. */}
+              {round.my_choice_key == null
+                ? '⏰ 時間到，下一題加油！'
+                : round.my_choice_key === round.correct_key
+                  ? '答對了！'
+                  : '答錯了，下一題加油！'}
             </p>
           )}
         </div>
