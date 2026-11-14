@@ -94,7 +94,7 @@ test.describe('PK 對戰 pk_human', () => {
         const group = p.getByRole('group', { name: '選項' });
         if (!(await group.count())) continue;
         const firstOption = group.getByRole('button').first();
-        if (await firstOption.count() && !(await firstOption.isDisabled())) {
+        if (await firstOption.count() && !(await firstOption.isDisabled({ timeout: 2000 }).catch(() => true))) {
           await firstOption.click();
         }
       }

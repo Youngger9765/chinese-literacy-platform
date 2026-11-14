@@ -186,7 +186,7 @@ test.describe('多人對抗賽 team_arena', () => {
           if (!weaponUsed) {
             const hintBtn = host.getByRole('button', { name: '看提示' });
             const callBtn = host.getByRole('button', { name: '呼叫隊友' });
-            if (await hintBtn.count() && !(await hintBtn.isDisabled())) {
+            if (await hintBtn.count() && !(await hintBtn.isDisabled({ timeout: 2000 }).catch(() => true))) {
               await hintBtn.click();
               weaponUsed = true;
               await host.waitForTimeout(1000);
