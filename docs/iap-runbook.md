@@ -318,9 +318,9 @@ CI workflow（`e2e-tests.yml`、`staging-deploy.yml`、`preview-deploy.yml`）
    `roles/iap.admin` 才能讀取/寫入 IAP 存取名單，這個角色範圍比實際需要
    的大很多；應該改成自訂的、只能讀寫 IAP policy 的最小權限角色，目前
    還沒做，所以頁面顯示「尚未設定 IAP」。
-3. **兩個丟棄式 canary 服務還留著**（`lingoleap-iap-canary`、
-   `lingoleap-invoker-canary`、`lingoleap-frontend-invoker-canary`）——
-   確認上面「對 staging 真的打開」的步驟不再需要參考這幾個服務之後即可
-   刪除，不是正式環境的一部分，不影響任何真實服務。
+3. ~~兩個丟棄式 canary 服務還留著~~ —— 已刪除：2026-11-15 查
+   `gcloud run services list`（lingoleap-dev／asia-east1），
+   `lingoleap-iap-canary`、`lingoleap-invoker-canary`、
+   `lingoleap-frontend-invoker-canary` 都已不在清單上。
 4. **staging QA 測試帳號的清理、唯讀 DB 角色**——跟 IAP 本身無關，是
    IAP 準備期間一併發現的既有技術債，還沒處理。
