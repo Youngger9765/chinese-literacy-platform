@@ -52,3 +52,31 @@ if:
 - the lock contains a loose range instead of an exact `==` pin.
 
 If this test fails, you forgot to regenerate the lock — run the command above.
+
+## Build dependencies and sdist-only packages (#3852)
+
+`--require-hashes` verifies every downloaded distribution, but **not** the
+packages pip installs into the isolated build env it creates when it has to
+build an sdist. `jieba==0.42.1` ships only an sdist, so without extra flags pip
+fetches a floating, unverified `setuptools` from PyPI to build it.
+
+So every install of `requirements.lock` (Dockerfile + CI) is two steps:
+
+```bash
+pip install --require-hashes --only-binary=:all: -r requirements-build.lock
+pip install --require-hashes --only-binary=:all: --no-binary=jieba \
+  --no-build-isolation -r requirements.lock
+```
+
+- `requirements-build.in` → `requirements-build.lock`: the hash-pinned build
+  backend (setuptools, matching the version the pinned base image ships).
+  Regenerate with
+  `uv pip compile requirements-build.in --generate-hashes --python-version 3.11 --python-platform x86_64-manylinux_2_28 -o requirements-build.lock`.
+- `--only-binary=:all:` makes any *new* sdist-only dependency fail the build
+  instead of being silently compiled. If that happens, either pick a version
+  with a wheel, or add it to `--no-binary=` everywhere **and** to
+  `SDIST_ALLOWLIST` in `tests/test_jieba_build_isolation_3852.py` (a reviewed
+  decision), making sure it builds with only `requirements-build.lock`.
+
+`tests/test_jieba_build_isolation_3852.py` fails CI if any install site drops
+one of these flags or the build-lock step.
