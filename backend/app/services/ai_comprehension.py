@@ -15,7 +15,6 @@ from .ai_base import (
     generate_structured_response,
     capture_usage,
     last_usage,
-    sanitize_ai_input,
     sanitize_dialogue_turns,
     TUTOR_PERSONA,
 )
@@ -82,12 +81,15 @@ async def generate_socratic_question(
         )
     ]
 
-    for turn in conversation:
+    # Issue #3936 follow-up (find_01AS6qqjWCjVEXLM2gfFuGyT): this used to
+    # sanitize only role == "student", trusting "ai" turns as server-made.
+    # The caller (/comprehension/question) builds `conversation` straight
+    # from the request body, so the CLIENT picks every role -- an "ai"
+    # label let attacker text reach the prompt unfiltered. Sanitize every
+    # turn the same way evaluate_comprehension already does.
+    for turn in sanitize_dialogue_turns(conversation):
         role = "model" if turn["role"] == "ai" else "user"
-        # Sanitize student inputs to prevent prompt injection (Issue #270)
         text = turn["text"]
-        if turn["role"] == "student":
-            text, _ = sanitize_ai_input(text)
         contents.append(
             genai_types.Content(
                 role=role,

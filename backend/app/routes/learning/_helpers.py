@@ -23,6 +23,17 @@ from ...models.parent_link import ParentStudentLink
 #: deep inside the sanitizer after the whole payload was already parsed.
 CONVERSATION_TURN_TEXT_MAX_LENGTH = 2000
 
+#: Max turns in any client-supplied Socratic dialogue that is fed into a
+#: Gemini prompt. A real session targets 5 understood questions
+#: (REQUIRED_UNDERSTOOD in services/socratic/prompt_builder.py), i.e. ~10
+#: turns (question + answer), a little more with retries/clarification.
+#: 40 gives a 4x margin over that for any legitimate session shape while
+#: keeping the worst-case prompt at 40 x 2000 chars instead of unbounded
+#: (find_01AS6qqjWCjVEXLM2gfFuGyT, issue #3936). Shared by every route
+#: that accepts such a list -- /comprehension-score (#3939) and
+#: /comprehension/question (#3936 follow-up) -- so the two cannot drift.
+MAX_DIALOGUE_TURNS = 40
+
 
 class ConversationTurn(BaseModel):
     """A single turn in a dialogue — used by comprehension Q&A and scoring.

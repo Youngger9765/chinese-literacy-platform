@@ -189,17 +189,39 @@ jobs:
             --set-env-vars="^::^ALLOWED_ORIGINS=https://placeholder.run.app::RUN_MIGRATIONS=true::ENVIRONMENT=preview::JWT_SECRET_KEY=${{ secrets.PREVIEW_JWT_SECRET_KEY }}::GCS_OMO_BUCKET=lingoleap-omo-uploads-preview::AZURE_SPEECH_KEY=${{ secrets.AZURE_SPEECH_KEY }}::AZURE_SPEECH_REGION=eastus::TTS_PROVIDER=azure::BUILD_SHA=${{ github.event.pull_request.head.sha }}" \
             --update-secrets="DATABASE_URL=lingoleap-database-url-preview:latest"
 
-      # #3719 — IAP 準備：預設關（IAP_ENABLED=false），這一步整個 skip，
-      # 跟今天行為一致。只有刻意把上面 env.IAP_ENABLED 改成 'true' 開 PR
-      # 才會執行。用 `gcloud beta run services update --iap`——Cloud Run
-      # 原生 IAP 整合，不是 HTTPS LB 那一套，不需要額外的 LB/NEG 資源。
-      - name: （IAP_ENABLED 時）替 backend preview 開 IAP
+      # #3719/#3733 — IAP 準備：預設關（IAP_ENABLED=false），這一步整個
+      # skip，跟今天行為一致。backend **不上原生 IAP**，改用 Cloud Run 本身的
+      # 「需要驗證」（run.invoker）：frontend 的 sidecar 只拿得到一般 ID
+      # token，原生 IAP 會回 401 Invalid JWT audience。先授權再拿掉
+      # allUsers；同源代理沒開時直接失敗、不動 IAM（瀏覽器會直接打 backend）。
+      # 見 docs/iap-runbook.md「backend 認證方式」。
+      - name: （IAP_ENABLED 時）backend preview 改成只給 frontend 與 CI 呼叫（run.invoker）
         if: env.IAP_ENABLED == 'true' && (needs.detect-changes.outputs.backend == 'true' || github.event.action == 'opened')
         run: |
-          gcloud beta run services update ${{ env.BACKEND_SERVICE }} \
-            --iap \
+          if [ "${{ env.SAME_ORIGIN_PROXY_ENABLED }}" != "true" ]; then
+            echo "::error::IAP_ENABLED=true requires SAME_ORIGIN_PROXY_ENABLED=true (browser would call the locked backend directly). No IAM change made."
+            exit 1
+          fi
+          for MEMBER in \
+            "serviceAccount:lingoleap-frontend-run@lingoleap-dev.iam.gserviceaccount.com" \
+            "serviceAccount:github-actions@lingoleap-dev.iam.gserviceaccount.com"; do
+            gcloud run services add-iam-policy-binding ${{ env.BACKEND_SERVICE }} \
+              --member="$MEMBER" \
+              --role=roles/run.invoker \
+              --region ${{ env.REGION }} \
+              --project ${{ env.PROJECT_ID }} >/dev/null
+          done
+          POLICY=$(gcloud run services get-iam-policy ${{ env.BACKEND_SERVICE }} \
             --region ${{ env.REGION }} \
-            --project ${{ env.PROJECT_ID }}
+            --project ${{ env.PROJECT_ID }} \
+            --format=json)
+          if printf '%s' "$POLICY" | grep -q '"allUsers"'; then
+            gcloud run services remove-iam-policy-binding ${{ env.BACKEND_SERVICE }} \
+              --member=allUsers \
+              --role=roles/run.invoker \
+              --region ${{ env.REGION }} \
+              --project ${{ env.PROJECT_ID }} >/dev/null
+          fi
 
       - name: Get backend preview URL
         id: backend-url

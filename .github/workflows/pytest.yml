@@ -124,10 +124,13 @@ jobs:
 
       # Installs from the hash-pinned lock, not requirements.txt's open ranges —
       # CI tests the exact same artifact the Dockerfile ships (#3849).
+      # Build backend first + no isolated build env for jieba's sdist (#3852,
+      # same flags as backend/Dockerfile; locked by test_jieba_build_isolation_3852.py).
       - name: Install dependencies
         run: |
           cd backend
-          pip install --require-hashes -r requirements.lock
+          pip install --require-hashes --only-binary=:all: -r requirements-build.lock
+          pip install --require-hashes --only-binary=:all: --no-binary=jieba --no-build-isolation -r requirements.lock
 
       # test_required_steps_parity_3695.py calls the REAL frontend
       # filterRequiredAssignmentSteps/resolveActiveSteps (stepConfig.ts) via

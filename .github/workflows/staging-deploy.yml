@@ -139,6 +139,17 @@ jobs:
       # "at most one of" groups, so combining them in one deploy invocation
       # is supported, and since DATABASE_URL now appears in only one of
       # them there is no same-key conflict.
+      #
+      # #4038: staging runs as its own identity, lingoleap-backend-staging-rt.
+      # It only has staging resources (staging DB secret, *-staging buckets,
+      # tts-cache, assets read). It is NOT the prod identity any more, so a
+      # staging bug cannot read the prod DATABASE_URL secret or prod buckets.
+      # Junyi BigQuery still works: the app impersonates lingoleap-junyi-bq
+      # (config.junyi_bigquery_service_account), and staging-rt holds
+      # serviceAccountTokenCreator on that one account only.
+      # Cloud SQL uses --set (not --add): --add is cumulative across revisions
+      # and had left the prod instance lingoleap-db attached to staging.
+      # Lock: backend/specs/test_workflow_runtime_sa_spec.py
       - name: Deploy backend to Cloud Run (Staging)
         run: |
           gcloud run deploy ${{ env.BACKEND_SERVICE }} \
@@ -153,8 +164,8 @@ jobs:
             --max-instances=8 \
             --concurrency=8 \
             --timeout=300s \
-            --add-cloudsql-instances=lingoleap-dev:asia-east1:lingoleap-staging-db \
-            --service-account=lingoleap-junyi-bq@lingoleap-dev.iam.gserviceaccount.com \
+            --set-cloudsql-instances=lingoleap-dev:asia-east1:lingoleap-staging-db \
+            --service-account=lingoleap-backend-staging-rt@lingoleap-dev.iam.gserviceaccount.com \
             --set-env-vars="^::^ALLOWED_ORIGINS=https://lingoleap-frontend-staging-958347263320.asia-east1.run.app,https://lingoleap-frontend-958347263320.asia-east1.run.app,https://lingoleap-staging.web.app,https://lingoleap-dev.web.app::RUN_MIGRATIONS=true::AZURE_SPEECH_KEY=${{ secrets.AZURE_SPEECH_KEY }}::AZURE_SPEECH_REGION=eastus::TTS_PROVIDER=azure::ENVIRONMENT=staging::JWT_SECRET_KEY=${{ secrets.STAGING_JWT_SECRET_KEY }}::GCS_OMO_BUCKET=lingoleap-omo-uploads-staging::READING_AUDIO_GCS_BUCKET=lingoleap-reading-audio-staging::BUILD_SHA=${{ github.sha }}::JUNYI_CLASS_IMPORT_ENABLED=true::JUNYI_BQ_MODE=real::PARENT_PORTAL_ENABLED=true::DB_POOL_SIZE=2::DB_MAX_OVERFLOW=0::ASYNC_THREAD_WORKERS=32::AI_FEATURES_ENABLED=true" \
             --update-secrets="DATABASE_URL=lingoleap-database-url-staging:latest"
 
@@ -165,14 +176,40 @@ jobs:
             --region ${{ env.REGION }} \
             --project ${{ env.PROJECT_ID }}
 
-      # #3719 — IAP 準備：預設關，改上面 env.IAP_ENABLED 才會跑。
-      - name: （IAP_ENABLED 時）替 staging backend 開 IAP
+      # #3719/#3733 — IAP 準備：預設關，改上面 env.IAP_ENABLED 才會跑。
+      # backend **不上原生 IAP**（frontend 的 sidecar 只拿得到一般 ID token，
+      # 原生 IAP 會回 401 Invalid JWT audience），改用 Cloud Run 本身的
+      # 「需要驗證」：先授權 run.invoker 給 frontend 執行身分＋CI，再拿掉
+      # allUsers（先給再收，不會有誰都進不去的空窗）。同源代理沒開時瀏覽器
+      # 會直接打 backend，鎖了就全站 403，所以那種情況直接失敗不動 IAM。
+      # 見 docs/iap-runbook.md「backend 認證方式」。
+      - name: （IAP_ENABLED 時）staging backend 改成只給 frontend 與 CI 呼叫（run.invoker）
         if: env.IAP_ENABLED == 'true'
         run: |
-          gcloud beta run services update ${{ env.BACKEND_SERVICE }} \
-            --iap \
+          if [ "${{ env.SAME_ORIGIN_PROXY_ENABLED }}" != "true" ]; then
+            echo "::error::IAP_ENABLED=true requires SAME_ORIGIN_PROXY_ENABLED=true (browser would call the locked backend directly). No IAM change made."
+            exit 1
+          fi
+          for MEMBER in \
+            "serviceAccount:lingoleap-frontend-run@lingoleap-dev.iam.gserviceaccount.com" \
+            "serviceAccount:github-actions@lingoleap-dev.iam.gserviceaccount.com"; do
+            gcloud run services add-iam-policy-binding ${{ env.BACKEND_SERVICE }} \
+              --member="$MEMBER" \
+              --role=roles/run.invoker \
+              --region ${{ env.REGION }} \
+              --project ${{ env.PROJECT_ID }} >/dev/null
+          done
+          POLICY=$(gcloud run services get-iam-policy ${{ env.BACKEND_SERVICE }} \
             --region ${{ env.REGION }} \
-            --project ${{ env.PROJECT_ID }}
+            --project ${{ env.PROJECT_ID }} \
+            --format=json)
+          if printf '%s' "$POLICY" | grep -q '"allUsers"'; then
+            gcloud run services remove-iam-policy-binding ${{ env.BACKEND_SERVICE }} \
+              --member=allUsers \
+              --role=roles/run.invoker \
+              --region ${{ env.REGION }} \
+              --project ${{ env.PROJECT_ID }} >/dev/null
+          fi
 
       - name: Verify backend health
         env:

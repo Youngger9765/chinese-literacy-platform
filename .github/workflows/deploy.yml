@@ -104,7 +104,7 @@ jobs:
       # instead via a dedicated secrets flag pointed at a Secret Manager
       # secret (`lingoleap-database-url-prod:latest`, project
       # `lingoleap-dev`) -- the runtime service account
-      # (`lingoleap-junyi-bq@lingoleap-dev.iam.gserviceaccount.com`, used
+      # (`lingoleap-backend-prod-rt@lingoleap-dev.iam.gserviceaccount.com`, used
       # just above) already has `secretAccessor` on it. gcloud CLI reference
       # (https://docs.cloud.google.com/sdk/gcloud/reference/run/deploy):
       # the bulk env-vars flag and the dedicated secrets flag are two
@@ -112,6 +112,13 @@ jobs:
       # same deploy invocation below -- since DATABASE_URL now appears in
       # only one of them, the resulting revision never tries to bind the
       # same key as both a literal value and a secret reference.
+      #
+      # #4038: prod runs as its own identity, lingoleap-backend-prod-rt
+      # (prod DB secret, *-prod buckets, tts-cache, assets read, Cloud SQL,
+      # Vertex, BigQuery job user). It no longer runs as lingoleap-junyi-bq;
+      # Junyi BigQuery goes through impersonating junyi-bq
+      # (config.junyi_bigquery_service_account), on which prod-rt holds
+      # serviceAccountTokenCreator. Lock: backend/specs/test_workflow_prod_runtime_sa_spec.py
       - name: Deploy backend to Cloud Run
         run: |
           gcloud run deploy ${{ env.BACKEND_SERVICE }} \
@@ -126,7 +133,7 @@ jobs:
             --concurrency=8 \
             --timeout=300s \
             --add-cloudsql-instances=lingoleap-dev:asia-east1:lingoleap-db \
-            --service-account=lingoleap-junyi-bq@lingoleap-dev.iam.gserviceaccount.com \
+            --service-account=lingoleap-backend-prod-rt@lingoleap-dev.iam.gserviceaccount.com \
             --set-env-vars="^::^ALLOWED_ORIGINS=https://lingoleap-frontend-958347263320.asia-east1.run.app,https://lingoleap-prod.web.app::RUN_MIGRATIONS=true::AZURE_SPEECH_KEY=${{ secrets.AZURE_SPEECH_KEY }}::AZURE_SPEECH_REGION=eastus::TTS_PROVIDER=azure::ENVIRONMENT=production::ENABLE_TEST_SEED=false::JWT_SECRET_KEY=${{ secrets.PROD_JWT_SECRET_KEY }}::GCS_OMO_BUCKET=lingoleap-omo-uploads-prod::READING_AUDIO_GCS_BUCKET=lingoleap-reading-audio-prod::BUILD_SHA=${{ github.sha }}::JUNYI_CLASS_IMPORT_ENABLED=true::JUNYI_BQ_MODE=real::DB_POOL_SIZE=6::DB_MAX_OVERFLOW=2::ASYNC_THREAD_WORKERS=32::AI_FEATURES_ENABLED=true" \
             --update-secrets="DATABASE_URL=lingoleap-database-url-prod:latest"
 
