@@ -58,9 +58,11 @@ def test_preview_iap_steps_are_gated_on_the_switch_not_unconditional():
     raw, doc = _load(PREVIEW_WF)
     steps = doc["jobs"]["deploy-preview"]["steps"]
     iap_steps = _iap_steps(steps)
-    assert len(iap_steps) >= 2, (
-        f"expected at least 2 steps calling `gcloud beta run services update` "
-        f"(backend + frontend preview), found {len(iap_steps)}"
+    # #3733: only the frontend gets native IAP now; the backend is locked
+    # with run.invoker instead (see test_backend_invoker_switch_3733.py).
+    assert len(iap_steps) >= 1, (
+        f"expected at least 1 step calling `gcloud beta run services update` "
+        f"(frontend preview), found {len(iap_steps)}"
     )
     for step in iap_steps:
         cond = step.get("if", "")
@@ -74,7 +76,7 @@ def test_preview_iap_steps_use_the_native_cloud_run_iap_flag():
     raw, doc = _load(PREVIEW_WF)
     steps = doc["jobs"]["deploy-preview"]["steps"]
     iap_flag_steps = [s for s in steps if "--iap" in str(s.get("run", ""))]
-    assert len(iap_flag_steps) >= 2
+    assert len(iap_flag_steps) >= 1  # frontend only since #3733
     for step in iap_flag_steps:
         assert "gcloud beta run services update" in str(step["run"]), (
             f"step {step.get('name')!r} uses --iap but not via "
@@ -101,9 +103,10 @@ def test_staging_iap_steps_are_gated_on_the_switch_not_unconditional():
     for job_name in ("deploy-backend", "deploy-frontend"):
         all_steps.extend(doc["jobs"][job_name]["steps"])
     iap_steps = _iap_steps(all_steps)
-    assert len(iap_steps) >= 2, (
-        f"expected at least 2 steps calling `gcloud beta run services update` "
-        f"(staging backend + frontend), found {len(iap_steps)}"
+    # #3733: only the frontend gets native IAP now (backend → run.invoker).
+    assert len(iap_steps) >= 1, (
+        f"expected at least 1 step calling `gcloud beta run services update` "
+        f"(staging frontend), found {len(iap_steps)}"
     )
     for step in iap_steps:
         cond = step.get("if", "")
@@ -119,7 +122,7 @@ def test_staging_iap_steps_use_the_native_cloud_run_iap_flag():
     for job_name in ("deploy-backend", "deploy-frontend"):
         all_steps.extend(doc["jobs"][job_name]["steps"])
     iap_flag_steps = [s for s in all_steps if "--iap" in str(s.get("run", ""))]
-    assert len(iap_flag_steps) >= 2
+    assert len(iap_flag_steps) >= 1  # frontend only since #3733
     for step in iap_flag_steps:
         assert "gcloud beta run services update" in str(step["run"]), (
             f"step {step.get('name')!r} uses --iap but not via "

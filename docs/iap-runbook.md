@@ -62,10 +62,17 @@ IAP（`gcloud beta run services update --iap`）。這一步**只決定「這個
 要不要過 IAP」**，不決定「誰能進去」——誰能進去是下面「開發人員／外部
 審查者要做什麼」那一段的事，是另一條獨立的 IAM 機制。
 
-**backend（Cloud Run invoker 驗證）**：目前**沒有**對應的 `IAP_ENABLED`
-式開關——這條路線沒有被寫進部署流程，只在丟棄式 canary 上手動驗證過（見
-下面「對 staging 真的打開：完整步驟（尚未執行）」）。要在 staging 上打開
-backend 的這層保護，需要走那段清單裡的步驟，不是改一個環境變數。
+**backend（Cloud Run invoker 驗證）**：同一個 `IAP_ENABLED` 開關（#3733
+起）。打開時 backend **不會**被上原生 IAP，而是：先把 `roles/run.invoker`
+授權給 `lingoleap-frontend-run`（frontend 執行身分）與 `github-actions`
+（CI），再拿掉 `allUsers`（先給再收）。這一步有防呆：
+`SAME_ORIGIN_PROXY_ENABLED` 不是 `'true'` 就直接失敗、不動任何 IAM——
+因為同源代理沒開時瀏覽器會直接打 backend，鎖了就全站 403。
+
+⚠️ 光打開這兩個開關還**不夠**：frontend 部署步驟還沒有改成 nginx＋sidecar
+雙容器（見下面「對 staging 真的打開」第 1、3 步），CI 打 backend 的健康
+檢查也還沒換成 invoker ID token（第 4 步）。那幾步做完、在 preview 上
+走過一次之前，不要把開關打開。
 
 ## 回滾（關掉）
 
@@ -221,11 +228,13 @@ gcloud beta run deploy <frontend-service> \
    （參考上面驗證過的 `cloudbuild-frontend.yaml` 做法，CI 環境是原生
    amd64 runner，不會撞到本機 QEMU 的 esbuild 當機問題，可以直接
    `docker build` 不用額外繞路）。
-2. 把 `staging-deploy.yml` 的 backend 部署步驟從
-   `--allow-unauthenticated` 改成 `--no-allow-unauthenticated`，並加一步
-   `add-iam-policy-binding` 把 `roles/run.invoker` 授權給 staging
-   frontend 的執行身分（預設運算服務帳號，或自訂的 runtime SA）和跑
-   `verify_*.py`／health-check 的 CI 服務帳號。
+2. ✅（#3733，程式已備好、開關預設關）`IAP_ENABLED` 打開時，
+   `staging-deploy.yml`／`preview-deploy.yml` 會先把 `roles/run.invoker`
+   授權給 `lingoleap-frontend-run` 與 `github-actions`，再拿掉 `allUsers`；
+   同源代理沒開時直接失敗。剩下：backend 部署步驟本身仍帶
+   `--allow-unauthenticated`，每次重新部署會在「部署完→鎖起來」之間短暫
+   公開幾秒；真的打開前把它改成依 `IAP_ENABLED` 帶
+   `--no-allow-unauthenticated`。
 3. 把 frontend 的部署步驟改成 `gcloud beta run deploy` 的雙容器語法（見
    上面驗證過的指令），`--iap` 這個開關沿用既有的 `IAP_ENABLED` 環境變數
    機制（`.github/workflows/staging-deploy.yml` 裡已經有這段，只是目前
