@@ -176,14 +176,40 @@ jobs:
             --region ${{ env.REGION }} \
             --project ${{ env.PROJECT_ID }}
 
-      # #3719 — IAP 準備：預設關，改上面 env.IAP_ENABLED 才會跑。
-      - name: （IAP_ENABLED 時）替 staging backend 開 IAP
+      # #3719/#3733 — IAP 準備：預設關，改上面 env.IAP_ENABLED 才會跑。
+      # backend **不上原生 IAP**（frontend 的 sidecar 只拿得到一般 ID token，
+      # 原生 IAP 會回 401 Invalid JWT audience），改用 Cloud Run 本身的
+      # 「需要驗證」：先授權 run.invoker 給 frontend 執行身分＋CI，再拿掉
+      # allUsers（先給再收，不會有誰都進不去的空窗）。同源代理沒開時瀏覽器
+      # 會直接打 backend，鎖了就全站 403，所以那種情況直接失敗不動 IAM。
+      # 見 docs/iap-runbook.md「backend 認證方式」。
+      - name: （IAP_ENABLED 時）staging backend 改成只給 frontend 與 CI 呼叫（run.invoker）
         if: env.IAP_ENABLED == 'true'
         run: |
-          gcloud beta run services update ${{ env.BACKEND_SERVICE }} \
-            --iap \
+          if [ "${{ env.SAME_ORIGIN_PROXY_ENABLED }}" != "true" ]; then
+            echo "::error::IAP_ENABLED=true requires SAME_ORIGIN_PROXY_ENABLED=true (browser would call the locked backend directly). No IAM change made."
+            exit 1
+          fi
+          for MEMBER in \
+            "serviceAccount:lingoleap-frontend-run@lingoleap-dev.iam.gserviceaccount.com" \
+            "serviceAccount:github-actions@lingoleap-dev.iam.gserviceaccount.com"; do
+            gcloud run services add-iam-policy-binding ${{ env.BACKEND_SERVICE }} \
+              --member="$MEMBER" \
+              --role=roles/run.invoker \
+              --region ${{ env.REGION }} \
+              --project ${{ env.PROJECT_ID }} >/dev/null
+          done
+          POLICY=$(gcloud run services get-iam-policy ${{ env.BACKEND_SERVICE }} \
             --region ${{ env.REGION }} \
-            --project ${{ env.PROJECT_ID }}
+            --project ${{ env.PROJECT_ID }} \
+            --format=json)
+          if printf '%s' "$POLICY" | grep -q '"allUsers"'; then
+            gcloud run services remove-iam-policy-binding ${{ env.BACKEND_SERVICE }} \
+              --member=allUsers \
+              --role=roles/run.invoker \
+              --region ${{ env.REGION }} \
+              --project ${{ env.PROJECT_ID }} >/dev/null
+          fi
 
       - name: Verify backend health
         env:
