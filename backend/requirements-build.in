@@ -1,0 +1,12 @@
+# Build-time dependencies, hash-pinned (#3852).
+#
+# jieba==0.42.1 is the one package in requirements.lock that ships only an
+# sdist (no wheel on PyPI), so pip has to build it. By default pip builds
+# sdists in an isolated env and fetches the build backend (setuptools) from
+# PyPI *without* applying --require-hashes -- observed in CI's pytest.yml log:
+# "Installing build dependencies ... Collecting setuptools>=40.8.0".
+# Instead we install this hash-pinned setuptools first and build jieba with
+# --no-build-isolation against it. Version matches what the pinned base
+# image (backend/Dockerfile, #3853) ships, i.e. what prod has always built
+# jieba with. Regenerate requirements-build.lock per backend/README.md.
+setuptools==79.0.1
