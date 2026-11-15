@@ -20,7 +20,7 @@ from ...services.ai_service import generate_socratic_question
 from ...services.ai_usage_tracker import last_usage, log_ai_usage
 from ...services.input_sanitizer import sanitize_ai_input
 from ...services.socratic_agent import socratic_agent
-from ._helpers import ConversationTurn
+from ._helpers import MAX_DIALOGUE_TURNS, ConversationTurn
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -31,7 +31,12 @@ logger = logging.getLogger(__name__)
 class ComprehensionRequest(BaseModel):
     story_title: str
     story_text: str = Field(..., max_length=10000)  # paragraphs joined with "\n"
-    conversation: list[ConversationTurn] = []
+    # Issue #3936 follow-up: this list feeds a paid Gemini prompt turn by
+    # turn and had no count bound (one request with 500 x 2000-char turns
+    # assembled a ~1M-char prompt). Same cap as /comprehension-score.
+    conversation: list[ConversationTurn] = Field(
+        default_factory=list, max_length=MAX_DIALOGUE_TURNS
+    )
 
 
 class ComprehensionResponse(BaseModel):
