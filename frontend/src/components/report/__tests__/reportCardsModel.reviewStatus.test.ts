@@ -136,3 +136,18 @@ describe('comprehension details', () => {
     });
   });
 });
+
+describe('spotlight uses first-try verdicts (#4081)', () => {
+  it('a question missed first time makes it yellow even though the latest feedback is all correct', () => {
+    const c = buildStepReportCards(steps, ['spotlight'], {
+      spotlight: { feedback: { a: true, b: true }, firstFeedback: { a: false, b: true } },
+    }, []);
+    expect(byId(c, 'spotlight').status).toBe('review');
+    expect(byId(c, 'spotlight').summary).toBe('答對 1/2 題');
+  });
+
+  it('old sessions with only the latest feedback are not guessed yellow', () => {
+    const c = buildStepReportCards(steps, ['spotlight'], { spotlight: { feedback: { a: true, b: false } } }, []);
+    expect(byId(c, 'spotlight').status).toBe('done');
+  });
+});

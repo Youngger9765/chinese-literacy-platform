@@ -274,6 +274,11 @@ function isValidGradeResultItem(item: unknown): item is GradeResultItem {
   );
 }
 
+/** 批改失敗的哨兵值（#4081）：畫面上要顯示，但永遠不存、不還原、不擋重交。 */
+function isGradeFailure(value: GradeResult | null): boolean {
+  return !!value && typeof value.score === 'number' && value.score < 0;
+}
+
 function isValidGradeResult(value: unknown): value is GradeResult {
   if (!value || typeof value !== 'object') return false;
   const results = (value as GradeResult).results;
@@ -1135,7 +1140,10 @@ const StoryStructureTable: React.FC<Props> = ({
   const [submitting, setSubmitting] = useState(false);
   const [gradeResult, setGradeResult] = useState<GradeResult | null>(() => {
     const restored = initialProgress?.gradeResult;
-    return isValidGradeResult(restored) ? restored : null;
+    // #4081：score < 0 是「批改失敗」的哨兵值，不是成績。以前它會被存進 DB、重新整理
+    // 後又還原回來，而 handleSubmit 看到 gradeResult !== null 就不讓交 —— 永遠卡在
+    // 「批改失敗，請重新整理後再試」，重新整理也救不回來。
+    return isValidGradeResult(restored) && !isGradeFailure(restored) ? restored : null;
   });
   const [showCoach, setShowCoach] = useState<boolean>(() => {
     if (showCoachProp !== undefined) return showCoachProp;
@@ -1204,7 +1212,7 @@ const StoryStructureTable: React.FC<Props> = ({
   // no-ops when the payload is unchanged, so this costs nothing when restored.
   useEffect(() => {
     if (!onProgressChange) return;
-    onProgressChange({ answers, gradeResult }, false);
+    onProgressChange({ answers, gradeResult: isGradeFailure(gradeResult) ? null : gradeResult }, false);
   }, [answers, gradeResult, onProgressChange]);
 
 
@@ -1382,7 +1390,7 @@ const StoryStructureTable: React.FC<Props> = ({
 
 
   const handleSubmit = useCallback(async () => {
-    if (!structure || submitting || gradeResult !== null) return;
+    if (!structure || submitting || (gradeResult !== null && !isGradeFailure(gradeResult))) return;
     setSubmitting(true);
     try {
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
@@ -1702,9 +1710,17 @@ const StoryStructureTable: React.FC<Props> = ({
             </button>
           </div>
         ) : !previewMode && score < 0 ? (
-          <p className="text-sm text-red-500 text-center">
-            批改失敗，請重新整理後再試
-          </p>
+          <div className="flex flex-col items-center gap-2">
+            <p className="text-sm text-red-500 text-center">批改失敗，你的答案還在，請再交一次</p>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={submitting}
+              className="min-h-[44px] px-6 rounded-full bg-accent text-white font-bold disabled:opacity-60"
+            >
+              {submitting ? '批改中…' : '再交一次'}
+            </button>
+          </div>
         ) : !previewMode ? (
           <div
             className={`rounded-xl p-4 text-center ${

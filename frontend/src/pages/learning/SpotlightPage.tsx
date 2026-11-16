@@ -4,7 +4,7 @@
  * v2 (#2205): BlockSequenceRenderer when spotlightV2.blocks present (dev7).
  * Legacy: StrategyExercise / GraphicTextIntegrationExercise via ComprehensionLayout.
  */
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ComprehensionLayout from '../../components/reading-steps/ComprehensionLayout';
 import StrategyExercise from '../../components/reading-steps/StrategyExercise';
@@ -17,6 +17,7 @@ import { LESSON_RENDERER_V1 } from '../../config/featureFlags';
 import LessonRenderer from '../../components/lesson-content/LessonRenderer';
 import { storyToLesson } from '../../components/lesson-content/lessonContentAdapter';
 import NextStepFooter from '../../components/learning/NextStepFooter';
+import { mergeFirstVerdicts } from '../../utils/firstVerdicts';
 
 const SpotlightPage: React.FC = () => {
   const navigate = useNavigate();
@@ -44,9 +45,21 @@ const SpotlightPage: React.FC = () => {
     [saveStepProgressPatch],
   );
 
+  // #4081：每題「第一次」的對錯。渲染器回報的 feedback 是最新一次 —— 聚光燈要全部答對
+  // 才能完成，所以最後一定是全對，報告永遠滿分、有錯過的題目也不會變黃色。第一次判定
+  // 出來的對錯只寫一次，之後重答不覆蓋（同閱讀理解的 firstTry）。
+  const firstFeedbackRef = useRef<Record<string, boolean> | null>(null);
+  if (firstFeedbackRef.current === null) {
+    const saved = savedStrategyData?.firstFeedback;
+    firstFeedbackRef.current =
+      saved && typeof saved === 'object' ? { ...(saved as Record<string, boolean>) } : {};
+  }
+
   const handleAnswerChange = useCallback(
     (exerciseState: Record<string, unknown>) => {
-      handleProgressChange(exerciseState, false);
+      const first = mergeFirstVerdicts(firstFeedbackRef.current ?? {}, exerciseState.feedback);
+      firstFeedbackRef.current = first;
+      handleProgressChange({ ...exerciseState, firstFeedback: first }, false);
     },
     [handleProgressChange],
   );

@@ -188,6 +188,10 @@ const ComprehensionMcqPage: React.FC = () => {
 
   // #2834：完成卡「全部重做」——徹底重置，等同學生第一次進到這個步驟。
   const handleRetryAll = useCallback(() => {
+    // #4081：還原用的 DB 快照也要清掉。LessonRenderer 重新掛載時會拿它當
+    // initialState —— 裡面每題都已經答對，於是一掛上就判定全部完成，並把
+    // 「第一次就全對」寫進 DB（學生其實一題都還沒重做）。
+    savedStepDataRef.current = {};
     firstTryRef.current = [];
     fullAnswersRef.current = {};
     fullFeedbackRef.current = {};

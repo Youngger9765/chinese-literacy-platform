@@ -164,4 +164,50 @@ describe('StoryStructureTable — progress persistence (#2833)', () => {
     // Not graded: the submit button must still say "提交答案", not show results.
     expect(screen.getByText('提交答案')).toBeTruthy();
   });
+
+  // #4081：批改失敗的哨兵值 {results: [], score: -1} 以前會被存進 DB；重新整理後
+  // 還原回來，又因為「已經有成績」不讓交 —— 永遠卡在「批改失敗，請重新整理後再試」。
+  it('a restored grade-failure sentinel does not block submitting again', async () => {
+    mockFetchSuccess(worksheetStructure);
+    render(
+      <StoryStructureTable
+        storyId="lesson-4081a"
+        showCoach={false}
+        initialProgress={{
+          answers: { '0-b0': '戴資穎', '1-b0': '邊角球', '1-b1': '難以預測' },
+          gradeResult: { results: [], score: -1 },
+        }}
+      />,
+    );
+    await waitFor(() => expect(screen.getByText('主角')).toBeTruthy());
+    expect(screen.queryByText(/批改失敗/)).toBeNull();
+    expect(screen.getByRole('button', { name: /提交答案/ })).toBeTruthy();
+  });
+
+  it('a failed grading is never reported for saving, and can be retried in place', async () => {
+    const onProgressChange = vi.fn();
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(worksheetStructure) })
+      .mockResolvedValueOnce({ ok: false, status: 503, json: () => Promise.resolve({}) })
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ results: [{ correct: true }, { correct: true }, { correct: true }], score: 100 }) });
+    vi.stubGlobal('fetch', fetchMock);
+    render(
+      <StoryStructureTable
+        storyId="lesson-4081b"
+        showCoach={false}
+        onProgressChange={onProgressChange}
+        initialProgress={{ answers: { '0-b0': '戴資穎', '1-b0': '邊角球', '1-b1': '難以預測' } }}
+      />,
+    );
+    await waitFor(() => expect(screen.getByText('主角')).toBeTruthy());
+    fireEvent.click(screen.getByRole('button', { name: /提交答案/ }));
+    await waitFor(() => expect(screen.getByText(/批改失敗/)).toBeTruthy());
+    for (const [payload] of onProgressChange.mock.calls) {
+      const g = (payload as { gradeResult?: { score?: number } | null }).gradeResult;
+      expect(g?.score ?? 0).toBeGreaterThanOrEqual(0);
+    }
+    fireEvent.click(screen.getByRole('button', { name: /再交一次/ }));
+    await waitFor(() => expect(screen.queryByText(/批改失敗/)).toBeNull());
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+  });
 });

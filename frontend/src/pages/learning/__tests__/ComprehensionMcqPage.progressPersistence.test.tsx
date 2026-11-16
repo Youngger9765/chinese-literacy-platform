@@ -203,4 +203,29 @@ describe('閱讀理解 — 作答中的答案要存進 DB（#2839）', () => {
     // 拿掉 initialState 之後舊斷言仍然綠。）
     expect(screen.getByText('全部答對！')).toBeInTheDocument();
   });
+
+  // #4081：「全部重做」後，LessonRenderer 重新掛載時拿的還是還原用的舊快照（每題都
+  // 已答對），一掛上就判定完成，並把「第一次就全對」寫進 DB —— 學生一題都還沒重做。
+  it('「全部重做」之後要真的從第 1 題開始，不能用舊答案直接判定完成、寫回第一次全對', () => {
+    const { unmount } = setup();
+    for (let i = 0; i < CORRECT_OPTION_TEXT.length; i++) answerQuestion(i);
+    const saved = mergedStepData();
+    unmount();
+    vi.clearAllMocks();
+
+    setup({ current_step: 'comprehension', steps_completed: [], step_data: { comprehension: saved } });
+    expect(screen.getByText('全部答對！')).toBeInTheDocument();
+
+    const before = mockSaveStepProgressPatch.mock.calls.length;
+    fireEvent.click(screen.getByRole('button', { name: /全部重做/ }));
+
+    // 回到作答畫面，不是馬上又出現完成卡
+    expect(screen.queryByText('全部答對！')).not.toBeInTheDocument();
+    expect(screen.getByText(CORRECT_OPTION_TEXT[0])).toBeInTheDocument();
+    // 按下重做之後，沒有任何一次 patch 把「第一次就答對」寫成滿的
+    for (const call of mockSaveStepProgressPatch.mock.calls.slice(before)) {
+      const ft = (call[0] as { stepData?: { firstTry?: unknown[] } }).stepData?.firstTry;
+      if (Array.isArray(ft)) expect(ft.length).toBeLessThan(CORRECT_OPTION_TEXT.length);
+    }
+  });
 });

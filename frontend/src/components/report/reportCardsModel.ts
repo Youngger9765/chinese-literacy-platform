@@ -300,15 +300,18 @@ const BUILDERS: Record<string, Builder> = {
   },
 
   spotlight: ({ data }) => {
-    // 沒有分數欄位；有對錯回饋的題目才算進來（lesson_v1 / spotlight_v2 都寫 feedback）。
-    const fb = isObj(data.feedback) ? Object.values(data.feedback) : [];
+    // #4081：有 firstFeedback（每題第一次的對錯）就用它 —— feedback 是最新一次，聚光燈
+    // 要全對才能完成，看它永遠是滿分。舊資料只有 feedback：照舊顯示，但分不出有沒有錯過，
+    // 不亂標黃色。
+    const first = isObj(data.firstFeedback) ? Object.values(data.firstFeedback) : null;
+    const fb = first ?? (isObj(data.feedback) ? Object.values(data.feedback) : []);
     const graded = fb.filter((v) => v === true || v === false);
     if (!graded.length) return { summary: null, details: [] };
     const n = graded.filter((v) => v === true).length;
     return {
       summary: correctOf(n, graded.length),
-      details: [{ kind: 'stats', items: [{ label: '選擇題答對', value: `${n} / ${graded.length} 題` }] }],
-      needsReview: n < graded.length,
+      details: [{ kind: 'stats', items: [{ label: first ? '第一次就答對' : '選擇題答對', value: `${n} / ${graded.length} 題` }] }],
+      needsReview: first ? n < graded.length : false,
     };
   },
 

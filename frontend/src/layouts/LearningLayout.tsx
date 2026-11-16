@@ -523,7 +523,12 @@ const LearningLayout: React.FC = () => {
           </div>
         </div>
       ) : (
-        <Outlet context={ctx} />
+        // #4081：多篇課同一種關卡共用一條路由，換篇次只改 `?p=`，頁面不會重新掛載 ——
+        // 各步驟頁用 ref 凍結的「還原快照」與作答 state 都還是上一篇的，接著被存進這一篇
+        // 的 key（saveStepProgressPatchKeyed 已經換成新篇次）。依完整 step key 重新掛載。
+        <React.Fragment key={stepKey}>
+          <Outlet context={ctx} />
+        </React.Fragment>
       )}
       <SessionTimeoutWarning
         visible={showTimeoutWarning}
