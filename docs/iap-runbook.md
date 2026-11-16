@@ -1,11 +1,42 @@
 # IAP 準備與開關手冊（#3719）
 
-> 現狀（2026-11-16 更新：部署接線已備好、開關仍關）／原文 2026-10-24：staging 與所有 preview 服務都還是
-> `--allow-unauthenticated`，跟這份文件存在之前完全一樣——**這份文件描述
-> 的是「整條路徑已經在丟棄式 canary 上驗證過、還沒對任何真實環境打開」的
-> 狀態**。#3719／#3725／#3728／#3729／#3730／#3731／#3733 都已經完成並
-> merge 進 staging；本文件第「對 staging 真的打開」段落是**尚未執行**的
-> 步驟清單，不是已發生的事。
+> 現狀（2026-11-16 晚，#4088 `6c41cc512`）：**staging 與所有 PR preview 已開 IAP，
+> 兩個開關都是 `'true'`**。正式環境（`lingoleap-frontend`／`lingoleap-backend`、
+> `lingoleap-prod.web.app`）沒有動。
+>
+> 線上實測（staging，2026-11-16）：匿名打 backend `/api/health` 403、匿名打 frontend
+> `/` 302 到 Google 登入；帶 CI 服務帳號自簽通行證（`aud` = frontend 網址 + `/*`）
+> frontend `/` 200、`/api/health` 200；學生「小明」經 frontend 登入 → `/api/users/me`
+> 200 student → `/api/stories?page_size=300` 179／179。正在服務的 revision：frontend
+> `lingoleap-frontend-staging-01777-gnd`（frontend＋sidecar 兩個容器，`iap-enabled: true`），
+> backend `lingoleap-backend-staging-01715-rjn`（invoker 只有 `lingoleap-frontend-run` 與
+> `github-actions`，沒有 `allUsers`）。`lingoleap-staging.web.app`／`lingoleap-dev.web.app`
+> 的 `/` 與任何路徑都 302 到 staging Cloud Run frontend。
+>
+> 第一次打開（#4083）失敗的兩個原因與修法：
+> 1. 只改 workflow 檔時 frontend 不重新部署 → #4084 讓 workflow 檔變動兩邊都部署。
+> 2. 既有 frontend 服務是**一個沒命名（或自動命名成 `frontend-1`）的容器**，
+>    `--container=frontend` 會在旁邊再加容器而失敗（`exactly one container with an
+>    exposed port`）→ #4086：代理開時，部署前先用 `scripts/cloudrun_name_legacy_container.py`
+>    把那個容器改名成 `frontend`（同一個 image 的 `gcloud run services replace`，其他設定
+>    不變），再跑原本帶 `--iap` 的雙容器部署，代理與 IAP 仍在同一個 revision 生效。已命名或
+>    全新服務直接跳過（重跑不會重複改）。先在既有 preview（#4085，草稿、未合併）實測過。
+>
+> 白名單（不在 workflow 裡）：
+>
+> **白名單**（`roles/iap.httpsResourceAccessor`，IAP IAM，不在 workflow 裡）：
+> 設在兩層——`lingoleap-frontend-staging` 服務層，以及 **asia-east1 的
+> Cloud Run IAP 區域層**（`projects/958347263320/iap_web/cloud_run-asia-east1`）。
+> 區域層讓每個新建的 preview frontend 自動繼承，不用逐一授權，staging 被刪掉
+> 重建也還在；代價是這個區域之後任何開了 IAP 的 Cloud Run 服務都套用同一份名單。
+> 成員：Young、Hans、靖杭、啟翔（`@junyiacademy.org`）＋ CI 的
+> `github-actions@` 服務帳號。查看：`gcloud beta iap web get-iam-policy
+> --resource-type=cloud-run --region=asia-east1 [--service=<svc>]`。
+>
+> ⚠️ 有 IAP 之後，staging 上只在 staging 才公開的頁面（`/presentation/*.html`、
+> `/intern-training/dashboard.html`）也要登入；正式環境同樣的頁面仍公開。
+> ⚠️ 自動化打 frontend 的通行證 `aud` 要寫 `<網址>/*` 才能打 `/` 以外的路徑，
+> 且主機名稱要跟實際請求的一致（hash 網址與 `-958347263320` 網址各要各的）。
 
 ## 為什麼要做這件事
 
@@ -222,13 +253,12 @@ gcloud beta run deploy <frontend-service> \
   用「只更新指定幾個 key、其他環境變數原封不動」的那個旗標
   （`--update-env-vars`）才安全，效果一樣達到、不會動到其他變數。
 
-## 對 staging 真的打開：步驟（程式接線已完成，開關仍預設關）
+## 對 staging 真的打開：步驟（2026-11-16 已打開，#4088）
 
-> 2026-11-16（#3733 第二輪）：部署流程的接線都已經寫進兩個 workflow，
-> 並用「真的執行 workflow 的 run 腳本、假 gcloud/docker/curl 記錄參數」
-> 的測試鎖住（`backend/tests/test_iap_open_wiring_3733.py`、
-> `scripts/test_iap_token_sh.py`）。**兩個開關仍是 `'false'`**，今天的
-> 部署行為不變。
+> 部署流程的接線寫在兩個 workflow，並用「真的執行 workflow 的 run 腳本、假
+> gcloud/docker/curl 記錄參數」的測試鎖住（`backend/tests/test_iap_open_wiring_3733.py`、
+> `backend/tests/test_cloudrun_name_legacy_container_3733.py`、
+> `scripts/test_iap_token_sh.py`）。兩個開關現在都是 `'true'`。
 
 | # | 項目 | 狀態 |
 |---|---|---|
@@ -244,6 +274,8 @@ gcloud beta run deploy <frontend-service> \
 | 10 | 順序（資安審查）：backend 服務已存在時，**部署前**先授權 `run.invoker` 給 frontend 執行身分與 CI（部署帶 `--no-allow-unauthenticated` 會立刻拿掉 `allUsers`）；第一次部署的 preview 沒有服務可綁就跳過，部署後那一步照舊冪等補授權。proxy 沒開就在這一步失敗，什麼都還沒部署 | ✅ |
 | 11 | 反向檢查（資安審查）：IAP 開時**完全不帶憑證**打一次——backend `/api/health` 必須 403、frontend 根目錄必須 302／401／403（不可 200），否則 job 失敗。staging 在 `smoke-test` job、preview 在 frontend 健康檢查之後 | ✅ |
 | 12 | 回滾（資安審查）：開關切回 `'false'` 時，frontend job 在部署非代理版 frontend **之前**先看 backend 的 IAM，沒有 `allUsers` 就補回 `run.invoker`（只動 frontend 時 backend job 會被跳過，否則 backend 會一直鎖著、全站 403）。已經是公開的（今天的正常狀態）就完全不寫 IAM | ✅ |
+| 13 | 既有單一容器的 frontend 服務：雙容器部署前先改名成 `frontend`（`services replace`，同 image），已命名或新服務跳過，版面不認得就在部署前失敗（#4086） | ✅ |
+| 14 | workflow 檔變動時 backend、frontend 都重新部署（#4084） | ✅ |
 
 **開門前一次性要給的 IAM（要 Young 同意，workflow 本身不會做）**：
 - `github-actions@` 對**自己**的 `roles/iam.serviceAccountTokenCreator`（CI 才簽得出 IAP 要的自簽 JWT）
@@ -251,7 +283,7 @@ gcloud beta run deploy <frontend-service> \
 
 **仍未接的**：`e2e-tests.yml`（打 staging 的 Playwright／QA 腳本）在 IAP 開時要能簽 JWT——同一個 tokenCreator 授權即可，但 workflow 還沒驗過。
 
-⚠️ **staging 一開，`lingoleap-staging.web.app`／`lingoleap-dev.web.app` 的 `/api` 會變 403**（Firebase rewrite 帶不了 invoker token，見「已知落差」第 1 點的實測）。處理方式是把這兩個站改成整站 302 到 staging Cloud Run frontend，由另一個獨立 PR 處理（不在這次的 IAP 順序修正裡）；那個 PR 合併前不要打開開關。
+`lingoleap-staging.web.app`／`lingoleap-dev.web.app`：Firebase rewrite 帶不了 invoker token（見「已知落差」第 1 點），所以這兩個站改成整站 302 到 staging Cloud Run frontend（#4078；根目錄 `/` 另外一條規則，#4086）。`staging-deploy.yml` 的 `Verify Firebase sites` 會檢查 `/` 與 `/learn/x?a=1` 都是 302。
 
 ## 開發人員要做什麼
 
@@ -298,9 +330,10 @@ Headless 的自動化（CI、Playwright、本機 QA 腳本）沒辦法走 IAP �
   不需要 IAM Credentials API，只需要呼叫端的身分對目標服務有
   `roles/run.invoker`。
 
-兩層都是**零行為改變**：`IAP_AUDIENCE`／`BACKEND_INVOKER_AUDIENCE` 現在
-誰都沒設，兩支工具的頂層函式都先檢查這個，沒設就直接回 `None`／`{}`，
-完全不會嘗試打任何網路請求。
+沒設 `IAP_AUDIENCE`／`BACKEND_INVOKER_AUDIENCE` 時，兩支工具的頂層函式直接回
+`None`／`{}`、不打任何網路請求。IAP 開著時，部署 workflow 會自己設好這兩個值
+（frontend 健康檢查簽給 frontend 網址；sidecar 的 `BACKEND_INVOKER_AUDIENCE` 是
+backend 網址）；其他腳本要打已上鎖的 staging，要自己設。
 
 CI workflow（`e2e-tests.yml`、`staging-deploy.yml`、`preview-deploy.yml`）
 已經有 `google-github-actions/auth@v2` 步驟，跑完之後 ambient 的服務帳號

@@ -35,20 +35,22 @@ env:
   PROJECT_ID: lingoleap-dev
   REGION: asia-east1
   REGISTRY: asia-east1-docker.pkg.dev/lingoleap-dev/lingoleap
-  # #3719 — IAP 準備：預設 false，等於今天的行為（兩個 preview 服務都還是
-  # --allow-unauthenticated）。要真的在 preview 上測 IAP 時，改這一行
-  # 成 'true' 開一個 PR 就會套用，不必再去改 gcloud 指令本身——
-  # 真正的 on/off 開關只有這一行。驗證方法與限制見
-  # docs/iap-runbook.md。目前仍然是 false，staging 與日常 preview
-  # 完全不受影響。
-  IAP_ENABLED: 'false'
+  # 2026-11-16 第二次打開（#3733）：第一次（#4083）因既有 frontend 是「一個沒命名
+  # 的容器」雙容器 deploy 失敗而回滾；現在部署前會先把它改名成 frontend（#4086，
+  # 已在既有 preview 上實測 #4085）。回滾＝這行與 SAME_ORIGIN_PROXY_ENABLED 一起改回 'false'。
+  # #3719/#3733 — 打開時每個 PR preview 的 frontend 過 IAP、
+  # backend 只給 frontend 與 CI 呼叫。真正的 on/off 開關只有這一行（與
+  # SAME_ORIGIN_PROXY_ENABLED 一起動）。新 preview 不需要逐一授權：白名單
+  # 設在 asia-east1 的 Cloud Run IAP 區域層，新服務自動繼承。見
+  # docs/iap-runbook.md。
+  IAP_ENABLED: 'true'
   # #3728/#3740 — 同源代理 build-time 開關，預設 false：關掉時這個 job
   # 建出來的 preview image 跟 #3741 revert 之後完全一樣（VITE_API_URL
   # 指到 backend 絕對網址，無 BACKEND_INTERNAL_URL、無
   # BACKEND_INVOKER_SIDECAR_PORT）。同一個理由、同一段完整說明見
   # staging-deploy.yml 這個開關旁的註解——這裡不重複貼一次，兩邊要改
   # 一起改。
-  SAME_ORIGIN_PROXY_ENABLED: 'false'
+  SAME_ORIGIN_PROXY_ENABLED: 'true'
 
 jobs:
   detect-changes:
@@ -69,8 +71,12 @@ jobs:
           filters: |
             backend:
               - 'backend/**'
+              # a switch flip here (IAP_ENABLED etc.) must redeploy both halves
+              - '.github/workflows/preview-deploy.yml'
             frontend:
               - 'frontend/**'
+              # a switch flip here (IAP_ENABLED etc.) must redeploy both halves
+              - '.github/workflows/preview-deploy.yml'
 
   deploy-preview:
     name: Deploy PR Preview
@@ -118,6 +124,11 @@ jobs:
 
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@e427ad8a34f8676edf47cf7d7925499adf3eb74f # v2.2.1
+        with:
+          # #3733: the runner's gcloud has no `beta` component; `gcloud beta
+          # run deploy` (IAP / two-container frontend) would stop on an
+          # install prompt in a non-interactive shell and fail the deploy.
+          install_components: 'beta'
 
       - name: Configure Docker for Artifact Registry
         run: gcloud auth configure-docker asia-east1-docker.pkg.dev
@@ -411,6 +422,33 @@ jobs:
             GCLOUD_RUN=(gcloud beta run)
           fi
           if [ "${{ env.SAME_ORIGIN_PROXY_ENABLED }}" = "true" ]; then
+            # #3733 (2nd attempt): an EXISTING frontend service is one UNNAMED
+            # container; --container=frontend can't address it and Cloud Run
+            # rejects the result ("exactly one container with an exposed
+            # port"). Rename it to `frontend` first with a same-image
+            # `services replace` (no other change, so that revision serves
+            # exactly what the last one did), then the deploy below updates
+            # it in place and adds the sidecar + --iap in ONE revision.
+            # Brand-new service or already named -> nothing to do (idempotent).
+            SVC_JSON=$(gcloud run services describe ${{ env.FRONTEND_SERVICE }} \
+              --region ${{ env.REGION }} \
+              --project ${{ env.PROJECT_ID }} \
+              --format=json 2>/dev/null || true)
+            if [ -n "$SVC_JSON" ]; then
+              RENAME_SPEC="$(mktemp)"
+              RENAME_RC=0
+              printf '%s' "$SVC_JSON" \
+                | python3 scripts/cloudrun_name_legacy_container.py frontend > "$RENAME_SPEC" \
+                || RENAME_RC=$?
+              if [ "$RENAME_RC" = "0" ]; then
+                gcloud run services replace "$RENAME_SPEC" \
+                  --region ${{ env.REGION }} \
+                  --project ${{ env.PROJECT_ID }}
+              elif [ "$RENAME_RC" != "10" ]; then
+                echo "::error::frontend service has an unexpected container layout; not deploying"
+                exit 1
+              fi
+            fi
             gcloud beta run deploy ${{ env.FRONTEND_SERVICE }} \
               --platform managed \
               --region ${{ env.REGION }} \
