@@ -4,7 +4,7 @@ import type { Browser, BrowserContext, Page } from '@playwright/test';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
-import { getIapProxyAuthHeader } from './utils/iapAuth';
+import { getIapProxyAuthHeader, newIapContext } from './utils/iapAuth';
 
 /**
  * progressRecheck3694.spec.ts — rerunnable regression check for #3694/#3695/#3707
@@ -145,14 +145,12 @@ function makeActorFactory(browser: Browser, puts: PutRecord[], pageErrors: strin
   const openContexts: BrowserContext[] = [];
 
   async function newPage(acc: Account, tag: string): Promise<{ ctx: BrowserContext; page: Page }> {
-    const ctx = await browser.newContext({
+    // #3719/#4097: manually created context — the IAP header is added per
+    // request for the origin under test only (newIapContext), never as a
+    // context-wide extraHTTPHeaders (that would reach third-party origins).
+    const ctx = await newIapContext(browser, {
       viewport: { width: 1180, height: 820 },
       permissions: ['microphone'],
-      // #3719: this browser/context is launched manually (`chromium.launch()`),
-      // not the test's default `page` fixture — it does NOT inherit
-      // playwright.config.ts's extraHTTPHeaders, so the IAP header must be
-      // passed explicitly here too.
-      extraHTTPHeaders: getIapProxyAuthHeader(),
       ...(storage ? { storageState: storage } : {}),
     });
     openContexts.push(ctx);
@@ -517,7 +515,7 @@ test('重開不縮水 / 繼續接續正確 / 做完老師端顯示完成 (#3694/
         await closeCtx(ctx, page);
       }
       const fin = await serverProgress(acc);
-      const tctx = await ownBrowser.newContext({ viewport: { width: 1180, height: 820 }, extraHTTPHeaders: getIapProxyAuthHeader() }); // #3719
+      const tctx = await newIapContext(ownBrowser, { viewport: { width: 1180, height: 820 } }); // #3719/#4097
       const tp = await tctx.newPage();
       tp.on('pageerror', (err) => pageErrors.push(`[teacher] ${err.message}`));
       await tp.goto(FE + '/login');

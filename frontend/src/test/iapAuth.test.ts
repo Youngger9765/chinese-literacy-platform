@@ -97,6 +97,24 @@ describe('getIapProxyAuthHeader', () => {
     const mintToken = vi.fn(() => '');
     expect(getIapProxyAuthHeader(mintToken)).toEqual({});
   });
+
+  // #4097: e2e-tests.yml signs the token on the runner and runs Playwright in
+  // a container that holds no GCP credential, so the container can't mint.
+  it('uses a pre-minted IAP_PROXY_TOKEN as-is, without calling the minter', () => {
+    vi.stubEnv('IAP_AUDIENCE', '');
+    vi.stubEnv('IAP_PROXY_TOKEN', 'pre-minted-jwt');
+    const mintToken = vi.fn(() => 'should-not-be-used');
+    expect(getIapProxyAuthHeader(mintToken)).toEqual({ 'Proxy-Authorization': 'Bearer pre-minted-jwt' });
+    expect(mintToken).not.toHaveBeenCalled();
+  });
+
+  it('an empty IAP_PROXY_TOKEN falls back to the normal audience/minter path', () => {
+    vi.stubEnv('IAP_PROXY_TOKEN', '');
+    vi.stubEnv('IAP_AUDIENCE', '');
+    const mintToken = vi.fn();
+    expect(getIapProxyAuthHeader(mintToken)).toEqual({});
+    expect(mintToken).not.toHaveBeenCalled();
+  });
 });
 
 describe('getIapProxyAuthHeader — default (self-signed JWT) minter, key-file branch', () => {

@@ -19,7 +19,8 @@
  * file — only the demo-path.spec.ts file uses the UI buttons (one click each).
  */
 
-import { test, expect, APIRequestContext, Page } from '@playwright/test';
+import { test, expect } from './fixtures/iap-fixture';
+import type { APIRequestContext, Page } from '@playwright/test';
 
 // Frontend navigation uses the test's baseURL (PLAYWRIGHT_BASE_URL); API calls go to
 // E2E_BACKEND_URL so the spec can be pointed at whichever environment is under test.

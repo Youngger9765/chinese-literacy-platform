@@ -14,7 +14,7 @@
  * story pack since #4054, e.g. 尋光隊 1 號; generic 甲隊/乙隊 only as fallback).
  */
 import { test, expect } from '../fixtures/pageerror-fixture';
-import { getIapProxyAuthHeader } from '../utils/iapAuth';
+import { newIapContext } from '../utils/iapAuth';
 import type { Page } from '@playwright/test';
 import {
   batchCreateStudents,
@@ -72,7 +72,7 @@ test.describe('多人對抗賽 team_arena', () => {
     const rotated = students.map((_, i) => `QaArena2026Aa${i}`);
 
     const errors: string[] = [];
-    const contexts = await Promise.all(students.map(() => browser.newContext({ extraHTTPHeaders: getIapProxyAuthHeader() }) /* #3719 */));
+    const contexts = await Promise.all(students.map(() => newIapContext(browser) /* #3719 */));
     const pages = await Promise.all(contexts.map((c) => c.newPage()));
     await Promise.all(pages.map((p, i) => watchErrors(p, `s${i + 1}`, errors)));
 
