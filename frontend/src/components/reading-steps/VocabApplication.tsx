@@ -22,12 +22,13 @@
  * - On manual redo, both localStorage keys are cleared.
  * - Fix #758: handleFinish no longer removes phase storage — completion persists.
  */
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Story } from '../../types';
 import FillInBlankExercise from './FillInBlankExercise';
 import type { QuestionResult, SavedProgress as ExerciseProgress } from './FillInBlankExercise';
 import { getLearningStorageScope, scopedStepStorageKey } from '../../services/learningStorageScope';
 import NextStepFooter from '../learning/NextStepFooter';
+import { readAttempts, scoredAttempt, type StepAttempt } from '../../utils/stepAttempts';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                               */
@@ -56,6 +57,7 @@ export interface VocabApplicationProps {
     currentStep?: string | null;
     markCompleted?: boolean;
     immediate?: boolean;
+    appendAttempt?: StepAttempt;
   }) => void;
   /**
    * #2848 — DB 裡 `step_data['vocab-application']` 先前存下的內容。
@@ -166,8 +168,8 @@ const VocabApplication: React.FC<VocabApplicationProps> = ({
     () => savedProgress.current?.firstTryResults ?? [],
   );
 
-  const sentences = story.fillInBlank ?? [];
-  const vocabBank = story.vocabBank ?? {};
+  const sentences = useMemo(() => story.fillInBlank ?? [], [story.fillInBlank]);
+  const vocabBank = useMemo(() => story.vocabBank ?? {}, [story.vocabBank]);
   const hasData = sentences.length > 0 && Object.keys(vocabBank).length > 0;
 
   // ── localStorage persistence (phase + result + firstTryResults) ───────────
@@ -290,6 +292,40 @@ const VocabApplication: React.FC<VocabApplicationProps> = ({
   }, []);
 
   // Issue #758: accept firstTryResults from FillInBlankExercise and persist them
+  // ── #4087：每做完一輪記一筆作答（成績單折線圖）─────────────────────────
+  // 第一次做完 / 全部重做 → 這一輪第一次就答對的題數；重做錯題 → 做完這一輪之後
+  // 總共答對幾題（原本就對的 + 這一輪重做時第一次就對的）。
+  const attemptsMadeRef = useRef(readAttempts(initialProgress).length);
+  const handleRoundFinished = useCallback(
+    (round: { retryMode: boolean; firstTryResults: QuestionResult[]; retryOutcome: Record<number, { correct: boolean; firstAnswer: string | null }> }) => {
+      if (!saveStepProgressPatch) return;
+      const wordOf = (code: string | null | undefined) => (code ? vocabBank[code] ?? code : null);
+      const kind = round.retryMode ? 'retry-wrong' : attemptsMadeRef.current > 0 ? 'retry-all' : 'first';
+      const bySentence = new Map(round.firstTryResults.map((r) => [r.sentenceIdx, r]));
+      const rows = sentences.map((sentence, i) => {
+        const original = bySentence.get(i);
+        const retried = round.retryMode ? round.retryOutcome[i] : undefined;
+        const correct = retried ? retried.correct : original?.firstTryCorrect === true;
+        const firstAnswer = retried ? retried.firstAnswer : original?.studentFirstAnswer ?? null;
+        return {
+          label: `第 ${i + 1} 題`,
+          correct,
+          studentAnswer: correct ? null : wordOf(firstAnswer as string | null),
+          correctAnswer: wordOf(sentence.answer),
+        };
+      });
+      attemptsMadeRef.current += 1;
+      saveStepProgressPatch({
+        stepId: 'vocab-application',
+        currentStep: 'vocab-application',
+        immediate: true,
+        stepData: {},
+        appendAttempt: scoredAttempt(kind, rows.filter((r) => r.correct).length, rows.length, rows),
+      });
+    },
+    [saveStepProgressPatch, sentences, vocabBank],
+  );
+
   function handleComplete(score: number, total: number, firstTryResults?: QuestionResult[]) {
     setResult({ score, total });
     if (firstTryResults) {
@@ -350,6 +386,7 @@ const VocabApplication: React.FC<VocabApplicationProps> = ({
           storyId={getLearningStorageScope(story.id)}
           initialProgress={restoredExerciseRef.current}
           onProgressChange={handleExerciseProgress}
+          onRoundFinished={handleRoundFinished}
         />
       )}
     </div>

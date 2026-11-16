@@ -210,4 +210,33 @@ describe('StoryStructureTable — progress persistence (#2833)', () => {
     await waitFor(() => expect(screen.queryByText(/批改失敗/)).toBeNull());
     expect(fetchMock).toHaveBeenCalledTimes(3);
   });
+
+  // #4087：每批改一次記一筆；「訂正後再交一次」也算一次（retry-wrong）。
+  it('each grading is an attempt; resubmitting after correcting is a retry-wrong attempt', async () => {
+    const onAttempt = vi.fn();
+    const oneWrong = { results: [{ correct: true }, { correct: false, correct_answer: '邊角球' }, { correct: true }], score: 67 };
+    const allRight = { results: [{ correct: true }, { correct: true }, { correct: true }], score: 100 };
+    vi.stubGlobal('fetch', vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(worksheetStructure) })
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(oneWrong) })
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(allRight) }));
+    render(
+      <StoryStructureTable
+        storyId="lesson-4087"
+        showCoach={false}
+        onAttempt={onAttempt}
+        initialProgress={{ answers: { '0-b0': '戴資穎', '1-b0': '錯的', '1-b1': '難以預測' } }}
+      />,
+    );
+    await waitFor(() => expect(screen.getByText('主角')).toBeTruthy());
+    fireEvent.click(screen.getByRole('button', { name: /提交答案/ }));
+    await waitFor(() => expect(onAttempt).toHaveBeenCalledTimes(1));
+    expect(onAttempt.mock.calls[0][0]).toMatchObject({ kind: 'first', correct: 2, total: 3 });
+
+    fireEvent.click(screen.getByRole('button', { name: '訂正後再交一次' }));
+    fireEvent.click(screen.getByRole('button', { name: /提交答案/ }));
+    await waitFor(() => expect(onAttempt).toHaveBeenCalledTimes(2));
+    expect(onAttempt.mock.calls[1][0]).toMatchObject({ kind: 'retry-wrong', correct: 3, total: 3 });
+    expect(screen.queryByRole('button', { name: '訂正後再交一次' })).toBeNull();
+  });
 });

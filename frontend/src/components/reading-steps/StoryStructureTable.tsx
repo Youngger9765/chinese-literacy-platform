@@ -19,6 +19,7 @@ import {
 } from './storyStructureProfile';
 import StepCoachCard, { StepCoachHelpButton } from '../learning/StepCoachCard';
 import { useIsMobile } from '../../hooks/useIsMobile';
+import { readAttempts, scoredAttempt, type StepAttempt } from '../../utils/stepAttempts';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -125,6 +126,8 @@ interface Props {
    * component (VocabDefinitionMatch, KeyPassageReading, ...) already does.
    */
   onProgressChange?: (stepData: Record<string, unknown>, immediate?: boolean) => void;
+  /** #4087：每批改成功一次記一筆作答（成績單折線圖：填對的格數）。 */
+  onAttempt?: (attempt: StepAttempt) => void;
 }
 
 const INLINE_BLANK_RE = /【([^】]*)】/g;
@@ -1124,6 +1127,7 @@ const StoryStructureTable: React.FC<Props> = ({
   showCoach: showCoachProp,
   initialProgress,
   onProgressChange,
+  onAttempt,
 }) => {
   const { token } = useAuth();
   const [structure, setStructure] = useState<StructureData | null>(structureProp ?? null);
@@ -1138,6 +1142,10 @@ const StoryStructureTable: React.FC<Props> = ({
     return isValidAnswerMap(restored) ? restored : {};
   });
   const [submitting, setSubmitting] = useState(false);
+  // #4087：這一關以前交過（DB 有成績或作答紀錄）→ 之後再交就是「訂正」那一次。
+  const gradedBeforeRef = useRef(
+    isValidGradeResult(initialProgress?.gradeResult) || readAttempts(initialProgress).length > 0,
+  );
   const [gradeResult, setGradeResult] = useState<GradeResult | null>(() => {
     const restored = initialProgress?.gradeResult;
     // #4081：score < 0 是「批改失敗」的哨兵值，不是成績。以前它會被存進 DB、重新整理
@@ -1403,6 +1411,17 @@ const StoryStructureTable: React.FC<Props> = ({
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data: GradeResult = await res.json();
       setGradeResult(data);
+      // #4087：第一次交 = first；「訂正後再交一次」= retry-wrong（訂正也算一次）。
+      if (onAttempt && Array.isArray(data.results) && data.results.length) {
+        const rows = data.results.map((r, i) => ({
+          label: `第 ${i + 1} 格`,
+          correct: r.correct === true,
+          correctAnswer: r.correct ? null : r.correct_answer ?? null,
+        }));
+        const kind = gradedBeforeRef.current ? 'retry-wrong' : 'first';
+        gradedBeforeRef.current = true;
+        onAttempt(scoredAttempt(kind, rows.filter((r) => r.correct).length, rows.length, rows));
+      }
     } catch {
       setGradeResult({ results: [], score: -1 });
     } finally {
@@ -1739,6 +1758,16 @@ const StoryStructureTable: React.FC<Props> = ({
             </p>
           </div>
         ) : null}
+        {/* #4087：訂正 —— 保留答案，改完再交一次。成績單會多一個節點。 */}
+        {!previewMode && submitted && score >= 0 && gradeResults.some((r) => !r.correct) && (
+          <button
+            type="button"
+            onClick={() => setGradeResult(null)}
+            className="mt-3 w-full min-h-[44px] rounded-full border-2 border-accent text-accent font-bold hover:bg-accent/5"
+          >
+            訂正後再交一次
+          </button>
+        )}
       </div>
     </div>
     </div>

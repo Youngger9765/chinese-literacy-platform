@@ -28,6 +28,7 @@ import AiDisabledResultNotice from './key-passage-reading/AiDisabledResultNotice
 import { readingPassagesOf } from './key-passage-reading/readingPassages';
 import LessonQrButton from '../qr/LessonQrButton';
 import { hasKeyPassage } from '../qr/lessonQr';
+import { newAttemptId, type StepAttempt } from '../../utils/stepAttempts';
 // Note: Web Speech removed (Issue #2266) — streaming transcript not available during recording.
 // Live preview area will be empty until Gemini STT returns post-submission.
 
@@ -53,7 +54,8 @@ interface KeyPassageReadingProps {
   /** Full step_data['key-passage-reading'] snapshot from DB (Issue #1549) — provides selfRating + transcript. */
   initialProgress?: KeyPassageReadingStepData;
   /** Persist incremental progress to LearningSession.step_progress (Issue #1549). */
-  onProgressChange?: (stepData: KeyPassageReadingStepData, immediate?: boolean) => void;
+  /** #4087：第三個參數是這一次朗讀（成績單折線圖），附加到 attempts。 */
+  onProgressChange?: (stepData: KeyPassageReadingStepData, immediate?: boolean, attempt?: StepAttempt) => void;
   /** DB LearningSession integer id — used to bind uploaded audio to the attempt row (Issue #2266). */
   dbSessionId?: number | null;
 }
@@ -200,7 +202,18 @@ const KeyPassageReading: React.FC<KeyPassageReadingProps> = ({
       setResult(newResult);
       setStreamingTranscript(transcript);
       setHistoryRefreshKey(k => k + 1);
-    }, [setResult, setStreamingTranscript, setHistoryRefreshKey]),
+      // #4087：每唸一次記一筆（每分鐘字數＋正確率）。AI 評分關掉時沒有分數，不記 ——
+      // 記成 0% 會在折線圖上變成一個假的退步。
+      if (!newResult.aiDisabled) {
+        onProgressChange?.({}, true, {
+          id: newAttemptId(),
+          at: new Date().toISOString(),
+          kind: 'reading',
+          cpm: Math.round(newResult.cpm),
+          accuracy: Math.round((newResult.matchRate <= 1 ? newResult.matchRate * 100 : newResult.matchRate)),
+        });
+      }
+    }, [setResult, setStreamingTranscript, setHistoryRefreshKey, onProgressChange]),
     onAudioSaved: useCallback((attemptId: number) => setAudioAttemptId(attemptId), []),
   });
 

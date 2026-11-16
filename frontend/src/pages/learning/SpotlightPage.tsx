@@ -18,6 +18,7 @@ import LessonRenderer from '../../components/lesson-content/LessonRenderer';
 import { storyToLesson } from '../../components/lesson-content/lessonContentAdapter';
 import NextStepFooter from '../../components/learning/NextStepFooter';
 import { mergeFirstVerdicts } from '../../utils/firstVerdicts';
+import { readAttempts, scoredAttempt } from '../../utils/stepAttempts';
 
 const SpotlightPage: React.FC = () => {
   const navigate = useNavigate();
@@ -64,9 +65,29 @@ const SpotlightPage: React.FC = () => {
     [handleProgressChange],
   );
 
+  // #4087：做完一次記一筆（成績單折線圖），用每題第一次的對錯。從 DB 還原成「已完成」
+  // 時，渲染器一掛上就會回報完成 —— 那不是新的一次。
+  const restoredDoneRef = useRef(!!savedStrategyData?.allDone);
+  const attemptsMadeRef = useRef(0);
   const handleStrategyComplete = useCallback(() => {
     setStrategyDone(true);
-  }, []);
+    if (restoredDoneRef.current) {
+      restoredDoneRef.current = false;
+      return;
+    }
+    const verdicts = Object.values(firstFeedbackRef.current ?? {});
+    if (!verdicts.length) return; // 沒有可判對錯的題目（純閱讀的聚光燈），不畫折線
+    const rows = verdicts.map((v, i) => ({ label: `第 ${i + 1} 題`, correct: v === true }));
+    const kind = readAttempts(savedStrategyData).length || attemptsMadeRef.current ? 'retry-all' : 'first';
+    attemptsMadeRef.current += 1;
+    saveStepProgressPatch({
+      stepId: 'spotlight',
+      stepData: {},
+      currentStep: 'spotlight',
+      immediate: true,
+      appendAttempt: scoredAttempt(kind, rows.filter((r) => r.correct).length, rows.length, rows),
+    });
+  }, [saveStepProgressPatch, savedStrategyData]);
 
   const handleNext = useCallback(() => {
     handleProgressChange({ completed: true, strategyDone }, true);

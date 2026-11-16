@@ -7,6 +7,7 @@ import { useCurrentStepId, useCurrentSectionSlug } from '../../hooks/useCurrentS
 import { useLearningContext } from '../../layouts/LearningLayout';
 import type { KeyPassageReadingStepData } from '../../types/stepProgress';
 import type { KeyPassageReadingResult } from '../../types';
+import type { StepAttempt } from '../../utils/stepAttempts';
 
 /** Canonical step id this page is registered under in STEP_REGISTRY. */
 const CANONICAL_STEP_ID = 'key-passage-reading';
@@ -34,12 +35,13 @@ const KeyPassageReadingPage: React.FC = () => {
   const stepId = useCurrentStepId(CANONICAL_STEP_ID);
 
   const handleProgressChange = useCallback(
-    (stepData: KeyPassageReadingStepData, immediate = false) => {
+    (stepData: KeyPassageReadingStepData, immediate = false, attempt?: StepAttempt) => {
       saveStepProgressPatch({
         stepId,
         stepData,
         currentStep: stepId,
         immediate,
+        ...(attempt ? { appendAttempt: attempt } : {}),
       });
     },
     [saveStepProgressPatch, stepId],
