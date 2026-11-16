@@ -816,7 +816,11 @@ jobs:
           IAP_SIGNING_SA_EMAIL: github-actions@lingoleap-dev.iam.gserviceaccount.com
         run: |
           source scripts/lib/iap-token.sh
-          IAP_TOKEN="$(iap_token "${STAGING_FRONTEND}")"
+          # aud must cover the PATH requested: a bare-URL aud only passes for
+          # "/" (run 43933120659: /api/health got IAP 401 with a valid JWT,
+          # while the "/" health check with the same signing passed). "/*"
+          # is one of the aud forms the iap-runbook lists as accepted.
+          IAP_TOKEN="$(iap_token "${STAGING_FRONTEND}/*")"
           if [ -z "${IAP_TOKEN}" ]; then
             echo "::error::could not sign an IAP token for the frontend"
             exit 1
