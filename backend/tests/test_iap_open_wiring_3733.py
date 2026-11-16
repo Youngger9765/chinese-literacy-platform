@@ -541,3 +541,41 @@ def test_switch_off_backend_already_public_is_untouched(wf, job, preview):
         "FAKE_MISSING": "1",
         "FAKE_IAM_POLICY": '{"bindings":[{"members":["serviceAccount:x@y"]}]}'})
     assert not _gcloud(calls, _GRANT), "no backend service -> nothing to reopen"
+
+
+# Live preview trial (PR #4079): the GitHub runner's gcloud ships WITHOUT the
+# `beta` component, so the first `gcloud beta run deploy` stopped on an
+# install prompt ("This prompt could not be answered because you are not in
+# an interactive session") and the frontend deploy failed. Every job that
+# runs a `gcloud beta` command must install the component in its
+# setup-gcloud step, before any step that uses it. Checked across every
+# workflow, not just the two IAP ones, so a new beta call can't regress it.
+def _beta_jobs():
+    for wf in sorted(WORKFLOWS_DIR.glob("*.yml")):
+        for name, job in (_doc(wf).get("jobs") or {}).items():
+            steps = job.get("steps") or []
+            if any(re.search(r"\bgcloud\s+beta\b", str(s.get("run", ""))) for s in steps):
+                yield wf, name
+
+
+BETA_JOBS = list(_beta_jobs())
+
+
+def test_beta_job_discovery_finds_the_iap_deploy_jobs():
+    # positive control: the scan must see the jobs we know use gcloud beta
+    found = {(wf.name, job) for wf, job in BETA_JOBS}
+    assert ("preview-deploy.yml", "deploy-preview") in found, found
+    assert ("staging-deploy.yml", "deploy-frontend") in found, found
+
+
+@pytest.mark.parametrize("wf,job", BETA_JOBS, ids=[f"{w.name}:{j}" for w, j in BETA_JOBS])
+def test_jobs_using_gcloud_beta_install_the_beta_component(wf, job):
+    steps = _job(wf, job)["steps"]
+    setup = [i for i, s in enumerate(steps) if "google-github-actions/setup-gcloud" in str(s.get("uses", ""))]
+    assert len(setup) == 1, f"{wf.name}:{job}: expected one setup-gcloud step, got {len(setup)}"
+    comps = str((steps[setup[0]].get("with") or {}).get("install_components", ""))
+    assert "beta" in [c.strip() for c in comps.split(",")], (
+        f"{wf.name}:{job}: setup-gcloud must set install_components: 'beta' "
+        "(runner gcloud has no beta component; the deploy dies on an install prompt)")
+    first_beta = min(i for i, s in enumerate(steps) if re.search(r"\bgcloud\s+beta\b", str(s.get("run", ""))))
+    assert setup[0] < first_beta, f"{wf.name}:{job}: beta used before setup-gcloud"
