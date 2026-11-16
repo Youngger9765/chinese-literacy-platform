@@ -118,6 +118,11 @@ jobs:
 
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@e427ad8a34f8676edf47cf7d7925499adf3eb74f # v2.2.1
+        with:
+          # #3733: the runner's gcloud has no `beta` component; `gcloud beta
+          # run deploy` (IAP / two-container frontend) would stop on an
+          # install prompt in a non-interactive shell and fail the deploy.
+          install_components: 'beta'
 
       - name: Configure Docker for Artifact Registry
         run: gcloud auth configure-docker asia-east1-docker.pkg.dev
