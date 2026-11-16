@@ -36,7 +36,7 @@ import { getTeacherStudentDialogue } from '../../services/teacherApi';
 import type { SessionDetailResponse } from '../../services/learningApi';
 import { resolveActiveSteps } from '../../config/stepConfig';
 import StepReportCards from '../../components/report/StepReportCards';
-import { buildStepReportCards, progressOrigin } from '../../components/report/reportCardsModel';
+import { buildStepReportCards } from '../../components/report/reportCardsModel';
 
 // ---------------------------------------------------------------------------
 // Page
@@ -91,7 +91,7 @@ const TeacherSessionReportPage: React.FC = () => {
         report?.step_progress?.steps_completed,
         report?.step_progress?.step_data,
         undefined,
-        { origin: progressOrigin(report?.step_progress), vocabularyFor: (id) => storyForStep(story, id)?.vocabulary },
+        { vocabularyFor: (id) => storyForStep(story, id)?.vocabulary },
       ),
     [story, report],
   );

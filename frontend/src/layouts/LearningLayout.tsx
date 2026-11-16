@@ -340,6 +340,17 @@ const LearningLayout: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, selectedStory]);
 
+  // #4028：上方導覽列要知道每一關的作答（有錯題的畫黃色圈圈）。
+  useEffect(() => {
+    learningNav.setStepProgress(stepProgressState);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stepProgressState]);
+  useEffect(
+    () => () => learningNav.setStepProgress(null),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
+
   // Memoise the outlet-context object so the Outlet (and any child component
   // destructuring via useLearningContext) sees a stable reference when no
   // dependency actually changed. Without useMemo, each LearningLayout render

@@ -18,30 +18,17 @@
  *   跟它同一課的其他 session 可能是更早或更晚、完全不相干的另一次嘗試 —— 往回找
  *   會把「更新一次嘗試」的記號誤植到「正在看的這一筆」上面。歷史頁要傳
  *   `carryForwardMarks=false`，只看這個 session 自己的記號（#3749）。
- *
- * 這次還沒做任何事時，看繼承來源那一次（#4028）：
- *   #2889 帶過來的勾現在分得出「這次」跟「上次」。但這個 session 如果什麼都還
- *   沒做（重新整理報告頁、或回到舊課直接點報告），整頁會是「這次完成 0 關」——
- *   重新整理的學生剛做完十關，卻看到零。所以這時改顯示被繼承的那一個 session
- *   的成果，`viewingPrevious` 告訴頁面那是哪一次、什麼時候，頁面要標出來，不能
- *   讓人以為是這次做的。歷史紀錄頁看的是一筆指定紀錄，不做這件事。
  */
 import { useEffect, useState } from 'react';
 import { API_BASE } from '../../services/apiConfig';
 import { loadStepProgress, type StepProgressData } from '../../services/learningApi';
 import { loadAnnotations, type AnnotationRecord } from '../../services/learning/annotationApi';
-import { progressOrigin, stepsDoneThisSession } from './reportCardsModel';
 
 export interface ReportData {
   progress: StepProgressData | null;
   /** null = 還在載入。 */
   annotations: AnnotationRecord[] | null;
   loading: boolean;
-  /**
-   * 不是 null 時，`progress` / `annotations` 是繼承來源那一次的，不是目前這個
-   * session 的（#4028，見檔頭）。`at` 是那一次的時間（ISO）。
-   */
-  viewingPrevious: { sessionId: number; at: string | null } | null;
 }
 
 /** 這一課自己的 session（新到舊），不含 exclude。 */
@@ -79,11 +66,10 @@ export function useReportProgress(
    * 記號要不要往回找同一課其他 session 的 carry-forward（見檔頭說明）。
    * 預設 true：學習流程內的 ReportPage.tsx 重新整理時要靠它才看得到剛做的記號。
    * 歷史紀錄頁在看一筆指定的過去 session，傳 false 只看這個 session 自己的。
-   * 同一個旗標也決定「這次什麼都沒做時，改看繼承來源那一次」（#4028）。
    */
   carryForwardMarks: boolean = true,
 ): ReportData {
-  const [state, setState] = useState<ReportData>({ progress: null, annotations: null, loading: true, viewingPrevious: null });
+  const [state, setState] = useState<ReportData>({ progress: null, annotations: null, loading: true });
 
   useEffect(() => {
     if (!dbSessionId || !token) return;
@@ -103,30 +89,8 @@ export function useReportProgress(
         console.warn('Annotation load failed (non-blocking):', err.message);
         return [] as AnnotationRecord[];
       }),
-    ]).then(async ([progress, annotations]) => {
-      let viewingPrevious: ReportData['viewingPrevious'] = null;
-      const origin = progressOrigin(progress);
-      if (
-        carryForwardMarks &&
-        progress &&
-        origin.carriedSessionId &&
-        origin.carriedSessionId !== dbSessionId &&
-        stepsDoneThisSession(progress).length === 0
-      ) {
-        const prevId = origin.carriedSessionId;
-        try {
-          const prev = (await loadStepProgress(token, prevId)).step_progress;
-          if (prev) {
-            progress = prev;
-            annotations = await loadMarksCarriedForward(token, prevId, storySlug).catch(() => annotations);
-            viewingPrevious = { sessionId: prevId, at: origin.carriedAt ?? null };
-          }
-        } catch (err) {
-          // 讀不到就照舊顯示這個 session 的（全部是「上次完成」），不擋頁面。
-          console.warn('Previous attempt progress load failed (non-blocking):', (err as Error).message);
-        }
-      }
-      if (!cancelled) setState({ progress, annotations, loading: false, viewingPrevious });
+    ]).then(([progress, annotations]) => {
+      if (!cancelled) setState({ progress, annotations, loading: false });
     });
     return () => {
       cancelled = true;

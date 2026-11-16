@@ -1,5 +1,5 @@
 /**
- * #4028 — 打開報告頁不能把「這次什麼都沒做」的自學 session 標成 completed。
+ * #4028 — 自學時，整課每一關都完成才把 session 標成 completed。
  *
  * 以前 ReportPage 一掛載就呼叫 handleSessionComplete（→ PATCH status=completed），
  * 0/10 關也一樣（staging session 1529 實測）。下次再進這一課就一定開新 session、
@@ -41,7 +41,6 @@ const renderPage = () =>
     </MemoryRouter>,
   );
 
-const carried = { session_id: 9, at: '2026-11-10T03:00:00Z', steps_completed: ['comprehension'] };
 
 describe('ReportPage marks a self-practice session completed only when something was done (#4028)', () => {
   beforeEach(() => {
@@ -51,61 +50,41 @@ describe('ReportPage marks a self-practice session completed only when something
   });
 
   it('a fresh session with nothing done stays in progress', async () => {
-    reportState = { loading: false, annotations: [], viewingPrevious: null,
+    reportState = { loading: false, annotations: [],
       progress: { steps_completed: ['report'], session_steps_completed: ['report'], step_data: {} } };
     renderPage();
-    await screen.findByText(/這次完成 0 \//);
-    expect(handleSessionComplete).not.toHaveBeenCalled();
-  });
-
-  it('a reopened lesson showing the previous attempt stays in progress', async () => {
-    reportState = { loading: false, annotations: [], viewingPrevious: { sessionId: 9, at: carried.at },
-      progress: { steps_completed: ['comprehension'], step_data: {} } };
-    renderPage();
-    await screen.findByText(/最近一次的學習成果/);
+    await screen.findByText(/完成 0 \//);
     expect(handleSessionComplete).not.toHaveBeenCalled();
   });
 
   it('waits for the DB progress before deciding', async () => {
-    reportState = { loading: true, annotations: null, viewingPrevious: null, progress: null };
+    reportState = { loading: true, annotations: null, progress: null };
     renderPage();
     await screen.findByText('載入學習成果…');
     expect(handleSessionComplete).not.toHaveBeenCalled();
   });
 
   // 手測踩到的（本機 session 29 → 30）：做兩關、看報告、回去做第三關，就被切成新
-  // session，剛做的全部變「上次完成」。只做了一部分不能標 completed。
-  it('a session with only some steps done this time stays in progress', async () => {
-    reportState = { loading: false, annotations: [], viewingPrevious: null,
-      progress: { steps_completed: ['comprehension', 'spotlight'], session_steps_completed: ['spotlight'],
-        step_data: {}, __meta: { carried_from: carried } } };
+  // session，剛做的全部變灰。只做了一部分不能標 completed。
+  it('a session with only some steps done stays in progress', async () => {
+    reportState = { loading: false, annotations: [],
+      progress: { steps_completed: ['comprehension', 'spotlight'], step_data: {} } };
     renderPage();
     await screen.findByRole('progressbar');
     expect(handleSessionComplete).not.toHaveBeenCalled();
   });
 
-  it('a session where every step was done this time is completed', async () => {
+  it('a session where every step is done is completed', async () => {
     const all = resolveActiveSteps(null).map((s) => s.id).filter((id) => id !== 'lesson-intro' && id !== 'report');
-    reportState = { loading: false, annotations: [], viewingPrevious: null,
-      progress: { steps_completed: all, session_steps_completed: all, step_data: {} } };
+    reportState = { loading: false, annotations: [], progress: { steps_completed: all, step_data: {} } };
     renderPage();
     await waitFor(() => expect(handleSessionComplete).toHaveBeenCalled());
-  });
-
-  it('every step done, but some only last time, is not this round finished', async () => {
-    const all = resolveActiveSteps(null).map((s) => s.id).filter((id) => id !== 'lesson-intro' && id !== 'report');
-    reportState = { loading: false, annotations: [], viewingPrevious: null,
-      progress: { steps_completed: all, session_steps_completed: all.slice(1), step_data: {},
-        __meta: { carried_from: { ...carried, steps_completed: [all[0]] } } } };
-    renderPage();
-    await screen.findByRole('progressbar');
-    expect(handleSessionComplete).not.toHaveBeenCalled();
   });
 
   it('assignment flow is unchanged: completes once ready even with nothing new this session', async () => {
     ctx.hasActiveAssignment = true;
     ctx.isAssignmentReadyForSubmit = true;
-    reportState = { loading: false, annotations: [], viewingPrevious: null,
+    reportState = { loading: false, annotations: [],
       progress: { steps_completed: ['report'], session_steps_completed: ['report'], step_data: {} } };
     renderPage();
     await waitFor(() => expect(handleSessionComplete).toHaveBeenCalled());

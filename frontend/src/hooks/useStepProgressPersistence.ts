@@ -98,16 +98,9 @@ export function mergeLoadedStepProgress(
   for (const id of local.steps_completed ?? []) {
     if (!completed.includes(id)) completed.push(id);
   }
-  // #4028 — same only-grows rule for "completed in this session".
-  const sessionDone = [...(loaded.session_steps_completed ?? [])];
-  for (const id of local.session_steps_completed ?? []) {
-    if (!sessionDone.includes(id)) sessionDone.push(id);
-  }
-  const tracksSession = loaded.session_steps_completed != null || local.session_steps_completed != null;
   return {
     current_step: loaded.current_step ?? local.current_step ?? null,
     steps_completed: completed,
-    ...(tracksSession ? { session_steps_completed: sessionDone } : {}),
     step_data: { ...(loaded.step_data ?? {}), ...(local.step_data ?? {}) },
   };
 }
@@ -184,27 +177,11 @@ export function useStepProgressPersistence({
   const [stepProgressState, setStepProgressState] = useState<StepProgressData>({
     current_step: null,
     steps_completed: [],
-    session_steps_completed: [],
     step_data: {},
   });
   // Latest progress for the load handler below, which runs from async callbacks.
   const stepProgressStateRef = useRef(stepProgressState);
   useEffect(() => { stepProgressStateRef.current = stepProgressState; }, [stepProgressState]);
-
-  // #4028 — "completed in this session" belongs to ONE session. When the layout
-  // moves on to a different DB session without remounting (e.g. after the report
-  // completes one and a new one is opened), what the old session completed must
-  // not be merged into the new one as if it had been done there. The new
-  // session's own list arrives with its async progress load, after this runs.
-  const sessionListOwnerRef = useRef(dbSessionId);
-  useEffect(() => {
-    if (sessionListOwnerRef.current === dbSessionId) return;
-    sessionListOwnerRef.current = dbSessionId;
-    const reset = (prev: StepProgressData) =>
-      prev.session_steps_completed?.length ? { ...prev, session_steps_completed: [] } : prev;
-    stepProgressStateRef.current = reset(stepProgressStateRef.current);
-    setStepProgressState(reset);
-  }, [dbSessionId]);
 
   const lessonActiveSteps = useMemo(
     () => resolveActiveSteps(selectedStory?.stepSequence),
@@ -264,16 +241,8 @@ export function useStepProgressPersistence({
       const serverCompleted = Array.isArray(data.steps_completed) ? data.steps_completed : [];
       const local = stepProgressStateRef.current;
       const missing = serverCompleted.filter((id) => !local.steps_completed.includes(id));
-      // #4028 — same for "completed in this session".
-      const serverSessionDone = Array.isArray(data.session_steps_completed) ? data.session_steps_completed : [];
-      const localSessionDone = local.session_steps_completed ?? [];
-      const missingSessionDone = serverSessionDone.filter((id) => !localSessionDone.includes(id));
-      if (missing.length === 0 && missingSessionDone.length === 0) return;
-      const merged = {
-        ...local,
-        steps_completed: [...local.steps_completed, ...missing],
-        session_steps_completed: [...localSessionDone, ...missingSessionDone],
-      };
+      if (missing.length === 0) return;
+      const merged = { ...local, steps_completed: [...local.steps_completed, ...missing] };
       stepProgressStateRef.current = merged;
       setStepProgressState(merged);
       setSession((prev) => {
@@ -288,7 +257,6 @@ export function useStepProgressPersistence({
       const merged = mergeLoadedStepProgress(stepProgressStateRef.current, {
         current_step: data.current_step ?? null,
         steps_completed: Array.isArray(data.steps_completed) ? data.steps_completed : [],
-        session_steps_completed: Array.isArray(data.session_steps_completed) ? data.session_steps_completed : [],
         step_data: loadedStepData,
       });
       const loadedCompleted = merged.steps_completed;
@@ -342,10 +310,6 @@ export function useStepProgressPersistence({
       setStepProgressState((prev) => {
         const completed = new Set<string>(prev.steps_completed);
         if (opts.completeStep) completed.add(opts.completeStep);
-        // #4028 — record that it was completed in THIS session, even when the
-        // step was already ticked by the #2889 carry-forward (a redo).
-        const sessionDone = new Set<string>(prev.session_steps_completed ?? []);
-        if (opts.completeStep) sessionDone.add(opts.completeStep);
 
         // Issue #2530: merge each step's patch ONE LEVEL deep instead of replacing the
         // whole step entry. A partial finish patch (e.g. tutor's { readingAttempt }) must
@@ -365,7 +329,6 @@ export function useStepProgressPersistence({
         const next: StepProgressData = {
           current_step: opts.currentStep ?? prev.current_step,
           steps_completed: Array.from(completed),
-          session_steps_completed: Array.from(sessionDone),
           step_data: mergedStepData,
           // Issue #3682 — tells the backend every required step is done, so it
           // can auto-submit a linked assignment from the DB side of the wire.
@@ -545,7 +508,6 @@ export function useStepProgressPersistence({
       const next: StepProgressData = {
         current_step: prev.current_step,
         steps_completed: Array.from(completed),
-        session_steps_completed: (prev.session_steps_completed ?? []).filter((id) => id !== 'paragraph-reading'),
         step_data: {
           ...prev.step_data,
           // Full replace (not shallow merge) so readingAttempt / reading_attempt are dropped too.

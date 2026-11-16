@@ -110,20 +110,6 @@ def save_step_progress(
     existing_step_data = existing_sp.step_data if existing_sp is not None else {}
     merged_step_data = {**existing_step_data, **payload.step_data}
 
-    # #4028: steps completed in THIS session, kept apart from the cumulative
-    # steps_completed that #2889 carries forward. Same union rule (a racing
-    # empty save must not wipe it), same reset_steps escape hatch, and never
-    # anything that isn't also in steps_completed — a stale client can't claim
-    # a step as "done now" that the session doesn't have at all.
-    existing_session_done = existing_sp.session_steps_completed if existing_sp is not None else None
-    merged_session_done: list[str] | None = None
-    if existing_session_done is not None or payload.session_steps_completed is not None:
-        merged_session_done = [s for s in (existing_session_done or []) if s not in reset_steps]
-        for step_id in payload.session_steps_completed or []:
-            if step_id not in merged_session_done:
-                merged_session_done.append(step_id)
-        merged_session_done = [s for s in merged_session_done if s in merged_steps_completed]
-
     # Version is stored at the top level so the frontend can read it directly
     # from StepProgressData.version. __meta keeps other metadata (source, etc.).
     session.step_progress = {
@@ -133,8 +119,6 @@ def save_step_progress(
         "version": next_version,
         "__meta": existing_meta,
     }
-    if merged_session_done is not None:
-        session.step_progress["session_steps_completed"] = merged_session_done
 
     # DEPRECATED (#1182): integer current_step sync removed.
     # step_progress.steps_completed is now the single source of truth;

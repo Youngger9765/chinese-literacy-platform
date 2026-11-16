@@ -35,35 +35,21 @@ MAX_READING_HISTORY_FETCH = 500
 
 
 def _mark_carried_from(carried: dict, previous: LearningSession) -> None:
-    """Record where carried-forward progress came from (#4028).
+    """Rebuild ``__meta`` on carried-forward progress (#4028).
 
-    #2889 copies the previous session's whole step_progress, including
-    ``steps_completed``. The report page then had no way to tell "done in this
-    attempt" from "done last time", and a student reopening a finished lesson saw
-    every card ticked before doing anything. ``steps_completed`` stays cumulative
-    (stepper pills and assignment readiness depend on it); instead this snapshot
-    says which of those ticks were inherited, and ``session_steps_completed``
-    starts empty so it only ever holds what happens in the new session.
-
-    ``__meta`` is rebuilt rather than copied: the previous session may have been
-    an assignment session, and its ``source: "assignment"`` / ``assignment_id``
-    would otherwise make this new self-practice session look like one
-    (``_is_assignment_session`` reads exactly that key).
+    #2889 copies the previous session's whole step_progress. Copying ``__meta``
+    with it was wrong: the previous session may have been an assignment session,
+    and its ``source: "assignment"`` / ``assignment_id`` then made this new
+    self-practice session look like one (``_is_assignment_session`` reads exactly
+    that key) — student after-class practice mixed into the teacher's assignment
+    records. The new ``__meta`` only says where the progress came from.
     """
     prev_meta = carried.get("__meta") if isinstance(carried.get("__meta"), dict) else {}
     when = previous.completed_at or None
     at = when.isoformat() if when else prev_meta.get("last_synced_at")
     if not at and previous.started_at:
         at = previous.started_at.isoformat()
-    done = carried.get("steps_completed")
-    carried["__meta"] = {
-        "carried_from": {
-            "session_id": previous.id,
-            "at": at,
-            "steps_completed": list(done) if isinstance(done, list) else [],
-        },
-    }
-    carried["session_steps_completed"] = []
+    carried["__meta"] = {"carried_from": {"session_id": previous.id, "at": at}}
 
 
 def _is_assignment_session(

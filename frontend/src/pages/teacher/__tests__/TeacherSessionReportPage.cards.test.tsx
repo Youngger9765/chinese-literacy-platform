@@ -97,7 +97,7 @@ describe('TeacherSessionReportPage — 報告區塊 (#3749)', () => {
     renderPage();
     await waitFor(() => expect(screen.getByTestId('step-report-cards')).toBeInTheDocument());
     expect(screen.queryByTestId('assessment-report')).not.toBeInTheDocument();
-    expect(screen.getByText('這次完成 2 / 2 關')).toBeInTheDocument();
+    expect(screen.getByText('完成 2 / 2 關')).toBeInTheDocument();
   });
 
   it('沒有做記號的資料時，讀全文卡片不會誤報「還沒有做記號」', async () => {

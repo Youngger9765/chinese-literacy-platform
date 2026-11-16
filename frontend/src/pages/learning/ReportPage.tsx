@@ -8,7 +8,7 @@ import { reportSessionComplete } from '../../services/gamificationApi';
 import { resolveActiveSteps } from '../../config/stepConfig';
 import StepReportCards from '../../components/report/StepReportCards';
 import { useReportProgress } from '../../components/report/useReportProgress';
-import { buildStepReportCards, marksFromAnnotations, progressOrigin } from '../../components/report/reportCardsModel';
+import { buildStepReportCards, marksFromAnnotations } from '../../components/report/reportCardsModel';
 import { storyForStep } from '../../services/api';
 
 /**
@@ -121,40 +121,31 @@ const ReportPage: React.FC = () => {
         report.progress?.steps_completed ?? session?.completedSteps,
         report.progress?.step_data,
         report.annotations ? marksFromAnnotations(report.annotations, selectedStory?.content) : null,
-        {
-          origin: progressOrigin(report.progress),
-          vocabularyFor: (id) => storyForStep(selectedStory, id)?.vocabulary,
-        },
+        { vocabularyFor: (id) => storyForStep(selectedStory, id)?.vocabulary },
       ),
     [selectedStory, report.progress, report.annotations, session?.completedSteps],
   );
 
   // Clear active session from localStorage when report is reached.
   //
-  // #4028：自學時，只有「這一次把整課每一關都做完」才把 session 標成 completed。
-  //
-  // 一開始的版本是「這次有完成任何一關就標」—— 本機手測馬上踩到：做兩關、看一下
-  // 報告、回去做第三關，就被切成新 session（completed 的不會被 #984 沿用），剛做的
-  // 兩關全部變成「上次完成」，5 分鐘內切出 3 個 session。標成 completed 的意思是
-  // 「這一輪結束了」，只有整課做完才是。沒做完就留著 in_progress，下次進來（或回去
-  // 做下一關）沿用同一個 session，做過的關卡一直是這一次的。
-  //
-  // 「每一關」= 報告卡片上除了課程簡介以外的每一張（報告本身不在卡片裡），跟作業的
-  // 必做關卡同一個範圍（filterRequiredAssignmentSteps 也排除 lesson-intro / report）。
-  // 作業流程照舊：交件條件另外把關。要等 DB 進度讀完才判斷；在看「繼承來源那一次」
-  // 時代表這次什麼都沒做。
+  // #4028：自學時，整課每一關都完成才把 session 標成 completed。
+  // 以前一打開報告頁就標完成（0/10 關也算）；之後一度改成「有完成任何一關就標」，
+  // 本機手測馬上踩到：做兩關、看一下報告、回去做第三關，就被切成新 session（completed
+  // 的不會被 #984 沿用），5 分鐘內切出 3 個 session。completed 的意思是「這一輪結束」，
+  // 只有整課做完才是；沒做完就留著 in_progress，回去繼續做沿用同一個 session。
+  // 「每一關」= 報告卡片上除了課程簡介以外的每一張（報告本身不在卡片裡），跟作業必做
+  // 關卡同一個範圍。作業流程照舊：交件條件另外把關。要等 DB 進度讀完才判斷。
   const requiredCards = cards.filter((c) => c.baseId !== 'lesson-intro');
-  const finishedThisSession =
-    !report.viewingPrevious && requiredCards.length > 0 && requiredCards.every((c) => c.status === 'this');
+  const finishedLesson = requiredCards.length > 0 && requiredCards.every((c) => c.completed);
   const progressReady = !(report.loading && dbSessionId);
   useEffect(() => {
     if (hasActiveAssignment) {
       if (!isAssignmentReadyForSubmit) return;
-    } else if (!progressReady || !finishedThisSession) {
+    } else if (!progressReady || !finishedLesson) {
       return;
     }
     handleSessionComplete();
-  }, [handleSessionComplete, hasActiveAssignment, isAssignmentReadyForSubmit, progressReady, finishedThisSession]);
+  }, [handleSessionComplete, hasActiveAssignment, isAssignmentReadyForSubmit, progressReady, finishedLesson]);
 
   const handleDismissToast = useCallback(() => {
     setShowXpToast(false);
@@ -209,7 +200,6 @@ const ReportPage: React.FC = () => {
           storyTitle={selectedStory?.title}
           cards={cards}
           onGoToStep={(stepId) => navigate(stepPath(storyId!, stepId))}
-          previousAttempt={report.viewingPrevious ? { at: report.viewingPrevious.at } : null}
         />
       )}
 

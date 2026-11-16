@@ -32,7 +32,7 @@ import { resolveActiveSteps } from '../../config/stepConfig';
 import { stepPath } from '../../config/stepPath';
 import StepReportCards from '../../components/report/StepReportCards';
 import { useReportProgress } from '../../components/report/useReportProgress';
-import { buildStepReportCards, marksFromAnnotations, progressOrigin } from '../../components/report/reportCardsModel';
+import { buildStepReportCards, marksFromAnnotations } from '../../components/report/reportCardsModel';
 
 import { buildComprehensionScores } from './session-history/helpers';
 import { StepRecordsView as _StepRecordsView } from './session-history/StepRecordsView';
@@ -115,7 +115,7 @@ const SessionHistoryReportPage: React.FC = () => {
         report.progress?.steps_completed,
         report.progress?.step_data,
         report.annotations ? marksFromAnnotations(report.annotations, story?.content) : null,
-        { origin: progressOrigin(report.progress), vocabularyFor: (id) => storyForStep(story, id)?.vocabulary },
+        { vocabularyFor: (id) => storyForStep(story, id)?.vocabulary },
       ),
     [story, report.progress, report.annotations],
   );

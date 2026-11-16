@@ -19,10 +19,6 @@ class StepProgressData(BaseModel):
     """
     current_step: str | None = None
     steps_completed: list[str] = Field(default_factory=list)
-    # #4028: the subset of steps_completed that was completed in THIS session.
-    # None = written by a client/session that predates the field (treat every
-    # step_completed that wasn't carried forward as this session's).
-    session_steps_completed: list[str] | None = None
     step_data: dict[str, Any] = Field(default_factory=dict)
     version: int | None = None
     # Internal metadata — preserved but not validated strictly
@@ -196,15 +192,6 @@ class StepProgressSaveRequest(BaseModel):
     # though the union would otherwise keep it (a plain omission, with nothing named
     # here, still only ever grows the list).
     reset_steps: list[_StepId] = Field(default_factory=list, max_length=MAX_PROGRESS_ITEMS, description="Step ids to deliberately un-complete")
-    # #4028: steps completed in THIS session (as opposed to inherited from the
-    # previous session by the #2889 carry-forward). Same monotonic-union rule as
-    # steps_completed. None = an older client that doesn't send it; the stored
-    # value is then left untouched.
-    session_steps_completed: list[_StepId] | None = Field(
-        None,
-        max_length=MAX_PROGRESS_ITEMS,
-        description="Step ids completed in this session (subset of steps_completed)",
-    )
 
     @field_validator("step_data")
     @classmethod

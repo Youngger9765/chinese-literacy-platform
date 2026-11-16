@@ -53,13 +53,13 @@ export type DetailBlock =
   | { kind: 'note'; text: string };
 
 /**
- * 這一關的完成狀態（#4028）。
- * - `this`：這一次（這個 session）完成的
- * - `previous`：上一次做過、這一次還沒做 —— #2889 把上次的進度帶過來，
- *   但不能跟這次做的混在一起算
+ * 這一關的狀態（#4028，案主定調）：
+ * - `done`：完成，而且每一題第一次就答對（或這一關沒有對錯）→ 綠色
+ * - `review`：完成，但有題目第一次答錯 / 還沒訂正 → 黃色，提醒回去看錯題
  * - `none`：沒完成
+ * 不分「這次 / 上次」：完成就是完成。上方關卡導覽列用同一個函式判斷（AppShell）。
  */
-export type CardStatus = 'this' | 'previous' | 'none';
+export type CardStatus = 'done' | 'review' | 'none';
 
 export interface StepReportCard {
   /** 完整 step id（多篇課帶 `#slug`），用來組網址。 */
@@ -67,11 +67,8 @@ export interface StepReportCard {
   baseId: string;
   label: string;
   icon: string;
-  /** 這一次完成的才是 true（#4028）。上次做過、這次沒做的是 false，看 status。 */
   completed: boolean;
   status: CardStatus;
-  /** status === 'previous' 時，上一次的時間（ISO），沒有就是 null。 */
-  previousAt: string | null;
   /** 卡片上的一行摘要，例如「答對 7/8 題」「做了 5 個記號」。 */
   summary: string | null;
   details: DetailBlock[];
@@ -195,7 +192,15 @@ function vocabMatchRows(list: unknown, vocab: VocabWord[] | undefined, prefix: s
   });
 }
 
-type Builder = (ctx: BuildCtx) => { summary: string | null; details: DetailBlock[] };
+/**
+ * `needsReview`：這一關有沒有「第一次答錯」的題目（→ 黃色）。不給就從作答列推：
+ * 任何一列 correct === false 就是。只有分數沒有逐題資料的關卡要自己給。
+ */
+type Builder = (ctx: BuildCtx) => { summary: string | null; details: DetailBlock[]; needsReview?: boolean };
+
+function rowsHaveMiss(details: DetailBlock[]): boolean {
+  return details.some((d) => d.kind === 'answers' && d.rows.some((r) => !r.correct));
+}
 
 function firstTryRows(list: unknown, prefix = '第'): AnswerRow[] {
   if (!Array.isArray(list)) return [];
@@ -259,6 +264,8 @@ const BUILDERS: Record<string, Builder> = {
       return {
         summary: correctOf(n, t),
         details: [{ kind: 'stats', items: [{ label: '答對（含訂正）', value: `${n} / ${t} 題` }] }],
+        // 舊資料沒有逐題第一次作答，分不出有沒有錯過 —— 不亂標黃色。
+        needsReview: false,
       };
     }
     const first = rows.filter((r) => r.correct).length;
@@ -285,7 +292,11 @@ const BUILDERS: Record<string, Builder> = {
     const details: DetailBlock[] = [];
     if (n !== null && t !== null) details.push({ kind: 'stats', items: [{ label: '第一次就答對', value: `${n} / ${t} 題` }] });
     if (rows.length) details.push({ kind: 'answers', title: '作答紀錄', rows });
-    return { summary: n !== null && t !== null ? correctOf(n, t) : null, details };
+    return {
+      summary: n !== null && t !== null ? correctOf(n, t) : null,
+      details,
+      needsReview: rows.length ? undefined : n !== null && t !== null && n < t,
+    };
   },
 
   spotlight: ({ data }) => {
@@ -297,6 +308,7 @@ const BUILDERS: Record<string, Builder> = {
     return {
       summary: correctOf(n, graded.length),
       details: [{ kind: 'stats', items: [{ label: '選擇題答對', value: `${n} / ${graded.length} 題` }] }],
+      needsReview: n < graded.length,
     };
   },
 
@@ -334,7 +346,11 @@ const BUILDERS: Record<string, Builder> = {
     const details: DetailBlock[] = [];
     if (n !== null && t !== null) details.push({ kind: 'stats', items: [{ label: '第一次就答對', value: `${n} / ${t} 題` }] });
     if (rows.length) details.push({ kind: 'answers', title: '作答紀錄', rows });
-    return { summary: n !== null && t !== null && t > 0 ? correctOf(n, t) : null, details };
+    return {
+      summary: n !== null && t !== null && t > 0 ? correctOf(n, t) : null,
+      details,
+      needsReview: rows.length ? undefined : n !== null && t !== null && n < t,
+    };
   },
 
   'vocab-review': ({ data }) => {
@@ -347,60 +363,12 @@ const BUILDERS: Record<string, Builder> = {
   },
 };
 
-/**
- * 哪些勾是這次打的、哪些是從上一次帶過來的（#4028）。
- * 由 `progressOrigin()` 從 DB 的 step_progress 取出。
- */
-export interface ProgressOrigin {
-  /** step_progress.session_steps_completed —— 這個 session 裡完成的。舊資料沒有這個欄位。 */
-  sessionStepsCompleted?: string[] | null;
-  /** step_progress.__meta.carried_from.steps_completed —— 從上一次帶過來的。 */
-  carriedStepsCompleted?: string[] | null;
-  /** step_progress.__meta.carried_from.at */
-  carriedAt?: string | null;
-  /** step_progress.__meta.carried_from.session_id */
-  carriedSessionId?: number | null;
-}
-
 export interface ReportCardOptions {
-  /** 哪些勾是這次的、哪些是上次帶過來的（#4028）。不給 = 全部當這次的。 */
-  origin?: ProgressOrigin;
   /**
    * 某一關（完整 step id，含 `#slug`）的詞語表，詞語理解的細節要用它把作答還原成詞語。
    * 呼叫端通常是 `(id) => storyForStep(story, id)?.vocabulary`。
    */
   vocabularyFor?: (stepId: string) => VocabWord[] | undefined;
-}
-
-/** 從 DB 回來的 step_progress 取出 ProgressOrigin；形狀不對的一律當沒有。 */
-export function progressOrigin(progress: unknown): ProgressOrigin {
-  if (!isObj(progress)) return {};
-  const strList = (v: unknown) => (Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : null);
-  const meta = isObj(progress.__meta) ? progress.__meta : {};
-  const carried = isObj(meta.carried_from) ? meta.carried_from : null;
-  return {
-    sessionStepsCompleted: strList(progress.session_steps_completed),
-    carriedStepsCompleted: carried ? strList(carried.steps_completed) ?? [] : null,
-    carriedAt: carried ? str(carried.at) : null,
-    carriedSessionId: carried ? num(carried.session_id) : null,
-  };
-}
-
-/**
- * 這個 session 自己完成了哪些關卡（#4028），不含 report 本身（一進報告頁就會被標完成）。
- * 有 session_steps_completed 就用它，再加上累計清單裡不是繼承來的；跟卡片的「這次」同一套規則。
- */
-export function stepsDoneThisSession(progress: unknown): string[] {
-  if (!isObj(progress)) return [];
-  const o = progressOrigin(progress);
-  const done = Array.isArray(progress.steps_completed)
-    ? progress.steps_completed.filter((x): x is string => typeof x === 'string').map(normalizeStepKey)
-    : [];
-  const carried = new Set((o.carriedStepsCompleted ?? []).map(normalizeStepKey));
-  const out = new Set((o.sessionStepsCompleted ?? []).map(normalizeStepKey));
-  for (const id of done) if (!carried.has(id)) out.add(id);
-  out.delete('report');
-  return [...out];
 }
 
 /**
@@ -413,8 +381,7 @@ export function stepsDoneThisSession(progress: unknown): string[] {
  *                       沒有能力提供記號資料（例如老師端：後端沒有教師專屬的
  *                       annotations 端點，見 TeacherSessionReportPage）—— 卡片
  *                       會略過記號細節，不會誤報「還沒有做記號」或卡在「載入中」。
- * @param opts           origin：哪些勾是這次的、哪些是上次帶過來的（#4028），不給 = 全部當
- *                       這次的；vocabularyFor：每一關的詞語表（詞語理解的作答細節）。
+ * @param opts           vocabularyFor：每一關的詞語表（詞語理解的作答細節）。
  */
 export function buildStepReportCards(
   steps: StepConfig[],
@@ -423,18 +390,8 @@ export function buildStepReportCards(
   marks: MarkedWord[] | null | undefined,
   opts: ReportCardOptions = {},
 ): StepReportCard[] {
-  const origin = opts.origin ?? {};
   const done = new Set((stepsCompleted ?? []).map(normalizeStepKey));
   const data = normalizeStepData(stepData);
-  // #4028：這次完成 = 這個 session 自己記下完成的 ∪ 累計清單裡不是從上一次帶過來的。
-  // 後半段讓沒有 session_steps_completed 的舊 session 照舊顯示；前半段讓「上次做過、
-  // 這次又重做」的關卡算成這次。
-  const carriedList = origin.carriedStepsCompleted;
-  const carried = new Set((carriedList ?? []).map(normalizeStepKey));
-  const sessionDone = new Set((origin.sessionStepsCompleted ?? []).map(normalizeStepKey));
-  const doneNow = (id: string) => sessionDone.has(id) || (done.has(id) && !carried.has(id));
-  // step_data 也會跟著帶過來，所以 entry.completed 只有在沒有繼承紀錄時才能當成「這次」。
-  const hasCarry = carriedList != null;
   // 課程簡介從來不會被寫進 steps_completed（按「開始」只存 current_step），
   // 所以只要後面任何一關有進度，就代表學生看過簡介了。
   // report 本身不算：一進報告頁就會把 report 寫進 steps_completed。
@@ -442,14 +399,6 @@ export function buildStepReportCards(
     const base = s.baseId ?? s.id;
     return base !== 'lesson-intro' && base !== 'report' && (done.has(s.id) || s.id in data);
   });
-  // 同一個規則，只看這一次（#4028）。
-  const anyLaterProgressNow = steps.some((s) => {
-    const base = s.baseId ?? s.id;
-    if (base === 'lesson-intro' || base === 'report') return false;
-    const unique = steps.filter((o) => (o.baseId ?? o.id) === base).length === 1 && base !== s.id;
-    return doneNow(s.id) || (unique && doneNow(base)) || (!hasCarry && s.id in data);
-  });
-
   // 記號的 offset 只對得上第一篇的課文（多篇課的第 2、3 篇不能標記），
   // 所以只掛在第一個讀全文-做記號上，其餘篇次不顯示記號。
   const firstAnnotateId = steps.find((s) => (s.baseId ?? s.id) === 'full-text-annotate')?.id;
@@ -466,32 +415,53 @@ export function buildStepReportCards(
       const baseId = s.baseId ?? s.id;
       const unique = baseCount.get(baseId) === 1 && baseId !== s.id;
       const entry = data[s.id] ?? (unique ? data[baseId] : undefined) ?? {};
-      const everCompleted =
+      const completed =
         done.has(s.id) ||
         (unique && done.has(baseId)) ||
         entry.completed === true ||
         (baseId === 'lesson-intro' && anyLaterProgress);
-      const completedNow =
-        doneNow(s.id) ||
-        (unique && doneNow(baseId)) ||
-        (!hasCarry && entry.completed === true) ||
-        (baseId === 'lesson-intro' && anyLaterProgressNow);
-      const status: CardStatus = completedNow ? 'this' : everCompleted ? 'previous' : 'none';
       const builder = BUILDERS[baseId];
       const stepMarks = s.id === firstAnnotateId ? marks : undefined;
-      const built = builder
-        ? builder({ data: entry, completed: completedNow, marks: stepMarks, vocabulary: opts.vocabularyFor?.(s.id) })
+      const built: ReturnType<Builder> = builder
+        ? builder({ data: entry, completed, marks: stepMarks, vocabulary: opts.vocabularyFor?.(s.id) })
         : { summary: null, details: [] };
+      const needsReview = built.needsReview ?? rowsHaveMiss(built.details);
+      const status: CardStatus = !completed ? 'none' : needsReview ? 'review' : 'done';
       return {
         stepId: s.id,
         baseId,
         label: s.label,
         icon: STEP_ICONS[baseId] ?? 'task_alt',
-        completed: completedNow,
+        completed,
         status,
-        previousAt: status === 'previous' ? origin.carriedAt ?? null : null,
         summary: built.summary,
         details: built.details,
       };
     });
+}
+
+/**
+ * 上方關卡導覽列用（#4028）：哪些關卡完成、哪些完成了但有錯題（黃色圈圈）。
+ * 跟報告卡片同一個判斷（buildStepReportCards），兩邊不會一個綠一個灰 / 一個綠一個黃
+ * —— 例如課程簡介：從來不會寫進 steps_completed，報告卡片用「後面有任何進度」判斷。
+ */
+export function stepNavStatus(
+  steps: StepConfig[],
+  stepsCompleted: string[] | null | undefined,
+  stepData: Record<string, unknown> | null | undefined,
+): { completed: Set<string>; review: Set<string> } {
+  const cards = buildStepReportCards(steps, stepsCompleted, stepData, undefined);
+  return {
+    completed: new Set(cards.filter((c) => c.completed).map((c) => c.stepId)),
+    review: new Set(cards.filter((c) => c.status === 'review').map((c) => c.stepId)),
+  };
+}
+
+/** 完成了但有錯題的關卡（stepNavStatus 的 review）。 */
+export function stepIdsNeedingReview(
+  steps: StepConfig[],
+  stepsCompleted: string[] | null | undefined,
+  stepData: Record<string, unknown> | null | undefined,
+): Set<string> {
+  return stepNavStatus(steps, stepsCompleted, stepData).review;
 }

@@ -172,24 +172,13 @@ def build_step_progress_update(existing: Optional[dict], graded: list) -> Option
     meta["last_synced_at"] = graded_at
     meta["omo_synced_at"] = graded_at
 
-    out = {
+    return {
         "current_step": sp.get("current_step"),  # leave navigation as-is
         "steps_completed": steps_completed,
         "step_data": step_data,
         "version": int(sp.get("version") or 0) + 1,
         "__meta": meta,
     }
-    # #4028: keep the "completed in this session" list, and count the worksheet
-    # just graded as done now. Sessions that never had the list keep not having
-    # it (the report then treats every non-carried step as this session's).
-    session_done = sp.get("session_steps_completed")
-    if isinstance(session_done, list):
-        session_done = list(session_done)
-        for step in by_step:
-            if step not in session_done:
-                session_done.append(step)
-        out["session_steps_completed"] = session_done
-    return out
 
 
 def sync_omo_grading_to_session(
