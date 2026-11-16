@@ -52,22 +52,27 @@ PAGES = ("/", "/index.html", "/login", "/learn/20016/vocab-application", "/teach
          "/presentation/short.html")
 BACKEND = ("/api/stories/20011", "/api/tts/sentence", "/api/health", "/q/abc123")
 
+# #3733: staging/dev are redirect-only (302 to the staging Cloud Run frontend),
+# so they serve no pages/assets of their own; these header rules apply only to
+# targets that actually serve content.
+SERVING = [h for h in CFG["hosting"] if not h.get("redirects")]
+
 
 def test_pages_are_revalidated():
-    assert CFG["hosting"]
-    for h in CFG["hosting"]:
+    assert SERVING
+    for h in SERVING:
         for path in PAGES:
             cc = _cache_control(h, path)
             assert cc and "no-cache" in cc, f"{h['target']} {path} -> {cc!r}"
 
 
 def test_backend_rewrites_keep_their_own_cache_control():
-    for h in CFG["hosting"]:
+    for h in SERVING:
         for path in BACKEND:
             assert _cache_control(h, path) is None, f"{h['target']} overrides backend Cache-Control on {path}"
 
 
 def test_hashed_assets_stay_cacheable():
-    for h in CFG["hosting"]:
+    for h in SERVING:
         cc = _cache_control(h, "/assets/index-AbC123.js")
         assert cc and "immutable" in cc, f"{h['target']} assets -> {cc!r}"
