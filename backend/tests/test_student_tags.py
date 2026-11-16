@@ -173,12 +173,14 @@ def other_teacher(client):
     return _register_user(client, "tag_other_tch")
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def student(client):
+    # Function-scoped: every test gets a student with no tags yet, so no test
+    # depends on (or is broken by) tags another test added earlier (#3787).
     return _register_user(client, "tag_student")
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def classroom_id(client, teacher, student, school_id):
     """Create a classroom, enroll the student, and return the classroom id."""
     create_resp = client.post(
@@ -263,7 +265,12 @@ class TestAddStudentTag:
         assert resp.json()["color"] == "gray"
 
     def test_add_duplicate_tag_returns_409(self, client, teacher, student, classroom_id):
-        # "需要關注" was already added in test_add_tag_returns_201
+        first = client.post(
+            f"/api/teacher/students/{student['user_id']}/tags",
+            json={"tag_name": "需要關注", "color": "red"},
+            headers=auth_header(teacher["token"]),
+        )
+        assert first.status_code == 201
         resp = client.post(
             f"/api/teacher/students/{student['user_id']}/tags",
             json={"tag_name": "需要關注", "color": "red"},
@@ -373,7 +380,12 @@ class TestTagsInProgressResponse:
     def test_progress_response_includes_student_tags(
         self, client, teacher, student, classroom_id
     ):
-        # Ensure student has the "需要關注" tag (added in TestAddStudentTag)
+        add_resp = client.post(
+            f"/api/teacher/students/{student['user_id']}/tags",
+            json={"tag_name": "需要關注", "color": "red"},
+            headers=auth_header(teacher["token"]),
+        )
+        assert add_resp.status_code == 201
         resp = client.get(
             f"/api/teacher/classrooms/{classroom_id}/progress",
             headers=auth_header(teacher["token"]),

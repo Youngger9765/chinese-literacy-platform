@@ -270,6 +270,29 @@ def _transcription_max_tokens(target_text: str) -> int:
     return max(1024, min(8192, len(target_text or "") * 2 + 512))
 
 
+_HINT_CHAR = _re_mod.compile(r"[㐀-䶿一-鿿豈-﫿\U00020000-\U0002ffff]")
+
+
+def _reference_char_hint(target_text: str) -> str:
+    """The passage's distinct Han characters, sorted by code point (#4066).
+
+    Why not the passage itself: given the ordered passage, Gemini rewrites what
+    the child actually said back into the reference.  Measured on saved prod
+    attempts (same audio, same model, with vs without the passage in the
+    prompt): attempt 152 / lesson 20017 → 99.6% vs 74.9% (child skipped the
+    opening sentence and paraphrased), attempt 120 / lesson 20145 → 100% vs
+    62%.  The front-end then scored the copied passage, which is how real
+    readings came out as "≥99% at >300 字/分".
+
+    A code-point-sorted character set keeps what the hint was for — choosing
+    the right homophone / proper-noun character (哈拉瑞, 他/她/它) — but has no
+    reading order left to copy.  Homophones are also re-corrected against the
+    real target in the front-end scorer (`correctHomophones`), so this hint is
+    only a tie-breaker, not the accuracy source.
+    """
+    return "".join(sorted(set(_HINT_CHAR.findall(target_text or ""))))
+
+
 def _is_hallucination_transcript(transcript: str, target_text: str) -> bool:
     """Return True when transcript looks like Gemini hallucinated the lesson hint.
 
@@ -554,20 +577,21 @@ async def transcribe_reading_audio(
         "你是一個繁體中文語音轉錄系統，專門轉錄台灣國小至國中學生的朗讀音檔。\n"
         "任務：將學生朗讀的音檔逐字轉錄成繁體中文文字，並加入正確標點符號。\n"
         "規則：\n"
-        "1. 課文原文（reference text）只用於校正同音字、近音字——"
-        "嚴禁直接把課文原文當成轉錄結果輸出。\n"
+        "1. 會附上一份「本課用字表」（依字碼排序，不是課文順序）。它只用在："
+        "你聽到的音有好幾個同音字可選時（例如人名、地名），挑用字表裡的那個字。"
+        "不可以用它補字、重組句子，或把學生換成別的說法的詞改回課文用字。\n"
         "2. 輸出必須忠實反映學生實際唸出的字（不要補字、不要修正未唸出的字、"
-        "不要把沒聽到的句子補進來）。\n"
+        "不要把沒聽到的句子補進來；學生跳過、唸錯、換詞，就照他唸的寫）。\n"
         "3. 在 transcript 中加入中文標點（。，！？……）。\n"
         "4. reasoning 欄位寫 1-2 句說明你如何處理難以辨認的部分（供教師稽核）。\n"
         "5. 若音檔中沒有清晰可辨的人聲朗讀（靜音、環境雜音、白噪音、音樂、"
         "只有單一音調或喇叭聲），transcript 必須回傳空字串 ''，"
-        "且 reasoning 註明「未偵測到人聲朗讀」——此時絕對不可輸出任何課文原文內容。\n"
+        "且 reasoning 註明「未偵測到人聲朗讀」。\n"
         "6. 只在你真的聽到學生唸出對應字句時，才把那些字寫進 transcript。\n"
         "回傳格式：JSON {\"transcript\": \"...\", \"reasoning\": \"...\"}"
     )
 
-    user_prompt = f"課文原文（供校正參考）：\n{target_text}"
+    user_prompt = f"本課用字表（依字碼排序，不是課文順序）：\n{_reference_char_hint(target_text)}"
 
     audio_part = genai_types.Part.from_bytes(
         data=gemini_audio_bytes,

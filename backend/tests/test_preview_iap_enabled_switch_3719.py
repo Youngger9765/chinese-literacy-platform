@@ -45,12 +45,14 @@ def _iap_steps(steps):
 # ── preview-deploy.yml ───────────────────────────────────────────────────
 
 
-def test_preview_iap_enabled_defaults_to_the_string_false():
+def test_preview_iap_enabled_is_the_string_true():
     raw, doc = _load(PREVIEW_WF)
     env = doc.get("env", {})
     assert "IAP_ENABLED" in env, "IAP_ENABLED switch is missing from preview-deploy.yml env"
-    assert env["IAP_ENABLED"] == "false", (
-        f"IAP_ENABLED must default to the string 'false', got {env['IAP_ENABLED']!r}"
+    # the STRING 'true' (opened 2026-11-16, #3733 second attempt); a YAML
+    # boolean would render as 'True' and break `env.IAP_ENABLED` compares.
+    assert env["IAP_ENABLED"] == "true", (
+        f"IAP_ENABLED must be the string 'true', got {env['IAP_ENABLED']!r}"
     )
 
 
@@ -78,9 +80,14 @@ def test_preview_iap_steps_use_the_native_cloud_run_iap_flag():
     iap_flag_steps = [s for s in steps if "--iap" in str(s.get("run", ""))]
     assert len(iap_flag_steps) >= 1  # frontend only since #3733
     for step in iap_flag_steps:
-        assert "gcloud beta run services update" in str(step["run"]), (
+        # #3733 security review: the frontend deploy itself now passes --iap
+        # (`gcloud beta run deploy`), so beta `deploy` is allowed too; what
+        # matters is that --iap never goes to the GA command group.
+        # test_iap_open_wiring_3733.py executes that step and asserts the
+        # recorded call starts with `gcloud beta run deploy`.
+        assert "gcloud beta run" in str(step["run"]), (
             f"step {step.get('name')!r} uses --iap but not via "
-            "`gcloud beta run services update` -- that flag does not exist "
+            "`gcloud beta run ...` -- that flag does not exist "
             "on the GA `gcloud run` command group"
         )
 
@@ -88,12 +95,14 @@ def test_preview_iap_steps_use_the_native_cloud_run_iap_flag():
 # ── staging-deploy.yml ───────────────────────────────────────────────────
 
 
-def test_staging_iap_enabled_defaults_to_the_string_false():
+def test_staging_iap_enabled_is_the_string_true():
     raw, doc = _load(STAGING_WF)
     env = doc.get("env", {})
     assert "IAP_ENABLED" in env, "IAP_ENABLED switch is missing from staging-deploy.yml env"
-    assert env["IAP_ENABLED"] == "false", (
-        f"IAP_ENABLED must default to the string 'false', got {env['IAP_ENABLED']!r}"
+    # the STRING 'true' (opened 2026-11-16, #3733 second attempt); a YAML
+    # boolean would render as 'True' and break `env.IAP_ENABLED` compares.
+    assert env["IAP_ENABLED"] == "true", (
+        f"IAP_ENABLED must be the string 'true', got {env['IAP_ENABLED']!r}"
     )
 
 
@@ -124,7 +133,8 @@ def test_staging_iap_steps_use_the_native_cloud_run_iap_flag():
     iap_flag_steps = [s for s in all_steps if "--iap" in str(s.get("run", ""))]
     assert len(iap_flag_steps) >= 1  # frontend only since #3733
     for step in iap_flag_steps:
-        assert "gcloud beta run services update" in str(step["run"]), (
+        # see the preview test above: beta `deploy` --iap is allowed (#3733)
+        assert "gcloud beta run" in str(step["run"]), (
             f"step {step.get('name')!r} uses --iap but not via "
-            "`gcloud beta run services update`"
+            "`gcloud beta run ...`"
         )

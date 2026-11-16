@@ -116,7 +116,7 @@ jobs:
       - name: Delete preview images from Artifact Registry
         run: |
           ISSUE_NUM=${{ steps.issue.outputs.num }}
-          for PACKAGE in backend frontend; do
+          for PACKAGE in backend frontend invoker-sidecar; do  # #3733: sidecar image (proxy on)
             echo "=== Cleaning ${PACKAGE} issue-${ISSUE_NUM} images ==="
             DIGESTS=$(gcloud artifacts docker images list \
               "${{ env.REGISTRY }}/${PACKAGE}" \

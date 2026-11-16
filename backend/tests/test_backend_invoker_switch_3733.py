@@ -59,15 +59,35 @@ def _run(step: dict) -> str:
 
 
 def _gated(step: dict) -> bool:
+    # "runs only when the switch is ON" -- `!= 'true'` (the #3733 rollback
+    # step that turns IAP back off) must not count as gated-on.
     cond = str(step.get("if", ""))
-    return "IAP_ENABLED" in cond and "'true'" in cond
+    return "IAP_ENABLED == 'true'" in cond
+
+
+PRE_GRANT = "deploy 前先授權"
 
 
 def _backend_iap_steps(steps: list[dict]) -> list[dict]:
+    # the post-deploy lock step (grant + revoke allUsers); the pre-deploy
+    # grant-only step (#3733 security review ordering fix) is checked apart.
     return [
         s for s in steps
         if _gated(s) and "BACKEND_SERVICE" in _run(s)
+        and PRE_GRANT not in str(s.get("name", ""))
     ]
+
+
+def _assert_pre_grant_only_grants(steps: list[dict]) -> None:
+    pre = [s for s in steps if PRE_GRANT in str(s.get("name", ""))]
+    assert len(pre) == 1 and _gated(pre[0])
+    run = _run(pre[0])
+    assert "--iap" not in run
+    assert FRONTEND_RUNTIME_SA in run and CI_SA in run and "roles/run.invoker" in run
+    assert "remove-iam-" "policy-binding" not in run, "pre-deploy step must only grant"
+    deploy_at = next(i for i, s in enumerate(steps)
+                     if "gcloud run deploy ${{ env.BACKEND_SERVICE }}" in _run(s))
+    assert steps.index(pre[0]) < deploy_at
 
 
 def _frontend_iap_steps(steps: list[dict]) -> list[dict]:
@@ -119,6 +139,7 @@ def test_preview_backend_iap_step_uses_run_invoker_not_native_iap():
     steps = _backend_iap_steps(_preview_steps())
     assert len(steps) == 1, f"expected exactly 1 gated backend step, found {len(steps)}"
     _assert_backend_step_uses_invoker(steps[0])
+    _assert_pre_grant_only_grants(_preview_steps())
 
 
 def test_preview_native_iap_is_only_applied_to_the_frontend():
@@ -139,6 +160,7 @@ def test_staging_backend_iap_step_uses_run_invoker_not_native_iap():
     steps = _backend_iap_steps(_staging_backend_steps())
     assert len(steps) == 1, f"expected exactly 1 gated backend step, found {len(steps)}"
     _assert_backend_step_uses_invoker(steps[0])
+    _assert_pre_grant_only_grants(_staging_backend_steps())
 
 
 def test_staging_native_iap_is_only_applied_to_the_frontend():
@@ -147,7 +169,12 @@ def test_staging_native_iap_is_only_applied_to_the_frontend():
         "staging deploy-backend job must not run --iap anywhere (#3733)"
     )
     frontend_iap = [s for s in _staging_frontend_steps() if "--iap" in _run(s)]
-    assert len(frontend_iap) == 1 and _gated(frontend_iap[0])
+    # the deploy itself (IAP flag only when IAP_ENABLED is true, #3733
+    # security review) + the idempotent gated re-assert step
+    assert len(frontend_iap) == 2
+    for s in frontend_iap:
+        assert "FRONTEND_SERVICE" in _run(s) and "BACKEND_SERVICE" not in _run(s)
+        assert _gated(s) or 'IAP_ENABLED }}" = "true" ]' in _run(s)
 
 
 def test_backend_deploy_still_public_while_switch_is_off():
@@ -159,7 +186,14 @@ def test_backend_deploy_still_public_while_switch_is_off():
             s for s in steps
             if "iam-policy-binding" in _run(s) and "BACKEND_SERVICE" in _run(s)
         ]
-        assert iam_steps and all(_gated(s) for s in iam_steps)
+        # gated-on steps, plus the switch-off rollback step that may only
+        # ADD allUsers back (never revoke anything)
+        for s in iam_steps:
+            if not _gated(s):
+                assert "IAP_ENABLED != 'true'" in str(s.get("if", "")), s.get("name")
+                assert "remove-iam-" "policy-binding" not in _run(s)
+                assert "--member=allUsers" in _run(s)
+        assert iam_steps and any(_gated(s) for s in iam_steps)
         deploys = [
             s for s in steps
             if "gcloud run deploy ${{ env.BACKEND_SERVICE }}" in _run(s)
