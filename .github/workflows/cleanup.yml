@@ -19,7 +19,7 @@ jobs:
     name: Delete old AR images (keep latest 3)
     runs-on: ubuntu-latest
     steps:
-      - uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed # v2.1.13
+      - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
         with:
           workload_identity_provider: projects/958347263320/locations/global/workloadIdentityPools/github-pool/providers/github-provider
           service_account: github-actions@lingoleap-dev.iam.gserviceaccount.com
@@ -109,7 +109,7 @@ jobs:
     name: Delete old Cloud Run revisions (keep latest 5)
     runs-on: ubuntu-latest
     steps:
-      - uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed # v2.1.13
+      - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
         with:
           workload_identity_provider: projects/958347263320/locations/global/workloadIdentityPools/github-pool/providers/github-provider
           service_account: github-actions@lingoleap-dev.iam.gserviceaccount.com
