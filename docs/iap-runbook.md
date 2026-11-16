@@ -1,6 +1,6 @@
 # IAP 準備與開關手冊（#3719）
 
-> 現狀（2026-10-24）：staging 與所有 preview 服務都還是
+> 現狀（2026-11-16 更新：部署接線已備好、開關仍關）／原文 2026-10-24：staging 與所有 preview 服務都還是
 > `--allow-unauthenticated`，跟這份文件存在之前完全一樣——**這份文件描述
 > 的是「整條路徑已經在丟棄式 canary 上驗證過、還沒對任何真實環境打開」的
 > 狀態**。#3719／#3725／#3728／#3729／#3730／#3731／#3733 都已經完成並
@@ -62,20 +62,33 @@ IAP（`gcloud beta run services update --iap`）。這一步**只決定「這個
 要不要過 IAP」**，不決定「誰能進去」——誰能進去是下面「開發人員／外部
 審查者要做什麼」那一段的事，是另一條獨立的 IAM 機制。
 
-**backend（Cloud Run invoker 驗證）**：目前**沒有**對應的 `IAP_ENABLED`
-式開關——這條路線沒有被寫進部署流程，只在丟棄式 canary 上手動驗證過（見
-下面「對 staging 真的打開：完整步驟（尚未執行）」）。要在 staging 上打開
-backend 的這層保護，需要走那段清單裡的步驟，不是改一個環境變數。
+**backend（Cloud Run invoker 驗證）**：同一個 `IAP_ENABLED` 開關（#3733
+起）。打開時 backend **不會**被上原生 IAP，而是：先把 `roles/run.invoker`
+授權給 `lingoleap-frontend-run`（frontend 執行身分）與 `github-actions`
+（CI），再拿掉 `allUsers`（先給再收）。這一步有防呆：
+`SAME_ORIGIN_PROXY_ENABLED` 不是 `'true'` 就直接失敗、不動任何 IAM——
+因為同源代理沒開時瀏覽器會直接打 backend，鎖了就全站 403。
+
+⚠️ 兩個開關要**一起**打開（`IAP_ENABLED` 與 `SAME_ORIGIN_PROXY_ENABLED`）；
+部署接線（nginx＋sidecar 雙容器、CI 帶 invoker ID token、backend 部署就鎖）
+已在 #3733 第二輪寫好（見下面「對 staging 真的打開」表）。開之前還要先給
+一次性 IAM（同一段），並先在一個 preview 上走過一次。
 
 ## 回滾（關掉）
 
-**frontend**：把 `IAP_ENABLED` 改回 `'false'`，merge。下一次部署就會是
-`--allow-unauthenticated` 的狀態——IAP 本身的 on/off 是 Cloud Run 服務的
-一個設定值，不是另外架的基礎設施，關掉不會留下殘留資源要清。
+**正規做法**：兩個 workflow 把 `IAP_ENABLED` 改回 `'false'` merge。下一次部署：
+backend 以 `--allow-unauthenticated` 部署（`allUsers` 回來）；frontend 若還開著
+IAP，`（IAP_ENABLED 關時）…若還開著 IAP 就關掉` 那一步會 `--no-iap`（#3733 補上，
+之前只改開關其實關不掉 frontend 的 IAP）。只有 frontend 有變動、backend job
+被跳過時，frontend job 會先跑 `（IAP 開關為 false 時）backend 若被鎖著就先補回
+allUsers`，再部署直接打 backend 的 frontend（資安審查補上）。
 
-**backend**：`gcloud run services update <service> --allow-unauthenticated`
-即可退回公開狀態；已經授權的 `run.invoker` binding 不會因此消失，只是
-暫時用不到，真的要清乾淨再另外 `remove-iam-policy-binding`。
+**立即手動（不等 CI）**：
+- frontend：`gcloud beta run services update <frontend> --no-iap --region asia-east1 --project lingoleap-dev`
+- backend：用目前的 image 重新部署並帶 `--allow-unauthenticated`
+  （`gcloud run deploy <backend> --image <現在的 image> --allow-unauthenticated --region asia-east1 --project lingoleap-dev`，
+  環境變數沿用），或 `add-iam-policy-binding --member=allUsers --role=roles/run.invoker`。
+- 已授權的 `run.invoker`／IAP accessor binding 不會因此消失，只是暫時用不到。
 
 ## frontend 認證方式：已實測驗證（#3730）
 
@@ -209,41 +222,36 @@ gcloud beta run deploy <frontend-service> \
   用「只更新指定幾個 key、其他環境變數原封不動」的那個旗標
   （`--update-env-vars`）才安全，效果一樣達到、不會動到其他變數。
 
-## 對 staging 真的打開：完整步驟（⚠️ 尚未執行，只是清單）
+## 對 staging 真的打開：步驟（程式接線已完成，開關仍預設關）
 
-> 以下是「如果要在 staging 上真的打開這整套保護」該做的事，**目前一項
-> 都還沒做**。寫在這裡是為了下次要做的時候不用重新設計一次，不是已完成
-> 的紀錄。
+> 2026-11-16（#3733 第二輪）：部署流程的接線都已經寫進兩個 workflow，
+> 並用「真的執行 workflow 的 run 腳本、假 gcloud/docker/curl 記錄參數」
+> 的測試鎖住（`backend/tests/test_iap_open_wiring_3733.py`、
+> `scripts/test_iap_token_sh.py`）。**兩個開關仍是 `'false'`**，今天的
+> 部署行為不變。
 
-1. 把 `.github/workflows/staging-deploy.yml` 的 frontend build 步驟加上
-   `BACKEND_INVOKER_SIDECAR_PORT` build-arg（目前只有
-   `BACKEND_INTERNAL_URL`），並新增一個 sidecar image 的 build+push 步驟
-   （參考上面驗證過的 `cloudbuild-frontend.yaml` 做法，CI 環境是原生
-   amd64 runner，不會撞到本機 QEMU 的 esbuild 當機問題，可以直接
-   `docker build` 不用額外繞路）。
-2. 把 `staging-deploy.yml` 的 backend 部署步驟從
-   `--allow-unauthenticated` 改成 `--no-allow-unauthenticated`，並加一步
-   `add-iam-policy-binding` 把 `roles/run.invoker` 授權給 staging
-   frontend 的執行身分（預設運算服務帳號，或自訂的 runtime SA）和跑
-   `verify_*.py`／health-check 的 CI 服務帳號。
-3. 把 frontend 的部署步驟改成 `gcloud beta run deploy` 的雙容器語法（見
-   上面驗證過的指令），`--iap` 這個開關沿用既有的 `IAP_ENABLED` 環境變數
-   機制（`.github/workflows/staging-deploy.yml` 裡已經有這段，只是目前
-   `IAP_ENABLED` 預設 `'false'`）。
-4. 確認 CI 本身打 staging 的腳本（`verify_qr_manifest.py`、
-   `verify_lesson_audio.py`、`health-check.sh`、`run-load-test.sh`、
-   `locustfile.py`）要從「直接打 backend 公開網址」改成用
-   `scripts/run_invoker_token.py` 的 `invoker_header()` 取得 ID token，
-   放進 `X-Serverless-Authorization`；Playwright 測試打 frontend 的部分
-   維持用 `scripts/iap_token.py`／`iapAuth.ts` 的自簽 JWT 不變。
-5. 先在**一個 PR preview**上走完整套（不是直接對 staging 動手），把
-   「backend 認證方式」那張實測表的幾項（匿名兩邊都擋、frontend 用自簽
-   JWT 進得去、經 frontend 轉送到 backend 也進得去）在真實 CI 環境（不是
-   本機 canary）重跑一次，確認一樣成立。
-6. 只有在上一步全部通過之後，才能把同樣的改動 merge 進
-   `staging-deploy.yml`，對 staging 真的生效。
-7. 完成後刪掉兩個丟棄式 canary 服務（`lingoleap-iap-canary`、
-   `lingoleap-invoker-canary`、`lingoleap-frontend-invoker-canary`）。
+| # | 項目 | 狀態 |
+|---|---|---|
+| 1 | proxy 開時 build＋push sidecar image（`invoker-sidecar:<tag>`） | ✅ |
+| 2 | backend：`IAP_ENABLED` 開時部署就帶 `--no-allow-unauthenticated`（不再「先公開、下一步才鎖」）；之後的步驟授權 `run.invoker` 給 frontend 執行身分與 CI，再拿掉 `allUsers` | ✅ |
+| 3 | frontend：proxy 開時改 `gcloud beta run deploy` nginx＋sidecar 雙容器（sidecar 探針 `/healthz`、`BACKEND_INVOKER_AUDIENCE`） | ✅ |
+| 4 | backend：proxy 開時設 `FRONTEND_PROXY_SA`＋`BACKEND_AUDIENCE`（固定 `-958347263320` 網址，與 sidecar 的 audience 逐字相同） | ✅ |
+| 5 | CI 打 backend（health、smoke、preview warm-up）：`google-github-actions/auth` 以 `token_format: id_token` 取 invoker ID token，放 `X-Serverless-Authorization`；不需新 IAM（`workloadIdentityUser` 已含 `getOpenIdToken`） | ✅ |
+| 6 | CI 打 frontend：IAP 開時以 frontend 自己的網址當 aud 自簽 JWT；Runner 沒有 google-auth，`scripts/lib/iap-token.sh` 改為退回 `gcloud iam service-accounts sign-jwt` | ✅ |
+| 7 | 把開關切回 `'false'` 時，若 frontend 還開著 IAP 就 `--no-iap`（`gcloud run deploy` 本身不會動 IAP 設定，舊版「改回 false 就恢復」其實不成立） | ✅ |
+| 8 | `e2e-preview-check`（刻意不持有 GCP 憑證）在 IAP 開時跳過，不假裝測過 | ✅ |
+| 9 | 順序（資安審查）：frontend 的 `gcloud beta run deploy` 本身就帶 `--iap`，新 revision 從第一秒就在 IAP 後面；之後的「開 IAP」步驟保留為冪等重設。舊版「先 `--allow-unauthenticated` 部署、下一步才 `--iap`」中間有匿名者經 nginx＋sidecar 打到已鎖 backend 的空窗 | ✅ |
+| 10 | 順序（資安審查）：backend 服務已存在時，**部署前**先授權 `run.invoker` 給 frontend 執行身分與 CI（部署帶 `--no-allow-unauthenticated` 會立刻拿掉 `allUsers`）；第一次部署的 preview 沒有服務可綁就跳過，部署後那一步照舊冪等補授權。proxy 沒開就在這一步失敗，什麼都還沒部署 | ✅ |
+| 11 | 反向檢查（資安審查）：IAP 開時**完全不帶憑證**打一次——backend `/api/health` 必須 403、frontend 根目錄必須 302／401／403（不可 200），否則 job 失敗。staging 在 `smoke-test` job、preview 在 frontend 健康檢查之後 | ✅ |
+| 12 | 回滾（資安審查）：開關切回 `'false'` 時，frontend job 在部署非代理版 frontend **之前**先看 backend 的 IAM，沒有 `allUsers` 就補回 `run.invoker`（只動 frontend 時 backend job 會被跳過，否則 backend 會一直鎖著、全站 403）。已經是公開的（今天的正常狀態）就完全不寫 IAM | ✅ |
+
+**開門前一次性要給的 IAM（要 Young 同意，workflow 本身不會做）**：
+- `github-actions@` 對**自己**的 `roles/iam.serviceAccountTokenCreator`（CI 才簽得出 IAP 要的自簽 JWT）
+- 每個開了 IAP 的 frontend 服務：`roles/iap.httpsResourceAccessor` 給 `github-actions@`（CI health）與要進來的人
+
+**仍未接的**：`e2e-tests.yml`（打 staging 的 Playwright／QA 腳本）在 IAP 開時要能簽 JWT——同一個 tokenCreator 授權即可，但 workflow 還沒驗過。
+
+⚠️ **staging 一開，`lingoleap-staging.web.app`／`lingoleap-dev.web.app` 的 `/api` 會變 403**（Firebase rewrite 帶不了 invoker token，見「已知落差」第 1 點的實測）。處理方式是把這兩個站改成整站 302 到 staging Cloud Run frontend，由另一個獨立 PR 處理（不在這次的 IAP 順序修正裡）；那個 PR 合併前不要打開開關。
 
 ## 開發人員要做什麼
 
@@ -300,18 +308,22 @@ CI workflow（`e2e-tests.yml`、`staging-deploy.yml`、`preview-deploy.yml`）
 
 ## 已知落差（誠實列出，還沒解決）
 
-1. **Firebase Hosting rewrite 是否真的繞過 Cloud Run 本身的 IAM/IAP
-   檢查**——目前只是依官方文件推論，沒有實測驗證過。如果「只在 backend
-   開保護、frontend 維持公開」這條路線未來要考慮，必須先驗證這個前提；
-   目前採用的架構（frontend 也上 IAP）不依賴這個假設成立，所以不是
-   立即的阻塞點，但文件裡只要還留著這個前提就該標注清楚。
+1. ~~Firebase Hosting rewrite 是否繞過 Cloud Run 本身的驗證~~ ——
+   **2026-11-16 實測：不會繞過。** 拋棄式 Hosting site 兩條 rewrite：
+   `/pub/**` → 公開的 hello 服務回 **200**（對照組，證明 rewrite 本身有效）；
+   `/**` → `--no-allow-unauthenticated` 的 hello 服務回 **403 Forbidden**。
+   測完 site 與兩個服務都已刪除。**後果**：backend 一鎖，所有 rewrite 到它的
+   Firebase 站（staging 的 `lingoleap-staging.web.app`、`lingoleap-dev.web.app`）
+   `/api`、`/assets`、`/q` 都會 403——它們不是保護的漏洞，但會壞掉。
+   處理方式：這兩個站改成整站 302 到 staging Cloud Run frontend，由另一個
+   獨立 PR 處理（見上面「對 staging 真的打開」段末）。
 2. **IAP 開通名單後台頁需要的 IAM 權限範圍太大**——PR #3724 的實作需要
    `roles/iap.admin` 才能讀取/寫入 IAP 存取名單，這個角色範圍比實際需要
    的大很多；應該改成自訂的、只能讀寫 IAP policy 的最小權限角色，目前
    還沒做，所以頁面顯示「尚未設定 IAP」。
-3. **兩個丟棄式 canary 服務還留著**（`lingoleap-iap-canary`、
-   `lingoleap-invoker-canary`、`lingoleap-frontend-invoker-canary`）——
-   確認上面「對 staging 真的打開」的步驟不再需要參考這幾個服務之後即可
-   刪除，不是正式環境的一部分，不影響任何真實服務。
+3. ~~兩個丟棄式 canary 服務還留著~~ —— 已刪除：2026-11-15 查
+   `gcloud run services list`（lingoleap-dev／asia-east1），
+   `lingoleap-iap-canary`、`lingoleap-invoker-canary`、
+   `lingoleap-frontend-invoker-canary` 都已不在清單上。
 4. **staging QA 測試帳號的清理、唯讀 DB 角色**——跟 IAP 本身無關，是
    IAP 準備期間一併發現的既有技術債，還沒處理。

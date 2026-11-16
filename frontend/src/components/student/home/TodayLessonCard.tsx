@@ -63,11 +63,21 @@ interface BookJacketCoverProps {
 }
 
 // Same-origin asset proxy (#2486) — lingoleap-assets is now a private GCS bucket.
-const THUMBNAIL_BASE = `${ASSET_BASE}/stories/thumbnails`;
+// #4034: lesson 200NN's cover lives at /assets/lesson/L00NN/thumbnail.webp (the
+// same path /api/stories returns); the old /stories/thumbnails/lesson-{id}.webp
+// folder only had legacy low ids, so every current lesson 404'd.
+// Legacy low ids keep the old folder, which still serves them.
+const lessonThumbnailUrl = (storyId: string): string => {
+  const n = Number(storyId) - 20000;
+  if (Number.isInteger(n) && n > 0) {
+    return `${ASSET_BASE}/lesson/L${String(n).padStart(4, '0')}/thumbnail.webp`;
+  }
+  return `${ASSET_BASE}/stories/thumbnails/lesson-${storyId}.webp`;
+};
 
 export const BookJacketCover: React.FC<BookJacketCoverProps> = ({ storyId, title }) => {
   const [imgOk, setImgOk] = useState(true);
-  const imgSrc = storyId ? `${THUMBNAIL_BASE}/lesson-${storyId}.webp` : null;
+  const imgSrc = storyId ? lessonThumbnailUrl(storyId) : null;
 
   // Reset error state when the story changes, so a previous 404 doesn't
   // block a new valid thumbnail if the component is reused.

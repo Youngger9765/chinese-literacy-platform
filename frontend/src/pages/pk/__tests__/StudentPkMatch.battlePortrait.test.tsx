@@ -8,6 +8,10 @@
  * own `bot_tier` field. This test asserts the LARGE portrait panel renders
  * off the poll response (robust across resume) and tracks
  * `state.ai_expression` through resolveAiExpression.
+ *
+ * #4050 bug 2: a THIRD rendering of the same portrait was added for
+ * mobile (the compact row's 44px avatar couldn't carry an expression) —
+ * see the 3-image assertion below.
  */
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
@@ -77,10 +81,12 @@ describe('StudentPkMatch battle-phase AI portrait', () => {
     );
 
     await waitFor(() => {
-      // The opponent now appears on the right twice (compact row on phones,
-      // side column on wide screens; CSS shows one). Both must resolve.
+      // The opponent now renders three times: the compact row's 44px
+      // avatar (phones), the mobile-only large portrait added for #4050
+      // bug 2, and the desktop <aside>'s large portrait — CSS shows
+      // exactly one of the three at any given width, but all three mount.
       const imgs = getAllByAltText('李白') as HTMLImageElement[];
-      expect(imgs.length).toBe(2);
+      expect(imgs.length).toBe(3);
       const img = imgs[0];
       // tier 7 -> the PNG override (data/pkFigures.ts), and ai_expression
       // 'thinking' from the poll response above -- both the asset-resolution

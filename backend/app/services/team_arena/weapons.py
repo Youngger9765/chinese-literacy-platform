@@ -54,6 +54,23 @@ def apply_eliminate(options: list[dict], correct_key: str, rng: random.Random) -
     return [o for o in options if o.get("key") in kept_keys]
 
 
+# issue #4054: known worksheet/structural section headings that must
+# never be quoted as a hint's "同一課的另一句話" — see the exclusion in
+# the scan loop below for why these can turn up as false-positive
+# candidates at all (a heading's own characters can carry a curated
+# zhuyin reading in the table just like a real sentence's do).
+_WORKSHEET_SECTION_LABELS: frozenset[str] = frozenset(
+    {
+        "文章重點表",
+        "學習單",
+        "習作",
+        "課文大意",
+        "課文結構表",
+        "重點整理",
+    }
+)
+
+
 def build_hint(payload: dict) -> str | None:
     """Returns a short hint string that never reveals the answer (PRD v2
     rule J: "提示不得直接透露答案"), or None when this question has no
@@ -107,6 +124,15 @@ def build_hint(payload: dict) -> str | None:
                 continue  # the very occurrence this question asks about
             if ch == char and readings.get(i) == reading:
                 clause, whole = _clause_around(text, i)
+                # issue #4054 (staging QA): 看提示 once quoted 「文章重點表」
+                # — a worksheet SECTION HEADING, not a sentence a student
+                # could read for context, because that heading happened to
+                # be one of the same-reading occurrences this lookup scans.
+                # A structural label is never a usable "同一課的另一句話"
+                # clue, so it is excluded the same way an 注音-carrying
+                # clause already is, never special-cased into the output.
+                if clause in _WORKSHEET_SECTION_LABELS:
+                    continue
                 # Some lessons print the reading inline (「暈ㄩㄣˋ」); a clause
                 # carrying 注音 would hand the student the answer.
                 if any(_is_zhuyin(ch2) for ch2 in clause):

@@ -116,7 +116,23 @@ const StudentEscapeRoomEntry: React.FC = () => {
         <p className="mt-6 rounded-xl bg-white/80 px-4 py-3 text-sm text-on-surface" aria-live="polite">
           本局範圍：{scope.label}
         </p>
-        <button type="button" disabled={busy} onClick={() => void handleStart()} className="btn-immersive mt-7 w-full disabled:opacity-50">
+        {/* #4051: the button's own white-on-purple TEXT already clears
+            WCAG AA (~6.7:1) — the actual low-contrast gap is the button's
+            fill (#564ABF) against this card's own purple gradient
+            (#6D5BD0→#4B3F99), measured at only ~1.3:1, well under the
+            3:1 WCAG AA non-text/UI-component threshold (1.4.11) — the
+            button's own boundary was nearly invisible against the card
+            it sits on. A white/80 border clears 3:1 across both ends of
+            the gradient (~3.95:1 / ~6.11:1) without touching the shared
+            `.btn-immersive` class's other usage (the result page's "再次
+            探索" button, which sits on a plain white card and already has
+            plenty of contrast there). */}
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => void handleStart()}
+          className="btn-immersive mt-7 w-full border-2 border-white/80 disabled:opacity-50"
+        >
           {busy ? '正在走進迷城' : '開始探索'}
         </button>
         {error && <p className="mt-4 text-sm text-error" role="alert">{error}</p>}

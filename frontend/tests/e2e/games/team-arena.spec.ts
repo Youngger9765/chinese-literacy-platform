@@ -10,7 +10,8 @@
  * (am_i_active gate — same invariant the backend's own_match.current_round
  * enforces), at least one weapon gets used, a tower-collapse/attack
  * animation plays, the result screen renders both sides, and an opposing
- * player's real name is NEVER shown — only "甲隊/乙隊 N 號".
+ * player's real name is NEVER shown — only "<隊名> N 號" (隊名 comes from the match's
+ * story pack since #4054, e.g. 尋光隊 1 號; generic 甲隊/乙隊 only as fallback).
  */
 import { test, expect } from '../fixtures/pageerror-fixture';
 import { getIapProxyAuthHeader } from '../utils/iapAuth';
@@ -122,13 +123,13 @@ test.describe('多人對抗賽 team_arena', () => {
     await opp1.goto('/team-arena/' + code);
     await opp2.goto('/team-arena/' + code);
 
-    // ── Lobby: opposing side must be masked as 乙隊 N 號, never real names ──
+    // ── Lobby: opposing side must be masked as <隊名> N 號, never real names ──
     // The lobby's own state is driven by the page's periodic poll (not
     // instant on join), so retry rather than a single fixed wait.
     let hostLobbyText = '';
     await expect(async () => {
       hostLobbyText = await host.locator('body').innerText();
-      expect(hostLobbyText).toMatch(/乙隊\s*\d+\s*號/);
+      expect(hostLobbyText).toMatch(/隊\s*\d+\s*號/);
     }).toPass({ timeout: 20000, intervals: [1000] });
     expect(hostLobbyText, 'host must NOT see opponent real names').not.toContain(students[2].name);
     expect(hostLobbyText).not.toContain(students[3].name);
@@ -136,7 +137,7 @@ test.describe('多人對抗賽 team_arena', () => {
     let oppLobbyText = '';
     await expect(async () => {
       oppLobbyText = await opp1.locator('body').innerText();
-      expect(oppLobbyText).toMatch(/甲隊\s*\d+\s*號/);
+      expect(oppLobbyText).toMatch(/隊\s*\d+\s*號/);
     }).toPass({ timeout: 20000, intervals: [1000] });
     expect(oppLobbyText).not.toContain(students[0].name);
     expect(oppLobbyText).not.toContain(students[1].name);
@@ -186,7 +187,7 @@ test.describe('多人對抗賽 team_arena', () => {
           if (!weaponUsed) {
             const hintBtn = host.getByRole('button', { name: '看提示' });
             const callBtn = host.getByRole('button', { name: '呼叫隊友' });
-            if (await hintBtn.count() && !(await hintBtn.isDisabled())) {
+            if (await hintBtn.count() && !(await hintBtn.isDisabled({ timeout: 2000 }).catch(() => true))) {
               await hintBtn.click();
               weaponUsed = true;
               await host.waitForTimeout(1000);

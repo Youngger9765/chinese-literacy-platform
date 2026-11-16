@@ -34,6 +34,7 @@ import {
 
 const MAX_ROUNDS = 150;
 
+
 test.describe('課堂搶答 live_quiz', () => {
   test('teacher hosts, two enrolled students join via the real keypad and reach the lobby', async ({ page, browser, request }) => {
     test.setTimeout(180_000);
@@ -159,7 +160,10 @@ test.describe('課堂搶答 live_quiz', () => {
           const btn = group.getByRole('button').first();
           // The answer window can close between the check and the click; the
           // options then unmount and an unbounded click would hang the test.
-          if (await btn.count() && !(await btn.isDisabled())) await btn.click({ timeout: 2000 }).catch(() => {});
+          // #4031: isDisabled() defaults to timeout 0 = wait forever; on a slow
+          // staging round it never returned and ate the whole test budget.
+          // Bound it like the click and treat "no answer in time" as disabled.
+          if (await btn.count() && !(await btn.isDisabled({ timeout: 2000 }).catch(() => true))) await btn.click({ timeout: 2000 }).catch(() => {});
         }
       }
       // Same race as the student-button fix above (#3710/#3735), on the

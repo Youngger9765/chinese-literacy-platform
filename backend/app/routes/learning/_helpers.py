@@ -23,6 +23,17 @@ from ...models.parent_link import ParentStudentLink
 #: deep inside the sanitizer after the whole payload was already parsed.
 CONVERSATION_TURN_TEXT_MAX_LENGTH = 2000
 
+#: Max turns in any client-supplied Socratic dialogue that is fed into a
+#: Gemini prompt. A real session targets 5 understood questions
+#: (REQUIRED_UNDERSTOOD in services/socratic/prompt_builder.py), i.e. ~10
+#: turns (question + answer), a little more with retries/clarification.
+#: 40 gives a 4x margin over that for any legitimate session shape while
+#: keeping the worst-case prompt at 40 x 2000 chars instead of unbounded
+#: (find_01AS6qqjWCjVEXLM2gfFuGyT, issue #3936). Shared by every route
+#: that accepts such a list -- /comprehension-score (#3939) and
+#: /comprehension/question (#3936 follow-up) -- so the two cannot drift.
+MAX_DIALOGUE_TURNS = 40
+
 
 class ConversationTurn(BaseModel):
     """A single turn in a dialogue — used by comprehension Q&A and scoring.
@@ -44,14 +55,41 @@ class ConversationTurn(BaseModel):
     text: str = Field(..., max_length=CONVERSATION_TURN_TEXT_MAX_LENGTH)
 
 
-def get_owned_session(session_id: int, current_user: User, db: Session) -> LearningSession:
+def get_owned_session(
+    session_id: int,
+    current_user: User,
+    db: Session,
+    for_update: bool = False,
+) -> LearningSession:
     """Fetch a LearningSession that belongs to the authenticated user.
 
     Raises 404 if the session does not exist, 403 if it belongs to another user.
     Used by learning_step_progress, learning_annotations, and any other route
     that operates on a single student-owned session.
+
+    `for_update`: take a `SELECT ... FOR UPDATE` row lock instead of a plain
+    read (Issue #4042). Only pass True from a call site that is about to
+    mutate this session AND award XP/badges in the same transaction --
+    `PUT /learning/sessions/{id}/progress` (the mid-session step-complete
+    branch) races `POST /gamification/session-complete` for the exact same
+    session_id when a student finishes their last step (the frontend fires
+    both close together). Without a shared lock-acquisition point, the two
+    requests can each hold a resource the other needs next (one has the
+    `learning_sessions` row and wants a `student_badges` insert slot, the
+    other has the opposite) -- Postgres's AB-BA deadlock detector then
+    kills one of them with a 500 (prod: 2026-11-06T05:05, two deadlocks
+    ~1s apart on session_id=1244). Locking the session row FIRST, before
+    either request touches XP/badge tables, means the second request
+    simply waits for the first to fully commit (releasing everything it
+    holds) instead of interleaving with it.
+    No-op on SQLite (the test suite's dialect) -- SQLAlchemy silently
+    drops FOR UPDATE for dialects that don't support it; Postgres (prod)
+    honors it.
     """
-    session = db.query(LearningSession).filter(LearningSession.id == session_id).first()
+    query = db.query(LearningSession).filter(LearningSession.id == session_id)
+    if for_update:
+        query = query.with_for_update()
+    session = query.first()
     if session is None:
         raise HTTPException(status_code=404, detail="Session not found")
     if session.student_id != current_user.id:

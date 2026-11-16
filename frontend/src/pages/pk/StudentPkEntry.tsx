@@ -4,8 +4,10 @@
  * Two entry points funnel here (§3.1 step 1): (a) a lesson's conclusion
  * page with `?lessonUid=&lessonTitle=` ("剛讀完的這課" becomes an option),
  * (b) the persistent sidebar entry with no query params ("我的年級題庫"
- * only — no "this lesson" context). Subtitle text is fixed per §2.1:
- * "一對一，隨時挑戰同學或文學家".
+ * only — no "this lesson" context). Subtitle text per §2.1 is
+ * "一對一，隨時挑戰同學或文學家" — #4050: now conditional on `canFindClassmate`
+ * (passed to PkHeroBanner as `pkHumanEnabled`), which drops the "挑戰同學"
+ * half when no enrolled classroom has 班級內 PK turned on.
  *
  * Full-screen game surface (§3.3) — no AppShell.
  *
@@ -194,7 +196,9 @@ const StudentPkEntry: React.FC = () => {
       </div>
 
       <div className="mt-4 w-full max-w-4xl">
-        <PkHeroBanner />
+        {/* #4050: pkHumanEnabled drives the subtitle — don't promise
+            "挑戰同學" when no enrolled classroom has 班級內 PK turned on. */}
+        <PkHeroBanner pkHumanEnabled={canFindClassmate} />
       </div>
 
       {lessonUid && (

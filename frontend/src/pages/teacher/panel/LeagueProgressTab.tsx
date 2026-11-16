@@ -106,7 +106,7 @@ const LeagueProgressTab: React.FC<LeagueProgressTabProps> = ({ classroomId }) =>
       )}
 
       {boardRow && (
-        <div className="rounded-2xl bg-gradient-to-br from-[#11806F] to-[#11806F]/80 p-4 shadow-sm">
+        <div className="rounded-2xl bg-gradient-to-br from-[#11806F] to-[#0E7366] p-4 shadow-sm">
           <EnergyBar
             label="班級平均"
             points={boardRow.average_points}

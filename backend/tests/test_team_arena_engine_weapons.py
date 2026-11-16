@@ -91,6 +91,21 @@ class TestEliminate:
     def test_reduces_to_two_options_including_correct(self, arena):
         _open_options(arena, "a")
         member = _active_member(arena, "a")
+        # #4050: force >= 3 options regardless of which round the deterministic
+        # draw happens to land on — this test is about the reduction mechanic,
+        # not about which real question has enough options today. Relying on
+        # the corpus's incidental option count made this test fragile to any
+        # unrelated content/question-generation change (a zhuyin sentence-
+        # boundary fix shifted the draw onto a real 2-option question, which
+        # is a perfectly legitimate case the SIBLING test below already covers
+        # on purpose).
+        round_state = arena["session"].scoreboard["sides"]["a"]["current_round"]
+        forced_options = [
+            {"key": "A", "text": "甲"},
+            {"key": "B", "text": "乙"},
+            {"key": "C", "text": "丙"},
+        ]
+        round_state["payload"] = {**round_state["payload"], "options": forced_options, "correct_key": "A"}
         result = svc.use_weapon(arena["db"], arena["session"], member.student, weapon="eliminate")
         assert result["weapon"] == "eliminate"
         options = result["options"]
@@ -101,6 +116,18 @@ class TestEliminate:
     def test_cannot_use_twice_same_game(self, arena):
         _open_options(arena, "a")
         member = _active_member(arena, "a")
+        # #4050: same fix as the sibling test above — force enough options
+        # so the FIRST use_weapon call below actually succeeds (so the
+        # second call's 409 is "already used this weapon", not "too few
+        # options"), regardless of which round the deterministic draw lands
+        # on.
+        round_state = arena["session"].scoreboard["sides"]["a"]["current_round"]
+        forced_options = [
+            {"key": "A", "text": "甲"},
+            {"key": "B", "text": "乙"},
+            {"key": "C", "text": "丙"},
+        ]
+        round_state["payload"] = {**round_state["payload"], "options": forced_options, "correct_key": "A"}
         svc.use_weapon(arena["db"], arena["session"], member.student, weapon="eliminate")
         with pytest.raises(HTTPException) as exc:
             svc.use_weapon(arena["db"], arena["session"], member.student, weapon="eliminate")

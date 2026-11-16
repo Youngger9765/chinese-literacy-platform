@@ -160,3 +160,21 @@ export async function fetchSeasonPack(
   });
   return handleResponse<{ season_id: number; override_key: string | null; effective_pack: LeagueTheme }>(res);
 }
+
+/** One row for the admin's season-assignment dropdown (issue #4052: was a
+ * bare number input with nothing to pick from). */
+export interface SeasonForAssignment {
+  id: number;
+  name: string;
+  kind: string;
+  game_start: string;
+  game_end: string;
+  story_pack_key: string | null;
+}
+
+export async function fetchSeasons(token: string): Promise<SeasonForAssignment[]> {
+  const res = await fetch(`${API_BASE}/api/admin/story-packs/seasons`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return handleResponse<SeasonForAssignment[]>(res);
+}

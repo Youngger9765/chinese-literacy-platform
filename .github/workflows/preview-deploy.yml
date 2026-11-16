@@ -84,6 +84,9 @@ jobs:
     outputs:
       frontend_url: ${{ steps.preview-urls.outputs.frontend_url }}
       backend_url: ${{ steps.preview-urls.outputs.backend_url }}
+      # #3733 — job-level `if:` can't read `env`, so e2e-preview-check
+      # learns the switch from here.
+      iap_enabled: ${{ env.IAP_ENABLED }}
 
     steps:
       - name: Checkout code
@@ -170,36 +173,103 @@ jobs:
       # "at most one of" groups, so combining them in one deploy invocation
       # is supported, and since DATABASE_URL now appears in only one of
       # them there is no same-key conflict.
+      #
+      # #3733 — IAP_ENABLED=true deploys the backend already locked
+      # (--no-allow-unauthenticated) instead of "deploy public, lock a step
+      # later": otherwise every redeploy re-adds allUsers for a few seconds.
+      # SAME_ORIGIN_PROXY_ENABLED=true also tells the backend which frontend
+      # identity may vouch for X-Client-IP (#3740, backend/app/config.py);
+      # BACKEND_AUDIENCE must equal the sidecar's BACKEND_INVOKER_AUDIENCE
+      # (the stable -958347263320 URL), both switches default off.
+      # #3733 security review — ordering: the deploy below with
+      # --no-allow-unauthenticated removes allUsers immediately, so the
+      # frontend runtime SA and the CI SA must already hold run.invoker.
+      # Grant first when the preview backend already exists (on the first
+      # deploy of a preview there is nothing to bind to yet; the
+      # post-deploy step below grants then, idempotently). Proxy off + IAP
+      # on fails here, before anything is deployed or locked.
+      - name: （IAP_ENABLED 時）deploy 前先授權 run.invoker（服務已存在時）
+        if: env.IAP_ENABLED == 'true' && (needs.detect-changes.outputs.backend == 'true' || github.event.action == 'opened')
+        run: |
+          if [ "${{ env.SAME_ORIGIN_PROXY_ENABLED }}" != "true" ]; then
+            echo "::error::IAP_ENABLED=true requires SAME_ORIGIN_PROXY_ENABLED=true (browser would call the locked backend directly). Nothing deployed, no IAM change made."
+            exit 1
+          fi
+          if ! gcloud run services describe ${{ env.BACKEND_SERVICE }} \
+              --region ${{ env.REGION }} \
+              --project ${{ env.PROJECT_ID }} \
+              --format='value(metadata.name)' >/dev/null 2>&1; then
+            echo "backend preview does not exist yet: nothing to grant before the first deploy"
+            exit 0
+          fi
+          for MEMBER in \
+            "serviceAccount:lingoleap-frontend-run@lingoleap-dev.iam.gserviceaccount.com" \
+            "serviceAccount:github-actions@lingoleap-dev.iam.gserviceaccount.com"; do
+            gcloud run services add-iam-policy-binding ${{ env.BACKEND_SERVICE }} \
+              --member="$MEMBER" \
+              --role=roles/run.invoker \
+              --region ${{ env.REGION }} \
+              --project ${{ env.PROJECT_ID }} >/dev/null
+          done
+
       - name: Deploy backend preview
         if: needs.detect-changes.outputs.backend == 'true' || github.event.action == 'opened'
         run: |
+          AUTH_FLAG=--allow-unauthenticated
+          [ "${{ env.IAP_ENABLED }}" = "true" ] && AUTH_FLAG=--no-allow-unauthenticated
+          PROXY_ENV=""
+          if [ "${{ env.SAME_ORIGIN_PROXY_ENABLED }}" = "true" ]; then
+            PROXY_ENV="::FRONTEND_PROXY_SA=lingoleap-frontend-run@lingoleap-dev.iam.gserviceaccount.com::BACKEND_AUDIENCE=https://${{ env.BACKEND_SERVICE }}-958347263320.asia-east1.run.app"
+          fi
           gcloud run deploy ${{ env.BACKEND_SERVICE }} \
             --image "${{ env.REGISTRY }}/backend:issue-${{ env.ISSUE_NUM }}-${{ github.sha }}" \
             --platform managed \
             --region ${{ env.REGION }} \
             --service-account lingoleap-preview-run@lingoleap-dev.iam.gserviceaccount.com \
             --project ${{ env.PROJECT_ID }} \
-            --allow-unauthenticated \
+            "$AUTH_FLAG" \
             --memory=1Gi \
             --cpu=1 \
             --min-instances=0 \
             --max-instances=1 \
             --timeout=300s \
             --add-cloudsql-instances=lingoleap-dev:asia-east1:lingoleap-preview-db \
-            --set-env-vars="^::^ALLOWED_ORIGINS=https://placeholder.run.app::RUN_MIGRATIONS=true::ENVIRONMENT=preview::JWT_SECRET_KEY=${{ secrets.PREVIEW_JWT_SECRET_KEY }}::GCS_OMO_BUCKET=lingoleap-omo-uploads-preview::AZURE_SPEECH_KEY=${{ secrets.AZURE_SPEECH_KEY }}::AZURE_SPEECH_REGION=eastus::TTS_PROVIDER=azure::BUILD_SHA=${{ github.event.pull_request.head.sha }}" \
+            --set-env-vars="^::^ALLOWED_ORIGINS=https://placeholder.run.app::RUN_MIGRATIONS=true::ENVIRONMENT=preview::JWT_SECRET_KEY=${{ secrets.PREVIEW_JWT_SECRET_KEY }}::GCS_OMO_BUCKET=lingoleap-omo-uploads-preview::AZURE_SPEECH_KEY=${{ secrets.AZURE_SPEECH_KEY }}::AZURE_SPEECH_REGION=eastus::TTS_PROVIDER=azure::BUILD_SHA=${{ github.event.pull_request.head.sha }}${PROXY_ENV}" \
             --update-secrets="DATABASE_URL=lingoleap-database-url-preview:latest"
 
-      # #3719 — IAP 準備：預設關（IAP_ENABLED=false），這一步整個 skip，
-      # 跟今天行為一致。只有刻意把上面 env.IAP_ENABLED 改成 'true' 開 PR
-      # 才會執行。用 `gcloud beta run services update --iap`——Cloud Run
-      # 原生 IAP 整合，不是 HTTPS LB 那一套，不需要額外的 LB/NEG 資源。
-      - name: （IAP_ENABLED 時）替 backend preview 開 IAP
+      # #3719/#3733 — IAP 準備：預設關（IAP_ENABLED=false），這一步整個
+      # skip，跟今天行為一致。backend **不上原生 IAP**，改用 Cloud Run 本身的
+      # 「需要驗證」（run.invoker）：frontend 的 sidecar 只拿得到一般 ID
+      # token，原生 IAP 會回 401 Invalid JWT audience。先授權再拿掉
+      # allUsers；同源代理沒開時直接失敗、不動 IAM（瀏覽器會直接打 backend）。
+      # 見 docs/iap-runbook.md「backend 認證方式」。
+      - name: （IAP_ENABLED 時）backend preview 改成只給 frontend 與 CI 呼叫（run.invoker）
         if: env.IAP_ENABLED == 'true' && (needs.detect-changes.outputs.backend == 'true' || github.event.action == 'opened')
         run: |
-          gcloud beta run services update ${{ env.BACKEND_SERVICE }} \
-            --iap \
+          if [ "${{ env.SAME_ORIGIN_PROXY_ENABLED }}" != "true" ]; then
+            echo "::error::IAP_ENABLED=true requires SAME_ORIGIN_PROXY_ENABLED=true (browser would call the locked backend directly). No IAM change made."
+            exit 1
+          fi
+          for MEMBER in \
+            "serviceAccount:lingoleap-frontend-run@lingoleap-dev.iam.gserviceaccount.com" \
+            "serviceAccount:github-actions@lingoleap-dev.iam.gserviceaccount.com"; do
+            gcloud run services add-iam-policy-binding ${{ env.BACKEND_SERVICE }} \
+              --member="$MEMBER" \
+              --role=roles/run.invoker \
+              --region ${{ env.REGION }} \
+              --project ${{ env.PROJECT_ID }} >/dev/null
+          done
+          POLICY=$(gcloud run services get-iam-policy ${{ env.BACKEND_SERVICE }} \
             --region ${{ env.REGION }} \
-            --project ${{ env.PROJECT_ID }}
+            --project ${{ env.PROJECT_ID }} \
+            --format=json)
+          if printf '%s' "$POLICY" | grep -q '"allUsers"'; then
+            gcloud run services remove-iam-policy-binding ${{ env.BACKEND_SERVICE }} \
+              --member=allUsers \
+              --role=roles/run.invoker \
+              --region ${{ env.REGION }} \
+              --project ${{ env.PROJECT_ID }} >/dev/null
+          fi
 
       - name: Get backend preview URL
         id: backend-url
@@ -216,6 +286,16 @@ jobs:
             URL="https://lingoleap-backend-958347263320.asia-east1.run.app"
           fi
           echo "url=${URL}" >> "$GITHUB_OUTPUT"
+          # #3733 — the invoker sidecar's token audience. Must equal the
+          # backend's own BACKEND_AUDIENCE (set in the deploy step, stable
+          # -958347263320 form) so #3740's X-Client-IP trust check matches;
+          # `describe` above returns the hash-form URL, which Cloud Run also
+          # accepts for invocation but isn't byte-equal to BACKEND_AUDIENCE.
+          case "$URL" in
+            *"/${{ env.BACKEND_SERVICE }}-"*) AUD="https://${{ env.BACKEND_SERVICE }}-958347263320.asia-east1.run.app" ;;
+            *) AUD="$URL" ;;
+          esac
+          echo "audience=${AUD}" >> "$GITHUB_OUTPUT"
           echo "Preview frontend will use backend: ${URL}"
 
       # --- Frontend ---
@@ -261,24 +341,116 @@ jobs:
             ./frontend
           docker push "${{ env.REGISTRY }}/frontend:issue-${{ env.ISSUE_NUM }}-${{ github.sha }}"
 
+      # #3733 — the nginx same-origin proxy reaches the (invoker-locked)
+      # backend through scripts/run_invoker_token.py --serve running as a
+      # sidecar container. Only built when the proxy is on; stdlib-only
+      # image, built on the runner's native amd64 (no QEMU, see runbook).
+      - name: Build & push invoker sidecar image (SAME_ORIGIN_PROXY_ENABLED)
+        if: needs.detect-changes.outputs.frontend == 'true' || github.event.action == 'opened'
+        run: |
+          if [ "${{ env.SAME_ORIGIN_PROXY_ENABLED }}" != "true" ]; then
+            echo "same-origin proxy off: no sidecar image needed"
+            exit 0
+          fi
+          docker build \
+            -f scripts/invoker-sidecar/Dockerfile \
+            -t "${{ env.REGISTRY }}/invoker-sidecar:issue-${{ env.ISSUE_NUM }}-${{ github.sha }}" \
+            .
+          docker push "${{ env.REGISTRY }}/invoker-sidecar:issue-${{ env.ISSUE_NUM }}-${{ github.sha }}"
+
+      # #3733 — proxy on: nginx (ingress, :8080) + invoker sidecar (:8081,
+      # probe /healthz so the probe never touches token issuance) in one
+      # revision; every service-level flag must come before the first
+      # --container (gcloud requirement), and the sidecar's env goes in with
+      # --update-env-vars (never the replace-all form). Verified command:
+      # docs/iap-runbook.md. Proxy off: exactly today's single-image deploy.
+      # Security review: with IAP_ENABLED the deploy itself carries --iap
+      # (`gcloud beta run deploy` has --[no-]iap) so no revision ever serves
+      # without IAP; enabling it only in a later step left an anonymous
+      # window where nginx + sidecar reached the locked backend.
+      #
+      # #3733 security review — rollback: IAP_ENABLED back to 'false' with a
+      # frontend-only change skips the backend deploy, so a once-locked
+      # preview backend would stay locked while this non-proxy frontend
+      # calls it from the browser. Reopen it first (allUsers run.invoker =
+      # today's --allow-unauthenticated); already public -> no IAM write.
+      # Only this preview's own backend: a preview without one falls back
+      # to shared staging, which staging-deploy.yml owns.
+      - name: （IAP 開關為 false 時）backend 若被鎖著就先補回 allUsers
+        if: env.IAP_ENABLED != 'true' && (needs.detect-changes.outputs.frontend == 'true' || github.event.action == 'opened')
+        run: |
+          if ! gcloud run services describe ${{ env.BACKEND_SERVICE }} \
+              --region ${{ env.REGION }} \
+              --project ${{ env.PROJECT_ID }} \
+              --format='value(metadata.name)' >/dev/null 2>&1; then
+            echo "no backend preview service: nothing to reopen"
+            exit 0
+          fi
+          POLICY=$(gcloud run services get-iam-policy ${{ env.BACKEND_SERVICE }} \
+            --region ${{ env.REGION }} \
+            --project ${{ env.PROJECT_ID }} \
+            --format=json)
+          if printf '%s' "$POLICY" | grep -q '"allUsers"'; then
+            echo "backend preview already public: nothing to reopen"
+          else
+            gcloud run services add-iam-policy-binding ${{ env.BACKEND_SERVICE }} \
+              --member=allUsers \
+              --role=roles/run.invoker \
+              --region ${{ env.REGION }} \
+              --project ${{ env.PROJECT_ID }} >/dev/null
+          fi
+
       - name: Deploy frontend preview
         if: needs.detect-changes.outputs.frontend == 'true' || github.event.action == 'opened'
         run: |
-          gcloud run deploy ${{ env.FRONTEND_SERVICE }} \
-            --image "${{ env.REGISTRY }}/frontend:issue-${{ env.ISSUE_NUM }}-${{ github.sha }}" \
-            --platform managed \
-            --region ${{ env.REGION }} \
-            --service-account lingoleap-frontend-run@lingoleap-dev.iam.gserviceaccount.com \
-            --project ${{ env.PROJECT_ID }} \
-            --allow-unauthenticated \
-            --port 8080 \
-            --memory=512Mi \
-            --cpu=1 \
-            --min-instances=0 \
-            --max-instances=1 \
-            --timeout=300s
+          FRONTEND_IMAGE="${{ env.REGISTRY }}/frontend:issue-${{ env.ISSUE_NUM }}-${{ github.sha }}"
+          IAP_FLAGS=()
+          GCLOUD_RUN=(gcloud run)
+          if [ "${{ env.IAP_ENABLED }}" = "true" ]; then
+            IAP_FLAGS=(--iap)
+            GCLOUD_RUN=(gcloud beta run)
+          fi
+          if [ "${{ env.SAME_ORIGIN_PROXY_ENABLED }}" = "true" ]; then
+            gcloud beta run deploy ${{ env.FRONTEND_SERVICE }} \
+              --platform managed \
+              --region ${{ env.REGION }} \
+              --project ${{ env.PROJECT_ID }} \
+              --service-account lingoleap-frontend-run@lingoleap-dev.iam.gserviceaccount.com \
+              --allow-unauthenticated \
+              ${IAP_FLAGS[@]+"${IAP_FLAGS[@]}"} \
+              --min-instances=0 \
+              --max-instances=1 \
+              --timeout=300s \
+              --container=frontend \
+                --image="$FRONTEND_IMAGE" \
+                --port=8080 \
+                --memory=512Mi \
+                --cpu=1 \
+                --depends-on=sidecar \
+              --container=sidecar \
+                --image="${{ env.REGISTRY }}/invoker-sidecar:issue-${{ env.ISSUE_NUM }}-${{ github.sha }}" \
+                --memory=256Mi \
+                --update-env-vars="BACKEND_INVOKER_AUDIENCE=${{ steps.backend-url.outputs.audience }}" \
+                --startup-probe=httpGet.port=8081,httpGet.path=/healthz,periodSeconds=2,failureThreshold=3
+          else
+            "${GCLOUD_RUN[@]}" deploy ${{ env.FRONTEND_SERVICE }} \
+              --image "$FRONTEND_IMAGE" \
+              --platform managed \
+              --region ${{ env.REGION }} \
+              --service-account lingoleap-frontend-run@lingoleap-dev.iam.gserviceaccount.com \
+              --project ${{ env.PROJECT_ID }} \
+              --allow-unauthenticated \
+              ${IAP_FLAGS[@]+"${IAP_FLAGS[@]}"} \
+              --port 8080 \
+              --memory=512Mi \
+              --cpu=1 \
+              --min-instances=0 \
+              --max-instances=1 \
+              --timeout=300s
+          fi
 
-      # #3719 — IAP 準備：同上，預設關、改 env.IAP_ENABLED 才會跑。
+      # #3719 — IAP 準備：同上，預設關、改 env.IAP_ENABLED 才會跑。The
+      # deploy above already carries --iap; this is an idempotent re-assert.
       - name: （IAP_ENABLED 時）替 frontend preview 開 IAP
         if: env.IAP_ENABLED == 'true' && (needs.detect-changes.outputs.frontend == 'true' || github.event.action == 'opened')
         run: |
@@ -286,6 +458,26 @@ jobs:
             --iap \
             --region ${{ env.REGION }} \
             --project ${{ env.PROJECT_ID }}
+
+      # #3733 — rollback half: plain `gcloud run deploy` never touches the
+      # IAP setting, so flipping IAP_ENABLED back to 'false' alone would
+      # leave a once-locked frontend locked forever. Turn it off only if it
+      # is actually on (today's never-locked previews: no-op, no revision).
+      - name: （IAP_ENABLED 關時）frontend preview 若還開著 IAP 就關掉
+        if: env.IAP_ENABLED != 'true' && (needs.detect-changes.outputs.frontend == 'true' || github.event.action == 'opened')
+        run: |
+          IAP_ON=$(gcloud run services describe ${{ env.FRONTEND_SERVICE }} \
+            --region ${{ env.REGION }} \
+            --project ${{ env.PROJECT_ID }} \
+            --format='value(metadata.annotations."run.googleapis.com/iap-enabled")' 2>/dev/null || true)
+          if [ "$IAP_ON" = "true" ]; then
+            gcloud beta run services update ${{ env.FRONTEND_SERVICE }} \
+              --no-iap \
+              --region ${{ env.REGION }} \
+              --project ${{ env.PROJECT_ID }}
+          else
+            echo "frontend has no IAP on: nothing to undo"
+          fi
 
       # 部署失敗時 gcloud 只說「container failed to start and listen on PORT」——
       # 真正的原因在容器自己的 log 裡，而那要有 gcloud 憑證才讀得到。
@@ -379,19 +571,95 @@ jobs:
             exit "$RC"
           fi
 
+      # #3733 — frontend health with IAP on: IAP only accepts a service-
+      # account SELF-SIGNED JWT whose aud is this frontend's URL (#3730),
+      # signed through IAM Credentials (no key file in CI): the github-
+      # actions SA needs roles/iam.serviceAccountTokenCreator on itself and
+      # roles/iap.httpsResourceAccessor on this service. Failing to sign
+      # while IAP is on is a hard error, not a silent anonymous retry.
+      - name: Verify frontend preview health
+        if: always() && steps.preview-urls.outputs.frontend_url != 'N/A' && steps.preview-urls.outputs.frontend_url != ''
+        env:
+          FRONTEND_URL: ${{ steps.preview-urls.outputs.frontend_url }}
+          IAP_AUDIENCE: ${{ env.IAP_ENABLED == 'true' && steps.preview-urls.outputs.frontend_url || '' }}
+          IAP_SIGNING_SA_EMAIL: github-actions@lingoleap-dev.iam.gserviceaccount.com
+        run: |
+          source scripts/lib/iap-token.sh
+          IAP_AUTH_ARGS=()
+          IAP_TOKEN="$(iap_token "${IAP_AUDIENCE:-}")"
+          if [ -n "${IAP_AUDIENCE:-}" ] && [ -z "${IAP_TOKEN}" ]; then
+            echo "::error::IAP is on but no IAP JWT could be signed (needs serviceAccountTokenCreator on the CI SA itself)"
+            exit 1
+          fi
+          if [ -n "${IAP_TOKEN}" ]; then
+            echo "::add-mask::${IAP_TOKEN}"
+            IAP_AUTH_ARGS=(-H "Proxy-Authorization: Bearer ${IAP_TOKEN}")
+          fi
+          for i in 1 2 3 4 5; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${IAP_AUTH_ARGS[@]+${IAP_AUTH_ARGS[@]}}" "$FRONTEND_URL/")
+            echo "Attempt $i: frontend preview health = $STATUS"
+            [ "$STATUS" = "200" ] && exit 0
+            sleep 10
+          done
+          echo "::error::frontend preview health check failed"
+          exit 1
+
+      # #3733 security review — negative check: the health checks prove
+      # CI's own credentials work; this proves an anonymous caller does NOT
+      # get in. No credentials: backend /api/health must be 403 (Cloud Run
+      # invoker check) and the frontend root must be 302 (IAP -> Google
+      # login) / 401 / 403, never 200. Anything else fails the job.
+      - name: （IAP_ENABLED 時）未帶憑證必須被擋（backend 403、frontend 非 200）
+        if: env.IAP_ENABLED == 'true' && steps.preview-urls.outputs.frontend_url != 'N/A' && steps.preview-urls.outputs.frontend_url != '' && steps.preview-urls.outputs.backend_url != 'N/A' && steps.preview-urls.outputs.backend_url != ''
+        env:
+          BACKEND_URL: ${{ steps.preview-urls.outputs.backend_url }}
+          FRONTEND_URL: ${{ steps.preview-urls.outputs.frontend_url }}
+        run: |
+          BE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "${BACKEND_URL}/api/health")
+          FE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "${FRONTEND_URL}/")
+          echo "anonymous: backend /api/health -> $BE, frontend / -> $FE"
+          FAIL=0
+          if [ "$BE" != "403" ]; then
+            echo "::error::anonymous backend /api/health returned $BE, expected 403 (backend not locked)"
+            FAIL=1
+          fi
+          case "$FE" in
+            302|401|403) ;;
+            *) echo "::error::anonymous frontend / returned $FE, expected 302/401/403 (frontend not behind IAP)"; FAIL=1 ;;
+          esac
+          exit "$FAIL"
+
+      # #3733 — backend locked with Cloud Run invoker auth (not IAP) when
+      # IAP_ENABLED: CI's own calls to it need a plain Google ID token for
+      # the github-actions SA (roles/run.invoker granted above), carried in
+      # X-Serverless-Authorization. The WIF principal already holds
+      # roles/iam.workloadIdentityUser (includes getOpenIdToken), so no new
+      # IAM is needed for this. Doesn't overwrite the job's credentials.
+      - name: （IAP_ENABLED 時）取 backend invoker ID token
+        id: invoker
+        if: env.IAP_ENABLED == 'true' && steps.preview-urls.outputs.backend_url != 'N/A' && steps.preview-urls.outputs.backend_url != ''
+        uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed # v2.1.13
+        with:
+          workload_identity_provider: projects/958347263320/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+          service_account: github-actions@lingoleap-dev.iam.gserviceaccount.com
+          token_format: id_token
+          id_token_audience: ${{ steps.preview-urls.outputs.backend_url }}
+          id_token_include_email: true
+          create_credentials_file: false
+          export_environment_variables: false
+
       - name: Warm backend to avoid cold-start CORS errors
         if: always() && steps.preview-urls.outputs.backend_url != 'N/A' && steps.preview-urls.outputs.backend_url != ''
         env:
           BACKEND_URL: ${{ steps.preview-urls.outputs.backend_url }}
           FRONTEND_URL: ${{ steps.preview-urls.outputs.frontend_url }}
-          # #3719 — IAP 準備：preview 未來可能在前面加一層 IAP。沒有任何
-          # secret 可讀時（還沒打開 IAP）下面是空陣列，跟今天完全一樣。
-          IAP_AUDIENCE: ${{ secrets.IAP_AUDIENCE }}
+          # #3733 — empty unless IAP_ENABLED (step above skipped) -> no
+          # header, exactly today's behavior. Backend is never behind IAP,
+          # so no IAP JWT (Proxy-Authorization) is sent here.
+          INVOKER_TOKEN: ${{ steps.invoker.outputs.id_token }}
         run: |
-          source scripts/lib/iap-token.sh
           IAP_AUTH_ARGS=()
-          IAP_TOKEN="$(iap_token "${IAP_AUDIENCE:-}")"
-          [ -n "${IAP_TOKEN}" ] && IAP_AUTH_ARGS=(-H "Proxy-Authorization: Bearer ${IAP_TOKEN}")
+          [ -n "${INVOKER_TOKEN:-}" ] && IAP_AUTH_ARGS=(-H "X-Serverless-Authorization: Bearer ${INVOKER_TOKEN}")
           # CORS env update creates a new Cloud Run revision which is cold.
           # Browsers hitting a cold revision see 5xx without CORS headers,
           # surfacing as spurious "blocked by CORS policy" console errors.
@@ -489,7 +757,12 @@ jobs:
       needs.deploy-preview.outputs.frontend_url != 'N/A' &&
       needs.deploy-preview.outputs.frontend_url != '' &&
       needs.deploy-preview.outputs.backend_url != 'N/A' &&
-      needs.deploy-preview.outputs.backend_url != ''
+      needs.deploy-preview.outputs.backend_url != '' &&
+      needs.deploy-preview.outputs.iap_enabled != 'true'
+    # #3733: with IAP_ENABLED this job can only ever see the Google login
+    # page / a 403 -- it deliberately holds no GCP credentials (see below),
+    # so it can't sign an IAP JWT. Skipped (visibly) rather than faked; the
+    # locked preview is verified by deploy-preview's own health checks.
     # Reorder (coordinator decision, 2026-11-05): this job runs npm ci +
     # `npx playwright install --with-deps` -- untrusted, lockfile-resolved
     # third-party code -- directly on the bare runner. It used to be the

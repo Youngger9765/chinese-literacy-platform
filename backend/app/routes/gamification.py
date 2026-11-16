@@ -18,11 +18,11 @@ from ..auth.authz import can
 from ..auth.dependencies import get_current_user
 from ..database import get_db
 from ..models.school import Classroom, ClassroomStudent
-from ..models.session import LearningSession
 from ..models.user import User
 from ..services.gamification_service import (
     award_xp,
     get_classroom_leaderboard,
+    get_session_for_update,
     get_student_summary,
     process_session_completion,
 )
@@ -189,7 +189,19 @@ def on_session_complete(
     # Settlement is idempotent per session_id, so the session must be this student's:
     # otherwise a child could settle a classmate's session for their own XP and the
     # classmate's real completion would then be skipped as "already processed" (#3531).
-    session = db.query(LearningSession).filter(LearningSession.id == body.session_id).first()
+    #
+    # Issue #4042: get_session_for_update() locks the session row before
+    # this route (or process_session_completion below it) touches any
+    # XP/badge table. `PUT /learning/sessions/{id}/progress` takes the
+    # SAME lock (via get_owned_session(..., for_update=True)) before its
+    # own step-complete XP/badge check -- the two routes fire within ~1s
+    # of each other when a student finishes their last step, and used to
+    # deadlock in Postgres on learning_sessions + student_badges
+    # (2026-11-06T05:05, two deadlocks ~1s apart on session_id=1244,
+    # killing one of the two requests with a 500). Whichever request gets
+    # here first now runs to completion (commit) before the other can even
+    # start its own XP/badge work.
+    session = get_session_for_update(db, body.session_id)
     if session is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Session not found")
     if session.student_id != body.student_id:

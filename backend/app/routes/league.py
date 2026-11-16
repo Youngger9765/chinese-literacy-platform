@@ -421,12 +421,19 @@ def get_my_history(
 
     seasons = svc.list_my_seasons(db, subject)
     store = get_story_pack_store(db)
+    # Issue #4052 code review: get_active_key() is now a real DB query (was
+    # a free dict lookup) — resolve the platform default ONCE here, not
+    # once per season inside the loop below (get_pack_for_season's
+    # `active_key` param opts out of its own internal query).
+    active_key = store.get_active_key()
     history = []
     for season in seasons:
         try:
             summary = svc.get_my_team_summary(db, subject, season)
         except svc.LeagueError:
             continue
-        summary["theme"] = theme_svc.get_pack_for_season(store, season).model_dump()
+        summary["theme"] = theme_svc.get_pack_for_season(
+            store, season, active_key=active_key
+        ).model_dump()
         history.append(summary)
     return history

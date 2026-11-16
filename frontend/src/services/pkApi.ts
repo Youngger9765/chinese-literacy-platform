@@ -63,6 +63,11 @@ export interface PkQueuePollResponse {
   match_id: number | null;
   suggest_ai: boolean;
   unchanged?: boolean;
+  /** #4050: the other side's real display name once status is "matched"
+   * (null while still waiting, or for an AI match — there's no human
+   * opponent to name). Lets the VS screen show who you're actually
+   * fighting instead of a hardcoded "同學". */
+  opponent_name?: string | null;
 }
 
 export interface PkInviteResponse {

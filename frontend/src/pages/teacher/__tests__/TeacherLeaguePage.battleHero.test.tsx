@@ -99,4 +99,17 @@ describe('TeacherLeaguePage — battle hero renders automatically', () => {
     // Viewer's own classroom is tagged.
     expect(screen.getByText('我們班')).toBeInTheDocument();
   });
+
+  it('issue #4052: the page heading does not duplicate 跨班賽季 while the board theme is still the client fallback', async () => {
+    // This fixture's getSeasonBoard mock (above) returns no `theme` field,
+    // so TeacherLeaguePage falls back to DEFAULT_THEME_FALLBACK — whose
+    // own title IS "跨班賽季". Naively rendering `${activeTheme.title} ·
+    // 跨班賽季` produced the visibly duplicated "跨班賽季 · 跨班賽季".
+    render(<TeacherLeaguePage />);
+    await screen.findByText('跨班邀請賽：三年甲班 vs 五年乙班');
+
+    const heading = screen.getByRole('heading', { level: 1 });
+    expect(heading.textContent).toBe('跨班賽季');
+    expect(heading.textContent).not.toBe('跨班賽季 · 跨班賽季');
+  });
 });

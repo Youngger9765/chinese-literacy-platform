@@ -31,7 +31,13 @@ const TeammateRow: React.FC<TeammateRowProps> = ({ teammates }) => (
         </span>
         <span className="min-w-0 text-xs font-medium text-on-surface sm:text-sm">
           <span className="block truncate">{TEAMMATE_NAMES[teammate.slug] ?? '隊友'}</span>
-          <span className="hidden text-on-surface-variant sm:block">{teammate.frozen ? '暫時定住' : '一起前進'}</span>
+          {/* #4051: this status text was `hidden ... sm:block` — invisible
+              below the 640px breakpoint, i.e. on every real phone (390px).
+              Always shown now, just smaller, so it still fits three
+              teammates across a narrow screen. */}
+          <span className="block truncate text-[10px] leading-tight text-on-surface-variant sm:text-xs">
+            {teammate.frozen ? '暫時定住' : '一起前進'}
+          </span>
         </span>
       </div>
     ))}

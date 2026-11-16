@@ -15,8 +15,16 @@ WORKDIR /app
 # anything (direct or transitive) whose sha256 doesn't match what was pinned, closing the
 # "any `pip install` can silently pull a same-day typosquat/compromised release" gap
 # (MAL-2026-4750, #2002, #3849).
-COPY requirements.txt requirements.lock ./
-RUN pip install --no-cache-dir --require-hashes -r requirements.lock
+#
+# #3852: --require-hashes does not cover the build env pip creates for an sdist,
+# and jieba==0.42.1 is sdist-only. So: install the hash-pinned build backend
+# (requirements-build.lock) first, force every other package to a hash-verified
+# wheel (--only-binary=:all:), and build jieba against that setuptools with
+# --no-build-isolation instead of letting pip fetch a floating one from PyPI.
+# Locked by backend/tests/test_jieba_build_isolation_3852.py.
+COPY requirements.txt requirements.lock requirements-build.lock ./
+RUN pip install --no-cache-dir --require-hashes --only-binary=:all: -r requirements-build.lock \
+ && pip install --no-cache-dir --require-hashes --only-binary=:all: --no-binary=jieba --no-build-isolation -r requirements.lock
 COPY app/ ./app/
 COPY data/ ./data/
 COPY alembic/ ./alembic/

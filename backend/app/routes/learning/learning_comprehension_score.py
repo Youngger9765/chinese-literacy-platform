@@ -20,7 +20,7 @@ from ...schemas.session import ComprehensionScoreResponse
 from ...services.ai_service import evaluate_comprehension
 from ...services.ai_usage_tracker import last_usage, log_ai_usage
 from ...services.input_sanitizer import sanitize_ai_input
-from ._helpers import ConversationTurn
+from ._helpers import MAX_DIALOGUE_TURNS, ConversationTurn
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -84,12 +84,7 @@ def get_dialogue_history(
 
 # ── Comprehension Scoring (Issue #243) ────────────────────────────────────────
 
-#: A real session targets 5 understood questions (REQUIRED_UNDERSTOOD in
-#: services/socratic/__init__.py), i.e. ~10 turns (question + answer) at
-#: most a little more with retries/clarification. 40 gives a 4x margin
-#: over that for any legitimate session shape while still being nowhere
-#: near "attacker sends thousands of turns" (find_01AS6qqjWCjVEXLM2gfFuGyT).
-MAX_DIALOGUE_TURNS = 40
+# MAX_DIALOGUE_TURNS lives in ._helpers (shared with /comprehension/question).
 
 
 class ComprehensionScoreRequest(BaseModel):

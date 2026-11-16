@@ -61,7 +61,17 @@ const STEPS: { icon: React.ReactNode; text: string }[] = [
   },
 ];
 
-const PkHeroBanner: React.FC = () => {
+interface PkHeroBannerProps {
+  /** #4050: whether the viewer has at least one enrolled classroom with
+   * 班級內 PK (同學配對對戰) turned on. The subtitle used to always promise
+   * "挑戰同學或文學家" even when no classroom had the toggle on, which only
+   * leaves 挑戰文學家 actually reachable — staging QA: "沒開真人 PK 時，首頁
+   * 副標仍寫隨時挑戰同學或文學家". Defaults to `true` (old behavior) for any
+   * caller that hasn't resolved this yet. */
+  pkHumanEnabled?: boolean;
+}
+
+const PkHeroBanner: React.FC<PkHeroBannerProps> = ({ pkHumanEnabled = true }) => {
   return (
     <div className="w-full overflow-hidden rounded-3xl bg-gradient-to-br from-[#8B7FD1] to-[#5B4DBD] shadow-sm">
       <div className="px-5 pb-4 pt-6 sm:px-8 sm:pt-8">
@@ -95,7 +105,9 @@ const PkHeroBanner: React.FC = () => {
           </div>
         </div>
         <h1 className="mt-4 text-center text-2xl font-bold text-white sm:text-3xl">PK 對戰</h1>
-        <p className="mt-1 text-center text-sm text-white/90">一對一，隨時挑戰同學或文學家</p>
+        <p className="mt-1 text-center text-sm text-white/90">
+          {pkHumanEnabled ? '一對一，隨時挑戰同學或文學家' : '一對一，隨時挑戰文學家'}
+        </p>
       </div>
       <div className="bg-white/10 px-5 py-4 sm:px-8">
         <p className="mb-2 text-center text-xs font-bold uppercase tracking-wide text-white/80 sm:text-left">

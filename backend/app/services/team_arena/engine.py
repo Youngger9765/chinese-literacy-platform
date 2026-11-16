@@ -165,14 +165,34 @@ def _display_name(member: TeamArenaMember) -> str:
     return resolve_display_name(name, member.rotation_order + 1)
 
 
-def _name_for_viewer(member: TeamArenaMember, side_key: str, index: int, viewer_side: str | None) -> str:
+def _name_for_viewer(
+    member: TeamArenaMember,
+    side_key: str,
+    index: int,
+    viewer_side: str | None,
+    team_labels: tuple[str, str] | list[str] | None = None,
+) -> str:
     """Real display names only for the viewer's OWN team. Anyone with the
     6-char code can join from any school, so the other team (and anyone
     not seated) sees a neutral seat label instead of a minor's real name
-    (security review 2026-10-21)."""
+    (security review 2026-10-21).
+
+    issue #4054: this seat label used to hardcode 甲隊/乙隊 regardless of
+    the match's actual story pack, so a student who saw the lobby/play
+    screen's themed team names (探書隊／尋光隊 etc., `teamLabel()` in
+    StudentTeamArenaPlay.tsx) saw the OPPONENT roster labelled with a
+    completely different vocabulary ("乙隊 1 號") in the same match. Takes
+    the already-resolved story's `team_labels` so this reads the same name
+    as everywhere else in that match; falls back to the generic 甲/乙隊
+    only when no story context is available at all (defensive — every real
+    caller always has one via `resolve_story_for_session`)."""
     if viewer_side == side_key:
         return _display_name(member)
-    return f"{'甲' if side_key == 'a' else '乙'}隊 {index + 1} 號"
+    if team_labels:
+        label = team_labels[0] if side_key == "a" else team_labels[1]
+    else:
+        label = "甲隊" if side_key == "a" else "乙隊"
+    return f"{label} {index + 1} 號"
 
 
 # ---------------------------------------------------------------------------
@@ -926,6 +946,12 @@ def _public_round_view(round_state: dict, *, db: Session, viewer: TeamArenaMembe
             "extra": payload.get("extra"),
             "options": payload.get("options") if show_options else None,
             "reading_seconds": round_state["reading_seconds"],
+            # issue #4054: a summoned teammate's suggestion screen is an
+            # "answer screen" too (PRD rule H lets them submit a choice
+            # for 呼叫隊友) — it was missing `answer_seconds`, so it could
+            # never show the same countdown the active player's screen
+            # gets even though it needs the identical duration.
+            "answer_seconds": round_state["answer_seconds"],
             "revealed": revealed,
         }
 
@@ -975,6 +1001,15 @@ def get_state(db: Session, session: TeamArenaSession, user: User) -> dict:
         "showdown": towers.is_showdown_turn(
             session.turn_no, session.settings.get("total_turns", 0), session.settings.get("team_size", 0)
         ),
+        # issue #4054: "作答畫面沒有倒數計時" — the active player's (and a
+        # summoned teammate's) answer screen had no countdown at all,
+        # unlike every other game mode. Server-authoritative, same idiom
+        # as live_quiz's CountdownBar: the client derives "options open
+        # at" from `turn_started_at + reading_seconds` and corrects its
+        # own clock skew against `server_now`, rather than trusting a
+        # client-started local timer.
+        "turn_started_at": _aware(session.turn_started_at).isoformat() if session.turn_started_at else None,
+        "server_now": _now().isoformat(),
     }
 
     by_side = _members_by_side(db, session.id)
@@ -996,7 +1031,7 @@ def get_state(db: Session, session: TeamArenaSession, user: User) -> dict:
                     # Real account id only for the viewer's own team: an id
                     # lets anyone recognise the same student across matches.
                     "student_id": m.student_id if viewer_side == side_key else None,
-                    "display_name": _name_for_viewer(m, side_key, i, viewer_side),
+                    "display_name": _name_for_viewer(m, side_key, i, viewer_side, base["story"]["team_labels"]),
                 }
                 for i, m in enumerate(team_members)
             ],
@@ -1129,6 +1164,10 @@ def get_result(db: Session, session: TeamArenaSession, user: User) -> dict:
     all_members = by_side.get("a", []) + by_side.get("b", [])
     highlights = _compute_highlights(session, all_members)
     viewer_side = COLUMN_TO_SIDE[member.side] if member is not None else None
+    # issue #4054: same seat-label fix as get_state — the result screen's
+    # opponent roster must read the same team name the rest of this match
+    # used, not a hardcoded 甲隊/乙隊.
+    team_labels = resolve_story_for_session(session.settings.get("story_pack_key"))["team_labels"]
 
     # PRD rule Q: "每人一句" — the whole roster's highlights are shown on
     # the shared end screen (not a private "only you see this" stat, the
@@ -1138,7 +1177,7 @@ def get_result(db: Session, session: TeamArenaSession, user: User) -> dict:
         side_key: [
             {
                 "student_id": m.student_id if viewer_side == side_key else None,
-                "display_name": _name_for_viewer(m, side_key, i, viewer_side),
+                "display_name": _name_for_viewer(m, side_key, i, viewer_side, team_labels),
                 "highlight": highlights[m.student_id],
             }
             for i, m in enumerate(by_side.get(side_key, []))

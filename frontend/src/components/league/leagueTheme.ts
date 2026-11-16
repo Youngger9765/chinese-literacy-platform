@@ -79,3 +79,24 @@ export const DEFAULT_THEME_FALLBACK: LeagueTheme = {
   ],
   result_copy: { win: '這一局由你們拿下！', lose: '這一局對手領先，再接再厲', draw: '勢均力敵，不分勝負' },
 };
+
+/** TeacherLeaguePage.tsx's <h1>. Normally "{pack title} · 跨班賽季"
+ * (PRD §13: the narrative skin's title + the fixed page label). But
+ * DEFAULT_THEME_FALLBACK.title above IS literally "跨班賽季" — naively
+ * concatenating renders the visibly duplicated "跨班賽季 · 跨班賽季"
+ * every time the board response hasn't resolved yet (issue #4052).
+ *
+ * Keyed on REFERENCE equality to the DEFAULT_THEME_FALLBACK singleton,
+ * NOT `theme.key === 'fallback'` (code review 2026-11-14 caught this: a
+ * backend pack's `key` is an admin-chosen slug with no reserved-word
+ * check anywhere in story_pack.py/story_pack_service.py — an admin could
+ * create a real custom pack with key="fallback" and this would have
+ * silently dropped the "· 跨班賽季" suffix for every real viewer of that
+ * pack, reintroducing the exact bug class this fix closes). The only
+ * caller ever passes this exact object: `primaryBoard?.theme ??
+ * DEFAULT_THEME_FALLBACK` — `??` returns the literal singleton
+ * reference, never a copy, so `===` is reliable here. */
+export function leaguePageHeading(theme: LeagueTheme): string {
+  if (theme === DEFAULT_THEME_FALLBACK) return theme.title;
+  return `${theme.title} · 跨班賽季`;
+}

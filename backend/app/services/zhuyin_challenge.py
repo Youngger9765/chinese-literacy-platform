@@ -79,6 +79,14 @@ _SENTENCE_END = frozenset("。！？")
 
 _CLAUSE_END = frozenset("。！？，、；：")
 
+# #4050: a closing quote/bracket immediately following a sentence- or
+# clause-ending delimiter belongs to the sentence/clause it closes, not
+# the next one — e.g. "...啊！」呵呵，我猜..." must split AFTER the 」, not
+# before it. Without this, _char_spans put a bare 」 at the START of the
+# next span (PM staging QA: a PK question stem rendered as
+# "「」呵呵，我猜別人都以為…」").
+_TRAILING_CLOSERS = frozenset("」』”’)）】》〉")
+
 STOP_LIST = frozenset((
     "的", "有", "會", "大", "上", "可", "們", "中", "看", "說",
     "家", "都", "過", "麼", "同", "把", "那", "作", "更", "些",
@@ -136,10 +144,20 @@ def _u16_chars(text: str) -> list[str]:
 def _char_spans(chars: list[str], delimiters: frozenset) -> list[tuple[int, int]]:
     spans: list[tuple[int, int]] = []
     start = 0
-    for i, ch in enumerate(chars):
-        if ch in delimiters:
-            spans.append((start, i + 1))
-            start = i + 1
+    n = len(chars)
+    i = 0
+    while i < n:
+        if chars[i] in delimiters:
+            end = i + 1
+            # #4050: absorb any closing quote/bracket(s) immediately
+            # following the delimiter into THIS span — see _TRAILING_CLOSERS.
+            while end < n and chars[end] in _TRAILING_CLOSERS:
+                end += 1
+            spans.append((start, end))
+            start = end
+            i = end
+            continue
+        i += 1
     if start < len(chars):
         spans.append((start, len(chars)))
     return spans

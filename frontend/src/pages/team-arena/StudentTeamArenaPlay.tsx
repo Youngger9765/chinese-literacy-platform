@@ -24,6 +24,10 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useTeamArenaPoll } from '../../components/team-arena/useTeamArenaPoll';
 import GameResultActions from '../../components/game/GameResultActions';
 import StemWithTarget from '../../components/live-quiz/StemWithTarget';
+// #4054: "作答畫面沒有倒數計時" — reuse the same server-authoritative
+// countdown live_quiz already has (read-only import, no changes to that
+// shared component) instead of writing a second, team-arena-only timer.
+import CountdownBar from '../../components/live-quiz/CountdownBar';
 import AttackAnimation from '../../components/team-arena/AttackAnimation';
 import TeammateActionToast, { type TeammateActionTone } from '../../components/team-arena/TeammateActionToast';
 import { TowerCollapse, VictoryBurst } from '../../components/team-arena/TowerCollapse';
@@ -90,27 +94,40 @@ type VisualEffect =
 // towers_destroyed) and a defense count (towers this side has left).
 const SideBar: React.FC<{
   label: string;
+  // #4054: "塔下方進度條沒有標示（是目前那座塔的血量）" — the story has
+  // carried a caption for exactly this bar since #3772
+  // (energy_bar_label, e.g. 書頁亮度／軍糧／墨量) but nothing ever
+  // rendered it.
+  energyBarLabel: string;
   sideData: { towers_destroyed: number; current_hp: number; seated: number; team_size: number };
   opponentTowersDestroyed: number;
   effect: VisualEffect | null;
   onEffectComplete: () => void;
-}> = ({ label, sideData, opponentTowersDestroyed, effect, onEffectComplete }) => (
+}> = ({ label, energyBarLabel, sideData, opponentTowersDestroyed, effect, onEffectComplete }) => (
   <div data-testid={`side-bar-${label}`} className="relative flex-1 rounded-xl border border-surface-dim bg-surface-container p-3 text-center overflow-hidden">
     <p className="text-xs font-semibold text-on-surface-variant">{label}</p>
     <p className="text-sm font-bold text-on-surface">已打倒對方 {opponentTowersDestroyed} 座塔</p>
     <p className="text-xs text-on-surface-variant">我方剩 {TOWER_COUNT - sideData.towers_destroyed} 座塔</p>
-    <div className="mt-1 h-2 w-full rounded-full bg-surface-dim">
-      <div
-        className="h-2 rounded-full bg-accent transition-all"
-        style={{ width: `${Math.max(0, Math.min(100, sideData.current_hp))}%` }}
-      />
+    <p className="mt-1 text-[10px] text-on-surface-variant">{energyBarLabel}</p>
+    {/* #4054: "攻擊動畫蓋住塔數文字" — AttackAnimation/TowerCollapse/
+        VictoryBurst are `absolute inset-0`; anchoring them to this small
+        band (instead of the whole card, which used to be their nearest
+        `relative` ancestor) keeps the tower-count text above always
+        visible instead of being covered mid-animation. */}
+    <div className="relative mt-1 h-5">
+      <div className="h-2 w-full rounded-full bg-surface-dim">
+        <div
+          className="h-2 rounded-full bg-accent transition-all"
+          style={{ width: `${Math.max(0, Math.min(100, sideData.current_hp))}%` }}
+        />
+      </div>
+      {effect?.kind === 'attack' && <AttackAnimation variant={effect.variant} onComplete={onEffectComplete} />}
+      {effect?.kind === 'collapse' && <TowerCollapse onComplete={onEffectComplete} />}
+      {effect?.kind === 'victory' && <VictoryBurst onComplete={onEffectComplete} />}
     </div>
     <p className="mt-1 text-[10px] text-on-surface-variant">
       {sideData.seated}/{sideData.team_size} 人
     </p>
-    {effect?.kind === 'attack' && <AttackAnimation variant={effect.variant} onComplete={onEffectComplete} />}
-    {effect?.kind === 'collapse' && <TowerCollapse onComplete={onEffectComplete} />}
-    {effect?.kind === 'victory' && <VictoryBurst onComplete={onEffectComplete} />}
   </div>
 );
 
@@ -127,6 +144,12 @@ const StudentTeamArenaPlay: React.FC = () => {
 
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState('');
+  // #4054: a summoned (呼叫隊友) teammate's suggestion click had no
+  // feedback at all — no selected state, no 已送出, and a failure was
+  // silently swallowed, so a child kept re-tapping a button that looked
+  // like it never registered anything.
+  const [suggestedKey, setSuggestedKey] = useState<string | null>(null);
+  const [suggestError, setSuggestError] = useState('');
   const [weaponError, setWeaponError] = useState('');
   const [weaponBusy, setWeaponBusy] = useState<TeamArenaWeapon | null>(null);
   const [result, setResult] = useState<TeamArenaResult | null>(null);
@@ -192,6 +215,8 @@ const StudentTeamArenaPlay: React.FC = () => {
       setSelectedKey(null);
       setSubmitError('');
       setWeaponError('');
+      setSuggestedKey(null);
+      setSuggestError('');
     }
   }, [turnNo]);
 
@@ -225,17 +250,33 @@ const StudentTeamArenaPlay: React.FC = () => {
     const mySide = ownMatch?.my_side;
     if (mySide && event.kind !== 'damage') {
       const scoredByUs = event.side !== mySide;
+      // #4054 (staging QA): "自己打倒的塔，提示說「隊友打倒了一座塔！」"
+      // — this toast used to always say 隊友 whenever MY side scored,
+      // even when the VIEWER THEMSELVES was the active player who just
+      // answered. `own_match.am_i_active` still reflects whoever was
+      // active for the round that just concluded — `active_member_id`
+      // only changes once a NEW round is ensured for a LATER turn_no
+      // (engine.py `_ensure_current_round`), and that only happens on a
+      // subsequent poll — so reading it right here reliably answers "was
+      // it me". Deliberately not applied to base_destroyed: the match has
+      // already ended by the time that fires and `own_match.am_i_active`
+      // is unconditionally false once ended (engine.py `get_state`), so
+      // there is no reliable self-signal there — also out of scope, the
+      // reported misattribution was towers only.
+      const iScoredIt = scoredByUs && event.kind === 'tower_fallen' && !!ownMatch?.am_i_active;
       const text =
         event.kind === 'base_destroyed'
           ? scoredByUs
             ? '太棒了！我方攻下對方主堡了！'
             : '我方主堡被攻下了，比賽結束'
           : scoredByUs
-            ? '隊友打倒了一座塔！'
+            ? iScoredIt
+              ? '你打倒了一座塔！做得好！'
+              : '隊友打倒了一座塔！'
             : '我方一座塔被打倒了，加油追回來！';
       setTeammateToast({ text, tone: scoredByUs ? 'good' : 'bad' });
     }
-  }, [state, ownMatch?.my_side]);
+  }, [state, ownMatch?.my_side, ownMatch?.am_i_active]);
 
   // Auto-dismiss the toast — it's a transient callout, not a persistent
   // status (that's what the SideBar numbers are for).
@@ -285,11 +326,20 @@ const StudentTeamArenaPlay: React.FC = () => {
   };
 
   const handleSuggest = async (key: string) => {
-    if (!token || !routeCode) return;
+    if (!token || !routeCode || suggestedKey) return;
+    // Optimistic selected+已送出 feedback (#4054) — the picker locks
+    // immediately so a child doesn't fire the same suggestion twice
+    // while the request is in flight.
+    setSuggestedKey(key);
+    setSuggestError('');
     try {
       await submitTeamArenaSuggestion(token, routeCode, key);
-    } catch {
-      // best-effort — teammate suggestions are a soft-help feature
+    } catch (err) {
+      // A failed suggestion must not look "已送出" nor stay permanently
+      // locked — unselect so the child can actually retry, and say so in
+      // plain language instead of swallowing the error.
+      setSuggestedKey(null);
+      setSuggestError(err instanceof TeamArenaApiError ? err.message : '建議送出失敗，請再試一次');
     }
   };
 
@@ -423,9 +473,23 @@ const StudentTeamArenaPlay: React.FC = () => {
 
   if (state.status === 'ended') {
     const outcome = ownMatch ? teamArenaMyOutcome(ownMatch) : null;
+    // #4054 (staging QA): the result screen only ever showed each side's
+    // own tower counts — "只能靠故事文字猜" who actually won. This reads
+    // the SERVER's own `winner` field (never re-derived from tower counts
+    // client-side — `result` and `own_match` are both just mirrors of the
+    // same `_end_session`-computed value, engine.py), preferring the
+    // dedicated `/result` payload but falling back to the already-polled
+    // `own_match.winner` so the banner is correct even before `/result`
+    // resolves.
+    const winnerSide = result ? result.sides.a.winner : (ownMatch?.winner ?? null);
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-surface px-6 py-10 text-center">
         <h1 className="mb-4 text-xl font-bold text-on-surface">比賽結束</h1>
+        {winnerSide && (
+          <p data-testid="winner-banner" className="mb-2 text-2xl font-extrabold text-on-surface">
+            {winnerSide === 'draw' ? '平手' : `🏆 ${teamLabel(state.story, winnerSide)} 獲勝！`}
+          </p>
+        )}
         {outcome && (
           <p className="mb-6 text-base font-semibold text-accent">{resultCopy(state.story, outcome)}</p>
         )}
@@ -478,6 +542,15 @@ const StudentTeamArenaPlay: React.FC = () => {
   const revealed = !!currentRound?.revealed;
   const wasCorrect = revealed && answered && payload?.correct_key != null ? selectedKey === payload.correct_key : null;
   const weaponsUsed = ownMatch.weapons_used;
+  // #4054: "作答畫面沒有倒數計時" — the answer window for THIS side's own
+  // round opens at `turn_started_at + reading_seconds` (reading_seconds
+  // is per-round, since each side's active member's stem can read for a
+  // different length of time); `server_now` corrects this browser's own
+  // clock skew, same as live_quiz's CountdownBar already does elsewhere.
+  const answerOpenAtIso =
+    state.turn_started_at != null && payload?.reading_seconds != null
+      ? new Date(new Date(state.turn_started_at).getTime() + payload.reading_seconds * 1000).toISOString()
+      : null;
 
   return (
     <div className="flex min-h-screen flex-col bg-surface px-5 py-6">
@@ -492,8 +565,8 @@ const StudentTeamArenaPlay: React.FC = () => {
       )}
 
       <div className="mb-4 flex gap-2">
-        <SideBar label={teamLabel(state.story, 'a')} sideData={state.sides.a} opponentTowersDestroyed={state.sides.b.towers_destroyed} effect={effects.a ?? null} onEffectComplete={() => clearEffect('a')} />
-        <SideBar label={teamLabel(state.story, 'b')} sideData={state.sides.b} opponentTowersDestroyed={state.sides.a.towers_destroyed} effect={effects.b ?? null} onEffectComplete={() => clearEffect('b')} />
+        <SideBar label={teamLabel(state.story, 'a')} energyBarLabel={state.story.energy_bar_label} sideData={state.sides.a} opponentTowersDestroyed={state.sides.b.towers_destroyed} effect={effects.a ?? null} onEffectComplete={() => clearEffect('a')} />
+        <SideBar label={teamLabel(state.story, 'b')} energyBarLabel={state.story.energy_bar_label} sideData={state.sides.b} opponentTowersDestroyed={state.sides.a.towers_destroyed} effect={effects.b ?? null} onEffectComplete={() => clearEffect('b')} />
       </div>
 
       {ownMatch.match_status === 'ended' ? (
@@ -511,6 +584,15 @@ const StudentTeamArenaPlay: React.FC = () => {
           )}
           {ownMatch.am_i_active && <p className="mb-2 text-sm font-semibold text-accent">輪到你了！</p>}
 
+          {/* #4054: "注音題只有一句話加底線字，沒有「這個字怎麼唸？」之
+              類的提問" — the underline (#3652) marks WHICH character, but
+              never says WHAT the task is. `extra.target_index` is the
+              same 注音-only signal StemWithTarget already keys off of —
+              there is no separate `source_module` field on the wire to
+              check instead. */}
+          {payload?.extra?.target_index != null && (
+            <p className="mb-1 text-sm font-semibold text-on-surface-variant">這個字怎麼唸？</p>
+          )}
           <p className="mb-4 text-lg font-medium text-on-surface">
             {payload?.stem != null && <StemWithTarget stem={payload.stem} targetIndex={payload.extra?.target_index} />}
           </p>
@@ -519,19 +601,41 @@ const StudentTeamArenaPlay: React.FC = () => {
             <p className="mb-3 rounded-lg bg-accent-bg px-3 py-2 text-sm text-accent">💡 {currentRound.hint_text}</p>
           )}
 
+          {/* #4054: countdown only once the answer window is actually
+              open (options visible) — the reading phase above
+              ("請先仔細讀題目") is a different screen, not in scope here.
+              Shown for the active player AND a summoned teammate alike —
+              both are picking an option against the same clock. */}
+          {options && answerOpenAtIso && payload?.answer_seconds != null && (
+            <div className="mb-3">
+              <CountdownBar
+                answerOpenAt={answerOpenAtIso}
+                seconds={payload.answer_seconds}
+                serverNow={state.server_now}
+                mode="player"
+              />
+            </div>
+          )}
+
           {!options ? (
             <p className="text-center text-on-surface-variant">請先仔細讀題目，稍後選項才會出現</p>
           ) : (
             <div className="grid grid-cols-1 gap-3">
               {options.map((opt) => {
-                const isSelected = selectedKey === opt.key;
+                // #4054: a called-for-help teammate (not the active
+                // player) has its OWN selected/sent state — `selectedKey`
+                // only ever reflects the ACTIVE player's own answer, so a
+                // suggestion must never read/share it (that was exactly
+                // why a suggestion click showed nothing before this fix).
+                const isSelected = ownMatch.am_i_active ? selectedKey === opt.key : suggestedKey === opt.key;
                 const isCorrectChoice = revealed && payload?.correct_key === opt.key;
                 const onClick = ownMatch.am_i_active ? () => handleAnswer(opt.key) : () => handleSuggest(opt.key);
+                const locked = ownMatch.am_i_active ? answered : suggestedKey != null;
                 return (
                   <button
                     key={opt.key}
                     type="button"
-                    disabled={ownMatch.am_i_active && answered}
+                    disabled={locked}
                     onClick={onClick}
                     className={`rounded-xl border-2 px-4 py-3 text-left text-base ${
                       isCorrectChoice
@@ -543,10 +647,16 @@ const StudentTeamArenaPlay: React.FC = () => {
                   >
                     <span className="mr-2 font-bold">{opt.key}</span>
                     {opt.text}
+                    {!ownMatch.am_i_active && isSelected && (
+                      <span className="ml-2 text-xs font-semibold text-accent">已送出</span>
+                    )}
                   </button>
                 );
               })}
             </div>
+          )}
+          {!ownMatch.am_i_active && suggestError && (
+            <p className="mt-3 text-sm text-red-600">{suggestError}</p>
           )}
 
           {ownMatch.am_i_active && options && (
