@@ -228,4 +228,62 @@ describe('閱讀理解 — 作答中的答案要存進 DB（#2839）', () => {
       if (Array.isArray(ft)) expect(ft.length).toBeLessThan(CORRECT_OPTION_TEXT.length);
     }
   });
+
+  // ── #4087：每一次作答記一筆（成績單折線圖）─────────────────────────────
+  const attemptsSaved = () =>
+    mockSaveStepProgressPatch.mock.calls
+      .map((c) => (c[0] as { appendAttempt?: { kind: string; correct: number; total: number } }).appendAttempt)
+      .filter(Boolean) as { kind: string; correct: number; total: number }[];
+
+  /** 第 i 題先答錯一次（選第一個不是正解的選項）再答對。 */
+  function answerWrongThenRight(i: number) {
+    const options = story.multipleChoice![i].options as string[];
+    const wrong = options.find((o) => o !== CORRECT_OPTION_TEXT[i])!;
+    fireEvent.click(screen.getByText(wrong));
+    fireEvent.click(screen.getByRole('button', { name: '再試一次' }));
+    answerQuestion(i);
+  }
+
+  it('finishing the quiz records one attempt with the first-try score', () => {
+    setup();
+    answerWrongThenRight(0);
+    for (let i = 1; i < CORRECT_OPTION_TEXT.length; i++) answerQuestion(i);
+    const a = attemptsSaved();
+    expect(a).toHaveLength(1);
+    expect(a[0]).toMatchObject({ kind: 'first', correct: CORRECT_OPTION_TEXT.length - 1, total: CORRECT_OPTION_TEXT.length });
+  });
+
+  it('reopening a finished quiz does not record another attempt', () => {
+    const { unmount } = setup();
+    for (let i = 0; i < CORRECT_OPTION_TEXT.length; i++) answerQuestion(i);
+    const saved = mergedStepData();
+    unmount();
+    vi.clearAllMocks();
+    setup({ current_step: 'comprehension', steps_completed: [], step_data: { comprehension: saved } });
+    expect(screen.getByText('全部答對！')).toBeInTheDocument();
+    expect(attemptsSaved()).toHaveLength(0);
+  });
+
+  it('「重做錯題」做完也記一筆，成績是做完之後總共答對幾題', () => {
+    setup();
+    answerWrongThenRight(0);
+    for (let i = 1; i < CORRECT_OPTION_TEXT.length; i++) answerQuestion(i);
+    fireEvent.click(screen.getByRole('button', { name: /重做錯題/ }));
+    // 只剩那一題，沒有「下一題」—— 直接選正解。
+    fireEvent.click(screen.getByText(CORRECT_OPTION_TEXT[0]));
+    const a = attemptsSaved();
+    expect(a.map((x) => x.kind)).toEqual(['first', 'retry-wrong']);
+    expect(a[1]).toMatchObject({ correct: CORRECT_OPTION_TEXT.length, total: CORRECT_OPTION_TEXT.length });
+  });
+
+  it('「全部重做」做完記成 retry-all', () => {
+    setup();
+    for (let i = 0; i < CORRECT_OPTION_TEXT.length; i++) answerQuestion(i);
+    fireEvent.click(screen.getByRole('button', { name: /全部重做/ }));
+    answerWrongThenRight(0);
+    for (let i = 1; i < CORRECT_OPTION_TEXT.length; i++) answerQuestion(i);
+    const a = attemptsSaved();
+    expect(a.map((x) => x.kind)).toEqual(['first', 'retry-all']);
+    expect(a[1].correct).toBe(CORRECT_OPTION_TEXT.length - 1);
+  });
 });

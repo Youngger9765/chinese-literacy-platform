@@ -6,7 +6,7 @@
  * When the lesson has no MCQ data, shows a placeholder + skip button.
  * Calls handleFinishComprehension from LearningContext when done.
  */
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import ComprehensionLayout from '../../components/reading-steps/ComprehensionLayout';
 import MultipleChoiceExercise from '../../components/reading-steps/MultipleChoiceExercise';
@@ -23,6 +23,18 @@ import { absorbVerdicts, allReviewItemsOf, type ReviewableBlock } from './compre
 import { normalizeChoiceAnswer } from '../../components/lesson-content/lessonGrading';
 import { storyToLesson } from '../../components/lesson-content/lessonContentAdapter';
 import NextStepFooter from '../../components/learning/NextStepFooter';
+import { mergeFirstVerdicts } from '../../utils/firstVerdicts';
+import { readAttempts, scoredAttempt, type AttemptRow, type StepAttempt } from '../../utils/stepAttempts';
+
+/** firstTry 紀錄 → 成績單節點點開後的逐題結果（#4087）。 */
+function attemptRowsOf(records: FirstTryRecord<string, string>[]): AttemptRow[] {
+  return records.map((r, i) => ({
+    label: `第 ${i + 1} 題`,
+    correct: r.firstTryCorrect === true,
+    studentAnswer: r.studentFirstAnswer != null ? String(r.studentFirstAnswer) : null,
+    correctAnswer: r.correctAnswer != null ? String(r.correctAnswer) : null,
+  }));
+}
 
 const ComprehensionMcqPage: React.FC = () => {
   const { storyId } = useParams<{ storyId: string }>();
@@ -58,9 +70,30 @@ const ComprehensionMcqPage: React.FC = () => {
       ? (savedStepData.firstTry as FirstTryRecord<string, string>[])
       : []),
   );
+  // `firstTry` 的鏡像。`absorbInto` 需要「合併後」的值來存進度，但合併不可以寫在
+  // `setFirstTry(prev => ...)` 的 updater 裡再順手 patch —— updater 必須是純函式
+  // （StrictMode 會重複呼叫）。所以合併算在外面，ref 負責記住最新值。
+  const firstTryRef = useRef<FirstTryRecord<string, string>[]>(firstTry);
+
   // #2834：null = 完整測驗；非 null = 「重做錯題」模式，只顯示這些 block id
   // （只在完成卡按下「重做錯題」後才會被設值，見 handleRetryWrong）。
   const [retryFilterIds, setRetryFilterIds] = useState<string[] | null>(null);
+  const retryFilterIdsRef = useRef<string[] | null>(null);
+  useEffect(() => { retryFilterIdsRef.current = retryFilterIds; }, [retryFilterIds]);
+
+  // ── #4087：每一次作答記一筆（成績單的折線圖）──────────────────────────
+  // 從 DB 還原成「已完成」時，LessonRenderer 一掛上就會用還原的作答判定完成 —— 那不是
+  // 一次新的作答，不能記。之後（全部重做、重做錯題）的完成才是。
+  const restoredDoneRef = useRef(typeof savedStepData.mcqTotal === 'number');
+  // 這次掛載之後新記的筆數（判斷下一輪是「第一次」還是「全部重做」）。
+  const attemptsMadeRef = useRef(0);
+  // 「重做錯題」這一輪，每題第一次的對錯（只記被重做的那幾題）。
+  const retryFirstRef = useRef<Record<string, boolean>>({});
+  const recordAttempt = useCallback(
+    (attempt: StepAttempt) =>
+      saveStepProgressPatch({ stepId: 'comprehension', stepData: {}, currentStep: 'comprehension', appendAttempt: attempt, immediate: true }),
+    [saveStepProgressPatch],
+  );
 
   const handleProgressChange = useCallback(
     (stepData: Record<string, unknown>, immediate = false) => {
@@ -95,19 +128,45 @@ const ComprehensionMcqPage: React.FC = () => {
   // 學生錯幾題都記 100%，而那個數字會流進學習紀錄與老師端報表。
   // 現在用第一次作答的真實分數（#2790）。
   const handleLessonRendererComplete = useCallback(() => {
-    const { correct, total } = firstTryScore(firstTry);
+    // #4087：讀 ref 不讀 state —— LessonRenderer 判定最後一題的同一輪就觸發完成，
+    // 那時 `firstTry` state 還沒更新到最後一題（實測記成 3/4，應為 4/5）。
+    // ref 在 absorbInto 裡同步更新，永遠是最新的。
+    const records = firstTryRef.current;
+    const { correct, total } = firstTryScore(records);
     const fallback = selectedStory?.multipleChoice?.length ?? 0;
     handleMcqComplete(correct, total || fallback);
-  }, [firstTry, selectedStory, handleMcqComplete]);
+    if (restoredDoneRef.current) {
+      restoredDoneRef.current = false; // 還原出來的完成，不是新的一次
+      return;
+    }
+    const kind = readAttempts(savedStepDataRef.current).length || attemptsMadeRef.current ? 'retry-all' : 'first';
+    attemptsMadeRef.current += 1;
+    recordAttempt(scoredAttempt(kind, correct, total || fallback, attemptRowsOf(records)));
+  }, [selectedStory, handleMcqComplete, recordAttempt]);
 
   // #2834「重做錯題」模式的 LessonRenderer 只顯示先前答錯的那幾題（見
   // `activeLesson` 的 blocks 過濾）。這幾題答完之後只是回到完成卡 —— 分數已經在
   // 第一次作答時定案（`firstTry` 對已存在的 id 不會被覆蓋，見 questionReview.ts
   // `recordFirstTry`），這裡不重新呼叫 `handleMcqComplete`，避免重覆 patch 進度。
   const handleRetryWrongComplete = useCallback(() => {
+    // #4087：「重做錯題」也算一次作答（案主定調）。這一次的成績 = 原本第一次就答對的
+    // + 這一輪重做時第一次就答對的 —— 也就是做完這一輪之後總共答對幾題。
+    const retried = new Set(retryFilterIdsRef.current ?? []);
+    const rows = firstTryRef.current.map((r, i) => {
+      const fixedNow = retried.has(String(r.id)) ? retryFirstRef.current[String(r.id)] === true : undefined;
+      return {
+        label: `第 ${i + 1} 題`,
+        correct: fixedNow ?? r.firstTryCorrect === true,
+        studentAnswer: r.studentFirstAnswer != null ? String(r.studentFirstAnswer) : null,
+        correctAnswer: r.correctAnswer != null ? String(r.correctAnswer) : null,
+      };
+    });
+    retryFirstRef.current = {};
+    attemptsMadeRef.current += 1;
+    recordAttempt(scoredAttempt('retry-wrong', rows.filter((r) => r.correct).length, rows.length, rows));
     setRetryFilterIds(null);
     setMcqDone(true);
-  }, []);
+  }, [recordAttempt]);
 
   // lesson.blocks → 計分/錯題卡片需要的最小形狀。`normalizeChoiceAnswer` 是
   // 這個 repo 判定選擇題正解的單一權威（answer 可能是索引也可能是 'A' 字母）。
@@ -130,10 +189,6 @@ const ComprehensionMcqPage: React.FC = () => {
       }));
   }, []);
 
-  // `firstTry` 的鏡像。`absorbInto` 需要「合併後」的值來存進度，但合併不可以寫在
-  // `setFirstTry(prev => ...)` 的 updater 裡再順手 patch —— updater 必須是純函式
-  // （StrictMode 會重複呼叫）。所以合併算在外面，ref 負責記住最新值。
-  const firstTryRef = useRef<FirstTryRecord<string, string>[]>(firstTry);
 
   // 跨「整份測驗」與「重做錯題」累積的完整作答。**不可以**直接把 LessonRenderer
   // 當下 emit 的 `e.answers` 存進 DB（code review 抓到，已補回歸測試）：
@@ -157,6 +212,9 @@ const ComprehensionMcqPage: React.FC = () => {
   const absorbInto = useCallback(
     (e: { answers: Record<string, unknown>; feedback: Record<string, boolean | null> }, lesson: unknown) => {
       const blocks = reviewableBlocksOf(lesson as { blocks?: unknown[] });
+      if (retryFilterIdsRef.current) {
+        retryFirstRef.current = mergeFirstVerdicts(retryFirstRef.current, e.feedback);
+      }
       const nextFirstTry = absorbVerdicts(firstTryRef.current, e.feedback ?? {}, e.answers ?? {}, blocks);
       firstTryRef.current = nextFirstTry;
       setFirstTry(nextFirstTry);
@@ -182,6 +240,8 @@ const ComprehensionMcqPage: React.FC = () => {
   // 讓底下的 LessonRenderer 過濾成只顯示這些題（見 activeLesson）。分數/firstTry
   // 完全不動，這是給學生練習用的，不是重新測驗。
   const handleRetryWrong = useCallback(() => {
+    retryFirstRef.current = {};
+    restoredDoneRef.current = false;
     setRetryFilterIds(wrongFirstTryIds(firstTry));
     setMcqDone(false);
   }, [firstTry]);
@@ -191,6 +251,9 @@ const ComprehensionMcqPage: React.FC = () => {
     // #4081：還原用的 DB 快照也要清掉。LessonRenderer 重新掛載時會拿它當
     // initialState —— 裡面每題都已經答對，於是一掛上就判定全部完成，並把
     // 「第一次就全對」寫進 DB（學生其實一題都還沒重做）。
+    // 先把已記的作答搬出來 —— 下面清掉快照之後，還要知道這一輪是「全部重做」。
+    attemptsMadeRef.current += readAttempts(savedStepDataRef.current).length;
+    restoredDoneRef.current = false;
     savedStepDataRef.current = {};
     firstTryRef.current = [];
     fullAnswersRef.current = {};

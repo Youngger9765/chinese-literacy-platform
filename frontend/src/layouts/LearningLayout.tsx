@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useMemo } from 'react';
 import { useCurrentStepId } from '../hooks/useCurrentStepId';
 import { storyForStep } from '../services/api';
 import { stepProgressForStep } from './stepProgressForStep';
+import type { StepAttempt } from '../utils/stepAttempts';
 import { Outlet, useParams, useNavigate, useOutletContext, useLocation } from 'react-router-dom';
 import type {
   Story,
@@ -177,6 +178,8 @@ export interface LearningContext {
     currentStep?: string | null;
     markCompleted?: boolean;
     immediate?: boolean;
+    /** #4087：這一次作答，附加到這一關的 attempts（成績單折線圖）。 */
+    appendAttempt?: StepAttempt;
   }) => void;
   /** Whether current assignment has completed all required steps (except report). */
   isAssignmentReadyForSubmit: boolean;

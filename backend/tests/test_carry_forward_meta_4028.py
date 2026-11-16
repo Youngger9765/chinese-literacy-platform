@@ -167,3 +167,39 @@ def test_a_later_save_keeps_the_carry_record(client, lessons):
     second = _open(client, tok, lessons[3])
     sp = _put(client, tok, second, steps_completed=DONE + ["comprehension"])
     assert sp["__meta"]["carried_from"]["session_id"] == first
+
+
+# ── #4087: per-step attempts survive racing saves ───────────────────────────
+
+
+def _attempt(i: int) -> dict:
+    return {"id": f"a{i}", "at": f"2026-11-16T10:0{i}:00Z", "kind": "first", "correct": i, "total": 5}
+
+
+def test_attempts_are_unioned_not_replaced(client, lessons):
+    tok = _student(client, "attempts")
+    sid = _open(client, tok, lessons[4])
+    _put(client, tok, sid, step_data={"comprehension": {"attempts": [_attempt(1), _attempt(2)]}})
+    # A save from an older snapshot that only knew attempt 1, plus a new attempt 3.
+    sp = _put(client, tok, sid, step_data={"comprehension": {"mcqScore": 3, "attempts": [_attempt(1), _attempt(3)]}})
+    ids = [a["id"] for a in sp["step_data"]["comprehension"]["attempts"]]
+    assert ids == ["a1", "a2", "a3"], ids
+    assert sp["step_data"]["comprehension"]["mcqScore"] == 3, "the rest of the entry still updates"
+
+
+def test_a_save_without_attempts_keeps_the_stored_ones(client, lessons):
+    tok = _student(client, "attempts2")
+    sid = _open(client, tok, lessons[4])
+    _put(client, tok, sid, step_data={"spotlight": {"attempts": [_attempt(1)]}})
+    sp = _put(client, tok, sid, step_data={"spotlight": {"answers": {"q": 1}}})
+    assert [a["id"] for a in sp["step_data"]["spotlight"]["attempts"]] == ["a1"]
+
+
+def test_attempts_are_capped(client, lessons):
+    tok = _student(client, "attempts3")
+    sid = _open(client, tok, lessons[5])
+    many = [{"id": f"x{i:02d}", "at": f"2026-11-16T10:{i:02d}:00Z", "kind": "first"} for i in range(40)]
+    _put(client, tok, sid, step_data={"comprehension": {"attempts": many[:20]}})
+    sp = _put(client, tok, sid, step_data={"comprehension": {"attempts": many[20:]}})
+    got = [a["id"] for a in sp["step_data"]["comprehension"]["attempts"]]
+    assert len(got) == 30 and got[-1] == "x39" and got[0] == "x10"
