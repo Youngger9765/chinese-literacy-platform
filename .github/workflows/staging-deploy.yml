@@ -800,6 +800,48 @@ jobs:
             exit 1
           fi
 
+      # #3740 — live lock on the real topology: a request that goes through
+      # the frontend's same-origin proxy must be counted in the SAME per-IP
+      # bucket as this runner's direct request. Direct d1 -> proxied p ->
+      # direct d2: shared bucket means p == d1-1 and d2 == d1-2. If backend
+      # stops trusting the proxy's X-Client-IP (e.g. the sidecar token lost
+      # its email claim), the proxied request lands in the frontend egress
+      # IP's bucket and d2 == d1-1 instead. Buckets are per instance, so a
+      # round can be inconclusive; any of 5 rounds passing is enough.
+      - name: （IAP_ENABLED 時）經前端轉送的請求與直連同一個限流額度（#3740）
+        if: env.IAP_ENABLED == 'true'
+        env:
+          INVOKER_TOKEN: ${{ steps.invoker.outputs.id_token }}
+          STAGING_FRONTEND: https://lingoleap-frontend-staging-958347263320.asia-east1.run.app
+          IAP_SIGNING_SA_EMAIL: github-actions@lingoleap-dev.iam.gserviceaccount.com
+        run: |
+          source scripts/lib/iap-token.sh
+          IAP_TOKEN="$(iap_token "${STAGING_FRONTEND}")"
+          if [ -z "${IAP_TOKEN}" ]; then
+            echo "::error::could not sign an IAP token for the frontend"
+            exit 1
+          fi
+          echo "::add-mask::${IAP_TOKEN}"
+          remaining() {
+            curl -s -D - -o /dev/null --max-time 30 "$@" \
+              | tr -d '\r' | awk -F': ' 'tolower($1)=="x-ratelimit-remaining"{print $2}'
+          }
+          direct() { remaining -H "X-Serverless-Authorization: Bearer ${INVOKER_TOKEN}" "${STAGING_BACKEND}/api/health"; }
+          proxied() { remaining -H "Proxy-Authorization: Bearer ${IAP_TOKEN}" "${STAGING_FRONTEND}/api/health"; }
+          for round in 1 2 3 4 5; do
+            D1=$(direct); P=$(proxied); D2=$(direct)
+            echo "round $round: direct=$D1 proxied=$P direct=$D2"
+            if [ -z "$D1" ] || [ -z "$P" ] || [ -z "$D2" ]; then
+              echo "::warning::round $round missing X-RateLimit-Remaining; retrying"
+            elif [ "$P" = "$((D1 - 1))" ] && [ "$D2" = "$((D1 - 2))" ]; then
+              echo "proxied request counted in the runner's own bucket"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "::error::proxied requests are not keyed on the real client IP (#3740)"
+          exit 1
+
       - name: Smoke test /api/teacher/story-tags (expect 200 or 401, not 500)
         env:
           INVOKER_TOKEN: ${{ steps.invoker.outputs.id_token }}

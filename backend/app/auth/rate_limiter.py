@@ -175,10 +175,36 @@ def real_ip_from_xff(xff: str, peer: str | None = None) -> str:
 
 
 def real_client_ip(request: Request) -> str:
-    """Real client IP for a FastAPI Request (see real_ip_from_xff)."""
-    return real_ip_from_xff(
-        request.headers.get("x-forwarded-for", ""),
+    """Real client IP for a FastAPI Request.
+
+    #3740 (second pass): routed through trusted_proxy_client_ip -- the same
+    rule GlobalRateLimitMiddleware uses -- instead of reading only
+    X-Forwarded-For. Behind the staging same-origin proxy, the last XFF
+    entry is the frontend container's egress IP, so every per-route IP
+    limiter (login, register, forgot-password, claim-account, TTS,
+    get_client_key's anonymous fallback) put all proxied users in one
+    bucket. X-Client-IP is still only trusted when X-Frontend-Identity
+    verifies as the configured frontend service account; otherwise this is
+    exactly real_ip_from_xff as before.
+
+    GlobalRateLimitMiddleware already resolved this for most /api requests
+    and left it in request.state.client_ip; reuse it so a forged identity
+    token is verified once per request, not once per limiter.
+    """
+    cached_ip = getattr(request.state, "client_ip", None)
+    if isinstance(cached_ip, str) and cached_ip:
+        return cached_ip
+
+    from ..config import settings  # local import: config imports nothing from here, but keep auth/ import-light
+
+    headers = request.headers
+    return trusted_proxy_client_ip(
+        headers.get("x-forwarded-for", ""),
         request.client.host if request.client else None,
+        headers.get("x-frontend-identity", ""),
+        headers.get("x-client-ip", ""),
+        settings.frontend_proxy_sa,
+        settings.backend_audience,
     )
 
 

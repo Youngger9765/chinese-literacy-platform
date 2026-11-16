@@ -112,31 +112,34 @@ BACKEND_HOST=$(printf '%s' "$BACKEND_INTERNAL_URL" | sed -E 's#^[a-zA-Z]+://##; 
 # whenever we're proxying at all (not gated on BACKEND_INVOKER_SIDECAR_PORT
 # below): the #3728 regression that broke backend's per-IP rate limiting
 # affects every proxied request regardless of whether the invoker-auth
-# sidecar is also in the picture. nginx derives the real end-user IP the
-# SAME way backend's own real_ip_from_xff() already does for direct
-# traffic (second-from-right of X-Forwarded-For -- GCP's own ingress
-# always appends exactly [real-client-ip, lb-ip] to whatever arrived at
-# THIS service), then passes it on as X-Client-IP. Backend only trusts
-# that header when this request also carries a Cloud-Run-verified
-# X-Serverless-Authorization identifying the frontend's own service
-# account (see backend/app/auth/rate_limiter.py's trusted_proxy_client_ip)
+# sidecar is also in the picture. nginx derives the real end-user IP as
+# the LAST entry of the X-Forwarded-For it received -- the one Cloud Run
+# appends itself (the TCP peer it saw), which the caller cannot choose --
+# then passes it on as X-Client-IP. #3740 second pass: this used to take
+# the SECOND-from-right entry on the assumption that GCP appends
+# [client, lb]. The staging nginx access log (2026-11-16, 4/4 proxied
+# /api requests, IAP on) shows Cloud Run hands this container exactly ONE
+# entry, the real client; a caller that sends its own X-Forwarded-For gets
+# the real IP appended after it, so second-from-right was the caller's
+# forged value. Backend only trusts X-Client-IP when this request also
+# carries an X-Frontend-Identity token it verifies itself as the frontend's
+# own service account (see backend/app/auth/rate_limiter.py's
+# trusted_proxy_client_ip)
 # -- so setting this header here is necessary but not sufficient on its
 # own; the design deliberately doesn't rely on nginx being the only thing
 # that can reach backend (#3740: backend stays directly reachable for CI/
 # health-checks, so a fixed hop-count or "trust X-Client-IP unconditionally"
 # design was rejected as forgeable).
 #
-# The two map patterns below are tried in order (first match wins); the
-# second-from-right one requires at least 2 comma-separated entries, the
-# third handles exactly one entry, and `default $remote_addr` covers no
-# XFF at all -- same fallback shape as real_ip_from_xff(xff, peer).
-# Verified live against nginx:alpine for 2/3/4-entry and no-comma inputs
-# before relying on it here (see PR description, not re-derived blind).
+# One pattern: the last non-empty comma-separated entry; `default
+# $remote_addr` covers no XFF at all. Behavior locked by
+# test-render-nginx-conf.sh section 5 (forged leading entries, no-space and
+# trailing-space shapes) and checked against a real nginx:alpine container
+# (see PR description).
 CLIENT_IP_MAP='
 map $http_x_forwarded_for $derived_client_ip {
   default $remote_addr;
-  "~^(?:[^,]*,\s*)*?([^,]+)\s*,\s*[^,\s]+$" $1;
-  "~^\s*([^,\s]+)\s*$" $1;
+  "~([^,\s]+)\s*$" $1;
 }
 '
 

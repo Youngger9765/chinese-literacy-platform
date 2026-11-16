@@ -159,7 +159,7 @@ check_cmd_not "Authorization header is never touched by this wiring" \
   grep -q 'proxy_set_header Authorization' "$OUT_INVOKER"
 
 # --- 3. #3740: real client IP behind the proxy ---
-check_cmd "derived_client_ip map present (second-from-right XFF, mirrors backend's real_ip_from_xff)" \
+check_cmd "derived_client_ip map present (last XFF entry -- the one Cloud Run appends)" \
   grep -q 'map $http_x_forwarded_for $derived_client_ip' "$OUT_INVOKER"
 
 # `|| true` below is load-bearing, not decorative: `grep -c` still PRINTS
@@ -181,6 +181,48 @@ check_cmd "X-Client-IP wired into all 3 backend-proxying locations (found $X_CLI
 X_FRONTEND_IDENTITY_COUNT=$(grep -c 'proxy_set_header X-Frontend-Identity $invoker_raw_token;' "$OUT_INVOKER" || true)
 check_cmd "X-Frontend-Identity wired into all 3 backend-proxying locations (found $X_FRONTEND_IDENTITY_COUNT, want 3)" \
   test "$X_FRONTEND_IDENTITY_COUNT" = "3"
+
+# --- 5. #3740 (second pass): the derived_client_ip map's BEHAVIOR, not just
+# its presence. Evaluates the rendered map's regex entries in nginx's
+# first-match order against the XFF shapes this container really receives.
+# Staging nginx access log (2026-11-16, 4/4 proxied /api requests): Cloud
+# Run hands this container exactly ONE XFF entry, the real client. A client
+# that sends its own X-Forwarded-For gets the real IP APPENDED after it, so
+# the old "second-from-right" rule picked the caller's forged value.
+# Only the LAST entry is something the caller cannot choose.
+MAP_CHECK="$WORKDIR/map_check.py"
+cat > "$MAP_CHECK" <<'PYEOF'
+import re, sys
+conf = open(sys.argv[1]).read()
+m = re.search(r"map \$http_x_forwarded_for \$derived_client_ip \{(.*?)\n\}", conf, re.S)
+if not m:
+    sys.exit("map block not found")
+entries = []
+for line in m.group(1).splitlines():
+    line = line.strip().rstrip(";")
+    if line.startswith('"~'):
+        pat, _, val = line[2:].rpartition('" ')
+        entries.append((pat, val.strip()))
+def derive(xff, remote="169.254.1.1"):
+    for pat, val in entries:
+        mm = re.search(pat, xff)
+        if mm:
+            return re.sub(r"\$(\d)", lambda g: mm.group(int(g.group(1))), val)
+    return remote
+cases = [
+    ("150.117.0.9", "150.117.0.9"),                      # real staging shape
+    ("6.6.6.6, 150.117.0.9", "150.117.0.9"),             # caller forged XFF
+    ("6.6.6.6, 7.7.7.7, 150.117.0.9", "150.117.0.9"),    # forged, two entries
+    ("6.6.6.6,150.117.0.9 ", "150.117.0.9"),             # no space / trailing space
+    ("", "169.254.1.1"),                                 # no XFF -> $remote_addr
+]
+bad = [(x, derive(x), want) for x, want in cases if derive(x) != want]
+for x, got, want in bad:
+    print(f"xff={x!r} -> {got!r}, want {want!r}")
+sys.exit(1 if bad else 0)
+PYEOF
+check_cmd "derived_client_ip = LAST XFF entry (forged leading entries never become X-Client-IP)" \
+  python3 "$MAP_CHECK" "$OUT_INVOKER"
 
 if [ "$FAILED" = "1" ]; then
   echo ""
