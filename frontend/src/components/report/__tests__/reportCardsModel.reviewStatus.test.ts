@@ -196,4 +196,9 @@ describe('attempts, rate and radar (#4087)', () => {
       { key: 'c', label: 'C', value: null, state: 'absent' },
     ])).toEqual({ strong: ['A'], weak: ['B'] });
   });
+
+  it('a step done but without a score (old record) is 無紀錄, not 還沒做', () => {
+    const cards = buildStepReportCards(steps, ['vocab-definition'], { 'vocab-definition': { result: { matchedCount: 7, totalCount: 8 } } }, []);
+    expect(radarOf(cards)[0].state).toBe('unscored');
+  });
 });

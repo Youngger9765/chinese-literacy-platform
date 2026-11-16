@@ -51,11 +51,17 @@ function scoreText(a: StepAttempt): string {
 
 // ── 雷達圖 ──────────────────────────────────────────────────────────────
 
+const RADAR_STATE_TEXT: Record<Exclude<RadarPoint['state'], 'scored'>, string> = {
+  absent: '本課無',
+  todo: '還沒做',
+  unscored: '無紀錄',
+};
+
 export const RadarPanel: React.FC<{ points: RadarPoint[] }> = ({ points }) => {
   const anyScored = points.some((p) => p.state === 'scored');
   const { strong, weak } = strengthsOf(points);
   const data = points.map((p) => ({
-    axis: p.state === 'absent' ? `${p.label}（本課無）` : p.state === 'todo' ? `${p.label}（還沒做）` : p.label,
+    axis: p.state === 'scored' ? p.label : `${p.label}（${RADAR_STATE_TEXT[p.state]}）`,
     value: p.value ?? 0,
   }));
 
@@ -83,7 +89,7 @@ export const RadarPanel: React.FC<{ points: RadarPoint[] }> = ({ points }) => {
               <li key={p.key} className="rounded-xl bg-surface-container-low px-3 py-2 text-center">
                 <div className="text-xs text-on-surface-variant">{p.label}</div>
                 <div className="font-headline font-bold text-on-surface">
-                  {p.state === 'scored' ? p.value : p.state === 'absent' ? '本課無' : '還沒做'}
+                  {p.state === 'scored' ? p.value : RADAR_STATE_TEXT[p.state]}
                 </div>
               </li>
             ))}
@@ -190,7 +196,16 @@ export const AttemptsPanel: React.FC<{ card: StepReportCard }> = ({ card }) => {
       </p>
       <div className="h-48" aria-hidden="true">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data} margin={{ top: 10, right: isReading ? 10 : 16, bottom: 0, left: -16 }}>
+          <LineChart
+            data={data}
+            margin={{ top: 10, right: isReading ? 10 : 16, bottom: 0, left: -16 }}
+            // 點到某個節點附近就選那一次（點本身也能點，但手指不一定點得準）。
+            onClick={(state: { activeTooltipIndex?: number | string | null } | null) => {
+              const i = Number(state?.activeTooltipIndex);
+              if (Number.isInteger(i) && i >= 0 && i < attempts.length) setSelected(i);
+            }}
+            style={{ cursor: 'pointer' }}
+          >
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="n" tick={{ fontSize: 11 }} />
             {isReading ? (
@@ -198,14 +213,14 @@ export const AttemptsPanel: React.FC<{ card: StepReportCard }> = ({ card }) => {
                 <YAxis yAxisId="cpm" tick={{ fontSize: 11 }} />
                 <YAxis yAxisId="acc" orientation="right" domain={[0, 100]} tick={{ fontSize: 11 }} />
                 <Tooltip />
-                <Line yAxisId="cpm" dataKey="cpm" name="每分鐘字數" stroke="#4f46e5" strokeWidth={2} dot={dot('cpm', '#4f46e5')} isAnimationActive={false} />
-                <Line yAxisId="acc" dataKey="accuracy" name="正確率 %" stroke="#059669" strokeWidth={2} dot={dot('acc', '#059669')} isAnimationActive={false} />
+                <Line yAxisId="cpm" dataKey="cpm" name="每分鐘字數" stroke="#4f46e5" strokeWidth={2} dot={dot('cpm', '#4f46e5')} activeDot={false} isAnimationActive={false} />
+                <Line yAxisId="acc" dataKey="accuracy" name="正確率 %" stroke="#059669" strokeWidth={2} dot={dot('acc', '#059669')} activeDot={false} isAnimationActive={false} />
               </>
             ) : (
               <>
                 <YAxis domain={[0, maxTotal]} allowDecimals={false} tick={{ fontSize: 11 }} />
                 <Tooltip />
-                <Line dataKey="correct" name="答對題數" stroke="#4f46e5" strokeWidth={2} dot={dot('c', '#4f46e5')} isAnimationActive={false} />
+                <Line dataKey="correct" name="答對題數" stroke="#4f46e5" strokeWidth={2} dot={dot('c', '#4f46e5')} activeDot={false} isAnimationActive={false} />
               </>
             )}
           </LineChart>

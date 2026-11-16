@@ -535,8 +535,11 @@ export interface RadarPoint {
   label: string;
   /** 0–100；null 見 state。 */
   value: number | null;
-  /** scored = 有分數；todo = 這課有、還沒做；absent = 這課沒有這種關卡（「本課無」）。 */
-  state: 'scored' | 'todo' | 'absent';
+  /**
+   * scored = 有分數；todo = 這課有、還沒做；unscored = 做過了但沒有可算的分數（例如
+   * #4087 以前的舊紀錄只存了訂正後的結果）；absent = 這課沒有這種關卡（「本課無」）。
+   */
+  state: 'scored' | 'todo' | 'unscored' | 'absent';
 }
 
 /** 卡片 → 雷達圖五項。一項 = 這課屬於它的各關分數平均（沒分數的關卡不算進平均）。 */
@@ -545,7 +548,10 @@ export function radarOf(cards: StepReportCard[]): RadarPoint[] {
     const mine = cards.filter((c) => (axis.steps as readonly string[]).includes(c.baseId));
     if (!mine.length) return { key: axis.key, label: axis.label, value: null, state: 'absent' as const };
     const rates = mine.map((c) => c.rate).filter((r): r is number => typeof r === 'number');
-    if (!rates.length) return { key: axis.key, label: axis.label, value: null, state: 'todo' as const };
+    if (!rates.length) {
+      const state = mine.some((c) => c.completed) ? ('unscored' as const) : ('todo' as const);
+      return { key: axis.key, label: axis.label, value: null, state };
+    }
     const value = Math.round(rates.reduce((a, b) => a + b, 0) / rates.length);
     return { key: axis.key, label: axis.label, value, state: 'scored' as const };
   });
