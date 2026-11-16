@@ -34,10 +34,13 @@ env:
   REGISTRY: asia-east1-docker.pkg.dev/lingoleap-dev/lingoleap
   BACKEND_SERVICE: lingoleap-backend-staging
   FRONTEND_SERVICE: lingoleap-frontend-staging
-  # #3719 — IAP 準備：同 preview-deploy.yml 的同名開關，預設 false。
+  # #3719/#3733 — 2026-11-16 起打開（staging frontend 過 IAP、backend 只給
+  # frontend 與 CI 呼叫）。回滾：這行與 SAME_ORIGIN_PROXY_ENABLED 一起改回
+  # 'false' 再部署。白名單是 IAP IAM（服務層＋asia-east1 Cloud Run 區域層），
+  # 不在這個 workflow 裡。
   # 唯一的 on/off 開關只有這一行；真的要在 staging 上測 IAP 前，先讀
   # docs/iap-runbook.md。
-  IAP_ENABLED: 'false'
+  IAP_ENABLED: 'true'
   # #3728/#3740 — 同源代理（frontend nginx 轉送 /api、/assets、/q 去
   # backend）的 build-time 開關，預設 false：關掉時這個 job 建出來的
   # image 跟 #3741 revert 之後的 staging 完全一樣（VITE_API_URL 指到
@@ -60,7 +63,7 @@ env:
   #       帶 FRONTEND_PROXY_SA + BACKEND_AUDIENCE）
   # 這三件事沒有一起做，打開這個開關不會讓代理可用，只會讓 build 直接
   # 壞掉（安全失敗，不是悄悄重現 regression）。
-  SAME_ORIGIN_PROXY_ENABLED: 'false'
+  SAME_ORIGIN_PROXY_ENABLED: 'true'
 
 jobs:
   detect-changes:
@@ -527,10 +530,17 @@ jobs:
             echo "::add-mask::${IAP_TOKEN}"
             IAP_AUTH_ARGS=(-H "Proxy-Authorization: Bearer ${IAP_TOKEN}")
           fi
-          URL=$(gcloud run services describe ${{ env.FRONTEND_SERVICE }} \
-            --region ${{ env.REGION }} \
-            --project ${{ env.PROJECT_ID }} \
-            --format='value(status.url)')
+          # IAP checks the JWT aud against the exact hostname requested, and
+          # status.url is the hash (oja2sffiya-de) host while the aud above is
+          # the -958347263320 one -> with IAP on, curl the URL we signed for.
+          if [ -n "${IAP_AUDIENCE:-}" ]; then
+            URL="${IAP_AUDIENCE}"
+          else
+            URL=$(gcloud run services describe ${{ env.FRONTEND_SERVICE }} \
+              --region ${{ env.REGION }} \
+              --project ${{ env.PROJECT_ID }} \
+              --format='value(status.url)')
+          fi
           for i in 1 2 3 4 5; do
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${IAP_AUTH_ARGS[@]+${IAP_AUTH_ARGS[@]}}" "$URL/")
             echo "Attempt $i: Frontend health = $STATUS"

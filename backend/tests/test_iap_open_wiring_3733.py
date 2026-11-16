@@ -401,11 +401,37 @@ def test_e2e_preview_check_does_not_run_against_locked_preview():
     )
 
 
-def test_switches_still_default_off():
+def test_switches_are_on_and_move_together():
+    """#3733/#3719 opened: staging and every PR preview are behind IAP.
+    The two switches must stay equal -- IAP without the proxy 403s the
+    whole site (guarded in the workflow), proxy without IAP is pointless."""
     for wf in (PREVIEW_WF, STAGING_WF):
         env = _doc(wf)["env"]
-        assert env["IAP_ENABLED"] == "false"
-        assert env["SAME_ORIGIN_PROXY_ENABLED"] == "false"
+        assert env["IAP_ENABLED"] == "true", wf.name
+        assert env["SAME_ORIGIN_PROXY_ENABLED"] == "true", wf.name
+
+
+STAGING_FRONTEND_HASH_URL = "https://lingoleap-frontend-staging-oja2sffiya-de.a.run.app"
+
+
+def test_staging_health_curls_the_same_host_its_iap_jwt_is_for():
+    """IAP checks the JWT aud against the exact hostname requested (preview
+    trial, PR #4082). The step signs for the -958347263320 URL, so it must
+    curl that URL -- not status.url, which gcloud returns as the hash
+    (oja2sffiya-de) host and IAP would reject with 401."""
+    step = _step(STAGING_WF, "deploy-frontend", "Verify frontend health")
+    ctx = _ctx(iap=True, proxy=True, preview=False)
+    ctx["FAKE_URL"] = STAGING_FRONTEND_HASH_URL
+    # the harness only substitutes plain names; evaluate the step's
+    # IAP_ENABLED-ternary for IAP on (asserted on by the test above).
+    aud_expr = _EXPR.search(str(step["env"]["IAP_AUDIENCE"])).group(1)
+    assert "env.IAP_ENABLED == 'true'" in aud_expr and STAGING_FRONTEND_URL in aud_expr
+    ctx[aud_expr] = STAGING_FRONTEND_URL
+    calls = _run_step(step, ctx)
+    curls = [c for c in calls if c.startswith("curl ")]
+    assert curls, calls
+    assert all(STAGING_FRONTEND_URL + "/" in c for c in curls), curls
+    assert not any("oja2sffiya" in c for c in curls), curls
 
 
 # ── 9: security review round (#3733) — ordering, negative check, rollback ─
