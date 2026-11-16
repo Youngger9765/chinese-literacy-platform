@@ -34,13 +34,14 @@ env:
   REGISTRY: asia-east1-docker.pkg.dev/lingoleap-dev/lingoleap
   BACKEND_SERVICE: lingoleap-backend-staging
   FRONTEND_SERVICE: lingoleap-frontend-staging
-  # #3719/#3733 — 2026-11-16 起打開（staging frontend 過 IAP、backend 只給
-  # frontend 與 CI 呼叫）。回滾：這行與 SAME_ORIGIN_PROXY_ENABLED 一起改回
-  # 'false' 再部署。白名單是 IAP IAM（服務層＋asia-east1 Cloud Run 區域層），
-  # 不在這個 workflow 裡。
+  # #3719/#3733 — IAP 開關（與 SAME_ORIGIN_PROXY_ENABLED 一起動）。白名單是
+  # IAP IAM（服務層＋asia-east1 Cloud Run 區域層），不在這個 workflow 裡。
+  # ⚠️ 2026-11-16 #4083 打開後回滾：既有 frontend 服務是「一個沒命名、有 port 的
+  # 容器」，雙容器 deploy 會在旁邊再加一個而失敗（exactly one container with an
+  # exposed port）。要再打開，先處理這個轉換（見 docs/iap-runbook.md）。
   # 唯一的 on/off 開關只有這一行；真的要在 staging 上測 IAP 前，先讀
   # docs/iap-runbook.md。
-  IAP_ENABLED: 'true'
+  IAP_ENABLED: 'false'
   # #3728/#3740 — 同源代理（frontend nginx 轉送 /api、/assets、/q 去
   # backend）的 build-time 開關，預設 false：關掉時這個 job 建出來的
   # image 跟 #3741 revert 之後的 staging 完全一樣（VITE_API_URL 指到
@@ -63,7 +64,7 @@ env:
   #       帶 FRONTEND_PROXY_SA + BACKEND_AUDIENCE）
   # 這三件事沒有一起做，打開這個開關不會讓代理可用，只會讓 build 直接
   # 壞掉（安全失敗，不是悄悄重現 regression）。
-  SAME_ORIGIN_PROXY_ENABLED: 'true'
+  SAME_ORIGIN_PROXY_ENABLED: 'false'
 
 jobs:
   detect-changes:
@@ -80,8 +81,12 @@ jobs:
           filters: |
             backend:
               - 'backend/**'
+              # a switch flip here (IAP_ENABLED etc.) must redeploy both halves
+              - '.github/workflows/staging-deploy.yml'
             frontend:
               - 'frontend/**'
+              # a switch flip here (IAP_ENABLED etc.) must redeploy both halves
+              - '.github/workflows/staging-deploy.yml'
             firebase:
               - 'firebase.json'
               - '.firebaserc'

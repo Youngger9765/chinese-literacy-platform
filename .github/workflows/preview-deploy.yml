@@ -35,19 +35,22 @@ env:
   PROJECT_ID: lingoleap-dev
   REGION: asia-east1
   REGISTRY: asia-east1-docker.pkg.dev/lingoleap-dev/lingoleap
-  # #3719/#3733 — 2026-11-16 起打開：每個 PR preview 的 frontend 過 IAP、
+  # ⚠️ 2026-11-16 #4083 打開後回滾：既有 frontend 服務是「一個沒命名、有 port 的
+  # 容器」，雙容器 deploy 會在旁邊再加一個而失敗（exactly one container with an
+  # exposed port）。要再打開，先處理這個轉換（見 docs/iap-runbook.md）。
+  # #3719/#3733 — 打開時每個 PR preview 的 frontend 過 IAP、
   # backend 只給 frontend 與 CI 呼叫。真正的 on/off 開關只有這一行（與
   # SAME_ORIGIN_PROXY_ENABLED 一起動）。新 preview 不需要逐一授權：白名單
   # 設在 asia-east1 的 Cloud Run IAP 區域層，新服務自動繼承。見
   # docs/iap-runbook.md。
-  IAP_ENABLED: 'true'
+  IAP_ENABLED: 'false'
   # #3728/#3740 — 同源代理 build-time 開關，預設 false：關掉時這個 job
   # 建出來的 preview image 跟 #3741 revert 之後完全一樣（VITE_API_URL
   # 指到 backend 絕對網址，無 BACKEND_INTERNAL_URL、無
   # BACKEND_INVOKER_SIDECAR_PORT）。同一個理由、同一段完整說明見
   # staging-deploy.yml 這個開關旁的註解——這裡不重複貼一次，兩邊要改
   # 一起改。
-  SAME_ORIGIN_PROXY_ENABLED: 'true'
+  SAME_ORIGIN_PROXY_ENABLED: 'false'
 
 jobs:
   detect-changes:
@@ -68,8 +71,12 @@ jobs:
           filters: |
             backend:
               - 'backend/**'
+              # a switch flip here (IAP_ENABLED etc.) must redeploy both halves
+              - '.github/workflows/preview-deploy.yml'
             frontend:
               - 'frontend/**'
+              # a switch flip here (IAP_ENABLED etc.) must redeploy both halves
+              - '.github/workflows/preview-deploy.yml'
 
   deploy-preview:
     name: Deploy PR Preview

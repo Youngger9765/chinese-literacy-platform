@@ -401,14 +401,14 @@ def test_e2e_preview_check_does_not_run_against_locked_preview():
     )
 
 
-def test_switches_are_on_and_move_together():
-    """#3733/#3719 opened: staging and every PR preview are behind IAP.
-    The two switches must stay equal -- IAP without the proxy 403s the
-    whole site (guarded in the workflow), proxy without IAP is pointless."""
+def test_switches_are_off_and_move_together():
+    """2026-11-16: opened in #4083, rolled back (an existing service with a
+    single unnamed container cannot be switched to the two-container deploy,
+    see docs/iap-runbook.md). The two switches must stay equal."""
     for wf in (PREVIEW_WF, STAGING_WF):
         env = _doc(wf)["env"]
-        assert env["IAP_ENABLED"] == "true", wf.name
-        assert env["SAME_ORIGIN_PROXY_ENABLED"] == "true", wf.name
+        assert env["IAP_ENABLED"] == "false", wf.name
+        assert env["SAME_ORIGIN_PROXY_ENABLED"] == "false", wf.name
 
 
 STAGING_FRONTEND_HASH_URL = "https://lingoleap-frontend-staging-oja2sffiya-de.a.run.app"
@@ -605,3 +605,22 @@ def test_jobs_using_gcloud_beta_install_the_beta_component(wf, job):
         "(runner gcloud has no beta component; the deploy dies on an install prompt)")
     first_beta = min(i for i, s in enumerate(steps) if re.search(r"\bgcloud\s+beta\b", str(s.get("run", ""))))
     assert setup[0] < first_beta, f"{wf.name}:{job}: beta used before setup-gcloud"
+
+
+# ── 10: a change to the deploy workflow itself redeploys both services ──
+
+
+@pytest.mark.parametrize("wf", [PREVIEW_WF, STAGING_WF], ids=["preview", "staging"])
+def test_workflow_change_counts_as_backend_and_frontend_change(wf):
+    """2026-11-16 (#4083): flipping IAP_ENABLED only touched the workflow
+    file, so paths-filter skipped deploy-frontend. The backend got locked,
+    the old public frontend kept serving and called the locked backend
+    directly -> staging broken until a manual workflow_dispatch. Any edit to
+    this workflow must redeploy both halves so the switches apply together."""
+    steps = _job(wf, "detect-changes")["steps"]
+    filt = [s for s in steps if "paths-filter" in str(s.get("uses", ""))]
+    assert len(filt) == 1
+    filters = yaml.safe_load(filt[0]["with"]["filters"])
+    me = f".github/workflows/{wf.name}"
+    for key in ("backend", "frontend"):
+        assert me in filters[key], f"{wf.name}: {key} filter misses {me}: {filters[key]}"
