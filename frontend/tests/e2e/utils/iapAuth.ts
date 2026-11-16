@@ -48,6 +48,7 @@ import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'no
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createSign } from 'node:crypto';
+import type { Browser, BrowserContext, BrowserContextOptions } from '@playwright/test';
 
 export type TokenMinter = (audience: string) => string;
 
@@ -242,4 +243,107 @@ export function _setClockForTests(now: () => number): void {
 /** 測試專用：把時鐘換回真正的 `Date.now`。 */
 export function _resetClockForTests(): void {
   _now = () => Date.now();
+}
+
+// ── #4097: scope the header to the IAP-protected origin(s) ──────────────
+//
+// Never put the header into a context-wide `extraHTTPHeaders`: Playwright
+// sends those on EVERY request of the context -- Google Fonts,
+// accounts.google.com, any CDN -- i.e. it hands the IAP credential to third
+// parties. Attach it per request instead, only when the request's origin is
+// one we are testing (IAP_AUDIENCE / PLAYWRIGHT_BASE_URL / E2E_BACKEND_URL).
+
+type ContextLike = Pick<BrowserContext, 'route'>;
+
+function originOf(url: string | undefined): string | null {
+  if (!url) return null;
+  try {
+    return new URL(url).origin;
+  } catch {
+    return null;
+  }
+}
+
+/** Origins that may receive the IAP header (only ones under test). */
+export function iapAllowedOrigins(): Set<string> {
+  const out = new Set<string>();
+  for (const v of [process.env.IAP_AUDIENCE, process.env.PLAYWRIGHT_BASE_URL, process.env.E2E_BACKEND_URL]) {
+    const o = originOf(v);
+    if (o) out.add(o);
+  }
+  return out;
+}
+
+/** The IAP header for this URL if its origin is allowed, else `{}`. */
+export function iapHeaderForUrl(url: string): Record<string, string> {
+  const o = originOf(url);
+  if (!o || !iapAllowedOrigins().has(o)) return {};
+  return getIapProxyAuthHeader();
+}
+
+/**
+ * Route every request of `context` through a handler that adds the IAP
+ * header only for allowed origins; anything else continues untouched. With
+ * no token at all (IAP off / local runs) nothing is installed.
+ *
+ * Why route.fetch + fulfill and not the obvious alternatives (probed with
+ * Playwright 1.59 / Chromium against an echo server, 2026-11-17):
+ *   - context-wide extraHTTPHeaders: Chromium refuses Proxy-Authorization
+ *     on navigation -> `net::ERR_INVALID_ARGUMENT` (also what CI showed)
+ *   - route.continue({ headers }): Chromium silently DROPS the header
+ *   - route.fetch({ headers }) + route.fulfill: delivered
+ * maxRedirects: 0 hands redirects back to the browser, so a hop to another
+ * origin goes through this handler again (and gets no header).
+ */
+export async function attachIapRoute(context: ContextLike): Promise<void> {
+  if (!getIapProxyAuthHeader()['Proxy-Authorization']) return;
+  await context.route('**/*', async (route) => {
+    const req = route.request();
+    const h = iapHeaderForUrl(req.url());
+    if (!h['Proxy-Authorization']) {
+      await route.continue();
+      return;
+    }
+    const response = await route.fetch({ headers: { ...req.headers(), ...h }, maxRedirects: 0 });
+    await route.fulfill({ response });
+  });
+}
+
+/** `browser.newContext(options)` + `attachIapRoute`, for manual contexts. */
+export async function newIapContext(
+  browser: Browser,
+  options?: BrowserContextOptions,
+): Promise<BrowserContext> {
+  const ctx = await browser.newContext(options);
+  await attachIapRoute(ctx);
+  return ctx;
+}
+
+const REQUEST_METHODS = new Set(['get', 'post', 'put', 'patch', 'delete', 'head', 'fetch']);
+
+/**
+ * Wrap an APIRequestContext so each call carries the IAP header only when
+ * its (absolute or baseURL-relative) URL is an allowed origin.
+ */
+export function scopeIapRequest<R extends object>(request: R): R {
+  return new Proxy(request, {
+    get(target, prop, receiver) {
+      const value = Reflect.get(target, prop, receiver);
+      if (typeof prop !== 'string' || !REQUEST_METHODS.has(prop) || typeof value !== 'function') return value;
+      return (urlOrReq: unknown, options: { headers?: Record<string, string> } = {}) => {
+        const raw = typeof urlOrReq === 'string' ? urlOrReq : (urlOrReq as { url(): string }).url();
+        let abs = raw;
+        try {
+          abs = new URL(raw, process.env.PLAYWRIGHT_BASE_URL || undefined).toString();
+        } catch {
+          // unparseable -> no allowed origin -> no header
+        }
+        const h = iapHeaderForUrl(abs);
+        const opts = h['Proxy-Authorization']
+          ? { ...options, headers: { ...(options.headers || {}), ...h } }
+          : options;
+        return (value as (...a: unknown[]) => unknown).call(target, urlOrReq, opts);
+      };
+    },
+  });
 }
