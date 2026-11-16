@@ -68,8 +68,12 @@ jobs:
           filters: |
             backend:
               - 'backend/**'
+              # a switch flip here (IAP_ENABLED etc.) must redeploy both halves
+              - '.github/workflows/preview-deploy.yml'
             frontend:
               - 'frontend/**'
+              # a switch flip here (IAP_ENABLED etc.) must redeploy both halves
+              - '.github/workflows/preview-deploy.yml'
 
   deploy-preview:
     name: Deploy PR Preview

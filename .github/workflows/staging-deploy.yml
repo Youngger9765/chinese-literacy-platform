@@ -80,8 +80,12 @@ jobs:
           filters: |
             backend:
               - 'backend/**'
+              # a switch flip here (IAP_ENABLED etc.) must redeploy both halves
+              - '.github/workflows/staging-deploy.yml'
             frontend:
               - 'frontend/**'
+              # a switch flip here (IAP_ENABLED etc.) must redeploy both halves
+              - '.github/workflows/staging-deploy.yml'
             firebase:
               - 'firebase.json'
               - '.firebaserc'
