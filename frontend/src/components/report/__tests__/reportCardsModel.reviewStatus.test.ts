@@ -1,5 +1,6 @@
 /**
- * #4028 — 報告卡片：完成就是綠色；完成了但有題目第一次答錯 → 黃色（要訂正）。
+ * #4028 — 報告卡片：完成就是綠色；還有題目錯著沒改對 → 黃色（要訂正）。訂正完就變回綠色，
+ * 卡片註明訂正過幾題（#4087 案主定調）。
  * 詞語理解改用「第一次作答」計分，列出答錯與訂正。上方導覽列用 stepIdsNeedingReview。
  */
 import { describe, expect, it } from 'vitest';
@@ -18,15 +19,25 @@ describe('card status: green / yellow / not done', () => {
         { id: 'q1', firstTryCorrect: true }, { id: 'q2', firstTryCorrect: false },
         { id: 'q3', firstTryCorrect: true }, { id: 'q4', firstTryCorrect: true },
       ],
+      feedback: { q1: true, q2: false, q3: true, q4: true }, // q2 還錯著
     },
     'vocab-application': { score: 8, total: 8 },
     spotlight: { feedback: { a: true, b: true } },
   };
   const cards = buildStepReportCards(steps, ['comprehension', 'vocab-application', 'spotlight', 'full-text-annotate'], data, []);
 
-  it('a completed step with a first-try miss is yellow', () => {
+  it('a completed step with a question still wrong is yellow, and says how many', () => {
     expect(byId(cards, 'comprehension').status).toBe('review');
+    expect(byId(cards, 'comprehension').toFix).toBe(1);
     expect(byId(cards, 'comprehension').completed).toBe(true);
+  });
+
+  it('once every miss is corrected it turns green and remembers how many were fixed', () => {
+    const fixed = { ...data, comprehension: { ...data.comprehension, feedback: { q1: true, q2: true, q3: true, q4: true } } };
+    const c = byId(buildStepReportCards(steps, ['comprehension'], fixed, []), 'comprehension');
+    expect(c.status).toBe('done');
+    expect(c).toMatchObject({ toFix: 0, fixed: 1 });
+    expect(c.summary).toBe('答對 3/4 題'); // 分數照第一次算
   });
 
   it('a completed step answered right first time is green', () => {
@@ -48,9 +59,15 @@ describe('card status: green / yellow / not done', () => {
     expect(byId(c, 'comprehension').status).toBe('none');
   });
 
-  it('score-only data (no per-question rows) still turns yellow when below full marks', () => {
+  it('score-only old records cannot tell what is still wrong, so they are not yellow', () => {
     const c = buildStepReportCards(steps, ['vocab-application'], { 'vocab-application': { score: 6, total: 8 } }, []);
-    expect(byId(c, 'vocab-application').status).toBe('review');
+    expect(byId(c, 'vocab-application').status).toBe('done');
+  });
+
+  it('vocab-application misses are always corrected by the end (you cannot move on without the right word)', () => {
+    const c = byId(buildStepReportCards(steps, ['vocab-application'], { 'vocab-application': { score: 1, total: 2,
+      firstTryResults: [{ firstTryCorrect: false }, { firstTryCorrect: true }] } }, []), 'vocab-application');
+    expect(c).toMatchObject({ status: 'done', fixed: 1, toFix: 0 });
   });
 
   it('the top stepper gets exactly the yellow steps', () => {
@@ -138,11 +155,23 @@ describe('comprehension details', () => {
 });
 
 describe('spotlight uses first-try verdicts (#4081)', () => {
-  it('a question missed first time makes it yellow even though the latest feedback is all correct', () => {
+  const log = {
+    a: { order: 0, label: 'A 題', firstAnswer: '錯', latestAnswer: '對', correctAnswer: '對' },
+    b: { order: 1, label: 'B 題', firstAnswer: 'B', latestAnswer: 'B', correctAnswer: 'B' },
+  };
+
+  it('a question still wrong keeps spotlight yellow', () => {
     const c = buildStepReportCards(steps, ['spotlight'], {
-      spotlight: { feedback: { a: true, b: true }, firstFeedback: { a: false, b: true } },
+      spotlight: { feedback: { a: false, b: true }, firstFeedback: { a: false, b: true }, answerLog: log },
     }, []);
-    expect(byId(c, 'spotlight').status).toBe('review');
+    expect(byId(c, 'spotlight')).toMatchObject({ status: 'review', toFix: 1 });
+  });
+
+  it('a question missed first time but corrected is green, scored by the first try', () => {
+    const c = buildStepReportCards(steps, ['spotlight'], {
+      spotlight: { feedback: { a: true, b: true }, firstFeedback: { a: false, b: true }, answerLog: log },
+    }, []);
+    expect(byId(c, 'spotlight')).toMatchObject({ status: 'done', fixed: 1, toFix: 0 });
     expect(byId(c, 'spotlight').summary).toBe('答對 1/2 題');
   });
 

@@ -55,9 +55,10 @@ export type DetailBlock =
 
 /**
  * 這一關的狀態（#4028，案主定調）：
- * - `done`：完成，而且每一題第一次就答對（或這一關沒有對錯）→ 綠色
- * - `review`：完成，但有題目第一次答錯 / 還沒訂正 → 黃色，提醒回去看錯題
+ * - `done`：完成，沒有要訂正的題目 → 綠色（第一次錯、後來改對的也是綠色，卡片註明訂正過幾題）
+ * - `review`：完成，但還有題目錯著沒改對 → 黃色，告訴學生還有幾題要訂正
  * - `none`：沒完成
+ * 案主定調（2026-11-16 手測後）：黃色只代表「還有題目要訂正」，訂正完就變綠色。
  * 不分「這次 / 上次」：完成就是完成。上方關卡導覽列用同一個函式判斷（AppShell）。
  */
 export type CardStatus = 'done' | 'review' | 'none';
@@ -82,6 +83,12 @@ export interface StepReportCard {
   chart: 'score' | 'reading' | null;
   /** 這一關的能力分數 0–100（最近一次作答的第一次答對率 / 朗讀正確率），雷達圖用；null = 沒有可算的。 */
   rate: number | null;
+  /** 還要訂正的題數（第一次錯、到現在還沒改對）。> 0 才是黃色（#4087 案主定調）。 */
+  toFix: number;
+  /** 第一次錯、後來改對的題數（綠色卡片上註明「訂正過 N 題」）。 */
+  fixed: number;
+  /** 題 / 格（文章重點表是格）。 */
+  unit: string;
 }
 
 /** #4087：哪些關卡有折線圖、畫哪一種。 */
@@ -221,21 +228,32 @@ function vocabMatchRows(list: unknown, vocab: VocabWord[] | undefined, prefix: s
 }
 
 /**
- * `needsReview`：這一關有沒有「第一次答錯」的題目（→ 黃色）。不給就從作答列推：
- * 任何一列 correct === false 就是。只有分數沒有逐題資料的關卡要自己給。
+ * 作答列的 `correct` 是第一次的對錯，`corrected` 是後來有沒有改對。「還要訂正」=
+ * 第一次錯、而且 corrected 不是 true（沒有 corrected 欄位的列，例如文章重點表的格子，
+ * 它的 correct 就是目前的批改結果，錯著就是還沒改）。只有分數、沒有逐題資料的舊紀錄
+ * 分不出有沒有改，不算要訂正。
  */
 type Builder = (ctx: BuildCtx) => {
   summary: string | null;
   details: DetailBlock[];
-  needsReview?: boolean;
   /** 0–100，沒有作答紀錄時雷達圖拿它當這一關的分數（#4087）。 */
   rate?: number | null;
 };
 
 const rateOf = (t: number, n: number) => (t > 0 ? Math.round((n / t) * 100) : null);
 
-function rowsHaveMiss(details: DetailBlock[]): boolean {
-  return details.some((d) => d.kind === 'answers' && d.rows.some((r) => !r.correct));
+function correctionCounts(details: DetailBlock[]): { toFix: number; fixed: number } {
+  let toFix = 0;
+  let fixed = 0;
+  for (const d of details) {
+    if (d.kind !== 'answers') continue;
+    for (const r of d.rows) {
+      if (r.correct) continue;
+      if (r.corrected === true) fixed += 1;
+      else toFix += 1;
+    }
+  }
+  return { toFix, fixed };
 }
 
 function firstTryRows(list: unknown, prefix = '第'): AnswerRow[] {
@@ -301,8 +319,6 @@ const BUILDERS: Record<string, Builder> = {
       return {
         summary: correctOf(n, t),
         details: [{ kind: 'stats', items: [{ label: '答對（含訂正）', value: `${n} / ${t} 題` }] }],
-        // 舊資料沒有逐題第一次作答，分不出有沒有錯過 —— 不亂標黃色。
-        needsReview: false,
       };
     }
     const first = rows.filter((r) => r.correct).length;
@@ -325,14 +341,14 @@ const BUILDERS: Record<string, Builder> = {
   'vocab-application': ({ data }) => {
     const n = num(data.score);
     const t = num(data.total);
-    const rows = firstTryRows(data.firstTryResults);
+    // 填對才能進下一題，所以做完時每一題第一次錯的都已經改對了。
+    const rows = firstTryRows(data.firstTryResults).map((r) => (r.correct ? r : { ...r, corrected: true }));
     const details: DetailBlock[] = [];
     if (n !== null && t !== null) details.push({ kind: 'stats', items: [{ label: '第一次就答對', value: `${n} / ${t} 題` }] });
     if (rows.length) details.push({ kind: 'answers', title: '作答紀錄', rows });
     return {
       summary: n !== null && t !== null ? correctOf(n, t) : null,
       details,
-      needsReview: rows.length ? undefined : n !== null && t !== null && n < t,
       rate: n !== null && t !== null ? rateOf(t, n) : null,
     };
   },
@@ -373,7 +389,6 @@ const BUILDERS: Record<string, Builder> = {
     return {
       summary: correctOf(n, graded.length),
       details,
-      needsReview: firstMap ? n < graded.length : false,
       rate: firstMap ? rateOf(graded.length, n) : null,
     };
   },
@@ -408,7 +423,9 @@ const BUILDERS: Record<string, Builder> = {
     const rows = firstTryRows(records).map((r, i) => {
       const id = str(records[i]?.id);
       const now = id ? latest[id] : undefined;
-      return r.correct || (now !== true && now !== false) ? r : { ...r, corrected: now === true };
+      if (r.correct) return r;
+      // 沒有最新對錯的舊紀錄：閱讀理解要答對才能往下，做完時一定改對了。
+      return { ...r, corrected: now === false ? false : true };
     });
     const details: DetailBlock[] = [];
     if (n !== null && t !== null) details.push({ kind: 'stats', items: [{ label: '第一次就答對', value: `${n} / ${t} 題` }] });
@@ -416,7 +433,6 @@ const BUILDERS: Record<string, Builder> = {
     return {
       summary: n !== null && t !== null && t > 0 ? correctOf(n, t) : null,
       details,
-      needsReview: rows.length ? undefined : n !== null && t !== null && n < t,
       rate: n !== null && t !== null ? rateOf(t, n) : null,
     };
   },
@@ -493,8 +509,8 @@ export function buildStepReportCards(
       const built: ReturnType<Builder> = builder
         ? builder({ data: entry, completed, marks: stepMarks, vocabulary: opts.vocabularyFor?.(s.id) })
         : { summary: null, details: [] };
-      const needsReview = built.needsReview ?? rowsHaveMiss(built.details);
-      const status: CardStatus = !completed ? 'none' : needsReview ? 'review' : 'done';
+      const { toFix, fixed } = correctionCounts(built.details);
+      const status: CardStatus = !completed ? 'none' : toFix > 0 ? 'review' : 'done';
       const chart = CHART_KIND[baseId] ?? null;
       const attempts = chart ? readAttempts(entry) : [];
       // 雷達圖看「最近一次完整作答」的第一次答對率：訂正錯題那幾次是改過之後的成績
@@ -513,6 +529,9 @@ export function buildStepReportCards(
         attempts,
         chart,
         rate: chart ? latest ?? built.rate ?? null : null,
+        toFix: completed ? toFix : 0,
+        fixed: completed ? fixed : 0,
+        unit: baseId === 'keypoints-table' ? '格' : '題',
       };
     });
 }

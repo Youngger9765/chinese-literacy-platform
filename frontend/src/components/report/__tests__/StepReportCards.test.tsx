@@ -9,13 +9,13 @@ import type { StepReportCard } from '../reportCardsModel';
 const cards: StepReportCard[] = [
   {
     stepId: 'full-text-annotate', baseId: 'full-text-annotate', label: '讀全文-做記號', icon: 'edit_note',
-    completed: true, status: 'done', attempts: [], chart: null, rate: null, summary: '做了 2 個記號',
+    completed: true, status: 'done', attempts: [], chart: null, rate: null, toFix: 0, fixed: 0, unit: '題', summary: '做了 2 個記號',
     details: [{ kind: 'marks', marks: [
       { type: 'unknown', text: '喝采', paragraphIndex: 0 },
       { type: 'important', text: '球后', paragraphIndex: 1 },
     ] }],
   },
-  { stepId: 'vocab-review', baseId: 'vocab-review', label: '語詞複習', icon: 'search', completed: false, status: 'none', attempts: [], chart: null, rate: null, summary: null, details: [] },
+  { stepId: 'vocab-review', baseId: 'vocab-review', label: '語詞複習', icon: 'search', completed: false, status: 'none', attempts: [], chart: null, rate: null, toFix: 0, fixed: 0, unit: '題', summary: null, details: [] },
 ];
 
 describe('StepReportCards', () => {
@@ -49,7 +49,7 @@ describe('StepReportCards', () => {
     cards[0],
     {
       stepId: 'comprehension', baseId: 'comprehension', label: '閱讀理解', icon: 'quiz',
-      completed: true, status: 'review', attempts: [], chart: 'score', rate: 75, summary: '答對 3/4 題',
+      completed: true, status: 'review', attempts: [], chart: 'score', rate: 75, toFix: 1, fixed: 1, unit: '題', summary: '答對 3/4 題',
       details: [{ kind: 'answers', title: '作答紀錄', rows: [
         { label: '第 1 題', correct: false, studentAnswer: 'A', correctAnswer: 'B', corrected: true },
         { label: '第 2 題', correct: false, studentAnswer: 'C', correctAnswer: 'D', corrected: false },
@@ -63,14 +63,17 @@ describe('StepReportCards', () => {
     expect(screen.getByText('完成 2 / 3 關')).toBeInTheDocument();
     expect(screen.getAllByLabelText('已完成')).toHaveLength(1);
     expect(screen.getAllByLabelText('已完成，有錯題要訂正')).toHaveLength(1);
-    expect(screen.getByTestId('step-report-review-note')).toHaveTextContent('其中 1 關有錯題');
+    // 直接說哪一關、還有幾題，點了就過去（#4087）
+    expect(screen.getByTestId('step-report-review-note')).toHaveTextContent('還有 1 關有錯題要訂正');
+    expect(screen.getByTestId('to-fix-badge')).toHaveTextContent('還有 1 題要訂正');
   });
 
   it('the yellow card lists first-try misses with corrected / not yet, and offers to go back (#4028)', () => {
     const go = vi.fn();
     render(<StepReportCards cards={withReview} onGoToStep={go} />);
-    fireEvent.click(screen.getByRole('button', { name: /閱讀理解/ }));
+    fireEvent.click(screen.getByRole('button', { name: /^閱讀理解：/ }));
     const dialog = screen.getByRole('dialog');
+    expect(within(dialog).getByText('還有 1 題要訂正')).toBeInTheDocument();
     expect(within(dialog).getByText('已訂正')).toBeInTheDocument();
     expect(within(dialog).getByText('還沒訂正')).toBeInTheDocument();
     expect(within(dialog).getByText('你第一次選：A')).toBeInTheDocument();
@@ -88,7 +91,7 @@ describe('StepReportCards', () => {
   // ── #4087：歷次作答折線圖 + 點節點看那一次 ──────────────────────────────
   const withAttempts: StepReportCard = {
     stepId: 'comprehension', baseId: 'comprehension', label: '閱讀理解', icon: 'quiz',
-    completed: true, status: 'done', chart: 'score', rate: 100, summary: '答對 4/4 題', details: [],
+    completed: true, status: 'done', chart: 'score', rate: 100, toFix: 0, fixed: 0, unit: '題', summary: '答對 4/4 題', details: [],
     attempts: [
       { id: 'a1', at: '2026-11-16T02:00:00Z', kind: 'first', correct: 2, total: 4,
         rows: [{ label: '第 1 題', correct: false, studentAnswer: '甲', correctAnswer: '乙' }] },
@@ -133,5 +136,18 @@ describe('StepReportCards', () => {
     expect(within(radar).getAllByText('本課無')).toHaveLength(3);
     expect(screen.getByTestId('report-radar-summary')).toHaveTextContent('強項：文意理解');
     expect(screen.getByTestId('report-radar-summary')).toHaveTextContent('需要加強：詞語力');
+  });
+
+  it('the top note lists each step still to fix and goes there (#4087)', () => {
+    const go = vi.fn();
+    render(<StepReportCards cards={withReview} onGoToStep={go} />);
+    fireEvent.click(screen.getByRole('button', { name: /閱讀理解・1 題 → 去訂正/ }));
+    expect(go).toHaveBeenCalledWith('comprehension');
+  });
+
+  it('a step whose misses were all corrected is green and says how many (#4087)', () => {
+    render(<StepReportCards cards={[{ ...cards[0], fixed: 2 }]} />);
+    expect(screen.getByTestId('fixed-badge')).toHaveTextContent('訂正過 2 題');
+    expect(screen.queryByTestId('step-report-review-note')).toBeNull();
   });
 });

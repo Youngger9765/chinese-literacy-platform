@@ -28,6 +28,13 @@ const MARK_STYLE: Record<MarkedWord['type'], { icon: string; label: string; chip
 
 const STATUS_LABEL: Record<CardStatus, string> = { done: '已完成', review: '已完成，有錯題要訂正', none: '未完成' };
 
+/** 卡片狀態的完整說法（#4087）：黃色寫還有幾題要訂正，綠色寫訂正過幾題。 */
+function statusPhrase(c: StepReportCard): string {
+  if (c.status === 'review') return `還有 ${c.toFix} ${c.unit}要訂正`;
+  if (c.status === 'done' && c.fixed > 0) return `已完成，訂正過 ${c.fixed} ${c.unit}`;
+  return STATUS_LABEL[c.status];
+}
+
 const CheckBadge: React.FC<{ status: CardStatus }> = ({ status }) =>
   status === 'done' ? (
     <span
@@ -211,7 +218,7 @@ const DetailDialog: React.FC<{
           <span className="material-symbols-outlined text-base" aria-hidden="true">
             {card.status === 'done' ? 'check_circle' : card.status === 'review' ? 'error' : 'pending'}
           </span>
-          {card.status === 'none' ? '還沒完成' : STATUS_LABEL[card.status]}
+          {card.status === 'none' ? '還沒完成' : statusPhrase(card)}
         </p>
 
         {card.attempts.length >= 2 ? (
@@ -271,9 +278,34 @@ const StepReportCards: React.FC<Props> = ({ storyTitle, cards, onGoToStep }) => 
           </span>
         </div>
         {reviewCount > 0 && (
-          <p className="mt-2 text-xs text-amber-800" data-testid="step-report-review-note">
-            其中 {reviewCount} 關有錯題，點黃色的卡片看錯在哪裡、回去訂正。
-          </p>
+          // #4087：直接說哪幾關、各還有幾題要訂正，點了就過去 —— 學生不用一張張卡片猜。
+          <div
+            className="mt-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3"
+            data-testid="step-report-review-note"
+          >
+            <p className="text-sm font-bold text-amber-900">還有 {reviewCount} 關有錯題要訂正：</p>
+            <ul className="mt-2 flex flex-wrap gap-2">
+              {cards
+                .filter((c) => c.status === 'review')
+                .map((c) => (
+                  <li key={c.stepId}>
+                    {onGoToStep ? (
+                      <button
+                        type="button"
+                        onClick={() => onGoToStep(c.stepId)}
+                        className="rounded-full bg-amber-400 px-3 py-1 text-xs font-bold text-amber-950 hover:bg-amber-300"
+                      >
+                        {c.label}・{c.toFix} {c.unit} → 去訂正
+                      </button>
+                    ) : (
+                      <span className="rounded-full bg-amber-200 px-3 py-1 text-xs font-bold text-amber-950">
+                        {c.label}・{c.toFix} {c.unit}
+                      </span>
+                    )}
+                  </li>
+                ))}
+            </ul>
+          </div>
         )}
       </header>
 
@@ -287,7 +319,7 @@ const StepReportCards: React.FC<Props> = ({ storyTitle, cards, onGoToStep }) => 
               type="button"
               onClick={() => setOpenId(c.stepId)}
               data-status={c.status}
-              aria-label={`${c.label}：${STATUS_LABEL[c.status]}${c.completed && c.summary ? `，${c.summary}` : ''}。點擊看詳細`}
+              aria-label={`${c.label}：${statusPhrase(c)}${c.completed && c.summary ? `，${c.summary}` : ''}。點擊看詳細`}
               className={`w-full h-full text-left rounded-2xl p-4 flex flex-col gap-3 transition-all active:scale-[0.98] ${
                 c.status === 'done'
                   ? 'bg-surface-container-lowest border-2 border-emerald-200 shadow-sm hover:shadow-md'
@@ -312,6 +344,16 @@ const StepReportCards: React.FC<Props> = ({ storyTitle, cards, onGoToStep }) => 
                 <p className="text-xs mt-0.5 text-on-surface-variant">
                   {c.completed ? c.summary ?? '已完成' : '未完成'}
                 </p>
+                {c.status === 'review' && (
+                  <p className="text-xs mt-1 font-bold text-amber-800" data-testid="to-fix-badge">
+                    還有 {c.toFix} {c.unit}要訂正
+                  </p>
+                )}
+                {c.status === 'done' && c.fixed > 0 && (
+                  <p className="text-xs mt-1 text-emerald-700" data-testid="fixed-badge">
+                    ✓ 訂正過 {c.fixed} {c.unit}
+                  </p>
+                )}
                 {c.attempts.length >= 2 && (
                   <p className="text-xs mt-1 font-bold text-accent" data-testid="attempts-badge">
                     📈 作答 {c.attempts.length} 次，點開看進步
