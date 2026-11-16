@@ -753,6 +753,10 @@ class GlobalRateLimitMiddleware:
             settings.frontend_proxy_sa,
             settings.backend_audience,
         )
+        # #3740: per-route limiters (real_client_ip) reuse this instead of
+        # re-verifying X-Frontend-Identity -- a failed verification is not
+        # cached, so a forged token would otherwise cost two cert checks.
+        scope.setdefault("state", {})["client_ip"] = ip
         method = scope.get("method", "GET").upper()
         # OPTIONS is handled above (#3227) and never reaches here.
         is_read = method in ("GET", "HEAD")
