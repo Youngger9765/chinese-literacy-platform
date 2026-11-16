@@ -176,21 +176,46 @@ def _patch_seed_assignments(db) -> None:
     )
 
 
+def _text_grade(raw) -> int | None:
+    """Catalogue grade → value for the INTEGER `texts.grade` column.
+
+    The catalogue stores grade as a STRING: "4".."9", or a category name
+    ("文言文", "品格教育") for ungraded lessons. A category has no year, so it
+    returns None rather than an invented number (#3790).
+    """
+    if raw is None:
+        return 4  # legacy default for lessons that never declared a grade
+    try:
+        return int(str(raw).strip())
+    except ValueError:
+        return None
+
+
 def _sync_yaml_lessons_to_texts(db) -> None:
     """Upsert all YAML lessons into the texts table (idempotent).
 
     Uses lesson_number as the unique key. New lessons are inserted;
     existing ones are skipped. Runs on every startup so newly added
     YAML files are automatically available as Text records.
+
+    Ungraded lessons (grade = 文言文／品格教育) are skipped: `texts.grade` is
+    INTEGER NOT NULL, and Postgres rejecting the string used to roll back the
+    whole batch (#3790). Sessions don't need a Text row — `text_id` is nullable
+    and a story is resolved from the catalogue.
     """
     from .lesson_loader import get_all_lessons
     from ..models.text import Text, VisibilityLevel, TextStatus
 
     lessons = get_all_lessons()
     synced = 0
+    ungraded = 0
     for lesson in lessons:
         ln = lesson.get("lesson_number")
         if ln is None:
+            continue
+        grade = _text_grade(lesson.get("grade"))
+        if grade is None:
+            ungraded += 1
             continue
         existing = db.query(Text).filter(Text.lesson_number == ln).first()
         if existing:
@@ -200,7 +225,7 @@ def _sync_yaml_lessons_to_texts(db) -> None:
             paragraphs=lesson.get("paragraphs", []),
             full_text=lesson.get("full_text"),
             char_count=lesson.get("char_count", 0),
-            grade=lesson.get("grade", 4),
+            grade=grade,
             grade_code=lesson.get("grade_code", ""),
             genre=lesson.get("genre", "記敘文"),
             text_type=lesson.get("text_type", "單"),
@@ -220,6 +245,11 @@ def _sync_yaml_lessons_to_texts(db) -> None:
     if synced:
         db.commit()
         logger.info("_sync_yaml_lessons_to_texts: synced %d lessons → texts table", synced)
+    if ungraded:
+        logger.info(
+            "_sync_yaml_lessons_to_texts: skipped %d ungraded lessons (no integer grade)",
+            ungraded,
+        )
 
 
 def _gen_code(k: int) -> str:
@@ -269,7 +299,13 @@ def seed_default_data():
 
             # Sync YAML lessons → texts table (idempotent, uses lesson_number unique key).
             # Runs on every startup so new lessons are picked up automatically.
-            _sync_yaml_lessons_to_texts(db)
+            # Isolated (#3790): a bad catalogue row must not roll back — or skip —
+            # the demo accounts below.
+            try:
+                _sync_yaml_lessons_to_texts(db)
+            except Exception as exc:  # noqa: BLE001 — log and keep seeding
+                db.rollback()
+                logger.warning("seed_default_data: texts sync failed, continuing: %s", exc)
 
             if not _allow_demo_seed:
                 logger.info("seed_default_data: ENABLE_TEST_SEED=false or ENVIRONMENT=production — skipping demo account seeding")
