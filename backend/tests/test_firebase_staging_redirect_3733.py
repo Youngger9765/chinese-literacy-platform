@@ -12,7 +12,14 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 CFG = json.loads((ROOT / "firebase.json").read_text(encoding="utf-8"))
 STAGING_FE = "https://lingoleap-frontend-staging-958347263320.asia-east1.run.app"
-EXPECTED_REDIRECTS = [{"source": "/:path*", "destination": f"{STAGING_FE}/:path*", "type": 302}]
+# "/" needs its own rule: "/:path*" does NOT match the bare root on Firebase
+# Hosting -- live on 2026-11-16 `/` still returned 200 (index.html) while
+# /learn/x?a=1 was 302 (#3733 second attempt). The explicit root rule goes
+# first so the root page can never be served from these two sites again.
+EXPECTED_REDIRECTS = [
+    {"source": "/", "destination": f"{STAGING_FE}/", "type": 302},
+    {"source": "/:path*", "destination": f"{STAGING_FE}/:path*", "type": 302},
+]
 
 
 def _target(name):
@@ -48,6 +55,9 @@ def test_verify_step_checks_302_to_staging_frontend_not_200():
     step = _verify_step()
     assert "%{redirect_url}" in step
     assert f'"302 {STAGING_FE}/learn/x?a=1"' in step
+    # the root page too (it was the one path still answering 200)
+    assert '"https://${site}.web.app/"' in step
+    assert f'"302 {STAGING_FE}/"' in step
     assert "/api/health" not in step, "verify step still expects the backend via Firebase"
     assert '!= "200"' not in step
     assert "exit 1" in step

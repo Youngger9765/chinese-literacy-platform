@@ -422,6 +422,33 @@ jobs:
             GCLOUD_RUN=(gcloud beta run)
           fi
           if [ "${{ env.SAME_ORIGIN_PROXY_ENABLED }}" = "true" ]; then
+            # #3733 (2nd attempt): an EXISTING frontend service is one UNNAMED
+            # container; --container=frontend can't address it and Cloud Run
+            # rejects the result ("exactly one container with an exposed
+            # port"). Rename it to `frontend` first with a same-image
+            # `services replace` (no other change, so that revision serves
+            # exactly what the last one did), then the deploy below updates
+            # it in place and adds the sidecar + --iap in ONE revision.
+            # Brand-new service or already named -> nothing to do (idempotent).
+            SVC_JSON=$(gcloud run services describe ${{ env.FRONTEND_SERVICE }} \
+              --region ${{ env.REGION }} \
+              --project ${{ env.PROJECT_ID }} \
+              --format=json 2>/dev/null || true)
+            if [ -n "$SVC_JSON" ]; then
+              RENAME_SPEC="$(mktemp)"
+              RENAME_RC=0
+              printf '%s' "$SVC_JSON" \
+                | python3 scripts/cloudrun_name_legacy_container.py frontend > "$RENAME_SPEC" \
+                || RENAME_RC=$?
+              if [ "$RENAME_RC" = "0" ]; then
+                gcloud run services replace "$RENAME_SPEC" \
+                  --region ${{ env.REGION }} \
+                  --project ${{ env.PROJECT_ID }}
+              elif [ "$RENAME_RC" != "10" ]; then
+                echo "::error::frontend service has an unexpected container layout; not deploying"
+                exit 1
+              fi
+            fi
             gcloud beta run deploy ${{ env.FRONTEND_SERVICE }} \
               --platform managed \
               --region ${{ env.REGION }} \

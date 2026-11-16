@@ -132,6 +132,11 @@
       ],
       "redirects": [
         {
+          "source": "/",
+          "destination": "https://lingoleap-frontend-staging-958347263320.asia-east1.run.app/",
+          "type": 302
+        },
+        {
           "source": "/:path*",
           "destination": "https://lingoleap-frontend-staging-958347263320.asia-east1.run.app/:path*",
           "type": 302
@@ -224,6 +229,11 @@
         "**/node_modules/**"
       ],
       "redirects": [
+        {
+          "source": "/",
+          "destination": "https://lingoleap-frontend-staging-958347263320.asia-east1.run.app/",
+          "type": 302
+        },
         {
           "source": "/:path*",
           "destination": "https://lingoleap-frontend-staging-958347263320.asia-east1.run.app/:path*",
