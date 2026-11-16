@@ -45,14 +45,14 @@ def _iap_steps(steps):
 # ── preview-deploy.yml ───────────────────────────────────────────────────
 
 
-def test_preview_iap_enabled_is_the_string_false():
+def test_preview_iap_enabled_is_the_string_true():
     raw, doc = _load(PREVIEW_WF)
     env = doc.get("env", {})
     assert "IAP_ENABLED" in env, "IAP_ENABLED switch is missing from preview-deploy.yml env"
-    # the STRING 'false' (rolled back 2026-11-16 after #4083); a YAML
-    # boolean would render as 'False' and break `env.IAP_ENABLED` compares.
-    assert env["IAP_ENABLED"] == "false", (
-        f"IAP_ENABLED must be the string 'false', got {env['IAP_ENABLED']!r}"
+    # the STRING 'true' (opened 2026-11-16, #3733 second attempt); a YAML
+    # boolean would render as 'True' and break `env.IAP_ENABLED` compares.
+    assert env["IAP_ENABLED"] == "true", (
+        f"IAP_ENABLED must be the string 'true', got {env['IAP_ENABLED']!r}"
     )
 
 
@@ -95,14 +95,14 @@ def test_preview_iap_steps_use_the_native_cloud_run_iap_flag():
 # ── staging-deploy.yml ───────────────────────────────────────────────────
 
 
-def test_staging_iap_enabled_is_the_string_false():
+def test_staging_iap_enabled_is_the_string_true():
     raw, doc = _load(STAGING_WF)
     env = doc.get("env", {})
     assert "IAP_ENABLED" in env, "IAP_ENABLED switch is missing from staging-deploy.yml env"
-    # the STRING 'false' (rolled back 2026-11-16 after #4083); a YAML
-    # boolean would render as 'False' and break `env.IAP_ENABLED` compares.
-    assert env["IAP_ENABLED"] == "false", (
-        f"IAP_ENABLED must be the string 'false', got {env['IAP_ENABLED']!r}"
+    # the STRING 'true' (opened 2026-11-16, #3733 second attempt); a YAML
+    # boolean would render as 'True' and break `env.IAP_ENABLED` compares.
+    assert env["IAP_ENABLED"] == "true", (
+        f"IAP_ENABLED must be the string 'true', got {env['IAP_ENABLED']!r}"
     )
 
 
