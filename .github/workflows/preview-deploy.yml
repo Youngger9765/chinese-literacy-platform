@@ -41,14 +41,14 @@ env:
   # 真正的 on/off 開關只有這一行。驗證方法與限制見
   # docs/iap-runbook.md。目前仍然是 false，staging 與日常 preview
   # 完全不受影響。
-  IAP_ENABLED: 'false'
+  IAP_ENABLED: 'true'
   # #3728/#3740 — 同源代理 build-time 開關，預設 false：關掉時這個 job
   # 建出來的 preview image 跟 #3741 revert 之後完全一樣（VITE_API_URL
   # 指到 backend 絕對網址，無 BACKEND_INTERNAL_URL、無
   # BACKEND_INVOKER_SIDECAR_PORT）。同一個理由、同一段完整說明見
   # staging-deploy.yml 這個開關旁的註解——這裡不重複貼一次，兩邊要改
   # 一起改。
-  SAME_ORIGIN_PROXY_ENABLED: 'false'
+  SAME_ORIGIN_PROXY_ENABLED: 'true'
 
 jobs:
   detect-changes:
