@@ -1,11 +1,23 @@
 # IAP 準備與開關手冊（#3719）
 
-> 現狀（2026-11-16 更新：部署接線已備好、開關仍關）／原文 2026-10-24：staging 與所有 preview 服務都還是
-> `--allow-unauthenticated`，跟這份文件存在之前完全一樣——**這份文件描述
-> 的是「整條路徑已經在丟棄式 canary 上驗證過、還沒對任何真實環境打開」的
-> 狀態**。#3719／#3725／#3728／#3729／#3730／#3731／#3733 都已經完成並
-> merge 進 staging；本文件第「對 staging 真的打開」段落是**尚未執行**的
-> 步驟清單，不是已發生的事。
+> 現狀（2026-11-16）：**staging 與所有 PR preview 已打開**——兩個 workflow 的
+> `IAP_ENABLED` 與 `SAME_ORIGIN_PROXY_ENABLED` 都是 `'true'`。frontend 過
+> Cloud Run 原生 IAP，backend 拿掉 `allUsers`、只給 frontend 執行身分與 CI
+> `run.invoker`。正式環境（`deploy.yml`）不受影響，仍公開。
+>
+> **白名單**（`roles/iap.httpsResourceAccessor`，IAP IAM，不在 workflow 裡）：
+> 設在兩層——`lingoleap-frontend-staging` 服務層，以及 **asia-east1 的
+> Cloud Run IAP 區域層**（`projects/958347263320/iap_web/cloud_run-asia-east1`）。
+> 區域層讓每個新建的 preview frontend 自動繼承，不用逐一授權，staging 被刪掉
+> 重建也還在；代價是這個區域之後任何開了 IAP 的 Cloud Run 服務都套用同一份名單。
+> 成員：Young、Hans、靖杭、啟翔（`@junyiacademy.org`）＋ CI 的
+> `github-actions@` 服務帳號。查看：`gcloud beta iap web get-iam-policy
+> --resource-type=cloud-run --region=asia-east1 [--service=<svc>]`。
+>
+> ⚠️ 有 IAP 之後，staging 上只在 staging 才公開的頁面（`/presentation/*.html`、
+> `/intern-training/dashboard.html`）也要登入；正式環境同樣的頁面仍公開。
+> ⚠️ 自動化打 frontend 的通行證 `aud` 要寫 `<網址>/*` 才能打 `/` 以外的路徑，
+> 且主機名稱要跟實際請求的一致（hash 網址與 `-958347263320` 網址各要各的）。
 
 ## 為什麼要做這件事
 
