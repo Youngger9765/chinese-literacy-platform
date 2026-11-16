@@ -75,7 +75,8 @@ const KeyPassageReading: React.FC<KeyPassageReadingProps> = ({
     sectionSlugForStep(story.manifestSections, 'key-passage-reading', moduleForStep)
     ?? qrSectionSlug ?? null;
   const { token, user } = useAuth();
-  const storageKey = scopedStepStorageKey('fullReading_progress_', story.id);
+  // #4081：快取分篇次 —— 不分的話多篇課的第 2 篇會讀到第 1 篇的結果。
+  const storageKey = `${scopedStepStorageKey('fullReading_progress_', story.id)}${qrSectionSlug ? `#${qrSectionSlug}` : ''}`;
   // #1462: in toolbox mode, completion screen shows 重做/回工具箱 instead of 下一關.
   const inToolbox = isToolboxMode();
 

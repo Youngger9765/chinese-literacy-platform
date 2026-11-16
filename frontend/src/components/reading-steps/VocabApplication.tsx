@@ -132,7 +132,33 @@ const VocabApplication: React.FC<VocabApplicationProps> = ({
       return JSON.parse(raw) as SavedPhaseProgress;
     } catch { return null; }
   };
-  const savedProgress = useRef(loadSaved());
+  // #4081：完成狀態與成績以 DB 為準。以前只從瀏覽器快取還原 —— 換裝置看不到完成
+  // 畫面；同一台裝置上快取裡的舊「已完成」+ 舊分數，一掛載又被當成這一次的成績標完成
+  // 存回 DB。DB 有完成紀錄就用它；在學習流程裡（有 DB 可寫）但 DB 沒有完成紀錄時，
+  // 不相信快取的「已完成」；沒有 DB 可寫時（例如沒有 session）才用快取。
+  const savedProgress = useRef<SavedPhaseProgress | null>(null);
+  if (savedProgress.current === null) {
+    const dbScore = typeof initialProgress?.score === 'number' ? initialProgress.score : null;
+    const dbTotal = typeof initialProgress?.total === 'number' ? initialProgress.total : null;
+    if (dbScore !== null && dbTotal !== null) {
+      savedProgress.current = {
+        phase: 'done',
+        result: { score: dbScore, total: dbTotal },
+        firstTryResults: Array.isArray(initialProgress?.firstTryResults)
+          ? (initialProgress.firstTryResults as QuestionResult[])
+          : [],
+      };
+    } else {
+      const cached = loadSaved();
+      savedProgress.current = saveStepProgressPatch && cached?.phase === 'done'
+        ? { phase: 'exercise', result: null, firstTryResults: [] }
+        : cached ?? { phase: 'exercise', result: null, firstTryResults: [] };
+    }
+  }
+  // 從 DB 還原出來的完成狀態不用再寫一次（下面的完成 effect 掛載時會跑）。
+  const skipRestoredCompletionRef = useRef(
+    typeof initialProgress?.score === 'number' && typeof initialProgress?.total === 'number',
+  );
 
   const [phase, setPhase] = useState<'exercise' | 'done'>(() => savedProgress.current?.phase ?? 'exercise');
   const [result, setResult] = useState<{ score: number; total: number } | null>(() => savedProgress.current?.result ?? null);
@@ -188,6 +214,10 @@ const VocabApplication: React.FC<VocabApplicationProps> = ({
   // When phase transitions to 'done', flush progress to DB immediately via patch
   // (merges with other steps' data instead of overwriting the snapshot).
   useEffect(() => {
+    if (skipRestoredCompletionRef.current) {
+      skipRestoredCompletionRef.current = false;
+      if (phase === 'done') return;
+    }
     if (phase === 'done' && result && saveStepProgressPatch) {
       // Issue #2070: include firstTryResults so teachers can see per-question
       // first-attempt accuracy, not just the aggregate score.
