@@ -78,6 +78,29 @@ describe('IAP header is scoped to the IAP origin (#4097)', () => {
     for (const u of THIRD_PARTY) expect(iapHeaderForUrl(u), u).toEqual({});
   });
 
+  // CI run 43939003809: 4 tests failed with "route.fetch: Target page,
+  // context or browser has been closed" — a request still in flight when the
+  // test ended. That is teardown noise, not a test result; anything else
+  // must still surface.
+  it('route handler ignores a request still in flight when the context closes', async () => {
+    const handler = await installedHandler();
+    const r = fakeRoute(`${STAGING}/assets/x.js`);
+    r.fetch = vi.fn(async () => {
+      throw new Error('route.fetch: Target page, context or browser has been closed');
+    });
+    await expect(handler(r)).resolves.toBeUndefined();
+    expect(r.fulfill).not.toHaveBeenCalled();
+  });
+
+  it('route handler still surfaces real fetch errors', async () => {
+    const handler = await installedHandler();
+    const r = fakeRoute(`${STAGING}/api/stories`);
+    r.fetch = vi.fn(async () => {
+      throw new Error('route.fetch: net::ERR_CONNECTION_RESET');
+    });
+    await expect(handler(r)).rejects.toThrow('ERR_CONNECTION_RESET');
+  });
+
   it('route handler adds the header only for the staging origin', async () => {
     const handler = await installedHandler();
     const own = fakeRoute(`${STAGING}/api/stories`);

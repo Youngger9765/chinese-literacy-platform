@@ -304,9 +304,22 @@ export async function attachIapRoute(context: ContextLike): Promise<void> {
       await route.continue();
       return;
     }
-    const response = await route.fetch({ headers: { ...req.headers(), ...h }, maxRedirects: 0 });
-    await route.fulfill({ response });
+    try {
+      const response = await route.fetch({ headers: { ...req.headers(), ...h }, maxRedirects: 0 });
+      await route.fulfill({ response });
+    } catch (err) {
+      // A request still in flight when the test/context closes (CI run
+      // 43939003809) is teardown noise; any other failure must surface.
+      if (isClosedTargetError(err)) return;
+      throw err;
+    }
   });
+}
+
+const CLOSED_TARGET = /Target page, context or browser has been closed|Test ended|Target closed/;
+
+function isClosedTargetError(err: unknown): boolean {
+  return CLOSED_TARGET.test(err instanceof Error ? err.message : String(err));
 }
 
 /** `browser.newContext(options)` + `attachIapRoute`, for manual contexts. */

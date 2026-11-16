@@ -15,6 +15,9 @@ export const test = base.extend({
   context: async ({ context }, use) => {
     await attachIapRoute(context);
     await use(context);
+    // Let routes still in flight finish quietly before Playwright closes the
+    // context (Playwright's own advice for route callbacks at test end).
+    await context.unrouteAll({ behavior: 'ignoreErrors' });
   },
   request: async ({ request }, use) => {
     await use(scopeIapRequest(request));
