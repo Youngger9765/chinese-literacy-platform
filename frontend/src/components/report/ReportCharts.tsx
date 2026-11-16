@@ -147,6 +147,8 @@ export const AttemptsPanel: React.FC<{ card: StepReportCard }> = ({ card }) => {
   const isReading = card.chart === 'reading';
   const maxTotal = Math.max(1, ...attempts.map((a) => a.total ?? 0));
   const data = attempts.map((a, i) => ({
+    // 每個點自己帶著「第幾次」—— 點擊時直接讀它，不靠 recharts 推算位置（#4087 手測）。
+    attemptIndex: i,
     n: `第${i + 1}次`,
     correct: a.correct ?? null,
     cpm: a.cpm ?? null,
@@ -159,24 +161,28 @@ export const AttemptsPanel: React.FC<{ card: StepReportCard }> = ({ card }) => {
     ? (last.cpm ?? 0) - (first.cpm ?? 0)
     : (last.correct ?? 0) - (first.correct ?? 0);
 
+  // 點節點選那一次。只在節點本身處理點擊：先前另外在整張圖上用 activeTooltipIndex
+  // 選「最近的點」，那個推算會算錯（桌機點第 3 個點跳到第 1 次），而且跟節點的點擊
+  // 前後各觸發一次、後者蓋掉前者。節點外面加一圈透明的大範圍，手指好點。
   const dot = (key: string, color: string) =>
-    (props: { cx?: number; cy?: number; index?: number }) => {
+    (props: { cx?: number; cy?: number; payload?: { attemptIndex?: number } }) => {
       const { cx, cy } = props;
-      const index = props.index ?? 0;
-      if (cx == null || cy == null) return <g key={`${key}-${index}`} />;
-      const on = index === selected;
+      const i = props.payload?.attemptIndex ?? -1;
+      if (cx == null || cy == null || i < 0) return <g key={`${key}-${i}`} />;
+      const on = i === selected;
       return (
-        <circle
-          key={`${key}-${index}`}
-          cx={cx}
-          cy={cy}
-          r={on ? 8 : 6}
-          fill={on ? color : '#fff'}
-          stroke={color}
-          strokeWidth={3}
+        <g
+          key={`${key}-${i}`}
+          data-attempt-index={i}
           style={{ cursor: 'pointer' }}
-          onClick={() => setSelected(index)}
-        />
+          onClick={(e) => {
+            e.stopPropagation();
+            setSelected(i);
+          }}
+        >
+          <circle cx={cx} cy={cy} r={18} fill="transparent" />
+          <circle cx={cx} cy={cy} r={on ? 8 : 6} fill={on ? color : '#fff'} stroke={color} strokeWidth={3} />
+        </g>
       );
     };
 
@@ -199,12 +205,6 @@ export const AttemptsPanel: React.FC<{ card: StepReportCard }> = ({ card }) => {
           <LineChart
             data={data}
             margin={{ top: 10, right: isReading ? 10 : 16, bottom: 0, left: -16 }}
-            // 點到某個節點附近就選那一次（點本身也能點，但手指不一定點得準）。
-            onClick={(state: { activeTooltipIndex?: number | string | null } | null) => {
-              const i = Number(state?.activeTooltipIndex);
-              if (Number.isInteger(i) && i >= 0 && i < attempts.length) setSelected(i);
-            }}
-            style={{ cursor: 'pointer' }}
           >
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="n" tick={{ fontSize: 11 }} />
