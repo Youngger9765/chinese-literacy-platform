@@ -26,9 +26,39 @@ iap_token() {
   if [ -z "$audience" ]; then
     return 0   # 沒設 audience：這階段的預期狀態，印空字串
   fi
-  if ! command -v python3 >/dev/null 2>&1; then
-    return 0   # 沒有 python3 可轉呼叫 —— 當沒有憑證，安靜放棄
+  local token=""
+  if command -v python3 >/dev/null 2>&1; then
+    token="$(python3 "${repo_root}/scripts/iap_token.py" "$audience" 2>/dev/null || true)"
   fi
-  python3 "${repo_root}/scripts/iap_token.py" "$audience" 2>/dev/null || true
+  if [ -n "$token" ]; then
+    printf '%s\n' "$token"
+    return 0
+  fi
+  _iap_token_via_gcloud "$audience"
+}
+
+# #3733 — GitHub runners have no google-auth Python package, so the python
+# path above returns nothing there. Fall back to IAM Credentials signJwt via
+# gcloud for the SA in IAP_SIGNING_SA_EMAIL (caller needs
+# roles/iam.serviceAccountTokenCreator on that SA). Same claims shape as
+# scripts/iap_token.py._build_claims (#3730: iss == sub == SA, aud == URL,
+# lifetime <= 1h). Any failure -> print nothing (callers treat that as
+# "no header"); the token only ever goes to stdout, never stderr.
+_iap_token_via_gcloud() {
+  local audience="$1" sa="${IAP_SIGNING_SA_EMAIL:-}"
+  [ -n "$sa" ] || return 0
+  command -v gcloud >/dev/null 2>&1 || return 0
+  local tmp now
+  tmp="$(mktemp -d)" || return 0
+  now="$(date +%s)"
+  printf '{"iss":"%s","sub":"%s","aud":"%s","iat":%d,"exp":%d}' \
+    "$sa" "$sa" "$audience" "$now" "$((now + 3000))" > "$tmp/claims.json"
+  if gcloud iam service-accounts sign-jwt "$tmp/claims.json" "$tmp/out.jwt" \
+      --iam-account="$sa" >/dev/null 2>&1 && [ -s "$tmp/out.jwt" ]; then
+    cat "$tmp/out.jwt"
+    printf '\n'
+  fi
+  rm -rf "$tmp"
+  return 0
 }
 
