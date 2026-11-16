@@ -341,16 +341,40 @@ const BUILDERS: Record<string, Builder> = {
     // #4081：有 firstFeedback（每題第一次的對錯）就用它 —— feedback 是最新一次，聚光燈
     // 要全對才能完成，看它永遠是滿分。舊資料只有 feedback：照舊顯示，但分不出有沒有錯過，
     // 不亂標黃色。
-    const first = isObj(data.firstFeedback) ? Object.values(data.firstFeedback) : null;
-    const fb = first ?? (isObj(data.feedback) ? Object.values(data.feedback) : []);
+    const firstMap = isObj(data.firstFeedback) ? data.firstFeedback : null;
+    const latestMap = isObj(data.feedback) ? data.feedback : {};
+    const fb = firstMap ? Object.values(firstMap) : Object.values(latestMap);
     const graded = fb.filter((v) => v === true || v === false);
     if (!graded.length) return { summary: null, details: [] };
     const n = graded.filter((v) => v === true).length;
+    const details: DetailBlock[] = [
+      { kind: 'stats', items: [{ label: firstMap ? '第一次就答對' : '選擇題答對', value: `${n} / ${graded.length} 題` }] },
+    ];
+    // #4087：每一題的作答紀錄（題目、你第一次選的、正確答案、有沒有訂正）。
+    const log = isObj(data.answerLog) ? data.answerLog : {};
+    const entries = Object.entries(log)
+      .filter((e): e is [string, Record<string, unknown>] => isObj(e[1]))
+      .sort((a, b) => (num(a[1].order) ?? 0) - (num(b[1].order) ?? 0));
+    if (entries.length) {
+      const rows: AnswerRow[] = entries.map(([key, e], i) => {
+        const first = firstMap?.[key] ?? latestMap[key];
+        const ok = first === true;
+        return {
+          label: `第 ${i + 1} 題`,
+          prompt: str(e.label),
+          correct: ok,
+          studentAnswer: ok ? null : str(e.firstAnswer),
+          correctAnswer: str(e.correctAnswer),
+          corrected: ok ? null : latestMap[key] === true,
+        };
+      });
+      details.push({ kind: 'answers', title: '作答紀錄', rows });
+    }
     return {
       summary: correctOf(n, graded.length),
-      details: [{ kind: 'stats', items: [{ label: first ? '第一次就答對' : '選擇題答對', value: `${n} / ${graded.length} 題` }] }],
-      needsReview: first ? n < graded.length : false,
-      rate: first ? rateOf(graded.length, n) : null,
+      details,
+      needsReview: firstMap ? n < graded.length : false,
+      rate: firstMap ? rateOf(graded.length, n) : null,
     };
   },
 
@@ -473,7 +497,10 @@ export function buildStepReportCards(
       const status: CardStatus = !completed ? 'none' : needsReview ? 'review' : 'done';
       const chart = CHART_KIND[baseId] ?? null;
       const attempts = chart ? readAttempts(entry) : [];
-      const latest = attempts.length ? attemptRate(attempts[attempts.length - 1]) : null;
+      // 雷達圖看「最近一次完整作答」的第一次答對率：訂正錯題那幾次是改過之後的成績
+      // （常常是滿分），拿來算強弱會把有錯過的項目也排成強項。
+      const full = attempts.filter((a) => a.kind !== 'retry-wrong');
+      const latest = full.length ? attemptRate(full[full.length - 1]) : null;
       return {
         stepId: s.id,
         baseId,

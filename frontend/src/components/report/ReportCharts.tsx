@@ -69,7 +69,7 @@ export const RadarPanel: React.FC<{ points: RadarPoint[] }> = ({ points }) => {
     <section className="rounded-3xl bg-surface-container-lowest shadow-editorial p-6" data-testid="report-radar">
       <h3 className="font-headline font-bold text-lg text-on-surface">我的能力分布</h3>
       <p className="text-xs text-on-surface-variant mt-1">
-        分數是各關「最近一次作答」第一次就答對的比例（朗讀看正確率），滿分 100。
+        分數是各關「最近一次完整作答」第一次就答對的比例（訂正不算；朗讀看正確率），滿分 100。
       </p>
       {anyScored ? (
         <>
@@ -126,6 +126,7 @@ const RowList: React.FC<{ rows: AttemptRow[] }> = ({ rows }) => (
             {r.correct ? '✓ 答對' : '✗ 答錯'}
           </span>
         </div>
+        {r.prompt && <p className="mt-1 text-on-surface">{r.prompt}</p>}
         {!r.correct && (r.studentAnswer || r.correctAnswer) && (
           <div className="mt-1 space-y-0.5 text-on-surface-variant">
             {r.studentAnswer && <p>你選：{r.studentAnswer}</p>}

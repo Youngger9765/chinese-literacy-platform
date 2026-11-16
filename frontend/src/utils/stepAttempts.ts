@@ -11,6 +11,8 @@
 /** 一次作答裡的一題。`correct` 是這一次裡「第一次就答對」。 */
 export interface AttemptRow {
   label: string;
+  /** 題目本身（有的話顯示在標號下面）。 */
+  prompt?: string | null;
   correct: boolean;
   studentAnswer?: string | null;
   correctAnswer?: string | null;

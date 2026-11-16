@@ -201,4 +201,33 @@ describe('attempts, rate and radar (#4087)', () => {
     const cards = buildStepReportCards(steps, ['vocab-definition'], { 'vocab-definition': { result: { matchedCount: 7, totalCount: 8 } } }, []);
     expect(radarOf(cards)[0].state).toBe('unscored');
   });
+
+  it('spotlight lists each question from its answer log: first pick, right answer, corrected (#4087)', () => {
+    const c = byId(buildStepReportCards(steps, ['spotlight'], {
+      spotlight: {
+        feedback: { k1: true, k2: true },
+        firstFeedback: { k1: false, k2: true },
+        answerLog: {
+          k2: { order: 1, label: '第二題題目', firstAnswer: 'B', latestAnswer: 'B', correctAnswer: 'B' },
+          k1: { order: 0, label: '第一題題目', firstAnswer: '錯的', latestAnswer: '對的', correctAnswer: '對的' },
+        },
+      },
+    }, []), 'spotlight');
+    expect(c.details.find((d) => d.kind === 'answers')).toMatchObject({
+      rows: [
+        { prompt: '第一題題目', correct: false, studentAnswer: '錯的', correctAnswer: '對的', corrected: true },
+        { prompt: '第二題題目', correct: true, corrected: null },
+      ],
+    });
+  });
+
+  it('the radar rate ignores 訂正錯題 attempts (their after-correction score is not ability) (#4087)', () => {
+    const c = byId(buildStepReportCards(steps, ['comprehension'], {
+      comprehension: { attempts: [
+        { id: 'a', at: '2026-11-16T01:00:00Z', kind: 'first', correct: 2, total: 4 },
+        { id: 'b', at: '2026-11-16T02:00:00Z', kind: 'retry-wrong', correct: 4, total: 4 },
+      ] },
+    }, []), 'comprehension');
+    expect(c.rate).toBe(50);
+  });
 });

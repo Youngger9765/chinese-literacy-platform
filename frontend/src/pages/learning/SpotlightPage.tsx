@@ -4,7 +4,7 @@
  * v2 (#2205): BlockSequenceRenderer when spotlightV2.blocks present (dev7).
  * Legacy: StrategyExercise / GraphicTextIntegrationExercise via ComprehensionLayout.
  */
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ComprehensionLayout from '../../components/reading-steps/ComprehensionLayout';
 import StrategyExercise from '../../components/reading-steps/StrategyExercise';
@@ -18,7 +18,39 @@ import LessonRenderer from '../../components/lesson-content/LessonRenderer';
 import { storyToLesson } from '../../components/lesson-content/lessonContentAdapter';
 import NextStepFooter from '../../components/learning/NextStepFooter';
 import { mergeFirstVerdicts } from '../../utils/firstVerdicts';
-import { readAttempts, scoredAttempt } from '../../utils/stepAttempts';
+import { readAttempts, scoredAttempt, type AttemptRow } from '../../utils/stepAttempts';
+
+/** 對錯的指紋：變了就代表學生改過答案（#4087）。 */
+const verdictSig = (fb: unknown) =>
+  JSON.stringify(
+    Object.entries((fb && typeof fb === 'object' ? fb : {}) as Record<string, unknown>)
+      .filter(([, v]) => v === true || v === false)
+      .sort(([a], [b]) => a.localeCompare(b)),
+  );
+
+/** 這一次的逐題結果：有作答紀錄（spotlight_v2）就用它，否則只列對錯。 */
+const rowsOf = (state: Record<string, unknown>, verdicts: Record<string, unknown>): AttemptRow[] => {
+  const log = (state.answerLog && typeof state.answerLog === 'object' ? state.answerLog : {}) as Record<
+    string,
+    { order?: number; label?: string; firstAnswer?: string; latestAnswer?: string; correctAnswer?: string | null }
+  >;
+  const keys = Object.keys(log).length
+    ? Object.keys(log).sort((a, b) => (log[a].order ?? 0) - (log[b].order ?? 0))
+    : Object.keys(verdicts).filter((k) => verdicts[k] === true || verdicts[k] === false);
+  return keys.map((k, i) => {
+    const correct = verdicts[k] === true;
+    const e = log[k];
+    const answered = verdicts === state.feedback ? e?.latestAnswer : e?.firstAnswer;
+    return {
+      label: `第 ${i + 1} 題`,
+      prompt: e?.label || null,
+      correct,
+      studentAnswer: correct ? null : answered ?? null,
+      correctAnswer: correct ? null : e?.correctAnswer ?? null,
+    };
+  });
+};
+
 
 const SpotlightPage: React.FC = () => {
   const navigate = useNavigate();
@@ -56,43 +88,101 @@ const SpotlightPage: React.FC = () => {
       saved && typeof saved === 'object' ? { ...(saved as Record<string, boolean>) } : {};
   }
 
+  // ── #4087：每一次作答記一筆（成績單折線圖）─────────────────────────────
+  // 「做完」那一次：每次掛載只記一筆。spotlight_v2 每按一次「確認」都會檢查完成度，
+  // 做完之後每訂正一題都會再回報一次完成 —— 那些是訂正，不是新的一輪。
+  // 從 DB 還原成「已完成」視同已經記過。
+  // 「訂正」：做完之後改了答案（含從成績單「回去訂正」回來），離開這一關時記一筆
+  // retry-wrong，成績 = 當下總共答對幾題。
+  const completionRecordedRef = useRef(!!savedStrategyData?.allDone);
+  const lastRecordedSigRef = useRef(verdictSig(savedStrategyData?.feedback));
+  const correctionPendingRef = useRef(false);
+  const latestStateRef = useRef<Record<string, unknown>>(savedStrategyData ?? {});
+  const attemptsMadeRef = useRef(0);
+
+  const recordAttempt = useCallback(
+    (kind: 'first' | 'retry-all' | 'retry-wrong', rows: AttemptRow[]) => {
+      if (!rows.length) return; // 沒有可判對錯的題目（純閱讀的聚光燈），不畫折線
+      attemptsMadeRef.current += 1;
+      saveStepProgressPatch({
+        stepId: 'spotlight',
+        stepData: {},
+        currentStep: 'spotlight',
+        immediate: true,
+        appendAttempt: scoredAttempt(kind, rows.filter((r) => r.correct).length, rows.length, rows),
+      });
+    },
+    [saveStepProgressPatch],
+  );
+
+  const flushCorrection = useCallback(() => {
+    if (!correctionPendingRef.current) return;
+    correctionPendingRef.current = false;
+    const state = latestStateRef.current;
+    lastRecordedSigRef.current = verdictSig(state.feedback);
+    recordAttempt('retry-wrong', rowsOf(state, (state.feedback ?? {}) as Record<string, unknown>));
+  }, [recordAttempt]);
+
   const handleAnswerChange = useCallback(
     (exerciseState: Record<string, unknown>) => {
       const first = mergeFirstVerdicts(firstFeedbackRef.current ?? {}, exerciseState.feedback);
       firstFeedbackRef.current = first;
-      handleProgressChange({ ...exerciseState, firstFeedback: first }, false);
+      const state = { ...exerciseState, firstFeedback: first };
+      latestStateRef.current = state;
+      if (exerciseState.allDone === true && !completionRecordedRef.current) {
+        // 「做完」那一次在這裡記，不在 onComplete 裡：渲染器在最後一題的「確認」當下
+        // 就同步回報完成，那時最後一題的對錯還沒透過 onChange 傳過來 —— 實測記成
+        // 5/8，少了最後一題。走到這裡的 state 已經含 allDone 與最後一題的對錯。
+        completionRecordedRef.current = true;
+        lastRecordedSigRef.current = verdictSig(exerciseState.feedback);
+        correctionPendingRef.current = false;
+        const kind = readAttempts(savedStrategyData).length || attemptsMadeRef.current ? 'retry-all' : 'first';
+        recordAttempt(kind, rowsOf(state, first));
+      } else if (completionRecordedRef.current && verdictSig(exerciseState.feedback) !== lastRecordedSigRef.current) {
+        correctionPendingRef.current = true;
+        // 錯題全部改對 = 這一輪訂正做完，當下就記，不等離開頁面（整頁重新整理或直接
+        // 關掉分頁時，卸載的那一下不會跑）。只改了一部分的，離開時再記。
+        // 「全部改對」= 每一題判過的題目現在都是對的。改答案的當下那一題會先回到「待確認」
+        // （null），那還不算改好 —— 只看「沒有錯的」會在那一下提早記一筆（實測多記了 8/9）。
+        const latest = (exerciseState.feedback ?? {}) as Record<string, unknown>;
+        if (Object.keys(first).every((k) => latest[k] === true)) {
+          correctionPendingRef.current = false;
+          lastRecordedSigRef.current = verdictSig(exerciseState.feedback);
+          recordAttempt('retry-wrong', rowsOf(state, (exerciseState.feedback ?? {}) as Record<string, unknown>));
+        }
+      }
+      handleProgressChange(state, false);
     },
-    [handleProgressChange],
+    [handleProgressChange, recordAttempt, savedStrategyData],
   );
 
-  // #4087：做完一次記一筆（成績單折線圖），用每題第一次的對錯。從 DB 還原成「已完成」
-  // 時，渲染器一掛上就會回報完成 —— 那不是新的一次。
-  const restoredDoneRef = useRef(!!savedStrategyData?.allDone);
-  const attemptsMadeRef = useRef(0);
+  // 作答紀錄在 handleAnswerChange 收到 allDone 時才記（見那裡的說明）。
   const handleStrategyComplete = useCallback(() => {
     setStrategyDone(true);
-    if (restoredDoneRef.current) {
-      restoredDoneRef.current = false;
-      return;
-    }
-    const verdicts = Object.values(firstFeedbackRef.current ?? {});
-    if (!verdicts.length) return; // 沒有可判對錯的題目（純閱讀的聚光燈），不畫折線
-    const rows = verdicts.map((v, i) => ({ label: `第 ${i + 1} 題`, correct: v === true }));
-    const kind = readAttempts(savedStrategyData).length || attemptsMadeRef.current ? 'retry-all' : 'first';
-    attemptsMadeRef.current += 1;
-    saveStepProgressPatch({
-      stepId: 'spotlight',
-      stepData: {},
-      currentStep: 'spotlight',
-      immediate: true,
-      appendAttempt: scoredAttempt(kind, rows.filter((r) => r.correct).length, rows.length, rows),
-    });
-  }, [saveStepProgressPatch, savedStrategyData]);
+  }, []);
+
+  // 離開這一頁（切到別關、回成績單）也要把訂正記下來。
+  const flushCorrectionRef = useRef(flushCorrection);
+  useEffect(() => { flushCorrectionRef.current = flushCorrection; }, [flushCorrection]);
+  useEffect(() => {
+    // 分頁被關掉 / 切走時也記（只改了一部分就離開的那一輪）。
+    const onHide = () => {
+      if (document.visibilityState === 'hidden') flushCorrectionRef.current();
+    };
+    document.addEventListener('visibilitychange', onHide);
+    window.addEventListener('pagehide', onHide);
+    return () => {
+      document.removeEventListener('visibilitychange', onHide);
+      window.removeEventListener('pagehide', onHide);
+      flushCorrectionRef.current();
+    };
+  }, []);
 
   const handleNext = useCallback(() => {
+    flushCorrection();
     handleProgressChange({ completed: true, strategyDone }, true);
     handleFinishReadingStrategy();
-  }, [handleFinishReadingStrategy, handleProgressChange, strategyDone]);
+  }, [flushCorrection, handleFinishReadingStrategy, handleProgressChange, strategyDone]);
 
   if (!selectedStory) return null;
 
