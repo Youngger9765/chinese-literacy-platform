@@ -30,6 +30,7 @@ What this locks (preview-deploy.yml and staging-deploy.yml):
 """
 from __future__ import annotations
 
+import json
 import os
 import re
 import stat
@@ -89,6 +90,10 @@ case "$*" in
   *"services describe"*) [ -n "${FAKE_MISSING:-}" ] && exit 1 ;;
 esac
 case "$*" in
+  *"services replace"*) cat "$4" > "$CALLS.replace" ;;
+esac
+case "$*" in
+  *"services describe"*"--format=json"*) printf '%s' "${FAKE_SERVICE_JSON:-}" ;;
   *"services describe"*"status.url"*) echo "$FAKE_URL" ;;
   *"services describe"*"annotations"*) echo "${FAKE_IAP_ANNOTATION:-}" ;;
   *"get-iam-policy"*)
@@ -151,6 +156,9 @@ def _run_step_rc(step: dict, ctx: dict[str, str],
             cwd=repo_root, env=env, capture_output=True, text=True, timeout=60,
         )
         recorded = [line for line in calls.read_text().splitlines() if line]
+        replaced = Path(str(calls) + ".replace")
+        if replaced.exists():
+            recorded.append("REPLACE_SPEC " + replaced.read_text().replace("\n", " "))
         return proc.returncode, recorded, f"STDERR:\n{proc.stderr}\nSTDOUT:\n{proc.stdout}"
 
 
@@ -268,6 +276,92 @@ def test_frontend_deploy_unchanged_when_proxy_disabled(wf, job, preview):
     assert deploys[0].startswith("gcloud run deploy ")
     assert "--container" not in deploys[0]
     assert "--image" in deploys[0] and "--allow-unauthenticated" in deploys[0]
+
+
+# ── 3b: existing single-unnamed-container services (#4083 rollback) ────
+#
+# Staging and every live preview frontend is ONE UNNAMED container with a
+# port; `--container=frontend` can't address it, so the two-container
+# deploy added containers beside it and Cloud Run refused the revision.
+# The deploy step must first rename that container to `frontend` (a
+# same-image `services replace`), then run the normal two-container deploy
+# which carries --iap -- so the proxy and IAP still land in ONE revision.
+
+
+def _legacy_service_json(name: str | None = None, extra: bool = False) -> str:
+    c = {"image": "frontend:old", "ports": [{"containerPort": 8080, "name": "http1"}]}
+    if name:
+        c["name"] = name
+    containers = [c] + ([{"name": "sidecar", "image": "sidecar:old"}] if extra else [])
+    return json.dumps({
+        "apiVersion": "serving.knative.dev/v1", "kind": "Service",
+        "metadata": {"name": "svc", "namespace": "958347263320", "uid": "u",
+                     "annotations": {"run.googleapis.com/ingress": "all"}},
+        "spec": {"template": {"metadata": {"annotations": {}},
+                              "spec": {"containers": containers,
+                                       "serviceAccountName": FRONTEND_RUNTIME_SA}},
+                 "traffic": [{"latestRevision": True, "percent": 100}]},
+        "status": {"url": "https://svc.run.app"},
+    })
+
+
+@pytest.mark.parametrize("wf,job,preview", FE_CASES)
+def test_existing_unnamed_container_renamed_before_two_container_deploy(wf, job, preview):
+    step = _step(wf, job, "Deploy frontend")
+    calls = _run_step(step, _ctx(iap=True, proxy=True, preview=preview),
+                      extra_env={"FAKE_SERVICE_JSON": _legacy_service_json()})
+    replaces = _gcloud(calls, "services replace")
+    deploys = _gcloud(calls, "run deploy")
+    assert len(replaces) == 1, calls
+    assert len(deploys) == 1
+    assert calls.index(replaces[0]) < calls.index(deploys[0]), "rename must precede the deploy"
+    assert "--region asia-east1" in replaces[0] and "--project lingoleap-dev" in replaces[0]
+    spec_line = [c for c in calls if c.startswith("REPLACE_SPEC ")]
+    assert spec_line, "replace got no spec file"
+    spec = json.loads(spec_line[0][len("REPLACE_SPEC "):])
+    cs = spec["spec"]["template"]["spec"]["containers"]
+    assert [c.get("name") for c in cs] == ["frontend"]
+    assert cs[0]["image"] == "frontend:old", "rename revision must serve the same image"
+    assert "status" not in spec
+    # the deploy itself still carries --iap + both containers (one revision)
+    assert "--iap" in deploys[0] and "--container=sidecar" in deploys[0]
+
+
+@pytest.mark.parametrize("wf,job,preview", FE_CASES)
+def test_already_converted_service_is_not_replaced_again(wf, job, preview):
+    step = _step(wf, job, "Deploy frontend")
+    calls = _run_step(step, _ctx(iap=True, proxy=True, preview=preview),
+                      extra_env={"FAKE_SERVICE_JSON": _legacy_service_json("frontend", extra=True)})
+    assert not _gcloud(calls, "services replace")
+    assert len(_gcloud(calls, "run deploy")) == 1
+
+
+@pytest.mark.parametrize("wf,job,preview", FE_CASES)
+def test_brand_new_service_skips_rename_and_deploys(wf, job, preview):
+    step = _step(wf, job, "Deploy frontend")
+    calls = _run_step(step, _ctx(iap=True, proxy=True, preview=preview),
+                      extra_env={"FAKE_MISSING": "1"})
+    assert not _gcloud(calls, "services replace")
+    assert len(_gcloud(calls, "run deploy")) == 1
+
+
+@pytest.mark.parametrize("wf,job,preview", FE_CASES)
+def test_unexpected_container_shape_fails_before_deploying(wf, job, preview):
+    step = _step(wf, job, "Deploy frontend")
+    rc, calls, out = _run_step_rc(step, _ctx(iap=True, proxy=True, preview=preview),
+                                  extra_env={"FAKE_SERVICE_JSON": _legacy_service_json("web", extra=True)})
+    assert rc != 0, out
+    assert not _gcloud(calls, "run deploy")
+    assert not _gcloud(calls, "services replace")
+
+
+@pytest.mark.parametrize("wf,job,preview", FE_CASES)
+def test_proxy_off_never_touches_container_names(wf, job, preview):
+    step = _step(wf, job, "Deploy frontend")
+    calls = _run_step(step, _ctx(iap=False, proxy=False, preview=preview),
+                      extra_env={"FAKE_SERVICE_JSON": _legacy_service_json()})
+    assert not _gcloud(calls, "services replace")
+    assert not _gcloud(calls, "--format=json")
 
 
 @pytest.mark.parametrize("wf,job,preview", FE_CASES)
