@@ -1,9 +1,19 @@
 # IAP 準備與開關手冊（#3719）
 
-> 現狀（2026-11-16）：**staging 與所有 PR preview 已打開**——兩個 workflow 的
-> `IAP_ENABLED` 與 `SAME_ORIGIN_PROXY_ENABLED` 都是 `'true'`。frontend 過
-> Cloud Run 原生 IAP，backend 拿掉 `allUsers`、只給 frontend 執行身分與 CI
-> `run.invoker`。正式環境（`deploy.yml`）不受影響，仍公開。
+> 現狀（2026-11-16 傍晚）：**開過一次又回滾，兩個開關都是 `'false'`**。
+> #4083 把開關打開後 staging 部署兩次失敗：
+> 1. 只改 workflow 檔時 `paths-filter` 跳過 frontend 部署，backend 被鎖、舊的公開
+>    frontend 直接打 backend → 全站壞（#4084 已讓 workflow 檔變動也觸發兩邊部署）。
+> 2. 手動補跑時雙容器 deploy 失敗：`Revision template should contain exactly one
+>    container with an exposed port`。既有 frontend 服務是一個**沒命名**、有 port 的
+>    容器，`--container=frontend` 不會取代它而是在旁邊加一個；沒名字也無法用
+>    `--remove-containers` 指定。preview 試跑沒遇到，是因為那是全新建立的服務。
+>    所有現存 preview（`-issue-N`）也都是這種單一無名容器。
+> **再打開前要先解第 2 點**（例如部署前偵測舊格式，先用 `gcloud run services
+> replace` 換成具名雙容器，或刪掉服務讓 workflow 重建），並先在一個**既有**的
+> preview 上試，不是新建的。
+>
+> 以下白名單在回滾後**保留**（開關關著時沒有作用）：
 >
 > **白名單**（`roles/iap.httpsResourceAccessor`，IAP IAM，不在 workflow 裡）：
 > 設在兩層——`lingoleap-frontend-staging` 服務層，以及 **asia-east1 的

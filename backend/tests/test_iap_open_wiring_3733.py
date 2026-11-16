@@ -401,14 +401,14 @@ def test_e2e_preview_check_does_not_run_against_locked_preview():
     )
 
 
-def test_switches_are_on_and_move_together():
-    """#3733/#3719 opened: staging and every PR preview are behind IAP.
-    The two switches must stay equal -- IAP without the proxy 403s the
-    whole site (guarded in the workflow), proxy without IAP is pointless."""
+def test_switches_are_off_and_move_together():
+    """2026-11-16: opened in #4083, rolled back (an existing service with a
+    single unnamed container cannot be switched to the two-container deploy,
+    see docs/iap-runbook.md). The two switches must stay equal."""
     for wf in (PREVIEW_WF, STAGING_WF):
         env = _doc(wf)["env"]
-        assert env["IAP_ENABLED"] == "true", wf.name
-        assert env["SAME_ORIGIN_PROXY_ENABLED"] == "true", wf.name
+        assert env["IAP_ENABLED"] == "false", wf.name
+        assert env["SAME_ORIGIN_PROXY_ENABLED"] == "false", wf.name
 
 
 STAGING_FRONTEND_HASH_URL = "https://lingoleap-frontend-staging-oja2sffiya-de.a.run.app"
