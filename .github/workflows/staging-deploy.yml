@@ -822,16 +822,26 @@ jobs:
             exit 1
           fi
           echo "::add-mask::${IAP_TOKEN}"
+          # Shape only, never the value: a JWT has 3 dot-separated parts.
+          echo "IAP token: ${#IAP_TOKEN} chars, $(printf '%s' "$IAP_TOKEN" | awk -F. '{print NF}') parts"
+          HDRS="$(mktemp)"
           remaining() {
-            curl -s -D - -o /dev/null --max-time 30 "$@" \
-              | tr -d '\r' | awk -F': ' 'tolower($1)=="x-ratelimit-remaining"{print $2}'
+            curl -s -D "$HDRS" -o /dev/null --max-time 30 "$@" || true
+            tr -d '\r' < "$HDRS" | awk -F': ' 'tolower($1)=="x-ratelimit-remaining"{print $2}'
+          }
+          # When the proxied call carries no rate-limit header, say why:
+          # status line plus IAP's own rejection headers (no token values).
+          explain() {
+            tr -d '\r' < "$HDRS" | grep -iE '^HTTP/|^www-authenticate:|^x-goog-iap-generated-response:|^location:' \
+              | sed -E 's/(location: [^?]*)\?.*/\1?.../I' | head -5
           }
           direct() { remaining -H "X-Serverless-Authorization: Bearer ${INVOKER_TOKEN}" "${STAGING_BACKEND}/api/health"; }
           proxied() { remaining -H "Proxy-Authorization: Bearer ${IAP_TOKEN}" "${STAGING_FRONTEND}/api/health"; }
           for round in 1 2 3 4 5; do
-            D1=$(direct); P=$(proxied); D2=$(direct)
+            D1=$(direct); P=$(proxied); [ -z "$P" ] && WHY="$(explain)"; D2=$(direct)
             echo "round $round: direct=$D1 proxied=$P direct=$D2"
             if [ -z "$D1" ] || [ -z "$P" ] || [ -z "$D2" ]; then
+              [ -z "$P" ] && printf 'proxied response:\n%s\n' "$WHY"
               echo "::warning::round $round missing X-RateLimit-Remaining; retrying"
             elif [ "$P" = "$((D1 - 1))" ] && [ "$D2" = "$((D1 - 2))" ]; then
               echo "proxied request counted in the runner's own bucket"
