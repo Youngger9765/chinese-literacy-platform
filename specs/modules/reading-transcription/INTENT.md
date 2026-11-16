@@ -43,9 +43,13 @@ Provide high-quality audio-to-text transcription for both FullReading (全文朗
 relying solely on the browser's Web Speech API.
 
 The browser Web Speech API has known accuracy issues with Taiwanese Mandarin, especially for
-homophones and text-specific vocabulary. Gemini can be guided with the reference (target) text
-to resolve ambiguities, producing transcripts that more faithfully represent what the student
-actually read.
+homophones and text-specific vocabulary. Gemini is given the passage's distinct characters,
+sorted by code point (NOT the passage in reading order), to pick the right homophone / proper-noun
+character. #4066: with the ordered passage in the prompt, Gemini rewrote skipped or paraphrased
+phrases back into the reference (saved prod attempts: 23/92 scored ≥99% with the passage vs 4/92
+with the character set; 9 of those 23 were <90% without any reference). The hint must never
+contain a copyable run of the passage — locked by
+`backend/tests/test_regression_reading_transcription_no_passage_copy.py`.
 
 ---
 
@@ -109,7 +113,7 @@ Browser (MediaRecorder)
   │   [Backend: reading_transcription_service.py]         │
   │   1. Check MIME → needs transcode?                    │
   │   2. If yes: ffmpeg webm→ogg (temp files)             │
-  │   3. Call Gemini Audio with reference text hint       │
+  │   3. Call Gemini Audio with passage char-set hint     │
   │   4. Return {transcript, method, reasoning}           │
   │      OR {transcript: null, method: "fallback", reason}│
   │                                                        │
