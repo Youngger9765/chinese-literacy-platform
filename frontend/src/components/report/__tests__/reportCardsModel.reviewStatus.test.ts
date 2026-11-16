@@ -4,7 +4,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { resolveActiveSteps } from '../../../config/stepConfig';
-import { buildStepReportCards, stepIdsNeedingReview } from '../reportCardsModel';
+import { buildStepReportCards, radarOf, stepIdsNeedingReview, strengthsOf } from '../reportCardsModel';
 
 const steps = resolveActiveSteps(null);
 type Cards = ReturnType<typeof buildStepReportCards>;
@@ -149,5 +149,51 @@ describe('spotlight uses first-try verdicts (#4081)', () => {
   it('old sessions with only the latest feedback are not guessed yellow', () => {
     const c = buildStepReportCards(steps, ['spotlight'], { spotlight: { feedback: { a: true, b: false } } }, []);
     expect(byId(c, 'spotlight').status).toBe('done');
+  });
+});
+
+describe('attempts, rate and radar (#4087)', () => {
+  const att = (id: string, at: string, correct: number, total: number) => ({ id, at, kind: 'first', correct, total });
+
+  it('a step\'s attempts come back in time order and its rate is the latest attempt', () => {
+    const c = byId(buildStepReportCards(steps, ['comprehension'], {
+      comprehension: { mcqScore: 1, mcqTotal: 4, attempts: [att('b', '2026-11-16T02:00:00Z', 4, 4), att('a', '2026-11-16T01:00:00Z', 1, 4)] },
+    }, []), 'comprehension');
+    expect(c.attempts.map((a) => a.id)).toEqual(['a', 'b']);
+    expect(c.chart).toBe('score');
+    expect(c.rate).toBe(100);
+  });
+
+  it('without attempts the rate falls back to the current first-try score', () => {
+    const c = byId(buildStepReportCards(steps, ['comprehension'], { comprehension: { mcqScore: 3, mcqTotal: 4 } }, []), 'comprehension');
+    expect(c.rate).toBe(75);
+  });
+
+  it('steps with no right/wrong have no chart and no rate', () => {
+    const c = byId(buildStepReportCards(steps, ['full-text-annotate'], { 'full-text-annotate': { attempts: [att('x', 'y', 1, 1)] } }, []), 'full-text-annotate');
+    expect(c.chart).toBeNull();
+    expect(c.attempts).toEqual([]);
+    expect(c.rate).toBeNull();
+  });
+
+  it('the radar always has the same five axes; vocab averages its steps; missing ones are marked', () => {
+    const cards = buildStepReportCards(steps, ['vocab-definition', 'vocab-application'], {
+      'vocab-application': { score: 3, total: 4 },
+      'vocab-definition': { attempts: [att('a', '2026-11-16T01:00:00Z', 1, 2)] },
+    }, []);
+    const r = radarOf(cards);
+    expect(r.map((p) => p.label)).toEqual(['詞語力', '文意理解', '結構統整', '閱讀策略', '朗讀流暢']);
+    expect(r[0]).toMatchObject({ state: 'scored', value: Math.round((50 + 75) / 2) });
+    expect(r[1].state).toBe('todo'); // comprehension exists in the default steps but has no score
+    expect(radarOf(cards.filter((c) => c.baseId !== 'spotlight'))[3].state).toBe('absent');
+  });
+
+  it('strengths need two scored axes with different values', () => {
+    expect(strengthsOf([{ key: 'a', label: 'A', value: 80, state: 'scored' }])).toEqual({ strong: [], weak: [] });
+    expect(strengthsOf([
+      { key: 'a', label: 'A', value: 80, state: 'scored' },
+      { key: 'b', label: 'B', value: 40, state: 'scored' },
+      { key: 'c', label: 'C', value: null, state: 'absent' },
+    ])).toEqual({ strong: ['A'], weak: ['B'] });
   });
 });

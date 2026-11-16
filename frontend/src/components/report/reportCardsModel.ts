@@ -14,6 +14,7 @@
 import { resolveStepId, type StepConfig } from '../../config/stepConfig';
 import { stripPUASelectors } from '../reading-steps/annotationOffsets';
 import type { AnnotationRecord } from '../../services/learning/annotationApi';
+import { readAttempts, type StepAttempt } from '../../utils/stepAttempts';
 
 export type AnnotationKind = 'unknown' | 'important';
 
@@ -72,6 +73,33 @@ export interface StepReportCard {
   /** 卡片上的一行摘要，例如「答對 7/8 題」「做了 5 個記號」。 */
   summary: string | null;
   details: DetailBlock[];
+  /**
+   * #4087：歷次作答（依時間）。有兩筆以上，成績單點開就畫折線圖。
+   * 只有作答類的關卡有（做記號、語詞複習、知識補給站、課程簡介沒有）。
+   */
+  attempts: StepAttempt[];
+  /** 折線圖畫什麼：答對題數（score）或朗讀的速度＋正確率（reading）；null = 這關不畫。 */
+  chart: 'score' | 'reading' | null;
+  /** 這一關的能力分數 0–100（最近一次作答的第一次答對率 / 朗讀正確率），雷達圖用；null = 沒有可算的。 */
+  rate: number | null;
+}
+
+/** #4087：哪些關卡有折線圖、畫哪一種。 */
+const CHART_KIND: Record<string, 'score' | 'reading'> = {
+  'vocab-definition': 'score',
+  'vocab-application': 'score',
+  comprehension: 'score',
+  spotlight: 'score',
+  'keypoints-table': 'score',
+  'key-passage-reading': 'reading',
+};
+
+/** 一筆作答 → 0–100。 */
+export function attemptRate(a: StepAttempt): number | null {
+  if (a.kind === 'reading') return typeof a.accuracy === 'number' ? Math.round(a.accuracy) : null;
+  return typeof a.correct === 'number' && typeof a.total === 'number' && a.total > 0
+    ? Math.round((a.correct / a.total) * 100)
+    : null;
 }
 
 /** 每一關的圖示（Material Symbols）。沒列到的用預設。 */
@@ -196,7 +224,15 @@ function vocabMatchRows(list: unknown, vocab: VocabWord[] | undefined, prefix: s
  * `needsReview`：這一關有沒有「第一次答錯」的題目（→ 黃色）。不給就從作答列推：
  * 任何一列 correct === false 就是。只有分數沒有逐題資料的關卡要自己給。
  */
-type Builder = (ctx: BuildCtx) => { summary: string | null; details: DetailBlock[]; needsReview?: boolean };
+type Builder = (ctx: BuildCtx) => {
+  summary: string | null;
+  details: DetailBlock[];
+  needsReview?: boolean;
+  /** 0–100，沒有作答紀錄時雷達圖拿它當這一關的分數（#4087）。 */
+  rate?: number | null;
+};
+
+const rateOf = (t: number, n: number) => (t > 0 ? Math.round((n / t) * 100) : null);
 
 function rowsHaveMiss(details: DetailBlock[]): boolean {
   return details.some((d) => d.kind === 'answers' && d.rows.some((r) => !r.correct));
@@ -246,6 +282,7 @@ const BUILDERS: Record<string, Builder> = {
     return {
       summary: cpm !== null ? `每分鐘 ${Math.round(cpm)} 字` : null,
       details: items.length ? [{ kind: 'stats', items }] : [{ kind: 'note', text: '沒有朗讀紀錄。' }],
+      rate: pct,
     };
   },
 
@@ -282,7 +319,7 @@ const BUILDERS: Record<string, Builder> = {
     ];
     if (mc.length) details.push({ kind: 'answers', title: '選擇題', rows: mc });
     if (dd.length) details.push({ kind: 'answers', title: '拖拉配對', rows: dd });
-    return { summary: correctOf(first, rows.length), details };
+    return { summary: correctOf(first, rows.length), details, rate: rateOf(rows.length, first) };
   },
 
   'vocab-application': ({ data }) => {
@@ -296,6 +333,7 @@ const BUILDERS: Record<string, Builder> = {
       summary: n !== null && t !== null ? correctOf(n, t) : null,
       details,
       needsReview: rows.length ? undefined : n !== null && t !== null && n < t,
+      rate: n !== null && t !== null ? rateOf(t, n) : null,
     };
   },
 
@@ -312,6 +350,7 @@ const BUILDERS: Record<string, Builder> = {
       summary: correctOf(n, graded.length),
       details: [{ kind: 'stats', items: [{ label: first ? '第一次就答對' : '選擇題答對', value: `${n} / ${graded.length} 題` }] }],
       needsReview: first ? n < graded.length : false,
+      rate: first ? rateOf(graded.length, n) : null,
     };
   },
 
@@ -332,6 +371,7 @@ const BUILDERS: Record<string, Builder> = {
         { kind: 'stats', items: [{ label: '答對', value: `${n} / ${results.length} 格` }] },
         { kind: 'answers', title: '每一格', rows },
       ],
+      rate: rateOf(results.length, n),
     };
   },
 
@@ -353,6 +393,7 @@ const BUILDERS: Record<string, Builder> = {
       summary: n !== null && t !== null && t > 0 ? correctOf(n, t) : null,
       details,
       needsReview: rows.length ? undefined : n !== null && t !== null && n < t,
+      rate: n !== null && t !== null ? rateOf(t, n) : null,
     };
   },
 
@@ -430,6 +471,9 @@ export function buildStepReportCards(
         : { summary: null, details: [] };
       const needsReview = built.needsReview ?? rowsHaveMiss(built.details);
       const status: CardStatus = !completed ? 'none' : needsReview ? 'review' : 'done';
+      const chart = CHART_KIND[baseId] ?? null;
+      const attempts = chart ? readAttempts(entry) : [];
+      const latest = attempts.length ? attemptRate(attempts[attempts.length - 1]) : null;
       return {
         stepId: s.id,
         baseId,
@@ -439,6 +483,9 @@ export function buildStepReportCards(
         status,
         summary: built.summary,
         details: built.details,
+        attempts,
+        chart,
+        rate: chart ? latest ?? built.rate ?? null : null,
       };
     });
 }
@@ -467,4 +514,52 @@ export function stepIdsNeedingReview(
   stepData: Record<string, unknown> | null | undefined,
 ): Set<string> {
   return stepNavStatus(steps, stepsCompleted, stepData).review;
+}
+
+// ── #4087：雷達圖 ─────────────────────────────────────────────────────────
+
+/**
+ * 五個固定項目（每一課都一樣，案主定調 2026-11-16）。幾個關卡整合成一項；
+ * 文言文課的文白比對併進詞語 / 文意。做記號、語詞複習、知識補給站、課程簡介不計。
+ */
+export const RADAR_AXES = [
+  { key: 'vocab', label: '詞語力', steps: ['vocab-definition', 'vocab-application', 'classical-word-matching'] },
+  { key: 'meaning', label: '文意理解', steps: ['comprehension', 'classical-sentence-matching'] },
+  { key: 'structure', label: '結構統整', steps: ['keypoints-table'] },
+  { key: 'strategy', label: '閱讀策略', steps: ['spotlight'] },
+  { key: 'fluency', label: '朗讀流暢', steps: ['key-passage-reading'] },
+] as const;
+
+export interface RadarPoint {
+  key: string;
+  label: string;
+  /** 0–100；null 見 state。 */
+  value: number | null;
+  /** scored = 有分數；todo = 這課有、還沒做；absent = 這課沒有這種關卡（「本課無」）。 */
+  state: 'scored' | 'todo' | 'absent';
+}
+
+/** 卡片 → 雷達圖五項。一項 = 這課屬於它的各關分數平均（沒分數的關卡不算進平均）。 */
+export function radarOf(cards: StepReportCard[]): RadarPoint[] {
+  return RADAR_AXES.map((axis) => {
+    const mine = cards.filter((c) => (axis.steps as readonly string[]).includes(c.baseId));
+    if (!mine.length) return { key: axis.key, label: axis.label, value: null, state: 'absent' as const };
+    const rates = mine.map((c) => c.rate).filter((r): r is number => typeof r === 'number');
+    if (!rates.length) return { key: axis.key, label: axis.label, value: null, state: 'todo' as const };
+    const value = Math.round(rates.reduce((a, b) => a + b, 0) / rates.length);
+    return { key: axis.key, label: axis.label, value, state: 'scored' as const };
+  });
+}
+
+/** 強項與需要加強（有分數的項目至少兩項才說；分數一樣就不分強弱）。 */
+export function strengthsOf(points: RadarPoint[]): { strong: string[]; weak: string[] } {
+  const scored = points.filter((p) => p.state === 'scored') as (RadarPoint & { value: number })[];
+  if (scored.length < 2) return { strong: [], weak: [] };
+  const max = Math.max(...scored.map((p) => p.value));
+  const min = Math.min(...scored.map((p) => p.value));
+  if (max === min) return { strong: [], weak: [] };
+  return {
+    strong: scored.filter((p) => p.value === max).map((p) => p.label),
+    weak: scored.filter((p) => p.value === min).map((p) => p.label),
+  };
 }

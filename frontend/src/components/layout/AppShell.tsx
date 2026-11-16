@@ -110,8 +110,8 @@ interface StepDotsProps {
   annotations?: ReturnType<typeof annotateStepParts>;
   currentStepIndex: number;
   completedSet: Set<string>;
-  /** #4028：完成了但有錯題的關卡（黃色圈圈），跟報告卡片同一個判斷。 */
-  reviewSet: Set<string>;
+  /** #4028：完成了但有錯題的關卡（黃色圈圈），跟報告卡片同一個判斷。沒給 = 沒有黃色。 */
+  reviewSet?: Set<string>;
   onStepClick: (step: Step) => void;
   /** Prev/next live INSIDE the dot row (#2889) — see NavArrow below. */
   prevStep: Step | null;
@@ -263,7 +263,7 @@ export const StepDots: React.FC<StepDotsProps> = ({
         const annAt = annotations?.[i];
         const ann = annAt?.step.id === step.id ? annAt : undefined;
         const isCompleted = completedSet.has(step.id);
-        const needsReview = isCompleted && reviewSet.has(step.id);
+        const needsReview = isCompleted && !!reviewSet?.has(step.id);
         const isActive = i === currentStepIndex;
 
         let dotClass = 'bg-on-surface-variant/20 text-on-surface-variant';

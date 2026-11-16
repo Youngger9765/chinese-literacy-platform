@@ -11,6 +11,8 @@
  */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { AnswerRow, CardStatus, DetailBlock, MarkedWord, StepReportCard } from './reportCardsModel';
+import { radarOf } from './reportCardsModel';
+import { AttemptsPanel, RadarPanel } from './ReportCharts';
 
 interface Props {
   storyTitle?: string;
@@ -212,7 +214,11 @@ const DetailDialog: React.FC<{
           {card.status === 'none' ? '還沒完成' : STATUS_LABEL[card.status]}
         </p>
 
-        {card.details.length > 0 ? (
+        {card.attempts.length >= 2 ? (
+          // #4087：重複作答過 → 折線圖 + 點節點看那一次（預設選最近一次，
+          // 所以不再重複列出目前的細節）。
+          <AttemptsPanel card={card} />
+        ) : card.details.length > 0 ? (
           card.details.map((b, i) => <Detail key={i} block={b} />)
         ) : (
           <p className="text-sm text-on-surface-variant">
@@ -271,6 +277,9 @@ const StepReportCards: React.FC<Props> = ({ storyTitle, cards, onGoToStep }) => 
         )}
       </header>
 
+      {/* #4087：能力雷達（五項固定）。放在卡片前面，一眼看到強項和弱項。 */}
+      <RadarPanel points={radarOf(cards)} />
+
       <ul className="grid grid-cols-2 md:grid-cols-3 gap-3">
         {cards.map((c) => (
           <li key={c.stepId}>
@@ -303,6 +312,11 @@ const StepReportCards: React.FC<Props> = ({ storyTitle, cards, onGoToStep }) => 
                 <p className="text-xs mt-0.5 text-on-surface-variant">
                   {c.completed ? c.summary ?? '已完成' : '未完成'}
                 </p>
+                {c.attempts.length >= 2 && (
+                  <p className="text-xs mt-1 font-bold text-accent" data-testid="attempts-badge">
+                    📈 作答 {c.attempts.length} 次，點開看進步
+                  </p>
+                )}
               </div>
             </button>
           </li>

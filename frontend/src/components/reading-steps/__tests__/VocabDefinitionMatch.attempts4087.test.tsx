@@ -77,10 +77,11 @@ afterEach(() => {
 
 /** 兩關都做完，第 1 題 first-try 答錯 → 結算畫面一定有「重做錯題」。 */
 type Attempt = { kind: string; correct: number; total: number; rows: { correct: boolean; studentAnswer?: string | null; correctAnswer?: string | null }[] };
-const attemptsOf = (spy: ReturnType<typeof vi.fn>) =>
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const attemptsOf = (spy: { mock: { calls: any[][] } }) =>
   spy.mock.calls.map((c) => c[2] as Attempt | undefined).filter(Boolean) as Attempt[];
 
-async function playToSummaryWithOneWrong(onProgressChange: ReturnType<typeof vi.fn>) {
+async function playToSummaryWithOneWrong(onProgressChange: (...args: unknown[]) => void) {
   render(<VocabDefinitionMatch story={story} onFinish={vi.fn()} onProgressChange={onProgressChange} />);
   dismissCoachIfPresent();
   answerCurrentWrong();

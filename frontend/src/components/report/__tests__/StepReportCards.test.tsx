@@ -9,13 +9,13 @@ import type { StepReportCard } from '../reportCardsModel';
 const cards: StepReportCard[] = [
   {
     stepId: 'full-text-annotate', baseId: 'full-text-annotate', label: '讀全文-做記號', icon: 'edit_note',
-    completed: true, status: 'done', summary: '做了 2 個記號',
+    completed: true, status: 'done', attempts: [], chart: null, rate: null, summary: '做了 2 個記號',
     details: [{ kind: 'marks', marks: [
       { type: 'unknown', text: '喝采', paragraphIndex: 0 },
       { type: 'important', text: '球后', paragraphIndex: 1 },
     ] }],
   },
-  { stepId: 'vocab-review', baseId: 'vocab-review', label: '語詞複習', icon: 'search', completed: false, status: 'none', summary: null, details: [] },
+  { stepId: 'vocab-review', baseId: 'vocab-review', label: '語詞複習', icon: 'search', completed: false, status: 'none', attempts: [], chart: null, rate: null, summary: null, details: [] },
 ];
 
 describe('StepReportCards', () => {
@@ -49,7 +49,7 @@ describe('StepReportCards', () => {
     cards[0],
     {
       stepId: 'comprehension', baseId: 'comprehension', label: '閱讀理解', icon: 'quiz',
-      completed: true, status: 'review', summary: '答對 3/4 題',
+      completed: true, status: 'review', attempts: [], chart: 'score', rate: 75, summary: '答對 3/4 題',
       details: [{ kind: 'answers', title: '作答紀錄', rows: [
         { label: '第 1 題', correct: false, studentAnswer: 'A', correctAnswer: 'B', corrected: true },
         { label: '第 2 題', correct: false, studentAnswer: 'C', correctAnswer: 'D', corrected: false },
@@ -83,5 +83,55 @@ describe('StepReportCards', () => {
     render(<StepReportCards cards={withReview} onGoToStep={vi.fn()} />);
     fireEvent.click(screen.getByRole('button', { name: /讀全文-做記號/ }));
     expect(within(screen.getByRole('dialog')).queryByRole('button', { name: /回去訂正|前往這一關/ })).toBeNull();
+  });
+
+  // ── #4087：歷次作答折線圖 + 點節點看那一次 ──────────────────────────────
+  const withAttempts: StepReportCard = {
+    stepId: 'comprehension', baseId: 'comprehension', label: '閱讀理解', icon: 'quiz',
+    completed: true, status: 'done', chart: 'score', rate: 100, summary: '答對 4/4 題', details: [],
+    attempts: [
+      { id: 'a1', at: '2026-11-16T02:00:00Z', kind: 'first', correct: 2, total: 4,
+        rows: [{ label: '第 1 題', correct: false, studentAnswer: '甲', correctAnswer: '乙' }] },
+      { id: 'a2', at: '2026-11-16T02:10:00Z', kind: 'retry-wrong', correct: 4, total: 4,
+        rows: [{ label: '第 1 題', correct: true }] },
+    ],
+  };
+
+  it('a card answered more than once says so on its face (#4087)', () => {
+    render(<StepReportCards cards={[withAttempts]} />);
+    expect(screen.getByTestId('attempts-badge')).toHaveTextContent('作答 2 次');
+  });
+
+  it('opening it shows the attempts, guides to tap a point, and shows that attempt (#4087)', () => {
+    render(<StepReportCards cards={[withAttempts]} />);
+    fireEvent.click(screen.getByRole('button', { name: /閱讀理解/ }));
+    const dialog = screen.getByRole('dialog');
+    expect(within(dialog).getByText(/點折線上的點/)).toBeInTheDocument();
+    expect(within(dialog).getByText('比第一次多對 2 題 🎉')).toBeInTheDocument();
+    // 預設選最近一次
+    expect(within(dialog).getByTestId('attempt-detail')).toHaveTextContent('第 2 次・訂正錯題');
+    fireEvent.click(within(dialog).getByRole('button', { name: /第 1 次/ }));
+    const detail = within(dialog).getByTestId('attempt-detail');
+    expect(detail).toHaveTextContent('第 1 次・第一次作答');
+    expect(detail).toHaveTextContent('答對 2/4');
+    expect(detail).toHaveTextContent('你選：甲');
+    expect(detail).toHaveTextContent('正確答案：乙');
+  });
+
+  it('a single attempt shows the result directly, no chart (#4087)', () => {
+    render(<StepReportCards cards={[{ ...withAttempts, attempts: [withAttempts.attempts[0]] }]} />);
+    expect(screen.queryByTestId('attempts-badge')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: /閱讀理解/ }));
+    expect(screen.queryByTestId('attempts-panel')).toBeNull();
+  });
+
+  it('shows the ability radar with strengths and weaknesses (#4087)', () => {
+    const vocab: StepReportCard = { ...withAttempts, stepId: 'vocab-definition', baseId: 'vocab-definition', label: '詞語理解', rate: 50, attempts: [] };
+    render(<StepReportCards cards={[withAttempts, vocab]} />);
+    const radar = screen.getByTestId('report-radar');
+    // 這兩張卡片只涵蓋詞語力、文意理解，其他三項是「本課無」
+    expect(within(radar).getAllByText('本課無')).toHaveLength(3);
+    expect(screen.getByTestId('report-radar-summary')).toHaveTextContent('強項：文意理解');
+    expect(screen.getByTestId('report-radar-summary')).toHaveTextContent('需要加強：詞語力');
   });
 });
