@@ -168,12 +168,19 @@ def test_health_wait_signs_for_staging_frontend_and_sends_it():
     assert str(env.get("IAP_SIGNING_SA_EMAIL")) == CI_SA
     rc, calls, claims, out = _run(step)
     assert rc == 0, out
-    assert json.loads(claims)["aud"] == STAGING_FRONTEND_URL
+    # IAP matches a self-signed JWT's aud against the REQUEST URL. A bare
+    # service URL only covers "/" (CI run 43935544444: health on "/" passed,
+    # every /login and /api/* got 401 "Invalid IAP credentials"). The
+    # wildcard form covers every path Playwright will hit.
+    assert json.loads(claims)["aud"] == STAGING_FRONTEND_URL + "/*"
     assert json.loads(claims)["iss"] == CI_SA
     curls = [c for c in calls if c.startswith("curl ")]
     assert curls, calls
     assert all(f"Proxy-Authorization: Bearer {FAKE_JWT}" in c for c in curls), curls
     assert all(STAGING_FRONTEND_URL in c for c in curls), curls
+    assert any(f"{STAGING_FRONTEND_URL}/login" in c for c in curls), (
+        "must prove the token works on a path other than '/' before Playwright"
+    )
     _assert_token_only_masked(out)
 
 
@@ -199,7 +206,7 @@ def test_playwright_runs_in_container_with_iap_token_through_frontend():
     step = _step("Run E2E tests")
     rc, calls, claims, out = _run(step, ctx={"steps.wait.outputs.effective_url": STAGING_FRONTEND_URL})
     assert rc == 0, out
-    assert json.loads(claims)["aud"] == STAGING_FRONTEND_URL
+    assert json.loads(claims)["aud"] == STAGING_FRONTEND_URL + "/*"
     passed = dict(c[4:].split("=", 1) for c in calls if c.startswith("ENV "))
     assert passed.get("IAP_PROXY_TOKEN") == FAKE_JWT, passed
     assert passed.get("PLAYWRIGHT_BASE_URL") == STAGING_FRONTEND_URL, passed

@@ -134,18 +134,27 @@ jobs:
           IAP_SIGNING_SA_EMAIL: github-actions@lingoleap-dev.iam.gserviceaccount.com
         run: |
           source "${GITHUB_WORKSPACE}/scripts/lib/iap-token.sh"
-          IAP_TOKEN="$(iap_token "${IAP_AUDIENCE}")"
+          # IAP matches a self-signed JWT's aud against the REQUEST URL: the
+          # bare service URL only authorises "/" (run 43935544444: "/" 200,
+          # /login and /api/* 401 "Invalid IAP credentials"). Sign for "/*".
+          IAP_TOKEN="$(iap_token "${IAP_AUDIENCE}/*")"
           if [ -z "${IAP_TOKEN}" ]; then
             echo "::error::staging is behind IAP but no IAP JWT could be signed (needs serviceAccountTokenCreator on the CI SA itself)"
             exit 1
           fi
           echo "::add-mask::${IAP_TOKEN}"
-          # IAP checks aud against the exact hostname -> curl the URL we signed for.
           STAGING_URL="${IAP_AUDIENCE}"
           echo "Waiting for staging frontend $STAGING_URL to respond with HTTP 200..."
           for i in $(seq 1 30); do
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" -H "Proxy-Authorization: Bearer ${IAP_TOKEN}" "$STAGING_URL" || echo "000")
             if [ "$STATUS" = "200" ]; then
+              # Prove the token also opens a non-root path, else Playwright
+              # would spend 30 min collecting 401s.
+              DEEP=$(curl -s -o /dev/null -w "%{http_code}" -H "Proxy-Authorization: Bearer ${IAP_TOKEN}" "${STAGING_URL}/login" || echo "000")
+              if [ "$DEEP" != "200" ]; then
+                echo "::error::IAP token opens / but /login got HTTP $DEEP — token audience does not cover sub-paths"
+                exit 1
+              fi
               echo "Staging is up (attempt $i) — running E2E against staging"
               echo "effective_url=${STAGING_URL}" >> "$GITHUB_OUTPUT"
               exit 0
@@ -158,8 +167,9 @@ jobs:
           exit 1
 
       # #4097 — Playwright needs the IAP JWT on every request incl. page
-      # navigation: playwright.config.ts puts getIapProxyAuthHeader() into
-      # extraHTTPHeaders, and that helper uses IAP_PROXY_TOKEN as-is. The
+      # navigation: tests/e2e/fixtures/iap-fixture.ts routes it onto requests
+      # for the staging origin only (never third parties), using
+      # IAP_PROXY_TOKEN as-is. aud is "<frontend>/*" so sub-paths pass. The
       # token is signed HERE, on the host, right before the container starts
       # (fresh, ~50 min lifetime; a typical run is ~32 min), and reaches the
       # container only through `-e IAP_PROXY_TOKEN` (value from this shell,
@@ -187,7 +197,7 @@ jobs:
           CI: 'true'
         run: |
           source "${GITHUB_WORKSPACE}/scripts/lib/iap-token.sh"
-          IAP_PROXY_TOKEN="$(iap_token "${IAP_AUDIENCE}")"
+          IAP_PROXY_TOKEN="$(iap_token "${IAP_AUDIENCE}/*")"
           if [ -z "${IAP_PROXY_TOKEN}" ]; then
             echo "::error::could not sign an IAP JWT for the staging frontend"
             exit 1
