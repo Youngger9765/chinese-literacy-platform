@@ -23,6 +23,7 @@ from typing import NamedTuple
 
 from fastapi import Depends, HTTPException, Request
 
+from ..config import settings
 from .trusted_proxies import is_trusted_hop
 
 
@@ -194,8 +195,6 @@ def real_client_ip(request: Request) -> str:
     cached_ip = getattr(request.state, "client_ip", None)
     if isinstance(cached_ip, str) and cached_ip:
         return cached_ip
-
-    from ..config import settings  # local import: config imports nothing from here, but keep auth/ import-light
 
     headers = request.headers
     return trusted_proxy_client_ip(
