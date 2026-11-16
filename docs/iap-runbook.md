@@ -251,7 +251,7 @@ gcloud beta run deploy <frontend-service> \
 
 **仍未接的**：`e2e-tests.yml`（打 staging 的 Playwright／QA 腳本）在 IAP 開時要能簽 JWT——同一個 tokenCreator 授權即可，但 workflow 還沒驗過。
 
-**Firebase 兩個站已改成整站轉址**：`lingoleap-staging.web.app`／`lingoleap-dev.web.app` 每個路徑都 302 到 staging Cloud Run frontend（`firebase.json`）。Firebase rewrite 帶不了 invoker token，backend 一鎖 `/api` 就會 403，所以不再代理。`Verify Firebase sites` 改驗 302 與目的地，鎖在 `backend/tests/test_firebase_staging_redirect_3733.py`。
+⚠️ **staging 一開，`lingoleap-staging.web.app`／`lingoleap-dev.web.app` 的 `/api` 會變 403**（Firebase rewrite 帶不了 invoker token，見「已知落差」第 1 點的實測）。處理方式是把這兩個站改成整站 302 到 staging Cloud Run frontend，由另一個獨立 PR 處理（不在這次的 IAP 順序修正裡）；那個 PR 合併前不要打開開關。
 
 ## 開發人員要做什麼
 
@@ -315,8 +315,8 @@ CI workflow（`e2e-tests.yml`、`staging-deploy.yml`、`preview-deploy.yml`）
    測完 site 與兩個服務都已刪除。**後果**：backend 一鎖，所有 rewrite 到它的
    Firebase 站（staging 的 `lingoleap-staging.web.app`、`lingoleap-dev.web.app`）
    `/api`、`/assets`、`/q` 都會 403——它們不是保護的漏洞，但會壞掉。
-   **已處理**：這兩個站改成整站 302 到 staging Cloud Run frontend（見上面
-   「對 staging 真的打開」段末）。
+   處理方式：這兩個站改成整站 302 到 staging Cloud Run frontend，由另一個
+   獨立 PR 處理（見上面「對 staging 真的打開」段末）。
 2. **IAP 開通名單後台頁需要的 IAM 權限範圍太大**——PR #3724 的實作需要
    `roles/iap.admin` 才能讀取/寫入 IAP 存取名單，這個角色範圍比實際需要
    的大很多；應該改成自訂的、只能讀寫 IAP policy 的最小權限角色，目前

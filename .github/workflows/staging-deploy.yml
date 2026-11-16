@@ -655,12 +655,11 @@ jobs:
       - name: Verify Firebase sites
         run: |
           for site in lingoleap-staging lingoleap-dev; do
-            # #3733: these sites now only forward to the IAP-locked staging
-            # frontend (a rewrite to the locked backend would 403).
-            OUT=$(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' "https://${site}.web.app/learn/x?a=1")
-            echo "${site}.web.app: ${OUT}"
-            if [ "$OUT" != "302 https://lingoleap-frontend-staging-958347263320.asia-east1.run.app/learn/x?a=1" ]; then
-              echo "::error::${site}.web.app does not forward to staging frontend"
+            FE=$(curl -s -o /dev/null -w '%{http_code}' "https://${site}.web.app/")
+            API=$(curl -s -o /dev/null -w '%{http_code}' "https://${site}.web.app/api/health")
+            echo "${site}.web.app: FE=${FE} /api/health=${API}"
+            if [ "$FE" != "200" ] || [ "$API" != "200" ]; then
+              echo "::error::${site}.web.app verification failed"
               exit 1
             fi
           done
