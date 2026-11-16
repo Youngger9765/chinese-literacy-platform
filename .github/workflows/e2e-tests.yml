@@ -21,13 +21,16 @@ name: E2E Tests (Playwright)
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
+  # #4097: re-check staging by hand after a merge (the PR-time run tests the
+  # still-undeployed PR against staging; this one tests what staging serves).
+  workflow_dispatch:
 
+# Only the e2e job holds id-token: write (declared on the job itself).
 permissions:
   contents: read
-  id-token: write
 
 concurrency:
-  group: e2e-${{ github.event.pull_request.head.ref }}
+  group: e2e-${{ github.event.pull_request.head.ref || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -41,12 +44,15 @@ jobs:
     permissions:
       contents: read
     outputs:
-      relevant: ${{ steps.filter.outputs.relevant }}
+      # workflow_dispatch has no PR diff for paths-filter -> always relevant
+      relevant: ${{ github.event_name == 'workflow_dispatch' && 'true' || steps.filter.outputs.relevant }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        if: github.event_name == 'pull_request'
         with:
           fetch-depth: 0          # paths-filter 要完整歷史才能算 diff
       - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        if: github.event_name == 'pull_request'
         id: filter
         with:
           filters: |
@@ -60,8 +66,17 @@ jobs:
     name: Playwright E2E Tests
     runs-on: ubuntu-24.04  # Playwright 不支援 ubuntu-latest 現在指向的 26.04
     # #3966: explicit per-job permissions — id-token:write is for the
-    # google-github-actions/auth WIF step below (checking staging health /
-    # GCP access), contents:read for checkout.
+    # google-github-actions/auth WIF step below (signing the IAP JWT),
+    # contents:read for checkout.
+    #
+    # #4097 — this job holds a GCP credential (WIF), so NO third-party code
+    # runs on this host: `npm ci` + Playwright run inside the official
+    # Playwright container (last step), which gets only the variables it
+    # needs -- never the GitHub OIDC request variables (ACTIONS_ID_TOKEN_*,
+    # with which any npm install script could mint its own GCP token) and
+    # never the workspace root, where auth@v2 writes gha-creds-*.json.
+    # Same rule as backend/specs/test_workflow_gcp_cred_exposure_spec.py;
+    # locked by backend/tests/test_e2e_iap_wiring_4097.py.
     permissions:
       contents: read
       id-token: write
@@ -70,29 +85,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
-      - name: Set up Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
-
-      - name: Install dependencies
-        working-directory: frontend
-        run: npm ci
-
-      - name: Install Playwright browsers
-        working-directory: frontend
-        run: npx playwright install chromium --with-deps
-
-      # #3719 — IAP 準備：staging 未來可能在前面加一層 IAP。這裡先把 gcloud
-      # 認證就位，讓 scripts/lib/iap-token.sh 跟 playwright.config.ts 的
-      # getIapProxyAuthHeader() 能在設了 IAP_AUDIENCE 之後要到通行證。
-      # IAP_AUDIENCE 現在沒有任何 secret 可讀（還沒打開 IAP），所以下面
-      # 每一步都跟今天完全一樣 —— 這一步只是把「打開時只要設一個 secret」
-      # 這件事準備好。
+      # #3733/#4097 — staging frontend is behind IAP. IAP only accepts a
+      # service-account SELF-SIGNED JWT whose aud is the frontend's exact
+      # URL (#3730); the github-actions SA signs it via IAM Credentials
+      # (same SA + permissions staging-deploy.yml's health check uses).
       - id: auth
         uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed # v2.1.13
         with:
@@ -132,18 +130,21 @@ jobs:
       - name: Wait for staging to be healthy
         id: wait
         env:
-          IAP_AUDIENCE: ${{ secrets.IAP_AUDIENCE }}
+          IAP_AUDIENCE: https://lingoleap-frontend-staging-958347263320.asia-east1.run.app
+          IAP_SIGNING_SA_EMAIL: github-actions@lingoleap-dev.iam.gserviceaccount.com
         run: |
           source "${GITHUB_WORKSPACE}/scripts/lib/iap-token.sh"
-          IAP_AUTH_ARGS=()
-          IAP_TOKEN="$(iap_token "${IAP_AUDIENCE:-}")"
-          if [ -n "${IAP_TOKEN}" ]; then
-            IAP_AUTH_ARGS=(-H "Proxy-Authorization: Bearer ${IAP_TOKEN}")
+          IAP_TOKEN="$(iap_token "${IAP_AUDIENCE}")"
+          if [ -z "${IAP_TOKEN}" ]; then
+            echo "::error::staging is behind IAP but no IAP JWT could be signed (needs serviceAccountTokenCreator on the CI SA itself)"
+            exit 1
           fi
-          STAGING_URL="https://lingoleap-frontend-staging-958347263320.asia-east1.run.app"
+          echo "::add-mask::${IAP_TOKEN}"
+          # IAP checks aud against the exact hostname -> curl the URL we signed for.
+          STAGING_URL="${IAP_AUDIENCE}"
           echo "Waiting for staging frontend $STAGING_URL to respond with HTTP 200..."
           for i in $(seq 1 30); do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${IAP_AUTH_ARGS[@]+${IAP_AUTH_ARGS[@]}}" "$STAGING_URL" || echo "000")
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" -H "Proxy-Authorization: Bearer ${IAP_TOKEN}" "$STAGING_URL" || echo "000")
             if [ "$STATUS" = "200" ]; then
               echo "Staging is up (attempt $i) — running E2E against staging"
               echo "effective_url=${STAGING_URL}" >> "$GITHUB_OUTPUT"
@@ -156,28 +157,59 @@ jobs:
           echo "effective_url=${STAGING_URL}" >> "$GITHUB_OUTPUT"
           exit 1
 
+      # #4097 — Playwright needs the IAP JWT on every request incl. page
+      # navigation: playwright.config.ts puts getIapProxyAuthHeader() into
+      # extraHTTPHeaders, and that helper uses IAP_PROXY_TOKEN as-is. The
+      # token is signed HERE, on the host, right before the container starts
+      # (fresh, ~50 min lifetime; a typical run is ~32 min), and reaches the
+      # container only through `-e IAP_PROXY_TOKEN` (value from this shell,
+      # never on the command line).
+      #
+      # API calls go through the frontend's same-origin proxy (/api/* ->
+      # invoker sidecar -> backend): E2E_BACKEND_URL = the frontend URL. The
+      # backend itself is run.invoker-locked, and the container carries only
+      # the IAP JWT -- exactly what a signed-in browser has.
+      #
+      # Image = the official Playwright image, browsers baked in; its version
+      # must equal frontend/package-lock.json's @playwright/test (locked by
+      # test_e2e_iap_wiring_4097.py). Only frontend/ is mounted.
       - name: Run E2E tests (core flows only)
-        working-directory: frontend
         env:
+          IAP_AUDIENCE: https://lingoleap-frontend-staging-958347263320.asia-east1.run.app
+          IAP_SIGNING_SA_EMAIL: github-actions@lingoleap-dev.iam.gserviceaccount.com
           PLAYWRIGHT_BASE_URL: ${{ steps.wait.outputs.effective_url }}
-          # 這支打的是 staging，而 PR 的 code 還沒部署上去。
-          # journey 那條驗的是「已部署的行為」，PR 階段落後一輪是正常的 ——
-          # 讓它回報而不是把整個 gate 弄紅（merge 後的 staging 跑才是判準）。
-          E2E_EXPECT_DEPLOYED: ${{ github.ref == 'refs/heads/staging' && '1' || '0' }}
+          E2E_BACKEND_URL: ${{ steps.wait.outputs.effective_url }}
+          # PR 階段打的是 staging，而 PR 的 code 還沒部署上去 ——
+          # journey 那條驗的是「已部署的行為」，PR 階段落後一輪是正常的，
+          # 讓它回報而不是把整個 gate 弄紅。merge 後手動跑（workflow_dispatch）
+          # 驗的是 staging 正在服務的版本，那才是判準 → 設 1。
+          E2E_EXPECT_DEPLOYED: ${{ github.event_name == 'workflow_dispatch' && '1' || '0' }}
           CI: 'true'
-          # #3719 — IAP 準備：見上面「Wait for staging to be healthy」註解。
-          IAP_AUDIENCE: ${{ secrets.IAP_AUDIENCE }}
         run: |
-          # Run all specs in testDir (tests/e2e). The old hardcoded list named 6
-          # spec files that were consolidated into demo-path + full-qa (#2062 — that
-          # stale list is why the workflow was disabled). Bare invocation auto-discovers.
-          npx playwright test --reporter=github --timeout=60000
+          source "${GITHUB_WORKSPACE}/scripts/lib/iap-token.sh"
+          IAP_PROXY_TOKEN="$(iap_token "${IAP_AUDIENCE}")"
+          if [ -z "${IAP_PROXY_TOKEN}" ]; then
+            echo "::error::could not sign an IAP JWT for the staging frontend"
+            exit 1
+          fi
+          echo "::add-mask::${IAP_PROXY_TOKEN}"
+          export IAP_PROXY_TOKEN
+          # Run all specs in testDir (tests/e2e). Bare invocation auto-discovers (#2062).
+          docker run --rm --init --ipc=host \
+            -v "${GITHUB_WORKSPACE}/frontend:/work" -w /work \
+            -e IAP_PROXY_TOKEN \
+            -e PLAYWRIGHT_BASE_URL \
+            -e E2E_BACKEND_URL \
+            -e E2E_EXPECT_DEPLOYED \
+            -e CI \
+            mcr.microsoft.com/playwright:v1.59.1-noble@sha256:b0ab6f3cb99aa7803adbc14d9027ec1785fc6e433b97e134e0f8fe61683b6b53 \
+            bash -c 'npm ci && npx playwright test --reporter=github --timeout=60000'
 
       - name: Upload test report
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: playwright-report-pr-${{ github.event.pull_request.number }}
+          name: playwright-report-${{ github.event.pull_request.number || github.run_id }}
           path: frontend/playwright-report/
           retention-days: 7
 
@@ -185,6 +217,6 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: playwright-results-pr-${{ github.event.pull_request.number }}
+          name: playwright-results-${{ github.event.pull_request.number || github.run_id }}
           path: frontend/test-results/
           retention-days: 3

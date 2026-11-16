@@ -187,6 +187,13 @@ function isWithinHardExpiry(mintedAtMs: number): boolean {
 export function getIapProxyAuthHeader(
   mintToken: TokenMinter = mintTokenSelfSigned,
 ): Record<string, string> {
+  // #4097: e2e-tests.yml signs the IAP JWT on the runner and runs Playwright
+  // in a container that holds no GCP credential (third-party npm code must
+  // not be able to reach one), so inside it nothing can be minted -- the
+  // pre-signed token comes in through this variable and is used as-is.
+  const preMinted = process.env.IAP_PROXY_TOKEN;
+  if (preMinted) return { 'Proxy-Authorization': `Bearer ${preMinted}` };
+
   const audience = process.env.IAP_AUDIENCE;
   if (!audience) return {};
 
