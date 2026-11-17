@@ -851,6 +851,18 @@ jobs:
       - if: steps.env-check.outputs.valid == 'true' && needs.deploy-preview.outputs.iap_enabled == 'true'
         uses: google-github-actions/setup-gcloud@e427ad8a34f8676edf47cf7d7925499adf3eb74f # v2.2.1
 
+      # Security review (MEDIUM): install runs in its OWN container that never
+      # receives IAP_PROXY_TOKEN, with --ignore-scripts, so no dependency
+      # install script can read the token. Only the `playwright test` container
+      # below gets it (browsers are baked into the image; nothing to install).
+      - name: Install E2E deps (no IAP token, no install scripts)
+        if: steps.env-check.outputs.valid == 'true'
+        run: |
+          docker run --rm --init \
+            -v "${GITHUB_WORKSPACE}/frontend:/work" -w /work \
+            mcr.microsoft.com/playwright:v1.59.1-noble@sha256:b0ab6f3cb99aa7803adbc14d9027ec1785fc6e433b97e134e0f8fe61683b6b53 \
+            npm ci --ignore-scripts
+
       # IAP matches a self-signed JWT's aud against the REQUEST URL: the bare
       # service URL only authorises "/" (run 43935544444), so sign
       # "<frontend>/*". API calls go through the frontend's same-origin /api
@@ -899,4 +911,4 @@ jobs:
             -e E2E_EXPECT_DEPLOYED \
             -e CI \
             mcr.microsoft.com/playwright:v1.59.1-noble@sha256:b0ab6f3cb99aa7803adbc14d9027ec1785fc6e433b97e134e0f8fe61683b6b53 \
-            bash -c 'npm ci && npx playwright test tests/e2e/multiTextJourney.spec.ts --reporter=github --timeout=300000'
+            npx playwright test tests/e2e/multiTextJourney.spec.ts --reporter=github --timeout=300000

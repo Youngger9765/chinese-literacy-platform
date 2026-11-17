@@ -59,8 +59,14 @@ def _step(name_part: str) -> dict:
 
 
 def _run_step() -> dict:
-    hits = [s for s in _job()["steps"] if "docker run" in str(s.get("run", ""))]
-    assert len(hits) == 1, f"expected exactly 1 docker-run step in {JOB}, got {len(hits)}"
+    hits = [s for s in _job()["steps"] if "playwright test" in str(s.get("run", ""))]
+    assert len(hits) == 1, f"expected exactly 1 playwright-test step in {JOB}, got {len(hits)}"
+    return hits[0]
+
+
+def _install_step() -> dict:
+    hits = [s for s in _job()["steps"] if "npm ci" in str(s.get("run", ""))]
+    assert len(hits) == 1, f"expected exactly 1 npm-ci step in {JOB}, got {len(hits)}"
     return hits[0]
 
 
@@ -294,3 +300,36 @@ def test_with_demo_credentials_the_environment_is_valid_and_nothing_leaks():
     assert rc == 0, out
     assert "valid=true" in gh_out
     assert "demo1234" not in out and "student@example.com" not in out
+
+
+# ── C: the IAP token never reaches dependency install scripts ───────────
+#
+# Security review (MEDIUM): `-e IAP_PROXY_TOKEN` into a container that ran
+# `npm ci && npx playwright test` let any postinstall script read the token.
+# Install now runs in its own container without the token (and with
+# --ignore-scripts); only the `playwright test` container gets it.
+
+
+def test_install_runs_without_the_token_and_without_scripts():
+    step = _install_step()
+    assert step is not None and "playwright test" not in str(step["run"])
+    assert "steps.env-check.outputs.valid == 'true'" in str(step.get("if", ""))
+    assert "IAP" not in json.dumps(step.get("env") or {}), step.get("env")
+    rc, calls, claims, out, _ = _run(step, _ctx(iap=True))
+    assert rc == 0, out
+    assert claims == "", "the install step must not sign a token"
+    docker = _docker_call(calls)
+    assert "IAP_PROXY_TOKEN" not in docker and "Proxy-Authorization" not in docker, docker
+    assert "npm ci --ignore-scripts" in docker, docker
+    assert not [c for c in calls if c.startswith("ENV IAP")], calls
+
+
+def test_token_container_runs_no_install():
+    rc, calls, _, out, _ = _run(_run_step(), _ctx(iap=True))
+    assert rc == 0, out
+    docker = _docker_call(calls)
+    assert not re.search(r"\bnpm (ci|install)\b", docker), (
+        "the container that holds IAP_PROXY_TOKEN must not run npm install scripts"
+    )
+    steps = _job()["steps"]
+    assert steps.index(_install_step()) < steps.index(_run_step())
