@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures/iap-fixture';
 import { getIapProxyAuthHeader } from './utils/iapAuth';
 
 /**

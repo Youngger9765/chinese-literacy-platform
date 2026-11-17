@@ -136,6 +136,37 @@ def student(client):
     return _register_and_login(client, "student")
 
 
+@pytest.fixture
+def owned_session(client):
+    """A fresh student with one freshly created learning session.
+
+    Each integration test gets its own student and session so it does not
+    depend on a session left behind by an earlier test in this module (#3787).
+    """
+    owner = _register_and_login(client)
+    resp = client.post(
+        "/api/learning/sessions",
+        json={"story_slug": VALID_SLUG},
+        headers=auth_header(owner["token"]),
+    )
+    assert resp.status_code == 201, resp.text
+    return {"token": owner["token"], "session_id": resp.json()["id"]}
+
+
+def _save_three_steps(client, token: str, session_id: int):
+    """Simulate the student completing 3 steps via PUT /progress."""
+    put_resp = client.put(
+        f"/api/learning/sessions/{session_id}/progress",
+        json={
+            "current_step": "vocab",
+            "steps_completed": ["reading-annotation", "tutor", "comprehension"],
+            "step_data": {},
+        },
+        headers=auth_header(token),
+    )
+    assert put_resp.status_code == 200, put_resp.text
+
+
 # ---------------------------------------------------------------------------
 # Unit tests: current_step_derived property (without ORM overhead)
 #
@@ -232,31 +263,10 @@ def test_session_creation_does_not_write_current_step(client, student):
         assert session.current_step == 1
 
 
-def test_saving_step_progress_does_not_update_current_step_column(client, student):
+def test_saving_step_progress_does_not_update_current_step_column(client, owned_session):
     """PUT /progress must NOT write to the integer current_step column."""
-    # Use existing session from previous test (same student + slug returns same session)
-    # or create a fresh one with a distinct slug is not possible here; re-use existing.
-    # Get the existing session_id from the previous test via the API.
-    list_resp = client.get(
-        "/api/learning/sessions",
-        headers=auth_header(student["token"]),
-    )
-    assert list_resp.status_code == 200, list_resp.text
-    sessions = list_resp.json()["items"]
-    assert len(sessions) >= 1
-    session_id = sessions[0]["id"]
-
-    # Simulate student completing 3 steps
-    put_resp = client.put(
-        f"/api/learning/sessions/{session_id}/progress",
-        json={
-            "current_step": "vocab",
-            "steps_completed": ["reading-annotation", "tutor", "comprehension"],
-            "step_data": {},
-        },
-        headers=auth_header(student["token"]),
-    )
-    assert put_resp.status_code == 200, put_resp.text
+    session_id = owned_session["session_id"]
+    _save_three_steps(client, owned_session["token"], session_id)
 
     # Verify the integer column was NOT updated
     with TestingSessionLocal() as db:
@@ -276,18 +286,15 @@ def test_saving_step_progress_does_not_update_current_step_column(client, studen
         )
 
 
-def test_get_session_status_returns_derived_step(client, student):
+def test_get_session_status_returns_derived_step(client, owned_session):
     """GET /sessions/{id}/status current_step must reflect step_progress, not the column."""
-    list_resp = client.get(
-        "/api/learning/sessions",
-        headers=auth_header(student["token"]),
-    )
-    session_id = list_resp.json()["items"][0]["id"]
+    session_id = owned_session["session_id"]
+    _save_three_steps(client, owned_session["token"], session_id)
 
-    # Check status endpoint returns derived value (4 from previous test), not stale column (1)
+    # Check status endpoint returns derived value (4), not stale column (1)
     status_resp = client.get(
         f"/api/learning/sessions/{session_id}/status",
-        headers=auth_header(student["token"]),
+        headers=auth_header(owned_session["token"]),
     )
     assert status_resp.status_code == 200, status_resp.text
     body = status_resp.json()
@@ -298,19 +305,15 @@ def test_get_session_status_returns_derived_step(client, student):
     )
 
 
-def test_patch_session_with_current_step_does_not_write_column(client, student):
+def test_patch_session_with_current_step_does_not_write_column(client, owned_session):
     """PATCH /sessions/{id} with current_step in payload must silently discard it."""
-    list_resp = client.get(
-        "/api/learning/sessions",
-        headers=auth_header(student["token"]),
-    )
-    session_id = list_resp.json()["items"][0]["id"]
+    session_id = owned_session["session_id"]
 
     # Try patching current_step directly (should be silently ignored)
     patch_resp = client.patch(
         f"/api/learning/sessions/{session_id}",
         json={"current_step": 5, "accuracy": 85.0},
-        headers=auth_header(student["token"]),
+        headers=auth_header(owned_session["token"]),
     )
     assert patch_resp.status_code == 200, patch_resp.text
 

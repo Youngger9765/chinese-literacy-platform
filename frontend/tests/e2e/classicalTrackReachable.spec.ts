@@ -1,4 +1,5 @@
-import { test, expect, APIRequestContext, Page } from '@playwright/test';
+import { test, expect } from './fixtures/iap-fixture';
+import type { APIRequestContext, Page } from '@playwright/test';
 
 /**
  * 文言文那一軌：學生從**真側欄**走得到，而且念順順讀的是原文（#2752 / #2730 週邊）。

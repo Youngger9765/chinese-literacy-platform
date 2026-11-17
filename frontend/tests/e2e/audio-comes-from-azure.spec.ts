@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures/iap-fixture';
 
 /**
  * 朗讀必須真的是後端合成的音檔，不是瀏覽器內建語音（#2930）。

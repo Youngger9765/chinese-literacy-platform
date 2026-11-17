@@ -86,8 +86,12 @@ def _decode_exp(id_token: str) -> int:
 
 
 def _fetch_from_metadata_server(audience: str) -> str:
+    # format=full (#3740)：預設格式的 token 不含 `email`／`email_verified`，
+    # backend 要靠驗過的 email 等於 FRONTEND_PROXY_SA 才信任 X-Client-IP；
+    # 少了這個參數，那個比對永遠不成立，所有經轉送的使用者又會共用 frontend
+    # 出口 IP 的限流額度。Cloud Run 的 invoker 驗證照樣接受這種 token。
     req = urllib.request.Request(
-        f"{_METADATA_IDENTITY_URL}?audience={audience}",
+        f"{_METADATA_IDENTITY_URL}?audience={audience}&format=full",
         headers={"Metadata-Flavor": "Google"},
     )
     with urllib.request.urlopen(req, timeout=5) as resp:  # noqa: S310

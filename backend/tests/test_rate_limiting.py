@@ -1931,3 +1931,151 @@ class TestGzipIsOn:
         r = client.get("/api/stories", headers={"Accept-Encoding": "identity"})
         assert r.status_code == 200
         assert "gzip" not in (r.headers.get("content-encoding") or "")
+
+
+class TestRealClientIpBehindSameOriginProxy:
+    """#3740 (second pass) — GlobalRateLimitMiddleware was moved onto
+    trusted_proxy_client_ip, but every PER-ROUTE IP limiter (login 60/min,
+    register 5/min, forgot-password 5/min, claim-account, TTS, and
+    get_client_key's anonymous fallback) still went through
+    real_client_ip(), which only reads X-Forwarded-For. Behind the staging
+    same-origin proxy, the last XFF entry backend sees is the FRONTEND
+    container's egress IP (staging request log, 2026-11-16: a proxied
+    POST /api/auth/login arrived from 34.34.x.x, not the user), so every
+    user behind the proxy still shared one login/register bucket.
+    """
+
+    FRONTEND_SA = "frontend-sa@lingoleap-dev.iam.gserviceaccount.com"
+    BACKEND_AUDIENCE = "https://lingoleap-backend-958347263320.asia-east1.run.app"
+    # Shape backend really receives through the proxy: nginx appends its own
+    # peer, then Cloud Run appends the frontend's egress IP.
+    PROXIED_XFF = "198.51.100.10, 169.254.1.1, 34.34.0.1"
+    EGRESS_IP = "34.34.0.1"
+
+    @pytest.fixture(autouse=True)
+    def _clear_caches(self):
+        from app.auth.rate_limiter import _verified_identity_cache
+        from app.routes.auth import rate_limiter as auth_rate_limiter
+        _verified_identity_cache.clear()
+        auth_rate_limiter.reset()
+        general_rate_limiter.reset()
+        yield
+        _verified_identity_cache.clear()
+        auth_rate_limiter.reset()
+        general_rate_limiter.reset()
+
+    def _patch_verify(self, token: str, email: str):
+        def _verify(tok, request, audience):
+            if tok != token or audience != self.BACKEND_AUDIENCE:
+                raise ValueError("unknown token or wrong audience")
+            return {"email": email, "email_verified": True, "exp": time.time() + 3600}
+        return patch("google.oauth2.id_token.verify_oauth2_token", side_effect=_verify)
+
+    def _request(self, headers: dict) -> Request:
+        raw = [(k.lower().encode(), v.encode()) for k, v in headers.items()]
+        return Request({"type": "http", "headers": raw, "client": ("169.254.9.9", 1234)})
+
+    def _proxy_config(self):
+        return (
+            patch.object(settings, "frontend_proxy_sa", self.FRONTEND_SA),
+            patch.object(settings, "backend_audience", self.BACKEND_AUDIENCE),
+        )
+
+    def test_real_client_ip_trusts_x_client_ip_from_the_verified_proxy(self):
+        from app.auth.rate_limiter import real_client_ip
+        token = "sidecar-token-1"
+        sa, aud = self._proxy_config()
+        with sa, aud, self._patch_verify(token, self.FRONTEND_SA):
+            ip = real_client_ip(self._request({
+                "X-Forwarded-For": self.PROXIED_XFF,
+                "X-Frontend-Identity": token,
+                "X-Client-IP": "198.51.100.10",
+            }))
+        assert ip == "198.51.100.10"
+
+    def test_real_client_ip_ignores_x_client_ip_with_a_forged_identity(self):
+        """Negative control: a direct caller setting both headers itself
+        with a token that does not verify must still be keyed on XFF."""
+        from app.auth.rate_limiter import real_client_ip
+        sa, aud = self._proxy_config()
+        with sa, aud, self._patch_verify("the-real-token", self.FRONTEND_SA):
+            ip = real_client_ip(self._request({
+                "X-Forwarded-For": "6.6.6.6, 203.0.113.50",
+                "X-Frontend-Identity": "forged-token",
+                "X-Client-IP": "6.6.6.6",
+            }))
+        assert ip == "203.0.113.50"
+
+    def test_real_client_ip_ignores_a_token_for_a_different_service_account(self):
+        from app.auth.rate_limiter import real_client_ip
+        token = "token-for-someone-else"
+        sa, aud = self._proxy_config()
+        with sa, aud, self._patch_verify(token, "attacker@other-project.iam.gserviceaccount.com"):
+            ip = real_client_ip(self._request({
+                "X-Forwarded-For": "6.6.6.6, 203.0.113.51",
+                "X-Frontend-Identity": token,
+                "X-Client-IP": "6.6.6.6",
+            }))
+        assert ip == "203.0.113.51"
+
+    def test_login_limiter_keys_each_proxied_user_separately(self, client):
+        """Through the real route: exhausting the login bucket of the
+        frontend's egress IP (what every proxied user collapsed onto) must
+        NOT lock out a proxied user whose verified X-Client-IP differs."""
+        from app.routes.auth import rate_limiter as auth_rate_limiter
+        for _ in range(60):
+            auth_rate_limiter.check(f"login:{self.EGRESS_IP}", max_requests=60, window_seconds=60)
+
+        token = "sidecar-token-2"
+        sa, aud = self._proxy_config()
+        with sa, aud, self._patch_verify(token, self.FRONTEND_SA):
+            resp = client.post(
+                "/api/auth/login",
+                json={"email": "nobody-3740@example.com", "password": "demo1234"},
+                headers={
+                    "X-Forwarded-For": self.PROXIED_XFF,
+                    "X-Frontend-Identity": token,
+                    "X-Client-IP": "198.51.100.10",
+                },
+            )
+        assert resp.status_code != 429, resp.text
+
+    def test_forged_identity_is_verified_once_per_request_not_twice(self, client):
+        """A failed verification is not cached, so a route-level limiter
+        recomputing the IP would verify a forged token a second time (one
+        more Google cert fetch per request). The middleware's result must
+        be reused."""
+        sa, aud = self._proxy_config()
+        with sa, aud, self._patch_verify("the-real-token", self.FRONTEND_SA) as verify:
+            client.post(
+                "/api/auth/login",
+                json={"email": "nobody-3740@example.com", "password": "demo1234"},
+                headers={
+                    "X-Forwarded-For": "6.6.6.6, 203.0.113.52",
+                    "X-Frontend-Identity": "forged-token",
+                    "X-Client-IP": "6.6.6.6",
+                },
+            )
+        assert verify.call_count == 1
+
+    def test_login_limiter_uses_the_verified_client_bucket(self, client):
+        """Mirror: exhausting the REAL user's bucket must 429 them even
+        though the egress-IP bucket is empty -- proves the route reads the
+        verified X-Client-IP rather than simply not limiting."""
+        from app.routes.auth import rate_limiter as auth_rate_limiter
+        for _ in range(60):
+            auth_rate_limiter.check("login:198.51.100.11", max_requests=60, window_seconds=60)
+
+        token = "sidecar-token-3"
+        sa, aud = self._proxy_config()
+        with sa, aud, self._patch_verify(token, self.FRONTEND_SA):
+            resp = client.post(
+                "/api/auth/login",
+                json={"email": "nobody-3740@example.com", "password": "demo1234"},
+                headers={
+                    "X-Forwarded-For": self.PROXIED_XFF,
+                    "X-Frontend-Identity": token,
+                    "X-Client-IP": "198.51.100.11",
+                },
+            )
+        assert resp.status_code == 429

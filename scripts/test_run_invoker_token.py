@@ -226,6 +226,25 @@ class FetchFromMetadataServer(unittest.TestCase):
         self.assertIn("audience=https://backend.example.com", req.full_url)
         self.assertTrue(req.full_url.startswith("http://metadata.google.internal/"))
 
+    def test_requests_the_full_format_so_the_token_carries_the_email_claim(self):
+        # #3740: backend trusts X-Client-IP only when this token's verified
+        # `email` equals FRONTEND_PROXY_SA. The metadata server leaves
+        # `email`/`email_verified` OUT of the default (standard) format, so
+        # without format=full that check can never pass and every proxied
+        # user collapses onto the frontend's egress IP.
+        fake_response = mock.MagicMock()
+        fake_response.read.return_value = b"the-token\n"
+        fake_response.__enter__ = lambda self: fake_response
+        fake_response.__exit__ = lambda self, *a: False
+
+        with mock.patch("urllib.request.urlopen", return_value=fake_response) as urlopen:
+            run_invoker_token._fetch_from_metadata_server("https://backend.example.com")
+
+        from urllib.parse import parse_qs, urlparse
+        query = parse_qs(urlparse(urlopen.call_args[0][0].full_url).query)
+        self.assertEqual(query.get("format"), ["full"])
+        self.assertEqual(query.get("audience"), ["https://backend.example.com"])
+
 
 class SidecarServer(unittest.TestCase):
     """nginx's `auth_request` directive is the only real caller of this

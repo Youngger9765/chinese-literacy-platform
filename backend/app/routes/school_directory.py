@@ -99,7 +99,8 @@ async def search_school_directory_route(
             if county:
                 suggestions = _filter_suggestions_to_county(db, county, suggestions)
         else:
-            logger.info("school_name_suggest rate-limited for key=%s", rl_key)
+            # No key in the log: it is a user id or client IP (#3740 CodeQL).
+            logger.info("school_name_suggest rate-limited")
             suggestions = []
 
     return SchoolDirectorySearchResponse(
