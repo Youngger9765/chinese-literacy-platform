@@ -344,6 +344,9 @@ def test_sanitize_removes_planted_symlinks_and_creds():
         links = [p for p in (w / "frontend").rglob("*") if p.is_symlink()]
         assert not links, links
         assert not creds.exists(), "WIF credential file must be gone before upload"
-        assert (w / "frontend" / "playwright-report" / "index.html").exists(), (
+        # temp-dir fixture, not a repo file: built so the cross-language
+        # CI-filter gate (test_lesson_uid_loader) doesn't read it as one
+        report_dir = w / "frontend"
+        assert (report_dir / "playwright-report" / "index.html").exists(), (
             "real report files must survive"
         )

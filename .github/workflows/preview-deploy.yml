@@ -843,13 +843,13 @@ jobs:
 
       - id: auth
         if: steps.env-check.outputs.valid == 'true' && needs.deploy-preview.outputs.iap_enabled == 'true'
-        uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed # v2.1.13
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
         with:
           workload_identity_provider: projects/958347263320/locations/global/workloadIdentityPools/github-pool/providers/github-provider
           service_account: github-actions@lingoleap-dev.iam.gserviceaccount.com
 
       - if: steps.env-check.outputs.valid == 'true' && needs.deploy-preview.outputs.iap_enabled == 'true'
-        uses: google-github-actions/setup-gcloud@e427ad8a34f8676edf47cf7d7925499adf3eb74f # v2.2.1
+        uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
 
       # Security review (MEDIUM): install runs in its OWN container that never
       # receives IAP_PROXY_TOKEN, with --ignore-scripts, so no dependency
