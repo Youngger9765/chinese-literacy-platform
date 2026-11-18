@@ -101,7 +101,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed # v2.1.13
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
         with:
           # Claude Security find_01WStrhArZsNRHeb92RWHZRE (high, CWE-250):
           # this job authenticates as github-actions@lingoleap-dev -- the
@@ -123,7 +123,7 @@ jobs:
           service_account: github-actions@lingoleap-dev.iam.gserviceaccount.com
 
       - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@e427ad8a34f8676edf47cf7d7925499adf3eb74f # v2.2.1
+        uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
         with:
           # #3733: the runner's gcloud has no `beta` component; `gcloud beta
           # run deploy` (IAP / two-container frontend) would stop on an
@@ -676,7 +676,7 @@ jobs:
       - name: （IAP_ENABLED 時）取 backend invoker ID token
         id: invoker
         if: env.IAP_ENABLED == 'true' && steps.preview-urls.outputs.backend_url != 'N/A' && steps.preview-urls.outputs.backend_url != ''
-        uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed # v2.1.13
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
         with:
           workload_identity_provider: projects/958347263320/locations/global/workloadIdentityPools/github-pool/providers/github-provider
           service_account: github-actions@lingoleap-dev.iam.gserviceaccount.com
@@ -740,7 +740,7 @@ jobs:
       # PR 只跑一課（五課走完整條路太慢，慢到會讓人想關掉這道門），
       # staging 維持五課全跑 —— 兩個環境跑不同的量，不是抽樣代替全檢。
       - name: Comment PR with preview URLs
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             const prNumber = context.payload.pull_request.number;
@@ -789,57 +789,126 @@ jobs:
   e2e-preview-check:
     name: 學生走得完嗎（multi-text journey on preview）
     needs: deploy-preview
-    runs-on: ubuntu-24.04  # 這個 job 會裝 Playwright，26.04 不支援
+    runs-on: ubuntu-24.04  # Playwright 不支援 ubuntu-latest 現在指向的 26.04
+    # 2026-11-17 — this job used to also require
+    # `needs.deploy-preview.outputs.iap_enabled != 'true'`. IAP has been on
+    # for every preview since #3733 (2026-11-16), so it was SKIPPED on every
+    # PR: the only PR-time "can a student walk the lesson" gate was gone.
+    # It now goes through IAP the same way e2e-tests.yml does (#4097).
     if: >-
       always() &&
       needs.deploy-preview.outputs.frontend_url != 'N/A' &&
       needs.deploy-preview.outputs.frontend_url != '' &&
       needs.deploy-preview.outputs.backend_url != 'N/A' &&
-      needs.deploy-preview.outputs.backend_url != '' &&
-      needs.deploy-preview.outputs.iap_enabled != 'true'
-    # #3733: with IAP_ENABLED this job can only ever see the Google login
-    # page / a 403 -- it deliberately holds no GCP credentials (see below),
-    # so it can't sign an IAP JWT. Skipped (visibly) rather than faked; the
-    # locked preview is verified by deploy-preview's own health checks.
-    # Reorder (coordinator decision, 2026-11-05): this job runs npm ci +
-    # `npx playwright install --with-deps` -- untrusted, lockfile-resolved
-    # third-party code -- directly on the bare runner. It used to be the
-    # LAST step of `deploy-preview`, which ran `google-github-actions/
-    # auth@v2` as one of its FIRST steps: every PR's dependency install ran
-    # on a runner that had already held live GCP credentials for the
-    # entire job. This job needs only the already-deployed preview's plain
-    # HTTP URLs (from deploy-preview's job outputs).
-    #
-    # find_015p35fzCRJqG7UACGpxSxQp (HIGH): reordering + having no
-    # `google-github-actions/auth` step in THIS job was not actually
-    # enough on its own -- `id-token: write` is an ambient permission a
-    # job either has or doesn't for its whole runtime, regardless of
-    # whether anything in it calls `auth@v2`. This job declares its own
-    # `permissions:` below (contents: read only) so it can never inherit
-    # `id-token: write` from the workflow level. backend/specs/
-    # test_workflow_gcp_cred_exposure_spec.py asserts this structurally
-    # (effective permissions, not step order) for every job in this file
-    # and deploy.yml/staging-deploy.yml.
+      needs.deploy-preview.outputs.backend_url != ''
+    # Credentials (find_015p35fzCRJqG7UACGpxSxQp / #4097): this job holds a
+    # WIF credential + id-token: write ONLY to sign the IAP JWT on the host.
+    # No third-party code runs on this host: npm ci + Playwright run inside
+    # the digest-pinned official Playwright image, which receives only the
+    # variables listed with -e (never ACTIONS_ID_TOKEN_*, never the
+    # workspace root where auth@v2 writes gha-creds-*.json). Locked by
+    # backend/tests/test_preview_journey_iap.py and
+    # backend/specs/test_workflow_gcp_cred_exposure_spec.py.
     permissions:
       contents: read
+      id-token: write
     steps:
       - name: Checkout code
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           ref: ${{ github.event.pull_request.head.sha }}
 
-      - name: 學生走得完嗎（multi-text journey on preview）
-        working-directory: frontend
+      # Every red this check showed before IAP was a Dependabot PR (15/15,
+      # 2026-11-12..14; human PRs 0 failures). Dependabot runs get no Actions
+      # secrets ("Secret source: Dependabot", Dependabot secret store empty),
+      # so deploy-preview builds the frontend with empty VITE_DEMO_STUDENT_*
+      # and the one-click login never leaves /login (run 43243744665,
+      # multiTextJourney.spec.ts:129). A preview nobody can log into is an
+      # INVALID environment, not "this PR broke the student journey".
+      # Only emptiness is checked; values are never printed.
+      - name: 環境合格檢查（preview 有沒有一鍵登入帳號）
+        id: env-check
         env:
-          PLAYWRIGHT_BASE_URL: ${{ needs.deploy-preview.outputs.frontend_url }}
-          E2E_BACKEND_URL: ${{ needs.deploy-preview.outputs.backend_url }}
+          DEMO_STUDENT_EMAIL: ${{ secrets.DEMO_STUDENT_EMAIL }}
+          DEMO_STUDENT_PW: ${{ secrets.DEMO_STUDENT_PW }}
+        run: |
+          if [ -n "${DEMO_STUDENT_EMAIL:-}" ] && [ -n "${DEMO_STUDENT_PW:-}" ]; then
+            echo "valid=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          MSG="INVALID（不是 FAIL）：這個 run 拿不到 Actions secrets（Dependabot 或 fork PR），preview 前端沒有一鍵登入帳號，學生登不進去，這道門無從判斷。不代表這個 PR 弄壞了學習流程。"
+          echo "::warning::${MSG}"
+          echo "${MSG}" >> "${GITHUB_STEP_SUMMARY:-/dev/null}"
+          echo "valid=false" >> "$GITHUB_OUTPUT"
+
+      - id: auth
+        if: steps.env-check.outputs.valid == 'true' && needs.deploy-preview.outputs.iap_enabled == 'true'
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          workload_identity_provider: projects/958347263320/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+          service_account: github-actions@lingoleap-dev.iam.gserviceaccount.com
+
+      - if: steps.env-check.outputs.valid == 'true' && needs.deploy-preview.outputs.iap_enabled == 'true'
+        uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
+
+      # Security review (MEDIUM): install runs in its OWN container that never
+      # receives IAP_PROXY_TOKEN, with --ignore-scripts, so no dependency
+      # install script can read the token. Only the `playwright test` container
+      # below gets it (browsers are baked into the image; nothing to install).
+      - name: Install E2E deps (no IAP token, no install scripts)
+        if: steps.env-check.outputs.valid == 'true'
+        run: |
+          docker run --rm --init \
+            -v "${GITHUB_WORKSPACE}/frontend:/work" -w /work \
+            mcr.microsoft.com/playwright:v1.59.1-noble@sha256:b0ab6f3cb99aa7803adbc14d9027ec1785fc6e433b97e134e0f8fe61683b6b53 \
+            npm ci --ignore-scripts
+
+      # IAP matches a self-signed JWT's aud against the REQUEST URL: the bare
+      # service URL only authorises "/" (run 43935544444), so sign
+      # "<frontend>/*". API calls go through the frontend's same-origin /api
+      # proxy (E2E_BACKEND_URL = frontend URL): the backend is
+      # run.invoker-locked and the container carries only the IAP JWT. Image
+      # = the same pinned Playwright image as e2e-tests.yml (version ==
+      # frontend/package-lock.json).
+      - name: 學生走得完嗎（multi-text journey on preview）
+        if: steps.env-check.outputs.valid == 'true'
+        env:
+          IAP_ENABLED: ${{ needs.deploy-preview.outputs.iap_enabled }}
+          IAP_SIGNING_SA_EMAIL: github-actions@lingoleap-dev.iam.gserviceaccount.com
+          PREVIEW_FRONTEND_URL: ${{ needs.deploy-preview.outputs.frontend_url }}
+          PREVIEW_BACKEND_URL: ${{ needs.deploy-preview.outputs.backend_url }}
           E2E_ONLY_LESSONS: "20063"      # G6-L22，三篇，Hans 回報的那一課
           E2E_EXPECT_DEPLOYED: "1"
-          # #3719 — IAP 準備：見「Warm backend」步驟的同一段說明。
-          IAP_AUDIENCE: ${{ secrets.IAP_AUDIENCE }}
+          CI: 'true'
         run: |
-          npm ci
-          npx playwright install chromium --with-deps
-          npx playwright test tests/e2e/multiTextJourney.spec.ts \
-            --reporter=github --timeout=300000
-
+          PLAYWRIGHT_BASE_URL="${PREVIEW_FRONTEND_URL}"
+          E2E_BACKEND_URL="${PREVIEW_BACKEND_URL}"
+          IAP_PROXY_TOKEN=""
+          if [ "${IAP_ENABLED}" = "true" ]; then
+            source "${GITHUB_WORKSPACE}/scripts/lib/iap-token.sh"
+            IAP_PROXY_TOKEN="$(iap_token "${PREVIEW_FRONTEND_URL}/*")"
+            if [ -z "${IAP_PROXY_TOKEN}" ]; then
+              echo "::error::preview is behind IAP but no IAP JWT could be signed (needs serviceAccountTokenCreator on the CI SA itself)"
+              exit 1
+            fi
+            echo "::add-mask::${IAP_PROXY_TOKEN}"
+            E2E_BACKEND_URL="${PREVIEW_FRONTEND_URL}"
+            # Prove the token opens a sub-path before spending minutes in Playwright.
+            DEEP=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 \
+              -H "Proxy-Authorization: Bearer ${IAP_PROXY_TOKEN}" "${PREVIEW_FRONTEND_URL}/login" || echo "000")
+            if [ "$DEEP" != "200" ]; then
+              echo "::error::IAP token did not open ${PREVIEW_FRONTEND_URL}/login (HTTP $DEEP)"
+              exit 1
+            fi
+          fi
+          export IAP_PROXY_TOKEN PLAYWRIGHT_BASE_URL E2E_BACKEND_URL
+          docker run --rm --init --ipc=host \
+            -v "${GITHUB_WORKSPACE}/frontend:/work" -w /work \
+            -e IAP_PROXY_TOKEN \
+            -e PLAYWRIGHT_BASE_URL \
+            -e E2E_BACKEND_URL \
+            -e E2E_ONLY_LESSONS \
+            -e E2E_EXPECT_DEPLOYED \
+            -e CI \
+            mcr.microsoft.com/playwright:v1.59.1-noble@sha256:b0ab6f3cb99aa7803adbc14d9027ec1785fc6e433b97e134e0f8fe61683b6b53 \
+            npx playwright test tests/e2e/multiTextJourney.spec.ts --reporter=github --timeout=300000

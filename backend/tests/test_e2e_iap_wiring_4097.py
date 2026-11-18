@@ -237,14 +237,16 @@ def test_container_gets_no_gcp_or_oidc_credentials():
 
 def test_no_third_party_code_runs_on_the_credentialed_host():
     """npm / npx / playwright may only appear inside the container step."""
-    pat = re.compile(r"\b(npm|npx|playwright)\b")
+    # command-shaped only: "frontend/playwright-report" is a path, not code
+    pat = re.compile(r"\b(npm|npx)\b|\bplaywright (test|install)\b")
     for s in _job()["steps"]:
         uses = str(s.get("uses", ""))
         assert "setup-node" not in uses, "host node toolchain is not needed any more"
         run = s.get("run")
         if not isinstance(run, str) or not pat.search(run):
             continue
-        assert "Run E2E tests" in str(s.get("name")), f"{s.get('name')} runs npm on the host"
+        assert any(k in str(s.get("name")) for k in ("Run E2E tests", "Install E2E deps")), (
+            f"{s.get('name')} runs npm on the host")
         before_docker = run.split("docker run", 1)[0]
         assert not pat.search(before_docker), "npm/npx must only run inside `docker run`"
 
@@ -279,3 +281,72 @@ def test_workflow_dispatch_runs_the_e2e_job():
     assert "workflow_dispatch" in json.dumps(det), (
         "detect-changes must not skip a manual run (paths-filter has no PR diff there)"
     )
+
+
+# ── 7: the IAP token never reaches dependency install scripts ───────────
+
+
+def test_install_container_gets_no_iap_token():
+    step = _step("Install E2E deps")
+    assert "IAP" not in json.dumps(step.get("env") or {}), step.get("env")
+    rc, calls, claims, out = _run(step)
+    assert rc == 0, out
+    assert claims == "", "install step must not sign a token"
+    docker = _docker_call(calls)
+    assert "IAP_PROXY_TOKEN" not in docker, docker
+    assert "npm ci --ignore-scripts" in docker, docker
+
+
+def test_token_container_runs_no_install():
+    rc, calls, _, out = _run(_step("Run E2E tests"),
+                             ctx={"steps.wait.outputs.effective_url": STAGING_FRONTEND_URL})
+    assert rc == 0, out
+    assert not re.search(r"\bnpm (ci|install)\b", _docker_call(calls)), (
+        "the container that holds IAP_PROXY_TOKEN must not run npm install scripts"
+    )
+    names = [str(s.get("name", "")) for s in _job()["steps"]]
+    assert names.index(_step("Install E2E deps")["name"]) < names.index(_step("Run E2E tests")["name"])
+
+
+# ── 8: nothing the container planted can smuggle the WIF creds out ──────
+#
+# Security review: the container writes into bind-mounted frontend/ and
+# upload-artifact follows symlinks, so a dependency could plant a link to
+# gha-creds-*.json (workspace root). A sanitize step must run before every
+# upload: drop symlinks in the uploaded dirs and delete the creds file.
+
+
+def test_sanitize_runs_before_every_upload():
+    steps = _job()["steps"]
+    names = [str(s.get("name", "")) for s in steps]
+    san = names.index(_step("Sanitize artifacts")["name"])
+    assert "always()" in str(steps[san].get("if", "")), "must also run when tests failed"
+    uploads = [i for i, s in enumerate(steps) if "upload-artifact" in str(s.get("uses", ""))]
+    assert uploads, "positive control: the job does upload artifacts"
+    assert all(san < i for i in uploads), (san, uploads)
+
+
+def test_sanitize_removes_planted_symlinks_and_creds():
+    step = _step("Sanitize artifacts")
+    with tempfile.TemporaryDirectory() as ws:
+        w = Path(ws)
+        creds = w / "gha-creds-abc.json"
+        creds.write_text("{}")
+        for d in ("playwright-report", "test-results"):
+            (w / "frontend" / d / "sub").mkdir(parents=True)
+            (w / "frontend" / d / "index.html").write_text("ok")
+            (w / "frontend" / d / "sub" / "leak.json").symlink_to(creds)
+        env = {"PATH": "/usr/bin:/bin", "GITHUB_WORKSPACE": ws,
+               "GITHUB_ENV": str(w / "gh_env"), "HOME": ws}
+        proc = subprocess.run(["bash", "-e", "-o", "pipefail", "-c", str(step["run"])],
+                              cwd=ws, env=env, capture_output=True, text=True, timeout=30)
+        assert proc.returncode == 0, proc.stdout + proc.stderr
+        links = [p for p in (w / "frontend").rglob("*") if p.is_symlink()]
+        assert not links, links
+        assert not creds.exists(), "WIF credential file must be gone before upload"
+        # temp-dir fixture, not a repo file: built so the cross-language
+        # CI-filter gate (test_lesson_uid_loader) doesn't read it as one
+        report_dir = w / "frontend"
+        assert (report_dir / "playwright-report" / "index.html").exists(), (
+            "real report files must survive"
+        )

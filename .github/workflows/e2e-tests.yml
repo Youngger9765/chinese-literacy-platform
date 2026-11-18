@@ -92,12 +92,12 @@ jobs:
       # URL (#3730); the github-actions SA signs it via IAM Credentials
       # (same SA + permissions staging-deploy.yml's health check uses).
       - id: auth
-        uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed # v2.1.13
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
         with:
           workload_identity_provider: projects/958347263320/locations/global/workloadIdentityPools/github-pool/providers/github-provider
           service_account: github-actions@lingoleap-dev.iam.gserviceaccount.com
 
-      - uses: google-github-actions/setup-gcloud@e427ad8a34f8676edf47cf7d7925499adf3eb74f # v2.2.1
+      - uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
 
       # ⚠️ 這裡原本寫著「這幾支 spec 只能打 staging」，理由有兩條，**兩條都已經不成立**
       #    （#3242 逐條查證，別再照舊結論走）：
@@ -183,6 +183,17 @@ jobs:
       # Image = the official Playwright image, browsers baked in; its version
       # must equal frontend/package-lock.json's @playwright/test (locked by
       # test_e2e_iap_wiring_4097.py). Only frontend/ is mounted.
+      # Security review (MEDIUM): install runs in its OWN container that never
+      # receives IAP_PROXY_TOKEN, with --ignore-scripts, so no dependency
+      # install script can read the token. Only the `playwright test` container
+      # below gets it (browsers are baked into the image; nothing to install).
+      - name: Install E2E deps (no IAP token, no install scripts)
+        run: |
+          docker run --rm --init \
+            -v "${GITHUB_WORKSPACE}/frontend:/work" -w /work \
+            mcr.microsoft.com/playwright:v1.59.1-noble@sha256:b0ab6f3cb99aa7803adbc14d9027ec1785fc6e433b97e134e0f8fe61683b6b53 \
+            npm ci --ignore-scripts
+
       - name: Run E2E tests (core flows only)
         env:
           IAP_AUDIENCE: https://lingoleap-frontend-staging-958347263320.asia-east1.run.app
@@ -213,11 +224,32 @@ jobs:
             -e E2E_EXPECT_DEPLOYED \
             -e CI \
             mcr.microsoft.com/playwright:v1.59.1-noble@sha256:b0ab6f3cb99aa7803adbc14d9027ec1785fc6e433b97e134e0f8fe61683b6b53 \
-            bash -c 'npm ci && npx playwright test --reporter=github --timeout=60000'
+            npx playwright test --reporter=github --timeout=60000
+
+      # Security review: the Playwright container wrote into the bind-mounted
+      # frontend/, and upload-artifact follows symlinks. A malicious dependency
+      # could plant a link to the WIF credential file (gha-creds-*.json in the
+      # workspace root) and have it uploaded as a "report". Before ANY upload:
+      # drop every symlink in the uploaded dirs and delete the credential file
+      # (nothing after this point needs GCP).
+      - name: Sanitize artifacts before upload (no symlinks, no GCP creds)
+        if: always()
+        run: |
+          for d in "${GITHUB_WORKSPACE}/frontend/playwright-report" "${GITHUB_WORKSPACE}/frontend/test-results"; do
+            [ -e "$d" ] || continue
+            find "$d" -type l -delete
+          done
+          rm -f "${GITHUB_WORKSPACE}"/gha-creds-*.json
+          unset GOOGLE_APPLICATION_CREDENTIALS CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE GOOGLE_GHA_CREDS_PATH
+          {
+            echo "GOOGLE_APPLICATION_CREDENTIALS="
+            echo "CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE="
+            echo "GOOGLE_GHA_CREDS_PATH="
+          } >> "$GITHUB_ENV"
 
       - name: Upload test report
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: playwright-report-${{ github.event.pull_request.number || github.run_id }}
           path: frontend/playwright-report/
@@ -225,7 +257,7 @@ jobs:
 
       - name: Upload test results (on failure)
         if: failure()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: playwright-results-${{ github.event.pull_request.number || github.run_id }}
           path: frontend/test-results/
