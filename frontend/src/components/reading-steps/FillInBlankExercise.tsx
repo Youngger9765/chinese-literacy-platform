@@ -90,6 +90,12 @@ interface Props {
   sentences: FillInBlankItem[];
   vocabBank: Record<string, string>;
   onComplete: (score: number, total: number, firstTryResults?: QuestionResult[]) => void;
+  /**
+   * #4087：一輪做完（切到總結畫面）時回報這一輪，成績單記一筆作答。
+   * `retryOutcome` 只在「重做錯題」那一輪有值：被重做的題目在這一輪第一次的對錯。
+   * 從還原的「已做完」狀態掛載時不會呼叫。
+   */
+  onRoundFinished?: (round: { retryMode: boolean; firstTryResults: QuestionResult[]; retryOutcome: Record<number, { correct: boolean; firstAnswer: string | null }> }) => void;
   storyId?: string | number;
   /**
    * #2848 — 先前存下的作答快照（DB 優先於 localStorage）。
@@ -210,6 +216,7 @@ const FillInBlankExercise: React.FC<Props> = ({
   storyId,
   initialProgress,
   onProgressChange,
+  onRoundFinished,
 }) => {
   const { zhuyinActive, processZhuyin } = useZhuyin();
   // #2848: DB 快照優先，localStorage 只是離線 / 尚未載入時的 L1 快取。
@@ -286,8 +293,24 @@ const FillInBlankExercise: React.FC<Props> = ({
     onProgressChange?.(progress);
   }, [currentIdx, usedCodes, score, firstTryResults, retryIndices, retryMode, storyId, onProgressChange]);
 
+  // #4087：還原時已經做完的那一輪不是新的作答。
+  const restoredDoneRef = useRef(done);
+  // 「重做錯題」這一輪，每題第一次的對錯（firstTryResults 對已記過的題不再寫）。
+  const retryOutcomeRef = useRef<Record<number, { correct: boolean; firstAnswer: string | null }>>({});
+  // 「做完」這個轉換點讀當下的值；放進 ref 才不會讓 effect 跟著每次作答重跑。
+  const roundRef = useRef({ retryMode, firstTryResults, onRoundFinished });
+  useEffect(() => { roundRef.current = { retryMode, firstTryResults, onRoundFinished }; });
   useEffect(() => {
-    if (done && phase === 'exercise') setPhase('summary');
+    if (done && phase === 'exercise') {
+      setPhase('summary');
+      if (restoredDoneRef.current) {
+        restoredDoneRef.current = false;
+      } else {
+        const { retryMode: rm, firstTryResults: ftr, onRoundFinished: cb } = roundRef.current;
+        cb?.({ retryMode: rm, firstTryResults: ftr, retryOutcome: { ...retryOutcomeRef.current } });
+      }
+      retryOutcomeRef.current = {};
+    }
   }, [done, phase]);
 
   const currentSentence = !done ? activeSentences[currentIdx] : null;
@@ -392,6 +415,9 @@ const FillInBlankExercise: React.FC<Props> = ({
       // prev）而非這裡捕捉的 `usedCodes`，避免 1200ms 後讀到過期的閉包值。
       const shouldLockCode = !isSubExercise && oneToOne;
 
+      if (retryMode && !(currentOriginalIdx in retryOutcomeRef.current)) {
+        retryOutcomeRef.current[currentOriginalIdx] = { correct: !firstTryUsed, firstAnswer: null };
+      }
       const alreadyRecorded = firstTryResults.some((r) => r.sentenceIdx === currentOriginalIdx);
       if (!alreadyRecorded) {
         const isFirstTryCorrect = !firstTryUsed;
@@ -426,6 +452,9 @@ const FillInBlankExercise: React.FC<Props> = ({
       }, 1200);
     } else {
       // A12: wrong → do NOT reveal correct answer; keep retryable
+      if (retryMode && !firstTryUsed && !(currentOriginalIdx in retryOutcomeRef.current)) {
+        retryOutcomeRef.current[currentOriginalIdx] = { correct: false, firstAnswer: code };
+      }
       if (!firstTryUsed) {
         setFirstTryResults((prev) => {
           const alreadyRecorded = prev.some((r) => r.sentenceIdx === currentOriginalIdx);

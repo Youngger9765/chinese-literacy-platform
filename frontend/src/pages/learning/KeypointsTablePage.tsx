@@ -13,6 +13,7 @@ import KeypointsFollowupQuestions from '../../components/reading-steps/Keypoints
 import { useLearningContext } from '../../layouts/LearningLayout';
 import { useCurrentSectionSlug } from '../../hooks/useCurrentStepId';
 import NextStepFooter from '../../components/learning/NextStepFooter';
+import type { StepAttempt } from '../../utils/stepAttempts';
 
 const KeypointsTablePage: React.FC = () => {
   // 這一步屬於哪一篇（多篇課才有）——重點表要跟著篇次走（#2930）。
@@ -36,6 +37,13 @@ const KeypointsTablePage: React.FC = () => {
         immediate,
       });
     },
+    [saveStepProgressPatch],
+  );
+
+  // #4087：每批改一次記一筆（成績單折線圖：填對的格數）。
+  const handleAttempt = useCallback(
+    (attempt: StepAttempt) =>
+      saveStepProgressPatch({ stepId: 'keypoints-table', stepData: {}, currentStep: 'keypoints-table', immediate: true, appendAttempt: attempt }),
     [saveStepProgressPatch],
   );
 
@@ -66,6 +74,7 @@ const KeypointsTablePage: React.FC = () => {
         roundSlug={roundSlug ?? undefined}
         initialProgress={initialProgress}
         onProgressChange={handleProgressChange}
+        onAttempt={handleAttempt}
       />
 
       {/* 第一篇專屬加碼題 (#2752 Phase 3, L0063-shape keypointsFollowupQuestions —

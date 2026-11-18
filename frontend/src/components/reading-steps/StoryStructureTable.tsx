@@ -19,6 +19,7 @@ import {
 } from './storyStructureProfile';
 import StepCoachCard, { StepCoachHelpButton } from '../learning/StepCoachCard';
 import { useIsMobile } from '../../hooks/useIsMobile';
+import { readAttempts, scoredAttempt, type StepAttempt } from '../../utils/stepAttempts';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -125,6 +126,8 @@ interface Props {
    * component (VocabDefinitionMatch, KeyPassageReading, ...) already does.
    */
   onProgressChange?: (stepData: Record<string, unknown>, immediate?: boolean) => void;
+  /** #4087：每批改成功一次記一筆作答（成績單折線圖：填對的格數）。 */
+  onAttempt?: (attempt: StepAttempt) => void;
 }
 
 const INLINE_BLANK_RE = /【([^】]*)】/g;
@@ -272,6 +275,11 @@ function isValidGradeResultItem(item: unknown): item is GradeResultItem {
     typeof r.feedback === 'string' &&
     typeof r.correct_answer === 'string'
   );
+}
+
+/** 批改失敗的哨兵值（#4081）：畫面上要顯示，但永遠不存、不還原、不擋重交。 */
+function isGradeFailure(value: GradeResult | null): boolean {
+  return !!value && typeof value.score === 'number' && value.score < 0;
 }
 
 function isValidGradeResult(value: unknown): value is GradeResult {
@@ -1119,6 +1127,7 @@ const StoryStructureTable: React.FC<Props> = ({
   showCoach: showCoachProp,
   initialProgress,
   onProgressChange,
+  onAttempt,
 }) => {
   const { token } = useAuth();
   const [structure, setStructure] = useState<StructureData | null>(structureProp ?? null);
@@ -1133,9 +1142,16 @@ const StoryStructureTable: React.FC<Props> = ({
     return isValidAnswerMap(restored) ? restored : {};
   });
   const [submitting, setSubmitting] = useState(false);
+  // #4087：這一關以前交過（DB 有成績或作答紀錄）→ 之後再交就是「訂正」那一次。
+  const gradedBeforeRef = useRef(
+    isValidGradeResult(initialProgress?.gradeResult) || readAttempts(initialProgress).length > 0,
+  );
   const [gradeResult, setGradeResult] = useState<GradeResult | null>(() => {
     const restored = initialProgress?.gradeResult;
-    return isValidGradeResult(restored) ? restored : null;
+    // #4081：score < 0 是「批改失敗」的哨兵值，不是成績。以前它會被存進 DB、重新整理
+    // 後又還原回來，而 handleSubmit 看到 gradeResult !== null 就不讓交 —— 永遠卡在
+    // 「批改失敗，請重新整理後再試」，重新整理也救不回來。
+    return isValidGradeResult(restored) && !isGradeFailure(restored) ? restored : null;
   });
   const [showCoach, setShowCoach] = useState<boolean>(() => {
     if (showCoachProp !== undefined) return showCoachProp;
@@ -1204,7 +1220,7 @@ const StoryStructureTable: React.FC<Props> = ({
   // no-ops when the payload is unchanged, so this costs nothing when restored.
   useEffect(() => {
     if (!onProgressChange) return;
-    onProgressChange({ answers, gradeResult }, false);
+    onProgressChange({ answers, gradeResult: isGradeFailure(gradeResult) ? null : gradeResult }, false);
   }, [answers, gradeResult, onProgressChange]);
 
 
@@ -1382,7 +1398,7 @@ const StoryStructureTable: React.FC<Props> = ({
 
 
   const handleSubmit = useCallback(async () => {
-    if (!structure || submitting || gradeResult !== null) return;
+    if (!structure || submitting || (gradeResult !== null && !isGradeFailure(gradeResult))) return;
     setSubmitting(true);
     try {
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
@@ -1395,6 +1411,17 @@ const StoryStructureTable: React.FC<Props> = ({
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data: GradeResult = await res.json();
       setGradeResult(data);
+      // #4087：第一次交 = first；「訂正後再交一次」= retry-wrong（訂正也算一次）。
+      if (onAttempt && Array.isArray(data.results) && data.results.length) {
+        const rows = data.results.map((r, i) => ({
+          label: `第 ${i + 1} 格`,
+          correct: r.correct === true,
+          correctAnswer: r.correct ? null : r.correct_answer ?? null,
+        }));
+        const kind = gradedBeforeRef.current ? 'retry-wrong' : 'first';
+        gradedBeforeRef.current = true;
+        onAttempt(scoredAttempt(kind, rows.filter((r) => r.correct).length, rows.length, rows));
+      }
     } catch {
       setGradeResult({ results: [], score: -1 });
     } finally {
@@ -1702,9 +1729,17 @@ const StoryStructureTable: React.FC<Props> = ({
             </button>
           </div>
         ) : !previewMode && score < 0 ? (
-          <p className="text-sm text-red-500 text-center">
-            批改失敗，請重新整理後再試
-          </p>
+          <div className="flex flex-col items-center gap-2">
+            <p className="text-sm text-red-500 text-center">批改失敗，你的答案還在，請再交一次</p>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={submitting}
+              className="min-h-[44px] px-6 rounded-full bg-accent text-white font-bold disabled:opacity-60"
+            >
+              {submitting ? '批改中…' : '再交一次'}
+            </button>
+          </div>
         ) : !previewMode ? (
           <div
             className={`rounded-xl p-4 text-center ${
@@ -1723,6 +1758,16 @@ const StoryStructureTable: React.FC<Props> = ({
             </p>
           </div>
         ) : null}
+        {/* #4087：訂正 —— 保留答案，改完再交一次。成績單會多一個節點。 */}
+        {!previewMode && submitted && score >= 0 && gradeResults.some((r) => !r.correct) && (
+          <button
+            type="button"
+            onClick={() => setGradeResult(null)}
+            className="mt-3 w-full min-h-[44px] rounded-full border-2 border-accent text-accent font-bold hover:bg-accent/5"
+          >
+            訂正後再交一次
+          </button>
+        )}
       </div>
     </div>
     </div>

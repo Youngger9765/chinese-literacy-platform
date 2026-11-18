@@ -45,7 +45,8 @@ vi.mock('../../../services/learning/comprehension', async () => {
   return { ...actual, fetchDialogueHistory: (...a: unknown[]) => mockStudentDialogue(...a) };
 });
 
-vi.mock('../../../services/api', () => ({ fetchStory: vi.fn().mockResolvedValue(null) }));
+vi.mock('../../../services/api', () => ({
+  storyForStep: (s: unknown) => s, fetchStory: vi.fn().mockResolvedValue(null) }));
 
 import TeacherSessionReportPage from '../TeacherSessionReportPage';
 import type { TeacherSessionReport } from '../../../services/teacherApi';
