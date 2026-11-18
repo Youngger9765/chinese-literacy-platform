@@ -26,6 +26,10 @@ import {
   StudentCrossTextPattern,
 } from '../../../services/teacherApi';
 
+// recharts 3.10 types the tooltip payload as a readonly array whose entries carry
+// the original data row in `payload`; name the row shape so the formatter stays typed.
+type ScoreTrendPoint = StudentCrossTextPattern['score_trend'][number];
+
 // ── Shared helpers ─────────────────────────────────────────────────────────────
 
 export function scoreColor(score: number | null): string {
@@ -232,8 +236,8 @@ export function StudentDetailPanel({ pattern }: StudentDetailPanelProps) {
               <Tooltip
                 formatter={(v: number) => [`${v} 分`, '分數']}
                 labelFormatter={(
-                  _: string,
-                  payload: Array<{ payload: { title: string | null } }>,
+                  _label: React.ReactNode,
+                  payload: ReadonlyArray<{ payload?: ScoreTrendPoint }>,
                 ) => payload?.[0]?.payload?.title || ''}
               />
               <Line
