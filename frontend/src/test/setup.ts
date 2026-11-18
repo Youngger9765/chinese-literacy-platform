@@ -1,4 +1,4 @@
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
 
 // jsdom does not implement matchMedia. Components that read it at module load
 // (e.g. ReadingAnnotation's IS_TOUCH = window.matchMedia('(pointer: coarse)'))
