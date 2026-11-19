@@ -9,4 +9,4 @@
 # --no-build-isolation against it. Version matches what the pinned base
 # image (backend/Dockerfile, #3853) ships, i.e. what prod has always built
 # jieba with. Regenerate requirements-build.lock per backend/README.md.
-setuptools==79.0.1
+setuptools==84.2.1
