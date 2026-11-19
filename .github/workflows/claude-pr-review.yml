@@ -83,7 +83,7 @@ jobs:
       # high）：這個 job 從不呼叫 Google Cloud，沒有任何合法理由需要
       # 用 id-token 去換 WIF 身分。整組拿掉。
     steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 1
           persist-credentials: false  # 不留 token'd git config 給任何一步撿到
@@ -224,7 +224,7 @@ jobs:
       # 覆寫既有檔案）從來沒有機會碰過這裡的任何東西。
     steps:
       - name: Download review artifact
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: claude-pr-review-${{ github.event.inputs.pr_number || github.event.issue.number }}-artifact
           # Downloaded OUTSIDE $GITHUB_WORKSPACE on purpose (2026-11
@@ -236,7 +236,7 @@ jobs:
           path: /tmp/claude-pr-review
         continue-on-error: true  # review job may have produced nothing at all
 
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 1
           persist-credentials: false

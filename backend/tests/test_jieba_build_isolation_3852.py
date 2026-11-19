@@ -144,6 +144,6 @@ def test_main_lock_install_never_creates_an_isolated_build_env(loc, script):
 def test_build_lock_is_exact_and_hashed():
     text = BUILD_LOCK.read_text()
     pins = re.findall(r"^([A-Za-z0-9][A-Za-z0-9._-]*)==(\S+)", text, re.M)
-    assert ("setuptools", "79.0.1") in [(n.lower(), v) for n, v in pins], pins
+    assert ("setuptools", "84.2.1") in [(n.lower(), v) for n, v in pins], pins
     assert "--hash=sha256:" in text
     assert not re.search(r"^[A-Za-z0-9][A-Za-z0-9._-]*\s*(>=|<=|~=|!=|>|<)", text, re.M)
