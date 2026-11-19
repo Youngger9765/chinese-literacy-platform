@@ -84,7 +84,7 @@ const SessionTimeoutWarning: React.FC<SessionTimeoutWarningProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs"
       role="dialog"
       aria-modal="true"
       aria-labelledby="session-timeout-title"
@@ -168,14 +168,14 @@ const SessionTimeoutWarning: React.FC<SessionTimeoutWarningProps> = ({
             ref={continueButtonRef}
             type="button"
             onClick={onContinue}
-            className="w-full bg-accent hover:bg-accent-hover text-white font-bold py-2.5 rounded-full transition-colors text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+            className="w-full bg-accent hover:bg-accent-hover text-white font-bold py-2.5 rounded-full transition-colors text-sm focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
           >
             繼續學習
           </button>
           <button
             type="button"
             onClick={onExpired}
-            className="w-full bg-gray-100 hover:bg-gray-200 text-gray-600 font-medium py-2 rounded-xl transition-colors text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+            className="w-full bg-gray-100 hover:bg-gray-200 text-gray-600 font-medium py-2 rounded-xl transition-colors text-sm focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
           >
             離開並儲存
           </button>

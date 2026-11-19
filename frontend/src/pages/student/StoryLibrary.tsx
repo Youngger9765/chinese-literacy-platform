@@ -26,8 +26,8 @@ const SkeletonCard = () => (
   <div className="bg-white rounded-2xl overflow-hidden shadow-card">
     <div className="h-40 bg-gray-200 animate-pulse" />
     <div className="p-4 space-y-2">
-      <div className="h-5 bg-gray-200 animate-pulse rounded w-3/4" />
-      <div className="h-3 bg-gray-200 animate-pulse rounded w-1/2" />
+      <div className="h-5 bg-gray-200 animate-pulse rounded-sm w-3/4" />
+      <div className="h-3 bg-gray-200 animate-pulse rounded-sm w-1/2" />
     </div>
   </div>
 );
@@ -317,7 +317,7 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="搜尋課文標題或體裁..."
-            className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg text-gray-900 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent text-sm"
+            className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg text-gray-900 bg-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-accent focus:border-transparent text-sm"
           />
           {searchQuery ? (
             <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">

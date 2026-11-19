@@ -30,13 +30,13 @@ export function formatScore(score: number | null): string {
 export function statusLabel(status: string) {
   if (status === 'completed') {
     return (
-      <span className="inline-block px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700">
+      <span className="inline-block px-1.5 py-0.5 rounded-sm text-xs font-medium bg-green-100 text-green-700">
         已完成
       </span>
     );
   }
   return (
-    <span className="inline-block px-1.5 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-700">
+    <span className="inline-block px-1.5 py-0.5 rounded-sm text-xs font-medium bg-yellow-100 text-yellow-700">
       進行中
     </span>
   );

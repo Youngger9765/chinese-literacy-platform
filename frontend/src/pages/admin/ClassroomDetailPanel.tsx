@@ -320,9 +320,9 @@ const ClassroomDetailPanel: React.FC<ClassroomDetailPanelProps> = ({ classroomId
       <div className="p-6 sm:p-8">
         <div className="max-w-4xl mx-auto">
           <div className="bg-white rounded-2xl shadow-card p-6 space-y-4">
-            <div className="h-6 bg-gray-200 animate-pulse rounded w-1/3" />
-            <div className="h-4 bg-gray-200 animate-pulse rounded w-1/4" />
-            <div className="h-4 bg-gray-200 animate-pulse rounded w-1/2" />
+            <div className="h-6 bg-gray-200 animate-pulse rounded-sm w-1/3" />
+            <div className="h-4 bg-gray-200 animate-pulse rounded-sm w-1/4" />
+            <div className="h-4 bg-gray-200 animate-pulse rounded-sm w-1/2" />
           </div>
         </div>
       </div>
@@ -486,13 +486,13 @@ const ClassroomDetailPanel: React.FC<ClassroomDetailPanelProps> = ({ classroomId
                         <button
                           onClick={() => handleRemoveStudent(student.id)}
                           disabled={removingStudentId === student.id}
-                          className="px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700 hover:bg-red-200 transition-colors cursor-pointer disabled:opacity-50"
+                          className="px-2 py-0.5 rounded-sm text-xs font-medium bg-red-100 text-red-700 hover:bg-red-200 transition-colors cursor-pointer disabled:opacity-50"
                         >
                           {removingStudentId === student.id ? '移除中...' : '確認移除'}
                         </button>
                         <button
                           onClick={() => setConfirmRemoveId(null)}
-                          className="px-2 py-0.5 rounded text-xs text-gray-500 hover:text-gray-700 cursor-pointer"
+                          className="px-2 py-0.5 rounded-sm text-xs text-gray-500 hover:text-gray-700 cursor-pointer"
                         >
                           取消
                         </button>
@@ -500,7 +500,7 @@ const ClassroomDetailPanel: React.FC<ClassroomDetailPanelProps> = ({ classroomId
                     ) : (
                       <button
                         onClick={() => setConfirmRemoveId(student.id)}
-                        className="px-2 py-0.5 rounded text-xs text-gray-400 hover:text-red-600 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
+                        className="px-2 py-0.5 rounded-sm text-xs text-gray-400 hover:text-red-600 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
                       >
                         移除
                       </button>

@@ -87,10 +87,10 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
       <div className="p-5 space-y-3">
         {Array.from({ length: 4 }).map((_, index) => (
           <div key={index} className="flex gap-4">
-            <div className="h-4 bg-gray-200 animate-pulse rounded w-1/4" />
-            <div className="h-4 bg-gray-200 animate-pulse rounded w-1/4" />
-            <div className="h-4 bg-gray-200 animate-pulse rounded w-1/4" />
-            <div className="h-4 bg-gray-200 animate-pulse rounded w-1/6" />
+            <div className="h-4 bg-gray-200 animate-pulse rounded-sm w-1/4" />
+            <div className="h-4 bg-gray-200 animate-pulse rounded-sm w-1/4" />
+            <div className="h-4 bg-gray-200 animate-pulse rounded-sm w-1/4" />
+            <div className="h-4 bg-gray-200 animate-pulse rounded-sm w-1/6" />
           </div>
         ))}
       </div>
@@ -264,7 +264,7 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
                     <td className="py-2.5 text-gray-600 whitespace-nowrap">{formatDate(student.last_session_date)}</td>
                     <td className="py-2.5 text-gray-600">{student.last_text_title ?? '-'}</td>
                     <td className="py-2.5 text-gray-600 text-center">
-                      <span className={`inline-block min-w-[2rem] px-2 py-0.5 rounded-full text-xs font-medium ${
+                      <span className={`inline-block min-w-8 px-2 py-0.5 rounded-full text-xs font-medium ${
                         student.total_sessions > 0
                           ? 'bg-[#19A696]/10 text-[#11806F]'
                           : 'bg-gray-100 text-gray-500'

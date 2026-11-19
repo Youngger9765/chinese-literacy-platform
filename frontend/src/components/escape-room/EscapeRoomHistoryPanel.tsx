@@ -71,7 +71,7 @@ const EscapeRoomHistoryPanel: React.FC<EscapeRoomHistoryPanelProps> = ({ token }
   if (runs.length === 0) {
     return (
       <div
-        className="mt-6 w-full max-w-sm rounded-2xl bg-surface-container-lowest px-4 py-4 text-center text-sm text-on-surface-variant shadow-sm"
+        className="mt-6 w-full max-w-sm rounded-2xl bg-surface-container-lowest px-4 py-4 text-center text-sm text-on-surface-variant shadow-xs"
         data-testid="escape-room-history-panel"
       >
         還沒有挑戰紀錄，去探索第一次吧！
@@ -84,7 +84,7 @@ const EscapeRoomHistoryPanel: React.FC<EscapeRoomHistoryPanelProps> = ({ token }
 
   return (
     <div
-      className="mt-6 w-full max-w-sm rounded-2xl bg-surface-container-lowest p-4 shadow-sm"
+      className="mt-6 w-full max-w-sm rounded-2xl bg-surface-container-lowest p-4 shadow-xs"
       data-testid="escape-room-history-panel"
     >
       <div className="flex items-center justify-between">
@@ -101,7 +101,7 @@ const EscapeRoomHistoryPanel: React.FC<EscapeRoomHistoryPanelProps> = ({ token }
               className="flex items-center justify-between gap-2 rounded-lg px-1 py-1 text-xs"
             >
               <span className="flex min-w-0 items-center gap-1.5 text-on-surface-variant">
-                <span className={`shrink-0 rounded px-1.5 py-0.5 font-bold ${badge.cls}`}>{badge.text}</span>
+                <span className={`shrink-0 rounded-sm px-1.5 py-0.5 font-bold ${badge.cls}`}>{badge.text}</span>
                 {duration && <span className="truncate">用時 {duration}</span>}
               </span>
               <span className="shrink-0 text-on-surface-variant">

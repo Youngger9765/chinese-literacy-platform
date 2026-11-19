@@ -251,8 +251,8 @@ const AdminTreeSidebar: React.FC<AdminTreeSidebarProps> = ({ selectedNode, onSel
           <div className="px-3 space-y-2">
             {Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className="flex items-center gap-2 py-1.5">
-                <div className="w-3.5 h-3.5 bg-gray-200 animate-pulse rounded" />
-                <div className="h-4 bg-gray-200 animate-pulse rounded flex-1" />
+                <div className="w-3.5 h-3.5 bg-gray-200 animate-pulse rounded-sm" />
+                <div className="h-4 bg-gray-200 animate-pulse rounded-sm flex-1" />
               </div>
             ))}
           </div>

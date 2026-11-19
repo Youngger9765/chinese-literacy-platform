@@ -114,7 +114,7 @@ const ExerciseBlockViewBody: React.FC<
         <button
           type="button"
           onClick={retry}
-          className="px-4 py-1.5 rounded-full text-base font-medium text-violet-700 border border-violet-300 hover:bg-violet-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          className="px-4 py-1.5 rounded-full text-base font-medium text-violet-700 border border-violet-300 hover:bg-violet-50 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-accent"
         >
           再試一次
         </button>

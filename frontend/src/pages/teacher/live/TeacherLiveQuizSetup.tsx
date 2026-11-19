@@ -359,7 +359,7 @@ const TeacherLiveQuizSetup: React.FC<Props> = ({ onCreated }) => {
         type="button"
         onClick={handleSubmit}
         disabled={submitting}
-        className="w-full rounded-xl bg-accent px-4 py-3 text-base font-semibold text-white shadow-sm transition-colors hover:bg-accent-hover disabled:opacity-50"
+        className="w-full rounded-xl bg-accent px-4 py-3 text-base font-semibold text-white shadow-xs transition-colors hover:bg-accent-hover disabled:opacity-50"
       >
         {submitting ? '開場中…' : '開場'}
       </button>

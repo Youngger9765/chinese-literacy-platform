@@ -71,7 +71,7 @@ export default function FontSizeControl({ onChange }: FontSizeControlProps) {
           title={`字體大小：${LABELS[l]}`}
           aria-label={`字體大小：${LABELS[l]}`}
           aria-pressed={level === l}
-          className={`w-6 h-6 rounded text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
+          className={`w-6 h-6 rounded text-xs font-bold transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
             level === l
               ? 'bg-accent text-white'
               : 'bg-gray-200 text-gray-600 hover:bg-gray-300'

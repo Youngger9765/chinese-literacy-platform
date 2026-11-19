@@ -38,7 +38,7 @@ const StudentSearchSection: React.FC<StudentSearchSectionProps> = ({
         onChange={(e) => onSearchInputChange(e.target.value)}
         placeholder="輸入姓名或 email 搜尋..."
         autoFocus
-        className="w-full h-10 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+        className="w-full h-10 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-hidden focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
       />
       {isSearching && (
         <div className="flex items-center gap-2 mt-3">

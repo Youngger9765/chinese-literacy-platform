@@ -99,7 +99,7 @@ const NoTeacherPage: React.FC = () => {
         </div>
 
         {/* Join by code card */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-4">
+        <div className="bg-white rounded-2xl shadow-xs border border-gray-100 p-6 mb-4">
           <h2 className="text-base font-semibold text-gray-800 mb-1">有加入代碼？</h2>
           <p className="text-sm text-gray-500 mb-4">如果老師給了你 6 碼代碼，可以在這裡輸入</p>
 
@@ -116,7 +116,7 @@ const NoTeacherPage: React.FC = () => {
                 placeholder="例如：AB1234"
                 maxLength={6}
                 autoComplete="off"
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-center text-lg font-mono tracking-widest focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition"
+                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-center text-lg font-mono tracking-widest focus:outline-hidden focus:ring-2 focus:ring-purple-400 focus:border-transparent transition"
               />
             </div>
 
@@ -134,7 +134,7 @@ const NoTeacherPage: React.FC = () => {
             <button
               type="submit"
               disabled={isSubmitting || joinCode.length !== 6}
-              className="w-full py-2.5 rounded-lg bg-purple-600 text-white font-medium text-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition"
+              className="w-full py-2.5 rounded-lg bg-purple-600 text-white font-medium text-sm hover:bg-purple-700 focus:outline-hidden focus:ring-2 focus:ring-purple-400 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
               {isSubmitting ? '加入中...' : '加入班級'}
             </button>
@@ -147,7 +147,7 @@ const NoTeacherPage: React.FC = () => {
           <button
             type="button"
             onClick={logout}
-            className="text-purple-600 hover:text-purple-700 underline underline-offset-2 focus:outline-none"
+            className="text-purple-600 hover:text-purple-700 underline underline-offset-2 focus:outline-hidden"
           >
             登出
           </button>

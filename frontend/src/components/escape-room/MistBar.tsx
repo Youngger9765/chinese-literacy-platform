@@ -13,7 +13,7 @@ const MistBar: React.FC<MistBarProps> = ({ distance, maxDistance = 100, reducedM
   const progress = Math.min(100, Math.max(0, (distance / safeMax) * 100));
 
   return (
-    <section className="rounded-2xl border border-slate-300 bg-slate-100/90 p-3 shadow-sm" aria-label="迷霧距離">
+    <section className="rounded-2xl border border-slate-300 bg-slate-100/90 p-3 shadow-xs" aria-label="迷霧距離">
       <div className="flex items-center justify-between gap-3 text-sm font-semibold text-slate-700">
         <span>迷霧距離</span>
         <span aria-live="polite">還有 {Math.max(0, Math.min(safeMax, distance))} 格空間</span>

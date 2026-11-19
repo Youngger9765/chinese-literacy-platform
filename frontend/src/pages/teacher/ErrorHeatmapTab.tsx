@@ -51,7 +51,7 @@ const ErrorHeatmapTab: React.FC<ErrorHeatmapTabProps> = ({ classroomId }) => {
     return (
       <div className="p-6 space-y-3">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="h-6 bg-gray-200 animate-pulse rounded w-full" />
+          <div key={i} className="h-6 bg-gray-200 animate-pulse rounded-sm w-full" />
         ))}
       </div>
     );

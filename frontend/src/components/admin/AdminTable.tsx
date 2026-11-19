@@ -60,7 +60,7 @@ function AdminTable<T>({
   return (
     <div className={`w-full ${className}`}>
       {/* ── Desktop table ──────────────────────────────────────────────── */}
-      <div className="hidden overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm md:block">
+      <div className="hidden overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-xs md:block">
         <table className="min-w-full divide-y divide-gray-200 text-sm">
           <thead className="bg-gray-50">
             <tr>
@@ -102,7 +102,7 @@ function AdminTable<T>({
           <div
             key={rowKey(row, index)}
             onClick={clickable ? () => onRowClick!(row) : undefined}
-            className={`rounded-xl border border-gray-200 bg-white p-4 shadow-sm ${
+            className={`rounded-xl border border-gray-200 bg-white p-4 shadow-xs ${
               clickable ? 'cursor-pointer hover:bg-blue-50 transition-colors' : ''
             }`}
           >

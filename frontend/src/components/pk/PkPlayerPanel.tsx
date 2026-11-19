@@ -79,7 +79,7 @@ const PkPlayerPanel: React.FC<PkPlayerPanelProps> = ({
     return (
       <div
         data-testid={`pk-panel-${side}`}
-        className={`flex min-w-0 flex-1 items-center gap-2 rounded-2xl bg-surface-container-lowest px-2.5 py-2 shadow-sm ${ring} ${isMe ? '' : 'flex-row-reverse text-right'}`}
+        className={`flex min-w-0 flex-1 items-center gap-2 rounded-2xl bg-surface-container-lowest px-2.5 py-2 shadow-xs ${ring} ${isMe ? '' : 'flex-row-reverse text-right'}`}
       >
         {picture('h-11 w-11 shrink-0')}
         <div className="min-w-0 flex-1">
@@ -94,7 +94,7 @@ const PkPlayerPanel: React.FC<PkPlayerPanelProps> = ({
   return (
     <div
       data-testid={`pk-panel-${side}`}
-      className={`flex w-full flex-col items-center gap-2 rounded-3xl bg-surface-container-lowest px-4 py-5 shadow-sm ${ring}`}
+      className={`flex w-full flex-col items-center gap-2 rounded-3xl bg-surface-container-lowest px-4 py-5 shadow-xs ${ring}`}
     >
       {picture(imageUrl ? 'h-48 w-40' : 'h-24 w-24 text-4xl')}
       <div className="text-sm">{nameLine}</div>

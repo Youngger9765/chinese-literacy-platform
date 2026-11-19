@@ -63,7 +63,7 @@ const StreakIndicator: React.FC<StreakIndicatorProps> = ({
 
   // Full card variant
   return (
-    <div className={`rounded-2xl bg-white border border-orange-100 shadow-sm p-4 ${className}`}>
+    <div className={`rounded-2xl bg-white border border-orange-100 shadow-xs p-4 ${className}`}>
       <div className="flex items-center gap-3 mb-3">
         <span className="text-5xl leading-none">{flame}</span>
         <div>
@@ -125,7 +125,7 @@ const StreakCalendar: React.FC<{ lastActivityDate: string | null; current: numbe
           <div
             className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all
               ${day.active
-                ? 'bg-orange-400 text-white shadow-sm'
+                ? 'bg-orange-400 text-white shadow-xs'
                 : 'bg-gray-100 text-gray-400'
               }`}
           >

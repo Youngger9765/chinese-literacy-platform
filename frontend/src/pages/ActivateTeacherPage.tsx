@@ -239,7 +239,7 @@ const ActivateTeacherPage: React.FC = () => {
             {anyActive ? '你現在也是老師了' : '等待學校管理員確認'}
           </p>
           {activeSchools.length > 0 && (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 mt-6 text-sm text-gray-700">
+            <div className="bg-white rounded-2xl shadow-xs border border-gray-200 p-4 mt-6 text-sm text-gray-700">
               {activeSchools.map((s) => s.name).join('、')}
             </div>
           )}
@@ -292,7 +292,7 @@ const ActivateTeacherPage: React.FC = () => {
 
         <form
           onSubmit={handleSubmit}
-          className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-5"
+          className="bg-white rounded-2xl shadow-xs border border-gray-200 p-6 space-y-5"
         >
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
@@ -325,7 +325,7 @@ const ActivateTeacherPage: React.FC = () => {
                   onChange={(e) => updateRow(index, { manualName: e.target.value })}
                   placeholder="請輸入完整校名"
                   autoComplete="off"
-                  className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+                  className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-hidden focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
                 />
               ) : row.selected ? (
                 <div className="flex items-center justify-between h-11 px-3 rounded-lg border border-accent bg-accent/5 text-sm">
@@ -345,7 +345,7 @@ const ActivateTeacherPage: React.FC = () => {
                     aria-label={`學校 ${index + 1} 縣市`}
                     value={row.county}
                     onChange={(e) => handleCountyChange(index, e.target.value)}
-                    className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+                    className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white text-sm focus:outline-hidden focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
                   >
                     <option value="">請選擇縣市</option>
                     {COUNTIES.map((c) => (
@@ -364,7 +364,7 @@ const ActivateTeacherPage: React.FC = () => {
                       onChange={(e) => handleQueryChange(index, e.target.value)}
                       placeholder="輸入學校名稱搜尋，例如：大安國小"
                       autoComplete="off"
-                      className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+                      className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-hidden focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
                     />
 
                     {row.results.length > 0 && (

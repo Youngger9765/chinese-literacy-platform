@@ -139,7 +139,7 @@ describe('validateScore', () => {
 // ─── Test 3: grade click pre-fills rounded score + teacher feedback ───────────
 
 describe('buildGradeClickState', () => {
-  it('pre-fills rounded integer score from submission', () => {
+  it('pre-fills rounded-sm integer score from submission', () => {
     const sub = makeSubmission({ id: 5, score: 87.6, teacher_feedback: '很好' });
     const state = buildGradeClickState(sub);
     expect(state.gradeInput).toBe('88');

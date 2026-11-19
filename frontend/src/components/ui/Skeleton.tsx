@@ -10,7 +10,7 @@ interface SkeletonProps {
 const baseClassName = 'relative overflow-hidden bg-slate-200';
 
 const shimmerClassName =
-  'before:absolute before:inset-0 before:-translate-x-full before:animate-[sk-shimmer_1.5s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/70 before:to-transparent';
+  'before:absolute before:inset-0 before:-translate-x-full before:animate-[sk-shimmer_1.5s_infinite] before:bg-linear-to-r before:from-transparent before:via-white/70 before:to-transparent';
 
 /**
  * Reusable skeleton block. Use className to mimic the final layout shape.
@@ -38,7 +38,7 @@ interface SkeletonTextProps {
 export const SkeletonText: React.FC<SkeletonTextProps> = ({
   lines = 3,
   className = '',
-  lineClassName = 'h-3 rounded',
+  lineClassName = 'h-3 rounded-sm',
   animation = 'shimmer',
 }) => (
   <div className={`space-y-2 ${className}`}>

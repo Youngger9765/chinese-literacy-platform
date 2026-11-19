@@ -328,7 +328,7 @@ const NotificationRow: React.FC<NotificationRowProps> = ({ item, onMarkRead, onN
           <button
             onClick={() => onNavigate(item)}
             title="查看學生"
-            className="p-1 rounded text-gray-400 hover:text-[#11806F] hover:bg-[#19A696]/10 transition-colors"
+            className="p-1 rounded-sm text-gray-400 hover:text-[#11806F] hover:bg-[#19A696]/10 transition-colors"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
@@ -343,7 +343,7 @@ const NotificationRow: React.FC<NotificationRowProps> = ({ item, onMarkRead, onN
             <button
               onClick={() => onMarkRead(item.alert_key)}
               title="標為已讀"
-              className="p-1 rounded text-gray-400 hover:text-green-600 hover:bg-green-50 transition-colors"
+              className="p-1 rounded-sm text-gray-400 hover:text-green-600 hover:bg-green-50 transition-colors"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path

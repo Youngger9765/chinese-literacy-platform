@@ -189,7 +189,7 @@ const StudentEscapeRoomRun: React.FC = () => {
     const escaped = result.result === 'escaped';
     return (
       <main className="flex min-h-screen items-center justify-center bg-accent-bg px-5 text-center">
-        <section className="w-full max-w-md rounded-3xl bg-white p-8 shadow-sm">
+        <section className="w-full max-w-md rounded-3xl bg-white p-8 shadow-xs">
           <p className="text-sm font-semibold text-accent">迷城密室</p>
           <h1 className="mt-3 text-3xl font-bold text-on-surface">{escaped ? '你們一起走出迷城了' : '這次沒來得及，再試一次？'}</h1>
           <p className="mt-4 leading-7 text-on-surface-variant">{result.message}</p>
@@ -214,12 +214,12 @@ const StudentEscapeRoomRun: React.FC = () => {
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-4 sm:px-6 sm:py-6">
         <MistBar distance={state.mist_distance} reducedMotion={reducedMotion} message={state.mist_message} />
         <TeammateRow teammates={state.teammates} />
-        <section className="rounded-3xl bg-white p-5 shadow-sm sm:p-8" aria-live="polite">
+        <section className="rounded-3xl bg-white p-5 shadow-xs sm:p-8" aria-live="polite">
           <p className="mb-5 rounded-xl bg-accent-bg px-4 py-3 text-sm text-on-surface-variant">{state.story_intro}</p>
           {baseQuestion ? (
             <>
               <p className="text-sm font-semibold text-accent">{questionTitle(state)}</p>
-              <h1 className="mt-3 text-xl font-bold leading-8 sm:text-2xl">
+              <h1 className="mt-3 text-xl font-bold leading-8 sm:text-2xl sm:leading-8">
                 <StemWithTarget stem={baseQuestion.stem} targetIndex={baseQuestion.extra?.target_index} />
               </h1>
               {targetCharPrompt(baseQuestion) && (

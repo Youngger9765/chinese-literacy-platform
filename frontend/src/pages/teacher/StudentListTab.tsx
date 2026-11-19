@@ -48,7 +48,7 @@ const ParentInviteButton: React.FC<{ token: string; studentId: number; studentNa
   if (code) {
     return (
       <div className="flex items-center gap-1.5">
-        <span className="text-xs font-mono bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded">
+        <span className="text-xs font-mono bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-sm">
           {code}
         </span>
         <button
@@ -531,7 +531,7 @@ const EditableSeatCell: React.FC<{
         }}
         className="h-8 w-16 px-2 rounded-md border border-[#19A696]/50 text-sm text-center"
       />
-      {error && <span className="text-xs text-red-500 whitespace-normal max-w-[8rem]">{error}</span>}
+      {error && <span className="text-xs text-red-500 whitespace-normal max-w-32">{error}</span>}
     </div>
   );
 };
@@ -694,7 +694,7 @@ const StudentListTab: React.FC<StudentListTabProps> = ({
                     setAddStudentError('');
                   }}
                   placeholder="輸入學生編號"
-                  className="w-full h-10 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-[#19A696]/40 focus:border-[#19A696] transition-colors"
+                  className="w-full h-10 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-hidden focus:ring-2 focus:ring-[#19A696]/40 focus:border-[#19A696] transition-colors"
                 />
               </div>
               <button

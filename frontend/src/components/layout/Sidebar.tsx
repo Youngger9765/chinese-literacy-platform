@@ -106,7 +106,7 @@ const MobileTabBar: React.FC<MobileTabBarProps> = ({
             aria-current={isActive(pathname, item.path) ? 'page' : undefined}
             className={`
               flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors
-              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent
+              focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent
               ${isActive(pathname, item.path) ? 'text-accent teacher-nav-active-text' : 'text-gray-500'}
             `}
           >
@@ -127,7 +127,7 @@ const MobileTabBar: React.FC<MobileTabBarProps> = ({
             onClick={() => setDrawerOpen(true)}
             aria-label="更多選項"
             aria-expanded={drawerOpen}
-            className="flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] font-medium text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent"
+            className="flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] font-medium text-gray-500 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent"
           >
             <span className="text-xl" aria-hidden="true">☰</span>
             <span>更多</span>
@@ -169,7 +169,7 @@ const MobileTabBar: React.FC<MobileTabBarProps> = ({
                       aria-pressed={v === activeView}
                       className={`
                         flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors
-                        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent
+                        focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent
                         ${v === activeView
                           ? 'bg-accent text-white teacher-nav-active-solid'
                           : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -200,7 +200,7 @@ const MobileTabBar: React.FC<MobileTabBarProps> = ({
                     aria-label={item.label}
                     className={`
                       flex flex-col items-center gap-1 p-3 rounded-xl text-sm font-medium transition-colors
-                      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent
+                      focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent
                       ${isActive(pathname, item.path)
                         ? 'bg-accent-bg text-accent teacher-nav-active-soft'
                         : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
@@ -238,7 +238,7 @@ const MobileTabBar: React.FC<MobileTabBarProps> = ({
                   onLogout();
                 }}
                 aria-label="登出"
-                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
               >
                 <span aria-hidden="true">🚪</span>
                 <span>登出</span>
@@ -396,7 +396,7 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
             onClick={() => navigate('/')}
             aria-label="LingoLeap 首頁"
             title={collapsed ? 'LingoLeap 首頁' : undefined}
-            className="flex items-center gap-2 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+            className="flex items-center gap-2 rounded-sm focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
           >
             <div
               className="teacher-brand-mark bg-accent w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
@@ -447,7 +447,7 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
                         };
                         navigate(home[e.target.value as WorkspaceView]);
                       }}
-                      className="mt-0.5 text-xs text-gray-500 bg-transparent border border-gray-200 rounded px-1.5 py-0.5 cursor-pointer hover:border-gray-400 focus:outline-none focus:ring-1 focus:ring-accent w-full"
+                      className="mt-0.5 text-xs text-gray-500 bg-transparent border border-gray-200 rounded-sm px-1.5 py-0.5 cursor-pointer hover:border-gray-400 focus:outline-hidden focus:ring-1 focus:ring-accent w-full"
                     >
                       {availableViews.map((v) => (
                         <option key={v} value={v}>
@@ -471,7 +471,7 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
             onClick={toggleCollapsed}
             aria-label={collapsed ? '展開側邊欄' : '收合側邊欄'}
             title={collapsed ? '展開側邊欄' : '收合側邊欄'}
-            className="p-2.5 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+            className="p-2.5 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
           >
             <span className="text-base font-mono" aria-hidden="true">
               {collapsed ? '»' : '«'}
@@ -515,7 +515,7 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
             title={collapsed ? '登出' : undefined}
             className={`
               flex items-center gap-2 rounded-lg transition-colors text-gray-500 hover:text-red-600 hover:bg-red-50
-              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
+              focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
               min-h-[44px]
               ${collapsed ? 'justify-center px-2 py-2.5 w-full' : 'px-3 py-2 w-full text-sm'}
             `}
@@ -530,7 +530,7 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
               <button
                 type="button"
                 onClick={() => navigate('/privacy')}
-                className="w-full text-left text-xs text-gray-400 hover:text-gray-600 transition-colors px-3 py-1 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+                className="w-full text-left text-xs text-gray-400 hover:text-gray-600 transition-colors px-3 py-1 rounded-sm focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
               >
                 隱私政策
               </button>
@@ -540,7 +540,7 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
                 onClick={() => navigate('/privacy')}
                 title="隱私政策"
                 aria-label="隱私政策"
-                className="p-1.5 text-gray-300 hover:text-gray-500 transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+                className="p-1.5 text-gray-300 hover:text-gray-500 transition-colors rounded-sm focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
               >
                 <span className="text-sm" aria-hidden="true">🔒</span>
               </button>

@@ -65,7 +65,7 @@ const SentenceInputCard: React.FC<SentenceInputCardProps> = ({
           onDragOver={e => e.preventDefault()}
           disabled={entry.status === 'loading' || isCurrentDone}
           placeholder={`用「${currentWordZhuyin}」造一個句子…`}
-          className={`flex-1 min-w-0 rounded-2xl border-2 px-4 py-3 text-base outline-none transition-all ${
+          className={`flex-1 min-w-0 rounded-2xl border-2 px-4 py-3 text-base outline-hidden transition-all ${
             entry.status === 'correct' ? 'border-emerald-400 bg-emerald-50 text-emerald-900'
             : entry.status === 'incorrect' ? 'border-amber-300 bg-amber-50 text-on-surface'
             : 'border-surface-container-high bg-transparent focus:border-accent text-on-surface'

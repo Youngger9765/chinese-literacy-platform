@@ -35,7 +35,7 @@ const TeammateRow: React.FC<TeammateRowProps> = ({ teammates }) => (
               below the 640px breakpoint, i.e. on every real phone (390px).
               Always shown now, just smaller, so it still fits three
               teammates across a narrow screen. */}
-          <span className="block truncate text-[10px] leading-tight text-on-surface-variant sm:text-xs">
+          <span className="block truncate text-[10px] leading-tight text-on-surface-variant sm:text-xs sm:leading-4">
             {teammate.frozen ? '暫時定住' : '一起前進'}
           </span>
         </span>

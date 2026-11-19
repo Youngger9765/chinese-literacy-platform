@@ -24,7 +24,7 @@ const MARK_STYLE: Record<MarkedWord['type'], { icon: string; label: string; chip
 const CheckBadge: React.FC<{ done: boolean }> = ({ done }) =>
   done ? (
     <span
-      className="flex items-center justify-center w-8 h-8 rounded-full bg-emerald-500 text-white shadow-sm"
+      className="flex items-center justify-center w-8 h-8 rounded-full bg-emerald-500 text-white shadow-xs"
       aria-label="已完成"
     >
       <span className="material-symbols-outlined text-xl" aria-hidden="true">check</span>
@@ -246,7 +246,7 @@ const StepReportCards: React.FC<Props> = ({ storyTitle, cards, onGoToStep }) => 
               aria-label={`${c.label}：${c.completed ? '已完成' : '未完成'}${c.summary ? `，${c.summary}` : ''}。點擊看詳細`}
               className={`w-full h-full text-left rounded-2xl p-4 flex flex-col gap-3 transition-all active:scale-[0.98] ${
                 c.completed
-                  ? 'bg-surface-container-lowest border-2 border-emerald-200 shadow-sm hover:shadow-md'
+                  ? 'bg-surface-container-lowest border-2 border-emerald-200 shadow-xs hover:shadow-md'
                   : 'bg-surface-container-low border-2 border-dashed border-outline-variant/60 hover:bg-surface-container'
               }`}
             >

@@ -38,7 +38,7 @@ const ParagraphProgress: React.FC<ParagraphProgressProps> = ({
             }
             disabled={status === 'locked' || !onSelectParagraph}
             onClick={() => onSelectParagraph?.(idx)}
-            className={`flex-1 rounded-full transition-all duration-500 focus:outline-none ${
+            className={`flex-1 rounded-full transition-all duration-500 focus:outline-hidden ${
               status === 'completed'
                 ? 'bg-emerald-500 hover:bg-emerald-400 cursor-pointer'
                 : status === 'current'

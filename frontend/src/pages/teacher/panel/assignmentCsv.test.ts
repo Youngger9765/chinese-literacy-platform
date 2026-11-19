@@ -20,7 +20,7 @@ const matrix = {
 } as never;
 
 describe('assignmentCsv', () => {
-  it('one row per student: name, status, rounded score; quotes commas and quotes', () => {
+  it('one row per student: name, status, rounded-sm score; quotes commas and quotes', () => {
     expect(assignmentCsv(matrix, 10, false).split('\r\n')).toEqual([
       '學生,狀態,分數',
       '王小明,已交,88',

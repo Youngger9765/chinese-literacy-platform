@@ -163,12 +163,12 @@ export const StudentTagManager: React.FC<StudentTagManagerProps> = ({
               onKeyDown={(event) => event.key === 'Enter' && handleAddCustom()}
               placeholder="輸入標籤名稱..."
               maxLength={50}
-              className="flex-1 px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+              className="flex-1 px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-blue-300"
             />
             <select
               value={customColor}
               onChange={(event) => setCustomColor(event.target.value)}
-              className="px-2 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white"
+              className="px-2 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-blue-300 bg-white"
             >
               <option value="gray">灰</option>
               <option value="red">紅</option>

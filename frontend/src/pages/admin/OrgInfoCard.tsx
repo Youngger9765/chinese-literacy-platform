@@ -89,7 +89,7 @@ const OrgInfoCard: React.FC<OrgInfoCardProps> = ({
                     onChange={(e) => onChangeEditName(e.target.value)}
                     required
                     autoFocus
-                    className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+                    className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-hidden focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
                   />
                 </div>
                 <div>
@@ -102,7 +102,7 @@ const OrgInfoCard: React.FC<OrgInfoCardProps> = ({
                     value={editDisplayName}
                     onChange={(e) => onChangeEditDisplayName(e.target.value)}
                     placeholder="自訂顯示名稱"
-                    className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+                    className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-hidden focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
                   />
                 </div>
                 <div>
@@ -116,7 +116,7 @@ const OrgInfoCard: React.FC<OrgInfoCardProps> = ({
                     onChange={(e) => onChangeEditTaxId(e.target.value)}
                     placeholder="例：12345678"
                     maxLength={20}
-                    className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+                    className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-hidden focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
                   />
                 </div>
                 <div>
@@ -129,7 +129,7 @@ const OrgInfoCard: React.FC<OrgInfoCardProps> = ({
                     value={editContactEmail}
                     onChange={(e) => onChangeEditContactEmail(e.target.value)}
                     placeholder="contact@example.com"
-                    className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+                    className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-hidden focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
                   />
                 </div>
                 <div>
@@ -142,7 +142,7 @@ const OrgInfoCard: React.FC<OrgInfoCardProps> = ({
                     value={editContactPhone}
                     onChange={(e) => onChangeEditContactPhone(e.target.value)}
                     placeholder="例：02-1234-5678"
-                    className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+                    className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-hidden focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
                   />
                 </div>
                 <div className="sm:col-span-2">
@@ -155,7 +155,7 @@ const OrgInfoCard: React.FC<OrgInfoCardProps> = ({
                     value={editAddress}
                     onChange={(e) => onChangeEditAddress(e.target.value)}
                     placeholder="例：台北市中正區重慶南路一段122號"
-                    className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+                    className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-hidden focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
                   />
                 </div>
                 <div className="sm:col-span-2">
@@ -168,7 +168,7 @@ const OrgInfoCard: React.FC<OrgInfoCardProps> = ({
                     onChange={(e) => onChangeEditDescription(e.target.value)}
                     rows={3}
                     placeholder="機構簡介或備註"
-                    className="w-full px-3 py-2 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors resize-none"
+                    className="w-full px-3 py-2 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-hidden focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors resize-none"
                   />
                 </div>
               </div>

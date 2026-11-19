@@ -198,7 +198,7 @@ const GuidedStepsExercise: React.FC<Props> = ({
               className="rounded-xl border border-gray-200 bg-surface-container-low p-4"
             >
               <div className="flex items-start gap-2 mb-3">
-                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-violet-100 text-violet-700 text-xs font-bold flex items-center justify-center mt-0.5">
+                <span className="shrink-0 w-6 h-6 rounded-full bg-violet-100 text-violet-700 text-xs font-bold flex items-center justify-center mt-0.5">
                   {stepIdx + 1}
                 </span>
                 <p className="text-sm font-medium text-on-surface-variant">{step.prompt}</p>
@@ -213,7 +213,7 @@ const GuidedStepsExercise: React.FC<Props> = ({
                     rows={3}
                     placeholder="請在此寫下你的答案..."
                     className={[
-                      'w-full resize-none rounded-lg border px-3 py-2 text-sm outline-none transition-colors',
+                      'w-full resize-none rounded-lg border px-3 py-2 text-sm outline-hidden transition-colors',
                       isDone
                         ? 'bg-gray-50 border-gray-200 text-gray-500'
                         : 'bg-white border-gray-300 focus:border-violet-400 focus:ring-2 focus:ring-violet-100',

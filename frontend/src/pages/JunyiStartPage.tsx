@@ -30,13 +30,13 @@ const JunyiStartPage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-amber-50 px-4">
-      <div className="w-full max-w-sm bg-white rounded-2xl shadow-sm border border-gray-200 p-6 text-center space-y-4">
+      <div className="w-full max-w-sm bg-white rounded-2xl shadow-xs border border-gray-200 p-6 text-center space-y-4">
         {error ? (
           <>
             <p className="text-red-600 text-sm">無法啟動均一登入，請回到 LingoLeap 登入頁重試。</p>
             <a
               href="/login"
-              className="block w-full h-11 leading-[2.75rem] bg-accent text-white rounded-lg font-bold text-sm"
+              className="block w-full h-11 leading-11 bg-accent text-white rounded-lg font-bold text-sm"
             >
               返回登入頁
             </a>

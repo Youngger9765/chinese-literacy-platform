@@ -80,7 +80,7 @@ const StudentEscapeRoomEntry: React.FC = () => {
       <div className="w-full max-w-lg">
         <GameBackButton to="/game-hub" />
       </div>
-      <div className="mt-4 w-full max-w-lg rounded-3xl bg-gradient-to-br from-[#6D5BD0] to-[#4B3F99] p-6 text-center text-white shadow-sm sm:p-10">
+      <div className="mt-4 w-full max-w-lg rounded-3xl bg-linear-to-br from-[#6D5BD0] to-[#4B3F99] p-6 text-center text-white shadow-xs sm:p-10">
         {/* #3761: the new codex image_gen lantern icon (also used on the
             game-hub card) replaces the plain gradient card — same "already
             had a decent banner, just no illustration" gap as team-arena. */}

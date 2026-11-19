@@ -504,7 +504,7 @@ export default function VocabWordSearch({
       <div className="flex flex-col xl:flex-row gap-6 items-center xl:items-start justify-center">
         {/* Grid with red border overlays for found words */}
         <div
-          className={`flex-shrink-0 touch-none cursor-crosshair border-2 shadow-sm transition-all duration-300 ${
+          className={`shrink-0 touch-none cursor-crosshair border-2 shadow-xs transition-all duration-300 ${
             demo?.step === 'find-word'
               ? 'border-amber-300 ring-4 ring-amber-200/50'
               : 'border-gray-200'
@@ -590,7 +590,7 @@ export default function VocabWordSearch({
                       ? 'bg-accent/10 text-accent line-through'
                       : isDemoTarget && demo?.step === 'find-word'
                       ? 'bg-amber-50 border-2 border-amber-400 text-amber-800 ring-4 ring-amber-300/40 shadow-md'
-                      : 'bg-surface-container-lowest border border-surface-container-high text-on-surface shadow-sm'
+                      : 'bg-surface-container-lowest border border-surface-container-high text-on-surface shadow-xs'
                   }`}
                 >
                   {(found || isDemoFound) && (

@@ -68,7 +68,7 @@ const CreateOrgPanel: React.FC<CreateOrgPanelProps> = ({ onCreated, onCancel }) 
                 required
                 autoFocus
                 placeholder="例：junyi-academy"
-                className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+                className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-hidden focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
               />
               <p className="text-xs text-gray-400 mt-1">唯一識別碼，建立後不建議修改</p>
             </div>
@@ -83,7 +83,7 @@ const CreateOrgPanel: React.FC<CreateOrgPanelProps> = ({ onCreated, onCancel }) 
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
                 placeholder="例：均一教育平台"
-                className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+                className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-hidden focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
               />
             </div>
 

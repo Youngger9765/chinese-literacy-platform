@@ -1,14 +1,14 @@
 /**
  * Regression lock for #3987 UI-3: the keypoints worksheet table was
  * cutting row text off mid-word at 390px (no visible scroll cue, and the
- * `min-w-[28rem]` floor forced a sideways scroll a phone user never
+ * `min-w-md` floor forced a sideways scroll a phone user never
  * discovered). Two independent changes landed in #3988:
  *
- *   1. `break-words` added to every cell-content span so a long unbroken
+ *   1. `wrap-break-word` added to every cell-content span so a long unbroken
  *      run of characters wraps instead of overflowing.
  *   2. The table itself switches to `table-fixed` + a 3-column `<colgroup>`
  *      on narrow phones (`useIsMobile(640)`) only — #3698's iPad
- *      split-panel `min-w-[28rem]` + horizontal-scroll floor must stay
+ *      split-panel `min-w-md` + horizontal-scroll floor must stay
  *      untouched at >=640px (it deliberately wants scroll, not wrap).
  */
 import { render, screen, waitFor } from '@testing-library/react';
@@ -60,7 +60,7 @@ const PAIR_STRUCTURE = {
 };
 
 // A fill_blank cell — routes through InlineWorksheetContent, one of the
-// three call sites that gained `break-words`.
+// three call sites that gained `wrap-break-word`.
 const FILL_BLANK_STRUCTURE = {
   layout: 'worksheet_table',
   title: '文章重點表',
@@ -120,7 +120,7 @@ describe('WorksheetTable narrow-phone layout (#3987 UI-3)', () => {
     const spans = Array.from(container.querySelectorAll('span.whitespace-pre-line'));
     expect(spans.length).toBeGreaterThan(0);
     for (const span of spans) {
-      expect(span.className.split(/\s+/)).toContain('break-words');
+      expect(span.className.split(/\s+/)).toContain('wrap-break-word');
     }
   });
 
@@ -134,13 +134,13 @@ describe('WorksheetTable narrow-phone layout (#3987 UI-3)', () => {
     expect(table).toBeTruthy();
     const classes = table!.className.split(/\s+/);
     expect(classes).toContain('table-fixed');
-    expect(classes).not.toContain('min-w-[28rem]');
+    expect(classes).not.toContain('min-w-md');
 
     const cols = table!.querySelectorAll('colgroup > col');
     expect(cols.length).toBe(3);
   });
 
-  it('keeps the #3698 min-w-[28rem] scroll floor (no colgroup) at >=640px', async () => {
+  it('keeps the #3698 min-w-md scroll floor (no colgroup) at >=640px', async () => {
     mockMatchMediaForWidth(1024);
     mockFetchSuccess(PAIR_STRUCTURE);
     const { container } = render(<StoryStructureTable storyId="lesson-01" showCoach={false} />);
@@ -149,7 +149,7 @@ describe('WorksheetTable narrow-phone layout (#3987 UI-3)', () => {
     const table = container.querySelector('table');
     expect(table).toBeTruthy();
     const classes = table!.className.split(/\s+/);
-    expect(classes).toContain('min-w-[28rem]');
+    expect(classes).toContain('min-w-md');
     expect(classes).not.toContain('table-fixed');
     expect(table!.querySelector('colgroup')).toBeNull();
   });

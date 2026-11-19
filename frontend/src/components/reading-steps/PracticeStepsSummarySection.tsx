@@ -23,7 +23,7 @@ const PracticeStepsSummarySection: React.FC<PracticeStepsSummarySectionProps> = 
         <div
           key={item.stepId}
           className={`rounded-2xl border p-4 flex items-center justify-between gap-3 ${
-            item.completed ? 'bg-white border-slate-200 shadow-sm' : 'bg-gray-50 border-dashed border-gray-300'
+            item.completed ? 'bg-white border-slate-200 shadow-xs' : 'bg-gray-50 border-dashed border-gray-300'
           }`}
         >
           <span className={`text-sm font-bold ${item.completed ? 'text-gray-900' : 'text-gray-400'}`}>

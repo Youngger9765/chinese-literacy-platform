@@ -99,7 +99,7 @@ const LessonPicker: React.FC<LessonPickerProps> = ({ selectedId, onChange }) => 
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="搜尋課文標題..."
-          className="w-full px-3 py-2 pr-8 border border-gray-200 rounded-lg text-sm bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
+          className="w-full px-3 py-2 pr-8 border border-gray-200 rounded-lg text-sm bg-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-accent focus:border-transparent"
         />
         {searchQuery ? (
           <button
@@ -157,7 +157,7 @@ const LessonPicker: React.FC<LessonPickerProps> = ({ selectedId, onChange }) => 
                 aria-pressed={isSelected}
                 className={`
                   w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-all
-                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
+                  focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
                   ${isSelected
                     ? 'bg-accent-bg border border-accent text-accent'
                     : 'bg-white border border-gray-100 text-gray-700 hover:bg-gray-50 hover:border-gray-200'

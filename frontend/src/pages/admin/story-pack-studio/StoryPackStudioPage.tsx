@@ -434,7 +434,7 @@ const StoryPackStudioPage: React.FC = () => {
                   value={jsonText}
                   onChange={(e) => setJsonText(e.target.value)}
                   spellCheck={false}
-                  className="w-full h-[480px] p-4 text-xs font-mono text-gray-800 outline-none resize-none"
+                  className="w-full h-[480px] p-4 text-xs font-mono text-gray-800 outline-hidden resize-none"
                 />
                 {(jsonParseError || fieldErrors.length > 0) && (
                   <div className="p-3 border-t border-gray-100 bg-red-50/50">

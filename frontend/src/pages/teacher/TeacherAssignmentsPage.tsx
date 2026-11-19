@@ -78,7 +78,7 @@ const TeacherAssignmentsPage: React.FC = () => {
         <div className="max-w-4xl mx-auto space-y-6">
           <LoadingIndicator />
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <Skeleton className="h-7 w-28 rounded" />
+            <Skeleton className="h-7 w-28 rounded-sm" />
             <Skeleton className="h-10 w-52 rounded-lg" />
           </div>
           <div className="bg-white rounded-2xl shadow-card p-6">
@@ -86,8 +86,8 @@ const TeacherAssignmentsPage: React.FC = () => {
             <div className="space-y-4">
               {Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className="border border-gray-100 rounded-lg p-4">
-                  <Skeleton className="h-4 w-1/3 rounded mb-3" />
-                  <SkeletonText lines={2} lineClassName="h-3 rounded" />
+                  <Skeleton className="h-4 w-1/3 rounded-sm mb-3" />
+                  <SkeletonText lines={2} lineClassName="h-3 rounded-sm" />
                 </div>
               ))}
             </div>
@@ -146,7 +146,7 @@ const TeacherAssignmentsPage: React.FC = () => {
             <select
               value={selectedId ?? ''}
               onChange={(e) => handleSelectClassroom(Number(e.target.value))}
-              className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#19A696]/40"
+              className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900 bg-white focus:outline-hidden focus:ring-2 focus:ring-[#19A696]/40"
             >
               {classrooms.map((c) => (
                 <option key={c.id} value={c.id}>

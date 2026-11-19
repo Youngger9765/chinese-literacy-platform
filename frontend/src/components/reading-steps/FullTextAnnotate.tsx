@@ -169,7 +169,7 @@ function DemoOverlay({ onClose }: { onClose: () => void }) {
             </p>
             {/* Animated yellow highlight */}
             <span
-              className="absolute rounded pointer-events-none bg-yellow-300/70"
+              className="absolute rounded-sm pointer-events-none bg-yellow-300/70"
               style={{
                 animation: 'ra-demo-highlight 2.4s ease-in-out infinite',
                 top: '50%',
@@ -1040,7 +1040,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
               死角，不是既有問題。加半透明底與模糊，避免課文從下面透出來。 */}
           <div
             data-testid="full-text-toolbar"
-            className="sticky top-0 z-20 flex flex-wrap justify-center items-center gap-3 pt-4 pb-4 mb-6 px-4 bg-surface/85 backdrop-blur-sm border-b border-outline-variant/20"
+            className="sticky top-0 z-20 flex flex-wrap justify-center items-center gap-3 pt-4 pb-4 mb-6 px-4 bg-surface/85 backdrop-blur-xs border-b border-outline-variant/20"
           >
             {/* #3134 — 原本只是顯示數量的標籤，現在同時是模式開關。
                 按下去課文進入標記模式，直接拖曳即可標記，不必長按選字
@@ -1056,7 +1056,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
                   aria-pressed={on}
                   aria-label={on ? `${cfg.label}：標記中，點擊結束` : `開始標記${cfg.label}的詞語`}
                   onClick={() => setMarkMode(on ? null : t)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full shadow-sm text-sm font-medium transition-all ${
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full shadow-xs text-sm font-medium transition-all ${
                     on ? `${cfg.activeClass} ring-2 ring-offset-1` : 'bg-surface-container-low hover:bg-surface-container-high'
                   }`}
                 >
@@ -1143,7 +1143,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
                 doing dogfood screenshotted exactly this heading. The title needs
                 the same table lookup as the body, not just the same font. */}
             <h1
-              className="font-headline font-medium text-3xl md:text-4xl text-on-surface tracking-tight leading-tight"
+              className="font-headline font-medium text-3xl md:text-4xl text-on-surface tracking-tight leading-tight md:leading-10"
               style={{ fontFamily: fontForZhuyin(zhuyinActive) }}
             >
               {zhuyinTitle}

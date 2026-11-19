@@ -210,7 +210,7 @@ const DefaultErrorUI: React.FC<{
             <button
               onClick={handleCopy}
               aria-label="複製錯誤代碼"
-              className="text-xs px-2 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded transition-colors"
+              className="text-xs px-2 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-sm transition-colors"
             >
               {copied ? '已複製' : '複製'}
             </button>
@@ -219,7 +219,7 @@ const DefaultErrorUI: React.FC<{
 
         {/* Show a brief, non-sensitive error hint in development */}
         {process.env.NODE_ENV !== 'production' && (
-          <p className="text-xs text-red-400 font-mono bg-red-50 rounded px-3 py-2 text-left break-words">
+          <p className="text-xs text-red-400 font-mono bg-red-50 rounded-sm px-3 py-2 text-left wrap-break-word">
             {error.message}
           </p>
         )}

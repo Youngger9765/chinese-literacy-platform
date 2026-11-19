@@ -169,7 +169,7 @@ const ErrorPatternsCard: React.FC<Props> = ({ storySlug, onBatchPractice }) => {
                   type="checkbox"
                   checked={selected.has(pattern.character)}
                   onChange={() => toggleSelect(pattern.character)}
-                  className="w-4 h-4 rounded border-gray-300 text-accent cursor-pointer"
+                  className="w-4 h-4 rounded-sm border-gray-300 text-accent cursor-pointer"
                   aria-label={`選擇 ${pattern.character}`}
                 />
               )}

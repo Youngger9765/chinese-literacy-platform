@@ -118,7 +118,7 @@ export const AssessmentLegacyResults: React.FC<AssessmentLegacyResultsProps> = (
       <div className="grid md:grid-cols-2 gap-4">
         {/* 聽寫練習 */}
         {dictationResult && (
-          <div className="rounded-2xl border p-5 bg-white border-slate-200 shadow-sm">
+          <div className="rounded-2xl border p-5 bg-white border-slate-200 shadow-xs">
             <div className="flex items-center gap-2 mb-3">
               <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold bg-accent text-white">5</span>
               <h4 className="text-sm font-bold text-gray-900">聽寫練習</h4>

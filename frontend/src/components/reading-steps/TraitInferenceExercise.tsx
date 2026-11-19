@@ -87,7 +87,7 @@ const TraitInferenceExercise: React.FC<Props> = ({
             key={idx}
             className="flex gap-3 bg-surface-container-low rounded-xl border border-gray-200 px-4 py-3"
           >
-            <span className="flex-shrink-0 px-2 py-0.5 rounded-md bg-blue-100 text-blue-700 text-xs font-semibold">
+            <span className="shrink-0 px-2 py-0.5 rounded-md bg-blue-100 text-blue-700 text-xs font-semibold">
               {clue.source}
             </span>
             <span className="text-sm text-on-surface">{clue.text}</span>

@@ -26,9 +26,9 @@ export const InlineXPPill: React.FC<InlineXPPillProps> = ({ summary, onClick }) 
       className="
         flex items-center gap-2.5 px-3.5 py-1.5 rounded-full
         bg-surface-container-lowest border border-[#E5E0D5]
-        hover:border-accent/40 hover:shadow-sm
+        hover:border-accent/40 hover:shadow-xs
         transition-all duration-150
-        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
+        focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
       "
       aria-label={`目前 Lv.${li.level}，連續 ${streak.current} 天，點我看成就`}
     >

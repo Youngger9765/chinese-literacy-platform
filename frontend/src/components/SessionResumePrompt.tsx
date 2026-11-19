@@ -123,7 +123,7 @@ const SessionResumePrompt: React.FC<SessionResumePromptProps> = ({ onDismiss }) 
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs"
       role="dialog"
       aria-modal="true"
       aria-label="繼續學習提示"

@@ -66,7 +66,8 @@ describe('ClassroomHeaderCard — tablet wrap safety (#3424)', () => {
     // Junyi-parity header: [name + pencil] and [班級代碼 group] sit in one row that wraps as a whole
     const row = name.closest('div')!.parentElement!;
     expect(row.className).toMatch(/\bflex-wrap\b/);
-    expect(name.className).toMatch(/\bbreak-words\b/);
+    // v4 name for v3 `break-words` (same overflow-wrap: break-word), #4136
+    expect(name.className).toMatch(/\bwrap-break-word\b/);
   });
 
   it('join-code button row wraps instead of being clipped by overflow-hidden', () => {

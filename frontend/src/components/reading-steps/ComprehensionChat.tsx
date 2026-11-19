@@ -175,7 +175,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
           onClick={() => handleTabChange('mcq')}
           className={`flex-1 px-5 py-3 rounded-full text-sm font-headline font-bold transition-all ${
             activeTab === 'mcq'
-              ? 'bg-surface-container-lowest text-accent shadow-sm'
+              ? 'bg-surface-container-lowest text-accent shadow-xs'
               : 'text-on-surface-variant hover:text-on-surface'
           }`}
         >
@@ -187,7 +187,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
         onClick={() => handleTabChange('structure')}
         className={`flex-1 px-5 py-3 rounded-full text-sm font-headline font-bold transition-all ${
           activeTab === 'structure'
-            ? 'bg-surface-container-lowest text-accent shadow-sm'
+            ? 'bg-surface-container-lowest text-accent shadow-xs'
             : 'text-on-surface-variant hover:text-on-surface'
         }`}
       >
@@ -199,7 +199,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
           onClick={() => handleTabChange('strategy')}
           className={`flex-1 px-5 py-3 rounded-full text-sm font-headline font-bold transition-all ${
             activeTab === 'strategy'
-              ? 'bg-surface-container-lowest text-accent shadow-sm'
+              ? 'bg-surface-container-lowest text-accent shadow-xs'
               : 'text-on-surface-variant hover:text-on-surface'
           }`}
         >
@@ -301,7 +301,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
           /* standard:     text only, col-span-7                       */}
           <div className={`${isGraphicText ? 'md:col-span-5' : 'md:col-span-7 lg:col-span-7'} min-h-0 flex flex-col gap-4`}>
 
-            <div className={`bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8 flex flex-col w-full min-h-0 ${isGraphicText ? 'flex-[3]' : 'flex-1'}`}>
+            <div className={`bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8 flex flex-col w-full min-h-0 ${isGraphicText ? 'flex-3' : 'flex-1'}`}>
               <div className="flex items-center gap-2 mb-4 shrink-0">
                 <span className="material-symbols-outlined text-accent text-xl">menu_book</span>
                 <span className="font-headline font-bold text-on-surface text-sm uppercase tracking-wider">參考課文</span>
@@ -312,7 +312,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
                     <span className="text-xs font-headline font-bold text-on-surface-variant/30 pt-1 select-none shrink-0 w-5 text-right">
                       {String(idx + 1).padStart(2, '0')}
                     </span>
-                    <p className={`text-lg md:text-xl text-on-surface leading-[2rem] md:leading-[2.2rem] ${isZhuyinAny ? 'tracking-[0.15em]' : ''}`}>
+                    <p className={`text-lg md:text-xl text-on-surface leading-8 md:leading-[2.2rem] ${isZhuyinAny ? 'tracking-[0.15em]' : ''}`}>
                       {/* #3022: in 'difficult' mode these strings now carry
                           DIFFICULT_SPAN markers. renderDifficultAwareText
                           consumes them into spans (so they stop leaking into

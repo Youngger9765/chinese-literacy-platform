@@ -121,7 +121,7 @@ const ToolPicker: React.FC<ToolPickerProps> = ({ selectedId, onChange }) => {
               aria-pressed={isSelected}
               className={`
                 w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left transition-all
-                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
+                focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
                 ${isSelected
                   ? 'bg-accent-bg border border-accent'
                   : 'bg-white border border-gray-100 hover:bg-gray-50 hover:border-gray-200'

@@ -138,7 +138,7 @@ const AssessmentReadingSummary: React.FC<AssessmentReadingSummaryProps> = ({
             <span className="text-xs text-gray-500 font-bold">正確字數/分鐘</span>
             <div className="flex gap-0.5 mt-2 w-full max-w-[120px]">
               {speedSegments.map((seg, idx) => (
-                <div key={idx} className={`flex-1 h-1.5 rounded-sm ${idx === currentSegment ? seg.color : 'bg-gray-200'}`} />
+                <div key={idx} className={`flex-1 h-1.5 rounded-xs ${idx === currentSegment ? seg.color : 'bg-gray-200'}`} />
               ))}
             </div>
             <p className="text-[10px] text-gray-400 mt-1">

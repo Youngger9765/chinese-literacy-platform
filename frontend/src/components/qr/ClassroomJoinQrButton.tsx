@@ -60,7 +60,7 @@ const ClassroomJoinQrDialog: React.FC<{
         <p className="mt-4 font-mono text-3xl font-bold tracking-widest text-accent select-all">
           {joinCode}
         </p>
-        <p className="mt-3 break-all rounded bg-gray-50 px-2 py-1.5 text-xs text-gray-400">
+        <p className="mt-3 break-all rounded-sm bg-gray-50 px-2 py-1.5 text-xs text-gray-400">
           {value}
         </p>
         <p className="mt-4 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700">

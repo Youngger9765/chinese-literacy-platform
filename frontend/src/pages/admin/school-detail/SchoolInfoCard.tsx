@@ -31,7 +31,7 @@ export interface SchoolInfoCardProps {
 }
 
 const INPUT_CLS =
-  'w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors';
+  'w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-hidden focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors';
 
 const formatDate = (dateStr: string) =>
   new Date(dateStr).toLocaleDateString('zh-TW', {

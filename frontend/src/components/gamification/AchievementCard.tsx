@@ -77,7 +77,7 @@ const AchievementCard: React.FC<AchievementCardProps> = ({ badge, size = 'md' })
         ${unlocked ? `ring-2 ${colors.ring}` : 'border-gray-200 opacity-50'}
         ${sizeClasses.card}
         flex flex-col items-center gap-2 text-center transition-all duration-200
-        ${unlocked ? 'shadow-sm hover:shadow-md' : ''}
+        ${unlocked ? 'shadow-xs hover:shadow-md' : ''}
       `}
       title={badge.description}
     >

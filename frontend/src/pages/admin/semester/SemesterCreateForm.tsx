@@ -77,7 +77,7 @@ const SemesterCreateForm: React.FC<SemesterCreateFormProps> = ({
             placeholder="例：113學年度上學期"
             value={form.name}
             onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-            className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-400"
           />
         </div>
         <div>
@@ -86,7 +86,7 @@ const SemesterCreateForm: React.FC<SemesterCreateFormProps> = ({
             type="date"
             value={form.start_date}
             onChange={e => setForm(f => ({ ...f, start_date: e.target.value }))}
-            className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-400"
           />
         </div>
         <div>
@@ -95,7 +95,7 @@ const SemesterCreateForm: React.FC<SemesterCreateFormProps> = ({
             type="date"
             value={form.end_date}
             onChange={e => setForm(f => ({ ...f, end_date: e.target.value }))}
-            className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-400"
           />
         </div>
         <div>
@@ -106,7 +106,7 @@ const SemesterCreateForm: React.FC<SemesterCreateFormProps> = ({
             max={365}
             value={form.grace_days}
             onChange={e => setForm(f => ({ ...f, grace_days: Number(e.target.value) }))}
-            className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-400"
           />
         </div>
         <div className="flex items-end">
@@ -126,7 +126,7 @@ const SemesterCreateForm: React.FC<SemesterCreateFormProps> = ({
               type="checkbox"
               checked={form.is_active}
               onChange={e => setForm(f => ({ ...f, is_active: e.target.checked }))}
-              className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+              className="rounded-sm border-gray-300 text-indigo-600 focus:ring-indigo-500"
             />
             立即設為目前學期（會停用其他學期）
           </label>

@@ -50,7 +50,7 @@ const Entry: React.FC<{
       <span className="text-[17px] font-medium text-slate-800">
         {entry.q}
         {roleLabel && (
-          <span className="ml-2 rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-500">
+          <span className="ml-2 rounded-sm bg-slate-100 px-2 py-0.5 text-xs text-slate-500">
             {roleLabel}
           </span>
         )}
@@ -211,7 +211,7 @@ const HelpPage: React.FC = () => {
             onChange={(e) => setQuery(e.target.value)}
             placeholder="搜尋問題，例如：麥克風、加入班級、作業"
             aria-label="搜尋使用說明"
-            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-[16px] outline-none focus:border-slate-500"
+            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-[16px] outline-hidden focus:border-slate-500"
           />
           {searching && (
             <p className="mt-2 text-[14px] text-slate-500">

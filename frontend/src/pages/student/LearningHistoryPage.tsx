@@ -95,7 +95,7 @@ const SessionCard: React.FC<{ session: LearningSummary }> = ({ session }) => {
             <h3 className="text-base font-medium text-gray-900 truncate">
               {session.story_title ?? session.story_slug ?? '未知課文'}
             </h3>
-            <span className="inline-block px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700">
+            <span className="inline-block px-1.5 py-0.5 rounded-sm text-xs font-medium bg-green-100 text-green-700">
               已完成
             </span>
           </div>
@@ -150,10 +150,10 @@ const ToolboxSessionCard: React.FC<{ session: ToolboxSession }> = ({ session }) 
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
             <h3 className="text-base font-medium text-gray-900 truncate">{toolLabel}</h3>
-            <span className="inline-block px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700">
+            <span className="inline-block px-1.5 py-0.5 rounded-sm text-xs font-medium bg-green-100 text-green-700">
               已完成
             </span>
-            <span className="inline-block px-1.5 py-0.5 rounded text-xs font-medium bg-accent-bg text-accent">
+            <span className="inline-block px-1.5 py-0.5 rounded-sm text-xs font-medium bg-accent-bg text-accent">
               練習工具箱
             </span>
           </div>
@@ -233,9 +233,9 @@ const TabContent: React.FC<{ source: TabKey }> = ({ source }) => {
       <div className="space-y-3">
         {Array.from({ length: 3 }).map((_, i) => (
           <div key={i} className="bg-white rounded-2xl shadow-card p-4">
-            <div className="h-4 bg-gray-200 animate-pulse rounded w-2/3 mb-3" />
-            <div className="h-3 bg-gray-200 animate-pulse rounded w-1/3 mb-2" />
-            <div className="h-4 bg-gray-200 animate-pulse rounded w-full" />
+            <div className="h-4 bg-gray-200 animate-pulse rounded-sm w-2/3 mb-3" />
+            <div className="h-3 bg-gray-200 animate-pulse rounded-sm w-1/3 mb-2" />
+            <div className="h-4 bg-gray-200 animate-pulse rounded-sm w-full" />
           </div>
         ))}
       </div>
@@ -345,7 +345,7 @@ const LeagueHistorySection: React.FC = () => {
   }, [token]);
 
   if (isLoading) {
-    return <div className="h-4 bg-gray-200 animate-pulse rounded w-1/3" />;
+    return <div className="h-4 bg-gray-200 animate-pulse rounded-sm w-1/3" />;
   }
   if (error) {
     return (
@@ -367,7 +367,7 @@ const LeagueHistorySection: React.FC = () => {
         <div key={s.season_id} className="bg-surface-container-lowest rounded-2xl shadow-card p-4">
           <h3 className="text-base font-bold text-on-surface mb-3">{s.season_name}</h3>
 
-          <div className="rounded-xl bg-gradient-to-br from-accent to-accent/80 p-3">
+          <div className="rounded-xl bg-linear-to-br from-accent to-accent/80 p-3">
             <EnergyBar
               label="我的貢獻"
               points={s.my_points}

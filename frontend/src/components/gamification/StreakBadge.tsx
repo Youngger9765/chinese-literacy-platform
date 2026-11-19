@@ -24,7 +24,7 @@ const StreakBadge: React.FC<StreakBadgeProps> = ({ streak, compact = false }) =>
   }
 
   return (
-    <div className="rounded-2xl border border-orange-100 bg-orange-50 p-4 shadow-sm">
+    <div className="rounded-2xl border border-orange-100 bg-orange-50 p-4 shadow-xs">
       <div className="flex items-center gap-2 mb-3">
         <span className="text-2xl">🔥</span>
         <span className="font-bold text-gray-700">連續學習</span>

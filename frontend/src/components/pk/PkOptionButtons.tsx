@@ -54,7 +54,7 @@ const PkOptionButtons: React.FC<PkOptionButtonsProps> = ({
             aria-label={imageUrl ? `${shape.label}：圖片選項` : `${shape.label}：${opt.text}`}
             aria-pressed={isSelected}
             className={[
-              'relative flex min-h-[120px] sm:min-h-[140px] flex-col items-center justify-center gap-2 rounded-2xl p-3 text-center shadow-sm transition-transform duration-150',
+              'relative flex min-h-[120px] sm:min-h-[140px] flex-col items-center justify-center gap-2 rounded-2xl p-3 text-center shadow-xs transition-transform duration-150',
               shape.bg,
               shape.textOnBg,
               'active:scale-95',
@@ -76,10 +76,10 @@ const PkOptionButtons: React.FC<PkOptionButtonsProps> = ({
                 {shape.glyph}
               </span>
             )}
-            {opt.text && <span className="text-base font-medium leading-snug break-words">{opt.text}</span>}
+            {opt.text && <span className="text-base font-medium leading-snug wrap-break-word">{opt.text}</span>}
             {revealed && (isCorrect || isWrongSelected) && (
               <span
-                className="absolute -top-2 -right-2 flex h-9 w-9 items-center justify-center rounded-full bg-white text-xl font-bold shadow"
+                className="absolute -top-2 -right-2 flex h-9 w-9 items-center justify-center rounded-full bg-white text-xl font-bold shadow-sm"
                 aria-label={isCorrect ? '正確' : '錯誤'}
               >
                 {isCorrect ? <span className="text-[#15803D]">✓</span> : <span className="text-on-surface-variant">✗</span>}

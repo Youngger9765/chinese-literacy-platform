@@ -38,8 +38,8 @@ interface LeagueBadgeCardProps {
 }
 
 const KIND_STYLE: Record<LeagueBadgeCardProps['kind'], { earned: string; defaultIcon: LeagueThemeArt }> = {
-  individual: { earned: 'bg-accent-bg border-accent/60 shadow-sm', defaultIcon: { kind: 'emoji', value: '⭐' } },
-  class: { earned: 'bg-tertiary-container/20 border-tertiary-container shadow-sm', defaultIcon: { kind: 'emoji', value: '🏆' } },
+  individual: { earned: 'bg-accent-bg border-accent/60 shadow-xs', defaultIcon: { kind: 'emoji', value: '⭐' } },
+  class: { earned: 'bg-tertiary-container/20 border-tertiary-container shadow-xs', defaultIcon: { kind: 'emoji', value: '🏆' } },
 };
 
 const LeagueBadgeCard: React.FC<LeagueBadgeCardProps> = ({ kind, earned, title, description, icon }) => {
@@ -53,7 +53,7 @@ const LeagueBadgeCard: React.FC<LeagueBadgeCardProps> = ({ kind, earned, title, 
     >
       {!earned && (
         <span
-          className="absolute top-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-surface-container-lowest text-[11px] leading-none shadow-sm"
+          className="absolute top-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-surface-container-lowest text-[11px] leading-none shadow-xs"
           aria-hidden="true"
         >
           🔒

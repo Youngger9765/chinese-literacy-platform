@@ -702,7 +702,7 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
       >
         {/* A7: text-base → text-lg md:text-xl leading-relaxed
             #2144: 教授「定義字換色」— 答對後定義文字轉綠，強化配對成功訊號 */}
-        <p className={`text-lg md:text-xl leading-relaxed ${isCorrect ? 'text-emerald-700 font-semibold' : 'text-on-surface'}`}>{item?.definition}</p>
+        <p className={`text-lg md:text-xl leading-relaxed md:leading-7 ${isCorrect ? 'text-emerald-700 font-semibold' : 'text-on-surface'}`}>{item?.definition}</p>
         <div className="flex items-center justify-center h-8">
           {isCorrect ? (
             <span className="font-bold text-base text-emerald-700 flex items-center gap-1">
@@ -855,7 +855,7 @@ export function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone
         {/* Right column — word bank panel, independently scrollable on desktop */}
         <div
           ref={wordBankScrollRef}
-          className="hidden md:flex md:flex-col w-72 flex-shrink-0 overflow-y-auto max-h-[calc(100vh-16rem)]"
+          className="hidden md:flex md:flex-col w-72 shrink-0 overflow-y-auto max-h-[calc(100vh-16rem)]"
         >
           {wordBankContent}
         </div>
