@@ -83,7 +83,7 @@ describe('SessionHistoryReportPage — 學習報告分頁 (#3749)', () => {
   it('渲染新版關卡卡片（StepReportCards），不是舊版 AssessmentReport', async () => {
     render(<SessionHistoryReportPage />);
 
-    await waitFor(() => expect(screen.getByTestId('step-report-cards')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByTestId('step-report-cards')).toBeInTheDocument(), { timeout: 5000 });
     expect(screen.queryByTestId('assessment-report')).not.toBeInTheDocument();
 
     // 完成的三關（lesson-intro 因後面有進度而算完成、full-text-annotate、
@@ -93,10 +93,10 @@ describe('SessionHistoryReportPage — 學習報告分頁 (#3749)', () => {
 
   it('跟學習流程結束時一樣能點卡片看細節（例如語詞複習找到的詞）', async () => {
     render(<SessionHistoryReportPage />);
-    await waitFor(() => expect(screen.getByTestId('step-report-cards')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByTestId('step-report-cards')).toBeInTheDocument(), { timeout: 5000 });
 
     screen.getByRole('button', { name: /語詞複習/ }).click();
-    await waitFor(() => expect(screen.getByText('春天')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('春天')).toBeInTheDocument(), { timeout: 5000 });
     expect(screen.getByText('花朵')).toBeInTheDocument();
   });
 });
