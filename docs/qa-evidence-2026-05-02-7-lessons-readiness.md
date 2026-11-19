@@ -207,4 +207,4 @@ print("\n✅ All 7 lessons e2e ready")
 - PR #1395: https://github.com/Youngger9765/chinese-literacy-platform/pull/1395
 - Issue #1393 (follow-up): https://github.com/Youngger9765/chinese-literacy-platform/issues/1393
 - CEO doc: `docs/ceo-review-2026-05-02.md`
-- 5/1 meeting record: `docs/meetings/2026-05-01-experts-review.md`
+- 5/1 meeting record: 5/1 專家會議（內部會議紀錄，已移至私有課程庫）

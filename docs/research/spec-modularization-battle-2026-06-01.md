@@ -13,7 +13,7 @@
 | # | Friction | Evidence |
 |---|---------|----------|
 | 1 | **SOT 衝突** | OMO grader 用 `vocabulary` list 算 A-G letter mapping，worksheet PDF 印 `vocab_bank` 字典 — 兩套不一致。`grep "vocab_bank" backend/app/services/omo_question_schema*.py = 0` |
-| 2 | **Spec 散落 7 處** | `CLAUDE.md` + `~/.claude/rules/*.md` + `~/.claude/skills/*` + `~/.claude/agents/*.md` + `docs/PRD.md` + `docs/meetings/*.md` + GitHub issue body |
+| 2 | **Spec 散落 7 處** | `CLAUDE.md` + `~/.claude/rules/*.md` + `~/.claude/skills/*` + `~/.claude/agents/*.md` + `docs/PRD.md` + 內部會議紀錄（已移至私有課程庫） + GitHub issue body |
 | 3 | **Context window 經濟** | 進 OMO scope 不該載入整份 PRD + 全 meeting + 全 rules。目前是 grep 撈 → miss / 過撈 |
 | 4 | **Stale drift 沒偵測** | 5/22 meeting 記載 G6-L25 OK；5/27 audit 發現 8/8 fb_answer 錯。spec ↔ code/data 無 CI sync |
 | 5 | **Issue body 是 spec 但在 codebase 外** | AI 寫 code 要 `gh fetch`，可能拿到舊版本 |

@@ -119,7 +119,7 @@ Team 會寫 INTENT.md、寫 spec.py，**永遠不連結**。Anchor scheme 需要
 
 R4 合成 directionally sound 但**解錯問題**。
 
-Real constraint visible in this repo：**方大哥跟教授才是 product authority，不是工程師**。CLAUDE.md 說「spec 散在 7 處」但 production 真實 failure 是 **pedagogical decisions 在 meetings 講了從來沒寫到任何地方**（`docs/meetings/` 140 files，`docs/specs/` 9 files）。被設計的 system 假設 spec drift 是 code-spec sync 問題。它 actually 是 **meeting-to-spec capture problem**。兩邊都沒提誰寫 INTENT.md after 5/1 expert review session，或什麼 enforce 它。
+Real constraint visible in this repo：**方大哥跟教授才是 product authority，不是工程師**。CLAUDE.md 說「spec 散在 7 處」但 production 真實 failure 是 **pedagogical decisions 在 meetings 講了從來沒寫到任何地方**（內部會議紀錄 140 份，已移至私有課程庫，`docs/specs/` 9 files）。被設計的 system 假設 spec drift 是 code-spec sync 問題。它 actually 是 **meeting-to-spec capture problem**。兩邊都沒提誰寫 INTENT.md after 5/1 expert review session，或什麼 enforce 它。
 
 Capsule with no author + no update trigger = orphaned markdown.
 

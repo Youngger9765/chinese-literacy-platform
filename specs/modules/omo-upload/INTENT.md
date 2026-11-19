@@ -29,7 +29,7 @@ owns_data: []  # 一修的 _parsed_2026-05-01/ 已封存（#2683）。二修抽�
 spec_tests: []
 related_issues: []
 source_meetings:
-  - docs/meetings/2026-05-01-experts-review.md
+  - 2026-05-01 專家會議（內部會議紀錄，已移至私有課程庫）
 last_reviewed: 2026-06-01
 owner: young
 ---

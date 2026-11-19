@@ -62,10 +62,7 @@ BRD ──────▶ MRD ──────▶ PRD ──────▶ TR
 
 | 文件 | 說明 |
 |------|------|
-| [team-contributions.md](meetings/team-contributions.md) | 每週貢獻紀錄 |
-| [2026-03-19-weekly-report.md](meetings/2026-03-19-weekly-report.md) | 本週週報 |
-| [2026-03-20-agenda.md](meetings/2026-03-20-agenda.md) | 明天會議議程 |
-| [meetings/](meetings/) | 會議記錄 |
+| 會議議程／紀錄／貢獻紀錄 | （內部會議紀錄，已移至私有課程庫；本 repo 為公開 repo，不放會議資料） |
 | [ROADMAP.md](ROADMAP.md) | 開發路線圖 v3.3（9 Phases, 2026 Q1-Q3） |
 
 ### 其他

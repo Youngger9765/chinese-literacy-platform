@@ -46,7 +46,7 @@ docs/qa/
 2. 比對「我要動的檔案」落在哪個 module 的 owns_code / owns_data
         ↓
 3. 只讀那個 module 的 INTENT.md（+ 需要時讀 test_*_spec.py）
-   → 不撈整份 PRD / 全 docs/meetings
+   → 不撈整份 PRD / 全部會議紀錄
         ↓
 4. 改完跑：cd backend && python -m pytest specs/ -v
    → 契約 fail = code/data 偏離意圖（修 code 或更新 spec，二擇一，強迫決策）
@@ -79,7 +79,7 @@ CI：`.github/workflows/spec-check.yml` 在 `specs/**`、`backend/specs/**`、
 ## 已知會 rot 的點（critic 提醒）
 
 Spec 真正的失效不是 code 改壞，是**會議講了沒人寫回 INTENT.md**
-（repo 有 ~140 個 `docs/meetings/`，spec 卻寥寥可數）。每個 module 的 INTENT.md 有
+（內部會議紀錄很多，spec 卻寥寥可數；會議紀錄不放在這個公開 repo，存於私有課程庫 kist-curriculum）。每個 module 的 INTENT.md 有
 `source_meetings` 欄；維護觸發點是會議 review，不是 code review。
 
 ## 刻意不做（Phase A 範圍外）

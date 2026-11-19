@@ -42,7 +42,8 @@ If the script fails (e.g. no Vertex AI auth locally), manually review their rece
 
 ## Step 3: Update Team Contributions
 
-Update `docs/meetings/team-contributions.md` with the latest week's data:
+Update `meetings/lingoleap-l3-docs/docs/meetings/team-contributions.md` in the **private L2 repo `kist-curriculum`** (commit + push there) with the latest week's data.
+⛔ L3 是開源公開 repo，任何內部會議議程、紀錄、逐字稿（含貢獻紀錄）都不准放進 L3（Young 2026-11-19 明令）:
 - Add a new week section at the top (format: `## M/DD ~ M/DD`)
 - For each intern, list their merged PRs with status ✅ and open PRs with 🔧
 - Include Young's work from the current session
