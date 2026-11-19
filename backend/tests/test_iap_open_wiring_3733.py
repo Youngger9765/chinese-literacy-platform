@@ -484,14 +484,20 @@ def test_switch_off_turns_native_iap_off_if_still_on(wf, job, preview):
     assert not _gcloud(calls, "--no-iap"), "no IAP on the service -> touch nothing (today's deploys)"
 
 
-# ── 8: e2e job has no credentials; must not run against a locked preview ─
+# ── 8: e2e job runs THROUGH IAP, not skipped ─────────────────────────────
+#
+# This used to assert the job is skipped when IAP is on. With IAP on for
+# every preview that meant the student-journey gate never ran on any PR
+# (2026-11-16..17). It now signs an IAP JWT on the host and runs Playwright
+# in a credential-free container, like e2e-tests.yml (#4097). Full lock:
+# test_preview_journey_iap.py.
 
 
-def test_e2e_preview_check_does_not_run_against_locked_preview():
+def test_e2e_preview_check_is_not_skipped_on_locked_preview():
     job = _job(PREVIEW_WF, "e2e-preview-check")
-    assert "outputs.iap_enabled != 'true'" in str(job.get("if", "")), (
-        "e2e-preview-check has no GCP credentials by design; with IAP on it "
-        "can only ever see the Google login page"
+    assert "iap_enabled" not in str(job.get("if", "")), (
+        "with IAP on for every preview, an iap_enabled gate here skips the "
+        "student-journey check on every PR"
     )
 
 

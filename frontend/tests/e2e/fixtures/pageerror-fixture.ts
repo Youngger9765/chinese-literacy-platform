@@ -1,4 +1,4 @@
-import { test as base } from '@playwright/test';
+import { test as base } from './iap-fixture';
 
 /**
  * pageerror-fixture.ts — Gate ③ of the frontend render-safety net (#2289)

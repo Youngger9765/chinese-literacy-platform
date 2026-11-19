@@ -106,9 +106,12 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: '20'
+          # vitest 5 declares engines node ^22.12 — this job runs the vitest
+          # suite, so it moves to 22. Build-only jobs and the Dockerfile stay
+          # on 20 (vite still supports ^20.19).
+          node-version: '22'
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 

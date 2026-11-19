@@ -76,7 +76,7 @@ _EXPECTED_AUTH_JOBS = {
         "smoke-test",
         "cleanup-images",
     },
-    "preview-deploy.yml": {"deploy-preview"},
+    "preview-deploy.yml": {"deploy-preview", "e2e-preview-check"},
 }
 
 
@@ -109,8 +109,45 @@ def _step_is_pinned_firebase_cli_install(step: dict) -> bool:
     )
 
 
+#: Second deliberate exception (#4097 pattern, preview journey 2026-11-17):
+#: npm ci + Playwright run INSIDE the digest-pinned official Playwright
+#: image. A container gets only the variables passed with `-e NAME` -- not
+#: the runner's ACTIONS_ID_TOKEN_* (so it cannot mint an OIDC token) -- and
+#: only the mounts listed; mounting nothing but frontend/ keeps it away
+#: from the workspace root where auth@v2 writes gha-creds-*.json. Every
+#: condition below must hold, else it is an untrusted install on the host.
+_PINNED_PLAYWRIGHT_IMAGE = re.compile(
+    r"mcr\.microsoft\.com/playwright:v[\d.]+-\w+@sha256:[0-9a-f]{64}"
+)
+_CONTAINER_FORBIDDEN = (
+    "--env-file", "docker.sock", "--privileged", "ACTIONS_ID_TOKEN",
+    "ACTIONS_RUNTIME", "GOOGLE_APPLICATION_CREDENTIALS", "GOOGLE_GHA_CREDS",
+    "CLOUDSDK", "--network=host", "--net=host",
+)
+
+
+def _step_runs_untrusted_only_in_pinned_container(step: dict) -> bool:
+    run = step.get("run")
+    if not isinstance(run, str) or run.count("docker run") != 1:
+        return False
+    host_part, container_part = run.split("docker run", 1)
+    if any(p.search(host_part) for p in _UNTRUSTED_INSTALL_PATTERNS):
+        return False
+    if not _PINNED_PLAYWRIGHT_IMAGE.search(container_part):
+        return False
+    if any(f in container_part for f in _CONTAINER_FORBIDDEN):
+        return False
+    mounts = re.findall(r"(?:-v|--volume|--mount)[ =](\S+)", container_part)
+    return bool(mounts) and all(
+        m.strip("\"'").split(":", 1)[0].rstrip("\"'") == "${GITHUB_WORKSPACE}/frontend"
+        for m in mounts
+    )
+
+
 def _step_is_untrusted_install(step: dict) -> bool:
     if _step_is_pinned_firebase_cli_install(step):
+        return False
+    if _step_runs_untrusted_only_in_pinned_container(step):
         return False
     run = step.get("run")
     if not isinstance(run, str):
@@ -322,3 +359,35 @@ def test_workflow_level_permissions_no_longer_grant_id_token() -> None:
             f"{filename} 的 workflow 層級 permissions 還有 id-token: write —— "
             "這樣每一個沒有自己宣告 permissions 的 job 都會繼承它"
         )
+
+
+_GOOD_CONTAINER_RUN = (
+    'source "${GITHUB_WORKSPACE}/scripts/lib/iap-token.sh"\n'
+    "docker run --rm --init --ipc=host \\\n"
+    '  -v "${GITHUB_WORKSPACE}/frontend:/work" -w /work \\\n'
+    "  -e IAP_PROXY_TOKEN -e PLAYWRIGHT_BASE_URL \\\n"
+    "  mcr.microsoft.com/playwright:v1.59.1-noble@sha256:" + "a" * 64 + " \\\n"
+    "  bash -c 'npm ci && npx playwright test'\n"
+)
+
+
+def test_the_pinned_container_exemption_is_narrow() -> None:
+    """正向對照：真實形狀（e2e-preview-check）被豁免；任何一個條件破掉，
+    都要回到「憑證 job 裡的第三方安裝」而被擋。"""
+    assert not _step_is_untrusted_install({"run": _GOOD_CONTAINER_RUN}), (
+        "真實的容器形狀卻被擋 —— 豁免沒生效"
+    )
+    broken = {
+        "npm on the host before docker": "npm ci\n" + _GOOD_CONTAINER_RUN,
+        "image not digest-pinned": _GOOD_CONTAINER_RUN.replace("@sha256:" + "a" * 64, ""),
+        "workspace root mounted": _GOOD_CONTAINER_RUN.replace(
+            "${GITHUB_WORKSPACE}/frontend:/work", "${GITHUB_WORKSPACE}:/work"),
+        "OIDC request var passed": _GOOD_CONTAINER_RUN.replace(
+            "-e IAP_PROXY_TOKEN", "-e ACTIONS_ID_TOKEN_REQUEST_TOKEN"),
+        "env-file": _GOOD_CONTAINER_RUN.replace("-e IAP_PROXY_TOKEN", "--env-file /tmp/e"),
+        "docker socket": _GOOD_CONTAINER_RUN.replace(
+            "-w /work", "-v /var/run/docker.sock:/var/run/docker.sock -w /work"),
+        "two docker runs": _GOOD_CONTAINER_RUN + _GOOD_CONTAINER_RUN,
+    }
+    for why, run in broken.items():
+        assert _step_is_untrusted_install({"run": run}), f"豁免太寬：{why} 仍被放行"

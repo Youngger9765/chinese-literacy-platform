@@ -64,10 +64,6 @@ vi.mock('../../../services/learningApi', () => ({
   validateStrategyAnswer: vi.fn(),
 }));
 
-import { fireEvent, waitFor } from '@testing-library/react';
-import { validateStrategyAnswer } from '../../../services/learningApi';
-import { beforeEach } from 'vitest';
-
 const FREE_TEXT_FIXTURE: SpotlightV2 = {
   lesson: 'G6-L23',
   strategy_name: '摘要策略',
