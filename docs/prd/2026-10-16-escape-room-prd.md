@@ -267,7 +267,7 @@ completed_at
 - `backend/app/services/pk/classroom_features.py`（`feature_settings` JSONB 的 typed accessor 設計，已上線）
 - `backend/app/services/live_quiz/sources/comprehension.py`（888 題／~150 課既有閱讀理解題庫，單選 A-D）
 - `backend/app/services/live_quiz/round_types/choice.py`（`generate_rounds`，PK 已驗證可重用）
-- `docs/meetings/2026-10-16-record.md`（會議紀錄：自學遊戲化方向、朗讀不適合比賽）
+- 10/16 會議紀錄（內部會議紀錄，已移至私有課程庫）（自學遊戲化方向、朗讀不適合比賽）
 - [彩虹橋（臺灣原住民神話）－維基百科](https://zh.wikipedia.org/zh-tw/%E5%BD%A9%E8%99%B9%E6%A9%8B_(%E8%87%BA%E7%81%A3%E5%8E%9F%E4%BD%8F%E6%B0%91%E7%A5%9E%E8%A9%B1)（泰雅族／賽德克族）
 - [百步蛇傳說－維基百科](https://zh.wikipedia.org/zh-hant/%E7%99%BE%E6%AD%A5%E8%9B%87%E5%82%B3%E8%AA%AA)、[臺灣原住民族事典－百步蛇](https://aborgpedia.alcd.center/detail?id=5404)（排灣族／魯凱族／布農族）
 - [射日傳說－國家文化記憶庫2.0](https://tcmb.culture.tw/zh-tw/detail?indexCode=Culture_Invisible&id=321523)、[臺灣原住民族事典－射日](https://aborgpedia.alcd.center/detail?id=11532)（跨族群版本）

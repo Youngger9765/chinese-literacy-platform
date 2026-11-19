@@ -4,7 +4,7 @@
 **分支**：`docs/issue-1378-fluency-research`
 **Mode**：SCOPE REDUCTION（建議）
 **Reviewer**：plan-ceo-review skill (gstack)
-**Source of truth**：[`docs/meetings/2026-05-01-experts-review.md`](meetings/2026-05-01-experts-review.md)
+**Source of truth**：5/1 專家會議（內部會議紀錄，已移至私有課程庫）
 
 ---
 

@@ -7,7 +7,7 @@
 
 ---
 
-## 一、5/1 會議重要決議（source: docs/meetings/2026-05-01-experts-review.md）
+## 一、5/1 會議重要決議（source: 5/1 專家會議（內部會議紀錄，已移至私有課程庫））
 
 ### 範疇定錨
 方大哥 5/1 拍板：**不再追求功能完整，追求兩個模組做到極致**。
@@ -155,8 +155,8 @@
 
 ## 附：來源 doc
 
-- `docs/meetings/2026-05-01-experts-review.md`（5/1 會議）
+- 5/1 專家會議（內部會議紀錄，已移至私有課程庫）
 - `docs/ceo-review-2026-05-02.md`（Approach B 7 課專修）
 - `docs/qa-evidence-2026-05-02-7-lessons-readiness.md`（backend e2e proof）
-- `docs/meetings/2026-05-08-record.md`（5/8 週會）
+- 5/8 週會（內部會議紀錄，已移至私有課程庫）
 - 今日 staging 截圖：`/tmp/staging-1547-*.png` / `/tmp/staging-1530-recheck.png` / `/tmp/staging-1531-recheck.png` / etc

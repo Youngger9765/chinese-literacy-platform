@@ -7,7 +7,9 @@
 
 **重要原則：不假設會議日期。** 沒有指定日期 → 必問。
 
-**用途**：自動查詢本週 PR/issue 數據，產出 4 份文件（議程 + 貢獻紀錄 + 靖杭 JSON + 啟翔 JSON），開 PR 到 staging，等 Young admin merge
+**用途**：自動查詢本週 PR/issue 數據，產出 4 份文件（議程 + 貢獻紀錄 → 私有 L2 `kist-curriculum` 直接 push；靖杭 JSON + 啟翔 JSON → L3 開 PR 到 staging，等 Young admin merge）
+
+⛔ **L3 是開源公開 repo，任何內部會議議程、紀錄、逐字稿都不准放進 L3（Young 2026-11-19 明令）**。議程與貢獻紀錄寫進私有 L2 repo `kist-curriculum`（本機 `/Users/young/project/kist-curriculum`）並在那裡直接 commit + push；L3 這邊只開 PR 更新實習生技能樹 JSON，PR 標題與內文**不寫任何議程內容**。
 
 **參考 PR**：#1483（merged 2026-05-07）是這個 skill 第一次跑的完整範例
 
@@ -141,7 +143,9 @@ cat frontend/public/intern-training/interns/xiung.json   | jq '{lastReview,skill
 ### 1e. 最近 agenda 範本
 
 ```bash
-ls docs/meetings/*-agenda.md | sort | tail -1
+L2=/Users/young/project/kist-curriculum
+git -C "$L2" pull --ff-only
+find "$L2/meetings" -name '*-agenda.md' | awk -F/ '{print $NF" "$0}' | sort | tail -1 | cut -d' ' -f2-
 ```
 
 ---
@@ -162,7 +166,7 @@ cd ../chinese-literacy-platform-issue-${ISSUE_NUM}
 
 ## Step 3：產出 4 份文件
 
-### 3a. 議程：docs/meetings/{MEETING_DATE}-agenda.md
+### 3a. 議程：`kist-curriculum/meetings/{MEETING_DATE}-agenda.md`（私有 L2，⛔ 不進 L3）
 
 依以下模板填入，**用 Step 1 數據填寫，不要虛構**：
 
@@ -257,7 +261,7 @@ cd ../chinese-literacy-platform-issue-${ISSUE_NUM}
 
 ---
 
-### 3b. 貢獻紀錄：docs/meetings/team-contributions.md
+### 3b. 貢獻紀錄：`kist-curriculum/meetings/lingoleap-l3-docs/docs/meetings/team-contributions.md`（私有 L2，⛔ 不進 L3）
 
 在 `---`（第一個橫線）之後、最近一週區段之前，插入新的週區段：
 
@@ -355,15 +359,24 @@ cd ../chinese-literacy-platform-issue-${ISSUE_NUM}
 ## Step 4：Commit + Push + PR
 
 ```bash
+# ① 議程 + 貢獻紀錄 → 私有 L2（直接 commit + push 到 main）
+L2=/Users/young/project/kist-curriculum
+git -C "$L2" add \
+  meetings/${MEETING_DATE}-agenda.md \
+  meetings/lingoleap-l3-docs/docs/meetings/team-contributions.md
+git -C "$L2" commit -m "docs(meeting): LingoLeap ${MEETING_DATE} agenda + contributions"
+git -C "$L2" push origin main
+# 把私有 GitHub 檔案連結發給與會者：
+# https://github.com/Youngger9765/kist-curriculum/blob/main/meetings/${MEETING_DATE}-agenda.md
+
+# ② 技能樹 JSON → L3 PR（⛔ 不 add 任何會議檔）
 cd ../chinese-literacy-platform-issue-${ISSUE_NUM}
 
 git add \
-  docs/meetings/${MEETING_DATE}-agenda.md \
-  docs/meetings/team-contributions.md \
   frontend/public/intern-training/interns/raymond.json \
   frontend/public/intern-training/interns/xiung.json
 
-git commit -m "docs(meeting): ${MEETING_DATE} agenda + contributions + skill trees (Related to #${ISSUE_NUM})"
+git commit -m "docs(interns): ${MEETING_DATE} skill trees (Related to #${ISSUE_NUM})"
 
 git push -u origin "$BRANCH"
 ```
@@ -384,25 +397,17 @@ jq . frontend/public/intern-training/interns/xiung.json   > /dev/null && echo "x
 gh pr create \
   --base staging \
   --head "$BRANCH" \
-  --title "docs(meeting): ${MEETING_DATE} agenda + team contributions + intern skill trees (Fixes #${ISSUE_NUM})" \
+  --title "docs(interns): ${MEETING_DATE} intern skill trees (Fixes #${ISSUE_NUM})" \
   --body "$(cat <<'EOF'
 ## Summary
 
-- Add `docs/meetings/{MEETING_DATE}-agenda.md` — agenda with 7/1 deadline risk table, action items
-- Update `docs/meetings/team-contributions.md` — prepend {WEEK_LABEL} week section
 - Update `frontend/public/intern-training/interns/raymond.json` — lastReview + history entries + skill bumps (if evidence)
 - Update `frontend/public/intern-training/interns/xiung.json` — lastReview + history entries + skill bumps (if evidence)
 
-## Key agenda items
-
-- {bullet 1 from agenda section 二/三}
-- {bullet 2}
-- {bullet 3}
+> 議程與貢獻紀錄已放私有課程庫（本 repo 公開，PR 內文不寫議程內容）
 
 ## Test plan
 
-- [ ] `docs/meetings/{MEETING_DATE}-agenda.md` renders correctly in GitHub preview
-- [ ] `team-contributions.md` new week section at top (after header, before last week)
 - [ ] `raymond.json` valid JSON — `jq . raymond.json` passes
 - [ ] `xiung.json` valid JSON — `jq . xiung.json` passes
 EOF
@@ -430,8 +435,8 @@ CI 通常只跑 lint/build（無後端 deploy），約 2-5 分鐘。
 Issue #${ISSUE_NUM} / PR #{PR_NUM} 已開
 
 4 份文件：
-- docs/meetings/${MEETING_DATE}-agenda.md（新增）
-- docs/meetings/team-contributions.md（${WEEK_LABEL} 週區段插入）
+- kist-curriculum/meetings/${MEETING_DATE}-agenda.md（私有 L2，新增，已 push）
+- kist-curriculum/meetings/lingoleap-l3-docs/docs/meetings/team-contributions.md（私有 L2，${WEEK_LABEL} 週區段插入，已 push）
 - frontend/public/intern-training/interns/raymond.json（lastReview ${MEETING_DATE}）
 - frontend/public/intern-training/interns/xiung.json（lastReview ${MEETING_DATE}）
 

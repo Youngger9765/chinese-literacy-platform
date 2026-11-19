@@ -83,3 +83,7 @@ qa-shots/
 # belt-and-suspenders for anyone running the scripts locally).
 .claude-issue-agent/
 .claude-pr-review/
+
+# Internal meeting notes never live in this public repo (Young 2026-11-19).
+# They belong in the private curriculum repo (kist-curriculum/meetings/).
+docs/meetings/
