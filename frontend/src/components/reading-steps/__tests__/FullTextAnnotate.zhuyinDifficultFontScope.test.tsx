@@ -132,7 +132,11 @@ describe('#3022 — difficult mode font scope (FullTextAnnotate)', () => {
     );
     expect(difficultSpan, 'expected a span wrapping the vocab char 龍').toBeTruthy();
     expect(difficultSpan!.style.fontFamily).toContain('BpmfZihiSerif');
-    expect(difficultSpan!.style.fontFamily).toBe(ZHUYIN_FONT_STACK.replace(/'/g, '"'));
+    // Compare the family list with quotes stripped: how a CSS engine serializes
+    // quoting is not part of the contract (jsdom <=30 kept "…" quotes, jsdom 31
+    // drops them for names that need none). Order and names must still match exactly.
+    const unquote = (s: string) => s.replace(/['"]/g, '');
+    expect(unquote(difficultSpan!.style.fontFamily)).toBe(unquote(ZHUYIN_FONT_STACK));
   });
 
   it('does NOT apply the zhuyin font to plain passage text next to the vocab word (regression lock for the literal leak)', () => {
