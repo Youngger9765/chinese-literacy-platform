@@ -34,36 +34,11 @@ const importantLinks: LinkItem[] = [
     badge: 'Roadmap',
   },
   {
-    title: '會議紀錄',
-    description: '查看最近的週會紀錄與決策。',
-    href: `${REPO_BLOB_BASE}/docs/meetings/2026-03-13.md`,
-    badge: 'Meeting',
-  },
-  {
-    title: '學生貢獻度',
-    description: '追蹤實習生本週輸出、PR 狀態與 issue 進度。',
-    href: `${REPO_BLOB_BASE}/docs/meetings/team-contributions.md`,
-    badge: 'Team',
-  },
-  {
     title: '學生學習歷程儀表板',
     description: '查看學生學習歷程與訓練儀表板。',
     href: 'https://lingoleap-frontend-958347263320.asia-east1.run.app/intern-training/dashboard.html',
     external: true,
     badge: 'Dashboard',
-  },
-];
-
-const quickLinks: LinkItem[] = [
-  {
-    title: '本週週報',
-    description: '2026-03-19 週報，整理本週交付、風險與下週重點。',
-    href: `${REPO_BLOB_BASE}/docs/meetings/2026-03-19-weekly-report.md`,
-  },
-  {
-    title: '明天會議議程',
-    description: '2026-03-20 會議議程，開會前可直接照這份走。',
-    href: `${REPO_BLOB_BASE}/docs/meetings/2026-03-20-agenda.md`,
   },
 ];
 
@@ -167,11 +142,6 @@ const ProjectHubPage: React.FC = () => {
               這頁把週報、明天會議議程、學生貢獻重點、學生儀表板和核心文件集中在同一個入口。
               也保留 ` /docs ` 可直接打開同一頁，方便沿用原本記法。
             </p>
-          </div>
-          <div className="mt-6 grid gap-3 sm:grid-cols-2">
-            {quickLinks.map((link) => (
-              <ResourceLinkCard key={link.title} {...link} />
-            ))}
           </div>
         </section>
 

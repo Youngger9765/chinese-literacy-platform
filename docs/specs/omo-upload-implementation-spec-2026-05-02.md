@@ -408,7 +408,7 @@ class OMOAnswer(BaseModel):
 
 ## 10. Refs
 
-- 5/1 expert meeting `docs/meetings/2026-05-01-experts-review.md` §四 OMO
+- 5/1 expert meeting §四 OMO（內部會議紀錄，已移至私有課程庫）
 - CEO doc `docs/ceo-review-2026-05-02.md`（OMO 從 7/2+ 升 P0）
 - 7 課 yml ground truth: `backend/data/lessons/_parsed_2026-05-01/G6-L22~25.yml`, `G7-L28~30.yml`
 - Existing AI infra: `backend/app/services/ai_service.py` (Vertex AI Gemini)

@@ -619,7 +619,7 @@ grep -n content_evidence_gate specs/run-ci.sh | grep -v ':\s*#'   # 無輸出 = 
 
 ## 附錄 B — 相關
 
-- 會議記錄：`docs/meetings/2026-08-21-record.md`
+- 會議記錄：8/21 會議（內部會議紀錄，已移至私有課程庫）
 - 前一份 PRD：`docs/prd/2026-08-17-multimodal-extraction.md`（#2736，抽取改走 LLM 多模態）
 - 二修進度：`docs/prd/2026-08-14-second-edition-reink-progress.md`（#2683，身分層）
 - 模組化 spec 系統：`specs/README.md`、`specs/registry.yaml`（41 個 module，**沒有一個擁有抽取管線** —— `split_lesson_modules` / `verbatim_gate` / `_extracted` / `lesson_uid_loader` 在 registry.yaml 命中數皆為 0；正向對照 `lesson_loader.py` 命中 2）

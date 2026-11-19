@@ -264,14 +264,18 @@ gh issue view <N> --repo Youngger9765/chinese-literacy-platform --json comments 
 ```
 
 看到確認詞才 `--add-label hans-verified` 並關；看不到就留著。
-## 會議議程 / 會議記錄 → 一律進 repo，不開 issue（Young 2026-08-21 明令）
+## 會議議程 / 會議記錄 → 一律進私有 L2 repo `kist-curriculum`，不開 issue（Young 2026-08-21 明令，2026-11-19 改目的地）
 
-要開會 → **議程必須在 GitHub 上有一個穩定的檔案 URL**，發給與會者的就是那個連結。
+⛔ **L3 是開源公開 repo，任何內部會議議程、紀錄、逐字稿都不准放進 L3（Young 2026-11-19 明令）**
+（舊的 `docs/meetings/` 已整批搬到 `kist-curriculum` 的 `meetings/lingoleap-l3-docs/`，`docs/meetings/` 已列入 `.gitignore`）
+
+要開會 → **議程必須在 GitHub 上有一個穩定的檔案 URL**（私有 repo 的檔案連結），發給與會者的就是那個連結。
 
 | 做 | 不做 |
 |---|---|
-| 寫進 `docs/meetings/YYYY-MM-DD-agenda.md`（會後紀錄用 `-record.md`） | ⛔ 開成 GitHub issue |
-| commit + push，把 GitHub 上的檔案連結發給與會者 | ⛔ 只寫在對話裡、只留本機不推 |
+| 寫進私有 L2 repo `kist-curriculum` 的 `meetings/YYYY-MM-DD-agenda.md`（會後紀錄用 `-record.md`） | ⛔ 開成 GitHub issue |
+| 在 `kist-curriculum` commit + push，把私有 GitHub 上的檔案連結發給與會者 | ⛔ 寫進本 repo（L3 公開）的任何位置 |
+| | ⛔ 只寫在對話裡、只留本機不推 |
 
 **為什麼不用 issue**：議程開成票會混進待辦票流，跟真正的工作票搶注意力；
 而開會當下需要一個穩定可讀的 URL，票裡的內容會被留言洗掉。

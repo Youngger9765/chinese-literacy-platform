@@ -6,7 +6,7 @@
 
 ## 0. 範圍與定位
 
-Young 2026-10-16 指示（會議紀錄 `docs/meetings/2026-10-16-record.md`）：
+Young 2026-10-16 指示（10/16 會議紀錄（內部會議紀錄，已移至私有課程庫））：
 
 > 跨班挑戰 or AI PK 請提供類似遊戲畫面，會有影像 NPC 跟你對話，要在畫面上跟你互動，類似 2D 的劇情模式，
 > 就是讓畫面精彩。找遊戲大師的專家來設計。需要圖就用 codex 製作。
@@ -505,7 +505,7 @@ PK 的 7 位人物在 `feat/issue-3586-pk-mode` 分支（`frontend/public/pk/fig
 - `docs/prd/2026-10-16-pk-mode-prd.md`（本 repo，雙人 PK 完整 PRD，666 行）
 - `docs/prd/2026-10-14-chinese-star-league-prd.md`（本 repo，跨班賽季完整 PRD，339 行）
 - `docs/research/2026-10-16-duolingo-vs-lingoleap.md`（本 repo，Duolingo 對照研究）
-- `docs/meetings/2026-10-16-record.md`（本 repo，會議紀錄）
+- 10/16 會議紀錄（內部會議紀錄，已移至私有課程庫）
 - `backend/app/schemas/league_theme.py`／`league_theme_defaults.py`／`league_theme_service.py`／
   `league_theme_store.py`（分支 `feat/issue-3594-league-theme`，進行中，本文件僅讀取引用）
 - `frontend/public/pk/figures/*/ART_BRIEF.md`（分支 `feat/issue-3586-pk-mode`，既有 PK SVG 美術規格書）
