@@ -83,7 +83,7 @@ jobs:
       # high）：這個 job 從不呼叫 Google Cloud，沒有任何合法理由需要
       # 用 id-token 去換 WIF 身分。整組拿掉。
     steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 1
           persist-credentials: false  # 不留 token'd git config 給任何一步撿到
@@ -236,7 +236,7 @@ jobs:
           path: /tmp/claude-pr-review
         continue-on-error: true  # review job may have produced nothing at all
 
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 1
           persist-credentials: false
