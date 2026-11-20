@@ -14,8 +14,8 @@ const PageLoader: React.FC = () => (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {Array.from({ length: 6 }).map((_, index) => (
           <div key={index} className="bg-white rounded-2xl shadow-card p-5">
-            <Skeleton className="h-5 w-2/3 rounded mb-3" />
-            <SkeletonText lines={3} lineClassName="h-3 rounded" />
+            <Skeleton className="h-5 w-2/3 rounded-sm mb-3" />
+            <SkeletonText lines={3} lineClassName="h-3 rounded-sm" />
           </div>
         ))}
       </div>

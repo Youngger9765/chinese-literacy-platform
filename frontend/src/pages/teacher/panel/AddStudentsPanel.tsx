@@ -111,7 +111,7 @@ const AddStudentsPanel: React.FC<AddStudentsPanelProps> = ({
       aria-selected={mode === m}
       onClick={() => setMode(m)}
       className={`flex-1 px-3 py-2.5 rounded-lg text-base font-medium cursor-pointer ${
-        mode === m ? 'bg-white shadow text-[#11806F]' : 'text-gray-600'
+        mode === m ? 'bg-white shadow-sm text-[#11806F]' : 'text-gray-600'
       }`}
     >
       {label}
@@ -142,7 +142,7 @@ const AddStudentsPanel: React.FC<AddStudentsPanelProps> = ({
             onChange={(e) => setText(e.target.value)}
             rows={6}
             placeholder={'1 王小明\n2 林雨萱\n3 陳柏宇'}
-            className="w-full px-3 py-2 rounded-lg border border-gray-300 text-base focus:outline-none focus:ring-2 focus:ring-[#19A696]/40"
+            className="w-full px-3 py-2 rounded-lg border border-gray-300 text-base focus:outline-hidden focus:ring-2 focus:ring-[#19A696]/40"
           />
           {dupes.length > 0 && (
             <p role="status" className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">

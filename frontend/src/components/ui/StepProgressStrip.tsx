@@ -40,7 +40,7 @@ const StepProgressStrip: React.FC<StepProgressStripProps> = ({
                   : 'bg-gray-50 border-gray-200 text-gray-500'
             }`}
           >
-            <span className="text-[11px] leading-tight font-medium text-center whitespace-normal break-words">
+            <span className="text-[11px] leading-tight font-medium text-center whitespace-normal wrap-break-word">
               {step.label}
             </span>
           </div>

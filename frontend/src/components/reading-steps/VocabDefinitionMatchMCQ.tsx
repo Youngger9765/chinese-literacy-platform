@@ -352,7 +352,7 @@ export function MultipleChoiceMode({
           demo?.step === 'read-def' ? 'ring-4 ring-amber-300/50' : ''
         }`}
       >
-        <p className="text-xl md:text-2xl text-on-surface leading-[2.5rem] md:leading-[3rem]">
+        <p className="text-xl md:text-2xl text-on-surface leading-10 md:leading-12">
           {item?.definition}
         </p>
       </div>

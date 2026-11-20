@@ -118,7 +118,7 @@ const ClassroomHeaderCard: React.FC<ClassroomHeaderCardProps> = ({
                 value={editName}
                 onChange={(e) => onEditNameChange(e.target.value)}
                 required
-                className="w-full h-10 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-[#19A696]/40 focus:border-[#19A696] transition-colors"
+                className="w-full h-10 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-hidden focus:ring-2 focus:ring-[#19A696]/40 focus:border-[#19A696] transition-colors"
               />
             </div>
             <div>
@@ -129,7 +129,7 @@ const ClassroomHeaderCard: React.FC<ClassroomHeaderCardProps> = ({
                 id="edit-grade"
                 value={editGrade}
                 onChange={(e) => onEditGradeChange(e.target.value)}
-                className="w-full h-10 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#19A696]/40 focus:border-[#19A696] transition-colors"
+                className="w-full h-10 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white text-sm focus:outline-hidden focus:ring-2 focus:ring-[#19A696]/40 focus:border-[#19A696] transition-colors"
               >
                 <option value="">未指定</option>
                 <optgroup label="國小">
@@ -171,7 +171,7 @@ const ClassroomHeaderCard: React.FC<ClassroomHeaderCardProps> = ({
            */}
           <div className="flex flex-wrap items-center gap-x-8 gap-y-2">
             <div className="flex items-center gap-2 min-w-0">
-              <h2 className="text-2xl font-bold text-gray-900 break-words">{classroom.name}</h2>
+              <h2 className="text-2xl font-bold text-gray-900 wrap-break-word">{classroom.name}</h2>
               <button
                 type="button"
                 onClick={onStartEditing}
@@ -250,7 +250,7 @@ const ClassroomHeaderCard: React.FC<ClassroomHeaderCardProps> = ({
                 <button
                   type="button"
                   onClick={onAddStudents}
-                  className="sm:w-20 h-[72px] flex flex-col items-center justify-center gap-1 rounded-lg border border-gray-200 bg-white shadow-sm hover:bg-[#19A696]/10 text-gray-700 cursor-pointer"
+                  className="sm:w-20 h-[72px] flex flex-col items-center justify-center gap-1 rounded-lg border border-gray-200 bg-white shadow-xs hover:bg-[#19A696]/10 text-gray-700 cursor-pointer"
                 >
                   {/* Issue #3989: icon badge is Junyi's teal (#19A696, same
                       token as the 新增學生 icon on d1-class.png), not the
@@ -263,7 +263,7 @@ const ClassroomHeaderCard: React.FC<ClassroomHeaderCardProps> = ({
                 <button
                   type="button"
                   onClick={onOpenSeatDialog}
-                  className="sm:w-20 h-[72px] flex flex-col items-center justify-center gap-1 rounded-lg border border-gray-200 bg-white shadow-sm hover:bg-[#19A696]/10 text-gray-700 cursor-pointer"
+                  className="sm:w-20 h-[72px] flex flex-col items-center justify-center gap-1 rounded-lg border border-gray-200 bg-white shadow-xs hover:bg-[#19A696]/10 text-gray-700 cursor-pointer"
                 >
                   {/* Issue #3992: same Junyi teal as 新增學生 above -- both
                       are "roster setup" actions in the same icon family. */}
@@ -274,7 +274,7 @@ const ClassroomHeaderCard: React.FC<ClassroomHeaderCardProps> = ({
               <button
                 onClick={onExportCsv}
                 disabled={isExporting}
-                className="sm:w-20 h-[72px] flex flex-col items-center justify-center gap-1 rounded-lg border border-gray-200 bg-white shadow-sm hover:bg-blue-50 text-gray-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="sm:w-20 h-[72px] flex flex-col items-center justify-center gap-1 rounded-lg border border-gray-200 bg-white shadow-xs hover:bg-blue-50 text-gray-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <svg className="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -284,7 +284,7 @@ const ClassroomHeaderCard: React.FC<ClassroomHeaderCardProps> = ({
               <button
                 onClick={onToggleActive}
                 disabled={isTogglingActive}
-                className="sm:w-20 h-[72px] flex flex-col items-center justify-center gap-1 rounded-lg border border-gray-200 bg-white shadow-sm hover:bg-gray-50 text-gray-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="sm:w-20 h-[72px] flex flex-col items-center justify-center gap-1 rounded-lg border border-gray-200 bg-white shadow-xs hover:bg-gray-50 text-gray-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <svg className={`w-7 h-7 ${classroom.is_active ? 'text-gray-500' : 'text-emerald-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={classroom.is_active ? 'M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z' : 'M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664zM21 12a9 9 0 11-18 0 9 9 0 0118 0z'} />
@@ -296,7 +296,7 @@ const ClassroomHeaderCard: React.FC<ClassroomHeaderCardProps> = ({
               <button
                 onClick={onShowDeleteConfirm}
                 disabled={isDeleting}
-                className="sm:w-20 h-[72px] flex flex-col items-center justify-center gap-1 rounded-lg border border-gray-200 bg-white shadow-sm hover:bg-red-50 text-gray-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="sm:w-20 h-[72px] flex flex-col items-center justify-center gap-1 rounded-lg border border-gray-200 bg-white shadow-xs hover:bg-red-50 text-gray-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <svg className="w-7 h-7 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

@@ -163,7 +163,7 @@ const StudentHome: React.FC = () => {
         <div className="flex items-start sm:items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-3 min-w-0">
             <div
-              className="w-12 h-12 rounded-full bg-accent text-white flex items-center justify-center shrink-0 shadow-sm"
+              className="w-12 h-12 rounded-full bg-accent text-white flex items-center justify-center shrink-0 shadow-xs"
               aria-hidden="true"
             >
               <span className="text-xl font-bold font-headline">
@@ -171,7 +171,7 @@ const StudentHome: React.FC = () => {
               </span>
             </div>
             <div className="min-w-0">
-              <h1 className="text-xl sm:text-2xl font-bold font-headline text-on-surface leading-tight truncate">
+              <h1 className="text-xl sm:text-2xl font-bold font-headline text-on-surface leading-tight sm:leading-8 truncate">
                 你好，{firstName}！
               </h1>
               <p className="text-xs sm:text-sm text-on-surface-variant mt-0.5">

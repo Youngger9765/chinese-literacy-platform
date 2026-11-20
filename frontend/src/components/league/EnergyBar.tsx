@@ -62,7 +62,7 @@ const EnergyBar: React.FC<EnergyBarProps> = ({
         aria-valuemax={100}
       >
         <div
-          className={`h-full rounded-full bg-gradient-to-r ${TONE_GRADIENT[tone]} transition-all duration-700`}
+          className={`h-full rounded-full bg-linear-to-r ${TONE_GRADIENT[tone]} transition-all duration-700`}
           style={{ width: `${pct}%` }}
         />
       </div>

@@ -57,7 +57,7 @@ const EditSection: React.FC<EditSectionProps> = ({
 }) => {
   return (
     <section
-      className={`rounded-xl border border-gray-200 bg-white shadow-sm ${className}`}
+      className={`rounded-xl border border-gray-200 bg-white shadow-xs ${className}`}
     >
       {/* ── Header ─────────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">

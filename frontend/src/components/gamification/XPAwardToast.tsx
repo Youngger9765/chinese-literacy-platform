@@ -120,7 +120,7 @@ const XPAwardToast: React.FC<XPAwardToastProps> = ({ result, onDismiss }) => {
 
         {/* Level up banner */}
         {levelUp && (
-          <div className="bg-gradient-to-r from-amber-400 to-orange-400 rounded-xl py-2 px-3 mb-3 text-center">
+          <div className="bg-linear-to-r from-amber-400 to-orange-400 rounded-xl py-2 px-3 mb-3 text-center">
             <span className="text-white font-black text-sm">升級了！{level_info.level_name}</span>
           </div>
         )}

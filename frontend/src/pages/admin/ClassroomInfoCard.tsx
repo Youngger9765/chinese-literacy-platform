@@ -58,7 +58,7 @@ const ClassroomInfoCard: React.FC<ClassroomInfoCardProps> = ({
                 onChange={(e) => onChangeEditName(e.target.value)}
                 required
                 autoFocus
-                className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+                className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-hidden focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
               />
             </div>
             <div>
@@ -73,7 +73,7 @@ const ClassroomInfoCard: React.FC<ClassroomInfoCardProps> = ({
                 value={editGrade}
                 onChange={(e) => onChangeEditGrade(e.target.value)}
                 placeholder="例：5"
-                className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+                className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-hidden focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
               />
             </div>
           </div>

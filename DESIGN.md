@@ -1,6 +1,6 @@
 # Design System — LingoLeap 國語文閱讀學習平台
 
-> **Source of truth: this file reflects the actual code** (`frontend/tailwind.config.js` + `frontend/src/index.css`).
+> **Source of truth: this file reflects the actual code** (`frontend/src/index.css` — the Tailwind v4 `@theme` block; there is no `tailwind.config.js` since #4136).
 > Last synced: 2026-04-20. If code diverges from here, update this file.
 
 ## Product Context
@@ -19,7 +19,7 @@
 
 ## Typography
 
-Four font stacks defined in `tailwind.config.js`:
+Four font stacks defined in the `@theme` block of `frontend/src/index.css`:
 
 | Tailwind class | Stack | Usage |
 |---------------|-------|-------|
@@ -87,7 +87,7 @@ Button utilities: `.btn-encourage` (bg `#994100`) and `.btn-encourage:hover` (bg
 
 ### Surface System（5-step Material 3 容器）
 
-全部定義在 `tailwind.config.js` `colors.surface`：
+全部定義在 `frontend/src/index.css` 的 `@theme`（`--color-surface-*`）：
 
 | Token | Hex | Usage |
 |-------|-----|-------|
@@ -206,7 +206,7 @@ className="bg-gradient-to-br from-accent to-accent/80"
 | `medium` | 250ms | 頁面轉場、tab 切換 |
 | `long` | 400ms | Modal 開關、sidebar 展開 |
 
-- **Named animations** (defined in tailwind.config.js + index.css):
+- **Named animations** (defined in the index.css `@theme` block + plain @keyframes in index.css):
   - `animate-shake` (0.45s) — 輸入錯誤搖晃
   - `animate-pop` (0.35s spring) — XP 通知彈出
   - `animate-slide-up` / `animate-slide-up-fast` — 內容進場

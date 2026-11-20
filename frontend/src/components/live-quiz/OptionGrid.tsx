@@ -68,7 +68,7 @@ const OptionGrid: React.FC<OptionGridProps> = ({
             aria-label={imageUrl ? `${shape.label}：圖片選項` : mode === 'player' ? `${shape.label}` : `${shape.label}：${opt.text}`}
             aria-pressed={isSelected}
             className={[
-              'relative flex items-center justify-center rounded-2xl shadow-sm transition-transform',
+              'relative flex items-center justify-center rounded-2xl shadow-xs transition-transform',
               shape.bg,
               shape.textOnBg,
               mode === 'host' ? 'min-h-[88px] px-6 py-4 text-left' : 'min-h-[120px] sm:min-h-[140px] active:scale-95',
@@ -96,7 +96,7 @@ const OptionGrid: React.FC<OptionGridProps> = ({
             {mode === 'host' && opt.text && (
               // PRD §12: 選項 32px（1280 寬）／44px（1920 寬）.
               <span
-                className="font-medium leading-snug break-words"
+                className="font-medium leading-snug wrap-break-word"
                 style={{ fontSize: 'clamp(32px, 8px + 1.875vw, 44px)' }}
               >
                 {opt.text}
@@ -116,7 +116,7 @@ const OptionGrid: React.FC<OptionGridProps> = ({
             )}
             {revealed && (isCorrect || isWrongSelected) && (
               <span
-                className="absolute -top-2 -right-2 flex h-9 w-9 items-center justify-center rounded-full bg-white text-xl font-bold shadow"
+                className="absolute -top-2 -right-2 flex h-9 w-9 items-center justify-center rounded-full bg-white text-xl font-bold shadow-sm"
                 aria-label={isCorrect ? '正確' : '錯誤'}
               >
                 {isCorrect ? (

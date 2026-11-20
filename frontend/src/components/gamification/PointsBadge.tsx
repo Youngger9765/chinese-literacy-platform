@@ -51,7 +51,7 @@ const PointsBadge: React.FC<PointsBadgeProps> = ({
   if (variant === 'compact') {
     return (
       <div
-        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gradient-to-r ${color} text-white text-sm font-bold shadow-sm ${className}`}
+        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-linear-to-r ${color} text-white text-sm font-bold shadow-xs ${className}`}
         title={`等級 ${levelInfo.level} ${levelInfo.level_name} — ${levelInfo.total_xp} XP`}
       >
         <span className="text-xs opacity-80">Lv.{levelInfo.level}</span>
@@ -62,11 +62,11 @@ const PointsBadge: React.FC<PointsBadgeProps> = ({
 
   // Full variant
   return (
-    <div className={`rounded-2xl bg-white border border-gray-100 shadow-sm p-4 ${className}`}>
+    <div className={`rounded-2xl bg-white border border-gray-100 shadow-xs p-4 ${className}`}>
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <div
-            className={`w-10 h-10 rounded-full bg-gradient-to-br ${color} flex items-center justify-center text-white font-black text-lg shadow`}
+            className={`w-10 h-10 rounded-full bg-linear-to-br ${color} flex items-center justify-center text-white font-black text-lg shadow-sm`}
           >
             {levelInfo.level}
           </div>
@@ -90,7 +90,7 @@ const PointsBadge: React.FC<PointsBadgeProps> = ({
           </div>
           <div className="h-2.5 rounded-full bg-gray-100 overflow-hidden">
             <div
-              className={`h-full rounded-full bg-gradient-to-r ${color} transition-all duration-500`}
+              className={`h-full rounded-full bg-linear-to-r ${color} transition-all duration-500`}
               style={{ width: `${levelInfo.progress_pct}%` }}
             />
           </div>

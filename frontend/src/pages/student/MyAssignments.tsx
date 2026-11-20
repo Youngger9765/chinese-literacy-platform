@@ -300,9 +300,9 @@ const MyAssignments: React.FC = () => {
           <div className="space-y-4">
             {Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className="bg-surface-container-lowest border border-[#E5E0D5] rounded-2xl p-4">
-                <div className="h-5 bg-surface-container animate-pulse rounded w-2/3 mb-3" />
-                <div className="h-4 bg-surface-container animate-pulse rounded w-1/3 mb-2" />
-                <div className="h-4 bg-surface-container animate-pulse rounded w-1/4" />
+                <div className="h-5 bg-surface-container animate-pulse rounded-sm w-2/3 mb-3" />
+                <div className="h-4 bg-surface-container animate-pulse rounded-sm w-1/3 mb-2" />
+                <div className="h-4 bg-surface-container animate-pulse rounded-sm w-1/4" />
               </div>
             ))}
           </div>

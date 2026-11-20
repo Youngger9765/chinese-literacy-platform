@@ -74,7 +74,7 @@ const RereadPanel: React.FC<RereadPanelProps> = ({
   return (
     <div className="space-y-4 animate-in fade-in duration-500">
       {/* Current reading results */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200 p-4">
+      <div className="bg-linear-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200 p-4">
         <h3 className="text-sm font-semibold text-blue-800 mb-3">本次朗讀成績</h3>
         <div className="grid grid-cols-3 gap-4 text-center">
           <div>
@@ -107,7 +107,7 @@ const RereadPanel: React.FC<RereadPanelProps> = ({
       <div className="flex gap-3">
         <button
           onClick={onReread}
-          className="flex-1 py-3 px-6 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 text-base"
+          className="flex-1 py-3 px-6 bg-linear-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 text-base"
         >
           🔄 再讀一次
         </button>

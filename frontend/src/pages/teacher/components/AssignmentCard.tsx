@@ -108,7 +108,7 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({
                 {formatDate(assignment.due_date)}
               </span>
               {isOverdue(assignment.due_date) && (
-                <span className="ml-1 inline-block px-1 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700">
+                <span className="ml-1 inline-block px-1 py-0.5 rounded-sm text-xs font-medium bg-red-100 text-red-700">
                   已逾期
                 </span>
               )}
@@ -118,7 +118,7 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({
             <span className="text-xs text-gray-400">完成率</span>
             <p>
               <span
-                className={`inline-block min-w-[2rem] px-2 py-0.5 rounded-full text-xs font-medium ${
+                className={`inline-block min-w-8 px-2 py-0.5 rounded-full text-xs font-medium ${
                   completionPct === 100
                     ? 'bg-green-100 text-green-700'
                     : completionPct > 0
@@ -138,13 +138,13 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({
               <button
                 onClick={() => onDelete(assignment)}
                 disabled={isDeleting}
-                className="px-2 py-1 rounded bg-red-500 text-white text-xs font-medium hover:bg-red-600 disabled:opacity-50 cursor-pointer transition-colors"
+                className="px-2 py-1 rounded-sm bg-red-500 text-white text-xs font-medium hover:bg-red-600 disabled:opacity-50 cursor-pointer transition-colors"
               >
                 {isDeleting ? '...' : '確認刪除'}
               </button>
               <button
                 onClick={() => onConfirmDelete(null)}
-                className="px-2 py-1 rounded border border-gray-300 text-gray-600 text-xs hover:bg-gray-50 cursor-pointer transition-colors"
+                className="px-2 py-1 rounded-sm border border-gray-300 text-gray-600 text-xs hover:bg-gray-50 cursor-pointer transition-colors"
               >
                 取消
               </button>
@@ -156,7 +156,7 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({
                   event.stopPropagation();
                   onEdit(assignment);
                 }}
-                className="p-1.5 rounded text-gray-400 hover:text-[#11806F] hover:bg-[#19A696]/10 transition-colors cursor-pointer"
+                className="p-1.5 rounded-sm text-gray-400 hover:text-[#11806F] hover:bg-[#19A696]/10 transition-colors cursor-pointer"
                 title="編輯任務"
                 aria-label="編輯任務"
               >
@@ -166,7 +166,7 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({
               </button>
               <button
                 onClick={() => onConfirmDelete(assignment.id)}
-                className="p-1.5 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
+                className="p-1.5 rounded-sm text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
                 title="刪除任務"
               >
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

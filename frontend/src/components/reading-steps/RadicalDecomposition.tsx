@@ -154,8 +154,8 @@ const RadicalDecomposition: React.FC<RadicalDecompositionProps> = ({
     // Character is an independent form (獨體字) or not in the database.
     // Show a friendly educational message instead of silently hiding the panel.
     return (
-      <div className="bg-surface rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
-        <div className="px-4 py-3 bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-gray-100 flex items-center gap-2">
+      <div className="bg-surface rounded-2xl border border-gray-200 overflow-hidden shadow-xs">
+        <div className="px-4 py-3 bg-linear-to-r from-indigo-50 to-purple-50 border-b border-gray-100 flex items-center gap-2">
           <span className="text-base font-bold text-on-surface-variant whitespace-nowrap">部件拆解</span>
         </div>
         <div className="p-4 flex flex-col items-center gap-3 text-center">
@@ -251,9 +251,9 @@ const RadicalDecomposition: React.FC<RadicalDecompositionProps> = ({
     : '點擊部件查看相關字';
 
   return (
-    <div className="bg-surface rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+    <div className="bg-surface rounded-2xl border border-gray-200 overflow-hidden shadow-xs">
       {/* Header */}
-      <div className="px-4 py-3 bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-gray-100 flex items-center gap-2">
+      <div className="px-4 py-3 bg-linear-to-r from-indigo-50 to-purple-50 border-b border-gray-100 flex items-center gap-2">
         <span className="text-base font-bold text-on-surface-variant whitespace-nowrap">{headerLabel}</span>
         <span className="text-xs text-gray-400 whitespace-nowrap">{headerSub}</span>
       </div>

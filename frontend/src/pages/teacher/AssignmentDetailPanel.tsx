@@ -109,9 +109,9 @@ const AssignmentDetailPanel: React.FC<Props> = ({
       <div className="space-y-2">
         {Array.from({ length: 3 }).map((_, i) => (
           <div key={i} className="flex gap-4">
-            <div className="h-3 bg-gray-200 animate-pulse rounded w-1/3" />
-            <div className="h-3 bg-gray-200 animate-pulse rounded w-1/5" />
-            <div className="h-3 bg-gray-200 animate-pulse rounded w-1/6" />
+            <div className="h-3 bg-gray-200 animate-pulse rounded-sm w-1/3" />
+            <div className="h-3 bg-gray-200 animate-pulse rounded-sm w-1/5" />
+            <div className="h-3 bg-gray-200 animate-pulse rounded-sm w-1/6" />
           </div>
         ))}
       </div>
@@ -218,7 +218,7 @@ const AssignmentDetailPanel: React.FC<Props> = ({
 
       {/* Grade error */}
       {gradeError && (
-        <div className="mb-2 text-xs text-red-600 bg-red-50 border border-red-200 rounded px-3 py-1.5">
+        <div className="mb-2 text-xs text-red-600 bg-red-50 border border-red-200 rounded-sm px-3 py-1.5">
           {gradeError}
           <button onClick={clearGradeError} className="ml-2 underline cursor-pointer">
             關閉

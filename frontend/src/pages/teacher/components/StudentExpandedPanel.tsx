@@ -94,7 +94,7 @@ export const StudentExpandedPanel: React.FC<StudentExpandedPanelProps> = ({
 
   const renderChart = () => {
     if (isLoadingCurve) {
-      return <div className="h-40 bg-gray-200 animate-pulse rounded" />;
+      return <div className="h-40 bg-gray-200 animate-pulse rounded-sm" />;
     }
 
     if (curveError) {
@@ -115,7 +115,7 @@ export const StudentExpandedPanel: React.FC<StudentExpandedPanelProps> = ({
             <select
               value={curveStoryFilter}
               onChange={(event) => onCurveStoryFilterChange(event.target.value)}
-              className="text-xs border border-gray-200 rounded px-2 py-1 bg-white text-gray-600"
+              className="text-xs border border-gray-200 rounded-sm px-2 py-1 bg-white text-gray-600"
             >
               <option value="">全部課文</option>
               {availableStories.map((story) => (
@@ -183,14 +183,14 @@ export const StudentExpandedPanel: React.FC<StudentExpandedPanelProps> = ({
                 <div className="flex items-center gap-2 shrink-0">
                   {statusLabel(session.status)}
                   {reviewedAt && (
-                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium text-emerald-600 bg-emerald-50 border border-emerald-200" title="已查看">
+                    <span className="inline-flex items-center px-1.5 py-0.5 rounded-sm text-[10px] font-medium text-emerald-600 bg-emerald-50 border border-emerald-200" title="已查看">
                       ✓ 已查看
                     </span>
                   )}
                   <Link
                     to={`/teacher/students/${studentId}/sessions/${session.id}/report`}
                     onClick={(event) => event.stopPropagation()}
-                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium text-[#11806F] border border-[#19A696]/30 hover:bg-[#19A696]/10 transition-colors"
+                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm text-[10px] font-medium text-[#11806F] border border-[#19A696]/30 hover:bg-[#19A696]/10 transition-colors"
                     title="查看學習報告"
                   >
                     <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -206,7 +206,7 @@ export const StudentExpandedPanel: React.FC<StudentExpandedPanelProps> = ({
                       event.stopPropagation();
                       onViewDialogue(studentId, session.id, session.story_title, studentName);
                     }}
-                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium text-[#11806F] border border-[#19A696]/30 hover:bg-[#19A696]/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm text-[10px] font-medium text-[#11806F] border border-[#19A696]/30 hover:bg-[#19A696]/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     title="查看蘇格拉底對話記錄"
                   >
                     {loadingDialogueSessionId === session.id ? (
@@ -244,10 +244,10 @@ export const StudentExpandedPanel: React.FC<StudentExpandedPanelProps> = ({
         <div className="space-y-2">
           {Array.from({ length: 3 }).map((_, index) => (
             <div key={index} className="flex gap-4">
-              <div className="h-3 bg-gray-200 animate-pulse rounded w-1/3" />
-              <div className="h-3 bg-gray-200 animate-pulse rounded w-1/5" />
-              <div className="h-3 bg-gray-200 animate-pulse rounded w-1/6" />
-              <div className="h-3 bg-gray-200 animate-pulse rounded w-1/6" />
+              <div className="h-3 bg-gray-200 animate-pulse rounded-sm w-1/3" />
+              <div className="h-3 bg-gray-200 animate-pulse rounded-sm w-1/5" />
+              <div className="h-3 bg-gray-200 animate-pulse rounded-sm w-1/6" />
+              <div className="h-3 bg-gray-200 animate-pulse rounded-sm w-1/6" />
             </div>
           ))}
         </div>
@@ -291,7 +291,7 @@ export const StudentExpandedPanel: React.FC<StudentExpandedPanelProps> = ({
                   <td className="py-1.5 text-center">
                     <Link
                       to={`/teacher/students/${studentId}/sessions/${session.id}/report`}
-                      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium text-[#11806F] border border-[#19A696]/30 hover:bg-[#19A696]/10 transition-colors"
+                      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm text-[10px] font-medium text-[#11806F] border border-[#19A696]/30 hover:bg-[#19A696]/10 transition-colors"
                       title="查看學習報告"
                     >
                       {reviewedAt ? '✓ 報告' : '報告'}
@@ -305,7 +305,7 @@ export const StudentExpandedPanel: React.FC<StudentExpandedPanelProps> = ({
                         event.stopPropagation();
                         onViewDialogue(studentId, session.id, session.story_title, studentName);
                       }}
-                      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium text-[#11806F] border border-[#19A696]/30 hover:bg-[#19A696]/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#19A696]"
+                      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm text-[10px] font-medium text-[#11806F] border border-[#19A696]/30 hover:bg-[#19A696]/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-[#19A696]"
                       title="查看蘇格拉底對話記錄"
                     >
                       {loadingDialogueSessionId === session.id ? (

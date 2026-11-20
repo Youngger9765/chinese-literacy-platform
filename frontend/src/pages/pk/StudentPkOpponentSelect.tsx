@@ -75,7 +75,7 @@ const StudentPkOpponentSelect: React.FC = () => {
               disabled={busyTier != null}
               onClick={() => void handlePick(opp)}
               className={[
-                'relative flex flex-col items-center gap-2 rounded-2xl border-2 bg-surface-container-lowest p-4 shadow-sm transition-transform active:scale-95 disabled:opacity-50',
+                'relative flex flex-col items-center gap-2 rounded-2xl border-2 bg-surface-container-lowest p-4 shadow-xs transition-transform active:scale-95 disabled:opacity-50',
                 opp.recommended ? 'border-accent' : 'border-transparent',
               ].join(' ')}
             >

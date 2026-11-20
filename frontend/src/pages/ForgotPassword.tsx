@@ -124,7 +124,7 @@ const ForgotPassword: React.FC = () => {
         {step === 'request' && (
           <form
             onSubmit={handleRequestSubmit}
-            className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-4"
+            className="bg-white rounded-2xl shadow-xs border border-gray-200 p-6 space-y-4"
           >
             <p className="text-sm text-gray-600">
               輸入您的電子郵件或使用者名稱，我們將為您產生重設連結。
@@ -147,7 +147,7 @@ const ForgotPassword: React.FC = () => {
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
                 placeholder="email@example.com 或 username"
-                className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+                className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-hidden focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
               />
             </div>
 
@@ -165,7 +165,7 @@ const ForgotPassword: React.FC = () => {
         {step === 'reset' && (
           <form
             onSubmit={handleResetSubmit}
-            className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-4"
+            className="bg-white rounded-2xl shadow-xs border border-gray-200 p-6 space-y-4"
           >
             {/* P0 notice: show token for testing */}
             {returnedToken && returnedToken !== 'account-not-found' && (
@@ -193,7 +193,7 @@ const ForgotPassword: React.FC = () => {
                 value={resetToken}
                 onChange={(e) => setResetToken(e.target.value)}
                 placeholder="貼上重設 token"
-                className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors font-mono text-xs"
+                className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-hidden focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors font-mono text-xs"
               />
             </div>
 
@@ -209,7 +209,7 @@ const ForgotPassword: React.FC = () => {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="至少 8 個字元，包含英文字母與數字"
-                className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+                className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-hidden focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
               />
               <PasswordStrengthIndicator password={newPassword} />
             </div>
@@ -226,7 +226,7 @@ const ForgotPassword: React.FC = () => {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="再輸入一次新密碼"
-                className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+                className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-hidden focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
               />
             </div>
 
@@ -250,7 +250,7 @@ const ForgotPassword: React.FC = () => {
 
         {/* Step 3: Done */}
         {step === 'done' && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-4 text-center">
+          <div className="bg-white rounded-2xl shadow-xs border border-gray-200 p-6 space-y-4 text-center">
             <div className="text-green-500 text-4xl">✓</div>
             <p className="text-gray-700 font-medium">密碼已成功重設！</p>
             <p className="text-gray-500 text-sm">請使用新密碼登入。</p>

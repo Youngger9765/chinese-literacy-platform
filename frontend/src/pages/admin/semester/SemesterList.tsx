@@ -107,7 +107,7 @@ const SemesterList: React.FC<SemesterListProps> = ({
                     type="text"
                     value={editForm.name}
                     onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-400"
                   />
                 </div>
                 <div>
@@ -116,7 +116,7 @@ const SemesterList: React.FC<SemesterListProps> = ({
                     type="date"
                     value={editForm.start_date}
                     onChange={e => setEditForm(f => ({ ...f, start_date: e.target.value }))}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-400"
                   />
                 </div>
                 <div>
@@ -125,7 +125,7 @@ const SemesterList: React.FC<SemesterListProps> = ({
                     type="date"
                     value={editForm.end_date}
                     onChange={e => setEditForm(f => ({ ...f, end_date: e.target.value }))}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-400"
                   />
                 </div>
                 <div>
@@ -136,7 +136,7 @@ const SemesterList: React.FC<SemesterListProps> = ({
                     max={365}
                     value={editForm.grace_days}
                     onChange={e => setEditForm(f => ({ ...f, grace_days: Number(e.target.value) }))}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-400"
                   />
                 </div>
                 <div className="flex items-end">

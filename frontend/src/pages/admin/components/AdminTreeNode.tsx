@@ -64,7 +64,7 @@ const AdminTreeNode: React.FC<OrgNodeProps> = ({
         {/* Chevron toggle */}
         <button
           onClick={(e) => { e.stopPropagation(); onToggleOrg(org.id); }}
-          className="p-0.5 rounded hover:bg-gray-200/50 cursor-pointer shrink-0"
+          className="p-0.5 rounded-sm hover:bg-gray-200/50 cursor-pointer shrink-0"
           aria-label={isExpanded ? '收合' : '展開'}
         >
           <ChevronIcon expanded={isExpanded} />
@@ -126,7 +126,7 @@ const AdminTreeNode: React.FC<OrgNodeProps> = ({
                   {/* Chevron toggle for school */}
                   <button
                     onClick={(e) => { e.stopPropagation(); onToggleSchool(school.id); }}
-                    className="p-0.5 rounded hover:bg-gray-200/50 cursor-pointer shrink-0"
+                    className="p-0.5 rounded-sm hover:bg-gray-200/50 cursor-pointer shrink-0"
                     aria-label={isSchoolExpanded ? '收合' : '展開'}
                   >
                     <ChevronIcon expanded={isSchoolExpanded} />

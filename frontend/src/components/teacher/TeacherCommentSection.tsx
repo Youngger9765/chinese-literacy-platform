@@ -115,7 +115,7 @@ const TeacherCommentSection: React.FC<TeacherCommentSectionProps> = ({
         {!aiFeaturesEnabled ? (
           <p className="text-sm text-gray-500 italic">AI 功能暫時關閉</p>
         ) : aiLoading && !aiComment ? (
-          <div className="animate-pulse h-16 bg-blue-100 rounded" />
+          <div className="animate-pulse h-16 bg-blue-100 rounded-sm" />
         ) : (
           <p className="text-sm text-blue-900 leading-relaxed whitespace-pre-wrap">
             {aiComment || '尚無 AI 評語'}

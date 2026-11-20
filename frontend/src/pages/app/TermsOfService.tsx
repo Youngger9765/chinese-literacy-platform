@@ -98,7 +98,7 @@ const TermsOfService: React.FC = () => {
       <div className="w-full max-w-lg">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 bg-[#5B4FC4] rounded-2xl mb-4">
+          <div className="inline-flex items-center justify-center w-14 h-14 bg-indigo-500 rounded-2xl mb-4">
             <span className="text-white font-black text-2xl">L</span>
           </div>
           <h1 className="text-2xl font-bold text-[#1A1A2E]">使用條款</h1>
@@ -114,11 +114,11 @@ const TermsOfService: React.FC = () => {
         {/* Card */}
         <form
           onSubmit={handleSubmit}
-          className="bg-white rounded-2xl shadow-sm border border-[#E5E0D5] p-6 space-y-6"
+          className="bg-white rounded-2xl shadow-xs border border-[#E5E0D5] p-6 space-y-6"
         >
           {/* Role badge */}
           <div className="flex items-center gap-2">
-            <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-[#5B4FC4]/10 text-[#5B4FC4]">
+            <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-indigo-500/10 text-indigo-500">
               {isAdmin ? '管理員帳號' : isTeacher ? '教師帳號' : '學生帳號'}
             </span>
             {user?.name && (
@@ -136,7 +136,7 @@ const TermsOfService: React.FC = () => {
                 key={c.id}
                 className="flex items-start gap-3 cursor-pointer group"
               >
-                <div className="relative flex-shrink-0 mt-0.5">
+                <div className="relative shrink-0 mt-0.5">
                   <input
                     type="checkbox"
                     id={c.id}
@@ -146,10 +146,10 @@ const TermsOfService: React.FC = () => {
                   />
                   <div
                     className={[
-                      'w-5 h-5 rounded border-2 flex items-center justify-center transition-colors',
+                      'w-5 h-5 rounded-sm border-2 flex items-center justify-center transition-colors',
                       checked[c.id]
-                        ? 'bg-[#5B4FC4] border-[#5B4FC4]'
-                        : 'bg-white border-[#E5E0D5] group-hover:border-[#5B4FC4]/60',
+                        ? 'bg-indigo-500 border-indigo-500'
+                        : 'bg-white border-[#E5E0D5] group-hover:border-indigo-500/60',
                     ].join(' ')}
                     aria-hidden="true"
                   >
@@ -193,7 +193,7 @@ const TermsOfService: React.FC = () => {
               href="/privacy"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[#5B4FC4] hover:underline"
+              className="text-indigo-500 hover:underline"
             >
               隱私權政策
             </a>
@@ -214,7 +214,7 @@ const TermsOfService: React.FC = () => {
             className={[
               'w-full h-11 rounded-xl font-bold text-sm transition-all',
               allChecked && !isSubmitting
-                ? 'bg-[#5B4FC4] hover:bg-[#4A3FA3] text-white shadow-sm'
+                ? 'bg-indigo-500 hover:bg-indigo-600 text-white shadow-xs'
                 : 'bg-[#E5E0D5] text-[#9CA3AF] cursor-not-allowed',
             ].join(' ')}
           >

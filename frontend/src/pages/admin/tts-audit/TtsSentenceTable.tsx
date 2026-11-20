@@ -58,12 +58,12 @@ function applyDisplayFilter(entry: ProvenanceEntry, filter: DisplayFilter): bool
 
 const SkeletonRow: React.FC = () => (
   <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100 animate-pulse">
-    <div className="w-8 h-3 bg-gray-200 rounded" />
-    <div className="flex-1 h-3 bg-gray-200 rounded" />
-    <div className="w-10 h-3 bg-gray-100 rounded" />
-    <div className="w-10 h-3 bg-gray-100 rounded" />
-    <div className="w-7 h-7 bg-gray-100 rounded" />
-    <div className="w-6 h-6 bg-gray-100 rounded" />
+    <div className="w-8 h-3 bg-gray-200 rounded-sm" />
+    <div className="flex-1 h-3 bg-gray-200 rounded-sm" />
+    <div className="w-10 h-3 bg-gray-100 rounded-sm" />
+    <div className="w-10 h-3 bg-gray-100 rounded-sm" />
+    <div className="w-7 h-7 bg-gray-100 rounded-sm" />
+    <div className="w-6 h-6 bg-gray-100 rounded-sm" />
   </div>
 );
 
@@ -241,7 +241,7 @@ const TtsSentenceTable: React.FC = () => {
           <select
             value={displayFilter}
             onChange={(ev) => { setDisplayFilter(ev.target.value as DisplayFilter); setSelectedIndex(null); }}
-            className="text-xs border border-gray-200 rounded px-2 py-1 text-gray-600 bg-white focus:outline-none focus:ring-1 focus:ring-blue-300 cursor-pointer"
+            className="text-xs border border-gray-200 rounded-sm px-2 py-1 text-gray-600 bg-white focus:outline-hidden focus:ring-1 focus:ring-blue-300 cursor-pointer"
           >
             {(Object.keys(FILTER_LABELS) as DisplayFilter[]).map((k) => (
               <option key={k} value={k}>
@@ -254,7 +254,7 @@ const TtsSentenceTable: React.FC = () => {
           <select
             value={lessonFilter}
             onChange={(ev) => { setLessonFilter(ev.target.value); setSelectedIndex(null); }}
-            className="text-xs border border-gray-200 rounded px-2 py-1 text-gray-600 bg-white focus:outline-none focus:ring-1 focus:ring-blue-300 cursor-pointer"
+            className="text-xs border border-gray-200 rounded-sm px-2 py-1 text-gray-600 bg-white focus:outline-hidden focus:ring-1 focus:ring-blue-300 cursor-pointer"
           >
             <option value="">全部課文</option>
             {lessonIds.map((id) => {
@@ -277,7 +277,7 @@ const TtsSentenceTable: React.FC = () => {
               placeholder="搜尋原句..."
               value={search}
               onChange={(ev) => { setSearch(ev.target.value); setSelectedIndex(null); }}
-              className="text-xs border border-gray-200 rounded pl-5 pr-2 py-1 w-36 text-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-300"
+              className="text-xs border border-gray-200 rounded-sm pl-5 pr-2 py-1 w-36 text-gray-600 focus:outline-hidden focus:ring-1 focus:ring-blue-300"
             />
           </div>
 

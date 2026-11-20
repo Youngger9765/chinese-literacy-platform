@@ -41,7 +41,7 @@ export function ScoreBanner({ score, total, onFinish, onRetry }: ScoreBannerProp
         <div className="w-full flex flex-col gap-3 mt-2">
           <button
             onClick={onRetry}
-            className="w-full py-2.5 rounded-full font-bold text-sm bg-indigo-600 hover:bg-indigo-500 text-white shadow transition-all active:scale-95"
+            className="w-full py-2.5 rounded-full font-bold text-sm bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm transition-all active:scale-95"
           >
             再玩一次
           </button>

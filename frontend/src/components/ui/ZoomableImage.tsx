@@ -43,7 +43,7 @@ const ZoomableImage: React.FC<ZoomableImageProps> = ({ src, alt, caption, classN
         type="button"
         onClick={() => { if (!imgError) setOpen(true); }}
         disabled={imgError}
-        className={`group relative block w-full overflow-hidden rounded-lg border border-outline-variant bg-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:cursor-not-allowed ${className ?? ''}`}
+        className={`group relative block w-full overflow-hidden rounded-lg border border-outline-variant bg-surface focus:outline-hidden focus-visible:ring-2 focus-visible:ring-accent disabled:cursor-not-allowed ${className ?? ''}`}
         aria-label={imgError ? `${alt}（圖片載入失敗）` : `放大圖片：${alt}`}
       >
         {imgError ? (
@@ -73,7 +73,7 @@ const ZoomableImage: React.FC<ZoomableImageProps> = ({ src, alt, caption, classN
           role="dialog"
           aria-modal="true"
           aria-label={alt}
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 md:p-8 animate-fade-in"
+          className="fixed inset-0 z-100 flex items-center justify-center bg-black/80 p-4 md:p-8 animate-fade-in"
           onClick={() => setOpen(false)}
         >
           <button

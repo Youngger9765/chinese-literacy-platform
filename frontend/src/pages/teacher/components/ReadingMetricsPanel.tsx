@@ -43,7 +43,7 @@ const ReadingMetricsPanel: React.FC<Props> = ({
             {readingErrorChars.map((ch, i) => (
               <span
                 key={i}
-                className="inline-block px-1.5 py-0.5 rounded bg-red-100 text-red-700 text-xs font-medium"
+                className="inline-block px-1.5 py-0.5 rounded-sm bg-red-100 text-red-700 text-xs font-medium"
               >
                 {ch}
               </span>

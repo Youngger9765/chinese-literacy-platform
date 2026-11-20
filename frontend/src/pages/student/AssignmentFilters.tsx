@@ -86,7 +86,7 @@ const AssignmentFilters: React.FC<Props> = ({
         <select
           value={sortKey}
           onChange={(e) => onSortChange(e.target.value as SortKey)}
-          className="mb-px text-xs text-on-surface-variant border border-[#E5E0D5] rounded-md px-2 py-1 bg-surface-container-lowest cursor-pointer focus:outline-none focus:ring-1 focus:ring-accent"
+          className="mb-px text-xs text-on-surface-variant border border-[#E5E0D5] rounded-md px-2 py-1 bg-surface-container-lowest cursor-pointer focus:outline-hidden focus:ring-1 focus:ring-accent"
           aria-label="排序方式"
         >
           {SORT_OPTIONS.map((opt) => (

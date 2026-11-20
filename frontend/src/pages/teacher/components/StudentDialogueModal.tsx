@@ -14,7 +14,7 @@ const DialogueTurnRow: React.FC<{ turn: TeacherDialogueTurn }> = ({ turn }) => {
   if (turn.role === 'ai') {
     return (
       <div className="flex gap-2.5">
-        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-[#11806F] flex items-center justify-center mt-0.5">
+        <div className="shrink-0 w-6 h-6 rounded-full bg-[#11806F] flex items-center justify-center mt-0.5">
           <span className="text-white text-[9px] font-bold">AI</span>
         </div>
         <div className="flex-1 max-w-[85%]">
@@ -34,7 +34,7 @@ const DialogueTurnRow: React.FC<{ turn: TeacherDialogueTurn }> = ({ turn }) => {
   if (turn.role === 'student') {
     return (
       <div className="flex gap-2.5 flex-row-reverse">
-        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center mt-0.5">
+        <div className="shrink-0 w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center mt-0.5">
           <svg className="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
               d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -102,7 +102,7 @@ export const StudentDialogueModal: React.FC<StudentDialogueModalProps> = ({
             type="button"
             onClick={onClose}
             aria-label="關閉對話紀錄"
-            className="flex-shrink-0 p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#19A696]"
+            className="shrink-0 p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#19A696]"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

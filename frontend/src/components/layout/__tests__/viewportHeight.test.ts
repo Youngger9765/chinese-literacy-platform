@@ -22,7 +22,9 @@ const appShell = readFileSync(join(SRC, 'components/layout/AppShell.tsx'), 'utf8
 
 describe('LearningAppShell 的畫面高度', () => {
   it('.h-viewport 先宣告 100vh 再用 100dvh 覆蓋', () => {
-    const rule = css.match(/\.h-viewport\s*\{([^}]*)\}/);
+    // Tailwind v4 (#4136): the rule is declared as `@utility h-viewport { … }`;
+    // the emitted .h-viewport keeps the same declaration order.
+    const rule = css.match(/(?:\.h-viewport|@utility h-viewport)\s*\{([^}]*)\}/);
     expect(rule, '.h-viewport 不見了 —— 外殼會退回 auto 高度').not.toBeNull();
 
     const body = rule![1];

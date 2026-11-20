@@ -66,7 +66,7 @@ const StoryCard: React.FC<StoryCardProps> = ({ story, isLoading, isCompleted, on
 
   return (
     <div
-      className={`bg-white rounded-xl overflow-hidden border transition-all cursor-pointer group shadow-sm ${borderClass} ${isLoading ? 'opacity-60 pointer-events-none' : ''}`}
+      className={`bg-white rounded-xl overflow-hidden border transition-all cursor-pointer group shadow-xs ${borderClass} ${isLoading ? 'opacity-60 pointer-events-none' : ''}`}
       onClick={onClick}
     >
       <div className="h-40 overflow-hidden relative">
@@ -97,11 +97,11 @@ const StoryCard: React.FC<StoryCardProps> = ({ story, isLoading, isCompleted, on
         {/* Top-right badges */}
         <div className="absolute top-2 right-2 flex flex-col items-end gap-1">
           {story.grade && (
-            <div className="bg-accent text-white text-xs font-bold px-2 py-0.5 rounded">
+            <div className="bg-accent text-white text-xs font-bold px-2 py-0.5 rounded-sm">
               {gradeLabel(String(story.grade))}
             </div>
           )}
-          <div className={`text-xs font-medium px-2 py-0.5 rounded ${diffConfig.className}`}>
+          <div className={`text-xs font-medium px-2 py-0.5 rounded-sm ${diffConfig.className}`}>
             {diffConfig.label}
           </div>
         </div>
@@ -122,7 +122,7 @@ const StoryCard: React.FC<StoryCardProps> = ({ story, isLoading, isCompleted, on
         <h4 className="text-gray-900 font-bold mb-1 line-clamp-1">{story.title}</h4>
         <div className="flex items-center gap-2 flex-wrap">
           {story.genre && (
-            <span className="text-xs text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100">
+            <span className="text-xs text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded-sm border border-gray-100">
               {story.genre}
             </span>
           )}
@@ -135,7 +135,7 @@ const StoryCard: React.FC<StoryCardProps> = ({ story, isLoading, isCompleted, on
             {story.customTags.map((tag) => (
               <span
                 key={tag}
-                className="text-xs bg-blue-50 text-blue-600 border border-blue-100 px-1.5 py-0.5 rounded"
+                className="text-xs bg-blue-50 text-blue-600 border border-blue-100 px-1.5 py-0.5 rounded-sm"
               >
                 {tag}
               </span>
@@ -146,7 +146,7 @@ const StoryCard: React.FC<StoryCardProps> = ({ story, isLoading, isCompleted, on
         {!isCompleted && (closeToLevelUp || (estimatedXP != null && estimatedXP > 0)) && (
           <div className="mt-2">
             {closeToLevelUp ? (
-              <span className="text-xs font-semibold text-[#5B4FC4] bg-[#5B4FC4]/10 px-2 py-0.5 rounded-full">
+              <span className="text-xs font-semibold text-indigo-500 bg-indigo-500/10 px-2 py-0.5 rounded-full">
                 ⚡ 再 1 篇就升級！
               </span>
             ) : (

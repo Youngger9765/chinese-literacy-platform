@@ -97,7 +97,7 @@ const HeatmapChart: React.FC<HeatmapChartProps> = ({ data }) => {
                     title={tooltip}
                   >
                     <span
-                      className={`inline-flex items-center justify-center min-w-9 px-1 h-7 rounded text-xs font-semibold ${colorClass}`}
+                      className={`inline-flex items-center justify-center min-w-9 px-1 h-7 rounded-sm text-xs font-semibold ${colorClass}`}
                     >
                       {label}
                     </span>
@@ -125,7 +125,7 @@ const HeatmapChart: React.FC<HeatmapChartProps> = ({ data }) => {
 function LegendItem({ color, label }: { color: string; label: string }) {
   return (
     <div className="flex items-center gap-1.5">
-      <span className={`inline-block w-5 h-4 rounded text-xs ${color}`} />
+      <span className={`inline-block w-5 h-4 rounded-sm text-xs ${color}`} />
       <span className="text-xs text-gray-500">{label}</span>
     </div>
   );

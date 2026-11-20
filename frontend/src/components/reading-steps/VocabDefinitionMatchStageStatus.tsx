@@ -31,7 +31,7 @@ function StepButton({
     <button
       type="button"
       onClick={onClick}
-      className="flex flex-col items-center gap-1 rounded-xl px-2 py-1 transition-colors hover:bg-surface-container-low focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+      className="flex flex-col items-center gap-1 rounded-xl px-2 py-1 transition-colors hover:bg-surface-container-low focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/40"
       aria-current={active ? 'step' : undefined}
       aria-label={`${label}${done ? '（已完成）' : ''}`}
     >

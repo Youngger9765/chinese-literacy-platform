@@ -72,9 +72,9 @@ const DictionaryPanel: React.FC<DictionaryPanelProps> = ({ character, className 
   if (state === 'loading') {
     return (
       <div className={`animate-pulse space-y-2 ${className}`}>
-        <div className="h-5 bg-gray-200 rounded w-1/3" />
-        <div className="h-4 bg-gray-200 rounded w-2/3" />
-        <div className="h-4 bg-gray-200 rounded w-1/2" />
+        <div className="h-5 bg-gray-200 rounded-sm w-1/3" />
+        <div className="h-4 bg-gray-200 rounded-sm w-2/3" />
+        <div className="h-4 bg-gray-200 rounded-sm w-1/2" />
       </div>
     );
   }
@@ -129,7 +129,7 @@ const DictionaryPanel: React.FC<DictionaryPanelProps> = ({ character, className 
             <li key={idx} className="flex gap-2">
               {/* Part of speech badge */}
               {def.type && (
-                <span className="shrink-0 mt-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 h-fit">
+                <span className="shrink-0 mt-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-sm bg-amber-100 text-amber-800 h-fit">
                   {def.type}
                 </span>
               )}

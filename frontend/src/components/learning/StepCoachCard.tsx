@@ -59,7 +59,7 @@ export const StepCoachCard: React.FC<StepCoachCardProps> = ({
       .join(' ')}
   >
     <div className="flex items-start gap-3">
-      <span className="material-symbols-outlined text-amber-500 text-2xl flex-shrink-0 mt-0.5">
+      <span className="material-symbols-outlined text-amber-500 text-2xl shrink-0 mt-0.5">
         {icon}
       </span>
       <div className="flex-1">

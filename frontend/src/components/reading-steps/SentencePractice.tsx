@@ -129,7 +129,7 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
             onClick={() => setCurrentWordIndex(i)}
             className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-headline font-bold transition-all ${
               active
-                ? 'bg-accent text-white shadow-sm'
+                ? 'bg-accent text-white shadow-xs'
                 : done
                   ? 'bg-emerald-100 text-emerald-700'
                   : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'

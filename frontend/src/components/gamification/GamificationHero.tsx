@@ -95,7 +95,7 @@ const XPProgressBar: React.FC<XPProgressBarProps> = ({
     </div>
     <div className="h-2 rounded-full bg-white/20 overflow-hidden">
       <div
-        className={`h-full rounded-full bg-gradient-to-r ${gradient} transition-all duration-700`}
+        className={`h-full rounded-full bg-linear-to-r ${gradient} transition-all duration-700`}
         style={{ width: `${Math.min(100, progressPct)}%`, filter: 'brightness(1.5)' }}
       />
     </div>
@@ -114,7 +114,7 @@ const GamificationHero: React.FC<GamificationHeroProps> = ({ summary, className 
 
   return (
     <div
-      className={`rounded-3xl bg-gradient-to-br from-accent to-accent/80 shadow-editorial overflow-hidden ${className}`}
+      className={`rounded-3xl bg-linear-to-br from-accent to-accent/80 shadow-editorial overflow-hidden ${className}`}
     >
       <div className="px-5 py-4 space-y-3">
         {/* ── Row 1: streak + level pill + XP bar ── */}
@@ -132,7 +132,7 @@ const GamificationHero: React.FC<GamificationHeroProps> = ({ summary, className 
 
           {/* Level pill */}
           <div
-            className={`shrink-0 px-2.5 py-1 rounded-full bg-gradient-to-r ${gradient} text-white text-xs font-black shadow-sm`}
+            className={`shrink-0 px-2.5 py-1 rounded-full bg-linear-to-r ${gradient} text-white text-xs font-black shadow-xs`}
           >
             Lv.{li.level}
           </div>

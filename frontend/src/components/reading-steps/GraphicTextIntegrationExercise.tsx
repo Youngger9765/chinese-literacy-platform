@@ -79,7 +79,7 @@ const GraphicTextIntegrationExercise: React.FC<Props> = ({
               <ol className="space-y-1.5 mt-3 ml-1">
                 {item.steps.map((step, stepIdx) => (
                   <li key={stepIdx} className="flex items-start gap-2 text-sm text-on-surface-variant">
-                    <span className="flex-shrink-0 font-semibold text-violet-600 min-w-[3rem]">
+                    <span className="shrink-0 font-semibold text-violet-600 min-w-12">
                       {step.step}
                     </span>
                     <span className="leading-relaxed">{step.description}</span>

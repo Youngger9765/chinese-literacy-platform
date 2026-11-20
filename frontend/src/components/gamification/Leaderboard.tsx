@@ -44,7 +44,7 @@ const EntryRow: React.FC<EntryRowProps> = ({ entry, isMe }) => {
       </div>
 
       {/* Avatar placeholder */}
-      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-200 to-purple-200 flex items-center justify-center shrink-0">
+      <div className="w-9 h-9 rounded-full bg-linear-to-br from-blue-200 to-purple-200 flex items-center justify-center shrink-0">
         <span className="text-sm font-bold text-white">
           {entry.name.charAt(0)}
         </span>

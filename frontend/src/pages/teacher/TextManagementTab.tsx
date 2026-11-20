@@ -178,9 +178,9 @@ const TextManagementTab: React.FC<TextManagementTabProps> = ({ classroomId }) =>
       <div className="p-5 space-y-3">
         {Array.from({ length: 3 }).map((_, i) => (
           <div key={i} className="flex gap-4">
-            <div className="h-4 bg-gray-200 animate-pulse rounded w-1/3" />
-            <div className="h-4 bg-gray-200 animate-pulse rounded w-1/4" />
-            <div className="h-4 bg-gray-200 animate-pulse rounded w-1/6" />
+            <div className="h-4 bg-gray-200 animate-pulse rounded-sm w-1/3" />
+            <div className="h-4 bg-gray-200 animate-pulse rounded-sm w-1/4" />
+            <div className="h-4 bg-gray-200 animate-pulse rounded-sm w-1/6" />
           </div>
         ))}
       </div>
@@ -280,7 +280,7 @@ const TextManagementTab: React.FC<TextManagementTabProps> = ({ classroomId }) =>
                         {story.charCount ? ` / ${story.charCount} 字` : ''}
                       </p>
                       {/* Platform badge — all stories here are internal YAML content (#1983) */}
-                      <span className="text-xs bg-blue-50 text-blue-600 border border-blue-100 px-1.5 py-0.5 rounded shrink-0">
+                      <span className="text-xs bg-blue-50 text-blue-600 border border-blue-100 px-1.5 py-0.5 rounded-sm shrink-0">
                         平台教材
                       </span>
                     </div>
@@ -329,12 +329,12 @@ const TextManagementTab: React.FC<TextManagementTabProps> = ({ classroomId }) =>
                   <div className="flex flex-wrap items-center gap-1.5 mt-1">
                     <span className="text-xs text-gray-400">指派於 {formatDate(text.assigned_at)}</span>
                     {tagData?.difficulty_level && DIFFICULTY_LABEL[tagData.difficulty_level] && (
-                      <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${DIFFICULTY_LABEL[tagData.difficulty_level].className}`}>
+                      <span className={`text-xs font-medium px-1.5 py-0.5 rounded-sm ${DIFFICULTY_LABEL[tagData.difficulty_level].className}`}>
                         {DIFFICULTY_LABEL[tagData.difficulty_level].label}
                       </span>
                     )}
                     {tagData?.custom_tags?.map((tag) => (
-                      <span key={tag} className="text-xs bg-blue-50 text-blue-600 border border-blue-100 px-1.5 py-0.5 rounded">
+                      <span key={tag} className="text-xs bg-blue-50 text-blue-600 border border-blue-100 px-1.5 py-0.5 rounded-sm">
                         {tag}
                       </span>
                     ))}
@@ -347,14 +347,14 @@ const TextManagementTab: React.FC<TextManagementTabProps> = ({ classroomId }) =>
                       取人，老師不在裡面，所以試做資料進不了統計。 */}
                   <a
                     href={`/learn/${text.text_id}/lesson-intro`}
-                    className="px-2 py-0.5 rounded text-xs font-medium text-[#11806F] hover:bg-[#19A696]/10 transition-colors cursor-pointer shrink-0"
+                    className="px-2 py-0.5 rounded-sm text-xs font-medium text-[#11806F] hover:bg-[#19A696]/10 transition-colors cursor-pointer shrink-0"
                     title="以你自己的帳號實際操作這一課"
                   >
                     我來試做
                   </a>
                   <button
                     onClick={() => setTagEditorStory({ ref: text.text_id, title: text.title })}
-                    className="px-2 py-0.5 rounded text-xs text-gray-400 hover:text-blue-600 hover:bg-blue-50 opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
+                    className="px-2 py-0.5 rounded-sm text-xs text-gray-400 hover:text-blue-600 hover:bg-blue-50 opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
                     title="設定標籤"
                   >
                     標籤
@@ -364,13 +364,13 @@ const TextManagementTab: React.FC<TextManagementTabProps> = ({ classroomId }) =>
                       <button
                         onClick={() => handleUnassign(text.text_id)}
                         disabled={unassigningTextId === text.text_id}
-                        className="px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700 hover:bg-red-200 transition-colors cursor-pointer disabled:opacity-50"
+                        className="px-2 py-0.5 rounded-sm text-xs font-medium bg-red-100 text-red-700 hover:bg-red-200 transition-colors cursor-pointer disabled:opacity-50"
                       >
                         {unassigningTextId === text.text_id ? '移除中...' : '確認移除'}
                       </button>
                       <button
                         onClick={() => setConfirmUnassignId(null)}
-                        className="px-2 py-0.5 rounded text-xs text-gray-500 hover:text-gray-700 cursor-pointer"
+                        className="px-2 py-0.5 rounded-sm text-xs text-gray-500 hover:text-gray-700 cursor-pointer"
                       >
                         取消
                       </button>
@@ -378,7 +378,7 @@ const TextManagementTab: React.FC<TextManagementTabProps> = ({ classroomId }) =>
                   ) : (
                     <button
                       onClick={() => handleUnassign(text.text_id)}
-                      className="px-2 py-0.5 rounded text-xs text-gray-400 hover:text-red-600 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
+                      className="px-2 py-0.5 rounded-sm text-xs text-gray-400 hover:text-red-600 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
                     >
                       移除
                     </button>

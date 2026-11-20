@@ -110,7 +110,7 @@ const ChangePasswordPage: React.FC = () => {
         {/* Form Card */}
         <form
           onSubmit={handleSubmit}
-          className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-4"
+          className="bg-white rounded-2xl shadow-xs border border-gray-200 p-6 space-y-4"
         >
           {/* Info */}
           <div className="bg-amber-50 border border-amber-200 text-amber-700 text-sm rounded-lg px-4 py-3">
@@ -135,7 +135,7 @@ const ChangePasswordPage: React.FC = () => {
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
               placeholder="輸入目前使用的密碼"
-              className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+              className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-hidden focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
             />
           </div>
 
@@ -151,7 +151,7 @@ const ChangePasswordPage: React.FC = () => {
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               placeholder="至少 8 個字元，包含英文字母與數字"
-              className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+              className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-hidden focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
             />
             <PasswordStrengthIndicator password={newPassword} />
           </div>
@@ -168,7 +168,7 @@ const ChangePasswordPage: React.FC = () => {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="再輸入一次新密碼"
-              className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+              className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-hidden focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
             />
           </div>
 

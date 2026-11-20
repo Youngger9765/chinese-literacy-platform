@@ -37,7 +37,7 @@ function AnswerRecordLink({ studentId, sessionId }: { studentId: number; session
   return (
     <Link
       to={`/teacher/students/${studentId}/sessions/${sessionId}/report`}
-      className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border border-[#19A696]/30 text-[#11806F] text-xs hover:bg-[#19A696]/10 transition-colors whitespace-nowrap"
+      className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-sm border border-[#19A696]/30 text-[#11806F] text-xs hover:bg-[#19A696]/10 transition-colors whitespace-nowrap"
       title="查看這位學生目前答過的內容"
     >
       作答紀錄
@@ -61,7 +61,7 @@ function MissingStepsLine({ sub }: { sub: StepCompletion }) {
   if (sub.required_step_count === 0) return null;
   const missingLabels = sub.missing_step_ids.map(stepIdToLabel);
   return (
-    <p className="mt-1 max-w-[260px] mx-auto text-[11px] leading-snug text-gray-500 whitespace-normal break-words">
+    <p className="mt-1 max-w-[260px] mx-auto text-[11px] leading-snug text-gray-500 whitespace-normal wrap-break-word">
       完成 {sub.completed_step_count}/{sub.required_step_count} 關
       {missingLabels.length > 0 && <>，缺：{missingLabels.join('、')}</>}
     </p>
@@ -110,13 +110,13 @@ function MarkCompleteAction({
         <button
           onClick={handleConfirm}
           disabled={saving}
-          className="px-1.5 py-0.5 rounded bg-[#11806F] text-white text-[11px] font-medium hover:bg-[#0E7366] disabled:opacity-50 cursor-pointer transition-colors"
+          className="px-1.5 py-0.5 rounded-sm bg-[#11806F] text-white text-[11px] font-medium hover:bg-[#0E7366] disabled:opacity-50 cursor-pointer transition-colors"
         >
           {saving ? '...' : '確定標記'}
         </button>
         <button
           onClick={() => setConfirming(false)}
-          className="px-1.5 py-0.5 rounded border border-gray-300 text-gray-600 text-[11px] hover:bg-gray-50 cursor-pointer transition-colors"
+          className="px-1.5 py-0.5 rounded-sm border border-gray-300 text-gray-600 text-[11px] hover:bg-gray-50 cursor-pointer transition-colors"
         >
           取消
         </button>
@@ -130,7 +130,7 @@ function MarkCompleteAction({
       <button
         onClick={() => setConfirming(true)}
         title={`將 ${studentName} 的這份任務標記為已完成`}
-        className="px-1.5 py-0.5 rounded border border-amber-300 text-amber-700 text-[11px] hover:bg-amber-50 cursor-pointer transition-colors"
+        className="px-1.5 py-0.5 rounded-sm border border-amber-300 text-amber-700 text-[11px] hover:bg-amber-50 cursor-pointer transition-colors"
       >
         標記完成
       </button>
@@ -144,7 +144,7 @@ function MarkCompleteAction({
 function TeacherMarkedBadge() {
   return (
     <span
-      className="ml-1 inline-block px-1 py-0.5 rounded bg-gray-100 text-gray-500 text-[10px] align-middle"
+      className="ml-1 inline-block px-1 py-0.5 rounded-sm bg-gray-100 text-gray-500 text-[10px] align-middle"
       title="這份任務由老師標記完成"
     >
       老師標記
@@ -226,7 +226,7 @@ const PlayAudioButton: React.FC<PlayAudioButtonProps> = ({
       onClick={handleClick}
       disabled={loading}
       title={isPlaying ? '停止播放' : '播放錄音'}
-      className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border border-green-200 text-green-700 text-xs hover:bg-green-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
+      className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-sm border border-green-200 text-green-700 text-xs hover:bg-green-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
     >
       {loading ? '...' : isPlaying ? '■ 停止' : '▶ 聽錄音'}
     </button>
@@ -296,13 +296,13 @@ const AssignmentSubmissionTable: React.FC<Props> = ({
               <button
                 onClick={() => onSaveGrade(sub)}
                 disabled={savingId === sub.id}
-                className="px-2 py-0.5 rounded bg-[#11806F] text-white text-xs font-medium hover:bg-[#0E7366] disabled:opacity-50 cursor-pointer transition-colors"
+                className="px-2 py-0.5 rounded-sm bg-[#11806F] text-white text-xs font-medium hover:bg-[#0E7366] disabled:opacity-50 cursor-pointer transition-colors"
               >
                 {savingId === sub.id ? '...' : '儲存'}
               </button>
               <button
                 onClick={onCancelGrade}
-                className="px-2 py-0.5 rounded border border-gray-300 text-gray-600 text-xs hover:bg-gray-50 cursor-pointer transition-colors"
+                className="px-2 py-0.5 rounded-sm border border-gray-300 text-gray-600 text-xs hover:bg-gray-50 cursor-pointer transition-colors"
               >
                 取消
               </button>
@@ -310,7 +310,7 @@ const AssignmentSubmissionTable: React.FC<Props> = ({
           ) : (sub.status === 'submitted' || sub.status === 'graded') ? (
             <button
               onClick={() => onGradeClick(sub)}
-              className="px-2 py-0.5 rounded border border-gray-300 text-gray-600 text-xs hover:bg-gray-50 cursor-pointer transition-colors"
+              className="px-2 py-0.5 rounded-sm border border-gray-300 text-gray-600 text-xs hover:bg-gray-50 cursor-pointer transition-colors"
             >
               {sub.status === 'graded' ? '重新批改' : '批改'}
             </button>
@@ -348,7 +348,7 @@ const AssignmentSubmissionTable: React.FC<Props> = ({
               onChange={(e) =>
                 setGradeInput((prev) => ({ ...prev, [sub.id]: e.target.value }))
               }
-              className="w-20 h-7 px-2 rounded border border-gray-300 text-center text-sm text-gray-900 bg-white focus:outline-none focus:border-[#19A696]"
+              className="w-20 h-7 px-2 rounded-sm border border-gray-300 text-center text-sm text-gray-900 bg-white focus:outline-hidden focus:border-[#19A696]"
               placeholder="0-100"
             />
           ) : (
@@ -363,7 +363,7 @@ const AssignmentSubmissionTable: React.FC<Props> = ({
         <div>
           <button
             onClick={() => setExpandedMetricsId((prev) => (prev === sub.id ? null : sub.id))}
-            className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border border-blue-200 text-blue-600 text-xs hover:bg-blue-50 cursor-pointer transition-colors"
+            className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-sm border border-blue-200 text-blue-600 text-xs hover:bg-blue-50 cursor-pointer transition-colors"
           >
             {expandedMetricsId === sub.id ? '收合朗讀數據' : '查看朗讀數據'}
           </button>
@@ -390,7 +390,7 @@ const AssignmentSubmissionTable: React.FC<Props> = ({
             }
             placeholder="輸入個別評語（選填）"
             rows={2}
-            className="w-full mt-1 px-2 py-1.5 rounded border border-gray-300 text-xs text-gray-900 bg-white placeholder-gray-400 focus:outline-none focus:border-[#19A696] resize-none"
+            className="w-full mt-1 px-2 py-1.5 rounded-sm border border-gray-300 text-xs text-gray-900 bg-white placeholder-gray-400 focus:outline-hidden focus:border-[#19A696] resize-none"
           />
         </div>
       ) : sub.teacher_feedback ? (
@@ -440,7 +440,7 @@ const AssignmentSubmissionTable: React.FC<Props> = ({
                         prev === group.student_id ? null : group.student_id
                       )
                     }
-                    className="inline-flex items-center justify-center w-4 h-4 rounded border border-gray-300 text-gray-500 hover:bg-gray-50 cursor-pointer transition-colors"
+                    className="inline-flex items-center justify-center w-4 h-4 rounded-sm border border-gray-300 text-gray-500 hover:bg-gray-50 cursor-pointer transition-colors"
                     title={isExpanded ? '收合歷史作答' : '展開歷史作答'}
                   >
                     {isExpanded ? '−' : '+'}
@@ -481,7 +481,7 @@ const AssignmentSubmissionTable: React.FC<Props> = ({
                   onChange={(e) =>
                     setGradeInput((prev) => ({ ...prev, [latest.id]: e.target.value }))
                   }
-                  className="w-16 h-6 px-1.5 rounded border border-gray-300 text-center text-xs focus:outline-none focus:border-[#19A696]"
+                  className="w-16 h-6 px-1.5 rounded-sm border border-gray-300 text-center text-xs focus:outline-hidden focus:border-[#19A696]"
                   placeholder="0-100"
                 />
               ) : latest.score != null ? (
@@ -496,7 +496,7 @@ const AssignmentSubmissionTable: React.FC<Props> = ({
                   onClick={() =>
                     setExpandedMetricsId((prev) => (prev === latest.id ? null : latest.id))
                   }
-                  className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border border-blue-200 text-blue-600 text-xs hover:bg-blue-50 cursor-pointer transition-colors"
+                  className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-sm border border-blue-200 text-blue-600 text-xs hover:bg-blue-50 cursor-pointer transition-colors"
                   title="展開朗讀數據"
                 >
                   {expandedMetricsId === latest.id ? '收合' : '查看'}
@@ -514,7 +514,7 @@ const AssignmentSubmissionTable: React.FC<Props> = ({
                   }
                   placeholder="輸入個別評語（選填）"
                   rows={2}
-                  className="w-full px-1.5 py-1 rounded border border-gray-300 text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#19A696] resize-none"
+                  className="w-full px-1.5 py-1 rounded-sm border border-gray-300 text-xs text-gray-900 placeholder-gray-400 focus:outline-hidden focus:border-[#19A696] resize-none"
                 />
               ) : latest.teacher_feedback ? (
                 <span className="text-gray-600 line-clamp-2" title={latest.teacher_feedback}>
@@ -530,13 +530,13 @@ const AssignmentSubmissionTable: React.FC<Props> = ({
                   <button
                     onClick={() => onSaveGrade(latestAsSub)}
                     disabled={savingId === latest.id}
-                    className="px-2 py-0.5 rounded bg-[#11806F] text-white text-xs font-medium hover:bg-[#0E7366] disabled:opacity-50 cursor-pointer transition-colors"
+                    className="px-2 py-0.5 rounded-sm bg-[#11806F] text-white text-xs font-medium hover:bg-[#0E7366] disabled:opacity-50 cursor-pointer transition-colors"
                   >
                     {savingId === latest.id ? '...' : '儲存'}
                   </button>
                   <button
                     onClick={onCancelGrade}
-                    className="px-2 py-0.5 rounded border border-gray-300 text-gray-600 text-xs hover:bg-gray-50 cursor-pointer transition-colors"
+                    className="px-2 py-0.5 rounded-sm border border-gray-300 text-gray-600 text-xs hover:bg-gray-50 cursor-pointer transition-colors"
                   >
                     取消
                   </button>
@@ -544,7 +544,7 @@ const AssignmentSubmissionTable: React.FC<Props> = ({
               ) : latest.status === 'submitted' || latest.status === 'graded' ? (
                 <button
                   onClick={() => onGradeClick(latestAsSub)}
-                  className="px-2 py-0.5 rounded border border-gray-300 text-gray-600 text-xs hover:bg-gray-50 cursor-pointer transition-colors"
+                  className="px-2 py-0.5 rounded-sm border border-gray-300 text-gray-600 text-xs hover:bg-gray-50 cursor-pointer transition-colors"
                 >
                   {latest.status === 'graded' ? '重新批改' : '批改'}
                 </button>
@@ -623,7 +623,7 @@ const AssignmentSubmissionTable: React.FC<Props> = ({
                     [sub.id]: e.target.value,
                   }))
                 }
-                className="w-16 h-6 px-1.5 rounded border border-gray-300 text-center text-xs focus:outline-none focus:border-[#19A696]"
+                className="w-16 h-6 px-1.5 rounded-sm border border-gray-300 text-center text-xs focus:outline-hidden focus:border-[#19A696]"
                 placeholder="0-100"
               />
             ) : sub.score != null ? (
@@ -638,7 +638,7 @@ const AssignmentSubmissionTable: React.FC<Props> = ({
                 onClick={() =>
                   setExpandedMetricsId((prev) => (prev === sub.id ? null : sub.id))
                 }
-                className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border border-blue-200 text-blue-600 text-xs hover:bg-blue-50 cursor-pointer transition-colors"
+                className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-sm border border-blue-200 text-blue-600 text-xs hover:bg-blue-50 cursor-pointer transition-colors"
                 title="展開朗讀數據"
               >
                 {expandedMetricsId === sub.id ? '收合' : '查看'}
@@ -659,7 +659,7 @@ const AssignmentSubmissionTable: React.FC<Props> = ({
                 }
                 placeholder="輸入個別評語（選填）"
                 rows={2}
-                className="w-full px-1.5 py-1 rounded border border-gray-300 text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#19A696] resize-none"
+                className="w-full px-1.5 py-1 rounded-sm border border-gray-300 text-xs text-gray-900 placeholder-gray-400 focus:outline-hidden focus:border-[#19A696] resize-none"
               />
             ) : sub.teacher_feedback ? (
               <span className="text-gray-600 line-clamp-2" title={sub.teacher_feedback}>
@@ -675,13 +675,13 @@ const AssignmentSubmissionTable: React.FC<Props> = ({
                 <button
                   onClick={() => onSaveGrade(sub)}
                   disabled={savingId === sub.id}
-                  className="px-2 py-0.5 rounded bg-[#11806F] text-white text-xs font-medium hover:bg-[#0E7366] disabled:opacity-50 cursor-pointer transition-colors"
+                  className="px-2 py-0.5 rounded-sm bg-[#11806F] text-white text-xs font-medium hover:bg-[#0E7366] disabled:opacity-50 cursor-pointer transition-colors"
                 >
                   {savingId === sub.id ? '...' : '儲存'}
                 </button>
                 <button
                   onClick={onCancelGrade}
-                  className="px-2 py-0.5 rounded border border-gray-300 text-gray-600 text-xs hover:bg-gray-50 cursor-pointer transition-colors"
+                  className="px-2 py-0.5 rounded-sm border border-gray-300 text-gray-600 text-xs hover:bg-gray-50 cursor-pointer transition-colors"
                 >
                   取消
                 </button>
@@ -689,7 +689,7 @@ const AssignmentSubmissionTable: React.FC<Props> = ({
             ) : sub.status === 'submitted' || sub.status === 'graded' ? (
               <button
                 onClick={() => onGradeClick(sub)}
-                className="px-2 py-0.5 rounded border border-gray-300 text-gray-600 text-xs hover:bg-gray-50 cursor-pointer transition-colors"
+                className="px-2 py-0.5 rounded-sm border border-gray-300 text-gray-600 text-xs hover:bg-gray-50 cursor-pointer transition-colors"
               >
                 {sub.status === 'graded' ? '重新批改' : '批改'}
               </button>

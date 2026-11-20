@@ -358,7 +358,7 @@ const LessonRenderer: React.FC<LessonRendererProps> = ({
                     type="button"
                     onClick={() => setReadingOpen(false)}
                     aria-label="收合參考課文"
-                    className="inline-flex items-center gap-1 rounded-full border border-outline-variant px-3 py-1 text-xs font-medium text-on-surface-variant hover:bg-surface-container-high focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                    className="inline-flex items-center gap-1 rounded-full border border-outline-variant px-3 py-1 text-xs font-medium text-on-surface-variant hover:bg-surface-container-high focus:outline-hidden focus-visible:ring-2 focus-visible:ring-accent"
                   >
                     <span className="material-symbols-outlined text-base leading-none">close</span>
                     收合
@@ -407,7 +407,7 @@ const LessonRenderer: React.FC<LessonRendererProps> = ({
                     onClick={() => setReadingOpen((o) => !o)}
                     aria-expanded={readingOpen}
                     aria-label={readingOpen ? '收合參考課文' : '展開參考課文'}
-                    className="inline-flex items-center gap-1 rounded-full border border-outline-variant px-3 py-1 text-xs font-medium text-on-surface-variant hover:bg-surface-container-high focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                    className="inline-flex items-center gap-1 rounded-full border border-outline-variant px-3 py-1 text-xs font-medium text-on-surface-variant hover:bg-surface-container-high focus:outline-hidden focus-visible:ring-2 focus-visible:ring-accent"
                   >
                     <span className="material-symbols-outlined text-base leading-none">menu_book</span>
                     {readingOpen ? '收合課文' : '參考課文'}

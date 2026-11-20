@@ -124,12 +124,12 @@ const StoryListTable: React.FC<StoryListTableProps> = ({
           placeholder="搜尋課文標題..."
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="border border-gray-300 rounded-lg px-3 py-2 text-sm flex-1 min-w-48 focus:outline-none focus:ring-2 focus:ring-accent/50"
+          className="border border-gray-300 rounded-lg px-3 py-2 text-sm flex-1 min-w-48 focus:outline-hidden focus:ring-2 focus:ring-accent/50"
         />
         <select
           value={gradeFilter}
           onChange={(e) => onGradeChange(e.target.value)}
-          className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/50 cursor-pointer"
+          className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-hidden focus:ring-2 focus:ring-accent/50 cursor-pointer"
         >
           <option value="">所有年級</option>
           {[4, 5, 6, 7, 8, 9].map((g) => (

@@ -140,7 +140,7 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin }) => {
             <h1 className="text-2xl font-bold text-gray-900">AI 朗讀助教</h1>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 text-center space-y-4">
+          <div className="bg-white rounded-2xl shadow-xs border border-gray-200 p-6 text-center space-y-4">
             <div className="text-4xl">📧</div>
             <h2 className="text-lg font-bold text-gray-900">請驗證您的 Email</h2>
             <p className="text-sm text-gray-600">
@@ -210,7 +210,7 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin }) => {
                 role="tab"
                 aria-selected={asParent === (k === 'parent')}
                 onClick={() => setAsParent(k === 'parent')}
-                className={`flex-1 h-10 rounded-lg text-sm font-medium ${asParent === (k === 'parent') ? 'bg-white shadow text-accent' : 'text-gray-600'}`}
+                className={`flex-1 h-10 rounded-lg text-sm font-medium ${asParent === (k === 'parent') ? 'bg-white shadow-sm text-accent' : 'text-gray-600'}`}
               >
                 {label}
               </button>
@@ -236,7 +236,7 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin }) => {
         {/* Form Card */}
         <form
           onSubmit={handleSubmit}
-          className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-4"
+          className="bg-white rounded-2xl shadow-xs border border-gray-200 p-6 space-y-4"
         >
           {/* Error Message */}
           {error && (
@@ -257,7 +257,7 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin }) => {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="你的名字"
-              className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+              className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-hidden focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
             />
           </div>
 
@@ -273,7 +273,7 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin }) => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="name@example.com"
-              className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+              className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-hidden focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
             />
           </div>
 
@@ -289,7 +289,7 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin }) => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="至少 8 個字元，包含英文字母與數字"
-              className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+              className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-hidden focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
             />
             <PasswordStrengthIndicator password={password} />
           </div>
@@ -306,7 +306,7 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin }) => {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="再輸入一次密碼"
-              className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+              className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-hidden focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
             />
           </div>
 

@@ -113,9 +113,9 @@ const PracticeToolbox: React.FC = () => {
             disabled={!canStart}
             className={`
               px-6 py-2.5 rounded-xl text-sm font-semibold transition-all shrink-0
-              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2
+              focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2
               ${canStart
-                ? 'bg-accent text-white hover:bg-primary-light shadow-sm active:scale-95'
+                ? 'bg-accent text-white hover:bg-primary-light shadow-xs active:scale-95'
                 : 'bg-gray-100 text-gray-400 cursor-not-allowed'
               }
             `}

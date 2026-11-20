@@ -24,7 +24,7 @@ type QaTab = 'keypoints' | 'spotlight';
 function GateBadge({ gate, result }: { gate: string; result?: GateResult }) {
   if (!result) {
     return (
-      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-gray-100 text-gray-400">
+      <span className="inline-flex items-center px-1.5 py-0.5 rounded-sm text-xs bg-gray-100 text-gray-400">
         {gate} —
       </span>
     );

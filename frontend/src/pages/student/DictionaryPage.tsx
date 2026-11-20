@@ -86,9 +86,9 @@ const DictionaryPage: React.FC = () => {
               shrink-0 w-9 h-9 flex items-center justify-center rounded-full
               bg-surface-container-lowest border border-[#E5E0D5]
               text-on-surface-variant hover:text-on-surface
-              hover:border-accent/40 hover:shadow-sm
+              hover:border-accent/40 hover:shadow-xs
               transition-all duration-150
-              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
+              focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
             "
             aria-label="返回"
           >
@@ -97,7 +97,7 @@ const DictionaryPage: React.FC = () => {
             </svg>
           </button>
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold font-headline text-on-surface leading-tight">
+            <h1 className="text-xl sm:text-2xl font-bold font-headline text-on-surface leading-tight sm:leading-8">
               字典查詢
             </h1>
             <p className="text-xs sm:text-sm text-on-surface-variant mt-0.5">
@@ -124,7 +124,7 @@ const DictionaryPage: React.FC = () => {
               className="
                 w-full rounded-xl border border-[#E5E0D5] bg-surface-container-lowest
                 px-4 py-3 text-base text-on-surface placeholder:text-on-surface-variant/50
-                focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent
+                focus:outline-hidden focus:ring-2 focus:ring-accent focus:border-transparent
                 transition-shadow duration-150
               "
               aria-label="輸入要查詢的字"
@@ -157,7 +157,7 @@ const DictionaryPage: React.FC = () => {
               hover:opacity-90 active:scale-[0.98]
               disabled:opacity-40 disabled:cursor-not-allowed
               transition-all duration-150
-              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
+              focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
             "
             aria-label="查詢"
           >

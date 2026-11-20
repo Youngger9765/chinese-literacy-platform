@@ -930,7 +930,7 @@ const ParagraphReading: React.FC<ParagraphReadingProps> = ({
 
       {/* #1462 Toolbox completion overlay */}
       {toolboxComplete && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-center justify-center p-6">
           <div className="bg-surface rounded-3xl shadow-editorial p-8 max-w-md w-full text-center space-y-4">
             <h2 className="text-2xl font-headline font-bold text-on-surface">朗讀練習完成！</h2>
             {overallMetrics && (

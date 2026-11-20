@@ -53,7 +53,7 @@ function ConfettiBurst() {
     return (
       <div
         key={i}
-        className={`absolute top-0 h-2.5 w-2.5 rounded-sm ${colorClass} ${animClass}`}
+        className={`absolute top-0 h-2.5 w-2.5 rounded-xs ${colorClass} ${animClass}`}
         style={{ left: `${left}%`, transform: `rotate(${rotate}deg)`, animationDelay: `${delay}s` }}
       />
     );
@@ -87,7 +87,7 @@ function Plinth({ rank, entry, revealed }: PlinthProps) {
       {/* Name + score card — rises above the block, fades/pops in a beat
           after the block itself starts rising. */}
       <div
-        className={`mb-2 flex min-h-[3.25rem] max-w-[6.5rem] sm:max-w-[8.5rem] flex-col items-center justify-end text-center transition-opacity duration-200 ${
+        className={`mb-2 flex min-h-13 max-w-26 sm:max-w-34 flex-col items-center justify-end text-center transition-opacity duration-200 ${
           revealed ? 'opacity-100' : 'opacity-0'
         }`}
       >
@@ -118,7 +118,7 @@ function Plinth({ rank, entry, revealed }: PlinthProps) {
         className={`relative flex items-start justify-center rounded-t-lg border-t-4 ${layout.widthClass} ${
           layout.heightClass
         } ${
-          layout.big ? 'border-warning bg-gradient-to-b from-accent-bg to-accent-bg-subtle' : 'border-accent-light bg-surface-container'
+          layout.big ? 'border-warning bg-linear-to-b from-accent-bg to-accent-bg-subtle' : 'border-accent-light bg-surface-container'
         } transition-all ease-[cubic-bezier(0.34,1.56,0.64,1)] duration-500 ${
           revealed ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-40'
         }`}
@@ -126,7 +126,7 @@ function Plinth({ rank, entry, revealed }: PlinthProps) {
         {layout.big && revealed && (
           <div
             className="pointer-events-none absolute -top-10 left-1/2 h-32 w-32 -translate-x-1/2 rounded-full opacity-70"
-            style={{ background: 'radial-gradient(circle, rgb(var(--color-warning) / 0.35), transparent 70%)' }}
+            style={{ background: 'radial-gradient(circle, rgb(var(--rgb-warning) / 0.35), transparent 70%)' }}
             aria-hidden="true"
           />
         )}
@@ -144,7 +144,7 @@ function LightRays() {
       className="pointer-events-none absolute left-1/2 top-0 h-56 w-56 -translate-x-1/2 -translate-y-10 opacity-40"
       style={{
         background:
-          'conic-gradient(from 0deg, transparent 0deg, rgb(var(--color-warning) / 0.25) 8deg, transparent 16deg, transparent 80deg, rgb(var(--color-warning) / 0.25) 88deg, transparent 96deg, transparent 170deg, rgb(var(--color-warning) / 0.25) 178deg, transparent 186deg, transparent 260deg, rgb(var(--color-warning) / 0.25) 268deg, transparent 276deg, transparent 360deg)',
+          'conic-gradient(from 0deg, transparent 0deg, rgb(var(--rgb-warning) / 0.25) 8deg, transparent 16deg, transparent 80deg, rgb(var(--rgb-warning) / 0.25) 88deg, transparent 96deg, transparent 170deg, rgb(var(--rgb-warning) / 0.25) 178deg, transparent 186deg, transparent 260deg, rgb(var(--rgb-warning) / 0.25) 268deg, transparent 276deg, transparent 360deg)',
       }}
       aria-hidden="true"
     />
@@ -181,7 +181,7 @@ const PodiumCeremony: React.FC<PodiumCeremonyProps> = ({ topThree }) => {
   const orderedEntries = topThree.map((entry, i) => ({ rank: i + 1, entry }));
 
   return (
-    <div className="relative mb-10 min-h-[14rem]">
+    <div className="relative mb-10 min-h-56">
       <button
         type="button"
         data-testid="podium-mute-toggle"

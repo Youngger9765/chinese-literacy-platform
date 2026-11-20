@@ -106,7 +106,7 @@ const TeacherLiveQuizHost: React.FC = () => {
       {takeoverPrompt ? (
         <>
           <span>另一個裝置正在控制這場搶答，是否要在這裡接手？</span>
-          <button type="button" onClick={takeoverPrompt} className="rounded bg-accent px-3 py-1 font-medium">
+          <button type="button" onClick={takeoverPrompt} className="rounded-sm bg-accent px-3 py-1 font-medium">
             接手控制
           </button>
           <button type="button" onClick={() => setTakeoverPrompt(null)} className="underline">
@@ -129,7 +129,7 @@ const TeacherLiveQuizHost: React.FC = () => {
           void runControl(endLiveQuizGame);
         }
       }}
-      className="fixed right-4 top-4 z-40 rounded-full border border-surface-dim bg-white/90 px-4 py-1.5 text-xs font-medium text-on-surface-variant shadow hover:bg-white"
+      className="fixed right-4 top-4 z-40 rounded-full border border-surface-dim bg-white/90 px-4 py-1.5 text-xs font-medium text-on-surface-variant shadow-sm hover:bg-white"
     >
       提前結束
     </button>
@@ -145,7 +145,7 @@ const TeacherLiveQuizHost: React.FC = () => {
       onClick={toggleMuted}
       aria-pressed={muted}
       aria-label={muted ? '開啟音效' : '關閉音效'}
-      className="fixed left-4 top-4 z-40 rounded-full border border-surface-dim bg-white/90 px-3 py-1.5 text-sm shadow hover:bg-white"
+      className="fixed left-4 top-4 z-40 rounded-full border border-surface-dim bg-white/90 px-3 py-1.5 text-sm shadow-sm hover:bg-white"
     >
       {muted ? '🔇' : '🔊'}
     </button>
