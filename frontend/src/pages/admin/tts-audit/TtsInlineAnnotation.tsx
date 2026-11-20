@@ -65,7 +65,7 @@ export const TtsInlineAnnotation: React.FC<Props> = ({ raw, replacements, compac
         // Full mode: show arrow + label inline
         return (
           <span key={i} className="inline-flex flex-col items-start mr-0.5 align-bottom">
-            <span className="bg-orange-50 border border-orange-200 rounded px-0.5 text-orange-800 font-medium leading-tight">
+            <span className="bg-orange-50 border border-orange-200 rounded-sm px-0.5 text-orange-800 font-medium leading-tight">
               {seg.text}
             </span>
             <span className="flex items-center gap-0.5 text-[10px] text-orange-500 leading-none mt-0.5 whitespace-nowrap">

@@ -59,7 +59,7 @@ const StarCelebration: React.FC<StarCelebrationProps> = ({
 
   return (
     <div
-      className={`rounded-3xl border-2 ${cfg.border} bg-gradient-to-br ${cfg.bg} p-8 flex flex-col items-center gap-4 shadow-sm`}
+      className={`rounded-3xl border-2 ${cfg.border} bg-linear-to-br ${cfg.bg} p-8 flex flex-col items-center gap-4 shadow-xs`}
     >
       {/* Badge */}
       <div className="flex items-center gap-2">

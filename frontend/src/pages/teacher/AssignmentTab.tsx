@@ -142,14 +142,14 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId, onChanged, o
               {formatDate(assignment.due_date)}
             </span>
             {isOverdue(assignment.due_date) && (
-              <span className="ml-1 inline-block px-1 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700">
+              <span className="ml-1 inline-block px-1 py-0.5 rounded-sm text-xs font-medium bg-red-100 text-red-700">
                 已逾期
               </span>
             )}
           </td>
           <td className="py-2.5 text-center">
             <span
-              className={`inline-block min-w-[2rem] px-2 py-0.5 rounded-full text-xs font-medium ${
+              className={`inline-block min-w-8 px-2 py-0.5 rounded-full text-xs font-medium ${
                 completionPct === 100
                   ? 'bg-green-100 text-green-700'
                   : completionPct > 0
@@ -181,13 +181,13 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId, onChanged, o
                 <button
                   onClick={() => handleDelete(assignment)}
                   disabled={isDeleting}
-                  className="px-1.5 py-0.5 rounded bg-red-500 text-white text-xs font-medium hover:bg-red-600 disabled:opacity-50 cursor-pointer transition-colors"
+                  className="px-1.5 py-0.5 rounded-sm bg-red-500 text-white text-xs font-medium hover:bg-red-600 disabled:opacity-50 cursor-pointer transition-colors"
                 >
                   {isDeleting ? '...' : '確認'}
                 </button>
                 <button
                   onClick={() => setConfirmDeleteId(null)}
-                  className="px-1.5 py-0.5 rounded border border-gray-300 text-gray-600 text-xs hover:bg-gray-50 cursor-pointer transition-colors"
+                  className="px-1.5 py-0.5 rounded-sm border border-gray-300 text-gray-600 text-xs hover:bg-gray-50 cursor-pointer transition-colors"
                 >
                   取消
                 </button>
@@ -196,7 +196,7 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId, onChanged, o
               <div className="flex items-center gap-0.5 justify-center">
                 <button
                   onClick={() => handleOpenEdit(assignment)}
-                  className="p-1 rounded text-gray-400 hover:text-[#11806F] hover:bg-[#19A696]/10 transition-colors cursor-pointer"
+                  className="p-1 rounded-sm text-gray-400 hover:text-[#11806F] hover:bg-[#19A696]/10 transition-colors cursor-pointer"
                   title="編輯任務"
                   aria-label="編輯任務"
                 >
@@ -206,7 +206,7 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId, onChanged, o
                 </button>
                 <button
                   onClick={() => setConfirmDeleteId(assignment.id)}
-                  className="p-1 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
+                  className="p-1 rounded-sm text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
                   title="刪除任務"
                 >
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -247,9 +247,9 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId, onChanged, o
       <div className="p-5 space-y-3">
         {Array.from({ length: 3 }).map((_, index) => (
           <div key={index} className="flex gap-4">
-            <div className="h-4 bg-gray-200 animate-pulse rounded w-1/3" />
-            <div className="h-4 bg-gray-200 animate-pulse rounded w-1/4" />
-            <div className="h-4 bg-gray-200 animate-pulse rounded w-1/6" />
+            <div className="h-4 bg-gray-200 animate-pulse rounded-sm w-1/3" />
+            <div className="h-4 bg-gray-200 animate-pulse rounded-sm w-1/4" />
+            <div className="h-4 bg-gray-200 animate-pulse rounded-sm w-1/6" />
           </div>
         ))}
       </div>

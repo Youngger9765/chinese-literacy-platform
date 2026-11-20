@@ -2,7 +2,7 @@
  * AttackAnimation — PRD §0 v2 改版 N: 答對時播放一次攻擊對方塔的動畫,
  * ≤1.5 秒不擋下一題、respects `prefers-reduced-motion`（只淡入淡出）。
  * 不使用任何商業遊戲的名稱／角色／美術 — 每種攻擊只是一個 emoji + CSS
- * keyframe 位移（見 tailwind.config.js `attack-*`），不是描摹特定作品。
+ * keyframe 位移（見 src/index.css `@theme` 的 `--animate-attack-*`），不是描摹特定作品。
  */
 import React, { useEffect, useRef } from 'react';
 import { usePrefersReducedMotion } from '../pk/usePrefersReducedMotion';

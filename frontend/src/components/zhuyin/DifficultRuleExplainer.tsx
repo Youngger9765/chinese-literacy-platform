@@ -144,7 +144,7 @@ export default function DifficultRuleExplainer() {
         aria-expanded={open}
         aria-label="這些字為什麼有注音"
         title="這些字為什麼有注音"
-        className="h-8 sm:h-9 w-8 sm:w-9 inline-flex items-center justify-center rounded-full bg-surface-container-high font-headline font-bold text-sm text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 active:scale-95 transition-all duration-200"
+        className="h-8 sm:h-9 w-8 sm:w-9 inline-flex items-center justify-center rounded-full bg-surface-container-high font-headline font-bold text-sm text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 active:scale-95 transition-all duration-200"
       >
         ？
       </button>

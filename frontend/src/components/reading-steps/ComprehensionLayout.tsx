@@ -193,7 +193,7 @@ const StoryTextCard: React.FC<{
             {String(idx + 1).padStart(2, '0')}
           </span>
           <p
-            className={`text-lg md:text-xl text-on-surface leading-[2rem] md:leading-[2.2rem] ${
+            className={`text-lg md:text-xl text-on-surface leading-8 md:leading-[2.2rem] ${
               zhuyinActive ? 'tracking-[0.15em]' : ''
             }`}
           >
@@ -311,7 +311,7 @@ const PairedReading: React.FC<{
                 {String(idx + 1).padStart(2, '0')}
               </span>
               <p
-                className={`text-lg md:text-xl text-on-surface leading-[2rem] md:leading-[2.2rem] ${
+                className={`text-lg md:text-xl text-on-surface leading-8 md:leading-[2.2rem] ${
                   zhuyinActive ? 'tracking-[0.15em]' : ''
                 }`}
               >
@@ -506,7 +506,7 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
            * 同一個捲軸，讓右欄拿到完整寬度——跟上面 `hasImages` 那個分支
            * 已經在用的「單一 overflow-y-auto 捲動區」是同一招，不是新發明的
            * 機制。平板（iPad 768/1024）與手機都落在這個堆疊區間，文章重點表
-           * 的 `min-w-[28rem]` 水平捲動只在 `xl` 以上、兩欄並排、右欄仍然
+           * 的 `min-w-md` 水平捲動只在 `xl` 以上、兩欄並排、右欄仍然
            * 不夠寬時才會真的派上用場
            * ══════════════════════════════════════════════════════════════════ */
           <div className="w-full h-full flex flex-col gap-6 overflow-y-auto pr-1 xl:grid xl:grid-cols-12 xl:grid-rows-[1fr] xl:overflow-visible xl:pr-0">
@@ -514,8 +514,8 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
             {/* Left: text card (xl:col-span-7). 堆疊時排第二——參考課文常常比
                 練習長很多，排第一會讓學生捲過一整篇課文才看到題目（Young
                 verbal feedback on #3696 screenshots）。xl 以上照舊是左欄，
-                order-none 取消上面的順序覆寫。 */}
-            <div className="order-2 flex flex-col xl:order-none xl:col-span-7 xl:min-h-0">
+                order-0 取消上面的順序覆寫。 */}
+            <div className="order-2 flex flex-col xl:order-0 xl:col-span-7 xl:min-h-0">
               <StoryTextCard
                 story={story}
                 zhuyinLines={zhuyinLines}
@@ -528,7 +528,7 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
             {/* Right: reference panels + exercise (xl:col-span-5). 堆疊時排
                 第一，讓題目不需要捲過整篇參考課文就看得到；需要課文時課文
                 就在下面，不是不見了。 */}
-            <div className="order-1 flex flex-col gap-3 custom-scrollbar xl:order-none xl:col-span-5 xl:min-h-0 xl:overflow-y-auto xl:pr-1">
+            <div className="order-1 flex flex-col gap-3 custom-scrollbar xl:order-0 xl:col-span-5 xl:min-h-0 xl:overflow-y-auto xl:pr-1">
               {hasTables && (
                 <CollapsibleRefPanel
                   icon="table_chart"

@@ -42,7 +42,7 @@ export function scoreColor(score: number | null): string {
 export function ScoreBadge({ score }: { score: number | null }) {
   return (
     <span
-      className="inline-block px-2 py-0.5 rounded text-white text-xs font-semibold"
+      className="inline-block px-2 py-0.5 rounded-sm text-white text-xs font-semibold"
       style={{ backgroundColor: scoreColor(score) }}
     >
       {score !== null ? score : '--'}
@@ -149,15 +149,15 @@ export function ClassOverviewPanel({ data }: ClassOverviewPanelProps) {
           </ResponsiveContainer>
           <div className="flex gap-4 mt-3 text-xs text-gray-500">
             <span>
-              <span className="inline-block w-3 h-3 rounded-sm bg-green-500 mr-1" />
+              <span className="inline-block w-3 h-3 rounded-xs bg-green-500 mr-1" />
               80+ 分
             </span>
             <span>
-              <span className="inline-block w-3 h-3 rounded-sm bg-amber-400 mr-1" />
+              <span className="inline-block w-3 h-3 rounded-xs bg-amber-400 mr-1" />
               60-79 分
             </span>
             <span>
-              <span className="inline-block w-3 h-3 rounded-sm bg-red-500 mr-1" />
+              <span className="inline-block w-3 h-3 rounded-xs bg-red-500 mr-1" />
               60 分以下
             </span>
           </div>
@@ -395,7 +395,7 @@ interface StudentSelectorProps {
 
 export function StudentSelector({ students, selected, onSelect }: StudentSelectorProps) {
   return (
-    <div className="w-full md:w-56 flex-shrink-0">
+    <div className="w-full md:w-56 shrink-0">
       <div className="bg-white rounded-2xl shadow-card overflow-hidden">
         <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
           <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">

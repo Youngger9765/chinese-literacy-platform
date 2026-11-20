@@ -91,7 +91,7 @@ const StudentOurClassPage: React.FC = () => {
       <div className="p-6 max-w-xl mx-auto">
         <h1 className="text-xl font-bold text-on-surface mb-1">我們班</h1>
         <p className="text-sm text-on-surface-variant mb-2">和別班比幾週，平常讀課文就累積</p>
-        <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-[#6D7B8F] to-[#4A5568] px-5 py-6 text-center shadow-sm">
+        <div className="overflow-hidden rounded-3xl bg-linear-to-br from-[#6D7B8F] to-[#4A5568] px-5 py-6 text-center shadow-xs">
           <img
             src="/story-assets/league-tang/guide-changan-greet.png"
             alt=""

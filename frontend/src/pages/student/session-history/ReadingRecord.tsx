@@ -26,7 +26,7 @@ export const ReadingRecord: React.FC<ReadingRecordProps> = ({ raw }) => {
             {mispronounced.map((w, i) => (
               <span
                 key={i}
-                className="px-2 py-0.5 rounded bg-red-100 text-red-700 text-sm font-medium"
+                className="px-2 py-0.5 rounded-sm bg-red-100 text-red-700 text-sm font-medium"
               >
                 {w}
               </span>

@@ -93,7 +93,7 @@ const StudentTeamArenaJoin: React.FC = () => {
         <div className="mb-4 w-full max-w-xl">
           <GameBackButton to="/game-hub" />
         </div>
-        <div className="w-full max-w-xl overflow-hidden rounded-3xl bg-gradient-to-br from-[#1FA6A6] to-[#E0792B] px-5 py-6 text-center shadow-sm sm:px-8">
+        <div className="w-full max-w-xl overflow-hidden rounded-3xl bg-linear-to-br from-[#1FA6A6] to-[#E0792B] px-5 py-6 text-center shadow-xs sm:px-8">
           <img
             src="/story-assets/team-arena-hub/icon.png"
             alt=""
@@ -108,7 +108,7 @@ const StudentTeamArenaJoin: React.FC = () => {
           <button
             type="button"
             onClick={() => setMode('host')}
-            className="w-full rounded-xl bg-accent px-4 py-3 text-base font-semibold text-white shadow-sm"
+            className="w-full rounded-xl bg-accent px-4 py-3 text-base font-semibold text-white shadow-xs"
           >
             發起比賽
           </button>
@@ -172,7 +172,7 @@ const StudentTeamArenaJoin: React.FC = () => {
             type="button"
             onClick={handleHost}
             disabled={creating}
-            className="w-full rounded-xl bg-accent px-4 py-3 text-base font-semibold text-white shadow-sm disabled:opacity-50"
+            className="w-full rounded-xl bg-accent px-4 py-3 text-base font-semibold text-white shadow-xs disabled:opacity-50"
           >
             {creating ? '建立中…' : '發起比賽'}
           </button>
@@ -198,7 +198,7 @@ const StudentTeamArenaJoin: React.FC = () => {
           onChange={(e) => setCode(sanitizeCode(e.target.value))}
           aria-label="6 碼多人對抗賽代碼"
           autoFocus
-          className="w-full rounded-xl border-2 border-surface-dim px-4 py-3 text-center text-2xl font-mono font-bold tracking-widest text-on-surface focus:border-accent focus:outline-none"
+          className="w-full rounded-xl border-2 border-surface-dim px-4 py-3 text-center text-2xl font-mono font-bold tracking-widest text-on-surface focus:border-accent focus:outline-hidden"
           placeholder="------"
         />
         <div>
@@ -208,7 +208,7 @@ const StudentTeamArenaJoin: React.FC = () => {
         <button
           type="submit"
           disabled={!codeComplete}
-          className="w-full rounded-xl bg-accent px-4 py-3 text-base font-semibold text-white shadow-sm disabled:opacity-40"
+          className="w-full rounded-xl bg-accent px-4 py-3 text-base font-semibold text-white shadow-xs disabled:opacity-40"
         >
           加入
         </button>

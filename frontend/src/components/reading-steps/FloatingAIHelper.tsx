@@ -163,7 +163,7 @@ const FloatingAIHelper: React.FC<FloatingAIHelperProps> = ({
 
       {/* Chat popup */}
       {isOpen && (
-        <div className="fixed bottom-24 right-6 z-50 w-80 sm:w-96 max-h-[28rem] bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden">
+        <div className="fixed bottom-24 right-6 z-50 w-80 sm:w-96 max-h-112 bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden">
           {/* Header */}
           <div className="shrink-0 bg-accent px-4 py-3 flex items-center gap-2">
             <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
@@ -191,7 +191,7 @@ const FloatingAIHelper: React.FC<FloatingAIHelperProps> = ({
             {messages.map((msg, i) => (
               <div key={i} className={`flex gap-2 ${msg.role === 'student' ? 'flex-row-reverse' : ''}`}>
                 {msg.role === 'ai' && (
-                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-accent flex items-center justify-center">
+                  <div className="shrink-0 w-6 h-6 rounded-full bg-accent flex items-center justify-center">
                     <span className="text-white text-[8px] font-bold">AI</span>
                   </div>
                 )}
@@ -207,7 +207,7 @@ const FloatingAIHelper: React.FC<FloatingAIHelperProps> = ({
 
             {isLoading && (
               <div className="flex gap-2">
-                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-accent flex items-center justify-center">
+                <div className="shrink-0 w-6 h-6 rounded-full bg-accent flex items-center justify-center">
                   <span className="text-white text-[8px] font-bold">AI</span>
                 </div>
                 <div className="bg-white border border-gray-200 rounded-xl px-3 py-2 flex items-center gap-1">
@@ -233,7 +233,7 @@ const FloatingAIHelper: React.FC<FloatingAIHelperProps> = ({
               placeholder="輸入問題…"
               rows={1}
               disabled={isLoading}
-              className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-accent resize-none disabled:opacity-50"
+              className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-hidden focus:border-accent resize-none disabled:opacity-50"
             />
             <VoiceInputButton
               onTranscript={(text) => setInputText(text)}
@@ -243,7 +243,7 @@ const FloatingAIHelper: React.FC<FloatingAIHelperProps> = ({
             <button
               onClick={handleSend}
               disabled={!inputText.trim() || isLoading}
-              className="flex-shrink-0 w-9 h-9 rounded-lg bg-accent hover:bg-accent-hover disabled:bg-gray-300 text-white flex items-center justify-center transition-all active:scale-95"
+              className="shrink-0 w-9 h-9 rounded-lg bg-accent hover:bg-accent-hover disabled:bg-gray-300 text-white flex items-center justify-center transition-all active:scale-95"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"

@@ -43,7 +43,7 @@ const OmoUploadPagePreview: React.FC<OmoUploadPagePreviewProps> = ({
   const isLast = pageIndex === totalPages - 1;
 
   return (
-    <div className="flex items-center gap-3 p-2 bg-white rounded-xl border border-gray-200 shadow-sm">
+    <div className="flex items-center gap-3 p-2 bg-white rounded-xl border border-gray-200 shadow-xs">
       {/* Thumbnail with page-number overlay */}
       <div className="relative shrink-0 w-16 h-16 rounded-lg overflow-hidden bg-gray-50 border border-gray-100">
         {isPdf || !previewUrl ? (

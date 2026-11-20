@@ -53,7 +53,7 @@ const XPBar: React.FC<XPBarProps> = ({ levelInfo, compact = false }) => {
   }
 
   return (
-    <div className={`rounded-2xl border border-gray-100 ${colors.bg} p-4 shadow-sm`}>
+    <div className={`rounded-2xl border border-gray-100 ${colors.bg} p-4 shadow-xs`}>
       {/* Level badge + name */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">

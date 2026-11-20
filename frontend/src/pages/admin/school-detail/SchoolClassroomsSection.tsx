@@ -35,7 +35,7 @@ export interface SchoolClassroomsSectionProps {
 }
 
 const INPUT_CLS =
-  'w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors';
+  'w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-hidden focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors';
 
 const CLASSROOM_COLUMNS: ColumnDef<SchoolClassroomResponse>[] = [
   { key: 'name', header: '班級名稱', render: (c) => <span className="font-medium text-gray-900">{c.name}</span> },
@@ -190,9 +190,9 @@ const SchoolClassroomsSection: React.FC<SchoolClassroomsSectionProps> = ({
       <div className="p-5">
         {isLoadingClassrooms ? (
           <div className="space-y-3">
-            <div className="h-4 bg-gray-200 animate-pulse rounded w-2/3" />
-            <div className="h-4 bg-gray-200 animate-pulse rounded w-1/2" />
-            <div className="h-4 bg-gray-200 animate-pulse rounded w-3/4" />
+            <div className="h-4 bg-gray-200 animate-pulse rounded-sm w-2/3" />
+            <div className="h-4 bg-gray-200 animate-pulse rounded-sm w-1/2" />
+            <div className="h-4 bg-gray-200 animate-pulse rounded-sm w-3/4" />
           </div>
         ) : classroomError ? (
           <div className="text-center py-6">

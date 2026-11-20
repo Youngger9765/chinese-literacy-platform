@@ -79,7 +79,7 @@ export const StepRecordsView: React.FC<StepRecordsViewProps> = ({
   if (!hasAny && !dialogueChecked) {
     return (
       <div className="space-y-2" aria-label="作答紀錄載入中">
-        <div className="h-4 bg-gray-200 animate-pulse rounded w-1/3" />
+        <div className="h-4 bg-gray-200 animate-pulse rounded-sm w-1/3" />
         <div className="h-20 bg-gray-100 animate-pulse rounded-xl" />
       </div>
     );
@@ -103,7 +103,7 @@ export const StepRecordsView: React.FC<StepRecordsViewProps> = ({
       {hasComprehension &&
         (loadingTurns ? (
           <div className="bg-white rounded-2xl shadow-card p-4">
-            <div className="h-4 bg-gray-200 animate-pulse rounded w-1/3 mb-3" />
+            <div className="h-4 bg-gray-200 animate-pulse rounded-sm w-1/3 mb-3" />
             <div className="space-y-2">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="h-8 bg-gray-100 animate-pulse rounded-xl" />

@@ -44,12 +44,12 @@ const MyTextsList: React.FC<MyTextsListProps> = ({
         placeholder="搜尋課文標題..."
         value={searchQuery}
         onChange={(e) => onSearchChange(e.target.value)}
-        className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 w-48"
+        className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-400 w-48"
       />
       <select
         value={filterGrade}
         onChange={(e) => onGradeChange(e.target.value === '' ? '' : Number(e.target.value))}
-        className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+        className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-400"
       >
         <option value="">所有年級</option>
         {GRADES.map((g) => (
@@ -59,7 +59,7 @@ const MyTextsList: React.FC<MyTextsListProps> = ({
       <select
         value={filterGenre}
         onChange={(e) => onGenreChange(e.target.value)}
-        className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+        className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-400"
       >
         <option value="">所有體裁</option>
         {GENRES.map((g) => (
@@ -100,7 +100,7 @@ const MyTextsList: React.FC<MyTextsListProps> = ({
           {texts.map((text) => (
             <div
               key={text.id}
-              className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl hover:shadow-sm transition-shadow"
+              className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl hover:shadow-xs transition-shadow"
             >
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 mb-1">

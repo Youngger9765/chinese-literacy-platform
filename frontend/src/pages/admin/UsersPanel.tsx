@@ -97,7 +97,7 @@ const UsersPanel: React.FC = () => {
             value={searchQuery}
             onChange={(e) => handleSearchChange(e.target.value)}
             placeholder="搜尋使用者姓名或 Email..."
-            className="w-full h-11 px-4 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent text-sm"
+            className="w-full h-11 px-4 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-accent focus:border-transparent text-sm"
           />
         </div>
 
@@ -119,10 +119,10 @@ const UsersPanel: React.FC = () => {
           <div className="bg-white rounded-2xl shadow-card overflow-hidden">
             {Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="flex items-center gap-4 px-6 py-4 border-b border-gray-100 last:border-b-0">
-                <div className="h-4 bg-gray-200 animate-pulse rounded w-1/4" />
-                <div className="h-4 bg-gray-200 animate-pulse rounded w-1/3" />
-                <div className="h-4 bg-gray-200 animate-pulse rounded w-16" />
-                <div className="h-4 bg-gray-200 animate-pulse rounded w-12 ml-auto" />
+                <div className="h-4 bg-gray-200 animate-pulse rounded-sm w-1/4" />
+                <div className="h-4 bg-gray-200 animate-pulse rounded-sm w-1/3" />
+                <div className="h-4 bg-gray-200 animate-pulse rounded-sm w-16" />
+                <div className="h-4 bg-gray-200 animate-pulse rounded-sm w-12 ml-auto" />
               </div>
             ))}
           </div>

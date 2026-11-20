@@ -419,7 +419,7 @@ const StudentTeamArenaPlay: React.FC = () => {
             creating/joining a room. Same asset, same gradient, so it
             reads as one continuous flow rather than "banner, then
             suddenly plain text" the moment a room exists. */}
-        <div className="mb-6 w-full max-w-sm overflow-hidden rounded-3xl bg-gradient-to-br from-[#1FA6A6] to-[#E0792B] px-5 py-6 shadow-sm">
+        <div className="mb-6 w-full max-w-sm overflow-hidden rounded-3xl bg-linear-to-br from-[#1FA6A6] to-[#E0792B] px-5 py-6 shadow-xs">
           <img
             src="/story-assets/team-arena-hub/icon.png"
             alt=""
@@ -450,7 +450,7 @@ const StudentTeamArenaPlay: React.FC = () => {
               type="button"
               onClick={handleStart}
               disabled={!bothFull}
-              className="mt-6 w-full max-w-xs rounded-xl bg-accent px-4 py-3 text-base font-semibold text-white shadow-sm disabled:opacity-40"
+              className="mt-6 w-full max-w-xs rounded-xl bg-accent px-4 py-3 text-base font-semibold text-white shadow-xs disabled:opacity-40"
             >
               {bothFull ? '開始比賽' : '等兩隊都滿額才能開始'}
             </button>

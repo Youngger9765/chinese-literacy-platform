@@ -74,17 +74,17 @@ const OrgDashboardPanel: React.FC<OrgDashboardPanelProps> = ({ organizationId })
               <div key={i} className="bg-white rounded-2xl shadow-card p-5 flex items-center gap-4">
                 <div className="w-11 h-11 bg-gray-200 animate-pulse rounded-xl shrink-0" />
                 <div className="space-y-2 flex-1">
-                  <div className="h-6 bg-gray-200 animate-pulse rounded w-1/3" />
-                  <div className="h-4 bg-gray-200 animate-pulse rounded w-1/2" />
+                  <div className="h-6 bg-gray-200 animate-pulse rounded-sm w-1/3" />
+                  <div className="h-4 bg-gray-200 animate-pulse rounded-sm w-1/2" />
                 </div>
               </div>
             ))}
           </div>
           <div className="bg-white rounded-2xl shadow-card p-6">
-            <div className="h-5 bg-gray-200 animate-pulse rounded w-1/4 mb-4" />
+            <div className="h-5 bg-gray-200 animate-pulse rounded-sm w-1/4 mb-4" />
             <div className="space-y-3">
               {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="h-10 bg-gray-200 animate-pulse rounded" />
+                <div key={i} className="h-10 bg-gray-200 animate-pulse rounded-sm" />
               ))}
             </div>
           </div>

@@ -121,7 +121,7 @@ const StatCard: React.FC<{
   unit: string;
   emoji: string;
 }> = ({ label, value, unit, emoji }) => (
-  <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-3 text-center">
+  <div className="rounded-2xl bg-white border border-gray-100 shadow-xs p-3 text-center">
     <div className="text-2xl mb-1">{emoji}</div>
     <div className="text-2xl font-black text-gray-800">
       {value}

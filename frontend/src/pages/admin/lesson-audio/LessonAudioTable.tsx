@@ -590,12 +590,12 @@ const LessonAudioTable: React.FC = () => {
         <div className="flex-1 overflow-hidden">
           {Array.from({ length: 16 }).map((_, index) => (
             <div key={index} className="flex animate-pulse items-center gap-3 border-b border-gray-100 px-4 py-3">
-              <div className="h-3 w-20 rounded bg-gray-200" />
-              <div className="h-3 flex-1 rounded bg-gray-100" />
-              <div className="h-8 w-24 rounded bg-gray-100" />
-              <div className="h-8 w-24 rounded bg-gray-100" />
-              <div className="h-8 w-24 rounded bg-gray-100" />
-              <div className="h-8 w-24 rounded bg-gray-100" />
+              <div className="h-3 w-20 rounded-sm bg-gray-200" />
+              <div className="h-3 flex-1 rounded-sm bg-gray-100" />
+              <div className="h-8 w-24 rounded-sm bg-gray-100" />
+              <div className="h-8 w-24 rounded-sm bg-gray-100" />
+              <div className="h-8 w-24 rounded-sm bg-gray-100" />
+              <div className="h-8 w-24 rounded-sm bg-gray-100" />
             </div>
           ))}
         </div>
@@ -624,12 +624,12 @@ const LessonAudioTable: React.FC = () => {
     <div className="flex h-full flex-col overflow-hidden">
       <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-gray-200 bg-white px-4 py-2.5">
         <h2 className="mr-1 text-sm font-semibold text-gray-800">課程音檔總表</h2>
-        <span className="rounded bg-gray-100 px-2 py-1 text-xs text-gray-500">{sortedStories.length} 課</span>
+        <span className="rounded-sm bg-gray-100 px-2 py-1 text-xs text-gray-500">{sortedStories.length} 課</span>
         <button
           type="button"
           onClick={downloadAllQrXlsx}
           disabled={isZipping || sortedStories.length === 0}
-          className="ml-auto inline-flex items-center gap-1.5 rounded border border-violet-200 bg-violet-50 px-2.5 py-1.5 text-xs font-medium text-violet-700 hover:bg-violet-100 disabled:cursor-wait disabled:opacity-60"
+          className="ml-auto inline-flex items-center gap-1.5 rounded-sm border border-violet-200 bg-violet-50 px-2.5 py-1.5 text-xs font-medium text-violet-700 hover:bg-violet-100 disabled:cursor-wait disabled:opacity-60"
         >
           {isZipping
             ? <><Loader2 className="h-3.5 w-3.5 animate-spin" />{zipProgress}</>
@@ -639,7 +639,7 @@ const LessonAudioTable: React.FC = () => {
           type="button"
           onClick={stopCurrentPlayback}
           disabled={!hasActivePlayback}
-          className="ml-auto inline-flex items-center gap-1.5 rounded border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-600 hover:border-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+          className="ml-auto inline-flex items-center gap-1.5 rounded-sm border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-600 hover:border-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <Square className="h-3.5 w-3.5" />
           停止播放
@@ -685,7 +685,7 @@ const LessonAudioTable: React.FC = () => {
             >
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="shrink-0 rounded bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-600">
+                  <span className="shrink-0 rounded-sm bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-600">
                     {lessonTitle(story)}{part ? `（篇${part.part ?? partIdx + 1}）` : ''}
                   </span>
                   <span className="truncate font-medium text-gray-900">{story.title}</span>
@@ -718,7 +718,7 @@ const LessonAudioTable: React.FC = () => {
                   stopCurrentPlayback();
                   if (wasIdle) playLesson(story, 'full', round);
                 }}
-                className="inline-flex w-fit items-center gap-1.5 rounded border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-600 hover:border-gray-300 hover:bg-gray-50"
+                className="inline-flex w-fit items-center gap-1.5 rounded-sm border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-600 hover:border-gray-300 hover:bg-gray-50"
               >
                 {fullContent.icon}
                 {fullContent.label}
@@ -739,7 +739,7 @@ const LessonAudioTable: React.FC = () => {
                   stopCurrentPlayback();
                   if (wasIdle) playLesson(story, 'key', round);
                 }}
-                  className="inline-flex items-center gap-1.5 rounded border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-600 hover:border-gray-300 hover:bg-gray-50"
+                  className="inline-flex items-center gap-1.5 rounded-sm border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-600 hover:border-gray-300 hover:bg-gray-50"
                 >
                   {keyContent.icon}
                   {keyContent.label}

@@ -63,7 +63,7 @@ export const TtsSentenceDetailPanel: React.FC<Props> = ({ entry, token, onClose 
             L{String(e.lesson_id).padStart(2, '0')} · p{e.paragraph_idx}/s{e.sentence_idx}
           </span>
           {hasReplacements && (
-            <span className="inline-flex items-center gap-1 text-xs text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded">
+            <span className="inline-flex items-center gap-1 text-xs text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded-sm">
               <span className="w-1.5 h-1.5 rounded-full bg-orange-500 inline-block" />
               {e.replacements_applied.length} 替換
             </span>
@@ -71,7 +71,7 @@ export const TtsSentenceDetailPanel: React.FC<Props> = ({ entry, token, onClose 
         </div>
         <button
           onClick={onClose}
-          className="text-gray-400 hover:text-gray-700 transition-colors p-1 rounded cursor-pointer"
+          className="text-gray-400 hover:text-gray-700 transition-colors p-1 rounded-sm cursor-pointer"
           aria-label="關閉（Esc）"
           title="關閉（Esc）"
         >
@@ -132,7 +132,7 @@ export const TtsSentenceDetailPanel: React.FC<Props> = ({ entry, token, onClose 
         {e.tts_prompt_prefix && (
           <section>
             <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Prompt Prefix</h3>
-            <div className="bg-amber-50 border border-amber-100 rounded-lg p-3 text-xs text-gray-700 font-mono leading-relaxed whitespace-pre-wrap break-words">
+            <div className="bg-amber-50 border border-amber-100 rounded-lg p-3 text-xs text-gray-700 font-mono leading-relaxed whitespace-pre-wrap wrap-break-word">
               {e.tts_prompt_prefix}
             </div>
           </section>
@@ -142,7 +142,7 @@ export const TtsSentenceDetailPanel: React.FC<Props> = ({ entry, token, onClose 
         {e.tts_contents_sent && (
           <section>
             <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">實際送出字串</h3>
-            <div className="bg-slate-50 border border-slate-100 rounded-lg p-3 text-xs text-gray-700 font-mono leading-relaxed whitespace-pre-wrap break-words">
+            <div className="bg-slate-50 border border-slate-100 rounded-lg p-3 text-xs text-gray-700 font-mono leading-relaxed whitespace-pre-wrap wrap-break-word">
               {e.tts_contents_sent}
             </div>
           </section>

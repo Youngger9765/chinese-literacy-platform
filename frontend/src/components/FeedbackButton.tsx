@@ -86,7 +86,7 @@ const FeedbackButton: React.FC = () => {
       <div className="fixed bottom-6 right-6 z-40">
         <div className="relative">
           {showTooltip && (
-            <div className="absolute bottom-full right-0 mb-2 whitespace-nowrap bg-gray-800 text-white text-xs px-2 py-1 rounded shadow-lg">
+            <div className="absolute bottom-full right-0 mb-2 whitespace-nowrap bg-gray-800 text-white text-xs px-2 py-1 rounded-sm shadow-lg">
               回報問題
             </div>
           )}
@@ -95,7 +95,7 @@ const FeedbackButton: React.FC = () => {
             onClick={openModal}
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={() => setShowTooltip(false)}
-            className="w-12 h-12 bg-accent hover:bg-accent-hover text-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
+            className="w-12 h-12 bg-accent hover:bg-accent-hover text-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110 focus:outline-hidden focus:ring-2 focus:ring-accent focus:ring-offset-2"
             aria-label="回報問題"
           >
             <svg
@@ -127,7 +127,7 @@ const FeedbackButton: React.FC = () => {
             if (e.target === e.currentTarget) closeModal();
           }}
         >
-          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-xs" />
           <div
             ref={dialogRef}
             className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 space-y-4"
@@ -199,7 +199,7 @@ const FeedbackButton: React.FC = () => {
                     <select
                       value={category}
                       onChange={(e) => setCategory(e.target.value as FeedbackCategory)}
-                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white focus:outline-hidden focus:ring-2 focus:ring-accent focus:border-transparent"
                       disabled={modalState === 'submitting'}
                     >
                       {CATEGORY_OPTIONS.map((opt) => (
@@ -222,7 +222,7 @@ const FeedbackButton: React.FC = () => {
                       placeholder="請簡短描述問題..."
                       maxLength={200}
                       required
-                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-accent focus:border-transparent"
                       disabled={modalState === 'submitting'}
                     />
                   </div>
@@ -238,7 +238,7 @@ const FeedbackButton: React.FC = () => {
                       onChange={(e) => setDescription(e.target.value)}
                       placeholder="請描述問題的詳細情況、重現步驟等..."
                       rows={4}
-                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent resize-none"
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-accent focus:border-transparent resize-none"
                       disabled={modalState === 'submitting'}
                     />
                   </div>

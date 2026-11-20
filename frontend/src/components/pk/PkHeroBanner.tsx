@@ -73,7 +73,7 @@ interface PkHeroBannerProps {
 
 const PkHeroBanner: React.FC<PkHeroBannerProps> = ({ pkHumanEnabled = true }) => {
   return (
-    <div className="w-full overflow-hidden rounded-3xl bg-gradient-to-br from-[#8B7FD1] to-[#5B4DBD] shadow-sm">
+    <div className="w-full overflow-hidden rounded-3xl bg-linear-to-br from-[#8B7FD1] to-[#5B4DBD] shadow-xs">
       <div className="px-5 pb-4 pt-6 sm:px-8 sm:pt-8">
         {/* 七位文學家並排出場 — line-up composition, not a confrontation
             pose (no art direction asked for one side-vs-other split, and
@@ -96,7 +96,7 @@ const PkHeroBanner: React.FC<PkHeroBannerProps> = ({ pkHumanEnabled = true }) =>
             ))}
           </div>
           <div
-            className="pointer-events-none absolute inset-y-0 right-0 flex w-10 items-center justify-end bg-gradient-to-l from-[#5B4DBD] to-transparent sm:hidden"
+            className="pointer-events-none absolute inset-y-0 right-0 flex w-10 items-center justify-end bg-linear-to-l from-[#5B4DBD] to-transparent sm:hidden"
             aria-hidden="true"
           >
             <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 animate-pulse text-white/80">

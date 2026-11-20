@@ -103,13 +103,13 @@ export function isOverdue(dueDate: string | null, now: Date = new Date()): boole
 export function MatrixLegend() {
   return (
     <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-600" aria-label="狀態說明">
-      <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded bg-green-100 text-green-800 font-semibold">88</span>已交（分數）</span>
-      <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded bg-green-100 text-green-800 font-semibold">已交</span>沒有分數</span>
-      <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded bg-orange-100 text-orange-800 font-semibold">52</span>低於 60 分</span>
-      <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded border border-dashed border-amber-400 text-amber-700 text-xs">進行中</span></span>
+      <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded-sm bg-green-100 text-green-800 font-semibold">88</span>已交（分數）</span>
+      <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded-sm bg-green-100 text-green-800 font-semibold">已交</span>沒有分數</span>
+      <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded-sm bg-orange-100 text-orange-800 font-semibold">52</span>低於 60 分</span>
+      <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded-sm border border-dashed border-amber-400 text-amber-700 text-xs">進行中</span></span>
       <span className="flex items-center gap-1.5"><span className="text-gray-400">未開始</span></span>
-      <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded bg-red-50 text-red-600 border border-red-200 text-xs font-medium">逾期未交</span></span>
-      <span className="flex items-center gap-1.5" title="這份任務只指派給部分學生，這位學生不在名單內（跟幾時加入班級無關，全班任務不管何時加入都會收到）"><span className="px-2 py-0.5 rounded text-xs text-gray-400 bg-gray-100">未指派</span></span>
+      <span className="flex items-center gap-1.5"><span className="px-2 py-0.5 rounded-sm bg-red-50 text-red-600 border border-red-200 text-xs font-medium">逾期未交</span></span>
+      <span className="flex items-center gap-1.5" title="這份任務只指派給部分學生，這位學生不在名單內（跟幾時加入班級無關，全班任務不管何時加入都會收到）"><span className="px-2 py-0.5 rounded-sm text-xs text-gray-400 bg-gray-100">未指派</span></span>
     </div>
   );
 }
@@ -118,7 +118,7 @@ export function CellBadge({ cell, overdue = false }: { cell: Cell | undefined; o
   if (!cell || cell.state === 'not_assigned') {
     return (
       <span
-        className="inline-block whitespace-nowrap shrink-0 px-2 py-0.5 rounded text-xs text-gray-400 bg-[repeating-linear-gradient(45deg,#f3f4f6,#f3f4f6_4px,#e5e7eb_4px,#e5e7eb_8px)]"
+        className="inline-block whitespace-nowrap shrink-0 px-2 py-0.5 rounded-sm text-xs text-gray-400 bg-[repeating-linear-gradient(45deg,#f3f4f6,#f3f4f6_4px,#e5e7eb_4px,#e5e7eb_8px)]"
         title="這位學生不在這份任務的指派名單內（老師指派的是部分學生，不是全班；跟幾時加入班級無關）"
       >
         未指派
@@ -127,14 +127,14 @@ export function CellBadge({ cell, overdue = false }: { cell: Cell | undefined; o
   }
   if (cell.state === 'completed') {
     return (
-      <span className={`inline-block whitespace-nowrap shrink-0 min-w-10 px-2 py-0.5 rounded text-sm font-semibold ${scoreClass(cell.score)}`}>
+      <span className={`inline-block whitespace-nowrap shrink-0 min-w-10 px-2 py-0.5 rounded-sm text-sm font-semibold ${scoreClass(cell.score)}`}>
         {cell.score !== null ? Math.round(cell.score) : '已交'}
       </span>
     );
   }
   if (overdue && (cell.state === 'in_progress' || cell.state === 'not_started')) {
     return (
-      <span className="inline-block whitespace-nowrap shrink-0 px-2 py-0.5 rounded text-xs font-medium bg-red-50 text-red-600 border border-red-200">
+      <span className="inline-block whitespace-nowrap shrink-0 px-2 py-0.5 rounded-sm text-xs font-medium bg-red-50 text-red-600 border border-red-200">
         逾期未交{cell.state === 'in_progress' ? '・做到一半' : ''}
       </span>
     );
@@ -142,7 +142,7 @@ export function CellBadge({ cell, overdue = false }: { cell: Cell | undefined; o
   if (cell.state === 'in_progress') {
     const label = stepLabel(cell.current_step);
     return (
-      <span className="inline-block whitespace-nowrap shrink-0 px-2 py-0.5 rounded text-xs font-medium text-amber-700 border border-dashed border-amber-400">
+      <span className="inline-block whitespace-nowrap shrink-0 px-2 py-0.5 rounded-sm text-xs font-medium text-amber-700 border border-dashed border-amber-400">
         進行中{label ? `・${label}` : ''}
       </span>
     );

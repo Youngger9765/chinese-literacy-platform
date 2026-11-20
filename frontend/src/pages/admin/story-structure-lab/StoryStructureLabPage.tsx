@@ -55,7 +55,7 @@ function JsonPanel({ title, data }: { title: string; data: unknown }) {
       <header className="px-4 py-2 border-b border-gray-100 bg-gray-50 text-sm font-semibold text-gray-700">
         {title}
       </header>
-      <pre className="p-4 text-xs overflow-auto max-h-80 whitespace-pre-wrap break-words text-gray-800">
+      <pre className="p-4 text-xs overflow-auto max-h-80 whitespace-pre-wrap wrap-break-word text-gray-800">
         {JSON.stringify(data, null, 2)}
       </pre>
     </section>

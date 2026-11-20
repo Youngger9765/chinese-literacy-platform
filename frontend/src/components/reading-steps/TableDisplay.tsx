@@ -118,7 +118,7 @@ export const TableCard: React.FC<{ table: LessonTable; compact?: boolean }> = ({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="group relative block w-full text-left rounded-2xl border border-outline-variant bg-surface-container-lowest p-3 md:p-4 hover:border-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-accent transition-colors"
+        className="group relative block w-full text-left rounded-2xl border border-outline-variant bg-surface-container-lowest p-3 md:p-4 hover:border-accent focus:outline-hidden focus-visible:ring-2 focus-visible:ring-accent transition-colors"
         aria-label={`放大表格：${table.title}`}
       >
         <div className="flex items-center gap-2 mb-2">
@@ -144,7 +144,7 @@ export const TableCard: React.FC<{ table: LessonTable; compact?: boolean }> = ({
           role="dialog"
           aria-modal="true"
           aria-label={table.title}
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 md:p-8 animate-fade-in"
+          className="fixed inset-0 z-100 flex items-center justify-center bg-black/80 p-4 md:p-8 animate-fade-in"
           onClick={() => setOpen(false)}
         >
           <button
@@ -183,7 +183,7 @@ const TableDisplay: React.FC<TableDisplayProps> = ({ tables, layout = 'stacked' 
   return (
     <div
       data-testid="lesson-tables"
-      className={`bg-surface-container-lowest rounded-3xl shadow-editorial p-4 md:p-5 flex flex-col w-full min-h-0 ${layout === 'strip' ? 'flex-[2]' : ''}`}
+      className={`bg-surface-container-lowest rounded-3xl shadow-editorial p-4 md:p-5 flex flex-col w-full min-h-0 ${layout === 'strip' ? 'flex-2' : ''}`}
     >
       {/* #1706: header removed — collapsible parent shows icon/title/count. */}
       <div className="text-[11px] text-on-surface-variant text-right mb-2 shrink-0 hidden md:block">點表可放大</div>

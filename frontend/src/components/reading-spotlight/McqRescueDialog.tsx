@@ -315,7 +315,7 @@ const McqRescueDialog: React.FC<Props> = ({
   return (
     /* Backdrop */
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4"
       onClick={handleBackdropClick}
       aria-hidden="false"
     >
@@ -477,7 +477,7 @@ const McqRescueDialog: React.FC<Props> = ({
                           ? '正在連接 AI 助教...'
                           : 'AI 功能暫時關閉'
                     }
-                    className="flex-1 text-sm rounded-xl border border-gray-200 px-4 py-2.5 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-200 disabled:bg-gray-50 disabled:text-gray-400 transition-colors"
+                    className="flex-1 text-sm rounded-xl border border-gray-200 px-4 py-2.5 focus:outline-hidden focus:border-blue-400 focus:ring-1 focus:ring-blue-200 disabled:bg-gray-50 disabled:text-gray-400 transition-colors"
                     maxLength={500}
                     aria-label="回答輸入框"
                   />

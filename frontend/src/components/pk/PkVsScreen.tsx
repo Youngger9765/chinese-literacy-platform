@@ -81,12 +81,12 @@ const PkVsScreen: React.FC<PkVsScreenProps> = ({
 
         <div className={['flex flex-1 flex-col items-center gap-2', motionClass(reducedMotion, 'animate-card-in')].join(' ')}>
           {aiFigure ? (
-            <div className="relative flex h-32 w-28 items-end justify-center overflow-hidden rounded-2xl bg-gradient-to-b from-accent-bg to-transparent sm:h-48 sm:w-40 md:h-60 md:w-48">
+            <div className="relative flex h-32 w-28 items-end justify-center overflow-hidden rounded-2xl bg-linear-to-b from-accent-bg to-transparent sm:h-48 sm:w-40 md:h-60 md:w-48">
               <PkFigurePortrait
                 tier={aiFigure.tier}
                 expression="idle"
                 name={aiFigure.name}
-                className="h-full w-full object-contain drop-shadow"
+                className="h-full w-full object-contain drop-shadow-sm"
               />
             </div>
           ) : opponentAvatarUrl ? (
@@ -106,7 +106,7 @@ const PkVsScreen: React.FC<PkVsScreenProps> = ({
       <button
         type="button"
         onClick={onDone}
-        className="mt-10 rounded-full bg-accent px-8 py-3 text-base font-bold text-white shadow active:scale-95 transition-transform"
+        className="mt-10 rounded-full bg-accent px-8 py-3 text-base font-bold text-white shadow-sm active:scale-95 transition-transform"
       >
         開始對戰
       </button>

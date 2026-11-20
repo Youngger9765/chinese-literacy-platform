@@ -72,7 +72,7 @@ const FlagModal: React.FC<FlagModalProps> = ({
   return (
     /* Modal backdrop */
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-xs"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -106,7 +106,7 @@ const FlagModal: React.FC<FlagModalProps> = ({
 
         {reason === '其他原因' && (
           <textarea
-            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-400 mb-4"
+            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm resize-none focus:outline-hidden focus:ring-2 focus:ring-blue-400 mb-4"
             rows={3}
             maxLength={200}
             placeholder="請描述問題（最多 200 字）"
@@ -176,7 +176,7 @@ const CropModal: React.FC<CropModalProps> = ({
         <button
           type="button"
           onClick={onClose}
-          className="p-1.5 rounded-full hover:bg-gray-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
+          className="p-1.5 rounded-full hover:bg-gray-200 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gray-400"
           aria-label="關閉截圖"
         >
           <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -324,7 +324,7 @@ const AnswerCard: React.FC<AnswerCardProps> = ({ answer, onFlag, onViewCrop, fla
   };
 
   return (
-    <div className={`bg-white rounded-2xl border shadow-sm p-4 ${lowConfidence ? 'border-amber-300 ring-1 ring-amber-200' : 'border-gray-100'}`}>
+    <div className={`bg-white rounded-2xl border shadow-xs p-4 ${lowConfidence ? 'border-amber-300 ring-1 ring-amber-200' : 'border-gray-100'}`}>
       {/* Header row */}
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex-1 min-w-0">
@@ -377,13 +377,13 @@ const AnswerCard: React.FC<AnswerCardProps> = ({ answer, onFlag, onViewCrop, fla
       <div className="grid grid-cols-2 gap-3 mb-3">
         <div className="bg-gray-50 rounded-xl p-3">
           <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-1">你的答案</p>
-          <p className="text-sm font-medium text-gray-900 break-words">
+          <p className="text-sm font-medium text-gray-900 wrap-break-word">
             {answer.student_answer || '（未作答）'}
           </p>
         </div>
         <div className={`rounded-xl p-3 ${answer.score >= 0.8 ? 'bg-green-50' : 'bg-red-50'}`}>
           <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-1">正確答案</p>
-          <p className="text-sm font-medium text-gray-900 break-words">
+          <p className="text-sm font-medium text-gray-900 wrap-break-word">
             {answer.correct_answer}
           </p>
         </div>
@@ -543,7 +543,7 @@ const OmoResultPage: React.FC<OmoResultPageProps> = ({
   return (
     <div className="flex flex-col gap-5 px-4 py-6 max-w-lg mx-auto">
       {/* Overall score banner */}
-      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-5 text-center">
+      <div className="bg-linear-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-5 text-center">
         <div className="text-4xl mb-2" aria-hidden="true">{scoreEmoji}</div>
         {lessonTitle && (
           <p className="text-sm text-blue-600 font-medium mb-1">{lessonTitle}</p>

@@ -6,14 +6,12 @@
     "Each entry MUST include a justification comment in the _justifications section"
   ],
   "npm": [
-    "1240992",
     "GHSA-fc5q-39xc-vjpf"
   ],
   "pip": [],
   "_justifications": {
     "_example_npm_1234567": "esbuild dev-only advisory, not exploitable in production build output",
     "_example_CVE-2023-99999": "affects feature X which we do not use; vendor patch not yet available",
-    "1240992": "braces GHSA-vfj7-8cjw-p6xm (stack-exhaustion DoS on deeply nested patterns): every braces release is affected (range <=3.0.3, no patched version). Only reached via tailwindcss@3.4.19 (latest v3) -> chokidar/micromatch/fast-glob, all devDependencies — `npm ls braces --omit=dev` is empty and `npm audit --omit=dev` has 0 high. Runs only at build time over the glob patterns in our own tailwind.config content[], never on user input, and is not in the shipped bundle. Only upstream fix path is the tailwindcss v4 major migration (config/CSS rewrite, out of scope for a deps chore). Re-evaluate when braces ships a fix or on the tailwind v4 migration. Filed 2026-10-08 (#3340).",
-    "GHSA-fc5q-39xc-vjpf": "picomatch ReDoS through single-branch repeated extglobs (CWE-1333): every picomatch release is affected (range <=4.0.7, first_patched_version null per GitHub advisory API on 2026-11-18). Only reached via devDependencies (tailwindcss@3 -> chokidar/micromatch, vite, vitest, tinyglobby) — `npm ls picomatch --omit=dev` is empty and `npm audit --omit=dev` reports 0 high. It only matches glob patterns from our own build/test config at build or dev time, never user input, and is not in the shipped bundle. Same shape as 1240992 (braces). Re-evaluate when picomatch ships a fix. Filed 2026-11-18; staging push audit has been red on this since 2026-11-18T02:05Z."
+    "GHSA-fc5q-39xc-vjpf": "picomatch ReDoS through single-branch repeated extglobs (CWE-1333): every picomatch release is affected (range <=4.0.7, first_patched_version null per GitHub advisory API on 2026-11-18). Only reached via devDependencies (vite, vitest, tinyglobby; the tailwindcss@3 path is gone since the v4 migration) — `npm ls picomatch --omit=dev` is empty and `npm audit --omit=dev` reports 0 high. It only matches glob patterns from our own build/test config at build or dev time, never user input, and is not in the shipped bundle. Re-evaluate when picomatch ships a fix. Filed 2026-11-18; staging push audit has been red on this since 2026-11-18T02:05Z."
   }
 }

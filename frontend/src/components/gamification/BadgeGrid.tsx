@@ -56,7 +56,7 @@ const BadgeCard: React.FC<BadgeCardProps> = ({ badge }) => {
 
   return (
     <div
-      className={`relative flex flex-col items-center gap-1 p-3 rounded-2xl border-2 shadow-sm transition-all ${colorClass} ${
+      className={`relative flex flex-col items-center gap-1 p-3 rounded-2xl border-2 shadow-xs transition-all ${colorClass} ${
         badge.unlocked ? 'opacity-100' : 'opacity-40 grayscale'
       }`}
       title={badge.description}

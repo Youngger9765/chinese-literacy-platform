@@ -108,7 +108,7 @@ const IapAllowlistPanel: React.FC = () => {
         {isLoading && !error && (
           <div className="space-y-3">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="h-5 bg-gray-200 animate-pulse rounded w-2/3" />
+              <div key={i} className="h-5 bg-gray-200 animate-pulse rounded-sm w-2/3" />
             ))}
           </div>
         )}

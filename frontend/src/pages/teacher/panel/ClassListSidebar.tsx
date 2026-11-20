@@ -42,10 +42,10 @@ const ClassListSidebar: React.FC<ClassListSidebarProps> = ({ currentId, onSwitch
     // Scoped to this one list; every other active-state indicator in the app
     // keeps the indigo brand accent.
     const className = isInactive
-      ? `w-full text-left px-4 py-3 text-base font-normal transition-colors cursor-pointer break-words ${
+      ? `w-full text-left px-4 py-3 text-base font-normal transition-colors cursor-pointer wrap-break-word ${
           isCurrent ? 'bg-gray-50 text-gray-400' : 'text-gray-400 hover:bg-gray-50'
         }`
-      : `w-full text-left px-4 py-3 text-base font-medium transition-colors cursor-pointer break-words border-r-4 ${
+      : `w-full text-left px-4 py-3 text-base font-medium transition-colors cursor-pointer wrap-break-word border-r-4 ${
           isCurrent ? 'bg-gray-100 text-gray-900 border-[#FFA500]' : 'text-gray-700 hover:bg-gray-50 border-transparent'
         }`;
 
@@ -88,7 +88,7 @@ const ClassListSidebar: React.FC<ClassListSidebarProps> = ({ currentId, onSwitch
             type="button"
             onClick={() => setShowInactive((isOpen) => !isOpen)}
             aria-expanded={showInactive}
-            className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded cursor-pointer"
+            className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-sm cursor-pointer"
           >
             已停用 ({inactiveClassrooms.length})
           </button>

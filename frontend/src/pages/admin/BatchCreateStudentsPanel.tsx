@@ -141,7 +141,7 @@ const BatchCreateStudentsPanel: React.FC<BatchCreateStudentsPanelProps> = ({
               value={batchInput}
               onChange={(e) => onBatchInputChange(e.target.value)}
               placeholder={'王小明 1\n李小華 2\n陳大文 3'}
-              className="w-full min-h-[120px] px-3 py-2 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors resize-y"
+              className="w-full min-h-[120px] px-3 py-2 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm font-mono focus:outline-hidden focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors resize-y"
             />
           </div>
 

@@ -27,7 +27,7 @@ const AssignmentWidget: React.FC<AssignmentWidgetProps> = ({
         p-4 flex items-center gap-3
         transition-all duration-150
         hover:shadow-md hover:border-accent/40 active:scale-[0.99]
-        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
+        focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
       "
       aria-label="查看班級作業"
     >
@@ -57,7 +57,7 @@ const AssignmentWidget: React.FC<AssignmentWidgetProps> = ({
         p-4 flex items-center gap-3
         transition-all duration-150
         hover:shadow-md hover:border-accent/40 active:scale-[0.99]
-        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
+        focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
       "
       aria-label="前往圖書館"
     >

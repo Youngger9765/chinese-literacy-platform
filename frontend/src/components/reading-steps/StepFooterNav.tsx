@@ -66,7 +66,7 @@ const StepFooterNav: React.FC = () => {
     <div
       role="navigation"
       aria-label="步驟底部導航"
-      className="shrink-0 z-40 h-16 flex items-center justify-between px-3 md:px-6 gap-2 bg-white/95 backdrop-blur-sm border-t border-gray-200 shadow-[0_-2px_12px_rgba(0,0,0,0.06)]"
+      className="shrink-0 z-40 h-16 flex items-center justify-between px-3 md:px-6 gap-2 bg-white/95 backdrop-blur-xs border-t border-gray-200 shadow-[0_-2px_12px_rgba(0,0,0,0.06)]"
     >
       {/* Left: Previous step */}
       <button
@@ -74,7 +74,7 @@ const StepFooterNav: React.FC = () => {
         onClick={() => handleNav(prevStep)}
         disabled={!prevStep}
         aria-label={prevStep ? `上一步：${prevStep.label}` : '已是第一步'}
-        className="flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 disabled:opacity-30 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent whitespace-nowrap"
+        className="flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 disabled:opacity-30 disabled:cursor-not-allowed transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent whitespace-nowrap"
       >
         <span className="material-symbols-outlined text-base leading-none">chevron_left</span>
         <span className="hidden sm:inline">上一步</span>
@@ -117,7 +117,7 @@ const StepFooterNav: React.FC = () => {
         onClick={() => handleNav(nextStep)}
         disabled={!nextStep}
         aria-label={nextStep ? `下一步：${nextStep.label}` : '已是最後一步'}
-        className="flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-semibold bg-accent text-white hover:bg-accent-hover disabled:opacity-30 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 whitespace-nowrap active:scale-95"
+        className="flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-semibold bg-accent text-white hover:bg-accent-hover disabled:opacity-30 disabled:cursor-not-allowed transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 whitespace-nowrap active:scale-95"
       >
         <span className="hidden sm:inline">下一步</span>
         <span className="material-symbols-outlined text-base leading-none">chevron_right</span>

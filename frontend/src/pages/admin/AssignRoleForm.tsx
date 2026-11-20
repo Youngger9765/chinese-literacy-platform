@@ -144,7 +144,7 @@ const AssignRoleForm: React.FC<AssignRoleFormProps> = ({ userId, onSuccess, onCa
           id="assign-role-select"
           value={selectedRoleName}
           onChange={(e) => setSelectedRoleName(e.target.value)}
-          className="w-full h-9 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
+          className="w-full h-9 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white text-sm focus:outline-hidden focus:ring-2 focus:ring-accent focus:border-transparent"
         >
           <option value="">請選擇角色</option>
           {availableRoles.map((role) => (
@@ -165,7 +165,7 @@ const AssignRoleForm: React.FC<AssignRoleFormProps> = ({ userId, onSuccess, onCa
             id="assign-scope-org"
             value={scopeId}
             onChange={(e) => setScopeId(e.target.value)}
-            className="w-full h-9 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
+            className="w-full h-9 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white text-sm focus:outline-hidden focus:ring-2 focus:ring-accent focus:border-transparent"
           >
             <option value="">請選擇機構</option>
             {organizations.map((org) => (
@@ -187,7 +187,7 @@ const AssignRoleForm: React.FC<AssignRoleFormProps> = ({ userId, onSuccess, onCa
             id="assign-scope-school"
             value={scopeId}
             onChange={(e) => setScopeId(e.target.value)}
-            className="w-full h-9 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
+            className="w-full h-9 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white text-sm focus:outline-hidden focus:ring-2 focus:ring-accent focus:border-transparent"
           >
             <option value="">請選擇學校</option>
             {schools.map((school) => (

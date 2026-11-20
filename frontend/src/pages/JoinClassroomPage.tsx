@@ -165,7 +165,7 @@ const JoinClassroomPage: React.FC = () => {
         {toast}
         <div className="w-full max-w-sm">
           {shellHeader(isAlready ? '你已經在這個班級了' : '加入成功')}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-2xl shadow-xs border border-gray-200 p-6">
             <div
               className={
                 isAlready
@@ -191,7 +191,7 @@ const JoinClassroomPage: React.FC = () => {
         {toast}
         <div className="w-full max-w-sm">
           {shellHeader('確認要加入的班級')}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-4">
+          <div className="bg-white rounded-2xl shadow-xs border border-gray-200 p-6 space-y-4">
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
                 {error}
@@ -238,7 +238,7 @@ const JoinClassroomPage: React.FC = () => {
 
         <form
           onSubmit={handleManualSubmit}
-          className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-4"
+          className="bg-white rounded-2xl shadow-xs border border-gray-200 p-6 space-y-4"
         >
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
@@ -258,7 +258,7 @@ const JoinClassroomPage: React.FC = () => {
               placeholder="輸入 6 碼加入代碼"
               autoComplete="off"
               autoFocus
-              className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm tracking-widest font-mono focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+              className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm tracking-widest font-mono focus:outline-hidden focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
             />
             <p className="text-xs text-gray-400 mt-1">由英文字母與數字組成，共 6 碼</p>
           </div>

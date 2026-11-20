@@ -293,7 +293,7 @@ const StudentPkMatch: React.FC = () => {
               bare text floating on the page background — PRD §16.5/§18 #9
               asks for a "clearly readable question card" at 390px, and a
               card is also a basic game-UI affordance a plain <p> isn't. */}
-          <div className="w-full max-w-md rounded-2xl bg-surface-container-lowest px-5 py-4 shadow-sm">
+          <div className="w-full max-w-md rounded-2xl bg-surface-container-lowest px-5 py-4 shadow-xs">
             <p className="text-center text-lg font-medium text-on-surface">
               <StemWithTarget
                 stem={round.stem}

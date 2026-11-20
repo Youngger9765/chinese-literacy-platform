@@ -78,7 +78,7 @@ const ParagraphBlockView: React.FC<Props> = ({ text, lineNumber }) => {
         </span>
       )}
       <p
-        className={`text-lg md:text-xl text-on-surface leading-[2rem] md:leading-[2.2rem] ${
+        className={`text-lg md:text-xl text-on-surface leading-8 md:leading-[2.2rem] ${
           zhuyinActive ? 'tracking-[0.15em]' : ''
         }`}
         {...(isMarkup ? { dangerouslySetInnerHTML: { __html: safeMarkup } } : {})}

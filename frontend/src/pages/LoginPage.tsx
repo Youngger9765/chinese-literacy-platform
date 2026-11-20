@@ -159,7 +159,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
         {/* Form Card */}
         <form
           onSubmit={handleSubmit}
-          className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-4"
+          className="bg-white rounded-2xl shadow-xs border border-gray-200 p-6 space-y-4"
         >
           {/* Error Message */}
           {error && (
@@ -180,7 +180,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="email@example.com 或 ABC1231"
-              className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+              className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-hidden focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
             />
           </div>
 
@@ -196,7 +196,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="輸入密碼"
-              className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+              className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-hidden focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
             />
           </div>
 

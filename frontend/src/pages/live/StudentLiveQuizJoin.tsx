@@ -118,7 +118,7 @@ const StudentLiveQuizJoin: React.FC = () => {
           type="button"
           disabled={!complete}
           onClick={() => setConfirming(true)}
-          className="w-full max-w-xs rounded-xl bg-accent px-4 py-3 text-base font-semibold text-white shadow-sm disabled:opacity-40"
+          className="w-full max-w-xs rounded-xl bg-accent px-4 py-3 text-base font-semibold text-white shadow-xs disabled:opacity-40"
         >
           下一步
         </button>

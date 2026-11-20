@@ -216,7 +216,7 @@ const StoryTagEditor: React.FC<StoryTagEditorProps> = ({
                   {customTags.map((tag) => (
                     <span
                       key={tag}
-                      className="inline-flex items-center gap-1 text-xs bg-blue-50 text-blue-600 border border-blue-100 px-2 py-0.5 rounded"
+                      className="inline-flex items-center gap-1 text-xs bg-blue-50 text-blue-600 border border-blue-100 px-2 py-0.5 rounded-sm"
                     >
                       {tag}
                       <button
@@ -247,7 +247,7 @@ const StoryTagEditor: React.FC<StoryTagEditorProps> = ({
                     onKeyDown={handleTagInputKeyDown}
                     placeholder="輸入標籤後按 Enter 或點「新增」"
                     maxLength={MAX_TAG_LENGTH}
-                    className="flex-1 text-sm px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#19A696] focus:border-transparent"
+                    className="flex-1 text-sm px-3 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-[#19A696] focus:border-transparent"
                   />
                   <button
                     onClick={handleAddTag}

@@ -64,8 +64,8 @@ const ComprehensionScoreCard: React.FC<ComprehensionScoreCardProps> = ({
         <div className="flex items-center gap-3 mb-6">
           <div className="w-16 h-16 rounded-full bg-gray-200" />
           <div className="space-y-2">
-            <div className="h-4 w-32 bg-gray-200 rounded" />
-            <div className="h-3 w-48 bg-gray-200 rounded" />
+            <div className="h-4 w-32 bg-gray-200 rounded-sm" />
+            <div className="h-3 w-48 bg-gray-200 rounded-sm" />
           </div>
         </div>
         <div className="space-y-4">
@@ -88,7 +88,7 @@ const ComprehensionScoreCard: React.FC<ComprehensionScoreCardProps> = ({
   return (
     <div className="rounded-2xl border border-slate-200 bg-surface overflow-hidden">
       {/* Header with overall score */}
-      <div className="bg-gradient-to-r from-accent/5 to-violet-50 px-6 py-5 border-b border-slate-100">
+      <div className="bg-linear-to-r from-accent/5 to-violet-50 px-6 py-5 border-b border-slate-100">
         <div className="flex items-center gap-4">
           {/* Score circle — teacher view only; student view just shows title + encouragement */}
           {!hideScores && (

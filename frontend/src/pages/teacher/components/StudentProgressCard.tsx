@@ -102,7 +102,7 @@ export const StudentProgressCard: React.FC<StudentProgressCardProps> = ({
       <div>
         <span className="text-xs text-gray-400">練習次數</span>
         <p>
-          <span className={`inline-block min-w-[2rem] px-2 py-0.5 rounded-full text-xs font-medium ${
+          <span className={`inline-block min-w-8 px-2 py-0.5 rounded-full text-xs font-medium ${
             student.total_sessions > 0 ? 'bg-[#19A696]/10 text-[#11806F]' : 'bg-gray-100 text-gray-500'
           }`}>{student.total_sessions}</span>
         </p>

@@ -87,10 +87,10 @@ const SectionCard: React.FC<{ title: string; children: React.ReactNode; icon?: s
 );
 
 const inputClass =
-  'w-full border border-surface-dim bg-surface-container-lowest rounded-xl px-3 py-2.5 text-on-surface focus:outline-none focus:ring-2 focus:ring-[#19A696]/40 focus:border-[#19A696] transition-shadow';
+  'w-full border border-surface-dim bg-surface-container-lowest rounded-xl px-3 py-2.5 text-on-surface focus:outline-hidden focus:ring-2 focus:ring-[#19A696]/40 focus:border-[#19A696] transition-shadow';
 
 const primaryButtonClass =
-  'bg-[#11806F] hover:bg-[#0E7366] text-white rounded-xl px-5 py-2.5 text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-sm';
+  'bg-[#11806F] hover:bg-[#0E7366] text-white rounded-xl px-5 py-2.5 text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-xs';
 
 const secondaryButtonClass =
   'bg-surface-container text-on-surface rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-surface-container-high transition-colors';

@@ -107,7 +107,7 @@ export function renderLineWithDiff(
   });
 
   return (
-    <p className={`leading-[4rem] ${extraClass}`} style={{ fontSize: fontSizePx }}>
+    <p className={`leading-16 ${extraClass}`} style={{ fontSize: fontSizePx }}>
       {chars}
     </p>
   );

@@ -236,7 +236,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({
 
   // ────────────────────────────────────────────────────────────────────────
   return (
-    <div className="max-w-4xl mx-auto space-y-6 animate-fadeIn">
+    <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
       {/* Repeated error alert modal (Issue #248) */}
       {showRepeatedAlert && repeatedAlerts.length > 0 && (
         <RepeatedErrorAlertModal
@@ -494,7 +494,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({
       )}
 
       {/* CTA */}
-      <div className="bg-gradient-to-r from-accent to-violet-600 rounded-3xl p-8 text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
+      <div className="bg-linear-to-r from-accent to-violet-600 rounded-3xl p-8 text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
         <div>
           <h3 className="text-2xl font-bold">準備好讀下一個故事了嗎？</h3>
           <p className="text-white/80">每天進步一點點，你就會變成閱讀小達人！</p>

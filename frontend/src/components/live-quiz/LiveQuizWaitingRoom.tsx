@@ -131,7 +131,7 @@ const LiveQuizWaitingRoom: React.FC<LiveQuizWaitingRoomProps> = ({ myName, playe
           no layout engine, can't assert the visual effect itself). */}
       <div
         data-testid="lobby-card"
-        className="mt-4 flex w-full max-w-3xl flex-1 flex-col overflow-hidden rounded-3xl bg-gradient-to-br from-[#F0624D] to-[#D63B2F] shadow-sm"
+        className="mt-4 flex w-full max-w-3xl flex-1 flex-col overflow-hidden rounded-3xl bg-linear-to-br from-[#F0624D] to-[#D63B2F] shadow-xs"
       >
         <div className="relative flex flex-1 flex-col items-center justify-center gap-5 px-5 pb-6 pt-8 sm:px-8">
           {/* #3761: "等待動畫（例如呼吸光暈或倒數感的動效，尊重 reduced-

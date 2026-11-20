@@ -212,7 +212,7 @@ export const WritePage: React.FC = () => {
           placeholder="輸入一個字"
           maxLength={1}
           aria-describedby="write-hint"
-          className="w-24 h-12 text-center text-2xl bg-white border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:border-accent focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+          className="w-24 h-12 text-center text-2xl bg-white border border-gray-200 rounded-lg text-gray-900 focus:outline-hidden focus:border-accent focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
         />
         <button
           type="button"
@@ -221,7 +221,7 @@ export const WritePage: React.FC = () => {
           }}
           disabled={!writeInput}
           aria-disabled={!writeInput}
-          className="px-6 h-12 bg-accent hover:bg-accent-hover disabled:bg-gray-300 disabled:text-gray-400 text-white rounded-lg font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+          className="px-6 h-12 bg-accent hover:bg-accent-hover disabled:bg-gray-300 disabled:text-gray-400 text-white rounded-lg font-bold transition-all focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
         >
           開始
         </button>
@@ -237,7 +237,7 @@ export const WritePage: React.FC = () => {
             type="button"
             onClick={() => setWritingChar(ch)}
             aria-label={`練習「${ch}」字`}
-            className="w-12 h-12 bg-gray-100 hover:bg-gray-200 text-gray-900 text-xl rounded-lg border border-gray-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+            className="w-12 h-12 bg-gray-100 hover:bg-gray-200 text-gray-900 text-xl rounded-lg border border-gray-200 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
           >
             {ch}
           </button>

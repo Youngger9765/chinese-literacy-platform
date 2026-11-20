@@ -87,7 +87,7 @@ const ReadingGoalsForm: React.FC<ReadingGoalsFormProps> = ({ value, onChange, gr
                 }
                 className={`px-3 py-1 rounded-full text-sm border transition-all ${
                   isSelected
-                    ? 'border-blue-700 bg-blue-700 text-white font-bold shadow-sm scale-105'
+                    ? 'border-blue-700 bg-blue-700 text-white font-bold shadow-xs scale-105'
                     : 'border-gray-300 bg-white text-gray-600 font-medium hover:border-blue-400 hover:scale-102'
                 }`}
               >
@@ -138,7 +138,7 @@ const ReadingGoalsForm: React.FC<ReadingGoalsFormProps> = ({ value, onChange, gr
                 const n = Number(e.target.value);
                 onChange({ ...value, target_cpm: e.target.value === '' ? null : n });
               }}
-              className="w-16 text-sm border border-gray-200 rounded px-2 py-1 text-center"
+              className="w-16 text-sm border border-gray-200 rounded-sm px-2 py-1 text-center"
             />
             <span className="text-xs text-gray-400">字/分</span>
           </div>
@@ -181,7 +181,7 @@ const ReadingGoalsForm: React.FC<ReadingGoalsFormProps> = ({ value, onChange, gr
                 const n = Number(e.target.value);
                 onChange({ ...value, target_accuracy: e.target.value === '' ? null : n });
               }}
-              className="w-16 text-sm border border-gray-200 rounded px-2 py-1 text-center"
+              className="w-16 text-sm border border-gray-200 rounded-sm px-2 py-1 text-center"
             />
             <span className="text-xs text-gray-400">%</span>
           </div>

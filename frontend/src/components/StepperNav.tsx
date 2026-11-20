@@ -166,7 +166,7 @@ const StepperNav: React.FC<StepperNavProps> = ({
               disabled={isDisabled}
               aria-current={isActive ? 'step' : undefined}
               aria-label={`步驟 ${stepDef.step}：${stepDef.label}（${isActive ? '目前' : isDisabled ? '未解鎖' : status === 'completed' ? '已完成' : '未完成'}）`}
-              className={`flex items-center gap-1.5 px-1.5 py-1.5 rounded-lg transition-all whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
+              className={`flex items-center gap-1.5 px-1.5 py-1.5 rounded-lg transition-all whitespace-nowrap focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
                 isActive
                   ? `${categoryColors.activeBg} ${categoryColors.text}`
                   : isDisabled

@@ -87,7 +87,7 @@ const MyTextFormModal: React.FC<MyTextFormModalProps> = ({
                 onChange={(e) => onFormChange('title', e.target.value)}
                 placeholder="請輸入課文標題"
                 autoFocus
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-400"
                 required
               />
             </div>
@@ -97,7 +97,7 @@ const MyTextFormModal: React.FC<MyTextFormModalProps> = ({
               <select
                 value={form.grade}
                 onChange={(e) => onFormChange('grade', Number(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-400"
               >
                 {GRADES.map((g) => (
                   <option key={g} value={g}>{g} 年級</option>
@@ -110,7 +110,7 @@ const MyTextFormModal: React.FC<MyTextFormModalProps> = ({
               <select
                 value={form.genre}
                 onChange={(e) => onFormChange('genre', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-400"
               >
                 {GENRES.map((g) => (
                   <option key={g} value={g}>{g}</option>
@@ -123,7 +123,7 @@ const MyTextFormModal: React.FC<MyTextFormModalProps> = ({
               <select
                 value={form.text_type}
                 onChange={(e) => onFormChange('text_type', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-400"
               >
                 {TEXT_TYPES.map((t) => (
                   <option key={t.value} value={t.value}>{t.label}</option>
@@ -138,7 +138,7 @@ const MyTextFormModal: React.FC<MyTextFormModalProps> = ({
                 value={form.reading_strategy}
                 onChange={(e) => onFormChange('reading_strategy', e.target.value)}
                 placeholder="例：找主旨、推論、比較"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-400"
               />
             </div>
           </div>
@@ -161,7 +161,7 @@ const MyTextFormModal: React.FC<MyTextFormModalProps> = ({
                     onChange={(e) => onUpdateParagraph(idx, e.target.value)}
                     placeholder={`第 ${idx + 1} 段內容...`}
                     rows={3}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-y"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-400 resize-y"
                   />
                   {form.paragraphs.length > 1 && (
                     <button
@@ -196,21 +196,21 @@ const MyTextFormModal: React.FC<MyTextFormModalProps> = ({
                       value={vocab.word}
                       onChange={(e) => onUpdateVocab(idx, 'word', e.target.value)}
                       placeholder="詞語"
-                      className="w-24 px-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                      className="w-24 px-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-400"
                     />
                     <input
                       type="text"
                       value={vocab.definition}
                       onChange={(e) => onUpdateVocab(idx, 'definition', e.target.value)}
                       placeholder="解釋"
-                      className="flex-1 px-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                      className="flex-1 px-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-400"
                     />
                     <input
                       type="text"
                       value={vocab.note}
                       onChange={(e) => onUpdateVocab(idx, 'note', e.target.value)}
                       placeholder="備註（可選）"
-                      className="w-28 px-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                      className="w-28 px-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-400"
                     />
                     <button
                       type="button"

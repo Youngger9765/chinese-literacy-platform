@@ -31,25 +31,25 @@ function StatusBadge({ status }: { status: string }) {
   switch (status) {
     case 'in_progress':
       return (
-        <span className="inline-block px-1.5 py-0.5 rounded text-xs font-medium bg-accent/10 text-accent">
+        <span className="inline-block px-1.5 py-0.5 rounded-sm text-xs font-medium bg-accent/10 text-accent">
           進行中
         </span>
       );
     case 'submitted':
       return (
-        <span className="inline-block px-1.5 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-700">
+        <span className="inline-block px-1.5 py-0.5 rounded-sm text-xs font-medium bg-indigo-100 text-indigo-700">
           已完成
         </span>
       );
     case 'graded':
       return (
-        <span className="inline-block px-1.5 py-0.5 rounded text-xs font-medium bg-tertiary/10 text-tertiary">
+        <span className="inline-block px-1.5 py-0.5 rounded-sm text-xs font-medium bg-tertiary/10 text-tertiary">
           已批改
         </span>
       );
     default:
       return (
-        <span className="inline-block px-1.5 py-0.5 rounded text-xs font-medium bg-surface-container text-on-surface-variant">
+        <span className="inline-block px-1.5 py-0.5 rounded-sm text-xs font-medium bg-surface-container text-on-surface-variant">
           待完成
         </span>
       );
@@ -156,7 +156,7 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({
               >
                 截止：{formatDate(a.due_date)}
                 {isOverdue(a.due_date) && (
-                  <span className="ml-1 inline-block px-1 py-0.5 rounded text-xs font-medium bg-error/10 text-error">
+                  <span className="ml-1 inline-block px-1 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error">
                     已逾期
                   </span>
                 )}

@@ -67,9 +67,9 @@ const PkResultScreen: React.FC<PkResultScreenProps> = ({ result, myName, opponen
       {result.outcome === 'win' && (
         <>
           <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden="true">
-            <div className="absolute left-1/3 top-0 h-3 w-3 rounded-sm bg-accent animate-confetti-drop-1" />
-            <div className="absolute left-1/2 top-0 h-3 w-3 rounded-sm bg-tertiary-container animate-confetti-drop-2" />
-            <div className="absolute left-2/3 top-0 h-3 w-3 rounded-sm bg-success animate-confetti-drop-3" />
+            <div className="absolute left-1/3 top-0 h-3 w-3 rounded-xs bg-accent animate-confetti-drop-1" />
+            <div className="absolute left-1/2 top-0 h-3 w-3 rounded-xs bg-tertiary-container animate-confetti-drop-2" />
+            <div className="absolute left-2/3 top-0 h-3 w-3 rounded-xs bg-success animate-confetti-drop-3" />
           </div>
         </>
       )}

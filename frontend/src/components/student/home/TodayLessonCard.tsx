@@ -88,16 +88,16 @@ export const BookJacketCover: React.FC<BookJacketCoverProps> = ({ storyId, title
   return (
     <div
       className="
-        relative w-[160px] sm:w-[200px] aspect-[200/270] shrink-0
+        relative w-[160px] sm:w-[200px] aspect-200/270 shrink-0
         rounded-l-sm rounded-r-md overflow-hidden
-        bg-gradient-to-br from-[#F7B76B] via-[#F59E42] to-[#E8841C]
+        bg-linear-to-br from-[#F7B76B] via-[#F59E42] to-[#E8841C]
         shadow-[4px_6px_16px_rgba(245,158,66,0.3),-2px_0_0_rgba(0,0,0,0.05)]
       "
       aria-hidden="true"
     >
       {/* Spine shadow line */}
       <div
-        className="absolute inset-y-0 left-0 w-2 bg-gradient-to-r from-black/15 to-transparent"
+        className="absolute inset-y-0 left-0 w-2 bg-linear-to-r from-black/15 to-transparent"
         aria-hidden="true"
       />
 
@@ -115,7 +115,7 @@ export const BookJacketCover: React.FC<BookJacketCoverProps> = ({ storyId, title
       {/* Text fallback (shown only if image absent or failed) */}
       {(!imgSrc || !imgOk) && (
         <div className="absolute inset-0 p-4 sm:p-5 flex flex-col justify-between text-white">
-          <div className="text-xl sm:text-2xl font-bold leading-tight tracking-tight line-clamp-4">
+          <div className="text-xl sm:text-2xl font-bold leading-tight sm:leading-8 tracking-tight line-clamp-4">
             {title}
           </div>
           <div className="text-[10px] sm:text-xs opacity-90 tracking-widest">今 日 課 文</div>
@@ -187,10 +187,10 @@ export const BookJacketHero: React.FC<BookJacketHeroProps> = ({ assignment, onCo
             bg-accent hover:bg-accent-hover
             text-white font-bold text-sm sm:text-base
             rounded-xl
-            shadow-sm hover:shadow-md
+            shadow-xs hover:shadow-md
             transition-all duration-150
             active:scale-[0.98]
-            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2
+            focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2
           "
           aria-label={`${ctaLabel}「${assignment.story_title}」`}
         >
@@ -222,15 +222,15 @@ export const ClassroomFallbackHero: React.FC<ClassroomFallbackHeroProps> = ({ cl
       flex items-center gap-4
       shadow-editorial
       hover:shadow-md hover:border-accent/40 transition-all duration-150
-      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2
+      focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2
     "
     aria-label={`前往${classroom.name}`}
   >
     <div
       className="
         w-16 h-20 shrink-0
-        rounded-sm
-        bg-gradient-to-br from-[#F7B76B] via-[#F59E42] to-[#E8841C]
+        rounded-xs
+        bg-linear-to-br from-[#F7B76B] via-[#F59E42] to-[#E8841C]
         flex items-center justify-center
         shadow-md
       "
@@ -242,7 +242,7 @@ export const ClassroomFallbackHero: React.FC<ClassroomFallbackHeroProps> = ({ cl
       <div className="text-[11px] font-bold tracking-widest text-tertiary-fixed-dim uppercase mb-1">
         繼 續 學 習
       </div>
-      <h1 className="text-xl sm:text-2xl font-bold font-headline text-on-surface leading-tight truncate">
+      <h1 className="text-xl sm:text-2xl font-bold font-headline text-on-surface leading-tight sm:leading-8 truncate">
         {classroom.name}
       </h1>
       <p className="text-sm text-on-surface-variant mt-0.5">

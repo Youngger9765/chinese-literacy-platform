@@ -77,7 +77,7 @@ const PrivacyPolicy: React.FC = () => {
   if (error || !policy) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-amber-50 p-6">
-        <div className="bg-white rounded-xl shadow p-8 max-w-md text-center">
+        <div className="bg-white rounded-xl shadow-sm p-8 max-w-md text-center">
           <p className="text-red-500 mb-4">{error ?? '發生未知錯誤'}</p>
           <button
             onClick={() => navigate(-1)}
@@ -94,7 +94,7 @@ const PrivacyPolicy: React.FC = () => {
     <div className="min-h-screen bg-amber-50 py-10 px-4">
       <div className="max-w-3xl mx-auto">
         {/* Header card */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-6">
+        <div className="bg-white rounded-2xl shadow-xs border border-gray-100 p-8 mb-6">
           <div className="flex items-center gap-3 mb-4">
             <button
               onClick={() => navigate(-1)}
@@ -148,7 +148,7 @@ const PrivacyPolicy: React.FC = () => {
             return (
               <section
                 key={key}
-                className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6"
+                className="bg-white rounded-2xl shadow-xs border border-gray-100 p-6"
               >
                 <h2 className="text-base font-bold text-gray-900 mb-3">{section.title}</h2>
                 <PolicyContent text={section.content} />

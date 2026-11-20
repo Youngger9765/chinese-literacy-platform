@@ -121,9 +121,9 @@ const HistoryCard: React.FC<{
     <button
       type="button"
       onClick={onClick}
-      className="w-full flex items-stretch gap-3 p-3 bg-white rounded-2xl border border-gray-200 shadow-sm
+      className="w-full flex items-stretch gap-3 p-3 bg-white rounded-2xl border border-gray-200 shadow-xs
         hover:bg-gray-50 active:bg-gray-100
-        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2
+        focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2
         transition-colors text-left"
     >
       {/* Thumbnail (or 📄 placeholder) */}
@@ -145,7 +145,7 @@ const HistoryCard: React.FC<{
       <div className="flex-1 min-w-0 flex flex-col gap-1 justify-center">
         <div className="flex items-center gap-2 flex-wrap">
           <span
-            className={`text-[11px] font-medium px-1.5 py-0.5 rounded border ${badge.cls}`}
+            className={`text-[11px] font-medium px-1.5 py-0.5 rounded-sm border ${badge.cls}`}
           >
             {badge.label}
           </span>
@@ -185,7 +185,7 @@ const OmoHistoryList: React.FC<OmoHistoryListProps> = ({ items, onSelect }) => {
           {/* Per-lesson section header (#2089) */}
           <div className="flex items-center gap-2 px-1">
             {group.gradeCode && (
-              <span className="shrink-0 text-[11px] font-semibold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded">
+              <span className="shrink-0 text-[11px] font-semibold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded-sm">
                 {group.gradeCode}
               </span>
             )}

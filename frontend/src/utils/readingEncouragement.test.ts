@@ -10,7 +10,7 @@ describe('readingEncouragement', () => {
     expect(encouragementContainsAbsoluteClaim(0.963)).toBe(false);
   });
 
-  it('allows absolute praise only at 100% rounded accuracy', () => {
+  it('allows absolute praise only at 100% rounded-sm accuracy', () => {
     expect(encouragementContainsAbsoluteClaim(1)).toBe(true);
     expect(getEncouragement(1).text).toMatch(/一字不差|完美/);
   });

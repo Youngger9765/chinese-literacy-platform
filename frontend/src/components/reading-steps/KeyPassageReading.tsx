@@ -429,7 +429,7 @@ const KeyPassageReading: React.FC<KeyPassageReadingProps> = ({
       {/* ── 評估進度：共用 EvalProgress（與逐段朗讀同款 duration 動態+緩動+snap，#2396）
             取代舊版乾轉圈 spinner（#2131）；置中 overlay 保留 ── */}
       {isTranscribing && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-6">
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs px-6">
           <div className="w-full max-w-md">
             <EvalProgress active={isTranscribing} recordingMs={lastRecordingMsRef.current} />
           </div>
@@ -445,7 +445,7 @@ const KeyPassageReading: React.FC<KeyPassageReadingProps> = ({
 
           {/* I4 (Issue #2156): Gemini fallback alert banner — 置於雙欄之上（全寬） */}
           {fallbackReason && result && (
-            <div className="mt-6 flex items-start gap-3 px-5 py-4 rounded-2xl bg-amber-50 border border-amber-300 shadow-sm">
+            <div className="mt-6 flex items-start gap-3 px-5 py-4 rounded-2xl bg-amber-50 border border-amber-300 shadow-xs">
               <span className="material-symbols-outlined text-amber-600 shrink-0 mt-0.5">warning</span>
               <div className="flex-1">
                 <p className="text-base font-bold text-amber-800">高品質辨識暫時失敗，這是粗略結果</p>
@@ -513,7 +513,7 @@ const KeyPassageReading: React.FC<KeyPassageReadingProps> = ({
                     {String(idx + 1).padStart(2, '0')}
                   </span>
                   <p
-                    className={`text-xl md:text-2xl text-on-surface leading-[2rem] md:leading-[2.2rem] ${isZhuyinAny ? 'tracking-[0.15em]' : ''}`}
+                    className={`text-xl md:text-2xl text-on-surface leading-8 md:leading-[2.2rem] ${isZhuyinAny ? 'tracking-[0.15em]' : ''}`}
                     style={{ fontFamily: fontForZhuyin(zhuyinActive) }}
                   >
                     {renderParagraph(line, idx)}
@@ -607,7 +607,7 @@ const KeyPassageReading: React.FC<KeyPassageReadingProps> = ({
 
       {/* Mic error — Issue #2357: opaque banner, not transparent pill overlapping passage */}
       {micError && (
-        <div className="mt-4 flex items-start gap-3 px-5 py-4 rounded-2xl bg-rose-50 border border-rose-300 shadow-sm">
+        <div className="mt-4 flex items-start gap-3 px-5 py-4 rounded-2xl bg-rose-50 border border-rose-300 shadow-xs">
           <span className="material-symbols-outlined text-rose-600 shrink-0 mt-0.5">mic_off</span>
           <div className="flex-1">
             <p className="text-base font-bold text-rose-800">{micError}</p>

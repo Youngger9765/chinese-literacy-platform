@@ -62,7 +62,7 @@ export default function ZhuyinToggle({
             aria-pressed={isActive}
             aria-label={seg.title}
             title={seg.title}
-            className={`h-8 sm:h-9 px-2 sm:px-3 rounded-full font-headline font-bold text-xs sm:text-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 active:scale-95 whitespace-nowrap ${
+            className={`h-8 sm:h-9 px-2 sm:px-3 rounded-full font-headline font-bold text-xs sm:text-sm transition-all duration-200 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 active:scale-95 whitespace-nowrap ${
               isActive
                 ? 'bg-accent text-white shadow-[0_2px_10px_rgba(86,74,191,0.35)]'
                 : 'text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface'
@@ -90,14 +90,14 @@ export default function ZhuyinToggle({
           disabled={difficultThreshold <= THRESHOLD_MIN}
           aria-label="降低難字門檻（標更多字）"
           title={`錯 ${difficultThreshold} 次以上才標 —— 按這裡標更多字`}
-          className="h-8 sm:h-9 w-7 rounded-full font-headline font-bold text-sm text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface disabled:opacity-30 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent active:scale-95"
+          className="h-8 sm:h-9 w-7 rounded-full font-headline font-bold text-sm text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface disabled:opacity-30 disabled:pointer-events-none focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent active:scale-95"
         >
           −
         </button>
         <span
           aria-live="polite"
           aria-label={`錯 ${difficultThreshold} 次以上才標`}
-          className="min-w-[2.5rem] text-center font-headline font-bold text-xs sm:text-sm text-on-surface-variant tabular-nums"
+          className="min-w-10 text-center font-headline font-bold text-xs sm:text-sm text-on-surface-variant tabular-nums"
         >
           {difficultThreshold}&thinsp;次
         </span>
@@ -107,7 +107,7 @@ export default function ZhuyinToggle({
           disabled={difficultThreshold >= THRESHOLD_MAX}
           aria-label="提高難字門檻（標更少字）"
           title={`錯 ${difficultThreshold} 次以上才標 —— 按這裡標更少字`}
-          className="h-8 sm:h-9 w-7 rounded-full font-headline font-bold text-sm text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface disabled:opacity-30 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent active:scale-95"
+          className="h-8 sm:h-9 w-7 rounded-full font-headline font-bold text-sm text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface disabled:opacity-30 disabled:pointer-events-none focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent active:scale-95"
         >
           ＋
         </button>

@@ -201,7 +201,7 @@ const GuidedStepsInput: React.FC<Props> = ({
     const submitted = fb === true || fb === false;
     const options = step.options ?? [];
     return (
-      <div key={i} className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm space-y-3">
+      <div key={i} className="rounded-xl border border-gray-200 bg-white p-5 shadow-xs space-y-3">
         <p className="text-base font-medium text-on-surface leading-relaxed whitespace-pre-wrap">{step.prompt}</p>
 
         {step.type === 'select' && (
