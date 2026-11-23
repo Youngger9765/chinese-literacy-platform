@@ -222,7 +222,12 @@ def attempt_match(db: Session, my_queue: PkQueue) -> PkMatch | None:
         return None
     my_queue = locked_mine
 
-    my_rating = pk_engine.get_or_create_rating(db, my_queue.student_id)
+    # #4059: commit=False -- my_queue's FOR UPDATE SKIP LOCKED lock (just
+    # taken above) is still needed until this function's own db.commit()
+    # below; letting get_or_create_rating commit here would end this
+    # transaction early and release that lock before my_queue is flipped
+    # to "matched".
+    my_rating = pk_engine.get_or_create_rating(db, my_queue.student_id, commit=False)
     band = _band_width_for(my_queue.created_at)
 
     q = (
@@ -252,6 +257,16 @@ def attempt_match(db: Session, my_queue: PkQueue) -> PkMatch | None:
         .first()
     )
     if candidate is None:
+        # #4059: nothing left in this call needs my_queue's lock protected
+        # any further (we're bailing out with no match), so it's safe to
+        # commit now -- this is what makes a brand-new my_rating (flushed,
+        # not committed, by the commit=False call above) durable instead
+        # of being silently rolled back when the request's DB session
+        # closes without ever calling commit() (get_db() only closes, see
+        # database.py). Without this, a student with no PkRating row yet
+        # who polls and finds no opponent would redo the same
+        # SAVEPOINT+INSERT+flush on every subsequent poll forever.
+        db.commit()
         return None
 
     side_a_student = db.query(User).filter(User.id == candidate.student_id).first()

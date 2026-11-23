@@ -69,7 +69,26 @@ PK_FIGURE_ASSET_BASE = "/pk-art/figures"
 # Rating
 # ---------------------------------------------------------------------------
 
-def get_or_create_rating(db: Session, student_id: int) -> PkRating:
+def get_or_create_rating(db: Session, student_id: int, *, commit: bool = True) -> PkRating:
+    """`commit=False` (#4059): `matchmaking.attempt_match`/`redeem_invite`
+    call this (directly, or via `create_human_match`) WHILE still holding a
+    `FOR UPDATE SKIP LOCKED` row lock taken earlier in the SAME
+    transaction. A top-level `db.commit()` ends that transaction — and a
+    transaction-scoped row lock ends with it — so unconditionally
+    committing here used to release the caller's lock EARLY, before the
+    row it was guarding got flipped to "matched". A second, genuinely
+    concurrent poll for that same row could then take a fresh lock on the
+    now-unlocked row and race its own candidate search, producing a
+    second PkMatch for the same student (see the regression lock in
+    test_pk_matchmaking.py::TestGetOrCreateRatingCommitDoesNotReleaseMatchmakingLocksEarly).
+    Callers that hold such a lock pass `commit=False`; the flush below
+    still makes the new row visible within THIS transaction (so its
+    `.rating`/`.id`/etc. can be used immediately), and it is the lock-
+    holding caller's own later `db.commit()` that makes it durable.
+    Callers with no lock to protect (the standalone `/api/pk/rating/me`
+    and `/api/pk/opponents` reads, `_finalize_match`, `create_ai_match`)
+    keep the default `commit=True` — unchanged behavior.
+    """
     rating = db.query(PkRating).filter(PkRating.student_id == student_id).first()
     if rating is not None:
         return rating
@@ -109,7 +128,8 @@ def get_or_create_rating(db: Session, student_id: int) -> PkRating:
         if rating is None:
             raise  # not actually a race — something else is wrong, surface it
         return rating
-    db.commit()
+    if commit:
+        db.commit()
     db.refresh(rating)
     return rating
 
@@ -209,8 +229,16 @@ def create_human_match(
     rng = random.Random(seed)
     rounds = build_pk_rounds(lessons, rng, rounds_per_match=ROUNDS_PER_MATCH)
 
-    rating_a = get_or_create_rating(db, side_a.id)
-    rating_b = get_or_create_rating(db, side_b.id)
+    # #4059: commit=False -- both callers of create_human_match
+    # (matchmaking.attempt_match/redeem_invite) already hold a FOR UPDATE
+    # SKIP LOCKED lock on a PkQueue row in this SAME transaction (the
+    # candidate / the invite). Letting get_or_create_rating commit here
+    # would end that transaction early and release the caller's lock
+    # before it gets to flip that row to "matched" — the db.commit()
+    # just below (which persists the match together with any rating rows
+    # created above) is what makes all of it durable atomically instead.
+    rating_a = get_or_create_rating(db, side_a.id, commit=False)
+    rating_b = get_or_create_rating(db, side_b.id, commit=False)
 
     match = PkMatch(
         side_a_user_id=side_a.id,

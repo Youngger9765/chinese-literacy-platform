@@ -14,7 +14,7 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
-from app.models.pk import PkMatch, PkQueue
+from app.models.pk import PkMatch, PkQueue, PkRating
 from app.services.pk import matchmaking as svc
 from league_factories import enroll_student, make_classroom, make_school, make_student, make_teacher
 
@@ -107,6 +107,52 @@ class TestAttemptMatch:
         assert m2 is None  # already matched by m1; must NOT create a second match
         count = db_session.query(PkMatch).count()
         assert count == 1
+
+    def test_new_students_rating_row_is_committed_even_when_no_opponent_is_found(
+        self, db_session, classroom, monkeypatch
+    ):
+        """#4059 (code review finding on the lock-release fix above):
+        get_or_create_rating's commit=False only flushes a brand-new
+        PkRating row -- it needs the LOCK-HOLDING caller's own later
+        commit to become durable. attempt_match's no-candidate path used
+        to return None with no commit anywhere in the call chain; since
+        FastAPI's get_db() dependency never commits on its own (only
+        closes -- database.py), that flush would be silently rolled back
+        once the request ends, forcing a never-rated student to redo the
+        same SAVEPOINT+INSERT on every subsequent poll forever.
+
+        Asserts the commit() call directly rather than via a rollback
+        probe: plain pysqlite's SAVEPOINT release has its own implicit-
+        commit quirk (the standard documented reason SQLAlchemy's SQLite
+        dialect needs its serializable-isolation event-listener workaround
+        for faithful nested-transaction semantics — not applied to this
+        shared test engine), so a `db_session.rollback()` here would not
+        reliably reproduce "the request ended without ever calling
+        commit()" the way it would on Postgres.
+        """
+        a = _enrolled_student(db_session, classroom)  # never played -- no PkRating row yet
+        qa = svc.create_queue_entry(db_session, a, scope_type="grade_pool", scope_ref="4", classroom_id=classroom.id)
+
+        real_commit = db_session.commit
+        commit_count = {"n": 0}
+
+        def counting_commit(*args, **kwargs):
+            commit_count["n"] += 1
+            return real_commit(*args, **kwargs)
+
+        monkeypatch.setattr(db_session, "commit", counting_commit)
+
+        match = svc.attempt_match(db_session, qa)  # no opponent waiting
+        assert match is None
+
+        assert commit_count["n"] >= 1, (
+            "attempt_match must commit a brand-new student's PkRating row "
+            "even when no opponent is found -- otherwise FastAPI's "
+            "get_db() dependency (which only closes the session, never "
+            "commits) would silently roll it back"
+        )
+        rating = db_session.query(PkRating).filter(PkRating.student_id == a.id).first()
+        assert rating is not None
 
     def test_different_scope_does_not_match(self, db_session, classroom):
         a = _enrolled_student(db_session, classroom)
@@ -503,3 +549,94 @@ class TestOpenQueueCap:
         with pytest.raises(Exception) as exc:
             svc.create_queue_entry(db_session, a, scope_type="grade_pool", scope_ref="4", classroom_id=classroom.id)
         assert exc.value.status_code == 429
+
+
+class TestGetOrCreateRatingCommitDoesNotReleaseMatchmakingLocksEarly:
+    """#4059 (found during independent review of #4055): engine.py's
+    `get_or_create_rating` ends with a top-level `db.commit()` whenever it
+    has to create a brand-new PkRating row (a student's very first PK
+    activity). `attempt_match` calls it directly on `my_queue.student_id`
+    right after taking `my_queue`'s own `FOR UPDATE SKIP LOCKED` lock —
+    and `create_human_match` (called from both `attempt_match` and
+    `redeem_invite`, always AFTER a row lock is already held in the same
+    transaction) calls it again for both sides.
+
+    On Postgres a `commit()` ends the whole transaction, and a
+    transaction-scoped row lock ends with it — so any of those calls
+    releases the lock EARLY, before the row is actually flipped to
+    "matched". A second, genuinely concurrent poll for the SAME queue row
+    (duplicate network retry, a second tab/device, a second Cloud Run
+    instance) can then take a FRESH lock on the now-unlocked row, see
+    `status == "waiting"` still true, and race its own candidate search —
+    producing a second PkMatch for the same student.
+
+    SQLite enforces no real row locks (see matchmaking.py's own module
+    docstring), so this drives the interleaving explicitly instead of
+    relying on real concurrency: it wraps `get_or_create_rating` and, only
+    when calling it would actually have ended the transaction — the exact
+    condition a real Postgres lock depends on — fires a second "concurrent"
+    `attempt_match()` call for the SAME queue row right then, before the
+    original call gets to finish. Pre-fix that commit happens (student `b`
+    has never played before) and the injected call succeeds, creating a
+    second match for `b`. Post-fix `get_or_create_rating` no longer commits
+    mid-flight, so there is nothing released for the injected call to grab,
+    and it correctly finds nothing left to do.
+    """
+
+    def test_premature_commit_lets_a_concurrent_poll_double_match_the_same_student(
+        self, db_session, classroom, monkeypatch
+    ):
+        a = _enrolled_student(db_session, classroom)  # never played -- no PkRating row yet
+        b = _enrolled_student(db_session, classroom)  # never played -- no PkRating row yet
+        c = _enrolled_student(db_session, classroom)  # a second available opponent
+        svc.create_queue_entry(db_session, a, scope_type="grade_pool", scope_ref="4", classroom_id=classroom.id)
+        qb = svc.create_queue_entry(db_session, b, scope_type="grade_pool", scope_ref="4", classroom_id=classroom.id)
+        svc.create_queue_entry(db_session, c, scope_type="grade_pool", scope_ref="4", classroom_id=classroom.id)
+
+        from app.services.pk import engine as pk_engine
+
+        # `db.in_transaction()` isn't a reliable before/after signal here:
+        # get_or_create_rating's own `db.refresh(rating)` (right after its
+        # `db.commit()`) immediately re-opens a new transaction via
+        # autobegin, so by the time a wrapper around the WHOLE function
+        # looks again, a commit that truly happened is already masked.
+        # Count actual `Session.commit()` invocations instead.
+        real_commit = db_session.commit
+        commit_count = {"n": 0}
+
+        def counting_commit(*a, **kw):
+            commit_count["n"] += 1
+            return real_commit(*a, **kw)
+
+        monkeypatch.setattr(db_session, "commit", counting_commit)
+
+        real_get_or_create_rating = pk_engine.get_or_create_rating
+        injected = {"done": False}
+
+        def spying_get_or_create_rating(db, student_id, **kwargs):
+            commits_before = commit_count["n"]
+            rating = real_get_or_create_rating(db, student_id, **kwargs)
+            committed_mid_flight = commit_count["n"] > commits_before
+            if committed_mid_flight and student_id == b.id and not injected["done"]:
+                injected["done"] = True
+                # On Postgres, the commit above would have just released
+                # qb's own FOR UPDATE SKIP LOCKED lock -- simulate a second,
+                # genuinely concurrent poll of the SAME row succeeding now
+                # that it is (incorrectly) unlocked.
+                svc.attempt_match(db_session, qb)
+            return rating
+
+        monkeypatch.setattr(pk_engine, "get_or_create_rating", spying_get_or_create_rating)
+
+        svc.attempt_match(db_session, qb)
+
+        b_matches = (
+            db_session.query(PkMatch)
+            .filter((PkMatch.side_a_user_id == b.id) | (PkMatch.side_b_user_id == b.id))
+            .all()
+        )
+        assert len(b_matches) == 1, (
+            f"expected exactly one match for student b, got {len(b_matches)} -- "
+            f"a premature commit inside get_or_create_rating let a concurrent "
+            f"poll of the same queue row double-match the same student"
+        )
