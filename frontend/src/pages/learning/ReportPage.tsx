@@ -10,6 +10,7 @@ import StepReportCards from '../../components/report/StepReportCards';
 import { useReportProgress } from '../../components/report/useReportProgress';
 import { buildStepReportCards, marksFromAnnotations } from '../../components/report/reportCardsModel';
 import { storyForStep } from '../../services/api';
+import { useMyLessonReview } from '../../hooks/useMyLessonReview';
 
 /**
  * 報告頁（#3399）：每一關一張卡片，完成打綠勾，點開看分數與作答。
@@ -58,6 +59,8 @@ const ReportPage: React.FC = () => {
   }, [selectedStory?.id, dbSessionId, saveStepProgressPatch]);
 
   const [xpResult, setXpResult] = useState<XPAwardResult | null>(null);
+  // #4104：老師送出的批閱（退回的關卡紅色、評語、分數）
+  const review = useMyLessonReview(storyId);
   const [showXpToast, setShowXpToast] = useState(false);
 
   // Award XP once we have a confirmed backend session ID
@@ -199,6 +202,7 @@ const ReportPage: React.FC = () => {
         <StepReportCards
           storyTitle={selectedStory?.title}
           cards={cards}
+          review={review}
           onGoToStep={(stepId) => navigate(stepPath(storyId!, stepId))}
         />
       )}

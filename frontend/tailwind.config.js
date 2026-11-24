@@ -15,6 +15,9 @@ export default {
         ui: ['cwTeXYen', '"Noto Sans TC"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         headline: ['"Plus Jakarta Sans"', '"Noto Sans TC"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         body: ['"Be Vietnam Pro"', '"Noto Sans TC"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        // #4104 學習批閱：老師紅筆的分數（手寫數字）。中文評語用楷書（cwTeXKai）——
+        // Google Fonts 的中文手寫體只有簡體字集，繁體會掉回系統字。
+        hand: ['Caveat', 'cwTeXKai', 'cursive'],
       },
       boxShadow: {
         card: '0 0 32px rgba(136, 152, 170, 0.12)',

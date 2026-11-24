@@ -88,6 +88,10 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack, 
       assignment: tab === 'assignments' ? searchParams.get('assignment') : null,
       student: tab === 'data' ? searchParams.get('student') : null,
       view: tab === 'data' ? searchParams.get('view') : null,
+      // #4104 學習批閱的位置（學生 / 課）只在那個分頁有意義
+      rs: tab === 'review' ? searchParams.get('rs') : null,
+      rn: tab === 'review' ? searchParams.get('rn') : null,
+      rl: tab === 'review' ? searchParams.get('rl') : null,
     });
   const setSelectedStudent = (id: number | null) =>
     updateParams({ tab: 'data', assignment: null, student: id === null ? null : String(id) });

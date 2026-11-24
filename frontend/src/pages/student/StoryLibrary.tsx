@@ -8,6 +8,7 @@ import { getLibraryStatus, type LibraryStoryStatus } from '../../services/progre
 import { useAuth } from '../../contexts/AuthContext';
 import StoryCard, { Difficulty, DIFFICULTY_CONFIG, getDifficulty } from '../../components/student/StoryCard';
 import { gradeLabel } from '../../utils/gradeLabel';
+import { fetchMyReviews, type MyReviewSummary } from '../../services/lessonReviewApi';
 
 interface StoryLibraryProps {
   onStartReading: (story: Story) => void | Promise<void>;
@@ -94,6 +95,7 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({
   const [classroomFilterLabel, setClassroomFilterLabel] = useState<string | null>(null);
   // Issue #1249: per-story student status map
   const [libraryStatus, setLibraryStatus] = useState<Record<string, LibraryStoryStatus>>({});
+  const [teacherReviews, setTeacherReviews] = useState<Record<string, MyReviewSummary>>({});
 
   // Bug fix #2188: completedSet merges external completedSlugs prop AND
   // stories with status='completed' from the API (libraryStatus).  This
@@ -113,6 +115,14 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({
       .then((data) => setXpToNext(data.level_info.xp_to_next))
       .catch(() => {/* silently ignore — XP callout is cosmetic */});
   }, [token, user]);
+
+  // #4104 學習批閱：老師送出的總分 / 退回關卡數（non-blocking）
+  useEffect(() => {
+    if (!token) return;
+    fetchMyReviews()
+      .then(setTeacherReviews)
+      .catch(() => {/* 讀不到不影響選課 */});
+  }, [token]);
 
   // Issue #1249: fetch per-story status labels (non-blocking)
   useEffect(() => {
@@ -357,6 +367,7 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({
                 isCompleted={completedSet.has(story.id)}
                 onClick={() => handleStoryClick(story)}
                 userStatus={libraryStatus[story.id]}
+                teacherReview={teacherReviews[story.id]}
                 estimatedXP={ESTIMATED_XP}
                 closeToLevelUp={isCloseToLevelUp}
                 onClearProgress={completedSet.has(story.id) && onClearProgress ? () => {

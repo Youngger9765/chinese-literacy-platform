@@ -52,11 +52,12 @@ describe('ClassroomTabs — Junyi three-tab layout (#3384)', () => {
   // league tab (MVP docs/prd/2026-10-14-chinese-star-league-prd.md §10,
   // renamed 班級賽 -> 跨班賽季 2026-10-16 #3554 follow-up — label only, the
   // TabKey stays 'league') added as a 4th tab after the original three.
-  it('shows the Junyi-named tabs plus 跨班賽季 in order', () => {
+  // #4104：學習批閱接在跨班賽季後面。
+  it('shows the Junyi-named tabs plus 跨班賽季 and 學習批閱 in order', () => {
     render(<ClassroomTabs {...props} />);
     const labels = screen.getAllByRole('tab').map((t) => t.getAttribute('aria-label') ?? t.textContent);
-    expect(labels).toEqual(['班級設定', '指派任務', '班級數據', '跨班賽季']);
-    expect(TABS.map((t) => t.key)).toEqual(['settings', 'assignments', 'data', 'league']);
+    expect(labels).toEqual(['班級設定', '指派任務', '班級數據', '跨班賽季', '學習批閱']);
+    expect(TABS.map((t) => t.key)).toEqual(['settings', 'assignments', 'data', 'league', 'review']);
   });
 
   it('跨班賽季 renders the league progress tab', () => {

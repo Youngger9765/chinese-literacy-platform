@@ -58,6 +58,33 @@ def _union_attempts(merged: dict, existing: dict, incoming: dict) -> None:
         merged[key] = {**entry, "attempts": ordered[-MAX_ATTEMPTS_PER_STEP:]}
 
 
+def _stamp_step_activity(
+    meta: dict,
+    existing_step_data: dict,
+    merged_step_data: dict,
+    newly_completed: list[str],
+) -> None:
+    """Record, server-side, when each step last had a real change (#4104).
+
+    ``__meta.step_activity[step_key] = <now ISO>`` for every step whose stored
+    data actually changed in this save, and every step newly marked complete.
+    A save that re-sends identical data (a restored step re-saving on mount)
+    stamps nothing. The teacher's 學習批閱 reads this to tell whether a
+    returned step was redone after it was returned, and whether a lesson was
+    started at all. ``__meta`` is never taken from the client payload, so the
+    student cannot forge it.
+    """
+    now = datetime.now(tz=timezone.utc).isoformat()
+    changed = [k for k, v in merged_step_data.items() if existing_step_data.get(k) != v]
+    keys = set(changed) | set(newly_completed)
+    if not keys:
+        return
+    activity = dict(meta.get("step_activity") or {})
+    for k in keys:
+        activity[k] = now
+    meta["step_activity"] = activity
+
+
 @router.put(
     "/learning/sessions/{session_id}/progress",
     response_model=StepProgressResponse,
@@ -147,6 +174,12 @@ def save_step_progress(
     existing_step_data = existing_sp.step_data if existing_sp is not None else {}
     merged_step_data = {**existing_step_data, **payload.step_data}
     _union_attempts(merged_step_data, existing_step_data, payload.step_data)
+    _stamp_step_activity(
+        existing_meta,
+        existing_step_data,
+        merged_step_data,
+        newly_completed=[s for s in merged_steps_completed if s not in base_steps_completed],
+    )
 
     # Version is stored at the top level so the frontend can read it directly
     # from StepProgressData.version. __meta keeps other metadata (source, etc.).

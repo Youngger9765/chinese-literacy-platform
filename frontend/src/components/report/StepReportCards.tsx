@@ -8,17 +8,34 @@
  *
  * #4028（案主定調）：完成就是綠勾；完成了但有題目第一次答錯 / 要訂正 → 黃色圈圈。
  * 上方關卡導覽列（AppShell）用同一個判斷。
+ *
+ * #4104 學習批閱：老師退回的關卡是紅色（優先於黃 / 綠），卡片上有老師的評語與
+ * 紅筆分數，標題旁是總分。老師端用 `renderCardTools` 在每張卡片下面放批閱工具。
  */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { AnswerRow, CardStatus, DetailBlock, MarkedWord, StepReportCard } from './reportCardsModel';
 import { radarOf } from './reportCardsModel';
 import { AttemptsPanel, RadarPanel } from './ReportCharts';
+import { CommentNote, ScoreMark } from './TeacherMarks';
+
+/** 老師送出的批閱（#4104），依 step id。學生端與老師端預覽都用它。 */
+export interface CardsReview {
+  totalScore: number | null;
+  teacherName: string | null;
+  steps: Record<string, { returned: boolean; redone?: boolean; comment: string | null; score: number | null }>;
+}
+
+type StepMark = CardsReview['steps'][string];
 
 interface Props {
   storyTitle?: string;
   cards: StepReportCard[];
   /** 未完成的關卡可以直接前往。 */
   onGoToStep?: (stepId: string) => void;
+  /** #4104：老師送出的批閱（退回 / 評語 / 分數）。 */
+  review?: CardsReview | null;
+  /** #4104：老師端在每張卡片下面放的批閱工具。 */
+  renderCardTools?: (card: StepReportCard) => React.ReactNode;
 }
 
 const MARK_STYLE: Record<MarkedWord['type'], { icon: string; label: string; chip: string }> = {
@@ -166,7 +183,10 @@ const DetailDialog: React.FC<{
   card: StepReportCard;
   onClose: () => void;
   onGoToStep?: (stepId: string) => void;
-}> = ({ card, onClose, onGoToStep }) => {
+  mark?: StepMark;
+  teacherName?: string | null;
+}> = ({ card, onClose, onGoToStep, mark, teacherName }) => {
+  const returned = !!mark?.returned;
   const closeRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     closeRef.current?.focus();
@@ -221,6 +241,21 @@ const DetailDialog: React.FC<{
           {card.status === 'none' ? '還沒完成' : statusPhrase(card)}
         </p>
 
+        {(returned || mark?.comment || mark?.score != null) && (
+          <div
+            className={`rounded-2xl border px-4 py-3 space-y-2 ${returned ? 'border-red-300 bg-red-50' : 'border-red-100 bg-[#fffaf5]'}`}
+            data-testid="dialog-teacher-review"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <p className={`text-sm font-bold ${returned ? 'text-red-700' : 'text-on-surface-variant'}`}>
+                {returned ? '老師退回這一關，請重做' : '老師的批閱'}
+              </p>
+              {mark?.score != null && <ScoreMark score={mark.score} />}
+            </div>
+            {mark?.comment && <CommentNote comment={mark.comment} teacherName={teacherName} />}
+          </div>
+        )}
+
         {card.attempts.length >= 2 ? (
           // #4087：重複作答過 → 折線圖 + 點節點看那一次（預設選最近一次，
           // 所以不再重複列出目前的細節）。
@@ -233,13 +268,15 @@ const DetailDialog: React.FC<{
           </p>
         )}
 
-        {card.status !== 'done' && onGoToStep && (
+        {(returned || card.status !== 'done') && onGoToStep && (
           <button
             type="button"
             onClick={() => onGoToStep(card.stepId)}
-            className="w-full h-11 rounded-full bg-accent text-white font-bold hover:bg-accent-hover"
+            className={`w-full h-11 rounded-full text-white font-bold ${
+              returned ? 'bg-red-600 hover:bg-red-700' : 'bg-accent hover:bg-accent-hover'
+            }`}
           >
-            {card.status === 'review' ? '回去訂正' : '前往這一關'}
+            {returned ? '去重做' : card.status === 'review' ? '回去訂正' : '前往這一關'}
           </button>
         )}
       </div>
@@ -247,21 +284,59 @@ const DetailDialog: React.FC<{
   );
 };
 
-const StepReportCards: React.FC<Props> = ({ storyTitle, cards, onGoToStep }) => {
+const ReturnedBadge: React.FC = () => (
+  <span
+    className="flex items-center justify-center w-8 h-8 rounded-full bg-red-500 text-white shadow-sm"
+    aria-label="老師退回，要重做"
+  >
+    <span className="material-symbols-outlined text-xl" aria-hidden="true">replay</span>
+  </span>
+);
+
+function cardAriaLabel(c: StepReportCard, mark: StepMark | undefined): string {
+  const state = mark?.returned ? '老師退回，要重做' : statusPhrase(c);
+  const summary = c.completed && c.summary ? `，${c.summary}` : '';
+  const score = mark?.score != null ? `，老師給 ${mark.score} 分` : '';
+  return `${c.label}：${state}${summary}${score}。點擊看詳細`;
+}
+
+function cardClass(c: StepReportCard, returned: boolean): string {
+  if (returned) return 'bg-red-50 border-2 border-red-400 shadow-sm hover:shadow-md';
+  if (c.status === 'done') return 'bg-surface-container-lowest border-2 border-emerald-200 shadow-sm hover:shadow-md';
+  if (c.status === 'review') return 'bg-surface-container-lowest border-2 border-amber-300 shadow-sm hover:shadow-md';
+  return 'bg-surface-container-low border-2 border-dashed border-outline-variant/60 hover:bg-surface-container';
+}
+
+const StepReportCards: React.FC<Props> = ({ storyTitle, cards, onGoToStep, review, renderCardTools }) => {
   const [openId, setOpenId] = useState<string | null>(null);
   const doneCount = cards.filter((c) => c.completed).length;
   const reviewCount = cards.filter((c) => c.status === 'review').length;
   const pct = cards.length ? Math.round((doneCount / cards.length) * 100) : 0;
   const open = cards.find((c) => c.stepId === openId) ?? null;
   const close = useCallback(() => setOpenId(null), []);
+  const markOf = (id: string): StepMark | undefined => review?.steps[id];
+  const returnedCards = cards.filter((c) => markOf(c.stepId)?.returned);
+  const totalScore = review?.totalScore ?? null;
 
   return (
     <div className="space-y-6" data-testid="step-report-cards">
       <header className="rounded-3xl bg-surface-container-lowest shadow-editorial p-6">
-        <p className="text-sm text-on-surface-variant">學習成果</p>
-        <h2 className="font-headline font-bold text-2xl text-on-surface mt-1">
-          {storyTitle ? `《${storyTitle}》` : '這一課'}
-        </h2>
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <p className="text-sm text-on-surface-variant">學習成果</p>
+            <h2 className="font-headline font-bold text-2xl text-on-surface mt-1">
+              {storyTitle ? `《${storyTitle}》` : '這一課'}
+            </h2>
+          </div>
+          {totalScore != null && (
+            <div className="shrink-0 flex flex-col items-center pr-2" data-testid="report-total-score">
+              <ScoreMark score={totalScore} size="total" />
+              <span className="mt-1 text-xs text-on-surface-variant">
+                {review?.teacherName ? `${review.teacherName}批閱` : '老師批閱'}
+              </span>
+            </div>
+          )}
+        </div>
         <div className="mt-4 flex items-center gap-3">
           <div
             className="flex-1 h-2.5 rounded-full bg-surface-container-high overflow-hidden"
@@ -277,6 +352,32 @@ const StepReportCards: React.FC<Props> = ({ storyTitle, cards, onGoToStep }) => 
             完成 {doneCount} / {cards.length} 關
           </span>
         </div>
+        {returnedCards.length > 0 && (
+          // #4104：老師退回的關卡，紅色、放最前面，點了就過去重做。
+          <div
+            className="mt-3 rounded-2xl border border-red-300 bg-red-50 px-4 py-3"
+            data-testid="step-report-returned-note"
+          >
+            <p className="text-sm font-bold text-red-800">老師退回 {returnedCards.length} 關，請重做：</p>
+            <ul className="mt-2 flex flex-wrap gap-2">
+              {returnedCards.map((c) => (
+                <li key={c.stepId}>
+                  {onGoToStep ? (
+                    <button
+                      type="button"
+                      onClick={() => onGoToStep(c.stepId)}
+                      className="rounded-full bg-red-600 px-3 py-1 text-xs font-bold text-white hover:bg-red-700"
+                    >
+                      {c.label} → 去重做
+                    </button>
+                  ) : (
+                    <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-bold text-red-800">{c.label}</span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         {reviewCount > 0 && (
           // #4087：直接說哪幾關、各還有幾題要訂正，點了就過去 —— 學生不用一張張卡片猜。
           <div
@@ -313,20 +414,18 @@ const StepReportCards: React.FC<Props> = ({ storyTitle, cards, onGoToStep }) => 
       <RadarPanel points={radarOf(cards)} />
 
       <ul className="grid grid-cols-2 md:grid-cols-3 gap-3">
-        {cards.map((c) => (
-          <li key={c.stepId}>
+        {cards.map((c) => {
+          const mark = markOf(c.stepId);
+          const returned = !!mark?.returned;
+          return (
+          <li key={c.stepId} className="flex flex-col gap-2">
             <button
               type="button"
               onClick={() => setOpenId(c.stepId)}
               data-status={c.status}
-              aria-label={`${c.label}：${statusPhrase(c)}${c.completed && c.summary ? `，${c.summary}` : ''}。點擊看詳細`}
-              className={`w-full h-full text-left rounded-2xl p-4 flex flex-col gap-3 transition-all active:scale-[0.98] ${
-                c.status === 'done'
-                  ? 'bg-surface-container-lowest border-2 border-emerald-200 shadow-sm hover:shadow-md'
-                  : c.status === 'review'
-                    ? 'bg-surface-container-lowest border-2 border-amber-300 shadow-sm hover:shadow-md'
-                    : 'bg-surface-container-low border-2 border-dashed border-outline-variant/60 hover:bg-surface-container'
-              }`}
+              data-returned={returned || undefined}
+              aria-label={cardAriaLabel(c, mark)}
+              className={`w-full ${renderCardTools ? '' : 'h-full'} text-left rounded-2xl p-4 flex flex-col gap-3 transition-all active:scale-[0.98] ${cardClass(c, returned)}`}
             >
               <div className="flex items-start justify-between">
                 <span
@@ -335,7 +434,10 @@ const StepReportCards: React.FC<Props> = ({ storyTitle, cards, onGoToStep }) => 
                 >
                   {c.icon}
                 </span>
-                <CheckBadge status={c.status} />
+                <span className="flex items-center gap-2">
+                  {mark?.score != null && <ScoreMark score={mark.score} />}
+                  {returned ? <ReturnedBadge /> : <CheckBadge status={c.status} />}
+                </span>
               </div>
               <div>
                 <p className={`font-headline font-bold ${c.completed ? 'text-on-surface' : 'text-on-surface-variant'}`}>
@@ -359,13 +461,29 @@ const StepReportCards: React.FC<Props> = ({ storyTitle, cards, onGoToStep }) => 
                     📈 作答 {c.attempts.length} 次，點開看進步
                   </p>
                 )}
+                {returned && (
+                  <p className="text-xs mt-1 font-bold text-red-700" data-testid="returned-badge">
+                    老師退回，請重做
+                  </p>
+                )}
+                {mark?.comment && <CommentNote comment={mark.comment} className="mt-2 line-clamp-3" />}
               </div>
             </button>
+            {renderCardTools?.(c)}
           </li>
-        ))}
+          );
+        })}
       </ul>
 
-      {open && <DetailDialog card={open} onClose={close} onGoToStep={onGoToStep} />}
+      {open && (
+        <DetailDialog
+          card={open}
+          onClose={close}
+          onGoToStep={onGoToStep}
+          mark={markOf(open.stepId)}
+          teacherName={review?.teacherName}
+        />
+      )}
     </div>
   );
 };
