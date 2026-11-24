@@ -50,7 +50,7 @@ const JunyiSloLogoutPage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-amber-50 px-4">
-      <div className="w-full max-w-sm bg-white rounded-2xl shadow-sm border border-gray-200 p-6 text-center space-y-4">
+      <div className="w-full max-w-sm bg-white rounded-2xl shadow-xs border border-gray-200 p-6 text-center space-y-4">
         <div className="flex justify-center">
           <div className="w-10 h-10 border-4 border-[#FF6B35] border-t-transparent rounded-full animate-spin" />
         </div>

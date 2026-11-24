@@ -58,7 +58,7 @@ export const NavButton: React.FC<NavButtonProps> = ({ item, collapsed, active, o
       title={collapsed ? item.label : undefined}
       className={`
         relative w-full flex items-center gap-3 rounded-lg transition-colors
-        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
+        focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
         ${collapsed ? 'justify-center px-2 py-2.5' : 'px-3 py-2.5'}
         ${active ? activeClassName : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}
       `}

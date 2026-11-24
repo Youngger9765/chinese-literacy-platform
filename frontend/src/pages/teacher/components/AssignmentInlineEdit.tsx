@@ -37,7 +37,7 @@ export const AssignmentInlineEdit: React.FC<AssignmentInlineEditProps> = ({
           value={editTitle}
           onChange={(event) => setEditTitle(event.target.value)}
           placeholder="留空則使用課文標題"
-          className="w-full h-9 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-[#19A696]/40 focus:border-[#19A696] transition-colors"
+          className="w-full h-9 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-hidden focus:ring-2 focus:ring-[#19A696]/40 focus:border-[#19A696] transition-colors"
         />
       </div>
       <div>
@@ -47,7 +47,7 @@ export const AssignmentInlineEdit: React.FC<AssignmentInlineEditProps> = ({
           value={editDescription}
           onChange={(event) => setEditDescription(event.target.value)}
           placeholder="任務說明（選填）"
-          className="w-full h-9 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-[#19A696]/40 focus:border-[#19A696] transition-colors"
+          className="w-full h-9 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-hidden focus:ring-2 focus:ring-[#19A696]/40 focus:border-[#19A696] transition-colors"
         />
       </div>
       <div>
@@ -69,7 +69,7 @@ export const AssignmentInlineEdit: React.FC<AssignmentInlineEditProps> = ({
         </button>
       </div>
       {editError && (
-        <div className="bg-red-50 border border-red-200 text-red-700 text-xs rounded px-3 py-2 mb-2">
+        <div className="bg-red-50 border border-red-200 text-red-700 text-xs rounded-sm px-3 py-2 mb-2">
           {editError}
         </div>
       )}

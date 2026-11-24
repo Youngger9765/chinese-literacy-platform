@@ -88,7 +88,7 @@ const VoiceInputButton: React.FC<VoiceInputButtonProps> = ({
       title={title}
       aria-label={isListening ? '停止語音輸入' : '語音輸入'}
       aria-pressed={isListening}
-      className={`${dimension} shrink-0 rounded-full flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
+      className={`${dimension} shrink-0 rounded-full flex items-center justify-center transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
         unsupported || disabled
           ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
           : isListening

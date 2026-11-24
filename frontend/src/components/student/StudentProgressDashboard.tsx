@@ -42,7 +42,7 @@ const StatCard: React.FC<StatCardProps> = ({ label, value, sub, icon, highlight 
   <div
     className={`rounded-2xl p-4 flex items-start gap-3 ${
       highlight
-        ? 'bg-gradient-to-br from-accent to-accent-hover text-white shadow-sm'
+        ? 'bg-linear-to-br from-accent to-accent-hover text-white shadow-xs'
         : 'bg-surface-container-lowest border border-[#E5E0D5]'
     }`}
   >

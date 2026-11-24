@@ -102,7 +102,7 @@ const OmoPaperResultBanner: React.FC<{ stepId: string }> = ({ stepId }) => {
   return (
     <section
       aria-label="紙本批改結果"
-      className="mb-4 rounded-2xl border border-amber-200 bg-amber-50/70 p-4 shadow-sm"
+      className="mb-4 rounded-2xl border border-amber-200 bg-amber-50/70 p-4 shadow-xs"
     >
       <div className="flex items-center gap-2 mb-2">
         <span className="text-lg" aria-hidden="true">📄</span>

@@ -13,7 +13,7 @@ modules:
   related_issues:
   - 415
   source_meetings:
-  - docs/meetings/2026-05-01-experts-review.md
+  - 2026-05-01 專家會議（內部會議紀錄，已移至私有課程庫）
   last_reviewed: 2026-06-02
   owner: young
   intent: specs/modules/ai-reading/INTENT.md
@@ -32,7 +32,7 @@ modules:
   - backend/specs/test_ai_service_circuit_breaker_spec.py
   related_issues: []
   source_meetings:
-  - docs/meetings/2026-05-01-experts-review.md
+  - 2026-05-01 專家會議（內部會議紀錄，已移至私有課程庫）
   last_reviewed: 2026-06-02
   owner: young
   intent: specs/modules/ai-service-circuit-breaker/INTENT.md
@@ -113,7 +113,7 @@ modules:
   - backend/specs/test_comprehension_grading_spec.py
   related_issues: []
   source_meetings:
-  - docs/meetings/2026-05-01-experts-review.md
+  - 2026-05-01 專家會議（內部會議紀錄，已移至私有課程庫）
   last_reviewed: 2026-06-02
   owner: young
   intent: specs/modules/comprehension-grading/INTENT.md
@@ -132,7 +132,7 @@ modules:
   related_issues:
   - 1509
   source_meetings:
-  - docs/meetings/2026-05-01-experts-review.md
+  - 2026-05-01 專家會議（內部會議紀錄，已移至私有課程庫）
   last_reviewed: 2026-06-01
   owner: young
   intent: specs/modules/content-schema/INTENT.md
@@ -192,7 +192,7 @@ modules:
   - 1369
   - 1402
   source_meetings:
-  - docs/meetings/2026-05-01-experts-review.md
+  - 2026-05-01 專家會議（內部會議紀錄，已移至私有課程庫）
   last_reviewed: 2026-06-02
   owner: young
   intent: specs/modules/exit-ticket/INTENT.md
@@ -209,7 +209,7 @@ modules:
   - backend/specs/test_gamification_xp_spec.py
   related_issues: []
   source_meetings:
-  - docs/meetings/2026-05-01-experts-review.md
+  - 2026-05-01 專家會議（內部會議紀錄，已移至私有課程庫）
   last_reviewed: 2026-06-02
   owner: young
   intent: specs/modules/gamification-xp/INTENT.md
@@ -363,7 +363,7 @@ modules:
   related_issues:
   - 1887
   source_meetings:
-  - docs/meetings/2026-05-01-experts-review.md
+  - 2026-05-01 專家會議（內部會議紀錄，已移至私有課程庫）
   last_reviewed: 2026-06-02
   owner: young
   intent: specs/modules/mcq-rescue/INTENT.md
@@ -387,7 +387,7 @@ modules:
   - 2027
   - 2028
   source_meetings:
-  - docs/meetings/2026-05-01-experts-review.md
+  - 2026-05-01 專家會議（內部會議紀錄，已移至私有課程庫）
   last_reviewed: 2026-06-01
   owner: young
   intent: specs/modules/omo-assessment/INTENT.md
@@ -485,7 +485,7 @@ modules:
   spec_tests: []
   related_issues: []
   source_meetings:
-  - docs/meetings/2026-05-01-experts-review.md
+  - 2026-05-01 專家會議（內部會議紀錄，已移至私有課程庫）
   last_reviewed: 2026-06-01
   owner: young
   intent: specs/modules/omo-upload/INTENT.md
@@ -641,7 +641,7 @@ modules:
   related_issues:
   - 1063
   source_meetings:
-  - docs/meetings/2026-05-01-experts-review.md
+  - 2026-05-01 專家會議（內部會議紀錄，已移至私有課程庫）
   last_reviewed: 2026-06-02
   owner: young
   intent: specs/modules/session-scoring/INTENT.md
@@ -661,7 +661,7 @@ modules:
   - backend/specs/test_socratic_dialogue_spec.py
   related_issues: []
   source_meetings:
-  - docs/meetings/2026-05-01-experts-review.md
+  - 2026-05-01 專家會議（內部會議紀錄，已移至私有課程庫）
   last_reviewed: 2026-06-02
   owner: young
   intent: specs/modules/socratic-dialogue/INTENT.md
@@ -714,7 +714,7 @@ modules:
   related_issues:
   - 1374
   source_meetings:
-  - docs/meetings/2026-05-01-experts-review.md
+  - 2026-05-01 專家會議（內部會議紀錄，已移至私有課程庫）
   last_reviewed: 2026-06-02
   owner: young
   intent: specs/modules/step-sequence/INTENT.md
@@ -794,7 +794,7 @@ modules:
   - backend/tests/test_no_duplicate_azure_impl.py
   related_issues: []
   source_meetings:
-  - docs/meetings/2026-05-01-experts-review.md
+  - 2026-05-01 專家會議（內部會議紀錄，已移至私有課程庫）
   last_reviewed: 2026-08-11
   owner: young
   intent: specs/modules/tts/INTENT.md

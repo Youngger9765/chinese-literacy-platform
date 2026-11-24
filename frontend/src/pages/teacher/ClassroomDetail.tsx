@@ -341,10 +341,10 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack, 
     return (
       <div className="flex-1 overflow-y-auto p-6 sm:p-8">
         <div className="max-w-4xl mx-auto">
-          <div className="h-5 bg-gray-200 animate-pulse rounded w-24 mb-6" />
+          <div className="h-5 bg-gray-200 animate-pulse rounded-sm w-24 mb-6" />
           <div className="bg-white rounded-2xl shadow-card p-6 space-y-4">
-            <div className="h-6 bg-gray-200 animate-pulse rounded w-1/3" />
-            <div className="h-4 bg-gray-200 animate-pulse rounded w-1/4" />
+            <div className="h-6 bg-gray-200 animate-pulse rounded-sm w-1/3" />
+            <div className="h-4 bg-gray-200 animate-pulse rounded-sm w-1/4" />
           </div>
         </div>
       </div>

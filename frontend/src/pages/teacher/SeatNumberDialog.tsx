@@ -178,7 +178,7 @@ const SeatNumberDialog: React.FC<SeatNumberDialogProps> = ({
                     onClick={() => moveUp(i)}
                     disabled={i === 0}
                     aria-label={`${row.name} 上移`}
-                    className="w-7 h-7 inline-flex items-center justify-center rounded text-gray-500 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                    className="w-7 h-7 inline-flex items-center justify-center rounded-sm text-gray-500 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
                   >
                     ↑
                   </button>
@@ -187,7 +187,7 @@ const SeatNumberDialog: React.FC<SeatNumberDialogProps> = ({
                     onClick={() => moveDown(i)}
                     disabled={i === rows.length - 1}
                     aria-label={`${row.name} 下移`}
-                    className="w-7 h-7 inline-flex items-center justify-center rounded text-gray-500 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                    className="w-7 h-7 inline-flex items-center justify-center rounded-sm text-gray-500 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
                   >
                     ↓
                   </button>
@@ -196,7 +196,7 @@ const SeatNumberDialog: React.FC<SeatNumberDialogProps> = ({
                       type="button"
                       onClick={() => removeRow(row.key)}
                       aria-label="移除空號"
-                      className="w-7 h-7 inline-flex items-center justify-center rounded text-gray-400 hover:text-red-600 hover:bg-red-50 cursor-pointer"
+                      className="w-7 h-7 inline-flex items-center justify-center rounded-sm text-gray-400 hover:text-red-600 hover:bg-red-50 cursor-pointer"
                     >
                       ✕
                     </button>

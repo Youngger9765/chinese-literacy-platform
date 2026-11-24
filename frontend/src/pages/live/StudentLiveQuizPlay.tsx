@@ -128,7 +128,7 @@ const StudentLiveQuizPlay: React.FC = () => {
           onClick={toggleMuted}
           aria-pressed={muted}
           aria-label={muted ? '開啟音效' : '關閉音效'}
-          className="fixed right-3 top-3 z-40 rounded-full border border-surface-dim bg-white/90 px-2.5 py-1 text-sm shadow"
+          className="fixed right-3 top-3 z-40 rounded-full border border-surface-dim bg-white/90 px-2.5 py-1 text-sm shadow-sm"
         >
           {muted ? '🔇' : '🔊'}
         </button>

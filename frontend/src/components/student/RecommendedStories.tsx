@@ -90,7 +90,7 @@ const StoryRecommendationCard: React.FC<StoryCardProps> = ({ rec, onStart }) => 
     <button
       type="button"
       onClick={onStart}
-      className="mt-auto w-full py-2.5 rounded-full bg-accent hover:bg-accent-hover text-white text-sm font-bold transition-colors min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+      className="mt-auto w-full py-2.5 rounded-full bg-accent hover:bg-accent-hover text-white text-sm font-bold transition-colors min-h-[44px] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
     >
       開始學習
     </button>

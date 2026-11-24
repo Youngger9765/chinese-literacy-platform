@@ -225,7 +225,7 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
         }}
       >
         {status === 'locked' ? (
-          <span className="blur-sm select-none">{
+          <span className="blur-xs select-none">{
             /* #3022: zhuyinLine 的型別是 ReactNode（別處可能塞 element 進來），
                只有它是字串時才可能帶 DIFFICULT_SPAN 標記、才需要切 run。 */
             typeof zhuyinLine === 'string'
@@ -460,7 +460,7 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
             <div className="flex gap-3 justify-center pt-2">
               <button
                 onClick={() => onRetryParagraph(idx)}
-                className="btn-encourage !text-sm !py-2.5 !px-6 !min-h-0"
+                className="btn-encourage text-sm! py-2.5! px-6! min-h-0!"
               >
                 重練這段
               </button>

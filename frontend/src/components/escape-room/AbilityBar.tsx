@@ -16,7 +16,7 @@ const ABILITIES: Array<{ key: EscapeRoomAbilityKey; title: string; description: 
 const AbilityBar: React.FC<AbilityBarProps> = ({ used, disabled, onUse }) => (
   <nav
     aria-label="能力卡"
-    className="fixed inset-x-0 bottom-0 z-10 border-t border-accent-bg-subtle bg-surface/95 p-2 backdrop-blur sm:static sm:rounded-2xl sm:border"
+    className="fixed inset-x-0 bottom-0 z-10 border-t border-accent-bg-subtle bg-surface/95 p-2 backdrop-blur-sm sm:static sm:rounded-2xl sm:border"
   >
     <div className="mx-auto flex max-w-xl gap-2">
       {ABILITIES.map((ability) => {

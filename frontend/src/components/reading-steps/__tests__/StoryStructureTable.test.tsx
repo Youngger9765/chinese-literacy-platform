@@ -295,7 +295,7 @@ describe('StoryStructureTable', () => {
     await waitFor(() => expect(screen.getByText('主角')).toBeTruthy());
     const tableEl = container.querySelector('table');
     expect(tableEl).toBeTruthy();
-    expect(tableEl?.className).toContain('min-w-[28rem]');
+    expect(tableEl?.className).toContain('min-w-md');
   });
 
   it('re-fetches when storyId prop changes', async () => {

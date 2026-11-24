@@ -146,7 +146,7 @@ export const FigureCard: React.FC<FigureCardProps> = ({ src, alt, caption, index
                 onClick={zoomOut}
                 disabled={scale <= ZOOM_MIN}
                 aria-label="縮小"
-                className="w-7 h-7 rounded-full bg-on-surface/60 hover:bg-on-surface/80 text-white flex items-center justify-center transition-colors disabled:opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                className="w-7 h-7 rounded-full bg-on-surface/60 hover:bg-on-surface/80 text-white flex items-center justify-center transition-colors disabled:opacity-30 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-accent"
               >
                 <span className="material-symbols-outlined text-base leading-none">remove</span>
               </button>
@@ -155,7 +155,7 @@ export const FigureCard: React.FC<FigureCardProps> = ({ src, alt, caption, index
                   type="button"
                   onClick={resetZoom}
                   aria-label="還原縮放"
-                  className="px-1.5 h-7 rounded-full bg-on-surface/60 hover:bg-on-surface/80 text-white text-[11px] font-bold flex items-center transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                  className="px-1.5 h-7 rounded-full bg-on-surface/60 hover:bg-on-surface/80 text-white text-[11px] font-bold flex items-center transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-accent"
                 >
                   {Math.round(scale * 100)}%
                 </button>
@@ -165,7 +165,7 @@ export const FigureCard: React.FC<FigureCardProps> = ({ src, alt, caption, index
                 onClick={zoomIn}
                 disabled={scale >= ZOOM_MAX}
                 aria-label="放大"
-                className="w-7 h-7 rounded-full bg-on-surface/60 hover:bg-on-surface/80 text-white flex items-center justify-center transition-colors disabled:opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                className="w-7 h-7 rounded-full bg-on-surface/60 hover:bg-on-surface/80 text-white flex items-center justify-center transition-colors disabled:opacity-30 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-accent"
               >
                 <span className="material-symbols-outlined text-base leading-none">add</span>
               </button>
@@ -174,7 +174,7 @@ export const FigureCard: React.FC<FigureCardProps> = ({ src, alt, caption, index
                 type="button"
                 onClick={() => setModalOpen(true)}
                 aria-label={`全螢幕查看 ${figureLabel}`}
-                className="w-7 h-7 rounded-full bg-on-surface/60 hover:bg-on-surface/80 text-white flex items-center justify-center transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                className="w-7 h-7 rounded-full bg-on-surface/60 hover:bg-on-surface/80 text-white flex items-center justify-center transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-accent"
               >
                 <span className="material-symbols-outlined text-base leading-none">fullscreen</span>
               </button>
@@ -247,13 +247,13 @@ export const FigureCard: React.FC<FigureCardProps> = ({ src, alt, caption, index
           aria-modal="true"
           aria-label={`${figureLabel} 全螢幕`}
           tabIndex={-1}
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 md:p-8 animate-fade-in"
+          className="fixed inset-0 z-100 flex items-center justify-center bg-black/80 p-4 md:p-8 animate-fade-in"
           onClick={() => setModalOpen(false)}
         >
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); setModalOpen(false); }}
-            className="absolute top-4 right-4 w-11 h-11 rounded-full bg-white/15 hover:bg-white/25 text-white flex items-center justify-center transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            className="absolute top-4 right-4 w-11 h-11 rounded-full bg-white/15 hover:bg-white/25 text-white flex items-center justify-center transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-accent"
             aria-label="關閉"
           >
             <span className="material-symbols-outlined">close</span>

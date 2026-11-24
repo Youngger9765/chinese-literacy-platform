@@ -80,11 +80,11 @@ interface StatCardProps {
 }
 
 const StatCard: React.FC<StatCardProps> = ({ icon, label, value, loading }) => (
-  <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex items-center gap-4">
+  <div className="bg-white rounded-xl border border-gray-100 shadow-xs p-5 flex items-center gap-4">
     <span className="text-3xl shrink-0" aria-hidden="true">{icon}</span>
     <div>
       <div
-        className={`text-2xl font-bold text-gray-900 ${loading ? 'animate-pulse bg-gray-200 rounded w-8 h-7 inline-block' : ''}`}
+        className={`text-2xl font-bold text-gray-900 ${loading ? 'animate-pulse bg-gray-200 rounded-sm w-8 h-7 inline-block' : ''}`}
         aria-label={`${label}: ${loading ? '載入中' : value}`}
       >
         {!loading && value}
@@ -120,7 +120,7 @@ const ClassroomListPreview: React.FC<ClassroomListPreviewProps> = ({ classrooms,
             type="button"
             onClick={() => onSelect(classroom.id)}
             aria-label={`前往 ${classroom.name}，共 ${classroom.student_count} 位學生`}
-            className="w-full flex items-center justify-between gap-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#19A696] focus-visible:ring-offset-1 text-left"
+            className="w-full flex items-center justify-between gap-4 bg-white rounded-xl border border-gray-100 shadow-xs p-4 hover:bg-gray-50 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#19A696] focus-visible:ring-offset-1 text-left"
           >
             <div className="flex items-center gap-3">
               <span className="text-2xl" aria-hidden="true">🏫</span>
@@ -128,7 +128,7 @@ const ClassroomListPreview: React.FC<ClassroomListPreviewProps> = ({ classrooms,
                 <div className="text-sm font-semibold text-gray-800">
                   {classroom.name}
                   {classroom.is_active === false && (
-                    <span className="ml-2 text-xs font-normal text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">已停用</span>
+                    <span className="ml-2 text-xs font-normal text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-sm">已停用</span>
                   )}
                 </div>
                 {classroom.grade != null && (
@@ -211,7 +211,7 @@ const TeacherHome: React.FC = () => {
     <div className="flex-1 overflow-y-auto">
       <div className="max-w-5xl mx-auto p-6 space-y-6">
         {/* Welcome banner */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-xs p-6">
           <div className="flex items-center gap-4">
             <div
               className="w-14 h-14 rounded-full bg-[#19A696] flex items-center justify-center shrink-0"
@@ -277,7 +277,7 @@ const TeacherHome: React.FC = () => {
                 aria-label={`${action.label}：${action.description}`}
                 className={`
                   flex items-center gap-4 p-4 rounded-xl border text-left transition-colors
-                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#19A696] focus-visible:ring-offset-2
+                  focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#19A696] focus-visible:ring-offset-2
                   ${action.colorClass}
                 `}
               >
@@ -303,7 +303,7 @@ const TeacherHome: React.FC = () => {
             <button
               type="button"
               onClick={() => navigate('/teacher')}
-              className="text-sm text-[#11806F] hover:text-[#0E7366] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#19A696] focus-visible:ring-offset-1 rounded"
+              className="text-sm text-[#11806F] hover:text-[#0E7366] font-medium transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#19A696] focus-visible:ring-offset-1 rounded-sm"
             >
               查看全部 →
             </button>
@@ -319,8 +319,8 @@ const TeacherHome: React.FC = () => {
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 bg-gray-200 rounded-full" />
                     <div className="space-y-1.5">
-                      <div className="h-3 bg-gray-200 rounded w-24" />
-                      <div className="h-2.5 bg-gray-200 rounded w-16" />
+                      <div className="h-3 bg-gray-200 rounded-sm w-24" />
+                      <div className="h-2.5 bg-gray-200 rounded-sm w-16" />
                     </div>
                   </div>
                 </div>

@@ -99,7 +99,7 @@ const DefeatRoster: React.FC<{ opponents: PkOpponent[]; onChallenge: () => void 
             type="button"
             onClick={onChallenge}
             title={o.unlocked ? `${o.name}（已擊敗）` : `${o.name}（尚未擊敗，點擊挑戰）`}
-            className="flex flex-col items-center gap-1 rounded-xl p-2 transition-colors hover:bg-surface-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            className="flex flex-col items-center gap-1 rounded-xl p-2 transition-colors hover:bg-surface-container focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent"
           >
             <PkFigureAvatar slug={o.slug} name={o.name} size="lg" locked={!o.unlocked} />
             <span className={`text-xs font-medium ${o.unlocked ? 'text-on-surface' : 'text-on-surface-variant'}`}>
@@ -180,7 +180,7 @@ const PkHistoryPanel: React.FC<PkHistoryPanelProps> = ({ token, onChallenge }) =
   if (matches.length === 0) {
     return (
       <div
-        className="mt-6 w-full max-w-3xl rounded-2xl bg-surface-container-lowest p-4 shadow-sm sm:p-6"
+        className="mt-6 w-full max-w-3xl rounded-2xl bg-surface-container-lowest p-4 shadow-xs sm:p-6"
         data-testid="pk-history-panel"
       >
         <DefeatRoster opponents={opponents} onChallenge={onChallenge} />
@@ -193,7 +193,7 @@ const PkHistoryPanel: React.FC<PkHistoryPanelProps> = ({ token, onChallenge }) =
 
   return (
     <div
-      className="mt-6 w-full max-w-3xl rounded-2xl bg-surface-container-lowest p-4 shadow-sm sm:p-6"
+      className="mt-6 w-full max-w-3xl rounded-2xl bg-surface-container-lowest p-4 shadow-xs sm:p-6"
       data-testid="pk-history-panel"
     >
       <DefeatRoster opponents={opponents} onChallenge={onChallenge} />
@@ -223,7 +223,7 @@ const PkHistoryPanel: React.FC<PkHistoryPanelProps> = ({ token, onChallenge }) =
           return (
             <li key={m.match_id} className="flex items-center justify-between gap-2 rounded-lg px-1 py-1 text-xs">
               <span className="flex min-w-0 items-center gap-1.5 text-on-surface-variant">
-                <span className={`shrink-0 rounded px-1.5 py-0.5 font-bold ${badge.cls}`}>{badge.text}</span>
+                <span className={`shrink-0 rounded-sm px-1.5 py-0.5 font-bold ${badge.cls}`}>{badge.text}</span>
                 <span className="truncate">vs {opponentLabel(m)}</span>
               </span>
               <span className="shrink-0 tabular-nums text-on-surface">

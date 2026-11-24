@@ -34,7 +34,7 @@ const AssessmentSectionWrapper: React.FC<AssessmentSectionWrapperProps> = ({
       className={`rounded-3xl border overflow-hidden ${
         disabled
           ? 'bg-gray-50 border-dashed border-gray-300'
-          : 'bg-white border-slate-200 shadow-sm'
+          : 'bg-white border-slate-200 shadow-xs'
       }`}
     >
       <div

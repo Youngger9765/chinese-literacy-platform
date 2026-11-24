@@ -345,7 +345,7 @@ const DictationPractice: React.FC<DictationPracticeProps> = ({
         </div>
 
         {/* Bottom actions */}
-        <div className="flex-shrink-0 bg-white border-t border-gray-200 px-6 py-4 flex items-center justify-between">
+        <div className="shrink-0 bg-white border-t border-gray-200 px-6 py-4 flex items-center justify-between">
           <button
             onClick={onBack}
             className="px-4 py-2.5 rounded-full text-sm text-gray-600 hover:text-gray-800 transition-colors"
@@ -391,7 +391,7 @@ const DictationPractice: React.FC<DictationPracticeProps> = ({
               disabled={isSpeaking || !ttsSupported}
               aria-label={isSpeaking ? '正在播放詞語音頻' : '播放詞語音頻'}
               aria-pressed={isSpeaking}
-              className={`w-24 h-24 rounded-full flex flex-col items-center justify-center gap-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2
+              className={`w-24 h-24 rounded-full flex flex-col items-center justify-center gap-2 transition-all focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2
                 ${isSpeaking
                   ? 'bg-accent/10 border-2 border-accent scale-110'
                   : 'bg-gray-50 border-2 border-gray-200 hover:border-accent hover:bg-accent/5 active:scale-95'
@@ -418,7 +418,7 @@ const DictationPractice: React.FC<DictationPracticeProps> = ({
                 onKeyDown={handleKeyDown}
                 placeholder="在此輸入..."
                 aria-label="聽寫答案輸入框，輸入你聽到的詞語，按 Enter 提交"
-                className="w-full text-center text-2xl font-bold py-4 px-4 rounded-xl border-2 border-gray-200 focus:border-accent focus:outline-none bg-white text-gray-900 placeholder-gray-300 transition-colors"
+                className="w-full text-center text-2xl font-bold py-4 px-4 rounded-xl border-2 border-gray-200 focus:border-accent focus:outline-hidden bg-white text-gray-900 placeholder-gray-300 transition-colors"
                 autoComplete="off"
                 autoCorrect="off"
                 autoCapitalize="none"
@@ -436,7 +436,7 @@ const DictationPractice: React.FC<DictationPracticeProps> = ({
         </div>
 
         {/* Bottom actions */}
-        <div className="flex-shrink-0 bg-white border-t border-gray-200 px-6 py-4 flex items-center justify-between gap-3">
+        <div className="shrink-0 bg-white border-t border-gray-200 px-6 py-4 flex items-center justify-between gap-3">
           <button
             onClick={() => submitAnswer(true)}
             className="px-4 py-2.5 rounded-full text-sm text-gray-500 hover:text-gray-700 border border-gray-300 bg-transparent hover:bg-gray-50 transition-colors"

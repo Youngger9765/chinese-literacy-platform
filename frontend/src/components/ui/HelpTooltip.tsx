@@ -78,7 +78,7 @@ const HelpTooltip: React.FC<HelpTooltipProps> = ({
         onMouseLeave={() => setVisible(false)}
         onFocus={() => setVisible(true)}
         onBlur={() => setVisible(false)}
-        className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-gray-200 text-gray-600 text-xs font-bold hover:bg-amber-200 hover:text-amber-800 focus:outline-none focus:ring-2 focus:ring-amber-400 transition-colors cursor-help"
+        className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-gray-200 text-gray-600 text-xs font-bold hover:bg-amber-200 hover:text-amber-800 focus:outline-hidden focus:ring-2 focus:ring-amber-400 transition-colors cursor-help"
       >
         ?
       </button>

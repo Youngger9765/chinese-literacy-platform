@@ -79,7 +79,7 @@ export function ComposeGame({ questions, onFinish, onBack }: ComposeGameProps) {
         <button
           onClick={onBack}
           aria-label="返回生字練習"
-          className="text-gray-400 hover:text-gray-700 transition-colors p-1 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+          className="text-gray-400 hover:text-gray-700 transition-colors p-1 rounded-sm focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />

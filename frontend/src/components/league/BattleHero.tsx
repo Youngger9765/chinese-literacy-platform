@@ -129,7 +129,7 @@ const BattleHero: React.FC<BattleHeroProps> = ({ theme, seasonName, rows, viewer
   return (
     <section
       aria-label={`${theme.era}${theme.title} · 跨班賽季對戰進度`}
-      className="relative rounded-3xl bg-gradient-to-br from-accent to-accent/80 shadow-editorial overflow-hidden px-5 py-6 sm:px-8 sm:py-7"
+      className="relative rounded-3xl bg-linear-to-br from-accent to-accent/80 shadow-editorial overflow-hidden px-5 py-6 sm:px-8 sm:py-7"
     >
       <EraBackdrop art={theme.background_art} />
       <div className="relative">

@@ -4,7 +4,7 @@
 **Priority**: P0 — 7/1 deadline 必含
 **Date**: 2026-05-02
 **Status**: Draft (pre-implementation, awaiting eng review)
-**Refs**: 5/1 專家會議 §三.6、`docs/meetings/2026-05-01-experts-review.md`
+**Refs**: 5/1 專家會議 §三.6（內部會議紀錄，已移至私有課程庫）
 
 ---
 

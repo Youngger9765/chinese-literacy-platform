@@ -193,7 +193,7 @@ const OmoResultStandalonePage: React.FC = () => {
           onClick={() => navigate(-1)}
           aria-label="返回"
           className="p-1 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100
-            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

@@ -127,7 +127,7 @@ const ClassroomPkSettingsPanel: React.FC<ClassroomPkSettingsPanelProps> = ({
                 aria-label={ariaLabel}
                 disabled={savingKey !== null}
                 onClick={() => handleToggle(key)}
-                className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 ${
+                className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 ${
                   checked ? 'bg-emerald-500' : 'bg-gray-300'
                 }`}
               >

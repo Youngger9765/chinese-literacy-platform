@@ -59,7 +59,7 @@ const PkFigureIntro: React.FC<PkFigureIntroProps> = ({ figure, firstTime, onDone
       <button
         type="button"
         onClick={finish}
-        className="absolute right-4 top-4 z-10 rounded-full bg-surface-container px-4 py-2 text-sm font-semibold text-on-surface shadow active:scale-95"
+        className="absolute right-4 top-4 z-10 rounded-full bg-surface-container px-4 py-2 text-sm font-semibold text-on-surface shadow-sm active:scale-95"
       >
         跳過
       </button>
@@ -76,7 +76,7 @@ const PkFigureIntro: React.FC<PkFigureIntroProps> = ({ figure, firstTime, onDone
             <p className="text-base text-on-surface">
               {beats[0].text}
               {beats[0].kind === 'legend' && (
-                <span className="ml-1 rounded bg-accent-bg px-1.5 py-0.5 text-xs font-bold text-accent">傳說</span>
+                <span className="ml-1 rounded-sm bg-accent-bg px-1.5 py-0.5 text-xs font-bold text-accent">傳說</span>
               )}
             </p>
             <p className="text-sm italic text-on-surface-variant">「{figure.quote.text}」—— {figure.quote.work}</p>
@@ -85,7 +85,7 @@ const PkFigureIntro: React.FC<PkFigureIntroProps> = ({ figure, firstTime, onDone
           <p key={beatIndex} className="text-base text-on-surface animate-fade-in">
             {beats[beatIndex].text}
             {beats[beatIndex].kind === 'legend' && (
-              <span className="ml-1 rounded bg-accent-bg px-1.5 py-0.5 text-xs font-bold text-accent">傳說</span>
+              <span className="ml-1 rounded-sm bg-accent-bg px-1.5 py-0.5 text-xs font-bold text-accent">傳說</span>
             )}
           </p>
         ) : (

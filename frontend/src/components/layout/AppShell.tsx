@@ -74,7 +74,7 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
       {/* Skip-to-content link — visually hidden until focused (WCAG 2.4.1) */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-accent focus:text-white focus:rounded focus:font-medium focus:text-sm focus:shadow-lg"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-accent focus:text-white focus:rounded-sm focus:font-medium focus:text-sm focus:shadow-lg"
       >
         跳至主要內容
       </a>
@@ -149,7 +149,7 @@ const NavArrow: React.FC<{
       type="button"
       onClick={() => step && onClick(step)}
       disabled={!step || disabled}
-      className="shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface disabled:opacity-30 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+      className="shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface disabled:opacity-30 disabled:cursor-not-allowed transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent"
       aria-label={label}
       title={label}
     >
@@ -303,7 +303,7 @@ export const StepDots: React.FC<StepDotsProps> = ({
               // -inset-1.5 (6px/side) gets exactly to 40×40 without the
               // invisible hit areas eating much more into the 6px gap between
               // dots than they already did.
-              className={`${sizeClass} relative before:absolute before:-inset-1.5 before:content-[''] rounded-full text-xs sm:text-sm md:text-base font-bold flex items-center justify-center transition-all hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${dotClass}`}
+              className={`${sizeClass} relative before:absolute before:-inset-1.5 before:content-[''] rounded-full text-xs sm:text-sm md:text-base font-bold flex items-center justify-center transition-all hover:scale-105 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${dotClass}`}
               aria-label={ann?.a11yLabel ?? `${i + 1}. ${step.label}`}
               aria-description={isReturned ? '老師退回，要重做' : needsReview ? '已完成，有錯題要訂正' : undefined}
               data-review={needsReview || undefined}
@@ -459,7 +459,7 @@ const ImmersiveTopBar: React.FC = () => {
       <button
         type="button"
         onClick={handleBack}
-        className="shrink-0 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full hover:bg-surface-container-high transition-colors active:scale-90 duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        className="shrink-0 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full hover:bg-surface-container-high transition-colors active:scale-90 duration-200 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent"
         aria-label={inToolbox ? '返回練習工具箱' : '返回圖書館'}
       >
         <span className="material-symbols-outlined text-on-surface text-xl md:text-2xl">arrow_back</span>
@@ -554,7 +554,7 @@ export const LearningAppShell: React.FC = () => {
       {/* Skip-to-content link */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-accent focus:text-white focus:rounded focus:font-medium focus:text-sm focus:shadow-lg"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-accent focus:text-white focus:rounded-sm focus:font-medium focus:text-sm focus:shadow-lg"
       >
         跳至主要內容
       </a>

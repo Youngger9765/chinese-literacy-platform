@@ -131,8 +131,8 @@ const GameHubCardButton: React.FC<{ card: GameHubCard; onOpen: () => void; size:
       disabled={disabled}
       aria-label={card.locked ? `${card.label}（${card.lockedText}）` : card.label}
       className={`
-        group flex flex-col overflow-hidden rounded-3xl border text-left shadow-sm transition-all
-        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
+        group flex flex-col overflow-hidden rounded-3xl border text-left shadow-xs transition-all
+        focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
         ${disabled
           ? 'border-gray-200 opacity-60 cursor-not-allowed'
           : 'border-gray-200 hover:-translate-y-0.5 hover:shadow-lg cursor-pointer'
@@ -140,7 +140,7 @@ const GameHubCardButton: React.FC<{ card: GameHubCard; onOpen: () => void; size:
       `}
     >
       <div
-        className={`relative flex ${heroHeight} items-end justify-center bg-gradient-to-br ${card.heroGradient} ${
+        className={`relative flex ${heroHeight} items-end justify-center bg-linear-to-br ${card.heroGradient} ${
           disabled ? 'grayscale' : ''
         }`}
       >

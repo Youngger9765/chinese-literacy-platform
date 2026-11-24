@@ -134,7 +134,7 @@ const ClassroomTabs: React.FC<ClassroomTabsProps> = ({
   topSlot,
 }) => (
   <div className="min-h-full flex flex-col">
-    <nav className="flex sticky top-0 z-10 shadow-sm" aria-label="班級分頁" role="tablist">
+    <nav className="flex sticky top-0 z-10 shadow-xs" aria-label="班級分頁" role="tablist">
       {TABS.map((tab) => (
         <button
           key={tab.key}

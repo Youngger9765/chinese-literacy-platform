@@ -168,7 +168,7 @@ const JunyiCallbackPage: React.FC = () => {
   if (error) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-amber-50 px-4">
-        <div className="w-full max-w-sm bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-4 text-center">
+        <div className="w-full max-w-sm bg-white rounded-2xl shadow-xs border border-gray-200 p-6 space-y-4 text-center">
           <div className="text-4xl">均一登入失敗</div>
           <p className="text-red-600 text-sm">{error}</p>
           <button
@@ -193,7 +193,7 @@ const JunyiCallbackPage: React.FC = () => {
   // Loading state — code is being exchanged with the backend
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-amber-50 px-4">
-      <div className="w-full max-w-sm bg-white rounded-2xl shadow-sm border border-gray-200 p-6 text-center space-y-4">
+      <div className="w-full max-w-sm bg-white rounded-2xl shadow-xs border border-gray-200 p-6 text-center space-y-4">
         <div className="flex justify-center">
           <div className="w-10 h-10 border-4 border-[#FF6B35] border-t-transparent rounded-full animate-spin" />
         </div>

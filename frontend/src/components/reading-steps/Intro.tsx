@@ -225,13 +225,13 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
               <img
                 src={story.thumbnail}
                 alt={`《${story.title}》課文封面圖`}
-                className="w-32 h-24 object-cover rounded-xl border border-gray-200 flex-shrink-0"
+                className="w-32 h-24 object-cover rounded-xl border border-gray-200 shrink-0"
                 onError={(e) => { e.currentTarget.style.display = 'none'; }}
               />
             ) : null}
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-accent-bg-subtle text-accent-hover border border-accent-bg-subtle uppercase tracking-widest">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-sm bg-accent-bg-subtle text-accent-hover border border-accent-bg-subtle uppercase tracking-widest">
                   {CATEGORY_LABEL[story.category] ?? story.category}
                 </span>
                 {/* #2082 A13: neutral level format — avoids "四年級" which feels
@@ -240,7 +240,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                     Product-tunable: owner may prefer pure number or different label. */}
                 <span className="text-[10px] text-gray-400">{gradeLabel(String(story.level))}</span>
               </div>
-              <h1 className={`text-2xl font-normal text-on-surface ${zhuyinActive ? 'leading-[2.4rem] tracking-[0.15em]' : 'leading-[1.5]'}`}>
+              <h1 className={`text-2xl font-normal text-on-surface ${zhuyinActive ? 'leading-[2.4rem] tracking-[0.15em]' : 'leading-normal'}`}>
                 {processZhuyin(story.title)}
               </h1>
               {/* #2139: genre/strategy subtitle removed here — replaced by the
@@ -340,7 +340,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                 <button
                   type="button"
                   onClick={() => { void handleDownloadWorksheetEdition('student'); }}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-700 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-700 transition-all active:scale-95 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
                   aria-label="下載學生版學習單"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -353,7 +353,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                 <button
                   type="button"
                   onClick={() => { void handleDownloadWorksheetEdition('teacher'); }}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border border-purple-300 bg-purple-50 hover:bg-purple-100 text-purple-700 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:ring-offset-1"
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border border-purple-300 bg-purple-50 hover:bg-purple-100 text-purple-700 transition-all active:scale-95 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:ring-offset-1"
                   aria-label="下載教師版學習單"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -442,7 +442,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                       key={step.id}
                       type="button"
                       onClick={() => navigate(stepPath(story.id, step.id))}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white hover:border-accent hover:text-accent hover:bg-accent/5 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white hover:border-accent hover:text-accent hover:bg-accent/5 transition-all active:scale-95 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
                       aria-label={`跳轉到第 ${idx + 1} 步：${step.label}`}
                     >
                       <span className="w-4 h-4 rounded-full bg-gray-100 text-gray-500 text-[10px] font-bold flex items-center justify-center shrink-0">
@@ -461,12 +461,12 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
 
       {/* Bottom action — #2082 A3: 開始學習 promoted to large primary CTA,
           返回圖書館 demoted to a secondary text link */}
-      <div className="flex-shrink-0 bg-surface-container-lowest border-t border-gray-200 px-6 py-4 flex flex-col sm:flex-row items-center gap-3">
+      <div className="shrink-0 bg-surface-container-lowest border-t border-gray-200 px-6 py-4 flex flex-col sm:flex-row items-center gap-3">
         {/* Primary CTA — full-width on mobile, min-height ~56px */}
         <button
           type="button"
           onClick={onStartReading}
-          className="w-full sm:flex-1 min-h-[56px] rounded-2xl font-bold text-lg bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+          className="w-full sm:flex-1 min-h-[56px] rounded-2xl font-bold text-lg bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
         >
           開始學習
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -477,7 +477,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
         <button
           type="button"
           onClick={onBack}
-          className="text-sm text-gray-400 hover:text-gray-700 transition-colors underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 rounded"
+          className="text-sm text-gray-400 hover:text-gray-700 transition-colors underline underline-offset-2 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 rounded-sm"
         >
           返回圖書館
         </button>
@@ -495,7 +495,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
           onClick={handleUploadedBackdropClick}
         >
           <div className="relative flex flex-col bg-white w-full max-w-3xl max-h-[90vh] rounded-2xl shadow-2xl overflow-hidden">
-            <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
+            <div className="shrink-0 flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
               <div className="min-w-0">
                 <p className="text-sm font-bold text-gray-800">已上傳學習單</p>
                 <p className="text-xs text-gray-400 truncate">{story.title}</p>
@@ -503,7 +503,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
               <button
                 type="button"
                 onClick={() => setShowUploadedModal(false)}
-                className="p-1.5 rounded-full hover:bg-gray-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 flex-shrink-0"
+                className="p-1.5 rounded-full hover:bg-gray-200 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gray-400 shrink-0"
                 aria-label="關閉已上傳學習單"
               >
                 <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -518,7 +518,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                   {priorUpload.images.map((image) => (
                     <div
                       key={`${image.attempt_id}-${image.index}`}
-                      className="aspect-[3/4] rounded-xl border border-gray-200 bg-gray-50 overflow-hidden flex items-center justify-center"
+                      className="aspect-3/4 rounded-xl border border-gray-200 bg-gray-50 overflow-hidden flex items-center justify-center"
                     >
                       {image.url ? (
                         <img

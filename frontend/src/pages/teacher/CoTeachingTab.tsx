@@ -165,7 +165,7 @@ const CoTeachingTab: React.FC<CoTeachingTabProps> = ({ classroomId, ownerId }) =
               onChange={(e) => setInviteEmail(e.target.value)}
               placeholder="輸入教師 Email"
               disabled={isInviting}
-              className="flex-1 min-w-0 text-base sm:text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:bg-gray-100"
+              className="flex-1 min-w-0 text-base sm:text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-hidden focus:ring-2 focus:ring-blue-400 disabled:bg-gray-100"
             />
             {/*
              * #3544: an input's default min-width:auto kept it at its intrinsic width,
@@ -177,7 +177,7 @@ const CoTeachingTab: React.FC<CoTeachingTabProps> = ({ classroomId, ownerId }) =
               onChange={(e) => setInviteRole(e.target.value as CoTeacherRole)}
               disabled={isInviting}
               aria-label="協同教師角色"
-              className="shrink-0 text-base sm:text-sm border border-gray-300 rounded-lg px-2 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:bg-gray-100 cursor-pointer"
+              className="shrink-0 text-base sm:text-sm border border-gray-300 rounded-lg px-2 py-2 focus:outline-hidden focus:ring-2 focus:ring-blue-400 disabled:bg-gray-100 cursor-pointer"
             >
               <option value="editor">可編輯</option>
               <option value="viewer">只能看</option>

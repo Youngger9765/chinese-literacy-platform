@@ -881,7 +881,7 @@ const BlockSequenceRenderer: React.FC<Props> = ({
                                     setBlockValue(key, next);
                                     checkCompletion({ ...blockState, [key]: next });
                                   }}
-                                  className="mx-1 min-w-[5rem] border-b border-gray-400 bg-transparent px-1 focus:outline-none focus:border-blue-500"
+                                  className="mx-1 min-w-20 border-b border-gray-400 bg-transparent px-1 focus:outline-hidden focus:border-blue-500"
                                 />
                               </span>
                             );
@@ -978,7 +978,7 @@ const BlockSequenceRenderer: React.FC<Props> = ({
                   <label className="text-sm text-on-surface-variant">
                     對應到：
                     <select
-                      className="ml-2 rounded border border-gray-300 px-2 py-1 text-base"
+                      className="ml-2 rounded-sm border border-gray-300 px-2 py-1 text-base"
                       value={picks[lk] ?? ''}
                       onChange={(e) => {
                         const next = { ...picks, [lk]: e.target.value };

@@ -376,7 +376,7 @@ const OmoIdentifyResult: React.FC<OmoIdentifyResultProps> = ({
               onClick={checkResultNow}
               className="px-5 py-2 text-sm font-medium rounded-xl border border-gray-300 bg-white
                 hover:bg-gray-50 active:bg-gray-100
-                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2
+                focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2
                 transition-colors"
             >
               立即查看批改結果
@@ -506,7 +506,7 @@ const OmoIdentifyResult: React.FC<OmoIdentifyResultProps> = ({
           disabled={confirming}
           className="w-full py-4 px-6 bg-green-600 hover:bg-green-700 disabled:opacity-60
             text-white font-bold text-lg rounded-xl transition-colors
-            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"
+            focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"
         >
           {confirming ? '確認中…' : '對，是這個！'}
         </button>
@@ -548,7 +548,7 @@ const OmoIdentifyResult: React.FC<OmoIdentifyResultProps> = ({
             className={`
               flex items-start gap-3 w-full rounded-2xl px-4 py-4 text-left transition-all
               border-2 hover:border-blue-400 hover:bg-blue-50
-              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500
+              focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500
               disabled:opacity-60
               ${idx === 0 ? 'border-blue-200 bg-white' : 'border-gray-200 bg-white'}
             `}

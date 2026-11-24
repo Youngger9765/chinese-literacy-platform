@@ -57,7 +57,7 @@ const ListeningQuestionPanel: React.FC<ListeningQuestionPanelProps> = ({
           }}
           className={`flex-1 px-5 py-3 rounded-full text-sm font-headline font-bold transition-all ${
             retellMode === 'text'
-              ? 'bg-surface-container-lowest text-accent shadow-sm'
+              ? 'bg-surface-container-lowest text-accent shadow-xs'
               : 'text-on-surface-variant'
           }`}
         >
@@ -68,7 +68,7 @@ const ListeningQuestionPanel: React.FC<ListeningQuestionPanelProps> = ({
           disabled={!speechSupported}
           className={`flex-1 px-5 py-3 rounded-full text-sm font-headline font-bold transition-all ${
             retellMode === 'voice'
-              ? 'bg-surface-container-lowest text-accent shadow-sm'
+              ? 'bg-surface-container-lowest text-accent shadow-xs'
               : 'text-on-surface-variant'
           } ${!speechSupported ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
@@ -85,7 +85,7 @@ const ListeningQuestionPanel: React.FC<ListeningQuestionPanelProps> = ({
             placeholder="在這裡輸入你記得的課文內容..."
             rows={6}
             maxLength={2000}
-            className="w-full px-4 py-3 border-2 border-surface-container-high rounded-2xl text-on-surface text-base placeholder-on-surface-variant/40 resize-none focus:outline-none focus:border-accent bg-transparent"
+            className="w-full px-4 py-3 border-2 border-surface-container-high rounded-2xl text-on-surface text-base placeholder-on-surface-variant/40 resize-none focus:outline-hidden focus:border-accent bg-transparent"
           />
           <p className="text-xs text-right text-on-surface-variant mt-2">{retelling.length} / 2000</p>
         </div>

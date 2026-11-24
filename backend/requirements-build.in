@@ -6,7 +6,8 @@
 # PyPI *without* applying --require-hashes -- observed in CI's pytest.yml log:
 # "Installing build dependencies ... Collecting setuptools>=40.8.0".
 # Instead we install this hash-pinned setuptools first and build jieba with
-# --no-build-isolation against it. Version matches what the pinned base
-# image (backend/Dockerfile, #3853) ships, i.e. what prod has always built
-# jieba with. Regenerate requirements-build.lock per backend/README.md.
-setuptools==79.0.1
+# --no-build-isolation against it. Originally 79.0.1 to match what the pinned
+# base image (backend/Dockerfile, #3853) ships; bumped to 84.2.1 (#4116/#4130)
+# after verifying jieba 0.42.1 builds and imports with it under
+# --no-build-isolation. Regenerate requirements-build.lock per backend/README.md.
+setuptools==84.2.1

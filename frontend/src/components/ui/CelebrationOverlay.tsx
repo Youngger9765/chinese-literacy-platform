@@ -101,7 +101,7 @@ const CelebrationOverlay: React.FC<CelebrationOverlayProps> = ({ score }) => {
 
       {/* Center modal */}
       <div
-        className={`celebration-overlay fixed inset-0 flex items-center justify-center z-[9998] pointer-events-none ${fading ? 'fading' : ''}`}
+        className={`celebration-overlay fixed inset-0 flex items-center justify-center z-9998 pointer-events-none ${fading ? 'fading' : ''}`}
       >
         <div className="bg-white rounded-3xl shadow-2xl px-10 py-8 flex flex-col items-center gap-3 border-4 border-yellow-300">
           {/* Stars */}

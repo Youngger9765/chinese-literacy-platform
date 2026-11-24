@@ -22,11 +22,11 @@ import { Step } from './useWriteCharacterMachine';
 
 export function ConfettiParticles() {
   const pieces = [
-    { color: 'bg-yellow-400', anim: 'animate-confetti-drop-1', left: '20%', shape: 'rounded-sm w-3 h-3' },
+    { color: 'bg-yellow-400', anim: 'animate-confetti-drop-1', left: '20%', shape: 'rounded-xs w-3 h-3' },
     { color: 'bg-pink-400',   anim: 'animate-confetti-drop-2', left: '50%', shape: 'rounded-full w-2.5 h-2.5' },
-    { color: 'bg-sky-400',    anim: 'animate-confetti-drop-3', left: '75%', shape: 'rounded-sm w-2 h-3' },
+    { color: 'bg-sky-400',    anim: 'animate-confetti-drop-3', left: '75%', shape: 'rounded-xs w-2 h-3' },
     { color: 'bg-emerald-400',anim: 'animate-confetti-drop-1', left: '35%', shape: 'rounded-full w-2 h-2' },
-    { color: 'bg-violet-400', anim: 'animate-confetti-drop-2', left: '65%', shape: 'rounded-sm w-3 h-2' },
+    { color: 'bg-violet-400', anim: 'animate-confetti-drop-2', left: '65%', shape: 'rounded-xs w-3 h-2' },
     { color: 'bg-orange-400', anim: 'animate-confetti-drop-3', left: '85%', shape: 'rounded-full w-2.5 h-2.5' },
   ];
   return (

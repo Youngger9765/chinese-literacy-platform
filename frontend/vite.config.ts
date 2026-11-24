@@ -1,6 +1,7 @@
 import path from 'path';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
   base: '/',
@@ -25,7 +26,7 @@ export default defineConfig({
       },
     },
   },
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
   build: {
     target: 'esnext',
   },
@@ -34,14 +35,18 @@ export default defineConfig({
   // a destructuring down-level it can't do ("Transforming destructuring ... is
   // not supported yet") on deps like date-fns / d3-array / @floating-ui,
   // crashing `npm run dev`. esnext skips that lowering entirely. (#2428)
+  // Vite 8 pre-bundles with Rolldown and silently ignores esbuildOptions.target,
+  // so the same intent now lives under rolldownOptions.transform.target.
   optimizeDeps: {
-    esbuildOptions: {
-      target: 'esnext',
+    rolldownOptions: {
+      transform: {
+        target: 'esnext',
+      },
     },
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      '@': path.resolve(import.meta.dirname, './src'),
     },
   },
   test: {

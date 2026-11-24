@@ -401,7 +401,7 @@ const OmoUpload: React.FC<OmoUploadProps> = ({
             className="w-full flex items-center justify-center gap-2 py-2.5 px-6
               text-gray-600 hover:text-gray-900 hover:bg-gray-100 active:bg-gray-200
               text-sm font-medium rounded-xl
-              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2
+              focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2
               transition-colors"
           >
             <span aria-hidden="true">📋</span>
@@ -503,7 +503,7 @@ const OmoUpload: React.FC<OmoUploadProps> = ({
             className="w-full flex items-center justify-center gap-2 py-3.5 px-6
               bg-blue-600 hover:bg-blue-700 active:bg-blue-800
               text-white font-semibold rounded-xl
-              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2
+              focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2
               transition-colors"
           >
             <span aria-hidden="true">📷</span>
@@ -516,7 +516,7 @@ const OmoUpload: React.FC<OmoUploadProps> = ({
               bg-white hover:bg-gray-50 active:bg-gray-100
               text-gray-700 font-semibold rounded-xl
               border border-gray-300
-              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2
+              focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2
               transition-colors"
           >
             <span aria-hidden="true">🖼️</span>
@@ -531,7 +531,7 @@ const OmoUpload: React.FC<OmoUploadProps> = ({
               className="w-full flex items-center justify-center gap-2 py-2.5 px-6
                 text-gray-600 hover:text-gray-900 hover:bg-gray-100 active:bg-gray-200
                 text-sm font-medium rounded-xl
-                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2
+                focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2
                 transition-colors"
             >
               <span aria-hidden="true">📋</span>
@@ -553,7 +553,7 @@ const OmoUpload: React.FC<OmoUploadProps> = ({
                   bg-white hover:bg-gray-50 active:bg-gray-100
                   text-gray-700 text-sm font-medium rounded-xl
                   border border-gray-300
-                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2
+                  focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2
                   transition-colors"
               >
                 <span aria-hidden="true">📷</span>
@@ -566,7 +566,7 @@ const OmoUpload: React.FC<OmoUploadProps> = ({
                   bg-white hover:bg-gray-50 active:bg-gray-100
                   text-gray-700 text-sm font-medium rounded-xl
                   border border-gray-300
-                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2
+                  focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2
                   transition-colors"
               >
                 <span aria-hidden="true">🖼️</span>
@@ -587,7 +587,7 @@ const OmoUpload: React.FC<OmoUploadProps> = ({
             className="w-full flex items-center justify-center gap-2 py-3.5 px-6
               bg-blue-600 hover:bg-blue-700 active:bg-blue-800
               text-white font-semibold rounded-xl
-              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2
+              focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2
               transition-colors"
           >
             <span aria-hidden="true">🚀</span>

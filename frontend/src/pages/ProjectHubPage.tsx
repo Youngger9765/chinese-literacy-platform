@@ -34,36 +34,11 @@ const importantLinks: LinkItem[] = [
     badge: 'Roadmap',
   },
   {
-    title: '會議紀錄',
-    description: '查看最近的週會紀錄與決策。',
-    href: `${REPO_BLOB_BASE}/docs/meetings/2026-03-13.md`,
-    badge: 'Meeting',
-  },
-  {
-    title: '學生貢獻度',
-    description: '追蹤實習生本週輸出、PR 狀態與 issue 進度。',
-    href: `${REPO_BLOB_BASE}/docs/meetings/team-contributions.md`,
-    badge: 'Team',
-  },
-  {
     title: '學生學習歷程儀表板',
     description: '查看學生學習歷程與訓練儀表板。',
     href: 'https://lingoleap-frontend-958347263320.asia-east1.run.app/intern-training/dashboard.html',
     external: true,
     badge: 'Dashboard',
-  },
-];
-
-const quickLinks: LinkItem[] = [
-  {
-    title: '本週週報',
-    description: '2026-03-19 週報，整理本週交付、風險與下週重點。',
-    href: `${REPO_BLOB_BASE}/docs/meetings/2026-03-19-weekly-report.md`,
-  },
-  {
-    title: '明天會議議程',
-    description: '2026-03-20 會議議程，開會前可直接照這份走。',
-    href: `${REPO_BLOB_BASE}/docs/meetings/2026-03-20-agenda.md`,
   },
 ];
 
@@ -100,7 +75,7 @@ const SectionCard: React.FC<SectionCardProps> = ({
   description,
   children,
 }) => (
-  <section className="rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm shadow-slate-200/70 backdrop-blur">
+  <section className="rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-xs shadow-slate-200/70 backdrop-blur-sm">
     <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">{eyebrow}</p>
     <div className="mt-3">
       <h2 className="text-2xl font-bold text-slate-900">{title}</h2>
@@ -138,8 +113,8 @@ const ProjectHubPage: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(16,185,129,0.18),_transparent_35%),linear-gradient(180deg,#f8fafc_0%,#eefbf5_52%,#f8fafc_100%)]">
-      <header className="border-b border-slate-200/80 bg-white/80 backdrop-blur">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.18),transparent_35%),linear-gradient(180deg,#f8fafc_0%,#eefbf5_52%,#f8fafc_100%)]">
+      <header className="border-b border-slate-200/80 bg-white/80 backdrop-blur-sm">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.28em] text-emerald-700">
@@ -157,21 +132,16 @@ const ProjectHubPage: React.FC = () => {
       </header>
 
       <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-        <section className="rounded-[2rem] border border-slate-200/80 bg-slate-900 px-6 py-8 text-white shadow-xl shadow-emerald-100 sm:px-8">
+        <section className="rounded-4xl border border-slate-200/80 bg-slate-900 px-6 py-8 text-white shadow-xl shadow-emerald-100 sm:px-8">
           <div className="max-w-3xl">
             <p className="text-sm font-semibold uppercase tracking-[0.32em] text-emerald-300">
               Route
             </p>
             <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">`/hub`</h2>
-            <p className="mt-4 text-sm leading-7 text-slate-200 sm:text-base">
+            <p className="mt-4 text-sm leading-7 text-slate-200 sm:text-base sm:leading-6">
               這頁把週報、明天會議議程、學生貢獻重點、學生儀表板和核心文件集中在同一個入口。
               也保留 ` /docs ` 可直接打開同一頁，方便沿用原本記法。
             </p>
-          </div>
-          <div className="mt-6 grid gap-3 sm:grid-cols-2">
-            {quickLinks.map((link) => (
-              <ResourceLinkCard key={link.title} {...link} />
-            ))}
           </div>
         </section>
 

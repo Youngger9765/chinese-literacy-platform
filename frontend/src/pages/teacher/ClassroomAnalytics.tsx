@@ -299,7 +299,7 @@ const ClassroomAnalytics: React.FC<ClassroomAnalyticsProps> = ({ classroomId }) 
                   const item = payload?.[0]?.payload as ErrorVocabItem | undefined;
                   if (!active || !item) return null;
                   return (
-                    <div className="rounded border border-gray-200 bg-white px-3 py-2 text-xs shadow-sm">
+                    <div className="rounded-sm border border-gray-200 bg-white px-3 py-2 text-xs shadow-xs">
                       <p>{item.character}</p>
                       <p>錯誤次數：{item.count}</p>
                       <p>學生人數：{item.student_count}</p>

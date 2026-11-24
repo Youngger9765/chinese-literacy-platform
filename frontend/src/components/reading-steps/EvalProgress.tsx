@@ -71,7 +71,7 @@ export function EvalProgress({ active, recordingMs, label = 'AI 評估中…' }:
 
   return (
     <div className="w-full flex flex-col items-center gap-3">
-      <div className="w-full rounded-2xl overflow-hidden shadow-[0_12px_48px_rgba(0,105,71,0.2)] bg-gradient-to-br from-[#006947] to-[#34d399]">
+      <div className="w-full rounded-2xl overflow-hidden shadow-[0_12px_48px_rgba(0,105,71,0.2)] bg-linear-to-br from-[#006947] to-[#34d399]">
         {/* 進度條（緩動寬度 + 掃描光點） */}
         <div className="relative h-1.5 bg-white/20">
           <div

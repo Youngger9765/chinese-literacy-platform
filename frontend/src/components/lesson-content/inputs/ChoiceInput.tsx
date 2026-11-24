@@ -58,7 +58,7 @@ const ChoiceInput: React.FC<Props> = ({ options, images, value, onChange, disabl
                 src={images[oi] as string}
                 alt={`選項 ${LETTERS[oi] ?? oi + 1}`}
                 loading="lazy"
-                className="h-24 w-24 sm:h-32 sm:w-32 object-contain rounded-md border border-gray-200 bg-white flex-shrink-0"
+                className="h-24 w-24 sm:h-32 sm:w-32 object-contain rounded-md border border-gray-200 bg-white shrink-0"
               />
             )}
             {opt && <span className="flex-1 whitespace-pre-wrap">{opt}</span>}

@@ -65,7 +65,7 @@ const RecordingButton: React.FC<RecordingButtonProps> = ({
           <button
             onClick={startRecording}
             disabled={disabled || isRequesting}
-            className="flex items-center gap-2 px-4 py-2 rounded-full bg-red-500 hover:bg-red-600 active:bg-red-700 text-white font-semibold text-sm shadow transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-4 py-2 rounded-full bg-red-500 hover:bg-red-600 active:bg-red-700 text-white font-semibold text-sm shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             aria-label="開始錄音"
           >
             {/* Mic icon */}
@@ -81,7 +81,7 @@ const RecordingButton: React.FC<RecordingButtonProps> = ({
             disabled
             aria-label="等待麥克風授權"
             aria-busy="true"
-            className="flex items-center gap-2 px-4 py-2 rounded-full bg-gray-400 text-white font-semibold text-sm shadow cursor-not-allowed"
+            className="flex items-center gap-2 px-4 py-2 rounded-full bg-gray-400 text-white font-semibold text-sm shadow-sm cursor-not-allowed"
           >
             <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
@@ -94,7 +94,7 @@ const RecordingButton: React.FC<RecordingButtonProps> = ({
         {isRecording && (
           <button
             onClick={stopRecording}
-            className="flex items-center gap-2 px-4 py-2 rounded-full bg-gray-700 hover:bg-gray-800 active:bg-gray-900 text-white font-semibold text-sm shadow transition-colors"
+            className="flex items-center gap-2 px-4 py-2 rounded-full bg-gray-700 hover:bg-gray-800 active:bg-gray-900 text-white font-semibold text-sm shadow-sm transition-colors"
             aria-label="停止錄音"
           >
             {/* Stop icon */}
@@ -118,7 +118,7 @@ const RecordingButton: React.FC<RecordingButtonProps> = ({
               {[0.1, 0.25, 0.45, 0.65, 0.85].map((threshold, i) => (
                 <div
                   key={i}
-                  className={`w-1 rounded-sm transition-all duration-75 ${
+                  className={`w-1 rounded-xs transition-all duration-75 ${
                     volumeLevel >= threshold ? 'bg-green-500' : 'bg-gray-300'
                   }`}
                   style={{ height: `${8 + i * 2}px` }}
@@ -189,7 +189,7 @@ const RecordingButton: React.FC<RecordingButtonProps> = ({
           role="alert"
           className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-sm text-red-700 max-w-xs"
         >
-          <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
           </svg>
           <span>{errorMessage}</span>

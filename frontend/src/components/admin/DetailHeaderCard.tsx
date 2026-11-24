@@ -50,7 +50,7 @@ const DetailHeaderCard: React.FC<DetailHeaderCardProps> = ({
 }) => {
   return (
     <div
-      className={`flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:flex-row sm:items-start sm:justify-between ${className}`}
+      className={`flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-xs sm:flex-row sm:items-start sm:justify-between ${className}`}
     >
       {/* ── Left: title + badge ────────────────────────────────────────── */}
       <div className="flex flex-col gap-1">

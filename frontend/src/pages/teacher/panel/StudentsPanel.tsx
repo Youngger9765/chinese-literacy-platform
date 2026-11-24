@@ -30,7 +30,7 @@ function AnswerRecordLink({ studentId, sessionId }: { studentId: number; session
   return (
     <Link
       to={`/teacher/students/${studentId}/sessions/${sessionId}/report`}
-      className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs font-medium text-[#11806F] border border-[#19A696]/30 hover:bg-[#19A696]/10 transition-colors whitespace-nowrap"
+      className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-sm text-xs font-medium text-[#11806F] border border-[#19A696]/30 hover:bg-[#19A696]/10 transition-colors whitespace-nowrap"
       title="查看這位學生目前答過的內容"
     >
       作答紀錄
@@ -204,7 +204,7 @@ export function StudentDetail({
                     </div>
                     <Link
                       to={`/teacher/students/${studentId}/sessions/${s.id}/report`}
-                      className="shrink-0 inline-flex items-center gap-0.5 px-2 py-1 rounded text-xs font-medium text-[#11806F] border border-[#19A696]/30 hover:bg-[#19A696]/10 transition-colors"
+                      className="shrink-0 inline-flex items-center gap-0.5 px-2 py-1 rounded-sm text-xs font-medium text-[#11806F] border border-[#19A696]/30 hover:bg-[#19A696]/10 transition-colors"
                     >
                       查看報告
                     </Link>

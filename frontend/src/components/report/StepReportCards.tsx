@@ -55,14 +55,14 @@ function statusPhrase(c: StepReportCard): string {
 const CheckBadge: React.FC<{ status: CardStatus }> = ({ status }) =>
   status === 'done' ? (
     <span
-      className="flex items-center justify-center w-8 h-8 rounded-full bg-emerald-500 text-white shadow-sm"
+      className="flex items-center justify-center w-8 h-8 rounded-full bg-emerald-500 text-white shadow-xs"
       aria-label={STATUS_LABEL.done}
     >
       <span className="material-symbols-outlined text-xl" aria-hidden="true">check</span>
     </span>
   ) : status === 'review' ? (
     <span
-      className="flex items-center justify-center w-8 h-8 rounded-full bg-amber-400 text-amber-950 shadow-sm"
+      className="flex items-center justify-center w-8 h-8 rounded-full bg-amber-400 text-amber-950 shadow-xs"
       aria-label={STATUS_LABEL.review}
     >
       <span className="material-symbols-outlined text-xl" aria-hidden="true">priority_high</span>
@@ -286,7 +286,7 @@ const DetailDialog: React.FC<{
 
 const ReturnedBadge: React.FC = () => (
   <span
-    className="flex items-center justify-center w-8 h-8 rounded-full bg-red-500 text-white shadow-sm"
+    className="flex items-center justify-center w-8 h-8 rounded-full bg-red-500 text-white shadow-xs"
     aria-label="老師退回，要重做"
   >
     <span className="material-symbols-outlined text-xl" aria-hidden="true">replay</span>
@@ -301,9 +301,9 @@ function cardAriaLabel(c: StepReportCard, mark: StepMark | undefined): string {
 }
 
 function cardClass(c: StepReportCard, returned: boolean): string {
-  if (returned) return 'bg-red-50 border-2 border-red-400 shadow-sm hover:shadow-md';
-  if (c.status === 'done') return 'bg-surface-container-lowest border-2 border-emerald-200 shadow-sm hover:shadow-md';
-  if (c.status === 'review') return 'bg-surface-container-lowest border-2 border-amber-300 shadow-sm hover:shadow-md';
+  if (returned) return 'bg-red-50 border-2 border-red-400 shadow-xs hover:shadow-md';
+  if (c.status === 'done') return 'bg-surface-container-lowest border-2 border-emerald-200 shadow-xs hover:shadow-md';
+  if (c.status === 'review') return 'bg-surface-container-lowest border-2 border-amber-300 shadow-xs hover:shadow-md';
   return 'bg-surface-container-low border-2 border-dashed border-outline-variant/60 hover:bg-surface-container';
 }
 

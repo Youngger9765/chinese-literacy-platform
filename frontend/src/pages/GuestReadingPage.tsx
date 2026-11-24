@@ -110,7 +110,7 @@ const GuestReadingPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-surface" data-testid="guest-reading-page">
       {/* Top bar — the player lives here so it stays reachable while reading. */}
-      <div className="sticky top-0 z-30 backdrop-blur bg-surface/85 border-b border-outline-variant/20">
+      <div className="sticky top-0 z-30 backdrop-blur-sm bg-surface/85 border-b border-outline-variant/20">
         <div className="max-w-4xl mx-auto px-5 py-3 flex items-center justify-between gap-4">
           <div className="min-w-0">
             <h1 className="font-headline font-bold text-lg text-on-surface truncate">

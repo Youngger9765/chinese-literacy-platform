@@ -111,18 +111,18 @@ const OrderingExercise: React.FC<Props> = ({ exercise, onComplete }) => {
                   : 'bg-surface-container-low border-gray-200 cursor-grab hover:border-violet-200 hover:bg-violet-50/30',
               ].join(' ')}
             >
-              <span className="w-6 h-6 flex-shrink-0 rounded-full bg-gray-100 text-gray-500 text-xs font-bold flex items-center justify-center">
+              <span className="w-6 h-6 shrink-0 rounded-full bg-gray-100 text-gray-500 text-xs font-bold flex items-center justify-center">
                 {index + 1}
               </span>
               <span className="flex-1 text-sm text-on-surface">{item.text}</span>
               {submitted && itemCorrect && (
-                <span className="text-emerald-500 text-base flex-shrink-0">&#10003;</span>
+                <span className="text-emerald-500 text-base shrink-0">&#10003;</span>
               )}
               {submitted && itemWrong && (
-                <span className="text-red-400 text-base flex-shrink-0">&#10007;</span>
+                <span className="text-red-400 text-base shrink-0">&#10007;</span>
               )}
               {!submitted && (
-                <span className="text-gray-300 text-lg flex-shrink-0 cursor-grab">&#8801;</span>
+                <span className="text-gray-300 text-lg shrink-0 cursor-grab">&#8801;</span>
               )}
             </div>
           );

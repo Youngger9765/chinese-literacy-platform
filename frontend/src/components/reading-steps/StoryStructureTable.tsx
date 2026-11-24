@@ -187,7 +187,7 @@ function DemoSpotlightOverlay({
         };
 
   return createPortal(
-    <div className="fixed inset-0 z-[220] pointer-events-none" role="presentation" aria-hidden>
+    <div className="fixed inset-0 z-220 pointer-events-none" role="presentation" aria-hidden>
       <div className="fixed left-0 right-0 top-0 bg-black/58 transition-opacity duration-700" style={{ height: top }} />
       <div className="fixed left-0 right-0 bg-black/58 transition-opacity duration-700" style={{ top: bottom, bottom: 0 }} />
       <div className="fixed bg-black/58 transition-opacity duration-700" style={{ top, left: 0, width: left, height }} />
@@ -197,7 +197,7 @@ function DemoSpotlightOverlay({
         style={{ top, left, width, height }}
       />
       <div
-        className="fixed z-[221] transition-all duration-700 ease-in-out"
+        className="fixed z-221 transition-all duration-700 ease-in-out"
         style={bubbleStyle}
         role="status"
         aria-live="polite"
@@ -491,7 +491,7 @@ const InlineBlankInput: React.FC<InlineBlankInputProps> = ({
       onChange={(e) => onChange(e.target.value)}
       placeholder="　"
       {...{ [STORY_STRUCTURE_INTERACTIVE_ATTR]: 'fill_blank' }}
-      className={`${width} inline-block bg-transparent border-b-2 border-gray-800 text-sm text-center focus:outline-none focus:border-amber-600 mx-0.5`}
+      className={`${width} inline-block bg-transparent border-b-2 border-gray-800 text-sm text-center focus:outline-hidden focus:border-amber-600 mx-0.5`}
       disabled={submitted}
     />
   );
@@ -532,7 +532,7 @@ const InlineWorksheetContent: React.FC<InlineWorksheetContentProps> = ({
         nodes.push(
           <span
             key={`i-${match.index}`}
-            className="inline-flex items-baseline px-1.5 py-0.5 mx-0.5 rounded text-xs font-semibold bg-amber-100 text-amber-800 align-middle"
+            className="inline-flex items-baseline px-1.5 py-0.5 mx-0.5 rounded-sm text-xs font-semibold bg-amber-100 text-amber-800 align-middle"
           >
             {match[1].trim()}
           </span>,
@@ -565,7 +565,7 @@ const InlineWorksheetContent: React.FC<InlineWorksheetContentProps> = ({
     return nodes;
   }, [text, rowIdx, subIdx, answers, setAnswer, submitted, gradeResults]);
 
-  return <span className="text-sm leading-relaxed whitespace-pre-line break-words">{parts}</span>;
+  return <span className="text-sm leading-relaxed whitespace-pre-line wrap-break-word">{parts}</span>;
 };
 
 
@@ -614,7 +614,7 @@ const FillBlankCell: React.FC<FillBlankCellProps> = ({
         onChange={(e) => onChange(e.target.value)}
         placeholder="　"
         {...{ [STORY_STRUCTURE_INTERACTIVE_ATTR]: 'fill_blank' }}
-        className="w-36 bg-amber-50 border-b-2 border-amber-400 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:border-amber-600 px-1 py-0.5 text-center"
+        className="w-36 bg-amber-50 border-b-2 border-amber-400 text-gray-900 text-sm placeholder-gray-400 focus:outline-hidden focus:border-amber-600 px-1 py-0.5 text-center"
         disabled={submitted}
       />
       <span className="text-gray-400 font-medium">】</span>
@@ -700,7 +700,7 @@ const CheckboxCell: React.FC<CheckboxCellProps> = ({
           >
             <span
               className={`w-4 h-4 shrink-0 flex items-center justify-center text-xs border-2 ${
-                isSingle ? 'rounded-full' : 'rounded'
+                isSingle ? 'rounded-full' : 'rounded-sm'
               } ${boxStyle}`}
             >
               {/* #2832 — the U+25CF '●' glyph used to mark a selected radio option
@@ -841,7 +841,7 @@ const InlineChoiceContent: React.FC<InlineChoiceContentProps> = ({
         nodes.push(
           <span
             key={`i-${match.index}`}
-            className="inline-flex items-baseline px-1.5 py-0.5 mx-0.5 rounded text-xs font-semibold bg-amber-100 text-amber-800 align-middle"
+            className="inline-flex items-baseline px-1.5 py-0.5 mx-0.5 rounded-sm text-xs font-semibold bg-amber-100 text-amber-800 align-middle"
           >
             {match[1].trim()}
           </span>,
@@ -900,7 +900,7 @@ const InlineChoiceContent: React.FC<InlineChoiceContentProps> = ({
     return nodes;
   }, [text, blanks, rowIdx, subIdx, answers, setAnswer, submitted, gradeResults]);
 
-  return <span className="text-sm leading-relaxed whitespace-pre-line break-words">{parts}</span>;
+  return <span className="text-sm leading-relaxed whitespace-pre-line wrap-break-word">{parts}</span>;
 };
 
 // ── Worksheet HTML table ─────────────────────────────────────────────────────
@@ -983,12 +983,12 @@ const WorksheetTable: React.FC<WorksheetTableProps> = ({
       );
     }
     if (cell) return renderCellContent(cell, rowIdx, subIdx);
-    return <span className="text-sm leading-relaxed whitespace-pre-line break-words">{value}</span>;
+    return <span className="text-sm leading-relaxed whitespace-pre-line wrap-break-word">{value}</span>;
   };
 
   // UI-3 (#390px keypoints-table overflow) vs #3696/#3698 (iPad split-panel
   // squeeze) pull in opposite directions on the SAME <table>:
-  //   - #3698 wants a min-w-[28rem] FLOOR + horizontal scroll, so a narrow
+  //   - #3698 wants a min-w-md FLOOR + horizontal scroll, so a narrow
   //     *split-panel* container (iPad portrait/landscape, ~246-435px) never
   //     crushes CheckboxCell's option pills to one character per line.
   //   - This fix wants the opposite on a true single-column PHONE viewport
@@ -1005,7 +1005,7 @@ const WorksheetTable: React.FC<WorksheetTableProps> = ({
       className={
         isNarrowPhone
           ? 'w-full table-fixed border-collapse border border-black text-sm bg-white'
-          : 'w-full min-w-[28rem] border-collapse border border-black text-sm bg-white'
+          : 'w-full min-w-md border-collapse border border-black text-sm bg-white'
       }
     >
       {isNarrowPhone && (
@@ -1633,7 +1633,7 @@ const StoryStructureTable: React.FC<Props> = ({
     <div
       ref={tableContainerRef}
       data-story-structure-table
-      className="overflow-hidden rounded-xl border-2 border-gray-300 shadow-sm"
+      className="overflow-hidden rounded-xl border-2 border-gray-300 shadow-xs"
     >
       <div className="bg-amber-50 border-b-2 border-amber-400 px-5 py-3 flex items-center justify-between gap-2">
         <span className="text-amber-800 font-bold text-base">📋 文章重點表</span>

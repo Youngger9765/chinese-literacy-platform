@@ -38,7 +38,7 @@ const ParagraphFeedbackPanel: React.FC<ParagraphFeedbackPanelProps> = ({
 }) => {
   return (
     <div
-      className={`bg-gray-50 flex flex-col min-h-0 border-l border-gray-200 ${isMobile ? 'flex-1' : 'flex-shrink-0 h-full'}`}
+      className={`bg-gray-50 flex flex-col min-h-0 border-l border-gray-200 ${isMobile ? 'flex-1' : 'shrink-0 h-full'}`}
       style={isMobile ? undefined : { width }}
     >
       {/* Header */}
@@ -69,7 +69,7 @@ const ParagraphFeedbackPanel: React.FC<ParagraphFeedbackPanelProps> = ({
         {isSessionActive && (
           <div className="space-y-1">
             <p className="text-xs font-bold text-accent-light uppercase tracking-widest animate-pulse">即時辨識</p>
-            <div className="bg-accent/10 border border-accent/20 rounded-xl px-3 py-2.5 text-sm text-gray-800 leading-relaxed min-h-[2.5rem]">
+            <div className="bg-accent/10 border border-accent/20 rounded-xl px-3 py-2.5 text-sm text-gray-800 leading-relaxed min-h-10">
               {streamingUserInput || <span className="text-gray-400">請開始朗讀…</span>}
             </div>
           </div>
@@ -108,7 +108,7 @@ const ParagraphFeedbackPanel: React.FC<ParagraphFeedbackPanelProps> = ({
 
       {/* Mic error — Issue #2357: promote to opaque banner with icon */}
       {micError && (
-        <div className="flex-shrink-0 mx-4 mb-3 flex items-center gap-3 px-4 py-3 rounded-2xl bg-rose-50 border border-rose-300 shadow-sm">
+        <div className="shrink-0 mx-4 mb-3 flex items-center gap-3 px-4 py-3 rounded-2xl bg-rose-50 border border-rose-300 shadow-xs">
           <span className="material-symbols-outlined text-rose-600 shrink-0">mic_off</span>
           <p className="text-base font-bold text-rose-800">{micError}</p>
         </div>

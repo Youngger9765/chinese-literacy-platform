@@ -167,7 +167,7 @@ const SelfAssessment: React.FC<SelfAssessmentProps> = ({
               className={`
                 flex-1 flex flex-col items-center gap-2 py-4 px-2 rounded-2xl border-2 transition-all
                 ${isSelected
-                  ? `${cfg.bg.replace('hover:', '')} ${cfg.border} shadow-sm`
+                  ? `${cfg.bg.replace('hover:', '')} ${cfg.border} shadow-xs`
                   : selectedRating
                     ? 'border-surface-container-high bg-surface-container-low opacity-40 cursor-not-allowed'
                     : `${cfg.bg} border-transparent hover:border-current`

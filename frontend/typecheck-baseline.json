@@ -3,12 +3,12 @@
   "_provenance": {
     "derived_from": "npx tsc --noEmit，取 error 行、排除測試檔（*.test.* / *.spec.* / *.eval.* / __tests__ / __smoke__ / test(s) 路徑片段）",
     "generated_by": "frontend/scripts/run-typecheck-ratchet.mjs --write-baseline",
-    "frozen_at": "2026-10-10T09:28:42.926Z",
-    "edition": "git cd698f6cb0b0",
+    "frozen_at": "2026-11-18T07:01:32.626Z",
+    "edition": "git 1c4d17f75071",
     "note": "⚠️ 這是產物不是真值。tsconfig、TypeScript 版本或排除規則改了，這個數字就會動 —— 重跑 --write-baseline，不要手改。"
   },
   "schemaVersion": 2,
-  "shippedErrors": 34,
+  "shippedErrors": 33,
   "entries": [
     {
       "file": "src/components/layout/Sidebar.tsx",
@@ -159,11 +159,6 @@
       "file": "src/pages/student/StudentProfile.tsx",
       "code": "TS2339",
       "text": "Property 'longest_streak' does not exist on type 'StreakInfo'."
-    },
-    {
-      "file": "src/pages/teacher/components/CrossTextChartGrid.tsx",
-      "code": "TS2322",
-      "text": "Type '(_: string, payload: Array<{ payload: { title: string | null; }; }>) => string' is not assignable to type '((label: ReactNode, payload: readonly Payload<number, string>[]) => ReactNode) & ((label: any, payload: Payload<number, string>[]) => ReactNode)'."
     },
     {
       "file": "src/services/api.ts",

@@ -41,7 +41,7 @@ const WordProgressSidebar: React.FC<WordProgressSidebarProps> = ({
             onClick={() => onSelectWord(i)}
             className={`flex items-center gap-2 px-4 py-3 rounded-2xl text-left transition-all ${
               active
-                ? 'bg-accent text-white shadow-sm'
+                ? 'bg-accent text-white shadow-xs'
                 : done
                   ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
                   : 'bg-surface-container-lowest text-on-surface hover:bg-surface-container-low'

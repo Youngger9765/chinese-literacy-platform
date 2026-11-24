@@ -75,7 +75,7 @@ const StoryFormModal: React.FC<StoryFormModalProps> = ({
                 disabled={mode === 'edit'}
                 required
                 min={1}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/50 disabled:bg-gray-100 disabled:text-gray-500"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-hidden focus:ring-2 focus:ring-accent/50 disabled:bg-gray-100 disabled:text-gray-500"
                 placeholder="例：58"
               />
             </Field>
@@ -83,7 +83,7 @@ const StoryFormModal: React.FC<StoryFormModalProps> = ({
               <select
                 value={formState.grade}
                 onChange={(e) => onFieldChange('grade', e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/50 cursor-pointer"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-hidden focus:ring-2 focus:ring-accent/50 cursor-pointer"
               >
                 {[4, 5, 6, 7, 8, 9].map((g) => (
                   <option key={g} value={String(g)}>{g} 年級</option>
@@ -99,7 +99,7 @@ const StoryFormModal: React.FC<StoryFormModalProps> = ({
               onChange={(e) => onFieldChange('title', e.target.value)}
               required
               maxLength={200}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/50"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-hidden focus:ring-2 focus:ring-accent/50"
               placeholder="例：第一百碗麵"
             />
           </Field>
@@ -112,7 +112,7 @@ const StoryFormModal: React.FC<StoryFormModalProps> = ({
                 onChange={(e) => onFieldChange('grade_code', e.target.value)}
                 required
                 maxLength={10}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/50"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-hidden focus:ring-2 focus:ring-accent/50"
                 placeholder="例：G5-10"
               />
             </Field>
@@ -120,7 +120,7 @@ const StoryFormModal: React.FC<StoryFormModalProps> = ({
               <select
                 value={formState.genre}
                 onChange={(e) => onFieldChange('genre', e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/50 cursor-pointer"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-hidden focus:ring-2 focus:ring-accent/50 cursor-pointer"
               >
                 {GENRE_OPTIONS.map((g) => (
                   <option key={g} value={g}>{g}</option>
@@ -134,7 +134,7 @@ const StoryFormModal: React.FC<StoryFormModalProps> = ({
               <select
                 value={formState.text_type}
                 onChange={(e) => onFieldChange('text_type', e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/50 cursor-pointer"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-hidden focus:ring-2 focus:ring-accent/50 cursor-pointer"
               >
                 {TEXT_TYPE_OPTIONS.map((t) => (
                   <option key={t} value={t}>{t}</option>
@@ -146,7 +146,7 @@ const StoryFormModal: React.FC<StoryFormModalProps> = ({
                 type="text"
                 value={formState.source_file}
                 onChange={(e) => onFieldChange('source_file', e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/50"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-hidden focus:ring-2 focus:ring-accent/50"
                 placeholder="例：G5-10-L58.docx"
               />
             </Field>
@@ -158,7 +158,7 @@ const StoryFormModal: React.FC<StoryFormModalProps> = ({
               value={formState.reading_strategy}
               onChange={(e) => onFieldChange('reading_strategy', e.target.value)}
               maxLength={200}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/50"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-hidden focus:ring-2 focus:ring-accent/50"
               placeholder="例：掌握段落大意"
             />
           </Field>
@@ -168,7 +168,7 @@ const StoryFormModal: React.FC<StoryFormModalProps> = ({
               value={formState.paragraphs}
               onChange={(e) => onFieldChange('paragraphs', e.target.value)}
               rows={6}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/50 resize-none"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-hidden focus:ring-2 focus:ring-accent/50 resize-none"
               placeholder={"第一段內容...\n第二段內容...\n第三段內容..."}
             />
           </Field>

@@ -18,7 +18,7 @@ probes:
   - specs/modules/omo-assessment/probes
 related_issues: [2015, 2027, 2028]
 source_meetings:
-  - docs/meetings/2026-05-01-experts-review.md
+  - 2026-05-01 專家會議（內部會議紀錄，已移至私有課程庫）
 last_reviewed: 2026-06-01
 owner: young
 ---

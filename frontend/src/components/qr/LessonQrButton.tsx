@@ -36,11 +36,11 @@ const STEP_LABEL: Record<LessonQrStep, string> = {
 
 const TRIGGER_CLASS: Record<'admin' | 'pill', string> = {
   admin:
-    'inline-flex items-center justify-center gap-1.5 rounded border border-gray-200 px-2.5 py-1.5 ' +
+    'inline-flex items-center justify-center gap-1.5 rounded-sm border border-gray-200 px-2.5 py-1.5 ' +
     'text-xs font-medium text-gray-600 hover:border-gray-300 hover:bg-gray-50 ' +
     'disabled:cursor-wait disabled:opacity-60',
   pill:
-    'inline-flex items-center gap-2 rounded-full bg-surface-container-low px-4 py-2 shadow-sm ' +
+    'inline-flex items-center gap-2 rounded-full bg-surface-container-low px-4 py-2 shadow-xs ' +
     'text-sm font-medium text-on-surface hover:bg-surface-container-high ' +
     'disabled:cursor-wait disabled:opacity-60 transition-all',
 };
@@ -88,19 +88,19 @@ const QrPreviewDialog: React.FC<{
       >
         <h3 className="mb-3 text-sm font-semibold text-gray-800">{title}</h3>
         <img src={dataUrl} alt={`${title} QR code`} className="mx-auto h-56 w-56" />
-        <p className="mt-3 break-all rounded bg-gray-50 px-2 py-1.5 text-xs text-gray-500">{value}</p>
+        <p className="mt-3 break-all rounded-sm bg-gray-50 px-2 py-1.5 text-xs text-gray-500">{value}</p>
         <div className="mt-4 flex justify-end gap-2">
           <button
             type="button"
             onClick={onClose}
-            className="rounded border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50"
+            className="rounded-sm border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50"
           >
             關閉
           </button>
           <button
             type="button"
             onClick={() => triggerDownload(dataUrl, filename)}
-            className="inline-flex items-center gap-1.5 rounded bg-violet-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-violet-700"
+            className="inline-flex items-center gap-1.5 rounded-sm bg-violet-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-violet-700"
           >
             <Download className="h-3.5 w-3.5" />
             下載 PNG

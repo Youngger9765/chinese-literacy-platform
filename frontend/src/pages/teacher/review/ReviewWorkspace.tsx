@@ -67,7 +67,7 @@ const ScoreInput: React.FC<{
         aria-label={label}
         aria-invalid={bad || undefined}
         data-testid={testId}
-        className={`${big ? 'w-20 h-11 text-2xl' : 'w-14 h-9 text-lg'} rounded-lg border-2 text-center font-hand font-bold text-[#d03a2f] focus:outline-none focus:ring-2 focus:ring-red-200 ${
+        className={`${big ? 'w-20 h-11 text-2xl' : 'w-14 h-9 text-lg'} rounded-lg border-2 text-center font-hand font-bold text-[#d03a2f] focus:outline-hidden focus:ring-2 focus:ring-red-200 ${
           bad ? 'border-red-500 bg-red-50' : 'border-gray-200'
         }`}
       />
@@ -120,7 +120,7 @@ const CardTools: React.FC<{
           placeholder={draft.returned ? `為什麼退回「${card.label}」？例：錯的題目再讀一次第三段` : `給「${card.label}」的評語`}
           aria-label={`${card.label}的評語`}
           data-testid="step-comment"
-          className="w-full rounded-lg border-2 border-gray-200 px-2 py-1.5 font-sans text-base text-[#d03a2f] focus:outline-none focus:ring-2 focus:ring-red-200"
+          className="w-full rounded-lg border-2 border-gray-200 px-2 py-1.5 font-sans text-base text-[#d03a2f] focus:outline-hidden focus:ring-2 focus:ring-red-200"
         />
       ) : (
         <button
@@ -276,7 +276,7 @@ const ReviewWorkspace: React.FC<{
 
       {/* 送出列：固定在底部 */}
       <div
-        className="sticky bottom-0 z-20 border-t border-gray-200 bg-white/95 backdrop-blur px-4 py-3 shadow-[0_-4px_16px_rgba(0,0,0,0.06)]"
+        className="sticky bottom-0 z-20 border-t border-gray-200 bg-white/95 backdrop-blur-sm px-4 py-3 shadow-[0_-4px_16px_rgba(0,0,0,0.06)]"
         data-testid="review-submit-bar"
       >
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2">

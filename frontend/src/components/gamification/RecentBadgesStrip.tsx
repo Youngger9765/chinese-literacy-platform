@@ -101,8 +101,8 @@ const RecentBadgesStrip: React.FC<RecentBadgesStripProps> = ({ badges, className
                 className={`
                   flex-none w-28 rounded-2xl border-2 ${bgClass} p-3
                   flex flex-col items-center gap-1.5 text-center
-                  shadow-sm hover:shadow-md transition-all active:scale-95
-                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent
+                  shadow-xs hover:shadow-md transition-all active:scale-95
+                  focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent
                 `}
                 role="listitem"
                 aria-label={`成就：${badge.name}`}

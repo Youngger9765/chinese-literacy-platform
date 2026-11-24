@@ -12,7 +12,7 @@ spec_tests:
   - backend/specs/test_gamification_xp_spec.py
 related_issues: []
 source_meetings:
-  - docs/meetings/2026-05-01-experts-review.md
+  - 2026-05-01 專家會議（內部會議紀錄，已移至私有課程庫）
 last_reviewed: 2026-06-02
 owner: young
 ---

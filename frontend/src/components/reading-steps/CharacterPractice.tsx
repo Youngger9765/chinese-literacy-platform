@@ -340,8 +340,8 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({
                     disabled={!isUnlocked}
                     onClick={() => isUnlocked && setCurrentIndex(i)}
                     className={[
-                      'flex-shrink-0 w-10 h-10 rounded-xl text-base font-bold transition-all duration-200',
-                      'flex items-center justify-center relative focus:outline-none focus-visible:ring-2 focus-visible:ring-accent',
+                      'shrink-0 w-10 h-10 rounded-xl text-base font-bold transition-all duration-200',
+                      'flex items-center justify-center relative focus:outline-hidden focus-visible:ring-2 focus-visible:ring-accent',
                       isActive
                         ? 'bg-accent text-white shadow-[0_4px_16px_rgba(86,74,191,0.35)] scale-105'
                         : isDone

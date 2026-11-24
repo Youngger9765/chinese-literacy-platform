@@ -178,7 +178,7 @@ const TeacherInstructionPanel: React.FC<TeacherInstructionPanelProps> = ({
               <select
                 value={newType}
                 onChange={(e) => setNewType(e.target.value)}
-                className="px-2.5 py-1.5 text-sm border border-gray-200 rounded-lg bg-white focus:ring-2 focus:ring-[#19A696]/30 focus:border-[#19A696] outline-none"
+                className="px-2.5 py-1.5 text-sm border border-gray-200 rounded-lg bg-white focus:ring-2 focus:ring-[#19A696]/30 focus:border-[#19A696] outline-hidden"
               >
                 {INSTRUCTION_TYPES.map((t) => (
                   <option key={t.value} value={t.value}>
@@ -193,7 +193,7 @@ const TeacherInstructionPanel: React.FC<TeacherInstructionPanelProps> = ({
                   placeholder="輸入教學指示，例如：這個學生有閱讀障礙，請放慢速度..."
                   maxLength={500}
                   rows={2}
-                  className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-[#19A696]/30 focus:border-[#19A696] outline-none"
+                  className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-[#19A696]/30 focus:border-[#19A696] outline-hidden"
                 />
                 <span className="absolute bottom-1.5 right-2 text-[10px] text-gray-300">
                   {newContent.length}/500
@@ -249,7 +249,7 @@ const TeacherInstructionPanel: React.FC<TeacherInstructionPanelProps> = ({
                           <select
                             value={editType}
                             onChange={(e) => setEditType(e.target.value)}
-                            className="px-2 py-1 text-sm border border-gray-200 rounded-lg bg-white focus:ring-2 focus:ring-[#19A696]/30 outline-none"
+                            className="px-2 py-1 text-sm border border-gray-200 rounded-lg bg-white focus:ring-2 focus:ring-[#19A696]/30 outline-hidden"
                           >
                             {INSTRUCTION_TYPES.map((t) => (
                               <option key={t.value} value={t.value}>
@@ -263,7 +263,7 @@ const TeacherInstructionPanel: React.FC<TeacherInstructionPanelProps> = ({
                           onChange={(e) => setEditContent(e.target.value)}
                           maxLength={500}
                           rows={2}
-                          className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-[#19A696]/30 outline-none"
+                          className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-[#19A696]/30 outline-hidden"
                         />
                         <div className="flex gap-2 justify-end">
                           <button
@@ -286,7 +286,7 @@ const TeacherInstructionPanel: React.FC<TeacherInstructionPanelProps> = ({
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1">
                             <span
-                              className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-medium ${typeConfig.color} mb-1.5`}
+                              className={`inline-block px-1.5 py-0.5 rounded-sm text-[10px] font-medium ${typeConfig.color} mb-1.5`}
                             >
                               {typeConfig.label}
                             </span>
@@ -297,7 +297,7 @@ const TeacherInstructionPanel: React.FC<TeacherInstructionPanelProps> = ({
                           <div className="flex gap-1 shrink-0">
                             <button
                               onClick={() => startEditing(instr)}
-                              className="p-1 rounded hover:bg-gray-100 transition-colors"
+                              className="p-1 rounded-sm hover:bg-gray-100 transition-colors"
                               title="Edit"
                             >
                               <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -306,7 +306,7 @@ const TeacherInstructionPanel: React.FC<TeacherInstructionPanelProps> = ({
                             </button>
                             <button
                               onClick={() => handleDelete(instr.id)}
-                              className="p-1 rounded hover:bg-red-50 transition-colors"
+                              className="p-1 rounded-sm hover:bg-red-50 transition-colors"
                               title="Delete"
                             >
                               <svg className="w-3.5 h-3.5 text-gray-400 hover:text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">

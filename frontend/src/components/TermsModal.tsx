@@ -98,12 +98,12 @@ const TermsModal: React.FC<TermsModalProps> = ({ onAccepted, onAccept }) => {
                 key={index}
                 className="flex items-start gap-3 cursor-pointer group"
               >
-                <div className="mt-0.5 flex-shrink-0">
+                <div className="mt-0.5 shrink-0">
                   <input
                     type="checkbox"
                     checked={checked[index]}
                     onChange={() => toggleItem(index)}
-                    className="w-4 h-4 rounded border-gray-300 text-accent accent-amber-500 cursor-pointer"
+                    className="w-4 h-4 rounded-sm border-gray-300 text-accent accent-amber-500 cursor-pointer"
                   />
                 </div>
                 <span className="text-sm text-gray-700 leading-relaxed group-hover:text-gray-900">

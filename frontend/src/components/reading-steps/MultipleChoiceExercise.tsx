@@ -185,7 +185,7 @@ const MultipleChoiceExercise: React.FC<Props> = ({
       </div>
 
       {/* Question */}
-      <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+      <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-xs">
         <p className="text-base font-medium text-gray-800 leading-relaxed mb-4">
           {current + 1}. {zh(q.question)}
         </p>
@@ -241,7 +241,7 @@ const MultipleChoiceExercise: React.FC<Props> = ({
                     src={optionImage}
                     alt={`選項 ${label}`}
                     loading="lazy"
-                    className="h-24 w-24 sm:h-32 sm:w-32 object-contain rounded-md border border-gray-200 bg-white flex-shrink-0"
+                    className="h-24 w-24 sm:h-32 sm:w-32 object-contain rounded-md border border-gray-200 bg-white shrink-0"
                   />
                 )}
                 {opt && <span>{zh(opt)}</span>}

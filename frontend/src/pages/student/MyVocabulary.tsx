@@ -82,7 +82,7 @@ const MyVocabulary: React.FC = () => {
                 id="story-filter"
                 value={selectedSlug}
                 onChange={(e) => setSelectedSlug(e.target.value)}
-                className="block w-full max-w-xs rounded-lg border border-[#E5E0D5] bg-surface-container-lowest py-2 px-3 text-sm text-on-surface shadow-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+                className="block w-full max-w-xs rounded-lg border border-[#E5E0D5] bg-surface-container-lowest py-2 px-3 text-sm text-on-surface shadow-xs focus:border-accent focus:outline-hidden focus:ring-1 focus:ring-accent"
               >
                 <option value="">全部課文</option>
                 {storyItems.map(({ slug, title }) => (

@@ -364,7 +364,7 @@ const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
                   </p>
                   <ul className="space-y-1 max-h-32 overflow-y-auto">
                     {uploadResult.errors.map((e, i) => (
-                      <li key={i} className="text-xs text-amber-800 bg-amber-50 border border-amber-100 rounded px-3 py-1.5">
+                      <li key={i} className="text-xs text-amber-800 bg-amber-50 border border-amber-100 rounded-sm px-3 py-1.5">
                         {e.name ? `${e.name}（座號 ${e.seat_number}）：` : ''}{e.error}
                       </li>
                     ))}

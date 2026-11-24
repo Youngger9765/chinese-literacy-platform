@@ -226,7 +226,7 @@ const ParagraphReadingControls: React.FC<ParagraphReadingControlsProps> = ({
           <div className="w-full flex flex-col items-center gap-2">
             {isSessionActive && !isSubmittingSentence && !recordingPendingReview && (
               <div className="flex items-center gap-3">
-                <span className="relative flex h-6 w-6 items-center justify-center flex-shrink-0">
+                <span className="relative flex h-6 w-6 items-center justify-center shrink-0">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-300 opacity-60" />
                   <span className="relative material-symbols-outlined text-xl text-red-500" style={{ fontVariationSettings: "'FILL' 1" }}>mic</span>
                 </span>
@@ -237,7 +237,7 @@ const ParagraphReadingControls: React.FC<ParagraphReadingControlsProps> = ({
                   {[0.15, 0.35, 0.55, 0.75].map((threshold) => (
                     <div
                       key={threshold}
-                      className={`w-1 rounded-sm transition-colors ${
+                      className={`w-1 rounded-xs transition-colors ${
                         volumeLevel >= threshold ? 'bg-green-500' : 'bg-gray-300'
                       }`}
                       style={{ height: `${8 + threshold * 16}px` }}
