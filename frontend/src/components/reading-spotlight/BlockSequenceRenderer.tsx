@@ -96,6 +96,20 @@ const toOptionKeys = (options: unknown): string[] | undefined => {
   return undefined;
 };
 
+/** 答錯時的提示 —— 選項沒有鎖，換一個答案就能再確認（#4087 訂正）。 */
+const WRONG_HINT = '再想想看，換一個答案再按「確認」';
+
+/** #4087：一題的作答紀錄（存在 step_data.spotlight.answerLog[key]）。 */
+export interface SpotlightAnswerLogEntry {
+  /** 第幾個被作答的（列表排序用）。 */
+  order: number;
+  label: string;
+  /** 第一次按確認時選的。之後不覆蓋。 */
+  firstAnswer: string;
+  latestAnswer: string;
+  correctAnswer: string | null;
+}
+
 const BlockSequenceRenderer: React.FC<Props> = ({
   spotlight,
   story,
@@ -120,16 +134,43 @@ const BlockSequenceRenderer: React.FC<Props> = ({
     () => (initialState?.textGrades as Record<string, StrategyGradeResult>) ?? {},
   );
   const [gradingKey, setGradingKey] = useState<string | null>(null);
+  // #4087：每一題的作答紀錄（題目、第一次選的、最新選的、正確答案），跟作答一起存進 DB，
+  // 成績單才列得出「你選了什麼、正確是什麼、有沒有訂正」。在按「確認」的當下記，
+  // 不用另外重算巢狀小題的 key。
+  const [answerLog, setAnswerLog] = useState<Record<string, SpotlightAnswerLogEntry>>(
+    () => (initialState?.answerLog as Record<string, SpotlightAnswerLogEntry>) ?? {},
+  );
+  const logAnswer = useCallback(
+    (key: string, label: string, studentAnswer: string, correctAnswer: string | null) => {
+      setAnswerLog((prev) => {
+        const old = prev[key];
+        return {
+          ...prev,
+          [key]: {
+            order: old?.order ?? Object.keys(prev).length,
+            label: label || old?.label || '',
+            firstAnswer: old?.firstAnswer ?? studentAnswer,
+            latestAnswer: studentAnswer,
+            correctAnswer,
+          },
+        };
+      });
+    },
+    [],
+  );
   const [allDone, setAllDone] = useState(() => !!(initialState?.allDone as boolean));
 
   const visibleSegmentCount = countVisibleSegments(segments, blockState);
 
   useEffect(() => {
-    onChange?.({ blockState, feedback, textGrades, allDone, renderer: 'spotlight_v2' });
-  }, [blockState, feedback, textGrades, allDone]); // eslint-disable-line react-hooks/exhaustive-deps
+    onChange?.({ blockState, feedback, textGrades, allDone, answerLog, renderer: 'spotlight_v2' });
+  }, [blockState, feedback, textGrades, allDone, answerLog]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const setBlockValue = useCallback((key: string, value: unknown) => {
     setBlockState((prev) => ({ ...prev, [key]: value }));
+    // #4087 訂正：答錯的題目換了答案 → 回到「還沒判定」，「確認」按鈕再出現。
+    // 答對的題目選項是鎖住的，走不到這裡。
+    setFeedback((prev) => (prev[key] === false ? { ...prev, [key]: null } : prev));
   }, []);
 
   const checkCompletion = useCallback(
@@ -157,6 +198,9 @@ const BlockSequenceRenderer: React.FC<Props> = ({
     if (typeof selected !== 'number') return;
     const options = toOptionList(block.options);
     const correct = resolveSingleCorrect(options, block.answer, selected, toOptionKeys(block.options));
+    const rightIdx = options.findIndex((_, i) =>
+      resolveSingleCorrect(options, block.answer as string | number, i, toOptionKeys(block.options)));
+    logAnswer(key, promptOf(block) ?? '', options[selected] ?? '', rightIdx >= 0 ? options[rightIdx] : null);
     setFeedback((prev) => ({ ...prev, [key]: correct }));
     checkCompletion(blockState);
   };
@@ -186,6 +230,12 @@ const BlockSequenceRenderer: React.FC<Props> = ({
         answer.length === selected.length &&
         [...selected].sort().join(',') ===
           [...(answer as number[])].map(Number).sort().join(',');
+    logAnswer(
+      key,
+      promptOf(block) ?? '',
+      [...selected].sort().map((i) => options[i] ?? '').join('、'),
+      answerUnusable || !Array.isArray(answer) ? null : (answer as number[]).map((i) => options[Number(i)] ?? '').filter(Boolean).join('、') || null,
+    );
     setFeedback((prev) => ({ ...prev, [key]: correct }));
     checkCompletion(blockState);
   };
@@ -265,6 +315,7 @@ const BlockSequenceRenderer: React.FC<Props> = ({
     key: string,
     opts: [string, string][],
     answer: unknown,
+    label = '',
   ): React.ReactElement => {
     if (answer === undefined || answer === null) {
       return (
@@ -296,7 +347,7 @@ const BlockSequenceRenderer: React.FC<Props> = ({
               type="button"
               role="checkbox"
               aria-checked={selected.includes(oi)}
-              disabled={fb !== undefined && fb !== null}
+              disabled={fb === true}
               onClick={() => toggle(oi)}
               className={[
                 'w-full text-left rounded-lg border px-3 py-2 text-base transition-colors',
@@ -321,6 +372,12 @@ const BlockSequenceRenderer: React.FC<Props> = ({
                 const correct =
                   selected.length === answerIdx.length &&
                   [...selected].sort().join(',') === [...answerIdx].sort().join(',');
+                logAnswer(
+                  key,
+                  label,
+                  [...selected].sort().map((i) => opts[i]?.[1] ?? '').join('、'),
+                  answerIdx.map((i) => opts[i]?.[1] ?? '').filter(Boolean).join('、') || null,
+                );
                 setFeedback((prev) => ({ ...prev, [key]: correct }));
                 // #3682 — 巢狀 sub_block 的「確認」以前從不觸發完成度檢查，
                 // 頁尾的前進按鈕永遠停用（詳見 spotlightBlockLogic.ts 的說明）。
@@ -332,7 +389,7 @@ const BlockSequenceRenderer: React.FC<Props> = ({
             </button>
           ) : (
             <p className={`text-base font-medium ${fb ? 'text-green-700' : 'text-amber-700'}`}>
-              {fb ? '✓ 答對了' : '再想想看'}
+              {fb ? '✓ 答對了' : WRONG_HINT}
             </p>
           )}
         </div>
@@ -347,7 +404,7 @@ const BlockSequenceRenderer: React.FC<Props> = ({
           <button
             key={ok}
             type="button"
-            disabled={fb !== undefined && fb !== null}
+            disabled={fb === true}
             onClick={() => setBlockValue(key, oi)}
             className={[
               'w-full text-left rounded-lg border px-3 py-2 text-base transition-colors',
@@ -374,6 +431,9 @@ const BlockSequenceRenderer: React.FC<Props> = ({
                 selected,
                 optionKeys,
               );
+              const rightIdx = opts.findIndex((_, i) =>
+                resolveSingleCorrect(opts.map(([, ov]) => ov), answer as string | number, i, optionKeys));
+              logAnswer(key, label, opts[selected]?.[1] ?? '', rightIdx >= 0 ? opts[rightIdx][1] : null);
               setFeedback((prev) => ({ ...prev, [key]: correct }));
               // #3682 — 同上，單選的「確認」也要觸發完成度檢查。
               checkCompletion({ ...blockState, [key]: selected });
@@ -384,7 +444,7 @@ const BlockSequenceRenderer: React.FC<Props> = ({
           </button>
         ) : (
           <p className={`text-base font-medium ${fb ? 'text-green-700' : 'text-amber-700'}`}>
-            {fb ? '✓ 答對了' : '再想想看'}
+            {fb ? '✓ 答對了' : WRONG_HINT}
           </p>
         )}
       </div>
@@ -468,7 +528,9 @@ const BlockSequenceRenderer: React.FC<Props> = ({
             <p key={i} className="text-base text-on-surface mb-2 whitespace-pre-wrap leading-relaxed">{t}</p>
           ))}
         {sb.hint ? <p className="text-sm text-on-surface-variant mb-2">{sb.hint}</p> : null}
-        {opts.length > 0 ? renderSubBlockOptions(key, opts, sb.answer) : null}
+        {opts.length > 0
+          ? renderSubBlockOptions(key, opts, sb.answer, sb.prompt ?? sb.stem ?? sb.instruction ?? sb.intro ?? '')
+          : null}
         {(sb.items ?? []).map((it, i) =>
           renderSubBlock(it as Parameters<typeof renderSubBlock>[0], `${key}-${i}`, depth + 1),
         )}
@@ -576,7 +638,7 @@ const BlockSequenceRenderer: React.FC<Props> = ({
                 <button
                   key={oi}
                   type="button"
-                  disabled={fb !== undefined && fb !== null}
+                  disabled={fb === true}
                   onClick={() => setBlockValue(key, oi)}
                   className={[
                     'w-full text-left rounded-lg border px-4 py-2.5 text-base transition-colors',
@@ -600,7 +662,7 @@ const BlockSequenceRenderer: React.FC<Props> = ({
               </button>
             ) : (
               <p className={`mt-3 text-base font-medium ${fb ? 'text-green-700' : 'text-amber-700'}`}>
-                {fb ? '✓ 答對了' : '再想想看'}
+                {fb ? '✓ 答對了' : WRONG_HINT}
               </p>
             )}
           </div>
@@ -851,7 +913,7 @@ const BlockSequenceRenderer: React.FC<Props> = ({
                   type="button"
                   role="checkbox"
                   aria-checked={selected.includes(oi)}
-                  disabled={fb !== undefined && fb !== null}
+                  disabled={fb === true}
                   onClick={() => toggle(oi)}
                   className={[
                     'w-full text-left rounded-lg border px-4 py-2.5 text-base transition-colors',
@@ -876,7 +938,7 @@ const BlockSequenceRenderer: React.FC<Props> = ({
               </button>
             ) : (
               <p className={`mt-3 text-base font-medium ${fb ? 'text-green-700' : 'text-amber-700'}`}>
-                {fb ? '✓ 已作答' : '再想想看'}
+                {fb ? '✓ 已作答' : WRONG_HINT}
               </p>
             )}
           </div>

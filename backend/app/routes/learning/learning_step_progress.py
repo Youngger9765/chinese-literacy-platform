@@ -26,6 +26,65 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
+#: #4087: cap on attempts kept per step (oldest dropped). Same number as the
+#: frontend's MAX_ATTEMPTS_PER_STEP (utils/stepAttempts.ts).
+MAX_ATTEMPTS_PER_STEP = 30
+
+
+def _union_attempts(merged: dict, existing: dict, incoming: dict) -> None:
+    """Keep every recorded attempt of a step across racing saves (#4087).
+
+    Each step's ``attempts`` (one entry per finished pass / correction / reading,
+    the source of the report's progress chart and radar) is a list inside the
+    step's step_data entry, and step entries are replaced wholesale on save. A
+    save built from an older snapshot — another tab, or a save that raced the
+    one that appended — would otherwise drop the attempts it never saw. Same
+    reasoning as the steps_completed union above (#3682): union by ``id``, keep
+    time order, cap the length.
+    """
+    for key, entry in incoming.items():
+        old = existing.get(key)
+        if not isinstance(entry, dict) or not isinstance(old, dict):
+            continue
+        old_list = old.get("attempts")
+        if not isinstance(old_list, list) or not old_list:
+            continue
+        new_list = entry.get("attempts") if isinstance(entry.get("attempts"), list) else []
+        by_id: dict = {}
+        for a in [*old_list, *new_list]:
+            if isinstance(a, dict) and isinstance(a.get("id"), str):
+                by_id[a["id"]] = a
+        ordered = sorted(by_id.values(), key=lambda a: str(a.get("at", "")))
+        merged[key] = {**entry, "attempts": ordered[-MAX_ATTEMPTS_PER_STEP:]}
+
+
+def _stamp_step_activity(
+    meta: dict,
+    existing_step_data: dict,
+    merged_step_data: dict,
+    newly_completed: list[str],
+) -> None:
+    """Record, server-side, when each step last had a real change (#4104).
+
+    ``__meta.step_activity[step_key] = <now ISO>`` for every step whose stored
+    data actually changed in this save, and every step newly marked complete.
+    A save that re-sends identical data (a restored step re-saving on mount)
+    stamps nothing. The teacher's 學習批閱 reads this to tell whether a
+    returned step was redone after it was returned, and whether a lesson was
+    started at all. ``__meta`` is never taken from the client payload, so the
+    student cannot forge it.
+    """
+    now = datetime.now(tz=timezone.utc).isoformat()
+    changed = [k for k, v in merged_step_data.items() if existing_step_data.get(k) != v]
+    keys = set(changed) | set(newly_completed)
+    if not keys:
+        return
+    activity = dict(meta.get("step_activity") or {})
+    for k in keys:
+        activity[k] = now
+    meta["step_activity"] = activity
+
+
 @router.put(
     "/learning/sessions/{session_id}/progress",
     response_model=StepProgressResponse,
@@ -114,6 +173,13 @@ def save_step_progress(
 
     existing_step_data = existing_sp.step_data if existing_sp is not None else {}
     merged_step_data = {**existing_step_data, **payload.step_data}
+    _union_attempts(merged_step_data, existing_step_data, payload.step_data)
+    _stamp_step_activity(
+        existing_meta,
+        existing_step_data,
+        merged_step_data,
+        newly_completed=[s for s in merged_steps_completed if s not in base_steps_completed],
+    )
 
     # Version is stored at the top level so the frontend can read it directly
     # from StepProgressData.version. __meta keeps other metadata (source, etc.).

@@ -9,14 +9,17 @@ import CoTeachingTab from './CoTeachingTab';
 import AssignmentsPanel from './panel/AssignmentsPanel';
 import ClassDataTab, { type DataView as ClassDataView } from './panel/ClassDataTab';
 import LeagueProgressTab from './panel/LeagueProgressTab';
+import LessonReviewTab from './review/LessonReviewTab';
 
-type TabKey = 'settings' | 'assignments' | 'data' | 'league';
+type TabKey = 'settings' | 'assignments' | 'data' | 'league' | 'review';
 
 export const TABS: { key: TabKey; label: string }[] = [
   { key: 'settings', label: '班級設定' },
   { key: 'assignments', label: '指派任務' },
   { key: 'data', label: '班級數據' },
   { key: 'league', label: '跨班賽季' },
+  // #4104：老師逐課批閱學生的成績單（單關退回、評語、每關分數與總分）
+  { key: 'review', label: '學習批閱' },
 ];
 
 const ALL_KEYS = new Set<string>(TABS.map((tab) => tab.key));
@@ -182,6 +185,8 @@ const ClassroomTabs: React.FC<ClassroomTabsProps> = ({
     )}
 
     {activeTab === 'league' && <LeagueProgressTab classroomId={classroomId} />}
+
+    {activeTab === 'review' && <LessonReviewTab classroomId={classroomId} />}
         </div>
       </div>
     </div>

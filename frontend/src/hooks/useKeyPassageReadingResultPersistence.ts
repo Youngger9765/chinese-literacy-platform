@@ -62,10 +62,14 @@ export function useKeyPassageReadingResultPersistence({
   initialResult,
   initialTranscript,
 }: UseKeyPassageReadingResultPersistenceProps): UseKeyPassageReadingResultPersistenceReturn {
-  /* ---- Bug #1320 Bug 3: Derive initial result priority:
-   *   1. localStorage (same-browser persistence, most complete — has diffTokens)
-   *   2. session.fullReadingResult rehydrated from DB (cross-browser / cleared localStorage)
-   *   localStorage wins because it contains diffTokens which the DB result may lack. ---- */
+  /* ---- Initial result priority (#4081, reversing Bug #1320's order):
+   *   1. this round's result from the DB (step_data — it carries diffTokens too)
+   *   2. localStorage, only when the DB has nothing (offline / before the first save)
+   *   localStorage used to win "because the DB result may lack diffTokens". That
+   *   stopped being true once KeyPassageReading wrote the full result (with
+   *   diffTokens) into step_data, and letting a stale browser copy win meant an
+   *   older reading on this device was shown and then saved back over a newer
+   *   one the DB already had. ---- */
   const loadSaved = (): { result: SavedResult; transcript: string } | null => {
     try {
       const raw = localStorage.getItem(storageKey);
@@ -76,7 +80,6 @@ export function useKeyPassageReadingResultPersistence({
   const savedProgress = useRef(loadSaved());
 
   const getInitialResult = (): SavedResult | null => {
-    if (savedProgress.current?.result) return savedProgress.current.result;
     if (initialResult) {
       return {
         matchRate: initialResult.matchRate,
@@ -88,14 +91,14 @@ export function useKeyPassageReadingResultPersistence({
         aiDisabled: initialResult.aiDisabled,
       };
     }
-    return null;
+    return savedProgress.current?.result ?? null;
   };
 
   const [result, setResult] = useState<SavedResult | null>(getInitialResult);
   const [streamingTranscript, setStreamingTranscript] = useState(
-    // Issue #2503: localStorage wins (most recent), else DB step_data transcript,
-    // so 你說的 survives handleFinish's localStorage clear + remount.
-    () => savedProgress.current?.transcript ?? initialTranscript ?? ''
+    // #4081: the DB's transcript first (same reason as the result above), then
+    // the browser copy (#2503: survives handleFinish's localStorage clear).
+    () => (initialResult ? initialTranscript : undefined) ?? savedProgress.current?.transcript ?? initialTranscript ?? ''
   );
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
 

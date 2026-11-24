@@ -20,6 +20,7 @@ vi.mock('../../../contexts/AuthContext', () => ({
 }));
 
 vi.mock('../../../services/api', () => ({
+  storyForStep: (s: unknown) => s,
   fetchStory: vi.fn().mockResolvedValue({
     id: '20011',
     title: '春天來了',

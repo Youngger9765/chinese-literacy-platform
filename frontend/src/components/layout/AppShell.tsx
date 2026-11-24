@@ -16,6 +16,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useWorkspace } from '../../contexts/WorkspaceContext';
 import { useLearningNav } from '../../contexts/LearningNavContext';
+import { stepNavStatus } from '../report/reportCardsModel';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import { getMyAssignments } from '../../services/assignmentApi';
 import { AppView } from '../../types';
@@ -31,6 +32,7 @@ import StepFooterNav from '../reading-steps/StepFooterNav';
 import { OnboardingWrapper } from '../../pages/app/InlinePages';
 import { isToolboxMode, setToolboxMode } from '../../services/learningStorageScope';
 import { stepNeighbours } from '../../config/stepNeighbours';
+import { useMyLessonReview } from '../../hooks/useMyLessonReview';
 
 /** The authenticated app shell with sidebar only (header removed 2026-04-18). */
 export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -109,6 +111,10 @@ interface StepDotsProps {
   annotations?: ReturnType<typeof annotateStepParts>;
   currentStepIndex: number;
   completedSet: Set<string>;
+  /** #4028：完成了但有錯題的關卡（黃色圈圈），跟報告卡片同一個判斷。沒給 = 沒有黃色。 */
+  reviewSet?: Set<string>;
+  /** #4104：老師退回、還沒重做的關卡（紅色圈圈，優先於黃 / 綠）。 */
+  returnedSet?: Set<string>;
   onStepClick: (step: Step) => void;
   /** Prev/next live INSIDE the dot row (#2889) — see NavArrow below. */
   prevStep: Step | null;
@@ -188,6 +194,8 @@ export const StepDots: React.FC<StepDotsProps> = ({
   annotations,
   currentStepIndex,
   completedSet,
+  reviewSet,
+  returnedSet,
   onStepClick,
   prevStep,
   nextStep,
@@ -259,10 +267,13 @@ export const StepDots: React.FC<StepDotsProps> = ({
         const annAt = annotations?.[i];
         const ann = annAt?.step.id === step.id ? annAt : undefined;
         const isCompleted = completedSet.has(step.id);
+        const isReturned = !!returnedSet?.has(step.id);
+        const needsReview = !isReturned && isCompleted && !!reviewSet?.has(step.id);
         const isActive = i === currentStepIndex;
 
         let dotClass = 'bg-on-surface-variant/20 text-on-surface-variant';
-        if (isCompleted) dotClass = 'bg-emerald-500 text-white';
+        if (isCompleted) dotClass = needsReview ? 'bg-amber-400 text-amber-950' : 'bg-emerald-500 text-white';
+        if (isReturned) dotClass = 'bg-red-500 text-white';
         if (isActive) dotClass = 'bg-accent text-white ring-2 ring-accent/30';
         const emphasis = step.navEmphasis && !isCompleted;
         if (emphasis && !isActive) dotClass = 'bg-violet-100 text-violet-700 ring-2 ring-violet-400';
@@ -294,10 +305,21 @@ export const StepDots: React.FC<StepDotsProps> = ({
               // dots than they already did.
               className={`${sizeClass} relative before:absolute before:-inset-1.5 before:content-[''] rounded-full text-xs sm:text-sm md:text-base font-bold flex items-center justify-center transition-all hover:scale-105 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${dotClass}`}
               aria-label={ann?.a11yLabel ?? `${i + 1}. ${step.label}`}
+              aria-description={isReturned ? '老師退回，要重做' : needsReview ? '已完成，有錯題要訂正' : undefined}
+              data-review={needsReview || undefined}
+              data-returned={isReturned || undefined}
               aria-current={isActive ? 'step' : undefined}
               title={ann?.partNo ? `${step.label}（第 ${ann.partNo} 篇）` : step.label}
             >
-              {isCompleted ? (
+              {isReturned ? (
+                <span className="material-symbols-outlined text-[16px] md:text-[20px] leading-none font-bold" aria-hidden="true">
+                  replay
+                </span>
+              ) : needsReview ? (
+                <span className="material-symbols-outlined text-[16px] md:text-[20px] leading-none font-bold" aria-hidden="true">
+                  priority_high
+                </span>
+              ) : isCompleted ? (
                 <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
@@ -349,7 +371,7 @@ const ImmersiveTopBar: React.FC = () => {
   //    於是 `stepNeighbours` 永遠命中第一個同名步驟 ——
   //    active 圓圈與上一步／下一步三輪共用一顆（2026-08-25 staging 實測）。
   const currentStepKey = useCurrentStepId(String(currentView));
-  const { selectedStory, session } = useLearningNav();
+  const { selectedStory, session, stepProgress } = useLearningNav();
   const {
     zhuyinMode, zhuyinReady, setZhuyinMode,
     difficultThreshold, setDifficultThreshold,   // #3240
@@ -392,8 +414,21 @@ const ImmersiveTopBar: React.FC = () => {
   );
   const totalSteps = activeSteps.length;
 
-  // Determine completed steps
-  const completedSet = new Set(session?.completedSteps ?? []);
+  // #4028：完成 / 完成但有錯題（黃色）都用報告卡片的同一個函式判斷，上方圈圈跟
+  // 報告頁不會一個綠一個灰。session.completedSteps 照舊併進來（剛按完成、DB 還沒回
+  // 來的那一瞬間）。
+  const navStatus = React.useMemo(
+    () => stepNavStatus(activeSteps, stepProgress?.steps_completed, stepProgress?.step_data),
+    [activeSteps, stepProgress?.steps_completed, stepProgress?.step_data],
+  );
+  const completedSet = new Set([...(session?.completedSteps ?? []), ...navStatus.completed]);
+  const reviewSet = navStatus.review;
+  // #4104：老師退回的關卡（紅色）。存檔後重抓 —— 重做了就解除，由後端判斷。
+  const lessonReview = useMyLessonReview(selectedStory?.id, stepProgress?.version);
+  const returnedSet = React.useMemo(
+    () => new Set(Object.entries(lessonReview?.steps ?? {}).filter(([, s]) => s.returned).map(([k]) => k)),
+    [lessonReview],
+  );
 
   const handleBack = () => {
     if (inToolbox) {
@@ -469,6 +504,8 @@ const ImmersiveTopBar: React.FC = () => {
               annotations={stepAnnotations}
               currentStepIndex={currentStepIndex}
               completedSet={completedSet}
+              reviewSet={reviewSet}
+              returnedSet={returnedSet}
               onStepClick={handleStepClick}
               prevStep={prevStep}
               nextStep={nextStep}

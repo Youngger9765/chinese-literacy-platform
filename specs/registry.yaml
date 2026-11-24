@@ -289,6 +289,25 @@ modules:
   last_reviewed: 2026-06-02
   owner: young
   intent: specs/modules/lesson-loader/INTENT.md
+- spec_id: teacher.lesson_review
+  module: lesson-review
+  title: 學習批閱 — 老師逐課批閱成績單（單關退回、評語、每關分數與總分）
+  stability: active
+  canonical_source: backend/app/services/lesson_review_service.py
+  owns_code:
+  - backend/app/services/lesson_review_service.py
+  - backend/app/models/lesson_review.py
+  - backend/app/routes/teacher/teacher_lesson_review.py
+  - backend/app/routes/learning/learning_reviews.py
+  spec_tests:
+  - backend/specs/test_lesson_review_spec.py
+  related_issues:
+  - 4104
+  - 4087
+  - 4028
+  last_reviewed: 2026-11-18
+  owner: young
+  intent: specs/modules/lesson-review/INTENT.md
 - spec_id: listening.eval.guards
   module: listening
   title: 聽力評估安全門 — 垃圾輸入拒評 + 逐字貼上短路 + 分數 Clamp

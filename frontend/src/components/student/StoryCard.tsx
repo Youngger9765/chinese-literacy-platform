@@ -5,6 +5,8 @@
 import React from 'react';
 import { Story } from '../../types';
 import type { LibraryStoryStatus } from '../../services/progressApi';
+import type { MyReviewSummary } from '../../services/lessonReviewApi';
+import { CircledScore } from '../report/TeacherMarks';
 import { gradeLabel } from '../../utils/gradeLabel';
 
 export type Difficulty = 'easy' | 'medium' | 'hard';
@@ -50,15 +52,21 @@ interface StoryCardProps {
   closeToLevelUp?: boolean;
   /** When provided, shows a small "clear progress" button on the card (Issue #2188). */
   onClearProgress?: () => void;
+  /** #4104 學習批閱：老師送出的總分與退回中的關卡數。 */
+  teacherReview?: MyReviewSummary;
 }
 
-const StoryCard: React.FC<StoryCardProps> = ({ story, isLoading, isCompleted, onClick, userStatus, estimatedXP, closeToLevelUp, onClearProgress }) => {
+const StoryCard: React.FC<StoryCardProps> = ({ story, isLoading, isCompleted, onClick, userStatus, estimatedXP, closeToLevelUp, onClearProgress, teacherReview }) => {
+  const returnedCount = teacherReview?.returned_count ?? 0;
+  const teacherScore = teacherReview?.total_score ?? null;
   const diff = getDifficulty(story);
   const diffConfig = DIFFICULTY_CONFIG[diff];
   const statusBadge = userStatus ? STATUS_BADGE[userStatus] : null;
 
   // Card border reflects status: assigned = orange, completed = green, else default
-  const borderClass = userStatus === 'assigned'
+  const borderClass = returnedCount > 0
+    ? 'border-red-400 hover:border-red-500'
+    : userStatus === 'assigned'
     ? 'border-orange-300 hover:border-orange-400'
     : isCompleted
       ? 'border-green-300 hover:border-green-400'
@@ -109,6 +117,21 @@ const StoryCard: React.FC<StoryCardProps> = ({ story, isLoading, isCompleted, on
         {statusBadge && (
           <div className={`absolute top-2 left-2 text-xs font-semibold px-2 py-0.5 rounded-full ${statusBadge.className}`}>
             {statusBadge.label}
+          </div>
+        )}
+        {/* #4104：老師紅筆圈起來的總分（像考卷右上角）與退回的關卡數 */}
+        {teacherScore != null && (
+          <div className="absolute bottom-1.5 right-2">
+            <CircledScore score={teacherScore} />
+          </div>
+        )}
+        {returnedCount > 0 && (
+          <div
+            className="absolute bottom-2 left-2 flex items-center gap-1 rounded-full bg-red-600 px-2 py-0.5 text-xs font-bold text-white shadow-sm"
+            data-testid="library-returned-badge"
+          >
+            <span className="material-symbols-outlined text-sm" aria-hidden="true">replay</span>
+            老師退回 {returnedCount} 關
           </div>
         )}
         {/* Loading overlay */}

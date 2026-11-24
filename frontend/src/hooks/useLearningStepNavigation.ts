@@ -178,7 +178,10 @@ export function useLearningStepNavigation({
       // 學生在第 2 步按「完成標記」會直接被丟到第 21 步的報告頁（#2930）。
       // 補上目前網址帶的輪次；單篇課沒有 `#`，keyed === stepId，行為不變。
       const keyed = currentStepKey.startsWith(`${stepId}#`) ? currentStepKey : stepId;
-      const payload = buildStepFinishPayload(keyed, stepData);
+      // #4104：每次按完成都蓋一個時間。這樣「重新完成」一定會改到這一關的資料，
+      // 後端才會記一筆 step_activity —— 老師退回的關卡靠它判斷「學生已重做」。
+      // 沒有這一欄的話，做記號這種資料不在 step_progress 的關卡，重做了也看不出來。
+      const payload = buildStepFinishPayload(keyed, { ...stepData, finishedAt: new Date().toISOString() });
       // Lesson-aware override (#2752): STEP_FINISH_TRANSITIONS is one static table
       // keyed by step id, so it cannot express "key-passage-reading is followed by
       // X for 白話 lessons but Y for 文言文 lessons" — both genres route through

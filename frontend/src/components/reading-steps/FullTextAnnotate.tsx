@@ -542,6 +542,13 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
   const [dbHydrated, setDbHydrated] = useState(false);
   // Debounce timer ref for DB saves
   const dbSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // #4081：還沒送出的那一份（800ms 防抖期間）。離開頁面時把它送出去，而不是丟掉。
+  const pendingSaveRef = useRef<{ sessionId: number; payload: AnnotationPayload[] } | null>(null);
+  // #4081：讀 DB 失敗時的那一份畫面狀態。學生還沒自己動手改之前，不能拿它去覆蓋 DB ——
+  // 讀不到不代表 DB 是空的，整份 PUT 會把裡面的記號全部刪掉。
+  const loadFailedSnapshotRef = useRef<Annotation[] | null>(null);
+  const annotationsRef = useRef(annotations);
+  useEffect(() => { annotationsRef.current = annotations; }, [annotations]);
 
   // Floating toolbar state
   const [toolbar, setToolbar] = useState<{
@@ -645,8 +652,10 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
         }
         // else: keep localStorage snapshot as-is (DB is empty, likely fresh session)
       } catch (err) {
-        // DB load failed — silently keep localStorage data; log for debugging
+        // DB load failed — keep showing the cached copy, but don't write it back
+        // over the DB until the student actually changes something (#4081).
         console.warn('[ReadingAnnotation] DB load failed, using localStorage fallback:', err);
+        if (!cancelled) loadFailedSnapshotRef.current = annotationsRef.current;
       } finally {
         // setDbHydrated(true) triggers the save effect to re-evaluate — this ensures
         // any annotation the student made during the DB load window is saved to DB.
@@ -662,19 +671,25 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
 
   useEffect(() => {
     if (!dbSessionId || !dbHydrated) return;
+    // #4081：讀 DB 失敗後、學生還沒改任何東西 —— 不寫。
+    if (loadFailedSnapshotRef.current === annotations) return;
+    loadFailedSnapshotRef.current = null;
 
     // Clear any pending save
     if (dbSaveTimerRef.current) clearTimeout(dbSaveTimerRef.current);
 
+    const payload: AnnotationPayload[] = annotations.map((ann) => ({
+      paragraph_index: ann.paragraphIndex,
+      char_start: ann.charStart,
+      char_end: ann.charEnd,
+      annotation_type: ann.type as 'unknown' | 'important',
+      client_id: ann.id,
+    }));
+    pendingSaveRef.current = { sessionId: dbSessionId, payload };
+
     dbSaveTimerRef.current = setTimeout(async () => {
+      pendingSaveRef.current = null;
       try {
-        const payload: AnnotationPayload[] = annotations.map((ann) => ({
-          paragraph_index: ann.paragraphIndex,
-          char_start: ann.charStart,
-          char_end: ann.charEnd,
-          annotation_type: ann.type as 'unknown' | 'important',
-          client_id: ann.id,
-        }));
         await saveAnnotations(dbSessionId, payload);
       } catch (err) {
         // Save failed (offline, token expired, etc.) — localStorage copy survives
@@ -686,6 +701,22 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
       if (dbSaveTimerRef.current) clearTimeout(dbSaveTimerRef.current);
     };
   }, [annotations, dbSessionId, dbHydrated]);
+
+  // #4081：離開這一頁（按「完成」、換關卡）時，防抖還沒到的那一份要送出去。
+  // 以前 cleanup 只取消計時器 —— 做完最後一個記號 0.8 秒內按完成，那個記號就
+  // 永遠沒進 DB；下次回來 DB 的舊版本又蓋掉了瀏覽器裡的。
+  useEffect(
+    () => () => {
+      const pending = pendingSaveRef.current;
+      pendingSaveRef.current = null;
+      if (pending) {
+        saveAnnotations(pending.sessionId, pending.payload).catch((err) =>
+          console.warn('[ReadingAnnotation] DB save on leave failed:', err),
+        );
+      }
+    },
+    [],
+  );
 
   // ── Summary ────────────────────────────────────────────────────────────
 

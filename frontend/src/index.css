@@ -21,6 +21,8 @@ layer(base);
     'Plus Jakarta Sans', 'Noto Sans TC', ui-sans-serif, system-ui, sans-serif;
   --font-body:
     'Be Vietnam Pro', 'Noto Sans TC', ui-sans-serif, system-ui, sans-serif;
+  /* 老師批閱的紅筆分數（#4104）：手寫數字用 Caveat，中文落到楷書 */
+  --font-hand: Caveat, cwTeXKai, cursive;
 
   --shadow-card: 0 0 32px rgba(136, 152, 170, 0.12);
   --shadow-editorial: 0 12px 48px rgba(48, 47, 42, 0.06);
