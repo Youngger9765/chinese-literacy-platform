@@ -37,7 +37,9 @@ const VocabReviewPage: React.FC = () => {
         stepData: {
           foundWords: progress.foundWords,
           elapsedTime: progress.elapsedTime,
-          ...(progress.completed ? { completed: true } : {}),
+          // #4081：一律送布林。只在 true 時才帶，重做之後舊的 completed: true 會被
+          // 一層合併保留下來，DB 永遠以為這一關已經完成。
+          completed: progress.completed === true,
         },
       });
     },

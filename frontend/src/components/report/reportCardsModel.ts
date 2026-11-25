@@ -14,6 +14,7 @@
 import { resolveStepId, type StepConfig } from '../../config/stepConfig';
 import { stripPUASelectors } from '../reading-steps/annotationOffsets';
 import type { AnnotationRecord } from '../../services/learning/annotationApi';
+import { readAttempts, type StepAttempt } from '../../utils/stepAttempts';
 
 export type AnnotationKind = 'unknown' | 'important';
 
@@ -23,12 +24,25 @@ export interface MarkedWord {
   paragraphIndex: number;
 }
 
-/** 一題的作答對照（你的答案 vs 正確答案）。 */
+/** 一題的作答對照（你的答案 vs 正確答案）。`correct` 一律是「第一次就答對」。 */
 export interface AnswerRow {
   label: string;
   correct: boolean;
+  /** 題目本身（例如詞語的解釋），有的話顯示在標號下面。 */
+  prompt?: string | null;
   studentAnswer?: string | null;
   correctAnswer?: string | null;
+  /**
+   * 第一次答錯之後，後來有沒有改對（#4028）。true = 已訂正、false = 還沒訂正、
+   * null/undefined = 這一關沒有記下（不顯示）。
+   */
+  corrected?: boolean | null;
+}
+
+/** 詞語理解用的詞語表（story.vocabulary 的形狀）。 */
+export interface VocabWord {
+  word: string;
+  definition?: string;
 }
 
 /** 卡片點開後的細節區塊。 */
@@ -39,6 +53,16 @@ export type DetailBlock =
   | { kind: 'words'; title: string; words: string[] }
   | { kind: 'note'; text: string };
 
+/**
+ * 這一關的狀態（#4028，案主定調）：
+ * - `done`：完成，沒有要訂正的題目 → 綠色（第一次錯、後來改對的也是綠色，卡片註明訂正過幾題）
+ * - `review`：完成，但還有題目錯著沒改對 → 黃色，告訴學生還有幾題要訂正
+ * - `none`：沒完成
+ * 案主定調（2026-11-16 手測後）：黃色只代表「還有題目要訂正」，訂正完就變綠色。
+ * 不分「這次 / 上次」：完成就是完成。上方關卡導覽列用同一個函式判斷（AppShell）。
+ */
+export type CardStatus = 'done' | 'review' | 'none';
+
 export interface StepReportCard {
   /** 完整 step id（多篇課帶 `#slug`），用來組網址。 */
   stepId: string;
@@ -46,9 +70,43 @@ export interface StepReportCard {
   label: string;
   icon: string;
   completed: boolean;
+  status: CardStatus;
   /** 卡片上的一行摘要，例如「答對 7/8 題」「做了 5 個記號」。 */
   summary: string | null;
   details: DetailBlock[];
+  /**
+   * #4087：歷次作答（依時間）。有兩筆以上，成績單點開就畫折線圖。
+   * 只有作答類的關卡有（做記號、語詞複習、知識補給站、課程簡介沒有）。
+   */
+  attempts: StepAttempt[];
+  /** 折線圖畫什麼：答對題數（score）或朗讀的速度＋正確率（reading）；null = 這關不畫。 */
+  chart: 'score' | 'reading' | null;
+  /** 這一關的能力分數 0–100（最近一次作答的第一次答對率 / 朗讀正確率），雷達圖用；null = 沒有可算的。 */
+  rate: number | null;
+  /** 還要訂正的題數（第一次錯、到現在還沒改對）。> 0 才是黃色（#4087 案主定調）。 */
+  toFix: number;
+  /** 第一次錯、後來改對的題數（綠色卡片上註明「訂正過 N 題」）。 */
+  fixed: number;
+  /** 題 / 格（文章重點表是格）。 */
+  unit: string;
+}
+
+/** #4087：哪些關卡有折線圖、畫哪一種。 */
+const CHART_KIND: Record<string, 'score' | 'reading'> = {
+  'vocab-definition': 'score',
+  'vocab-application': 'score',
+  comprehension: 'score',
+  spotlight: 'score',
+  'keypoints-table': 'score',
+  'key-passage-reading': 'reading',
+};
+
+/** 一筆作答 → 0–100。 */
+export function attemptRate(a: StepAttempt): number | null {
+  if (a.kind === 'reading') return typeof a.accuracy === 'number' ? Math.round(a.accuracy) : null;
+  return typeof a.correct === 'number' && typeof a.total === 'number' && a.total > 0
+    ? Math.round((a.correct / a.total) * 100)
+    : null;
 }
 
 /** 每一關的圖示（Material Symbols）。沒列到的用預設。 */
@@ -141,9 +199,62 @@ interface BuildCtx {
   completed: boolean;
   /** null = 載入中；undefined = 這一關沒有記號可顯示（多篇課的第 2 篇之後）。 */
   marks: MarkedWord[] | null | undefined;
+  /** 這一關（這一輪）的詞語表；拿不到時是 undefined，細節就只列對錯不列詞語。 */
+  vocabulary?: VocabWord[];
 }
 
-type Builder = (ctx: BuildCtx) => { summary: string | null; details: DetailBlock[] };
+/**
+ * 詞語理解的一個模式（選擇題 / 拖拉配對）→ 每題的作答列（#4028）。
+ * 跟關卡頁的錯題回顧同一套讀法（VocabDefinitionMatch.StageCompletedPlaceholder）：
+ * 對錯看 firstTryCorrect（只寫一次），學生選的看 firstTryAnsweredWordIdx ——
+ * answeredWordIdx 是「最後一次」，重做之後一定是對的。
+ */
+function vocabMatchRows(list: unknown, vocab: VocabWord[] | undefined, prefix: string): AnswerRow[] {
+  if (!Array.isArray(list)) return [];
+  return list.filter(isObj).map((a, i) => {
+    const defIndex = num(a.defIndex);
+    const item = defIndex !== null ? vocab?.[defIndex] : undefined;
+    const firstOk = (a.firstTryCorrect ?? a.correct) === true;
+    const pickIdx = num(a.firstTryAnsweredWordIdx) ?? num(a.answeredWordIdx);
+    return {
+      label: `${prefix}第 ${i + 1} 題`,
+      correct: firstOk,
+      prompt: item?.definition ?? null,
+      studentAnswer: !firstOk && pickIdx !== null ? vocab?.[pickIdx]?.word ?? null : null,
+      correctAnswer: item?.word ?? null,
+      corrected: firstOk ? null : a.correct === true,
+    };
+  });
+}
+
+/**
+ * 作答列的 `correct` 是第一次的對錯，`corrected` 是後來有沒有改對。「還要訂正」=
+ * 第一次錯、而且 corrected 不是 true（沒有 corrected 欄位的列，例如文章重點表的格子，
+ * 它的 correct 就是目前的批改結果，錯著就是還沒改）。只有分數、沒有逐題資料的舊紀錄
+ * 分不出有沒有改，不算要訂正。
+ */
+type Builder = (ctx: BuildCtx) => {
+  summary: string | null;
+  details: DetailBlock[];
+  /** 0–100，沒有作答紀錄時雷達圖拿它當這一關的分數（#4087）。 */
+  rate?: number | null;
+};
+
+const rateOf = (t: number, n: number) => (t > 0 ? Math.round((n / t) * 100) : null);
+
+function correctionCounts(details: DetailBlock[]): { toFix: number; fixed: number } {
+  let toFix = 0;
+  let fixed = 0;
+  for (const d of details) {
+    if (d.kind !== 'answers') continue;
+    for (const r of d.rows) {
+      if (r.correct) continue;
+      if (r.corrected === true) fixed += 1;
+      else toFix += 1;
+    }
+  }
+  return { toFix, fixed };
+}
 
 function firstTryRows(list: unknown, prefix = '第'): AnswerRow[] {
   if (!Array.isArray(list)) return [];
@@ -189,39 +300,96 @@ const BUILDERS: Record<string, Builder> = {
     return {
       summary: cpm !== null ? `每分鐘 ${Math.round(cpm)} 字` : null,
       details: items.length ? [{ kind: 'stats', items }] : [{ kind: 'note', text: '沒有朗讀紀錄。' }],
+      rate: pct,
     };
   },
 
-  'vocab-definition': ({ data }) => {
-    const r = isObj(data.result) ? data.result : {};
-    const n = num(r.matchedCount);
-    const t = num(r.totalCount);
-    if (n === null || t === null) return { summary: null, details: [] };
-    return {
-      summary: correctOf(n, t),
-      details: [{ kind: 'stats', items: [{ label: '答對', value: `${n} / ${t} 題` }] }],
-    };
+  'vocab-definition': ({ data, vocabulary }) => {
+    // #4028：以前讀 result.matchedCount —— 那是「訂正完」的數字，重做錯題之後永遠是
+    // 全對（本機實測：第一次錯了一半，報告寫「答對 22/22」）。改用每題的第一次作答。
+    const mc = vocabMatchRows(data.mcAnswers, vocabulary, '選擇題 ');
+    const dd = vocabMatchRows(data.dragDropAnswers, vocabulary, '配對 ');
+    const rows = [...mc, ...dd];
+    if (!rows.length) {
+      // 舊資料只有 result：照舊顯示，但標明那是訂正後的結果。
+      const r = isObj(data.result) ? data.result : {};
+      const n = num(r.matchedCount);
+      const t = num(r.totalCount);
+      if (n === null || t === null) return { summary: null, details: [] };
+      return {
+        summary: correctOf(n, t),
+        details: [{ kind: 'stats', items: [{ label: '答對（含訂正）', value: `${n} / ${t} 題` }] }],
+      };
+    }
+    const first = rows.filter((r) => r.correct).length;
+    const wrong = rows.length - first;
+    const fixed = rows.filter((r) => r.corrected === true).length;
+    const details: DetailBlock[] = [
+      {
+        kind: 'stats',
+        items: [
+          { label: '第一次就答對', value: `${first} / ${rows.length} 題` },
+          { label: '答錯後訂正', value: `${fixed} / ${wrong} 題` },
+        ],
+      },
+    ];
+    if (mc.length) details.push({ kind: 'answers', title: '選擇題', rows: mc });
+    if (dd.length) details.push({ kind: 'answers', title: '拖拉配對', rows: dd });
+    return { summary: correctOf(first, rows.length), details, rate: rateOf(rows.length, first) };
   },
 
   'vocab-application': ({ data }) => {
     const n = num(data.score);
     const t = num(data.total);
-    const rows = firstTryRows(data.firstTryResults);
+    // 填對才能進下一題，所以做完時每一題第一次錯的都已經改對了。
+    const rows = firstTryRows(data.firstTryResults).map((r) => (r.correct ? r : { ...r, corrected: true }));
     const details: DetailBlock[] = [];
     if (n !== null && t !== null) details.push({ kind: 'stats', items: [{ label: '第一次就答對', value: `${n} / ${t} 題` }] });
     if (rows.length) details.push({ kind: 'answers', title: '作答紀錄', rows });
-    return { summary: n !== null && t !== null ? correctOf(n, t) : null, details };
+    return {
+      summary: n !== null && t !== null ? correctOf(n, t) : null,
+      details,
+      rate: n !== null && t !== null ? rateOf(t, n) : null,
+    };
   },
 
   spotlight: ({ data }) => {
-    // 沒有分數欄位；有對錯回饋的題目才算進來（lesson_v1 / spotlight_v2 都寫 feedback）。
-    const fb = isObj(data.feedback) ? Object.values(data.feedback) : [];
+    // #4081：有 firstFeedback（每題第一次的對錯）就用它 —— feedback 是最新一次，聚光燈
+    // 要全對才能完成，看它永遠是滿分。舊資料只有 feedback：照舊顯示，但分不出有沒有錯過，
+    // 不亂標黃色。
+    const firstMap = isObj(data.firstFeedback) ? data.firstFeedback : null;
+    const latestMap = isObj(data.feedback) ? data.feedback : {};
+    const fb = firstMap ? Object.values(firstMap) : Object.values(latestMap);
     const graded = fb.filter((v) => v === true || v === false);
     if (!graded.length) return { summary: null, details: [] };
     const n = graded.filter((v) => v === true).length;
+    const details: DetailBlock[] = [
+      { kind: 'stats', items: [{ label: firstMap ? '第一次就答對' : '選擇題答對', value: `${n} / ${graded.length} 題` }] },
+    ];
+    // #4087：每一題的作答紀錄（題目、你第一次選的、正確答案、有沒有訂正）。
+    const log = isObj(data.answerLog) ? data.answerLog : {};
+    const entries = Object.entries(log)
+      .filter((e): e is [string, Record<string, unknown>] => isObj(e[1]))
+      .sort((a, b) => (num(a[1].order) ?? 0) - (num(b[1].order) ?? 0));
+    if (entries.length) {
+      const rows: AnswerRow[] = entries.map(([key, e], i) => {
+        const first = firstMap?.[key] ?? latestMap[key];
+        const ok = first === true;
+        return {
+          label: `第 ${i + 1} 題`,
+          prompt: str(e.label),
+          correct: ok,
+          studentAnswer: ok ? null : str(e.firstAnswer),
+          correctAnswer: str(e.correctAnswer),
+          corrected: ok ? null : latestMap[key] === true,
+        };
+      });
+      details.push({ kind: 'answers', title: '作答紀錄', rows });
+    }
     return {
       summary: correctOf(n, graded.length),
-      details: [{ kind: 'stats', items: [{ label: '選擇題答對', value: `${n} / ${graded.length} 題` }] }],
+      details,
+      rate: firstMap ? rateOf(graded.length, n) : null,
     };
   },
 
@@ -242,17 +410,31 @@ const BUILDERS: Record<string, Builder> = {
         { kind: 'stats', items: [{ label: '答對', value: `${n} / ${results.length} 格` }] },
         { kind: 'answers', title: '每一格', rows },
       ],
+      rate: rateOf(results.length, n),
     };
   },
 
   comprehension: ({ data }) => {
     const n = num(data.mcqScore) ?? num(data.mcq_score);
     const t = num(data.mcqTotal) ?? num(data.mcq_total);
-    const rows = firstTryRows(data.firstTry);
+    // #4028：feedback 是「最新一次」的對錯 —— 第一次錯、後來改對就是已訂正。
+    const latest = isObj(data.feedback) ? data.feedback : {};
+    const records = Array.isArray(data.firstTry) ? data.firstTry.filter(isObj) : [];
+    const rows = firstTryRows(records).map((r, i) => {
+      const id = str(records[i]?.id);
+      const now = id ? latest[id] : undefined;
+      if (r.correct) return r;
+      // 沒有最新對錯的舊紀錄：閱讀理解要答對才能往下，做完時一定改對了。
+      return { ...r, corrected: now === false ? false : true };
+    });
     const details: DetailBlock[] = [];
     if (n !== null && t !== null) details.push({ kind: 'stats', items: [{ label: '第一次就答對', value: `${n} / ${t} 題` }] });
     if (rows.length) details.push({ kind: 'answers', title: '作答紀錄', rows });
-    return { summary: n !== null && t !== null && t > 0 ? correctOf(n, t) : null, details };
+    return {
+      summary: n !== null && t !== null && t > 0 ? correctOf(n, t) : null,
+      details,
+      rate: n !== null && t !== null ? rateOf(t, n) : null,
+    };
   },
 
   'vocab-review': ({ data }) => {
@@ -265,6 +447,14 @@ const BUILDERS: Record<string, Builder> = {
   },
 };
 
+export interface ReportCardOptions {
+  /**
+   * 某一關（完整 step id，含 `#slug`）的詞語表，詞語理解的細節要用它把作答還原成詞語。
+   * 呼叫端通常是 `(id) => storyForStep(story, id)?.vocabulary`。
+   */
+  vocabularyFor?: (stepId: string) => VocabWord[] | undefined;
+}
+
 /**
  * 組出報告頁的卡片清單。
  *
@@ -275,12 +465,14 @@ const BUILDERS: Record<string, Builder> = {
  *                       沒有能力提供記號資料（例如老師端：後端沒有教師專屬的
  *                       annotations 端點，見 TeacherSessionReportPage）—— 卡片
  *                       會略過記號細節，不會誤報「還沒有做記號」或卡在「載入中」。
+ * @param opts           vocabularyFor：每一關的詞語表（詞語理解的作答細節）。
  */
 export function buildStepReportCards(
   steps: StepConfig[],
   stepsCompleted: string[] | null | undefined,
   stepData: Record<string, unknown> | null | undefined,
   marks: MarkedWord[] | null | undefined,
+  opts: ReportCardOptions = {},
 ): StepReportCard[] {
   const done = new Set((stepsCompleted ?? []).map(normalizeStepKey));
   const data = normalizeStepData(stepData);
@@ -291,7 +483,6 @@ export function buildStepReportCards(
     const base = s.baseId ?? s.id;
     return base !== 'lesson-intro' && base !== 'report' && (done.has(s.id) || s.id in data);
   });
-
   // 記號的 offset 只對得上第一篇的課文（多篇課的第 2、3 篇不能標記），
   // 所以只掛在第一個讀全文-做記號上，其餘篇次不顯示記號。
   const firstAnnotateId = steps.find((s) => (s.baseId ?? s.id) === 'full-text-annotate')?.id;
@@ -315,15 +506,112 @@ export function buildStepReportCards(
         (baseId === 'lesson-intro' && anyLaterProgress);
       const builder = BUILDERS[baseId];
       const stepMarks = s.id === firstAnnotateId ? marks : undefined;
-      const built = builder ? builder({ data: entry, completed, marks: stepMarks }) : { summary: null, details: [] };
+      const built: ReturnType<Builder> = builder
+        ? builder({ data: entry, completed, marks: stepMarks, vocabulary: opts.vocabularyFor?.(s.id) })
+        : { summary: null, details: [] };
+      const { toFix, fixed } = correctionCounts(built.details);
+      const status: CardStatus = !completed ? 'none' : toFix > 0 ? 'review' : 'done';
+      const chart = CHART_KIND[baseId] ?? null;
+      const attempts = chart ? readAttempts(entry) : [];
+      // 雷達圖看「最近一次完整作答」的第一次答對率：訂正錯題那幾次是改過之後的成績
+      // （常常是滿分），拿來算強弱會把有錯過的項目也排成強項。
+      const full = attempts.filter((a) => a.kind !== 'retry-wrong');
+      const latest = full.length ? attemptRate(full[full.length - 1]) : null;
       return {
         stepId: s.id,
         baseId,
         label: s.label,
         icon: STEP_ICONS[baseId] ?? 'task_alt',
         completed,
+        status,
         summary: built.summary,
         details: built.details,
+        attempts,
+        chart,
+        rate: chart ? latest ?? built.rate ?? null : null,
+        toFix: completed ? toFix : 0,
+        fixed: completed ? fixed : 0,
+        unit: baseId === 'keypoints-table' ? '格' : '題',
       };
     });
+}
+
+/**
+ * 上方關卡導覽列用（#4028）：哪些關卡完成、哪些完成了但有錯題（黃色圈圈）。
+ * 跟報告卡片同一個判斷（buildStepReportCards），兩邊不會一個綠一個灰 / 一個綠一個黃
+ * —— 例如課程簡介：從來不會寫進 steps_completed，報告卡片用「後面有任何進度」判斷。
+ */
+export function stepNavStatus(
+  steps: StepConfig[],
+  stepsCompleted: string[] | null | undefined,
+  stepData: Record<string, unknown> | null | undefined,
+): { completed: Set<string>; review: Set<string> } {
+  const cards = buildStepReportCards(steps, stepsCompleted, stepData, undefined);
+  return {
+    completed: new Set(cards.filter((c) => c.completed).map((c) => c.stepId)),
+    review: new Set(cards.filter((c) => c.status === 'review').map((c) => c.stepId)),
+  };
+}
+
+/** 完成了但有錯題的關卡（stepNavStatus 的 review）。 */
+export function stepIdsNeedingReview(
+  steps: StepConfig[],
+  stepsCompleted: string[] | null | undefined,
+  stepData: Record<string, unknown> | null | undefined,
+): Set<string> {
+  return stepNavStatus(steps, stepsCompleted, stepData).review;
+}
+
+// ── #4087：雷達圖 ─────────────────────────────────────────────────────────
+
+/**
+ * 五個固定項目（每一課都一樣，案主定調 2026-11-16）。幾個關卡整合成一項；
+ * 文言文課的文白比對併進詞語 / 文意。做記號、語詞複習、知識補給站、課程簡介不計。
+ */
+export const RADAR_AXES = [
+  { key: 'vocab', label: '詞語力', steps: ['vocab-definition', 'vocab-application', 'classical-word-matching'] },
+  { key: 'meaning', label: '文意理解', steps: ['comprehension', 'classical-sentence-matching'] },
+  { key: 'structure', label: '結構統整', steps: ['keypoints-table'] },
+  { key: 'strategy', label: '閱讀策略', steps: ['spotlight'] },
+  { key: 'fluency', label: '朗讀流暢', steps: ['key-passage-reading'] },
+] as const;
+
+export interface RadarPoint {
+  key: string;
+  label: string;
+  /** 0–100；null 見 state。 */
+  value: number | null;
+  /**
+   * scored = 有分數；todo = 這課有、還沒做；unscored = 做過了但沒有可算的分數（例如
+   * #4087 以前的舊紀錄只存了訂正後的結果）；absent = 這課沒有這種關卡（「本課無」）。
+   */
+  state: 'scored' | 'todo' | 'unscored' | 'absent';
+}
+
+/** 卡片 → 雷達圖五項。一項 = 這課屬於它的各關分數平均（沒分數的關卡不算進平均）。 */
+export function radarOf(cards: StepReportCard[]): RadarPoint[] {
+  return RADAR_AXES.map((axis) => {
+    const mine = cards.filter((c) => (axis.steps as readonly string[]).includes(c.baseId));
+    if (!mine.length) return { key: axis.key, label: axis.label, value: null, state: 'absent' as const };
+    const rates = mine.map((c) => c.rate).filter((r): r is number => typeof r === 'number');
+    if (!rates.length) {
+      const state = mine.some((c) => c.completed) ? ('unscored' as const) : ('todo' as const);
+      return { key: axis.key, label: axis.label, value: null, state };
+    }
+    const value = Math.round(rates.reduce((a, b) => a + b, 0) / rates.length);
+    return { key: axis.key, label: axis.label, value, state: 'scored' as const };
+  });
+}
+
+/** 強項與需要加強（有分數的項目至少兩項才說；分數一樣就不分強弱）。 */
+export function strengthsOf(points: RadarPoint[]): { strong: string[]; weak: string[] } {
+  const scored = points.filter((p) => p.state === 'scored') as (RadarPoint & { value: number })[];
+  if (scored.length < 2) return { strong: [], weak: [] };
+  const max = Math.max(...scored.map((p) => p.value));
+  const min = Math.min(...scored.map((p) => p.value));
+  if (max === min) return { strong: [], weak: [] };
+  return {
+    strong: scored.filter((p) => p.value === max).map((p) => p.label),
+    weak: scored.filter((p) => p.value === min).map((p) => p.label),
+  };
 }

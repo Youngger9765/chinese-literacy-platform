@@ -1,8 +1,36 @@
+import { authToken } from '../utils/storage';
+
 const ACTIVE_ASSIGNMENT_CONTEXT_KEY = 'activeAssignmentContext';
 const TOOLBOX_MODE_KEY = 'toolboxMode';
 
 /**
+ * 目前登入的使用者 id，從登入 token 的 `sub` 解出來（#4081）。
+ *
+ * 學習步驟的快取原本只綁課：共用平板上，學生 A 做過的作答，學生 B 打開同一課時
+ * 會被當成「還原進度」顯示出來，接著被存進 B 自己的資料庫紀錄。快取 key 綁上
+ * 使用者，換人就是另一組 key。
+ *
+ * 從 token 解而不是從 React 狀態拿：步驟元件在 render 當下（lazy useState）就讀
+ * 快取，比 AuthContext 的 effect 還早；token 是登入那一刻就寫好的，永遠跟目前的
+ * 使用者一致。只是拿來分開快取，不做任何驗證，解不出來就回 null。
+ */
+export function currentLearnerId(): string | null {
+  try {
+    const token = authToken.get();
+    const part = token?.split('.')[1];
+    if (!part) return null;
+    const json = atob(part.replace(/-/g, '+').replace(/_/g, '/'));
+    const sub = (JSON.parse(json) as { sub?: unknown }).sub;
+    return typeof sub === 'string' || typeof sub === 'number' ? String(sub) : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Build a storage scope for learning-step cache keys.
+ *
+ * Every scope is prefixed with `u<userId>__` when someone is logged in (#4081).
  *
  * - Toolbox:       scope = storyId + "__t"      (#1460 — single-shot, isolated)
  * - Assignment:    scope = storyId + "__a_" + assignmentId
@@ -12,6 +40,12 @@ const TOOLBOX_MODE_KEY = 'toolboxMode';
  * sees self-practice or assignment leftovers (and vice versa).
  */
 export function getLearningStorageScope(storyId: string | number): string {
+  const learner = currentLearnerId();
+  // 使用者放在最前面：toolbox 的 `__t` 結尾不變，clearToolboxScopeForStory 照樣比得到。
+  return learner ? `u${learner}__${storyScope(storyId)}` : storyScope(storyId);
+}
+
+function storyScope(storyId: string | number): string {
   const storyKey = String(storyId);
 
   try {
@@ -95,3 +129,6 @@ export function clearToolboxScopeForStory(storyId: string | number): void {
     // localStorage unavailable (private mode, SSR) — best-effort
   }
 }
+
+// 清除學習快取放在 utils/storage（登出流程在那裡，避免兩個模組互相 import）。
+export { LEARNING_CACHE_PREFIXES, clearLearningCache } from '../utils/storage';
