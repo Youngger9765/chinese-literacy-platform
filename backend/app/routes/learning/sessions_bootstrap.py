@@ -34,6 +34,24 @@ logger = logging.getLogger(__name__)
 MAX_READING_HISTORY_FETCH = 500
 
 
+def _mark_carried_from(carried: dict, previous: LearningSession) -> None:
+    """Rebuild ``__meta`` on carried-forward progress (#4028).
+
+    #2889 copies the previous session's whole step_progress. Copying ``__meta``
+    with it was wrong: the previous session may have been an assignment session,
+    and its ``source: "assignment"`` / ``assignment_id`` then made this new
+    self-practice session look like one (``_is_assignment_session`` reads exactly
+    that key) — student after-class practice mixed into the teacher's assignment
+    records. The new ``__meta`` only says where the progress came from.
+    """
+    prev_meta = carried.get("__meta") if isinstance(carried.get("__meta"), dict) else {}
+    when = previous.completed_at or None
+    at = when.isoformat() if when else prev_meta.get("last_synced_at")
+    if not at and previous.started_at:
+        at = previous.started_at.isoformat()
+    carried["__meta"] = {"carried_from": {"session_id": previous.id, "at": at}}
+
+
 def _is_assignment_session(
     session: LearningSession,
     assignment_session_ids: set[int],
@@ -143,6 +161,7 @@ def create_learning_session(
             # Deep copy: sharing the dict would let a later write to the new session
             # mutate the old row's JSONB through the same Python object.
             carried = copy.deepcopy(previous.step_progress)
+            _mark_carried_from(carried, previous)
             logger.info(
                 "Carrying step_progress forward from session %d for user %d, story=%s (#2889)",
                 previous.id, current_user.id, normalized_slug,

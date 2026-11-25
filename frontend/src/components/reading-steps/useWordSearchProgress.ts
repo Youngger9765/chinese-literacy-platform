@@ -288,6 +288,9 @@ export function useWordSearchProgress(
   const handleRedo = useCallback(() => {
     // Clear localStorage so completion state is gone
     try { localStorage.removeItem(storageKey); } catch {}
+    // #4081：DB 也要歸零。以前只清 localStorage —— 上面的存檔 effect 在一個字都還沒
+    // 找到時不送，DB 裡就一直是上一輪的「已完成」+ 全部的字；重新整理後又回到完成畫面。
+    onProgressChange?.({ foundWords: [], elapsedTime: 0, completed: false });
     // Reset all game state; incrementing redoKey regenerates the grid via useMemo
     setFoundWords(new Set());
     setHighlightedCells(new Set());
@@ -298,7 +301,7 @@ export function useWordSearchProgress(
     setFinishedElapsed(0);
     setJustFound(null);
     setRedoKey((k) => k + 1);
-  }, [storageKey]);
+  }, [storageKey, onProgressChange]);
 
   return {
     foundWords,

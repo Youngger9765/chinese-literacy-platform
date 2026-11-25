@@ -6,6 +6,8 @@ import KeyPassageReading from '../../components/reading-steps/KeyPassageReading'
 import { useCurrentStepId, useCurrentSectionSlug } from '../../hooks/useCurrentStepId';
 import { useLearningContext } from '../../layouts/LearningLayout';
 import type { KeyPassageReadingStepData } from '../../types/stepProgress';
+import type { KeyPassageReadingResult } from '../../types';
+import type { StepAttempt } from '../../utils/stepAttempts';
 
 /** Canonical step id this page is registered under in STEP_REGISTRY. */
 const CANONICAL_STEP_ID = 'key-passage-reading';
@@ -33,16 +35,30 @@ const KeyPassageReadingPage: React.FC = () => {
   const stepId = useCurrentStepId(CANONICAL_STEP_ID);
 
   const handleProgressChange = useCallback(
-    (stepData: KeyPassageReadingStepData, immediate = false) => {
+    (stepData: KeyPassageReadingStepData, immediate = false, attempt?: StepAttempt) => {
       saveStepProgressPatch({
         stepId,
         stepData,
         currentStep: stepId,
         immediate,
+        ...(attempt ? { appendAttempt: attempt } : {}),
       });
     },
     [saveStepProgressPatch, stepId],
   );
+
+  // #4081：這一篇自己的結果。以前傳的是 session.fullReadingResult —— 不分篇次，
+  // 多篇課的第 2 篇會顯示（並存成）第 1 篇的朗讀結果。step_data 這一輪的 result
+  // 已經有完整的 diffTokens；只有整課只有一篇重點朗讀時，才退回舊欄位（舊 session）。
+  const stepProgress = stepProgressData.step_data?.[stepId] as KeyPassageReadingStepData | undefined;
+  const rounds = (selectedStory?.stepSequence ?? []).filter(
+    (s) => s === CANONICAL_STEP_ID || s.startsWith(`${CANONICAL_STEP_ID}#`),
+  ).length;
+  const roundResult =
+    stepProgress?.result && typeof stepProgress.result.matchRate === 'number'
+      ? (stepProgress.result as KeyPassageReadingResult)
+      : null;
+  const initialResult = roundResult ?? (rounds <= 1 ? session?.fullReadingResult ?? null : null);
 
   if (!selectedStory) return null;
 
@@ -52,8 +68,8 @@ const KeyPassageReadingPage: React.FC = () => {
       story={selectedStory}
       onFinish={handleFinishKeyPassageReading}
       onBack={() => navigate(`/learn/${storyId}/paragraph-reading`)}
-      initialResult={session?.fullReadingResult ?? null}
-      initialProgress={stepProgressData.step_data?.[stepId] as KeyPassageReadingStepData | undefined}
+      initialResult={initialResult}
+      initialProgress={stepProgress}
       onProgressChange={handleProgressChange}
       dbSessionId={dbSessionId}
     />

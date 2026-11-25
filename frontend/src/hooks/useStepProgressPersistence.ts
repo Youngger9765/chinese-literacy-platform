@@ -1,3 +1,4 @@
+import { appendAttempt, type StepAttempt } from '../utils/stepAttempts';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import type { AuthUser } from '../services/authApi';
@@ -27,6 +28,8 @@ interface PersistStepProgressOptions {
   currentStep?: string | null;
   completeStep?: string;
   stepDataPatch?: Record<string, unknown>;
+  /** #4087：加進某一關 `attempts` 的那一筆（key = 完整 step key）。 */
+  appendAttempt?: { key: string; attempt: StepAttempt };
 }
 
 interface SaveStepProgressPatchOptions {
@@ -38,6 +41,11 @@ interface SaveStepProgressPatchOptions {
   currentStep?: string | null;
   markCompleted?: boolean;
   immediate?: boolean;
+  /**
+   * #4087：這一次作答（做完一輪 / 全部重做 / 重做錯題 / 唸一次）。附加到這一關的
+   * `attempts`，以目前 state 裡的清單為底 —— 步驟頁不用自己拿舊清單。
+   */
+  appendAttempt?: StepAttempt;
 }
 
 interface UseStepProgressPersistenceOptions {
@@ -325,6 +333,11 @@ export function useStepProgressPersistence({
             ? { ...prevVal, ...patchVal }
             : patchVal;
         }
+        if (opts.appendAttempt) {
+          const { key, attempt } = opts.appendAttempt;
+          const entry = isPlainObject(mergedStepData[key]) ? (mergedStepData[key] as Record<string, unknown>) : {};
+          mergedStepData[key] = { ...entry, attempts: appendAttempt(entry.attempts, attempt) };
+        }
 
         const next: StepProgressData = {
           current_step: opts.currentStep ?? prev.current_step,
@@ -412,6 +425,7 @@ export function useStepProgressPersistence({
               ...opts.stepData,
             },
           },
+          ...(opts.appendAttempt ? { appendAttempt: { key: keyed, attempt: opts.appendAttempt } } : {}),
         },
         opts.immediate ?? false,
       );

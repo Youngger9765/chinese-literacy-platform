@@ -117,6 +117,42 @@ export const authToken = {
   },
 };
 
+/**
+ * 學習步驟在瀏覽器裡的快取前綴（#4081）。登出時全部清掉 —— 學習紀錄的真相在資料庫，
+ * 這些只是快取；留著只會讓下一個在同一台裝置登入的人看到（並存進）上一個人的作答。
+ * 新增一個步驟快取時把前綴加到這裡。
+ */
+export const LEARNING_CACHE_PREFIXES = [
+  'annotations_',
+  'fullReading_progress_',
+  'vocabDef_progress_',
+  'vocabApp_progress_',
+  'vocab_app_progress_',
+  'wordSearch_progress_',
+  'knowledge_viewed_',
+  'sentencePractice_progress_',
+  'liveTutor_progress_',
+  'tutor_completed_',
+  'vocabPractice_progress_',
+  'comprehension_completion_',
+  'report_viewed_',
+  'self-practice-completed-',
+  'lingoleap-active-session-',
+] as const;
+
+export function clearLearningCache(): void {
+  try {
+    const keys: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && LEARNING_CACHE_PREFIXES.some((p) => key.startsWith(p))) keys.push(key);
+    }
+    keys.forEach((k) => localStorage.removeItem(k));
+  } catch {
+    // localStorage unavailable (private mode, SSR) — best-effort
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Session cleanup — single logout primitive
 // ---------------------------------------------------------------------------
@@ -143,6 +179,8 @@ export const ACTIVE_ASSIGNMENT_CONTEXT_KEY = 'activeAssignmentContext';
  */
 export function clearAuthSession(): void {
   authToken.remove();
+  // #4081：學習步驟的快取也清掉 —— 下一個在同一台裝置登入的人不該看到上一個人的作答。
+  clearLearningCache();
   safeStorage.local.remove(JUNYI_SESSION_FLAG);
   try {
     sessionStorage.removeItem('activeAssignmentId');

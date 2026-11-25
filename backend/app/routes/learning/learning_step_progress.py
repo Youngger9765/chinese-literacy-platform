@@ -26,6 +26,38 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
+#: #4087: cap on attempts kept per step (oldest dropped). Same number as the
+#: frontend's MAX_ATTEMPTS_PER_STEP (utils/stepAttempts.ts).
+MAX_ATTEMPTS_PER_STEP = 30
+
+
+def _union_attempts(merged: dict, existing: dict, incoming: dict) -> None:
+    """Keep every recorded attempt of a step across racing saves (#4087).
+
+    Each step's ``attempts`` (one entry per finished pass / correction / reading,
+    the source of the report's progress chart and radar) is a list inside the
+    step's step_data entry, and step entries are replaced wholesale on save. A
+    save built from an older snapshot — another tab, or a save that raced the
+    one that appended — would otherwise drop the attempts it never saw. Same
+    reasoning as the steps_completed union above (#3682): union by ``id``, keep
+    time order, cap the length.
+    """
+    for key, entry in incoming.items():
+        old = existing.get(key)
+        if not isinstance(entry, dict) or not isinstance(old, dict):
+            continue
+        old_list = old.get("attempts")
+        if not isinstance(old_list, list) or not old_list:
+            continue
+        new_list = entry.get("attempts") if isinstance(entry.get("attempts"), list) else []
+        by_id: dict = {}
+        for a in [*old_list, *new_list]:
+            if isinstance(a, dict) and isinstance(a.get("id"), str):
+                by_id[a["id"]] = a
+        ordered = sorted(by_id.values(), key=lambda a: str(a.get("at", "")))
+        merged[key] = {**entry, "attempts": ordered[-MAX_ATTEMPTS_PER_STEP:]}
+
+
 @router.put(
     "/learning/sessions/{session_id}/progress",
     response_model=StepProgressResponse,
@@ -114,6 +146,7 @@ def save_step_progress(
 
     existing_step_data = existing_sp.step_data if existing_sp is not None else {}
     merged_step_data = {**existing_step_data, **payload.step_data}
+    _union_attempts(merged_step_data, existing_step_data, payload.step_data)
 
     # Version is stored at the top level so the frontend can read it directly
     # from StepProgressData.version. __meta keeps other metadata (source, etc.).
