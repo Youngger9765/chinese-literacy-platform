@@ -311,6 +311,75 @@ def _backfill_submission_scores(db: Session, session_id: int, score: float) -> N
     )
 
 
+def _recompute_overall_score(
+    db: Session,
+    learning_session: LearningSession,
+    session_id: int,
+    reading_accuracy: float | None,
+    comprehension_passed: bool,
+    comprehension_score: float | None,
+) -> None:
+    """依目前 DB 上的作答資料（加上這次呼叫帶來的值）算出並寫入 overall_score（#1063）。"""
+    scores: list[float] = []
+    weights: list[float] = []
+    # Accuracy from reading (weight: 40%)
+    if learning_session.accuracy is not None:
+        # The column takes 0-100 (SessionUpdateRequest) but older writers used
+        # 0-1; multiplying a percentage by 100 again produced scores in the
+        # thousands (#3376 audit). Same normalisation as the vocab branch below.
+        acc = float(learning_session.accuracy)
+        scores.append(acc * 100 if acc <= 1 else acc)
+        weights.append(0.4)
+    elif reading_accuracy is not None:
+        scores.append(reading_accuracy)
+        weights.append(0.4)
+    # Comprehension score (weight: 40%)
+    #
+    # ⛔ 順序有意義，不要調換（#2904）：
+    #   ① DB 上已經算好的分數
+    #   ② 這次呼叫帶上來的真實百分比 ← 新增
+    #   ③ 只知道「有沒有達標」的舊 client，才退回固定 80
+    #
+    # 原本只有 ①③。`comprehension_passed` 是個 bool，False 什麼都不加，
+    # 於是**沒達標的學生不是拿低分，是整段 `if scores` 不成立、完全沒有分數**
+    # —— 不報錯、不寫、沒有痕跡。prod 561 課完成只有 9 筆有分數就是這個形狀。
+    # 前端在 ReportPage 早就算出真實百分比了，只是被壓成布林送上來。
+    if learning_session.comprehension_score is not None:
+        scores.append(learning_session.comprehension_score)
+        weights.append(0.4)
+    elif comprehension_score is not None:
+        scores.append(comprehension_score)
+        weights.append(0.4)
+    elif comprehension_passed:
+        # 舊 client 只送得出 bool，這裡沒有真實分數可用。
+        # ⛔ 不從 bool 反推分數 —— 那是編一個數字出來。
+        scores.append(80.0)  # default pass score
+        weights.append(0.4)
+    # Vocab result (weight: 20%) — extract from vocab_result JSONB if available
+    if isinstance(learning_session.vocab_result, dict):
+        vocab_accuracy = learning_session.vocab_result.get("accuracy")
+        if isinstance(vocab_accuracy, (int, float)):
+            scores.append(float(vocab_accuracy) * 100 if vocab_accuracy <= 1 else float(vocab_accuracy))
+            weights.append(0.2)
+
+    if scores and weights:
+        total_weight = sum(weights)
+        overall = sum(s * w for s, w in zip(scores, weights)) / total_weight
+        learning_session.overall_score = round(overall, 1)
+        logger.info(
+            "Set overall_score=%.1f for session %d (sources=%d)",
+            learning_session.overall_score, session_id, len(scores),
+        )
+        _backfill_submission_scores(db, session_id, learning_session.overall_score)
+
+def _mark_session_completed(db: Session, session_id: int) -> None:
+    """把 session 標成 completed（已是 completed 就不動，也不會降級）。"""
+    learning_session = db.query(LearningSession).filter(LearningSession.id == session_id).first()
+    if learning_session is not None and learning_session.status != "completed":
+        learning_session.status = "completed"
+        learning_session.completed_at = datetime.now(timezone.utc)
+
+
 def process_session_completion(
     db: Session,
     student_id: int,
@@ -319,6 +388,7 @@ def process_session_completion(
     comprehension_passed: bool = False,
     comprehension_score: float | None = None,
     activity_date: date | None = None,
+    lesson_finished: bool | None = None,
 ) -> dict:
     """Main entry point: called when a learning session is fully completed.
 
@@ -347,6 +417,23 @@ def process_session_completion(
         .first()
     )
     if existing_logs is not None:
+        # XP 已結算過，但「整課做完」可能是之後才發生（先看報告領了 XP、回去做完）。
+        # 完成狀態不能因為 XP 的冪等而被跳過。
+        late_badges: list = []
+        if lesson_finished is True:
+            # 先在沒做完時領過 XP，總分是用當時的進度算的；整課做完後要重算，
+            # 否則 overall_score 會停在只做一關時的值。
+            _done = db.query(LearningSession).filter(LearningSession.id == session_id).first()
+            if _done is not None:
+                _recompute_overall_score(
+                    db, _done, session_id,
+                    reading_accuracy, comprehension_passed, comprehension_score,
+                )
+            _mark_session_completed(db, session_id)
+            late_badges = check_and_award_badges(
+                db, student_id, session_id=session_id, reading_accuracy=reading_accuracy
+            )
+            db.commit()
         # Already processed — return existing summary without awarding again
         total_xp = _get_total_xp(db, student_id)
         lv_info = level_progress(total_xp)
@@ -373,7 +460,7 @@ def process_session_completion(
                 "current": streak.current_streak,
                 "longest": streak.longest_streak,
             },
-            "badges_unlocked": [],
+            "badges_unlocked": late_badges,
             "notes": ["（已處理，不重複計算）"],
         }
 
@@ -422,57 +509,10 @@ def process_session_completion(
     # --- Compute and persist overall_score (#1063) ---
     learning_session = db.query(LearningSession).filter(LearningSession.id == session_id).first()
     if learning_session is not None:
-        scores: list[float] = []
-        weights: list[float] = []
-        # Accuracy from reading (weight: 40%)
-        if learning_session.accuracy is not None:
-            # The column takes 0-100 (SessionUpdateRequest) but older writers used
-            # 0-1; multiplying a percentage by 100 again produced scores in the
-            # thousands (#3376 audit). Same normalisation as the vocab branch below.
-            acc = float(learning_session.accuracy)
-            scores.append(acc * 100 if acc <= 1 else acc)
-            weights.append(0.4)
-        elif reading_accuracy is not None:
-            scores.append(reading_accuracy)
-            weights.append(0.4)
-        # Comprehension score (weight: 40%)
-        #
-        # ⛔ 順序有意義，不要調換（#2904）：
-        #   ① DB 上已經算好的分數
-        #   ② 這次呼叫帶上來的真實百分比 ← 新增
-        #   ③ 只知道「有沒有達標」的舊 client，才退回固定 80
-        #
-        # 原本只有 ①③。`comprehension_passed` 是個 bool，False 什麼都不加，
-        # 於是**沒達標的學生不是拿低分，是整段 `if scores` 不成立、完全沒有分數**
-        # —— 不報錯、不寫、沒有痕跡。prod 561 課完成只有 9 筆有分數就是這個形狀。
-        # 前端在 ReportPage 早就算出真實百分比了，只是被壓成布林送上來。
-        if learning_session.comprehension_score is not None:
-            scores.append(learning_session.comprehension_score)
-            weights.append(0.4)
-        elif comprehension_score is not None:
-            scores.append(comprehension_score)
-            weights.append(0.4)
-        elif comprehension_passed:
-            # 舊 client 只送得出 bool，這裡沒有真實分數可用。
-            # ⛔ 不從 bool 反推分數 —— 那是編一個數字出來。
-            scores.append(80.0)  # default pass score
-            weights.append(0.4)
-        # Vocab result (weight: 20%) — extract from vocab_result JSONB if available
-        if isinstance(learning_session.vocab_result, dict):
-            vocab_accuracy = learning_session.vocab_result.get("accuracy")
-            if isinstance(vocab_accuracy, (int, float)):
-                scores.append(float(vocab_accuracy) * 100 if vocab_accuracy <= 1 else float(vocab_accuracy))
-                weights.append(0.2)
-
-        if scores and weights:
-            total_weight = sum(weights)
-            overall = sum(s * w for s, w in zip(scores, weights)) / total_weight
-            learning_session.overall_score = round(overall, 1)
-            logger.info(
-                "Set overall_score=%.1f for session %d (sources=%d)",
-                learning_session.overall_score, session_id, len(scores),
-            )
-            _backfill_submission_scores(db, session_id, learning_session.overall_score)
+        _recompute_overall_score(
+            db, learning_session, session_id,
+            reading_accuracy, comprehension_passed, comprehension_score,
+        )
 
         # ⛔ 標記完成**不可以**綁在「有沒有算出分數」上（#2904 的第二層）。
         # 原本這三行縮在 `if scores and weights:` 裡面，於是三個來源都空的 session
@@ -481,9 +521,12 @@ def process_session_completion(
         # 那四條紅了很久，而它不在 CI 具名清單裡所以沒人發現）。
         #
         # 完成是**事實**（學生走完了），分數是可有可無的**量測**。兩件事不同層。
-        if learning_session.status != "completed":
-            learning_session.status = "completed"
-            learning_session.completed_at = datetime.now(timezone.utc)
+        #
+        # 但「領 XP」也不等於「整課做完」：前端會在只做了一關時就打開報告頁領 XP，
+        # 這時送 lesson_finished=False，只結算 XP，不標完成（否則學習紀錄會把
+        # 只做一關的自主練習顯示成「已完成」）。沒送（舊 client）維持舊行為。
+        if lesson_finished is not False:
+            _mark_session_completed(db, session_id)
 
     # --- Check badges ---
     newly_unlocked = check_and_award_badges(
