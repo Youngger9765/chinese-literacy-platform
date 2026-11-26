@@ -60,57 +60,6 @@ const ReportPage: React.FC = () => {
   const [xpResult, setXpResult] = useState<XPAwardResult | null>(null);
   const [showXpToast, setShowXpToast] = useState(false);
 
-  // Award XP once we have a confirmed backend session ID
-  useEffect(() => {
-    if (hasActiveAssignment && !isAssignmentReadyForSubmit) return;
-    if (!dbSessionId || !token || !user?.id) return;
-    // Skip XP award when student hasn't completed any learning steps yet
-    const hasLearningData = !!(
-      session?.readingAttempt ||
-      session?.fullReadingResult ||
-      session?.comprehensionResult ||
-      session?.vocabResult
-    );
-    if (!hasLearningData) return;
-
-    const readingAccuracy = session?.readingAttempt?.accuracy;
-    const comprehensionPct = session?.comprehensionResult
-      ? Math.round(
-          (session.comprehensionResult.understoodCount /
-            Math.max(session.comprehensionResult.requiredCount, 1)) *
-            100
-        )
-      : undefined;
-    const comprehensionPassed = comprehensionPct !== undefined && comprehensionPct >= 60;
-
-    // comprehensionPct 這裡本來就算好了，原本卻只把 `>= 60` 的布林送上去 ——
-    // 於是沒達標的學生在後端整段 `if scores` 不成立，**完全沒有分數**（#2904）。
-    // 真實百分比一起送，後端有值就用它；舊 build 沒送時才退回 passed。
-    reportSessionComplete(Number(user.id), dbSessionId, token, {
-      readingAccuracy,
-      comprehensionPassed,
-      comprehensionScore: comprehensionPct,
-    })
-      .then((result) => {
-        if (result.xp_earned > 0) {
-          setXpResult({
-            xp_earned: result.xp_earned,
-            new_total_xp: result.new_total_xp,
-            level_info: result.level_info,
-            streak: result.streak,
-            badges_unlocked: result.badges_unlocked,
-          });
-          setShowXpToast(true);
-        }
-      })
-      .catch((err: Error) => {
-        // Non-critical — don't block student view
-        console.warn('XP award failed (non-blocking):', err.message);
-      });
-    // Run once per report page load — dbSessionId is the stable identifier
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dbSessionId, hasActiveAssignment, isAssignmentReadyForSubmit]);
-
   // 進度與記號都直接讀 DB（含重新整理後的 carry-forward，理由見 hook）。
   const report = useReportProgress(dbSessionId, token, storyId, stepProgressData);
 
@@ -146,6 +95,67 @@ const ReportPage: React.FC = () => {
     }
     handleSessionComplete();
   }, [handleSessionComplete, hasActiveAssignment, isAssignmentReadyForSubmit, progressReady, finishedLesson]);
+
+  // Award XP once we have a confirmed backend session ID
+  //
+  // 領 XP 不等於整課做完：只做一關就打開報告頁也會領 XP，但不能因此把 session
+  // 標成「已完成」（學習紀錄頁會把它顯示成已完成）。所以等 DB 進度讀完，再把
+  // 「整課是否做完」一起送上去；後端只在 lessonFinished 不是 false 時才標完成。
+  // 之後才做完整課，finishedLesson 變 true 會再送一次：XP 後端不會重發，只補標完成。
+  const xpToastShownRef = React.useRef(false);
+  useEffect(() => {
+    if (hasActiveAssignment && !isAssignmentReadyForSubmit) return;
+    if (!dbSessionId || !token || !user?.id) return;
+    if (!progressReady) return;
+    // Skip XP award when student hasn't completed any learning steps yet
+    const hasLearningData = !!(
+      session?.readingAttempt ||
+      session?.fullReadingResult ||
+      session?.comprehensionResult ||
+      session?.vocabResult
+    );
+    if (!hasLearningData) return;
+
+    const readingAccuracy = session?.readingAttempt?.accuracy;
+    const comprehensionPct = session?.comprehensionResult
+      ? Math.round(
+          (session.comprehensionResult.understoodCount /
+            Math.max(session.comprehensionResult.requiredCount, 1)) *
+            100
+        )
+      : undefined;
+    const comprehensionPassed = comprehensionPct !== undefined && comprehensionPct >= 60;
+
+    // comprehensionPct 這裡本來就算好了，原本卻只把 `>= 60` 的布林送上去 ——
+    // 於是沒達標的學生在後端整段 `if scores` 不成立，**完全沒有分數**（#2904）。
+    // 真實百分比一起送，後端有值就用它；舊 build 沒送時才退回 passed。
+    reportSessionComplete(Number(user.id), dbSessionId, token, {
+      readingAccuracy,
+      comprehensionPassed,
+      comprehensionScore: comprehensionPct,
+      // 作業流程的交件條件另外把關，這裡照舊視為已完成
+      lessonFinished: hasActiveAssignment ? true : finishedLesson,
+    })
+      .then((result) => {
+        if (result.xp_earned > 0 && !xpToastShownRef.current) {
+          xpToastShownRef.current = true;
+          setXpResult({
+            xp_earned: result.xp_earned,
+            new_total_xp: result.new_total_xp,
+            level_info: result.level_info,
+            streak: result.streak,
+            badges_unlocked: result.badges_unlocked,
+          });
+          setShowXpToast(true);
+        }
+      })
+      .catch((err: Error) => {
+        // Non-critical — don't block student view
+        console.warn('XP award failed (non-blocking):', err.message);
+      });
+    // dbSessionId 是穩定識別；progressReady／finishedLesson 變化時再送一次（見上）
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dbSessionId, hasActiveAssignment, isAssignmentReadyForSubmit, progressReady, finishedLesson]);
 
   const handleDismissToast = useCallback(() => {
     setShowXpToast(false);
