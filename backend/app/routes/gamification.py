@@ -50,6 +50,8 @@ class SessionCompleteRequest(BaseModel):
     comprehension_passed: bool = False
     #: 真實百分比。舊 client 不會送，那時才退回 comprehension_passed（#2904）
     comprehension_score: float | None = None
+    #: 整課是否真的做完。False＝只領 XP、不標完成；沒送（舊 client）維持舊行為
+    lesson_finished: bool | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -213,5 +215,6 @@ def on_session_complete(
         reading_accuracy=body.reading_accuracy,
         comprehension_passed=body.comprehension_passed,
         comprehension_score=body.comprehension_score,
+        lesson_finished=body.lesson_finished,
     )
     return result

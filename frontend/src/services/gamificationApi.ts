@@ -206,6 +206,8 @@ export async function reportSessionComplete(
     comprehensionPassed?: boolean;
     /** 真實百分比。只送 passed 的話，沒達標的學生會完全沒有分數（#2904）。*/
     comprehensionScore?: number;
+    /** 整課是否真的做完。false＝只領 XP、不把 session 標成已完成；不送＝舊行為。 */
+    lessonFinished?: boolean;
   } = {},
 ): Promise<{
   xp_earned: number;
@@ -226,6 +228,7 @@ export async function reportSessionComplete(
       reading_accuracy: opts.readingAccuracy ?? null,
       comprehension_passed: opts.comprehensionPassed ?? false,
       comprehension_score: opts.comprehensionScore ?? null,
+      ...(opts.lessonFinished === undefined ? {} : { lesson_finished: opts.lessonFinished }),
     }),
   });
   if (!res.ok) throw new Error(`reportSessionComplete failed: ${res.status}`);
