@@ -9,7 +9,7 @@ pydantic-settings>=2.0
 # module named 'psycopg'` 然後 exit(1)。2026-09-25 所有新建的 preview 後端
 # 全數起不來就是這個（#3320）；prod/staging 只是還沒重建 image 而已。
 # 要升 2.1 就得一起換 psycopg3 並驗過 —— 那是獨立的一件事，不是隨 build 漂移。
-sqlalchemy>=2.0,<2.1
+sqlalchemy>=2.1.9,<2.2
 psycopg2-binary>=2.9
 redis>=5.0
 python-dotenv>=1.2.4
