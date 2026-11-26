@@ -20,7 +20,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { fetchStory } from '../../services/api';
+import { fetchStory, storyForStep } from '../../services/api';
 import {
   fetchTeacherSessionReport,
   type TeacherSessionReport,
@@ -91,6 +91,7 @@ const TeacherSessionReportPage: React.FC = () => {
         report?.step_progress?.steps_completed,
         report?.step_progress?.step_data,
         undefined,
+        { vocabularyFor: (id) => storyForStep(story, id)?.vocabulary },
       ),
     [story, report],
   );

@@ -203,4 +203,87 @@ describe('閱讀理解 — 作答中的答案要存進 DB（#2839）', () => {
     // 拿掉 initialState 之後舊斷言仍然綠。）
     expect(screen.getByText('全部答對！')).toBeInTheDocument();
   });
+
+  // #4081：「全部重做」後，LessonRenderer 重新掛載時拿的還是還原用的舊快照（每題都
+  // 已答對），一掛上就判定完成，並把「第一次就全對」寫進 DB —— 學生一題都還沒重做。
+  it('「全部重做」之後要真的從第 1 題開始，不能用舊答案直接判定完成、寫回第一次全對', () => {
+    const { unmount } = setup();
+    for (let i = 0; i < CORRECT_OPTION_TEXT.length; i++) answerQuestion(i);
+    const saved = mergedStepData();
+    unmount();
+    vi.clearAllMocks();
+
+    setup({ current_step: 'comprehension', steps_completed: [], step_data: { comprehension: saved } });
+    expect(screen.getByText('全部答對！')).toBeInTheDocument();
+
+    const before = mockSaveStepProgressPatch.mock.calls.length;
+    fireEvent.click(screen.getByRole('button', { name: /全部重做/ }));
+
+    // 回到作答畫面，不是馬上又出現完成卡
+    expect(screen.queryByText('全部答對！')).not.toBeInTheDocument();
+    expect(screen.getByText(CORRECT_OPTION_TEXT[0])).toBeInTheDocument();
+    // 按下重做之後，沒有任何一次 patch 把「第一次就答對」寫成滿的
+    for (const call of mockSaveStepProgressPatch.mock.calls.slice(before)) {
+      const ft = (call[0] as { stepData?: { firstTry?: unknown[] } }).stepData?.firstTry;
+      if (Array.isArray(ft)) expect(ft.length).toBeLessThan(CORRECT_OPTION_TEXT.length);
+    }
+  });
+
+  // ── #4087：每一次作答記一筆（成績單折線圖）─────────────────────────────
+  const attemptsSaved = () =>
+    mockSaveStepProgressPatch.mock.calls
+      .map((c) => (c[0] as { appendAttempt?: { kind: string; correct: number; total: number } }).appendAttempt)
+      .filter(Boolean) as { kind: string; correct: number; total: number }[];
+
+  /** 第 i 題先答錯一次（選第一個不是正解的選項）再答對。 */
+  function answerWrongThenRight(i: number) {
+    const options = story.multipleChoice![i].options as string[];
+    const wrong = options.find((o) => o !== CORRECT_OPTION_TEXT[i])!;
+    fireEvent.click(screen.getByText(wrong));
+    fireEvent.click(screen.getByRole('button', { name: '再試一次' }));
+    answerQuestion(i);
+  }
+
+  it('finishing the quiz records one attempt with the first-try score', () => {
+    setup();
+    answerWrongThenRight(0);
+    for (let i = 1; i < CORRECT_OPTION_TEXT.length; i++) answerQuestion(i);
+    const a = attemptsSaved();
+    expect(a).toHaveLength(1);
+    expect(a[0]).toMatchObject({ kind: 'first', correct: CORRECT_OPTION_TEXT.length - 1, total: CORRECT_OPTION_TEXT.length });
+  });
+
+  it('reopening a finished quiz does not record another attempt', () => {
+    const { unmount } = setup();
+    for (let i = 0; i < CORRECT_OPTION_TEXT.length; i++) answerQuestion(i);
+    const saved = mergedStepData();
+    unmount();
+    vi.clearAllMocks();
+    setup({ current_step: 'comprehension', steps_completed: [], step_data: { comprehension: saved } });
+    expect(screen.getByText('全部答對！')).toBeInTheDocument();
+    expect(attemptsSaved()).toHaveLength(0);
+  });
+
+  it('「重做錯題」做完也記一筆，成績是做完之後總共答對幾題', () => {
+    setup();
+    answerWrongThenRight(0);
+    for (let i = 1; i < CORRECT_OPTION_TEXT.length; i++) answerQuestion(i);
+    fireEvent.click(screen.getByRole('button', { name: /重做錯題/ }));
+    // 只剩那一題，沒有「下一題」—— 直接選正解。
+    fireEvent.click(screen.getByText(CORRECT_OPTION_TEXT[0]));
+    const a = attemptsSaved();
+    expect(a.map((x) => x.kind)).toEqual(['first', 'retry-wrong']);
+    expect(a[1]).toMatchObject({ correct: CORRECT_OPTION_TEXT.length, total: CORRECT_OPTION_TEXT.length });
+  });
+
+  it('「全部重做」做完記成 retry-all', () => {
+    setup();
+    for (let i = 0; i < CORRECT_OPTION_TEXT.length; i++) answerQuestion(i);
+    fireEvent.click(screen.getByRole('button', { name: /全部重做/ }));
+    answerWrongThenRight(0);
+    for (let i = 1; i < CORRECT_OPTION_TEXT.length; i++) answerQuestion(i);
+    const a = attemptsSaved();
+    expect(a.map((x) => x.kind)).toEqual(['first', 'retry-all']);
+    expect(a[1].correct).toBe(CORRECT_OPTION_TEXT.length - 1);
+  });
 });

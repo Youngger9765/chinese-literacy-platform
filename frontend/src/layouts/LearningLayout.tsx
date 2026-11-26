@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useMemo } from 'react';
 import { useCurrentStepId } from '../hooks/useCurrentStepId';
 import { storyForStep } from '../services/api';
+import { stepProgressForStep } from './stepProgressForStep';
+import type { StepAttempt } from '../utils/stepAttempts';
 import { Outlet, useParams, useNavigate, useOutletContext, useLocation } from 'react-router-dom';
 import type {
   Story,
@@ -176,6 +178,8 @@ export interface LearningContext {
     currentStep?: string | null;
     markCompleted?: boolean;
     immediate?: boolean;
+    /** #4087：這一次作答，附加到這一關的 attempts（成績單折線圖）。 */
+    appendAttempt?: StepAttempt;
   }) => void;
   /** Whether current assignment has completed all required steps (except report). */
   isAssignmentReadyForSubmit: boolean;
@@ -339,6 +343,17 @@ const LearningLayout: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, selectedStory]);
 
+  // #4028：上方導覽列要知道每一關的作答（有錯題的畫黃色圈圈）。
+  useEffect(() => {
+    learningNav.setStepProgress(stepProgressState);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stepProgressState]);
+  useEffect(
+    () => () => learningNav.setStepProgress(null),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
+
   // Memoise the outlet-context object so the Outlet (and any child component
   // destructuring via useLearningContext) sees a stable reference when no
   // dependency actually changed. Without useMemo, each LearningLayout render
@@ -364,6 +379,13 @@ const LearningLayout: React.FC = () => {
   const storyForThisStep = useMemo(
     () => storyForStep(selectedStory, stepKey),
     [selectedStory, stepKey],
+  );
+
+  // 讀的那一半（#4028）：上面補了寫入的輪次，步驟頁讀 `step_data['<base id>']` 時
+  // 也要拿到這一輪的資料，否則離開再回來進度就不見了。見 stepProgressForStep.ts。
+  const stepProgressForThisStep = useMemo(
+    () => stepProgressForStep(stepProgressState, stepKey, selectedStory?.stepSequence),
+    [stepProgressState, stepKey, selectedStory?.stepSequence],
   );
 
   const ctx: LearningContext = useMemo(
@@ -402,7 +424,7 @@ const LearningLayout: React.FC = () => {
       assignmentReadingGoals,
       syncProgress,
       flushProgress,
-      stepProgressData: stepProgressState,
+      stepProgressData: stepProgressForThisStep,
       saveStepProgressPatch: saveStepProgressPatchKeyed,
       isAssignmentReadyForSubmit,
       missingAssignmentSteps,
@@ -443,8 +465,8 @@ const LearningLayout: React.FC = () => {
       assignmentReadingGoals,
       syncProgress,
       flushProgress,
-      stepProgressState,
-      saveStepProgressPatch,
+      stepProgressForThisStep,
+      saveStepProgressPatchKeyed,
       isAssignmentReadyForSubmit,
       missingAssignmentSteps,
       firstIncompleteStepPath,
@@ -504,7 +526,12 @@ const LearningLayout: React.FC = () => {
           </div>
         </div>
       ) : (
-        <Outlet context={ctx} />
+        // #4081：多篇課同一種關卡共用一條路由，換篇次只改 `?p=`，頁面不會重新掛載 ——
+        // 各步驟頁用 ref 凍結的「還原快照」與作答 state 都還是上一篇的，接著被存進這一篇
+        // 的 key（saveStepProgressPatchKeyed 已經換成新篇次）。依完整 step key 重新掛載。
+        <React.Fragment key={stepKey}>
+          <Outlet context={ctx} />
+        </React.Fragment>
       )}
       <SessionTimeoutWarning
         visible={showTimeoutWarning}

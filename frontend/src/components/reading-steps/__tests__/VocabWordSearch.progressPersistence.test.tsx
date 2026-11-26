@@ -14,7 +14,7 @@
  *
  * 斷言用「找到 N 個就要存回 N 個」的數量形式。
  */
-import { render, act } from '@testing-library/react';
+import { render, act, screen } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import VocabWordSearch from '../VocabWordSearch';
 import type { Story } from '../../../types';
@@ -194,5 +194,25 @@ describe('語詞複習 — 找到的字要進得了 DB（#2848）', () => {
     expect(third).toBeTruthy();
     dragOver(third!.from, third!.to);
     expect(foundFromLastCall(after)).toBe(3);
+  });
+
+  // #4081：「重新練習」以前只清 localStorage。存檔 effect 在一個字都還沒找到時不送，
+  // DB 裡就一直是上一輪的「已完成」+ 全部的字，重新整理又回到完成畫面。
+  it('「重新練習」要立刻把 DB 裡的進度歸零（含 completed: false）', () => {
+    const onProgressChange = vi.fn();
+    const all = story.vocabulary!.map((v) => v.word);
+    render(
+      <VocabWordSearch
+        story={story}
+        onFinish={vi.fn()}
+        initialProgress={{ foundWords: all, elapsedTime: 30, completed: true }}
+        onProgressChange={onProgressChange}
+      />,
+    );
+    onProgressChange.mockClear();
+    act(() => {
+      screen.getByRole('button', { name: '重新練習' }).click();
+    });
+    expect(onProgressChange).toHaveBeenCalledWith({ foundWords: [], elapsedTime: 0, completed: false });
   });
 });

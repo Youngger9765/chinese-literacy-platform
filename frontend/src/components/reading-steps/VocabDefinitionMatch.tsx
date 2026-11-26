@@ -43,6 +43,7 @@ import { MultipleChoiceMode } from './VocabDefinitionMatchMCQ';
 import { DragDropMode } from './VocabDefinitionMatchDragDrop';
 import NextStepFooter from '../learning/NextStepFooter';
 import StepActionBar from '../learning/StepActionBar';
+import { readAttempts, scoredAttempt, type StepAttempt } from '../../utils/stepAttempts';
 
 /* ------------------------------------------------------------------ */
 /*  Public types                                                        */
@@ -58,7 +59,8 @@ export interface VocabDefinitionMatchProps {
   onFinish: (result: VocabDefinitionMatchResult) => void;
   zhuyinActive?: boolean;
   initialProgress?: Record<string, unknown>;
-  onProgressChange?: (stepData: Record<string, unknown>, immediate?: boolean) => void;
+  /** #4087：第三個參數是這一次作答（回到總結畫面時），附加到成績單的 attempts。 */
+  onProgressChange?: (stepData: Record<string, unknown>, immediate?: boolean, attempt?: StepAttempt) => void;
 }
 
 /* ------------------------------------------------------------------ */
@@ -176,7 +178,7 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
   const zhuyinFont = fontForZhuyin(zhuyinActive);
 
   const progressStorageKey = scopedStepStorageKey('vocabDef_progress_', story.id);
-  const vocab: VocabItem[] = story.vocabulary ?? [];
+  const vocab: VocabItem[] = useMemo(() => story.vocabulary ?? [], [story.vocabulary]);
   const hasData = vocab.length > 0;
   const allIndices = useMemo(() => vocab.map((_, i) => i), [vocab]);
 
@@ -273,6 +275,37 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
     onProgressChange(buildProgressPayload(), false);
   }, [onProgressChange, buildProgressPayload]);
 
+  // ── #4087：每一次作答（每回到總結畫面一次）記一筆 ───────────────────────
+  // 從 DB 還原成總結畫面時，下面的完成 effect 一掛載就會跑 —— 那不是新的作答。
+  const restoredSummaryRef = useRef(isStepCompleted);
+  // 這一輪是怎麼開始的；null = 沒按過重做（第一次，或還原了做到一半的那一輪）。
+  const pendingKindRef = useRef<'retry-all' | 'retry-wrong' | null>(null);
+  // 「重做錯題」那一輪，每題在重做時第一次的對錯（依模式、依 defIndex）。合併回總結時
+  // 保留的是原本的 firstTryCorrect，所以這一輪的成績要另外記。
+  const retryOutcomeRef = useRef<{ mc: Map<number, boolean>; dd: Map<number, boolean> }>({ mc: new Map(), dd: new Map() });
+
+  const buildAttempt = useCallback((): StepAttempt => {
+    const kind = pendingKindRef.current
+      ?? (readAttempts(initialProgress).length ? 'retry-all' : 'first');
+    const rowsOf = (list: AnswerRecord[], outcome: Map<number, boolean>, prefix: string) =>
+      list.map((a, i) => {
+        const original = (a.firstTryCorrect ?? a.correct) === true;
+        const correct = kind === 'retry-wrong' && outcome.has(a.defIndex) ? outcome.get(a.defIndex) === true : original;
+        const pick = a.firstTryAnsweredWordIdx ?? a.answeredWordIdx;
+        return {
+          label: `${prefix}第 ${i + 1} 題`,
+          correct,
+          studentAnswer: !original && pick != null ? vocab[pick]?.word ?? null : null,
+          correctAnswer: vocab[a.defIndex]?.word ?? null,
+        };
+      });
+    const rows = [
+      ...rowsOf(mcAnswers, retryOutcomeRef.current.mc, '選擇題 '),
+      ...rowsOf(dragDropAnswers, retryOutcomeRef.current.dd, '配對 '),
+    ];
+    return scoredAttempt(kind, rows.filter((r) => r.correct).length, rows.length, rows);
+  }, [initialProgress, mcAnswers, dragDropAnswers, vocab]);
+
   const completionFlushedRef = useRef(false);
   useEffect(() => {
     if (!onProgressChange) return;
@@ -282,9 +315,16 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
     }
     if (completionFlushedRef.current) return;
 
-    onProgressChange(buildProgressPayload(), true);
+    if (restoredSummaryRef.current) {
+      restoredSummaryRef.current = false;
+      onProgressChange(buildProgressPayload(), true);
+    } else {
+      onProgressChange(buildProgressPayload(), true, buildAttempt());
+      pendingKindRef.current = 'retry-all'; // 之後沒按任何重做又回到總結（理論上不會）也不算第一次
+      retryOutcomeRef.current = { mc: new Map(), dd: new Map() };
+    }
     completionFlushedRef.current = true;
-  }, [onProgressChange, isStepCompleted, buildProgressPayload]);
+  }, [onProgressChange, isStepCompleted, buildProgressPayload, buildAttempt]);
 
   const startStage = useCallback((nextMode: InteractionMode, indices: number[]) => {
     setMode(nextMode);
@@ -327,6 +367,11 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
   const dragDropRetryBaselineRef = useRef<AnswerRecord[] | null>(null);
 
   const handleAllDone = useCallback((answers: AnswerRecord[]) => {
+    // #4087：重做輪交回來的是被重做的那幾題，它們的 firstTryCorrect 就是這一輪的第一次。
+    const target = mode === 'multiple-choice' ? retryOutcomeRef.current.mc : retryOutcomeRef.current.dd;
+    if ((mode === 'multiple-choice' ? mcRetryBaselineRef.current : dragDropRetryBaselineRef.current)) {
+      for (const a of answers) target.set(a.defIndex, (a.firstTryCorrect ?? a.correct) === true);
+    }
     if (mode === 'multiple-choice') {
       const baseline = mcRetryBaselineRef.current;
       const merged = baseline ? mergeRetryAnswers(baseline, answers) : answers;
@@ -346,6 +391,8 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
     const sourceAnswers = targetMode === 'multiple-choice' ? mcAnswers : dragDropAnswers;
     const wrongIndices = selectRetryIndices(sourceAnswers);
     if (wrongIndices.length === 0) return;
+    pendingKindRef.current = 'retry-wrong';
+    restoredSummaryRef.current = false;
     // #2849 — 必須把該模式的「最終結果」清掉。render gate 是
     // `mcDone ? <StageCompletedPlaceholder/> : <MultipleChoiceMode/>`，而
     // `mcDone = mcAnswers.length > 0`；只設 mode/phase/activeDefIndices 的話它仍是
@@ -366,6 +413,8 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
   // 重做一律連「作答中」的快照一起清 —— 只清最終結果的話，還原時會把上一輪的
   // 中途答案接回來，學生按了「重做」卻發現題目已經被填好（#2839 code review）。
   const handleRetryAll = useCallback(() => {
+    pendingKindRef.current = 'retry-all';
+    restoredSummaryRef.current = false;
     mcRetryBaselineRef.current = null;
     dragDropRetryBaselineRef.current = null;
     setMcAnswers([]);
@@ -376,6 +425,8 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
   }, [startStage, allIndices]);
 
   const handleRetryMc = useCallback(() => {
+    pendingKindRef.current = 'retry-all';
+    restoredSummaryRef.current = false;
     mcRetryBaselineRef.current = null;
     setMcAnswers([]);
     setMcProgress([]);
@@ -383,6 +434,8 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
   }, [startStage, allIndices]);
 
   const handleRetryDragDrop = useCallback(() => {
+    pendingKindRef.current = 'retry-all';
+    restoredSummaryRef.current = false;
     dragDropRetryBaselineRef.current = null;
     setDragDropAnswers([]);
     setDragDropProgress([]);

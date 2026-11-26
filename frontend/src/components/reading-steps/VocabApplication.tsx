@@ -22,12 +22,13 @@
  * - On manual redo, both localStorage keys are cleared.
  * - Fix #758: handleFinish no longer removes phase storage — completion persists.
  */
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Story } from '../../types';
 import FillInBlankExercise from './FillInBlankExercise';
 import type { QuestionResult, SavedProgress as ExerciseProgress } from './FillInBlankExercise';
 import { getLearningStorageScope, scopedStepStorageKey } from '../../services/learningStorageScope';
 import NextStepFooter from '../learning/NextStepFooter';
+import { readAttempts, scoredAttempt, type StepAttempt } from '../../utils/stepAttempts';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                               */
@@ -56,6 +57,7 @@ export interface VocabApplicationProps {
     currentStep?: string | null;
     markCompleted?: boolean;
     immediate?: boolean;
+    appendAttempt?: StepAttempt;
   }) => void;
   /**
    * #2848 — DB 裡 `step_data['vocab-application']` 先前存下的內容。
@@ -132,7 +134,33 @@ const VocabApplication: React.FC<VocabApplicationProps> = ({
       return JSON.parse(raw) as SavedPhaseProgress;
     } catch { return null; }
   };
-  const savedProgress = useRef(loadSaved());
+  // #4081：完成狀態與成績以 DB 為準。以前只從瀏覽器快取還原 —— 換裝置看不到完成
+  // 畫面；同一台裝置上快取裡的舊「已完成」+ 舊分數，一掛載又被當成這一次的成績標完成
+  // 存回 DB。DB 有完成紀錄就用它；在學習流程裡（有 DB 可寫）但 DB 沒有完成紀錄時，
+  // 不相信快取的「已完成」；沒有 DB 可寫時（例如沒有 session）才用快取。
+  const savedProgress = useRef<SavedPhaseProgress | null>(null);
+  if (savedProgress.current === null) {
+    const dbScore = typeof initialProgress?.score === 'number' ? initialProgress.score : null;
+    const dbTotal = typeof initialProgress?.total === 'number' ? initialProgress.total : null;
+    if (dbScore !== null && dbTotal !== null) {
+      savedProgress.current = {
+        phase: 'done',
+        result: { score: dbScore, total: dbTotal },
+        firstTryResults: Array.isArray(initialProgress?.firstTryResults)
+          ? (initialProgress.firstTryResults as QuestionResult[])
+          : [],
+      };
+    } else {
+      const cached = loadSaved();
+      savedProgress.current = saveStepProgressPatch && cached?.phase === 'done'
+        ? { phase: 'exercise', result: null, firstTryResults: [] }
+        : cached ?? { phase: 'exercise', result: null, firstTryResults: [] };
+    }
+  }
+  // 從 DB 還原出來的完成狀態不用再寫一次（下面的完成 effect 掛載時會跑）。
+  const skipRestoredCompletionRef = useRef(
+    typeof initialProgress?.score === 'number' && typeof initialProgress?.total === 'number',
+  );
 
   const [phase, setPhase] = useState<'exercise' | 'done'>(() => savedProgress.current?.phase ?? 'exercise');
   const [result, setResult] = useState<{ score: number; total: number } | null>(() => savedProgress.current?.result ?? null);
@@ -140,8 +168,8 @@ const VocabApplication: React.FC<VocabApplicationProps> = ({
     () => savedProgress.current?.firstTryResults ?? [],
   );
 
-  const sentences = story.fillInBlank ?? [];
-  const vocabBank = story.vocabBank ?? {};
+  const sentences = useMemo(() => story.fillInBlank ?? [], [story.fillInBlank]);
+  const vocabBank = useMemo(() => story.vocabBank ?? {}, [story.vocabBank]);
   const hasData = sentences.length > 0 && Object.keys(vocabBank).length > 0;
 
   // ── localStorage persistence (phase + result + firstTryResults) ───────────
@@ -188,6 +216,10 @@ const VocabApplication: React.FC<VocabApplicationProps> = ({
   // When phase transitions to 'done', flush progress to DB immediately via patch
   // (merges with other steps' data instead of overwriting the snapshot).
   useEffect(() => {
+    if (skipRestoredCompletionRef.current) {
+      skipRestoredCompletionRef.current = false;
+      if (phase === 'done') return;
+    }
     if (phase === 'done' && result && saveStepProgressPatch) {
       // Issue #2070: include firstTryResults so teachers can see per-question
       // first-attempt accuracy, not just the aggregate score.
@@ -260,6 +292,40 @@ const VocabApplication: React.FC<VocabApplicationProps> = ({
   }, []);
 
   // Issue #758: accept firstTryResults from FillInBlankExercise and persist them
+  // ── #4087：每做完一輪記一筆作答（成績單折線圖）─────────────────────────
+  // 第一次做完 / 全部重做 → 這一輪第一次就答對的題數；重做錯題 → 做完這一輪之後
+  // 總共答對幾題（原本就對的 + 這一輪重做時第一次就對的）。
+  const attemptsMadeRef = useRef(readAttempts(initialProgress).length);
+  const handleRoundFinished = useCallback(
+    (round: { retryMode: boolean; firstTryResults: QuestionResult[]; retryOutcome: Record<number, { correct: boolean; firstAnswer: string | null }> }) => {
+      if (!saveStepProgressPatch) return;
+      const wordOf = (code: string | null | undefined) => (code ? vocabBank[code] ?? code : null);
+      const kind = round.retryMode ? 'retry-wrong' : attemptsMadeRef.current > 0 ? 'retry-all' : 'first';
+      const bySentence = new Map(round.firstTryResults.map((r) => [r.sentenceIdx, r]));
+      const rows = sentences.map((sentence, i) => {
+        const original = bySentence.get(i);
+        const retried = round.retryMode ? round.retryOutcome[i] : undefined;
+        const correct = retried ? retried.correct : original?.firstTryCorrect === true;
+        const firstAnswer = retried ? retried.firstAnswer : original?.studentFirstAnswer ?? null;
+        return {
+          label: `第 ${i + 1} 題`,
+          correct,
+          studentAnswer: correct ? null : wordOf(firstAnswer as string | null),
+          correctAnswer: wordOf(sentence.answer),
+        };
+      });
+      attemptsMadeRef.current += 1;
+      saveStepProgressPatch({
+        stepId: 'vocab-application',
+        currentStep: 'vocab-application',
+        immediate: true,
+        stepData: {},
+        appendAttempt: scoredAttempt(kind, rows.filter((r) => r.correct).length, rows.length, rows),
+      });
+    },
+    [saveStepProgressPatch, sentences, vocabBank],
+  );
+
   function handleComplete(score: number, total: number, firstTryResults?: QuestionResult[]) {
     setResult({ score, total });
     if (firstTryResults) {
@@ -320,6 +386,7 @@ const VocabApplication: React.FC<VocabApplicationProps> = ({
           storyId={getLearningStorageScope(story.id)}
           initialProgress={restoredExerciseRef.current}
           onProgressChange={handleExerciseProgress}
+          onRoundFinished={handleRoundFinished}
         />
       )}
     </div>
