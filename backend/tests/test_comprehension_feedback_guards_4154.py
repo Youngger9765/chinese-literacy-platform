@@ -112,3 +112,28 @@ def test_main_text_gets_feedback_but_repeat_round_section_does_not():
     rnd = li._mcq_from(l, section={"questions": [q]})
     assert rnd and rnd[0]["option_explanations"] is None
     assert rnd[0]["evidence_sentence"] is None and rnd[0]["evidence_paragraph"] is None
+
+
+# ── 4. 注音端點是公開的：它回傳每段原文，說明檔不可以從那裡漏出去 ────────────────
+# 資安掃描發現（2026-11-27）：產生器遞迴收服務端整份 dict，option_explanations
+# 被收進注音表；而該端點不需登入、回傳 text，正解那句以「正確」開頭 = 公布答案。
+@pytest.mark.parametrize("lesson_id,uid", [(20011, "L0011"), (20010, "L0010"), (20016, "L0016")])
+def test_anonymous_zhuyin_endpoint_has_no_answer_bearing_text(client, lesson_id, uid):
+    r = client.get(f"/api/lessons/{uid}/zhuyin")
+    assert r.status_code == 200, r.text
+    texts = r.json()["texts"]
+    assert len(texts) > 50, "對照：端點要真的有回內容，否則下面兩條空過"
+    bad = [t["section"] for t in texts if "option_explanations" in t["section"]]
+    assert not bad, f"{uid} 注音端點漏出說明：{bad[:3]}"
+    assert not [t for t in texts if t["text"].startswith("正確")], f"{uid} 有以「正確」開頭的字串"
+
+
+def test_zhuyin_collector_skips_option_explanations():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "gen_zhuyin", os.path.join(os.path.dirname(__file__), "..", "scripts", "generate_lesson_zhuyin.py"))
+    gen = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(gen)
+    sections = [t["section"] for t in gen.collect_served_texts("L0011")]
+    assert sections, "對照：收集器要真的收到東西"
+    assert not [s for s in sections if "option_explanations" in s]
