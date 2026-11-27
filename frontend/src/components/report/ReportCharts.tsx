@@ -57,12 +57,14 @@ const RADAR_STATE_TEXT: Record<Exclude<RadarPoint['state'], 'scored'>, string> =
   unscored: '無紀錄',
 };
 
-export const RadarPanel: React.FC<{ points: RadarPoint[] }> = ({ points }) => {
+export const RadarPanel: React.FC<{ points: RadarPoint[]; average?: RadarPoint[] | null }> = ({ points, average }) => {
   const anyScored = points.some((p) => p.state === 'scored');
   const { strong, weak } = strengthsOf(points);
   const data = points.map((p) => ({
     axis: p.state === 'scored' ? p.label : `${p.label}（${RADAR_STATE_TEXT[p.state]}）`,
     value: p.value ?? 0,
+    // #4162：最近 5 課平均（沒有分數的項目畫在 0，跟本課同一個處理）
+    avg: average?.find((a) => a.key === p.key)?.value ?? 0,
   }));
 
   return (
@@ -79,10 +81,18 @@ export const RadarPanel: React.FC<{ points: RadarPoint[] }> = ({ points }) => {
                 <PolarGrid />
                 <PolarAngleAxis dataKey="axis" tick={{ fontSize: 12 }} />
                 <PolarRadiusAxis domain={[0, 100]} tickCount={5} tick={{ fontSize: 10 }} />
-                <Radar dataKey="value" stroke="#4f46e5" fill="#6366f1" fillOpacity={0.3} />
+                {average && (
+                  <Radar dataKey="avg" name="最近 5 課平均" stroke="#6b7280" strokeDasharray="5 4" fill="none" />
+                )}
+                <Radar dataKey="value" name="這課" stroke="#4f46e5" fill="#6366f1" fillOpacity={0.3} />
               </RadarChart>
             </ResponsiveContainer>
           </div>
+          {average && (
+            <p className="text-xs text-on-surface-variant mt-1 text-center" data-testid="report-radar-legend">
+              實線：這課　虛線：最近 5 課平均
+            </p>
+          )}
           {/* 給螢幕閱讀器與窄螢幕：同一份資料的文字版 */}
           <ul className="grid grid-cols-2 sm:grid-cols-5 gap-2 mt-2" aria-label="各項能力分數">
             {points.map((p) => (
@@ -91,6 +101,12 @@ export const RadarPanel: React.FC<{ points: RadarPoint[] }> = ({ points }) => {
                 <div className="font-headline font-bold text-on-surface">
                   {p.state === 'scored' ? p.value : RADAR_STATE_TEXT[p.state]}
                 </div>
+                {average && (() => {
+                  const a = average.find((x) => x.key === p.key)?.value;
+                  return typeof a === 'number' ? (
+                    <div className="text-[11px] text-on-surface-variant">平均 {a}</div>
+                  ) : null;
+                })()}
               </li>
             ))}
           </ul>

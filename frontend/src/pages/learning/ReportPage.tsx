@@ -7,6 +7,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { reportSessionComplete } from '../../services/gamificationApi';
 import { resolveActiveSteps } from '../../config/stepConfig';
 import StepReportCards from '../../components/report/StepReportCards';
+import { useRecentAbility } from '../../hooks/useRecentAbility';
 import { useReportProgress } from '../../components/report/useReportProgress';
 import { buildStepReportCards, marksFromAnnotations } from '../../components/report/reportCardsModel';
 import { storyForStep } from '../../services/api';
@@ -62,6 +63,8 @@ const ReportPage: React.FC = () => {
 
   // 進度與記號都直接讀 DB（含重新整理後的 carry-forward，理由見 hook）。
   const report = useReportProgress(dbSessionId, token, storyId, stepProgressData);
+  // #4162：最近幾課的能力分數（跨課雷達平均、矩陣、診斷句用）
+  const abilityHistory = useRecentAbility(token);
 
   const cards = useMemo(
     () =>
@@ -210,6 +213,9 @@ const ReportPage: React.FC = () => {
           storyTitle={selectedStory?.title}
           cards={cards}
           onGoToStep={(stepId) => navigate(stepPath(storyId!, stepId))}
+          abilityHistory={abilityHistory}
+          currentLesson={storyId ? { storyId, sessionId: dbSessionId ?? null, title: selectedStory?.title } : undefined}
+          onGoToLessonStep={(sid, stepId) => navigate(stepPath(sid, stepId))}
         />
       )}
 
