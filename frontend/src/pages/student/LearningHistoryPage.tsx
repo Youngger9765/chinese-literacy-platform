@@ -98,6 +98,11 @@ const SessionCard: React.FC<{ session: LearningSummary }> = ({ session }) => {
             <span className="inline-block px-1.5 py-0.5 rounded-sm text-xs font-medium bg-green-100 text-green-700">
               已完成
             </span>
+            {session.entry_source === 'ai_dispatch' && (
+              <span data-testid="ai-dispatch-badge" className="inline-block px-1.5 py-0.5 rounded-sm text-xs font-medium bg-accent-bg text-accent">
+                AI 派發
+              </span>
+            )}
           </div>
 
           {/* Metadata row — Issue #1094: 學生端不顯示得分 / 準確率 */}

@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
 import { getStoryRecommendations } from '../../../services/progressApi';
 import { gradeLabel } from '../../../utils/gradeLabel';
+import { markEntrySource } from '../../../utils/entrySource';
 import { stepPath } from '../../../config/stepPath';
 import { pickPair, type DispatchRec } from './pickPair';
 
@@ -95,7 +96,10 @@ const DispatchPicker: React.FC<Props> = ({ excludeSlug, autoStart = true }) => {
             <p className="text-sm text-on-surface" data-testid="dispatch-reason">為什麼推這課：{r.reason}</p>
             <button
               type="button"
-              onClick={() => navigate(stepPath(r.story_slug, 'lesson-intro'))}
+              onClick={() => {
+                markEntrySource(r.story_slug); // 建立學習紀錄時標成 AI 派發
+                navigate(stepPath(r.story_slug, 'lesson-intro'));
+              }}
               className="mt-auto h-10 rounded-full bg-accent text-white font-bold hover:bg-accent-hover"
             >
               選這課開始

@@ -139,6 +139,17 @@ describe('DispatchPicker', () => {
     expect(screen.getByTestId('where').textContent).toBe('/learn/S2/lesson-intro');
   });
 
+  it('選卡時記下「這一課是從 AI 派發進來的」，讓建立學習紀錄時能標記（#4161）', async () => {
+    sessionStorage.clear();
+    renderIn(<DispatchPicker />);
+    const cards = await screen.findAllByTestId('dispatch-card');
+    expect(sessionStorage.getItem('lingoleap_entry_source')).toBeNull(); // 還沒選之前沒有標記
+    fireEvent.click(within(cards[1]).getByRole('button', { name: '選這課開始' }));
+    // 標記的是選的那一課（S2），不是另一張（S1）
+    const stored = JSON.parse(sessionStorage.getItem('lingoleap_entry_source')!);
+    expect(stored).toMatchObject({ storyId: 'S2', source: 'ai_dispatch' });
+  });
+
   it('新帳號沒有紀錄時後端依年級回推薦，照樣是 2 張卡不是空白', async () => {
     recApi.fn.mockResolvedValue({ recommendations: [rec(1, '難度符合你目前的程度（4 年級）'), rec(2, '難度略高，適合挑戰')], total: 2 });
     renderIn(<DispatchPicker />);
