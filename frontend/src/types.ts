@@ -95,6 +95,11 @@ export interface MultipleChoiceItem {
    *  圖、文字欄位原稿就是空的）會有值。已由 api.ts 的 resolveAssetUrl
    *  解析成可直接丟進 <img src> 的完整 URL。 */
   option_images?: (string | null)[] | null;
+  /** #4154: 每個選項一句說明，順序同 `options`。沒有資料時為 null／缺。 */
+  option_explanations?: string[] | null;
+  /** #4154: 課文依據句與它所在的整段（兩者一起有或一起沒有）。 */
+  evidence_sentence?: string | null;
+  evidence_paragraph?: string | null;
 }
 
 // 閱讀策略練習 (#943)

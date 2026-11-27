@@ -24,6 +24,7 @@ import { recordMcqAttempt } from '../../services/learningApi';
 import type { ExerciseBlockT } from '../../schema/lessonContent';
 import { grade } from './lessonGrading';
 import ChoiceInput from './inputs/ChoiceInput';
+import McqFeedbackExtras, { pickEvidence } from './McqFeedbackExtras';
 import MultiChoiceInput from './inputs/MultiChoiceInput';
 import OrderingInput from './inputs/OrderingInput';
 import TraitInput from './inputs/TraitInput';
@@ -210,6 +211,16 @@ const ExerciseBlockViewBody: React.FC<
         });
       }
     };
+    // #4154: 答對 → 四句全開；答錯 → 只開「被選的那一格」（不公布正解，2026-08-19 的規矩）。
+    const perOptionExplanations =
+      q.option_explanations && q.option_explanations.length === q.options.length
+        ? q.option_explanations
+        : null;
+    const choiceExplanations: (string | null)[] | null = !perOptionExplanations || !submitted
+      ? null
+      : verdict === true
+        ? perOptionExplanations
+        : perOptionExplanations.map((e, i) => (i === value ? e : null));
     return (
       <>
         <p className="text-lg font-medium text-on-surface mb-4 leading-relaxed whitespace-pre-wrap">{q.question}</p>
@@ -219,8 +230,20 @@ const ExerciseBlockViewBody: React.FC<
           value={typeof value === 'number' ? value : null}
           onChange={handlePick}
           verdict={verdict}
+          explanations={choiceExplanations}
+          answerIndex={verdict === true && typeof exercise.answer === 'number' ? exercise.answer : null}
         />
         {submitted ? submittedFeedback('✓ 答對了', '再想想看') : null}
+        {/* #4154: 作答後才出現（答錯、答對都有），沒有說明資料的題目不畫 */}
+        {submitted && perOptionExplanations ? (
+          <McqFeedbackExtras
+            lessonCode={lessonCode}
+            exerciseId={exercise.id}
+            questionText={q.question}
+            evidence={pickEvidence(q)}
+            chosenLetter={typeof value === 'number' ? (LETTERS[value] ?? String(value)) : null}
+          />
+        ) : null}
         {pendingRescue && rescue === null ? (
           <button
             type="button"
