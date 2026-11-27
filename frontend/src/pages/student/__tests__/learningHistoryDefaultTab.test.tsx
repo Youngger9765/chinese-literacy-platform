@@ -31,8 +31,11 @@ describe('#2889 學習紀錄：兩段都要在', () => {
   it('names both sections', () => {
     // Positive control for the test above: without it, deleting one section
     // entirely would still leave a one-element array that "starts with self".
-    expect(SRC).toContain("label: '自學紀錄'");
-    expect(SRC).toContain("label: '作業回顧'");
+    // #4163：名稱與老師端一致（老師作業、自主練習；AI 派發目前資料庫無欄位可分，併在自主練習）
+    expect(SRC).toContain("label: '自主練習'");
+    expect(SRC).toContain("label: '老師作業'");
+    expect(SRC).not.toContain("label: '自學紀錄'");
+    expect(SRC).not.toContain("label: '作業回顧'");
   });
 
   it('has no tab state left behind — nothing is one click away', () => {

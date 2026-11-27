@@ -7,6 +7,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { reportSessionComplete } from '../../services/gamificationApi';
 import { resolveActiveSteps } from '../../config/stepConfig';
 import StepReportCards from '../../components/report/StepReportCards';
+import DispatchPicker from '../../components/student/dispatch/DispatchPicker';
 import { useRecentAbility } from '../../hooks/useRecentAbility';
 import { useReportProgress } from '../../components/report/useReportProgress';
 import { buildStepReportCards, marksFromAnnotations } from '../../components/report/reportCardsModel';
@@ -217,6 +218,15 @@ const ReportPage: React.FC = () => {
           currentLesson={storyId ? { storyId, sessionId: dbSessionId ?? null, title: selectedStory?.title } : undefined}
           onGoToLessonStep={(sid, stepId) => navigate(stepPath(sid, stepId))}
         />
+      )}
+
+      {/* #4161：做完一課，一鍵再派下一組（不含剛做完的這一課） */}
+      {!(report.loading && dbSessionId) && !hasActiveAssignment && (
+        <section className="mt-6 rounded-3xl bg-surface-container-lowest shadow-editorial p-6" data-testid="report-next-dispatch" aria-label="再派一組">
+          <h3 className="font-headline font-bold text-lg text-on-surface">下一課想練什麼</h3>
+          <p className="text-sm text-on-surface-variant mt-1 mb-3">AI 依你剛做完的結果再挑 2 課，選 1 課繼續</p>
+          <DispatchPicker excludeSlug={storyId} autoStart={false} />
+        </section>
       )}
 
       {showXpToast && xpResult && (
