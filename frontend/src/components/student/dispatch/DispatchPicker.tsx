@@ -90,7 +90,7 @@ const DispatchPicker: React.FC<Props> = ({ excludeSlug, autoStart = true }) => {
           <li key={r.story_slug} className="rounded-2xl border border-[#E5E0D5] bg-surface-container-lowest p-4 flex flex-col gap-2" data-testid="dispatch-card">
             <h4 className="font-headline font-bold text-on-surface">{r.title}</h4>
             <p className="text-xs text-on-surface-variant">
-              {Number.isFinite(r.grade) ? gradeLabel(String(r.grade)) : ''}{r.genre ? `・${r.genre}` : ''}
+              {gradeLabel(String(r.grade))}{r.genre ? `・${r.genre}` : ''}
             </p>
             <p className="text-sm text-on-surface" data-testid="dispatch-reason">為什麼推這課：{r.reason}</p>
             <button

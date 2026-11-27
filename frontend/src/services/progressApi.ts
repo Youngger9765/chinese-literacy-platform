@@ -145,7 +145,8 @@ export async function getRepeatedErrorsAlert(
 export interface StoryRecommendationItem {
   story_slug: string;
   title: string;
-  grade: number;
+  /** 數字年級是整數；文言文、品格教育是文字 */
+  grade: number | string;
   genre: string;
   difficulty_match_score: number;
   reason: string;

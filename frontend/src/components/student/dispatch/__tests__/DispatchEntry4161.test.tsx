@@ -6,7 +6,7 @@ import { render, screen, fireEvent, waitFor, within } from '@testing-library/rea
 import { MemoryRouter, useLocation } from 'react-router-dom';
 
 vi.mock('../../../../contexts/AuthContext', () => ({
-  useAuth: () => ({ token: 't', user: { id: 7, role: 'student' } }),
+  useAuth: () => ({ token: 't', user: { id: 7, roles: [{ role_name: 'student' }] } }),
 }));
 const recApi = vi.hoisted(() => ({ fn: vi.fn() }));
 vi.mock('../../../../services/progressApi', () => ({
@@ -105,6 +105,14 @@ describe('DispatchPicker', () => {
       seen.push(titles().join(','));
     }
     expect(seen).toEqual(['課1,課2', '課3,課4', '課5', '課1,課2', '課3,課4']);
+  });
+
+  it('年級是文字的課（文言文）照樣派得出來，卡片寫「文言文」，數字年級寫「第 4 級」', async () => {
+    recApi.fn.mockResolvedValue({ recommendations: [{ ...rec(1), grade: '文言文' }, rec(2)], total: 2 });
+    renderIn(<DispatchPicker />);
+    const cards = await screen.findAllByTestId('dispatch-card');
+    expect(cards[0].textContent).toContain('文言文');
+    expect(cards[1].textContent).toContain('第 4 級');
   });
 
   it('派完一輪會從頭再來，不會變空白', async () => {
