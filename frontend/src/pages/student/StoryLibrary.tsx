@@ -1,11 +1,13 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Story } from '../../types';
 import { fetchStories, fetchStory } from '../../services/api';
 import { getClassroomTexts } from '../../services/teacherApi';
 import { getGamificationPoints } from '../../services/gamificationApi';
 import { getLibraryStatus, type LibraryStoryStatus } from '../../services/progressApi';
 import { useAuth } from '../../contexts/AuthContext';
+import LearningEntryCards from '../../components/student/dispatch/LearningEntryCards';
+import { getMyAssignments } from '../../services/assignmentApi';
 import StoryCard, { Difficulty, DIFFICULTY_CONFIG, getDifficulty } from '../../components/student/StoryCard';
 import { gradeLabel } from '../../utils/gradeLabel';
 import { matchesStory, suggestKeywords } from '../../utils/storySearch';
@@ -43,6 +45,20 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({
   onClearProgress,
 }) => {
   const { token, user } = useAuth();
+  // #4163：課文清單頂端的入口卡只給學生；老師作業提醒要有未完成作業數
+  const isStudent = user?.role === 'student';
+  const [pendingAssignments, setPendingAssignments] = useState(0);
+  const listTopRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!token || !isStudent) return;
+    let cancelled = false;
+    getMyAssignments(token)
+      .then((list) => {
+        if (!cancelled) setPendingAssignments(list.filter((a) => a.status === 'pending' || a.status === 'in_progress').length);
+      })
+      .catch(() => { /* 提醒列拿不到就不顯示 */ });
+    return () => { cancelled = true; };
+  }, [token, isStudent]);
   const [xpToNext, setXpToNext] = useState<number | null>(null);
 
   /* #1725: persist filter selections across the lesson round-trip so that
@@ -241,6 +257,13 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({
 
   return (
     <div className="space-y-5">
+      {isStudent && (
+        <LearningEntryCards
+          pendingAssignments={pendingAssignments}
+          onPickSelf={() => listTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+        />
+      )}
+      <div ref={listTopRef} />
       {/* Header */}
       <div className="flex items-end justify-between flex-wrap gap-2">
         <div>

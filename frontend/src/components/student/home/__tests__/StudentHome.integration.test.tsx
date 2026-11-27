@@ -196,7 +196,7 @@ describe('StudentHome integration', () => {
     });
   });
 
-  it('renders 班級作業 tile', async () => {
+  it('有班級的學生同時看到「AI 派發」「自主練習」兩張入口卡，老師作業另放提醒列 (#4163)', async () => {
     vi.mocked(fetchMyEnrolledClassrooms).mockResolvedValue({ classrooms: [mockClassroom] });
     vi.mocked(fetchGamificationSummary).mockResolvedValue(mockGamification);
     vi.mocked(getMyAssignments).mockResolvedValue([mockAssignment]);
@@ -207,9 +207,10 @@ describe('StudentHome integration', () => {
       </MemoryRouter>,
     );
 
-    await waitFor(() => {
-      expect(screen.getByText('班級作業')).toBeTruthy();
-    });
+    const entry = await screen.findByTestId('learning-entry');
+    expect(entry.querySelector('[data-testid="entry-ai"]')?.textContent).toContain('AI 派發');
+    expect(entry.querySelector('[data-testid="entry-self"]')?.textContent).toContain('自主練習');
+    expect(screen.getByTestId('assignment-reminder').textContent).toContain('1');
   });
 
   it('renders XP pill when gamification is loaded', async () => {

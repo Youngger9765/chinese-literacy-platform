@@ -21,7 +21,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import StudentProgressDashboard from '../../components/student/StudentProgressDashboard';
-import RecommendedStories from '../../components/student/RecommendedStories';
 import LiveQuizInviteBanner from '../../components/student/home/LiveQuizInviteBanner';
 import RecentBadgesStrip from '../../components/gamification/RecentBadgesStrip';
 import QuickPracticeStrip from '../../components/student/QuickPracticeStrip';
@@ -34,7 +33,7 @@ import { loadResumeRecord, resolveResume, type ResumeInfo } from '../../utils/re
 import { fetchStory } from '../../services/api';
 import { stepPath } from '../../config/stepPath';
 import { InlineXPPill } from '../../components/student/home/HomeStats';
-import AssignmentWidget from '../../components/student/home/AssignmentWidget';
+import LearningEntryCards from '../../components/student/dispatch/LearningEntryCards';
 import {
   fetchMyEnrolledClassrooms,
   type StudentEnrolledClassroom,
@@ -235,12 +234,8 @@ const StudentHome: React.FC = () => {
         {/* ── Practice shelf ─────────────────────────────────────────────── */}
         <QuickPracticeStrip />
 
-        {/* ── Secondary tiles: assignments + library ─────────────────────── */}
-        <AssignmentWidget
-          pendingCount={pendingAssignmentCount}
-          onGoAssignments={() => navigate('/assignments')}
-          onGoLibrary={() => navigate('/library')}
-        />
+        {/* ── 這次想怎麼練：AI 派發 / 自主練習（老師作業另放提醒列）─────────── */}
+        <LearningEntryCards pendingAssignments={pendingAssignmentCount} />
 
         {/* ── Learning progress ──────────────────────────────────────────── */}
         <section aria-labelledby="progress-title">
@@ -258,16 +253,6 @@ const StudentHome: React.FC = () => {
         </section>
 
         {gamification && <RecentBadgesStrip badges={gamification.badges} />}
-
-        <section aria-labelledby="recommended-title">
-          <h2
-            id="recommended-title"
-            className="text-base font-bold font-headline text-on-surface mb-3"
-          >
-            推薦課文
-          </h2>
-          <RecommendedStories />
-        </section>
       </div>
     </div>
   );
