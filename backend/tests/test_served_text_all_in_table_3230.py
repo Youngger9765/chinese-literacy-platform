@@ -45,7 +45,11 @@ _SKIP_KEYS = {
 }
 _INTERNAL_KEY = re.compile(
     r"(answer_note|_note$|^notes$|^qa|review|errata|provenance|evidence|rationale"
-    r"|verdict|audit|debug|todo|comment)", re.I)
+    r"|verdict|audit|debug|todo|comment"
+    # 答題說明：正解那句寫「正確」，注音端點公開，進表等於公布答案（#4154 資安修補）；
+    # 畫面上它是純文字段落、不走注音，所以不在表裡不會掉回舊選擇器。
+    # 與 scripts/generate_lesson_zhuyin.py 的 _INTERNAL_KEY 保持同一份排除。
+    r"|^option_explanations$)", re.I)
 
 
 def served_strings(lesson: dict) -> list[tuple[str, str]]:
