@@ -20,11 +20,11 @@ interface ZhuyinToggleProps {
 }
 
 const SEGMENTS: Array<{ mode: ZhuyinMode; label: string; title: string }> = [
-  { mode: 'none',      label: '無',   title: '關閉注音' },
+  { mode: 'none',      label: '不顯示', title: '關閉注音' },
   // ⚠️ #3224 之後這裡不再是詞彙表 —— 難字＝**這個孩子唸錯過的字**。
   //    原本的 title 寫「（詞彙表）」，那句話在 #3224 之後就不對了。
   { mode: 'difficult', label: '難字', title: '只標你唸錯過的字' },
-  { mode: 'all',       label: '全',   title: '顯示全文注音' },
+  { mode: 'all',       label: '全部', title: '顯示全文注音' },
 ];
 
 export default function ZhuyinToggle({
@@ -45,6 +45,11 @@ export default function ZhuyinToggle({
       會當場變多變少 —— 面板從「宣稱規則」變成「示範規則」，那比任何一句文案都有用。
     */
     <div data-zhuyin-controls className="inline-flex items-center gap-1.5">
+    {/* #4156：原本只有「無／難字／全」三個字，第一次看到的人不知道它控制什麼 */}
+    {/* 手機寬度＋難字模式（多一組門檻鈕）時先讓位，避免把右側說明鈕擠出畫面 */}
+    <span className={`font-headline font-bold text-[11px] sm:text-sm text-on-surface-variant whitespace-nowrap ${showThreshold ? 'hidden sm:inline' : ''}`}>
+      注音
+    </span>
     <div
       role="group"
       aria-label="注音顯示模式"
@@ -62,7 +67,7 @@ export default function ZhuyinToggle({
             aria-pressed={isActive}
             aria-label={seg.title}
             title={seg.title}
-            className={`h-8 sm:h-9 px-2 sm:px-3 rounded-full font-headline font-bold text-xs sm:text-sm transition-all duration-200 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 active:scale-95 whitespace-nowrap ${
+            className={`h-8 sm:h-9 px-1.5 sm:px-3 rounded-full font-headline font-bold text-xs sm:text-sm transition-all duration-200 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 active:scale-95 whitespace-nowrap ${
               isActive
                 ? 'bg-accent text-white shadow-[0_2px_10px_rgba(86,74,191,0.35)]'
                 : 'text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface'
