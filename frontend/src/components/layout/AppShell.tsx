@@ -32,6 +32,7 @@ import StepFooterNav from '../reading-steps/StepFooterNav';
 import { OnboardingWrapper } from '../../pages/app/InlinePages';
 import { isToolboxMode, setToolboxMode } from '../../services/learningStorageScope';
 import { stepNeighbours } from '../../config/stepNeighbours';
+import { stepTitleText } from './stepTitleText';
 
 /** The authenticated app shell with sidebar only (header removed 2026-04-18). */
 export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -465,7 +466,7 @@ const ImmersiveTopBar: React.FC = () => {
               {selectedStory && <span className="text-on-surface-variant/40 shrink-0">·</span>}
               <span className="font-headline font-bold text-accent tracking-wide shrink-0">
                 {/* Toolbox mode: single-shot, hide N/total counter (#1460) */}
-                {inToolbox ? currentStep.label : `${currentStep.label} ${currentStepIndex + 1}/${totalSteps}`}
+                {stepTitleText(currentStep, currentStepIndex, totalSteps, inToolbox)}
               </span>
             </>
           )}

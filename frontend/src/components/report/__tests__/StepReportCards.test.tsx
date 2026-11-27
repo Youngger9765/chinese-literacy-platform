@@ -39,7 +39,7 @@ describe('StepReportCards', () => {
   it('lets the student go to an unfinished step', () => {
     const go = vi.fn();
     render(<StepReportCards cards={cards} onGoToStep={go} />);
-    fireEvent.click(screen.getByRole('button', { name: /語詞複習/ }));
+    fireEvent.click(screen.getByRole('button', { name: /^語詞複習：/ }));
     fireEvent.click(screen.getByRole('button', { name: '前往這一關' }));
     expect(go).toHaveBeenCalledWith('vocab-review');
   });
