@@ -116,7 +116,9 @@ interface ApiStoryDetail extends ApiStoryListItem {
   fill_in_blank: Array<Record<string, any>> | null;
   multiple_choice: Array<{ question: string; options: string[]; answer: string | null;
     explanation: string | null; material_table?: Record<string, unknown> | null;
-    option_images?: (string | null)[] | null }> | null;
+    option_images?: (string | null)[] | null;
+    option_explanations?: string[] | null; evidence_sentence?: string | null;
+    evidence_paragraph?: string | null }> | null;
   vocab_bank: Record<string, string> | null;
   knowledge_video_url: string | null;
   // Full video list (#1683). null for legacy lessons without video_links field.

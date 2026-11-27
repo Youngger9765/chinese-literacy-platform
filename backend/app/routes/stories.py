@@ -616,7 +616,15 @@ def list_stories(
 # `explanation` (top level and every repeat round). A verified JWT — signature
 # only, no DB round trip — still gets them, because the student renderers grade
 # locally.
-_MCQ_ANSWER_KEYS = ("answer", "explanation")
+# #4154：逐選項說明的正解那句固定以「正確」開頭、依據句會指向答案所在，
+# 對沒登入的人等於公布答案，所以跟 answer / explanation 一起拿掉。
+_MCQ_ANSWER_KEYS = (
+    "answer",
+    "explanation",
+    "option_explanations",
+    "evidence_sentence",
+    "evidence_paragraph",
+)
 
 
 def _strip_mcq_answers(items):

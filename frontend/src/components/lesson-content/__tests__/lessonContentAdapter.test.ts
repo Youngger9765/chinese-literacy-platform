@@ -233,3 +233,55 @@ describe('regression: hand-written G7-L30 fixture does NOT change (bypasses the 
     ]);
   });
 });
+
+describe('storyToLesson — #4154 作答後回饋欄位', () => {
+  const base = {
+    id: 'L0011',
+    title: '贏得喝采的輸家',
+    level: '4',
+    content: [],
+    thumbnail: '',
+    category: 'Fable',
+    filename: 'L0011',
+    lesson_code: 'L0011',
+    paragraphs: ['不幸鷹眼判定出界，大家唉聲嘆氣、捶胸頓足。'],
+  };
+  const mcqBase = {
+    question: '「捶胸頓足」最可能的情緒是？',
+    options: ['開心', '懊惱', '欣喜', '寂寞'],
+    answer: 'B',
+    explanation: null,
+  };
+
+  it('說明、依據句、依據段都帶進題目；選項說明數量不變', () => {
+    const story = {
+      ...base,
+      multipleChoice: [
+        {
+          ...mcqBase,
+          option_explanations: ['甲', '乙', '丙', '丁'],
+          evidence_sentence: '唉聲嘆氣、捶胸頓足',
+          evidence_paragraph: '不幸鷹眼判定出界，大家唉聲嘆氣、捶胸頓足。',
+        },
+      ],
+    } as Story;
+    const { lesson, gaps } = storyToLesson(story);
+    expect(lesson, gaps.join('; ')).not.toBeNull();
+    const ex = lesson!.blocks.find((b) => b.id === 'ex-mcq-1');
+    if (!ex || ex.type !== 'exercise' || ex.question.kind !== 'multiple_choice') throw new Error('shape');
+    expect(ex.question.option_explanations).toEqual(['甲', '乙', '丙', '丁']);
+    expect(ex.question.evidence_sentence).toBe('唉聲嘆氣、捶胸頓足');
+    expect(ex.question.evidence_paragraph).toContain('捶胸頓足');
+  });
+
+  it('沒有這些欄位的舊題：question 物件上完全沒有這三個 key', () => {
+    const { lesson, gaps } = storyToLesson({ ...base, multipleChoice: [mcqBase] } as Story);
+    expect(lesson, gaps.join('; ')).not.toBeNull();
+    const ex = lesson!.blocks.find((b) => b.id === 'ex-mcq-1');
+    if (!ex || ex.type !== 'exercise') throw new Error('shape');
+    const keys = Object.keys(ex.question);
+    expect(keys).not.toContain('option_explanations');
+    expect(keys).not.toContain('evidence_sentence');
+    expect(keys).not.toContain('evidence_paragraph');
+  });
+});

@@ -277,7 +277,8 @@ _SKIP_KEYS = {
 # 因為「列得出來的欄位」那條路的失敗模式就是每加一個元件就多一個漏洞。
 _INTERNAL_KEY = re.compile(
     r"(answer_note|_note$|^notes$|^qa|review|errata|provenance|evidence|rationale"
-    r"|verdict|audit|debug|todo|comment)", re.I)
+    r"|verdict|audit|debug|todo|comment"
+    r"|^option_explanations$)", re.I)  # 答題說明：正解那句寫「正確」，注音端點公開 = 洩漏答案（#4154）
 _MAX_LEN = 1200
 
 
