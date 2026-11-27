@@ -79,3 +79,13 @@ describe('StepDots tap target (#3987 UI-5 — before:-inset-1 -> before:-inset-1
     }
   });
 });
+
+describe('#4155 每顆導覽鈕同時有圓形單字與完整關卡名稱', () => {
+  it('⭐ 每一顆下方都看得到完整名稱', () => {
+    const { container } = renderDots();
+    const labels = Array.from(container.querySelectorAll('[data-step-label]')).map((e) => e.textContent);
+    // makeStep 把 label 設成和 id 相同；內容必須是 step.label，不是 displayChar（1、2、3）
+    expect(labels).toEqual(['a', 'b', 'c']);
+    expect(labels).not.toContain('1');
+  });
+});

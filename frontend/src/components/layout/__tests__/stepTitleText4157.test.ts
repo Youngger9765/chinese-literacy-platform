@@ -1,17 +1,52 @@
 /**
- * #4157 —— 頁首不再寫「報告 10/10」：那是關卡位置，跟同頁「完成 0 / 9 關」會互相矛盾。
+ * #4157 / #4155 —— 頁首不再寫「報告 10/10」，關卡位置改成獨立的「第 N / M 關」，
+ * 報告不算在 M 裡。
  */
 import { describe, expect, it } from 'vitest';
-import { stepTitleText } from '../stepTitleText';
+import { stepTitleText, stepCounterText, stepCountExcludingReport } from '../stepTitleText';
 
-describe('#4157 stepTitleText', () => {
-  it('⭐ 報告頁只顯示名稱，不帶 N/total', () => {
-    expect(stepTitleText({ id: 'report', label: '報告' }, 9, 10, false)).toBe('報告');
+const steps = [
+  { id: 'lesson-intro', label: '課程簡介' },
+  { id: 'comprehension', label: '閱讀理解' },
+  { id: 'report', label: '報告' },
+];
+
+describe('stepTitleText（只有名稱）', () => {
+  it('⭐ 任何關卡都只回名稱，不帶 N/total', () => {
+    expect(stepTitleText(steps[2])).toBe('報告');
+    expect(stepTitleText(steps[1])).toBe('閱讀理解');
   });
-  it('⛔ 其他關卡維持「名稱 N/total」', () => {
-    expect(stepTitleText({ id: 'full-text-annotate', label: '讀全文-做記號' }, 1, 11, false)).toBe('讀全文-做記號 2/11');
+});
+
+describe('stepCounterText（#4155）', () => {
+  it('⭐ 第 N / M 關，M 不含報告', () => {
+    expect(stepCounterText(steps, 1, false)).toBe('第 2 / 2 關');
+    expect(stepCounterText(steps, 0, false)).toBe('第 1 / 2 關');
   });
-  it('⛔ 工具箱模式只顯示名稱', () => {
-    expect(stepTitleText({ id: 'full-text-annotate', label: '讀全文-做記號' }, 1, 11, true)).toBe('讀全文-做記號');
+  it('⛔ 報告頁與工具箱模式不顯示', () => {
+    expect(stepCounterText(steps, 2, false)).toBeNull();
+    expect(stepCounterText(steps, 0, true)).toBeNull();
+  });
+  it('⛔ 報告不在最後時，分子也不會超過分母', () => {
+    const odd = [
+      { id: 'lesson-intro', label: '課程簡介' },
+      { id: 'report', label: '報告' },
+      { id: 'comprehension', label: '閱讀理解' },
+    ];
+    expect(stepCounterText(odd, 2, false)).toBe('第 2 / 2 關');
+  });
+  it('⛔ 多文本課同一關重複多輪，每一輪各算一關', () => {
+    const multi = [
+      { id: 'full-text-annotate', label: '讀全文-做記號' },
+      { id: 'full-text-annotate', label: '讀全文-做記號' },
+      { id: 'report', label: '報告' },
+    ];
+    expect(stepCounterText(multi, 1, false)).toBe('第 2 / 2 關');
+  });
+});
+
+describe('stepCountExcludingReport', () => {
+  it('⭐ 不含報告', () => {
+    expect(stepCountExcludingReport(steps)).toBe(2);
   });
 });
