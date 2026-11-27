@@ -7,7 +7,9 @@ import { MemoryRouter } from 'react-router-dom';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import React from 'react';
 
-let authUser: { id: number; role?: string } = { id: 1, role: 'student' };
+// 真的 AuthUser 沒有 `role`，角色在 roles 陣列裡（role_name）；上一版測試用了假的欄位所以沒抓到
+const withRole = (role_name: string) => ({ roles: [{ role_name, role_display_name: role_name, scope_type: 'school', scope_id: null }] });
+let authUser: { id: number; roles?: unknown[] } = { id: 1, ...withRole('student') };
 vi.mock('../../../contexts/AuthContext', () => ({
   useAuth: () => ({ token: 't', user: authUser }),
 }));
@@ -42,7 +44,7 @@ const renderLib = async () => {
 };
 
 describe('#4163 課文庫頂端入口', () => {
-  beforeEach(() => { sessionStorage.clear(); authUser = { id: 1, role: 'student' }; });
+  beforeEach(() => { sessionStorage.clear(); authUser = { id: 1, ...withRole('student') }; });
 
   it('學生：看到兩張入口卡，並提醒 2 份未完成作業（已完成的不算）', async () => {
     await renderLib();
@@ -53,7 +55,7 @@ describe('#4163 課文庫頂端入口', () => {
   });
 
   it('老師：不出現入口卡', async () => {
-    authUser = { id: 2, role: 'teacher' };
+    authUser = { id: 2, ...withRole('teacher') };
     await renderLib();
     expect(screen.queryByTestId('learning-entry')).toBeNull();
   });

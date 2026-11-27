@@ -46,7 +46,7 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({
 }) => {
   const { token, user } = useAuth();
   // #4163：課文清單頂端的入口卡只給學生；老師作業提醒要有未完成作業數
-  const isStudent = user?.role === 'student';
+  const isStudent = !!user?.roles?.some((r) => r.role_name === 'student');
   const [pendingAssignments, setPendingAssignments] = useState(0);
   const listTopRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
