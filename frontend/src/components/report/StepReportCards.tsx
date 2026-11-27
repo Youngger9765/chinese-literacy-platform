@@ -251,6 +251,9 @@ const StepReportCards: React.FC<Props> = ({ storyTitle, cards, onGoToStep }) => 
   const [openId, setOpenId] = useState<string | null>(null);
   const doneCount = cards.filter((c) => c.completed).length;
   const reviewCount = cards.filter((c) => c.status === 'review').length;
+  // #4157：沒有任何一關有動靜（沒完成、沒作答紀錄、沒有要訂正）才算還沒開始
+  const notStarted =
+    cards.length > 0 && cards.every((c) => c.status === 'none' && c.attempts.length === 0 && c.toFix === 0);
   const pct = cards.length ? Math.round((doneCount / cards.length) * 100) : 0;
   const open = cards.find((c) => c.stepId === openId) ?? null;
   const close = useCallback(() => setOpenId(null), []);
@@ -309,6 +312,27 @@ const StepReportCards: React.FC<Props> = ({ storyTitle, cards, onGoToStep }) => 
         )}
       </header>
 
+      {notStarted ? (
+        // #4157：一關都沒做就只放一張引導卡，不放空雷達與九張灰卡。
+        <div
+          data-testid="report-not-started"
+          className="rounded-3xl bg-surface-container-lowest shadow-editorial p-8 text-center"
+        >
+          <p className="font-headline font-bold text-xl text-on-surface">
+            {onGoToStep ? '還沒開始，從第 1 關出發' : '還沒有任何關卡完成'}
+          </p>
+          {onGoToStep && cards[0] && (
+            <button
+              type="button"
+              onClick={() => onGoToStep(cards[0].stepId)}
+              className="mt-5 h-11 px-8 rounded-full bg-accent text-white font-bold hover:bg-accent-hover"
+            >
+              開始第 1 關
+            </button>
+          )}
+        </div>
+      ) : (
+      <>
       {/* #4087：能力雷達（五項固定）。放在卡片前面，一眼看到強項和弱項。 */}
       <RadarPanel points={radarOf(cards)} />
 
@@ -361,9 +385,22 @@ const StepReportCards: React.FC<Props> = ({ storyTitle, cards, onGoToStep }) => 
                 )}
               </div>
             </button>
+            {c.status === 'none' && onGoToStep && (
+              // #4157：未完成的卡片旁直接給「去做」，不用先點開再找按鈕。
+              <button
+                type="button"
+                onClick={() => onGoToStep(c.stepId)}
+                aria-label={`去做：${c.label}`}
+                className="mt-1 w-full text-center text-xs font-bold text-accent hover:underline"
+              >
+                去做 →
+              </button>
+            )}
           </li>
         ))}
       </ul>
+      </>
+      )}
 
       {open && <DetailDialog card={open} onClose={close} onGoToStep={onGoToStep} />}
     </div>
