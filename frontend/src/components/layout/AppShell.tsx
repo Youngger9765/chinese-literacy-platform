@@ -32,7 +32,7 @@ import StepFooterNav from '../reading-steps/StepFooterNav';
 import { OnboardingWrapper } from '../../pages/app/InlinePages';
 import { isToolboxMode, setToolboxMode } from '../../services/learningStorageScope';
 import { stepNeighbours } from '../../config/stepNeighbours';
-import { stepTitleText } from './stepTitleText';
+import { stepTitleText, stepCounterText } from './stepTitleText';
 
 /** The authenticated app shell with sidebar only (header removed 2026-04-18). */
 export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -321,11 +321,15 @@ export const StepDots: React.FC<StepDotsProps> = ({
                 displayChar
               )}
             </button>
-            {emphasis && step.navShortLabel ? (
-              <span className={`sm:hidden text-[9px] leading-none mt-0.5 font-semibold ${isActive ? 'text-accent' : 'text-violet-600'}`}>
-                {step.navShortLabel}
-              </span>
-            ) : null}
+            {/* #4155：圓形單字保留，下方補完整關卡名稱，不用再記每個字是哪一關 */}
+            <span
+              data-step-label
+              className={`mt-0.5 text-[10px] md:text-xs leading-none whitespace-nowrap ${
+                isActive ? 'font-bold text-accent' : emphasis ? 'font-semibold text-violet-600' : 'text-on-surface-variant'
+              }`}
+            >
+              {step.label}
+            </span>
             <span
               role="tooltip"
               className="hidden md:block absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 pointer-events-none opacity-0 translate-y-1 transition-all duration-150 group-hover:opacity-100 group-hover:translate-y-0 group-focus-within:opacity-100 group-focus-within:translate-y-0"
@@ -402,7 +406,6 @@ const ImmersiveTopBar: React.FC = () => {
     () => annotateStepParts(activeSteps, selectedStory?.manifestSections),
     [activeSteps, selectedStory?.manifestSections],
   );
-  const totalSteps = activeSteps.length;
 
   // #4028：完成 / 完成但有錯題（黃色）都用報告卡片的同一個函式判斷，上方圈圈跟
   // 報告頁不會一個綠一個灰。session.completedSteps 照舊併進來（剛按完成、DB 還沒回
@@ -466,8 +469,14 @@ const ImmersiveTopBar: React.FC = () => {
               {selectedStory && <span className="text-on-surface-variant/40 shrink-0">·</span>}
               <span className="font-headline font-bold text-accent tracking-wide shrink-0">
                 {/* Toolbox mode: single-shot, hide N/total counter (#1460) */}
-                {stepTitleText(currentStep, currentStepIndex, totalSteps, inToolbox)}
+                {stepTitleText(currentStep)}
               </span>
+              {stepCounterText(activeSteps, currentStepIndex, inToolbox) && (
+                // #4155：關卡位置獨立一段，報告不算在內
+                <span className="text-xs text-on-surface-variant shrink-0" data-testid="step-counter">
+                  {stepCounterText(activeSteps, currentStepIndex, inToolbox)}
+                </span>
+              )}
             </>
           )}
         </div>
