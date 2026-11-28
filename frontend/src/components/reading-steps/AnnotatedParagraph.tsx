@@ -260,6 +260,7 @@ const AnnotatedParagraph: React.FC<AnnotatedParagraphProps> = ({
   return (
     <p
       data-para-idx={paraIdx}
+      data-reading-text
       className="text-on-surface/90"
       style={{
         fontSize: `${fontSizePx}px`,

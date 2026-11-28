@@ -829,8 +829,11 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
 
     // Convert viewport coords to scroll-content coords so the toolbar stays
     // attached to the selected text even in long, scrolled paragraphs.
-    const x = info.rect.left + info.rect.width / 2 - containerRect.left + container.scrollLeft;
-    const y = info.rect.top - containerRect.top - 8 + container.scrollTop;
+    // 字級用 CSS zoom 調時，量到的螢幕座標已被放大，而 absolute 的 left/top 會在縮放區內再乘一次，
+    // 所以先除掉倍率（#4160）
+    const zoom = container.offsetWidth > 0 ? containerRect.width / container.offsetWidth : 1;
+    const x = (info.rect.left + info.rect.width / 2 - containerRect.left) / zoom + container.scrollLeft;
+    const y = (info.rect.top - containerRect.top - 8) / zoom + container.scrollTop;
 
     setToolbar({
       visible: true,
