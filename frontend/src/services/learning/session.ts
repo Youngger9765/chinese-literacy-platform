@@ -351,6 +351,8 @@ export interface LearningSummary {
   story_slug: string | null;
   story_title: string | null;
   learning_source?: 'self' | 'assignment' | null;
+  /** #4161：從 AI 派發的卡點進來的練習；其他一律是空值 */
+  entry_source?: 'ai_dispatch' | null;
   status: string;
   current_step: number;
   accuracy: number | null;

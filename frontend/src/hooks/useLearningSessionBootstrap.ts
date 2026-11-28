@@ -5,6 +5,7 @@ import { fetchStory, saveActiveSession } from '../services/api';
 import type { LearningSession, Story } from '../types';
 import { STEP_PATH_TO_NUMBER } from '../config/stepConfig';
 import { isToolboxMode } from '../services/learningStorageScope';
+import { clearEntrySource, takeEntrySource } from '../utils/entrySource';
 import type { AssignmentReadingGoals } from '../layouts/LearningLayout';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
@@ -59,6 +60,12 @@ function readAssignmentContext(): AssignmentContext | null {
   } catch {
     return null;
   }
+}
+
+/** 建立學習紀錄時要多帶的欄位：這一課是從 AI 派發點進來的才有（#4161） */
+function entrySourceField(storyId: string): { entry_source?: 'ai_dispatch' } {
+  const source = takeEntrySource(storyId);
+  return source ? { entry_source: source } : {};
 }
 
 export function useLearningSessionBootstrap({
@@ -257,7 +264,7 @@ export function useLearningSessionBootstrap({
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ story_slug: storyId }),
+      body: JSON.stringify({ story_slug: storyId, ...entrySourceField(storyId) }),
     })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
@@ -287,6 +294,7 @@ export function useLearningSessionBootstrap({
       .then((data) => {
         const existing = data?.items?.[0];
         if (existing?.id) {
+          clearEntrySource(); // 沿用進行中的紀錄、不新建：標記不留到之後
           storeSessionId(existing.id);
           return null;
         }
@@ -296,7 +304,7 @@ export function useLearningSessionBootstrap({
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ story_slug: storyId }),
+          body: JSON.stringify({ story_slug: storyId, ...entrySourceField(storyId) }),
         });
       })
       .then((res) => {
