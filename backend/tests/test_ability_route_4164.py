@@ -129,3 +129,53 @@ def test_只答一題不給等級():
     body = _get(71).json()
     assert body["scored_answers"] == 1
     assert body["ready"] is False and body["level"] is None
+
+
+def test_有離線校準檔就用檔_不讀資料庫的作答(tmp_path, monkeypatch):
+    import json
+
+    from app.services.ability import service
+
+    items = {f"{lesson}:q{k}": {"difficulty": 2.0, "se": 0.1, "n": 99} for k, (lesson, _) in enumerate([("L0", 0), ("L0", 0), ("L0", 0), ("L1", 0), ("L1", 0), ("L1", 0), ("L2", 0), ("L2", 0)])}
+    f = tmp_path / "cal.json"
+    f.write_text(json.dumps({"generated_at": "x", "items": items}), encoding="utf-8")
+    live = _get(1).json()["theta"]
+    monkeypatch.setattr(service, "OFFLINE_CALIBRATION_PATH", f)
+    body = _get(1).json()
+    # 同一位學生、同樣的作答；檔案把每題都標成很難，答對的題數不變，估計出的能力就該明顯更高
+    assert body["calibrated_items"] == 8
+    assert body["theta"] > live + 0.3, (live, body["theta"])
+
+
+def test_離線校準檔壞掉就退回即時校準(tmp_path, monkeypatch):
+    from app.services.ability import service
+
+    f = tmp_path / "bad.json"
+    f.write_text("{not json", encoding="utf-8")
+    monkeypatch.setattr(service, "OFFLINE_CALIBRATION_PATH", f)
+    assert service.load_offline_calibration() is None
+    body = _get(1).json()
+    assert body["ready"] is True and body["calibrated_items"] == 8
+
+
+def test_批次校準產物格式可被讀回(tmp_path):
+    import json
+
+    from app.services.ability import service
+
+    db = Session()
+    payload = service.build_calibration_payload(db)
+    db.close()
+    f = tmp_path / "cal.json"
+    f.write_text(json.dumps(payload), encoding="utf-8")
+    back = service.load_offline_calibration(f)
+    assert back is not None and len(back) == 8 and all(v.n >= 30 for v in back.values())
+
+
+@pytest.mark.parametrize("content", ['{"items": []}', '{"items": {}}', '{"items": {"a": 1}}', "[]", ""])
+def test_離線校準檔內容不合格式一律當沒有檔(tmp_path, content):
+    from app.services.ability import service
+
+    f = tmp_path / "x.json"
+    f.write_text(content, encoding="utf-8")
+    assert service.load_offline_calibration(f) is None
