@@ -4,7 +4,7 @@ Handles rule-based learning recommendations and AI-powered story recommendations
 """
 import logging
 from fastapi import APIRouter, Depends, Query
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from sqlalchemy.orm import Session
 
 from ...auth.dependencies import get_current_user
@@ -67,10 +67,17 @@ def get_recommendations(
 class StoryRecommendationItem(BaseModel):
     story_slug: str
     title: str
-    grade: int
+    # 課程年級是分類字串："4".."9" 或 文言文、品格教育；後者不能強轉整數（#4161）
+    grade: int | str
     genre: str
     difficulty_match_score: int
     reason: str
+
+    @field_validator("grade", mode="before")
+    @classmethod
+    def _numeric_grade_stays_int(cls, v):
+        # 數字年級照舊回整數（既有契約）；文言文、品格教育維持文字
+        return int(v) if isinstance(v, str) and v.isdigit() else v
 
 
 class StoryRecommendationsResponse(BaseModel):

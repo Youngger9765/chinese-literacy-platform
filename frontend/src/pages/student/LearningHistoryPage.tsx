@@ -32,8 +32,8 @@ type TabKey = 'assignment' | 'self';
 
 // Both rendered, in this order. 自學 first because it is where the volume is.
 const SECTIONS: { key: TabKey; label: string }[] = [
-  { key: 'self', label: '自學紀錄' },
-  { key: 'assignment', label: '作業回顧' },
+  { key: 'self', label: '自主練習' },
+  { key: 'assignment', label: '老師作業' },
 ];
 
 // 讀家記憶 (PRD §10 UIUX: "讀家記憶 as a tab inside 學習紀錄") rendered as its
@@ -98,6 +98,11 @@ const SessionCard: React.FC<{ session: LearningSummary }> = ({ session }) => {
             <span className="inline-block px-1.5 py-0.5 rounded-sm text-xs font-medium bg-green-100 text-green-700">
               已完成
             </span>
+            {session.entry_source === 'ai_dispatch' && (
+              <span data-testid="ai-dispatch-badge" className="inline-block px-1.5 py-0.5 rounded-sm text-xs font-medium bg-accent-bg text-accent">
+                AI 派發
+              </span>
+            )}
           </div>
 
           {/* Metadata row — Issue #1094: 學生端不顯示得分 / 準確率 */}
@@ -264,7 +269,7 @@ const TabContent: React.FC<{ source: TabKey }> = ({ source }) => {
           </svg>
         </div>
         <p className="text-sm font-medium text-gray-700 mb-1">
-          {source === 'assignment' ? '還沒有作業學習紀錄' : '還沒有自學紀錄'}
+          {source === 'assignment' ? '還沒有老師作業的學習紀錄' : '還沒有自主練習的紀錄'}
         </p>
         <p className="text-xs text-gray-500">
           {source === 'assignment'

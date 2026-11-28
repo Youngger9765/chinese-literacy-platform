@@ -13,12 +13,23 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { AnswerRow, CardStatus, DetailBlock, MarkedWord, StepReportCard } from './reportCardsModel';
 import { radarOf } from './reportCardsModel';
 import { AttemptsPanel, RadarPanel } from './ReportCharts';
+import AbilityMatrixPanel from './AbilityMatrixPanel';
+import { averageOfOthers, type LessonAbility } from './abilityHistory';
 
 interface Props {
   storyTitle?: string;
   cards: StepReportCard[];
   /** 未完成的關卡可以直接前往。 */
   onGoToStep?: (stepId: string) => void;
+  /**
+   * #4162：最近幾課的能力分數（由舊到新）。只有學生端會傳；老師端不傳就維持單課雷達。
+   * 目前這一課用畫面上的 cards 算，不用歷史裡那份，兩邊才不會不一致。
+   */
+  abilityHistory?: LessonAbility[] | null;
+  /** 目前這一課的課號與 session，用來把歷史裡的同一課換成畫面上的即時資料 */
+  currentLesson?: { storyId: string; sessionId: number | null; title?: string };
+  /** 點矩陣格子或診斷建議：跳到某課某關 */
+  onGoToLessonStep?: (storyId: string, stepId: string) => void;
 }
 
 const MARK_STYLE: Record<MarkedWord['type'], { icon: string; label: string; chip: string }> = {
@@ -247,12 +258,28 @@ const DetailDialog: React.FC<{
   );
 };
 
-const StepReportCards: React.FC<Props> = ({ storyTitle, cards, onGoToStep }) => {
+const StepReportCards: React.FC<Props> = ({ storyTitle, cards, onGoToStep, abilityHistory, currentLesson, onGoToLessonStep }) => {
   const [openId, setOpenId] = useState<string | null>(null);
   const doneCount = cards.filter((c) => c.completed).length;
   const reviewCount = cards.filter((c) => c.status === 'review').length;
+  // #4157：沒有任何一關有動靜（沒完成、沒作答紀錄、沒有要訂正）才算還沒開始
+  const notStarted =
+    cards.length > 0 && cards.every((c) => c.status === 'none' && c.attempts.length === 0 && c.toFix === 0);
   const pct = cards.length ? Math.round((doneCount / cards.length) * 100) : 0;
   const open = cards.find((c) => c.stepId === openId) ?? null;
+  // #4162：跨課比較。目前這一課換成畫面上的即時資料，放在最後（最新）
+  const ability = React.useMemo(() => {
+    if (!abilityHistory || !currentLesson) return null;
+    const current: LessonAbility = {
+      sessionId: currentLesson.sessionId ?? -1,
+      storyId: currentLesson.storyId,
+      title: currentLesson.title ?? storyTitle ?? currentLesson.storyId,
+      points: radarOf(cards),
+    };
+    if (!current.points.some((p) => p.state === 'scored')) return null;
+    const lessons = [...abilityHistory.filter((l) => l.storyId !== current.storyId), current];
+    return { lessons, average: averageOfOthers(current, lessons) };
+  }, [abilityHistory, currentLesson, cards, storyTitle]);
   const close = useCallback(() => setOpenId(null), []);
 
   return (
@@ -309,8 +336,30 @@ const StepReportCards: React.FC<Props> = ({ storyTitle, cards, onGoToStep }) => 
         )}
       </header>
 
+      {notStarted ? (
+        // #4157：一關都沒做就只放一張引導卡，不放空雷達與九張灰卡。
+        <div
+          data-testid="report-not-started"
+          className="rounded-3xl bg-surface-container-lowest shadow-editorial p-8 text-center"
+        >
+          <p className="font-headline font-bold text-xl text-on-surface">
+            {onGoToStep ? '還沒開始，從第 1 關出發' : '還沒有任何關卡完成'}
+          </p>
+          {onGoToStep && cards[0] && (
+            <button
+              type="button"
+              onClick={() => onGoToStep(cards[0].stepId)}
+              className="mt-5 h-11 px-8 rounded-full bg-accent text-white font-bold hover:bg-accent-hover"
+            >
+              開始第 1 關
+            </button>
+          )}
+        </div>
+      ) : (
+      <>
       {/* #4087：能力雷達（五項固定）。放在卡片前面，一眼看到強項和弱項。 */}
-      <RadarPanel points={radarOf(cards)} />
+      <RadarPanel points={radarOf(cards)} average={ability?.average ?? null} />
+      {ability && <AbilityMatrixPanel lessons={ability.lessons} onGoToLessonStep={onGoToLessonStep} />}
 
       <ul className="grid grid-cols-2 md:grid-cols-3 gap-3">
         {cards.map((c) => (
@@ -361,9 +410,22 @@ const StepReportCards: React.FC<Props> = ({ storyTitle, cards, onGoToStep }) => 
                 )}
               </div>
             </button>
+            {c.status === 'none' && onGoToStep && (
+              // #4157：未完成的卡片旁直接給「去做」，不用先點開再找按鈕。
+              <button
+                type="button"
+                onClick={() => onGoToStep(c.stepId)}
+                aria-label={`去做：${c.label}`}
+                className="mt-1 w-full text-center text-xs font-bold text-accent hover:underline"
+              >
+                去做 →
+              </button>
+            )}
           </li>
         ))}
       </ul>
+      </>
+      )}
 
       {open && <DetailDialog card={open} onClose={close} onGoToStep={onGoToStep} />}
     </div>

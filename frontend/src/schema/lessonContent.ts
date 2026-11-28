@@ -61,6 +61,10 @@ const MultipleChoiceQuestion = z
     // it ever reaches the Story the adapter reads); null/absent entries
     // mean that option stays text-only.
     option_images: z.array(z.string().nullable()).nullish(),
+    // #4154: 每個選項一句說明（同 options 順序）＋課文依據句與其所在整段。
+    option_explanations: z.array(z.string()).nullish(),
+    evidence_sentence: z.string().nullish(),
+    evidence_paragraph: z.string().nullish(),
   })
   .strict();
 

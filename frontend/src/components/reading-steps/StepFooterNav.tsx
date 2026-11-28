@@ -21,6 +21,7 @@ import { useAppView } from '../../hooks/useAppView';
 import { isToolboxMode } from '../../services/learningStorageScope';
 import { stepNeighbours } from '../../config/stepNeighbours';
 import { STEP_REGISTRY, resolveStepId } from '../../config/stepConfig';
+import { stepCounterText, stepCountExcludingReport } from '../layout/stepTitleText';
 
 const StepFooterNav: React.FC = () => {
   const navigate = useNavigate();
@@ -37,7 +38,8 @@ const StepFooterNav: React.FC = () => {
   // #2905 — see config/stepNeighbours.ts. -1 no longer means "nowhere".
   const nav = useMemo(() => stepNeighbours(activeSteps, currentStepKey), [activeSteps, currentStepKey]);
   const currentStepIndex = nav.index;
-  const totalSteps = activeSteps.length;
+  // #4155：和頁首同一個算法，報告不計入（頁首「第 N / M 關」的 M）
+  const totalSteps = stepCountExcludingReport(activeSteps);
   const { current: currentStep, prev: prevStep, next: nextStep } = nav;
 
   const completedSet = new Set(session?.completedSteps ?? []);
@@ -59,7 +61,7 @@ const StepFooterNav: React.FC = () => {
   }
 
   // Progress fraction (0–1) based on completed steps
-  const completedCount = activeSteps.filter((s) => completedSet.has(s.id)).length;
+  const completedCount = activeSteps.filter((s) => s.id !== 'report' && completedSet.has(s.id)).length;
   const progressFraction = totalSteps > 0 ? completedCount / totalSteps : 0;
 
   return (
@@ -88,7 +90,10 @@ const StepFooterNav: React.FC = () => {
               where they are — so the label comes from the registry. */}
           {currentStep ? (
             <>
-              第 {currentStepIndex + 1}&nbsp;/&nbsp;{totalSteps} 步&nbsp;·&nbsp;
+              {/* #4155：和頁首同一個算法（報告不計入），不再出現頁首 9、底部 10 兩個總數 */}
+              {stepCounterText(activeSteps, currentStepIndex, inToolbox) ? (
+                <>{stepCounterText(activeSteps, currentStepIndex, inToolbox)}&nbsp;·&nbsp;</>
+              ) : null}
               <span className="text-accent font-semibold">{currentStep.label}</span>
             </>
           ) : (
@@ -106,7 +111,7 @@ const StepFooterNav: React.FC = () => {
             aria-valuenow={Math.round(progressFraction * 100)}
             aria-valuemin={0}
             aria-valuemax={100}
-            aria-label={`完成 ${completedCount} / ${totalSteps} 步`}
+            aria-label={`完成 ${completedCount} / ${totalSteps} 關`}
           />
         </div>
       </div>

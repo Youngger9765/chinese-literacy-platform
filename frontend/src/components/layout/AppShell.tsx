@@ -27,11 +27,15 @@ import { useAppView } from '../../hooks/useAppView';
 import Sidebar from './Sidebar';
 import LearningLayout from '../../layouts/LearningLayout';
 import ZhuyinToggle from '../ui/ZhuyinToggle';
+import ReadingToolbar from '../ui/ReadingToolbar';
+import { useReadingPrefs } from '../../hooks/useReadingPrefs';
+import { FONT_SCALES } from '../../utils/readingPrefs';
 import DevSkipButton from '../ui/DevSkipButton';
 import StepFooterNav from '../reading-steps/StepFooterNav';
 import { OnboardingWrapper } from '../../pages/app/InlinePages';
 import { isToolboxMode, setToolboxMode } from '../../services/learningStorageScope';
 import { stepNeighbours } from '../../config/stepNeighbours';
+import { stepTitleText, stepCounterText } from './stepTitleText';
 
 /** The authenticated app shell with sidebar only (header removed 2026-04-18). */
 export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -320,11 +324,15 @@ export const StepDots: React.FC<StepDotsProps> = ({
                 displayChar
               )}
             </button>
-            {emphasis && step.navShortLabel ? (
-              <span className={`sm:hidden text-[9px] leading-none mt-0.5 font-semibold ${isActive ? 'text-accent' : 'text-violet-600'}`}>
-                {step.navShortLabel}
-              </span>
-            ) : null}
+            {/* #4155：圓形單字保留，下方補完整關卡名稱，不用再記每個字是哪一關 */}
+            <span
+              data-step-label
+              className={`mt-0.5 text-[10px] md:text-xs leading-none whitespace-nowrap ${
+                isActive ? 'font-bold text-accent' : emphasis ? 'font-semibold text-violet-600' : 'text-on-surface-variant'
+              }`}
+            >
+              {step.label}
+            </span>
             <span
               role="tooltip"
               className="hidden md:block absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 pointer-events-none opacity-0 translate-y-1 transition-all duration-150 group-hover:opacity-100 group-hover:translate-y-0 group-focus-within:opacity-100 group-focus-within:translate-y-0"
@@ -401,7 +409,6 @@ const ImmersiveTopBar: React.FC = () => {
     () => annotateStepParts(activeSteps, selectedStory?.manifestSections),
     [activeSteps, selectedStory?.manifestSections],
   );
-  const totalSteps = activeSteps.length;
 
   // #4028：完成 / 完成但有錯題（黃色）都用報告卡片的同一個函式判斷，上方圈圈跟
   // 報告頁不會一個綠一個灰。session.completedSteps 照舊併進來（剛按完成、DB 還沒回
@@ -465,8 +472,14 @@ const ImmersiveTopBar: React.FC = () => {
               {selectedStory && <span className="text-on-surface-variant/40 shrink-0">·</span>}
               <span className="font-headline font-bold text-accent tracking-wide shrink-0">
                 {/* Toolbox mode: single-shot, hide N/total counter (#1460) */}
-                {inToolbox ? currentStep.label : `${currentStep.label} ${currentStepIndex + 1}/${totalSteps}`}
+                {stepTitleText(currentStep)}
               </span>
+              {stepCounterText(activeSteps, currentStepIndex, inToolbox) && (
+                // #4155：關卡位置獨立一段，報告不算在內
+                <span className="text-xs text-on-surface-variant shrink-0" data-testid="step-counter">
+                  {stepCounterText(activeSteps, currentStepIndex, inToolbox)}
+                </span>
+              )}
             </>
           )}
         </div>
@@ -499,6 +512,7 @@ const ImmersiveTopBar: React.FC = () => {
 
       {/* Right: zhuyin toggle */}
       <div className="shrink-0 flex items-center gap-2">
+        <ReadingToolbar />
         {selectedStory && (
           <ZhuyinToggle
             mode={zhuyinMode}
@@ -522,8 +536,12 @@ const ImmersiveTopBar: React.FC = () => {
  */
 export const LearningAppShell: React.FC = () => {
   const { zhuyinActive } = useZhuyin();
+  const prefs = useReadingPrefs();
   return (
     <div
+      data-reading-theme={prefs.theme}
+      data-reading-font={prefs.font}
+      data-reading-align={prefs.align}
       /*
        * h-viewport（index.css）而不是 h-screen —— 兩者差在 iPad 上會不會把底部
        * 那條 StepFooterNav 推到摺線以下。原因與實測寫在那個 class 的註解裡。
@@ -550,6 +568,7 @@ export const LearningAppShell: React.FC = () => {
         role="main"
         aria-label="學習內容"
         className="flex-1 flex flex-col overflow-y-auto"
+        style={FONT_SCALES[prefs.sizeIndex] === 1 ? undefined : ({ zoom: FONT_SCALES[prefs.sizeIndex] } as React.CSSProperties)}
         tabIndex={-1}
       >
         <LearningLayout />

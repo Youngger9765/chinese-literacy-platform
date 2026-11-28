@@ -31,6 +31,7 @@ import PageLoader from '../../components/ui/PageLoader';
 import { resolveActiveSteps } from '../../config/stepConfig';
 import { stepPath } from '../../config/stepPath';
 import StepReportCards from '../../components/report/StepReportCards';
+import { useRecentAbility } from '../../hooks/useRecentAbility';
 import { useReportProgress } from '../../components/report/useReportProgress';
 import { buildStepReportCards, marksFromAnnotations } from '../../components/report/reportCardsModel';
 
@@ -107,6 +108,8 @@ const SessionHistoryReportPage: React.FC = () => {
   // 這一筆的（carry-forward 是為了 ReportPage.tsx 重新整理時的同一次嘗試設計的，
   // 見 useReportProgress.ts 檔頭說明）。
   const report = useReportProgress(dbSessionId, token, detail?.story_slug ?? undefined, null, false);
+  // #4162：最近幾課的能力分數
+  const abilityHistory = useRecentAbility(token);
 
   const cards = useMemo(
     () =>
@@ -204,6 +207,9 @@ const SessionHistoryReportPage: React.FC = () => {
               storyTitle={story?.title}
               cards={cards}
               onGoToStep={storyId ? (stepId) => navigate(stepPath(storyId, stepId)) : undefined}
+              abilityHistory={abilityHistory}
+              currentLesson={storyId ? { storyId, sessionId: dbSessionId, title: story?.title } : undefined}
+              onGoToLessonStep={(sid, stepId) => navigate(stepPath(sid, stepId))}
             />
           )
         ) : (

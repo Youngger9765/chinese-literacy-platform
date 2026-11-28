@@ -173,6 +173,15 @@ function toLessonTableBlock(
   return block;
 }
 
+/** #4154: 作答後回饋的欄位 —— 有就帶、沒有就不加（讓舊題的 question 物件形狀不變）。 */
+function feedbackFields(mcq: MultipleChoiceItem) {
+  return {
+    ...(mcq.option_explanations ? { option_explanations: mcq.option_explanations } : {}),
+    ...(mcq.evidence_sentence ? { evidence_sentence: mcq.evidence_sentence } : {}),
+    ...(mcq.evidence_paragraph ? { evidence_paragraph: mcq.evidence_paragraph } : {}),
+  };
+}
+
 /**
  * storyToLesson — best-effort legacy Story → zod Lesson (dev/QA harness only).
  * Returns null lesson (+ recorded gaps) whenever the result would not satisfy the
@@ -309,6 +318,7 @@ export function storyToLesson(story: Story | null | undefined): AdapterResult {
           // path were fixed (LESSON_RENDERER_V1 defaults ON and goes through
           // THIS adapter, not the legacy component).
           option_images: mcq.option_images ?? undefined,
+          ...feedbackFields(mcq),
         },
         answerSpace: 'choice',
         answer: 0,
@@ -327,6 +337,7 @@ export function storyToLesson(story: Story | null | undefined): AdapterResult {
         options: mcq.options,
         explanation: mcq.explanation ?? null,
         option_images: mcq.option_images ?? undefined,
+        ...feedbackFields(mcq),
       },
       answerSpace: 'choice',
       answer: idx,

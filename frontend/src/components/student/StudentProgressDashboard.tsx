@@ -99,8 +99,9 @@ const NewStudentHint: React.FC = () => (
 // ── Main component ────────────────────────────────────────────────────────────
 
 interface StudentProgressDashboardProps {
-  /** Called with the set of completed story slugs so StoryLibrary can show badges. */
-  onDashboardLoaded?: (completedSlugs: string[]) => void;
+  /** Called with the set of completed story slugs so StoryLibrary can show badges.
+   *  第二個參數是整份儀表板資料（#4159：首頁招呼語要「這週完成幾課」，不必再打一次請求）。 */
+  onDashboardLoaded?: (completedSlugs: string[], data: StudentDashboardData) => void;
 }
 
 const StudentProgressDashboard: React.FC<StudentProgressDashboardProps> = ({
@@ -128,7 +129,7 @@ const StudentProgressDashboard: React.FC<StudentProgressDashboardProps> = ({
     fetchStudentDashboard(token, userId)
       .then((d) => {
         setData(d);
-        onDashboardLoadedRef.current?.(d.completed_story_slugs);
+        onDashboardLoadedRef.current?.(d.completed_story_slugs, d);
       })
       .catch((err) => setError(err.message))
       .finally(() => setIsLoading(false));

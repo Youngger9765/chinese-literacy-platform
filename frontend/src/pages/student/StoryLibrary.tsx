@@ -1,13 +1,16 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Story } from '../../types';
 import { fetchStories, fetchStory } from '../../services/api';
 import { getClassroomTexts } from '../../services/teacherApi';
 import { getGamificationPoints } from '../../services/gamificationApi';
 import { getLibraryStatus, type LibraryStoryStatus } from '../../services/progressApi';
 import { useAuth } from '../../contexts/AuthContext';
+import LearningEntryCards from '../../components/student/dispatch/LearningEntryCards';
+import { getMyAssignments } from '../../services/assignmentApi';
 import StoryCard, { Difficulty, DIFFICULTY_CONFIG, getDifficulty } from '../../components/student/StoryCard';
 import { gradeLabel } from '../../utils/gradeLabel';
+import { matchesStory, suggestKeywords } from '../../utils/storySearch';
 
 interface StoryLibraryProps {
   onStartReading: (story: Story) => void | Promise<void>;
@@ -42,6 +45,20 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({
   onClearProgress,
 }) => {
   const { token, user } = useAuth();
+  // #4163：課文清單頂端的入口卡只給學生；老師作業提醒要有未完成作業數
+  const isStudent = !!user?.roles?.some((r) => r.role_name === 'student');
+  const [pendingAssignments, setPendingAssignments] = useState(0);
+  const listTopRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!token || !isStudent) return;
+    let cancelled = false;
+    getMyAssignments(token)
+      .then((list) => {
+        if (!cancelled) setPendingAssignments(list.filter((a) => a.status === 'pending' || a.status === 'in_progress').length);
+      })
+      .catch(() => { /* 提醒列拿不到就不顯示 */ });
+    return () => { cancelled = true; };
+  }, [token, isStudent]);
   const [xpToNext, setXpToNext] = useState<number | null>(null);
 
   /* #1725: persist filter selections across the lesson round-trip so that
@@ -172,12 +189,12 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({
     if (selectedGrade != null) filtered = filtered.filter((s) => s.grade === selectedGrade);
   }
   if (searchQuery) {
-    const q = searchQuery.toLowerCase();
-    filtered = filtered.filter(
-      (s) => s.title.toLowerCase().includes(q) || (s.genre?.toLowerCase().includes(q) ?? false),
-    );
+    filtered = filtered.filter((s) => matchesStory(s, searchQuery));
   }
+  // 套「只看未讀」之前就已經是 0 篇，代表是搜尋／年級沒找到，不是「讀完了」（#4158 審查）
+  const emptyBeforeUnread = filtered.length === 0;
   if (showOnlyUnread) filtered = filtered.filter((s) => !completedSet.has(s.id));
+  const allRead = showOnlyUnread && !emptyBeforeUnread;
 
   const stories = limit ? filtered.slice(0, limit) : filtered;
   const completedCount = allStories.filter((s) => completedSet.has(s.id)).length;
@@ -240,6 +257,13 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({
 
   return (
     <div className="space-y-5">
+      {isStudent && (
+        <LearningEntryCards
+          pendingAssignments={pendingAssignments}
+          onPickSelf={() => listTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+        />
+      )}
+      <div ref={listTopRef} />
       {/* Header */}
       <div className="flex items-end justify-between flex-wrap gap-2">
         <div>
@@ -316,7 +340,7 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="搜尋課文標題或體裁..."
+            placeholder="搜尋課文標題、體裁或年級..."
             className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg text-gray-900 bg-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-accent focus:border-transparent text-sm"
           />
           {searchQuery ? (
@@ -332,7 +356,14 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({
           )}
         </div>
         {hasActiveFilter && (
-          <p className="text-xs text-gray-500 mt-1.5">找到 {stories.length} 篇</p>
+          <p className="text-xs text-gray-500 mt-1.5">
+            找到 {stories.length} 篇
+            {searchQuery && stories.some((s) => completedSet.has(s.id)) && (
+              <span className="ml-1 text-green-600">
+                · 其中已完成 {stories.filter((s) => completedSet.has(s.id)).length} 篇
+              </span>
+            )}
+          </p>
         )}
       </div>
 
@@ -380,15 +411,31 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({
       {!isLoading && stories.length === 0 && !error && (
         <div className="text-center py-12 space-y-3">
           <div className="w-14 h-14 mx-auto rounded-xl bg-gray-100 flex items-center justify-center text-2xl">
-            {showOnlyUnread ? '✅' : '🔍'}
+            {allRead ? '✅' : '🔍'}
           </div>
           <p className="text-gray-600 font-medium">
-            {showOnlyUnread ? '所有課文都讀完了！' : '沒有找到符合條件的讀本'}
+            {allRead ? '所有課文都讀完了！' : '沒有找到符合條件的讀本'}
           </p>
-          {showOnlyUnread ? (
+          {allRead ? (
             <p className="text-sm text-gray-400">可以選個舊課文複習，或切換「顯示全部」重新閱讀。</p>
           ) : (
-            <button onClick={clearFilters} className="text-sm text-accent underline">清除篩選條件</button>
+            <div className="space-y-2">
+              {searchQuery && suggestKeywords(allStories).length > 0 && (
+                <div className="flex flex-wrap justify-center items-center gap-2" data-testid="search-suggestions">
+                  <span className="text-sm text-gray-500">試試這些關鍵字：</span>
+                  {suggestKeywords(allStories).map((k) => (
+                    <button
+                      key={k}
+                      onClick={() => { setSearchQuery(k); setSelectedGrade(null); setShowOnlyUnread(false); }}
+                      className="px-3 py-1 rounded-full text-sm bg-white border border-gray-200 text-gray-700 hover:border-accent"
+                    >
+                      {k}
+                    </button>
+                  ))}
+                </div>
+              )}
+              <button onClick={clearFilters} className="text-sm text-accent underline">清除篩選條件</button>
+            </div>
           )}
         </div>
       )}

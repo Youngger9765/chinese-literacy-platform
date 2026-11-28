@@ -21,18 +21,19 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import StudentProgressDashboard from '../../components/student/StudentProgressDashboard';
-import RecommendedStories from '../../components/student/RecommendedStories';
-import SessionResumePrompt from '../../components/SessionResumePrompt';
 import LiveQuizInviteBanner from '../../components/student/home/LiveQuizInviteBanner';
 import RecentBadgesStrip from '../../components/gamification/RecentBadgesStrip';
 import QuickPracticeStrip from '../../components/student/QuickPracticeStrip';
 import {
   BookJacketHero,
-  ClassroomFallbackHero,
   NoClassroomWaitingScreen,
 } from '../../components/student/home/TodayLessonCard';
+import { ContinueLearningCard, StartLessonCard } from '../../components/student/home/ContinueLearningCard';
+import { loadResumeRecord, resolveResume, type ResumeInfo } from '../../utils/resumeInfo';
+import { fetchStory } from '../../services/api';
+import { stepPath } from '../../config/stepPath';
 import { InlineXPPill } from '../../components/student/home/HomeStats';
-import AssignmentWidget from '../../components/student/home/AssignmentWidget';
+import LearningEntryCards from '../../components/student/dispatch/LearningEntryCards';
 import {
   fetchMyEnrolledClassrooms,
   type StudentEnrolledClassroom,
@@ -53,32 +54,52 @@ import {
 const StudentHome: React.FC = () => {
   const { user, token } = useAuth();
   const navigate = useNavigate();
-  const [showResumePrompt, setShowResumePrompt] = useState(true);
   const [classrooms, setClassrooms] = useState<StudentEnrolledClassroom[]>([]);
   const [classroomsLoaded, setClassroomsLoaded] = useState(false);
   const [gamification, setGamification] = useState<GamificationSummary | null>(null);
   const [assignments, setAssignments] = useState<StudentAssignmentResponse[]>([]);
+  // 招呼語下一行的數字，來自進度儀表板的載入回呼（不另打請求）；沒回來就不顯示，避免閃一個假的「0 課」
+  const [summary, setSummary] = useState<{ completed: number; week: number } | null>(null);
+  // 首屏「接著做」：先讀裝置上的進行中紀錄，再抓那一課的資料，用它自己的關卡順序算第幾關
+  // 依賴用原始值（使用者編號），不用整個 user 物件：物件換參照會重抓課文
+  const userId = user?.id;
+  const resumeRecord = useMemo(
+    () => (userId !== undefined ? loadResumeRecord(String(userId)) : null),
+    [userId],
+  );
+  const [resume, setResume] = useState<{ info: ResumeInfo | null; title: string | null } | null>(null);
+  // 有紀錄但還沒算完時先不畫首屏大卡，避免先閃「選一課開始」再跳成「接著做」
+  const resumePending = !!resumeRecord && resume === null;
+
+  useEffect(() => {
+    if (!resumeRecord) return;
+    let cancelled = false;
+    fetchStory(resumeRecord.storyId)
+      .then((s) => {
+        if (!cancelled) setResume({ info: resolveResume(resumeRecord, s.stepSequence), title: s.title });
+      })
+      .catch(() => {
+        // 抓不到課文：退回預設順序，課名顯示課號
+        if (!cancelled) setResume({ info: resolveResume(resumeRecord), title: null });
+      });
+    return () => { cancelled = true; };
+  }, [resumeRecord]);
+  const resumeInfo = resume?.info ?? null;
 
   const firstName = user?.name ?? '同學';
 
   useEffect(() => {
     if (!token || !user) return;
 
-    // Issue #3714: these three fetches have no cancel guard, so a response
-    // arriving after this component already unmounted (student navigated
-    // away, e.g. clicked a sidebar link) would still fire — most visibly
-    // the auto-redirect below, which would navigate the student BACK to
-    // /library and override wherever they'd already gone.
+    // 沒有取消守衛的話，元件卸載後才回來的回應仍會寫狀態（#3714）。
+    // #4159：單一班級自動跳去課文庫的行為拿掉了 —— 它讓學生永遠看不到首頁
+    // （沒有「我做到哪、今天做什麼」）。
     let cancelled = false;
 
     fetchMyEnrolledClassrooms(token)
       .then((res) => {
         if (cancelled) return;
         setClassrooms(res.classrooms);
-        if (res.classrooms.length === 1 && res.classrooms[0].is_active) {
-          // keep the auto-redirect behaviour from the prior revision
-          navigate(`/library?classroom=${res.classrooms[0].id}`, { replace: true });
-        }
       })
       .catch(() => { /* non-fatal */ })
       .finally(() => {
@@ -100,7 +121,7 @@ const StudentHome: React.FC = () => {
     return () => {
       cancelled = true;
     };
-  }, [token, user, navigate]);
+  }, [token, user]);
 
   /** Today's active assignment, if any.
    * Priority: in_progress first, then pending.
@@ -123,6 +144,14 @@ const StudentHome: React.FC = () => {
     return sorted[0];
   }, [assignments]);
 
+  // 進行中的課剛好是未完成作業：走作業流程（它帶作業情境，直接跳關卡會被當成自主練習）
+  const resumeIsAssignment = useMemo(
+    () => !!resumeInfo && assignments.some(
+      (a) => (a.status === 'in_progress' || a.status === 'pending') && String(a.story_id ?? a.text_id) === resumeInfo.storyId,
+    ),
+    [assignments, resumeInfo],
+  );
+
   const pendingAssignmentCount = useMemo(
     () => assignments.filter((a) => a.status === 'pending' || a.status === 'in_progress').length,
     [assignments],
@@ -138,8 +167,6 @@ const StudentHome: React.FC = () => {
     navigate(`/library?classroom=${classroomId}`);
   }, [navigate]);
 
-  const noop = useCallback(() => {}, []);
-
   if (classroomsLoaded && classrooms.length === 0) {
     return <NoClassroomWaitingScreen firstName={firstName} />;
   }
@@ -148,12 +175,6 @@ const StudentHome: React.FC = () => {
 
   return (
     <div className="flex-1 overflow-y-auto bg-surface">
-      {showResumePrompt && (
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-4">
-          <SessionResumePrompt onDismiss={() => setShowResumePrompt(false)} />
-        </div>
-      )}
-
       <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-4">
         <LiveQuizInviteBanner />
       </div>
@@ -175,7 +196,9 @@ const StudentHome: React.FC = () => {
                 你好，{firstName}！
               </h1>
               <p className="text-xs sm:text-sm text-on-surface-variant mt-0.5">
-                今天想探索什麼故事呢？
+                {summary
+                  ? `已完成 ${summary.completed} 課 · 這週讀了 ${summary.week} 次`
+                  : '今天想探索什麼故事呢？'}
               </p>
             </div>
           </div>
@@ -188,27 +211,31 @@ const StudentHome: React.FC = () => {
         </div>
 
         {/* ── Hero: book jacket OR classroom fallback ─────────────────────── */}
-        {todayAssignment ? (
+        {resumePending ? null : resumeInfo && !resumeIsAssignment ? (
+          <ContinueLearningCard
+            info={resumeInfo}
+            title={resume?.title ?? null}
+            onContinue={() => navigate(stepPath(resumeInfo.storyId, resumeInfo.stepId))}
+          />
+        ) : todayAssignment ? (
           <BookJacketHero
             assignment={todayAssignment}
             onContinue={handleContinueAssignment}
           />
-        ) : primaryClassroom ? (
-          <ClassroomFallbackHero
-            classroom={primaryClassroom}
-            onClick={() => handleSelectClassroom(primaryClassroom.id)}
+        ) : (
+          <StartLessonCard
+            classroomName={primaryClassroom?.name}
+            onStart={() =>
+              primaryClassroom ? handleSelectClassroom(primaryClassroom.id) : navigate('/library')
+            }
           />
-        ) : null}
+        )}
 
         {/* ── Practice shelf ─────────────────────────────────────────────── */}
         <QuickPracticeStrip />
 
-        {/* ── Secondary tiles: assignments + library ─────────────────────── */}
-        <AssignmentWidget
-          pendingCount={pendingAssignmentCount}
-          onGoAssignments={() => navigate('/assignments')}
-          onGoLibrary={() => navigate('/library')}
-        />
+        {/* ── 這次想怎麼練：AI 派發 / 自主練習（老師作業另放提醒列）─────────── */}
+        <LearningEntryCards pendingAssignments={pendingAssignmentCount} />
 
         {/* ── Learning progress ──────────────────────────────────────────── */}
         <section aria-labelledby="progress-title">
@@ -218,20 +245,14 @@ const StudentHome: React.FC = () => {
           >
             學習進度
           </h2>
-          <StudentProgressDashboard onDashboardLoaded={noop} />
+          <StudentProgressDashboard
+            onDashboardLoaded={(slugs, d) =>
+              setSummary({ completed: slugs.length, week: d.week_sessions })
+            }
+          />
         </section>
 
         {gamification && <RecentBadgesStrip badges={gamification.badges} />}
-
-        <section aria-labelledby="recommended-title">
-          <h2
-            id="recommended-title"
-            className="text-base font-bold font-headline text-on-surface mb-3"
-          >
-            推薦課文
-          </h2>
-          <RecommendedStories />
-        </section>
       </div>
     </div>
   );

@@ -24,19 +24,33 @@ interface Props {
   disabled?: boolean;
   /** Feedback verdict once submitted (true/false), or null while unanswered. */
   verdict?: boolean | null;
+  /** #4154: 每個選項下方的一句說明，同 `options` 順序；該格為 null 就不畫。 */
+  explanations?: (string | null)[] | null;
+  /** #4154: 說明攤開時，哪一格是正解（正解那句用綠字）。答錯時不傳，不公布答案。 */
+  answerIndex?: number | null;
 }
 
 const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 
-const ChoiceInput: React.FC<Props> = ({ options, images, value, onChange, disabled, verdict }) => {
+const ChoiceInput: React.FC<Props> = ({
+  options,
+  images,
+  value,
+  onChange,
+  disabled,
+  verdict,
+  explanations,
+  answerIndex,
+}) => {
   const locked = disabled || (verdict !== undefined && verdict !== null);
   return (
     <div className="space-y-2" role="radiogroup">
       {options.map((opt, oi) => {
         const selected = value === oi;
+        const explanation = explanations?.[oi] ?? null;
         return (
+          <div key={oi} className="space-y-1">
           <button
-            key={oi}
             type="button"
             role="radio"
             aria-checked={selected}
@@ -63,6 +77,17 @@ const ChoiceInput: React.FC<Props> = ({ options, images, value, onChange, disabl
             )}
             {opt && <span className="flex-1 whitespace-pre-wrap">{opt}</span>}
           </button>
+          {explanation ? (
+            <p
+              data-testid={`choice-explanation-${LETTERS[oi] ?? oi + 1}`}
+              className={`ml-8 text-base leading-relaxed ${
+                answerIndex === oi ? 'text-green-700' : 'text-gray-600'
+              }`}
+            >
+              {explanation}
+            </p>
+          ) : null}
+          </div>
         );
       })}
     </div>

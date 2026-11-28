@@ -7,6 +7,9 @@ import { useAuth } from '../../contexts/AuthContext';
 import { reportSessionComplete } from '../../services/gamificationApi';
 import { resolveActiveSteps } from '../../config/stepConfig';
 import StepReportCards from '../../components/report/StepReportCards';
+import ReadingLevelCard from '../../components/report/ReadingLevelCard';
+import DispatchPicker from '../../components/student/dispatch/DispatchPicker';
+import { useRecentAbility } from '../../hooks/useRecentAbility';
 import { useReportProgress } from '../../components/report/useReportProgress';
 import { buildStepReportCards, marksFromAnnotations } from '../../components/report/reportCardsModel';
 import { storyForStep } from '../../services/api';
@@ -62,6 +65,8 @@ const ReportPage: React.FC = () => {
 
   // 進度與記號都直接讀 DB（含重新整理後的 carry-forward，理由見 hook）。
   const report = useReportProgress(dbSessionId, token, storyId, stepProgressData);
+  // #4162：最近幾課的能力分數（跨課雷達平均、矩陣、診斷句用）
+  const abilityHistory = useRecentAbility(token);
 
   const cards = useMemo(
     () =>
@@ -210,7 +215,22 @@ const ReportPage: React.FC = () => {
           storyTitle={selectedStory?.title}
           cards={cards}
           onGoToStep={(stepId) => navigate(stepPath(storyId!, stepId))}
+          abilityHistory={abilityHistory}
+          currentLesson={storyId ? { storyId, sessionId: dbSessionId ?? null, title: selectedStory?.title } : undefined}
+          onGoToLessonStep={(sid, stepId) => navigate(stepPath(sid, stepId))}
         />
+      )}
+
+      {/* #4164：閱讀等級（資料不足時只顯示估計中） */}
+      {!(report.loading && dbSessionId) && <ReadingLevelCard token={token} />}
+
+      {/* #4161：做完一課，一鍵再派下一組（不含剛做完的這一課） */}
+      {!(report.loading && dbSessionId) && !hasActiveAssignment && (
+        <section className="mt-6 rounded-3xl bg-surface-container-lowest shadow-editorial p-6" data-testid="report-next-dispatch" aria-label="再派一組">
+          <h3 className="font-headline font-bold text-lg text-on-surface">下一課想練什麼</h3>
+          <p className="text-sm text-on-surface-variant mt-1 mb-3">AI 依你剛做完的結果再挑 2 課，選 1 課繼續</p>
+          <DispatchPicker excludeSlug={storyId} autoStart={false} />
+        </section>
       )}
 
       {showXpToast && xpResult && (

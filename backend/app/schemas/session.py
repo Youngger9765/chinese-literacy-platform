@@ -75,6 +75,8 @@ def parse_step_progress(
 class SessionCreateRequest(BaseModel):
     story_slug: str = Field(..., min_length=1, max_length=100)
     story_title: str | None = Field(None, max_length=200)
+    # #4161: set only by the AI 派發 cards; anything else is rejected (422)
+    entry_source: Literal["ai_dispatch"] | None = None
 
 
 class SessionUpdateRequest(BaseModel):
@@ -97,6 +99,8 @@ class SessionSummaryResponse(BaseModel):
     story_slug_derived: str | None = None
     story_title: str | None = None  # human-readable title, e.g. "第六課 牛頓的故事"
     learning_source: Literal["self", "assignment"] | None = None
+    # #4161: "ai_dispatch" when the student started this lesson from an AI 派發 card
+    entry_source: Literal["ai_dispatch"] | None = None
     status: str
     # Read from `current_step_derived`, not the column of the same name. #1182 made
     # `step_progress.steps_completed` the single source of truth and stopped syncing the

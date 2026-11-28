@@ -11,6 +11,8 @@ These are called once at module load time by lesson_loader.py (and directly
 by tests that need to verify index construction in isolation).
 """
 
+from functools import lru_cache
+from pathlib import Path
 import os
 import re
 from typing import Any
@@ -878,8 +880,84 @@ def _mcq_from(l: dict, section: dict | None = None) -> list[dict]:
             # 這一題要讀的那張表（#3277）。L0150 第 4 題問的就是 PISA 那張排名表 ——
             # 而在這之前這裡只送題幹與選項，**學生被要求讀一張看不到的表**。
             "material_table": q.get("material_table") or None,
+            # #4154 作答後回饋：每個選項一句說明（順序同 options）＋課文依據句。
+            # 沒有資料就送 None，前端退回舊的單一 explanation，不會空白。
+            **_feedback_fields(l, q, len(letters), use_feedback=section is None),
         })
     return out
+
+
+#: 模型產生的逐題回饋資料夾（測試可以換掉它）。
+FEEDBACK_DIR = Path(__file__).resolve().parent.parent.parent / "data" / "comprehension_feedback"
+
+
+@lru_cache(maxsize=None)
+def _feedback_file(uid: str) -> dict:
+    """#4154：`data/comprehension_feedback/<uid>.yml`，以題號為鍵。
+
+    ⛔ 為什麼不寫進 comprehension 模組檔：那份檔被「內容忠實度證明」逐字比對原稿，
+    模型產生的說明不在原稿裡，一加進去證明就不成立（2026-11-27 實測 L0010/L0011/L0016
+    三課 Gate 8 變紅）。產生的內容獨立放，先例是 `key_reading_passages.yml`。
+
+    這份檔是模型產生的、格式沒有保證，而這支在載入課程清單時就會執行 ——
+    壞了不能讓整個後端起不來。所以任何壞法都退成「這課沒有回饋」，並記一筆。
+    """
+    import logging
+
+    import yaml
+
+    path = FEEDBACK_DIR / f"{uid}.yml"
+    if not path.is_file():
+        return {}
+    try:
+        data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    except Exception:  # noqa: BLE001 — 壞檔一律退成沒有
+        logging.getLogger(__name__).warning("comprehension_feedback/%s.yml 讀不進來，略過這課的回饋", uid)
+        return {}
+    qs = data.get("questions") if isinstance(data, dict) else None
+    if not isinstance(qs, dict):
+        return {}
+    return {k: v for k, v in qs.items() if isinstance(v, dict)}
+
+
+def _feedback_fields(l: dict, q: dict, n_options: int, *, use_feedback: bool) -> dict:
+    none = {"option_explanations": None, "evidence_sentence": None, "evidence_paragraph": None}
+    uid, idx = l.get("lesson_uid"), q.get("index")
+    if not use_feedback or not uid or idx is None:
+        return none
+    fb = _feedback_file(str(uid)).get(idx) or {}
+    return {
+        "option_explanations": _option_explanations(fb, n_options),
+        **_evidence_for(l, fb.get("evidence_sentence")),
+    }
+
+
+def _evidence_for(l: dict, sentence: str | None) -> dict:
+    """#4154：依據句＋它所在的整段課文，供前端畫螢光。
+
+    找不到那一段（句子不在課文裡）就兩個都送 None —— 螢光畫不出來的依據不如不顯示，
+    而且不能讓學生看到一句課文裡根本沒有的「原文」。
+    """
+    none = {"evidence_sentence": None, "evidence_paragraph": None}
+    if not sentence or not isinstance(sentence, str):
+        return none
+    for para in _flat_paragraphs(l.get("full_text_annotate")):
+        if isinstance(para, str) and sentence in para:
+            return {"evidence_sentence": sentence, "evidence_paragraph": para}
+    return none
+
+
+def _option_explanations(q: dict, n_options: int) -> list[str] | None:
+    """#4154：只有「數量剛好等於選項數、每句非空」才送；否則整組不送。
+
+    半套資料比沒有更糟 —— 前端用位置對應，少一句就會把說明貼到錯的選項上。
+    """
+    exps = q.get("option_explanations")
+    if not isinstance(exps, list) or len(exps) != n_options:
+        return None
+    if not all(isinstance(e, str) and e.strip() for e in exps):
+        return None
+    return list(exps)  # 複製：快取的清單不能被下游改到
 
 
 def _thumbnail_name(uid: str, version_id: str | None) -> str | None:

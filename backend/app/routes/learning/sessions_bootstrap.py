@@ -188,6 +188,7 @@ def create_learning_session(
         status="in_progress",
         classroom_id=classroom_id,
         step_progress=carried,
+        entry_source=payload.entry_source,
     )
     db.add(session)
     try:

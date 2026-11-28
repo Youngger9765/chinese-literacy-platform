@@ -120,6 +120,12 @@ class LearningSession(Base):
     # Issue #1762: distinguish assignment vs self-study sessions
     # Values: "self_study" (default) | "assignment"
     session_mode: Mapped[str] = mapped_column(String(20), nullable=False, server_default="self_study")
+    # Issue #4161: how the student got into this lesson. NULL = picked it themselves
+    # (and every row from before this column existed); "ai_dispatch" = started from an
+    # AI 派發 card. Set once at creation, never updated. Kept apart from `session_mode`
+    # on purpose: that column drives assignment-vs-self logic and a third value there
+    # would silently change what existing filters match.
+    entry_source: Mapped[str | None] = mapped_column(String(20), nullable=True)
 
     @hybrid_property
     def story_slug_derived(self) -> str | None:

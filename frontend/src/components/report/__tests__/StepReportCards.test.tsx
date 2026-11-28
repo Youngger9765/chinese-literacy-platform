@@ -39,7 +39,7 @@ describe('StepReportCards', () => {
   it('lets the student go to an unfinished step', () => {
     const go = vi.fn();
     render(<StepReportCards cards={cards} onGoToStep={go} />);
-    fireEvent.click(screen.getByRole('button', { name: /語詞複習/ }));
+    fireEvent.click(screen.getByRole('button', { name: /^語詞複習：/ }));
     fireEvent.click(screen.getByRole('button', { name: '前往這一關' }));
     expect(go).toHaveBeenCalledWith('vocab-review');
   });
@@ -136,6 +136,45 @@ describe('StepReportCards', () => {
     expect(within(radar).getAllByText('本課無')).toHaveLength(3);
     expect(screen.getByTestId('report-radar-summary')).toHaveTextContent('強項：文意理解');
     expect(screen.getByTestId('report-radar-summary')).toHaveTextContent('需要加強：詞語力');
+  });
+
+  // ── #4162：跨課能力診斷只在傳入歷史資料時出現（老師端不傳，維持單課雷達）──
+  it('有歷史資料：雷達加平均線、顯示矩陣；沒傳歷史：兩者都沒有 (#4162)', () => {
+    const vocab: StepReportCard = { ...withAttempts, stepId: 'vocab-definition', baseId: 'vocab-definition', label: '詞語理解', rate: 50, attempts: [] };
+    const mk = (n: number) => ({
+      sessionId: n, storyId: `S${n}`, title: `第${n}課`,
+      points: ['vocab', 'meaning', 'structure', 'strategy', 'fluency'].map((key, i) => ({
+        key, label: ['詞語力', '文意理解', '結構統整', '閱讀策略', '朗讀流暢'][i], value: 70, state: 'scored' as const,
+      })),
+    });
+    const { unmount } = render(
+      <StepReportCards
+        cards={[withAttempts, vocab]}
+        abilityHistory={[mk(1), mk(2)]}
+        currentLesson={{ storyId: 'CUR', sessionId: 99, title: '這課' }}
+      />,
+    );
+    expect(screen.getByTestId('report-radar-legend')).toBeInTheDocument();
+    expect(screen.getByTestId('ability-matrix')).toBeInTheDocument();
+    unmount();
+    // 歷史裡有同一課的舊紀錄：矩陣只出現一次這一課，而且是畫面上的即時分數
+    const same = { ...mk(7), storyId: 'CUR', title: '同一課舊紀錄' };
+    const { unmount: u2 } = render(
+      <StepReportCards
+        cards={[withAttempts, vocab]}
+        abilityHistory={[mk(1), same]}
+        currentLesson={{ storyId: 'CUR', sessionId: 99, title: '這課' }}
+      />,
+    );
+    const matrix = screen.getByTestId('ability-matrix');
+    expect(within(matrix).queryByText('同一課舊紀錄')).toBeNull();
+    expect(within(matrix).getAllByText('這課')).toHaveLength(1);
+    expect(matrix.querySelectorAll('thead th[title]')).toHaveLength(2);
+    u2();
+    // 老師端：有 currentLesson 的情況下也不傳歷史（null 與未傳）都不顯示
+    render(<StepReportCards cards={[withAttempts, vocab]} abilityHistory={null} currentLesson={{ storyId: 'CUR', sessionId: 99 }} />);
+    expect(screen.queryByTestId('report-radar-legend')).toBeNull();
+    expect(screen.queryByTestId('ability-matrix')).toBeNull();
   });
 
   it('the top note lists each step still to fix and goes there (#4087)', () => {
