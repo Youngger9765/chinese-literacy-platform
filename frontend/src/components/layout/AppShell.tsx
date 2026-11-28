@@ -27,6 +27,9 @@ import { useAppView } from '../../hooks/useAppView';
 import Sidebar from './Sidebar';
 import LearningLayout from '../../layouts/LearningLayout';
 import ZhuyinToggle from '../ui/ZhuyinToggle';
+import ReadingToolbar from '../ui/ReadingToolbar';
+import { useReadingPrefs } from '../../hooks/useReadingPrefs';
+import { FONT_SCALES } from '../../utils/readingPrefs';
 import DevSkipButton from '../ui/DevSkipButton';
 import StepFooterNav from '../reading-steps/StepFooterNav';
 import { OnboardingWrapper } from '../../pages/app/InlinePages';
@@ -509,6 +512,7 @@ const ImmersiveTopBar: React.FC = () => {
 
       {/* Right: zhuyin toggle */}
       <div className="shrink-0 flex items-center gap-2">
+        <ReadingToolbar />
         {selectedStory && (
           <ZhuyinToggle
             mode={zhuyinMode}
@@ -532,8 +536,12 @@ const ImmersiveTopBar: React.FC = () => {
  */
 export const LearningAppShell: React.FC = () => {
   const { zhuyinActive } = useZhuyin();
+  const prefs = useReadingPrefs();
   return (
     <div
+      data-reading-theme={prefs.theme}
+      data-reading-font={prefs.font}
+      data-reading-align={prefs.align}
       /*
        * h-viewport（index.css）而不是 h-screen —— 兩者差在 iPad 上會不會把底部
        * 那條 StepFooterNav 推到摺線以下。原因與實測寫在那個 class 的註解裡。
@@ -560,6 +568,7 @@ export const LearningAppShell: React.FC = () => {
         role="main"
         aria-label="學習內容"
         className="flex-1 flex flex-col overflow-y-auto"
+        style={FONT_SCALES[prefs.sizeIndex] === 1 ? undefined : ({ zoom: FONT_SCALES[prefs.sizeIndex] } as React.CSSProperties)}
         tabIndex={-1}
       >
         <LearningLayout />

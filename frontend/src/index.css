@@ -698,3 +698,63 @@ layer(base);
 .animate-pop        { animation: pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
 .animate-fade-in    { animation: fade-in 0.3s ease-out; }
 .animate-bounce-in  { animation: bounce-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+/* #4160 閱讀偏好：套在學習外殼（data-reading-*），不影響老師端與其他頁 */
+@layer utilities {
+  /* 字型：注音開啟時維持注音專用字型（IVS 變體字形，換掉會錯位），所以只在注音關閉時生效 */
+  [data-reading-font='sans']:not([data-zhuyin-active='true']) *:not(.material-symbols-outlined) {
+    font-family: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', Arial, sans-serif;
+  }
+  [data-reading-font='serif']:not([data-zhuyin-active='true']) *:not(.material-symbols-outlined) {
+    font-family: 'Noto Serif TC', 'PingFang TC', 'Songti TC', serif;
+  }
+  [data-reading-font='kai']:not([data-zhuyin-active='true']) *:not(.material-symbols-outlined) {
+    font-family: 'cwTeXKai', 'Kaiti TC', 'BiauKai', 'DFKai-SB', serif;
+  }
+
+  /* 對齊：只動課文段落，題目卡片不動 */
+  [data-reading-align='center'] [data-reading-text] { text-align: center; }
+  [data-reading-align='justify'] [data-reading-text] { text-align: justify; }
+
+  /* 亮度：覆寫底色與文字 token，元件用的 bg-surface／text-on-surface 會跟著換 */
+  [data-reading-theme='warm'] {
+    --color-surface: #f6e9c8;
+    --color-surface-bright: #f6e9c8;
+    --color-surface-container-lowest: #fbf1d6;
+    --color-surface-container-low: #f1e2bb;
+    --color-surface-container: #ecdcb2;
+    --color-surface-container-high: #e6d4a6;
+    --color-surface-container-highest: #dfcb9b;
+    --color-on-surface: #3b2f1a;
+    --color-on-surface-variant: #5a4a2c;
+  }
+  [data-reading-theme='dark'] {
+    --color-surface: #1c1b1f;
+    --color-surface-bright: #1c1b1f;
+    --color-surface-container-lowest: #26252a;
+    --color-surface-container-low: #2b2a30;
+    --color-surface-container: #313036;
+    --color-surface-container-high: #3a393f;
+    --color-surface-container-highest: #45444b;
+    --color-on-surface: #ece8df;
+    --color-on-surface-variant: #c4c0b6;
+    color-scheme: dark;
+  }
+
+  /* 頂部列的半透明底是寫死的米白，換亮度時要跟著表面色走，否則深色下文字糊成灰 */
+  [data-reading-theme='warm'] .glass,
+  [data-reading-theme='dark'] .glass {
+    background: color-mix(in srgb, var(--color-surface) 85%, transparent);
+  }
+  /* 寫死淺底的卡片（奶油說明卡、白卡）裡，文字色改回深色，否則淺字落在淺底上看不見 */
+  [data-reading-theme='dark'] [class*='bg-amber-'],
+  [data-reading-theme='dark'] [class*='bg-yellow-'],
+  [data-reading-theme='dark'] [class*='bg-orange-'],
+  [data-reading-theme='dark'] [class*='bg-white'],
+  [data-reading-theme='dark'] [class*='bg-gray-50'],
+  [data-reading-theme='dark'] [class*='bg-gray-100'] {
+    --color-on-surface: #302f2a;
+    --color-on-surface-variant: #5e5b55;
+    color: #302f2a;
+  }
+}
