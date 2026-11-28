@@ -5,13 +5,16 @@
 
 from __future__ import annotations
 
+import json
 import time
+from pathlib import Path
 
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from ...models.mcq_attempt import McqAttempt
 from .rasch import (
+    ItemCalibration,
     LEVEL_LABELS,
     calibrate_items,
     grade_prior,
@@ -33,7 +36,37 @@ def reset_calibration_cache() -> None:
     _cache["value"] = None
 
 
+# 離線批次校準檔：有檔就用檔（上正式站走這條，不必每次請求掃全表）；沒檔才即時算
+OFFLINE_CALIBRATION_PATH = Path(__file__).resolve().parents[3] / "data" / "ability_calibration.json"
+
+
+def load_offline_calibration(path: Path | None = None) -> dict[str, ItemCalibration] | None:
+    p = path or OFFLINE_CALIBRATION_PATH
+    try:
+        raw = json.loads(p.read_text(encoding="utf-8"))
+        items = {
+            k: ItemCalibration(difficulty=float(v["difficulty"]), se=float(v["se"]), n=int(v["n"]))
+            for k, v in raw["items"].items()
+        }
+    except (OSError, ValueError, KeyError, TypeError, AttributeError):
+        return None
+    # 空的校準等於沒有檔：否則所有學生都拿不到等級，還沒有任何提示
+    return items or None
+
+
+def build_calibration_payload(db: Session) -> dict:
+    cal = calibrate_items(first_attempts(db), min_n=MIN_ITEM_RESPONSES)
+    return {
+        "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "min_n": MIN_ITEM_RESPONSES,
+        "items": {k: {"difficulty": round(v.difficulty, 4), "se": round(v.se, 4), "n": v.n} for k, v in cal.items()},
+    }
+
+
 def _calibration(db: Session):
+    offline = load_offline_calibration()
+    if offline is not None:
+        return offline
     now = time.monotonic()
     if _cache["value"] is None or now - _cache["at"] > CALIBRATION_TTL_SECONDS:
         _cache["value"] = calibrate_items(first_attempts(db), min_n=MIN_ITEM_RESPONSES)
