@@ -7,6 +7,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { reportSessionComplete } from '../../services/gamificationApi';
 import { resolveActiveSteps } from '../../config/stepConfig';
 import StepReportCards from '../../components/report/StepReportCards';
+import ReadingLevelCard from '../../components/report/ReadingLevelCard';
 import DispatchPicker from '../../components/student/dispatch/DispatchPicker';
 import { useRecentAbility } from '../../hooks/useRecentAbility';
 import { useReportProgress } from '../../components/report/useReportProgress';
@@ -219,6 +220,9 @@ const ReportPage: React.FC = () => {
           onGoToLessonStep={(sid, stepId) => navigate(stepPath(sid, stepId))}
         />
       )}
+
+      {/* #4164：閱讀等級（資料不足時只顯示估計中） */}
+      {!(report.loading && dbSessionId) && <ReadingLevelCard token={token} />}
 
       {/* #4161：做完一課，一鍵再派下一組（不含剛做完的這一課） */}
       {!(report.loading && dbSessionId) && !hasActiveAssignment && (
